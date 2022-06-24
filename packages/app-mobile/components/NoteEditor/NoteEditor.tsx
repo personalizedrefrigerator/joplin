@@ -42,6 +42,20 @@ function useCss(themeId: number): string {
 			:root {
 				background-color: ${theme.backgroundColor};
 			}
+
+			body {
+				margin: 0;
+				height: 100vh;
+				width: 100vh;
+				width: 100vw;
+				min-width: 100vw;
+				box-sizing: border-box;
+				
+				padding-left: 1px;
+				padding-right: 1px;
+				padding-bottom: 1px;
+				padding-top: 10px;
+			}
 		`;
 	}, [themeId]);
 }
@@ -49,7 +63,7 @@ function useCss(themeId: number): string {
 function useHtml(css: string): string {
 	const [html, setHtml] = useState('');
 
-	useEffect(() => {
+	useMemo(() => {
 		setHtml(
 			`
 				<!DOCTYPE html>
@@ -65,7 +79,7 @@ function useHtml(css: string): string {
 							${css}
 						</style>
 					</head>
-					<body style="margin:0; height:100vh; width:100vh; width:100vw; min-width:100vw; box-sizing: border-box; padding: 10px;">
+					<body>
 						<div class="CodeMirror" style="height:100%;" autocapitalize="on"></div>
 					</body>
 				</html>

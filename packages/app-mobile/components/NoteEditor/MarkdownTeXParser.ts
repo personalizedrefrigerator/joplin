@@ -2,21 +2,40 @@
 // See also https://github.com/lezer-parser/markdown/blob/main/src/extension.ts
 // for the built-in extensions.
 import { tags } from '@lezer/highlight';
+import { parseMixed, SyntaxNodeRef, Input, NestedParse } from '@lezer/common';
 import {
 	MarkdownConfig, InlineContext,
 	BlockContext, Line, LeafBlock,
 } from '@lezer/markdown';
+import { stexMath } from '@codemirror/legacy-modes/mode/stex';
+import { StreamLanguage } from '@codemirror/language';
 
 const DOLLAR_SIGN_CHAR_CODE = 36;
 const MATH_BLOCK_START_REGEX = /^\$\$/;
 const MATH_BLOCK_STOP_REGEX = /^.*\$\$\s*$/;
 
-const InlineMathDelim = { resolve: 'InlineMath', mark: 'InlineMathDelim' };
+const TEX_LANGUAGE = StreamLanguage.define(stexMath);
+const BLOCK_MATH_TAG = 'BlockMath';
+const INLINE_MATH_TAG = 'InlineMath';
+
+const InlineMathDelim = { resolve: INLINE_MATH_TAG, mark: 'InlineMathDelim' };
+
+// Wraps a TeX math-mode parser
+const wrappedTeXParser = (nodeTag: string) => parseMixed(
+	(node: SyntaxNodeRef, _input: Input): NestedParse => {
+		if (node.name != nodeTag) {
+			return null;
+		}
+
+		return {
+			parser: TEX_LANGUAGE.parser,
+		};
+	});
 
 const InlineMathConfig: MarkdownConfig = {
 	defineNodes: [
 		{
-			name: 'InlineMath',
+			name: INLINE_MATH_TAG,
 			style: tags.comment,
 		},
 		{
@@ -25,7 +44,7 @@ const InlineMathConfig: MarkdownConfig = {
 		},
 	],
 	parseInline: [{
-		name: 'InlineMath',
+		name: INLINE_MATH_TAG,
 		after: 'InlineCode',
 
 		parse(cx: InlineContext, next: number, pos: number): number {
@@ -44,17 +63,18 @@ const InlineMathConfig: MarkdownConfig = {
 			return pos + 1;
 		},
 	}],
+	wrap: wrappedTeXParser(INLINE_MATH_TAG),
 };
 
 const BlockMathConfig: MarkdownConfig = {
 	defineNodes: [
 		{
-			name: 'BlockMath',
+			name: BLOCK_MATH_TAG,
 			style: tags.comment,
 		},
 	],
 	parseBlock: [{
-		name: 'BlockMath',
+		name: BLOCK_MATH_TAG,
 		before: 'FencedCode',
 		parse(cx: BlockContext, line: Line): boolean {
 			const delimLength = 2;
@@ -64,7 +84,8 @@ const BlockMathConfig: MarkdownConfig = {
 			if (MATH_BLOCK_START_REGEX.exec(line.text)) {
 				// If the math region ends immediately (on the same line),
 				if (MATH_BLOCK_STOP_REGEX.exec(line.text.substring(delimLength))) {
-					const elem = cx.elt('BlockMath', cx.lineStart, cx.lineStart + line.text.length);
+					const elem = cx.elt(
+						BLOCK_MATH_TAG, cx.lineStart, cx.lineStart + line.text.length);
 					cx.addElement(elem);
 				} else {
 					let hadNextLine = false;
@@ -85,7 +106,7 @@ const BlockMathConfig: MarkdownConfig = {
 					}
 
 					// Mark all lines in the block as math.
-					const elem = cx.elt('BlockMath', start, stop);
+					const elem = cx.elt(BLOCK_MATH_TAG, start, stop);
 					cx.addElement(elem);
 				}
 
@@ -104,6 +125,7 @@ const BlockMathConfig: MarkdownConfig = {
 			return MATH_BLOCK_START_REGEX.exec(line.text) != null;
 		},
 	}],
+	wrap: wrappedTeXParser(BLOCK_MATH_TAG),
 };
 
 
