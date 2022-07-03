@@ -210,6 +210,12 @@ function useHtml(css: string): string {
 								height: 100%;
 							}
 
+							body {
+								position: fixed;
+								top: 0;
+								bottom: 0;
+							}
+
 							${css}
 						</style>
 					</head>
@@ -266,6 +272,13 @@ function NoteEditor(props: Props, ref: any) {
 
 			cm = codeMirrorBundle.initCodeMirror(parentElement, initialText, theme);
 			${setInitialSelectionJS}
+
+			// Prevent iOS from scrolling the body element instead of
+			// CodeMirror (see https://stackoverflow.com/a/63518068)
+			window.addEventListener('scroll', evt => {
+				evt.preventDefault();
+				window.scrollTo(0, 0);
+			});
 		} catch (e) {
 			window.ReactNativeWebView.postMessage("error:" + e.message + ": " + JSON.stringify(e))
 		} finally {
