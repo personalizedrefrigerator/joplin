@@ -5,10 +5,11 @@
 
 import { mkdirp, readFile, writeFile } from 'fs-extra';
 import { dirname, extname, basename } from 'path';
-import TerserPlugin from 'terser-webpack-plugin';
 const execa = require('execa');
 
-import webpack from 'webpack';
+// We need this to be transpiled to `const webpack = require('webpack')`.
+// As such, do a namespace import. See https://www.typescriptlang.org/tsconfig#esModuleInterop
+import * as webpack from 'webpack';
 
 const rootDir = dirname(dirname(dirname(__dirname)));
 const mobileDir = `${rootDir}/packages/app-mobile`;
@@ -60,23 +61,10 @@ class BundledFile {
 				rules: [
 					{
 						// Include .tsx to include react components
-						test: /\.tsx?$/i,
+						test: /\.tsx?$/,
 						use: 'ts-loader',
 						exclude: /node_modules/,
 					},
-					{
-						test: /\.css$/i,
-						use: ['style-loader', 'css-loader'],
-					},
-				],
-			},
-			optimization: {
-				minimizer: [
-					// Don't create separate files for comments.
-					// See https://stackoverflow.com/a/65650316/17055750
-					new TerserPlugin({
-						extractComments: false,
-					}),
 				],
 			},
 			// Increase the minimum size required
@@ -145,7 +133,7 @@ class BundledFile {
 	// Create a minified JS file in the same directory as `this.sourceFilePath` with
 	// the same name.
 	public build() {
-		const compiler = webpack(this.getWebpackOptions('development'));
+		const compiler = webpack(this.getWebpackOptions('production'));
 		return new Promise<void>((resolve, reject) => {
 			console.info(`Building bundle: ${this.bundleName}...`);
 
@@ -170,7 +158,7 @@ class BundledFile {
 	}
 
 	public startWatching() {
-		const compiler = webpack(this.getWebpackOptions('production'));
+		const compiler = webpack(this.getWebpackOptions('development'));
 		const watchOptions = {
 			ignored: '**/node_modules',
 		};
@@ -196,7 +184,7 @@ class BundledFile {
 const bundledFiles: BundledFile[] = [
 	new BundledFile(
 		'svgEditorBundle',
-		`${mobileDir}/components/NoteEditor/ImageEditor/SVGEditor.ts`
+		`${mobileDir}/components/NoteEditor/ImageEditor/createJsDrawEditor.ts`
 	),
 	new BundledFile(
 		'codeMirrorBundle',

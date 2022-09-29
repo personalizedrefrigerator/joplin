@@ -15,7 +15,7 @@ const Resource = require('@joplin/lib/models/Resource').default;
 const injectedJs = {
 	webviewLib: require('@joplin/lib/rnInjectedJs/webviewLib'),
 	codeMirrorBundle: require('../lib/rnInjectedJs/CodeMirror.bundle'),
-	svgEditorBundle: require('../lib/rnInjectedJs/SVGEditor.bundle'),
+	svgEditorBundle: require('../lib/rnInjectedJs/createJsDrawEditor.bundle'),
 };
 
 function shimInit() {

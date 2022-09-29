@@ -2,12 +2,11 @@ const React = require('react');
 import { _ } from '@joplin/lib/locale';
 import shim from '@joplin/lib/shim';
 import { themeStyle } from '@joplin/lib/theme';
-import { Theme, ThemeAppearance } from '@joplin/lib/themes/type';
+import { Theme } from '@joplin/lib/themes/type';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { Alert, BackHandler } from 'react-native';
 import { WebViewMessageEvent } from 'react-native-webview';
 import ExtendedWebView from '../../ExtendedWebView';
-import { EditorLocalization } from './types';
 
 type OnSaveCallback = (svgData: string)=> void;
 type OnCancelCallback = ()=> void;
@@ -22,12 +21,21 @@ interface Props {
 const useCss = (editorTheme: Theme) => {
 	return useMemo(() => {
 		return `
-			:root > body {
+			:root .imageEditorContainer {
 				--primary-background-color: ${editorTheme.backgroundColor};
 				--primary-background-color-transparent: ${editorTheme.backgroundColorTransparent};
 				--secondary-background-color: ${editorTheme.selectedColor2};
 				--primary-foreground-color: ${editorTheme.color};
 				--secondary-foreground-color: ${editorTheme.color2};
+
+				width: 100vw;
+				height: 100vh;
+				box-sizing: border-box;
+			}
+
+			body, html {
+				padding: 0;
+				margin: 0;
 			}
 		`;
 	}, [editorTheme]);
@@ -58,24 +66,7 @@ const ImageEditor = (props: Props) => {
 			);
 			return true;
 		});
-	}, []);
-
-	const localization: EditorLocalization = {
-		pen: _('Pen'),
-		eraser: _('Eraser'),
-		select: _('Select'),
-		touchDrawing: _('Touch Drawing'),
-		thicknessLabel: _('Thickness: '),
-		colorLabel: _('Color:'),
-		resizeImageToSelection: _('Resize image to selection'),
-		undo: _('Undo'),
-		redo: _('Redo'),
-
-		// {} is used instead of %d here because formatting is being done within
-		// the injected JS.
-		loading: _('Loading {}%%...'),
-		imageEditor: _('Image Editor'),
-	};
+	}, [webviewRef, props.onCancel]);
 
 	const css = useCss(editorTheme);
 	const html = useMemo(() => `
@@ -114,15 +105,7 @@ const ImageEditor = (props: Props) => {
 			if (window.editor === undefined) {
 				${shim.injectedJs('svgEditorBundle')}
 
-				window.editor = new svgEditorBundle.SVGEditor(
-					document.body,
-
-					// Use the default rendering mode -- we can't access it while bundled
-					undefined,
-
-					${editorTheme.appearance === ThemeAppearance.Light},
-					${JSON.stringify(localization)},
-				);
+				window.editor = svgEditorBundle.createJsDrawEditor();
 
 				window.initialSVGData = ${JSON.stringify(props.initialSVGData)};
 				if (initialSVGData && initialSVGData.length > 0) {
@@ -169,6 +152,7 @@ const ImageEditor = (props: Props) => {
 			onMessage={onMessage}
 			onError={onError}
 			ref={webviewRef}
+			webviewInstanceId={'image-editor-js-draw'}
 		/>
 	);
 };

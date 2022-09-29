@@ -52,9 +52,12 @@ export default function useMessageHandler(scrollWhenReady: any, setScrollWhenRea
 			void CommandService.instance().execute(commandName, ...commandArgs);
 		} else if (msg === 'postMessageService.message') {
 			void PostMessageService.instance().postMessage(arg0);
+		} else if (msg === 'openPdfViewer') {
+			await CommandService.instance().execute('openPdfViewer', arg0.resourceId, arg0.pageNo);
 		} else {
 			await CommandService.instance().execute('openItem', msg);
 			// bridge().showErrorMessageBox(_('Unsupported link or message: %s', msg));
 		}
+		// eslint-disable-next-line @seiyab/react-hooks/exhaustive-deps -- Old code before rule was applied
 	}, [dispatch, setLocalSearchResultCount, scrollWhenReady, formNote]);
 }

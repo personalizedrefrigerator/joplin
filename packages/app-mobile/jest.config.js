@@ -1,25 +1,23 @@
-// Test configuration
-// See https://jestjs.io/docs/configuration#testenvironment-string
+module.exports = {
+	preset: 'react-native',
 
-const config = {
-	preset: 'ts-jest',
-
-	// File extensions for imports, in order of precedence:
-	// prefer importing from .ts or .tsx to importing from .js
-	// files.
-	moduleFileExtensions: [
+	'moduleFileExtensions': [
 		'ts',
 		'tsx',
 		'js',
 	],
 
-	// Mocks.
-	// See https://jestjs.io/docs/webpack#handling-static-assets
-	moduleNameMapper: {
-		// Webpack allows importing CSS files. Mock it.
-		'\\.(css|lessc)': '<rootDir>/__mocks__/styleMock.js',
-		'@melloware/coloris': '<rootDir>/__mocks__/coloris.ts',
+	'transform': {
+		'\\.(ts|tsx)$': 'ts-jest',
 	},
-};
 
-module.exports = config;
+	testMatch: ['**/*.test.(ts|tsx)'],
+
+	testPathIgnorePatterns: ['<rootDir>/node_modules/'],
+
+	'transformIgnorePatterns': [
+		'node_modules/(?!@codemirror)/',
+	],
+
+	slowTestThreshold: 40,
+};

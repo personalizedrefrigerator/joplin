@@ -29,6 +29,7 @@ module.exports = {
 
 		// React Native variables
 		'__DEV__': 'readonly',
+		'JSX': 'readonly',
 
 		// Clipper variables
 		'browserSupportsPromises_': true,
@@ -83,7 +84,9 @@ module.exports = {
 		// 'complexity': ['warn', { max: 10 }],
 
 		// Checks rules of Hooks
-		'react-hooks/rules-of-hooks': 'error',
+		'@seiyab/react-hooks/rules-of-hooks': 'error',
+		'@seiyab/react-hooks/exhaustive-deps': ['error', { 'ignoreThisDependency': 'props' }],
+
 		// Checks effect dependencies
 		// Disable because of this: https://github.com/facebook/react/issues/16265
 		// "react-hooks/exhaustive-deps": "warn",
@@ -134,7 +137,10 @@ module.exports = {
 	'plugins': [
 		'react',
 		'@typescript-eslint',
-		'react-hooks',
+		// Need to use a fork of the official rules of hooks because of this bug:
+		// https://github.com/facebook/react/issues/16265
+		'@seiyab/eslint-plugin-react-hooks',
+		// 'react-hooks',
 		'import',
 	],
 	'overrides': [
