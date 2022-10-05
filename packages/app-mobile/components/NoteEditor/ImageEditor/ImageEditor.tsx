@@ -113,7 +113,10 @@ const ImageEditor = (props: Props) => {
 				}
 
 				const toolbar = editor.addToolbar();
-				toolbar.addActionButton(${JSON.stringify(_('Done'))}, () => {
+				toolbar.addActionButton({
+					label: ${JSON.stringify(_('Done'))},
+					icon: editor.icons.makeSaveIcon(),
+				}, () => {
 					saveDrawing();
 				});
 			}
