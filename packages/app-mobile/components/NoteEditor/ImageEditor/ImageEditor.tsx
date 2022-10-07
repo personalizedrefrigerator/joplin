@@ -1,5 +1,6 @@
 const React = require('react');
 import { _ } from '@joplin/lib/locale';
+import Setting from '@joplin/lib/models/Setting';
 import shim from '@joplin/lib/shim';
 import { themeStyle } from '@joplin/lib/theme';
 import { Theme } from '@joplin/lib/themes/type';
@@ -91,12 +92,12 @@ const ImageEditor = (props: Props) => {
 			);
 		};
 
-		window.saveDrawing = () => {
+		const saveDrawing = (isAutosave) => {
 			const img = window.editor.toSVG();
 			window.ReactNativeWebView.postMessage(
 				JSON.stringify({
-					action: 'save',
-					data: img.outerHTML
+					action: isAutosave ? 'autosave' : 'save',
+					data: img.outerHTML,
 				}),
 			);
 		};
@@ -117,8 +118,14 @@ const ImageEditor = (props: Props) => {
 					label: ${JSON.stringify(_('Done'))},
 					icon: editor.icons.makeSaveIcon(),
 				}, () => {
-					saveDrawing();
+					saveDrawing(false);
 				});
+
+				// Auto-save every minute.
+				const autoSaveInterval = 60 * 1000;
+				setInterval(() => {
+					saveDrawing(true);
+				}, autoSaveInterval);
 			}
 		} catch(e) {
 			window.ReactNativeWebView.postMessage(
@@ -128,7 +135,7 @@ const ImageEditor = (props: Props) => {
 		true;
 	`, [props.initialSVGData]);
 
-	const onMessage = useCallback((event: WebViewMessageEvent) => {
+	const onMessage = useCallback(async (event: WebViewMessageEvent) => {
 		const data = event.nativeEvent.data;
 		if (data.startsWith('error:')) {
 			console.error('ImageEditor:', data);
@@ -138,6 +145,10 @@ const ImageEditor = (props: Props) => {
 		const json = JSON.parse(data);
 		if (json.action === 'save') {
 			props.onSave(json.data);
+		} else if (json.action === 'autosave') {
+			const filePath = `${Setting.value('resourceDir')}/autosaved-drawing.joplin.svg`;
+			await shim.fsDriver().writeFile(filePath, json.data, 'utf8');
+			console.info('Auto-saved to %s', filePath);
 		} else {
 			console.error('Unknown action,', json.action);
 		}
