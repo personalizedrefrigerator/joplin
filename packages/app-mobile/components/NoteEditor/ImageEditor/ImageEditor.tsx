@@ -121,8 +121,8 @@ const ImageEditor = (props: Props) => {
 					saveDrawing(false);
 				});
 
-				// Auto-save every minute.
-				const autoSaveInterval = 60 * 1000;
+				// Auto-save four minutes.
+				const autoSaveInterval = 4 * 60 * 1000;
 				setInterval(() => {
 					saveDrawing(true);
 				}, autoSaveInterval);
