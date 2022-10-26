@@ -46,28 +46,34 @@ const ImageEditor = (props: Props) => {
 	const editorTheme: Theme = themeStyle(props.themeId);
 	const webviewRef = useRef(null);
 
-	useEffect(() => {
-		BackHandler.addEventListener('hardwareBackPress', () => {
-			Alert.alert(
-				_('Save changes?'), _('This drawing may have unsaved changes.'), [
-					{
-						text: _('Discard changes'),
-						onPress: () => props.onCancel(),
-						style: 'destructive',
+	const onBackPress = useCallback(() => {
+		Alert.alert(
+			_('Save changes?'), _('This drawing may have unsaved changes.'), [
+				{
+					text: _('Discard changes'),
+					onPress: () => props.onCancel(),
+					style: 'destructive',
+				},
+				{
+					text: _('Save changes'),
+					onPress: () => {
+						// saveDrawing calls props.onSave(...) which may close the
+						// editor.
+						webviewRef.current.injectJS('saveDrawing();');
 					},
-					{
-						text: _('Save changes'),
-						onPress: () => {
-							// saveDrawing calls props.onSave(...) which may close the
-							// editor.
-							webviewRef.current.injectJS('saveDrawing();');
-						},
-					},
-				]
-			);
-			return true;
-		});
+				},
+			]
+		);
+		return true;
 	}, [webviewRef, props.onCancel]);
+
+	useEffect(() => {
+		BackHandler.addEventListener('hardwareBackPress', onBackPress);
+
+		return () => {
+			BackHandler.removeEventListener('hardwareBackPress', onBackPress);
+		};
+	}, [onBackPress]);
 
 	const css = useCss(editorTheme);
 	const html = useMemo(() => `
@@ -101,6 +107,7 @@ const ImageEditor = (props: Props) => {
 				}),
 			);
 		};
+		window.saveDrawing = saveDrawing;
 
 		try {
 			if (window.editor === undefined) {
