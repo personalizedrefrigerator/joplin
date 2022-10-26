@@ -2918,7 +2918,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@electron/get@npm:^1.13.0":
+"@electron/get@npm:^1.14.1":
   version: 1.14.1
   resolution: "@electron/get@npm:1.14.1"
   dependencies:
@@ -4051,11 +4051,11 @@ __metadata:
     compare-versions: ^3.2.1
     countable: ^3.0.1
     debounce: ^1.2.0
-    electron: 18.2.0
+    electron: 19.0.10
     electron-builder: ^23.0.3
     electron-notarize: ^1.2.1
     electron-rebuild: ^3.2.7
-    electron-window-state: ^4.1.1
+    electron-window-state: ^5.0.3
     formatcoords: ^1.1.3
     fs-extra: 10.0.0
     glob: ^7.1.6
@@ -4194,12 +4194,11 @@ __metadata:
     typescript: ^4.7.4
     uglify-js: ^3.13.10
     url: ^0.11.0
-    valid-url: ^1.0.9
     webpack: ^5.74.0
   languageName: unknown
   linkType: soft
 
-"@joplin/fork-htmlparser2@^4.1.40, @joplin/fork-htmlparser2@workspace:packages/fork-htmlparser2":
+"@joplin/fork-htmlparser2@^4.1.41, @joplin/fork-htmlparser2@workspace:packages/fork-htmlparser2":
   version: 0.0.0-use.local
   resolution: "@joplin/fork-htmlparser2@workspace:packages/fork-htmlparser2"
   dependencies:
@@ -4221,7 +4220,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@joplin/fork-sax@^1.2.44, @joplin/fork-sax@workspace:packages/fork-sax":
+"@joplin/fork-sax@^1.2.45, @joplin/fork-sax@workspace:packages/fork-sax":
   version: 0.0.0-use.local
   resolution: "@joplin/fork-sax@workspace:packages/fork-sax"
   dependencies:
@@ -4230,7 +4229,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@joplin/fork-uslug@^1.0.5, @joplin/fork-uslug@workspace:packages/fork-uslug":
+"@joplin/fork-uslug@^1.0.6, @joplin/fork-uslug@workspace:packages/fork-uslug":
   version: 0.0.0-use.local
   resolution: "@joplin/fork-uslug@workspace:packages/fork-uslug"
   dependencies:
@@ -4240,11 +4239,11 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@joplin/htmlpack@workspace:packages/htmlpack, @joplin/htmlpack@~2.9":
+"@joplin/htmlpack@^2.9.1, @joplin/htmlpack@workspace:packages/htmlpack":
   version: 0.0.0-use.local
   resolution: "@joplin/htmlpack@workspace:packages/htmlpack"
   dependencies:
-    "@joplin/fork-htmlparser2": ^4.1.40
+    "@joplin/fork-htmlparser2": ^4.1.41
     "@types/fs-extra": ^9.0.6
     css: ^3.0.0
     datauri: ^4.1.0
@@ -4253,19 +4252,19 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@joplin/lib@workspace:^, @joplin/lib@workspace:packages/lib, @joplin/lib@~2.9":
+"@joplin/lib@^2.9.1, @joplin/lib@workspace:packages/lib, @joplin/lib@~2.9":
   version: 0.0.0-use.local
   resolution: "@joplin/lib@workspace:packages/lib"
   dependencies:
     "@aws-sdk/client-s3": ^3.34.0
     "@aws-sdk/s3-request-presigner": ^3.34.0
-    "@joplin/fork-htmlparser2": ^4.1.40
-    "@joplin/fork-sax": ^1.2.44
-    "@joplin/fork-uslug": ^1.0.5
-    "@joplin/htmlpack": ~2.9
-    "@joplin/renderer": ~2.9
-    "@joplin/turndown": ^4.0.62
-    "@joplin/turndown-plugin-gfm": ^1.0.44
+    "@joplin/fork-htmlparser2": ^4.1.41
+    "@joplin/fork-sax": ^1.2.45
+    "@joplin/fork-uslug": ^1.0.6
+    "@joplin/htmlpack": ^2.9.1
+    "@joplin/renderer": ^2.9.1
+    "@joplin/turndown": ^4.0.63
+    "@joplin/turndown-plugin-gfm": ^1.0.45
     "@types/fs-extra": ^9.0.6
     "@types/jest": ^26.0.15
     "@types/js-yaml": ^4.0.2
@@ -4328,7 +4327,6 @@ __metadata:
     uglifycss: 0.0.29
     url-parse: ^1.4.7
     uuid: ^3.0.1
-    valid-url: ^1.0.9
     word-wrap: ^1.2.3
     xml2js: ^0.4.19
   languageName: unknown
@@ -4341,7 +4339,7 @@ __metadata:
     "@fortawesome/fontawesome-svg-core": ^6.1.2
     "@fortawesome/free-solid-svg-icons": ^6.1.2
     "@fortawesome/react-fontawesome": ^0.2.0
-    "@joplin/lib": "workspace:^"
+    "@joplin/lib": ~2.9
     "@types/jest": ^28.1.6
     "@types/pdfjs-dist": ^2.10.378
     "@types/react": 16.9.55
@@ -4369,8 +4367,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@joplin/plugin-repo-cli@workspace:packages/plugin-repo-cli"
   dependencies:
-    "@joplin/lib": ~2.9
-    "@joplin/tools": ~2.9
+    "@joplin/lib": ^2.9.1
+    "@joplin/tools": ^2.9.1
     "@types/fs-extra": ^9.0.6
     "@types/jest": ^26.0.15
     "@types/node": ^14.14.6
@@ -4411,12 +4409,12 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@joplin/renderer@workspace:packages/renderer, @joplin/renderer@~2.9":
+"@joplin/renderer@^2.9.1, @joplin/renderer@workspace:packages/renderer, @joplin/renderer@~2.9":
   version: 0.0.0-use.local
   resolution: "@joplin/renderer@workspace:packages/renderer"
   dependencies:
-    "@joplin/fork-htmlparser2": ^4.1.40
-    "@joplin/fork-uslug": ^1.0.5
+    "@joplin/fork-htmlparser2": ^4.1.41
+    "@joplin/fork-uslug": ^1.0.6
     "@types/jest": ^26.0.15
     "@types/node": ^14.14.6
     font-awesome-filetypes: ^2.1.0
@@ -4506,12 +4504,12 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@joplin/tools@workspace:packages/tools, @joplin/tools@~2.9":
+"@joplin/tools@^2.9.1, @joplin/tools@workspace:packages/tools, @joplin/tools@~2.9":
   version: 0.0.0-use.local
   resolution: "@joplin/tools@workspace:packages/tools"
   dependencies:
-    "@joplin/lib": ~2.9
-    "@joplin/renderer": ~2.9
+    "@joplin/lib": ^2.9.1
+    "@joplin/renderer": ^2.9.1
     "@rmp135/sql-ts": ^1.6.0
     "@types/fs-extra": ^9.0.6
     "@types/jest": ^26.0.15
@@ -4545,7 +4543,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@joplin/turndown-plugin-gfm@^1.0.44, @joplin/turndown-plugin-gfm@workspace:packages/turndown-plugin-gfm":
+"@joplin/turndown-plugin-gfm@^1.0.45, @joplin/turndown-plugin-gfm@workspace:packages/turndown-plugin-gfm":
   version: 0.0.0-use.local
   resolution: "@joplin/turndown-plugin-gfm@workspace:packages/turndown-plugin-gfm"
   dependencies:
@@ -4557,7 +4555,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@joplin/turndown@^4.0.62, @joplin/turndown@workspace:packages/turndown":
+"@joplin/turndown@^4.0.63, @joplin/turndown@workspace:packages/turndown":
   version: 0.0.0-use.local
   resolution: "@joplin/turndown@workspace:packages/turndown"
   dependencies:
@@ -13445,7 +13443,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"deep-equal@npm:^1.0.1, deep-equal@npm:~1.1.1":
+"deep-equal@npm:~1.0.1":
+  version: 1.0.1
+  resolution: "deep-equal@npm:1.0.1"
+  checksum: 5af8cbfcebf190491878a498caccc7dc9592f8ebd1685b976eacc3825619d222b5e929923163b92c4f414494e2b884f7ebf00c022e8198e8292deb70dd9785f4
+  languageName: node
+  linkType: hard
+
+"deep-equal@npm:~1.1.1":
   version: 1.1.1
   resolution: "deep-equal@npm:1.1.1"
   dependencies:
@@ -13456,13 +13461,6 @@ __metadata:
     object-keys: ^1.1.1
     regexp.prototype.flags: ^1.2.0
   checksum: f92686f2c5bcdf714a75a5fa7a9e47cb374a8ec9307e717b8d1ce61f56a75aaebf5619c2a12b8087a705b5a2f60d0292c35f8b58cb1f72e3268a3a15cab9f78d
-  languageName: node
-  linkType: hard
-
-"deep-equal@npm:~1.0.1":
-  version: 1.0.1
-  resolution: "deep-equal@npm:1.0.1"
-  checksum: 5af8cbfcebf190491878a498caccc7dc9592f8ebd1685b976eacc3825619d222b5e929923163b92c4f414494e2b884f7ebf00c022e8198e8292deb70dd9785f4
   languageName: node
   linkType: hard
 
@@ -14533,27 +14531,26 @@ __metadata:
   languageName: node
   linkType: hard
 
-"electron-window-state@npm:^4.1.1":
-  version: 4.1.1
-  resolution: "electron-window-state@npm:4.1.1"
+"electron-window-state@npm:^5.0.3":
+  version: 5.0.3
+  resolution: "electron-window-state@npm:5.0.3"
   dependencies:
-    deep-equal: ^1.0.1
-    jsonfile: ^2.2.3
+    jsonfile: ^4.0.0
     mkdirp: ^0.5.1
-  checksum: 442f71f798b61d3738bbe9273ee7db2e55ea1d9c6d6c15e44392f7966fadc41e2e3f8fe4ad88ea0f5df2580a0256c4d29b5e245dc1b3852cecffd8addd3bfe23
+  checksum: 955868c1db598cfb5111612c9df93f61b8999b339fb56cb37ba884a9141478feaef9e9b4d9e777079cdad80fb0bb64b61ae706c85f1f91ba5904f8596d30d7e9
   languageName: node
   linkType: hard
 
-"electron@npm:18.2.0":
-  version: 18.2.0
-  resolution: "electron@npm:18.2.0"
+"electron@npm:19.0.10":
+  version: 19.0.10
+  resolution: "electron@npm:19.0.10"
   dependencies:
-    "@electron/get": ^1.13.0
+    "@electron/get": ^1.14.1
     "@types/node": ^16.11.26
     extract-zip: ^1.0.3
   bin:
     electron: cli.js
-  checksum: 242169d6e22854248e427326a03910b96311333d5dd57aa0e4cd9cef733aa8c2e893b16269c32514ad325468cdc08c41736d6f1f6791770cad236652fe06662c
+  checksum: 828198c09cf1f9900e6f6a850761ee24d23e5bf157b1ef1960c2353d0c8d686177019df0082a5e08fe0ee7559a4327794e45022a769f45a0738a7a862dd77840
   languageName: node
   linkType: hard
 
@@ -22456,7 +22453,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jsonfile@npm:^2.1.0, jsonfile@npm:^2.2.3":
+"jsonfile@npm:^2.1.0":
   version: 2.4.0
   resolution: "jsonfile@npm:2.4.0"
   dependencies:
@@ -34460,13 +34457,6 @@ __metadata:
   dependencies:
     homedir-polyfill: ^1.0.1
   checksum: 193db08aa396d993da04d3d985450784aa0010f51613005d13ef97d7b2b9e1ba5aef04affa585037adece12de5ca532f6f5fc40288495eab55e2eebc201809d2
-  languageName: node
-  linkType: hard
-
-"valid-url@npm:^1.0.9":
-  version: 1.0.9
-  resolution: "valid-url@npm:1.0.9"
-  checksum: 3ecb030559404441c2cf104cbabab8770efb0f36d117db03d1081052ef133015a68806148ce954bb4dd0b5c42c14b709a88783c93d66b0916cb67ba771c98702
   languageName: node
   linkType: hard
 
