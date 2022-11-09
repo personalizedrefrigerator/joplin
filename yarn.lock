@@ -4096,6 +4096,7 @@ __metadata:
     jest-environment-jsdom: 28.1.3
     jetifier: 1.6.8
     joplin-rn-alarm-notification: 1.0.5
+    js-draw: ^0.9.0
     jsc-android: 241213.1.0
     jsdom: 20.0.0
     md5: 2.3.0
@@ -5533,6 +5534,13 @@ __metadata:
     lodash: ^4.17.15
     tmp-promise: ^3.0.2
   checksum: 12527e42c2865504eb2a91cc419e52dd7a68c1eda1138c0713a1520a5413ef9dabfa9d21b7908d211998b75c60035d1d5ae87c00fe8ff5be8fa8449525235dd5
+  languageName: node
+  linkType: hard
+
+"@melloware/coloris@npm:^0.16.1":
+  version: 0.16.1
+  resolution: "@melloware/coloris@npm:0.16.1"
+  checksum: 32b468ae92bba2b470896a3c3d8db71106e555f81e996dcb54a3d55557c95b1788c0f58d4cfd963b0ead8af85469459f3fcc6d3bb104dd689bdf5203715fd06d
   languageName: node
   linkType: hard
 
@@ -9487,6 +9495,13 @@ __metadata:
   version: 2.2.2
   resolution: "before-after-hook@npm:2.2.2"
   checksum: dc2e1ffe389e5afbef2a46790b1b5a50247ed57aba67649cfa9ec2552d248cc9278f222e72fb5a8ff59bbb39d78fbaa97e7234ead0c6b5e8418b67a8644ce207
+  languageName: node
+  linkType: hard
+
+"bezier-js@npm:^6.1.0":
+  version: 6.1.0
+  resolution: "bezier-js@npm:6.1.0"
+  checksum: 46b4133c821df152cf12f392313a94cd4a1a4649277367990970a2aefb8275999a594d35cff3bada92947f5e6fee423a54ba89857a3954fdcd8f04f0d475e488
   languageName: node
   linkType: hard
 
@@ -21414,6 +21429,16 @@ __metadata:
   version: 3.6.1
   resolution: "jquery@npm:3.6.1"
   checksum: 6177d866a74f1137cad800f142c7cdbd5ab19cd4282546f8bdb4890c9f933b1d542ab96f2aa15d007e43c98de7315b0513e849ec5359d3ac5640f720892fe547
+  languageName: node
+  linkType: hard
+
+"js-draw@npm:^0.9.0":
+  version: 0.9.0
+  resolution: "js-draw@npm:0.9.0"
+  dependencies:
+    "@melloware/coloris": ^0.16.1
+    bezier-js: ^6.1.0
+  checksum: 93c23028ee2fcfb69718397893a807ecc2151b2593dd7961b6d5c8101c71100d955e84800a81685eedeaa941da0f6962892451f591a6ba11557f633c3f264b79
   languageName: node
   linkType: hard
 
@@ -35372,4 +35397,3 @@ __metadata:
   checksum: 76ab32c066082ac73491b7cd7f93ad0595c59b6d45ae80a0745e9e1661237388beb2f0c2ba0ae3dc330ca3ecdb87edcb7a21e0c09137ab81d5b32e584cda1e5d
   languageName: node
   linkType: hard
-

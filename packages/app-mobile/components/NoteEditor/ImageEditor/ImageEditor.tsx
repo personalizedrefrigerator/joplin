@@ -128,6 +128,11 @@ const ImageEditor = (props: Props) => {
 					saveDrawing(false);
 				});
 
+				svgEditorBundle.restoreToolbarState(toolbar);
+				editor.notifier.on(EditorEventType.ToolUpdated, () => {
+					svgEditorBundle.saveToolbarState(toolbar);
+				});
+
 				// Auto-save four minutes.
 				const autoSaveInterval = 4 * 60 * 1000;
 				setInterval(() => {
