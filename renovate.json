@@ -3,6 +3,8 @@
 	"extends": [
 		"config:base"
 	],
+	"prConcurrentLimit": 20,
+	"prHourlyLimit": 0,
 	"ignorePaths": [
 		"**/node_modules/**",
 		"**/bower_components/**",
@@ -11,18 +13,46 @@
 		"Assets/**"
 	],
 	"ignoreDeps": [
-		"react-native",
-		"@types/react-native",
 		"@babel/core",
+		"@codemirror/commands",
+		"@codemirror/lang-cpp",
+		"@codemirror/lang-html",
+		"@codemirror/lang-java",
+		"@codemirror/lang-javascript",
+		"@codemirror/lang-markdown",
+		"@codemirror/lang-php",
+		"@codemirror/lang-rust",
+		"@codemirror/language",
+		"@codemirror/legacy-modes",
+		"@codemirror/search",
+		"@codemirror/state",
+		"@codemirror/view",
+		"@fortawesome/fontawesome-svg-core",
+		"@fortawesome/free-solid-svg-icons",
+		"@svgr/webpack",
+		"@types/react-native",
+		"actions/stale",
 		"babel-eslint",
 		"babel-loader",
-		"katex",
+		"babel-preset-react-app",
+		"browserify",
+		"codemirror",
+		"com.android.tools.build:gradle",
+		"cspell",
+		"electron",
 		"jsc-android",
+		"katex",
+		"mermaid",
 		"metro-react-native-babel-preset",
-		"webpack",
+		"react-native",
 		"rollup",
 		"typedoc",
-		"actions/stale",
-		"@svgr/webpack"
+		"webpack"
+	],
+	"packageRules": [
+		{
+			"matchUpdateTypes": ["patch"],
+			"automerge": true
+		}
 	]
 }

@@ -63,16 +63,16 @@
   },
   "devDependencies": {
     "@seiyab/eslint-plugin-react-hooks": "4.5.1-alpha.5",
-    "@typescript-eslint/eslint-plugin": "5.33.1",
-    "@typescript-eslint/parser": "5.33.1",
-    "cspell": "5.20.0",
+    "@typescript-eslint/eslint-plugin": "5.42.1",
+    "@typescript-eslint/parser": "5.42.1",
+    "cspell": "5.21.2",
     "eslint": "8.22.0",
-    "eslint-interactive": "10.0.0",
+    "eslint-interactive": "10.2.0",
     "eslint-plugin-import": "2.26.0",
-    "eslint-plugin-promise": "6.0.1",
-    "eslint-plugin-react": "7.30.1",
+    "eslint-plugin-promise": "6.1.1",
+    "eslint-plugin-react": "7.31.10",
     "fs-extra": "8.1.0",
-    "glob": "7.2.0",
+    "glob": "7.2.3",
     "gulp": "4.0.2",
     "husky": "3.1.0",
     "lerna": "3.22.1",
@@ -85,7 +85,7 @@
     "@types/fs-extra": "9.0.13",
     "http-server": "0.13.0",
     "node-gyp": "8.4.1",
-    "nodemon": "2.0.15"
+    "nodemon": "2.0.20"
   },
   "packageManager": "yarn@3.2.4"
 }
