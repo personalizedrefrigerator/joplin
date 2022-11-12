@@ -1388,6 +1388,15 @@ class Setting extends BaseModel {
 				isGlobal: true,
 			},
 
+			'imageeditor.jsdrawToolbar': {
+				value: '',
+				type: SettingItemType.String,
+				public: false,
+				appTypes: [AppType.Mobile],
+				label: () => '',
+				storage: SettingStorage.File,
+			},
+
 			'net.customCertificates': {
 				value: '',
 				type: SettingItemType.String,

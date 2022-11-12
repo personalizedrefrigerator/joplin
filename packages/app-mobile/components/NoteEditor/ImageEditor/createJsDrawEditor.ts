@@ -1,6 +1,10 @@
 
-import Editor, { HTMLToolbar } from 'js-draw';
+import Editor, { EditorEventType, HTMLToolbar } from 'js-draw';
 import 'js-draw/bundle';
+
+declare namespace ReactNativeWebView {
+	const postMessage: (data: any)=> void;
+}
 
 export const createJsDrawEditor = (): Editor => {
 	const parentElement = document.body;
@@ -9,13 +13,7 @@ export const createJsDrawEditor = (): Editor => {
 	return editor;
 };
 
-const editorStateLocalStorageKey = 'toolbarStateStore';
-export const saveToolbarState = (toolbar: HTMLToolbar) => {
-	localStorage.setItem(editorStateLocalStorageKey, toolbar.serializeState());
-};
-
-export const restoreToolbarState = (toolbar: HTMLToolbar) => {
-	const state = localStorage.getItem(editorStateLocalStorageKey);
+export const restoreToolbarState = (toolbar: HTMLToolbar, state: string) => {
 	if (state) {
 		// deserializeState throws on invalid argument.
 		try {
@@ -24,6 +22,18 @@ export const restoreToolbarState = (toolbar: HTMLToolbar) => {
 			console.warn('Error deserializing toolbar state: ', e);
 		}
 	}
+};
+
+export const listenToolbarState = (editor: Editor, toolbar: HTMLToolbar) => {
+	editor.notifier.on(EditorEventType.ToolUpdated, () => {
+		const state = toolbar.serializeState();
+		ReactNativeWebView.postMessage(
+			JSON.stringify({
+				action: 'save-toolbar',
+				data: state,
+			})
+		);
+	});
 };
 
 export default createJsDrawEditor;

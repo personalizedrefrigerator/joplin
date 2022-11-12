@@ -128,12 +128,13 @@ const ImageEditor = (props: Props) => {
 					saveDrawing(false);
 				});
 
-				svgEditorBundle.restoreToolbarState(toolbar);
-				editor.notifier.on(EditorEventType.ToolUpdated, () => {
-					svgEditorBundle.saveToolbarState(toolbar);
-				});
+				svgEditorBundle.restoreToolbarState(
+					toolbar,
+					${JSON.stringify(Setting.value('imageeditor.jsdrawToolbar'))}
+				);
+				svgEditorBundle.listenToolbarState(editor, toolbar);
 
-				// Auto-save four minutes.
+				// Auto-save every four minutes.
 				const autoSaveInterval = 4 * 60 * 1000;
 				setInterval(() => {
 					saveDrawing(true);
@@ -161,6 +162,8 @@ const ImageEditor = (props: Props) => {
 			const filePath = `${Setting.value('resourceDir')}/autosaved-drawing.joplin.svg`;
 			await shim.fsDriver().writeFile(filePath, json.data, 'utf8');
 			console.info('Auto-saved to %s', filePath);
+		} else if (json.action === 'save-toolbar') {
+			Setting.setValue('imageeditor.jsdrawToolbar', json.data);
 		} else {
 			console.error('Unknown action,', json.action);
 		}
