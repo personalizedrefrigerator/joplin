@@ -66,7 +66,7 @@
     "@typescript-eslint/eslint-plugin": "5.42.1",
     "@typescript-eslint/parser": "5.42.1",
     "cspell": "5.21.2",
-    "eslint": "8.22.0",
+    "eslint": "8.27.0",
     "eslint-interactive": "10.2.0",
     "eslint-plugin-import": "2.26.0",
     "eslint-plugin-promise": "6.1.1",
@@ -87,5 +87,8 @@
     "node-gyp": "8.4.1",
     "nodemon": "2.0.20"
   },
-  "packageManager": "yarn@3.2.4"
+  "packageManager": "yarn@3.2.4",
+  "resolutions": {
+    "joplin-rn-alarm-notification@1.0.5": "patch:joplin-rn-alarm-notification@npm:1.0.5#.yarn/patches/joplin-rn-alarm-notification-npm-1.0.5-662e871c03"
+  }
 }
