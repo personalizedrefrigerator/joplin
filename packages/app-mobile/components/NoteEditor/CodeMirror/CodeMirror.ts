@@ -12,6 +12,7 @@
 import { MarkdownMathExtension } from './markdownMathParser';
 import createTheme from './theme';
 import decoratorExtension from './decoratorExtension';
+import editorZoomExtension from './editorZoomExtension';
 
 import syntaxHighlightingLanguages from './syntaxHighlightingLanguages';
 
@@ -298,6 +299,7 @@ export function initCodeMirror(
 				highlightSpecialChars(),
 				// highlightSelectionMatches(),
 				indentOnInput(),
+				editorZoomExtension,
 
 				// By default, indent with four spaces
 				indentUnit.of('    '),
