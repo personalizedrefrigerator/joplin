@@ -1637,6 +1637,15 @@ class Setting extends BaseModel {
 				public: false,
 			},
 
+			// Stores the last time at which the application was opened with wasClosedSuccessfully
+			// set to false. Currently desktop only.
+			// Used to estimate whether an unsuccessful close was actually an undesired crash.
+			lastCrashDetectedTimestamp: {
+				value: 0,
+				type: SettingItemType.Int,
+				public: false,
+			},
+
 			wasClosedSuccessfully: {
 				value: true,
 				type: SettingItemType.Bool,

@@ -337,12 +337,21 @@ class Application extends BaseApplication {
 	}
 
 	public crashDetectionHandler() {
-		// This handler conflicts with the single instance behaviour, so it's
-		// not used for now.
+		// Attempt to work around
 		// https://discourse.joplinapp.org/t/pre-release-v2-8-is-now-available-updated-27-april/25158/56?u=laurent
+		// by only showing the "start in safe mode" prompt if the app was first opened very recently.
+		const lastCrashDetectedStart = Setting.value('lastCrashDetectedTimestamp');
+
 		if (!Setting.value('wasClosedSuccessfully')) {
-			const answer = confirm(_('The application did not close properly. Would you like to start in safe mode?'));
-			Setting.setValue('isSafeMode', !!answer);
+			const currentTimestamp = Date.now();
+			const timeoutMs = 10 * 1000;
+
+			// If there was an unsuccessful close very recently,
+			if (currentTimestamp - lastCrashDetectedStart < timeoutMs) {
+				const answer = confirm(_('The application did not close properly. Would you like to start in safe mode?'));
+				Setting.setValue('isSafeMode', !!answer);
+			}
+			Setting.setValue('lastCrashDetectedTimestamp', currentTimestamp);
 		}
 
 		Setting.setValue('wasClosedSuccessfully', false);
@@ -355,7 +364,7 @@ class Application extends BaseApplication {
 
 		argv = await super.start(argv);
 
-		// this.crashDetectionHandler();
+		this.crashDetectionHandler();
 
 		await this.applySettingsSideEffects();
 
