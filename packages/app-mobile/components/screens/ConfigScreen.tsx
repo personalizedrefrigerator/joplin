@@ -1,8 +1,10 @@
 /* eslint-disable @typescript-eslint/explicit-member-accessibility */
 import Slider from '@react-native-community/slider';
 const React = require('react');
+const RNExitApp = require('react-native-exit-app').default;
+const { dialogs } = require('../../utils/dialogs.js');
 import { Platform, Linking, View, Switch, StyleSheet, ScrollView, Text, Button, TouchableOpacity, TextInput, Alert, PermissionsAndroid, TouchableNativeFeedback } from 'react-native';
-import Setting, { AppType } from '@joplin/lib/models/Setting';
+import Setting, { AppType, SyncStartupOperation } from '@joplin/lib/models/Setting';
 import NavService from '@joplin/lib/services/NavService';
 import ReportService from '@joplin/lib/services/ReportService';
 import SearchEngine from '@joplin/lib/services/searchengine/SearchEngine';
@@ -24,6 +26,7 @@ const shared = require('@joplin/lib/components/shared/config-shared.js');
 import SyncTargetRegistry from '@joplin/lib/SyncTargetRegistry';
 import { openDocumentTree } from '@joplin/react-native-saf-x';
 import biometricAuthenticate from '../biometrics/biometricAuthenticate';
+const DialogBox = require('react-native-dialogbox').default;
 
 class ConfigScreenComponent extends BaseScreenComponent {
 	public static navigationOptions(): any {
@@ -31,6 +34,7 @@ class ConfigScreenComponent extends BaseScreenComponent {
 	}
 
 	private componentsY_: Record<string, number> = {};
+	public dialogbox?: typeof DialogBox;
 
 	public constructor() {
 		super();
@@ -501,6 +505,30 @@ class ConfigScreenComponent extends BaseScreenComponent {
 		return false;
 	}
 
+	private async handleSettingButton(key: string) {
+		if (key === 'sync.clearLocalSyncStateButton' || key === 'sync.clearLocalDataButton') {
+			const confirmResult = await dialogs.confirm(
+				this, _('This cannot be undone. Do you want to continue?')
+			);
+			if (!confirmResult) return;
+
+			let operation = SyncStartupOperation.ClearLocalData;
+			if (key === 'sync.clearLocalSyncStateButton') {
+				operation = SyncStartupOperation.ClearLocalSyncState;
+			}
+
+			Setting.setValue('sync.startupOperation', operation);
+			await Setting.saveAll();
+
+			await dialogs.info(
+				this, _('The app is now going to close. Please relaunch it to complete the process.')
+			);
+			RNExitApp.exitApp();
+		} else {
+			throw new Error(`Unhandled key: ${key}`);
+		}
+	}
+
 	public settingToComponent(key: string, value: any) {
 		const themeId = this.props.themeId;
 		const theme = themeStyle(themeId);
@@ -611,6 +639,8 @@ class ConfigScreenComponent extends BaseScreenComponent {
 					{descriptionComp}
 				</View>
 			);
+		} else if (md.type === Setting.TYPE_BUTTON) {
+			return this.renderButton(key, md.label(), md.onClick ?? (() => this.handleSettingButton(key)));
 		} else {
 			// throw new Error('Unsupported setting type: ' + md.type);
 		}
@@ -765,6 +795,11 @@ class ConfigScreenComponent extends BaseScreenComponent {
 			<View style={this.rootStyle(this.props.themeId).root}>
 				<ScreenHeader title={_('Configuration')} showSaveButton={true} showSearchButton={false} showSideMenuButton={false} saveButtonDisabled={!this.state.changedSettingKeys.length} onSaveButtonPress={this.saveButton_press} />
 				<ScrollView ref={this.scrollViewRef_}>{settingComps}</ScrollView>
+				<DialogBox
+					ref={(dialogbox: typeof DialogBox) => {
+						this.dialogbox = dialogbox;
+					}}
+				/>
 			</View>
 		);
 	}

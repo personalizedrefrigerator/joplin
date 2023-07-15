@@ -105,6 +105,7 @@ import setIgnoreTlsErrors from './utils/TlsUtils';
 import ShareService from '@joplin/lib/services/share/ShareService';
 import setupNotifications from './utils/setupNotifications';
 import { loadMasterKeysFromSettings, migrateMasterPassword } from '@joplin/lib/services/e2ee/utils';
+import handleSyncStartupOperation from '@joplin/lib/services/synchronizer/utils/handleSyncStartupOperation';
 import SyncTargetNone from '@joplin/lib/SyncTargetNone';
 import { setRSA } from '@joplin/lib/services/e2ee/ppk';
 import RSA from './services/e2ee/RSA.react-native';
@@ -512,6 +513,7 @@ async function initialize(dispatch: Function) {
 
 		await loadKeychainServiceAndSettings(KeychainServiceDriverMobile);
 		await migrateMasterPassword();
+		await handleSyncStartupOperation();
 
 		if (!Setting.value('clientId')) Setting.setValue('clientId', uuid.create());
 		reg.logger().info(`Client ID: ${Setting.value('clientId')}`);
