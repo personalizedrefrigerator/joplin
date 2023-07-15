@@ -9,6 +9,7 @@ import { Theme } from '@joplin/lib/themes/type';
 import { useState, useMemo, useCallback, useRef } from 'react';
 import { View, Text, Pressable, ViewStyle, PressableStateCallbackType, StyleProp, StyleSheet, LayoutChangeEvent, LayoutRectangle, Animated, AccessibilityState, AccessibilityRole } from 'react-native';
 import { Menu, MenuOptions, MenuTrigger, renderers } from 'react-native-popup-menu';
+import platformAnimationSettings from '../utils/platformAnimationSettings';
 
 type ButtonClickListener = ()=> void;
 interface ButtonProps {
@@ -50,7 +51,7 @@ const CustomButton = (props: ButtonProps) => {
 		Animated.timing(fadeAnim, {
 			toValue: 0.5,
 			duration: animationDuration,
-			useNativeDriver: true,
+			...platformAnimationSettings,
 		}).start();
 	}, [fadeAnim]);
 	const onPressOut = useCallback(() => {
@@ -58,7 +59,7 @@ const CustomButton = (props: ButtonProps) => {
 		Animated.timing(fadeAnim, {
 			toValue: 1,
 			duration: animationDuration,
-			useNativeDriver: true,
+			...platformAnimationSettings,
 		}).start();
 
 		setTooltipVisible(false);

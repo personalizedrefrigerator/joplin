@@ -14,6 +14,7 @@ import { AppState } from '../utils/types';
 import Setting from '@joplin/lib/models/Setting';
 import { reg } from '@joplin/lib/registry';
 import { ProfileConfig } from '@joplin/lib/services/profileConfig/types';
+import platformAnimationSettings from '../utils/platformAnimationSettings';
 
 // We need this to suppress the useless warning
 // https://github.com/oblador/react-native-vector-icons/issues/1465
@@ -111,7 +112,9 @@ const SideMenuContentComponent = (props: Props) => {
 					toValue: 1,
 					duration: 3000,
 					easing: Easing.linear,
-				})
+					...platformAnimationSettings,
+				}),
+				platformAnimationSettings
 			);
 
 			syncIconAnimation.start();
