@@ -1,5 +1,5 @@
 import Setting, { Env } from './models/Setting';
-import Logger, { TargetType, LoggerWrapper } from './Logger';
+import Logger, { TargetType, LoggerWrapper } from '@joplin/utils/Logger';
 import shim from './shim';
 const { setupProxySettings } = require('./shim-init-node');
 import BaseService from './services/BaseService';
@@ -58,6 +58,7 @@ import RSA from './services/e2ee/RSA.node';
 import Resource from './models/Resource';
 import { ProfileConfig } from './services/profileConfig/types';
 import initProfile from './services/profileConfig/initProfile';
+import { parseShareCache } from './services/share/reducer';
 
 import RotatingLogs from './RotatingLogs';
 
@@ -839,6 +840,8 @@ export default class BaseApplication {
 		await handleSyncStartupOperation();
 
 		appLogger.info(`Client ID: ${Setting.value('clientId')}`);
+
+		BaseItem.syncShareCache = parseShareCache(Setting.value('sync.shareCache'));
 
 		if (initArgs?.isSafeMode) {
 			Setting.setValue('isSafeMode', true);

@@ -1,5 +1,5 @@
 import { ModelType, DeleteOptions } from '../BaseModel';
-import { BaseItemEntity, NoteEntity } from '../services/database/types';
+import { BaseItemEntity, DeletedItemEntity, NoteEntity } from '../services/database/types';
 import Setting from './Setting';
 import BaseModel from '../BaseModel';
 import time from '../time';
@@ -11,7 +11,10 @@ import ShareService from '../services/share/ShareService';
 import itemCanBeEncrypted from './utils/itemCanBeEncrypted';
 import { getEncryptionEnabled } from '../services/synchronizer/syncInfoUtils';
 import JoplinError from '../JoplinError';
-import { LoadOptions } from './utils/types';
+import { LoadOptions, SaveOptions } from './utils/types';
+import { State as ShareState } from '../services/share/reducer';
+import { checkIfItemCanBeAddedToFolder, checkIfItemCanBeChanged, checkIfItemsCanBeChanged, needsReadOnlyChecks } from './utils/readOnly';
+
 const { sprintf } = require('sprintf-js');
 const moment = require('moment');
 
@@ -45,6 +48,7 @@ export default class BaseItem extends BaseModel {
 	public static encryptionService_: any = null;
 	public static revisionService_: any = null;
 	public static shareService_: ShareService = null;
+	private static syncShareCache_: ShareState | null = null;
 
 	// Also update:
 	// - itemsThatNeedSync()
@@ -81,6 +85,14 @@ export default class BaseItem extends BaseModel {
 		}
 
 		throw new Error(`Invalid class name: ${className}`);
+	}
+
+	public static get syncShareCache(): ShareState {
+		return this.syncShareCache_;
+	}
+
+	public static set syncShareCache(v: ShareState) {
+		this.syncShareCache_ = v;
 	}
 
 	public static async findUniqueItemTitle(title: string, parentId: string = null) {
@@ -200,10 +212,10 @@ export default class BaseItem extends BaseModel {
 		return this.loadItemById(this.pathToId(path));
 	}
 
-	public static async loadItemById(id: string) {
+	public static async loadItemById(id: string, options: LoadOptions = null) {
 		const classes = this.syncItemClassNames();
 		for (let i = 0; i < classes.length; i++) {
-			const item = await this.getClass(classes[i]).load(id);
+			const item = await this.getClass(classes[i]).load(id, options);
 			if (item) return item;
 		}
 		return null;
@@ -221,6 +233,21 @@ export default class BaseItem extends BaseModel {
 			output = output.concat(models);
 		}
 		return output;
+	}
+
+	public static async loadItemsByTypeAndIds(itemType: ModelType, ids: string[], options: LoadOptions = null): Promise<any[]> {
+		if (!ids.length) return [];
+
+		const fields = options && options.fields ? options.fields : [];
+		const ItemClass = this.getClassByItemType(itemType);
+		const fieldsSql = fields.length ? this.db().escapeFields(fields) : '*';
+		const sql = `SELECT ${fieldsSql} FROM ${ItemClass.tableName()} WHERE id IN ("${ids.join('","')}")`;
+		return ItemClass.modelSelectAll(sql);
+	}
+
+	public static async loadItemByTypeAndId(itemType: ModelType, id: string, options: LoadOptions = null) {
+		const result = await this.loadItemsByTypeAndIds(itemType, [id], options);
+		return result.length ? result[0] : null;
 	}
 
 	public static loadItemByField(itemType: number, field: string, value: any) {
@@ -258,6 +285,11 @@ export default class BaseItem extends BaseModel {
 			});
 		}
 
+		if (needsReadOnlyChecks(this.modelType(), options.changeSource, this.syncShareCache, options.disableReadOnlyCheck)) {
+			const previousItems = await this.loadItemsByTypeAndIds(this.modelType(), ids, { fields: ['share_id', 'id'] });
+			checkIfItemsCanBeChanged(this.modelType(), options.changeSource, previousItems, this.syncShareCache);
+		}
+
 		await super.batchDelete(ids, options);
 
 		if (trackDeleted) {
@@ -289,7 +321,7 @@ export default class BaseItem extends BaseModel {
 	// - Client 1 syncs with target 2 only => the note is *not* deleted from target 2 because no information
 	//   that it was previously deleted exist (deleted_items entry has been deleted).
 	// The solution would be to permanently store the list of deleted items on each client.
-	public static deletedItems(syncTarget: number) {
+	public static deletedItems(syncTarget: number): Promise<DeletedItemEntity[]> {
 		return this.db().selectAll('SELECT * FROM deleted_items WHERE sync_target = ?', [syncTarget]);
 	}
 
@@ -863,11 +895,32 @@ export default class BaseItem extends BaseModel {
 		await this.db().exec('UPDATE sync_items SET force_sync = 1');
 	}
 
-	public static async save(o: any, options: any = null) {
+	public static async save(o: any, options: SaveOptions = null) {
 		if (!options) options = {};
 
 		if (options.userSideValidation === true) {
 			if (o.encryption_applied) throw new Error(_('Encrypted items cannot be modified'));
+		}
+
+		const isNew = this.isNew(o, options);
+
+		if (needsReadOnlyChecks(this.modelType(), options.changeSource, this.syncShareCache)) {
+			if (!isNew) {
+				const previousItem = await this.loadItemByTypeAndId(this.modelType(), o.id, { fields: ['id', 'share_id'] });
+				checkIfItemCanBeChanged(this.modelType(), options.changeSource, previousItem, this.syncShareCache);
+			}
+
+			// If the item has a parent folder (a note or a sub-folder), check
+			// that we're not adding the item to a read-only folder.
+			if (o.parent_id) {
+				await checkIfItemCanBeAddedToFolder(
+					this.modelType(),
+					this.getClass('Folder'),
+					options.changeSource,
+					BaseItem.syncShareCache,
+					o.parent_id
+				);
+			}
 		}
 
 		return super.save(o, options);
