@@ -17,6 +17,13 @@ interface DecryptionResult {
 	error: any;
 }
 
+interface ItemTypeAndId {
+	type_: number;
+	id: string;
+}
+
+type ErrorHandlerType = 'log'|'dispatchAndLog';
+
 export default class DecryptionWorker {
 
 	public static instance_: DecryptionWorker = null;
@@ -31,6 +38,11 @@ export default class DecryptionWorker {
 	private maxDecryptionAttempts_ = 2;
 	private startCalls_: boolean[] = [];
 	private encryptionService_: EncryptionService = null;
+
+	// Error tracking
+	private itemIdToErrorCodeMap_: Record<string, string> = {};
+	private itemIdToErrorDetailMap_: Record<string, string> = {};
+	private errorCodeToCountMap_: Record<string, number> = {};
 
 	public constructor() {
 		this.state_ = 'idle';
@@ -91,9 +103,63 @@ export default class DecryptionWorker {
 		}, 1000);
 	}
 
+	public getDecryptionError(itemId: string) {
+		if (!(itemId in this.itemIdToErrorCodeMap_)) {
+			// If there was an error, it happened in a previous attempt to decrypt
+			// (e.g. the app was restarted and this.itemIdToErrorMap_ was thus cleared).
+			return null;
+		}
+
+		return this.itemIdToErrorDetailMap_[itemId];
+	}
+
+	private clearErrorFor(itemId: string, errorHandler: ErrorHandlerType) {
+		if (itemId in this.itemIdToErrorCodeMap_) {
+			delete this.itemIdToErrorCodeMap_[itemId];
+			delete this.itemIdToErrorDetailMap_[itemId];
+			this.errorCodeToCountMap_[itemId] --;
+
+			// If the error was just cleared
+			if (this.errorCodeToCountMap_[itemId] === 0) {
+				delete this.errorCodeToCountMap_[itemId];
+
+				if (errorHandler === 'dispatchAndLog') {
+					this.dispatch({
+						type: 'SET_DECRYPTION_ERROR_LIST',
+						errorList: Object.keys(this.errorCodeToCountMap_),
+					});
+				}
+			}
+		}
+	}
+
+	private recordErrorFor(itemId: string, error: any, errorHandler: ErrorHandlerType) {
+		const errorCode = error.code ?? error.message;
+
+		const isNewError =
+			!(errorCode in this.errorCodeToCountMap_)
+			|| this.errorCodeToCountMap_[errorCode] === 0;
+
+		// Change the error associated with the ID
+		this.clearErrorFor(itemId, errorHandler);
+		this.itemIdToErrorCodeMap_[itemId] = errorCode;
+		this.itemIdToErrorDetailMap_[itemId] = `${error.message ?? error}`;
+		this.errorCodeToCountMap_[errorCode] ??= 0;
+		this.errorCodeToCountMap_[errorCode] ++;
+
+		if (errorHandler === 'dispatchAndLog' && isNewError) {
+			this.dispatch({
+				type: 'SET_DECRYPTION_ERROR_LIST',
+				errorList: Object.keys(this.errorCodeToCountMap_),
+			});
+		}
+	}
+
 	public async decryptionDisabledItems() {
 		let items = await this.kvStore().searchByPrefix('decrypt:');
-		items = items.filter(item => item.value > this.maxDecryptionAttempts_);
+
+		// An item is disabled if it won't be decrypted any more times.
+		items = items.filter(item => item.value >= this.maxDecryptionAttempts_);
 		items = items.map(item => {
 			const s = item.key.split(':');
 			return {
@@ -101,15 +167,23 @@ export default class DecryptionWorker {
 				id: s[2],
 			};
 		});
-		return items;
+
+		type ItemRecordList = ItemTypeAndId[];
+		return items as ItemRecordList;
 	}
 
-	public async clearDisabledItem(typeId: string, itemId: string) {
+	public async clearDisabledItem(typeId: number, itemId: string) {
 		await this.kvStore().deleteValue(`decrypt:${typeId}:${itemId}`);
 	}
 
 	public async clearDisabledItems() {
 		await this.kvStore().deleteByPrefix('decrypt:');
+	}
+
+	public async retryDisabledItem(typeId: number, itemId: string) {
+		// Set the decryption attempt counter such that the specified item's decryption
+		// is attempted exactly once.
+		await this.kvStore().setValue(`decrypt:${typeId}:${itemId}`, this.maxDecryptionAttempts_ - 1);
 	}
 
 	public dispatchReport(report: any) {
@@ -121,7 +195,7 @@ export default class DecryptionWorker {
 	private async start_(options: any = null): Promise<DecryptionResult> {
 		if (options === null) options = {};
 		if (!('masterKeyNotLoadedHandler' in options)) options.masterKeyNotLoadedHandler = 'throw';
-		if (!('errorHandler' in options)) options.errorHandler = 'log';
+		if (!('errorHandler' in options)) options.errorHandler = 'dispatchAndLog';
 
 		if (this.state_ !== 'idle') {
 			const msg = `DecryptionWorker: cannot start because state is "${this.state_}"`;
@@ -169,12 +243,17 @@ export default class DecryptionWorker {
 		this.dispatch({ type: 'ENCRYPTION_HAS_DISABLED_ITEMS', value: false });
 		this.dispatchReport({ state: 'started' });
 
+		const onItemDisabled = (itemType: number, itemId: string) => {
+			this.logger().debug(`DecryptionWorker: ${BaseModel.modelTypeToName(itemType)} ${itemId}: Decryption has failed more than 2 times - skipping it`);
+			this.dispatch({ type: 'ENCRYPTION_HAS_DISABLED_ITEMS', value: true });
+		};
+
 		try {
 			const notLoadedMasterKeyDisptaches = [];
 
 			while (true) {
 				const result: ItemsThatNeedDecryptionResult = await BaseItem.itemsThatNeedDecryption(excludedIds);
-				const items = result.items;
+				const items: ItemTypeAndId[] = result.items;
 
 				for (let i = 0; i < items.length; i++) {
 					const item = items[i];
@@ -197,16 +276,16 @@ export default class DecryptionWorker {
 					try {
 						const decryptCounter = await this.kvStore().incValue(counterKey);
 						if (decryptCounter > this.maxDecryptionAttempts_) {
-							this.logger().debug(`DecryptionWorker: ${BaseModel.modelTypeToName(item.type_)} ${item.id}: Decryption has failed more than 2 times - skipping it`);
-							this.dispatch({ type: 'ENCRYPTION_HAS_DISABLED_ITEMS', value: true });
-							skippedItemCount++;
+							onItemDisabled(item.type_, item.id);
 							excludedIds.push(item.id);
+							skippedItemCount++;
 							continue;
 						}
 
 						const decryptedItem = await ItemClass.decrypt(item);
 
 						await clearDecryptionCounter();
+						this.clearErrorFor(item.id, options.errorHandler);
 
 						if (!decryptedItemCounts[decryptedItem.type_]) decryptedItemCounts[decryptedItem.type_] = 0;
 
@@ -229,6 +308,13 @@ export default class DecryptionWorker {
 					} catch (error) {
 						excludedIds.push(item.id);
 
+						const counter: number = await this.kvStore().value(counterKey);
+						// If the item's counter value will cause it not to be decrypted on future
+						// loop iterations,
+						if (counter >= this.maxDecryptionAttempts_) {
+							onItemDisabled(item.type_, item.id);
+						}
+
 						if (error.code === 'masterKeyNotLoaded' && options.masterKeyNotLoadedHandler === 'dispatch') {
 							if (notLoadedMasterKeyDisptaches.indexOf(error.masterKeyId) < 0) {
 								this.dispatch({
@@ -246,7 +332,9 @@ export default class DecryptionWorker {
 							throw error;
 						}
 
-						if (options.errorHandler === 'log') {
+						this.recordErrorFor(item.id, error, options.errorHandler);
+
+						if (options.errorHandler === 'log' || options.errorHandler === 'dispatchAndLog') {
 							this.logger().warn(`DecryptionWorker: error for: ${item.id} (${ItemClass.tableName()})`, error, item);
 						} else {
 							throw error;
