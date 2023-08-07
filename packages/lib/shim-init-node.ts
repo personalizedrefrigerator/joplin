@@ -1,27 +1,35 @@
 'use strict';
 
-const fs = require('fs-extra');
+import fs = require('fs-extra');
 const shim = require('./shim').default;
 const GeolocationNode = require('./geolocation-node').default;
 const { FileApiDriverLocal } = require('./file-api-driver-local');
 const { setLocale, defaultLocale, closestSupportedLocale } = require('./locale');
 const FsDriverNode = require('./fs-driver-node').default;
 const mimeUtils = require('./mime-utils.js').mime;
-const Note = require('./models/Note').default;
 const Resource = require('./models/Resource').default;
 const { _ } = require('./locale');
 const http = require('http');
 const https = require('https');
-const { HttpProxyAgent, HttpsProxyAgent } = require('hpagent');
+import { HttpProxyAgent, HttpsProxyAgent } from 'hpagent';
+import type Setting from './models/Setting';
 const toRelative = require('relative');
-const timers = require('timers');
+import * as timers from 'timers';
+import Note from './models/Note';
+import { NoteEntity } from './services/database/types';
 const zlib = require('zlib');
 const dgram = require('dgram');
 const { basename, fileExtension, safeFileExtension } = require('./path-utils');
 
-const proxySettings = {};
+interface ProxySettings {
+	maxConcurrentConnections?: number;
+	proxyTimeout?: number;
+	proxyEnabled?: boolean;
+	proxyUrl?: string;
+}
+const proxySettings: ProxySettings = {};
 
-function fileExists(filePath) {
+function fileExists(filePath: string) {
 	try {
 		return fs.statSync(filePath).isFile();
 	} catch (error) {
@@ -29,11 +37,11 @@ function fileExists(filePath) {
 	}
 }
 
-function isUrlHttps(url) {
+function isUrlHttps(url: string) {
 	return url.startsWith('https');
 }
 
-function resolveProxyUrl(proxyUrl) {
+function resolveProxyUrl(proxyUrl: string) {
 	return (
 		proxyUrl ||
 		process.env['http_proxy'] ||
@@ -52,12 +60,12 @@ function callsites() {
 	return stack;
 }
 
-const gunzipFile = function(source, destination) {
+const gunzipFile = function(source: string, destination: string) {
 	if (!fileExists(source)) {
 		throw new Error(`No such file: ${source}`);
 	}
 
-	return new Promise((resolve, reject) => {
+	return new Promise<void>((resolve, reject) => {
 		// prepare streams
 		const src = fs.createReadStream(source);
 		const dest = fs.createWriteStream(destination);
@@ -80,14 +88,14 @@ const gunzipFile = function(source, destination) {
 	});
 };
 
-function setupProxySettings(options) {
+function setupProxySettings(options: ProxySettings) {
 	proxySettings.maxConcurrentConnections = options.maxConcurrentConnections;
 	proxySettings.proxyTimeout = options.proxyTimeout;
 	proxySettings.proxyEnabled = options.proxyEnabled;
 	proxySettings.proxyUrl = options.proxyUrl;
 }
 
-function shimInit(options = null) {
+function shimInit(options: any = null) {
 	options = {
 		sharp: null,
 		keytar: null,
@@ -133,23 +141,23 @@ function shimInit(options = null) {
 		return shim.electronBridge_;
 	};
 
-	shim.randomBytes = async count => {
+	shim.randomBytes = async (count: number) => {
 		const buffer = require('crypto').randomBytes(count);
 		return Array.from(buffer);
 	};
 
-	shim.detectAndSetLocale = function(Setting) {
+	shim.detectAndSetLocale = function(settings: typeof Setting) {
 		let locale = shim.isElectron() ? shim.electronBridge().getLocale() : process.env.LANG;
 		if (!locale) locale = defaultLocale();
 		locale = locale.split('.');
 		locale = locale[0];
 		locale = closestSupportedLocale(locale);
-		Setting.setValue('locale', locale);
+		settings.setValue('locale', locale);
 		setLocale(locale);
 		return locale;
 	};
 
-	shim.writeImageToFile = async function(nativeImage, mime, targetPath) {
+	shim.writeImageToFile = async function(nativeImage: any, mime: string, targetPath: string) {
 		if (shim.isElectron()) {
 			// For Electron
 			let buffer = null;
@@ -170,7 +178,7 @@ function shimInit(options = null) {
 		}
 	};
 
-	shim.showMessageBox = (message, options = null) => {
+	shim.showMessageBox = (message: string, options: any = null) => {
 		if (shim.isElectron()) {
 			return shim.electronBridge().showMessageBox(message, options);
 		} else {
@@ -178,7 +186,7 @@ function shimInit(options = null) {
 		}
 	};
 
-	const handleResizeImage_ = async function(filePath, targetPath, mime, resizeLargeImages) {
+	const handleResizeImage_ = async (filePath: string, targetPath: string, mime: string, resizeLargeImages: string) => {
 		const maxDim = Resource.IMAGE_MAX_DIMENSION;
 
 		if (shim.isElectron()) {
@@ -206,7 +214,7 @@ function shimInit(options = null) {
 				return true;
 			}
 
-			const options = {};
+			const options: any = {};
 			if (size.width > size.height) {
 				options.width = maxDim;
 			} else {
@@ -232,7 +240,7 @@ function shimInit(options = null) {
 						fit: 'inside',
 						withoutEnlargement: true,
 					})
-					.toFile(targetPath, (error, info) => {
+					.toFile(targetPath, (error: any, info: any) => {
 						if (error) {
 							reject(error);
 						} else {
@@ -249,7 +257,7 @@ function shimInit(options = null) {
 	// from a file, and update one. To update a resource, pass the
 	// destinationResourceId option. This method is indirectly tested in
 	// Api.test.ts.
-	shim.createResourceFromPath = async function(filePath, defaultProps = null, options = null) {
+	shim.createResourceFromPath = async function(filePath: string, defaultProps: any = null, options: any = null) {
 		options = { resizeLargeImages: 'always', // 'always', 'ask' or 'never'
 			userSideValidation: false,
 			destinationResourceId: '', ...options };
@@ -313,7 +321,7 @@ function shimInit(options = null) {
 		const fileStat = await shim.fsDriver().stat(targetPath);
 		resource.size = fileStat.size;
 
-		const saveOptions = { isNew: true };
+		const saveOptions: any = { isNew: true };
 		if (options.userSideValidation) saveOptions.userSideValidation = true;
 
 		if (isUpdate) {
@@ -329,7 +337,7 @@ function shimInit(options = null) {
 		}
 	};
 
-	shim.attachFileToNoteBody = async function(noteBody, filePath, position = null, options = null) {
+	shim.attachFileToNoteBody = async (noteBody: string, filePath: string, position: number|null = null, options: any = null) => {
 		options = { createFileURL: false, ...options };
 
 		const { basename } = require('path');
@@ -363,7 +371,7 @@ function shimInit(options = null) {
 		return newBody.join('\n\n');
 	};
 
-	shim.attachFileToNote = async function(note, filePath, position = null, options = null) {
+	shim.attachFileToNote = async function(note: NoteEntity, filePath: string, position: number|null = null, options: any = null) {
 		const newBody = await shim.attachFileToNoteBody(note.body, filePath, position, options);
 		if (!newBody) return null;
 
@@ -371,7 +379,7 @@ function shimInit(options = null) {
 		return Note.save(newNote);
 	};
 
-	shim.imageToDataUrl = async (filePath, maxSize) => {
+	shim.imageToDataUrl = async (filePath: string, maxSize: number) => {
 		if (shim.isElectron()) {
 			const nativeImage = require('electron').nativeImage;
 			let image = nativeImage.createFromPath(filePath);
@@ -386,7 +394,7 @@ function shimInit(options = null) {
 				if (size.width > maxSize || size.height > maxSize) {
 					console.warn(`Image is over ${maxSize}px - resizing it: ${filePath}`);
 
-					const options = {};
+					const options: any = {};
 					if (size.width > size.height) {
 						options.width = maxSize;
 					} else {
@@ -403,7 +411,7 @@ function shimInit(options = null) {
 		}
 	},
 
-	shim.imageFromDataUrl = async function(imageDataUrl, filePath, options = null) {
+	shim.imageFromDataUrl = async (imageDataUrl: string, filePath: string, options: any = null) => {
 		if (options === null) options = {};
 
 		if (shim.isElectron()) {
@@ -433,12 +441,12 @@ function shimInit(options = null) {
 	const nodeFetch = require('node-fetch');
 
 	// Not used??
-	shim.readLocalFileBase64 = path => {
+	shim.readLocalFileBase64 = (path: string) => {
 		const data = fs.readFileSync(path);
 		return new Buffer(data).toString('base64');
 	};
 
-	shim.fetch = async function(url, options = {}) {
+	shim.fetch = async (url: string, options: any = {}) => {
 		try { // Check if the url is valid
 			new URL(url);
 		} catch (error) { // If the url is not valid, a TypeError will be thrown
@@ -451,20 +459,20 @@ function shimInit(options = null) {
 		}, options);
 	};
 
-	shim.fetchBlob = async function(url, options) {
+	shim.fetchBlob = async function(url: string, options: any) {
 		if (!options || !options.path) throw new Error('fetchBlob: target file path is missing');
 		if (!options.method) options.method = 'GET';
 		// if (!('maxRetry' in options)) options.maxRetry = 5;
 
 		const urlParse = require('url').parse;
 
-		url = urlParse(url.trim());
+		const parsedUrl: URL = urlParse(url.trim());
 		const method = options.method ? options.method : 'GET';
-		const http = url.protocol.toLowerCase() === 'http:' ? require('follow-redirects').http : require('follow-redirects').https;
+		const http = parsedUrl.protocol.toLowerCase() === 'http:' ? require('follow-redirects').http : require('follow-redirects').https;
 		const headers = options.headers ? options.headers : {};
 		const filePath = options.path;
 
-		function makeResponse(response) {
+		const makeResponse = (response: any) => {
 			return {
 				ok: response.statusCode < 400,
 				path: filePath,
@@ -477,27 +485,29 @@ function shimInit(options = null) {
 				status: response.statusCode,
 				headers: response.headers,
 			};
-		}
+		};
 
-		const requestOptions = {
-			protocol: url.protocol,
-			host: url.hostname,
-			port: url.port,
+		const urlQuery = (parsedUrl as any).query;
+
+		const requestOptions: any = {
+			protocol: parsedUrl.protocol,
+			host: parsedUrl.hostname,
+			port: parsedUrl.port,
 			method: method,
-			path: url.pathname + (url.query ? `?${url.query}` : ''),
+			path: parsedUrl.pathname + (urlQuery ? `?${urlQuery}` : ''),
 			headers: headers,
 		};
 
 		const resolvedProxyUrl = resolveProxyUrl(proxySettings.proxyUrl);
-		requestOptions.agent = (resolvedProxyUrl && proxySettings.proxyEnabled) ? shim.proxyAgent(url.href, resolvedProxyUrl) : null;
+		requestOptions.agent = (resolvedProxyUrl && proxySettings.proxyEnabled) ? shim.proxyAgent(parsedUrl.href, resolvedProxyUrl) : null;
 
 		const doFetchOperation = async () => {
 			return new Promise((resolve, reject) => {
-				let file = null;
+				let file: fs.WriteStream|null = null;
 
-				const cleanUpOnError = error => {
+				const cleanUpOnError = (error: any) => {
 					// We ignore any unlink error as we only want to report on the main error
-					fs.unlink(filePath)
+					void fs.unlink(filePath)
 					// eslint-disable-next-line promise/prefer-await-to-then -- Old code before rule was applied
 						.catch(() => {})
 					// eslint-disable-next-line promise/prefer-await-to-then -- Old code before rule was applied
@@ -521,7 +531,7 @@ function shimInit(options = null) {
 						cleanUpOnError(error);
 					});
 
-					const request = http.request(requestOptions, (response) => {
+					const request = http.request(requestOptions, (response: any) => {
 						response.pipe(file);
 
 						const isGzipped = response.headers['content-encoding'] === 'gzip';
@@ -547,7 +557,7 @@ function shimInit(options = null) {
 						});
 					});
 
-					request.on('error', (error) => {
+					request.on('error', (error: any) => {
 						cleanUpOnError(error);
 					});
 
@@ -561,20 +571,20 @@ function shimInit(options = null) {
 		return shim.fetchWithRetry(doFetchOperation, options);
 	};
 
-	shim.uploadBlob = async function(url, options) {
+	shim.uploadBlob = async function(url: string, options: any) {
 		if (!options || !options.path) throw new Error('uploadBlob: source file path is missing');
 		const content = await fs.readFile(options.path);
 		options = { ...options, body: content };
 		return shim.fetch(url, options);
 	};
 
-	shim.stringByteLength = function(string) {
+	shim.stringByteLength = (string: string) => {
 		return Buffer.byteLength(string, 'utf-8');
 	};
 
 	shim.Buffer = Buffer;
 
-	shim.openUrl = url => {
+	shim.openUrl = (url: string) => {
 		// Returns true if it opens the file successfully; returns false if it could
 		// not find the file.
 		return shim.electronBridge().openExternal(url);
@@ -582,7 +592,7 @@ function shimInit(options = null) {
 
 	shim.httpAgent_ = null;
 
-	shim.httpAgent = url => {
+	shim.httpAgent = (url: string) => {
 		if (!shim.httpAgent_) {
 			const AgentSettings = {
 				keepAlive: true,
@@ -597,7 +607,7 @@ function shimInit(options = null) {
 		return url.startsWith('https') ? shim.httpAgent_.https : shim.httpAgent_.http;
 	};
 
-	shim.proxyAgent = (serverUrl, proxyUrl) => {
+	shim.proxyAgent = (serverUrl: string, proxyUrl: string) => {
 		const proxyAgentConfig = {
 			keepAlive: true,
 			maxSockets: proxySettings.maxConcurrentConnections,
@@ -618,7 +628,7 @@ function shimInit(options = null) {
 		}
 	};
 
-	shim.openOrCreateFile = (filepath, defaultContents) => {
+	shim.openOrCreateFile = (filepath: string, defaultContents: string) => {
 		// If the file doesn't exist, create it
 		if (!fs.existsSync(filepath)) {
 			fs.writeFile(filepath, defaultContents, 'utf-8', (error) => {
@@ -645,23 +655,23 @@ function shimInit(options = null) {
 		return 'unknown-version!';
 	};
 
-	shim.pathRelativeToCwd = (path) => {
+	shim.pathRelativeToCwd = (path: string) => {
 		return toRelative(process.cwd(), path);
 	};
 
-	shim.setTimeout = (fn, interval) => {
+	shim.setTimeout = (fn: ()=> void, interval: number) => {
 		return timers.setTimeout(fn, interval);
 	};
 
-	shim.setInterval = (fn, interval) => {
+	shim.setInterval = (fn: ()=> void, interval: number) => {
 		return timers.setInterval(fn, interval);
 	};
 
-	shim.clearTimeout = (id) => {
+	shim.clearTimeout = (id: ReturnType<typeof timers.setTimeout>) => {
 		return timers.clearTimeout(id);
 	};
 
-	shim.clearInterval = (id) => {
+	shim.clearInterval = (id: ReturnType<typeof timers.setInterval>) => {
 		return timers.clearInterval(id);
 	};
 
@@ -669,9 +679,9 @@ function shimInit(options = null) {
 		return keytar;
 	};
 
-	shim.requireDynamic = (path) => {
+	shim.requireDynamic = (path: string) => {
 		if (path.indexOf('.') === 0) {
-			const sites = callsites();
+			const sites = callsites() as any;
 			if (sites.length <= 1) throw new Error(`Cannot require file (1) ${path}`);
 			const filename = sites[1].getFileName();
 			if (!filename) throw new Error(`Cannot require file (2) ${path}`);
