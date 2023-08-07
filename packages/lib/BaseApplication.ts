@@ -1,7 +1,7 @@
 import Setting, { Env } from './models/Setting';
 import Logger, { TargetType, LoggerWrapper } from '@joplin/utils/Logger';
 import shim from './shim';
-const { setupProxySettings } = require('./shim-init-node');
+import { setCustomCAs, setupProxySettings } from './shim-init-node';
 import BaseService from './services/BaseService';
 import reducer, { setStore } from './reducer';
 import KeychainServiceDriver from './services/keychain/KeychainServiceDriver.node';
@@ -29,7 +29,7 @@ const os = require('os');
 const fs = require('fs-extra');
 import JoplinError from './JoplinError';
 const EventEmitter = require('events');
-const syswidecas = require('./vendor/syswide-cas');
+// const syswidecas = require('./vendor/syswide-cas');
 import SyncTargetRegistry from './SyncTargetRegistry';
 const SyncTargetFilesystem = require('./SyncTargetFilesystem.js');
 const SyncTargetNextcloud = require('./SyncTargetNextcloud.js');
@@ -470,11 +470,12 @@ export default class BaseApplication {
 			},
 			'net.customCertificates': async () => {
 				const caPaths = Setting.value('net.customCertificates').split(',');
-				for (let i = 0; i < caPaths.length; i++) {
-					const f = caPaths[i].trim();
-					if (!f) continue;
-					syswidecas.addCAs(f);
-				}
+				setCustomCAs(caPaths);
+				// for (let i = 0; i < caPaths.length; i++) {
+				// 	const f = caPaths[i].trim();
+				// 	if (!f) continue;
+				// 	syswidecas.addCAs(f);
+				// }
 			},
 			'net.proxyEnabled': async () => {
 				setupProxySettings({

@@ -17,6 +17,8 @@ const toRelative = require('relative');
 import * as timers from 'timers';
 import Note from './models/Note';
 import { NoteEntity } from './services/database/types';
+import { Agent as NodeHttpAgent } from 'http';
+import { Agent as NodeHttpsAgent, AgentOptions as HttpsAgentOptions } from 'https';
 const zlib = require('zlib');
 const dgram = require('dgram');
 const { basename, fileExtension, safeFileExtension } = require('./path-utils');
@@ -88,14 +90,19 @@ const gunzipFile = function(source: string, destination: string) {
 	});
 };
 
-function setupProxySettings(options: ProxySettings) {
+export const setupProxySettings = (options: ProxySettings) => {
 	proxySettings.maxConcurrentConnections = options.maxConcurrentConnections;
 	proxySettings.proxyTimeout = options.proxyTimeout;
 	proxySettings.proxyEnabled = options.proxyEnabled;
 	proxySettings.proxyUrl = options.proxyUrl;
-}
+};
 
-function shimInit(options: any = null) {
+let customCAs: Buffer[];
+export const setCustomCAs = (cas: string[]) => {
+	customCAs = cas.map(path => fs.readFileSync(path));
+};
+
+export const shimInit = (options: any = null) => {
 	options = {
 		sharp: null,
 		keytar: null,
@@ -446,14 +453,65 @@ function shimInit(options: any = null) {
 		return new Buffer(data).toString('base64');
 	};
 
+	shim.httpAgent_ = null;
+
+	shim.httpAgent = (url: string) => {
+		if (!shim.httpAgent_) {
+			const AgentSettings = {
+				keepAlive: true,
+				maxSockets: 1,
+				keepAliveMsecs: 5000,
+			};
+			shim.httpAgent_ = {
+				http: new http.Agent(AgentSettings),
+				https: new https.Agent(AgentSettings),
+			};
+		}
+		return url.startsWith('https') ? shim.httpAgent_.https : shim.httpAgent_.http;
+	};
+
+	const proxyAgent = (serverUrl: string, proxyUrl: string, options?: HttpsAgentOptions) => {
+		const proxyAgentConfig = {
+			...options,
+			keepAlive: true,
+			maxSockets: proxySettings.maxConcurrentConnections,
+			keepAliveMsecs: 5000,
+			proxy: proxyUrl,
+			timeout: proxySettings.proxyTimeout * 1000,
+		};
+
+		// Based on https://github.com/delvedor/hpagent#usage
+		if (!isUrlHttps(proxyUrl) && !isUrlHttps(serverUrl)) {
+			return new HttpProxyAgent(proxyAgentConfig);
+		} else if (isUrlHttps(proxyUrl) && !isUrlHttps(serverUrl)) {
+			return new HttpProxyAgent(proxyAgentConfig);
+		} else if (!isUrlHttps(proxyUrl) && isUrlHttps(serverUrl)) {
+			return new HttpsProxyAgent(proxyAgentConfig);
+		} else {
+			return new HttpsProxyAgent(proxyAgentConfig);
+		}
+	};
+
+	const getFetchAgent = (url: string): NodeHttpAgent => {
+		const resolvedProxyUrl = resolveProxyUrl(proxySettings.proxyUrl);
+		const httpsOptions: HttpsAgentOptions = {
+			ca: customCAs,
+		};
+
+		if (resolvedProxyUrl && proxySettings.proxyEnabled) {
+			return proxyAgent(url, resolvedProxyUrl, httpsOptions);
+		} else {
+			return isUrlHttps(url) ? new NodeHttpsAgent(httpsOptions) : null;
+		}
+	};
+
 	shim.fetch = async (url: string, options: any = {}) => {
 		try { // Check if the url is valid
 			new URL(url);
 		} catch (error) { // If the url is not valid, a TypeError will be thrown
 			throw new Error(`Not a valid URL: ${url}`);
 		}
-		const resolvedProxyUrl = resolveProxyUrl(proxySettings.proxyUrl);
-		options.agent = (resolvedProxyUrl && proxySettings.proxyEnabled) ? shim.proxyAgent(url, resolvedProxyUrl) : null;
+		options.agent = getFetchAgent(url);
 		return shim.fetchWithRetry(() => {
 			return nodeFetch(url, options);
 		}, options);
@@ -498,8 +556,7 @@ function shimInit(options: any = null) {
 			headers: headers,
 		};
 
-		const resolvedProxyUrl = resolveProxyUrl(proxySettings.proxyUrl);
-		requestOptions.agent = (resolvedProxyUrl && proxySettings.proxyEnabled) ? shim.proxyAgent(parsedUrl.href, resolvedProxyUrl) : null;
+		requestOptions.agent = getFetchAgent(url);
 
 		const doFetchOperation = async () => {
 			return new Promise((resolve, reject) => {
@@ -590,44 +647,6 @@ function shimInit(options: any = null) {
 		return shim.electronBridge().openExternal(url);
 	};
 
-	shim.httpAgent_ = null;
-
-	shim.httpAgent = (url: string) => {
-		if (!shim.httpAgent_) {
-			const AgentSettings = {
-				keepAlive: true,
-				maxSockets: 1,
-				keepAliveMsecs: 5000,
-			};
-			shim.httpAgent_ = {
-				http: new http.Agent(AgentSettings),
-				https: new https.Agent(AgentSettings),
-			};
-		}
-		return url.startsWith('https') ? shim.httpAgent_.https : shim.httpAgent_.http;
-	};
-
-	shim.proxyAgent = (serverUrl: string, proxyUrl: string) => {
-		const proxyAgentConfig = {
-			keepAlive: true,
-			maxSockets: proxySettings.maxConcurrentConnections,
-			keepAliveMsecs: 5000,
-			proxy: proxyUrl,
-			timeout: proxySettings.proxyTimeout * 1000,
-		};
-
-		// Based on https://github.com/delvedor/hpagent#usage
-		if (!isUrlHttps(proxyUrl) && !isUrlHttps(serverUrl)) {
-			return new HttpProxyAgent(proxyAgentConfig);
-		} else if (isUrlHttps(proxyUrl) && !isUrlHttps(serverUrl)) {
-			return new HttpProxyAgent(proxyAgentConfig);
-		} else if (!isUrlHttps(proxyUrl) && isUrlHttps(serverUrl)) {
-			return new HttpsProxyAgent(proxyAgentConfig);
-		} else {
-			return new HttpsProxyAgent(proxyAgentConfig);
-		}
-	};
-
 	shim.openOrCreateFile = (filepath: string, defaultContents: string) => {
 		// If the file doesn't exist, create it
 		if (!fs.existsSync(filepath)) {
@@ -692,6 +711,5 @@ function shimInit(options: any = null) {
 			return require(path);
 		}
 	};
-}
+};
 
-module.exports = { shimInit, setupProxySettings };
