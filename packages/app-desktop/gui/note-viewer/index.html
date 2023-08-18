@@ -315,6 +315,66 @@
 			return { mutationObserver, resizeObserver };
 		};
 
+		let brokenImageURIToObjectURI = {};
+		let fixingBrokenImagesCount = 0;
+
+		// Decompresses images that aren't automatically decompressed (e.g. svgzs, which are
+		// gzipped SVGs.)
+		const fixBrokenImages = async () => {
+			const images = [...document.querySelectorAll('img[src*=svgz]')];
+			fixingBrokenImagesCount++;
+			const runID = fixingBrokenImagesCount;
+
+			const cancelled = () => runID !== fixingBrokenImagesCount;
+
+			// If between renders, stop. This prevents unused object URIs from being
+			// freed unnecessarily.
+			if (images.length === 0) {
+				return;
+			}
+
+			let usedObjectURIs = new Set();
+			await Promise.all(images.map(async (image) => {
+				const originalSrc = image.src;
+				if (!image.complete && originalSrc.match(/^file.*\.svgz([?][^/]*)?$/i)) {
+					image.setAttribute('data-original-src', originalSrc);
+
+					if (cancelled()) return;
+
+					// Create an object URI for a decompressed version of the image
+					if (!(originalSrc in brokenImageURIToObjectURI)) {
+						const data = await fetch(originalSrc);
+						const compressedBlob = await data.blob();
+
+						const gzipStream = new DecompressionStream('gzip');
+						const decompressed = compressedBlob.stream().pipeThrough(gzipStream);
+						const decompressedResult = new Response(decompressed);
+
+						const text = await decompressedResult.text();
+						const blobResult = new Blob([ text ], { type: 'image/svg+xml' });
+
+						if (cancelled()) return;
+
+						brokenImageURIToObjectURI[originalSrc] = URL.createObjectURL(blobResult);
+					}
+
+					const uri = brokenImageURIToObjectURI[originalSrc];
+					image.src = uri;
+					usedObjectURIs.add(uri);
+				}
+			}));
+
+			// Clean up unused object URIs.
+			for (const key in brokenImageURIToObjectURI) {
+				const objectURI = brokenImageURIToObjectURI[key];
+
+				if (!usedObjectURIs.has(objectURI)) {
+					URL.revokeObjectURL(objectURI);
+					delete brokenImageURIToObjectURI[key];
+				}
+			}
+		};
+
 		// To suppress too frequent restoring of scroll positions and refreshing of the scroll map
 		let restoreAndRefreshTimeoutID_ = null;
 		let restoreAndRefreshTimeout_ = Date.now();
@@ -324,6 +384,8 @@
 
 		// A callback anonymous function invoked when the scroll height changes.
 		const onRendering = observeRendering((cause, height, heightChanged) => {
+			fixBrokenImages();
+
 			if (!alreadyAllImagesLoaded && !scrollmap.isPresent()) {
 				const loaded = allImagesLoaded();
 				if (loaded) {
