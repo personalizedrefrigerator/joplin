@@ -18,12 +18,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/laurent22/joplin.git"
+    "url": "git+https://github.com/personalizedrefrigerator/joplin.git"
   },
   "author": "Laurent Cozic",
   "license": "AGPL-3.0-or-later",
   "bugs": {
-    "url": "https://github.com/laurent22/joplin/issues"
+    "url": "https://github.com/personalizedrefrigerator/joplin/issues"
   },
   "build": {
     "appId": "net.cozic.joplin-desktop",
@@ -90,7 +90,8 @@
             "CFBundleURLName": "org.joplinapp.x-callback-url"
           }
         ]
-      }
+      },
+      "artifactName": "${productName}-${version}-${arch}.${ext}"
     },
     "linux": {
       "icon": "../../Assets/LinuxIcons",
@@ -105,7 +106,7 @@
       "writeUpdateInfo": false
     }
   },
-  "homepage": "https://github.com/laurent22/joplin#readme",
+  "homepage": "https://github.com/personalizedrefrigerator/joplin#readme",
   "devDependencies": {
     "@electron/rebuild": "3.2.13",
     "@joplin/tools": "~2.12",
