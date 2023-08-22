@@ -6,7 +6,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/laurent22/joplin.git"
+    "url": "git+https://github.com/personalizedrefrigerator/joplin.git"
   },
   "engines": {
     "node": ">=16"
