@@ -24,3 +24,26 @@ export interface RSA {
 	publicKey(rsaKeyPair: RSAKeyPair): string;
 	privateKey(rsaKeyPair: RSAKeyPair): string;
 }
+
+export interface InputStringStream {
+	index(): number;
+	read(size: number): Promise<string|null>;
+	close(): Promise<void>;
+}
+
+export interface OutputStringStream {
+	index(): number;
+	append(data: string): Promise<void>;
+	close(): Promise<void>;
+}
+
+export enum EncryptionMethod {
+	SJCL = 1,
+	SJCL2 = 2,
+	SJCL3 = 3,
+	SJCL4 = 4,
+	SJCL1a = 5,
+	Custom = 6,
+	SJCL1b = 7,
+	Sodium1 = 8,
+}

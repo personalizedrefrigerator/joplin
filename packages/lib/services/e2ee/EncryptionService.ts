@@ -1,4 +1,4 @@
-import { MasterKeyEntity } from './types';
+import { EncryptionMethod, InputStringStream, MasterKeyEntity, OutputStringStream } from './types';
 import Logger from '@joplin/utils/Logger';
 import shim from '../../shim';
 import Setting from '../../models/Setting';
@@ -6,6 +6,7 @@ import MasterKey from '../../models/MasterKey';
 import BaseItem from '../../models/BaseItem';
 import JoplinError from '../../JoplinError';
 import { getActiveMasterKeyId, setActiveMasterKeyId } from '../synchronizer/syncInfoUtils';
+import makeStreamEncryptor from './streams/encryptStream';
 const { padLeft } = require('../../string-utils.js');
 
 const logger = Logger.create('EncryptionService');
@@ -29,17 +30,6 @@ export interface EncryptionCustomHandler {
 	context?: any;
 	encrypt(context: any, hexaBytes: string, password: string): Promise<string>;
 	decrypt(context: any, hexaBytes: string, password: string): Promise<string>;
-}
-
-export enum EncryptionMethod {
-	SJCL = 1,
-	SJCL2 = 2,
-	SJCL3 = 3,
-	SJCL4 = 4,
-	SJCL1a = 5,
-	Custom = 6,
-	SJCL1b = 7,
-	Sodium1 = 8,
 }
 
 export interface EncryptOptions {
@@ -265,25 +255,6 @@ export default class EncryptionService {
 		return error;
 	}
 
-	private async deriveSodiumKey(key: string): Promise<Uint8Array> {
-		const sodium = await shim.libSodiumModule();
-		const binaryMasterKey = sodium.from_base64(key);
-
-		// TODO(REQUIRED): Switch to the streams API: https://doc.libsodium.org/secret-key_cryptography/secretstream
-		// TODO(REQUIRED): Is this really okay to do??? Our master keys are *much* longer (384 bytes) than
-		//                 the 32 bytes required by libsodium.
-		//                 Key derivation by generichash is suggested by
-		//                 https://github.com/jedisct1/libsodium/issues/347#issuecomment-372721843
-		//                 but the post is quite old.
-		//                 ...is this really okay?
-		const subkey = sodium.crypto_generichash(
-			sodium.crypto_aead_chacha20poly1305_IETF_KEYBYTES,
-			binaryMasterKey
-		);
-
-		return subkey;
-	}
-
 	public async encrypt(method: EncryptionMethod, key: string, plainText: string): Promise<string> {
 		if (!method) throw new Error('Encryption method is required');
 		if (!key) throw new Error('Encryption key is required');
@@ -412,7 +383,7 @@ export default class EncryptionService {
 
 				// Doc: https://doc.libsodium.org/secret-key_cryptography/aead/chacha20-poly1305/xchacha20-poly1305_construction#combined-mode
 				const cipherText = sodium.crypto_secretbox_easy(
-					plainText,
+					new TextEncoder().encode(plainText),
 					publicNonce,
 					subkey
 				);
@@ -454,9 +425,9 @@ export default class EncryptionService {
 
 			// TODO(required): does this work with invalid utf-8?
 			const result = sodium.crypto_secretbox_open_easy(
-				ct, nonce, subkey, 'text'
+				ct, nonce, subkey
 			);
-			return result;
+			return new TextDecoder('utf8').decode(result);
 		} else {
 			try {
 				const output = sjcl.json.decrypt(key, cipherText);
@@ -487,6 +458,21 @@ export default class EncryptionService {
 
 		await destination.append(this.encodeHeader_(header));
 
+		const encryptor = await makeStreamEncryptor(method, masterKeyPlainText);
+
+		let doneSize = 0;
+		for await (const cypherText of encryptor.encrypt(source)) {
+			doneSize += this.chunkSize_;
+			if (options.onProgress) options.onProgress({ doneSize: doneSize });
+
+			// Wait for a frame so that the app remains responsive in mobile.
+			// https://corbt.com/posts/2015/12/22/breaking-up-heavy-processing-in-react-native.html
+			await shim.waitForFrame();
+
+			await destination.append(cypherText);
+		}
+
+		/*
 		let doneSize = 0;
 
 		while (true) {
@@ -505,6 +491,7 @@ export default class EncryptionService {
 			await destination.append(padLeft(encrypted.length.toString(16), 6, '0'));
 			await destination.append(encrypted);
 		}
+		*/
 	}
 
 	private async decryptAbstract_(source: any, destination: any, options: EncryptOptions = null) {
@@ -513,6 +500,16 @@ export default class EncryptionService {
 		const header: any = await this.decodeHeaderSource_(source);
 		const masterKeyPlainText = this.loadedMasterKey(header.masterKeyId).plainText;
 
+		const decryptor = await makeStreamDecryptor(header.encryptionMethod, masterKeyPlainText);
+
+		for await (const plainText of decryptor.decryptFrom(source)) {
+			if (options.onProgress) options.onProgress({ doneSize: source.index });
+
+			await destination.append(plainText);
+			await shim.waitForFrame();
+		}
+
+		/*OLD
 		let doneSize = 0;
 
 		while (true) {
@@ -532,40 +529,48 @@ export default class EncryptionService {
 			const plainText = await this.decrypt(header.encryptionMethod, masterKeyPlainText, block);
 			await destination.append(plainText);
 		}
+		*/
 	}
 
-	private stringReader_(string: string, sync = false) {
+	private stringReader_(string: string, sync = false): InputStringStream {
+		let index = 0;
 		const reader = {
-			index: 0,
-			read: function(size: number) {
-				const output = string.substr(reader.index, size);
-				reader.index += size;
+			index: () => index,
+			read: async (size: number) => {
+				const output = string.substr(index, size);
+				index += size;
 				return !sync ? Promise.resolve(output) : output;
 			},
-			close: function() {},
+			close: async () => {},
 		};
 		return reader;
 	}
 
 	private stringWriter_() {
-		const output: any = {
-			data: [],
-			append: async function(data: any) {
-				output.data.push(data);
+		let data: string[] = [];
+		let index = 0;
+		const output = {
+			index: () => index,
+			append: async (chunk: string) => {
+				index += chunk.length;
+				data.push(chunk);
 			},
-			result: function() {
-				return output.data.join('');
+			result: () => {
+				return data.join('');
 			},
-			close: function() {},
+			close: async () => {},
 		};
 		return output;
 	}
 
 	private async fileReader_(path: string, encoding: any) {
 		const handle = await this.fsDriver().open(path, 'r');
+		let index = 0;
 		const reader = {
 			handle: handle,
+			index: () => index,
 			read: async (size: number) => {
+				index += size;
 				return this.fsDriver().readFileChunk(reader.handle, size, encoding);
 			},
 			close: async () => {
@@ -584,18 +589,18 @@ export default class EncryptionService {
 		};
 	}
 
-	public async encryptString(plainText: any, options: EncryptOptions = null): Promise<string> {
+	public async encryptString(plainText: string, options: EncryptOptions = null): Promise<string> {
 		const source = this.stringReader_(plainText);
 		const destination = this.stringWriter_();
 		await this.encryptAbstract_(source, destination, options);
 		return destination.result();
 	}
 
-	public async decryptString(cipherText: any, options: EncryptOptions = null): Promise<string> {
+	public async decryptString(cipherText: string, options: EncryptOptions = null): Promise<string> {
 		const source = this.stringReader_(cipherText);
 		const destination = this.stringWriter_();
 		await this.decryptAbstract_(source, destination, options);
-		return destination.data.join('');
+		return destination.result();
 	}
 
 	public async encryptFile(srcPath: string, destPath: string, options: EncryptOptions = null) {

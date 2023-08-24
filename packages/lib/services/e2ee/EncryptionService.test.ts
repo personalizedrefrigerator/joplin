@@ -265,16 +265,20 @@ describe('services_EncryptionService', () => {
 
 		await service.loadMasterKey(masterKey, '123456', true);
 
+		const invalidUnicode = '🐶🐶🐶'.substring(0, 5);
+
 		// First check that we can replicate the error with the old encryption method
 		service.defaultEncryptionMethod_ = EncryptionMethod.SJCL;
-		const hasThrown = await checkThrowAsync(async () => await service.encryptString('🐶🐶🐶'.substr(0, 5)));
+		const hasThrown = await checkThrowAsync(async () => await service.encryptString(invalidUnicode));
 		expect(hasThrown).toBe(true);
 
-		// Now check that the new one fixes the problem
-		service.defaultEncryptionMethod_ = EncryptionMethod.SJCL1a;
-		const cipherText = await service.encryptString('🐶🐶🐶'.substr(0, 5));
-		const plainText = await service.decryptString(cipherText);
-		expect(plainText).toBe('🐶🐶🐶'.substr(0, 5));
+		// Now check that the new ones fix the problem
+		for (const method of [ EncryptionMethod.SJCL1a, EncryptionMethod.Sodium1 ]) {
+			service.defaultEncryptionMethod_ = method;
+			const cipherText = await service.encryptString(invalidUnicode);
+			const plainText = await service.decryptString(cipherText);
+			expect(plainText).toBe(invalidUnicode);
+		}
 	}));
 
 	it('should check if a master key is loaded', (async () => {

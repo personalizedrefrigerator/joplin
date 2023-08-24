@@ -637,7 +637,11 @@ packages/lib/services/e2ee/RSA.node.js
 packages/lib/services/e2ee/ppk.test.js
 packages/lib/services/e2ee/ppk.js
 packages/lib/services/e2ee/ppkTestUtils.js
+packages/lib/services/e2ee/streams/encryptStream.js
 packages/lib/services/e2ee/types.js
+packages/lib/services/e2ee/util/arrayBufferToString.js
+packages/lib/services/e2ee/util/deriveSodiumKey.js
+packages/lib/services/e2ee/util/stringToArrayBuffer.js
 packages/lib/services/e2ee/utils.test.js
 packages/lib/services/e2ee/utils.js
 packages/lib/services/interop/InteropService.test.js
