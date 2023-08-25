@@ -2,7 +2,7 @@ name: Build macOS M1
 on: [push, pull_request]
 jobs:
   pre_job:
-    if: github.repository == 'laurent22/joplin'
+    if: github.repository == 'personalizedrefrigerator/joplin'
     runs-on: ubuntu-latest
     outputs:
       should_skip: ${{ steps.skip_check.outputs.should_skip }}
@@ -15,7 +15,7 @@ jobs:
   Main:
     needs: pre_job
     # We always process desktop release tags, because they also publish the release
-    if: github.repository == 'laurent22/joplin' && (needs.pre_job.outputs.should_skip != 'true' || startsWith(github.ref, 'refs/tags/v'))
+    if: github.repository == 'personalizedrefrigerator/joplin' && (startsWith(github.ref, 'refs/tags/v'))
     runs-on: macos-latest
     steps:
 
@@ -56,12 +56,12 @@ jobs:
 
           if [[ $GIT_TAG_NAME = v* ]]; then
             echo "Building and publishing desktop application..."
-            PYTHON_PATH=$(which python) USE_HARD_LINKS=false yarn run dist --mac --arm64
+            #PYTHON_PATH=$(which python) USE_HARD_LINKS=false yarn run dist --mac --arm64
 
             yarn rename-release-assets --repo="$GH_REPO" --tag="$GIT_TAG_NAME" --token="$GITHUB_TOKEN"
           else
             echo "Building but *not* publishing desktop application..."
-
+            exit 1
             # We also want to disable signing the app in this case, because
             # it doesn't work and we don't need it.
             # https://www.electron.build/code-signing#how-to-disable-code-signing-during-the-build-process-on-macos
