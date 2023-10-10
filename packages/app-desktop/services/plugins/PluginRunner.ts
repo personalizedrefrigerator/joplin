@@ -108,11 +108,14 @@ export default class PluginRunner extends BasePluginRunner {
 		const scriptPath = `${Setting.value('tempDir')}/plugin_${plugin.id}.js`;
 		await shim.fsDriver().writeFile(scriptPath, plugin.scriptText, 'utf8');
 
+		const allowDangerousAPIs = !plugin.sandboxed;
+		console.log('TODO', allowDangerousAPIs);
 		const pluginWindow = bridge().newBrowserWindow({
 			show: false,
 			webPreferences: {
-				nodeIntegration: true,
-				contextIsolation: false,
+				nodeIntegration: true,//allowDangerousAPIs,
+				contextIsolation: false,//allowDangerousAPIs,
+				//sandbox: plugin.sandboxed,
 			},
 		});
 

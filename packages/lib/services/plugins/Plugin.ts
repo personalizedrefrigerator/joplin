@@ -73,6 +73,11 @@ export default class Plugin {
 		return this.baseDir_;
 	}
 
+	public get sandboxed(): boolean {
+		// TODO:
+		return true;
+	}
+
 	public async dataDir(): Promise<string> {
 		if (this.dataDirCreated_) return this.dataDir_;
 
