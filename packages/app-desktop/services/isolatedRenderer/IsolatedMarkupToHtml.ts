@@ -1,6 +1,6 @@
 import { PluginStates } from '@joplin/lib/services/plugins/reducer';
 import uuid from '@joplin/lib/uuid';
-import { MarkupLanguage } from '@joplin/renderer/MarkupToHtml';
+import MarkupToHtml, { MarkupLanguage } from '@joplin/renderer/MarkupToHtml';
 import { join } from 'path';
 import { MarkupToHtmlConverter, RenderResult, RenderResultPluginAsset } from '@joplin/renderer/types';
 import { MainToSandboxMessage, RendererSetupOptions, SandboxMessageType, SandboxToMainMessage } from './types';
@@ -12,6 +12,10 @@ export default class IsolatedMarkupToHtml implements MarkupToHtmlConverter {
 	private sandboxInitialized = false;
 	private initializingSandbox = false;
 	private sandboxInitializationListeners: (()=> void)[] = [];
+
+	// We keep an unsandboxed MarkupToHtml for synchronous calls that do
+	// not need access to plugins.
+	private unsandboxedMarkupToHtml: MarkupToHtmlConverter|null = null;
 
 	public constructor(private globalOptions: RendererSetupOptions) {
 		this.iframe = document.createElement('iframe');
@@ -155,15 +159,27 @@ export default class IsolatedMarkupToHtml implements MarkupToHtmlConverter {
 		const response = await messageResponsePromise;
 		if (response.kind === SandboxMessageType.RenderResult) {
 			return response.result;
-		} else if (response.kind === SandboxMessageType.RenderError) {
+		} else if (response.kind === SandboxMessageType.Error) {
 			throw new Error(response.errorMessage);
 		}
 
 		throw new Error(`Invalid response, ${response.kind}`);
 	}
 
-	public stripMarkup(_markupLanguage: MarkupLanguage, _markup: string, _options: any): string {
-		throw new Error('Method not implemented.');
+	public stripMarkup(markupLanguage: MarkupLanguage, markup: string, options: any): string {
+		this.unsandboxedMarkupToHtml ??= new MarkupToHtml();
+
+		// Pass only collapseWhiteSpaces to prevent accidental rendering
+		// with plugins.
+		const stripMarkupOptions = {
+			collapseWhiteSpaces: options.collapseWhiteSpaces,
+		};
+
+		return this.unsandboxedMarkupToHtml.stripMarkup(
+			markupLanguage,
+			markup,
+			stripMarkupOptions,
+		);
 	}
 
 	public allAssets(_markupLanguage: MarkupLanguage, _theme: any, _noteStyleOptions: NoteStyleOptions): Promise<RenderResultPluginAsset[]> {

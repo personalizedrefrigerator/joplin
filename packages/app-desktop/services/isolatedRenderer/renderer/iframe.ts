@@ -40,7 +40,7 @@ const main = () => {
 			});
 		} catch (error) {
 			postMessageToParent({
-				kind: SandboxMessageType.RenderError,
+				kind: SandboxMessageType.Error,
 				responseId: message.responseId,
 				errorMessage: `${error}`,
 			});

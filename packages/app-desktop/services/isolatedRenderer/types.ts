@@ -32,7 +32,7 @@ export enum SandboxMessageType {
 	// sandbox -> main
 	SandboxLoaded,
 	RenderResult,
-	RenderError,
+	Error,
 }
 
 // Messages from the main process to the iframe
@@ -76,8 +76,8 @@ export interface RenderResultMessage extends SandboxResponse {
 	result: RenderResult;
 }
 
-export interface RenderErrorMessage extends SandboxResponse {
-	kind: SandboxMessageType.RenderError;
+export interface ErrorMessage extends SandboxResponse {
+	kind: SandboxMessageType.Error;
 	errorMessage: string;
 }
 
@@ -88,5 +88,5 @@ export interface SandboxLoadedMessage {
 	responseId: undefined;
 }
 
-export type SandboxToMainMessage = RenderResultMessage|RenderErrorMessage|SandboxLoadedMessage;
+export type SandboxToMainMessage = RenderResultMessage|ErrorMessage|SandboxLoadedMessage;
 

@@ -50,13 +50,17 @@ export interface RenderResult {
 
 export interface MarkupRenderer {
 	render(markup: string, theme: any, options: RenderOptions): Promise<RenderResult>;
-	clearCache?: ()=> void;
+	clearCache(): void;
 	allAssets(theme: any, noteStyleOptions: NoteStyleOptions|null): Promise<RenderResultPluginAsset[]>;
+}
+
+interface StripMarkupOptions {
+	collapseWhiteSpaces: boolean;
 }
 
 export interface MarkupToHtmlConverter {
 	render(markupLanguage: MarkupLanguage, markup: string, theme: any, options: any): Promise<RenderResult>;
 	clearCache(markupLanguage: MarkupLanguage): void;
-	stripMarkup(markupLanguage: MarkupLanguage, markup: string, options: any): string;
+	stripMarkup(markupLanguage: MarkupLanguage, markup: string, options: StripMarkupOptions): string;
 	allAssets(markupLanguage: MarkupLanguage, theme: any, noteStyleOptions: NoteStyleOptions|null): Promise<RenderResultPluginAsset[]>;
 }

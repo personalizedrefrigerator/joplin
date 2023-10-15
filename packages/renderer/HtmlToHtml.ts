@@ -74,7 +74,9 @@ export default class HtmlToHtml implements MarkupRenderer {
 		return []; // TODO
 	}
 
-	public clearCache = undefined;
+	public clearCache() {
+		// Do nothing
+	}
 
 	// Note: the "theme" variable is ignored and instead the light theme is
 	// always used for HTML notes.

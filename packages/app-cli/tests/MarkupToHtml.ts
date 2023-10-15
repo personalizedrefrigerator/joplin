@@ -31,14 +31,14 @@ describe('MarkupToHtml', () => {
 			for (const t of testCases[markup]) {
 				const input = t[0];
 				const expected = t[1];
-				const actual = service.stripMarkup(Number(markup), input);
+				const actual = await service.stripMarkup(Number(markup), input);
 				expect(actual).toBe(expected);
 			}
 		}
 
-		expect(service.stripMarkup(1, 'one line\n\ntwo line', { collapseWhiteSpaces: true })).toBe('one line two line');
-		expect(service.stripMarkup(1, 'one line    two line', { collapseWhiteSpaces: true })).toBe('one line two line');
-		expect(service.stripMarkup(1, 'one line\n    two line', { collapseWhiteSpaces: true })).toBe('one line two line');
+		expect(await service.stripMarkup(1, 'one line\n\ntwo line', { collapseWhiteSpaces: true })).toBe('one line two line');
+		expect(await service.stripMarkup(1, 'one line    two line', { collapseWhiteSpaces: true })).toBe('one line two line');
+		expect(await service.stripMarkup(1, 'one line\n    two line', { collapseWhiteSpaces: true })).toBe('one line two line');
 	}));
 
 
