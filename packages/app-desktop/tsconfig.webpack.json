@@ -1,0 +1,15 @@
+{
+	"extends": "./tsconfig.json",
+	"compilerOptions": {
+		// ES6 allows tree-shaking
+		"module": "es6",
+		"target": "es6",
+		"allowJs": true,
+		"moduleResolution": "Node",
+		"esModuleInterop": true,
+		"sourceMap": true
+	},
+	"include": [
+        "services/isolatedRenderer/**/*.ts"
+	],
+}

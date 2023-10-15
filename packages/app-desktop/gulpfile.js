@@ -2,6 +2,7 @@ const gulp = require('gulp');
 const utils = require('@joplin/tools/gulp/utils');
 const compileSass = require('@joplin/tools/compileSass');
 const compilePackageInfo = require('@joplin/tools/compilePackageInfo');
+const bundleJs = require('./tools/bundleJs');
 
 const tasks = {
 	compileScripts: {
@@ -35,6 +36,12 @@ const tasks = {
 			);
 		},
 	},
+	bundle: {
+		fn: bundleJs.bundleJs,
+	},
+	watchBundle: {
+		fn: bundleJs.watchBundledJs,
+	},
 };
 
 utils.registerGulpTasks(gulp, tasks);
@@ -49,4 +56,6 @@ const buildParallel = [
 	'compileSass',
 ];
 
+// Exclude bundle from build because it can take a long time.
 gulp.task('build', gulp.parallel(...buildParallel));
+gulp.task('build-full', gulp.parallel(...buildParallel, 'bundle'));

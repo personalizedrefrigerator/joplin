@@ -68,6 +68,7 @@ export default class IsolatedMarkupToHtml implements MarkupToHtmlConverter {
 
 		if (response.kind === SandboxMessageType.Error) {
 			if (response.unusable) {
+				this.initializingSandbox = false;
 				throw new Error(response.errorMessage);
 			} else {
 				logger.error(`Nonfatal error loading the renderer: ${response.errorMessage}`);
@@ -77,6 +78,7 @@ export default class IsolatedMarkupToHtml implements MarkupToHtmlConverter {
 		}
 
 		if (response.kind !== SandboxMessageType.OptionsLoaded) {
+			this.initializingSandbox = false;
 			throw new Error(`Invalid render initialization response, ${response}`);
 		}
 
