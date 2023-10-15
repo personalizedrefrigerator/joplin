@@ -57,10 +57,11 @@ export default class IsolatedMarkupToHtml implements MarkupToHtmlConverter {
 		// Allows identifying replies
 		const responseId = uuid.create();
 
+		const plugins = await readPluginFiles(this.globalOptions.pluginStates);
 		this.postMessage({
 			kind: SandboxMessageType.SetOptions,
 			options: this.globalOptions,
-			plugins: await readPluginFiles(this.globalOptions.pluginStates),
+			plugins,
 			responseId,
 		});
 

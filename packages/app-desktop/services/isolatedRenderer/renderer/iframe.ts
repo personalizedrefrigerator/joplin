@@ -76,7 +76,7 @@ const main = () => {
 			const errors = [];
 			let unusable = false;
 
-			const extraRendererRules: ExtraRendererRule[] = await loadContentScripts(message.plugins, error => errors.push(error));
+			const extraRendererRules: ExtraRendererRule[] = await loadContentScripts(message.plugins ?? [], error => errors.push(error));
 
 			try {
 				wrappedMarkupToHtml = new MarkupToHtml({

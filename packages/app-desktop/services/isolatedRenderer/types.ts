@@ -51,7 +51,10 @@ export enum SandboxMessageType {
 export interface SetOptionsMessage {
 	kind: SandboxMessageType.SetOptions;
 	options: RendererSetupOptions;
-	plugins: ContentScriptRecord[];
+
+	// It seems that even if `plugins: []` is passed, plugins can be null
+	// in iframe.ts.
+	plugins?: ContentScriptRecord[];
 
 	responseId: string;
 }
