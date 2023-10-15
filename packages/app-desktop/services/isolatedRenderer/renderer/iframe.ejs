@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval'">
+		<title>Joplin Renderer</title>
+	</head>
+	<body>
+		<!--
+			See https://stackoverflow.com/a/74045175.
+			Note that we need to inline the JavaScript here
+			so that the iframe can be sandboxed *without* the
+			allow-same-origin flag (required to disable accessing
+			the parent frame).
+		-->
+		<script>
+			"use strict";
+
+			<%=
+				compilation.assets[webpackConfig.output.filename]
+					.source()
+					.replace(/<\/\s*(script)>/ig, '\\u003C/$1>')
+			%>
+		</script>
+	</body>
+</html>

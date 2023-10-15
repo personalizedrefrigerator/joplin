@@ -1,5 +1,6 @@
 
 const path = require('node:path');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 const rendererDirectory = path.resolve(__dirname, './services/isolatedRenderer/renderer/');
 
@@ -24,6 +25,15 @@ exports.default = {
 	},
 	resolve: {
 		extensions: ['.ts', '.js'],
-		fallback: { 'events': require.resolve('events/') },
+		fallback: {
+			'events': require.resolve('events/'),
+			'url': require.resolve('url/'),
+		},
 	},
+	plugins: [
+		new HtmlWebpackPlugin({
+			inject: false,
+			template: 'services/isolatedRenderer/renderer/iframe.ejs',
+		}),
+	],
 };

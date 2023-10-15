@@ -3,36 +3,14 @@ import noteStyle from './noteStyle';
 import { fileExtension } from './pathUtils';
 import setupLinkify from './MdToHtml/setupLinkify';
 import validateLinks from './MdToHtml/validateLinks';
-import { ItemIdToUrlHandler } from './utils';
-import { RenderResult, RenderResultPluginAsset } from './MarkupToHtml';
 import { Options as NoteStyleOptions } from './noteStyle';
 import hljs from './highlight';
+import { ItemIdToUrlHandler, MarkupRenderer, RenderOptions, RenderResult, RenderResultPluginAsset } from './types';
 
 const Entities = require('html-entities').AllHtmlEntities;
 const htmlentities = new Entities().encode;
 const MarkdownIt = require('markdown-it');
 const md5 = require('md5');
-
-export interface RenderOptions {
-	contentMaxWidth?: number;
-	bodyOnly?: boolean;
-	splitted?: boolean;
-	externalAssetsOnly?: boolean;
-	postMessageSyntax?: string;
-	highlightedKeywords?: string[];
-	codeTheme?: string;
-	theme?: any;
-	plugins?: Record<string, any>;
-	audioPlayerEnabled?: boolean;
-	videoPlayerEnabled?: boolean;
-	pdfViewerEnabled?: boolean;
-	codeHighlightCacheKey?: string;
-	plainResourceRendering?: boolean;
-	mapsToLine?: boolean;
-	useCustomPdfViewer?: boolean;
-	noteId?: string;
-	vendorDir?: string;
-}
 
 interface RendererRule {
 	install(context: any, ruleOptions: any): any;
@@ -192,7 +170,7 @@ export interface RuleOptions {
 	platformName?: string;
 }
 
-export default class MdToHtml {
+export default class MdToHtml implements MarkupRenderer {
 
 	private resourceBaseUrl_: string;
 	private ResourceModel_: any;
@@ -429,7 +407,7 @@ export default class MdToHtml {
 	}
 
 	// "theme" is the theme as returned by themeStyle()
-	public async render(body: string, theme: any = null, options: RenderOptions = null): Promise<RenderResult> {
+	public async render(body: string, theme: any = null, options: RenderOptions|null = null): Promise<RenderResult> {
 
 		options = {
 			// In bodyOnly mode, the rendered Markdown is returned without the wrapper DIV
@@ -558,23 +536,34 @@ export default class MdToHtml {
 
 		const allRules = { ...rules, ...this.extraRendererRules_ };
 
+		const loadPlugin = (plugin: any, options: any) => {
+			// Handle the case where we're bundling with webpack --
+			// some modules that are commmonjs imports in nodejs
+			// act like ES6 imports.
+			if (typeof plugin !== 'function' && plugin.default) {
+				plugin = plugin.default;
+			}
+
+			markdownIt.use(plugin, options);
+		};
+
 		for (const key in allRules) {
 			if (!this.pluginEnabled(key)) continue;
 
 			const rule = allRules[key];
 
-			markdownIt.use(rule.plugin, {
+			loadPlugin(rule.plugin, {
 				context: context,
 				...ruleOptions,
 				...(ruleOptions.plugins[key] ? ruleOptions.plugins[key] : {}),
 			});
 		}
 
-		markdownIt.use(markdownItAnchor, { slugify: slugify });
+		loadPlugin(markdownItAnchor, { slugify: slugify });
 
 		for (const key in plugins) {
 			if (this.pluginEnabled(key)) {
-				markdownIt.use(plugins[key].module, plugins[key].options);
+				loadPlugin(plugins[key].module, plugins[key].options);
 			}
 		}
 

@@ -1,3 +1,5 @@
+import { ItemIdToUrlHandler } from './types';
+
 const Entities = require('html-entities').AllHtmlEntities;
 const htmlentities = new Entities().encode;
 
@@ -121,8 +123,6 @@ utils.resourceStatus = function(ResourceModel: any, resourceInfo: any) {
 
 	return resourceStatus;
 };
-
-export type ItemIdToUrlHandler = (resource: any)=> string;
 
 utils.imageReplacement = function(ResourceModel: any, src: string, resources: any, resourceBaseUrl: string, itemIdToUrl: ItemIdToUrlHandler = null) {
 	if (!ResourceModel || !resources) return null;

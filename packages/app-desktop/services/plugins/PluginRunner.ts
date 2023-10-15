@@ -109,13 +109,14 @@ export default class PluginRunner extends BasePluginRunner {
 		await shim.fsDriver().writeFile(scriptPath, plugin.scriptText, 'utf8');
 
 		const allowDangerousAPIs = !plugin.sandboxed;
-		console.log('TODO', allowDangerousAPIs);
+		// eslint-disable-next-line no-console
+		console.warn('TODO', allowDangerousAPIs);
 		const pluginWindow = bridge().newBrowserWindow({
 			show: false,
 			webPreferences: {
-				nodeIntegration: true,//allowDangerousAPIs,
-				contextIsolation: false,//allowDangerousAPIs,
-				//sandbox: plugin.sandboxed,
+				nodeIntegration: true, // allowDangerousAPIs,
+				contextIsolation: false, // allowDangerousAPIs,
+				// sandbox: plugin.sandboxed,
 			},
 		});
 

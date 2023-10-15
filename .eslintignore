@@ -44,6 +44,8 @@ packages/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/supportedLocales.js
 packages/app-desktop/locales
 packages/app-desktop/node_modules
 packages/app-desktop/packageInfo.js
+packages/app-desktop/services/isolatedRenderer/renderer/iframe.bundle.js
+packages/app-desktop/services/isolatedRenderer/renderer/index.html
 packages/app-desktop/services/electron-context-menu.js
 packages/app-desktop/vendor/lib/
 packages/app-mobile/android
@@ -382,7 +384,7 @@ packages/app-desktop/plugins/GotoAnything.js
 packages/app-desktop/services/bridge.js
 packages/app-desktop/services/commands/stateToWhenClauseContext.js
 packages/app-desktop/services/commands/types.js
-packages/app-desktop/services/isolatedRenderer/IsolatedRendererControl.js
+packages/app-desktop/services/isolatedRenderer/IsolatedMarkupToHtml.js
 packages/app-desktop/services/isolatedRenderer/renderer/iframe.js
 packages/app-desktop/services/isolatedRenderer/types.js
 packages/app-desktop/services/plugins/BackOffHandler.js
@@ -963,6 +965,7 @@ packages/renderer/htmlUtils.js
 packages/renderer/index.js
 packages/renderer/noteStyle.js
 packages/renderer/pathUtils.js
+packages/renderer/types.js
 packages/renderer/utils.js
 packages/tools/build-release-stats.js
 packages/tools/build-welcome.js

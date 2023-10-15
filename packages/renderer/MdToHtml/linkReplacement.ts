@@ -1,4 +1,5 @@
-import utils, { ItemIdToUrlHandler } from '../utils';
+import { ItemIdToUrlHandler } from '../types';
+import utils from '../utils';
 import createEventHandlingAttrs from './createEventHandlingAttrs';
 const Entities = require('html-entities').AllHtmlEntities;
 const htmlentities = new Entities().encode;

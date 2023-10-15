@@ -1,8 +1,8 @@
 import htmlUtils from './htmlUtils';
 import linkReplacement from './MdToHtml/linkReplacement';
-import utils, { ItemIdToUrlHandler } from './utils';
+import utils from './utils';
 import InMemoryCache from './InMemoryCache';
-import { RenderResult } from './MarkupToHtml';
+import { MarkupRenderer, RenderOptions, RenderResult } from './types';
 const md5 = require('md5');
 
 // Renderered notes can potentially be quite large (for example
@@ -30,16 +30,6 @@ interface Options {
 	fsDriver?: FsDriver;
 }
 
-interface RenderOptions {
-	splitted: boolean;
-	bodyOnly: boolean;
-	externalAssetsOnly: boolean;
-	resources: any;
-	postMessageSyntax: string;
-	enableLongPress: boolean;
-	itemIdToUrl?: ItemIdToUrlHandler;
-}
-
 // https://github.com/es-shims/String.prototype.trimStart/blob/main/implementation.js
 function trimStart(s: string): string {
 	// eslint-disable-next-line no-control-regex
@@ -47,7 +37,7 @@ function trimStart(s: string): string {
 	return s.replace(startWhitespace, '');
 }
 
-export default class HtmlToHtml {
+export default class HtmlToHtml implements MarkupRenderer {
 
 	private resourceBaseUrl_;
 	private ResourceModel_;
@@ -83,6 +73,8 @@ export default class HtmlToHtml {
 	public async allAssets(/* theme*/): Promise<any[]> {
 		return []; // TODO
 	}
+
+	public clearCache = undefined;
 
 	// Note: the "theme" variable is ignored and instead the light theme is
 	// always used for HTML notes.
