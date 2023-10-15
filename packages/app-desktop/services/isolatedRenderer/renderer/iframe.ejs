@@ -17,7 +17,9 @@
 			"use strict";
 
 			<%=
-				compilation.assets[webpackConfig.output.filename]
+				compilation.assets[
+					webpackConfig.output.chunkFilename.replace('[name]', 'iframe')
+				]
 					.source()
 					.replace(/<\/\s*(script)>/ig, '\\u003C/$1>')
 			%>

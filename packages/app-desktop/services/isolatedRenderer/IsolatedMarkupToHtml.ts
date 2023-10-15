@@ -11,10 +11,18 @@ const logger = Logger.create('IsolatedMarkupToHtml');
 
 export default class IsolatedMarkupToHtml implements MarkupToHtmlConverter {
 	private iframe: HTMLIFrameElement;
+	private destroyed = false;
 
 	private sandboxInitialized = false;
 	private initializingSandbox = false;
+
+	// Listeners for the sandbox to be fully loaded
 	private sandboxInitializationListeners: (()=> void)[] = [];
+
+	// Listeners for any ongoing renders to finish.
+	private endOfOngoingRenderListeners: (()=> void)[] = [];
+
+	private activeRendererCount = 0;
 
 	// We keep an unsandboxed MarkupToHtml for synchronous calls that do
 	// not need access to plugins.
@@ -36,8 +44,15 @@ export default class IsolatedMarkupToHtml implements MarkupToHtmlConverter {
 		this.iframe.style.display = 'none';
 	}
 
-	public destroy() {
+	public async destroy() {
+		// Ensure that this iframe has been set up correctly
+		await this.initializeSandbox();
+
+		// Ensure that no rendering tasks are using the iframe
+		await this.waitForRenderersToFinish();
+
 		this.iframe.remove();
+		this.destroyed = true;
 	}
 
 	private async initializeSandbox() {
@@ -93,6 +108,10 @@ export default class IsolatedMarkupToHtml implements MarkupToHtmlConverter {
 
 
 	private postMessage(message: MainToSandboxMessage) {
+		if (this.destroyed) {
+			throw new Error('The markup renderer has already been destroyed.');
+		}
+
 		this.iframe.contentWindow.postMessage(
 			message,
 			// Doesn't work (gives error about null origin)
@@ -105,9 +124,10 @@ export default class IsolatedMarkupToHtml implements MarkupToHtmlConverter {
 		return new Promise<SandboxToMainMessage>((resolve, _reject) => {
 
 			const messageListener = (event: MessageEvent) => {
-
-				if (event.origin !== this.iframe.contentWindow.origin) {
-					console.warn(`Ignored event from origin ${event.origin} expected origin to be ${this.iframe.contentWindow.origin}`);
+				// Determine the source of the event and only continue if it's
+				// from our iframe.
+				// See https://stackoverflow.com/a/71561712
+				if (event.source !== this.iframe.contentWindow) {
 					return;
 				}
 
@@ -143,49 +163,72 @@ export default class IsolatedMarkupToHtml implements MarkupToHtmlConverter {
 	public async render(
 		markupLanguage: MarkupLanguage, markup: string, theme: any, options: any,
 	): Promise<RenderResult> {
-		// Ensure that the sandbox is ready before continuing
-		await this.initializeSandbox();
+		this.activeRendererCount++;
 
-		options = {
-			...options,
+		try {
+			// Ensure that the sandbox is ready before continuing
+			await this.initializeSandbox();
 
-			// Not transferable
-			ResourceModel: undefined,
-		};
+			options = {
+				...options,
 
-		// A unique ID that allows us to identify this render request
-		const responseId = uuid.create();
+				// Not transferable
+				ResourceModel: undefined,
+			};
 
-		// Wait for a response before posting the message so that even
-		// in an extreme (currently impossible?) case where the sandbox
-		// replies immediately, we'll stil get the response.
-		const messageResponsePromise = this.getNextResponseWithId(responseId);
+			// A unique ID that allows us to identify this render request
+			const responseId = uuid.create();
 
-		this.postMessage({
-			kind: SandboxMessageType.Render,
-			markupLanguage,
-			markup,
-			options: {
-				theme,
-				audioPlayerEnabled: options.audioPlayerEnabled ?? true,
-				videoPlayerEnabled: options.videoPlayerEnabled ?? true,
-				pdfViewerEnabled: options.pdfViewerEnabled ?? true,
-				mapsToLine: options.mapsToLine ?? false,
-				noteId: options.noteId,
-				resources: options.resources,
-			},
+			// Wait for a response before posting the message so that even
+			// in an extreme (currently impossible?) case where the sandbox
+			// replies immediately, we'll stil get the response.
+			const messageResponsePromise = this.getNextResponseWithId(responseId);
 
-			responseId,
-		});
+			this.postMessage({
+				kind: SandboxMessageType.Render,
+				markupLanguage,
+				markup,
+				options: {
+					theme,
+					audioPlayerEnabled: options.audioPlayerEnabled ?? true,
+					videoPlayerEnabled: options.videoPlayerEnabled ?? true,
+					pdfViewerEnabled: options.pdfViewerEnabled ?? true,
+					mapsToLine: options.mapsToLine ?? false,
+					noteId: options.noteId,
+					resources: options.resources,
+				},
 
-		const response = await messageResponsePromise;
-		if (response.kind === SandboxMessageType.RenderResult) {
-			return response.result;
-		} else if (response.kind === SandboxMessageType.Error) {
-			throw new Error(response.errorMessage);
+				responseId,
+			});
+
+			const response = await messageResponsePromise;
+			if (response.kind === SandboxMessageType.RenderResult) {
+				return response.result;
+			} else if (response.kind === SandboxMessageType.Error) {
+				throw new Error(response.errorMessage);
+			}
+
+			throw new Error(`Invalid response, ${response.kind}`);
+		} finally {
+			this.activeRendererCount--;
+
+			if (this.activeRendererCount === 0) {
+				for (const listener of this.endOfOngoingRenderListeners) {
+					listener();
+				}
+				this.endOfOngoingRenderListeners = [];
+			}
 		}
+	}
 
-		throw new Error(`Invalid response, ${response.kind}`);
+	private waitForRenderersToFinish() {
+		return new Promise<void>(resolve => {
+			if (this.activeRendererCount === 0) {
+				resolve();
+			} else {
+				this.endOfOngoingRenderListeners.push(() => resolve());
+			}
+		});
 	}
 
 	public stripMarkup(markupLanguage: MarkupLanguage, markup: string, options: any): string {
@@ -204,7 +247,9 @@ export default class IsolatedMarkupToHtml implements MarkupToHtmlConverter {
 		);
 	}
 
-	public allAssets(_markupLanguage: MarkupLanguage, _theme: any, _noteStyleOptions: NoteStyleOptions): Promise<RenderResultPluginAsset[]> {
-		throw new Error('Method not implemented.');
+	public allAssets(markupLanguage: MarkupLanguage, theme: any, noteStyleOptions: NoteStyleOptions): Promise<RenderResultPluginAsset[]> {
+		this.unsandboxedMarkupToHtml ??= new MarkupToHtml();
+
+		return this.unsandboxedMarkupToHtml.allAssets(markupLanguage, theme, noteStyleOptions);
 	}
 }

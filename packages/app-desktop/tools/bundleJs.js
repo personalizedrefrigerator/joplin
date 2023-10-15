@@ -10,11 +10,17 @@ const rendererDirectory = resolve(__dirname, '../services/isolatedRenderer/rende
 
 const webpackOptions = mode => ({
 	context: dirname(__dirname),
-	entry: join(rendererDirectory, 'iframe.ts'),
+	entry: {
+		'iframe': join(rendererDirectory, 'iframe.ts'),
+	},
 	mode,
+
+	// Prevents "unable to load sourcemap" warnings
+	devtool: mode === 'development' ? 'cheap-source-map' : undefined,
+
 	output: {
 		path: rendererDirectory,
-		filename: 'iframe.bundle.js',
+		filename: '[name].bundle.js',
 
 		// Self-executing script
 		iife: true,

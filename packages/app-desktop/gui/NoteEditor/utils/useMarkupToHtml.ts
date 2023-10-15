@@ -1,9 +1,10 @@
 import { PluginStates } from '@joplin/lib/services/plugins/reducer';
-import { useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { ResourceInfos } from './types';
 import markupLanguageUtils from '../../../utils/markupLanguageUtils';
 import Setting from '@joplin/lib/models/Setting';
 import shim from '@joplin/lib/shim';
+import type IsolatedMarkupToHtml from '../../../services/isolatedRenderer/IsolatedMarkupToHtml';
 
 const { themeStyle } = require('@joplin/lib/theme');
 import Note from '@joplin/lib/models/Note';
@@ -30,12 +31,18 @@ export interface MarkupToHtmlOptions {
 export default function useMarkupToHtml(deps: HookDependencies) {
 	const { themeId, customCss, plugins } = deps;
 
-	const markupToHtml = useMemo(() => {
-		return markupLanguageUtils.newMarkupToHtml(deps.plugins, {
+	const [markupToHtml, setMarkupToHtml] = useState<IsolatedMarkupToHtml>();
+
+	useEffect(() => {
+		const mdToHtml = markupLanguageUtils.newMarkupToHtml(plugins, {
 			resourceBaseUrl: `file://${Setting.value('resourceDir')}/`,
 			customCss: customCss || '',
 		});
-		// eslint-disable-next-line @seiyab/react-hooks/exhaustive-deps -- Old code before rule was applied
+		setMarkupToHtml(mdToHtml);
+
+		return () => {
+			void mdToHtml.destroy();
+		};
 	}, [plugins, customCss]);
 
 	return useCallback(async (markupLanguage: number, md: string, options: MarkupToHtmlOptions = null): Promise<any> => {
