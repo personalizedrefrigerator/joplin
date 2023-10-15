@@ -1,10 +1,13 @@
-import { PluginStates } from '@joplin/lib/services/plugins/reducer';
 import uuid from '@joplin/lib/uuid';
 import MarkupToHtml, { MarkupLanguage } from '@joplin/renderer/MarkupToHtml';
 import { join } from 'path';
 import { MarkupToHtmlConverter, RenderResult, RenderResultPluginAsset } from '@joplin/renderer/types';
 import { MainToSandboxMessage, RendererSetupOptions, SandboxMessageType, SandboxToMainMessage } from './types';
 import { Options as NoteStyleOptions } from '@joplin/renderer/noteStyle';
+import readPluginFiles from './utils/readPluginFiles';
+import Logger from '@joplin/utils/Logger';
+
+const logger = Logger.create('IsolatedMarkupToHtml');
 
 export default class IsolatedMarkupToHtml implements MarkupToHtmlConverter {
 	private iframe: HTMLIFrameElement;
@@ -28,7 +31,8 @@ export default class IsolatedMarkupToHtml implements MarkupToHtmlConverter {
 
 		void this.initializeSandbox();
 
-		document.body.appendChild(this.iframe);
+		// We need to add the iframe to the document for it to load
+		document.documentElement.appendChild(this.iframe);
 		this.iframe.style.display = 'none';
 	}
 
@@ -50,11 +54,31 @@ export default class IsolatedMarkupToHtml implements MarkupToHtmlConverter {
 		this.initializingSandbox = true;
 		await this.getNextMessageSatisfying(message => message.kind === SandboxMessageType.SandboxLoaded);
 
+		// Allows identifying replies
+		const responseId = uuid.create();
+
 		this.postMessage({
 			kind: SandboxMessageType.SetOptions,
 			options: this.globalOptions,
+			plugins: await readPluginFiles(this.globalOptions.pluginStates),
+			responseId,
 		});
 
+		let response = await this.getNextResponseWithId(responseId);
+
+		if (response.kind === SandboxMessageType.Error) {
+			if (response.unusable) {
+				throw new Error(response.errorMessage);
+			} else {
+				logger.error(`Nonfatal error loading the renderer: ${response.errorMessage}`);
+			}
+
+			response = await this.getNextResponseWithId(responseId);
+		}
+
+		if (response.kind !== SandboxMessageType.OptionsLoaded) {
+			throw new Error(`Invalid render initialization response, ${response}`);
+		}
 
 		this.initializingSandbox = false;
 		this.sandboxInitialized = true;
@@ -104,13 +128,6 @@ export default class IsolatedMarkupToHtml implements MarkupToHtmlConverter {
 		});
 	}
 
-	public setPlugins(plugins: PluginStates) {
-		this.postMessage({
-			kind: SandboxMessageType.SetPlugins,
-			plugins,
-		});
-	}
-
 	public async clearCache(markupLanguage: MarkupLanguage) {
 		await this.initializeSandbox();
 
@@ -127,7 +144,6 @@ export default class IsolatedMarkupToHtml implements MarkupToHtmlConverter {
 		await this.initializeSandbox();
 
 		options = {
-			...this.globalOptions,
 			...options,
 
 			// Not transferable

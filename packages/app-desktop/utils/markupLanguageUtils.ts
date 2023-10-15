@@ -17,15 +17,13 @@ class MarkupLanguageUtils extends BaseMarkupLanguageUtils {
 			pluginOptions[n] = { enabled: subValues[n] };
 		}
 
-		// TODO: Plugins
-		console.warn('TODO: Plugins', plugins);
-
 		const renderOptions: RendererSetupOptions = {
 			pluginOptions: pluginOptions,
 			tempDir: Setting.value('tempDir'),
 			isSafeMode: Setting.value('isSafeMode'),
 			customCss: options.customCss ?? '',
 			resourceBaseUrl: options.resourceBaseUrl ?? `file://${Setting.value('resourceDir')}/`,
+			pluginStates: plugins,
 		};
 
 		return new IsolatedMarkupToHtml(renderOptions);

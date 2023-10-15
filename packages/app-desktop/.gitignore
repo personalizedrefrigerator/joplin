@@ -21,3 +21,4 @@ integration-tests/test-profile/
 
 services/isolatedRenderer/renderer/index.html
 services/isolatedRenderer/renderer/*.bundle.js
+services/isolatedRenderer/renderer/*.bundle.js.*.txt

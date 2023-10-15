@@ -2,6 +2,8 @@ import MarkupToHtml from '@joplin/renderer/MarkupToHtml';
 import { MainToSandboxMessage, RenderMessage, SandboxMessageType, SandboxToMainMessage } from '../types';
 import { internalUrl, isResourceUrl, isSupportedImageMimeType, pathToId, resourceFilename, resourceFriendlySafeFilename, resourceFullPath, urlToId } from '@joplin/lib/models/utils/resourceUtils';
 import { ResourceEntity } from '@joplin/lib/services/database/types';
+import { ExtraRendererRule } from '@joplin/renderer/MdToHtml';
+import loadContentScripts from './loadContentScripts';
 
 const main = () => {
 	// The parent window has origin `file://` because it's an
@@ -54,12 +56,13 @@ const main = () => {
 				kind: SandboxMessageType.Error,
 				responseId: message.responseId,
 				errorMessage: `${error}`,
+				unusable: true,
 			});
 			throw error;
 		}
 	};
 
-	window.addEventListener('message', event => {
+	window.addEventListener('message', async event => {
 		if (event.origin !== parentOrigin) {
 			console.warn('IFRAME: Ignored event from origin: ', event.origin);
 			return;
@@ -70,10 +73,43 @@ const main = () => {
 		if (message.kind === SandboxMessageType.SetOptions) {
 			resourceBaseDir = message.options.resourceBaseUrl;
 
-			wrappedMarkupToHtml = new MarkupToHtml({
-				...message.options,
-				ResourceModel,
+			const errors = [];
+			let unusable = false;
+
+			const extraRendererRules: ExtraRendererRule[] = await loadContentScripts(message.plugins, error => errors.push(error));
+
+			try {
+				wrappedMarkupToHtml = new MarkupToHtml({
+					...message.options,
+					extraRendererRules,
+					ResourceModel,
+				});
+			} catch (error) {
+				errors.push(error);
+				unusable = true;
+			}
+
+			if (errors.length > 0) {
+				// Log the error messages for easier debugging
+				console.error('Renderer setup errors', errors);
+
+				// Notify the parent
+				postMessageToParent({
+					kind: SandboxMessageType.Error,
+					responseId: message.responseId,
+					errorMessage: `${errors.map(error => `${error}`).join(', ')}`,
+					unusable,
+				});
+
+				if (unusable) {
+					throw errors[errors.length - 1];
+				}
+			}
+			postMessageToParent({
+				kind: SandboxMessageType.OptionsLoaded,
+				responseId: message.responseId,
 			});
+
 			return;
 		}
 

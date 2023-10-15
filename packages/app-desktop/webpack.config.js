@@ -6,7 +6,7 @@ const rendererDirectory = path.resolve(__dirname, './services/isolatedRenderer/r
 
 exports.default = {
 	entry: path.join(rendererDirectory, 'iframe.ts'),
-	mode: 'development',
+	mode: 'production',
 	output: {
 		path: rendererDirectory,
 		filename: 'iframe.bundle.js',

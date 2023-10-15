@@ -1,4 +1,4 @@
-import { PluginStates } from '../reducer';
+import type { PluginStates } from '../reducer';
 import { ContentScriptType, ContentScriptContext, PostMessageHandler } from '../api/types';
 import { dirname } from '@joplin/renderer/pathUtils';
 import shim from '../../../shim';

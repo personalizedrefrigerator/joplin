@@ -1,9 +1,16 @@
-import { PluginStates } from '@joplin/lib/services/plugins/reducer';
+import type { PluginStates } from '@joplin/lib/services/plugins/reducer';
 import type { MarkupLanguage } from '@joplin/renderer/MarkupToHtml';
-import { RenderResult } from '@joplin/renderer/types';
+import type { RenderResult } from '@joplin/renderer/types';
 
 export interface RendererPluginOptions {
 	enabled: boolean;
+}
+
+export interface ContentScriptRecord {
+	pluginId: string;
+	contentScriptId: string;
+	script: string;
+	assetPath: string;
 }
 
 export interface RendererSetupOptions {
@@ -12,6 +19,7 @@ export interface RendererSetupOptions {
 	tempDir: string;
 	pluginOptions: Record<string, RendererPluginOptions>;
 	isSafeMode: boolean;
+	pluginStates: PluginStates;
 }
 
 export interface RendererOptions {
@@ -34,6 +42,7 @@ export enum SandboxMessageType {
 	// sandbox -> main
 	SandboxLoaded,
 	RenderResult,
+	OptionsLoaded,
 	Error,
 }
 
@@ -42,6 +51,9 @@ export enum SandboxMessageType {
 export interface SetOptionsMessage {
 	kind: SandboxMessageType.SetOptions;
 	options: RendererSetupOptions;
+	plugins: ContentScriptRecord[];
+
+	responseId: string;
 }
 
 export interface RenderMessage {
@@ -55,17 +67,12 @@ export interface RenderMessage {
 	responseId: string;
 }
 
-export interface SetPluginsMessage {
-	kind: SandboxMessageType.SetPlugins;
-	plugins: PluginStates;
-}
-
 export interface ClearCacheMessage {
 	kind: SandboxMessageType.ClearCache;
 	language: MarkupLanguage;
 }
 
-export type MainToSandboxMessage = RenderMessage|SetOptionsMessage|SetPluginsMessage|ClearCacheMessage;
+export type MainToSandboxMessage = RenderMessage|SetOptionsMessage|ClearCacheMessage;
 
 // Messages from the iframe to the main process that are in response
 // to a MainToSandboxMessage
@@ -81,6 +88,11 @@ export interface RenderResultMessage extends SandboxResponse {
 export interface ErrorMessage extends SandboxResponse {
 	kind: SandboxMessageType.Error;
 	errorMessage: string;
+
+	// If the result of the callback was unusable or not
+	// (if NOT unusable, the listener should expect another
+	// message).
+	unusable: boolean;
 }
 
 export interface SandboxLoadedMessage {
@@ -90,5 +102,9 @@ export interface SandboxLoadedMessage {
 	responseId: undefined;
 }
 
-export type SandboxToMainMessage = RenderResultMessage|ErrorMessage|SandboxLoadedMessage;
+export interface OptionsLoadSuccessMessage extends SandboxResponse {
+	kind: SandboxMessageType.OptionsLoaded;
+}
+
+export type SandboxToMainMessage = RenderResultMessage|ErrorMessage|SandboxLoadedMessage|OptionsLoadSuccessMessage;
 
