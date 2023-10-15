@@ -121,8 +121,31 @@ const main = () => {
 			wrappedMarkupToHtml.clearCache(message.language);
 		} else if (message.kind === SandboxMessageType.Render) {
 			void render(message);
+		} else if (message.kind === SandboxMessageType.GetAssets) {
+			try {
+				const assets = await wrappedMarkupToHtml.allAssets(
+					message.language, message.theme, message.noteStyleOptions,
+				);
+				postMessageToParent({
+					kind: SandboxMessageType.AssetsResult,
+					assets,
+					responseId: message.responseId,
+				});
+			} catch (error) {
+				postMessageToParent({
+					kind: SandboxMessageType.Error,
+					errorMessage: `${error}`,
+					responseId: message.responseId,
+					unusable: true,
+				});
+			}
 		} else {
 			console.warn('unknown message:', event.data);
+
+			// Use TypeScript to assert that all message types
+			// were handled.
+			const exhaustivenessCheck: never = message;
+			throw exhaustivenessCheck;
 		}
 	});
 

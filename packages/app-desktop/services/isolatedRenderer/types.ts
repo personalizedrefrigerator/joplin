@@ -1,6 +1,7 @@
 import type { PluginStates } from '@joplin/lib/services/plugins/reducer';
 import type { MarkupLanguage } from '@joplin/renderer/MarkupToHtml';
-import type { RenderResult } from '@joplin/renderer/types';
+import type { Options as NoteStyleOptions } from '@joplin/renderer/noteStyle';
+import type { RenderResult, RenderResultPluginAsset } from '@joplin/renderer/types';
 
 export interface RendererPluginOptions {
 	enabled: boolean;
@@ -36,19 +37,20 @@ export enum SandboxMessageType {
 	// main -> sandbox
 	SetOptions,
 	Render,
-	SetPlugins,
+	GetAssets,
 	ClearCache,
 
 	// sandbox -> main
 	SandboxLoaded,
 	RenderResult,
+	AssetsResult,
 	OptionsLoaded,
 	Error,
 }
 
 // Messages from the main process to the iframe
 //
-export interface SetOptionsMessage {
+interface SetOptionsMessage {
 	kind: SandboxMessageType.SetOptions;
 	options: RendererSetupOptions;
 
@@ -70,12 +72,21 @@ export interface RenderMessage {
 	responseId: string;
 }
 
-export interface ClearCacheMessage {
+interface ClearCacheMessage {
 	kind: SandboxMessageType.ClearCache;
 	language: MarkupLanguage;
 }
 
-export type MainToSandboxMessage = RenderMessage|SetOptionsMessage|ClearCacheMessage;
+interface GetAssetsMessage {
+	kind: SandboxMessageType.GetAssets;
+	language: MarkupLanguage;
+	theme: any;
+	noteStyleOptions: NoteStyleOptions;
+
+	responseId: string;
+}
+
+export type MainToSandboxMessage = RenderMessage|SetOptionsMessage|GetAssetsMessage|ClearCacheMessage;
 
 // Messages from the iframe to the main process that are in response
 // to a MainToSandboxMessage
@@ -83,12 +94,12 @@ interface SandboxResponse {
 	responseId: string;
 }
 
-export interface RenderResultMessage extends SandboxResponse {
+interface RenderResultMessage extends SandboxResponse {
 	kind: SandboxMessageType.RenderResult;
 	result: RenderResult;
 }
 
-export interface ErrorMessage extends SandboxResponse {
+interface ErrorMessage extends SandboxResponse {
 	kind: SandboxMessageType.Error;
 	errorMessage: string;
 
@@ -98,16 +109,21 @@ export interface ErrorMessage extends SandboxResponse {
 	unusable: boolean;
 }
 
-export interface SandboxLoadedMessage {
+interface SandboxLoadedMessage {
 	kind: SandboxMessageType.SandboxLoaded;
 
 	// Not a response
 	responseId: undefined;
 }
 
-export interface OptionsLoadSuccessMessage extends SandboxResponse {
+interface OptionsLoadSuccessMessage extends SandboxResponse {
 	kind: SandboxMessageType.OptionsLoaded;
 }
 
-export type SandboxToMainMessage = RenderResultMessage|ErrorMessage|SandboxLoadedMessage|OptionsLoadSuccessMessage;
+interface AssetsResult extends SandboxResponse {
+	kind: SandboxMessageType.AssetsResult;
+	assets: RenderResultPluginAsset[];
+}
+
+export type SandboxToMainMessage = RenderResultMessage|ErrorMessage|SandboxLoadedMessage|OptionsLoadSuccessMessage|AssetsResult;
 

@@ -19,10 +19,10 @@ export default class IsolatedMarkupToHtml implements MarkupToHtmlConverter {
 	// Listeners for the sandbox to be fully loaded
 	private sandboxInitializationListeners: (()=> void)[] = [];
 
-	// Listeners for any ongoing renders to finish.
-	private endOfOngoingRenderListeners: (()=> void)[] = [];
+	// Listeners for any ongoing renders/asset calls to finish.
+	private endOfOngoingTaskListeners: (()=> void)[] = [];
 
-	private activeRendererCount = 0;
+	private activeTaskCount = 0;
 
 	// We keep an unsandboxed MarkupToHtml for synchronous calls that do
 	// not need access to plugins.
@@ -95,7 +95,7 @@ export default class IsolatedMarkupToHtml implements MarkupToHtmlConverter {
 
 		if (response.kind !== SandboxMessageType.OptionsLoaded) {
 			this.initializingSandbox = false;
-			throw new Error(`Invalid render initialization response, ${response}`);
+			throw new Error(`Invalid render initialization response, ${JSON.stringify(response)}`);
 		}
 
 		this.initializingSandbox = false;
@@ -160,12 +160,27 @@ export default class IsolatedMarkupToHtml implements MarkupToHtmlConverter {
 		});
 	}
 
+	private async runAsyncTask<T>(task: ()=> Promise<T>): Promise<T> {
+		this.activeTaskCount++;
+
+		try {
+			return await task();
+		} finally {
+			this.activeTaskCount--;
+
+			if (this.activeTaskCount === 0) {
+				for (const listener of this.endOfOngoingTaskListeners) {
+					listener();
+				}
+				this.endOfOngoingTaskListeners = [];
+			}
+		}
+	}
+
 	public async render(
 		markupLanguage: MarkupLanguage, markup: string, theme: any, options: any,
 	): Promise<RenderResult> {
-		this.activeRendererCount++;
-
-		try {
+		return this.runAsyncTask(async () => {
 			// Ensure that the sandbox is ready before continuing
 			await this.initializeSandbox();
 
@@ -209,24 +224,15 @@ export default class IsolatedMarkupToHtml implements MarkupToHtmlConverter {
 			}
 
 			throw new Error(`Invalid response, ${response.kind}`);
-		} finally {
-			this.activeRendererCount--;
-
-			if (this.activeRendererCount === 0) {
-				for (const listener of this.endOfOngoingRenderListeners) {
-					listener();
-				}
-				this.endOfOngoingRenderListeners = [];
-			}
-		}
+		});
 	}
 
 	private waitForRenderersToFinish() {
 		return new Promise<void>(resolve => {
-			if (this.activeRendererCount === 0) {
+			if (this.activeTaskCount === 0) {
 				resolve();
 			} else {
-				this.endOfOngoingRenderListeners.push(() => resolve());
+				this.endOfOngoingTaskListeners.push(() => resolve());
 			}
 		});
 	}
@@ -248,8 +254,26 @@ export default class IsolatedMarkupToHtml implements MarkupToHtmlConverter {
 	}
 
 	public allAssets(markupLanguage: MarkupLanguage, theme: any, noteStyleOptions: NoteStyleOptions): Promise<RenderResultPluginAsset[]> {
-		this.unsandboxedMarkupToHtml ??= new MarkupToHtml();
+		return this.runAsyncTask(async () => {
+			const responseId = uuid.create();
 
-		return this.unsandboxedMarkupToHtml.allAssets(markupLanguage, theme, noteStyleOptions);
+			this.postMessage({
+				kind: SandboxMessageType.GetAssets,
+				language: markupLanguage,
+				theme,
+				noteStyleOptions,
+				responseId,
+			});
+
+			const response = await this.getNextResponseWithId(responseId);
+
+			if (response.kind === SandboxMessageType.Error) {
+				throw new Error(response.errorMessage);
+			} else if (response.kind !== SandboxMessageType.AssetsResult) {
+				throw new Error(`Invalid response to allAssets message: ${JSON.stringify(response)}`);
+			}
+
+			return response.assets;
+		});
 	}
 }
