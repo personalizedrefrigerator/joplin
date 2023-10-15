@@ -9,12 +9,13 @@ import { ResourceEntity, ResourceLocalStateEntity } from '../services/database/t
 import ResourceLocalState from './ResourceLocalState';
 const pathUtils = require('../path-utils');
 const { mime } = require('../mime-utils.js');
-const { filename, safeFilename } = require('../path-utils');
+const { safeFilename } = require('../path-utils');
 const { FsDriverDummy } = require('../fs-driver-dummy.js');
 import JoplinError from '../JoplinError';
 import itemCanBeEncrypted from './utils/itemCanBeEncrypted';
 import { getEncryptionEnabled } from '../services/synchronizer/syncInfoUtils';
 import ShareService from '../services/share/ShareService';
+import { internalUrl, isResourceUrl, isSupportedImageMimeType, pathToId, resourceFilename, resourceFriendlySafeFilename, resourceFullPath, resourceRelativePath, urlToId } from './utils/resourceUtils';
 
 export default class Resource extends BaseItem {
 
@@ -48,8 +49,7 @@ export default class Resource extends BaseItem {
 	}
 
 	public static isSupportedImageMimeType(type: string) {
-		const imageMimeTypes = ['image/jpg', 'image/jpeg', 'image/png', 'image/gif', 'image/svg+xml', 'image/webp', 'image/avif'];
-		return imageMimeTypes.indexOf(type.toLowerCase()) >= 0;
+		return isSupportedImageMimeType(type);
 	}
 
 	public static fetchStatuses(resourceIds: string[]): Promise<any[]> {
@@ -112,27 +112,19 @@ export default class Resource extends BaseItem {
 	}
 
 	public static filename(resource: ResourceEntity, encryptedBlob = false) {
-		let extension = encryptedBlob ? 'crypted' : resource.file_extension;
-		if (!extension) extension = resource.mime ? mime.toFileExtension(resource.mime) : '';
-		extension = extension ? `.${extension}` : '';
-		return resource.id + extension;
+		return resourceFilename(resource, encryptedBlob);
 	}
 
 	public static friendlySafeFilename(resource: ResourceEntity) {
-		let ext = resource.file_extension;
-		if (!ext) ext = resource.mime ? mime.toFileExtension(resource.mime) : '';
-		const safeExt = ext ? pathUtils.safeFileExtension(ext).toLowerCase() : '';
-		let title = resource.title ? resource.title : resource.id;
-		if (safeExt && pathUtils.fileExtension(title).toLowerCase() === safeExt) title = pathUtils.filename(title);
-		return pathUtils.friendlySafeFilename(title) + (safeExt ? `.${safeExt}` : '');
+		return resourceFriendlySafeFilename(resource);
 	}
 
 	public static relativePath(resource: ResourceEntity, encryptedBlob = false) {
-		return `${Setting.value('resourceDirName')}/${this.filename(resource, encryptedBlob)}`;
+		return resourceRelativePath(resource, this.baseRelativeDirectoryPath(), encryptedBlob);
 	}
 
 	public static fullPath(resource: ResourceEntity, encryptedBlob = false) {
-		return `${Setting.value('resourceDir')}/${this.filename(resource, encryptedBlob)}`;
+		return resourceFullPath(resource, this.baseDirectoryPath(), encryptedBlob);
 	}
 
 	public static async isReady(resource: ResourceEntity) {
@@ -247,11 +239,11 @@ export default class Resource extends BaseItem {
 	}
 
 	public static internalUrl(resource: ResourceEntity) {
-		return `:/${resource.id}`;
+		return internalUrl(resource);
 	}
 
 	public static pathToId(path: string) {
-		return filename(path);
+		return pathToId(path);
 	}
 
 	public static async content(resource: ResourceEntity) {
@@ -259,12 +251,11 @@ export default class Resource extends BaseItem {
 	}
 
 	public static isResourceUrl(url: string) {
-		return url && url.length === 34 && url[0] === ':' && url[1] === '/';
+		return isResourceUrl(url);
 	}
 
 	public static urlToId(url: string) {
-		if (!this.isResourceUrl(url)) throw new Error(`Not a valid resource URL: ${url}`);
-		return url.substr(2);
+		return urlToId(url);
 	}
 
 	public static async localState(resourceOrId: any) {

@@ -1,9 +1,7 @@
 import MarkupToHtml from '@joplin/renderer/MarkupToHtml';
-import Resource from '@joplin/lib/models/Resource';
 import { MainToSandboxMessage, RenderMessage, SandboxMessageType, SandboxToMainMessage } from '../types';
-
-// TODO: Don't include Resource -- it's huge
-const ResourceModel = Resource;
+import { internalUrl, isResourceUrl, isSupportedImageMimeType, pathToId, resourceFilename, resourceFriendlySafeFilename, resourceFullPath, urlToId } from '@joplin/lib/models/utils/resourceUtils';
+import { ResourceEntity } from '@joplin/lib/services/database/types';
 
 const main = () => {
 	// The parent window has origin `file://` because it's an
@@ -16,6 +14,19 @@ const main = () => {
 		parent.postMessage(message, '*');
 	};
 
+	let resourceBaseDir = '';
+	const ResourceModel = {
+		filename: resourceFilename,
+		friendlySafeFilename: resourceFriendlySafeFilename,
+		fullPath: (resource: ResourceEntity, encryptedBlob?: boolean) => {
+			return resourceFullPath(resource, resourceBaseDir, encryptedBlob);
+		},
+		internalUrl,
+		pathToId,
+		isResourceUrl,
+		isSupportedImageMimeType,
+		urlToId,
+	};
 
 	let wrappedMarkupToHtml: MarkupToHtml|null = null;
 
@@ -24,7 +35,7 @@ const main = () => {
 			...message.options,
 			ResourceModel,
 		};
-		const renderer = new MarkupToHtml(options);
+		const renderer = wrappedMarkupToHtml;
 		try {
 			const result = await renderer.render(
 				message.markupLanguage,
@@ -50,13 +61,15 @@ const main = () => {
 
 	window.addEventListener('message', event => {
 		if (event.origin !== parentOrigin) {
-			console.warn('IFRAME: Ignored event from origin', event.origin);
+			console.warn('IFRAME: Ignored event from origin: ', event.origin);
 			return;
 		}
 
 		const message = event.data as MainToSandboxMessage;
 
 		if (message.kind === SandboxMessageType.SetOptions) {
+			resourceBaseDir = message.options.resourceBaseUrl;
+
 			wrappedMarkupToHtml = new MarkupToHtml({
 				...message.options,
 				ResourceModel,
@@ -72,25 +85,8 @@ const main = () => {
 			wrappedMarkupToHtml.clearCache(message.language);
 		} else if (message.kind === SandboxMessageType.Render) {
 			void render(message);
-		}
-
-
-
-		if (event.data?.message === 'render') {
-			// TODO: Validate params
-			try {
-				parent.postMessage({
-					message: 'renderResult',
-					data: render(event.data.params),
-				});
-			} catch (error) {
-				parent.postMessage({
-					message: 'renderError',
-					data: `Renderer error: ${error}`,
-				});
-			}
 		} else {
-			console.warn('unknown message, ', event.data?.message);
+			console.warn('unknown message:', event.data);
 		}
 	});
 

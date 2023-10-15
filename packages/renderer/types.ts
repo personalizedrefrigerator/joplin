@@ -26,7 +26,7 @@ export interface RenderOptions {
 	vendorDir?: string;
 	itemIdToUrl?: ItemIdToUrlHandler;
 
-	resources?: any;
+	resources?: Record<string, any>;
 }
 
 export interface RenderResultPluginAsset {

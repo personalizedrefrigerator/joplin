@@ -151,6 +151,7 @@ export default class IsolatedMarkupToHtml implements MarkupToHtmlConverter {
 				videoPlayerEnabled: options.videoPlayerEnabled ?? false,
 				pdfViewerEnabled: options.pdfViewerEnabled ?? false,
 				noteId: options.noteId,
+				resources: options.resources,
 			},
 
 			responseId,

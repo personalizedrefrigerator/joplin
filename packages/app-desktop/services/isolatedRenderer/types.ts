@@ -20,6 +20,7 @@ export interface RendererOptions {
 	videoPlayerEnabled: boolean;
 	pdfViewerEnabled: boolean;
 	noteId: string;
+	resources: Record<string, any>;
 }
 
 export enum SandboxMessageType {
