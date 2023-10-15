@@ -19,6 +19,7 @@ export interface RendererOptions {
 	audioPlayerEnabled: boolean;
 	videoPlayerEnabled: boolean;
 	pdfViewerEnabled: boolean;
+	mapsToLine: boolean;
 	noteId: string;
 	resources: Record<string, any>;
 }

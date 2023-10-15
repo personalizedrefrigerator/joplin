@@ -127,6 +127,7 @@ export default class IsolatedMarkupToHtml implements MarkupToHtmlConverter {
 		await this.initializeSandbox();
 
 		options = {
+			...this.globalOptions,
 			...options,
 
 			// Not transferable
@@ -147,9 +148,10 @@ export default class IsolatedMarkupToHtml implements MarkupToHtmlConverter {
 			markup,
 			options: {
 				theme,
-				audioPlayerEnabled: options.audioPlayerEnabled ?? false,
-				videoPlayerEnabled: options.videoPlayerEnabled ?? false,
-				pdfViewerEnabled: options.pdfViewerEnabled ?? false,
+				audioPlayerEnabled: options.audioPlayerEnabled ?? true,
+				videoPlayerEnabled: options.videoPlayerEnabled ?? true,
+				pdfViewerEnabled: options.pdfViewerEnabled ?? true,
+				mapsToLine: options.mapsToLine ?? false,
 				noteId: options.noteId,
 				resources: options.resources,
 			},
