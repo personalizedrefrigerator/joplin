@@ -385,6 +385,9 @@ packages/app-desktop/services/bridge.js
 packages/app-desktop/services/commands/stateToWhenClauseContext.js
 packages/app-desktop/services/commands/types.js
 packages/app-desktop/services/isolatedRenderer/IsolatedMarkupToHtml.js
+packages/app-desktop/services/isolatedRenderer/messenger/RemoteMessenger.js
+packages/app-desktop/services/isolatedRenderer/messenger/WindowMessenger.js
+packages/app-desktop/services/isolatedRenderer/messenger/types.js
 packages/app-desktop/services/isolatedRenderer/renderer/iframe.js
 packages/app-desktop/services/isolatedRenderer/renderer/loadContentScripts.js
 packages/app-desktop/services/isolatedRenderer/types.js

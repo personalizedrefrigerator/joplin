@@ -1,243 +1,99 @@
-import uuid from '@joplin/lib/uuid';
 import MarkupToHtml, { MarkupLanguage } from '@joplin/renderer/MarkupToHtml';
 import { join } from 'path';
-import { MarkupToHtmlConverter, RenderResult, RenderResultPluginAsset } from '@joplin/renderer/types';
-import { MainToSandboxMessage, RendererSetupOptions, SandboxMessageType, SandboxToMainMessage } from './types';
+import { MarkupToHtmlConverter, RenderResult } from '@joplin/renderer/types';
 import { Options as NoteStyleOptions } from '@joplin/renderer/noteStyle';
 import readPluginFiles from './utils/readPluginFiles';
+import { MainApi, RendererApi, RendererHandle, RendererSetupOptions } from './types';
+import WindowMessenger from './messenger/WindowMessenger';
 import Logger from '@joplin/utils/Logger';
+import shim from '@joplin/lib/shim';
 
 const logger = Logger.create('IsolatedMarkupToHtml');
 
+let iframeMessenger: WindowMessenger<MainApi, RendererApi>|null = null;
+
+// Creates a single shared, sandboxed iframe to be used for markup rendering.
 export default class IsolatedMarkupToHtml implements MarkupToHtmlConverter {
-	private iframe: HTMLIFrameElement;
-	private destroyed = false;
-
-	private sandboxInitialized = false;
-	private initializingSandbox = false;
-
-	// Listeners for the sandbox to be fully loaded
-	private sandboxInitializationListeners: (()=> void)[] = [];
-
-	// Listeners for any ongoing renders/asset calls to finish.
-	private endOfOngoingTaskListeners: (()=> void)[] = [];
-
-	private activeTaskCount = 0;
+	private remoteApi: RendererApi;
+	private sandboxInitializationPromise: Promise<void>;
+	private rendererHandle: RendererHandle;
 
 	// We keep an unsandboxed MarkupToHtml for synchronous calls that do
 	// not need access to plugins.
 	private unsandboxedMarkupToHtml: MarkupToHtmlConverter|null = null;
 
-	public constructor(private globalOptions: RendererSetupOptions) {
-		this.iframe = document.createElement('iframe');
-		this.iframe.src = join(__dirname, 'renderer', 'index.html');
+	public constructor(globalOptions: RendererSetupOptions) {
+		// Create the shared iframe if needed
+		if (!iframeMessenger) {
+			const iframe = document.createElement('iframe');
+			iframe.src = join(__dirname, 'renderer', 'index.html');
 
-		// Note: Do not enable both allow-scripts and allow-same-origin as this
-		// breaks the sandbox. See
-		// https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe
-		this.iframe.setAttribute('sandbox', 'allow-scripts');
+			// Note: Do not enable both allow-scripts and allow-same-origin as this
+			// breaks the sandbox. See
+			// https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe
+			iframe.setAttribute('sandbox', 'allow-scripts');
 
-		void this.initializeSandbox();
+			// We need to add the iframe to the document for it to load
+			document.documentElement.appendChild(iframe);
+			iframe.style.display = 'none';
 
-		// We need to add the iframe to the document for it to load
-		document.documentElement.appendChild(this.iframe);
-		this.iframe.style.display = 'none';
-	}
-
-	public async destroy() {
-		// Ensure that this iframe has been set up correctly
-		await this.initializeSandbox();
-
-		// Ensure that no rendering tasks are using the iframe
-		await this.waitForRenderersToFinish();
-
-		this.iframe.remove();
-		this.destroyed = true;
-	}
-
-	private async initializeSandbox() {
-		if (this.sandboxInitialized) {
-			return;
-		}
-
-		if (this.initializingSandbox) {
-			return new Promise<void>(resolve => {
-				this.sandboxInitializationListeners.push(() => resolve());
+			iframeMessenger = new WindowMessenger<MainApi, RendererApi>(iframe.contentWindow, {
+				logError: async (errorMessage: string) => {
+					logger.error(errorMessage);
+				},
+				cacheCssToFile: async (cssStrings: string[]) => {
+					return shim.fsDriver().cacheCssToFile(cssStrings);
+				},
 			});
 		}
 
-		this.initializingSandbox = true;
-		await this.getNextMessageSatisfying(message => message.kind === SandboxMessageType.SandboxLoaded);
+		this.remoteApi = iframeMessenger.remoteApi;
 
-		// Allows identifying replies
-		const responseId = uuid.create();
-
-		const plugins = await readPluginFiles(this.globalOptions.pluginStates);
-		this.postMessage({
-			kind: SandboxMessageType.SetOptions,
-			options: this.globalOptions,
-			plugins,
-			responseId,
-		});
-
-		let response = await this.getNextResponseWithId(responseId);
-
-		if (response.kind === SandboxMessageType.Error) {
-			if (response.unusable) {
-				this.initializingSandbox = false;
-				throw new Error(response.errorMessage);
-			} else {
-				logger.error(`Nonfatal error loading the renderer: ${response.errorMessage}`);
-			}
-
-			response = await this.getNextResponseWithId(responseId);
-		}
-
-		if (response.kind !== SandboxMessageType.OptionsLoaded) {
-			this.initializingSandbox = false;
-			throw new Error(`Invalid render initialization response, ${JSON.stringify(response)}`);
-		}
-
-		this.initializingSandbox = false;
-		this.sandboxInitialized = true;
-
-		for (const listener of this.sandboxInitializationListeners) {
-			listener();
-		}
+		// Run async setup -- initialize the renderer and send plugin data that needs to be
+		// loaded in the main process.
+		this.sandboxInitializationPromise = (async () => {
+			const plugins = await readPluginFiles(globalOptions.pluginStates);
+			this.rendererHandle = await this.remoteApi.createWithOptions(globalOptions, plugins);
+		})();
 	}
 
+	public async destroy() {
+		await this.sandboxInitializationPromise;
 
-	private postMessage(message: MainToSandboxMessage) {
-		if (this.destroyed) {
-			throw new Error('The markup renderer has already been destroyed.');
-		}
-
-		this.iframe.contentWindow.postMessage(
-			message,
-			// Doesn't work (gives error about null origin)
-			// this.iframe.contentWindow.origin,
-			'*',
-		);
-	}
-
-	private getNextMessageSatisfying(condition: (message: SandboxToMainMessage)=> boolean) {
-		return new Promise<SandboxToMainMessage>((resolve, _reject) => {
-
-			const messageListener = (event: MessageEvent) => {
-				// Determine the source of the event and only continue if it's
-				// from our iframe.
-				// See https://stackoverflow.com/a/71561712
-				if (event.source !== this.iframe.contentWindow) {
-					return;
-				}
-
-				if (!condition(event.data)) {
-					return;
-				}
-
-				const message = event.data as SandboxToMainMessage;
-
-				window.removeEventListener('message', messageListener);
-				resolve(message);
-			};
-
-			window.addEventListener('message', messageListener);
-		});
-	}
-
-	private getNextResponseWithId(senderId: string) {
-		return this.getNextMessageSatisfying(message => {
-			return message.responseId === senderId;
-		});
+		await this.remoteApi.destroy(this.rendererHandle);
 	}
 
 	public async clearCache(markupLanguage: MarkupLanguage) {
-		await this.initializeSandbox();
-
-		this.postMessage({
-			kind: SandboxMessageType.ClearCache,
-			language: markupLanguage,
-		});
-	}
-
-	private async runAsyncTask<T>(task: ()=> Promise<T>): Promise<T> {
-		this.activeTaskCount++;
-
-		try {
-			return await task();
-		} finally {
-			this.activeTaskCount--;
-
-			if (this.activeTaskCount === 0) {
-				for (const listener of this.endOfOngoingTaskListeners) {
-					listener();
-				}
-				this.endOfOngoingTaskListeners = [];
-			}
-		}
+		await this.sandboxInitializationPromise;
+		await this.remoteApi.clearCache(this.rendererHandle, markupLanguage);
 	}
 
 	public async render(
 		markupLanguage: MarkupLanguage, markup: string, theme: any, options: any,
 	): Promise<RenderResult> {
-		return this.runAsyncTask(async () => {
-			// Ensure that the sandbox is ready before continuing
-			await this.initializeSandbox();
+		await this.sandboxInitializationPromise;
 
-			options = {
-				...options,
+		// Filter the options to ensure that only transferable options are sent.
+		const rendererOptions = {
+			theme,
+			audioPlayerEnabled: options.audioPlayerEnabled ?? true,
+			videoPlayerEnabled: options.videoPlayerEnabled ?? true,
+			pdfViewerEnabled: options.pdfViewerEnabled ?? true,
+			mapsToLine: options.mapsToLine ?? false,
+			noteId: options.noteId,
+			resources: options.resources,
+		};
 
-				// Not transferable
-				ResourceModel: undefined,
-			};
-
-			// A unique ID that allows us to identify this render request
-			const responseId = uuid.create();
-
-			// Wait for a response before posting the message so that even
-			// in an extreme (currently impossible?) case where the sandbox
-			// replies immediately, we'll stil get the response.
-			const messageResponsePromise = this.getNextResponseWithId(responseId);
-
-			this.postMessage({
-				kind: SandboxMessageType.Render,
-				markupLanguage,
-				markup,
-				options: {
-					theme,
-					audioPlayerEnabled: options.audioPlayerEnabled ?? true,
-					videoPlayerEnabled: options.videoPlayerEnabled ?? true,
-					pdfViewerEnabled: options.pdfViewerEnabled ?? true,
-					mapsToLine: options.mapsToLine ?? false,
-					noteId: options.noteId,
-					resources: options.resources,
-				},
-
-				responseId,
-			});
-
-			const response = await messageResponsePromise;
-			if (response.kind === SandboxMessageType.RenderResult) {
-				return response.result;
-			} else if (response.kind === SandboxMessageType.Error) {
-				throw new Error(response.errorMessage);
-			}
-
-			throw new Error(`Invalid response, ${response.kind}`);
-		});
-	}
-
-	private waitForRenderersToFinish() {
-		return new Promise<void>(resolve => {
-			if (this.activeTaskCount === 0) {
-				resolve();
-			} else {
-				this.endOfOngoingTaskListeners.push(() => resolve());
-			}
+		return await this.remoteApi.render(this.rendererHandle, {
+			markupLanguage,
+			markup,
+			options: rendererOptions,
 		});
 	}
 
 	public stripMarkup(markupLanguage: MarkupLanguage, markup: string, options: any): string {
+		// This method is synchronous. As such, we can't pass messages to the renderer.
+		// Do everything with a MarkupToHtml that has no plugins.
 		this.unsandboxedMarkupToHtml ??= new MarkupToHtml();
 
 		// Pass only collapseWhiteSpaces to prevent accidental rendering
@@ -253,27 +109,11 @@ export default class IsolatedMarkupToHtml implements MarkupToHtmlConverter {
 		);
 	}
 
-	public allAssets(markupLanguage: MarkupLanguage, theme: any, noteStyleOptions: NoteStyleOptions): Promise<RenderResultPluginAsset[]> {
-		return this.runAsyncTask(async () => {
-			const responseId = uuid.create();
+	public async allAssets(markupLanguage: MarkupLanguage, theme: any, noteStyleOptions: NoteStyleOptions) {
+		await this.sandboxInitializationPromise;
 
-			this.postMessage({
-				kind: SandboxMessageType.GetAssets,
-				language: markupLanguage,
-				theme,
-				noteStyleOptions,
-				responseId,
-			});
-
-			const response = await this.getNextResponseWithId(responseId);
-
-			if (response.kind === SandboxMessageType.Error) {
-				throw new Error(response.errorMessage);
-			} else if (response.kind !== SandboxMessageType.AssetsResult) {
-				throw new Error(`Invalid response to allAssets message: ${JSON.stringify(response)}`);
-			}
-
-			return response.assets;
+		return await this.remoteApi.getAssets(this.rendererHandle, {
+			markupLanguage, theme, noteStyleOptions,
 		});
 	}
 }

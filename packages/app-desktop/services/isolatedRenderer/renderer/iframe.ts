@@ -1,27 +1,24 @@
-import MarkupToHtml from '@joplin/renderer/MarkupToHtml';
-import { MainToSandboxMessage, RenderMessage, SandboxMessageType, SandboxToMainMessage } from '../types';
+import MarkupToHtml, { MarkupLanguage } from '@joplin/renderer/MarkupToHtml';
 import { internalUrl, isResourceUrl, isSupportedImageMimeType, pathToId, resourceFilename, resourceFriendlySafeFilename, resourceFullPath, urlToId } from '@joplin/lib/models/utils/resourceUtils';
 import { ResourceEntity } from '@joplin/lib/services/database/types';
 import { ExtraRendererRule } from '@joplin/renderer/MdToHtml';
 import loadContentScripts from './loadContentScripts';
+import WindowMessenger from '../messenger/WindowMessenger';
+import { GetAssetsProps, MainApi, RenderProps, RendererApi, RendererHandle } from '../types';
+import { RenderResult, RenderResultPluginAsset } from '@joplin/renderer/types';
 
-const main = () => {
-	// The parent window has origin `file://` because it's an
-	// electron app.
-	const parentOrigin = 'file://';
+interface MarkupToHtmlWrapper {
+	render(props: RenderProps): Promise<RenderResult>;
+	clearCache(language: MarkupLanguage): void;
+	getAssets(props: GetAssetsProps): Promise<RenderResultPluginAsset[]>;
+}
 
-	const postMessageToParent = (message: SandboxToMainMessage) => {
-		// It seems that we need to use '*' here because of sandboxing
-		// restrictions.
-		parent.postMessage(message, '*');
-	};
-
-	let resourceBaseDir = '';
-	const ResourceModel = {
+const makeResourceModel = (getResourceBaseDir: ()=> string) => {
+	const resourceModel = {
 		filename: resourceFilename,
 		friendlySafeFilename: resourceFriendlySafeFilename,
 		fullPath: (resource: ResourceEntity, encryptedBlob?: boolean) => {
-			return resourceFullPath(resource, resourceBaseDir, encryptedBlob);
+			return resourceFullPath(resource, getResourceBaseDir(), encryptedBlob);
 		},
 		internalUrl,
 		pathToId,
@@ -30,131 +27,90 @@ const main = () => {
 		urlToId,
 	};
 
-	let wrappedMarkupToHtml: MarkupToHtml|null = null;
+	return resourceModel;
+};
 
-	const render = async (message: RenderMessage) => {
-		const options = {
-			...message.options,
-			ResourceModel,
-		};
-		const renderer = wrappedMarkupToHtml;
-		try {
-			const result = await renderer.render(
-				message.markupLanguage,
-				message.markup,
-				options.theme,
-				options,
-			);
+const wrappedRenderers: MarkupToHtmlWrapper[] = [];
 
-			postMessageToParent({
-				kind: SandboxMessageType.RenderResult,
-				responseId: message.responseId,
-				result,
-			});
-		} catch (error) {
-			postMessageToParent({
-				kind: SandboxMessageType.Error,
-				responseId: message.responseId,
-				errorMessage: `${error}`,
-				unusable: true,
-			});
-			throw error;
-		}
-	};
+const assertRendererExists = (handle: RendererHandle) => {
+	if (handle >= wrappedRenderers.length) {
+		throw new Error(`Renderer ${handle} has not been created yet`);
+	}
 
-	window.addEventListener('message', async event => {
-		if (event.origin !== parentOrigin) {
-			console.warn('IFRAME: Ignored event from origin: ', event.origin);
-			return;
-		}
+	if (!wrappedRenderers[handle]) {
+		throw new Error(`Renderer ${handle} has already been destroyed`);
+	}
+};
 
-		const message = event.data as MainToSandboxMessage;
+let remoteApi: MainApi;
+const rendererApi: RendererApi = {
+	async createWithOptions(options, plugins) {
+		const resourceModel = makeResourceModel(() => options.resourceBaseUrl);
+		const extraRendererRules: ExtraRendererRule[] = await loadContentScripts(
+			plugins ?? [],
+			error => remoteApi.logError(`Error loading content scipts: ${error}`),
+		);
 
-		if (message.kind === SandboxMessageType.SetOptions) {
-			resourceBaseDir = message.options.resourceBaseUrl;
+		const renderer = new MarkupToHtml({
+			...options,
+			extraRendererRules,
+			ResourceModel: resourceModel,
+			fsDriver: {
+				cacheCssToFile: remoteApi.cacheCssToFile,
+			},
+		});
 
-			const errors = [];
-			let unusable = false;
+		const wrapper: MarkupToHtmlWrapper = {
+			render: (props: RenderProps) => {
+				const options = {
+					...props.options,
+					ResourceModel: resourceModel,
+				};
 
-			const extraRendererRules: ExtraRendererRule[] = await loadContentScripts(message.plugins ?? [], error => errors.push(error));
-
-			try {
-				wrappedMarkupToHtml = new MarkupToHtml({
-					...message.options,
-					extraRendererRules,
-					ResourceModel,
-				});
-			} catch (error) {
-				errors.push(error);
-				unusable = true;
-			}
-
-			if (errors.length > 0) {
-				// Log the error messages for easier debugging
-				console.error('Renderer setup errors', errors);
-
-				// Notify the parent
-				postMessageToParent({
-					kind: SandboxMessageType.Error,
-					responseId: message.responseId,
-					errorMessage: `${errors.map(error => `${error}`).join(', ')}`,
-					unusable,
-				});
-
-				if (unusable) {
-					throw errors[errors.length - 1];
-				}
-			}
-			postMessageToParent({
-				kind: SandboxMessageType.OptionsLoaded,
-				responseId: message.responseId,
-			});
-
-			return;
-		}
-
-		if (!wrappedMarkupToHtml) {
-			throw new Error(`MarkupToHtml not yet initialized. message: ${JSON.stringify(message)}`);
-		}
-
-		if (message.kind === SandboxMessageType.ClearCache) {
-			wrappedMarkupToHtml.clearCache(message.language);
-		} else if (message.kind === SandboxMessageType.Render) {
-			void render(message);
-		} else if (message.kind === SandboxMessageType.GetAssets) {
-			try {
-				const assets = await wrappedMarkupToHtml.allAssets(
-					message.language, message.theme, message.noteStyleOptions,
+				return renderer.render(
+					props.markupLanguage,
+					props.markup,
+					props.options.theme,
+					options,
 				);
-				postMessageToParent({
-					kind: SandboxMessageType.AssetsResult,
-					assets,
-					responseId: message.responseId,
-				});
-			} catch (error) {
-				postMessageToParent({
-					kind: SandboxMessageType.Error,
-					errorMessage: `${error}`,
-					responseId: message.responseId,
-					unusable: true,
-				});
-			}
-		} else {
-			console.warn('unknown message:', event.data);
+			},
+			clearCache: (language: MarkupLanguage) => {
+				return renderer.clearCache(language);
+			},
+			getAssets: (props: GetAssetsProps) => {
+				return renderer.allAssets(props.markupLanguage, props.theme, props.noteStyleOptions);
+			},
+		};
 
-			// Use TypeScript to assert that all message types
-			// were handled.
-			const exhaustivenessCheck: never = message;
-			throw exhaustivenessCheck;
-		}
-	});
+		const wrapperId = wrappedRenderers.length;
+		wrappedRenderers.push(wrapper);
+		return wrapperId;
+	},
 
-	postMessageToParent({
-		kind: SandboxMessageType.SandboxLoaded,
+	async render(rendererId: RendererHandle, props: RenderProps) {
+		assertRendererExists(rendererId);
+		return wrappedRenderers[rendererId].render(props);
+	},
 
-		// Not a response
-		responseId: undefined,
-	});
+	async clearCache(rendererId: RendererHandle, language: MarkupLanguage) {
+		assertRendererExists(rendererId);
+		return wrappedRenderers[rendererId].clearCache(language);
+	},
+
+	getAssets(rendererId: RendererHandle, props: GetAssetsProps) {
+		assertRendererExists(rendererId);
+
+		return wrappedRenderers[rendererId].getAssets(props);
+	},
+
+	async destroy(rendererId: RendererHandle) {
+		delete wrappedRenderers[rendererId];
+	},
+};
+
+const main = () => {
+	const messenger = new WindowMessenger<RendererApi, MainApi>(window.parent, rendererApi);
+	remoteApi = messenger.remoteApi;
 };
 
 main();

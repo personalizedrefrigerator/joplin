@@ -1,3 +1,4 @@
+import type { CachedCssResult } from '@joplin/lib/fs-driver-base';
 import type { PluginStates } from '@joplin/lib/services/plugins/reducer';
 import type { MarkupLanguage } from '@joplin/renderer/MarkupToHtml';
 import type { Options as NoteStyleOptions } from '@joplin/renderer/noteStyle';
@@ -33,97 +34,41 @@ export interface RendererOptions {
 	resources: Record<string, any>;
 }
 
-export enum SandboxMessageType {
-	// main -> sandbox
-	SetOptions,
-	Render,
-	GetAssets,
-	ClearCache,
-
-	// sandbox -> main
-	SandboxLoaded,
-	RenderResult,
-	AssetsResult,
-	OptionsLoaded,
-	Error,
-}
-
-// Messages from the main process to the iframe
-//
-interface SetOptionsMessage {
-	kind: SandboxMessageType.SetOptions;
-	options: RendererSetupOptions;
-
-	// It seems that even if `plugins: []` is passed, plugins can be null
-	// in iframe.ts.
-	plugins?: ContentScriptRecord[];
-
-	responseId: string;
-}
-
-export interface RenderMessage {
-	kind: SandboxMessageType.Render;
-	markup: string;
+export interface RenderProps {
 	markupLanguage: MarkupLanguage;
+	markup: string;
 	options: RendererOptions;
-
-	// should be a unique identifier, allowing a RenderResultMessage
-	// to be associated with this RenderMessage.
-	responseId: string;
 }
 
-interface ClearCacheMessage {
-	kind: SandboxMessageType.ClearCache;
-	language: MarkupLanguage;
-}
-
-interface GetAssetsMessage {
-	kind: SandboxMessageType.GetAssets;
-	language: MarkupLanguage;
+export interface GetAssetsProps {
+	markupLanguage: MarkupLanguage;
 	theme: any;
 	noteStyleOptions: NoteStyleOptions;
-
-	responseId: string;
 }
 
-export type MainToSandboxMessage = RenderMessage|SetOptionsMessage|GetAssetsMessage|ClearCacheMessage;
+export type RendererHandle = number;
 
-// Messages from the iframe to the main process that are in response
-// to a MainToSandboxMessage
-interface SandboxResponse {
-	responseId: string;
+// For TypeScript to check the serializability of arguments, these
+// must be type aliases (and not interfaces).
+export interface RendererApi {
+	createWithOptions(options: RendererSetupOptions, plugins: ContentScriptRecord[]): Promise<RendererHandle>;
+
+	render(
+		renderer: RendererHandle,
+		props: RenderProps,
+	): Promise<RenderResult>;
+
+	clearCache(renderer: RendererHandle, language: MarkupLanguage): Promise<void>;
+
+	getAssets(
+		renderer: RendererHandle,
+		props: GetAssetsProps,
+	): Promise<RenderResultPluginAsset[]>;
+
+	destroy(renderer: RendererHandle): Promise<void>;
 }
 
-interface RenderResultMessage extends SandboxResponse {
-	kind: SandboxMessageType.RenderResult;
-	result: RenderResult;
+export interface MainApi {
+	logError(errorMessage: string): Promise<void>;
+	cacheCssToFile(cssStrings: string[]): Promise<CachedCssResult>;
 }
-
-interface ErrorMessage extends SandboxResponse {
-	kind: SandboxMessageType.Error;
-	errorMessage: string;
-
-	// If the result of the callback was unusable or not
-	// (if NOT unusable, the listener should expect another
-	// message).
-	unusable: boolean;
-}
-
-interface SandboxLoadedMessage {
-	kind: SandboxMessageType.SandboxLoaded;
-
-	// Not a response
-	responseId: undefined;
-}
-
-interface OptionsLoadSuccessMessage extends SandboxResponse {
-	kind: SandboxMessageType.OptionsLoaded;
-}
-
-interface AssetsResult extends SandboxResponse {
-	kind: SandboxMessageType.AssetsResult;
-	assets: RenderResultPluginAsset[];
-}
-
-export type SandboxToMainMessage = RenderResultMessage|ErrorMessage|SandboxLoadedMessage|OptionsLoadSuccessMessage|AssetsResult;
-
