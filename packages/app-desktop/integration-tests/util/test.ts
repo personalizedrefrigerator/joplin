@@ -1,5 +1,5 @@
 import { resolve, join, dirname } from 'path';
-import { rm, mkdirp } from 'fs-extra';
+import { remove, mkdirp } from 'fs-extra';
 import { _electron as electron, Page, ElectronApplication, test as base } from '@playwright/test';
 import uuid from '@joplin/lib/uuid';
 
@@ -32,16 +32,11 @@ export const test = base.extend<JoplinFixtures>({
 
 		await electronApp.firstWindow();
 		await electronApp.close();
-		await rm(profileSubdir, { recursive: true });
+		await remove(profileSubdir);
 	},
 
 	mainWindow: async ({ electronApp }, use) => {
 		const window = await electronApp.firstWindow();
-
-		// Redirect console output to the nodejs terminal
-		// eslint-disable-next-line no-console
-		window.on('console', console.log);
-
 		await use(window);
 	},
 });
