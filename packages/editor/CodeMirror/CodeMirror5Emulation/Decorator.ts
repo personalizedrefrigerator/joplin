@@ -34,23 +34,25 @@ const addMarkDecorationEffect = StateEffect.define<LineCssDecorationSpec>(mapRan
 // TODO: Support removing mark decorations
 //     const removeMarkDecorationEffect = StateEffect.define<LineDecorationSpec>(mapRangeConfig);
 
-export interface LineWidgetOptions {
+export interface WidgetDecorationOptions {
 	className?: string;
 	above?: boolean;
 }
 
-interface LineWidgetDecorationSpec extends DecorationRange {
+interface WidgetDecorationSpec extends DecorationRange {
 	element: HTMLElement;
-	options: LineWidgetOptions;
+	options: WidgetDecorationOptions;
 }
-const addLineWidgetEffect = StateEffect.define<LineWidgetDecorationSpec>(mapRangeConfig);
-const removeLineWidgetEffect = StateEffect.define<{ element: HTMLElement }>();
+const addLineWidgetEffect = StateEffect.define<WidgetDecorationSpec>(mapRangeConfig);
+const addInlineWidgetEffect = StateEffect.define<WidgetDecorationSpec>(mapRangeConfig);
+
+const removeWidgetEffect = StateEffect.define<{ element: HTMLElement }>();
 
 
 class WidgetDecorationWrapper extends WidgetType {
 	public constructor(
 		public readonly element: HTMLElement,
-		public readonly options: LineWidgetOptions,
+		public readonly options: WidgetDecorationOptions,
 	) {
 		super();
 	}
@@ -193,7 +195,17 @@ export default class Decorator {
 					decorations = decorations.update({
 						add: [decoration.range(options.above ? effect.value.from : effect.value.to)],
 					});
-				} else if (effect.is(removeLineWidgetEffect)) {
+				} else if (effect.is(addInlineWidgetEffect)) {
+					const widgetSpec = effect.value;
+					const decoration = Decoration.widget({
+						widget: new WidgetDecorationWrapper(
+							widgetSpec.element, widgetSpec.options,
+						),
+					});
+					decorations = decorations.update({
+						add: [decoration.range(effect.value.from)],
+					});
+				} else if (effect.is(removeWidgetEffect)) {
 					decorations = decorations.update({
 						// Returns true only for decorations that should be kept.
 						filter: (_from, _to, value) => {
@@ -336,12 +348,12 @@ export default class Decorator {
 		return lineClasses;
 	}
 
-	private createLineWidgetControl(node: HTMLElement, options: LineWidgetOptions): LineWidgetControl {
+	private createLineWidgetControl(node: HTMLElement, options: WidgetDecorationOptions): LineWidgetControl {
 		return {
 			node,
 			clear: () => {
 				this.editor.dispatch({
-					effects: removeLineWidgetEffect.of({ element: node }),
+					effects: removeWidgetEffect.of({ element: node }),
 				});
 			},
 			changed: () => {
@@ -367,7 +379,8 @@ export default class Decorator {
 		return lineWidgets;
 	}
 
-	public addLineWidget(lineNumber: number, node: HTMLElement, options: LineWidgetOptions): LineWidgetControl {
+	// lineNumber should be zero-indexed
+	public addLineWidget(lineNumber: number, node: HTMLElement, options: WidgetDecorationOptions): LineWidgetControl {
 		const line = this.editor.state.doc.line(lineNumber + 1);
 
 		const lineWidgetOptions = {
@@ -381,5 +394,17 @@ export default class Decorator {
 		});
 
 		return this.createLineWidgetControl(node, options);
+	}
+
+	public addInlineWidget(position: number, node: HTMLElement) {
+		const options = {
+			from: position,
+			to: position,
+			element: node,
+			options: {},
+		};
+		this.editor.dispatch({
+			effects: addInlineWidgetEffect.of(options),
+		});
 	}
 }

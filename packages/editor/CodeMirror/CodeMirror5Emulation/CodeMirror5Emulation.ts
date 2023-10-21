@@ -5,8 +5,8 @@ import { CodeMirror as BaseCodeMirror5Emulation, Vim } from '@replit/codemirror-
 import { LogMessageCallback } from '../../types';
 import editorCommands from '../editorCommands/editorCommands';
 import { StateEffect } from '@codemirror/state';
-import { StreamParser } from '@codemirror/language';
-import Decorator, { LineWidgetOptions } from './Decorator';
+import { StreamParser, syntaxTree } from '@codemirror/language';
+import Decorator, { WidgetDecorationOptions } from './Decorator';
 const { pregQuote } = require('@joplin/lib/string-utils-common');
 
 
@@ -25,13 +25,18 @@ interface DocumentPosition {
 	ch: number;
 }
 
-const documentPositionFromPos = (doc: Text, pos: number): DocumentPosition => {
+const cm6PositionToCm5 = (doc: Text, pos: number): DocumentPosition => {
 	const line = doc.lineAt(pos);
 	return {
 		// CM 5 uses 0-based line numbering
 		line: line.number - 1,
 		ch: pos - line.from,
 	};
+};
+
+const cm5PositionToCm6 = (doc: Text, position: DocumentPosition): number => {
+	const line = doc.line(position.line + 1);
+	return line.from + position.ch;
 };
 
 export default class CodeMirror5Emulation extends BaseCodeMirror5Emulation {
@@ -119,7 +124,8 @@ export default class CodeMirror5Emulation extends BaseCodeMirror5Emulation {
 			// Note: We can allow legacy CM5 CSS to apply to the editor
 			// with a line similar to the following:
 			//    EditorView.editorAttributes.of({ class: 'CodeMirror' }),
-			// Many of these styles, however, don't work well with CodeMirror 6.
+			// Many of these styles, however, don't work well with CodeMirror 6,
+			// likely because the CodeMirror 5 stylesheets are still loaded.
 		];
 	}
 
@@ -169,8 +175,8 @@ export default class CodeMirror5Emulation extends BaseCodeMirror5Emulation {
 		for (const transaction of update.transactions) {
 			transaction.changes.iterChanges((fromA, toA, _fromB, _toB, inserted: Text) => {
 				changes.push({
-					from: documentPositionFromPos(origDoc, fromA),
-					to: documentPositionFromPos(origDoc, toA),
+					from: cm6PositionToCm5(origDoc, fromA),
+					to: cm6PositionToCm5(origDoc, toA),
 					text: inserted.sliceString(0).split('\n'),
 					removed: origDoc.sliceString(fromA, toA).split('\n'),
 					transaction,
@@ -260,10 +266,33 @@ export default class CodeMirror5Emulation extends BaseCodeMirror5Emulation {
 		return result;
 	}
 
-	public getStateAfter(_line: number) {
-		// TODO: Should return parser state. Returning an empty object
-		//       allows some plugins to run without crashing, however.
-		return {};
+	public getStateAfter(lineNumber: number) {
+		const state = this.editor.state;
+		const line = state.doc.line(lineNumber + 1);
+
+		let inCodeBlock = false;
+		let inTable = false;
+
+		syntaxTree(state).iterate({
+			from: line.from,
+			to: line.to,
+			enter: node => {
+				if (node.name === 'FencedCode') {
+					inCodeBlock = true;
+				} else if (node.name === 'Table') {
+					inTable = true;
+				}
+			},
+		});
+
+		// TODO: CM5's getStateAfter returns far more information than this.
+		return {
+			inCodeBlock,
+			inTable,
+			outer: {
+				code: inCodeBlock,
+			},
+		};
 	}
 
 	public getScrollPercent() {
@@ -319,9 +348,28 @@ export default class CodeMirror5Emulation extends BaseCodeMirror5Emulation {
 		this._decorator.removeLineClass(lineNumber, where, className);
 	}
 
-	public addLineWidget(lineNumber: number, node: HTMLElement, options: LineWidgetOptions) {
-		this._decorator.addLineWidget(lineNumber, node, options);
+	public addLineWidget(lineNumber: number, node: HTMLElement, options: WidgetDecorationOptions) {
+		return this._decorator.addLineWidget(lineNumber, node, options);
 	}
+
+	public addWidget(pos: DocumentPosition, node: HTMLElement, _scrollIntoView: boolean) {
+		this._decorator.addInlineWidget(
+			cm5PositionToCm6(this.editor.state.doc, pos),
+			node,
+		);
+	}
+
+	public getDoc() {
+		// In CodeMirror 5, the document and the editor are different objects.
+		// This object supports undo/redo and several document operations, so
+		// return it.
+		return this;
+	}
+
+	public getEditor() {
+		return this;
+	}
+
 
 	// TODO: Currently copied from useCursorUtils.ts.
 	// TODO: Remove the duplicate code when CodeMirror 5 is eventually removed.
