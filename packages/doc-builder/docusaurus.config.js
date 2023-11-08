@@ -11,7 +11,7 @@ process.env.WEBSITE_BASE_URL = process.env.WEBSITE_BASE_URL || '';
 const config = {
 	title: 'Joplin',
 	tagline: 'Free your notes!',
-	favicon: 'favicon.ico',
+	favicon: process.env.WEBSITE_BASE_URL + '/favicon.ico',
 
 	// Set the production url of your site here
 	url: process.env.WEBSITE_BASE_URL,
@@ -27,7 +27,7 @@ const config = {
 	// to replace "en" with "zh-Hans".
 	i18n: {
 		defaultLocale: 'en',
-		locales: ['en'],
+		locales: ['en', 'fr'],
 	},
 
 	plugins: [
@@ -115,6 +115,10 @@ const config = {
 						position: 'right',
 						className: 'navbar-custom-buttons sponsor-button',
 						target: '_self',
+					},
+					{
+						type: 'localeDropdown',
+						position: 'right',
 					},
 				],
 			},
