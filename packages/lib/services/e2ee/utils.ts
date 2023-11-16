@@ -141,6 +141,10 @@ export async function loadMasterKeysFromSettings(service: EncryptionService) {
 	for (let i = 0; i < masterKeys.length; i++) {
 		const mk = masterKeys[i];
 		if (service.isMasterKeyLoaded(mk)) continue;
+		if (!masterKeyEnabled(mk)) {
+			logger.info('Skipping disabled master key.');
+			continue;
+		}
 
 		const password = await findMasterKeyPassword(service, mk);
 		if (!password) continue;
