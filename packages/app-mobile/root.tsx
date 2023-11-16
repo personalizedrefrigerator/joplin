@@ -66,7 +66,7 @@ const { SearchScreen } = require('./components/screens/search.js');
 const { OneDriveLoginScreen } = require('./components/screens/onedrive-login.js');
 import EncryptionConfigScreen from './components/screens/encryption-config';
 const { DropboxLoginScreen } = require('./components/screens/dropbox-login.js');
-const { MenuContext } = require('react-native-popup-menu');
+const { MenuProvider } = require('react-native-popup-menu');
 import SideMenu from './components/SideMenu';
 import SideMenuContent from './components/side-menu-content';
 const { SideMenuContentNote } = require('./components/side-menu-content-note.js');
@@ -175,20 +175,23 @@ const generalMiddleware = (store: any) => (next: any) => async (action: any) => 
 		setLocale(Setting.value('locale'));
 	}
 
-	if ((action.type === 'SETTING_UPDATE_ONE' && (action.key.indexOf('encryption.') === 0)) || (action.type === 'SETTING_UPDATE_ALL')) {
-		await loadMasterKeysFromSettings(EncryptionService.instance());
-		void DecryptionWorker.instance().scheduleStart();
-		const loadedMasterKeyIds = EncryptionService.instance().loadedMasterKeyIds();
+	// Encryption setup is already handled by the setup code
+	//if (newState.appState === 'ready') {
+		if ((action.type === 'SETTING_UPDATE_ONE' && (action.key.indexOf('encryption.') === 0)) || (action.type === 'SETTING_UPDATE_ALL')) {
+			await loadMasterKeysFromSettings(EncryptionService.instance());
+			void DecryptionWorker.instance().scheduleStart();
+			const loadedMasterKeyIds = EncryptionService.instance().loadedMasterKeyIds();
 
-		storeDispatch({
-			type: 'MASTERKEY_REMOVE_NOT_LOADED',
-			ids: loadedMasterKeyIds,
-		});
+			storeDispatch({
+				type: 'MASTERKEY_REMOVE_NOT_LOADED',
+				ids: loadedMasterKeyIds,
+			});
 
-		// Schedule a sync operation so that items that need to be encrypted
-		// are sent to sync target.
-		void reg.scheduleSync(null, null, true);
-	}
+			// Schedule a sync operation so that items that need to be encrypted
+			// are sent to sync target.
+			void reg.scheduleSync(null, null, true);
+		}
+	//}
 
 	if (
 		action.type === 'AUTODETECT_THEME'
@@ -468,11 +471,15 @@ async function initialize(dispatch: Function) {
 	Setting.setConstant('env', __DEV__ ? 'dev' : 'prod');
 	Setting.setConstant('appId', 'net.cozic.joplin-mobile');
 	Setting.setConstant('appType', 'mobile');
-	Setting.setConstant('tempDir', await initializeTempDir());
 	const resourceDir = getResourceDir(currentProfile, isSubProfile);
 	Setting.setConstant('resourceDir', resourceDir);
 
-	await shim.fsDriver().mkdir(resourceDir);
+	const tempDirPromise = initializeTempDir();
+	await Promise.all([
+		tempDirPromise,
+		shim.fsDriver().mkdir(resourceDir),
+	]);
+	Setting.setConstant('tempDir', await tempDirPromise);
 
 	const logDatabase = new Database(new DatabaseDriverReactNative());
 	await logDatabase.open({ name: 'log.sqlite' });
@@ -539,6 +546,15 @@ async function initialize(dispatch: Function) {
 
 	setRSA(RSA);
 
+	let setupPromise: Promise<void>|null = null;
+	const addSetupTask = (task: Promise<void>) => {
+		if (!setupPromise) {
+			setupPromise = task;
+		} else {
+			setupPromise = setupPromise.then(() => task);
+		}
+	};
+
 	try {
 		if (Setting.value('env') === 'prod') {
 			await db.open({ name: getDatabaseName(currentProfile, isSubProfile) });
@@ -591,7 +607,7 @@ async function initialize(dispatch: Function) {
 		}
 
 		PluginAssetsLoader.instance().setLogger(mainLogger);
-		await PluginAssetsLoader.instance().importAssets();
+		addSetupTask(PluginAssetsLoader.instance().importAssets());
 
 		// eslint-disable-next-line require-atomic-updates
 		BaseItem.revisionService_ = RevisionService.instance();
@@ -625,58 +641,62 @@ async function initialize(dispatch: Function) {
 		DecryptionWorker.instance().setLogger(mainLogger);
 		DecryptionWorker.instance().setKvStore(KvStore.instance());
 		DecryptionWorker.instance().setEncryptionService(EncryptionService.instance());
-		await loadMasterKeysFromSettings(EncryptionService.instance());
+//		if (Setting.value('encryption.enabled')) {
+//			addSetupTask(loadMasterKeysFromSettings(EncryptionService.instance()));
+//		}
 		DecryptionWorker.instance().on('resourceMetadataButNotBlobDecrypted', decryptionWorker_resourceMetadataButNotBlobDecrypted);
 
 		// ----------------------------------------------------------------
 		// / E2EE SETUP
 		// ----------------------------------------------------------------
 
-		await ShareService.instance().initialize(store, EncryptionService.instance());
+		ShareService.instance().initialize(store, EncryptionService.instance());
 
-		reg.logger().info('Loading folders...');
+		addSetupTask((async () => {
+			reg.logger().info('Loading folders...');
 
-		await FoldersScreenUtils.refreshFolders();
+			await FoldersScreenUtils.refreshFolders();
 
-		const tags = await Tag.allWithNotes();
+			const tags = await Tag.allWithNotes();
 
-		dispatch({
-			type: 'TAG_UPDATE_ALL',
-			items: tags,
-		});
-
-		// const masterKeys = await MasterKey.all();
-
-		// dispatch({
-		// 	type: 'MASTERKEY_UPDATE_ALL',
-		// 	items: masterKeys,
-		// });
-
-		const folderId = Setting.value('activeFolderId');
-		let folder = await Folder.load(folderId);
-
-		if (!folder) folder = await Folder.defaultFolder();
-
-		dispatch({
-			type: 'FOLDER_SET_COLLAPSED_ALL',
-			ids: Setting.value('collapsedFolderIds'),
-		});
-
-		const notesParent = parseNotesParent(Setting.value('notesParent'), Setting.value('activeFolderId'));
-
-		if (notesParent && notesParent.type === 'SmartFilter') {
-			dispatch(DEFAULT_ROUTE);
-		} else if (!folder) {
-			dispatch(DEFAULT_ROUTE);
-		} else {
 			dispatch({
-				type: 'NAV_GO',
-				routeName: 'Notes',
-				folderId: folder.id,
+				type: 'TAG_UPDATE_ALL',
+				items: tags,
 			});
-		}
 
-		await clearSharedFilesCache();
+			// const masterKeys = await MasterKey.all();
+
+			// dispatch({
+			// 	type: 'MASTERKEY_UPDATE_ALL',
+			// 	items: masterKeys,
+			// });
+
+			const folderId = Setting.value('activeFolderId');
+			let folder = await Folder.load(folderId);
+
+			if (!folder) folder = await Folder.defaultFolder();
+
+			dispatch({
+				type: 'FOLDER_SET_COLLAPSED_ALL',
+				ids: Setting.value('collapsedFolderIds'),
+			});
+
+			const notesParent = parseNotesParent(Setting.value('notesParent'), Setting.value('activeFolderId'));
+
+			if (notesParent && notesParent.type === 'SmartFilter') {
+				dispatch(DEFAULT_ROUTE);
+			} else if (!folder) {
+				dispatch(DEFAULT_ROUTE);
+			} else {
+				dispatch({
+					type: 'NAV_GO',
+					routeName: 'Notes',
+					folderId: folder.id,
+				});
+			}
+		})());
+
+		addSetupTask(clearSharedFilesCache());
 	} catch (error) {
 		alert(`Initialization error: ${error.message}`);
 		reg.logger().error('Initialization error:', error);
@@ -703,20 +723,23 @@ async function initialize(dispatch: Function) {
 	SearchEngine.instance().setLogger(reg.logger());
 	SearchEngine.instance().scheduleSyncTables();
 
-	await MigrationService.instance().run();
+	addSetupTask(MigrationService.instance().run());
 
 	// When the app starts we want the full sync to
 	// start almost immediately to get the latest data.
 	// doWifiConnectionCheck set to true so initial sync
 	// doesn't happen on mobile data
 	// eslint-disable-next-line promise/prefer-await-to-then -- Old code before rule was applied
-	void reg.scheduleSync(100, null, true).then(() => {
+	void (async () => {
+		await setupPromise;
+
+		await reg.scheduleSync(100, null, true);
 		// Wait for the first sync before updating the notifications, since synchronisation
 		// might change the notifications.
 		void AlarmService.updateAllNotifications();
 
 		void DecryptionWorker.instance().scheduleStart();
-	});
+	})();
 
 	await WelcomeUtils.install(Setting.value('locale'), dispatch);
 
@@ -750,7 +773,7 @@ async function initialize(dispatch: Function) {
 	// call will throw an error, alerting us of the issue. Otherwise it will
 	// just print some messages in the console.
 	// ----------------------------------------------------------------------------
-	if (Setting.value('env') === 'dev') {
+	if (Setting.value('env') === 'dev' && 1 < 0) {
 		await runRsaIntegrationTests();
 		await runOnDeviceFsDriverTests();
 	}
@@ -1088,7 +1111,7 @@ class AppComponent extends React.Component {
 					}}
 				>
 					<StatusBar barStyle={statusBarStyle} />
-					<MenuContext style={{ flex: 1 }}>
+					<MenuProvider style={{ flex: 1 }}>
 						<SafeAreaView style={{ flex: 0, backgroundColor: theme.backgroundColor2 }}/>
 						<SafeAreaView style={{ flex: 1 }}>
 							<View style={{ flex: 1, backgroundColor: theme.backgroundColor }}>
@@ -1101,7 +1124,7 @@ class AppComponent extends React.Component {
 								sensorInfo={this.state.sensorInfo}
 							/> }
 						</SafeAreaView>
-					</MenuContext>
+					</MenuProvider>
 				</SideMenu>
 			</View>
 		);

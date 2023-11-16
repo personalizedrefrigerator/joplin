@@ -11,7 +11,7 @@ import time from '@joplin/lib/time';
 import { decryptedStatText, enableEncryptionConfirmationMessages, onSavePasswordClick, useInputMasterPassword, useInputPasswords, usePasswordChecker, useStats } from '@joplin/lib/components/EncryptionConfigScreen/utils';
 import { MasterKeyEntity } from '@joplin/lib/services/e2ee/types';
 import { State } from '@joplin/lib/reducer';
-import { SyncInfo } from '@joplin/lib/services/synchronizer/syncInfoUtils';
+import { SyncInfo, masterKeyEnabled, setMasterKeyEnabled } from '@joplin/lib/services/synchronizer/syncInfoUtils';
 import { getDefaultMasterKey, setupAndDisableEncryption, toggleAndSetupEncryption } from '@joplin/lib/services/e2ee/utils';
 import { useMemo, useRef, useState } from 'react';
 
@@ -119,6 +119,10 @@ const EncryptionConfigScreen = (props: Props) => {
 				<View style={{ flexDirection: 'row', alignItems: 'center' }}>
 					<Text style={{ flex: 0, fontSize: theme.fontSize, marginRight: 10, color: theme.color }}>{_('Password:')}</Text>
 					{renderPasswordInput(mk.id)}
+					<Button
+						onPress={() => setMasterKeyEnabled(mk.id, !masterKeyEnabled(mk))}
+						title={masterKeyEnabled(mk) ? _('Disable') : _('Enable')}
+					/>
 				</View>
 			</View>
 		);
