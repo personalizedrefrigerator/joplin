@@ -176,22 +176,22 @@ const generalMiddleware = (store: any) => (next: any) => async (action: any) => 
 	}
 
 	// Encryption setup is already handled by the setup code
-	//if (newState.appState === 'ready') {
-		if ((action.type === 'SETTING_UPDATE_ONE' && (action.key.indexOf('encryption.') === 0)) || (action.type === 'SETTING_UPDATE_ALL')) {
-			await loadMasterKeysFromSettings(EncryptionService.instance());
-			void DecryptionWorker.instance().scheduleStart();
-			const loadedMasterKeyIds = EncryptionService.instance().loadedMasterKeyIds();
+	// if (newState.appState === 'ready') {
+	if ((action.type === 'SETTING_UPDATE_ONE' && (action.key.indexOf('encryption.') === 0)) || (action.type === 'SETTING_UPDATE_ALL')) {
+		await loadMasterKeysFromSettings(EncryptionService.instance());
+		void DecryptionWorker.instance().scheduleStart();
+		const loadedMasterKeyIds = EncryptionService.instance().loadedMasterKeyIds();
 
-			storeDispatch({
-				type: 'MASTERKEY_REMOVE_NOT_LOADED',
-				ids: loadedMasterKeyIds,
-			});
+		storeDispatch({
+			type: 'MASTERKEY_REMOVE_NOT_LOADED',
+			ids: loadedMasterKeyIds,
+		});
 
-			// Schedule a sync operation so that items that need to be encrypted
-			// are sent to sync target.
-			void reg.scheduleSync(null, null, true);
-		}
-	//}
+		// Schedule a sync operation so that items that need to be encrypted
+		// are sent to sync target.
+		void reg.scheduleSync(null, null, true);
+	}
+	// }
 
 	if (
 		action.type === 'AUTODETECT_THEME'
@@ -471,15 +471,11 @@ async function initialize(dispatch: Function) {
 	Setting.setConstant('env', __DEV__ ? 'dev' : 'prod');
 	Setting.setConstant('appId', 'net.cozic.joplin-mobile');
 	Setting.setConstant('appType', 'mobile');
+	Setting.setConstant('tempDir', await initializeTempDir());
 	const resourceDir = getResourceDir(currentProfile, isSubProfile);
 	Setting.setConstant('resourceDir', resourceDir);
 
-	const tempDirPromise = initializeTempDir();
-	await Promise.all([
-		tempDirPromise,
-		shim.fsDriver().mkdir(resourceDir),
-	]);
-	Setting.setConstant('tempDir', await tempDirPromise);
+	await shim.fsDriver().mkdir(resourceDir);
 
 	const logDatabase = new Database(new DatabaseDriverReactNative());
 	await logDatabase.open({ name: 'log.sqlite' });
@@ -546,15 +542,6 @@ async function initialize(dispatch: Function) {
 
 	setRSA(RSA);
 
-	let setupPromise: Promise<void>|null = null;
-	const addSetupTask = (task: Promise<void>) => {
-		if (!setupPromise) {
-			setupPromise = task;
-		} else {
-			setupPromise = setupPromise.then(() => task);
-		}
-	};
-
 	try {
 		if (Setting.value('env') === 'prod') {
 			await db.open({ name: getDatabaseName(currentProfile, isSubProfile) });
@@ -607,7 +594,7 @@ async function initialize(dispatch: Function) {
 		}
 
 		PluginAssetsLoader.instance().setLogger(mainLogger);
-		addSetupTask(PluginAssetsLoader.instance().importAssets());
+		await PluginAssetsLoader.instance().importAssets();
 
 		// eslint-disable-next-line require-atomic-updates
 		BaseItem.revisionService_ = RevisionService.instance();
@@ -641,62 +628,58 @@ async function initialize(dispatch: Function) {
 		DecryptionWorker.instance().setLogger(mainLogger);
 		DecryptionWorker.instance().setKvStore(KvStore.instance());
 		DecryptionWorker.instance().setEncryptionService(EncryptionService.instance());
-//		if (Setting.value('encryption.enabled')) {
-//			addSetupTask(loadMasterKeysFromSettings(EncryptionService.instance()));
-//		}
+		await loadMasterKeysFromSettings(EncryptionService.instance());
 		DecryptionWorker.instance().on('resourceMetadataButNotBlobDecrypted', decryptionWorker_resourceMetadataButNotBlobDecrypted);
 
 		// ----------------------------------------------------------------
 		// / E2EE SETUP
 		// ----------------------------------------------------------------
 
-		ShareService.instance().initialize(store, EncryptionService.instance());
+		await ShareService.instance().initialize(store, EncryptionService.instance());
 
-		addSetupTask((async () => {
-			reg.logger().info('Loading folders...');
+		reg.logger().info('Loading folders...');
 
-			await FoldersScreenUtils.refreshFolders();
+		await FoldersScreenUtils.refreshFolders();
 
-			const tags = await Tag.allWithNotes();
+		const tags = await Tag.allWithNotes();
 
+		dispatch({
+			type: 'TAG_UPDATE_ALL',
+			items: tags,
+		});
+
+		// const masterKeys = await MasterKey.all();
+
+		// dispatch({
+		// 	type: 'MASTERKEY_UPDATE_ALL',
+		// 	items: masterKeys,
+		// });
+
+		const folderId = Setting.value('activeFolderId');
+		let folder = await Folder.load(folderId);
+
+		if (!folder) folder = await Folder.defaultFolder();
+
+		dispatch({
+			type: 'FOLDER_SET_COLLAPSED_ALL',
+			ids: Setting.value('collapsedFolderIds'),
+		});
+
+		const notesParent = parseNotesParent(Setting.value('notesParent'), Setting.value('activeFolderId'));
+
+		if (notesParent && notesParent.type === 'SmartFilter') {
+			dispatch(DEFAULT_ROUTE);
+		} else if (!folder) {
+			dispatch(DEFAULT_ROUTE);
+		} else {
 			dispatch({
-				type: 'TAG_UPDATE_ALL',
-				items: tags,
+				type: 'NAV_GO',
+				routeName: 'Notes',
+				folderId: folder.id,
 			});
+		}
 
-			// const masterKeys = await MasterKey.all();
-
-			// dispatch({
-			// 	type: 'MASTERKEY_UPDATE_ALL',
-			// 	items: masterKeys,
-			// });
-
-			const folderId = Setting.value('activeFolderId');
-			let folder = await Folder.load(folderId);
-
-			if (!folder) folder = await Folder.defaultFolder();
-
-			dispatch({
-				type: 'FOLDER_SET_COLLAPSED_ALL',
-				ids: Setting.value('collapsedFolderIds'),
-			});
-
-			const notesParent = parseNotesParent(Setting.value('notesParent'), Setting.value('activeFolderId'));
-
-			if (notesParent && notesParent.type === 'SmartFilter') {
-				dispatch(DEFAULT_ROUTE);
-			} else if (!folder) {
-				dispatch(DEFAULT_ROUTE);
-			} else {
-				dispatch({
-					type: 'NAV_GO',
-					routeName: 'Notes',
-					folderId: folder.id,
-				});
-			}
-		})());
-
-		addSetupTask(clearSharedFilesCache());
+		await clearSharedFilesCache();
 	} catch (error) {
 		alert(`Initialization error: ${error.message}`);
 		reg.logger().error('Initialization error:', error);
@@ -723,23 +706,20 @@ async function initialize(dispatch: Function) {
 	SearchEngine.instance().setLogger(reg.logger());
 	SearchEngine.instance().scheduleSyncTables();
 
-	addSetupTask(MigrationService.instance().run());
+	await MigrationService.instance().run();
 
 	// When the app starts we want the full sync to
 	// start almost immediately to get the latest data.
 	// doWifiConnectionCheck set to true so initial sync
 	// doesn't happen on mobile data
 	// eslint-disable-next-line promise/prefer-await-to-then -- Old code before rule was applied
-	void (async () => {
-		await setupPromise;
-
-		await reg.scheduleSync(100, null, true);
+	void reg.scheduleSync(100, null, true).then(() => {
 		// Wait for the first sync before updating the notifications, since synchronisation
 		// might change the notifications.
 		void AlarmService.updateAllNotifications();
 
 		void DecryptionWorker.instance().scheduleStart();
-	})();
+	});
 
 	await WelcomeUtils.install(Setting.value('locale'), dispatch);
 
@@ -773,7 +753,7 @@ async function initialize(dispatch: Function) {
 	// call will throw an error, alerting us of the issue. Otherwise it will
 	// just print some messages in the console.
 	// ----------------------------------------------------------------------------
-	if (Setting.value('env') === 'dev' && 1 < 0) {
+	if (Setting.value('env') === 'dev') {
 		await runRsaIntegrationTests();
 		await runOnDeviceFsDriverTests();
 	}
