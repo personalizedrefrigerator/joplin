@@ -112,6 +112,15 @@ const EncryptionConfigScreen = (props: Props) => {
 			}
 		};
 
+		const isEnabled = masterKeyEnabled(mk);
+		const toggleEnabledButton = (
+			<Button
+				onPress={() => setMasterKeyEnabled(mk.id, !masterKeyEnabled(mk))}
+				title={isEnabled ? _('Disable') : _('Enable')}
+			/>
+		);
+		const isDefaultMasterKey = props.activeMasterKeyId === mk.id;
+
 		return (
 			<View key={mk.id}>
 				<Text style={styles.titleText}>{_('Master Key %s', mk.id.substr(0, 6))}</Text>
@@ -119,10 +128,7 @@ const EncryptionConfigScreen = (props: Props) => {
 				<View style={{ flexDirection: 'row', alignItems: 'center' }}>
 					<Text style={{ flex: 0, fontSize: theme.fontSize, marginRight: 10, color: theme.color }}>{_('Password:')}</Text>
 					{renderPasswordInput(mk.id)}
-					<Button
-						onPress={() => setMasterKeyEnabled(mk.id, !masterKeyEnabled(mk))}
-						title={masterKeyEnabled(mk) ? _('Disable') : _('Enable')}
-					/>
+					{!isDefaultMasterKey || !isEnabled ? toggleEnabledButton : null}
 				</View>
 			</View>
 		);
