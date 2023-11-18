@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Platform, Linking, View, Switch, ScrollView, Text, TouchableOpacity, Alert, PermissionsAndroid, Dimensions, AccessibilityInfo } from 'react-native';
-import Setting, { AppType, SettingMetadataSection } from '@joplin/lib/models/Setting';
+import Setting, { AppType, SettingMetadataSection, SyncStartupOperation } from '@joplin/lib/models/Setting';
 import NavService from '@joplin/lib/services/NavService';
 import SearchEngine from '@joplin/lib/services/searchengine/SearchEngine';
 import checkPermissions from '../../../utils/checkPermissions';
@@ -29,6 +29,7 @@ import SettingComponent from './SettingComponent';
 import ExportDebugReportButton, { exportDebugReportTitle } from './NoteExportSection/ExportDebugReportButton';
 import SectionSelector from './SectionSelector';
 import { TextInput } from 'react-native-paper';
+const RNExitApp = require('react-native-exit-app').default;
 
 interface ConfigScreenState {
 	settings: any;
@@ -595,6 +596,52 @@ class ConfigScreenComponent extends BaseScreenComponent<ConfigScreenProps, Confi
 		return false;
 	};
 
+	public handleButtonClick = async (settingId: string) => {
+		const confirm = (message: string) => {
+			return new Promise<boolean>(resolve => {
+				Alert.alert(
+					'WARNING',
+					message,
+					[
+						{ text: 'YES', onPress: () => resolve(true) },
+						{ text: 'NO', onPress: () => resolve(false) },
+					],
+				);
+			});
+		};
+
+		const alert = (message: string) => {
+			return new Promise<void>(resolve => {
+				Alert.alert(
+					_('Notice'),
+					message,
+					[
+						{ text: _('Ok'), onPress: () => resolve() },
+					],
+				);
+			});
+		};
+
+		const restart = async () => {
+			await alert('The app will now restart. Please re-open it to continue.');
+			RNExitApp.exitApp();
+		};
+
+		if (settingId === 'sync.clearLocalSyncStateButton') {
+			if (!(await confirm('This cannot be undone. Do you want to continue?'))) return;
+			Setting.setValue('sync.startupOperation', SyncStartupOperation.ClearLocalSyncState);
+			await Setting.saveAll();
+			await restart();
+		} else if (settingId === 'sync.clearLocalDataButton') {
+			if (!(await confirm('This cannot be undone. Do you want to continue?'))) return;
+			Setting.setValue('sync.startupOperation', SyncStartupOperation.ClearLocalData);
+			await Setting.saveAll();
+			await restart();
+		} else {
+			throw new Error(`Unhandled key: ${settingId}`);
+		}
+	};
+
 	public settingToComponent(key: string, value: any) {
 		const updateSettingValue = async (key: string, value: any) => {
 			const handled = await this.handleSetting(key, value);
@@ -608,6 +655,7 @@ class ConfigScreenComponent extends BaseScreenComponent<ConfigScreenProps, Confi
 				value={value}
 				themeId={this.props.themeId}
 				updateSettingValue={updateSettingValue}
+				handleButtonClick={this.handleButtonClick}
 				styles={this.styles()}
 			/>
 		);

@@ -9,7 +9,10 @@ import Slider from '@react-native-community/slider';
 import SettingsToggle from './SettingsToggle';
 import FileSystemPathSelector from './FileSystemPathSelector';
 import shim from '@joplin/lib/shim';
+import SettingsButton from './SettingsButton';
 const { themeStyle } = require('../../global-style.js');
+
+export type HandleButtonClickCallback = (settingId: string)=> void;
 
 interface Props {
 	settingId: string;
@@ -20,6 +23,7 @@ interface Props {
 	styles: ConfigScreenStyles;
 	themeId: number;
 
+	handleButtonClick: HandleButtonClickCallback;
 	updateSettingValue: UpdateSettingValueCallback;
 }
 
@@ -145,7 +149,13 @@ const SettingComponent: React.FunctionComponent<Props> = props => {
 			</View>
 		);
 	} else if (md.type === Setting.TYPE_BUTTON) {
-		// TODO: Not yet supported
+		return (
+			<SettingsButton
+				styles={props.styles}
+				title={md.label?.() ?? 'Unlabeled'}
+				clickHandler={() => props.handleButtonClick(props.settingId)}
+			/>
+		);
 	} else if (Setting.value('env') === 'dev') {
 		throw new Error(`Unsupported setting type: ${md.type}`);
 	}

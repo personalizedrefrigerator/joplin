@@ -122,6 +122,7 @@ import { ReactNode } from 'react';
 import { parseShareCache } from '@joplin/lib/services/share/reducer';
 import autodetectTheme, { onSystemColorSchemeChange } from './utils/autodetectTheme';
 import runOnDeviceFsDriverTests from './utils/fs-driver/runOnDeviceTests';
+import handleSyncStartupOperation from '@joplin/lib/services/synchronizer/utils/handleSyncStartupOperation';
 
 type SideMenuPosition = 'left' | 'right';
 
@@ -553,6 +554,7 @@ async function initialize(dispatch: Function) {
 
 		await loadKeychainServiceAndSettings(KeychainServiceDriverMobile);
 		await migrateMasterPassword();
+		await handleSyncStartupOperation();
 
 		if (!Setting.value('clientId')) Setting.setValue('clientId', uuid.create());
 		reg.logger().info(`Client ID: ${Setting.value('clientId')}`);
