@@ -2677,7 +2677,7 @@ class Setting extends BaseModel {
 			'encryption': 'icon-encryption',
 			'server': 'far fa-hand-scissors',
 			'keymap': 'fa fa-keyboard',
-			'joplinCloud': 'fa fa-cloud',
+			'joplinCloud': 'joplin joplin-cloud',
 			'tools': 'fa fa-toolbox',
 			'export': 'fa fa-file-export',
 			'moreInfo': 'fa fa-info-circle',

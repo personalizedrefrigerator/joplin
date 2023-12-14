@@ -1,4 +1,5 @@
 import { TextStyle, ViewStyle, StyleSheet } from 'react-native';
+import { IconStyle } from '../../Icon/Icon';
 const { themeStyle } = require('../../global-style.js');
 
 type SidebarButtonStyle = ViewStyle & { height: number };
@@ -27,11 +28,11 @@ export interface ConfigScreenStyleSheet {
 	switchSettingControl: TextStyle;
 
 	sidebarButton: SidebarButtonStyle;
-	sidebarIcon: TextStyle;
 	selectedSidebarButton: SidebarButtonStyle;
 	sidebarButtonMainText: TextStyle;
 	sidebarSelectedButtonText: TextStyle;
 	sidebarButtonDescriptionText: TextStyle;
+	sidebarIcon: IconStyle;
 
 	settingControl: TextStyle;
 }
@@ -188,11 +189,11 @@ const configScreenStyles = (themeId: number): ConfigScreenStyles => {
 
 		sidebarButtonMainText: sidebarButtonMainText,
 		sidebarIcon: {
-			...sidebarButtonMainText,
-			textAlign: 'center',
-			fontSize: 18,
-			width: sidebarButtonHeight * 0.8,
+			size: 23.8,
 			opacity: fadedOpacity,
+			width: sidebarButtonHeight * 0.8,
+			color: theme.color,
+			align: 'center',
 		},
 		sidebarSelectedButtonText: {
 			...sidebarButtonMainText,

@@ -5,7 +5,7 @@ import { FunctionComponent, useEffect, useMemo, useState } from 'react';
 import { ConfigScreenStyles } from './configScreenStyles';
 import { FlatList, Text, Pressable, View, ViewStyle } from 'react-native';
 import { settingsSections } from '@joplin/lib/components/shared/config/config-shared';
-import Icon from '../../Icon';
+import Icon from '../../Icon/Icon';
 
 interface Props {
 	styles: ConfigScreenStyles;
