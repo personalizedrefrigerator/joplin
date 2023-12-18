@@ -91,6 +91,7 @@ export default function Sidebar(props: Props) {
 
 	function renderButton(section: any) {
 		const selected = props.selection === section.name;
+		const iconClassNames = Setting.sectionNameToIcon(section.name, AppType.Desktop);
 		return (
 			<StyledListItem
 				key={section.name}
@@ -100,9 +101,10 @@ export default function Sidebar(props: Props) {
 				isSubSection={Setting.isSubSection(section.name)}
 				selected={selected}
 				onClick={() => { props.onSelectionChange({ section: section }); }}
+				className={'config-screen-sidebar-section'}
 			>
 				<StyledListItemIcon
-					className={Setting.sectionNameToIcon(section.name, AppType.Desktop)}
+					className={`${iconClassNames} icon`}
 				/>
 				<StyledListItemLabel>
 					{Setting.sectionNameToLabel(section.name)}
