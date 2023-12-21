@@ -175,7 +175,7 @@ export default class NoteTextViewerComponent extends React.Component<Props, any>
 	// ----------------------------------------------------------------
 
 	public render() {
-		const viewerStyle = { border: 'none', ...this.props.viewerStyle };
+		const viewerStyle = { border: 'none', backgroundColor: 'white', ...this.props.viewerStyle };
 		return <iframe className="noteTextViewer" ref={this.webviewRef_} style={viewerStyle} src="gui/note-viewer/index.html"></iframe>;
 	}
 }
