@@ -216,6 +216,10 @@ export default class CodeMirror5Emulation extends BaseCodeMirror5Emulation {
 		return super.getSearchCursor(query, pos || { line: 0, ch: 0 });
 	}
 
+	public override setCursor(line: number|DocumentPosition, column: number) {
+		return super.setCursor(line, column);
+	}
+
 	public lineAtHeight(height: number, _mode?: 'local') {
 		const lineInfo = this.editor.lineBlockAtHeight(height);
 

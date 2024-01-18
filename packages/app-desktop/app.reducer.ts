@@ -5,6 +5,7 @@ import iterateItems from './gui/ResizableLayout/utils/iterateItems';
 import { LayoutItem } from './gui/ResizableLayout/utils/types';
 import validateLayout from './gui/ResizableLayout/utils/validateLayout';
 import Logger from '@joplin/utils/Logger';
+import { EditorCursorLocation } from './gui/NoteEditor/utils/types';
 
 const logger = Logger.create('app.reducer');
 
@@ -30,7 +31,8 @@ export interface AppState extends State {
 	noteVisiblePanes: string[];
 	windowContentSize: any;
 	watchedNoteFiles: string[];
-	lastEditorScrollPercents: any;
+	lastEditorScrollPercents: Record<string, number>;
+	lastEditorCursorLocations: Record<string, EditorCursorLocation>;
 	devToolsVisible: boolean;
 	visibleDialogs: any; // empty object if no dialog is visible. Otherwise contains the list of visible dialogs.
 	focusedField: string;
@@ -57,6 +59,7 @@ export function createAppDefaultState(windowContentSize: any, resourceEditWatche
 		windowContentSize, // bridge().windowContentSize(),
 		watchedNoteFiles: [],
 		lastEditorScrollPercents: {},
+		lastEditorCursorLocations: {},
 		devToolsVisible: false,
 		visibleDialogs: {}, // empty object if no dialog is visible. Otherwise contains the list of visible dialogs.
 		focusedField: null,
@@ -242,6 +245,16 @@ export default function(state: AppState, action: any) {
 				newPercents[action.noteId] = action.percent;
 				newState.lastEditorScrollPercents = newPercents;
 			}
+			break;
+
+		case 'EDITOR_CURSOR_LOCATION_SET':
+			newState = {
+				...state,
+				lastEditorCursorLocations: {
+					...state.lastEditorCursorLocations,
+					[action.noteId]: { column: action.location.column, line: action.location.line },
+				},
+			};
 			break;
 
 		case 'NOTE_DEVTOOLS_TOGGLE':

@@ -14,7 +14,7 @@ import useFormNote, { OnLoadEvent } from './utils/useFormNote';
 import useEffectiveNoteId from './utils/useEffectiveNoteId';
 import useFolder from './utils/useFolder';
 import styles_ from './styles';
-import { NoteEditorProps, FormNote, ScrollOptions, ScrollOptionTypes, OnChangeEvent, NoteBodyEditorProps, AllAssetsOptions, NoteBodyEditorRef } from './utils/types';
+import { NoteEditorProps, FormNote, ScrollOptions, ScrollOptionTypes, OnChangeEvent, NoteBodyEditorProps, AllAssetsOptions, NoteBodyEditorRef, EditorCursorLocation } from './utils/types';
 import ResourceEditWatcher from '@joplin/lib/services/ResourceEditWatcher/index';
 import CommandService from '@joplin/lib/services/CommandService';
 import ToolbarButton from '../ToolbarButton/ToolbarButton';
@@ -207,9 +207,12 @@ function NoteEditor(props: NoteEditorProps) {
 	}, [props.isProvisional, formNote.id]);
 
 	const previousNoteId = usePrevious(formNote.id);
+	const previousEncrypted = usePrevious(formNote.encryption_applied);
 
 	useEffect(() => {
-		if (formNote.id === previousNoteId) return;
+		const isSameNote = formNote.id === previousNoteId;
+		const decryptionJustFinished = previousEncrypted && !formNote.encryption_applied;
+		if (isSameNote && !decryptionJustFinished) return;
 
 		if (editorRef.current) {
 			editorRef.current.resetScroll();
@@ -218,11 +221,14 @@ function NoteEditor(props: NoteEditorProps) {
 		setScrollWhenReady({
 			type: props.selectedNoteHash ? ScrollOptionTypes.Hash : ScrollOptionTypes.Percent,
 			value: props.selectedNoteHash ? props.selectedNoteHash : props.lastEditorScrollPercents[formNote.id] || 0,
+			cursor: props.lastEditorCursorLocations[formNote.id],
 		});
 
-		void ResourceEditWatcher.instance().stopWatchingAll();
+		if (!isSameNote) {
+			void ResourceEditWatcher.instance().stopWatchingAll();
+		}
 		// eslint-disable-next-line @seiyab/react-hooks/exhaustive-deps -- Old code before rule was applied
-	}, [formNote.id, previousNoteId]);
+	}, [formNote.id, formNote.encryption_applied, previousNoteId, previousEncrypted]);
 
 	const onFieldChange = useCallback((field: string, value: any, changeId = 0) => {
 		if (!isMountedRef.current) {
@@ -405,6 +411,21 @@ function NoteEditor(props: NoteEditorProps) {
 		});
 	}, [props.dispatch]);
 
+	const lastCursorLocationRef = useRef<EditorCursorLocation>(undefined);
+	const onCursorMove = useCallback(({ location }: { location: EditorCursorLocation }) => {
+		if (formNote.encryption_applied) return;
+
+		const lastLocation = lastCursorLocationRef.current;
+		if (lastLocation?.line !== location.line || lastLocation?.column !== location.column) {
+			props.dispatch({
+				type: 'EDITOR_CURSOR_LOCATION_SET',
+				noteId: formNoteRef.current.id,
+				location: location,
+			});
+			lastCursorLocationRef.current = { ...location };
+		}
+	}, [props.dispatch, formNote]);
+
 	function renderNoNotes(rootStyle: any) {
 		const emptyDivStyle = {
 			backgroundColor: 'black',
@@ -455,6 +476,7 @@ function NoteEditor(props: NoteEditorProps) {
 		dispatch: props.dispatch,
 		noteToolbar: null,
 		onScroll: onScroll,
+		onCursorMove: onCursorMove,
 		setLocalSearchResultCount: setLocalSearchResultCount,
 		searchMarkers: searchMarkers,
 		visiblePanes: props.noteVisiblePanes || ['editor', 'viewer'],
@@ -685,6 +707,7 @@ const mapStateToProps = (state: AppState) => {
 		notesParentType: state.notesParentType,
 		selectedNoteTags: state.selectedNoteTags,
 		lastEditorScrollPercents: state.lastEditorScrollPercents,
+		lastEditorCursorLocations: state.lastEditorCursorLocations,
 		selectedNoteHash: state.selectedNoteHash,
 		searches: state.searches,
 		selectedSearchId: state.selectedSearchId,

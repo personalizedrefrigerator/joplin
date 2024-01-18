@@ -17,6 +17,11 @@ export interface ToolbarButtonInfos {
 	[key: string]: ToolbarButtonInfo;
 }
 
+export interface EditorCursorLocation {
+	line: number;
+	column: number;
+}
+
 export interface NoteEditorProps {
 	noteId: string;
 	themeId: number;
@@ -33,6 +38,7 @@ export interface NoteEditorProps {
 	notesParentType: string;
 	selectedNoteTags: any[];
 	lastEditorScrollPercents: any;
+	lastEditorCursorLocations: Record<string, EditorCursorLocation>;
 	selectedNoteHash: string;
 	searches: any[];
 	selectedSearchId: string;
@@ -81,6 +87,7 @@ export interface NoteBodyEditorProps {
 	onWillChange(event: any): void;
 	onMessage(event: any): void;
 	onScroll(event: { percent: number }): void;
+	onCursorMove(event: { location: EditorCursorLocation }): void;
 	markupToHtml: (markupLanguage: MarkupLanguage, markup: string, options: MarkupToHtmlOptions)=> Promise<RenderResult>;
 	// eslint-disable-next-line @typescript-eslint/ban-types -- Old code before rule was applied
 	htmlToMarkdown: Function;
@@ -188,6 +195,7 @@ export enum ScrollOptionTypes {
 export interface ScrollOptions {
 	type: ScrollOptionTypes;
 	value: any;
+	cursor?: EditorCursorLocation;
 }
 
 export interface OnChangeEvent {

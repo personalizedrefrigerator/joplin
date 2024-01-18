@@ -161,6 +161,10 @@ const CodeMirror = (props: NoteBodyEditorProps, ref: ForwardedRef<NoteBodyEditor
 				resetScroll();
 			},
 			scrollTo: (options: ScrollOptions) => {
+				if (options.cursor) {
+					editorRef.current.setCursor(options.cursor.line, options.cursor.column);
+				}
+
 				if (options.type === ScrollOptionTypes.Hash) {
 					if (!webviewRef.current) return;
 					webviewRef.current.send('scrollToHash', options.value as string);
@@ -168,7 +172,6 @@ const CodeMirror = (props: NoteBodyEditorProps, ref: ForwardedRef<NoteBodyEditor
 					const percent = options.value as number;
 					setEditorPercentScroll(percent);
 					setViewerPercentScroll(percent);
-
 				} else {
 					throw new Error(`Unsupported scroll options: ${options.type}`);
 				}
@@ -349,8 +352,18 @@ const CodeMirror = (props: NoteBodyEditorProps, ref: ForwardedRef<NoteBodyEditor
 			codeMirror_change(event.value);
 		} else if (event.kind === EditorEventType.SelectionRangeChange) {
 			setSelectionRange({ from: event.from, to: event.to });
+
+			// We use .getCursor to get the line and column of the cursor (as opposed to
+			// event.from and event.to, which are just numbers).
+			const cursorRowCol = editorRef.current.getCursor();
+			props.onCursorMove({
+				location: {
+					line: cursorRowCol.line,
+					column: cursorRowCol.ch,
+				},
+			});
 		}
-	}, [editor_scroll, codeMirror_change]);
+	}, [editor_scroll, codeMirror_change, props.onCursorMove]);
 
 	const editorSettings = useMemo((): EditorSettings => {
 		const isHTMLNote = props.contentMarkupLanguage === MarkupToHtml.MARKUP_LANGUAGE_HTML;

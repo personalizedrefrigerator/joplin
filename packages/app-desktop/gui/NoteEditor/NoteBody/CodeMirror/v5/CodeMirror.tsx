@@ -56,6 +56,8 @@ function CodeMirror(props: NoteBodyEditorProps, ref: ForwardedRef<NoteBodyEditor
 	// eslint-disable-next-line @typescript-eslint/ban-types -- Old code before rule was applied
 	const props_onChangeRef = useRef<Function>(null);
 	props_onChangeRef.current = props.onChange;
+	const props_onCursorMoveRef = useRef<typeof props.onCursorMove>(null);
+	props_onCursorMoveRef.current = props.onCursorMove;
 
 	const rootSize = useElementSize(rootRef);
 
@@ -66,6 +68,9 @@ function CodeMirror(props: NoteBodyEditorProps, ref: ForwardedRef<NoteBodyEditor
 
 	const codeMirror_change = useCallback((newBody: string) => {
 		props_onChangeRef.current({ changeId: null, content: newBody });
+
+		const cursorLocation = editorRef.current.getCursor('anchor');
+		props_onCursorMoveRef.current({ location: { line: cursorLocation.line, column: cursorLocation.ch } });
 	}, []);
 
 	const wrapSelectionWithStrings = useCallback((string1: string, string2 = '', defaultText = '') => {
@@ -108,6 +113,10 @@ function CodeMirror(props: NoteBodyEditorProps, ref: ForwardedRef<NoteBodyEditor
 				resetScroll();
 			},
 			scrollTo: (options: ScrollOptions) => {
+				if (options.cursor) {
+					editorRef.current.setCursor(options.cursor.line, options.cursor.column);
+				}
+
 				if (options.type === ScrollOptionTypes.Hash) {
 					if (!webviewRef.current) return;
 					webviewRef.current.send('scrollToHash', options.value as string);
