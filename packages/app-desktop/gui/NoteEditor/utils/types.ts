@@ -123,7 +123,6 @@ export interface NoteBodyEditorProps {
 	setLocalSearch(search: string): void;
 	setShowLocalSearch(show: boolean): void;
 	useLocalSearch: boolean;
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	searchMarkers: SearchMarkers;
 	visiblePanes: string[];
 	keyboardMode: string;
