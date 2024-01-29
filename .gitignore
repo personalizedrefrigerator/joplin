@@ -508,6 +508,7 @@ packages/app-mobile/components/screens/ConfigScreen/SectionSelector.js
 packages/app-mobile/components/screens/ConfigScreen/SettingComponent.js
 packages/app-mobile/components/screens/ConfigScreen/SettingItem.js
 packages/app-mobile/components/screens/ConfigScreen/SettingsButton.js
+packages/app-mobile/components/screens/ConfigScreen/SettingsSlider.js
 packages/app-mobile/components/screens/ConfigScreen/SettingsToggle.js
 packages/app-mobile/components/screens/ConfigScreen/configScreenStyles.js
 packages/app-mobile/components/screens/ConfigScreen/types.js
