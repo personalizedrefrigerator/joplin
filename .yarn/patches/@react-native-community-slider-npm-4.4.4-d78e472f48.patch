@@ -47,10 +47,25 @@ index 0000000000000000000000000000000000000000..cfc0427f99df9a9ec8314c21bd9aed59
 +	}
 +}
 diff --git a/android/src/main/java/com/reactnativecommunity/slider/ReactSlider.java b/android/src/main/java/com/reactnativecommunity/slider/ReactSlider.java
-index 7bf2bdeab76beceb27a5b8fd45645f3344473b68..1c2b770c38e1e426396df5ba74da4c723e7c1da9 100644
+index 7bf2bdeab76beceb27a5b8fd45645f3344473b68..d2f7615741af3890455695a89762902e9edac45a 100644
 --- a/android/src/main/java/com/reactnativecommunity/slider/ReactSlider.java
 +++ b/android/src/main/java/com/reactnativecommunity/slider/ReactSlider.java
-@@ -246,6 +246,10 @@ public class ReactSlider extends AppCompatSeekBar {
+@@ -225,12 +225,14 @@ public class ReactSlider extends AppCompatSeekBar {
+   private void updateLowerLimit() {
+     double limit = Math.max(mRealLowerLimit, mMinValue);
+     mLowerLimit = (int) Math.round((limit - mMinValue) / (mMaxValue - mMinValue) * getTotalSteps());
++    LogHelper.logMessage(getContext(), "-Update lowerLimit to %d (limit=%f, min=%f, max=%f, steps=%d)", mLowerLimit, limit, mMinValue, mMaxValue, getTotalSteps());
+   }
+ 
+   /** Update limit based on props limit, max and min */
+   private void updateUpperLimit() {
+     double limit = Math.min(mRealUpperLimit, mMaxValue);
+     mUpperLimit = (int) Math.round((limit - mMinValue) / (mMaxValue - mMinValue) * getTotalSteps());
++    LogHelper.logMessage(getContext(), "-Update upperLimit to %d (limit=%f, min=%f, max=%f, steps=%d)", mUpperLimit, limit, mMinValue, mMaxValue, getTotalSteps());
+   }
+ 
+   /** Update value only (optimization in case only value is set). */
+@@ -246,6 +248,10 @@ public class ReactSlider extends AppCompatSeekBar {
      return mStep > 0 ? mStep : mStepCalculated;
    }
  
@@ -62,7 +77,7 @@ index 7bf2bdeab76beceb27a5b8fd45645f3344473b68..1c2b770c38e1e426396df5ba74da4c72
      BitmapDrawable bitmapDrawable = null;
      ExecutorService executorService = Executors.newSingleThreadExecutor();
 diff --git a/android/src/oldarch/java/com/reactnativecommunity/slider/ReactSliderManager.java b/android/src/oldarch/java/com/reactnativecommunity/slider/ReactSliderManager.java
-index 3ff5930f85a3cd92c2549925f41058abb188a57e..b4aa6af7aa9ef013034c4b45e57aad0703dfebc9 100644
+index 3ff5930f85a3cd92c2549925f41058abb188a57e..ea21e2d9c8d02f02d0dd5632a4e3ae4180440673 100644
 --- a/android/src/oldarch/java/com/reactnativecommunity/slider/ReactSliderManager.java
 +++ b/android/src/oldarch/java/com/reactnativecommunity/slider/ReactSliderManager.java
 @@ -26,24 +26,49 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> {
@@ -92,7 +107,7 @@ index 3ff5930f85a3cd92c2549925f41058abb188a57e..b4aa6af7aa9ef013034c4b45e57aad07
 +                mChangeListenerDepth ++;
 +                try {
 +                  // Prevent stackoverflows
-+                  if (mChangeListenerDepth > 15) {
++                  if (mChangeListenerDepth > 20) {
 +                    LogHelper.logMessage(seekbar.getContext(), "== onProgressChanged: Maximum recursion exceeded ==");
 +                    return;
 +                  }
