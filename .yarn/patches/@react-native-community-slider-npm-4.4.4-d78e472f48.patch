@@ -1,0 +1,109 @@
+diff --git a/android/src/main/java/com/reactnativecommunity/slider/LogHelper.java b/android/src/main/java/com/reactnativecommunity/slider/LogHelper.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..68b35f9520d95907edd4c972796d377004a49887
+--- /dev/null
++++ b/android/src/main/java/com/reactnativecommunity/slider/LogHelper.java
+@@ -0,0 +1,34 @@
++/**
++ * Copyright (c) Facebook, Inc. and its affiliates.
++ *
++ * <p>This source code is licensed under the MIT license found in the LICENSE file in the root
++ * directory of this source tree.
++ */
++package com.reactnativecommunity.slider;
++
++import java.io.BufferedWriter;
++import java.io.FileOutputStream;
++import java.io.OutputStreamWriter;
++import java.io.PrintWriter;
++
++public class LogHelper {
++	private static @Nullable LogHelper instance = null;
++
++	public PrintWriter mWriter;
++
++	public LogHelper(Context context) {
++		String logFileName = "log.txt";
++		FileOutputStream os = context.openFileOutput(logFileName, Context.MODE_PRIVATE|Context.MODE_APPEND);
++		mWriter = new PrintWriter(new OutputStreamWriter(os));
++	}
++	
++	public static void logMessage(Context context, String message, Object... formatArgs) {
++		if (LogHelper.instance == null) {
++			LogHelper.instance = new LogHelper(context);
++		}
++
++		LogHelper.instance.mWriter.printf(message, formatArgs);
++		LogHelper.instance.mWriter.println();
++		LogHelper.instance.mWriter.flush();
++	}
++}
+diff --git a/android/src/oldarch/java/com/reactnativecommunity/slider/ReactSliderManager.java b/android/src/oldarch/java/com/reactnativecommunity/slider/ReactSliderManager.java
+index 3ff5930f85a3cd92c2549925f41058abb188a57e..1ab60a2c8b5e15d6c7e97d8a950a1a9b6163f161 100644
+--- a/android/src/oldarch/java/com/reactnativecommunity/slider/ReactSliderManager.java
++++ b/android/src/oldarch/java/com/reactnativecommunity/slider/ReactSliderManager.java
+@@ -26,24 +26,48 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> {
+ 
+   private static final SeekBar.OnSeekBarChangeListener ON_CHANGE_LISTENER =
+           new SeekBar.OnSeekBarChangeListener() {
++            private int mChangeListenerDepth = 0;
++
+             @Override
+             public void onProgressChanged(SeekBar seekbar, int progress, boolean fromUser) {
+-              ReactSlider slider = (ReactSlider)seekbar;
+-
+-              if(progress < slider.getLowerLimit()) {
+-                progress = slider.getLowerLimit();
+-                seekbar.setProgress(progress);
+-              } else if(progress > slider.getUpperLimit()) {
+-                progress = slider.getUpperLimit();
+-                seekbar.setProgress(progress);
+-              }
+-
+-              ReactContext reactContext = (ReactContext) seekbar.getContext();
+-              if(fromUser) {
+-                reactContext.getNativeModule(UIManagerModule.class).getEventDispatcher().dispatchEvent(
+-                  new ReactSliderEvent(
+-                    seekbar.getId(),
+-                    slider.toRealProgress(progress), true));
++                mChangeListenerDepth ++;
++                try {
++                  // Prevent stackoverflows
++                  if (mChangeListenerDepth > 15) {
++                    LogHelper.logMessage(seekbar.getContext(), "== onProgressChanged: Maximum recursion exceeded ==");
++                    return;
++                  }
++
++                  ReactSlider slider = (ReactSlider)seekbar;
++
++                  LogHelper.logMessage(
++                    seekbar.getContext(),
++                    "== onProgressChanged: { recursionDepth: %d, progress: %d, lowerLimit: %d, upperLimit: %d } ==",
++                    mChangeListenerDepth,
++                    progress,
++                    slider.getLowerLimit(),
++                    slider.getUpperLimit()
++                  );
++
++                  if(progress < slider.getLowerLimit() + 1) {
++                    LogHelper.logMessage(seekbar.getContext(), "  progress < lowerLimit");
++                    progress = slider.getLowerLimit();
++                    seekbar.setProgress(progress);
++                  } else if(progress > slider.getUpperLimit()) {
++                    LogHelper.logMessage(seekbar.getContext(), "  progress > upperLimit");
++                    progress = slider.getUpperLimit();
++                    seekbar.setProgress(progress);
++                  }
++
++                  ReactContext reactContext = (ReactContext) seekbar.getContext();
++                  if(fromUser) {
++                    reactContext.getNativeModule(UIManagerModule.class).getEventDispatcher().dispatchEvent(
++                      new ReactSliderEvent(
++                        seekbar.getId(),
++                        slider.toRealProgress(progress), true));
++                  }
++              } finally {
++                mChangeListenerDepth --;
+               }
+             }
+ 
