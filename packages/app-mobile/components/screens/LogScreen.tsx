@@ -15,6 +15,7 @@ import Share from 'react-native-share';
 import { writeTextToCacheFile } from '../../utils/ShareUtils';
 import shim from '@joplin/lib/shim';
 import { TextInput } from 'react-native-paper';
+import Clipboard from '@react-native-community/clipboard';
 
 const logger = Logger.create('LogScreen');
 
@@ -51,7 +52,13 @@ class LogScreenComponent extends BaseScreenComponent<Props, State> {
 			{
 				title: _('Share'),
 				onPress: () => {
-					void this.onSharePress();
+					void this.onSharePress(false);
+				},
+			},
+			{
+				title: _('Copy to clipboard'),
+				onPress: () => {
+					void this.onSharePress(true);
 				},
 			},
 		];
@@ -85,22 +92,26 @@ class LogScreenComponent extends BaseScreenComponent<Props, State> {
 		return await reg.logger().lastEntries(limit, { levels, filter: this.state.filter });
 	}
 
-	private async onSharePress() {
+	private async onSharePress(toClipboard: boolean) {
 		const allEntries: any[] = await this.getLogEntries(this.state.showErrorsOnly);
 		const logData = allEntries.map(entry => this.formatLogEntry(entry)).join('\n');
 
 		let fileToShare;
 		try {
-			// Using a .txt file extension causes a "No valid provider found from URL" error
-			// and blank share sheet on iOS for larger log files (around 200 KiB).
-			fileToShare = await writeTextToCacheFile(logData, 'mobile-log.log');
+			if (toClipboard) {
+				Clipboard.setString(logData);
+			} else {
+				// Using a .txt file extension causes a "No valid provider found from URL" error
+				// and blank share sheet on iOS for larger log files (around 200 KiB).
+				fileToShare = await writeTextToCacheFile(logData, 'mobile-log.log');
 
-			await Share.open({
-				type: 'text/plain',
-				filename: 'log.txt',
-				url: `file://${fileToShare}`,
-				failOnCancel: false,
-			});
+				await Share.open({
+					type: 'text/plain',
+					filename: 'log.txt',
+					url: `file://${fileToShare}`,
+					failOnCancel: false,
+				});
+			}
 		} catch (e) {
 			logger.error('Unable to share log data:', e);
 

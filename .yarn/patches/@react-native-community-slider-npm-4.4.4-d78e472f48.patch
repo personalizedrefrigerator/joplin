@@ -1,9 +1,9 @@
 diff --git a/android/src/main/java/com/reactnativecommunity/slider/LogHelper.java b/android/src/main/java/com/reactnativecommunity/slider/LogHelper.java
 new file mode 100644
-index 0000000000000000000000000000000000000000..68b35f9520d95907edd4c972796d377004a49887
+index 0000000000000000000000000000000000000000..cfc0427f99df9a9ec8314c21bd9aed59cad3df3c
 --- /dev/null
 +++ b/android/src/main/java/com/reactnativecommunity/slider/LogHelper.java
-@@ -0,0 +1,34 @@
+@@ -0,0 +1,42 @@
 +/**
 + * Copyright (c) Facebook, Inc. and its affiliates.
 + *
@@ -13,21 +13,29 @@ index 0000000000000000000000000000000000000000..68b35f9520d95907edd4c972796d3770
 +package com.reactnativecommunity.slider;
 +
 +import java.io.BufferedWriter;
++import java.io.FileNotFoundException;
 +import java.io.FileOutputStream;
 +import java.io.OutputStreamWriter;
 +import java.io.PrintWriter;
++import android.content.Context;
++
 +
 +public class LogHelper {
-+	private static @Nullable LogHelper instance = null;
++	private static LogHelper instance = null;
 +
 +	public PrintWriter mWriter;
 +
 +	public LogHelper(Context context) {
 +		String logFileName = "log.txt";
-+		FileOutputStream os = context.openFileOutput(logFileName, Context.MODE_PRIVATE|Context.MODE_APPEND);
-+		mWriter = new PrintWriter(new OutputStreamWriter(os));
++		try {
++			FileOutputStream os = context.openFileOutput(logFileName, Context.MODE_PRIVATE|Context.MODE_APPEND);
++			mWriter = new PrintWriter(new OutputStreamWriter(os));
++		} catch(FileNotFoundException ex) {
++			// Transform from a must-be-caught exception to an ordinary exception
++			throw new RuntimeException(ex);
++		}
 +	}
-+	
++
 +	public static void logMessage(Context context, String message, Object... formatArgs) {
 +		if (LogHelper.instance == null) {
 +			LogHelper.instance = new LogHelper(context);
@@ -38,11 +46,26 @@ index 0000000000000000000000000000000000000000..68b35f9520d95907edd4c972796d3770
 +		LogHelper.instance.mWriter.flush();
 +	}
 +}
+diff --git a/android/src/main/java/com/reactnativecommunity/slider/ReactSlider.java b/android/src/main/java/com/reactnativecommunity/slider/ReactSlider.java
+index 7bf2bdeab76beceb27a5b8fd45645f3344473b68..1c2b770c38e1e426396df5ba74da4c723e7c1da9 100644
+--- a/android/src/main/java/com/reactnativecommunity/slider/ReactSlider.java
++++ b/android/src/main/java/com/reactnativecommunity/slider/ReactSlider.java
+@@ -246,6 +246,10 @@ public class ReactSlider extends AppCompatSeekBar {
+     return mStep > 0 ? mStep : mStepCalculated;
+   }
+ 
++  public String getDebugInfo() {
++    return String.format("totalSteps: %d, mStep=%f, stepValue=%f, minValue=%f, maxValue=%f, lowerLimit=%d, upperLimit=%d, realLowerLimit=%f, realUpperLimit=%f", getTotalSteps(), mStep, getStepValue(), mMinValue, mMaxValue, mLowerLimit, mUpperLimit, mRealLowerLimit, mRealUpperLimit);
++  }
++
+   private BitmapDrawable getBitmapDrawable(final String uri) {
+     BitmapDrawable bitmapDrawable = null;
+     ExecutorService executorService = Executors.newSingleThreadExecutor();
 diff --git a/android/src/oldarch/java/com/reactnativecommunity/slider/ReactSliderManager.java b/android/src/oldarch/java/com/reactnativecommunity/slider/ReactSliderManager.java
-index 3ff5930f85a3cd92c2549925f41058abb188a57e..1ab60a2c8b5e15d6c7e97d8a950a1a9b6163f161 100644
+index 3ff5930f85a3cd92c2549925f41058abb188a57e..b4aa6af7aa9ef013034c4b45e57aad0703dfebc9 100644
 --- a/android/src/oldarch/java/com/reactnativecommunity/slider/ReactSliderManager.java
 +++ b/android/src/oldarch/java/com/reactnativecommunity/slider/ReactSliderManager.java
-@@ -26,24 +26,48 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> {
+@@ -26,24 +26,49 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> {
  
    private static final SeekBar.OnSeekBarChangeListener ON_CHANGE_LISTENER =
            new SeekBar.OnSeekBarChangeListener() {
@@ -84,13 +107,14 @@ index 3ff5930f85a3cd92c2549925f41058abb188a57e..1ab60a2c8b5e15d6c7e97d8a950a1a9b
 +                    slider.getLowerLimit(),
 +                    slider.getUpperLimit()
 +                  );
++                  LogHelper.logMessage(seekbar.getContext(), "   Seekbar props: %s", slider.getDebugInfo());
 +
-+                  if(progress < slider.getLowerLimit() + 1) {
-+                    LogHelper.logMessage(seekbar.getContext(), "  progress < lowerLimit");
++                  if(progress < slider.getLowerLimit()) {
++                    LogHelper.logMessage(seekbar.getContext(), "  progress(%d) < lowerLimit(%d)", progress, slider.getLowerLimit());
 +                    progress = slider.getLowerLimit();
 +                    seekbar.setProgress(progress);
 +                  } else if(progress > slider.getUpperLimit()) {
-+                    LogHelper.logMessage(seekbar.getContext(), "  progress > upperLimit");
++                    LogHelper.logMessage(seekbar.getContext(), "  progress(%d) > upperLimit(%d)", progress, slider.getLowerLimit());
 +                    progress = slider.getUpperLimit();
 +                    seekbar.setProgress(progress);
 +                  }
@@ -106,4 +130,42 @@ index 3ff5930f85a3cd92c2549925f41058abb188a57e..1ab60a2c8b5e15d6c7e97d8a950a1a9b
 +                mChangeListenerDepth --;
                }
              }
+ 
+@@ -135,31 +160,37 @@ public class ReactSliderManager extends SimpleViewManager<ReactSlider> {
+ 
+   @ReactProp(name = "value", defaultFloat = 0f)
+   public void setValue(ReactSlider view, float value) {
++    LogHelper.logMessage(view.getContext(), "prop: setValue to %f", value);
+     ReactSliderManagerImpl.setValue(view, value);
+   }
+ 
+   @ReactProp(name = "minimumValue", defaultFloat = 0f)
+   public void setMinimumValue(ReactSlider view, float value) {
++    LogHelper.logMessage(view.getContext(), "prop: setMinimumValue to %f", value);
+     ReactSliderManagerImpl.setMinimumValue(view, value);
+   }
+ 
+   @ReactProp(name = "maximumValue", defaultFloat = 1f)
+   public void setMaximumValue(ReactSlider view, float value) {
++    LogHelper.logMessage(view.getContext(), "prop: setMaximumValue to %f", value);
+     ReactSliderManagerImpl.setMaximumValue(view, value);
+   }
+ 
+   @ReactProp(name = "lowerLimit")
+   public void setLowerLimit(ReactSlider view, float value) {
++    LogHelper.logMessage(view.getContext(), "prop: setLowerLimit to %f", value);
+     ReactSliderManagerImpl.setLowerLimit(view, value);
+   }
+ 
+   @ReactProp(name = "upperLimit")
+   public void setUpperLimit(ReactSlider view, float value) {
++    LogHelper.logMessage(view.getContext(), "prop: setUpperLimit to %f", value);
+     ReactSliderManagerImpl.setUpperLimit(view, value);
+   }
+ 
+   @ReactProp(name = "step", defaultFloat = 0f)
+   public void setStep(ReactSlider view, float value) {
++    LogHelper.logMessage(view.getContext(), "prop: setStep to %f", value);
+     ReactSliderManagerImpl.setStep(view, value);
+   }
  

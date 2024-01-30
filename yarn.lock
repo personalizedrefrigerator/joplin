@@ -9369,8 +9369,8 @@ __metadata:
 
 "@react-native-community/slider@patch:@react-native-community/slider@npm%3A4.4.4#./.yarn/patches/@react-native-community-slider-npm-4.4.4-d78e472f48.patch::locator=root%40workspace%3A.":
   version: 4.4.4
-  resolution: "@react-native-community/slider@patch:@react-native-community/slider@npm%3A4.4.4#./.yarn/patches/@react-native-community-slider-npm-4.4.4-d78e472f48.patch::version=4.4.4&hash=2321fd&locator=root%40workspace%3A."
-  checksum: 397c15df3fd26d2edad669431f79e076de6e70ca39461c16d0822d68f8025cbe11b685cdd864bafa061015efcbd5af3f371253c74c9afb5b0f93cb30ad5273b3
+  resolution: "@react-native-community/slider@patch:@react-native-community/slider@npm%3A4.4.4#./.yarn/patches/@react-native-community-slider-npm-4.4.4-d78e472f48.patch::version=4.4.4&hash=b25bc1&locator=root%40workspace%3A."
+  checksum: ef14fa0718e9717e1886fffaf5bb44e9b342f67f3323a01a30d963926b53208495bea343a6bb3bcf2a62bdb7f874b8929d68f721800bb162cc82d75d39ade337
   languageName: node
   linkType: hard
 

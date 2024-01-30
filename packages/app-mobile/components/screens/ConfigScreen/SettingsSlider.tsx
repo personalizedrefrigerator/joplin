@@ -6,6 +6,11 @@ import { Button, Card, Switch, Text } from 'react-native-paper';
 import { ConfigScreenStyleSheet } from './configScreenStyles';
 import Slider from '@react-native-community/slider';
 import { useMemo, useState } from 'react';
+import { join } from 'path';
+import { DocumentDirectoryPath } from 'react-native-fs';
+import Logger from '@joplin/utils/Logger';
+import shim from '@joplin/lib/shim';
+import NavService from '@joplin/lib/services/NavService';
 
 interface Props {
 	metadata: SettingItem;
@@ -14,6 +19,21 @@ interface Props {
 	onChange: (value: number)=> void;
 }
 
+const sliderLogger = Logger.create('SliderLogger');
+
+const pullSliderLogs = async () => {
+	const logFilePath = join(DocumentDirectoryPath, 'log.txt');
+	sliderLogger.info('');
+	sliderLogger.info('-----------------------');
+	sliderLogger.info(await shim.fsDriver().readFile(logFilePath));
+	sliderLogger.info('-----------------------');
+
+	// Clear the file
+	await shim.fsDriver().writeFile(logFilePath, '', 'utf8');
+
+	void NavService.go('Log', { defaultFilter: 'SliderLogger' });
+};
+
 const SettingsSlider: React.FC<Props> = props => {
 	const md = props.metadata;
 	const unitLabel = md.unitLabel ? md.unitLabel(props.value) : props.value;
@@ -21,13 +41,13 @@ const SettingsSlider: React.FC<Props> = props => {
 	const maximum = 'maximum' in md ? md.maximum : 10;
 
 	const [showSlider, setShowSlider] = useState(false);
-	const [includeStyle, setIncludeStyle] = useState(false);
-	const [includeStep, setIncludeStep] = useState(false);
-	const [includeMin, setIncludeMin] = useState(false);
-	const [includeMax, setIncludeMax] = useState(false);
-	const [includeInitialValue, setIncludeInitialValue] = useState(false);
-	const [includeOnChange, setIncludeOnChange] = useState(false);
-	const [hardcodeWidth, setHardcodeWidth] = useState(true);
+	const [includeStyle, setIncludeStyle] = useState(true);
+	const [includeStep, setIncludeStep] = useState(true);
+	const [includeMin, setIncludeMin] = useState(true);
+	const [includeMax, setIncludeMax] = useState(true);
+	const [includeInitialValue, setIncludeInitialValue] = useState(true);
+	const [includeOnChange, setIncludeOnChange] = useState(true);
+	const [hardcodeWidth, setHardcodeWidth] = useState(false);
 
 	const style = useMemo(() => ({
 		flex: hardcodeWidth ? 0 : 1, ...(hardcodeWidth ? { width: 100 } : null),
@@ -70,6 +90,7 @@ const SettingsSlider: React.FC<Props> = props => {
 					{renderSwitch('Apply an initial value', includeInitialValue, setIncludeInitialValue)}
 				</Card.Content>
 				<Card.Actions>
+					<Button onPress={pullSliderLogs}>Pull logs</Button>
 					<Button onPress={() => setSliderKey(sliderKey + 1)}>Reload slider</Button>
 				</Card.Actions>
 			</Card>
