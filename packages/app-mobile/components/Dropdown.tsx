@@ -1,5 +1,5 @@
 const React = require('react');
-import { TouchableOpacity, TouchableWithoutFeedback, Dimensions, Text, Modal, View, LayoutRectangle, ViewStyle, TextStyle, FlatList } from 'react-native';
+import { TouchableOpacity, TouchableWithoutFeedback, Dimensions, Text, Modal, View, LayoutRectangle, ViewStyle, TextStyle, FlatList, ScrollView } from 'react-native';
 import { Component } from 'react';
 import { _ } from '@joplin/lib/locale';
 
@@ -20,6 +20,7 @@ interface DropdownProps {
 	itemStyle?: TextStyle;
 	disabled?: boolean;
 
+	allowHorizontalScroll?: boolean;
 	labelTransform?: 'trim';
 	items: DropdownListItem[];
 
@@ -73,6 +74,8 @@ class Dropdown extends Component<DropdownProps, DropdownState> {
 			top: listTop,
 			left: this.state.headerSize.x,
 			position: 'absolute',
+			borderWidth: 1,
+			borderColor: '#ccc',
 		};
 
 		const backgroundCloseButtonStyle: ViewStyle = {
@@ -83,8 +86,7 @@ class Dropdown extends Component<DropdownProps, DropdownState> {
 			width: windowWidth,
 		};
 
-		const itemListStyle = { ...(this.props.itemListStyle ? this.props.itemListStyle : {}), borderWidth: 1,
-			borderColor: '#ccc' };
+		const itemListStyle = { ...(this.props.itemListStyle ? this.props.itemListStyle : {}) };
 
 		const itemWrapperStyle = { ...(this.props.itemWrapperStyle ? this.props.itemWrapperStyle : {}), flex: 1,
 			justifyContent: 'center',
@@ -133,7 +135,7 @@ class Dropdown extends Component<DropdownProps, DropdownState> {
 						if (this.props.onValueChange) this.props.onValueChange(item.value);
 					}}
 				>
-					<Text ellipsizeMode="tail" numberOfLines={1} style={itemStyle} key={key}>
+					<Text ellipsizeMode='tail' numberOfLines={1} style={itemStyle} key={key}>
 						{item.label}
 					</Text>
 				</TouchableOpacity>
@@ -155,6 +157,25 @@ class Dropdown extends Component<DropdownProps, DropdownState> {
 				}}>{_('Close dropdown')}</Text>
 			</TouchableWithoutFeedback>
 		);
+
+		const listComponent = (
+			<FlatList
+				style={itemListStyle}
+				data={this.props.items}
+				renderItem={itemRenderer}
+				getItemLayout={(_data, index) => ({
+					length: itemHeight,
+					offset: itemHeight * index,
+					index,
+				})}
+			/>
+		);
+
+		const wrappedListComponent = this.props.allowHorizontalScroll ? (
+			<ScrollView horizontal={true}>
+				{listComponent}
+			</ScrollView>
+		) : listComponent;
 
 		return (
 			<View style={{ flex: 1, flexDirection: 'column' }}>
@@ -193,17 +214,9 @@ class Dropdown extends Component<DropdownProps, DropdownState> {
 
 					<View
 						accessibilityRole='menu'
-						style={wrapperStyle}>
-						<FlatList
-							style={itemListStyle}
-							data={this.props.items}
-							renderItem={itemRenderer}
-							getItemLayout={(_data, index) => ({
-								length: itemHeight,
-								offset: itemHeight * index,
-								index,
-							})}
-						/>
+						style={wrapperStyle}
+					>
+						{wrappedListComponent}
 					</View>
 
 					{screenReaderCloseMenuButton}

@@ -65,6 +65,7 @@ const FolderPicker: FunctionComponent<FolderPickerProps> = ({
 			items={titlePickerItems(!!mustSelect)}
 			disabled={disabled}
 			labelTransform="trim"
+			allowHorizontalScroll={true}
 			selectedValue={selectedFolderId || ''}
 			itemListStyle={{
 				backgroundColor: theme.backgroundColor,
