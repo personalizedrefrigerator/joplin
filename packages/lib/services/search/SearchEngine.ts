@@ -777,18 +777,37 @@ export default class SearchEngine {
 				if (!queryHasFilters) {
 					const toSearch = parsedQuery.allTerms.map(t => t.value).join(' ');
 
-					let itemRows = await this.db().selectAll<ProcessResultsRow>(`
-						SELECT
-							id,
-							title,
-							user_updated_time,
-							offsets(items_fts) AS offsets,
-							matchinfo(items_fts, 'pcnalx') AS matchinfo,
-							item_id,
-							item_type
-						FROM items_fts
-						WHERE title MATCH ? OR body MATCH ?
-					`, [toSearch, toSearch]);
+					let itemRows: ProcessResultsRow[] = [];
+
+					const findItemRows = (searchTitle: boolean) => {
+						const whereClause = `
+							WHERE ${searchTitle ? 'title MATCH ? OR ' : ''} body MATCH ?
+						`;
+						const queryParams = searchTitle ? [toSearch, toSearch] : [toSearch];
+
+						return this.db().selectAll<ProcessResultsRow>(`
+							SELECT
+								id,
+								title,
+								user_updated_time,
+								offsets(items_fts) AS offsets,
+								matchinfo(items_fts, 'pcnalx') AS matchinfo,
+								item_id,
+								item_type
+							FROM items_fts
+							${whereClause}
+						`, queryParams);
+					};
+
+					// Android <= 25 doesn't support the following syntax:
+					//    WHERE title MATCH ? OR body MATCH ?
+					// So that we can continue supporting these devices, we search only
+					// the body field in these cases.
+					try {
+						itemRows = await findItemRows(true);
+					} catch (_error) {
+						itemRows = await findItemRows(false);
+					}
 
 					const resourcesToNotes = await NoteResource.associatedResourceNotes(itemRows.map(r => r.item_id), { fields: ['note_id', 'parent_id'] });
 
