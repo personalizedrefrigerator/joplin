@@ -805,7 +805,11 @@ export default class SearchEngine {
 					// the body field in these cases.
 					try {
 						itemRows = await findItemRows(true);
-					} catch (_error) {
+					} catch (error) {
+						if (shim.mobilePlatform() !== 'android') {
+							this.logger().error('Resource search failed: ', error);
+						}
+
 						itemRows = await findItemRows(false);
 					}
 
