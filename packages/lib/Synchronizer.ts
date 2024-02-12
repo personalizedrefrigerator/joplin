@@ -285,6 +285,8 @@ export default class Synchronizer {
 		this.logSyncOperation('cancelling', null, null, '');
 		this.cancelling_ = true;
 
+		this.api().cancelOngoingRequests();
+
 		return new Promise((resolve) => {
 			const iid = shim.setInterval(() => {
 				if (this.state() === 'idle') {

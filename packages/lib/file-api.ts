@@ -70,33 +70,6 @@ function requestCanBeRepeated(error: any) {
 	return true;
 }
 
-// eslint-disable-next-line @typescript-eslint/ban-types -- Old code before rule was applied
-async function tryAndRepeat(fn: Function, count: number) {
-	let retryCount = 0;
-
-	// Don't use internal fetch retry mechanim since we
-	// are already retrying here.
-	const shimFetchMaxRetryPrevious = shim.fetchMaxRetrySet(0);
-	const defer = () => {
-		shim.fetchMaxRetrySet(shimFetchMaxRetryPrevious);
-	};
-
-	while (true) {
-		try {
-			const result = await fn();
-			defer();
-			return result;
-		} catch (error) {
-			if (retryCount >= count || !requestCanBeRepeated(error)) {
-				defer();
-				throw error;
-			}
-			retryCount++;
-			await time.sleep(1 + retryCount * 3);
-		}
-	}
-}
-
 class FileApi {
 
 	private baseDir_: any;
@@ -107,6 +80,7 @@ class FileApi {
 	public requestRepeatCount_: number = null; // For testing purpose only - normally this value should come from the driver
 	private remoteDateOffset_ = 0;
 	private remoteDateNextCheckTime_ = 0;
+	private cancelCounter_ = 0; // Increment to cancel any ongoing operations
 	private remoteDateMutex_ = new Mutex();
 	private initialized_ = false;
 
@@ -215,6 +189,10 @@ class FileApi {
 		return this.driver_.lastRequests ? this.driver_.lastRequests() : [];
 	}
 
+	public cancelOngoingRequests() {
+		this.cancelCounter_ ++;
+	}
+
 	public clearLastRequests() {
 		if (this.driver_.clearLastRequests) this.driver_.clearLastRequests();
 	}
@@ -265,6 +243,35 @@ class FileApi {
 		return output.join('/');
 	}
 
+	private async tryAndRepeat(fn: ()=> Promise<any>, count: number) {
+		let retryCount = 0;
+
+		// Don't use internal fetch retry mechanim since we
+		// are already retrying here.
+		const shimFetchMaxRetryPrevious = shim.fetchMaxRetrySet(0);
+		const defer = () => {
+			shim.fetchMaxRetrySet(shimFetchMaxRetryPrevious);
+		};
+
+		const originalCancelCounter = this.cancelCounter_;
+
+		while (true) {
+			try {
+				const result = await fn();
+				defer();
+				return result;
+			} catch (error) {
+				const cancelling = this.cancelCounter_ > originalCancelCounter;
+				if (cancelling || retryCount >= count || !requestCanBeRepeated(error)) {
+					defer();
+					throw error;
+				}
+				retryCount++;
+				await time.sleep(1 + retryCount * 3);
+			}
+		}
+	}
+
 	// DRIVER MUST RETURN PATHS RELATIVE TO `path`
 	// eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
 	public async list(path = '', options: any = null): Promise<PaginatedList> {
@@ -276,7 +283,7 @@ class FileApi {
 
 		logger.debug(`list ${this.baseDir()}`);
 
-		const result: PaginatedList = await tryAndRepeat(() => this.driver_.list(this.fullPath(path), options), this.requestRepeatCount());
+		const result: PaginatedList = await this.tryAndRepeat(() => this.driver_.list(this.fullPath(path), options), this.requestRepeatCount());
 
 		if (!options.includeHidden) {
 			const temp = [];
@@ -300,19 +307,19 @@ class FileApi {
 	// Deprectated
 	public setTimestamp(path: string, timestampMs: number) {
 		logger.debug(`setTimestamp ${this.fullPath(path)}`);
-		return tryAndRepeat(() => this.driver_.setTimestamp(this.fullPath(path), timestampMs), this.requestRepeatCount());
+		return this.tryAndRepeat(() => this.driver_.setTimestamp(this.fullPath(path), timestampMs), this.requestRepeatCount());
 		// return this.driver_.setTimestamp(this.fullPath(path), timestampMs);
 	}
 
 	public mkdir(path: string) {
 		logger.debug(`mkdir ${this.fullPath(path)}`);
-		return tryAndRepeat(() => this.driver_.mkdir(this.fullPath(path)), this.requestRepeatCount());
+		return this.tryAndRepeat(() => this.driver_.mkdir(this.fullPath(path)), this.requestRepeatCount());
 	}
 
 	public async stat(path: string) {
 		logger.debug(`stat ${this.fullPath(path)}`);
 
-		const output = await tryAndRepeat(() => this.driver_.stat(this.fullPath(path)), this.requestRepeatCount());
+		const output = await this.tryAndRepeat(() => this.driver_.stat(this.fullPath(path)), this.requestRepeatCount());
 
 		if (!output) return output;
 		output.path = path;
@@ -324,7 +331,7 @@ class FileApi {
 		if (!options) options = {};
 		if (!options.encoding) options.encoding = 'utf8';
 		logger.debug(`get ${this.fullPath(path)}`);
-		return tryAndRepeat(() => this.driver_.get(this.fullPath(path), options), this.requestRepeatCount());
+		return this.tryAndRepeat(() => this.driver_.get(this.fullPath(path), options), this.requestRepeatCount());
 	}
 
 	public async put(path: string, content: any, options: any = null) {
@@ -334,52 +341,52 @@ class FileApi {
 			if (!(await this.fsDriver().exists(options.path))) throw new JoplinError(`File not found: ${options.path}`, 'fileNotFound');
 		}
 
-		return tryAndRepeat(() => this.driver_.put(this.fullPath(path), content, options), this.requestRepeatCount());
+		return this.tryAndRepeat(() => this.driver_.put(this.fullPath(path), content, options), this.requestRepeatCount());
 	}
 
 	public async multiPut(items: MultiPutItem[], options: any = null) {
 		if (!this.driver().supportsMultiPut) throw new Error('Multi PUT not supported');
-		return tryAndRepeat(() => this.driver_.multiPut(items, options), this.requestRepeatCount());
+		return this.tryAndRepeat(() => this.driver_.multiPut(items, options), this.requestRepeatCount());
 	}
 
 	public delete(path: string) {
 		logger.debug(`delete ${this.fullPath(path)}`);
-		return tryAndRepeat(() => this.driver_.delete(this.fullPath(path)), this.requestRepeatCount());
+		return this.tryAndRepeat(() => this.driver_.delete(this.fullPath(path)), this.requestRepeatCount());
 	}
 
 	// Deprectated
 	public move(oldPath: string, newPath: string) {
 		logger.debug(`move ${this.fullPath(oldPath)} => ${this.fullPath(newPath)}`);
-		return tryAndRepeat(() => this.driver_.move(this.fullPath(oldPath), this.fullPath(newPath)), this.requestRepeatCount());
+		return this.tryAndRepeat(() => this.driver_.move(this.fullPath(oldPath), this.fullPath(newPath)), this.requestRepeatCount());
 	}
 
 	// Deprectated
 	public format() {
-		return tryAndRepeat(() => this.driver_.format(), this.requestRepeatCount());
+		return this.tryAndRepeat(() => this.driver_.format(), this.requestRepeatCount());
 	}
 
 	public clearRoot() {
-		return tryAndRepeat(() => this.driver_.clearRoot(this.baseDir()), this.requestRepeatCount());
+		return this.tryAndRepeat(() => this.driver_.clearRoot(this.baseDir()), this.requestRepeatCount());
 	}
 
 	public delta(path: string, options: any = null): Promise<PaginatedList> {
 		logger.debug(`delta ${this.fullPath(path)}`);
-		return tryAndRepeat(() => this.driver_.delta(this.fullPath(path), options), this.requestRepeatCount());
+		return this.tryAndRepeat(() => this.driver_.delta(this.fullPath(path), options), this.requestRepeatCount());
 	}
 
 	public async acquireLock(type: LockType, clientType: LockClientType, clientId: string): Promise<Lock> {
 		if (!this.supportsLocks) throw new Error('Sync target does not support built-in locks');
-		return tryAndRepeat(() => this.driver_.acquireLock(type, clientType, clientId), this.requestRepeatCount());
+		return this.tryAndRepeat(() => this.driver_.acquireLock(type, clientType, clientId), this.requestRepeatCount());
 	}
 
 	public async releaseLock(type: LockType, clientType: LockClientType, clientId: string) {
 		if (!this.supportsLocks) throw new Error('Sync target does not support built-in locks');
-		return tryAndRepeat(() => this.driver_.releaseLock(type, clientType, clientId), this.requestRepeatCount());
+		return this.tryAndRepeat(() => this.driver_.releaseLock(type, clientType, clientId), this.requestRepeatCount());
 	}
 
 	public async listLocks() {
 		if (!this.supportsLocks) throw new Error('Sync target does not support built-in locks');
-		return tryAndRepeat(() => this.driver_.listLocks(), this.requestRepeatCount());
+		return this.tryAndRepeat(() => this.driver_.listLocks(), this.requestRepeatCount());
 	}
 
 }
