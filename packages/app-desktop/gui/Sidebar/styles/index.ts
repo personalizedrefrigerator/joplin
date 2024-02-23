@@ -57,8 +57,9 @@ export const StyledListItem = styled.div`
 	/*text-transform: ${(props: any) => props.isSpecialItem ? 'uppercase' : 'none'};*/
 	transition: 0.1s;
 
-	&:hover {
+	&:hover, &:focus-visible {
 		background-color: ${(props: any) => props.theme.backgroundColorHover2};
+		outline: none;
 	}
 `;
 

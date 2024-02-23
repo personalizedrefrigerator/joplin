@@ -32,8 +32,9 @@ export const StyledListItem = styled.a`
 	opacity: ${(props: any) => props.selected ? 1 : 0.8};
 	padding-left: ${(props: any) => props.isSubSection ? '35' : props.theme.mainPadding}px;
 
-	&:hover {
+	&:hover, &:focus-visible {
 		background-color: ${(props: any) => props.theme.backgroundColorHover2};
+		outline: none;
 	}
 `;
 

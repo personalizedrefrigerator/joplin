@@ -80,8 +80,9 @@ const StyledButtonPrimary = styled(StyledButtonBase)`
 	background-color: ${(props: any) => props.theme.backgroundColor5};
 
 	${(props: any) => props.disabled} {
-		&:hover {
+		&:hover, &:focus-visible {
 			background-color: ${(props: any) => props.theme.backgroundColorHover5};
+			outline: none;
 		}
 
 		&:active {
@@ -103,8 +104,9 @@ const StyledButtonSecondary = styled(StyledButtonBase)`
 	background-color: ${(props: any) => props.theme.backgroundColor4};
 
 	${(props: any) => props.disabled} {
-		&:hover {
+		&:hover, &:focus-visible {
 			background-color: ${(props: any) => props.theme.backgroundColorHover4};
+			outline: none;
 		}
 
 		&:active {
@@ -125,7 +127,7 @@ const StyledButtonTertiary = styled(StyledButtonBase)`
 	border: 1px solid ${(props: any) => props.theme.color3};
 	background-color: ${(props: any) => props.theme.backgroundColor3};
 
-	&:hover {
+	&:hover, &:focus-visible {
 		background-color: ${(props: any) => props.theme.backgroundColorHoverDim3};
 	}
 
@@ -162,7 +164,7 @@ const StyledButtonSidebarSecondary = styled(StyledButtonBase)`
 	border-color: ${(props: any) => props.theme.color2};
 	color: ${(props: any) => props.theme.color2};
 
-	&:hover {
+	&:hover, &:focus-visible {
 		color: ${(props: any) => props.theme.colorHover2};
 		border-color: ${(props: any) => props.theme.colorHover2};
 		background: none;

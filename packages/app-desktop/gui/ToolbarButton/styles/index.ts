@@ -24,8 +24,9 @@ export const StyledRoot = styled.a<RootProps>`
 	padding-left: 5px;
 	padding-right: 5px;
 
-	&:hover {
+	&:hover, &:focus-visible {
 		background-color: ${(props: RootProps) => props.disabled ? 'none' : props.theme.backgroundColorHover3};
+		outline: none;
 	}
 `;
 

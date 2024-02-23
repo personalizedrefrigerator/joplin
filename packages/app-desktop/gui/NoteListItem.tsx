@@ -35,8 +35,9 @@ const StyledRoot = styled.div`
 		left: 16px;
 	}
 
-	&:hover {
+	&:hover, &:focus-visible {
 		background-color: ${(props: any) => props.theme.backgroundColorHover3};
+		outline: none;
 	}
 `;
 

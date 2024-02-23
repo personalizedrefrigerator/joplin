@@ -433,6 +433,7 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: any) => {
 			.tox .tox-tbtn--enabled,
 			.tox .tox-tbtn--enabled:hover,
 			.tox .tox-menu button:hover,
+			.tox .tox-menu button:focus-visible,
 			.tox .tox-split-button {
 				background-color: ${theme.selectedColor};
 			}
@@ -447,7 +448,9 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: any) => {
 			}
 			
 			.tox .tox-tbtn:hover,
-			.tox .tox-menu button:hover > svg {
+			.tox .tox-tbtn:focus-visible,
+			.tox .tox-menu button:hover > svg,
+			.tox .tox-menu button:focus-visible > svg {
 				color: ${theme.colorHover3} !important;
 				fill: ${theme.colorHover3} !important;
 				background-color: ${theme.backgroundColorHover3}
