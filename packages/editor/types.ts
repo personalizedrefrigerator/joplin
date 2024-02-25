@@ -64,10 +64,11 @@ export enum EditorCommandType {
 
 // Because the editor package can run in a WebView, plugin content scripts
 // need to be provided as text, rather than as file paths.
-export interface PluginData {
+export interface ContentScriptData {
 	pluginId: string;
 	contentScriptId: string;
 	contentScriptJs: ()=> Promise<string>;
+	loadCssAsset: (name: string)=> Promise<string>;
 	postMessageHandler: (message: any)=> any;
 }
 
@@ -94,12 +95,12 @@ export interface EditorControl {
 
 	setSearchState(state: SearchState): void;
 
-	setPlugins(plugins: PluginData[]): Promise<void>;
+	setContentScripts(plugins: ContentScriptData[]): Promise<void>;
 }
 
 export enum EditorLanguageType {
-	Markdown,
-	Html,
+	Markdown = 'markdown',
+	Html = 'html',
 }
 
 export enum EditorKeymap {
@@ -108,11 +109,20 @@ export enum EditorKeymap {
 	Emacs = 'emacs',
 }
 
+export interface EditorTheme extends Theme {
+	fontFamily: string;
+	fontSize?: number;
+	fontSizeUnits?: number;
+	isDesktop?: boolean;
+	monospaceFont?: string;
+	contentMaxWidth?: number;
+}
+
 export interface EditorSettings {
 	// EditorSettings objects are deserialized within WebViews, where
 	// [themeStyle(themeId: number)] doesn't work. As such, we need both
 	// a Theme must be provided.
-	themeData: Theme;
+	themeData: EditorTheme;
 
 	// True if the search panel is implemented outside of the editor (e.g. with
 	// React Native).

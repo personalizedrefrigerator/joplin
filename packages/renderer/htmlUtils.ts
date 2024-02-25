@@ -189,9 +189,11 @@ class HtmlUtils {
 			// If true, adds a "jop-noMdConv" class to all the tags.
 			// It can be used afterwards to restore HTML tags in Markdown.
 			addNoMdConvClass: false,
-			allowedFilePrefixes: [],
 			...options,
 		};
+
+		// If options.allowedFilePrefixes is `undefined`, default to [].
+		options.allowedFilePrefixes ??= [];
 
 		const output: string[] = [];
 
@@ -402,6 +404,35 @@ export const extractHtmlBody = (html: string) => {
 	parser.end();
 
 	return bodyFound ? output.join('') : html;
+};
+
+export const htmlDocIsImageOnly = (html: string) => {
+	let imageCount = 0;
+	let nonImageFound = false;
+	let textFound = false;
+
+	const parser = new htmlparser2.Parser({
+
+		onopentag: (name: string) => {
+			if (name === 'img') {
+				imageCount++;
+			} else if (['meta'].includes(name)) {
+				// We allow these tags since they don't print anything
+			} else {
+				nonImageFound = true;
+			}
+		},
+
+		ontext: (text: string) => {
+			if (text.trim()) textFound = true;
+		},
+
+	});
+
+	parser.write(html);
+	parser.end();
+
+	return imageCount === 1 && !nonImageFound && !textFound;
 };
 
 export default new HtmlUtils();

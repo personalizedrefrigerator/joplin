@@ -9,8 +9,6 @@ import { WebView, WebViewMessageEvent } from 'react-native-webview';
 import { WebViewErrorEvent, WebViewEvent, WebViewSource } from 'react-native-webview/lib/WebViewTypes';
 
 import Setting from '@joplin/lib/models/Setting';
-import { themeStyle } from '@joplin/lib/theme';
-import { Theme } from '@joplin/lib/themes/type';
 import shim from '@joplin/lib/shim';
 import { StyleProp, ViewStyle } from 'react-native';
 
@@ -34,8 +32,6 @@ type OnLoadEndCallback = (event: WebViewEvent)=> void;
 type OnFileUpdateCallback = (event: SourceFileUpdateEvent)=> void;
 
 interface Props {
-	themeId: number;
-
 	// A name to be associated with the WebView (e.g. NoteEditor)
 	// This name should be unique.
 	webviewInstanceId: string;
@@ -67,7 +63,6 @@ interface Props {
 }
 
 const ExtendedWebView = (props: Props, ref: Ref<WebViewControl>) => {
-	const theme: Theme = themeStyle(props.themeId);
 	const webviewRef = useRef(null);
 	const [source, setSource] = useState<WebViewSource|undefined>(undefined);
 
@@ -129,10 +124,16 @@ const ExtendedWebView = (props: Props, ref: Ref<WebViewControl>) => {
 	// to avoid various crashes and errors:
 	// https://github.com/react-native-webview/react-native-webview/issues/2920
 	// https://github.com/react-native-webview/react-native-webview/issues/2995
+	//
+	// decelerationRate='normal' is necessary on iOS for a native-like inertial scroll
+	// (the default deaccelerates too quickly).
 	return (
 		<WebView
 			style={{
-				backgroundColor: theme.backgroundColor,
+				// `backgroundColor: transparent` prevents a white fhash on iOS.
+				// It seems that `backgroundColor: theme.backgroundColor` does not
+				// prevent the flash.
+				backgroundColor: 'transparent',
 				...(props.style as any),
 			}}
 			ref={webviewRef}
@@ -146,10 +147,12 @@ const ExtendedWebView = (props: Props, ref: Ref<WebViewControl>) => {
 			mixedContentMode={props.mixedContentMode}
 			allowFileAccess={true}
 			allowFileAccessFromFileURLs={props.allowFileAccessFromJs}
+			webviewDebuggingEnabled={Setting.value('env') === 'dev'}
 			injectedJavaScript={props.injectedJavaScript}
 			onMessage={props.onMessage}
 			onError={props.onError}
 			onLoadEnd={props.onLoadEnd}
+			decelerationRate='normal'
 		/>
 	);
 };

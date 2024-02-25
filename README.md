@@ -26,12 +26,12 @@ For more information about the applications, see the [full Joplin documentation]
 
 Donations to Joplin support the development of the project. Developing quality applications mostly takes time, but there are also some expenses, such as digital certificates to sign the applications, app store fees, hosting, etc. Most of all, your donation will make it possible to keep up the current development standard.
 
-Please see the [donation page](https://github.com/laurent22/joplin/blob/dev/readme/about/donate.md) for information on how to support the development of Joplin.
+Please see the [donation page](https://github.com/laurent22/joplin/blob/dev/readme/donate.md) for information on how to support the development of Joplin.
 
 # Sponsors
 
 <!-- SPONSORS-ORG -->
-<a href="https://seirei.ne.jp"><img title="Serei Network" width="256" src="https://joplinapp.org/images/sponsors/SeireiNetwork.png"/></a> <a href="https://www.hosting.de/nextcloud/?mtm_campaign=managed-nextcloud&amp;mtm_kwd=joplinapp&amp;mtm_source=joplinapp-webseite&amp;mtm_medium=banner"><img title="Hosting.de" width="256" src="https://joplinapp.org/images/sponsors/HostingDe.png"/></a> <a href="https://residence-greece.com/"><img title="Greece Golden Visa" width="256" src="https://joplinapp.org/images/sponsors/ResidenceGreece.jpg"/></a> <a href="https://grundstueckspreise.info/"><img title="SP Software GmbH" width="256" src="https://joplinapp.org/images/sponsors/Grundstueckspreise.png"/></a> <a href="https://tranio.com/spain/"><img title="Property for sale in Spain" width="256" src="https://joplinapp.org/images/sponsors/TranioOverseasProperty.jpg"/></a> <a href="https://citricsheep.com"><img title="Citric Sheep" width="256" src="https://joplinapp.org/images/sponsors/CitricSheep.png"/></a>
+<a href="https://seirei.ne.jp"><img title="Serei Network" width="256" src="https://joplinapp.org/images/sponsors/SeireiNetwork.png"/></a> <a href="https://www.hosting.de/nextcloud/?mtm_campaign=managed-nextcloud&amp;mtm_kwd=joplinapp&amp;mtm_source=joplinapp-webseite&amp;mtm_medium=banner"><img title="Hosting.de" width="256" src="https://joplinapp.org/images/sponsors/HostingDe.png"/></a> <a href="https://grundstueckspreise.info/"><img title="SP Software GmbH" width="256" src="https://joplinapp.org/images/sponsors/Grundstueckspreise.png"/></a> <a href="https://citricsheep.com"><img title="Citric Sheep" width="256" src="https://joplinapp.org/images/sponsors/CitricSheep.png"/></a> <a href="https://sorted.travel/?utm_source=joplinapp"><img title="Sorted Travel" width="256" src="https://joplinapp.org/images/sponsors/SortedTravel.png"/></a> <a href="https://celebian.com"><img title="Celebian" width="256" src="https://joplinapp.org/images/sponsors/Celebian.png"/></a> <a href="https://bestkru.com"><img title="BestKru" width="256" src="https://joplinapp.org/images/sponsors/BestKru.png"/></a>
 <!-- SPONSORS-ORG -->
 
 * * *
