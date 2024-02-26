@@ -1,5 +1,5 @@
 const React = require('react');
-import { TouchableOpacity, TouchableWithoutFeedback, Dimensions, Text, Modal, View, LayoutRectangle, ViewStyle, TextStyle, FlatList } from 'react-native';
+import { TouchableOpacity, TouchableWithoutFeedback, Dimensions, Text, Modal, View, LayoutRectangle, ViewStyle, TextStyle, FlatList, Animated, Easing } from 'react-native';
 import { Component } from 'react';
 import { _ } from '@joplin/lib/locale';
 
@@ -34,6 +34,7 @@ interface DropdownProps {
 interface DropdownState {
 	headerSize: LayoutRectangle;
 	listVisible: boolean;
+	indentAdjust: Animated.Value;
 }
 
 class Dropdown extends Component<DropdownProps, DropdownState> {
@@ -46,6 +47,7 @@ class Dropdown extends Component<DropdownProps, DropdownState> {
 		this.state = {
 			headerSize: { x: 0, y: 0, width: 0, height: 0 },
 			listVisible: false,
+			indentAdjust: new Animated.Value(0),
 		};
 	}
 
@@ -131,7 +133,14 @@ class Dropdown extends Component<DropdownProps, DropdownState> {
 
 		const itemRenderer = ({ item }: { item: DropdownListItem }) => {
 			const key = item.value ? item.value.toString() : '__null'; // The top item ("Move item to notebook...") has a null value.
-			const indentWidth = Math.min((item.depth ?? 0) * 32, dropdownWidth * 2 / 3);
+			const fullIndentSize = (item.depth ?? 0) * 32;
+			const maximumIndentSize = dropdownWidth * 2 / 3;
+			const indentWidth = Math.min(fullIndentSize, maximumIndentSize);
+
+			const marginValue = this.state.indentAdjust.interpolate({
+				inputRange: [0, fullIndentSize],
+				outputRange: [indentWidth, 0],
+			});
 
 			return (
 				<TouchableOpacity
@@ -142,10 +151,29 @@ class Dropdown extends Component<DropdownProps, DropdownState> {
 						closeList();
 						if (this.props.onValueChange) this.props.onValueChange(item.value);
 					}}
+					onLongPress={() => {
+						Animated.timing(this.state.indentAdjust, {
+							toValue: fullIndentSize,
+							easing: Easing.linear,
+							duration: 50,
+							useNativeDriver: false,
+						}).start();
+					}}
+					onPressOut={() => {
+						this.state.indentAdjust.stopAnimation();
+						Animated.timing(this.state.indentAdjust, {
+							toValue: 0,
+							easing: Easing.linear,
+							duration: 20,
+							useNativeDriver: false,
+						}).start();
+					}}
 				>
-					<Text ellipsizeMode="tail" numberOfLines={1} style={{ ...itemStyle, marginStart: indentWidth }} key={key}>
-						{item.label}
-					</Text>
+					<Animated.View style={{ flex: 1, height: itemHeight, marginStart: marginValue }}>
+						<Text ellipsizeMode="tail" numberOfLines={1} style={itemStyle} key={key}>
+							{item.label}
+						</Text>
+					</Animated.View>
 				</TouchableOpacity>
 			);
 		};
