@@ -5,7 +5,7 @@ import Setting from '../../models/Setting';
 import MasterKey from '../../models/MasterKey';
 import BaseItem from '../../models/BaseItem';
 import JoplinError from '../../JoplinError';
-import { getActiveMasterKeyId, setActiveMasterKeyId } from '../synchronizer/syncInfoUtils';
+import { getActiveMasterKeyId, masterKeyById, masterKeyEnabled, setActiveMasterKeyId } from '../synchronizer/syncInfoUtils';
 const { padLeft } = require('../../string-utils.js');
 
 const logger = Logger.create('EncryptionService');
@@ -142,7 +142,11 @@ export default class EncryptionService {
 
 	public loadedMasterKey(id: string) {
 		if (!this.decryptedMasterKeys_[id]) {
-			const error: any = new Error(`Master key is not loaded: ${id}`);
+			const masterKey = masterKeyById(id);
+			const disabled = masterKey && !masterKeyEnabled(masterKey);
+			const message = disabled ? `Master key is disabled and not loaded: ${id}` : `Master key is not loaded: ${id}`;
+
+			const error: any = new Error(message);
 			error.code = 'masterKeyNotLoaded';
 			error.masterKeyId = id;
 			throw error;
