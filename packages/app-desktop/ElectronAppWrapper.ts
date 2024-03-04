@@ -1,4 +1,4 @@
-import Logger from '@joplin/utils/Logger';
+import Logger, { LoggerWrapper } from '@joplin/utils/Logger';
 import { PluginMessage } from './services/plugins/PluginRunner';
 import shim from '@joplin/lib/shim';
 import { isCallbackUrl } from '@joplin/lib/callbackUrlUtils';
@@ -13,6 +13,7 @@ const fs = require('fs-extra');
 import { dialog, ipcMain } from 'electron';
 import { _ } from '@joplin/lib/locale';
 import restartInSafeModeFromMain from './utils/restartInSafeModeFromMain';
+import handleCustomProtocols, { CustomProtocolHandler } from './utils/customProtocols/handleCustomProtocols';
 import { clearTimeout, setTimeout } from 'timers';
 
 interface RendererProcessQuitReply {
@@ -37,6 +38,7 @@ export default class ElectronAppWrapper {
 	private rendererProcessQuitReply_: RendererProcessQuitReply = null;
 	private pluginWindows_: PluginWindows = {};
 	private initialCallbackUrl_: string = null;
+	private customProtocolHandler_: CustomProtocolHandler = null;
 
 	public constructor(electronApp: any, env: string, profilePath: string|null, isDebugMode: boolean, initialCallbackUrl: string) {
 		this.electronApp_ = electronApp;
@@ -438,6 +440,14 @@ export default class ElectronAppWrapper {
 		});
 
 		return false;
+	}
+
+	public initializeCustomProtocolHandler(logger: LoggerWrapper) {
+		this.customProtocolHandler_ ??= handleCustomProtocols(logger);
+	}
+
+	public getCustomProtocolHandler() {
+		return this.customProtocolHandler_;
 	}
 
 	public async start() {

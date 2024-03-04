@@ -471,6 +471,10 @@ packages/app-desktop/utils/7zip/pathToBundled7Zip.js
 packages/app-desktop/utils/checkForUpdatesUtils.test.js
 packages/app-desktop/utils/checkForUpdatesUtils.js
 packages/app-desktop/utils/checkForUpdatesUtilsTestData.js
+packages/app-desktop/utils/customProtocols/constants.js
+packages/app-desktop/utils/customProtocols/handleCustomProtocols.test.js
+packages/app-desktop/utils/customProtocols/handleCustomProtocols.js
+packages/app-desktop/utils/customProtocols/registerCustomProtocols.js
 packages/app-desktop/utils/markupLanguageUtils.js
 packages/app-desktop/utils/restartInSafeModeFromMain.test.js
 packages/app-desktop/utils/restartInSafeModeFromMain.js
@@ -1057,6 +1061,8 @@ packages/lib/utils/joplinCloud.js
 packages/lib/utils/processStartFlags.js
 packages/lib/utils/replaceUnsupportedCharacters.test.js
 packages/lib/utils/replaceUnsupportedCharacters.js
+packages/lib/utils/resolvePathWithinDir.test.js
+packages/lib/utils/resolvePathWithinDir.js
 packages/lib/utils/userFetcher.js
 packages/lib/utils/webDAVUtils.test.js
 packages/lib/utils/webDAVUtils.js

@@ -10,6 +10,7 @@ const FsDriverNode = require('@joplin/lib/fs-driver-node').default;
 const envFromArgs = require('@joplin/lib/envFromArgs');
 const packageInfo = require('./packageInfo.js');
 const { isCallbackUrl } = require('@joplin/lib/callbackUrlUtils');
+const registerCustomProtocols = require('./utils/customProtocols/registerCustomProtocols.js').default;
 const determineBaseAppDirs = require('@joplin/lib/determineBaseAppDirs').default;
 
 // Electron takes the application name from package.json `name` and
@@ -60,6 +61,7 @@ if (pathExistsSync(settingsPath)) {
 }
 
 electronApp.setAsDefaultProtocolClient('joplin');
+void registerCustomProtocols();
 
 const initialCallbackUrl = process.argv.find((arg) => isCallbackUrl(arg));
 
