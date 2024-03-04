@@ -8,7 +8,7 @@ import { LoggerWrapper } from '@joplin/utils/Logger';
 
 export interface CustomProtocolHandler {
 	allowReadAccessToDirectory(path: string): void;
-	allowReadAccessToFile(path: string): { remove(): void };
+	allowReadAccessToFile(...path: string[]): { remove(): void };
 }
 
 
@@ -72,7 +72,6 @@ const handleCustomProtocols = (logger: LoggerWrapper): CustomProtocolHandler => 
 		const targetFile = join(rootDirectory, pathname);
 
 		const asFileUrl = pathToFileURL(targetFile).toString();
-		logger.debug('protocol handler: Fetch file URL', asFileUrl);
 		return net.fetch(asFileUrl);
 	});
 
@@ -84,15 +83,17 @@ const handleCustomProtocols = (logger: LoggerWrapper): CustomProtocolHandler => 
 
 			readableDirectories.push(allowedPath);
 		},
-		allowReadAccessToFile: (path: string) => {
-			const allowedPath = resolve(appBundleDirectory, path);
-			logger.debug('protocol handler: Allow read access to file', allowedPath);
-			readableFiles.add(path);
+		allowReadAccessToFile: (...paths: string[]) => {
+			const resolvedPaths = paths.map(p => resolve(appBundleDirectory, p));
+			for (const path of resolvedPaths) {
+				readableFiles.add(path);
+			}
 
 			return {
 				remove: () => {
-					logger.debug('protocol handler: Remove read access to file', allowedPath);
-					readableFiles.delete(path);
+					for (const path of resolvedPaths) {
+						readableFiles.delete(path);
+					}
 				},
 			};
 		},

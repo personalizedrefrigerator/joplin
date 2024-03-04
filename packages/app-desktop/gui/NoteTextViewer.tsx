@@ -179,15 +179,10 @@ export default class NoteTextViewerComponent extends React.Component<Props, any>
 			const protocolHandler = bridge().electronApp().getCustomProtocolHandler();
 
 			const pluginAssetPaths: string[] = options.pluginAssets.map((asset: any) => asset.path);
-			const assetAccesses = pluginAssetPaths.map(
-				path => protocolHandler.allowReadAccessToFile(path),
-			);
+			const accessControl = protocolHandler.allowReadAccessToFile(...pluginAssetPaths);
 
 			this.removePluginAssetsCallback_ = () => {
-				for (const accessControl of assetAccesses) {
-					accessControl.remove();
-				}
-
+				accessControl.remove();
 				this.removePluginAssetsCallback_ = null;
 			};
 		}
