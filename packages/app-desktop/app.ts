@@ -434,9 +434,9 @@ class Application extends BaseApplication {
 		this.protocolHandler_.allowReadAccessToDirectory(__dirname); // App bundle directory
 		this.protocolHandler_.allowReadAccessToDirectory(Setting.value('cacheDir'));
 		this.protocolHandler_.allowReadAccessToDirectory(Setting.value('resourceDir'));
-		// this.protocolHandler_.allowReadAccessTo(Setting.value('tempDir'));
-		// For now, this doesn't seem necessary:
+		// For now, these don't seem necessary:
 		//  this.protocolHandler_.allowReadAccessTo(Setting.value('profileDir'));
+		//  this.protocolHandler_.allowReadAccessTo(Setting.value('tempDir'));
 		// If it is needed, note that they decrease the security of the protcol
 		// handler, and, as such, it may make sense to also limit permissions of
 		// allowed pages with a Content Security Policy.
