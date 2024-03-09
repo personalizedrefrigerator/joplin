@@ -5,27 +5,9 @@ import time from './time';
 import JoplinDatabase, { TableField } from './JoplinDatabase';
 import { LoadOptions, SaveOptions } from './models/utils/types';
 import { SqlQuery } from './services/database/types';
+import { ModelType } from './types';
 const Mutex = require('async-mutex').Mutex;
 
-// New code should make use of this enum
-export enum ModelType {
-	Note = 1,
-	Folder = 2,
-	Setting = 3,
-	Resource = 4,
-	Tag = 5,
-	NoteTag = 6,
-	Search = 7,
-	Alarm = 8,
-	MasterKey = 9,
-	ItemChange = 10,
-	NoteResource = 11,
-	ResourceLocalState = 12,
-	Revision = 13,
-	Migration = 14,
-	SmartFilter = 15,
-	Command = 16,
-}
 
 export interface DeleteOptions {
 	idFieldName?: string;
@@ -56,6 +38,7 @@ class BaseModel {
 	// TODO: This ancient part of Joplin about model types is a bit of a
 	// mess and should be refactored properly.
 
+	// New code should make use of the ModelType enum
 	public static typeEnum_: any[] = [
 		['TYPE_NOTE', ModelType.Note],
 		['TYPE_FOLDER', ModelType.Folder],
