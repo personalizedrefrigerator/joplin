@@ -11,13 +11,9 @@
 	if (typeof browser !== 'undefined') {
 		// eslint-disable-next-line no-undef
 		browser_ = browser;
-		// eslint-disable-next-line no-undef
-		browserSupportsPromises_ = true;
 	} else if (typeof chrome !== 'undefined') {
 		// eslint-disable-next-line no-undef
 		browser_ = chrome;
-		// eslint-disable-next-line no-undef
-		browserSupportsPromises_ = false;
 	}
 
 	function escapeHtml(s) {
@@ -307,7 +303,7 @@
 			cleanUpElement(convertToMarkup, cleanDocument, imageSizes, imageIndexes);
 
 			// eslint-disable-next-line no-undef
-			const stylesheets = convertToMarkup === 'html' ? getStyleSheets(document) : null;
+			const stylesheets = convertToMarkup === 'html' ? getStyleSheets(document) : [];
 
 			// The <BODY> tag may have a style in the CSS stylesheets. This
 			// style can be overriden by setting the `style` attribute on the
@@ -461,6 +457,7 @@
 						tags: command.tags,
 						windowInnerWidth: window.innerWidth,
 						windowInnerHeight: window.innerHeight,
+						devicePixelRatio: window.devicePixelRatio,
 					};
 
 					browser_.runtime.sendMessage({

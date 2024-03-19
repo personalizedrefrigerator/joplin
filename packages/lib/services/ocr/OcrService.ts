@@ -1,4 +1,4 @@
-import { toIso639 } from '../../locale';
+import { toIso639Alpha3 } from '../../locale';
 import Resource from '../../models/Resource';
 import Setting from '../../models/Setting';
 import shim from '../../shim';
@@ -62,6 +62,17 @@ export default class OcrService {
 		const resourceFilePath = Resource.fullPath(resource);
 
 		if (resource.mime === 'application/pdf') {
+			// OCR can be slow for large PDFs.
+			// Skip it if the PDF already includes text.
+			const pageTexts = await shim.pdfExtractEmbeddedText(resourceFilePath);
+			const pagesWithText = pageTexts.filter(text => !!text.trim().length);
+
+			if (pagesWithText.length > 0) {
+				return {
+					text: pageTexts.join('\n'),
+				};
+			}
+
 			const imageFilePaths = await shim.pdfToImages(resourceFilePath, await this.pdfExtractDir());
 			const results: RecognizeResult[] = [];
 
@@ -139,7 +150,7 @@ export default class OcrService {
 		};
 
 		try {
-			const language = toIso639(Setting.value('locale'));
+			const language = toIso639Alpha3(Setting.value('locale'));
 
 			let totalProcessed = 0;
 

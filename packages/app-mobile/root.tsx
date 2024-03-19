@@ -76,7 +76,7 @@ const { FileApiDriverLocal } = require('@joplin/lib/file-api-driver-local');
 import ResourceFetcher from '@joplin/lib/services/ResourceFetcher';
 import SearchEngine from '@joplin/lib/services/search/SearchEngine';
 import WelcomeUtils from '@joplin/lib/WelcomeUtils';
-const { themeStyle } = require('./components/global-style.js');
+import { themeStyle } from './components/global-style';
 import SyncTargetRegistry from '@joplin/lib/SyncTargetRegistry';
 const SyncTargetFilesystem = require('@joplin/lib/SyncTargetFilesystem.js');
 const SyncTargetNextcloud = require('@joplin/lib/SyncTargetNextcloud.js');
@@ -85,6 +85,7 @@ const SyncTargetDropbox = require('@joplin/lib/SyncTargetDropbox.js');
 const SyncTargetAmazonS3 = require('@joplin/lib/SyncTargetAmazonS3.js');
 import BiometricPopup from './components/biometrics/BiometricPopup';
 import initLib from '@joplin/lib/initLib';
+import JoplinCloudLoginScreen from './components/screens/JoplinCloudLoginScreen';
 
 SyncTargetRegistry.addClass(SyncTargetNone);
 SyncTargetRegistry.addClass(SyncTargetOneDrive);
@@ -121,13 +122,18 @@ import { ReactNode } from 'react';
 import { parseShareCache } from '@joplin/lib/services/share/reducer';
 import autodetectTheme, { onSystemColorSchemeChange } from './utils/autodetectTheme';
 import runOnDeviceFsDriverTests from './utils/fs-driver/runOnDeviceTests';
-import { refreshFolders } from '@joplin/lib/folders-screen-utils';
+import PluginRunnerWebView from './plugins/PluginRunner/PluginRunnerWebView';
+import { refreshFolders, scheduleRefreshFolders } from '@joplin/lib/folders-screen-utils';
+import KeymapService from '@joplin/lib/services/KeymapService';
+import PluginService from '@joplin/lib/services/plugins/PluginService';
+import initializeCommandService from './utils/initializeCommandService';
+import PlatformImplementation from './plugins/PlatformImplementation';
 
 type SideMenuPosition = 'left' | 'right';
 
 const logger = Logger.create('root');
 
-let storeDispatch = function(_action: any) {};
+let storeDispatch: any = function(_action: any) {};
 
 const logReducerAction = function(action: any) {
 	if (['SIDE_MENU_OPEN_PERCENT', 'SYNC_REPORT_UPDATE'].indexOf(action.type) >= 0) return;
@@ -148,6 +154,7 @@ const generalMiddleware = (store: any) => (next: any) => async (action: any) => 
 
 	const result = next(action);
 	const newState = store.getState();
+	let doRefreshFolders = false;
 
 	await reduxSharedMiddleware(store, next, action, storeDispatch as any);
 
@@ -156,6 +163,10 @@ const generalMiddleware = (store: any) => (next: any) => async (action: any) => 
 	if (['NOTE_UPDATE_ONE', 'NOTE_DELETE', 'FOLDER_UPDATE_ONE', 'FOLDER_DELETE'].indexOf(action.type) >= 0) {
 		if (!await reg.syncTarget().syncStarted()) void reg.scheduleSync(1000, { syncSteps: ['update_remote', 'delete_remote'] }, true);
 		SearchEngine.instance().scheduleSyncTables();
+	}
+
+	if (['FOLDER_UPDATE_ONE'].indexOf(action.type) >= 0) {
+		doRefreshFolders = true;
 	}
 
 	if (['EVENT_NOTE_ALARM_FIELD_CHANGE', 'NOTE_DELETE'].indexOf(action.type) >= 0) {
@@ -213,6 +224,10 @@ const generalMiddleware = (store: any) => (next: any) => async (action: any) => 
 
 	if (action.type === 'SYNC_CREATED_OR_UPDATED_RESOURCE') {
 		void ResourceFetcher.instance().autoAddResources();
+	}
+
+	if (doRefreshFolders) {
+		await scheduleRefreshFolders((action: any) => storeDispatch(action));
 	}
 
 	return result;
@@ -470,8 +485,10 @@ async function initialize(dispatch: Function) {
 	Setting.setConstant('appId', 'net.cozic.joplin-mobile');
 	Setting.setConstant('appType', 'mobile');
 	Setting.setConstant('tempDir', await initializeTempDir());
+	Setting.setConstant('cacheDir', `${getProfilesRootDir()}/cache`);
 	const resourceDir = getResourceDir(currentProfile, isSubProfile);
 	Setting.setConstant('resourceDir', resourceDir);
+	Setting.setConstant('pluginDir', `${getProfilesRootDir()}/plugins`);
 
 	await shim.fsDriver().mkdir(resourceDir);
 
@@ -537,13 +554,26 @@ async function initialize(dispatch: Function) {
 	AlarmService.setDriver(new AlarmServiceDriver(mainLogger));
 	AlarmService.setLogger(mainLogger);
 
+	// Currently CommandService is just used for plugins.
+	initializeCommandService(store);
+
+	// KeymapService is also present for plugin compatibility
+	KeymapService.instance().initialize();
+
+	// Even if there are no plugins, we need to initialize the PluginService so that
+	// plugin search can work.
+	const platformImplementation = PlatformImplementation.instance();
+	PluginService.instance().initialize(
+		platformImplementation.versionInfo.version, platformImplementation, null, store,
+	);
+
 	setRSA(RSA);
 
 	try {
 		if (Setting.value('env') === 'prod') {
 			await db.open({ name: getDatabaseName(currentProfile, isSubProfile) });
 		} else {
-			await db.open({ name: getDatabaseName(currentProfile, isSubProfile, '-3') });
+			await db.open({ name: getDatabaseName(currentProfile, isSubProfile, '-20240127-1') });
 
 			// await db.clearForTesting();
 		}
@@ -574,6 +604,7 @@ async function initialize(dispatch: Function) {
 			// Setting.setValue('sync.10.userContentPath', 'https://joplinusercontent.com');
 			Setting.setValue('sync.10.path', 'http://api.joplincloud.local:22300');
 			Setting.setValue('sync.10.userContentPath', 'http://joplinusercontent.local:22300');
+			Setting.setValue('sync.10.website', 'http://joplincloud.local:22300');
 
 			// Setting.setValue('sync.target', 10);
 			// Setting.setValue('sync.10.username', 'user1@example.com');
@@ -723,6 +754,18 @@ async function initialize(dispatch: Function) {
 	// Collect revisions more frequently on mobile because it doesn't auto-save
 	// and it cannot collect anything when the app is not active.
 	RevisionService.instance().runInBackground(1000 * 30);
+
+	// ----------------------------------------------------------------------------
+	// Plugin service setup
+	// ----------------------------------------------------------------------------
+
+	// On startup, we can clear plugin update state -- plugins that were updated when the
+	// user last ran the app have been updated and will be reloaded.
+	const pluginService = PluginService.instance();
+	const pluginSettings = pluginService.unserializePluginSettings(Setting.value('plugins.states'));
+
+	const updatedSettings = pluginService.clearUpdateState(pluginSettings);
+	Setting.setValue('plugins.states', pluginService.serializePluginSettings(updatedSettings));
 
 	// ----------------------------------------------------------------------------
 	// Keep this below to test react-native-rsa-native
@@ -981,9 +1024,13 @@ class AppComponent extends React.Component {
 
 		if (sharedData) {
 			reg.logger().info('Received shared data');
-			if (this.props.selectedFolderId) {
+
+			// selectedFolderId can be null if no screens other than "All notes"
+			// have been opened.
+			const targetFolder = this.props.selectedFolderId ?? (await Folder.defaultFolder())?.id;
+			if (targetFolder) {
 				logger.info('Sharing: handleShareData: Processing...');
-				await handleShared(sharedData, this.props.selectedFolderId, this.props.dispatch);
+				await handleShared(sharedData, targetFolder, this.props.dispatch);
 			} else {
 				reg.logger().info('Cannot handle share - default folder id is not set');
 			}
@@ -1050,6 +1097,7 @@ class AppComponent extends React.Component {
 			Folder: { screen: FolderScreen },
 			OneDriveLogin: { screen: OneDriveLoginScreen },
 			DropboxLogin: { screen: DropboxLoginScreen },
+			JoplinCloudLogin: { screen: JoplinCloudLoginScreen },
 			EncryptionConfig: { screen: EncryptionConfigScreen },
 			UpgradeSyncTarget: { screen: UpgradeSyncTargetScreen },
 			ProfileSwitcher: { screen: ProfileSwitcher },
@@ -1071,11 +1119,20 @@ class AppComponent extends React.Component {
 		logger.info('root.biometrics: shouldShowMainContent', shouldShowMainContent);
 		logger.info('root.biometrics: this.state.sensorInfo', this.state.sensorInfo);
 
+		// The right sidemenu can be difficult to close due to a bug in the sidemenu
+		// library (right sidemenus can't be swiped closed).
+		//
+		// Additionally, it can interfere with scrolling in the note viewer, so we use
+		// a smaller edge hit width.
+		const menuEdgeHitWidth = menuPosition === 'right' ? 20 : 30;
+
 		const mainContent = (
 			<View style={{ flex: 1, backgroundColor: theme.backgroundColor }}>
 				<SideMenu
 					menu={sideMenuContent}
-					edgeHitWidth={20}
+					edgeHitWidth={menuEdgeHitWidth}
+					toleranceX={4}
+					toleranceY={20}
 					openMenuOffset={this.state.sideMenuWidth}
 					menuPosition={menuPosition}
 					onChange={(isOpen: boolean) => this.sideMenu_change(isOpen)}
@@ -1103,6 +1160,7 @@ class AppComponent extends React.Component {
 						</SafeAreaView>
 					</MenuProvider>
 				</SideMenu>
+				<PluginRunnerWebView />
 			</View>
 		);
 
@@ -1118,9 +1176,22 @@ class AppComponent extends React.Component {
 					...paperTheme.colors,
 					onPrimaryContainer: theme.color5,
 					primaryContainer: theme.backgroundColor5,
-					surfaceVariant: theme.backgroundColor,
-					onSurfaceVariant: theme.color,
 					primary: theme.color,
+
+					secondaryContainer: theme.raisedBackgroundColor,
+					onSecondaryContainer: theme.raisedColor,
+
+					surfaceVariant: theme.backgroundColor3,
+					onSurfaceVariant: theme.color3,
+
+					elevation: {
+						level0: 'transparent',
+						level1: theme.oddBackgroundColor,
+						level2: theme.raisedBackgroundColor,
+						level3: theme.raisedBackgroundColor,
+						level4: theme.raisedBackgroundColor,
+						level5: theme.raisedBackgroundColor,
+					},
 				},
 			}}>
 				{mainContent}

@@ -192,6 +192,7 @@ Setting.setConstant('appId', 'net.cozic.joplintest-cli');
 Setting.setConstant('appType', 'cli');
 Setting.setConstant('tempDir', baseTempDir);
 Setting.setConstant('cacheDir', baseTempDir);
+Setting.setConstant('resourceDir', baseTempDir);
 Setting.setConstant('pluginDataDir', `${profileDir}/profile/plugin-data`);
 Setting.setConstant('profileDir', profileDir);
 Setting.setConstant('rootProfileDir', rootProfileDir);
@@ -850,7 +851,7 @@ async function createNTestNotes(n: number, folder: any, tagIds: string[] = null,
 	const notes = [];
 	for (let i = 0; i < n; i++) {
 		const title_ = n > 1 ? `${title}${i}` : title;
-		const note = await Note.save({ title: title_, parent_id: folder.id, is_conflict: 0 });
+		const note = await Note.save({ title: title_, parent_id: folder.id, is_conflict: 0, deleted_time: 0 });
 		notes.push(note);
 		await time.msleep(10);
 	}

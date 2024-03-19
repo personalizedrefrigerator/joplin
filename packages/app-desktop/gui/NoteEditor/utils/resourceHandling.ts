@@ -10,6 +10,9 @@ import rendererHtmlUtils, { extractHtmlBody } from '@joplin/renderer/htmlUtils';
 import Logger from '@joplin/utils/Logger';
 import { fileUriToPath } from '@joplin/utils/url';
 import { MarkupLanguage } from '@joplin/renderer';
+import { HtmlToMarkdownHandler, MarkupToHtmlHandler } from './types';
+import markupRenderOptions from './markupRenderOptions';
+import { fileExtension, filename, safeFileExtension, safeFilename } from '@joplin/utils/path';
 const joplinRendererUtils = require('@joplin/renderer').utils;
 const { clipboard } = require('electron');
 const mimeUtils = require('@joplin/lib/mime-utils.js').mime;
@@ -135,23 +138,37 @@ export async function getResourcesFromPasteEvent(event: any) {
 	return output;
 }
 
-export async function processPastedHtml(html: string) {
+
+const processImagesInPastedHtml = async (html: string) => {
 	const allImageUrls: string[] = [];
 	const mappedResources: Record<string, string> = {};
-
-	// When copying text from eg. GitHub, the HTML might contain non-breaking
-	// spaces instead of regular spaces. If these non-breaking spaces are
-	// inserted into the TinyMCE editor (using insertContent), they will be
-	// dropped. So here we convert them to regular spaces.
-	// https://stackoverflow.com/a/31790544/561309
-	html = html.replace(/[\u202F\u00A0]/g, ' ');
 
 	htmlUtils.replaceImageUrls(html, (src: string) => {
 		allImageUrls.push(src);
 	});
 
+	const downloadImage = async (imageSrc: string) => {
+		try {
+			const fileExt = safeFileExtension(fileExtension(imageSrc));
+			const name = safeFilename(filename(imageSrc));
+			const pieces = [name ? name : md5(Date.now() + Math.random())];
+			if (fileExt) pieces.push(fileExt);
+			const filePath = `${Setting.value('tempDir')}/${pieces.join('.')}`;
+			await shim.fetchBlob(imageSrc, { path: filePath });
+			const createdResource = await shim.createResourceFromPath(filePath);
+			await shim.fsDriver().remove(filePath);
+			mappedResources[imageSrc] = `file://${encodeURI(Resource.fullPath(createdResource))}`;
+		} catch (error) {
+			logger.warn(`Error creating a resource for ${imageSrc}.`, error);
+			mappedResources[imageSrc] = imageSrc;
+		}
+	};
+
+	const downloadImages: Promise<void>[] = [];
+
 	for (const imageSrc of allImageUrls) {
 		if (!mappedResources[imageSrc]) {
+			logger.info(`processPastedHtml: Processing image ${imageSrc}`);
 			try {
 				if (imageSrc.startsWith('file')) {
 					const imageFilePath = path.normalize(fileUriToPath(imageSrc));
@@ -163,27 +180,43 @@ export async function processPastedHtml(html: string) {
 						const createdResource = await shim.createResourceFromPath(imageFilePath);
 						mappedResources[imageSrc] = `file://${encodeURI(Resource.fullPath(createdResource))}`;
 					}
-				} else if (imageSrc.startsWith('data:')) { // Data URIs
+				} else if (imageSrc.startsWith('data:')) {
 					mappedResources[imageSrc] = imageSrc;
 				} else {
-					const filePath = `${Setting.value('tempDir')}/${md5(Date.now() + Math.random())}`;
-					await shim.fetchBlob(imageSrc, { path: filePath });
-					const createdResource = await shim.createResourceFromPath(filePath);
-					await shim.fsDriver().remove(filePath);
-					mappedResources[imageSrc] = `file://${encodeURI(Resource.fullPath(createdResource))}`;
+					downloadImages.push(downloadImage(imageSrc));
 				}
 			} catch (error) {
-				logger.warn(`Error creating a resource for ${imageSrc}.`, error);
+				logger.warn(`processPastedHtml: Error creating a resource for ${imageSrc}.`, error);
 				mappedResources[imageSrc] = imageSrc;
 			}
 		}
 	}
 
-	return extractHtmlBody(rendererHtmlUtils.sanitizeHtml(
-		htmlUtils.replaceImageUrls(html, (src: string) => {
-			return mappedResources[src];
-		}), {
-			allowedFilePrefixes: [Setting.value('resourceDir')],
-		},
-	));
+	await Promise.all(downloadImages);
+
+	return htmlUtils.replaceImageUrls(html, (src: string) => mappedResources[src]);
+};
+
+export async function processPastedHtml(html: string, htmlToMd: HtmlToMarkdownHandler | null, mdToHtml: MarkupToHtmlHandler | null) {
+	// When copying text from eg. GitHub, the HTML might contain non-breaking
+	// spaces instead of regular spaces. If these non-breaking spaces are
+	// inserted into the TinyMCE editor (using insertContent), they will be
+	// dropped. So here we convert them to regular spaces.
+	// https://stackoverflow.com/a/31790544/561309
+	html = html.replace(/[\u202F\u00A0]/g, ' ');
+
+	html = await processImagesInPastedHtml(html);
+
+	// TinyMCE can accept any type of HTML, including HTML that may not be preserved once saved as
+	// Markdown. For example the content may have a dark background which would be supported by
+	// TinyMCE, but lost once the note is saved. So here we convert the HTML to Markdown then back
+	// to HTML to ensure that the content we paste will be handled correctly by the app.
+	if (htmlToMd && mdToHtml) {
+		const md = await htmlToMd(MarkupLanguage.Markdown, html, '');
+		html = (await mdToHtml(MarkupLanguage.Markdown, md, markupRenderOptions({ bodyOnly: true }))).html;
+	}
+
+	return extractHtmlBody(rendererHtmlUtils.sanitizeHtml(html, {
+		allowedFilePrefixes: [Setting.value('resourceDir')],
+	}));
 }
