@@ -25,7 +25,7 @@ import BaseModel, { ModelType } from '@joplin/lib/BaseModel';
 import ActionButton from '../ActionButton';
 const { fileExtension, safeFileExtension } = require('@joplin/lib/path-utils');
 const mimeUtils = require('@joplin/lib/mime-utils.js').mime;
-import ScreenHeader, { MenuOptionType } from '../ScreenHeader';
+import ScreenHeader from '../ScreenHeader';
 import NoteTagsDialog from './NoteTagsDialog';
 import time from '@joplin/lib/time';
 const { Checkbox } = require('../checkbox.js');
@@ -62,6 +62,7 @@ import { PluginStates } from '@joplin/lib/services/plugins/reducer';
 import pickDocument from '../../utils/pickDocument';
 import debounce from '../../utils/debounce';
 import { focus } from '@joplin/lib/utils/focusHandler';
+import { MenuOptionType } from '../PopoverMenu';
 const urlUtils = require('@joplin/lib/urlUtils');
 
 const emptyArray: any[] = [];

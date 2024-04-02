@@ -544,6 +544,7 @@ packages/app-mobile/components/NoteEditor/hooks/useEditorCommandHandler.js
 packages/app-mobile/components/NoteEditor/hooks/useKeyboardVisible.js
 packages/app-mobile/components/NoteEditor/types.js
 packages/app-mobile/components/NoteList.js
+packages/app-mobile/components/PopoverMenu.js
 packages/app-mobile/components/ProfileSwitcher/ProfileEditor.js
 packages/app-mobile/components/ProfileSwitcher/ProfileSwitcher.js
 packages/app-mobile/components/ProfileSwitcher/useProfileConfig.js

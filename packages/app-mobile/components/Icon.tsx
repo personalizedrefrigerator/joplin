@@ -1,10 +1,11 @@
 
 import * as React from 'react';
-import { TextStyle, Text } from 'react-native';
+import { TextStyle, Text, AccessibilityRole } from 'react-native';
 
 const FontAwesomeIcon = require('react-native-vector-icons/FontAwesome5').default;
 const AntIcon = require('react-native-vector-icons/AntDesign').default;
 const MaterialIcon = require('react-native-vector-icons/MaterialIcons').default;
+const Ionicon = require('react-native-vector-icons/Ionicons').default;
 
 
 interface Props {
@@ -13,6 +14,7 @@ interface Props {
 
 	// If `null` is given, the content must be labeled elsewhere.
 	accessibilityLabel: string|null;
+	accessibilityRole?: AccessibilityRole;
 
 	allowFontScaling?: boolean;
 }
@@ -37,6 +39,7 @@ const Icon: React.FC<Props> = props => {
 		importantForAccessibility,
 		'aria-hidden': accessibilityHidden,
 		accessibilityLabel: props.accessibilityLabel,
+		accessibilityRole: props.accessibilityRole,
 		style: props.style,
 		allowFontScaling: props.allowFontScaling,
 	};
@@ -54,6 +57,8 @@ const Icon: React.FC<Props> = props => {
 		return <AntIcon name={nameSuffix} {...sharedProps}/>;
 	} else if (namePrefix === 'material') {
 		return <MaterialIcon name={nameSuffix} {...sharedProps}/>;
+	} else if (namePrefix === 'ionicon') {
+		return <Ionicon name={nameSuffix} {...sharedProps}/>;
 	} else if (namePrefix === 'text') {
 		return (
 			<Text

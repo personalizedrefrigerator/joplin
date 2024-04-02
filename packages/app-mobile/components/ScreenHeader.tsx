@@ -2,11 +2,10 @@ const React = require('react');
 
 import { connect } from 'react-redux';
 import { PureComponent, ReactElement } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, Dimensions, ViewStyle } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, ViewStyle } from 'react-native';
 const Icon = require('react-native-vector-icons/Ionicons').default;
 const { BackButtonService } = require('../services/back-button.js');
 import NavService from '@joplin/lib/services/NavService';
-import { Menu, MenuOptions, MenuOption, MenuTrigger } from 'react-native-popup-menu';
 import { _, _n } from '@joplin/lib/locale';
 import Setting from '@joplin/lib/models/Setting';
 import Note from '@joplin/lib/models/Note';
@@ -27,6 +26,7 @@ import { ModelType } from '@joplin/lib/BaseModel';
 import { PluginStates } from '@joplin/lib/services/plugins/reducer';
 import { ContainerType } from '@joplin/lib/services/plugins/WebviewController';
 import { Dispatch } from 'redux';
+import PopoverMenu, { MenuOptionType } from './PopoverMenu';
 
 // We need this to suppress the useless warning
 // https://github.com/oblador/react-native-vector-icons/issues/1465
@@ -39,18 +39,10 @@ Icon.loadFont().catch((error: any) => { console.info(error); });
 // default height.
 const PADDING_V = 10;
 
-type OnSelectCallbackType=()=> void;
 type OnPressCallback=()=> void;
 interface NavButtonPressEvent {
 	// Name of the screen to navigate to
 	screen: string;
-}
-
-export interface MenuOptionType {
-	onPress: OnPressCallback;
-	isDivider?: boolean;
-	title: string;
-	disabled?: boolean;
 }
 
 interface ScreenHeaderProps {
@@ -125,11 +117,6 @@ class ScreenHeaderComponent extends PureComponent<ScreenHeaderProps, ScreenHeade
 				shadowColor: '#000000',
 				elevation: 5,
 			},
-			divider: {
-				borderBottomWidth: 1,
-				borderColor: theme.dividerColor,
-				backgroundColor: '#0000ff',
-			},
 			sideMenuButton: {
 				flex: 1,
 				alignItems: 'center',
@@ -177,25 +164,10 @@ class ScreenHeaderComponent extends PureComponent<ScreenHeaderProps, ScreenHeade
 				fontSize: 30,
 				paddingLeft: 10,
 				paddingRight: theme.marginRight,
+				paddingTop: PADDING_V,
+				paddingBottom: PADDING_V,
 				color: theme.color2,
 				fontWeight: 'bold',
-			},
-			contextMenu: {
-				backgroundColor: theme.backgroundColor2,
-			},
-			contextMenuItem: {
-				backgroundColor: theme.backgroundColor,
-			},
-			contextMenuItemText: {
-				flex: 1,
-				textAlignVertical: 'center',
-				paddingLeft: theme.marginLeft,
-				paddingRight: theme.marginRight,
-				paddingTop: theme.itemMarginTop,
-				paddingBottom: theme.itemMarginBottom,
-				color: theme.color,
-				backgroundColor: theme.backgroundColor,
-				fontSize: theme.fontSize,
 			},
 			titleText: {
 				flex: 1,
@@ -212,11 +184,6 @@ class ScreenHeaderComponent extends PureComponent<ScreenHeaderProps, ScreenHeade
 				flexDirection: 'row',
 				padding: theme.marginLeft,
 			},
-		};
-
-		styleObject.contextMenuItemTextDisabled = {
-			...styleObject.contextMenuItemText,
-			opacity: 0.5,
 		};
 
 		styleObject.topIcon = { ...theme.icon };
@@ -277,7 +244,7 @@ class ScreenHeaderComponent extends PureComponent<ScreenHeaderProps, ScreenHeade
 		}
 	}
 
-	private async deleteButton_press() {
+	private deleteButton_press = async () => {
 		// Dialog needs to be displayed as a child of the parent component, otherwise
 		// it won't be visible within the header component.
 		const noteIds = this.props.selectedNoteIds;
@@ -288,9 +255,9 @@ class ScreenHeaderComponent extends PureComponent<ScreenHeaderProps, ScreenHeade
 		} catch (error) {
 			alert(_n('This note could not be deleted: %s', 'These notes could not be deleted: %s', noteIds.length, error.message));
 		}
-	}
+	};
 
-	private async restoreButton_press() {
+	private restoreButton_press = async () => {
 		// Dialog needs to be displayed as a child of the parent component, otherwise
 		// it won't be visible within the header component.
 		const noteIds = this.props.selectedNoteIds;
@@ -301,13 +268,7 @@ class ScreenHeaderComponent extends PureComponent<ScreenHeaderProps, ScreenHeade
 		} catch (error) {
 			alert(`Could not restore note(s): ${error.message}`);
 		}
-	}
-
-	private menu_select(value: OnSelectCallbackType) {
-		if (typeof value === 'function') {
-			value();
-		}
-	}
+	};
 
 	private warningBox_press(event: NavButtonPressEvent) {
 		void NavService.go(event.screen);
@@ -535,42 +496,27 @@ class ScreenHeaderComponent extends PureComponent<ScreenHeaderProps, ScreenHeade
 			);
 		}
 
-		let key = 0;
-		const menuOptionComponents = [];
+		const menuOptions: MenuOptionType[] = [];
 
 		const selectedFolder = this.props.notesParentType === 'Folder' ? Folder.byId(this.props.folders, this.props.selectedFolderId) : null;
 		const selectedFolderInTrash = itemIsInTrash(selectedFolder);
 
 		if (!this.props.noteSelectionEnabled) {
-			for (let i = 0; i < this.props.menuOptions.length; i++) {
-				const o = this.props.menuOptions[i];
+			menuOptions.push(...this.props.menuOptions);
 
-				if (o.isDivider) {
-					menuOptionComponents.push(<View key={`menuOption_${key++}`} style={this.styles().divider} />);
-				} else {
-					menuOptionComponents.push(
-						<MenuOption value={o.onPress} key={`menuOption_${key++}`} style={this.styles().contextMenuItem} disabled={!!o.disabled}>
-							<Text style={o.disabled ? this.styles().contextMenuItemTextDisabled : this.styles().contextMenuItemText}>{o.title}</Text>
-						</MenuOption>,
-					);
-				}
-			}
-
-			if (menuOptionComponents.length) {
-				menuOptionComponents.push(<View key={`menuOption_${key++}`} style={this.styles().divider} />);
+			if (menuOptions.length) {
+				menuOptions.push({ isDivider: true });
 			}
 		} else {
-			menuOptionComponents.push(
-				<MenuOption value={() => this.deleteButton_press()} key={'menuOption_delete'} style={this.styles().contextMenuItem}>
-					<Text style={this.styles().contextMenuItemText}>{_('Delete')}</Text>
-				</MenuOption>,
-			);
+			menuOptions.push({
+				onPress: this.deleteButton_press,
+				title: _('Delete'),
+			});
 
-			menuOptionComponents.push(
-				<MenuOption value={() => this.duplicateButton_press()} key={'menuOption_duplicate'} style={this.styles().contextMenuItem}>
-					<Text style={this.styles().contextMenuItemText}>{_('Duplicate')}</Text>
-				</MenuOption>,
-			);
+			menuOptions.push({
+				onPress: this.duplicateButton_press,
+				title: _('Duplicate'),
+			});
 		}
 
 		const createTitleComponent = (disabled: boolean, hideableAfterTitleComponents: ReactElement) => {
@@ -663,7 +609,6 @@ class ScreenHeaderComponent extends PureComponent<ScreenHeaderProps, ScreenHeade
 		const hideableRightComponents = pluginPanelsComp;
 
 		const titleComp = createTitleComponent(headerItemDisabled, hideableRightComponents);
-		const windowHeight = Dimensions.get('window').height - 50;
 
 		const contextMenuStyle: ViewStyle = {
 			paddingTop: PADDING_V,
@@ -674,17 +619,13 @@ class ScreenHeaderComponent extends PureComponent<ScreenHeaderProps, ScreenHeade
 		if (this.props.noteSelectionEnabled) contextMenuStyle.width = 1;
 
 		const menuComp =
-			!menuOptionComponents.length || !showContextMenuButton ? null : (
-				<Menu onSelect={value => this.menu_select(value)} style={this.styles().contextMenu}>
-					<MenuTrigger style={contextMenuStyle}>
-						<View accessibilityLabel={_('Actions')}>
-							<Icon name="ellipsis-vertical" style={this.styles().contextMenuTrigger} />
-						</View>
-					</MenuTrigger>
-					<MenuOptions>
-						<ScrollView style={{ maxHeight: windowHeight }}>{menuOptionComponents}</ScrollView>
-					</MenuOptions>
-				</Menu>
+			!menuOptions.length || !showContextMenuButton ? null : (
+				<PopoverMenu
+					themeId={this.props.themeId}
+					options={menuOptions}
+					triggerLabel={_('Actions')}
+					triggerStyle={this.styles().contextMenuTrigger}
+				/>
 			);
 
 		return (

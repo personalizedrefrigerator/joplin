@@ -9,7 +9,7 @@ import { themeStyle } from '../global-style';
 import Logger from '@joplin/utils/Logger';
 import { BaseScreenComponent } from '../base-screen';
 import { _ } from '@joplin/lib/locale';
-import { MenuOptionType } from '../ScreenHeader';
+import { MenuOptionType } from '../PopoverMenu';
 import { AppState } from '../../utils/types';
 import Share from 'react-native-share';
 import { writeTextToCacheFile } from '../../utils/ShareUtils';
