@@ -121,7 +121,7 @@ import { ReactNode } from 'react';
 import { parseShareCache } from '@joplin/lib/services/share/reducer';
 import autodetectTheme, { onSystemColorSchemeChange } from './utils/autodetectTheme';
 import runOnDeviceFsDriverTests from './utils/fs-driver/runOnDeviceTests';
-import PluginRunnerWebView from './plugins/PluginRunner/PluginRunnerWebView';
+import PluginRunnerWebViewManager from './plugins/PluginRunner/PluginRunnerWebViewManager';
 import { refreshFolders, scheduleRefreshFolders } from '@joplin/lib/folders-screen-utils';
 import KeymapService from '@joplin/lib/services/KeymapService';
 import PluginService from '@joplin/lib/services/plugins/PluginService';
@@ -1170,7 +1170,7 @@ class AppComponent extends React.Component {
 						</SafeAreaView>
 					</MenuProvider>
 				</SideMenu>
-				<PluginRunnerWebView />
+				<PluginRunnerWebViewManager />
 			</View>
 		);
 

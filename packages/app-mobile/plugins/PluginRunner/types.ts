@@ -1,5 +1,5 @@
 
-import ApiGlobal from '@joplin/lib/services/plugins/api/Global';
+import type ApiGlobal from '@joplin/lib/services/plugins/api/Global';
 import { SerializableData } from '@joplin/lib/utils/ipc/types';
 
 export enum LogLevel {

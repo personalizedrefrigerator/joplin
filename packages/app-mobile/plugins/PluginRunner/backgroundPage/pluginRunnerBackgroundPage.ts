@@ -1,4 +1,4 @@
-export { runPlugin, stopPlugin } from './startStopPlugin';
+export { default as runPlugin } from './runPlugin';
 
 // Old plugins allowed to import legacy APIs
 const legacyPluginIds = [
@@ -43,5 +43,4 @@ export const requireModule = (moduleName: string, fromPluginId: string) => {
 	throw new Error(`Unable to require module ${moduleName} on mobile.`);
 };
 
-export { default as initializePluginBackgroundIframe } from './initializePluginBackgroundIframe';
 export { default as initializeDialogWebView } from './initializeDialogWebView';

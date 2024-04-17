@@ -595,10 +595,10 @@ packages/app-mobile/gulpfile.js
 packages/app-mobile/plugins/PlatformImplementation.js
 packages/app-mobile/plugins/PluginRunner/PluginRunner.js
 packages/app-mobile/plugins/PluginRunner/PluginRunnerWebView.js
+packages/app-mobile/plugins/PluginRunner/PluginRunnerWebViewManager.js
 packages/app-mobile/plugins/PluginRunner/backgroundPage/initializeDialogWebView.js
-packages/app-mobile/plugins/PluginRunner/backgroundPage/initializePluginBackgroundIframe.js
 packages/app-mobile/plugins/PluginRunner/backgroundPage/pluginRunnerBackgroundPage.js
-packages/app-mobile/plugins/PluginRunner/backgroundPage/startStopPlugin.js
+packages/app-mobile/plugins/PluginRunner/backgroundPage/runPlugin.js
 packages/app-mobile/plugins/PluginRunner/backgroundPage/utils/getFormData.test.js
 packages/app-mobile/plugins/PluginRunner/backgroundPage/utils/getFormData.js
 packages/app-mobile/plugins/PluginRunner/backgroundPage/utils/makeSandboxedIframe.js
