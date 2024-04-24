@@ -13,6 +13,7 @@ export interface Props {
 	watchedNoteFiles: string[];
 	plugins: PluginStates;
 	selectedFolderId: string;
+	selectedSmartFilterId: string;
 	customCss: string;
 	notesParentType: string;
 	noteSortOrder: string;

@@ -67,19 +67,20 @@ const NoteList = (props: Props) => {
 
 	const focusNote = useFocusNote(itemRefs);
 
-	const moveNote = useMoveNote(
-		props.notesParentType,
-		props.noteSortOrder,
-		props.selectedNoteIds,
-		props.selectedFolderId,
-		props.uncompletedTodosOnTop,
-		props.showCompletedTodos,
-		props.notes,
-		props.selectedFolderInTrash,
+	const moveNote = useMoveNote({
+		notesParentType: props.notesParentType,
+		noteSortOrder: props.noteSortOrder,
+		selectedNoteIds: props.selectedNoteIds,
+		selectedFolderId: props.selectedFolderId,
+		selectedSmartFilterId: props.selectedSmartFilterId,
+		uncompletedTodosOnTop: props.uncompletedTodosOnTop,
+		showCompletedTodos: props.showCompletedTodos,
+		notes: props.notes,
+		selectedFolderInTrash: props.selectedFolderInTrash,
 		makeItemIndexVisible,
 		focusNote,
-		props.dispatch,
-	);
+		dispatch: props.dispatch,
+	});
 
 	const noteItemStyle = useMemo(() => {
 		return {
@@ -129,20 +130,22 @@ const NoteList = (props: Props) => {
 		props.customCss,
 	);
 
-	const { onDragStart, onDragOver, onDrop, dragOverTargetNoteIndex } = useDragAndDrop(props.parentFolderIsReadOnly,
-		props.selectedNoteIds,
-		props.selectedFolderId,
+	const { onDragStart, onDragOver, onDrop, dragOverTargetNoteIndex } = useDragAndDrop({
+		parentFolderIsReadOnly: props.parentFolderIsReadOnly,
+		selectedNoteIds: props.selectedNoteIds,
+		selectedFolderId: props.selectedFolderId,
+		selectedSmartFilterId: props.selectedSmartFilterId,
 		listRef,
 		scrollTop,
 		itemSize,
-		props.notesParentType,
-		props.noteSortOrder,
-		props.uncompletedTodosOnTop,
-		props.showCompletedTodos,
-		listRenderer.flow,
+		notesParentType: props.notesParentType,
+		noteSortOrder: props.noteSortOrder,
+		uncompletedTodosOnTop: props.uncompletedTodosOnTop,
+		showCompletedTodos: props.showCompletedTodos,
+		flow: listRenderer.flow,
 		itemsPerLine,
-		props.selectedFolderInTrash,
-	);
+		selectedFolderInTrash: props.selectedFolderInTrash,
+	});
 
 	// 2024-04-01: Whatever the below effect is supposed to be doing has been lost in time and even
 	// if it's doing something useful it should be refactored. In my tests, removing it doesn't
@@ -290,6 +293,7 @@ const mapStateToProps = (state: AppState) => {
 		folders: state.folders,
 		selectedNoteIds: state.selectedNoteIds,
 		selectedFolderId: state.selectedFolderId,
+		selectedSmartFilterId: state.selectedSmartFilterId,
 		themeId: state.settings.theme,
 		notesParentType: state.notesParentType,
 		searches: state.searches,

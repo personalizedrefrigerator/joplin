@@ -1,25 +1,43 @@
 import * as React from 'react';
-import { useCallback, DragEventHandler, MutableRefObject, useState, useEffect } from 'react';
+import { useCallback, DragEventHandler, MutableRefObject, useState, useEffect, useMemo } from 'react';
 import Note from '@joplin/lib/models/Note';
 import canManuallySortNotes from './canManuallySortNotes';
 import { Size } from '@joplin/utils/types';
 import { ItemFlow } from '@joplin/lib/services/plugins/api/noteListType';
 
-const useDragAndDrop = (
-	parentFolderIsReadOnly: boolean,
-	selectedNoteIds: string[],
-	selectedFolderId: string,
-	listRef: MutableRefObject<HTMLDivElement>,
-	scrollTop: number,
-	itemSize: Size,
-	notesParentType: string,
-	noteSortOrder: string,
-	uncompletedTodosOnTop: boolean,
-	showCompletedTodos: boolean,
-	flow: ItemFlow,
-	itemsPerLine: number,
-	selectedFolderInTrash: boolean,
-) => {
+interface Props {
+	parentFolderIsReadOnly: boolean;
+	selectedNoteIds: string[];
+	selectedFolderId: string;
+	selectedSmartFilterId: string;
+	listRef: MutableRefObject<HTMLDivElement>;
+	scrollTop: number;
+	itemSize: Size;
+	notesParentType: string;
+	noteSortOrder: string;
+	uncompletedTodosOnTop: boolean;
+	showCompletedTodos: boolean;
+	flow: ItemFlow;
+	itemsPerLine: number;
+	selectedFolderInTrash: boolean;
+}
+
+const useDragAndDrop = ({
+	parentFolderIsReadOnly,
+	selectedNoteIds,
+	selectedFolderId,
+	selectedSmartFilterId,
+	listRef,
+	scrollTop,
+	itemSize,
+	notesParentType,
+	noteSortOrder,
+	uncompletedTodosOnTop,
+	showCompletedTodos,
+	flow,
+	itemsPerLine,
+	selectedFolderInTrash,
+}: Props) => {
 	const [dragOverTargetNoteIndex, setDragOverTargetNoteIndex] = useState(null);
 
 	const onGlobalDrop = useCallback(() => {
@@ -32,6 +50,10 @@ const useDragAndDrop = (
 			document.removeEventListener('dragend', onGlobalDrop);
 		};
 	}, [onGlobalDrop]);
+
+	const supportsManualSorting = useMemo(() => {
+		return canManuallySortNotes({ notesParentType, selectedSmartFilterId, noteSortOrder, selectedFolderInTrash, allowPromptToSwitch: false });
+	}, [notesParentType, selectedSmartFilterId, noteSortOrder, selectedFolderInTrash]);
 
 	const onDragStart: DragEventHandler = useCallback(event => {
 		if (parentFolderIsReadOnly) return false;
@@ -72,8 +94,7 @@ const useDragAndDrop = (
 	}, [listRef, itemSize, scrollTop, flow, itemsPerLine]);
 
 	const onDragOver: DragEventHandler = useCallback(event => {
-		if (notesParentType !== 'Folder') return;
-		if (selectedFolderInTrash) return;
+		if (!supportsManualSorting) return;
 
 		const dt = event.dataTransfer;
 
@@ -83,14 +104,16 @@ const useDragAndDrop = (
 			if (dragOverTargetNoteIndex === newIndex) return;
 			setDragOverTargetNoteIndex(newIndex);
 		}
-	}, [notesParentType, dragTargetNoteIndex, dragOverTargetNoteIndex, selectedFolderInTrash]);
+	}, [supportsManualSorting, dragTargetNoteIndex, dragOverTargetNoteIndex]);
 
 	const onDrop: DragEventHandler = useCallback(async (event) => {
 		const dt = event.dataTransfer;
 		if (!dt.types.includes('text/x-jop-note-ids')) return;
 
 		// TODO: check that parent type is folder
-		if (!canManuallySortNotes(notesParentType, noteSortOrder, selectedFolderInTrash)) return;
+		if (!canManuallySortNotes({ notesParentType, selectedSmartFilterId, noteSortOrder, selectedFolderInTrash, allowPromptToSwitch: true })) {
+			return;
+		}
 
 		setDragOverTargetNoteIndex(null);
 
@@ -98,7 +121,7 @@ const useDragAndDrop = (
 		const noteIds: string[] = JSON.parse(dt.getData('text/x-jop-note-ids'));
 
 		await Note.insertNotesAt(selectedFolderId, noteIds, targetNoteIndex, uncompletedTodosOnTop, showCompletedTodos);
-	}, [notesParentType, dragTargetNoteIndex, noteSortOrder, selectedFolderId, uncompletedTodosOnTop, showCompletedTodos, selectedFolderInTrash]);
+	}, [notesParentType, dragTargetNoteIndex, noteSortOrder, selectedFolderId, selectedSmartFilterId, uncompletedTodosOnTop, showCompletedTodos, selectedFolderInTrash]);
 
 	return { onDragStart, onDragOver, onDrop, dragOverTargetNoteIndex };
 };

@@ -6,9 +6,37 @@ import canManuallySortNotes from './canManuallySortNotes';
 import { FocusNote } from './useFocusNote';
 import { Dispatch } from 'redux';
 
-const useMoveNote = (notesParentType: string, noteSortOrder: string, selectedNoteIds: string[], selectedFolderId: string, uncompletedTodosOnTop: boolean, showCompletedTodos: boolean, notes: NoteEntity[], selectedFolderInTrash: boolean, makeItemIndexVisible: (itemIndex: number)=> void, focusNote: FocusNote, dispatch: Dispatch) => {
+interface Props {
+	notesParentType: string;
+	noteSortOrder: string;
+	selectedNoteIds: string[];
+	selectedFolderId: string;
+	selectedSmartFilterId: string;
+	uncompletedTodosOnTop: boolean;
+	showCompletedTodos: boolean;
+	notes: NoteEntity[];
+	selectedFolderInTrash: boolean;
+	makeItemIndexVisible: (itemIndex: number)=> void;
+	focusNote: FocusNote;
+	dispatch: Dispatch;
+}
+
+const useMoveNote = ({
+	notesParentType,
+	noteSortOrder,
+	selectedNoteIds,
+	selectedFolderId,
+	selectedSmartFilterId,
+	uncompletedTodosOnTop,
+	showCompletedTodos,
+	notes,
+	selectedFolderInTrash,
+	makeItemIndexVisible,
+	focusNote,
+	dispatch,
+}: Props) => {
 	const moveNote = useCallback((direction: number, inc: number) => {
-		if (!canManuallySortNotes(notesParentType, noteSortOrder, selectedFolderInTrash)) return;
+		if (!canManuallySortNotes({ notesParentType, selectedSmartFilterId, noteSortOrder, selectedFolderInTrash, allowPromptToSwitch: true })) return;
 
 		const noteId = selectedNoteIds[0];
 		let targetNoteIndex = BaseModel.modelIndexById(notes, noteId);
@@ -29,7 +57,7 @@ const useMoveNote = (notesParentType: string, noteSortOrder: string, selectedNot
 		makeItemIndexVisible(targetNoteIndex);
 
 		focusNote(noteId);
-	}, [selectedFolderId, noteSortOrder, notes, notesParentType, selectedNoteIds, uncompletedTodosOnTop, showCompletedTodos, selectedFolderInTrash, makeItemIndexVisible, focusNote, dispatch]);
+	}, [selectedFolderId, selectedSmartFilterId, noteSortOrder, notes, notesParentType, selectedNoteIds, uncompletedTodosOnTop, showCompletedTodos, selectedFolderInTrash, makeItemIndexVisible, focusNote, dispatch]);
 
 	return moveNote;
 };
