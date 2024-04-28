@@ -280,5 +280,26 @@ test.describe('main', () => {
 
 		await electronApp.close();
 	});
+
+	test('should not have settings error', async ({ electronApp, mainWindow }) => {
+		let settingsError = false;
+		mainWindow.on('console', message => {
+			if (message.type() === 'error' && message.text().includes('SQL')) {
+				settingsError = true;
+			}
+			console.log(message.type(), message.text());
+		});
+		const mainScreen = new MainScreen(mainWindow);
+		await mainScreen.waitFor();
+		await mainScreen.openSettings(electronApp);
+
+		// Should be on the settings screen
+		const settingsScreen = new SettingsScreen(mainWindow);
+		await settingsScreen.waitFor();
+
+		const backupTab = settingsScreen.getTabLocator('Backup');
+		await backupTab.waitFor();
+		expect(settingsError).toBe(true);
+	});
 });
 
