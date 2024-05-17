@@ -113,15 +113,21 @@ export default async (store: any, _next: any, action: any, dispatch: Dispatch) =
 		if (sortNoteListTimeout) shim.clearTimeout(sortNoteListTimeout);
 		sortNoteListTimeout = null;
 
-		// We sort the note lists with two seconds debounce because doing can be
+		// Depending on the number of notes and current hardware, sorting the note list can be slow.
+		// When changed by a user, we want the note list to update as fast as possible. As such,
+		// debounce based on how slow it is to update the note list.
+		const lastSortDuration = newState.noteListLastSortEndTime - newState.noteListLastSortStartTime;
+		const nextSortDelay = lastSortDuration < 500 ? Math.min(lastSortDuration * 2, 100) : 2000;
+
+		// We sort the note lists with a debounce because doing can be
 		// very slow and would have to be done every time a note is added.
-		if (Date.now() - newState.noteListLastSortTime > 10000) {
+		if (Date.now() - newState.noteListLastSortEndTime > nextSortDelay * 2) {
 			dispatch({ type: 'NOTE_SORT' });
 		} else {
 			sortNoteListTimeout = shim.setTimeout(() => {
 				sortNoteListTimeout = null;
 				dispatch({ type: 'NOTE_SORT' });
-			}, 2000);
+			}, nextSortDelay);
 		}
 	}
 

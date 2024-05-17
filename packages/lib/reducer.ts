@@ -126,7 +126,8 @@ export interface State {
 	needApiAuth: boolean;
 	profileConfig: ProfileConfig;
 	noteListRendererIds: string[];
-	noteListLastSortTime: number;
+	noteListLastSortStartTime: number;
+	noteListLastSortEndTime: number;
 	lastDeletion: StateLastDeletion;
 	lastDeletionNotificationTime: number;
 	mustUpgradeAppMessage: string;
@@ -204,7 +205,8 @@ export const defaultState: State = {
 	needApiAuth: false,
 	profileConfig: null,
 	noteListRendererIds: getListRendererIds(),
-	noteListLastSortTime: 0,
+	noteListLastSortStartTime: 0,
+	noteListLastSortEndTime: 0,
 	lastDeletion: {
 		noteIds: [],
 		folderIds: [],
@@ -938,7 +940,8 @@ const reducer = produce((draft: Draft<State> = defaultState, action: any) => {
 		case 'NOTE_UPDATE_ALL':
 			draft.notes = action.notes;
 			draft.notesSource = action.notesSource;
-			draft.noteListLastSortTime = Date.now(); // Notes are already sorted when they are set this way.
+			draft.noteListLastSortStartTime = Date.now();
+			draft.noteListLastSortEndTime = Date.now(); // Notes are already sorted when they are set this way.
 			updateSelectedNotesFromExistingNotes(draft);
 			break;
 
@@ -1044,8 +1047,11 @@ const reducer = produce((draft: Draft<State> = defaultState, action: any) => {
 		case 'NOTE_SORT':
 
 			{
+				draft.noteListLastSortStartTime = Date.now();
+
 				draft.notes = Note.sortNotes(draft.notes, stateUtils.notesOrder(draft.settings), draft.settings.uncompletedTodosOnTop);
-				draft.noteListLastSortTime = Date.now();
+
+				draft.noteListLastSortEndTime = Date.now();
 			}
 			break;
 
