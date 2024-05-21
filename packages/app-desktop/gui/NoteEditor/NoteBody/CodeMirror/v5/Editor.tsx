@@ -136,6 +136,7 @@ function Editor(props: EditorProps, ref: any) {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	const editor_change = useCallback((cm: any, change: any) => {
 		if (props.onChange && change.origin !== 'setValue') {
+			logger.debug('Calling props.onChange -- changed from non-setValue location');
 			props.onChange(cm.getValue());
 			lastEditTime.current = Date.now();
 		}

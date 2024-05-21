@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, RefObject } from 'react';
+import { useState, useEffect, useCallback, RefObject, useRef } from 'react';
 import { FormNote, defaultFormNote, ResourceInfos } from './types';
 import { clearResourceCache, attachedResources } from './resourceHandling';
 import AsyncActionQueue from '@joplin/lib/AsyncActionQueue';
@@ -80,11 +80,14 @@ export default function useFormNote(dependencies: HookDependencies) {
 	const previousNoteId = usePrevious(formNote.id);
 	const [resourceInfos, setResourceInfos] = useState<ResourceInfos>({});
 
+	const formNoteRef = useRef(formNote);
+	formNoteRef.current = formNote;
+
 	// Increasing the value of this counter cancels any ongoing note refreshes and starts
 	// a new refresh.
 	const [formNoteRefreshScheduled, setFormNoteRefreshScheduled] = useState<number>(0);
 
-	const initNoteState = useCallback(async (n: NoteEntity) => {
+	const initNoteState = useCallback(async (n: NoteEntity, isNewNote: boolean) => {
 		let originalCss = '';
 
 		if (n.markup_language === MarkupToHtml.MARKUP_LANGUAGE_HTML) {
@@ -115,7 +118,16 @@ export default function useFormNote(dependencies: HookDependencies) {
 		// be first because it loads the resource infos in an async way. If we
 		// swap them, the formNote will be updated first and rendered, then the
 		// the resources will load, and the note will be re-rendered.
-		setResourceInfos(await attachedResources(n.body));
+		const resources = await attachedResources(n.body);
+
+		// If the user changes the note while resources are loading, this can lead to
+		// a note being incorrectly marked as "unchanged".
+		if (!isNewNote && formNoteRef.current?.hasChanged) {
+			logger.info('Cancelled note refresh -- form note changed while loading attached resources.');
+			return null;
+		}
+
+		setResourceInfos(resources);
 		setFormNote(newFormNote);
 
 		logger.debug('Resource info and form note set.');
@@ -127,6 +139,10 @@ export default function useFormNote(dependencies: HookDependencies) {
 
 	useEffect(() => {
 		if (formNoteRefreshScheduled <= 0) return () => {};
+		if (formNoteRef.current.hasChanged) {
+			logger.info('Form note changed between scheduling a refresh and the refresh itself. Cancelling the refresh.');
+			return () => {};
+		}
 
 		logger.info('Sync has finished and note has never been changed - reloading it');
 
@@ -144,7 +160,7 @@ export default function useFormNote(dependencies: HookDependencies) {
 				return;
 			}
 
-			await initNoteState(n);
+			await initNoteState(n, false);
 
 			logger.debug('clearing scheduled note refresh. Cancelled: ', cancelled);
 			setFormNoteRefreshScheduled(0);
@@ -174,7 +190,7 @@ export default function useFormNote(dependencies: HookDependencies) {
 		const syncJustEnded = prevSyncStarted && !syncStarted;
 
 		if (!decryptionJustEnded && !syncJustEnded) return;
-		if (formNote.hasChanged) return;
+		if (formNoteRef.current.hasChanged) return;
 
 		logger.debug('Sync or decryption finished with an unchanged formNote.');
 
@@ -185,7 +201,7 @@ export default function useFormNote(dependencies: HookDependencies) {
 	}, [
 		prevSyncStarted, syncStarted,
 		prevDecryptionStarted, decryptionStarted,
-		formNote.hasChanged, refreshFormNote,
+		refreshFormNote,
 	]);
 
 	useEffect(() => {
@@ -222,7 +238,7 @@ export default function useFormNote(dependencies: HookDependencies) {
 
 			await onBeforeLoad({ formNote });
 
-			const newFormNote = await initNoteState(n);
+			const newFormNote = await initNoteState(n, true);
 
 			setIsNewNote(isProvisional);
 
