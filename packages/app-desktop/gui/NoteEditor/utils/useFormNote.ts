@@ -8,13 +8,15 @@ import Setting from '@joplin/lib/models/Setting';
 import usePrevious from '../../hooks/usePrevious';
 import ResourceEditWatcher from '@joplin/lib/services/ResourceEditWatcher/index';
 
-const { MarkupToHtml } = require('@joplin/renderer');
+import { MarkupToHtml } from '@joplin/renderer';
 import Note from '@joplin/lib/models/Note';
-import { reg } from '@joplin/lib/registry';
 import ResourceFetcher from '@joplin/lib/services/ResourceFetcher';
 import DecryptionWorker from '@joplin/lib/services/DecryptionWorker';
 import { NoteEntity } from '@joplin/lib/services/database/types';
 import { focus } from '@joplin/lib/utils/focusHandler';
+import Logger from '@joplin/utils/Logger';
+
+const logger = Logger.create('useFormNote');
 
 export interface OnLoadEvent {
 	formNote: FormNote;
@@ -82,7 +84,7 @@ export default function useFormNote(dependencies: HookDependencies) {
 	// a new refresh.
 	const [formNoteRefreshScheduled, setFormNoteRefreshScheduled] = useState<number>(0);
 
-	async function initNoteState(n: NoteEntity) {
+	const initNoteState = useCallback(async (n: NoteEntity) => {
 		let originalCss = '';
 
 		if (n.markup_language === MarkupToHtml.MARKUP_LANGUAGE_HTML) {
@@ -107,6 +109,8 @@ export default function useFormNote(dependencies: HookDependencies) {
 			encryption_applied: n.encryption_applied,
 		};
 
+		logger.debug('Initializing note state');
+
 		// Note that for performance reason,the call to setResourceInfos should
 		// be first because it loads the resource infos in an async way. If we
 		// swap them, the formNote will be updated first and rendered, then the
@@ -114,15 +118,17 @@ export default function useFormNote(dependencies: HookDependencies) {
 		setResourceInfos(await attachedResources(n.body));
 		setFormNote(newFormNote);
 
+		logger.debug('Resource info and form note set.');
+
 		await handleResourceDownloadMode(n.body);
 
 		return newFormNote;
-	}
+	}, []);
 
 	useEffect(() => {
 		if (formNoteRefreshScheduled <= 0) return () => {};
 
-		reg.logger().info('Sync has finished and note has never been changed - reloading it');
+		logger.info('Sync has finished and note has never been changed - reloading it');
 
 		let cancelled = false;
 
@@ -134,11 +140,13 @@ export default function useFormNote(dependencies: HookDependencies) {
 			// it would not have been loaded in the editor (due to note selection changing
 			// on delete)
 			if (!n) {
-				reg.logger().warn('Trying to reload note that has been deleted:', noteId);
+				logger.warn('Trying to reload note that has been deleted:', noteId);
 				return;
 			}
 
 			await initNoteState(n);
+
+			logger.debug('clearing scheduled note refresh. Cancelled: ', cancelled);
 			setFormNoteRefreshScheduled(0);
 		};
 
@@ -147,12 +155,14 @@ export default function useFormNote(dependencies: HookDependencies) {
 		return () => {
 			cancelled = true;
 		};
+		// eslint-disable-next-line @seiyab/react-hooks/exhaustive-deps -- Old code before rule was applied
 	}, [formNoteRefreshScheduled, noteId]);
 
 	const refreshFormNote = useCallback(() => {
 		// Increase the counter to cancel any ongoing refresh attempts
 		// and start a new one.
 		setFormNoteRefreshScheduled(formNoteRefreshScheduled + 1);
+		logger.debug('Form note refresh has been scheduled.');
 	}, [formNoteRefreshScheduled]);
 
 	useEffect(() => {
@@ -165,6 +175,8 @@ export default function useFormNote(dependencies: HookDependencies) {
 
 		if (!decryptionJustEnded && !syncJustEnded) return;
 		if (formNote.hasChanged) return;
+
+		logger.debug('Sync or decryption finished with an unchanged formNote.');
 
 		// Refresh the form note.
 		// This is kept separate from the above logic so that when prevSyncStarted is changed
@@ -186,7 +198,7 @@ export default function useFormNote(dependencies: HookDependencies) {
 
 		let cancelled = false;
 
-		reg.logger().debug('Loading existing note', noteId);
+		logger.debug('Loading existing note', noteId);
 
 		function handleAutoFocus(noteIsTodo: boolean) {
 			if (!isProvisional) return;
@@ -206,7 +218,7 @@ export default function useFormNote(dependencies: HookDependencies) {
 			const n = await Note.load(noteId);
 			if (cancelled) return;
 			if (!n) throw new Error(`Cannot find note with ID: ${noteId}`);
-			reg.logger().debug('Loaded note:', n);
+			logger.debug('Loaded note:', n);
 
 			await onBeforeLoad({ formNote });
 

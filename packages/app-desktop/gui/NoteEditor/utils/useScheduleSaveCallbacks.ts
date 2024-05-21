@@ -48,6 +48,7 @@ const useScheduleSaveCallbacks = (props: Props) => {
 
 	const saveNoteIfWillChange = useCallback(async (formNote: FormNote) => {
 		if (!formNote.id || !formNote.bodyWillChangeId) return;
+		logger.debug('Note will change -- saving. ID', formNote.id);
 
 		const body = await props.editorRef.current.content();
 

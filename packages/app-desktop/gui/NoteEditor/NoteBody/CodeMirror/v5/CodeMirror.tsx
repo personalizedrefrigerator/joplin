@@ -720,7 +720,12 @@ function CodeMirror(props: NoteBodyEditorProps, ref: ForwardedRef<NoteBodyEditor
 		// window size is changed for example) but this is a fairly quick operation so it's worth
 		// it.
 		editorRef.current.refresh();
+		reg.logger().debug('editorRef.current.refresh()');
 	}, [rootSize, styles.editor, props.visiblePanes]);
+
+	useEffect(() => {
+		reg.logger().debug('Component mounted.');
+	}, []);
 
 	useContextMenu({
 		plugins: props.plugins,

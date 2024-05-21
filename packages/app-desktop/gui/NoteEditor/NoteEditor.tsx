@@ -32,7 +32,6 @@ import { itemIsReadOnly } from '@joplin/lib/models/utils/readOnly';
 const { themeStyle } = require('@joplin/lib/theme');
 const { substrWithEllipsis } = require('@joplin/lib/string-utils');
 import NoteSearchBar from '../NoteSearchBar';
-import { reg } from '@joplin/lib/registry';
 import Note from '@joplin/lib/models/Note';
 import Folder from '@joplin/lib/models/Folder';
 import bridge from '../../services/bridge';
@@ -51,12 +50,15 @@ import getPluginSettingValue from '@joplin/lib/services/plugins/utils/getPluginS
 import { MarkupLanguage } from '@joplin/renderer';
 import useScrollWhenReadyOptions from './utils/useScrollWhenReadyOptions';
 import useScheduleSaveCallbacks from './utils/useScheduleSaveCallbacks';
+import Logger from '@joplin/utils/Logger';
 
 const commands = [
 	require('./commands/showRevisions'),
 ];
 
 const toolbarButtonUtils = new ToolbarButtonUtils(CommandService.instance());
+
+const logger = Logger.create('NoteEditor');
 
 function NoteEditor(props: NoteEditorProps) {
 	const [showRevisions, setShowRevisions] = useState(false);
@@ -166,7 +168,7 @@ function NoteEditor(props: NoteEditorProps) {
 			// trigger onChange events, for example the textarea might be cleared.
 			// We need to ignore these events, otherwise the note is going to be saved
 			// with an invalid body.
-			reg.logger().debug('Skipping change event because the component is unmounted');
+			logger.debug('Skipping change event because the component is unmounted');
 			return;
 		}
 
@@ -454,6 +456,12 @@ function NoteEditor(props: NoteEditorProps) {
 		await openItemById(resourceId, props.dispatch);
 	}, [props.dispatch]);
 
+	const noViewableNotes = formNote.encryption_applied || !formNote.id || !effectiveNoteId;
+	useEffect(() => {
+		logger.debug(`noViewableNotes has changed. Now: ${noViewableNotes}; encrypted: ${formNote.encryption_applied}, id: ${formNote.id}, effectiveNoteId: ${effectiveNoteId}`);
+		// eslint-disable-next-line @seiyab/react-hooks/exhaustive-deps -- debug logic.
+	}, [noViewableNotes]);
+
 	if (showRevisions) {
 		const theme = themeStyle(props.themeId);
 
@@ -566,7 +574,7 @@ function NoteEditor(props: NoteEditorProps) {
 		}
 	}
 
-	if (formNote.encryption_applied || !formNote.id || !effectiveNoteId) {
+	if (noViewableNotes) {
 		return renderNoNotes(styles.root);
 	}
 

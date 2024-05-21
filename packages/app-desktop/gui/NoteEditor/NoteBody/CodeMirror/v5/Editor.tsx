@@ -34,6 +34,9 @@ import Setting from '@joplin/lib/models/Setting';
 
 import { reg } from '@joplin/lib/registry';
 import { focus } from '@joplin/lib/utils/focusHandler';
+import Logger from '@joplin/utils/Logger';
+
+const logger = Logger.create('CodeMirror/v5/Editor');
 
 // Based on http://pypl.github.io/PYPL.html
 const topLanguages = [
@@ -250,7 +253,9 @@ function Editor(props: EditorProps, ref: any) {
 		if (editor) {
 			//  Value can also be changed by the editor itself so we need this guard
 			//  to prevent loops
-			if (props.value !== editor.getValue()) {
+			const oldValue = editor.getValue();
+			if (props.value !== oldValue) {
+				logger.debug('Editor content changed externally. Was previously', oldValue ? 'non-empty' : 'empty');
 				editor.setValue(props.value);
 				editor.clearHistory();
 			}
