@@ -34,7 +34,7 @@ export interface HookDependencies {
 	onAfterLoad(event: OnLoadEvent): void;
 }
 
-export type SetFormNote = ReturnType<typeof useState<FormNote>>[1];
+export type OnSetFormNote = ReturnType<typeof useState<FormNote>>[1];
 
 // eslint-disable-next-line @typescript-eslint/ban-types -- Old code before rule was applied
 function installResourceChangeHandler(onResourceChangeHandler: Function) {
@@ -162,7 +162,7 @@ export default function useFormNote(dependencies: HookDependencies) {
 
 			await initNoteState(n, false);
 
-			logger.debug('clearing scheduled note refresh. Cancelled: ', cancelled);
+			logger.debug('finished scheduled note refresh. Cancelled: ', cancelled);
 			setFormNoteRefreshScheduled(0);
 		};
 
@@ -295,5 +295,24 @@ export default function useFormNote(dependencies: HookDependencies) {
 		};
 	}, [formNote.body]);
 
-	return { isNewNote, formNote, setFormNote, resourceInfos };
+	// Currently, useFormNote relies on formNoteRef being up-to-date immediately after the editor
+	// changes, with no delay during which async code can run. Even a small delay (e.g. that introduced
+	// by a setState -> useEffect) can lead to a race condition. See https://github.com/laurent22/joplin/issues/8960.
+	const onSetFormNote: OnSetFormNote = useCallback(newFormNote => {
+		if (typeof newFormNote === 'function') {
+			const newNote = newFormNote(formNoteRef.current);
+			formNoteRef.current = newNote;
+			setFormNote(newNote);
+		} else {
+			formNoteRef.current = newFormNote;
+			setFormNote(newFormNote);
+		}
+	}, [setFormNote]);
+
+	return {
+		isNewNote,
+		formNote,
+		setFormNote: onSetFormNote,
+		resourceInfos,
+	};
 }
