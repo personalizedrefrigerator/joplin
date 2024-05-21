@@ -200,9 +200,11 @@ function NoteEditor(props: NoteEditorProps) {
 		if (changeId !== null && field === 'body' && formNote.bodyWillChangeId !== changeId) {
 			// Note was changed, but another note was loaded before save - skipping
 			// The previously loaded note, that was modified, will be saved via saveNoteIfWillChange()
+			logger.debug('skipping save -- another note was loaded');
 		} else {
 			setFormNote(newNote);
 			void scheduleSaveNote(newNote);
+			logger.debug('setFormNote and scheduled save. Changed:', newNote.hasChanged);
 		}
 	}, [handleProvisionalFlag, formNote, setFormNote, isNewNote, titleHasBeenManuallyChanged, scheduleSaveNote]);
 
