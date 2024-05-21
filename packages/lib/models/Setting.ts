@@ -1501,6 +1501,7 @@ class Setting extends BaseModel {
 				options: () => {
 					return {
 						0: _('Disabled'),
+						5: _('5s'),
 						300: _('%d minutes', 5),
 						600: _('%d minutes', 10),
 						1800: _('%d minutes', 30),
