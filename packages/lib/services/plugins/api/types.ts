@@ -616,8 +616,8 @@ export enum ContentScriptType {
 	 * }
 	 * ```
 	 *
-	 * See [the
-	 * demo](https://github.com/laurent22/joplin/tree/dev/packages/app-cli/tests/support/plugins/content_script)
+	 * See
+	 * [the demo](https://github.com/laurent22/joplin/tree/dev/packages/app-cli/tests/support/plugins/content_script)
 	 * for a simple Markdown-it plugin example.
 	 *
 	 * ## Exported members
@@ -632,8 +632,8 @@ export enum ContentScriptType {
 	 *
 	 * - Using the **optional** `assets` key you may specify assets such as JS
 	 *   or CSS that should be loaded in the rendered HTML document. Check for
-	 *   example the Joplin [Mermaid
-	 *   plugin](https://github.com/laurent22/joplin/blob/dev/packages/renderer/MdToHtml/rules/mermaid.ts)
+	 *   example the Joplin
+	 *   [Mermaid plugin](https://github.com/laurent22/joplin/blob/dev/packages/renderer/MdToHtml/rules/mermaid.ts)
 	 *   to see how the data should be structured.
 	 *
 	 * ## Supporting the Rich Text Editor
@@ -706,8 +706,8 @@ export enum ContentScriptType {
 	 * ```
 	 *
 	 * See {@link JoplinContentScripts.onMessage} for more details, as well as
-	 * the [postMessage
-	 * demo](https://github.com/laurent22/joplin/tree/dev/packages/app-cli/tests/support/plugins/post_messages).
+	 * the
+	 * [postMessage demo](https://github.com/laurent22/joplin/tree/dev/packages/app-cli/tests/support/plugins/post_messages).
 	 *
 	 * ## Registering an existing Markdown-it plugin
 	 *
@@ -773,8 +773,8 @@ export enum ContentScriptType {
 	 *
 	 * - Using the **optional** `assets` key you may specify **only** CSS assets
 	 *   that should be loaded in the rendered HTML document. Check for example
-	 *   the Joplin [Mermaid
-	 *   plugin](https://github.com/laurent22/joplin/blob/dev/packages/renderer/MdToHtml/rules/mermaid.ts)
+	 *   the Joplin
+	 *   [Mermaid plugin](https://github.com/laurent22/joplin/blob/dev/packages/renderer/MdToHtml/rules/mermaid.ts)
 	 *   to see how the data should be structured.
 	 *
 	 * One of the `plugin`, `codeMirrorResources`, or `codeMirrorOptions` keys
@@ -807,8 +807,8 @@ export enum ContentScriptType {
 	 * ```
 	 *
 	 * See {@link JoplinContentScripts.onMessage} for more details, as well as
-	 * the [postMessage
-	 * demo](https://github.com/laurent22/joplin/tree/dev/packages/app-cli/tests/support/plugins/post_messages).
+	 * the
+	 * [postMessage demo](https://github.com/laurent22/joplin/tree/dev/packages/app-cli/tests/support/plugins/post_messages).
 	 *
 	 */
 	CodeMirrorPlugin = 'codeMirrorPlugin',

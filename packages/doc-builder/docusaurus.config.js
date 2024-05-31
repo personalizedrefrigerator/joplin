@@ -147,6 +147,21 @@ const config = {
 				},
 			},
 		],
+		[
+			"docusaurus-plugin-typedoc",
+			{
+				entryPoints: "./typedoc/index.ts",
+				tsconfig: "./typedoc/tsconfig.json",
+				readme: "none",
+				excludePrivate: true,
+				parametersFormat: "table",
+				textContentMappings: {
+				  "title.indexPage": "Plugin API",
+				  "title.memberPage": "{name}",
+				},
+				out: "./help/api/plugin-api-docs",
+			},
+		],
 	],
 
 	markdown: {

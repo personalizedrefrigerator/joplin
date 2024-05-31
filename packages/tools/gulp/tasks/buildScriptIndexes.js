@@ -4,7 +4,7 @@ const utils = require('../utils');
 const glob = require('glob');
 const rootDir = utils.rootDir();
 
-async function processDirectory(dir, indexFilePath = null, typeScriptType = null, imports = null, importNameTemplate = null, exportNameTemplate = null) {
+async function processDirectory(dir, exportAsList = true, indexFilePath = null, typeScriptType = null, imports = null, importPathTemplate = null, importNameTemplate = null, exportNameTemplate = null) {
 	if (!indexFilePath) indexFilePath = `${dir}/index.ts`;
 	if (!typeScriptType) typeScriptType = 'any';
 	if (!importNameTemplate) importNameTemplate = '* as FILE_NAME';
@@ -25,7 +25,7 @@ async function processDirectory(dir, indexFilePath = null, typeScriptType = null
 
 	for (const tsFile of tsFiles) {
 		const f = utils.getFilename(tsFile);
-		fileContent.push(`import ${importNameTemplate.replace(/FILE_NAME/g, f)} from './${f}';`);
+		fileContent.push(`import ${importNameTemplate.replace(/FILE_NAME/g, f)} from '${importPathTemplate ?? './'}${f}';`);
 	}
 
 	fileContent.push('');
@@ -35,18 +35,24 @@ async function processDirectory(dir, indexFilePath = null, typeScriptType = null
 		fileContent.push('');
 	}
 
-	fileContent.push(`const index: ${typeScriptType}[] = [`);
+	if (exportAsList) {
+		fileContent.push(`const index: ${typeScriptType}[] = [`);
+	} else {
+		fileContent.push('export {');
+	}
 
 	for (const tsFile of tsFiles) {
 		const f = utils.getFilename(tsFile);
 		fileContent.push(`\t${exportNameTemplate.replace(/FILE_NAME/g, f)},`);
 	}
 
-	fileContent.push('];');
-
-	fileContent.push('');
-
-	fileContent.push('export default index;');
+	if (exportAsList) {
+		fileContent.push('];');
+		fileContent.push('');
+		fileContent.push('export default index;');
+	} else {
+		fileContent.push('};');
+	}
 
 	console.info(`Generating ${indexFilePath}...`);
 
@@ -69,12 +75,24 @@ module.exports = {
 		await processDirectory(`${rootDir}/packages/app-desktop/gui/Sidebar/commands`);
 		await processDirectory(`${rootDir}/packages/app-mobile/commands`);
 		await processDirectory(`${rootDir}/packages/lib/commands`);
+		await processDirectory(
+			`${rootDir}/packages/lib/services/plugins/api`,
+			false,
+			`${rootDir}/packages/doc-builder/typedoc/index.ts`,
+			null,
+			null,
+			'@joplin/lib/services/plugins/api/',
+			'{default as FILE_NAME}',
+			null,
+		);
 
 		await processDirectory(
 			`${rootDir}/packages/lib/services/database/migrations`,
+			true,
 			null,
 			'Migration',
 			'import { Migration } from \'../types\';',
+			null,
 			'migrationFILE_NAME',
 			'migrationFILE_NAME',
 		);
