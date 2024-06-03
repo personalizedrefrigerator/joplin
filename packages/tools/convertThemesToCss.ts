@@ -13,6 +13,7 @@ function themeIdFromName(name: string) {
 		dracula: 5,
 		nord: 6,
 		aritimDark: 7,
+		lightModern: 8,
 	};
 
 	if (!nameToId[name]) throw new Error(`Invalid name: ${name}`);

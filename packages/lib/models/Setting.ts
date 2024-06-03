@@ -260,6 +260,7 @@ class Setting extends BaseModel {
 	public static THEME_DRACULA = 5;
 	public static THEME_NORD = 6;
 	public static THEME_ARITIM_DARK = 7;
+	public static THEME_LIGHT_MODERN = 8;
 
 	public static FONT_DEFAULT = 0;
 	public static FONT_MENLO = 1;
@@ -428,6 +429,7 @@ class Setting extends BaseModel {
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 			const output: any = {};
 			output[Setting.THEME_LIGHT] = _('Light');
+			output[Setting.THEME_LIGHT_MODERN] = _('Light modern');
 			output[Setting.THEME_DARK] = _('Dark');
 			output[Setting.THEME_DRACULA] = _('Dracula');
 			output[Setting.THEME_SOLARIZED_LIGHT] = _('Solarised Light');
