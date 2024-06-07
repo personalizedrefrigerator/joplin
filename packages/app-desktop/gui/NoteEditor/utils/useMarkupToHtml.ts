@@ -5,8 +5,10 @@ import Setting from '@joplin/lib/models/Setting';
 import shim from '@joplin/lib/shim';
 
 const { themeStyle } = require('@joplin/lib/theme');
-import Note from '@joplin/lib/models/Note';
 import { MarkupToHtmlOptions } from './types';
+import { ItemIdToUrlHandler } from '@joplin/renderer/types';
+import Resource from '@joplin/lib/models/Resource';
+import { toFileProtocolPath } from '@joplin/utils/path';
 
 interface HookDependencies {
 	themeId: number;
@@ -39,14 +41,17 @@ export default function useMarkupToHtml(deps: HookDependencies) {
 		md = md || '';
 
 		const theme = themeStyle(themeId);
-		let resources = {};
+		const resources = options.resourceInfos;
 
+		let itemIdToUrl: ItemIdToUrlHandler|undefined = undefined;
 		if (options.replaceResourceInternalToExternalLinks) {
-			md = await Note.replaceResourceInternalToExternalLinks(md, { useAbsolutePaths: true });
-		} else {
-			resources = options.resourceInfos;
+			itemIdToUrl = (resourceId: string, defaultUrl: string, cacheBreaker = '') => {
+				if (resources[resourceId]) {
+					return toFileProtocolPath(Resource.fullPath(resources[resourceId].item)) + cacheBreaker;
+				}
+				return defaultUrl;
+			};
 		}
-
 		delete options.replaceResourceInternalToExternalLinks;
 
 		const result = await markupToHtml.render(markupLanguage, md, theme, {
@@ -58,6 +63,7 @@ export default function useMarkupToHtml(deps: HookDependencies) {
 			codeHighlightCacheKey: 'useMarkupToHtml',
 			settingValue: deps.settingValue,
 			whiteBackgroundNoteRendering,
+			itemIdToUrl,
 			...options,
 		});
 

@@ -142,9 +142,8 @@ export const imageReplacement = function(ResourceModel: OptionsResourceModel, sr
 	if (ResourceModel.isSupportedImageMimeType(mime)) {
 		let newSrc = '';
 
-		if (itemIdToUrl) {
-			newSrc = itemIdToUrl(resource.id);
-		} else {
+		const cacheBreaker = `?t=${resource.updated_time}`;
+		{
 			const temp = [];
 
 			if (resourceBaseUrl) {
@@ -154,9 +153,13 @@ export const imageReplacement = function(ResourceModel: OptionsResourceModel, sr
 			}
 
 			temp.push(ResourceModel.filename(resource));
-			temp.push(`?t=${resource.updated_time}`);
+			temp.push(cacheBreaker);
 
 			newSrc = temp.join('');
+		}
+
+		if (itemIdToUrl) {
+			newSrc = itemIdToUrl(resource.id, newSrc, cacheBreaker);
 		}
 
 		// let newSrc = `./${ResourceModel.filename(resource)}`;

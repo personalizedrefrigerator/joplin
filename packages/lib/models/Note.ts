@@ -202,7 +202,7 @@ export default class Note extends BaseItem {
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	public static async replaceResourceExternalToInternalLinks(body: string, options: any = null) {
+	public static replaceResourceExternalToInternalLinks(body: string, options: any = null) {
 		options = { useAbsolutePaths: false, ...options };
 
 		const resourceDir = toForwardSlashes(Setting.value('resourceDir'));

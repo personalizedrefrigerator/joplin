@@ -2,13 +2,22 @@ import { MarkupLanguage } from './MarkupToHtml';
 import { Options as NoteStyleOptions } from './noteStyle';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-export type ItemIdToUrlHandler = (resource: any)=> string;
+export type ItemIdToUrlHandler = (resourceId: string, defaultUrl: string|null, cacheBreaker: string)=> string;
 
 interface ResourceEntity {
-	id: string;
+	id?: string;
 	title?: string;
 	mime?: string;
 	file_extension?: string;
+}
+
+interface ResourceInfo {
+	item: ResourceEntity;
+	localState: unknown;
+}
+
+export interface ResourceInfos {
+	[id: string]: ResourceInfo;
 }
 
 export interface FsDriver {
@@ -49,7 +58,7 @@ export interface RenderOptions {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	settingValue?: (pluginId: string, key: string)=> any;
 
-	resources?: Record<string, ResourceEntity>;
+	resources?: ResourceInfos;
 
 	// HtmlToHtml only
 	whiteBackgroundNoteRendering?: boolean;

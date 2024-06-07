@@ -197,8 +197,7 @@ export default function(theme: any, options: Options = null) {
 
 		.resource-icon {
 			display: inline-block;
-			position: relative;
-			top: 0.3em;
+			vertical-align: text-bottom;
 			text-decoration: none;
 			width: 1.2em;
 			height: 1.4em;
