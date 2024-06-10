@@ -133,6 +133,33 @@ test.describe('main', () => {
 		expect(finalCodeMirrorContent).toContain(`:/${resourceId}`);
 	});
 
+	test('should toggle bulleted lists in the Rich Text editor when the default keyboard shortcut is pressed', async ({ mainWindow }) => {
+		const mainScreen = new MainScreen(mainWindow);
+		await mainScreen.createNewNote('Test');
+		const editor = mainScreen.noteEditor;
+
+		// Switch to the RTE
+		await editor.toggleEditorsButton.click();
+		await editor.richTextEditor.click();
+
+		await mainWindow.keyboard.type('Test...');
+
+		// Default keyboard shortcut for "toggle bulleted list"
+		await mainWindow.keyboard.down('Control');
+		await mainWindow.keyboard.down('Alt');
+		await mainWindow.keyboard.type('-');
+		await mainWindow.keyboard.up('Control');
+		await mainWindow.keyboard.up('Alt');
+
+		await expect(editor.getTinyMCEFrameLocator().locator('li')).toHaveText('Testing...');
+
+		// Should have updated the markdown
+		await editor.toggleEditorsButton.click();
+		await editor.codeMirrorEditor.waitFor();
+		const codeMirrorContent = await editor.codeMirrorEditor.innerText();
+		expect(codeMirrorContent).toBe('- Testing...');
+	});
+
 	test('should correctly resize large images', async ({ electronApp, mainWindow }) => {
 		const mainScreen = new MainScreen(mainWindow);
 		await mainScreen.createNewNote('Image resize test (part 1)');
