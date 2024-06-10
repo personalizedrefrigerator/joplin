@@ -1261,6 +1261,7 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: any) => {
 
 				for (const command of Object.keys(joplinCommandToTinyMceCommands)) {
 					if (keymapService.hasCommand(command) && keymapService.getAccelerator(command) === eventAccelerator) {
+						event.preventDefault();
 						void CommandService.instance().execute(command);
 						break;
 					}
