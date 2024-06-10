@@ -589,6 +589,12 @@ export interface CodeMirrorControl {
 		 */
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 		enableLanguageDataAutocomplete: { of: (enabled: boolean)=> any };
+
+		/**
+		 * [Annotation](https://codemirror.net/docs/ref/#state.Annotation)s added to transactions
+		 * by Joplin. For example, to indicate that the editor switched notes.
+		 */
+		annotations: { switchNotesAnnotation: unknown };
 	};
 }
 

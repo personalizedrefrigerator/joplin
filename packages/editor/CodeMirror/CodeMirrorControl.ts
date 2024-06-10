@@ -1,13 +1,14 @@
 import { EditorView, KeyBinding, keymap } from '@codemirror/view';
-import { EditorCommandType, EditorControl, EditorSettings, LogMessageCallback, ContentScriptData, SearchState, EditorUpdateReason, EditorUpdateContext } from '../types';
+import { EditorCommandType, EditorControl, EditorSettings, LogMessageCallback, ContentScriptData, SearchState, EditorUpdateReason } from '../types';
 import CodeMirror5Emulation from './CodeMirror5Emulation/CodeMirror5Emulation';
 import editorCommands from './editorCommands/editorCommands';
-import { Annotation, Compartment, EditorSelection, Extension, StateEffect, Transaction } from '@codemirror/state';
+import { Compartment, EditorSelection, Extension, StateEffect } from '@codemirror/state';
 import { updateLink } from './markdown/markdownCommands';
 import { SearchQuery, setSearchQuery } from '@codemirror/search';
 import PluginLoader from './pluginApi/PluginLoader';
 import customEditorCompletion, { editorCompletionSource, enableLanguageDataAutocomplete } from './pluginApi/customEditorCompletion';
 import { CompletionSource } from '@codemirror/autocomplete';
+import updateReasonToAnnotations, { switchNotesAnnotation } from './util/updateReasonToAnnotations';
 
 interface Callbacks {
 	onUndoRedo(): void;
@@ -20,22 +21,6 @@ interface Callbacks {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 type EditorUserCommand = (...args: any[])=> any;
 
-
-const switchNotesAnnotation = Annotation.define<{ noteId: string }>();
-
-const updateReasonToAnnotations = (reason: EditorUpdateContext|undefined) => {
-	if (!reason) return [];
-
-	if (reason.reason === EditorUpdateReason.UserPaste) {
-		return [Transaction.userEvent.of('input.paste')];
-	} else if (reason.reason === EditorUpdateReason.SwitchNotes) {
-		return [switchNotesAnnotation.of({
-			noteId: reason.newNoteId,
-		})];
-	}
-
-	return [];
-};
 
 export default class CodeMirrorControl extends CodeMirror5Emulation implements EditorControl {
 	private _pluginControl: PluginLoader;
@@ -106,14 +91,14 @@ export default class CodeMirrorControl extends CodeMirror5Emulation implements E
 		this.editor.scrollDOM.scrollTop = fraction * maxScroll;
 	}
 
-	public insertText(text: string, reason?: EditorUpdateContext) {
+	public insertText(text: string, reason?: EditorUpdateReason) {
 		this.editor.dispatch(
 			this.editor.state.replaceSelection(text),
 			{ annotations: updateReasonToAnnotations(reason) },
 		);
 	}
 
-	public updateBody(newBody: string, reason?: EditorUpdateContext) {
+	public updateBody(newBody: string, reason?: EditorUpdateReason) {
 		// TODO: doc.toString() can be slow for large documents.
 		const currentBody = this.editor.state.doc.toString();
 

@@ -16,7 +16,7 @@ import { MarkupToHtml } from '@joplin/renderer';
 const { clipboard } = require('electron');
 import { reg } from '@joplin/lib/registry';
 import ErrorBoundary from '../../../../ErrorBoundary';
-import { EditorKeymap, EditorLanguageType, EditorSettings, EditorUpdateReason } from '@joplin/editor/types';
+import { EditorKeymap, EditorLanguageType, EditorSettings, UpdateReasonType } from '@joplin/editor/types';
 import useStyles from '../utils/useStyles';
 import { EditorEvent, EditorEventType } from '@joplin/editor/events';
 import useScrollHandler from '../utils/useScrollHandler';
@@ -82,7 +82,7 @@ const CodeMirror = (props: NoteBodyEditorProps, ref: ForwardedRef<NoteBodyEditor
 		const resourceMds = await getResourcesFromPasteEvent(event);
 		if (!resourceMds.length) return;
 		if (editorRef.current) {
-			editorRef.current.insertText(resourceMds.join('\n'), { reason: EditorUpdateReason.UserPaste });
+			editorRef.current.insertText(resourceMds.join('\n'), { reason: UpdateReasonType.UserPaste });
 		}
 	}, []);
 
@@ -129,7 +129,7 @@ const CodeMirror = (props: NoteBodyEditorProps, ref: ForwardedRef<NoteBodyEditor
 	const editorPasteText = useCallback(async () => {
 		if (editorRef.current) {
 			const modifiedMd = await Note.replaceResourceExternalToInternalLinks(clipboard.readText(), { useAbsolutePaths: true });
-			editorRef.current.insertText(modifiedMd, { reason: EditorUpdateReason.UserPaste });
+			editorRef.current.insertText(modifiedMd, { reason: UpdateReasonType.UserPaste });
 		}
 	}, []);
 
@@ -373,7 +373,11 @@ const CodeMirror = (props: NoteBodyEditorProps, ref: ForwardedRef<NoteBodyEditor
 	const noteIdRef = useRef(props.noteId);
 	noteIdRef.current = props.noteId;
 	useEffect(() => {
-		if (editorRef.current?.updateBody(props.content, { reason: EditorUpdateReason.SwitchNotes, newNoteId: noteIdRef.current })) {
+		const updatedBody = editorRef.current?.updateBody(
+			props.content,
+			{ reason: UpdateReasonType.SwitchNotes, newNoteId: noteIdRef.current },
+		);
+		if (updatedBody) {
 			editorRef.current?.clearHistory();
 		}
 	}, [props.content]);

@@ -85,16 +85,16 @@ export interface ContentScriptData {
 	postMessageHandler: (message: any)=> any;
 }
 
-// Intended to correspond with https://codemirror.net/docs/ref/#state.Transaction%5EuserEvent
-export enum EditorUpdateReason {
+export enum UpdateReasonType {
 	UserPaste = 'input.paste',
 	SwitchNotes = 'switchNotes',
 }
 
-export type EditorUpdateContext = {
-	reason: EditorUpdateReason.UserPaste;
+// Intended to provide additional information to editor plugins.
+export type EditorUpdateReason = {
+	reason: UpdateReasonType.UserPaste;
 }|{
-	reason: EditorUpdateReason.SwitchNotes;
+	reason: UpdateReasonType.SwitchNotes;
 	newNoteId: string;
 };
 
@@ -111,8 +111,8 @@ export interface EditorControl {
 	// 0 corresponds to the top, 1 corresponds to the bottom.
 	setScrollPercent(fraction: number): void;
 
-	insertText(text: string, reason?: EditorUpdateContext): void;
-	updateBody(newBody: string, reason?: EditorUpdateContext): void;
+	insertText(text: string, reason?: EditorUpdateReason): void;
+	updateBody(newBody: string, reason?: EditorUpdateReason): void;
 
 	updateSettings(newSettings: EditorSettings): void;
 

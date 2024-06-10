@@ -754,6 +754,7 @@ packages/editor/CodeMirror/testUtil/typeText.js
 packages/editor/CodeMirror/theme.js
 packages/editor/CodeMirror/util/isInSyntaxNode.js
 packages/editor/CodeMirror/util/setupVim.js
+packages/editor/CodeMirror/util/updateReasonToAnnotations.js
 packages/editor/SelectionFormatting.js
 packages/editor/events.js
 packages/editor/types.js
