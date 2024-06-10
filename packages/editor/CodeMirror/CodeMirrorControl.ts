@@ -1,8 +1,8 @@
 import { EditorView, KeyBinding, keymap } from '@codemirror/view';
-import { EditorCommandType, EditorControl, EditorSettings, LogMessageCallback, ContentScriptData, SearchState, UserEventSource } from '../types';
+import { EditorCommandType, EditorControl, EditorSettings, LogMessageCallback, ContentScriptData, SearchState, EditorUpdateReason, EditorUpdateContext } from '../types';
 import CodeMirror5Emulation from './CodeMirror5Emulation/CodeMirror5Emulation';
 import editorCommands from './editorCommands/editorCommands';
-import { Compartment, EditorSelection, Extension, StateEffect } from '@codemirror/state';
+import { Annotation, Compartment, EditorSelection, Extension, StateEffect, Transaction } from '@codemirror/state';
 import { updateLink } from './markdown/markdownCommands';
 import { SearchQuery, setSearchQuery } from '@codemirror/search';
 import PluginLoader from './pluginApi/PluginLoader';
@@ -19,6 +19,23 @@ interface Callbacks {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 type EditorUserCommand = (...args: any[])=> any;
+
+
+const switchNotesAnnotation = Annotation.define<{ noteId: string }>();
+
+const updateReasonToAnnotations = (reason: EditorUpdateContext|undefined) => {
+	if (!reason) return [];
+
+	if (reason.reason === EditorUpdateReason.UserPaste) {
+		return [Transaction.userEvent.of('input.paste')];
+	} else if (reason.reason === EditorUpdateReason.SwitchNotes) {
+		return [switchNotesAnnotation.of({
+			noteId: reason.newNoteId,
+		})];
+	}
+
+	return [];
+};
 
 export default class CodeMirrorControl extends CodeMirror5Emulation implements EditorControl {
 	private _pluginControl: PluginLoader;
@@ -89,11 +106,14 @@ export default class CodeMirrorControl extends CodeMirror5Emulation implements E
 		this.editor.scrollDOM.scrollTop = fraction * maxScroll;
 	}
 
-	public insertText(text: string, userEvent?: UserEventSource) {
-		this.editor.dispatch(this.editor.state.replaceSelection(text), { userEvent });
+	public insertText(text: string, reason?: EditorUpdateContext) {
+		this.editor.dispatch(
+			this.editor.state.replaceSelection(text),
+			{ annotations: updateReasonToAnnotations(reason) },
+		);
 	}
 
-	public updateBody(newBody: string) {
+	public updateBody(newBody: string, reason?: EditorUpdateContext) {
 		// TODO: doc.toString() can be slow for large documents.
 		const currentBody = this.editor.state.doc.toString();
 
@@ -116,6 +136,7 @@ export default class CodeMirrorControl extends CodeMirror5Emulation implements E
 				},
 				selection: EditorSelection.cursor(newCursorPosition),
 				scrollIntoView: true,
+				annotations: updateReasonToAnnotations(reason),
 			}));
 
 			return true;
@@ -199,6 +220,10 @@ export default class CodeMirrorControl extends CodeMirror5Emulation implements E
 		// See https://discuss.codemirror.net/t/autocompletion-merging-override-in-config/7853
 		completionSource: (completionSource: CompletionSource) => editorCompletionSource.of(completionSource),
 		enableLanguageDataAutocomplete: enableLanguageDataAutocomplete,
+
+		annotations: {
+			switchNotesAnnotation,
+		},
 	};
 
 	public addExtension(extension: Extension) {
