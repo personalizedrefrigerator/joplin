@@ -37,6 +37,7 @@ const md5 = require('md5');
 const { clipboard } = require('electron');
 const supportedLocales = require('./supportedLocales');
 import { hasProtocol } from '@joplin/utils/url';
+import KeymapService from '@joplin/lib/services/KeymapService';
 
 const logger = Logger.create('TinyMCE');
 
@@ -1240,8 +1241,7 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: any) => {
 			}
 		}
 
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-		async function onKeyDown(event: any) {
+		async function onKeyDown(event: KeyboardEvent) {
 			// It seems "paste as text" is handled automatically on Windows and Linux,
 			// so we need to run the below code only on macOS. If we were to run this
 			// on Windows/Linux, we would have this double-paste issue:
@@ -1254,6 +1254,17 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: any) => {
 			if ((event.metaKey || event.ctrlKey) && event.shiftKey && event.code === 'KeyV') {
 				event.preventDefault();
 				pasteAsPlainText(null);
+			} else if (event.metaKey || event.ctrlKey || event.altKey) {
+				// Some commands aren't in Joplin's toolbar, but still need keybindings registered.
+				const keymapService = KeymapService.instance();
+				const eventAccelerator = keymapService.domToElectronAccelerator(event);
+
+				for (const command of Object.keys(joplinCommandToTinyMceCommands)) {
+					if (keymapService.hasCommand(command) && keymapService.getAccelerator(command) === eventAccelerator) {
+						void CommandService.instance().execute(command);
+						break;
+					}
+				}
 			}
 		}
 

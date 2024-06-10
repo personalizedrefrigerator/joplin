@@ -243,6 +243,10 @@ export default class KeymapService extends BaseService {
 		this.keymap[command].accelerator = accelerator;
 	}
 
+	public hasCommand(command: string) {
+		return this.keymap.hasOwnProperty(command);
+	}
+
 	public getAccelerator(command: string) {
 		const item = this.keymap[command];
 		if (!item) throw new Error(`KeymapService: "${command}" command does not exist!`);
