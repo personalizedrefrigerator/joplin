@@ -125,6 +125,10 @@ export default class CodeMirrorControl extends CodeMirror5Emulation implements E
 			}));
 
 			return true;
+		} else if (reason) {
+			this.editor.dispatch(this.editor.state.update({
+				annotations: updateReasonToAnnotations(reason),
+			}));
 		}
 
 		return false;
