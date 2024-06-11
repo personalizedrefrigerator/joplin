@@ -3,9 +3,9 @@ import uuid from '@joplin/lib/uuid';
 import Setting from '@joplin/lib/models/Setting';
 import shim from '@joplin/lib/shim';
 import UndoRedoService from '@joplin/lib/services/UndoRedoService';
-import NoteBodyViewer from '../NoteBodyViewer/NoteBodyViewer';
-import checkPermissions from '../../utils/checkPermissions';
-import NoteEditor from '../NoteEditor/NoteEditor';
+import NoteBodyViewer from '../../NoteBodyViewer/NoteBodyViewer';
+import checkPermissions from '../../../utils/checkPermissions';
+import NoteEditor from '../../NoteEditor/NoteEditor';
 import { Size } from '@joplin/utils/types';
 const FileViewer = require('react-native-file-viewer').default;
 const React = require('react');
@@ -22,48 +22,49 @@ const md5 = require('md5');
 const { BackButtonService } = require('../../services/back-button.js');
 import NavService, { OnNavigateCallback as OnNavigateCallback } from '@joplin/lib/services/NavService';
 import BaseModel, { ModelType } from '@joplin/lib/BaseModel';
-import ActionButton from '../ActionButton';
+import ActionButton from '../../ActionButton';
 const { fileExtension, safeFileExtension } = require('@joplin/lib/path-utils');
 import * as mimeUtils from '@joplin/lib/mime-utils';
-import ScreenHeader, { MenuOptionType } from '../ScreenHeader';
-import NoteTagsDialog from './NoteTagsDialog';
+import ScreenHeader, { MenuOptionType } from '../../ScreenHeader';
+import NoteTagsDialog from '../NoteTagsDialog';
 import time from '@joplin/lib/time';
 const { Checkbox } = require('../checkbox.js');
 import { _, currentLocale } from '@joplin/lib/locale';
 import { reg } from '@joplin/lib/registry';
 import ResourceFetcher from '@joplin/lib/services/ResourceFetcher';
-import { BaseScreenComponent } from '../base-screen';
-import { themeStyle, editorFont } from '../global-style';
+import { BaseScreenComponent } from '../../base-screen';
+import { themeStyle, editorFont } from '../../global-style';
 const { dialogs } = require('../../utils/dialogs.js');
 const DialogBox = require('react-native-dialogbox').default;
 import ImageResizer from '@bam.tech/react-native-image-resizer';
 import shared, { BaseNoteScreenComponent } from '@joplin/lib/components/shared/note-screen-shared';
-import { Asset, ImagePickerResponse, launchImageLibrary } from 'react-native-image-picker';
-import SelectDateTimeDialog from '../SelectDateTimeDialog';
-import ShareExtension from '../../utils/ShareExtension.js';
-import CameraView from '../CameraView';
+import { ImagePickerResponse, launchImageLibrary } from 'react-native-image-picker';
+import SelectDateTimeDialog from '../../SelectDateTimeDialog';
+import ShareExtension from '../../../utils/ShareExtension.js';
+import CameraView from '../../CameraView';
 import { FolderEntity, NoteEntity, ResourceEntity } from '@joplin/lib/services/database/types';
 import Logger from '@joplin/utils/Logger';
-import ImageEditor from '../NoteEditor/ImageEditor/ImageEditor';
-import promptRestoreAutosave from '../NoteEditor/ImageEditor/promptRestoreAutosave';
-import isEditableResource from '../NoteEditor/ImageEditor/isEditableResource';
-import VoiceTypingDialog from '../voiceTyping/VoiceTypingDialog';
-import { voskEnabled } from '../../services/voiceTyping/vosk';
-import { isSupportedLanguage } from '../../services/voiceTyping/vosk.android';
+import ImageEditor from '../../NoteEditor/ImageEditor/ImageEditor';
+import promptRestoreAutosave from '../../NoteEditor/ImageEditor/promptRestoreAutosave';
+import isEditableResource from '../../NoteEditor/ImageEditor/isEditableResource';
+import VoiceTypingDialog from '../../voiceTyping/VoiceTypingDialog';
+import { voskEnabled } from '../../../services/voiceTyping/vosk';
+import { isSupportedLanguage } from '../../../services/voiceTyping/vosk.android';
 import { ChangeEvent as EditorChangeEvent, SelectionRangeChangeEvent, UndoRedoDepthChangeEvent } from '@joplin/editor/events';
 import { join } from 'path';
 import { Dispatch } from 'redux';
 import { RefObject } from 'react';
-import { SelectionRange } from '../NoteEditor/types';
-import { AppState } from '../../utils/types';
+import { SelectionRange } from '../../NoteEditor/types';
+import { AppState } from '../../../utils/types';
 import restoreItems from '@joplin/lib/services/trash/restoreItems';
 import { getDisplayParentTitle } from '@joplin/lib/services/trash';
 import { PluginStates, utils as pluginUtils } from '@joplin/lib/services/plugins/reducer';
-import pickDocument from '../../utils/pickDocument';
-import debounce from '../../utils/debounce';
+import pickDocument from '../../../utils/pickDocument';
+import debounce from '../../../utils/debounce';
 import { focus } from '@joplin/lib/utils/focusHandler';
 import CommandService from '@joplin/lib/services/CommandService';
 import * as urlUtils from '@joplin/lib/urlUtils';
+import { Attachment } from './types';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 const emptyArray: any[] = [];
@@ -757,7 +758,7 @@ class NoteScreenComponent extends BaseScreenComponent<Props, State> implements B
 		return await saveOriginalImage();
 	}
 
-	public async attachFile(pickerResponse: Asset, fileType: string): Promise<ResourceEntity|null> {
+	public async attachFile(pickerResponse: Attachment, fileType: string): Promise<ResourceEntity|null> {
 		if (!pickerResponse) {
 			// User has cancelled
 			return null;
