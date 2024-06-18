@@ -1,4 +1,3 @@
-const leftPad = require('left-pad');
 
 export default function(context) { 
 	return {
@@ -37,10 +36,19 @@ export default function(context) {
 					<div class="just-testing joplin-editable">
 						${richTextEditorMetadata}
 
-						<p>JUST TESTING: <pre>${markdownIt.utils.escapeHtml(leftPad(token.content.trim(), 10, 'x'))}</pre></p>
+						<p>JUST TESTING: <pre>${markdownIt.utils.escapeHtml([token.content.trim(), 10, 'x'].join('..'))}</pre></p>
 						<p><a href="#" onclick="${postMessageWithResponseTest.replace(/\n/g, ' ')}">Click to post a message "justtesting" to plugin and check the response in the console</a></p>
 					</div>
 				`;
+			};
+			const originalRender = markdownIt.renderer.render;
+			markdownIt.renderer.render = (...args: any) => {
+				let result = originalRender.apply(markdownIt.renderer, args);
+				console.log('INT(0)', result);
+				result += `<style onload="console.log('test')"></style>`;
+				console.log('INT(1)', result);
+
+				return result;
 			};
 		},
 		assets: function() {
