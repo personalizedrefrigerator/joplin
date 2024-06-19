@@ -18,21 +18,21 @@ import { getTrashFolderIcon, getTrashFolderId } from '@joplin/lib/services/trash
 import restoreItems from '@joplin/lib/services/trash/restoreItems';
 import emptyTrash from '@joplin/lib/services/trash/emptyTrash';
 import { ModelType } from '@joplin/lib/BaseModel';
-const { substrWithEllipsis } = require('@joplin/lib/string-utils');
+import { Dispatch } from 'redux';
+import { substrWithEllipsis } from '@joplin/lib/string-utils';
+import { StateDecryptionWorker, StateResourceFetcher } from '@joplin/lib/reducer';
 
 interface Props {
 	syncStarted: boolean;
 	themeId: number;
 	sideMenuVisible: boolean;
 	// eslint-disable-next-line @typescript-eslint/ban-types -- Old code before rule was applied
-	dispatch: Function;
+	dispatch: Dispatch;
 	collapsedFolderIds: string[];
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	syncReport: any;
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	decryptionWorker: any;
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	resourceFetcher: any;
+	decryptionWorker: StateDecryptionWorker;
+	resourceFetcher: StateResourceFetcher;
 	syncOnlyOverWifi: boolean;
 	isOnMobileData: boolean;
 	notesParentType: string;

@@ -5,7 +5,7 @@ import { connect } from 'react-redux';
 import NoteList from '../NoteList';
 import Folder from '@joplin/lib/models/Folder';
 import Tag from '@joplin/lib/models/Tag';
-import Note from '@joplin/lib/models/Note';
+import Note, { NoteSortOrder } from '@joplin/lib/models/Note';
 import Setting from '@joplin/lib/models/Setting';
 import { themeStyle } from '../global-style';
 import { ScreenHeader } from '../ScreenHeader';
@@ -13,24 +13,55 @@ import { _ } from '@joplin/lib/locale';
 import ActionButton from '../ActionButton';
 const { dialogs } = require('../../utils/dialogs.js');
 const DialogBox = require('react-native-dialogbox').default;
-const { BaseScreenComponent } = require('../base-screen');
+import { BaseScreenComponent } from '../base-screen';
 const { BackButtonService } = require('../../services/back-button.js');
 import { AppState } from '../../utils/types';
-import { NoteEntity } from '@joplin/lib/services/database/types';
+import { FolderEntity, NoteEntity } from '@joplin/lib/services/database/types';
 import { itemIsInTrash } from '@joplin/lib/services/trash';
+import { Dispatch } from 'redux';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-class NotesScreenComponent extends BaseScreenComponent<any> {
+interface Props {
+	themeId: number;
+	notesOrder: NoteSortOrder;
+	selectedFolderId: string;
+	selectedTagId: string;
+	activeFolderId: string;
+	selectedSmartFilterId: string;
+	notesParentType: string;
+	notesSource: string;
+	folders: FolderEntity[];
+	uncompletedTodosOnTop: boolean;
+	showCompletedTodos: boolean;
+	noteSelectionEnabled: boolean;
+	visible: boolean;
+
+	dispatch: Dispatch;
+}
+
+interface State {}
+
+class NotesScreenComponent extends BaseScreenComponent<Props, State> {
 
 	private onAppStateChangeSub_: NativeEventSubscription = null;
+	private onAppStateChange_: ()=> Promise<void>;
+	private sortButton_press: ()=> Promise<void>;
+	private backHandler: ()=> void;
 
-	public constructor() {
-		super();
+	private folderPickerOptions_: { enabled: boolean };
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Partially refactored old code before rule was applied
+	private dialogbox: any;
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Partially refactored old code before rule was applied
+	private styles_: any;
+
+	public constructor(props: Props) {
+		super(props);
 
 		this.onAppStateChange_ = async () => {
 			// Force an update to the notes list when app state changes
-			const newProps = { ...this.props };
-			newProps.notesSource = '';
+			const newProps = {
+				...this.props,
+				notesSource: '',
+			};
 			await this.refreshNotes(newProps);
 		};
 
@@ -110,15 +141,13 @@ class NotesScreenComponent extends BaseScreenComponent<any> {
 		BackButtonService.removeHandler(this.backHandler);
 	}
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	public async componentDidUpdate(prevProps: any) {
+	public async componentDidUpdate(prevProps: Props) {
 		if (prevProps.notesOrder !== this.props.notesOrder || prevProps.selectedFolderId !== this.props.selectedFolderId || prevProps.selectedTagId !== this.props.selectedTagId || prevProps.selectedSmartFilterId !== this.props.selectedSmartFilterId || prevProps.notesParentType !== this.props.notesParentType || prevProps.uncompletedTodosOnTop !== this.props.uncompletedTodosOnTop || prevProps.showCompletedTodos !== this.props.showCompletedTodos) {
 			await this.refreshNotes(this.props);
 		}
 	}
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	public async refreshNotes(props: any = null) {
+	public async refreshNotes(props: Props|null = null) {
 		if (props === null) props = this.props;
 
 		const options = {
@@ -307,8 +336,6 @@ const NotesScreen = connect((state: AppState) => {
 		noteSelectionEnabled: state.noteSelectionEnabled,
 		notesOrder: stateUtils.notesOrder(state.settings),
 	};
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-})(NotesScreenComponent as any);
+})(NotesScreenComponent);
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-export default NotesScreen as any;
+export default NotesScreen;

@@ -1,9 +1,9 @@
 import * as React from 'react';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, ViewStyle } from 'react-native';
 import { themeStyle } from './global-style';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-const rootStyles_: Record<number, any> = {};
+type StyleSheets = { root: ViewStyle };
+const rootStyles_: Record<number, StyleSheets> = {};
 
 class BaseScreenComponent<Props, State> extends React.Component<Props, State> {
 

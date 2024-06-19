@@ -1,5 +1,5 @@
-const React = require('react');
-const { TextInput, TouchableOpacity, Linking, View, StyleSheet, Text, Button, ScrollView } = require('react-native');
+import * as React from 'react';
+import { TextInput, TouchableOpacity, Linking, View, StyleSheet, Text, Button, ScrollView, TextStyle } from 'react-native';
 const { connect } = require('react-redux');
 import ScreenHeader from '../ScreenHeader';
 import { themeStyle } from '../global-style';
@@ -16,8 +16,7 @@ import { getDefaultMasterKey, setupAndDisableEncryption, toggleAndSetupEncryptio
 import { useMemo, useRef, useState } from 'react';
 
 interface Props {
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	themeId: any;
+	themeId: number;
 	masterKeys: MasterKeyEntity[];
 	passwords: Record<string, string>;
 	notLoadedMasterKeys: string[];
@@ -53,7 +52,7 @@ const EncryptionConfigScreen = (props: Props) => {
 	}, [theme]);
 
 	const styles = useMemo(() => {
-		const styles = {
+		return StyleSheet.create({
 			titleText: {
 				flex: 1,
 				fontWeight: 'bold',
@@ -80,9 +79,7 @@ const EncryptionConfigScreen = (props: Props) => {
 				flex: 1,
 				padding: theme.margin,
 			},
-		};
-
-		return StyleSheet.create(styles);
+		});
 	}, [theme]);
 
 	const decryptedItemsInfo = props.encryptionEnabled ? <Text style={styles.normalText}>{decryptedStatText(stats)}</Text> : null;
@@ -93,8 +90,7 @@ const EncryptionConfigScreen = (props: Props) => {
 		const password = inputPasswords[mk.id] ? inputPasswords[mk.id] : '';
 		const passwordOk = passwordChecks[mk.id] === true ? '✔' : '❌';
 
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-		const inputStyle: any = { flex: 1, marginRight: 10, color: theme.color };
+		const inputStyle: TextStyle = { flex: 1, marginRight: 10, color: theme.color };
 		inputStyle.borderBottomWidth = 1;
 		inputStyle.borderBottomColor = theme.dividerColor;
 
@@ -203,8 +199,7 @@ const EncryptionConfigScreen = (props: Props) => {
 	const renderMasterPassword = () => {
 		if (!props.encryptionEnabled && !props.masterKeys.length) return null;
 
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-		const inputStyle: any = { flex: 1, marginRight: 10, color: theme.color };
+		const inputStyle: TextStyle = { flex: 1, marginRight: 10, color: theme.color };
 		inputStyle.borderBottomWidth = 1;
 		inputStyle.borderBottomColor = theme.dividerColor;
 
@@ -294,7 +289,7 @@ const EncryptionConfigScreen = (props: Props) => {
 						<Text>{_('For more information about End-To-End Encryption (E2EE) and advice on how to enable it please check the documentation:')}</Text>
 						<TouchableOpacity
 							onPress={() => {
-								Linking.openURL('https://joplinapp.org/help/apps/sync/e2ee');
+								void Linking.openURL('https://joplinapp.org/help/apps/sync/e2ee');
 							}}
 						>
 							<Text>https://joplinapp.org/help/apps/sync/e2ee</Text>

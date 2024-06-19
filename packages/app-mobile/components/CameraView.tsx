@@ -7,6 +7,8 @@ const Icon = require('react-native-vector-icons/Ionicons').default;
 const { _ } = require('@joplin/lib/locale');
 import shim from '@joplin/lib/shim';
 import Setting from '@joplin/lib/models/Setting';
+import { LayoutChangeEvent } from 'react-native';
+import { AppState } from '../utils/types';
 
 class CameraView extends Component {
 	public constructor() {
@@ -29,8 +31,7 @@ class CameraView extends Component {
 		this.onLayout = this.onLayout.bind(this);
 	}
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	public onLayout(event: any) {
+	public onLayout(event: LayoutChangeEvent) {
 		this.setState({
 			screenWidth: event.nativeEvent.layout.width,
 			screenHeight: event.nativeEvent.layout.height,
@@ -235,8 +236,7 @@ class CameraView extends Component {
 	}
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-const mapStateToProps = (state: any) => {
+const mapStateToProps = (state: AppState) => {
 	return {
 		cameraRatio: state.settings['camera.ratio'],
 		cameraType: state.settings['camera.type'],

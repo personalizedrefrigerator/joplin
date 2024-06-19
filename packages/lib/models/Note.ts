@@ -24,11 +24,12 @@ const { isImageMimeType } = require('../resourceUtils');
 const { MarkupToHtml } = require('@joplin/renderer');
 const { ALL_NOTES_FILTER_ID } = require('../reserved-ids');
 
+export type NoteSortOrder = {
+	by: string;
+	dir: string;
+}[];
 interface PreviewsOptions {
-	order?: {
-		by: string;
-		dir: string;
-	}[];
+	order?: NoteSortOrder;
 	conditions?: string[];
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	conditionsParams?: any[];
