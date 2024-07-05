@@ -8,6 +8,7 @@ import { Dispatch } from 'redux';
 import { FocusNote } from './useFocusNote';
 import { ItemFlow } from '@joplin/lib/services/plugins/api/noteListType';
 import { KeyboardEventKey } from '@joplin/lib/dom';
+import KeymapService from '@joplin/lib/services/KeymapService';
 
 const useOnKeyDown = (
 	selectedNoteIds: string[],
@@ -104,7 +105,14 @@ const useOnKeyDown = (
 			event.preventDefault();
 		}
 
-		if (noteIds.length && (key === 'Delete' || (key === 'Backspace' && event.metaKey))) {
+		if (
+			noteIds.length &&
+			CommandService.instance().isEnabled('permanentlyDeleteNote')
+			&& KeymapService.instance().eventMatchesCommandAccelerator(event, 'permanentlyDeleteNote')
+		) {
+			event.preventDefault();
+			void CommandService.instance().execute('permanentlyDeleteNote', noteIds);
+		} else if (noteIds.length && (key === 'Delete' || (key === 'Backspace' && event.metaKey))) {
 			event.preventDefault();
 			if (CommandService.instance().isEnabled('deleteNote')) {
 				void CommandService.instance().execute('deleteNote', noteIds);

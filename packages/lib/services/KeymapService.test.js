@@ -337,4 +337,12 @@ describe('services_KeymapService', () => {
 			}
 		});
 	});
+
+	it('should check whether a DOM event matches an accelerator', () => {
+		keymapService.initialize();
+		keymapService.overrideKeymap([{ command: 'print', accelerator: 'Ctrl+Alt+Shift+A' }]);
+		const mockEvent = { code: 'KeyA', keyCode: 65, key: 'a', shiftKey: true, ctrlKey: true, altKey: true };
+		expect(keymapService.eventMatchesCommandAccelerator(mockEvent, 'print')).toBe(true);
+		expect(keymapService.eventMatchesCommandAccelerator(mockEvent, 'gotoAnything')).toBe(false);
+	});
 });

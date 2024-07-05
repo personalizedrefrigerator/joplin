@@ -3,6 +3,7 @@ import shim from '../shim';
 import { _ } from '../locale';
 import keysRegExp from './KeymapService_keysRegExp';
 import keycodeToElectronMap from './KeymapService_keycodeToElectronMap';
+import type * as React from 'react';
 
 import BaseService from './BaseService';
 
@@ -414,6 +415,11 @@ export default class KeymapService extends BaseService {
 		if (electronKey && keysRegExp.test(electronKey)) parts.push(electronKey);
 
 		return parts.join('+');
+	}
+
+	public eventMatchesCommandAccelerator(event: KeyboardEvent|React.KeyboardEvent, command: string) {
+		const accelerator = this.domToElectronAccelerator(event);
+		return this.getAccelerator(command) === accelerator;
 	}
 
 	public on<Name extends EventName>(eventName: Name, callback: EventListenerCallback<Name>) {

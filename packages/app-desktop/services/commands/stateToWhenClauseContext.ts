@@ -22,6 +22,8 @@ export default function stateToWhenClauseContext(state: AppState, options: WhenC
 		sidebarVisible: !!state.mainLayout && layoutItemProp(state.mainLayout, 'sideBar', 'visible'),
 		noteListHasNotes: !!state.notes.length,
 
+		noteListFocused: state.focusedField === 'noteList',
+
 		// Deprecated
 		sideBarVisible: !!state.mainLayout && layoutItemProp(state.mainLayout, 'sideBar', 'visible'),
 	};

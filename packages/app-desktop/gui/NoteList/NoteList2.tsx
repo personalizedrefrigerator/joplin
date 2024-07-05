@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useMemo, useRef, useEffect } from 'react';
+import { useMemo, useRef, useEffect, useCallback } from 'react';
 import { AppState } from '../../app.reducer';
 import BaseModel, { ModelType } from '@joplin/lib/BaseModel';
 import { Props } from './utils/types';
@@ -262,6 +262,20 @@ const NoteList = (props: Props) => {
 		return output;
 	}, [listRenderer.flow]);
 
+	const onFocus = useCallback(() => {
+		props.dispatch({
+			type: 'FOCUS_SET',
+			field: 'noteList',
+		});
+	}, [props.dispatch]);
+
+	const onBlur = useCallback(() => {
+		props.dispatch({
+			type: 'FOCUS_CLEAR',
+			field: 'noteList',
+		});
+	}, [props.dispatch]);
+
 	return (
 		<div
 			className="note-list"
@@ -270,6 +284,8 @@ const NoteList = (props: Props) => {
 			onScroll={onScroll}
 			onKeyDown={onKeyDown}
 			onDrop={onDrop}
+			onFocus={onFocus}
+			onBlur={onBlur}
 		>
 			{renderEmptyList()}
 			{renderFiller('top', topFillerStyle)}
