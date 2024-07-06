@@ -1244,6 +1244,7 @@ packages/lib/themes/aritimDark.js
 packages/lib/themes/dark.js
 packages/lib/themes/dracula.js
 packages/lib/themes/light.js
+packages/lib/themes/lightModern.js
 packages/lib/themes/nord.js
 packages/lib/themes/oledDark.js
 packages/lib/themes/solarizedDark.js
