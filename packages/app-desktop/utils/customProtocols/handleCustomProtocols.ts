@@ -88,7 +88,8 @@ const handleCustomProtocols = (logger: LoggerWrapper): CustomProtocolHandler => 
 
 		pathname = resolve(appBundleDirectory, pathname);
 
-		const allowedHosts = ['note-viewer'];
+		const allowedHosts = ['note-viewer', 'resource'];
+		let limitScriptAccess = false;
 
 		let canRead = false;
 		if (allowedHosts.includes(host)) {
@@ -102,6 +103,11 @@ const handleCustomProtocols = (logger: LoggerWrapper): CustomProtocolHandler => 
 					}
 				}
 			}
+
+			if (host === 'resource' && !canRead) {
+				limitScriptAccess = true;
+				canRead = pathname.endsWith('.mp4');
+			}
 		} else {
 			throw new Error(`Invalid URL ${request.url}`);
 		}
@@ -114,12 +120,21 @@ const handleCustomProtocols = (logger: LoggerWrapper): CustomProtocolHandler => 
 		logger.debug('protocol handler: Fetch file URL', asFileUrl);
 
 		const rangeHeader = request.headers.get('Range');
+		let response;
 		if (!rangeHeader) {
-			const response = await net.fetch(asFileUrl);
-			return response;
+			response = await net.fetch(asFileUrl);
 		} else {
-			return handleRangeRequest(request, pathname);
+			response = await handleRangeRequest(request, pathname);
 		}
+
+		if (limitScriptAccess) {
+			response.headers.append('Cross-Origin-Resource-Policy', 'same-origin');
+			// Specify a different origin from the original request. See
+			// https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Origin
+			response.headers.append('Access-Control-Allow-Origin', `${contentProtocolName}://some-other-host.${host}`);
+		}
+
+		return response;
 	});
 
 	const appBundleDirectory = dirname(dirname(__dirname));

@@ -280,6 +280,10 @@
 			return true;
 		}
 
+		function replaceFileUrls() {
+			// TODO
+		}
+
 		let alreadyAllImagesLoaded = false;
 
 		// During a note is being rendered, its height is varying. To keep scroll
@@ -403,6 +407,7 @@
 				webviewLib.setupResourceManualDownload();
 			}
 
+			replaceFileUrls();
 			document.dispatchEvent(new Event('joplin-noteDidUpdate'));
 
 			if (scrollmap.isPresent()) {
