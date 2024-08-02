@@ -8,10 +8,13 @@ import { menuItems } from '../../../utils/contextMenu';
 import MenuUtils from '@joplin/lib/services/commands/MenuUtils';
 import CommandService from '@joplin/lib/services/CommandService';
 import Setting from '@joplin/lib/models/Setting';
+import type { Editor } from 'tinymce';
+import * as mimeUtils from '@joplin/lib/mime-utils';
 
 import Resource from '@joplin/lib/models/Resource';
 import { TinyMceEditorEvents } from './types';
 import { HtmlToMarkdownHandler, MarkupToHtmlHandler } from '../../../utils/types';
+import { filename } from '@joplin/utils/path';
 
 const menuUtils = new MenuUtils(CommandService.instance());
 
@@ -19,7 +22,7 @@ const menuUtils = new MenuUtils(CommandService.instance());
 // handler on the webContent. This function will return null if the point is
 // not within the TinyMCE editor.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-function contextMenuElement(editor: any, x: number, y: number) {
+function contextMenuElement(editor: Editor, x: number|null, y: number|null) {
 	if (!editor || !editor.getDoc()) return null;
 
 	const iframes = document.getElementsByClassName('tox-edit-area__iframe');
@@ -49,7 +52,7 @@ interface ContextMenuActionOptions {
 const contextMenuActionOptions: ContextMenuActionOptions = { current: null };
 
 // eslint-disable-next-line @typescript-eslint/ban-types, @typescript-eslint/no-explicit-any -- Old code before rule was applied, Old code before rule was applied
-export default function(editor: any, plugins: PluginStates, dispatch: Function, htmlToMd: HtmlToMarkdownHandler, mdToHtml: MarkupToHtmlHandler) {
+export default function(editor: Editor, plugins: PluginStates, dispatch: Function, htmlToMd: HtmlToMarkdownHandler, mdToHtml: MarkupToHtmlHandler) {
 	useEffect(() => {
 		if (!editor) return () => {};
 
@@ -57,18 +60,29 @@ export default function(editor: any, plugins: PluginStates, dispatch: Function, 
 
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 		function onContextMenu(_event: any, params: any) {
-			const element = contextMenuElement(editor, params.x, params.y);
+			const element = params.editorTarget ?? contextMenuElement(editor, params.x, params.y);
 			if (!element) return;
 
 			let itemType: ContextMenuItemType = ContextMenuItemType.None;
 			let resourceId = '';
 			let linkToCopy = null;
+			let mime = null;
+			let fileName = null;
+			let textToCopy = null;
 
-			if (element.nodeName === 'IMG') {
+			const mermaidElement = element.closest('.mermaid');
+			if (mermaidElement) {
 				itemType = ContextMenuItemType.Image;
-				resourceId = Resource.pathToId(element.src);
+				mime = 'image/svg+xml';
+				textToCopy = mermaidElement.querySelector('svg')?.outerHTML;
+				fileName = 'diagram.svg';
+			} else if (element.nodeName === 'IMG') {
+				itemType = ContextMenuItemType.Image;
+				fileName = filename((element as HTMLImageElement).src);
+				resourceId = Resource.pathToId(fileName);
+				mime = mimeUtils.fromFilename(fileName);
 			} else if (element.nodeName === 'A') {
-				resourceId = Resource.pathToId(element.href);
+				resourceId = Resource.pathToId((element as HTMLAnchorElement).href);
 				itemType = resourceId ? ContextMenuItemType.Resource : ContextMenuItemType.Link;
 				linkToCopy = element.getAttribute('href') || '';
 			} else {
@@ -78,10 +92,10 @@ export default function(editor: any, plugins: PluginStates, dispatch: Function, 
 			contextMenuActionOptions.current = {
 				itemType,
 				resourceId,
-				filename: null,
-				mime: null,
+				filename: fileName,
+				mime,
 				linkToCopy,
-				textToCopy: null,
+				textToCopy,
 				htmlToCopy: editor.selection ? editor.selection.getContent() : '',
 				insertContent: (content: string) => {
 					editor.insertContent(content);
@@ -123,7 +137,17 @@ export default function(editor: any, plugins: PluginStates, dispatch: Function, 
 
 		bridge().window().webContents.on('context-menu', onContextMenu);
 
+		const onHtmlContextMenu = (event: MouseEvent) => {
+			// ContextMenu events triggered by plugins (built-in or otherwise).
+			const fromUser = event.isTrusted;
+			if (!fromUser) {
+				onContextMenu(event, { editorTarget: event.target });
+			}
+		};
+		editor.on('contextmenu', onHtmlContextMenu);
+
 		return () => {
+			editor.off('contextmenu', onHtmlContextMenu);
 			if (bridge().window()?.webContents?.off) {
 				bridge().window().webContents.off('context-menu', onContextMenu);
 			}
