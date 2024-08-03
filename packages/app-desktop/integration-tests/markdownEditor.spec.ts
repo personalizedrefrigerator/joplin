@@ -17,6 +17,8 @@ test.describe('markdownEditor', () => {
 		const importedHtmlFileItem = mainScreen.noteListContainer.getByText('test-html-file-with-image');
 		await importedHtmlFileItem.click();
 
+		await mainScreen.noteEditor.waitFor();
+
 		const viewerFrame = mainScreen.noteEditor.getNoteViewerIframe();
 		// Should render headers
 		await expect(viewerFrame.locator('h1')).toHaveText('Test HTML file!');
