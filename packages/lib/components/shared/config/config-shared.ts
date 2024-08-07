@@ -31,6 +31,7 @@ interface ConfigScreenComponent {
 	settingToComponent(settingId: string, setting: any): ReactNode;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	sectionToComponent(sectionName: string, section: any, settings: any, isSelected: boolean): ReactNode;
+	onRestartNeeded(): void;
 
 	state: Partial<ConfigScreenState>;
 
@@ -162,6 +163,10 @@ export const saveSettings = async (comp: ConfigScreenComponent) => {
 	for (const key in comp.state.settings) {
 		if (!comp.state.settings.hasOwnProperty(key)) continue;
 		if (comp.state.changedSettingKeys.indexOf(key) < 0) continue;
+
+		if (Setting.settingMetadata(key).needRestart) {
+			comp.onRestartNeeded();
+		}
 		Setting.setValue(key, comp.state.settings[key]);
 	}
 

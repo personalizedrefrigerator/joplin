@@ -33,6 +33,7 @@ declare global {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 class ConfigScreenComponent extends React.Component<any, any> {
+	private needRestart_ = false;
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	private rowStyle_: any = null;
@@ -296,12 +297,13 @@ class ConfigScreenComponent extends React.Component<any, any> {
 	}
 
 	private onUpdateSettingValue = ({ key, value }: UpdateSettingValueEvent) => {
-		const md = Setting.settingMetadata(key);
-		if (md.needRestart) {
-			this.setState({ needRestart: true });
-		}
 		shared.updateSettingValue(this, key, value);
 	};
+
+	public onRestartNeeded() {
+		this.needRestart_ = true;
+		this.setState({ needRestart: true });
+	}
 
 	public settingToComponent<T extends string>(key: T, value: SettingValueType<T>) {
 		return (
@@ -327,7 +329,7 @@ class ConfigScreenComponent extends React.Component<any, any> {
 	}
 
 	private async checkNeedRestart() {
-		if (this.state.needRestart) {
+		if (this.needRestart_) {
 			const doItNow = await bridge().showConfirmMessageBox(this.restartMessage(), {
 				buttons: [_('Do it now'), _('Later')],
 			});
@@ -392,11 +394,17 @@ class ConfigScreenComponent extends React.Component<any, any> {
 
 		const sections = shared.settingsSections({ device: AppType.Desktop, settings });
 
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-		const needRestartComp: any = this.state.needRestart ? (
+		const needRestartComp: React.ReactNode = this.state.needRestart ? (
 			<div style={{ ...theme.textStyle, padding: 10, paddingLeft: 24, backgroundColor: theme.warningBackgroundColor, color: theme.color }}>
 				{this.restartMessage()}
-				<a style={{ ...theme.urlStyle, marginLeft: 10 }} href="#" onClick={() => { void this.restartApp(); }}>{_('Restart now')}</a>
+				<a
+					style={{ ...theme.urlStyle, marginLeft: 10 }}
+					href="#"
+					onClick={async () => {
+						await shared.saveSettings(this);
+						await this.restartApp();
+					}}
+				>{_('Restart now')}</a>
 			</div>
 		) : null;
 

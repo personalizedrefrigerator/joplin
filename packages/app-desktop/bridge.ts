@@ -461,7 +461,12 @@ export class Bridge {
 		}
 	}
 
+	private relaunched_ = false;
 	public restart(linuxSafeRestart = true) {
+		// Needed in dev mode to handle the case where .restart() is called multiple times.
+		if (this.relaunched_) return;
+		this.relaunched_ = true;
+
 		// Note that in this case we are not sending the "appClose" event
 		// to notify services and component that the app is about to close
 		// but for the current use-case it's not really needed.
