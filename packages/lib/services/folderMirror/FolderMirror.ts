@@ -62,7 +62,6 @@ export default class {
 	private watcher_: DirectoryWatcher|null = null;
 	private modifyRemoteActions_: ActionListeners;
 	private modifyLocalActions_: ActionListeners;
-	private localTree_: ItemTree;
 	private remoteTree_: ItemTree;
 	private actionQueue_: AsyncActionQueue<ActionQueueEvent>;
 	private fullSyncEndListeners_: ((error: unknown)=> void)[] = [];
@@ -78,7 +77,6 @@ export default class {
 		const baseItem = { id: this.baseFolderId, type_: ModelType.Folder };
 
 		this.remoteLinkTracker_ = new LinkTracker(this.onLinkTrackerItemUpdate_);
-		this.localTree_ = new ItemTree(baseItem);
 		this.remoteTree_ = new ItemTree(baseItem, this.remoteLinkTracker_.toEventHandlers(LinkType.PathLink));
 
 		this.actionQueue_ = new AsyncActionQueue();
