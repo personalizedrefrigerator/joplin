@@ -16,7 +16,11 @@ type KeychainServiceDriverConstructor = new (appId: string, clientId: string)=> 
 // In other words, it's not possible to load the settings without the KS service and it's not
 // possible to initialise the KS service without the settings.
 // The solution is to fetch just the client ID directly from the database.
-export async function loadKeychainServiceAndSettings(keychainServiceDrivers: KeychainServiceDriverConstructor[]) {
+export async function loadKeychainServiceAndSettings(keychainServiceDrivers: KeychainServiceDriverConstructor[]|KeychainServiceDriverConstructor) {
+	if (!Array.isArray(keychainServiceDrivers)) {
+		keychainServiceDrivers = [keychainServiceDrivers];
+	}
+
 	const clientIdSetting = await Setting.loadOne('clientId');
 	const clientId = clientIdSetting ? clientIdSetting.value : uuid.create();
 	await KeychainService.instance().initialize(
