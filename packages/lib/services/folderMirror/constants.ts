@@ -1,6 +1,7 @@
 import { ModelType } from '../../BaseModel';
 import { FolderEntity, NoteEntity, ResourceEntity } from '../database/types';
 import { FolderItem } from './types';
+const { ALL_NOTES_FILTER_ID } = require('../../reserved-ids.js');
 
 export const resourcesDirName = 'resources';
 export const resourceMetadataExtension = '.metadata.yml';
@@ -11,6 +12,12 @@ export const resourcesDirItem: FolderItem = {
 	parent_id: '',
 	deleted_time: 0,
 	virtual: true,
+	type_: ModelType.Folder,
+};
+
+export const baseItem: FolderEntity = {
+	id: ALL_NOTES_FILTER_ID,
+	title: '',
 	type_: ModelType.Folder,
 };
 

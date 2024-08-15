@@ -7,6 +7,7 @@ import { LinkTrackerWrapper } from './LinkTracker';
 import { ResourceEntity } from '../database/types';
 import debugLogger from './utils/debugLogger';
 import encodeTitle from './utils/encodeTitle';
+import { TreeCommand, TreeCommandType } from './model/commands';
 
 export interface AddOrUpdateEvent {
 	path: string;
@@ -382,6 +383,24 @@ export default class ItemTree {
 
 		this.checkRep_();
 		return result;
+	}
+
+	// Applies a command to this tree.
+	public dispatch(command: TreeCommand, actionListeners: ActionListeners) {
+		if (command.type === TreeCommandType.Add) {
+			return this.addItemAt(command.path, command.item, actionListeners);
+		} else if (command.type === TreeCommandType.Update) {
+			return this.updateAtPath(command.path, command.newItem, actionListeners);
+		} else if (command.type === TreeCommandType.Move) {
+			return this.move(command.originalPath, command.newPath, actionListeners);
+		} else if (command.type === TreeCommandType.Remove) {
+			return this.deleteAtPath(command.path, actionListeners);
+		} else if (command.type === TreeCommandType.Rename) {
+			const toPath = join(dirname(command.originalPath), command.newName);
+			return this.move(command.originalPath, toPath, actionListeners);
+		}
+		const exhaustivenessCheck: never = command;
+		throw new Error(`Invalid command: ${exhaustivenessCheck}`);
 	}
 
 	public items() {
