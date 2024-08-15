@@ -11,7 +11,7 @@ import uuid from '../uuid';
 import ResourceService from '../services/ResourceService';
 import KeymapService from '../services/KeymapService';
 import KvStore from '../services/KvStore';
-import KeychainServiceDriver from '../services/keychain/KeychainServiceDriver.node';
+import KeychainServiceDriverNode from '../services/keychain/KeychainServiceDriver.node';
 import KeychainServiceDriverDummy from '../services/keychain/KeychainServiceDriver.dummy';
 import FileApiDriverJoplinServer from '../file-api-driver-joplinServer';
 import OneDriveApi from '../onedrive-api';
@@ -285,6 +285,7 @@ async function switchClient(id: number, options: any = null) {
 
 	currentClient_ = id;
 	BaseModel.setDb(databases_[id]);
+	KvStore.instance().setDb(databases_[id]);
 
 	BaseItem.encryptionService_ = encryptionServices_[id];
 	Resource.encryptionService_ = encryptionServices_[id];
@@ -300,7 +301,7 @@ async function switchClient(id: number, options: any = null) {
 	Setting.setConstant('pluginDir', pluginDir(id));
 	Setting.setConstant('isSubProfile', false);
 
-	await loadKeychainServiceAndSettings(options.keychainEnabled ? KeychainServiceDriver : KeychainServiceDriverDummy);
+	await loadKeychainServiceAndSettings([options.keychainEnabled ? KeychainServiceDriverNode : KeychainServiceDriverDummy]);
 
 	Setting.setValue('sync.target', syncTargetId());
 	Setting.setValue('sync.wipeOutFailSafe', false); // To keep things simple, always disable fail-safe unless explicitly set in the test itself
@@ -364,7 +365,7 @@ async function setupDatabase(id: number = null, options: any = null) {
 	if (databases_[id]) {
 		BaseModel.setDb(databases_[id]);
 		await clearDatabase(id);
-		await loadKeychainServiceAndSettings(options.keychainEnabled ? KeychainServiceDriver : KeychainServiceDriverDummy);
+		await loadKeychainServiceAndSettings([options.keychainEnabled ? KeychainServiceDriverNode : KeychainServiceDriverDummy]);
 		Setting.setValue('sync.target', syncTargetId());
 		return;
 	}
@@ -383,7 +384,7 @@ async function setupDatabase(id: number = null, options: any = null) {
 
 	BaseModel.setDb(databases_[id]);
 	await clearSettingFile(id);
-	await loadKeychainServiceAndSettings(options.keychainEnabled ? KeychainServiceDriver : KeychainServiceDriverDummy);
+	await loadKeychainServiceAndSettings([options.keychainEnabled ? KeychainServiceDriverNode : KeychainServiceDriverDummy]);
 
 	reg.setDb(databases_[id]);
 	Setting.setValue('sync.target', syncTargetId());
@@ -1077,7 +1078,7 @@ const simulateReadOnlyShareEnv = (shareId: string, store?: Store) => {
 };
 
 export const newOcrService = () => {
-	const driver = new OcrDriverTesseract({ createWorker });
+	const driver = new OcrDriverTesseract({ createWorker }, { workerPath: null, corePath: null, languageDataPath: null });
 	return new OcrService(driver);
 };
 
