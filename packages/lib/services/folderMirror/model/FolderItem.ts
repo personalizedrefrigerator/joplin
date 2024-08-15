@@ -1,6 +1,6 @@
-import { MirrorableItemType } from "./commands";
+import { MirrorableItemType } from './commands';
 
-interface FolderItemState {
+export interface FolderItemState {
 	itemType: MirrorableItemType;
 	id: string|null;
 	body: string|null;

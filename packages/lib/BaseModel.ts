@@ -26,6 +26,7 @@ export enum ModelType {
 	Migration = 14,
 	SmartFilter = 15,
 	Command = 16,
+	FolderMirrorJournal = 17,
 }
 
 export interface DeleteOptions {

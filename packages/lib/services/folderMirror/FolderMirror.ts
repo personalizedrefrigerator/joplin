@@ -1,10 +1,10 @@
 import { ModelType } from '../../BaseModel';
 import { DirectoryWatchEvent, DirectoryWatchEventType, DirectoryWatcher } from '../../fs-driver-base';
-import Folder, { FolderEntityWithChildren } from '../../models/Folder';
+import Folder from '../../models/Folder';
 import Note from '../../models/Note';
 import shim from '../../shim';
 import { serialize } from '../../utils/frontMatter';
-import { FolderEntity, NoteEntity, ResourceEntity } from '../database/types';
+import { FolderEntity, NoteEntity } from '../database/types';
 import { basename, dirname, join, relative } from 'path';
 import writeFolderInfo from './utils/folderInfo/writeFolderInfo';
 import { FolderItem, ResourceItem } from './types';
@@ -18,11 +18,12 @@ import debugLogger from './utils/debugLogger';
 import statToItem from './utils/statToItem';
 import fillRemoteTree from './utils/fillRemoteTree';
 import Resource from '../../models/Resource';
-import { itemDiffFields, resourceMetadataExtension, resourcesDirId, resourcesDirItem, resourcesDirName } from './constants';
+import { itemDiffFields, resourceMetadataExtension, resourcesDirId, resourcesDirName } from './constants';
 import resourceToMetadataYml from './utils/resourceToMetadataYml';
 import Logger from '@joplin/utils/Logger';
 import keysMatch from './utils/keysMatch';
 import mergeTrees from './utils/mergeTrees';
+import fillLocalTree from './utils/fillLocalTree';
 const { ALL_NOTES_FILTER_ID } = require('../../reserved-ids.js');
 
 // A logger for less verbose logs (debugLogger is for very verbose logging).
@@ -62,6 +63,7 @@ export default class {
 	private watcher_: DirectoryWatcher|null = null;
 	private modifyRemoteActions_: ActionListeners;
 	private modifyLocalActions_: ActionListeners;
+	private localTree_: ItemTree;
 	private remoteTree_: ItemTree;
 	private actionQueue_: AsyncActionQueue<ActionQueueEvent>;
 	private fullSyncEndListeners_: ((error: unknown)=> void)[] = [];
@@ -77,6 +79,7 @@ export default class {
 		const baseItem = { id: this.baseFolderId, type_: ModelType.Folder };
 
 		this.remoteLinkTracker_ = new LinkTracker(this.onLinkTrackerItemUpdate_);
+		this.localTree_ = new ItemTree(baseItem);
 		this.remoteTree_ = new ItemTree(baseItem, this.remoteLinkTracker_.toEventHandlers(LinkType.PathLink));
 
 		this.actionQueue_ = new AsyncActionQueue();
@@ -125,7 +128,7 @@ export default class {
 				const note = item as NoteEntity;
 				const toSave = {
 					...note,
-					body: this.remoteLinkTracker_.convertLinkTypes(LinkType.IdLink, note.body, event.path),
+					body: this.convertLinks(LinkType.IdLink, note.body, event.path),
 				};
 				result = await Note.save(toSave, { isNew });
 			} else if (item.type_ === ModelType.Resource) {
@@ -232,7 +235,7 @@ export default class {
 				const note = item as NoteEntity;
 				const toSave = {
 					...note,
-					body: this.remoteLinkTracker_.convertLinkTypes(LinkType.PathLink, note.body, path),
+					body: this.convertLinks(LinkType.PathLink, note.body, path),
 				};
 				await shim.fsDriver().writeFile(fullPath, await getNoteMd(toSave), 'utf8');
 			} else if (item.type_ === ModelType.Resource) {
@@ -286,6 +289,12 @@ export default class {
 		};
 	}
 
+	private convertLinks(toType: LinkType, body: string, path: string) {
+		// Use remoteLinkTracker_ -- its paths are more likely to be accurate to
+		// the file system after a full sync has completed.
+		return this.remoteLinkTracker_.convertLinkTypes(toType, body, path);
+	}
+
 	private onLinkTrackerItemUpdate_ = async (updatedItem: FolderItem) => {
 		debugLogger.debug('Link tracker item update', updatedItem.title);
 		debugLogger.group();
@@ -293,62 +302,6 @@ export default class {
 		await this.localTree_.processItem(null, updatedItem, this.modifyLocalActions_);
 		debugLogger.groupEnd();
 	};
-
-	public onLocalItemDelete(id: string) {
-		if (this.watcher_ && this.localTree_.hasId(id)) {
-			this.actionQueue_.push(this.handleQueueAction, { type: FolderMirrorEventType.DatabaseItemDelete, id });
-		}
-	}
-
-	public onLocalItemUpdate(item: FolderItem) {
-		if (!this.watcher_) return;
-
-		// Note that we can't skip out-of-tree items at this stage -- it's possible that a parent of the
-		// current item will be added by a pending queue action (so we can't check parent/ancestor IDs here).
-		this.actionQueue_.push(
-			this.handleQueueAction,
-			{ type: FolderMirrorEventType.DatabaseItemChange, id: item.id, parentId: item.parent_id },
-		);
-	}
-
-	public async watch() {
-		if (this.watcher_) return;
-
-		let watcherLoaded = false;
-		this.watcher_ = await shim.fsDriver().watchDirectory(this.baseFilePath, async (event): Promise<void> => {
-			// Skip events from an initial scan, which should already be handled by a full sync.
-			if (!watcherLoaded) return;
-
-			this.actionQueue_.push(this.handleQueueAction, { type: FolderMirrorEventType.WatcherEvent, event });
-		});
-		watcherLoaded = true;
-	}
-
-	public async stopWatching() {
-		if (this.watcher_) {
-			const closePromise = this.watcher_.close();
-			this.watcher_ = null;
-			await closePromise;
-		}
-	}
-
-	public async waitForIdle() {
-		await this.actionQueue_.waitForAllDone();
-	}
-
-	public fullSync() {
-		return new Promise<void>((resolve, reject) => {
-			this.fullSyncEndListeners_.push((error) => {
-				if (error) {
-					reject(error);
-				} else {
-					resolve();
-				}
-			});
-
-			this.actionQueue_.push(this.handleQueueAction, { type: FolderMirrorEventType.FullSync });
-		});
-	}
 
 	private async addNewLocalResource(id: string, addToRemote: boolean) {
 		if (this.localTree_.hasId(id)) {
@@ -360,6 +313,7 @@ export default class {
 		const resource: ResourceItem = { ...await Resource.load(id, { fields: resourceFields }) };
 		resource.parent_id = resourcesDirId;
 		resource.deleted_time = 0;
+
 		await this.localTree_.addItemTo(resourcesDirName, resource, noOpActionListeners);
 		if (addToRemote) {
 			await this.remoteTree_.addItemTo(resourcesDirName, resource, this.modifyRemoteActions_);
@@ -371,64 +325,16 @@ export default class {
 	private async fullSyncTask() {
 		const filePath = this.baseFilePath;
 		const baseFolderId = this.baseFolderId;
-		const folderFields = ['id', 'icon', 'title', 'parent_id', 'updated_time', 'deleted_time'];
-		const isAllNotes = baseFolderId === '';
 
 		debugLogger.debug('starting full sync');
 		debugLogger.group();
 
-		const childrenFolders =
-			isAllNotes ? await Folder.all({ fields: folderFields }) : await Folder.allChildrenFolders(baseFolderId, folderFields);
-		const allFolders = await Folder.allAsTree(childrenFolders, { toplevelId: baseFolderId });
-
 		this.localTree_.resetData();
 		this.remoteTree_.resetData();
 
-
-		const processFolders = async (basePath: string, parentId: string, folders: FolderEntityWithChildren[]) => {
-			for (const folder of folders) {
-				if (folder.deleted_time) continue;
-
-				await this.localTree_.addItemTo(basePath, folder, noOpActionListeners);
-				const folderPath = this.localTree_.pathFromId(folder.id);
-				await processFolders(folderPath, folder.id, folder.children || []);
-			}
-
-			const noteFields = ['id', 'title', 'body', 'is_todo', 'todo_due', 'todo_completed', 'parent_id', 'updated_time', 'deleted_time'];
-			const childNotes = await Note.allByParentId(parentId, { fields: noteFields });
-
-			for (const note of childNotes) {
-				if (note.deleted_time) continue;
-
-				// Add resources first, so that their links get processed first.
-				const linkedItems = await Note.linkedItems(note.body ?? '');
-				const linkedResources: ResourceEntity[] = linkedItems.filter(item => item.type_ === ModelType.Resource);
-
-				// Sort the linked resources for consistency when testing (default sorting may involve
-				// ID ordering).
-				linkedResources.sort((a, b) => {
-					const createdTimeDiff = a.created_time - b.created_time;
-					if (createdTimeDiff !== 0) return createdTimeDiff;
-					const updatedTimeDiff = a.updated_time - b.updated_time;
-					if (updatedTimeDiff !== 0) return updatedTimeDiff;
-					return 0;
-				});
-
-				for (const resource of linkedResources) {
-					await this.addNewLocalResource(resource.id, false);
-				}
-
-				if (!note.deleted_time) {
-					await this.localTree_.addItemTo(basePath, note, noOpActionListeners);
-				}
-			}
-		};
-
-		await this.localTree_.addItemAt(resourcesDirName, resourcesDirItem, noOpActionListeners);
-		await processFolders('', baseFolderId, allFolders);
+		await fillLocalTree(this.localTree_, baseFolderId);
 		debugLogger.debug('built local tree. Building remote:');
 
-		debugLogger.group();
 		const generatedIds: string[] = [];
 		await fillRemoteTree(filePath, this.remoteTree_, {
 			onAdd: async ({ item }) => {
@@ -448,7 +354,6 @@ export default class {
 				return item;
 			},
 		});
-		debugLogger.groupEnd();
 
 		for (const id of generatedIds) {
 			const path = this.remoteTree_.pathFromId(id);
@@ -490,9 +395,7 @@ export default class {
 				const body = (localItem as NoteEntity).body;
 				localItem = {
 					...localItem,
-					// Use remoteLinkTracker_ -- its paths are more likely to be accurate to
-					// the file system after a full sync has completed.
-					body: this.remoteLinkTracker_.convertLinkTypes(LinkType.IdLink, body, path),
+					body: this.convertLinks(LinkType.IdLink, body, path),
 				};
 			}
 
@@ -685,6 +588,62 @@ export default class {
 		}
 		}
 	};
+
+	public onLocalItemDelete(id: string) {
+		if (this.watcher_ && this.localTree_.hasId(id)) {
+			this.actionQueue_.push(this.handleQueueAction, { type: FolderMirrorEventType.DatabaseItemDelete, id });
+		}
+	}
+
+	public onLocalItemUpdate(item: FolderItem) {
+		if (!this.watcher_) return;
+
+		// Note that we can't skip out-of-tree items at this stage -- it's possible that a parent of the
+		// current item will be added by a pending queue action (so we can't check parent/ancestor IDs here).
+		this.actionQueue_.push(
+			this.handleQueueAction,
+			{ type: FolderMirrorEventType.DatabaseItemChange, id: item.id, parentId: item.parent_id },
+		);
+	}
+
+	public async watch() {
+		if (this.watcher_) return;
+
+		let watcherLoaded = false;
+		this.watcher_ = await shim.fsDriver().watchDirectory(this.baseFilePath, async (event): Promise<void> => {
+			// Skip events from an initial scan, which should already be handled by a full sync.
+			if (!watcherLoaded) return;
+
+			this.actionQueue_.push(this.handleQueueAction, { type: FolderMirrorEventType.WatcherEvent, event });
+		});
+		watcherLoaded = true;
+	}
+
+	public async stopWatching() {
+		if (this.watcher_) {
+			const closePromise = this.watcher_.close();
+			this.watcher_ = null;
+			await closePromise;
+		}
+	}
+
+	public async waitForIdle() {
+		await this.actionQueue_.waitForAllDone();
+	}
+
+	public fullSync() {
+		return new Promise<void>((resolve, reject) => {
+			this.fullSyncEndListeners_.push((error) => {
+				if (error) {
+					reject(error);
+				} else {
+					resolve();
+				}
+			});
+
+			this.actionQueue_.push(this.handleQueueAction, { type: FolderMirrorEventType.FullSync });
+		});
+	}
 
 	public test__setCreateUuid(fn: ()=> string) {
 		this.createUuid_ = fn;

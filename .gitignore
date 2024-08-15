@@ -949,6 +949,7 @@ packages/lib/models/ItemChange.js
 packages/lib/models/MasterKey.test.js
 packages/lib/models/MasterKey.js
 packages/lib/models/Migration.js
+packages/lib/models/MirrorJournalEntry.js
 packages/lib/models/Note.test.js
 packages/lib/models/Note.js
 packages/lib/models/NoteResource.js
@@ -1039,6 +1040,7 @@ packages/lib/services/database/migrations/44.js
 packages/lib/services/database/migrations/45.js
 packages/lib/services/database/migrations/46.js
 packages/lib/services/database/migrations/47.js
+packages/lib/services/database/migrations/48.js
 packages/lib/services/database/migrations/index.js
 packages/lib/services/database/sqlStringToLines.js
 packages/lib/services/database/types.js
@@ -1061,10 +1063,15 @@ packages/lib/services/folderMirror/ItemTree.test.js
 packages/lib/services/folderMirror/ItemTree.js
 packages/lib/services/folderMirror/LinkTracker.js
 packages/lib/services/folderMirror/constants.js
+packages/lib/services/folderMirror/model/AbstractFolderItem.js
+packages/lib/services/folderMirror/model/FolderItem.js
+packages/lib/services/folderMirror/model/TreeController.js
+packages/lib/services/folderMirror/model/commands.js
 packages/lib/services/folderMirror/types.js
 packages/lib/services/folderMirror/utils/debugLogger.js
 packages/lib/services/folderMirror/utils/decodeTitle.js
 packages/lib/services/folderMirror/utils/encodeTitle.js
+packages/lib/services/folderMirror/utils/fillLocalTree.js
 packages/lib/services/folderMirror/utils/fillRemoteTree.js
 packages/lib/services/folderMirror/utils/folderInfo/index.js
 packages/lib/services/folderMirror/utils/folderInfo/loadFolderInfo.js

@@ -1,4 +1,5 @@
-import { ModelType } from "../../../BaseModel"
+import { ModelType } from '../../../BaseModel';
+import { FolderItem } from '../types';
 
 export enum TreeCommandType {
 	Rename,
@@ -14,12 +15,13 @@ export enum MirrorableItemType {
 }
 
 interface BaseCommand {
-	itemType: MirrorableItemType,
+	itemType: MirrorableItemType;
 }
 
 interface AddItemCommand {
-	type: TreeCommandType.Add,
-
+	type: TreeCommandType.Add;
+	parentPath: string;
+	item: FolderItem;
 }
 
 interface MoveItemCommand {
@@ -34,5 +36,10 @@ interface RenameItemCommand {
 	newName: string;
 }
 
-export type TreeCommand = (AddItemCommand | MoveItemCommand | RenameItemCommand) & BaseCommand;
+interface RemoveItemCommand {
+	type: TreeCommandType.Remove;
+	path: string;
+}
+
+export type TreeCommand = (AddItemCommand | MoveItemCommand | RemoveItemCommand | RenameItemCommand) & BaseCommand;
 
