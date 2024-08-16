@@ -1,14 +1,17 @@
-import { itemDiffFields } from '../constants';
-import keysMatch from './keysMatch';
-import ItemTree from '../ItemTree';
-import { AddItemCommand, TreeCommand, TreeCommandType } from '../model/commands';
+import ItemTree from '../../ItemTree';
+import { AddItemCommand, TreeCommand, TreeCommandType } from './commands';
+import itemsMatch from '../itemsMatch';
+
+type PathString = string;
+export type TreeDiff = Map<PathString, TreeCommand>;
+type IdString = string;
 
 // Returns operations that can be applied to `originalTree` to get `updatedTree`.
-const diffTrees = (originalTree: ItemTree, updatedTree: ItemTree) => {
+const diffTrees = (originalTree: ItemTree, updatedTree: ItemTree): TreeDiff => {
 	// Maps from id -> command
-	const additions: Map<string, AddItemCommand> = new Map();
+	const additions: Map<IdString, AddItemCommand> = new Map();
+	const output: TreeDiff = new Map();
 
-	const updates: TreeCommand[] = [];
 	const handledPaths = new Set<string>();
 
 	for (const [itemPath, item] of updatedTree.items()) {
@@ -25,8 +28,8 @@ const diffTrees = (originalTree: ItemTree, updatedTree: ItemTree) => {
 			});
 		} else {
 			const originalItem = originalTree.getAtPath(itemPath);
-			if (!keysMatch(originalItem, item, itemDiffFields)) {
-				updates.push({
+			if (!itemsMatch(originalItem, item)) {
+				output.set(itemPath, {
 					type: TreeCommandType.Update,
 					path: itemPath,
 					// TODO: Handle the case where the ID changes?
@@ -38,25 +41,23 @@ const diffTrees = (originalTree: ItemTree, updatedTree: ItemTree) => {
 		handledPaths.add(itemPath);
 	}
 
-	const output: TreeCommand[] = [];
-
 	// Check for deletions
 	for (const [path, remoteItem] of originalTree.items()) {
 		if (handledPaths.has(path)) continue;
 
 		// Item with the removed item's ID created? Move/rename.
-		if (additions.has(remoteItem.id)) {
+		if (remoteItem.id && additions.has(remoteItem.id)) {
 			const addCommand = additions.get(remoteItem.id);
 			additions.delete(remoteItem.id);
 
-			output.push({
+			output.set(path, {
 				type: TreeCommandType.Move,
 				originalPath: path,
 				newPath: addCommand.path,
 				itemType: addCommand.item.type_,
 			});
 		} else {
-			output.push({
+			output.set(path, {
 				type: TreeCommandType.Remove,
 				path,
 				itemType: remoteItem.type_,
@@ -65,9 +66,9 @@ const diffTrees = (originalTree: ItemTree, updatedTree: ItemTree) => {
 	}
 
 	for (const command of additions.values()) {
-		output.push(command);
+		output.set(command.path, command);
 	}
-	return output.concat(updates);
+	return output;
 };
 
 export default diffTrees;

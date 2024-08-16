@@ -1,7 +1,15 @@
-import { FolderEntity, NoteEntity, ResourceEntity } from '../../database/types';
 import { FolderItem } from '../types';
 
-const keysMatch = (localItem: FolderItem, remoteItem: FolderItem, keys: ((keyof FolderEntity)|(keyof NoteEntity)|(keyof ResourceEntity))[]) => {
+// This applies keyof to each possible value of the given union.
+// See https://www.typescriptlang.org/docs/handbook/2/conditional-types.html#distributive-conditional-types
+// This is useful because ItemType is often a union.
+type UnionKeys<T> = T extends object ? keyof T : never;
+
+const keysMatch = <ItemType extends object = FolderItem> (
+	localItem: ItemType,
+	remoteItem: ItemType,
+	keys: UnionKeys<ItemType>[],
+) => {
 	for (const key of keys) {
 		if (key in localItem !== key in remoteItem) {
 			return false;

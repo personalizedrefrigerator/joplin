@@ -1,13 +1,13 @@
 import { dirname, join } from 'path/posix';
 import { FolderItem } from './types';
 import { extname, normalize } from 'path';
-import { ModelType } from '../../BaseModel';
 import time from '../../time';
 import { LinkTrackerWrapper } from './LinkTracker';
 import { ResourceEntity } from '../database/types';
 import debugLogger from './utils/debugLogger';
 import encodeTitle from './utils/encodeTitle';
-import { TreeCommand, TreeCommandType } from './model/commands';
+import { MirrorableItemType, TreeCommand, TreeCommandType } from './utils/diff/commands';
+import itemsMatch from './utils/itemsMatch';
 
 export interface AddOrUpdateEvent {
 	path: string;
@@ -49,6 +49,14 @@ export const noOpActionListeners: ActionListeners = {
 	onUpdate: async ()=>{},
 	onDelete: async ()=>{},
 };
+
+interface Conflict {
+	// If null, the item was expected to exist, but did not (e.g. when attempting to
+	// delete an item that doesn't exist).
+	originalItem: FolderItem|null;
+	originalPath: string;
+	message: string;
+}
 
 export default class ItemTree {
 	private pathToItem_: Map<string, FolderItem> = new Map();
@@ -104,9 +112,9 @@ export default class ItemTree {
 	private getUniqueItemPathInParent(parentPath: string, item: FolderItem, allowPresentPaths: string[] = []) {
 		let baseName = encodeTitle(item.title);
 		let extension = '';
-		if (item.type_ === ModelType.Note) {
+		if (item.type_ === MirrorableItemType.Note) {
 			extension = '.md';
-		} else if (item.type_ === ModelType.Resource) {
+		} else if (item.type_ === MirrorableItemType.Resource) {
 			const resource = item as ResourceEntity;
 			// Prefer filename and file_extension, when available.
 			extension = resource.file_extension ?? extname(resource.filename ?? '');
@@ -205,7 +213,7 @@ export default class ItemTree {
 			let toParentPath;
 			if (!this.hasPath(toPath)) {
 				toParentPath = dirname(toPath);
-			} else if (this.getAtPath(toPath).type_ === ModelType.Folder) {
+			} else if (this.getAtPath(toPath).type_ === MirrorableItemType.Folder) {
 				toParentPath = toPath;
 				toPath = this.getUniqueItemPathInParent(toParentPath, item);
 			} else {
@@ -229,7 +237,7 @@ export default class ItemTree {
 				movedItem: { ...item, parent_id: toParentId },
 			});
 
-			const canHaveChildren = item.type_ === ModelType.Folder;
+			const canHaveChildren = item.type_ === MirrorableItemType.Folder;
 			if (canHaveChildren) {
 				// Handle the case where an item starts with path but is not a child of it
 				const prefix = fromPath.endsWith('/') ? fromPath : `${fromPath}/`;
@@ -272,7 +280,7 @@ export default class ItemTree {
 
 		const item = this.getAtPath(path);
 
-		const canHaveChildren = item.type_ === ModelType.Folder;
+		const canHaveChildren = item.type_ === MirrorableItemType.Folder;
 		const promises: Promise<void>[] = [];
 		if (canHaveChildren) {
 			// Handle the case where an item starts with path but is not a child of it
@@ -386,21 +394,68 @@ export default class ItemTree {
 	}
 
 	// Applies a command to this tree.
-	public dispatch(command: TreeCommand, actionListeners: ActionListeners) {
+	public async dispatch(command: TreeCommand, actionListeners: ActionListeners) {
+		const conflicts: Conflict[] = [];
+		const conflict = (originalPath: string, originalItem: FolderItem|null, message: string) => {
+			conflicts.push({ message, originalItem, originalPath });
+		};
+
 		if (command.type === TreeCommandType.Add) {
-			return this.addItemAt(command.path, command.item, actionListeners);
+			let skipAdd = false;
+			if (this.hasPath(command.path)) {
+				const original = this.getAtPath(command.path);
+				// If items are identical, addItemAt is a no-op
+				if (itemsMatch(original, command.item)) {
+					skipAdd = true;
+				} else {
+					conflict(
+						command.path,
+						this.getAtPath(command.path),
+						`Added an item at a path that already exists (${JSON.stringify(command.path)}).`,
+					);
+					await this.deleteAtPath(command.path, actionListeners);
+				}
+			}
+
+			if (!skipAdd) {
+				await this.addItemAt(command.path, command.item, actionListeners);
+			}
 		} else if (command.type === TreeCommandType.Update) {
-			return this.updateAtPath(command.path, command.newItem, actionListeners);
-		} else if (command.type === TreeCommandType.Move) {
-			return this.move(command.originalPath, command.newPath, actionListeners);
+			if (!this.hasPath(command.path)) {
+				conflict(command.path, null, 'Updating an item that doesn\'t exist.');
+				await this.addItemAt(command.path, command.newItem, actionListeners);
+			} else {
+				await this.updateAtPath(command.path, command.newItem, actionListeners);
+			}
+		} else if (command.type === TreeCommandType.Move || command.type === TreeCommandType.Rename) {
+			const newPath = command.type === TreeCommandType.Move ? command.newPath : join(dirname(command.originalPath), command.newName);
+
+			let canMove = true;
+			if (this.hasPath(newPath)) {
+				conflict(newPath, this.getAtPath(newPath), 'Moving or renaming an item to a destination that already exists.');
+				await this.deleteAtPath(newPath, actionListeners);
+			}
+
+			if (!this.hasPath(command.originalPath)) {
+				canMove = false;
+				conflict(command.originalPath, null, 'Attempted to move an item that doesn\'t exist.');
+			}
+
+			if (canMove) {
+				await this.move(command.originalPath, newPath, actionListeners);
+			}
 		} else if (command.type === TreeCommandType.Remove) {
-			return this.deleteAtPath(command.path, actionListeners);
-		} else if (command.type === TreeCommandType.Rename) {
-			const toPath = join(dirname(command.originalPath), command.newName);
-			return this.move(command.originalPath, toPath, actionListeners);
+			if (!this.hasPath(command.path)) {
+				conflict(command.path, null, 'Attempted to remove an item that doesn\'t exist.');
+			} else {
+				await this.deleteAtPath(command.path, actionListeners);
+			}
+		} else {
+			const exhaustivenessCheck: never = command;
+			throw new Error(`Invalid command: ${exhaustivenessCheck}`);
 		}
-		const exhaustivenessCheck: never = command;
-		throw new Error(`Invalid command: ${exhaustivenessCheck}`);
+
+		return { conflicts };
 	}
 
 	public items() {

@@ -22,8 +22,8 @@ import { itemDiffFields, resourceMetadataExtension, resourcesDirId, resourcesDir
 import resourceToMetadataYml from './utils/resourceToMetadataYml';
 import Logger from '@joplin/utils/Logger';
 import keysMatch from './utils/keysMatch';
-import mergeTrees from './utils/mergeTrees';
 import fillLocalTree from './utils/fillLocalTree';
+import mergeTrees from './utils/diff/mergeTrees';
 const { ALL_NOTES_FILTER_ID } = require('../../reserved-ids.js');
 
 // A logger for less verbose logs (debugLogger is for very verbose logging).
@@ -63,8 +63,11 @@ export default class {
 	private watcher_: DirectoryWatcher|null = null;
 	private modifyRemoteActions_: ActionListeners;
 	private modifyLocalActions_: ActionListeners;
-	private localTree_: ItemTree;
-	private remoteTree_: ItemTree;
+
+	private localTree_: ItemTree; // Database
+	private remoteTree_: ItemTree; // File system
+	private journalTree_: ItemTree; // History
+
 	private actionQueue_: AsyncActionQueue<ActionQueueEvent>;
 	private fullSyncEndListeners_: ((error: unknown)=> void)[] = [];
 	private remoteLinkTracker_: LinkTracker;
@@ -81,6 +84,7 @@ export default class {
 		this.remoteLinkTracker_ = new LinkTracker(this.onLinkTrackerItemUpdate_);
 		this.localTree_ = new ItemTree(baseItem);
 		this.remoteTree_ = new ItemTree(baseItem, this.remoteLinkTracker_.toEventHandlers(LinkType.PathLink));
+		this.journalTree_ = new ItemTree(baseItem);
 
 		this.actionQueue_ = new AsyncActionQueue();
 		this.actionQueue_.setCanSkipTaskHandler((current, next) => {
@@ -362,7 +366,16 @@ export default class {
 		}
 		debugLogger.debug('built remote tree', generatedIds.length, 'new IDs');
 
-		await mergeTrees(this.localTree_, this.remoteTree_, this.modifyLocalActions_, this.modifyRemoteActions_);
+		// TODO(pr): Load Journal from the database.
+		this.journalTree_.resetData();
+
+		await mergeTrees({
+			journalTree: this.journalTree_,
+			localTree: this.localTree_,
+			remoteTree: this.remoteTree_,
+			modifyLocal: this.modifyLocalActions_,
+			modifyRemote: this.modifyRemoteActions_,
+		});
 
 		debugLogger.groupEnd();
 	}

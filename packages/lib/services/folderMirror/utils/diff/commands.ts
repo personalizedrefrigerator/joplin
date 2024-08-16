@@ -1,5 +1,5 @@
-import { ModelType } from '../../../BaseModel';
-import { FolderItem } from '../types';
+import { ModelType } from '../../../../BaseModel';
+import { FolderItem } from '../../types';
 
 export enum TreeCommandType {
 	Add = 'add',

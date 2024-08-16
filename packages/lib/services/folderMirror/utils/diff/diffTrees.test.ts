@@ -1,9 +1,9 @@
-import { ModelType } from '../../../BaseModel';
-import { baseItem } from '../constants';
-import ItemTree, { noOpActionListeners } from '../ItemTree';
+import { ModelType } from '../../../../BaseModel';
+import { baseItem } from '../../constants';
+import ItemTree, { noOpActionListeners } from '../../ItemTree';
 import diffTrees from './diffTrees';
 
-describe('folderMirror/utils/diffTrees', () => {
+describe('folderMirror/diffTrees', () => {
 	test('should diff with the empty tree', async () => {
 		const emptyTree = new ItemTree(baseItem);
 		const updatedTree = new ItemTree(baseItem);
