@@ -126,3 +126,4 @@ BYTV
 mirrorable
 keyval
 traineddata
+Famegear
