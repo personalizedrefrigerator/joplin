@@ -185,6 +185,18 @@ if [ "$IS_LINUX" == "1" ]; then
 	if [ $testResult -ne 0 ]; then
 		exit $testResult
 	fi
+
+	echo "Step: Checking for ignored files that have been committed..."
+	trackedIgnoredFiles=$(git ls-files --ignored --cached --exclude-standard)
+	hasTrackedIgnoredFiles=$(echo "$trackedIgnoredFiles" | wc -w)
+	if [ $hasTrackedIgnoredFiles -gt 0 ]; then
+		ignoredFileCount=$(echo "$trackedIgnoredFiles" | wc -l)
+		echo "ERROR: $ignoredFileCount file(s) that are present in .gitignore are also tracked by git."
+		echo "These files may have been accidentally committed. Please remove them or update the .gitignore."
+		echo "These files are:"
+		echo "$trackedIgnoredFiles"
+		exit 1
+	fi
 fi
 
 # =============================================================================
