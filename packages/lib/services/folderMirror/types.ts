@@ -7,3 +7,10 @@ export type ResourceItem = ResourceEntity & {
 };
 
 export type FolderItem = (FolderEntity | NoteEntity | ResourceItem) & { virtual?: boolean };
+
+export type ItemsMatchCallback = (a: FolderItem, b: FolderItem)=>boolean;
+
+export interface TreeLike {
+	hasPath(path: string): boolean;
+	hashAtPath(path: string): string;
+}

@@ -2,7 +2,7 @@ import BaseModel, { ModelType } from '../BaseModel';
 import { SqlQuery } from '../services/database/types';
 import Database from '../database';
 
-type MirrorJournalData = {
+export type MirrorJournalData = {
 	item_id: string;
 	mirror_id: string;
 	hash_md5: string;

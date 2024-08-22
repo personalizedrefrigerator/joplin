@@ -111,6 +111,12 @@ export default class LinkTracker {
 	) {
 	}
 
+	public static fromTree(tree: ItemTree) {
+		const tracker = new LinkTracker(async ()=>{});
+		tracker.setTree(tree);
+		return tracker;
+	}
+
 	public setTree(tree: ItemTree) {
 		this.tree = tree;
 	}

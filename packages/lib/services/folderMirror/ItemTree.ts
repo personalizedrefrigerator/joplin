@@ -8,6 +8,8 @@ import debugLogger from './utils/debugLogger';
 import encodeTitle from './utils/encodeTitle';
 import { MirrorableItemType, TreeCommand, TreeCommandType } from './utils/diff/commands';
 import itemsMatch from './utils/itemsMatch';
+import keysMatch from './utils/keysMatch';
+import { nonMergableFields } from './constants';
 
 export interface AddOrUpdateEvent {
 	path: string;
@@ -56,6 +58,8 @@ interface Conflict {
 	originalItem: FolderItem|null;
 	originalPath: string;
 	message: string;
+
+	command: TreeCommand;
 }
 
 export default class ItemTree {
@@ -397,15 +401,27 @@ export default class ItemTree {
 	public async dispatch(command: TreeCommand, actionListeners: ActionListeners) {
 		const conflicts: Conflict[] = [];
 		const conflict = (originalPath: string, originalItem: FolderItem|null, message: string) => {
-			conflicts.push({ message, originalItem, originalPath });
+			conflicts.push({ message, originalItem, originalPath, command });
 		};
 
 		if (command.type === TreeCommandType.Add) {
 			let skipAdd = false;
+
 			if (this.hasPath(command.path)) {
 				const original = this.getAtPath(command.path);
 				// If items are identical, addItemAt is a no-op
 				if (itemsMatch(original, command.item)) {
+					skipAdd = true;
+				} else if (keysMatch(original, command.item, nonMergableFields)) {
+					if (command.item.updated_time > original.updated_time) {
+						const updateCommand: TreeCommand = {
+							type: TreeCommandType.Update,
+							path: command.path,
+							newItem: command.item,
+							itemType: command.itemType,
+						};
+						conflicts.push(...(await this.dispatch(updateCommand, actionListeners)).conflicts);
+					}
 					skipAdd = true;
 				} else {
 					conflict(

@@ -4,6 +4,7 @@ import Note from '../../../models/Note';
 import { ResourceEntity } from '../../database/types';
 import { resourcesDirId, resourcesDirItem, resourcesDirName } from '../constants';
 import ItemTree, { noOpActionListeners } from '../ItemTree';
+import LinkTracker, { LinkType } from '../LinkTracker';
 import { ResourceItem } from '../types';
 
 
@@ -51,13 +52,21 @@ const fillLocalTree = async (itemTree: ItemTree, baseFolderId: string) => {
 			}
 
 			if (!note.deleted_time) {
-				await itemTree.addItemTo(basePath, note, noOpActionListeners);
+				await itemTree.addItemTo(basePath, {...note}, noOpActionListeners);
 			}
 		}
 	};
 
 	await itemTree.addItemAt(resourcesDirName, resourcesDirItem, noOpActionListeners);
 	await processFolders('', baseFolderId, allFolders);
+
+	// Convert to path links -- allows comparison with remote notes
+	const linkTracker = LinkTracker.fromTree(itemTree);
+	for (const [path, item] of [...itemTree.items()]) {
+		if (item.type_ === ModelType.Note && 'body' in item) {
+			item.body = linkTracker.convertLinkTypes(LinkType.PathLink, item.body, path);
+		}
+	}
 };
 
 export default fillLocalTree;

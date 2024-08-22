@@ -36,9 +36,14 @@ const mergeTrees = async (
 			return conflicts.map(c => c.message).join('\n').replace(/\n|^/g, '\n    ');
 		};
 		throw new Error(
-			`Conflict handling is not implemented! Conflicts: ${conflictMessage(remoteConflicts)}\n\n${conflictMessage(localConflicts)}`,
+			`Conflict handling is not implemented! Conflicts: ${conflictMessage(remoteConflicts)}\n\n${conflictMessage(localConflicts)}
+			
+			Remote commands: ${remoteConflicts.map(r => JSON.stringify(r.command, undefined, ' '))}
+			Local commands: ${localConflicts.map(c => JSON.stringify(c.command, undefined, ' '))}
+			`,
 		);
 	}
 };
+
 
 export default mergeTrees;
