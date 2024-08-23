@@ -56,6 +56,27 @@ export default class PluginRunner extends BasePluginRunner {
 		`);
 
 		messenger.onWebViewLoaded();
+
+		void (async () => {
+			await messenger.remoteApi.ping('test');
+			logger.info('======PERF TEST======');
+			logger.info('  RESULT,\t', 'toBg,\t', 'fromBg,\ttotal');
+			for (let size = 8; size <= Math.pow(2, 26); size *= 2) {
+				logger.info('Testing size', size);
+				const rawData = [];
+				for (let i = 0; i < size; i += 8) {
+					rawData.push(`1234abc${Math.floor(Math.random() * 10)}`);
+				}
+				const b64 = rawData.join('');
+				logger.info('  built data');
+				const prePing = Date.now();
+				const { data, timestamp } = await messenger.remoteApi.ping(b64);
+				const postPing = Date.now();
+				logger.info('  size:', size, ',\t', timestamp - prePing, ',\t', postPing - timestamp, ',\t', postPing - prePing);
+				if (data !== b64) throw new Error('corruption!');
+			}
+			logger.info('======/PERF TEST======');
+		})();
 	}
 
 	public override async stop(plugin: Plugin) {

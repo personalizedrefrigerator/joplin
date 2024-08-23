@@ -16,7 +16,8 @@ export interface PluginMainProcessApi {
 }
 
 export interface PluginWebViewApi {
-
+	// Allows performance testing. Returns the given string.
+	ping(data: string): Promise<{ data: string; timestamp: number }>;
 }
 
 // Similar to PluginViewState, but with loaded scripts (rather than

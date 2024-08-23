@@ -5,7 +5,11 @@ import wrapConsoleLog from './utils/wrapConsoleLog';
 
 
 export const initializePluginBackgroundIframe = async (messageChannelId: string) => {
-	const localApi = { };
+	const localApi = {
+		async ping(data: string) {
+			return { data, timestamp: Date.now() };
+		},
+	};
 	const messenger = new WindowMessenger<PluginWebViewApi, PluginMainProcessApi>(messageChannelId, parent, localApi);
 	await messenger.awaitRemoteReady();
 
