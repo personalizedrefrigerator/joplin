@@ -210,7 +210,10 @@ const generalMiddleware = (store: any) => (next: any) => async (action: any) => 
 	// Like the desktop and CLI apps, we run this whenever the sync target properties change.
 	// Previously, this only ran when encryption was enabled/disabled. However, after fetching
 	// a new key, this needs to run.
-	if ((action.type === 'SETTING_UPDATE_ONE' && action.key === 'syncInfoCache') || (action.type === 'SETTING_UPDATE_ALL')) {
+	if (
+		(action.type === 'SETTING_UPDATE_ONE' && ['encryption.passwordCache', 'encryption.masterPassword', 'syncInfoCache'].includes(action.key))
+		|| action.type === 'SETTING_UPDATE_ALL'
+	) {
 		await loadMasterKeysFromSettings(EncryptionService.instance());
 		void DecryptionWorker.instance().scheduleStart();
 		const loadedMasterKeyIds = EncryptionService.instance().loadedMasterKeyIds();
