@@ -124,7 +124,7 @@ export async function findMasterKeyPassword(service: EncryptionService, masterKe
 		return masterPassword;
 	}
 
-	logger.info('findMasterKeyPassword: No master password is defined or is invalid - trying to get master key specific password');
+	logger.info('findMasterKeyPassword: No master password is defined - trying to get master key specific password');
 
 	const passwords = passwordCache ? passwordCache : Setting.value('encryption.passwordCache');
 	return passwords[masterKey.id];
@@ -187,10 +187,10 @@ export const activeMasterKeySanityCheck = () => {
 export function showMissingMasterKeyMessage(syncInfo: SyncInfo, notLoadedMasterKeys: string[]) {
 	if (!syncInfo.masterKeys.length) return false;
 
-	let countMissingPassword = 0;
+	notLoadedMasterKeys = notLoadedMasterKeys.slice();
 
-	for (const id of notLoadedMasterKeys) {
-		const mk = syncInfo.masterKeys.find(mk => mk.id === id);
+	for (let i = notLoadedMasterKeys.length - 1; i >= 0; i--) {
+		const mk = syncInfo.masterKeys.find(mk => mk.id === notLoadedMasterKeys[i]);
 
 		// A "notLoadedMasterKey" is a key that either doesn't exist or for
 		// which a password hasn't been set yet. For the purpose of this
@@ -198,12 +198,11 @@ export function showMissingMasterKeyMessage(syncInfo: SyncInfo, notLoadedMasterK
 		// Master keys that haven't been downloaded yet should normally be
 		// downloaded at some point.
 		// https://github.com/laurent22/joplin/issues/5391
-		if (mk && masterKeyEnabled(mk)) {
-			countMissingPassword ++;
-		}
+		if (!mk) continue;
+		if (!masterKeyEnabled(mk)) notLoadedMasterKeys.pop();
 	}
 
-	return countMissingPassword > 0;
+	return !!notLoadedMasterKeys.length;
 }
 
 export function getDefaultMasterKey(): MasterKeyEntity {
