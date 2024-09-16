@@ -22,9 +22,9 @@ export const runtime = (comp: any): CommandRuntime => {
 
 			let allAreFolders = true;
 			const itemIdToType = new Map<string, ModelType>();
-			for (const id of itemIds) {
-				const item = await BaseItem.loadItemById(id);
-				itemIdToType.set(id, item.type_);
+			const loadedItems = await BaseItem.loadItemsByIds(itemIds, { fields: ['id'] });
+			for (const item of loadedItems) {
+				itemIdToType.set(item.id, item.type_);
 
 				if (item.type_ !== ModelType.Folder) {
 					allAreFolders = false;

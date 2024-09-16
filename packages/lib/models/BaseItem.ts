@@ -239,15 +239,17 @@ export default class BaseItem extends BaseModel {
 		return null;
 	}
 
-	public static async loadItemsByIds(ids: string[]) {
+	public static async loadItemsByIds(ids: string[], options: LoadOptions|null = null) {
 		if (!ids.length) return [];
 
 		const classes = this.syncItemClassNames();
+		const fieldsSql = options?.fields?.length ? this.db().escapeFields(options.fields) : '*';
+
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 		let output: any[] = [];
 		for (let i = 0; i < classes.length; i++) {
 			const ItemClass = this.getClass(classes[i]);
-			const sql = `SELECT * FROM ${ItemClass.tableName()} WHERE id IN ('${ids.join('\',\'')}')`;
+			const sql = `SELECT ${fieldsSql} FROM ${ItemClass.tableName()} WHERE id IN ('${ids.join('\',\'')}')`;
 			const models = await ItemClass.modelSelectAll(sql);
 			output = output.concat(models);
 		}
