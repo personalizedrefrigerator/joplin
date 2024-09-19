@@ -249,6 +249,9 @@ for (const library of externalContentScriptLibraries) {
 
 const extraScriptConfig = {
 	...baseConfig,
+	// Prevents "exports is not defined" errors:
+	target: 'web',
+
 	resolve: {
 		alias: {
 			api: path.resolve(__dirname, 'api'),
