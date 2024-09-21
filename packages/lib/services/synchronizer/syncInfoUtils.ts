@@ -23,6 +23,11 @@ export interface SyncInfoValueString {
 	updatedTime: number;
 }
 
+export interface SyncInfoValueNumber {
+	value: number;
+	updatedTime: number;
+}
+
 export interface SyncInfoValuePublicPrivateKeyPair {
 	value: PublicPrivateKeyPair;
 	updatedTime: number;
@@ -201,6 +206,7 @@ export function mergeSyncInfos(s1: SyncInfo, s2: SyncInfo): SyncInfo {
 			output.masterKeys[idx] = mk.updated_time > mk2.updated_time ? mk : mk2;
 		}
 	}
+	output.keepOldNotesForDays = Math.max(s1.keepOldNotesForDays, s2.keepOldNotesForDays);
 
 	// We use >= so that the version from s1 (local) is preferred to the version in s2 (remote).
 	// For example, if s2 has appMinVersion 0.00 and s1 has appMinVersion 0.0.0, we choose the
@@ -221,12 +227,14 @@ export class SyncInfo {
 	private activeMasterKeyId_: SyncInfoValueString;
 	private masterKeys_: MasterKeyEntity[] = [];
 	private ppk_: SyncInfoValuePublicPrivateKeyPair;
+	private keepOldNotesForDays_: SyncInfoValueNumber;
 	private appMinVersion_: string = appMinVersion_;
 
 	public constructor(serialized: string = null) {
 		this.e2ee_ = { value: false, updatedTime: 0 };
 		this.activeMasterKeyId_ = { value: '', updatedTime: 0 };
 		this.ppk_ = { value: null, updatedTime: 0 };
+		this.keepOldNotesForDays_ = { value: 90, updatedTime: 0 };
 
 		if (serialized) this.load(serialized);
 	}
@@ -239,6 +247,7 @@ export class SyncInfo {
 			activeMasterKeyId: this.activeMasterKeyId_,
 			masterKeys: this.masterKeys,
 			ppk: this.ppk_,
+			keepOldNotesForDays: this.keepOldNotesForDays_,
 			appMinVersion: this.appMinVersion,
 		};
 	}
@@ -282,6 +291,7 @@ export class SyncInfo {
 		this.masterKeys_ = 'masterKeys' in s ? s.masterKeys : [];
 		this.ppk_ = 'ppk' in s ? s.ppk : { value: null, updatedTime: 0 };
 		this.appMinVersion_ = s.appMinVersion ? s.appMinVersion : '0.0.0';
+		this.keepOldNotesForDays_ = s.keepOldNotesForDays ?? { value: Setting.value('revisionService.ttlDays'), updatedTime: Date.now() };
 
 		// Migration for master keys that didn't have "hasBeenUsed" property -
 		// in that case we assume they've been used at least once.
@@ -357,6 +367,16 @@ export class SyncInfo {
 		if (JSON.stringify(v) === JSON.stringify(this.masterKeys_)) return;
 
 		this.masterKeys_ = v;
+	}
+
+	public get keepOldNotesForDays(): number {
+		return this.keepOldNotesForDays_.value;
+	}
+
+	public set keepOldNotesForDays(v: number) {
+		if (v === this.keepOldNotesForDays_.value) return;
+
+		this.keepOldNotesForDays_ = { value: v, updatedTime: Date.now() };
 	}
 
 	public keyTimestamp(name: string): number {

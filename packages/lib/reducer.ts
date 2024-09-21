@@ -13,6 +13,8 @@ import { ProcessResultsRow } from './services/search/SearchEngine';
 import { getDisplayParentId } from './services/trash';
 import Logger from '@joplin/utils/Logger';
 import { SettingsRecord } from './models/settings/types';
+import { localSyncInfo, saveLocalSyncInfo } from './services/synchronizer/syncInfoUtils';
+import Setting from './models/Setting';
 const fastDeepEqual = require('fast-deep-equal');
 const { ALL_NOTES_FILTER_ID } = require('./reserved-ids');
 const { createSelectorCreator, defaultMemoize } = require('reselect');
@@ -1357,6 +1359,15 @@ const reducer = produce((draft: Draft<State> = defaultState, action: any) => {
 		// To allow creating notes when opening the app with all notes and/or tags,
 		// a "last selected folder ID" needs to be set.
 		draft.selectedFolderId ??= draft.settings.activeFolderId;
+	}
+
+	if (action.type === 'SETTING_UPDATE_ALL' || (action.type === 'SETTING_UPDATE_ONE' && action.key === 'revisionService.ttlDays')) {
+		const syncInfo = localSyncInfo();
+		const localTtlDays = Setting.value('revisionService.ttlDays');
+		if (localTtlDays !== syncInfo.keepOldNotesForDays) {
+			syncInfo.keepOldNotesForDays = localTtlDays;
+			saveLocalSyncInfo(syncInfo);
+		}
 	}
 
 	for (const additionalReducer of additionalReducers) {
