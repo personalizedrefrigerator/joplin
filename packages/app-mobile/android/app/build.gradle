@@ -1,6 +1,7 @@
 apply plugin: "com.android.application"
 apply plugin: "org.jetbrains.kotlin.android"
 apply plugin: "com.facebook.react"
+import com.android.build.OutputFile
 
 /**
  * This is the configuration block to customize your React Native Android app.
@@ -81,9 +82,6 @@ android {
         targetSdkVersion rootProject.ext.targetSdkVersion
 		versionCode 2097752
 		versionName "3.1.4"
-		ndk {
-			abiFilters "armeabi-v7a", "x86", "arm64-v8a", "x86_64"
-		}
 		
         // https://github.com/react-native-community/react-native-camera/issues/2138
         missingDimensionStrategy 'react-native-camera', 'general'
@@ -106,6 +104,26 @@ android {
 				keyPassword JOPLIN_RELEASE_KEY_PASSWORD
 			}
 		}
+    }
+    splits {
+        abi {
+            reset()
+            enable true
+            universalApk false // set to true to also create a universal APK
+            include "armeabi-v7a", "x86_64", "x86", "arm64-v8a"
+        }
+    }
+    applicationVariants.configureEach { variant ->
+        variant.outputs.each { output ->
+            // For each separate APK per architecture, set a unique version code as described here:
+            // https://developer.android.com/studio/build/configure-apk-splits.html
+            // Example: versionCode 1 will generate 1001 for armeabi-v7a, 1002 for x86, etc.
+            def versionCodes = ["armeabi-v7a": 1, "x86": 2, "arm64-v8a": 3, "x86_64": 4]
+            def abi = output.getFilter(OutputFile.ABI)
+            if (abi != null) {
+                output.versionCodeOverride = defaultConfig.versionCode * 1000 + versionCodes.get(abi)
+            }
+        }
     }
     buildTypes {
         debug {
