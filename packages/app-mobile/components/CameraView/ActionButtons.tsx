@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useMemo } from 'react';
-import { View, StyleSheet, ViewStyle, Platform } from 'react-native';
+import { View, StyleSheet, ViewStyle } from 'react-native';
 import IconButton from '../IconButton';
 import { _ } from '@joplin/lib/locale';
 import { CameraDirection } from '@joplin/lib/models/settings/builtInMetadata';
@@ -35,22 +35,23 @@ const useStyles = () => {
 			alignItems: 'center',
 			alignSelf: 'flex-end',
 		};
+		const buttonRowContainer: ViewStyle = {
+			display: 'flex',
+			flexDirection: 'row',
+			justifyContent: 'space-between',
+			left: 20,
+			right: 20,
+			position: 'absolute',
+		};
 
 		return StyleSheet.create({
-			container: {
-				flex: 1,
-				flexDirection: 'column',
-				justifyContent: 'space-between',
-				borderWidth: 1,
-				paddingTop: 10,
-				paddingBottom: 10,
+			buttonRowContainerTop: {
+				...buttonRowContainer,
+				top: 20,
 			},
-			buttonRowContainer: {
-				display: 'flex',
-				flexDirection: 'row',
-				justifyContent: 'space-between',
-				marginLeft: 20,
-				marginRight: 20,
+			buttonRowContainerBottom: {
+				...buttonRowContainer,
+				bottom: 20,
 			},
 			buttonContainer,
 			buttonContent: {
@@ -82,7 +83,7 @@ const useStyles = () => {
 	}, []);
 };
 
-const ActionBar: React.FC<Props> = props => {
+const ActionButtons: React.FC<Props> = props => {
 	const styles = useStyles();
 	const reverseButton = (
 		<IconButton
@@ -115,19 +116,16 @@ const ActionBar: React.FC<Props> = props => {
 		/>
 	);
 	const cameraActions = (
-		<View style={styles.buttonRowContainer}>
+		<View style={styles.buttonRowContainerBottom}>
 			{reverseButton}
 			{takePhotoButton}
-			{
-				// Changing ratio is only supported on Android:
-				Platform.OS === 'android' ? ratioButton : <View style={{ flex: 1 }}/>
-			}
+			{ratioButton}
 		</View>
 	);
 
 
-	return <View style={styles.container}>
-		<View style={styles.buttonRowContainer}>
+	return <>
+		<View style={styles.buttonRowContainerTop}>
 			<IconButton
 				themeId={props.themeId}
 				iconName='ionicon arrow-back'
@@ -138,7 +136,7 @@ const ActionBar: React.FC<Props> = props => {
 			/>
 		</View>
 		{props.cameraReady ? cameraActions : <ActivityIndicator/>}
-	</View>;
+	</>;
 };
 
-export default ActionBar;
+export default ActionButtons;

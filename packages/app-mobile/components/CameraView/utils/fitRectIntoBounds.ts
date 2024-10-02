@@ -1,7 +1,4 @@
-export interface Rect {
-	width: number;
-	height: number;
-}
+import Rect from './Rect';
 
 const fitRectIntoBounds = (rect: Rect, bounds: Rect) => {
 	const rectRatio = rect.width / rect.height;
