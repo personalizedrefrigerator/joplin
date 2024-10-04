@@ -1,4 +1,4 @@
-import BaseApplication from '@joplin/lib/BaseApplication';
+import BaseNodeApplication from '@joplin/lib/BaseNodeApplication';
 import { refreshFolders } from '@joplin/lib/folders-screen-utils.js';
 import ResourceService from '@joplin/lib/services/ResourceService';
 import BaseModel, { ModelType } from '@joplin/lib/BaseModel';
@@ -20,7 +20,7 @@ const { cliUtils } = require('./cli-utils.js');
 const Cache = require('@joplin/lib/Cache');
 const { splitCommandBatch } = require('@joplin/lib/string-utils');
 
-class Application extends BaseApplication {
+class Application extends BaseNodeApplication {
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	private commands_: Record<string, any> = {};
@@ -472,6 +472,8 @@ class Application extends BaseApplication {
 
 			this.startRotatingLogMaintenance(Setting.value('profileDir'));
 		}
+
+		return argv;
 	}
 }
 

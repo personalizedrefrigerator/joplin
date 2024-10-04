@@ -1,5 +1,5 @@
 /* eslint-disable require-atomic-updates */
-import BaseApplication from '../BaseApplication';
+import BaseNodeApplication from '../BaseNodeApplication';
 import BaseModel from '../BaseModel';
 import Logger, { TargetType, LoggerWrapper, LogLevel } from '@joplin/utils/Logger';
 import Setting, { AppType, Env } from '../models/Setting';
@@ -944,7 +944,7 @@ export async function naughtyStrings() {
 // }
 
 // Application for feature integration testing
-class TestApp extends BaseApplication {
+class TestApp extends BaseNodeApplication {
 
 	private hasGui_: boolean;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
@@ -984,6 +984,8 @@ class TestApp extends BaseApplication {
 		await this.wait();
 
 		this.logger_.info('Test app started...');
+
+		return argv;
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied

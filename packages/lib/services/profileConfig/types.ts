@@ -12,6 +12,12 @@ export interface ProfileConfig {
 	profiles: Profile[];
 }
 
+export interface ProfilesInfo {
+	profileConfig: ProfileConfig;
+	isSubProfile: boolean;
+	profileDir: string;
+}
+
 export const defaultProfile = (): Profile => {
 	return {
 		name: 'Default',

@@ -1,7 +1,8 @@
 import { getCurrentProfile, getProfileFullPath, isSubProfile, loadProfileConfig } from '.';
 import Setting from '../../models/Setting';
+import { ProfilesInfo } from './types';
 
-export default async (rootProfileDir: string) => {
+export default async (rootProfileDir: string): Promise<ProfilesInfo> => {
 	const profileConfig = await loadProfileConfig(`${rootProfileDir}/profiles.json`);
 	const profileDir = getProfileFullPath(getCurrentProfile(profileConfig), rootProfileDir);
 	const isSub = isSubProfile(getCurrentProfile(profileConfig));

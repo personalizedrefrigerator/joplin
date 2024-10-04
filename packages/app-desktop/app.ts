@@ -12,7 +12,8 @@ import AlarmServiceDriverNode from '@joplin/lib/services/AlarmServiceDriverNode'
 import Logger, { TargetType } from '@joplin/utils/Logger';
 import Setting from '@joplin/lib/models/Setting';
 import actionApi from '@joplin/lib/services/rest/actionApi.desktop';
-import BaseApplication, { StartOptions } from '@joplin/lib/BaseApplication';
+import { StartOptions } from '@joplin/lib/BaseApplication';
+import BaseNodeApplication from '@joplin/lib/BaseNodeApplication';
 import DebugService from '@joplin/lib/debug/DebugService';
 import { _, setLocale } from '@joplin/lib/locale';
 import SpellCheckerService from '@joplin/lib/services/spellChecker/SpellCheckerService';
@@ -84,7 +85,7 @@ const appDefaultState = createAppDefaultState(
 	resourceEditWatcherDefaultState,
 );
 
-class Application extends BaseApplication {
+class Application extends BaseNodeApplication {
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	private checkAllPluginStartedIID_: any = null;

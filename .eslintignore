@@ -537,6 +537,7 @@ packages/app-desktop/utils/markupLanguageUtils.js
 packages/app-desktop/utils/restartInSafeModeFromMain.test.js
 packages/app-desktop/utils/restartInSafeModeFromMain.js
 packages/app-mobile/PluginAssetsLoader.js
+packages/app-mobile/app.js
 packages/app-mobile/commands/index.js
 packages/app-mobile/commands/newNote.test.js
 packages/app-mobile/commands/newNote.js
@@ -896,6 +897,7 @@ packages/lib/AsyncActionQueue.js
 packages/lib/BaseApplication.js
 packages/lib/BaseModel.test.js
 packages/lib/BaseModel.js
+packages/lib/BaseNodeApplication.js
 packages/lib/BaseSyncTarget.js
 packages/lib/ClipperServer.js
 packages/lib/CssUtils.js

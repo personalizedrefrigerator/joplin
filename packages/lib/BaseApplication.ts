@@ -1,41 +1,25 @@
 import Setting, { Env } from './models/Setting';
-import Logger, { TargetType, LoggerWrapper } from '@joplin/utils/Logger';
+import Logger, { LoggerWrapper, LogLevel } from '@joplin/utils/Logger';
 import shim from './shim';
-const { setupProxySettings } = require('./shim-init-node');
 import BaseService from './services/BaseService';
 import reducer, { getNotesParent, serializeNotesParent, setStore, State } from './reducer';
 import KeychainServiceDriverNode from './services/keychain/KeychainServiceDriver.node';
 import KeychainServiceDriverElectron from './services/keychain/KeychainServiceDriver.electron';
 import { setLocale } from './locale';
 import KvStore from './services/KvStore';
-import SyncTargetJoplinServer from './SyncTargetJoplinServer';
-import SyncTargetOneDrive from './SyncTargetOneDrive';
 import { createStore, applyMiddleware, Store } from 'redux';
-const { defaultState, stateUtils } = require('./reducer');
-import JoplinDatabase from './JoplinDatabase';
+import { defaultState, stateUtils } from './reducer';
 import { cancelTimers as folderScreenUtilsCancelTimers, refreshFolders, scheduleRefreshFolders } from './folders-screen-utils';
-const { DatabaseDriverNode } = require('./database-driver-node.js');
-import BaseModel from './BaseModel';
+import BaseModel, { ModelType } from './BaseModel';
 import Folder from './models/Folder';
 import BaseItem from './models/BaseItem';
 import Note from './models/Note';
 import Tag from './models/Tag';
-import { splitCommandString } from '@joplin/utils';
 import { setDateFormat, setTimeFormat, setTimeLocale } from '@joplin/utils/time';
 import { reg } from './registry';
 import time from './time';
 import BaseSyncTarget from './BaseSyncTarget';
 import reduxSharedMiddleware from './components/shared/reduxSharedMiddleware';
-import dns = require('dns');
-import fs = require('fs-extra');
-const EventEmitter = require('events');
-const syswidecas = require('./vendor/syswide-cas');
-import SyncTargetRegistry from './SyncTargetRegistry';
-import SyncTargetFilesystem from './SyncTargetFilesystem';
-const SyncTargetNextcloud = require('./SyncTargetNextcloud.js');
-const SyncTargetWebDAV = require('./SyncTargetWebDAV.js');
-const SyncTargetDropbox = require('./SyncTargetDropbox.js');
-const SyncTargetAmazonS3 = require('./SyncTargetAmazonS3.js');
 import EncryptionService from './services/e2ee/EncryptionService';
 import ResourceFetcher from './services/ResourceFetcher';
 import SearchEngineUtils from './services/search/SearchEngineUtils';
@@ -47,28 +31,31 @@ import { loadKeychainServiceAndSettings } from './services/SettingUtils';
 import MigrationService from './services/MigrationService';
 import ShareService from './services/share/ShareService';
 import handleSyncStartupOperation from './services/synchronizer/utils/handleSyncStartupOperation';
-import SyncTargetJoplinCloud from './SyncTargetJoplinCloud';
-const { setAutoFreeze } = require('immer');
+import { setAutoFreeze } from 'immer';
 import { getEncryptionEnabled } from './services/synchronizer/syncInfoUtils';
 import { loadMasterKeysFromSettings, migrateMasterPassword } from './services/e2ee/utils';
-import SyncTargetNone from './SyncTargetNone';
 import { setRSA } from './services/e2ee/ppk';
-import RSA from './services/e2ee/RSA.node';
 import Resource from './models/Resource';
-import { ProfileConfig } from './services/profileConfig/types';
-import initProfile from './services/profileConfig/initProfile';
+import { ProfileConfig, ProfilesInfo } from './services/profileConfig/types';
 import { parseShareCache } from './services/share/reducer';
-import RotatingLogs from './RotatingLogs';
-import { NoteEntity } from './services/database/types';
-import { join } from 'path';
-import processStartFlags from './utils/processStartFlags';
+import { FolderEntity, NoteEntity } from './services/database/types';
+import processStartFlags, { MatchedStartFlags } from './utils/processStartFlags';
 import { setupAutoDeletion } from './services/trash/permanentlyDeleteOldItems';
-import determineProfileAndBaseDir from './determineBaseAppDirs';
+import EventDispatcher from './EventDispatcher';
+import { RSA } from './services/e2ee/types';
+import SyncTargetRegistry from './SyncTargetRegistry';
+import SyncTargetNone from './SyncTargetNone';
+import SyncTargetFilesystem from './SyncTargetFilesystem';
+import SyncTargetOneDrive from './SyncTargetOneDrive';
+import SyncTargetJoplinServer from './SyncTargetJoplinServer';
+import SyncTargetJoplinCloud from './SyncTargetJoplinCloud';
+import JoplinDatabase from './JoplinDatabase';
+const SyncTargetNextcloud = require('./SyncTargetNextcloud.js');
+const SyncTargetWebDAV = require('./SyncTargetWebDAV.js');
+const SyncTargetDropbox = require('./SyncTargetDropbox.js');
+const SyncTargetAmazonS3 = require('./SyncTargetAmazonS3.js');
 
 const appLogger: LoggerWrapper = Logger.create('App');
-
-// const ntpClient = require('./vendor/ntp-client');
-// ntpClient.dgram = require('dgram');
 
 export interface StartOptions {
 	keychainEnabled?: boolean;
@@ -79,14 +66,13 @@ export interface StartOptions {
 }
 export const safeModeFlagFilename = 'force-safe-mode-on-next-start';
 
-export default class BaseApplication {
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	private eventEmitter_: any;
+export default abstract class BaseApplication {
+
+	private eventEmitter_: EventDispatcher<string, unknown>;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	private scheduleAutoAddResourcesIID_: any = null;
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	private database_: any = null;
+	protected database_: JoplinDatabase|null = null;
 	private profileConfig_: ProfileConfig = null;
 
 	protected showStackTraces_ = false;
@@ -95,16 +81,12 @@ export default class BaseApplication {
 	// Note: this is basically a cache of state.selectedFolderId. It should *only*
 	// be derived from the state and not set directly since that would make the
 	// state and UI out of sync.
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	protected currentFolder_: any = null;
+	protected currentFolder_: FolderEntity|null = null;
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	protected store_: Store<any> = null;
-
-	private rotatingLogs: RotatingLogs;
+	protected store_: Store<Store> = null;
 
 	public constructor() {
-		this.eventEmitter_ = new EventEmitter();
+		this.eventEmitter_ = new EventDispatcher();
 		this.decryptionWorker_resourceMetadataButNotBlobDecrypted = this.decryptionWorker_resourceMetadataButNotBlobDecrypted.bind(this);
 	}
 
@@ -161,8 +143,7 @@ export default class BaseApplication {
 		this.switchCurrentFolder(newFolder);
 	}
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	public switchCurrentFolder(folder: any) {
+	public switchCurrentFolder(folder: FolderEntity) {
 		if (!this.hasGui()) {
 			this.currentFolder_ = { ...folder };
 			Setting.setValue('activeFolderId', folder ? folder.id : '');
@@ -176,18 +157,11 @@ export default class BaseApplication {
 
 	// Handles the initial flags passed to main script and
 	// returns the remaining args.
-	private async handleStartFlags_(argv: string[], setDefaults = true) {
+	protected async handleStartFlags(argv: string[], setDefaults = true) {
 		const flags = await processStartFlags(argv, setDefaults);
 
 		if (flags.matched.showStackTraces) {
 			this.showStackTraces_ = true;
-		}
-
-		// Work around issues with ipv6 resolution -- default to ipv4first.
-		// (possibly incorrect URL serialization see https://github.com/mswjs/msw/issues/1388#issuecomment-1241180921).
-		// See also https://github.com/node-fetch/node-fetch/issues/1624#issuecomment-1407717012
-		if (flags.matched.allowOverridingDnsResultOrder) {
-			dns.setDefaultResultOrder('ipv4first');
 		}
 
 		return {
@@ -196,19 +170,14 @@ export default class BaseApplication {
 		};
 	}
 
-	// eslint-disable-next-line @typescript-eslint/ban-types -- Old code before rule was applied
-	public on(eventName: string, callback: Function) {
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Partially refactored old code before rule was applied
+	public on(eventName: string, callback: (...args: any[])=> void) {
 		return this.eventEmitter_.on(eventName, callback);
 	}
 
-	public async exit(code = 0) {
-		await Setting.saveAll();
-		process.exit(code);
-	}
-
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	public async refreshNotes(state: any, useSelectedNoteId = false, noteHash = '') {
-		let parentType = state.notesParentType;
+	public async refreshNotes(state: State, useSelectedNoteId = false, noteHash = '') {
+		let parentType: ModelType|string = state.notesParentType;
 		let parentId = null;
 
 		if (parentType === 'Folder') {
@@ -335,9 +304,7 @@ export default class BaseApplication {
 		return o.join(', ');
 	}
 
-	public hasGui() {
-		return false;
-	}
+	public abstract hasGui(): boolean;
 
 	public uiType() {
 		return this.hasGui() ? 'gui' : 'cli';
@@ -345,7 +312,7 @@ export default class BaseApplication {
 
 	public generalMiddlewareFn() {
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-		const middleware = (store: any) => (next: any) => (action: any) => {
+		const middleware = (store: Store) => (next: any) => (action: any) => {
 			return this.generalMiddleware(store, next, action);
 		};
 
@@ -354,8 +321,7 @@ export default class BaseApplication {
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	protected async applySettingsSideEffects(action: any = null) {
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-		const sideEffects: any = {
+		const sideEffects: Record<string, ()=> Promise<void>> = {
 			'dateFormat': async () => {
 				time.setLocale(Setting.value('locale'));
 				setTimeLocale(Setting.value('locale'));
@@ -363,25 +329,6 @@ export default class BaseApplication {
 				setTimeFormat(Setting.value('timeFormat'));
 				time.setDateFormat(Setting.value('dateFormat'));
 				time.setTimeFormat(Setting.value('timeFormat'));
-			},
-			'net.ignoreTlsErrors': async () => {
-				process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = Setting.value('net.ignoreTlsErrors') ? '0' : '1';
-			},
-			'net.customCertificates': async () => {
-				const caPaths = Setting.value('net.customCertificates').split(',');
-				for (let i = 0; i < caPaths.length; i++) {
-					const f = caPaths[i].trim();
-					if (!f) continue;
-					syswidecas.addCAs(f);
-				}
-			},
-			'net.proxyEnabled': async () => {
-				setupProxySettings({
-					maxConcurrentConnections: Setting.value('sync.maxConcurrentConnections'),
-					proxyTimeout: Setting.value('net.proxyTimeout'),
-					proxyEnabled: Setting.value('net.proxyEnabled'),
-					proxyUrl: Setting.value('net.proxyUrl'),
-				});
 			},
 
 			// Note: this used to run when "encryption.enabled" was changed, but
@@ -418,9 +365,6 @@ export default class BaseApplication {
 		sideEffects['locale'] = sideEffects['dateFormat'];
 		sideEffects['encryption.passwordCache'] = sideEffects['syncInfoCache'];
 		sideEffects['encryption.masterPassword'] = sideEffects['syncInfoCache'];
-		sideEffects['sync.maxConcurrentConnections'] = sideEffects['net.proxyEnabled'];
-		sideEffects['sync.proxyTimeout'] = sideEffects['net.proxyEnabled'];
-		sideEffects['sync.proxyUrl'] = sideEffects['net.proxyEnabled'];
 
 		if (action) {
 			const effect = sideEffects[action.key];
@@ -623,49 +567,48 @@ export default class BaseApplication {
 		ResourceFetcher.instance().dispatch = function() {};
 	}
 
-	public async readFlagsFromFile(flagPath: string) {
-		if (!fs.existsSync(flagPath)) return {};
-		let flagContent = fs.readFileSync(flagPath, 'utf8');
-		if (!flagContent) return {};
+	protected async handleFirstStart() {
+		// detectAndSetLocale sets the locale to the system default locale.
+		// Not calling it when a new profile is created ensures that the
+		// the language set by the user is not overridden by the system
+		// default language.
+		if (!Setting.value('isSubProfile')) {
+			const locale = shim.detectAndSetLocale(Setting);
+			reg.logger().info(`First start: detected locale as ${locale}`);
+		}
+		Setting.skipDefaultMigrations();
 
-		flagContent = flagContent.trim();
+		if (Setting.value('env') === 'dev') {
+			Setting.setValue('showTrayIcon', false);
+			Setting.setValue('autoUpdateEnabled', false);
+			Setting.setValue('sync.interval', 3600);
+		}
 
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-		let flags: any = splitCommandString(flagContent);
-		flags.splice(0, 0, 'cmd');
-		flags.splice(0, 0, 'node');
-
-		flags = await this.handleStartFlags_(flags, false);
-
-		return flags.matched;
+		Setting.setValue('firstStart', false);
 	}
 
-	protected startRotatingLogMaintenance(profileDir: string) {
-		this.rotatingLogs = new RotatingLogs(profileDir);
-		const processLogs = async () => {
-			try {
-				await this.rotatingLogs.cleanActiveLogFile();
-				await this.rotatingLogs.deleteNonActiveLogFiles();
-			} catch (error) {
-				appLogger.error(error);
-			}
-		};
-		shim.setTimeout(() => { void processLogs(); }, 60000);
-		shim.setInterval(() => { void processLogs(); }, 24 * 60 * 60 * 1000);
+	protected async setDefaultSettings() {
+		if (Setting.value('isSubProfile')) Setting.setValue('welcome.enabled', false);
+
+		if (!Setting.value('api.token')) {
+			void (async () => {
+				const token = await EncryptionService.instance().generateApiToken();
+				Setting.setValue('api.token', token);
+			})();
+		}
 	}
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	public async start(argv: string[], options: StartOptions = null): Promise<any> {
+	public async start(argv: string[], options: StartOptions = null): Promise<string[]> {
 		options = {
 			keychainEnabled: true,
 			setupGlobalLogger: true,
 			...options,
 		};
 
-		const startFlags = await this.handleStartFlags_(argv);
+		const startFlags = await this.handleStartFlags(argv);
 
 		argv = startFlags.argv;
-		let initArgs = startFlags.matched;
+		let initArgs = { ...startFlags.matched };
 		if (argv.length) this.showPromptString_ = false;
 
 		let appName = options.appName;
@@ -677,24 +620,11 @@ export default class BaseApplication {
 
 		// https://immerjs.github.io/immer/docs/freezing
 		setAutoFreeze(initArgs.env === 'dev');
-
-		const { rootProfileDir, homeDir } = determineProfileAndBaseDir(options.rootProfileDir ?? initArgs.profileDir, appName);
-		const { profileDir, profileConfig, isSubProfile } = await initProfile(rootProfileDir);
-		this.profileConfig_ = profileConfig;
-
-		const resourceDirName = 'resources';
-		const resourceDir = `${profileDir}/${resourceDirName}`;
-		const tempDir = `${profileDir}/tmp`;
-		const cacheDir = `${profileDir}/cache`;
-
 		Setting.setConstant('env', initArgs.env as Env);
-		Setting.setConstant('resourceDirName', resourceDirName);
-		Setting.setConstant('resourceDir', resourceDir);
-		Setting.setConstant('tempDir', tempDir);
-		Setting.setConstant('pluginDataDir', `${profileDir}/plugin-data`);
-		Setting.setConstant('cacheDir', cacheDir);
-		Setting.setConstant('pluginDir', `${rootProfileDir}/plugins`);
-		Setting.setConstant('homeDir', homeDir);
+		const profileInfo = await this.initProfileAndDirs(initArgs, options);
+		this.profileConfig_ = profileInfo.profileConfig;
+		initArgs = { ...initArgs, ...await this.getExtraInitArgs(profileInfo) };
+		const globalLogger = await this.initLogger(options.setupGlobalLogger, initArgs.logLevel ?? null);
 
 		SyncTargetRegistry.addClass(SyncTargetNone);
 		SyncTargetRegistry.addClass(SyncTargetFilesystem);
@@ -706,49 +636,13 @@ export default class BaseApplication {
 		SyncTargetRegistry.addClass(SyncTargetJoplinServer);
 		SyncTargetRegistry.addClass(SyncTargetJoplinCloud);
 
-		try {
-			await shim.fsDriver().remove(tempDir);
-		} catch (error) {
-			// Can't do anything in this case, not even log, since the logger
-			// is not yet ready. But normally it's not an issue if the temp
-			// dir cannot be deleted.
-		}
-
-		await fs.mkdirp(profileDir, 0o755);
-		await fs.mkdirp(resourceDir, 0o755);
-		await fs.mkdirp(tempDir, 0o755);
-		await fs.mkdirp(cacheDir, 0o755);
-
-		// Clean up any remaining watched files (they start with "edit-")
-		await shim.fsDriver().removeAllThatStartWith(profileDir, 'edit-');
-
-		const extraFlags = await this.readFlagsFromFile(`${profileDir}/flags.txt`);
-		initArgs = { ...initArgs, ...extraFlags };
-
-		const globalLogger = Logger.globalLogger;
-
-		if (options.setupGlobalLogger) {
-			globalLogger.addTarget(TargetType.File, { path: `${profileDir}/log.txt` });
-			if (Setting.value('appType') === 'desktop') {
-				globalLogger.addTarget(TargetType.Console);
-			}
-			globalLogger.setLevel(initArgs.logLevel);
-		}
-
 		reg.setLogger(Logger.create('') as Logger);
-		// reg.dispatch = () => {};
-
 		BaseService.logger_ = globalLogger;
 
+		appLogger.info(`Profile directory: ${Setting.value('profileDir')}`);
+		appLogger.info(`Root profile directory: ${Setting.value('rootProfileDir')}`);
 
-		appLogger.info(`Profile directory: ${profileDir}`);
-		appLogger.info(`Root profile directory: ${rootProfileDir}`);
-
-		this.database_ = new JoplinDatabase(new DatabaseDriverNode());
-		this.database_.setLogExcludedQueryTypes(['SELECT']);
-		this.database_.setLogger(globalLogger);
-
-		await this.database_.open({ name: `${profileDir}/database.sqlite` });
+		this.database_ = await this.openDatabase(profileInfo, globalLogger);
 
 		// if (Setting.value('env') === 'dev') await this.database_.clearForTesting();
 
@@ -756,7 +650,7 @@ export default class BaseApplication {
 		BaseModel.setDb(this.database_);
 		KvStore.instance().setDb(reg.db());
 
-		setRSA(RSA);
+		setRSA(await this.getRSA());
 
 		await loadKeychainServiceAndSettings(
 			options.keychainEnabled ? [KeychainServiceDriverElectron, KeychainServiceDriverNode] : [],
@@ -772,32 +666,8 @@ export default class BaseApplication {
 			Setting.setValue('isSafeMode', true);
 		}
 
-		const safeModeFlagFile = join(profileDir, safeModeFlagFilename);
-		if (await fs.pathExists(safeModeFlagFile) && fs.readFileSync(safeModeFlagFile, 'utf8') === 'true') {
-			appLogger.info(`Safe mode enabled because of file: ${safeModeFlagFile}`);
-			Setting.setValue('isSafeMode', true);
-			fs.removeSync(safeModeFlagFile);
-		}
-
 		if (Setting.value('firstStart')) {
-
-			// detectAndSetLocale sets the locale to the system default locale.
-			// Not calling it when a new profile is created ensures that the
-			// the language set by the user is not overridden by the system
-			// default language.
-			if (!Setting.value('isSubProfile')) {
-				const locale = shim.detectAndSetLocale(Setting);
-				reg.logger().info(`First start: detected locale as ${locale}`);
-			}
-			Setting.skipDefaultMigrations();
-
-			if (Setting.value('env') === 'dev') {
-				Setting.setValue('showTrayIcon', false);
-				Setting.setValue('autoUpdateEnabled', false);
-				Setting.setValue('sync.interval', 3600);
-			}
-
-			Setting.setValue('firstStart', false);
+			await this.handleFirstStart();
 		} else {
 			Setting.applyDefaultMigrations();
 			Setting.applyUserSettingMigration();
@@ -828,22 +698,13 @@ export default class BaseApplication {
 		}
 
 		if ('welcomeDisabled' in initArgs) Setting.setValue('welcome.enabled', !initArgs.welcomeDisabled);
-		if (isSubProfile) Setting.setValue('welcome.enabled', false);
 
-		if (!Setting.value('api.token')) {
-			void EncryptionService.instance()
-				.generateApiToken()
-			// eslint-disable-next-line promise/prefer-await-to-then -- Old code before rule was applied
-				.then((token: string) => {
-					Setting.setValue('api.token', token);
-				});
-		}
+		await this.setDefaultSettings();
 
 		time.setDateFormat(Setting.value('dateFormat'));
 		time.setTimeFormat(Setting.value('timeFormat'));
 
 		BaseItem.revisionService_ = RevisionService.instance();
-
 
 		BaseItem.encryptionService_ = EncryptionService.instance();
 		BaseItem.shareService_ = ShareService.instance();
@@ -877,4 +738,11 @@ export default class BaseApplication {
 
 		return argv;
 	}
+
+	// Should create the profile and set directory setting constants
+	protected abstract initProfileAndDirs(initArgs: MatchedStartFlags, startupOptions: StartOptions): Promise<ProfilesInfo>;
+	protected abstract initLogger(setupGlobalLogger: boolean, logLevel: LogLevel|null): Promise<Logger>;
+	protected abstract openDatabase(profile: ProfilesInfo, logger: Logger): Promise<JoplinDatabase>;
+	protected abstract getExtraInitArgs(profile: ProfilesInfo): Promise<MatchedStartFlags>;
+	protected abstract getRSA(): Promise<RSA>;
 }
