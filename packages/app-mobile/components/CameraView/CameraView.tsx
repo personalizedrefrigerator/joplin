@@ -58,12 +58,13 @@ const useStyles = ({ themeId, style, cameraFormat, sensorOrientation }: UseStyle
 		});
 
 		const result: ViewStyle = {
-			transform: [
-				{ translateX: (screenWidth - output.width) / 2 },
-				{ translateY: (screenHeight - output.height) / 2 },
-			],
+			left: (screenWidth - output.width) / 2,
+			top: (screenHeight - output.height) / 2,
 			width: output.width,
 			height: output.height,
+			flexBasis: output.height,
+			flexGrow: 0,
+			alignContent: 'center',
 		};
 		return result;
 	}, [cameraFormat, sensorOrientation, screenWidth, screenHeight]);
