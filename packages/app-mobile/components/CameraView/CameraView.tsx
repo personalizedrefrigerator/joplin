@@ -39,13 +39,15 @@ interface Props {
 interface UseStyleProps {
 	themeId: number;
 	style: ViewStyle;
-	cameraFormat: CameraDeviceFormat;
-	sensorOrientation: Orientation;
+	cameraFormat: CameraDeviceFormat|null;
+	sensorOrientation: Orientation|null;
 }
 
 const useStyles = ({ themeId, style, cameraFormat, sensorOrientation }: UseStyleProps) => {
 	const { width: screenWidth, height: screenHeight } = useWindowDimensions();
-	const outputPositioning = useMemo(() => {
+	const outputPositioning = useMemo((): ViewStyle => {
+		if (!sensorOrientation) return {};
+
 		const reverseWidthHeight = sensorOrientation.includes('landscape');
 		const output = fitRectIntoBounds({
 			width: !reverseWidthHeight ? cameraFormat.photoWidth : cameraFormat.photoHeight,
@@ -98,13 +100,17 @@ const CameraViewComponent: React.FC<Props> = props => {
 	const [requestingPermissions, setRequestingPermissions] = useState(false);
 	const [cameraReady, setCameraReady] = useState(false);
 
-	const device = useCameraDevice(props.cameraType === CameraDirection.Front ? 'front' : 'back');
-	const format = useBestFormat(device.formats, props.cameraRatio);
+	const deviceFront = useCameraDevice('front');
+	const deviceBack = useCameraDevice('back');
+	const preferredDevice = props.cameraType === CameraDirection.Front ? deviceFront : deviceBack;
+	const device = preferredDevice ?? deviceFront ?? deviceBack;
+
+	const format = useBestFormat(device?.formats ?? [], props.cameraRatio);
 	const styles = useStyles({
 		themeId: props.themeId,
 		cameraFormat: format,
 		style: props.style,
-		sensorOrientation: device.sensorOrientation,
+		sensorOrientation: device?.sensorOrientation,
 	});
 
 	useAsyncEffect(async () => {
@@ -134,7 +140,7 @@ const CameraViewComponent: React.FC<Props> = props => {
 		Setting.setValue('camera.type', newDirection);
 	}, [props.cameraType]);
 
-	const availableRatios = useAvailableRatios(device.formats);
+	const availableRatios = useAvailableRatios(device?.formats ?? []);
 	const onNextCameraRatio = useCallback(async () => {
 		const integerRatios = availableRatios.filter(ratio => !ratio.match(/\d\.[^5]/));
 		const targetRatios = integerRatios.length ? integerRatios : availableRatios;
@@ -174,6 +180,13 @@ const CameraViewComponent: React.FC<Props> = props => {
 			<LinkButton onPress={onDeviceSettingsClick}>{_('Open settings')}</LinkButton>
 			<PrimaryButton onPress={props.onCancel}>{_('Go back')}</PrimaryButton>
 		</View>;
+	} else if (!device) {
+		content = <View style={styles.loadingContainer}>
+			<Text>
+				{_('No camera device available!')}
+			</Text>
+			<PrimaryButton onPress={props.onCancel}>{_('Go back')}</PrimaryButton>
+		</View>;
 	} else {
 		content = <>
 			<CameraComponent
@@ -192,7 +205,7 @@ const CameraViewComponent: React.FC<Props> = props => {
 				themeId={props.themeId}
 				onCameraReverse={onCameraReverse}
 				cameraDirection={props.cameraType}
-				cameraRatio={pixelRectToAspectRatio({ width: format.photoWidth, height: format.photoHeight })}
+				cameraRatio={format ? pixelRectToAspectRatio({ width: format.photoWidth, height: format.photoHeight }) : null}
 				onSetCameraRatio={onNextCameraRatio}
 				onTakePicture={onTakePicture}
 				takingPicture={takingPicture}
