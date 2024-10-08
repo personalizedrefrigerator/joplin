@@ -1,13 +1,12 @@
 import * as React from 'react';
-import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { connect } from 'react-redux';
 import { Text, StyleSheet, Linking, View, useWindowDimensions } from 'react-native';
 import { _ } from '@joplin/lib/locale';
 import { ViewStyle } from 'react-native';
-import { useCameraPermission, useCameraDevice, Camera, CameraProps, CameraDeviceFormat } from 'react-native-vision-camera';
+import { useCameraPermission, useCameraDevice, Camera, CameraProps, CameraDeviceFormat, Orientation } from 'react-native-vision-camera';
 import useAsyncEffect from '@joplin/lib/hooks/useAsyncEffect';
-import { DialogContext } from '../DialogManager';
 import { AppState } from '../../utils/types';
 import ActionButtons from './ActionButtons';
 import { CameraDirection } from '@joplin/lib/models/settings/builtInMetadata';
@@ -41,26 +40,31 @@ interface UseStyleProps {
 	themeId: number;
 	style: ViewStyle;
 	cameraFormat: CameraDeviceFormat;
+	sensorOrientation: Orientation;
 }
 
-const useStyles = ({ themeId, style, cameraFormat }: UseStyleProps) => {
+const useStyles = ({ themeId, style, cameraFormat, sensorOrientation }: UseStyleProps) => {
 	const { width: screenWidth, height: screenHeight } = useWindowDimensions();
 	const outputPositioning = useMemo(() => {
+		const reverseWidthHeight = sensorOrientation.includes('landscape');
 		const output = fitRectIntoBounds({
-			width: cameraFormat.photoWidth,
-			height: cameraFormat.photoHeight,
+			width: !reverseWidthHeight ? cameraFormat.photoWidth : cameraFormat.photoHeight,
+			height: reverseWidthHeight ? cameraFormat.photoWidth : cameraFormat.photoHeight,
 		}, {
 			width: screenWidth,
 			height: screenHeight,
 		});
 
-		return {
-			left: (screenWidth - output.width) / 2,
-			top: (screenHeight - output.height) / 2,
+		const result: ViewStyle = {
+			transform: [
+				{ translateX: (screenWidth - output.width) / 2 },
+				{ translateY: (screenHeight - output.height) / 2 },
+			],
 			width: output.width,
 			height: output.height,
 		};
-	}, [cameraFormat, screenWidth, screenHeight]);
+		return result;
+	}, [cameraFormat, sensorOrientation, screenWidth, screenHeight]);
 
 	return useMemo(() => {
 		const theme = themeStyle(themeId);
@@ -74,7 +78,7 @@ const useStyles = ({ themeId, style, cameraFormat }: UseStyleProps) => {
 				...outputPositioning,
 				...style,
 			},
-			errorContainer: {
+			loadingContainer: {
 				backgroundColor: theme.backgroundColor,
 				maxWidth: 600,
 				marginLeft: 'auto',
@@ -86,30 +90,33 @@ const useStyles = ({ themeId, style, cameraFormat }: UseStyleProps) => {
 	}, [themeId, style, outputPositioning]);
 };
 
+const onDeviceSettingsClick = () => Linking.openSettings();
+
 const CameraViewComponent: React.FC<Props> = props => {
 	const cameraRef = useRef<Camera|null>(null);
 	const { hasPermission, requestPermission } = useCameraPermission();
+	const [requestingPermissions, setRequestingPermissions] = useState(false);
 	const [cameraReady, setCameraReady] = useState(false);
-	const dialogs = useContext(DialogContext);
 
 	const device = useCameraDevice(props.cameraType === CameraDirection.Front ? 'front' : 'back');
 	const format = useBestFormat(device.formats, props.cameraRatio);
-	const styles = useStyles({ themeId: props.themeId, cameraFormat: format, style: props.style });
+	const styles = useStyles({
+		themeId: props.themeId,
+		cameraFormat: format,
+		style: props.style,
+		sensorOrientation: device.sensorOrientation,
+	});
 
-	useAsyncEffect(async (event) => {
-		if (!hasPermission) {
-			const success = await requestPermission();
-			if (event.cancelled) return;
-
-			if (!success) {
-				dialogs.prompt(
-					_('Missing camera permission'),
-					_('The camera permission is required to take pictures.'),
-					[{ text: _('Open settings'), onPress: () => Linking.openSettings() }],
-				);
+	useAsyncEffect(async () => {
+		try {
+			if (!hasPermission) {
+				setRequestingPermissions(true);
+				await requestPermission();
 			}
+		} finally {
+			setRequestingPermissions(false);
 		}
-	}, [hasPermission, requestPermission, dialogs]);
+	}, [hasPermission, requestPermission]);
 
 	useEffect(() => {
 		const handler = () => {
@@ -129,7 +136,7 @@ const CameraViewComponent: React.FC<Props> = props => {
 
 	const availableRatios = useAvailableRatios(device.formats);
 	const onNextCameraRatio = useCallback(async () => {
-		const integerRatios = availableRatios.filter(ratio => !ratio.includes('.'));
+		const integerRatios = availableRatios.filter(ratio => !ratio.match(/\d\.[^5]/));
 		const targetRatios = integerRatios.length ? integerRatios : availableRatios;
 		const ratioIndex = Math.max(0, targetRatios.indexOf(props.cameraRatio));
 
@@ -159,9 +166,12 @@ const CameraViewComponent: React.FC<Props> = props => {
 
 	let content;
 	if (!hasPermission) {
-		content = <View style={styles.errorContainer}>
-			<Text>{_('Missing camera permission')}</Text>
-			<LinkButton onPress={() => Linking.openSettings()}>{_('Open settings')}</LinkButton>
+		content = <View style={styles.loadingContainer}>
+			<Text>
+				{requestingPermissions ? _('Waiting for camera permission...') : _('Missing camera permission')}
+			</Text>
+			<Text>{_('The camera permission is required to take pictures.')}</Text>
+			<LinkButton onPress={onDeviceSettingsClick}>{_('Open settings')}</LinkButton>
 			<PrimaryButton onPress={props.onCancel}>{_('Go back')}</PrimaryButton>
 		</View>;
 	} else {
