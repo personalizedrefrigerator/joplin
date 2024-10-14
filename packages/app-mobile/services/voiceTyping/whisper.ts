@@ -8,14 +8,14 @@ import { SpeechToTextCallbacks, VoiceTypingProvider, VoiceTypingSession } from '
 
 const logger = Logger.create('voiceTyping/whisper');
 
-const { SpeechToTextModule } = NativeModules;
+const speechToTextModule = () => NativeModules.SpeechToTextModule;
 
 // Timestamps are in the form <|0.00|>. They seem to be added:
 // - After long pauses.
 // - Between sentences (in pairs).
 // - At the beginning and end of a sequence.
 const timestampExp = /<\|(\d+\.\d*)\|>/g;
-const timestampPairExp = /<\|(\d+\.\d*)\|><\|(\d+\.\d*)\|>/g;
+const timestampPairExp = /<\|(\d+\.\d*)\|>\s*<\|(\d+\.\d*)\|>/g;
 const postProcessSpeech = (text: string) => {
 	return text.replace(timestampExp, '').replace(/\[BLANK_AUDIO\]/g, '');
 };
@@ -35,14 +35,14 @@ class Whisper implements VoiceTypingSession {
 		}
 		try {
 			logger.debug('starting recorder');
-			await SpeechToTextModule.startRecording(this.sessionId);
+			await speechToTextModule().startRecording(this.sessionId);
 			logger.debug('recorder started');
 
 			const loopStartCounter = this.closeCounter;
 			while (this.closeCounter === loopStartCounter) {
-				logger.debug('reading block');
-				const data: string = await SpeechToTextModule.expandBufferAndConvert(this.sessionId, 4);
-				logger.debug('done reading block. Length', data?.length);
+				console.debug('reading block');
+				const data: string = await speechToTextModule().expandBufferAndConvert(this.sessionId, 4);
+				console.debug('done reading block. Length', data, data?.length);
 
 				if (this.sessionId === null) {
 					logger.debug('Session stopped. Ending inference loop.');
@@ -80,13 +80,13 @@ class Whisper implements VoiceTypingSession {
 					}
 				}
 
-				const recordingLength = await SpeechToTextModule.getBufferLengthSeconds(this.sessionId);
+				const recordingLength = await speechToTextModule().getBufferLengthSeconds(this.sessionId);
 				if (trimTo > 0 && trimTo < recordingLength * 2 / 3) {
 					logger.debug('Trim to', trimTo, 'in recording with length', recordingLength);
 					this.callbacks.onFinalize(postProcessSpeech(dataBeforeTrim));
 					this.callbacks.onPreview(postProcessSpeech(dataAfterTrim));
 					this.lastPreviewData = dataAfterTrim;
-					await SpeechToTextModule.dropFirstSeconds(this.sessionId, trimTo);
+					await speechToTextModule().dropFirstSeconds(this.sessionId, trimTo);
 				} else {
 					logger.debug('Preview', data);
 					this.lastPreviewData = data;
@@ -108,9 +108,9 @@ class Whisper implements VoiceTypingSession {
 		}
 
 		const sessionId = this.sessionId;
-		this.sessionId = null;
 		this.closeCounter ++;
-		await SpeechToTextModule.closeSession(sessionId);
+		await speechToTextModule().closeSession(sessionId);
+		this.sessionId = null;
 
 		if (this.lastPreviewData) {
 			this.callbacks.onFinalize(postProcessSpeech(this.lastPreviewData));
@@ -123,7 +123,7 @@ const modelLocalFilepath = () => {
 };
 
 const whisper: VoiceTypingProvider = {
-	supported: () => !!SpeechToTextModule,
+	supported: () => !!speechToTextModule(),
 	modelLocalFilepath: modelLocalFilepath,
 	getDownloadUrl: () => {
 		let urlTemplate = rtrimSlashes(Setting.value('voiceTypingBaseUrl').trim());
@@ -138,7 +138,8 @@ const whisper: VoiceTypingProvider = {
 		return join(dirname(modelLocalFilepath()), 'uuid');
 	},
 	build: async ({ modelPath, callbacks, locale }) => {
-		const sessionId = await SpeechToTextModule.openSession(modelPath, locale);
+		const sessionId = await speechToTextModule().openSession(modelPath, locale);
+		console.log('sessionId', sessionId)
 		return new Whisper(sessionId, callbacks);
 	},
 	modelName: 'whisper',
