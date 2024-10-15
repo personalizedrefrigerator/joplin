@@ -72,6 +72,14 @@ const header6LineDecoration = Decoration.line({
 	attributes: { class: 'cm-h6 cm-headerLine cm-header' },
 });
 
+const orderedListDecoration = Decoration.line({
+	attributes: { class: 'cm-ordered-list cm-list' },
+});
+
+const bulletListDecoration = Decoration.line({
+	attributes: { class: 'cm-unordered-list cm-list' },
+});
+
 const tableHeaderDecoration = Decoration.line({
 	attributes: { class: 'cm-tableHeader' },
 });
@@ -106,6 +114,9 @@ const nodeNameToLineDecoration: Record<string, Decoration> = {
 	'ATXHeading4': header4LineDecoration,
 	'ATXHeading5': header5LineDecoration,
 	'ATXHeading6': header6LineDecoration,
+
+	'OrderedList': orderedListDecoration,
+	'BulletList': bulletListDecoration,
 
 	'TableHeader': tableHeaderDecoration,
 	'TableDelimiter': tableDelimiterDecoration,
