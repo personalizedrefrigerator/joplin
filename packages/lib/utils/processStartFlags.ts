@@ -132,8 +132,16 @@ const processStartFlags = async (argv: string[], setDefaults = true) => {
 			continue;
 		}
 
+		if (arg.startsWith('--password-store=')) {
+			// Electron-specific flag for configuring safeStorage on Linux. See
+			// https://www.electronjs.org/docs/latest/api/safe-storage
+			argv.splice(0, 1);
+			continue;
+		}
+
 		if (arg.indexOf('--user-data-dir=') === 0) {
 			// Electron-specific flag. Allows users to run the app with chromedriver.
+			// See https://www.electronjs.org/docs/latest/api/safe-storage#safestoragegetselectedstoragebackend-linux
 			argv.splice(0, 1);
 			continue;
 		}
