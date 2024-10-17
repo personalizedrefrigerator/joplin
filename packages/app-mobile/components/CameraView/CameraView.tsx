@@ -41,14 +41,15 @@ interface UseStyleProps {
 	style: ViewStyle;
 	cameraFormat: CameraDeviceFormat|null;
 	sensorOrientation: Orientation|null;
+	previewOrientation: Orientation;
 }
 
-const useStyles = ({ themeId, style, cameraFormat, sensorOrientation }: UseStyleProps) => {
+const useStyles = ({ themeId, style, cameraFormat, sensorOrientation, previewOrientation }: UseStyleProps) => {
 	const { width: screenWidth, height: screenHeight } = useWindowDimensions();
 	const outputPositioning = useMemo((): ViewStyle => {
-		if (!sensorOrientation) return {};
+		if (!sensorOrientation || !previewOrientation) return {};
 
-		const reverseWidthHeight = sensorOrientation.includes('landscape');
+		const reverseWidthHeight = sensorOrientation.includes('landscape') !== previewOrientation.includes('landscape');
 		const output = fitRectIntoBounds({
 			width: !reverseWidthHeight ? cameraFormat.photoWidth : cameraFormat.photoHeight,
 			height: reverseWidthHeight ? cameraFormat.photoWidth : cameraFormat.photoHeight,
@@ -67,7 +68,7 @@ const useStyles = ({ themeId, style, cameraFormat, sensorOrientation }: UseStyle
 			alignContent: 'center',
 		};
 		return result;
-	}, [cameraFormat, sensorOrientation, screenWidth, screenHeight]);
+	}, [cameraFormat, previewOrientation, sensorOrientation, screenWidth, screenHeight]);
 
 	return useMemo(() => {
 		const theme = themeStyle(themeId);
@@ -78,6 +79,8 @@ const useStyles = ({ themeId, style, cameraFormat, sensorOrientation }: UseStyle
 			},
 			camera: {
 				position: 'relative',
+				borderColor: 'red',
+				borderWidth: 8,
 				...outputPositioning,
 				...style,
 			},
@@ -107,11 +110,13 @@ const CameraViewComponent: React.FC<Props> = props => {
 	const device = preferredDevice ?? deviceFront ?? deviceBack;
 
 	const format = useBestFormat(device?.formats ?? [], props.cameraRatio);
+	const [previewOrientation, setPreviewOrientation] = useState<Orientation>('portrait');
 	const styles = useStyles({
 		themeId: props.themeId,
 		cameraFormat: format,
 		style: props.style,
 		sensorOrientation: device?.sensorOrientation,
+		previewOrientation,
 	});
 
 	useAsyncEffect(async () => {
@@ -199,6 +204,7 @@ const CameraViewComponent: React.FC<Props> = props => {
 				photo={true}
 				isActive={true}
 				format={format}
+				onPreviewOrientationChanged={setPreviewOrientation}
 
 				enableZoomGesture={true}
 			/>
