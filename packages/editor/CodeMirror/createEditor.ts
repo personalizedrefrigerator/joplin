@@ -32,6 +32,7 @@ import handlePasteEvent from './utils/handlePasteEvent';
 import biDirectionalTextExtension from './utils/biDirectionalTextExtension';
 import searchExtension from './utils/searchExtension';
 import isCursorAtBeginning from './utils/isCursorAtBeginning';
+import overwriteModeExtension from './utils/overwriteModeExtension';
 
 const createEditor = (
 	parentElement: HTMLElement, props: EditorProps,
@@ -253,7 +254,9 @@ const createEditor = (
 
 				// Apply styles to entire lines (block-display decorations)
 				decoratorExtension,
+
 				biDirectionalTextExtension,
+				overwriteModeExtension,
 
 				// Adds additional CSS classes to tokens (the default CSS classes are
 				// auto-generated and thus unstable).

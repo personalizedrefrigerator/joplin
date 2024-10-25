@@ -1,5 +1,23 @@
 # Joplin Desktop Changelog
 
+## [v3.1.20](https://github.com/laurent22/joplin/releases/tag/v3.1.20) - 2024-10-22T12:21:32Z
+
+- Fixed: Fix error screen shown on opening settings when an incompatible plugin is installed ([#11223](https://github.com/laurent22/joplin/issues/11223) by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Security: Improve KaTeX error handling ([#11207](https://github.com/laurent22/joplin/issues/11207) by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Security: Improve Markdown viewer link handling ([#11201](https://github.com/laurent22/joplin/issues/11201) by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Security: Open more target="_blank" links in a browser ([#11212](https://github.com/laurent22/joplin/issues/11212) by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+
+## [v3.1.18](https://github.com/laurent22/joplin/releases/tag/v3.1.18) (Pre-release) - 2024-10-11T23:27:10Z
+
+- New: Plugins: Add support for joplin.settings.values and deprecate joplin.settings.value ([715abcc](https://github.com/laurent22/joplin/commit/715abcc))
+- Improved: Downgrade CodeMirror packages to fix various Android regressions ([#11170](https://github.com/laurent22/joplin/issues/11170) by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Improved: Plugins: Name webview root attribute so that it can be styled ([75b8caf](https://github.com/laurent22/joplin/commit/75b8caf))
+- Improved: Remove Math Mode from the list of plugins incompatible with the new editor ([#11143](https://github.com/laurent22/joplin/issues/11143) by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Improved: Updated packages glob (v10.4.5), katex (v0.16.11), types
+- Fixed: Accessibility: Fix context menu button doesn't open the note list context menu (regression) ([#11175](https://github.com/laurent22/joplin/issues/11175) by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Fix incorrect list switching behavior ([#11137](https://github.com/laurent22/joplin/issues/11137)) ([#11135](https://github.com/laurent22/joplin/issues/11135) by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Improve performance by allowing note list background timers to be cancelled ([#11133](https://github.com/laurent22/joplin/issues/11133)) ([#11129](https://github.com/laurent22/joplin/issues/11129) by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+
 ## [v3.1.17](https://github.com/laurent22/joplin/releases/tag/v3.1.17) (Pre-release) - 2024-09-26T11:57:54Z
 
 - Improved: Enable again auto-updates ([058a559](https://github.com/laurent22/joplin/commit/058a559))
