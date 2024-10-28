@@ -7,7 +7,7 @@ import { classHighlighter } from '@lezer/highlight';
 import {
 	EditorView, drawSelection, highlightSpecialChars, ViewUpdate, Command, rectangularSelection,
 } from '@codemirror/view';
-import { history, undoDepth, redoDepth, standardKeymap } from '@codemirror/commands';
+import { history, undoDepth, redoDepth, standardKeymap, insertTab } from '@codemirror/commands';
 
 import { keymap, KeyBinding } from '@codemirror/view';
 import { searchKeymap } from '@codemirror/search';
@@ -32,6 +32,17 @@ import handlePasteEvent from './utils/handlePasteEvent';
 import biDirectionalTextExtension from './utils/biDirectionalTextExtension';
 import searchExtension from './utils/searchExtension';
 import isCursorAtBeginning from './utils/isCursorAtBeginning';
+import overwriteModeExtension from './utils/overwriteModeExtension';
+
+// Newer versions of CodeMirror by default use Chrome's EditContext API.
+// While this might be stable enough for desktop use, it causes significant
+// problems on Android:
+// - https://github.com/codemirror/dev/issues/1450
+// - https://github.com/codemirror/dev/issues/1451
+// For now, CodeMirror allows disabling EditContext to work around these issues:
+// https://discuss.codemirror.net/t/experimental-support-for-editcontext/8144/3
+type ExtendedEditorView = typeof EditorView & { EDIT_CONTEXT: boolean };
+(EditorView as ExtendedEditorView).EDIT_CONTEXT = false;
 
 const createEditor = (
 	parentElement: HTMLElement, props: EditorProps,
@@ -176,7 +187,13 @@ const createEditor = (
 			notifyLinkEditRequest();
 			return true;
 		}),
-		keyCommand('Tab', insertOrIncreaseIndent, true),
+		keyCommand('Tab', (view: EditorView) => {
+			if (settings.autocompleteMarkup) {
+				return insertOrIncreaseIndent(view);
+			}
+			// Use the default indent behavior (which doesn't adjust markup)
+			return insertTab(view);
+		}, true),
 		keyCommand('Shift-Tab', (view) => {
 			// When at the beginning of the editor, allow shift-tab to act
 			// normally.
@@ -253,7 +270,11 @@ const createEditor = (
 
 				// Apply styles to entire lines (block-display decorations)
 				decoratorExtension,
+
 				biDirectionalTextExtension,
+				overwriteModeExtension,
+
+				props.localisations ? EditorState.phrases.of(props.localisations) : [],
 
 				// Adds additional CSS classes to tokens (the default CSS classes are
 				// auto-generated and thus unstable).
