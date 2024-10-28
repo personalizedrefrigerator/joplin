@@ -34,7 +34,7 @@ describe('renderMarkup', () => {
 
 		{
 			const note = await Note.save({ });
-			await shim.attachFileToNote(note, testImagePath, null, { resizeLargeImages: 'never' });
+			await shim.attachFileToNote(note, testImagePath, { resizeLargeImages: 'never' });
 			const resource = (await Resource.all())[0];
 			const noteBody = (await Note.load(note.id)).body;
 			const renderedNote = await await command.execute(null, MarkupLanguage.Markdown, noteBody);
