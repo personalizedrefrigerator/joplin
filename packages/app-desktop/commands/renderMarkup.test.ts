@@ -38,7 +38,7 @@ describe('renderMarkup', () => {
 			const resource = (await Resource.all())[0];
 			const noteBody = (await Note.load(note.id)).body;
 			const renderedNote = await await command.execute(null, MarkupLanguage.Markdown, noteBody);
-			expect(renderedNote.html).toContain(`<div id="rendered-md"><p><img data-from-md data-resource-id="${resource.id}" src="joplin-content://note-viewer//Users/laurent/src/joplin/packages/lib/testing/../../app-cli/tests/test data/`);
+			expect(renderedNote.html).toContain(`<div id="rendered-md"><p><img data-from-md data-resource-id="${resource.id}" src="joplin-content://note-viewer/`);
 			expect(renderedNote.html).toContain(`/resources-1/${resource.id}.jpg?t=`);
 			expect(renderedNote.html).toContain('" title alt="photo.jpg" /></p>');
 		}
