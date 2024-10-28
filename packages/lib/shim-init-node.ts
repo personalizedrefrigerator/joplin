@@ -416,11 +416,10 @@ function shimInit(options: ShimInitOptions = null) {
 		return newBody.join('\n\n');
 	};
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	shim.attachFileToNote = async function(note, filePath, position: number = null, options: any = null) {
+	shim.attachFileToNote = async function(note, filePath, options = {}) {
 		if (!options) options = {};
 		if (note.markup_language) options.markupLanguage = note.markup_language;
-		const newBody = await shim.attachFileToNoteBody(note.body, filePath, position, options);
+		const newBody = await shim.attachFileToNoteBody(note.body, filePath, options.position ?? 0, options);
 		if (!newBody) return null;
 
 		const newNote = { ...note, body: newBody };

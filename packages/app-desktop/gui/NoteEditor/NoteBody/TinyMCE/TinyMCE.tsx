@@ -1,7 +1,8 @@
 import * as React from 'react';
 import { useState, useEffect, useCallback, useRef, forwardRef, useImperativeHandle } from 'react';
 import { ScrollOptions, ScrollOptionTypes, EditorCommand, NoteBodyEditorProps, ResourceInfos, HtmlToMarkdownHandler } from '../../utils/types';
-import { resourcesStatus, commandAttachFileToBody, getResourcesFromPasteEvent, processPastedHtml, attachedResources } from '../../utils/resourceHandling';
+import { resourcesStatus, commandAttachFileToBody, getResourcesFromPasteEvent, processPastedHtml } from '../../utils/resourceHandling';
+import attachedResources from '@joplin/lib/utils/attachedResources';
 import useScroll from './utils/useScroll';
 import styles_ from './styles';
 import CommandService from '@joplin/lib/services/CommandService';

@@ -10,7 +10,7 @@ import RevisionService from '@joplin/lib/services/RevisionService';
 import { MarkupToHtml } from '@joplin/renderer';
 import time from '@joplin/lib/time';
 import bridge from '../services/bridge';
-import markupLanguageUtils from '../utils/markupLanguageUtils';
+import markupLanguageUtils from '@joplin/lib/utils/markupLanguageUtils';
 import { NoteEntity, RevisionEntity } from '@joplin/lib/services/database/types';
 import { AppState } from '../app.reducer';
 const urlUtils = require('@joplin/lib/urlUtils');
