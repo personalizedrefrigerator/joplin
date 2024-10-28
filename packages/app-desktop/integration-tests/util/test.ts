@@ -32,6 +32,14 @@ const getAndResizeMainWindow = async (electronApp: ElectronApplication) => {
 	return mainWindow;
 };
 
+const waitForStartupPlugins = async (electronApp: ElectronApplication) => {
+	return electronApp.evaluate(({ ipcMain }) => {
+		return new Promise<void>(resolve => {
+			ipcMain.once('startup-plugins-loaded', () => resolve());
+		});
+	});
+};
+
 const testDir = dirname(__dirname);
 
 export const test = base.extend<JoplinFixtures>({
@@ -77,10 +85,12 @@ export const test = base.extend<JoplinFixtures>({
 					pluginPaths.map(path => resolve(testDir, path)).join(','),
 				],
 			});
+			const mainWindowPromise = getAndResizeMainWindow(electronApp);
+			await waitForStartupPlugins(electronApp);
 
 			return {
 				app: electronApp,
-				mainWindow: await getAndResizeMainWindow(electronApp),
+				mainWindow: await mainWindowPromise,
 			};
 		});
 
@@ -91,13 +101,7 @@ export const test = base.extend<JoplinFixtures>({
 	},
 
 	startupPluginsLoaded: async ({ electronApp }, use) => {
-		const startupPluginsLoadedPromise = electronApp.evaluate(({ ipcMain }) => {
-			return new Promise<void>(resolve => {
-				ipcMain.once('startup-plugins-loaded', () => resolve());
-			});
-		});
-
-		await use(startupPluginsLoadedPromise);
+		await use(waitForStartupPlugins(electronApp));
 	},
 
 	mainWindow: async ({ electronApp }, use) => {

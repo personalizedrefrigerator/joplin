@@ -233,7 +233,7 @@ export default class NoteTextViewerComponent extends React.Component<Props, any>
 				className="noteTextViewer"
 				ref={this.webviewRef_}
 				style={viewerStyle}
-				allow='fullscreen=* autoplay=* local-fonts=* encrypted-media=*'
+				allow='clipboard-write=(self) fullscreen=(self) autoplay=(self) local-fonts=(self) encrypted-media=(self)'
 				allowFullScreen={true}
 				aria-label={_('Rendered note')}
 				src={`joplin-content://note-viewer/${__dirname}/note-viewer/index.html`}
