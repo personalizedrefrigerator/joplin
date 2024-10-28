@@ -15,7 +15,7 @@ import ItemList from '../gui/ItemList';
 import HelpButton from '../gui/HelpButton';
 import { surroundKeywords, nextWhitespaceIndex, removeDiacritics } from '@joplin/lib/string-utils';
 import { mergeOverlappingIntervals } from '@joplin/lib/ArrayUtils';
-import markupLanguageUtils from '../utils/markupLanguageUtils';
+import markupLanguageUtils from '@joplin/lib/utils/markupLanguageUtils';
 import focusEditorIfEditorCommand from '@joplin/lib/services/commands/focusEditorIfEditorCommand';
 import Logger from '@joplin/utils/Logger';
 import { MarkupLanguage, MarkupToHtml } from '@joplin/renderer';

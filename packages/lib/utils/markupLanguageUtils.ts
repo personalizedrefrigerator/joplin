@@ -1,6 +1,6 @@
-import { MarkupLanguageUtils as BaseMarkupLanguageUtils } from '@joplin/lib/markupLanguageUtils';
-import { PluginStates } from '@joplin/lib/services/plugins/reducer';
-import { contentScriptsToRendererRules } from '@joplin/lib/services/plugins/utils/loadContentScripts';
+import { MarkupLanguageUtils as BaseMarkupLanguageUtils } from '../markupLanguageUtils';
+import { PluginStates } from '../services/plugins/reducer';
+import { contentScriptsToRendererRules } from '../services/plugins/utils/loadContentScripts';
 import { Options } from '@joplin/renderer/MarkupToHtml';
 
 class MarkupLanguageUtils extends BaseMarkupLanguageUtils {
