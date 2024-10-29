@@ -6,6 +6,7 @@ import { classHighlighter } from '@lezer/highlight';
 
 import {
 	EditorView, drawSelection, highlightSpecialChars, ViewUpdate, Command, rectangularSelection,
+	dropCursor,
 } from '@codemirror/view';
 import { history, undoDepth, redoDepth, standardKeymap } from '@codemirror/commands';
 
@@ -253,6 +254,8 @@ const createEditor = (
 
 				// Apply styles to entire lines (block-display decorations)
 				decoratorExtension,
+				dropCursor(),
+
 				biDirectionalTextExtension,
 
 				// Adds additional CSS classes to tokens (the default CSS classes are

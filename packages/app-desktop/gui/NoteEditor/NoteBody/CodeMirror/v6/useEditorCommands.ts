@@ -1,10 +1,10 @@
 
 import { RefObject, useMemo } from 'react';
-import { CommandValue } from '../../../utils/types';
+import { CommandValue, DropCommandValue } from '../../../utils/types';
 import { commandAttachFileToBody } from '../../../utils/resourceHandling';
 import { _ } from '@joplin/lib/locale';
 import dialogs from '../../../../dialogs';
-import { EditorCommandType } from '@joplin/editor/types';
+import { EditorCommandType, UserEventSource } from '@joplin/editor/types';
 import Logger from '@joplin/utils/Logger';
 import CodeMirrorControl from '@joplin/editor/CodeMirror/CodeMirrorControl';
 import { MarkupLanguage } from '@joplin/renderer';
@@ -38,10 +38,16 @@ const useEditorCommands = (props: Props) => {
 		};
 
 		return {
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-			dropItems: async (cmd: any) => {
+			dropItems: async (cmd: DropCommandValue) => {
 				if (cmd.type === 'notes') {
-					editorRef.current.insertText(cmd.markdownTags.join('\n'));
+					const text = cmd.markdownTags.join('\n');
+
+					const pos = cmd.pos && editorRef.current.editor.posAtCoords({ x: cmd.pos.clientX, y: cmd.pos.clientY });
+					if ((pos ?? null) !== null) {
+						editorRef.current.select(pos, pos);
+					}
+
+					editorRef.current.insertText(text, UserEventSource.Drop);
 				} else if (cmd.type === 'files') {
 					const pos = props.selectionRange.from;
 					const newBody = await commandAttachFileToBody(props.editorContent, cmd.paths, { createFileURL: !!cmd.createFileURL, position: pos, markupLanguage: props.contentMarkupLanguage });

@@ -1,6 +1,7 @@
 import { useCallback } from 'react';
 import Note from '@joplin/lib/models/Note';
 import { DragEvent as ReactDragEvent } from 'react';
+import { DropCommandValue } from './types';
 
 interface HookDependencies {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
@@ -29,12 +30,18 @@ export default function useDropHandler(dependencies: HookDependencies): DropHand
 					noteMarkdownTags.push(Note.markdownTag(note));
 				}
 
+				const props: DropCommandValue = {
+					type: 'notes',
+					pos: {
+						clientX: event.clientX,
+						clientY: event.clientY,
+					},
+					markdownTags: noteMarkdownTags,
+				};
+
 				editorRef.current.execCommand({
 					name: 'dropItems',
-					value: {
-						type: 'notes',
-						markdownTags: noteMarkdownTags,
-					},
+					value: props,
 				});
 			};
 			void dropNotes();
@@ -51,13 +58,15 @@ export default function useDropHandler(dependencies: HookDependencies): DropHand
 				paths.push(file.path);
 			}
 
+			const props: DropCommandValue = {
+				type: 'files',
+				paths: paths,
+				createFileURL: createFileURL,
+			};
+
 			editorRef.current.execCommand({
 				name: 'dropItems',
-				value: {
-					type: 'files',
-					paths: paths,
-					createFileURL: createFileURL,
-				},
+				value: props,
 			});
 			return true;
 		}

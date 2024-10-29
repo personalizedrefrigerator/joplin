@@ -252,3 +252,16 @@ export interface CommandValue {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	value?: any; // For TinyMCE only
 }
+
+export type DropCommandValue = {
+	type: 'notes';
+	pos: {
+		clientX: number;
+		clientY: number;
+	}|undefined;
+	markdownTags: string[];
+}|{
+	type: 'files';
+	paths: string[];
+	createFileURL: boolean;
+};
