@@ -132,6 +132,8 @@ packages/app-desktop/commands/exportNotes.js
 packages/app-desktop/commands/focusElement.js
 packages/app-desktop/commands/index.js
 packages/app-desktop/commands/openProfileDirectory.js
+packages/app-desktop/commands/renderMarkup.test.js
+packages/app-desktop/commands/renderMarkup.js
 packages/app-desktop/commands/replaceMisspelling.js
 packages/app-desktop/commands/restoreNoteRevision.js
 packages/app-desktop/commands/startExternalEditing.js
@@ -517,7 +519,6 @@ packages/app-desktop/utils/customProtocols/handleCustomProtocols.js
 packages/app-desktop/utils/customProtocols/registerCustomProtocols.js
 packages/app-desktop/utils/isSafeToOpen.test.js
 packages/app-desktop/utils/isSafeToOpen.js
-packages/app-desktop/utils/markupLanguageUtils.js
 packages/app-desktop/utils/restartInSafeModeFromMain.test.js
 packages/app-desktop/utils/restartInSafeModeFromMain.js
 packages/app-mobile/PluginAssetsLoader.js
@@ -1328,6 +1329,7 @@ packages/lib/types.js
 packages/lib/urlUtils.js
 packages/lib/utils/ActionLogger.test.js
 packages/lib/utils/ActionLogger.js
+packages/lib/utils/attachedResources.js
 packages/lib/utils/credentialFiles.js
 packages/lib/utils/dom/makeSandboxedIframe.js
 packages/lib/utils/focusHandler.js
@@ -1347,6 +1349,7 @@ packages/lib/utils/ipc/utils/separateCallbacksFromSerializable.js
 packages/lib/utils/ipc/utils/separateCallbacksFromSerializableArray.js
 packages/lib/utils/joplinCloud/index.js
 packages/lib/utils/joplinCloud/types.js
+packages/lib/utils/markupLanguageUtils.js
 packages/lib/utils/processStartFlags.js
 packages/lib/utils/replaceUnsupportedCharacters.test.js
 packages/lib/utils/replaceUnsupportedCharacters.js
