@@ -10,10 +10,24 @@ const createScanner = (page: Page) => {
 		.setLegacyMode(true);
 };
 
+// Fade-in transitions can cause color contrast issues if still running
+// during a scan.
+// See https://github.com/dequelabs/axe-core-npm/issues/952
+const waitForAnimationsToEnd = (page: Page) => {
+	return page.locator('body').evaluate(element => {
+		const animationPromises = element
+			.getAnimations({ subtree: true })
+			.map(animation => animation.finished);
+		return Promise.all(animationPromises);
+	});
+};
+
 const expectNoViolations = async (page: Page) => {
+	await waitForAnimationsToEnd(page);
 	const results = await createScanner(page).analyze();
 	expect(results.violations).toEqual([]);
 };
+
 
 test.describe('wcag', () => {
 	for (const tabName of ['General', 'Plugins']) {
@@ -44,9 +58,10 @@ test.describe('wcag', () => {
 		await mainScreen.sidebar.allNotes.click();
 		await mainScreen.createNewNote('Test');
 
-		const results = await createScanner(mainWindow)
-			.analyze();
-		expect(results.violations).toEqual([]);
+		// Ensure that `:hover` styling is consistent between tests:
+		await mainScreen.noteEditor.noteTitleInput.hover();
+
+		await expectNoViolations(mainWindow);
 	});
 });
 
