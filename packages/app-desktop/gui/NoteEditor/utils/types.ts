@@ -253,15 +253,18 @@ export interface CommandValue {
 	value?: any; // For TinyMCE only
 }
 
-export type DropCommandValue = {
-	type: 'notes';
+type DropCommandBase = {
 	pos: {
 		clientX: number;
 		clientY: number;
 	}|undefined;
+};
+
+export type DropCommandValue = ({
+	type: 'notes';
 	markdownTags: string[];
 }|{
 	type: 'files';
 	paths: string[];
 	createFileURL: boolean;
-};
+}) & DropCommandBase;

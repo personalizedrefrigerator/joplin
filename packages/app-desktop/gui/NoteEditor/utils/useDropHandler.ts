@@ -20,6 +20,11 @@ export default function useDropHandler(dependencies: HookDependencies): DropHand
 		const dt = event.dataTransfer;
 		const createFileURL = event.altKey;
 
+		const eventPosition = {
+			clientX: event.clientX,
+			clientY: event.clientY,
+		};
+
 		if (dt.types.indexOf('text/x-jop-note-ids') >= 0) {
 			const noteIds = JSON.parse(dt.getData('text/x-jop-note-ids'));
 
@@ -32,10 +37,7 @@ export default function useDropHandler(dependencies: HookDependencies): DropHand
 
 				const props: DropCommandValue = {
 					type: 'notes',
-					pos: {
-						clientX: event.clientX,
-						clientY: event.clientY,
-					},
+					pos: eventPosition,
 					markdownTags: noteMarkdownTags,
 				};
 
@@ -60,6 +62,7 @@ export default function useDropHandler(dependencies: HookDependencies): DropHand
 
 			const props: DropCommandValue = {
 				type: 'files',
+				pos: eventPosition,
 				paths: paths,
 				createFileURL: createFileURL,
 			};

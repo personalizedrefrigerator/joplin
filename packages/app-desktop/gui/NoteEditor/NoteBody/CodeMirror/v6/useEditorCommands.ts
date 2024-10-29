@@ -39,18 +39,21 @@ const useEditorCommands = (props: Props) => {
 
 		return {
 			dropItems: async (cmd: DropCommandValue) => {
+				let pos = cmd.pos && editorRef.current.editor.posAtCoords({ x: cmd.pos.clientX, y: cmd.pos.clientY });
 				if (cmd.type === 'notes') {
 					const text = cmd.markdownTags.join('\n');
-
-					const pos = cmd.pos && editorRef.current.editor.posAtCoords({ x: cmd.pos.clientX, y: cmd.pos.clientY });
 					if ((pos ?? null) !== null) {
 						editorRef.current.select(pos, pos);
 					}
 
 					editorRef.current.insertText(text, UserEventSource.Drop);
 				} else if (cmd.type === 'files') {
-					const pos = props.selectionRange.from;
-					const newBody = await commandAttachFileToBody(props.editorContent, cmd.paths, { createFileURL: !!cmd.createFileURL, position: pos, markupLanguage: props.contentMarkupLanguage });
+					pos ??= props.selectionRange.from;
+					const newBody = await commandAttachFileToBody(props.editorContent, cmd.paths, {
+						createFileURL: !!cmd.createFileURL,
+						position: pos,
+						markupLanguage: props.contentMarkupLanguage,
+					});
 					editorRef.current.updateBody(newBody);
 				} else {
 					logger.warn('CodeMirror: unsupported drop item: ', cmd);
