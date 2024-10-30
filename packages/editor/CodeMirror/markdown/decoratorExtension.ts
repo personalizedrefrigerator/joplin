@@ -84,6 +84,10 @@ const tableDelimiterDecoration = Decoration.line({
 	attributes: { class: 'cm-tableDelimiter' },
 });
 
+const listItemDecoration = Decoration.line({
+	attributes: { class: 'cm-listItem' },
+});
+
 const horizontalRuleDecoration = Decoration.mark({
 	attributes: { class: 'cm-hr' },
 });
@@ -110,6 +114,8 @@ const nodeNameToLineDecoration: Record<string, Decoration> = {
 	'TableHeader': tableHeaderDecoration,
 	'TableDelimiter': tableDelimiterDecoration,
 	'TableRow': tableBodyDecoration,
+
+	'ListItem': listItemDecoration,
 };
 
 const nodeNameToMarkDecoration: Record<string, Decoration> = {
@@ -122,6 +128,12 @@ const nodeNameToMarkDecoration: Record<string, Decoration> = {
 	'TaskMarker': taskMarkerDecoration,
 };
 
+const multilineNodes = {
+	'FencedCode': true,
+	'CodeBlock': true,
+	'BlockMath': true,
+	'Blockquote': true,
+};
 
 type DecorationDescription = { pos: number; length: number; decoration: Decoration };
 
@@ -179,8 +191,8 @@ const computeDecorations = (view: EditorView) => {
 					addDecorationToRange(viewFrom, viewTo, decoration);
 				}
 
-				// Only block decorations will have differing first and last lines
-				if (blockDecorated) {
+				// Only certain block decorations will have differing first and last lines
+				if (blockDecorated && multilineNodes.hasOwnProperty(node.name)) {
 					// Allow different styles for the first, last lines in a block.
 					if (viewFrom === node.from) {
 						addDecorationToLines(viewFrom, viewFrom, regionStartDecoration);
