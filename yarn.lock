@@ -7562,7 +7562,7 @@ __metadata:
     react-native-paper: 5.12.5
     react-native-popup-menu: 0.16.1
     react-native-quick-actions: 0.3.13
-    react-native-quick-crypto: 0.7.1
+    react-native-quick-crypto: 0.7.5
     react-native-rsa-native: 2.0.5
     react-native-safe-area-context: 4.10.8
     react-native-securerandom: 1.0.1
@@ -7959,7 +7959,7 @@ __metadata:
     "@types/yargs": 17.0.32
     "@types/zxcvbn": 4.4.4
     bcryptjs: 2.4.3
-    bulma: 1.0.0
+    bulma: 1.0.2
     bulma-prefers-dark: 0.1.0-beta.1
     compare-versions: 6.1.1
     dayjs: 1.11.12
@@ -9760,140 +9760,6 @@ __metadata:
   dependencies:
     "@octokit/openapi-types": ^12.11.0
   checksum: fd6f75e0b19b90d1a3d244d2b0c323ed8f2f05e474a281f60a321986683548ef2e0ec2b3a946aa9405d6092e055344455f69f58957c60f58368c8bdda5b7d2ab
-  languageName: node
-  linkType: hard
-
-"@parcel/watcher-android-arm64@npm:2.4.1":
-  version: 2.4.1
-  resolution: "@parcel/watcher-android-arm64@npm:2.4.1"
-  conditions: os=android & cpu=arm64
-  languageName: node
-  linkType: hard
-
-"@parcel/watcher-darwin-arm64@npm:2.4.1":
-  version: 2.4.1
-  resolution: "@parcel/watcher-darwin-arm64@npm:2.4.1"
-  conditions: os=darwin & cpu=arm64
-  languageName: node
-  linkType: hard
-
-"@parcel/watcher-darwin-x64@npm:2.4.1":
-  version: 2.4.1
-  resolution: "@parcel/watcher-darwin-x64@npm:2.4.1"
-  conditions: os=darwin & cpu=x64
-  languageName: node
-  linkType: hard
-
-"@parcel/watcher-freebsd-x64@npm:2.4.1":
-  version: 2.4.1
-  resolution: "@parcel/watcher-freebsd-x64@npm:2.4.1"
-  conditions: os=freebsd & cpu=x64
-  languageName: node
-  linkType: hard
-
-"@parcel/watcher-linux-arm-glibc@npm:2.4.1":
-  version: 2.4.1
-  resolution: "@parcel/watcher-linux-arm-glibc@npm:2.4.1"
-  conditions: os=linux & cpu=arm & libc=glibc
-  languageName: node
-  linkType: hard
-
-"@parcel/watcher-linux-arm64-glibc@npm:2.4.1":
-  version: 2.4.1
-  resolution: "@parcel/watcher-linux-arm64-glibc@npm:2.4.1"
-  conditions: os=linux & cpu=arm64 & libc=glibc
-  languageName: node
-  linkType: hard
-
-"@parcel/watcher-linux-arm64-musl@npm:2.4.1":
-  version: 2.4.1
-  resolution: "@parcel/watcher-linux-arm64-musl@npm:2.4.1"
-  conditions: os=linux & cpu=arm64 & libc=musl
-  languageName: node
-  linkType: hard
-
-"@parcel/watcher-linux-x64-glibc@npm:2.4.1":
-  version: 2.4.1
-  resolution: "@parcel/watcher-linux-x64-glibc@npm:2.4.1"
-  conditions: os=linux & cpu=x64 & libc=glibc
-  languageName: node
-  linkType: hard
-
-"@parcel/watcher-linux-x64-musl@npm:2.4.1":
-  version: 2.4.1
-  resolution: "@parcel/watcher-linux-x64-musl@npm:2.4.1"
-  conditions: os=linux & cpu=x64 & libc=musl
-  languageName: node
-  linkType: hard
-
-"@parcel/watcher-win32-arm64@npm:2.4.1":
-  version: 2.4.1
-  resolution: "@parcel/watcher-win32-arm64@npm:2.4.1"
-  conditions: os=win32 & cpu=arm64
-  languageName: node
-  linkType: hard
-
-"@parcel/watcher-win32-ia32@npm:2.4.1":
-  version: 2.4.1
-  resolution: "@parcel/watcher-win32-ia32@npm:2.4.1"
-  conditions: os=win32 & cpu=ia32
-  languageName: node
-  linkType: hard
-
-"@parcel/watcher-win32-x64@npm:2.4.1":
-  version: 2.4.1
-  resolution: "@parcel/watcher-win32-x64@npm:2.4.1"
-  conditions: os=win32 & cpu=x64
-  languageName: node
-  linkType: hard
-
-"@parcel/watcher@npm:^2.4.1":
-  version: 2.4.1
-  resolution: "@parcel/watcher@npm:2.4.1"
-  dependencies:
-    "@parcel/watcher-android-arm64": 2.4.1
-    "@parcel/watcher-darwin-arm64": 2.4.1
-    "@parcel/watcher-darwin-x64": 2.4.1
-    "@parcel/watcher-freebsd-x64": 2.4.1
-    "@parcel/watcher-linux-arm-glibc": 2.4.1
-    "@parcel/watcher-linux-arm64-glibc": 2.4.1
-    "@parcel/watcher-linux-arm64-musl": 2.4.1
-    "@parcel/watcher-linux-x64-glibc": 2.4.1
-    "@parcel/watcher-linux-x64-musl": 2.4.1
-    "@parcel/watcher-win32-arm64": 2.4.1
-    "@parcel/watcher-win32-ia32": 2.4.1
-    "@parcel/watcher-win32-x64": 2.4.1
-    detect-libc: ^1.0.3
-    is-glob: ^4.0.3
-    micromatch: ^4.0.5
-    node-addon-api: ^7.0.0
-    node-gyp: latest
-  dependenciesMeta:
-    "@parcel/watcher-android-arm64":
-      optional: true
-    "@parcel/watcher-darwin-arm64":
-      optional: true
-    "@parcel/watcher-darwin-x64":
-      optional: true
-    "@parcel/watcher-freebsd-x64":
-      optional: true
-    "@parcel/watcher-linux-arm-glibc":
-      optional: true
-    "@parcel/watcher-linux-arm64-glibc":
-      optional: true
-    "@parcel/watcher-linux-arm64-musl":
-      optional: true
-    "@parcel/watcher-linux-x64-glibc":
-      optional: true
-    "@parcel/watcher-linux-x64-musl":
-      optional: true
-    "@parcel/watcher-win32-arm64":
-      optional: true
-    "@parcel/watcher-win32-ia32":
-      optional: true
-    "@parcel/watcher-win32-x64":
-      optional: true
-  checksum: 4da70551da27e565c726b0bbd5ba5afcb2bca36dfd8619a649f0eaa41f693ddd1d630c36e53bc083895d71a3e28bc4199013e557cd13c7af6ccccab28ceecbff
   languageName: node
   linkType: hard
 
@@ -16485,12 +16351,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"bulma@npm:1.0.0":
-  version: 1.0.0
-  resolution: "bulma@npm:1.0.0"
-  dependencies:
-    sass: ^1.71.1
-  checksum: 8999b476dbc0ec39633038dfbc5242ec1f328848c2e4bcb2c5837686fb83ca43d99e40b019784e78981c4a48e8e6e3967b5d4282549fdfec8ef7e47587a76017
+"bulma@npm:1.0.2":
+  version: 1.0.2
+  resolution: "bulma@npm:1.0.2"
+  checksum: 4adeafdd4e702a61f84094fbeea35c577eeeae8a11c503596d810689de0c00c87a3f930aadf4a41fc05a5b8492c6ebc6b99708684f707d920fe943bc8b018cc8
   languageName: node
   linkType: hard
 
@@ -17226,15 +17090,6 @@ __metadata:
     fsevents:
       optional: true
   checksum: d1fda32fcd67d9f6170a8468ad2630a3c6194949c9db3f6a91b16478c328b2800f433fb5d2592511b6cb145a47c013ea1cce60b432b1a001ae3ee978a8bffc2d
-  languageName: node
-  linkType: hard
-
-"chokidar@npm:^4.0.0":
-  version: 4.0.1
-  resolution: "chokidar@npm:4.0.1"
-  dependencies:
-    readdirp: ^4.0.1
-  checksum: 193da9786b0422a895d59c7552195d15c6c636e6a2293ae43d09e34e243e24ccd02d693f007c767846a65abbeae5fea6bfacb8fc2ddec4ea4d397620d552010d
   languageName: node
   linkType: hard
 
@@ -20441,15 +20296,6 @@ __metadata:
   version: 5.0.0
   resolution: "detect-indent@npm:5.0.0"
   checksum: 61763211daa498e00eec073aba95d544ae5baed19286a0a655697fa4fffc9f4539c8376e2c7df8fa11d6f8eaa16c1e6a689f403ac41ee78a060278cdadefe2ff
-  languageName: node
-  linkType: hard
-
-"detect-libc@npm:^1.0.3":
-  version: 1.0.3
-  resolution: "detect-libc@npm:1.0.3"
-  bin:
-    detect-libc: ./bin/detect-libc.js
-  checksum: daaaed925ffa7889bd91d56e9624e6c8033911bb60f3a50a74a87500680652969dbaab9526d1e200a4c94acf80fc862a22131841145a0a8482d60a99c24f4a3e
   languageName: node
   linkType: hard
 
@@ -33516,15 +33362,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"node-addon-api@npm:^7.0.0":
-  version: 7.1.1
-  resolution: "node-addon-api@npm:7.1.1"
-  dependencies:
-    node-gyp: latest
-  checksum: 46051999e3289f205799dfaf6bcb017055d7569090f0004811110312e2db94cb4f8654602c7eb77a60a1a05142cc2b96e1b5c56ca4622c41a5c6370787faaf30
-  languageName: node
-  linkType: hard
-
 "node-api-version@npm:^0.2.0":
   version: 0.2.0
   resolution: "node-api-version@npm:0.2.0"
@@ -38095,16 +37932,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-quick-crypto@npm:0.7.1":
-  version: 0.7.1
-  resolution: "react-native-quick-crypto@npm:0.7.1"
+"react-native-quick-crypto@npm:0.7.5":
+  version: 0.7.5
+  resolution: "react-native-quick-crypto@npm:0.7.5"
   dependencies:
     "@craftzdog/react-native-buffer": ^6.0.5
     events: ^3.3.0
     readable-stream: ^4.5.2
     string_decoder: ^1.3.0
     util: ^0.12.5
-  checksum: 9a7a1fb1456410db30f062078f570bc566cac36fbc165e7d8ee8677bec09fcc96923de3cf7a0464804142af242a822bf66ea22460951399b9247e4a03fcfe059
+  peerDependencies:
+    react: "*"
+    react-native: "*"
+  checksum: 07f5abc4ddf7fbc8d5bfa9b459f04a7e1fbc3afe9b1add8e07d0918401abb2a8a987da00741b2baa4e94d2125cec10b3a77c4136250a20f6f3376cefba048135
   languageName: node
   linkType: hard
 
@@ -38898,13 +38738,6 @@ __metadata:
     graceful-fs: ^4.1.2
     once: ^1.3.0
   checksum: 6d9f334e40dfd0f5e4a8aab5e67eb460c95c85083c690431f87ab2c9135191170e70c2db6d71afcafb78e073d23eb95dcb3fc33ef91308f6ebfe3197be35e608
-  languageName: node
-  linkType: hard
-
-"readdirp@npm:^4.0.1":
-  version: 4.0.2
-  resolution: "readdirp@npm:4.0.2"
-  checksum: 309376e717f94fb7eb61bec21e2603243a9e2420cd2e9bf94ddf026aefea0d7377ed1a62f016d33265682e44908049a55c3cfc2307450a1421654ea008489b39
   languageName: node
   linkType: hard
 
@@ -40314,20 +40147,6 @@ __metadata:
   bin:
     sass: sass.js
   checksum: 6b5dce17faa1bd1e349b4825bf7f76559a32f3f95d789cd2847623c88ee9635e1485d3458532a05fa5b9134cfbce79a4bad3f13dc63c2433632347674db0abae
-  languageName: node
-  linkType: hard
-
-"sass@npm:^1.71.1":
-  version: 1.80.4
-  resolution: "sass@npm:1.80.4"
-  dependencies:
-    "@parcel/watcher": ^2.4.1
-    chokidar: ^4.0.0
-    immutable: ^4.0.0
-    source-map-js: ">=0.6.2 <2.0.0"
-  bin:
-    sass: sass.js
-  checksum: 83278e922a5972c2643500044935d4989204b01500cf19e0abfa275462a7b0139f42b2a848ad82c28c756fbcd5ada32aa8e92ce3fb17814dff195e8d89193531
   languageName: node
   linkType: hard
 
