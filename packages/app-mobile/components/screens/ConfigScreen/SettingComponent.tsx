@@ -10,6 +10,7 @@ import SettingsToggle from './SettingsToggle';
 import FileSystemPathSelector from './FileSystemPathSelector';
 import shim from '@joplin/lib/shim';
 import { themeStyle } from '../../global-style';
+import { useId } from 'react';
 
 interface Props {
 	settingId: string;
@@ -39,16 +40,19 @@ const SettingComponent: React.FunctionComponent<Props> = props => {
 	const descriptionComp = !settingDescription ? null : <Text style={styleSheet.settingDescriptionText}>{settingDescription}</Text>;
 	const containerStyle = props.styles.getContainerStyle(!!settingDescription);
 
+	const labelId = useId();
+
 	if (md.isEnum) {
 		const value = props.value?.toString();
 
 		const items = Setting.enumOptionsToValueLabels(md.options(), md.optionsOrder ? md.optionsOrder() : []);
+		const label = md.label();
 
 		return (
 			<View key={props.settingId} style={{ flexDirection: 'column', borderBottomWidth: 1, borderBottomColor: theme.dividerColor }}>
 				<View style={containerStyle}>
 					<Text key="label" style={styleSheet.settingText}>
-						{md.label()}
+						{label}
 					</Text>
 					<Dropdown
 						key="control"
@@ -69,6 +73,7 @@ const SettingComponent: React.FunctionComponent<Props> = props => {
 						onValueChange={(itemValue: string) => {
 							void props.updateSettingValue(props.settingId, itemValue);
 						}}
+						accessibilityHint={label}
 					/>
 				</View>
 				{descriptionComp}
@@ -90,6 +95,7 @@ const SettingComponent: React.FunctionComponent<Props> = props => {
 		const unitLabel = md.unitLabel ? md.unitLabel(props.value) : props.value;
 		const minimum = 'minimum' in md ? md.minimum : 0;
 		const maximum = 'maximum' in md ? md.maximum : 10;
+		const label = md.label();
 
 		// Note: Do NOT add the minimumTrackTintColor and maximumTrackTintColor props
 		// on the Slider as they are buggy and can crash the app on certain devices.
@@ -97,8 +103,8 @@ const SettingComponent: React.FunctionComponent<Props> = props => {
 		// https://github.com/react-native-community/react-native-slider/issues/161
 		return (
 			<View key={props.settingId} style={styleSheet.settingContainer}>
-				<Text key="label" style={styleSheet.settingText}>
-					{md.label()}
+				<Text key="label" style={styleSheet.settingText} nativeID={labelId}>
+					{label}
 				</Text>
 				<View style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', flex: 1 }}>
 					<Text style={styleSheet.sliderUnits}>{unitLabel}</Text>
@@ -110,6 +116,7 @@ const SettingComponent: React.FunctionComponent<Props> = props => {
 						maximumValue={maximum}
 						value={props.value}
 						onValueChange={newValue => void props.updateSettingValue(props.settingId, newValue)}
+						accessibilityHint={label}
 					/>
 				</View>
 			</View>
@@ -129,7 +136,7 @@ const SettingComponent: React.FunctionComponent<Props> = props => {
 		return (
 			<View key={props.settingId} style={{ flexDirection: 'column', borderBottomWidth: 1, borderBottomColor: theme.dividerColor }}>
 				<View key={props.settingId} style={containerStyle}>
-					<Text key="label" style={styleSheet.settingText}>
+					<Text key="label" style={styleSheet.settingText} nativeID={labelId}>
 						{md.label()}
 					</Text>
 					<TextInput
@@ -143,6 +150,7 @@ const SettingComponent: React.FunctionComponent<Props> = props => {
 						value={props.value}
 						onChangeText={(newValue: string) => void props.updateSettingValue(props.settingId, newValue)}
 						secureTextEntry={!!md.secure}
+						aria-labelledby={labelId}
 					/>
 				</View>
 				{descriptionComp}
