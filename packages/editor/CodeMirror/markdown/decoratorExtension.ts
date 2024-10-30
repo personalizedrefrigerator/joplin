@@ -84,6 +84,14 @@ const tableDelimiterDecoration = Decoration.line({
 	attributes: { class: 'cm-tableDelimiter' },
 });
 
+const orderedListDecoration = Decoration.line({
+	attributes: { class: 'cm-orderedList' },
+});
+
+const unorderedListDecoration = Decoration.line({
+	attributes: { class: 'cm-unorderedList' },
+});
+
 const listItemDecoration = Decoration.line({
 	attributes: { class: 'cm-listItem' },
 });
@@ -101,6 +109,10 @@ const nodeNameToLineDecoration: Record<string, Decoration> = {
 	'CodeBlock': codeBlockDecoration,
 	'BlockMath': mathBlockDecoration,
 	'Blockquote': blockQuoteDecoration,
+	'OrderedList': orderedListDecoration,
+	'BulletList': unorderedListDecoration,
+
+	'ListItem': listItemDecoration,
 
 	'SetextHeading1': header1LineDecoration,
 	'ATXHeading1': header1LineDecoration,
@@ -114,8 +126,6 @@ const nodeNameToLineDecoration: Record<string, Decoration> = {
 	'TableHeader': tableHeaderDecoration,
 	'TableDelimiter': tableDelimiterDecoration,
 	'TableRow': tableBodyDecoration,
-
-	'ListItem': listItemDecoration,
 };
 
 const nodeNameToMarkDecoration: Record<string, Decoration> = {
@@ -133,6 +143,8 @@ const multilineNodes = {
 	'CodeBlock': true,
 	'BlockMath': true,
 	'Blockquote': true,
+	'OrderedList': true,
+	'BulletList': true,
 };
 
 type DecorationDescription = { pos: number; length: number; decoration: Decoration };
