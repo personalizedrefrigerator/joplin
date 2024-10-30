@@ -167,8 +167,7 @@ class NotesScreenComponent extends BaseScreenComponent<Props, State> {
 		});
 
 		if (source === props.notesSource) return;
-		// TODO: For now, search refresh is handled by the search screen. In the future,
-		// this should be refactored to use the same logic as desktop and CLI.
+		// For now, search refresh is handled by the search screen.
 		if (props.notesParentType === 'Search') return;
 
 		let notes: NoteEntity[] = [];
