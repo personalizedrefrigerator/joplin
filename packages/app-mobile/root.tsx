@@ -308,6 +308,10 @@ const appReducer = (state = appDefaultState, action: any) => {
 
 				newState.selectedNoteHash = '';
 
+				if (action.routeName === 'Search') {
+					newState.notesParentType = 'Search';
+				}
+
 				if ('noteId' in action) {
 					newState.selectedNoteIds = action.noteId ? [action.noteId] : [];
 				}
