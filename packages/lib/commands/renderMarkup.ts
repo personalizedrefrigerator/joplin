@@ -1,3 +1,4 @@
+import { toForwardSlashes } from '@joplin/utils/path';
 import markupLanguageUtils from '../markupLanguageUtils';
 import Setting from '../models/Setting';
 import { CommandRuntime, CommandDeclaration, CommandContext } from '../services/CommandService';
@@ -10,7 +11,7 @@ export const declaration: CommandDeclaration = {
 };
 
 const getMarkupToHtml = () => {
-	const resourceBaseUrl = 'joplin-resource://';
+	const resourceBaseUrl = `/${toForwardSlashes(Setting.value('resourceDir'))}/`;
 
 	return markupLanguageUtils.newMarkupToHtml({}, {
 		resourceBaseUrl,
