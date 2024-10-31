@@ -1423,6 +1423,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@axe-core/playwright@npm:4.10.0":
+  version: 4.10.0
+  resolution: "@axe-core/playwright@npm:4.10.0"
+  dependencies:
+    axe-core: ~4.10.0
+  peerDependencies:
+    playwright-core: ">= 1.0.0"
+  checksum: cba9b7f625c8ed510e661d8d014f7e924fb85175b918b818cb808eec848c3e8a2cbbe2960ccf8dd4b9f84a4a4ea33eeeace48de2560a4a5777dd0ee6281d0c81
+  languageName: node
+  linkType: hard
+
 "@babel/code-frame@npm:7.10.4, @babel/code-frame@npm:~7.10.4":
   version: 7.10.4
   resolution: "@babel/code-frame@npm:7.10.4"
