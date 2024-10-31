@@ -24,6 +24,7 @@ export interface OnLoadEvent {
 
 export interface HookDependencies {
 	noteId: string;
+	editorId: string;
 	isProvisional: boolean;
 	titleInputRef: RefObject<HTMLInputElement>;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
@@ -65,22 +66,8 @@ function resourceInfosChanged(a: ResourceInfos, b: ResourceInfos): boolean {
 	return false;
 }
 
-// Should be a fast-to-compute string uniquely determined by properties of [note] that
-// change the editor.
-const computeNoteContentKey = (note: NoteEntity) => {
-	return JSON.stringify({
-		id: note.id,
-		body: note.body,
-		title: note.title,
-		is_todo: note.is_todo,
-		todo_completed: note.todo_completed,
-		markup_language: note.markup_language,
-		encryption_applied: note.encryption_applied,
-	});
-};
-
 type InitNoteStateCallback = (note: NoteEntity, isNew: boolean)=> Promise<FormNote>;
-const useRefreshFormNoteOnChange = (formNoteRef: RefObject<FormNote>, noteId: string, initNoteState: InitNoteStateCallback) => {
+const useRefreshFormNoteOnChange = (formNoteRef: RefObject<FormNote>, editorId: string, noteId: string, initNoteState: InitNoteStateCallback) => {
 	// Increasing the value of this counter cancels any ongoing note refreshes and starts
 	// a new refresh.
 	const [formNoteRefreshScheduled, setFormNoteRefreshScheduled] = useState<number>(0);
@@ -96,7 +83,7 @@ const useRefreshFormNoteOnChange = (formNoteRef: RefObject<FormNote>, noteId: st
 
 		const loadNote = async () => {
 			const n = await Note.load(noteId);
-			if (event.cancelled) return;
+			if (event.cancelled || formNoteRef.current.hasChanged) return;
 
 			// Normally should not happened because if the note has been deleted via sync
 			// it would not have been loaded in the editor (due to note selection changing
@@ -112,7 +99,7 @@ const useRefreshFormNoteOnChange = (formNoteRef: RefObject<FormNote>, noteId: st
 		};
 
 		await loadNote();
-	}, [formNoteRefreshScheduled, noteId, initNoteState]);
+	}, [formNoteRefreshScheduled, noteId, editorId, initNoteState]);
 
 	const refreshFormNote = useCallback(() => {
 		// Increase the counter to cancel any ongoing refresh attempts
@@ -125,9 +112,9 @@ const useRefreshFormNoteOnChange = (formNoteRef: RefObject<FormNote>, noteId: st
 
 		let cancelled = false;
 
-		type ChangeEventSlice = { itemId: string };
-		const listener = ({ itemId }: ChangeEventSlice) => {
-			if (itemId === noteId && !cancelled) {
+		type ChangeEventSlice = { itemId: string; changeId: string };
+		const listener = ({ itemId, changeId }: ChangeEventSlice) => {
+			if (itemId === noteId && !cancelled && !(changeId ?? 'unknown').endsWith(editorId)) {
 				if (formNoteRef.current.hasChanged) return;
 				refreshFormNote();
 			}
@@ -138,11 +125,11 @@ const useRefreshFormNoteOnChange = (formNoteRef: RefObject<FormNote>, noteId: st
 			eventManager.off(EventName.ItemChange, listener);
 			cancelled = true;
 		};
-	}, [formNoteRef, noteId, refreshFormNote]);
+	}, [formNoteRef, noteId, editorId, refreshFormNote]);
 };
 
 export default function useFormNote(dependencies: HookDependencies) {
-	const { noteId, isProvisional, titleInputRef, editorRef, onBeforeLoad, onAfterLoad } = dependencies;
+	const { noteId, editorId, isProvisional, titleInputRef, editorRef, onBeforeLoad, onAfterLoad } = dependencies;
 
 	const [formNote, setFormNote] = useState<FormNote>(defaultFormNote());
 	const [isNewNote, setIsNewNote] = useState(false);
@@ -151,7 +138,6 @@ export default function useFormNote(dependencies: HookDependencies) {
 
 	const formNoteRef = useRef(formNote);
 	formNoteRef.current = formNote;
-	const recentNoteKeys = useRef<Set<string>>(new Set());
 
 	const initNoteState: InitNoteStateCallback = useCallback(async (n, isNewNote) => {
 		let originalCss = '';
@@ -181,16 +167,6 @@ export default function useFormNote(dependencies: HookDependencies) {
 
 		logger.debug('Initializing note state');
 
-		const newContentKey = computeNoteContentKey(newFormNote);
-		const changeIsFromRecentSave = recentNoteKeys.current.has(newContentKey);
-		recentNoteKeys.current.clear();
-		recentNoteKeys.current.add(newContentKey);
-
-		if (changeIsFromRecentSave) {
-			logger.debug('Cancelled note refresh -- the just-loaded note content was recently saved.');
-			return null;
-		}
-
 		// Note that for performance reason,the call to setResourceInfos should
 		// be first because it loads the resource infos in an async way. If we
 		// swap them, the formNote will be updated first and rendered, then the
@@ -214,7 +190,7 @@ export default function useFormNote(dependencies: HookDependencies) {
 		return newFormNote;
 	}, []);
 
-	useRefreshFormNoteOnChange(formNoteRef, noteId, initNoteState);
+	useRefreshFormNoteOnChange(formNoteRef, editorId, noteId, initNoteState);
 
 	useEffect(() => {
 		if (!noteId) {
@@ -287,7 +263,6 @@ export default function useFormNote(dependencies: HookDependencies) {
 	useEffect(() => {
 		if (previousNoteId !== formNote.id) {
 			void onResourceChange();
-			recentNoteKeys.current.clear();
 		}
 	}, [previousNoteId, formNote.id, onResourceChange]);
 
@@ -319,7 +294,6 @@ export default function useFormNote(dependencies: HookDependencies) {
 		} else {
 			newNote = newFormNote;
 		}
-		recentNoteKeys.current.add(computeNoteContentKey(newNote));
 		formNoteRef.current = newNote;
 		setFormNote(newNote);
 	}, [setFormNote]);

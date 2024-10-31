@@ -24,6 +24,7 @@ export enum EventName {
 interface ItemChangeEvent {
 	itemType: ModelType;
 	itemId: string;
+	changeId: string;
 	eventType: number;
 }
 

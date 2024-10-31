@@ -61,6 +61,7 @@ const commands = [
 const toolbarButtonUtils = new ToolbarButtonUtils(CommandService.instance());
 
 const onDragOver: React.DragEventHandler = event => event.preventDefault();
+let editorIdCounter = 0;
 
 function NoteEditorContent(props: NoteEditorProps) {
 	const [showRevisions, setShowRevisions] = useState(false);
@@ -72,9 +73,13 @@ function NoteEditorContent(props: NoteEditorProps) {
 	const isMountedRef = useRef(true);
 	const noteSearchBarRef = useRef(null);
 
+	const editorId = useMemo(() => {
+		return `editor-${editorIdCounter++}`;
+	}, []);
+
 	const setFormNoteRef = useRef<OnSetFormNote>();
 	const { saveNoteIfWillChange, scheduleSaveNote } = useScheduleSaveCallbacks({
-		setFormNote: setFormNoteRef, dispatch: props.dispatch, editorRef,
+		setFormNote: setFormNoteRef, dispatch: props.dispatch, editorRef, editorId,
 	});
 	const formNote_beforeLoad = useCallback(async (event: OnLoadEvent) => {
 		await saveNoteIfWillChange(event.formNote);
@@ -94,6 +99,7 @@ function NoteEditorContent(props: NoteEditorProps) {
 		editorRef: editorRef,
 		onBeforeLoad: formNote_beforeLoad,
 		onAfterLoad: formNote_afterLoad,
+		editorId,
 	});
 	setFormNoteRef.current = setFormNote;
 	const formNoteRef = useRef<FormNote>();
