@@ -32,6 +32,7 @@ export default function(frameWindow: any, isReady: boolean, pluginId: string, vi
 				void PostMessageService.instance().postMessage({
 					pluginId,
 					viewId,
+					windowId,
 					...event.data.message,
 				});
 			}
@@ -43,5 +44,5 @@ export default function(frameWindow: any, isReady: boolean, pluginId: string, vi
 			if (frameWindow?.removeEventListener) frameWindow.removeEventListener('message', onMessage_);
 		};
 		// eslint-disable-next-line @seiyab/react-hooks/exhaustive-deps -- Old code before rule was applied
-	}, [frameWindow, isReady, pluginId, viewId]);
+	}, [frameWindow, isReady, pluginId, windowId, viewId]);
 }
