@@ -73,6 +73,7 @@ function NoteEditorContent(props: NoteEditorProps) {
 	const isMountedRef = useRef(true);
 	const noteSearchBarRef = useRef(null);
 
+	// Should be constant and unique to this instance of the editor.
 	const editorId = useMemo(() => {
 		return `editor-${editorIdCounter++}`;
 	}, []);
