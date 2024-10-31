@@ -1441,7 +1441,7 @@ const reducer = produce((draft: Draft<State> = defaultState, action: any) => {
 			draft.customViewerCss += action.css;
 			break;
 
-		case 'CUSTOM_APP_CSS_ADD':
+		case 'CUSTOM_CHROME_CSS_ADD':
 			// To enable/disable custom CSS, some plugins add the same chrome CSS file multiple times.
 			// For performance, only apply the last copy of each file.
 			draft.customChromeCssPaths = draft.customChromeCssPaths.filter(path => path !== action.filePath);

@@ -1,4 +1,3 @@
-import Setting from '@joplin/lib/models/Setting';
 import { defaultWindowId } from '@joplin/lib/reducer';
 import shim from '@joplin/lib/shim';
 import * as React from 'react';
@@ -89,7 +88,6 @@ const NewWindowOrIFrame: React.FC<Props> = props => {
 			'vendor/lib/smalltalk/css/smalltalk.css',
 			'vendor/lib/roboto-fontface/css/roboto/roboto-fontface.css',
 			'vendor/lib/codemirror/lib/codemirror.css',
-			Setting.customCssFilePath(Setting.customCssFilenames.JOPLIN_APP),
 		];
 
 		for (const url of cssUrls) {

@@ -23,7 +23,7 @@ export default class JoplinWindow {
 	 */
 	public async loadChromeCssFile(filePath: string) {
 		this.store_.dispatch({
-			type: 'CUSTOM_APP_CSS_ADD',
+			type: 'CUSTOM_CHROME_CSS_ADD',
 			filePath,
 		});
 	}
