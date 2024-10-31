@@ -164,9 +164,11 @@ export default function NoteListWrapper(props: Props) {
 		/>;
 	};
 
+	const windowId = useContext(WindowIdContext);
 	const renderNoteList = () => {
 		if (!listRenderer) return null;
 		return <NoteList2
+			windowId={windowId}
 			listRenderer={listRenderer}
 			resizableLayoutEventEmitter={props.resizableLayoutEventEmitter}
 			size={noteListSize}
@@ -174,8 +176,6 @@ export default function NoteListWrapper(props: Props) {
 			columns={columns}
 		/>;
 	};
-
-	const windowId = useContext(WindowIdContext);
 
 	return (
 		<StyledRoot>

@@ -28,7 +28,7 @@ import useActiveDescendantId from './utils/useActiveDescendantId';
 import getNoteElementIdFromJoplinId from '../NoteListItem/utils/getNoteElementIdFromJoplinId';
 import useFocusVisible from './utils/useFocusVisible';
 import { stateUtils } from '@joplin/lib/reducer';
-const { connect } = require('react-redux');
+import { connect } from 'react-redux';
 
 const commands = {
 	focusElementNoteList,
@@ -312,20 +312,24 @@ const NoteList = (props: Props) => {
 	);
 };
 
-const mapStateToProps = (state: AppState) => {
+interface OwnProps {
+	windowId: string;
+}
+
+const mapStateToProps = (state: AppState, ownProps: OwnProps) => {
 	const selectedFolder: FolderEntity = state.notesParentType === 'Folder' ? Folder.byId(state.folders, state.selectedFolderId) : null;
 	const userId = state.settings['sync.userId'];
-	const mainWindowState = stateUtils.mainWindowState(state);
+	const windowState = stateUtils.windowStateById(state, ownProps.windowId);
 
 	return {
-		notes: mainWindowState.notes,
+		notes: windowState.notes,
 		folders: state.folders,
-		selectedNoteIds: mainWindowState.selectedNoteIds,
-		selectedFolderId: mainWindowState.selectedFolderId,
+		selectedNoteIds: windowState.selectedNoteIds,
+		selectedFolderId: windowState.selectedFolderId,
 		themeId: state.settings.theme,
 		notesParentType: state.notesParentType,
 		searches: state.searches,
-		selectedSearchId: mainWindowState.selectedSearchId,
+		selectedSearchId: windowState.selectedSearchId,
 		watchedNoteFiles: state.watchedNoteFiles,
 		provisionalNoteIds: state.provisionalNoteIds,
 		isInsertingNotes: state.isInsertingNotes,

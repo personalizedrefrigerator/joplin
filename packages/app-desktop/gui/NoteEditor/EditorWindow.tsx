@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useCallback, useMemo, useRef, useState } from 'react';
-import NoteEditorContent from './NoteEditor';
+import NoteEditor from './NoteEditor';
 import StyleSheetContainer from '../StyleSheets/StyleSheetContainer';
 import { connect } from 'react-redux';
 import { AppState } from '../../app.reducer';
@@ -42,7 +42,7 @@ const SecondaryWindow: React.FC<Props> = props => {
 
 	const { windowTitle, onNoteTitleChange } = useWindowTitle(props.newWindow);
 	const editor = <div className='note-editor-wrapper' ref={containerRef}>
-		<NoteEditorContent
+		<NoteEditor
 			windowId={props.windowId}
 			onTitleChange={onNoteTitleChange}
 		/>
