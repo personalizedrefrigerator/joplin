@@ -198,7 +198,7 @@ const NoteTextViewer = forwardRef((props: Props, ref: ForwardedRef<NoteViewerCon
 			if (!wv) return;
 
 			for (const n in webviewListeners) {
-				if (!webviewListeners.current.hasOwnProperty(n)) continue;
+				if (!webviewListeners.hasOwnProperty(n)) continue;
 				const fn = webviewListeners[n];
 				wv.removeEventListener(n, fn);
 			}
