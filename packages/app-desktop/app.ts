@@ -403,6 +403,23 @@ class Application extends BaseApplication {
 		}
 	}
 
+	private async setupCustomCss() {
+		const chromeCssPath = Setting.customCssFilePath(Setting.customCssFilenames.JOPLIN_APP);
+		if (await shim.fsDriver().exists(chromeCssPath)) {
+			this.store().dispatch({
+				// Main window custom CSS
+				type: 'CUSTOM_CHROME_CSS_ADD',
+				filePath: chromeCssPath,
+			});
+		}
+
+		this.store().dispatch({
+			// Markdown preview pane
+			type: 'CUSTOM_VIEWER_CSS_APPEND',
+			css: await loadCustomCss(Setting.customCssFilePath(Setting.customCssFilenames.RENDERED_MARKDOWN)),
+		});
+	}
+
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	public async start(argv: string[], startOptions: StartOptions = null): Promise<any> {
 		// If running inside a package, the command line, instead of being "node.exe <path> <flags>" is "joplin.exe <flags>" so
@@ -501,17 +518,6 @@ class Application extends BaseApplication {
 		// manually call dispatchUpdateAll() to force an update.
 		Setting.dispatchUpdateAll();
 
-		this.store().dispatch({
-			// Main window custom CSS
-			type: 'CUSTOM_CHROME_CSS_ADD',
-			filePath: Setting.customCssFilePath(Setting.customCssFilenames.JOPLIN_APP),
-		});
-		this.store().dispatch({
-			// Markdown preview pane
-			type: 'CUSTOM_VIEWER_CSS_APPEND',
-			css: await loadCustomCss(Setting.customCssFilePath(Setting.customCssFilenames.RENDERED_MARKDOWN)),
-		});
-
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 		await refreshFolders((action: any) => this.dispatch(action), '');
 
@@ -521,6 +527,8 @@ class Application extends BaseApplication {
 			type: 'TAG_UPDATE_ALL',
 			items: tags,
 		});
+
+		await this.setupCustomCss();
 
 		// const masterKeys = await MasterKey.all();
 
