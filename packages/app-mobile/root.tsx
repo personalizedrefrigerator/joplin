@@ -948,6 +948,21 @@ class AppComponent extends React.Component {
 				throw error;
 			}
 
+			// https://reactnative.dev/docs/linking#handling-deep-links
+			//
+			// The handler added with Linking.addEventListener() is only triggered when app is already open.
+			//
+			// When the app is not already open and the deep link triggered app launch,
+			// the URL can be obtained with Linking.getInitialURL().
+			//
+			// We only save the URL here since we want to show the content only
+			// after biometrics check is passed or known disabled.
+			const url = await Linking.getInitialURL();
+			if (url && isCallbackUrl(url)) {
+				logger.info('received initial callback url: ', url);
+				this.callbackUrl = url;
+			}
+
 			const loadedSensorInfo = await sensorInfo();
 			this.setState({ sensorInfo: loadedSensorInfo });
 
