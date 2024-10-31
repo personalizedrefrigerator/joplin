@@ -114,7 +114,12 @@ const useRefreshFormNoteOnChange = (formNoteRef: RefObject<FormNote>, editorId: 
 
 		type ChangeEventSlice = { itemId: string; changeId: string };
 		const listener = ({ itemId, changeId }: ChangeEventSlice) => {
-			if (itemId === noteId && !cancelled && !(changeId ?? 'unknown').endsWith(editorId)) {
+			// If this change came from the current editor, it should already be
+			// handled by calls to `setFormNote`. If events from the current editor
+			// aren't ignored, most user-activated note changes (e.g. a keypress)
+			// cause the note to refresh. (Undesired refreshes can cause the cursor to jump).
+			const isExternalChange = !(changeId ?? 'unknown').endsWith(editorId);
+			if (itemId === noteId && !cancelled && isExternalChange) {
 				if (formNoteRef.current.hasChanged) return;
 				refreshFormNote();
 			}
