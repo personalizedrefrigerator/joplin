@@ -7,8 +7,20 @@ import ResourceFetcher from '@joplin/lib/services/ResourceFetcher';
 import { reg } from '@joplin/lib/registry';
 const bridge = require('@electron/remote').require('./bridge').default;
 
-// eslint-disable-next-line @typescript-eslint/ban-types, @typescript-eslint/no-explicit-any -- Old code before rule was applied, Old code before rule was applied
-export default function useMessageHandler(scrollWhenReady: ScrollOptions|null, clearScrollWhenReady: ()=> void, editorRef: any, setLocalSearchResultCount: Function, dispatch: Function, formNote: FormNote, htmlToMd: HtmlToMarkdownHandler, mdToHtml: MarkupToHtmlHandler) {
+export default function useMessageHandler(
+	scrollWhenReady: ScrollOptions|null,
+	clearScrollWhenReady: ()=> void,
+	windowId: string,
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
+	editorRef: any,
+	// eslint-disable-next-line @typescript-eslint/ban-types -- Old code before rule was applied
+	setLocalSearchResultCount: Function,
+	// eslint-disable-next-line @typescript-eslint/ban-types -- Old code before rule was applied
+	dispatch: Function,
+	formNote: FormNote,
+	htmlToMd: HtmlToMarkdownHandler,
+	mdToHtml: MarkupToHtmlHandler,
+) {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	return useCallback(async (event: any) => {
 		const msg = event.channel ? event.channel : '';
@@ -57,7 +69,7 @@ export default function useMessageHandler(scrollWhenReady: ScrollOptions|null, c
 			const commandArgs = arg0.args || [];
 			void CommandService.instance().execute(commandName, ...commandArgs);
 		} else if (msg === 'postMessageService.message') {
-			void PostMessageService.instance().postMessage(arg0);
+			void PostMessageService.instance().postMessage({ ...arg0, windowId });
 		} else if (msg === 'openPdfViewer') {
 			await CommandService.instance().execute('openPdfViewer', arg0.resourceId, arg0.pageNo);
 		} else {

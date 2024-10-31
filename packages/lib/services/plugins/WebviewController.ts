@@ -4,6 +4,7 @@ import { ButtonSpec, DialogResult, ViewHandle } from './api/types';
 const { toSystemSlashes } = require('../../path-utils');
 import PostMessageService, { MessageParticipant } from '../PostMessageService';
 import { PluginViewState } from './reducer';
+import { defaultWindowId } from '../../reducer';
 
 export enum ContainerType {
 	Panel = 'panel',
@@ -124,6 +125,7 @@ export default class WebviewController extends ViewController {
 		void PostMessageService.instance().postMessage({
 			pluginId: this.pluginId,
 			viewId: this.handle,
+			windowId: defaultWindowId,
 			contentScriptId: null,
 			from: MessageParticipant.Plugin,
 			to: MessageParticipant.UserWebview,

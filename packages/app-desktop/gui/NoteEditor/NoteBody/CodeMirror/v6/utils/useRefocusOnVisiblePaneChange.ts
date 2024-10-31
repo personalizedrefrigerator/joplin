@@ -1,11 +1,11 @@
 import { RefObject, useRef, useEffect } from 'react';
 import { focus } from '@joplin/lib/utils/focusHandler';
 import CodeMirrorControl from '@joplin/editor/CodeMirror/CodeMirrorControl';
-import NoteTextViewer from '../../../../../NoteTextViewer';
+import { NoteViewerControl } from '../../../../../NoteTextViewer';
 
 interface Props {
 	editorRef: RefObject<CodeMirrorControl>;
-	webviewRef: RefObject<NoteTextViewer>;
+	webviewRef: RefObject<NoteViewerControl>;
 	visiblePanes: string[];
 }
 
