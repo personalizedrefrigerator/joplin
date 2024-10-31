@@ -11,7 +11,10 @@ export const declaration: CommandDeclaration = {
 };
 
 const getMarkupToHtml = () => {
-	const resourceBaseUrl = `/${toForwardSlashes(Setting.value('resourceDir'))}/`;
+	let resourceBaseUrl = `${toForwardSlashes(Setting.value('resourceDir'))}/`;
+	if (!resourceBaseUrl.startsWith('/')) {
+		resourceBaseUrl = `/${resourceBaseUrl}`;
+	}
 
 	return markupLanguageUtils.newMarkupToHtml({}, {
 		resourceBaseUrl,
