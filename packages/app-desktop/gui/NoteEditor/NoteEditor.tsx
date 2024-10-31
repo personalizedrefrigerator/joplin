@@ -652,7 +652,7 @@ const mapStateToProps = (state: AppState, ownProps: OwnProps) => {
 		selectedNoteHash: windowState.selectedNoteHash,
 		searches: state.searches,
 		selectedSearchId: windowState.selectedSearchId,
-		customCss: state.customCss,
+		customCss: state.customViewerCss,
 		noteVisiblePanes: windowState.noteVisiblePanes,
 		watchedResources: state.watchedResources,
 		highlightedWords: state.highlightedWords,

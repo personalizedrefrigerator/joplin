@@ -334,7 +334,7 @@ const mapStateToProps = (state: AppState) => {
 		showCompletedTodos: state.settings.showCompletedTodos,
 		highlightedWords: state.highlightedWords,
 		plugins: state.pluginService.plugins,
-		customCss: state.customCss,
+		customCss: state.customViewerCss,
 		focusedField: state.focusedField,
 		parentFolderIsReadOnly: state.notesParentType === 'Folder' && selectedFolder ? itemIsReadOnlySync(ModelType.Folder, ItemChange.SOURCE_UNSPECIFIED, selectedFolder as ItemSlice, userId, state.shareService) : false,
 		selectedFolderInTrash: itemIsInTrash(selectedFolder),

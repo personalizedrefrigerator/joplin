@@ -142,7 +142,8 @@ export interface State extends WindowState {
 	biometricsDone: boolean;
 	hasDisabledSyncItems: boolean;
 	hasDisabledEncryptionItems: boolean;
-	customCss: string;
+	customViewerCss: string;
+	customChromeCssPaths: string[];
 	collapsedFolderIds: string[];
 	clipperServer: StateClipperServer;
 	decryptionWorker: StateDecryptionWorker;
@@ -190,7 +191,8 @@ export const defaultState: State = {
 	biometricsDone: false,
 	hasDisabledSyncItems: false,
 	hasDisabledEncryptionItems: false,
-	customCss: '',
+	customViewerCss: '',
+	customChromeCssPaths: [],
 	collapsedFolderIds: [],
 	clipperServer: {
 		startState: 'idle',
@@ -1435,8 +1437,15 @@ const reducer = produce((draft: Draft<State> = defaultState, action: any) => {
 			}
 			break;
 
-		case 'CUSTOM_CSS_APPEND':
-			draft.customCss += action.css;
+		case 'CUSTOM_VIEWER_CSS_APPEND':
+			draft.customViewerCss += action.css;
+			break;
+
+		case 'CUSTOM_APP_CSS_ADD':
+			// To enable/disable custom CSS, some plugins add the same chrome CSS file multiple times.
+			// For performance, only apply the last copy of each file.
+			draft.customChromeCssPaths = draft.customChromeCssPaths.filter(path => path !== action.filePath);
+			draft.customChromeCssPaths.push(action.filePath);
 			break;
 
 		case 'SET_NOTE_TAGS':

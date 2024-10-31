@@ -21,6 +21,7 @@ import { AppState } from '../../app.reducer';
 interface Props {
 	themeId: number;
 	editorFontSetting: string;
+	customChromeCssPaths: string[];
 }
 
 const editorFontFromSettings = (settingValue: string) => {
@@ -74,6 +75,27 @@ const StyleSheetContainer: React.FC<Props> = props => {
 		};
 	}, [themeStyleSheetContent, editorStyleSheetContent, doc]);
 
+	useEffect(() => {
+		if (!doc) return () => {};
+
+		const elements: HTMLElement[] = [];
+		for (const path of props.customChromeCssPaths) {
+			const element = doc.createElement('link');
+			element.rel = 'stylesheet';
+			element.href = path;
+			element.classList.add('custom-userchrome-css');
+			doc.head.appendChild(element);
+
+			elements.push(element);
+		}
+
+		return () => {
+			for (const element of elements) {
+				element.remove();
+			}
+		};
+	}, [doc, props.customChromeCssPaths]);
+
 	return <div ref={setElementRef} style={{ display: 'none' }}></div>;
 };
 
@@ -81,5 +103,6 @@ export default connect((state: AppState) => {
 	return {
 		themeId: state.settings.theme,
 		editorFontSetting: state.settings['style.editor.fontFamily'] as string,
+		customChromeCssPaths: state.customChromeCssPaths,
 	};
 })(StyleSheetContainer);

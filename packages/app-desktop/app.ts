@@ -34,7 +34,7 @@ const Menu = bridge().Menu;
 const PluginManager = require('@joplin/lib/services/PluginManager');
 import RevisionService from '@joplin/lib/services/RevisionService';
 import MigrationService from '@joplin/lib/services/MigrationService';
-import { loadCustomCss, injectCustomStyles } from '@joplin/lib/CssUtils';
+import { loadCustomCss } from '@joplin/lib/CssUtils';
 import mainScreenCommands from './gui/WindowCommandHandler/commands/index';
 import noteEditorCommands from './gui/NoteEditor/commands/index';
 import noteListCommands from './gui/NoteList/commands/index';
@@ -435,9 +435,6 @@ class Application extends BaseApplication {
 			syncDebugLog.info(`Profile dir: ${dir}`);
 		}
 
-		// Loads app-wide styles. (Markdown preview-specific styles loaded in app.js)
-		await injectCustomStyles('appStyles', Setting.customCssFilePath(Setting.customCssFilenames.JOPLIN_APP));
-
 		this.setupAutoUpdaterService();
 
 		AlarmService.setDriver(new AlarmServiceDriverNode({ appName: packageInfo.build.appId }));
@@ -559,7 +556,7 @@ class Application extends BaseApplication {
 		// Loads custom Markdown preview styles
 		const cssString = await loadCustomCss(Setting.customCssFilePath(Setting.customCssFilenames.RENDERED_MARKDOWN));
 		this.store().dispatch({
-			type: 'CUSTOM_CSS_APPEND',
+			type: 'CUSTOM_VIEWER_CSS_APPEND',
 			css: cssString,
 		});
 

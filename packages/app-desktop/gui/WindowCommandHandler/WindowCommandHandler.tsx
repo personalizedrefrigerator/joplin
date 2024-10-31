@@ -243,7 +243,7 @@ export default connect((state: AppState, ownProps: ConnectProps) => {
 		plugins: state.pluginService.plugins,
 		currentWindowDialogs: windowState.visibleDialogs,
 		pluginHtmlContents: state.pluginService.pluginHtmlContents,
-		customCss: state.customCss,
+		customCss: state.customViewerCss,
 		editorNoteStatuses: state.editorNoteStatuses,
 		pluginsLegacy: state.pluginsLegacy,
 		modalMessage: state.modalOverlayMessage,

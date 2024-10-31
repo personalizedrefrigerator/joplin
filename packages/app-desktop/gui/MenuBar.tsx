@@ -1126,7 +1126,7 @@ const mapStateToProps = (state: AppState) => {
 		['spellChecker.languages']: state.settings['spellChecker.languages'],
 		['spellChecker.enabled']: state.settings['spellChecker.enabled'],
 		plugins: state.pluginService.plugins,
-		customCss: state.customCss,
+		customCss: state.customViewerCss,
 		profileConfig: state.profileConfig,
 		noteListRendererIds: state.noteListRendererIds,
 		noteListRendererId: state.settings['notes.listRendererId'],
