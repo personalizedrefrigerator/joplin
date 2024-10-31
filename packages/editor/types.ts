@@ -152,6 +152,7 @@ export interface EditorSettings {
 	useExternalSearch: boolean;
 
 	automatchBraces: boolean;
+	autocompleteMarkup: boolean;
 
 	// True if internal command keyboard shortcuts should be ignored (thus
 	// allowing Joplin shortcuts to run).
@@ -173,9 +174,15 @@ export type OnEventCallback = (event: EditorEvent)=> void;
 export type PasteFileCallback = (data: File)=> Promise<void>;
 type OnScrollPastBeginningCallback = ()=> void;
 
+interface Localisations {
+	[editorString: string]: string;
+}
+
 export interface EditorProps {
 	settings: EditorSettings;
 	initialText: string;
+	// Used mostly for internal editor library strings
+	localisations?: Localisations;
 
 	// If null, paste and drag-and-drop will not work for resources unless handled elsewhere.
 	onPasteFile: PasteFileCallback|null;

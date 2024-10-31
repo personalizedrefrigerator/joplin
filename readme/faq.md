@@ -153,6 +153,10 @@ If `Show tray icon` is enabled, closing the Joplin window does not quit the appl
 
 Additionally the Windows Task Manager can be used to verify whether Joplin is still around.
 
+## Are notebooks and notes backed up during an iOS backup to your Mac?
+
+Notebooks and notes on iOS are not backed up when [backing up to your Mac](https://support.apple.com/guide/mac-help/back-up-and-restore-your-device-mchla3c8ed03/mac).
+
 ## Why is it named Joplin?
 
 The name comes from the composer and pianist [Scott Joplin](https://en.wikipedia.org/wiki/Scott_Joplin), which I often listen to. His name is also easy to remember and type so it felt like a good choice.

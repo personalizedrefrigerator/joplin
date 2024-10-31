@@ -383,6 +383,7 @@ const CodeMirror = (props: NoteBodyEditorProps, ref: ForwardedRef<NoteBodyEditor
 				monospaceFont: Setting.value('style.editor.monospaceFontFamily'),
 			},
 			automatchBraces: Setting.value('editor.autoMatchingBraces'),
+			autocompleteMarkup: Setting.value('editor.autocompleteMarkup'),
 			useExternalSearch: false,
 			ignoreModifiers: true,
 			spellcheckEnabled: Setting.value('editor.spellcheckBeta'),

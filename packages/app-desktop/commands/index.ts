@@ -7,6 +7,7 @@ import * as exportNotes from './exportNotes';
 import * as focusElement from './focusElement';
 import * as openNoteInNewWindow from './openNoteInNewWindow';
 import * as openProfileDirectory from './openProfileDirectory';
+import * as renderMarkup from './renderMarkup';
 import * as replaceMisspelling from './replaceMisspelling';
 import * as restoreNoteRevision from './restoreNoteRevision';
 import * as startExternalEditing from './startExternalEditing';
@@ -27,6 +28,7 @@ const index: any[] = [
 	focusElement,
 	openNoteInNewWindow,
 	openProfileDirectory,
+	renderMarkup,
 	replaceMisspelling,
 	restoreNoteRevision,
 	startExternalEditing,

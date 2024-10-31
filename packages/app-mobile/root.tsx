@@ -21,7 +21,6 @@ import ShareExtension from './utils/ShareExtension';
 import handleShared from './utils/shareHandler';
 import uuid from '@joplin/lib/uuid';
 import { loadKeychainServiceAndSettings } from '@joplin/lib/services/SettingUtils';
-import KeychainServiceDriverMobile from '@joplin/lib/services/keychain/KeychainServiceDriver.mobile';
 import { _, setLocale } from '@joplin/lib/locale';
 import SyncTargetJoplinServer from '@joplin/lib/SyncTargetJoplinServer';
 import SyncTargetJoplinCloud from '@joplin/lib/SyncTargetJoplinCloud';
@@ -111,6 +110,7 @@ import { loadMasterKeysFromSettings, migrateMasterPassword } from '@joplin/lib/s
 import { setRSA } from '@joplin/lib/services/e2ee/ppk';
 import RSA from './services/e2ee/RSA.react-native';
 import { runIntegrationTests as runRsaIntegrationTests } from '@joplin/lib/services/e2ee/ppkTestUtils';
+import { runIntegrationTests as runCryptoIntegrationTests } from '@joplin/lib/services/e2ee/cryptoTestUtils';
 import { Theme, ThemeAppearance } from '@joplin/lib/themes/type';
 import ProfileSwitcher from './components/ProfileSwitcher/ProfileSwitcher';
 import ProfileEditor from './components/ProfileSwitcher/ProfileEditor';
@@ -596,7 +596,7 @@ async function initialize(dispatch: Dispatch) {
 		reg.logger().info('Database is ready.');
 		reg.logger().info('Loading settings...');
 
-		await loadKeychainServiceAndSettings([KeychainServiceDriverMobile]);
+		await loadKeychainServiceAndSettings([]);
 		await migrateMasterPassword();
 
 		if (!Setting.value('clientId')) Setting.setValue('clientId', uuid.create());
@@ -819,8 +819,9 @@ async function initialize(dispatch: Dispatch) {
 		if (Platform.OS !== 'web') {
 			await runRsaIntegrationTests();
 		} else {
-			logger.info('Skipping RSA tests -- not supported on mobile.');
+			logger.info('Skipping encryption tests -- not supported on web.');
 		}
+		await runCryptoIntegrationTests();
 		await runOnDeviceFsDriverTests();
 	}
 
@@ -945,6 +946,21 @@ class AppComponent extends React.Component {
 					state: 'error',
 				});
 				throw error;
+			}
+
+			// https://reactnative.dev/docs/linking#handling-deep-links
+			//
+			// The handler added with Linking.addEventListener() is only triggered when app is already open.
+			//
+			// When the app is not already open and the deep link triggered app launch,
+			// the URL can be obtained with Linking.getInitialURL().
+			//
+			// We only save the URL here since we want to show the content only
+			// after biometrics check is passed or known disabled.
+			const url = await Linking.getInitialURL();
+			if (url && isCallbackUrl(url)) {
+				logger.info('received initial callback url: ', url);
+				this.callbackUrl = url;
 			}
 
 			const loadedSensorInfo = await sensorInfo();

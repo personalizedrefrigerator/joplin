@@ -133,6 +133,8 @@ packages/app-desktop/commands/focusElement.js
 packages/app-desktop/commands/index.js
 packages/app-desktop/commands/openNoteInNewWindow.js
 packages/app-desktop/commands/openProfileDirectory.js
+packages/app-desktop/commands/renderMarkup.test.js
+packages/app-desktop/commands/renderMarkup.js
 packages/app-desktop/commands/replaceMisspelling.js
 packages/app-desktop/commands/restoreNoteRevision.js
 packages/app-desktop/commands/startExternalEditing.js
@@ -216,6 +218,7 @@ packages/app-desktop/gui/NoteEditor/NoteBody/CodeMirror/v5/utils/useScrollUtils.
 packages/app-desktop/gui/NoteEditor/NoteBody/CodeMirror/v6/CodeMirror.js
 packages/app-desktop/gui/NoteEditor/NoteBody/CodeMirror/v6/Editor.js
 packages/app-desktop/gui/NoteEditor/NoteBody/CodeMirror/v6/useEditorCommands.js
+packages/app-desktop/gui/NoteEditor/NoteBody/CodeMirror/v6/utils/localisation.js
 packages/app-desktop/gui/NoteEditor/NoteBody/CodeMirror/v6/utils/useKeymap.js
 packages/app-desktop/gui/NoteEditor/NoteBody/CodeMirror/v6/utils/useRefocusOnVisiblePaneChange.js
 packages/app-desktop/gui/NoteEditor/NoteBody/PlainEditor/PlainEditor.js
@@ -318,7 +321,9 @@ packages/app-desktop/gui/NoteTextViewer.js
 packages/app-desktop/gui/NoteToolbar/NoteToolbar.js
 packages/app-desktop/gui/NotyfContext.js
 packages/app-desktop/gui/OneDriveLoginScreen.js
+packages/app-desktop/gui/PasswordInput/LabelledPasswordInput.js
 packages/app-desktop/gui/PasswordInput/PasswordInput.js
+packages/app-desktop/gui/PasswordInput/types.js
 packages/app-desktop/gui/PdfViewer.js
 packages/app-desktop/gui/PromptDialog.js
 packages/app-desktop/gui/ResizableLayout/MoveButtons.js
@@ -522,7 +527,6 @@ packages/app-desktop/utils/customProtocols/handleCustomProtocols.js
 packages/app-desktop/utils/customProtocols/registerCustomProtocols.js
 packages/app-desktop/utils/isSafeToOpen.test.js
 packages/app-desktop/utils/isSafeToOpen.js
-packages/app-desktop/utils/markupLanguageUtils.js
 packages/app-desktop/utils/restartInSafeModeFromMain.test.js
 packages/app-desktop/utils/restartInSafeModeFromMain.js
 packages/app-mobile/PluginAssetsLoader.js
@@ -536,7 +540,16 @@ packages/app-mobile/commands/util/goToNote.js
 packages/app-mobile/commands/util/showResource.js
 packages/app-mobile/components/BackButtonDialogBox.js
 packages/app-mobile/components/BetaChip.js
-packages/app-mobile/components/CameraView.js
+packages/app-mobile/components/CameraView/ActionButtons.js
+packages/app-mobile/components/CameraView/Camera/index.jest.js
+packages/app-mobile/components/CameraView/Camera/index.js
+packages/app-mobile/components/CameraView/Camera/types.js
+packages/app-mobile/components/CameraView/CameraView.test.js
+packages/app-mobile/components/CameraView/CameraView.js
+packages/app-mobile/components/CameraView/ScannedBarcodes.js
+packages/app-mobile/components/CameraView/types.js
+packages/app-mobile/components/CameraView/utils/fitRectIntoBounds.js
+packages/app-mobile/components/CameraView/utils/useBarcodeScanner.js
 packages/app-mobile/components/Checkbox.js
 packages/app-mobile/components/DialogManager.js
 packages/app-mobile/components/DismissibleDialog.js
@@ -713,6 +726,7 @@ packages/app-mobile/components/screens/UpgradeSyncTargetScreen.js
 packages/app-mobile/components/screens/encryption-config.js
 packages/app-mobile/components/screens/status.js
 packages/app-mobile/components/side-menu-content.js
+packages/app-mobile/components/testing/TestProviderStack.js
 packages/app-mobile/components/voiceTyping/VoiceTypingDialog.js
 packages/app-mobile/gulpfile.js
 packages/app-mobile/index.web.js
@@ -722,10 +736,15 @@ packages/app-mobile/services/AlarmServiceDriver.ios.js
 packages/app-mobile/services/AlarmServiceDriver.web.js
 packages/app-mobile/services/BackButtonService.js
 packages/app-mobile/services/e2ee/RSA.react-native.js
+packages/app-mobile/services/e2ee/crypto.js
 packages/app-mobile/services/plugins/PlatformImplementation.js
 packages/app-mobile/services/profiles/index.js
+packages/app-mobile/services/voiceTyping/VoiceTyping.js
+packages/app-mobile/services/voiceTyping/utils/splitWhisperText.test.js
+packages/app-mobile/services/voiceTyping/utils/splitWhisperText.js
 packages/app-mobile/services/voiceTyping/vosk.android.js
 packages/app-mobile/services/voiceTyping/vosk.js
+packages/app-mobile/services/voiceTyping/whisper.js
 packages/app-mobile/setupQuickActions.js
 packages/app-mobile/tools/buildInjectedJs/BundledFile.js
 packages/app-mobile/tools/buildInjectedJs/constants.js
@@ -853,6 +872,8 @@ packages/editor/CodeMirror/utils/growSelectionToNode.js
 packages/editor/CodeMirror/utils/handlePasteEvent.js
 packages/editor/CodeMirror/utils/isCursorAtBeginning.js
 packages/editor/CodeMirror/utils/isInSyntaxNode.js
+packages/editor/CodeMirror/utils/overwriteModeExtension.test.js
+packages/editor/CodeMirror/utils/overwriteModeExtension.js
 packages/editor/CodeMirror/utils/searchExtension.js
 packages/editor/CodeMirror/utils/setupVim.js
 packages/editor/SelectionFormatting.js
@@ -1089,6 +1110,10 @@ packages/lib/services/debug/populateDatabase.js
 packages/lib/services/e2ee/EncryptionService.test.js
 packages/lib/services/e2ee/EncryptionService.js
 packages/lib/services/e2ee/RSA.node.js
+packages/lib/services/e2ee/crypto.test.js
+packages/lib/services/e2ee/crypto.js
+packages/lib/services/e2ee/cryptoShared.js
+packages/lib/services/e2ee/cryptoTestUtils.js
 packages/lib/services/e2ee/ppk.test.js
 packages/lib/services/e2ee/ppk.js
 packages/lib/services/e2ee/ppkTestUtils.js
@@ -1127,7 +1152,6 @@ packages/lib/services/keychain/KeychainService.test.js
 packages/lib/services/keychain/KeychainService.js
 packages/lib/services/keychain/KeychainServiceDriver.dummy.js
 packages/lib/services/keychain/KeychainServiceDriver.electron.js
-packages/lib/services/keychain/KeychainServiceDriver.mobile.js
 packages/lib/services/keychain/KeychainServiceDriver.node.js
 packages/lib/services/keychain/KeychainServiceDriverBase.js
 packages/lib/services/noteList/defaultLeftToRightListRenderer.js
@@ -1325,6 +1349,7 @@ packages/lib/types.js
 packages/lib/urlUtils.js
 packages/lib/utils/ActionLogger.test.js
 packages/lib/utils/ActionLogger.js
+packages/lib/utils/attachedResources.js
 packages/lib/utils/credentialFiles.js
 packages/lib/utils/dom/makeSandboxedIframe.js
 packages/lib/utils/focusHandler.js
@@ -1344,6 +1369,7 @@ packages/lib/utils/ipc/utils/separateCallbacksFromSerializable.js
 packages/lib/utils/ipc/utils/separateCallbacksFromSerializableArray.js
 packages/lib/utils/joplinCloud/index.js
 packages/lib/utils/joplinCloud/types.js
+packages/lib/utils/markupLanguageUtils.js
 packages/lib/utils/processStartFlags.js
 packages/lib/utils/replaceUnsupportedCharacters.test.js
 packages/lib/utils/replaceUnsupportedCharacters.js

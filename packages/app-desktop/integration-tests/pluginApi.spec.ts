@@ -18,6 +18,7 @@ test.describe('pluginApi', () => {
 				await editor.richTextEditor.click();
 			}
 
+			await editor.expectToHaveText('This content should be overwritten.');
 			await mainScreen.goToAnything.runCommand(app, 'testUpdateEditorText');
 			await editor.expectToHaveText('PASS');
 

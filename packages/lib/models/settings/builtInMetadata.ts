@@ -14,6 +14,11 @@ const customCssFilePath = (Setting: typeof SettingType, filename: string): strin
 	return `${Setting.value('rootProfileDir')}/${filename}`;
 };
 
+export enum CameraDirection {
+	Back,
+	Front,
+}
+
 const builtInMetadata = (Setting: typeof SettingType) => {
 	const platform = shim.platformName();
 	const mobilePlatform = shim.mobilePlatform();
@@ -638,6 +643,18 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 			section: 'note',
 			appTypes: [AppType.Desktop],
 			label: () => _('Auto-pair braces, parentheses, quotations, etc.'),
+			storage: SettingStorage.File,
+			isGlobal: true,
+		},
+		'editor.autocompleteMarkup': {
+			value: true,
+			advanced: true,
+			type: SettingItemType.Bool,
+			public: true,
+			section: 'note',
+			appTypes: [AppType.Desktop, AppType.Mobile],
+			label: () => _('Autocomplete Markdown and HTML'),
+			description: () => _('Enables Markdown list continuation, auto-closing HTML tags, and other markup autocompletions.'),
 			storage: SettingStorage.File,
 			isGlobal: true,
 		},
@@ -1424,7 +1441,7 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 		'welcome.wasBuilt': { value: false, type: SettingItemType.Bool, public: false },
 		'welcome.enabled': { value: true, type: SettingItemType.Bool, public: false },
 
-		'camera.type': { value: 0, type: SettingItemType.Int, public: false, appTypes: [AppType.Mobile] },
+		'camera.type': { value: CameraDirection.Back, type: SettingItemType.Int, public: false, appTypes: [AppType.Mobile] },
 		'camera.ratio': { value: '4:3', type: SettingItemType.String, public: false, appTypes: [AppType.Mobile] },
 
 		'spellChecker.enabled': { value: true, type: SettingItemType.Bool, isGlobal: true, storage: SettingStorage.File, public: false },
@@ -1591,6 +1608,17 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 		// 	storage: SettingStorage.File,
 		// },
 
+		'featureFlag.useBetaEncryptionMethod': {
+			value: false,
+			type: SettingItemType.Bool,
+			public: true,
+			storage: SettingStorage.File,
+			label: () => 'Use beta encryption',
+			description: () => 'Set beta encryption methods as the default methods. This applies to all clients and takes effect after restarting the app.',
+			section: 'sync',
+			isGlobal: true,
+		},
+
 		'sync.allowUnsupportedProviders': {
 			value: -1,
 			type: SettingItemType.Int,
@@ -1613,6 +1641,25 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 			// For now, iOS and web don't support voice typing.
 			show: () => shim.mobilePlatform() === 'android',
 			section: 'note',
+		},
+
+		'voiceTyping.preferredProvider': {
+			value: 'whisper-tiny',
+			type: SettingItemType.String,
+			public: true,
+			appTypes: [AppType.Mobile],
+			label: () => _('Preferred voice typing provider'),
+			isEnum: true,
+			// For now, iOS and web don't support voice typing.
+			show: () => shim.mobilePlatform() === 'android',
+			section: 'note',
+
+			options: () => {
+				return {
+					'vosk': _('Vosk'),
+					'whisper-tiny': _('Whisper'),
+				};
+			},
 		},
 
 		'trash.autoDeletionEnabled': {

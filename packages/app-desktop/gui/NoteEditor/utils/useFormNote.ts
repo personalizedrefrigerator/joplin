@@ -1,12 +1,11 @@
 import { useState, useEffect, useCallback, RefObject, useRef } from 'react';
 import { FormNote, defaultFormNote, ResourceInfos } from './types';
-import { clearResourceCache, attachedResources } from './resourceHandling';
 import AsyncActionQueue from '@joplin/lib/AsyncActionQueue';
 import { handleResourceDownloadMode } from './resourceHandling';
 import { splitHtml } from '@joplin/renderer/HtmlToHtml';
 import Setting from '@joplin/lib/models/Setting';
 import usePrevious from '../../hooks/usePrevious';
-
+import attachedResources, { clearResourceCache } from '@joplin/lib/utils/attachedResources';
 import { MarkupToHtml } from '@joplin/renderer';
 import Note from '@joplin/lib/models/Note';
 import ResourceFetcher from '@joplin/lib/services/ResourceFetcher';
