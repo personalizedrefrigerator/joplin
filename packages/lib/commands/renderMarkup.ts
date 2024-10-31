@@ -1,8 +1,8 @@
-import markupLanguageUtils from '@joplin/lib/markupLanguageUtils';
-import Setting from '@joplin/lib/models/Setting';
-import { CommandRuntime, CommandDeclaration, CommandContext } from '@joplin/lib/services/CommandService';
-import { themeStyle } from '@joplin/lib/theme';
-import attachedResources from '@joplin/lib/utils/attachedResources';
+import markupLanguageUtils from '../markupLanguageUtils';
+import Setting from '../models/Setting';
+import { CommandRuntime, CommandDeclaration, CommandContext } from '../services/CommandService';
+import { themeStyle } from '../theme';
+import attachedResources from '../utils/attachedResources';
 import { MarkupLanguage } from '@joplin/renderer';
 
 export const declaration: CommandDeclaration = {
@@ -10,7 +10,7 @@ export const declaration: CommandDeclaration = {
 };
 
 const getMarkupToHtml = () => {
-	const resourceBaseUrl = `joplin-content://note-viewer/${Setting.value('resourceDir')}/`;
+	const resourceBaseUrl = 'joplin-resource://';
 
 	return markupLanguageUtils.newMarkupToHtml({}, {
 		resourceBaseUrl,
