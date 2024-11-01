@@ -5,14 +5,19 @@ import { useState, useEffect, useRef, createContext } from 'react';
 import { createPortal } from 'react-dom';
 import { SecondaryWindowApi } from '../utils/window/types';
 
-export enum WindowMode {
-	Iframe, NewWindow,
-}
+// This component uses react-dom's Portals to render its children in a different HTML
+// document. As children are rendered in a different Window/Document, they should avoid
+// referencing the `window` and `document` globals. Instead, HTMLElement.ownerDocument
+// and refs can be used to access the child component's DOM.
 
 export const WindowIdContext = createContext(defaultWindowId);
 
 type OnCloseCallback = ()=> void;
 type OnFocusCallback = ()=> void;
+
+export enum WindowMode {
+	Iframe, NewWindow,
+}
 
 interface Props {
 	// Note: children will be rendered in a different DOM from this node. Avoid using document.* methods

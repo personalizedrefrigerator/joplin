@@ -312,11 +312,11 @@ const NoteList = (props: Props) => {
 	);
 };
 
-interface OwnProps {
+interface ConnectProps {
 	windowId: string;
 }
 
-const mapStateToProps = (state: AppState, ownProps: OwnProps) => {
+const mapStateToProps = (state: AppState, ownProps: ConnectProps) => {
 	const selectedFolder: FolderEntity = state.notesParentType === 'Folder' ? Folder.byId(state.folders, state.selectedFolderId) : null;
 	const userId = state.settings['sync.userId'];
 	const windowState = stateUtils.windowStateById(state, ownProps.windowId);

@@ -630,11 +630,11 @@ function NoteEditorContent(props: NoteEditorProps) {
 	);
 }
 
-interface OwnProps {
+interface ConnectProps {
 	windowId: string;
 }
 
-const mapStateToProps = (state: AppState, ownProps: OwnProps) => {
+const mapStateToProps = (state: AppState, ownProps: ConnectProps) => {
 	const whenClauseContext = stateToWhenClauseContext(state, { windowId: ownProps.windowId });
 	const windowState = stateUtils.windowStateById(state, ownProps.windowId);
 	const noteId = stateUtils.selectedNoteId(windowState);
