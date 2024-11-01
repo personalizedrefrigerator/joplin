@@ -29,22 +29,30 @@ interface PluginWindows {
 	[key: string]: any;
 }
 
-export default class ElectronAppWrapper {
+type SecondaryWindowId = string;
+interface SecondaryWindowData {
+	electronId: number;
+}
 
+export default class ElectronAppWrapper {
 	private logger_: Logger = null;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	private electronApp_: any;
 	private env_: string;
 	private isDebugMode_: boolean;
 	private profilePath_: string;
+
 	private win_: BrowserWindow = null;
+	private mainWindowHidden_ = true;
+	private pluginWindows_: PluginWindows = {};
+	private secondaryWindows_: Map<SecondaryWindowId, SecondaryWindowData> = new Map();
+
 	private willQuitApp_ = false;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	private tray_: any = null;
 	private buildDir_: string = null;
 	private rendererProcessQuitReply_: RendererProcessQuitReply = null;
-	private pluginWindows_: PluginWindows = {};
-	private joplinWindowIdToElectronId_: Map<string, number> = new Map();
+
 	private initialCallbackUrl_: string = null;
 	private updaterService_: AutoUpdaterService = null;
 	private customProtocolHandler_: CustomProtocolHandler = null;
@@ -84,9 +92,9 @@ export default class ElectronAppWrapper {
 			return this.mainWindow();
 		}
 
-		const electronId = this.joplinWindowIdToElectronId_.get(joplinId);
-		if (electronId !== undefined) {
-			return BrowserWindow.fromId(electronId);
+		const windowData = this.secondaryWindows_.get(joplinId);
+		if (windowData !== undefined) {
+			return BrowserWindow.fromId(windowData.electronId);
 		}
 		return null;
 	}
@@ -229,6 +237,15 @@ export default class ElectronAppWrapper {
 			}
 		});
 
+		this.mainWindowHidden_ = !windowOptions.show;
+		this.win_.on('hide', () => {
+			this.mainWindowHidden_ = true;
+		});
+
+		this.win_.on('show', () => {
+			this.mainWindowHidden_ = false;
+		});
+
 		void this.win_.loadURL(url.format({
 			pathname: path.join(__dirname, 'index.html'),
 			protocol: 'file:',
@@ -305,7 +322,8 @@ export default class ElectronAppWrapper {
 					this.hide();
 				}
 			} else {
-				if (this.trayShown() && !this.willQuitApp_) {
+				const hasBackgroundWindows = this.secondaryWindows_.size > 0;
+				if ((hasBackgroundWindows || this.trayShown()) && !this.willQuitApp_) {
 					event.preventDefault();
 					this.win_.hide();
 				} else {
@@ -333,6 +351,23 @@ export default class ElectronAppWrapper {
 					}
 				}
 			}
+		});
+
+		ipcMain.on('secondary-window-added', (event, windowId: string) => {
+			const window = BrowserWindow.fromWebContents(event.sender);
+			const electronWindowId = window?.id;
+			this.secondaryWindows_.set(windowId, { electronId: electronWindowId });
+
+			window.once('close', () => {
+				this.secondaryWindows_.delete(windowId);
+
+				const allSecondaryWindowsClosed = this.secondaryWindows_.size === 0;
+				const mainWindowVisuallyClosed = this.mainWindowHidden_;
+				if (allSecondaryWindowsClosed && mainWindowVisuallyClosed && !this.trayShown()) {
+					// Gracefully quit the app if the user has closed all windows
+					this.win_.close();
+				}
+			});
 		});
 
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
@@ -379,16 +414,6 @@ export default class ElectronAppWrapper {
 
 		ipcMain.on('check-for-updates', () => {
 			void this.updaterService_.checkForUpdates(true);
-		});
-
-		ipcMain.on('secondary-window-added', (event, windowId: string) => {
-			const window = BrowserWindow.fromWebContents(event.sender);
-			const electronWindowId = window?.id;
-			this.joplinWindowIdToElectronId_.set(windowId, electronWindowId);
-
-			window.once('close', () => {
-				this.joplinWindowIdToElectronId_.delete(windowId);
-			});
 		});
 
 		// Let us register listeners on the window, so we can update the state
