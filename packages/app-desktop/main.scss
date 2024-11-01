@@ -300,15 +300,6 @@ Component-specific classes
 // 	margin-right: 10px;
 // }
 
-.master-password-dialog .fa-check {
-	color: var(--joplin-color-correct);
-}
-
-.master-password-dialog .fa-times {
-	color: var(--joplin-color-error);
-	margin-left: 5px;
-}
-
 
 // Disable dragging of links (which are often buttons)
 a:not([draggable=true]), img:not([draggable=true]) {

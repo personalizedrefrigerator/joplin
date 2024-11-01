@@ -23,6 +23,8 @@ const useWindowCommands = ({ documentRef, customCss, plugins, editorNoteStatuses
 	});
 	const windowControl = useWindowControl(setDialogState, onPrintCallback);
 
+	// This effect needs to run as soon as possible. Certain components may fail to load if window
+	// commands are not registered on their first render.
 	useNowEffect(() => {
 		const runtimeHandles = commands.map((command: ComponentCommandSpec<WindowControl>) => {
 			const runtime: CommandRuntime = {

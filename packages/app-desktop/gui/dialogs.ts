@@ -15,6 +15,9 @@ class Dialogs {
 	}
 
 	private get smalltalk(): Smalltalk {
+		// The smalltalk library shows prompts in whichever document it is loaded in
+		// (it uses the global document object).
+		// As such, a copy of the library needs to be loaded in each window:
 		if (this.activeWindow && 'smalltalk' in this.activeWindow) {
 			return this.activeWindow.smalltalk as Smalltalk;
 		}

@@ -10,7 +10,7 @@
 
 import * as React from 'react';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import useAsyncEffect, { AsyncEffectEvent } from '@joplin/lib/hooks/useAsyncEffect';
 import themeToCss from '@joplin/lib/services/style/themeToCss';
 import { themeStyle } from '@joplin/lib/theme';
@@ -32,58 +32,42 @@ const editorFontFromSettings = (settingValue: string) => {
 	return fontFamilies;
 };
 
-const StyleSheetContainer: React.FC<Props> = props => {
-	const [themeStyleSheetContent, setThemeStyleSheetContent] = useState('');
-	const [editorStyleSheetContent, setEditorStyleSheetContent] = useState('');
-	const [elementRef, setElementRef] = useState<HTMLElement|null>(null);
-	const doc = useDom(elementRef);
+const useThemeCss = (themeId: number) => {
+	const [themeCss, setThemeCss] = useState('');
 
 	useAsyncEffect(async (event: AsyncEffectEvent) => {
-		const theme = themeStyle(props.themeId);
+		const theme = themeStyle(themeId);
 		const themeCss = themeToCss(theme);
 		if (event.cancelled) return;
-		setThemeStyleSheetContent(themeCss);
-	}, [props.themeId]);
+		setThemeCss(themeCss);
+	}, [themeId]);
 
+	return themeCss;
+};
 
-	useEffect(() => {
-		const fontFamilies = editorFontFromSettings(props.editorFontSetting);
-		setEditorStyleSheetContent(`
+const useEditorCss = (editorFontSetting: string) => {
+	return useMemo(() => {
+		const fontFamilies = editorFontFromSettings(editorFontSetting);
+		return `
 			/* The '*' and '!important' parts are necessary to make sure Russian text is displayed properly
 			   https://github.com/laurent22/joplin/issues/155
 			
 			   Note: Be careful about the specificity here. Incorrect specificity can break monospaced fonts in tables. */
 			.CodeMirror5 *, .cm-editor .cm-content { font-family: ${fontFamilies.join(', ')} !important; }
-		`);
-	}, [props.editorFontSetting]);
+		`;
+	}, [editorFontSetting]);
+};
 
-	useEffect(() => {
-		if (!doc) return () => {};
-
-		const element = doc.createElement('style');
-		element.setAttribute('id', 'main-theme-stylesheet-container');
-		doc.head.appendChild(element);
-		element.appendChild(document.createTextNode(`
-			/* Theme CSS */
-			${themeStyleSheetContent}
-
-			/* Editor font CSS */
-			${editorStyleSheetContent}
-		`));
-		return () => {
-			doc.head.removeChild(element);
-		};
-	}, [themeStyleSheetContent, editorStyleSheetContent, doc]);
-
+const useLinkedCss = (doc: Document|null, cssPaths: string[]) => {
 	useEffect(() => {
 		if (!doc) return () => {};
 
 		const elements: HTMLElement[] = [];
-		for (const path of props.customChromeCssPaths) {
+		for (const path of cssPaths) {
 			const element = doc.createElement('link');
 			element.rel = 'stylesheet';
 			element.href = path;
-			element.classList.add('custom-userchrome-css');
+			element.classList.add('dynamic-linked-stylesheet');
 			doc.head.appendChild(element);
 
 			elements.push(element);
@@ -94,7 +78,38 @@ const StyleSheetContainer: React.FC<Props> = props => {
 				element.remove();
 			}
 		};
-	}, [doc, props.customChromeCssPaths]);
+	}, [doc, cssPaths]);
+};
+
+const useAppliedCss = (doc: Document|null, css: string) => {
+	useEffect(() => {
+		if (!doc) return () => {};
+
+		const element = doc.createElement('style');
+		element.setAttribute('id', 'main-theme-stylesheet-container');
+		doc.head.appendChild(element);
+		element.appendChild(document.createTextNode(css));
+		return () => {
+			doc.head.removeChild(element);
+		};
+	}, [css, doc]);
+};
+
+const StyleSheetContainer: React.FC<Props> = props => {
+	const [elementRef, setElementRef] = useState<HTMLElement|null>(null);
+	const doc = useDom(elementRef);
+
+	const themeCss = useThemeCss(props.themeId);
+	const editorCss = useEditorCss(props.editorFontSetting);
+
+	useAppliedCss(doc, `
+		/* Theme CSS */
+		${themeCss}
+
+		/* Editor font CSS */
+		${editorCss}
+	`);
+	useLinkedCss(doc, props.customChromeCssPaths);
 
 	return <div ref={setElementRef} style={{ display: 'none' }}></div>;
 };

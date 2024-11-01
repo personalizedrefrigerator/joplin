@@ -294,15 +294,10 @@ export class Bridge {
 		return new BrowserWindow(options);
 	}
 
+	// Note: This provides the size of the main window. Prefer CSS where possible.
 	public windowContentSize() {
 		if (!this.mainWindow()) return { width: 0, height: 0 };
 		const s = this.mainWindow().getContentSize();
-		return { width: s[0], height: s[1] };
-	}
-
-	public windowSize() {
-		if (!this.mainWindow()) return { width: 0, height: 0 };
-		const s = this.mainWindow().getSize();
 		return { width: s[0], height: s[1] };
 	}
 
@@ -323,7 +318,7 @@ export class Bridge {
 	public async showSaveDialog(options: any) {
 		if (!options) options = {};
 		if (!('defaultPath' in options) && this.lastSelectedPaths_.file) options.defaultPath = this.lastSelectedPaths_.file;
-		const { filePath } = await dialog.showSaveDialog(this.mainWindow(), options);
+		const { filePath } = await dialog.showSaveDialog(this.activeWindow(), options);
 		if (filePath) {
 			this.lastSelectedPaths_.file = filePath;
 		}
@@ -338,7 +333,7 @@ export class Bridge {
 		if (!('defaultPath' in options) && (this.lastSelectedPaths_ as any)[fileType]) options.defaultPath = (this.lastSelectedPaths_ as any)[fileType];
 		if (!('createDirectory' in options)) options.createDirectory = true;
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-		const { filePaths } = await dialog.showOpenDialog(this.mainWindow(), options as any);
+		const { filePaths } = await dialog.showOpenDialog(this.activeWindow(), options as any);
 		if (filePaths && filePaths.length) {
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 			(this.lastSelectedPaths_ as any)[fileType] = dirname(filePaths[0]);
@@ -349,7 +344,7 @@ export class Bridge {
 	// Don't use this directly - call one of the showXxxxxxxMessageBox() instead
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	private showMessageBox_(window: any, options: MessageDialogOptions): number {
-		if (!window) window = this.mainWindow();
+		if (!window) window = this.activeWindow();
 		return dialog.showMessageBoxSync(window, { message: '', ...options });
 	}
 
@@ -359,7 +354,7 @@ export class Bridge {
 			...options,
 		};
 
-		return this.showMessageBox_(this.mainWindow(), {
+		return this.showMessageBox_(this.activeWindow(), {
 			type: 'error',
 			message: message,
 			buttons: options.buttons,
@@ -372,7 +367,7 @@ export class Bridge {
 			...options,
 		};
 
-		const result = this.showMessageBox_(this.mainWindow(), { type: 'question',
+		const result = this.showMessageBox_(this.activeWindow(), { type: 'question',
 			message: message,
 			cancelId: 1,
 			buttons: options.buttons, ...options });
@@ -382,7 +377,7 @@ export class Bridge {
 
 	/* returns the index of the clicked button */
 	public showMessageBox(message: string, options: MessageDialogOptions = {}) {
-		const result = this.showMessageBox_(this.mainWindow(), { type: 'question',
+		const result = this.showMessageBox_(this.activeWindow(), { type: 'question',
 			message: message,
 			buttons: [_('OK'), _('Cancel')], ...options });
 
@@ -391,7 +386,7 @@ export class Bridge {
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	public showInfoMessageBox(message: string, options: any = {}) {
-		const result = this.showMessageBox_(this.mainWindow(), { type: 'info',
+		const result = this.showMessageBox_(this.activeWindow(), { type: 'info',
 			message: message,
 			buttons: [_('OK')], ...options });
 		return result === 0;
@@ -435,7 +430,7 @@ export class Bridge {
 				const allowOpenId = 2;
 				const learnMoreId = 1;
 				const fileExtensionDescription = JSON.stringify(fileExtension);
-				const result = await dialog.showMessageBox(this.mainWindow(), {
+				const result = await dialog.showMessageBox(this.activeWindow(), {
 					title: _('Unknown file type'),
 					message:
 						_('Joplin doesn\'t recognise the %s extension. Opening this file could be dangerous. What would you like to do?', fileExtensionDescription),

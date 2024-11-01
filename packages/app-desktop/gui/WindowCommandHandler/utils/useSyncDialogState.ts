@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import { DialogState } from '../types';
 import { Dispatch } from 'redux';
 
+// Syncs whether dialogs are open/closed with the global reducer state.
 const useSyncDialogState = (dialogState: DialogState, dispatch: Dispatch) => {
 	const lastDialogStateRef = useRef(dialogState);
 	useEffect(() => {
