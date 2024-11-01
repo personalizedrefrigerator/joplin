@@ -356,12 +356,19 @@ function NoteEditorContent(props: NoteEditorProps) {
 	useEffect(() => {
 		const dependencies = {
 			setShowRevisions,
+			isInFocusedDocument: () => {
+				return containerRef.current?.ownerDocument?.hasFocus();
+			},
 		};
 
-		CommandService.instance().componentRegisterCommands(dependencies, commands);
+		const registeredCommands = CommandService.instance().componentRegisterCommands(
+			dependencies,
+			commands,
+			true,
+		);
 
 		return () => {
-			CommandService.instance().componentUnregisterCommands(commands);
+			registeredCommands.deregister();
 		};
 	}, [setShowRevisions]);
 
@@ -382,7 +389,7 @@ function NoteEditorContent(props: NoteEditorProps) {
 			opacity: 0.1,
 			...rootStyle,
 		};
-		return <div style={emptyDivStyle}></div>;
+		return <div style={emptyDivStyle} ref={containerRef}></div>;
 	}
 
 	function renderTagButton() {
@@ -480,10 +487,11 @@ function NoteEditorContent(props: NoteEditorProps) {
 			padding: theme.margin,
 			verticalAlign: 'top',
 			boxSizing: 'border-box',
+			flex: 1,
 		};
 
 		return (
-			<div style={revStyle}>
+			<div style={revStyle} ref={containerRef}>
 				<NoteRevisionViewer customCss={props.customCss} noteId={formNote.id} onBack={noteRevisionViewer_onBack} />
 			</div>
 		);

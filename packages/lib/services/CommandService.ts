@@ -257,10 +257,20 @@ export default class CommandService extends BaseService {
 		}
 	}
 
-	public componentRegisterCommands<ComponentType>(component: ComponentType, commands: ComponentCommandSpec<ComponentType>[]) {
+	public componentRegisterCommands<ComponentType>(component: ComponentType, commands: ComponentCommandSpec<ComponentType>[], allowMultiple?: boolean) {
+		const runtimeHandles: RegisteredRuntime[] = [];
 		for (const command of commands) {
-			CommandService.instance().registerRuntime(command.declaration.name, command.runtime(component));
+			runtimeHandles.push(
+				CommandService.instance().registerRuntime(command.declaration.name, command.runtime(component), allowMultiple),
+			);
 		}
+		return {
+			deregister: () => {
+				for (const handle of runtimeHandles) {
+					handle.deregister();
+				}
+			},
+		};
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
