@@ -13,7 +13,6 @@ const { StyleSheetManager } = require('styled-components');
 import createCache from '@emotion/cache';
 import { CacheProvider } from '@emotion/react';
 import { stateUtils } from '@joplin/lib/reducer';
-import MenuBar from '../MenuBar';
 
 interface Props {
 	dispatch: Dispatch;
@@ -72,7 +71,6 @@ const SecondaryWindow: React.FC<Props> = props => {
 		title={windowTitle}
 	>
 		<LibraryStyleRoot>
-			<MenuBar windowId={props.windowId}/>
 			<WindowCommandHandler windowId={props.windowId} />
 			{editor}
 		</LibraryStyleRoot>

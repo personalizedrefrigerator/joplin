@@ -257,7 +257,7 @@ class RootComponent extends React.Component<Props, any> {
 			<StyleSheetManager disableVendorPrefixes>
 				<ThemeProvider theme={theme}>
 					<StyleSheetContainer/>
-					<MenuBar windowId={defaultWindowId}/>
+					<MenuBar/>
 					<GlobalStyle/>
 					<WindowCommandHandler windowId={defaultWindowId} />
 					<Navigator style={navigatorStyle} screens={screens} className={`profile-${this.props.profileConfigCurrentProfileId}`} />
