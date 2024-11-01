@@ -13,6 +13,7 @@ import Resource from '@joplin/lib/models/Resource';
 import { TinyMceEditorEvents } from './types';
 import { HtmlToMarkdownHandler, MarkupToHtmlHandler } from '../../../utils/types';
 import { Editor } from 'tinymce';
+import { Menu } from 'electron';
 
 const menuUtils = new MenuUtils(CommandService.instance());
 
@@ -55,11 +56,14 @@ export default function(editor: Editor, plugins: PluginStates, dispatch: Functio
 		if (!editor) return () => {};
 
 		const contextMenuItems = menuItems(dispatch, htmlToMd, mdToHtml);
+		const targetWindow = bridge().activeWindow();
 
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-		function onContextMenu(_event: any, params: any) {
+		function onContextMenu(event: any, params: any) {
 			const element = contextMenuElement(editor, params.x, params.y);
 			if (!element) return;
+
+			event.preventDefault();
 
 			let itemType: ContextMenuItemType = ContextMenuItemType.None;
 			let resourceId = '';
@@ -118,15 +122,15 @@ export default function(editor: Editor, plugins: PluginStates, dispatch: Functio
 
 			template = template.concat(menuUtils.pluginContextMenuItems(plugins, MenuItemLocation.EditorContextMenu));
 
-			const menu = bridge().Menu.buildFromTemplate(template);
+			const menu = Menu.buildFromTemplate(template);
 			menu.popup();
 		}
 
-		bridge().activeWindow().webContents.on('context-menu', onContextMenu);
+		targetWindow.webContents.on('context-menu', onContextMenu);
 
 		return () => {
-			if (bridge().activeWindow()?.webContents?.off) {
-				bridge().activeWindow().webContents.off('context-menu', onContextMenu);
+			if (!targetWindow.isDestroyed() && targetWindow?.webContents?.off) {
+				targetWindow.webContents.off('context-menu', onContextMenu);
 			}
 		};
 	}, [editor, plugins, dispatch, htmlToMd, mdToHtml]);
