@@ -1111,7 +1111,9 @@ function MenuBar(props: Props): any {
 		// Currently, this sets the menu for all windows. Although it's possible to set the menu
 		// for individual windows with BrowserWindow.setMenu, it causes issues with updating the
 		// state of existing menu items (and doesn't work with MacOS/Playwright).
-		Menu.setApplicationMenu(menu);
+		if (menu) {
+			Menu.setApplicationMenu(menu);
+		}
 	}, [menu]);
 
 	useEffect(() => {
