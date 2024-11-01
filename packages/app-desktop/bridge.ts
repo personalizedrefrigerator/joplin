@@ -267,12 +267,14 @@ export class Bridge {
 		return this.electronWrapper_.activeWindow();
 	}
 
-	public hasActiveWindow() {
-		return !!BrowserWindow.getFocusedWindow();
-	}
-
 	public windowById(id: string) {
 		return this.electronWrapper_.windowById(id);
+	}
+
+	public switchToMainWindow() {
+		if (this.activeWindow() !== this.mainWindow()) {
+			this.mainWindow().show();
+		}
 	}
 
 	public showItemInFolder(fullPath: string) {
