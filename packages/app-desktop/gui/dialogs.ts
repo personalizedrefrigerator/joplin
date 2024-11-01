@@ -1,9 +1,5 @@
 import Logger from '@joplin/utils/Logger';
 
-// Can't upgrade beyond 2.x because it doesn't work with Electron. If trying to
-// upgrade again, check that adding a link from the CodeMirror editor works/
-const smalltalk = require('smalltalk');
-
 const logger = Logger.create('dialogs');
 
 interface Smalltalk {
@@ -22,7 +18,12 @@ class Dialogs {
 		if (this.activeWindow && 'smalltalk' in this.activeWindow) {
 			return this.activeWindow.smalltalk as Smalltalk;
 		}
-		return smalltalk;
+
+		if ('smalltalk' in window) {
+			return window.smalltalk as Smalltalk;
+		}
+
+		throw new Error('Unable to find the smalltalk library. Please make sure it has been loaded with a <script> element.');
 	}
 
 	public async alert(message: string, title = '') {

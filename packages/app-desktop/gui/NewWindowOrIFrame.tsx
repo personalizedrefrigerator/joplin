@@ -11,6 +11,9 @@ export enum WindowMode {
 
 export const WindowIdContext = createContext(defaultWindowId);
 
+type OnCloseCallback = ()=> void;
+type OnFocusCallback = ()=> void;
+
 interface Props {
 	// Note: children will be rendered in a different DOM from this node. Avoid using document.* methods
 	// in child components.
@@ -18,26 +21,26 @@ interface Props {
 	title: string;
 	mode: WindowMode;
 	windowId: string;
-	onClose: ()=> void;
-	onFocus?: ()=> void;
+	onClose: OnCloseCallback;
+	onFocus?: OnFocusCallback;
 }
 
-const NewWindowOrIFrame: React.FC<Props> = props => {
-	const [iframeRef, setIframeRef] = useState<HTMLIFrameElement|null>(null);
-	const [loaded, setLoaded] = useState(false);
+const useDocument = (
+	mode: WindowMode,
+	iframeElement: HTMLIFrameElement|null,
+	onClose: OnCloseCallback,
+) => {
 	const [doc, setDoc] = useState<Document>(null);
 
-	const onCloseRef = useRef(props.onClose);
-	onCloseRef.current = props.onClose;
-	const onFocusRef = useRef(props.onFocus);
-	onFocusRef.current = props.onFocus;
+	const onCloseRef = useRef(onClose);
+	onCloseRef.current = onClose;
 
 	useEffect(() => {
 		let openedWindow: Window|null = null;
 		const unmounted = false;
-		if (iframeRef) {
-			setDoc(iframeRef?.contentWindow?.document);
-		} else if (props.mode === WindowMode.NewWindow) {
+		if (iframeElement) {
+			setDoc(iframeElement?.contentWindow?.document);
+		} else if (mode === WindowMode.NewWindow) {
 			openedWindow = window.open('about:blank');
 			setDoc(openedWindow.document);
 
@@ -68,11 +71,19 @@ const NewWindowOrIFrame: React.FC<Props> = props => {
 				}
 			}, 200);
 
-			if (iframeRef && !openedWindow) {
+			if (iframeElement && !openedWindow) {
 				onCloseRef.current?.();
 			}
 		};
-	}, [iframeRef, props.mode]);
+	}, [iframeElement, mode]);
+
+	return doc;
+};
+
+type OnSetLoaded = (loaded: boolean)=> void;
+const useDocumentSetup = (doc: Document|null, setLoaded: OnSetLoaded, onFocus?: OnFocusCallback) => {
+	const onFocusRef = useRef(onFocus);
+	onFocusRef.current = onFocus;
 
 	useEffect(() => {
 		if (!doc) return;
@@ -98,6 +109,15 @@ const NewWindowOrIFrame: React.FC<Props> = props => {
 			doc.head.appendChild(style);
 		}
 
+		const jsUrls = [
+			'vendor/lib/smalltalk/dist/smalltalk.min.js',
+		];
+		for (const url of jsUrls) {
+			const script = doc.createElement('script');
+			script.src = url;
+			doc.head.appendChild(script);
+		}
+
 		doc.body.style.height = '100vh';
 
 		const containerWindow = doc.defaultView;
@@ -109,7 +129,15 @@ const NewWindowOrIFrame: React.FC<Props> = props => {
 		}
 
 		setLoaded(true);
-	}, [doc]);
+	}, [doc, setLoaded]);
+};
+
+const NewWindowOrIFrame: React.FC<Props> = props => {
+	const [iframeRef, setIframeRef] = useState<HTMLIFrameElement|null>(null);
+	const [loaded, setLoaded] = useState(false);
+
+	const doc = useDocument(props.mode, iframeRef, props.onClose);
+	useDocumentSetup(doc, setLoaded, props.onFocus);
 
 	useEffect(() => {
 		if (!doc) return;
