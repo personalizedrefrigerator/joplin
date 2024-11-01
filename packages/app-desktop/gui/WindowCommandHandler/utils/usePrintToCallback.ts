@@ -15,7 +15,7 @@ interface Props {
 }
 
 interface PrintOptions {
-	path: string;
+	path?: string;
 	noteId: string;
 }
 
@@ -37,7 +37,7 @@ const usePrintToCallback = (props: Props): PrintCallback => {
 		// Concurrent print calls are disallowed to avoid incorrect settings being restored upon completion
 		if (isPrinting) {
 			// eslint-disable-next-line no-console -- Old code from before rule was applied
-			console.info(`Printing ${options.path} to ${target} disallowed, already printing.`);
+			console.info(`Printing ${options.path ?? options.noteId} to ${target} disallowed, already printing.`);
 			return;
 		}
 
