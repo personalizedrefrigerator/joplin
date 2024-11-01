@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef, useCallback, useMemo } from 'react';
 import { AppState } from '../app.reducer';
 import InteropService from '@joplin/lib/services/interop/InteropService';
-import { stateUtils } from '@joplin/lib/reducer';
+import { defaultWindowId, stateUtils } from '@joplin/lib/reducer';
 import CommandService from '@joplin/lib/services/CommandService';
 import MenuUtils from '@joplin/lib/services/commands/MenuUtils';
 import KeymapService from '@joplin/lib/services/KeymapService';
@@ -19,7 +19,7 @@ import menuCommandNames from './menuCommandNames';
 import stateToWhenClauseContext from '../services/commands/stateToWhenClauseContext';
 import bridge from '../services/bridge';
 import checkForUpdates from '../checkForUpdates';
-const { connect } = require('react-redux');
+import { connect } from 'react-redux';
 import { reg } from '@joplin/lib/registry';
 import { ProfileConfig } from '@joplin/lib/services/profileConfig/types';
 import PluginService, { PluginSettings } from '@joplin/lib/services/plugins/PluginService';
@@ -150,7 +150,7 @@ interface Props {
 	dispatch: Function;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	menuItemProps: any;
-	routeName: string;
+	mainScreenVisible: boolean;
 	selectedFolderId: string;
 	layoutButtonSequence: number;
 	['notes.sortOrder.field']: string;
@@ -173,6 +173,8 @@ interface Props {
 	pluginSettings: PluginSettings;
 	noteListRendererIds: string[];
 	noteListRendererId: string;
+	isWindowFocused: boolean;
+	windowId: string;
 	showMenuBar: boolean;
 }
 
@@ -192,11 +194,11 @@ function menuItemSetEnabled(id: string, enabled: boolean) {
 	menuItem.enabled = enabled;
 }
 
-const applyMenuBarVisibility = (showMenuBar: boolean) => {
+const applyMenuBarVisibility = (windowId: string, showMenuBar: boolean) => {
 	// The menu bar cannot be hidden on macOS
 	if (shim.isMac()) return;
 
-	const window = bridge().mainWindow();
+	const window = bridge().windowById(windowId) ?? bridge().mainWindow();
 	window.setAutoHideMenuBar(!showMenuBar);
 	window.setMenuBarVisibility(showMenuBar);
 };
@@ -1019,7 +1021,7 @@ function useMenu(props: Props) {
 				rootMenus.help,
 			].filter(item => item !== null);
 
-			if (props.routeName !== 'Main') {
+			if (!props.mainScreenVisible) {
 				setMenu(Menu.buildFromTemplate([
 					{
 						label: _('&File'),
@@ -1049,7 +1051,7 @@ function useMenu(props: Props) {
 		};
 		// eslint-disable-next-line @seiyab/react-hooks/exhaustive-deps -- Old code before rule was applied
 	}, [
-		props.routeName,
+		props.mainScreenVisible,
 		props.pluginMenuItems,
 		props.pluginMenus,
 		keymapLastChangeTime,
@@ -1099,18 +1101,41 @@ function useMenu(props: Props) {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 function MenuBar(props: Props): any {
 	const menu = useMenu(props);
-	if (menu) Menu.setApplicationMenu(menu);
-	applyMenuBarVisibility(props.showMenuBar);
+
+	useEffect(() => {
+		if (shim.isMac()) {
+			// On MacOS, window.setMenu does nothing and the app menu must be set instead
+			if (props.isWindowFocused) {
+				Menu.setApplicationMenu(menu);
+			}
+		} else {
+			bridge().windowById(props.windowId)?.setMenu(menu);
+		}
+	}, [menu, props.windowId, props.isWindowFocused]);
+
+	useEffect(() => {
+		applyMenuBarVisibility(props.windowId, props.showMenuBar);
+	}, [props.showMenuBar, props.windowId]);
+
 	return null;
 }
 
-const mapStateToProps = (state: AppState) => {
+interface OwnProps {
+	windowId: string;
+}
+
+const mapStateToProps = (state: AppState, { windowId }: OwnProps) => {
 	const whenClauseContext = stateToWhenClauseContext(state);
 
+	const isSecondaryWindow = windowId !== defaultWindowId;
+
 	return {
+		windowId: windowId,
 		menuItemProps: menuUtils.commandsToMenuItemProps(commandNames.concat(getPluginCommandNames(state.pluginService.plugins)), whenClauseContext),
 		locale: state.settings.locale,
-		routeName: state.route.routeName,
+		// Secondary windows can only show the main screen
+		mainScreenVisible: state.route.routeName === 'Main' || isSecondaryWindow,
+		isWindowFocused: windowId === state.windowId,
 		selectedFolderId: state.selectedFolderId,
 		layoutButtonSequence: state.settings.layoutButtonSequence,
 		['notes.sortOrder.field']: state.settings['notes.sortOrder.field'],

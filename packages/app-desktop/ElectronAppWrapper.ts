@@ -17,6 +17,8 @@ import { _ } from '@joplin/lib/locale';
 import restartInSafeModeFromMain from './utils/restartInSafeModeFromMain';
 import handleCustomProtocols, { CustomProtocolHandler } from './utils/customProtocols/handleCustomProtocols';
 import { clearTimeout, setTimeout } from 'timers';
+import { resolve } from 'path';
+import { defaultWindowId } from '@joplin/lib/reducer';
 
 interface RendererProcessQuitReply {
 	canClose: boolean;
@@ -42,6 +44,7 @@ export default class ElectronAppWrapper {
 	private buildDir_: string = null;
 	private rendererProcessQuitReply_: RendererProcessQuitReply = null;
 	private pluginWindows_: PluginWindows = {};
+	private joplinWindowIdToElectronId_: Map<string, number> = new Map();
 	private initialCallbackUrl_: string = null;
 	private updaterService_: AutoUpdaterService = null;
 	private customProtocolHandler_: CustomProtocolHandler = null;
@@ -74,6 +77,18 @@ export default class ElectronAppWrapper {
 
 	public activeWindow() {
 		return BrowserWindow.getFocusedWindow() ?? this.win_;
+	}
+
+	public windowById(joplinId: string) {
+		if (joplinId === defaultWindowId) {
+			return this.mainWindow();
+		}
+
+		const electronId = this.joplinWindowIdToElectronId_.get(joplinId);
+		if (electronId !== undefined) {
+			return BrowserWindow.fromId(electronId);
+		}
+		return null;
 	}
 
 	public env() {
@@ -254,7 +269,9 @@ export default class ElectronAppWrapper {
 					return {
 						action: 'allow',
 						overrideBrowserWindowOptions: {
-							webPreferences: { },
+							webPreferences: {
+								preload: resolve(__dirname, './utils/window/secondaryWindowPreload.js'),
+							},
 						},
 					};
 				} else if (event.url.match(/^https?:\/\//)) {
@@ -362,6 +379,16 @@ export default class ElectronAppWrapper {
 
 		ipcMain.on('check-for-updates', () => {
 			void this.updaterService_.checkForUpdates(true);
+		});
+
+		ipcMain.on('secondary-window-added', (event, windowId: string) => {
+			const window = BrowserWindow.fromWebContents(event.sender);
+			const electronWindowId = window?.id;
+			this.joplinWindowIdToElectronId_.set(windowId, electronWindowId);
+
+			window.once('close', () => {
+				this.joplinWindowIdToElectronId_.delete(windowId);
+			});
 		});
 
 		// Let us register listeners on the window, so we can update the state

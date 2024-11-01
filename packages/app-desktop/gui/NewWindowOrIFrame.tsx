@@ -3,6 +3,7 @@ import shim from '@joplin/lib/shim';
 import * as React from 'react';
 import { useState, useEffect, useRef, createContext } from 'react';
 import { createPortal } from 'react-dom';
+import { SecondaryWindowApi } from '../utils/window/types';
 
 export enum WindowMode {
 	Iframe, NewWindow,
@@ -114,6 +115,14 @@ const NewWindowOrIFrame: React.FC<Props> = props => {
 		if (!doc) return;
 		doc.title = props.title;
 	}, [doc, props.title]);
+
+	useEffect(() => {
+		const win = doc?.defaultView;
+		if (win && 'electronWindow' in win && typeof win.electronWindow === 'object') {
+			const electronWindow = win.electronWindow as SecondaryWindowApi;
+			electronWindow.onSetWindowId(props.windowId);
+		}
+	}, [doc, props.windowId]);
 
 	const parentNode = loaded ? doc?.body : null;
 	const wrappedChildren = <WindowIdContext.Provider value={props.windowId}>{props.children}</WindowIdContext.Provider>;

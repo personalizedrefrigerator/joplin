@@ -267,6 +267,14 @@ export class Bridge {
 		return this.electronWrapper_.activeWindow();
 	}
 
+	public hasActiveWindow() {
+		return !!BrowserWindow.getFocusedWindow();
+	}
+
+	public windowById(id: string) {
+		return this.electronWrapper_.windowById(id);
+	}
+
 	public showItemInFolder(fullPath: string) {
 		return require('electron').shell.showItemInFolder(toSystemSlashes(fullPath));
 	}
