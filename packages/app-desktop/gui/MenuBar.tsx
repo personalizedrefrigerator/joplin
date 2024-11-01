@@ -178,8 +178,8 @@ interface Props {
 	pluginSettings: PluginSettings;
 	noteListRendererIds: string[];
 	noteListRendererId: string;
-	isWindowFocused: boolean;
 	windowId: string;
+	secondaryWindowFocused: boolean;
 	showMenuBar: boolean;
 }
 
@@ -1108,15 +1108,11 @@ function MenuBar(props: Props): any {
 	const menu = useMenu(props);
 
 	useEffect(() => {
-		if (shim.isMac()) {
-			// On MacOS, window.setMenu does nothing and the app menu must be set instead
-			if (props.isWindowFocused) {
-				Menu.setApplicationMenu(menu);
-			}
-		} else {
-			bridge().windowById(props.windowId)?.setMenu(menu);
-		}
-	}, [menu, props.windowId, props.isWindowFocused]);
+		// Currently, this sets the menu for all windows. Although it's possible to set the menu
+		// for individual windows with BrowserWindow.setMenu, it causes issues with updating the
+		// state of existing menu items (and doesn't work with MacOS/Playwright).
+		Menu.setApplicationMenu(menu);
+	}, [menu]);
 
 	useEffect(() => {
 		applyMenuBarVisibility(props.windowId, props.showMenuBar);
@@ -1125,22 +1121,19 @@ function MenuBar(props: Props): any {
 	return null;
 }
 
-interface OwnProps {
-	windowId: string;
-}
 
-const mapStateToProps = (state: AppState, { windowId }: OwnProps) => {
+const mapStateToProps = (state: AppState): Partial<Props> => {
 	const whenClauseContext = stateToWhenClauseContext(state);
 
-	const isSecondaryWindow = windowId !== defaultWindowId;
+	const secondaryWindowFocused = state.windowId !== defaultWindowId;
 
 	return {
-		windowId: windowId,
+		windowId: state.windowId,
 		menuItemProps: menuUtils.commandsToMenuItemProps(commandNames.concat(getPluginCommandNames(state.pluginService.plugins)), whenClauseContext),
 		locale: state.settings.locale,
 		// Secondary windows can only show the main screen
-		mainScreenVisible: state.route.routeName === 'Main' || isSecondaryWindow,
-		isWindowFocused: windowId === state.windowId,
+		mainScreenVisible: state.route.routeName === 'Main' || secondaryWindowFocused,
+
 		selectedFolderId: state.selectedFolderId,
 		layoutButtonSequence: state.settings.layoutButtonSequence,
 		['notes.sortOrder.field']: state.settings['notes.sortOrder.field'],
