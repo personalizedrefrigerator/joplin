@@ -152,15 +152,18 @@ const useContextMenu = (props: ContextMenuProps) => {
 				menu.append(new MenuItem(item));
 			});
 
-			menu.popup();
+			menu.popup({ window: bridge().activeWindow() });
 		}
 
 		// Prepend the event listener so that it gets called before
 		// the listener that shows the default menu.
-		bridge().activeWindow().webContents.prependListener('context-menu', onContextMenu);
+		const targetWindow = bridge().activeWindow();
+		targetWindow.webContents.prependListener('context-menu', onContextMenu);
 
 		return () => {
-			bridge().activeWindow().webContents.off('context-menu', onContextMenu);
+			if (!targetWindow.isDestroyed()) {
+				targetWindow.webContents.off('context-menu', onContextMenu);
+			}
 		};
 	}, [
 		props.plugins, props.editorClassName, editorRef, props.containerRef,
