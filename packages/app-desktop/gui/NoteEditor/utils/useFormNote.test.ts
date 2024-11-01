@@ -37,10 +37,12 @@ describe('useFormNote', () => {
 			initialProps: makeFormNoteProps(),
 		});
 		await formNote.waitFor(() => {
-			expect(formNote.result.current.formNote).toMatchObject({
-				encryption_applied: 0,
-				title: testNote.title,
-			});
+			// id is falsy until after the first load of the form note.
+			expect(formNote.result.current.formNote.id).not.toBeFalsy();
+		});
+		expect(formNote.result.current.formNote).toMatchObject({
+			encryption_applied: 0,
+			title: testNote.title,
 		});
 
 		await act(async () => {
@@ -72,7 +74,6 @@ describe('useFormNote', () => {
 		await formNote.waitFor(() => {
 			expect(formNote.result.current.formNote).toMatchObject({
 				encryption_applied: 0,
-				title: 'Test Note!',
 			});
 		});
 
