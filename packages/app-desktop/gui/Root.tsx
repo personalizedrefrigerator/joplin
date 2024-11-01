@@ -19,10 +19,6 @@ import ClipperServer from '@joplin/lib/ClipperServer';
 import DialogTitle from './DialogTitle';
 import DialogButtonRow, { ButtonSpec, ClickEvent, ClickEventHandler } from './DialogButtonRow';
 import Dialog from './Dialog';
-import SyncWizardDialog from './SyncWizard/Dialog';
-import MasterPasswordDialog from './MasterPasswordDialog/Dialog';
-import EditFolderDialog from './EditFolderDialog/Dialog';
-import PdfViewer from './PdfViewer';
 import StyleSheetContainer from './StyleSheets/StyleSheetContainer';
 import ImportScreen from './ImportScreen';
 const { ResourceScreen } = require('./ResourceScreen.js');
@@ -54,46 +50,6 @@ interface ModalDialogProps {
 	onClick: ClickEventHandler;
 }
 
-interface RegisteredDialogProps {
-	themeId: number;
-	key: string;
-	// eslint-disable-next-line @typescript-eslint/ban-types -- Old code before rule was applied
-	dispatch: Function;
-}
-
-interface RegisteredDialog {
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	render: (props: RegisteredDialogProps, customProps: any)=> any;
-}
-
-const registeredDialogs: Record<string, RegisteredDialog> = {
-	syncWizard: {
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-		render: (props: RegisteredDialogProps, customProps: any) => {
-			return <SyncWizardDialog key={props.key} dispatch={props.dispatch} themeId={props.themeId} {...customProps}/>;
-		},
-	},
-
-	masterPassword: {
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-		render: (props: RegisteredDialogProps, customProps: any) => {
-			return <MasterPasswordDialog key={props.key} dispatch={props.dispatch} themeId={props.themeId} {...customProps}/>;
-		},
-	},
-
-	editFolder: {
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-		render: (props: RegisteredDialogProps, customProps: any) => {
-			return <EditFolderDialog key={props.key} dispatch={props.dispatch} themeId={props.themeId} {...customProps}/>;
-		},
-	},
-	pdfViewer: {
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-		render: (props: RegisteredDialogProps, customProps: any) => {
-			return <PdfViewer key={props.key} dispatch={props.dispatch} themeId={props.themeId} {...customProps}/>;
-		},
-	},
-};
 
 const GlobalStyle = createGlobalStyle`
 	* {
@@ -205,25 +161,6 @@ class RootComponent extends React.Component<Props, any> {
 		};
 	}
 
-	private renderDialogs() {
-		const props: Props = this.props;
-
-		if (!props.dialogs.length) return null;
-
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-		const output: any[] = [];
-		for (const dialog of props.dialogs) {
-			const md = registeredDialogs[dialog.name];
-			if (!md) throw new Error(`Unknown dialog: ${dialog.name}`);
-			output.push(md.render({
-				key: dialog.name,
-				themeId: props.themeId,
-				dispatch: props.dispatch,
-			}, dialog.props));
-		}
-		return output;
-	}
-
 	private renderSecondaryWindows() {
 		return this.props.secondaryWindowStates.map((windowState: WindowState) => {
 			return <EditorWindow
@@ -263,7 +200,6 @@ class RootComponent extends React.Component<Props, any> {
 					<Navigator style={navigatorStyle} screens={screens} className={`profile-${this.props.profileConfigCurrentProfileId}`} />
 					{this.renderSecondaryWindows()}
 					{this.renderModalMessage(this.modalDialogProps())}
-					{this.renderDialogs()}
 				</ThemeProvider>
 			</StyleSheetManager>
 		);

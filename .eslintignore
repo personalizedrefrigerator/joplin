@@ -460,6 +460,7 @@ packages/app-desktop/gui/WindowCommandHandler/commands/togglePerFolderSortOrder.
 packages/app-desktop/gui/WindowCommandHandler/commands/toggleSideBar.js
 packages/app-desktop/gui/WindowCommandHandler/commands/toggleVisiblePanes.js
 packages/app-desktop/gui/WindowCommandHandler/types.js
+packages/app-desktop/gui/WindowCommandHandler/utils/appDialogs.js
 packages/app-desktop/gui/WindowCommandHandler/utils/usePrintToCallback.js
 packages/app-desktop/gui/WindowCommandHandler/utils/useWindowControl.js
 packages/app-desktop/gui/dialogs.js

@@ -38,6 +38,7 @@ export interface AppWindowState extends WindowState {
 	noteVisiblePanes: string[];
 	editorCodeView: boolean;
 	visibleDialogs: VisibleDialogs;
+	dialogs: AppStateDialog[];
 	devToolsVisible: boolean;
 }
 
@@ -60,7 +61,6 @@ export interface AppState extends State, AppWindowState {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	watchedResources: any;
 	mainLayout: LayoutItem;
-	dialogs: AppStateDialog[];
 	isResettingLayout: boolean;
 }
 
@@ -68,6 +68,7 @@ export const createAppDefaultWindowState = (): AppWindowState => {
 	return {
 		...defaultWindowState,
 		visibleDialogs: {},
+		dialogs: [],
 		noteVisiblePanes: ['editor', 'viewer'],
 		editorCodeView: true,
 		devToolsVisible: false,
@@ -93,7 +94,6 @@ export function createAppDefaultState(windowContentSize: any, resourceEditWatche
 		layoutMoveMode: false,
 		mainLayout: null,
 		startupPluginsLoaded: false,
-		dialogs: [],
 		isResettingLayout: false,
 		modalOverlayMessage: null,
 		...resourceEditWatcherDefaultState,

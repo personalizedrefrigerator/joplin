@@ -11,7 +11,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { DialogState } from './types';
 import usePrintToCallback from './utils/usePrintToCallback';
 import { connect } from 'react-redux';
-import { AppState, VisibleDialogs } from '../../app.reducer';
+import { AppState, AppStateDialog, VisibleDialogs } from '../../app.reducer';
 import useWindowControl, { WindowControl } from './utils/useWindowControl';
 import commands from './commands';
 import CommandService, { CommandRuntime, ComponentCommandSpec } from '@joplin/lib/services/CommandService';
@@ -19,6 +19,7 @@ import { Dispatch } from 'redux';
 import ModalMessageOverlay from './ModalMessageOverlay';
 import useNowEffect from '@joplin/lib/hooks/useNowEffect';
 import { stateUtils } from '@joplin/lib/reducer';
+import appDialogs from './utils/appDialogs';
 
 const PluginManager = require('@joplin/lib/services/PluginManager');
 
@@ -28,6 +29,7 @@ interface Props {
 	plugins: PluginStates;
 	pluginHtmlContents: PluginHtmlContents;
 	currentWindowDialogs: VisibleDialogs;
+	appDialogs: AppStateDialog[];
 	pluginsLegacy: unknown;
 	modalMessage: string|null;
 
@@ -165,6 +167,22 @@ const WindowCommandHandler: React.FC<Props> = props => {
 		);
 	};
 
+	const renderAppDialogs = () => {
+		if (!props.appDialogs.length) return null;
+
+		const output: React.ReactNode[] = [];
+		for (const dialog of props.appDialogs) {
+			const md = appDialogs[dialog.name];
+			if (!md) throw new Error(`Unknown dialog: ${dialog.name}`);
+			output.push(md.render({
+				key: dialog.name,
+				themeId: props.themeId,
+				dispatch: props.dispatch,
+			}, dialog.props));
+		}
+		return output;
+	};
+
 	const promptOnClose = useCallback((answer: unknown, buttonType: unknown) => {
 		dialogState.promptOptions.onClose(answer, buttonType);
 	}, [dialogState.promptOptions]);
@@ -216,6 +234,7 @@ const WindowCommandHandler: React.FC<Props> = props => {
 				onClose={onDialogHideCallbacks.shareFolderDialogOptions}
 			/>
 		)}
+		{renderAppDialogs()}
 
 		<PromptDialog
 			autocomplete={promptOptions && 'autocomplete' in promptOptions ? promptOptions.autocomplete : null}
@@ -242,6 +261,7 @@ export default connect((state: AppState, ownProps: ConnectProps) => {
 		themeId: state.settings.theme,
 		plugins: state.pluginService.plugins,
 		currentWindowDialogs: windowState.visibleDialogs,
+		appDialogs: windowState.dialogs,
 		pluginHtmlContents: state.pluginService.pluginHtmlContents,
 		customCss: state.customViewerCss,
 		editorNoteStatuses: state.editorNoteStatuses,
