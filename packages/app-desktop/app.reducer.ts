@@ -100,6 +100,15 @@ export function createAppDefaultState(windowContentSize: any, resourceEditWatche
 	};
 }
 
+const hideBackgroundDialogsMatching = produce((state: AppState, id: string) => {
+	for (const windowId of Object.keys(state.backgroundWindows)) {
+		const win = state.backgroundWindows[windowId];
+		if (id in win.visibleDialogs) {
+			delete win.visibleDialogs[id];
+		}
+	}
+});
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 export default function(state: AppState, action: any) {
 	let newState = state;
@@ -308,12 +317,14 @@ export default function(state: AppState, action: any) {
 			newState = { ...state };
 			newState.visibleDialogs = { ...newState.visibleDialogs };
 			newState.visibleDialogs[action.name] = true;
+			newState = hideBackgroundDialogsMatching(newState, action.name);
 			break;
 
 		case 'VISIBLE_DIALOGS_REMOVE':
 			newState = { ...state };
 			newState.visibleDialogs = { ...newState.visibleDialogs };
 			delete newState.visibleDialogs[action.name];
+			newState = hideBackgroundDialogsMatching(newState, action.name);
 			break;
 
 		case 'FOCUS_SET':

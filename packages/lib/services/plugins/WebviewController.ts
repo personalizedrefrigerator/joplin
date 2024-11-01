@@ -190,6 +190,11 @@ export default class WebviewController extends ViewController {
 	// ---------------------------------------------
 
 	public async open(): Promise<DialogResult> {
+		if (this.closeResponse_) {
+			this.closeResponse_.resolve(null);
+			this.closeResponse_ = null;
+		}
+
 		this.store.dispatch({
 			type: 'VISIBLE_DIALOGS_ADD',
 			name: this.handle,
@@ -215,6 +220,7 @@ export default class WebviewController extends ViewController {
 	public closeWithResponse(result: DialogResult) {
 		this.close();
 		this.closeResponse_.resolve(result);
+		this.closeResponse_ = null;
 	}
 
 	public get buttons(): ButtonSpec[] {
