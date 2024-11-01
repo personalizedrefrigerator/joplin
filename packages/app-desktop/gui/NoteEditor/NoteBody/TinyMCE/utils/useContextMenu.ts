@@ -8,13 +8,15 @@ import { menuItems } from '../../../utils/contextMenu';
 import MenuUtils from '@joplin/lib/services/commands/MenuUtils';
 import CommandService from '@joplin/lib/services/CommandService';
 import Setting from '@joplin/lib/models/Setting';
+import type { Event as ElectronEvent } from 'electron';
 
 import Resource from '@joplin/lib/models/Resource';
 import { TinyMceEditorEvents } from './types';
 import { HtmlToMarkdownHandler, MarkupToHtmlHandler } from '../../../utils/types';
 import { Editor } from 'tinymce';
-import { Menu } from 'electron';
 
+const Menu = bridge().Menu;
+const MenuItem = bridge().MenuItem;
 const menuUtils = new MenuUtils(CommandService.instance());
 
 // x and y are the absolute coordinates, as returned by the context-menu event
@@ -59,11 +61,13 @@ export default function(editor: Editor, plugins: PluginStates, dispatch: Functio
 		const targetWindow = bridge().activeWindow();
 
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-		function onContextMenu(event: any, params: any) {
+		function onContextMenu(event: ElectronEvent, params: any) {
 			const element = contextMenuElement(editor, params.x, params.y);
 			if (!element) return;
 
 			event.preventDefault();
+
+			const menu = new Menu();
 
 			let itemType: ContextMenuItemType = ContextMenuItemType.None;
 			let resourceId = '';
@@ -99,34 +103,33 @@ export default function(editor: Editor, plugins: PluginStates, dispatch: Functio
 				mdToHtml,
 			};
 
-			let template = [];
-
 			for (const itemName in contextMenuItems) {
 				const item = contextMenuItems[itemName];
 
 				if (!item.isActive(itemType, contextMenuActionOptions.current)) continue;
 
-				template.push({
+				menu.append(new MenuItem({
 					label: item.label,
 					click: () => {
 						item.onAction(contextMenuActionOptions.current);
 					},
-				});
+				}));
 			}
 
 			const spellCheckerMenuItems = SpellCheckerService.instance().contextMenuItems(params.misspelledWord, params.dictionarySuggestions);
 
 			for (const item of spellCheckerMenuItems) {
-				template.push(item);
+				menu.append(new MenuItem(item));
 			}
 
-			template = template.concat(menuUtils.pluginContextMenuItems(plugins, MenuItemLocation.EditorContextMenu));
+			for (const item of menuUtils.pluginContextMenuItems(plugins, MenuItemLocation.EditorContextMenu)) {
+				menu.append(new MenuItem(item));
+			}
 
-			const menu = Menu.buildFromTemplate(template);
-			menu.popup();
+			menu.popup({ window: targetWindow });
 		}
 
-		targetWindow.webContents.on('context-menu', onContextMenu);
+		targetWindow.webContents.prependListener('context-menu', onContextMenu);
 
 		return () => {
 			if (!targetWindow.isDestroyed() && targetWindow?.webContents?.off) {
