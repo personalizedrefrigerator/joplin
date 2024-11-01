@@ -56,11 +56,14 @@ const SecondaryWindow: React.FC<Props> = props => {
 	}, [props.dispatch, props.windowId, newWindow]);
 
 	const onWindowFocus = useCallback(() => {
-		props.dispatch({
-			type: 'WINDOW_FOCUS',
-			windowId: props.windowId,
-			lastWindowId: props.activeWindowId,
-		});
+		// Verify that the window still has focus (e.g. to handle the case where the event was delayed).
+		if (containerRef.current?.ownerDocument.hasFocus()) {
+			props.dispatch({
+				type: 'WINDOW_FOCUS',
+				windowId: props.windowId,
+				lastWindowId: props.activeWindowId,
+			});
+		}
 	}, [props.dispatch, props.windowId, props.activeWindowId]);
 
 	return <NewWindowOrIFrame
