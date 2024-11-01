@@ -14,6 +14,7 @@ import { extname, normalize } from 'path';
 import isSafeToOpen from './utils/isSafeToOpen';
 import { closeSync, openSync, readSync, statSync } from 'fs';
 import { KB } from '@joplin/utils/bytes';
+import { defaultWindowId } from '@joplin/lib/reducer';
 
 interface LastSelectedPath {
 	file: string;
@@ -271,10 +272,17 @@ export class Bridge {
 		return this.electronWrapper_.windowById(id);
 	}
 
-	public switchToMainWindow() {
-		if (this.activeWindow() !== this.mainWindow()) {
-			this.mainWindow().show();
+	// Switches to the window with the given ID, but only if that window was not the
+	// last focused window
+	public switchToWindow(windowId: string) {
+		const targetWindow = this.windowById(windowId);
+		if (this.activeWindow() !== this.windowById(windowId)) {
+			targetWindow.show();
 		}
+	}
+
+	public switchToMainWindow() {
+		this.switchToWindow(defaultWindowId);
 	}
 
 	public showItemInFolder(fullPath: string) {
