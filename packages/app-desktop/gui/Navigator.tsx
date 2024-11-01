@@ -3,7 +3,6 @@ const { connect } = require('react-redux');
 import Setting from '@joplin/lib/models/Setting';
 import { AppState } from '../app.reducer';
 import bridge from '../services/bridge';
-import { focus } from '@joplin/lib/utils/focusHandler';
 
 interface Props {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
@@ -16,7 +15,7 @@ interface Props {
 }
 
 class NavigatorComponent extends React.Component<Props> {
-	public override componentDidUpdate(prevProps: Props): void {
+	public override componentDidUpdate(): void {
 		if (this.props.route) {
 			const routeName = this.props.route.routeName;
 			const screenInfo = this.props.screens[routeName];
@@ -26,12 +25,6 @@ class NavigatorComponent extends React.Component<Props> {
 				windowTitle.push(screenInfo.title());
 			}
 			this.updateWindowTitle(windowTitle.join(' - '));
-
-			if (prevProps.route.routeName && routeName !== prevProps.route.routeName) {
-				if (bridge().hasActiveWindow() && bridge().activeWindow() !== bridge().mainWindow()) {
-					focus('Navigator', bridge().mainWindow());
-				}
-			}
 		}
 	}
 

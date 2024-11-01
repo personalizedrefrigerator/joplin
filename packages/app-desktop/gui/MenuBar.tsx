@@ -27,6 +27,11 @@ import { getListRendererById, getListRendererIds } from '@joplin/lib/services/no
 import useAsyncEffect from '@joplin/lib/hooks/useAsyncEffect';
 import { EventName } from '@joplin/lib/eventManager';
 import { ipcRenderer } from 'electron';
+import NavService from '@joplin/lib/services/NavService';
+import Logger from '@joplin/utils/Logger';
+
+const logger = Logger.create('MenuBar');
+
 const packageInfo: PackageInfo = require('../packageInfo.js');
 const { clipboard } = require('electron');
 const Menu = bridge().Menu;
@@ -404,6 +409,17 @@ function useMenu(props: Props) {
 
 			const keymapService = KeymapService.instance();
 
+			const navigateTo = (routeName: string) => {
+				void NavService.go(routeName);
+
+				// NavService.go opens in the main window -- switch to it to show the screen:
+				const isBackgroundWindow = props.windowId !== defaultWindowId;
+				if (isBackgroundWindow) {
+					logger.info('Focusing the main window');
+					bridge().mainWindow().show();
+				}
+			};
+
 			const quitMenuItem = {
 				label: _('Quit'),
 				accelerator: keymapService.getAccelerator('quit'),
@@ -517,10 +533,7 @@ function useMenu(props: Props) {
 			const syncStatusItem = {
 				label: _('Synchronisation Status'),
 				click: () => {
-					props.dispatch({
-						type: 'NAV_GO',
-						routeName: 'Status',
-					});
+					navigateTo('Status');
 				},
 			};
 
@@ -550,10 +563,7 @@ function useMenu(props: Props) {
 					label: _('Options'),
 					accelerator: keymapService.getAccelerator('config'),
 					click: () => {
-						props.dispatch({
-							type: 'NAV_GO',
-							routeName: 'Config',
-						});
+						navigateTo('Config');
 					},
 				},
 				separator(),
@@ -563,10 +573,7 @@ function useMenu(props: Props) {
 			const toolsItemsAll = [{
 				label: _('Note attachments...'),
 				click: () => {
-					props.dispatch({
-						type: 'NAV_GO',
-						routeName: 'Resources',
-					});
+					navigateTo('Resources');
 				},
 			}];
 
@@ -621,10 +628,7 @@ function useMenu(props: Props) {
 					visible: !!shim.isMac(),
 					accelerator: shim.isMac() && keymapService.getAccelerator('config'),
 					click: () => {
-						props.dispatch({
-							type: 'NAV_GO',
-							routeName: 'Config',
-						});
+						navigateTo('Config');
 					},
 				}, {
 					label: _('Check for updates...'),
@@ -1051,6 +1055,7 @@ function useMenu(props: Props) {
 		};
 		// eslint-disable-next-line @seiyab/react-hooks/exhaustive-deps -- Old code before rule was applied
 	}, [
+		props.windowId,
 		props.mainScreenVisible,
 		props.pluginMenuItems,
 		props.pluginMenus,
