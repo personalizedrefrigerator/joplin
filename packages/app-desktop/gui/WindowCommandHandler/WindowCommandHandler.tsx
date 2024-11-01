@@ -4,22 +4,20 @@ import ShareFolderDialog from '../ShareFolderDialog/ShareFolderDialog';
 import NotePropertiesDialog from '../NotePropertiesDialog';
 import NoteContentPropertiesDialog from '../NoteContentPropertiesDialog';
 import ShareNoteDialog from '../ShareNoteDialog';
-import { PluginHtmlContents, PluginStates, utils as pluginUtils } from '@joplin/lib/services/plugins/reducer';
-import { ContainerType } from '@joplin/lib/services/plugins/WebviewController';
-import UserWebviewDialog from '../../services/plugins/UserWebviewDialog';
+import { PluginHtmlContents, PluginStates } from '@joplin/lib/services/plugins/reducer';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { DialogState } from './types';
-import usePrintToCallback from './utils/usePrintToCallback';
 import { connect } from 'react-redux';
 import { AppState, AppStateDialog, VisibleDialogs } from '../../app.reducer';
-import useWindowControl, { WindowControl } from './utils/useWindowControl';
-import commands from './commands';
-import CommandService, { CommandRuntime, ComponentCommandSpec } from '@joplin/lib/services/CommandService';
 import { Dispatch } from 'redux';
 import ModalMessageOverlay from './ModalMessageOverlay';
-import useNowEffect from '@joplin/lib/hooks/useNowEffect';
-import { stateUtils } from '@joplin/lib/reducer';
-import appDialogs from './utils/appDialogs';
+import { EditorNoteStatuses, stateUtils } from '@joplin/lib/reducer';
+import dialogs from '../dialogs';
+import useDom from '../hooks/useDom';
+import useWindowCommands from './utils/useWindowCommands';
+import PluginDialogs from './PluginDialogs';
+import useSyncDialogState from './utils/useSyncDialogState';
+import AppDialogs from './AppDialogs';
 
 const PluginManager = require('@joplin/lib/services/PluginManager');
 
@@ -28,13 +26,13 @@ interface Props {
 	themeId: number;
 	plugins: PluginStates;
 	pluginHtmlContents: PluginHtmlContents;
-	currentWindowDialogs: VisibleDialogs;
-	appDialogs: AppStateDialog[];
+	visibleDialogs: VisibleDialogs;
+	appDialogStates: AppStateDialog[];
 	pluginsLegacy: unknown;
 	modalMessage: string|null;
 
 	customCss: string;
-	editorNoteStatuses: Record<string, string>;
+	editorNoteStatuses: EditorNoteStatuses;
 }
 
 const defaultDialogState: DialogState = {
@@ -53,72 +51,44 @@ const defaultDialogState: DialogState = {
 	promptOptions: null,
 };
 
-const WindowCommandHandler: React.FC<Props> = props => {
-	const [dialogState, setDialogState] = useState<DialogState>(defaultDialogState);
-
-	const lastDialogStateRef = useRef(dialogState);
+// Certain dialog libraries need a reference to the active window:
+const useSyncActiveWindow = (containerWindow: Window|null) => {
 	useEffect(() => {
-		const prevState = lastDialogStateRef.current;
-		const state = dialogState;
-		if (state.notePropertiesDialogOptions !== prevState.notePropertiesDialogOptions) {
-			props.dispatch({
-				type: state.notePropertiesDialogOptions && state.notePropertiesDialogOptions.visible ? 'VISIBLE_DIALOGS_ADD' : 'VISIBLE_DIALOGS_REMOVE',
-				name: 'noteProperties',
-			});
+		if (!containerWindow) return () => {};
+
+		const onFocusCallback = () => {
+			dialogs.setActiveWindow(containerWindow);
+		};
+		if (containerWindow.document.hasFocus()) {
+			onFocusCallback();
 		}
 
-		if (state.noteContentPropertiesDialogOptions !== prevState.noteContentPropertiesDialogOptions) {
-			props.dispatch({
-				type: state.noteContentPropertiesDialogOptions && state.noteContentPropertiesDialogOptions.visible ? 'VISIBLE_DIALOGS_ADD' : 'VISIBLE_DIALOGS_REMOVE',
-				name: 'noteContentProperties',
-			});
-		}
-
-		if (state.shareNoteDialogOptions !== prevState.shareNoteDialogOptions) {
-			props.dispatch({
-				type: state.shareNoteDialogOptions && state.shareNoteDialogOptions.visible ? 'VISIBLE_DIALOGS_ADD' : 'VISIBLE_DIALOGS_REMOVE',
-				name: 'shareNote',
-			});
-		}
-
-		if (state.shareFolderDialogOptions !== prevState.shareFolderDialogOptions) {
-			props.dispatch({
-				type: state.shareFolderDialogOptions && state.shareFolderDialogOptions.visible ? 'VISIBLE_DIALOGS_ADD' : 'VISIBLE_DIALOGS_REMOVE',
-				name: 'shareFolder',
-			});
-		}
-		lastDialogStateRef.current = dialogState;
-	}, [dialogState, props.dispatch]);
-
-	const onPrintCallback = usePrintToCallback({
-		customCss: props.customCss,
-		editorNoteStatuses: props.editorNoteStatuses,
-		plugins: props.plugins,
-	});
-	const windowControl = useWindowControl(setDialogState, onPrintCallback);
-
-	const documentRef = useRef<Document|null>(null);
-	useNowEffect(() => {
-		const runtimeHandles = commands.map((command: ComponentCommandSpec<WindowControl>) => {
-			const runtime: CommandRuntime = {
-				getPriority: () => {
-					return documentRef.current?.hasFocus() ? 1 : 0;
-				},
-				...command.runtime(windowControl),
-			};
-			return CommandService.instance().registerRuntime(
-				command.declaration.name,
-				runtime,
-				true,
-			);
-		});
+		containerWindow.addEventListener('focus', onFocusCallback);
 
 		return () => {
-			for (const runtimeHandle of runtimeHandles) {
-				runtimeHandle.deregister();
-			}
+			containerWindow.removeEventListener('focus', onFocusCallback);
 		};
-	}, [windowControl]);
+	}, [containerWindow]);
+};
+
+const WindowCommandHandler: React.FC<Props> = props => {
+	const [referenceElement, setReferenceElement] = useState(null);
+	const containerDocument = useDom(referenceElement);
+
+	const documentRef = useRef<Document|null>(null);
+	documentRef.current = containerDocument;
+
+	const [dialogState, setDialogState] = useState<DialogState>(defaultDialogState);
+
+	useSyncDialogState(dialogState, props.dispatch);
+	useWindowCommands({
+		documentRef,
+		customCss: props.customCss,
+		plugins: props.plugins,
+		editorNoteStatuses: props.editorNoteStatuses,
+		setDialogState,
+	});
+	useSyncActiveWindow(containerDocument?.defaultView);
 
 	const onDialogHideCallbacks = useMemo(() => {
 		type OnHideCallbacks = Partial<Record<keyof DialogState, ()=> void>>;
@@ -136,62 +106,9 @@ const WindowCommandHandler: React.FC<Props> = props => {
 		return result;
 	}, []);
 
-	const renderPluginDialogs = () => {
-		const output = [];
-		const infos = pluginUtils.viewInfosByType(props.plugins, 'webview');
-
-		for (const info of infos) {
-			const { plugin, view } = info;
-			if (view.containerType !== ContainerType.Dialog) continue;
-			if (!props.currentWindowDialogs[view.id]) continue;
-			const html = props.pluginHtmlContents[plugin.id]?.[view.id] ?? '';
-
-			output.push(<UserWebviewDialog
-				key={view.id}
-				viewId={view.id}
-				themeId={props.themeId}
-				html={html}
-				scripts={view.scripts}
-				pluginId={plugin.id}
-				buttons={view.buttons}
-				fitToContent={view.fitToContent}
-			/>);
-		}
-
-		if (!output.length) return null;
-
-		return (
-			<div className='user-webview-dialog-container'>
-				{output}
-			</div>
-		);
-	};
-
-	const renderAppDialogs = () => {
-		if (!props.appDialogs.length) return null;
-
-		const output: React.ReactNode[] = [];
-		for (const dialog of props.appDialogs) {
-			const md = appDialogs[dialog.name];
-			if (!md) throw new Error(`Unknown dialog: ${dialog.name}`);
-			output.push(md.render({
-				key: dialog.name,
-				themeId: props.themeId,
-				dispatch: props.dispatch,
-			}, dialog.props));
-		}
-		return output;
-	};
-
 	const promptOnClose = useCallback((answer: unknown, buttonType: unknown) => {
 		dialogState.promptOptions.onClose(answer, buttonType);
 	}, [dialogState.promptOptions]);
-
-	const onReferenceElementLoad = useCallback((element: HTMLDivElement|null) => {
-		if (!element) return;
-
-		documentRef.current ??= element.getRootNode() as Document;
-	}, []);
 
 	const dialogInfo = PluginManager.instance().pluginDialogToShow(props.pluginsLegacy);
 	const pluginDialog = !dialogInfo ? null : <dialogInfo.Dialog {...dialogInfo.props} />;
@@ -200,10 +117,20 @@ const WindowCommandHandler: React.FC<Props> = props => {
 
 
 	return <>
-		<div ref={onReferenceElementLoad}/>
+		<div ref={setReferenceElement}/>
 		{pluginDialog}
 		{props.modalMessage !== null ? <ModalMessageOverlay message={props.modalMessage}/> : null}
-		{renderPluginDialogs()}
+		<PluginDialogs
+			themeId={props.themeId}
+			visibleDialogs={props.visibleDialogs}
+			pluginHtmlContents={props.pluginHtmlContents}
+			plugins={props.plugins}
+		/>
+		<AppDialogs
+			appDialogStates={props.appDialogStates}
+			themeId={props.themeId}
+			dispatch={props.dispatch}
+		/>
 		{noteContentPropertiesDialogOptions.visible && (
 			<NoteContentPropertiesDialog
 				markupLanguage={noteContentPropertiesDialogOptions.markupLanguage}
@@ -234,7 +161,6 @@ const WindowCommandHandler: React.FC<Props> = props => {
 				onClose={onDialogHideCallbacks.shareFolderDialogOptions}
 			/>
 		)}
-		{renderAppDialogs()}
 
 		<PromptDialog
 			autocomplete={promptOptions && 'autocomplete' in promptOptions ? promptOptions.autocomplete : null}
@@ -260,8 +186,8 @@ export default connect((state: AppState, ownProps: ConnectProps) => {
 	return {
 		themeId: state.settings.theme,
 		plugins: state.pluginService.plugins,
-		currentWindowDialogs: windowState.visibleDialogs,
-		appDialogs: windowState.dialogs,
+		visibleDialogs: windowState.visibleDialogs,
+		appDialogStates: windowState.dialogs,
 		pluginHtmlContents: state.pluginService.pluginHtmlContents,
 		customCss: state.customViewerCss,
 		editorNoteStatuses: state.editorNoteStatuses,

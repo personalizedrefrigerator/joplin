@@ -116,6 +116,10 @@ export const defaultWindowState: WindowState = {
 	},
 };
 
+export interface EditorNoteStatuses {
+	[id: string]: string;
+}
+
 export interface State extends WindowState {
 	backgroundWindows: Record<string, WindowState>;
 
@@ -151,8 +155,7 @@ export interface State extends WindowState {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	pluginsLegacy: any;
 	provisionalNoteIds: string[];
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	editorNoteStatuses: any;
+	editorNoteStatuses: EditorNoteStatuses;
 	isInsertingNotes: boolean;
 	hasEncryptedItems: boolean;
 	needApiAuth: boolean;

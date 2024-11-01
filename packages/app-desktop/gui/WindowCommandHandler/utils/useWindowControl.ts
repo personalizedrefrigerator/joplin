@@ -8,7 +8,7 @@ export interface WindowControl {
 	printTo: PrintCallback;
 }
 
-type OnSetDialogState = React.Dispatch<React.SetStateAction<DialogState>>;
+export type OnSetDialogState = React.Dispatch<React.SetStateAction<DialogState>>;
 const useWindowControl = (setDialogState: OnSetDialogState, onPrint: PrintCallback) => {
 	// Avoid reloading the output where possible -- reloading the window control
 	// may mean reloading all main window commands.
