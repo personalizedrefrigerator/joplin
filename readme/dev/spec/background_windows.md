@@ -1,6 +1,6 @@
 # Background windows
 
-On desktop, Joplin supports multiple windows using the `backgroundWindows` reducer property. Each entry in `backgroundWindows` contains the state of a window that is in the background (not currently focused).
+On desktop, Joplin supports multiple windows with the `backgroundWindows` reducer state. Each entry in `backgroundWindows` contains the state of a window that is in the background (not currently focused). The currently focused window's state is stored in the top-level state object.
 
 ## State structure
 
