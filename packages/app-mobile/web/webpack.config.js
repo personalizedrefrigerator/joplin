@@ -73,6 +73,7 @@ module.exports = {
 			'react-native-zip-archive': emptyLibraryMock,
 			'react-native-document-picker': emptyLibraryMock,
 			'react-native-exit-app': emptyLibraryMock,
+			'expo-camera': emptyLibraryMock,
 
 			// Workaround for applying serviceworker types to a single file.
 			// See https://joshuatz.com/posts/2021/strongly-typed-service-workers/.
@@ -100,6 +101,7 @@ module.exports = {
 			'timers': require.resolve('timers-browserify'),
 			'path': require.resolve('path-browserify'),
 			'stream': require.resolve('stream-browserify'),
+			'crypto': require.resolve('crypto-browserify'),
 		},
 	},
 

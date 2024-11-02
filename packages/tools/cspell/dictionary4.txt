@@ -136,3 +136,6 @@ Backblaze
 onnx
 onnxruntime
 treeitem
+qrcode
+Rocketbook
+datamatrix

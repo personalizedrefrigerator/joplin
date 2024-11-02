@@ -2,7 +2,7 @@
   "name": "@joplin/app-mobile",
   "description": "Joplin for Mobile",
   "license": "AGPL-3.0-or-later",
-  "version": "3.1.0",
+  "version": "3.2.0",
   "private": true,
   "scripts": {
     "start": "BROWSERSLIST_IGNORE_OLD_DATA=true react-native start --reset-cache",
@@ -21,12 +21,12 @@
   },
   "dependencies": {
     "@bam.tech/react-native-image-resizer": "3.0.10",
-    "@joplin/editor": "~3.1",
-    "@joplin/lib": "~3.1",
-    "@joplin/react-native-alarm-notification": "~3.1",
-    "@joplin/react-native-saf-x": "~3.1",
-    "@joplin/renderer": "~3.1",
-    "@joplin/utils": "~3.1",
+    "@joplin/editor": "~3.2",
+    "@joplin/lib": "~3.2",
+    "@joplin/react-native-alarm-notification": "~3.2",
+    "@joplin/react-native-saf-x": "~3.2",
+    "@joplin/renderer": "~3.2",
+    "@joplin/utils": "~3.2",
     "@react-native-clipboard/clipboard": "1.14.1",
     "@react-native-community/datetimepicker": "8.1.1",
     "@react-native-community/geolocation": "3.2.1",
@@ -39,6 +39,8 @@
     "crypto-browserify": "3.12.0",
     "deprecated-react-native-prop-types": "5.0.0",
     "events": "3.3.0",
+    "expo": "51.0.0",
+    "expo-camera": "15.0.16",
     "lodash": "4.17.21",
     "md5": "2.3.0",
     "path-browserify": "1.0.1",
@@ -46,7 +48,6 @@
     "punycode": "2.3.1",
     "react": "18.3.1",
     "react-native": "0.74.1",
-    "react-native-camera": "4.2.1",
     "react-native-device-info": "10.14.0",
     "react-native-dialogbox": "0.6.10",
     "react-native-document-picker": "9.3.0",
@@ -62,7 +63,7 @@
     "react-native-paper": "5.12.5",
     "react-native-popup-menu": "0.16.1",
     "react-native-quick-actions": "0.3.13",
-    "react-native-quick-crypto": "0.7.2",
+    "react-native-quick-crypto": "0.7.5",
     "react-native-rsa-native": "2.0.5",
     "react-native-safe-area-context": "4.10.8",
     "react-native-securerandom": "1.0.1",
@@ -89,7 +90,7 @@
     "@babel/plugin-transform-export-namespace-from": "7.24.7",
     "@babel/preset-env": "7.24.7",
     "@babel/runtime": "7.24.7",
-    "@joplin/tools": "~3.1",
+    "@joplin/tools": "~3.2",
     "@js-draw/material-icons": "1.20.3",
     "@react-native/babel-preset": "0.74.86",
     "@react-native/metro-config": "0.74.86",
@@ -134,5 +135,13 @@
   },
   "engines": {
     "node": ">=18"
+  },
+  "expo": {
+    "autolinking": {
+      "exclude": [
+        "expo-application",
+        "expo-keep-awake"
+      ]
+    }
   }
 }
