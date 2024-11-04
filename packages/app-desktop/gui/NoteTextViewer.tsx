@@ -198,8 +198,14 @@ const NoteTextViewer = forwardRef((props: Props, ref: ForwardedRef<NoteViewerCon
 			domReadyRef.current = false;
 
 			const wv = webviewRef.current;
+			if (!wv) return;
 
 			for (const n in webviewListeners) {
+				if (!webviewListeners.hasOwnProperty(n)) continue;
+				const fn = webviewListeners[n];
+				wv.removeEventListener(n, fn);
+			}
+
 			containerWindow?.removeEventListener('message', messageListener);
 
 			removePluginAssetsCallbackRef.current?.();
