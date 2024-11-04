@@ -116,6 +116,7 @@ const useDocumentSetup = (doc: Document|null, setLoaded: OnSetLoaded, onFocus?: 
 
 		const jsUrls = [
 			'vendor/lib/smalltalk/dist/smalltalk.min.js',
+			'./utils/window/eventHandlerOverrides.js',
 		];
 		for (const url of jsUrls) {
 			const script = doc.createElement('script');
