@@ -378,6 +378,8 @@ const CodeMirror = (props: NoteBodyEditorProps, ref: ForwardedRef<NoteBodyEditor
 			katexEnabled: Setting.value('markdown.plugin.katex'),
 			themeData: {
 				...styles.globalTheme,
+				marginLeft: 0,
+				marginRight: 0,
 				monospaceFont: Setting.value('style.editor.monospaceFontFamily'),
 			},
 			automatchBraces: Setting.value('editor.autoMatchingBraces'),

@@ -140,3 +140,4 @@ WCAG
 qrcode
 Rocketbook
 datamatrix
+nosniff
