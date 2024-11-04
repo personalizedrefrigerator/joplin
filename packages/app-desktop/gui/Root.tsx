@@ -25,7 +25,7 @@ const { ResourceScreen } = require('./ResourceScreen.js');
 import Navigator from './Navigator';
 import WelcomeUtils from '@joplin/lib/WelcomeUtils';
 import JoplinCloudLoginScreen from './JoplinCloudLoginScreen';
-import WindowCommandHandler from './WindowCommandHandler/WindowCommandHandler';
+import WindowCommandsAndDialogs from './WindowCommandsAndDialogs/WindowCommandsAndDialogs';
 import { defaultWindowId, stateUtils, WindowState } from '@joplin/lib/reducer';
 import bridge from '../services/bridge';
 import EditorWindow from './NoteEditor/EditorWindow';
@@ -196,7 +196,7 @@ class RootComponent extends React.Component<Props, any> {
 					<StyleSheetContainer/>
 					<MenuBar/>
 					<GlobalStyle/>
-					<WindowCommandHandler windowId={defaultWindowId} />
+					<WindowCommandsAndDialogs windowId={defaultWindowId} />
 					<Navigator style={navigatorStyle} screens={screens} className={`profile-${this.props.profileConfigCurrentProfileId}`} />
 					{this.renderSecondaryWindows()}
 					{this.renderModalMessage(this.modalDialogProps())}

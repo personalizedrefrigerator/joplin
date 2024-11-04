@@ -71,7 +71,7 @@ const useSyncActiveWindow = (containerWindow: Window|null) => {
 	}, [containerWindow]);
 };
 
-const WindowCommandHandler: React.FC<Props> = props => {
+const WindowCommandsAndDialogs: React.FC<Props> = props => {
 	const [referenceElement, setReferenceElement] = useState(null);
 	const containerDocument = useDom(referenceElement);
 
@@ -194,4 +194,4 @@ export default connect((state: AppState, ownProps: ConnectProps) => {
 		pluginsLegacy: state.pluginsLegacy,
 		modalMessage: state.modalOverlayMessage,
 	};
-})(WindowCommandHandler);
+})(WindowCommandsAndDialogs);

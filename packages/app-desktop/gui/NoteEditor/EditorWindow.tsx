@@ -6,7 +6,7 @@ import { connect } from 'react-redux';
 import { AppState } from '../../app.reducer';
 import { Dispatch } from 'redux';
 import NewWindowOrIFrame, { WindowMode } from '../NewWindowOrIFrame';
-import WindowCommandHandler from '../WindowCommandHandler/WindowCommandHandler';
+import WindowCommandsAndDialogs from '../WindowCommandsAndDialogs/WindowCommandsAndDialogs';
 
 const { StyleSheetManager } = require('styled-components');
 // Note: Transitive dependencies used only by react-select. Remove if react-select is removed.
@@ -74,7 +74,7 @@ const SecondaryWindow: React.FC<Props> = props => {
 		title={windowTitle}
 	>
 		<LibraryStyleRoot>
-			<WindowCommandHandler windowId={props.windowId} />
+			<WindowCommandsAndDialogs windowId={props.windowId} />
 			{editor}
 		</LibraryStyleRoot>
 		<StyleSheetContainer />
