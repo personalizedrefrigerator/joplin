@@ -75,7 +75,8 @@ describe('useFormNote', () => {
 			expect(formNote.result.current.formNote).toMatchObject({
 				encryption_applied: 0,
 			});
-		});
+			// A larger-than-default timeout is needed to prevent CI failures:
+		}, { timeout: 5_000 });
 
 		formNote.unmount();
 	});
