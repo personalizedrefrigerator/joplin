@@ -71,11 +71,11 @@ const NoteTextViewer = forwardRef((props: Props, ref: ForwardedRef<NoteViewerCon
 		const result: NoteViewerControl = {
 			domReady: () => domReadyRef.current,
 			setHtml: (html: string, options: SetHtmlOptions) => {
+				const protocolHandler = bridge().electronApp().getCustomProtocolHandler();
+
 				// Grant & remove asset access.
 				if (options.pluginAssets) {
 					removePluginAssetsCallbackRef.current?.();
-
-					const protocolHandler = bridge().electronApp().getCustomProtocolHandler();
 
 					const pluginAssetPaths: string[] = options.pluginAssets.map((asset) => asset.path);
 					const assetAccesses = pluginAssetPaths.map(
@@ -91,7 +91,10 @@ const NoteTextViewer = forwardRef((props: Props, ref: ForwardedRef<NoteViewerCon
 					};
 				}
 
-				result.send('setHtml', html, options);
+				result.send('setHtml', html, {
+					...options,
+					mediaAccessKey: protocolHandler.getMediaAccessKey(),
+				});
 			},
 			send: (channel: string, arg0: unknown = null, arg1: unknown = null) => {
 				const win = webviewRef.current?.contentWindow;
@@ -195,14 +198,8 @@ const NoteTextViewer = forwardRef((props: Props, ref: ForwardedRef<NoteViewerCon
 			domReadyRef.current = false;
 
 			const wv = webviewRef.current;
-			if (!wv) return;
 
 			for (const n in webviewListeners) {
-				if (!webviewListeners.hasOwnProperty(n)) continue;
-				const fn = webviewListeners[n];
-				wv.removeEventListener(n, fn);
-			}
-
 			containerWindow?.removeEventListener('message', messageListener);
 
 			removePluginAssetsCallbackRef.current?.();
