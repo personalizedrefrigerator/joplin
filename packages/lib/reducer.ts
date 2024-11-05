@@ -121,6 +121,8 @@ export interface EditorNoteStatuses {
 }
 
 export interface State extends WindowState {
+	// Contains state specific to windows that currently don't have focus.
+	// See spec/background_windows.md for details.
 	backgroundWindows: Record<string, WindowState>;
 
 	folders: FolderEntity[];
