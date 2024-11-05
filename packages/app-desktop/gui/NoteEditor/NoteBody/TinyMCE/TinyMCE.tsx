@@ -41,7 +41,7 @@ const supportedLocales = require('./supportedLocales');
 import { hasProtocol } from '@joplin/utils/url';
 import useTabIndenter from './utils/useTabIndenter';
 import useKeyboardRefocusHandler from './utils/useKeyboardRefocusHandler';
-import useDom from '../../../hooks/useDom';
+import useDocument from '../../../hooks/useDocument';
 
 const logger = Logger.create('TinyMCE');
 
@@ -101,7 +101,7 @@ let changeId_ = 1;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 const TinyMCE = (props: NoteBodyEditorProps, ref: any) => {
 	const [editorContainer, setEditorContainer] = useState<HTMLDivElement|null>(null);
-	const editorContainerDom = useDom(editorContainer);
+	const editorContainerDom = useDocument(editorContainer);
 	const [editor, setEditor] = useState<Editor|null>(null);
 	const [scriptLoaded, setScriptLoaded] = useState(false);
 	const [editorReady, setEditorReady] = useState(false);

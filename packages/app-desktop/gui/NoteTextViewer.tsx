@@ -5,7 +5,7 @@ import bridge from '../services/bridge';
 import { focus } from '@joplin/lib/utils/focusHandler';
 import { ForwardedRef, forwardRef, RefObject, useContext, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import { WindowIdContext } from './NewWindowOrIFrame';
-import useDom from './hooks/useDom';
+import useDocument from './hooks/useDocument';
 
 interface Props {
 	// eslint-disable-next-line @typescript-eslint/ban-types -- Old code before rule was applied
@@ -64,7 +64,7 @@ const NoteTextViewer = forwardRef((props: Props, ref: ForwardedRef<NoteViewerCon
 	type RemovePluginAssetsCallback = ()=> void;
 	const removePluginAssetsCallbackRef = useRef<RemovePluginAssetsCallback|null>(null);
 
-	const parentDoc = useDom(webview);
+	const parentDoc = useDocument(webview);
 	const containerWindow = parentDoc?.defaultView;
 
 	useImperativeHandle(ref, () => {

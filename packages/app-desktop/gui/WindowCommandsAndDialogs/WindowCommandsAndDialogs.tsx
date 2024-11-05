@@ -13,7 +13,7 @@ import { Dispatch } from 'redux';
 import ModalMessageOverlay from './ModalMessageOverlay';
 import { EditorNoteStatuses, stateUtils } from '@joplin/lib/reducer';
 import dialogs from '../dialogs';
-import useDom from '../hooks/useDom';
+import useDocument from '../hooks/useDocument';
 import useWindowCommands from './utils/useWindowCommands';
 import PluginDialogs from './PluginDialogs';
 import useSyncDialogState from './utils/useSyncDialogState';
@@ -73,7 +73,7 @@ const useSyncActiveWindow = (containerWindow: Window|null) => {
 
 const WindowCommandsAndDialogs: React.FC<Props> = props => {
 	const [referenceElement, setReferenceElement] = useState(null);
-	const containerDocument = useDom(referenceElement);
+	const containerDocument = useDocument(referenceElement);
 
 	const documentRef = useRef<Document|null>(null);
 	documentRef.current = containerDocument;

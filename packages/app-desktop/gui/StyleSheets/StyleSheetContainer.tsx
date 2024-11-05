@@ -14,7 +14,7 @@ import { useEffect, useMemo, useState } from 'react';
 import useAsyncEffect, { AsyncEffectEvent } from '@joplin/lib/hooks/useAsyncEffect';
 import themeToCss from '@joplin/lib/services/style/themeToCss';
 import { themeStyle } from '@joplin/lib/theme';
-import useDom from '../hooks/useDom';
+import useDocument from '../hooks/useDocument';
 import { connect } from 'react-redux';
 import { AppState } from '../../app.reducer';
 
@@ -97,7 +97,7 @@ const useAppliedCss = (doc: Document|null, css: string) => {
 
 const StyleSheetContainer: React.FC<Props> = props => {
 	const [elementRef, setElementRef] = useState<HTMLElement|null>(null);
-	const doc = useDom(elementRef);
+	const doc = useDocument(elementRef);
 
 	const themeCss = useThemeCss(props.themeId);
 	const editorCss = useEditorCss(props.editorFontSetting);

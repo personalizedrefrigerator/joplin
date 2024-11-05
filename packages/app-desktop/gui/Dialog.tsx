@@ -2,7 +2,7 @@ import * as React from 'react';
 import { ReactNode, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { blur, focus } from '@joplin/lib/utils/focusHandler';
-import useDom from './hooks/useDom';
+import useDocument from './hooks/useDocument';
 
 type OnCancelListener = ()=> void;
 
@@ -16,7 +16,7 @@ interface Props {
 
 const Dialog: React.FC<Props> = props => {
 	const [containerElement, setContainerElement] = useState<HTMLDivElement|null>(null);
-	const containerDocument = useDom(containerElement);
+	const containerDocument = useDocument(containerElement);
 
 	// For correct focus handling, the dialog element needs to be managed separately from React. In particular,
 	// just after creating the dialog, we need to call .showModal() and just **before** closing the dialog, we
