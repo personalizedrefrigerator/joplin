@@ -5,7 +5,7 @@ import CommandService from '@joplin/lib/services/CommandService';
 import PostMessageService from '@joplin/lib/services/PostMessageService';
 import ResourceFetcher from '@joplin/lib/services/ResourceFetcher';
 import { reg } from '@joplin/lib/registry';
-const bridge = require('@electron/remote').require('./bridge').default;
+import bridge from '../../../services/bridge';
 
 export default function useMessageHandler(
 	scrollWhenReady: ScrollOptions|null,
@@ -61,7 +61,7 @@ export default function useMessageHandler(
 				mdToHtml,
 			}, dispatch);
 
-			menu.popup({ window: bridge().window() });
+			menu.popup({ window: bridge().activeWindow() });
 		} else if (msg.indexOf('#') === 0) {
 			// This is an internal anchor, which is handled by the WebView so skip this case
 		} else if (msg === 'contentScriptExecuteCommand') {
