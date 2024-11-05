@@ -155,3 +155,9 @@ Suppose `<MyComponent>` could be displayed in any window of the app and we want 
    - With `useContext(WindowIdContext)`, where `WindowIdContext` is the context that provides the window ID. ([Documentation for `useContext`](https://react.dev/reference/react/useContext)).
 2. Use the window ID to determine the current window state. To do this, use the window ID to look up the state for the current window (e.g. with `stateUtils.windowStateById`).
 3. Get the `selectedNoteIds` from the window state.
+
+## Limitations
+
+- **All windows have the same menubar:** Currently, Joplin sets the application menubar with `Menu.setApplicationMenu`. This allows the menu to be updated later with `Menu.getApplicationMenu`, but means that all windows have the same menu.
+	- An alternative might be to set menus on individual windows with [`BrowserWindow.setMenu`](https://www.electronjs.org/docs/latest/api/browser-window#winsetmenumenu-linux-windows), but this doesn't allow accessing the menu later (e.g. from Playwright) with `Menu.getApplicationMenu` and does not work on MacOS.
+- **Certain UI only available on the main window:** At present, certain parts of the UI (e.g. sidebars, warning banners, etc.) are only visible on the main window.While this simplifies multi-window support by limiting which components need to work in secondary windows, it makes secondary windows more limited than primary windows.
