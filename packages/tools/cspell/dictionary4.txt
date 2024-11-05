@@ -139,3 +139,4 @@ treeitem
 qrcode
 Rocketbook
 datamatrix
+nosniff

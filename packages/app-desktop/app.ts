@@ -137,6 +137,12 @@ class Application extends BaseApplication {
 			this.updateLanguage();
 		}
 
+		if (action.type === 'SETTING_UPDATE_ONE' && action.key === 'renderer.fileUrls' || action.type === 'SETTING_UPDATE_ALL') {
+			bridge().electronApp().getCustomProtocolHandler().setMediaAccessEnabled(
+				Setting.value('renderer.fileUrls'),
+			);
+		}
+
 		if (action.type === 'SETTING_UPDATE_ONE' && action.key === 'showTrayIcon' || action.type === 'SETTING_UPDATE_ALL') {
 			this.updateTray();
 		}
