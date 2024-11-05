@@ -1,8 +1,12 @@
 # Background windows
 
+This document explains Joplin's multiple window support from a technical perspective.
+
+## Reducer state
+
 On desktop, Joplin supports multiple windows with the `backgroundWindows` reducer state. Each entry in `backgroundWindows` contains the state of a window that is in the background (not currently focused). The currently focused window's state is stored in the top-level state object.
 
-## State structure
+### State structure
 
 Suppose that there are three windows, `window1`, `window2`, and `window3`.
 
@@ -40,7 +44,7 @@ state = {
 
 Notice that the state for the focused window is part of the main state object. This is for compatibility. Historically, Joplin only supported one window with at most one open editor. As a result, many commands assume that if `state.selectedNoteIds = ['some-id-here']`, then `state.selectedNoteIds[0]` is the ID of the note currently being edited. By storing the `selectedNoteIds` for the currently active window in the main `state` object, Joplin remains compatible with legacy commands and components.
 
-## Switching windows
+### Switching windows
 
 When the user switches from one window to another, a `WINDOW_FOCUS` action is sent to the reducer. The reducer responds by moving the old window's state to `backgroundWindows` and the new window's state to the main `state` object.
 
@@ -93,7 +97,7 @@ For example, if a user switches from `window1` to `window2`, the state change lo
 	```
 	Window 2 is now the main window.
 
-## Extra per-window state
+### Extra per-window state
 
 Some per-window state is application specific. For example, the `devToolsVisible` property is **specific to the desktop app** and is different for each window (because each window can have its own dev tools).
 
@@ -101,7 +105,49 @@ This is supported by giving `backgroundWindows` a type with an extended set of p
 
 When new windows are opened with the `WINDOW_OPEN` action, the default value for the new window-specific properties must be provided. For example, `{ devToolsVisible: false }`.
 
-## Components: Getting the ID for the current window
+## Rendering components in new windows
+
+The [react-dom portals API](https://react.dev/reference/react-dom/createPortal) allows a component to render its children in a different place. In this case, Joplin uses the portals API to render certain components in a new window, while keeping them in the same React component tree.
+
+### Same React tree, different DOMs
+
+The React portals API allows all editors to be descendants of the `<Root/>` component, while also being in a different HTML `document`:
+
+```mermaid
+flowchart TD
+    subgraph Main Window
+        Root
+        Root-->Navigator
+        Navigator-->MainContent("[[Main app content]]")
+        Root-->EditorWindow1
+        Root-->EditorWindow2
+
+        EditorWindow1-->NewWindowOrIframe1-->Portal1(("Portal"))
+        EditorWindow2-->NewWindowOrIframe2-->Portal2(("Portal"))
+    end
+
+    subgraph Window1
+        NoteEditor1["Note editor"]
+    end
+
+    subgraph Window2
+        NoteEditor2["Note editor"]
+    end
+
+    Portal1-->NoteEditor1
+    Portal2-->NoteEditor2
+```
+
+This also means that components running in secondary windows (e.g. `Window1`, `Window2` above) are controlled by JavaScript in the main window. As a result,
+- Closing the main window means that secondary windows must also be closed.
+	- Hiding the window with `BrowserWindow.hide` is used instead.
+- Component logic must be careful to reference the correct DOM. **Using the global `document` and `window` objects is often incorrect.**
+	- Instead of the `document` global variable, use [`HTMLElement.ownerDocument`](https://developer.mozilla.org/en-US/docs/Web/API/Node/ownerDocument) (or the `useDom` hook).
+	- Instead of `window`, use [`.defaultView`](https://developer.mozilla.org/en-US/docs/Web/API/Document/defaultView) on a [`Document`](https://developer.mozilla.org/en-US/docs/Web/API/Document) object.
+
+### Getting the ID for the current window
+
+Sometimes, it's necessary to get the Joplin ID of the current window. This ID allows referencing the state specific to a window in Joplin's reducer.
 
 Suppose `<MyComponent>` could be displayed in any window of the app and we want to find the selected note IDs for its window. To do this:
 1. Get the window ID. This can be done by either:
