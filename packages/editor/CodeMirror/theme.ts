@@ -187,7 +187,8 @@ const createTheme = (theme: EditorTheme): Extension[] => {
 		// Allows editor content to be left-aligned with the toolbar on desktop.
 		// See https://github.com/laurent22/joplin/issues/11279
 		[`${editorNoGuttersSelector} .cm-line`]: theme.isDesktop ? {
-			paddingLeft: 0,
+			// Note: This cannot be zero:
+			paddingLeft: '1px',
 		} : undefined,
 
 		// Override the default URL style when the URL is within a link
