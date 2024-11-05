@@ -511,6 +511,9 @@ export default class BaseApplication {
 			refreshNotesUseSelectedNoteId = true;
 		}
 
+		// Switching windows can also change which note(s) and which note parent type is selected.
+		// Refreshing notes after switching windows helps ensure that the selected note/tags/other state
+		// is correct for the current window.
 		if (action.type === 'WINDOW_FOCUS' && action.lastWindowId !== action.windowId) {
 			refreshNotes = true;
 			refreshNotesUseSelectedNoteId = true;
