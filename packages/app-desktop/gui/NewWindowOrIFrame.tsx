@@ -99,12 +99,6 @@ const useDocumentSetup = (doc: Document|null, setLoaded: OnSetLoaded, onFocus?: 
 
 		const cssUrls = [
 			'style.min.css',
-			'style/icons/style.css',
-			'vendor/lib/@fortawesome/fontawesome-free/css/all.min.css',
-			'vendor/lib/react-datetime/css/react-datetime.css',
-			'vendor/lib/smalltalk/css/smalltalk.css',
-			'vendor/lib/roboto-fontface/css/roboto/roboto-fontface.css',
-			'vendor/lib/codemirror/lib/codemirror.css',
 		];
 
 		for (const url of cssUrls) {
