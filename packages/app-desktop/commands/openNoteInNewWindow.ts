@@ -17,9 +17,6 @@ export const runtime = (): CommandRuntime => {
 	return {
 		execute: async (context: CommandContext, noteId: string = null) => {
 			noteId = noteId || stateUtils.selectedNoteId(context.state);
-			if (!noteId) {
-				throw new Error('Error: No notes are selected. Select at least one note to open in a new window.');
-			}
 
 			const note = await Note.load(noteId, { fields: ['parent_id'] });
 			context.dispatch({
