@@ -3,7 +3,7 @@ on: [push, pull_request]
 jobs:
   Main:
     # We always process desktop release tags, because they also publish the release
-    if: github.repository == 'laurent22/joplin' && (startsWith(github.ref, 'refs/tags/v'))
+    if: github.repository == 'laurent22/joplin'
     runs-on: macos-latest
     steps:
 
