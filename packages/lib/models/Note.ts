@@ -830,7 +830,7 @@ export default class Note extends BaseItem {
 		if (dispatchUpdateAction) {
 			// Ensures that any note added to the state has all the required
 			// properties for the UI to work.
-			if (!('deleted_time' in savedNote)) {
+			if (!('deleted_time' in savedNote) || !('share_id' in savedNote)) {
 				const fields = removeElement(unique(this.previewFields().concat(Object.keys(savedNote))), 'type_');
 				savedNote = await this.load(savedNote.id, {
 					fields,
