@@ -71,12 +71,17 @@ const FloatingActionButton = (props: ActionButtonProps) => {
 	// is disabled.
 	//
 	// See https://github.com/callstack/react-native-paper/issues/4064
+	// May be possible to remove if https://github.com/callstack/react-native-paper/pull/4514
+	// is merged.
 	const adjustMargins = !open && shim.mobilePlatform() === 'android';
 	const marginStyles = useMemo((): ViewStyle => {
 		if (!adjustMargins) {
 			return {};
 		}
 
+		// Internally, React Native Paper uses absolute positioning to make its
+		// (usually invisible) view fill the screen. Setting top and left to
+		// undefined causes the view to take up only part of the screen.
 		return {
 			top: undefined,
 			left: undefined,
