@@ -919,9 +919,7 @@ export default class Note extends BaseItem {
 
 			for (let i = 0; i < processIds.length; i++) {
 				const id = processIds[i];
-				void ItemChange.add(BaseModel.TYPE_NOTE, id, changeType, {
-					changeSource, beforeChangeItemJson: beforeChangeItems[id],
-				});
+				void ItemChange.add(BaseModel.TYPE_NOTE, id, changeType, changeSource, beforeChangeItems[id]);
 
 				this.dispatch({
 					type: 'NOTE_DELETE',
