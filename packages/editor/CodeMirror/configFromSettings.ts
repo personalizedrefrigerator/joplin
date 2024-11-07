@@ -29,7 +29,7 @@ const configFromSettings = (settings: EditorSettings) => {
 					],
 					codeLanguages: lookUpLanguage,
 				}),
-				markdownLanguage.data.of({ closeBrackets: openingBrackets }),
+				markdownLanguage.data.of({ closeBrackets: { brackets: openingBrackets } }),
 			];
 		} else if (language === EditorLanguageType.Html) {
 			return html();
