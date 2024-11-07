@@ -89,6 +89,9 @@ import JoplinCloudLoginScreen from './components/screens/JoplinCloudLoginScreen'
 
 import SyncTargetNone from '@joplin/lib/SyncTargetNone';
 
+const fastDeepEqual = require('fast-deep-equal');
+
+
 SyncTargetRegistry.addClass(SyncTargetNone);
 SyncTargetRegistry.addClass(SyncTargetOneDrive);
 SyncTargetRegistry.addClass(SyncTargetNextcloud);
@@ -301,7 +304,15 @@ const appReducer = (state = appDefaultState, action: any) => {
 				const currentRoute = state.route;
 
 				if (!historyGoingBack && historyCanGoBackTo(currentRoute)) {
-					navHistory.push(currentRoute);
+					const previousRoute = navHistory.length && navHistory[navHistory.length - 1];
+					// Don't allow going back to the same screen.
+					if (!previousRoute || !fastDeepEqual(navHistory[navHistory.length - 1], currentRoute)) {
+						navHistory.push(currentRoute);
+					}
+				}
+
+				if (action.clearHistory) {
+					navHistory.splice(0, navHistory.length);
 				}
 
 				newState = { ...state };
@@ -349,7 +360,7 @@ const appReducer = (state = appDefaultState, action: any) => {
 				newState.route = action;
 				newState.historyCanGoBack = !!navHistory.length;
 
-				logger.debug('Navigated to route:', newState.route?.routeName, 'with notesParentType:', newState.notesParentType);
+				logger.debug('Navigated to route:', newState.route?.routeName, 'with notesParentType:', newState.notesParentType, navHistory);
 			}
 			break;
 

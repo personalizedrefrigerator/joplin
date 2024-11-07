@@ -245,14 +245,14 @@ class NoteScreenComponent extends BaseScreenComponent<Props, State> implements B
 			}
 
 			if (this.state.fromShare) {
-				// effectively the same as NAV_BACK but NAV_BACK causes undesired behaviour in this case:
+				// Note: In the past, NAV_BACK caused undesired behaviour in this case:
 				// - share to Joplin from some other app
 				// - open Joplin and open any note
 				// - go back -- with NAV_BACK this causes the app to exit rather than just showing notes
+				// This no longer seems to happen, but this case should be checked when adjusting navigation
+				// history behavior.
 				this.props.dispatch({
-					type: 'NAV_GO',
-					routeName: 'Notes',
-					folderId: this.state.note.parent_id,
+					type: 'NAV_BACK',
 				});
 
 				ShareExtension.close();
