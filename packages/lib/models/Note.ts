@@ -828,6 +828,12 @@ export default class Note extends BaseItem {
 		void ItemChange.add(BaseModel.TYPE_NOTE, savedNote.id, isNew ? ItemChange.TYPE_CREATE : ItemChange.TYPE_UPDATE, changeSource, beforeNoteJson);
 
 		if (dispatchUpdateAction) {
+			// The UI requires share_id -- if a new note, it will always be the empty string in the database
+			// until processed by the share service. At present, loading savedNote from the database in this case
+			// breaks tests.
+			if (!('share_id' in savedNote) && isNew) {
+				savedNote.share_id = '';
+			}
 			// Ensures that any note added to the state has all the required
 			// properties for the UI to work.
 			if (!('deleted_time' in savedNote) || !('share_id' in savedNote)) {
@@ -913,7 +919,9 @@ export default class Note extends BaseItem {
 
 			for (let i = 0; i < processIds.length; i++) {
 				const id = processIds[i];
-				void ItemChange.add(BaseModel.TYPE_NOTE, id, changeType, changeSource, beforeChangeItems[id]);
+				void ItemChange.add(BaseModel.TYPE_NOTE, id, changeType, {
+					changeSource, beforeChangeItemJson: beforeChangeItems[id],
+				});
 
 				this.dispatch({
 					type: 'NOTE_DELETE',
