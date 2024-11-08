@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useRef, useImperativeHandle, forwardRef, useEffect, useMemo } from 'react';
+import { useRef, useImperativeHandle, forwardRef, useEffect, useMemo, useContext } from 'react';
 import useViewIsReady from './hooks/useViewIsReady';
 import useThemeCss from './hooks/useThemeCss';
 import useContentSize from './hooks/useContentSize';
@@ -9,6 +9,7 @@ import useWebviewToPluginMessages from './hooks/useWebviewToPluginMessages';
 import useScriptLoader from './hooks/useScriptLoader';
 import Logger from '@joplin/utils/Logger';
 import { focus } from '@joplin/lib/utils/focusHandler';
+import { WindowIdContext } from '../../gui/NewWindowOrIFrame';
 
 const logger = Logger.create('UserWebview');
 
@@ -125,11 +126,13 @@ function UserWebview(props: Props, ref: any) {
 		htmlHash,
 	);
 
+	const windowId = useContext(WindowIdContext);
 	useWebviewToPluginMessages(
 		frameWindow(),
 		isReady,
 		props.pluginId,
 		props.viewId,
+		windowId,
 		postMessage,
 	);
 

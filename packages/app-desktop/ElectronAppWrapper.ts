@@ -17,6 +17,8 @@ import { _ } from '@joplin/lib/locale';
 import restartInSafeModeFromMain from './utils/restartInSafeModeFromMain';
 import handleCustomProtocols, { CustomProtocolHandler } from './utils/customProtocols/handleCustomProtocols';
 import { clearTimeout, setTimeout } from 'timers';
+import { resolve } from 'path';
+import { defaultWindowId } from '@joplin/lib/reducer';
 
 interface RendererProcessQuitReply {
 	canClose: boolean;
@@ -27,21 +29,30 @@ interface PluginWindows {
 	[key: string]: any;
 }
 
-export default class ElectronAppWrapper {
+type SecondaryWindowId = string;
+interface SecondaryWindowData {
+	electronId: number;
+}
 
+export default class ElectronAppWrapper {
 	private logger_: Logger = null;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	private electronApp_: any;
 	private env_: string;
 	private isDebugMode_: boolean;
 	private profilePath_: string;
+
 	private win_: BrowserWindow = null;
+	private mainWindowHidden_ = true;
+	private pluginWindows_: PluginWindows = {};
+	private secondaryWindows_: Map<SecondaryWindowId, SecondaryWindowData> = new Map();
+
 	private willQuitApp_ = false;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	private tray_: any = null;
 	private buildDir_: string = null;
 	private rendererProcessQuitReply_: RendererProcessQuitReply = null;
-	private pluginWindows_: PluginWindows = {};
+
 	private initialCallbackUrl_: string = null;
 	private updaterService_: AutoUpdaterService = null;
 	private customProtocolHandler_: CustomProtocolHandler = null;
@@ -68,8 +79,24 @@ export default class ElectronAppWrapper {
 		return this.logger_;
 	}
 
-	public window() {
+	public mainWindow() {
 		return this.win_;
+	}
+
+	public activeWindow() {
+		return BrowserWindow.getFocusedWindow() ?? this.win_;
+	}
+
+	public windowById(joplinId: string) {
+		if (joplinId === defaultWindowId) {
+			return this.mainWindow();
+		}
+
+		const windowData = this.secondaryWindows_.get(joplinId);
+		if (windowData !== undefined) {
+			return BrowserWindow.fromId(windowData.electronId);
+		}
+		return null;
 	}
 
 	public env() {
@@ -210,6 +237,15 @@ export default class ElectronAppWrapper {
 			}
 		});
 
+		this.mainWindowHidden_ = !windowOptions.show;
+		this.win_.on('hide', () => {
+			this.mainWindowHidden_ = true;
+		});
+
+		this.win_.on('show', () => {
+			this.mainWindowHidden_ = false;
+		});
+
 		void this.win_.loadURL(url.format({
 			pathname: path.join(__dirname, 'index.html'),
 			protocol: 'file:',
@@ -249,6 +285,11 @@ export default class ElectronAppWrapper {
 					// Script-controlled pages: Used for opening notes in new windows
 					return {
 						action: 'allow',
+						overrideBrowserWindowOptions: {
+							webPreferences: {
+								preload: resolve(__dirname, './utils/window/secondaryWindowPreload.js'),
+							},
+						},
 					};
 				} else if (event.url.match(/^https?:\/\//)) {
 					void bridge().openExternal(event.url);
@@ -281,7 +322,8 @@ export default class ElectronAppWrapper {
 					this.hide();
 				}
 			} else {
-				if (this.trayShown() && !this.willQuitApp_) {
+				const hasBackgroundWindows = this.secondaryWindows_.size > 0;
+				if ((hasBackgroundWindows || this.trayShown()) && !this.willQuitApp_) {
 					event.preventDefault();
 					this.win_.hide();
 				} else {
@@ -309,6 +351,23 @@ export default class ElectronAppWrapper {
 					}
 				}
 			}
+		});
+
+		ipcMain.on('secondary-window-added', (event, windowId: string) => {
+			const window = BrowserWindow.fromWebContents(event.sender);
+			const electronWindowId = window?.id;
+			this.secondaryWindows_.set(windowId, { electronId: electronWindowId });
+
+			window.once('close', () => {
+				this.secondaryWindows_.delete(windowId);
+
+				const allSecondaryWindowsClosed = this.secondaryWindows_.size === 0;
+				const mainWindowVisuallyClosed = this.mainWindowHidden_;
+				if (allSecondaryWindowsClosed && mainWindowVisuallyClosed && !this.trayShown()) {
+					// Gracefully quit the app if the user has closed all windows
+					this.win_.close();
+				}
+			});
 		});
 
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
@@ -442,11 +501,11 @@ export default class ElectronAppWrapper {
 			this.tray_.setContextMenu(contextMenu);
 
 			this.tray_.on('click', () => {
-				if (!this.window()) {
+				if (!this.mainWindow()) {
 					console.warn('The window object was not available during the click event from tray icon');
 					return;
 				}
-				this.window().show();
+				this.mainWindow().show();
 			});
 		} catch (error) {
 			console.error('Cannot create tray', error);
@@ -473,7 +532,7 @@ export default class ElectronAppWrapper {
 		// Someone tried to open a second instance - focus our window instead
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 		this.electronApp_.on('second-instance', (_e: any, argv: string[]) => {
-			const win = this.window();
+			const win = this.mainWindow();
 			if (!win) return;
 			if (win.isMinimized()) win.restore();
 			win.show();

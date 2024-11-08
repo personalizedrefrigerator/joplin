@@ -57,7 +57,7 @@ export default class Joplin {
 		this.settings_ = new JoplinSettings(plugin);
 		this.contentScripts_ = new JoplinContentScripts(plugin);
 		this.clipboard_ = new JoplinClipboard(implementation.clipboard, implementation.nativeImage);
-		this.window_ = new JoplinWindow(implementation.window, plugin, store);
+		this.window_ = new JoplinWindow(plugin, store);
 	}
 
 	public get data(): JoplinData {
