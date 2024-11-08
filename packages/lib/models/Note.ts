@@ -825,7 +825,9 @@ export default class Note extends BaseItem {
 
 		let savedNote = await super.save(o, options);
 
-		void ItemChange.add(BaseModel.TYPE_NOTE, savedNote.id, isNew ? ItemChange.TYPE_CREATE : ItemChange.TYPE_UPDATE, changeSource, beforeNoteJson);
+		void ItemChange.add(BaseModel.TYPE_NOTE, savedNote.id, isNew ? ItemChange.TYPE_CREATE : ItemChange.TYPE_UPDATE, {
+			changeSource, changeId: options?.changeId, beforeChangeItemJson: beforeNoteJson,
+		});
 
 		if (dispatchUpdateAction) {
 			// Ensures that any note added to the state has all the required
@@ -843,6 +845,7 @@ export default class Note extends BaseItem {
 				provisional: isProvisional,
 				ignoreProvisionalFlag: ignoreProvisionalFlag,
 				changedFields: changedFields,
+				changeId: options?.changeId,
 				...options?.dispatchOptions,
 			});
 		}
@@ -913,7 +916,9 @@ export default class Note extends BaseItem {
 
 			for (let i = 0; i < processIds.length; i++) {
 				const id = processIds[i];
-				void ItemChange.add(BaseModel.TYPE_NOTE, id, changeType, changeSource, beforeChangeItems[id]);
+				void ItemChange.add(BaseModel.TYPE_NOTE, id, changeType, {
+					changeSource, beforeChangeItemJson: beforeChangeItems[id],
+				});
 
 				this.dispatch({
 					type: 'NOTE_DELETE',

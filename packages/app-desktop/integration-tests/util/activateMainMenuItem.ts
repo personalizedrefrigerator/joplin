@@ -41,7 +41,7 @@ const activateMainMenuItem = async (
 			};
 
 			const appMenu = Menu.getApplicationMenu();
-			return activateItemInSubmenu(appMenu.items, '');
+			return !!appMenu && activateItemInSubmenu(appMenu.items, '');
 		}, [targetItemLabel, parentMenuLabel]);
 	}, {
 		message: `should find and activate menu item with label ${JSON.stringify(targetItemLabel)}`,

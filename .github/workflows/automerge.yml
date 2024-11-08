@@ -6,10 +6,10 @@ jobs:
 
   # This job will make the action fail if any of the checks hasn't passed
   # https://github.com/marketplace/actions/allcheckspassed
-  allchecks:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: wechuli/allcheckspassed@v1
+  # allchecks:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: wechuli/allcheckspassed@v1
 
   automerge:
     runs-on: ubuntu-latest

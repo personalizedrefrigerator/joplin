@@ -90,6 +90,7 @@ export interface ContentScriptData {
 // Intended to correspond with https://codemirror.net/docs/ref/#state.Transaction%5EuserEvent
 export enum UserEventSource {
 	Paste = 'input.paste',
+	Drop = 'input.drop',
 }
 
 export interface EditorControl {

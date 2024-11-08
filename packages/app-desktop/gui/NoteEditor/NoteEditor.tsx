@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo, useContext } from 'react';
 import TinyMCE from './NoteBody/TinyMCE/TinyMCE';
 import { connect } from 'react-redux';
 import MultiNoteActions from '../MultiNoteActions';
@@ -51,6 +51,8 @@ import { MarkupLanguage } from '@joplin/renderer';
 import useScrollWhenReadyOptions from './utils/useScrollWhenReadyOptions';
 import useScheduleSaveCallbacks from './utils/useScheduleSaveCallbacks';
 import WarningBanner from './WarningBanner/WarningBanner';
+import { stateUtils } from '@joplin/lib/reducer';
+import { WindowIdContext } from '../NewWindowOrIFrame';
 const debounce = require('debounce');
 
 const commands = [
@@ -59,7 +61,10 @@ const commands = [
 
 const toolbarButtonUtils = new ToolbarButtonUtils(CommandService.instance());
 
-function NoteEditor(props: NoteEditorProps) {
+const onDragOver: React.DragEventHandler = event => event.preventDefault();
+let editorIdCounter = 0;
+
+function NoteEditorContent(props: NoteEditorProps) {
 	const [showRevisions, setShowRevisions] = useState(false);
 	const [titleHasBeenManuallyChanged, setTitleHasBeenManuallyChanged] = useState(false);
 	const [isReadOnly, setIsReadOnly] = useState<boolean>(false);
@@ -69,9 +74,14 @@ function NoteEditor(props: NoteEditorProps) {
 	const isMountedRef = useRef(true);
 	const noteSearchBarRef = useRef(null);
 
+	// Should be constant and unique to this instance of the editor.
+	const editorId = useMemo(() => {
+		return `editor-${editorIdCounter++}`;
+	}, []);
+
 	const setFormNoteRef = useRef<OnSetFormNote>();
 	const { saveNoteIfWillChange, scheduleSaveNote } = useScheduleSaveCallbacks({
-		setFormNote: setFormNoteRef, dispatch: props.dispatch, editorRef,
+		setFormNote: setFormNoteRef, dispatch: props.dispatch, editorRef, editorId,
 	});
 	const formNote_beforeLoad = useCallback(async (event: OnLoadEvent) => {
 		await saveNoteIfWillChange(event.formNote);
@@ -85,14 +95,13 @@ function NoteEditor(props: NoteEditorProps) {
 	const effectiveNoteId = useEffectiveNoteId(props);
 
 	const { formNote, setFormNote, isNewNote, resourceInfos } = useFormNote({
-		syncStarted: props.syncStarted,
-		decryptionStarted: props.decryptionStarted,
 		noteId: effectiveNoteId,
 		isProvisional: props.isProvisional,
 		titleInputRef: titleInputRef,
 		editorRef: editorRef,
 		onBeforeLoad: formNote_beforeLoad,
 		onAfterLoad: formNote_afterLoad,
+		editorId,
 	});
 	setFormNoteRef.current = setFormNote;
 	const formNoteRef = useRef<FormNote>();
@@ -166,6 +175,10 @@ function NoteEditor(props: NoteEditorProps) {
 		}, 100);
 	}, [props.dispatch]);
 
+	useEffect(() => {
+		props.onTitleChange?.(formNote.title);
+	}, [formNote.title, props.onTitleChange]);
+
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	const onFieldChange = useCallback(async (field: string, value: any, changeId = 0) => {
 		if (!isMountedRef.current) {
@@ -225,6 +238,7 @@ function NoteEditor(props: NoteEditorProps) {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	const onTitleChange = useCallback((event: any) => onFieldChange('title', event.target.value), [onFieldChange]);
 
+	const containerRef = useRef<HTMLDivElement>(null);
 	useWindowCommandHandler({
 		dispatch: props.dispatch,
 		setShowLocalSearch,
@@ -232,6 +246,7 @@ function NoteEditor(props: NoteEditorProps) {
 		editorRef,
 		titleInputRef,
 		onBodyChange,
+		containerRef,
 	});
 
 	// const onTitleKeydown = useCallback((event:any) => {
@@ -295,7 +310,8 @@ function NoteEditor(props: NoteEditorProps) {
 		lastEditorScrollPercents: props.lastEditorScrollPercents,
 		editorRef,
 	});
-	const onMessage = useMessageHandler(scrollWhenReady, clearScrollWhenReady, editorRef, setLocalSearchResultCount, props.dispatch, formNote, htmlToMarkdown, markupToHtml);
+	const windowId = useContext(WindowIdContext);
+	const onMessage = useMessageHandler(scrollWhenReady, clearScrollWhenReady, windowId, editorRef, setLocalSearchResultCount, props.dispatch, formNote, htmlToMarkdown, markupToHtml);
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	const externalEditWatcher_noteChange = useCallback((event: any) => {
@@ -340,12 +356,19 @@ function NoteEditor(props: NoteEditorProps) {
 	useEffect(() => {
 		const dependencies = {
 			setShowRevisions,
+			isInFocusedDocument: () => {
+				return containerRef.current?.ownerDocument?.hasFocus();
+			},
 		};
 
-		CommandService.instance().componentRegisterCommands(dependencies, commands);
+		const registeredCommands = CommandService.instance().componentRegisterCommands(
+			dependencies,
+			commands,
+			true,
+		);
 
 		return () => {
-			CommandService.instance().componentUnregisterCommands(commands);
+			registeredCommands.deregister();
 		};
 	}, [setShowRevisions]);
 
@@ -366,7 +389,7 @@ function NoteEditor(props: NoteEditorProps) {
 			opacity: 0.1,
 			...rootStyle,
 		};
-		return <div style={emptyDivStyle}></div>;
+		return <div style={emptyDivStyle} ref={containerRef}></div>;
 	}
 
 	function renderTagButton() {
@@ -464,10 +487,11 @@ function NoteEditor(props: NoteEditorProps) {
 			padding: theme.margin,
 			verticalAlign: 'top',
 			boxSizing: 'border-box',
+			flex: 1,
 		};
 
 		return (
-			<div style={revStyle}>
+			<div style={revStyle} ref={containerRef}>
 				<NoteRevisionViewer customCss={props.customCss} noteId={formNote.id} onBack={noteRevisionViewer_onBack} />
 			</div>
 		);
@@ -575,7 +599,7 @@ function NoteEditor(props: NoteEditorProps) {
 	const theme = themeStyle(props.themeId);
 
 	return (
-		<div style={styles.root} onDrop={onDrop}>
+		<div style={styles.root} onDragOver={onDragOver} onDrop={onDrop} ref={containerRef}>
 			<div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
 				{renderResourceWatchingNotification()}
 				{renderResourceInSearchResultsNotification()}
@@ -606,33 +630,40 @@ function NoteEditor(props: NoteEditorProps) {
 	);
 }
 
-export {
-	NoteEditor as NoteEditorComponent,
-};
+interface ConnectProps {
+	windowId: string;
+}
 
-const mapStateToProps = (state: AppState) => {
-	const noteId = state.selectedNoteIds.length === 1 ? state.selectedNoteIds[0] : null;
-	const whenClauseContext = stateToWhenClauseContext(state);
+const mapStateToProps = (state: AppState, ownProps: ConnectProps) => {
+	const whenClauseContext = stateToWhenClauseContext(state, { windowId: ownProps.windowId });
+	const windowState = stateUtils.windowStateById(state, ownProps.windowId);
+	const noteId = stateUtils.selectedNoteId(windowState);
+
+	let bodyEditor = windowState.editorCodeView ? 'CodeMirror6' : 'TinyMCE';
+	if (state.settings.isSafeMode) {
+		bodyEditor = 'PlainText';
+	} else if (windowState.editorCodeView && state.settings['editor.legacyMarkdown']) {
+		bodyEditor = 'CodeMirror5';
+	}
 
 	return {
-		noteId: noteId,
-		notes: state.notes,
-		selectedNoteIds: state.selectedNoteIds,
-		selectedFolderId: state.selectedFolderId,
+		noteId,
+		bodyEditor,
 		isProvisional: state.provisionalNoteIds.includes(noteId),
+		notes: windowState.notes,
+		selectedNoteIds: windowState.selectedNoteIds,
+		selectedFolderId: windowState.selectedFolderId,
 		editorNoteStatuses: state.editorNoteStatuses,
-		syncStarted: state.syncStarted,
-		decryptionStarted: state.decryptionWorker?.state !== 'idle',
 		themeId: state.settings.theme,
 		watchedNoteFiles: state.watchedNoteFiles,
-		notesParentType: state.notesParentType,
-		selectedNoteTags: state.selectedNoteTags,
+		notesParentType: windowState.notesParentType,
+		selectedNoteTags: windowState.selectedNoteTags,
 		lastEditorScrollPercents: state.lastEditorScrollPercents,
-		selectedNoteHash: state.selectedNoteHash,
+		selectedNoteHash: windowState.selectedNoteHash,
 		searches: state.searches,
-		selectedSearchId: state.selectedSearchId,
-		customCss: state.customCss,
-		noteVisiblePanes: state.noteVisiblePanes,
+		selectedSearchId: windowState.selectedSearchId,
+		customCss: state.customViewerCss,
+		noteVisiblePanes: windowState.noteVisiblePanes,
 		watchedResources: state.watchedResources,
 		highlightedWords: state.highlightedWords,
 		plugins: state.pluginService.plugins,
@@ -654,4 +685,4 @@ const mapStateToProps = (state: AppState) => {
 	};
 };
 
-export default connect(mapStateToProps)(NoteEditor);
+export default connect(mapStateToProps)(NoteEditorContent);

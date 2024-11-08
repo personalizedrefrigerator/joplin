@@ -27,7 +27,8 @@ import { _ } from '@joplin/lib/locale';
 import useActiveDescendantId from './utils/useActiveDescendantId';
 import getNoteElementIdFromJoplinId from '../NoteListItem/utils/getNoteElementIdFromJoplinId';
 import useFocusVisible from './utils/useFocusVisible';
-const { connect } = require('react-redux');
+import { stateUtils } from '@joplin/lib/reducer';
+import { connect } from 'react-redux';
 
 const commands = {
 	focusElementNoteList,
@@ -311,19 +312,24 @@ const NoteList = (props: Props) => {
 	);
 };
 
-const mapStateToProps = (state: AppState) => {
+interface ConnectProps {
+	windowId: string;
+}
+
+const mapStateToProps = (state: AppState, ownProps: ConnectProps) => {
 	const selectedFolder: FolderEntity = state.notesParentType === 'Folder' ? Folder.byId(state.folders, state.selectedFolderId) : null;
 	const userId = state.settings['sync.userId'];
+	const windowState = stateUtils.windowStateById(state, ownProps.windowId);
 
 	return {
-		notes: state.notes,
+		notes: windowState.notes,
 		folders: state.folders,
-		selectedNoteIds: state.selectedNoteIds,
-		selectedFolderId: state.selectedFolderId,
+		selectedNoteIds: windowState.selectedNoteIds,
+		selectedFolderId: windowState.selectedFolderId,
 		themeId: state.settings.theme,
 		notesParentType: state.notesParentType,
 		searches: state.searches,
-		selectedSearchId: state.selectedSearchId,
+		selectedSearchId: windowState.selectedSearchId,
 		watchedNoteFiles: state.watchedNoteFiles,
 		provisionalNoteIds: state.provisionalNoteIds,
 		isInsertingNotes: state.isInsertingNotes,
@@ -332,7 +338,7 @@ const mapStateToProps = (state: AppState) => {
 		showCompletedTodos: state.settings.showCompletedTodos,
 		highlightedWords: state.highlightedWords,
 		plugins: state.pluginService.plugins,
-		customCss: state.customCss,
+		customCss: state.customViewerCss,
 		focusedField: state.focusedField,
 		parentFolderIsReadOnly: state.notesParentType === 'Folder' && selectedFolder ? itemIsReadOnlySync(ModelType.Folder, ItemChange.SOURCE_UNSPECIFIED, selectedFolder as ItemSlice, userId, state.shareService) : false,
 		selectedFolderInTrash: itemIsInTrash(selectedFolder),

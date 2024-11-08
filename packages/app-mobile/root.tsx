@@ -308,6 +308,10 @@ const appReducer = (state = appDefaultState, action: any) => {
 
 				newState.selectedNoteHash = '';
 
+				if (action.routeName === 'Search') {
+					newState.notesParentType = 'Search';
+				}
+
 				if ('noteId' in action) {
 					newState.selectedNoteIds = action.noteId ? [action.noteId] : [];
 				}
@@ -344,6 +348,8 @@ const appReducer = (state = appDefaultState, action: any) => {
 
 				newState.route = action;
 				newState.historyCanGoBack = !!navHistory.length;
+
+				logger.debug('Navigated to route:', newState.route?.routeName, 'with notesParentType:', newState.notesParentType);
 			}
 			break;
 

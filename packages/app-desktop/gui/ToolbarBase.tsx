@@ -106,7 +106,8 @@ const ToolbarBaseComponent: React.FC<Props> = props => {
 		return allItems.filter(isFocusable);
 	}, [allItems]);
 	const containerRef = useRef<HTMLDivElement|null>(null);
-	const containerHasFocus = !!containerRef.current?.contains(document.activeElement);
+	const doc = containerRef.current?.ownerDocument;
+	const containerHasFocus = !!containerRef.current?.contains(doc?.activeElement);
 
 	let keyCounter = 0;
 	const renderItem = (o: ToolbarItemInfo, indexInFocusable: number) => {

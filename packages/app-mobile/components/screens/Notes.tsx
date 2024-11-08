@@ -167,6 +167,8 @@ class NotesScreenComponent extends BaseScreenComponent<Props, State> {
 		});
 
 		if (source === props.notesSource) return;
+		// For now, search refresh is handled by the search screen.
+		if (props.notesParentType === 'Search') return;
 
 		let notes: NoteEntity[] = [];
 		if (props.notesParentType === 'Folder') {

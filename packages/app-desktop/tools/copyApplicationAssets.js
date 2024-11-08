@@ -88,6 +88,7 @@ async function main() {
 		'react-datetime/css/react-datetime.css',
 		'roboto-fontface/css/roboto/roboto-fontface.css',
 		'smalltalk/css/smalltalk.css',
+		'smalltalk/dist/smalltalk.min.js',
 		'smalltalk/img/IDR_CLOSE_DIALOG_H.png',
 		'smalltalk/img/IDR_CLOSE_DIALOG.png',
 		{
