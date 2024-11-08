@@ -1,5 +1,5 @@
 name: Build macOS M1
-on: [push, pull_request]
+on: [workflow_dispatch]
 jobs:
   Main:
     # We always process desktop release tags, because they also publish the release

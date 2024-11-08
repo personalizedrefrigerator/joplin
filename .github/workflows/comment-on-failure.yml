@@ -1,11 +1,6 @@
 name: comment-on-failure
-on:
-  workflow_run:
-    workflows:
-      - Joplin Continuous Integration
-      - react-native-android-build-apk
-      - Build macOS M1
-    types: [ completed ]
+on: [workflow_dispatch]
+
 
 jobs:
   comment-failure:

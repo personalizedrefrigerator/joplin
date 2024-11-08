@@ -1,9 +1,6 @@
 name: 'Close stale issues'
-on:
-  schedule:
-    - cron: '0 16 * * *'
-permissions:
-  issues: write
+on: [workflow_dispatch]
+
 jobs:
   ProcessStaleIssues:
     if: github.repository == 'laurent22/joplin'
