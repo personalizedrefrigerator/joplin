@@ -212,7 +212,7 @@ class Dropdown extends Component<DropdownProps, DropdownState> {
 						disabled={this.props.disabled}
 						onPress={this.onOpenList}
 						accessibilityRole='button'
-						accessibilityHint={this.props.accessibilityHint}
+						accessibilityHint={[this.props.accessibilityHint, _('Opens dropdown')].join(' ')}
 					>
 						<Text ellipsizeMode="tail" numberOfLines={1} style={headerStyle}>
 							{headerLabel}
@@ -220,6 +220,8 @@ class Dropdown extends Component<DropdownProps, DropdownState> {
 						<Text
 							style={headerArrowStyle}
 							aria-hidden={true}
+							importantForAccessibility='no'
+							accessibilityElementsHidden={true}
 							accessibilityRole='image'
 						>{'▼'}</Text>
 					</TouchableOpacity>
