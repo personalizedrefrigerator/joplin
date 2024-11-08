@@ -15,7 +15,7 @@ import ItemList from '../gui/ItemList';
 import HelpButton from '../gui/HelpButton';
 import { surroundKeywords, nextWhitespaceIndex, removeDiacritics } from '@joplin/lib/string-utils';
 import { mergeOverlappingIntervals } from '@joplin/lib/ArrayUtils';
-import markupLanguageUtils from '../utils/markupLanguageUtils';
+import markupLanguageUtils from '@joplin/lib/utils/markupLanguageUtils';
 import focusEditorIfEditorCommand from '@joplin/lib/services/commands/focusEditorIfEditorCommand';
 import Logger from '@joplin/utils/Logger';
 import { MarkupLanguage, MarkupToHtml } from '@joplin/renderer';
@@ -636,7 +636,9 @@ class DialogComponent extends React.PureComponent<Props, State> {
 	}
 
 	private calculateMaxHeight(itemHeight: number) {
-		const maxItemCount = Math.floor((0.7 * window.innerHeight) / itemHeight);
+		const listContainer: HTMLElement|null = this.itemListRef.current?.container;
+		const containerWindow = listContainer?.ownerDocument?.defaultView ?? window;
+		const maxItemCount = Math.floor((0.7 * containerWindow.innerHeight) / itemHeight);
 		return maxItemCount * itemHeight;
 	}
 

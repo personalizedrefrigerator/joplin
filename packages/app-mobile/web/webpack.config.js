@@ -61,6 +61,7 @@ module.exports = {
 	resolve: {
 		alias: {
 			'react-native$': 'react-native-web',
+			'crypto': path.resolve(__dirname, 'mocks/nodeCrypto.js'),
 
 			// Map some modules that don't work on web to the empty dictionary.
 			'react-native-fingerprint-scanner': emptyLibraryMock,
@@ -72,6 +73,7 @@ module.exports = {
 			'react-native-zip-archive': emptyLibraryMock,
 			'react-native-document-picker': emptyLibraryMock,
 			'react-native-exit-app': emptyLibraryMock,
+			'expo-camera': emptyLibraryMock,
 
 			// Workaround for applying serviceworker types to a single file.
 			// See https://joshuatz.com/posts/2021/strongly-typed-service-workers/.
@@ -99,6 +101,7 @@ module.exports = {
 			'timers': require.resolve('timers-browserify'),
 			'path': require.resolve('path-browserify'),
 			'stream': require.resolve('stream-browserify'),
+			'crypto': require.resolve('crypto-browserify'),
 		},
 	},
 

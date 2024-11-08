@@ -79,6 +79,10 @@ const createTheme = (theme: EditorTheme): Extension[] => {
 	// be at least this specific.
 	const selectionBackgroundSelector = '&.cm-focused > .cm-scroller > .cm-selectionLayer .cm-selectionBackground';
 
+	// Matches the editor only when there are no gutters (e.g. line numbers) added by
+	// plugins
+	const editorNoGuttersSelector = '&:not(:has(> .cm-scroller > .cm-gutters))';
+
 	const baseHeadingStyle = {
 		fontWeight: 'bold',
 		fontFamily: theme.fontFamily,
@@ -178,6 +182,13 @@ const createTheme = (theme: EditorTheme): Extension[] => {
 			// Center
 			marginLeft: 'auto',
 			marginRight: 'auto',
+		} : undefined,
+
+		// Allows editor content to be left-aligned with the toolbar on desktop.
+		// See https://github.com/laurent22/joplin/issues/11279
+		[`${editorNoGuttersSelector} .cm-line`]: theme.isDesktop ? {
+			// Note: This cannot be zero:
+			paddingLeft: '1px',
 		} : undefined,
 
 		// Override the default URL style when the URL is within a link

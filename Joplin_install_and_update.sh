@@ -263,7 +263,8 @@ StartupWMClass=Joplin
 Type=Application
 Categories=Office;
 MimeType=x-scheme-handler/joplin;
-X-GNOME-SingleWindow=true // should be removed eventually as it was upstream to be an XDG specification
+# should be removed eventually as it was upstream to be an XDG specification
+X-GNOME-SingleWindow=true
 SingleMainWindow=true
 EOF
 

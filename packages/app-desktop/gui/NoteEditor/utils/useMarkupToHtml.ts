@@ -1,6 +1,6 @@
 import { PluginStates } from '@joplin/lib/services/plugins/reducer';
 import { useCallback, useMemo } from 'react';
-import markupLanguageUtils from '../../../utils/markupLanguageUtils';
+import markupLanguageUtils from '@joplin/lib/utils/markupLanguageUtils';
 import Setting from '@joplin/lib/models/Setting';
 import shim from '@joplin/lib/shim';
 

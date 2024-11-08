@@ -11,7 +11,7 @@ import KvStore from './services/KvStore';
 import SyncTargetJoplinServer from './SyncTargetJoplinServer';
 import SyncTargetOneDrive from './SyncTargetOneDrive';
 import { createStore, applyMiddleware, Store } from 'redux';
-const { defaultState, stateUtils } = require('./reducer');
+import { defaultState, stateUtils } from './reducer';
 import JoplinDatabase from './JoplinDatabase';
 import { cancelTimers as folderScreenUtilsCancelTimers, refreshFolders, scheduleRefreshFolders } from './folders-screen-utils';
 const { DatabaseDriverNode } = require('./database-driver-node.js');
@@ -64,6 +64,7 @@ import { join } from 'path';
 import processStartFlags from './utils/processStartFlags';
 import { setupAutoDeletion } from './services/trash/permanentlyDeleteOldItems';
 import determineProfileAndBaseDir from './determineBaseAppDirs';
+import NavService from './services/NavService';
 
 const appLogger: LoggerWrapper = Logger.create('App');
 
@@ -98,8 +99,7 @@ export default class BaseApplication {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	protected currentFolder_: any = null;
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	protected store_: Store<any> = null;
+	protected store_: Store<State> = null;
 
 	private rotatingLogs: RotatingLogs;
 
@@ -511,6 +511,14 @@ export default class BaseApplication {
 			refreshNotesUseSelectedNoteId = true;
 		}
 
+		// Switching windows can also change which note(s) and which note parent type is selected.
+		// Refreshing notes after switching windows helps ensure that the selected note/tags/other state
+		// is correct for the current window.
+		if (action.type === 'WINDOW_FOCUS' && action.lastWindowId !== action.windowId) {
+			refreshNotes = true;
+			refreshNotesUseSelectedNoteId = true;
+		}
+
 		// Should refresh the notes when:
 		// - A tag is selected, to show the notes for that tag
 		// - When a tag is updated so that when searching by tags, the search results are updated
@@ -610,6 +618,7 @@ export default class BaseApplication {
 
 		BaseModel.dispatch = this.store().dispatch;
 		BaseSyncTarget.dispatch = this.store().dispatch;
+		NavService.dispatch = this.store().dispatch;
 		DecryptionWorker.instance().dispatch = this.store().dispatch;
 		ResourceFetcher.instance().dispatch = this.store().dispatch;
 		ShareService.instance().initialize(this.store(), EncryptionService.instance());

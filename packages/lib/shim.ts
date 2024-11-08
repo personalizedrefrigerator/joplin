@@ -2,6 +2,8 @@ import * as React from 'react';
 import { NoteEntity, ResourceEntity } from './services/database/types';
 import type FsDriverBase from './fs-driver-base';
 import type FileApiDriverLocal from './file-api-driver-local';
+import { Crypto } from './services/e2ee/types';
+import { MarkupLanguage } from '@joplin/renderer';
 
 export interface CreateResourceFromPathOptions {
 	resizeLargeImages?: 'always' | 'never' | 'ask';
@@ -30,6 +32,12 @@ interface FetchOptions {
 	headers?: Record<string, string>;
 	body?: string;
 	agent?: unknown;
+}
+
+interface AttachFileToNoteOptions {
+	resizeLargeImages?: 'always'|'never';
+	position?: number;
+	markupLanguage?: MarkupLanguage;
 }
 
 let isTestingEnv_ = false;
@@ -292,6 +300,8 @@ const shim = {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	sjclModule: null as any,
 
+	crypto: null as Crypto,
+
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	randomBytes: async (_count: number): Promise<any> => {
 		throw new Error('Not implemented: randomBytes');
@@ -305,8 +315,7 @@ const shim = {
 	// eslint-disable-next-line @typescript-eslint/ban-types -- Old code before rule was applied
 	detectAndSetLocale: null as Function,
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	attachFileToNote: async (_note: any, _filePath: string): Promise<NoteEntity> => {
+	attachFileToNote: async (_note: NoteEntity, _filePath: string, _options?: AttachFileToNoteOptions): Promise<NoteEntity> => {
 		throw new Error('Not implemented: attachFileToNote');
 	},
 

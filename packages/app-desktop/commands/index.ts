@@ -2,10 +2,13 @@
 import * as copyDevCommand from './copyDevCommand';
 import * as editProfileConfig from './editProfileConfig';
 import * as emptyTrash from './emptyTrash';
+import * as exportDeletionLog from './exportDeletionLog';
 import * as exportFolders from './exportFolders';
 import * as exportNotes from './exportNotes';
 import * as focusElement from './focusElement';
+import * as openNoteInNewWindow from './openNoteInNewWindow';
 import * as openProfileDirectory from './openProfileDirectory';
+import * as renderMarkup from './renderMarkup';
 import * as replaceMisspelling from './replaceMisspelling';
 import * as restoreNoteRevision from './restoreNoteRevision';
 import * as startExternalEditing from './startExternalEditing';
@@ -21,10 +24,13 @@ const index: any[] = [
 	copyDevCommand,
 	editProfileConfig,
 	emptyTrash,
+	exportDeletionLog,
 	exportFolders,
 	exportNotes,
 	focusElement,
+	openNoteInNewWindow,
 	openProfileDirectory,
+	renderMarkup,
 	replaceMisspelling,
 	restoreNoteRevision,
 	startExternalEditing,

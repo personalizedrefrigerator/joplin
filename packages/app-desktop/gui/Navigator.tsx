@@ -1,55 +1,67 @@
-const React = require('react');
+import * as React from 'react';
 const { connect } = require('react-redux');
 import Setting from '@joplin/lib/models/Setting';
-import { AppState } from '../app.reducer';
-const bridge = require('@electron/remote').require('./bridge').default;
+import { AppState, AppStateRoute } from '../app.reducer';
+import bridge from '../services/bridge';
+import { useContext, useEffect, useRef } from 'react';
+import { WindowIdContext } from './NewWindowOrIFrame';
 
 interface Props {
+	route: AppStateRoute;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	route: any;
+	screens: Record<string, any>;
+
+	style: React.CSSProperties;
+	className?: string;
 }
 
-class NavigatorComponent extends React.Component<Props> {
-	public UNSAFE_componentWillReceiveProps(newProps: Props) {
-		if (newProps.route) {
-			const screenInfo = this.props.screens[newProps.route.routeName];
+const NavigatorComponent: React.FC<Props> = props => {
+	const windowId = useContext(WindowIdContext);
+
+	const route = props.route;
+	const screenInfo = props.screens[route?.routeName];
+
+	const screensRef = useRef(props.screens);
+	screensRef.current = props.screens;
+
+	const prevRoute = useRef<AppStateRoute|null>(null);
+	useEffect(() => {
+		const routeName = route?.routeName;
+		if (route) {
 			const devMarker = Setting.value('env') === 'dev' ? ` (DEV - ${Setting.value('profileDir')})` : '';
 			const windowTitle = [`Joplin${devMarker}`];
 			if (screenInfo.title) {
 				windowTitle.push(screenInfo.title());
 			}
-			this.updateWindowTitle(windowTitle.join(' - '));
+			bridge().windowById(windowId)?.setTitle(windowTitle.join(' - '));
 		}
-	}
 
-	public updateWindowTitle(title: string) {
-		try {
-			if (bridge().window()) bridge().window().setTitle(title);
-		} catch (error) {
-			console.warn('updateWindowTitle', error);
+		// When a navigation happens in an unfocused window, show the window to the user.
+		// This might happen if, for example, a secondary window triggers a navigation in
+		// the main window.
+		if (routeName && routeName !== prevRoute.current?.routeName) {
+			bridge().switchToWindow(windowId);
 		}
-	}
 
-	public render() {
-		if (!this.props.route) throw new Error('Route must not be null');
+		prevRoute.current = route;
+	}, [route, screenInfo, windowId]);
 
-		const route = this.props.route;
-		const screenProps = route.props ? route.props : {};
-		const screenInfo = this.props.screens[route.routeName];
-		const Screen = screenInfo.screen;
+	if (!route) throw new Error('Route must not be null');
 
-		const screenStyle = {
-			width: this.props.style.width,
-			height: this.props.style.height,
-		};
+	const screenProps = route.props ? route.props : {};
+	const Screen = screenInfo.screen;
 
-		return (
-			<div style={this.props.style} className={this.props.className}>
-				<Screen style={screenStyle} {...screenProps} />
-			</div>
-		);
-	}
-}
+	const screenStyle = {
+		width: props.style.width,
+		height: props.style.height,
+	};
+
+	return (
+		<div style={props.style} className={props.className}>
+			<Screen style={screenStyle} {...screenProps} />
+		</div>
+	);
+};
 
 const Navigator = connect((state: AppState) => {
 	return {

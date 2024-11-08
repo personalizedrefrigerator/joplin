@@ -110,7 +110,9 @@ export default class JoplinViewsDialogs {
 	}
 
 	/**
-	 * Opens the dialog
+	 * Opens the dialog.
+	 *
+	 * On desktop, this closes any copies of the dialog open in different windows.
 	 */
 	public async open(handle: ViewHandle): Promise<DialogResult> {
 		return this.controller(handle).open();

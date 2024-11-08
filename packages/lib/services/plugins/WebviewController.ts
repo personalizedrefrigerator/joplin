@@ -4,6 +4,7 @@ import { ButtonSpec, DialogResult, ViewHandle } from './api/types';
 const { toSystemSlashes } = require('../../path-utils');
 import PostMessageService, { MessageParticipant } from '../PostMessageService';
 import { PluginViewState } from './reducer';
+import { defaultWindowId } from '../../reducer';
 
 export enum ContainerType {
 	Panel = 'panel',
@@ -124,6 +125,7 @@ export default class WebviewController extends ViewController {
 		void PostMessageService.instance().postMessage({
 			pluginId: this.pluginId,
 			viewId: this.handle,
+			windowId: defaultWindowId,
 			contentScriptId: null,
 			from: MessageParticipant.Plugin,
 			to: MessageParticipant.UserWebview,
@@ -188,6 +190,11 @@ export default class WebviewController extends ViewController {
 	// ---------------------------------------------
 
 	public async open(): Promise<DialogResult> {
+		if (this.closeResponse_) {
+			this.closeResponse_.resolve(null);
+			this.closeResponse_ = null;
+		}
+
 		this.store.dispatch({
 			type: 'VISIBLE_DIALOGS_ADD',
 			name: this.handle,
@@ -213,6 +220,7 @@ export default class WebviewController extends ViewController {
 	public closeWithResponse(result: DialogResult) {
 		this.close();
 		this.closeResponse_.resolve(result);
+		this.closeResponse_ = null;
 	}
 
 	public get buttons(): ButtonSpec[] {

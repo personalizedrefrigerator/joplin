@@ -1,18 +1,20 @@
 import { RefObject, useRef, useEffect } from 'react';
 import { focus } from '@joplin/lib/utils/focusHandler';
 import CodeMirrorControl from '@joplin/editor/CodeMirror/CodeMirrorControl';
-import NoteTextViewer from '../../../../../NoteTextViewer';
+import { NoteViewerControl } from '../../../../../NoteTextViewer';
 
 interface Props {
 	editorRef: RefObject<CodeMirrorControl>;
-	webviewRef: RefObject<NoteTextViewer>;
+	webviewRef: RefObject<NoteViewerControl>;
 	visiblePanes: string[];
 }
 
 const useRefocusOnVisiblePaneChange = ({ editorRef, webviewRef, visiblePanes }: Props) => {
 	const lastVisiblePanes = useRef(visiblePanes);
 	useEffect(() => {
-		const editorHasFocus = editorRef.current?.cm6?.dom?.contains(document.activeElement);
+		const cm6Dom = editorRef.current?.cm6?.dom;
+		const doc = cm6Dom?.getRootNode() as Document|null;
+		const editorHasFocus = cm6Dom?.contains(doc?.activeElement);
 		const viewerHasFocus = webviewRef.current?.hasFocus();
 
 		const lastHadViewer = lastVisiblePanes.current.includes('viewer');
