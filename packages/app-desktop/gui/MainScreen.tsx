@@ -633,10 +633,12 @@ class MainScreenComponent extends React.Component<Props, State> {
 			},
 
 			editor: () => {
-				return <NoteEditor
-					windowId={defaultWindowId}
-					key={key}
-				/>;
+				return <div className='note-editor-wrapper' role='main' aria-label={_('Note')}>
+					<NoteEditor
+						windowId={defaultWindowId}
+						key={key}
+					/>
+				</div>;
 			},
 		};
 
