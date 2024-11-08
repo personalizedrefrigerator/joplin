@@ -305,8 +305,11 @@ const appReducer = (state = appDefaultState, action: any) => {
 
 				if (!historyGoingBack && historyCanGoBackTo(currentRoute)) {
 					const previousRoute = navHistory.length && navHistory[navHistory.length - 1];
-					// Don't allow going back to the same screen.
-					if (!previousRoute || !fastDeepEqual(navHistory[navHistory.length - 1], currentRoute)) {
+					const isDifferentRoute = !previousRoute || !fastDeepEqual(navHistory[navHistory.length - 1], currentRoute);
+
+					// Avoid multiple consecutive duplicate screens in the navigation history -- these can make
+					// pressing "back" seem to have no effect.
+					if (isDifferentRoute) {
 						navHistory.push(currentRoute);
 					}
 				}
