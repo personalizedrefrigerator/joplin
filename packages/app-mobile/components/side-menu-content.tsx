@@ -411,7 +411,7 @@ const SideMenuContentComponent = (props: Props) => {
 	const renderFolderIcon = (folderId: string, folderIcon: FolderIcon) => {
 		if (!folderIcon) {
 			if (folderId === getTrashFolderId()) {
-				folderIcon = getTrashFolderIcon(FolderIconType.Emoji);
+				folderIcon = getTrashFolderIcon(FolderIconType.FontAwesome);
 			} else if (alwaysShowFolderIcons) {
 				return <IonIcon name="folder-outline" style={styles_.folderBaseIcon} />;
 			} else {
