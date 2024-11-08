@@ -36,6 +36,7 @@ const DropdownAlert = require('react-native-dropdownalert').default;
 const AlarmServiceDriver = require('./services/AlarmServiceDriver').default;
 const SafeAreaView = require('./components/SafeAreaView');
 const { connect, Provider } = require('react-redux');
+import fastDeepEqual = require('fast-deep-equal');
 import { Provider as PaperProvider, MD3DarkTheme, MD3LightTheme } from 'react-native-paper';
 import BackButtonService from './services/BackButtonService';
 import NavService from '@joplin/lib/services/NavService';
@@ -89,7 +90,6 @@ import JoplinCloudLoginScreen from './components/screens/JoplinCloudLoginScreen'
 
 import SyncTargetNone from '@joplin/lib/SyncTargetNone';
 
-const fastDeepEqual = require('fast-deep-equal');
 
 
 SyncTargetRegistry.addClass(SyncTargetNone);
