@@ -235,7 +235,6 @@ class NoteScreenComponent extends BaseScreenComponent<Props, State> implements B
 				Keyboard.dismiss();
 
 				this.setState({
-					note: { ...this.state.lastSavedNote },
 					mode: 'view',
 				});
 
