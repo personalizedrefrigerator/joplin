@@ -360,7 +360,7 @@ const appReducer = (state = appDefaultState, action: any) => {
 				newState.route = action;
 				newState.historyCanGoBack = !!navHistory.length;
 
-				logger.debug('Navigated to route:', newState.route?.routeName, 'with notesParentType:', newState.notesParentType, navHistory);
+				logger.debug('Navigated to route:', newState.route?.routeName, 'with notesParentType:', newState.notesParentType);
 			}
 			break;
 
