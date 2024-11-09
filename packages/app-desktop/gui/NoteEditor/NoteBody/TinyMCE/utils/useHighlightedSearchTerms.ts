@@ -2,23 +2,23 @@ import SearchEngine from '@joplin/lib/services/search/SearchEngine';
 import { themeStyle } from '@joplin/lib/theme';
 import { Theme } from '@joplin/lib/themes/type';
 import { useEffect, useMemo } from 'react';
-import { Editor } from 'tinymce';
+import { Editor, EditorEvent } from 'tinymce';
 
 // TODO: Remove after upgrading TypeScript.
 // NOTE: While Highlight is Set-like, its API may be slightly different.
 declare global {
 	interface Window {
-		Highlight: any;
-		Range: any;
-		CSS: any;
+		Highlight: typeof Highlight;
+		Range: typeof Range;
+		CSS: typeof CSS;
 	}
 }
 
 const useHighlightedSearchTerms = (editor: Editor, searchTerms: string[], themeId: number) => {
 	const searchRegexes = useMemo(() => {
-		return searchTerms.map(term => {
-			if (typeof term === 'object') {
-				term = (term as any).value;
+		return searchTerms.map((term: unknown) => {
+			if (typeof term === 'object' && term !== null && 'value' in term) {
+				term = term.value;
 			}
 			return new RegExp(SearchEngine.instance().queryTermToRegex(term), 'ig');
 		});
@@ -35,12 +35,6 @@ const useHighlightedSearchTerms = (editor: Editor, searchTerms: string[], themeI
 				background-color: ${theme.searchMarkerBackgroundColor};
 				color: ${theme.searchMarkerColor};
 			}
-
-			/* Try to work around a bug on chrome where misspellings also have the
-			   same color as search markers. */
-			::spelling-error, ::highlight(none) {
-				color: inherit;
-			}
 		`);
 		editor.getDoc().head.appendChild(style);
 
@@ -56,7 +50,7 @@ const useHighlightedSearchTerms = (editor: Editor, searchTerms: string[], themeI
 
 		const editorWindow = editor.getWin();
 		const ranges: Map<Node, Range[]> = new Map();
-		let highlight: any = undefined;
+		let highlight: Highlight = undefined;
 
 		const processNode = (node: Node) => {
 			for (const child of node.childNodes) {
@@ -89,7 +83,8 @@ const useHighlightedSearchTerms = (editor: Editor, searchTerms: string[], themeI
 			editorWindow.CSS.highlights.set('jop-search-highlight', highlight);
 		};
 
-		const onNodeChange = ({ element }: any) => {
+		type NodeChangeEvent = { element: Element };
+		const onNodeChange = ({ element }: EditorEvent<NodeChangeEvent>) => {
 			rebuildHighlights(element);
 		};
 

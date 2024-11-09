@@ -23,6 +23,7 @@ module.exports = {
 		'FileSystemCreateWritableOptions': 'readonly',
 		'FileSystemHandle': 'readonly',
 		'IDBTransactionMode': 'readonly',
+		'Highlight': 'readonly',
 
 		// ServiceWorker
 		'ExtendableEvent': 'readonly',
