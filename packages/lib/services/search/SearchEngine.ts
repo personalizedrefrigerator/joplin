@@ -506,6 +506,7 @@ export default class SearchEngine {
 	}
 
 	// https://stackoverflow.com/a/13818704/561309
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	public queryTermToRegex(term: any): string {
 		while (term.length && term.indexOf('*') === 0) {
 			term = term.substr(1);
