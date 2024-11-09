@@ -1,5 +1,11 @@
 # Joplin iOS Changelog
 
+## [ios-v13.1.7](https://github.com/laurent22/joplin/releases/tag/ios-v13.1.7) - 2024-11-09T13:05:12Z
+
+- Fixed: Fix error on creating new notes if the user is a share recipient (#11326) (#11325 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Fix new note button is pushed off-screen on certain Android devices (#11323) (#11276 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Fix search result note hidden after powering on device (#11297) (#11197 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+
 ## [ios-v13.1.6](https://github.com/laurent22/joplin/releases/tag/ios-v13.1.6) - 2024-10-17T22:16:20Z
 
 - Improved: Added feature flag to disable sync lock support (#10925) (#10407)

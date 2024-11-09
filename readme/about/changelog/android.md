@@ -1,5 +1,11 @@
 # Joplin Android Changelog
 
+## [android-v3.1.8](https://github.com/laurent22/joplin/releases/tag/android-v3.1.8) (Pre-release) - 2024-11-09T13:02:33Z
+
+- Fixed: Fix error on creating new notes if the user is a share recipient (#11326) (#11325 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Fix new note button is pushed off-screen on certain Android devices (#11323) (#11276 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Fix sharing to Joplin causes back navigation to get stuck (#11355) (#11324 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+
 ## [android-v3.1.7](https://github.com/laurent22/joplin/releases/tag/android-v3.1.7) (Pre-release) - 2024-11-04T20:27:52Z
 
 - Fixed: Fix search result note hidden after powering on device (#11297) (#11197 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))

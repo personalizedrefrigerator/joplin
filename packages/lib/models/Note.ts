@@ -830,9 +830,15 @@ export default class Note extends BaseItem {
 		});
 
 		if (dispatchUpdateAction) {
+			// The UI requires share_id -- if a new note, it will always be the empty string in the database
+			// until processed by the share service. At present, loading savedNote from the database in this case
+			// breaks tests.
+			if (!('share_id' in savedNote) && isNew) {
+				savedNote.share_id = '';
+			}
 			// Ensures that any note added to the state has all the required
 			// properties for the UI to work.
-			if (!('deleted_time' in savedNote)) {
+			if (!('deleted_time' in savedNote) || !('share_id' in savedNote)) {
 				const fields = removeElement(unique(this.previewFields().concat(Object.keys(savedNote))), 'type_');
 				savedNote = await this.load(savedNote.id, {
 					fields,

@@ -391,6 +391,7 @@ const CodeMirror = (props: NoteBodyEditorProps, ref: ForwardedRef<NoteBodyEditor
 			spellcheckEnabled: Setting.value('editor.spellcheckBeta'),
 			keymap: keyboardMode,
 			indentWithTabs: true,
+			editorLabel: _('Markdown editor'),
 		};
 	}, [
 		props.contentMarkupLanguage, props.disabled, props.keyboardMode, styles.globalTheme,
