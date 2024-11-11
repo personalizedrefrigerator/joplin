@@ -33,9 +33,12 @@ export default class MainScreen {
 	public async createNewNote(title: string) {
 		await this.waitFor();
 
-		await this.newNoteButton.click();
-		await expect(this.noteEditor.noteTitleInput).toHaveValue('');
-		await expect(this.noteEditor.noteTitleInput).toHaveJSProperty('placeholder', 'Creating new note...');
+		await expect.poll(async () => {
+			await this.newNoteButton.click();
+			await expect(this.noteEditor.noteTitleInput).toHaveValue('');
+			await expect(this.noteEditor.noteTitleInput).toHaveJSProperty('placeholder', 'Creating new note...');
+			return true;
+		}).toBe(true);
 
 		// Fill the title
 		await this.noteEditor.noteTitleInput.click();
