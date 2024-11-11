@@ -33,12 +33,14 @@ export default class MainScreen {
 	public async createNewNote(title: string) {
 		await this.waitFor();
 
+		// Create the new note. Retry this -- creating new notes can sometimes fail if done just after
+		// application startup.
 		await expect.poll(async () => {
 			await this.newNoteButton.click();
-			await expect(this.noteEditor.noteTitleInput).toHaveValue('');
-			await expect(this.noteEditor.noteTitleInput).toHaveJSProperty('placeholder', 'Creating new note...');
+			await expect(this.noteEditor.noteTitleInput).toHaveValue('', { timeout: 4_000 });
+			await expect(this.noteEditor.noteTitleInput).toHaveJSProperty('placeholder', 'Creating new note...', { timeout: 4_000 });
 			return true;
-		}).toBe(true);
+		}, { timeout: 10_000 }).toBe(true);
 
 		// Fill the title
 		await this.noteEditor.noteTitleInput.click();
