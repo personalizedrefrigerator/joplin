@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Button, Dialog, Divider, Surface, Text } from 'react-native-paper';
 import { DialogType, PromptDialogData } from './types';
-import { useWindowDimensions, StyleSheet, ScrollView } from 'react-native';
+import { StyleSheet } from 'react-native';
 import { useMemo } from 'react';
 import { themeStyle } from '../global-style';
 
@@ -10,11 +10,7 @@ interface Props {
 	themeId: number;
 }
 
-const buttonHeight = 40;
-
-const useStyles = (themeId: number, buttonCount: number, isMenu: boolean) => {
-	const windowSize = useWindowDimensions();
-
+const useStyles = (themeId: number, isMenu: boolean) => {
 	return useMemo(() => {
 		const theme = themeStyle(themeId);
 
@@ -23,19 +19,12 @@ const useStyles = (themeId: number, buttonCount: number, isMenu: boolean) => {
 				backgroundColor: theme.backgroundColor,
 				borderRadius: 24,
 				paddingTop: 24,
-				maxHeight: windowSize.height,
 			},
 
-			buttonScroller: {
-				height: isMenu ? Math.min(buttonCount * buttonHeight, windowSize.height * 2 / 3) : buttonHeight,
-			},
 			buttonScrollerContent: {
 				flexDirection: 'row',
 				justifyContent: 'flex-end',
 				flexWrap: 'wrap',
-			},
-			actionButton: {
-				minHeight: buttonHeight,
 			},
 
 			dialogContent: {
@@ -44,34 +33,35 @@ const useStyles = (themeId: number, buttonCount: number, isMenu: boolean) => {
 			dialogActions: {
 				paddingBottom: 14,
 				paddingTop: 4,
+
+				...(isMenu ? {
+					flexDirection: 'column',
+					alignItems: 'stretch',
+				} : {}),
 			},
-			menuDialogActions: {
-				flexDirection: 'column',
-				alignContent: 'stretch',
-			},
-			menuDialogLabel: {
-				textAlign: 'center',
+			dialogLabel: {
+				textAlign: isMenu ? 'center' : undefined,
 			},
 		});
-	}, [windowSize.height, themeId, buttonCount, isMenu]);
+	}, [themeId, isMenu]);
 };
 
 const PromptDialog: React.FC<Props> = ({ dialog, themeId }) => {
 	const isMenu = dialog.type === DialogType.Menu;
-	const styles = useStyles(themeId, dialog.buttons.length, isMenu);
+	const styles = useStyles(themeId, isMenu);
 
 	const buttons = dialog.buttons.map((button, index) => {
 		return (
 			<Button
 				key={`${index}-${button.text}`}
 				onPress={button.onPress}
-				style={styles.actionButton}
 			>{button.text}</Button>
 		);
 	});
 	const titleComponent = <Text
 		variant='titleMedium'
 		accessibilityRole='header'
+		style={styles.dialogLabel}
 	>{dialog.title}</Text>;
 
 	return (
@@ -85,23 +75,14 @@ const PromptDialog: React.FC<Props> = ({ dialog, themeId }) => {
 				{dialog.title ? titleComponent : null}
 				<Text
 					variant='bodyMedium'
-					style={isMenu ? styles.menuDialogLabel : null}
+					style={styles.dialogLabel}
 				>{dialog.message}</Text>
 			</Dialog.Content>
 			{isMenu ? <Divider/> : null}
 			<Dialog.Actions
-				style={[
-					styles.dialogActions,
-				]}
+				style={styles.dialogActions}
 			>
-				<ScrollView contentContainerStyle={[
-					styles.buttonScrollerContent,
-					isMenu ? styles.menuDialogActions : null,
-				]} style={[
-					styles.buttonScroller,
-				]}>
-					{buttons}
-				</ScrollView>
+				{buttons}
 			</Dialog.Actions>
 		</Surface>
 	);

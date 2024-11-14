@@ -69,6 +69,7 @@ const DialogManager: React.FC<Props> = props => {
 		<Portal>
 			<Modal
 				visible={!!dialogComponents.length}
+				scrollOverflow={true}
 				containerStyle={styles.modalContainer}
 				animationType='fade'
 				backgroundColor='rgba(0, 0, 0, 0.1)'

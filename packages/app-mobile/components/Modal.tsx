@@ -1,12 +1,17 @@
 import * as React from 'react';
 import { RefObject, useCallback, useMemo, useRef } from 'react';
-import { GestureResponderEvent, Modal, ModalProps, StyleSheet, View, ViewStyle, useWindowDimensions } from 'react-native';
+import { GestureResponderEvent, Modal, ModalProps, ScrollView, StyleSheet, View, ViewStyle, useWindowDimensions } from 'react-native';
 import { hasNotch } from 'react-native-device-info';
 
 interface ModalElementProps extends ModalProps {
 	children: React.ReactNode;
 	containerStyle?: ViewStyle;
 	backgroundColor?: string;
+
+	// If scrollOverflow is provided, the modal is wrapped in a vertical
+	// ScrollView. This allows the user to scroll parts of dialogs into
+	// view that would otherwise be clipped by the screen edge.
+	scrollOverflow?: boolean;
 }
 
 const useStyles = (backgroundColor?: string) => {
@@ -28,6 +33,13 @@ const useStyles = (backgroundColor?: string) => {
 				backgroundColor,
 				flexGrow: 1,
 				flexShrink: 1,
+			},
+			modalScrollView: {
+				flexGrow: 1,
+				flexShrink: 1,
+			},
+			modalScrollViewContent: {
+				minHeight: '100%',
 			},
 		});
 	}, [isLandscape, backgroundColor]);
@@ -51,6 +63,7 @@ const ModalElement: React.FC<ModalElementProps> = ({
 	children,
 	containerStyle,
 	backgroundColor,
+	scrollOverflow,
 	...modalProps
 }) => {
 	const styles = useStyles(backgroundColor);
@@ -66,18 +79,25 @@ const ModalElement: React.FC<ModalElementProps> = ({
 	const backgroundRef = useRef<View>();
 	const { onShouldBackgroundCaptureTouch, onBackgroundTouchFinished } = useBackgroundTouchListeners(modalProps.onRequestClose, backgroundRef);
 
+	const contentAndBackdrop = <View
+		ref={backgroundRef}
+		style={styles.modalBackground}
+		onStartShouldSetResponder={onShouldBackgroundCaptureTouch}
+		onResponderRelease={onBackgroundTouchFinished}
+	>{content}</View>;
+
 	// supportedOrientations: On iOS, this allows the dialog to be shown in non-portrait orientations.
 	return (
 		<Modal
 			supportedOrientations={['portrait', 'portrait-upside-down', 'landscape', 'landscape-left', 'landscape-right']}
 			{...modalProps}
 		>
-			<View
-				ref={backgroundRef}
-				style={styles.modalBackground}
-				onStartShouldSetResponder={onShouldBackgroundCaptureTouch}
-				onResponderRelease={onBackgroundTouchFinished}
-			>{content}</View>
+			{scrollOverflow ? (
+				<ScrollView
+					style={styles.modalScrollView}
+					contentContainerStyle={styles.modalScrollViewContent}
+				>{contentAndBackdrop}</ScrollView>
+			) : contentAndBackdrop}
 		</Modal>
 	);
 };
