@@ -1,8 +1,9 @@
 import { _ } from '@joplin/lib/locale';
 import { Alert } from 'react-native';
-import { DialogControl, PromptButton } from '../components/DialogManager';
+import { DialogControl } from '../components/DialogManager';
 import { RefObject } from 'react';
 import { MessageBoxType, ShowMessageBoxOptions } from '@joplin/lib/shim';
+import { PromptButton } from '../components/DialogManager/types';
 
 
 const makeShowMessageBox = (dialogControl: null|RefObject<DialogControl>) => (message: string, options: ShowMessageBoxOptions = null) => {
