@@ -11,7 +11,6 @@ import { themeStyle } from '../global-style';
 import { FolderPickerOptions, ScreenHeader } from '../ScreenHeader';
 import { _ } from '@joplin/lib/locale';
 import ActionButton from '../buttons/FloatingActionButton';
-const DialogBox = require('react-native-dialogbox').default;
 import BackButtonService from '../../services/BackButtonService';
 import { BaseScreenComponent } from '../base-screen';
 import { AppState } from '../../utils/types';
@@ -300,12 +299,6 @@ class NotesScreenComponent extends BaseScreenComponent<Props, State> {
 				<ScreenHeader title={iconString + title} showBackButton={false} sortButton_press={this.sortButton_press} folderPickerOptions={this.folderPickerOptions()} showSearchButton={true} showSideMenuButton={true} />
 				<NoteList />
 				{actionButtonComp}
-				<DialogBox
-					// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-					ref={(dialogbox: any) => {
-						this.dialogbox = dialogbox;
-					}}
-				/>
 			</AccessibleView>
 		);
 	}

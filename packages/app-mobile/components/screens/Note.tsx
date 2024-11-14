@@ -32,8 +32,6 @@ import { reg } from '@joplin/lib/registry';
 import ResourceFetcher from '@joplin/lib/services/ResourceFetcher';
 import { BaseScreenComponent } from '../base-screen';
 import { themeStyle, editorFont } from '../global-style';
-const { dialogs } = require('../../utils/dialogs.js');
-const DialogBox = require('react-native-dialogbox').default;
 import shared, { BaseNoteScreenComponent, Props as BaseProps } from '@joplin/lib/components/shared/note-screen-shared';
 import { Asset, ImagePickerResponse, launchImageLibrary } from 'react-native-image-picker';
 import SelectDateTimeDialog from '../SelectDateTimeDialog';
@@ -49,7 +47,7 @@ import { isSupportedLanguage } from '../../services/voiceTyping/vosk';
 import { ChangeEvent as EditorChangeEvent, SelectionRangeChangeEvent, UndoRedoDepthChangeEvent } from '@joplin/editor/events';
 import { join } from 'path';
 import { Dispatch } from 'redux';
-import { RefObject } from 'react';
+import { RefObject, useContext } from 'react';
 import { SelectionRange } from '../NoteEditor/types';
 import { getNoteCallbackUrl } from '@joplin/lib/callbackUrlUtils';
 import { AppState } from '../../utils/types';
@@ -64,6 +62,7 @@ import { ResourceInfo } from '../NoteBodyViewer/hooks/useRerenderHandler';
 import getImageDimensions from '../../utils/image/getImageDimensions';
 import resizeImage from '../../utils/image/resizeImage';
 import { CameraResult } from '../CameraView/types';
+import { DialogContext, DialogControl } from '../DialogManager';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 const emptyArray: any[] = [];
@@ -85,6 +84,10 @@ interface Props extends BaseProps {
 	highlightedWords: string[];
 	noteHash: string;
 	toolbarEnabled: boolean;
+}
+
+interface ComponentProps extends Props {
+	dialogs: DialogControl;
 }
 
 interface State {
@@ -117,7 +120,7 @@ interface State {
 	voiceTypingDialogShown: boolean;
 }
 
-class NoteScreenComponent extends BaseScreenComponent<Props, State> implements BaseNoteScreenComponent {
+class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> implements BaseNoteScreenComponent {
 	// This isn't in this.state because we don't want changing scroll to trigger
 	// a re-render.
 	private lastBodyScroll: number|undefined = undefined;
@@ -153,7 +156,7 @@ class NoteScreenComponent extends BaseScreenComponent<Props, State> implements B
 		return { header: null };
 	}
 
-	public constructor(props: Props) {
+	public constructor(props: ComponentProps) {
 		super(props);
 
 		this.state = {
@@ -206,7 +209,10 @@ class NoteScreenComponent extends BaseScreenComponent<Props, State> implements B
 
 		const saveDialog = async () => {
 			if (this.isModified()) {
-				const buttonId = await dialogs.pop(this, _('This note has been modified:'), [{ text: _('Save changes'), id: 'save' }, { text: _('Discard changes'), id: 'discard' }, { text: _('Cancel'), id: 'cancel' }]);
+				const buttonId = await this.props.dialogs.showMenu(
+					_('This note has been modified:'),
+					[{ text: _('Save changes'), id: 'save' }, { text: _('Discard changes'), id: 'discard' }, { text: _('Cancel'), id: 'cancel' }],
+				);
 
 				if (buttonId === 'cancel') return true;
 				if (buttonId === 'save') await this.saveNoteButton_press();
@@ -269,7 +275,7 @@ class NoteScreenComponent extends BaseScreenComponent<Props, State> implements B
 			try {
 				await CommandService.instance().execute('openItem', msg);
 			} catch (error) {
-				dialogs.error(this, error.message);
+				await this.props.dialogs.error(error.message);
 			}
 		};
 
@@ -664,14 +670,15 @@ class NoteScreenComponent extends BaseScreenComponent<Props, State> implements B
 		if (canResize) {
 			const resizeLargeImages = Setting.value('imageResizing');
 			if (resizeLargeImages === 'alwaysAsk') {
-				const userAnswer = await dialogs.pop(this, `${_('You are about to attach a large image (%dx%d pixels). Would you like to resize it down to %d pixels before attaching it?', dimensions.width, dimensions.height, maxSize)}\n\n${_('(You may disable this prompt in the options)')}`, [
-					{ text: _('Yes'), id: 'yes' },
-					{ text: _('No'), id: 'no' },
-					{ text: _('Cancel'), id: 'cancel' },
-				]);
+				const userAnswer = await this.props.dialogs.showMenu(
+					`${_('You are about to attach a large image (%dx%d pixels). Would you like to resize it down to %d pixels before attaching it?', dimensions.width, dimensions.height, maxSize)}\n\n${_('(You may disable this prompt in the options)')}`, [
+						{ text: _('Yes'), id: 'yes' },
+						{ text: _('No'), id: 'no' },
+						{ text: _('Cancel'), id: 'cancel' },
+					]);
 				if (userAnswer === 'yes') return await saveResizedImage();
 				if (userAnswer === 'no') return await saveOriginalImage();
-				if (userAnswer === 'cancel') return false;
+				if (userAnswer === 'cancel' || !userAnswer) return false;
 			} else if (resizeLargeImages === 'alwaysResize') {
 				return await saveResizedImage();
 			}
@@ -759,7 +766,7 @@ class NoteScreenComponent extends BaseScreenComponent<Props, State> implements B
 				if (!done) return null;
 			} else {
 				if (fileType === 'image' && mimeType !== 'image/svg+xml') {
-					dialogs.error(this, _('Unsupported image type: %s', mimeType));
+					await this.props.dialogs.error(_('Unsupported image type: %s', mimeType));
 					return null;
 				} else {
 					await shim.fsDriver().copy(localFilePath, targetPath);
@@ -773,7 +780,7 @@ class NoteScreenComponent extends BaseScreenComponent<Props, State> implements B
 			}
 		} catch (error) {
 			reg.logger().warn('Could not attach file:', error);
-			await dialogs.error(this, error.message);
+			await this.props.dialogs.error(error.message);
 			return null;
 		}
 
@@ -996,7 +1003,7 @@ class NoteScreenComponent extends BaseScreenComponent<Props, State> implements B
 			await Linking.openURL(url);
 		} catch (error) {
 			this.props.dispatch({ type: 'SIDE_MENU_CLOSE' });
-			await dialogs.error(this, error.message);
+			await this.props.dialogs.error(error.message);
 		}
 	}
 
@@ -1007,7 +1014,7 @@ class NoteScreenComponent extends BaseScreenComponent<Props, State> implements B
 		try {
 			await Linking.openURL(note.source_url);
 		} catch (error) {
-			await dialogs.error(this, error.message);
+			await this.props.dialogs.error(error.message);
 		}
 	}
 
@@ -1070,7 +1077,7 @@ class NoteScreenComponent extends BaseScreenComponent<Props, State> implements B
 		if (Platform.OS === 'ios') buttons.push({ text: _('Attach photo'), id: 'attachPhoto' });
 		buttons.push({ text: _('Take photo'), id: 'takePhoto' });
 
-		const buttonId = await dialogs.pop(this, _('Choose an option'), buttons);
+		const buttonId = await this.props.dialogs.showMenu(_('Choose an option'), buttons);
 
 		if (buttonId === 'takePhoto') await this.takePhoto_onPress();
 		if (buttonId === 'attachFile') await this.attachFile_onPress();
@@ -1631,12 +1638,6 @@ class NoteScreenComponent extends BaseScreenComponent<Props, State> implements B
 
 				<SelectDateTimeDialog themeId={this.props.themeId} shown={this.state.alarmDialogShown} date={dueDate} onAccept={this.onAlarmDialogAccept} onReject={this.onAlarmDialogReject} />
 
-				<DialogBox
-					// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-					ref={(dialogbox: any) => {
-						this.dialogbox = dialogbox;
-					}}
-				/>
 				{noteTagDialog}
 			</View>
 		);
@@ -1648,8 +1649,9 @@ class NoteScreenComponent extends BaseScreenComponent<Props, State> implements B
 // which can cause some bugs where previously set state to another note would interfere
 // how the new note should be rendered
 const NoteScreenWrapper = (props: Props) => {
+	const dialogs = useContext(DialogContext);
 	return (
-		<NoteScreenComponent key={props.noteId} {...props} />
+		<NoteScreenComponent key={props.noteId} dialogs={dialogs} {...props} />
 	);
 };
 

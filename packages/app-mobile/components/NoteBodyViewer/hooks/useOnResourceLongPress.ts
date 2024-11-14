@@ -55,7 +55,7 @@ export default function useOnResourceLongPress(callbacks: Callbacks) {
 			}
 		} catch (e) {
 			logger.error('Could not handle link long press', e);
-			void shim.showMessageBox(`An error occurred, check log for details: ${e}`);
+			void shim.showErrorDialog(`An error occurred, check log for details: ${e}`);
 		}
 	}, [onJoplinLinkClick, onRequestEditResource, dialogManager]);
 }

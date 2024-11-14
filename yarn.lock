@@ -8402,7 +8402,6 @@ __metadata:
     react-dom: 18.3.1
     react-native: 0.74.1
     react-native-device-info: 10.14.0
-    react-native-dialogbox: 0.6.10
     react-native-document-picker: 9.3.0
     react-native-dropdownalert: 5.1.0
     react-native-exit-app: 2.0.0
@@ -39431,18 +39430,6 @@ __metadata:
   peerDependencies:
     react-native: "*"
   checksum: bf0630beef9c391498122cc66708fa9922bf8335701b0fe7f30642f509d60441338607a89daaa86eb9ced675926ee948da034c63c03659053ce34c10d50bd9e3
-  languageName: node
-  linkType: hard
-
-"react-native-dialogbox@npm:0.6.10":
-  version: 0.6.10
-  resolution: "react-native-dialogbox@npm:0.6.10"
-  dependencies:
-    prop-types: ^15.6.2
-  peerDependencies:
-    react: "*"
-    react-native: ">=0.30.0"
-  checksum: 4163dbf7975551b905053b9df4cdbcb02116acb2aaf16e88546e0f48b82bc18af5f0fffec384dcb1f570cc35fc59804bdb7cba0a153e75cacd72201f159e7e58
   languageName: node
   linkType: hard
 

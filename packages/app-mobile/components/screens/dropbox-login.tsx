@@ -1,29 +1,29 @@
-const React = require('react');
+import * as React from 'react';
 
-const { View, Button, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView } = require('react-native');
+import { View, Button, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
+import { AppState } from '../../utils/types';
 const { connect } = require('react-redux');
-const { ScreenHeader } = require('../ScreenHeader');
-const { _ } = require('@joplin/lib/locale');
+import { ScreenHeader } from '../ScreenHeader';
+import { _ } from '@joplin/lib/locale';
 const { BaseScreenComponent } = require('../base-screen');
-const DialogBox = require('react-native-dialogbox').default;
-const { dialogs } = require('../../utils/dialogs.js');
 const Shared = require('@joplin/lib/components/shared/dropbox-login-shared');
-const { themeStyle } = require('../global-style');
+const shim = require('@joplin/lib/shim').default;
+import { themeStyle } from '../global-style';
 
 class DropboxLoginScreenComponent extends BaseScreenComponent {
-	constructor() {
+	public constructor() {
 		super();
 
 		this.styles_ = {};
 
-		this.shared_ = new Shared(this, msg => dialogs.info(this, msg), msg => dialogs.error(this, msg));
+		this.shared_ = new Shared(this, (msg: string) => shim.showMessageBox(msg), (msg: string) => shim.showErrorDialog(msg));
 	}
 
-	UNSAFE_componentWillMount() {
+	public UNSAFE_componentWillMount() {
 		this.shared_.refreshUrl();
 	}
 
-	styles() {
+	private styles() {
 		const themeId = this.props.themeId;
 		const theme = themeStyle(themeId);
 
@@ -47,7 +47,7 @@ class DropboxLoginScreenComponent extends BaseScreenComponent {
 		return this.styles_[themeId];
 	}
 
-	render() {
+	public render() {
 		const theme = themeStyle(this.props.themeId);
 
 		return (
@@ -70,21 +70,15 @@ class DropboxLoginScreenComponent extends BaseScreenComponent {
 					{/* Add this extra padding to make sure the view is scrollable when the keyboard is visible on small screens (iPhone SE) */}
 					<View style={{ height: 200 }}></View>
 				</ScrollView>
-
-				<DialogBox
-					ref={dialogbox => {
-						this.dialogbox = dialogbox;
-					}}
-				/>
 			</View>
 		);
 	}
 }
 
-const DropboxLoginScreen = connect(state => {
+const DropboxLoginScreen = connect((state: AppState) => {
 	return {
 		themeId: state.settings.theme,
 	};
 })(DropboxLoginScreenComponent);
 
-module.exports = { DropboxLoginScreen };
+export default DropboxLoginScreen;

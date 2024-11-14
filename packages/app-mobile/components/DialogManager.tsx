@@ -24,6 +24,8 @@ interface MenuChoice<IdType> {
 }
 
 export interface DialogControl {
+	info(message: string): Promise<void>;
+	error(message: string): Promise<void>;
 	prompt(title: string, message: string, buttons?: PromptButton[], options?: PromptOptions): void;
 	showMenu<IdType>(title: string, choices: MenuChoice<IdType>[]): Promise<IdType>;
 }
@@ -98,7 +100,23 @@ const DialogManager: React.FC<Props> = props => {
 		};
 
 		const defaultButtons = [{ text: _('OK') }];
-		return {
+		const control: DialogControl = {
+			info: (message: string) => {
+				return new Promise<void>((resolve) => {
+					control.prompt(_('Info'), message, [{
+						text: _('OK'),
+						onPress: () => resolve(),
+					}]);
+				});
+			},
+			error: (message: string) => {
+				return new Promise<void>((resolve) => {
+					control.prompt(_('Error'), message, [{
+						text: _('OK'),
+						onPress: () => resolve(),
+					}]);
+				});
+			},
 			prompt: (title: string, message: string, buttons: PromptButton[] = defaultButtons, options?: PromptOptions) => {
 				if (Platform.OS !== 'web' && Platform.OS !== 'android') {
 					// Alert.alert provides a more native style on iOS.
@@ -157,6 +175,8 @@ const DialogManager: React.FC<Props> = props => {
 				});
 			},
 		};
+
+		return control;
 	}, []);
 	const dialogControlRef = useRef(dialogControl);
 	dialogControlRef.current = dialogControl;

@@ -2,27 +2,24 @@ import { _ } from '@joplin/lib/locale';
 import { Alert } from 'react-native';
 import { DialogControl, PromptButton } from '../components/DialogManager';
 import { RefObject } from 'react';
+import { MessageBoxType, ShowMessageBoxOptions } from '@joplin/lib/shim';
 
-interface Options {
-	title: string;
-	buttons: string[];
-}
 
-const makeShowMessageBox = (dialogControl: null|RefObject<DialogControl>) => (message: string, options: Options = null) => {
+const makeShowMessageBox = (dialogControl: null|RefObject<DialogControl>) => (message: string, options: ShowMessageBoxOptions = null) => {
 	return new Promise<number>(resolve => {
-		const defaultButtons: PromptButton[] = [
-			{
-				text: _('OK'),
-				onPress: () => resolve(0),
-			},
-			{
-				text: _('Cancel'),
-				onPress: () => resolve(1),
-				style: 'cancel',
-			},
-		];
+		const okButton: PromptButton = {
+			text: _('OK'),
+			onPress: () => resolve(0),
+		};
+		const cancelButton: PromptButton = {
+			text: _('Cancel'),
+			onPress: () => resolve(1),
+			style: 'cancel',
+		};
+		const defaultConfirmButtons = [okButton, cancelButton];
+		const defaultAlertButtons = [okButton];
 
-		let buttons = defaultButtons;
+		let buttons = options?.type === MessageBoxType.Confirm ? defaultConfirmButtons : defaultAlertButtons;
 		if (options?.buttons) {
 			buttons = options.buttons.map((text, index) => {
 				return {
