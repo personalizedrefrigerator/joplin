@@ -1343,7 +1343,7 @@ class AppComponent extends React.Component {
 					},
 				},
 			}}>
-				<DialogManager>
+				<DialogManager themeId={this.props.themeId}>
 					{mainContent}
 				</DialogManager>
 			</PaperProvider>

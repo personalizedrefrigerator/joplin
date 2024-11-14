@@ -11,7 +11,6 @@ import { themeStyle } from '../global-style';
 import { FolderPickerOptions, ScreenHeader } from '../ScreenHeader';
 import { _ } from '@joplin/lib/locale';
 import ActionButton from '../buttons/FloatingActionButton';
-const { dialogs } = require('../../utils/dialogs.js');
 const DialogBox = require('react-native-dialogbox').default;
 import BackButtonService from '../../services/BackButtonService';
 import { BaseScreenComponent } from '../base-screen';
@@ -20,6 +19,7 @@ import { FolderEntity, NoteEntity, TagEntity } from '@joplin/lib/services/databa
 import { itemIsInTrash } from '@joplin/lib/services/trash';
 import AccessibleView from '../accessibility/AccessibleView';
 import { Dispatch } from 'redux';
+import { DialogControl } from '../DialogManager';
 
 interface Props {
 	dispatch: Dispatch;
@@ -40,6 +40,8 @@ interface Props {
 	selectedTagId: string;
 	selectedSmartFilterId: string;
 	notesParentType: string;
+
+	dialogManager: DialogControl;
 }
 
 interface State {
@@ -99,7 +101,7 @@ class NotesScreenComponent extends BaseScreenComponent<Props, State> {
 			id: { name: 'showCompletedTodos', value: !Setting.value('showCompletedTodos') },
 		});
 
-		const r = await dialogs.pop(this, Setting.settingMetadata('notes.sortOrder.field').label(), buttons);
+		const r = await this.props.dialogManager.showMenu(Setting.settingMetadata('notes.sortOrder.field').label(), buttons);
 		if (!r) return;
 
 		Setting.setValue(r.name, r.value);

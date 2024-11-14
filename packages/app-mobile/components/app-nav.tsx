@@ -6,6 +6,7 @@ import { Component } from 'react';
 import { KeyboardAvoidingView, Keyboard, Platform, View, KeyboardEvent, Dimensions, EmitterSubscription } from 'react-native';
 import { AppState } from '../utils/types';
 import { themeStyle } from './global-style';
+import { DialogContext } from './DialogManager';
 
 interface State {
 	autoCompletionBarExtraHeight: number;
@@ -115,7 +116,9 @@ class AppNavComponent extends Component<Props, State> {
 				behavior={Platform.OS === 'ios' ? 'padding' : null}
 				style={style}
 			>
-				<NotesScreen visible={notesScreenVisible} />
+				<DialogContext.Consumer>{
+					dialogs => <NotesScreen visible={notesScreenVisible} dialogManager={dialogs}/>
+				}</DialogContext.Consumer>
 				{searchScreenLoaded && <SearchScreen visible={searchScreenVisible} />}
 				{!notesScreenVisible && !searchScreenVisible && <Screen navigation={{ state: route }} themeId={this.props.themeId} dispatch={this.props.dispatch} />}
 				<View style={{ height: this.state.autoCompletionBarExtraHeight }} />

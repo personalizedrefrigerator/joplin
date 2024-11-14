@@ -1,11 +1,12 @@
 import * as React from 'react';
 import { createContext, useEffect, useMemo, useRef, useState } from 'react';
-import { Alert, Platform, StyleSheet } from 'react-native';
-import { Button, Dialog, Portal, Text } from 'react-native-paper';
+import { Alert, Platform, StyleSheet, useWindowDimensions } from 'react-native';
+import { Button, Dialog, Divider, Portal, Surface, Text } from 'react-native-paper';
 import Modal from './Modal';
 import { _ } from '@joplin/lib/locale';
 import shim from '@joplin/lib/shim';
 import makeShowMessageBox from '../utils/makeShowMessageBox';
+import { themeStyle } from './global-style';
 
 export interface PromptButton {
 	text: string;
@@ -17,17 +18,30 @@ interface PromptOptions {
 	cancelable?: boolean;
 }
 
+interface MenuChoice<IdType> {
+	text: string;
+	id: IdType;
+}
+
 export interface DialogControl {
 	prompt(title: string, message: string, buttons?: PromptButton[], options?: PromptOptions): void;
+	showMenu<IdType>(title: string, choices: MenuChoice<IdType>[]): Promise<IdType>;
 }
 
 export const DialogContext = createContext<DialogControl>(null);
 
 interface Props {
+	themeId: number;
 	children: React.ReactNode;
 }
 
+enum DialogType {
+	Prompt,
+	Menu,
+}
+
 interface PromptDialogData {
+	type: DialogType;
 	key: string;
 	title: string;
 	message: string;
@@ -35,49 +49,77 @@ interface PromptDialogData {
 	onDismiss: (()=> void)|null;
 }
 
-const styles = StyleSheet.create({
-	dialogContainer: {
-		maxWidth: 400,
-		minWidth: '50%',
-		alignSelf: 'center',
-	},
-	modalContainer: {
-		marginTop: 'auto',
-		marginBottom: 'auto',
-	},
-});
+const useStyles = (themeId: number) => {
+	const windowSize = useWindowDimensions();
+
+	return useMemo(() => {
+		const theme = themeStyle(themeId);
+
+		return StyleSheet.create({
+			dialogContainer: {
+				backgroundColor: theme.backgroundColor,
+				borderRadius: 24,
+				paddingTop: 24,
+				maxHeight: windowSize.height,
+			},
+			modalContainer: {
+				marginLeft: 'auto',
+				marginRight: 'auto',
+				marginTop: 'auto',
+				marginBottom: 'auto',
+				width: Math.max(windowSize.width / 2, 400),
+			},
+
+			dialogContent: {
+				paddingBottom: 14,
+			},
+			dialogActions: {
+				paddingBottom: 14,
+			},
+			menuDialogActions: {
+				paddingTop: 4,
+				flexDirection: 'column',
+				alignItems: 'stretch',
+			},
+			menuDialogLabel: {
+				textAlign: 'center',
+			},
+		});
+	}, [windowSize.width, windowSize.height, themeId]);
+};
 
 const DialogManager: React.FC<Props> = props => {
 	const [dialogModels, setPromptDialogs] = useState<PromptDialogData[]>([]);
 	const nextDialogIdRef = useRef(0);
 
 	const dialogControl: DialogControl = useMemo(() => {
+		const onDismiss = (dialog: PromptDialogData) => {
+			setPromptDialogs(dialogs => dialogs.filter(d => d !== dialog));
+		};
+
 		const defaultButtons = [{ text: _('OK') }];
 		return {
 			prompt: (title: string, message: string, buttons: PromptButton[] = defaultButtons, options?: PromptOptions) => {
-				if (Platform.OS !== 'web') {
+				if (Platform.OS !== 'web' && Platform.OS !== 'android') {
 					// Alert.alert provides a more native style on iOS.
 					Alert.alert(title, message, buttons, options);
 
 					// Alert.alert doesn't work on web.
 				} else {
-					const onDismiss = () => {
-						setPromptDialogs(dialogs => dialogs.filter(d => d !== dialog));
-					};
-
 					const cancelable = options?.cancelable ?? true;
 					const dialog: PromptDialogData = {
+						type: DialogType.Prompt,
 						key: `dialog-${nextDialogIdRef.current++}`,
 						title,
 						message,
 						buttons: buttons.map(button => ({
 							...button,
 							onPress: () => {
-								onDismiss();
+								onDismiss(dialog);
 								button.onPress?.();
 							},
 						})),
-						onDismiss: cancelable ? onDismiss : null,
+						onDismiss: cancelable ? () => onDismiss(dialog) : null,
 					};
 
 					setPromptDialogs(dialogs => {
@@ -87,6 +129,32 @@ const DialogManager: React.FC<Props> = props => {
 						];
 					});
 				}
+			},
+			showMenu: function<T>(title: string, choices: MenuChoice<T>[]) {
+				return new Promise<T>((resolve) => {
+					const dismiss = () => onDismiss(dialog);
+
+					const dialog: PromptDialogData = {
+						type: DialogType.Menu,
+						key: `menu-dialog-${nextDialogIdRef.current++}`,
+						title: '',
+						message: title,
+						buttons: choices.map(choice => ({
+							text: choice.text,
+							onPress: () => {
+								dismiss();
+								resolve(choice.id);
+							},
+						})),
+						onDismiss: dismiss,
+					};
+					setPromptDialogs(dialogs => {
+						return [
+							...dialogs,
+							dialog,
+						];
+					});
+				});
 			},
 		};
 	}, []);
@@ -101,6 +169,8 @@ const DialogManager: React.FC<Props> = props => {
 		};
 	}, []);
 
+	const styles = useStyles(props.themeId);
+
 	const dialogComponents: React.ReactNode[] = [];
 	for (const dialog of dialogModels) {
 		const buttons = dialog.buttons.map((button, index) => {
@@ -108,22 +178,33 @@ const DialogManager: React.FC<Props> = props => {
 				<Button key={`${index}-${button.text}`} onPress={button.onPress}>{button.text}</Button>
 			);
 		});
+		const titleComponent = <Text variant='titleMedium' accessibilityRole='header'>{dialog.title}</Text>;
+
+		const isMenu = dialog.type === DialogType.Menu;
 		dialogComponents.push(
-			<Dialog
+			<Surface
 				testID={'prompt-dialog'}
 				style={styles.dialogContainer}
 				key={dialog.key}
-				visible={true}
-				onDismiss={dialog.onDismiss}
+				elevation={1}
 			>
-				<Dialog.Title>{dialog.title}</Dialog.Title>
-				<Dialog.Content>
-					<Text variant='bodyMedium'>{dialog.message}</Text>
+				<Dialog.Content style={styles.dialogContent}>
+					{dialog.title ? titleComponent : null}
+					<Text
+						variant='bodyMedium'
+						style={isMenu ? styles.menuDialogLabel : null}
+					>{dialog.message}</Text>
 				</Dialog.Content>
-				<Dialog.Actions>
+				{isMenu ? <Divider/> : null}
+				<Dialog.Actions
+					style={[
+						styles.dialogActions,
+						isMenu ? styles.menuDialogActions : null,
+					]}
+				>
 					{buttons}
 				</Dialog.Actions>
-			</Dialog>,
+			</Surface>,
 		);
 	}
 
@@ -136,7 +217,7 @@ const DialogManager: React.FC<Props> = props => {
 			<Modal
 				visible={!!dialogComponents.length}
 				containerStyle={styles.modalContainer}
-				animationType='none'
+				animationType='fade'
 				backgroundColor='rgba(0, 0, 0, 0.1)'
 				transparent={true}
 				onRequestClose={dialogModels[dialogComponents.length - 1]?.onDismiss}
