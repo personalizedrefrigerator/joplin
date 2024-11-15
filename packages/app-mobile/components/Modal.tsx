@@ -45,7 +45,9 @@ const useStyles = (hasScrollView: boolean, backgroundColor: string|undefined) =>
 				flexShrink: 1,
 			},
 			modalScrollViewContent: {
-				minHeight: '100%',
+				// Make the scroll view's scrolling region at least as tall as its container.
+				// This makes it possible to vertically center the content of scrollable modals.
+				flexGrow: 1,
 			},
 		});
 	}, [hasScrollView, isLandscape, backgroundColor]);
