@@ -19,6 +19,8 @@ const useStyles = (themeId: number, isMenu: boolean) => {
 				backgroundColor: theme.backgroundColor,
 				borderRadius: 24,
 				paddingTop: 24,
+				marginLeft: 4,
+				marginRight: 4,
 			},
 
 			buttonScrollerContent: {
