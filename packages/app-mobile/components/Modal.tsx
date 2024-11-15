@@ -14,7 +14,7 @@ interface ModalElementProps extends ModalProps {
 	scrollOverflow?: boolean;
 }
 
-const useStyles = (backgroundColor?: string) => {
+const useStyles = (hasScrollView: boolean, backgroundColor: string|undefined) => {
 	const { width: windowWidth, height: windowHeight } = useWindowDimensions();
 	const isLandscape = windowWidth > windowHeight;
 	return useMemo(() => {
@@ -30,11 +30,17 @@ const useStyles = (backgroundColor?: string) => {
 		return StyleSheet.create({
 			modalBackground: {
 				...backgroundPadding,
-				backgroundColor,
 				flexGrow: 1,
 				flexShrink: 1,
+
+				// When hasScrollView, the modal background is wrapped in a ScrollView. In this case, it's
+				// possible to scroll content outside the background into view. To prevent the edge of the
+				// background from being visible, the background color is applied to the ScrollView container
+				// instead:
+				backgroundColor: hasScrollView ? null : backgroundColor,
 			},
 			modalScrollView: {
+				backgroundColor,
 				flexGrow: 1,
 				flexShrink: 1,
 			},
@@ -42,7 +48,7 @@ const useStyles = (backgroundColor?: string) => {
 				minHeight: '100%',
 			},
 		});
-	}, [isLandscape, backgroundColor]);
+	}, [hasScrollView, isLandscape, backgroundColor]);
 };
 
 const useBackgroundTouchListeners = (onRequestClose: (event: GestureResponderEvent)=> void, backdropRef: RefObject<View>) => {
@@ -66,7 +72,7 @@ const ModalElement: React.FC<ModalElementProps> = ({
 	scrollOverflow,
 	...modalProps
 }) => {
-	const styles = useStyles(backgroundColor);
+	const styles = useStyles(scrollOverflow, backgroundColor);
 
 	// contentWrapper adds padding. To allow styling the region outside of the modal
 	// (e.g. to add a background), the content is wrapped twice.
