@@ -28,6 +28,7 @@ const useStyles = () => {
 				marginTop: 'auto',
 				marginBottom: 'auto',
 				width: Math.max(windowSize.width / 2, 400),
+				maxWidth: '100%',
 			},
 		});
 	}, [windowSize.width]);
