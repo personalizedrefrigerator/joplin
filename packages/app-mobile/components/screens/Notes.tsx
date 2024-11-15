@@ -11,14 +11,14 @@ import { themeStyle } from '../global-style';
 import { FolderPickerOptions, ScreenHeader } from '../ScreenHeader';
 import { _ } from '@joplin/lib/locale';
 import ActionButton from '../buttons/FloatingActionButton';
-import BackButtonService from '../../services/BackButtonService';
 import { BaseScreenComponent } from '../base-screen';
 import { AppState } from '../../utils/types';
 import { FolderEntity, NoteEntity, TagEntity } from '@joplin/lib/services/database/types';
 import { itemIsInTrash } from '@joplin/lib/services/trash';
 import AccessibleView from '../accessibility/AccessibleView';
 import { Dispatch } from 'redux';
-import { DialogControl } from '../DialogManager';
+import { DialogContext, DialogControl } from '../DialogManager';
+import { useContext } from 'react';
 
 interface Props {
 	dispatch: Dispatch;
@@ -39,25 +39,24 @@ interface Props {
 	selectedTagId: string;
 	selectedSmartFilterId: string;
 	notesParentType: string;
-
-	dialogManager: DialogControl;
 }
 
 interface State {
 
 }
 
+interface ComponentProps extends Props {
+	dialogManager: DialogControl;
+}
+
 type Styles = Record<string, ViewStyle|TextStyle>;
 
-class NotesScreenComponent extends BaseScreenComponent<Props, State> {
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Partial refactor of old code from before rule was applied
-	private dialogbox: any;
-
+class NotesScreenComponent extends BaseScreenComponent<ComponentProps, State> {
 	private onAppStateChangeSub_: NativeEventSubscription = null;
 	private styles_: Record<number, Styles> = {};
 	private folderPickerOptions_: FolderPickerOptions;
 
-	public constructor(props: Props) {
+	public constructor(props: ComponentProps) {
 		super(props);
 	}
 
@@ -106,14 +105,6 @@ class NotesScreenComponent extends BaseScreenComponent<Props, State> {
 		Setting.setValue(r.name, r.value);
 	};
 
-	private backHandler = () => {
-		if (this.dialogbox && this.dialogbox.state && this.dialogbox.state.isVisible) {
-			this.dialogbox.close();
-			return true;
-		}
-		return false;
-	};
-
 	public styles() {
 		if (!this.styles_) this.styles_ = {};
 		const themeId = this.props.themeId;
@@ -133,14 +124,12 @@ class NotesScreenComponent extends BaseScreenComponent<Props, State> {
 	}
 
 	public async componentDidMount() {
-		BackButtonService.addHandler(this.backHandler);
 		await this.refreshNotes();
 		this.onAppStateChangeSub_ = RNAppState.addEventListener('change', this.onAppStateChange_);
 	}
 
 	public async componentWillUnmount() {
 		if (this.onAppStateChangeSub_) this.onAppStateChangeSub_.remove();
-		BackButtonService.removeHandler(this.backHandler);
 	}
 
 	public async componentDidUpdate(prevProps: Props) {
@@ -304,6 +293,11 @@ class NotesScreenComponent extends BaseScreenComponent<Props, State> {
 	}
 }
 
+const NotesScreenWrapper: React.FC<Props> = props => {
+	const dialogManager = useContext(DialogContext);
+	return <NotesScreenComponent {...props} dialogManager={dialogManager}/>;
+};
+
 const NotesScreen = connect((state: AppState) => {
 	return {
 		folders: state.folders,
@@ -322,6 +316,6 @@ const NotesScreen = connect((state: AppState) => {
 		noteSelectionEnabled: state.noteSelectionEnabled,
 		notesOrder: stateUtils.notesOrder(state.settings),
 	};
-})(NotesScreenComponent);
+})(NotesScreenWrapper);
 
 export default NotesScreen;
