@@ -20,7 +20,8 @@ const makeShowMessageBox = (dialogControl: null|RefObject<DialogControl>) => (me
 		const defaultConfirmButtons = [okButton, cancelButton];
 		const defaultAlertButtons = [okButton];
 
-		let buttons = options?.type === MessageBoxType.Confirm ? defaultConfirmButtons : defaultAlertButtons;
+		const dialogType = options.type ?? MessageBoxType.Confirm;
+		let buttons = dialogType === MessageBoxType.Confirm ? defaultConfirmButtons : defaultAlertButtons;
 		if (options?.buttons) {
 			buttons = options.buttons.map((text, index) => {
 				return {

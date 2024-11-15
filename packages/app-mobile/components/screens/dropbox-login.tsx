@@ -7,7 +7,7 @@ import { ScreenHeader } from '../ScreenHeader';
 import { _ } from '@joplin/lib/locale';
 const { BaseScreenComponent } = require('../base-screen');
 const Shared = require('@joplin/lib/components/shared/dropbox-login-shared');
-const shim = require('@joplin/lib/shim').default;
+import shim, { MessageBoxType } from '@joplin/lib/shim';
 import { themeStyle } from '../global-style';
 
 class DropboxLoginScreenComponent extends BaseScreenComponent {
@@ -16,7 +16,11 @@ class DropboxLoginScreenComponent extends BaseScreenComponent {
 
 		this.styles_ = {};
 
-		this.shared_ = new Shared(this, (msg: string) => shim.showMessageBox(msg), (msg: string) => shim.showErrorDialog(msg));
+		this.shared_ = new Shared(
+			this,
+			(msg: string) => shim.showMessageBox(msg, { type: MessageBoxType.Info }),
+			(msg: string) => shim.showErrorDialog(msg),
+		);
 	}
 
 	public UNSAFE_componentWillMount() {
