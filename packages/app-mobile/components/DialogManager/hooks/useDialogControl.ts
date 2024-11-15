@@ -33,11 +33,10 @@ const useDialogControl = (setPromptDialogs: SetPromptDialogs) => {
 				});
 			},
 			prompt: (title: string, message: string, buttons: PromptButton[] = defaultButtons, options?: PromptOptions) => {
-				if (Platform.OS === 'ios') {
-					// Alert.alert provides a more native style on iOS.
+				// Alert.alert doesn't work on web.
+				if (Platform.OS !== 'web') {
+					// Note: Alert.alert provides a more native style on iOS.
 					Alert.alert(title, message, buttons, options);
-
-					// Alert.alert doesn't work on web.
 				} else {
 					const cancelable = options?.cancelable ?? true;
 					const dialog: PromptDialogData = {
