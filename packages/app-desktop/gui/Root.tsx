@@ -88,6 +88,11 @@ async function initialize() {
 	});
 
 	store.dispatch({
+		type: 'EDITOR_PLUGIN_VIEW_IDS_CHANGED',
+		value: Setting.value('plugins.shownEditorViewIds'),
+	});
+
+	store.dispatch({
 		type: 'NOTE_VISIBLE_PANES_SET',
 		panes: Setting.value('noteVisiblePanes'),
 	});

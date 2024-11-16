@@ -36,6 +36,7 @@ export interface VisibleDialogs {
 
 export interface AppWindowState extends WindowState {
 	noteVisiblePanes: string[];
+	shownEditorPluginViewIds: string[];
 	editorCodeView: boolean;
 	visibleDialogs: VisibleDialogs;
 	dialogs: AppStateDialog[];
@@ -74,6 +75,7 @@ export const createAppDefaultWindowState = (): AppWindowState => {
 		visibleDialogs: {},
 		dialogs: [],
 		noteVisiblePanes: ['editor', 'viewer'],
+		shownEditorPluginViewIds: [],
 		editorCodeView: true,
 		devToolsVisible: false,
 	};
@@ -214,6 +216,13 @@ export default function(state: AppState, action: any) {
 			newState = {
 				...state,
 				editorCodeView: action.value,
+			};
+			break;
+
+		case 'EDITOR_PLUGIN_VIEW_IDS_CHANGED':
+			newState = {
+				...state,
+				shownEditorPluginViewIds: action.value,
 			};
 			break;
 

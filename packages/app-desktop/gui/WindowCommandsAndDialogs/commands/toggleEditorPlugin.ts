@@ -3,6 +3,7 @@ import { _ } from '@joplin/lib/locale';
 import Setting from '@joplin/lib/models/Setting';
 import getActivePluginEditorView from '@joplin/lib/services/plugins/utils/getActivePluginEditorView';
 import Logger from '@joplin/utils/Logger';
+import { AppState } from '../../../app.reducer';
 
 const logger = Logger.create('toggleEditorPlugin');
 
@@ -15,7 +16,7 @@ export const declaration: CommandDeclaration = {
 export const runtime = (): CommandRuntime => {
 	return {
 		execute: async (context: CommandContext) => {
-			const shownEditorViewIds = Setting.value('plugins.shownEditorViewIds');
+			const shownEditorViewIds = [...(context.state as AppState).shownEditorPluginViewIds];
 			const { editorPlugin, editorView } = getActivePluginEditorView(context.state.pluginService.plugins);
 
 			if (!editorPlugin) {
@@ -32,6 +33,7 @@ export const runtime = (): CommandRuntime => {
 			}
 
 			Setting.setValue('plugins.shownEditorViewIds', shownEditorViewIds);
+			context.dispatch({ type: 'EDITOR_PLUGIN_VIEW_IDS_CHANGED', value: shownEditorViewIds });
 		},
 	};
 };

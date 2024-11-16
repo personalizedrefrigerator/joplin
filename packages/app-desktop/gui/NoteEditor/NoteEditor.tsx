@@ -93,7 +93,7 @@ function NoteEditorContent(props: NoteEditorProps) {
 	const noteSearchBarRef = useRef(null);
 	const viewUpdateAsyncQueue_ = useRef<AsyncActionQueue>(new AsyncActionQueue(100, IntervalType.Fixed));
 
-	const shownEditorViewIds = props['plugins.shownEditorViewIds'];
+	const shownEditorViewIds = props.shownEditorPluginViewIds;
 
 	// Should be constant and unique to this instance of the editor.
 	const editorId = useMemo(() => {
@@ -733,7 +733,7 @@ const mapStateToProps = (state: AppState, ownProps: ConnectProps) => {
 		highlightedWords: state.highlightedWords,
 		plugins: state.pluginService.plugins,
 		pluginHtmlContents: state.pluginService.pluginHtmlContents,
-		'plugins.shownEditorViewIds': state.settings['plugins.shownEditorViewIds'] || [],
+		shownEditorPluginViewIds: windowState.shownEditorPluginViewIds,
 		toolbarButtonInfos: toolbarButtonUtils.commandsToToolbarButtons([
 			'historyBackward',
 			'historyForward',
