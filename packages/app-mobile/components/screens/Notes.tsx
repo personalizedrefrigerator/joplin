@@ -166,7 +166,7 @@ class NotesScreenComponent extends BaseScreenComponent<Props, State> {
 			parentId: parent.id,
 		});
 
-		if (source === props.notesSource) return;
+		if (source === props.notesSource && false) return;
 		// For now, search refresh is handled by the search screen.
 		if (props.notesParentType === 'Search') return;
 
@@ -222,11 +222,11 @@ class NotesScreenComponent extends BaseScreenComponent<Props, State> {
 
 	public folderPickerOptions() {
 		const options = {
-			enabled: this.props.noteSelectionEnabled,
+			visible: this.props.noteSelectionEnabled,
 			mustSelect: true,
 		};
 
-		if (this.folderPickerOptions_ && options.enabled === this.folderPickerOptions_.enabled) return this.folderPickerOptions_;
+		if (this.folderPickerOptions_ && options.visible === this.folderPickerOptions_.visible) return this.folderPickerOptions_;
 
 		this.folderPickerOptions_ = options;
 		return this.folderPickerOptions_;

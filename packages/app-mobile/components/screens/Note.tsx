@@ -50,7 +50,7 @@ import { isSupportedLanguage } from '../../services/voiceTyping/vosk';
 import { ChangeEvent as EditorChangeEvent, SelectionRangeChangeEvent, UndoRedoDepthChangeEvent } from '@joplin/editor/events';
 import { join } from 'path';
 import { Dispatch } from 'redux';
-import { RefObject } from 'react';
+import { RefObject, useRef } from 'react';
 import { SelectionRange } from '../NoteEditor/types';
 import { getNoteCallbackUrl } from '@joplin/lib/callbackUrlUtils';
 import { AppState } from '../../utils/types';
@@ -1372,7 +1372,8 @@ class NoteScreenComponent extends BaseScreenComponent<Props, State> implements B
 
 	public folderPickerOptions() {
 		const options = {
-			enabled: !this.state.readOnly,
+			visible: !this.state.readOnly,
+			disabled: false,
 			selectedFolderId: this.state.folder ? this.state.folder.id : null,
 			onValueChange: this.folderPickerOptions_valueChanged,
 		};
@@ -1380,7 +1381,7 @@ class NoteScreenComponent extends BaseScreenComponent<Props, State> implements B
 		if (
 			this.folderPickerOptions_
 			&& options.selectedFolderId === this.folderPickerOptions_.selectedFolderId
-			&& options.enabled === this.folderPickerOptions_.enabled
+			&& options.visible === this.folderPickerOptions_.visible
 		) {
 			return this.folderPickerOptions_;
 		}
@@ -1639,8 +1640,18 @@ class NoteScreenComponent extends BaseScreenComponent<Props, State> implements B
 // which can cause some bugs where previously set state to another note would interfere
 // how the new note should be rendered
 const NoteScreenWrapper = (props: Props) => {
+	const lastNonNullNoteIdRef = useRef(props.noteId);
+	if (props.noteId) {
+		lastNonNullNoteIdRef.current = props.noteId;
+	}
+
+	// This keeps the current note open even if it's no longer present in selectedNoteIds.
+	// This might happen, for example, if the selected note is moved to an unselected
+	// folder.
+	const noteId = lastNonNullNoteIdRef.current;
+
 	return (
-		<NoteScreenComponent key={props.noteId} {...props} />
+		<NoteScreenComponent key={noteId} {...props} noteId={noteId} />
 	);
 };
 

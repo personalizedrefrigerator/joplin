@@ -10,7 +10,6 @@ const goToNote = async (id: string, hash?: string) => {
 	return NavService.go('Note', {
 		noteId: id,
 		noteHash: hash,
-		folderId: note.parent_id,
 	});
 };
 
