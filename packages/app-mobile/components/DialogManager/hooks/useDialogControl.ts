@@ -71,11 +71,11 @@ const useDialogControl = (setPromptDialogs: SetPromptDialogs) => {
 						key: `menu-dialog-${nextDialogIdRef.current++}`,
 						title: '',
 						message: title,
-						buttons: choices.map(choice => ({
-							text: choice.text,
+						buttons: choices.map(({ id, ...buttonProps }) => ({
+							...buttonProps,
 							onPress: () => {
 								dismiss();
-								resolve(choice.id);
+								resolve(id);
 							},
 						})),
 						onDismiss: dismiss,

@@ -19,6 +19,7 @@ import AccessibleView from '../accessibility/AccessibleView';
 import { Dispatch } from 'redux';
 import { DialogContext, DialogControl } from '../DialogManager';
 import { useContext } from 'react';
+import { MenuChoice } from '../DialogManager/types';
 
 interface Props {
 	dispatch: Dispatch;
@@ -68,34 +69,35 @@ class NotesScreenComponent extends BaseScreenComponent<ComponentProps, State> {
 	};
 
 	private sortButton_press = async () => {
-		const buttons = [];
+		type IdType = { name: string; value: string|boolean };
+		const buttons: MenuChoice<IdType>[] = [];
 		const sortNoteOptions = Setting.enumOptions('notes.sortOrder.field');
-
-		const makeCheckboxText = function(selected: boolean, sign: string, label: string) {
-			const s = sign === 'tick' ? '✓' : '⬤';
-			return (selected ? `${s} ` : '') + label;
-		};
 
 		for (const field in sortNoteOptions) {
 			if (!sortNoteOptions.hasOwnProperty(field)) continue;
 			buttons.push({
-				text: makeCheckboxText(Setting.value('notes.sortOrder.field') === field, 'bullet', sortNoteOptions[field]),
+				text: sortNoteOptions[field],
+				iconChecked: 'fas fa-circle',
+				checked: Setting.value('notes.sortOrder.field') === field,
 				id: { name: 'notes.sortOrder.field', value: field },
 			});
 		}
 
 		buttons.push({
-			text: makeCheckboxText(Setting.value('notes.sortOrder.reverse'), 'tick', `[ ${Setting.settingMetadata('notes.sortOrder.reverse').label()} ]`),
+			text: `[ ${Setting.settingMetadata('notes.sortOrder.reverse').label()} ]`,
+			checked: Setting.value('notes.sortOrder.reverse'),
 			id: { name: 'notes.sortOrder.reverse', value: !Setting.value('notes.sortOrder.reverse') },
 		});
 
 		buttons.push({
-			text: makeCheckboxText(Setting.value('uncompletedTodosOnTop'), 'tick', `[ ${Setting.settingMetadata('uncompletedTodosOnTop').label()} ]`),
+			text: `[ ${Setting.settingMetadata('uncompletedTodosOnTop').label()} ]`,
+			checked: Setting.value('uncompletedTodosOnTop'),
 			id: { name: 'uncompletedTodosOnTop', value: !Setting.value('uncompletedTodosOnTop') },
 		});
 
 		buttons.push({
-			text: makeCheckboxText(Setting.value('showCompletedTodos'), 'tick', `[ ${Setting.settingMetadata('showCompletedTodos').label()} ]`),
+			text: `[ ${Setting.settingMetadata('showCompletedTodos').label()} ]`,
+			checked: Setting.value('showCompletedTodos'),
 			id: { name: 'showCompletedTodos', value: !Setting.value('showCompletedTodos') },
 		});
 

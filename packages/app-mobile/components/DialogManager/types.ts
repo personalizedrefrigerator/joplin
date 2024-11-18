@@ -1,16 +1,21 @@
 
-export interface PromptButton {
+interface BaseButton {
 	text: string;
-	onPress?: ()=> void;
 	style?: 'cancel'|'default'|'destructive';
+
+	checked?: boolean|null;
+	iconChecked?: string;
+}
+
+export interface PromptButton extends BaseButton {
+	onPress?: ()=> void;
 }
 
 export interface PromptOptions {
 	cancelable?: boolean;
 }
 
-export interface MenuChoice<IdType> {
-	text: string;
+export interface MenuChoice<IdType> extends BaseButton {
 	id: IdType;
 }
 
