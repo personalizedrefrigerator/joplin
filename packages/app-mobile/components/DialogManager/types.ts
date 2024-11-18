@@ -1,5 +1,5 @@
 
-interface BaseButton {
+interface BaseButtonSpec {
 	text: string;
 	style?: 'cancel'|'default'|'destructive';
 
@@ -7,7 +7,7 @@ interface BaseButton {
 	iconChecked?: string;
 }
 
-export interface PromptButton extends BaseButton {
+export interface PromptButtonSpec extends BaseButtonSpec {
 	onPress?: ()=> void;
 }
 
@@ -15,14 +15,14 @@ export interface PromptOptions {
 	cancelable?: boolean;
 }
 
-export interface MenuChoice<IdType> extends BaseButton {
+export interface MenuChoice<IdType> extends BaseButtonSpec {
 	id: IdType;
 }
 
 export interface DialogControl {
 	info(message: string): Promise<void>;
 	error(message: string): Promise<void>;
-	prompt(title: string, message: string, buttons?: PromptButton[], options?: PromptOptions): void;
+	prompt(title: string, message: string, buttons?: PromptButtonSpec[], options?: PromptOptions): void;
 	showMenu<IdType>(title: string, choices: MenuChoice<IdType>[]): Promise<IdType>;
 }
 
@@ -36,7 +36,7 @@ export interface PromptDialogData {
 	key: string;
 	title: string;
 	message: string;
-	buttons: PromptButton[];
+	buttons: PromptButtonSpec[];
 	onDismiss: (()=> void)|null;
 }
 

@@ -3,16 +3,16 @@ import { Alert } from 'react-native';
 import { DialogControl } from '../components/DialogManager';
 import { RefObject } from 'react';
 import { MessageBoxType, ShowMessageBoxOptions } from '@joplin/lib/shim';
-import { PromptButton } from '../components/DialogManager/types';
+import { PromptButtonSpec } from '../components/DialogManager/types';
 
 
 const makeShowMessageBox = (dialogControl: null|RefObject<DialogControl>) => (message: string, options: ShowMessageBoxOptions = null) => {
 	return new Promise<number>(resolve => {
-		const okButton: PromptButton = {
+		const okButton: PromptButtonSpec = {
 			text: _('OK'),
 			onPress: () => resolve(0),
 		};
-		const cancelButton: PromptButton = {
+		const cancelButton: PromptButtonSpec = {
 			text: _('Cancel'),
 			onPress: () => resolve(1),
 			style: 'cancel',

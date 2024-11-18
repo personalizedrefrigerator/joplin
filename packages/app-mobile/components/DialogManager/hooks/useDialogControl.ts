@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Alert, Platform } from 'react-native';
-import { DialogControl, DialogType, MenuChoice, PromptButton, PromptDialogData, PromptOptions } from '../types';
+import { DialogControl, DialogType, MenuChoice, PromptButtonSpec, PromptDialogData, PromptOptions } from '../types';
 import { _ } from '@joplin/lib/locale';
 import { useMemo, useRef } from 'react';
 
@@ -32,7 +32,7 @@ const useDialogControl = (setPromptDialogs: SetPromptDialogs) => {
 					}]);
 				});
 			},
-			prompt: (title: string, message: string, buttons: PromptButton[] = defaultButtons, options?: PromptOptions) => {
+			prompt: (title: string, message: string, buttons: PromptButtonSpec[] = defaultButtons, options?: PromptOptions) => {
 				// Alert.alert doesn't work on web.
 				if (Platform.OS !== 'web') {
 					// Note: Alert.alert provides a more native style on iOS.

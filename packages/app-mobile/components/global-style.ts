@@ -3,6 +3,8 @@ import { Platform, TextStyle, ViewStyle } from 'react-native';
 import { themeById } from '@joplin/lib/theme';
 import { Theme as BaseTheme } from '@joplin/lib/themes/type';
 
+const Color = require('color');
+
 const baseStyle = {
 	appearance: 'light',
 	fontSize: 16,
@@ -16,12 +18,15 @@ const baseStyle = {
 };
 
 export type ThemeStyle = BaseTheme & typeof baseStyle & {
+	backgroundColorHover4: string;
+
 	fontSize: number;
 	fontSizeSmaller: number;
 	marginRight: number;
 	marginLeft: number;
 	marginTop: number;
 	marginBottom: number;
+	borderRadius: number;
 	icon: TextStyle;
 	lineInput: ViewStyle;
 	buttonRow: ViewStyle;
@@ -112,6 +117,9 @@ function extraStyles(theme: BaseTheme) {
 		keyboardAppearance: theme.appearance,
 		color5: theme.color5 ?? theme.backgroundColor4,
 		backgroundColor5: theme.backgroundColor5 ?? theme.color4,
+
+		backgroundColorHover4: Color(theme.color4).alpha(0.12).rgb().string(),
+		borderRadius: 24,
 	};
 }
 
