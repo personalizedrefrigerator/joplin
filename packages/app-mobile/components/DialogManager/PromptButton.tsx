@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useMemo } from 'react';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, TextStyle, View } from 'react-native';
 import { TouchableRipple, Text } from 'react-native-paper';
 import { PromptButtonSpec } from './types';
 import { ThemeStyle, themeStyle } from '../global-style';
@@ -13,17 +13,32 @@ interface Props {
 
 const useStyles = (theme: ThemeStyle) => {
 	return useMemo(() => {
+		const buttonText: TextStyle = {
+			color: theme.color4,
+			textAlign: 'center',
+		};
+
 		return StyleSheet.create({
+			buttonContainer: {
+				// This applies the borderRadius to the TouchableRipple's parent, which
+				// seems necessary on Android.
+				borderRadius: theme.borderRadius,
+				overflow: 'hidden',
+			},
 			button: {
 				borderRadius: theme.borderRadius,
 				padding: 10,
 			},
-			buttonText: {
-				color: theme.color4,
-				textAlign: 'center',
+			buttonContent: {
+				display: 'flex',
+				flexDirection: 'row',
+				justifyContent: 'center',
+				alignItems: 'baseline',
 			},
+			buttonText,
 			icon: {
-				marginEnd: 8,
+				...buttonText,
+				marginRight: 8,
 			},
 		});
 	}, [theme]);
@@ -47,16 +62,21 @@ const PromptButton: React.FC<Props> = props => {
 	) : null;
 
 	return (
-		<TouchableRipple
-			onPress={onPress}
-			style={styles.button}
-			rippleColor={theme.backgroundColorHover4}
-			accessibilityRole={isCheckbox ? 'checkbox' : 'button'}
-			accessibilityState={isCheckbox ? { checked } : null}
-			aria-checked={isCheckbox ? checked : undefined}
-		>
-			<Text style={styles.buttonText}>{icon}{text}</Text>
-		</TouchableRipple>
+		<View style={styles.buttonContainer}>
+			<TouchableRipple
+				onPress={onPress}
+				style={styles.button}
+				rippleColor={theme.backgroundColorHover4}
+				accessibilityRole={isCheckbox ? 'checkbox' : 'button'}
+				accessibilityState={isCheckbox ? { checked } : null}
+				aria-checked={isCheckbox ? checked : undefined}
+			>
+				<View style={styles.buttonContent}>
+					{icon}
+					<Text style={styles.buttonText}>{text}</Text>
+				</View>
+			</TouchableRipple>
+		</View>
 	);
 };
 
