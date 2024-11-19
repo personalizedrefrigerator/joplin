@@ -139,7 +139,13 @@ class NoteItemComponent extends PureComponent<Props, State> {
 		const noteTitle = Note.displayTitle(note);
 
 		return (
-			<TouchableOpacity onPress={this.onPress} onLongPress={this.onLongPress} activeOpacity={0.5}>
+			<TouchableOpacity
+				onPress={this.onPress}
+				onLongPress={this.onLongPress}
+				activeOpacity={0.5}
+				accessibilityHint={_('Opens note')}
+				accessibilityRole='button'
+			>
 				<View style={selectionWrapperStyle}>
 					<View style={opacityStyle}>
 						<View style={listItemStyle}>
