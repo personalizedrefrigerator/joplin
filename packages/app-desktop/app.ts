@@ -713,6 +713,9 @@ class Application extends BaseApplication {
 			SearchEngine.instance().scheduleSyncTables();
 		});
 
+		// Used by tests
+		ipcRenderer.send('startup-finished');
+
 		// setTimeout(() => {
 		// 	void populateDatabase(reg.db(), {
 		// 		clearDatabase: true,
