@@ -15,12 +15,12 @@ test.describe('main', () => {
 		// A window should open with the correct title
 		expect(await mainWindow.title()).toMatch(/^Joplin/);
 
-		const mainPage = new MainScreen(mainWindow);
+		const mainPage = await new MainScreen(mainWindow).setup();
 		await mainPage.waitFor();
 	});
 
 	test('should be able to create and edit a new note', async ({ mainWindow }) => {
-		const mainScreen = new MainScreen(mainWindow);
+		const mainScreen = await new MainScreen(mainWindow).setup();
 		const editor = await mainScreen.createNewNote('Test note');
 
 		// Note list should contain the new note
@@ -41,7 +41,7 @@ test.describe('main', () => {
 	});
 
 	test('mermaid and KaTeX should render', async ({ mainWindow }) => {
-		const mainScreen = new MainScreen(mainWindow);
+		const mainScreen = await new MainScreen(mainWindow).setup();
 		const editor = await mainScreen.createNewNote('🚧 Test 🚧');
 
 		const testCommitId = 'bf59b2';
@@ -97,7 +97,7 @@ test.describe('main', () => {
 	});
 
 	test('should correctly resize large images', async ({ electronApp, mainWindow }) => {
-		const mainScreen = new MainScreen(mainWindow);
+		const mainScreen = await new MainScreen(mainWindow).setup();
 		await mainScreen.createNewNote('Image resize test (part 1)');
 		const editor = mainScreen.noteEditor;
 
@@ -138,7 +138,7 @@ test.describe('main', () => {
 
 	for (const target of ['', '_blank']) {
 		test(`clicking on an external link with target=${JSON.stringify(target)} should try to launch a browser`, async ({ electronApp, mainWindow }) => {
-			const mainScreen = new MainScreen(mainWindow);
+			const mainScreen = await new MainScreen(mainWindow).setup();
 			await mainScreen.waitFor();
 
 			// Mock openExternal

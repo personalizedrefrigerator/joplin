@@ -24,6 +24,12 @@ export default class MainScreen {
 		this.goToAnything = new GoToAnything(page, this);
 	}
 
+	public async setup() {
+		await this.waitFor();
+		await this.sidebar.createNewFolder('Test');
+		return this;
+	}
+
 	public async waitFor() {
 		await this.newNoteButton.waitFor();
 		await this.noteList.waitFor();

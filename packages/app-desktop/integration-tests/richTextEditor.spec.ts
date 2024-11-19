@@ -6,7 +6,7 @@ import { basename, join } from 'path';
 
 test.describe('richTextEditor', () => {
 	test('HTML links should be preserved when editing a note', async ({ electronApp, mainWindow }) => {
-		const mainScreen = new MainScreen(mainWindow);
+		const mainScreen = await new MainScreen(mainWindow).setup();
 		await mainScreen.createNewNote('Testing!');
 		const editor = mainScreen.noteEditor;
 
@@ -50,7 +50,7 @@ test.describe('richTextEditor', () => {
 	});
 
 	test('should watch resources for changes when opened with ctrl+click', async ({ electronApp, mainWindow }) => {
-		const mainScreen = new MainScreen(mainWindow);
+		const mainScreen = await new MainScreen(mainWindow).setup();
 		await mainScreen.createNewNote('Testing!');
 		const editor = mainScreen.noteEditor;
 
@@ -83,7 +83,7 @@ test.describe('richTextEditor', () => {
 	});
 
 	test('pressing Tab should indent', async ({ mainWindow }) => {
-		const mainScreen = new MainScreen(mainWindow);
+		const mainScreen = await new MainScreen(mainWindow).setup();
 		await mainScreen.createNewNote('Testing tabs!');
 		const editor = mainScreen.noteEditor;
 
@@ -121,7 +121,7 @@ test.describe('richTextEditor', () => {
 	});
 
 	test('should be possible to navigate between the note title and rich text editor with enter/down/up keys', async ({ mainWindow }) => {
-		const mainScreen = new MainScreen(mainWindow);
+		const mainScreen = await new MainScreen(mainWindow).setup();
 		await mainScreen.createNewNote('Testing keyboard navigation!');
 
 		const editor = mainScreen.noteEditor;

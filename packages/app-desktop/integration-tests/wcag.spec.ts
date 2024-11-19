@@ -32,7 +32,7 @@ const expectNoViolations = async (page: Page) => {
 test.describe('wcag', () => {
 	for (const tabName of ['General', 'Plugins']) {
 		test(`should not detect significant issues in the settings screen ${tabName} tab`, async ({ electronApp, mainWindow }) => {
-			const mainScreen = new MainScreen(mainWindow);
+			const mainScreen = await new MainScreen(mainWindow).setup();
 			await mainScreen.waitFor();
 
 			await mainScreen.openSettings(electronApp);
@@ -50,7 +50,7 @@ test.describe('wcag', () => {
 	}
 
 	test('should not detect significant issues in the main screen with an open note', async ({ mainWindow }) => {
-		const mainScreen = new MainScreen(mainWindow);
+		const mainScreen = await new MainScreen(mainWindow).setup();
 		await mainScreen.waitFor();
 
 		await mainScreen.createNewNote('Test');
