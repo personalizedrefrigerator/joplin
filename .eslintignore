@@ -783,6 +783,8 @@ packages/app-mobile/services/profiles/index.js
 packages/app-mobile/services/voiceTyping/VoiceTyping.js
 packages/app-mobile/services/voiceTyping/utils/splitWhisperText.test.js
 packages/app-mobile/services/voiceTyping/utils/splitWhisperText.js
+packages/app-mobile/services/voiceTyping/utils/unzip.android.js
+packages/app-mobile/services/voiceTyping/utils/unzip.js
 packages/app-mobile/services/voiceTyping/vosk.android.js
 packages/app-mobile/services/voiceTyping/vosk.js
 packages/app-mobile/services/voiceTyping/whisper.js
