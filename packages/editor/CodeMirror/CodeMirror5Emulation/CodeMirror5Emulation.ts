@@ -416,12 +416,22 @@ export default class CodeMirror5Emulation extends BaseCodeMirror5Emulation {
 		this.editor.scrollDOM.appendChild(node);
 	}
 
+	private clipPositionToDocument(pos: number) {
+		if (pos >= this.cm6.state.doc.length) {
+			return this.cm6.state.doc.length;
+		}
+		if (pos < 0) {
+			return 0;
+		}
+		return pos;
+	}
+
 	public markText(from: DocumentPosition, to: DocumentPosition, options?: MarkTextOptions) {
 		const doc = this.editor.state.doc;
 
 		return this._decorator.markText(
-			posFromDocumentPosition(doc, from),
-			posFromDocumentPosition(doc, to),
+			this.clipPositionToDocument(posFromDocumentPosition(doc, from)),
+			this.clipPositionToDocument(posFromDocumentPosition(doc, to)),
 			options,
 		);
 	}
