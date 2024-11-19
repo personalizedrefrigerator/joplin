@@ -35,4 +35,11 @@ export default class NoteList {
 	public async expectNoteToBeSelected(title: string|RegExp) {
 		await expect(this.getNoteItemByTitle(title)).toHaveAttribute('aria-selected', 'true');
 	}
+
+	public expectNoteCountToBe(count: number) {
+		return expect.poll(async () => {
+			const firstItem = this.container.locator('[role=option][aria-setsize]').first();
+			return firstItem.evaluate(element => Number(element.ariaSetSize));
+		}).toBe(count);
+	}
 }
