@@ -562,7 +562,12 @@ class ScreenHeaderComponent extends PureComponent<ScreenHeaderProps, ScreenHeade
 				const title = 'title' in this.props && this.props.title !== null ? this.props.title : '';
 				return (
 					<>
-						<Text ellipsizeMode={'tail'} numberOfLines={1} style={this.styles().titleText}>{title}</Text>
+						<Text
+							ellipsizeMode={'tail'}
+							numberOfLines={1}
+							style={this.styles().titleText}
+							accessibilityRole='header'
+						>{title}</Text>
 						{hideableAfterTitleComponents}
 					</>
 				);
