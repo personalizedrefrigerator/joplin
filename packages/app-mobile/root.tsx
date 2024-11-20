@@ -56,7 +56,7 @@ import RevisionService from '@joplin/lib/services/RevisionService';
 import JoplinDatabase from '@joplin/lib/JoplinDatabase';
 import Database from '@joplin/lib/database';
 import NotesScreen from './components/screens/Notes';
-const { TagsScreen } = require('./components/screens/tags.js');
+import TagsScreen from './components/screens/tags';
 import ConfigScreen from './components/screens/ConfigScreen/ConfigScreen';
 const { FolderScreen } = require('./components/screens/folder.js');
 import LogScreen from './components/screens/LogScreen';
