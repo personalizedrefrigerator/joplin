@@ -18,7 +18,7 @@ There are also a few forks of existing packages under the "fork-*" name.
 
 ## Required dependencies
 
-All of the required dependencies are listed within the [devbox.json](../../devbox.json) file in the project root. You can either manually install them based on that list, or you can automatically install them on Linux or MacOS by using:
+All of the required dependencies are listed within the [devbox.json](https://github.com/laurent22/joplin/blob/dev/devbox.json) file in the project root. You can either manually install them based on that list, or you can automatically install them on Linux or MacOS by using:
 
 ```sh
 devbox shell
