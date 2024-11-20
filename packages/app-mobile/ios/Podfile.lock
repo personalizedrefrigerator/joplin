@@ -48,7 +48,7 @@ PODS:
   - JoplinRNShareExtension (1.0.0):
     - JoplinCommonShareExtension
     - React
-  - OpenSSL-Universal (3.1.5004)
+  - OpenSSL-Universal (3.3.2000)
   - RCT-Folly (2024.01.01.00):
     - boost
     - DoubleConversion
@@ -983,7 +983,7 @@ PODS:
     - React-Core
   - react-native-fingerprint-scanner (6.0.0):
     - React
-  - react-native-geolocation (3.2.1):
+  - react-native-geolocation (3.3.0):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -1380,15 +1380,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - RNZipArchive (6.1.2):
-    - React-Core
-    - RNZipArchive/Core (= 6.1.2)
-    - SSZipArchive (~> 2.2)
-  - RNZipArchive/Core (6.1.2):
-    - React-Core
-    - SSZipArchive (~> 2.2)
   - SocketRocket (0.7.0)
-  - SSZipArchive (2.4.3)
   - Yoga (0.0.0)
   - ZXingObjC/Core (3.6.9)
   - ZXingObjC/OneD (3.6.9):
@@ -1490,14 +1482,12 @@ DEPENDENCIES:
   - RNSecureRandom (from `../node_modules/react-native-securerandom`)
   - RNShare (from `../node_modules/react-native-share`)
   - RNVectorIcons (from `../node_modules/react-native-vector-icons`)
-  - RNZipArchive (from `../node_modules/react-native-zip-archive`)
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
 
 SPEC REPOS:
   trunk:
     - OpenSSL-Universal
     - SocketRocket
-    - SSZipArchive
     - ZXingObjC
 
 EXTERNAL SOURCES:
@@ -1684,8 +1674,6 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-share"
   RNVectorIcons:
     :path: "../node_modules/react-native-vector-icons"
-  RNZipArchive:
-    :path: "../node_modules/react-native-zip-archive"
   Yoga:
     :path: "../node_modules/react-native/ReactCommon/yoga"
 
@@ -1705,7 +1693,7 @@ SPEC CHECKSUMS:
   hermes-engine: 16b8530de1b383cdada1476cf52d1b52f0692cbc
   JoplinCommonShareExtension: a8b60b02704d85a7305627912c0240e94af78db7
   JoplinRNShareExtension: 485f3e6dad83b7b77f1572eabc249f869ee55c02
-  OpenSSL-Universal: 0db2e81615ad95efc90ce13a638986858da38c0d
+  OpenSSL-Universal: b60a3702c9fea8b3145549d421fdb018e53ab7b4
   RCT-Folly: 02617c592a293bd6d418e0a88ff4ee1f88329b47
   RCTDeprecation: efb313d8126259e9294dc4ee0002f44a6f676aba
   RCTRequired: f49ea29cece52aee20db633ae7edc4b271435562
@@ -1733,7 +1721,7 @@ SPEC CHECKSUMS:
   react-native-alarm-notification: a36e11891970bfda3e64c5b87c7a39ea3e3d0e1b
   react-native-document-picker: 5b97e24a7f1a1e4a50a72c540a043f32d29a70a2
   react-native-fingerprint-scanner: ac6656f18c8e45a7459302b84da41a44ad96dbbe
-  react-native-geolocation: fe0562c94eb0b6334f266aea717448dfd9b08cd0
+  react-native-geolocation: 5c5dd5de4571c55014e9e98214b273eed854f293
   react-native-get-random-values: 21325b2244dfa6b58878f51f9aa42821e7ba3d06
   react-native-image-picker: d3a65af2538ac5407e5329e50f057fb2456f15f8
   react-native-image-resizer: fd0c333eca55147bd55c5e054cac95dcd0da6814
@@ -1782,12 +1770,10 @@ SPEC CHECKSUMS:
   RNSecureRandom: 07efbdf2cd99efe13497433668e54acd7df49fef
   RNShare: 0fad69ae2d71de9d1f7b9a43acf876886a6cb99c
   RNVectorIcons: 2a2f79274248390b80684ea3c4400bd374a15c90
-  RNZipArchive: 6d736ee4e286dbbd9d81206b7a4da355596ca04a
   SocketRocket: abac6f5de4d4d62d24e11868d7a2f427e0ef940d
-  SSZipArchive: fe6a26b2a54d5a0890f2567b5cc6de5caa600aef
   Yoga: 348f8b538c3ed4423eb58a8e5730feec50bce372
   ZXingObjC: 8898711ab495761b2dbbdec76d90164a6d7e14c5
 
 PODFILE CHECKSUM: 11a2f8ebab99f816b8905858bff8a86a196b1f7e
 
-COCOAPODS: 1.15.2
+COCOAPODS: 1.16.1

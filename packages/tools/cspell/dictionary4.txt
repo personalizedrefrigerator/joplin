@@ -144,3 +144,5 @@ datamatrix
 nosniff
 CNIL
 setsize
+Comprar
+seguidores
