@@ -126,7 +126,6 @@ const NoteItemComponent: React.FC<Props> = memo(props => {
 		});
 	}, [props.dispatch, props.note, props.noteSelectionEnabled]);
 
-	const onLongPressProps = useOnLongPressProps(onLongPress);
 
 	const note = props.note ?? {};
 	const isTodo = !!Number(note.is_todo);
@@ -141,6 +140,9 @@ const NoteItemComponent: React.FC<Props> = memo(props => {
 	const selectionWrapperStyle = isSelected ? styles.selectionWrapperSelected : styles.selectionWrapper;
 
 	const noteTitle = Note.displayTitle(note);
+
+	const selectDeselectLabel = isSelected ? _('Deselect') : _('Select');
+	const onLongPressProps = useOnLongPressProps({ onLongPress, actionDescription: selectDeselectLabel });
 
 	const contextMenuProps = {
 		// Web only.
