@@ -301,25 +301,6 @@ const CodeMirror = (props: NoteBodyEditorProps, ref: ForwardedRef<NoteBodyEditor
 		}
 	}, [renderedBody, webviewReady, getLineScrollPercent, setEditorPercentScroll]);
 
-	const cellEditorStyle = useMemo(() => {
-		const output = { ...styles.cellEditor };
-		if (!props.visiblePanes.includes('editor')) {
-			output.display = 'none'; // Seems to work fine since the refactoring
-		}
-
-		return output;
-	}, [styles.cellEditor, props.visiblePanes]);
-
-	const cellViewerStyle = useMemo(() => {
-		const output = { ...styles.cellViewer };
-		if (!props.visiblePanes.includes('viewer')) {
-			output.display = 'none';
-		} else if (!props.visiblePanes.includes('editor')) {
-			output.borderLeftStyle = 'none';
-		}
-		return output;
-	}, [styles.cellViewer, props.visiblePanes]);
-
 	useRefocusOnVisiblePaneChange({ editorRef, webviewRef, visiblePanes: props.visiblePanes });
 
 	useEditorSearchHandler({
@@ -406,7 +387,7 @@ const CodeMirror = (props: NoteBodyEditorProps, ref: ForwardedRef<NoteBodyEditor
 
 	const renderEditor = () => {
 		return (
-			<div style={cellEditorStyle}>
+			<div className='editor'>
 				<Editor
 					style={styles.editor}
 					initialText={props.content}
@@ -427,7 +408,7 @@ const CodeMirror = (props: NoteBodyEditorProps, ref: ForwardedRef<NoteBodyEditor
 
 	const renderViewer = () => {
 		return (
-			<div style={cellViewerStyle}>
+			<div className='viewer'>
 				<NoteTextViewer
 					ref={webviewRef}
 					themeId={props.themeId}
@@ -440,8 +421,18 @@ const CodeMirror = (props: NoteBodyEditorProps, ref: ForwardedRef<NoteBodyEditor
 		);
 	};
 
-	const windowId = useContext(WindowIdContext);
+	const editorViewerRow = (
+		<div className={[
+			'note-editor-viewer-row',
+			props.visiblePanes.includes('editor') ? '-show-editor' : '',
+			props.visiblePanes.includes('viewer') ? '-show-viewer' : '',
+		].join(' ')}>
+			{renderEditor()}
+			{renderViewer()}
+		</div>
+	);
 
+	const windowId = useContext(WindowIdContext);
 	return (
 		<ErrorBoundary message="The text editor encountered a fatal error and could not continue. The error might be due to a plugin, so please try to disable some of them and try again.">
 			<div style={styles.root} ref={rootRef}>
@@ -449,10 +440,7 @@ const CodeMirror = (props: NoteBodyEditorProps, ref: ForwardedRef<NoteBodyEditor
 					<Toolbar themeId={props.themeId} windowId={windowId}/>
 					{props.noteToolbar}
 				</div>
-				<div style={styles.rowEditorViewer}>
-					{renderEditor()}
-					{renderViewer()}
-				</div>
+				{editorViewerRow}
 			</div>
 		</ErrorBoundary>
 	);
