@@ -168,7 +168,6 @@ const VoiceTypingDialog: React.FC<Props> = props => {
 		return <Text variant='labelSmall'>{preview}</Text>;
 	};
 
-	const headerAndStatus = <Text variant='bodyMedium' role='alert'>{`${_('Voice typing...')}\n${renderContent()}`}</Text>;
 	return (
 		<Surface>
 			<View style={styles.container}>
@@ -181,10 +180,21 @@ const VoiceTypingDialog: React.FC<Props> = props => {
 							// Auto-focus
 							refocusCounter={1}
 							aria-live='polite'
-							role='alert'
+							role='heading'
 						>
-							{headerAndStatus}
+							<Text variant='bodyMedium'>
+								{_('Voice typing...')}
+							</Text>
 						</AccessibleView>
+						<Text
+							variant='bodyMedium'
+							// role="status" might fit better here. However, react-native
+							// doesn't seem to support it.
+							role='alert'
+							// Although on web, role=alert should imply aria-live=polite,
+							// this does not seem to be the case for React Native:
+							accessibilityLiveRegion='polite'
+						>{renderContent()}</Text>
 						{renderPreview()}
 					</View>
 				</View>
