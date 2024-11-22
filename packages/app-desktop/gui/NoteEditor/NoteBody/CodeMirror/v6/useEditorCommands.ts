@@ -84,7 +84,7 @@ const useEditorCommands = (props: Props) => {
 				const url = await dialogs.prompt(_('Insert Hyperlink'));
 				focus('useEditorCommands::textLink', editorRef.current);
 				if (url) {
-					editorRef.current.wrapSelections('[', `](${url})`);
+					editorRef.current.wrapSelections('[', `](${url})`, _('Hyperlink'));
 				}
 			},
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
