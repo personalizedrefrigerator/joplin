@@ -30,6 +30,7 @@ import { OnMessageEvent } from '../ExtendedWebView/types';
 import { join, dirname } from 'path';
 import * as mimeUtils from '@joplin/lib/mime-utils';
 import uuid from '@joplin/lib/uuid';
+import localisation from '@joplin/editor/CodeMirror/localisation';
 
 type ChangeEventHandler = (event: ChangeEvent)=> void;
 type UndoRedoDepthChangeHandler = (event: UndoRedoDepthChangeEvent)=> void;
@@ -376,8 +377,9 @@ function NoteEditor(props: Props, ref: any) {
 				const parentElement = document.getElementsByClassName('CodeMirror')[0];
 				const initialText = ${JSON.stringify(props.initialText)};
 				const settings = ${JSON.stringify(editorSettings)};
+				const localisations = ${JSON.stringify(localisation())};
 
-				window.cm = codeMirrorBundle.initCodeMirror(parentElement, initialText, settings);
+				window.cm = codeMirrorBundle.initCodeMirror(parentElement, initialText, localisations, settings);
 
 				${setInitialSelectionJS}
 

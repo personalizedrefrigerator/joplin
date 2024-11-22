@@ -19,6 +19,7 @@ import { focus } from '@joplin/lib/utils/focusHandler';
 export const initCodeMirror = (
 	parentElement: HTMLElement,
 	initialText: string,
+	localisations: Record<string, string>,
 	settings: EditorSettings,
 ): CodeMirrorControl => {
 	const messenger = new WebViewToRNMessenger<CodeMirrorControl, WebViewToEditorApi>('editor', null);
@@ -26,6 +27,7 @@ export const initCodeMirror = (
 	const control = createEditor(parentElement, {
 		initialText,
 		settings,
+		localisations,
 
 		onPasteFile: async (data) => {
 			const reader = new FileReader();

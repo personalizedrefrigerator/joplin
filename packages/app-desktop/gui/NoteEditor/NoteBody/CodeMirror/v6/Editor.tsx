@@ -14,7 +14,7 @@ import useKeymap from './utils/useKeymap';
 import useEditorSearch from '../utils/useEditorSearchExtension';
 import CommandService from '@joplin/lib/services/CommandService';
 import { SearchMarkers } from '../../../utils/useSearchMarkers';
-import localisation from './utils/localisation';
+import localisation from '@joplin/editor/CodeMirror/localisation';
 
 interface Props extends EditorProps {
 	style: React.CSSProperties;
