@@ -63,6 +63,7 @@ const toggleSelectedLinesStartWith = (
 			lines.push(line);
 		}
 
+		let changedLineCount = 0;
 		for (const line of lines) {
 			const text = getLineContent(line);
 			const contentFrom = getLineContentStart(line);
@@ -74,6 +75,7 @@ const toggleSelectedLinesStartWith = (
 				continue;
 			}
 
+			changedLineCount ++;
 			if (alreadyHasFormatting) {
 				const match = text.match(regex);
 				if (match) {
@@ -119,6 +121,10 @@ const toggleSelectedLinesStartWith = (
 			announcement = state.phrase('Added $ markup', accessibleName);
 		} else if (charsAdded < 0) {
 			announcement = state.phrase('Removed $ markup', accessibleName);
+		}
+
+		if (changedLineCount > 1) {
+			announcement += ` ${state.phrase('on $ lines', changedLineCount)}`;
 		}
 
 		return {
