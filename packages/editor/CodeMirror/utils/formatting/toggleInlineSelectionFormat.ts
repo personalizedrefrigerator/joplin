@@ -27,7 +27,7 @@ const toggleInlineSelectionFormat = (
 
 	// Grow the selection to encompass the entire node.
 	const newRange = growSelectionToNode(state, sel, spec.nodeName);
-	return toggleInlineRegionSurrounded(state.doc, newRange, spec);
+	return toggleInlineRegionSurrounded(state, newRange, spec);
 };
 
 export default toggleInlineSelectionFormat;

@@ -16,12 +16,15 @@ export interface RegionSpec {
 
 	// How to identify the region
 	matcher: RegionMatchSpec;
+
+	accessibleName: string;
 }
 
 export namespace RegionSpec { // eslint-disable-line no-redeclare
 	interface RegionSpecConfig {
 		nodeName?: string;
 		template: string | { start: string; end: string };
+		accessibleName: string;
 		matcher?: RegionMatchSpec;
 	}
 
@@ -47,6 +50,7 @@ export namespace RegionSpec { // eslint-disable-line no-redeclare
 			nodeName: config.nodeName,
 			template: { start: templateStart, end: templateEnd },
 			matcher,
+			accessibleName: config.accessibleName,
 		};
 	};
 

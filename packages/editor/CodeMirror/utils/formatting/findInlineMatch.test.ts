@@ -7,6 +7,7 @@ describe('findInlineMatch', () => {
 
 	const boldSpec: RegionSpec = RegionSpec.of({
 		template: '**',
+		accessibleName: 'Bold',
 	});
 
 	it('matching a bolded region: should return the length of the match', () => {
@@ -33,6 +34,7 @@ describe('findInlineMatch', () => {
 		const spec: RegionSpec = {
 			template: { start: '*', end: '*' },
 			matcher: { start: /[*_]/g, end: /[*_]/g },
+			accessibleName: 'Italic',
 		};
 		const testString = 'This is a _test_';
 		const testDoc = DocumentText.of([testString]);
@@ -51,6 +53,7 @@ describe('findInlineMatch', () => {
 			start: /^\s*[-*]\s/g,
 			end: /$/g,
 		},
+		accessibleName: 'List',
 	};
 
 	it('matching a custom list: should not match a list if not within the selection', () => {

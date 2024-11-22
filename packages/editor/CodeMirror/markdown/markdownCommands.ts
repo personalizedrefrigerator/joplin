@@ -21,7 +21,11 @@ import toggleSelectedLinesStartWith from '../utils/formatting/toggleSelectedLine
 const startingSpaceRegex = /^(\s*)/;
 
 export const toggleBolded: Command = (view: EditorView): boolean => {
-	const spec = RegionSpec.of({ template: '**', nodeName: 'StrongEmphasis' });
+	const spec = RegionSpec.of({
+		template: '**',
+		nodeName: 'StrongEmphasis',
+		accessibleName: view.state.phrase('Bold'),
+	});
 	const changes = toggleInlineFormatGlobally(view.state, spec);
 
 	view.dispatch(changes);
@@ -78,8 +82,13 @@ export const toggleItalicized: Command = (view: EditorView): boolean => {
 
 			template: { start: '*', end: '*' },
 			matcher: { start: /[_*]/g, end: /[_*]/g },
+
+			accessibleName: view.state.phrase('Italic'),
 		});
-		view.dispatch(changes);
+
+		view.dispatch(
+			changes,
+		);
 	}
 
 	return true;
@@ -89,11 +98,16 @@ export const toggleItalicized: Command = (view: EditorView): boolean => {
 // a block (fenced) code block.
 export const toggleCode: Command = (view: EditorView): boolean => {
 	const codeFenceRegex = /^```\w*\s*$/;
-	const inlineRegionSpec = RegionSpec.of({ template: '`', nodeName: 'InlineCode' });
+	const inlineRegionSpec = RegionSpec.of({
+		template: '`',
+		nodeName: 'InlineCode',
+		accessibleName: view.state.phrase('Inline code'),
+	});
 	const blockRegionSpec: RegionSpec = {
 		nodeName: 'FencedCode',
 		template: { start: '```', end: '```' },
 		matcher: { start: codeFenceRegex, end: codeFenceRegex },
+		accessibleName: view.state.phrase('Block code'),
 	};
 
 	const changes = toggleRegionFormatGlobally(view.state, inlineRegionSpec, blockRegionSpec);
@@ -105,7 +119,11 @@ export const toggleCode: Command = (view: EditorView): boolean => {
 export const toggleMath: Command = (view: EditorView): boolean => {
 	const blockStartRegex = /^\$\$/;
 	const blockEndRegex = /\$\$\s*$/;
-	const inlineRegionSpec = RegionSpec.of({ nodeName: 'InlineMath', template: '$' });
+	const inlineRegionSpec = RegionSpec.of({
+		nodeName: 'InlineMath',
+		template: '$',
+		accessibleName: view.state.phrase('Inline math'),
+	});
 	const blockRegionSpec = RegionSpec.of({
 		nodeName: 'BlockMath',
 		template: '$$',
@@ -113,6 +131,7 @@ export const toggleMath: Command = (view: EditorView): boolean => {
 			start: blockStartRegex,
 			end: blockEndRegex,
 		},
+		accessibleName: view.state.phrase('Block math'),
 	});
 
 	const changes = toggleRegionFormatGlobally(view.state, inlineRegionSpec, blockRegionSpec);
@@ -159,6 +178,40 @@ export const toggleList = (listType: ListType): Command => {
 			}
 
 			return null;
+		};
+
+		const getAnnouncementForChange = (itemAddedCount: number, itemReplacedCount: number, itemRemovedCount: number) => {
+			if (itemAddedCount === 0 && itemRemovedCount === 0 && itemReplacedCount === 0) {
+				// No changes to announce
+				return '';
+			}
+
+			let listTypeDescription = '';
+			if (listType === ListType.CheckList) {
+				listTypeDescription = state.phrase('Checklist');
+			} else if (listType === ListType.OrderedList) {
+				listTypeDescription = state.phrase('Numbered list');
+			} else if (listType === ListType.UnorderedList) {
+				listTypeDescription = state.phrase('Bullet list');
+			} else {
+				const exhaustivenessCheck: never = listType;
+				throw new Error(`Unknown list type ${exhaustivenessCheck}`);
+			}
+
+			const announcement = [];
+			if (itemAddedCount) {
+				announcement.push(state.phrase('Added $1 $2 items', itemAddedCount, listTypeDescription));
+			}
+
+			if (itemReplacedCount) {
+				announcement.push(state.phrase('Replaced $1 items with $2 items', itemReplacedCount, listTypeDescription));
+			}
+
+			if (itemRemovedCount) {
+				announcement.push(state.phrase('Removed $1 $2 items', itemRemovedCount, listTypeDescription));
+			}
+
+			return announcement.join(' , ');
 		};
 
 		const changes: TransactionSpec = state.changeByRange((sel: SelectionRange) => {
@@ -273,6 +326,11 @@ export const toggleList = (listType: ListType): Command => {
 				sel = EditorSelection.range(fromLine.from, toLine.to);
 			}
 
+			// Number of list items removed and replaced with non-list items
+			let numberOfItemsRemoved = 0;
+			let numberOfItemsReplaced = 0;
+			let numberOfItemsAdded = 0;
+
 			// Number of the item in the list (e.g. 2 for the 2nd item in the list)
 			let listItemCounter = 1;
 			for (let lineNum = fromLine.number; lineNum <= toLine.number; lineNum ++) {
@@ -327,6 +385,15 @@ export const toggleList = (listType: ListType): Command => {
 					replacementString = `${firstLineIndentation}- `;
 				}
 
+				// Store information required for accessibility announcements
+				if (replacementString.length === 0) {
+					numberOfItemsRemoved ++;
+				} else if (deleteTo > deleteFrom) {
+					numberOfItemsReplaced ++;
+				} else {
+					numberOfItemsAdded ++;
+				}
+
 				changes.push({
 					from: deleteFrom,
 					to: deleteTo,
@@ -348,9 +415,18 @@ export const toggleList = (listType: ListType): Command => {
 				);
 			}
 
+			const announcementText = getAnnouncementForChange(
+				numberOfItemsAdded, numberOfItemsReplaced, numberOfItemsRemoved,
+			);
+
 			return {
 				changes,
 				range: sel,
+				effects: [
+					announcementText ? (
+						EditorView.announce.of(announcementText)
+					) : [],
+				].flat(),
 			};
 		});
 		view.dispatch(changes);
@@ -371,29 +447,34 @@ export const toggleHeaderLevel = (level: number): Command => {
 			headerStr += '#';
 		}
 
-		const matchEmpty = true;
 		// Remove header formatting for any other level
 		let changes = toggleSelectedLinesStartWith(
 			view.state,
-			new RegExp(
-				// Check all numbers of #s lower than [level]
-				`${level - 1 >= 1 ? `(?:^[#]{1,${level - 1}}\\s)|` : ''
+			{
+				regex: new RegExp(
+					// Check all numbers of #s lower than [level]
+					`${level - 1 >= 1 ? `(?:^[#]{1,${level - 1}}\\s)|` : ''
 
-				// Check all number of #s higher than [level]
-				}(?:^[#]{${level + 1},}\\s)`,
-			),
-			'',
-			matchEmpty,
+					// Check all number of #s higher than [level]
+					}(?:^[#]{${level + 1},}\\s)`,
+				),
+				template: '',
+				matchEmpty: true,
+				accessibleName: view.state.phrase('Header'),
+			},
 		);
 		view.dispatch(changes);
 
 		// Set to the proper header level
 		changes = toggleSelectedLinesStartWith(
 			view.state,
-			// We want exactly [level] '#' characters.
-			new RegExp(`^[#]{${level}} `),
-			`${headerStr} `,
-			matchEmpty,
+			{
+				// We want exactly [level] '#' characters.
+				regex: new RegExp(`^[#]{${level}} `),
+				template: `${headerStr} `,
+				matchEmpty: true,
+				accessibleName: view.state.phrase('Header level $', level),
+			},
 		);
 		view.dispatch(changes);
 
@@ -428,17 +509,20 @@ export const insertHorizontalRule: Command = (view: EditorView) => {
 // Prepends the given editor's indentUnit to all lines of the current selection
 // and re-numbers modified ordered lists (if any).
 export const increaseIndent: Command = (view: EditorView): boolean => {
-	const matchEmpty = true;
 	const matchNothing = /$ ^/;
 	const indentUnit = indentString(view.state, getIndentUnit(view.state));
 
 	const changes = toggleSelectedLinesStartWith(
 		view.state,
-		// Delete nothing
-		matchNothing,
-		// ...and thus always add indentUnit.
-		indentUnit,
-		matchEmpty,
+		{
+			// Delete nothing
+			regex: matchNothing,
+			// ...and thus always add indentUnit.
+			template: indentUnit,
+			matchEmpty: true,
+
+			accessibleName: view.state.phrase('Indent'),
+		},
 	);
 	view.dispatch(changes);
 
@@ -478,15 +562,19 @@ export const insertOrIncreaseIndent: Command = (view: EditorView): boolean => {
 };
 
 export const decreaseIndent: Command = (view: EditorView): boolean => {
-	const matchEmpty = true;
 	const changes = toggleSelectedLinesStartWith(
 		view.state,
-		// Assume indentation is either a tab or in units
-		// of n spaces.
-		new RegExp(`^(?:[\\t]|[ ]{1,${getIndentUnit(view.state)}})`),
-		// Don't add new text
-		'',
-		matchEmpty,
+		{
+			// Assume indentation is either a tab or in units
+			// of n spaces.
+			regex: new RegExp(`^(?:[\\t]|[ ]{1,${getIndentUnit(view.state)}})`),
+
+			// Don't add new text
+			template: '',
+			matchEmpty: true,
+
+			accessibleName: view.state.phrase('Indent'),
+		},
 	);
 
 	view.dispatch(changes);

@@ -14,9 +14,6 @@ const useHeaderButtons = ({ selectionState, editorControl, readOnly }: ButtonRow
 				description: _('Header %d', level),
 				active,
 
-				// We only call addHeaderButton 5 times and in the same order, so
-				// the linter error is safe to ignore.
-				// eslint-disable-next-line @seiyab/react-hooks/rules-of-hooks
 				onPress: () => {
 					editorControl.toggleHeaderLevel(level);
 				},
