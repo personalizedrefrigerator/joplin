@@ -15,6 +15,7 @@ const defaultFormNoteProps: HookDependencies = {
 	onBeforeLoad: () => { },
 	onAfterLoad: () => { },
 	editorId: 'editor',
+	builtInEditorVisible: false,
 };
 
 describe('useFormNote', () => {

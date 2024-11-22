@@ -3,8 +3,6 @@ const { TextInput, TouchableOpacity, Linking, View, StyleSheet, Text, Button, Sc
 const { connect } = require('react-redux');
 import ScreenHeader from '../ScreenHeader';
 import { themeStyle } from '../global-style';
-const DialogBox = require('react-native-dialogbox').default;
-const { dialogs } = require('../../utils/dialogs.js');
 import EncryptionService from '@joplin/lib/services/e2ee/EncryptionService';
 import { _ } from '@joplin/lib/locale';
 import time from '@joplin/lib/time';
@@ -13,7 +11,8 @@ import { MasterKeyEntity } from '@joplin/lib/services/e2ee/types';
 import { State } from '@joplin/lib/reducer';
 import { SyncInfo } from '@joplin/lib/services/synchronizer/syncInfoUtils';
 import { getDefaultMasterKey, setupAndDisableEncryption, toggleAndSetupEncryption } from '@joplin/lib/services/e2ee/utils';
-import { useMemo, useRef, useState } from 'react';
+import { useMemo, useState } from 'react';
+import shim from '@joplin/lib/shim';
 
 interface Props {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
@@ -35,7 +34,6 @@ const EncryptionConfigScreen = (props: Props) => {
 	const { passwordChecks, masterPasswordKeys } = usePasswordChecker(props.masterKeys, props.activeMasterKeyId, props.masterPassword, props.passwords);
 	const { inputPasswords, onInputPasswordChange } = useInputPasswords(props.passwords);
 	const { inputMasterPassword, onMasterPasswordSave, onMasterPasswordChange } = useInputMasterPassword(props.masterKeys, props.activeMasterKeyId);
-	const dialogBoxRef = useRef(null);
 
 	const mkComps = [];
 
@@ -240,7 +238,7 @@ const EncryptionConfigScreen = (props: Props) => {
 
 	const onToggleButtonClick = async () => {
 		if (props.encryptionEnabled) {
-			const ok = await dialogs.confirmRef(dialogBoxRef.current, _('Disabling encryption means *all* your notes and attachments are going to be re-synchronised and sent unencrypted to the sync target. Do you wish to continue?'));
+			const ok = await shim.showConfirmationDialog(_('Disabling encryption means *all* your notes and attachments are going to be re-synchronised and sent unencrypted to the sync target. Do you wish to continue?'));
 			if (!ok) return;
 
 			try {
@@ -312,7 +310,6 @@ const EncryptionConfigScreen = (props: Props) => {
 				{nonExistingMasterKeySection}
 				<View style={{ flex: 1, height: 20 }}></View>
 			</ScrollView>
-			<DialogBox ref={dialogBoxRef}/>
 		</View>
 	);
 };

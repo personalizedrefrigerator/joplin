@@ -31,6 +31,7 @@ export interface HookDependencies {
 	editorRef: any;
 	onBeforeLoad(event: OnLoadEvent): void;
 	onAfterLoad(event: OnLoadEvent): void;
+	builtInEditorVisible: boolean;
 }
 
 type MapFormNoteCallback = (previousFormNote: FormNote)=> FormNote;
@@ -67,10 +68,11 @@ function resourceInfosChanged(a: ResourceInfos, b: ResourceInfos): boolean {
 }
 
 type InitNoteStateCallback = (note: NoteEntity, isNew: boolean)=> Promise<FormNote>;
-const useRefreshFormNoteOnChange = (formNoteRef: RefObject<FormNote>, editorId: string, noteId: string, initNoteState: InitNoteStateCallback) => {
+const useRefreshFormNoteOnChange = (formNoteRef: RefObject<FormNote>, editorId: string, noteId: string, initNoteState: InitNoteStateCallback, builtInEditorVisible: boolean) => {
 	// Increasing the value of this counter cancels any ongoing note refreshes and starts
 	// a new refresh.
 	const [formNoteRefreshScheduled, setFormNoteRefreshScheduled] = useState<number>(0);
+	const prevBuiltInEditorVisible = usePrevious<boolean>(builtInEditorVisible);
 
 	useQueuedAsyncEffect(async (event) => {
 		if (formNoteRefreshScheduled <= 0) return;
@@ -107,6 +109,15 @@ const useRefreshFormNoteOnChange = (formNoteRef: RefObject<FormNote>, editorId: 
 		setFormNoteRefreshScheduled(formNoteRefreshScheduled + 1);
 	}, [formNoteRefreshScheduled]);
 
+	// When switching from the plugin editor to the built-in editor, we refresh the note since the
+	// plugin may have modified it via the data API.
+	useEffect(() => {
+		if (prevBuiltInEditorVisible !== builtInEditorVisible && builtInEditorVisible) {
+			refreshFormNote();
+		}
+	}, [builtInEditorVisible, prevBuiltInEditorVisible, refreshFormNote]);
+
+
 	useEffect(() => {
 		if (!noteId) return ()=>{};
 
@@ -134,7 +145,9 @@ const useRefreshFormNoteOnChange = (formNoteRef: RefObject<FormNote>, editorId: 
 };
 
 export default function useFormNote(dependencies: HookDependencies) {
-	const { noteId, editorId, isProvisional, titleInputRef, editorRef, onBeforeLoad, onAfterLoad } = dependencies;
+	const {
+		noteId, isProvisional, titleInputRef, editorRef, onBeforeLoad, onAfterLoad, builtInEditorVisible, editorId,
+	} = dependencies;
 
 	const [formNote, setFormNote] = useState<FormNote>(defaultFormNote());
 	const [isNewNote, setIsNewNote] = useState(false);
@@ -195,7 +208,7 @@ export default function useFormNote(dependencies: HookDependencies) {
 		return newFormNote;
 	}, []);
 
-	useRefreshFormNoteOnChange(formNoteRef, editorId, noteId, initNoteState);
+	useRefreshFormNoteOnChange(formNoteRef, editorId, noteId, initNoteState, builtInEditorVisible);
 
 	useEffect(() => {
 		if (!noteId) {

@@ -1268,11 +1268,11 @@ msgstr "新建待办事项。"
 
 #: packages/app-desktop/gui/NoteEditor/NoteTitle/NoteTitleBar.tsx:114
 msgid "Creating new note..."
-msgstr "新建笔记 %s..."
+msgstr "新建笔记..."
 
 #: packages/app-desktop/gui/NoteEditor/NoteTitle/NoteTitleBar.tsx:114
 msgid "Creating new to-do..."
-msgstr "新建待办 %s..."
+msgstr "新建待办..."
 
 #: packages/app-mobile/components/screens/ConfigScreen/NoteExportSection/ExportDebugReportButton.tsx:29
 msgid "Creating report..."

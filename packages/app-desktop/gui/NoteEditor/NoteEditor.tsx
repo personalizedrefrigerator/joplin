@@ -32,7 +32,6 @@ import { itemIsReadOnly } from '@joplin/lib/models/utils/readOnly';
 const { themeStyle } = require('@joplin/lib/theme');
 const { substrWithEllipsis } = require('@joplin/lib/string-utils');
 import NoteSearchBar from '../NoteSearchBar';
-import { reg } from '@joplin/lib/registry';
 import Note from '@joplin/lib/models/Note';
 import Folder from '@joplin/lib/models/Folder';
 import NoteRevisionViewer from '../NoteRevisionViewer';
@@ -51,9 +50,19 @@ import { MarkupLanguage } from '@joplin/renderer';
 import useScrollWhenReadyOptions from './utils/useScrollWhenReadyOptions';
 import useScheduleSaveCallbacks from './utils/useScheduleSaveCallbacks';
 import WarningBanner from './WarningBanner/WarningBanner';
+import UserWebview from '../../services/plugins/UserWebview';
+import Logger from '@joplin/utils/Logger';
+import usePluginEditorView from './utils/usePluginEditorView';
 import { stateUtils } from '@joplin/lib/reducer';
 import { WindowIdContext } from '../NewWindowOrIFrame';
+import { EditorActivationCheckFilterObject } from '@joplin/lib/services/plugins/api/types';
+import PluginService from '@joplin/lib/services/plugins/PluginService';
+import WebviewController from '@joplin/lib/services/plugins/WebviewController';
+import AsyncActionQueue, { IntervalType } from '@joplin/lib/AsyncActionQueue';
+
 const debounce = require('debounce');
+
+const logger = Logger.create('NoteEditor');
 
 const commands = [
 	require('./commands/showRevisions'),
@@ -64,6 +73,15 @@ const toolbarButtonUtils = new ToolbarButtonUtils(CommandService.instance());
 const onDragOver: React.DragEventHandler = event => event.preventDefault();
 let editorIdCounter = 0;
 
+const makeNoteUpdateAction = (shownEditorViewIds: string[]) => {
+	return async () => {
+		for (const viewId of shownEditorViewIds) {
+			const controller = PluginService.instance().viewControllerByViewId(viewId) as WebviewController;
+			if (controller) controller.emitUpdate();
+		}
+	};
+};
+
 function NoteEditorContent(props: NoteEditorProps) {
 	const [showRevisions, setShowRevisions] = useState(false);
 	const [titleHasBeenManuallyChanged, setTitleHasBeenManuallyChanged] = useState(false);
@@ -73,6 +91,9 @@ function NoteEditorContent(props: NoteEditorProps) {
 	const titleInputRef = useRef<HTMLInputElement>();
 	const isMountedRef = useRef(true);
 	const noteSearchBarRef = useRef(null);
+	const viewUpdateAsyncQueue_ = useRef<AsyncActionQueue>(new AsyncActionQueue(100, IntervalType.Fixed));
+
+	const shownEditorViewIds = props['plugins.shownEditorViewIds'];
 
 	// Should be constant and unique to this instance of the editor.
 	const editorId = useMemo(() => {
@@ -94,6 +115,29 @@ function NoteEditorContent(props: NoteEditorProps) {
 
 	const effectiveNoteId = useEffectiveNoteId(props);
 
+	useAsyncEffect(async (event) => {
+		if (!props.startupPluginsLoaded) return;
+
+		let filterObject: EditorActivationCheckFilterObject = {
+			activatedEditors: [],
+		};
+		filterObject = await eventManager.filterEmit('editorActivationCheck', filterObject);
+		if (event.cancelled) return;
+
+		for (const editor of filterObject.activatedEditors) {
+			const controller = PluginService.instance().pluginById(editor.pluginId).viewController(editor.viewId) as WebviewController;
+			controller.setActive(editor.isActive);
+		}
+	}, [effectiveNoteId, props.startupPluginsLoaded]);
+
+	useEffect(() => {
+		if (!props.startupPluginsLoaded) return;
+		viewUpdateAsyncQueue_.current.push(makeNoteUpdateAction(shownEditorViewIds));
+	}, [effectiveNoteId, shownEditorViewIds, props.startupPluginsLoaded]);
+
+	const { editorPlugin, editorView } = usePluginEditorView(props.plugins, shownEditorViewIds);
+	const builtInEditorVisible = !editorPlugin;
+
 	const { formNote, setFormNote, isNewNote, resourceInfos } = useFormNote({
 		noteId: effectiveNoteId,
 		isProvisional: props.isProvisional,
@@ -101,6 +145,7 @@ function NoteEditorContent(props: NoteEditorProps) {
 		editorRef: editorRef,
 		onBeforeLoad: formNote_beforeLoad,
 		onAfterLoad: formNote_afterLoad,
+		builtInEditorVisible,
 		editorId,
 	});
 	setFormNoteRef.current = setFormNote;
@@ -186,7 +231,7 @@ function NoteEditorContent(props: NoteEditorProps) {
 			// trigger onChange events, for example the textarea might be cleared.
 			// We need to ignore these events, otherwise the note is going to be saved
 			// with an invalid body.
-			reg.logger().debug('Skipping change event because the component is unmounted');
+			logger.debug('Skipping change event because the component is unmounted');
 			return;
 		}
 
@@ -456,16 +501,18 @@ function NoteEditorContent(props: NoteEditorProps) {
 
 	let editor = null;
 
-	if (props.bodyEditor === 'TinyMCE') {
-		editor = <TinyMCE {...editorProps}/>;
-	} else if (props.bodyEditor === 'PlainText') {
-		editor = <PlainEditor {...editorProps}/>;
-	} else if (props.bodyEditor === 'CodeMirror5') {
-		editor = <CodeMirror5 {...editorProps}/>;
-	} else if (props.bodyEditor === 'CodeMirror6') {
-		editor = <CodeMirror6 {...editorProps}/>;
-	} else {
-		throw new Error(`Invalid editor: ${props.bodyEditor}`);
+	if (builtInEditorVisible) {
+		if (props.bodyEditor === 'TinyMCE') {
+			editor = <TinyMCE {...editorProps}/>;
+		} else if (props.bodyEditor === 'PlainText') {
+			editor = <PlainEditor {...editorProps}/>;
+		} else if (props.bodyEditor === 'CodeMirror5') {
+			editor = <CodeMirror5 {...editorProps}/>;
+		} else if (props.bodyEditor === 'CodeMirror6') {
+			editor = <CodeMirror6 {...editorProps}/>;
+		} else {
+			throw new Error(`Invalid editor: ${props.bodyEditor}`);
+		}
 	}
 
 	const noteRevisionViewer_onBack = useCallback(() => {
@@ -592,6 +639,23 @@ function NoteEditorContent(props: NoteEditorProps) {
 		}
 	}
 
+	const renderPluginEditor = () => {
+		if (!editorPlugin) return null;
+
+		const html = props.pluginHtmlContents[editorPlugin.id]?.[editorView.id] ?? '';
+
+		return <UserWebview
+			key={editorView.id}
+			viewId={editorView.id}
+			themeId={props.themeId}
+			html={html}
+			scripts={editorView.scripts}
+			pluginId={editorPlugin.id}
+			borderBottom={true}
+			fitToContent={false}
+		/>;
+	};
+
 	if (formNote.encryption_applied || !formNote.id || !effectiveNoteId) {
 		return renderNoNotes(styles.root);
 	}
@@ -616,6 +680,7 @@ function NoteEditorContent(props: NoteEditorProps) {
 				{renderSearchInfo()}
 				<div style={{ display: 'flex', flex: 1, paddingLeft: theme.editorPaddingLeft, maxHeight: '100%', minHeight: '0' }}>
 					{editor}
+					{renderPluginEditor()}
 				</div>
 				<div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
 					{renderSearchBar()}
@@ -667,6 +732,8 @@ const mapStateToProps = (state: AppState, ownProps: ConnectProps) => {
 		watchedResources: state.watchedResources,
 		highlightedWords: state.highlightedWords,
 		plugins: state.pluginService.plugins,
+		pluginHtmlContents: state.pluginService.pluginHtmlContents,
+		'plugins.shownEditorViewIds': state.settings['plugins.shownEditorViewIds'] || [],
 		toolbarButtonInfos: toolbarButtonUtils.commandsToToolbarButtons([
 			'historyBackward',
 			'historyForward',

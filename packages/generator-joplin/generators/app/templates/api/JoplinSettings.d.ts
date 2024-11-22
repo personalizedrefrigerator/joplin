@@ -38,6 +38,12 @@ export default class JoplinSettings {
      */
     registerSection(name: string, section: SettingSection): Promise<void>;
     /**
+     * Gets setting values (only applies to setting you registered from your plugin)
+     */
+    values(keys: string[] | string): Promise<Record<string, unknown>>;
+    /**
+     * @deprecated Use joplin.settings.values()
+     *
      * Gets a setting value (only applies to setting you registered from your plugin)
      */
     value(key: string): Promise<any>;

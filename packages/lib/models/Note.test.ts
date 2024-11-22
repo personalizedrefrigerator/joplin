@@ -387,7 +387,7 @@ describe('models/Note', () => {
 		expect(conflictedNote.conflict_original_id).toBe(origNote.id);
 		expect(conflictedNote.parent_id).toBe(folder.id);
 		expect(conflictedNote.is_shared).toBeUndefined();
-		expect(conflictedNote.share_id).toBeUndefined();
+		expect(conflictedNote.share_id).toBe('');
 	});
 
 	it('should copy conflicted note to target folder and cancel conflict', (async () => {

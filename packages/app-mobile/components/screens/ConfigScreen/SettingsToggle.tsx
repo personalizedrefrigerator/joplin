@@ -36,6 +36,7 @@ const SettingsToggle: FunctionComponent<Props> = props => {
 					trackColor={{ false: theme.dividerColor }}
 					value={props.value}
 					onValueChange={(value: boolean) => void props.updateSettingValue(props.settingId, value)}
+					accessibilityHint={props.label}
 				/>
 			</View>
 			{props.description}

@@ -23,6 +23,9 @@ interface Callbacks {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 type EditorUserCommand = (...args: any[])=> any;
 
+// Copied from CodeMirror source code since type is not exported
+export type ScrollStrategy = 'nearest' | 'start' | 'end' | 'center';
+
 export default class CodeMirrorControl extends CodeMirror5Emulation implements EditorControl {
 	private _pluginControl: PluginLoader;
 	private _userCommands: Map<string, EditorUserCommand> = new Map();
@@ -175,6 +178,20 @@ export default class CodeMirrorControl extends CodeMirror5Emulation implements E
 			],
 		});
 
+	}
+
+	public scrollToText(text: string, scrollStrategy: ScrollStrategy) {
+		const doc = this.editor.state.doc;
+		const index = doc.toString().indexOf(text);
+		const textFound = index >= 0;
+
+		if (textFound) {
+			this.editor.dispatch({
+				effects: EditorView.scrollIntoView(index, { y: scrollStrategy }),
+			});
+		}
+
+		return textFound;
 	}
 
 	public addStyles(...styles: Parameters<typeof EditorView.theme>) {

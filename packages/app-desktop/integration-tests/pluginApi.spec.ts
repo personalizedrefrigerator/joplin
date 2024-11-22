@@ -5,7 +5,7 @@ import MainScreen from './models/MainScreen';
 test.describe('pluginApi', () => {
 	test('the editor.setText command should update the current note (use RTE: false)', async ({ startAppWithPlugins }) => {
 		const { app, mainWindow } = await startAppWithPlugins(['resources/test-plugins/execCommand.js']);
-		const mainScreen = new MainScreen(mainWindow);
+		const mainScreen = await new MainScreen(mainWindow).setup();
 		await mainScreen.createNewNote('First note');
 		const editor = mainScreen.noteEditor;
 

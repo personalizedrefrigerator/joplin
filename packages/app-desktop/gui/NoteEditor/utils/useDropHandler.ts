@@ -2,6 +2,7 @@ import { useCallback } from 'react';
 import Note from '@joplin/lib/models/Note';
 import { DragEvent as ReactDragEvent } from 'react';
 import { DropCommandValue } from './types';
+import { webUtils } from 'electron';
 
 interface HookDependencies {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
@@ -56,8 +57,9 @@ export default function useDropHandler(dependencies: HookDependencies): DropHand
 			const paths = [];
 			for (let i = 0; i < files.length; i++) {
 				const file = files[i];
-				if (!file.path) continue;
-				paths.push(file.path);
+				const path = webUtils.getPathForFile(file);
+				if (!path) continue;
+				paths.push(path);
 			}
 
 			const props: DropCommandValue = {

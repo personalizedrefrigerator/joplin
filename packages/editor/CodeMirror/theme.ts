@@ -93,6 +93,11 @@ const createTheme = (theme: EditorTheme): Extension[] => {
 		// need to be overridden.
 		'&, &.CodeMirror': baseGlobalStyle,
 
+		'& .cm-dropCursor': {
+			backgroundColor: isDarkTheme ? 'white' : 'black',
+			width: '1px',
+		},
+
 		// These must be !important or more specific than CodeMirror's built-ins
 		'& .cm-content': {
 			fontFamily: theme.fontFamily,

@@ -64,7 +64,9 @@ export default class JoplinViewsDialogs {
      */
     setButtons(handle: ViewHandle, buttons: ButtonSpec[]): Promise<ButtonSpec[]>;
     /**
-     * Opens the dialog
+     * Opens the dialog.
+     *
+     * On desktop, this closes any copies of the dialog open in different windows.
      */
     open(handle: ViewHandle): Promise<DialogResult>;
     /**

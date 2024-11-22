@@ -384,6 +384,26 @@ export interface Rectangle {
 	height?: number;
 }
 
+export type ActivationCheckCallback = ()=> Promise<boolean>;
+
+export type UpdateCallback = ()=> Promise<void>;
+
+export type VisibleHandler = ()=> Promise<void>;
+
+export interface EditContextMenuFilterObject {
+	items: MenuItem[];
+}
+
+export interface EditorActivationCheckFilterObject {
+	activatedEditors: {
+		pluginId: string;
+		viewId: string;
+		isActive: boolean;
+	}[];
+}
+
+export type FilterHandler<T> = (object: T)=> Promise<T>;
+
 // =================================================================
 // Settings types
 // =================================================================

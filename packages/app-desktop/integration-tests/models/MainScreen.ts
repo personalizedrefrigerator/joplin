@@ -24,6 +24,12 @@ export default class MainScreen {
 		this.goToAnything = new GoToAnything(page, this);
 	}
 
+	public async setup() {
+		await this.waitFor();
+		await this.sidebar.createNewFolder('Test');
+		return this;
+	}
+
 	public async waitFor() {
 		await this.newNoteButton.waitFor();
 		await this.noteList.waitFor();
@@ -33,9 +39,14 @@ export default class MainScreen {
 	public async createNewNote(title: string) {
 		await this.waitFor();
 
-		await this.newNoteButton.click();
-		await expect(this.noteEditor.noteTitleInput).toHaveValue('');
-		await expect(this.noteEditor.noteTitleInput).toHaveJSProperty('placeholder', 'Creating new note...');
+		// Create the new note. Retry this -- creating new notes can sometimes fail if done just after
+		// application startup.
+		await expect.poll(async () => {
+			await this.newNoteButton.click();
+			await expect(this.noteEditor.noteTitleInput).toHaveValue('', { timeout: 4_000 });
+			await expect(this.noteEditor.noteTitleInput).toHaveJSProperty('placeholder', 'Creating new note...', { timeout: 4_000 });
+			return true;
+		}, { timeout: 10_000 }).toBe(true);
 
 		// Fill the title
 		await this.noteEditor.noteTitleInput.click();

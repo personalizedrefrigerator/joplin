@@ -42,7 +42,7 @@ export const runtime = (): CommandRuntime => {
 			} else {
 				const errorMessage = _('Unsupported link or message: %s', link);
 				logger.error(errorMessage);
-				await shim.showMessageBox(errorMessage);
+				await shim.showErrorDialog(errorMessage);
 			}
 		},
 	};

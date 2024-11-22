@@ -7,6 +7,7 @@ import stateToWhenClauseContext from '../../services/commands/stateToWhenClauseC
 import { connect } from 'react-redux';
 import { buildStyle } from '@joplin/lib/theme';
 import { _ } from '@joplin/lib/locale';
+import getActivePluginEditorView from '@joplin/lib/services/plugins/utils/getActivePluginEditorView';
 import { AppState } from '../../app.reducer';
 
 interface NoteToolbarProps {
@@ -49,13 +50,20 @@ interface ConnectProps {
 const mapStateToProps = (state: AppState, ownProps: ConnectProps) => {
 	const whenClauseContext = stateToWhenClauseContext(state, { windowId: ownProps.windowId });
 
+	const { editorPlugin } = getActivePluginEditorView(state.pluginService.plugins);
+
+	const commands = [
+		'showSpellCheckerMenu',
+		'editAlarm',
+		'toggleVisiblePanes',
+		'showNoteProperties',
+	];
+
+	if (editorPlugin) commands.push('toggleEditorPlugin');
+
 	return {
-		toolbarButtonInfos: toolbarButtonUtils.commandsToToolbarButtons([
-			'showSpellCheckerMenu',
-			'editAlarm',
-			'toggleVisiblePanes',
-			'showNoteProperties',
-		].concat(pluginUtils.commandNamesFromViews(state.pluginService.plugins, 'noteToolbar')), whenClauseContext),
+		toolbarButtonInfos: toolbarButtonUtils.commandsToToolbarButtons(commands
+			.concat(pluginUtils.commandNamesFromViews(state.pluginService.plugins, 'noteToolbar')), whenClauseContext),
 	};
 };
 

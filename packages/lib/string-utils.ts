@@ -100,25 +100,6 @@ export function removeDiacritics(str: string) {
 	return str;
 }
 
-export function escapeFilename(s: string, maxLength = 32) {
-	let output = removeDiacritics(s);
-	output = output.replace('\n\r', ' ');
-	output = output.replace('\r\n', ' ');
-	output = output.replace('\r', ' ');
-	output = output.replace('\n', ' ');
-	output = output.replace('\t', ' ');
-	output = output.replace('\0', '');
-
-	const unsafe = '/\\:*"\'?<>|'; // In Windows
-	for (let i = 0; i < unsafe.length; i++) {
-		output = output.replace(unsafe[i], '_');
-	}
-
-	if (output.toLowerCase() === 'nul') output = 'n_l'; // For Windows...
-
-	return output.substr(0, maxLength);
-}
-
 export function wrap(text: string, indent: string, width: number) {
 	const wrap_ = require('word-wrap');
 

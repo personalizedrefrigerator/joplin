@@ -26,6 +26,8 @@ jobs:
           node-version: '18'
           cache: 'yarn'
 
+      - uses: dtolnay/rust-toolchain@stable
+
       - name: Install Yarn
         run: |
           corepack enable

@@ -153,7 +153,7 @@ shared.saveNoteButton_press = async function(comp: BaseNoteScreenComponent, fold
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	const newState: any = {
-		lastSavedNote: { ...savedNote },
+		lastSavedNote: { ...note, ...savedNote },
 		note: note,
 	};
 

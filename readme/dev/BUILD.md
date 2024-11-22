@@ -18,10 +18,15 @@ There are also a few forks of existing packages under the "fork-*" name.
 
 ## Required dependencies
 
-- Install Node 18+. On Windows, also install the build tools - https://nodejs.org/en/
-  - [Enable Yarn](https://yarnpkg.com/getting-started/install): `corepack enable`
-- macOS: Install Cocoapods - `brew install cocoapods`. Apple Silicon [may require libvips](https://github.com/laurent22/joplin/pull/5966#issuecomment-1007158597) - `brew install vips`.
-- Linux: Install dependencies - `sudo apt install build-essential libnss3 libsecret-1-dev python rsync libgbm-dev libatk-bridge2.0-0 libgtk-3.0 libasound2`
+All of the required dependencies are listed within the [devbox.json](https://github.com/laurent22/joplin/blob/dev/devbox.json) file in the project root. You can either manually install them based on that list, or you can automatically install them on Linux or MacOS by using:
+
+```sh
+devbox shell
+```
+
+If you don't already have devbox, please [follow these instructions](https://www.jetify.com/docs/devbox/quickstart/).
+
+If working on the `onenote-converter` packages you will need to install the [Rust toolchain](https://rustup.rs/).
 
 ## Building
 

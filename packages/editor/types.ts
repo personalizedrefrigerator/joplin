@@ -168,6 +168,8 @@ export interface EditorSettings {
 	readOnly: boolean;
 
 	indentWithTabs: boolean;
+
+	editorLabel: string;
 }
 
 export type LogMessageCallback = (message: string)=> void;

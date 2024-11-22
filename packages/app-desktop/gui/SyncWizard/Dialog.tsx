@@ -121,7 +121,7 @@ const SlowSyncWarning = styled.div`
 const syncTargetNames: string[] = [
 	'joplinCloud',
 	'dropbox',
-	'onedrive',
+	// 'onedrive',
 	'nextcloud',
 	'webdav',
 	'amazon_s3',

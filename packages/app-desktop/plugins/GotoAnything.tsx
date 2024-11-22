@@ -23,6 +23,7 @@ import Resource from '@joplin/lib/models/Resource';
 import { NoteEntity, ResourceEntity } from '@joplin/lib/services/database/types';
 import Dialog from '../gui/Dialog';
 import AsyncActionQueue from '@joplin/lib/AsyncActionQueue';
+import { htmlentities } from '@joplin/utils/html';
 
 const logger = Logger.create('GotoAnything');
 
@@ -555,7 +556,7 @@ class DialogComponent extends React.PureComponent<Props, State> {
 		};
 
 		const titleHtml = item.fragments
-			? `<span style="font-weight: bold; color: ${theme.color};">${item.title}</span>`
+			? `<span style="font-weight: bold; color: ${theme.color};">${htmlentities(item.title)}</span>`
 			: wrapKeywordMatches(item.title);
 
 		const fragmentsHtml = !item.fragments ? null : wrapKeywordMatches(item.fragments);

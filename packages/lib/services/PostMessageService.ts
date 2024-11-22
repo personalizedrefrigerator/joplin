@@ -127,14 +127,15 @@ export default class PostMessageService {
 		}
 
 		if (!responder) {
-			logger.warn('Cannot respond to message because no responder was found', message);
+			logger.info('Cannot respond to message because no responder was found', message);
+			logger.info('Error was:', error);
+		} else {
+			responder({
+				responseId: message.id,
+				response: responseContent,
+				error,
+			});
 		}
-
-		responder({
-			responseId: message.id,
-			response: responseContent,
-			error,
-		});
 	}
 
 	private responder(type: ResponderComponentType, viewId: string, windowId: string) {

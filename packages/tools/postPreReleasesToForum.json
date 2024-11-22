@@ -99,6 +99,18 @@
 		"v3.1.18": true,
 		"android-v3.1.5": true,
 		"ios-v13.1.5": true,
-		"v3.1.20": true
+		"v3.1.20": true,
+		"v3.1.22": true,
+		"v3.1.23": true,
+		"v3.1.24": true,
+		"v3.2.1": true,
+		"android-v3.1.6": true,
+		"android-v3.1.7": true,
+		"android-v3.1.8": true,
+		"android-v3.2.1": true,
+		"ios-v13.1.6": true,
+		"ios-v13.1.7": true,
+		"v3.2.3": true,
+		"android-v3.2.2": true
 	}
 }

@@ -180,7 +180,7 @@ export async function processPastedHtml(html: string, htmlToMd: HtmlToMarkdownHa
 	// TinyMCE, but lost once the note is saved. So here we convert the HTML to Markdown then back
 	// to HTML to ensure that the content we paste will be handled correctly by the app.
 	if (htmlToMd && mdToHtml) {
-		const md = await htmlToMd(MarkupLanguage.Markdown, html, '');
+		const md = await htmlToMd(MarkupLanguage.Markdown, html, '', { preserveColorStyles: Setting.value('editor.pastePreserveColors') });
 		html = (await mdToHtml(MarkupLanguage.Markdown, md, markupRenderOptions({ bodyOnly: true }))).html;
 
 		// When plugins that add to the end of rendered content are installed, bodyOnly can

@@ -21,12 +21,16 @@ export type OnClickHandler = (event: OnClickEvent) => Promise<void>;
  * complemented with special properties such as `note.isWatched`, to know if a note is currently
  * opened in the external editor, and `note.tags` to get the list tags associated with the note.
  *
+ * The `note.todoStatusText` property is a localised description of the to-do status (e.g.
+ * "to-do, incomplete"). If you include an `<input type='checkbox' ... />` for to-do items that would
+ * otherwise be unlabelled, consider adding `note.todoStatusText` as the checkbox's `aria-label`.
+ *
  * ## Item properties
  *
  * The `item.*` properties are specific to the rendered item. The most important being
  * `item.selected`, which you can use to display the selected note in a different way.
  */
-export type ListRendererDependency = ListRendererDatabaseDependency | 'item.index' | 'item.selected' | 'item.size.height' | 'item.size.width' | 'note.folder.title' | 'note.isWatched' | 'note.tags' | 'note.titleHtml';
+export type ListRendererDependency = ListRendererDatabaseDependency | 'item.index' | 'item.selected' | 'item.size.height' | 'item.size.width' | 'note.folder.title' | 'note.isWatched' | 'note.tags' | 'note.todoStatusText' | 'note.titleHtml';
 export type ListRendererItemValueTemplates = Record<string, string>;
 export declare const columnNames: readonly ["note.folder.title", "note.is_todo", "note.latitude", "note.longitude", "note.source_url", "note.tags", "note.title", "note.todo_completed", "note.todo_due", "note.user_created_time", "note.user_updated_time"];
 export type ColumnName = typeof columnNames[number];

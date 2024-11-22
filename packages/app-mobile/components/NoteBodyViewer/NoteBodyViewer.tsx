@@ -3,7 +3,6 @@ import * as React from 'react';
 import useOnMessage, { HandleMessageCallback, OnMarkForDownloadCallback } from './hooks/useOnMessage';
 import { useRef, useCallback, useState, useMemo } from 'react';
 import { View, ViewStyle } from 'react-native';
-import BackButtonDialogBox from '../BackButtonDialogBox';
 import ExtendedWebView from '../ExtendedWebView';
 import { WebViewControl } from '../ExtendedWebView/types';
 import useOnResourceLongPress from './hooks/useOnResourceLongPress';
@@ -37,7 +36,6 @@ interface Props {
 }
 
 export default function NoteBodyViewer(props: Props) {
-	const dialogBoxRef = useRef(null);
 	const webviewRef = useRef<WebViewControl>(null);
 
 	const onScroll = useCallback(async (scrollTop: number) => {
@@ -49,7 +47,6 @@ export default function NoteBodyViewer(props: Props) {
 			onJoplinLinkClick: props.onJoplinLinkClick,
 			onRequestEditResource: props.onRequestEditResource,
 		},
-		dialogBoxRef,
 	);
 
 	const onPostMessage = useOnMessage(props.noteBody, {
@@ -101,9 +98,6 @@ export default function NoteBodyViewer(props: Props) {
 		if (props.onLoadEnd) props.onLoadEnd();
 	}, [props.onLoadEnd]);
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	const BackButtonDialogBox_ = BackButtonDialogBox as any;
-
 	const { html, injectedJs } = useSource(tempDir, props.themeId);
 
 	return (
@@ -119,7 +113,6 @@ export default function NoteBodyViewer(props: Props) {
 				onLoadEnd={onLoadEnd}
 				onMessage={onWebViewMessage}
 			/>
-			<BackButtonDialogBox_ ref={dialogBoxRef}/>
 		</View>
 	);
 }

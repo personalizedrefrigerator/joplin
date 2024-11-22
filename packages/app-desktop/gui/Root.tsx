@@ -25,6 +25,7 @@ const { ResourceScreen } = require('./ResourceScreen.js');
 import Navigator from './Navigator';
 import WelcomeUtils from '@joplin/lib/WelcomeUtils';
 import JoplinCloudLoginScreen from './JoplinCloudLoginScreen';
+import InteropService from '@joplin/lib/services/interop/InteropService';
 import WindowCommandsAndDialogs from './WindowCommandsAndDialogs/WindowCommandsAndDialogs';
 import { defaultWindowId, stateUtils, WindowState } from '@joplin/lib/reducer';
 import bridge from '../services/bridge';
@@ -91,6 +92,9 @@ async function initialize() {
 		type: 'NOTE_VISIBLE_PANES_SET',
 		panes: Setting.value('noteVisiblePanes'),
 	});
+
+	InteropService.instance().document = document;
+	InteropService.instance().xmlSerializer = new XMLSerializer();
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied

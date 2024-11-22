@@ -150,7 +150,7 @@ export default class LockHandler {
 	private refreshTimers_: RefreshTimers = {};
 	private autoRefreshInterval_: number = 1000 * 60;
 	private lockTtl_: number = defaultLockTtl;
-	private enabled_ = true;
+	private enabled_ = false;
 
 	public constructor(api: FileApi, options: LockHandlerOptions = null) {
 		if (!options) options = {};
@@ -206,6 +206,8 @@ export default class LockHandler {
 	public async locks(lockType: LockType = null): Promise<Lock[]> {
 		if (!this.enabled) return [];
 
+		if (this.enabled) throw new Error('Lock handler is enabled');
+
 		if (this.useBuiltInLocks) {
 			const locks = (await this.api_.listLocks()).items;
 			return locks;
@@ -227,6 +229,8 @@ export default class LockHandler {
 	}
 
 	private async saveLock(lock: Lock) {
+		if (!this.enabled) return;
+		if (this.enabled) throw new Error('Lock handler is enabled');
 		await this.api_.put(this.lockFilePath(lock), JSON.stringify(lock));
 	}
 
@@ -285,6 +289,10 @@ export default class LockHandler {
 	}
 
 	private async acquireExclusiveLock(clientType: LockClientType, clientId: string, options: AcquireLockOptions = null): Promise<Lock> {
+		if (!this.enabled) return nullLock();
+
+		if (this.enabled) throw new Error('Lock handler is enabled');
+
 		if (this.useBuiltInLocks) return this.api_.acquireLock(LockType.Exclusive, clientType, clientId);
 
 		// The logic to acquire an exclusive lock, while avoiding race conditions is as follow:
@@ -375,6 +383,8 @@ export default class LockHandler {
 	public startAutoLockRefresh(lock: Lock, errorHandler: Function): string {
 		if (!this.enabled) return '';
 
+		if (this.enabled) throw new Error('Lock handler is enabled');
+
 		const handle = this.autoLockRefreshHandle(lock);
 		if (this.refreshTimers_[handle]) {
 			throw new Error(`There is already a timer refreshing this lock: ${handle}`);
@@ -434,6 +444,8 @@ export default class LockHandler {
 	public stopAutoLockRefresh(lock: Lock) {
 		if (!this.enabled) return;
 
+		if (this.enabled) throw new Error('Lock handler is enabled');
+
 		const handle = this.autoLockRefreshHandle(lock);
 		if (!this.refreshTimers_[handle]) {
 			// Should not throw an error because lock may have been cleared in startAutoLockRefresh
@@ -448,6 +460,8 @@ export default class LockHandler {
 
 	public async acquireLock(lockType: LockType, clientType: LockClientType, clientId: string, options: AcquireLockOptions = null): Promise<Lock> {
 		if (!this.enabled) return nullLock();
+
+		if (this.enabled) throw new Error('Lock handler is enabled');
 
 		options = {
 			...defaultAcquireLockOptions(),
@@ -465,6 +479,8 @@ export default class LockHandler {
 
 	public async releaseLock(lockType: LockType, clientType: LockClientType, clientId: string) {
 		if (!this.enabled) return;
+
+		if (this.enabled) throw new Error('Lock handler is enabled');
 
 		if (this.useBuiltInLocks) {
 			await this.api_.releaseLock(lockType, clientType, clientId);

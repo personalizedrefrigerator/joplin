@@ -35,6 +35,7 @@ const DropdownAlert = require('react-native-dropdownalert').default;
 const AlarmServiceDriver = require('./services/AlarmServiceDriver').default;
 const SafeAreaView = require('./components/SafeAreaView');
 const { connect, Provider } = require('react-redux');
+import fastDeepEqual = require('fast-deep-equal');
 import { Provider as PaperProvider, MD3DarkTheme, MD3LightTheme } from 'react-native-paper';
 import BackButtonService from './services/BackButtonService';
 import NavService from '@joplin/lib/services/NavService';
@@ -55,7 +56,7 @@ import RevisionService from '@joplin/lib/services/RevisionService';
 import JoplinDatabase from '@joplin/lib/JoplinDatabase';
 import Database from '@joplin/lib/database';
 import NotesScreen from './components/screens/Notes';
-const { TagsScreen } = require('./components/screens/tags.js');
+import TagsScreen from './components/screens/tags';
 import ConfigScreen from './components/screens/ConfigScreen/ConfigScreen';
 const { FolderScreen } = require('./components/screens/folder.js');
 import LogScreen from './components/screens/LogScreen';
@@ -63,7 +64,7 @@ import StatusScreen from './components/screens/status';
 import SearchScreen from './components/screens/SearchScreen';
 const { OneDriveLoginScreen } = require('./components/screens/onedrive-login.js');
 import EncryptionConfigScreen from './components/screens/encryption-config';
-const { DropboxLoginScreen } = require('./components/screens/dropbox-login.js');
+import DropboxLoginScreen from './components/screens/dropbox-login.js';
 import { MenuProvider } from 'react-native-popup-menu';
 import SideMenu, { SideMenuPosition } from './components/SideMenu';
 import SideMenuContent from './components/side-menu-content';
@@ -87,6 +88,8 @@ import { isCallbackUrl, parseCallbackUrl, CallbackUrlCommand } from '@joplin/lib
 import JoplinCloudLoginScreen from './components/screens/JoplinCloudLoginScreen';
 
 import SyncTargetNone from '@joplin/lib/SyncTargetNone';
+
+
 
 SyncTargetRegistry.addClass(SyncTargetNone);
 SyncTargetRegistry.addClass(SyncTargetOneDrive);
@@ -301,7 +304,18 @@ const appReducer = (state = appDefaultState, action: any) => {
 				const currentRoute = state.route;
 
 				if (!historyGoingBack && historyCanGoBackTo(currentRoute)) {
-					navHistory.push(currentRoute);
+					const previousRoute = navHistory.length && navHistory[navHistory.length - 1];
+					const isDifferentRoute = !previousRoute || !fastDeepEqual(navHistory[navHistory.length - 1], currentRoute);
+
+					// Avoid multiple consecutive duplicate screens in the navigation history -- these can make
+					// pressing "back" seem to have no effect.
+					if (isDifferentRoute) {
+						navHistory.push(currentRoute);
+					}
+				}
+
+				if (action.clearHistory) {
+					navHistory.splice(0, navHistory.length);
 				}
 
 				newState = { ...state };
@@ -1329,7 +1343,7 @@ class AppComponent extends React.Component {
 					},
 				},
 			}}>
-				<DialogManager>
+				<DialogManager themeId={this.props.themeId}>
 					{mainContent}
 				</DialogManager>
 			</PaperProvider>

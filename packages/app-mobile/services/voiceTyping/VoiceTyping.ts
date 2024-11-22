@@ -1,7 +1,7 @@
 import shim from '@joplin/lib/shim';
 import Logger from '@joplin/utils/Logger';
 import { PermissionsAndroid, Platform } from 'react-native';
-import { unzip } from 'react-native-zip-archive';
+import unzip from './utils/unzip';
 const md5 = require('md5');
 
 const logger = Logger.create('voiceTyping');

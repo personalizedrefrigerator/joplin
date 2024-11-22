@@ -16,7 +16,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Poedit 3.4.4\n"
+"X-Generator: Poedit 3.5\n"
 
 #: packages/app-mobile/components/screens/ConfigScreen/ConfigScreen.tsx:600
 msgid "- Camera: to allow taking a picture and attaching it to a note."
@@ -292,7 +292,7 @@ msgid ""
 "unexpected behaviour."
 msgstr ""
 "Pemacu \"%s\" digunakan untuk perintah \"%s\" dan \"%s\". Ini dapat "
-"menimbulkan perilaku yangtidak terduga."
+"menimbulkan perilaku yang tidak terduga."
 
 #: packages/app-desktop/gui/MainScreen/MainScreen.tsx:676
 #: packages/app-mobile/components/screens/ShareManager/IncomingShareItem.tsx:40
@@ -569,9 +569,9 @@ msgid ""
 "to it before syncing, otherwise all files will be removed! See the FAQ for "
 "more details: %s"
 msgstr ""
-"Perhatian: Jika Anda mengubah lokasi ini, pastikan Anda menyalin semua "
-"konten Anda ke lokasi baru sebelum melakukan penyelarasan, jika tidak, semua "
-"berkas akan dihapus! Lihat FAQ untuk rincian lebih lanjut: %s"
+"Perhatian: Jika Anda mengubah lokasi ini, pastikan Anda menyalin semua isi "
+"catatan Anda ke lokasi baru sebelum melakukan penyelarasan, jika tidak, "
+"semua berkas akan dihapus! Lihat FAQ untuk rincian lebih lanjut: %s"
 
 #: packages/app-cli/app/command-sync.ts:72
 #: packages/app-cli/app/command-sync.ts:86
@@ -1088,11 +1088,11 @@ msgstr "Penagihan gabungan"
 
 #: packages/app-desktop/gui/ConfigScreen/controls/plugins/SearchPlugins.tsx:107
 msgid "Content provided by %s"
-msgstr "Konten disediakan oleh %s"
+msgstr "Isi disediakan oleh %s"
 
 #: packages/app-mobile/components/screens/ConfigScreen/plugins/PluginStates.tsx:102
 msgid "Content provided by: %s"
-msgstr "Konten disediakan oleh: %s"
+msgstr "Isi disediakan oleh: %s"
 
 #: packages/app-mobile/components/ProfileSwitcher/ProfileSwitcher.tsx:65
 msgid "Continue"
@@ -1587,7 +1587,7 @@ msgstr "Buang perubahan"
 
 #: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:457
 msgid "Dismiss"
-msgstr "Bubarkan"
+msgstr "Tutup"
 
 #: packages/app-cli/app/command-geoloc.ts:13
 msgid "Displays a geolocation URL for the note."
@@ -2441,7 +2441,7 @@ msgstr "Beranda"
 
 #: packages/app-desktop/gui/NoteEditor/editorCommandDeclarations.ts:100
 msgid "Horizontal Rule"
-msgstr "Garis Horisontal"
+msgstr "Garis Mendatar"
 
 #: packages/lib/services/interop/InteropService.ts:176
 msgid "HTML Directory"
@@ -5725,7 +5725,7 @@ msgid ""
 "content."
 msgstr ""
 "Berhenti membagikan buku catatan ini? Penerima tidak akan lagi memiliki "
-"akses ke kontennya."
+"akses ke isinya."
 
 #: packages/app-mobile/components/screens/Note.tsx:807
 msgid "Unsupported image type: %s"

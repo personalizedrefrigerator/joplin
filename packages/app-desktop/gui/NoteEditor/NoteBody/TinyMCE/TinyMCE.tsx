@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useState, useEffect, useCallback, useRef, forwardRef, useImperativeHandle, useMemo } from 'react';
-import { ScrollOptions, ScrollOptionTypes, EditorCommand, NoteBodyEditorProps, ResourceInfos, HtmlToMarkdownHandler } from '../../utils/types';
+import { ScrollOptions, ScrollOptionTypes, EditorCommand, NoteBodyEditorProps, ResourceInfos, HtmlToMarkdownHandler, ScrollToTextValue } from '../../utils/types';
 import { resourcesStatus, commandAttachFileToBody, getResourcesFromPasteEvent, processPastedHtml } from '../../utils/resourceHandling';
 import attachedResources from '@joplin/lib/utils/attachedResources';
 import useScroll from './utils/useScroll';
@@ -243,6 +243,28 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: any) => {
 						insertResourcesIntoContentRef.current(cmd.value.paths, { createFileURL: !!cmd.value.createFileURL });
 					} else {
 						logger.warn('unsupported drop item: ', cmd);
+					}
+				} else if (cmd.name === 'editor.scrollToText') {
+
+					const cmdValue = cmd.value as ScrollToTextValue;
+
+					const findElementByText = (doc: Document, text: string, element: string) => {
+						const headers = doc.querySelectorAll(element);
+						for (const header of headers) {
+							if (header.textContent?.trim() === text) {
+								return header;
+							}
+						}
+						return null;
+					};
+
+					const contentDocument = editor.getDoc();
+					const targetElement = findElementByText(contentDocument, cmdValue.text, cmdValue.element);
+
+					if (targetElement) {
+						targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+					} else {
+						logger.warn('editor.scrollToText: Could not find text to scroll to :', cmdValue);
 					}
 				} else {
 					commandProcessed = false;

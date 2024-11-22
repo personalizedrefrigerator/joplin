@@ -36,12 +36,11 @@ export const generateNonce = async (nonce: Uint8Array) => {
 };
 
 export const increaseNonce = async (nonce: Uint8Array) => {
-	const carry = 1;
 	const end = nonce.length - nonceCounterLength;
 	let i = nonce.length;
 	while (i-- > end) {
-		nonce[i] += carry;
-		if (nonce[i] !== 0 || carry !== 1) {
+		nonce[i] += 1;
+		if (nonce[i] !== 0) {
 			break;
 		}
 	}

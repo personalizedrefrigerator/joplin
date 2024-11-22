@@ -4,6 +4,8 @@ import { CommandRuntime, CommandDeclaration, CommandContext } from '@joplin/lib/
 import { themeStyle } from '@joplin/lib/theme';
 import attachedResources from '@joplin/lib/utils/attachedResources';
 import { MarkupLanguage } from '@joplin/renderer';
+import { Options } from '@joplin/renderer/MdToHtml';
+import { RenderOptions } from '@joplin/renderer/types';
 
 export const declaration: CommandDeclaration = {
 	name: 'renderMarkup',
@@ -20,9 +22,10 @@ const getMarkupToHtml = () => {
 
 export const runtime = (): CommandRuntime => {
 	return {
-		execute: async (_context: CommandContext, markupLanguage: MarkupLanguage, markup: string) => {
+		execute: async (_context: CommandContext, markupLanguage: MarkupLanguage, markup: string, _rendererOptions: Options = null, renderOptions: RenderOptions = null) => {
 			const markupToHtml = getMarkupToHtml();
 			const html = await markupToHtml.render(markupLanguage, markup, themeStyle(Setting.value('theme')), {
+				...renderOptions,
 				resources: await attachedResources(markup),
 				splitted: true,
 			});

@@ -3,7 +3,7 @@ import { useState, useCallback, useMemo } from 'react';
 import { FAB, Portal } from 'react-native-paper';
 import { _ } from '@joplin/lib/locale';
 import { Dispatch } from 'redux';
-import { Platform, useWindowDimensions, View } from 'react-native';
+import { Platform, View, ViewStyle } from 'react-native';
 import shim from '@joplin/lib/shim';
 import AccessibleWebMenu from '../accessibility/AccessibleModalMenu';
 const Icon = require('react-native-vector-icons/Ionicons').default;
@@ -71,10 +71,22 @@ const FloatingActionButton = (props: ActionButtonProps) => {
 	// is disabled.
 	//
 	// See https://github.com/callstack/react-native-paper/issues/4064
-	const windowSize = useWindowDimensions();
+	// May be possible to remove if https://github.com/callstack/react-native-paper/pull/4514
+	// is merged.
 	const adjustMargins = !open && shim.mobilePlatform() === 'android';
-	const marginTop = adjustMargins ? Math.max(0, windowSize.height - 140) : undefined;
-	const marginStart = adjustMargins ? Math.max(0, windowSize.width - 200) : undefined;
+	const marginStyles = useMemo((): ViewStyle => {
+		if (!adjustMargins) {
+			return {};
+		}
+
+		// Internally, React Native Paper uses absolute positioning to make its
+		// (usually invisible) view fill the screen. Setting top and left to
+		// undefined causes the view to take up only part of the screen.
+		return {
+			top: undefined,
+			left: undefined,
+		};
+	}, [adjustMargins]);
 
 	const label = props.mainButton?.label ?? _('Add new');
 
@@ -92,7 +104,7 @@ const FloatingActionButton = (props: ActionButtonProps) => {
 	const menuContent = <FAB.Group
 		open={open}
 		accessibilityLabel={label}
-		style={{ marginStart, marginTop }}
+		style={marginStyles}
 		icon={ open ? openIcon : closedIcon }
 		fabStyle={{
 			backgroundColor: props.mainButton?.color ?? 'rgba(231,76,60,1)',

@@ -1,12 +1,14 @@
 import AsyncActionQueue from '@joplin/lib/AsyncActionQueue';
 import { ToolbarButtonInfo } from '@joplin/lib/services/commands/ToolbarButtonUtils';
-import { PluginStates } from '@joplin/lib/services/plugins/reducer';
+import { PluginHtmlContents, PluginStates } from '@joplin/lib/services/plugins/reducer';
 import { MarkupLanguage } from '@joplin/renderer';
 import { RenderResult, RenderResultPluginAsset } from '@joplin/renderer/types';
 import { Dispatch } from 'redux';
 import { ProcessResultsRow } from '@joplin/lib/services/search/SearchEngine';
 import { DropHandler } from './useDropHandler';
 import { SearchMarkers } from './useSearchMarkers';
+import { ParseOptions } from '@joplin/lib/HtmlToMd';
+import { ScrollStrategy } from '@joplin/editor/CodeMirror/CodeMirrorControl';
 
 export interface AllAssetsOptions {
 	contentMaxWidthTarget?: string;
@@ -54,9 +56,11 @@ export interface NoteEditorProps {
 	shareCacheSetting: string;
 	syncUserId: string;
 	searchResults: ProcessResultsRow[];
-
+	pluginHtmlContents: PluginHtmlContents;
+	'plugins.shownEditorViewIds': string[];
 	onTitleChange?: (title: string)=> void;
 	bodyEditor: string;
+	startupPluginsLoaded: boolean;
 }
 
 export interface NoteBodyEditorRef {
@@ -85,7 +89,7 @@ export interface MarkupToHtmlOptions {
 }
 
 export type MarkupToHtmlHandler = (markupLanguage: MarkupLanguage, markup: string, options: MarkupToHtmlOptions)=> Promise<RenderResult>;
-export type HtmlToMarkdownHandler = (markupLanguage: number, html: string, originalCss: string)=> Promise<string>;
+export type HtmlToMarkdownHandler = (markupLanguage: number, html: string, originalCss: string, parseOptions?: ParseOptions)=> Promise<string>;
 
 export interface NoteBodyEditorProps {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
@@ -268,3 +272,12 @@ export type DropCommandValue = ({
 	paths: string[];
 	createFileURL: boolean;
 }) & DropCommandBase;
+
+export interface ScrollToTextValue {
+	// Text should be plain text - it should not include Markdown characters as it needs to work
+	// with both TinyMCE and CodeMirror. To specific an element use the `element` property. For
+	// example to scroll to `## Scroll to this`, use `{ text: 'Scroll to this', element: 'h2' }`.
+	text: string;
+	element: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'strong' | 'ul';
+	scrollStrategy?: ScrollStrategy;
+}

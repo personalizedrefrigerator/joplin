@@ -1278,7 +1278,7 @@ msgstr "建立新的待辦事項..."
 
 #: packages/app-mobile/components/screens/ConfigScreen/NoteExportSection/ExportDebugReportButton.tsx:29
 msgid "Creating report..."
-msgstr "正在建立新報告 %s..."
+msgstr "正在建立新報告..."
 
 #: packages/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/utils/useLinkTooltips.ts:41
 msgid "Ctrl-click to open"
@@ -1441,7 +1441,7 @@ msgstr "確定刪除這份邀請嗎？此舉將會使共享對象無法再存取
 
 #: packages/app-mobile/components/ProfileSwitcher/ProfileSwitcher.tsx:98
 msgid "Delete this profile?"
-msgstr "刪除此設定檔「%s」？"
+msgstr "刪除此設定檔？"
 
 #: packages/app-desktop/gui/NotePropertiesDialog.tsx:69
 #: packages/app-mobile/components/screens/ConfigScreen/plugins/PluginInfoModal.tsx:207
@@ -5471,7 +5471,7 @@ msgstr ""
 
 #: packages/app-desktop/bridge.ts:417
 msgid "Unknown file type"
-msgstr "未知的檔案類型：%s"
+msgstr "未知的檔案類型"
 
 #: packages/lib/utils/processStartFlags.ts:178
 msgid "Unknown flag: %s"

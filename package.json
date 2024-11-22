@@ -9,7 +9,8 @@
     "url": "git+https://github.com/laurent22/joplin.git"
   },
   "engines": {
-    "node": ">=18"
+    "node": ">=18",
+    "yarn": "3.8.3"
   },
   "scripts": {
     "buildApiDoc": "yarn workspace joplin start apidoc ../../readme/api/references/rest_api.md",
@@ -88,7 +89,7 @@
     "husky": "3.1.0",
     "lerna": "3.22.1",
     "lint-staged": "15.2.8",
-    "madge": "6.1.0",
+    "madge": "7.0.0",
     "npm-package-json-lint": "7.1.0",
     "typescript": "5.4.5"
   },

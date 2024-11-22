@@ -1,10 +1,6 @@
 import Plugin from '../Plugin';
 import { FolderEntity } from '../../database/types';
-import { Disposable, MenuItem } from './types';
-export interface EditContextMenuFilterObject {
-    items: MenuItem[];
-}
-type FilterHandler<T> = (object: T) => Promise<void>;
+import { Disposable, EditContextMenuFilterObject, FilterHandler } from './types';
 declare enum ItemChangeEventType {
     Create = 1,
     Update = 2,
