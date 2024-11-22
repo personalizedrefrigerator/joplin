@@ -424,7 +424,7 @@ const SideMenuContentComponent = (props: Props) => {
 		} else if (folderIcon.type === FolderIconType.DataUrl) {
 			return <Image style={styles_.folderImageIcon} source={{ uri: folderIcon.dataUrl }}/>;
 		} else if (folderIcon.type === FolderIconType.FontAwesome) {
-			return <Icon style={styles_.folderBaseIcon} name={folderIcon.name} accessibilityLabel={''}/>;
+			return <Icon style={styles_.folderBaseIcon} name={folderIcon.name} accessibilityLabel={null}/>;
 		} else {
 			throw new Error(`Unsupported folder icon type: ${folderIcon.type}`);
 		}
@@ -485,6 +485,7 @@ const SideMenuContentComponent = (props: Props) => {
 						event.preventDefault();
 						void folder_longPress(folder);
 					}}
+					accessibilityHint={_('Opens notebook')}
 					role='button'
 				>
 					<View style={folderButtonStyle}>
@@ -500,7 +501,7 @@ const SideMenuContentComponent = (props: Props) => {
 	};
 
 	const renderSidebarButton = (key: string, title: string, iconName: string, onPressHandler: ()=> void = null, selected = false) => {
-		let icon = <IonIcon name={iconName} style={styles_.sidebarIcon} aria-hidden={true} />;
+		let icon = <Icon name={`ionicon ${iconName}`} style={styles_.sidebarIcon} accessibilityLabel={null} />;
 
 		if (key === 'synchronize_button') {
 			icon = <Animated.View style={{ transform: [{ rotate: syncIconRotation }] }}>{icon}</Animated.View>;
@@ -516,7 +517,7 @@ const SideMenuContentComponent = (props: Props) => {
 		if (!onPressHandler) return content;
 
 		return (
-			<TouchableOpacity key={key} onPress={onPressHandler} role='button'>
+			<TouchableOpacity key={key} onPress={onPressHandler} accessibilityRole='button'>
 				{content}
 			</TouchableOpacity>
 		);
