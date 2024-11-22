@@ -21,21 +21,11 @@ function pluginAssets(theme: any) {
 					list-style-type: none;
 				}
 
-				li.md-checkbox .checkbox-wrapper {
-					display: flex;
-					flex-direction: row;
-					align-items: flex-start;
-				}
-
 				li.md-checkbox input[type=checkbox] {
-					display: flex;
 					margin-left: -1.71em;
 					margin-right: 0.7em;
-					margin-top: 5px;
-				}
-
-				li.md-checkbox label {
-					display: flex;
+					position: relative;
+					top: 1px;
 				}
 				
 				ul.joplin-checklist {
