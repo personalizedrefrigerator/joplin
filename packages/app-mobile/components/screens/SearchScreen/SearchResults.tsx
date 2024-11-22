@@ -100,10 +100,11 @@ const SearchResults: React.FC<Props> = props => {
 	// Don't show the progress bar immediately, only show if the search
 	// is taking some time.
 	const longRunning = useIsLongRunning(isPending);
+	const progressVisible = longRunning;
 
 	// To have the correct height on web, the progress bar needs to be wrapped:
-	const progressBar = <View>
-		<ProgressBar indeterminate={true} visible={longRunning}/>
+	const progressBar = <View aria-hidden={!progressVisible}>
+		<ProgressBar indeterminate={true} visible={progressVisible}/>
 	</View>;
 
 	return (
