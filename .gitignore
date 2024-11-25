@@ -846,7 +846,6 @@ packages/editor/CodeMirror/editorCommands/sortSelectedLines.test.js
 packages/editor/CodeMirror/editorCommands/sortSelectedLines.js
 packages/editor/CodeMirror/editorCommands/supportsCommand.js
 packages/editor/CodeMirror/getScrollFraction.js
-packages/editor/CodeMirror/localisation.js
 packages/editor/CodeMirror/markdown/codeBlockLanguages/allLanguages.js
 packages/editor/CodeMirror/markdown/codeBlockLanguages/defaultLanguage.js
 packages/editor/CodeMirror/markdown/codeBlockLanguages/lookUpLanguage.js
@@ -876,6 +875,7 @@ packages/editor/CodeMirror/testUtil/pressReleaseKey.js
 packages/editor/CodeMirror/testUtil/typeText.js
 packages/editor/CodeMirror/theme.js
 packages/editor/CodeMirror/utils/biDirectionalTextExtension.js
+packages/editor/CodeMirror/utils/editorLocalizationExtension.js
 packages/editor/CodeMirror/utils/formatting/RegionSpec.js
 packages/editor/CodeMirror/utils/formatting/findInlineMatch.test.js
 packages/editor/CodeMirror/utils/formatting/findInlineMatch.js
@@ -900,6 +900,9 @@ packages/editor/CodeMirror/utils/searchExtension.js
 packages/editor/CodeMirror/utils/setupVim.js
 packages/editor/SelectionFormatting.js
 packages/editor/events.js
+packages/editor/localization.js
+packages/editor/localizationPatterns.js
+packages/editor/tools/buildLocalizations.js
 packages/editor/types.js
 packages/fork-htmlparser2/src/CollectingHandler.js
 packages/fork-htmlparser2/src/FeedHandler.spec.js

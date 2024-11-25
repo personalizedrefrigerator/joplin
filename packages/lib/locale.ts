@@ -683,6 +683,24 @@ export const toIso639Alpha3 = (code: string) => {
 	return info.alpha3;
 };
 
+const rawStringByLocale = (locale: string, source: string) => {
+	const strings = localeStrings(locale);
+	const lookUpResult = strings[source];
+	let translatedString = '';
+
+	if (lookUpResult === undefined || !lookUpResult.join('')) {
+		translatedString = source;
+	} else {
+		translatedString = lookUpResult[0];
+	}
+
+	return translatedString;
+};
+
+export const rawStringInCurrentLocale = (source: string) => {
+	return rawStringByLocale(currentLocale_, source);
+};
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 function _(s: string, ...args: any[]): string {
 	return stringByLocale(currentLocale_, s, ...args);
@@ -714,17 +732,9 @@ function _n(singular: string, plural: string, n: number, ...args: any[]) {
 	}
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-const stringByLocale = (locale: string, s: string, ...args: any[]): string => {
-	const strings = localeStrings(locale);
-	const result = strings[s];
-	let translatedString = '';
-
-	if (result === undefined || !result.join('')) {
-		translatedString = s;
-	} else {
-		translatedString = result[0];
-	}
+// Like lookUpStringInLocale, but applies format args.
+const stringByLocale = (locale: string, s: string, ...args: unknown[]): string => {
+	const translatedString = rawStringByLocale(locale, s);
 
 	try {
 		return sprintf(translatedString, ...args);

@@ -15,7 +15,7 @@ import { editorFont } from '../global-style';
 
 import { EditorControl as EditorBodyControl, ContentScriptData } from '@joplin/editor/types';
 import { EditorControl, EditorSettings, SelectionRange, WebViewToEditorApi } from './types';
-import { _ } from '@joplin/lib/locale';
+import { _, rawStringInCurrentLocale } from '@joplin/lib/locale';
 import MarkdownToolbar from './MarkdownToolbar/MarkdownToolbar';
 import { ChangeEvent, EditorEvent, EditorEventType, SelectionRangeChangeEvent, UndoRedoDepthChangeEvent } from '@joplin/editor/events';
 import { EditorCommandType, EditorKeymap, EditorLanguageType, SearchState } from '@joplin/editor/types';
@@ -30,7 +30,7 @@ import { OnMessageEvent } from '../ExtendedWebView/types';
 import { join, dirname } from 'path';
 import * as mimeUtils from '@joplin/lib/mime-utils';
 import uuid from '@joplin/lib/uuid';
-import localisation from '@joplin/editor/CodeMirror/localisation';
+import { makeLocalizations } from '@joplin/editor/localization';
 
 type ChangeEventHandler = (event: ChangeEvent)=> void;
 type UndoRedoDepthChangeHandler = (event: UndoRedoDepthChangeEvent)=> void;
@@ -377,9 +377,11 @@ function NoteEditor(props: Props, ref: any) {
 				const parentElement = document.getElementsByClassName('CodeMirror')[0];
 				const initialText = ${JSON.stringify(props.initialText)};
 				const settings = ${JSON.stringify(editorSettings)};
-				const localisations = ${JSON.stringify(localisation())};
+				const localizations = ${JSON.stringify(
+		makeLocalizations(rawStringInCurrentLocale),
+	)};
 
-				window.cm = codeMirrorBundle.initCodeMirror(parentElement, initialText, localisations, settings);
+				window.cm = codeMirrorBundle.initCodeMirror(parentElement, initialText, localizations, settings);
 
 				${setInitialSelectionJS}
 

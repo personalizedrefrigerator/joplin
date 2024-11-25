@@ -3,6 +3,7 @@ import { RegionSpec } from './RegionSpec';
 import findInlineMatch, { MatchSide } from './findInlineMatch';
 import { SelectionUpdate } from './types';
 import { EditorView } from '@codemirror/view';
+import { _ } from '../../../localization';
 
 // Toggles whether the given selection matches the inline region specified by [spec].
 //
@@ -39,7 +40,7 @@ const toggleInlineRegionSurrounded = (
 			insert: content,
 		});
 
-		announcement = state.phrase('Removed $ markup', spec.accessibleName);
+		announcement = _('Removed %s markup', spec.accessibleName);
 	} else {
 		changes.push({
 			from: sel.from,
@@ -60,7 +61,7 @@ const toggleInlineRegionSurrounded = (
 			finalSelStart = sel.from + spec.template.start.length;
 			finalSelEnd = finalSelStart;
 		}
-		announcement = state.phrase('Added $ markup', spec.accessibleName);
+		announcement = _('Added %s markup', spec.accessibleName);
 	}
 
 	return {

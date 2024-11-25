@@ -4,6 +4,7 @@ import findInlineMatch, { MatchSide } from './findInlineMatch';
 import growSelectionToNode from '../growSelectionToNode';
 import toggleInlineSelectionFormat from './toggleInlineSelectionFormat';
 import { EditorView } from '@codemirror/view';
+import { _ } from '../../../localization';
 
 const blockQuoteStartLen = '> '.length;
 const blockQuoteRegex = /^>\s/;
@@ -101,7 +102,7 @@ const toggleRegionFormatGlobally = (
 				range: EditorSelection.cursor(inlineStart + blockStart.length),
 				effects: [
 					EditorView.announce.of(
-						state.phrase('Converted $1 to $2', inlineSpec.accessibleName, blockSpec.accessibleName),
+						_('Converted %s to %s', inlineSpec.accessibleName, blockSpec.accessibleName),
 					),
 				],
 			};
@@ -172,7 +173,7 @@ const toggleRegionFormatGlobally = (
 			});
 			charsAdded -= toMatchTo - toMatchFrom;
 
-			announcement = state.phrase('Removed $ markup', blockSpec.accessibleName);
+			announcement = _('Removed %s markup', blockSpec.accessibleName);
 		} else {
 			let insertBefore, insertAfter;
 
@@ -195,7 +196,7 @@ const toggleRegionFormatGlobally = (
 			});
 			charsAdded += insertBefore.length + insertAfter.length;
 
-			announcement = state.phrase('Added $ markup', blockSpec.accessibleName);
+			announcement = _('Added %s markup', blockSpec.accessibleName);
 		}
 
 		const range = EditorSelection.range(
@@ -203,7 +204,7 @@ const toggleRegionFormatGlobally = (
 		);
 
 		if (!range.empty) {
-			announcement += `\n${state.phrase('Selected changed content')}`;
+			announcement += `\n${_('Selected changed content')}`;
 		}
 
 		return {

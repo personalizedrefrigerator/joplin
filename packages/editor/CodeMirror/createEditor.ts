@@ -34,6 +34,7 @@ import biDirectionalTextExtension from './utils/biDirectionalTextExtension';
 import searchExtension from './utils/searchExtension';
 import isCursorAtBeginning from './utils/isCursorAtBeginning';
 import overwriteModeExtension from './utils/overwriteModeExtension';
+import editorLocalizationExtension from './utils/editorLocalizationExtension';
 
 // Newer versions of CodeMirror by default use Chrome's EditContext API.
 // While this might be stable enough for desktop use, it causes significant
@@ -276,7 +277,7 @@ const createEditor = (
 				biDirectionalTextExtension,
 				overwriteModeExtension,
 
-				props.localisations ? EditorState.phrases.of(props.localisations) : [],
+				editorLocalizationExtension(),
 
 				// Adds additional CSS classes to tokens (the default CSS classes are
 				// auto-generated and thus unstable).

@@ -14,7 +14,8 @@ import useKeymap from './utils/useKeymap';
 import useEditorSearch from '../utils/useEditorSearchExtension';
 import CommandService from '@joplin/lib/services/CommandService';
 import { SearchMarkers } from '../../../utils/useSearchMarkers';
-import localisation from '@joplin/editor/CodeMirror/localisation';
+import { makeLocalizations, setLocalizations } from '@joplin/editor/localization';
+import { rawStringInCurrentLocale } from '@joplin/lib/locale';
 
 interface Props extends EditorProps {
 	style: React.CSSProperties;
@@ -99,10 +100,11 @@ const Editor = (props: Props, ref: ForwardedRef<CodeMirrorControl>) => {
 
 		const editorProps: EditorProps = {
 			...props,
-			localisations: localisation(),
 			onEvent: event => onEventRef.current(event),
 			onLogMessage: message => onLogMessageRef.current(message),
 		};
+
+		setLocalizations(makeLocalizations(rawStringInCurrentLocale));
 
 		const editor = createEditor(editorContainerRef.current, editorProps);
 		editor.addStyles({

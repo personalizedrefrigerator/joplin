@@ -1,6 +1,7 @@
 import { EditorSelection, EditorState, Line, SelectionRange, TransactionSpec } from '@codemirror/state';
 import growSelectionToNode from '../growSelectionToNode';
 import { EditorView } from '@codemirror/view';
+import { _ } from '../../../localization';
 
 interface FormattingSpec {
 	regex: RegExp;
@@ -118,13 +119,13 @@ const toggleSelectedLinesStartWith = (
 
 		let announcement = '';
 		if (charsAdded > 0) {
-			announcement = state.phrase('Added $ markup', accessibleName);
+			announcement = _('Added %s markup', accessibleName);
 		} else if (charsAdded < 0) {
-			announcement = state.phrase('Removed $ markup', accessibleName);
+			announcement = _('Removed %s markup', accessibleName);
 		}
 
 		if (changedLineCount > 1) {
-			announcement += ` ${state.phrase('on $ lines', changedLineCount)}`;
+			announcement += ` ${_('on %d lines', changedLineCount)}`;
 		}
 
 		return {

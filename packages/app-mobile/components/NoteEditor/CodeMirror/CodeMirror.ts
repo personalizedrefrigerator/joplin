@@ -15,19 +15,20 @@ import CodeMirrorControl from '@joplin/editor/CodeMirror/CodeMirrorControl';
 import WebViewToRNMessenger from '../../../utils/ipc/WebViewToRNMessenger';
 import { WebViewToEditorApi } from '../types';
 import { focus } from '@joplin/lib/utils/focusHandler';
+import { Localizations, setLocalizations } from '@joplin/editor/localization';
 
 export const initCodeMirror = (
 	parentElement: HTMLElement,
 	initialText: string,
-	localisations: Record<string, string>,
+	localizations: Localizations,
 	settings: EditorSettings,
 ): CodeMirrorControl => {
 	const messenger = new WebViewToRNMessenger<CodeMirrorControl, WebViewToEditorApi>('editor', null);
 
+	setLocalizations(localizations);
 	const control = createEditor(parentElement, {
 		initialText,
 		settings,
-		localisations,
 
 		onPasteFile: async (data) => {
 			const reader = new FileReader();

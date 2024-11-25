@@ -17,6 +17,7 @@ import growSelectionToNode from '../utils/growSelectionToNode';
 import tabsToSpaces from '../utils/formatting/tabsToSpaces';
 import renumberSelectedLists from './utils/renumberSelectedLists';
 import toggleSelectedLinesStartWith from '../utils/formatting/toggleSelectedLinesStartWith';
+import { _ } from '../../localization';
 
 const startingSpaceRegex = /^(\s*)/;
 
@@ -24,7 +25,7 @@ export const toggleBolded: Command = (view: EditorView): boolean => {
 	const spec = RegionSpec.of({
 		template: '**',
 		nodeName: 'StrongEmphasis',
-		accessibleName: view.state.phrase('Bold'),
+		accessibleName: _('Bold'),
 	});
 	const changes = toggleInlineFormatGlobally(view.state, spec);
 
@@ -83,7 +84,7 @@ export const toggleItalicized: Command = (view: EditorView): boolean => {
 			template: { start: '*', end: '*' },
 			matcher: { start: /[_*]/g, end: /[_*]/g },
 
-			accessibleName: view.state.phrase('Italic'),
+			accessibleName: _('Italic'),
 		});
 
 		view.dispatch(
@@ -101,13 +102,13 @@ export const toggleCode: Command = (view: EditorView): boolean => {
 	const inlineRegionSpec = RegionSpec.of({
 		template: '`',
 		nodeName: 'InlineCode',
-		accessibleName: view.state.phrase('Inline code'),
+		accessibleName: _('Inline code'),
 	});
 	const blockRegionSpec: RegionSpec = {
 		nodeName: 'FencedCode',
 		template: { start: '```', end: '```' },
 		matcher: { start: codeFenceRegex, end: codeFenceRegex },
-		accessibleName: view.state.phrase('Block code'),
+		accessibleName: _('Block code'),
 	};
 
 	const changes = toggleRegionFormatGlobally(view.state, inlineRegionSpec, blockRegionSpec);
@@ -122,7 +123,7 @@ export const toggleMath: Command = (view: EditorView): boolean => {
 	const inlineRegionSpec = RegionSpec.of({
 		nodeName: 'InlineMath',
 		template: '$',
-		accessibleName: view.state.phrase('Inline math'),
+		accessibleName: _('Inline math'),
 	});
 	const blockRegionSpec = RegionSpec.of({
 		nodeName: 'BlockMath',
@@ -131,7 +132,7 @@ export const toggleMath: Command = (view: EditorView): boolean => {
 			start: blockStartRegex,
 			end: blockEndRegex,
 		},
-		accessibleName: view.state.phrase('Block math'),
+		accessibleName: _('Block math'),
 	});
 
 	const changes = toggleRegionFormatGlobally(view.state, inlineRegionSpec, blockRegionSpec);
@@ -188,11 +189,11 @@ export const toggleList = (listType: ListType): Command => {
 
 			let listTypeDescription = '';
 			if (listType === ListType.CheckList) {
-				listTypeDescription = state.phrase('Checklist');
+				listTypeDescription = _('Checklist');
 			} else if (listType === ListType.OrderedList) {
-				listTypeDescription = state.phrase('Numbered list');
+				listTypeDescription = _('Numbered list');
 			} else if (listType === ListType.UnorderedList) {
-				listTypeDescription = state.phrase('Bullet list');
+				listTypeDescription = _('Bullet list');
 			} else {
 				const exhaustivenessCheck: never = listType;
 				throw new Error(`Unknown list type ${exhaustivenessCheck}`);
@@ -200,15 +201,15 @@ export const toggleList = (listType: ListType): Command => {
 
 			const announcement = [];
 			if (itemAddedCount) {
-				announcement.push(state.phrase('Added $1 $2 items', itemAddedCount, listTypeDescription));
+				announcement.push(_('Added %d %s items', itemAddedCount, listTypeDescription));
 			}
 
 			if (itemReplacedCount) {
-				announcement.push(state.phrase('Replaced $1 items with $2 items', itemReplacedCount, listTypeDescription));
+				announcement.push(_('Replaced %d items with %s items', itemReplacedCount, listTypeDescription));
 			}
 
 			if (itemRemovedCount) {
-				announcement.push(state.phrase('Removed $1 $2 items', itemRemovedCount, listTypeDescription));
+				announcement.push(_('Removed %d %s items', itemRemovedCount, listTypeDescription));
 			}
 
 			return announcement.join(' , ');
@@ -460,7 +461,7 @@ export const toggleHeaderLevel = (level: number): Command => {
 				),
 				template: '',
 				matchEmpty: true,
-				accessibleName: view.state.phrase('Header'),
+				accessibleName: _('Header'),
 			},
 		);
 		view.dispatch(changes);
@@ -473,7 +474,7 @@ export const toggleHeaderLevel = (level: number): Command => {
 				regex: new RegExp(`^[#]{${level}} `),
 				template: `${headerStr} `,
 				matchEmpty: true,
-				accessibleName: view.state.phrase('Header level $', level),
+				accessibleName: _('Header level %d', level),
 			},
 		);
 		view.dispatch(changes);
@@ -521,7 +522,7 @@ export const increaseIndent: Command = (view: EditorView): boolean => {
 			template: indentUnit,
 			matchEmpty: true,
 
-			accessibleName: view.state.phrase('Indent'),
+			accessibleName: _('Indent'),
 		},
 	);
 	view.dispatch(changes);
@@ -573,7 +574,7 @@ export const decreaseIndent: Command = (view: EditorView): boolean => {
 			template: '',
 			matchEmpty: true,
 
-			accessibleName: view.state.phrase('Indent'),
+			accessibleName: _('Indent'),
 		},
 	);
 
