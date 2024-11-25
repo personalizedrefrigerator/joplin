@@ -4,6 +4,8 @@ import { SelectionUpdate } from './types';
 import findInlineMatch, { MatchSide } from './findInlineMatch';
 import growSelectionToNode from '../growSelectionToNode';
 import toggleInlineRegionSurrounded from './toggleInlineRegionSurrounded';
+import { EditorView } from '@codemirror/view';
+import { _ } from '@joplin/lib/locale';
 
 // Returns updated selections: For all selections in the given `EditorState`, toggles
 // whether each is contained in an inline region of type [spec].
@@ -22,6 +24,11 @@ const toggleInlineSelectionFormat = (
 
 		return {
 			range: EditorSelection.cursor(newCursorPos),
+			effects: [
+				EditorView.announce.of(
+					_('Moved cursor out of %s markup', spec.accessibleName),
+				),
+			],
 		};
 	}
 
