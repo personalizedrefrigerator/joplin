@@ -10089,23 +10089,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@lezer/markdown@npm:1.3.2":
+"@lezer/markdown@npm:1.3.2, @lezer/markdown@npm:^1.0.0":
   version: 1.3.2
   resolution: "@lezer/markdown@npm:1.3.2"
   dependencies:
     "@lezer/common": ^1.0.0
     "@lezer/highlight": ^1.0.0
   checksum: 080c5e6e13ff227d5a1883dd895ef08d6fc8eb9620eb00f93fe1292dd9a740ec50ccf340f2aab2f522843d26ad2ad991ef029fd93cf09f88e00ef470f1142d15
-  languageName: node
-  linkType: hard
-
-"@lezer/markdown@npm:^1.0.0":
-  version: 1.3.1
-  resolution: "@lezer/markdown@npm:1.3.1"
-  dependencies:
-    "@lezer/common": ^1.0.0
-    "@lezer/highlight": ^1.0.0
-  checksum: b5cbb857a90411e174e7ad23433756a81cf2ab422ef749e529211e078ed4061b4595fa8cbcca56119919c0b2735e8ecac11ff34768d64cb90e599fde2bc6c730
   languageName: node
   linkType: hard
 
