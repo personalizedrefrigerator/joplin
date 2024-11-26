@@ -1,5 +1,6 @@
-import { keymap, EditorView } from '@codemirror/view';
+import { EditorView } from '@codemirror/view';
 import { StateField, Facet, StateEffect } from '@codemirror/state';
+import keyUpHandlerExtension from './keyUpHandlerExtension';
 
 const overwriteModeFacet = Facet.define({
 	combine: values => values[0] ?? false,
@@ -62,17 +63,36 @@ const overwriteModeState = StateField.define({
 	],
 });
 
+export const overwriteModeEnabled = (view: EditorView) => {
+	return view.state.field(overwriteModeState);
+};
+
+const setOverwriteModeEnabled = (enabled: boolean, view: EditorView) => {
+	view.dispatch({
+		effects: [
+			toggleOverwrite.of(enabled),
+			EditorView.announce.of(
+				// TODO: Localize:
+				enabled ? 'Overwrite mode enabled' : 'Overwrite mode disabled',
+			),
+		],
+	});
+};
+
 const overwriteModeExtension = [
 	overwriteModeState,
-	keymap.of([{
-		key: 'Insert',
-		run: (view) => {
-			view.dispatch({
-				effects: toggleOverwrite.of(!view.state.field(overwriteModeState)),
-			});
-			return false;
+	keyUpHandlerExtension(
+		(event) => (
+			event.code === 'Insert' && !event.shiftKey && !event.altKey && !event.metaKey && !event.ctrlKey
+		),
+		({ view, otherKeysWerePressed }) => {
+			if (otherKeysWerePressed) {
+				return false;
+			}
+			setOverwriteModeEnabled(!overwriteModeEnabled(view), view);
+			return true;
 		},
-	}]),
+	),
 ];
 
 export default overwriteModeExtension;
