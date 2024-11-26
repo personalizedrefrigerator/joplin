@@ -22,6 +22,8 @@ export default [
 	'Header',
 	'Header level %d',
 	'Indent',
+	'Overwrite mode enabled',
+	'Overwrite mode disabled',
 	'Control character',
 	'Selection deleted',
 	'Go to line',
