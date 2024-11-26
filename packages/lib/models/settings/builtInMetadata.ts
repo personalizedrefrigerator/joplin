@@ -898,7 +898,7 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 			advanced: true,
 
 			label: () => _('Plugin WebView debugging'),
-			description: () => _('Allows debugging mobile plugins. See %s for details.', 'https://https://joplinapp.org/help/api/references/mobile_plugin_debugging/'),
+			description: () => _('Allows debugging mobile plugins. See %s for details.', 'https://joplinapp.org/help/api/references/mobile_plugin_debugging/'),
 		},
 
 		'plugins.pluginSupportEnabled': {

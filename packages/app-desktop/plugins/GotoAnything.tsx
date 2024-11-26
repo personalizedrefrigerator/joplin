@@ -13,7 +13,7 @@ import Folder from '@joplin/lib/models/Folder';
 import Note from '@joplin/lib/models/Note';
 import ItemList from '../gui/ItemList';
 import HelpButton from '../gui/HelpButton';
-import { surroundKeywords, nextWhitespaceIndex, removeDiacritics } from '@joplin/lib/string-utils';
+import { surroundKeywords, nextWhitespaceIndex, removeDiacritics, escapeRegExp, KeywordType } from '@joplin/lib/string-utils';
 import { mergeOverlappingIntervals } from '@joplin/lib/ArrayUtils';
 import markupLanguageUtils from '@joplin/lib/utils/markupLanguageUtils';
 import focusEditorIfEditorCommand from '@joplin/lib/services/commands/focusEditorIfEditorCommand';
@@ -56,7 +56,7 @@ interface State {
 	query: string;
 	results: GotoAnythingSearchResult[];
 	selectedItemId: string;
-	keywords: string[];
+	keywords: (string | ComplexTerm)[];
 	listType: number;
 	showHelp: boolean;
 	resultsInBody: boolean;
@@ -376,9 +376,15 @@ class DialogComponent extends React.PureComponent<Props, State> {
 					results = results.filter(r => !!notesById[r.id])
 						.map(r => ({ ...r, title: notesById[r.id].title }));
 
-					const normalizedKeywords = (await this.keywords(searchQuery)).map(
-						({ valueRegex }: ComplexTerm) => new RegExp(removeDiacritics(valueRegex), 'ig'),
-					);
+					const keywordRegexes = (await this.keywords(searchQuery)).map(term => {
+						if (typeof term === 'string') {
+							return new RegExp(escapeRegExp(term), 'ig');
+						} else if (term.valueRegex) {
+							return new RegExp(removeDiacritics(term.valueRegex), 'ig');
+						} else {
+							return new RegExp(escapeRegExp(term.value), 'ig');
+						}
+					});
 
 					for (let i = 0; i < results.length; i++) {
 						const row = results[i];
@@ -393,7 +399,7 @@ class DialogComponent extends React.PureComponent<Props, State> {
 								const normalizedBody = removeDiacritics(body);
 
 								// Iterate over all matches in the body for each search keyword
-								for (const keywordRegex of normalizedKeywords) {
+								for (const keywordRegex of keywordRegexes) {
 									for (const match of normalizedBody.matchAll(keywordRegex)) {
 										// Populate 'indices' with [begin index, end index] of each note fragment
 										// Begins at the regex matching index, ends at the next whitespace after seeking 15 characters to the right
@@ -547,7 +553,7 @@ class DialogComponent extends React.PureComponent<Props, State> {
 
 		const wrapKeywordMatches = (unescapedContent: string) => {
 			return surroundKeywords(
-				this.state.keywords,
+				this.state.keywords as KeywordType,
 				unescapedContent,
 				`<span class="match-highlight" style="font-weight: bold; color: ${theme.searchMarkerColor}; background-color: ${theme.searchMarkerBackgroundColor}">`,
 				'</span>',

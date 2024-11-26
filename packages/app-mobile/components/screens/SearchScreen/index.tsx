@@ -11,6 +11,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import IconButton from '../../IconButton';
 import SearchResults from './SearchResults';
 import AccessibleView from '../../accessibility/AccessibleView';
+import { ComplexTerm } from '@joplin/lib/services/search/SearchEngine';
 
 interface Props {
 	themeId: number;
@@ -73,7 +74,7 @@ const SearchScreenComponent: React.FC<Props> = props => {
 		setQuery('');
 	}, []);
 
-	const onHighlightedWordsChange = useCallback((words: string[]) => {
+	const onHighlightedWordsChange = useCallback((words: (ComplexTerm | string)[]) => {
 		props.dispatch({
 			type: 'SET_HIGHLIGHTED',
 			words,
