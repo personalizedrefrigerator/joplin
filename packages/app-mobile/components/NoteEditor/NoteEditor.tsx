@@ -377,9 +377,7 @@ function NoteEditor(props: Props, ref: any) {
 				const parentElement = document.getElementsByClassName('CodeMirror')[0];
 				const initialText = ${JSON.stringify(props.initialText)};
 				const settings = ${JSON.stringify(editorSettings)};
-				const localizations = ${JSON.stringify(
-		makeLocalizations(rawStringInCurrentLocale),
-	)};
+				const localizations = ${JSON.stringify(makeLocalizations(rawStringInCurrentLocale))};
 
 				window.cm = codeMirrorBundle.initCodeMirror(parentElement, initialText, localizations, settings);
 
