@@ -297,7 +297,7 @@ describe('markdownCommands', () => {
 		insertOrIncreaseIndent(editor);
 
 		expect(getLastAnnouncement(editor)).toBe('Added Indent markup to line start');
-		expect(editor.state.doc.toString()).toBe('\t Test');
+		expect(editor.state.doc.toString()).toBe('\tTest.');
 	});
 
 	it('insertOrIncreaseIndent should insert tabs when selection is empty, in a paragraph', async () => {
