@@ -2,9 +2,11 @@
 export default [
 	'Removed %s markup',
 	'Added %s markup',
+	'Moved cursor out of %s markup',
 	'Converted %s to %s',
 	'Selected changed content',
 	'on %d lines',
+	'to line start',
 	'Bold',
 	'Italic',
 	'Inline code',

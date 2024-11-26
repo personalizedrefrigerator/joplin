@@ -296,7 +296,7 @@ describe('markdownCommands', () => {
 
 		insertOrIncreaseIndent(editor);
 
-		expect(getLastAnnouncement(editor)).toBe('Added Indent markup at line start');
+		expect(getLastAnnouncement(editor)).toBe('Added Indent markup to line start');
 		expect(editor.state.doc.toString()).toBe('\t Test');
 	});
 
