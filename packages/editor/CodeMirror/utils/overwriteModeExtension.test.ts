@@ -46,6 +46,17 @@ describe('overwriteModeExtension', () => {
 		expect(editor.state.doc.toString()).toBe('Example!');
 	});
 
+	test('should be disabled by pressing <escape>', async () => {
+		const editor = await createEditor('Test!', true);
+
+		expect(overwriteModeEnabled(editor)).toBe(true);
+		pressReleaseKey(editor, { key: 'Escape', code: 'Escape' });
+		expect(overwriteModeEnabled(editor)).toBe(false);
+		// Escape should not re-enable the extension
+		pressReleaseKey(editor, { key: 'Escape', code: 'Escape' });
+		expect(overwriteModeEnabled(editor)).toBe(false);
+	});
+
 	test('<insert> should not toggle overwrite mode if other keys are pressed', async () => {
 		// On Linux, the Orca screen reader's default "do screen reader action" key is
 		// <insert>. To avoid toggling insert mode when users perform screen reader actions,

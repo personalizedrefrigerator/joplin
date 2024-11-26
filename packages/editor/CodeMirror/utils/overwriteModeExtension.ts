@@ -1,4 +1,4 @@
-import { EditorView } from '@codemirror/view';
+import { EditorView, keymap } from '@codemirror/view';
 import { StateField, Facet, StateEffect } from '@codemirror/state';
 import keyUpHandlerExtension from './keyUpHandlerExtension';
 
@@ -81,6 +81,20 @@ const setOverwriteModeEnabled = (enabled: boolean, view: EditorView) => {
 
 const overwriteModeExtension = [
 	overwriteModeState,
+	keymap.of([
+		{
+			// The <escape> keyboard shortcut may be more easily discoverable for users
+			// who enter overwrite mode unintentionally.
+			key: 'Escape',
+			run: (view) => {
+				if (overwriteModeEnabled(view)) {
+					setOverwriteModeEnabled(false, view);
+					return true;
+				}
+				return false;
+			},
+		},
+	]),
 	keyUpHandlerExtension(
 		(event) => (
 			event.code === 'Insert' && !event.shiftKey && !event.altKey && !event.metaKey && !event.ctrlKey
