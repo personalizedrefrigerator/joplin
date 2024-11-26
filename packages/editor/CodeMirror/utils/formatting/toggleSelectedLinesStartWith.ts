@@ -126,6 +126,8 @@ const toggleSelectedLinesStartWith = (
 
 		if (changedLineCount > 1) {
 			announcement += ` ${_('on %d lines', changedLineCount)}`;
+		} else {
+			announcement += ` ${_('at line start.')}`;
 		}
 
 		return {
