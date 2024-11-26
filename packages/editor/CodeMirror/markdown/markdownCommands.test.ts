@@ -6,6 +6,8 @@ import {
 } from './markdownCommands';
 import createTestEditor from '../testUtil/createTestEditor';
 import { blockMathTagName } from './markdownMathParser';
+import getLastAnnouncement from '../testUtil/getLastAnnouncement';
+import typeText from '../testUtil/typeText';
 
 describe('markdownCommands', () => {
 
@@ -36,6 +38,23 @@ describe('markdownCommands', () => {
 
 		toggleItalicized(editor);
 		expect(editor.state.doc.toString()).toBe('Testing...');
+	});
+
+	it('should announce for accessibility after bolding or removing bold formatting from content', async () => {
+		const initialDocText = 'Test';
+		const editor = await createTestEditor(
+			initialDocText, EditorSelection.range(0, initialDocText.length), [],
+		);
+
+		toggleBolded(editor);
+
+		expect(editor.state.doc.toString()).toBe('**Test**');
+		expect(getLastAnnouncement(editor)).toBe('Added Bold markup');
+
+		toggleBolded(editor);
+
+		expect(editor.state.doc.toString()).toBe('Test');
+		expect(getLastAnnouncement(editor)).toBe('Removed Bold markup');
 	});
 
 	it('for a cursor, bolding, then italicizing, should produce a bold-italic region', async () => {
@@ -82,6 +101,19 @@ describe('markdownCommands', () => {
 
 		editor.dispatch(editor.state.replaceSelection(' is a function.'));
 		expect(editor.state.doc.toString()).toBe('Testing...\n\n`f(x) = ...` is a function.');
+	});
+
+	it('should announce for accessibility when navigating out of an inline code region', async () => {
+		const editor = await createTestEditor('', EditorSelection.cursor(0), []);
+
+		toggleCode(editor);
+		expect(getLastAnnouncement(editor)).toBe('Added Inline code markup');
+		typeText(editor, 'test');
+		toggleCode(editor);
+		expect(getLastAnnouncement(editor)).toBe('Moved cursor out of Inline code markup');
+
+		expect(editor.state.doc.toString()).toBe('`test`');
+		expect(editor.state.selection.main.head).toBe(editor.state.doc.length);
 	});
 
 	it('should set headers to the proper levels (when toggling)', async () => {
@@ -252,6 +284,20 @@ describe('markdownCommands', () => {
 		insertOrIncreaseIndent(editor);
 
 		expect(editor.state.doc.toString()).toBe('> \tTesting...\n> \tTest.');
+	});
+
+	it('insertOrIncreaseIndent announce the change when text is selected', async () => {
+		const initialText = 'Test.';
+		const editor = await createTestEditor(
+			initialText,
+			EditorSelection.range(0, initialText.length),
+			[],
+		);
+
+		insertOrIncreaseIndent(editor);
+
+		expect(getLastAnnouncement(editor)).toBe('Added Indent markup at line start');
+		expect(editor.state.doc.toString()).toBe('\t Test');
 	});
 
 	it('insertOrIncreaseIndent should insert tabs when selection is empty, in a paragraph', async () => {
