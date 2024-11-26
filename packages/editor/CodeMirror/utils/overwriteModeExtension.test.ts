@@ -3,6 +3,7 @@ import createTestEditor from '../testUtil/createTestEditor';
 import overwriteModeExtension, { toggleOverwrite } from './overwriteModeExtension';
 import typeText from '../testUtil/typeText';
 import pressReleaseKey from '../testUtil/pressReleaseKey';
+import getLastAnnouncement from '../testUtil/getLastAnnouncement';
 
 const createEditor = async (initialText: string, defaultEnabled = false) => {
 	const editor = await createTestEditor(initialText, EditorSelection.cursor(0), [], [
@@ -53,5 +54,15 @@ describe('overwriteModeExtension', () => {
 		typeText(editor, 't');
 
 		expect(editor.state.doc.toString()).toBe('Test! This is a test! test\nTest');
+	});
+
+	test('should announce when toggling overwrite', async () => {
+		const editor = await createEditor('\nTest');
+
+		pressReleaseKey(editor, { key: 'Insert', code: 'Insert' });
+		expect(getLastAnnouncement(editor)).toBe('Overwrite mode enabled');
+
+		pressReleaseKey(editor, { key: 'Insert', code: 'Insert' });
+		expect(getLastAnnouncement(editor)).toBe('Overwrite mode disabled');
 	});
 });
