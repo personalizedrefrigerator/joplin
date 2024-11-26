@@ -58,6 +58,9 @@ const useOnSidebarKeyDownHandler = (props: Props) => {
 			event.preventDefault();
 
 			void CommandService.instance().execute('focusElement', 'noteBody');
+		} else if (event.code === 'Enter' && !event.shiftKey) {
+			event.preventDefault();
+			void CommandService.instance().execute('focusElement', 'noteList');
 		}
 
 		if (indexChange !== 0) {

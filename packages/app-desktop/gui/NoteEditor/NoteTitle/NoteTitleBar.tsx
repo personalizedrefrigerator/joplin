@@ -85,7 +85,7 @@ export default function NoteTitleBar(props: Props) {
 	const onTitleKeydown: React.KeyboardEventHandler<HTMLInputElement> = useCallback((event) => {
 		const titleElement = event.currentTarget;
 		const selectionAtEnd = titleElement.selectionEnd === titleElement.value.length;
-		if ((event.key === 'ArrowDown' && selectionAtEnd) || event.key === 'Enter') {
+		if ((event.key === 'ArrowDown' && selectionAtEnd) || (event.key === 'Enter' && !event.shiftKey)) {
 			event.preventDefault();
 			const moveCursorToStart = event.key === 'ArrowDown';
 			void CommandService.instance().execute('focusElement', 'noteBody', { moveCursorToStart });

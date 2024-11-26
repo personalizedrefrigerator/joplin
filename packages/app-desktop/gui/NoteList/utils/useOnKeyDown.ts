@@ -153,6 +153,17 @@ const useOnKeyDown = (
 			announceForAccessibility(!wasCompleted ? _('Complete') : _('Incomplete'));
 		}
 
+		// Check for isDefaultPrevented to allow plugins to call .preventDefault
+		if (key === 'Enter' && !event.isDefaultPrevented()) {
+			event.preventDefault();
+
+			if (event.shiftKey) {
+				void CommandService.instance().execute('focusElement', 'sideBar');
+			} else {
+				void CommandService.instance().execute('focusElement', 'noteTitle');
+			}
+		}
+
 		if (key.toUpperCase() === 'A' && (event.ctrlKey || event.metaKey)) {
 			event.preventDefault();
 
