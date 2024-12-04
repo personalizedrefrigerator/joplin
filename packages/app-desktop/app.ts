@@ -133,33 +133,29 @@ class Application extends BaseApplication {
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	protected async generalMiddleware(store: any, next: any, action: any) {
-		const isSettingUpdate = (key: string) => {
-			return action.type === 'SETTING_UPDATE_ONE' && action.key === key || action.type === 'SETTING_UPDATE_ALL';
-		};
-
-		if (isSettingUpdate('locale')) {
+		if (action.type === 'SETTING_UPDATE_ONE' && action.key === 'locale' || action.type === 'SETTING_UPDATE_ALL') {
 			this.updateLanguage();
 		}
 
-		if (isSettingUpdate('renderer.fileUrls')) {
+		if (action.type === 'SETTING_UPDATE_ONE' && action.key === 'renderer.fileUrls' || action.type === 'SETTING_UPDATE_ALL') {
 			bridge().electronApp().getCustomProtocolHandler().setMediaAccessEnabled(
 				Setting.value('renderer.fileUrls'),
 			);
 		}
 
-		if (isSettingUpdate('showTrayIcon')) {
+		if (action.type === 'SETTING_UPDATE_ONE' && action.key === 'showTrayIcon' || action.type === 'SETTING_UPDATE_ALL') {
 			this.updateTray();
 		}
 
-		if (isSettingUpdate('ocr.enabled')) {
+		if (action.type === 'SETTING_UPDATE_ONE' && action.key === 'ocr.enabled' || action.type === 'SETTING_UPDATE_ALL') {
 			void this.setupOcrService();
 		}
 
-		if (isSettingUpdate('windowContentZoomFactor')) {
+		if (action.type === 'SETTING_UPDATE_ONE' && action.key === 'windowContentZoomFactor' || action.type === 'SETTING_UPDATE_ALL') {
 			bridge().setZoomFactor(Setting.value('windowContentZoomFactor') / 100);
 		}
 
-		if (isSettingUpdate('linking.extraAllowedExtensions')) {
+		if (action.type === 'SETTING_UPDATE_ONE' && action.key === 'linking.extraAllowedExtensions' || action.type === 'SETTING_UPDATE_ALL') {
 			bridge().extraAllowedOpenExtensions = Setting.value('linking.extraAllowedExtensions');
 		}
 
