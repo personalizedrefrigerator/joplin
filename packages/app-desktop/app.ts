@@ -29,7 +29,7 @@ import { reg } from '@joplin/lib/registry';
 const packageInfo: PackageInfo = require('./packageInfo.js');
 import DecryptionWorker from '@joplin/lib/services/DecryptionWorker';
 import ClipperServer from '@joplin/lib/ClipperServer';
-import { ipcRenderer, webFrame } from 'electron';
+import { ipcRenderer } from 'electron';
 const Menu = bridge().Menu;
 const PluginManager = require('@joplin/lib/services/PluginManager');
 import RevisionService from '@joplin/lib/services/RevisionService';
@@ -133,29 +133,33 @@ class Application extends BaseApplication {
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	protected async generalMiddleware(store: any, next: any, action: any) {
-		if (action.type === 'SETTING_UPDATE_ONE' && action.key === 'locale' || action.type === 'SETTING_UPDATE_ALL') {
+		const isSettingUpdate = (key: string) => {
+			return action.type === 'SETTING_UPDATE_ONE' && action.key === key || action.type === 'SETTING_UPDATE_ALL';
+		};
+
+		if (isSettingUpdate('locale')) {
 			this.updateLanguage();
 		}
 
-		if (action.type === 'SETTING_UPDATE_ONE' && action.key === 'renderer.fileUrls' || action.type === 'SETTING_UPDATE_ALL') {
+		if (isSettingUpdate('renderer.fileUrls')) {
 			bridge().electronApp().getCustomProtocolHandler().setMediaAccessEnabled(
 				Setting.value('renderer.fileUrls'),
 			);
 		}
 
-		if (action.type === 'SETTING_UPDATE_ONE' && action.key === 'showTrayIcon' || action.type === 'SETTING_UPDATE_ALL') {
+		if (isSettingUpdate('showTrayIcon')) {
 			this.updateTray();
 		}
 
-		if (action.type === 'SETTING_UPDATE_ONE' && action.key === 'ocr.enabled' || action.type === 'SETTING_UPDATE_ALL') {
+		if (isSettingUpdate('ocr.enabled')) {
 			void this.setupOcrService();
 		}
 
-		if (action.type === 'SETTING_UPDATE_ONE' && action.key === 'windowContentZoomFactor' || action.type === 'SETTING_UPDATE_ALL') {
-			webFrame.setZoomFactor(Setting.value('windowContentZoomFactor') / 100);
+		if (isSettingUpdate('windowContentZoomFactor')) {
+			bridge().setZoomFactor(Setting.value('windowContentZoomFactor') / 100);
 		}
 
-		if (action.type === 'SETTING_UPDATE_ONE' && action.key === 'linking.extraAllowedExtensions' || action.type === 'SETTING_UPDATE_ALL') {
+		if (isSettingUpdate('linking.extraAllowedExtensions')) {
 			bridge().extraAllowedOpenExtensions = Setting.value('linking.extraAllowedExtensions');
 		}
 
