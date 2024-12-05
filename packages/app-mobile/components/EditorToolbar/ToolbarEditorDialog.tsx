@@ -15,6 +15,8 @@ import Setting from '@joplin/lib/models/Setting';
 import DismissibleDialog, { DialogSize } from '../DismissibleDialog';
 import selectedCommandNamesFromState from './utils/selectedCommandNamesFromState';
 import stateToWhenClauseContext from '../../services/commands/stateToWhenClauseContext';
+import { DeleteButton } from '../buttons';
+import shim from '@joplin/lib/shim';
 
 const toolbarButtonUtils = new ToolbarButtonUtils(CommandService.instance());
 
@@ -23,6 +25,7 @@ interface EditorDialogProps {
 	defaultToolbarButtonInfos: ToolbarItem[];
 	selectedCommandNames: string[];
 	allCommandNames: string[];
+	hasCustomizedLayout: boolean;
 
 	visible: boolean;
 	onDismiss: ()=> void;
@@ -45,8 +48,8 @@ const useStyle = (themeId: number) => {
 				marginTop: theme.marginTop,
 				flex: 1,
 			},
-			listItemButton: {
-
+			resetButton: {
+				marginTop: theme.marginTop,
 			},
 			listItem: {
 				flexDirection: 'row',
@@ -101,7 +104,6 @@ const ToolbarItemToggle: React.FC<ItemToggleProps> = ({
 
 	return (
 		<TouchableRipple
-			style={styles.listItemButton}
 			accessibilityRole='checkbox'
 			accessibilityState={{ checked }}
 			aria-checked={checked}
@@ -135,6 +137,25 @@ const ToolbarEditorScreen: React.FC<EditorDialogProps> = props => {
 		/>;
 	};
 
+	const onRestoreDefaultLayout = useCallback(async () => {
+		// Dismiss before showing the confirm dialog to prevent modal conflicts.
+		// On some platforms (web and possibly iOS) showing multiple modals
+		// at the same time can cause issues.
+		props.onDismiss();
+
+		const message = _('Are you sure that you want to restore the default toolbar layout?\nThis cannot be undone.');
+		if (await shim.showConfirmationDialog(message)) {
+			Setting.setValue('editor.toolbarButtons', []);
+		}
+	}, [props.onDismiss]);
+
+	const restoreButton = <DeleteButton
+		style={styles.resetButton}
+		onPress={onRestoreDefaultLayout}
+	>
+		{_('Restore default')}
+	</DeleteButton>;
+
 	return (
 		<DismissibleDialog
 			size={DialogSize.Small}
@@ -148,6 +169,7 @@ const ToolbarEditorScreen: React.FC<EditorDialogProps> = props => {
 			</View>
 			<ScrollView style={styles.listContainer}>
 				{props.defaultToolbarButtonInfos.map((item, index) => renderItem(item, index))}
+				{props.hasCustomizedLayout ? restoreButton : null}
 			</ScrollView>
 		</DismissibleDialog>
 	);
@@ -163,6 +185,7 @@ export default connect((state: AppState) => {
 		themeId: state.settings.theme,
 		selectedCommandNames,
 		allCommandNames,
+		hasCustomizedLayout: state.settings['editor.toolbarButtons'].length > 0,
 		defaultToolbarButtonInfos: toolbarButtonUtils.commandsToToolbarButtons(allCommandNames, whenClauseContext),
 	};
 })(ToolbarEditorScreen);
