@@ -57,8 +57,7 @@ export default class ToolbarButtonUtils {
 			return this.toolbarButtonCache_[commandName].info;
 		}
 
-		// The command's runtime may not be available until soon after the component is mounted:
-		const command = this.service.commandByName(commandName, { runtimeMustBeRegistered: false });
+		const command = this.service.commandByName(commandName, { runtimeMustBeRegistered: true });
 
 		const output: ToolbarButtonInfo = {
 			type: 'button',

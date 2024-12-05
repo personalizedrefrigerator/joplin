@@ -10,6 +10,8 @@ import { setupDatabase, switchClient } from '@joplin/lib/testing/test-utils';
 import createMockReduxStore from '../../utils/testing/createMockReduxStore';
 import setGlobalStore from '../../utils/testing/setGlobalStore';
 import Setting from '@joplin/lib/models/Setting';
+import CommandService, { CommandRuntime, RegisteredRuntime } from '@joplin/lib/services/CommandService';
+import allCommandNamesFromState from './utils/allCommandNamesFromState';
 
 let store: Store<AppState>;
 
@@ -48,6 +50,29 @@ const toggleSettingsItem = async (props: ToggleSettingItemProps) => {
 	});
 };
 
+let mockCommands: RegisteredRuntime|null = null;
+// The toolbar expects all toolbar command runtimes to be registered before it can be
+// rendered:
+const mockCommandRuntimes = (store: Store<AppState>) => {
+	const makeMockRuntime = (commandName: string) => ({
+		declaration: { name: commandName },
+		runtime: (_props: null): CommandRuntime => ({
+			execute: jest.fn(),
+		}),
+	});
+
+	const isSeparator = (commandName: string) => commandName === '-';
+
+	const mockRuntimes = allCommandNamesFromState(
+		store.getState(),
+	).filter(
+		name => !isSeparator(name),
+	).map(makeMockRuntime);
+	return CommandService.instance().componentRegisterCommands(
+		null, mockRuntimes,
+	);
+};
+
 describe('EditorToolbar', () => {
 	beforeEach(async () => {
 		await setupDatabase(0);
@@ -55,6 +80,12 @@ describe('EditorToolbar', () => {
 
 		store = createMockReduxStore();
 		setGlobalStore(store);
+		mockCommands = mockCommandRuntimes(store);
+	});
+
+	afterEach(() => {
+		mockCommands?.deregister();
+		mockCommands = null;
 	});
 
 	it('unchecking items in settings should remove them from the toolbar', async () => {

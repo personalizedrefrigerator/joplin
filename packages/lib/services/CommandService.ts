@@ -257,7 +257,7 @@ export default class CommandService extends BaseService {
 		}
 	}
 
-	public componentRegisterCommands<ComponentType>(component: ComponentType, commands: ComponentCommandSpec<ComponentType>[], allowMultiple?: boolean) {
+	public componentRegisterCommands<ComponentType>(component: ComponentType, commands: ComponentCommandSpec<ComponentType>[], allowMultiple?: boolean): RegisteredRuntime {
 		const runtimeHandles: RegisteredRuntime[] = [];
 		for (const command of commands) {
 			runtimeHandles.push(
