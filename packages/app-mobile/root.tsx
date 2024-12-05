@@ -117,6 +117,7 @@ import { runIntegrationTests as runCryptoIntegrationTests } from '@joplin/lib/se
 import { Theme, ThemeAppearance } from '@joplin/lib/themes/type';
 import ProfileSwitcher from './components/ProfileSwitcher/ProfileSwitcher';
 import ProfileEditor from './components/ProfileSwitcher/ProfileEditor';
+import ToolbarEditor from './components/EditorToolbar/ToolbarEditorScreen';
 import sensorInfo, { SensorInfo } from './components/biometrics/sensorInfo';
 import { getCurrentProfile } from '@joplin/lib/services/profileConfig';
 import { getDatabaseName, getPluginDataDir, getProfilesRootDir, getResourceDir, setDispatch } from './services/profiles';
@@ -1247,6 +1248,7 @@ class AppComponent extends React.Component {
 			ShareManager: { screen: ShareManager },
 			ProfileSwitcher: { screen: ProfileSwitcher },
 			ProfileEditor: { screen: ProfileEditor },
+			ToolbarEditor: { screen: ToolbarEditor },
 			Log: { screen: LogScreen },
 			Status: { screen: StatusScreen },
 			Search: { screen: SearchScreen },

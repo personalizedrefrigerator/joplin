@@ -574,6 +574,7 @@ packages/app-mobile/commands/newNote.js
 packages/app-mobile/commands/openItem.js
 packages/app-mobile/commands/openNote.js
 packages/app-mobile/commands/scrollToHash.js
+packages/app-mobile/commands/showToolbarSettings.js
 packages/app-mobile/commands/util/goToNote.js
 packages/app-mobile/commands/util/showResource.js
 packages/app-mobile/components/BetaChip.js
@@ -598,7 +599,10 @@ packages/app-mobile/components/Dropdown.test.js
 packages/app-mobile/components/Dropdown.js
 packages/app-mobile/components/EditorToolbar/ButtonGroup.js
 packages/app-mobile/components/EditorToolbar/EditorToolbar.js
+packages/app-mobile/components/EditorToolbar/SettingButton.js
 packages/app-mobile/components/EditorToolbar/ToolbarButton.js
+packages/app-mobile/components/EditorToolbar/ToolbarEditorScreen.js
+packages/app-mobile/components/EditorToolbar/utils/defaultCommandNamesFromState.js
 packages/app-mobile/components/EditorToolbar/utils/toolbarButtonsFromState.js
 packages/app-mobile/components/EditorToolbar/utils/useIsSelected.js
 packages/app-mobile/components/ExtendedWebView/index.jest.js

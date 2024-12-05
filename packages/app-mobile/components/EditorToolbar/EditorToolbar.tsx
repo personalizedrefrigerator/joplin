@@ -9,6 +9,7 @@ import ButtonGroup from './ButtonGroup';
 import { useMemo } from 'react';
 import { themeStyle } from '../global-style';
 import ToggleSpaceButton from '../ToggleSpaceButton';
+import SettingButton from './SettingButton';
 
 interface Props {
 	themeId: number;
@@ -52,6 +53,7 @@ const EditorToolbar: React.FC<Props> = props => {
 		<ScrollView horizontal={true} style={styles.content}>
 			<View style={styles.contentContainer}>
 				{buttonGroups.map(renderGroup)}
+				<SettingButton />
 			</View>
 		</ScrollView>
 	</ToggleSpaceButton>;
