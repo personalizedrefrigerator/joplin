@@ -5,6 +5,7 @@ import { StyleSheet, View } from 'react-native';
 import { themeStyle } from '../global-style';
 import ToolbarButton from './ToolbarButton';
 import SelectionFormatting from '@joplin/editor/SelectionFormatting';
+import isSelected from './utils/isSelected';
 
 interface Props {
 	themeId: number;
@@ -20,7 +21,7 @@ const ButtonGroup: React.FC<Props> = props => {
 			key={`command-${info.name}`}
 			buttonInfo={info}
 			themeId={props.themeId}
-			selectionState={props.selectionState}
+			selected={isSelected(info.name, props.selectionState)}
 		/>;
 	};
 

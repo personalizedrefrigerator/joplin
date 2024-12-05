@@ -5,7 +5,7 @@ import { CommandRuntimeProps } from '../types';
 export const declaration: CommandDeclaration = {
 	name: 'setTags',
 	label: () => _('Tags'),
-	iconName: 'material tag',
+	iconName: 'material tag-multiple',
 };
 
 export const runtime = (props: CommandRuntimeProps): CommandRuntime => {

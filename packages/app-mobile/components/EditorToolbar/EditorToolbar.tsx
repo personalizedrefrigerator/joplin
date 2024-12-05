@@ -6,7 +6,7 @@ import { ToolbarButtonInfo, ToolbarItem } from '@joplin/lib/services/commands/To
 import toolbarButtonsFromState from './utils/toolbarButtonsFromState';
 import SelectionFormatting from '@joplin/editor/SelectionFormatting';
 import ButtonGroup from './ButtonGroup';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { themeStyle } from '../global-style';
 import ToggleSpaceButton from '../ToggleSpaceButton';
 import SettingButton from './SettingButton';
@@ -52,16 +52,31 @@ const EditorToolbar: React.FC<Props> = props => {
 	};
 
 	const [settingsVisible, setSettingsVisible] = useState(false);
+	const scrollViewRef = useRef<ScrollView|null>(null);
 	const onDismissSettingsDialog = useCallback(() => {
 		setSettingsVisible(false);
+
+		// This works around an issue on Android -- after removing items
+		// from the toolbar, the scrollview can be scrolled past the end.
+		//
+		// Scrolling to the end keeps the last item visible, even if a large
+		// number of items are removed from the toolbar.
+		scrollViewRef.current?.scrollToEnd();
 	}, []);
 
 	return <>
 		<ToggleSpaceButton themeId={props.themeId}>
-			<ScrollView horizontal={true} style={styles.content}>
+			<ScrollView
+				ref={scrollViewRef}
+				horizontal={true}
+				style={styles.content}
+			>
 				<View style={styles.contentContainer}>
 					{buttonGroups.map(renderGroup)}
-					<SettingButton setSettingsVisible={setSettingsVisible} themeId={props.themeId} />
+					<SettingButton
+						setSettingsVisible={setSettingsVisible}
+						themeId={props.themeId}
+					/>
 				</View>
 			</ScrollView>
 		</ToggleSpaceButton>
