@@ -3,7 +3,6 @@ import { useMemo } from 'react';
 import createRootStyle from '../../utils/createRootStyle';
 import { FlatList, View, StyleSheet } from 'react-native';
 import { Divider, Text } from 'react-native-paper';
-import ScreenHeader from '../ScreenHeader';
 import { _ } from '@joplin/lib/locale';
 import { themeStyle } from '../global-style';
 import { connect } from 'react-redux';
@@ -11,11 +10,11 @@ import ToolbarButtonUtils, { ToolbarItem } from '@joplin/lib/services/commands/T
 import Icon from '../Icon';
 import Checkbox from '../Checkbox';
 import { AppState } from '../../utils/types';
-import { Dispatch } from 'redux';
 import stateToWhenClauseContext from '@joplin/lib/services/commands/stateToWhenClauseContext';
 import CommandService from '@joplin/lib/services/CommandService';
 import defaultCommandNamesFromState from './utils/defaultCommandNamesFromState';
 import Setting from '@joplin/lib/models/Setting';
+import DismissibleDialog, { DialogSize } from '../DismissibleDialog';
 
 const toolbarButtonUtils = new ToolbarButtonUtils(CommandService.instance());
 
@@ -24,7 +23,9 @@ interface Props {
 	defaultToolbarButtonInfos: ToolbarItem[];
 	selectedCommandNames: string[];
 	defaultCommandNames: string[];
-	dispatch: Dispatch;
+
+	visible: boolean;
+	onDismiss: ()=> void;
 }
 
 const useStyle = (themeId: number) => {
@@ -41,12 +42,15 @@ const useStyle = (themeId: number) => {
 				fontSize: theme.fontSize,
 			},
 			listContainer: {
+				marginTop: theme.marginTop,
 				flex: 1,
 			},
 			listItem: {
 				flexDirection: 'row',
-				gap: 4,
+				gap: theme.margin,
 				padding: 4,
+				paddingTop: theme.itemMarginTop,
+				paddingBottom: theme.itemMarginBottom,
 			},
 			checkbox: {
 				color: theme.color,
@@ -63,6 +67,22 @@ const keyExtractor = (item: ToolbarItem, index: number) => {
 	}
 };
 
+const setCommandIncluded = (commandName: string, allCommandNames: string[], include: boolean) => {
+	let newSelectedCommands;
+	if (include) {
+		newSelectedCommands = [];
+		for (const name of allCommandNames) {
+			if (name === commandName || allCommandNames.includes(name)) {
+				newSelectedCommands.push(name);
+			}
+		}
+	} else {
+		const lastSelectedCommands = Setting.value('editor.toolbarButtons');
+		newSelectedCommands = lastSelectedCommands.filter(name => name !== commandName);
+	}
+	Setting.setValue('editor.toolbarButtons', newSelectedCommands);
+};
+
 const ToolbarEditorScreen: React.FC<Props> = props => {
 	const styles = useStyle(props.themeId);
 
@@ -74,24 +94,12 @@ const ToolbarEditorScreen: React.FC<Props> = props => {
 
 		const title = item.title || item.tooltip;
 		const checked = props.selectedCommandNames.includes(item.name);
+
 		return (
 			<View style={styles.listItem}>
 				<Checkbox
 					checked={checked}
-					onChange={() => {
-						let newSelectedCommands = [...props.selectedCommandNames];
-						if (checked) {
-							newSelectedCommands = newSelectedCommands.filter(name => name !== item.name);
-						} else {
-							newSelectedCommands = [];
-							for (const commandName of props.defaultCommandNames) {
-								if (commandName === item.name || props.selectedCommandNames.includes(commandName)) {
-									newSelectedCommands.push(commandName);
-								}
-							}
-						}
-						Setting.setValue('editor.toolbarButtons', newSelectedCommands);
-					}}
+					onChange={() => setCommandIncluded(item.name, props.defaultCommandNames, !checked)}
 					accessibilityLabel={title}
 					style={styles.checkbox}
 				/>
@@ -104,16 +112,15 @@ const ToolbarEditorScreen: React.FC<Props> = props => {
 	};
 
 	return (
-		<View style={styles.root}>
-			<ScreenHeader
-				title={_('Toolbar')}
-				showSaveButton={false}
-				showSideMenuButton={false}
-				showSearchButton={false}
-			/>
+		<DismissibleDialog
+			size={DialogSize.Small}
+			themeId={props.themeId}
+			visible={props.visible}
+			onDismiss={props.onDismiss}
+		>
 			<View>
-				<Text variant='titleSmall'>{_('Manage toolbar options')}</Text>
-				<Text variant='bodyMedium'>{_('Check elements to display in the toolbar')}</Text>
+				<Text variant='headlineMedium'>{_('Manage toolbar options')}</Text>
+				<Text variant='labelMedium'>{_('Check elements to display in the toolbar')}</Text>
 			</View>
 			<View style={styles.listContainer}>
 				<FlatList
@@ -123,7 +130,7 @@ const ToolbarEditorScreen: React.FC<Props> = props => {
 					extraData={props.selectedCommandNames}
 				/>
 			</View>
-		</View>
+		</DismissibleDialog>
 	);
 };
 

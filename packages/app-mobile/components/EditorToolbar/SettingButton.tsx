@@ -1,31 +1,31 @@
 import * as React from 'react';
 import ButtonGroup from './ButtonGroup';
-import ToolbarButtonUtils, { ToolbarButtonInfo } from '@joplin/lib/services/commands/ToolbarButtonUtils';
-import CommandService from '@joplin/lib/services/CommandService';
-import { connect } from 'react-redux';
-import { AppState } from '../../utils/types';
-import stateToWhenClauseContext from '@joplin/lib/services/commands/stateToWhenClauseContext';
+import { ToolbarButtonInfo } from '@joplin/lib/services/commands/ToolbarButtonUtils';
+import { _ } from '@joplin/lib/locale';
+import { useMemo } from 'react';
 
 interface Props {
 	themeId: number;
-	buttonInfos: ToolbarButtonInfo[];
+	setSettingsVisible: (visible: boolean)=> void;
 }
 
-const toolbarButtonUtils = new ToolbarButtonUtils(CommandService.instance());
+const SettingButton: React.FC<Props> = ({ themeId, setSettingsVisible }) => {
+	const buttonInfos: ToolbarButtonInfo[] = useMemo(() => [{
+		type: 'button',
+		name: 'showToolbarSettings',
+		tooltip: _('Settings'),
+		iconName: 'material cogs',
+		enabled: true,
+		onClick: () => setSettingsVisible(true),
+		title: '',
+	}], [setSettingsVisible]);
 
-const SettingButton: React.FC<Props> = props => {
 	return <ButtonGroup
-		themeId={props.themeId}
-		buttonInfos={props.buttonInfos}
+		themeId={themeId}
+		buttonInfos={buttonInfos}
 		selectionState={null}
 	/>;
 };
 
-export default connect((state: AppState) => {
-	const whenClauseContext = stateToWhenClauseContext(state);
+export default SettingButton;
 
-	return {
-		themeId: state.settings.theme,
-		buttonInfos: toolbarButtonUtils.commandsToToolbarButtons(['showToolbarSettings'], whenClauseContext) as ToolbarButtonInfo[],
-	};
-})(SettingButton);

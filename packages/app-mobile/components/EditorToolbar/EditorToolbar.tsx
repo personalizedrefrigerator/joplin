@@ -6,10 +6,11 @@ import { ToolbarButtonInfo, ToolbarItem } from '@joplin/lib/services/commands/To
 import toolbarButtonsFromState from './utils/toolbarButtonsFromState';
 import SelectionFormatting from '@joplin/editor/SelectionFormatting';
 import ButtonGroup from './ButtonGroup';
-import { useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { themeStyle } from '../global-style';
 import ToggleSpaceButton from '../ToggleSpaceButton';
 import SettingButton from './SettingButton';
+import ToolbarEditorDialog from './ToolbarEditorDialog';
 
 interface Props {
 	themeId: number;
@@ -49,14 +50,23 @@ const EditorToolbar: React.FC<Props> = props => {
 			themeId={props.themeId}
 		/>;
 	};
-	return <ToggleSpaceButton themeId={props.themeId}>
-		<ScrollView horizontal={true} style={styles.content}>
-			<View style={styles.contentContainer}>
-				{buttonGroups.map(renderGroup)}
-				<SettingButton />
-			</View>
-		</ScrollView>
-	</ToggleSpaceButton>;
+
+	const [settingsVisible, setSettingsVisible] = useState(false);
+	const onDismissSettingsDialog = useCallback(() => {
+		setSettingsVisible(false);
+	}, []);
+
+	return <>
+		<ToggleSpaceButton themeId={props.themeId}>
+			<ScrollView horizontal={true} style={styles.content}>
+				<View style={styles.contentContainer}>
+					{buttonGroups.map(renderGroup)}
+					<SettingButton setSettingsVisible={setSettingsVisible} themeId={props.themeId} />
+				</View>
+			</ScrollView>
+		</ToggleSpaceButton>
+		<ToolbarEditorDialog visible={settingsVisible} onDismiss={onDismissSettingsDialog} />
+	</>;
 };
 
 const useStyles = (themeId: number) => {
