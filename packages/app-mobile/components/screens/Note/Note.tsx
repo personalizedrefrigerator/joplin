@@ -522,7 +522,6 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 				},
 			},
 			commands,
-			true,
 		);
 	}
 

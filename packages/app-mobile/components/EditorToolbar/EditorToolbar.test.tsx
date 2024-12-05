@@ -10,6 +10,8 @@ import { setupDatabase, switchClient } from '@joplin/lib/testing/test-utils';
 import createMockReduxStore from '../../utils/testing/createMockReduxStore';
 import setGlobalStore from '../../utils/testing/setGlobalStore';
 import Setting from '@joplin/lib/models/Setting';
+import CommandService, { CommandRuntime, RegisteredRuntime } from '@joplin/lib/services/CommandService';
+import allToolbarCommandNamesFromState from './utils/allToolbarCommandNamesFromState';
 
 let store: Store<AppState>;
 
@@ -28,6 +30,10 @@ const queryToolbarButton = (label: string) => {
 const openSettings = async () => {
 	const settingButton = screen.getByRole('button', { name: 'Settings' });
 	fireEvent.press(settingButton);
+
+	// Settings should be open:
+	const settingsHeader = await screen.findByRole('heading', { name: 'Manage toolbar options' });
+	expect(settingsHeader).toBeVisible();
 };
 
 interface ToggleSettingItemProps {
@@ -48,6 +54,29 @@ const toggleSettingsItem = async (props: ToggleSettingItemProps) => {
 	});
 };
 
+let mockCommands: RegisteredRuntime|null = null;
+// The toolbar expects all toolbar command runtimes to be registered before it can be
+// rendered:
+const mockCommandRuntimes = (store: Store<AppState>) => {
+	const makeMockRuntime = (commandName: string) => ({
+		declaration: { name: commandName },
+		runtime: (_props: null): CommandRuntime => ({
+			execute: jest.fn(),
+		}),
+	});
+
+	const isSeparator = (commandName: string) => commandName === '-';
+
+	const mockRuntimes = allToolbarCommandNamesFromState(
+		store.getState(),
+	).filter(
+		name => !isSeparator(name),
+	).map(makeMockRuntime);
+	return CommandService.instance().componentRegisterCommands(
+		null, mockRuntimes,
+	);
+};
+
 describe('EditorToolbar', () => {
 	beforeEach(async () => {
 		await setupDatabase(0);
@@ -55,6 +84,15 @@ describe('EditorToolbar', () => {
 
 		store = createMockReduxStore();
 		setGlobalStore(store);
+		mockCommands = mockCommandRuntimes(store);
+
+		// Start with the default set of buttons
+		Setting.setValue('editor.toolbarButtons', []);
+	});
+
+	afterEach(() => {
+		mockCommands?.deregister();
+		mockCommands = null;
 	});
 
 	it('unchecking items in settings should remove them from the toolbar', async () => {
@@ -94,6 +132,28 @@ describe('EditorToolbar', () => {
 		await waitFor(() => {
 			expect(queryToolbarButton(commandLabel)).toBeVisible();
 		});
+
+		toolbar.unmount();
+	});
+
+	it('should only include the math toolbar button if math is enabled in global settings', async () => {
+		Setting.setValue('editor.toolbarButtons', ['textMath']);
+		Setting.setValue('markdown.plugin.katex', true);
+
+		const toolbar = render(<WrappedToolbar/>);
+
+		// Should initially show in the toolbar
+		expect(queryToolbarButton('Math')).toBeVisible();
+
+		// After disabled: Should not show in the toolbar
+		await waitFor(() => {
+			Setting.setValue('markdown.plugin.katex', false);
+			expect(queryToolbarButton('Math')).toBeNull();
+		});
+
+		// Should not show in settings
+		await openSettings();
+		expect(screen.queryByRole('checkbox', { name: 'Math' })).toBeNull();
 
 		toolbar.unmount();
 	});

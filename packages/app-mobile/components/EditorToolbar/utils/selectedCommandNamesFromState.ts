@@ -1,6 +1,6 @@
 import { EditorCommandType } from '@joplin/editor/types';
 import { AppState } from '../../../utils/types';
-import allCommandNamesFromState from './allCommandNamesFromState';
+import allToolbarCommandNamesFromState from './allToolbarCommandNamesFromState';
 import { Platform } from 'react-native';
 
 const omitFromDefault: string[] = [
@@ -17,7 +17,7 @@ if (Platform.OS !== 'ios') {
 }
 
 const selectedCommandNamesFromState = (state: AppState) => {
-	const allCommandNames = allCommandNamesFromState(state);
+	const allCommandNames = allToolbarCommandNamesFromState(state);
 	const defaultCommandNames = allCommandNames.filter(commandName => {
 		return !omitFromDefault.includes(commandName);
 	});
