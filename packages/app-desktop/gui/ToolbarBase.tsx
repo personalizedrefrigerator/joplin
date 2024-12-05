@@ -2,29 +2,25 @@ import * as React from 'react';
 import ToolbarButton from './ToolbarButton/ToolbarButton';
 import ToggleEditorsButton, { Value } from './ToggleEditorsButton/ToggleEditorsButton';
 import ToolbarSpace from './ToolbarSpace';
-import { ToolbarButtonInfo } from '@joplin/lib/services/commands/ToolbarButtonUtils';
+import { ToolbarItem } from '@joplin/lib/services/commands/ToolbarButtonUtils';
 import { AppState } from '../app.reducer';
 import { connect } from 'react-redux';
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { focus } from '@joplin/lib/utils/focusHandler';
 
-interface ToolbarItemInfo extends ToolbarButtonInfo {
-	type?: string;
-}
-
 interface Props {
 	themeId: number;
 	style: React.CSSProperties;
-	items: ToolbarItemInfo[];
+	items: ToolbarItem[];
 	disabled: boolean;
 	'aria-label': string;
 }
 
-const getItemType = (item: ToolbarItemInfo) => {
+const getItemType = (item: ToolbarItem) => {
 	return item.type ?? 'button';
 };
 
-const isFocusable = (item: ToolbarItemInfo) => {
+const isFocusable = (item: ToolbarItem) => {
 	if (!item.enabled) {
 		return false;
 	}
@@ -32,11 +28,11 @@ const isFocusable = (item: ToolbarItemInfo) => {
 	return getItemType(item) === 'button';
 };
 
-const useCategorizedItems = (items: ToolbarItemInfo[]) => {
+const useCategorizedItems = (items: ToolbarItem[]) => {
 	return useMemo(() => {
-		const itemsLeft: ToolbarItemInfo[] = [];
-		const itemsCenter: ToolbarItemInfo[] = [];
-		const itemsRight: ToolbarItemInfo[] = [];
+		const itemsLeft: ToolbarItem[] = [];
+		const itemsCenter: ToolbarItem[] = [];
+		const itemsRight: ToolbarItem[] = [];
 
 		if (items) {
 			for (const item of items) {
@@ -63,7 +59,7 @@ const useCategorizedItems = (items: ToolbarItemInfo[]) => {
 
 const useKeyboardHandler = (
 	setSelectedIndex: React.Dispatch<React.SetStateAction<number>>,
-	focusableItems: ToolbarItemInfo[],
+	focusableItems: ToolbarItem[],
 ) => {
 	const onKeyDown: React.KeyboardEventHandler<HTMLElement> = useCallback(event => {
 		let direction = 0;
@@ -110,11 +106,10 @@ const ToolbarBaseComponent: React.FC<Props> = props => {
 	const containerHasFocus = !!containerRef.current?.contains(doc?.activeElement);
 
 	let keyCounter = 0;
-	const renderItem = (o: ToolbarItemInfo, indexInFocusable: number) => {
+	const renderItem = (o: ToolbarItem, indexInFocusable: number) => {
 		let key = o.iconName ? o.iconName : '';
 		key += o.title ? o.title : '';
 		key += o.name ? o.name : '';
-		const itemType = !('type' in o) ? 'button' : o.type;
 
 		if (!key) key = `${o.type}_${keyCounter++}`;
 
@@ -132,7 +127,7 @@ const ToolbarBaseComponent: React.FC<Props> = props => {
 			}
 		};
 
-		if (o.name === 'toggleEditors') {
+		if (o.type === 'button' && o.name === 'toggleEditors') {
 			return <ToggleEditorsButton
 				key={o.name}
 				buttonRef={setButtonRefCallback}
@@ -141,7 +136,7 @@ const ToolbarBaseComponent: React.FC<Props> = props => {
 				toolbarButtonInfo={o}
 				tabIndex={tabIndex}
 			/>;
-		} else if (itemType === 'button') {
+		} else if (o.type === 'button') {
 			return (
 				<ToolbarButton
 					tabIndex={tabIndex}
@@ -149,7 +144,7 @@ const ToolbarBaseComponent: React.FC<Props> = props => {
 					{...buttonProps}
 				/>
 			);
-		} else if (itemType === 'separator') {
+		} else if (o.type === 'separator') {
 			return <ToolbarSpace {...buttonProps} />;
 		}
 
@@ -157,7 +152,7 @@ const ToolbarBaseComponent: React.FC<Props> = props => {
 	};
 
 	let focusableIndex = 0;
-	const renderList = (items: ToolbarItemInfo[]) => {
+	const renderList = (items: ToolbarItem[]) => {
 		const result: React.ReactNode[] = [];
 
 		for (const item of items) {

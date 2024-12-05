@@ -1,5 +1,5 @@
 import AsyncActionQueue from '@joplin/lib/AsyncActionQueue';
-import { ToolbarButtonInfo } from '@joplin/lib/services/commands/ToolbarButtonUtils';
+import { ToolbarButtonInfo, ToolbarItem } from '@joplin/lib/services/commands/ToolbarButtonUtils';
 import { PluginHtmlContents, PluginStates } from '@joplin/lib/services/plugins/reducer';
 import { MarkupLanguage } from '@joplin/renderer';
 import { RenderResult, RenderResultPluginAsset } from '@joplin/renderer/types';
@@ -48,7 +48,7 @@ export interface NoteEditorProps {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	highlightedWords: any[];
 	plugins: PluginStates;
-	toolbarButtonInfos: ToolbarButtonInfo[];
+	toolbarButtonInfos: ToolbarItem[];
 	setTagsToolbarButtonInfo: ToolbarButtonInfo;
 	contentMaxWidth: number;
 	isSafeMode: boolean;
@@ -136,7 +136,7 @@ export interface NoteBodyEditorProps {
 	locale: string;
 	// eslint-disable-next-line @typescript-eslint/ban-types -- Old code before rule was applied
 	onDrop: DropHandler;
-	noteToolbarButtonInfos: ToolbarButtonInfo[];
+	noteToolbarButtonInfos: ToolbarItem[];
 	plugins: PluginStates;
 	fontSize: number;
 	contentMaxWidth: number;
