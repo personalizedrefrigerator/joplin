@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
-import { Banner, ActivityIndicator, Text } from 'react-native-paper';
+import { Icon, ActivityIndicator, Text, Surface, Button } from 'react-native-paper';
 import { _, languageName } from '@joplin/lib/locale';
 import useAsyncEffect, { AsyncEffectEvent } from '@joplin/lib/hooks/useAsyncEffect';
 import { IconSource } from 'react-native-paper/lib/typescript/components/Icon';
@@ -9,6 +9,8 @@ import whisper from '../../services/voiceTyping/whisper';
 import vosk from '../../services/voiceTyping/vosk';
 import { AppState } from '../../utils/types';
 import { connect } from 'react-redux';
+import { View, StyleSheet } from 'react-native';
+import AccessibleView from '../accessibility/AccessibleView';
 
 interface Props {
 	locale: string;
@@ -79,6 +81,30 @@ const useWhisper = ({ locale, provider, onSetPreview, onText }: UseVoiceTypingPr
 	return [error, mustDownloadModel, voiceTyping];
 };
 
+const styles = StyleSheet.create({
+	container: {
+		marginHorizontal: 1,
+		width: '100%',
+		maxWidth: 680,
+		alignSelf: 'center',
+	},
+	contentWrapper: {
+		flexDirection: 'row',
+	},
+	iconWrapper: {
+		margin: 8,
+		marginTop: 16,
+	},
+	content: {
+		marginTop: 16,
+		marginHorizontal: 8,
+	},
+	actionContainer: {
+		flexDirection: 'row',
+		justifyContent: 'flex-end',
+	},
+});
+
 const VoiceTypingDialog: React.FC<Props> = props => {
 	const [recorderState, setRecorderState] = useState<RecorderState>(RecorderState.Loading);
 	const [preview, setPreview] = useState<string>('');
@@ -142,22 +168,44 @@ const VoiceTypingDialog: React.FC<Props> = props => {
 		return <Text variant='labelSmall'>{preview}</Text>;
 	};
 
-	const headerAndStatus = <Text variant='bodyMedium'>{`${_('Voice typing...')}\n${renderContent()}`}</Text>;
 	return (
-		<Banner
-			visible={true}
-			icon={renderIcon()}
-			actions={[
-				{
-					label: _('Done'),
-					onPress: onDismiss,
-				},
-			]}
-		>
-			{headerAndStatus}
-			<Text>{'\n'}</Text>
-			{renderPreview()}
-		</Banner>
+		<Surface>
+			<View style={styles.container}>
+				<View style={styles.contentWrapper}>
+					<View style={styles.iconWrapper}>
+						<Icon source={renderIcon()} size={40}/>
+					</View>
+					<View style={styles.content}>
+						<AccessibleView
+							// Auto-focus
+							refocusCounter={1}
+							aria-live='polite'
+							role='heading'
+						>
+							<Text variant='bodyMedium'>
+								{_('Voice typing...')}
+							</Text>
+						</AccessibleView>
+						<Text
+							variant='bodyMedium'
+							// role="status" might fit better here. However, react-native
+							// doesn't seem to support it.
+							role='alert'
+							// Although on web, role=alert should imply aria-live=polite,
+							// this does not seem to be the case for React Native:
+							accessibilityLiveRegion='polite'
+						>{renderContent()}</Text>
+						{renderPreview()}
+					</View>
+				</View>
+				<View style={styles.actionContainer}>
+					<Button
+						onPress={onDismiss}
+						accessibilityHint={_('Ends voice typing')}
+					>{_('Done')}</Button>
+				</View>
+			</View>
+		</Surface>
 	);
 };
 

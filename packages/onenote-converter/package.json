@@ -10,13 +10,7 @@
     "type": "git",
     "url": "https://github.com/laurent22/joplin"
   },
-  "files": [
-    "./pkg/onenote_converter_bg.wasm",
-    "./pkg/onenote_converter.js",
-    "./pkg/onenote_converter.d.ts"
-  ],
   "main": "./pkg/onenote_converter.js",
-  "types": "./pkg/onenote_converter.d.ts",
   "scripts": {
     "build": "node ./build.js --profile=release",
     "buildDev": "node ./build.js --profile=dev"

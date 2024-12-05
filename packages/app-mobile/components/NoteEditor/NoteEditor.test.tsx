@@ -7,10 +7,12 @@ import '@testing-library/jest-native';
 import NoteEditor from './NoteEditor';
 import Setting from '@joplin/lib/models/Setting';
 import { _ } from '@joplin/lib/locale';
-import { MenuProvider } from 'react-native-popup-menu';
 import { setupDatabaseAndSynchronizer, switchClient } from '@joplin/lib/testing/test-utils';
 import commandDeclarations from './commandDeclarations';
 import CommandService from '@joplin/lib/services/CommandService';
+import TestProviderStack from '../testing/TestProviderStack';
+import createMockReduxStore from '../../utils/testing/createMockReduxStore';
+import initializeCommandService from '../../utils/initializeCommandService';
 
 describe('NoteEditor', () => {
 	beforeAll(() => {
@@ -27,8 +29,11 @@ describe('NoteEditor', () => {
 	});
 
 	it('should hide the markdown toolbar when the window is small', async () => {
+		const store = createMockReduxStore();
+		initializeCommandService(store);
+
 		const wrappedNoteEditor = render(
-			<MenuProvider>
+			<TestProviderStack store={store}>
 				<NoteEditor
 					themeId={Setting.THEME_ARITIM_DARK}
 					initialText='Testing...'
@@ -41,7 +46,7 @@ describe('NoteEditor', () => {
 					onAttach={async ()=>{}}
 					plugins={{}}
 				/>
-			</MenuProvider>,
+			</TestProviderStack>,
 		);
 
 		// Maps from screen height to whether the markdown toolbar should be visible.
@@ -70,7 +75,7 @@ describe('NoteEditor', () => {
 			setRootHeight(height);
 
 			await waitFor(async () => {
-				const showMoreButton = await screen.queryByLabelText(_('Show more actions'));
+				const showMoreButton = await screen.queryByLabelText(_('Bold'));
 				if (visible) {
 					expect(showMoreButton).not.toBeNull();
 				} else {

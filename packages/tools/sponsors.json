@@ -1,31 +1,19 @@
 {
 	"github": [
 		{
-			"name": "tateisu"
-		},
-		{
 			"name": "matmoly"
 		},
 		{
 			"name": "KentBrockman"
 		},
 		{
-			"name": "CyberXZT"
-		},
-		{
 			"name": "avanderberg"
-		},
-		{
-			"name": "dbrandonjohnson"
 		},
 		{
 			"name": "chr15m"
 		},
 		{
 			"name": "maxtruxa"
-		},
-		{
-			"name": "konishi-t"
 		},
 		{
 			"name": "marcdw1289"
@@ -37,31 +25,13 @@
 			"name": "sif"
 		},
 		{
-			"name": "saarantras"
-		},
-		{
 			"name": "Hegghammer"
-		},
-		{
-			"name": "jknowles"
-		},
-		{
-			"name": "fats"
-		},
-		{
-			"name": "dchecks"
 		},
 		{
 			"name": "Galliver7"
 		},
 		{
-			"name": "mu88"
-		},
-		{
 			"name": "andypiper"
-		},
-		{
-			"name": "jamesandariese"
 		},
 		{
 			"name": "Akhil-CM"
@@ -129,12 +99,6 @@
 			"githubUser": "bytv1"
 		},
 		{
-			"url": "https://www.famegear.com",
-			"title": "Famegear",
-			"imageName": "Famegear.png",
-			"githubUser": "rankmediateknologi"
-		},
-		{
 			"url": "https://casinoreviews.net",
 			"title": "Casino Reviews",
 			"imageName": "CasinoReviews.png"
@@ -166,6 +130,12 @@
 			"title": "SP Software GmbH",
 			"imageName": "Grundstueckspreise.png",
 			"githubUser": "PeterSchumacher22"
+		},
+		{
+			"url": "https://www.famegear.com",
+			"title": "Famegear",
+			"imageName": "Famegear.png",
+			"githubUser": "rankmediateknologi"
 		}
 	]
 }

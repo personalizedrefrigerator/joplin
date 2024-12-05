@@ -33,12 +33,15 @@ export enum EditorCommandType {
 	InsertHorizontalRule = 'textHorizontalRule',
 
 	// Find commands
+	ToggleSearch = 'textSearch',
 	ShowSearch = 'find',
 	HideSearch = 'hideSearchDialog',
 	FindNext = 'findNext',
 	FindPrevious = 'findPrev',
 	ReplaceNext = 'replace',
 	ReplaceAll = 'replaceAll',
+
+	EditLink = 'textLink',
 
 	// Editing and navigation commands
 	ScrollSelectionIntoView = 'scrollSelectionIntoView',

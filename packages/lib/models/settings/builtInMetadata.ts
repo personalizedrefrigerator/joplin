@@ -19,6 +19,26 @@ export enum CameraDirection {
 	Front,
 }
 
+export enum EditorToolbarButtons {
+	Divider = '|',
+	Attach = 'app.attachFile',
+	ToggleHeading1 = 'editor.textHeading1',
+	ToggleHeading2 = 'editor.textHeading2',
+	ToggleHeading3 = 'editor.textHeading3',
+	ToggleHeading4 = 'editor.textHeading4',
+	Bold = 'editor.textBold',
+	Italic = 'editor.textItalic',
+	Code = 'editor.textCode',
+	Math = 'editor.textMath',
+	NumberedList = 'editor.textNumberedList',
+	ToggleBulletedList = 'editor.textBulletedList',
+	ToggleCheckList = 'editor.textCheckbox',
+	IndentMore = 'editor.indentMore',
+	IndentLess = 'editor.indentLess',
+	Tags = 'app.setTags',
+	Search = 'editor.find',
+}
+
 const builtInMetadata = (Setting: typeof SettingType) => {
 	const platform = shim.platformName();
 	const mobilePlatform = shim.mobilePlatform();
@@ -668,6 +688,15 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 			storage: SettingStorage.File,
 			isGlobal: true,
 		},
+		'editor.toolbarButtons': {
+			value: [] as string[],
+			public: false,
+			type: SettingItemType.Array,
+			storage: SettingStorage.File,
+			isGlobal: true,
+			appTypes: [AppType.Mobile],
+			label: () => 'buttons included in the editor toolbar',
+		},
 		'notes.columns': {
 			value: defaultListColumns(),
 			public: false,
@@ -898,7 +927,7 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 			advanced: true,
 
 			label: () => _('Plugin WebView debugging'),
-			description: () => _('Allows debugging mobile plugins. See %s for details.', 'https://https://joplinapp.org/help/api/references/mobile_plugin_debugging/'),
+			description: () => _('Allows debugging mobile plugins. See %s for details.', 'https://joplinapp.org/help/api/references/mobile_plugin_debugging/'),
 		},
 
 		'plugins.pluginSupportEnabled': {
@@ -1647,6 +1676,19 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 			label: () => 'Use beta encryption',
 			description: () => 'Set beta encryption methods as the default methods. This applies to all clients and takes effect after restarting the app.',
 			section: 'sync',
+			isGlobal: true,
+		},
+
+		'featureFlag.useNewMobileToolbar': {
+			value: true,
+			type: SettingItemType.Bool,
+			public: true,
+			advanced: true,
+			storage: SettingStorage.File,
+			appTypes: [AppType.Mobile],
+			label: () => 'Enable editor toolbar redesign',
+			description: () => 'Disable this feature to use the legacy Markdown toolbar.',
+			section: 'appearance',
 			isGlobal: true,
 		},
 

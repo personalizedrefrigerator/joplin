@@ -1,7 +1,7 @@
 // A toolbar for the markdown editor.
 
 import * as React from 'react';
-import { Platform, StyleSheet } from 'react-native';
+import { StyleSheet } from 'react-native';
 import { useMemo } from 'react';
 
 import { _ } from '@joplin/lib/locale';
@@ -9,12 +9,12 @@ import { MarkdownToolbarProps, StyleSheetData } from './types';
 import Toolbar from './Toolbar';
 import { buttonSize } from './ToolbarButton';
 import { Theme } from '@joplin/lib/themes/type';
-import ToggleSpaceButton from './ToggleSpaceButton';
+import ToggleSpaceButton from '../../ToggleSpaceButton';
 import useHeaderButtons from './buttons/useHeaderButtons';
 import useInlineFormattingButtons from './buttons/useInlineFormattingButtons';
 import useActionButtons from './buttons/useActionButtons';
 import useListButtons from './buttons/useListButtons';
-import useKeyboardVisible from '../hooks/useKeyboardVisible';
+import useKeyboardVisible from '../../../utils/hooks/useKeyboardVisible';
 import usePluginButtons from './buttons/usePluginButtons';
 
 
@@ -72,7 +72,6 @@ const MarkdownToolbar: React.FC<MarkdownToolbarProps> = (props: MarkdownToolbarP
 
 	return (
 		<ToggleSpaceButton
-			spaceApplicable={ Platform.OS === 'ios' && keyboardVisible }
 			themeId={props.editorSettings.themeId}
 			style={styles.container}
 		>

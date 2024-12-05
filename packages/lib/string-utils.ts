@@ -100,6 +100,10 @@ export function removeDiacritics(str: string) {
 	return str;
 }
 
+export function escapeRegExp(keyword: string) {
+	return keyword.replace(/[.*+\-?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
+}
+
 export function wrap(text: string, indent: string, width: number) {
 	const wrap_ = require('word-wrap');
 

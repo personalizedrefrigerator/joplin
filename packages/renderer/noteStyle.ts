@@ -15,6 +15,27 @@ export interface Options {
 	whiteBackgroundNoteRendering?: boolean;
 }
 
+const notLoadedCss = `
+	.not-loaded-resource img {
+		width: 1.15em;
+		height: 1.15em;
+		background: white;
+		padding: 2px !important;
+		border-radius: 2px;
+		box-shadow: 0 1px 3px #000000aa;
+	}
+
+	a.not-loaded-resource img {
+		margin-right: .2em;
+	}
+
+	a.not-loaded-resource {
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+	}
+`;
+
 // If we are viewing an HTML note, it means it comes from the web clipper or
 // emil-to-note, in which case we don't apply any specific theme. We just need
 // to ensure the background is white so that we don't end up with a dark theme
@@ -24,6 +45,8 @@ export const whiteBackgroundNoteStyle = () => {
 		body {
 			background-color: #ffffff;
 		}
+
+		${notLoadedCss}
 
 		/* TinyMCE adds a dashed border for tables that have no borders
 		to make it easier to view where the cells are and edit them.
@@ -334,24 +357,7 @@ export default function(theme: any, options: Options = null) {
 			color: black;
 		}
 
-		.not-loaded-resource img {
-			width: 1.15em;
-			height: 1.15em;
-			background: white;
-			padding: 2px !important;
-			border-radius: 2px;
-			box-shadow: 0 1px 3px #000000aa;
-		}
-
-		a.not-loaded-resource img {
-			margin-right: .2em;
-		}
-
-		a.not-loaded-resource {
-			display: flex;
-			flex-direction: row;
-			align-items: center;
-		}
+		${notLoadedCss}
 
 		.md-checkbox input[type=checkbox]:checked {
 			opacity: 0.7;

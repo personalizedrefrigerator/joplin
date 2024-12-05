@@ -7,13 +7,13 @@ import useQueuedAsyncEffect from '@joplin/lib/hooks/useQueuedAsyncEffect';
 import { NoteEntity } from '@joplin/lib/services/database/types';
 import SearchEngineUtils from '@joplin/lib/services/search/SearchEngineUtils';
 import Note from '@joplin/lib/models/Note';
-import SearchEngine from '@joplin/lib/services/search/SearchEngine';
+import SearchEngine, { ComplexTerm } from '@joplin/lib/services/search/SearchEngine';
 import { ProgressBar } from 'react-native-paper';
 import shim from '@joplin/lib/shim';
 
 interface Props {
 	query: string;
-	onHighlightedWordsChange: (highlightedWords: string[])=> void;
+	onHighlightedWordsChange: (highlightedWords: (ComplexTerm | string)[])=> void;
 
 	ftsEnabled: number;
 }

@@ -20,11 +20,18 @@ async function main() {
 	const buildCommand = `wasm-pack build --target nodejs --${argv.profile}`;
 
 	await execCommand(buildCommand);
+
+	if (argv.profile !== 'release') return;
+
+	// If release build, remove intermediary folder to decrease size of release
+	const removeIntermediaryFolder = 'cargo clean';
+
+	await execCommand(removeIntermediaryFolder);
 }
 
 // eslint-disable-next-line promise/prefer-await-to-then
 main().catch((error) => {
-	console.error('Fatal error');
+	console.error('Fatal error', error);
 	if (error.stderr.includes('No such file or directory (os error 2)')) {
 		console.error('----------------------------------------------------------------');
 		console.error('Rust toolchain is missing, please install it: https://rustup.rs/');

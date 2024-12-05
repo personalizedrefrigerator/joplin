@@ -153,9 +153,15 @@ const useOnKeyDown = (
 			announceForAccessibility(!wasCompleted ? _('Complete') : _('Incomplete'));
 		}
 
-		if (key === 'Tab' && event.shiftKey) {
+		// Check for isDefaultPrevented to allow plugins to call .preventDefault
+		if (key === 'Enter' && !event.isDefaultPrevented()) {
 			event.preventDefault();
-			void CommandService.instance().execute('focusElement', 'sideBar');
+
+			if (event.shiftKey) {
+				void CommandService.instance().execute('focusElement', 'sideBar');
+			} else {
+				void CommandService.instance().execute('focusElement', 'noteTitle');
+			}
 		}
 
 		if (key.toUpperCase() === 'A' && (event.ctrlKey || event.metaKey)) {

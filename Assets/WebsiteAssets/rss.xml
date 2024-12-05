@@ -1,4 +1,9 @@
-<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[Joplin]]></title><description><![CDATA[Joplin, the open source note-taking application]]></description><link>https://joplinapp.org</link><generator>RSS for Node</generator><lastBuildDate>Mon, 01 Jul 2024 00:00:00 GMT</lastBuildDate><atom:link href="https://joplinapp.org/rss.xml" rel="self" type="application/rss+xml"/><pubDate>Mon, 01 Jul 2024 00:00:00 GMT</pubDate><item><title><![CDATA[What's new in Joplin 3.0]]></title><description><![CDATA[<h2>Desktop application<a name="desktop-application" href="#desktop-application" class="heading-anchor">🔗</a></h2>
+<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[Joplin]]></title><description><![CDATA[Joplin, the open source note-taking application]]></description><link>https://joplinapp.org</link><generator>RSS for Node</generator><lastBuildDate>Thu, 28 Nov 2024 00:00:00 GMT</lastBuildDate><atom:link href="https://joplinapp.org/rss.xml" rel="self" type="application/rss+xml"/><pubDate>Thu, 28 Nov 2024 00:00:00 GMT</pubDate><item><title><![CDATA[Project 1: Making voice typing even better for everyone]]></title><description><![CDATA[<p>Joplin is partnering with a French government institution to bring you innovative new features! We will work on accessibility, voice typing, HTR and add Rocketbook integration. Today we'll present the planned improvements to voice typing:</p>
+<p>Right now, voice input works pretty well, but there’s one thing that still needs improvement: punctuation. Our current system is accurate, but it doesn’t pick up on things like commas or periods, which can make spoken text harder to understand. That’s why we’re looking into other voice recognition engines that can handle punctuation better while keeping the accuracy we need.</p>
+<p>Improving voice input like this isn’t just about convenience – it’s about making our app more accessible to everyone. For people with visual impairments, being able to use voice input means they don’t have to rely on typing. Those with motor difficulties can control the app without needing to use their hands. And for users with dyslexia or other learning challenges, voice input can be much easier and more natural than typing out words.</p>
+<p>We’re excited to experiment with this new feature, knowing it could make a real difference for people who rely on voice technology to get things done.</p>
+<p><img src="https://raw.githubusercontent.com/laurent22/joplin/dev/Assets/WebsiteAssets/images/news/20241128-voice-typing.jpg" alt=""></p>
+]]></description><link>https://joplinapp.org/news/20241128-project-1-voice-input</link><guid isPermaLink="false">20241128-project-1-voice-input</guid><pubDate>Thu, 28 Nov 2024 00:00:00 GMT</pubDate><twitter-text></twitter-text></item><item><title><![CDATA[What's new in Joplin 3.0]]></title><description><![CDATA[<h2>Desktop application<a name="desktop-application" href="#desktop-application" class="heading-anchor">🔗</a></h2>
 <h3>Trash folder<a name="trash-folder" href="#trash-folder" class="heading-anchor">🔗</a></h3>
 <p>Joplin now support a trash folder - any deleted notes or notebooks will be moved to that folder. You can also choose to have these notes permanently deleted after a number of days.</p>
 <p><img src="https://raw.githubusercontent.com/laurent22/joplin/dev/Assets/WebsiteAssets/images/news/20240701-trash.png" alt=""></p>
@@ -393,48 +398,4 @@ sys 0m38.013s</p>
 <p><img src="https://raw.githubusercontent.com/laurent22/joplin/dev/Assets/WebsiteAssets/images/news/20220606-publish-website.png" alt=""></p>
 <h2>And more!<a name="and-more" href="#and-more" class="heading-anchor">🔗</a></h2>
 <p>In total there are 38 changes to improve the app reliability, security and usability. Full changelog is at <a href="https://joplinapp.org/help/about/changelog/desktop">https://joplinapp.org/help/about/changelog/desktop</a></p>
-]]></description><link>https://joplinapp.org/news/20220606-release-2-8</link><guid isPermaLink="false">20220606-release-2-8</guid><pubDate>Mon, 06 Jun 2022 00:00:00 GMT</pubDate><twitter-text></twitter-text></item><item><title><![CDATA[Joplin received 6 Contributor Projects for GSoC 2022!]]></title><description><![CDATA[<p>We are glad to announce that Google allocated us six projects this year for Google Summer of Code! So this is six contributors who will be working on various parts of the apps, both desktop and mobile, over the summer.</p>
-<p>Over the next few weeks, till 13 June, will be the Community Bonding Period during which GSoC contributors get to know mentors, read documentation, and get up to speed to begin working on their projects.</p>
-<p>Here's the full list of projects, contributors and mentors.</p>
-<table class="table">
-<thead>
-<tr>
-<th>Project Title</th>
-<th>Contributor</th>
-<th>Assigned Mentor(s)</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Improve PDF previewer of Joplin</td>
-<td>asrient</td>
-<td>Roman, JackGruber</td>
-</tr>
-<tr>
-<td>Implement default plugins on desktop application</td>
-<td>mak2002</td>
-<td>CalebJohn, Laurent</td>
-</tr>
-<tr>
-<td>Mobile — Easier Editing</td>
-<td>Henry H</td>
-<td>Daeraxa, CalebJohn</td>
-</tr>
-<tr>
-<td>Improve plugin search and discoverability</td>
-<td>Retr0ve</td>
-<td>JackGruber, Stefan</td>
-</tr>
-<tr>
-<td>Tablet Layout Project</td>
-<td>Tolu-Mals</td>
-<td>Laurent, Daeraxa</td>
-</tr>
-<tr>
-<td>Email Plugin</td>
-<td>Bishoy Magdy Adeeb</td>
-<td>Stefan, Roman</td>
-</tr>
-</tbody>
-</table>
-]]></description><link>https://joplinapp.org/news/20220522-gsoc-contributors</link><guid isPermaLink="false">20220522-gsoc-contributors</guid><pubDate>Sun, 22 May 2022 00:00:00 GMT</pubDate><twitter-text>Joplin received 6 Contributor Projects for GSoC 2022! Welcome to our new contributors who will be working on these projects over summer!</twitter-text></item></channel></rss>
+]]></description><link>https://joplinapp.org/news/20220606-release-2-8</link><guid isPermaLink="false">20220606-release-2-8</guid><pubDate>Mon, 06 Jun 2022 00:00:00 GMT</pubDate><twitter-text></twitter-text></item></channel></rss>

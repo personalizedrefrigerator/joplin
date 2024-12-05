@@ -16,7 +16,6 @@ import { editorFont } from '../global-style';
 import { EditorControl as EditorBodyControl, ContentScriptData } from '@joplin/editor/types';
 import { EditorControl, EditorSettings, SelectionRange, WebViewToEditorApi } from './types';
 import { _ } from '@joplin/lib/locale';
-import MarkdownToolbar from './MarkdownToolbar/MarkdownToolbar';
 import { ChangeEvent, EditorEvent, EditorEventType, SelectionRangeChangeEvent, UndoRedoDepthChangeEvent } from '@joplin/editor/events';
 import { EditorCommandType, EditorKeymap, EditorLanguageType, SearchState } from '@joplin/editor/types';
 import SelectionFormatting, { defaultSelectionFormatting } from '@joplin/editor/SelectionFormatting';
@@ -30,6 +29,8 @@ import { OnMessageEvent } from '../ExtendedWebView/types';
 import { join, dirname } from 'path';
 import * as mimeUtils from '@joplin/lib/mime-utils';
 import uuid from '@joplin/lib/uuid';
+import EditorToolbar from '../EditorToolbar/EditorToolbar';
+import MarkdownToolbar from './MarkdownToolbarOld/MarkdownToolbar';
 
 type ChangeEventHandler = (event: ChangeEvent)=> void;
 type UndoRedoDepthChangeHandler = (event: UndoRedoDepthChangeEvent)=> void;
@@ -535,20 +536,21 @@ function NoteEditor(props: Props, ref: any) {
 		}
 	}, []);
 
-	const toolbar = <MarkdownToolbar
-		style={{
-			// Don't show the markdown toolbar if there isn't enough space
-			// for it:
-			flexShrink: 1,
-		}}
-		editorSettings={editorSettings}
-		editorControl={editorControl}
-		selectionState={selectionState}
-		searchState={searchState}
-		pluginStates={props.plugins}
-		onAttach={props.onAttach}
-		readOnly={props.readOnly}
-	/>;
+	const toolbar = Setting.value('featureFlag.useNewMobileToolbar') ? (
+		<EditorToolbar
+			selectionState={selectionState}
+		/>
+	) : (
+		<MarkdownToolbar
+			selectionState={selectionState}
+			editorSettings={editorSettings}
+			editorControl={editorControl}
+			searchState={searchState}
+			pluginStates={props.plugins}
+			onAttach={props.onAttach}
+			readOnly={props.readOnly}
+		/>
+	);
 
 	return (
 		<View
