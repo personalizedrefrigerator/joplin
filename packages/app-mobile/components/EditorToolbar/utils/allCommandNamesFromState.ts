@@ -5,7 +5,11 @@ import { EditorCommandType } from '@joplin/editor/types';
 const defaultCommandNames = [
 	'attachFile',
 	'-',
+	EditorCommandType.ToggleHeading1,
 	EditorCommandType.ToggleHeading2,
+	EditorCommandType.ToggleHeading3,
+	EditorCommandType.ToggleHeading4,
+	EditorCommandType.ToggleHeading5,
 	EditorCommandType.ToggleBolded,
 	EditorCommandType.ToggleItalicized,
 	'-',
@@ -25,7 +29,7 @@ const defaultCommandNames = [
 ];
 
 
-const defaultCommandNamesFromState = (state: AppState) => {
+const allCommandNamesFromState = (state: AppState) => {
 	const pluginCommandNames = pluginUtils.commandNamesFromViews(state.pluginService.plugins, 'editorToolbar');
 
 	if (pluginCommandNames.length > 0) {
@@ -35,4 +39,4 @@ const defaultCommandNamesFromState = (state: AppState) => {
 	return defaultCommandNames;
 };
 
-export default defaultCommandNamesFromState;
+export default allCommandNamesFromState;

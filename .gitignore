@@ -577,7 +577,8 @@ packages/app-mobile/components/EditorToolbar/EditorToolbar.js
 packages/app-mobile/components/EditorToolbar/SettingButton.js
 packages/app-mobile/components/EditorToolbar/ToolbarButton.js
 packages/app-mobile/components/EditorToolbar/ToolbarEditorDialog.js
-packages/app-mobile/components/EditorToolbar/utils/defaultCommandNamesFromState.js
+packages/app-mobile/components/EditorToolbar/utils/allCommandNamesFromState.js
+packages/app-mobile/components/EditorToolbar/utils/selectedCommandNamesFromState.js
 packages/app-mobile/components/EditorToolbar/utils/toolbarButtonsFromState.js
 packages/app-mobile/components/EditorToolbar/utils/useIsSelected.js
 packages/app-mobile/components/ExtendedWebView/index.jest.js

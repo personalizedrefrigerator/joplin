@@ -11,9 +11,10 @@ import Icon from '../Icon';
 import { AppState } from '../../utils/types';
 import stateToWhenClauseContext from '@joplin/lib/services/commands/stateToWhenClauseContext';
 import CommandService from '@joplin/lib/services/CommandService';
-import defaultCommandNamesFromState from './utils/defaultCommandNamesFromState';
+import allCommandNamesFromState from './utils/allCommandNamesFromState';
 import Setting from '@joplin/lib/models/Setting';
 import DismissibleDialog, { DialogSize } from '../DismissibleDialog';
+import selectedCommandNamesFromState from './utils/selectedCommandNamesFromState';
 
 const toolbarButtonUtils = new ToolbarButtonUtils(CommandService.instance());
 
@@ -21,7 +22,7 @@ interface Props {
 	themeId: number;
 	defaultToolbarButtonInfos: ToolbarItem[];
 	selectedCommandNames: string[];
-	defaultCommandNames: string[];
+	allCommandNames: string[];
 
 	visible: boolean;
 	onDismiss: ()=> void;
@@ -103,7 +104,7 @@ const ToolbarEditorScreen: React.FC<Props> = props => {
 				accessibilityRole='checkbox'
 				accessibilityState={{ checked }}
 				aria-checked={checked}
-				onPress={() => setCommandIncluded(item.name, props.defaultCommandNames, !checked)}
+				onPress={() => setCommandIncluded(item.name, props.allCommandNames, !checked)}
 			>
 				<View style={styles.listItem}>
 					<Icon name={checked ? 'ionicon checkbox-outline' : 'ionicon square-outline'} style={styles.icon} accessibilityLabel={null}/>
@@ -142,15 +143,13 @@ const ToolbarEditorScreen: React.FC<Props> = props => {
 export default connect((state: AppState) => {
 	const whenClauseContext = stateToWhenClauseContext(state);
 
-	const defaultCommandNames = defaultCommandNamesFromState(state);
-	const selectedCommandNames = state.settings['editor.toolbarButtons']?.length ? (
-		state.settings['editor.toolbarButtons']
-	) : defaultCommandNamesFromState(state);
+	const allCommandNames = allCommandNamesFromState(state);
+	const selectedCommandNames = selectedCommandNamesFromState(state);
 
 	return {
 		themeId: state.settings.theme,
 		selectedCommandNames,
-		defaultCommandNames,
-		defaultToolbarButtonInfos: toolbarButtonUtils.commandsToToolbarButtons(defaultCommandNames, whenClauseContext),
+		allCommandNames,
+		defaultToolbarButtonInfos: toolbarButtonUtils.commandsToToolbarButtons(allCommandNames, whenClauseContext),
 	};
 })(ToolbarEditorScreen);
