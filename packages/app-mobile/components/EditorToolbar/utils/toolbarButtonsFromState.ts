@@ -9,7 +9,7 @@ const toolbarButtonUtils = new ToolbarButtonUtils(CommandService.instance());
 const toolbarButtonsFromState = (state: AppState) => {
 	const whenClauseContext = stateToWhenClauseContext(state);
 
-	const commandNames = state.settings['editor.toolbarButtons'].length ? (
+	const commandNames = state.settings['editor.toolbarButtons']?.length ? (
 		state.settings['editor.toolbarButtons']
 	) : defaultCommandNamesFromState(state);
 

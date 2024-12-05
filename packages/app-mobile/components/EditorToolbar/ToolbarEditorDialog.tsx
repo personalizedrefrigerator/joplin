@@ -143,7 +143,7 @@ export default connect((state: AppState) => {
 	const whenClauseContext = stateToWhenClauseContext(state);
 
 	const defaultCommandNames = defaultCommandNamesFromState(state);
-	const selectedCommandNames = state.settings['editor.toolbarButtons'].length ? (
+	const selectedCommandNames = state.settings['editor.toolbarButtons']?.length ? (
 		state.settings['editor.toolbarButtons']
 	) : defaultCommandNamesFromState(state);
 

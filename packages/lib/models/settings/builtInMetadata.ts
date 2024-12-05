@@ -1679,6 +1679,19 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 			isGlobal: true,
 		},
 
+		'featureFlag.useNewMobileToolbar': {
+			value: true,
+			type: SettingItemType.Bool,
+			public: true,
+			advanced: true,
+			storage: SettingStorage.File,
+			appTypes: [AppType.Mobile],
+			label: () => 'Enable editor toolbar redesign',
+			description: () => 'Disable this feature to use the legacy Markdown toolbar.',
+			section: 'appearance',
+			isGlobal: true,
+		},
+
 		'sync.allowUnsupportedProviders': {
 			value: -1,
 			type: SettingItemType.Int,
