@@ -1,12 +1,12 @@
 import * as React from 'react';
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import createRootStyle from '../../utils/createRootStyle';
-import { FlatList, View, StyleSheet } from 'react-native';
+import { View, StyleSheet, ScrollView } from 'react-native';
 import { Divider, Text, TouchableRipple } from 'react-native-paper';
 import { _ } from '@joplin/lib/locale';
 import { themeStyle } from '../global-style';
 import { connect } from 'react-redux';
-import ToolbarButtonUtils, { ToolbarItem } from '@joplin/lib/services/commands/ToolbarButtonUtils';
+import ToolbarButtonUtils, { ToolbarButtonInfo, ToolbarItem } from '@joplin/lib/services/commands/ToolbarButtonUtils';
 import Icon from '../Icon';
 import { AppState } from '../../utils/types';
 import CommandService from '@joplin/lib/services/CommandService';
@@ -18,7 +18,7 @@ import stateToWhenClauseContext from '../../services/commands/stateToWhenClauseC
 
 const toolbarButtonUtils = new ToolbarButtonUtils(CommandService.instance());
 
-interface Props {
+interface EditorDialogProps {
 	themeId: number;
 	defaultToolbarButtonInfos: ToolbarItem[];
 	selectedCommandNames: string[];
@@ -60,14 +60,7 @@ const useStyle = (themeId: number) => {
 		});
 	}, [themeId]);
 };
-
-const keyExtractor = (item: ToolbarItem, index: number) => {
-	if (item.type === 'separator') {
-		return `separator-${index}`;
-	} else {
-		return `command-${item.name}`;
-	}
-};
+type Styles = ReturnType<typeof useStyle>;
 
 const setCommandIncluded = (
 	commandName: string,
@@ -90,35 +83,56 @@ const setCommandIncluded = (
 	Setting.setValue('editor.toolbarButtons', newSelectedCommands);
 };
 
-const ToolbarEditorScreen: React.FC<Props> = props => {
+interface ItemToggleProps {
+	item: ToolbarButtonInfo;
+	selectedCommandNames: string[];
+	allCommandNames: string[];
+	styles: Styles;
+}
+const ToolbarItemToggle: React.FC<ItemToggleProps> = ({
+	item, selectedCommandNames, styles, allCommandNames,
+}) => {
+	const title = item.title || item.tooltip;
+	const checked = selectedCommandNames.includes(item.name);
+
+	const onToggle = useCallback(() => {
+		setCommandIncluded(item.name, selectedCommandNames, allCommandNames, !checked);
+	}, [item, selectedCommandNames, allCommandNames, checked]);
+
+	return (
+		<TouchableRipple
+			style={styles.listItemButton}
+			accessibilityRole='checkbox'
+			accessibilityState={{ checked }}
+			aria-checked={checked}
+			onPress={onToggle}
+		>
+			<View style={styles.listItem}>
+				<Icon name={checked ? 'ionicon checkbox-outline' : 'ionicon square-outline'} style={styles.icon} accessibilityLabel={null}/>
+				<Icon name={item.iconName} style={styles.icon} accessibilityLabel={null}/>
+				<Text style={styles.labelText}>
+					{title}
+				</Text>
+			</View>
+		</TouchableRipple>
+	);
+};
+
+const ToolbarEditorScreen: React.FC<EditorDialogProps> = props => {
 	const styles = useStyle(props.themeId);
 
-	type RenderItemEvent = { item: ToolbarItem };
-	const renderItem = ({ item }: RenderItemEvent) => {
+	const renderItem = (item: ToolbarItem, index: number) => {
 		if (item.type === 'separator') {
-			return <Divider/>;
+			return <Divider key={`separator-${index}`} />;
 		}
 
-		const title = item.title || item.tooltip;
-		const checked = props.selectedCommandNames.includes(item.name);
-
-		return (
-			<TouchableRipple
-				style={styles.listItemButton}
-				accessibilityRole='checkbox'
-				accessibilityState={{ checked }}
-				aria-checked={checked}
-				onPress={() => setCommandIncluded(item.name, props.selectedCommandNames, props.allCommandNames, !checked)}
-			>
-				<View style={styles.listItem}>
-					<Icon name={checked ? 'ionicon checkbox-outline' : 'ionicon square-outline'} style={styles.icon} accessibilityLabel={null}/>
-					<Icon name={item.iconName} style={styles.icon} accessibilityLabel={null}/>
-					<Text style={styles.labelText}>
-						{title}
-					</Text>
-				</View>
-			</TouchableRipple>
-		);
+		return <ToolbarItemToggle
+			key={`command-${item.name}`}
+			item={item}
+			styles={styles}
+			allCommandNames={props.allCommandNames}
+			selectedCommandNames={props.selectedCommandNames}
+		/>;
 	};
 
 	return (
@@ -132,14 +146,9 @@ const ToolbarEditorScreen: React.FC<Props> = props => {
 				<Text variant='headlineMedium'>{_('Manage toolbar options')}</Text>
 				<Text variant='labelMedium'>{_('Check elements to display in the toolbar')}</Text>
 			</View>
-			<View style={styles.listContainer}>
-				<FlatList
-					data={props.defaultToolbarButtonInfos}
-					renderItem={renderItem}
-					keyExtractor={keyExtractor}
-					extraData={props.selectedCommandNames}
-				/>
-			</View>
+			<ScrollView style={styles.listContainer}>
+				{props.defaultToolbarButtonInfos.map((item, index) => renderItem(item, index))}
+			</ScrollView>
 		</DismissibleDialog>
 	);
 };

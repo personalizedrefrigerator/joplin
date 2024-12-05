@@ -13,23 +13,6 @@ interface Props {
 	selectionState: SelectionFormatting;
 }
 
-const ButtonGroup: React.FC<Props> = props => {
-	const styles = useStyles(props.themeId);
-
-	const renderButton = (info: ToolbarButtonInfo) => {
-		return <ToolbarButton
-			key={`command-${info.name}`}
-			buttonInfo={info}
-			themeId={props.themeId}
-			selected={isSelected(info.name, props.selectionState)}
-		/>;
-	};
-
-	return <View style={styles.container}>
-		{props.buttonInfos.map(renderButton)}
-	</View>;
-};
-
 const useStyles = (themeId: number) => {
 	return useMemo(() => {
 		const theme = themeStyle(themeId);
@@ -45,6 +28,23 @@ const useStyles = (themeId: number) => {
 			},
 		});
 	}, [themeId]);
+};
+
+const ButtonGroup: React.FC<Props> = props => {
+	const styles = useStyles(props.themeId);
+
+	const renderButton = (info: ToolbarButtonInfo) => {
+		return <ToolbarButton
+			key={`command-${info.name}`}
+			buttonInfo={info}
+			themeId={props.themeId}
+			selected={isSelected(info.name, props.selectionState)}
+		/>;
+	};
+
+	return <View style={styles.container}>
+		{props.buttonInfos.map(renderButton)}
+	</View>;
 };
 
 export default ButtonGroup;

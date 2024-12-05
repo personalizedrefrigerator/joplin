@@ -11,26 +11,6 @@ interface Props {
 	selected?: boolean;
 }
 
-const ToolbarButton: React.FC<Props> = memo(({ themeId, buttonInfo, selected }) => {
-	const styles = useStyles(themeId, selected, buttonInfo.enabled);
-	const isToggleButton = selected !== undefined;
-
-	return <IconButton
-		iconName={buttonInfo.iconName}
-		description={buttonInfo.title || buttonInfo.tooltip}
-		onPress={buttonInfo.onClick}
-		disabled={!buttonInfo.enabled}
-		iconStyle={styles.icon}
-		containerStyle={styles.button}
-		accessibilityState={{ selected }}
-		accessibilityRole={isToggleButton ? 'togglebutton' : 'button'}
-		role={'button'}
-		aria-pressed={selected}
-		preventKeyboardDismiss={true}
-		themeId={themeId}
-	/>;
-});
-
 const useStyles = (themeId: number, selected: boolean, enabled: boolean) => {
 	return useMemo(() => {
 		const theme = themeStyle(themeId);
@@ -50,5 +30,25 @@ const useStyles = (themeId: number, selected: boolean, enabled: boolean) => {
 		});
 	}, [themeId, selected, enabled]);
 };
+
+const ToolbarButton: React.FC<Props> = memo(({ themeId, buttonInfo, selected }) => {
+	const styles = useStyles(themeId, selected, buttonInfo.enabled);
+	const isToggleButton = selected !== undefined;
+
+	return <IconButton
+		iconName={buttonInfo.iconName}
+		description={buttonInfo.title || buttonInfo.tooltip}
+		onPress={buttonInfo.onClick}
+		disabled={!buttonInfo.enabled}
+		iconStyle={styles.icon}
+		containerStyle={styles.button}
+		accessibilityState={{ selected }}
+		accessibilityRole={isToggleButton ? 'togglebutton' : 'button'}
+		role={'button'}
+		aria-pressed={selected}
+		preventKeyboardDismiss={true}
+		themeId={themeId}
+	/>;
+});
 
 export default ToolbarButton;

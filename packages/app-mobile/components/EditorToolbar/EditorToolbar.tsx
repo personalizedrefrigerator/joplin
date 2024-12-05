@@ -18,6 +18,25 @@ interface Props {
 	selectionState: SelectionFormatting;
 }
 
+const useStyles = (themeId: number) => {
+	return useMemo(() => {
+		const theme = themeStyle(themeId);
+		return StyleSheet.create({
+			content: {
+				flexGrow: 0,
+			},
+			contentContainer: {
+				paddingVertical: 4,
+				flexDirection: 'row',
+				backgroundColor: theme.backgroundColor3,
+				borderWidth: 1,
+				borderColor: theme.color3,
+				borderRadius: 10,
+			},
+		});
+	}, [themeId]);
+};
+
 const EditorToolbar: React.FC<Props> = props => {
 	const styles = useStyles(props.themeId);
 
@@ -82,25 +101,6 @@ const EditorToolbar: React.FC<Props> = props => {
 		</ToggleSpaceButton>
 		<ToolbarEditorDialog visible={settingsVisible} onDismiss={onDismissSettingsDialog} />
 	</>;
-};
-
-const useStyles = (themeId: number) => {
-	return useMemo(() => {
-		const theme = themeStyle(themeId);
-		return StyleSheet.create({
-			content: {
-				flexGrow: 0,
-			},
-			contentContainer: {
-				paddingVertical: 4,
-				flexDirection: 'row',
-				backgroundColor: theme.backgroundColor3,
-				borderWidth: 1,
-				borderColor: theme.color3,
-				borderRadius: 10,
-			},
-		});
-	}, [themeId]);
 };
 
 export default connect((state: AppState) => {
