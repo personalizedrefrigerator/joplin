@@ -10,7 +10,7 @@ import ToolbarButtonUtils, { ToolbarButtonInfo, ToolbarItem } from '@joplin/lib/
 import Icon from '../Icon';
 import { AppState } from '../../utils/types';
 import CommandService from '@joplin/lib/services/CommandService';
-import allCommandNamesFromState from './utils/allCommandNamesFromState';
+import allToolbarCommandNamesFromState from './utils/allToolbarCommandNamesFromState';
 import Setting from '@joplin/lib/models/Setting';
 import DismissibleDialog, { DialogSize } from '../DismissibleDialog';
 import selectedCommandNamesFromState from './utils/selectedCommandNamesFromState';
@@ -143,7 +143,7 @@ const ToolbarEditorScreen: React.FC<EditorDialogProps> = props => {
 			onDismiss={props.onDismiss}
 		>
 			<View>
-				<Text variant='headlineMedium'>{_('Manage toolbar options')}</Text>
+				<Text variant='headlineMedium' role='heading'>{_('Manage toolbar options')}</Text>
 				<Text variant='labelMedium'>{_('Check elements to display in the toolbar')}</Text>
 			</View>
 			<ScrollView style={styles.listContainer}>
@@ -156,7 +156,7 @@ const ToolbarEditorScreen: React.FC<EditorDialogProps> = props => {
 export default connect((state: AppState) => {
 	const whenClauseContext = stateToWhenClauseContext(state);
 
-	const allCommandNames = allCommandNamesFromState(state);
+	const allCommandNames = allToolbarCommandNamesFromState(state);
 	const selectedCommandNames = selectedCommandNamesFromState(state);
 
 	return {

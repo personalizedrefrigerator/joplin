@@ -30,14 +30,25 @@ const builtInCommandNames = [
 ];
 
 
-const allCommandNamesFromState = (state: AppState) => {
+const allToolbarCommandNamesFromState = (state: AppState) => {
 	const pluginCommandNames = pluginUtils.commandNamesFromViews(state.pluginService.plugins, 'editorToolbar');
 
+	let allCommandNames = builtInCommandNames;
 	if (pluginCommandNames.length > 0) {
-		return builtInCommandNames.concat(['-'], pluginCommandNames);
+		allCommandNames = allCommandNames.concat(['-'], pluginCommandNames);
 	}
 
-	return builtInCommandNames;
+	// If the user disables math markup, the "toggle math" button won't be useful.
+	// Disabling the math markup button maintains compatibility with the previous
+	// toolbar.
+	const mathEnabled = state.settings['markdown.plugin.katex'];
+	if (!mathEnabled) {
+		allCommandNames = allCommandNames.filter(
+			name => name !== EditorCommandType.ToggleMath,
+		);
+	}
+
+	return allCommandNames;
 };
 
-export default allCommandNamesFromState;
+export default allToolbarCommandNamesFromState;
