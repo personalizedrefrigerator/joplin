@@ -15,7 +15,7 @@ const headerDeclarations = () => {
 	for (let level = 1; level <= 5; level++) {
 		result.push({
 			name: `textHeading${level}`,
-			iconName: `text H${level}`,
+			iconName: `material format-header-${level}`,
 			label: () => _('Header %d', level),
 		});
 	}
@@ -52,23 +52,23 @@ const declarations: CommandDeclaration[] = [
 	{
 		name: EditorCommandType.ToggleBolded,
 		label: () => _('Bold'),
-		iconName: 'fa bold',
+		iconName: 'material format-bold',
 	},
 	{
 		name: EditorCommandType.ToggleItalicized,
 		label: () => _('Italic'),
-		iconName: 'fa italic',
+		iconName: 'material format-italic',
 	},
 	...headerDeclarations(),
 	{
 		name: EditorCommandType.ToggleCode,
 		label: () => _('Code'),
-		iconName: 'text {;}',
+		iconName: 'material code-json',
 	},
 	{
 		name: EditorCommandType.ToggleMath,
 		label: () => _('Math'),
-		iconName: 'text ∑',
+		iconName: 'material sigma',
 	},
 	{
 		name: EditorCommandType.ToggleNumberedList,

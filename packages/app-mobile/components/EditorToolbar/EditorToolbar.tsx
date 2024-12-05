@@ -1,13 +1,14 @@
 import * as React from 'react';
 import { AppState } from '../../utils/types';
 import { connect } from 'react-redux';
-import { ScrollView, StyleSheet } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import { ToolbarButtonInfo, ToolbarItem } from '@joplin/lib/services/commands/ToolbarButtonUtils';
 import toolbarButtonsFromState from './utils/toolbarButtonsFromState';
 import SelectionFormatting from '@joplin/editor/SelectionFormatting';
 import ButtonGroup from './ButtonGroup';
 import { useMemo } from 'react';
 import { themeStyle } from '../global-style';
+import ToggleSpaceButton from '../ToggleSpaceButton';
 
 interface Props {
 	themeId: number;
@@ -47,18 +48,29 @@ const EditorToolbar: React.FC<Props> = props => {
 			themeId={props.themeId}
 		/>;
 	};
-	return <ScrollView horizontal={true} style={styles.container}>
-		{buttonGroups.map(renderGroup)}
-	</ScrollView>;
+	return <ToggleSpaceButton themeId={props.themeId}>
+		<ScrollView horizontal={true} style={styles.content}>
+			<View style={styles.contentContainer}>
+				{buttonGroups.map(renderGroup)}
+			</View>
+		</ScrollView>
+	</ToggleSpaceButton>;
 };
 
 const useStyles = (themeId: number) => {
 	return useMemo(() => {
 		const theme = themeStyle(themeId);
 		return StyleSheet.create({
-			container: {
+			content: {
 				flexGrow: 0,
+			},
+			contentContainer: {
+				paddingVertical: 3,
+				flexDirection: 'row',
 				backgroundColor: theme.backgroundColor3,
+				borderWidth: 1,
+				borderColor: theme.color3,
+				borderRadius: 10,
 			},
 		});
 	}, [themeId]);

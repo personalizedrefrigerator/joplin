@@ -11,6 +11,7 @@ const defaultCommandNames = [
 	EditorCommandType.ToggleHeading2,
 	EditorCommandType.ToggleBolded,
 	EditorCommandType.ToggleItalicized,
+	'-',
 	EditorCommandType.ToggleCode,
 	EditorCommandType.ToggleMath,
 	'-',

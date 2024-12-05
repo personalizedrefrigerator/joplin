@@ -35,9 +35,9 @@ const useStyles = (themeId: number) => {
 		return StyleSheet.create({
 			container: {
 				backgroundColor: theme.backgroundColor,
-				borderRadius: 12,
+				borderRadius: 10,
 				borderWidth: 1,
-				borderColor: theme.color,
+				borderColor: theme.color3,
 				overflow: 'hidden',
 				flexDirection: 'row',
 				marginHorizontal: 3,

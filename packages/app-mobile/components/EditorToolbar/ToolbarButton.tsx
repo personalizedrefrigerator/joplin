@@ -36,7 +36,7 @@ const useStyles = (themeId: number, selected: boolean) => {
 		const theme = themeStyle(themeId);
 		return StyleSheet.create({
 			icon: {
-				color: theme.color3,
+				color: theme.color,
 				fontSize: 22,
 			},
 			button: {
