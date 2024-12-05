@@ -73,17 +73,17 @@ const declarations: CommandDeclaration[] = [
 	{
 		name: EditorCommandType.ToggleNumberedList,
 		label: () => _('Ordered list'),
-		iconName: 'fa list-ol',
+		iconName: 'material format-list-numbered',
 	},
 	{
 		name: EditorCommandType.ToggleBulletedList,
 		label: () => _('Unordered list'),
-		iconName: 'fa list-ul',
+		iconName: 'material format-list-bulleted',
 	},
 	{
 		name: EditorCommandType.ToggleCheckList,
 		label: () => _('Task list'),
-		iconName: 'fa tasks',
+		iconName: 'material format-list-checks',
 	},
 	{
 		name: EditorCommandType.IndentLess,
@@ -98,12 +98,12 @@ const declarations: CommandDeclaration[] = [
 	{
 		name: EditorCommandType.ToggleSearch,
 		label: () => _('Search'),
-		iconName: 'fa search',
+		iconName: 'material magnify',
 	},
 	{
 		name: EditorCommandType.EditLink,
 		label: () => _('Link'),
-		iconName: 'fa link',
+		iconName: 'material link',
 	},
 ];
 

@@ -3,17 +3,16 @@ import { _ } from '@joplin/lib/locale';
 import { CommandRuntimeProps } from '../types';
 
 export const declaration: CommandDeclaration = {
-	name: 'setTags',
-	label: () => _('Tags'),
-	iconName: 'material tag-multiple',
+	name: 'hideKeyboard',
+	label: () => _('Hide keyboard'),
+	iconName: 'material keyboard-close',
 };
 
 export const runtime = (props: CommandRuntimeProps): CommandRuntime => {
 	return {
 		execute: async (_context: CommandContext) => {
-			props.setTagDialogVisible(true);
+			props.hideKeyboard();
 		},
-
-		enabledCondition: '!noteIsReadOnly',
+		enabledCondition: 'keyboardVisible',
 	};
 };

@@ -1,8 +1,8 @@
 import { AppState } from '../../../utils/types';
 import ToolbarButtonUtils from '@joplin/lib/services/commands/ToolbarButtonUtils';
 import CommandService from '@joplin/lib/services/CommandService';
-import stateToWhenClauseContext from '@joplin/lib/services/commands/stateToWhenClauseContext';
 import selectedCommandNamesFromState from './selectedCommandNamesFromState';
+import stateToWhenClauseContext from '../../../services/commands/stateToWhenClauseContext';
 
 const toolbarButtonUtils = new ToolbarButtonUtils(CommandService.instance());
 

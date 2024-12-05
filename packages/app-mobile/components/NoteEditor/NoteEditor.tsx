@@ -30,7 +30,6 @@ import { join, dirname } from 'path';
 import * as mimeUtils from '@joplin/lib/mime-utils';
 import uuid from '@joplin/lib/uuid';
 import EditorToolbar from '../EditorToolbar/EditorToolbar';
-import MarkdownToolbar from './MarkdownToolbarOld/MarkdownToolbar';
 
 type ChangeEventHandler = (event: ChangeEvent)=> void;
 type UndoRedoDepthChangeHandler = (event: UndoRedoDepthChangeEvent)=> void;
@@ -536,21 +535,7 @@ function NoteEditor(props: Props, ref: any) {
 		}
 	}, []);
 
-	const toolbar = Setting.value('featureFlag.useNewMobileToolbar') ? (
-		<EditorToolbar
-			selectionState={selectionState}
-		/>
-	) : (
-		<MarkdownToolbar
-			selectionState={selectionState}
-			editorSettings={editorSettings}
-			editorControl={editorControl}
-			searchState={searchState}
-			pluginStates={props.plugins}
-			onAttach={props.onAttach}
-			readOnly={props.readOnly}
-		/>
-	);
+	const toolbar = <EditorToolbar selectionState={selectionState} />;
 
 	return (
 		<View

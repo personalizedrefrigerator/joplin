@@ -1,11 +1,6 @@
 import SelectionFormatting from '@joplin/editor/SelectionFormatting';
 import { EditorCommandType } from '@joplin/editor/types';
 
-interface Props {
-	commandName: string;
-	selectionState: SelectionFormatting | null;
-}
-
 type SelectionSelector = (selectionState: SelectionFormatting)=> boolean;
 
 const commandNameToSelectionState: Record<string, SelectionSelector> = {
@@ -26,7 +21,7 @@ const commandNameToSelectionState: Record<string, SelectionSelector> = {
 };
 
 // Returns undefined if not a toggle button
-const useIsSelected = ({ selectionState, commandName }: Props) => {
+const isSelected = (commandName: string, selectionState: SelectionFormatting) => {
 	if (commandName in commandNameToSelectionState) {
 		if (!selectionState) return false;
 		return commandNameToSelectionState[commandName as EditorCommandType](
@@ -36,4 +31,4 @@ const useIsSelected = ({ selectionState, commandName }: Props) => {
 	return undefined;
 };
 
-export default useIsSelected;
+export default isSelected;
