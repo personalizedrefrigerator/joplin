@@ -68,16 +68,17 @@ const keyExtractor = (item: ToolbarItem, index: number) => {
 };
 
 const setCommandIncluded = (commandName: string, allCommandNames: string[], include: boolean) => {
+	const lastSelectedCommands = Setting.value('editor.toolbarButtons');
+
 	let newSelectedCommands;
 	if (include) {
 		newSelectedCommands = [];
 		for (const name of allCommandNames) {
-			if (name === commandName || allCommandNames.includes(name)) {
+			if (name === commandName || lastSelectedCommands.includes(name)) {
 				newSelectedCommands.push(name);
 			}
 		}
 	} else {
-		const lastSelectedCommands = Setting.value('editor.toolbarButtons');
 		newSelectedCommands = lastSelectedCommands.filter(name => name !== commandName);
 	}
 	Setting.setValue('editor.toolbarButtons', newSelectedCommands);
@@ -99,7 +100,7 @@ const ToolbarEditorScreen: React.FC<Props> = props => {
 			<View style={styles.listItem}>
 				<Checkbox
 					checked={checked}
-					onChange={() => setCommandIncluded(item.name, props.defaultCommandNames, !checked)}
+					onChange={(newChecked) => setCommandIncluded(item.name, props.defaultCommandNames, newChecked)}
 					accessibilityLabel={title}
 					style={styles.checkbox}
 				/>
