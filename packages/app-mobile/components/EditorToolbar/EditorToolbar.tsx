@@ -65,7 +65,7 @@ const useStyles = (themeId: number) => {
 				flexGrow: 0,
 			},
 			contentContainer: {
-				paddingVertical: 3,
+				paddingVertical: 4,
 				flexDirection: 'row',
 				backgroundColor: theme.backgroundColor3,
 				borderWidth: 1,

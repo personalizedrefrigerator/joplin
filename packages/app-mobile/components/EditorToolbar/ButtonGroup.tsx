@@ -40,7 +40,7 @@ const useStyles = (themeId: number) => {
 				borderColor: theme.color3,
 				overflow: 'hidden',
 				flexDirection: 'row',
-				marginHorizontal: 3,
+				marginHorizontal: 4,
 			},
 		});
 	}, [themeId]);
