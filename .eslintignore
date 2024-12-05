@@ -643,17 +643,6 @@ packages/app-mobile/components/NoteEditor/ImageEditor/js-draw/startAutosaveLoop.
 packages/app-mobile/components/NoteEditor/ImageEditor/js-draw/types.js
 packages/app-mobile/components/NoteEditor/ImageEditor/js-draw/watchEditorForTemplateChanges.js
 packages/app-mobile/components/NoteEditor/ImageEditor/promptRestoreAutosave.js
-packages/app-mobile/components/NoteEditor/MarkdownToolbarOld/MarkdownToolbar.js
-packages/app-mobile/components/NoteEditor/MarkdownToolbarOld/ToggleOverflowButton.js
-packages/app-mobile/components/NoteEditor/MarkdownToolbarOld/Toolbar.js
-packages/app-mobile/components/NoteEditor/MarkdownToolbarOld/ToolbarButton.js
-packages/app-mobile/components/NoteEditor/MarkdownToolbarOld/ToolbarOverflowRows.js
-packages/app-mobile/components/NoteEditor/MarkdownToolbarOld/buttons/useActionButtons.js
-packages/app-mobile/components/NoteEditor/MarkdownToolbarOld/buttons/useHeaderButtons.js
-packages/app-mobile/components/NoteEditor/MarkdownToolbarOld/buttons/useInlineFormattingButtons.js
-packages/app-mobile/components/NoteEditor/MarkdownToolbarOld/buttons/useListButtons.js
-packages/app-mobile/components/NoteEditor/MarkdownToolbarOld/buttons/usePluginButtons.js
-packages/app-mobile/components/NoteEditor/MarkdownToolbarOld/types.js
 packages/app-mobile/components/NoteEditor/NoteEditor.test.js
 packages/app-mobile/components/NoteEditor/NoteEditor.js
 packages/app-mobile/components/NoteEditor/SearchPanel.js
