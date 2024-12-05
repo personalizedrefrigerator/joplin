@@ -9,12 +9,12 @@ import { connect } from 'react-redux';
 import ToolbarButtonUtils, { ToolbarItem } from '@joplin/lib/services/commands/ToolbarButtonUtils';
 import Icon from '../Icon';
 import { AppState } from '../../utils/types';
-import stateToWhenClauseContext from '@joplin/lib/services/commands/stateToWhenClauseContext';
 import CommandService from '@joplin/lib/services/CommandService';
 import allCommandNamesFromState from './utils/allCommandNamesFromState';
 import Setting from '@joplin/lib/models/Setting';
 import DismissibleDialog, { DialogSize } from '../DismissibleDialog';
 import selectedCommandNamesFromState from './utils/selectedCommandNamesFromState';
+import stateToWhenClauseContext from '../../services/commands/stateToWhenClauseContext';
 
 const toolbarButtonUtils = new ToolbarButtonUtils(CommandService.instance());
 

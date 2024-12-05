@@ -506,7 +506,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 			{
 				attachFile: this.attachFile.bind(this),
 				hideKeyboard: () => {
-					// TODO,
+					this.editorRef?.current?.hideKeyboard();
 				},
 				insertText: this.insertText.bind(this),
 				get dialogs() {

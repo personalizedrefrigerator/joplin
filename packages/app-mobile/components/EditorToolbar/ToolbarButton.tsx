@@ -12,13 +12,14 @@ interface Props {
 }
 
 const ToolbarButton: React.FC<Props> = memo(({ themeId, buttonInfo, selected }) => {
-	const styles = useStyles(themeId, selected);
+	const styles = useStyles(themeId, selected, buttonInfo.enabled);
 	const isToggleButton = selected !== undefined;
 
 	return <IconButton
 		iconName={buttonInfo.iconName}
 		description={buttonInfo.title || buttonInfo.tooltip}
 		onPress={buttonInfo.onClick}
+		disabled={!buttonInfo.enabled}
 		iconStyle={styles.icon}
 		containerStyle={styles.button}
 		accessibilityState={{ selected }}
@@ -30,7 +31,7 @@ const ToolbarButton: React.FC<Props> = memo(({ themeId, buttonInfo, selected }) 
 	/>;
 });
 
-const useStyles = (themeId: number, selected: boolean) => {
+const useStyles = (themeId: number, selected: boolean, enabled: boolean) => {
 	return useMemo(() => {
 		const theme = themeStyle(themeId);
 		return StyleSheet.create({
@@ -44,9 +45,10 @@ const useStyles = (themeId: number, selected: boolean) => {
 				height: 48,
 				justifyContent: 'center',
 				alignItems: 'center',
+				opacity: enabled ? 1 : theme.disabledOpacity,
 			},
 		});
-	}, [themeId, selected]);
+	}, [themeId, selected, enabled]);
 };
 
 export default ToolbarButton;

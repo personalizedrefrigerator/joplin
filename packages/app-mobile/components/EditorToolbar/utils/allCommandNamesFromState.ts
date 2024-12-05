@@ -26,6 +26,7 @@ const builtInCommandNames = [
 	EditorCommandType.EditLink,
 	'setTags',
 	EditorCommandType.ToggleSearch,
+	'hideKeyboard',
 ];
 
 
