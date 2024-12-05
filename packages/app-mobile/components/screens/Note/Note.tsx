@@ -54,7 +54,7 @@ import { getDisplayParentTitle } from '@joplin/lib/services/trash';
 import { PluginStates, utils as pluginUtils } from '@joplin/lib/services/plugins/reducer';
 import debounce from '../../../utils/debounce';
 import { focus } from '@joplin/lib/utils/focusHandler';
-import CommandService from '@joplin/lib/services/CommandService';
+import CommandService, { RegisteredRuntime } from '@joplin/lib/services/CommandService';
 import { ResourceInfo } from '../../NoteBodyViewer/hooks/useRerenderHandler';
 import getImageDimensions from '../../../utils/image/getImageDimensions';
 import resizeImage from '../../../utils/image/resizeImage';
@@ -149,6 +149,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 	private folderPickerOptions_: any;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	public dialogbox: any;
+	private commandRegistration_: RegisteredRuntime|null = null;
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	public static navigationOptions(): any {
@@ -502,7 +503,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 		void this.requestGeoLocationPermissions();
 
 		const dialogs = () => this.props.dialogs;
-		CommandService.instance().componentRegisterCommands<CommandRuntimeProps>(
+		this.commandRegistration_ = CommandService.instance().componentRegisterCommands<CommandRuntimeProps>(
 			{
 				attachFile: this.attachFile.bind(this),
 				hideKeyboard: () => {
@@ -595,6 +596,8 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 		// It cannot theoretically be undefined, since componentDidMount should always be called before
 		// componentWillUnmount, but with React Native the impossible often becomes possible.
 		if (this.undoRedoService_) this.undoRedoService_.off('stackChange', this.undoRedoService_stackChange);
+
+		this.commandRegistration_?.deregister();
 	}
 
 	private title_changeText(text: string) {
