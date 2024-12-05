@@ -17,6 +17,7 @@ const ToolbarButton: React.FC<Props> = ({ themeId, buttonInfo, selectionState })
 	const commandName = buttonInfo.name;
 	const selected = useIsSelected({ selectionState, commandName });
 	const styles = useStyles(themeId, selected);
+	const isToggleButton = selected !== undefined;
 
 	return <IconButton
 		iconName={buttonInfo.iconName}
@@ -25,7 +26,9 @@ const ToolbarButton: React.FC<Props> = ({ themeId, buttonInfo, selectionState })
 		iconStyle={styles.icon}
 		containerStyle={styles.button}
 		accessibilityState={{ selected }}
-		accessibilityRole={selected !== undefined ? 'togglebutton' : 'button'}
+		accessibilityRole={isToggleButton ? 'togglebutton' : 'button'}
+		role={'button'}
+		aria-pressed={selected}
 		preventKeyboardDismiss={true}
 		themeId={themeId}
 	/>;
