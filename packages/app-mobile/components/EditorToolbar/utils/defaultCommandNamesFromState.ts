@@ -27,7 +27,12 @@ const defaultCommandNames = [
 
 const defaultCommandNamesFromState = (state: AppState) => {
 	const pluginCommandNames = pluginUtils.commandNamesFromViews(state.pluginService.plugins, 'editorToolbar');
-	return defaultCommandNames.concat(pluginCommandNames);
+
+	if (pluginCommandNames.length > 0) {
+		return defaultCommandNames.concat(['-'], pluginCommandNames);
+	}
+
+	return defaultCommandNames;
 };
 
 export default defaultCommandNamesFromState;
