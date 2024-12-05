@@ -2,7 +2,7 @@ import { AppState } from '../../../utils/types';
 import { utils as pluginUtils } from '@joplin/lib/services/plugins/reducer';
 import { EditorCommandType } from '@joplin/editor/types';
 
-const defaultCommandNames = [
+const builtInCommandNames = [
 	'attachFile',
 	'-',
 	EditorCommandType.ToggleHeading1,
@@ -33,10 +33,10 @@ const allCommandNamesFromState = (state: AppState) => {
 	const pluginCommandNames = pluginUtils.commandNamesFromViews(state.pluginService.plugins, 'editorToolbar');
 
 	if (pluginCommandNames.length > 0) {
-		return defaultCommandNames.concat(['-'], pluginCommandNames);
+		return builtInCommandNames.concat(['-'], pluginCommandNames);
 	}
 
-	return defaultCommandNames;
+	return builtInCommandNames;
 };
 
 export default allCommandNamesFromState;
