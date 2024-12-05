@@ -314,6 +314,33 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 		this.voiceTypingDialog_onDismiss = this.voiceTypingDialog_onDismiss.bind(this);
 	}
 
+	private registerCommands() {
+		if (this.commandRegistration_) return;
+
+		const dialogs = () => this.props.dialogs;
+		this.commandRegistration_ = CommandService.instance().componentRegisterCommands<CommandRuntimeProps>(
+			{
+				attachFile: this.attachFile.bind(this),
+				hideKeyboard: () => {
+					this.editorRef?.current?.hideKeyboard();
+				},
+				insertText: this.insertText.bind(this),
+				get dialogs() {
+					return dialogs();
+				},
+				setCameraVisible: (visible) => {
+					this.setState({ showCamera: visible });
+				},
+				setTagDialogVisible: (visible) => {
+					if (!this.state.note || !this.state.note.id) return;
+
+					this.setState({ noteTagDialogShown: visible });
+				},
+			},
+			commands,
+		);
+	}
+
 	private useEditorBeta(): boolean {
 		return this.props.useEditorBeta;
 	}
@@ -501,29 +528,6 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 		// has already been granted, it doesn't slow down opening the note. If it hasn't
 		// been granted, the popup will open anyway.
 		void this.requestGeoLocationPermissions();
-
-		const dialogs = () => this.props.dialogs;
-		this.commandRegistration_ = CommandService.instance().componentRegisterCommands<CommandRuntimeProps>(
-			{
-				attachFile: this.attachFile.bind(this),
-				hideKeyboard: () => {
-					this.editorRef?.current?.hideKeyboard();
-				},
-				insertText: this.insertText.bind(this),
-				get dialogs() {
-					return dialogs();
-				},
-				setCameraVisible: (visible) => {
-					this.setState({ showCamera: visible });
-				},
-				setTagDialogVisible: (visible) => {
-					if (!this.state.note || !this.state.note.id) return;
-
-					this.setState({ noteTagDialogShown: visible });
-				},
-			},
-			commands,
-		);
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
@@ -598,6 +602,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 		if (this.undoRedoService_) this.undoRedoService_.off('stackChange', this.undoRedoService_stackChange);
 
 		this.commandRegistration_?.deregister();
+		this.commandRegistration_ = null;
 	}
 
 	private title_changeText(text: string) {
@@ -1384,6 +1389,12 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 	}
 
 	public render() {
+		// Commands must be registered before child components can render.
+		// Calling this in the constructor won't work in strict mode, where
+		// componentWillUnmount (which removes the commands) can be called
+		// multiple times.
+		this.registerCommands();
+
 		if (this.state.isLoading) {
 			return (
 				<View style={this.styles().screen}>
