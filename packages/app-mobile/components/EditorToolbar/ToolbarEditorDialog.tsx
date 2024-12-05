@@ -2,13 +2,12 @@ import * as React from 'react';
 import { useMemo } from 'react';
 import createRootStyle from '../../utils/createRootStyle';
 import { FlatList, View, StyleSheet } from 'react-native';
-import { Divider, Text } from 'react-native-paper';
+import { Divider, Text, TouchableRipple } from 'react-native-paper';
 import { _ } from '@joplin/lib/locale';
 import { themeStyle } from '../global-style';
 import { connect } from 'react-redux';
 import ToolbarButtonUtils, { ToolbarItem } from '@joplin/lib/services/commands/ToolbarButtonUtils';
 import Icon from '../Icon';
-import Checkbox from '../Checkbox';
 import { AppState } from '../../utils/types';
 import stateToWhenClauseContext from '@joplin/lib/services/commands/stateToWhenClauseContext';
 import CommandService from '@joplin/lib/services/CommandService';
@@ -36,7 +35,7 @@ const useStyle = (themeId: number) => {
 			...createRootStyle(themeId),
 			icon: {
 				color: theme.color,
-				fontSize: theme.fontSize,
+				fontSize: theme.fontSizeLarge,
 			},
 			labelText: {
 				fontSize: theme.fontSize,
@@ -45,15 +44,17 @@ const useStyle = (themeId: number) => {
 				marginTop: theme.marginTop,
 				flex: 1,
 			},
+			listItemButton: {
+
+			},
 			listItem: {
 				flexDirection: 'row',
+				alignItems: 'center',
+				justifyContent: 'flex-start',
 				gap: theme.margin,
 				padding: 4,
 				paddingTop: theme.itemMarginTop,
 				paddingBottom: theme.itemMarginBottom,
-			},
-			checkbox: {
-				color: theme.color,
 			},
 		});
 	}, [themeId]);
@@ -97,18 +98,21 @@ const ToolbarEditorScreen: React.FC<Props> = props => {
 		const checked = props.selectedCommandNames.includes(item.name);
 
 		return (
-			<View style={styles.listItem}>
-				<Checkbox
-					checked={checked}
-					onChange={(newChecked) => setCommandIncluded(item.name, props.defaultCommandNames, newChecked)}
-					accessibilityLabel={title}
-					style={styles.checkbox}
-				/>
-				<Icon name={item.iconName} style={styles.icon} accessibilityLabel={null}/>
-				<Text style={styles.labelText}>
-					{title}
-				</Text>
-			</View>
+			<TouchableRipple
+				style={styles.listItemButton}
+				accessibilityRole='checkbox'
+				accessibilityState={{ checked }}
+				aria-checked={checked}
+				onPress={() => setCommandIncluded(item.name, props.defaultCommandNames, !checked)}
+			>
+				<View style={styles.listItem}>
+					<Icon name={checked ? 'ionicon checkbox-outline' : 'ionicon square-outline'} style={styles.icon} accessibilityLabel={null}/>
+					<Icon name={item.iconName} style={styles.icon} accessibilityLabel={null}/>
+					<Text style={styles.labelText}>
+						{title}
+					</Text>
+				</View>
+			</TouchableRipple>
 		);
 	};
 
