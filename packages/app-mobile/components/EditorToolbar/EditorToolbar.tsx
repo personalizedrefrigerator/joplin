@@ -75,11 +75,12 @@ const EditorToolbar: React.FC<Props> = props => {
 	const onDismissSettingsDialog = useCallback(() => {
 		setSettingsVisible(false);
 
-		// This works around an issue on Android -- after removing items
-		// from the toolbar, the scrollview can be scrolled past the end.
-		//
-		// Scrolling to the end keeps the last item visible, even if a large
-		// number of items are removed from the toolbar.
+		// On Android, if the ScrollView isn't manually scrolled to the end,
+		// all items can be invisible in some cases. This causes issues with
+		// TalkBack on Android.
+		// In particular, if 1) the toolbar initially has many items on a device
+		// with a small screen, and 2) the user removes most items, then most/all
+		// items are scrolled offscreen. Calling .scrollToEnd corrects this:
 		scrollViewRef.current?.scrollToEnd();
 	}, []);
 
