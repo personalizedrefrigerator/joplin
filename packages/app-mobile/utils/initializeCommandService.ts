@@ -26,7 +26,9 @@ const initializeCommandService = (store: Store<AppState, any>) => {
 	for (const declaration of editorCommandDeclarations) {
 		CommandService.instance().registerDeclaration(declaration);
 	}
-	registerCommands(noteCommands);
+	for (const command of noteCommands) {
+		CommandService.instance().registerDeclaration(command.declaration);
+	}
 	registerCommands(globalCommands);
 	registerCommands(libCommands);
 };

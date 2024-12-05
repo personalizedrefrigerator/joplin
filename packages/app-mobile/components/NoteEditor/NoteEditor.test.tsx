@@ -75,11 +75,11 @@ describe('NoteEditor', () => {
 			setRootHeight(height);
 
 			await waitFor(async () => {
-				const showMoreButton = await screen.queryByLabelText(_('Bold'));
+				const toolbarButton = await screen.queryByLabelText(_('Bold'));
 				if (visible) {
-					expect(showMoreButton).not.toBeNull();
+					expect(toolbarButton).not.toBeNull();
 				} else {
-					expect(showMoreButton).toBeNull();
+					expect(toolbarButton).toBeNull();
 				}
 			});
 		}

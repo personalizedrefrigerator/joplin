@@ -19,26 +19,6 @@ export enum CameraDirection {
 	Front,
 }
 
-export enum EditorToolbarButtons {
-	Divider = '|',
-	Attach = 'app.attachFile',
-	ToggleHeading1 = 'editor.textHeading1',
-	ToggleHeading2 = 'editor.textHeading2',
-	ToggleHeading3 = 'editor.textHeading3',
-	ToggleHeading4 = 'editor.textHeading4',
-	Bold = 'editor.textBold',
-	Italic = 'editor.textItalic',
-	Code = 'editor.textCode',
-	Math = 'editor.textMath',
-	NumberedList = 'editor.textNumberedList',
-	ToggleBulletedList = 'editor.textBulletedList',
-	ToggleCheckList = 'editor.textCheckbox',
-	IndentMore = 'editor.indentMore',
-	IndentLess = 'editor.indentLess',
-	Tags = 'app.setTags',
-	Search = 'editor.find',
-}
-
 const builtInMetadata = (Setting: typeof SettingType) => {
 	const platform = shim.platformName();
 	const mobilePlatform = shim.mobilePlatform();

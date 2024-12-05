@@ -54,7 +54,7 @@ import { getDisplayParentTitle } from '@joplin/lib/services/trash';
 import { PluginStates, utils as pluginUtils } from '@joplin/lib/services/plugins/reducer';
 import debounce from '../../../utils/debounce';
 import { focus } from '@joplin/lib/utils/focusHandler';
-import CommandService from '@joplin/lib/services/CommandService';
+import CommandService, { RegisteredRuntime } from '@joplin/lib/services/CommandService';
 import { ResourceInfo } from '../../NoteBodyViewer/hooks/useRerenderHandler';
 import getImageDimensions from '../../../utils/image/getImageDimensions';
 import resizeImage from '../../../utils/image/resizeImage';
@@ -149,6 +149,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 	private folderPickerOptions_: any;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	public dialogbox: any;
+	private commandRegistration_: RegisteredRuntime|null = null;
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	public static navigationOptions(): any {
@@ -311,6 +312,33 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 		this.onUndoRedoDepthChange = this.onUndoRedoDepthChange.bind(this);
 		this.voiceTypingDialog_onText = this.voiceTypingDialog_onText.bind(this);
 		this.voiceTypingDialog_onDismiss = this.voiceTypingDialog_onDismiss.bind(this);
+	}
+
+	private registerCommands() {
+		if (this.commandRegistration_) return;
+
+		const dialogs = () => this.props.dialogs;
+		this.commandRegistration_ = CommandService.instance().componentRegisterCommands<CommandRuntimeProps>(
+			{
+				attachFile: this.attachFile.bind(this),
+				hideKeyboard: () => {
+					this.editorRef?.current?.hideKeyboard();
+				},
+				insertText: this.insertText.bind(this),
+				get dialogs() {
+					return dialogs();
+				},
+				setCameraVisible: (visible) => {
+					this.setState({ showCamera: visible });
+				},
+				setTagDialogVisible: (visible) => {
+					if (!this.state.note || !this.state.note.id) return;
+
+					this.setState({ noteTagDialogShown: visible });
+				},
+			},
+			commands,
+		);
 	}
 
 	private useEditorBeta(): boolean {
@@ -500,29 +528,6 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 		// has already been granted, it doesn't slow down opening the note. If it hasn't
 		// been granted, the popup will open anyway.
 		void this.requestGeoLocationPermissions();
-
-		const dialogs = () => this.props.dialogs;
-		CommandService.instance().componentRegisterCommands<CommandRuntimeProps>(
-			{
-				attachFile: this.attachFile.bind(this),
-				hideKeyboard: () => {
-					this.editorRef?.current?.hideKeyboard();
-				},
-				insertText: this.insertText.bind(this),
-				get dialogs() {
-					return dialogs();
-				},
-				setCameraVisible: (visible) => {
-					this.setState({ showCamera: visible });
-				},
-				setTagDialogVisible: (visible) => {
-					if (!this.state.note || !this.state.note.id) return;
-
-					this.setState({ noteTagDialogShown: visible });
-				},
-			},
-			commands,
-		);
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
@@ -595,6 +600,9 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 		// It cannot theoretically be undefined, since componentDidMount should always be called before
 		// componentWillUnmount, but with React Native the impossible often becomes possible.
 		if (this.undoRedoService_) this.undoRedoService_.off('stackChange', this.undoRedoService_stackChange);
+
+		this.commandRegistration_?.deregister();
+		this.commandRegistration_ = null;
 	}
 
 	private title_changeText(text: string) {
@@ -1381,6 +1389,12 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 	}
 
 	public render() {
+		// Commands must be registered before child components can render.
+		// Calling this in the constructor won't work in strict mode, where
+		// componentWillUnmount (which removes the commands) can be called
+		// multiple times.
+		this.registerCommands();
+
 		if (this.state.isLoading) {
 			return (
 				<View style={this.styles().screen}>
