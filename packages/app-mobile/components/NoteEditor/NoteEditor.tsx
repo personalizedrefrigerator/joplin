@@ -184,7 +184,7 @@ const useEditorControl = (
 	setSearchState: OnSearchStateChangeCallback,
 ): EditorControl => {
 	return useMemo(() => {
-		const execCommand = (command: EditorCommandType) => {
+		const execEditorCommand = (command: EditorCommandType) => {
 			void bodyControl.execCommand(command);
 		};
 
@@ -229,25 +229,25 @@ const useEditorControl = (
 			},
 
 			toggleBolded() {
-				execCommand(EditorCommandType.ToggleBolded);
+				execEditorCommand(EditorCommandType.ToggleBolded);
 			},
 			toggleItalicized() {
-				execCommand(EditorCommandType.ToggleItalicized);
+				execEditorCommand(EditorCommandType.ToggleItalicized);
 			},
 			toggleOrderedList() {
-				execCommand(EditorCommandType.ToggleNumberedList);
+				execEditorCommand(EditorCommandType.ToggleNumberedList);
 			},
 			toggleUnorderedList() {
-				execCommand(EditorCommandType.ToggleBulletedList);
+				execEditorCommand(EditorCommandType.ToggleBulletedList);
 			},
 			toggleTaskList() {
-				execCommand(EditorCommandType.ToggleCheckList);
+				execEditorCommand(EditorCommandType.ToggleCheckList);
 			},
 			toggleCode() {
-				execCommand(EditorCommandType.ToggleCode);
+				execEditorCommand(EditorCommandType.ToggleCode);
 			},
 			toggleMath() {
-				execCommand(EditorCommandType.ToggleMath);
+				execEditorCommand(EditorCommandType.ToggleMath);
 			},
 			toggleHeaderLevel(level: number) {
 				const levelToCommand = [
@@ -264,19 +264,19 @@ const useEditorControl = (
 					throw new Error(`Unsupported header level ${level}`);
 				}
 
-				execCommand(levelToCommand[index]);
+				execEditorCommand(levelToCommand[index]);
 			},
 			increaseIndent() {
-				execCommand(EditorCommandType.IndentMore);
+				execEditorCommand(EditorCommandType.IndentMore);
 			},
 			decreaseIndent() {
-				execCommand(EditorCommandType.IndentLess);
+				execEditorCommand(EditorCommandType.IndentLess);
 			},
 			updateLink(label: string, url: string) {
 				bodyControl.updateLink(label, url);
 			},
 			scrollSelectionIntoView() {
-				execCommand(EditorCommandType.ScrollSelectionIntoView);
+				execEditorCommand(EditorCommandType.ScrollSelectionIntoView);
 			},
 			showLinkDialog() {
 				setLinkDialogVisible(true);
@@ -296,23 +296,23 @@ const useEditorControl = (
 
 			searchControl: {
 				findNext() {
-					execCommand(EditorCommandType.FindNext);
+					execEditorCommand(EditorCommandType.FindNext);
 				},
 				findPrevious() {
-					execCommand(EditorCommandType.FindPrevious);
+					execEditorCommand(EditorCommandType.FindPrevious);
 				},
 				replaceNext() {
-					execCommand(EditorCommandType.ReplaceNext);
+					execEditorCommand(EditorCommandType.ReplaceNext);
 				},
 				replaceAll() {
-					execCommand(EditorCommandType.ReplaceAll);
+					execEditorCommand(EditorCommandType.ReplaceAll);
 				},
 
 				showSearch() {
-					execCommand(EditorCommandType.ShowSearch);
+					execEditorCommand(EditorCommandType.ShowSearch);
 				},
 				hideSearch() {
-					execCommand(EditorCommandType.HideSearch);
+					execEditorCommand(EditorCommandType.HideSearch);
 				},
 
 				setSearchState: setSearchStateCallback,

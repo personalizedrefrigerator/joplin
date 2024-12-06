@@ -116,7 +116,7 @@ describe('EditorToolbar', () => {
 	});
 
 	it('should only include the math toolbar button if math is enabled in global settings', async () => {
-		Setting.setValue('editor.toolbarButtons', ['textMath']);
+		Setting.setValue('editor.toolbarButtons', ['editor.textMath']);
 		Setting.setValue('markdown.plugin.katex', true);
 
 		const toolbar = render(<WrappedToolbar/>);

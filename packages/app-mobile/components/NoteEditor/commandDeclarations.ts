@@ -66,7 +66,9 @@ const declarations: CommandDeclaration[] = [
 		iconName: 'material code-json',
 	},
 	{
-		name: EditorCommandType.ToggleMath,
+		// The 'editor.' prefix needs to be included because ToggleMath is not a legacy
+		// editor command. Without this, ToggleMath is not recognised as an editor command.
+		name: `editor.${EditorCommandType.ToggleMath}`,
 		label: () => _('Math'),
 		iconName: 'material sigma',
 	},

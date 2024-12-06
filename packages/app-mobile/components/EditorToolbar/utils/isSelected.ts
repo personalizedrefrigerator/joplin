@@ -22,6 +22,10 @@ const commandNameToSelectionState: Record<string, SelectionSelector> = {
 
 // Returns undefined if not a toggle button
 const isSelected = (commandName: string, selectionState: SelectionFormatting) => {
+	// Newer editor commands are registered with the "editor." prefix. Remove this
+	// prefix to simplify looking up the selection state:
+	commandName = commandName.replace(/^editor\./, '');
+
 	if (commandName in commandNameToSelectionState) {
 		if (!selectionState) return false;
 		return commandNameToSelectionState[commandName as EditorCommandType](

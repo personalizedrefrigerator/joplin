@@ -14,7 +14,7 @@ const builtInCommandNames = [
 	EditorCommandType.ToggleItalicized,
 	'-',
 	EditorCommandType.ToggleCode,
-	EditorCommandType.ToggleMath,
+	`editor.${EditorCommandType.ToggleMath}`,
 	'-',
 	EditorCommandType.ToggleNumberedList,
 	EditorCommandType.ToggleBulletedList,
@@ -44,7 +44,7 @@ const allToolbarCommandNamesFromState = (state: AppState) => {
 	const mathEnabled = state.settings['markdown.plugin.katex'];
 	if (!mathEnabled) {
 		allCommandNames = allCommandNames.filter(
-			name => name !== EditorCommandType.ToggleMath,
+			name => name !== `editor.${EditorCommandType.ToggleMath}`,
 		);
 	}
 
