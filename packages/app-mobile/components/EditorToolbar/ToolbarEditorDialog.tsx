@@ -153,7 +153,7 @@ const ToolbarEditorScreen: React.FC<EditorDialogProps> = props => {
 		style={styles.resetButton}
 		onPress={onRestoreDefaultLayout}
 	>
-		{_('Restore default')}
+		{_('Restore defaults')}
 	</DeleteButton>;
 
 	return (

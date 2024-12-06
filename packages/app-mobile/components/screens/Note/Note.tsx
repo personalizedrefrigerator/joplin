@@ -322,7 +322,11 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 			{
 				attachFile: this.attachFile.bind(this),
 				hideKeyboard: () => {
-					this.editorRef?.current?.hideKeyboard();
+					if (this.useEditorBeta()) {
+						this.editorRef?.current?.hideKeyboard();
+					} else {
+						Keyboard.dismiss();
+					}
 				},
 				insertText: this.insertText.bind(this),
 				get dialogs() {
@@ -338,6 +342,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 				},
 			},
 			commands,
+			true,
 		);
 	}
 
