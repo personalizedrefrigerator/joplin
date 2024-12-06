@@ -13,6 +13,7 @@ export default function isEditorCommand(commandName: string) {
         commandName === 'textSelectAll' ||
         commandName === 'textBold' ||
         commandName === 'textItalic' ||
+        commandName === 'textMath' ||
         commandName === 'textCode' ||
         commandName === 'attachFile' ||
         commandName === 'textNumberedList' ||

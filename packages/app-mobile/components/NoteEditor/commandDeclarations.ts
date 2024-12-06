@@ -14,7 +14,7 @@ const headerDeclarations = () => {
 	const result: CommandDeclaration[] = [];
 	for (let level = 1; level <= 5; level++) {
 		result.push({
-			name: `textHeading${level}`,
+			name: `editor.textHeading${level}`,
 			iconName: `material format-header-${level}`,
 			label: () => _('Header %d', level),
 		});
