@@ -5,16 +5,16 @@ import { EditorCommandType } from '@joplin/editor/types';
 const builtInCommandNames = [
 	'attachFile',
 	'-',
-	EditorCommandType.ToggleHeading1,
-	EditorCommandType.ToggleHeading2,
-	EditorCommandType.ToggleHeading3,
-	EditorCommandType.ToggleHeading4,
-	EditorCommandType.ToggleHeading5,
+	'editor.textHeading1',
+	'editor.textHeading2',
+	'editor.textHeading3',
+	'editor.textHeading4',
+	'editor.textHeading5',
 	EditorCommandType.ToggleBolded,
 	EditorCommandType.ToggleItalicized,
 	'-',
 	EditorCommandType.ToggleCode,
-	EditorCommandType.ToggleMath,
+	`editor.${EditorCommandType.ToggleMath}`,
 	'-',
 	EditorCommandType.ToggleNumberedList,
 	EditorCommandType.ToggleBulletedList,
@@ -44,7 +44,7 @@ const allToolbarCommandNamesFromState = (state: AppState) => {
 	const mathEnabled = state.settings['markdown.plugin.katex'];
 	if (!mathEnabled) {
 		allCommandNames = allCommandNames.filter(
-			name => name !== EditorCommandType.ToggleMath,
+			name => name !== `editor.${EditorCommandType.ToggleMath}`,
 		);
 	}
 

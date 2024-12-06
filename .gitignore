@@ -578,6 +578,7 @@ packages/app-mobile/components/EditorToolbar/EditorToolbar.js
 packages/app-mobile/components/EditorToolbar/SettingButton.js
 packages/app-mobile/components/EditorToolbar/ToolbarButton.js
 packages/app-mobile/components/EditorToolbar/ToolbarEditorDialog.js
+packages/app-mobile/components/EditorToolbar/testing/mockCommandRuntimes.js
 packages/app-mobile/components/EditorToolbar/utils/allToolbarCommandNamesFromState.js
 packages/app-mobile/components/EditorToolbar/utils/isSelected.js
 packages/app-mobile/components/EditorToolbar/utils/selectedCommandNamesFromState.js
@@ -824,7 +825,7 @@ packages/app-mobile/utils/shim-init-react/shimInitShared.js
 packages/app-mobile/utils/testing/createMockReduxStore.js
 packages/app-mobile/utils/testing/getWebViewDomById.js
 packages/app-mobile/utils/testing/getWebViewWindowById.js
-packages/app-mobile/utils/testing/setGlobalStore.js
+packages/app-mobile/utils/testing/setupGlobalStore.js
 packages/app-mobile/utils/types.js
 packages/app-mobile/web/serviceWorker.js
 packages/default-plugins/build.js

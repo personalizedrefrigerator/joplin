@@ -1,13 +1,12 @@
-import { EditorCommandType } from '@joplin/editor/types';
 import { AppState } from '../../../utils/types';
 import allToolbarCommandNamesFromState from './allToolbarCommandNamesFromState';
 import { Platform } from 'react-native';
 
 const omitFromDefault: string[] = [
-	EditorCommandType.ToggleHeading1,
-	EditorCommandType.ToggleHeading3,
-	EditorCommandType.ToggleHeading4,
-	EditorCommandType.ToggleHeading5,
+	'editor.textHeading1',
+	'editor.textHeading3',
+	'editor.textHeading4',
+	'editor.textHeading5',
 ];
 
 // The "hide keyboard" button is only needed on iOS, so only show it there by default.

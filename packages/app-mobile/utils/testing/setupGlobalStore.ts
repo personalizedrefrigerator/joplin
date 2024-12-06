@@ -6,11 +6,11 @@ import NavService from '@joplin/lib/services/NavService';
 import BaseModel from '@joplin/lib/BaseModel';
 
 // Sets a given Redux store as global
-const setGlobalStore = (store: Store<AppState>) => {
+const setupGlobalStore = (store: Store<AppState>) => {
 	BaseModel.dispatch = store.dispatch;
 	BaseSyncTarget.dispatch = store.dispatch;
 	NavService.dispatch = store.dispatch;
 	initializeCommandService(store);
 };
 
-export default setGlobalStore;
+export default setupGlobalStore;

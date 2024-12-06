@@ -26,7 +26,7 @@ import CodeMirrorControl from '@joplin/editor/CodeMirror/CodeMirrorControl';
 import Setting from '@joplin/lib/models/Setting';
 import Resource from '@joplin/lib/models/Resource';
 import TestProviderStack from '../../testing/TestProviderStack';
-import setGlobalStore from '../../../utils/testing/setGlobalStore';
+import setupGlobalStore from '../../../utils/testing/setupGlobalStore';
 
 interface WrapperProps {
 }
@@ -138,7 +138,7 @@ describe('screens/Note', () => {
 		await switchClient(0);
 
 		store = createMockReduxStore();
-		setGlobalStore(store);
+		setupGlobalStore(store);
 
 		// In order for note changes to be saved, note-screen-shared requires
 		// that at least one folder exist.

@@ -14,7 +14,7 @@ const headerDeclarations = () => {
 	const result: CommandDeclaration[] = [];
 	for (let level = 1; level <= 5; level++) {
 		result.push({
-			name: `textHeading${level}`,
+			name: `editor.textHeading${level}`,
 			iconName: `material format-header-${level}`,
 			label: () => _('Header %d', level),
 		});
@@ -66,7 +66,9 @@ const declarations: CommandDeclaration[] = [
 		iconName: 'material code-json',
 	},
 	{
-		name: EditorCommandType.ToggleMath,
+		// The 'editor.' prefix needs to be included because ToggleMath is not a legacy
+		// editor command. Without this, ToggleMath is not recognised as an editor command.
+		name: `editor.${EditorCommandType.ToggleMath}`,
 		label: () => _('Math'),
 		iconName: 'material sigma',
 	},

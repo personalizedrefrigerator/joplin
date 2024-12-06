@@ -8,10 +8,10 @@ import TestProviderStack from '../testing/TestProviderStack';
 import EditorToolbar from './EditorToolbar';
 import { setupDatabase, switchClient } from '@joplin/lib/testing/test-utils';
 import createMockReduxStore from '../../utils/testing/createMockReduxStore';
-import setGlobalStore from '../../utils/testing/setGlobalStore';
+import setupGlobalStore from '../../utils/testing/setupGlobalStore';
 import Setting from '@joplin/lib/models/Setting';
-import CommandService, { CommandRuntime, RegisteredRuntime } from '@joplin/lib/services/CommandService';
-import allToolbarCommandNamesFromState from './utils/allToolbarCommandNamesFromState';
+import { RegisteredRuntime } from '@joplin/lib/services/CommandService';
+import mockCommandRuntimes from './testing/mockCommandRuntimes';
 
 let store: Store<AppState>;
 
@@ -55,27 +55,6 @@ const toggleSettingsItem = async (props: ToggleSettingItemProps) => {
 };
 
 let mockCommands: RegisteredRuntime|null = null;
-// The toolbar expects all toolbar command runtimes to be registered before it can be
-// rendered:
-const mockCommandRuntimes = (store: Store<AppState>) => {
-	const makeMockRuntime = (commandName: string) => ({
-		declaration: { name: commandName },
-		runtime: (_props: null): CommandRuntime => ({
-			execute: jest.fn(),
-		}),
-	});
-
-	const isSeparator = (commandName: string) => commandName === '-';
-
-	const mockRuntimes = allToolbarCommandNamesFromState(
-		store.getState(),
-	).filter(
-		name => !isSeparator(name),
-	).map(makeMockRuntime);
-	return CommandService.instance().componentRegisterCommands(
-		null, mockRuntimes,
-	);
-};
 
 describe('EditorToolbar', () => {
 	beforeEach(async () => {
@@ -83,7 +62,7 @@ describe('EditorToolbar', () => {
 		await switchClient(0);
 
 		store = createMockReduxStore();
-		setGlobalStore(store);
+		setupGlobalStore(store);
 		mockCommands = mockCommandRuntimes(store);
 
 		// Start with the default set of buttons
@@ -137,7 +116,7 @@ describe('EditorToolbar', () => {
 	});
 
 	it('should only include the math toolbar button if math is enabled in global settings', async () => {
-		Setting.setValue('editor.toolbarButtons', ['textMath']);
+		Setting.setValue('editor.toolbarButtons', ['editor.textMath']);
 		Setting.setValue('markdown.plugin.katex', true);
 
 		const toolbar = render(<WrappedToolbar/>);
