@@ -9,10 +9,16 @@ import Setting from '@joplin/lib/models/Setting';
 import { _ } from '@joplin/lib/locale';
 import { setupDatabaseAndSynchronizer, switchClient } from '@joplin/lib/testing/test-utils';
 import commandDeclarations from './commandDeclarations';
-import CommandService from '@joplin/lib/services/CommandService';
+import CommandService, { RegisteredRuntime } from '@joplin/lib/services/CommandService';
 import TestProviderStack from '../testing/TestProviderStack';
 import createMockReduxStore from '../../utils/testing/createMockReduxStore';
-import initializeCommandService from '../../utils/initializeCommandService';
+import mockCommandRuntimes from '../EditorToolbar/testing/mockCommandRuntimes';
+import setupGlobalStore from '../../utils/testing/setupGlobalStore';
+import { Store } from 'redux';
+import { AppState } from '../../utils/types';
+
+let store: Store<AppState>;
+let registeredRuntime: RegisteredRuntime;
 
 describe('NoteEditor', () => {
 	beforeAll(() => {
@@ -26,12 +32,17 @@ describe('NoteEditor', () => {
 		// Required to use ExtendedWebView
 		await setupDatabaseAndSynchronizer(0);
 		await switchClient(0);
+
+		store = createMockReduxStore();
+		setupGlobalStore(store);
+		registeredRuntime = mockCommandRuntimes(store);
+	});
+
+	afterEach(() => {
+		registeredRuntime.deregister();
 	});
 
 	it('should hide the markdown toolbar when the window is small', async () => {
-		const store = createMockReduxStore();
-		initializeCommandService(store);
-
 		const wrappedNoteEditor = render(
 			<TestProviderStack store={store}>
 				<NoteEditor
