@@ -49,7 +49,7 @@ test.describe('wcag', () => {
 		});
 	}
 
-	test('should not detect significant issues in the main screen with an open note', async ({ mainWindow }) => {
+	test('should not detect significant issues in the main screen with an open note (Markdown editor)', async ({ mainWindow }) => {
 		const mainScreen = await new MainScreen(mainWindow).setup();
 		await mainScreen.waitFor();
 
@@ -62,6 +62,13 @@ test.describe('wcag', () => {
 		// Ensure that `:hover` styling is consistent between tests:
 		await mainScreen.noteEditor.noteTitleInput.hover();
 
+		await expectNoViolations(mainWindow);
+	});
+
+	test('should not detect significant issues in the new folder dialog', async ({ mainWindow }) => {
+		const mainScreen = await new MainScreen(mainWindow).setup();
+		await mainScreen.waitFor();
+		await mainScreen.sidebar.openNewFolderDialog();
 		await expectNoViolations(mainWindow);
 	});
 });

@@ -1,7 +1,12 @@
 import styled from 'styled-components';
+import { Theme } from '@joplin/lib/themes/type';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-const Root = styled.div<any>`
+interface RootProps {
+	justifyContent: string;
+	theme: Theme;
+}
+
+const Root = styled.h1<RootProps>`
 	display: flex;
 	justify-content: ${props => props.justifyContent ? props.justifyContent : 'center'};
 	font-family: ${props => props.theme.fontFamily};
@@ -9,6 +14,7 @@ const Root = styled.div<any>`
 	line-height: 1.6em;
 	color: ${props => props.theme.color};
 	font-weight: bold;
+	margin-top: 0;
 	margin-bottom: 1em;
 `;
 

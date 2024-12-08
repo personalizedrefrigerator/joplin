@@ -11,9 +11,16 @@ export default class Sidebar {
 		this.allNotes = this.container.getByText('All notes');
 	}
 
-	public async createNewFolder(title: string) {
+	public async openNewFolderDialog() {
 		const newFolderButton = this.container.getByRole('button', { name: 'New' });
 		await newFolderButton.click();
+
+		const dialogContent = this.mainScreen.dialog.getByRole('heading', { name: 'Create notebook' });
+		await dialogContent.waitFor();
+	}
+
+	public async createNewFolder(title: string) {
+		await this.openNewFolderDialog();
 
 		const titleInput = this.mainScreen.dialog.getByLabel('Title');
 		await titleInput.fill(title);
