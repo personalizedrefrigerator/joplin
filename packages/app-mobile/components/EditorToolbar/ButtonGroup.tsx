@@ -4,13 +4,13 @@ import { useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { themeStyle } from '../global-style';
 import ToolbarButton from './ToolbarButton';
-import SelectionFormatting from '@joplin/editor/SelectionFormatting';
 import isSelected from './utils/isSelected';
+import { EditorState } from './types';
 
 interface Props {
 	themeId: number;
 	buttonInfos: ToolbarButtonInfo[];
-	selectionState: SelectionFormatting;
+	editorState: EditorState;
 }
 
 const useStyles = (themeId: number) => {
@@ -38,7 +38,7 @@ const ButtonGroup: React.FC<Props> = props => {
 			key={`command-${info.name}`}
 			buttonInfo={info}
 			themeId={props.themeId}
-			selected={isSelected(info.name, props.selectionState)}
+			selected={isSelected(info.name, props.editorState)}
 		/>;
 	};
 

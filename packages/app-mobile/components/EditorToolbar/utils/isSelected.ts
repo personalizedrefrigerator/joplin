@@ -1,9 +1,10 @@
 import SelectionFormatting from '@joplin/editor/SelectionFormatting';
 import { EditorCommandType } from '@joplin/editor/types';
+import { EditorState } from '../types';
 
-type SelectionSelector = (selectionState: SelectionFormatting)=> boolean;
+type StateSelector = (selectionState: SelectionFormatting, searchVisible: boolean)=> boolean;
 
-const commandNameToSelectionState: Record<string, SelectionSelector> = {
+const commandNameToSelectionState: Record<string, StateSelector> = {
 	[EditorCommandType.ToggleBolded]: state => state.bolded,
 	[EditorCommandType.ToggleItalicized]: state => state.italicized,
 	[EditorCommandType.ToggleCode]: state => state.inCode,
@@ -18,18 +19,19 @@ const commandNameToSelectionState: Record<string, SelectionSelector> = {
 	[EditorCommandType.ToggleNumberedList]: state => state.inOrderedList,
 	[EditorCommandType.ToggleCheckList]: state => state.inChecklist,
 	[EditorCommandType.EditLink]: state => state.inLink,
+	[EditorCommandType.ToggleSearch]: (_selectionState, searchVisible) => searchVisible,
 };
 
 // Returns undefined if not a toggle button
-const isSelected = (commandName: string, selectionState: SelectionFormatting) => {
+const isSelected = (commandName: string, editorState: EditorState) => {
 	// Newer editor commands are registered with the "editor." prefix. Remove this
 	// prefix to simplify looking up the selection state:
 	commandName = commandName.replace(/^editor\./, '');
 
 	if (commandName in commandNameToSelectionState) {
-		if (!selectionState) return false;
+		if (!editorState) return false;
 		return commandNameToSelectionState[commandName as EditorCommandType](
-			selectionState,
+			editorState.selectionState, editorState.searchVisible,
 		);
 	}
 	return undefined;

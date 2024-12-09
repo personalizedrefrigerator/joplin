@@ -23,7 +23,7 @@ const SettingButton: React.FC<Props> = ({ themeId, setSettingsVisible }) => {
 	return <ButtonGroup
 		themeId={themeId}
 		buttonInfos={buttonInfos}
-		selectionState={null}
+		editorState={null}
 	/>;
 };
 

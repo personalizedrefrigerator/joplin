@@ -535,7 +535,12 @@ function NoteEditor(props: Props, ref: any) {
 		}
 	}, []);
 
-	const toolbar = <EditorToolbar selectionState={selectionState} />;
+	const toolbarEditorState = useMemo(() => ({
+		selectionState,
+		searchVisible: searchState.dialogVisible,
+	}), [selectionState, searchState.dialogVisible]);
+
+	const toolbar = <EditorToolbar editorState={toolbarEditorState} />;
 
 	return (
 		<View
