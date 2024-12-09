@@ -24,14 +24,11 @@ const useStyles = (themeId: number) => {
 		return StyleSheet.create({
 			content: {
 				flexGrow: 0,
+				backgroundColor: theme.backgroundColor3,
 			},
 			contentContainer: {
 				paddingVertical: 4,
 				flexDirection: 'row',
-				backgroundColor: theme.backgroundColor3,
-				borderWidth: 1,
-				borderColor: theme.color3,
-				borderRadius: 10,
 			},
 		});
 	}, [themeId]);
