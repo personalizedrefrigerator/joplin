@@ -42,12 +42,12 @@ const WebBetaButton: React.FC<Props> = props => {
 				iconStyle={props.iconStyle}
 			/>
 			<DismissibleDialog
+				heading={_('Beta')}
 				size={DialogSize.Small}
 				themeId={props.themeId}
 				visible={dialogVisible}
 				onDismiss={onHideDialog}
 			>
-				<Text variant='headlineMedium'>{_('Beta')}</Text>
 				<Text>{'At present, the web client is in beta. In the future, it may change significantly, or be removed.'}</Text>
 				<View style={feedbackContainerStyles}>
 					<LinkButton onPress={onLeaveFeedback}>{_('Give feedback')}</LinkButton>
