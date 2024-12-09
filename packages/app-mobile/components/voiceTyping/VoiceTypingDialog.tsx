@@ -78,6 +78,10 @@ const useWhisper = ({ locale, provider, onSetPreview, onText }: UseVoiceTypingPr
 		setMustDownloadModel(!(await builder.isDownloaded()));
 	}, [builder]);
 
+	useEffect(() => () => {
+		void voiceTypingRef.current?.stop();
+	}, []);
+
 	return [error, mustDownloadModel, voiceTyping];
 };
 
