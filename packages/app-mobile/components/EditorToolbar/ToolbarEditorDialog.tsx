@@ -162,10 +162,10 @@ const ToolbarEditorScreen: React.FC<EditorDialogProps> = props => {
 			themeId={props.themeId}
 			visible={props.visible}
 			onDismiss={props.onDismiss}
+			heading={_('Manage toolbar options')}
 		>
 			<View>
-				<Text variant='headlineMedium' role='heading'>{_('Manage toolbar options')}</Text>
-				<Text variant='labelMedium'>{_('Check elements to display in the toolbar')}</Text>
+				<Text variant='bodyMedium'>{_('Check elements to display in the toolbar')}</Text>
 			</View>
 			<ScrollView style={styles.listContainer}>
 				{props.defaultToolbarButtonInfos.map((item, index) => renderItem(item, index))}
