@@ -22,6 +22,8 @@ const useStyles = (themeId: number, selected: boolean, enabled: boolean) => {
 				fontSize: 22 * fontScale,
 			},
 			button: {
+				// Scaling the button width/height by the device font scale causes the button to scale
+				// with the user's device font size.
 				width: 48 * fontScale,
 				height: 48 * fontScale,
 				justifyContent: 'center',
