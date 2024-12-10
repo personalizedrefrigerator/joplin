@@ -30,7 +30,7 @@ import handleConflictAction from './services/synchronizer/utils/handleConflictAc
 import resourceRemotePath from './services/synchronizer/utils/resourceRemotePath';
 import syncDeleteStep from './services/synchronizer/utils/syncDeleteStep';
 import { ErrorCode } from './errors';
-import { SyncAction } from './services/synchronizer/utils/types';
+import { SyncAction, SyncReport, SyncReportItemCounts } from './services/synchronizer/utils/types';
 import checkDisabledSyncItemsNotification from './services/synchronizer/utils/checkDisabledSyncItemsNotification';
 const { sprintf } = require('sprintf-js');
 const { Dirnames } = require('./services/synchronizer/utils/types');
@@ -193,15 +193,62 @@ export default class Synchronizer {
 		return `${duration}ms`;
 	}
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	public static reportToLines(report: any) {
+	public static reportToLines(report: SyncReport) {
+		const formatItemCounts = (counts: SyncReportItemCounts) => {
+			const includedKeyNames: string[] = [];
+			let hasOther = false;
+
+			let sum = 0;
+			for (const [key, value] of Object.entries(counts)) {
+				if (value) {
+					sum += value;
+
+					if (key === 'Revision') {
+						includedKeyNames.push(_('revisions'));
+					} else if (key === 'Note') {
+						includedKeyNames.push(_('notes'));
+					} else if (key === 'Resource') {
+						includedKeyNames.push(_('resources'));
+					} else if (key === 'Folder') {
+						includedKeyNames.push(_('notebooks'));
+					} else {
+						hasOther = true;
+					}
+				}
+			}
+
+			// In some cases, no type information is available (e.g. when creating local items).
+			// In these cases, avoid logging "other", because that might be inaccurate.
+			if (hasOther && includedKeyNames.length > 0) {
+				includedKeyNames.push(_('other'));
+			}
+
+			if (includedKeyNames.length > 0) {
+				return _('%d (%s)', sum, includedKeyNames.join(', '));
+			} else {
+				return _('%d', sum);
+			}
+		};
+
 		const lines = [];
-		if (report.createLocal) lines.push(_('Created local items: %d.', report.createLocal));
-		if (report.updateLocal) lines.push(_('Updated local items: %d.', report.updateLocal));
-		if (report.createRemote) lines.push(_('Created remote items: %d.', report.createRemote));
-		if (report.updateRemote) lines.push(_('Updated remote items: %d.', report.updateRemote));
-		if (report.deleteLocal) lines.push(_('Deleted local items: %d.', report.deleteLocal));
-		if (report.deleteRemote) lines.push(_('Deleted remote items: %d.', report.deleteRemote));
+		if (report.createLocal) {
+			lines.push(_('Created local: %s.', formatItemCounts(report.createLocal)));
+		}
+		if (report.updateLocal) {
+			lines.push(_('Updated local: %s.', formatItemCounts(report.updateLocal)));
+		}
+		if (report.createRemote) {
+			lines.push(_('Created remote: %s.', formatItemCounts(report.createRemote)));
+		}
+		if (report.updateRemote) {
+			lines.push(_('Updated remote: %s.', formatItemCounts(report.updateRemote)));
+		}
+		if (report.deleteLocal) {
+			lines.push(_('Deleted local: %s.', formatItemCounts(report.deleteLocal)));
+		}
+		if (report.deleteRemote) {
+			lines.push(_('Deleted remote: %s.', formatItemCounts(report.deleteRemote)));
+		}
 		if (report.fetchingTotal && report.fetchingProcessed) lines.push(_('Fetched items: %d/%d.', report.fetchingProcessed, report.fetchingTotal));
 		if (report.cancelling && !report.completedTime) lines.push(_('Cancelling...'));
 		if (report.completedTime) lines.push(_('Completed: %s (%s)', time.formatMsToLocal(report.completedTime), this.completionTime(report)));
@@ -216,10 +263,13 @@ export default class Synchronizer {
 		line.push(action);
 		if (message) line.push(message);
 
-		let type = local && local.type_ ? local.type_ : null;
-		if (!type) type = remote && remote.type_ ? remote.type_ : null;
+		const type: ModelType|null = local?.type_ ?? remote?.type_ ?? null;
 
-		if (type) line.push(BaseItem.modelTypeToClassName(type));
+		let modelName = 'unknown';
+		if (type) {
+			modelName = BaseItem.modelTypeToClassName(type);
+			line.push(modelName);
+		}
 
 		if (local) {
 			const s = [];
@@ -241,8 +291,18 @@ export default class Synchronizer {
 
 		if (!['fetchingProcessed', 'fetchingTotal'].includes(action)) syncDebugLog.info(line.join(': '));
 
-		if (!this.progressReport_[action]) this.progressReport_[action] = 0;
-		this.progressReport_[action] += actionCount;
+		// Actions that are categorized by per-item-type
+		const itemActions: string[] = [
+			SyncAction.CreateLocal, SyncAction.CreateRemote, SyncAction.UpdateLocal, SyncAction.UpdateRemote, SyncAction.DeleteLocal, SyncAction.DeleteRemote,
+		];
+		if (itemActions.includes(action)) {
+			this.progressReport_[action] = { ...this.progressReport_[action] };
+			this.progressReport_[action][modelName] ??= 0;
+			this.progressReport_[action][modelName] += actionCount;
+		} else {
+			this.progressReport_[action] ??= 0;
+			this.progressReport_[action] += actionCount;
+		}
 		this.progressReport_.state = this.state();
 		this.onProgress_(this.progressReport_);
 

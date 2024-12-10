@@ -18,6 +18,18 @@ export enum SyncAction {
 	DeleteLocal = 'deleteLocal',
 }
 
+export type SyncReportItemCounts = Record<string, number>;
+type SyncReportItemSection = Partial<Record<SyncAction, SyncReportItemCounts>>;
+
+export type SyncReport = SyncReportItemSection & {
+	fetchingTotal?: number;
+	fetchingProcessed?: number;
+	cancelling?: boolean;
+	startTime?: number;
+	completedTime?: number;
+	errors?: string[];
+};
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 export type LogSyncOperationFunction = (action: SyncAction, local?: any, remote?: RemoteItem, message?: string, actionCount?: number)=> void;
 

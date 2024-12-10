@@ -24,7 +24,7 @@ export default async (syncTargetId: number, cancelling: boolean, logSyncOperatio
 				await apiCall('delete', remoteContentPath);
 			}
 
-			logSyncOperation(SyncAction.DeleteRemote, null, { id: item.item_id }, 'local has been deleted');
+			logSyncOperation(SyncAction.DeleteRemote, null, { type_: item.item_type, id: item.item_id }, 'local has been deleted');
 		} catch (error) {
 			if (error.code === 'isReadOnly') {
 				let remoteContent = await apiCall('get', path);
