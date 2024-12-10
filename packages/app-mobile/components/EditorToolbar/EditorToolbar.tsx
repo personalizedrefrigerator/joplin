@@ -27,8 +27,12 @@ const useStyles = (themeId: number) => {
 				backgroundColor: theme.backgroundColor3,
 			},
 			contentContainer: {
+				flexGrow: 1,
 				paddingVertical: 0,
 				flexDirection: 'row',
+			},
+			spacer: {
+				flexGrow: 1,
 			},
 		});
 	}, [themeId]);
@@ -87,14 +91,14 @@ const EditorToolbar: React.FC<Props> = props => {
 				ref={scrollViewRef}
 				horizontal={true}
 				style={styles.content}
+				contentContainerStyle={styles.contentContainer}
 			>
-				<View style={styles.contentContainer}>
-					{buttonGroups.map(renderGroup)}
-					<SettingButton
-						setSettingsVisible={setSettingsVisible}
-						themeId={props.themeId}
-					/>
-				</View>
+				{buttonGroups.map(renderGroup)}
+				<View style={styles.spacer}/>
+				<SettingButton
+					setSettingsVisible={setSettingsVisible}
+					themeId={props.themeId}
+				/>
 			</ScrollView>
 		</ToggleSpaceButton>
 		<ToolbarEditorDialog visible={settingsVisible} onDismiss={onDismissSettingsDialog} />
