@@ -2,7 +2,7 @@ import * as React from 'react';
 import { ToolbarButtonInfo } from '@joplin/lib/services/commands/ToolbarButtonUtils';
 import IconButton from '../IconButton';
 import { memo, useMemo } from 'react';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, useWindowDimensions } from 'react-native';
 import { themeStyle } from '../global-style';
 
 interface Props {
@@ -12,23 +12,27 @@ interface Props {
 }
 
 const useStyles = (themeId: number, selected: boolean, enabled: boolean) => {
+	const { fontScale } = useWindowDimensions();
+
 	return useMemo(() => {
 		const theme = themeStyle(themeId);
 		return StyleSheet.create({
 			icon: {
 				color: theme.color,
-				fontSize: 22,
+				fontSize: 22 * fontScale,
 			},
 			button: {
-				backgroundColor: selected ? theme.backgroundColorHover3 : theme.backgroundColor3,
-				width: 48,
-				height: 48,
+				// Scaling the button width/height by the device font scale causes the button to scale
+				// with the user's device font size.
+				width: 48 * fontScale,
+				height: 48 * fontScale,
 				justifyContent: 'center',
 				alignItems: 'center',
+				backgroundColor: selected ? theme.backgroundColorHover3 : theme.backgroundColor3,
 				opacity: enabled ? 1 : theme.disabledOpacity,
 			},
 		});
-	}, [themeId, selected, enabled]);
+	}, [themeId, selected, enabled, fontScale]);
 };
 
 const ToolbarButton: React.FC<Props> = memo(({ themeId, buttonInfo, selected }) => {
