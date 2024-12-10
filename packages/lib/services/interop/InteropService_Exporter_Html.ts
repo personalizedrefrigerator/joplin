@@ -15,6 +15,9 @@ const { escapeHtml } = require('../../string-utils.js');
 import { assetsToHeaders } from '@joplin/renderer';
 import getPluginSettingValue from '../plugins/utils/getPluginSettingValue';
 import { LinkRenderingType } from '@joplin/renderer/MdToHtml';
+import Logger from '@joplin/utils/Logger';
+
+const logger = Logger.create('InteropService_Exporter_Html');
 
 export default class InteropService_Exporter_Html extends InteropService_Exporter_Base {
 
@@ -136,11 +139,15 @@ export default class InteropService_Exporter_Html extends InteropService_Exporte
 			for (let i = 0; i < result.pluginAssets.length; i++) {
 				const asset = result.pluginAssets[i];
 				const filePath = asset.pathIsAbsolute ? asset.path : `${libRootPath}/node_modules/@joplin/renderer/assets/${asset.name}`;
-				const destPath = `${dirname(noteFilePath)}/pluginAssets/${asset.name}`;
-				const dir = dirname(destPath);
-				await shim.fsDriver().mkdir(dir);
-				this.createdDirs_.push(dir);
-				await shim.fsDriver().copy(filePath, destPath);
+				if (!(await shim.fsDriver().exists(filePath))) {
+					logger.warn(`File does not exist and cannot be exported: ${filePath}`);
+				} else {
+					const destPath = `${dirname(noteFilePath)}/pluginAssets/${asset.name}`;
+					const dir = dirname(destPath);
+					await shim.fsDriver().mkdir(dir);
+					this.createdDirs_.push(dir);
+					await shim.fsDriver().copy(filePath, destPath);
+				}
 			}
 
 			const fullHtml = `
