@@ -596,10 +596,8 @@ packages/app-mobile/components/DialogManager/types.js
 packages/app-mobile/components/DismissibleDialog.js
 packages/app-mobile/components/Dropdown.test.js
 packages/app-mobile/components/Dropdown.js
-packages/app-mobile/components/EditorToolbar/ButtonGroup.js
 packages/app-mobile/components/EditorToolbar/EditorToolbar.test.js
 packages/app-mobile/components/EditorToolbar/EditorToolbar.js
-packages/app-mobile/components/EditorToolbar/SettingButton.js
 packages/app-mobile/components/EditorToolbar/ToolbarButton.js
 packages/app-mobile/components/EditorToolbar/ToolbarEditorDialog.js
 packages/app-mobile/components/EditorToolbar/testing/mockCommandRuntimes.js

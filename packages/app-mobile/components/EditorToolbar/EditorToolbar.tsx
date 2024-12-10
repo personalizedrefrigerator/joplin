@@ -4,13 +4,14 @@ import { connect } from 'react-redux';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { ToolbarButtonInfo, ToolbarItem } from '@joplin/lib/services/commands/ToolbarButtonUtils';
 import toolbarButtonsFromState from './utils/toolbarButtonsFromState';
-import ButtonGroup from './ButtonGroup';
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { themeStyle } from '../global-style';
 import ToggleSpaceButton from '../ToggleSpaceButton';
-import SettingButton from './SettingButton';
 import ToolbarEditorDialog from './ToolbarEditorDialog';
 import { EditorState } from './types';
+import ToolbarButton from './ToolbarButton';
+import isSelected from './utils/isSelected';
+import { _ } from '@joplin/lib/locale';
 
 interface Props {
 	themeId: number;
@@ -38,36 +39,36 @@ const useStyles = (themeId: number) => {
 	}, [themeId]);
 };
 
+type SetSettingsVisible = React.Dispatch<React.SetStateAction<boolean>>;
+const useSettingButtonInfo = (setSettingsVisible: SetSettingsVisible) => {
+	return useMemo((): ToolbarButtonInfo => ({
+		type: 'button',
+		name: 'showToolbarSettings',
+		tooltip: _('Settings'),
+		iconName: 'material cogs',
+		enabled: true,
+		onClick: () => setSettingsVisible(true),
+		title: '',
+	}), [setSettingsVisible]);
+};
+
 const EditorToolbar: React.FC<Props> = props => {
 	const styles = useStyles(props.themeId);
 
-	const buttonGroups: ToolbarButtonInfo[][] = [];
-	let currentGroup: ToolbarButtonInfo[] = [];
-
-	const finalizeGroup = () => {
-		if (currentGroup.length > 0) {
-			buttonGroups.push(currentGroup);
-			currentGroup = [];
-		}
-	};
+	const buttonInfos: ToolbarButtonInfo[] = [];
 
 	for (const info of props.toolbarButtonInfos) {
-		if (info.type === 'separator') {
-			finalizeGroup();
-		} else {
-			currentGroup.push(info);
+		if (info.type !== 'separator') {
+			buttonInfos.push(info);
 		}
 	}
 
-	finalizeGroup();
-
-	const renderGroup = (group: ToolbarButtonInfo[]) => {
-		const firstItem = group[0];
-		return <ButtonGroup
-			key={`group-starting-with-${firstItem.name}`}
-			buttonInfos={group}
-			editorState={props.editorState}
+	const renderButton = (info: ToolbarButtonInfo) => {
+		return <ToolbarButton
+			key={`command-${info.name}`}
+			buttonInfo={info}
 			themeId={props.themeId}
+			selected={isSelected(info.name, props.editorState)}
 		/>;
 	};
 
@@ -85,6 +86,12 @@ const EditorToolbar: React.FC<Props> = props => {
 		scrollViewRef.current?.scrollToEnd();
 	}, []);
 
+	const settingsButtonInfo = useSettingButtonInfo(setSettingsVisible);
+	const settingsButton = <ToolbarButton
+		buttonInfo={settingsButtonInfo}
+		themeId={props.themeId}
+	/>;
+
 	return <>
 		<ToggleSpaceButton themeId={props.themeId}>
 			<ScrollView
@@ -93,12 +100,9 @@ const EditorToolbar: React.FC<Props> = props => {
 				style={styles.content}
 				contentContainerStyle={styles.contentContainer}
 			>
-				{buttonGroups.map(renderGroup)}
+				{buttonInfos.map(renderButton)}
 				<View style={styles.spacer}/>
-				<SettingButton
-					setSettingsVisible={setSettingsVisible}
-					themeId={props.themeId}
-				/>
+				{settingsButton}
 			</ScrollView>
 		</ToggleSpaceButton>
 		<ToolbarEditorDialog visible={settingsVisible} onDismiss={onDismissSettingsDialog} />
