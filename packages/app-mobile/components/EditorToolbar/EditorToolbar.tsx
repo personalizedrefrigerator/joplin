@@ -27,7 +27,7 @@ const useStyles = (themeId: number) => {
 				backgroundColor: theme.backgroundColor3,
 			},
 			contentContainer: {
-				paddingVertical: 4,
+				paddingVertical: 0,
 				flexDirection: 'row',
 			},
 		});
