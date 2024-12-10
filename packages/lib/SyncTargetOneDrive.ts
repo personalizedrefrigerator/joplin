@@ -33,7 +33,7 @@ export default class SyncTargetOneDrive extends BaseSyncTarget {
 	}
 
 	public static label() {
-		return `${_('OneDrive')} (Deprecated)`;
+		return _('OneDrive');
 	}
 
 	public static description() {

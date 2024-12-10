@@ -36,7 +36,8 @@ const PADDING_V = 10;
 type OnPressCallback=()=> void;
 
 export interface FolderPickerOptions {
-	enabled: boolean;
+	visible: boolean;
+	disabled?: boolean;
 	selectedFolderId?: string;
 	onValueChange?: OnValueChangedListener;
 	mustSelect?: boolean;
@@ -515,10 +516,12 @@ class ScreenHeaderComponent extends PureComponent<ScreenHeaderProps, ScreenHeade
 			});
 		}
 
-		const createTitleComponent = (disabled: boolean, hideableAfterTitleComponents: ReactElement) => {
+		const createTitleComponent = (hideableAfterTitleComponents: ReactElement) => {
 			const folderPickerOptions = this.props.folderPickerOptions;
 
-			if (folderPickerOptions && folderPickerOptions.enabled) {
+			if (folderPickerOptions && folderPickerOptions.visible) {
+				const hasSelectedNotes = this.props.selectedNoteIds.length > 0;
+				const disabled = this.props.folderPickerOptions.disabled ?? !hasSelectedNotes;
 				return (
 					<FolderPicker
 						themeId={themeId}
@@ -602,7 +605,7 @@ class ScreenHeaderComponent extends PureComponent<ScreenHeaderProps, ScreenHeade
 			{betaIconComp}
 		</>;
 
-		const titleComp = createTitleComponent(headerItemDisabled, hideableRightComponents);
+		const titleComp = createTitleComponent(hideableRightComponents);
 
 		const contextMenuStyle: ViewStyle = {
 			paddingTop: PADDING_V,

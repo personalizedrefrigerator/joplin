@@ -19,7 +19,7 @@ interface WrapperProps { }
 
 const WrappedToolbar: React.FC<WrapperProps> = _props => {
 	return <TestProviderStack store={store}>
-		<EditorToolbar selectionState={null} />
+		<EditorToolbar editorState={null} />
 	</TestProviderStack>;
 };
 

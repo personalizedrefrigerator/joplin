@@ -75,7 +75,7 @@ class Whisper implements VoiceTypingSession {
 
 	public async stop() {
 		if (this.sessionId === null) {
-			logger.warn('Session already closed.');
+			logger.debug('Session already closed.');
 			return;
 		}
 

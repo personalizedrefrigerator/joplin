@@ -99,6 +99,11 @@ export default class ElectronAppWrapper {
 		return null;
 	}
 
+	public allAppWindows() {
+		const allWindowIds = [...this.secondaryWindows_.keys(), defaultWindowId];
+		return allWindowIds.map(id => this.windowById(id));
+	}
+
 	public env() {
 		return this.env_;
 	}
@@ -357,6 +362,9 @@ export default class ElectronAppWrapper {
 			const window = BrowserWindow.fromWebContents(event.sender);
 			const electronWindowId = window?.id;
 			this.secondaryWindows_.set(windowId, { electronId: electronWindowId });
+
+			// Match the main window's zoom:
+			window.webContents.setZoomFactor(this.mainWindow().webContents.getZoomFactor());
 
 			window.once('close', () => {
 				this.secondaryWindows_.delete(windowId);

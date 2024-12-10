@@ -4,18 +4,18 @@ import { connect } from 'react-redux';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { ToolbarButtonInfo, ToolbarItem } from '@joplin/lib/services/commands/ToolbarButtonUtils';
 import toolbarButtonsFromState from './utils/toolbarButtonsFromState';
-import SelectionFormatting from '@joplin/editor/SelectionFormatting';
 import ButtonGroup from './ButtonGroup';
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { themeStyle } from '../global-style';
 import ToggleSpaceButton from '../ToggleSpaceButton';
 import SettingButton from './SettingButton';
 import ToolbarEditorDialog from './ToolbarEditorDialog';
+import { EditorState } from './types';
 
 interface Props {
 	themeId: number;
 	toolbarButtonInfos: ToolbarItem[];
-	selectionState: SelectionFormatting;
+	editorState: EditorState;
 }
 
 const useStyles = (themeId: number) => {
@@ -27,7 +27,7 @@ const useStyles = (themeId: number) => {
 				backgroundColor: theme.backgroundColor3,
 			},
 			contentContainer: {
-				paddingVertical: 4,
+				paddingVertical: 0,
 				flexDirection: 'row',
 			},
 		});
@@ -62,7 +62,7 @@ const EditorToolbar: React.FC<Props> = props => {
 		return <ButtonGroup
 			key={`group-starting-with-${firstItem.name}`}
 			buttonInfos={group}
-			selectionState={props.selectionState}
+			editorState={props.editorState}
 			themeId={props.themeId}
 		/>;
 	};

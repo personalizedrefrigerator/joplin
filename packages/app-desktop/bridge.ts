@@ -285,6 +285,13 @@ export class Bridge {
 		this.switchToWindow(defaultWindowId);
 	}
 
+	// zoom should be in the range [0..1]
+	public setZoomFactor(zoom: number) {
+		for (const window of this.electronWrapper_.allAppWindows()) {
+			window.webContents.setZoomFactor(zoom);
+		}
+	}
+
 	public showItemInFolder(fullPath: string) {
 		return require('electron').shell.showItemInFolder(toSystemSlashes(fullPath));
 	}

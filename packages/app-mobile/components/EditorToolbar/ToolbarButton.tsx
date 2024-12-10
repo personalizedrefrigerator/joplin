@@ -20,7 +20,7 @@ const useStyles = (themeId: number, selected: boolean, enabled: boolean) => {
 				fontSize: 22,
 			},
 			button: {
-				backgroundColor: selected ? theme.backgroundColorHover3 : theme.backgroundColor,
+				backgroundColor: selected ? theme.backgroundColorHover3 : theme.backgroundColor3,
 				width: 48,
 				height: 48,
 				justifyContent: 'center',
