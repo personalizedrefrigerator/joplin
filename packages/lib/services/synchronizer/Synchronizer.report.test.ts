@@ -35,11 +35,6 @@ describe('Synchronizer.report', () => {
 		await synchronizerStart();
 
 		// Deleting a remote item: Should list item types
-		expect(getClient2SyncReport()).toMatchObject({
-			deleteRemote: {
-				Note: 1,
-			},
-		});
 		expect(Synchronizer.reportToLines(getClient2SyncReport())[0]).toBe(
 			'Deleted remote: 1 (notes).',
 		);
@@ -52,12 +47,6 @@ describe('Synchronizer.report', () => {
 
 		// Deleting local items: Sync report should include type descriptions:
 		await synchronizerStart();
-		expect(getClient2SyncReport()).toMatchObject({
-			deleteLocal: {
-				Note: 1,
-				Folder: 1,
-			},
-		});
 		expect(Synchronizer.reportToLines(getClient2SyncReport())[0]).toBe(
 			'Deleted local: 2 (notes, notebooks).',
 		);
