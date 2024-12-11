@@ -204,7 +204,7 @@ export default class Synchronizer {
 					sum += value;
 
 					if (key === 'Revision') {
-						includedKeyNames.push(_('old note versions'));
+						includedKeyNames.push(_('note history'));
 					} else if (key === 'Note') {
 						includedKeyNames.push(_('notes'));
 					} else if (key === 'Resource') {
