@@ -1321,6 +1321,7 @@ packages/lib/services/synchronizer/Synchronizer.basics.test.js
 packages/lib/services/synchronizer/Synchronizer.conflicts.test.js
 packages/lib/services/synchronizer/Synchronizer.e2ee.test.js
 packages/lib/services/synchronizer/Synchronizer.ppk.test.js
+packages/lib/services/synchronizer/Synchronizer.report.test.js
 packages/lib/services/synchronizer/Synchronizer.resources.test.js
 packages/lib/services/synchronizer/Synchronizer.revisions.test.js
 packages/lib/services/synchronizer/Synchronizer.sharing.test.js

@@ -18,12 +18,19 @@ export enum SyncAction {
 	DeleteLocal = 'deleteLocal',
 }
 
-export type SyncReportItemCounts = Record<string, number>;
-type SyncReportItemSection = Partial<Record<SyncAction, SyncReportItemCounts>>;
+export interface ItemCountPerType {
+	[modelType: string]: number;
+}
+
+type SyncReportItemSection = {
+	[action in SyncAction]?: ItemCountPerType;
+};
 
 export type SyncReport = SyncReportItemSection & {
 	fetchingTotal?: number;
 	fetchingProcessed?: number;
+
+	state?: string;
 	cancelling?: boolean;
 	startTime?: number;
 	completedTime?: number;

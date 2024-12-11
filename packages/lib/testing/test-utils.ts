@@ -67,7 +67,8 @@ import OcrDriverTesseract from '../services/ocr/drivers/OcrDriverTesseract';
 import OcrService from '../services/ocr/OcrService';
 import { createWorker } from 'tesseract.js';
 import { reg } from '../registry';
-import { Store } from 'redux';
+import { createStore, Store } from 'redux';
+import reducer, { defaultState as defaultAppState, State as AppState } from '../reducer';
 
 // Each suite has its own separate data and temp directory so that multiple
 // suites can be run at the same time. suiteName is what is used to
@@ -451,6 +452,14 @@ const createNoteAndResource = async (options: CreateNoteAndResourceOptions = nul
 	const resourceIds = await Note.linkedItemIds(note.body);
 	const resource: ResourceEntity = await Resource.load(resourceIds[0]);
 	return { note, resource };
+};
+
+export const createReduxStore = (defaultState: AppState = defaultAppState) => {
+	const mockReducer = (state: AppState = defaultState, action: unknown) => {
+		return reducer(state, action);
+	};
+
+	return createStore(mockReducer);
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied

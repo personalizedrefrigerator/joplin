@@ -30,7 +30,7 @@ import handleConflictAction from './services/synchronizer/utils/handleConflictAc
 import resourceRemotePath from './services/synchronizer/utils/resourceRemotePath';
 import syncDeleteStep from './services/synchronizer/utils/syncDeleteStep';
 import { ErrorCode } from './errors';
-import { SyncAction, SyncReport, SyncReportItemCounts } from './services/synchronizer/utils/types';
+import { SyncAction, SyncReport, ItemCountPerType } from './services/synchronizer/utils/types';
 import checkDisabledSyncItemsNotification from './services/synchronizer/utils/checkDisabledSyncItemsNotification';
 import { substrWithEllipsis } from './string-utils';
 const { sprintf } = require('sprintf-js');
@@ -83,8 +83,7 @@ export default class Synchronizer {
 
 	// eslint-disable-next-line @typescript-eslint/ban-types -- Old code before rule was applied
 	private onProgress_: Function;
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	private progressReport_: any = {};
+	private progressReport_: SyncReport = {};
 
 	// eslint-disable-next-line @typescript-eslint/ban-types -- Old code before rule was applied
 	public dispatch: Function;
@@ -195,7 +194,7 @@ export default class Synchronizer {
 	}
 
 	public static reportToLines(report: SyncReport) {
-		const formatItemCounts = (counts: SyncReportItemCounts) => {
+		const formatItemCounts = (counts: ItemCountPerType) => {
 			const includedKeyNames: string[] = [];
 			let hasOther = false;
 
@@ -294,14 +293,15 @@ export default class Synchronizer {
 		if (!['fetchingProcessed', 'fetchingTotal'].includes(action)) syncDebugLog.info(line.join(': '));
 
 		// Actions that are categorized by per-item-type
-		const itemActions: string[] = [
-			SyncAction.CreateLocal, SyncAction.CreateRemote, SyncAction.UpdateLocal, SyncAction.UpdateRemote, SyncAction.DeleteLocal, SyncAction.DeleteRemote,
-		];
-		if (itemActions.includes(action)) {
+		const isItemAction = (testAction: string): testAction is SyncAction => {
+			const syncActions: string[] = Object.values(SyncAction);
+			return syncActions.includes(testAction);
+		};
+		if (isItemAction(action)) {
 			this.progressReport_[action] = { ...this.progressReport_[action] };
 			this.progressReport_[action][modelName] ??= 0;
 			this.progressReport_[action][modelName] += actionCount;
-		} else {
+		} else if (action === 'fetchingProcessed' || action === 'fetchingTotal') {
 			this.progressReport_[action] ??= 0;
 			this.progressReport_[action] += actionCount;
 		}
@@ -313,13 +313,14 @@ export default class Synchronizer {
 		// for this but for now this simple fix will do.
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 		const reportCopy: any = {};
-		for (const n in this.progressReport_) reportCopy[n] = this.progressReport_[n];
+		for (const [key, value] of Object.entries(this.progressReport_)) {
+			reportCopy[key] = value;
+		}
 		if (reportCopy.errors) reportCopy.errors = this.progressReport_.errors.slice();
 		this.dispatch({ type: 'SYNC_REPORT_UPDATE', report: reportCopy });
 	}
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	public async logSyncSummary(report: any) {
+	public async logSyncSummary(report: SyncReport) {
 		logger.info('Operations completed: ');
 		for (const n in report) {
 			if (!report.hasOwnProperty(n)) continue;
@@ -329,7 +330,8 @@ export default class Synchronizer {
 			if (n === 'state') continue;
 			if (n === 'startTime') continue;
 			if (n === 'completedTime') continue;
-			logger.info(`${n}: ${report[n] ? report[n] : '-'}`);
+			const key = n as keyof typeof report;
+			logger.info(`${n}: ${report[key] ? report[key] : '-'}`);
 		}
 		const folderCount = await Folder.count();
 		const noteCount = await Note.count();

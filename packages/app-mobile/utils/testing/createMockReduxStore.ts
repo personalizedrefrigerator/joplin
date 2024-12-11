@@ -1,5 +1,4 @@
-import reducer from '@joplin/lib/reducer';
-import { createStore } from 'redux';
+import { createReduxStore } from '@joplin/lib/testing/test-utils';
 import appDefaultState from '../appDefaultState';
 import Setting from '@joplin/lib/models/Setting';
 
@@ -9,11 +8,7 @@ const defaultState = {
 	settings: { theme: Setting.THEME_LIGHT },
 };
 
-const testReducer = (state = defaultState, action: unknown) => {
-	return reducer(state, action);
-};
-
 const createMockReduxStore = () => {
-	return createStore(testReducer);
+	return createReduxStore(defaultState);
 };
 export default createMockReduxStore;
