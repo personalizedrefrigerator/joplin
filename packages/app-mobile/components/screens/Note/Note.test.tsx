@@ -8,11 +8,10 @@ import NoteScreen from './Note';
 import { setupDatabaseAndSynchronizer, switchClient, simulateReadOnlyShareEnv, supportDir, synchronizerStart, resourceFetcher, runWithFakeTimers } from '@joplin/lib/testing/test-utils';
 import { waitFor as waitForWithRealTimers } from '@joplin/lib/testing/test-utils';
 import Note from '@joplin/lib/models/Note';
-import { AppState } from '../../utils/types';
+import { AppState } from '../../../utils/types';
 import { Store } from 'redux';
-import createMockReduxStore from '../../utils/testing/createMockReduxStore';
-import initializeCommandService from '../../utils/initializeCommandService';
-import getWebViewDomById from '../../utils/testing/getWebViewDomById';
+import createMockReduxStore from '../../../utils/testing/createMockReduxStore';
+import getWebViewDomById from '../../../utils/testing/getWebViewDomById';
 import { NoteEntity } from '@joplin/lib/services/database/types';
 import Folder from '@joplin/lib/models/Folder';
 import BaseItem from '@joplin/lib/models/BaseItem';
@@ -22,11 +21,12 @@ import { getDisplayParentId } from '@joplin/lib/services/trash';
 import { itemIsReadOnlySync, ItemSlice } from '@joplin/lib/models/utils/readOnly';
 import { LayoutChangeEvent } from 'react-native';
 import shim from '@joplin/lib/shim';
-import getWebViewWindowById from '../../utils/testing/getWebViewWindowById';
+import getWebViewWindowById from '../../../utils/testing/getWebViewWindowById';
 import CodeMirrorControl from '@joplin/editor/CodeMirror/CodeMirrorControl';
 import Setting from '@joplin/lib/models/Setting';
 import Resource from '@joplin/lib/models/Resource';
-import TestProviderStack from '../testing/TestProviderStack';
+import TestProviderStack from '../../testing/TestProviderStack';
+import setupGlobalStore from '../../../utils/testing/setupGlobalStore';
 
 interface WrapperProps {
 }
@@ -138,7 +138,7 @@ describe('screens/Note', () => {
 		await switchClient(0);
 
 		store = createMockReduxStore();
-		initializeCommandService(store);
+		setupGlobalStore(store);
 
 		// In order for note changes to be saved, note-screen-shared requires
 		// that at least one folder exist.

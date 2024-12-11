@@ -9,16 +9,15 @@
 
 import Setting from '@joplin/lib/models/Setting';
 import { themeStyle } from '@joplin/lib/theme';
-import { Theme } from '@joplin/lib/themes/type';
 
 import * as React from 'react';
 import { ReactNode, useCallback, useState, useEffect } from 'react';
-import { View, ViewStyle } from 'react-native';
-import IconButton from '../../IconButton';
+import { Platform, View, ViewStyle } from 'react-native';
+import IconButton from './IconButton';
+import useKeyboardVisible from '../utils/hooks/useKeyboardVisible';
 
 interface Props {
 	children: ReactNode;
-	spaceApplicable: boolean;
 	themeId: number;
 	style?: ViewStyle;
 }
@@ -44,7 +43,7 @@ const ToggleSpaceButton = (props: Props) => {
 		}
 	}, [onDecreaseSpace]);
 
-	const theme: Theme = themeStyle(props.themeId);
+	const theme = themeStyle(props.themeId);
 
 	const decreaseSpaceButton = (
 		<>
@@ -77,15 +76,18 @@ const ToggleSpaceButton = (props: Props) => {
 		</>
 	);
 
+	const { keyboardVisible } = useKeyboardVisible();
+	const spaceApplicable = keyboardVisible && Platform.OS === 'ios';
+
 	const style: ViewStyle = {
-		marginBottom: props.spaceApplicable ? additionalSpace : 0,
+		marginBottom: spaceApplicable ? additionalSpace : 0,
 		...props.style,
 	};
 
 	return (
 		<View style={style}>
 			{props.children}
-			{ decreaseSpaceBtnVisible && props.spaceApplicable ? decreaseSpaceButton : null }
+			{ decreaseSpaceBtnVisible && spaceApplicable ? decreaseSpaceButton : null }
 		</View>
 	);
 };

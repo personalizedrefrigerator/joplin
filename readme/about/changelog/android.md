@@ -1,5 +1,27 @@
 # Joplin Android Changelog
 
+## [android-v3.2.3](https://github.com/laurent22/joplin/releases/tag/android-v3.2.3) (Pre-release) - 2024-12-11T13:58:14Z
+
+- New: Accessibility: Add checked/unchecked accessibility information to the "sort notes by" dialog (#11411 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- New: Translation: Add sk_SK.po (Slovak) (#11433 by [@dodog](https://github.com/dodog))
+- Improved: Accessibility: Describe the notebook dropdown for accessibility tools (#11430 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Improved: Accessibility: Improve note list accessibility (#11419 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Improved: Accessibility: Improve note selection screen reader accessibility (#11424 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Improved: Accessibility: Improve screen reader accessibility of the tag list (#11420 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Improved: Accessibility: Improve side menu and heading screen reader accessibility (#11427 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Improved: Accessibility: Improve tag dialog screen reader accessibility (#11421 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Improved: Accessibility: Improve voice typing dialog screen reader accessibility (#11428 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Improved: Accessibility: Mark note properties buttons as buttons (#11432 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Improved: Accessibility: Search screen: Hide the progress bar from accessibility tools when invisible (#11431 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Improved: Close voice typing session when closing the editor (#11466 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Improved: Editor: Switch to a scrolling toolbar, allow adding/removing toolbar items (#11472 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Improved: Reactivate pCloud synchronisation (23032b9)
+- Improved: Removed deprecation notice on OneDrive sync method (ceea0bc)
+- Fixed: Accessibility: Fix screen reader is unable to scroll settings tab list (#11429 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Fix switching notes then unloading app causes blank screen (#11396) (#11384 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Fix the error caused by undefined isCodeBlock_ (turndown-plugin-gfm) (#11471 by Manabu Nakazawa)
+- Fixed: Upgrade CodeMirror packages (#11440) (#11318 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+
 ## [android-v3.2.2](https://github.com/laurent22/joplin/releases/tag/android-v3.2.2) (Pre-release) - 2024-11-19T01:12:43Z
 
 - Improved: Accessibility: Improve dialog accessibility (#11395 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))

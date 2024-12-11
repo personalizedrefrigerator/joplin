@@ -668,6 +668,15 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 			storage: SettingStorage.File,
 			isGlobal: true,
 		},
+		'editor.toolbarButtons': {
+			value: [] as string[],
+			public: false,
+			type: SettingItemType.Array,
+			storage: SettingStorage.File,
+			isGlobal: true,
+			appTypes: [AppType.Mobile],
+			label: () => 'buttons included in the editor toolbar',
+		},
 		'notes.columns': {
 			value: defaultListColumns(),
 			public: false,

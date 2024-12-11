@@ -20,7 +20,7 @@ import ToolbarButton from '../ToolbarButton/ToolbarButton';
 import Button, { ButtonLevel } from '../Button/Button';
 import eventManager, { EventName } from '@joplin/lib/eventManager';
 import { AppState } from '../../app.reducer';
-import ToolbarButtonUtils from '@joplin/lib/services/commands/ToolbarButtonUtils';
+import ToolbarButtonUtils, { ToolbarButtonInfo } from '@joplin/lib/services/commands/ToolbarButtonUtils';
 import { _, _n } from '@joplin/lib/locale';
 import TagList from '../TagList';
 import NoteTitleBar from './NoteTitle/NoteTitleBar';
@@ -742,7 +742,7 @@ const mapStateToProps = (state: AppState, ownProps: ConnectProps) => {
 		], whenClauseContext),
 		setTagsToolbarButtonInfo: toolbarButtonUtils.commandsToToolbarButtons([
 			'setTags',
-		], whenClauseContext)[0],
+		], whenClauseContext)[0] as ToolbarButtonInfo,
 		contentMaxWidth: state.settings['style.editor.contentMaxWidth'],
 		isSafeMode: state.settings.isSafeMode,
 		useCustomPdfViewer: false,

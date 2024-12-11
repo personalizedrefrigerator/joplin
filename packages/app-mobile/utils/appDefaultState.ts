@@ -11,6 +11,7 @@ export const DEFAULT_ROUTE = {
 const appDefaultState: AppState = {
 	smartFilterId: undefined,
 	...defaultState,
+	keyboardVisible: false,
 	route: DEFAULT_ROUTE,
 	noteSelectionEnabled: false,
 	noteSideMenuOptions: null,

@@ -3,66 +3,65 @@ import uuid from '@joplin/lib/uuid';
 import Setting from '@joplin/lib/models/Setting';
 import shim from '@joplin/lib/shim';
 import UndoRedoService from '@joplin/lib/services/UndoRedoService';
-import NoteBodyViewer from '../NoteBodyViewer/NoteBodyViewer';
-import checkPermissions from '../../utils/checkPermissions';
-import NoteEditor from '../NoteEditor/NoteEditor';
+import NoteBodyViewer from '../../NoteBodyViewer/NoteBodyViewer';
+import checkPermissions from '../../../utils/checkPermissions';
+import NoteEditor from '../../NoteEditor/NoteEditor';
 import * as React from 'react';
 import { Keyboard, View, TextInput, StyleSheet, Linking, Share, NativeSyntheticEvent } from 'react-native';
 import { Platform, PermissionsAndroid } from 'react-native';
 import { connect } from 'react-redux';
-// const { MarkdownEditor } = require('@joplin/lib/../MarkdownEditor/index.js');
 import Note from '@joplin/lib/models/Note';
 import BaseItem from '@joplin/lib/models/BaseItem';
 import Resource from '@joplin/lib/models/Resource';
 import Folder from '@joplin/lib/models/Folder';
 const Clipboard = require('@react-native-clipboard/clipboard').default;
 const md5 = require('md5');
-import BackButtonService from '../../services/BackButtonService';
+import BackButtonService from '../../../services/BackButtonService';
 import NavService, { OnNavigateCallback as OnNavigateCallback } from '@joplin/lib/services/NavService';
 import { ModelType } from '@joplin/lib/BaseModel';
-import FloatingActionButton from '../buttons/FloatingActionButton';
+import FloatingActionButton from '../../buttons/FloatingActionButton';
 const { fileExtension, safeFileExtension } = require('@joplin/lib/path-utils');
 import * as mimeUtils from '@joplin/lib/mime-utils';
-import ScreenHeader, { MenuOptionType } from '../ScreenHeader';
-import NoteTagsDialog from './NoteTagsDialog';
+import ScreenHeader, { MenuOptionType } from '../../ScreenHeader';
+import NoteTagsDialog from '../NoteTagsDialog';
 import time from '@joplin/lib/time';
-import Checkbox from '../Checkbox';
+import Checkbox from '../../Checkbox';
 import { _, currentLocale } from '@joplin/lib/locale';
 import { reg } from '@joplin/lib/registry';
 import ResourceFetcher from '@joplin/lib/services/ResourceFetcher';
-import { BaseScreenComponent } from '../base-screen';
-import { themeStyle, editorFont } from '../global-style';
+import { BaseScreenComponent } from '../../base-screen';
+import { themeStyle, editorFont } from '../../global-style';
 import shared, { BaseNoteScreenComponent, Props as BaseProps } from '@joplin/lib/components/shared/note-screen-shared';
-import { Asset, ImagePickerResponse, launchImageLibrary } from 'react-native-image-picker';
-import SelectDateTimeDialog from '../SelectDateTimeDialog';
-import ShareExtension from '../../utils/ShareExtension.js';
-import CameraView from '../CameraView/CameraView';
+import SelectDateTimeDialog from '../../SelectDateTimeDialog';
+import ShareExtension from '../../../utils/ShareExtension.js';
+import CameraView from '../../CameraView/CameraView';
 import { FolderEntity, NoteEntity, ResourceEntity } from '@joplin/lib/services/database/types';
 import Logger from '@joplin/utils/Logger';
-import ImageEditor from '../NoteEditor/ImageEditor/ImageEditor';
-import promptRestoreAutosave from '../NoteEditor/ImageEditor/promptRestoreAutosave';
-import isEditableResource from '../NoteEditor/ImageEditor/isEditableResource';
-import VoiceTypingDialog from '../voiceTyping/VoiceTypingDialog';
-import { isSupportedLanguage } from '../../services/voiceTyping/vosk';
+import ImageEditor from '../../NoteEditor/ImageEditor/ImageEditor';
+import promptRestoreAutosave from '../../NoteEditor/ImageEditor/promptRestoreAutosave';
+import isEditableResource from '../../NoteEditor/ImageEditor/isEditableResource';
+import VoiceTypingDialog from '../../voiceTyping/VoiceTypingDialog';
+import { isSupportedLanguage } from '../../../services/voiceTyping/vosk';
 import { ChangeEvent as EditorChangeEvent, SelectionRangeChangeEvent, UndoRedoDepthChangeEvent } from '@joplin/editor/events';
 import { join } from 'path';
 import { Dispatch } from 'redux';
 import { RefObject, useContext, useRef } from 'react';
-import { SelectionRange } from '../NoteEditor/types';
+import { SelectionRange } from '../../NoteEditor/types';
 import { getNoteCallbackUrl } from '@joplin/lib/callbackUrlUtils';
-import { AppState } from '../../utils/types';
+import { AppState } from '../../../utils/types';
 import restoreItems from '@joplin/lib/services/trash/restoreItems';
 import { getDisplayParentTitle } from '@joplin/lib/services/trash';
 import { PluginStates, utils as pluginUtils } from '@joplin/lib/services/plugins/reducer';
-import pickDocument from '../../utils/pickDocument';
-import debounce from '../../utils/debounce';
+import debounce from '../../../utils/debounce';
 import { focus } from '@joplin/lib/utils/focusHandler';
-import CommandService from '@joplin/lib/services/CommandService';
-import { ResourceInfo } from '../NoteBodyViewer/hooks/useRerenderHandler';
-import getImageDimensions from '../../utils/image/getImageDimensions';
-import resizeImage from '../../utils/image/resizeImage';
-import { CameraResult } from '../CameraView/types';
-import { DialogContext, DialogControl } from '../DialogManager';
+import CommandService, { RegisteredRuntime } from '@joplin/lib/services/CommandService';
+import { ResourceInfo } from '../../NoteBodyViewer/hooks/useRerenderHandler';
+import getImageDimensions from '../../../utils/image/getImageDimensions';
+import resizeImage from '../../../utils/image/resizeImage';
+import { CameraResult } from '../../CameraView/types';
+import { DialogContext, DialogControl } from '../../DialogManager';
+import { CommandRuntimeProps, PickerResponse } from './types';
+import commands from './commands';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 const emptyArray: any[] = [];
@@ -150,6 +149,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 	private folderPickerOptions_: any;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	public dialogbox: any;
+	private commandRegistration_: RegisteredRuntime|null = null;
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	public static navigationOptions(): any {
@@ -292,7 +292,6 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 			}
 		};
 
-		this.takePhoto_onPress = this.takePhoto_onPress.bind(this);
 		this.cameraView_onPhoto = this.cameraView_onPhoto.bind(this);
 		this.cameraView_onCancel = this.cameraView_onCancel.bind(this);
 		this.properties_onPress = this.properties_onPress.bind(this);
@@ -313,6 +312,38 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 		this.onUndoRedoDepthChange = this.onUndoRedoDepthChange.bind(this);
 		this.voiceTypingDialog_onText = this.voiceTypingDialog_onText.bind(this);
 		this.voiceTypingDialog_onDismiss = this.voiceTypingDialog_onDismiss.bind(this);
+	}
+
+	private registerCommands() {
+		if (this.commandRegistration_) return;
+
+		const dialogs = () => this.props.dialogs;
+		this.commandRegistration_ = CommandService.instance().componentRegisterCommands<CommandRuntimeProps>(
+			{
+				attachFile: this.attachFile.bind(this),
+				hideKeyboard: () => {
+					if (this.useEditorBeta()) {
+						this.editorRef?.current?.hideKeyboard();
+					} else {
+						Keyboard.dismiss();
+					}
+				},
+				insertText: this.insertText.bind(this),
+				get dialogs() {
+					return dialogs();
+				},
+				setCameraVisible: (visible) => {
+					this.setState({ showCamera: visible });
+				},
+				setTagDialogVisible: (visible) => {
+					if (!this.state.note || !this.state.note.id) return;
+
+					this.setState({ noteTagDialogShown: visible });
+				},
+			},
+			commands,
+			true,
+		);
 	}
 
 	private useEditorBeta(): boolean {
@@ -574,6 +605,9 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 		// It cannot theoretically be undefined, since componentDidMount should always be called before
 		// componentWillUnmount, but with React Native the impossible often becomes possible.
 		if (this.undoRedoService_) this.undoRedoService_.off('stackChange', this.undoRedoService_stackChange);
+
+		this.commandRegistration_?.deregister();
+		this.commandRegistration_ = null;
 	}
 
 	private title_changeText(text: string) {
@@ -634,11 +668,6 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	public async saveOneProperty(name: string, value: any) {
 		await shared.saveOneProperty(this, name, value);
-	}
-
-	private async pickDocuments() {
-		const result = await pickDocument({ multiple: true });
-		return result;
 	}
 
 	public async resizeImage(localFilePath: string, targetPath: string, mimeType: string) {
@@ -720,7 +749,10 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 		return newNote;
 	}
 
-	public async attachFile(pickerResponse: Asset, fileType: string): Promise<ResourceEntity|null> {
+	public async attachFile(
+		pickerResponse: PickerResponse,
+		fileType: string,
+	): Promise<ResourceEntity|null> {
 		if (!pickerResponse) {
 			// User has cancelled
 			return null;
@@ -800,36 +832,6 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 		this.scheduleSave();
 
 		return resource;
-	}
-
-	private async attachPhoto_onPress() {
-		// the selection Limit should be specified. I think 200 is enough?
-		const response: ImagePickerResponse = await launchImageLibrary({ mediaType: 'photo', includeBase64: false, selectionLimit: 200 });
-
-		if (response.errorCode) {
-			reg.logger().warn('Got error from picker', response.errorCode);
-			return;
-		}
-
-		if (response.didCancel) {
-			reg.logger().info('User cancelled picker');
-			return;
-		}
-
-		for (const asset of response.assets) {
-			await this.attachFile(asset, 'image');
-		}
-	}
-
-	private async takePhoto_onPress() {
-		if (Platform.OS === 'web') {
-			const response = await pickDocument({ multiple: true, preferCamera: true });
-			for (const asset of response) {
-				await this.attachFile(asset, 'image');
-			}
-		} else {
-			this.setState({ showCamera: true });
-		}
 	}
 
 	private cameraView_onPhoto(data: CameraResult) {
@@ -935,23 +937,10 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 		}
 	};
 
-	private async attachFile_onPress() {
-		const response = await this.pickDocuments();
-		for (const asset of response) {
-			await this.attachFile(asset, 'all');
-		}
-	}
-
 	private toggleIsTodo_onPress() {
 		shared.toggleIsTodo_onPress(this);
 
 		this.scheduleSave();
-	}
-
-	private tags_onPress() {
-		if (!this.state.note || !this.state.note.id) return;
-
-		this.setState({ noteTagDialogShown: true });
 	}
 
 	private async share_onPress() {
@@ -1059,37 +1048,8 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 		return output;
 	}
 
-	public async showAttachMenu() {
-		// If the keyboard is editing a WebView, the standard Keyboard.dismiss()
-		// may not work. As such, we also need to call hideKeyboard on the editorRef
-		this.editorRef.current?.hideKeyboard();
-
-		const buttons = [];
-
-		// On iOS, it will show "local files", which means certain files saved from the browser
-		// and the iCloud files, but it doesn't include photos and images from the CameraRoll
-		//
-		// On Android, it will depend on the phone, but usually it will allow browsing all files and photos.
-		buttons.push({ text: _('Attach file'), id: 'attachFile' });
-
-		// Disabled on Android because it doesn't work due to permission issues, but enabled on iOS
-		// because that's only way to browse photos from the camera roll.
-		if (Platform.OS === 'ios') buttons.push({ text: _('Attach photo'), id: 'attachPhoto' });
-		buttons.push({ text: _('Take photo'), id: 'takePhoto' });
-
-		const buttonId = await this.props.dialogs.showMenu(_('Choose an option'), buttons);
-
-		if (buttonId === 'takePhoto') await this.takePhoto_onPress();
-		if (buttonId === 'attachFile') await this.attachFile_onPress();
-		if (buttonId === 'attachPhoto') await this.attachPhoto_onPress();
-	}
-
 	public onAttach = async (filePath?: string) => {
-		if (filePath) {
-			await this.attachFile({ uri: filePath }, 'all');
-		} else {
-			await this.showAttachMenu();
-		}
+		await CommandService.instance().execute('attachFile', filePath);
 	};
 
 	// private vosk_:Vosk;
@@ -1183,7 +1143,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 		if (canAttachPicture) {
 			output.push({
 				title: _('Attach...'),
-				onPress: () => this.showAttachMenu(),
+				onPress: () => this.onAttach(),
 				disabled: readOnly,
 			});
 		}
@@ -1227,13 +1187,24 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 			});
 		}
 
+		const commandService = CommandService.instance();
+		const whenContext = commandService.currentWhenClauseContext();
+		const addButtonFromCommand = (commandName: string, title?: string) => {
+			if (commandName === '-') {
+				output.push({ isDivider: true });
+			} else {
+				output.push({
+					title: title ?? commandService.description(commandName),
+					onPress: async () => {
+						void commandService.execute(commandName);
+					},
+					disabled: !commandService.isEnabled(commandName, whenContext),
+				});
+			}
+		};
+
 		if (isSaved && !isDeleted) {
-			output.push({
-				title: _('Tags'),
-				onPress: () => {
-					this.tags_onPress();
-				},
-			});
+			addButtonFromCommand('setTags');
 		}
 
 		output.push({
@@ -1282,22 +1253,6 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 				},
 			});
 		}
-
-		const commandService = CommandService.instance();
-		const whenContext = commandService.currentWhenClauseContext();
-		const addButtonFromCommand = (commandName: string, title?: string) => {
-			if (commandName === '-') {
-				output.push({ isDivider: true });
-			} else {
-				output.push({
-					title: title ?? commandService.description(commandName),
-					onPress: async () => {
-						void commandService.execute(commandName);
-					},
-					disabled: !commandService.isEnabled(commandName, whenContext),
-				});
-			}
-		};
 
 		if (whenContext.inTrash) {
 			addButtonFromCommand('permanentlyDeleteNote');
@@ -1440,6 +1395,12 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 	}
 
 	public render() {
+		// Commands must be registered before child components can render.
+		// Calling this in the constructor won't work in strict mode, where
+		// componentWillUnmount (which removes the commands) can be called
+		// multiple times.
+		this.registerCommands();
+
 		if (this.state.isLoading) {
 			return (
 				<View style={this.styles().screen}>
