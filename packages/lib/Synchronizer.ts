@@ -32,7 +32,6 @@ import syncDeleteStep from './services/synchronizer/utils/syncDeleteStep';
 import { ErrorCode } from './errors';
 import { SyncAction, SyncReport, ItemCountPerType } from './services/synchronizer/utils/types';
 import checkDisabledSyncItemsNotification from './services/synchronizer/utils/checkDisabledSyncItemsNotification';
-import { substrWithEllipsis } from './string-utils';
 const { sprintf } = require('sprintf-js');
 const { Dirnames } = require('./services/synchronizer/utils/types');
 
@@ -224,8 +223,7 @@ export default class Synchronizer {
 			}
 
 			if (includedKeyNames.length > 0) {
-				const shortenedDescription = substrWithEllipsis(includedKeyNames.join(', '), 0, 24);
-				return _('%d (%s)', sum, shortenedDescription);
+				return _('%d (%s)', sum, includedKeyNames.join(', '));
 			} else {
 				return _('%d', sum);
 			}
