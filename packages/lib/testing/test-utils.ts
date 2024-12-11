@@ -454,12 +454,14 @@ const createNoteAndResource = async (options: CreateNoteAndResourceOptions = nul
 	return { note, resource };
 };
 
-export const createReduxStore = (defaultState: AppState = defaultAppState) => {
+export const createReduxStore = <StateType extends AppState> (
+	defaultState: StateType = defaultAppState as StateType,
+) => {
 	const mockReducer = (state: AppState = defaultState, action: unknown) => {
 		return reducer(state, action);
 	};
 
-	return createStore(mockReducer);
+	return createStore(mockReducer) as Store<StateType>;
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
