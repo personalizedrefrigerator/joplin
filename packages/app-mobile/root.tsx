@@ -520,6 +520,7 @@ async function initialize(dispatch: Dispatch) {
 	Setting.setConstant('cacheDir', `${getProfilesRootDir()}/cache`);
 	const resourceDir = getResourceDir(currentProfile, isSubProfile);
 	Setting.setConstant('resourceDir', resourceDir);
+	Setting.setConstant('resourceBaseUrl', `file://${resourceDir}/`);
 	Setting.setConstant('pluginDir', `${getProfilesRootDir()}/plugins`);
 	Setting.setConstant('pluginDataDir', getPluginDataDir(currentProfile, isSubProfile));
 

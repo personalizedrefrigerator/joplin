@@ -1,7 +1,7 @@
-import shim from '@joplin/lib/shim';
-import Resource from '@joplin/lib/models/Resource';
-import Note from '@joplin/lib/models/Note';
-import { setupDatabaseAndSynchronizer, supportDir, switchClient } from '@joplin/lib/testing/test-utils';
+import shim from '../shim';
+import Resource from '../models/Resource';
+import Note from '../models/Note';
+import { setupDatabaseAndSynchronizer, supportDir, switchClient } from '../testing/test-utils';
 import { runtime } from './renderMarkup';
 import { MarkupLanguage } from '@joplin/renderer';
 const testImagePath = `${supportDir}/photo.jpg`;
@@ -38,7 +38,7 @@ describe('renderMarkup', () => {
 			const resource = (await Resource.all())[0];
 			const noteBody = (await Note.load(note.id)).body;
 			const renderedNote = await await command.execute(null, MarkupLanguage.Markdown, noteBody);
-			expect(renderedNote.html).toContain(`<div id="rendered-md"><p><img data-from-md data-resource-id="${resource.id}" src="joplin-content://note-viewer/`);
+			expect(renderedNote.html).toContain(`<div id="rendered-md"><p><img data-from-md data-resource-id="${resource.id}" src="`);
 			expect(renderedNote.html).toContain(`/resources-1/${resource.id}.jpg?t=`);
 			expect(renderedNote.html).toContain('" title alt="photo.jpg" /></p>');
 		}

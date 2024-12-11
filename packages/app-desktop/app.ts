@@ -434,6 +434,9 @@ class Application extends BaseApplication {
 
 		argv = await super.start(argv, startOptions);
 
+		const resourceBaseUrl = `joplin-content://note-viewer/${Setting.value('resourceDir')}/`;
+		Setting.setConstant('resourceBaseUrl', resourceBaseUrl);
+
 		bridge().setLogFilePath(Logger.globalLogger.logFilePath());
 
 		await this.applySettingsSideEffects();

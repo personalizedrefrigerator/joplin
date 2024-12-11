@@ -49,6 +49,7 @@ export interface Constants {
 	appType: AppType;
 	resourceDirName: string;
 	resourceDir: string;
+	resourceBaseUrl: string;
 	profileDir: string;
 	rootProfileDir: string;
 	tempDir: string;
@@ -214,6 +215,7 @@ class Setting extends BaseModel {
 		appType: 'SET_ME' as any, // 'cli' or 'mobile'
 		resourceDirName: '',
 		resourceDir: '',
+		resourceBaseUrl: '',
 		profileDir: '',
 		rootProfileDir: '',
 		tempDir: '',
