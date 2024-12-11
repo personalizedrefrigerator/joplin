@@ -194,7 +194,7 @@ export default class Synchronizer {
 
 	public static reportToLines(report: SyncReport) {
 		const formatItemCounts = (counts: ItemCountPerType) => {
-			const includedKeyNames: string[] = [];
+			const modifiedItemNames: string[] = [];
 			let hasOther = false;
 
 			let sum = 0;
@@ -203,13 +203,13 @@ export default class Synchronizer {
 					sum += value;
 
 					if (key === 'Revision') {
-						includedKeyNames.push(_('note history'));
+						modifiedItemNames.push(_('note history'));
 					} else if (key === 'Note') {
-						includedKeyNames.push(_('notes'));
+						modifiedItemNames.push(_('notes'));
 					} else if (key === 'Resource') {
-						includedKeyNames.push(_('resources'));
+						modifiedItemNames.push(_('resources'));
 					} else if (key === 'Folder') {
-						includedKeyNames.push(_('notebooks'));
+						modifiedItemNames.push(_('notebooks'));
 					} else {
 						hasOther = true;
 					}
@@ -218,12 +218,12 @@ export default class Synchronizer {
 
 			// In some cases, no type information is available (e.g. when creating local items).
 			// In these cases, avoid logging "other", because that might be inaccurate.
-			if (hasOther && includedKeyNames.length > 0) {
-				includedKeyNames.push(_('other'));
+			if (hasOther && modifiedItemNames.length > 0) {
+				modifiedItemNames.push(_('other'));
 			}
 
-			if (includedKeyNames.length > 0) {
-				return _('%d (%s)', sum, includedKeyNames.join(', '));
+			if (modifiedItemNames.length > 0) {
+				return _('%d (%s)', sum, modifiedItemNames.join(', '));
 			} else {
 				return _('%d', sum);
 			}
