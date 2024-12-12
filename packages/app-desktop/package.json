@@ -41,6 +41,12 @@
       "build/tesseract.js-core/**",
       "build/7zip/**"
     ],
+    "files": [
+      "!**/node_modules/mermaid/**",
+      "!**/node_modules/cytoscape-fcose/demo/**",
+      "!node_modules/@fortawesome/**",
+      "!./integration-tests/**"
+    ],
     "afterAllArtifactBuild": "./afterAllArtifactBuild.js",
     "asar": true,
     "asarUnpack": "./node_modules/node-notifier/vendor/**",
