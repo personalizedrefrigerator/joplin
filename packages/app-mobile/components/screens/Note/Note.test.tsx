@@ -27,6 +27,7 @@ import Setting from '@joplin/lib/models/Setting';
 import Resource from '@joplin/lib/models/Resource';
 import TestProviderStack from '../../testing/TestProviderStack';
 import setupGlobalStore from '../../../utils/testing/setupGlobalStore';
+import CommandService from '@joplin/lib/services/CommandService';
 
 interface WrapperProps {
 }
@@ -122,13 +123,22 @@ const openNoteActionsMenu = async () => {
 	});
 };
 
+const expectToBeEditing = async (editing: boolean) => {
+	await waitFor(() => {
+		const editButton = screen.queryByLabelText('Edit');
+		if (editing) {
+			expect(editButton).toBeNull();
+		} else {
+			expect(editButton).not.toBeNull();
+		}
+	});
+};
+
 const openEditor = async () => {
 	const editButton = await screen.findByLabelText('Edit');
 
 	fireEvent.press(editButton);
-	await waitFor(() => {
-		expect(screen.queryByLabelText('Edit')).toBeNull();
-	});
+	await expectToBeEditing(true);
 };
 
 describe('screens/Note', () => {
@@ -324,5 +334,16 @@ describe('screens/Note', () => {
 				throw new Error(`Should not be testing downloadMode: ${downloadMode}.`);
 			}
 		});
+	});
+
+	it('the toggleVisiblePanes command should start and stop editing', async () => {
+		await openNewNote({ title: 'To be edited', body: '...' });
+		render(<WrappedNoteScreen />);
+
+		await expectToBeEditing(false);
+		await CommandService.instance().execute('toggleVisiblePanes');
+		await expectToBeEditing(true);
+		await CommandService.instance().execute('toggleVisiblePanes');
+		await expectToBeEditing(false);
 	});
 });

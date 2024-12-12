@@ -60,7 +60,7 @@ import getImageDimensions from '../../../utils/image/getImageDimensions';
 import resizeImage from '../../../utils/image/resizeImage';
 import { CameraResult } from '../../CameraView/types';
 import { DialogContext, DialogControl } from '../../DialogManager';
-import { CommandRuntimeProps, PickerResponse } from './types';
+import { CommandRuntimeProps, EditorMode, PickerResponse } from './types';
 import commands from './commands';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
@@ -91,7 +91,7 @@ interface ComponentProps extends Props {
 
 interface State {
 	note: NoteEntity;
-	mode: 'view'|'edit';
+	mode: EditorMode;
 	readOnly: boolean;
 	folder: FolderEntity|null;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
@@ -339,6 +339,10 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 					if (!this.state.note || !this.state.note.id) return;
 
 					this.setState({ noteTagDialogShown: visible });
+				},
+				getMode: () => this.state.mode,
+				setMode: (mode: 'view'|'edit') => {
+					this.setState({ mode });
 				},
 			},
 			commands,
