@@ -140,7 +140,7 @@ class NoteRevisionViewerComponent extends React.PureComponent<Props, State> {
 		const theme = themeStyle(this.props.themeId);
 
 		const markupToHtml = markupLanguageUtils.newMarkupToHtml({}, {
-			resourceBaseUrl: Setting.value('resourceBaseUrl'),
+			resourceBaseUrl: `joplin-content://note-viewer/${Setting.value('resourceDir')}/`,
 			customCss: this.props.customCss ? this.props.customCss : '',
 		});
 

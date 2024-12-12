@@ -195,7 +195,6 @@ Setting.setConstant('appType', AppType.Cli);
 Setting.setConstant('tempDir', baseTempDir);
 Setting.setConstant('cacheDir', baseTempDir);
 Setting.setConstant('resourceDir', baseTempDir);
-Setting.setConstant('resourceBaseUrl', `${baseTempDir}/`);
 Setting.setConstant('pluginDataDir', `${profileDir}/profile/plugin-data`);
 Setting.setConstant('profileDir', profileDir);
 Setting.setConstant('rootProfileDir', rootProfileDir);
@@ -296,7 +295,6 @@ async function switchClient(id: number, options: any = null) {
 	Setting.setConstant('rootProfileDir', rootProfileDir);
 	Setting.setConstant('resourceDirName', resourceDirName(id));
 	Setting.setConstant('resourceDir', resourceDir(id));
-	Setting.setConstant('resourceBaseUrl', `${resourceDir(id)}/`);
 	Setting.setConstant('pluginDir', pluginDir(id));
 	Setting.setConstant('isSubProfile', false);
 

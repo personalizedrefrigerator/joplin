@@ -22,7 +22,7 @@ export default function useMarkupToHtml(deps: HookDependencies) {
 	const { themeId, customCss, plugins, whiteBackgroundNoteRendering } = deps;
 
 	const resourceBaseUrl = useMemo(() => {
-		return Setting.value('resourceBaseUrl');
+		return `joplin-content://note-viewer/${Setting.value('resourceDir')}/`;
 	}, []);
 
 	const markupToHtml = useMemo(() => {

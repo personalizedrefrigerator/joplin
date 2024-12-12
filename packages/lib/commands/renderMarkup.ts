@@ -13,7 +13,7 @@ export const declaration: CommandDeclaration = {
 
 const getMarkupToHtml = () => {
 	return markupLanguageUtils.newMarkupToHtml({}, {
-		resourceBaseUrl: Setting.value('resourceBaseUrl'),
+		resourceBaseUrl: `file://${Setting.value('resourceDir')}/`,
 		customCss: '',
 	});
 };
