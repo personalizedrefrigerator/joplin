@@ -34,7 +34,7 @@ interface UseVoiceTypingProps {
 	onText: OnTextCallback;
 }
 
-const useWhisper = ({ locale, provider, onSetPreview, onText }: UseVoiceTypingProps): [Error | null, boolean, VoiceTypingSession|null] => {
+const useVoiceTyping = ({ locale, provider, onSetPreview, onText }: UseVoiceTypingProps) => {
 	const [voiceTyping, setVoiceTyping] = useState<VoiceTypingSession>(null);
 	const [error, setError] = useState<Error>(null);
 	const [mustDownloadModel, setMustDownloadModel] = useState<boolean | null>(null);
@@ -50,6 +50,8 @@ const useWhisper = ({ locale, provider, onSetPreview, onText }: UseVoiceTypingPr
 	const builder = useMemo(() => {
 		return new VoiceTyping(locale, provider?.startsWith('whisper') ? [whisper] : [vosk]);
 	}, [locale, provider]);
+
+	const [redownloadCounter, setRedownloadCounter] = useState(0);
 
 	useAsyncEffect(async (event: AsyncEffectEvent) => {
 		try {
@@ -72,7 +74,7 @@ const useWhisper = ({ locale, provider, onSetPreview, onText }: UseVoiceTypingPr
 		} finally {
 			setMustDownloadModel(false);
 		}
-	}, [builder]);
+	}, [builder, redownloadCounter]);
 
 	useAsyncEffect(async (_event: AsyncEffectEvent) => {
 		setMustDownloadModel(!(await builder.isDownloaded()));
@@ -82,7 +84,16 @@ const useWhisper = ({ locale, provider, onSetPreview, onText }: UseVoiceTypingPr
 		void voiceTypingRef.current?.stop();
 	}, []);
 
-	return [error, mustDownloadModel, voiceTyping];
+	const onRequestRedownload = useCallback(async () => {
+		await voiceTypingRef.current?.stop();
+		await builder.clearDownloads();
+		setMustDownloadModel(true);
+		setRedownloadCounter(value => value + 1);
+	}, [builder]);
+
+	return {
+		error, mustDownloadModel, voiceTyping, onRequestRedownload,
+	};
 };
 
 const styles = StyleSheet.create({
@@ -112,7 +123,12 @@ const styles = StyleSheet.create({
 const VoiceTypingDialog: React.FC<Props> = props => {
 	const [recorderState, setRecorderState] = useState<RecorderState>(RecorderState.Loading);
 	const [preview, setPreview] = useState<string>('');
-	const [modelError, mustDownloadModel, voiceTyping] = useWhisper({
+	const {
+		error: modelError,
+		mustDownloadModel,
+		voiceTyping,
+		onRequestRedownload,
+	} = useVoiceTyping({
 		locale: props.locale,
 		onSetPreview: setPreview,
 		onText: props.onText,
@@ -172,6 +188,10 @@ const VoiceTypingDialog: React.FC<Props> = props => {
 		return <Text variant='labelSmall'>{preview}</Text>;
 	};
 
+	const reDownloadButton = <Button onPress={onRequestRedownload}>
+		{_('Re-download model')}
+	</Button>;
+
 	return (
 		<Surface>
 			<View style={styles.container}>
@@ -203,6 +223,7 @@ const VoiceTypingDialog: React.FC<Props> = props => {
 					</View>
 				</View>
 				<View style={styles.actionContainer}>
+					{recorderState === RecorderState.Error ? reDownloadButton : null}
 					<Button
 						onPress={onDismiss}
 						accessibilityHint={_('Ends voice typing')}
