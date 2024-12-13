@@ -41,9 +41,6 @@
       "build/tesseract.js-core/**",
       "build/7zip/**"
     ],
-    "files": [
-      "!./integration-tests/**"
-    ],
     "afterAllArtifactBuild": "./afterAllArtifactBuild.js",
     "asar": true,
     "asarUnpack": "./node_modules/node-notifier/vendor/**",
