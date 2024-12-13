@@ -115,8 +115,10 @@
       "icon": "../../Assets/LinuxIcons",
       "category": "Office",
       "desktop": {
-        "Icon": "joplin",
-        "MimeType": "x-scheme-handler/joplin;"
+        "entry": {
+          "Icon": "joplin",
+          "MimeType": "x-scheme-handler/joplin;"
+        }
       },
       "target": "AppImage"
     }
@@ -125,7 +127,7 @@
   "devDependencies": {
     "7zip-bin": "5.2.0",
     "@axe-core/playwright": "4.10.0",
-    "@electron/rebuild": "3.6.0",
+    "@electron/rebuild": "3.7.1",
     "@joplin/default-plugins": "~3.2",
     "@joplin/tools": "~3.2",
     "@playwright/test": "1.45.3",
@@ -139,7 +141,7 @@
     "@types/tesseract.js": "2.0.0",
     "axios": "^1.7.7",
     "electron": "32.2.0",
-    "electron-builder": "24.13.3",
+    "electron-builder": "26.0.0-alpha.7",
     "glob": "10.4.5",
     "gulp": "4.0.2",
     "jest": "29.7.0",
