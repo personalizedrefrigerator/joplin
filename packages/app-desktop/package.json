@@ -42,9 +42,6 @@
       "build/7zip/**"
     ],
     "files": [
-      "!**/node_modules/mermaid/**",
-      "!**/node_modules/cytoscape-fcose/demo/**",
-      "!node_modules/@fortawesome/**",
       "!./integration-tests/**"
     ],
     "afterAllArtifactBuild": "./afterAllArtifactBuild.js",
