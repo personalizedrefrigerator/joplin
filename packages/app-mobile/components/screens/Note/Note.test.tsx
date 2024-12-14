@@ -346,4 +346,32 @@ describe('screens/Note', () => {
 		await CommandService.instance().execute('toggleVisiblePanes');
 		await expectToBeEditing(false);
 	});
+
+	it('deselecting all notes should continue displaying the last-selected note', async () => {
+		const noteId = await openNewNote({
+			title: 'Title: Test note',
+			body: '',
+		});
+
+		render(<WrappedNoteScreen />);
+
+		const titleInput = await screen.findByDisplayValue('Title: Test note');
+		expect(titleInput).toBeVisible();
+
+		store.dispatch({
+			type: 'NOTE_UPDATE_ALL',
+			notes: [],
+			notesSource: 'test',
+		});
+
+		// Should now have no selected notes
+		expect(store.getState()).toMatchObject({ selectedNoteIds: [] });
+
+		// Should still be possible to edit
+		await openEditor();
+
+		const editor = await getNoteEditorControl();
+		editor.insertText('Updated body');
+		await waitForNoteToMatch(noteId, { body: 'Updated body' });
+	});
 });

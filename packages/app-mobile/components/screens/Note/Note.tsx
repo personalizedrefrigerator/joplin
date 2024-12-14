@@ -1603,7 +1603,7 @@ const NoteScreenWrapper = (props: Props) => {
 
 	const dialogs = useContext(DialogContext);
 	return (
-		<NoteScreenComponent key={noteId} dialogs={dialogs} {...props} />
+		<NoteScreenComponent key={noteId} dialogs={dialogs} {...props} noteId={noteId} />
 	);
 };
 
