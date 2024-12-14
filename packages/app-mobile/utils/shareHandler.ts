@@ -42,7 +42,7 @@ export default async (sharedData: SharedData, folderId: string, dispatch: Functi
 	dispatch({ type: 'SIDE_MENU_CLOSE' });
 
 	shim.setTimeout(async () => {
-		await NavService.go('Note', { noteId: newNote.id, sharedData });
+		await NavService.go('Note', { noteId: newNote.id, folderId, sharedData });
 
 		ShareExtension.close();
 	}, 5);
