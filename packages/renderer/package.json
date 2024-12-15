@@ -18,7 +18,6 @@
   },
   "author": "",
   "license": "AGPL-3.0-or-later",
-
   "//": "Mermaid is bundled by buildAssets.js -- using it as an unbundled dependency significantly increases app size.",
   "devDependencies": {
     "@types/jest": "29.5.12",
