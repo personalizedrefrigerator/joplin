@@ -35,6 +35,7 @@ interface Props {
 	showCompletedTodos: boolean;
 	noteSelectionEnabled: boolean;
 
+	selectedNoteIds: string[];
 	activeFolderId: string;
 	selectedFolderId: string;
 	selectedTagId: string;
@@ -171,11 +172,28 @@ class NotesScreenComponent extends BaseScreenComponent<ComponentProps, State> {
 			notes = await Note.previews(null, options);
 		}
 
-		this.props.dispatch({
-			type: 'NOTE_UPDATE_ALL',
-			notes: notes,
-			notesSource: source,
-		});
+		// Avoid updating the notes list if it would clear the selection:
+		const wouldClearSelection = () => {
+			if (props.selectedNoteIds.length) {
+				const noteIds = new Set(notes.map(note => note.id));
+				let removedCount = 0;
+				for (const noteId of props.selectedNoteIds) {
+					if (!noteIds.has(noteId)) {
+						removedCount ++;
+					}
+				}
+				return removedCount === props.selectedNoteIds.length;
+			}
+			return false;
+		};
+
+		if (!wouldClearSelection()) {
+			this.props.dispatch({
+				type: 'NOTE_UPDATE_ALL',
+				notes: notes,
+				notesSource: source,
+			});
+		}
 	}
 
 	public newNoteNavigate = async (folderId: string, isTodo: boolean) => {

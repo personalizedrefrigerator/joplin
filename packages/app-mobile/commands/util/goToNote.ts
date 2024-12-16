@@ -19,8 +19,6 @@ const goToNote = async (id: string, hash?: string, options: GotoNoteOptions = nu
 
 	return NavService.go('Note', {
 		noteId: id,
-		// Always provide a folderId -- omitting this can lead to invalid state
-		folderId: note.parent_id,
 		noteHash: hash,
 		newNoteAttachFileAction: options.attachFileAction,
 	});
