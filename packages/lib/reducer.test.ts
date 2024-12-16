@@ -707,11 +707,15 @@ describe('reducer', () => {
 		}
 	});
 
-	// Regression test for #10589 -- on mobile, in general, selectedNoteIds shouldn't be cleared
-	// when updating items.
+	// Regression test for #10589.
 	it.each([
-		true, false,
-	])('should preserve note selection if selecting in other folders is allowed (allowSelectionInOtherFolders: %j)', async (allowSelectionInOtherFolders) => {
+		[true, false],
+		[undefined, false],
+		[undefined, true],
+		[false, true],
+	])('should preserve note selection if specified with an option (preserveSelection: %j, allowSelectionInOtherFolders: %j)', async (
+		preserveSelectionOption, allowSelectionInOtherFolders,
+	) => {
 		const folders = await createNTestFolders(3);
 		const notes = await createNTestNotes(5, folders[0]);
 
@@ -726,13 +730,20 @@ describe('reducer', () => {
 			state = reducer(state, action);
 		});
 
+		// Dispatching with preserveSelection should preserve the selected note (as is done on
+		// mobile).
 		await Note.moveToFolder(
 			state.selectedNoteIds[0],
 			folders[1].id,
+			{ dispatchOptions: { preserveSelection: preserveSelectionOption } },
 		);
 
 		expect(BaseModel.dispatch).toHaveBeenCalled();
-		if (allowSelectionInOtherFolders) {
+
+		// preserveSelectionOption takes precedence over allowSelectionInOtherFolders
+		const shouldPreserveSelection = preserveSelectionOption ?? allowSelectionInOtherFolders;
+
+		if (shouldPreserveSelection) {
 			expect(state.selectedNoteIds).toMatchObject([notes[0].id]);
 		} else {
 			expect(state.selectedNoteIds).toMatchObject([notes[1].id]);
@@ -740,6 +751,27 @@ describe('reducer', () => {
 		// Original note should no longer be present in the sidebar
 		expect(state.notes.every(n => n.id !== notes[0].id)).toBe(true);
 		expect(state.selectedFolderId).toBe(folders[0].id);
+	});
+
+	test('when selection is allowed in unselected folders, NOTE_UPDATE_ALL should not remove items from the selection', async () => {
+		const folders = await createNTestFolders(2);
+		const notes = await createNTestNotes(2, folders[0]);
+
+		// select the 1st folder and the 1st note
+		let state = initTestState(folders, 0, notes, [0]);
+		state = { ...state, allowSelectionInOtherFolders: true };
+		state = goToNote(notes, [0], state);
+
+		expect(state.selectedNoteIds).toEqual([notes[0].id]);
+		expect(state.notes).toHaveLength(2);
+
+		state = reducer(state, {
+			type: 'NOTE_UPDATE_ALL',
+			notes: [],
+		});
+
+		expect(state.notes).toHaveLength(0);
+		expect(state.selectedNoteIds).toEqual([notes[0].id]);
 	});
 
 	// window tests
