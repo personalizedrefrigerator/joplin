@@ -45,7 +45,7 @@ import { isSupportedLanguage } from '../../../services/voiceTyping/vosk';
 import { ChangeEvent as EditorChangeEvent, SelectionRangeChangeEvent, UndoRedoDepthChangeEvent } from '@joplin/editor/events';
 import { join } from 'path';
 import { Dispatch } from 'redux';
-import { RefObject, useContext, useRef } from 'react';
+import { RefObject, useContext } from 'react';
 import { SelectionRange } from '../../NoteEditor/types';
 import { getNoteCallbackUrl } from '@joplin/lib/callbackUrlUtils';
 import { AppState } from '../../../utils/types';
@@ -1615,19 +1615,9 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 // which can cause some bugs where previously set state to another note would interfere
 // how the new note should be rendered
 const NoteScreenWrapper = (props: Props) => {
-	const lastNonNullNoteIdRef = useRef(props.noteId);
-	if (props.noteId) {
-		lastNonNullNoteIdRef.current = props.noteId;
-	}
-
-	// This keeps the current note open even if it's no longer present in selectedNoteIds.
-	// This might happen, for example, if the selected note is moved to an unselected
-	// folder.
-	const noteId = lastNonNullNoteIdRef.current;
-
 	const dialogs = useContext(DialogContext);
 	return (
-		<NoteScreenComponent key={noteId} dialogs={dialogs} {...props} noteId={noteId} />
+		<NoteScreenComponent key={props.noteId} dialogs={dialogs} {...props} />
 	);
 };
 
