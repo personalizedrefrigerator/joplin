@@ -62,6 +62,7 @@ import { CameraResult } from '../../CameraView/types';
 import { DialogContext, DialogControl } from '../../DialogManager';
 import { CommandRuntimeProps, EditorMode, PickerResponse } from './types';
 import commands from './commands';
+import { AttachFileAction, AttachFileOptions } from './commands/attachFile';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 const emptyArray: any[] = [];
@@ -83,6 +84,7 @@ interface Props extends BaseProps {
 	highlightedWords: string[];
 	noteHash: string;
 	toolbarEnabled: boolean;
+	newNoteAttachFileAction: AttachFileAction;
 }
 
 interface ComponentProps extends Props {
@@ -523,6 +525,19 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 		// has already been granted, it doesn't slow down opening the note. If it hasn't
 		// been granted, the popup will open anyway.
 		void this.requestGeoLocationPermissions();
+
+		if (this.props.newNoteAttachFileAction) {
+			setTimeout(async () => {
+				if (this.props.newNoteAttachFileAction === AttachFileAction.AttachDrawing) {
+					await this.drawPicture_onPress();
+				} else {
+					const options: AttachFileOptions = {
+						action: this.props.newNoteAttachFileAction,
+					};
+					await CommandService.instance().execute('attachFile', '', options);
+				}
+			}, 100);
+		}
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
@@ -1294,6 +1309,11 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 				done = true;
 			}
 
+			if (!this.noteEditorVisible()) {
+				logger.info(`Note editor is not visible - not setting focus on ${fieldToFocus}`);
+				done = true;
+			}
+
 			if (done) {
 				shim.clearInterval(this.focusUpdateIID_);
 				this.focusUpdateIID_ = null;
@@ -1373,6 +1393,10 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 
 	private voiceTypingDialog_onDismiss() {
 		this.setState({ voiceTypingDialogShown: false });
+	}
+
+	private noteEditorVisible() {
+		return !this.state.showCamera && !this.state.showImageEditor;
 	}
 
 	public render() {
@@ -1611,6 +1635,7 @@ const NoteScreen = connect((state: AppState) => {
 	return {
 		noteId: state.selectedNoteIds.length ? state.selectedNoteIds[0] : null,
 		noteHash: state.selectedNoteHash,
+		newNoteAttachFileAction: state.newNoteAttachFileAction,
 		itemType: state.selectedItemType,
 		folders: state.folders,
 		searchQuery: state.searchQuery,

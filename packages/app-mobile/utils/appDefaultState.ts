@@ -1,7 +1,6 @@
 import { defaultState } from '@joplin/lib/reducer';
 import { AppState } from './types';
 
-
 export const DEFAULT_ROUTE = {
 	type: 'NAV_GO',
 	routeName: 'Notes',
@@ -10,7 +9,6 @@ export const DEFAULT_ROUTE = {
 
 const appDefaultState: AppState = {
 	smartFilterId: undefined,
-	...defaultState,
 	keyboardVisible: false,
 	route: DEFAULT_ROUTE,
 	noteSelectionEnabled: false,
@@ -18,5 +16,7 @@ const appDefaultState: AppState = {
 	isOnMobileData: false,
 	disableSideMenuGestures: false,
 	showPanelsDialog: false,
+	newNoteAttachFileAction: null,
+	...defaultState,
 };
 export default appDefaultState;
