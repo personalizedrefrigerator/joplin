@@ -18,5 +18,8 @@ const appDefaultState: AppState = {
 	showPanelsDialog: false,
 	newNoteAttachFileAction: null,
 	...defaultState,
+
+	// On mobile, it's possible to select notes that aren't in the selected folder/tag/etc.
+	allowSelectionInOtherFolders: true,
 };
 export default appDefaultState;
