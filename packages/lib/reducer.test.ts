@@ -707,15 +707,17 @@ describe('reducer', () => {
 		}
 	});
 
-	// Regression test for #10589.
+	// Regression test for #10589 -- on mobile, in general, selectedNoteIds shouldn't be cleared
+	// when updating items.
 	it.each([
 		true, false,
-	])('should preserve note selection if specified while moving a note (preserveSelection: %j)', async (preserveSelection) => {
+	])('should preserve note selection if selecting in other folders is allowed (allowSelectionInOtherFolders: %j)', async (allowSelectionInOtherFolders) => {
 		const folders = await createNTestFolders(3);
 		const notes = await createNTestNotes(5, folders[0]);
 
 		// select the 1st folder and the 1st note
 		let state = initTestState(folders, 0, notes, [0]);
+		state = { ...state, allowSelectionInOtherFolders };
 		state = goToNote(notes, [0], state);
 
 		expect(state.selectedNoteIds).toHaveLength(1);
@@ -724,16 +726,13 @@ describe('reducer', () => {
 			state = reducer(state, action);
 		});
 
-		// Dispatching with preserveSelection should preserve the selected note (as is done on
-		// mobile).
 		await Note.moveToFolder(
 			state.selectedNoteIds[0],
 			folders[1].id,
-			preserveSelection ? { dispatchOptions: { preserveSelection: true } } : undefined,
 		);
 
 		expect(BaseModel.dispatch).toHaveBeenCalled();
-		if (preserveSelection) {
+		if (allowSelectionInOtherFolders) {
 			expect(state.selectedNoteIds).toMatchObject([notes[0].id]);
 		} else {
 			expect(state.selectedNoteIds).toMatchObject([notes[1].id]);

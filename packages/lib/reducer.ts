@@ -1153,7 +1153,7 @@ const reducer = produce((draft: Draft<State> = defaultState, action: any) => {
 					// For example, if the user drags the current note to a different folder,
 					// a new note should be selected.
 					// In some cases, however, the selection needs to be preserved (e.g. the mobile app).
-					const preserveSelection = action.preserveSelection || draft.allowSelectionInOtherFolders;
+					const preserveSelection = action.preserveSelection ?? draft.allowSelectionInOtherFolders;
 					if (noteFolderHasChanged && !preserveSelection) {
 						let newIndex = movedNotePreviousIndex;
 						if (newIndex >= newNotes.length) newIndex = newNotes.length - 1;
