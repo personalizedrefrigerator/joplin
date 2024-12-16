@@ -12,8 +12,7 @@ const goToNote = async (id: string, hash?: string, options: GotoNoteOptions = nu
 		...options,
 	};
 
-	const note = await Note.load(id);
-	if (!note) {
+	if (!(await Note.load(id))) {
 		throw new Error(`No note with id ${id}`);
 	}
 
