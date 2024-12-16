@@ -147,3 +147,6 @@ setsize
 Comprar
 seguidores
 devbox
+Ökonomie
+Favorite
+tablist
