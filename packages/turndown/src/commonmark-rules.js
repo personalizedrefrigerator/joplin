@@ -573,10 +573,11 @@ function imageMarkdownFromNode(node, options = null) {
         return false;
       }
 
-      // A closing tag is only necessary when the image would be in a list item
-      // by itself, and the next item is a list.
       const allChildren = [...parent.childNodes];
       const nonEmptyChildren = allChildren.filter(item => {
+        // Even if surrounded by #text nodes that only contain whitespace, Markdown after
+        // an <img> can still be incorrectly interpreted as HTML. Only non-empty #texts seem
+        // to prevent this.
         return item.nodeName !== '#text' || item.textContent.trim() !== '';
       });
 
