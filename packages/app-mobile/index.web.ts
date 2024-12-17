@@ -1,5 +1,9 @@
 import { AppRegistry } from 'react-native';
 import Root from './root';
+import CommandService from '@joplin/lib/services/CommandService';
+import Note from '@joplin/lib/models/Note';
+import Tag from '@joplin/lib/models/Tag';
+import Folder from '@joplin/lib/models/Folder';
 
 require('./web/rnVectorIconsSetup.js');
 
@@ -11,6 +15,16 @@ interface ExtendedNavigator extends Navigator {
 	virtualKeyboard?: { overlaysContent: boolean };
 }
 declare const navigator: ExtendedNavigator;
+
+interface ExtendedWindow extends Window {
+	joplin: {
+		Note: typeof Note;
+		Tag: typeof Tag;
+		Folder: typeof Folder;
+		commands: CommandService;
+	};
+}
+declare const window: ExtendedWindow;
 
 // Should prevent the browser from auto-deleting background data.
 const requestPersistentStorage = async () => {
@@ -51,6 +65,19 @@ const keepAppAboveKeyboard = () => {
 	}
 };
 
+const registerDebugApis = () => {
+	if (__DEV__) {
+		window.joplin = {
+			Note,
+			Tag,
+			Folder,
+			get commands() {
+				return CommandService.instance();
+			},
+		};
+	}
+};
+
 addEventListener('DOMContentLoaded', async () => {
 	if (window.crossOriginIsolated === false) {
 		// Currently, reloading should be handled by serviceWorker.ts -- this change is left for
@@ -62,6 +89,7 @@ addEventListener('DOMContentLoaded', async () => {
 
 	keepAppAboveKeyboard();
 	void requestPersistentStorage();
+	registerDebugApis();
 
 	AppRegistry.runApplication('Joplin', {
 		rootTag: document.querySelector('#root'),
