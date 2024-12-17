@@ -563,6 +563,8 @@ function imageMarkdownFromNode(node, options = null) {
   if (options.preserveImageTagsWithSize && (node.getAttribute('width') || node.getAttribute('height'))) {
     let html = node.outerHTML;
 
+    // To prevent markup immediately after the image from being interpreted as HTML, a closing tag
+    // is sometimes necessary.
     const needsClosingTag = () => {
       const parent = node.parentElement;
       if (!parent || parent.nodeName !== 'LI') return false;
