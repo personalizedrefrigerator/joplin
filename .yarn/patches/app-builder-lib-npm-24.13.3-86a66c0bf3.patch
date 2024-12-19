@@ -1,3 +1,5 @@
+# This patch prevents the installer from considering itself as a running instance of Joplin.
+# See https://github.com/laurent22/joplin/pull/11541
 diff --git a/templates/nsis/include/allowOnlyOneInstallerInstance.nsh b/templates/nsis/include/allowOnlyOneInstallerInstance.nsh
 index fe5d45c730f36c9fe8d8cfea12e242e501b67139..af2ce5c90ac910b079e24992519bffe33d57668a 100644
 --- a/templates/nsis/include/allowOnlyOneInstallerInstance.nsh
