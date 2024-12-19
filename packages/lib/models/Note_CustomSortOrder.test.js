@@ -259,13 +259,9 @@ describe('models/Note_CustomSortOrder', () => {
 		// Post-reorder, the updated note is not at the index requested, but
 		// as close as possible: at the top edge of its window.
 		const resortedNotes2 = await sortNotes();
-		expect(resortedNotes2.length).toBe(6);
-		expect(resortedNotes2[0].id).toBe(resortedNotes1[0].id);
-		expect(resortedNotes2[1].id).toBe(resortedNotes1[1].id);
-		expect(resortedNotes2[2].id).toBe(resortedNotes1[2].id);
-		expect(resortedNotes2[3].id).toBe(resortedNotes1[4].id);
-		expect(resortedNotes2[4].id).toBe(resortedNotes1[3].id);
-		expect(resortedNotes2[5].id).toBe(resortedNotes1[5].id);
+		expect(resortedNotes2.map(note => note.id)).toEqual([
+			0, 1, 2, 4, 3, 5
+		].map(index => resortedNotes1[index].id));
 
 		// Limit reorder - place an uncompleted todo into another window
 		await Note.insertNotesAt(folder1.id, [resortedNotes2[0].id], 4, true, false);
@@ -282,4 +278,57 @@ describe('models/Note_CustomSortOrder', () => {
 		expect(resortedNotes3[5].id).toBe(resortedNotes2[5].id);
 	}));
 
+	it('should handle floating-point orders', async () => {
+		const folder1 = await Folder.save({});
+
+		const orders = [
+			0.00029208307766476335,
+			0.0002919084705921691,
+			0.0002918968301206628,
+			0.00029171058257656217,
+			0.00014585529128828109,
+		];
+
+		const notes = [];
+		for (const order of orders) {
+			notes.push(await Note.save({ order, parent_id: folder1.id }));
+			await time.msleep(2);
+		}
+
+		const sortedNoteIds = async () => (await Note.previews(folder1.id, {
+			fields: ['id', 'order'],
+			order: Note.customOrderByColumns(),
+		})).map(note => note.id);
+
+		expect(await sortedNoteIds()).toEqual(notes.map(note => note.id));
+
+		const toMove = notes[1];
+
+		await Note.insertNotesAt(folder1.id, [toMove.id], 2, false, false);
+		expect(await sortedNoteIds()).toEqual([
+			notes[0].id,
+			notes[2].id,
+			notes[1].id,
+			notes[3].id,
+			notes[4].id,
+		]);
+		
+		await Note.insertNotesAt(folder1.id, [toMove.id], 3, false, false);
+		expect(await sortedNoteIds()).toEqual([
+			notes[0].id,
+			notes[2].id,
+			notes[3].id,
+			notes[1].id,
+			notes[4].id,
+		]);
+
+		await Note.insertNotesAt(folder1.id, [toMove.id], 2, false, false);
+		expect(await sortedNoteIds()).toEqual([
+			notes[0].id,
+			notes[2].id,
+			notes[1].id,
+			notes[3].id,
+			notes[4].id,
+		]);
+	});
 });

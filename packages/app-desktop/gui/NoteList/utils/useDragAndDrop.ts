@@ -4,6 +4,8 @@ import Note from '@joplin/lib/models/Note';
 import canManuallySortNotes from './canManuallySortNotes';
 import { Size } from '@joplin/utils/types';
 import { ItemFlow } from '@joplin/lib/services/plugins/api/noteListType';
+import BaseModel from '@joplin/lib/BaseModel';
+import { NoteEntity } from '@joplin/lib/services/database/types';
 
 const useDragAndDrop = (
 	parentFolderIsReadOnly: boolean,
@@ -19,6 +21,7 @@ const useDragAndDrop = (
 	flow: ItemFlow,
 	itemsPerLine: number,
 	selectedFolderInTrash: boolean,
+	notes: NoteEntity[]
 ) => {
 	const [dragOverTargetNoteIndex, setDragOverTargetNoteIndex] = useState(null);
 
@@ -61,6 +64,23 @@ const useDragAndDrop = (
 	const dragTargetNoteIndex = useCallback((event: React.DragEvent) => {
 		const rect = listRef.current.getBoundingClientRect();
 		const lineIndexFloat = (event.clientY - rect.top + scrollTop) / itemSize.height;
+		(window as any).testElement ??= (() => {
+			const t = document.createElement('div');
+			t.style.backgroundColor = 'red';
+			t.style.border = '1px solid blue';
+			t.style.width = '3px';
+			t.style.height = '3px';
+			t.style.opacity = '0.4';
+			t.style.pointerEvents = 'none';
+			t.style.position = 'fixed';
+			t.style.left = 'var(--t-left)';
+			t.style.top = 'var(--t-top)';
+			document.body.appendChild(t);
+			return t;
+		})();
+		document.body.style.setProperty('--t-left', `${event.clientX}px`);
+		document.body.style.setProperty('--t-top', `${event.clientY}px`);
+
 		if (flow === ItemFlow.TopToBottom) {
 			return Math.abs(Math.round(lineIndexFloat));
 		} else {
@@ -78,6 +98,7 @@ const useDragAndDrop = (
 		const dt = event.dataTransfer;
 
 		if (dt.types.indexOf('text/x-jop-note-ids') >= 0) {
+			console.log('dragover');
 			event.preventDefault();
 			const newIndex = dragTargetNoteIndex(event);
 			if (dragOverTargetNoteIndex === newIndex) return;
@@ -86,8 +107,10 @@ const useDragAndDrop = (
 	}, [notesParentType, dragTargetNoteIndex, dragOverTargetNoteIndex, selectedFolderInTrash]);
 
 	const onDrop: DragEventHandler = useCallback(async (event) => {
+		console.log('drop')
 		const dt = event.dataTransfer;
 		if (!dt.types.includes('text/x-jop-note-ids')) return;
+		console.log('..a');
 
 		// TODO: check that parent type is folder
 		if (!canManuallySortNotes(notesParentType, noteSortOrder, selectedFolderInTrash)) return;
@@ -96,11 +119,15 @@ const useDragAndDrop = (
 
 		const targetNoteIndex = dragTargetNoteIndex(event);
 		const noteIds: string[] = JSON.parse(dt.getData('text/x-jop-note-ids'));
+		const originalNoteIndex = BaseModel.modelIndexById(notes, noteIds[0]);
+		console.debug('reorder notes', { originalNoteIndex, targetNoteIndex, noteIds });
+		console.debug('reorder notes.. from', (await Note.load(noteIds[0])).order)
 
 		await Note.insertNotesAt(selectedFolderId, noteIds, targetNoteIndex, uncompletedTodosOnTop, showCompletedTodos);
+		console.debug('reorder notes.. to', (await Note.load(noteIds[0])).order)
 	}, [notesParentType, dragTargetNoteIndex, noteSortOrder, selectedFolderId, uncompletedTodosOnTop, showCompletedTodos, selectedFolderInTrash]);
 
-	return { onDragStart, onDragOver, onDrop, dragOverTargetNoteIndex };
+	return { onDragStart, onDragOver, onDrop, notes, dragOverTargetNoteIndex };
 };
 
 export default useDragAndDrop;

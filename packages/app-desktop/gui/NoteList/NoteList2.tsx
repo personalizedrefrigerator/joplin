@@ -149,6 +149,7 @@ const NoteList = (props: Props) => {
 		listRenderer.flow,
 		itemsPerLine,
 		props.selectedFolderInTrash,
+		props.notes
 	);
 
 	// 2024-04-01: Whatever the below effect is supposed to be doing has been lost in time and even
