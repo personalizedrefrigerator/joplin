@@ -27,6 +27,9 @@ export interface ConfigScreenStyleSheet {
 	switchSettingContainer: ViewStyle;
 	switchSettingControl: TextStyle;
 
+	iconButton: ViewStyle;
+	iconButtonText: TextStyle;
+
 	sidebarButton: SidebarButtonStyle;
 	sidebarIcon: TextStyle;
 	selectedSidebarButton: SidebarButtonStyle;
@@ -162,6 +165,16 @@ const configScreenStyles = (themeId: number): ConfigScreenStyles => {
 		},
 		settingControl: settingControlStyle,
 		textInput: {
+			color: theme.color,
+		},
+		iconButton: {
+			paddingTop: theme.marginTop,
+			paddingBottom: theme.marginBottom,
+			paddingLeft: theme.marginLeft,
+			paddingRight: theme.marginRight,
+		},
+		iconButtonText: {
+			fontSize: theme.fontSizeLarge,
 			color: theme.color,
 		},
 
