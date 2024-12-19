@@ -15673,6 +15673,49 @@ __metadata:
   languageName: node
   linkType: hard
 
+"app-builder-lib@patch:app-builder-lib@npm%3A26.0.0-alpha.7#./.yarn/patches/app-builder-lib-npm-26.0.0-alpha.7-e1b3dca119.patch::locator=root%40workspace%3A.":
+  version: 26.0.0-alpha.7
+  resolution: "app-builder-lib@patch:app-builder-lib@npm%3A26.0.0-alpha.7#./.yarn/patches/app-builder-lib-npm-26.0.0-alpha.7-e1b3dca119.patch::version=26.0.0-alpha.7&hash=4b8476&locator=root%40workspace%3A."
+  dependencies:
+    "@develar/schema-utils": ~2.6.5
+    "@electron/asar": 3.2.17
+    "@electron/fuses": ^1.8.0
+    "@electron/notarize": 2.5.0
+    "@electron/osx-sign": 1.3.1
+    "@electron/rebuild": 3.7.0
+    "@electron/universal": 2.0.1
+    "@malept/flatpak-bundler": ^0.4.0
+    "@types/fs-extra": 9.0.13
+    async-exit-hook: ^2.0.1
+    bluebird-lst: ^1.0.9
+    builder-util: 26.0.0-alpha.7
+    builder-util-runtime: 9.2.10
+    chromium-pickle-js: ^0.2.0
+    config-file-ts: 0.2.8-rc1
+    debug: ^4.3.4
+    dotenv: ^16.4.5
+    dotenv-expand: ^11.0.6
+    ejs: ^3.1.8
+    electron-publish: 26.0.0-alpha.7
+    fs-extra: ^10.1.0
+    hosted-git-info: ^4.1.0
+    is-ci: ^3.0.0
+    isbinaryfile: ^5.0.0
+    js-yaml: ^4.1.0
+    json5: ^2.2.3
+    lazy-val: ^1.0.5
+    minimatch: ^10.0.0
+    resedit: ^1.7.0
+    semver: ^7.3.8
+    tar: ^6.1.12
+    temp-file: ^3.4.0
+  peerDependencies:
+    dmg-builder: 26.0.0-alpha.7
+    electron-builder-squirrel-windows: 26.0.0-alpha.7
+  checksum: 029ae7a08a044ad84d461d478ff7a8907adea7518a38be8624fa59b76be0eaf26b675beef8180a0b9b1b238400f700a7f6055c328b902af7e6a45cef4ae53ab2
+  languageName: node
+  linkType: hard
+
 "app-module-path@npm:^2.2.0":
   version: 2.2.0
   resolution: "app-module-path@npm:2.2.0"

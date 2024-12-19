@@ -1,0 +1,13 @@
+diff --git a/templates/nsis/include/allowOnlyOneInstallerInstance.nsh b/templates/nsis/include/allowOnlyOneInstallerInstance.nsh
+index 97b27fce6798e30e3e631221435f09b3579e77c3..d5bceb55090c6a88a8c267ffc49ae7f8c2f77708 100644
+--- a/templates/nsis/include/allowOnlyOneInstallerInstance.nsh
++++ b/templates/nsis/include/allowOnlyOneInstallerInstance.nsh
+@@ -42,7 +42,7 @@
+     ${nsProcess::FindProcess} "${_FILE}" ${_ERR}
+   !else
+     # find process owned by current user
+-    nsExec::Exec `"$SYSDIR\cmd.exe" /c tasklist /FI "USERNAME eq %USERNAME%" /FI "IMAGENAME eq ${_FILE}" /FO csv | "$SYSDIR\find.exe" "${_FILE}"`
++    nsExec::Exec `"$SYSDIR\cmd.exe" /c tasklist /FI "USERNAME eq %USERNAME%" /FI "PID ne $pid" /FI "IMAGENAME eq ${_FILE}" /FO csv | "$SYSDIR\find.exe" "${_FILE}"`
+     Pop ${_ERR}
+   !endif
+ !macroend
