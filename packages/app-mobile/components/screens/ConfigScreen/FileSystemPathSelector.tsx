@@ -25,12 +25,10 @@ type ExtendedSelf = (typeof window.self) & {
 };
 declare const self: ExtendedSelf;
 
-const styles = StyleSheet.create({
+const pathSelectorStyles = StyleSheet.create({
 	container: {
-		paddingTop: 0,
-		paddingLeft: 0,
-		paddingRight: 0,
-		paddingBottom: 0,
+		flexDirection: 'row',
+		alignItems: 'center',
 	},
 	mainButton: {
 		flexGrow: 1,
@@ -97,13 +95,13 @@ const FileSystemPathSelector: FunctionComponent<Props> = props => {
 		/>
 	);
 
-	return <View style={[styleSheet.settingContainer, styles.container]}>
+	return <View style={pathSelectorStyles.container}>
 		<TouchableRipple
 			onPress={selectDirectoryButtonPress}
-			style={styles.mainButton}
+			style={pathSelectorStyles.mainButton}
 			role='button'
 		>
-			<View style={styles.buttonContent}>
+			<View style={pathSelectorStyles.buttonContent}>
 				<Text key="label" style={styleSheet.settingText}>
 					{props.settingMetadata.label()}
 				</Text>
