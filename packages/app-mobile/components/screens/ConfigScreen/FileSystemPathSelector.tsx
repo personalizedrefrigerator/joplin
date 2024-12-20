@@ -9,9 +9,8 @@ import { openDocumentTree } from '@joplin/react-native-saf-x';
 import { UpdateSettingValueCallback } from './types';
 import { reg } from '@joplin/lib/registry';
 import type FsDriverWeb from '../../../utils/fs-driver/fs-driver-rn.web';
-import { TouchableRipple } from 'react-native-paper';
+import { IconButton, TouchableRipple } from 'react-native-paper';
 import { _ } from '@joplin/lib/locale';
-import IconButton from '../../IconButton';
 
 interface Props {
 	themeId: number;
@@ -92,11 +91,8 @@ const FileSystemPathSelector: FunctionComponent<Props> = props => {
 
 	const clearButton = (
 		<IconButton
-			iconName='material delete'
-			description={_('Clear')}
-			iconStyle={styleSheet.iconButtonText}
-			contentWrapperStyle={styleSheet.iconButton}
-			themeId={props.themeId}
+			icon='delete'
+			accessibilityLabel={_('Clear')}
 			onPress={clearPathButtonPress}
 		/>
 	);
