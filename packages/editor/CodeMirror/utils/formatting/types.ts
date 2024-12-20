@@ -1,5 +1,5 @@
-import { ChangeSpec, SelectionRange, StateEffect } from '@codemirror/state';
+import { ChangeSpec, SelectionRange } from '@codemirror/state';
 
 // Specifies the update of a single selection region and its contents
-export type SelectionUpdate = { range: SelectionRange; changes?: ChangeSpec; effects?: StateEffect<unknown>[] };
+export type SelectionUpdate = { range: SelectionRange; changes?: ChangeSpec };
 

@@ -97,7 +97,6 @@ const SearchScreenComponent: React.FC<Props> = props => {
 					<TextInput
 						style={styles.searchTextInput}
 						autoFocus={props.visible}
-						accessibilityLabel={_('Search')}
 						underlineColorAndroid="#ffffff00"
 						onChangeText={setQuery}
 						value={query}

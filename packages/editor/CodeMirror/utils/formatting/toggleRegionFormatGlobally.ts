@@ -3,7 +3,6 @@ import { RegionSpec } from './RegionSpec';
 import findInlineMatch, { MatchSide } from './findInlineMatch';
 import growSelectionToNode from '../growSelectionToNode';
 import toggleInlineSelectionFormat from './toggleInlineSelectionFormat';
-import { EditorView } from '@codemirror/view';
 
 const blockQuoteStartLen = '> '.length;
 const blockQuoteRegex = /^>\s/;
@@ -99,11 +98,6 @@ const toggleRegionFormatGlobally = (
 				],
 
 				range: EditorSelection.cursor(inlineStart + blockStart.length),
-				effects: [
-					EditorView.announce.of(
-						state.phrase('Converted $1 to $2', inlineSpec.accessibleName, blockSpec.accessibleName),
-					),
-				],
 			};
 		}
 
@@ -152,7 +146,6 @@ const toggleRegionFormatGlobally = (
 		// Otherwise, we're toggling the block version
 		const startMatch = blockSpec.matcher.start.exec(fromLineText);
 		const stopMatch = blockSpec.matcher.end.exec(toLineText);
-		let announcement;
 		if (startMatch && stopMatch) {
 			// Get start and stop indices for the starting and ending matches
 			const [fromMatchFrom, fromMatchTo] = getMatchEndPoints(startMatch, fromLine, inBlockQuote);
@@ -171,8 +164,6 @@ const toggleRegionFormatGlobally = (
 				to: toMatchTo,
 			});
 			charsAdded -= toMatchTo - toMatchFrom;
-
-			announcement = state.phrase('Removed $ markup', blockSpec.accessibleName);
 		} else {
 			let insertBefore, insertAfter;
 
@@ -194,27 +185,15 @@ const toggleRegionFormatGlobally = (
 				insert: insertAfter,
 			});
 			charsAdded += insertBefore.length + insertAfter.length;
-
-			announcement = state.phrase('Added $ markup', blockSpec.accessibleName);
-		}
-
-		const range = EditorSelection.range(
-			fromLine.from, toLine.to + charsAdded,
-		);
-
-		if (!range.empty) {
-			announcement += `\n${state.phrase('Selected changed content')}`;
 		}
 
 		return {
 			changes,
 
 			// Selection should now encompass all lines that were changed.
-			range,
-
-			effects: [
-				EditorView.announce.of(announcement),
-			],
+			range: EditorSelection.range(
+				fromLine.from, toLine.to + charsAdded,
+			),
 		};
 	});
 

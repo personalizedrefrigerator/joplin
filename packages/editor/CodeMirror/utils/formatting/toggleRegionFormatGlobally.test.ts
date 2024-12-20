@@ -12,12 +12,10 @@ describe('toggleRegionFormatGlobally', () => {
 	const inlineCodeRegionSpec = RegionSpec.of({
 		template: '`',
 		nodeName: 'InlineCode',
-		accessibleName: 'Inline code',
 	});
 	const blockCodeRegionSpec: RegionSpec = {
 		template: { start: '``````', end: '``````' },
 		matcher: { start: codeFenceRegex, end: codeFenceRegex },
-		accessibleName: 'Block code',
 	};
 
 	it('should create an empty inline region around the cursor, if given an empty selection', () => {

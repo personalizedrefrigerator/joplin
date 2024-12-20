@@ -1,25 +1,19 @@
 import { EditorSelection, EditorState, Line, SelectionRange, TransactionSpec } from '@codemirror/state';
 import growSelectionToNode from '../growSelectionToNode';
-import { EditorView } from '@codemirror/view';
-
-interface FormattingSpec {
-	regex: RegExp;
-	template: string;
-	matchEmpty: boolean;
-
-	// Determines where this formatting can begin on a line.
-	// Defaults to after a block quote marker
-	lineContentStartRegex?: RegExp;
-	// Syntax name associated with what [regex] matches (e.g. FencedCode)
-	nodeName?: string;
-
-	accessibleName: string;
-}
 
 // Toggles whether all lines in the user's selection start with [regex].
 const toggleSelectedLinesStartWith = (
 	state: EditorState,
-	{ regex, template, matchEmpty, lineContentStartRegex = /^>\s/, nodeName, accessibleName }: FormattingSpec,
+	regex: RegExp,
+	template: string,
+	matchEmpty: boolean,
+
+	// Determines where this formatting can begin on a line.
+	// Defaults to after a block quote marker
+	lineContentStartRegex = /^>\s/,
+
+	// Name associated with what [regex] matches (e.g. FencedCode)
+	nodeName?: string,
 ): TransactionSpec => {
 	const getLineContentStart = (line: Line): number => {
 		const blockQuoteMatch = line.text.match(lineContentStartRegex);
@@ -44,7 +38,7 @@ const toggleSelectedLinesStartWith = (
 		const doc = state.doc;
 		const fromLine = doc.lineAt(sel.from);
 		const toLine = doc.lineAt(sel.to);
-		let alreadyHasFormatting = false;
+		let hasProp = false;
 		let charsAdded = 0;
 		let charsAddedBefore = 0;
 
@@ -57,7 +51,7 @@ const toggleSelectedLinesStartWith = (
 
 			// If already matching [regex],
 			if (text.search(regex) === 0) {
-				alreadyHasFormatting = true;
+				hasProp = true;
 			}
 
 			lines.push(line);
@@ -74,23 +68,24 @@ const toggleSelectedLinesStartWith = (
 				continue;
 			}
 
-			if (alreadyHasFormatting) {
+			if (hasProp) {
 				const match = text.match(regex);
-				if (match) {
-					changes.push({
-						from: contentFrom,
-						to: contentFrom + match[0].length,
-						insert: '',
-					});
-
-					const deletedSize = match[0].length;
-					if (contentFrom <= sel.from) {
-						// Math.min: Handles the case where some deleted characters are before sel.from
-						// and others are after.
-						charsAddedBefore -= Math.min(sel.from - contentFrom, deletedSize);
-					}
-					charsAdded -= deletedSize;
+				if (!match) {
+					continue;
 				}
+				changes.push({
+					from: contentFrom,
+					to: contentFrom + match[0].length,
+					insert: '',
+				});
+
+				const deletedSize = match[0].length;
+				if (contentFrom <= sel.from) {
+					// Math.min: Handles the case where some deleted characters are before sel.from
+					// and others are after.
+					charsAddedBefore -= Math.min(sel.from - contentFrom, deletedSize);
+				}
+				charsAdded -= deletedSize;
 			} else {
 				changes.push({
 					from: contentFrom,
@@ -114,22 +109,11 @@ const toggleSelectedLinesStartWith = (
 			newSel = EditorSelection.range(fromLine.from, toLine.to + charsAdded);
 		}
 
-		let announcement = '';
-		if (charsAdded > 0) {
-			announcement = state.phrase('Added $ markup', accessibleName);
-		} else if (charsAdded < 0) {
-			announcement = state.phrase('Removed $ markup', accessibleName);
-		}
-
 		return {
 			changes,
 
 			// Selection should now encompass all lines that were changed.
 			range: newSel,
-
-			effects: announcement ? [
-				EditorView.announce.of(announcement),
-			] : [],
 		};
 	});
 
