@@ -35,6 +35,7 @@ interface Props {
 	showCompletedTodos: boolean;
 	noteSelectionEnabled: boolean;
 
+	selectedNoteIds: string[];
 	activeFolderId: string;
 	selectedFolderId: string;
 	selectedTagId: string;

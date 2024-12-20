@@ -16,6 +16,7 @@ import { assetsToHeaders } from '@joplin/renderer';
 import getPluginSettingValue from '../plugins/utils/getPluginSettingValue';
 import { LinkRenderingType } from '@joplin/renderer/MdToHtml';
 import Logger from '@joplin/utils/Logger';
+import { parseRenderedNoteMetadata } from './utils';
 
 const logger = Logger.create('InteropService_Exporter_Html');
 
@@ -128,8 +129,11 @@ export default class InteropService_Exporter_Html extends InteropService_Exporte
 					},
 				},
 			});
+
 			const noteContent = [];
-			if (item.title) noteContent.push(`<div class="exported-note-title">${escapeHtml(item.title)}</div>`);
+			const metadata = parseRenderedNoteMetadata(result.html ? result.html : '');
+			if (!metadata.printTitle) logger.info('Not printing title because joplin-metadata-print-title tag is set to false');
+			if (metadata.printTitle && item.title) noteContent.push(`<div class="exported-note-title">${escapeHtml(item.title)}</div>`);
 			if (result.html) noteContent.push(result.html);
 
 			const libRootPath = dirname(dirname(__dirname));

@@ -50,6 +50,11 @@ export interface RenderOptions {
 
 	resources?: Record<string, ResourceEntity>;
 
+	onResourceLoaded?: ()=> void;
+	editPopupFiletypes?: string[];
+	createEditPopupSyntax?: string;
+	destroyEditPopupSyntax?: string;
+
 	// HtmlToHtml only
 	whiteBackgroundNoteRendering?: boolean;
 }

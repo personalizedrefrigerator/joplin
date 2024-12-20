@@ -1029,7 +1029,7 @@ PODS:
     - Yoga
   - react-native-image-resizer (3.0.10):
     - React-Core
-  - react-native-netinfo (11.3.2):
+  - react-native-netinfo (11.3.3):
     - React-Core
   - react-native-quick-crypto (0.7.5):
     - DoubleConversion
@@ -1056,7 +1056,7 @@ PODS:
     - Yoga
   - react-native-rsa-native (2.0.5):
     - React
-  - react-native-saf-x (3.2.0):
+  - react-native-saf-x (3.2.4):
     - React-Core
   - react-native-safe-area-context (4.10.8):
     - React-Core
@@ -1725,10 +1725,10 @@ SPEC CHECKSUMS:
   react-native-get-random-values: 21325b2244dfa6b58878f51f9aa42821e7ba3d06
   react-native-image-picker: d3a65af2538ac5407e5329e50f057fb2456f15f8
   react-native-image-resizer: fd0c333eca55147bd55c5e054cac95dcd0da6814
-  react-native-netinfo: 076df4f9b07f6670acf4ce9a75aac8d34c2e2ccc
+  react-native-netinfo: 9af975c142e5673d643093aa5afdfa26f46b71b4
   react-native-quick-crypto: 7085e4e4607e7e8fa57f4193f994d5262d351e45
   react-native-rsa-native: 12132eb627797529fdb1f0d22fd0f8f9678df64a
-  react-native-saf-x: 4eb5df05a53de42a943e8c460e1fff8d1d0df770
+  react-native-saf-x: 2b561a9a31413dc594cf2b56a3a8736836b0cf9f
   react-native-safe-area-context: b7daa1a8df36095a032dff095a1ea8963cb48371
   react-native-slider: 03f213d3ffbf919b16298c7896c1b60101d8e137
   react-native-sqlite-storage: f6d515e1c446d1e6d026aa5352908a25d4de3261
@@ -1776,4 +1776,4 @@ SPEC CHECKSUMS:
 
 PODFILE CHECKSUM: 11a2f8ebab99f816b8905858bff8a86a196b1f7e
 
-COCOAPODS: 1.16.1
+COCOAPODS: 1.16.2

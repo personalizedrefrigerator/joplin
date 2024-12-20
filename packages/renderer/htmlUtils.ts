@@ -260,6 +260,10 @@ class HtmlUtils {
 
 		const parser = new htmlparser2.Parser({
 
+			oncomment: (encodedData: string) => {
+				output.push(`<!--${encodedData}-->`);
+			},
+
 			onopentag: (name: string, attrs: Record<string, string>) => {
 				// Note: "name" and attribute names are always lowercase even
 				// when the input is not. So there is no need to call

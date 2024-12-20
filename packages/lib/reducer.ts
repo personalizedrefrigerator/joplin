@@ -169,6 +169,8 @@ export interface State extends WindowState {
 	mustUpgradeAppMessage: string;
 	mustAuthenticate: boolean;
 
+	allowSelectionInOtherFolders: boolean;
+
 	// Extra reducer keys go here:
 	pluginService: PluginServiceState;
 	shareService: ShareServiceState;
@@ -236,6 +238,7 @@ export const defaultState: State = {
 	lastDeletionNotificationTime: 0,
 	mustUpgradeAppMessage: '',
 	mustAuthenticate: false,
+	allowSelectionInOtherFolders: false,
 
 	pluginService: pluginServiceDefaultState,
 	shareService: shareServiceDefaultState,
@@ -1080,7 +1083,9 @@ const reducer = produce((draft: Draft<State> = defaultState, action: any) => {
 			draft.notes = action.notes;
 			draft.notesSource = action.notesSource;
 			draft.noteListLastSortTime = Date.now(); // Notes are already sorted when they are set this way.
-			updateSelectedNotesFromExistingNotes(draft);
+			if (!draft.allowSelectionInOtherFolders) {
+				updateSelectedNotesFromExistingNotes(draft);
+			}
 			break;
 
 			// Insert the note into the note list if it's new, or
@@ -1148,7 +1153,8 @@ const reducer = produce((draft: Draft<State> = defaultState, action: any) => {
 					// For example, if the user drags the current note to a different folder,
 					// a new note should be selected.
 					// In some cases, however, the selection needs to be preserved (e.g. the mobile app).
-					if (noteFolderHasChanged && !action.preserveSelection) {
+					const preserveSelection = action.preserveSelection ?? draft.allowSelectionInOtherFolders;
+					if (noteFolderHasChanged && !preserveSelection) {
 						let newIndex = movedNotePreviousIndex;
 						if (newIndex >= newNotes.length) newIndex = newNotes.length - 1;
 						if (!newNotes.length) newIndex = -1;

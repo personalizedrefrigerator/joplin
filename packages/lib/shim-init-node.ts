@@ -18,6 +18,7 @@ import crypto from './services/e2ee/crypto';
 import FileApiDriverLocal from './file-api-driver-local';
 import * as mimeUtils from './mime-utils';
 import BaseItem from './models/BaseItem';
+import { Size } from '@joplin/utils/types';
 const { _ } = require('./locale');
 const http = require('http');
 const https = require('https');
@@ -146,6 +147,10 @@ function shimInit(options: ShimInitOptions = null) {
 		return shim.fsDriver_;
 	};
 
+	shim.sharpEnabled = () => {
+		return !!sharp;
+	};
+
 	shim.dgram = () => {
 		return dgram;
 	};
@@ -270,10 +275,17 @@ function shimInit(options: ShimInitOptions = null) {
 			return await saveOriginalImage();
 		} else {
 			// For the CLI tool
-			const image = sharp(filePath);
-			const md = await image.metadata();
 
-			if (md.width <= maxDim && md.height <= maxDim) {
+			let md: Size = null;
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+			let image: any = null;
+
+			if (sharp) {
+				image = sharp(filePath);
+				md = await image.metadata();
+			}
+
+			if (!md || (md.width <= maxDim && md.height <= maxDim)) {
 				await shim.fsDriver().copy(filePath, targetPath);
 				return true;
 			}
@@ -453,7 +465,7 @@ function shimInit(options: ShimInitOptions = null) {
 		} else {
 			throw new Error('Unsupported method');
 		}
-	},
+	};
 
 	shim.imageFromDataUrl = async function(imageDataUrl, filePath, options = null) {
 		if (options === null) options = {};

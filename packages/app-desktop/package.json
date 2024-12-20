@@ -1,6 +1,6 @@
 {
   "name": "@joplin/app-desktop",
-  "version": "3.2.3",
+  "version": "3.2.5",
   "description": "Joplin for Desktop",
   "main": "main.js",
   "private": true,
@@ -118,7 +118,13 @@
         "Icon": "joplin",
         "MimeType": "x-scheme-handler/joplin;"
       },
-      "target": "AppImage"
+      "target": [
+        "AppImage",
+        "deb"
+      ],
+      "executableName": "joplin",
+      "maintainer": "Joplin Team <no-reply@joplinapp.org>",
+      "artifactName": "Joplin-${version}.${ext}"
     }
   },
   "homepage": "https://github.com/laurent22/joplin#readme",

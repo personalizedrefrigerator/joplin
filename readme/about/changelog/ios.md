@@ -1,5 +1,42 @@
 # Joplin iOS Changelog
 
+## [ios-v13.2.2](https://github.com/laurent22/joplin/releases/tag/ios-v13.2.2) - 2024-12-12T16:39:28Z
+
+- New: Accessibility: Add checked/unchecked accessibility information to the "sort notes by" dialog (#11411 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- New: Add new encryption methods based on native crypto libraries (#10696 by Self Not Found)
+- New: Add setting to disable markup autocompletion (#11222 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- New: Add support for overwrite mode in the Markdown editor (#11262 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Improved: Accessibility: Describe the notebook dropdown for accessibility tools (#11430 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Improved: Accessibility: Improve dialog accessibility (#11395 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Improved: Accessibility: Improve note list accessibility (#11419 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Improved: Accessibility: Improve note selection screen reader accessibility (#11424 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Improved: Accessibility: Improve screen reader accessibility of the tag list (#11420 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Improved: Accessibility: Improve setting control accessibility (#11358 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Improved: Accessibility: Improve side menu and heading screen reader accessibility (#11427 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Improved: Accessibility: Improve tag dialog screen reader accessibility (#11421 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Improved: Accessibility: Mark note properties buttons as buttons (#11432 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Improved: Accessibility: Search screen: Hide the progress bar from accessibility tools when invisible (#11431 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Improved: Allow user to generate deletion logs (#11083) (#10664 by [@pedr](https://github.com/pedr))
+- Improved: Camera screen: Support scanning QR codes (#11245 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Improved: Center sidebar icons (#11299 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Improved: Deprecated OneDrive sync method (e36f377)
+- Improved: Editor: Switch to a scrolling toolbar, allow adding/removing toolbar items (#11472 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Improved: Reactivate pCloud synchronisation (23032b9)
+- Improved: Remove the need for sync locks (#11377)
+- Improved: Removed deprecation notice on OneDrive sync method (ceea0bc)
+- Improved: Updated packages @adobe/css-tools (v4.4.0), @react-native-community/datetimepicker (v8.2.0), @react-native-community/geolocation (v3.3.0), @react-native-community/slider (v4.5.3), @react-native/babel-preset (v0.74.86), @react-native/metro-config (v0.74.87), compare-versions (v6.1.1), dayjs (v1.11.12), expo (v51.0.26), highlight.js (v11.10.0), jsdom (v24.1.1), react-native-localize (v3.2.1), react-native-paper (v5.12.5), react-native-quick-crypto (v0.7.2), react-native-safe-area-context (v4.10.8), react-native-webview (v13.10.5), sass (v1.77.8), url (v0.11.4)
+- Improved: Upgrade CodeMirror packages (#11221 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Improved: Use a FontAwesome icon for the trash folder (#11357) (#11202 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Improved: Updated packages @react-native-community/netinfo (v11.3.3)
+- Fixed: Accessibility: Fix screen reader is unable to scroll settings tab list (#11429 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Fix `undefined` errors in translations (#11407 by Self Not Found)
+- Fixed: Fix list renumbering in the Markdown editor resets the first list item number to 1 (#11220 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Fix race condition which may cause data loss, particularly before or after pasting text in the note editor (#11334) (#11317 by [@mrjo118](https://github.com/mrjo118))
+- Fixed: Fix switching notes then unloading app causes blank screen (#11396) (#11384 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Fix the error caused by undefined isCodeBlock_ (turndown-plugin-gfm) (#11471 by Manabu Nakazawa)
+- Fixed: Handle callback url triggered app launch (#11280) (#9204 by [@tiberiusteng](https://github.com/tiberiusteng))
+- Fixed: Upgrade CodeMirror packages (#11440) (#11318 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+
 ## [ios-v13.1.7](https://github.com/laurent22/joplin/releases/tag/ios-v13.1.7) - 2024-11-09T13:05:12Z
 
 - Fixed: Fix error on creating new notes if the user is a share recipient (#11326) (#11325 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))

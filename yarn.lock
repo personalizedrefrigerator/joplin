@@ -8364,12 +8364,12 @@ __metadata:
     "@joplin/tools": ~3.2
     "@joplin/utils": ~3.2
     "@js-draw/material-icons": 1.20.3
-    "@react-native-clipboard/clipboard": 1.14.1
+    "@react-native-clipboard/clipboard": 1.14.2
     "@react-native-community/datetimepicker": 8.2.0
     "@react-native-community/geolocation": 3.3.0
-    "@react-native-community/netinfo": 11.3.2
+    "@react-native-community/netinfo": 11.3.3
     "@react-native-community/push-notification-ios": 1.11.0
-    "@react-native-community/slider": 4.5.2
+    "@react-native-community/slider": 4.5.3
     "@react-native/babel-preset": 0.74.86
     "@react-native/metro-config": 0.74.87
     "@sqlite.org/sqlite-wasm": 3.46.0-build2
@@ -8382,7 +8382,7 @@ __metadata:
     "@types/react": 18.3.3
     "@types/react-native": 0.70.6
     "@types/react-redux": 7.1.33
-    "@types/serviceworker": 0.0.92
+    "@types/serviceworker": 0.0.95
     "@types/tar-stream": 3.1.3
     assert-browserify: 2.0.0
     babel-jest: 29.7.0
@@ -8533,7 +8533,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@joplin/fork-htmlparser2@^4.1.52, @joplin/fork-htmlparser2@workspace:packages/fork-htmlparser2":
+"@joplin/fork-htmlparser2@^4.1.56, @joplin/fork-htmlparser2@workspace:packages/fork-htmlparser2":
   version: 0.0.0-use.local
   resolution: "@joplin/fork-htmlparser2@workspace:packages/fork-htmlparser2"
   dependencies:
@@ -8554,7 +8554,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@joplin/fork-sax@^1.2.56, @joplin/fork-sax@workspace:packages/fork-sax":
+"@joplin/fork-sax@^1.2.60, @joplin/fork-sax@workspace:packages/fork-sax":
   version: 0.0.0-use.local
   resolution: "@joplin/fork-sax@workspace:packages/fork-sax"
   dependencies:
@@ -8563,7 +8563,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@joplin/fork-uslug@^1.0.17, @joplin/fork-uslug@workspace:packages/fork-uslug":
+"@joplin/fork-uslug@^1.0.21, @joplin/fork-uslug@workspace:packages/fork-uslug":
   version: 0.0.0-use.local
   resolution: "@joplin/fork-uslug@workspace:packages/fork-uslug"
   dependencies:
@@ -8573,12 +8573,12 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@joplin/htmlpack@workspace:packages/htmlpack, @joplin/htmlpack@~3.2":
+"@joplin/htmlpack@^3.2.4, @joplin/htmlpack@workspace:packages/htmlpack":
   version: 0.0.0-use.local
   resolution: "@joplin/htmlpack@workspace:packages/htmlpack"
   dependencies:
     "@adobe/css-tools": 4.4.0
-    "@joplin/fork-htmlparser2": ^4.1.52
+    "@joplin/fork-htmlparser2": ^4.1.56
     "@types/fs-extra": 11.0.4
     datauri: 4.1.0
     fs-extra: 11.2.0
@@ -8586,22 +8586,22 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@joplin/lib@workspace:packages/lib, @joplin/lib@~3.2":
+"@joplin/lib@^3.2.4, @joplin/lib@workspace:packages/lib, @joplin/lib@~3.2":
   version: 0.0.0-use.local
   resolution: "@joplin/lib@workspace:packages/lib"
   dependencies:
     "@adobe/css-tools": 4.4.0
     "@aws-sdk/client-s3": 3.296.0
     "@aws-sdk/s3-request-presigner": 3.296.0
-    "@joplin/fork-htmlparser2": ^4.1.52
-    "@joplin/fork-sax": ^1.2.56
-    "@joplin/fork-uslug": ^1.0.17
-    "@joplin/htmlpack": ~3.2
-    "@joplin/onenote-converter": 0.0.1
-    "@joplin/renderer": ~3.2
-    "@joplin/turndown": ^4.0.74
-    "@joplin/turndown-plugin-gfm": ^1.0.56
-    "@joplin/utils": ~3.2
+    "@joplin/fork-htmlparser2": ^4.1.56
+    "@joplin/fork-sax": ^1.2.60
+    "@joplin/fork-uslug": ^1.0.21
+    "@joplin/htmlpack": ^3.2.4
+    "@joplin/onenote-converter": ^3.2.4
+    "@joplin/renderer": ^3.2.4
+    "@joplin/turndown": ^4.0.78
+    "@joplin/turndown-plugin-gfm": ^1.0.60
+    "@joplin/utils": ^3.2.4
     "@testing-library/react-hooks": 8.0.1
     "@types/adm-zip": 0.5.5
     "@types/fs-extra": 11.0.4
@@ -8615,7 +8615,7 @@ __metadata:
     "@types/node-rsa": 1.1.4
     "@types/react": 18.3.3
     "@types/uuid": 9.0.7
-    adm-zip: 0.5.12
+    adm-zip: 0.5.16
     async-mutex: 0.5.0
     base-64: 1.0.0
     base64-stream: 1.0.0
@@ -8678,7 +8678,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@joplin/onenote-converter@0.0.1, @joplin/onenote-converter@workspace:packages/onenote-converter":
+"@joplin/onenote-converter@^3.2.4, @joplin/onenote-converter@workspace:packages/onenote-converter":
   version: 0.0.0-use.local
   resolution: "@joplin/onenote-converter@workspace:packages/onenote-converter"
   dependencies:
@@ -8722,9 +8722,9 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@joplin/plugin-repo-cli@workspace:packages/plugin-repo-cli"
   dependencies:
-    "@joplin/lib": ~3.2
-    "@joplin/tools": ~3.2
-    "@joplin/utils": ~3.2
+    "@joplin/lib": ^3.2.4
+    "@joplin/tools": ^3.2.4
+    "@joplin/utils": ^3.2.4
     "@types/fs-extra": 11.0.4
     "@types/jest": 29.5.12
     "@types/node": 18.19.50
@@ -8773,13 +8773,13 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@joplin/renderer@workspace:packages/renderer, @joplin/renderer@~3.2":
+"@joplin/renderer@^3.2.4, @joplin/renderer@workspace:packages/renderer, @joplin/renderer@~3.2":
   version: 0.0.0-use.local
   resolution: "@joplin/renderer@workspace:packages/renderer"
   dependencies:
-    "@joplin/fork-htmlparser2": ^4.1.52
-    "@joplin/fork-uslug": ^1.0.17
-    "@joplin/utils": ~3.2
+    "@joplin/fork-htmlparser2": ^4.1.56
+    "@joplin/fork-uslug": ^1.0.21
+    "@joplin/utils": ^3.2.4
     "@types/jest": 29.5.12
     "@types/markdown-it": 13.0.9
     "@types/node": 18.19.50
@@ -8836,7 +8836,7 @@ __metadata:
     "@types/nodemailer": 6.4.15
     "@types/uuid": 9.0.7
     "@types/yargs": 17.0.33
-    "@types/zxcvbn": 4.4.4
+    "@types/zxcvbn": 4.4.5
     bcryptjs: 2.4.3
     bulma: 1.0.2
     bulma-prefers-dark: 0.1.0-beta.1
@@ -8877,15 +8877,15 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@joplin/tools@workspace:packages/tools, @joplin/tools@~3.2":
+"@joplin/tools@^3.2.4, @joplin/tools@workspace:packages/tools, @joplin/tools@~3.2":
   version: 0.0.0-use.local
   resolution: "@joplin/tools@workspace:packages/tools"
   dependencies:
     "@docusaurus/plugin-sitemap": 2.4.3
-    "@joplin/fork-htmlparser2": ^4.1.52
-    "@joplin/lib": ~3.2
-    "@joplin/renderer": ~3.2
-    "@joplin/utils": ~3.2
+    "@joplin/fork-htmlparser2": ^4.1.56
+    "@joplin/lib": ^3.2.4
+    "@joplin/renderer": ^3.2.4
+    "@joplin/utils": ^3.2.4
     "@rmp135/sql-ts": 1.18.1
     "@types/fs-extra": 11.0.4
     "@types/jest": 29.5.12
@@ -8927,7 +8927,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@joplin/turndown-plugin-gfm@^1.0.56, @joplin/turndown-plugin-gfm@workspace:packages/turndown-plugin-gfm":
+"@joplin/turndown-plugin-gfm@^1.0.60, @joplin/turndown-plugin-gfm@workspace:packages/turndown-plugin-gfm":
   version: 0.0.0-use.local
   resolution: "@joplin/turndown-plugin-gfm@workspace:packages/turndown-plugin-gfm"
   dependencies:
@@ -8939,7 +8939,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@joplin/turndown@^4.0.74, @joplin/turndown@workspace:packages/turndown":
+"@joplin/turndown@^4.0.78, @joplin/turndown@workspace:packages/turndown":
   version: 0.0.0-use.local
   resolution: "@joplin/turndown@workspace:packages/turndown"
   dependencies:
@@ -8956,26 +8956,11 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@joplin/utils@npm:~2.12":
-  version: 2.12.1
-  resolution: "@joplin/utils@npm:2.12.1"
-  dependencies:
-    async-mutex: 0.4.0
-    execa: 5.1.1
-    fs-extra: 11.1.1
-    glob: 10.3.3
-    moment: 2.29.4
-    node-fetch: 2.6.7
-    sprintf-js: 1.1.2
-  checksum: dab823a7bb5d6d13c3d85c67dc669861aa0cdb89cee28cddceb280b43a235d7e058813b9724468b58532489fde25e0857098afe322286bd914e6096d1dc7ece7
-  languageName: node
-  linkType: hard
-
-"@joplin/utils@workspace:packages/utils, @joplin/utils@~3.2":
+"@joplin/utils@^3.2.4, @joplin/utils@workspace:packages/utils, @joplin/utils@~3.2":
   version: 0.0.0-use.local
   resolution: "@joplin/utils@workspace:packages/utils"
   dependencies:
-    "@joplin/fork-htmlparser2": ^4.1.52
+    "@joplin/fork-htmlparser2": ^4.1.56
     "@types/fs-extra": 11.0.4
     "@types/jest": 29.5.12
     "@types/markdown-it": 13.0.9
@@ -8994,6 +8979,21 @@ __metadata:
     ts-jest: 29.1.5
   languageName: unknown
   linkType: soft
+
+"@joplin/utils@npm:~2.12":
+  version: 2.12.1
+  resolution: "@joplin/utils@npm:2.12.1"
+  dependencies:
+    async-mutex: 0.4.0
+    execa: 5.1.1
+    fs-extra: 11.1.1
+    glob: 10.3.3
+    moment: 2.29.4
+    node-fetch: 2.6.7
+    sprintf-js: 1.1.2
+  checksum: dab823a7bb5d6d13c3d85c67dc669861aa0cdb89cee28cddceb280b43a235d7e058813b9724468b58532489fde25e0857098afe322286bd914e6096d1dc7ece7
+  languageName: node
+  linkType: hard
 
 "@jridgewell/gen-mapping@npm:^0.3.0":
   version: 0.3.3
@@ -10756,15 +10756,20 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-native-clipboard/clipboard@npm:1.14.1":
-  version: 1.14.1
-  resolution: "@react-native-clipboard/clipboard@npm:1.14.1"
+"@react-native-clipboard/clipboard@npm:1.14.2":
+  version: 1.14.2
+  resolution: "@react-native-clipboard/clipboard@npm:1.14.2"
   peerDependencies:
-    react: 16.9.0 || 16.11.0 || 16.13.1 || 17.0.1 || 17.0.2 || 18.0.0 || 18.1.0 || 18.2.0
-    react-native: ^0.61.5 || ^0.62.3 || ^0.63.2 || ^0.64.2 || ^0.65.0 || ^0.66.0 || ^0.67.0 || ^0.68.0 || ^0.69.0 || ^0.70.0 || ^0.71.0 || ^0.72.0 || ^0.73.0
-    react-native-macos: ^0.61.0 || ^0.62.0 || ^0.63.0 || ^0.64.0 || ^0.65.0 || ^0.66.0 || ^0.67.0 || ^0.68.0 || ^0.69.0 || ^0.70.0 || ^0.71.0 || ^0.72.0 || ^0.73.0
-    react-native-windows: ^0.61.0 || ^0.62.0 || ^0.63.0 || ^0.64.0 || ^0.65.0 || ^0.66.0 || ^0.67.0 || ^0.68.0 || ^0.69.0 || ^0.70.0 || ^0.71.0 || ^0.72.0 || ^0.73.0
-  checksum: 005ce2bee4d6e30b2a6b11be0d0ee169ab108d24f2a9b518b0ba8e5b96616c6dfb089c28644c1b5e3c1b9aa786c92cbf781e525223f56ab8589da1df79cae31f
+    react: ">= 16.9.0"
+    react-native: ">= 0.61.5"
+    react-native-macos: ">= 0.61.0"
+    react-native-windows: ">= 0.61.0"
+  peerDependenciesMeta:
+    react-native-macos:
+      optional: true
+    react-native-windows:
+      optional: true
+  checksum: a14c7de784f78c360b41fc723221d1091ccf59dc12ff5dcadf11c7fe078ae081afa1b95f2fe3cf0d4fcd25bc0e2a04cc56fb85aff8437de19cb2eba7d95362df
   languageName: node
   linkType: hard
 
@@ -11165,12 +11170,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-native-community/netinfo@npm:11.3.2":
-  version: 11.3.2
-  resolution: "@react-native-community/netinfo@npm:11.3.2"
+"@react-native-community/netinfo@npm:11.3.3":
+  version: 11.3.3
+  resolution: "@react-native-community/netinfo@npm:11.3.3"
   peerDependencies:
     react-native: ">=0.59"
-  checksum: 6ec29c1305655f66267a026d3af970a71aa77193b6ed6e6538613334c0470f75ae9d6e3fd7ad40f75d618d6a59d9e14d4986625666d6227f7273f756809f39d3
+  checksum: 1f274b85df111115f4b240c15ec0fe0a93d980b5ab10241ebbd08b9df792ea3559f7b278cd8d5ee92f31abe1de0611da59db0131e694134687f09355e51637a5
   languageName: node
   linkType: hard
 
@@ -13901,10 +13906,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/serviceworker@npm:0.0.92":
-  version: 0.0.92
-  resolution: "@types/serviceworker@npm:0.0.92"
-  checksum: e6f73abe305961935afe082fcc4e2c4b63f47b5c5d0ff118f9f6df0abb55e8383e188c544c0a66c142e356da0613be48091060388f5e9dfc72f06a9ec47bbd5c
+"@types/serviceworker@npm:0.0.95":
+  version: 0.0.95
+  resolution: "@types/serviceworker@npm:0.0.95"
+  checksum: 5181314ea241276b126cdd4c0197dbd5bc6801cf6834e3debe38548d349645f76f503b53f66b429fa9d26ea12e048eac8d1ccb9965f803f43cb1bd182df2a4e5
   languageName: node
   linkType: hard
 
@@ -14097,10 +14102,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/zxcvbn@npm:4.4.4":
-  version: 4.4.4
-  resolution: "@types/zxcvbn@npm:4.4.4"
-  checksum: e7efc6ca5e5aa5764981d853c53c4fe7b9b36a187bde29a2465cc1028e385073b7ae1fed126c41e86a6b0cd96f6326d0e8aa3a506bd0dca8fb98803a166f2c20
+"@types/zxcvbn@npm:4.4.5":
+  version: 4.4.5
+  resolution: "@types/zxcvbn@npm:4.4.5"
+  checksum: 6cef28a9d2c13838edce31b33eb11d6aaadb3fb1d3e90f51c2f2a7280be7c0c32c7a62f5cab05297f742f4c8c8fd07d9d8d6095a3255a6a9f280a5eee6b360b4
   languageName: node
   linkType: hard
 
@@ -15118,10 +15123,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"adm-zip@npm:0.5.12":
-  version: 0.5.12
-  resolution: "adm-zip@npm:0.5.12"
-  checksum: 299bd727c5275f6f6d30f2540aad1c7d6e5671613ff5b720201d04fc69bb3ab00fa0770f922da38b26654381cbc5043113fb3458dd0d1aff8fede542493921f5
+"adm-zip@npm:0.5.16":
+  version: 0.5.16
+  resolution: "adm-zip@npm:0.5.16"
+  checksum: 1f4104f3462b99e1b34d78ccfbdcf47e533a9cc7f894cedec6cd67b06cc6ad0b3a45241d66df5471050c7abbdd67e5707e3959fc76d75176ed6101a5b2a580d5
   languageName: node
   linkType: hard
 
@@ -15605,6 +15610,44 @@ __metadata:
     dmg-builder: 24.13.3
     electron-builder-squirrel-windows: 24.13.3
   checksum: 68ea3295efe99b8e8d4f9a1e77f3eae34de01b9829f8907e467d658b9406aa04c95baa2c06142b29bd8184d4efdc69f176a53d62fec36e7eba80024c46ce5adc
+  languageName: node
+  linkType: hard
+
+"app-builder-lib@patch:app-builder-lib@npm%3A24.13.3#./.yarn/patches/app-builder-lib-npm-24.13.3-86a66c0bf3.patch::locator=root%40workspace%3A.":
+  version: 24.13.3
+  resolution: "app-builder-lib@patch:app-builder-lib@npm%3A24.13.3#./.yarn/patches/app-builder-lib-npm-24.13.3-86a66c0bf3.patch::version=24.13.3&hash=e2b05a&locator=root%40workspace%3A."
+  dependencies:
+    "@develar/schema-utils": ~2.6.5
+    "@electron/notarize": 2.2.1
+    "@electron/osx-sign": 1.0.5
+    "@electron/universal": 1.5.1
+    "@malept/flatpak-bundler": ^0.4.0
+    "@types/fs-extra": 9.0.13
+    async-exit-hook: ^2.0.1
+    bluebird-lst: ^1.0.9
+    builder-util: 24.13.1
+    builder-util-runtime: 9.2.4
+    chromium-pickle-js: ^0.2.0
+    debug: ^4.3.4
+    ejs: ^3.1.8
+    electron-publish: 24.13.1
+    form-data: ^4.0.0
+    fs-extra: ^10.1.0
+    hosted-git-info: ^4.1.0
+    is-ci: ^3.0.0
+    isbinaryfile: ^5.0.0
+    js-yaml: ^4.1.0
+    lazy-val: ^1.0.5
+    minimatch: ^5.1.1
+    read-config-file: 6.3.2
+    sanitize-filename: ^1.6.3
+    semver: ^7.3.8
+    tar: ^6.1.12
+    temp-file: ^3.4.0
+  peerDependencies:
+    dmg-builder: 24.13.3
+    electron-builder-squirrel-windows: 24.13.3
+  checksum: e023282fbf7381b0b504ae0835dabb26ad0092c32fad89116aa259f790bba912805338bc895ed205b70a193e39559b3939e816c0afeacaca49f3b55c3446a807
   languageName: node
   linkType: hard
 

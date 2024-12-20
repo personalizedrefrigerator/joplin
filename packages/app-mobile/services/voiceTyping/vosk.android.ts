@@ -117,7 +117,7 @@ export const startRecording = (vosk: Vosk, options: StartOptions): VoiceTypingSe
 			eventHandler.remove();
 		}
 
-		vosk.cleanup(),
+		vosk.cleanup();
 
 		state_ = State.Idle;
 
