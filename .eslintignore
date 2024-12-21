@@ -643,6 +643,8 @@ packages/app-mobile/components/NoteEditor/ImageEditor/js-draw/startAutosaveLoop.
 packages/app-mobile/components/NoteEditor/ImageEditor/js-draw/types.js
 packages/app-mobile/components/NoteEditor/ImageEditor/js-draw/watchEditorForTemplateChanges.js
 packages/app-mobile/components/NoteEditor/ImageEditor/promptRestoreAutosave.js
+packages/app-mobile/components/NoteEditor/ImageEditor/types.js
+packages/app-mobile/components/NoteEditor/ImageEditor/utils/useEditorMessenger.js
 packages/app-mobile/components/NoteEditor/NoteEditor.test.js
 packages/app-mobile/components/NoteEditor/NoteEditor.js
 packages/app-mobile/components/NoteEditor/SearchPanel.js
