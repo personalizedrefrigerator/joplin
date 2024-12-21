@@ -23,7 +23,8 @@ import { ModelType } from '@joplin/lib/BaseModel';
 import { DialogContext } from './DialogManager';
 import { TextStyle, ViewStyle } from 'react-native';
 import { StateDecryptionWorker, StateResourceFetcher } from '@joplin/lib/reducer';
-const { TouchableRipple } = require('react-native-paper');
+import useOnLongPressProps from '../utils/hooks/useOnLongPressProps';
+import { TouchableRipple } from 'react-native-paper';
 const { substrWithEllipsis } = require('@joplin/lib/string-utils');
 
 interface Props {
@@ -56,11 +57,9 @@ const folderIconRightMargin = 10;
 
 let syncIconAnimation: Animated.CompositeAnimation|null = null;
 
-const SideMenuContentComponent = (props: Props) => {
-	const alwaysShowFolderIcons = useMemo(() => Folder.shouldShowFolderIcons(props.folders), [props.folders]);
-
-	const styles_ = useMemo(() => {
-		const theme = themeStyle(props.themeId);
+const useStyles = (themeId: number) => {
+	return useMemo(() => {
+		const theme = themeStyle(themeId);
 
 		const buttonStyle: ViewStyle = {
 			flex: 1,
@@ -150,7 +149,128 @@ const SideMenuContentComponent = (props: Props) => {
 		});
 
 		return styles;
-	}, [props.themeId]);
+	}, [themeId]);
+};
+
+type Styles = ReturnType<typeof useStyles>;
+
+interface FolderItemProps {
+	themeId: number;
+	hasChildren: boolean;
+	collapsed: boolean;
+	folder: FolderEntity;
+	selected: boolean;
+	depth: number;
+	styles: Styles;
+	alwaysShowFolderIcons: boolean;
+
+	onPress(folder: FolderEntity): void;
+	onTogglePress(folder: FolderEntity): void;
+	onLongPress(folder: FolderEntity): void;
+}
+
+const FolderItem: React.FC<FolderItemProps> = props => {
+	const theme = themeStyle(props.themeId);
+	const styles_ = props.styles;
+
+	const folderButtonStyle: ViewStyle = {
+		flex: 1,
+		flexDirection: 'row',
+		flexBasis: 'auto',
+		height: 36,
+		alignItems: 'center',
+		paddingRight: theme.marginRight,
+		paddingLeft: 10,
+	};
+	const selected = props.selected;
+	if (selected) folderButtonStyle.backgroundColor = theme.selectedColor;
+	folderButtonStyle.paddingLeft = props.depth * 10 + theme.marginLeft;
+
+	const iconWrapperStyle: ViewStyle = { paddingLeft: 10, paddingRight: 10 };
+	if (selected) iconWrapperStyle.backgroundColor = theme.selectedColor;
+
+	let iconWrapper = null;
+
+	const collapsed = props.collapsed;// props.collapsedFolderIds.indexOf(folder.id) >= 0;
+	const iconName = collapsed ? 'chevron-down' : 'chevron-up';
+	const iconComp = <IonIcon name={iconName} style={styles_.folderToggleIcon} />;
+
+	iconWrapper = !props.hasChildren ? null : (
+		<TouchableOpacity
+			style={iconWrapperStyle}
+			onPress={() => {
+				props.onTogglePress(props.folder);
+			}}
+
+			accessibilityLabel={collapsed ? _('Expand') : _('Collapse')}
+			accessibilityState={{ expanded: !collapsed }}
+			accessibilityRole="togglebutton"
+		>
+			{iconComp}
+		</TouchableOpacity>
+	);
+
+	const folderIcon = Folder.unserializeIcon(props.folder.icon);
+
+	const renderFolderIcon = (folderId: string, folderIcon: FolderIcon) => {
+		if (!folderIcon) {
+			if (folderId === getTrashFolderId()) {
+				folderIcon = getTrashFolderIcon(FolderIconType.FontAwesome);
+			} else if (props.alwaysShowFolderIcons) {
+				return <IonIcon name="folder-outline" style={styles_.folderBaseIcon} />;
+			} else {
+				return null;
+			}
+		}
+
+		if (folderIcon.type === FolderIconType.Emoji) {
+			return <Text style={styles_.folderEmojiIcon}>{folderIcon.emoji}</Text>;
+		} else if (folderIcon.type === FolderIconType.DataUrl) {
+			return <Image style={styles_.folderImageIcon} source={{ uri: folderIcon.dataUrl }}/>;
+		} else if (folderIcon.type === FolderIconType.FontAwesome) {
+			return <Icon style={styles_.folderBaseIcon} name={folderIcon.name} accessibilityLabel={null}/>;
+		} else {
+			throw new Error(`Unsupported folder icon type: ${folderIcon.type}`);
+		}
+	};
+
+	const onPress = useCallback(() => {
+		props.onPress(props.folder);
+	}, [props.folder, props.onPress]);
+
+	const onLongPress = useCallback(() => {
+		props.onLongPress(props.folder);
+	}, [props.folder, props.onLongPress]);
+
+	const longPressProps = useOnLongPressProps({
+		onLongPress,
+		actionDescription: _('Notebook options'),
+	});
+
+	return (
+		<View key={props.folder.id} style={{ flex: 1, flexDirection: 'row' }}>
+			<TouchableRipple
+				style={{ flex: 1, flexBasis: 'auto' }}
+				onPress={onPress}
+				{...longPressProps}
+				accessibilityHint={_('Opens notebook')}
+				role='button'
+			>
+				<View style={folderButtonStyle}>
+					{renderFolderIcon(props.folder.id, folderIcon)}
+					<Text numberOfLines={1} style={styles_.folderButtonText}>
+						{Folder.displayTitle(props.folder)}
+					</Text>
+				</View>
+			</TouchableRipple>
+			{iconWrapper}
+		</View>
+	);
+};
+
+const SideMenuContentComponent = (props: Props) => {
+	const alwaysShowFolderIcons = useMemo(() => Folder.shouldShowFolderIcons(props.folders), [props.folders]);
+	const styles_ = useStyles(props.themeId);
 
 	useEffect(() => {
 		if (props.syncStarted) {
@@ -170,6 +290,8 @@ const SideMenuContentComponent = (props: Props) => {
 		}
 	}, [props.syncStarted]);
 
+	const dialogs = useContext(DialogContext);
+
 	const folder_press = (folder: FolderEntity) => {
 		props.dispatch({ type: 'SIDE_MENU_CLOSE' });
 
@@ -179,8 +301,6 @@ const SideMenuContentComponent = (props: Props) => {
 			folderId: folder.id,
 		});
 	};
-
-	const dialogs = useContext(DialogContext);
 
 	const folder_longPress = async (folderOrAll: FolderEntity | string) => {
 		if (folderOrAll === 'all') return;
@@ -408,96 +528,21 @@ const SideMenuContentComponent = (props: Props) => {
 		if (actionDone === 'auth') props.dispatch({ type: 'SIDE_MENU_CLOSE' });
 	}, [performSync, props.dispatch]);
 
-	const renderFolderIcon = (folderId: string, folderIcon: FolderIcon) => {
-		if (!folderIcon) {
-			if (folderId === getTrashFolderId()) {
-				folderIcon = getTrashFolderIcon(FolderIconType.FontAwesome);
-			} else if (alwaysShowFolderIcons) {
-				return <IonIcon name="folder-outline" style={styles_.folderBaseIcon} />;
-			} else {
-				return null;
-			}
-		}
-
-		if (folderIcon.type === FolderIconType.Emoji) {
-			return <Text style={styles_.folderEmojiIcon}>{folderIcon.emoji}</Text>;
-		} else if (folderIcon.type === FolderIconType.DataUrl) {
-			return <Image style={styles_.folderImageIcon} source={{ uri: folderIcon.dataUrl }}/>;
-		} else if (folderIcon.type === FolderIconType.FontAwesome) {
-			return <Icon style={styles_.folderBaseIcon} name={folderIcon.name} accessibilityLabel={null}/>;
-		} else {
-			throw new Error(`Unsupported folder icon type: ${folderIcon.type}`);
-		}
-	};
 
 	const renderFolderItem = (folder: FolderEntity, hasChildren: boolean, depth: number) => {
-		const theme = themeStyle(props.themeId);
-
-		const folderButtonStyle: ViewStyle = {
-			flex: 1,
-			flexDirection: 'row',
-			flexBasis: 'auto',
-			height: 36,
-			alignItems: 'center',
-			paddingRight: theme.marginRight,
-			paddingLeft: 10,
-		};
-		const selected = isFolderSelected(folder, { selectedFolderId: props.selectedFolderId, notesParentType: props.notesParentType });
-		if (selected) folderButtonStyle.backgroundColor = theme.selectedColor;
-		folderButtonStyle.paddingLeft = depth * 10 + theme.marginLeft;
-
-		const iconWrapperStyle: ViewStyle = { paddingLeft: 10, paddingRight: 10 };
-		if (selected) iconWrapperStyle.backgroundColor = theme.selectedColor;
-
-		let iconWrapper = null;
-
-		const collapsed = props.collapsedFolderIds.indexOf(folder.id) >= 0;
-		const iconName = collapsed ? 'chevron-down' : 'chevron-up';
-		const iconComp = <IonIcon name={iconName} style={styles_.folderToggleIcon} />;
-
-		iconWrapper = !hasChildren ? null : (
-			<TouchableOpacity
-				style={iconWrapperStyle}
-				onPress={() => {
-					if (hasChildren) folder_togglePress(folder);
-				}}
-
-				accessibilityLabel={collapsed ? _('Expand') : _('Collapse')}
-				accessibilityRole="togglebutton"
-			>
-				{iconComp}
-			</TouchableOpacity>
-		);
-
-		const folderIcon = Folder.unserializeIcon(folder.icon);
-
-		return (
-			<View key={folder.id} style={{ flex: 1, flexDirection: 'row' }}>
-				<TouchableRipple
-					style={{ flex: 1, flexBasis: 'auto' }}
-					onPress={() => {
-						folder_press(folder);
-					}}
-					onLongPress={() => {
-						void folder_longPress(folder);
-					}}
-					onContextMenu={(event: Event) => { // web only
-						event.preventDefault();
-						void folder_longPress(folder);
-					}}
-					accessibilityHint={_('Opens notebook')}
-					role='button'
-				>
-					<View style={folderButtonStyle}>
-						{renderFolderIcon(folder.id, folderIcon)}
-						<Text numberOfLines={1} style={styles_.folderButtonText}>
-							{Folder.displayTitle(folder)}
-						</Text>
-					</View>
-				</TouchableRipple>
-				{iconWrapper}
-			</View>
-		);
+		return <FolderItem
+			themeId={props.themeId}
+			hasChildren={hasChildren}
+			depth={depth}
+			collapsed={props.collapsedFolderIds.includes(folder.id)}
+			selected={isFolderSelected(folder, { selectedFolderId: props.selectedFolderId, notesParentType: props.notesParentType })}
+			styles={styles_}
+			folder={folder}
+			alwaysShowFolderIcons={alwaysShowFolderIcons}
+			onPress={folder_press}
+			onLongPress={folder_longPress}
+			onTogglePress={folder_togglePress}
+		/>;
 	};
 
 	const renderSidebarButton = (key: string, title: string, iconName: string, onPressHandler: ()=> void = null, selected = false) => {
