@@ -229,6 +229,7 @@ const NoteList = (props: Props) => {
 					onContextMenu={onItemContextMenu}
 					onDragStart={onDragStart}
 					onDragOver={onDragOver}
+					onDrop={onDrop}
 					style={noteItemStyle}
 					highlightedWords={highlightedWords}
 					isProvisional={props.provisionalNoteIds.includes(note.id)}

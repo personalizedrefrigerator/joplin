@@ -25,6 +25,7 @@ interface NoteItemProps {
 	onContextMenu: MouseEventHandler;
 	onDragOver: DragEventHandler;
 	onDragStart: DragEventHandler;
+	onDrop: DragEventHandler;
 	style: CSSProperties;
 	note: NoteEntity;
 	isWatched: boolean;
@@ -160,6 +161,7 @@ const NoteListItem = (props: NoteItemProps, ref: LegacyRef<HTMLDivElement>) => {
 		onContextMenu={props.onContextMenu}
 		onDragStart={props.onDragStart}
 		onDragOver={props.onDragOver}
+		onDrop={props.onDrop}
 
 		aria-selected={props.isSelected}
 		aria-posinset={1 + props.index}
