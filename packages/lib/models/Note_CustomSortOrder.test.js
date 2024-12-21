@@ -260,7 +260,7 @@ describe('models/Note_CustomSortOrder', () => {
 		// as close as possible: at the top edge of its window.
 		const resortedNotes2 = await sortNotes();
 		expect(resortedNotes2.map(note => note.id)).toEqual([
-			0, 1, 2, 4, 3, 5
+			0, 1, 2, 4, 3, 5,
 		].map(index => resortedNotes1[index].id));
 
 		// Limit reorder - place an uncompleted todo into another window
@@ -304,7 +304,20 @@ describe('models/Note_CustomSortOrder', () => {
 
 		const toMove = notes[1];
 
-		await Note.insertNotesAt(folder1.id, [toMove.id], 2, false, false);
+		// Insert just before index 1 or 2
+		for (const targetIndex of [1, 2]) {
+			await Note.insertNotesAt(folder1.id, [toMove.id], targetIndex, false, false);
+			// Should result in no change
+			expect(await sortedNoteIds()).toEqual([
+				notes[0].id,
+				notes[1].id,
+				notes[2].id,
+				notes[3].id,
+				notes[4].id,
+			]);
+		}
+
+		await Note.insertNotesAt(folder1.id, [toMove.id], 3, false, false);
 		expect(await sortedNoteIds()).toEqual([
 			notes[0].id,
 			notes[2].id,
@@ -312,8 +325,8 @@ describe('models/Note_CustomSortOrder', () => {
 			notes[3].id,
 			notes[4].id,
 		]);
-		
-		await Note.insertNotesAt(folder1.id, [toMove.id], 3, false, false);
+
+		await Note.insertNotesAt(folder1.id, [toMove.id], 4, false, false);
 		expect(await sortedNoteIds()).toEqual([
 			notes[0].id,
 			notes[2].id,
@@ -322,13 +335,13 @@ describe('models/Note_CustomSortOrder', () => {
 			notes[4].id,
 		]);
 
-		await Note.insertNotesAt(folder1.id, [toMove.id], 2, false, false);
+		await Note.insertNotesAt(folder1.id, [toMove.id], 5, false, false);
 		expect(await sortedNoteIds()).toEqual([
 			notes[0].id,
 			notes[2].id,
-			notes[1].id,
 			notes[3].id,
 			notes[4].id,
+			notes[1].id,
 		]);
 	});
 });

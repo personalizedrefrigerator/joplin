@@ -13,7 +13,7 @@ const useMoveNote = (notesParentType: string, noteSortOrder: string, selectedNot
 		const noteId = selectedNoteIds[0];
 		let targetNoteIndex = BaseModel.modelIndexById(notes, noteId);
 		if ((direction === 1)) {
-			targetNoteIndex += inc;
+			targetNoteIndex += inc + 1;
 		}
 		if ((direction === -1)) {
 			targetNoteIndex -= inc;

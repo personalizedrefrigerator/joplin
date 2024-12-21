@@ -1062,12 +1062,9 @@ export default class Note extends BaseItem {
 				previousOrder = notes[i].order;
 			}
 
-			if (hasSetOrder) notes = await getSortedNotes(folderId);
-
-			// Remove the notes to be inserted from the note list. This allows moving notes
-			// by one step.
-			const targetNoteInNotebook = notes.find(n => n.id === noteIds[0]);
-			notes = notes.filter(note => !noteIds.includes(note.id));
+			if (hasSetOrder) {
+				notes = await getSortedNotes(folderId);
+			}
 
 			// If uncompletedTodosOnTop, then we should only consider the existing
 			// order of same-completion-window notes. A completed todo or non-todo
@@ -1091,6 +1088,7 @@ export default class Note extends BaseItem {
 			let lastRelevantNoteIndex = notes.length - 1;
 			if (uncompletedTodosOnTop) {
 				const uncompletedTest = (n: NoteEntity) => !(n.todo_completed || !n.is_todo);
+				const targetNoteInNotebook = notes.find(n => n.id === noteIds[0]);
 				if (targetNoteInNotebook) {
 					const targetUncompleted = uncompletedTest(targetNoteInNotebook);
 					const noteFilterCondition = targetUncompleted ? (n: NoteEntity) => uncompletedTest(n) : (n: NoteEntity) => !uncompletedTest(n);
