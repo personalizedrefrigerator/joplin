@@ -87,6 +87,14 @@ const ExtendedWebView = (props: Props, ref: Ref<WebViewControl>) => {
 		return Setting.value('env') === 'dev' || (!!props.hasPluginScripts && Setting.value('plugins.enableWebviewDebugging'));
 	}, [props.hasPluginScripts]);
 
+	const [reloadCounter, setReloadCounter] = useState(0);
+	const refreshWebView = useCallback(() => {
+		// Reload the WebView after a brief delay. See https://github.com/react-native-webview/react-native-webview/issues/3524
+		shim.setTimeout(() => {
+			setReloadCounter(counter => counter + 1);
+		}, 150);
+	}, []);
+
 	// - `setSupportMultipleWindows` must be `true` for security reasons:
 	//   https://github.com/react-native-webview/react-native-webview/releases/tag/v11.0.0
 
@@ -99,6 +107,7 @@ const ExtendedWebView = (props: Props, ref: Ref<WebViewControl>) => {
 	// (the default deaccelerates too quickly).
 	return (
 		<WebView
+			key={`webview-${reloadCounter}`}
 			style={{
 				// `backgroundColor: transparent` prevents a white fhash on iOS.
 				// It seems that `backgroundColor: theme.backgroundColor` does not
@@ -123,6 +132,8 @@ const ExtendedWebView = (props: Props, ref: Ref<WebViewControl>) => {
 			onMessage={props.onMessage}
 			onError={props.onError ?? onError}
 			onLoadEnd={props.onLoadEnd}
+			onContentProcessDidTerminate={refreshWebView}
+			onRenderProcessGone={refreshWebView}
 			decelerationRate='normal'
 		/>
 	);
