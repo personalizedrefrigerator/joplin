@@ -12,11 +12,13 @@ import type FsDriverWeb from '../../../utils/fs-driver/fs-driver-rn.web';
 import { IconButton, TouchableRipple } from 'react-native-paper';
 import { _ } from '@joplin/lib/locale';
 
+type Mode = 'read'|'readwrite';
+
 interface Props {
 	themeId: number;
 	styles: ConfigScreenStyles;
 	settingMetadata: SettingItem;
-	mode: 'read'|'readwrite';
+	mode: Mode;
 	description: React.ReactNode|null;
 	updateSettingValue: UpdateSettingValueCallback;
 }
@@ -25,6 +27,48 @@ type ExtendedSelf = (typeof window.self) & {
 	showDirectoryPicker: (options: { id: string; mode: string })=> Promise<FileSystemDirectoryHandle>;
 };
 declare const self: ExtendedSelf;
+
+const useFileSystemPath = (settingId: string, updateSettingValue: UpdateSettingValueCallback, accessMode: Mode) => {
+	const [fileSystemPath, setFileSystemPath] = useState<string>('');
+
+	useEffect(() => {
+		setFileSystemPath(Setting.value(settingId));
+	}, [settingId]);
+
+	const showDirectoryPicker = useCallback(async () => {
+		if (shim.mobilePlatform() === 'web') {
+			// Directory picker IDs can't include certain characters.
+			const pickerId = `setting-${settingId}`.replace(/[^a-zA-Z]/g, '_');
+			const handle = await self.showDirectoryPicker({ id: pickerId, mode: accessMode });
+			const fsDriver = shim.fsDriver() as FsDriverWeb;
+			const uri = await fsDriver.mountExternalDirectory(handle, pickerId, accessMode);
+			await updateSettingValue(settingId, uri);
+			setFileSystemPath(uri);
+		} else {
+			try {
+				const doc = await openDocumentTree(true);
+				if (doc?.uri) {
+					setFileSystemPath(doc.uri);
+					await updateSettingValue(settingId, doc.uri);
+				} else {
+					throw new Error('User cancelled operation');
+				}
+			} catch (e) {
+				reg.logger().info('Didn\'t pick sync dir: ', e);
+			}
+		}
+	}, [updateSettingValue, settingId, accessMode]);
+
+	const clearPath = useCallback(() => {
+		setFileSystemPath('');
+		void updateSettingValue(settingId, '');
+	}, [updateSettingValue, settingId]);
+
+	// Supported on Android and some versions of Chrome
+	const supported = shim.fsDriver().isUsingAndroidSAF() || (shim.mobilePlatform() === 'web' && 'showDirectoryPicker' in self);
+
+	return { clearPath, showDirectoryPicker, fileSystemPath, supported };
+};
 
 const pathSelectorStyles = StyleSheet.create({
 	innerContainer: {
@@ -36,7 +80,8 @@ const pathSelectorStyles = StyleSheet.create({
 	mainButton: {
 		flexGrow: 1,
 		flexShrink: 1,
-		padding: 22,
+		paddingHorizontal: 16,
+		paddingVertical: 22,
 		margin: 0,
 	},
 	buttonContent: {
@@ -45,48 +90,8 @@ const pathSelectorStyles = StyleSheet.create({
 });
 
 const FileSystemPathSelector: FunctionComponent<Props> = props => {
-	const [fileSystemPath, setFileSystemPath] = useState<string>('');
-
 	const settingId = props.settingMetadata.key;
-
-	useEffect(() => {
-		setFileSystemPath(Setting.value(settingId));
-	}, [settingId]);
-
-	const selectDirectoryButtonPress = useCallback(async () => {
-		if (shim.mobilePlatform() === 'web') {
-			// Directory picker IDs can't include certain characters.
-			const pickerId = `setting-${settingId}`.replace(/[^a-zA-Z]/g, '_');
-			const handle = await self.showDirectoryPicker({ id: pickerId, mode: props.mode });
-			const fsDriver = shim.fsDriver() as FsDriverWeb;
-			const uri = await fsDriver.mountExternalDirectory(handle, pickerId, props.mode);
-			await props.updateSettingValue(settingId, uri);
-			setFileSystemPath(uri);
-		} else {
-			try {
-				const doc = await openDocumentTree(true);
-				if (doc?.uri) {
-					setFileSystemPath(doc.uri);
-					await props.updateSettingValue(settingId, doc.uri);
-				} else {
-					throw new Error('User cancelled operation');
-				}
-			} catch (e) {
-				reg.logger().info('Didn\'t pick sync dir: ', e);
-			}
-		}
-	}, [props.updateSettingValue, settingId, props.mode]);
-
-	const clearPathButtonPress = useCallback(() => {
-		setFileSystemPath('');
-		void props.updateSettingValue(settingId, '');
-	}, [props.updateSettingValue, settingId]);
-
-	// Supported on Android and some versions of Chrome
-	const supported = shim.fsDriver().isUsingAndroidSAF() || (shim.mobilePlatform() === 'web' && 'showDirectoryPicker' in self);
-	if (!supported) {
-		return null;
-	}
+	const { clearPath, showDirectoryPicker, fileSystemPath, supported } = useFileSystemPath(settingId, props.updateSettingValue, props.mode);
 
 	const styleSheet = props.styles.styleSheet;
 
@@ -94,7 +99,7 @@ const FileSystemPathSelector: FunctionComponent<Props> = props => {
 		<IconButton
 			icon='delete'
 			accessibilityLabel={_('Clear')}
-			onPress={clearPathButtonPress}
+			onPress={clearPath}
 		/>
 	);
 
@@ -102,7 +107,7 @@ const FileSystemPathSelector: FunctionComponent<Props> = props => {
 
 	const control = <View style={[containerStyles.innerContainer, pathSelectorStyles.innerContainer]}>
 		<TouchableRipple
-			onPress={selectDirectoryButtonPress}
+			onPress={showDirectoryPicker}
 			style={pathSelectorStyles.mainButton}
 			role='button'
 		>
@@ -119,6 +124,7 @@ const FileSystemPathSelector: FunctionComponent<Props> = props => {
 	</View>;
 
 	if (!supported) return null;
+
 	return <View style={containerStyles.outerContainer}>
 		{control}
 		{props.description}
