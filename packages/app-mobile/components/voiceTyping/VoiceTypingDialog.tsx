@@ -38,6 +38,7 @@ const useVoiceTyping = ({ locale, provider, onSetPreview, onText }: UseVoiceTypi
 	const [voiceTyping, setVoiceTyping] = useState<VoiceTypingSession>(null);
 	const [error, setError] = useState<Error>(null);
 	const [mustDownloadModel, setMustDownloadModel] = useState<boolean | null>(null);
+	const [modelIsOutdated, setModelIsOutdated] = useState(false);
 
 	const onTextRef = useRef(onText);
 	onTextRef.current = onText;
@@ -56,6 +57,8 @@ const useVoiceTyping = ({ locale, provider, onSetPreview, onText }: UseVoiceTypi
 	useAsyncEffect(async (event: AsyncEffectEvent) => {
 		try {
 			await voiceTypingRef.current?.stop();
+
+			setModelIsOutdated(await builder.isDownloadedFromOutdatedUrl());
 
 			if (!await builder.isDownloaded()) {
 				if (event.cancelled) return;
@@ -92,7 +95,7 @@ const useVoiceTyping = ({ locale, provider, onSetPreview, onText }: UseVoiceTypi
 	}, [builder]);
 
 	return {
-		error, mustDownloadModel, voiceTyping, onRequestRedownload,
+		error, mustDownloadModel, voiceTyping, onRequestRedownload, modelIsOutdated,
 	};
 };
 
@@ -128,6 +131,7 @@ const VoiceTypingDialog: React.FC<Props> = props => {
 		mustDownloadModel,
 		voiceTyping,
 		onRequestRedownload,
+		modelIsOutdated,
 	} = useVoiceTyping({
 		locale: props.locale,
 		onSetPreview: setPreview,
@@ -191,6 +195,7 @@ const VoiceTypingDialog: React.FC<Props> = props => {
 	const reDownloadButton = <Button onPress={onRequestRedownload}>
 		{_('Re-download model')}
 	</Button>;
+	const allowReDownload = recorderState === RecorderState.Error || modelIsOutdated;
 
 	return (
 		<Surface>
@@ -223,7 +228,7 @@ const VoiceTypingDialog: React.FC<Props> = props => {
 					</View>
 				</View>
 				<View style={styles.actionContainer}>
-					{recorderState === RecorderState.Error ? reDownloadButton : null}
+					{allowReDownload ? reDownloadButton : null}
 					<Button
 						onPress={onDismiss}
 						accessibilityHint={_('Ends voice typing')}
