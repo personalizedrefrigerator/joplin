@@ -124,16 +124,14 @@ const SettingComponent: React.FunctionComponent<Props> = props => {
 	} else if (md.type === Setting.TYPE_STRING) {
 		if (['sync.2.path', 'plugins.devPluginPaths'].includes(md.key) && (shim.fsDriver().isUsingAndroidSAF() || shim.mobilePlatform() === 'web')) {
 			return (
-				<View style={containerStyles.outerContainer}>
-					<FileSystemPathSelector
-						themeId={props.themeId}
-						mode={md.key === 'sync.2.path' ? 'readwrite' : 'read'}
-						styles={props.styles}
-						settingMetadata={md}
-						updateSettingValue={props.updateSettingValue}
-					/>
-					{descriptionComp}
-				</View>
+				<FileSystemPathSelector
+					themeId={props.themeId}
+					mode={md.key === 'sync.2.path' ? 'readwrite' : 'read'}
+					styles={props.styles}
+					settingMetadata={md}
+					updateSettingValue={props.updateSettingValue}
+					description={descriptionComp}
+				/>
 			);
 		}
 

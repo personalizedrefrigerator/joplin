@@ -17,6 +17,7 @@ interface Props {
 	styles: ConfigScreenStyles;
 	settingMetadata: SettingItem;
 	mode: 'read'|'readwrite';
+	description: React.ReactNode|null;
 	updateSettingValue: UpdateSettingValueCallback;
 }
 
@@ -26,9 +27,11 @@ type ExtendedSelf = (typeof window.self) & {
 declare const self: ExtendedSelf;
 
 const pathSelectorStyles = StyleSheet.create({
-	container: {
-		flexDirection: 'row',
-		alignItems: 'center',
+	innerContainer: {
+		paddingTop: 0,
+		paddingBottom: 0,
+		paddingLeft: 0,
+		paddingRight: 0,
 	},
 	mainButton: {
 		flexGrow: 1,
@@ -95,7 +98,9 @@ const FileSystemPathSelector: FunctionComponent<Props> = props => {
 		/>
 	);
 
-	return <View style={pathSelectorStyles.container}>
+	const containerStyles = props.styles.getContainerStyle(!!props.description);
+
+	const control = <View style={[containerStyles.innerContainer, pathSelectorStyles.innerContainer]}>
 		<TouchableRipple
 			onPress={selectDirectoryButtonPress}
 			style={pathSelectorStyles.mainButton}
@@ -111,6 +116,12 @@ const FileSystemPathSelector: FunctionComponent<Props> = props => {
 			</View>
 		</TouchableRipple>
 		{fileSystemPath ? clearButton : null}
+	</View>;
+
+	if (!supported) return null;
+	return <View style={containerStyles.outerContainer}>
+		{control}
+		{props.description}
 	</View>;
 };
 

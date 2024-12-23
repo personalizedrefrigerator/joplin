@@ -931,7 +931,13 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 			advanced: true,
 			appTypes: [AppType.Desktop, AppType.Mobile],
 			// For now, development plugins are only enabled on desktop & web.
-			show: () => shim.isElectron() || shim.mobilePlatform() === 'web',
+			show: (settings) => {
+				if (shim.isElectron()) return true;
+				if (shim.mobilePlatform() !== 'web') return false;
+
+				const pluginSupportEnabled = settings['plugins.pluginSupportEnabled'];
+				return !!pluginSupportEnabled;
+			},
 			label: () => 'Development plugins',
 			description: () => {
 				if (shim.mobilePlatform()) {
