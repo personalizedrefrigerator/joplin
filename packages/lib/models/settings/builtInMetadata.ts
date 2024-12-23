@@ -935,7 +935,7 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 			label: () => 'Development plugins',
 			description: () => {
 				if (shim.mobilePlatform()) {
-					return 'The path to a plugin\'s development directory. When rebuilt, the plugin will be reloaded.';
+					return 'The path to a plugin\'s development directory. When the plugin is rebuilt, Joplin reloads the plugin automatically.';
 				} else {
 					return 'You may add multiple plugin paths, each separated by a comma. You will need to restart the application for the changes to take effect.';
 				}
