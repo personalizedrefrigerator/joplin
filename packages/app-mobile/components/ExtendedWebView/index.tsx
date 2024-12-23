@@ -91,7 +91,11 @@ const ExtendedWebView = (props: Props, ref: Ref<WebViewControl>) => {
 	const refreshWebViewAfterCrash = useCallback(() => {
 		// Reload the WebView on crash. See https://github.com/react-native-webview/react-native-webview/issues/3524
 		logger.warn('Content process lost. Reloading the webview...');
-		setReloadCounter(counter => counter + 1);
+		shim.setTimeout(() => {
+			setReloadCounter(counter => counter + 1);
+			// Restart after a brief delay to mitigate the case where the crash is due to
+			// an out-of-memory or content script bug.
+		}, 250);
 	}, []);
 
 	// - `setSupportMultipleWindows` must be `true` for security reasons:
