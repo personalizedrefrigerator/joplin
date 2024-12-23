@@ -66,6 +66,7 @@ const useVoiceTyping = ({ locale, provider, onSetPreview, onText }: UseVoiceTypi
 	useAsyncEffect(async (event: AsyncEffectEvent) => {
 		try {
 			await voiceTypingRef.current?.stop();
+			onSetPreviewRef.current?.('');
 
 			setModelIsOutdated(await builder.isDownloadedFromOutdatedUrl());
 
