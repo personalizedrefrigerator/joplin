@@ -271,6 +271,8 @@ const FolderItem: React.FC<FolderItemProps> = props => {
 				onPress={onPress}
 				{...longPressProps}
 				accessibilityHint={_('Opens notebook')}
+				accessibilityState={{ selected: props.selected }}
+				aria-selected={props.selected}
 				role='button'
 			>
 				<View style={styles.folderButton}>
