@@ -8,6 +8,17 @@ import Logger from '@joplin/utils/Logger';
 
 const logger = Logger.create('attachFile');
 
+export enum AttachFileAction {
+	TakePhoto = 'takePhoto',
+	AttachFile = 'attachFile',
+	AttachPhoto = 'attachPhoto',
+	AttachDrawing = 'attachDrawing',
+}
+
+export interface AttachFileOptions {
+	action?: AttachFileAction | null;
+}
+
 export const declaration: CommandDeclaration = {
 	name: 'attachFile',
 	label: () => _('Attach file'),
@@ -50,35 +61,46 @@ export const runtime = (props: CommandRuntimeProps): CommandRuntime => {
 		}
 	};
 
-	const showAttachMenu = async () => {
+	const showAttachMenu = async (action: AttachFileAction = null) => {
 		props.hideKeyboard();
 
-		const buttons = [];
+		let buttonId: AttachFileAction = null;
 
-		// On iOS, it will show "local files", which means certain files saved from the browser
-		// and the iCloud files, but it doesn't include photos and images from the CameraRoll
-		//
-		// On Android, it will depend on the phone, but usually it will allow browsing all files and photos.
-		buttons.push({ text: _('Attach file'), id: 'attachFile' });
+		if (action) {
+			buttonId = action;
+		} else {
+			const buttons = [];
 
-		// Disabled on Android because it doesn't work due to permission issues, but enabled on iOS
-		// because that's only way to browse photos from the camera roll.
-		if (Platform.OS === 'ios') buttons.push({ text: _('Attach photo'), id: 'attachPhoto' });
-		buttons.push({ text: _('Take photo'), id: 'takePhoto' });
+			// On iOS, it will show "local files", which means certain files saved from the browser
+			// and the iCloud files, but it doesn't include photos and images from the CameraRoll
+			//
+			// On Android, it will depend on the phone, but usually it will allow browsing all files and photos.
+			buttons.push({ text: _('Attach file'), id: AttachFileAction.AttachFile });
 
-		const buttonId = await props.dialogs.showMenu(_('Choose an option'), buttons);
+			// Disabled on Android because it doesn't work due to permission issues, but enabled on iOS
+			// because that's only way to browse photos from the camera roll.
+			if (Platform.OS === 'ios') buttons.push({ text: _('Attach photo'), id: AttachFileAction.AttachPhoto });
+			buttons.push({ text: _('Take photo'), id: AttachFileAction.TakePhoto });
 
-		if (buttonId === 'takePhoto') await takePhoto();
-		if (buttonId === 'attachFile') await attachFile();
-		if (buttonId === 'attachPhoto') await attachPhoto();
+			buttonId = await props.dialogs.showMenu(_('Choose an option'), buttons) as AttachFileAction;
+		}
+
+		if (buttonId === AttachFileAction.TakePhoto) await takePhoto();
+		if (buttonId === AttachFileAction.AttachFile) await attachFile();
+		if (buttonId === AttachFileAction.AttachPhoto) await attachPhoto();
 	};
 
 	return {
-		execute: async (_context: CommandContext, filePath?: string) => {
+		execute: async (_context: CommandContext, filePath?: string, options: AttachFileOptions = null) => {
+			options = {
+				action: null,
+				...options,
+			};
+
 			if (filePath) {
 				await props.attachFile({ uri: filePath }, 'all');
 			} else {
-				await showAttachMenu();
+				await showAttachMenu(options.action);
 			}
 		},
 

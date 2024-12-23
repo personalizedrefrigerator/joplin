@@ -550,7 +550,14 @@ class ScreenHeaderComponent extends PureComponent<ScreenHeaderProps, ScreenHeade
 
 							try {
 								for (let i = 0; i < noteIds.length; i++) {
-									await Note.moveToFolder(noteIds[i], folderId);
+									await Note.moveToFolder(
+										noteIds[i],
+										folderId,
+										// By default, the note selection is preserved on mobile when a note is moved to
+										// a different folder. However, when moving notes from the note list, this shouldn't be
+										// the case:
+										{ dispatchOptions: { preserveSelection: false } },
+									);
 								}
 							} catch (error) {
 								alert(_n('This note could not be moved: %s', 'These notes could not be moved: %s', noteIds.length, error.message));

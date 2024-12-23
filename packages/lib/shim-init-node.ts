@@ -465,7 +465,7 @@ function shimInit(options: ShimInitOptions = null) {
 		} else {
 			throw new Error('Unsupported method');
 		}
-	},
+	};
 
 	shim.imageFromDataUrl = async function(imageDataUrl, filePath, options = null) {
 		if (options === null) options = {};

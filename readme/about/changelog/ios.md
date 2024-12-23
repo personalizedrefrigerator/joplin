@@ -1,12 +1,11 @@
 # Joplin iOS Changelog
 
-## [ios-v13.2.1](https://github.com/laurent22/joplin/releases/tag/ios-v13.2.1) - 2024-12-11T15:32:59Z
+## [ios-v13.2.2](https://github.com/laurent22/joplin/releases/tag/ios-v13.2.2) - 2024-12-12T16:39:28Z
 
 - New: Accessibility: Add checked/unchecked accessibility information to the "sort notes by" dialog (#11411 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
 - New: Add new encryption methods based on native crypto libraries (#10696 by Self Not Found)
 - New: Add setting to disable markup autocompletion (#11222 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
 - New: Add support for overwrite mode in the Markdown editor (#11262 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
-- New: Translation: Add sk_SK.po (Slovak) (#11433 by [@dodog](https://github.com/dodog))
 - Improved: Accessibility: Describe the notebook dropdown for accessibility tools (#11430 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
 - Improved: Accessibility: Improve dialog accessibility (#11395 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
 - Improved: Accessibility: Improve note list accessibility (#11419 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
@@ -28,6 +27,7 @@
 - Improved: Updated packages @adobe/css-tools (v4.4.0), @react-native-community/datetimepicker (v8.2.0), @react-native-community/geolocation (v3.3.0), @react-native-community/slider (v4.5.3), @react-native/babel-preset (v0.74.86), @react-native/metro-config (v0.74.87), compare-versions (v6.1.1), dayjs (v1.11.12), expo (v51.0.26), highlight.js (v11.10.0), jsdom (v24.1.1), react-native-localize (v3.2.1), react-native-paper (v5.12.5), react-native-quick-crypto (v0.7.2), react-native-safe-area-context (v4.10.8), react-native-webview (v13.10.5), sass (v1.77.8), url (v0.11.4)
 - Improved: Upgrade CodeMirror packages (#11221 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
 - Improved: Use a FontAwesome icon for the trash folder (#11357) (#11202 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Improved: Updated packages @react-native-community/netinfo (v11.3.3)
 - Fixed: Accessibility: Fix screen reader is unable to scroll settings tab list (#11429 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
 - Fixed: Fix `undefined` errors in translations (#11407 by Self Not Found)
 - Fixed: Fix list renumbering in the Markdown editor resets the first list item number to 1 (#11220 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))

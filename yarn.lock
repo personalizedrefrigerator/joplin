@@ -8364,7 +8364,7 @@ __metadata:
     "@joplin/tools": ~3.2
     "@joplin/utils": ~3.2
     "@js-draw/material-icons": 1.20.3
-    "@react-native-clipboard/clipboard": 1.14.1
+    "@react-native-clipboard/clipboard": 1.14.2
     "@react-native-community/datetimepicker": 8.2.0
     "@react-native-community/geolocation": 3.3.0
     "@react-native-community/netinfo": 11.3.3
@@ -8382,7 +8382,7 @@ __metadata:
     "@types/react": 18.3.3
     "@types/react-native": 0.70.6
     "@types/react-redux": 7.1.33
-    "@types/serviceworker": 0.0.92
+    "@types/serviceworker": 0.0.95
     "@types/tar-stream": 3.1.3
     assert-browserify: 2.0.0
     babel-jest: 29.7.0
@@ -8615,7 +8615,7 @@ __metadata:
     "@types/node-rsa": 1.1.4
     "@types/react": 18.3.3
     "@types/uuid": 9.0.7
-    adm-zip: 0.5.12
+    adm-zip: 0.5.16
     async-mutex: 0.5.0
     base-64: 1.0.0
     base64-stream: 1.0.0
@@ -8836,7 +8836,7 @@ __metadata:
     "@types/nodemailer": 6.4.15
     "@types/uuid": 9.0.7
     "@types/yargs": 17.0.33
-    "@types/zxcvbn": 4.4.4
+    "@types/zxcvbn": 4.4.5
     bcryptjs: 2.4.3
     bulma: 1.0.2
     bulma-prefers-dark: 0.1.0-beta.1
@@ -8945,7 +8945,7 @@ __metadata:
   dependencies:
     "@adobe/css-tools": 4.4.0
     "@rollup/plugin-commonjs": 25.0.8
-    "@rollup/plugin-node-resolve": 15.2.3
+    "@rollup/plugin-node-resolve": 15.2.4
     "@rollup/plugin-replace": 5.0.7
     browserify: 14.5.0
     html-entities: 1.4.0
@@ -10756,15 +10756,20 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-native-clipboard/clipboard@npm:1.14.1":
-  version: 1.14.1
-  resolution: "@react-native-clipboard/clipboard@npm:1.14.1"
+"@react-native-clipboard/clipboard@npm:1.14.2":
+  version: 1.14.2
+  resolution: "@react-native-clipboard/clipboard@npm:1.14.2"
   peerDependencies:
-    react: 16.9.0 || 16.11.0 || 16.13.1 || 17.0.1 || 17.0.2 || 18.0.0 || 18.1.0 || 18.2.0
-    react-native: ^0.61.5 || ^0.62.3 || ^0.63.2 || ^0.64.2 || ^0.65.0 || ^0.66.0 || ^0.67.0 || ^0.68.0 || ^0.69.0 || ^0.70.0 || ^0.71.0 || ^0.72.0 || ^0.73.0
-    react-native-macos: ^0.61.0 || ^0.62.0 || ^0.63.0 || ^0.64.0 || ^0.65.0 || ^0.66.0 || ^0.67.0 || ^0.68.0 || ^0.69.0 || ^0.70.0 || ^0.71.0 || ^0.72.0 || ^0.73.0
-    react-native-windows: ^0.61.0 || ^0.62.0 || ^0.63.0 || ^0.64.0 || ^0.65.0 || ^0.66.0 || ^0.67.0 || ^0.68.0 || ^0.69.0 || ^0.70.0 || ^0.71.0 || ^0.72.0 || ^0.73.0
-  checksum: 005ce2bee4d6e30b2a6b11be0d0ee169ab108d24f2a9b518b0ba8e5b96616c6dfb089c28644c1b5e3c1b9aa786c92cbf781e525223f56ab8589da1df79cae31f
+    react: ">= 16.9.0"
+    react-native: ">= 0.61.5"
+    react-native-macos: ">= 0.61.0"
+    react-native-windows: ">= 0.61.0"
+  peerDependenciesMeta:
+    react-native-macos:
+      optional: true
+    react-native-windows:
+      optional: true
+  checksum: a14c7de784f78c360b41fc723221d1091ccf59dc12ff5dcadf11c7fe078ae081afa1b95f2fe3cf0d4fcd25bc0e2a04cc56fb85aff8437de19cb2eba7d95362df
   languageName: node
   linkType: hard
 
@@ -11727,14 +11732,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@rollup/plugin-node-resolve@npm:15.2.3":
-  version: 15.2.3
-  resolution: "@rollup/plugin-node-resolve@npm:15.2.3"
+"@rollup/plugin-node-resolve@npm:15.2.4":
+  version: 15.2.4
+  resolution: "@rollup/plugin-node-resolve@npm:15.2.4"
   dependencies:
     "@rollup/pluginutils": ^5.0.1
     "@types/resolve": 1.20.2
     deepmerge: ^4.2.2
-    is-builtin-module: ^3.2.1
     is-module: ^1.0.0
     resolve: ^1.22.1
   peerDependencies:
@@ -11742,7 +11746,7 @@ __metadata:
   peerDependenciesMeta:
     rollup:
       optional: true
-  checksum: 730f32c2f8fdddff07cf0fca86a5dac7c475605fb96930197a868c066e62eb6388c557545e4f7d99b7a283411754c9fbf98944ab086b6074e04fc1292e234aa8
+  checksum: 4c03d41bcbb7028432c8c7295ede54051151abdd726360cc089c5fe04d2ec266f961f7be78061aaf289b5294097db35393bfff1d6c01ad24d20471e07753e06c
   languageName: node
   linkType: hard
 
@@ -13901,10 +13905,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/serviceworker@npm:0.0.92":
-  version: 0.0.92
-  resolution: "@types/serviceworker@npm:0.0.92"
-  checksum: e6f73abe305961935afe082fcc4e2c4b63f47b5c5d0ff118f9f6df0abb55e8383e188c544c0a66c142e356da0613be48091060388f5e9dfc72f06a9ec47bbd5c
+"@types/serviceworker@npm:0.0.95":
+  version: 0.0.95
+  resolution: "@types/serviceworker@npm:0.0.95"
+  checksum: 5181314ea241276b126cdd4c0197dbd5bc6801cf6834e3debe38548d349645f76f503b53f66b429fa9d26ea12e048eac8d1ccb9965f803f43cb1bd182df2a4e5
   languageName: node
   linkType: hard
 
@@ -14097,10 +14101,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/zxcvbn@npm:4.4.4":
-  version: 4.4.4
-  resolution: "@types/zxcvbn@npm:4.4.4"
-  checksum: e7efc6ca5e5aa5764981d853c53c4fe7b9b36a187bde29a2465cc1028e385073b7ae1fed126c41e86a6b0cd96f6326d0e8aa3a506bd0dca8fb98803a166f2c20
+"@types/zxcvbn@npm:4.4.5":
+  version: 4.4.5
+  resolution: "@types/zxcvbn@npm:4.4.5"
+  checksum: 6cef28a9d2c13838edce31b33eb11d6aaadb3fb1d3e90f51c2f2a7280be7c0c32c7a62f5cab05297f742f4c8c8fd07d9d8d6095a3255a6a9f280a5eee6b360b4
   languageName: node
   linkType: hard
 
@@ -15118,10 +15122,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"adm-zip@npm:0.5.12":
-  version: 0.5.12
-  resolution: "adm-zip@npm:0.5.12"
-  checksum: 299bd727c5275f6f6d30f2540aad1c7d6e5671613ff5b720201d04fc69bb3ab00fa0770f922da38b26654381cbc5043113fb3458dd0d1aff8fede542493921f5
+"adm-zip@npm:0.5.16":
+  version: 0.5.16
+  resolution: "adm-zip@npm:0.5.16"
+  checksum: 1f4104f3462b99e1b34d78ccfbdcf47e533a9cc7f894cedec6cd67b06cc6ad0b3a45241d66df5471050c7abbdd67e5707e3959fc76d75176ed6101a5b2a580d5
   languageName: node
   linkType: hard
 
@@ -15605,6 +15609,44 @@ __metadata:
     dmg-builder: 24.13.3
     electron-builder-squirrel-windows: 24.13.3
   checksum: 68ea3295efe99b8e8d4f9a1e77f3eae34de01b9829f8907e467d658b9406aa04c95baa2c06142b29bd8184d4efdc69f176a53d62fec36e7eba80024c46ce5adc
+  languageName: node
+  linkType: hard
+
+"app-builder-lib@patch:app-builder-lib@npm%3A24.13.3#./.yarn/patches/app-builder-lib-npm-24.13.3-86a66c0bf3.patch::locator=root%40workspace%3A.":
+  version: 24.13.3
+  resolution: "app-builder-lib@patch:app-builder-lib@npm%3A24.13.3#./.yarn/patches/app-builder-lib-npm-24.13.3-86a66c0bf3.patch::version=24.13.3&hash=e2b05a&locator=root%40workspace%3A."
+  dependencies:
+    "@develar/schema-utils": ~2.6.5
+    "@electron/notarize": 2.2.1
+    "@electron/osx-sign": 1.0.5
+    "@electron/universal": 1.5.1
+    "@malept/flatpak-bundler": ^0.4.0
+    "@types/fs-extra": 9.0.13
+    async-exit-hook: ^2.0.1
+    bluebird-lst: ^1.0.9
+    builder-util: 24.13.1
+    builder-util-runtime: 9.2.4
+    chromium-pickle-js: ^0.2.0
+    debug: ^4.3.4
+    ejs: ^3.1.8
+    electron-publish: 24.13.1
+    form-data: ^4.0.0
+    fs-extra: ^10.1.0
+    hosted-git-info: ^4.1.0
+    is-ci: ^3.0.0
+    isbinaryfile: ^5.0.0
+    js-yaml: ^4.1.0
+    lazy-val: ^1.0.5
+    minimatch: ^5.1.1
+    read-config-file: 6.3.2
+    sanitize-filename: ^1.6.3
+    semver: ^7.3.8
+    tar: ^6.1.12
+    temp-file: ^3.4.0
+  peerDependencies:
+    dmg-builder: 24.13.3
+    electron-builder-squirrel-windows: 24.13.3
+  checksum: e023282fbf7381b0b504ae0835dabb26ad0092c32fad89116aa259f790bba912805338bc895ed205b70a193e39559b3939e816c0afeacaca49f3b55c3446a807
   languageName: node
   linkType: hard
 
@@ -17787,7 +17829,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"builtin-modules@npm:3.3.0, builtin-modules@npm:^3.3.0":
+"builtin-modules@npm:3.3.0":
   version: 3.3.0
   resolution: "builtin-modules@npm:3.3.0"
   checksum: db021755d7ed8be048f25668fe2117620861ef6703ea2c65ed2779c9e3636d5c3b82325bd912244293959ff3ae303afa3471f6a15bf5060c103e4cc3a839749d
@@ -28959,15 +29001,6 @@ __metadata:
   version: 2.0.5
   resolution: "is-buffer@npm:2.0.5"
   checksum: 764c9ad8b523a9f5a32af29bdf772b08eb48c04d2ad0a7240916ac2688c983bf5f8504bf25b35e66240edeb9d9085461f9b5dae1f3d2861c6b06a65fe983de42
-  languageName: node
-  linkType: hard
-
-"is-builtin-module@npm:^3.2.1":
-  version: 3.2.1
-  resolution: "is-builtin-module@npm:3.2.1"
-  dependencies:
-    builtin-modules: ^3.3.0
-  checksum: e8f0ffc19a98240bda9c7ada84d846486365af88d14616e737d280d378695c8c448a621dcafc8332dbf0fcd0a17b0763b845400709963fa9151ddffece90ae88
   languageName: node
   linkType: hard
 

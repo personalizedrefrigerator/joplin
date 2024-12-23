@@ -302,6 +302,7 @@ async function main() {
 		selectedCommandArgs = args;
 	}
 
+	// eslint-disable-next-line no-unused-expressions -- Old code before rule was applied
 	require('yargs')
 		.scriptName(scriptName)
 		.usage('$0 <cmd> [args]')

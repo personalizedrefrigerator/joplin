@@ -172,7 +172,9 @@ export default class Tag extends BaseItem {
 	}
 
 	public static async loadByTitle(title: string): Promise<TagEntity> {
-		return this.loadByField('title', title, { caseInsensitive: true });
+		// Case insensitive doesn't work with especial Unicode characters like Ö
+		const lowercaseTitle = title.toLowerCase();
+		return this.loadByField('title', lowercaseTitle, { caseInsensitive: true });
 	}
 
 	public static async addNoteTagByTitle(noteId: string, tagTitle: string) {

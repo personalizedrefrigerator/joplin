@@ -7,10 +7,15 @@ export interface PickerResponse {
 	fileName?: string;
 }
 
+export type EditorMode = 'view'|'edit';
+
 export interface CommandRuntimeProps {
 	attachFile(pickerResponse: PickerResponse, fileType: string): Promise<ResourceEntity|null>;
 	hideKeyboard(): void;
 	insertText(text: string): void;
+
+	getMode(): EditorMode;
+	setMode(mode: EditorMode): void;
 	setCameraVisible(visible: boolean): void;
 	setTagDialogVisible(visible: boolean): void;
 	dialogs: DialogControl;

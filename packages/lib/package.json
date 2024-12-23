@@ -53,7 +53,7 @@
     "@joplin/turndown-plugin-gfm": "^1.0.60",
     "@joplin/utils": "^3.2.4",
     "@types/nanoid": "3.0.0",
-    "adm-zip": "0.5.12",
+    "adm-zip": "0.5.16",
     "async-mutex": "0.5.0",
     "base-64": "1.0.0",
     "base64-stream": "1.0.0",

@@ -135,8 +135,6 @@ packages/app-desktop/commands/focusElement.js
 packages/app-desktop/commands/index.js
 packages/app-desktop/commands/openNoteInNewWindow.js
 packages/app-desktop/commands/openProfileDirectory.js
-packages/app-desktop/commands/renderMarkup.test.js
-packages/app-desktop/commands/renderMarkup.js
 packages/app-desktop/commands/replaceMisspelling.js
 packages/app-desktop/commands/restoreNoteRevision.js
 packages/app-desktop/commands/startExternalEditing.js
@@ -733,6 +731,7 @@ packages/app-mobile/components/screens/Note/commands/attachFile.js
 packages/app-mobile/components/screens/Note/commands/hideKeyboard.js
 packages/app-mobile/components/screens/Note/commands/index.js
 packages/app-mobile/components/screens/Note/commands/setTags.js
+packages/app-mobile/components/screens/Note/commands/toggleVisiblePanes.js
 packages/app-mobile/components/screens/Note/types.js
 packages/app-mobile/components/screens/NoteTagsDialog.js
 packages/app-mobile/components/screens/Notes.js
@@ -970,6 +969,8 @@ packages/lib/commands/historyForward.js
 packages/lib/commands/index.js
 packages/lib/commands/openMasterPasswordDialog.js
 packages/lib/commands/permanentlyDeleteNote.js
+packages/lib/commands/renderMarkup.test.js
+packages/lib/commands/renderMarkup.js
 packages/lib/commands/synchronize.js
 packages/lib/components/EncryptionConfigScreen/utils.test.js
 packages/lib/components/EncryptionConfigScreen/utils.js
