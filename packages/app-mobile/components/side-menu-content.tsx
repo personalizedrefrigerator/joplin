@@ -191,7 +191,7 @@ const FolderItem: React.FC<FolderItemProps> = props => {
 
 	let iconWrapper = null;
 
-	const collapsed = props.collapsed;// props.collapsedFolderIds.indexOf(folder.id) >= 0;
+	const collapsed = props.collapsed;
 	const iconName = collapsed ? 'chevron-down' : 'chevron-up';
 	const iconComp = <IonIcon name={iconName} style={styles_.folderToggleIcon} />;
 
@@ -531,6 +531,7 @@ const SideMenuContentComponent = (props: Props) => {
 
 	const renderFolderItem = (folder: FolderEntity, hasChildren: boolean, depth: number) => {
 		return <FolderItem
+			key={`folder-item-${folder.id}`}
 			themeId={props.themeId}
 			hasChildren={hasChildren}
 			depth={depth}
