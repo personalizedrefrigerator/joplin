@@ -11,6 +11,9 @@ import { AppState } from '../../utils/types';
 import { connect } from 'react-redux';
 import { View, StyleSheet } from 'react-native';
 import AccessibleView from '../accessibility/AccessibleView';
+import Logger from '@joplin/utils/Logger';
+
+const logger = Logger.create('VoiceTypingDialog');
 
 interface Props {
 	locale: string;
@@ -53,6 +56,12 @@ const useVoiceTyping = ({ locale, provider, onSetPreview, onText }: UseVoiceTypi
 	}, [locale, provider]);
 
 	const [redownloadCounter, setRedownloadCounter] = useState(0);
+
+	useEffect(() => {
+		if (modelIsOutdated) {
+			logger.info('The downloaded version of the model is from an outdated URL.');
+		}
+	}, [modelIsOutdated]);
 
 	useAsyncEffect(async (event: AsyncEffectEvent) => {
 		try {
@@ -193,7 +202,7 @@ const VoiceTypingDialog: React.FC<Props> = props => {
 	};
 
 	const reDownloadButton = <Button onPress={onRequestRedownload}>
-		{_('Re-download model')}
+		{modelIsOutdated ? _('Download updated model') : _('Re-download model')}
 	</Button>;
 	const allowReDownload = recorderState === RecorderState.Error || modelIsOutdated;
 

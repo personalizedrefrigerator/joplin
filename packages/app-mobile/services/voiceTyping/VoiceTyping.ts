@@ -71,11 +71,14 @@ export default class VoiceTyping {
 
 	public async isDownloadedFromOutdatedUrl() {
 		const uuidPath = this.getUuidPath();
-		if (!await shim.fsDriver().exists(uuidPath)) return false;
+		if (!await shim.fsDriver().exists(uuidPath)) {
+			// Not downloaded at all
+			return false;
+		}
 
 		const modelUrl = this.provider.getDownloadUrl(this.locale);
 		const urlHash = await shim.fsDriver().readFile(uuidPath);
-		return urlHash.trim() === md5(modelUrl);
+		return urlHash.trim() !== md5(modelUrl);
 	}
 
 	public async isDownloaded() {
