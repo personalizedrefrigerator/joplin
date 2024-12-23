@@ -42,9 +42,9 @@ const usePlugins = (
 	const reloadAllRef = useRef(false);
 	reloadAllRef.current ||= pluginRunner !== lastPluginRunner;
 
-	useOnDevPluginsUpdated(() => {
-		logger.info('Dev plugin updated. Reloading...');
-		reloadAllRef.current = true;
+	useOnDevPluginsUpdated(async (pluginId: string) => {
+		logger.info(`Dev plugin ${pluginId} updated. Reloading...`);
+		await PluginService.instance().unloadPlugin(pluginId);
 		setReloadCounter(counter => counter + 1);
 	}, devPluginPath, pluginSupportEnabled);
 

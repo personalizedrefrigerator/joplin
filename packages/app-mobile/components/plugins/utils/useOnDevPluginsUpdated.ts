@@ -1,10 +1,10 @@
 import useAsyncEffect from '@joplin/lib/hooks/useAsyncEffect';
 import shim from '@joplin/lib/shim';
 import time from '@joplin/lib/time';
-import { join } from 'path';
+import { basename, join } from 'path';
 import { useRef } from 'react';
 
-type OnDevPluginChange = ()=> void;
+type OnDevPluginChange = (id: string)=> void;
 
 const useOnDevPluginsUpdated = (onDevPluginChange: OnDevPluginChange, devPluginPath: string, pluginSupportEnabled: boolean) => {
 	const onDevPluginChangeRef = useRef(onDevPluginChange);
@@ -16,10 +16,12 @@ const useOnDevPluginsUpdated = (onDevPluginChange: OnDevPluginChange, devPluginP
 
 		const itemToLastModTime = new Map<string, number>();
 
-		while (!event.cancelled) {
-			const publishFolder = join(devPluginPath, 'publish');
-			const dirStats = await shim.fsDriver().readDirStats(publishFolder);
+		// publishPath should point to the publish/ subfolder of a plugin's development
+		// directory.
+		const checkPluginChange = async (pluginPublishPath: string) => {
+			const dirStats = await shim.fsDriver().readDirStats(pluginPublishPath);
 			let hasChange = false;
+			let changedPluginId = '';
 			for (const item of dirStats) {
 				if (item.path.endsWith('.jpl')) {
 					const lastModTime = itemToLastModTime.get(item.path);
@@ -27,6 +29,8 @@ const useOnDevPluginsUpdated = (onDevPluginChange: OnDevPluginChange, devPluginP
 					if (lastModTime === undefined || lastModTime < modTime) {
 						itemToLastModTime.set(item.path, modTime);
 						hasChange = true;
+						changedPluginId = basename(item.path, '.jpl');
+						break;
 					}
 				}
 			}
@@ -38,11 +42,17 @@ const useOnDevPluginsUpdated = (onDevPluginChange: OnDevPluginChange, devPluginP
 					// will always be true, even with no plugin reload.
 					isFirstUpdateRef.current = false;
 				} else {
-					onDevPluginChangeRef.current();
+					onDevPluginChangeRef.current(changedPluginId);
 				}
 			}
+		};
 
-			await time.sleep(5);
+		while (!event.cancelled) {
+			const publishFolder = join(devPluginPath, 'publish');
+			await checkPluginChange(publishFolder);
+
+			const pollingIntervalSeconds = 5;
+			await time.sleep(pollingIntervalSeconds);
 		}
 	}, [devPluginPath, pluginSupportEnabled]);
 };
