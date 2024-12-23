@@ -68,7 +68,12 @@ export default class VoiceTyping {
 	}
 
 	public async isDownloaded() {
-		return await shim.fsDriver().exists(this.getUuidPath());
+		const uuidPath = this.getUuidPath();
+		if (!await shim.fsDriver().exists(uuidPath)) return false;
+
+		const modelUrl = this.provider.getDownloadUrl(this.locale);
+		const urlHash = await shim.fsDriver().readFile(uuidPath);
+		return urlHash.trim() === md5(modelUrl);
 	}
 
 	public async download() {
