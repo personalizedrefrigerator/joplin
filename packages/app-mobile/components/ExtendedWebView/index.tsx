@@ -88,11 +88,10 @@ const ExtendedWebView = (props: Props, ref: Ref<WebViewControl>) => {
 	}, [props.hasPluginScripts]);
 
 	const [reloadCounter, setReloadCounter] = useState(0);
-	const refreshWebView = useCallback(() => {
-		// Reload the WebView after a brief delay. See https://github.com/react-native-webview/react-native-webview/issues/3524
-		shim.setTimeout(() => {
-			setReloadCounter(counter => counter + 1);
-		}, 150);
+	const refreshWebViewAfterCrash = useCallback(() => {
+		// Reload the WebView on crash. See https://github.com/react-native-webview/react-native-webview/issues/3524
+		logger.warn('Content process lost. Reloading the webview...');
+		setReloadCounter(counter => counter + 1);
 	}, []);
 
 	// - `setSupportMultipleWindows` must be `true` for security reasons:
@@ -132,8 +131,8 @@ const ExtendedWebView = (props: Props, ref: Ref<WebViewControl>) => {
 			onMessage={props.onMessage}
 			onError={props.onError ?? onError}
 			onLoadEnd={props.onLoadEnd}
-			onContentProcessDidTerminate={refreshWebView}
-			onRenderProcessGone={refreshWebView}
+			onContentProcessDidTerminate={refreshWebViewAfterCrash}
+			onRenderProcessGone={refreshWebViewAfterCrash}
 			decelerationRate='normal'
 		/>
 	);
