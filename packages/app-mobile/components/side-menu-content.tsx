@@ -587,13 +587,12 @@ const SideMenuContentComponent = (props: Props) => {
 		}
 
 		const content = (
-			<View
-				key={key}
-				style={selected ? styles_.sideButtonSelected : styles_.sideButton}
-				accessibilityRole={isHeader ? 'header' : undefined}
-			>
+			<View key={key} style={selected ? styles_.sideButtonSelected : styles_.sideButton}>
 				{icon}
-				<Text style={styles_.sideButtonText}>{title}</Text>
+				<Text
+					style={styles_.sideButtonText}
+					accessibilityRole={isHeader ? 'header' : undefined}
+				>{title}</Text>
 			</View>
 		);
 
