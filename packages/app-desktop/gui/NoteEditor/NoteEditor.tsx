@@ -59,6 +59,7 @@ import { EditorActivationCheckFilterObject } from '@joplin/lib/services/plugins/
 import PluginService from '@joplin/lib/services/plugins/PluginService';
 import WebviewController from '@joplin/lib/services/plugins/WebviewController';
 import AsyncActionQueue, { IntervalType } from '@joplin/lib/AsyncActionQueue';
+import useResourceUnwatcher from './utils/useResourceUnwatcher';
 
 const debounce = require('debounce');
 
@@ -357,6 +358,8 @@ function NoteEditorContent(props: NoteEditorProps) {
 	});
 	const windowId = useContext(WindowIdContext);
 	const onMessage = useMessageHandler(scrollWhenReady, clearScrollWhenReady, windowId, editorRef, setLocalSearchResultCount, props.dispatch, formNote, htmlToMarkdown, markupToHtml);
+
+	useResourceUnwatcher({ noteId: formNote.id, windowId });
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	const externalEditWatcher_noteChange = useCallback((event: any) => {
@@ -729,7 +732,7 @@ const mapStateToProps = (state: AppState, ownProps: ConnectProps) => {
 		selectedSearchId: windowState.selectedSearchId,
 		customCss: state.customViewerCss,
 		noteVisiblePanes: windowState.noteVisiblePanes,
-		watchedResources: state.watchedResources,
+		watchedResources: windowState.watchedResources,
 		highlightedWords: state.highlightedWords,
 		plugins: state.pluginService.plugins,
 		pluginHtmlContents: state.pluginService.pluginHtmlContents,

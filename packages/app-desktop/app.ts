@@ -653,6 +653,7 @@ class Application extends BaseApplication {
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 			(action: any) => { this.store().dispatch(action); },
 			(path: string) => bridge().openItem(path),
+			() => this.store().getState().windowId,
 		);
 
 		// Forwards the local event to the global event manager, so that it can

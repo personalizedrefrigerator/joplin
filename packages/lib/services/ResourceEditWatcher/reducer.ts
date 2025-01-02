@@ -20,6 +20,14 @@ const reducer = produce((draft: Draft<any>, action: any) => {
 			break;
 
 		case 'RESOURCE_EDIT_WATCHER_REMOVE':
+			// RESOURCE_EDIT_WATCHER_REMOVE signals that a resource is no longer being watched.
+			// As such, it should be removed from all windows' resource lists:
+			for (const windowId in draft.backgroundWindows) {
+				// watchedResources is per-window only on desktop:
+				if ('watchedResources' in draft.backgroundWindows[windowId]) {
+					delete draft.backgroundWindows[windowId].watchedResources[action.id];
+				}
+			}
 
 			delete draft.watchedResources[action.id];
 			break;
