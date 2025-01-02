@@ -133,7 +133,7 @@ class NestingDecoration {
 		}
 
 		const decoration = Decoration.mark({
-			attributes: { class: `cm-node${this.childNode}-level-${parentCounter}` },
+			attributes: { class: `cm-${this.childNode}-level-${parentCounter}` },
 		});
 		this.decorationCache.set(parentCounter, decoration);
 		return decoration;
