@@ -111,7 +111,8 @@
 		{
 			"url": "https://ca.edubirdie.com/",
 			"title": "Achieve academic success with Edubirdie — your trusted partner for expert writing assistance and resources!",
-			"imageName": "Edubirdie.png"
+			"imageName": "Edubirdie.png",
+			"alt": "EduBirdie"
 		}
 	],
 	"orgsOld": [
