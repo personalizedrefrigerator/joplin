@@ -920,8 +920,8 @@ function useMenu(props: Props) {
 						label: _('Joplin Forum'),
 						click() { void bridge().openExternal('https://discourse.joplinapp.org'); },
 					}, {
-						label: _('Join us on Twitter'),
-						click() { void bridge().openExternal('https://twitter.com/joplinapp'); },
+						label: _('Join us on %s', 'Bluesky'),
+						click() { void bridge().openExternal('https://bsky.app/profile/joplinapp.bsky.social'); },
 					}, {
 						label: _('Make a donation'),
 						click() { void bridge().openExternal('https://joplinapp.org/donate/'); },
