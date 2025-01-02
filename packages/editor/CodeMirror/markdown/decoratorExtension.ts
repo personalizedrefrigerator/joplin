@@ -104,6 +104,45 @@ const taskMarkerDecoration = Decoration.mark({
 	attributes: { class: 'cm-taskMarker' },
 });
 
+const strikethroughDecoration = Decoration.mark({
+	attributes: { class: 'cm-strike' },
+});
+
+// A decoration that includes information about its parent nodes
+class NestingDecoration {
+	private decorationCache: Map<number, Decoration> = new Map();
+
+	public constructor(
+		// Parent nodes to include information about
+		private readonly parentNodes: string[],
+		// Node to add the decoration to
+		public readonly childNode: string,
+	) {
+	}
+
+	public toDecoration(parentNodeCounts: Map<string, number>): Decoration {
+		let parentCounter = 0;
+		for (const nodeName of this.parentNodes) {
+			const nodeCount = parentNodeCounts.get(nodeName);
+			parentCounter += nodeCount ?? 0;
+		}
+
+		const cachedDecoration = this.decorationCache.get(parentCounter);
+		if (cachedDecoration) {
+			return cachedDecoration;
+		}
+
+		const decoration = Decoration.mark({
+			attributes: { class: `cm-node${this.childNode}-level-${parentCounter}` },
+		});
+		this.decorationCache.set(parentCounter, decoration);
+		return decoration;
+	}
+}
+
+const quoteMarkDecoration = new NestingDecoration(['Blockquote'], 'QuoteMark');
+const listMarkDecoration = new NestingDecoration(['OrderedList', 'BulletList'], 'ListMark');
+
 const nodeNameToLineDecoration: Record<string, Decoration> = {
 	'FencedCode': codeBlockDecoration,
 	'CodeBlock': codeBlockDecoration,
@@ -128,7 +167,7 @@ const nodeNameToLineDecoration: Record<string, Decoration> = {
 	'TableRow': tableBodyDecoration,
 };
 
-const nodeNameToMarkDecoration: Record<string, Decoration> = {
+const nodeNameToMarkDecoration: Record<string, Decoration|NestingDecoration> = {
 	'InlineCode': inlineCodeDecoration,
 	'URL': urlDecoration,
 	'InlineMath': inlineMathDecoration,
@@ -136,6 +175,9 @@ const nodeNameToMarkDecoration: Record<string, Decoration> = {
 	'TagName': htmlTagNameDecoration,
 	'HorizontalRule': horizontalRuleDecoration,
 	'TaskMarker': taskMarkerDecoration,
+	'Strikethrough': strikethroughDecoration,
+	'QuoteMark': quoteMarkDecoration,
+	'ListMark': listMarkDecoration,
 };
 
 const multilineNodes = {
@@ -180,12 +222,16 @@ const computeDecorations = (view: EditorView) => {
 	};
 
 	for (const { from, to } of view.visibleRanges) {
+		// Maps from node names to the number of times a node is the parent of the current.
+		const parentNodeCounts = new Map<string, number>();
 		ensureSyntaxTree(
 			view.state,
 			to,
 		)?.iterate({
 			from, to,
 			enter: node => {
+				parentNodeCounts.set(node.name, (parentNodeCounts.get(node.name) ?? 0) + 1);
+
 				let blockDecorated = false;
 
 				// Compute the visible region of the node.
@@ -199,7 +245,11 @@ const computeDecorations = (view: EditorView) => {
 				}
 
 				if (nodeNameToMarkDecoration.hasOwnProperty(node.name)) {
-					const decoration = nodeNameToMarkDecoration[node.name];
+					let decoration = nodeNameToMarkDecoration[node.name];
+					if (decoration instanceof NestingDecoration) {
+						decoration = decoration.toDecoration(parentNodeCounts);
+					}
+
 					addDecorationToRange(viewFrom, viewTo, decoration);
 				}
 
@@ -213,6 +263,12 @@ const computeDecorations = (view: EditorView) => {
 					if (viewTo === node.to) {
 						addDecorationToLines(viewTo, viewTo, regionStopDecoration);
 					}
+				}
+			},
+			leave: node => {
+				const prevNestingLevel = parentNodeCounts.get(node.name);
+				if (prevNestingLevel) {
+					parentNodeCounts.set(node.name, prevNestingLevel - 1);
 				}
 			},
 		});
