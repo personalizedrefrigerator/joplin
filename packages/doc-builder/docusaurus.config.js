@@ -245,6 +245,10 @@ const config = {
 						title: 'Community',
 						items: [
 							{
+								label: 'Bluesky',
+								href: 'https://bsky.app/profile/joplinapp.bsky.social',
+							},
+							{
 								label: 'Twitter',
 								href: 'https://twitter.com/joplinapp',
 							},
