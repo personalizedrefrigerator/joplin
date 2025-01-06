@@ -363,6 +363,7 @@ export default class ResourceEditWatcher {
 
 		this.dispatch({
 			type: 'RESOURCE_EDIT_WATCHER_CLEAR',
+			windowId: sourceWindow,
 		});
 	}
 
