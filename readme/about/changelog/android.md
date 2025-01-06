@@ -1,5 +1,20 @@
 # Joplin Android Changelog
 
+## [android-v3.2.4](https://github.com/laurent22/joplin/releases/tag/android-v3.2.4) (Pre-release) - 2025-01-06T12:50:23Z
+
+- New: Plugin API: Add support for the renderMarkup command (#11494 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Improved: Accessibility: Improve sidemenu notebook list accessibility (#11556 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Improved: Add an accordion for disabled master keys on encryption screen (#11529) (#11486 by [@pedr](https://github.com/pedr))
+- Improved: Add more options when long pressing the icon on mobile (#11517) (#10374)
+- Improved: Display html notes using white theme (#11510) (#10609)
+- Improved: Plugin API: Implement the `toggleVisiblePanes` command (#11496 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Improved: Removed old hack that was making the note body move up and down (#11511)
+- Improved: Updated packages @react-native-clipboard/clipboard (v1.14.2), @react-native-community/netinfo (v11.3.3), @react-native-community/slider (v4.5.3), @rollup/plugin-node-resolve (v15.2.4), adm-zip (v0.5.16)
+- Improved: Use real timers for sync operations (#11081)
+- Fixed: Fix editor shows nothing when there are no selected note IDs (#11514) (#11264 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Fix missing "Insert Time" button (#11542) (#11539 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Locked out of mobile app due to broken fingerprint scanner (#10926)
+
 ## [android-v3.2.3](https://github.com/laurent22/joplin/releases/tag/android-v3.2.3) (Pre-release) - 2024-12-11T13:58:14Z
 
 - New: Accessibility: Add checked/unchecked accessibility information to the "sort notes by" dialog (#11411 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))

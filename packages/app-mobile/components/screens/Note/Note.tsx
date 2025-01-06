@@ -69,6 +69,10 @@ const emptyArray: any[] = [];
 
 const logger = Logger.create('screens/Note');
 
+interface InsertTextOptions {
+	newLine?: boolean;
+}
+
 interface Props extends BaseProps {
 	provisionalNoteIds: string[];
 	dispatch: Dispatch;
@@ -721,20 +725,21 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 		return await saveOriginalImage();
 	}
 
-	private async insertText(text: string) {
+	private async insertText(text: string, { newLine = false }: InsertTextOptions = {}) {
 		const newNote = { ...this.state.note };
+		const separator = newLine ? '\n' : '';
 
 		if (this.state.mode === 'edit') {
 			let newText = '';
 
 			if (this.selection) {
-				newText = `\n${text}\n`;
+				newText = `${separator}${text}${separator}`;
 				const prefix = newNote.body.substring(0, this.selection.start);
 				const suffix = newNote.body.substring(this.selection.end);
 				newNote.body = `${prefix}${newText}${suffix}`;
 			} else {
-				newText = `\n${text}`;
-				newNote.body = `${newNote.body}\n${newText}`;
+				newText = `${separator}${separator}${text}`;
+				newNote.body = `${newNote.body}${newText}`;
 			}
 
 			if (this.useEditorBeta()) {
@@ -747,7 +752,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 				}
 			}
 		} else {
-			newNote.body += `\n${text}`;
+			newNote.body += `${separator}${text}`;
 		}
 
 		this.setState({ note: newNote });
@@ -830,7 +835,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 		resource = await Resource.save(resource, { isNew: true });
 
 		const resourceTag = Resource.markupTag(resource);
-		const newNote = await this.insertText(resourceTag);
+		const newNote = await this.insertText(resourceTag, { newLine: true });
 
 		void this.refreshResource(resource, newNote.body);
 
@@ -850,7 +855,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 
 	private cameraView_onInsertBarcode = (data: string) => {
 		this.setState({ showCamera: false });
-		void this.insertText(data);
+		void this.insertText(data, { newLine: true });
 	};
 
 	private cameraView_onCancel() {

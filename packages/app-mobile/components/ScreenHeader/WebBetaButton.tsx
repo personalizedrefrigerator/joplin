@@ -50,7 +50,7 @@ const WebBetaButton: React.FC<Props> = props => {
 			>
 				<Text>{'At present, the web client is in beta. In the future, it may change significantly, or be removed.'}</Text>
 				<View style={feedbackContainerStyles}>
-					<LinkButton onPress={onLeaveFeedback}>{_('Give feedback')}</LinkButton>
+					<LinkButton onPress={onLeaveFeedback}>{'Give feedback'}</LinkButton>
 				</View>
 			</DismissibleDialog>
 		</>

@@ -89,6 +89,9 @@
 	"(In plugin: %s)": [
 		""
 	],
+	"(level %d)": [
+		""
+	],
 	"(None)": [
 		""
 	],
@@ -170,6 +173,9 @@
 	"Add recipient:": [
 		""
 	],
+	"Add tag %s to note": [
+		""
+	],
 	"Add title": [
 		"Aldoni titolon"
 	],
@@ -184,6 +190,9 @@
 	],
 	"Advanced options": [
 		"Altnivelaj opcioj"
+	],
+	"all": [
+		""
 	],
 	"All data, including notes, notebooks and tags will be permanently deleted.": [
 		""
@@ -239,6 +248,9 @@
 	"Apply": [
 		"Apliki"
 	],
+	"Are you sure that you want to restore the default toolbar layout?\nThis cannot be undone.": [
+		""
+	],
 	"Are you sure you want to renew the authorisation token?": [
 		""
 	],
@@ -249,6 +261,9 @@
 		""
 	],
 	"Aritim Dark": [
+		""
+	],
+	"At present, Joplin Web can only be open in one tab at a time. Please close the other instance of Joplin.": [
 		""
 	],
 	"Attach file": [
@@ -290,6 +305,9 @@
 	"Auto-pair braces, parentheses, quotations, etc.": [
 		""
 	],
+	"Autocomplete Markdown and HTML": [
+		""
+	],
 	"Automatically delete notes in the trash after a number of days": [
 		""
 	],
@@ -303,9 +321,6 @@
 		""
 	],
 	"Beta": [
-		""
-	],
-	"Biometric unlock is not setup on the device. Please set it up in order to unlock Joplin. If the device is on lockout, consider switching it off and on to reset biometrics scanning.": [
 		""
 	],
 	"Bold": [
@@ -324,6 +339,9 @@
 		""
 	],
 	"by %s": [
+		""
+	],
+	"by word": [
 		""
 	],
 	"Can view": [
@@ -383,10 +401,16 @@
 	"Change application layout": [
 		""
 	],
+	"Change shortcut for \"%s\"": [
+		""
+	],
 	"Characters": [
 		""
 	],
 	"Characters excluding spaces": [
+		""
+	],
+	"Check elements to display in the toolbar": [
 		""
 	],
 	"Check for updates...": [
@@ -416,7 +440,13 @@
 	"Click \"%s\" to restore the note. It will be copied in the notebook named \"%s\". The current version of the note will not be replaced or modified.": [
 		""
 	],
+	"close": [
+		""
+	],
 	"Close": [
+		""
+	],
+	"Close side menu": [
 		""
 	],
 	"Close the application, then delete your profile in \"%s\", and start the application again. Make sure you create a backup first by exporting all your notes as JEX.": [
@@ -437,10 +467,7 @@
 	"Code Block": [
 		""
 	],
-	"Collapse": [
-		""
-	],
-	"Collapse %s": [
+	"Collapsed, press space to expand.": [
 		""
 	],
 	"Coming alarms": [
@@ -492,6 +519,9 @@
 		""
 	],
 	"Continue": [
+		""
+	],
+	"Control character": [
 		""
 	],
 	"Convert to note": [
@@ -582,6 +612,9 @@
 		""
 	],
 	"Ctrl-click to open: %s": [
+		""
+	],
+	"current match": [
 		""
 	],
 	"Current version is up-to-date.": [
@@ -791,6 +824,9 @@
 	"Edit in external editor": [
 		""
 	],
+	"Edit in new window": [
+		""
+	],
 	"Edit note.": [
 		"Redakti noton."
 	],
@@ -866,6 +902,9 @@
 	"Enable encryption": [
 		""
 	],
+	"Enable file:// URLs for images and videos": [
+		""
+	],
 	"Enable footnotes": [
 		"Ebligi piednotojn"
 	],
@@ -899,6 +938,9 @@
 	"Enable soft breaks": [
 		""
 	],
+	"Enable spell checking in Markdown editor": [
+		""
+	],
 	"Enable spellcheck in the text editor": [
 		""
 	],
@@ -923,6 +965,9 @@
 	"Enabled": [
 		"Ebligita"
 	],
+	"Enables Markdown list continuation, auto-closing HTML tags, and other markup autocompletions.": [
+		""
+	],
 	"Enabling encryption means *all* your notes and attachments are going to be re-synchronised and sent encrypted to the sync target.": [
 		""
 	],
@@ -941,6 +986,9 @@
 	"Encryption is: %s": [
 		""
 	],
+	"Ends voice typing": [
+		""
+	],
 	"Enter code here": [
 		"Entajpu kodon ĉi tie"
 	],
@@ -949,6 +997,9 @@
 	],
 	"Enter notebook title": [
 		"Entajpu notlibron titolon"
+	],
+	"Entering selection mode": [
+		""
 	],
 	"Enum": [
 		""
@@ -977,10 +1028,10 @@
 	"Exits the application.": [
 		"Eliri la aplikaĵon."
 	],
-	"Expand": [
+	"Expand %s": [
 		""
 	],
-	"Expand %s": [
+	"Expanded, press space to collapse.": [
 		""
 	],
 	"Export": [
@@ -1028,9 +1079,6 @@
 	"File system": [
 		"Dosiera sistemo"
 	],
-	"Find and replace": [
-		""
-	],
 	"Firefox Extension": [
 		""
 	],
@@ -1048,6 +1096,9 @@
 	],
 	"Focus title": [
 		"Fokusi titolon"
+	],
+	"Follow link": [
+		""
 	],
 	"For debugging purpose only: export your profile to an external SD card.": [
 		""
@@ -1097,6 +1148,15 @@
 	"Gets or sets a config value. If [value] is not provided, it will show the value of [name]. If neither [name] nor [value] is provided, it will list the current configuration.": [
 		""
 	],
+	"go": [
+		""
+	],
+	"Go back": [
+		""
+	],
+	"Go to line": [
+		""
+	],
 	"Go to source URL": [
 		"Iri al URL-fonto"
 	],
@@ -1110,9 +1170,6 @@
 		""
 	],
 	"Header %d": [
-		""
-	],
-	"Headers": [
 		""
 	],
 	"Heading": [
@@ -1131,9 +1188,6 @@
 		""
 	],
 	"Hide keyboard": [
-		""
-	],
-	"Hide more actions": [
 		""
 	],
 	"Highlight": [
@@ -1241,6 +1295,9 @@
 	"Indent more": [
 		""
 	],
+	"Info": [
+		""
+	],
 	"Inline Code": [
 		""
 	],
@@ -1283,7 +1340,7 @@
 	"Items that cannot be synchronised": [
 		""
 	],
-	"Join us on Twitter": [
+	"Join us on %s": [
 		""
 	],
 	"Joplin can synchronise your notes using various providers. Select one from the list below.": [
@@ -1304,6 +1361,9 @@
 	"Joplin Forum": [
 		"Joplin-forumo"
 	],
+	"Joplin is already running.": [
+		""
+	],
 	"Joplin Server URL": [
 		""
 	],
@@ -1314,9 +1374,6 @@
 		"Joplin-retejo"
 	],
 	"Joplin's own sync service. Also gives access to Joplin-specific features such as publishing notes or collaborating on notebooks with others.": [
-		""
-	],
-	"KaTeX": [
 		""
 	],
 	"Keep note history for": [
@@ -1386,13 +1443,7 @@
 		"",
 		""
 	],
-	"Links with protocol \"%s\" are not supported": [
-		""
-	],
 	"List item": [
-		""
-	],
-	"Lists": [
 		""
 	],
 	"Loaded": [
@@ -1452,6 +1503,12 @@
 	"Master Key %s": [
 		"Ĉefa Klavo %s"
 	],
+	"match case": [
+		""
+	],
+	"Math": [
+		""
+	],
 	"Max concurrent connections": [
 		""
 	],
@@ -1462,6 +1519,9 @@
 		""
 	],
 	"Minimise": [
+		""
+	],
+	"Missing camera permission": [
 		""
 	],
 	"Missing keys": [
@@ -1503,9 +1563,6 @@
 	"Never resize": [
 		""
 	],
-	"New": [
-		""
-	],
 	"New note": [
 		"Nova noto"
 	],
@@ -1530,6 +1587,9 @@
 	"New version: %s": [
 		"Nova versio: %s"
 	],
+	"next": [
+		""
+	],
 	"Next match": [
 		""
 	],
@@ -1550,9 +1610,6 @@
 	],
 	"No active notebook.": [
 		"Ne estas aktiva notlibro."
-	],
-	"No item with ID %s": [
-		""
 	],
 	"No new invitations": [
 		""
@@ -1579,6 +1636,9 @@
 		""
 	],
 	"No text editor is defined. Please set it using `config editor <editor-path>`": [
+		""
+	],
+	"None": [
 		""
 	],
 	"Nord": [
@@ -1644,11 +1704,17 @@
 	"Numbered List": [
 		""
 	],
+	"OCR: Clear cache and re-download language data files": [
+		""
+	],
 	"OK": [
 		"Bone"
 	],
 	"On %s: %s": [
 		"En %s: %s"
+	],
+	"on line": [
+		""
 	],
 	"One of your master keys use an obsolete encryption method.": [
 		""
@@ -1722,9 +1788,6 @@
 	"Per user. Minimum of %d users.": [
 		""
 	],
-	"Permission to use camera": [
-		"Permeso por uzi kameraon"
-	],
 	"Please click on \"%s\" to proceed, or set the passwords in the \"%s\" list below.": [
 		""
 	],
@@ -1791,6 +1854,12 @@
 	"Preferred light theme": [
 		""
 	],
+	"Preferred voice typing provider": [
+		""
+	],
+	"Preserve colours when pasting text in Rich Text Editor": [
+		""
+	],
 	"Press Ctrl+D or type \"exit\" to exit the application": [
 		""
 	],
@@ -1801,6 +1870,9 @@
 		""
 	],
 	"Press to set the decryption password.": [
+		""
+	],
+	"previous": [
 		""
 	],
 	"Previous match": [
@@ -1831,6 +1903,9 @@
 		""
 	],
 	"Processing": [
+		""
+	],
+	"Processing photo...": [
 		""
 	],
 	"Profile": [
@@ -1929,6 +2004,12 @@
 	"Replace: ": [
 		""
 	],
+	"replaced $ matches": [
+		""
+	],
+	"replaced match on line $": [
+		""
+	],
 	"Report an issue": [
 		""
 	],
@@ -1971,6 +2052,12 @@
 	"Reverses the sorting order.": [
 		""
 	],
+	"Rich Text": [
+		""
+	],
+	"Rich Text editor. Press Escape then Tab to escape focus.": [
+		""
+	],
 	"Runs the commands contained in the text file. There should be one command per line.": [
 		""
 	],
@@ -2008,6 +2095,9 @@
 		"Konservi la ŝanĝojn"
 	],
 	"Save geo-location with notes": [
+		""
+	],
+	"Scanned code": [
 		""
 	],
 	"Search": [
@@ -2058,6 +2148,9 @@
 	"Sets the property <name> of the given <note> to the given [value]. Possible properties are:\n\n%s": [
 		""
 	],
+	"Settings": [
+		""
+	],
 	"Share": [
 		"Konigi"
 	],
@@ -2089,6 +2182,9 @@
 		""
 	],
 	"Show/hide the sidebar": [
+		""
+	],
+	"Shows notes for tag": [
 		""
 	],
 	"Shrink large images before adding them to notes.": [
@@ -2137,6 +2233,12 @@
 		""
 	],
 	"Some items could not be synchronised. Please try to synchronise them first.": [
+		""
+	],
+	"Sort \"%s\" in ascending order": [
+		""
+	],
+	"Sort \"%s\" in descending order": [
 		""
 	],
 	"Sort notebooks by": [
@@ -2243,6 +2345,9 @@
 	],
 	"Switch between note and to-do type": [
 		"Ŝalti inter nota kaj taska tipo"
+	],
+	"Switch to back-facing camera": [
+		""
 	],
 	"Switch to note type": [
 		"Ŝalti al nota tipo"
@@ -2386,7 +2491,7 @@
 	"The following keys use an out-dated encryption algorithm and it is recommended to upgrade them. The upgraded key will still be able to decrypt and encrypt your data as usual.": [
 		""
 	],
-	"The Joplin mobile app does not currently support this type of link: %s": [
+	"The following plugins may not support the current markdown editor:": [
 		""
 	],
 	"The Joplin team has vetted this plugin and it meets our standards for security and performance.": [
@@ -2441,6 +2546,9 @@
 	"The target to synchronise to. Each sync target may have additional parameters which are named as `sync.NUM.NAME` (all documented below).": [
 		""
 	],
+	"The web client does not support accepting encrypted shared notebooks. Please switch to the desktop or mobile app before accepting the share.\n\nError: \"%s\"": [
+		""
+	],
 	"The Web Clipper needs your authorisation to access your data.": [
 		""
 	],
@@ -2490,9 +2598,6 @@
 		""
 	],
 	"This attachment is not downloaded or not decrypted yet": [
-		""
-	],
-	"This attachment is not downloaded or not decrypted yet.": [
 		""
 	],
 	"This authorisation token is only needed to allow third-party applications to access Joplin.": [
@@ -2707,6 +2812,9 @@
 	"Use the arrows to move the layout items. Press \"Escape\" to exit.": [
 		""
 	],
+	"Use the legacy Markdown editor": [
+		""
+	],
 	"Use this to rebuild the search index if there is a problem with search. It may take a long time depending on the number of notes.": [
 		""
 	],
@@ -2744,6 +2852,9 @@
 		""
 	],
 	"Voice typing...": [
+		""
+	],
+	"Vosk": [
 		""
 	],
 	"Waiting for authorisation...": [
@@ -2797,6 +2908,9 @@
 	"When enabled, the application will scan your attachments and extract the text from it. This will allow you to search for text in these attachments.": [
 		""
 	],
+	"Whisper": [
+		""
+	],
 	"Window unresponsive.": [
 		""
 	],
@@ -2846,9 +2960,6 @@
 		""
 	],
 	"Your password is needed to decrypt some of your data. Type `:e2ee decrypt` to set it.": [
-		""
-	],
-	"Your permission to use your camera is required.": [
 		""
 	],
 	"Your version: %s": [

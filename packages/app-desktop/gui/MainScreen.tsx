@@ -41,6 +41,8 @@ import validateColumns from './NoteListHeader/utils/validateColumns';
 import TrashNotification from './TrashNotification/TrashNotification';
 import UpdateNotification from './UpdateNotification/UpdateNotification';
 import NoteEditor from './NoteEditor/NoteEditor';
+import PluginNotification from './PluginNotification/PluginNotification';
+import { Toast } from '@joplin/lib/services/plugins/api/types';
 
 const ipcRenderer = require('electron').ipcRenderer;
 
@@ -79,6 +81,7 @@ interface Props {
 	notesSortOrderReverse: boolean;
 	notesColumns: NoteListColumns;
 	showInvalidJoplinCloudCredential: boolean;
+	toast: Toast;
 }
 
 interface ShareFolderDialogOptions {
@@ -758,6 +761,10 @@ class MainScreenComponent extends React.Component<Props, State> {
 					dispatch={this.props.dispatch as any}
 				/>
 				<UpdateNotification themeId={this.props.themeId} />
+				<PluginNotification
+					themeId={this.props.themeId}
+					toast={this.props.toast}
+				/>
 				{messageComp}
 				{layoutComp}
 			</div>
@@ -800,6 +807,7 @@ const mapStateToProps = (state: AppState) => {
 		notesSortOrderReverse: state.settings['notes.sortOrder.reverse'],
 		notesColumns: validateColumns(state.settings['notes.columns']),
 		showInvalidJoplinCloudCredential: state.settings['sync.target'] === 10 && state.mustAuthenticate,
+		toast: state.toast,
 	};
 };
 

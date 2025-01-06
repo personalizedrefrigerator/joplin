@@ -116,6 +116,9 @@
 	"(In plugin: %s)": [
 		"(I udvidelse: %s)"
 	],
+	"(level %d)": [
+		""
+	],
 	"(None)": [
 		"(Ingen)"
 	],
@@ -208,6 +211,9 @@
 	],
 	"Add recipient:": [
 		"Tilføj modtager:"
+	],
+	"Add tag %s to note": [
+		""
 	],
 	"Add title": [
 		"Tilføj titel"
@@ -305,6 +311,9 @@
 	"Aritim Dark": [
 		"Aritim Mørk"
 	],
+	"At present, Joplin Web can only be open in one tab at a time. Please close the other instance of Joplin.": [
+		""
+	],
 	"Attach": [
 		"Vedhæft"
 	],
@@ -356,6 +365,9 @@
 	"Auto-pair braces, parentheses, quotations, etc.": [
 		"Auto-par klammer, parenteser, citater, etc."
 	],
+	"Autocomplete Markdown and HTML": [
+		""
+	],
 	"Automatically check for updates": [
 		"Tjek automatisk efter opdateringer"
 	],
@@ -374,9 +386,6 @@
 	"Beta": [
 		"Beta"
 	],
-	"Biometric unlock is not setup on the device. Please set it up in order to unlock Joplin. If the device is on lockout, consider switching it off and on to reset biometrics scanning.": [
-		"Biometrisk oplåsning er ikke konfigureret på enheden. Du skal sætte det op for at låse Joplin op. Hvis enheden er nedlåst, kan du overveje at slukke og tænde den for at nulstille biometrisk scanning."
-	],
 	"Bold": [
 		"Fed"
 	],
@@ -394,6 +403,9 @@
 	],
 	"by %s": [
 		"af %s"
+	],
+	"by word": [
+		""
 	],
 	"Can Share": [
 		"Kan dele"
@@ -470,11 +482,17 @@
 	"Change language": [
 		"Skift sprog"
 	],
+	"Change shortcut for \"%s\"": [
+		""
+	],
 	"Characters": [
 		"Tegn"
 	],
 	"Characters excluding spaces": [
 		"Tegn eksklusiv mellemrum"
+	],
+	"Check elements to display in the toolbar": [
+		""
 	],
 	"Check for updates...": [
 		"Tjek om der er opdateringer.."
@@ -521,6 +539,9 @@
 	"Close dropdown": [
 		"Luk rullelisten"
 	],
+	"Close side menu": [
+		""
+	],
 	"Close the application, then delete your profile in \"%s\", and start the application again. Make sure you create a backup first by exporting all your notes as JEX.": [
 		"Luk applikationen, slet derefter din profil i \"%s\", og start applikationen igen. Sørg for at lave en sikkerhedskopi først ved at eksportere alle dine noter som JEX."
 	],
@@ -548,11 +569,8 @@
 	"Collaborate on notebooks with others": [
 		"Samarbejd med andre om notesbøger"
 	],
-	"Collapse": [
-		"Fold sammen"
-	],
-	"Collapse %s": [
-		"Fold %s sammen"
+	"Collapsed, press space to expand.": [
+		""
 	],
 	"Coming alarms": [
 		"Kommende alarmer"
@@ -1041,6 +1059,9 @@
 	"Edit in external editor": [
 		"Rediger i ekstern editor"
 	],
+	"Edit in new window": [
+		""
+	],
 	"Edit link": [
 		"Rediger link"
 	],
@@ -1131,6 +1152,9 @@
 	"Enable encryption": [
 		"Aktivér kryptering"
 	],
+	"Enable file:// URLs for images and videos": [
+		""
+	],
 	"Enable footnotes": [
 		"Aktivér fodnoter"
 	],
@@ -1193,6 +1217,9 @@
 	],
 	"Enabled": [
 		"Aktiveret"
+	],
+	"Enables Markdown list continuation, auto-closing HTML tags, and other markup autocompletions.": [
+		""
 	],
 	"Enabling encryption means *all* your notes and attachments are going to be re-synchronised and sent encrypted to the sync target.": [
 		"Slås kryptering fra vil *alle* dine noter og vedhæftninger blive re-synkroniseret og sendt ukrypteret til synk-modtageren."
@@ -1266,11 +1293,11 @@
 	"Exits the application.": [
 		"Lukker programmet."
 	],
-	"Expand": [
-		"Udvid"
-	],
 	"Expand %s": [
 		"Udvid %s"
+	],
+	"Expanded, press space to collapse.": [
+		""
 	],
 	"Export": [
 		"Eksportér"
@@ -1341,9 +1368,6 @@
 	"Filter tags": [
 		"Filtrer etiketter"
 	],
-	"Find and replace": [
-		"Find og erstat"
-	],
 	"Find: ": [
 		"Find: "
 	],
@@ -1365,6 +1389,9 @@
 	"Focus title": [
 		"Fokuser på titel"
 	],
+	"Follow link": [
+		""
+	],
 	"For debugging purpose only: export your profile to an external SD card.": [
 		"Kun til fejlsøgning: Eksporter din profil til et eksternt SD-kort."
 	],
@@ -1382,9 +1409,6 @@
 	],
 	"Force path style": [
 		"Gennemtving sti-stil"
-	],
-	"Formatting": [
-		"Formatering"
 	],
 	"Forward": [
 		"Videresend"
@@ -1423,8 +1447,17 @@
 	"Gets or sets a config value. If [value] is not provided, it will show the value of [name]. If neither [name] nor [value] is provided, it will list the current configuration.": [
 		"Henter eller tilføjer konfigurationsværdi. Hvis [value] er tilføjet, vises værdien af [name]. Hvis hverken [name] eller [value] er tilføjet, vises aktuel konfiguration."
 	],
+	"go": [
+		""
+	],
+	"Go back": [
+		""
+	],
 	"Go to Joplin Cloud profile": [
 		"Gå til Joplin Cloud-profil"
+	],
+	"Go to line": [
+		""
 	],
 	"Go to source URL": [
 		"Gå til kilde-URL"
@@ -1440,9 +1473,6 @@
 	],
 	"Header %d": [
 		"Overskrift %d"
-	],
-	"Headers": [
-		"Overskrifter"
 	],
 	"Heading": [
 		"Overskrift"
@@ -1473,9 +1503,6 @@
 	],
 	"Hide keyboard": [
 		"Skjul tastatur"
-	],
-	"Hide more actions": [
-		"Skjul flere handlinger"
 	],
 	"Highlight": [
 		"Fremhæv"
@@ -1594,6 +1621,9 @@
 	"Indent more": [
 		"Indryk mere"
 	],
+	"Info": [
+		""
+	],
 	"Information": [
 		"Information"
 	],
@@ -1660,9 +1690,6 @@
 	"Items that cannot be synchronised": [
 		"Emner kan ikke synkroniseres"
 	],
-	"Join us on Twitter": [
-		"Følg os på Twitter"
-	],
 	"Joplin can synchronise your notes using various providers. Select one from the list below.": [
 		"Joplin kan synkronisere dine noter ved hjælp af forskellige tjenesteudbydere. Vælg en fra listen nedenfor."
 	],
@@ -1713,9 +1740,6 @@
 	],
 	"Joplin's own sync service. Also gives access to Joplin-specific features such as publishing notes or collaborating on notebooks with others.": [
 		"Joplin's egen synkroniseringstjeneste. Giver også adgang til særlige Joplin-funktioner såsom publicering af noter og samarbejde med andre om notesbøger."
-	],
-	"KaTeX": [
-		"KaTeX"
 	],
 	"Keep note history for": [
 		"Behold note-historie i"
@@ -1802,14 +1826,8 @@
 	"Link text": [
 		"Link-tekst"
 	],
-	"Links with protocol \"%s\" are not supported": [
-		"Links med \"%s\" protokollen er ikke understøttede"
-	],
 	"List item": [
 		"Listepunkt"
-	],
-	"Lists": [
-		"Lister"
 	],
 	"Loaded": [
 		"Indlæst"
@@ -1825,6 +1843,9 @@
 	],
 	"Log": [
 		"Log"
+	],
+	"Login to Joplin Cloud.": [
+		"Log ind på Joplin Cloud."
 	],
 	"Login with Dropbox": [
 		"Log på med Dropbox"
@@ -1891,6 +1912,12 @@
 	],
 	"Master password:": [
 		"Hovedadgangskode:"
+	],
+	"match case": [
+		""
+	],
+	"Math": [
+		""
 	],
 	"Max concurrent connections": [
 		"Maksimale samtidige forbindelser"
@@ -1964,9 +1991,6 @@
 	"Never resize": [
 		"Ændr aldrig størrelse"
 	],
-	"New": [
-		"Ny"
-	],
 	"New invitations": [
 		"Nye versioner"
 	],
@@ -1994,6 +2018,9 @@
 	"New version: %s": [
 		"Ny version: %s"
 	],
+	"next": [
+		""
+	],
 	"Next match": [
 		"Næste match"
 	],
@@ -2017,9 +2044,6 @@
 	],
 	"No active notebook.": [
 		"Ingen aktiv notesbog."
-	],
-	"No item with ID %s": [
-		"Intet emne med ID'en %s"
 	],
 	"No new invitations": [
 		"Ingen nye invitationer"
@@ -2156,6 +2180,9 @@
 	"Numbered List": [
 		"Nummeret liste"
 	],
+	"OCR: Clear cache and re-download language data files": [
+		""
+	],
 	"OK": [
 		"OK"
 	],
@@ -2164,6 +2191,9 @@
 	],
 	"On %s: %s": [
 		"På %s: %s"
+	],
+	"on line": [
+		""
 	],
 	"One of your master keys use an obsolete encryption method.": [
 		"En af dine hovednøgler bruger en forældet krypteringsmetode."
@@ -2276,9 +2306,6 @@
 	"Permission needed": [
 		"Tilladelse nødvendig"
 	],
-	"Permission to use camera": [
-		"Tilladelse til at bruge kameraet"
-	],
 	"Please click on \"%s\" to proceed, or set the passwords in the \"%s\" list below.": [
 		"Klik på \"%s\" for at fortsætte, eller indstil adgangskoderne på \"%s\"-listen nedenfor."
 	],
@@ -2368,6 +2395,12 @@
 	],
 	"Preferred light theme": [
 		"Foretrukket lyst tema"
+	],
+	"Preferred voice typing provider": [
+		""
+	],
+	"Preserve colours when pasting text in Rich Text Editor": [
+		""
 	],
 	"Press Ctrl+D or type \"exit\" to exit the application": [
 		"Tast Ctrl+D eller tast \"exit\" for at afslutte app'en"
@@ -2534,6 +2567,12 @@
 	"Replace: ": [
 		"Erstat: "
 	],
+	"replaced $ matches": [
+		""
+	],
+	"replaced match on line $": [
+		""
+	],
 	"Report an issue": [
 		"Rapportér et problem"
 	],
@@ -2609,6 +2648,12 @@
 	"Revision: %s (%s)": [
 		"Revision: %s (%s)"
 	],
+	"Rich Text": [
+		""
+	],
+	"Rich Text editor. Press Escape then Tab to escape focus.": [
+		""
+	],
 	"Runs the commands contained in the text file. There should be one command per line.": [
 		"Afvikler kommandoerne i tekstfilen. Der skal være én kommando pr. linje."
 	],
@@ -2653,6 +2698,9 @@
 	],
 	"Save geo-location with notes": [
 		"Gem geo-lokation i noter"
+	],
+	"Scanned code": [
+		""
 	],
 	"Search": [
 		"Søg"
@@ -2729,6 +2777,9 @@
 	"Sets the property <name> of the given <note> to the given [value]. Possible properties are:\n\n%s": [
 		"Sætter ejerskab <name> af valgt <note> til aktuel [value]. Mulige ejerskab er:\n\n%s"
 	],
+	"Settings": [
+		""
+	],
 	"Share": [
 		"Del"
 	],
@@ -2779,9 +2830,6 @@
 	],
 	"Show monospace fonts only.": [
 		"Vis kun monospace-skrifttyper."
-	],
-	"Show more actions": [
-		"Vis flere handlinger"
 	],
 	"Show note counts": [
 		"Vis noteantal"
@@ -2842,6 +2890,12 @@
 	],
 	"Some items could not be synchronised. Please try to synchronise them first.": [
 		"Nogle elementer kunne ikke synkroniseres. Prøv at synkronisere dem først."
+	],
+	"Sort \"%s\" in ascending order": [
+		""
+	],
+	"Sort \"%s\" in descending order": [
+		""
 	],
 	"Sort notebooks by": [
 		"Sorter notesbøger efter"
@@ -2956,6 +3010,9 @@
 	],
 	"Switch profile": [
 		"Skift profil"
+	],
+	"Switch to back-facing camera": [
+		""
 	],
 	"Switch to note type": [
 		"Skift til note"
@@ -3120,8 +3177,8 @@
 	"The following keys use an out-dated encryption algorithm and it is recommended to upgrade them. The upgraded key will still be able to decrypt and encrypt your data as usual.": [
 		"Følgende nøgler bruger en forældet krypteringsalgoritme, og det anbefales at opgradere dem. Den opgraderet nøgler vil stadig kunne dekryptere og kryptere dine data som normalt."
 	],
-	"The Joplin mobile app does not currently support this type of link: %s": [
-		"Joplin mobil-app'en understøtter på nuværende tidspunkt ikke denne type link: %s"
+	"The following plugins may not support the current markdown editor:": [
+		""
 	],
 	"The Joplin team has vetted this plugin and it meets our standards for security and performance.": [
 		"Joplin-teamet har kontrolleret dette plugin, og det opfylder vores standarder for sikkerhed og ydeevne."
@@ -3174,6 +3231,9 @@
 	],
 	"The target to synchronise to. Each sync target may have additional parameters which are named as `sync.NUM.NAME` (all documented below).": [
 		"Synkroniseringsmålet. Hver synk. mål kan have ekstra parametre der  navngives som `sync.NUM.NAME` (se dokumentation herunder)."
+	],
+	"The web client does not support accepting encrypted shared notebooks. Please switch to the desktop or mobile app before accepting the share.\n\nError: \"%s\"": [
+		""
 	],
 	"The Web Clipper needs your authorisation to access your data.": [
 		"Web Clipper har brug for din tilladelse til at få adgang til dine data."
@@ -3228,9 +3288,6 @@
 	],
 	"This attachment is not downloaded or not decrypted yet": [
 		"Denne vedhæftning er ikke downloadet eller ikke dekrypteret endnu"
-	],
-	"This attachment is not downloaded or not decrypted yet.": [
-		"Denne vedhæftning er ikke downloadet eller er ikke blevet dekrypteret endnu."
 	],
 	"This authorisation token is only needed to allow third-party applications to access Joplin.": [
 		"Denne autoriseringstoken er kun nødvendig for at tillade tredjepartsprogrammer at tilgå Joplin."
@@ -3577,6 +3634,9 @@
 	"Voice typing...": [
 		"Stemmeindtastning..."
 	],
+	"Vosk": [
+		""
+	],
 	"Waiting for authorisation...": [
 		"Venter på godkendelse..."
 	],
@@ -3634,6 +3694,9 @@
 	"When enabled, the application will scan your attachments and extract the text from it. This will allow you to search for text in these attachments.": [
 		"Når det er aktiveret, vil applikationen scanne dine vedhæftede filer og udtrække teksten fra dem. Dette giver dig mulighed for at søge efter tekst i disse vedhæftede filer."
 	],
+	"Whisper": [
+		""
+	],
 	"Window unresponsive.": [
 		"Vinduet reagerer ikke."
 	],
@@ -3683,16 +3746,13 @@
 		"Dine data bliver genkrypteret og synkroniseret igen."
 	],
 	"Your Joplin Cloud credentials are invalid, please login.": [
-		""
+		"Dine Joplin Cloud-legitimationsoplysninger er ugyldige, log venligst ind."
 	],
 	"Your password is needed to decrypt some of your data.": [
 		"Din adgangskode er nødvendig for at dekryptere nogle af dine data."
 	],
 	"Your password is needed to decrypt some of your data. Type `:e2ee decrypt` to set it.": [
 		"Din adgangskode er nødvendig for at dekryptere nogle af dine data. Tast `:e2ee decrypt` for at indstille den."
-	],
-	"Your permission to use your camera is required.": [
-		"Din tilladelse til at bruge kameraet er påkrævet."
 	],
 	"Your version: %s": [
 		"Din version: %s"
