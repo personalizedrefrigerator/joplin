@@ -46,7 +46,7 @@ export default class ResourceEditWatcher {
 	private eventEmitter_: any;
 	private tempDir_ = '';
 	private openItem_: OpenItemFn;
-	private getWindowId_: GetWindowIdFn;
+	private getActiveWindowId_: GetWindowIdFn;
 
 	public constructor() {
 		this.logger_ = new Logger();
@@ -61,7 +61,7 @@ export default class ResourceEditWatcher {
 		this.logger_ = logger;
 		this.dispatch = dispatch;
 		this.openItem_ = openItem;
-		this.getWindowId_ = getWindowId;
+		this.getActiveWindowId_ = getWindowId;
 	}
 
 	public static instance() {
@@ -246,7 +246,7 @@ export default class ResourceEditWatcher {
 	}
 
 	private async watch(resourceId: string): Promise<WatchedItem> {
-		const sourceWindowId = this.getWindowId_();
+		const sourceWindowId = this.getActiveWindowId_();
 		let watchedItem = this.watchedItemByResourceId(resourceId);
 
 		if (!watchedItem) {
@@ -274,7 +274,7 @@ export default class ResourceEditWatcher {
 			watchedItem.title = resource.title;
 			// Reset the watching window list to handle the case where the active window
 			// was changed while loading the resource.
-			watchedItem.watchedByWindows = [this.getWindowId_()];
+			watchedItem.watchedByWindows = [this.getActiveWindowId_()];
 
 			this.watchFile(editFilePath);
 
