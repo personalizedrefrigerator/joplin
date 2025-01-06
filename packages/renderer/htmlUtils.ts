@@ -308,6 +308,12 @@ class HtmlUtils {
 					attrs['href'] = '#';
 				}
 
+				// Allowing the 'name' attribute allows an attacker to overwrite
+				// DOM methods (e.g. getElementById) with elements.
+				if ('name' in attrs) {
+					delete attrs['name'];
+				}
+
 				// We need to clear any such attribute, otherwise it will
 				// make any arbitrary link open within the application.
 				if ('data-from-md' in attrs) {
