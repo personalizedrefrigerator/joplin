@@ -12,3 +12,15 @@
 		right: 0;
 	}
 }
+
+body:not(.-native-scrollbars) .folder-and-tag-list {
+	::-webkit-scrollbar {
+		width: calc(var(--scrollbar-size) + 1px);
+	}
+
+	::-webkit-scrollbar-thumb {
+		// Makes the scrollbar more visible -- adds spacing between the scrollbar and
+		// the edge of the screen.
+		border: 1px solid var(--joplin-background-color2);
+	}
+}

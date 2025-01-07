@@ -1,13 +1,20 @@
 import shim from '@joplin/lib/shim';
 import Button from '../../Button/Button';
 import { css } from 'styled-components';
+import { ThemeStyle } from '@joplin/lib/theme';
 const styled = require('styled-components').default;
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-type StyleProps = any;
+type StyleProps = {
+	theme: ThemeStyle;
+	isConflictFolder?: boolean;
+	isSpecialItem?: boolean;
+	shareId?: string;
+	selected?: boolean;
+};
 
 export const StyledRoot = styled.div`
 	background-color: ${(props: StyleProps) => props.theme.backgroundColor2};
+	--scrollbar-color: ${(props: StyleProps) => props.theme.color2};
 	width: 100%;
 	height: 100%;
 	overflow-x: hidden;

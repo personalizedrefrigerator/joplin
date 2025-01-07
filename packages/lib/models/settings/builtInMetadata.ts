@@ -1117,6 +1117,17 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 			appTypes: [AppType.Mobile],
 		},
 
+		'ui.customScrollbars': {
+			value: true,
+			type: SettingItemType.Bool,
+			public: true,
+			label: () => _('Use themed scrollbars'),
+			description: () => _('When enabled, scrollbars are restyled to match Joplin\'s theme. Disable to use the default OS scrollbars.'),
+			storage: SettingStorage.File,
+			appTypes: [AppType.Desktop],
+			section: 'appearance',
+		},
+
 		// TODO: Is there a better way to do this? The goal here is to simply have
 		// a way to display a link to the customizable stylesheets, not for it to
 		// serve as a customizable Setting. But because the Setting page is auto-

@@ -21,6 +21,7 @@ import { AppState } from '../../app.reducer';
 interface Props {
 	themeId: number;
 	editorFontSetting: string;
+	customScrollbarsSetting: boolean;
 	customChromeCssPaths: string[];
 }
 
@@ -95,6 +96,19 @@ const useAppliedCss = (doc: Document|null, css: string) => {
 	}, [css, doc]);
 };
 
+const useThemeFlag = (doc: Document|null, flag: string, enabled: boolean) => {
+	useEffect(() => {
+		if (enabled && doc?.body) {
+			doc.body.classList.add(flag);
+			return () => {
+				doc.body.classList.remove(flag);
+			};
+		}
+
+		return () => {};
+	}, [doc, flag, enabled]);
+};
+
 const StyleSheetContainer: React.FC<Props> = props => {
 	const [elementRef, setElementRef] = useState<HTMLElement|null>(null);
 	const doc = useDocument(elementRef);
@@ -111,12 +125,16 @@ const StyleSheetContainer: React.FC<Props> = props => {
 	`);
 	useLinkedCss(doc, props.customChromeCssPaths);
 
+	// Theme flags
+	useThemeFlag(doc, '-native-scrollbars', !props.customScrollbarsSetting);
+
 	return <div ref={setElementRef} style={{ display: 'none' }}></div>;
 };
 
 export default connect((state: AppState) => {
 	return {
 		themeId: state.settings.theme,
+		customScrollbarsSetting: state.settings['ui.customScrollbars'],
 		editorFontSetting: state.settings['style.editor.fontFamily'] as string,
 		customChromeCssPaths: state.customChromeCssPaths,
 	};
