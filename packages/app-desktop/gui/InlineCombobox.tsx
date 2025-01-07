@@ -2,6 +2,7 @@ import * as React from 'react';
 import { useState, useCallback, CSSProperties, useEffect, useRef, useId } from 'react';
 import { _ } from '@joplin/lib/locale';
 import { focus } from '@joplin/lib/utils/focusHandler';
+import ItemList from './ItemList';
 
 interface Props {
 	inputType?: string;
@@ -24,10 +25,9 @@ const suggestionMatchesFilter = (suggestion: string, filter: string) => {
 
 const InlineCombobox: React.FC<Props> = ({ inputType, controls, inputStyle, value, suggestedValues, renderOption, onChange, inputId }) => {
 	const [showList, setShowList] = useState(false);
-	const [visibleSuggestions, setVisibleSuggestions] = useState<string[]>([]);
 	const containerRef = useRef<HTMLDivElement|null>(null);
 	const inputRef = useRef<HTMLInputElement|null>(null);
-	const listboxRef = useRef<HTMLDivElement|null>(null);
+	const listboxRef = useRef<ItemList<string>|null>(null);
 
 	const [filteredSuggestions, setFilteredSuggestions] = useState(suggestedValues);
 
@@ -38,8 +38,10 @@ const InlineCombobox: React.FC<Props> = ({ inputType, controls, inputStyle, valu
 	const selectedIndex = filteredSuggestions.indexOf(value);
 
 	useEffect(() => {
-		setVisibleSuggestions(filteredSuggestions);
-	}, [filteredSuggestions]);
+		if (selectedIndex >= 0 && showList) {
+			listboxRef.current?.makeItemIndexVisible(selectedIndex);
+		}
+	}, [selectedIndex, showList]);
 
 	const focusInput = useCallback(() => {
 		focus('ComboBox/focus input', inputRef.current);
@@ -61,9 +63,10 @@ const InlineCombobox: React.FC<Props> = ({ inputType, controls, inputStyle, valu
 		setShowList(true);
 	}, []);
 
-	const onBlur = useCallback(() => {
+	const onBlur = useCallback((event: React.FocusEvent) => {
 		const hasHoverOrFocus = !!containerRef.current.querySelector(':focus-within, :hover');
-		if (!hasHoverOrFocus) {
+		const movesToContainedItem = containerRef.current.contains(event.relatedTarget);
+		if (!hasHoverOrFocus && !movesToContainedItem) {
 			setShowList(false);
 		}
 	}, []);
@@ -75,6 +78,7 @@ const InlineCombobox: React.FC<Props> = ({ inputType, controls, inputStyle, valu
 		focusInput();
 		onChange(newValue);
 		setFilteredSuggestions(suggestedValues);
+		setShowList(false);
 	}, [onChange, suggestedValues, focusInput]);
 
 	const onKeyDown: React.KeyboardEventHandler<HTMLInputElement> = useCallback(event => {
@@ -103,8 +107,6 @@ const InlineCombobox: React.FC<Props> = ({ inputType, controls, inputStyle, valu
 				}
 				const newKey = filteredSuggestions[newSelectedIndex];
 				onChange(newKey);
-				const targetChild = listboxRef.current.children[newSelectedIndex];
-				targetChild?.scrollIntoView({ block: 'nearest' });
 			}
 			setShowList(true);
 		} else if (event.code === 'Enter') {
@@ -118,28 +120,32 @@ const InlineCombobox: React.FC<Props> = ({ inputType, controls, inputStyle, valu
 	}, [filteredSuggestions, value, selectedIndex, onChange]);
 
 	const valuesListId = useId();
-	let selectedSuggestionId = undefined;
 
-	const suggestionElements = [];
-	for (const key of visibleSuggestions) {
-		const selected = key === value;
-		const id = `combobox-${valuesListId}-option-${key}`;
-		if (selected) {
-			selectedSuggestionId = id;
+	const itemId = (index: number) => {
+		if (index < 0) {
+			return undefined;
+		} else {
+			return `combobox-${valuesListId}-option-${index}`;
 		}
+	};
+	const onRenderItem = (key: string, index: number) => {
+		const selected = key === value;
+		const id = itemId(index);
 
-		suggestionElements.push(
+		return (
 			<div
 				key={key}
 				data-key={key}
 				className={`combobox-suggestion-option ${selected ? '-selected' : ''}`}
 				role='option'
+				aria-posinset={1 + index}
+				aria-setsize={filteredSuggestions.length}
 				onClick={onItemClick}
 				aria-selected={selected}
 				id={id}
-			>{renderOption(key)}</div>,
+			>{renderOption(key)}</div>
 		);
-	}
+	};
 
 	return (
 		<div
@@ -164,21 +170,27 @@ const InlineCombobox: React.FC<Props> = ({ inputType, controls, inputStyle, valu
 				aria-autocomplete='list'
 				aria-controls={valuesListId}
 				aria-expanded={showList}
-				aria-activedescendant={selectedSuggestionId}
+				aria-activedescendant={itemId(selectedIndex)}
 			/>
 			<div className='suggestions'>
 				{
 					// Custom controls
 					controls
 				}
-				<div
+				<ItemList
 					role='listbox'
-					aria-label={_('Font picker')}
+					aria-label={_('Suggestions')}
+					style={{ height: 200 }}
+					itemHeight={26}
+
+					alwaysRenderSelection={true}
+					selectedIndex={selectedIndex >= 0 ? selectedIndex : undefined}
+
+					items={filteredSuggestions}
+					itemRenderer={onRenderItem}
 					id={valuesListId}
 					ref={listboxRef}
-				>
-					{suggestionElements}
-				</div>
+				/>
 			</div>
 		</div>
 	);

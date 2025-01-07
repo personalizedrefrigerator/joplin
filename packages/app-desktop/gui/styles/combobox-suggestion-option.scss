@@ -1,4 +1,6 @@
 .combobox-suggestion-option {
+	height: 26px;
+	box-sizing: border-box;
 	padding: 5px;
 	border-bottom: 1px solid var(--joplin-border-color4);
 	cursor: pointer;
