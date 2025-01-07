@@ -17,6 +17,7 @@ const urlUtils = require('@joplin/lib/urlUtils');
 const ReactTooltip = require('react-tooltip');
 const { connect } = require('react-redux');
 import shared from '@joplin/lib/components/shared/note-screen-shared';
+import shim, { MessageBoxType } from '@joplin/lib/shim';
 
 interface Props {
 	themeId: number;
@@ -97,7 +98,7 @@ class NoteRevisionViewerComponent extends React.PureComponent<Props, State> {
 		this.setState({ restoring: true });
 		await RevisionService.instance().importRevisionNote(this.state.note);
 		this.setState({ restoring: false });
-		alert(RevisionService.instance().restoreSuccessMessage(this.state.note));
+		await shim.showMessageBox(RevisionService.instance().restoreSuccessMessage(this.state.note), { type: MessageBoxType.Info });
 	}
 
 	private backButton_click() {
