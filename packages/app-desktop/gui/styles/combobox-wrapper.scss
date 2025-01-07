@@ -1,0 +1,18 @@
+
+.combobox-wrapper {
+	> .suggestions {
+		background-color: var(--joplin-background-color);
+		max-height: 200px;
+		width: 50%;
+		min-width: 20em;
+		overflow-y: auto;
+		border: 1px solid var(--joplin-border-color4);
+		border-radius: 5px;
+		margin-top: 10px;
+		display: none;
+	}
+
+	&.-expanded > .suggestions {
+		display: block;
+	}
+}

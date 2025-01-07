@@ -1,0 +1,10 @@
+.combobox-suggestion-option {
+	padding: 5px;
+	border-bottom: 1px solid var(--joplin-border-color4);
+	cursor: pointer;
+
+	&:hover, &.-selected {
+		color: var(--joplin-background-color); 
+		background-color: var(--joplin-color);
+	}
+}
