@@ -644,6 +644,7 @@ export default class MdToHtml implements MarkupRenderer {
 
 		let cssStrings = noteStyle(options.theme, {
 			contentMaxWidth: options.contentMaxWidth,
+			customScrollbars: options.customScrollbars,
 		});
 
 		let output: RenderResult = { ...this.allProcessedAssets(allRules, options.theme, options.codeTheme) };

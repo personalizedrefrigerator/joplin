@@ -98,10 +98,10 @@ const useAppliedCss = (doc: Document|null, css: string) => {
 
 const useThemeFlag = (doc: Document|null, flag: string, enabled: boolean) => {
 	useEffect(() => {
-		if (enabled && doc?.body) {
-			doc.body.classList.add(flag);
+		if (enabled && doc) {
+			doc.documentElement.classList.add(flag);
 			return () => {
-				doc.body.classList.remove(flag);
+				doc.documentElement.classList.remove(flag);
 			};
 		}
 

@@ -13,7 +13,7 @@
 	}
 }
 
-body:not(.-native-scrollbars) .folder-and-tag-list {
+:root:not(.-native-scrollbars) .folder-and-tag-list {
 	::-webkit-scrollbar {
 		width: calc(var(--scrollbar-size) + 1px);
 	}

@@ -201,6 +201,7 @@ function NoteEditorContent(props: NoteEditorProps) {
 			contentMaxWidth: props.contentMaxWidth,
 			contentMaxWidthTarget: options.contentMaxWidthTarget,
 			whiteBackgroundNoteRendering: options.whiteBackgroundNoteRendering,
+			customScrollbars: Setting.value('ui.customScrollbars'),
 		});
 	}, [props.themeId, props.customCss, props.contentMaxWidth]);
 

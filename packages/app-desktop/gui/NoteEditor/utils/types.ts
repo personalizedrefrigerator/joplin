@@ -81,6 +81,7 @@ export interface MarkupToHtmlOptions {
 	bodyOnly?: boolean;
 	mapsToLine?: boolean;
 	useCustomPdfViewer?: boolean;
+	customScrollbars?: boolean;
 	noteId?: string;
 	vendorDir?: string;
 	platformName?: string;

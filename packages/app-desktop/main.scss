@@ -33,7 +33,7 @@ a {
 	text-decoration: none;
 }
 
-body:not(.-native-scrollbars) {
+:root:not(.-native-scrollbars) {
 	::-webkit-scrollbar {
 		width: 7px;
 		height: 7px;

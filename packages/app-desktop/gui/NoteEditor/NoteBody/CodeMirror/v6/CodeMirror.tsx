@@ -48,7 +48,10 @@ function defaultRenderedBody(): RenderedBody {
 }
 
 function markupRenderOptions(override: MarkupToHtmlOptions = null): MarkupToHtmlOptions {
-	return { ...override };
+	return {
+		customScrollbars: Setting.value('ui.customScrollbars'),
+		...override,
+	};
 }
 
 const CodeMirror = (props: NoteBodyEditorProps, ref: ForwardedRef<NoteBodyEditorRef>) => {

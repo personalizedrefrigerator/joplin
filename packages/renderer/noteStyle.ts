@@ -13,7 +13,11 @@ export interface Options {
 	contentMaxWidthTarget?: string;
 	themeId?: number;
 	whiteBackgroundNoteRendering?: boolean;
+	customScrollbars?: boolean;
 }
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
+type Theme = any;
 
 const notLoadedCss = `
 	.not-loaded-resource img {
@@ -33,6 +37,29 @@ const notLoadedCss = `
 		display: flex;
 		flex-direction: row;
 		align-items: center;
+	}
+`;
+
+const customScrollbarCss = (theme: Theme) => `
+	::-webkit-scrollbar {
+		width: 7px;
+		height: 7px;
+	}
+	::-webkit-scrollbar-corner {
+		background: none;
+	}
+	::-webkit-scrollbar-thumb {
+		background: color-mix(in srgb, ${theme.color} 26%, transparent);
+		border-radius: 5px;
+	}
+	::-webkit-scrollbar-track:hover {
+		background: color-mix(in srgb, ${theme.color} 10%, rgba(150, 150, 150, 0.05));
+	}
+	::-webkit-scrollbar-thumb:hover {
+		background: color-mix(in srgb, ${theme.color} 70%, transparent);
+	}
+	::-webkit-scrollbar-track {
+		border: none;
 	}
 `;
 
@@ -72,8 +99,7 @@ export const whiteBackgroundNoteStyle = () => {
 	`;
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-export default function(theme: any, options: Options = null) {
+export default function(theme: Theme, options: Options = null) {
 	options = {
 		contentMaxWidth: 0,
 		...options,
@@ -117,27 +143,7 @@ export default function(theme: any, options: Options = null) {
 			border-radius: 3px;
 			background-color: ${theme.codeBackgroundColor};
 		}
-		::-webkit-scrollbar {
-			width: 7px;
-			height: 7px;
-		}
-		::-webkit-scrollbar-corner {
-			background: none;
-		}
-		::-webkit-scrollbar-track {
-			border: none;
-		}
-		::-webkit-scrollbar-thumb {
-			background: rgba(100, 100, 100, 0.3); 
-			border-radius: 5px;
-		}
-		::-webkit-scrollbar-track:hover {
-			background: rgba(0, 0, 0, 0.1); 
-		}
-		::-webkit-scrollbar-thumb:hover {
-			background: rgba(100, 100, 100, 0.7); 
-		}
-
+		${options.customScrollbars ? customScrollbarCss(theme) : ''}
 		${maxWidthCss}
 
 		/* Remove top padding and margin from first child so that top of rendered text is aligned to top of text editor text */
