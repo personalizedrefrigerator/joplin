@@ -384,7 +384,9 @@ function ShareFolderDialog(props: Props) {
 
 	async function buttonRow_click(event: ClickEvent) {
 		if (event.buttonName === 'unshare') {
-			if (!confirm(_('Unshare this notebook? The recipients will no longer have access to its content.'))) return;
+			if (!await shim.showConfirmationDialog(_('Unshare this notebook? The recipients will no longer have access to its content.'))) {
+				return;
+			}
 			await ShareService.instance().unshareFolder(props.folderId);
 			void synchronize();
 		}
