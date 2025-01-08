@@ -641,6 +641,7 @@ packages/app-mobile/components/NoteEditor/ImageEditor/isEditableResource.js
 packages/app-mobile/components/NoteEditor/ImageEditor/js-draw/applyTemplateToEditor.js
 packages/app-mobile/components/NoteEditor/ImageEditor/js-draw/createJsDrawEditor.test.js
 packages/app-mobile/components/NoteEditor/ImageEditor/js-draw/createJsDrawEditor.js
+packages/app-mobile/components/NoteEditor/ImageEditor/js-draw/polyfills.js
 packages/app-mobile/components/NoteEditor/ImageEditor/js-draw/startAutosaveLoop.js
 packages/app-mobile/components/NoteEditor/ImageEditor/js-draw/types.js
 packages/app-mobile/components/NoteEditor/ImageEditor/js-draw/watchEditorForTemplateChanges.js
