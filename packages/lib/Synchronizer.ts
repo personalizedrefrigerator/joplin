@@ -337,8 +337,10 @@ export default class Synchronizer {
 		const hasActiveExclusiveLock = await hasActiveLock(locks, currentDate, this.lockHandler().lockTtl, LockType.Exclusive);
 		if (hasActiveExclusiveLock) return 'hasExclusiveLock';
 
-		const hasActiveSyncLock = await hasActiveLock(locks, currentDate, this.lockHandler().lockTtl, LockType.Sync, this.lockClientType(), this.clientId_);
-		if (!hasActiveSyncLock) return 'syncLockGone';
+		if (this.lockHandler().enabled) {
+			const hasActiveSyncLock = await hasActiveLock(locks, currentDate, this.lockHandler().lockTtl, LockType.Sync, this.lockClientType(), this.clientId_);
+			if (!hasActiveSyncLock) return 'syncLockGone';
+		}
 
 		return '';
 	}
