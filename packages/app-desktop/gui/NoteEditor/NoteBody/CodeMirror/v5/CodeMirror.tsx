@@ -48,7 +48,7 @@ function CodeMirror(props: NoteBodyEditorProps, ref: ForwardedRef<NoteBodyEditor
 	const [webviewReady, setWebviewReady] = useState(false);
 
 	const editorRef = useRef(null);
-	const rootRef = useRef(null);
+	const rootRef = useRef<HTMLDivElement|null>(null);
 	const webviewRef = useRef(null);
 	// eslint-disable-next-line @typescript-eslint/ban-types -- Old code before rule was applied
 	const props_onChangeRef = useRef<Function>(null);
@@ -431,10 +431,11 @@ function CodeMirror(props: NoteBodyEditorProps, ref: ForwardedRef<NoteBodyEditor
 			max-width: ${props.contentMaxWidth}px !important;
 		` : '';
 
-		const element = document.createElement('style');
+		const ownerDoc = rootRef.current.ownerDocument;
+		const element = ownerDoc.createElement('style');
 		element.setAttribute('id', 'codemirrorStyle');
-		document.head.appendChild(element);
-		element.appendChild(document.createTextNode(`
+		ownerDoc.head.appendChild(element);
+		element.appendChild(ownerDoc.createTextNode(`
 			/* These must be important to prevent the codemirror defaults from taking over*/
 			.CodeMirror {
 				font-family: monospace;
@@ -447,6 +448,11 @@ function CodeMirror(props: NoteBodyEditorProps, ref: ForwardedRef<NoteBodyEditor
 				/* Some themes add a box shadow for some reason */
 				-webkit-box-shadow: none !important;
 				line-height: ${theme.lineHeight} !important;
+			}
+
+			.CodeMirror-code:focus-visible {
+				/* Avoid showing additional focus-visible decoration */
+				outline: none;
 			}
 
 			.CodeMirror-lines {
@@ -591,7 +597,7 @@ function CodeMirror(props: NoteBodyEditorProps, ref: ForwardedRef<NoteBodyEditor
 		`));
 
 		return () => {
-			document.head.removeChild(element);
+			ownerDoc.head.removeChild(element);
 		};
 		// eslint-disable-next-line @seiyab/react-hooks/exhaustive-deps -- Old code before rule was applied
 	}, [props.themeId, props.contentMaxWidth]);
