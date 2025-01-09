@@ -40,7 +40,7 @@ index fe5d45c730f36c9fe8d8cfea12e242e501b67139..97b27fce6798e30e3e631221435f09b3
            !insertmacro FIND_PROCESS "${APP_EXECUTABLE_FILENAME}" $R0
            ${If} $R0 == 0
 diff --git a/templates/nsis/include/installUtil.nsh b/templates/nsis/include/installUtil.nsh
-index 47367741632726ba0886ac516461dbe98b7aea58..daf71a18fd8112dd8980d71c2a82201ca132c21e 100644
+index 47367741632726ba0886ac516461dbe98b7aea58..675965762375925a505ca6d8bbb67507ef696c2e 100644
 --- a/templates/nsis/include/installUtil.nsh
 +++ b/templates/nsis/include/installUtil.nsh
 @@ -126,10 +126,11 @@ Function handleUninstallResult
@@ -58,17 +58,25 @@ index 47367741632726ba0886ac516461dbe98b7aea58..daf71a18fd8112dd8980d71c2a82201c
    ${endif}
  FunctionEnd
  
-@@ -216,7 +217,7 @@ Function uninstallOldVersion
+@@ -216,11 +217,13 @@ Function uninstallOldVersion
      IntOp $R5 $R5 + 1
  
      ${if} $R5 > 5
 -      MessageBox MB_RETRYCANCEL|MB_ICONEXCLAMATION "$(appCannotBeClosed)" /SD IDCANCEL IDRETRY OneMoreAttempt
-+      MessageBox MB_RETRYCANCEL|MB_ICONEXCLAMATION "$(appCannotBeUninstalled)" /SD IDCANCEL IDRETRY OneMoreAttempt
-       Return
+-      Return
++      MessageBox MB_RETRYCANCEL|MB_ICONEXCLAMATION "$(appCannotBeUninstalled)" /SD IDCANCEL IDRETRY ContinueWithoutUninstall
++        Abort ; Exit early
++      ContinueWithoutUninstall:
++        Return
      ${endIf}
  
+-  OneMoreAttempt:
++#  OneMoreAttempt: ; Commented out because unused
+     ExecWait '"$uninstallerFileNameTemp" /S /KEEP_APP_DATA $0 _?=$installationDir' $R0
+     ifErrors TryInPlace CheckResult
+ 
 diff --git a/templates/nsis/messages.yml b/templates/nsis/messages.yml
-index a1c2847fa48d79f835b30b48e999ccaf3c818657..0f92e0d4f87248a6df8a7fc1adef4c918539299e 100644
+index a1c2847fa48d79f835b30b48e999ccaf3c818657..6884c18d1e77dbd6be114401d23cf5caf3e0dd94 100644
 --- a/templates/nsis/messages.yml
 +++ b/templates/nsis/messages.yml
 @@ -235,3 +235,8 @@ uninstallFailed:
@@ -78,5 +86,5 @@ index a1c2847fa48d79f835b30b48e999ccaf3c818657..0f92e0d4f87248a6df8a7fc1adef4c91
 +
 +
 +appCannotBeUninstalled:
-+  en: "The old version of ${PRODUCT_NAME} could not be removed. \nClick Retry to try again or Cancel to continue with the installation."
++  en: "The old version of ${PRODUCT_NAME} could not be removed. \nClick Retry to skip this step."
 +
