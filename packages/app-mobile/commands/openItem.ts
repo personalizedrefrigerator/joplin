@@ -20,6 +20,8 @@ export const runtime = (): CommandRuntime => {
 		execute: async (_context: CommandContext, link: string) => {
 			if (!link) throw new Error('Link cannot be empty');
 
+			let isInvalid = false;
+
 			if (link.startsWith('joplin://') || link.startsWith(':/')) {
 				const parsedUrl = parseResourceUrl(link);
 				if (parsedUrl) {
@@ -33,13 +35,18 @@ export const runtime = (): CommandRuntime => {
 						await showResource(item);
 					} else {
 						logger.error('Unsupported item type for links:', item.type_);
+						isInvalid = true;
 					}
 				} else {
-					logger.error(`Invalid Joplin link: ${link}`);
+					isInvalid = true;
 				}
 			} else if (urlProtocol(link)) {
 				shim.openUrl(link);
 			} else {
+				isInvalid = true;
+			}
+
+			if (isInvalid) {
 				const errorMessage = _('Unsupported link or message: %s', link);
 				logger.error(errorMessage);
 				await shim.showErrorDialog(errorMessage);
