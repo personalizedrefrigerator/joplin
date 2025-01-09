@@ -48,7 +48,10 @@ function CodeMirror(props: NoteBodyEditorProps, ref: ForwardedRef<NoteBodyEditor
 	const [webviewReady, setWebviewReady] = useState(false);
 
 	const editorRef = useRef(null);
+	const [editorRoot, setEditorRoot] = useState<HTMLDivElement|null>(null);
 	const rootRef = useRef<HTMLDivElement|null>(null);
+	rootRef.current = editorRoot;
+
 	const webviewRef = useRef(null);
 	// eslint-disable-next-line @typescript-eslint/ban-types -- Old code before rule was applied
 	const props_onChangeRef = useRef<Function>(null);
@@ -410,6 +413,8 @@ function CodeMirror(props: NoteBodyEditorProps, ref: ForwardedRef<NoteBodyEditor
 	}, [styles.editor.codeMirrorTheme]);
 
 	useEffect(() => {
+		if (!editorRoot) return () => {};
+
 		const theme = themeStyle(props.themeId);
 
 		// Selection in dark mode is hard to see so make it brighter.
@@ -431,7 +436,7 @@ function CodeMirror(props: NoteBodyEditorProps, ref: ForwardedRef<NoteBodyEditor
 			max-width: ${props.contentMaxWidth}px !important;
 		` : '';
 
-		const ownerDoc = rootRef.current.ownerDocument;
+		const ownerDoc = editorRoot.ownerDocument;
 		const element = ownerDoc.createElement('style');
 		element.setAttribute('id', 'codemirrorStyle');
 		ownerDoc.head.appendChild(element);
@@ -599,8 +604,7 @@ function CodeMirror(props: NoteBodyEditorProps, ref: ForwardedRef<NoteBodyEditor
 		return () => {
 			ownerDoc.head.removeChild(element);
 		};
-		// eslint-disable-next-line @seiyab/react-hooks/exhaustive-deps -- Old code before rule was applied
-	}, [props.themeId, props.contentMaxWidth]);
+	}, [props.themeId, props.contentMaxWidth, props.fontSize, editorRoot]);
 
 	const webview_domReady = useCallback(() => {
 		setWebviewReady(true);
@@ -780,7 +784,7 @@ function CodeMirror(props: NoteBodyEditorProps, ref: ForwardedRef<NoteBodyEditor
 	const windowId = useContext(WindowIdContext);
 	return (
 		<ErrorBoundary message="The text editor encountered a fatal error and could not continue. The error might be due to a plugin, so please try to disable some of them and try again.">
-			<div style={styles.root} ref={rootRef}>
+			<div style={styles.root} ref={setEditorRoot}>
 				<div style={styles.rowToolbar}>
 					<Toolbar themeId={props.themeId} windowId={windowId}/>
 					{props.noteToolbar}
