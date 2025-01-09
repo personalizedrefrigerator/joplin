@@ -4,6 +4,8 @@
 #  - See https://github.com/electron-userland/electron-builder/pull/8133
 # - If an existing uninstaller fails, gives an option to continue with the installation
 #   despite the failure.
+# - Updates "uninstall failed" error messages to state that uninstallation failed (rather
+#   than incorrectly stating that the issue was with closing the app).
 #
 # See https://github.com/laurent22/joplin/pull/11541
 diff --git a/templates/nsis/include/allowOnlyOneInstallerInstance.nsh b/templates/nsis/include/allowOnlyOneInstallerInstance.nsh
@@ -38,7 +40,7 @@ index fe5d45c730f36c9fe8d8cfea12e242e501b67139..97b27fce6798e30e3e631221435f09b3
            !insertmacro FIND_PROCESS "${APP_EXECUTABLE_FILENAME}" $R0
            ${If} $R0 == 0
 diff --git a/templates/nsis/include/installUtil.nsh b/templates/nsis/include/installUtil.nsh
-index 47367741632726ba0886ac516461dbe98b7aea58..7fdd231e2000eac411d87957f3e3cd491091acff 100644
+index 47367741632726ba0886ac516461dbe98b7aea58..25cb4690e945ff5c77d6aa0845480a6dca318031 100644
 --- a/templates/nsis/include/installUtil.nsh
 +++ b/templates/nsis/include/installUtil.nsh
 @@ -126,10 +126,11 @@ Function handleUninstallResult
@@ -46,7 +48,7 @@ index 47367741632726ba0886ac516461dbe98b7aea58..7fdd231e2000eac411d87957f3e3cd49
  
    ${if} $R0 != 0
 -    MessageBox MB_OK|MB_ICONEXCLAMATION "$(uninstallFailed): $R0"
-+    MessageBox MB_YESNO|MB_ICONEXCLAMATION "$(uninstallFailedIgnore): $R0" IDYES ignoreError
++    MessageBox MB_YESNO|MB_ICONEXCLAMATION "$(uninstallFailedIgnore) (error code $R0)" IDYES ignoreError
      DetailPrint `Uninstall was not successful. Uninstaller error code: $R0.`
      SetErrorLevel 2
      Quit
@@ -54,14 +56,27 @@ index 47367741632726ba0886ac516461dbe98b7aea58..7fdd231e2000eac411d87957f3e3cd49
    ${endif}
  FunctionEnd
  
+@@ -216,7 +217,7 @@ Function uninstallOldVersion
+     IntOp $R5 $R5 + 1
+ 
+     ${if} $R5 > 5
+-      MessageBox MB_RETRYCANCEL|MB_ICONEXCLAMATION "$(appCannotBeClosed)" /SD IDCANCEL IDRETRY OneMoreAttempt
++      MessageBox MB_RETRYCANCEL|MB_ICONEXCLAMATION "$(appCannotBeUninstalled)" /SD IDCANCEL IDRETRY OneMoreAttempt
+       Return
+     ${endIf}
+ 
 diff --git a/templates/nsis/messages.yml b/templates/nsis/messages.yml
-index a1c2847fa48d79f835b30b48e999ccaf3c818657..24c0fc65102489ad6cb87bf0bb4c1caaf684430e 100644
+index a1c2847fa48d79f835b30b48e999ccaf3c818657..ebb3181568f0ed79d3490138d913326b3455e59e 100644
 --- a/templates/nsis/messages.yml
 +++ b/templates/nsis/messages.yml
-@@ -235,3 +235,6 @@ uninstallFailed:
+@@ -235,3 +235,10 @@ uninstallFailed:
    sv: Det gick inte att avinstallera gamla programfiler. Försök att köra installationsprogrammet igen.
    uk: Не вдалось видалити старі файли застосунку. Будь ласка, спробуйте запустити встановлювач знов.
    zh_TW: 無法俺安裝舊的應用程式檔案。 請嘗試再次執行安裝程式。
 +
++
++appCannotBeUninstalled:
++  en: "The old version of ${PRODUCT_NAME} could not be removed. \nClick Retry to try again or Cancel for more options."
++
 +uninstallFailedIgnore:
-+  en: Failed to remove old application files. Continue anyway? Error code
++  en: Failed to remove old application files. Continue without removing old application files?
