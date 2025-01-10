@@ -324,6 +324,8 @@ export function extraStyles(theme: Theme) {
 		// but some times, depending on the theme, it might be too dark or too light, so it can be
 		// specified directly by the theme too.
 		highlightedColor: theme.highlightedColor ?? theme.selectedColor2,
+		markHighlightColor: theme.searchMarkerColor,
+		markHighlightBackgroundColor: theme.searchMarkerBackgroundColor,
 	};
 }
 

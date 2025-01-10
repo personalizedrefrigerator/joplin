@@ -45,7 +45,7 @@ const htmlTagNameDecoration = Decoration.mark({
 });
 
 const markDecoration = Decoration.mark({
-	attributes: { class: 'cm-mark' },
+	attributes: { class: 'cm-highlighted' },
 });
 
 const blockQuoteDecoration = Decoration.line({
