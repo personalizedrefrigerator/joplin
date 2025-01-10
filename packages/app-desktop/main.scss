@@ -33,6 +33,15 @@ a {
 	text-decoration: none;
 }
 
+:root.-dark-mode {
+	// Make most UI controls (including native scrollbars) match the app theme.
+	color-scheme: dark;
+}
+
+input[type=checkbox] {
+	color-scheme: light;
+}
+
 :root:not(.-native-scrollbars) {
 	::-webkit-scrollbar {
 		width: 7px;

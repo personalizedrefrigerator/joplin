@@ -135,6 +135,7 @@ export default function(theme: Theme, options: Options = null) {
 			font-family: ${fontFamily};
 			padding-bottom: ${formatCssSize(theme.bodyPaddingBottom)};
 			padding-top: ${formatCssSize(theme.bodyPaddingTop)};
+			${theme.appearance === 'dark' ? 'color-scheme: dark;' : ''}
 		}
 		kbd {
 			border: 1px solid ${theme.codeBorderColor};
@@ -142,6 +143,9 @@ export default function(theme: Theme, options: Options = null) {
 			padding: 2px 4px;
 			border-radius: 3px;
 			background-color: ${theme.codeBackgroundColor};
+		}
+		input[type=checkbox] {
+			color-scheme: light;
 		}
 		${options.customScrollbars ? customScrollbarCss(theme) : ''}
 		${maxWidthCss}

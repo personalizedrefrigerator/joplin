@@ -13,10 +13,11 @@ import * as React from 'react';
 import { useEffect, useMemo, useState } from 'react';
 import useAsyncEffect, { AsyncEffectEvent } from '@joplin/lib/hooks/useAsyncEffect';
 import themeToCss from '@joplin/lib/services/style/themeToCss';
-import { themeStyle } from '@joplin/lib/theme';
+import { ThemeStyle, themeStyle } from '@joplin/lib/theme';
 import useDocument from '../hooks/useDocument';
 import { connect } from 'react-redux';
 import { AppState } from '../../app.reducer';
+import { ThemeAppearance } from '@joplin/lib/themes/type';
 
 interface Props {
 	themeId: number;
@@ -33,15 +34,14 @@ const editorFontFromSettings = (settingValue: string) => {
 	return fontFamilies;
 };
 
-const useThemeCss = (themeId: number) => {
+const useThemeCss = (theme: ThemeStyle) => {
 	const [themeCss, setThemeCss] = useState('');
 
 	useAsyncEffect(async (event: AsyncEffectEvent) => {
-		const theme = themeStyle(themeId);
 		const themeCss = themeToCss(theme);
 		if (event.cancelled) return;
 		setThemeCss(themeCss);
-	}, [themeId]);
+	}, [theme]);
 
 	return themeCss;
 };
@@ -109,11 +109,12 @@ const useThemeFlag = (doc: Document|null, flag: string, enabled: boolean) => {
 	}, [doc, flag, enabled]);
 };
 
-const StyleSheetContainer: React.FC<Props> = props => {
+const AppStyleContainer: React.FC<Props> = props => {
 	const [elementRef, setElementRef] = useState<HTMLElement|null>(null);
 	const doc = useDocument(elementRef);
 
-	const themeCss = useThemeCss(props.themeId);
+	const theme = themeStyle(props.themeId);
+	const themeCss = useThemeCss(theme);
 	const editorCss = useEditorCss(props.editorFontSetting);
 
 	useAppliedCss(doc, `
@@ -127,6 +128,7 @@ const StyleSheetContainer: React.FC<Props> = props => {
 
 	// Theme flags
 	useThemeFlag(doc, '-native-scrollbars', !props.customScrollbarsSetting);
+	useThemeFlag(doc, '-dark-mode', theme.appearance === ThemeAppearance.Dark);
 
 	return <div ref={setElementRef} style={{ display: 'none' }}></div>;
 };
@@ -138,4 +140,4 @@ export default connect((state: AppState) => {
 		editorFontSetting: state.settings['style.editor.fontFamily'] as string,
 		customChromeCssPaths: state.customChromeCssPaths,
 	};
-})(StyleSheetContainer);
+})(AppStyleContainer);
