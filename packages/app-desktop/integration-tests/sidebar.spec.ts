@@ -109,6 +109,7 @@ test.describe('sidebar', () => {
 		const testFolderA = await sidebar.createNewFolder('Folder A');
 		const testFolderB = await sidebar.createNewFolder('Folder B');
 
+		// Convert folder B to a subfolder
 		await testFolderB.dragTo(testFolderA);
 
 		await expect(testFolderB).toBeVisible();
