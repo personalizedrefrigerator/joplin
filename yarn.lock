@@ -15614,7 +15614,7 @@ __metadata:
 
 "app-builder-lib@patch:app-builder-lib@npm%3A24.13.3#./.yarn/patches/app-builder-lib-npm-24.13.3-86a66c0bf3.patch::locator=root%40workspace%3A.":
   version: 24.13.3
-  resolution: "app-builder-lib@patch:app-builder-lib@npm%3A24.13.3#./.yarn/patches/app-builder-lib-npm-24.13.3-86a66c0bf3.patch::version=24.13.3&hash=e2b05a&locator=root%40workspace%3A."
+  resolution: "app-builder-lib@patch:app-builder-lib@npm%3A24.13.3#./.yarn/patches/app-builder-lib-npm-24.13.3-86a66c0bf3.patch::version=24.13.3&hash=f44207&locator=root%40workspace%3A."
   dependencies:
     "@develar/schema-utils": ~2.6.5
     "@electron/notarize": 2.2.1
@@ -15646,7 +15646,7 @@ __metadata:
   peerDependencies:
     dmg-builder: 24.13.3
     electron-builder-squirrel-windows: 24.13.3
-  checksum: e023282fbf7381b0b504ae0835dabb26ad0092c32fad89116aa259f790bba912805338bc895ed205b70a193e39559b3939e816c0afeacaca49f3b55c3446a807
+  checksum: 6901faad49f5e705906fb1cdeb0d9324400b9eb168a37a1be76641e494630cfbf03184314b4f585cedfc0741f6a97b92c41aa97bd8c0b07076978a8aaa28c0b7
   languageName: node
   linkType: hard
 

@@ -7,6 +7,8 @@ import watchEditorForTemplateChanges from './watchEditorForTemplateChanges';
 import { ImageEditorCallbacks, ImageEditorControl, LocalizedStrings } from './types';
 import startAutosaveLoop from './startAutosaveLoop';
 import WebViewToRNMessenger from '../../../../utils/ipc/WebViewToRNMessenger';
+import './polyfills';
+
 
 const restoreToolbarState = (toolbar: AbstractToolbar, state: string) => {
 	if (state) {

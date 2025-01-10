@@ -7,6 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Joplin-CLI 1.0.0\n"
 "Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: \n"
 "Last-Translator: ERYpTION\n"
 "Language-Team: \n"
 "Language: da_DK\n"
@@ -18,9 +20,7 @@ msgstr ""
 
 #: packages/app-mobile/components/screens/ConfigScreen/ConfigScreen.tsx:592
 msgid "- Camera: to allow taking a picture and attaching it to a note."
-msgstr ""
-"- Kamera: Tilladelse til fotografering og vedhæftning af et billede til en "
-"note."
+msgstr "- Kamera: For at kunne tage et billede og vedhæfte det til en note."
 
 #: packages/app-mobile/components/screens/ConfigScreen/ConfigScreen.tsx:595
 msgid "- Location: to allow attaching geo-location information to a note."
@@ -49,7 +49,7 @@ msgstr "(I udvidelse: %s)"
 
 #: packages/app-mobile/components/side-menu-content.tsx:265
 msgid "(level %d)"
-msgstr ""
+msgstr "(niveau %d)"
 
 #: packages/lib/SyncTargetNone.ts:16
 msgid "(None)"
@@ -262,9 +262,8 @@ msgstr ""
 "opgave). Brug \"clear\" til at konvertere en opgave til en alm. note."
 
 #: packages/app-desktop/gui/UpdateNotification/UpdateNotification.tsx:62
-#, fuzzy
 msgid "A new update (%s) is available"
-msgstr "Opdatering tilgængelig"
+msgstr "En ny opdatering (%s) er tilgængelig"
 
 #: packages/lib/models/settings/builtInMetadata.ts:1239
 msgid "A3"
@@ -373,7 +372,7 @@ msgstr "Tilføj modtager:"
 
 #: packages/app-mobile/components/screens/NoteTagsDialog.tsx:94
 msgid "Add tag %s to note"
-msgstr ""
+msgstr "Tilføj etiketten %s til note"
 
 #: packages/app-mobile/components/screens/Note/Note.tsx:1574
 msgid "Add title"
@@ -384,9 +383,8 @@ msgid "Add to dictionary"
 msgstr "Tilføj til ordbog"
 
 #: packages/app-mobile/components/CameraView/ScannedBarcodes.tsx:98
-#, fuzzy
 msgid "Add to note"
-msgstr "Tilføj titel"
+msgstr "Tilføj til note"
 
 #: packages/server/src/services/MustacheService.ts:162
 #: packages/server/src/services/MustacheService.ts:286
@@ -410,9 +408,8 @@ msgid "Advanced tools"
 msgstr "Avancerede værktøjer"
 
 #: packages/app-desktop/gui/NoteEditor/NoteBody/CodeMirror/v6/utils/localisation.ts:18
-#, fuzzy
 msgid "all"
-msgstr "Installer"
+msgstr "alle"
 
 #: packages/app-mobile/components/ProfileSwitcher/ProfileSwitcher.tsx:109
 msgid ""
@@ -521,13 +518,12 @@ msgid "Apply"
 msgstr "Anvend"
 
 #: packages/app-mobile/components/EditorToolbar/ToolbarEditorDialog.tsx:146
-#, fuzzy
 msgid ""
 "Are you sure that you want to restore the default toolbar layout?\n"
 "This cannot be undone."
 msgstr ""
-"Er du sikker på, at du vil vende tilbage til standardlayoutet? Den aktuelle "
-"layoutkonfiguration vil gå tabt."
+"Er du sikker på, at du vil gendanne værktøjslinjens standardlayout?\n"
+"Dette kan ikke gøres om."
 
 #: packages/app-desktop/gui/ClipperConfigScreen.tsx:37
 msgid "Are you sure you want to renew the authorisation token?"
@@ -554,6 +550,8 @@ msgid ""
 "At present, Joplin Web can only be open in one tab at a time. Please close "
 "the other instance of Joplin."
 msgstr ""
+"På nuværende tidspunkt kan Joplin Web kun være åben i én fane ad gangen. Luk "
+"den anden instans af Joplin."
 
 #: packages/app-mobile/components/NoteEditor/ImageEditor/promptRestoreAutosave.ts:25
 msgid "Attach"
@@ -639,7 +637,7 @@ msgstr "Auto-par klammer, parenteser, citater, etc."
 
 #: packages/lib/models/settings/builtInMetadata.ts:656
 msgid "Autocomplete Markdown and HTML"
-msgstr ""
+msgstr "Autofuldførelse af Markdown og HTML"
 
 #: packages/lib/models/settings/builtInMetadata.ts:1184
 msgid "Automatically check for updates"
@@ -701,7 +699,7 @@ msgstr "af %s"
 
 #: packages/app-desktop/gui/NoteEditor/NoteBody/CodeMirror/v6/utils/localisation.ts:20
 msgid "by word"
-msgstr ""
+msgstr "efter ord"
 
 #: packages/server/src/routes/admin/users.ts:160
 msgid "Can Share"
@@ -872,13 +870,12 @@ msgid "Change language"
 msgstr "Skift sprog"
 
 #: packages/app-mobile/components/CameraView/ActionButtons.tsx:124
-#, fuzzy
 msgid "Change ratio"
-msgstr "Indstillinger"
+msgstr "Skift forhold"
 
 #: packages/app-desktop/gui/KeymapConfig/KeymapConfigScreen.tsx:98
 msgid "Change shortcut for \"%s\""
-msgstr ""
+msgstr "Skift genvej for \"%s\""
 
 #: packages/app-desktop/gui/NoteContentPropertiesDialog.tsx:106
 msgid "Characters"
@@ -890,7 +887,7 @@ msgstr "Tegn eksklusiv mellemrum"
 
 #: packages/app-mobile/components/EditorToolbar/ToolbarEditorDialog.tsx:168
 msgid "Check elements to display in the toolbar"
-msgstr ""
+msgstr "Markér elementer, der skal vises i værktøjslinjen"
 
 #: packages/app-desktop/gui/MenuBar.tsx:634
 #: packages/app-desktop/gui/MenuBar.tsx:929
@@ -955,9 +952,8 @@ msgid "Client ID: %s"
 msgstr "Klient-ID: %s"
 
 #: packages/app-desktop/gui/NoteEditor/NoteBody/CodeMirror/v6/utils/localisation.ts:23
-#, fuzzy
 msgid "close"
-msgstr "Luk"
+msgstr "luk"
 
 #: packages/app-desktop/gui/MenuBar.tsx:359
 #: packages/app-desktop/gui/NoteContentPropertiesDialog.tsx:175
@@ -977,13 +973,12 @@ msgid "Close dropdown"
 msgstr "Luk rullelisten"
 
 #: packages/app-mobile/components/accessibility/AccessibleModalMenu.tsx:46
-#, fuzzy
 msgid "Close menu"
-msgstr "Luk"
+msgstr "Luk menu"
 
 #: packages/app-mobile/components/SideMenu.tsx:300
 msgid "Close side menu"
-msgstr ""
+msgstr "Luk sidemenu"
 
 #: packages/lib/models/settings/settingValidations.ts:33
 msgid ""
@@ -1031,7 +1026,7 @@ msgstr "Samarbejd med andre om notesbøger"
 
 #: packages/app-desktop/gui/Sidebar/listItemComponents/ExpandIcon.tsx:28
 msgid "Collapsed, press space to expand."
-msgstr ""
+msgstr "Sammenklappet, tryk på mellemrum for at udvide."
 
 #: packages/lib/services/ReportService.ts:351
 msgid "Coming alarms"
@@ -1040,9 +1035,9 @@ msgstr "Kommende alarmer"
 #: packages/lib/models/settings/builtInMetadata.ts:1365
 msgid ""
 "Comma-separated list of paths to directories to load the certificates from, "
-"or path to individual cert files. For example: /my/cert_dir, /other/"
-"custom.pem. Note that if you make changes to the TLS settings, you must save "
-"your changes before clicking on \"Check synchronisation configuration\"."
+"or path to individual cert files. For example: /my/cert_dir, /other/custom."
+"pem. Note that if you make changes to the TLS settings, you must save your "
+"changes before clicking on \"Check synchronisation configuration\"."
 msgstr ""
 "Komma-adskilt liste med stier til mapper der indlæses certifikater fra, "
 "eller stier til individuelle certifikatfiler. For eksempel: /my/cert_dir, /"
@@ -1071,14 +1066,12 @@ msgid "Compact"
 msgstr "Kompakt"
 
 #: packages/app-desktop/gui/NoteList/utils/useOnKeyDown.ts:153
-#, fuzzy
 msgid "Complete"
-msgstr "Fuldført"
+msgstr "Fuldfør"
 
 #: packages/app-desktop/gui/NoteListItem/utils/prepareViewProps.ts:40
-#, fuzzy
 msgid "Complete to-do"
-msgstr "Fuldført"
+msgstr "Fuldfør gøremål"
 
 #: packages/app-desktop/gui/NoteListHeader/utils/getColumnTitle.ts:12
 #: packages/app-desktop/gui/NotePropertiesDialog.tsx:70
@@ -1151,11 +1144,10 @@ msgid "Consolidated billing"
 msgstr "Konsolideret fakturering"
 
 #: packages/app-desktop/gui/Sidebar/listItemComponents/NoteCount.tsx:11
-#, fuzzy
 msgid "Contains %d note"
 msgid_plural "Contains %d notes"
-msgstr[0] "Konverter til note"
-msgstr[1] "Konverter til note"
+msgstr[0] "Indeholder %d note"
+msgstr[1] "Indeholder %d noter"
 
 #: packages/app-desktop/gui/ConfigScreen/controls/plugins/SearchPlugins.tsx:106
 msgid "Content provided by %s"
@@ -1170,9 +1162,8 @@ msgid "Continue"
 msgstr "Fortsæt"
 
 #: packages/app-desktop/gui/NoteEditor/NoteBody/CodeMirror/v6/utils/localisation.ts:6
-#, fuzzy
 msgid "Control character"
-msgstr "Tegn"
+msgstr "Kontroltegn"
 
 #: packages/app-mobile/components/screens/Note/Note.tsx:1221
 msgid "Convert to note"
@@ -1410,14 +1401,12 @@ msgid "Ctrl-click to open: %s"
 msgstr "Ctrl-klik for at åbne: %s"
 
 #: packages/app-desktop/gui/NoteEditor/NoteBody/CodeMirror/v6/utils/localisation.ts:24
-#, fuzzy
 msgid "current match"
-msgstr "Næste match"
+msgstr "nuværende match"
 
 #: packages/app-desktop/gui/MasterPasswordDialog/Dialog.tsx:152
-#, fuzzy
 msgid "Current password"
-msgstr "Indtast adgangskode"
+msgstr "Nuværende adgangskode"
 
 #: packages/app-desktop/checkForUpdates.ts:90
 msgid "Current version is up-to-date."
@@ -1613,14 +1602,12 @@ msgid "Deletes the notes without asking for confirmation."
 msgstr "Sletter noterne uden at bede om bekræftelse."
 
 #: packages/app-mobile/components/screens/ConfigScreen/ConfigScreen.tsx:550
-#, fuzzy
 msgid "Deletion log"
-msgstr "Slet linje"
+msgstr "Sletningslog"
 
 #: packages/app-mobile/components/NoteItem.tsx:144
-#, fuzzy
 msgid "Deselect"
-msgstr "Vælg"
+msgstr "Fravælg"
 
 #: packages/app-cli/app/command-export.ts:24
 msgid "Destination format: %s"
@@ -1666,9 +1653,8 @@ msgid "Disabled"
 msgstr "Deaktiveret"
 
 #: packages/app-mobile/components/screens/encryption-config.tsx:323
-#, fuzzy
 msgid "Disabled keys"
-msgstr "Skjul deaktiverede nøgler"
+msgstr "Deaktiverede taster"
 
 #: packages/app-desktop/gui/EncryptionConfigScreen/EncryptionConfigScreen.tsx:200
 #: packages/app-mobile/components/screens/encryption-config.tsx:251
@@ -1872,12 +1858,11 @@ msgstr "Rediger i ekstern editor"
 
 #: packages/app-desktop/commands/openNoteInNewWindow.ts:10
 msgid "Edit in new window"
-msgstr ""
+msgstr "Redigér i nyt vindue"
 
 #: packages/app-desktop/gui/utils/NoteListUtils.ts:70
-#, fuzzy
 msgid "Edit in..."
-msgstr "Rediger link"
+msgstr "Rediger i..."
 
 #: packages/app-mobile/components/NoteEditor/EditLinkDialog.tsx:143
 msgid "Edit link"
@@ -1908,9 +1893,8 @@ msgid "Editor"
 msgstr "Editor"
 
 #: packages/app-desktop/gui/NoteEditor/NoteBody/CodeMirror/Toolbar.tsx:38
-#, fuzzy
 msgid "Editor actions"
-msgstr "Tekstredigeringsskrifttype"
+msgstr "Editor-handlinger"
 
 #: packages/lib/models/settings/builtInMetadata.ts:1060
 msgid "Editor font"
@@ -2026,7 +2010,7 @@ msgstr "Aktivér kryptering"
 
 #: packages/lib/models/settings/builtInMetadata.ts:980
 msgid "Enable file:// URLs for images and videos"
-msgstr ""
+msgstr "Aktivér file:// URLs for billeder og videoer"
 
 #: packages/lib/models/settings/builtInMetadata.ts:961
 msgid "Enable footnotes"
@@ -2082,9 +2066,8 @@ msgid "Enable soft breaks"
 msgstr "Slå bløde ombrydninger til"
 
 #: packages/lib/models/settings/builtInMetadata.ts:1289
-#, fuzzy
 msgid "Enable spell checking in Markdown editor"
-msgstr "Aktiver stavekontrol i teksteditoren"
+msgstr "Aktiver stavekontrol i Markdown-editor"
 
 #: packages/lib/models/settings/builtInMetadata.ts:789
 msgid "Enable spellcheck in the text editor"
@@ -2123,6 +2106,8 @@ msgid ""
 "Enables Markdown list continuation, auto-closing HTML tags, and other markup "
 "autocompletions."
 msgstr ""
+"Aktiverer Markdown-listefortsættelse, automatisk lukning af HTML-tags og "
+"andre markup-autoudførelser."
 
 #: packages/lib/components/EncryptionConfigScreen/utils.ts:50
 msgid ""
@@ -2168,9 +2153,8 @@ msgid "End-to-end encryption"
 msgstr "End-to-end kryptering"
 
 #: packages/app-mobile/components/voiceTyping/VoiceTypingDialog.tsx:208
-#, fuzzy
 msgid "Ends voice typing"
-msgstr "Stemmeindtastning..."
+msgstr "Afslutter stemmeindtastning"
 
 #: packages/app-mobile/components/screens/dropbox-login.tsx:70
 msgid "Enter code here"
@@ -2190,9 +2174,8 @@ msgid "Enter password"
 msgstr "Indtast adgangskode"
 
 #: packages/app-mobile/components/NoteItem.tsx:120
-#, fuzzy
 msgid "Entering selection mode"
-msgstr "Åbner sektion %s"
+msgstr "Går i valgtilstand"
 
 #: packages/app-cli/app/help-utils.js:56
 msgid "Enum"
@@ -2259,7 +2242,7 @@ msgstr "Udvid %s"
 
 #: packages/app-desktop/gui/Sidebar/listItemComponents/ExpandIcon.tsx:26
 msgid "Expanded, press space to collapse."
-msgstr ""
+msgstr "Udvidet, tryk på mellemrum for at skjule."
 
 #: packages/app-desktop/gui/KeymapConfig/KeymapConfigScreen.tsx:182
 #: packages/app-desktop/gui/Sidebar/hooks/useOnRenderItem.tsx:212
@@ -2285,9 +2268,8 @@ msgid "Export Debug Report"
 msgstr "Eksporter fejlrapport"
 
 #: packages/app-desktop/commands/exportDeletionLog.ts:11
-#, fuzzy
 msgid "Export deletion log"
-msgstr "Eksporter alle"
+msgstr "Eksporter sletningslog"
 
 #: packages/app-mobile/components/screens/ConfigScreen/NoteExportSection/ExportProfileButton.tsx:16
 msgid "Export profile"
@@ -2373,9 +2355,8 @@ msgid "Filter tags"
 msgstr "Filtrer etiketter"
 
 #: packages/app-desktop/gui/NoteEditor/NoteBody/CodeMirror/v6/utils/localisation.ts:14
-#, fuzzy
 msgid "Find"
-msgstr "Find: "
+msgstr "Find"
 
 #: packages/app-mobile/components/NoteEditor/SearchPanel.tsx:253
 msgid "Find: "
@@ -2413,7 +2394,7 @@ msgstr "Fokuser på titel"
 
 #: packages/app-mobile/components/CameraView/ScannedBarcodes.tsx:97
 msgid "Follow link"
-msgstr ""
+msgstr "Følg link"
 
 #: packages/app-mobile/components/screens/ConfigScreen/NoteExportSection/ExportProfileButton.tsx:38
 msgid "For debugging purpose only: export your profile to an external SD card."
@@ -2508,11 +2489,11 @@ msgstr ""
 
 #: packages/app-desktop/gui/NoteEditor/NoteBody/CodeMirror/v6/utils/localisation.ts:13
 msgid "go"
-msgstr ""
+msgstr "gå"
 
 #: packages/app-mobile/components/CameraView/CameraView.tsx:165
 msgid "Go back"
-msgstr ""
+msgstr "Gå tilbage"
 
 #: packages/app-desktop/gui/JoplinCloudConfigScreen.tsx:44
 #: packages/app-mobile/components/screens/ConfigScreen/JoplinCloudConfig.tsx:59
@@ -2521,7 +2502,7 @@ msgstr "Gå til Joplin Cloud-profil"
 
 #: packages/app-desktop/gui/NoteEditor/NoteBody/CodeMirror/v6/utils/localisation.ts:12
 msgid "Go to line"
-msgstr ""
+msgstr "Gå til line"
 
 # Kilde-URL er en dårlig oversættelse
 #: packages/app-mobile/components/screens/Note/Note.tsx:1051
@@ -2589,9 +2570,8 @@ msgid "Hide keyboard"
 msgstr "Skjul tastatur"
 
 #: packages/app-desktop/gui/PasswordInput/PasswordInput.tsx:21
-#, fuzzy
 msgid "Hide password"
-msgstr "Ugyldig adgangskode"
+msgstr "Skjul adgangskode"
 
 #: packages/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/utils/setupToolbarButtons.ts:14
 msgid "Highlight"
@@ -2808,14 +2788,12 @@ msgid "Incompatible"
 msgstr "Inkompatibel"
 
 #: packages/app-desktop/gui/NoteList/utils/useOnKeyDown.ts:153
-#, fuzzy
 msgid "Incomplete"
-msgstr "Fuldført"
+msgstr "Ikke fuldført"
 
 #: packages/app-desktop/gui/NoteListItem/utils/prepareViewProps.ts:40
-#, fuzzy
 msgid "Incomplete to-do"
-msgstr "Vis færdige opgaver"
+msgstr "Ufuldførte gøremål"
 
 #: packages/app-mobile/components/NoteEditor/commandDeclarations.ts:97
 msgid "Increase indent level"
@@ -2831,7 +2809,7 @@ msgstr "Indryk mere"
 
 #: packages/app-mobile/components/DialogManager/hooks/useDialogControl.ts:21
 msgid "Info"
-msgstr ""
+msgstr "Info"
 
 #: packages/app-mobile/components/screens/ConfigScreen/ConfigScreen.tsx:222
 msgid "Information"
@@ -2933,9 +2911,8 @@ msgid "Items that cannot be synchronised"
 msgstr "Emner kan ikke synkroniseres"
 
 #: packages/app-desktop/gui/MenuBar.tsx:923
-#, fuzzy
 msgid "Join us on %s"
-msgstr "Følg os på Twitter"
+msgstr "Følg os på %s"
 
 #: packages/app-desktop/gui/SyncWizard/Dialog.tsx:267
 msgid ""
@@ -2991,9 +2968,8 @@ msgid "Joplin Forum"
 msgstr "Joplin-forum"
 
 #: packages/app-mobile/utils/lockToSingleInstance.ts:16
-#, fuzzy
 msgid "Joplin is already running."
-msgstr "Serveren kører allerede på port %d"
+msgstr "Joplin kører allerede"
 
 #: packages/lib/services/plugins/PluginService.ts:523
 msgid "Joplin Mobile"
@@ -3242,9 +3218,8 @@ msgid "Manage shared notebooks"
 msgstr "Administrer delte notesbøger"
 
 #: packages/app-mobile/components/EditorToolbar/ToolbarEditorDialog.tsx:165
-#, fuzzy
 msgid "Manage toolbar options"
-msgstr "Administrer dine udvidelser"
+msgstr "Administrer indstillinger for værktøjslinjen"
 
 #: packages/app-desktop/gui/ConfigScreen/controls/plugins/PluginsStates.tsx:331
 msgid "Manage your plugins"
@@ -3278,9 +3253,8 @@ msgstr "Markdown + Front Matter"
 
 #: packages/app-desktop/gui/NoteEditor/NoteBody/CodeMirror/v6/CodeMirror.tsx:375
 #: packages/app-mobile/components/NoteEditor/NoteEditor.tsx:352
-#, fuzzy
 msgid "Markdown editor"
-msgstr "Markdown"
+msgstr "Markdown-editor"
 
 #: packages/app-cli/app/command-done.ts:15
 msgid "Marks a to-do as done."
@@ -3311,11 +3285,11 @@ msgstr "Hovedadgangskode:"
 
 #: packages/app-desktop/gui/NoteEditor/NoteBody/CodeMirror/v6/utils/localisation.ts:19
 msgid "match case"
-msgstr ""
+msgstr "match bogstavstørrelse"
 
 #: packages/app-mobile/components/NoteEditor/commandDeclarations.ts:72
 msgid "Math"
-msgstr ""
+msgstr "Matematik"
 
 #: packages/lib/models/settings/builtInMetadata.ts:421
 msgid "Max concurrent connections"
@@ -3342,9 +3316,8 @@ msgid "Minimise"
 msgstr "Minimér"
 
 #: packages/app-mobile/components/CameraView/CameraView.tsx:163
-#, fuzzy
 msgid "Missing camera permission"
-msgstr "Manglende hovednøgler"
+msgstr "Mangler kameratilladelse"
 
 #: packages/app-desktop/gui/EncryptionConfigScreen/EncryptionConfigScreen.tsx:320
 msgid "Missing keys"
@@ -3432,14 +3405,12 @@ msgid "Never resize"
 msgstr "Ændr aldrig størrelse"
 
 #: packages/app-mobile/setupQuickActions.ts:33
-#, fuzzy
 msgid "New attachment"
-msgstr "Note vedhæftninger"
+msgstr "Ny vedhæftning"
 
 #: packages/app-mobile/setupQuickActions.ts:34
-#, fuzzy
 msgid "New drawing"
-msgstr "Tegner"
+msgstr "Ny tegning"
 
 #: packages/app-mobile/components/screens/ShareManager/index.tsx:120
 msgid "New invitations"
@@ -3468,9 +3439,8 @@ msgid ""
 msgstr "Ny notesbog \"%s\" bliver oprettet og filen \"%s\" importeres til den"
 
 #: packages/app-mobile/setupQuickActions.ts:32
-#, fuzzy
 msgid "New photo"
-msgstr "Tag et foto"
+msgstr "Nyt foto"
 
 #: packages/app-desktop/gui/WindowCommandsAndDialogs/commands/newSubFolder.ts:6
 msgid "New sub-notebook"
@@ -3494,7 +3464,7 @@ msgstr "Ny version: %s"
 
 #: packages/app-desktop/gui/NoteEditor/NoteBody/CodeMirror/v6/utils/localisation.ts:16
 msgid "next"
-msgstr ""
+msgstr "næste"
 
 #: packages/app-mobile/components/NoteEditor/SearchPanel.tsx:271
 msgid "Next match"
@@ -3578,14 +3548,12 @@ msgstr ""
 "path>`"
 
 #: packages/app-desktop/gui/UpdateNotification/UpdateNotification.tsx:93
-#, fuzzy
 msgid "No updates available"
-msgstr "Opdatering tilgængelig"
+msgstr "Ingen opdatering tilgængelig"
 
 #: packages/app-desktop/gui/WindowCommandsAndDialogs/commands/moveToFolder.ts:44
-#, fuzzy
 msgid "None"
-msgstr "(Ingen)"
+msgstr "Ingen"
 
 #: packages/lib/models/settings/builtInMetadata.ts:47
 msgid "Nord"
@@ -3747,12 +3715,11 @@ msgstr "Nummeret liste"
 
 #: packages/lib/models/settings/builtInMetadata.ts:531
 msgid "OCR: Clear cache and re-download language data files"
-msgstr ""
+msgstr "OCR: Ryd cache og download sprogdatafiler igen"
 
 #: packages/lib/models/settings/builtInMetadata.ts:512
-#, fuzzy
 msgid "OCR: Language data URL or path"
-msgstr "Sprog, datoformat"
+msgstr "OCR: URL eller sti til sprogdata"
 
 #: packages/app-desktop/bridge.ts:360 packages/app-desktop/bridge.ts:373
 #: packages/app-desktop/bridge.ts:389 packages/app-desktop/bridge.ts:398
@@ -3788,7 +3755,7 @@ msgstr "På %s: %s"
 
 #: packages/app-desktop/gui/NoteEditor/NoteBody/CodeMirror/v6/utils/localisation.ts:27
 msgid "on line"
-msgstr ""
+msgstr "på linje"
 
 #: packages/app-desktop/gui/MainScreen.tsx:525
 msgid "One of your master keys use an obsolete encryption method."
@@ -3819,9 +3786,8 @@ msgid "OneDrive Login"
 msgstr "OneDrive login"
 
 #: packages/lib/services/interop/InteropService.ts:144
-#, fuzzy
 msgid "OneNote Notebook"
-msgstr "Ny notesbog"
+msgstr "OneNote-notesbog"
 
 #: packages/app-desktop/gui/WindowCommandsAndDialogs/commands/print.ts:18
 msgid "Only one note can be printed at a time."
@@ -3848,9 +3814,8 @@ msgid "Open profile directory"
 msgstr "Åbn profilmappe"
 
 #: packages/app-mobile/components/CameraView/CameraView.tsx:164
-#, fuzzy
 msgid "Open settings"
-msgstr "Åbner sektion %s"
+msgstr "Åbn indstillinger"
 
 #: packages/app-mobile/components/screens/ConfigScreen/plugins/EnablePluginSupportPage.tsx:115
 msgid "Open Source"
@@ -3869,19 +3834,16 @@ msgid "Opening section %s"
 msgstr "Åbner sektion %s"
 
 #: packages/app-mobile/components/Dropdown.tsx:215
-#, fuzzy
 msgid "Opens dropdown"
-msgstr "Luk rullelisten"
+msgstr "Åbner rulleliste"
 
 #: packages/app-mobile/components/NoteItem.tsx:162
-#, fuzzy
 msgid "Opens note"
-msgstr "Åbn den"
+msgstr "Åbner note"
 
 #: packages/app-mobile/components/side-menu-content.tsx:273
-#, fuzzy
 msgid "Opens notebook"
-msgstr "Ny notesbog"
+msgstr "Åbner notesbog"
 
 #: packages/app-cli/app/command-e2ee.ts:41
 #: packages/app-cli/app/command-e2ee.ts:87
@@ -4144,11 +4106,11 @@ msgstr "Foretrukket lyst tema"
 
 #: packages/lib/models/settings/builtInMetadata.ts:1690
 msgid "Preferred voice typing provider"
-msgstr ""
+msgstr "Foretrukken udbyder af stemmeskrivning"
 
 #: packages/lib/models/settings/builtInMetadata.ts:667
 msgid "Preserve colours when pasting text in Rich Text Editor"
-msgstr ""
+msgstr "Bevar farver, når du indsætter tekst i Rich Text Editor"
 
 #: packages/app-cli/app/app-gui.js:758
 msgid "Press Ctrl+D or type \"exit\" to exit the application"
@@ -4171,9 +4133,8 @@ msgid "Press to set the decryption password."
 msgstr "Klik for at gemme dekrypterings-adgangskodeord."
 
 #: packages/app-desktop/gui/NoteEditor/NoteBody/CodeMirror/v6/utils/localisation.ts:17
-#, fuzzy
 msgid "previous"
-msgstr "Forrige match"
+msgstr "forrige"
 
 #: packages/app-mobile/components/NoteEditor/SearchPanel.tsx:281
 msgid "Previous match"
@@ -4216,9 +4177,8 @@ msgid "Processing"
 msgstr "Behandler"
 
 #: packages/app-mobile/components/CameraView/ActionButtons.tsx:111
-#, fuzzy
 msgid "Processing photo..."
-msgstr "Behandler"
+msgstr "Behandler foto..."
 
 #: packages/server/src/routes/admin/users.ts:254
 msgid "Profile"
@@ -4274,9 +4234,8 @@ msgid "Publish notes to the internet"
 msgstr "Udgiv noter til internettet"
 
 #: packages/app-mobile/components/CameraView/ScannedBarcodes.tsx:78
-#, fuzzy
 msgid "QR Code"
-msgstr "Kode"
+msgstr "QR-kode"
 
 #: packages/app-desktop/app.ts:219
 #: packages/app-desktop/ElectronAppWrapper.ts:123
@@ -4294,9 +4253,8 @@ msgid "Re-encryption"
 msgstr "Genkryptering"
 
 #: packages/app-desktop/gui/MasterPasswordDialog/Dialog.tsx:180
-#, fuzzy
 msgid "Re-enter password"
-msgstr "Indtast adgangskode"
+msgstr "Indtast adgangskode igen"
 
 #: packages/lib/models/settings/builtInMetadata.ts:1166
 msgid "Re-upload local data to sync target"
@@ -4362,9 +4320,8 @@ msgid "Remove"
 msgstr "Fjern"
 
 #: packages/app-desktop/gui/ShareFolderDialog/ShareFolderDialog.tsx:329
-#, fuzzy
 msgid "Remove %s from share"
-msgstr "Slet etikette \"%s\" fra alle noter?"
+msgstr "Fjern %s fra deling"
 
 #: packages/app-desktop/gui/Sidebar/hooks/useOnRenderItem.tsx:110
 msgid "Remove tag \"%s\" from all notes?"
@@ -4396,9 +4353,8 @@ msgid "Renew token"
 msgstr "Forny token"
 
 #: packages/app-desktop/gui/NoteEditor/NoteBody/CodeMirror/v6/utils/localisation.ts:21
-#, fuzzy
 msgid "replace"
-msgstr "Erstat"
+msgstr "erstat"
 
 #: packages/app-desktop/gui/NoteEditor/NoteBody/CodeMirror/v6/utils/localisation.ts:15
 #: packages/app-mobile/components/NoteEditor/SearchPanel.tsx:291
@@ -4406,9 +4362,8 @@ msgid "Replace"
 msgstr "Erstat"
 
 #: packages/app-desktop/gui/NoteEditor/NoteBody/CodeMirror/v6/utils/localisation.ts:22
-#, fuzzy
 msgid "replace all"
-msgstr "Erstat alt"
+msgstr "erstat alt"
 
 #: packages/app-mobile/components/NoteEditor/SearchPanel.tsx:301
 msgid "Replace all"
@@ -4424,11 +4379,11 @@ msgstr "Erstat: "
 
 #: packages/app-desktop/gui/NoteEditor/NoteBody/CodeMirror/v6/utils/localisation.ts:25
 msgid "replaced $ matches"
-msgstr ""
+msgstr "erstattet $ matcher"
 
 #: packages/app-desktop/gui/NoteEditor/NoteBody/CodeMirror/v6/utils/localisation.ts:26
 msgid "replaced match on line $"
-msgstr ""
+msgstr "erstattet match på linje $"
 
 #: packages/app-mobile/components/screens/ConfigScreen/plugins/PluginInfoModal.tsx:162
 msgid "Report an issue"
@@ -4491,9 +4446,8 @@ msgid "Restore"
 msgstr "Gendan"
 
 #: packages/app-mobile/components/EditorToolbar/ToolbarEditorDialog.tsx:156
-#, fuzzy
 msgid "Restore defaults"
-msgstr "Gendannede elementer"
+msgstr "Gendan standarder"
 
 #: packages/app-desktop/gui/WindowCommandsAndDialogs/commands/restoreNote.ts:10
 msgid "Restore note"
@@ -4551,11 +4505,11 @@ msgstr "Revision: %s (%s)"
 
 #: packages/app-desktop/gui/ToggleEditorsButton/ToggleEditorsButton.tsx:28
 msgid "Rich Text"
-msgstr ""
+msgstr "Rich Text"
 
 #: packages/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/TinyMCE.tsx:686
 msgid "Rich Text editor. Press Escape then Tab to escape focus."
-msgstr ""
+msgstr "Rich Text-editor. Tryk på Escape og derefter Tab for at forlade fokus."
 
 #: packages/app-cli/app/command-batch.js:10
 msgid ""
@@ -4636,7 +4590,7 @@ msgstr "Gem geo-lokation i noter"
 
 #: packages/app-mobile/components/CameraView/ScannedBarcodes.tsx:89
 msgid "Scanned code"
-msgstr ""
+msgstr "Scannet kode"
 
 #: packages/app-desktop/gui/lib/SearchInput/SearchInput.tsx:62
 #: packages/app-mobile/components/NoteEditor/commandDeclarations.ts:102
@@ -4669,9 +4623,8 @@ msgid "Search in current note"
 msgstr "Søg i denne note"
 
 #: packages/app-desktop/plugins/GotoAnything.tsx:665
-#, fuzzy
 msgid "Search results"
-msgstr "Ingen resultater"
+msgstr "Søgeresultater"
 
 #: packages/app-mobile/components/screens/ConfigScreen/ConfigScreen.tsx:169
 msgid "Search shown"
@@ -4694,9 +4647,8 @@ msgid "Searches for the given <pattern> in all the notes."
 msgstr "Søger efter <pattern> mønster i alle noter."
 
 #: packages/app-desktop/gui/UpdateNotification/UpdateNotification.tsx:63
-#, fuzzy
 msgid "See changelog"
-msgstr "Komplet ændringslog"
+msgstr "Se ændringslog"
 
 #: packages/lib/models/settings/builtInMetadata.ts:1185
 msgid "See the pre-release page for more details: %s"
@@ -4725,14 +4677,12 @@ msgid "Select parent notebook"
 msgstr "Vælg overordnet notesbog"
 
 #: packages/app-desktop/gui/NoteEditor/NoteBody/CodeMirror/v6/utils/localisation.ts:9
-#, fuzzy
 msgid "Selection deleted"
-msgstr "dato for færdiggørelse"
+msgstr "Valg slettet"
 
 #: packages/app-mobile/components/FolderPicker.tsx:68
-#, fuzzy
 msgid "Selects a notebook"
-msgstr "Vælg overordnet notesbog"
+msgstr "Vælger en notesbog"
 
 #: packages/app-desktop/gui/MenuBar.tsx:359
 msgid "Send bug report"
@@ -4788,7 +4738,7 @@ msgstr ""
 
 #: packages/app-mobile/components/EditorToolbar/EditorToolbar.tsx:47
 msgid "Settings"
-msgstr ""
+msgstr "Indstillinger"
 
 #: packages/app-desktop/gui/ShareFolderDialog/ShareFolderDialog.tsx:280
 #: packages/app-mobile/components/NoteBodyViewer/hooks/useOnResourceLongPress.ts:44
@@ -4827,9 +4777,8 @@ msgid "Share permissions"
 msgstr "Deletilladelser"
 
 #: packages/app-desktop/gui/Sidebar/listItemComponents/FolderItem.tsx:56
-#, fuzzy
 msgid "Shared"
-msgstr "Del"
+msgstr "Delt"
 
 #: packages/app-mobile/components/screens/ShareManager/index.tsx:107
 msgid "Shares"
@@ -4876,14 +4825,12 @@ msgid "Show note counts"
 msgstr "Vis noteantal"
 
 #: packages/app-mobile/components/side-menu-content.tsx:258
-#, fuzzy
 msgid "Show notebook options"
-msgstr "Vis noteantal"
+msgstr "Vis indstillinger for notesbog"
 
 #: packages/app-desktop/gui/PasswordInput/PasswordInput.tsx:21
-#, fuzzy
 msgid "Show password"
-msgstr "Indstil adgangskoden"
+msgstr "Vis adgangskode"
 
 #: packages/lib/models/settings/builtInMetadata.ts:698
 msgid "Show sort order buttons"
@@ -4898,9 +4845,8 @@ msgid "Show/hide the sidebar"
 msgstr "Vis/skjul sidebjælken"
 
 #: packages/app-mobile/components/screens/tags.tsx:76
-#, fuzzy
 msgid "Shows notes for tag"
-msgstr "Vis noteantal"
+msgstr "Vis noter for etiketter"
 
 #: packages/lib/models/settings/builtInMetadata.ts:863
 msgid "Shrink large images before adding them to notes."
@@ -4982,11 +4928,11 @@ msgstr ""
 
 #: packages/app-desktop/gui/ResourceScreen.tsx:92
 msgid "Sort \"%s\" in ascending order"
-msgstr ""
+msgstr "Sorter \"%s\" i stigende rækkefølge"
 
 #: packages/app-desktop/gui/ResourceScreen.tsx:92
 msgid "Sort \"%s\" in descending order"
-msgstr ""
+msgstr "Sorter \"%s\" i faldende rækkefølge"
 
 #: packages/lib/models/settings/builtInMetadata.ts:754
 msgid "Sort notebooks by"
@@ -5168,12 +5114,11 @@ msgstr "Skift profil"
 
 #: packages/app-mobile/components/CameraView/ActionButtons.tsx:101
 msgid "Switch to back-facing camera"
-msgstr ""
+msgstr "Skift til bagudvendt kamera"
 
 #: packages/app-mobile/components/CameraView/ActionButtons.tsx:101
-#, fuzzy
 msgid "Switch to front-facing camera"
-msgstr "Skift til profil %d"
+msgstr "Skift til frontkameraet"
 
 #: packages/app-desktop/gui/utils/NoteListUtils.ts:93
 msgid "Switch to note type"
@@ -5186,14 +5131,12 @@ msgid "Switch to profile %d"
 msgstr "Skift til profil %d"
 
 #: packages/app-desktop/gui/ToggleEditorsButton/ToggleEditorsButton.tsx:28
-#, fuzzy
 msgid "Switch to the %s Editor"
-msgstr "Skift til note"
+msgstr "Skift til %s editoren"
 
 #: packages/app-desktop/gui/NoteEditor/WarningBanner/WarningBanner.tsx:78
-#, fuzzy
 msgid "Switch to the legacy editor"
-msgstr "Skift til note"
+msgstr "Skift til den gamle editor"
 
 #: packages/app-desktop/gui/utils/NoteListUtils.ts:102
 msgid "Switch to to-do type"
@@ -5470,6 +5413,7 @@ msgstr ""
 #: packages/app-desktop/gui/NoteEditor/WarningBanner/WarningBanner.tsx:83
 msgid "The following plugins may not support the current markdown editor:"
 msgstr ""
+"Følgende plugins understøtter muligvis ikke den aktuelle markdown-editor:"
 
 #: packages/app-desktop/gui/ConfigScreen/controls/plugins/PluginBox.tsx:257
 #: packages/app-mobile/components/screens/ConfigScreen/plugins/PluginBox/RecommendedBadge.tsx:49
@@ -5594,6 +5538,10 @@ msgid ""
 "\n"
 "Error: \"%s\""
 msgstr ""
+"Webklienten understøtter ikke accept af krypterede delte notebooks. Skift "
+"venligst til desktop- eller mobilappen, før du accepterer delingen.\n"
+"\n"
+"Fejl: \"%s\""
 
 #: packages/app-desktop/gui/Root.tsx:150
 msgid "The Web Clipper needs your authorisation to access your data."
@@ -5948,9 +5896,8 @@ msgid "Toggle editor layout"
 msgstr "Skift editor layout"
 
 #: packages/app-desktop/gui/WindowCommandsAndDialogs/commands/toggleEditorPlugin.ts:11
-#, fuzzy
 msgid "Toggle editor plugin"
-msgstr "Skift editor layout"
+msgstr "Skift editor-plugin"
 
 #: packages/app-desktop/gui/WindowCommandsAndDialogs/commands/toggleEditors.ts:8
 msgid "Toggle editors"
@@ -6079,9 +6026,8 @@ msgstr ""
 
 #: packages/app-mobile/utils/getVersionInfoText.ts:13
 #: packages/app-mobile/utils/getVersionInfoText.ts:14
-#, fuzzy
 msgid "Unknown"
-msgstr "Ukendt flag: %s"
+msgstr "Ukendt"
 
 #: packages/app-desktop/bridge.ts:441
 msgid "Unknown file type"
@@ -6099,9 +6045,8 @@ msgstr ""
 "version"
 
 #: packages/app-mobile/utils/getVersionInfoText.ts:28
-#, fuzzy
 msgid "Unknown platform"
-msgstr "Ukendt markering: %s"
+msgstr "Ukendt platform"
 
 #: packages/app-mobile/components/NoteEditor/commandDeclarations.ts:82
 msgid "Unordered list"
@@ -6149,9 +6094,8 @@ msgid "Update available"
 msgstr "Opdatering tilgængelig"
 
 #: packages/app-desktop/gui/UpdateNotification/UpdateNotification.tsx:65
-#, fuzzy
 msgid "Update later"
-msgstr "opdateringsdato"
+msgstr "Opdater senere"
 
 #: packages/server/src/routes/admin/users.ts:257
 #: packages/server/src/routes/index/users.ts:91
@@ -6251,9 +6195,8 @@ msgstr ""
 "afslutte."
 
 #: packages/lib/models/settings/builtInMetadata.ts:1333
-#, fuzzy
 msgid "Use the legacy Markdown editor"
-msgstr "Aktivér Markdown-værktøjslinjen"
+msgstr "Brug den gamle Markdown-editor"
 
 #: packages/app-mobile/components/screens/ConfigScreen/ConfigScreen.tsx:551
 msgid ""
@@ -6285,8 +6228,8 @@ msgid ""
 "tables, checkboxes, code). If not found, a generic monospace (fixed width) "
 "font is used."
 msgstr ""
-"Bruges hvor en font med fast bredde er nødvendig for at vise læsbar tekst "
-"(f.eks. tabeller, afkrydsningsfelter, kode). Hvis ikke fundet, bruges en "
+"Bruges hvor en font med fast bredde er nødvendig for at vise læsbar tekst (f."
+"eks. tabeller, afkrydsningsfelter, kode). Hvis ikke fundet, bruges en "
 "generisk monospatieret (fast bredde) font."
 
 #: packages/server/src/services/MustacheService.ts:125
@@ -6348,7 +6291,7 @@ msgstr "Stemmeindtastning..."
 
 #: packages/lib/models/settings/builtInMetadata.ts:1698
 msgid "Vosk"
-msgstr ""
+msgstr "Vosk"
 
 #: packages/lib/services/joplinCloudUtils.ts:27
 msgid "Waiting for authorisation..."
@@ -6455,7 +6398,7 @@ msgstr ""
 
 #: packages/lib/models/settings/builtInMetadata.ts:1699
 msgid "Whisper"
-msgstr ""
+msgstr "Whisper"
 
 #: packages/app-desktop/ElectronAppWrapper.ts:222
 msgid "Window unresponsive."
@@ -6556,8 +6499,8 @@ msgid ""
 "Your password is needed to decrypt some of your data. Type `:e2ee decrypt` "
 "to set it."
 msgstr ""
-"Din adgangskode er nødvendig for at dekryptere nogle af dine data. Tast "
-"`:e2ee decrypt` for at indstille den."
+"Din adgangskode er nødvendig for at dekryptere nogle af dine data. Tast `:"
+"e2ee decrypt` for at indstille den."
 
 #: packages/app-desktop/checkForUpdates.ts:108
 msgid "Your version: %s"

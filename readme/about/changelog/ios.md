@@ -1,5 +1,23 @@
 # Joplin iOS Changelog
 
+## [ios-v13.2.4](https://github.com/laurent22/joplin/releases/tag/ios-v13.2.4) - 2025-01-08T00:11:58Z
+
+- New: Plugin API: Add support for the renderMarkup command (#11494 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Improved: Accessibility: Improve sidemenu notebook list accessibility (#11556 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Improved: Add an accordion for disabled master keys on encryption screen (#11529) (#11486 by [@pedr](https://github.com/pedr))
+- Improved: Add more options when long pressing the icon on mobile (#11517) (#10374)
+- Improved: Display html notes using white theme (#11510) (#10609)
+- Improved: Mark biometric lock feature as stable (955d39b)
+- Improved: Plugin API: Implement the `toggleVisiblePanes` command (#11496 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Improved: Removed old hack that was making the note body move up and down (#11511)
+- Improved: Updated packages @react-native-clipboard/clipboard (v1.14.2), @rollup/plugin-node-resolve (v15.2.4), adm-zip (v0.5.16)
+- Improved: Upgrade js-draw to 1.26.0 (#11589 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Improved: Use real timers for sync operations (#11081)
+- Fixed: Fix blank screen on bringing app from background (#11555) (#11544 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Fix editor shows nothing when there are no selected note IDs (#11514) (#11264 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Fix missing "Insert Time" button (#11542) (#11539 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Locked out of mobile app due to broken fingerprint scanner (#10926)
+
 ## [ios-v13.2.2](https://github.com/laurent22/joplin/releases/tag/ios-v13.2.2) - 2024-12-12T16:39:28Z
 
 - New: Accessibility: Add checked/unchecked accessibility information to the "sort notes by" dialog (#11411 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))

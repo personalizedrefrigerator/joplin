@@ -48,22 +48,24 @@ export default class ToolbarButtonUtils {
 	private commandToToolbarButton(commandName: string, whenClauseContext: WhenClauseContext): ToolbarButtonInfo {
 		const newEnabled = this.service.isEnabled(commandName, whenClauseContext);
 		const newTitle = this.service.title(commandName);
+		const newIcon = this.service.iconName(commandName);
+		const newLabel = this.service.label(commandName);
 
 		if (
 			this.toolbarButtonCache_[commandName] &&
 			this.toolbarButtonCache_[commandName].info.enabled === newEnabled &&
-			this.toolbarButtonCache_[commandName].info.title === newTitle
+			this.toolbarButtonCache_[commandName].info.title === newTitle &&
+			this.toolbarButtonCache_[commandName].info.iconName === newIcon &&
+			this.toolbarButtonCache_[commandName].info.tooltip === newLabel
 		) {
 			return this.toolbarButtonCache_[commandName].info;
 		}
 
-		const command = this.service.commandByName(commandName, { runtimeMustBeRegistered: true });
-
 		const output: ToolbarButtonInfo = {
 			type: 'button',
 			name: commandName,
-			tooltip: this.service.label(commandName),
-			iconName: command.declaration.iconName,
+			tooltip: newLabel,
+			iconName: newIcon,
 			enabled: newEnabled,
 			onClick: async () => {
 				await this.service.execute(commandName);

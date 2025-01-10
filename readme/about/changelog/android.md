@@ -1,5 +1,10 @@
 # Joplin Android Changelog
 
+## [android-v3.2.5](https://github.com/laurent22/joplin/releases/tag/android-v3.2.5) (Pre-release) - 2025-01-07T23:35:43Z
+
+- Improved: Allow re-downloading voice typing models on URL change and error (#11557 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Improved: Upgrade js-draw to 1.26.0 (#11589 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+
 ## [android-v3.2.4](https://github.com/laurent22/joplin/releases/tag/android-v3.2.4) (Pre-release) - 2025-01-06T12:50:23Z
 
 - New: Plugin API: Add support for the renderMarkup command (#11494 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
