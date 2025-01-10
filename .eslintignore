@@ -883,6 +883,10 @@ packages/editor/CodeMirror/editorCommands/sortSelectedLines.test.js
 packages/editor/CodeMirror/editorCommands/sortSelectedLines.js
 packages/editor/CodeMirror/editorCommands/supportsCommand.js
 packages/editor/CodeMirror/getScrollFraction.js
+packages/editor/CodeMirror/markdown/MarkdownHighlightExtension.test.js
+packages/editor/CodeMirror/markdown/MarkdownHighlightExtension.js
+packages/editor/CodeMirror/markdown/MarkdownMathExtension.test.js
+packages/editor/CodeMirror/markdown/MarkdownMathExtension.js
 packages/editor/CodeMirror/markdown/codeBlockLanguages/allLanguages.js
 packages/editor/CodeMirror/markdown/codeBlockLanguages/defaultLanguage.js
 packages/editor/CodeMirror/markdown/codeBlockLanguages/lookUpLanguage.js
@@ -894,8 +898,6 @@ packages/editor/CodeMirror/markdown/markdownCommands.bulletedVsChecklist.test.js
 packages/editor/CodeMirror/markdown/markdownCommands.test.js
 packages/editor/CodeMirror/markdown/markdownCommands.toggleList.test.js
 packages/editor/CodeMirror/markdown/markdownCommands.js
-packages/editor/CodeMirror/markdown/markdownMathParser.test.js
-packages/editor/CodeMirror/markdown/markdownMathParser.js
 packages/editor/CodeMirror/markdown/utils/renumberSelectedLists.test.js
 packages/editor/CodeMirror/markdown/utils/renumberSelectedLists.js
 packages/editor/CodeMirror/markdown/utils/stripBlockquote.js
@@ -906,6 +908,7 @@ packages/editor/CodeMirror/pluginApi/customEditorCompletion.js
 packages/editor/CodeMirror/testUtil/createEditorControl.js
 packages/editor/CodeMirror/testUtil/createEditorSettings.js
 packages/editor/CodeMirror/testUtil/createTestEditor.js
+packages/editor/CodeMirror/testUtil/findNodesWithName.js
 packages/editor/CodeMirror/testUtil/forceFullParse.js
 packages/editor/CodeMirror/testUtil/loadLanguages.js
 packages/editor/CodeMirror/testUtil/pressReleaseKey.js

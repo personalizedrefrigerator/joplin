@@ -335,6 +335,7 @@ function NoteEditor(props: Props, ref: any) {
 	const editorSettings: EditorSettings = useMemo(() => ({
 		themeId: props.themeId,
 		themeData: editorTheme(props.themeId),
+		markdownMarkEnabled: Setting.value('markdown.plugin.mark'),
 		katexEnabled: Setting.value('markdown.plugin.katex'),
 		spellcheckEnabled: Setting.value('editor.mobile.spellcheckEnabled'),
 		language: EditorLanguageType.Markdown,

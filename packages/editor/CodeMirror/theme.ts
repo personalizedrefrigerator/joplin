@@ -8,7 +8,7 @@ import { tags } from '@lezer/highlight';
 import { EditorView } from '@codemirror/view';
 import { Extension } from '@codemirror/state';
 
-import { inlineMathTag, mathTag } from './markdown/markdownMathParser';
+import { inlineMathTag, mathTag } from './markdown/MarkdownMathExtension';
 import { EditorTheme } from '../types';
 
 // For an example on how to customize the theme, see:
