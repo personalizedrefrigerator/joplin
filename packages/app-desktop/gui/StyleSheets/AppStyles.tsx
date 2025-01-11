@@ -20,6 +20,7 @@ import { AppState } from '../../app.reducer';
 
 interface Props {
 	themeId: number;
+	largeControls: boolean;
 	editorFontSetting: string;
 	customChromeCssPaths: string[];
 }
@@ -95,7 +96,21 @@ const useAppliedCss = (doc: Document|null, css: string) => {
 	}, [css, doc]);
 };
 
-const StyleSheetContainer: React.FC<Props> = props => {
+
+const useThemeFlag = (doc: Document|null, flag: string, enabled: boolean) => {
+	useEffect(() => {
+		if (enabled && doc?.documentElement) {
+			doc.documentElement.classList.add(flag);
+			return () => {
+				doc.documentElement.classList.remove(flag);
+			};
+		}
+
+		return () => {};
+	}, [doc, flag, enabled]);
+};
+
+const AppStyles: React.FC<Props> = props => {
 	const [elementRef, setElementRef] = useState<HTMLElement|null>(null);
 	const doc = useDocument(elementRef);
 
@@ -111,6 +126,8 @@ const StyleSheetContainer: React.FC<Props> = props => {
 	`);
 	useLinkedCss(doc, props.customChromeCssPaths);
 
+	useThemeFlag(doc, '-large-controls', props.largeControls);
+
 	return <div ref={setElementRef} style={{ display: 'none' }}></div>;
 };
 
@@ -118,6 +135,7 @@ export default connect((state: AppState) => {
 	return {
 		themeId: state.settings.theme,
 		editorFontSetting: state.settings['style.editor.fontFamily'] as string,
+		largeControls: state.settings['style.increaseControlSize'],
 		customChromeCssPaths: state.customChromeCssPaths,
 	};
-})(StyleSheetContainer);
+})(AppStyles);

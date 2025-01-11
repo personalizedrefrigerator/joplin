@@ -35,6 +35,19 @@ a {
 	height: 7px;
 }
 
+:root.-large-controls {
+	// WCAG 2.2's SC 2.5.8: The target size for pointer events must be at least 24px x 24px
+	// (Though there are exceptions).
+	::-webkit-scrollbar, input[type=checkbox] {
+		width: 24px;
+		height: 24px;
+	}
+
+	::-webkit-scrollbar-thumb {
+		border-radius: 12px;
+	}
+}
+
 ::-webkit-scrollbar-corner {
 	background: none;
 }

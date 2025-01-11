@@ -1120,6 +1120,18 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 
 		'style.editor.contentMaxWidth': { value: 0, type: SettingItemType.Int, public: true, storage: SettingStorage.File, isGlobal: true, appTypes: [AppType.Desktop], section: 'appearance', label: () => _('Editor maximum width'), description: () => _('Set it to 0 to make it take the complete available space. Recommended width is 600.') },
 
+		'style.increaseControlSize': {
+			value: false,
+			type: SettingItemType.Bool,
+			public: true,
+			section: 'appearance',
+
+			label: () => _('Prefer large controls'),
+			description: () => _('Increases the size of checkboxes, scrollbars, and other otherwise-small controls.'),
+			storage: SettingStorage.File,
+			isGlobal: true,
+		},
+
 		'ui.layout': { value: {}, type: SettingItemType.Object, storage: SettingStorage.File, isGlobal: true, public: false, appTypes: [AppType.Desktop] },
 
 		'ui.lastSelectedPluginPanel': {

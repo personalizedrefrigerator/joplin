@@ -643,6 +643,7 @@ export default class MdToHtml implements MarkupRenderer {
 		const renderedBody = markdownIt.render(body, context);
 
 		let cssStrings = noteStyle(options.theme, {
+			increaseControlsSize: options.increaseControlsSize,
 			contentMaxWidth: options.contentMaxWidth,
 		});
 

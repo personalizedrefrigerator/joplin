@@ -180,6 +180,7 @@ function NoteEditorContent(props: NoteEditorProps) {
 		whiteBackgroundNoteRendering,
 		customCss: props.customCss,
 		plugins: props.plugins,
+		increaseControlsSize: props.increaseControlsSize,
 		settingValue: getPluginSettingValue,
 	});
 
@@ -200,9 +201,10 @@ function NoteEditorContent(props: NoteEditorProps) {
 		return markupToHtml.allAssets(markupLanguage, theme, {
 			contentMaxWidth: props.contentMaxWidth,
 			contentMaxWidthTarget: options.contentMaxWidthTarget,
+			increaseControlsSize: props.increaseControlsSize,
 			whiteBackgroundNoteRendering: options.whiteBackgroundNoteRendering,
 		});
-	}, [props.themeId, props.customCss, props.contentMaxWidth]);
+	}, [props.themeId, props.increaseControlsSize, props.customCss, props.contentMaxWidth]);
 
 	const handleProvisionalFlag = useCallback(() => {
 		if (props.isProvisional) {
@@ -494,6 +496,7 @@ function NoteEditorContent(props: NoteEditorProps) {
 		plugins: props.plugins,
 		fontSize: Setting.value('style.editor.fontSize'),
 		contentMaxWidth: props.contentMaxWidth,
+		increaseControlSize: props.increaseControlsSize,
 		isSafeMode: props.isSafeMode,
 		useCustomPdfViewer: props.useCustomPdfViewer,
 		// We need it to identify the context for which media is rendered.
@@ -747,6 +750,7 @@ const mapStateToProps = (state: AppState, ownProps: ConnectProps) => {
 			'setTags',
 		], whenClauseContext)[0] as ToolbarButtonInfo,
 		contentMaxWidth: state.settings['style.editor.contentMaxWidth'],
+		increaseControlsSize: state.settings['style.increaseControlSize'],
 		isSafeMode: state.settings.isSafeMode,
 		useCustomPdfViewer: false,
 		syncUserId: state.settings['sync.userId'],

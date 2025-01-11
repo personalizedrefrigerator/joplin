@@ -51,6 +51,7 @@ export interface NoteEditorProps {
 	toolbarButtonInfos: ToolbarItem[];
 	setTagsToolbarButtonInfo: ToolbarButtonInfo;
 	contentMaxWidth: number;
+	increaseControlsSize: boolean;
 	isSafeMode: boolean;
 	useCustomPdfViewer: boolean;
 	shareCacheSetting: string;
@@ -76,6 +77,7 @@ export interface MarkupToHtmlOptions {
 	replaceResourceInternalToExternalLinks?: boolean;
 	resourceInfos?: ResourceInfos;
 	contentMaxWidth?: number;
+	increaseControlsSize?: boolean;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	plugins?: Record<string, any>;
 	bodyOnly?: boolean;
@@ -104,6 +106,8 @@ export interface NoteBodyEditorProps {
 	// or the CodeMirror editor. This is used to correctly render HTML notes and
 	// avoid cases where black text is rendered over a dark background.
 	whiteBackgroundNoteRendering: boolean;
+
+	increaseControlSize: boolean;
 
 	content: string;
 	contentKey: string;

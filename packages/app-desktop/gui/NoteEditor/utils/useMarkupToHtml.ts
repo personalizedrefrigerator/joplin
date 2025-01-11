@@ -16,10 +16,11 @@ interface HookDependencies {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	settingValue: (pluginId: string, key: string)=> any;
 	whiteBackgroundNoteRendering: boolean;
+	increaseControlsSize: boolean;
 }
 
 export default function useMarkupToHtml(deps: HookDependencies) {
-	const { themeId, customCss, plugins, whiteBackgroundNoteRendering } = deps;
+	const { themeId, customCss, plugins, whiteBackgroundNoteRendering, increaseControlsSize } = deps;
 
 	const resourceBaseUrl = useMemo(() => {
 		return `joplin-content://note-viewer/${Setting.value('resourceDir')}/`;
@@ -63,6 +64,7 @@ export default function useMarkupToHtml(deps: HookDependencies) {
 			codeHighlightCacheKey: 'useMarkupToHtml',
 			settingValue: deps.settingValue,
 			whiteBackgroundNoteRendering,
+			increaseControlsSize,
 			itemIdToUrl: (id: string, urlParameters = '') => {
 				if (!(id in resources) || !resources[id]) {
 					return null;
@@ -74,5 +76,5 @@ export default function useMarkupToHtml(deps: HookDependencies) {
 		});
 
 		return result;
-	}, [themeId, markupToHtml, whiteBackgroundNoteRendering, resourceBaseUrl, deps.settingValue]);
+	}, [themeId, markupToHtml, whiteBackgroundNoteRendering, increaseControlsSize, resourceBaseUrl, deps.settingValue]);
 }

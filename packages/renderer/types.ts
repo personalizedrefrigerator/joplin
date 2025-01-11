@@ -10,6 +10,11 @@ interface ResourceEntity {
 	file_extension?: string;
 }
 
+interface ResourceInfo {
+	localState: unknown;
+	item: ResourceEntity;
+}
+
 export interface FsDriver {
 	writeFile: (path: string, content: string, encoding: string)=> Promise<void>;
 	exists: (path: string)=> Promise<boolean>;
@@ -19,6 +24,7 @@ export interface FsDriver {
 
 export interface RenderOptions {
 	contentMaxWidth?: number;
+	increaseControlsSize?: boolean;
 	bodyOnly?: boolean;
 	splitted?: boolean;
 	enableLongPress?: boolean;
@@ -48,7 +54,7 @@ export interface RenderOptions {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	settingValue?: (pluginId: string, key: string)=> any;
 
-	resources?: Record<string, ResourceEntity>;
+	resources?: Record<string, ResourceInfo>;
 
 	onResourceLoaded?: ()=> void;
 	editPopupFiletypes?: string[];

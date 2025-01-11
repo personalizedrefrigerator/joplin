@@ -11,6 +11,7 @@ function formatCssSize(v: any): string {
 export interface Options {
 	contentMaxWidth?: number;
 	contentMaxWidthTarget?: string;
+	increaseControlsSize?: boolean;
 	themeId?: number;
 	whiteBackgroundNoteRendering?: boolean;
 }
@@ -117,6 +118,7 @@ export default function(theme: any, options: Options = null) {
 			border-radius: 3px;
 			background-color: ${theme.codeBackgroundColor};
 		}
+
 		::-webkit-scrollbar {
 			width: 7px;
 			height: 7px;
@@ -137,6 +139,17 @@ export default function(theme: any, options: Options = null) {
 		::-webkit-scrollbar-thumb:hover {
 			background: rgba(100, 100, 100, 0.7); 
 		}
+
+		${options.increaseControlsSize ? `
+			::-webkit-scrollbar {
+				width: 24px;
+				height: 24px;
+			}
+
+			::-webkit-scrollbar-thumb {
+				border-radius: 12px;
+			}
+		` : ''}
 
 		${maxWidthCss}
 
