@@ -1140,8 +1140,8 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 				[ScrollbarSize.Large]: _('Large'),
 			}),
 
-			label: () => _('Larger scrollbars'),
-			description: () => _('Increases the width of scrollbars.'),
+			label: () => _('Scrollbar size'),
+			description: () => _('Configures the size of scrollbars used in the app.'),
 			storage: SettingStorage.File,
 			isGlobal: true,
 		},
