@@ -45,7 +45,6 @@ import PlainEditor from './NoteBody/PlainEditor/PlainEditor';
 import CodeMirror6 from './NoteBody/CodeMirror/v6/CodeMirror';
 import CodeMirror5 from './NoteBody/CodeMirror/v5/CodeMirror';
 import { openItemById } from './utils/contextMenu';
-import getPluginSettingValue from '@joplin/lib/services/plugins/utils/getPluginSettingValue';
 import { MarkupLanguage } from '@joplin/renderer';
 import useScrollWhenReadyOptions from './utils/useScrollWhenReadyOptions';
 import useScheduleSaveCallbacks from './utils/useScheduleSaveCallbacks';
@@ -181,7 +180,6 @@ function NoteEditorContent(props: NoteEditorProps) {
 		customCss: props.customCss,
 		plugins: props.plugins,
 		increaseControlsSize: props.increaseControlsSize,
-		settingValue: getPluginSettingValue,
 	});
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied

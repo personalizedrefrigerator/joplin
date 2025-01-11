@@ -5,12 +5,10 @@ import NoteTextViewer, { NoteViewerControl } from './NoteTextViewer';
 import HelpButton from './HelpButton';
 import BaseModel from '@joplin/lib/BaseModel';
 import Revision from '@joplin/lib/models/Revision';
-import Setting from '@joplin/lib/models/Setting';
 import RevisionService from '@joplin/lib/services/RevisionService';
-import { MarkupToHtml } from '@joplin/renderer';
+import { MarkupLanguage } from '@joplin/renderer';
 import time from '@joplin/lib/time';
 import bridge from '../services/bridge';
-import markupLanguageUtils from '@joplin/lib/utils/markupLanguageUtils';
 import { NoteEntity, RevisionEntity } from '@joplin/lib/services/database/types';
 import { AppState } from '../app.reducer';
 const urlUtils = require('@joplin/lib/urlUtils');
@@ -20,6 +18,8 @@ import shared from '@joplin/lib/components/shared/note-screen-shared';
 import shim, { MessageBoxType } from '@joplin/lib/shim';
 import { RefObject, useCallback, useRef, useState } from 'react';
 import useQueuedAsyncEffect from '@joplin/lib/hooks/useQueuedAsyncEffect';
+import useMarkupToHtml from './hooks/useMarkupToHtml';
+import useAsyncEffect from '@joplin/lib/hooks/useAsyncEffect';
 
 interface Props {
 	themeId: number;
@@ -27,6 +27,7 @@ interface Props {
 	// eslint-disable-next-line @typescript-eslint/ban-types -- Old code before rule was applied
 	onBack: Function;
 	customCss: string;
+	increaseControlsSize: boolean;
 }
 
 const useNoteContent = (
@@ -35,47 +36,46 @@ const useNoteContent = (
 	revisions: RevisionEntity[],
 	themeId: number,
 	customCss: string,
+	increaseControlsSize: boolean,
 ) => {
 	const [note, setNote] = useState<NoteEntity>(null);
 
-	useQueuedAsyncEffect(async () => {
-		let noteBody = '';
-		let markupLanguage = MarkupToHtml.MARKUP_LANGUAGE_MARKDOWN;
+	const markupToHtml = useMarkupToHtml({
+		themeId,
+		customCss,
+		plugins: {},
+		whiteBackgroundNoteRendering: false,
+		increaseControlsSize: increaseControlsSize,
+	});
+
+	useAsyncEffect(async (event) => {
 		if (!revisions.length || !currentRevId) {
-			noteBody = _('This note has no history');
-			setNote(note);
+			setNote(null);
 		} else {
 			const revIndex = BaseModel.modelIndexById(revisions, currentRevId);
 			const note = await RevisionService.instance().revisionNote(revisions, revIndex);
-			if (!note) return;
-			noteBody = note.body;
-			markupLanguage = note.markup_language;
+			if (!note || event.cancelled) return;
 			setNote(note);
 		}
+	}, [revisions, currentRevId, themeId, customCss, viewerRef]);
 
-		const theme = themeStyle(themeId);
-
-		const markupToHtml = markupLanguageUtils.newMarkupToHtml({}, {
-			resourceBaseUrl: `joplin-content://note-viewer/${Setting.value('resourceDir')}/`,
-			customCss: customCss ? customCss : '',
-		});
-
-		const result = await markupToHtml.render(markupLanguage, noteBody, theme, {
-			codeTheme: theme.codeThemeCss,
+	useQueuedAsyncEffect(async () => {
+		const noteBody = note?.body ?? _('This note has no history');
+		const markupLanguage = note.markup_language ?? MarkupLanguage.Markdown;
+		const result = await markupToHtml(markupLanguage, noteBody, {
 			resources: await shared.attachedResources(noteBody),
-			postMessageSyntax: 'ipcProxySendToHost',
+			whiteBackgroundNoteRendering: markupLanguage === MarkupLanguage.Html,
 		});
 
 		viewerRef.current.setHtml(result.html, {
-			// cssFiles: result.cssFiles,
 			pluginAssets: result.pluginAssets,
 		});
-	}, [revisions, themeId, customCss, viewerRef]);
+	}, [note, viewerRef]);
 
 	return note;
 };
 
-const NoteRevisionViewerComponent: React.FC<Props> = ({ themeId, noteId, onBack, customCss }) => {
+const NoteRevisionViewerComponent: React.FC<Props> = ({ themeId, noteId, onBack, customCss, increaseControlsSize }) => {
 	const helpButton_onClick = useCallback(() => {}, []);
 	const viewerRef = useRef<NoteViewerControl|null>(null);
 
@@ -83,7 +83,7 @@ const NoteRevisionViewerComponent: React.FC<Props> = ({ themeId, noteId, onBack,
 	const [currentRevId, setCurrentRevId] = useState('');
 	const [restoring, setRestoring] = useState(false);
 
-	const note = useNoteContent(viewerRef, currentRevId, revisions, themeId, customCss);
+	const note = useNoteContent(viewerRef, currentRevId, revisions, themeId, customCss, increaseControlsSize);
 
 	const viewer_domReady = useCallback(async () => {
 		// this.viewerRef_.current.openDevTools();
@@ -192,6 +192,7 @@ const NoteRevisionViewerComponent: React.FC<Props> = ({ themeId, noteId, onBack,
 const mapStateToProps = (state: AppState) => {
 	return {
 		themeId: state.settings.theme,
+		increaseControlsSize: state.settings['style.increaseControlSize'],
 	};
 };
 

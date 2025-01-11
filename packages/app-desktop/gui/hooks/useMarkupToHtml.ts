@@ -9,6 +9,7 @@ import Note from '@joplin/lib/models/Note';
 import { ResourceInfos } from '../NoteEditor/utils/types';
 import { resourceFullPath } from '@joplin/lib/models/utils/resourceUtils';
 import { RenderOptions } from '@joplin/renderer/types';
+import getPluginSettingValue from '@joplin/lib/services/plugins/utils/getPluginSettingValue';
 
 export interface MarkupToHtmlOptions extends RenderOptions {
 	resourceInfos?: ResourceInfos;
@@ -19,8 +20,6 @@ interface HookDependencies {
 	themeId: number;
 	customCss: string;
 	plugins: PluginStates;
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	settingValue: (pluginId: string, key: string)=> any;
 	whiteBackgroundNoteRendering: boolean;
 	increaseControlsSize: boolean;
 }
@@ -67,7 +66,7 @@ export default function useMarkupToHtml(deps: HookDependencies) {
 			splitted: true,
 			externalAssetsOnly: true,
 			codeHighlightCacheKey: 'useMarkupToHtml',
-			settingValue: deps.settingValue,
+			settingValue: getPluginSettingValue,
 			whiteBackgroundNoteRendering,
 			increaseControlsSize,
 			itemIdToUrl: (id: string, urlParameters = '') => {
@@ -81,5 +80,5 @@ export default function useMarkupToHtml(deps: HookDependencies) {
 		});
 
 		return result;
-	}, [themeId, markupToHtml, whiteBackgroundNoteRendering, increaseControlsSize, resourceBaseUrl, deps.settingValue]);
+	}, [themeId, markupToHtml, whiteBackgroundNoteRendering, increaseControlsSize, resourceBaseUrl]);
 }
