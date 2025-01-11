@@ -19,7 +19,7 @@ import ClipperServer from '@joplin/lib/ClipperServer';
 import DialogTitle from './DialogTitle';
 import DialogButtonRow, { ButtonSpec, ClickEvent, ClickEventHandler } from './DialogButtonRow';
 import Dialog from './Dialog';
-import AppStyles from './StyleSheets/AppStyles';
+import StyleSheetContainer from './StyleSheets/StyleSheetContainer';
 import ImportScreen from './ImportScreen';
 const { ResourceScreen } = require('./ResourceScreen.js');
 import Navigator from './Navigator';
@@ -197,7 +197,7 @@ class RootComponent extends React.Component<Props, any> {
 		return (
 			<StyleSheetManager disableVendorPrefixes>
 				<ThemeProvider theme={theme}>
-					<AppStyles/>
+					<StyleSheetContainer/>
 					<MenuBar/>
 					<GlobalStyle/>
 					<WindowCommandsAndDialogs windowId={defaultWindowId} />

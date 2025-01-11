@@ -34,7 +34,7 @@ export interface FsDriver {
 
 export interface RenderOptions {
 	contentMaxWidth?: number;
-	increaseControlsSize?: boolean;
+	scrollbarSize?: number;
 	bodyOnly?: boolean;
 	splitted?: boolean;
 	enableLongPress?: boolean;

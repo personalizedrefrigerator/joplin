@@ -20,14 +20,14 @@ import { RefObject, useCallback, useRef, useState } from 'react';
 import useQueuedAsyncEffect from '@joplin/lib/hooks/useQueuedAsyncEffect';
 import useMarkupToHtml from './hooks/useMarkupToHtml';
 import useAsyncEffect from '@joplin/lib/hooks/useAsyncEffect';
+import { ScrollbarSize } from '@joplin/lib/models/settings/builtInMetadata';
 
 interface Props {
 	themeId: number;
 	noteId: string;
-	// eslint-disable-next-line @typescript-eslint/ban-types -- Old code before rule was applied
-	onBack: Function;
+	onBack: ()=> void;
 	customCss: string;
-	increaseControlsSize: boolean;
+	scrollbarSize: ScrollbarSize;
 }
 
 const useNoteContent = (
@@ -36,7 +36,7 @@ const useNoteContent = (
 	revisions: RevisionEntity[],
 	themeId: number,
 	customCss: string,
-	increaseControlsSize: boolean,
+	scrollbarSize: ScrollbarSize,
 ) => {
 	const [note, setNote] = useState<NoteEntity>(null);
 
@@ -45,7 +45,7 @@ const useNoteContent = (
 		customCss,
 		plugins: {},
 		whiteBackgroundNoteRendering: false,
-		increaseControlsSize: increaseControlsSize,
+		scrollbarSize,
 	});
 
 	useAsyncEffect(async (event) => {
@@ -75,7 +75,7 @@ const useNoteContent = (
 	return note;
 };
 
-const NoteRevisionViewerComponent: React.FC<Props> = ({ themeId, noteId, onBack, customCss, increaseControlsSize }) => {
+const NoteRevisionViewerComponent: React.FC<Props> = ({ themeId, noteId, onBack, customCss, scrollbarSize }) => {
 	const helpButton_onClick = useCallback(() => {}, []);
 	const viewerRef = useRef<NoteViewerControl|null>(null);
 
@@ -83,7 +83,7 @@ const NoteRevisionViewerComponent: React.FC<Props> = ({ themeId, noteId, onBack,
 	const [currentRevId, setCurrentRevId] = useState('');
 	const [restoring, setRestoring] = useState(false);
 
-	const note = useNoteContent(viewerRef, currentRevId, revisions, themeId, customCss, increaseControlsSize);
+	const note = useNoteContent(viewerRef, currentRevId, revisions, themeId, customCss, scrollbarSize);
 
 	const viewer_domReady = useCallback(async () => {
 		// this.viewerRef_.current.openDevTools();
@@ -192,7 +192,7 @@ const NoteRevisionViewerComponent: React.FC<Props> = ({ themeId, noteId, onBack,
 const mapStateToProps = (state: AppState) => {
 	return {
 		themeId: state.settings.theme,
-		increaseControlsSize: state.settings['style.increaseControlSize'],
+		scrollbarSize: state.settings['style.scrollbarSize'],
 	};
 };
 

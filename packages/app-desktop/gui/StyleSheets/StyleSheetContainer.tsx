@@ -17,10 +17,11 @@ import { themeStyle } from '@joplin/lib/theme';
 import useDocument from '../hooks/useDocument';
 import { connect } from 'react-redux';
 import { AppState } from '../../app.reducer';
+import { ScrollbarSize } from '@joplin/lib/models/settings/builtInMetadata';
 
 interface Props {
 	themeId: number;
-	largeControls: boolean;
+	scrollbarSize: ScrollbarSize;
 	editorFontSetting: string;
 	customChromeCssPaths: string[];
 }
@@ -96,21 +97,7 @@ const useAppliedCss = (doc: Document|null, css: string) => {
 	}, [css, doc]);
 };
 
-
-const useThemeFlag = (doc: Document|null, flag: string, enabled: boolean) => {
-	useEffect(() => {
-		if (enabled && doc?.documentElement) {
-			doc.documentElement.classList.add(flag);
-			return () => {
-				doc.documentElement.classList.remove(flag);
-			};
-		}
-
-		return () => {};
-	}, [doc, flag, enabled]);
-};
-
-const AppStyles: React.FC<Props> = props => {
+const StyleSheetContainer: React.FC<Props> = props => {
 	const [elementRef, setElementRef] = useState<HTMLElement|null>(null);
 	const doc = useDocument(elementRef);
 
@@ -121,12 +108,15 @@ const AppStyles: React.FC<Props> = props => {
 		/* Theme CSS */
 		${themeCss}
 
+		/* Base scrollbar size */
+		:root {
+			--scrollbar-size: ${Number(props.scrollbarSize)}px;
+		}
+
 		/* Editor font CSS */
 		${editorCss}
 	`);
 	useLinkedCss(doc, props.customChromeCssPaths);
-
-	useThemeFlag(doc, '-large-controls', props.largeControls);
 
 	return <div ref={setElementRef} style={{ display: 'none' }}></div>;
 };
@@ -135,7 +125,7 @@ export default connect((state: AppState) => {
 	return {
 		themeId: state.settings.theme,
 		editorFontSetting: state.settings['style.editor.fontFamily'] as string,
-		largeControls: state.settings['style.increaseControlSize'],
+		scrollbarSize: state.settings['style.scrollbarSize'],
 		customChromeCssPaths: state.customChromeCssPaths,
 	};
-})(AppStyles);
+})(StyleSheetContainer);

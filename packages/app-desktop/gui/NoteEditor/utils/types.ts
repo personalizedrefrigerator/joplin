@@ -10,6 +10,7 @@ import { SearchMarkers } from './useSearchMarkers';
 import { ParseOptions } from '@joplin/lib/HtmlToMd';
 import { ScrollStrategy } from '@joplin/editor/CodeMirror/CodeMirrorControl';
 import { MarkupToHtmlOptions } from '../../hooks/useMarkupToHtml';
+import { ScrollbarSize } from '@joplin/lib/models/settings/builtInMetadata';
 
 export interface AllAssetsOptions {
 	contentMaxWidthTarget?: string;
@@ -52,7 +53,7 @@ export interface NoteEditorProps {
 	toolbarButtonInfos: ToolbarItem[];
 	setTagsToolbarButtonInfo: ToolbarButtonInfo;
 	contentMaxWidth: number;
-	increaseControlsSize: boolean;
+	scrollbarSize: ScrollbarSize;
 	isSafeMode: boolean;
 	useCustomPdfViewer: boolean;
 	shareCacheSetting: string;
@@ -92,7 +93,7 @@ export interface NoteBodyEditorProps {
 	// avoid cases where black text is rendered over a dark background.
 	whiteBackgroundNoteRendering: boolean;
 
-	increaseControlSize: boolean;
+	scrollbarSize: ScrollbarSize;
 
 	content: string;
 	contentKey: string;

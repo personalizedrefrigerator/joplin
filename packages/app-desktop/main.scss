@@ -31,21 +31,8 @@ a {
 }
 
 ::-webkit-scrollbar {
-	width: 7px;
-	height: 7px;
-}
-
-:root.-large-controls {
-	// WCAG 2.2's SC 2.5.8: The target size for pointer events must be at least 24px x 24px
-	// (Though there are exceptions).
-	::-webkit-scrollbar, input[type=checkbox] {
-		width: 24px;
-		height: 24px;
-	}
-
-	::-webkit-scrollbar-thumb {
-		border-radius: 12px;
-	}
+	width: var(--scrollbar-size, 7px);
+	height: var(--scrollbar-size, 7px);
 }
 
 ::-webkit-scrollbar-corner {
@@ -58,7 +45,7 @@ a {
 
 ::-webkit-scrollbar-thumb {
 	background: rgba(100, 100, 100, 0.3);
-	border-radius: 5px;
+	border-radius: calc(var(--scrollbar-size, 7px) * 0.7);
 }
 
 ::-webkit-scrollbar-track:hover {

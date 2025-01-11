@@ -19,6 +19,12 @@ export enum CameraDirection {
 	Front,
 }
 
+export enum ScrollbarSize {
+	Small = 7,
+	Medium = 12,
+	Large = 24,
+}
+
 const builtInMetadata = (Setting: typeof SettingType) => {
 	const platform = shim.platformName();
 	const mobilePlatform = shim.mobilePlatform();
@@ -1120,14 +1126,22 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 
 		'style.editor.contentMaxWidth': { value: 0, type: SettingItemType.Int, public: true, storage: SettingStorage.File, isGlobal: true, appTypes: [AppType.Desktop], section: 'appearance', label: () => _('Editor maximum width'), description: () => _('Set it to 0 to make it take the complete available space. Recommended width is 600.') },
 
-		'style.increaseControlSize': {
-			value: false,
-			type: SettingItemType.Bool,
+		'style.scrollbarSize': {
+			value: ScrollbarSize.Small,
+			type: SettingItemType.String,
 			public: true,
 			section: 'appearance',
+			appTypes: [AppType.Desktop],
+			isEnum: true,
 
-			label: () => _('Larger controls'),
-			description: () => _('Increases the size of scrollbars and otherwise-small controls. This makes scrollbars and checkboxes easier to click.'),
+			options: () => ({
+				[ScrollbarSize.Small]: _('Small'),
+				[ScrollbarSize.Medium]: _('Medium'),
+				[ScrollbarSize.Large]: _('Large'),
+			}),
+
+			label: () => _('Larger scrollbars'),
+			description: () => _('Increases the width of scrollbars.'),
 			storage: SettingStorage.File,
 			isGlobal: true,
 		},

@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useCallback, useMemo, useRef, useState } from 'react';
 import NoteEditor from './NoteEditor';
-import AppStyles from '../StyleSheets/AppStyles';
+import StyleSheetContainer from '../StyleSheets/StyleSheetContainer';
 import { connect } from 'react-redux';
 import { AppState } from '../../app.reducer';
 import { Dispatch } from 'redux';
@@ -79,7 +79,7 @@ const SecondaryWindow: React.FC<Props> = props => {
 			<WindowCommandsAndDialogs windowId={props.windowId} />
 			{editor}
 		</LibraryStyleRoot>
-		<AppStyles />
+		<StyleSheetContainer />
 	</NewWindowOrIFrame>;
 };
 
