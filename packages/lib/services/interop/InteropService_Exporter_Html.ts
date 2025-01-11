@@ -6,7 +6,7 @@ import Folder from '../../models/Folder';
 import Note from '../../models/Note';
 import Setting from '../../models/Setting';
 import { MarkupToHtml } from '@joplin/renderer';
-import { NoteEntity, ResourceEntity } from '../database/types';
+import { NoteEntity, ResourceEntity, ResourceLocalStateEntity } from '../database/types';
 import { contentScriptsToRendererRules } from '../plugins/utils/loadContentScripts';
 import { basename, friendlySafeFilename, rtrimSlashes, dirname } from '../../path-utils';
 import htmlpack from '@joplin/htmlpack';
@@ -17,6 +17,8 @@ import getPluginSettingValue from '../plugins/utils/getPluginSettingValue';
 import { LinkRenderingType } from '@joplin/renderer/MdToHtml';
 import Logger from '@joplin/utils/Logger';
 import { parseRenderedNoteMetadata } from './utils';
+import ResourceLocalState from '../../models/ResourceLocalState';
+import { ResourceInfos } from '@joplin/renderer/types';
 
 const logger = Logger.create('InteropService_Exporter_Html');
 
@@ -28,7 +30,7 @@ export default class InteropService_Exporter_Html extends InteropService_Exporte
 	private createdDirs_: string[] = [];
 	private resourceDir_: string;
 	private markupToHtml_: MarkupToHtml;
-	private resources_: ResourceEntity[] = [];
+	private resources_: ResourceInfos = {};
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	private style_: any;
 	private packIntoSingleFile_ = false;
@@ -174,10 +176,14 @@ export default class InteropService_Exporter_Html extends InteropService_Exporte
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	public async processResource(resource: any, filePath: string) {
+	public async processResource(resource: ResourceEntity, filePath: string) {
 		const destResourcePath = `${this.resourceDir_}/${basename(filePath)}`;
 		await shim.fsDriver().copy(filePath, destResourcePath);
-		this.resources_.push(resource);
+		const localState: ResourceLocalStateEntity = await ResourceLocalState.load(resource.id);
+		this.resources_[resource.id] = {
+			localState,
+			item: resource,
+		};
 	}
 
 	public async close() {

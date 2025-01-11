@@ -6,8 +6,14 @@ import shim from '@joplin/lib/shim';
 
 const { themeStyle } = require('@joplin/lib/theme');
 import Note from '@joplin/lib/models/Note';
-import { MarkupToHtmlOptions, ResourceInfos } from './types';
+import { ResourceInfos } from '../NoteEditor/utils/types';
 import { resourceFullPath } from '@joplin/lib/models/utils/resourceUtils';
+import { RenderOptions } from '@joplin/renderer/types';
+
+export interface MarkupToHtmlOptions extends RenderOptions {
+	resourceInfos?: ResourceInfos;
+	replaceResourceInternalToExternalLinks?: boolean;
+}
 
 interface HookDependencies {
 	themeId: number;
@@ -33,8 +39,7 @@ export default function useMarkupToHtml(deps: HookDependencies) {
 		});
 	}, [plugins, customCss, resourceBaseUrl]);
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	return useCallback(async (markupLanguage: number, md: string, options: MarkupToHtmlOptions = null): Promise<any> => {
+	return useCallback(async (markupLanguage: number, md: string, options: MarkupToHtmlOptions|null = null) => {
 		options = {
 			replaceResourceInternalToExternalLinks: false,
 			resourceInfos: {},

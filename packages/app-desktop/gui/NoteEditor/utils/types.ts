@@ -9,6 +9,7 @@ import { DropHandler } from './useDropHandler';
 import { SearchMarkers } from './useSearchMarkers';
 import { ParseOptions } from '@joplin/lib/HtmlToMd';
 import { ScrollStrategy } from '@joplin/editor/CodeMirror/CodeMirrorControl';
+import { MarkupToHtmlOptions } from '../../hooks/useMarkupToHtml';
 
 export interface AllAssetsOptions {
 	contentMaxWidthTarget?: string;
@@ -73,23 +74,7 @@ export interface NoteBodyEditorRef {
 	execCommand(command: CommandValue): Promise<void>;
 }
 
-export interface MarkupToHtmlOptions {
-	replaceResourceInternalToExternalLinks?: boolean;
-	resourceInfos?: ResourceInfos;
-	contentMaxWidth?: number;
-	increaseControlsSize?: boolean;
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	plugins?: Record<string, any>;
-	bodyOnly?: boolean;
-	mapsToLine?: boolean;
-	useCustomPdfViewer?: boolean;
-	noteId?: string;
-	vendorDir?: string;
-	platformName?: string;
-	allowedFilePrefixes?: string[];
-	whiteBackgroundNoteRendering?: boolean;
-}
-
+export { MarkupToHtmlOptions };
 export type MarkupToHtmlHandler = (markupLanguage: MarkupLanguage, markup: string, options: MarkupToHtmlOptions)=> Promise<RenderResult>;
 export type HtmlToMarkdownHandler = (markupLanguage: number, html: string, originalCss: string, parseOptions?: ParseOptions)=> Promise<string>;
 

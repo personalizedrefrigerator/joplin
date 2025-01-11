@@ -289,7 +289,6 @@ packages/app-desktop/gui/NoteEditor/utils/useEffectiveNoteId.js
 packages/app-desktop/gui/NoteEditor/utils/useFolder.js
 packages/app-desktop/gui/NoteEditor/utils/useFormNote.test.js
 packages/app-desktop/gui/NoteEditor/utils/useFormNote.js
-packages/app-desktop/gui/NoteEditor/utils/useMarkupToHtml.js
 packages/app-desktop/gui/NoteEditor/utils/useMessageHandler.js
 packages/app-desktop/gui/NoteEditor/utils/useNoteSearchBar.js
 packages/app-desktop/gui/NoteEditor/utils/usePluginEditorView.test.js
@@ -480,6 +479,7 @@ packages/app-desktop/gui/hooks/useDocument.js
 packages/app-desktop/gui/hooks/useEffectDebugger.js
 packages/app-desktop/gui/hooks/useElementHeight.js
 packages/app-desktop/gui/hooks/useImperativeHandlerDebugger.js
+packages/app-desktop/gui/hooks/useMarkupToHtml.js
 packages/app-desktop/gui/hooks/usePrevious.js
 packages/app-desktop/gui/hooks/usePropsDebugger.js
 packages/app-desktop/gui/lib/SearchInput/SearchInput.js
