@@ -1126,8 +1126,8 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 			public: true,
 			section: 'appearance',
 
-			label: () => _('Prefer large controls'),
-			description: () => _('Increases the size of checkboxes, scrollbars, and other otherwise-small controls.'),
+			label: () => _('Larger controls'),
+			description: () => _('Increases the size of scrollbars and otherwise-small controls. This makes scrollbars and checkboxes easier to click.'),
 			storage: SettingStorage.File,
 			isGlobal: true,
 		},
