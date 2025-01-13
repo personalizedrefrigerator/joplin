@@ -11,6 +11,7 @@ function formatCssSize(v: any): string {
 export interface Options {
 	contentMaxWidth?: number;
 	contentMaxWidthTarget?: string;
+	scrollbarSize?: number;
 	themeId?: number;
 	whiteBackgroundNoteRendering?: boolean;
 }
@@ -117,9 +118,17 @@ export default function(theme: any, options: Options = null) {
 			border-radius: 3px;
 			background-color: ${theme.codeBackgroundColor};
 		}
+
+		:root {
+			--scrollbar-size: ${Number(options.scrollbarSize ?? 7)}px;
+		}
+
 		::-webkit-scrollbar {
-			width: 7px;
-			height: 7px;
+			width: var(--scrollbar-size);
+			height: var(--scrollbar-size);
+		}
+		::-webkit-scrollbar-thumb {
+			border-radius: calc(var(--scrollbar-size) / 2);
 		}
 		::-webkit-scrollbar-corner {
 			background: none;

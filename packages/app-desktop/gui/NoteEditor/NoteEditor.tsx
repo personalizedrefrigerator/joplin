@@ -9,7 +9,7 @@ import useNoteSearchBar from './utils/useNoteSearchBar';
 import useMessageHandler from './utils/useMessageHandler';
 import useWindowCommandHandler from './utils/useWindowCommandHandler';
 import useDropHandler from './utils/useDropHandler';
-import useMarkupToHtml from './utils/useMarkupToHtml';
+import useMarkupToHtml from '../hooks/useMarkupToHtml';
 import useFormNote, { OnLoadEvent, OnSetFormNote } from './utils/useFormNote';
 import useEffectiveNoteId from './utils/useEffectiveNoteId';
 import useFolder from './utils/useFolder';
@@ -45,7 +45,6 @@ import PlainEditor from './NoteBody/PlainEditor/PlainEditor';
 import CodeMirror6 from './NoteBody/CodeMirror/v6/CodeMirror';
 import CodeMirror5 from './NoteBody/CodeMirror/v5/CodeMirror';
 import { openItemById } from './utils/contextMenu';
-import getPluginSettingValue from '@joplin/lib/services/plugins/utils/getPluginSettingValue';
 import { MarkupLanguage } from '@joplin/renderer';
 import useScrollWhenReadyOptions from './utils/useScrollWhenReadyOptions';
 import useScheduleSaveCallbacks from './utils/useScheduleSaveCallbacks';
@@ -180,7 +179,7 @@ function NoteEditorContent(props: NoteEditorProps) {
 		whiteBackgroundNoteRendering,
 		customCss: props.customCss,
 		plugins: props.plugins,
-		settingValue: getPluginSettingValue,
+		scrollbarSize: props.scrollbarSize,
 	});
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
@@ -200,9 +199,10 @@ function NoteEditorContent(props: NoteEditorProps) {
 		return markupToHtml.allAssets(markupLanguage, theme, {
 			contentMaxWidth: props.contentMaxWidth,
 			contentMaxWidthTarget: options.contentMaxWidthTarget,
+			scrollbarSize: props.scrollbarSize,
 			whiteBackgroundNoteRendering: options.whiteBackgroundNoteRendering,
 		});
-	}, [props.themeId, props.customCss, props.contentMaxWidth]);
+	}, [props.themeId, props.scrollbarSize, props.customCss, props.contentMaxWidth]);
 
 	const handleProvisionalFlag = useCallback(() => {
 		if (props.isProvisional) {
@@ -494,6 +494,7 @@ function NoteEditorContent(props: NoteEditorProps) {
 		plugins: props.plugins,
 		fontSize: Setting.value('style.editor.fontSize'),
 		contentMaxWidth: props.contentMaxWidth,
+		scrollbarSize: props.scrollbarSize,
 		isSafeMode: props.isSafeMode,
 		useCustomPdfViewer: props.useCustomPdfViewer,
 		// We need it to identify the context for which media is rendered.
@@ -747,6 +748,7 @@ const mapStateToProps = (state: AppState, ownProps: ConnectProps) => {
 			'setTags',
 		], whenClauseContext)[0] as ToolbarButtonInfo,
 		contentMaxWidth: state.settings['style.editor.contentMaxWidth'],
+		scrollbarSize: state.settings['style.scrollbarSize'],
 		isSafeMode: state.settings.isSafeMode,
 		useCustomPdfViewer: false,
 		syncUserId: state.settings['sync.userId'],

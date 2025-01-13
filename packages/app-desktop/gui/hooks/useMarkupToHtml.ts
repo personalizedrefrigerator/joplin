@@ -6,20 +6,27 @@ import shim from '@joplin/lib/shim';
 
 const { themeStyle } = require('@joplin/lib/theme');
 import Note from '@joplin/lib/models/Note';
-import { MarkupToHtmlOptions, ResourceInfos } from './types';
+import { ResourceInfos } from '../NoteEditor/utils/types';
 import { resourceFullPath } from '@joplin/lib/models/utils/resourceUtils';
+import { RenderOptions } from '@joplin/renderer/types';
+import getPluginSettingValue from '@joplin/lib/services/plugins/utils/getPluginSettingValue';
+import { ScrollbarSize } from '@joplin/lib/models/settings/builtInMetadata';
+
+export interface MarkupToHtmlOptions extends RenderOptions {
+	resourceInfos?: ResourceInfos;
+	replaceResourceInternalToExternalLinks?: boolean;
+}
 
 interface HookDependencies {
 	themeId: number;
 	customCss: string;
 	plugins: PluginStates;
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	settingValue: (pluginId: string, key: string)=> any;
 	whiteBackgroundNoteRendering: boolean;
+	scrollbarSize: ScrollbarSize;
 }
 
 export default function useMarkupToHtml(deps: HookDependencies) {
-	const { themeId, customCss, plugins, whiteBackgroundNoteRendering } = deps;
+	const { themeId, customCss, plugins, whiteBackgroundNoteRendering, scrollbarSize } = deps;
 
 	const resourceBaseUrl = useMemo(() => {
 		return `joplin-content://note-viewer/${Setting.value('resourceDir')}/`;
@@ -32,8 +39,7 @@ export default function useMarkupToHtml(deps: HookDependencies) {
 		});
 	}, [plugins, customCss, resourceBaseUrl]);
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	return useCallback(async (markupLanguage: number, md: string, options: MarkupToHtmlOptions = null): Promise<any> => {
+	return useCallback(async (markupLanguage: number, md: string, options: MarkupToHtmlOptions|null = null) => {
 		options = {
 			replaceResourceInternalToExternalLinks: false,
 			resourceInfos: {},
@@ -61,8 +67,9 @@ export default function useMarkupToHtml(deps: HookDependencies) {
 			splitted: true,
 			externalAssetsOnly: true,
 			codeHighlightCacheKey: 'useMarkupToHtml',
-			settingValue: deps.settingValue,
+			settingValue: getPluginSettingValue,
 			whiteBackgroundNoteRendering,
+			scrollbarSize: scrollbarSize,
 			itemIdToUrl: (id: string, urlParameters = '') => {
 				if (!(id in resources) || !resources[id]) {
 					return null;
@@ -74,5 +81,5 @@ export default function useMarkupToHtml(deps: HookDependencies) {
 		});
 
 		return result;
-	}, [themeId, markupToHtml, whiteBackgroundNoteRendering, resourceBaseUrl, deps.settingValue]);
+	}, [themeId, markupToHtml, whiteBackgroundNoteRendering, scrollbarSize, resourceBaseUrl]);
 }

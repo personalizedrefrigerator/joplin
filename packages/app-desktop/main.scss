@@ -31,8 +31,8 @@ a {
 }
 
 ::-webkit-scrollbar {
-	width: 7px;
-	height: 7px;
+	width: var(--scrollbar-size, 7px);
+	height: var(--scrollbar-size, 7px);
 }
 
 ::-webkit-scrollbar-corner {
@@ -45,7 +45,7 @@ a {
 
 ::-webkit-scrollbar-thumb {
 	background: rgba(100, 100, 100, 0.3);
-	border-radius: 5px;
+	border-radius: calc(var(--scrollbar-size, 7px) * 0.7);
 }
 
 ::-webkit-scrollbar-track:hover {

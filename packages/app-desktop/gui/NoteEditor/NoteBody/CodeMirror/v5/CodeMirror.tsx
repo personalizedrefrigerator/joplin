@@ -2,7 +2,7 @@ import * as React from 'react';
 import { useState, useEffect, useRef, forwardRef, useCallback, useImperativeHandle, ForwardedRef, useContext } from 'react';
 
 // eslint-disable-next-line no-unused-vars
-import { EditorCommand, MarkupToHtmlOptions, NoteBodyEditorProps, NoteBodyEditorRef } from '../../../utils/types';
+import { EditorCommand, NoteBodyEditorProps, NoteBodyEditorRef } from '../../../utils/types';
 import { commandAttachFileToBody, getResourcesFromPasteEvent } from '../../../utils/resourceHandling';
 import { ScrollOptions, ScrollOptionTypes } from '../../../utils/types';
 import { CommandValue } from '../../../utils/types';
@@ -34,6 +34,7 @@ import useWebviewIpcMessage from '../utils/useWebviewIpcMessage';
 import useEditorSearchHandler from '../utils/useEditorSearchHandler';
 import { focus } from '@joplin/lib/utils/focusHandler';
 import { WindowIdContext } from '../../../../NewWindowOrIFrame';
+import { MarkupToHtmlOptions } from '../../../../hooks/useMarkupToHtml';
 
 function markupRenderOptions(override: MarkupToHtmlOptions = null): MarkupToHtmlOptions {
 	return { ...override };

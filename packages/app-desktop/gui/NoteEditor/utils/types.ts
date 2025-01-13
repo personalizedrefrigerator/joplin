@@ -9,6 +9,8 @@ import { DropHandler } from './useDropHandler';
 import { SearchMarkers } from './useSearchMarkers';
 import { ParseOptions } from '@joplin/lib/HtmlToMd';
 import { ScrollStrategy } from '@joplin/editor/CodeMirror/CodeMirrorControl';
+import { MarkupToHtmlOptions } from '../../hooks/useMarkupToHtml';
+import { ScrollbarSize } from '@joplin/lib/models/settings/builtInMetadata';
 
 export interface AllAssetsOptions {
 	contentMaxWidthTarget?: string;
@@ -51,6 +53,7 @@ export interface NoteEditorProps {
 	toolbarButtonInfos: ToolbarItem[];
 	setTagsToolbarButtonInfo: ToolbarButtonInfo;
 	contentMaxWidth: number;
+	scrollbarSize: ScrollbarSize;
 	isSafeMode: boolean;
 	useCustomPdfViewer: boolean;
 	shareCacheSetting: string;
@@ -72,22 +75,7 @@ export interface NoteBodyEditorRef {
 	execCommand(command: CommandValue): Promise<void>;
 }
 
-export interface MarkupToHtmlOptions {
-	replaceResourceInternalToExternalLinks?: boolean;
-	resourceInfos?: ResourceInfos;
-	contentMaxWidth?: number;
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	plugins?: Record<string, any>;
-	bodyOnly?: boolean;
-	mapsToLine?: boolean;
-	useCustomPdfViewer?: boolean;
-	noteId?: string;
-	vendorDir?: string;
-	platformName?: string;
-	allowedFilePrefixes?: string[];
-	whiteBackgroundNoteRendering?: boolean;
-}
-
+export { MarkupToHtmlOptions };
 export type MarkupToHtmlHandler = (markupLanguage: MarkupLanguage, markup: string, options: MarkupToHtmlOptions)=> Promise<RenderResult>;
 export type HtmlToMarkdownHandler = (markupLanguage: number, html: string, originalCss: string, parseOptions?: ParseOptions)=> Promise<string>;
 
@@ -104,6 +92,8 @@ export interface NoteBodyEditorProps {
 	// or the CodeMirror editor. This is used to correctly render HTML notes and
 	// avoid cases where black text is rendered over a dark background.
 	whiteBackgroundNoteRendering: boolean;
+
+	scrollbarSize: ScrollbarSize;
 
 	content: string;
 	contentKey: string;

@@ -1035,6 +1035,7 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: any) => {
 
 			const allAssetsOptions: NoteStyleOptions = {
 				contentMaxWidthTarget: '.mce-content-body',
+				scrollbarSize: props.scrollbarSize,
 				themeId: props.contentMarkupLanguage === MarkupLanguage.Html ? 1 : null,
 				whiteBackgroundNoteRendering: props.whiteBackgroundNoteRendering,
 			};
@@ -1051,7 +1052,7 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: any) => {
 			cancelled = true;
 		};
 		// eslint-disable-next-line @seiyab/react-hooks/exhaustive-deps -- Old code before rule was applied
-	}, [editor, props.themeId, props.markupToHtml, props.allAssets, props.content, props.resourceInfos, props.contentKey, props.contentMarkupLanguage, props.whiteBackgroundNoteRendering]);
+	}, [editor, props.themeId, props.scrollbarSize, props.markupToHtml, props.allAssets, props.content, props.resourceInfos, props.contentKey, props.contentMarkupLanguage, props.whiteBackgroundNoteRendering]);
 
 	useEffect(() => {
 		if (!editor) return () => {};
