@@ -150,8 +150,8 @@ const useRerenderHandler = (props: Props) => {
 			theme: JSON.stringify({
 				bodyPaddingTop: '0.8em',
 				bodyPaddingBottom: props.paddingBottom,
-
 				...theme,
+
 				noteViewerFontSize: props.fontSize,
 			}),
 			codeTheme: theme.codeThemeCss,

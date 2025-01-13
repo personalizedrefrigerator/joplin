@@ -9,7 +9,6 @@ const baseStyle = {
 	appearance: 'light',
 	fontSize: 16,
 	fontSizeLarge: 20,
-	noteViewerFontSize: 16,
 	margin: 15, // No text and no interactive component should be within this margin
 	itemMarginTop: 10,
 	itemMarginBottom: 10,
