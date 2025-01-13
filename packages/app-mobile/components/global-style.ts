@@ -15,6 +15,8 @@ const baseStyle = {
 	fontSizeSmaller: 14,
 	disabledOpacity: 0.2,
 	lineHeight: '1.6em',
+	// The default, may be overridden in settings:
+	noteViewerFontSize: 16,
 };
 
 export type ThemeStyle = BaseTheme & typeof baseStyle & {
