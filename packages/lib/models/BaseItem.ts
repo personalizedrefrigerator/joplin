@@ -15,6 +15,7 @@ import { LoadOptions, SaveOptions } from './utils/types';
 import { State as ShareState } from '../services/share/reducer';
 import { checkIfItemCanBeAddedToFolder, checkIfItemCanBeChanged, checkIfItemsCanBeChanged, needsShareReadOnlyChecks } from './utils/readOnly';
 import { checkObjectHasProperties } from '@joplin/utils/object';
+import isItemId from './utils/isItemId';
 
 const { sprintf } = require('sprintf-js');
 const moment = require('moment');
@@ -219,11 +220,17 @@ export default class BaseItem extends BaseModel {
 	public static pathToId(path: string): string {
 		const p = path.split('/');
 		const s = p[p.length - 1].split('.');
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-		let name: any = s[0];
-		if (!name) return name;
-		name = name.split('-');
-		return name[name.length - 1];
+		let name = s[0];
+
+		const lastDashIndex = name.lastIndexOf('-');
+		name = name.substring(lastDashIndex + 1);
+
+		const id = name;
+		if (isItemId(id)) {
+			return id;
+		}
+
+		return '';
 	}
 
 	public static loadItemByPath(path: string) {
@@ -560,6 +567,12 @@ export default class BaseItem extends BaseModel {
 		let state = 'readingProps';
 		const body: string[] = [];
 
+		const validateKeyValue = (key: string, value: string) => {
+			if (key === 'id' && !isItemId(value)) {
+				throw new Error(`Invalid item ID ${value}`);
+			}
+		};
+
 		for (let i = lines.length - 1; i >= 0; i--) {
 			let line = lines[i];
 
@@ -575,6 +588,7 @@ export default class BaseItem extends BaseModel {
 				if (p < 0) throw new Error(`Invalid property format: ${line}: ${content}`);
 				const key = line.substr(0, p).trim();
 				const value = line.substr(p + 1).trim();
+				validateKeyValue(key, value);
 				output[key] = value;
 			} else if (state === 'readingBody') {
 				body.splice(0, 0, line);

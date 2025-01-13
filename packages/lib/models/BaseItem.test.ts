@@ -149,4 +149,13 @@ three line \\n no escape`)).toBe(0);
 		expect(await syncTime(note1.id)).toBe(newTime);
 	});
 
+	it.each([
+		{ path: '/this/is/a/test.png', expected: '' },
+		{ path: '/this/is/a/8e17c52af1b84886b04fcd66005d976c.png', expected: '8e17c52af1b84886b04fcd66005d976c' },
+		{ path: '/this/is/a/test-12345678901234567890aaaaaaaaaaaa.png', expected: '12345678901234567890aaaaaaaaaaaa' },
+		{ path: '/this/is/a/test-12345678901234567890aaaaaaaaaa.png', expected: '' },
+	])('pathToId should only return valid IDs', async ({ path, expected }) => {
+		expect(BaseItem.pathToId(path)).toBe(expected);
+	});
+
 });
