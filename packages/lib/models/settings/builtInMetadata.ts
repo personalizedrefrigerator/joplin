@@ -1057,6 +1057,20 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 		// Deprecated in favour of windowContentZoomFactor
 		'style.zoom': { value: 100, type: SettingItemType.Int, public: false, storage: SettingStorage.File, isGlobal: true, appTypes: [AppType.Desktop], section: 'appearance', label: () => '', minimum: 50, maximum: 500, step: 10 },
 
+		'style.viewer.fontSize': {
+			value: 16,
+			type: SettingItemType.Int,
+			public: true,
+			storage: SettingStorage.File,
+			isGlobal: true,
+			appTypes: [AppType.Mobile],
+			section: 'appearance',
+			label: () => _('Viewer font size'),
+			minimum: 4,
+			maximum: 50,
+			step: 1,
+		},
+
 		'style.editor.fontSize': {
 			value: 15,
 			type: SettingItemType.Int,
@@ -1125,20 +1139,6 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 		},
 
 		'style.editor.contentMaxWidth': { value: 0, type: SettingItemType.Int, public: true, storage: SettingStorage.File, isGlobal: true, appTypes: [AppType.Desktop], section: 'appearance', label: () => _('Editor maximum width'), description: () => _('Set it to 0 to make it take the complete available space. Recommended width is 600.') },
-
-		'style.viewer.fontSize': {
-			value: 16,
-			type: SettingItemType.Int,
-			public: true,
-			storage: SettingStorage.File,
-			isGlobal: true,
-			appTypes: [AppType.Mobile],
-			section: 'appearance',
-			label: () => _('Viewer font size'),
-			minimum: 4,
-			maximum: 50,
-			step: 1,
-		},
 
 		'style.scrollbarSize': {
 			value: ScrollbarSize.Small,
