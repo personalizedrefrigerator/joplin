@@ -273,7 +273,7 @@ export default function(props: Props) {
 			<span id={selfHostingLabelId}>
 				Self-hosting? Joplin also supports various self-hosting options such as Nextcloud, WebDAV, AWS S3 and Joplin Server.
 			</span>
-			&nbsp;
+			{' '}
 			<a
 				href="#"
 				onClick={onSelfHostingClick}
