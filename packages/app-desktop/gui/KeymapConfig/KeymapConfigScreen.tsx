@@ -152,7 +152,7 @@ export const KeymapConfigScreen = ({ themeId }: KeymapConfigScreenProps) => {
 					className={`flat-button edit ${editing[command] ? '-editing' : ''}`}
 					style={styles.tableCellStatus}
 					aria-live={recorderError ? 'polite' : null}
-					id={`${baseId}-${command}-recorder-status`}
+					id={statusId}
 					tabIndex={statusContent ? 0 : -1}
 					onClick={handleClick}
 				>
