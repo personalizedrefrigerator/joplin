@@ -38,6 +38,7 @@ interface Props {
 	fontSize?: number;
 
 	'aria-controls'?: string;
+	'aria-describedby'?: string;
 	'aria-expanded'?: string;
 }
 
@@ -263,6 +264,7 @@ const Button = React.forwardRef((props: Props, ref: any) => {
 			aria-disabled={props.disabled}
 			aria-expanded={props['aria-expanded']}
 			aria-controls={props['aria-controls']}
+			aria-describedby={props['aria-describedby']}
 		>
 			{renderIcon()}
 			{renderTitle()}
