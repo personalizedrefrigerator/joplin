@@ -40,7 +40,7 @@ export default function ButtonBar(props: Props) {
 	}
 
 	return (
-		<StyledRoot>
+		<StyledRoot role='navigation'>
 			<Button
 				onClick={props.onCancelClick}
 				level={ButtonLevel.Secondary}
