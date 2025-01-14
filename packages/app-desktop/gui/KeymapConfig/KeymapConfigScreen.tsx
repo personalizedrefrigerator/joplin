@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useState } from 'react';
+import { useId, useState } from 'react';
 
 import KeymapService, { KeymapItem } from '@joplin/lib/services/KeymapService';
 import { ShortcutRecorder } from './ShortcutRecorder';
@@ -116,6 +116,8 @@ export const KeymapConfigScreen = ({ themeId }: KeymapConfigScreenProps) => {
 		);
 	};
 
+	const baseId = useId();
+
 	const renderKeymapRow = ({ command, accelerator }: KeymapItem) => {
 		const handleClick = () => {
 			if (!editing[command]) {
@@ -125,6 +127,7 @@ export const KeymapConfigScreen = ({ themeId }: KeymapConfigScreenProps) => {
 			}
 		};
 		const statusContent = renderStatus(command);
+		const statusId = `${baseId}-${command}-recorder-status`;
 		const cellContent =
 			<div className='keymap-shortcut-row-content'>
 				{editing[command] ?
@@ -136,6 +139,7 @@ export const KeymapConfigScreen = ({ themeId }: KeymapConfigScreenProps) => {
 						initialAccelerator={accelerator || '' /* Because accelerator is null if disabled */}
 						commandName={command}
 						themeId={themeId}
+						aria-errormessage={recorderError ? statusId : ''}
 					/> :
 					<div style={styles.tableCellContent} onClick={handleClick}>
 						{accelerator
@@ -148,6 +152,7 @@ export const KeymapConfigScreen = ({ themeId }: KeymapConfigScreenProps) => {
 					className={`flat-button edit ${editing[command] ? '-editing' : ''}`}
 					style={styles.tableCellStatus}
 					aria-live={recorderError ? 'polite' : null}
+					id={`${baseId}-${command}-recorder-status`}
 					tabIndex={statusContent ? 0 : -1}
 					onClick={handleClick}
 				>

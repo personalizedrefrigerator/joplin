@@ -15,9 +15,13 @@ export interface ShortcutRecorderProps {
 	initialAccelerator: string;
 	commandName: string;
 	themeId: number;
+
+	'aria-errormessage': string;
 }
 
-export const ShortcutRecorder = ({ onSave, onReset, onCancel, onError, initialAccelerator, commandName, themeId }: ShortcutRecorderProps) => {
+export const ShortcutRecorder = ({
+	onSave, onReset, onCancel, onError, initialAccelerator, commandName, themeId, 'aria-errormessage': ariaErrorMessageId,
+}: ShortcutRecorderProps) => {
 	const styles = styles_(themeId);
 
 	const [accelerator, setAccelerator] = useState(initialAccelerator);
@@ -69,6 +73,7 @@ export const ShortcutRecorder = ({ onSave, onReset, onCancel, onError, initialAc
 	const hintText = _('Press the shortcut and then press ENTER. Or, press BACKSPACE to clear the shortcut.');
 	const placeholderText = _('Press the shortcut');
 
+	const invalid = accelerator && !saveAllowed;
 	return (
 		<div className='shortcut-recorder' style={styles.recorderContainer}>
 			<input
@@ -79,7 +84,8 @@ export const ShortcutRecorder = ({ onSave, onReset, onCancel, onError, initialAc
 				placeholder={placeholderText}
 				title={hintText}
 				aria-description={hintText}
-				aria-invalid={accelerator && !saveAllowed}
+				aria-invalid={invalid}
+				aria-errormessage={invalid ? ariaErrorMessageId : null}
 				// With readOnly, aria-live polite seems necessary for screen readers to read
 				// the shortcut as it updates.
 				aria-live='polite'
