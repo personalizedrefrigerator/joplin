@@ -215,7 +215,7 @@ export function extraStyles(theme: Theme) {
 		...fontSizes,
 		selectedDividerColor: Color(theme.dividerColor).darken(0.2).hex(),
 		iconColor,
-		colorFaded2: Color(theme.color2).alpha(0.5).rgb(),
+		colorFaded2: Color(theme.color2).alpha(0.52).rgb(),
 		colorHover2: Color(theme.color2).alpha(0.7).rgb(),
 		colorActive2: Color(theme.color2).alpha(0.9).rgb(),
 

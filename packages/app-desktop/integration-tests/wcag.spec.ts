@@ -55,10 +55,6 @@ test.describe('wcag', () => {
 
 		await mainScreen.createNewNote('Test');
 
-		// For now, activate all notes to make it active. When inactive, it causes a contrast warning.
-		// This seems to be allowed under WCAG 2.2 SC 1.4.3 under the "Incidental" exception.
-		await mainScreen.sidebar.allNotes.click();
-
 		// Ensure that `:hover` styling is consistent between tests:
 		await mainScreen.noteEditor.noteTitleInput.hover();
 
