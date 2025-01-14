@@ -198,14 +198,14 @@ export default function(props: Props) {
 
 	const baseId = useId();
 
-	function renderSelectArea(info: SyncTargetInfo, describedByIds: string) {
+	function renderSelectArea(info: SyncTargetInfo, describedById: string) {
 		return (
 			<SelectButton
 				level={ButtonLevel.Primary}
 				title={_('Select')}
 				onClick={() => onSelectButtonClick(info.name as SyncTargetInfoName)}
 				disabled={false}
-				aria-describedby={describedByIds}
+				aria-describedby={describedById}
 			/>
 		);
 	}
@@ -218,12 +218,9 @@ export default function(props: Props) {
 		const logoImageSrc = logoImageName ? `${bridge().buildDir()}/images/${logoImageName}` : '';
 		const logo = logoImageSrc ? <SyncTargetLogo src={logoImageSrc} aria-hidden={true}/> : null;
 
-		const headerId = `${baseId}-${info.id}`;
-		const descriptionId = `${headerId}-description`;
 		const descriptionComp = (
 			<SyncTargetDescription
 				height={height}
-				id={descriptionId}
 				ref={info.name === 'joplinCloud' ? joplinCloudDescriptionRef : null}
 			>{info.description}</SyncTargetDescription>
 		);
@@ -234,12 +231,13 @@ export default function(props: Props) {
 			return <SlowSyncWarning>{`⚠️ ${_('%s is not optimised for synchronising many small files so your initial synchronisation will be slow.', info.label)}`}</SlowSyncWarning>;
 		};
 
+		const headerId = `${baseId}-${info.id}`;
 		return (
 			<SyncTargetBox id={key} key={key}>
 				<SyncTargetTitle id={headerId}>{logo}{info.label}</SyncTargetTitle>
 				{descriptionComp}
 				{featuresComp}
-				{renderSelectArea(info, `${headerId} ${descriptionId}`)}
+				{renderSelectArea(info, headerId)}
 				{renderSlowSyncWarning()}
 			</SyncTargetBox>
 		);
