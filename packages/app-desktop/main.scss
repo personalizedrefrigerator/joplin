@@ -6,6 +6,10 @@ body, textarea {
 
 :root {
 	background-color: var(--joplin-background-color);
+
+	// The scrollbar color for individual scrolling regions can be overridden
+	// by setting this CSS variable for an element.
+	--scrollbar-color: var(--joplin-color);
 }
 
 #react-root {
@@ -44,16 +48,16 @@ a {
 }
 
 ::-webkit-scrollbar-thumb {
-	background: rgba(100, 100, 100, 0.3);
+	background: color-mix(in srgb, var(--scrollbar-color) 26%, transparent);
 	border-radius: calc(var(--scrollbar-size, 7px) * 0.7);
 }
 
 ::-webkit-scrollbar-track:hover {
-	background: rgba(0, 0, 0, 0.1);
+	background: color-mix(in srgb, var(--scrollbar-color) 10%, rgba(150, 150, 150, 0.05));
 }
 
 ::-webkit-scrollbar-thumb:hover {
-	background: rgba(100, 100, 100, 0.7);
+	background: color-mix(in srgb, var(--scrollbar-color) 30%, transparent);
 }
 
 .fade_out {

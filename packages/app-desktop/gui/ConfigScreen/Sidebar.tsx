@@ -22,6 +22,7 @@ interface Props {
 export const StyledRoot = styled.div`
 	display: flex;
 	background-color: ${(props: StyleProps) => props.theme.backgroundColor2};
+	--scrollbar-color: var(--joplin-color2);
 	flex-direction: column;
 	overflow-x: hidden;
 	overflow-y: auto;

@@ -1,13 +1,20 @@
 import shim from '@joplin/lib/shim';
 import Button from '../../Button/Button';
 import { css } from 'styled-components';
+import { ThemeStyle } from '@joplin/lib/theme';
 const styled = require('styled-components').default;
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-type StyleProps = any;
+type StyleProps = {
+	theme: ThemeStyle;
+	isConflictFolder?: boolean;
+	isSpecialItem?: boolean;
+	shareId?: string;
+	selected?: boolean;
+};
 
 export const StyledRoot = styled.div`
 	background-color: ${(props: StyleProps) => props.theme.backgroundColor2};
+	--scrollbar-color: ${(props: StyleProps) => props.theme.color2};
 	width: 100%;
 	height: 100%;
 	overflow-x: hidden;
@@ -61,7 +68,12 @@ export const StyledListItemAnchor = styled.a`
 	text-decoration: none;
 	color: ${(props: StyleProps) => listItemTextColor(props)};
 	cursor: default;
-	opacity: ${(props: StyleProps) => props.selected || props.shareId ? 1 : 0.8};
+	opacity: ${(props: StyleProps) => {
+		// So that the conflicts folder and shared folders have sufficient contrast,
+		// use an opacity of 1 even when unselected.
+		const needsHigherContrast = props.isConflictFolder || props.isSpecialItem;
+		return (props.selected || props.shareId || needsHigherContrast) ? 1 : 0.8;
+	}};
 	white-space: nowrap;
 	display: flex;
 	flex: 1;
