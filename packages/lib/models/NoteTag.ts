@@ -12,7 +12,8 @@ export default class NoteTag extends BaseItem {
 
 	public static async byNoteIds(noteIds: string[]) {
 		if (!noteIds.length) return [];
-		return this.modelSelectAll(`SELECT * FROM note_tags WHERE note_id IN ('${noteIds.join('\',\'')}')`);
+		const idsSql = this.whereIdsInSql({ ids: noteIds, field: 'note_id' });
+		return this.modelSelectAll(`SELECT * FROM note_tags WHERE ${idsSql.sql}`, idsSql.params);
 	}
 
 	public static async tagIdsByNoteId(noteId: string) {

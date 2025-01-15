@@ -144,10 +144,13 @@ export default class SearchEngine {
 
 		while (noteIds.length) {
 			const currentIds = noteIds.splice(0, 100);
+			const idsInSql = BaseModel.whereIdsInSql({ ids: currentIds });
 			const notes = await Note.modelSelectAll(`
 				SELECT ${SearchEngine.relevantFields}
 				FROM notes
-				WHERE id IN ('${currentIds.join('\',\'')}') AND is_conflict = 0 AND encryption_applied = 0 AND deleted_time = 0`);
+				WHERE ${idsInSql.sql} AND is_conflict = 0 AND encryption_applied = 0 AND deleted_time = 0`,
+			idsInSql.params,
+			);
 			const queries = [];
 
 			for (let i = 0; i < notes.length; i++) {
@@ -228,9 +231,11 @@ export default class SearchEngine {
 				const queries = [];
 
 				const noteIds = changes.map(a => a.item_id);
+				const noteIdsSql = Note.whereIdsInSql({ ids: noteIds });
 				const notes = await Note.modelSelectAll(`
 					SELECT ${SearchEngine.relevantFields}
-					FROM notes WHERE id IN ('${noteIds.join('\',\'')}') AND is_conflict = 0 AND encryption_applied = 0 AND deleted_time = 0`,
+					FROM notes WHERE ${noteIdsSql.sql} AND is_conflict = 0 AND encryption_applied = 0 AND deleted_time = 0`,
+				noteIdsSql.params,
 				);
 
 				for (let i = 0; i < changes.length; i++) {

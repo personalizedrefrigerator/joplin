@@ -243,12 +243,14 @@ export default class BaseItem extends BaseModel {
 		if (!ids.length) return [];
 
 		const classes = this.syncItemClassNames();
+		const idsSql = this.whereIdsInSql({ ids });
+
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 		let output: any[] = [];
 		for (let i = 0; i < classes.length; i++) {
 			const ItemClass = this.getClass(classes[i]);
-			const sql = `SELECT * FROM ${ItemClass.tableName()} WHERE id IN ('${ids.join('\',\'')}')`;
-			const models = await ItemClass.modelSelectAll(sql);
+			const sql = `SELECT * FROM ${ItemClass.tableName()} WHERE ${idsSql.sql}`;
+			const models = await ItemClass.modelSelectAll(sql, idsSql.params);
 			output = output.concat(models);
 		}
 		return output;
@@ -261,8 +263,9 @@ export default class BaseItem extends BaseModel {
 		const fields = options && options.fields ? options.fields : [];
 		const ItemClass = this.getClassByItemType(itemType);
 		const fieldsSql = fields.length ? this.db().escapeFields(fields) : '*';
-		const sql = `SELECT ${fieldsSql} FROM ${ItemClass.tableName()} WHERE id IN ('${ids.join('\',\'')}')`;
-		return ItemClass.modelSelectAll(sql);
+		const idsSql = this.whereIdsInSql({ ids });
+		const sql = `SELECT ${fieldsSql} FROM ${ItemClass.tableName()} WHERE ${idsSql.sql}`;
+		return ItemClass.modelSelectAll(sql, idsSql.params);
 	}
 
 	public static async loadItemByTypeAndId(itemType: ModelType, id: string, options: LoadOptions = null) {
@@ -300,7 +303,8 @@ export default class BaseItem extends BaseModel {
 		// since no other client have (or should have) them.
 		let conflictNoteIds: string[] = [];
 		if (this.modelType() === BaseModel.TYPE_NOTE) {
-			const conflictNotes = await this.db().selectAll(`SELECT id FROM notes WHERE id IN ('${ids.join('\',\'')}') AND is_conflict = 1`);
+			const idsSql = this.whereIdsInSql({ ids });
+			const conflictNotes = await this.db().selectAll(`SELECT id FROM notes WHERE ${idsSql.sql} AND is_conflict = 1`, idsSql.params);
 			conflictNoteIds = conflictNotes.map((n: NoteEntity) => {
 				return n.id;
 			});
@@ -655,13 +659,18 @@ export default class BaseItem extends BaseModel {
 			const ItemClass = this.getClass(className);
 
 			let whereSql = ['encryption_applied = 1'];
+			let params: string[] = [];
 
 			if (className === 'Resource') {
 				const blobDownloadedButEncryptedSql = 'encryption_blob_encrypted = 1 AND id IN (SELECT resource_id FROM resource_local_states WHERE fetch_status = 2))';
 				whereSql = [`(encryption_applied = 1 OR (${blobDownloadedButEncryptedSql})`];
 			}
 
-			if (exclusions.length) whereSql.push(`id NOT IN ('${exclusions.join('\',\'')}')`);
+			if (exclusions.length) {
+				const idSql = this.whereIdsInSql({ ids: exclusions, negate: true });
+				whereSql.push(idSql.sql);
+				params = params.concat(idSql.params);
+			}
 
 			const sql = sprintf(
 				`
@@ -675,7 +684,7 @@ export default class BaseItem extends BaseModel {
 				limit,
 			);
 
-			const items = await ItemClass.modelSelectAll(sql);
+			const items = await ItemClass.modelSelectAll(sql, params);
 
 			if (i >= classNames.length - 1) {
 				return { hasMore: items.length >= limit, items: items };
@@ -943,7 +952,8 @@ export default class BaseItem extends BaseModel {
 			});
 			if (!ids.length) continue;
 
-			await this.db().exec(`UPDATE sync_items SET force_sync = 1 WHERE item_id IN ('${ids.join('\',\'')}')`);
+			const idsSql = this.whereIdsInSql({ ids, field: 'item_id' });
+			await this.db().exec(`UPDATE sync_items SET force_sync = 1 WHERE ${idsSql.sql}`, idsSql.params);
 		}
 	}
 

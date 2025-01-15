@@ -29,7 +29,7 @@ export interface PreviewsOrder {
 	dir: string;
 }
 
-interface PreviewsOptions {
+export interface PreviewsOptions {
 	order?: PreviewsOrder[];
 	conditions?: string[];
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
@@ -893,8 +893,7 @@ export default class Note extends BaseItem {
 					'updated_time = ?',
 				];
 
-				// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-				const params: any[] = [
+				let params: (string|number)[] = [
 					now,
 					now,
 				];
@@ -904,10 +903,12 @@ export default class Note extends BaseItem {
 					params.push(options.toTrashParentId);
 				}
 
+				const idsSql = this.whereIdsInSql({ ids: processIds });
+				params = params.concat(idsSql.params);
 				const sql = `
 					UPDATE notes
 					SET	${updateSql.join(', ')}						
-					WHERE id IN ('${processIds.join('\',\'')}')
+					WHERE ${idsSql.sql}
 				`;
 
 				await this.db().exec({ sql, params });

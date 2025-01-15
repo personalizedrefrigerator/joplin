@@ -86,13 +86,14 @@ export default class NoteResource extends BaseModel {
 		fields.push('resource_id');
 		fields.push('note_id');
 
+		const idsSql = this.whereIdsInSql({ ids: resourceIds, field: 'resource_id' });
 		const rows = await this.modelSelectAll(`
 			SELECT ${this.selectFields({ ...options, fields })}
 			FROM note_resources
 			LEFT JOIN notes
 			ON notes.id = note_resources.note_id
-			WHERE resource_id IN ('${resourceIds.join('\', \'')}') AND is_associated = 1
-		`);
+			WHERE ${idsSql.sql} AND is_associated = 1
+		`, idsSql.params);
 
 		const output: Record<string, NoteEntity[]> = {};
 		for (const row of rows) {

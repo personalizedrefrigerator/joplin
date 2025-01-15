@@ -432,11 +432,14 @@ export default class Folder extends BaseItem {
 		// await this.unshareItems(ModelType.Folder, sharedFolderIds);
 
 		const sql = ['SELECT id, parent_id FROM folders WHERE share_id != \'\''];
+		let params: string[] = [];
 		if (sharedFolderIds.length) {
-			sql.push(` AND id NOT IN ('${sharedFolderIds.join('\',\'')}')`);
+			const placeholders = sharedFolderIds.map(() => '?').join(', ');
+			sql.push(` AND id NOT IN (${placeholders})`);
+			params = params.concat(sharedFolderIds);
 		}
 
-		const foldersToUnshare: FolderEntity[] = await this.db().selectAll(sql.join(' '));
+		const foldersToUnshare: FolderEntity[] = await this.db().selectAll(sql.join(' '), params);
 
 		report.unshareUpdateCount += foldersToUnshare.length;
 
@@ -540,13 +543,14 @@ export default class Folder extends BaseItem {
 			// one note. If it is not, we create duplicate resources so that
 			// each note has its own separate resource.
 
+			const idsSql = this.whereIdsInSql({ ids: resourceIds, field: 'resource_id' });
 			const noteResourceAssociations = await this.db().selectAll(`
 				SELECT resource_id, note_id, notes.share_id
 				FROM note_resources
 				LEFT JOIN notes ON notes.id = note_resources.note_id
-				WHERE resource_id IN ('${resourceIds.join('\',\'')}')
+				WHERE ${idsSql.sql}
 				AND is_associated = 1
-			`) as NoteResourceRow[];
+			`, idsSql.params) as NoteResourceRow[];
 
 			const resourceIdToNotes: Record<string, NoteResourceRow[]> = {};
 
@@ -648,15 +652,16 @@ export default class Folder extends BaseItem {
 			const fields = ['id'];
 			if (hasParentId) fields.push('parent_id');
 
+			const idsSql = this.whereIdsInSql({ ids: activeShareIds, negate: true, field: 'share_id' });
 			const query = activeShareIds.length ? `
 				SELECT ${this.db().escapeFields(fields)} FROM ${tableName}
-				WHERE share_id != '' AND share_id NOT IN ('${activeShareIds.join('\',\'')}')
+				WHERE share_id != '' AND ${idsSql.sql}
 			` : `
 				SELECT ${this.db().escapeFields(fields)} FROM ${tableName}
 				WHERE share_id != ''
 			`;
 
-			const rows = await this.db().selectAll(query);
+			const rows = await this.db().selectAll(query, idsSql.params);
 
 			report[tableName] = rows.length;
 

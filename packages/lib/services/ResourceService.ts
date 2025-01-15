@@ -54,7 +54,8 @@ export default class ResourceService extends BaseService {
 
 				// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 				const noteIds = changes.map((a: any) => a.item_id);
-				const notes = await Note.modelSelectAll(`SELECT id, title, body, encryption_applied FROM notes WHERE id IN ('${noteIds.join('\',\'')}')`);
+				const idsSql = Note.whereIdsInSql({ ids: noteIds });
+				const notes = await Note.modelSelectAll(`SELECT id, title, body, encryption_applied FROM notes WHERE ${idsSql.sql}`, idsSql.params);
 
 				const noteById = (noteId: string) => {
 					for (let i = 0; i < notes.length; i++) {

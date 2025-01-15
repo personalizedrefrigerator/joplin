@@ -55,6 +55,12 @@ export interface DeleteOptions {
 	toTrashParentId?: string;
 }
 
+interface IdsWhereClauseOptions {
+	ids: string[];
+	field?: string;
+	negate?: boolean;
+}
+
 class BaseModel {
 
 	// TODO: This ancient part of Joplin about model types is a bit of a
@@ -345,15 +351,24 @@ class BaseModel {
 		return this.modelSelectAll(q.sql, q.params);
 	}
 
+	public static whereIdsInSql({ ids, field = 'id', negate = false }: IdsWhereClauseOptions) {
+		const idsPlaceholders = ids.map(() => '?').join(',');
+		return {
+			sql: `${this.db().escapeField(field)} ${negate ? 'NOT' : ''} IN (${idsPlaceholders})`,
+			params: ids,
+		};
+	}
+
 	public static async byIds(ids: string[], options: LoadOptions = null) {
 		if (!ids.length) return [];
 		if (!options) options = {};
 		if (!options.fields) options.fields = '*';
 
 		let sql = `SELECT ${this.db().escapeFields(options.fields)} FROM \`${this.tableName()}\``;
-		sql += ` WHERE id IN ('${ids.join('\',\'')}')`;
-		const q = this.applySqlOptions(options, sql);
-		return this.modelSelectAll(q.sql);
+		const idsSql = this.whereIdsInSql({ ids });
+		sql += ` WHERE ${idsSql.sql}`;
+		const q = this.applySqlOptions(options, sql, idsSql.params);
+		return this.modelSelectAll(q);
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
@@ -750,8 +765,9 @@ class BaseModel {
 
 		options = this.modOptions(options);
 		const idFieldName = options.idFieldName ? options.idFieldName : 'id';
-		const sql = `DELETE FROM ${this.tableName()} WHERE ${idFieldName} IN ('${ids.join('\',\'')}')`;
-		await this.db().exec(sql);
+		const idsCondition = this.whereIdsInSql({ ids, field: idFieldName });
+		const sql = `DELETE FROM ${this.tableName()} WHERE ${idsCondition.sql}`;
+		await this.db().exec(sql, idsCondition.params);
 	}
 
 	public static db() {

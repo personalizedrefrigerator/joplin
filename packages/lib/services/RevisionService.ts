@@ -138,7 +138,11 @@ export default class RevisionService extends BaseService {
 				if (!changes.length) break;
 
 				const noteIds = changes.map((a) => a.item_id);
-				const notes = await Note.modelSelectAll(`SELECT * FROM notes WHERE is_conflict = 0 AND encryption_applied = 0 AND id IN ('${noteIds.join('\',\'')}')`);
+				const idPlaceholders = noteIds.map(() => '?').join(',');
+				const notes = await Note.modelSelectAll(
+					`SELECT * FROM notes WHERE is_conflict = 0 AND encryption_applied = 0 AND id IN (${idPlaceholders})`,
+					noteIds,
+				);
 
 				for (let i = 0; i < changes.length; i++) {
 					const change = changes[i];

@@ -76,7 +76,8 @@ export default class Resource extends BaseItem {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	public static fetchStatuses(resourceIds: string[]): Promise<any[]> {
 		if (!resourceIds.length) return Promise.resolve([]);
-		return this.db().selectAll(`SELECT resource_id, fetch_status FROM resource_local_states WHERE resource_id IN ('${resourceIds.join('\',\'')}')`);
+		const idsSql = this.whereIdsInSql({ ids: resourceIds, field: 'resource_id' });
+		return this.db().selectAll(`SELECT resource_id, fetch_status FROM resource_local_states WHERE ${idsSql.sql}')`, idsSql.params);
 	}
 
 	public static sharedResourceIds(): Promise<string[]> {
@@ -367,8 +368,11 @@ export default class Resource extends BaseItem {
 
 	public static async downloadedButEncryptedBlobCount(excludedIds: string[] = null) {
 		let excludedSql = '';
+		let whereParams: string[] = [];
 		if (excludedIds && excludedIds.length) {
-			excludedSql = `AND resource_id NOT IN ('${excludedIds.join('\',\'')}')`;
+			const idsSql = this.whereIdsInSql({ ids: excludedIds, field: 'resource_id', negate: true });
+			excludedSql = `AND ${idsSql.sql}`;
+			whereParams = whereParams.concat(idsSql.params);
 		}
 
 		const r = await this.db().selectOne(`
@@ -377,7 +381,7 @@ export default class Resource extends BaseItem {
 			WHERE fetch_status = ?
 			AND resource_id IN (SELECT id FROM resources WHERE encryption_blob_encrypted = 1)
 			${excludedSql}
-		`, [Resource.FETCH_STATUS_DONE]);
+		`, [Resource.FETCH_STATUS_DONE, ...whereParams]);
 
 		return r ? r.total : 0;
 	}
@@ -536,14 +540,21 @@ export default class Resource extends BaseItem {
 
 	public static async needOcr(supportedMimeTypes: string[], skippedResourceIds: string[], limit: number, options: LoadOptions): Promise<ResourceEntity[]> {
 		const query = this.baseNeedOcrQuery(this.selectFields(options), supportedMimeTypes);
-		const skippedResourcesSql = skippedResourceIds.length ? `AND resources.id NOT IN  ('${skippedResourceIds.join('\',\'')}')` : '';
+
+		let skippedResourcesSql = '';
+		let params = query.params;
+		if (skippedResourceIds.length) {
+			const idsSql = this.whereIdsInSql({ ids: skippedResourceIds, field: 'resources.id', negate: true });
+			skippedResourcesSql = `AND ${idsSql.sql}`;
+			params = params.concat(idsSql.params);
+		}
 
 		return await this.db().selectAll(`
 			${query.sql}
 			${skippedResourcesSql}			
 			ORDER BY updated_time DESC
 			LIMIT ${limit}
-		`, query.params);
+		`, params);
 	}
 
 	private static async resetOcrStatus(resourceId: string) {
@@ -576,7 +587,8 @@ export default class Resource extends BaseItem {
 	public static async resourceOcrTextsByIds(ids: string[]): Promise<ResourceEntity[]> {
 		if (!ids.length) return [];
 		ids = unique(ids);
-		return this.modelSelectAll(`SELECT id, ocr_text FROM resources WHERE id IN ('${ids.join('\',\'')}')`);
+		const idsSql = this.whereIdsInSql({ ids });
+		return this.modelSelectAll(`SELECT id, ocr_text FROM resources WHERE ${idsSql.sql}`, idsSql.params);
 	}
 
 	public static async allForNormalization(updatedTime: number, id: string, limit = 100, options: LoadOptions = null) {
