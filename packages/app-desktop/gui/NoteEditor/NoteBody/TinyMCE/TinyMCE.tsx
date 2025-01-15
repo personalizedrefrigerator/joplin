@@ -685,7 +685,6 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: any) => {
 			const editors = await containerWindow.tinymce.init({
 				selector: `#${editorContainer.id}`,
 
-				license_key: 'gpl',
 				// Ensures that the "Premium plugins" toolbar option is disabled. See
 				// https://www.tiny.cloud/docs/tinymce/latest/editor-premium-upgrade-promotion/
 				promotion: false,
