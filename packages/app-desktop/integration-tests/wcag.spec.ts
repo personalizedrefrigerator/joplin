@@ -63,6 +63,12 @@ test.describe('wcag', () => {
 		await mainScreen.noteEditor.noteTitleInput.hover();
 
 		await expectNoViolations(mainWindow);
+
+		// Should not find issues with the Rich Text Editor
+		await mainScreen.noteEditor.toggleEditorsButton.click();
+		await mainScreen.noteEditor.richTextEditor.click();
+
+		await expectNoViolations(mainWindow);
 	});
 });
 
