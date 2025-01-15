@@ -7,8 +7,6 @@ import { Page } from '@playwright/test';
 const createScanner = (page: Page) => {
 	return new AxeBuilder({ page })
 		.disableRules(['page-has-heading-one'])
-		// Ignores a TinyMCE accessibility issue (can be removed after upgrading to TinyMCE v7)
-		.exclude(['.tox-toolbar__group[title=""][role="toolbar"]:nth-child(1) > .tox-tbtn[aria-haspopup="true"][type="button"]'])
 		// Needed because we're using Electron. See https://github.com/dequelabs/axe-core-npm/issues/1141
 		.setLegacyMode(true);
 };

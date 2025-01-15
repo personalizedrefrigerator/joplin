@@ -67,6 +67,7 @@ export default function(editor: any) {
 
 	editor.ui.registry.addGroupToolbarButton('formattingExtras', {
 		icon: 'image-options',
+		tooltip: _('Formatting'),
 		items: items.join(' '),
 	});
 }
