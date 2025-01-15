@@ -3,11 +3,6 @@ import time from './time';
 import shim from './shim';
 import { SqlParams, SqlQuery, StringOrSqlQuery } from './services/database/types';
 
-
-const removeSqlUnsafeFieldCharacters = (text: string) => {
-	return text.replace(/[^a-zA-Z0-9_]/g, '');
-};
-
 const Mutex = require('async-mutex').Mutex;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
@@ -73,8 +68,8 @@ export default class Database {
 	public escapeField(field: string) {
 		if (field === '*') return '*';
 		const p = field.split('.');
-		if (p.length === 1) return `\`${removeSqlUnsafeFieldCharacters(field)}\``;
-		if (p.length === 2) return `${removeSqlUnsafeFieldCharacters(p[0])}.\`${removeSqlUnsafeFieldCharacters(p[1])}\``;
+		if (p.length === 1) return `\`${field}\``;
+		if (p.length === 2) return `${p[0]}.\`${p[1]}\``;
 
 		throw new Error(`Invalid field format: ${field}`);
 	}
