@@ -77,7 +77,7 @@ export default class Resource extends BaseItem {
 	public static fetchStatuses(resourceIds: string[]): Promise<any[]> {
 		if (!resourceIds.length) return Promise.resolve([]);
 		const idsSql = this.whereIdsInSql({ ids: resourceIds, field: 'resource_id' });
-		return this.db().selectAll(`SELECT resource_id, fetch_status FROM resource_local_states WHERE ${idsSql.sql}')`, idsSql.params);
+		return this.db().selectAll(`SELECT resource_id, fetch_status FROM resource_local_states WHERE ${idsSql.sql}`, idsSql.params);
 	}
 
 	public static sharedResourceIds(): Promise<string[]> {
