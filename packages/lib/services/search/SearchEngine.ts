@@ -233,8 +233,9 @@ export default class SearchEngine {
 				const noteIds = changes.map(a => a.item_id);
 				const noteIdsSql = Note.whereIdsInSql({ ids: noteIds });
 				const notes = await Note.modelSelectAll(`
-					SELECT ${SearchEngine.relevantFields}
-					FROM notes WHERE ${noteIdsSql.sql} AND is_conflict = 0 AND encryption_applied = 0 AND deleted_time = 0`,
+						SELECT ${SearchEngine.relevantFields}
+						FROM notes WHERE ${noteIdsSql.sql} AND is_conflict = 0 AND encryption_applied = 0 AND deleted_time = 0
+					`,
 				noteIdsSql.params,
 				);
 
