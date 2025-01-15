@@ -352,10 +352,9 @@ class BaseModel {
 	}
 
 	public static whereIdsInSql({ ids, field = 'id', negate = false }: IdsWhereClauseOptions) {
-		const idsPlaceholders = ids.map(() => '?').join(',');
 		return {
-			sql: `${this.db().escapeField(field)} ${negate ? 'NOT' : ''} IN (${idsPlaceholders})`,
-			params: ids,
+			sql: `${this.db().escapeField(field)} ${negate ? 'NOT' : ''} IN (${this.db().escapeValues(ids).join(',')})`,
+			params: [] as string[],
 		};
 	}
 
