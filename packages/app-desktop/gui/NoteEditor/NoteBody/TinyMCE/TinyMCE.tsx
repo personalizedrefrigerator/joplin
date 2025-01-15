@@ -569,6 +569,12 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: any) => {
 			.tox .tox-split-button:hover {
 				box-shadow: none;
 			}
+			
+			/* Decrease the spacing between groups */
+			.tox .tox-toolbar__group {
+				padding-left: 7px;
+				padding-right: 7px;
+			}
 
 			.tox-tinymce,
 			.tox .tox-toolbar__group,
