@@ -8340,7 +8340,7 @@ __metadata:
     styled-system: 5.1.5
     taboverride: 4.0.3
     tesseract.js: 5.1.0
-    tinymce: 6.8.5
+    tinymce: 7.6.0
     ts-jest: 29.1.5
     ts-node: 10.9.2
     typescript: 5.4.5
@@ -45536,10 +45536,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tinymce@npm:6.8.5":
-  version: 6.8.5
-  resolution: "tinymce@npm:6.8.5"
-  checksum: 7f7ad8dd2b117b8a671f97e41fc094935cfe4d4b525c90e97c6fdb480b19514e334f4360d89f34c04915a928e0cf5264fc1a60559554770452d6fce17b884940
+"tinymce@npm:7.6.0":
+  version: 7.6.0
+  resolution: "tinymce@npm:7.6.0"
+  checksum: 4d6c8ee17cac6ff7e674ce116fe88615f8ca41a4e479dc9c536d1073d8ec0847265e075463858ba47808c38795e8bb909ebcb3fc48e47f7f321bccbbee854ee7
   languageName: node
   linkType: hard
 

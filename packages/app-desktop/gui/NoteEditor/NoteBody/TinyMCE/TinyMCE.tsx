@@ -501,6 +501,7 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: any) => {
 			.tox .tox-toolbar-label {
 				color: ${theme.color3} !important;
 				fill: ${theme.color3} !important;
+				background: transparent;
 			}
 
 			.tox .tox-statusbar a,
@@ -683,10 +684,12 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: any) => {
 			const containerWindow = editorContainerDom.defaultView as any;
 			const editors = await containerWindow.tinymce.init({
 				selector: `#${editorContainer.id}`,
+				license_key: 'gpl',
 				width: '100%',
 				body_class: 'jop-tinymce',
 				height: '100%',
 				resize: false,
+				highlight_on_focus: false, // TODO: Consider removing this.
 				icons: 'Joplin',
 				icons_url: 'gui/NoteEditor/NoteBody/TinyMCE/icons.js',
 				plugins: 'link joplinLists searchreplace codesample table',
