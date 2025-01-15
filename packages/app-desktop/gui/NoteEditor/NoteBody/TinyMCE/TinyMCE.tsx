@@ -476,7 +476,7 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: any) => {
 			*/
 			
 			.tox .tox-dialog textarea {
-				font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
+				font-family: Menlo, Monaco, Consolas, "Courier New", monospace !important;
 			}
 
 			.tox .tox-dialog-wrap__backdrop {
@@ -689,7 +689,7 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: any) => {
 				body_class: 'jop-tinymce',
 				height: '100%',
 				resize: false,
-				highlight_on_focus: false, // TODO: Consider removing this.
+				highlight_on_focus: false,
 				icons: 'Joplin',
 				icons_url: 'gui/NoteEditor/NoteBody/TinyMCE/icons.js',
 				plugins: 'link joplinLists searchreplace codesample table',
