@@ -159,3 +159,4 @@ Bluesky
 Tebi
 unwatcher
 pedr
+haspopup
