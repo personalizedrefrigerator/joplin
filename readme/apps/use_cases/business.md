@@ -1,4 +1,4 @@
-# Joplin for your businesses
+# Joplin for your business
 
 Whether you're running a company, a team or a growing start-up, efficiency and organisation are key to success. Discover how Joplin can transform the way you run your business with these five practical uses:
 

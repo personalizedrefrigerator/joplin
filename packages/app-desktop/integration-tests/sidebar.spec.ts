@@ -101,4 +101,25 @@ test.describe('sidebar', () => {
 		await expect(mainWindow.getByText('Another note in Folder A')).toBeAttached();
 		await expect(mainWindow.getByText('A note in Folder B')).toBeAttached();
 	});
+
+	test('double-clicking should collapse/expand folders in the sidebar', async ({ mainWindow }) => {
+		const mainScreen = await new MainScreen(mainWindow).setup();
+		const sidebar = mainScreen.sidebar;
+
+		const testFolderA = await sidebar.createNewFolder('Folder A');
+		const testFolderB = await sidebar.createNewFolder('Folder B');
+
+		// Convert folder B to a subfolder
+		await testFolderB.dragTo(testFolderA);
+
+		await expect(testFolderB).toBeVisible();
+
+		// Collapse
+		await testFolderA.dblclick();
+		await expect(testFolderB).not.toBeVisible();
+
+		// Expand
+		await testFolderA.dblclick();
+		await expect(testFolderB).toBeVisible();
+	});
 });

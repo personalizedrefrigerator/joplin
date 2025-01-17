@@ -61,7 +61,7 @@ export default class InteropService_Importer_OneNote extends InteropService_Impo
 		const outputDirectory2 = join(tempOutputDirectory, baseFolder);
 
 		const notebookFiles = zip.getEntries().filter(e => e.name !== '.onetoc2' && e.name !== 'OneNote_RecycleBin.onetoc2');
-		const { oneNoteConverter } = shim.requireDynamic('../../../onenote-converter/pkg/onenote_converter');
+		const { oneNoteConverter } = shim.requireDynamic('@joplin/onenote-converter');
 
 		logger.info('Extracting OneNote to HTML');
 		for (const notebookFile of notebookFiles) {

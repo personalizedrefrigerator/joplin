@@ -13,6 +13,7 @@ import { ProcessResultsRow } from './services/search/SearchEngine';
 import { getDisplayParentId } from './services/trash';
 import Logger from '@joplin/utils/Logger';
 import { SettingsRecord } from './models/settings/types';
+import { Toast, ToastType } from './services/plugins/api/types';
 const fastDeepEqual = require('fast-deep-equal');
 const { ALL_NOTES_FILTER_ID } = require('./reserved-ids');
 const { createSelectorCreator, defaultMemoize } = require('reselect');
@@ -168,6 +169,9 @@ export interface State extends WindowState {
 	lastDeletionNotificationTime: number;
 	mustUpgradeAppMessage: string;
 	mustAuthenticate: boolean;
+	toast: Toast | null;
+
+	allowSelectionInOtherFolders: boolean;
 
 	// Extra reducer keys go here:
 	pluginService: PluginServiceState;
@@ -236,9 +240,11 @@ export const defaultState: State = {
 	lastDeletionNotificationTime: 0,
 	mustUpgradeAppMessage: '',
 	mustAuthenticate: false,
+	allowSelectionInOtherFolders: false,
 
 	pluginService: pluginServiceDefaultState,
 	shareService: shareServiceDefaultState,
+	toast: null,
 };
 
 for (const additionalReducer of additionalReducers) {
@@ -1080,7 +1086,9 @@ const reducer = produce((draft: Draft<State> = defaultState, action: any) => {
 			draft.notes = action.notes;
 			draft.notesSource = action.notesSource;
 			draft.noteListLastSortTime = Date.now(); // Notes are already sorted when they are set this way.
-			updateSelectedNotesFromExistingNotes(draft);
+			if (!draft.allowSelectionInOtherFolders) {
+				updateSelectedNotesFromExistingNotes(draft);
+			}
 			break;
 
 			// Insert the note into the note list if it's new, or
@@ -1148,7 +1156,8 @@ const reducer = produce((draft: Draft<State> = defaultState, action: any) => {
 					// For example, if the user drags the current note to a different folder,
 					// a new note should be selected.
 					// In some cases, however, the selection needs to be preserved (e.g. the mobile app).
-					if (noteFolderHasChanged && !action.preserveSelection) {
+					const preserveSelection = action.preserveSelection ?? draft.allowSelectionInOtherFolders;
+					if (noteFolderHasChanged && !preserveSelection) {
 						let newIndex = movedNotePreviousIndex;
 						if (newIndex >= newNotes.length) newIndex = newNotes.length - 1;
 						if (!newNotes.length) newIndex = -1;
@@ -1494,6 +1503,15 @@ const reducer = produce((draft: Draft<State> = defaultState, action: any) => {
 				noteListRendererIds.push(action.value);
 				draft.noteListRendererIds = noteListRendererIds;
 			}
+			break;
+
+		case 'TOAST_SHOW':
+			draft.toast = {
+				duration: 6000,
+				type: ToastType.Info,
+				...action.value,
+				timestamp: Date.now(),
+			};
 			break;
 
 		}

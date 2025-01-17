@@ -6,7 +6,7 @@ import attachedResources from '@joplin/lib/utils/attachedResources';
 import useScroll from './utils/useScroll';
 import styles_ from './styles';
 import CommandService from '@joplin/lib/services/CommandService';
-import { ToolbarButtonInfo } from '@joplin/lib/services/commands/ToolbarButtonUtils';
+import { ToolbarItem } from '@joplin/lib/services/commands/ToolbarButtonUtils';
 import ToggleEditorsButton, { Value as ToggleEditorsButtonValue } from '../../../ToggleEditorsButton/ToggleEditorsButton';
 import ToolbarButton from '../../../../gui/ToolbarButton/ToolbarButton';
 import usePluginServiceRegistration from '../../utils/usePluginServiceRegistration';
@@ -1035,6 +1035,7 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: any) => {
 
 			const allAssetsOptions: NoteStyleOptions = {
 				contentMaxWidthTarget: '.mce-content-body',
+				scrollbarSize: props.scrollbarSize,
 				themeId: props.contentMarkupLanguage === MarkupLanguage.Html ? 1 : null,
 				whiteBackgroundNoteRendering: props.whiteBackgroundNoteRendering,
 			};
@@ -1051,7 +1052,7 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: any) => {
 			cancelled = true;
 		};
 		// eslint-disable-next-line @seiyab/react-hooks/exhaustive-deps -- Old code before rule was applied
-	}, [editor, props.themeId, props.markupToHtml, props.allAssets, props.content, props.resourceInfos, props.contentKey, props.contentMarkupLanguage, props.whiteBackgroundNoteRendering]);
+	}, [editor, props.themeId, props.scrollbarSize, props.markupToHtml, props.allAssets, props.content, props.resourceInfos, props.contentKey, props.contentMarkupLanguage, props.whiteBackgroundNoteRendering]);
 
 	useEffect(() => {
 		if (!editor) return () => {};
@@ -1383,7 +1384,9 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: any) => {
 		};
 	}, []);
 
-	function renderExtraToolbarButton(key: string, info: ToolbarButtonInfo) {
+	function renderExtraToolbarButton(key: string, info: ToolbarItem) {
+		if (info.type === 'separator') return null;
+
 		return <ToolbarButton
 			key={key}
 			themeId={props.themeId}
@@ -1412,7 +1415,7 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: any) => {
 		for (const info of props.noteToolbarButtonInfos) {
 			if (leftButtonCommandNames.includes(info.name)) continue;
 
-			if (info.name === 'toggleEditors') {
+			if (info.type === 'button' && info.name === 'toggleEditors') {
 				buttons.push(<ToggleEditorsButton
 					key={info.name}
 					value={ToggleEditorsButtonValue.RichText}

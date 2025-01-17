@@ -260,6 +260,10 @@ class HtmlUtils {
 
 		const parser = new htmlparser2.Parser({
 
+			oncomment: (encodedData: string) => {
+				output.push(`<!--${encodedData}-->`);
+			},
+
 			onopentag: (name: string, attrs: Record<string, string>) => {
 				// Note: "name" and attribute names are always lowercase even
 				// when the input is not. So there is no need to call
@@ -302,6 +306,12 @@ class HtmlUtils {
 				// filter on the tag name and process all HREF attributes.
 				if ('href' in attrs && !this.isAcceptedUrl(attrs['href'], options.allowedFilePrefixes)) {
 					attrs['href'] = '#';
+				}
+
+				// Allowing the 'name' attribute allows an attacker to overwrite
+				// DOM methods (e.g. getElementById) with elements.
+				if ('name' in attrs) {
+					delete attrs['name'];
 				}
 
 				// We need to clear any such attribute, otherwise it will

@@ -372,6 +372,19 @@ export interface DialogResult {
 	formData?: any;
 }
 
+export enum ToastType {
+	Info = 'info',
+	Success = 'success',
+	Error = 'error',
+}
+
+export interface Toast {
+	message: string;
+	type?: ToastType;
+	duration?: number;
+	timestamp?: number;
+}
+
 export interface Size {
 	width?: number;
 	height?: number;

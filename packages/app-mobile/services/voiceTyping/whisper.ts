@@ -75,7 +75,7 @@ class Whisper implements VoiceTypingSession {
 
 	public async stop() {
 		if (this.sessionId === null) {
-			logger.warn('Session already closed.');
+			logger.debug('Session already closed.');
 			return;
 		}
 
@@ -105,6 +105,10 @@ const whisper: VoiceTypingProvider = {
 		}
 
 		return urlTemplate.replace(/\{task\}/g, 'whisper_tiny.onnx');
+	},
+	deleteCachedModels: async (locale) => {
+		await shim.fsDriver().remove(modelLocalFilepath());
+		await shim.fsDriver().remove(whisper.getUuidPath(locale));
 	},
 	getUuidPath: () => {
 		return join(dirname(modelLocalFilepath()), 'uuid');

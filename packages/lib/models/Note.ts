@@ -1030,6 +1030,7 @@ export default class Note extends BaseItem {
 					FROM notes
 					WHERE
 						is_conflict = 0
+						AND deleted_time = 0
 						${showCompletedTodos ? '' : 'AND todo_completed = 0'}
 					AND parent_id = ?
 				`;

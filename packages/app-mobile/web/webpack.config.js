@@ -15,6 +15,8 @@ const babelLoaderConfiguration = {
 		// Compiling these libraries with babel cause build errors.
 		/.*node_modules[/\\]@babel.*/,
 		/.*node_modules[/\\]@sqlite\.org[/\\].*/,
+		/.*node_modules[/\\]markdown-it-anchor[/\\].*/,
+		/.*node_modules[/\\]markdown-it-toc-done-right[/\\].*/,
 	],
 
 	use: {

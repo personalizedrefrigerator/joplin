@@ -29,6 +29,7 @@ import getNoteElementIdFromJoplinId from '../NoteListItem/utils/getNoteElementId
 import useFocusVisible from './utils/useFocusVisible';
 import { stateUtils } from '@joplin/lib/reducer';
 import { connect } from 'react-redux';
+import useOnNoteDoubleClick from './utils/useOnNoteDoubleClick';
 
 const commands = {
 	focusElementNoteList,
@@ -102,6 +103,8 @@ const NoteList = (props: Props) => {
 	}, [props.size]);
 
 	const onNoteClick = useOnNoteClick(props.dispatch, focusNote);
+
+	const onNoteDoubleClick = useOnNoteDoubleClick();
 
 	const onKeyDown = useOnKeyDown(
 		activeNoteId,
@@ -226,6 +229,7 @@ const NoteList = (props: Props) => {
 					itemSize={itemSize}
 					onChange={listRenderer.onChange}
 					onClick={onNoteClick}
+					onDoubleClick={onNoteDoubleClick}
 					onContextMenu={onItemContextMenu}
 					onDragStart={onDragStart}
 					onDragOver={onDragOver}

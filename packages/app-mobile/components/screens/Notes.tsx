@@ -35,6 +35,7 @@ interface Props {
 	showCompletedTodos: boolean;
 	noteSelectionEnabled: boolean;
 
+	selectedNoteIds: string[];
 	activeFolderId: string;
 	selectedFolderId: string;
 	selectedTagId: string;
@@ -214,11 +215,11 @@ class NotesScreenComponent extends BaseScreenComponent<ComponentProps, State> {
 
 	public folderPickerOptions() {
 		const options = {
-			enabled: this.props.noteSelectionEnabled,
+			visible: this.props.noteSelectionEnabled,
 			mustSelect: true,
 		};
 
-		if (this.folderPickerOptions_ && options.enabled === this.folderPickerOptions_.enabled) return this.folderPickerOptions_;
+		if (this.folderPickerOptions_ && options.visible === this.folderPickerOptions_.visible) return this.folderPickerOptions_;
 
 		this.folderPickerOptions_ = options;
 		return this.folderPickerOptions_;
