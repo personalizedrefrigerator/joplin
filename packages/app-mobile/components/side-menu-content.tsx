@@ -1,20 +1,17 @@
 import * as React from 'react';
-import { useMemo, useEffect, useCallback, useContext } from 'react';
-import { Easing, Animated, TouchableOpacity, Text, StyleSheet, ScrollView, View, Image, ImageStyle } from 'react-native';
+import { useMemo, useCallback, useContext } from 'react';
+import { TouchableOpacity, Text, StyleSheet, ScrollView, View, Image, ImageStyle } from 'react-native';
 import { Dispatch } from 'redux';
 import { connect } from 'react-redux';
 const IonIcon = require('react-native-vector-icons/Ionicons').default;
 import Icon from './Icon';
 import Folder from '@joplin/lib/models/Folder';
-import Synchronizer from '@joplin/lib/Synchronizer';
 import NavService from '@joplin/lib/services/NavService';
 import { _ } from '@joplin/lib/locale';
 import { themeStyle } from './global-style';
 import { buildFolderTree, isFolderSelected, renderFolders } from '@joplin/lib/components/shared/side-menu-shared';
 import { FolderEntity, FolderIcon, FolderIconType } from '@joplin/lib/services/database/types';
 import { AppState } from '../utils/types';
-import Setting from '@joplin/lib/models/Setting';
-import { reg } from '@joplin/lib/registry';
 import { ProfileConfig } from '@joplin/lib/services/profileConfig/types';
 import { getTrashFolderIcon, getTrashFolderId } from '@joplin/lib/services/trash';
 import restoreItems from '@joplin/lib/services/trash/restoreItems';
@@ -22,23 +19,16 @@ import emptyTrash from '@joplin/lib/services/trash/emptyTrash';
 import { ModelType } from '@joplin/lib/BaseModel';
 import { DialogContext } from './DialogManager';
 import { TextStyle, ViewStyle } from 'react-native';
-import { StateDecryptionWorker, StateResourceFetcher } from '@joplin/lib/reducer';
 import useOnLongPressProps from '../utils/hooks/useOnLongPressProps';
 import { TouchableRipple } from 'react-native-paper';
 import shim from '@joplin/lib/shim';
+import SyncButton from './SyncButton';
 const { substrWithEllipsis } = require('@joplin/lib/string-utils');
 
 interface Props {
-	syncStarted: boolean;
 	themeId: number;
 	dispatch: Dispatch;
 	collapsedFolderIds: string[];
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	syncReport: any;
-	decryptionWorker: StateDecryptionWorker;
-	resourceFetcher: StateResourceFetcher;
-	syncOnlyOverWifi: boolean;
-	isOnMobileData: boolean;
 	notesParentType: string;
 	folders: FolderEntity[];
 	profileConfig: ProfileConfig;
@@ -47,16 +37,8 @@ interface Props {
 	selectedTagId: string;
 }
 
-const syncIconRotationValue = new Animated.Value(0);
-
-const syncIconRotation = syncIconRotationValue.interpolate({
-	inputRange: [0, 1],
-	outputRange: ['0deg', '360deg'],
-});
 
 const folderIconRightMargin = 10;
-
-let syncIconAnimation: Animated.CompositeAnimation|null = null;
 
 const useStyles = (themeId: number) => {
 	return useMemo(() => {
@@ -104,13 +86,6 @@ const useStyles = (themeId: number) => {
 			},
 			button: buttonStyle,
 			buttonText: buttonTextStyle,
-			syncStatus: {
-				paddingLeft: theme.marginLeft,
-				paddingRight: theme.marginRight,
-				color: theme.colorFaded,
-				fontSize: theme.fontSizeSmaller,
-				flex: 0,
-			},
 			sidebarIcon: sidebarIconStyle,
 			folderButton: folderButtonStyle,
 			folderButtonText: {
@@ -295,24 +270,6 @@ const SideMenuContentComponent = (props: Props) => {
 	const alwaysShowFolderIcons = useMemo(() => Folder.shouldShowFolderIcons(props.folders), [props.folders]);
 	const styles_ = useStyles(props.themeId);
 
-	useEffect(() => {
-		if (props.syncStarted) {
-			syncIconAnimation = Animated.loop(
-				Animated.timing(syncIconRotationValue, {
-					toValue: 1,
-					duration: 3000,
-					easing: Easing.linear,
-					useNativeDriver: false,
-				}),
-			);
-
-			syncIconAnimation.start();
-		} else {
-			if (syncIconAnimation) syncIconAnimation.stop();
-			syncIconAnimation = null;
-		}
-	}, [props.syncStarted]);
-
 	const dialogs = useContext(DialogContext);
 
 	const folder_press = (folder: FolderEntity) => {
@@ -493,64 +450,6 @@ const SideMenuContentComponent = (props: Props) => {
 		});
 	};
 
-	const performSync = useCallback(async () => {
-		const action = props.syncStarted ? 'cancel' : 'start';
-
-		if (!Setting.value('sync.target')) {
-			props.dispatch({
-				type: 'SIDE_MENU_CLOSE',
-			});
-
-			props.dispatch({
-				type: 'NAV_GO',
-				routeName: 'Config',
-				sectionName: 'sync',
-			});
-
-			return 'init';
-		}
-
-		if (!(await reg.syncTarget().isAuthenticated())) {
-			if (reg.syncTarget().authRouteName()) {
-				props.dispatch({
-					type: 'NAV_GO',
-					routeName: reg.syncTarget().authRouteName(),
-				});
-				return 'auth';
-			}
-
-			reg.logger().error('Not authenticated with sync target - please check your credentials.');
-			return 'error';
-		}
-
-		let sync = null;
-		try {
-			sync = await reg.syncTarget().synchronizer();
-		} catch (error) {
-			reg.logger().error('Could not initialise synchroniser: ');
-			reg.logger().error(error);
-			error.message = `Could not initialise synchroniser: ${error.message}`;
-			props.dispatch({
-				type: 'SYNC_REPORT_UPDATE',
-				report: { errors: [error] },
-			});
-			return 'error';
-		}
-
-		if (action === 'cancel') {
-			void sync.cancel();
-			return 'cancel';
-		} else {
-			void reg.scheduleSync(0);
-			return 'sync';
-		}
-	}, [props.syncStarted, props.dispatch]);
-
-	const synchronize_press = useCallback(async () => {
-		const actionDone = await performSync();
-		if (actionDone === 'auth') props.dispatch({ type: 'SIDE_MENU_CLOSE' });
-	}, [performSync, props.dispatch]);
-
 
 	const renderFolderItem = (folder: FolderEntity, hasChildren: boolean, depth: number) => {
 		return <FolderItem
@@ -580,11 +479,7 @@ const SideMenuContentComponent = (props: Props) => {
 		iconName: string,
 		{ onPress = null, selected = false, isHeader = false }: SidebarButtonOptions = {},
 	) => {
-		let icon = <Icon name={`ionicon ${iconName}`} style={styles_.sidebarIcon} accessibilityLabel={null} />;
-
-		if (key === 'synchronize_button') {
-			icon = <Animated.View style={{ transform: [{ rotate: syncIconRotation }] }}>{icon}</Animated.View>;
-		}
+		const icon = <Icon name={`ionicon ${iconName}`} style={styles_.sidebarIcon} accessibilityLabel={null} />;
 
 		const content = (
 			<View key={key} style={selected ? styles_.sideButtonSelected : styles_.sideButton}>
@@ -629,41 +524,11 @@ const SideMenuContentComponent = (props: Props) => {
 
 		items.push(makeDivider('divider_2'));
 
-		const lines = Synchronizer.reportToLines(props.syncReport);
-		const syncReportText = lines.join('\n');
-
-		let decryptionReportText = '';
-		if (props.decryptionWorker && props.decryptionWorker.state !== 'idle' && props.decryptionWorker.itemCount) {
-			decryptionReportText = _('Decrypting items: %d/%d', props.decryptionWorker.itemIndex + 1, props.decryptionWorker.itemCount);
-		}
-
-		let resourceFetcherText = '';
-		if (props.resourceFetcher && props.resourceFetcher.toFetchCount) {
-			resourceFetcherText = _('Fetching resources: %d/%d', props.resourceFetcher.fetchingCount, props.resourceFetcher.toFetchCount);
-		}
-
-		const fullReport = [];
-		if (syncReportText) fullReport.push(syncReportText);
-		if (resourceFetcherText) fullReport.push(resourceFetcherText);
-		if (decryptionReportText) fullReport.push(decryptionReportText);
-
-		items.push(renderSidebarButton('synchronize_button', !props.syncStarted ? _('Synchronise') : _('Cancel'), 'sync', { onPress: synchronize_press }));
-
-		if (fullReport.length) {
-			items.push(
-				<Text key="sync_report" style={styles_.syncStatus}>
-					{fullReport.join('\n')}
-				</Text>,
-			);
-		}
-
-		if (props.syncOnlyOverWifi && props.isOnMobileData) {
-			items.push(
-				<Text key="net_info" style={styles_.syncStatus}>
-					{ _('Mobile data - auto-sync disabled') }
-				</Text>,
-			);
-		}
+		items.push(
+			<SyncButton
+				key='sync_button'
+			/>,
+		);
 
 		return <View style={{ flex: 0, flexDirection: 'column', flexBasis: 'auto', paddingBottom: theme.marginBottom }}>{items}</View>;
 	};
@@ -723,18 +588,12 @@ const SideMenuContentComponent = (props: Props) => {
 export default connect((state: AppState) => {
 	return {
 		folders: state.folders,
-		syncStarted: state.syncStarted,
-		syncReport: state.syncReport,
 		selectedFolderId: state.selectedFolderId,
 		selectedTagId: state.selectedTagId,
 		notesParentType: state.notesParentType,
 		locale: state.settings.locale,
 		themeId: state.settings.theme,
 		collapsedFolderIds: state.collapsedFolderIds,
-		decryptionWorker: state.decryptionWorker,
-		resourceFetcher: state.resourceFetcher,
-		isOnMobileData: state.isOnMobileData,
-		syncOnlyOverWifi: state.settings['sync.mobileWifiOnly'],
 		profileConfig: state.profileConfig,
 		inboxJopId: state.settings['sync.10.inboxId'],
 	};

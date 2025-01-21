@@ -25,3 +25,22 @@ export type LogSyncOperationFunction = (action: SyncAction, local?: any, remote?
 export type ApiCallFunction = (fnName: string, ...args: any[])=> Promise<any>;
 
 export const conflictActions: SyncAction[] = [SyncAction.ItemConflict, SyncAction.NoteConflict, SyncAction.ResourceConflict];
+
+export interface ItemCountPerType {
+	[modelType: string]: number;
+}
+
+type SyncReportItemSection = {
+	[action in SyncAction]?: ItemCountPerType;
+};
+
+export type SyncReport = SyncReportItemSection & {
+	fetchingTotal?: number;
+	fetchingProcessed?: number;
+
+	state?: string;
+	cancelling?: boolean;
+	startTime?: number;
+	completedTime?: number;
+	errors?: string[];
+};

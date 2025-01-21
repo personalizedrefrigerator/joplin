@@ -14,6 +14,7 @@ import { getDisplayParentId } from './services/trash';
 import Logger from '@joplin/utils/Logger';
 import { SettingsRecord } from './models/settings/types';
 import { Toast, ToastType } from './services/plugins/api/types';
+import { SyncReport } from './services/synchronizer/utils/types';
 const fastDeepEqual = require('fast-deep-equal');
 const { ALL_NOTES_FILTER_ID } = require('./reserved-ids');
 const { createSelectorCreator, defaultMemoize } = require('reselect');
@@ -139,8 +140,7 @@ export interface State extends WindowState {
 	screens: any;
 	historyCanGoBack: boolean;
 	syncStarted: boolean;
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	syncReport: any;
+	syncReport: SyncReport;
 	searchResults: ProcessResultsRow[];
 	settings: Partial<SettingsRecord>;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied

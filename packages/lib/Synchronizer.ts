@@ -30,7 +30,7 @@ import handleConflictAction from './services/synchronizer/utils/handleConflictAc
 import resourceRemotePath from './services/synchronizer/utils/resourceRemotePath';
 import syncDeleteStep from './services/synchronizer/utils/syncDeleteStep';
 import { ErrorCode } from './errors';
-import { SyncAction } from './services/synchronizer/utils/types';
+import { SyncAction, SyncReport } from './services/synchronizer/utils/types';
 import checkDisabledSyncItemsNotification from './services/synchronizer/utils/checkDisabledSyncItemsNotification';
 const { sprintf } = require('sprintf-js');
 const { Dirnames } = require('./services/synchronizer/utils/types');
@@ -82,8 +82,7 @@ export default class Synchronizer {
 
 	// eslint-disable-next-line @typescript-eslint/ban-types -- Old code before rule was applied
 	private onProgress_: Function;
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	private progressReport_: any = {};
+	private progressReport_: SyncReport = {};
 
 	// eslint-disable-next-line @typescript-eslint/ban-types -- Old code before rule was applied
 	public dispatch: Function;
@@ -241,8 +240,10 @@ export default class Synchronizer {
 
 		if (!['fetchingProcessed', 'fetchingTotal'].includes(action)) syncDebugLog.info(line.join(': '));
 
-		if (!this.progressReport_[action]) this.progressReport_[action] = 0;
-		this.progressReport_[action] += actionCount;
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Partially refactored old code
+		const currentReport = this.progressReport_ as any;
+		if (!currentReport[action]) currentReport[action] = 0;
+		currentReport[action] += actionCount;
 		this.progressReport_.state = this.state();
 		this.onProgress_(this.progressReport_);
 
@@ -251,7 +252,7 @@ export default class Synchronizer {
 		// for this but for now this simple fix will do.
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 		const reportCopy: any = {};
-		for (const n in this.progressReport_) reportCopy[n] = this.progressReport_[n];
+		for (const n in this.progressReport_) reportCopy[n] = currentReport[n];
 		if (reportCopy.errors) reportCopy.errors = this.progressReport_.errors.slice();
 		this.dispatch({ type: 'SYNC_REPORT_UPDATE', report: reportCopy });
 	}
