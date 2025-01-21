@@ -6,16 +6,6 @@ const styled = require('styled-components').default;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 type StyleProps = any;
 
-export const StyledRoot = styled.div`
-	background-color: ${(props: StyleProps) => props.theme.backgroundColor2};
-	width: 100%;
-	height: 100%;
-	overflow-x: hidden;
-	overflow-y: hidden;
-	display: inline-flex;
-	flex-direction: column;
-`;
-
 export const StyledHeader = styled.div`
 	//height: ${(props: StyleProps) => props.theme.topRowHeight}px;
 	//text-decoration: none;

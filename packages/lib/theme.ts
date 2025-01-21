@@ -233,6 +233,11 @@ export function extraStyles(theme: Theme) {
 		backgroundColorActive5,
 		focusOutlineColor,
 
+		scrollbarThumbColor: Color(theme.color).alpha(0.3).rgb(),
+		scrollbarThumbColorHover: Color(theme.color).alpha(0.6).rgb(),
+		scrollbarThumbColor2: Color(theme.color2).alpha(0.2).rgb(),
+		scrollbarThumbColorHover2: Color(theme.color2).alpha(0.6).rgb(),
+
 		icon: {
 			...globalStyle.icon,
 			color: theme.color,

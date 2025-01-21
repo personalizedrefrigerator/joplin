@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { StyledRoot, StyledSyncReportText, StyledSyncReport, StyledSynchronizeButton } from './styles';
+import { StyledSyncReportText, StyledSyncReport, StyledSynchronizeButton } from './styles';
 import { ButtonLevel } from '../Button/Button';
 import CommandService from '@joplin/lib/services/CommandService';
 import Synchronizer from '@joplin/lib/Synchronizer';
@@ -74,13 +74,13 @@ const SidebarComponent = (props: Props) => {
 	);
 
 	return (
-		<StyledRoot className="sidebar" role='navigation' aria-label={_('Sidebar')}>
+		<div className='sidebar sidebar-wrapper _scrollbar2' role='navigation' aria-label={_('Sidebar')}>
 			<div style={{ flex: 1 }}><FolderAndTagList/></div>
 			<div style={{ flex: 0, padding: theme.mainPadding }}>
 				{syncReportComp}
 				{syncButton}
 			</div>
-		</StyledRoot>
+		</div>
 	);
 };
 

@@ -20,11 +20,6 @@ interface Props {
 }
 
 export const StyledRoot = styled.div`
-	display: flex;
-	background-color: ${(props: StyleProps) => props.theme.backgroundColor2};
-	flex-direction: column;
-	overflow-x: hidden;
-	overflow-y: auto;
 `;
 
 export const StyledListItem = styled.a`
@@ -164,8 +159,8 @@ export default function Sidebar(props: Props) {
 	}
 
 	return (
-		<StyledRoot role='tablist'>
+		<div className='settings-sidebar _scrollbar2' role='tablist'>
 			{buttons}
-		</StyledRoot>
+		</div>
 	);
 }
