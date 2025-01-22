@@ -343,7 +343,7 @@ export function extraStyles(theme: ThemeAndDerivedColors) {
 
 type ExtraStyles = ReturnType<typeof extraStyles>;
 type GlobalStyle = typeof globalStyle;
-export type ThemeStyle = Theme & ExtraStyles & GlobalStyle & { cacheKey: number };
+export type ThemeStyle = ThemeAndDerivedColors & ExtraStyles & GlobalStyle & { cacheKey: number };
 
 const themeCache_: Record<string, ThemeStyle> = {};
 
