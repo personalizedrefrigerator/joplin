@@ -128,7 +128,7 @@ export const derivedColors = (theme: Theme) => {
 
 		scrollbarThumbColor: rgbString(Color(theme.color).alpha(0.54)),
 		scrollbarThumbColorHover: rgbString(Color(theme.color).alpha(0.63)),
-		scrollbarThumbColor2: rgbString(Color(theme.color2).alpha(0.36)),
+		scrollbarThumbColor2: rgbString(Color(theme.color2).alpha(0.46)),
 		scrollbarThumbColorHover2: rgbString(Color(theme.color2).alpha(0.63)),
 
 		selectedDividerColor: hexString(Color(theme.dividerColor).darken(0.2)),
