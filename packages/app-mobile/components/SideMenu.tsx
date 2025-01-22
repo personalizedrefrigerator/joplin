@@ -57,25 +57,15 @@ const useStyles = ({ themeId, isLeftMenu, isVerticalMenu, menuSize, menuOpenFrac
 				flexShrink: 1,
 				width: windowWidth,
 				height: windowHeight,
-				transform: [isVerticalMenu ? {
-					translateY: menuOpenFraction.interpolate({
-						inputRange: [0, 1],
-						outputRange: [0, -menuSize],
-					}),
-				} : {
-					translateX: menuOpenFraction.interpolate({
-						inputRange: [0, 1],
-						outputRange: [0, isLeftMenu ? menuSize : -menuSize],
-					}),
-					// The RN Animation docs suggests setting "perspective" while setting other transform styles:
-					// https://reactnative.dev/docs/animations#bear-in-mind
-				}, { perspective: 1000 }],
 			},
 			contentWrapper: {
 				display: 'flex',
 				flexDirection: 'column',
 				flexGrow: 1,
 				flexShrink: 1,
+			},
+			fillParent: {
+				flex: 1,
 			},
 			menuWrapper: {
 				position: 'absolute',
@@ -96,6 +86,20 @@ const useStyles = ({ themeId, isLeftMenu, isVerticalMenu, menuSize, menuOpenFrac
 				} : {
 					right: 0,
 				}),
+
+				transform: [isVerticalMenu ? {
+					translateY: menuOpenFraction.interpolate({
+						inputRange: [0, 1],
+						outputRange: [menuSize, 0],
+					}),
+				} : {
+					translateX: menuOpenFraction.interpolate({
+						inputRange: [0, 1],
+						outputRange: isLeftMenu ? [-menuSize, 0] : [menuSize, 0],
+					}),
+					// The RN Animation docs suggests setting "perspective" while setting other transform styles:
+					// https://reactnative.dev/docs/animations#bear-in-mind
+				}, { perspective: 1000 }],
 			},
 			closeButtonOverlay: {
 				position: 'absolute',
@@ -301,19 +305,21 @@ const SideMenuComponent: React.FC<Props> = props => {
 	const styles = useStyles({ themeId: props.themeId, menuOpenFraction, menuSize, isLeftMenu, isVerticalMenu });
 
 	const menuComponent = (
-		<AccessibleView
-			inert={!open}
-			style={styles.menuWrapper}
-		>
+		<Animated.View style={styles.menuWrapper}>
 			<AccessibleView
-				// Auto-focuses an empty view at the beginning of the sidemenu -- if we instead
-				// focus the container view, VoiceOver fails to focus to any components within
-				// the sidebar.
-				refocusCounter={!open ? 1 : undefined}
-			/>
+				inert={!open}
+				style={styles.fillParent}
+			>
+				<AccessibleView
+					// Auto-focuses an empty view at the beginning of the sidemenu -- if we instead
+					// focus the container view, VoiceOver fails to focus to any components within
+					// the sidebar.
+					refocusCounter={!open ? 1 : undefined}
+				/>
 
-			{props.menu}
-		</AccessibleView>
+				{props.menu}
+			</AccessibleView>
+		</Animated.View>
 	);
 
 	const contentComponent = (
@@ -344,11 +350,11 @@ const SideMenuComponent: React.FC<Props> = props => {
 			style={styles.mainContainer}
 			{...panResponder.panHandlers}
 		>
-			{menuComponent}
-			<Animated.View style={styles.contentOuterWrapper}>
+			<View style={styles.contentOuterWrapper}>
 				{contentComponent}
 				{closeButtonOverlay}
-			</Animated.View>
+			</View>
+			{menuComponent}
 		</View>
 	);
 };
