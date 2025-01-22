@@ -260,8 +260,10 @@ class HtmlUtils {
 
 		const parser = new htmlparser2.Parser({
 
-			oncomment: (encodedData: string) => {
-				output.push(`<!--${encodedData}-->`);
+			oncomment: (data: string) => {
+				// Ensure that <s and >s are escaped within comments. In some cases,
+				// these characters can end a comment early (e.g. <style><!--</style>-->)
+				output.push(`<!--${htmlentities(data)}-->`);
 			},
 
 			onopentag: (name: string, attrs: Record<string, string>) => {
