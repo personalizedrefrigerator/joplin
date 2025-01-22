@@ -1,6 +1,6 @@
 import Setting from '@joplin/lib/models/Setting';
 import { Platform, TextStyle, ViewStyle } from 'react-native';
-import { themeById } from '@joplin/lib/theme';
+import { derivedColors, themeById } from '@joplin/lib/theme';
 import { Theme as BaseTheme } from '@joplin/lib/themes/type';
 
 const Color = require('color');
@@ -154,6 +154,7 @@ function themeStyle(theme: number) {
 	const output: ThemeStyle = {
 		...baseStyle,
 		...baseTheme,
+		...derivedColors(baseTheme),
 		...extraStyles(baseTheme),
 	};
 	themeCache_[cacheKey] = output;
