@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { connect } from 'react-redux';
-import { AccessibilityInfo, Animated, Dimensions, Easing, I18nManager, LayoutChangeEvent, PanResponder, Pressable, StyleSheet, useWindowDimensions, View } from 'react-native';
+import { AccessibilityInfo, Animated, Dimensions, Easing, I18nManager, LayoutChangeEvent, PanResponder, Pressable, StyleSheet, useWindowDimensions, View, ViewStyle } from 'react-native';
 import { State } from '@joplin/lib/reducer';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import AccessibleView from './accessibility/AccessibleView';
@@ -27,6 +27,7 @@ interface Props {
 	toleranceY: number;
 	openMenuOffset: number;
 	menuPosition: SideMenuPosition;
+	menuStyle: ViewStyle;
 
 	onChange: OnChangeCallback;
 	disableGestures: boolean;
@@ -44,6 +45,12 @@ const useStyles = ({ themeId, isLeftMenu, isVerticalMenu, menuSize, menuOpenFrac
 	const { height: windowHeight, width: windowWidth } = useWindowDimensions();
 	return useMemo(() => {
 		const theme = themeStyle(themeId);
+
+		const menuWrapperSizeValue = menuOpenFraction.interpolate({
+			inputRange: [0, 1],
+			outputRange: [0, menuSize],
+		});
+
 		return StyleSheet.create({
 			mainContainer: {
 				display: 'flex',
@@ -64,20 +71,18 @@ const useStyles = ({ themeId, isLeftMenu, isVerticalMenu, menuSize, menuOpenFrac
 				flexGrow: 1,
 				flexShrink: 1,
 			},
-			fillParent: {
-				flex: 1,
-			},
 			menuWrapper: {
 				position: 'absolute',
 				bottom: 0,
 				...(isVerticalMenu ? {
 					left: 0,
 					right: 0,
-					height: menuSize,
+					height: menuWrapperSizeValue,
 				} : {
 					top: 0,
-					width: menuSize,
+					width: menuWrapperSizeValue,
 				}),
+				overflow: 'hidden',
 
 				// In React Native, RTL replaces `left` with `right` and `right` with `left`.
 				// As such, we need to reverse the normal direction in RTL mode.
@@ -86,20 +91,11 @@ const useStyles = ({ themeId, isLeftMenu, isVerticalMenu, menuSize, menuOpenFrac
 				} : {
 					right: 0,
 				}),
-
-				transform: [isVerticalMenu ? {
-					translateY: menuOpenFraction.interpolate({
-						inputRange: [0, 1],
-						outputRange: [menuSize, 0],
-					}),
-				} : {
-					translateX: menuOpenFraction.interpolate({
-						inputRange: [0, 1],
-						outputRange: isLeftMenu ? [-menuSize, 0] : [menuSize, 0],
-					}),
-					// The RN Animation docs suggests setting "perspective" while setting other transform styles:
-					// https://reactnative.dev/docs/animations#bear-in-mind
-				}, { perspective: 1000 }],
+			},
+			menuContent: {
+				flex: 1,
+				width: menuSize,
+				alignSelf: (isLeftMenu === !I18nManager.isRTL ? 'flex-end' : 'flex-start'),
 			},
 			closeButtonOverlay: {
 				position: 'absolute',
@@ -305,16 +301,16 @@ const SideMenuComponent: React.FC<Props> = props => {
 	const styles = useStyles({ themeId: props.themeId, menuOpenFraction, menuSize, isLeftMenu, isVerticalMenu });
 
 	const menuComponent = (
-		<Animated.View style={styles.menuWrapper}>
+		<Animated.View style={[styles.menuWrapper, props.menuStyle]}>
 			<AccessibleView
 				inert={!open}
-				style={styles.fillParent}
+				style={styles.menuContent}
 			>
 				<AccessibleView
 					// Auto-focuses an empty view at the beginning of the sidemenu -- if we instead
 					// focus the container view, VoiceOver fails to focus to any components within
 					// the sidebar.
-					refocusCounter={!open ? 1 : undefined}
+					refocusCounter={open ? 1 : undefined}
 				/>
 
 				{props.menu}
@@ -327,7 +323,7 @@ const SideMenuComponent: React.FC<Props> = props => {
 			inert={open}
 			style={styles.contentWrapper}
 		>
-			<AccessibleView refocusCounter={open ? 1 : undefined} />
+			<AccessibleView refocusCounter={!open ? 1 : undefined} />
 			{props.children}
 		</AccessibleView>
 	);
