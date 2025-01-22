@@ -97,7 +97,7 @@ const globalStyle = (() => {
 	};
 })();
 
-export const derivedColors = (theme: Theme) => {
+export const withDerivedColors = (theme: Theme) => {
 	const backgroundColor5 = theme.backgroundColor5 ?? theme.color4;
 	const backgroundColor4 = theme.backgroundColor4;
 
@@ -137,7 +137,7 @@ export const derivedColors = (theme: Theme) => {
 	};
 };
 
-type ThemeAndDerivedColors = ReturnType<typeof derivedColors>;
+type ThemeAndDerivedColors = ReturnType<typeof withDerivedColors>;
 
 export function extraStyles(theme: ThemeAndDerivedColors) {
 	const zoomRatio = 1;
@@ -353,7 +353,7 @@ export function themeStyle(themeId: number): ThemeStyle {
 	const cacheKey = themeId;
 	if (themeCache_[cacheKey]) return themeCache_[cacheKey];
 
-	const theme = derivedColors(themes[themeId]);
+	const theme = withDerivedColors(themes[themeId]);
 	const output: ThemeStyle = {
 		cacheKey,
 		...globalStyle,
