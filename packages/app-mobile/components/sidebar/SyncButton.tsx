@@ -1,17 +1,18 @@
 import * as React from 'react';
-import { AppState } from '../utils/types';
+import { AppState } from '../../utils/types';
 import { connect } from 'react-redux';
 import type { Dispatch } from 'redux';
 import { useEffect, useMemo, useCallback, useRef, useState } from 'react';
-import { Animated, Easing, StyleSheet, Text, TouchableOpacity } from 'react-native';
+import { Animated, Easing, StyleSheet, Text } from 'react-native';
 import { SyncReport } from '@joplin/lib/services/synchronizer/utils/types';
 import Synchronizer from '@joplin/lib/Synchronizer';
 import { StateDecryptionWorker, StateResourceFetcher } from '@joplin/lib/reducer';
 import { _ } from '@joplin/lib/locale';
-import { themeStyle } from './global-style';
-import Icon from './Icon';
+import { themeStyle } from '../global-style';
+import Icon from '../Icon';
 import Setting from '@joplin/lib/models/Setting';
 import { reg } from '@joplin/lib/registry';
+import SideMenuButton from './SideMenuButton';
 
 interface Props {
 	dispatch: Dispatch;
@@ -74,21 +75,6 @@ const useStyles = (themeId: number, rotation: Animated.AnimatedNode) => {
 				width: 26,
 				textAlign: 'center',
 				textAlignVertical: 'center',
-			},
-			syncButton: {
-				flex: 0,
-				flexDirection: 'row',
-				flexBasis: 'auto',
-				height: 36,
-				alignItems: 'center',
-				paddingLeft: theme.marginLeft,
-				paddingRight: theme.marginRight,
-			},
-			syncButtonText: {
-				flex: 1,
-				color: theme.color,
-				paddingLeft: 10,
-				fontSize: theme.fontSize,
 			},
 		});
 	}, [themeId, rotation]);
@@ -177,43 +163,42 @@ const useSyncReportLines = (syncReport: SyncReport, decryptionWorker: StateDecry
 };
 
 const SyncButton: React.FC<Props> = props => {
-
 	const syncIconRotation = useSyncIconRotation(props.syncStarted);
 	const styles = useStyles(props.themeId, syncIconRotation);
 
 	const items = [];
+
+	if (props.syncOnlyOverWifi && props.isOnMobileData) {
+		items.push(
+			<Text key="net_info" style={styles.syncStatus}>
+				{ _('Mobile data - auto-sync disabled') }
+			</Text>,
+		);
+	}
+
+	const onSyncPress = useOnSyncPress(props.syncStarted, props.dispatch);
+	const syncIcon = <Animated.View style={styles.syncIconContainer}>
+		<Icon
+			name='ionicon sync'
+			style={styles.syncIconContent}
+			accessibilityLabel={null}
+		/>
+	</Animated.View>;
+	items.push(
+		<SideMenuButton
+			key='sync_button'
+			themeId={props.themeId}
+			icon={syncIcon}
+			text={!props.syncStarted ? _('Synchronise') : _('Cancel')}
+			onPress={onSyncPress}
+		/>,
+	);
 
 	const fullReport = useSyncReportLines(props.syncReport, props.decryptionWorker, props.resourceFetcher);
 	if (fullReport.length) {
 		items.push(
 			<Text key="sync_report" style={styles.syncStatus}>
 				{fullReport}
-			</Text>,
-		);
-	}
-
-	const onSyncPress = useOnSyncPress(props.syncStarted, props.dispatch);
-	items.push(
-		<TouchableOpacity
-			key='sync_button'
-			style={styles.syncButton}
-			onPress={onSyncPress}
-		>
-			<Animated.View style={styles.syncIconContainer}>
-				<Icon
-					name='ionicon sync'
-					style={styles.syncIconContent}
-					accessibilityLabel={null}
-				/>
-			</Animated.View>
-			<Text style={styles.syncButtonText}>{!props.syncStarted ? _('Synchronise') : _('Cancel')}</Text>
-		</TouchableOpacity>,
-	);
-
-	if (props.syncOnlyOverWifi && props.isOnMobileData) {
-		items.push(
-			<Text key="net_info" style={styles.syncStatus}>
-				{ _('Mobile data - auto-sync disabled') }
 			</Text>,
 		);
 	}

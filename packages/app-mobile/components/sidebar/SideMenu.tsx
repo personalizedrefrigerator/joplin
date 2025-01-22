@@ -3,10 +3,10 @@ import { connect } from 'react-redux';
 import { AccessibilityInfo, Animated, Dimensions, Easing, I18nManager, LayoutChangeEvent, PanResponder, Pressable, StyleSheet, useWindowDimensions, View } from 'react-native';
 import { State } from '@joplin/lib/reducer';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import AccessibleView from './accessibility/AccessibleView';
+import AccessibleView from '../accessibility/AccessibleView';
 import { _ } from '@joplin/lib/locale';
-import useReduceMotionEnabled from '../utils/hooks/useReduceMotionEnabled';
-import { themeStyle } from './global-style';
+import useReduceMotionEnabled from '../../utils/hooks/useReduceMotionEnabled';
+import { themeStyle } from '../global-style';
 
 export enum SideMenuPosition {
 	Left = 'left',

@@ -66,9 +66,9 @@ const { OneDriveLoginScreen } = require('./components/screens/onedrive-login.js'
 import EncryptionConfigScreen from './components/screens/encryption-config';
 import DropboxLoginScreen from './components/screens/dropbox-login.js';
 import { MenuProvider } from 'react-native-popup-menu';
-import SideMenu, { SideMenuPosition } from './components/SideMenu';
-import SideMenuContent from './components/side-menu-content';
-import SideMenuContentNote from './components/SideMenuContentNote';
+import SideMenu, { SideMenuPosition } from './components/sidebar/SideMenu';
+import SideMenuContent from './components/sidebar/side-menu-content';
+import SideMenuContentNote from './components/sidebar/SideMenuContentNote';
 import { reg } from '@joplin/lib/registry';
 const { defaultState } = require('@joplin/lib/reducer');
 import FileApiDriverLocal from '@joplin/lib/file-api-driver-local';

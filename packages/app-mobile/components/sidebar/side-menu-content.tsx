@@ -4,26 +4,27 @@ import { TouchableOpacity, Text, StyleSheet, ScrollView, View, Image, ImageStyle
 import { Dispatch } from 'redux';
 import { connect } from 'react-redux';
 const IonIcon = require('react-native-vector-icons/Ionicons').default;
-import Icon from './Icon';
+import { themeStyle } from '../global-style';
+import { DialogContext } from '../DialogManager';
+import Icon from '../Icon';
+import useOnLongPressProps from '../../utils/hooks/useOnLongPressProps';
+import { AppState } from '../../utils/types';
 import Folder from '@joplin/lib/models/Folder';
 import NavService from '@joplin/lib/services/NavService';
 import { _ } from '@joplin/lib/locale';
-import { themeStyle } from './global-style';
 import { buildFolderTree, isFolderSelected, renderFolders } from '@joplin/lib/components/shared/side-menu-shared';
 import { FolderEntity, FolderIcon, FolderIconType } from '@joplin/lib/services/database/types';
-import { AppState } from '../utils/types';
 import { ProfileConfig } from '@joplin/lib/services/profileConfig/types';
 import { getTrashFolderIcon, getTrashFolderId } from '@joplin/lib/services/trash';
 import restoreItems from '@joplin/lib/services/trash/restoreItems';
 import emptyTrash from '@joplin/lib/services/trash/emptyTrash';
 import { ModelType } from '@joplin/lib/BaseModel';
-import { DialogContext } from './DialogManager';
 import { TextStyle, ViewStyle } from 'react-native';
-import useOnLongPressProps from '../utils/hooks/useOnLongPressProps';
 import { TouchableRipple } from 'react-native-paper';
 import shim from '@joplin/lib/shim';
 import SyncButton from './SyncButton';
-const { substrWithEllipsis } = require('@joplin/lib/string-utils');
+import { substrWithEllipsis } from '@joplin/lib/string-utils';
+import SideMenuButton from './SideMenuButton';
 
 interface Props {
 	themeId: number;
@@ -481,23 +482,15 @@ const SideMenuContentComponent = (props: Props) => {
 	) => {
 		const icon = <Icon name={`ionicon ${iconName}`} style={styles_.sidebarIcon} accessibilityLabel={null} />;
 
-		const content = (
-			<View key={key} style={selected ? styles_.sideButtonSelected : styles_.sideButton}>
-				{icon}
-				<Text
-					style={styles_.sideButtonText}
-					accessibilityRole={isHeader ? 'header' : undefined}
-				>{title}</Text>
-			</View>
-		);
-
-		if (!onPress) return content;
-
-		return (
-			<TouchableOpacity key={key} onPress={onPress} accessibilityRole='button'>
-				{content}
-			</TouchableOpacity>
-		);
+		return <SideMenuButton
+			themeId={props.themeId}
+			key={key}
+			onPress={onPress}
+			selected={selected}
+			contentRole={isHeader ? 'header' : undefined}
+			icon={icon}
+			text={title}
+		/>;
 	};
 
 	const makeDivider = (key: string) => {
