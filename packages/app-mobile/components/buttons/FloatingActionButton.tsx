@@ -72,7 +72,7 @@ const FloatingActionButton = (props: ActionButtonProps) => {
 	const actionButtons = actions.map((action, idx) => {
 		return <FAB
 			key={`option-${idx}`}
-			label='test'
+			label={action.label}
 			icon={action.icon}
 			onPress={action.onPress}
 			size='small'
