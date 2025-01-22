@@ -66,7 +66,6 @@ const { OneDriveLoginScreen } = require('./components/screens/onedrive-login.js'
 import EncryptionConfigScreen from './components/screens/encryption-config';
 import DropboxLoginScreen from './components/screens/dropbox-login.js';
 import { MenuProvider } from 'react-native-popup-menu';
-import SideMenu, { SideMenuPosition } from './components/SideMenu';
 import SideMenuContent from './components/side-menu-content';
 import SideMenuContentNote from './components/SideMenuContentNote';
 import { reg } from '@joplin/lib/registry';
@@ -139,6 +138,8 @@ import DialogManager from './components/DialogManager';
 import lockToSingleInstance from './utils/lockToSingleInstance';
 import { AppState } from './utils/types';
 import { getDisplayParentId } from '@joplin/lib/services/trash';
+import AppSideMenu from './components/sidebar/AppSideMenu';
+import { SideMenuPosition } from './components/sidebar/SideMenu';
 
 const logger = Logger.create('root');
 
@@ -1295,24 +1296,13 @@ class AppComponent extends React.Component {
 		logger.info('root.biometrics: shouldShowMainContent', shouldShowMainContent);
 		logger.info('root.biometrics: this.state.sensorInfo', this.state.sensorInfo);
 
-		// The right sidemenu can be difficult to close due to a bug in the sidemenu
-		// library (right sidemenus can't be swiped closed).
-		//
-		// Additionally, it can interfere with scrolling in the note viewer, so we use
-		// a smaller edge hit width.
-		const menuEdgeHitWidth = menuPosition === 'right' ? 20 : 30;
-
 		const mainContent = (
 			<View style={{ flex: 1, backgroundColor: theme.backgroundColor }}>
-				<SideMenu
+				<AppSideMenu
 					menu={sideMenuContent}
-					edgeHitWidth={menuEdgeHitWidth}
-					toleranceX={4}
-					toleranceY={20}
 					openMenuOffset={this.state.sideMenuWidth}
 					menuPosition={menuPosition}
 					onChange={(isOpen: boolean) => this.sideMenu_change(isOpen)}
-					menuStyle={{ backgroundColor: theme.backgroundColor }}
 					disableGestures={disableSideMenuGestures}
 				>
 					<StatusBar barStyle={statusBarStyle} />
@@ -1331,7 +1321,7 @@ class AppComponent extends React.Component {
 							/> }
 						</SafeAreaView>
 					</MenuProvider>
-				</SideMenu>
+				</AppSideMenu>
 				<PluginRunnerWebView />
 			</View>
 		);

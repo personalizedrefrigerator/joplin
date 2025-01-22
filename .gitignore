@@ -643,7 +643,6 @@ packages/app-mobile/components/ScreenHeader/WarningBox.js
 packages/app-mobile/components/ScreenHeader/WebBetaButton.js
 packages/app-mobile/components/ScreenHeader/index.js
 packages/app-mobile/components/SelectDateTimeDialog.js
-packages/app-mobile/components/SideMenu.js
 packages/app-mobile/components/SideMenuContentNote.js
 packages/app-mobile/components/TextInput.js
 packages/app-mobile/components/ToggleSpaceButton.js
@@ -754,6 +753,8 @@ packages/app-mobile/components/screens/encryption-config.js
 packages/app-mobile/components/screens/status.js
 packages/app-mobile/components/screens/tags.js
 packages/app-mobile/components/side-menu-content.js
+packages/app-mobile/components/sidebar/AppSideMenu.js
+packages/app-mobile/components/sidebar/SideMenu.js
 packages/app-mobile/components/testing/TestProviderStack.js
 packages/app-mobile/components/voiceTyping/VoiceTypingDialog.js
 packages/app-mobile/gulpfile.js
