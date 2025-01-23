@@ -132,7 +132,7 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: any) => {
 
 	usePluginServiceRegistration(ref);
 	useContextMenu(editor, props.plugins, props.dispatch, props.htmlToMarkdown, props.markupToHtml);
-	useTabIndenter(editor);
+	useTabIndenter(editor, !props.tabMovesFocus);
 	useKeyboardRefocusHandler(editor);
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
