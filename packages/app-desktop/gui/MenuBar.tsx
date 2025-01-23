@@ -774,12 +774,6 @@ function useMenu(props: Props) {
 						menuItemDic['editor.swapLineDown'],
 						menuItemDic['editor.swapLineUp'],
 						separator(),
-						{
-							...menuItemDic['toggleTabKeyNavigation'],
-							label: Setting.settingMetadata('editor.tabMovesFocus').label(),
-							type: 'checkbox',
-						},
-						separator(),
 						menuItemDic.focusSearch,
 						menuItemDic.showLocalSearch,
 					],
@@ -831,6 +825,12 @@ function useMenu(props: Props) {
 							click: () => {
 								Setting.setValue('showCompletedTodos', !Setting.value('showCompletedTodos'));
 							},
+						},
+						separator(),
+						{
+							...menuItemDic['toggleTabKeyNavigation'],
+							label: Setting.settingMetadata('editor.tabMovesFocus').label(),
+							type: 'checkbox',
 						},
 						separator(),
 						{
