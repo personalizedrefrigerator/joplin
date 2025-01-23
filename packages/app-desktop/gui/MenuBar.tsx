@@ -775,13 +775,9 @@ function useMenu(props: Props) {
 						menuItemDic['editor.swapLineUp'],
 						separator(),
 						{
-							id: 'indentWithTab',
+							...menuItemDic['toggleTabKeyNavigation'],
 							label: Setting.settingMetadata('editor.tabMovesFocus').label(),
 							type: 'checkbox',
-							click: () => {
-								Setting.setValue('editor.tabMovesFocus', !Setting.value('editor.tabMovesFocus'));
-							},
-							accelerator: keymapService.getAccelerator('toggleTabKeyNavigation'),
 						},
 						separator(),
 						menuItemDic.focusSearch,
