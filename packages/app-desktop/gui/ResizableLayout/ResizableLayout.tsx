@@ -8,7 +8,7 @@ import { Size, LayoutItem } from './utils/types';
 import { canMove, MoveDirection } from './utils/movements';
 import MoveButtons, { MoveButtonClickEvent } from './MoveButtons';
 import { StyledWrapperRoot, StyledMoveOverlay, MoveModeRootWrapper, MoveModeRootMessage } from './utils/style';
-import { Resizable } from 're-resizable';
+import { Resizable, ResizeCallback, ResizeStartCallback } from 're-resizable';
 const EventEmitter = require('events');
 
 interface OnResizeEvent {
@@ -34,7 +34,7 @@ function itemVisible(item: LayoutItem, moveMode: boolean) {
 }
 
 // eslint-disable-next-line @typescript-eslint/ban-types, @typescript-eslint/no-explicit-any -- Old code before rule was applied, Old code before rule was applied
-function renderContainer(item: LayoutItem, parent: LayoutItem | null, sizes: LayoutItemSizes, resizedItemMaxSize: Size | null, onResizeStart: Function, onResize: Function, onResizeStop: Function, children: any[], isLastChild: boolean, moveMode: boolean): any {
+function renderContainer(item: LayoutItem, parent: LayoutItem | null, sizes: LayoutItemSizes, resizedItemMaxSize: Size | null, onResizeStart: ResizeStartCallback, onResize: ResizeCallback, onResizeStop: ResizeCallback, children: any[], isLastChild: boolean, moveMode: boolean): any {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	const style: any = {
 		display: itemVisible(item, moveMode) ? 'flex' : 'none',
@@ -62,12 +62,9 @@ function renderContainer(item: LayoutItem, parent: LayoutItem | null, sizes: Lay
 				className={className}
 				style={style}
 				size={size}
-				// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-				onResizeStart={onResizeStart as any}
-				// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-				onResize={onResize as any}
-				// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-				onResizeStop={onResizeStop as any}
+				onResizeStart={onResizeStart}
+				onResize={onResize}
+				onResizeStop={onResizeStop}
 				enable={enable}
 				minWidth={'minWidth' in item ? item.minWidth : itemMinWidth}
 				minHeight={'minHeight' in item ? item.minHeight : itemMinHeight}
