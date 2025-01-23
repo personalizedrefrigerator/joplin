@@ -3,6 +3,7 @@ import { useCallback } from 'react';
 import Button, { ButtonLevel } from '../Button/Button';
 import { MoveDirection } from './utils/movements';
 import styled from 'styled-components';
+import { _ } from '@joplin/lib/locale';
 
 const StyledRoot = styled.div`
 	display: flex;
@@ -53,11 +54,21 @@ export default function MoveButtons(props: Props) {
 		throw new Error('Unreachable');
 	}
 
+	const iconLabel = (dir: MoveDirection) => {
+		if (dir === MoveDirection.Up) return _('Move up');
+		if (dir === MoveDirection.Down) return _('Move down');
+		if (dir === MoveDirection.Left) return _('Move left');
+		if (dir === MoveDirection.Right) return _('Move right');
+		const unreachable: never = dir;
+		throw new Error(`Invalid direction: ${unreachable}`);
+	};
+
 	function renderButton(dir: MoveDirection) {
 		return <ArrowButton
 			disabled={!canMove(dir)}
 			level={ButtonLevel.Primary}
 			iconName={`fas fa-arrow-${dir}`}
+			iconLabel={iconLabel(dir)}
 			onClick={() => onButtonClick(dir)}
 		/>;
 	}
@@ -69,7 +80,7 @@ export default function MoveButtons(props: Props) {
 			</ButtonRow>
 			<ButtonRow>
 				{renderButton(MoveDirection.Left)}
-				<EmptyButton iconName="fas fa-arrow-down" disabled={true}/>
+				<EmptyButton iconName="fas fa-arrow-down" aria-hidden={true} disabled={true}/>
 				{renderButton(MoveDirection.Right)}
 			</ButtonRow>
 			<ButtonRow>
