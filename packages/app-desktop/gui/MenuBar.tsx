@@ -257,7 +257,7 @@ function useMenuStates(menu: any, props: Props) {
 			menuItemSetChecked('showNoteCounts', props.showNoteCounts);
 			menuItemSetChecked('uncompletedTodosOnTop', props.uncompletedTodosOnTop);
 			menuItemSetChecked('showCompletedTodos', props.showCompletedTodos);
-			menuItemSetChecked('indentWithTab', props.tabMovesFocus);
+			menuItemSetChecked('toggleTabKeyNavigation', props.tabMovesFocus);
 		}
 
 		timeoutId = setTimeout(scheduleUpdate, 150);
