@@ -1,0 +1,16 @@
+
+.editor-status-bar {
+	display: flex;
+	flex-direction: row;
+
+	> .spacer {
+		flex-grow: 1;
+	}
+
+	> .status {
+		background-color: var(--joplin-background-color-active3);
+		color: var(--joplin-color3);
+		align-self: end;
+		padding: 4px;
+	}
+}
