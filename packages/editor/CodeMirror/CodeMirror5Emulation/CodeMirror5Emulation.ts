@@ -37,6 +37,10 @@ interface DocumentPositionRange {
 	to: DocumentPosition;
 }
 
+const clampPositionToDoc = (doc: Text, pos: number) => {
+	return Math.min(Math.max(0, pos), doc.length);
+};
+
 const documentPositionFromPos = (doc: Text, pos: number): DocumentPosition => {
 	const line = doc.lineAt(pos);
 	return {
@@ -420,8 +424,8 @@ export default class CodeMirror5Emulation extends BaseCodeMirror5Emulation {
 		const doc = this.editor.state.doc;
 
 		return this._decorator.markText(
-			posFromDocumentPosition(doc, from),
-			posFromDocumentPosition(doc, to),
+			clampPositionToDoc(doc, posFromDocumentPosition(doc, from)),
+			clampPositionToDoc(doc, posFromDocumentPosition(doc, to)),
 			options,
 		);
 	}
