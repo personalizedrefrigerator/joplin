@@ -120,6 +120,30 @@ test.describe('richTextEditor', () => {
 		await expect(editor.codeMirrorEditor).toHaveText('This is a        test.        Test! Another:        !');
 	});
 
+	test('should be possible to disable tab indentation from the menu', async ({ mainWindow, electronApp }) => {
+		const mainScreen = await new MainScreen(mainWindow).setup();
+		await mainScreen.createNewNote('Testing keyboard navigation!');
+
+		const editor = mainScreen.noteEditor;
+		await editor.toggleEditorsButton.click();
+		await editor.richTextEditor.click();
+
+		await editor.enableTabNavigation(electronApp);
+		await mainWindow.keyboard.type('This is a');
+
+		// Tab should navigate
+		await expect(editor.richTextEditor).toBeFocused();
+		await mainWindow.keyboard.press('Tab');
+		await expect(editor.richTextEditor).not.toBeFocused();
+
+		await editor.disableTabNavigation(electronApp);
+
+		// Tab should not navigate
+		await editor.richTextEditor.click();
+		await mainWindow.keyboard.press('Tab');
+		await expect(editor.richTextEditor).toBeFocused();
+	});
+
 	test('should be possible to navigate between the note title and rich text editor with enter/down/up keys', async ({ mainWindow }) => {
 		const mainScreen = await new MainScreen(mainWindow).setup();
 		await mainScreen.createNewNote('Testing keyboard navigation!');

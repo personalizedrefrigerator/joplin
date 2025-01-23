@@ -1,6 +1,6 @@
-
-import { Locator, Page } from '@playwright/test';
+import { ElectronApplication, Locator, Page } from '@playwright/test';
 import { expect } from '../util/test';
+import activateMainMenuItem from '../util/activateMainMenuItem';
 
 export default class NoteEditorPage {
 	public readonly codeMirrorEditor: Locator;
@@ -13,6 +13,7 @@ export default class NoteEditorPage {
 	public readonly editorSearchInput: Locator;
 	public readonly viewerSearchInput: Locator;
 	private readonly containerLocator: Locator;
+	private readonly disableTabNavigationButton: Locator;
 
 	public constructor(page: Page) {
 		this.containerLocator = page.locator('.rli-editor');
@@ -26,6 +27,7 @@ export default class NoteEditorPage {
 		// The editor and viewer have slightly different search UI
 		this.editorSearchInput = this.containerLocator.getByPlaceholder('Find');
 		this.viewerSearchInput = this.containerLocator.getByPlaceholder('Search...');
+		this.disableTabNavigationButton = this.containerLocator.getByRole('button', { name: 'Tab moves focus' });
 	}
 
 	public toolbarButtonLocator(title: string) {
@@ -73,6 +75,18 @@ export default class NoteEditorPage {
 
 	public focusCodeMirrorEditor() {
 		return this.codeMirrorEditor.click();
+	}
+
+	public async enableTabNavigation(electronApp: ElectronApplication) {
+		await expect(this.disableTabNavigationButton).not.toBeVisible();
+		await activateMainMenuItem(electronApp, 'Tab moves focus');
+		await expect(this.disableTabNavigationButton).toBeVisible();
+	}
+
+	public async disableTabNavigation(electronApp: ElectronApplication) {
+		await expect(this.disableTabNavigationButton).toBeVisible();
+		await activateMainMenuItem(electronApp, 'Tab moves focus');
+		await expect(this.disableTabNavigationButton).not.toBeVisible();
 	}
 
 	public async waitFor() {
