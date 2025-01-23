@@ -26,6 +26,8 @@ const getLabel = (commandName: string): string => {
 		return _('Close Window');
 	case 'config':
 		return shim.isMac() ? _('Preferences') : _('Options');
+	case 'toggleTabKeyNavigation':
+		return _('Editor: Toggle tab navigation');
 	}
 
 	// We don't throw an error if a command is not found because if for

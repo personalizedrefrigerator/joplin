@@ -781,7 +781,7 @@ function useMenu(props: Props) {
 							click: () => {
 								Setting.setValue('editor.tabMovesFocus', !Setting.value('editor.tabMovesFocus'));
 							},
-							accelerator: 'CommandOrControl+M',
+							accelerator: keymapService.getAccelerator('toggleTabKeyNavigation'),
 						},
 						separator(),
 						menuItemDic.focusSearch,
