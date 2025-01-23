@@ -36,9 +36,12 @@ const ArrowButton = styled(Button)`
 	opacity: ${props => props.disabled ? 0.2 : 1};
 `;
 
+type ButtonKey = string;
+
 export interface MoveButtonClickEvent {
 	direction: MoveDirection;
 	itemKey: string;
+	buttonKey: ButtonKey;
 }
 
 interface Props {
@@ -49,11 +52,14 @@ interface Props {
 	canMoveRight: boolean;
 	canMoveUp: boolean;
 	canMoveDown: boolean;
+
+	// A buttonKey to auto-focus
+	autoFocusKey: ButtonKey|null;
 }
 
 export default function MoveButtons(props: Props) {
 	const onButtonClick = useCallback((direction: MoveDirection) => {
-		props.onClick({ direction, itemKey: props.itemKey });
+		props.onClick({ direction, itemKey: props.itemKey, buttonKey: `${props.itemKey}-${direction}` });
 	}, [props.onClick, props.itemKey]);
 
 	function canMove(dir: MoveDirection) {
@@ -76,12 +82,14 @@ export default function MoveButtons(props: Props) {
 	const descriptionId = useId();
 
 	function renderButton(dir: MoveDirection) {
+		const key = `${props.itemKey}-${dir}`;
 		return <ArrowButton
 			disabled={!canMove(dir)}
 			level={ButtonLevel.Primary}
 			iconName={`fas fa-arrow-${dir}`}
 			iconLabel={iconLabel(dir)}
 			aria-describedby={descriptionId}
+			autoFocus={key === props.autoFocusKey}
 			onClick={() => onButtonClick(dir)}
 		/>;
 	}

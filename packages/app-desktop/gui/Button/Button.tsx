@@ -30,6 +30,7 @@ interface Props {
 	iconAnimation?: string;
 	tooltip?: string;
 	disabled?: boolean;
+	autoFocus?: boolean;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied;
 	style?: any;
 	size?: ButtonSize;
@@ -253,6 +254,7 @@ const Button = React.forwardRef((props: Props, ref: any) => {
 			size={props.size}
 			style={props.style}
 			disabled={props.disabled}
+			autoFocus={props.autoFocus}
 			title={props.tooltip}
 			className={props.className}
 			iconOnly={iconOnly}

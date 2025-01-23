@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useRef, useState, useEffect } from 'react';
+import { useRef, useState, useEffect, useCallback } from 'react';
 import useWindowResizeEvent from './utils/useWindowResizeEvent';
 import setLayoutItemProps from './utils/setLayoutItemProps';
 import useLayoutItemSizes, { LayoutItemSizes, itemSize, calculateMaxSizeAvailableForItem, itemMinWidth, itemMinHeight } from './utils/useLayoutItemSizes';
@@ -89,15 +89,22 @@ function ResizableLayout(props: Props) {
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	const [resizedItem, setResizedItem] = useState<any>(null);
+	const lastUsedMoveButtonKey = useRef<string|null>(null);
+
+	const onMoveButtonClick = useCallback((event: MoveButtonClickEvent) => {
+		lastUsedMoveButtonKey.current = event.buttonKey;
+		props.onMoveButtonClick(event);
+	}, [props.onMoveButtonClick]);
 
 	const renderMoveControls = (item: LayoutItem, parent: LayoutItem | null, size: Size) => {
 		return (
 			<StyledWrapperRoot key={item.key} size={size}>
 				<StyledMoveOverlay>
 					<MoveButtons
+						autoFocusKey={lastUsedMoveButtonKey.current}
 						itemKey={item.key}
 						itemLabel={props.layoutKeyToLabel(item.key)}
-						onClick={props.onMoveButtonClick}
+						onClick={onMoveButtonClick}
 						canMoveLeft={canMove(MoveDirection.Left, item, parent)}
 						canMoveRight={canMove(MoveDirection.Right, item, parent)}
 						canMoveUp={canMove(MoveDirection.Up, item, parent)}
