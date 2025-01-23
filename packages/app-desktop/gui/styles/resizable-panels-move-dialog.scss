@@ -1,0 +1,7 @@
+.resizable-panels-move-dialog {
+	padding: 0;
+
+	&::backdrop {
+		background-color: transparent !important;
+	}
+}
