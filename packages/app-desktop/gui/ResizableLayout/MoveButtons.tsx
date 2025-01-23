@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useCallback } from 'react';
+import { useCallback, useId } from 'react';
 import Button, { ButtonLevel } from '../Button/Button';
 import { MoveDirection } from './utils/movements';
 import styled from 'styled-components';
@@ -35,6 +35,7 @@ export interface MoveButtonClickEvent {
 interface Props {
 	onClick(event: MoveButtonClickEvent): void;
 	itemKey: string;
+	itemLabel: string;
 	canMoveLeft: boolean;
 	canMoveRight: boolean;
 	canMoveUp: boolean;
@@ -63,12 +64,15 @@ export default function MoveButtons(props: Props) {
 		throw new Error(`Invalid direction: ${unreachable}`);
 	};
 
+	const descriptionId = useId();
+
 	function renderButton(dir: MoveDirection) {
 		return <ArrowButton
 			disabled={!canMove(dir)}
 			level={ButtonLevel.Primary}
 			iconName={`fas fa-arrow-${dir}`}
 			iconLabel={iconLabel(dir)}
+			aria-describedby={descriptionId}
 			onClick={() => onButtonClick(dir)}
 		/>;
 	}
@@ -86,6 +90,7 @@ export default function MoveButtons(props: Props) {
 			<ButtonRow>
 				{renderButton(MoveDirection.Down)}
 			</ButtonRow>
+			<span id={descriptionId}>{props.itemLabel}</span>
 		</StyledRoot>
 	);
 }

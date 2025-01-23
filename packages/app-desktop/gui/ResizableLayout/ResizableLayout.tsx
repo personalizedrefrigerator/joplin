@@ -18,6 +18,7 @@ interface OnResizeEvent {
 
 interface Props {
 	layout: LayoutItem;
+	layoutKeyToLabel: (key: string)=> string;
 	onResize(event: OnResizeEvent): void;
 	width?: number;
 	height?: number;
@@ -89,29 +90,34 @@ function ResizableLayout(props: Props) {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	const [resizedItem, setResizedItem] = useState<any>(null);
 
-	function renderItemWrapper(comp: React.ReactNode, item: LayoutItem, parent: LayoutItem | null, size: Size, showMoveControls: boolean) {
-		const moveControls = (
-			<StyledMoveOverlay>
-				<MoveButtons
-					itemKey={item.key}
-					onClick={props.onMoveButtonClick}
-					canMoveLeft={canMove(MoveDirection.Left, item, parent)}
-					canMoveRight={canMove(MoveDirection.Right, item, parent)}
-					canMoveUp={canMove(MoveDirection.Up, item, parent)}
-					canMoveDown={canMove(MoveDirection.Down, item, parent)}
-				/>
-			</StyledMoveOverlay>
-		);
-
+	const renderMoveControls = (item: LayoutItem, parent: LayoutItem | null, size: Size) => {
 		return (
 			<StyledWrapperRoot key={item.key} size={size}>
-				{showMoveControls ? moveControls : comp}
+				<StyledMoveOverlay>
+					<MoveButtons
+						itemKey={item.key}
+						itemLabel={props.layoutKeyToLabel(item.key)}
+						onClick={props.onMoveButtonClick}
+						canMoveLeft={canMove(MoveDirection.Left, item, parent)}
+						canMoveRight={canMove(MoveDirection.Right, item, parent)}
+						canMoveUp={canMove(MoveDirection.Up, item, parent)}
+						canMoveDown={canMove(MoveDirection.Down, item, parent)}
+					/>
+				</StyledMoveOverlay>
+			</StyledWrapperRoot>
+		);
+	};
+
+	function renderItemWrapper(comp: React.ReactNode, item: LayoutItem, size: Size) {
+		return (
+			<StyledWrapperRoot key={item.key} size={size}>
+				{comp}
 			</StyledWrapperRoot>
 		);
 	}
 
 	function renderLayoutItem(
-		item: LayoutItem, parent: LayoutItem | null, sizes: LayoutItemSizes, isVisible: boolean, isLastChild: boolean, showMoveControls: boolean,
+		item: LayoutItem, parent: LayoutItem | null, sizes: LayoutItemSizes, isVisible: boolean, isLastChild: boolean, onlyMoveControls: boolean,
 	): React.ReactNode {
 		function onResizeStart() {
 			setResizedItem({
@@ -162,15 +168,14 @@ function ResizableLayout(props: Props) {
 				visible: isVisible,
 			});
 
-			const wrapper = renderItemWrapper(comp, item, parent, size, showMoveControls);
-
+			const wrapper = onlyMoveControls ? renderMoveControls(item, parent, size) : renderItemWrapper(comp, item, size);
 			return renderContainer(item, parent, sizes, resizedItemMaxSize, onResizeStart, onResize, onResizeStop, [wrapper], isLastChild, props.moveMode);
 		} else {
 			const childrenComponents = [];
 			for (let i = 0; i < item.children.length; i++) {
 				const child = item.children[i];
 				childrenComponents.push(
-					renderLayoutItem(child, item, sizes, isVisible && itemVisible(child, props.moveMode), i === item.children.length - 1, showMoveControls),
+					renderLayoutItem(child, item, sizes, isVisible && itemVisible(child, props.moveMode), i === item.children.length - 1, onlyMoveControls),
 				);
 			}
 
