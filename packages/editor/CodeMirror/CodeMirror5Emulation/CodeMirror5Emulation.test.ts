@@ -201,4 +201,13 @@ describe('CodeMirror5Emulation', () => {
 		const dom = codeMirror.editor.dom;
 		expect(dom.querySelectorAll(`.${testClassName}`)).toHaveLength(1);
 	});
+
+	it('.markText should throw when given non-integer boundaries', () => {
+		const codeMirror = makeCodeMirrorEmulation('Test...');
+
+		expect(() => codeMirror.markText(
+			{ line: 0, ch: 4.2 },
+			{ line: 0, ch: 5 },
+		)).toThrow(/is not an integer/i);
+	});
 });

@@ -52,7 +52,12 @@ const documentPositionFromPos = (doc: Text, pos: number): DocumentPosition => {
 
 const posFromDocumentPosition = (doc: Text, pos: DocumentPosition) => {
 	const line = doc.line(pos.line + 1);
-	return line.from + pos.ch;
+	const result = line.from + pos.ch;
+
+	if (!Number.isInteger(result)) {
+		throw new Error(`Document position ${result} (${pos.line}:${pos.ch}) is not an integer`);
+	}
+	return result;
 };
 
 export default class CodeMirror5Emulation extends BaseCodeMirror5Emulation {
