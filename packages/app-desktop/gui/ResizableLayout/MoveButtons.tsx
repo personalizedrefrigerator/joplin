@@ -11,6 +11,15 @@ const StyledRoot = styled.div`
 	padding: 5px;
 	background-color: ${props => props.theme.backgroundColor};
 	border-radius: 5px;
+
+	> .label {
+		text-align: center;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+
+		font-weight: bold;
+		padding-top: 4px;
+	}
 `;
 
 const ButtonRow = styled.div`
@@ -90,7 +99,7 @@ export default function MoveButtons(props: Props) {
 			<ButtonRow>
 				{renderButton(MoveDirection.Down)}
 			</ButtonRow>
-			<span id={descriptionId}>{props.itemLabel}</span>
+			<div className='label' id={descriptionId}>{props.itemLabel}</div>
 		</StyledRoot>
 	);
 }
