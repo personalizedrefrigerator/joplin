@@ -123,7 +123,7 @@ function ResizableLayout(props: Props) {
 		const resizedItemMaxSize = resizedItem && item.key === resizedItem.key ? resizedItem.maxSize : null;
 		const visible = itemVisible(item, props.moveMode);
 		const itemContainerProps = {
-			item, parent, sizes, resizedItemMaxSize, onResizeStart, onResizeStop, onResize, isLastChild, visible,
+			key: item.key, item, parent, sizes, resizedItemMaxSize, onResizeStart, onResizeStop, onResize, isLastChild, visible,
 		};
 		if (!item.children) {
 			const size = itemSize(item, parent, sizes, false);
