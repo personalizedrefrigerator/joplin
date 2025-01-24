@@ -10,10 +10,17 @@ import MoveButtons, { MoveButtonClickEvent } from './MoveButtons';
 import { StyledWrapperRoot, StyledMoveOverlay, MoveModeRootMessage } from './utils/style';
 import { Resizable, ResizeCallback, ResizeStartCallback } from 're-resizable';
 import Dialog from '../Dialog';
-const EventEmitter = require('events');
+import * as EventEmitter from 'events';
 
 interface OnResizeEvent {
 	layout: LayoutItem;
+}
+
+interface ResizedItem {
+	key: string;
+	initialWidth: number;
+	initialHeight: number;
+	maxSize: Size;
 }
 
 interface Props {
@@ -36,8 +43,7 @@ function itemVisible(item: LayoutItem, moveMode: boolean) {
 }
 
 function renderContainer(item: LayoutItem, parent: LayoutItem | null, sizes: LayoutItemSizes, resizedItemMaxSize: Size | null, onResizeStart: ResizeStartCallback, onResize: ResizeCallback, onResizeStop: ResizeCallback, children: React.ReactNode[], isLastChild: boolean, moveMode: boolean) {
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	const style: any = {
+	const style: React.CSSProperties = {
 		display: itemVisible(item, moveMode) ? 'flex' : 'none',
 		flexDirection: item.direction,
 	};
@@ -87,8 +93,7 @@ function renderContainer(item: LayoutItem, parent: LayoutItem | null, sizes: Lay
 function ResizableLayout(props: Props) {
 	const eventEmitter = useRef(new EventEmitter());
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	const [resizedItem, setResizedItem] = useState<any>(null);
+	const [resizedItem, setResizedItem] = useState<ResizedItem|null>(null);
 	const lastUsedMoveButtonKey = useRef<string|null>(null);
 
 	const onMoveButtonClick = useCallback((event: MoveButtonClickEvent) => {
@@ -126,17 +131,16 @@ function ResizableLayout(props: Props) {
 	function renderLayoutItem(
 		item: LayoutItem, parent: LayoutItem | null, sizes: LayoutItemSizes, isVisible: boolean, isLastChild: boolean, onlyMoveControls: boolean,
 	): React.ReactNode {
-		function onResizeStart() {
+		const onResizeStart: ResizeStartCallback = () => {
 			setResizedItem({
 				key: item.key,
 				initialWidth: sizes[item.key].width,
 				initialHeight: sizes[item.key].height,
 				maxSize: calculateMaxSizeAvailableForItem(item, parent, sizes),
 			});
-		}
+		};
 
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-		function onResize(_event: any, direction: string, _refToElement: any, delta: any) {
+		const onResize: ResizeCallback = (_event, direction, _refToElement, delta) => {
 			const newWidth = Math.max(itemMinWidth, resizedItem.initialWidth + delta.width);
 			const newHeight = Math.max(itemMinHeight, resizedItem.initialHeight + delta.height);
 
@@ -156,13 +160,12 @@ function ResizableLayout(props: Props) {
 
 			props.onResize({ layout: newLayout });
 			eventEmitter.current.emit('resize');
-		}
+		};
 
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-		function onResizeStop(_event: any, _direction: any, _refToElement: any, delta: any) {
+		const onResizeStop: ResizeCallback = (_event, _direction, _refToElement, delta) => {
 			onResize(_event, _direction, _refToElement, delta);
 			setResizedItem(null);
-		}
+		};
 
 		const resizedItemMaxSize = resizedItem && item.key === resizedItem.key ? resizedItem.maxSize : null;
 		if (!item.children) {
