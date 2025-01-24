@@ -167,7 +167,7 @@ function ResizableLayout(props: Props) {
 
 	function renderMoveModeBox() {
 		return <div>
-			<Dialog contentFillsScreen={true} className='resizable-panels-move-dialog'>
+			<Dialog contentFillsScreen={true} className='change-app-layout-dialog'>
 				<MoveModeRootMessage>{props.moveModeMessage}</MoveModeRootMessage>
 				{renderRoot(true)}
 			</Dialog>
