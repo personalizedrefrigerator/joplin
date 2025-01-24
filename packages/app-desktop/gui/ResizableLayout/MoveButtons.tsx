@@ -53,7 +53,8 @@ interface Props {
 	canMoveUp: boolean;
 	canMoveDown: boolean;
 
-	// A buttonKey to auto-focus
+	// A buttonKey to auto-focus. As one of the move buttons can change the app's layout,
+	// it's important to refocus the last-clicked button.
 	autoFocusKey: ButtonKey|null;
 }
 
@@ -81,15 +82,36 @@ export default function MoveButtons(props: Props) {
 
 	const descriptionId = useId();
 
+	const buttonKey = (dir: MoveDirection) => `${props.itemKey}-${dir}`;
+	const autoFocusDirection = (() => {
+		if (!props.autoFocusKey) return undefined;
+
+		const buttonDirections = [MoveDirection.Up, MoveDirection.Down, MoveDirection.Left, MoveDirection.Right];
+		const autoFocusDirection = buttonDirections.find(
+			direction => buttonKey(direction) === props.autoFocusKey,
+		);
+
+		if (!autoFocusDirection) {
+			return null;
+		}
+
+		const autoFocusDirectionEnabled = autoFocusDirection && canMove(autoFocusDirection);
+		if (autoFocusDirectionEnabled) {
+			return autoFocusDirection;
+		} else {
+			// Select an enabled direction instead
+			return buttonDirections.find(dir => canMove(dir));
+		}
+	})();
+
 	function renderButton(dir: MoveDirection) {
-		const key = `${props.itemKey}-${dir}`;
 		return <ArrowButton
 			disabled={!canMove(dir)}
 			level={ButtonLevel.Primary}
 			iconName={`fas fa-arrow-${dir}`}
 			iconLabel={iconLabel(dir)}
 			aria-describedby={descriptionId}
-			autoFocus={key === props.autoFocusKey}
+			autoFocus={autoFocusDirection === dir}
 			onClick={() => onButtonClick(dir)}
 		/>;
 	}
