@@ -6,8 +6,11 @@ import bridge from '../services/bridge';
 import { useContext, useEffect, useMemo, useRef } from 'react';
 import { WindowIdContext } from './NewWindowOrIFrame';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Partially refactor of code before rule was applied
+type ScreenProps = any;
+
 interface AppScreen {
-	screen: React.ComponentType;
+	screen: React.ComponentType<ScreenProps>;
 	title?: ()=> string;
 }
 
