@@ -8,9 +8,10 @@ import { Size, LayoutItem } from './utils/types';
 import { canMove, MoveDirection } from './utils/movements';
 import MoveButtons, { MoveButtonClickEvent } from './MoveButtons';
 import { StyledWrapperRoot, StyledMoveOverlay, MoveModeRootMessage } from './utils/style';
-import { Resizable, ResizeCallback, ResizeStartCallback } from 're-resizable';
+import type { ResizeCallback, ResizeStartCallback } from 're-resizable';
 import Dialog from '../Dialog';
 import * as EventEmitter from 'events';
+import LayoutItemContainer from './LayoutItemContainer';
 
 interface OnResizeEvent {
 	layout: LayoutItem;
@@ -40,54 +41,6 @@ function itemVisible(item: LayoutItem, moveMode: boolean) {
 	if (moveMode) return true;
 	if (item.children && !item.children.length) return false;
 	return item.visible !== false;
-}
-
-function renderContainer(item: LayoutItem, parent: LayoutItem | null, sizes: LayoutItemSizes, resizedItemMaxSize: Size | null, onResizeStart: ResizeStartCallback, onResize: ResizeCallback, onResizeStop: ResizeCallback, children: React.ReactNode[], isLastChild: boolean, moveMode: boolean) {
-	const style: React.CSSProperties = {
-		display: itemVisible(item, moveMode) ? 'flex' : 'none',
-		flexDirection: item.direction,
-	};
-
-	const size: Size = itemSize(item, parent, sizes, true);
-
-	const className = `resizableLayoutItem rli-${item.key}`;
-	if (item.resizableRight || item.resizableBottom) {
-		const enable = {
-			top: false,
-			right: !!item.resizableRight && !isLastChild,
-			bottom: !!item.resizableBottom && !isLastChild,
-			left: false,
-			topRight: false,
-			bottomRight: false,
-			bottomLeft: false,
-			topLeft: false,
-		};
-
-		return (
-			<Resizable
-				key={item.key}
-				className={className}
-				style={style}
-				size={size}
-				onResizeStart={onResizeStart}
-				onResize={onResize}
-				onResizeStop={onResizeStop}
-				enable={enable}
-				minWidth={'minWidth' in item ? item.minWidth : itemMinWidth}
-				minHeight={'minHeight' in item ? item.minHeight : itemMinHeight}
-				maxWidth={resizedItemMaxSize?.width}
-				maxHeight={resizedItemMaxSize?.height}
-			>
-				{children}
-			</Resizable>
-		);
-	} else {
-		return (
-			<div key={item.key} className={className} style={{ ...style, ...size }}>
-				{children}
-			</div>
-		);
-	}
 }
 
 function ResizableLayout(props: Props) {
@@ -168,6 +121,10 @@ function ResizableLayout(props: Props) {
 		};
 
 		const resizedItemMaxSize = resizedItem && item.key === resizedItem.key ? resizedItem.maxSize : null;
+		const visible = itemVisible(item, props.moveMode);
+		const itemContainerProps = {
+			item, parent, sizes, resizedItemMaxSize, onResizeStart, onResizeStop, onResize, isLastChild, visible,
+		};
 		if (!item.children) {
 			const size = itemSize(item, parent, sizes, false);
 
@@ -179,7 +136,9 @@ function ResizableLayout(props: Props) {
 			});
 
 			const wrapper = onlyMoveControls ? renderMoveControls(item, parent, size) : renderItemWrapper(comp, item, size);
-			return renderContainer(item, parent, sizes, resizedItemMaxSize, onResizeStart, onResize, onResizeStop, [wrapper], isLastChild, props.moveMode);
+			return <LayoutItemContainer {...itemContainerProps}>
+				{wrapper}
+			</LayoutItemContainer>;
 		} else {
 			const childrenComponents = [];
 			for (let i = 0; i < item.children.length; i++) {
@@ -189,7 +148,9 @@ function ResizableLayout(props: Props) {
 				);
 			}
 
-			return renderContainer(item, parent, sizes, resizedItemMaxSize, onResizeStart, onResize, onResizeStop, childrenComponents, isLastChild, props.moveMode);
+			return <LayoutItemContainer {...itemContainerProps}>
+				{childrenComponents}
+			</LayoutItemContainer>;
 		}
 	}
 
