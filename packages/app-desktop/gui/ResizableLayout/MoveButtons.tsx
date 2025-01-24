@@ -49,8 +49,9 @@ interface Props {
 	canMoveUp: boolean;
 	canMoveDown: boolean;
 
-	// A buttonKey to auto-focus. As one of the move buttons can change the app's layout,
-	// it's important to refocus the last-clicked button.
+	// Specifies which button to auto-focus (if any). Clicking a "Move ..." button changes the app's layout. By default, this
+	// causes focus to jump to the start of the move dialog. Providing the key of the last-clicked button allows focus
+	// to be restored after changing the app layout:
 	autoFocusKey: ButtonKey|null;
 }
 
