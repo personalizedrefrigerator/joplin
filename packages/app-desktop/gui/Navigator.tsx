@@ -6,7 +6,7 @@ import bridge from '../services/bridge';
 import { useContext, useEffect, useMemo, useRef } from 'react';
 import { WindowIdContext } from './NewWindowOrIFrame';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Partially refactor of code before rule was applied
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Partial refactor of code from before rule was applied
 type ScreenProps = any;
 
 interface AppScreen {
@@ -56,7 +56,6 @@ const useWindowRefocusManager = (route: AppStateRoute) => {
 };
 
 const NavigatorComponent: React.FC<Props> = props => {
-
 	const route = props.route;
 	const screenInfo = props.screens[route?.routeName];
 
