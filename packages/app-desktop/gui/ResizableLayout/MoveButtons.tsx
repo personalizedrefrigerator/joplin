@@ -76,7 +76,8 @@ export default function MoveButtons(props: Props) {
 		throw new Error(`Invalid direction: ${unreachable}`);
 	};
 
-	const descriptionId = useId();
+	const baseId = useId();
+	const descriptionId = `${baseId}-description`;
 
 	const buttonKey = (dir: MoveDirection) => `${props.itemKey}-${dir}`;
 	const autoFocusDirection = (() => {
@@ -101,13 +102,17 @@ export default function MoveButtons(props: Props) {
 	})();
 
 	function renderButton(dir: MoveDirection) {
+		const buttonId = `${baseId}-button-${dir}`;
 		return <ArrowButton
+			id={buttonId}
 			disabled={!canMove(dir)}
 			level={ButtonLevel.Primary}
 			iconName={`fas fa-arrow-${dir}`}
 			iconLabel={iconLabel(dir)}
-			aria-describedby={descriptionId}
-			autoFocus={autoFocusDirection === dir}
+			aria-labelledby={`${buttonId} ${descriptionId}`}
+			// Use 'true' as a string to use the browser's default autoFocus behavior
+			// (rather than the Electron behavior).
+			autoFocus={autoFocusDirection === dir ? 'true' : undefined}
 			onClick={() => onButtonClick(dir)}
 		/>;
 	}
@@ -125,7 +130,11 @@ export default function MoveButtons(props: Props) {
 			<ButtonRow>
 				{renderButton(MoveDirection.Down)}
 			</ButtonRow>
-			<div className='label' id={descriptionId}>{props.itemLabel}</div>
+			<div
+				className='label'
+				aria-live={autoFocusDirection ? 'polite' : null}
+				id={descriptionId}
+			>{props.itemLabel}</div>
 		</StyledRoot>
 	);
 }

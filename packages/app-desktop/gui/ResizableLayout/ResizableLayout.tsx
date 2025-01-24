@@ -4,7 +4,7 @@ import useWindowResizeEvent from './utils/useWindowResizeEvent';
 import setLayoutItemProps from './utils/setLayoutItemProps';
 import useLayoutItemSizes, { LayoutItemSizes, itemSize, calculateMaxSizeAvailableForItem, itemMinWidth, itemMinHeight } from './utils/useLayoutItemSizes';
 import validateLayout from './utils/validateLayout';
-import { Size, LayoutItem } from './utils/types';
+import { Size, LayoutItem, LayoutItemDirection } from './utils/types';
 import { canMove, MoveDirection } from './utils/movements';
 import MoveButtons, { MoveButtonClickEvent } from './MoveButtons';
 import { StyledWrapperRoot, StyledMoveOverlay, MoveModeRootMessage } from './utils/style';
@@ -18,7 +18,7 @@ interface OnResizeEvent {
 
 interface Props {
 	layout: LayoutItem;
-	layoutKeyToLabel: (key: string)=> string;
+	layoutLabel: (itemKey: string, rowIndex: number, colIndex: number)=> string;
 	onResize(event: OnResizeEvent): void;
 	width?: number;
 	height?: number;
@@ -96,14 +96,19 @@ function ResizableLayout(props: Props) {
 		props.onMoveButtonClick(event);
 	}, [props.onMoveButtonClick]);
 
-	const renderMoveControls = (item: LayoutItem, parent: LayoutItem | null, size: Size) => {
+	type ItemPosition = {
+		rowIndex: number;
+		colIndex: number;
+	};
+
+	const renderMoveControls = (item: LayoutItem, parent: LayoutItem | null, size: Size, { rowIndex, colIndex }: ItemPosition) => {
 		return (
 			<StyledWrapperRoot key={item.key} size={size}>
 				<StyledMoveOverlay>
 					<MoveButtons
 						autoFocusKey={lastUsedMoveButtonKey.current}
 						itemKey={item.key}
-						itemLabel={props.layoutKeyToLabel(item.key)}
+						itemLabel={props.layoutLabel(item.key, rowIndex, colIndex)}
 						onClick={onMoveButtonClick}
 						canMoveLeft={canMove(MoveDirection.Left, item, parent)}
 						canMoveRight={canMove(MoveDirection.Right, item, parent)}
@@ -124,7 +129,7 @@ function ResizableLayout(props: Props) {
 	}
 
 	function renderLayoutItem(
-		item: LayoutItem, parent: LayoutItem | null, sizes: LayoutItemSizes, isVisible: boolean, isLastChild: boolean, onlyMoveControls: boolean,
+		item: LayoutItem, parent: LayoutItem | null, sizes: LayoutItemSizes, isVisible: boolean, isLastChild: boolean, onlyMoveControls: boolean, position: ItemPosition,
 	): React.ReactNode {
 		function onResizeStart() {
 			setResizedItem({
@@ -175,14 +180,25 @@ function ResizableLayout(props: Props) {
 				visible: isVisible,
 			});
 
-			const wrapper = onlyMoveControls ? renderMoveControls(item, parent, size) : renderItemWrapper(comp, item, size);
+			const wrapper = onlyMoveControls ? renderMoveControls(item, parent, size, position) : renderItemWrapper(comp, item, size);
 			return renderContainer(item, parent, sizes, resizedItemMaxSize, onResizeStart, onResize, onResizeStop, [wrapper], isLastChild, props.moveMode);
 		} else {
 			const childrenComponents = [];
 			for (let i = 0; i < item.children.length; i++) {
 				const child = item.children[i];
 				childrenComponents.push(
-					renderLayoutItem(child, item, sizes, isVisible && itemVisible(child, props.moveMode), i === item.children.length - 1, onlyMoveControls),
+					renderLayoutItem(
+						child,
+						item,
+						sizes,
+						isVisible && itemVisible(child, props.moveMode),
+						i === item.children.length - 1,
+						onlyMoveControls,
+						{
+							rowIndex: position.rowIndex + (item.direction === LayoutItemDirection.Row ? i : 0),
+							colIndex: position.colIndex + (item.direction === LayoutItemDirection.Column ? i : 0),
+						},
+					),
 				);
 			}
 
@@ -198,7 +214,7 @@ function ResizableLayout(props: Props) {
 	const sizes = useLayoutItemSizes(props.layout, props.moveMode);
 
 	const renderRoot = (moveControlsOnly: boolean) => {
-		return renderLayoutItem(props.layout, null, sizes, itemVisible(props.layout, props.moveMode), true, moveControlsOnly);
+		return renderLayoutItem(props.layout, null, sizes, itemVisible(props.layout, props.moveMode), true, moveControlsOnly, { rowIndex: 0, colIndex: 0 });
 	};
 
 	function renderMoveModeBox() {

@@ -741,8 +741,8 @@ class MainScreenComponent extends React.Component<Props, State> {
 		);
 	}
 
-	private layoutKeyToLabel = (key: string) => {
-		return layoutKeyToLabel(key, this.props.plugins);
+	private layoutKeyToLabel = (key: string, row: number, column: number) => {
+		return `${layoutKeyToLabel(key, this.props.plugins)} (${row}, ${column})`;
 	};
 
 	public render() {
@@ -763,7 +763,7 @@ class MainScreenComponent extends React.Component<Props, State> {
 				onResize={this.resizableLayout_resize}
 				onMoveButtonClick={this.resizableLayout_moveButtonClick}
 				renderItem={this.resizableLayout_renderItem}
-				layoutKeyToLabel={this.layoutKeyToLabel}
+				layoutLabel={this.layoutKeyToLabel}
 				moveMode={this.props.layoutMoveMode}
 				moveModeMessage={_('Use the arrows to move the layout items. Press "Escape" to exit.')}
 			/>
