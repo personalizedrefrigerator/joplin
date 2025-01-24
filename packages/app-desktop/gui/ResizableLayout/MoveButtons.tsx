@@ -106,14 +106,13 @@ export default function MoveButtons(props: Props) {
 			level={ButtonLevel.Primary}
 			iconName={`fas fa-arrow-${dir}`}
 			iconLabel={iconLabel(dir)}
-			aria-describedby={descriptionId}
 			autoFocus={autoFocusDirection === dir}
 			onClick={() => onButtonClick(dir)}
 		/>;
 	}
 
 	return (
-		<StyledRoot>
+		<StyledRoot role='group' aria-labelledby={descriptionId}>
 			<ButtonRow>
 				{renderButton(MoveDirection.Up)}
 			</ButtonRow>
