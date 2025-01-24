@@ -18,11 +18,8 @@ export enum ButtonSize {
 	Normal = 2,
 }
 
-type BaseButtonProps = Omit<
-React.DetailedHTMLProps<React.HTMLAttributes<HTMLButtonElement>, HTMLButtonElement>,
-'onClick'
->;
-interface Props extends BaseButtonProps {
+type ReactButtonProps = React.DetailedHTMLProps<React.HTMLAttributes<HTMLButtonElement>, HTMLButtonElement>;
+interface Props extends Omit<ReactButtonProps, 'onClick'> {
 	title?: string;
 	iconName?: string;
 	level?: ButtonLevel;
