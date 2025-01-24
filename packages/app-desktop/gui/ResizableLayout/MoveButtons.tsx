@@ -13,12 +13,8 @@ const StyledRoot = styled.div`
 	border-radius: 5px;
 
 	> .label {
-		text-align: center;
-		text-overflow: ellipsis;
-		white-space: nowrap;
-
-		font-weight: bold;
-		padding-top: 4px;
+		// Used only for accessibility tools
+		display: none;
 	}
 `;
 

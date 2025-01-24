@@ -29,11 +29,11 @@ export const StyledMoveOverlay = styled.div`
 `;
 
 export const MoveModeRootMessage = styled.h1`
-	position:absolute;
+	position: absolute;
 	bottom: 10px;
+	font-size: 1em;
 
 	z-index:200;
 	background-color: ${props => props.theme.backgroundColor};
 	padding: 10px;
-	border-radius: 5px;
 `;
