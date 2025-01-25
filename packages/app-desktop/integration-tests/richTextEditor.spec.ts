@@ -144,6 +144,25 @@ test.describe('richTextEditor', () => {
 		await expect(editor.richTextEditor).toBeFocused();
 	});
 
+	test('double-clicking a code block should edit it', async ({ mainWindow }) => {
+		const mainScreen = await new MainScreen(mainWindow).setup();
+		await mainScreen.createNewNote('Testing code blocks');
+
+		const editor = mainScreen.noteEditor;
+		await editor.toggleEditorsButton.click();
+
+		// Make the code block
+		await editor.toggleCodeBlockButton.click();
+		const codeEditor = editor.richTextCodeEditor;
+		await codeEditor.textArea.fill('This is a test code block!');
+		await codeEditor.submit();
+
+		// Double-clicking the code block should open it
+		const renderedCode = editor.getRichTextFrameLocator().locator('pre.hljs', { hasText: 'This is a test code block!' });
+		await renderedCode.first().dblclick();
+		await codeEditor.waitFor();
+	});
+
 	test('disabling tab indentation should also disable it in code dialogs', async ({ mainWindow, electronApp }) => {
 		const mainScreen = await new MainScreen(mainWindow).setup();
 		await mainScreen.createNewNote('Testing code blocks');
