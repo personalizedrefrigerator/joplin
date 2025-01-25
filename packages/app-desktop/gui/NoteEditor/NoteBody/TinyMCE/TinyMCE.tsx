@@ -42,6 +42,7 @@ import { hasProtocol } from '@joplin/utils/url';
 import useTabIndenter from './utils/useTabIndenter';
 import useKeyboardRefocusHandler from './utils/useKeyboardRefocusHandler';
 import useDocument from '../../../hooks/useDocument';
+import useEmbeddedContentEditor from './utils/useEmbeddedContentEditor';
 
 const logger = Logger.create('TinyMCE');
 
@@ -72,14 +73,6 @@ function awfulInitHack(html: string): string {
 	return html === '<div id="rendered-md"></div>' ? '<div id="rendered-md"><p></p></div>' : html;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-function findEditableContainer(node: any): any {
-	while (node) {
-		if (node.classList && node.classList.contains('joplin-editable')) return node;
-		node = node.parentNode;
-	}
-	return null;
-}
 
 let markupToHtml_ = new MarkupToHtml();
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
@@ -130,19 +123,20 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: any) => {
 
 	const { scrollToPercent } = useScroll({ editor, onScroll: props.onScroll });
 
-	usePluginServiceRegistration(ref);
-	useContextMenu(editor, props.plugins, props.dispatch, props.htmlToMarkdown, props.markupToHtml);
-	useTabIndenter(editor);
-	useKeyboardRefocusHandler(editor);
-
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	const dispatchDidUpdate = (editor: any) => {
+	const dispatchDidUpdate = useCallback((editor: Editor) => {
 		if (dispatchDidUpdateIID_) shim.clearTimeout(dispatchDidUpdateIID_);
 		dispatchDidUpdateIID_ = shim.setTimeout(() => {
 			dispatchDidUpdateIID_ = null;
 			if (editor && editor.getDoc()) editor.getDoc().dispatchEvent(new Event('joplin-noteDidUpdate'));
 		}, 10);
-	};
+	}, []);
+
+	usePluginServiceRegistration(ref);
+	useContextMenu(editor, props.plugins, props.dispatch, props.htmlToMarkdown, props.markupToHtml);
+	useTabIndenter(editor);
+	useEmbeddedContentEditor({ editor, markupToHtml, dispatchDidUpdate });
+	useKeyboardRefocusHandler(editor);
+
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	const insertResourcesIntoContent = useCallback(async (filePaths: string[] = null, options: any = null) => {
@@ -179,7 +173,7 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: any) => {
 				props.onMessage({ channel: href });
 			}
 		}
-	}, [editor, props.onMessage]);
+	}, [editor, props.onMessage, dispatchDidUpdate]);
 
 	useImperativeHandle(ref, () => {
 		return {
@@ -819,11 +813,6 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: any) => {
 					editor.addShortcut('Meta+Shift+9', '', () => editor.execCommand('InsertJoplinChecklist'));
 
 					// TODO: remove event on unmount?
-					editor.on('DblClick', (event) => {
-						const editable = findEditableContainer(event.target);
-						if (editable) openEditDialog(editor, markupToHtml, dispatchDidUpdate, editable);
-					});
-
 					editor.on('drop', (event) => {
 						// Prevent the message "Dropped file type is not supported" from showing up.
 						// It was added in TinyMCE 5.4 and doesn't apply since we do support

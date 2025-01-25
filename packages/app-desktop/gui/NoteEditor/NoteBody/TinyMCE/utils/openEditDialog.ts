@@ -1,7 +1,9 @@
 import { _ } from '@joplin/lib/locale';
 import { MarkupToHtml } from '@joplin/renderer';
-import { TinyMceEditorEvents } from './types';
+import { DispatchDidUpdateCallback, TinyMceEditorEvents } from './types';
 import { focus } from '@joplin/lib/utils/focusHandler';
+import { RefObject } from 'react';
+import { MarkupToHtmlHandler } from '../../../utils/types';
 const taboverride = require('taboverride');
 
 interface SourceInfo {
@@ -81,8 +83,13 @@ function editableInnerHtml(html: string): string {
 	return editable[0].innerHTML;
 }
 
-// eslint-disable-next-line @typescript-eslint/ban-types, @typescript-eslint/no-explicit-any -- Old code before rule was applied, Old code before rule was applied
-export default function openEditDialog(editor: any, markupToHtml: any, dispatchDidUpdate: Function, editable: any) {
+export default function openEditDialog(
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied, Old code before rule was applied
+	editor: any,
+	markupToHtml: RefObject<MarkupToHtmlHandler>,
+	dispatchDidUpdate: DispatchDidUpdateCallback,
+	editable: Element,
+) {
 	const source = editable ? findBlockSource(editable) : newBlockSource();
 
 	editor.windowManager.open({

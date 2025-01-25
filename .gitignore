@@ -231,6 +231,7 @@ packages/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/utils/shouldPasteResources.
 packages/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/utils/shouldPasteResources.js
 packages/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/utils/types.js
 packages/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/utils/useContextMenu.js
+packages/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/utils/useEmbeddedContentEditor.js
 packages/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/utils/useKeyboardRefocusHandler.js
 packages/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/utils/useLinkTooltips.js
 packages/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/utils/useScroll.js
