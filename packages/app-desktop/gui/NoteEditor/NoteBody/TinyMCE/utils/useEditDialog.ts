@@ -1,91 +1,32 @@
-import { _ } from '@joplin/lib/locale';
-import { MarkupToHtml } from '@joplin/renderer';
+import { RefObject, useMemo } from 'react';
+import type { Editor } from 'tinymce';
 import { DispatchDidUpdateCallback, TinyMceEditorEvents } from './types';
-import { Editor } from 'tinymce';
-import Setting from '@joplin/lib/models/Setting';
-import { focus } from '@joplin/lib/utils/focusHandler';
-import { RefObject } from 'react';
 import { MarkupToHtmlHandler } from '../../../utils/types';
-const taboverride = require('taboverride');
+import { _ } from '@joplin/lib/locale';
+import enableTextAreaTab, { TextAreaTabHandler } from './enableTextAreaTab';
+import { MarkupToHtml } from '@joplin/renderer';
+
+interface Props {
+	editor: Editor;
+	markupToHtml: RefObject<MarkupToHtmlHandler>;
+	dispatchDidUpdate: DispatchDidUpdateCallback;
+}
+
+export interface EditDialogControl {
+	editNew: ()=> void;
+	editExisting: (elementInEditable: Node)=> void;
+	isEditable: (element: Node)=> boolean;
+}
 
 interface SourceInfo {
 	openCharacters: string;
 	closeCharacters: string;
 	content: string;
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	node: any;
+	node: Element;
 	language: string;
 }
 
-const createTextAreaKeyListeners = () => {
-	let hasListeners = true;
-
-	// Selectively enable/disable taboverride based on settings -- remove taboverride
-	// when pressing tab if tab is expected to move focus.
-	const onKeyDown = (event: KeyboardEvent) => {
-		if (event.key === 'Tab') {
-			if (Setting.value('editor.tabMovesFocus')) {
-				taboverride.utils.removeListeners(event.currentTarget);
-				hasListeners = false;
-			} else {
-				// Prevent the default focus-changing behavior
-				event.preventDefault();
-				requestAnimationFrame(() => {
-					focus('openEditDialog::dialogTextArea_keyDown', event.target);
-				});
-			}
-		}
-	};
-
-	const onKeyUp = (event: KeyboardEvent) => {
-		if (event.key === 'Tab' && !hasListeners) {
-			taboverride.utils.addListeners(event.currentTarget);
-			hasListeners = true;
-		}
-	};
-
-	return { onKeyDown, onKeyUp };
-};
-
-interface TextAreaTabHandler {
-	remove(): void;
-}
-
-// Allows pressing tab in a textarea to input an actual tab (instead of changing focus)
-// taboverride will take care of actually inserting the tab character, while the keydown
-// event listener will override the default behaviour, which is to focus the next field.
-function enableTextAreaTab(document: Document): TextAreaTabHandler {
-	type RemoveCallback = ()=> void;
-	const removeCallbacks: RemoveCallback[] = [];
-
-	const textAreas = document.querySelectorAll<HTMLTextAreaElement>('.tox-textarea');
-	for (const textArea of textAreas) {
-		const { onKeyDown, onKeyUp } = createTextAreaKeyListeners();
-		textArea.addEventListener('keydown', onKeyDown);
-		textArea.addEventListener('keyup', onKeyUp);
-
-		// Enable/disable taboverride **after** the listeners above.
-		// The custom keyup/keydown need to have higher precedence.
-		taboverride.set(textArea, true);
-
-		removeCallbacks.push(() => {
-			taboverride.set(textArea, false);
-			textArea.removeEventListener('keyup', onKeyUp);
-			textArea.removeEventListener('keydown', onKeyDown);
-		});
-	}
-
-	return {
-		remove: () => {
-			for (const callback of removeCallbacks) {
-				callback();
-			}
-		},
-	};
-}
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-function findBlockSource(node: any): SourceInfo {
+function findBlockSource(node: Element): SourceInfo {
 	const sources = node.getElementsByClassName('joplin-source');
 	if (!sources.length) throw new Error('No source for node');
 	const source = sources[0];
@@ -129,15 +70,13 @@ function editableInnerHtml(html: string): string {
 	return editable[0].innerHTML;
 }
 
-export default function openEditDialog(
+function openEditDialog(
 	editor: Editor,
 	markupToHtml: RefObject<MarkupToHtmlHandler>,
 	dispatchDidUpdate: DispatchDidUpdateCallback,
 	editable: Element,
 ) {
 	const source = editable ? findBlockSource(editable) : newBlockSource();
-
-	const containerDocument = editor.getContainer().ownerDocument;
 	let tabHandler: TextAreaTabHandler|null = null;
 
 	editor.windowManager.open({
@@ -196,6 +135,40 @@ export default function openEditDialog(
 	});
 
 	window.requestAnimationFrame(() => {
-		tabHandler = enableTextAreaTab(containerDocument);
+		const containerDocument = editor.getContainer().ownerDocument;
+		const textAreas = containerDocument.querySelectorAll<HTMLTextAreaElement>('.tox-textarea');
+		tabHandler = enableTextAreaTab([...textAreas]);
 	});
 }
+
+const findEditableContainer = (node: Node) => {
+	if (node.nodeName.startsWith('#')) { // Not an element, e.g. #text
+		node = node.parentElement;
+	}
+	return (node as Element)?.closest('.joplin-editable');
+};
+
+const useEditDialog = ({
+	editor, markupToHtml, dispatchDidUpdate,
+}: Props): EditDialogControl => {
+	return useMemo(() => {
+		const edit = (editable: Element|null) => {
+			openEditDialog(editor, markupToHtml, dispatchDidUpdate, editable);
+		};
+
+		return {
+			isEditable: element => !!findEditableContainer(element),
+			editExisting: (element: Node) => {
+				const editable = findEditableContainer(element);
+				if (editable) {
+					edit(editable);
+				}
+			},
+			editNew: () => {
+				edit(null);
+			},
+		};
+	}, [editor, markupToHtml, dispatchDidUpdate]);
+};
+
+export default useEditDialog;

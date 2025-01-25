@@ -19,7 +19,6 @@ import { MarkupLanguage, MarkupToHtml } from '@joplin/renderer';
 import BaseItem from '@joplin/lib/models/BaseItem';
 import setupToolbarButtons from './utils/setupToolbarButtons';
 import { plainTextToHtml } from '@joplin/lib/htmlUtils';
-import openEditDialog from './utils/openEditDialog';
 import { themeStyle } from '@joplin/lib/theme';
 import { loadScript } from '../../../utils/loadScript';
 import bridge from '../../../../services/bridge';
@@ -42,7 +41,8 @@ import { hasProtocol } from '@joplin/utils/url';
 import useTabIndenter from './utils/useTabIndenter';
 import useKeyboardRefocusHandler from './utils/useKeyboardRefocusHandler';
 import useDocument from '../../../hooks/useDocument';
-import useEmbeddedContentEditor from './utils/useEmbeddedContentEditor';
+import useEditDialog from './utils/useEditDialog';
+import useEditDialogEventListeners from './utils/useEditDialogEventListeners';
 
 const logger = Logger.create('TinyMCE');
 
@@ -131,13 +131,15 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: any) => {
 		}, 10);
 	}, []);
 
+	const editDialog = useEditDialog({ editor, markupToHtml, dispatchDidUpdate });
+	const editDialogRef = useRef(editDialog);
+	editDialogRef.current = editDialog;
+
+	useEditDialogEventListeners(editor, editDialog);
 	usePluginServiceRegistration(ref);
-	useContextMenu(editor, props.plugins, props.dispatch, props.htmlToMarkdown, props.markupToHtml);
-	useEmbeddedContentEditor({ editor, markupToHtml, dispatchDidUpdate });
+	useContextMenu(editor, props.plugins, props.dispatch, props.htmlToMarkdown, props.markupToHtml, editDialog);
 	useTabIndenter(editor, !props.tabMovesFocus);
 	useKeyboardRefocusHandler(editor);
-
-
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	const insertResourcesIntoContent = useCallback(async (filePaths: string[] = null, options: any = null) => {
@@ -747,7 +749,7 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: any) => {
 						tooltip: _('Code Block'),
 						icon: 'code-sample',
 						onAction: async function() {
-							openEditDialog(editor, markupToHtml, dispatchDidUpdate, null);
+							editDialogRef.current.editNew();
 						},
 					});
 

@@ -14,6 +14,9 @@ import Resource from '@joplin/lib/models/Resource';
 import { TinyMceEditorEvents } from './types';
 import { HtmlToMarkdownHandler, MarkupToHtmlHandler } from '../../../utils/types';
 import { Editor } from 'tinymce';
+import { EditDialogControl } from './useEditDialog';
+import { Dispatch } from 'redux';
+import { _ } from '@joplin/lib/locale';
 
 const Menu = bridge().Menu;
 const MenuItem = bridge().MenuItem;
@@ -52,8 +55,7 @@ interface ContextMenuActionOptions {
 
 const contextMenuActionOptions: ContextMenuActionOptions = { current: null };
 
-// eslint-disable-next-line @typescript-eslint/ban-types, @typescript-eslint/no-explicit-any -- Old code before rule was applied, Old code before rule was applied
-export default function(editor: Editor, plugins: PluginStates, dispatch: Function, htmlToMd: HtmlToMarkdownHandler, mdToHtml: MarkupToHtmlHandler) {
+export default function(editor: Editor, plugins: PluginStates, dispatch: Dispatch, htmlToMd: HtmlToMarkdownHandler, mdToHtml: MarkupToHtmlHandler, editDialog: EditDialogControl) {
 	useEffect(() => {
 		if (!editor) return () => {};
 
@@ -68,6 +70,17 @@ export default function(editor: Editor, plugins: PluginStates, dispatch: Functio
 			event.preventDefault();
 
 			const menu = new Menu();
+
+			if (editDialog.isEditable(element)) {
+				menu.append(new MenuItem({
+					type: 'normal',
+					label: _('Edit'),
+					click: () => {
+						editDialog.editExisting(element);
+					},
+				}));
+				menu.append(new MenuItem({ type: 'separator' }));
+			}
 
 			let itemType: ContextMenuItemType = ContextMenuItemType.None;
 			let resourceId = '';
@@ -136,5 +149,5 @@ export default function(editor: Editor, plugins: PluginStates, dispatch: Functio
 				targetWindow.webContents.off('context-menu', onContextMenu);
 			}
 		};
-	}, [editor, plugins, dispatch, htmlToMd, mdToHtml]);
+	}, [editor, plugins, dispatch, htmlToMd, mdToHtml, editDialog]);
 }

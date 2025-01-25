@@ -110,8 +110,7 @@ export interface NoteBodyEditorProps {
 	htmlToMarkdown: HtmlToMarkdownHandler;
 	allAssets: (markupLanguage: MarkupLanguage, options: AllAssetsOptions)=> Promise<RenderResultPluginAsset[]>;
 	disabled: boolean;
-	// eslint-disable-next-line @typescript-eslint/ban-types -- Old code before rule was applied
-	dispatch: Function;
+	dispatch: Dispatch;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	noteToolbar: any;
 	setLocalSearchResultCount(count: number): void;
