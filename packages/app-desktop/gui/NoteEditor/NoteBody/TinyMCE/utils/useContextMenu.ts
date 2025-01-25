@@ -62,26 +62,7 @@ export default function(editor: Editor, plugins: PluginStates, dispatch: Dispatc
 		const contextMenuItems = menuItems(dispatch, htmlToMd, mdToHtml);
 		const targetWindow = bridge().activeWindow();
 
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-		function onContextMenu(event: ElectronEvent, params: any) {
-			const element = contextMenuElement(editor, params.x, params.y);
-			if (!element) return;
-
-			event.preventDefault();
-
-			const menu = new Menu();
-
-			if (editDialog.isEditable(element)) {
-				menu.append(new MenuItem({
-					type: 'normal',
-					label: _('Edit'),
-					click: () => {
-						editDialog.editExisting(element);
-					},
-				}));
-				menu.append(new MenuItem({ type: 'separator' }));
-			}
-
+		const makeMainMenuItems = (element: Element) => {
 			let itemType: ContextMenuItemType = ContextMenuItemType.None;
 			let resourceId = '';
 			let linkToCopy = null;
@@ -116,29 +97,57 @@ export default function(editor: Editor, plugins: PluginStates, dispatch: Dispatc
 				mdToHtml,
 			};
 
+			const result = [];
 			for (const itemName in contextMenuItems) {
 				const item = contextMenuItems[itemName];
 
 				if (!item.isActive(itemType, contextMenuActionOptions.current)) continue;
 
-				menu.append(new MenuItem({
+				result.push(new MenuItem({
 					label: item.label,
 					click: () => {
 						item.onAction(contextMenuActionOptions.current);
 					},
 				}));
 			}
+			return result;
+		};
 
+		const makeEditableMenuItems = (element: Element) => {
+			if (editDialog.isEditable(element)) {
+				return [
+					new MenuItem({
+						type: 'normal',
+						label: _('Edit'),
+						click: () => {
+							editDialog.editExisting(element);
+						},
+					}),
+					new MenuItem({ type: 'separator' }),
+				];
+			}
+			return [];
+		};
+
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
+		function onContextMenu(event: ElectronEvent, params: any) {
+			const element = contextMenuElement(editor, params.x, params.y);
+			if (!element) return;
+
+			event.preventDefault();
+
+			const menu = new Menu();
+			const menuItems = [];
+
+			menuItems.push(...makeEditableMenuItems(element));
+			menuItems.push(...makeMainMenuItems(element));
 			const spellCheckerMenuItems = SpellCheckerService.instance().contextMenuItems(params.misspelledWord, params.dictionarySuggestions);
+			menuItems.push(...spellCheckerMenuItems);
+			menuItems.push(...menuUtils.pluginContextMenuItems(plugins, MenuItemLocation.EditorContextMenu));
 
-			for (const item of spellCheckerMenuItems) {
-				menu.append(new MenuItem(item));
+			for (const item of menuItems) {
+				menu.append(item);
 			}
-
-			for (const item of menuUtils.pluginContextMenuItems(plugins, MenuItemLocation.EditorContextMenu)) {
-				menu.append(new MenuItem(item));
-			}
-
 			menu.popup({ window: targetWindow });
 		}
 
