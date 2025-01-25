@@ -61,7 +61,7 @@ const useNoteContent = (
 
 	useQueuedAsyncEffect(async () => {
 		const noteBody = note?.body ?? _('This note has no history');
-		const markupLanguage = note.markup_language ?? MarkupLanguage.Markdown;
+		const markupLanguage = note?.markup_language ?? MarkupLanguage.Markdown;
 		const result = await markupToHtml(markupLanguage, noteBody, {
 			resources: await shared.attachedResources(noteBody),
 			whiteBackgroundNoteRendering: markupLanguage === MarkupLanguage.Html,
