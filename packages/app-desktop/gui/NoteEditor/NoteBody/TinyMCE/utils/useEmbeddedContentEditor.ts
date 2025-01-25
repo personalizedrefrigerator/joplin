@@ -20,7 +20,7 @@ const useEmbeddedContentEditor = ({
 	useEffect(() => {
 		if (!editor) return () => {};
 
-		const openInEditor = (element: Node) => {
+		const openIfEditableBlock = (element: Node) => {
 			if (element.nodeName.startsWith('#')) { // e.g. '#text'
 				element = element.parentElement;
 			}
@@ -34,13 +34,13 @@ const useEmbeddedContentEditor = ({
 		};
 
 		const dblClickHandler = (event: Event) => {
-			openInEditor(event.target as Node);
+			openIfEditableBlock(event.target as Node);
 		};
 
 		const keyDownHandler = (event: KeyboardEvent) => {
 			const hasModifiers = event.shiftKey || event.altKey || event.ctrlKey || event.metaKey;
 			if (event.code === 'Enter' && !event.isComposing && !hasModifiers) {
-				if (openInEditor(editor.selection.getNode())) {
+				if (openIfEditableBlock(editor.selection.getNode())) {
 					event.preventDefault();
 				}
 			}
