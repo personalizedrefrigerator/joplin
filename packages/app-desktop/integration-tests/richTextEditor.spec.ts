@@ -144,6 +144,32 @@ test.describe('richTextEditor', () => {
 		await expect(editor.richTextEditor).toBeFocused();
 	});
 
+	test('disabling tab indentation should also disable it in code dialogs', async ({ mainWindow, electronApp }) => {
+		const mainScreen = await new MainScreen(mainWindow).setup();
+		await mainScreen.createNewNote('Testing code blocks');
+
+		const editor = mainScreen.noteEditor;
+		await editor.toggleEditorsButton.click();
+		await editor.richTextEditor.click();
+
+		await editor.toggleCodeBlockButton.click();
+		const codeEditor = editor.richTextCodeEditor;
+		await codeEditor.waitFor();
+
+		// Initially, pressing <tab> in the textarea should add a tab
+		await codeEditor.textArea.click();
+		await mainWindow.keyboard.press('Tab');
+		await expect(codeEditor.textArea).toHaveValue('\t');
+		await expect(codeEditor.textArea).toBeFocused();
+
+		await editor.enableTabNavigation(electronApp);
+
+		// After enabling tab navigation, pressing tab should navigate.
+		await expect(codeEditor.textArea).toBeFocused();
+		await mainWindow.keyboard.press('Tab');
+		await expect(codeEditor.textArea).not.toBeFocused();
+	});
+
 	test('should be possible to navigate between the note title and rich text editor with enter/down/up keys', async ({ mainWindow }) => {
 		const mainScreen = await new MainScreen(mainWindow).setup();
 		await mainScreen.createNewNote('Testing keyboard navigation!');
