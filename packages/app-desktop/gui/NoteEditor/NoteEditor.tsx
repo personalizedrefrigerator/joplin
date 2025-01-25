@@ -16,13 +16,11 @@ import useFolder from './utils/useFolder';
 import styles_ from './styles';
 import { NoteEditorProps, FormNote, OnChangeEvent, NoteBodyEditorProps, AllAssetsOptions, NoteBodyEditorRef } from './utils/types';
 import CommandService from '@joplin/lib/services/CommandService';
-import ToolbarButton from '../ToolbarButton/ToolbarButton';
 import Button, { ButtonLevel } from '../Button/Button';
 import eventManager, { EventName } from '@joplin/lib/eventManager';
 import { AppState } from '../../app.reducer';
 import ToolbarButtonUtils, { ToolbarButtonInfo } from '@joplin/lib/services/commands/ToolbarButtonUtils';
 import { _, _n } from '@joplin/lib/locale';
-import TagList from '../TagList';
 import NoteTitleBar from './NoteTitle/NoteTitleBar';
 import markupLanguageUtils from '@joplin/lib/utils/markupLanguageUtils';
 import Setting from '@joplin/lib/models/Setting';
@@ -59,6 +57,7 @@ import PluginService from '@joplin/lib/services/plugins/PluginService';
 import WebviewController from '@joplin/lib/services/plugins/WebviewController';
 import AsyncActionQueue, { IntervalType } from '@joplin/lib/AsyncActionQueue';
 import useResourceUnwatcher from './utils/useResourceUnwatcher';
+import StatusBar from './StatusBar';
 
 const debounce = require('debounce');
 
@@ -440,24 +439,6 @@ function NoteEditorContent(props: NoteEditorProps) {
 		return <div style={emptyDivStyle} ref={containerRef}></div>;
 	}
 
-	function renderTagButton() {
-		return <ToolbarButton
-			themeId={props.themeId}
-			toolbarButtonInfo={props.setTagsToolbarButtonInfo}
-		/>;
-	}
-
-	function renderTagBar() {
-		const theme = themeStyle(props.themeId);
-		const noteIds = [formNote.id];
-		const instructions = <span onClick={() => { void CommandService.instance().execute('setTags', noteIds); }} style={{ ...theme.clickableTextStyle, whiteSpace: 'nowrap' }}>{_('Click to add tags...')}</span>;
-		const tagList = props.selectedNoteTags.length ? <TagList items={props.selectedNoteTags} /> : null;
-
-		return (
-			<div style={{ paddingLeft: 8, display: 'flex', flexDirection: 'row', alignItems: 'center' }}>{tagList}{instructions}</div>
-		);
-	}
-
 	const searchMarkers = useSearchMarkers(showLocalSearch, localSearchMarkerOptions, props.searches, props.selectedSearchId, props.highlightedWords);
 
 	const editorProps: NoteBodyEditorProps = {
@@ -488,6 +469,7 @@ function NoteEditorContent(props: NoteEditorProps) {
 		searchMarkers: searchMarkers,
 		visiblePanes: props.noteVisiblePanes || ['editor', 'viewer'],
 		keyboardMode: Setting.value('editor.keyboardMode'),
+		tabMovesFocus: props.tabMovesFocus,
 		locale: Setting.value('locale'),
 		onDrop: onDrop,
 		noteToolbarButtonInfos: props.toolbarButtonInfos,
@@ -690,10 +672,11 @@ function NoteEditorContent(props: NoteEditorProps) {
 				<div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
 					{renderSearchBar()}
 				</div>
-				<div className="tag-bar" style={{ paddingLeft: theme.editorPaddingLeft, display: 'flex', flexDirection: 'row', alignItems: 'center', height: 40 }}>
-					{renderTagButton()}
-					{renderTagBar()}
-				</div>
+				<StatusBar
+					noteId={formNote.id}
+					setTagsToolbarButtonInfo={props.setTagsToolbarButtonInfo}
+					selectedNoteTags={props.selectedNoteTags}
+				/>
 				<WarningBanner bodyEditor={props.bodyEditor}/>
 			</div>
 		</div>
@@ -750,6 +733,7 @@ const mapStateToProps = (state: AppState, ownProps: ConnectProps) => {
 		], whenClauseContext)[0] as ToolbarButtonInfo,
 		contentMaxWidth: state.settings['style.editor.contentMaxWidth'],
 		scrollbarSize: state.settings['style.scrollbarSize'],
+		tabMovesFocus: state.settings['editor.tabMovesFocus'],
 		isSafeMode: state.settings.isSafeMode,
 		useCustomPdfViewer: false,
 		syncUserId: state.settings['sync.userId'],

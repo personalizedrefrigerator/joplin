@@ -120,6 +120,56 @@ test.describe('richTextEditor', () => {
 		await expect(editor.codeMirrorEditor).toHaveText('This is a        test.        Test! Another:        !');
 	});
 
+	test('should be possible to disable tab indentation from the menu', async ({ mainWindow, electronApp }) => {
+		const mainScreen = await new MainScreen(mainWindow).setup();
+		await mainScreen.createNewNote('Testing keyboard navigation!');
+
+		const editor = mainScreen.noteEditor;
+		await editor.toggleEditorsButton.click();
+		await editor.richTextEditor.click();
+
+		await editor.enableTabNavigation(electronApp);
+		await mainWindow.keyboard.type('This is a');
+
+		// Tab should navigate
+		await expect(editor.richTextEditor).toBeFocused();
+		await mainWindow.keyboard.press('Tab');
+		await expect(editor.richTextEditor).not.toBeFocused();
+
+		await editor.disableTabNavigation(electronApp);
+
+		// Tab should not navigate
+		await editor.richTextEditor.click();
+		await mainWindow.keyboard.press('Tab');
+		await expect(editor.richTextEditor).toBeFocused();
+	});
+
+	test('disabling tab indentation should also disable it in code dialogs', async ({ mainWindow, electronApp }) => {
+		const mainScreen = await new MainScreen(mainWindow).setup();
+		await mainScreen.createNewNote('Testing code blocks');
+
+		const editor = mainScreen.noteEditor;
+		await editor.toggleEditorsButton.click();
+		await editor.richTextEditor.click();
+
+		await editor.toggleCodeBlockButton.click();
+		const codeEditor = editor.richTextCodeEditor;
+		await codeEditor.waitFor();
+
+		// Initially, pressing <tab> in the textarea should add a tab
+		await codeEditor.textArea.click();
+		await mainWindow.keyboard.press('Tab');
+		await expect(codeEditor.textArea).toHaveValue('\t');
+		await expect(codeEditor.textArea).toBeFocused();
+
+		await editor.enableTabNavigation(electronApp);
+
+		// After enabling tab navigation, pressing tab should navigate.
+		await expect(codeEditor.textArea).toBeFocused();
+		await mainWindow.keyboard.press('Tab');
+		await expect(codeEditor.textArea).not.toBeFocused();
+	});
+
 	test('should be possible to navigate between the note title and rich text editor with enter/down/up keys', async ({ mainWindow }) => {
 		const mainScreen = await new MainScreen(mainWindow).setup();
 		await mainScreen.createNewNote('Testing keyboard navigation!');

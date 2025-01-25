@@ -49,6 +49,7 @@ export interface NoteEditorProps {
 	watchedResources: any;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	highlightedWords: any[];
+	tabMovesFocus: boolean;
 	plugins: PluginStates;
 	toolbarButtonInfos: ToolbarItem[];
 	setTagsToolbarButtonInfo: ToolbarButtonInfo;
@@ -121,6 +122,7 @@ export interface NoteBodyEditorProps {
 	searchMarkers: SearchMarkers;
 	visiblePanes: string[];
 	keyboardMode: string;
+	tabMovesFocus: boolean;
 	resourceInfos: ResourceInfos;
 	resourceDirectory: string;
 	locale: string;
