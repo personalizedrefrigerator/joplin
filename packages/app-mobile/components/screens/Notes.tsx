@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { AppState as RNAppState, View, StyleSheet, NativeEventSubscription, ViewStyle, TextStyle } from 'react-native';
+import { AppState as RNAppState, View, StyleSheet, NativeEventSubscription, ViewStyle, TextStyle, Text } from 'react-native';
 import { stateUtils } from '@joplin/lib/reducer';
 import { connect } from 'react-redux';
 import NoteList from '../NoteList';
@@ -20,6 +20,7 @@ import { Dispatch } from 'redux';
 import { DialogContext, DialogControl } from '../DialogManager';
 import { useContext } from 'react';
 import { MenuChoice } from '../DialogManager/types';
+import SideMenu, { SideMenuPosition } from '../sidebar/SideMenu';
 
 interface Props {
 	dispatch: Dispatch;
@@ -282,16 +283,27 @@ class NotesScreenComponent extends BaseScreenComponent<ComponentProps, State> {
 		// Ensure that screen readers can't focus the notes list when it isn't visible.
 		const accessibilityHidden = !this.props.visible;
 
+		const menu = <View><Text>Test</Text></View>;
 		return (
-			<AccessibleView
-				style={rootStyle}
-
-				inert={accessibilityHidden}
+			<SideMenu
+				menu={menu}
+				overlayColor={'red'}
+				menuStyle={{ backgroundColor: 'orange' }}
+				openMenuOffset={200}
+				menuPosition={SideMenuPosition.Bottom}
+				onChange={()=>{}}
+				disableGestures={!this.props.visible}
 			>
-				<ScreenHeader title={iconString + title} showBackButton={false} sortButton_press={this.sortButton_press} folderPickerOptions={this.folderPickerOptions()} showSearchButton={true} showSideMenuButton={true} />
-				<NoteList />
-				{actionButtonComp}
-			</AccessibleView>
+				<AccessibleView
+					style={rootStyle}
+
+					inert={accessibilityHidden}
+				>
+					<ScreenHeader title={iconString + title} showBackButton={false} sortButton_press={this.sortButton_press} folderPickerOptions={this.folderPickerOptions()} showSearchButton={true} showSideMenuButton={true} />
+					<NoteList />
+					{actionButtonComp}
+				</AccessibleView>
+			</SideMenu>
 		);
 	}
 }

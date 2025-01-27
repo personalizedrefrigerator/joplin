@@ -14,7 +14,7 @@ export enum SideMenuPosition {
 export type OnChangeCallback = (isOpen: boolean)=> void;
 
 interface Props {
-	isOpen: boolean;
+	isOpen?: boolean;
 
 	menu: React.ReactNode;
 	children: React.ReactNode|React.ReactNode[];
@@ -286,7 +286,9 @@ const SideMenu: React.FC<Props> = props => {
 	const [open, setIsOpen] = useState(false);
 
 	useEffect(() => {
-		setIsOpen(props.isOpen);
+		if (props.isOpen !== undefined) {
+			setIsOpen(props.isOpen);
+		}
 	}, [props.isOpen]);
 
 	// menuSize: The size of the menu along the drag axis. In left/right mode, this is the width.

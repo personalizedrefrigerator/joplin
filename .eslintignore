@@ -788,6 +788,7 @@ packages/app-mobile/components/screens/encryption-config.js
 packages/app-mobile/components/screens/status.js
 packages/app-mobile/components/screens/tags.js
 packages/app-mobile/components/side-menu-content.js
+packages/app-mobile/components/sidebar/AppPullUpMenu.js
 packages/app-mobile/components/sidebar/AppSideMenu.js
 packages/app-mobile/components/sidebar/BottomDrawer.js
 packages/app-mobile/components/sidebar/SideMenu.js
