@@ -480,8 +480,8 @@ packages/app-desktop/gulpfile.js
 packages/app-desktop/integration-tests/goToAnything.spec.js
 packages/app-desktop/integration-tests/main.spec.js
 packages/app-desktop/integration-tests/markdownEditor.spec.js
-packages/app-desktop/integration-tests/models/EditorCodeDialog.js
 packages/app-desktop/integration-tests/models/ChangeAppLayoutScreen.js
+packages/app-desktop/integration-tests/models/EditorCodeDialog.js
 packages/app-desktop/integration-tests/models/GoToAnything.js
 packages/app-desktop/integration-tests/models/MainScreen.js
 packages/app-desktop/integration-tests/models/NoteEditorScreen.js
