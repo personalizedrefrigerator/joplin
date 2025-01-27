@@ -4,7 +4,7 @@ import { DesktopCommandContext } from '../services/commands/types';
 import Setting from '@joplin/lib/models/Setting';
 
 export const declaration: CommandDeclaration = {
-	name: 'toggleTabKeyNavigation',
+	name: 'toggleTabMovesFocus',
 	label: () => _('Toggle editor tab key navigation'),
 	iconName: 'fas fa-keyboard',
 };

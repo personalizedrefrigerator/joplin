@@ -18,7 +18,7 @@ import * as switchProfile2 from './switchProfile2';
 import * as switchProfile3 from './switchProfile3';
 import * as toggleExternalEditing from './toggleExternalEditing';
 import * as toggleSafeMode from './toggleSafeMode';
-import * as toggleTabKeyNavigation from './toggleTabKeyNavigation';
+import * as toggleTabMovesFocus from './toggleTabMovesFocus';
 
 const index: any[] = [
 	copyDevCommand,
@@ -40,7 +40,7 @@ const index: any[] = [
 	switchProfile3,
 	toggleExternalEditing,
 	toggleSafeMode,
-	toggleTabKeyNavigation,
+	toggleTabMovesFocus,
 ];
 
 export default index;

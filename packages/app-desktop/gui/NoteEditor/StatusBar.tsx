@@ -55,31 +55,27 @@ const StatusBar: React.FC<Props> = props => {
 		/>;
 	}
 
-	function renderTagBarContent() {
+	function renderTagBar() {
 		const theme = themeStyle(props.themeId);
 		const noteIds = [props.noteId];
 		const instructions = <span onClick={() => { void CommandService.instance().execute('setTags', noteIds); }} style={{ ...theme.clickableTextStyle, whiteSpace: 'nowrap' }}>{_('Click to add tags...')}</span>;
 		const tagList = props.selectedNoteTags.length ? <TagList items={props.selectedNoteTags} /> : null;
 
-		return (
-			<div style={{ paddingLeft: 8, display: 'flex', flexDirection: 'row', alignItems: 'center' }}>{tagList}{instructions}</div>
-		);
+		return <div className='tag-bar'>
+			{renderTagButton()}
+			<div className='content'>{tagList}{instructions}</div>
+		</div>;
 	}
 
-	const tagBar = <div className='tag-bar'>
-		{renderTagButton()}
-		{renderTagBarContent()}
-	</div>;
-
 	const keyboardStatus = <StatusIndicator
-		commandName='toggleTabKeyNavigation'
+		commandName='toggleTabMovesFocus'
 		label={props.tabMovesFocus ? _('Tab moves focus') : _('Tab indents')}
 		showWhenUnfocused={props.tabMovesFocus}
 	/>;
 
 	return <div className='editor-status-bar'>
-		{tagBar}
-		<div className='spacer'></div>
+		{renderTagBar()}
+		<div className='spacer'/>
 		{keyboardStatus}
 	</div>;
 };

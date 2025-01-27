@@ -257,7 +257,7 @@ function useMenuStates(menu: any, props: Props) {
 			menuItemSetChecked('showNoteCounts', props.showNoteCounts);
 			menuItemSetChecked('uncompletedTodosOnTop', props.uncompletedTodosOnTop);
 			menuItemSetChecked('showCompletedTodos', props.showCompletedTodos);
-			menuItemSetChecked('toggleTabKeyNavigation', props.tabMovesFocus);
+			menuItemSetChecked('toggleTabMovesFocus', props.tabMovesFocus);
 		}
 
 		timeoutId = setTimeout(scheduleUpdate, 150);
@@ -828,7 +828,7 @@ function useMenu(props: Props) {
 						},
 						separator(),
 						{
-							...menuItemDic['toggleTabKeyNavigation'],
+							...menuItemDic['toggleTabMovesFocus'],
 							label: Setting.settingMetadata('editor.tabMovesFocus').label(),
 							type: 'checkbox',
 						},
