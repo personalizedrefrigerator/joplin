@@ -8364,7 +8364,7 @@ __metadata:
     "@joplin/tools": ~3.2
     "@joplin/utils": ~3.2
     "@js-draw/material-icons": 1.26.0
-    "@react-native-clipboard/clipboard": 1.14.2
+    "@react-native-clipboard/clipboard": 1.14.3
     "@react-native-community/datetimepicker": 8.2.0
     "@react-native-community/geolocation": 3.3.0
     "@react-native-community/netinfo": 11.3.3
@@ -10756,9 +10756,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-native-clipboard/clipboard@npm:1.14.2":
-  version: 1.14.2
-  resolution: "@react-native-clipboard/clipboard@npm:1.14.2"
+"@react-native-clipboard/clipboard@npm:1.14.3":
+  version: 1.14.3
+  resolution: "@react-native-clipboard/clipboard@npm:1.14.3"
   peerDependencies:
     react: ">= 16.9.0"
     react-native: ">= 0.61.5"
@@ -10769,7 +10769,7 @@ __metadata:
       optional: true
     react-native-windows:
       optional: true
-  checksum: a14c7de784f78c360b41fc723221d1091ccf59dc12ff5dcadf11c7fe078ae081afa1b95f2fe3cf0d4fcd25bc0e2a04cc56fb85aff8437de19cb2eba7d95362df
+  checksum: bcf4a45e4b2a8d18a79930e76ac015e90a9218b2e033adc565f55332b699063465ccaae0a913a24237187f4c7c25a675840334151c894abc9b97497126be9878
   languageName: node
   linkType: hard
 
