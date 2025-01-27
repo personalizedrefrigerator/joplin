@@ -1400,8 +1400,8 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: any) => {
 			const ownerDocument = editorRef.current.getContainer().ownerDocument;
 			const parentWindow = ownerDocument.defaultView;
 
-			// As of TinyMCE 6, calling .remove after the parent window is closed
-			// throws an Error. Since closing the window also removes the editor,
+			// Calling .remove after the parent window is closed throws an Error
+			// related to DOM API access. Since closing the window also removes the editor,
 			// it shouldn't be necessary to call .remove in this case:
 			if (parentWindow) {
 				editorRef.current.remove();
