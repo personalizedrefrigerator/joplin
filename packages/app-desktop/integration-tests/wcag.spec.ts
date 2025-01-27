@@ -67,5 +67,11 @@ test.describe('wcag', () => {
 
 		await expectNoViolations(mainWindow);
 	});
+
+	test('should not detect significant issues in the change app layout screen', async ({ mainWindow, electronApp }) => {
+		const mainScreen = await new MainScreen(mainWindow).setup();
+		await mainScreen.changeLayoutScreen.open(electronApp);
+		await expectNoViolations(mainWindow);
+	});
 });
 
