@@ -42,7 +42,7 @@ export default function() {
 		'togglePerFolderSortOrder',
 		'toggleSideBar',
 		'toggleVisiblePanes',
-		'toggleTabKeyNavigation',
+		'toggleTabMovesFocus',
 		'editor.deleteLine',
 		'editor.duplicateLine',
 		// We cannot put the undo/redo commands in the menu because they are
