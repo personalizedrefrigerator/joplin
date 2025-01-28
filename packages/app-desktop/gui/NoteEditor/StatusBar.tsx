@@ -102,8 +102,8 @@ const StatusBar: React.FC<Props> = props => {
 	return <div className='editor-status-bar'>
 		{renderTagBar()}
 		<div className='spacer'/>
-		{renderVisiblePaneStatus()}
 		{keyboardStatus}
+		{renderVisiblePaneStatus()}
 	</div>;
 };
 
