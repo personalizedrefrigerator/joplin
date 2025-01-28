@@ -1,10 +1,12 @@
 
 .editor-status-indicator {
 	width: 0;
+	height: 0;
 	overflow: hidden;
 
 	&:has(> :focus-visible), &.-show {
 		width: unset;
+		height: unset;
 		overflow: visible;
 	}
 

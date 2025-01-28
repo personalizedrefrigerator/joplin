@@ -10,6 +10,7 @@ import TagList from '../TagList';
 import { _ } from '@joplin/lib/locale';
 import { useCallback } from 'react';
 import KeymapService from '@joplin/lib/services/KeymapService';
+import { stateUtils } from '@joplin/lib/reducer';
 
 interface Props {
 	themeId: number;
@@ -17,6 +18,9 @@ interface Props {
 	noteId: string;
 	setTagsToolbarButtonInfo: ToolbarButtonInfo;
 	selectedNoteTags: TagEntity[];
+
+	codeView: boolean;
+	visiblePanes: string[];
 }
 
 interface StatusIndicatorProps {
@@ -39,6 +43,7 @@ const StatusIndicator: React.FC<StatusIndicatorProps> = props => {
 	>
 		<button
 			className='button'
+			aria-description={_('Click to toggle')}
 			aria-keyshortcuts={keyshortcuts}
 			onClick={runCommand}
 		>
@@ -67,6 +72,27 @@ const StatusBar: React.FC<Props> = props => {
 		</div>;
 	}
 
+	const renderVisiblePaneStatus = () => {
+		if (!props.codeView) return null;
+
+		const editorVisible = props.visiblePanes.includes('editor');
+		const viewerVisible = props.visiblePanes.includes('viewer');
+		const bothVisible = editorVisible && viewerVisible;
+		let label;
+		if (bothVisible) {
+			label = _('Editor and viewer visible');
+		} else {
+			label = editorVisible ? _('Editor visible') : _('Viewer visible');
+		}
+
+		return <StatusIndicator
+			commandName='toggleVisiblePanes'
+			label={label}
+			showWhenUnfocused={false}
+		/>;
+	};
+
+
 	const keyboardStatus = <StatusIndicator
 		commandName='toggleTabMovesFocus'
 		label={props.tabMovesFocus ? _('Tab moves focus') : _('Tab indents')}
@@ -76,13 +102,21 @@ const StatusBar: React.FC<Props> = props => {
 	return <div className='editor-status-bar'>
 		{renderTagBar()}
 		<div className='spacer'/>
+		{renderVisiblePaneStatus()}
 		{keyboardStatus}
 	</div>;
 };
 
-export default connect((state: AppState) => {
+interface OwnProps {
+	windowId: string;
+}
+
+export default connect((state: AppState, ownProps: OwnProps) => {
+	const windowState = stateUtils.windowStateById(state, ownProps.windowId);
 	return {
 		themeId: state.settings.theme,
 		tabMovesFocus: state.settings['editor.tabMovesFocus'],
+		visiblePanes: windowState.noteVisiblePanes,
+		codeView: windowState.editorCodeView,
 	};
 })(StatusBar);

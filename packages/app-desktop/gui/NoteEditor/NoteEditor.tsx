@@ -676,6 +676,7 @@ function NoteEditorContent(props: NoteEditorProps) {
 					noteId={formNote.id}
 					setTagsToolbarButtonInfo={props.setTagsToolbarButtonInfo}
 					selectedNoteTags={props.selectedNoteTags}
+					windowId={windowId}
 				/>
 				<WarningBanner bodyEditor={props.bodyEditor}/>
 			</div>
