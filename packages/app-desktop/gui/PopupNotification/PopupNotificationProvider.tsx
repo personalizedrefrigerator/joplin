@@ -39,7 +39,7 @@ const PopupNotificationProvider: React.FC<Props> = props => {
 
 	const popupManager = useMemo((): PopupManager => {
 		return {
-			createPopup(content, type: NotificationType): PopupHandle {
+			createPopup({ content, type }): PopupHandle {
 				const key = `popup-${nextPopupKey.current++}`;
 				const newPopup = {
 					key,

@@ -24,6 +24,7 @@ const NotificationItem: React.FC<Props> = props => {
 	const containerModifier = (() => {
 		if (props.type === NotificationType.Success) return '-success';
 		if (props.type === NotificationType.Error) return '-error';
+		if (props.type === NotificationType.Info) return '-info';
 		return '';
 	})();
 

@@ -11,6 +11,11 @@ export enum NotificationType {
 	Error = 'error',
 }
 
+export interface PopupOptions {
+	content: ()=> React.ReactNode;
+	type?: NotificationType;
+}
+
 export interface PopupControl {
-	createPopup(content: ()=> React.ReactNode, type: NotificationType): PopupHandle;
+	createPopup(props: PopupOptions): PopupHandle;
 }
