@@ -1,0 +1,14 @@
+
+.popup-notification-list {
+	position: absolute;
+	bottom: 0;
+	right: 0;
+	z-index: 10;
+
+	display: flex;
+	// Focus should jump to the bottom item first
+	flex-direction: column-reverse;
+
+	max-height: 100vh;
+	overflow-y: auto;
+}
