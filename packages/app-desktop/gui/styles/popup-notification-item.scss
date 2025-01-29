@@ -91,9 +91,13 @@
 	}
 
 	&.-dismissing {
-		opacity: 0;
-		transform: translateY(25%);
-		animation: slide-out 0.4s ease-out forwards;
+		// Animate the icon and content first
+		animation: slide-out 0.25s ease-out both;
+		animation-delay: 0.25s;
+
+		& > .content, & > .icon {
+			animation: slide-out 0.3s ease-out both;
+		}
 	}
 
 	&.-success {
@@ -107,7 +111,9 @@
 	}
 
 	@media (prefers-reduced-motion) {
-		transform: none;
+		&, & > .content, & > .icon {
+			transform: none !important;
+		}
 
 		> .ripple {
 			transform: scale(1);

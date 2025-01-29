@@ -31,7 +31,7 @@ const PopupNotificationProvider: React.FC<Props> = props => {
 		}));
 
 		// Remove the popup
-		const dismissAnimationDelay = 500;
+		const dismissAnimationDelay = 600;
 		setTimeout(() => {
 			setPopupSpecs(popups => popups.filter(p => p.key !== event.key));
 		}, dismissAnimationDelay);
