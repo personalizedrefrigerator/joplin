@@ -110,6 +110,11 @@
 		--ripple-color: var(--joplin-color-error);
 	}
 
+	&.-info {
+		--text-color: var(--joplin-color5);
+		--ripple-color: var(--joplin-background-color5);
+	}
+
 	@media (prefers-reduced-motion) {
 		&, & > .content, & > .icon {
 			transform: none !important;

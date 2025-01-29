@@ -28,11 +28,12 @@ const NotificationItem: React.FC<Props> = props => {
 		return '';
 	})();
 
+	const icon = <i role='img' aria-hidden='true' className={`icon ${iconClassName}`}/>;
 	return <div
 		role='alert'
 		className={`popup-notification-item ${containerModifier} ${props.dismissing ? '-dismissing' : ''}`}
 	>
-		<i role='img' aria-hidden='true' className={`icon ${iconClassName}`}></i>
+		{iconClassName ? icon : null}
 		<div className='ripple'/>
 		<div className='content'>
 			{props.children}
