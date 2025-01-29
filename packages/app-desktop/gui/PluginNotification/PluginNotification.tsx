@@ -29,9 +29,8 @@ export default (props: Props) => {
 	useEffect(() => {
 		if (!toast.message) return;
 
-		popupManager.createPopup({
+		popupManager.createPopup(() => toast.message, {
 			type: toast.type as string as NotificationType,
-			content: () => <>{toast.message}</>,
 		}).scheduleRemove(toast.duration);
 	}, [toast.message, toast.duration, toast.type, popupManager]);
 

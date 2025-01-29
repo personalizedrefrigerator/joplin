@@ -51,12 +51,9 @@ export default (props: Props) => {
 			notification.remove();
 			void onCancelClick(props.lastDeletion);
 		};
-		const notification = popupManager.createPopup({
-			content: () => (
-				<TrashNotificationMessage message={msg} onCancel={handleCancelClick}/>
-			),
-			type: NotificationType.Success,
-		});
+		const notification = popupManager.createPopup(() => (
+			<TrashNotificationMessage message={msg} onCancel={handleCancelClick}/>
+		), { type: NotificationType.Success });
 		notification.scheduleRemove();
 	}, [props.lastDeletion, props.dispatch, popupManager]);
 

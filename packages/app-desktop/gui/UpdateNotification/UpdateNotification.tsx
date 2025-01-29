@@ -32,42 +32,37 @@ const UpdateNotification: React.FC<Props> = () => {
 	const popupManager = useContext(PopupNotificationContext);
 
 	const handleUpdateDownloaded = useCallback((_event: IpcRendererEvent, info: UpdateInfo) => {
-		const notification = popupManager.createPopup({
-			content: () => (
-				<div className='update-notification'>
-					{_('A new update (%s) is available', info.version)}
-					<button className='link-button' onClick={openChangelogLink}>{
-						_('See changelog')
-					}</button>
-					<div className='buttons'>
-						<Button
-							level={ButtonLevel.Tertiary}
-							onClick={() => {
-								notification.remove();
-								handleApplyUpdate();
-							}}
-							title={_('Restart now')}
-						/>
-						<Button
-							level={ButtonLevel.Tertiary}
-							onClick={() => notification.remove()}
-							title={_('Update later')}
-						/>
-					</div>
+		const notification = popupManager.createPopup(() => (
+			<div className='update-notification'>
+				{_('A new update (%s) is available', info.version)}
+				<button className='link-button' onClick={openChangelogLink}>{
+					_('See changelog')
+				}</button>
+				<div className='buttons'>
+					<Button
+						level={ButtonLevel.Tertiary}
+						onClick={() => {
+							notification.remove();
+							handleApplyUpdate();
+						}}
+						title={_('Restart now')}
+					/>
+					<Button
+						level={ButtonLevel.Tertiary}
+						onClick={() => notification.remove()}
+						title={_('Update later')}
+					/>
 				</div>
-			),
-		});
+			</div>
+		));
 	}, [popupManager]);
 
 	const handleUpdateNotAvailable = useCallback(() => {
-		const notification = popupManager.createPopup({
-			content: () => (
-				<div className='update-notification'>
-					{_('No updates available')}
-				</div>
-			),
-			type: NotificationType.Info,
-		});
+		const notification = popupManager.createPopup(() => (
+			<div className='update-notification'>
+				{_('No updates available')}
+			</div>
+		), { type: NotificationType.Info });
 		notification.scheduleRemove();
 	}, [popupManager]);
 
