@@ -1,12 +1,11 @@
 import * as React from 'react';
-import { NotificationDismissEvent, NotificationType } from './types';
+import { NotificationType } from './types';
 import { useId } from 'react';
 
 interface Props {
 	children: React.ReactNode;
 	key: string;
 	type: NotificationType;
-	onDismiss: (event: NotificationDismissEvent)=> void;
 	dismissing: boolean;
 	popup: boolean;
 }

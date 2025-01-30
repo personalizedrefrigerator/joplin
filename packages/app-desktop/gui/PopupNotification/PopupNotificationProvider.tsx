@@ -12,7 +12,7 @@ interface Props {
 
 interface PopupSpec {
 	key: string;
-	dismissedAt: number|undefined;
+	dismissAt: number|undefined;
 	type: NotificationType;
 	content: ()=> React.ReactNode;
 }
@@ -25,13 +25,38 @@ const PopupNotificationProvider: React.FC<Props> = props => {
 		const removeOldPopups = () => {
 			// The WCAG allows dismissing notifications older than 20 hours.
 			setPopupSpecs(popups => popups.filter(popup => {
-				if (!popup.dismissedAt) {
+				if (!popup.dismissAt) {
 					return true; // Not dismissed
 				}
 
-				const dismissedRecently = popup.dismissedAt > performance.now() - Hour * 20;
+				const dismissedRecently = popup.dismissAt > performance.now() - Hour * 20;
 				return dismissedRecently;
 			}));
+		};
+
+		const removePopupWithKey = (key: string) => {
+			setPopupSpecs(popups => popups.filter(p => p.key !== key));
+		};
+
+		const dismissAnimationDelay = 600;
+		const dismissPopup = (key: string) => {
+			// Start the dismiss animation
+			setPopupSpecs(popups => popups.map(p => {
+				if (p.key === key) {
+					return { ...p, dismissAt: performance.now() + dismissAnimationDelay };
+				} else {
+					return p;
+				}
+			}));
+
+			removeOldPopups();
+		};
+
+		const dismissAndRemovePopup = (key: string) => {
+			dismissPopup(key);
+			setTimeout(() => {
+				removePopupWithKey(key);
+			}, dismissAnimationDelay);
 		};
 
 		const manager: PopupManager = {
@@ -41,7 +66,7 @@ const PopupNotificationProvider: React.FC<Props> = props => {
 					key,
 					content,
 					type,
-					dismissedAt: undefined,
+					dismissAt: undefined,
 				};
 
 				setPopupSpecs(popups => {
@@ -60,30 +85,15 @@ const PopupNotificationProvider: React.FC<Props> = props => {
 
 				const handle: PopupHandle = {
 					remove() {
-						manager.onPopupDismissed({ key });
+						dismissAndRemovePopup(key);
 					},
-					// Default to removing after 5.5s + 0.5s
-					// See https://www.sheribyrnehaber.com/designing-toast-messages-for-accessibility/
-					scheduleRemove(delay = 5_500) {
+					scheduleDismiss(delay = 5_500) {
 						setTimeout(() => {
-							handle.remove();
+							dismissPopup(key);
 						}, delay);
 					},
 				};
 				return handle;
-			},
-			onPopupDismissed: (event) => {
-				// Start the dismiss animation
-				const dismissAnimationDelay = 600;
-				setPopupSpecs(popups => popups.map(p => {
-					if (p.key === event.key) {
-						return { ...p, dismissedAt: performance.now() + dismissAnimationDelay };
-					} else {
-						return p;
-					}
-				}));
-
-				removeOldPopups();
 			},
 		};
 		return manager;

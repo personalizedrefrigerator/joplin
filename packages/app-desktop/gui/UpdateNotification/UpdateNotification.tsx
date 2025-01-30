@@ -63,7 +63,7 @@ const UpdateNotification: React.FC<Props> = () => {
 				{_('No updates available')}
 			</div>
 		), { type: NotificationType.Info });
-		notification.scheduleRemove();
+		notification.scheduleDismiss();
 	}, [popupManager]);
 
 	useEffect(() => {

@@ -2,7 +2,7 @@ import * as React from 'react';
 
 export type PopupHandle = {
 	remove(): void;
-	scheduleRemove(delay?: number): void;
+	scheduleDismiss(delay?: number): void;
 };
 
 export enum NotificationType {
@@ -17,13 +17,6 @@ export interface PopupOptions {
 	type?: NotificationType;
 }
 
-export interface NotificationDismissEvent {
-	key: string;
-}
-
 export interface PopupControl {
 	createPopup(content: NotificationContentCallback, props?: PopupOptions): PopupHandle;
-
-	// createPopup().remove() should be preferred to .dismissPopup(key)
-	onPopupDismissed(event: NotificationDismissEvent): void;
 }

@@ -31,7 +31,7 @@ export default (props: Props) => {
 
 		popupManager.createPopup(() => toast.message, {
 			type: toast.type as string as NotificationType,
-		}).scheduleRemove(toast.duration);
+		}).scheduleDismiss(toast.duration);
 	}, [toast.message, toast.duration, toast.type, popupManager]);
 
 	return <div style={{ display: 'none' }}/>;

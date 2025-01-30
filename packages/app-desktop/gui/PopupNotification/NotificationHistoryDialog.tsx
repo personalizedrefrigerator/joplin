@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { PopupNotificationContext, VisibleNotificationsContext } from './PopupNotificationProvider';
+import { VisibleNotificationsContext } from './PopupNotificationProvider';
 import NotificationItem from './NotificationItem';
 import { useContext } from 'react';
 import Dialog from '../Dialog';
@@ -12,7 +12,6 @@ interface Props {
 }
 
 const NotificationHistoryDialog: React.FC<Props> = props => {
-	const popupManager = useContext(PopupNotificationContext);
 	const popupSpecs = useContext(VisibleNotificationsContext);
 	const popups = [];
 	for (const spec of popupSpecs) {
@@ -20,7 +19,6 @@ const NotificationHistoryDialog: React.FC<Props> = props => {
 			<NotificationItem
 				key={spec.key}
 				type={spec.type}
-				onDismiss={popupManager.onPopupDismissed}
 				dismissing={false}
 				popup={false}
 			>{spec.content()}</NotificationItem>,
@@ -31,7 +29,7 @@ const NotificationHistoryDialog: React.FC<Props> = props => {
 	return <Dialog onCancel={props.onClose}>
 		<h1>{_('Recent notifications')}</h1>
 		<div className='popup-notification-list'>
-			{popups.length ? popups : _('No recent notifications')}
+			{popups.length ? popups : <div>{_('No recent notifications')}</div>}
 		</div>
 		<Button onClick={props.onClose} title={_('Done')}/>
 	</Dialog>;
