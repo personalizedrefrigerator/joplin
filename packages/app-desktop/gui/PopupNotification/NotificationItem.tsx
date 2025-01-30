@@ -1,9 +1,5 @@
 import * as React from 'react';
-import { NotificationType } from './types';
-
-export interface NotificationDismissEvent {
-	key: string;
-}
+import { NotificationDismissEvent, NotificationType } from './types';
 
 interface Props {
 	children: React.ReactNode;

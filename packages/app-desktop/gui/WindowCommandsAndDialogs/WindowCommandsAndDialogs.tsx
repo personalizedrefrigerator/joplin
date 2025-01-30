@@ -18,6 +18,7 @@ import useWindowCommands from './utils/useWindowCommands';
 import PluginDialogs from './PluginDialogs';
 import useSyncDialogState from './utils/useSyncDialogState';
 import AppDialogs from './AppDialogs';
+import PopupNotificationList from '../PopupNotification/PopupNotificationList';
 
 const PluginManager = require('@joplin/lib/services/PluginManager');
 
@@ -173,6 +174,8 @@ const WindowCommandsAndDialogs: React.FC<Props> = props => {
 			buttons={promptOptions && 'buttons' in promptOptions ? promptOptions.buttons : null}
 			inputType={promptOptions && 'inputType' in promptOptions ? promptOptions.inputType : null}
 		/>
+
+		<PopupNotificationList/>
 	</>;
 };
 
