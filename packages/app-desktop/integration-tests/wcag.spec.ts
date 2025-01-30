@@ -7,6 +7,7 @@ import { Page } from '@playwright/test';
 const createScanner = (page: Page) => {
 	return new AxeBuilder({ page })
 		.disableRules(['page-has-heading-one'])
+		// Needed because we're using Electron. See https://github.com/dequelabs/axe-core-npm/issues/1141
 		.setLegacyMode(true);
 };
 
@@ -32,7 +33,7 @@ const expectNoViolations = async (page: Page) => {
 test.describe('wcag', () => {
 	for (const tabName of ['General', 'Plugins']) {
 		test(`should not detect significant issues in the settings screen ${tabName} tab`, async ({ electronApp, mainWindow }) => {
-			const mainScreen = new MainScreen(mainWindow);
+			const mainScreen = await new MainScreen(mainWindow).setup();
 			await mainScreen.waitFor();
 
 			await mainScreen.openSettings(electronApp);
@@ -50,18 +51,26 @@ test.describe('wcag', () => {
 	}
 
 	test('should not detect significant issues in the main screen with an open note', async ({ mainWindow }) => {
-		const mainScreen = new MainScreen(mainWindow);
+		const mainScreen = await new MainScreen(mainWindow).setup();
 		await mainScreen.waitFor();
 
 		await mainScreen.createNewNote('Test');
 
-		// For now, activate all notes to make it active. When inactive, it causes a contrast warning.
-		// This seems to be allowed under WCAG 2.2 SC 1.4.3 under the "Incidental" exception.
-		await mainScreen.sidebar.allNotes.click();
-
 		// Ensure that `:hover` styling is consistent between tests:
 		await mainScreen.noteEditor.noteTitleInput.hover();
 
+		await expectNoViolations(mainWindow);
+
+		// Should not find issues with the Rich Text Editor
+		await mainScreen.noteEditor.toggleEditorsButton.click();
+		await mainScreen.noteEditor.richTextEditor.click();
+
+		await expectNoViolations(mainWindow);
+	});
+
+	test('should not detect significant issues in the change app layout screen', async ({ mainWindow, electronApp }) => {
+		const mainScreen = await new MainScreen(mainWindow).setup();
+		await mainScreen.changeLayoutScreen.open(electronApp);
 		await expectNoViolations(mainWindow);
 	});
 });

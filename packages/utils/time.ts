@@ -145,3 +145,15 @@ export const formatMsToLocal = (ms: number, format: string|null = null) => {
 	if (format === null) format = dateTimeFormat();
 	return dayjs(ms).format(format);
 };
+
+export const formatMsToDateTimeLocal = (ms: number) => {
+	return formatMsToLocal(ms, 'YYYY-MM-DDTHH:mm');
+};
+
+export const isValidDate = (anything: string) => {
+	return dayjs(anything).isValid();
+};
+
+export const formatDateTimeLocalToMs = (anything: string) => {
+	return dayjs(anything).unix() * 1000;
+};

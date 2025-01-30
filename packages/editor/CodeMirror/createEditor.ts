@@ -34,6 +34,7 @@ import biDirectionalTextExtension from './utils/biDirectionalTextExtension';
 import searchExtension from './utils/searchExtension';
 import isCursorAtBeginning from './utils/isCursorAtBeginning';
 import overwriteModeExtension from './utils/overwriteModeExtension';
+import handleLinkEditRequests, { showLinkEditor } from './utils/handleLinkEditRequests';
 
 // Newer versions of CodeMirror by default use Chrome's EditContext API.
 // While this might be stable enough for desktop use, it causes significant
@@ -95,12 +96,6 @@ const createEditor = (
 
 			schedulePostUndoRedoDepthChange(editor);
 		}
-	};
-
-	const notifyLinkEditRequest = () => {
-		props.onEvent({
-			kind: EditorEventType.EditLink,
-		});
 	};
 
 
@@ -184,11 +179,12 @@ const createEditor = (
 		keyCommand('Mod-`', toggleCode),
 		keyCommand('Mod-[', decreaseIndent),
 		keyCommand('Mod-]', increaseIndent),
-		keyCommand('Mod-k', (_: EditorView) => {
-			notifyLinkEditRequest();
-			return true;
-		}),
+		keyCommand('Mod-k', showLinkEditor),
 		keyCommand('Tab', (view: EditorView) => {
+			if (settings.tabMovesFocus) {
+				return false;
+			}
+
 			if (settings.autocompleteMarkup) {
 				return insertOrIncreaseIndent(view);
 			}
@@ -196,6 +192,10 @@ const createEditor = (
 			return insertTab(view);
 		}, true),
 		keyCommand('Shift-Tab', (view) => {
+			if (settings.tabMovesFocus) {
+				return false;
+			}
+
 			// When at the beginning of the editor, allow shift-tab to act
 			// normally.
 			if (isCursorAtBeginning(view.state)) {
@@ -289,6 +289,11 @@ const createEditor = (
 					notifySelectionFormattingChange(viewUpdate);
 				}),
 
+				handleLinkEditRequests(() => {
+					props.onEvent({
+						kind: EditorEventType.EditLink,
+					});
+				}),
 			],
 			doc: initialText,
 		}),

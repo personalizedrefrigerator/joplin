@@ -5,7 +5,8 @@ import { Locator } from '@playwright/test';
 
 test.describe('goToAnything', () => {
 	test('clicking outside of go to anything should close it', async ({ electronApp, mainWindow }) => {
-		const mainScreen = new MainScreen(mainWindow);
+		const mainScreen = await new MainScreen(mainWindow).setup();
+		await mainScreen.createNewNote('Test');
 		await mainScreen.noteEditor.waitFor();
 		const goToAnything = mainScreen.goToAnything;
 		await goToAnything.open(electronApp);
@@ -19,7 +20,7 @@ test.describe('goToAnything', () => {
 	});
 
 	test('pressing escape in go to anything should close it ', async ({ electronApp, mainWindow }) => {
-		const mainScreen = new MainScreen(mainWindow);
+		const mainScreen = await new MainScreen(mainWindow).setup();
 		const goToAnything = mainScreen.goToAnything;
 
 		// Pressing Escape to close the dialog should work even if opened multiple times in a row.
@@ -33,7 +34,7 @@ test.describe('goToAnything', () => {
 	});
 
 	test('closing go to anything should restore the original keyboard focus', async ({ electronApp, mainWindow }) => {
-		const mainScreen = new MainScreen(mainWindow);
+		const mainScreen = await new MainScreen(mainWindow).setup();
 		await mainScreen.createNewNote('');
 
 		const initialFocusLocators: [Locator, boolean][] = [
@@ -65,7 +66,7 @@ test.describe('goToAnything', () => {
 	});
 
 	test('should be possible to show the set tags dialog from goToAnything', async ({ electronApp, mainWindow }) => {
-		const mainScreen = new MainScreen(mainWindow);
+		const mainScreen = await new MainScreen(mainWindow).setup();
 		await mainScreen.createNewNote('Test note');
 
 		const goToAnything = mainScreen.goToAnything;

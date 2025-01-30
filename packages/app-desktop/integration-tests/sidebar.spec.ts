@@ -3,7 +3,7 @@ import MainScreen from './models/MainScreen';
 
 test.describe('sidebar', () => {
 	test('should be able to create new folders', async ({ mainWindow }) => {
-		const mainScreen = new MainScreen(mainWindow);
+		const mainScreen = await new MainScreen(mainWindow).setup();
 		const sidebar = mainScreen.sidebar;
 
 		for (let i = 0; i < 3; i++) {
@@ -17,7 +17,7 @@ test.describe('sidebar', () => {
 	});
 
 	test('should allow changing the focused folder with the arrow keys', async ({ electronApp, mainWindow }) => {
-		const mainScreen = new MainScreen(mainWindow);
+		const mainScreen = await new MainScreen(mainWindow).setup();
 		const sidebar = mainScreen.sidebar;
 
 		const folderAHeader = await sidebar.createNewFolder('Folder A');
@@ -45,7 +45,7 @@ test.describe('sidebar', () => {
 	});
 
 	test('should allow changing the parent of a folder by drag-and-drop', async ({ electronApp, mainWindow }) => {
-		const mainScreen = new MainScreen(mainWindow);
+		const mainScreen = await new MainScreen(mainWindow).setup();
 		const sidebar = mainScreen.sidebar;
 
 		const parentFolderHeader = await sidebar.createNewFolder('Parent folder');
@@ -77,7 +77,7 @@ test.describe('sidebar', () => {
 	});
 
 	test('all notes section should list all notes', async ({ electronApp, mainWindow }) => {
-		const mainScreen = new MainScreen(mainWindow);
+		const mainScreen = await new MainScreen(mainWindow).setup();
 		const sidebar = mainScreen.sidebar;
 
 		const testFolderA = await sidebar.createNewFolder('Folder A');
@@ -100,5 +100,26 @@ test.describe('sidebar', () => {
 		await expect(mainWindow.getByText('A note in Folder A')).toBeAttached();
 		await expect(mainWindow.getByText('Another note in Folder A')).toBeAttached();
 		await expect(mainWindow.getByText('A note in Folder B')).toBeAttached();
+	});
+
+	test('double-clicking should collapse/expand folders in the sidebar', async ({ mainWindow }) => {
+		const mainScreen = await new MainScreen(mainWindow).setup();
+		const sidebar = mainScreen.sidebar;
+
+		const testFolderA = await sidebar.createNewFolder('Folder A');
+		const testFolderB = await sidebar.createNewFolder('Folder B');
+
+		// Convert folder B to a subfolder
+		await testFolderB.dragTo(testFolderA);
+
+		await expect(testFolderB).toBeVisible();
+
+		// Collapse
+		await testFolderA.dblclick();
+		await expect(testFolderB).not.toBeVisible();
+
+		// Expand
+		await testFolderA.dblclick();
+		await expect(testFolderB).toBeVisible();
 	});
 });

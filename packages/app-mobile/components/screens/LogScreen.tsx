@@ -105,7 +105,7 @@ class LogScreenComponent extends BaseScreenComponent<Props, State> {
 			logger.error('Unable to share log data:', e);
 
 			// Display a message to the user (e.g. in the case where the user is out of disk space).
-			void shim.showMessageBox(_('Error'), _('Unable to share log data. Reason: %s', e.toString()));
+			void shim.showErrorDialog(_('Unable to share log data. Reason: %s', e.toString()));
 		} finally {
 			if (fileToShare) {
 				await shim.fsDriver().remove(fileToShare);

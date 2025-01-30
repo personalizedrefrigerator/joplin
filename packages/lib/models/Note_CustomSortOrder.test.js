@@ -282,4 +282,34 @@ describe('models/Note_CustomSortOrder', () => {
 		expect(resortedNotes3[5].id).toBe(resortedNotes2[5].id);
 	}));
 
+	it('should account for items in the trash', async () => {
+		const folder1 = await Folder.save({});
+
+		const notes = [];
+		notes.push(await Note.save({ order: 1003, parent_id: folder1.id, deleted_time: 1 })); await time.msleep(2);
+		notes.push(await Note.save({ order: 1002, parent_id: folder1.id })); await time.msleep(2);
+		notes.push(await Note.save({ order: 1001, parent_id: folder1.id })); await time.msleep(2);
+		notes.push(await Note.save({ order: 1000, parent_id: folder1.id })); await time.msleep(2);
+
+		const sortedNoteIds = async () => {
+			const notes = await Note.previews(folder1.id, {
+				fields: ['id', 'order', 'user_created_time', 'is_todo', 'todo_completed'],
+				order: Note.customOrderByColumns(),
+			});
+			return notes.map(note => note.id);
+		};
+
+		// Should sort items correctly initially, with deleted items omitted
+		expect(await sortedNoteIds()).toEqual([
+			notes[1].id, notes[2].id, notes[3].id,
+		]);
+
+		// Move a note to the end
+		await Note.insertNotesAt(folder1.id, [notes[1].id], 3, true, true);
+
+		// Should correctly reorder notes
+		expect(await sortedNoteIds()).toEqual([
+			notes[2].id, notes[3].id, notes[1].id,
+		]);
+	});
 });

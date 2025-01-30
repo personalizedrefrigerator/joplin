@@ -54,14 +54,9 @@ const useOnSidebarKeyDownHandler = (props: Props) => {
 			indexChange = -1;
 		} else if (event.code === 'ArrowDown') {
 			indexChange = 1;
-		} else if (event.code === 'Tab') {
+		} else if (event.code === 'Enter' && !event.shiftKey) {
 			event.preventDefault();
-
-			if (event.shiftKey) {
-				void CommandService.instance().execute('focusElement', 'noteBody');
-			} else {
-				void CommandService.instance().execute('focusElement', 'noteList');
-			}
+			void CommandService.instance().execute('focusElement', 'noteList');
 		}
 
 		if (indexChange !== 0) {

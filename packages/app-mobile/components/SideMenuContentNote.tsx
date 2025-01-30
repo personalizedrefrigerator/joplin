@@ -91,7 +91,11 @@ const SideMenuContentNoteComponent: React.FC<Props> = props => {
 		if (!onPressHandler) return content;
 
 		return (
-			<TouchableOpacity key={key} onPress={onPressHandler}>
+			<TouchableOpacity
+				key={key}
+				onPress={onPressHandler}
+				accessibilityRole='button'
+			>
 				{content}
 			</TouchableOpacity>
 		);

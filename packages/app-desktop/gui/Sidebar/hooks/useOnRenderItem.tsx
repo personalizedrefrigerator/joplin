@@ -31,6 +31,7 @@ import HeaderItem from '../listItemComponents/HeaderItem';
 import AllNotesItem from '../listItemComponents/AllNotesItem';
 import ListItemWrapper from '../listItemComponents/ListItemWrapper';
 import { focus } from '@joplin/lib/utils/focusHandler';
+import shim from '@joplin/lib/shim';
 
 const Menu = bridge().Menu;
 const MenuItem = bridge().MenuItem;
@@ -309,7 +310,7 @@ const useOnRenderItem = (props: Props) => {
 			}
 		} catch (error) {
 			logger.error(error);
-			alert(error.message);
+			await shim.showErrorDialog(error.message);
 		}
 	}, []);
 

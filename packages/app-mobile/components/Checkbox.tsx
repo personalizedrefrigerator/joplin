@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { TouchableHighlight, StyleSheet, TextStyle } from 'react-native';
-const Icon = require('react-native-vector-icons/Ionicons').default;
+import Icon from './Icon';
 
 interface Props {
 	checked: boolean;
@@ -44,7 +44,7 @@ const Checkbox: React.FC<Props> = props => {
 		});
 	}, [props.onChange]);
 
-	const iconName = checked ? 'checkbox-outline' : 'square-outline';
+	const iconName = checked ? 'ionicon checkbox-outline' : 'ionicon square-outline';
 	const styles = useStyles(props.style, props.iconStyle);
 
 	const accessibilityState = useMemo(() => ({
@@ -58,8 +58,10 @@ const Checkbox: React.FC<Props> = props => {
 			accessibilityRole="checkbox"
 			accessibilityState={accessibilityState}
 			accessibilityLabel={props.accessibilityLabel ?? ''}
+			// Web requires aria-checked
+			aria-checked={checked}
 		>
-			<Icon name={iconName} style={styles.icon} />
+			<Icon name={iconName} style={styles.icon} accessibilityLabel={null} />
 		</TouchableHighlight>
 	);
 };

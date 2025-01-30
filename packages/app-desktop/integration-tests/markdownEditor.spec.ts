@@ -8,7 +8,7 @@ import activateMainMenuItem from './util/activateMainMenuItem';
 
 test.describe('markdownEditor', () => {
 	test('preview pane should render images in HTML notes', async ({ mainWindow, electronApp }) => {
-		const mainScreen = new MainScreen(mainWindow);
+		const mainScreen = await new MainScreen(mainWindow).setup();
 		await mainScreen.waitFor();
 
 		await mainScreen.importHtmlDirectory(electronApp, join(__dirname, 'resources', 'html-import'));
@@ -36,7 +36,7 @@ test.describe('markdownEditor', () => {
 	});
 
 	test('preview pane should render PDFs', async ({ mainWindow, electronApp }) => {
-		const mainScreen = new MainScreen(mainWindow);
+		const mainScreen = await new MainScreen(mainWindow).setup();
 		await mainScreen.createNewNote('PDF attachments');
 		const editor = mainScreen.noteEditor;
 
@@ -81,7 +81,7 @@ test.describe('markdownEditor', () => {
 	});
 
 	test('preview pane should render video attachments', async ({ mainWindow, electronApp }) => {
-		const mainScreen = new MainScreen(mainWindow);
+		const mainScreen = await new MainScreen(mainWindow).setup();
 		await mainScreen.createNewNote('Media attachments');
 		const editor = mainScreen.noteEditor;
 
@@ -105,7 +105,7 @@ test.describe('markdownEditor', () => {
 	});
 
 	test('arrow keys should navigate the toolbar', async ({ mainWindow }) => {
-		const mainScreen = new MainScreen(mainWindow);
+		const mainScreen = await new MainScreen(mainWindow).setup();
 		await mainScreen.waitFor();
 
 		await mainScreen.createNewNote('Note 1');
@@ -142,7 +142,7 @@ test.describe('markdownEditor', () => {
 	});
 
 	test('should sync local search between the viewer and editor', async ({ mainWindow }) => {
-		const mainScreen = new MainScreen(mainWindow);
+		const mainScreen = await new MainScreen(mainWindow).setup();
 		await mainScreen.waitFor();
 		const noteEditor = mainScreen.noteEditor;
 
@@ -198,7 +198,7 @@ test.describe('markdownEditor', () => {
 	});
 
 	test('should move focus when the visible editor panes change', async ({ mainWindow, electronApp }) => {
-		const mainScreen = new MainScreen(mainWindow);
+		const mainScreen = await new MainScreen(mainWindow).setup();
 		await mainScreen.waitFor();
 		const noteEditor = mainScreen.noteEditor;
 

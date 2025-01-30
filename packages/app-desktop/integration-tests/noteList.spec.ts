@@ -4,7 +4,7 @@ import setMessageBoxResponse from './util/setMessageBoxResponse';
 
 test.describe('noteList', () => {
 	test('should be possible to edit notes in a different notebook when searching', async ({ mainWindow, electronApp }) => {
-		const mainScreen = new MainScreen(mainWindow);
+		const mainScreen = await new MainScreen(mainWindow).setup();
 		const sidebar = mainScreen.sidebar;
 
 		const folderAHeader = await sidebar.createNewFolder('Folder A');
@@ -39,7 +39,7 @@ test.describe('noteList', () => {
 	});
 
 	test('shift-delete should ask to permanently delete notes, but only when the note list is focused', async ({ electronApp, mainWindow }) => {
-		const mainScreen = new MainScreen(mainWindow);
+		const mainScreen = await new MainScreen(mainWindow).setup();
 		const sidebar = mainScreen.sidebar;
 
 		const folderBHeader = await sidebar.createNewFolder('Folder B');
@@ -76,7 +76,7 @@ test.describe('noteList', () => {
 	});
 
 	test('arrow keys should navigate the note list', async ({ electronApp, mainWindow }) => {
-		const mainScreen = new MainScreen(mainWindow);
+		const mainScreen = await new MainScreen(mainWindow).setup();
 		const sidebar = mainScreen.sidebar;
 
 		await sidebar.createNewFolder('Folder');
@@ -89,6 +89,7 @@ test.describe('noteList', () => {
 		const noteList = mainScreen.noteList;
 		await noteList.sortByTitle(electronApp);
 		await noteList.focusContent(electronApp);
+
 		// The most recently-created note should be visible
 		const note4Item = noteList.getNoteItemByTitle('note_4');
 		const note3Item = noteList.getNoteItemByTitle('note_3');

@@ -48,6 +48,8 @@ export const runtime = (): CommandRuntime => {
 				shownEditorViewIds.splice(idx, 1);
 			}
 
+			logger.info('Shown editor IDs:', shownEditorViewIds);
+
 			Setting.setValue('plugins.shownEditorViewIds', shownEditorViewIds);
 			context.dispatch({ type: 'EDITOR_PLUGIN_VIEW_IDS_CHANGED', value: shownEditorViewIds });
 		},

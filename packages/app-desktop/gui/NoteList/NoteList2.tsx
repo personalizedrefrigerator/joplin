@@ -29,6 +29,7 @@ import getNoteElementIdFromJoplinId from '../NoteListItem/utils/getNoteElementId
 import useFocusVisible from './utils/useFocusVisible';
 import { stateUtils } from '@joplin/lib/reducer';
 import { connect } from 'react-redux';
+import useOnNoteDoubleClick from './utils/useOnNoteDoubleClick';
 
 const commands = {
 	focusElementNoteList,
@@ -102,6 +103,8 @@ const NoteList = (props: Props) => {
 	}, [props.size]);
 
 	const onNoteClick = useOnNoteClick(props.dispatch, focusNote);
+
+	const onNoteDoubleClick = useOnNoteDoubleClick();
 
 	const onKeyDown = useOnKeyDown(
 		activeNoteId,
@@ -198,7 +201,9 @@ const NoteList = (props: Props) => {
 
 	const renderEmptyList = () => {
 		if (props.notes.length) return null;
-		return <div className="emptylist">{getEmptyFolderMessage(props.folders, props.selectedFolderId)}</div>;
+		// Role status is necessary for the screenreader to announce that the list is empty, since when there are
+		// zero items there is not list to render
+		return <div className="emptylist" role="status">{getEmptyFolderMessage(props.folders, props.selectedFolderId)}</div>;
 	};
 
 	const renderFiller = (key: string, style: React.CSSProperties) => {
@@ -226,6 +231,7 @@ const NoteList = (props: Props) => {
 					itemSize={itemSize}
 					onChange={listRenderer.onChange}
 					onClick={onNoteClick}
+					onDoubleClick={onNoteDoubleClick}
 					onContextMenu={onItemContextMenu}
 					onDragStart={onDragStart}
 					onDragOver={onDragOver}
@@ -302,6 +308,7 @@ const NoteList = (props: Props) => {
 			onKeyUp={onKeyUp}
 			onDrop={onDrop}
 			onContextMenu={onContainerContextMenu}
+			id='notes-list'
 		>
 			{renderEmptyList()}
 			{renderFiller('top', topFillerStyle)}

@@ -17,6 +17,8 @@ import crypto from './services/e2ee/crypto';
 
 import FileApiDriverLocal from './file-api-driver-local';
 import * as mimeUtils from './mime-utils';
+import BaseItem from './models/BaseItem';
+import { Size } from '@joplin/utils/types';
 const { _ } = require('./locale');
 const http = require('http');
 const https = require('https');
@@ -145,6 +147,10 @@ function shimInit(options: ShimInitOptions = null) {
 		return shim.fsDriver_;
 	};
 
+	shim.sharpEnabled = () => {
+		return !!sharp;
+	};
+
 	shim.dgram = () => {
 		return dgram;
 	};
@@ -269,10 +275,17 @@ function shimInit(options: ShimInitOptions = null) {
 			return await saveOriginalImage();
 		} else {
 			// For the CLI tool
-			const image = sharp(filePath);
-			const md = await image.metadata();
 
-			if (md.width <= maxDim && md.height <= maxDim) {
+			let md: Size = null;
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+			let image: any = null;
+
+			if (sharp) {
+				image = sharp(filePath);
+				md = await image.metadata();
+			}
+
+			if (!md || (md.width <= maxDim && md.height <= maxDim)) {
 				await shim.fsDriver().copy(filePath, targetPath);
 				return true;
 			}
@@ -309,13 +322,11 @@ function shimInit(options: ShimInitOptions = null) {
 
 		const isUpdate = !!options.destinationResourceId;
 
-		const uuid = require('./uuid').default;
-
 		if (!(await fs.pathExists(filePath))) throw new Error(_('Cannot access %s', filePath));
 
 		defaultProps = defaultProps ? defaultProps : {};
 
-		let resourceId = defaultProps.id ? defaultProps.id : uuid.create();
+		let resourceId = defaultProps.id ? defaultProps.id : BaseItem.generateUuid();
 		if (isUpdate) resourceId = options.destinationResourceId;
 
 		let resource = isUpdate ? {} : Resource.new();
@@ -380,7 +391,13 @@ function shimInit(options: ShimInitOptions = null) {
 	};
 
 	shim.attachFileToNoteBody = async function(noteBody, filePath, position = null, options = null) {
-		options = { createFileURL: false, markupLanguage: 1, ...options };
+		options = {
+			createFileURL: false,
+			markupLanguage: 1,
+			resourcePrefix: '',
+			resourceSuffix: '',
+			...options,
+		};
 
 		const { basename } = require('path');
 		const { escapeTitleText } = require('./markdownUtils').default;
@@ -401,16 +418,16 @@ function shimInit(options: ShimInitOptions = null) {
 		if (noteBody && position) newBody.push(noteBody.substr(0, position));
 
 		if (!options.createFileURL) {
-			newBody.push(Resource.markupTag(resource, options.markupLanguage));
+			newBody.push(options.resourcePrefix + Resource.markupTag(resource, options.markupLanguage) + options.resourceSuffix);
 		} else {
 			const filename = escapeTitleText(basename(filePath)); // to get same filename as standard drag and drop
 			const fileURL = `[${filename}](${toFileProtocolPath(filePath)})`;
-			newBody.push(fileURL);
+			newBody.push(options.resourcePrefix + fileURL + options.resourceSuffix);
 		}
 
 		if (noteBody) newBody.push(noteBody.substr(position));
 
-		return newBody.join('\n\n');
+		return newBody.join('');
 	};
 
 	shim.attachFileToNote = async function(note, filePath, options = {}) {
@@ -454,7 +471,7 @@ function shimInit(options: ShimInitOptions = null) {
 		} else {
 			throw new Error('Unsupported method');
 		}
-	},
+	};
 
 	shim.imageFromDataUrl = async function(imageDataUrl, filePath, options = null) {
 		if (options === null) options = {};
