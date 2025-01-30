@@ -19,6 +19,7 @@ import PluginDialogs from './PluginDialogs';
 import useSyncDialogState from './utils/useSyncDialogState';
 import AppDialogs from './AppDialogs';
 import PopupNotificationList from '../PopupNotification/PopupNotificationList';
+import NotificationHistoryDialog from '../PopupNotification/NotificationHistoryDialog';
 
 const PluginManager = require('@joplin/lib/services/PluginManager');
 
@@ -47,6 +48,9 @@ const defaultDialogState: DialogState = {
 		visible: false,
 	},
 	shareFolderDialogOptions: {
+		visible: false,
+	},
+	notificationDialogOptions: {
 		visible: false,
 	},
 	promptOptions: null,
@@ -114,7 +118,10 @@ const WindowCommandsAndDialogs: React.FC<Props> = props => {
 	const dialogInfo = PluginManager.instance().pluginDialogToShow(props.pluginsLegacy);
 	const pluginDialog = !dialogInfo ? null : <dialogInfo.Dialog {...dialogInfo.props} />;
 
-	const { noteContentPropertiesDialogOptions, notePropertiesDialogOptions, shareNoteDialogOptions, shareFolderDialogOptions, promptOptions } = dialogState;
+	const {
+		noteContentPropertiesDialogOptions, notePropertiesDialogOptions, shareNoteDialogOptions, shareFolderDialogOptions, promptOptions,
+		notificationDialogOptions,
+	} = dialogState;
 
 
 	return <>
@@ -176,6 +183,10 @@ const WindowCommandsAndDialogs: React.FC<Props> = props => {
 		/>
 
 		<PopupNotificationList/>
+		<NotificationHistoryDialog
+			visible={notificationDialogOptions.visible}
+			onClose={onDialogHideCallbacks.notificationDialogOptions}
+		/>
 	</>;
 };
 

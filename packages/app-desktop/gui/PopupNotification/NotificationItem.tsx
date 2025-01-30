@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { NotificationDismissEvent, NotificationType } from './types';
+import { useId } from 'react';
 
 interface Props {
 	children: React.ReactNode;
@@ -7,6 +8,7 @@ interface Props {
 	type: NotificationType;
 	onDismiss: (event: NotificationDismissEvent)=> void;
 	dismissing: boolean;
+	popup: boolean;
 }
 
 const NotificationItem: React.FC<Props> = props => {
@@ -25,13 +27,15 @@ const NotificationItem: React.FC<Props> = props => {
 	})();
 
 	const icon = <i role='img' aria-hidden='true' className={`icon ${iconClassName}`}/>;
+	const contentId = useId();
 	return <div
-		role='alert'
+		role={props.popup ? 'alert' : 'group'}
+		aria-labelledby={contentId}
 		className={`popup-notification-item ${containerModifier} ${props.dismissing ? '-dismissing' : ''}`}
 	>
 		{iconClassName ? icon : null}
 		<div className='ripple'/>
-		<div className='content'>
+		<div className='content' id={contentId}>
 			{props.children}
 		</div>
 	</div>;

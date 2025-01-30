@@ -20,6 +20,7 @@ export interface DialogState {
 		visible: boolean;
 		folderId?: string;
 	};
+	notificationDialogOptions: { visible: boolean };
 	promptOptions: {
 		inputType?: string;
 		buttons?: unknown[];

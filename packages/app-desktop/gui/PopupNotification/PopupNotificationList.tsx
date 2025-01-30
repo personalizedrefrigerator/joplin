@@ -12,18 +12,22 @@ const PopupNotificationList: React.FC<Props> = () => {
 	const popupSpecs = useContext(VisibleNotificationsContext);
 	const popups = [];
 	for (const spec of popupSpecs) {
+		const dismissed = spec.dismissedAt <= performance.now();
+		if (dismissed) continue;
+
 		popups.push(
 			<NotificationItem
 				key={spec.key}
 				type={spec.type}
 				onDismiss={popupManager.onPopupDismissed}
-				dismissing={spec.dismissing}
+				dismissing={!!spec.dismissedAt}
+				popup={true}
 			>{spec.content()}</NotificationItem>,
 		);
 	}
 	popups.reverse();
 
-	return <div className='popup-notification-list'>
+	return <div className='popup-notification-list -overlay'>
 		{popups}
 	</div>;
 };

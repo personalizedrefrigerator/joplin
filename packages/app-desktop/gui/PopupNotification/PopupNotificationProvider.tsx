@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { createContext, useMemo, useRef, useState } from 'react';
 import { NotificationType, PopupHandle, PopupControl as PopupManager } from './types';
+import { Hour } from '@joplin/utils/time';
 
 export const PopupNotificationContext = createContext<PopupManager|null>(null);
 export const VisibleNotificationsContext = createContext<PopupSpec[]>([]);
@@ -11,7 +12,7 @@ interface Props {
 
 interface PopupSpec {
 	key: string;
-	dismissing: boolean;
+	dismissedAt: number|undefined;
 	type: NotificationType;
 	content: ()=> React.ReactNode;
 }
@@ -21,14 +22,26 @@ const PopupNotificationProvider: React.FC<Props> = props => {
 	const nextPopupKey = useRef(0);
 
 	const popupManager = useMemo((): PopupManager => {
+		const removeOldPopups = () => {
+			// The WCAG allows dismissing notifications older than 20 hours.
+			setPopupSpecs(popups => popups.filter(popup => {
+				if (!popup.dismissedAt) {
+					return true; // Not dismissed
+				}
+
+				const dismissedRecently = popup.dismissedAt > performance.now() - Hour * 20;
+				return dismissedRecently;
+			}));
+		};
+
 		const manager: PopupManager = {
 			createPopup: (content, { type } = {}): PopupHandle => {
 				const key = `popup-${nextPopupKey.current++}`;
-				const newPopup = {
+				const newPopup: PopupSpec = {
 					key,
 					content,
 					type,
-					dismissing: false,
+					dismissedAt: undefined,
 				};
 
 				setPopupSpecs(popups => {
@@ -61,19 +74,16 @@ const PopupNotificationProvider: React.FC<Props> = props => {
 			},
 			onPopupDismissed: (event) => {
 				// Start the dismiss animation
+				const dismissAnimationDelay = 600;
 				setPopupSpecs(popups => popups.map(p => {
 					if (p.key === event.key) {
-						return { ...p, dismissing: true };
+						return { ...p, dismissedAt: performance.now() + dismissAnimationDelay };
 					} else {
 						return p;
 					}
 				}));
 
-				// Remove the popup
-				const dismissAnimationDelay = 600;
-				setTimeout(() => {
-					setPopupSpecs(popups => popups.filter(p => p.key !== event.key));
-				}, dismissAnimationDelay);
+				removeOldPopups();
 			},
 		};
 		return manager;

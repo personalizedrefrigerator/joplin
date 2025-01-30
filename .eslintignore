@@ -357,6 +357,7 @@ packages/app-desktop/gui/PasswordInput/PasswordInput.js
 packages/app-desktop/gui/PasswordInput/types.js
 packages/app-desktop/gui/PdfViewer.js
 packages/app-desktop/gui/PluginNotification/PluginNotification.js
+packages/app-desktop/gui/PopupNotification/NotificationHistoryDialog.js
 packages/app-desktop/gui/PopupNotification/NotificationItem.js
 packages/app-desktop/gui/PopupNotification/PopupNotificationList.js
 packages/app-desktop/gui/PopupNotification/PopupNotificationProvider.js
@@ -462,6 +463,7 @@ packages/app-desktop/gui/WindowCommandsAndDialogs/commands/showEditorPlugin.js
 packages/app-desktop/gui/WindowCommandsAndDialogs/commands/showModalMessage.js
 packages/app-desktop/gui/WindowCommandsAndDialogs/commands/showNoteContentProperties.js
 packages/app-desktop/gui/WindowCommandsAndDialogs/commands/showNoteProperties.js
+packages/app-desktop/gui/WindowCommandsAndDialogs/commands/showNotificationDialog.js
 packages/app-desktop/gui/WindowCommandsAndDialogs/commands/showPrompt.js
 packages/app-desktop/gui/WindowCommandsAndDialogs/commands/showShareFolderDialog.js
 packages/app-desktop/gui/WindowCommandsAndDialogs/commands/showShareNoteDialog.js

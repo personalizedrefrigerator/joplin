@@ -32,6 +32,7 @@ import * as showEditorPlugin from './showEditorPlugin';
 import * as showModalMessage from './showModalMessage';
 import * as showNoteContentProperties from './showNoteContentProperties';
 import * as showNoteProperties from './showNoteProperties';
+import * as showNotificationDialog from './showNotificationDialog';
 import * as showPrompt from './showPrompt';
 import * as showShareFolderDialog from './showShareFolderDialog';
 import * as showShareNoteDialog from './showShareNoteDialog';
@@ -82,6 +83,7 @@ const index: any[] = [
 	showModalMessage,
 	showNoteContentProperties,
 	showNoteProperties,
+	showNotificationDialog,
 	showPrompt,
 	showShareFolderDialog,
 	showShareNoteDialog,
