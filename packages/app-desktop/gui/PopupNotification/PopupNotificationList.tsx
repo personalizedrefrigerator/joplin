@@ -25,9 +25,9 @@ const PopupNotificationList: React.FC<Props> = () => {
 	}
 	popups.reverse();
 
-	return <div className='popup-notification-list -overlay'>
+	return <ul className='popup-notification-list -overlay'>
 		{popups}
-	</div>;
+	</ul>;
 };
 
 export default PopupNotificationList;

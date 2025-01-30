@@ -28,9 +28,9 @@ const NotificationHistoryDialog: React.FC<Props> = props => {
 	if (!props.visible) return null;
 	return <Dialog onCancel={props.onClose}>
 		<h1>{_('Recent notifications')}</h1>
-		<div className='popup-notification-list'>
+		<ul className='popup-notification-list'>
 			{popups.length ? popups : <div>{_('No recent notifications')}</div>}
-		</div>
+		</ul>
 		<Button onClick={props.onClose} title={_('Done')}/>
 	</Dialog>;
 };

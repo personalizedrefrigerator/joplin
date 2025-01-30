@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { NotificationType } from './types';
-import { useId } from 'react';
+import { _ } from '@joplin/lib/locale';
 
 interface Props {
 	children: React.ReactNode;
@@ -11,11 +11,17 @@ interface Props {
 }
 
 const NotificationItem: React.FC<Props> = props => {
-	const iconClassName = (() => {
-		if (props.type === NotificationType.Success) return 'fas fa-check';
-		if (props.type === NotificationType.Error) return 'fas fa-times';
-		if (props.type === NotificationType.Info) return 'fas fa-info';
-		return '';
+	const [iconClassName, iconLabel] = (() => {
+		if (props.type === NotificationType.Success) {
+			return ['fas fa-check', _('Success')];
+		}
+		if (props.type === NotificationType.Error) {
+			return ['fas fa-times', _('Error')];
+		}
+		if (props.type === NotificationType.Info) {
+			return ['fas fa-info', _('Info')];
+		}
+		return ['', ''];
 	})();
 
 	const containerModifier = (() => {
@@ -25,19 +31,22 @@ const NotificationItem: React.FC<Props> = props => {
 		return '';
 	})();
 
-	const icon = <i role='img' aria-hidden='true' className={`icon ${iconClassName}`}/>;
-	const contentId = useId();
-	return <div
-		role={props.popup ? 'alert' : 'group'}
-		aria-labelledby={contentId}
+	const icon = <i
+		role='img'
+		aria-label={iconLabel}
+		className={`icon ${iconClassName}`}
+	/>;
+
+	return <li
+		role={props.popup ? 'alert' : undefined}
 		className={`popup-notification-item ${containerModifier} ${props.dismissing ? '-dismissing' : ''}`}
 	>
 		{iconClassName ? icon : null}
 		<div className='ripple'/>
-		<div className='content' id={contentId}>
+		<div className='content'>
 			{props.children}
 		</div>
-	</div>;
+	</li>;
 };
 
 export default NotificationItem;
