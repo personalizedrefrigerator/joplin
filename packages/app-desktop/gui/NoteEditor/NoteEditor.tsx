@@ -118,6 +118,7 @@ function NoteEditorContent(props: NoteEditorProps) {
 		if (!props.startupPluginsLoaded) return;
 
 		let filterObject: EditorActivationCheckFilterObject = {
+			effectiveNoteId,
 			activatedEditors: [],
 		};
 		filterObject = await eventManager.filterEmit('editorActivationCheck', filterObject);

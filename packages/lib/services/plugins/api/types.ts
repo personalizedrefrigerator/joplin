@@ -397,7 +397,11 @@ export interface Rectangle {
 	height?: number;
 }
 
-export type ActivationCheckCallback = ()=> Promise<boolean>;
+interface ActivationCheckEvent {
+	noteId: string;
+}
+
+export type ActivationCheckCallback = (event: ActivationCheckEvent)=> Promise<boolean>;
 
 export type UpdateCallback = ()=> Promise<void>;
 
@@ -408,6 +412,7 @@ export interface EditContextMenuFilterObject {
 }
 
 export interface EditorActivationCheckFilterObject {
+	effectiveNoteId: string;
 	activatedEditors: {
 		pluginId: string;
 		viewId: string;

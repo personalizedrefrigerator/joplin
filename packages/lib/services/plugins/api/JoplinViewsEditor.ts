@@ -100,7 +100,7 @@ export default class JoplinViewsEditors {
 	 */
 	public async onActivationCheck(handle: ViewHandle, callback: ActivationCheckCallback): Promise<void> {
 		const handler: FilterHandler<EditorActivationCheckFilterObject> = async (object) => {
-			const isActive = await callback();
+			const isActive = await callback({ noteId: object.effectiveNoteId });
 			object.activatedEditors.push({
 				pluginId: this.plugin.id,
 				viewId: handle,
