@@ -41,8 +41,8 @@
 
 	box-shadow: 0 3px 7px 0px rgba(0, 0, 0, 0.25);
 
-	--text-color: var(--joplin-color3);
-	--ripple-color: var(--joplin-background-color3);
+	--text-color: var(--joplin-color5);
+	--ripple-color: var(--joplin-background-color5);
 	background-color: color-mix(in srgb, var(--ripple-color) 20%, transparent 70%);
 	color: var(--text-color);
 
@@ -101,12 +101,10 @@
 	}
 
 	&.-success {
-		--text-color: white;
 		--ripple-color: var(--joplin-color-correct);
 	}
 
 	&.-error {
-		--text-color: white;
 		--ripple-color: var(--joplin-color-error);
 	}
 
