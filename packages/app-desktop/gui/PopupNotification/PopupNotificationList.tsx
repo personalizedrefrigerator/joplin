@@ -5,6 +5,8 @@ import { useContext } from 'react';
 
 interface Props {}
 
+// This component displays the popups managed by PopupNotificationContext.
+// This allows popups to be shown in multiple windows at the same time.
 const PopupNotificationList: React.FC<Props> = () => {
 	const popupManager = useContext(PopupNotificationContext);
 	const popupSpecs = useContext(VisibleNotificationsContext);
@@ -20,6 +22,7 @@ const PopupNotificationList: React.FC<Props> = () => {
 		);
 	}
 	popups.reverse();
+
 	return <div className='popup-notification-list'>
 		{popups}
 	</div>;
