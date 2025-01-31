@@ -1,4 +1,5 @@
 import joplin from 'api';
+import { WebViewMessage } from './types';
 
 joplin.plugins.register({
 	onStart: async function() {
@@ -7,16 +8,18 @@ joplin.plugins.register({
 		await editors.addScript(view, './editor.js');
 
 		await editors.onActivationCheck(view, async ({ noteId }) => {
-			const note = await joplin.data.get(['notes', noteId]);
-			return !!note && note.body.includes('#edit-test');
+			const note = await joplin.data.get(['notes', noteId], { fields: ['body'] });
+			console.log('note', note);
+			return !!note && note.body?.includes('#edit-test');
 		});
 
-		await editors.onUpdate(view, async () => {
-			await editors.postMessage(view, newBody);
+		await editors.onUpdate(view, async ({ noteId, newBody }) => {
+			editors.postMessage(view, { noteId, content: newBody });
 		});
 
-		await editors.onMessage(view, (message: string) => {
-			
+		await editors.onMessage(view, async (message: WebViewMessage) => {
+			console.log('save to', message.noteId, 'with', message.content);
+			await joplin.data.put(['notes', message.noteId], null, { body: message.content });
 		});
 	},
 });
