@@ -2,6 +2,7 @@ import * as React from 'react';
 import { VisibleNotificationsContext } from './PopupNotificationProvider';
 import NotificationItem from './NotificationItem';
 import { useContext } from 'react';
+import { _ } from '@joplin/lib/locale';
 
 interface Props {}
 
@@ -25,9 +26,17 @@ const PopupNotificationList: React.FC<Props> = () => {
 	}
 	popups.reverse();
 
-	return <ul className='popup-notification-list -overlay'>
-		{popups}
-	</ul>;
+	if (popups.length) {
+		return <ul
+			className='popup-notification-list -overlay'
+			role='group'
+			aria-label={_('Notifications')}
+		>
+			{popups}
+		</ul>;
+	} else {
+		return null;
+	}
 };
 
 export default PopupNotificationList;
