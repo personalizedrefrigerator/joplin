@@ -27,9 +27,9 @@ const ToggleSpaceButton = (props: Props) => {
 
 	// Some devices need space added, others need space removed.
 	const additionalPositiveSpace = 30;
-	const additionalNegativeSpace = -8;
+	const additionalNegativeSpace = -10;
 
-	// Switch from adding +30px to -8px.
+	// Switch from adding +30px to -10px.
 	const onDecreaseSpace = useCallback(() => {
 		setAdditionalSpace(additionalNegativeSpace);
 		setDecreaseSpaceBtnVisible(false);
@@ -80,9 +80,7 @@ const ToggleSpaceButton = (props: Props) => {
 
 	const style: ViewStyle = useMemo(() => ({
 		marginBottom: spaceApplicable ? additionalSpace : 0,
-		// Additional space (if visible) should match the main toolbar background:
-		backgroundColor: theme.backgroundColor3,
-	}), [spaceApplicable, theme, additionalSpace]);
+	}), [spaceApplicable, additionalSpace]);
 
 	return (
 		<View style={style}>
