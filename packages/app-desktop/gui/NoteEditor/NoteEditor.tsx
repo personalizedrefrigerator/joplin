@@ -72,11 +72,12 @@ const toolbarButtonUtils = new ToolbarButtonUtils(CommandService.instance());
 const onDragOver: React.DragEventHandler = event => event.preventDefault();
 let editorIdCounter = 0;
 
-const makeNoteUpdateAction = (shownEditorViewIds: string[]) => {
+const makeNoteUpdateAction = (shownEditorViewIds: string[], formNote: FormNote) => {
+	const event = { newBody: formNote.body, noteId: formNote.id };
 	return async () => {
 		for (const viewId of shownEditorViewIds) {
 			const controller = PluginService.instance().viewControllerByViewId(viewId) as WebviewController;
-			if (controller) controller.emitUpdate();
+			if (controller) controller.emitUpdate(event);
 		}
 	};
 };
@@ -130,11 +131,6 @@ function NoteEditorContent(props: NoteEditorProps) {
 		}
 	}, [effectiveNoteId, props.startupPluginsLoaded]);
 
-	useEffect(() => {
-		if (!props.startupPluginsLoaded) return;
-		viewUpdateAsyncQueue_.current.push(makeNoteUpdateAction(shownEditorViewIds));
-	}, [effectiveNoteId, shownEditorViewIds, props.startupPluginsLoaded]);
-
 	const { editorPlugin, editorView } = usePluginEditorView(props.plugins, shownEditorViewIds);
 	const builtInEditorVisible = !editorPlugin;
 
@@ -153,6 +149,11 @@ function NoteEditorContent(props: NoteEditorProps) {
 	formNoteRef.current = { ...formNote };
 
 	const formNoteFolder = useFolder({ folderId: formNote.parent_id });
+
+	useEffect(() => {
+		if (!props.startupPluginsLoaded) return;
+		viewUpdateAsyncQueue_.current.push(makeNoteUpdateAction(shownEditorViewIds, formNoteRef.current));
+	}, [effectiveNoteId, shownEditorViewIds, props.startupPluginsLoaded]);
 
 	const {
 		localSearch,

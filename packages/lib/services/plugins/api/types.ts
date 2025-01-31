@@ -403,7 +403,12 @@ interface ActivationCheckEvent {
 
 export type ActivationCheckCallback = (event: ActivationCheckEvent)=> Promise<boolean>;
 
-export type UpdateCallback = ()=> Promise<void>;
+export interface UpdateEvent {
+	newBody: string;
+	noteId: string;
+}
+
+export type UpdateCallback = (event: UpdateEvent)=> Promise<void>;
 
 export type VisibleHandler = ()=> Promise<void>;
 

@@ -49,12 +49,15 @@ function findItemByKey(layout: any, key: string): any {
 	return recurseFind(layout);
 }
 
+interface UpdateEvent { noteId: string; newBody: string }
+type UpdateListener = (event: UpdateEvent)=> void;
+
 export default class WebviewController extends ViewController {
 
 	private baseDir_: string;
 	// eslint-disable-next-line @typescript-eslint/ban-types -- Old code before rule was applied
 	private messageListener_: Function = null;
-	private updateListener_: ()=> void = null;
+	private updateListener_: UpdateListener|null = null;
 	private closeResponse_: CloseResponse = null;
 	private containerType_: ContainerType = null;
 
@@ -154,7 +157,7 @@ export default class WebviewController extends ViewController {
 		return this.messageListener_(event.message);
 	}
 
-	public emitUpdate() {
+	public emitUpdate(event: UpdateEvent) {
 		if (!this.updateListener_) return;
 
 		if (this.containerType_ === ContainerType.Editor && (!this.isActive() || !this.isVisible())) {
@@ -162,7 +165,7 @@ export default class WebviewController extends ViewController {
 			return;
 		}
 
-		this.updateListener_();
+		this.updateListener_(event);
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
@@ -170,8 +173,7 @@ export default class WebviewController extends ViewController {
 		this.messageListener_ = callback;
 	}
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	public onUpdate(callback: any) {
+	public onUpdate(callback: UpdateListener) {
 		this.updateListener_ = callback;
 	}
 
