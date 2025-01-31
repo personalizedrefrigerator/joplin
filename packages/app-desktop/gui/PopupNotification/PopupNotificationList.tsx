@@ -12,8 +12,7 @@ const PopupNotificationList: React.FC<Props> = () => {
 	const popupSpecs = useContext(VisibleNotificationsContext);
 	const popups = [];
 	for (const spec of popupSpecs) {
-		const dismissed = spec.dismissAt <= performance.now();
-		if (dismissed) continue;
+		if (spec.dismissed) continue;
 
 		popups.push(
 			<NotificationItem

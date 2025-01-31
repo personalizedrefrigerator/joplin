@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { createContext, useMemo, useRef, useState } from 'react';
 import { NotificationType, PopupHandle, PopupControl as PopupManager } from './types';
-import { Hour } from '@joplin/utils/time';
+import { Hour, msleep } from '@joplin/utils/time';
 
 export const PopupNotificationContext = createContext<PopupManager|null>(null);
 export const VisibleNotificationsContext = createContext<PopupSpec[]>([]);
@@ -12,7 +12,8 @@ interface Props {
 
 interface PopupSpec {
 	key: string;
-	dismissAt: number|undefined;
+	dismissAt?: number;
+	dismissed: boolean;
 	type: NotificationType;
 	content: ()=> React.ReactNode;
 }
@@ -25,8 +26,8 @@ const PopupNotificationProvider: React.FC<Props> = props => {
 		const removeOldPopups = () => {
 			// The WCAG allows dismissing notifications older than 20 hours.
 			setPopupSpecs(popups => popups.filter(popup => {
-				if (!popup.dismissAt) {
-					return true; // Not dismissed
+				if (!popup.dismissed) {
+					return true;
 				}
 
 				const dismissedRecently = popup.dismissAt > performance.now() - Hour * 20;
@@ -38,25 +39,37 @@ const PopupNotificationProvider: React.FC<Props> = props => {
 			setPopupSpecs(popups => popups.filter(p => p.key !== key));
 		};
 
-		const dismissAnimationDelay = 600;
-		const dismissPopup = (key: string) => {
-			// Start the dismiss animation
+		type UpdatePopupCallback = (popup: PopupSpec)=> PopupSpec;
+		const updatePopupWithKey = (key: string, updateCallback: UpdatePopupCallback) => {
 			setPopupSpecs(popups => popups.map(p => {
 				if (p.key === key) {
-					return { ...p, dismissAt: performance.now() + dismissAnimationDelay };
+					return updateCallback(p);
 				} else {
 					return p;
 				}
 			}));
+		};
 
+		const dismissAnimationDelay = 600;
+		const dismissPopup = async (key: string) => {
+			// Start the dismiss animation
+			updatePopupWithKey(key, popup => ({
+				...popup,
+				dismissAt: performance.now() + dismissAnimationDelay,
+			}));
+
+			await msleep(dismissAnimationDelay);
+
+			updatePopupWithKey(key, popup => ({
+				...popup,
+				dismissed: true,
+			}));
 			removeOldPopups();
 		};
 
-		const dismissAndRemovePopup = (key: string) => {
-			dismissPopup(key);
-			setTimeout(() => {
-				removePopupWithKey(key);
-			}, dismissAnimationDelay);
+		const dismissAndRemovePopup = async (key: string) => {
+			await dismissPopup(key);
+			removePopupWithKey(key);
 		};
 
 		const manager: PopupManager = {
@@ -66,7 +79,7 @@ const PopupNotificationProvider: React.FC<Props> = props => {
 					key,
 					content,
 					type,
-					dismissAt: undefined,
+					dismissed: false,
 				};
 
 				setPopupSpecs(popups => {
@@ -85,11 +98,11 @@ const PopupNotificationProvider: React.FC<Props> = props => {
 
 				const handle: PopupHandle = {
 					remove() {
-						dismissAndRemovePopup(key);
+						void dismissAndRemovePopup(key);
 					},
 					scheduleDismiss(delay = 5_500) {
 						setTimeout(() => {
-							dismissPopup(key);
+							void dismissPopup(key);
 						}, delay);
 					},
 				};
