@@ -11,7 +11,7 @@ import Setting from '@joplin/lib/models/Setting';
 import { themeStyle } from '@joplin/lib/theme';
 
 import * as React from 'react';
-import { ReactNode, useCallback, useState, useEffect } from 'react';
+import { ReactNode, useCallback, useState, useEffect, useMemo } from 'react';
 import { Platform, View, ViewStyle } from 'react-native';
 import IconButton from './IconButton';
 import useKeyboardVisible from '../utils/hooks/useKeyboardVisible';
@@ -19,7 +19,6 @@ import useKeyboardVisible from '../utils/hooks/useKeyboardVisible';
 interface Props {
 	children: ReactNode;
 	themeId: number;
-	style?: ViewStyle;
 }
 
 const ToggleSpaceButton = (props: Props) => {
@@ -27,10 +26,10 @@ const ToggleSpaceButton = (props: Props) => {
 	const [decreaseSpaceBtnVisible, setDecreaseSpaceBtnVisible] = useState(true);
 
 	// Some devices need space added, others need space removed.
-	const additionalPositiveSpace = 14;
-	const additionalNegativeSpace = -14;
+	const additionalPositiveSpace = 30;
+	const additionalNegativeSpace = -8;
 
-	// Switch from adding +14px to -14px.
+	// Switch from adding +30px to -8px.
 	const onDecreaseSpace = useCallback(() => {
 		setAdditionalSpace(additionalNegativeSpace);
 		setDecreaseSpaceBtnVisible(false);
@@ -79,10 +78,11 @@ const ToggleSpaceButton = (props: Props) => {
 	const { keyboardVisible } = useKeyboardVisible();
 	const spaceApplicable = keyboardVisible && Platform.OS === 'ios';
 
-	const style: ViewStyle = {
+	const style: ViewStyle = useMemo(() => ({
 		marginBottom: spaceApplicable ? additionalSpace : 0,
-		...props.style,
-	};
+		// Additional space (if visible) should match the main toolbar background:
+		backgroundColor: theme.backgroundColor3,
+	}), [spaceApplicable, theme, additionalSpace]);
 
 	return (
 		<View style={style}>
