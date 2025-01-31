@@ -1,0 +1,1 @@
+(()=>{const e=document.createElement("textarea");document.body.appendChild(e),webviewApi.onMessage((t=>{e.value=t.message})),e.oninput=()=>{webviewApi.postMessage(e.value)},exports.default={}.default})();

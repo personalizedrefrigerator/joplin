@@ -1,0 +1,10 @@
+{
+	"manifest_version": 1,
+	"id": "org.joplinapp.custom_editors",
+	"app_min_version": "3.3",
+	"version": "1.0.0",
+	"name": "Custom editor demo",
+	"description": "Creates a custom Joplin editor",
+	"keywords": [],
+	"categories": []
+}
