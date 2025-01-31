@@ -864,6 +864,9 @@
 	"Delete local data and re-download from sync target": [
 		"Yerel veriyi silip senkronizasyon sunucusundan yeniden indir"
 	],
+	"Delete model and re-download?\nThis cannot be undone.": [
+		""
+	],
 	"Delete note": [
 		"Notu sil"
 	],
@@ -2485,6 +2488,9 @@
 	],
 	"Quit": [
 		"Çıkış"
+	],
+	"Re-download model": [
+		""
 	],
 	"Re-encrypt data": [
 		"Verini yeniden şifrele"

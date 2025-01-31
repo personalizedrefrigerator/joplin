@@ -680,6 +680,9 @@
 	"Delete local data and re-download from sync target": [
 		""
 	],
+	"Delete model and re-download?\nThis cannot be undone.": [
+		""
+	],
 	"Delete the Inbox notebook?\n\nIf you delete the inbox notebook, any email that's recently been sent to it may be lost.": [
 		""
 	],
@@ -708,6 +711,9 @@
 		""
 	],
 	"Detailed": [
+		""
+	],
+	"Dev": [
 		""
 	],
 	"Directory": [
@@ -777,6 +783,9 @@
 		""
 	],
 	"Download and install the relevant extension for your browser:": [
+		""
+	],
+	"Download updated model": [
 		""
 	],
 	"Downloaded": [
@@ -1931,6 +1940,9 @@
 	],
 	"Quit": [
 		"Eliri"
+	],
+	"Re-download model": [
+		""
 	],
 	"Re-upload local data to sync target": [
 		""

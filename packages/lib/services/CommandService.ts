@@ -209,6 +209,10 @@ export default class CommandService extends BaseService {
 		};
 	}
 
+	public unregisterDeclaration(name: string) {
+		delete this.commands_[name];
+	}
+
 	public registerRuntime(commandName: string, runtime: CommandRuntime, allowMultiple = false): RegisteredRuntime {
 		if (typeof commandName !== 'string') throw new Error(`Command name must be a string. Got: ${JSON.stringify(commandName)}`);
 

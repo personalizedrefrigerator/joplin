@@ -786,6 +786,9 @@
 	"Delete local data and re-download from sync target": [
 		"Eliminar datos locales y volver a descargarlos desde el objetivo de sincronización"
 	],
+	"Delete model and re-download?\nThis cannot be undone.": [
+		""
+	],
 	"Delete plugin \"%s\"?": [
 		"¿Borrar plugin «%s»?"
 	],
@@ -829,6 +832,9 @@
 		"Formato de destino: %s"
 	],
 	"Detailed": [
+		""
+	],
+	"Dev": [
 		""
 	],
 	"Directory": [
@@ -2251,6 +2257,9 @@
 	],
 	"Quit": [
 		"Salir"
+	],
+	"Re-download model": [
+		""
 	],
 	"Re-encrypt data": [
 		"Recifrar datos"

@@ -16,15 +16,15 @@ msgstr ""
 "Plural-Forms: nplurals=1; plural=0;\n"
 "X-Generator: Poedit 3.0\n"
 
-#: packages/app-mobile/components/screens/ConfigScreen/ConfigScreen.tsx:592
+#: packages/app-mobile/components/screens/ConfigScreen/ConfigScreen.tsx:593
 msgid "- Camera: to allow taking a picture and attaching it to a note."
 msgstr "- Camera: cho phép chụp ảnh và đính kèm vào note."
 
-#: packages/app-mobile/components/screens/ConfigScreen/ConfigScreen.tsx:595
+#: packages/app-mobile/components/screens/ConfigScreen/ConfigScreen.tsx:596
 msgid "- Location: to allow attaching geo-location information to a note."
 msgstr "- VỊ trí: cho phép đính thông tin vị trí vào note."
 
-#: packages/app-mobile/components/screens/ConfigScreen/ConfigScreen.tsx:589
+#: packages/app-mobile/components/screens/ConfigScreen/ConfigScreen.tsx:590
 msgid ""
 "- Storage: to allow attaching files to notes and to enable filesystem "
 "synchronisation."
@@ -99,8 +99,8 @@ msgstr "&Giao diện"
 msgid "&Window"
 msgstr "Đóng cửa sổ"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1469
-#: packages/lib/models/settings/builtInMetadata.ts:1721
+#: packages/lib/models/settings/builtInMetadata.ts:1483
+#: packages/lib/models/settings/builtInMetadata.ts:1735
 msgid "%d days"
 msgstr "%d ngày"
 
@@ -116,12 +116,12 @@ msgstr ""
 msgid "%d GB storage space"
 msgstr ""
 
-#: packages/lib/models/settings/builtInMetadata.ts:1213
+#: packages/lib/models/settings/builtInMetadata.ts:1227
 msgid "%d hour"
 msgstr "%d giờ"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1214
-#: packages/lib/models/settings/builtInMetadata.ts:1215
+#: packages/lib/models/settings/builtInMetadata.ts:1228
+#: packages/lib/models/settings/builtInMetadata.ts:1229
 msgid "%d hours"
 msgstr "%d giờ"
 
@@ -138,9 +138,9 @@ msgstr ""
 msgid "%d MB per note or attachment"
 msgstr "Đính kèm ghi chú"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1210
-#: packages/lib/models/settings/builtInMetadata.ts:1211
-#: packages/lib/models/settings/builtInMetadata.ts:1212
+#: packages/lib/models/settings/builtInMetadata.ts:1224
+#: packages/lib/models/settings/builtInMetadata.ts:1225
+#: packages/lib/models/settings/builtInMetadata.ts:1226
 msgid "%d minutes"
 msgstr "%d phút"
 
@@ -232,7 +232,7 @@ msgstr "%s: %d/%d"
 msgid "%s: %s"
 msgstr "%s: %s"
 
-#: packages/app-desktop/gui/ConfigScreen/ConfigScreen.tsx:223
+#: packages/app-desktop/gui/ConfigScreen/ConfigScreen.tsx:224
 #: packages/app-desktop/gui/EncryptionConfigScreen/EncryptionConfigScreen.tsx:265
 #, fuzzy
 msgid "%s: Missing password."
@@ -267,15 +267,15 @@ msgstr ""
 msgid "A new update (%s) is available"
 msgstr "Export hồ sơ"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1239
+#: packages/lib/models/settings/builtInMetadata.ts:1253
 msgid "A3"
 msgstr "A3"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1237
+#: packages/lib/models/settings/builtInMetadata.ts:1251
 msgid "A4"
 msgstr "A4"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1240
+#: packages/lib/models/settings/builtInMetadata.ts:1254
 msgid "A5"
 msgstr "A5"
 
@@ -371,7 +371,7 @@ msgstr "Điền tiêu đề"
 msgid "Add or remove tags:"
 msgstr "Gắn hoặc gỡ nhãn:"
 
-#: packages/app-desktop/gui/ShareFolderDialog/ShareFolderDialog.tsx:276
+#: packages/app-desktop/gui/ShareFolderDialog/ShareFolderDialog.tsx:277
 msgid "Add recipient:"
 msgstr "Thêm người nhận:"
 
@@ -401,11 +401,11 @@ msgstr ""
 msgid "Admin dashboard"
 msgstr ""
 
-#: packages/app-desktop/gui/ClipperConfigScreen.tsx:138
+#: packages/app-desktop/gui/ClipperConfigScreen.tsx:139
 msgid "Advanced options"
 msgstr "Chức năng nâng cao"
 
-#: packages/app-mobile/components/screens/ConfigScreen/ConfigScreen.tsx:652
+#: packages/app-mobile/components/screens/ConfigScreen/ConfigScreen.tsx:653
 #, fuzzy
 msgid "Advanced settings"
 msgstr "Hiển thị cài đặt nâng cao"
@@ -447,7 +447,7 @@ msgstr ""
 msgid "Also displays unset and hidden config variables."
 msgstr "Biến chưa được đặt và biến ẩn của cấu hình cũng sẽ được hiển thị."
 
-#: packages/app-desktop/gui/ShareNoteDialog.tsx:204
+#: packages/app-desktop/gui/ShareNoteDialog.tsx:205
 #, fuzzy
 msgid "Also publish linked notes"
 msgstr "Ngưng công khai ghi chú"
@@ -461,7 +461,7 @@ msgstr "Luôn luôn"
 msgid "Always ask"
 msgstr "Luôn luôn"
 
-#: packages/app-desktop/bridge.ts:445
+#: packages/app-desktop/bridge.ts:450
 msgid "Always open %s files without asking."
 msgstr ""
 
@@ -525,7 +525,7 @@ msgid ""
 "This cannot be undone."
 msgstr "Bạn có chắc là muốn làm mới mã uỷ quyền?"
 
-#: packages/app-desktop/gui/ClipperConfigScreen.tsx:37
+#: packages/app-desktop/gui/ClipperConfigScreen.tsx:38
 msgid "Are you sure you want to renew the authorisation token?"
 msgstr "Bạn có chắc là muốn làm mới mã uỷ quyền?"
 
@@ -611,7 +611,7 @@ msgid ""
 "Authentication was not completed (did not receive an authentication token)."
 msgstr "Quy trình xác nhận chưa hoàn thành (chưa nhận được mã xác nhận)."
 
-#: packages/app-desktop/gui/ClipperConfigScreen.tsx:139
+#: packages/app-desktop/gui/ClipperConfigScreen.tsx:140
 msgid "Authorisation token:"
 msgstr "Mã ủy quyền:"
 
@@ -637,12 +637,12 @@ msgstr "Tự động đóng ngoặc nhọn, ngoặc đơn, ngoặc kép, v.v..."
 msgid "Autocomplete Markdown and HTML"
 msgstr ""
 
-#: packages/lib/models/settings/builtInMetadata.ts:1184
+#: packages/lib/models/settings/builtInMetadata.ts:1198
 #, fuzzy
 msgid "Automatically check for updates"
 msgstr "Đang kiểm tra cập nhật..."
 
-#: packages/lib/models/settings/builtInMetadata.ts:1708
+#: packages/lib/models/settings/builtInMetadata.ts:1722
 msgid "Automatically delete notes in the trash after a number of days"
 msgstr ""
 
@@ -651,8 +651,8 @@ msgid "Automatically switch theme to match system theme"
 msgstr "Tự động đổi giao diện khớp với giao diện hệ thống"
 
 #: packages/app-desktop/gui/ConfigScreen/ButtonBar.tsx:48
-#: packages/app-desktop/gui/ConfigScreen/ConfigScreen.tsx:452
-#: packages/app-desktop/gui/NoteRevisionViewer.tsx:209
+#: packages/app-desktop/gui/ConfigScreen/ConfigScreen.tsx:453
+#: packages/app-desktop/gui/NoteRevisionViewer.tsx:210
 #: packages/app-mobile/components/CameraView/ActionButtons.tsx:148
 #: packages/app-mobile/components/ScreenHeader/index.tsx:279
 #: packages/lib/commands/historyBackward.ts:6
@@ -705,25 +705,25 @@ msgstr ""
 msgid "Can Share"
 msgstr "Chia sẻ"
 
-#: packages/app-desktop/gui/ShareFolderDialog/ShareFolderDialog.tsx:119
+#: packages/app-desktop/gui/ShareFolderDialog/ShareFolderDialog.tsx:120
 msgid "Can view"
 msgstr ""
 
-#: packages/app-desktop/gui/ShareFolderDialog/ShareFolderDialog.tsx:120
+#: packages/app-desktop/gui/ShareFolderDialog/ShareFolderDialog.tsx:121
 msgid "Can view and edit"
 msgstr ""
 
 #: packages/app-desktop/bridge.ts:373 packages/app-desktop/bridge.ts:389
-#: packages/app-desktop/bridge.ts:447
+#: packages/app-desktop/bridge.ts:452
 #: packages/app-desktop/checkForUpdates.ts:109
 #: packages/app-desktop/commands/emptyTrash.ts:17
-#: packages/app-desktop/gui/ConfigScreen/ConfigScreen.tsx:452
+#: packages/app-desktop/gui/ConfigScreen/ConfigScreen.tsx:453
 #: packages/app-desktop/gui/DialogButtonRow.tsx:79
 #: packages/app-desktop/gui/KeymapConfig/ShortcutRecorder.tsx:99
 #: packages/app-desktop/gui/NoteList/utils/canManuallySortNotes.ts:11
 #: packages/app-desktop/gui/PromptDialog.tsx:291
 #: packages/app-desktop/gui/ResourceScreen.tsx:225
-#: packages/app-desktop/gui/Sidebar/hooks/useOnRenderItem.tsx:149
+#: packages/app-desktop/gui/Sidebar/hooks/useOnRenderItem.tsx:150
 #: packages/app-desktop/gui/Sidebar/Sidebar.tsx:27
 #: packages/app-desktop/gui/TrashNotification/TrashNotification.tsx:74
 #: packages/app-desktop/services/plugins/UserWebviewDialogButtonBar.tsx:20
@@ -895,8 +895,8 @@ msgstr ""
 msgid "Check for updates..."
 msgstr "Đang kiểm tra cập nhật..."
 
-#: packages/app-desktop/gui/ConfigScreen/ConfigScreen.tsx:263
-#: packages/app-mobile/components/screens/ConfigScreen/ConfigScreen.tsx:464
+#: packages/app-desktop/gui/ConfigScreen/ConfigScreen.tsx:264
+#: packages/app-mobile/components/screens/ConfigScreen/ConfigScreen.tsx:465
 msgid "Check synchronisation configuration"
 msgstr "Kiểm tra cài đặt đồng bộ hóa"
 
@@ -922,6 +922,7 @@ msgstr "Chrome Web Store"
 
 #: packages/app-desktop/gui/EditFolderDialog/Dialog.tsx:150
 #: packages/app-desktop/gui/PromptDialog.tsx:298
+#: packages/app-mobile/components/screens/ConfigScreen/FileSystemPathSelector.tsx:101
 #: packages/app-mobile/components/screens/SearchScreen/index.tsx:111
 msgid "Clear"
 msgstr "Xóa"
@@ -936,7 +937,7 @@ msgstr "Bỏ báo động"
 msgid "Clear search"
 msgstr "Bỏ báo động"
 
-#: packages/app-desktop/gui/NoteRevisionViewer.tsx:204
+#: packages/app-desktop/gui/NoteRevisionViewer.tsx:205
 msgid ""
 "Click \"%s\" to restore the note. It will be copied in the notebook named "
 "\"%s\". The current version of the note will not be replaced or modified."
@@ -944,7 +945,7 @@ msgstr ""
 "Ấn \"%s\" để hồi phục note. Thao tác này sẽ sao chép notebook có tên \"%s\". "
 "Phiên bản hiện tại của note sẽ không bị mất đi hay thay đổi."
 
-#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:450
+#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:453
 msgid "Click to add tags..."
 msgstr "Nhấn để thêm nhãn…"
 
@@ -959,12 +960,12 @@ msgstr "Đóng"
 
 #: packages/app-desktop/gui/MenuBar.tsx:359
 #: packages/app-desktop/gui/NoteContentPropertiesDialog.tsx:175
-#: packages/app-desktop/gui/ShareFolderDialog/ShareFolderDialog.tsx:408
-#: packages/app-desktop/gui/ShareNoteDialog.tsx:222
+#: packages/app-desktop/gui/ShareFolderDialog/ShareFolderDialog.tsx:411
+#: packages/app-desktop/gui/ShareNoteDialog.tsx:223
 #: packages/app-desktop/gui/SyncWizard/Dialog.tsx:273
 #: packages/app-desktop/services/plugins/UserWebviewDialogButtonBar.tsx:23
 #: packages/app-mobile/components/DismissibleDialog.tsx:82
-#: packages/app-mobile/components/NoteEditor/ImageEditor/ImageEditor.tsx:167
+#: packages/app-mobile/components/NoteEditor/ImageEditor/ImageEditor.tsx:166
 #: packages/app-mobile/components/NoteEditor/SearchPanel.tsx:201
 #: packages/app-mobile/components/ProfileSwitcher/ProfileSwitcher.tsx:146
 msgid "Close"
@@ -1035,7 +1036,7 @@ msgstr ""
 msgid "Coming alarms"
 msgstr "Báo động sắp gần"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1365
+#: packages/lib/models/settings/builtInMetadata.ts:1379
 msgid ""
 "Comma-separated list of paths to directories to load the certificates from, "
 "or path to individual cert files. For example: /my/cert_dir, /other/"
@@ -1107,7 +1108,7 @@ msgid "Compress old changes"
 msgstr ""
 
 #: packages/app-mobile/components/ProfileSwitcher/ProfileSwitcher.tsx:132
-#: packages/app-mobile/components/screens/ConfigScreen/ConfigScreen.tsx:824
+#: packages/app-mobile/components/screens/ConfigScreen/ConfigScreen.tsx:819
 #: packages/app-mobile/components/side-menu-content.tsx:628
 msgid "Configuration"
 msgstr "Cấu hình"
@@ -1139,8 +1140,8 @@ msgstr "Xung đột"
 msgid "Conflicts (attachments)"
 msgstr "Đính kèm ghi chú"
 
-#: packages/app-desktop/gui/ConfigScreen/ConfigScreen.tsx:252
-#: packages/app-mobile/components/screens/ConfigScreen/ConfigScreen.tsx:461
+#: packages/app-desktop/gui/ConfigScreen/ConfigScreen.tsx:253
+#: packages/app-mobile/components/screens/ConfigScreen/ConfigScreen.tsx:462
 #, fuzzy
 msgid "Connect to Joplin Cloud"
 msgstr "Joplin Cloud"
@@ -1182,7 +1183,7 @@ msgstr "Chuyển thành note"
 msgid "Convert to todo"
 msgstr "Chuyển thành todo"
 
-#: packages/app-mobile/components/voiceTyping/VoiceTypingDialog.tsx:151
+#: packages/app-mobile/components/voiceTyping/VoiceTypingDialog.tsx:181
 #, fuzzy
 msgid "Converting speech to text..."
 msgstr "Chuyển thành note"
@@ -1195,12 +1196,12 @@ msgstr "Chuyển thành note"
 msgid "Copy"
 msgstr "Sao chép"
 
-#: packages/app-desktop/commands/copyDevCommand.ts:8
+#: packages/app-desktop/commands/copyDevCommand.ts:9
 msgid "Copy dev mode command to clipboard"
 msgstr "Sao chép lệnh dev mode"
 
-#: packages/app-desktop/gui/Sidebar/hooks/useOnRenderItem.tsx:228
-#: packages/app-desktop/gui/Sidebar/hooks/useOnRenderItem.tsx:242
+#: packages/app-desktop/gui/Sidebar/hooks/useOnRenderItem.tsx:229
+#: packages/app-desktop/gui/Sidebar/hooks/useOnRenderItem.tsx:243
 #: packages/app-desktop/gui/utils/NoteListUtils.ts:127
 #: packages/app-mobile/components/screens/Note/Note.tsx:1239
 #, fuzzy
@@ -1231,7 +1232,7 @@ msgstr "Sao chép markdown link"
 msgid "Copy path to clipboard"
 msgstr "Sao chép đường dẫn"
 
-#: packages/app-desktop/gui/ShareNoteDialog.tsx:215
+#: packages/app-desktop/gui/ShareNoteDialog.tsx:216
 msgid "Copy Shareable Link"
 msgid_plural "Copy Shareable Links"
 msgstr[0] "Sao chép link chia sẻ"
@@ -1242,11 +1243,11 @@ msgstr[0] "Sao chép link chia sẻ"
 msgid "Copy to clipboard"
 msgstr "Sao chép đường dẫn"
 
-#: packages/app-desktop/gui/ClipperConfigScreen.tsx:143
+#: packages/app-desktop/gui/ClipperConfigScreen.tsx:144
 msgid "Copy token"
 msgstr "Sao chép mã"
 
-#: packages/app-mobile/components/screens/ConfigScreen/ConfigScreen.tsx:610
+#: packages/app-mobile/components/screens/ConfigScreen/ConfigScreen.tsx:611
 #, fuzzy
 msgid "Copy version info"
 msgstr "Hiện thị thông tin phiên bản"
@@ -1307,7 +1308,7 @@ msgstr "Không thể cài đặt phần mở rộng: %s"
 msgid "Could not upgrade master key: %s"
 msgstr "Không thể nâng cấp khoá chính: %s"
 
-#: packages/app-desktop/gui/WindowCommandsAndDialogs/commands/leaveSharedFolder.ts:26
+#: packages/app-desktop/gui/WindowCommandsAndDialogs/commands/leaveSharedFolder.ts:27
 msgid ""
 "Could not verify the share status of this notebook - aborting. Please try "
 "again when you are connected to the internet."
@@ -1422,7 +1423,7 @@ msgstr ""
 msgid "current match"
 msgstr ""
 
-#: packages/app-desktop/gui/MasterPasswordDialog/Dialog.tsx:152
+#: packages/app-desktop/gui/MasterPasswordDialog/Dialog.tsx:153
 #, fuzzy
 msgid "Current password"
 msgstr "Điền mật khẩu master:"
@@ -1439,15 +1440,15 @@ msgstr "thứ tự tuỳ chỉnh"
 msgid "Custom order"
 msgstr "Thứ tự tuỳ chỉnh"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1153
+#: packages/lib/models/settings/builtInMetadata.ts:1167
 msgid "Custom stylesheet for Joplin-wide app styles"
 msgstr "Stylesheet tùy chỉnh cho các kiểu ứng dụng Joplin"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1136
+#: packages/lib/models/settings/builtInMetadata.ts:1150
 msgid "Custom stylesheet for rendered Markdown"
 msgstr "Stylesheet tùy chỉnh cho Markdown được hiển thị"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1364
+#: packages/lib/models/settings/builtInMetadata.ts:1378
 msgid "Custom TLS certificates"
 msgstr "Tùy chỉnh TLS certicates"
 
@@ -1477,8 +1478,8 @@ msgstr ""
 msgid "Date format"
 msgstr "Định dạng ngày"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1469
-#: packages/lib/models/settings/builtInMetadata.ts:1721
+#: packages/lib/models/settings/builtInMetadata.ts:1483
+#: packages/lib/models/settings/builtInMetadata.ts:1735
 msgid "days"
 msgstr "ngày"
 
@@ -1499,9 +1500,9 @@ msgstr "Những mục đã được giải mã: %s / %s"
 msgid "Decrypting items: %d/%d"
 msgstr "Số mục được giải mã: %d/%d"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1067
-#: packages/lib/models/settings/builtInMetadata.ts:1074
-#: packages/lib/models/settings/builtInMetadata.ts:1275
+#: packages/lib/models/settings/builtInMetadata.ts:1081
+#: packages/lib/models/settings/builtInMetadata.ts:1088
+#: packages/lib/models/settings/builtInMetadata.ts:1289
 msgid "Default"
 msgstr "Mặc định"
 
@@ -1540,9 +1541,15 @@ msgstr "Xóa số note này %d?"
 msgid "Delete line"
 msgstr "Xoá dòng"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1177
+#: packages/lib/models/settings/builtInMetadata.ts:1191
 msgid "Delete local data and re-download from sync target"
 msgstr "Xóa dữ liệu cục bộ và tải xuống lại từ mục tiêu đồng bộ hóa"
+
+#: packages/app-mobile/services/voiceTyping/VoiceTyping.ts:90
+msgid ""
+"Delete model and re-download?\n"
+"This cannot be undone."
+msgstr ""
 
 #: packages/lib/commands/deleteNote.ts:7
 #, fuzzy
@@ -1577,7 +1584,7 @@ msgid ""
 "may be lost."
 msgstr ""
 
-#: packages/app-desktop/gui/ShareFolderDialog/ShareFolderDialog.tsx:245
+#: packages/app-desktop/gui/ShareFolderDialog/ShareFolderDialog.tsx:246
 msgid ""
 "Delete this invitation? The recipient will no longer have access to this "
 "shared notebook."
@@ -1624,7 +1631,7 @@ msgstr "Xóa những notes trùng với <note-pattern>."
 msgid "Deletes the notes without asking for confirmation."
 msgstr "Xóa notes mà không cần xác nhận."
 
-#: packages/app-mobile/components/screens/ConfigScreen/ConfigScreen.tsx:550
+#: packages/app-mobile/components/screens/ConfigScreen/ConfigScreen.tsx:551
 #, fuzzy
 msgid "Deletion log"
 msgstr "Xoá dòng"
@@ -1641,6 +1648,10 @@ msgstr "Định dạng của điểm đến: %s"
 #: packages/lib/services/noteList/defaultLeftToRightListRenderer.ts:25
 #: packages/lib/services/noteList/defaultMultiColumnsRenderer.ts:8
 msgid "Detailed"
+msgstr ""
+
+#: packages/app-mobile/components/screens/ConfigScreen/plugins/PluginBox/PluginChips.tsx:99
+msgid "Dev"
 msgstr ""
 
 #: packages/lib/services/interop/Module.ts:62
@@ -1665,7 +1676,7 @@ msgstr "Tắt chức năng mã hóa"
 msgid "Disable safe mode and restart"
 msgstr "Tắt chế độ an toàn và khởi động lại"
 
-#: packages/app-desktop/gui/ClipperConfigScreen.tsx:93
+#: packages/app-desktop/gui/ClipperConfigScreen.tsx:94
 msgid "Disable Web Clipper Service"
 msgstr "Vô hiệu hóa dịch vụ Web Clipper"
 
@@ -1674,7 +1685,7 @@ msgstr "Vô hiệu hóa dịch vụ Web Clipper"
 #: packages/app-desktop/gui/KeymapConfig/KeymapConfigScreen.tsx:143
 #: packages/app-mobile/components/screens/ConfigScreen/plugins/PluginBox/PluginChips.tsx:85
 #: packages/app-mobile/components/screens/encryption-config.tsx:313
-#: packages/lib/models/settings/builtInMetadata.ts:1209
+#: packages/lib/models/settings/builtInMetadata.ts:1223
 msgid "Disabled"
 msgstr "Đã tắt"
 
@@ -1699,8 +1710,8 @@ msgstr ""
 msgid "Discard"
 msgstr "Bỏ thay đổi"
 
-#: packages/app-mobile/components/NoteEditor/ImageEditor/ImageEditor.tsx:106
-#: packages/app-mobile/components/screens/ConfigScreen/ConfigScreen.tsx:268
+#: packages/app-mobile/components/NoteEditor/ImageEditor/ImageEditor.tsx:105
+#: packages/app-mobile/components/screens/ConfigScreen/ConfigScreen.tsx:269
 #: packages/app-mobile/components/screens/Note/Note.tsx:209
 msgid "Discard changes"
 msgstr "Bỏ thay đổi"
@@ -1755,7 +1766,7 @@ msgstr "HIển thị thông tin sử dụng."
 msgid "Displays version information"
 msgstr "Hiện thị thông tin phiên bản"
 
-#: packages/app-desktop/gui/ConfigScreen/ConfigScreen.tsx:337
+#: packages/app-desktop/gui/ConfigScreen/ConfigScreen.tsx:338
 #: packages/app-desktop/gui/NoteList/utils/canManuallySortNotes.ts:11
 msgid "Do it now"
 msgstr "Thực hiện ngay"
@@ -1782,7 +1793,7 @@ msgid "Donate, website"
 msgstr "Website của Joplin"
 
 #: packages/app-mobile/components/NoteEditor/EditLinkDialog.tsx:151
-#: packages/app-mobile/components/voiceTyping/VoiceTypingDialog.tsx:209
+#: packages/app-mobile/components/voiceTyping/VoiceTypingDialog.tsx:245
 #: packages/lib/models/Resource.ts:34
 msgid "Done"
 msgstr ""
@@ -1791,9 +1802,14 @@ msgstr ""
 msgid "Download"
 msgstr "Tải xuống"
 
-#: packages/app-desktop/gui/ClipperConfigScreen.tsx:130
+#: packages/app-desktop/gui/ClipperConfigScreen.tsx:131
 msgid "Download and install the relevant extension for your browser:"
 msgstr "Tải về và cài đặt tiện ích liên quan tới trình duyệt web của bạn:"
+
+#: packages/app-mobile/components/voiceTyping/VoiceTypingDialog.tsx:206
+#, fuzzy
+msgid "Download updated model"
+msgstr "Đã tải"
 
 #: packages/lib/models/Resource.ts:409
 msgid "Downloaded"
@@ -1811,7 +1827,7 @@ msgstr "Đã tải về và đã mã hóa"
 msgid "Downloading"
 msgstr "Đang tải"
 
-#: packages/app-mobile/components/voiceTyping/VoiceTypingDialog.tsx:152
+#: packages/app-mobile/components/voiceTyping/VoiceTypingDialog.tsx:182
 #, fuzzy
 msgid "Downloading %s language files..."
 msgstr "Đang tải về tài nguyên..."
@@ -1935,23 +1951,23 @@ msgstr "Trình chỉnh sửa văn bản"
 msgid "Editor actions"
 msgstr "Font của trình chỉnh sửa văn bản"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1060
+#: packages/lib/models/settings/builtInMetadata.ts:1074
 msgid "Editor font"
 msgstr "Font của trình chỉnh sửa văn bản"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1086
+#: packages/lib/models/settings/builtInMetadata.ts:1100
 msgid "Editor font family"
 msgstr "Font family của trình chỉnh sửa văn bản"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1048
+#: packages/lib/models/settings/builtInMetadata.ts:1062
 msgid "Editor font size"
 msgstr "Kích thước font của trình chỉnh sửa văn bản"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1107
+#: packages/lib/models/settings/builtInMetadata.ts:1121
 msgid "Editor maximum width"
 msgstr ""
 
-#: packages/lib/models/settings/builtInMetadata.ts:1099
+#: packages/lib/models/settings/builtInMetadata.ts:1113
 msgid "Editor monospace font family"
 msgstr "Họ phông chữ monospace"
 
@@ -1965,7 +1981,7 @@ msgstr "Trình chỉnh sửa văn bản"
 msgid "Either \"text\" or \"json\""
 msgstr "\"text\" hoặc \"json\""
 
-#: packages/lib/models/settings/builtInMetadata.ts:1276
+#: packages/lib/models/settings/builtInMetadata.ts:1290
 msgid "Emacs"
 msgstr "Emacs"
 
@@ -1996,7 +2012,7 @@ msgstr "Hiện thị thông tin phiên bản"
 msgid "Emails"
 msgstr ""
 
-#: packages/app-desktop/gui/NoteEditor/NoteBody/CodeMirror/v5/CodeMirror.tsx:192
+#: packages/app-desktop/gui/NoteEditor/NoteBody/CodeMirror/v5/CodeMirror.tsx:195
 msgid "emphasised text"
 msgstr "chữ nhấn mạnh"
 
@@ -2013,27 +2029,27 @@ msgstr ""
 msgid "Enable"
 msgstr "Bật"
 
-#: packages/lib/models/settings/builtInMetadata.ts:964
+#: packages/lib/models/settings/builtInMetadata.ts:978
 msgid "Enable ^sup^ syntax"
 msgstr "Bật ^sup^ syntax"
 
-#: packages/lib/models/settings/builtInMetadata.ts:968
+#: packages/lib/models/settings/builtInMetadata.ts:982
 msgid "Enable ++insert++ syntax"
 msgstr "Bật ++insert++ syntax"
 
-#: packages/lib/models/settings/builtInMetadata.ts:960
+#: packages/lib/models/settings/builtInMetadata.ts:974
 msgid "Enable ==mark== syntax"
 msgstr "Bật ==mark== syntax"
 
-#: packages/lib/models/settings/builtInMetadata.ts:963
+#: packages/lib/models/settings/builtInMetadata.ts:977
 msgid "Enable ~sub~ syntax"
 msgstr "Bật ~sub~ syntax"
 
-#: packages/lib/models/settings/builtInMetadata.ts:966
+#: packages/lib/models/settings/builtInMetadata.ts:980
 msgid "Enable abbreviation syntax"
 msgstr "Bật abbreviation syntax"
 
-#: packages/lib/models/settings/builtInMetadata.ts:957
+#: packages/lib/models/settings/builtInMetadata.ts:971
 msgid "Enable audio player"
 msgstr "Bật audio player"
 
@@ -2041,7 +2057,7 @@ msgstr "Bật audio player"
 msgid "Enable biometrics authentication?"
 msgstr ""
 
-#: packages/lib/models/settings/builtInMetadata.ts:965
+#: packages/lib/models/settings/builtInMetadata.ts:979
 msgid "Enable deflist syntax"
 msgstr "Bật deflist syntax"
 
@@ -2050,39 +2066,39 @@ msgstr "Bật deflist syntax"
 msgid "Enable encryption"
 msgstr "Bật chức năng mã hóa"
 
-#: packages/lib/models/settings/builtInMetadata.ts:980
+#: packages/lib/models/settings/builtInMetadata.ts:994
 msgid "Enable file:// URLs for images and videos"
 msgstr ""
 
-#: packages/lib/models/settings/builtInMetadata.ts:961
+#: packages/lib/models/settings/builtInMetadata.ts:975
 msgid "Enable footnotes"
 msgstr "Bật footnotes"
 
-#: packages/lib/models/settings/builtInMetadata.ts:954
+#: packages/lib/models/settings/builtInMetadata.ts:968
 msgid "Enable Fountain syntax support"
 msgstr "Bật hỗ trợ Fountain syntax"
 
-#: packages/lib/models/settings/builtInMetadata.ts:951
+#: packages/lib/models/settings/builtInMetadata.ts:965
 msgid "Enable Linkify"
 msgstr "Bật Linkify"
 
-#: packages/lib/models/settings/builtInMetadata.ts:967
+#: packages/lib/models/settings/builtInMetadata.ts:981
 msgid "Enable markdown emoji"
 msgstr "Bật markdown emoji"
 
-#: packages/lib/models/settings/builtInMetadata.ts:953
+#: packages/lib/models/settings/builtInMetadata.ts:967
 msgid "Enable math expressions"
 msgstr "Bật hỗ trợ toán học"
 
-#: packages/lib/models/settings/builtInMetadata.ts:955
+#: packages/lib/models/settings/builtInMetadata.ts:969
 msgid "Enable Mermaid diagrams support"
 msgstr "Bật Mermaid diagrams support"
 
-#: packages/lib/models/settings/builtInMetadata.ts:969
+#: packages/lib/models/settings/builtInMetadata.ts:983
 msgid "Enable multimarkdown table extension"
 msgstr "Bật multimarkdown table extension"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1459
+#: packages/lib/models/settings/builtInMetadata.ts:1473
 msgid "Enable note history"
 msgstr "Bật lịch sử note"
 
@@ -2095,7 +2111,7 @@ msgstr ""
 msgid "Enable or disable plugins"
 msgstr "Quản lý các phần mở rộng"
 
-#: packages/lib/models/settings/builtInMetadata.ts:959
+#: packages/lib/models/settings/builtInMetadata.ts:973
 msgid "Enable PDF viewer"
 msgstr "Bật trình xem PDF"
 
@@ -2105,11 +2121,11 @@ msgstr "Bật trình xem PDF"
 msgid "Enable plugin support"
 msgstr "Bật hỗ trợ cá nhân làm thuật in máy"
 
-#: packages/lib/models/settings/builtInMetadata.ts:949
+#: packages/lib/models/settings/builtInMetadata.ts:963
 msgid "Enable soft breaks"
 msgstr "Bật tự động xuống trang"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1289
+#: packages/lib/models/settings/builtInMetadata.ts:1303
 #, fuzzy
 msgid "Enable spell checking in Markdown editor"
 msgstr "Bật markdown emoji"
@@ -2118,7 +2134,7 @@ msgstr "Bật markdown emoji"
 msgid "Enable spellcheck in the text editor"
 msgstr ""
 
-#: packages/lib/models/settings/builtInMetadata.ts:962
+#: packages/lib/models/settings/builtInMetadata.ts:976
 msgid "Enable table of contents extension"
 msgstr "Bật ứng dụng mở rộng mục lục"
 
@@ -2127,15 +2143,15 @@ msgstr "Bật ứng dụng mở rộng mục lục"
 msgid "Enable the Markdown toolbar"
 msgstr "Bật markdown emoji"
 
-#: packages/lib/models/settings/builtInMetadata.ts:950
+#: packages/lib/models/settings/builtInMetadata.ts:964
 msgid "Enable typographer support"
 msgstr "Bật hỗ trợ cá nhân làm thuật in máy"
 
-#: packages/lib/models/settings/builtInMetadata.ts:958
+#: packages/lib/models/settings/builtInMetadata.ts:972
 msgid "Enable video player"
 msgstr "Bật video player"
 
-#: packages/app-desktop/gui/ClipperConfigScreen.tsx:104
+#: packages/app-desktop/gui/ClipperConfigScreen.tsx:105
 msgid "Enable Web Clipper Service"
 msgstr "Bật dịch vụ Web Clipper"
 
@@ -2175,7 +2191,7 @@ msgstr "Các mục đã mã hóa không thể chỉnh sửa"
 msgid "Encryption"
 msgstr "Mã hóa"
 
-#: packages/app-mobile/components/screens/ConfigScreen/ConfigScreen.tsx:529
+#: packages/app-mobile/components/screens/ConfigScreen/ConfigScreen.tsx:530
 #: packages/app-mobile/components/screens/encryption-config.tsx:298
 msgid "Encryption Config"
 msgstr "Cấu hình mã hóa"
@@ -2201,7 +2217,7 @@ msgstr "Mã hóa"
 msgid "End-to-end encryption"
 msgstr "Bật chức năng mã hóa"
 
-#: packages/app-mobile/components/voiceTyping/VoiceTypingDialog.tsx:208
+#: packages/app-mobile/components/voiceTyping/VoiceTypingDialog.tsx:244
 msgid "Ends voice typing"
 msgstr ""
 
@@ -2246,10 +2262,10 @@ msgid "Error opening note in editor: %s"
 msgstr "Lỗi khi mở note trong trình chỉnh sửa: %s"
 
 #: packages/app-desktop/gui/KeymapConfig/KeymapConfigScreen.tsx:64
-#: packages/app-desktop/gui/WindowCommandsAndDialogs/commands/leaveSharedFolder.ts:31
+#: packages/app-desktop/gui/WindowCommandsAndDialogs/commands/leaveSharedFolder.ts:32
 #: packages/app-mobile/components/screens/ConfigScreen/plugins/PluginUploadButton.tsx:85
 #: packages/app-mobile/components/screens/ShareManager/AcceptedShareItem.tsx:67
-#: packages/app-mobile/components/voiceTyping/VoiceTypingDialog.tsx:153
+#: packages/app-mobile/components/voiceTyping/VoiceTypingDialog.tsx:183
 #: packages/lib/services/KeymapService.ts:209
 msgid "Error: %s"
 msgstr "Lỗi: %s"
@@ -2297,7 +2313,7 @@ msgid "Expanded, press space to collapse."
 msgstr ""
 
 #: packages/app-desktop/gui/KeymapConfig/KeymapConfigScreen.tsx:182
-#: packages/app-desktop/gui/Sidebar/hooks/useOnRenderItem.tsx:212
+#: packages/app-desktop/gui/Sidebar/hooks/useOnRenderItem.tsx:213
 #: packages/app-desktop/gui/utils/NoteListUtils.ts:175
 msgid "Export"
 msgstr "Nhập"
@@ -2362,11 +2378,11 @@ msgstr "Chỉ xuất ghi chú được chọn."
 msgid "Exports only the given notebook."
 msgstr "Chỉ xuất số ghi chú được chọn."
 
-#: packages/lib/models/settings/builtInMetadata.ts:1430
+#: packages/lib/models/settings/builtInMetadata.ts:1444
 msgid "Fail-safe"
 msgstr "Fail-safe"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1431
+#: packages/lib/models/settings/builtInMetadata.ts:1445
 msgid ""
 "Fail-safe: Do not wipe out local data when sync target is empty (often the "
 "result of a misconfiguration or bug)"
@@ -2378,8 +2394,8 @@ msgstr ""
 msgid "Fatal error:"
 msgstr "Lỗi nghiêm trọng:"
 
-#: packages/app-mobile/components/screens/ConfigScreen/ConfigScreen.tsx:617
-#: packages/app-mobile/components/screens/ConfigScreen/ConfigScreen.tsx:625
+#: packages/app-mobile/components/screens/ConfigScreen/ConfigScreen.tsx:618
+#: packages/app-mobile/components/screens/ConfigScreen/ConfigScreen.tsx:626
 msgid "Feature flags"
 msgstr "Cờ nổi bật"
 
@@ -2425,11 +2441,11 @@ msgstr "Tìm thấy: %d."
 msgid "Firefox Extension"
 msgstr "Firefox Extension"
 
-#: packages/app-mobile/components/screens/ConfigScreen/ConfigScreen.tsx:551
+#: packages/app-mobile/components/screens/ConfigScreen/ConfigScreen.tsx:552
 msgid "Fix search index"
 msgstr "Sửa index tìm kiếm"
 
-#: packages/app-mobile/components/screens/ConfigScreen/ConfigScreen.tsx:551
+#: packages/app-mobile/components/screens/ConfigScreen/ConfigScreen.tsx:552
 msgid "Fixing search index..."
 msgstr "Sửa index tìm kiếm..."
 
@@ -2459,7 +2475,7 @@ msgstr ""
 msgid "For debugging purpose only: export your profile to an external SD card."
 msgstr "Dành riêng cho mục đích debugging: export hồ sơ của bạn tới thẻ SD."
 
-#: packages/lib/models/settings/builtInMetadata.ts:1410
+#: packages/lib/models/settings/builtInMetadata.ts:1424
 msgid "For example \"%s\""
 msgstr ""
 
@@ -2517,7 +2533,7 @@ msgstr "Chung"
 msgid "Generated"
 msgstr "Chung"
 
-#: packages/app-desktop/gui/ShareNoteDialog.tsx:185
+#: packages/app-desktop/gui/ShareNoteDialog.tsx:186
 msgid "Generating link..."
 msgid_plural "Generating links..."
 msgstr[0] "Đang tạo đường dẫn..."
@@ -2530,7 +2546,7 @@ msgstr ""
 msgid "Get it now:"
 msgstr "Đặt mua ngay bây giờ:"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1185
+#: packages/lib/models/settings/builtInMetadata.ts:1199
 msgid "Get pre-releases when checking for updates"
 msgstr "Cập nhật bản trước phát hành khi kiểm tra cập nhật"
 
@@ -2587,7 +2603,7 @@ msgstr ""
 msgid "Heading"
 msgstr "Tiêu đề"
 
-#: packages/app-desktop/gui/ConfigScreen/ConfigScreen.tsx:227
+#: packages/app-desktop/gui/ConfigScreen/ConfigScreen.tsx:228
 #: packages/app-desktop/gui/EncryptionConfigScreen/EncryptionConfigScreen.tsx:265
 #: packages/app-desktop/gui/HelpButton.tsx:49
 #: packages/server/src/services/MustacheService.ts:284
@@ -2691,7 +2707,7 @@ msgstr ""
 msgid "Ignore"
 msgstr "Bỏ qua"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1389
+#: packages/lib/models/settings/builtInMetadata.ts:1403
 msgid "Ignore TLS certificate errors"
 msgstr "Bỏ qua các lỗi TLS certificate"
 
@@ -2824,8 +2840,8 @@ msgstr ""
 msgid "In order to synchronise, please upgrade your application to version %s+"
 msgstr ""
 
-#: packages/app-mobile/components/screens/ConfigScreen/ConfigScreen.tsx:121
-#: packages/app-mobile/components/screens/ConfigScreen/ConfigScreen.tsx:223
+#: packages/app-mobile/components/screens/ConfigScreen/ConfigScreen.tsx:122
+#: packages/app-mobile/components/screens/ConfigScreen/ConfigScreen.tsx:224
 msgid ""
 "In order to use file system synchronisation your permission to write to "
 "external storage is required."
@@ -2833,7 +2849,7 @@ msgstr ""
 "Để sử dụng đồng bộ hóa tệp tin hệ thống, bạn cần cho phép ghi vào hệ thống "
 "lưu trữ bên ngoài."
 
-#: packages/app-desktop/gui/ClipperConfigScreen.tsx:120
+#: packages/app-desktop/gui/ClipperConfigScreen.tsx:121
 msgid "In order to use the web clipper, you need to do the following:"
 msgstr "Để có thể sử dụng web clipper, bạn cần làm theo các bước sau:"
 
@@ -2841,7 +2857,7 @@ msgstr "Để có thể sử dụng web clipper, bạn cần làm theo các bư�
 msgid "In progress"
 msgstr "Đang hoạt động"
 
-#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:625
+#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:628
 msgid "In: %s"
 msgstr "Trong: %s"
 
@@ -2875,7 +2891,7 @@ msgstr "Bớt thụt dòng"
 msgid "Info"
 msgstr ""
 
-#: packages/app-mobile/components/screens/ConfigScreen/ConfigScreen.tsx:222
+#: packages/app-mobile/components/screens/ConfigScreen/ConfigScreen.tsx:223
 msgid "Information"
 msgstr "Thông tin"
 
@@ -2887,7 +2903,7 @@ msgstr "Code cùng hàng"
 msgid "Insert"
 msgstr "Thêm"
 
-#: packages/app-desktop/gui/NoteEditor/NoteBody/CodeMirror/v5/CodeMirror.tsx:194
+#: packages/app-desktop/gui/NoteEditor/NoteBody/CodeMirror/v5/CodeMirror.tsx:197
 #: packages/app-desktop/gui/NoteEditor/NoteBody/CodeMirror/v6/useEditorCommands.ts:84
 msgid "Insert Hyperlink"
 msgstr "Chèn Liên kết"
@@ -3003,7 +3019,7 @@ msgstr "Joplin Cloud"
 msgid "Joplin Desktop"
 msgstr "Website của Joplin"
 
-#: packages/app-desktop/bridge.ts:443
+#: packages/app-desktop/bridge.ts:448
 msgid ""
 "Joplin doesn't recognise the %s extension. Opening this file could be "
 "dangerous. What would you like to do?"
@@ -3059,7 +3075,7 @@ msgstr "Mật khẩu máy chủ Joplin"
 msgid "Joplin Server URL"
 msgstr "Joplin Server URL"
 
-#: packages/app-desktop/gui/ClipperConfigScreen.tsx:119
+#: packages/app-desktop/gui/ClipperConfigScreen.tsx:120
 msgid ""
 "Joplin Web Clipper allows saving web pages and screenshots from your browser "
 "to Joplin."
@@ -3067,7 +3083,7 @@ msgstr ""
 "Joplin Web Clipper cho phép lưu lại các trang web và screenshots trên trình "
 "duyệt web tới Joplin."
 
-#: packages/app-mobile/components/screens/ConfigScreen/ConfigScreen.tsx:604
+#: packages/app-mobile/components/screens/ConfigScreen/ConfigScreen.tsx:605
 msgid "Joplin website"
 msgstr "Website của Joplin"
 
@@ -3077,16 +3093,16 @@ msgid ""
 "such as publishing notes or collaborating on notebooks with others."
 msgstr ""
 
-#: packages/lib/models/settings/builtInMetadata.ts:1471
+#: packages/lib/models/settings/builtInMetadata.ts:1485
 msgid "Keep note history for"
 msgstr "Lưu giữ lịch sử note để"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1725
+#: packages/lib/models/settings/builtInMetadata.ts:1739
 #, fuzzy
 msgid "Keep notes in the trash for"
 msgstr "Lưu giữ lịch sử note để"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1271
+#: packages/lib/models/settings/builtInMetadata.ts:1285
 msgid "Keyboard Mode"
 msgstr "Ché độ bàn phím"
 
@@ -3107,7 +3123,7 @@ msgstr "Chuỗi khóa được hỗ trợ: %s"
 msgid "Keys that need upgrading"
 msgstr "Các khoá chính cần nâng cấp"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1248
+#: packages/lib/models/settings/builtInMetadata.ts:1262
 msgid "Landscape"
 msgstr "Landscape"
 
@@ -3124,7 +3140,7 @@ msgstr "Định dạng ngày"
 msgid "Last error: %s"
 msgstr "Lỗi gần nhất; %s"
 
-#: packages/app-desktop/gui/ConfigScreen/ConfigScreen.tsx:337
+#: packages/app-desktop/gui/ConfigScreen/ConfigScreen.tsx:338
 msgid "Later"
 msgstr "Sau đó"
 
@@ -3132,7 +3148,7 @@ msgstr "Sau đó"
 msgid "Latitude"
 msgstr ""
 
-#: packages/app-desktop/gui/NoteEditor/NoteBody/CodeMirror/v5/CodeMirror.tsx:628
+#: packages/app-desktop/gui/NoteEditor/NoteBody/CodeMirror/v5/CodeMirror.tsx:638
 #: packages/app-desktop/gui/NoteEditor/NoteBody/CodeMirror/v6/CodeMirror.tsx:237
 msgid "Layout"
 msgstr "Dàn trang"
@@ -3141,14 +3157,14 @@ msgstr "Dàn trang"
 msgid "Layout button sequence"
 msgstr "Thứ tự của nút hệ thống nút nhấn"
 
-#: packages/app-desktop/bridge.ts:448
+#: packages/app-desktop/bridge.ts:453
 #: packages/app-mobile/components/screens/ConfigScreen/plugins/EnablePluginSupportPage.tsx:118
 #: packages/app-mobile/components/screens/ConfigScreen/plugins/PluginBox/RecommendedBadge.tsx:52
 #, fuzzy
 msgid "Learn more"
 msgstr "Bớt thụt dòng"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1678
+#: packages/lib/models/settings/builtInMetadata.ts:1692
 msgid "Leave it blank to download the language files from the default website"
 msgstr ""
 
@@ -3157,16 +3173,16 @@ msgstr ""
 msgid "Leave notebook"
 msgstr "Chia sẻ sổ ghi chú…"
 
-#: packages/app-desktop/gui/WindowCommandsAndDialogs/commands/leaveSharedFolder.ts:10
+#: packages/app-desktop/gui/WindowCommandsAndDialogs/commands/leaveSharedFolder.ts:11
 #, fuzzy
 msgid "Leave notebook..."
 msgstr "Chia sẻ sổ ghi chú…"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1242
+#: packages/lib/models/settings/builtInMetadata.ts:1256
 msgid "Legal"
 msgstr "Legal"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1238
+#: packages/lib/models/settings/builtInMetadata.ts:1252
 msgid "Letter"
 msgstr "Letter"
 
@@ -3194,7 +3210,7 @@ msgstr "Đường link"
 msgid "Link description"
 msgstr "Mã hóa"
 
-#: packages/app-desktop/gui/ShareNoteDialog.tsx:186
+#: packages/app-desktop/gui/ShareNoteDialog.tsx:187
 msgid "Link has been copied to clipboard!"
 msgid_plural "Links have been copied to clipboard!"
 msgstr[0] "Đường dẫn đã được sao chép!"
@@ -3204,9 +3220,9 @@ msgstr[0] "Đường dẫn đã được sao chép!"
 msgid "Link text"
 msgstr "Đường link"
 
-#: packages/app-desktop/gui/NoteEditor/NoteBody/CodeMirror/v5/CodeMirror.tsx:228
-#: packages/app-desktop/gui/NoteEditor/NoteBody/CodeMirror/v5/CodeMirror.tsx:230
 #: packages/app-desktop/gui/NoteEditor/NoteBody/CodeMirror/v5/CodeMirror.tsx:231
+#: packages/app-desktop/gui/NoteEditor/NoteBody/CodeMirror/v5/CodeMirror.tsx:233
+#: packages/app-desktop/gui/NoteEditor/NoteBody/CodeMirror/v5/CodeMirror.tsx:234
 msgid "List item"
 msgstr "Danh mục"
 
@@ -3217,7 +3233,7 @@ msgstr "Đã tải"
 
 #: packages/app-desktop/gui/ConfigScreen/controls/FontSearch.tsx:123
 #: packages/app-mobile/components/screens/ConfigScreen/plugins/PluginStates.tsx:117
-#: packages/app-mobile/components/voiceTyping/VoiceTypingDialog.tsx:149
+#: packages/app-mobile/components/voiceTyping/VoiceTypingDialog.tsx:179
 #: packages/app-mobile/root.tsx:1247
 #, fuzzy
 msgid "Loading..."
@@ -3236,7 +3252,7 @@ msgstr ""
 "Tập tin bị khóa hiện đang dừng hoạt động. Nếu không có quy trình đồng bộ nào "
 "đang hoạt đông, bạn có thể xóa file bị khóa tại \"%s\" và tiếp tục sử dung."
 
-#: packages/app-mobile/components/screens/ConfigScreen/ConfigScreen.tsx:549
+#: packages/app-mobile/components/screens/ConfigScreen/ConfigScreen.tsx:550
 #: packages/app-mobile/components/screens/LogScreen.tsx:215
 #: packages/server/src/services/MustacheService.ts:282
 msgid "Log"
@@ -3268,11 +3284,11 @@ msgid "Longitude"
 msgstr ""
 
 #: packages/app-desktop/gui/MenuBar.tsx:926
-#: packages/app-mobile/components/screens/ConfigScreen/ConfigScreen.tsx:603
+#: packages/app-mobile/components/screens/ConfigScreen/ConfigScreen.tsx:604
 msgid "Make a donation"
 msgstr "Quyên góp"
 
-#: packages/app-desktop/gui/MasterPasswordDialog/Dialog.tsx:220
+#: packages/app-desktop/gui/MasterPasswordDialog/Dialog.tsx:221
 #, fuzzy
 msgid "Manage master password"
 msgstr "Điền mật khẩu master:"
@@ -3287,12 +3303,12 @@ msgstr "Điền mật khẩu master:"
 msgid "Manage multiple users"
 msgstr "Điền mật khẩu master:"
 
-#: packages/app-mobile/components/screens/ConfigScreen/ConfigScreen.tsx:547
+#: packages/app-mobile/components/screens/ConfigScreen/ConfigScreen.tsx:548
 #, fuzzy
 msgid "Manage profiles"
 msgstr "Export hồ sơ"
 
-#: packages/app-mobile/components/screens/ConfigScreen/ConfigScreen.tsx:554
+#: packages/app-mobile/components/screens/ConfigScreen/ConfigScreen.tsx:555
 #, fuzzy
 msgid "Manage shared notebooks"
 msgstr "Export hồ sơ"
@@ -3689,7 +3705,7 @@ msgstr "ghi chú"
 msgid "Note"
 msgstr "Note"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1535
+#: packages/lib/models/settings/builtInMetadata.ts:1549
 msgid "Note area growth factor"
 msgstr "Yếu tố tăng trưởng khu vực ghi chú"
 
@@ -3733,7 +3749,7 @@ msgstr "Ghi chú này không phải là to-do: \"%s\""
 msgid "Note list"
 msgstr "Danh sách ghi chú"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1520
+#: packages/lib/models/settings/builtInMetadata.ts:1534
 msgid "Note list growth factor"
 msgstr "Yếu tố tăng trưởng danh sách ghi chú"
 
@@ -3752,11 +3768,11 @@ msgstr "Đặc tính của ghi chú"
 msgid "Note title"
 msgstr "Tiêu đề ghi chú"
 
-#: packages/lib/models/settings/builtInMetadata.ts:995
+#: packages/lib/models/settings/builtInMetadata.ts:1009
 msgid "Note: Does not work in all desktop environments."
 msgstr "Lưu ý: Không hoạt động trong tất cả môi trường desktop."
 
-#: packages/app-desktop/gui/ShareNoteDialog.tsx:192
+#: packages/app-desktop/gui/ShareNoteDialog.tsx:193
 msgid ""
 "Note: When a note is shared, it will no longer be encrypted on the server."
 msgstr ""
@@ -3772,7 +3788,7 @@ msgstr "Sổ&ghi chú"
 msgid "Notebook"
 msgstr "Notebooks"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1505
+#: packages/lib/models/settings/builtInMetadata.ts:1519
 msgid "Notebook list growth factor"
 msgstr "Yếu tố tăng trưởng danh sách sổ ghi chú"
 
@@ -3826,7 +3842,7 @@ msgid "OCR: Language data URL or path"
 msgstr "Định dạng ngày"
 
 #: packages/app-desktop/bridge.ts:360 packages/app-desktop/bridge.ts:373
-#: packages/app-desktop/bridge.ts:389 packages/app-desktop/bridge.ts:398
+#: packages/app-desktop/bridge.ts:387 packages/app-desktop/bridge.ts:403
 #: packages/app-desktop/gui/ConfigScreen/ButtonBar.tsx:34
 #: packages/app-desktop/gui/DialogButtonRow.tsx:71
 #: packages/app-desktop/gui/MenuBar.tsx:601
@@ -3837,7 +3853,7 @@ msgstr "Định dạng ngày"
 #: packages/app-mobile/components/DialogManager/hooks/useDialogControl.ts:30
 #: packages/app-mobile/components/ModalDialog.tsx:80
 #: packages/app-mobile/components/plugins/dialogs/PluginDialogWebView.tsx:128
-#: packages/app-mobile/components/screens/ConfigScreen/ConfigScreen.tsx:224
+#: packages/app-mobile/components/screens/ConfigScreen/ConfigScreen.tsx:225
 #: packages/app-mobile/components/screens/ConfigScreen/NoteExportSection/ExportProfileButton.tsx:61
 #: packages/app-mobile/components/screens/ConfigScreen/NoteExportSection/TaskButton.tsx:75
 #: packages/app-mobile/components/screens/ConfigScreen/plugins/PluginBox/PluginChips.tsx:66
@@ -3907,7 +3923,7 @@ msgstr "Mở"
 msgid "Open %s"
 msgstr "Mở %s"
 
-#: packages/app-desktop/bridge.ts:449
+#: packages/app-desktop/bridge.ts:454
 #, fuzzy
 msgid "Open it"
 msgstr "Mở"
@@ -3939,7 +3955,7 @@ msgstr ""
 msgid "Open..."
 msgstr "Mở..."
 
-#: packages/app-mobile/components/screens/ConfigScreen/ConfigScreen.tsx:205
+#: packages/app-mobile/components/screens/ConfigScreen/ConfigScreen.tsx:206
 msgid "Opening section %s"
 msgstr ""
 
@@ -3984,11 +4000,11 @@ msgstr "Thoát ứng dụng."
 msgid "Output format: %s"
 msgstr "Định dạng đầu ra: %s"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1245
+#: packages/lib/models/settings/builtInMetadata.ts:1259
 msgid "Page orientation for PDF export"
 msgstr "Định hướng trang để export PDF"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1235
+#: packages/lib/models/settings/builtInMetadata.ts:1249
 msgid "Page size for PDF export"
 msgstr "Kích thước của trang để export dạng PDF"
 
@@ -4087,7 +4103,7 @@ msgstr ""
 "Vui lòng nhập mật khẩu trong danh sách khoá chính dưới đây trước khi nâng "
 "cấp khoá."
 
-#: packages/app-desktop/gui/ShareFolderDialog/ShareFolderDialog.tsx:379
+#: packages/app-desktop/gui/ShareFolderDialog/ShareFolderDialog.tsx:380
 msgid ""
 "Please note that if it is a large notebook, it may take a few minutes for "
 "all the notes to show up on the recipient's device."
@@ -4107,7 +4123,7 @@ msgstr ""
 "đường dẫn này cũng như các dữ liệu cá nhân. Không có dữ liệu nào sẽ được "
 "chia sẻ với bên thứ ba."
 
-#: packages/app-mobile/components/voiceTyping/VoiceTypingDialog.tsx:150
+#: packages/app-mobile/components/voiceTyping/VoiceTypingDialog.tsx:180
 msgid "Please record your voice..."
 msgstr ""
 
@@ -4182,7 +4198,7 @@ msgid "Plugin WebView debugging"
 msgstr ""
 
 #: packages/app-desktop/gui/ConfigScreen/Sidebar.tsx:148
-#: packages/app-mobile/components/screens/ConfigScreen/ConfigScreen.tsx:522
+#: packages/app-mobile/components/screens/ConfigScreen/ConfigScreen.tsx:523
 #: packages/app-mobile/components/screens/ConfigScreen/SectionSelector/index.tsx:42
 #: packages/lib/models/Setting.ts:1178
 msgid "Plugins"
@@ -4194,7 +4210,7 @@ msgid ""
 "can extend Joplin's editor, viewer, and more."
 msgstr ""
 
-#: packages/lib/models/settings/builtInMetadata.ts:1247
+#: packages/lib/models/settings/builtInMetadata.ts:1261
 msgid "Portrait"
 msgstr "Portrait"
 
@@ -4222,7 +4238,7 @@ msgstr "Ưu tiên giao diện tối"
 msgid "Preferred light theme"
 msgstr "Ưu tiên giao diện sáng"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1690
+#: packages/lib/models/settings/builtInMetadata.ts:1704
 msgid "Preferred voice typing provider"
 msgstr ""
 
@@ -4268,7 +4284,7 @@ msgstr "In"
 msgid "Priority support"
 msgstr ""
 
-#: packages/app-mobile/components/screens/ConfigScreen/ConfigScreen.tsx:605
+#: packages/app-mobile/components/screens/ConfigScreen/ConfigScreen.tsx:606
 msgid "Privacy Policy"
 msgstr "Điều khoản riêng tư"
 
@@ -4324,16 +4340,16 @@ msgstr "Phiên bản thông tin: %s"
 msgid "Properties"
 msgstr "Tính chất"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1399
+#: packages/lib/models/settings/builtInMetadata.ts:1413
 #, fuzzy
 msgid "Proxy enabled"
 msgstr "Đã bật"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1421
+#: packages/lib/models/settings/builtInMetadata.ts:1435
 msgid "Proxy timeout (seconds)"
 msgstr ""
 
-#: packages/lib/models/settings/builtInMetadata.ts:1409
+#: packages/lib/models/settings/builtInMetadata.ts:1423
 msgid "Proxy URL"
 msgstr ""
 
@@ -4345,7 +4361,7 @@ msgstr ""
 msgid "Publish note..."
 msgstr "Công khai ghi chú…"
 
-#: packages/app-desktop/gui/ShareNoteDialog.tsx:212
+#: packages/app-desktop/gui/ShareNoteDialog.tsx:213
 msgid "Publish Notes"
 msgstr "Công khai các Ghi chú"
 
@@ -4366,6 +4382,10 @@ msgstr "Mã"
 msgid "Quit"
 msgstr "Thoát"
 
+#: packages/app-mobile/components/voiceTyping/VoiceTypingDialog.tsx:206
+msgid "Re-download model"
+msgstr ""
+
 #: packages/app-desktop/gui/EncryptionConfigScreen/EncryptionConfigScreen.tsx:342
 msgid "Re-encrypt data"
 msgstr "Mã hoá lại dữ liệu"
@@ -4374,12 +4394,12 @@ msgstr "Mã hoá lại dữ liệu"
 msgid "Re-encryption"
 msgstr "Tái mã hóa"
 
-#: packages/app-desktop/gui/MasterPasswordDialog/Dialog.tsx:180
+#: packages/app-desktop/gui/MasterPasswordDialog/Dialog.tsx:181
 #, fuzzy
 msgid "Re-enter password"
 msgstr "Điền mật khẩu master:"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1166
+#: packages/lib/models/settings/builtInMetadata.ts:1180
 msgid "Re-upload local data to sync target"
 msgstr "Tải lên lại dữ liệu cục bộ để đồng bộ hóa mục tiêu"
 
@@ -4391,19 +4411,19 @@ msgstr "Xem thêm"
 msgid "Read time: %s min"
 msgstr "Thời gian đọc: %s phút"
 
-#: packages/app-desktop/gui/ShareFolderDialog/ShareFolderDialog.tsx:312
+#: packages/app-desktop/gui/ShareFolderDialog/ShareFolderDialog.tsx:313
 msgid "Recipient has accepted the invitation"
 msgstr "Người nhận đã chấp nhận lời mời"
 
-#: packages/app-desktop/gui/ShareFolderDialog/ShareFolderDialog.tsx:310
+#: packages/app-desktop/gui/ShareFolderDialog/ShareFolderDialog.tsx:311
 msgid "Recipient has not yet accepted the invitation"
 msgstr "Người nhận chưa chấp nhận lời mời"
 
-#: packages/app-desktop/gui/ShareFolderDialog/ShareFolderDialog.tsx:311
+#: packages/app-desktop/gui/ShareFolderDialog/ShareFolderDialog.tsx:312
 msgid "Recipient has rejected the invitation"
 msgstr "Người nhận đã từ chối lời mời"
 
-#: packages/app-desktop/gui/ShareFolderDialog/ShareFolderDialog.tsx:340
+#: packages/app-desktop/gui/ShareFolderDialog/ShareFolderDialog.tsx:341
 msgid "Recipients:"
 msgstr "Người nhận:"
 
@@ -4419,7 +4439,7 @@ msgstr "command"
 
 #: packages/app-desktop/gui/MenuBar.tsx:754
 #: packages/app-desktop/gui/NoteEditor/editorCommandDeclarations.ts:122
-#: packages/app-mobile/components/NoteEditor/ImageEditor/ImageEditor.tsx:169
+#: packages/app-mobile/components/NoteEditor/ImageEditor/ImageEditor.tsx:168
 #: packages/app-mobile/components/ScreenHeader/index.tsx:351
 msgid "Redo"
 msgstr "Redo"
@@ -4441,20 +4461,20 @@ msgstr "Bật hỗ trợ toán học"
 msgid "Reject"
 msgstr "Từ chối"
 
-#: packages/app-desktop/gui/Sidebar/hooks/useOnRenderItem.tsx:106
+#: packages/app-desktop/gui/Sidebar/hooks/useOnRenderItem.tsx:107
 msgid "Remove"
 msgstr "Xóa"
 
-#: packages/app-desktop/gui/ShareFolderDialog/ShareFolderDialog.tsx:329
+#: packages/app-desktop/gui/ShareFolderDialog/ShareFolderDialog.tsx:330
 #, fuzzy
 msgid "Remove %s from share"
 msgstr "Gỡ bỏ tag \"%s\" khỏi tất cả các notes?"
 
-#: packages/app-desktop/gui/Sidebar/hooks/useOnRenderItem.tsx:110
+#: packages/app-desktop/gui/Sidebar/hooks/useOnRenderItem.tsx:111
 msgid "Remove tag \"%s\" from all notes?"
 msgstr "Gỡ bỏ tag \"%s\" khỏi tất cả các notes?"
 
-#: packages/app-desktop/gui/Sidebar/hooks/useOnRenderItem.tsx:112
+#: packages/app-desktop/gui/Sidebar/hooks/useOnRenderItem.tsx:113
 msgid "Remove this search from the sidebar?"
 msgstr "Bỏ kết quả tìm kiếm từ thanh bên?"
 
@@ -4475,7 +4495,7 @@ msgstr "Đổi tên nhãn:"
 msgid "Renames the given <item> (note or notebook) to <name>."
 msgstr "Đổi tên <item> (note hoặc notebook) được lựa chọn thành <name>."
 
-#: packages/app-desktop/gui/ClipperConfigScreen.tsx:149
+#: packages/app-desktop/gui/ClipperConfigScreen.tsx:150
 msgid "Renew token"
 msgstr "Làm mới mã"
 
@@ -4542,8 +4562,8 @@ msgstr "Tập tin hệ thống"
 msgid "Reset application layout"
 msgstr "Thay đổi giao diện ứng dụng"
 
-#: packages/app-desktop/gui/MasterPasswordDialog/Dialog.tsx:220
 #: packages/app-desktop/gui/MasterPasswordDialog/Dialog.tsx:221
+#: packages/app-desktop/gui/MasterPasswordDialog/Dialog.tsx:222
 #, fuzzy
 msgid "Reset master password"
 msgstr "Điền mật khẩu master:"
@@ -4566,13 +4586,13 @@ msgstr "Khởi động lại và nâng cấp"
 msgid "Restart in safe mode"
 msgstr "Khởi động lại và nâng cấp"
 
-#: packages/app-desktop/gui/ConfigScreen/ConfigScreen.tsx:404
+#: packages/app-desktop/gui/ConfigScreen/ConfigScreen.tsx:405
 #: packages/app-desktop/gui/UpdateNotification/UpdateNotification.tsx:64
 msgid "Restart now"
 msgstr "Khởi động lại ngay bây giờ"
 
 #: packages/app-desktop/gui/KeymapConfig/ShortcutRecorder.tsx:96
-#: packages/app-desktop/gui/NoteRevisionViewer.tsx:203
+#: packages/app-desktop/gui/NoteRevisionViewer.tsx:204
 #: packages/app-mobile/components/ScreenHeader/index.tsx:450
 #: packages/app-mobile/components/ScreenHeader/index.tsx:452
 #: packages/app-mobile/components/screens/Note/Note.tsx:1256
@@ -4696,8 +4716,8 @@ msgstr ""
 
 #: packages/app-desktop/gui/EncryptionConfigScreen/EncryptionConfigScreen.tsx:129
 #: packages/app-desktop/gui/KeymapConfig/ShortcutRecorder.tsx:93
-#: packages/app-desktop/gui/MasterPasswordDialog/Dialog.tsx:221
-#: packages/app-mobile/components/NoteEditor/ImageEditor/ImageEditor.tsx:166
+#: packages/app-desktop/gui/MasterPasswordDialog/Dialog.tsx:222
+#: packages/app-mobile/components/NoteEditor/ImageEditor/ImageEditor.tsx:165
 #: packages/app-mobile/components/screens/encryption-config.tsx:116
 #: packages/app-mobile/components/screens/encryption-config.tsx:229
 msgid "Save"
@@ -4718,14 +4738,14 @@ msgid "Save as..."
 msgstr "Lưu lại thành..."
 
 #: packages/app-desktop/gui/NotePropertiesDialog.tsx:325
-#: packages/app-mobile/components/NoteEditor/ImageEditor/ImageEditor.tsx:111
+#: packages/app-mobile/components/NoteEditor/ImageEditor/ImageEditor.tsx:110
 #: packages/app-mobile/components/ScreenHeader/index.tsx:305
-#: packages/app-mobile/components/screens/ConfigScreen/ConfigScreen.tsx:268
+#: packages/app-mobile/components/screens/ConfigScreen/ConfigScreen.tsx:269
 #: packages/app-mobile/components/screens/Note/Note.tsx:209
 msgid "Save changes"
 msgstr "Lưu thay đổi"
 
-#: packages/app-mobile/components/NoteEditor/ImageEditor/ImageEditor.tsx:104
+#: packages/app-mobile/components/NoteEditor/ImageEditor/ImageEditor.tsx:103
 #, fuzzy
 msgid "Save changes?"
 msgstr "Lưu thay đổi"
@@ -4741,7 +4761,7 @@ msgstr ""
 #: packages/app-desktop/gui/lib/SearchInput/SearchInput.tsx:62
 #: packages/app-mobile/components/NoteEditor/commandDeclarations.ts:102
 #: packages/app-mobile/components/ScreenHeader/index.tsx:379
-#: packages/app-mobile/components/screens/ConfigScreen/ConfigScreen.tsx:789
+#: packages/app-mobile/components/screens/ConfigScreen/ConfigScreen.tsx:784
 #: packages/app-mobile/components/screens/ConfigScreen/plugins/PluginStates.tsx:29
 #: packages/app-mobile/components/screens/SearchScreen/index.tsx:87
 msgid "Search"
@@ -4757,7 +4777,7 @@ msgstr "Tìm kiếm phần mở rộng…"
 msgid "Search for..."
 msgstr "Tìm kiếm..."
 
-#: packages/app-mobile/components/screens/ConfigScreen/ConfigScreen.tsx:169
+#: packages/app-mobile/components/screens/ConfigScreen/ConfigScreen.tsx:170
 #, fuzzy
 msgid "Search hidden"
 msgstr "Tìm kiếm"
@@ -4775,7 +4795,7 @@ msgstr "Tìm kiếm trong ghi chú hiện tại"
 msgid "Search results"
 msgstr "Không có kết quả"
 
-#: packages/app-mobile/components/screens/ConfigScreen/ConfigScreen.tsx:169
+#: packages/app-mobile/components/screens/ConfigScreen/ConfigScreen.tsx:170
 #, fuzzy
 msgid "Search shown"
 msgstr "Tìm kiếm"
@@ -4788,7 +4808,7 @@ msgstr "Tìm kiếm:"
 #: packages/app-desktop/gui/lib/SearchInput/SearchInput.tsx:75
 #: packages/app-desktop/gui/NoteSearchBar.tsx:194
 #: packages/app-desktop/gui/ResourceScreen.tsx:299
-#: packages/app-mobile/components/screens/ConfigScreen/ConfigScreen.tsx:790
+#: packages/app-mobile/components/screens/ConfigScreen/ConfigScreen.tsx:785
 msgid "Search..."
 msgstr "Tìm kiếm..."
 
@@ -4801,7 +4821,7 @@ msgstr "Tìm <pattern> trong tất cả các notes."
 msgid "See changelog"
 msgstr "Toàn bộ thay đổi"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1185
+#: packages/lib/models/settings/builtInMetadata.ts:1199
 msgid "See the pre-release page for more details: %s"
 msgstr "Xem trang phát hành trước để có thêm thông tin chi tiết: %s"
 
@@ -4869,7 +4889,7 @@ msgstr "Đặt nhắc hẹn"
 msgid "Set alarm:"
 msgstr "Đặt nhắc hẹn:"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1107
+#: packages/lib/models/settings/builtInMetadata.ts:1121
 msgid ""
 "Set it to 0 to make it take the complete available space. Recommended width "
 "is 600."
@@ -4896,7 +4916,7 @@ msgstr ""
 msgid "Settings"
 msgstr ""
 
-#: packages/app-desktop/gui/ShareFolderDialog/ShareFolderDialog.tsx:280
+#: packages/app-desktop/gui/ShareFolderDialog/ShareFolderDialog.tsx:281
 #: packages/app-mobile/components/NoteBodyViewer/hooks/useOnResourceLongPress.ts:44
 #: packages/app-mobile/components/screens/LogScreen.tsx:56
 #: packages/app-mobile/components/screens/Note/Note.tsx:1180
@@ -4920,7 +4940,7 @@ msgstr "Vui lòng tạo một notebook trước"
 msgid "Share from %s (%s)"
 msgstr "%s = %s (%s)"
 
-#: packages/app-desktop/gui/ShareFolderDialog/ShareFolderDialog.tsx:397
+#: packages/app-desktop/gui/ShareFolderDialog/ShareFolderDialog.tsx:400
 msgid "Share Notebook"
 msgstr "Chia sẻ Sổ ghi chú"
 
@@ -4942,7 +4962,7 @@ msgstr "Chia sẻ"
 msgid "Shares"
 msgstr "Chia sẻ"
 
-#: packages/app-desktop/gui/ShareFolderDialog/ShareFolderDialog.tsx:363
+#: packages/app-desktop/gui/ShareFolderDialog/ShareFolderDialog.tsx:364
 msgid "Sharing notebook..."
 msgstr "Chia sẻ sổ ghi chú…"
 
@@ -5001,7 +5021,7 @@ msgstr "Đặt mật khẩu"
 msgid "Show sort order buttons"
 msgstr "Hiển thị số lượng note"
 
-#: packages/lib/models/settings/builtInMetadata.ts:993
+#: packages/lib/models/settings/builtInMetadata.ts:1007
 msgid "Show tray icon"
 msgstr "Hiển thị biểu tượng ở tray"
 
@@ -5128,11 +5148,11 @@ msgstr "Định dạng từ nguồn: %s"
 msgid "Source: "
 msgstr "Nguồn"
 
-#: packages/app-desktop/gui/Sidebar/hooks/useOnRenderItem.tsx:434
+#: packages/app-desktop/gui/Sidebar/hooks/useOnRenderItem.tsx:435
 msgid "Spacer"
 msgstr ""
 
-#: packages/lib/models/settings/builtInMetadata.ts:1449
+#: packages/lib/models/settings/builtInMetadata.ts:1463
 msgid ""
 "Specify the port that should be used by the API server. If not set, a "
 "default will be used."
@@ -5151,7 +5171,7 @@ msgstr "Kiểm tra chính tả"
 msgid "Split View"
 msgstr "Chia đôi màn hình"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1008
+#: packages/lib/models/settings/builtInMetadata.ts:1022
 msgid "Start application minimised in the tray icon"
 msgstr ""
 "Chạy chương trình trong nền, hiển thị icon trong tray khi máy khởi động"
@@ -5193,15 +5213,15 @@ msgstr "Số liệu…"
 msgid "Status"
 msgstr "Trạng thái"
 
-#: packages/app-desktop/gui/ClipperConfigScreen.tsx:87
+#: packages/app-desktop/gui/ClipperConfigScreen.tsx:88
 msgid "Status: %s"
 msgstr "Trạng thái: %s"
 
-#: packages/app-desktop/gui/ClipperConfigScreen.tsx:81
+#: packages/app-desktop/gui/ClipperConfigScreen.tsx:82
 msgid "Status: Started on port %d"
 msgstr "Trạng thái: bắt đầu trên port %d"
 
-#: packages/app-desktop/gui/ClipperConfigScreen.tsx:123
+#: packages/app-desktop/gui/ClipperConfigScreen.tsx:124
 msgid "Step 1: Enable the clipper service"
 msgstr "Bước 1: Bật dịch vụ clipper"
 
@@ -5218,7 +5238,7 @@ msgstr ""
 msgid "Step 2: Enter the code provided by Dropbox:"
 msgstr "Bước 2: Điền mã được cung cấp bởi Dropbox:"
 
-#: packages/app-desktop/gui/ClipperConfigScreen.tsx:129
+#: packages/app-desktop/gui/ClipperConfigScreen.tsx:130
 msgid "Step 2: Install the extension"
 msgstr "Bước 2: Cài đặt tiện ích mở rộng"
 
@@ -5238,7 +5258,7 @@ msgstr ""
 msgid "Strikethrough"
 msgstr "Gạch bỏ"
 
-#: packages/app-desktop/gui/NoteEditor/NoteBody/CodeMirror/v5/CodeMirror.tsx:191
+#: packages/app-desktop/gui/NoteEditor/NoteBody/CodeMirror/v5/CodeMirror.tsx:194
 msgid "strong text"
 msgstr "chữ in đậm"
 
@@ -5323,7 +5343,7 @@ msgstr ""
 msgid "Sync as many devices as you want"
 msgstr ""
 
-#: packages/app-mobile/components/screens/ConfigScreen/ConfigScreen.tsx:548
+#: packages/app-mobile/components/screens/ConfigScreen/ConfigScreen.tsx:549
 msgid "Sync Status"
 msgstr "Trạng thái đồng bộ"
 
@@ -5362,7 +5382,7 @@ msgstr "Bật chức năng mã hóa"
 msgid "Synchronisation"
 msgstr "Đồng bộ hóa"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1206
+#: packages/lib/models/settings/builtInMetadata.ts:1220
 msgid "Synchronisation interval"
 msgstr "Tần suất đồng bộ hóa"
 
@@ -5389,7 +5409,7 @@ msgstr "Mục tiêu đồng bộ hóa: %s (%s)"
 msgid "Synchronise"
 msgstr "Đồng bộ hóa"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1226
+#: packages/lib/models/settings/builtInMetadata.ts:1240
 msgid "Synchronise only over WiFi connection"
 msgstr "Chỉ đồng bộ hóa qua kết nối WiFi"
 
@@ -5397,15 +5417,15 @@ msgstr "Chỉ đồng bộ hóa qua kết nối WiFi"
 msgid "Synchronises with remote storage."
 msgstr "Đồng bộ hóa với hệ thống lưu trữ từ xa."
 
-#: packages/app-desktop/gui/ShareNoteDialog.tsx:184
+#: packages/app-desktop/gui/ShareNoteDialog.tsx:185
 msgid "Synchronising..."
 msgstr "Đang đồng bộ hóa..."
 
-#: packages/app-desktop/gui/ShareFolderDialog/ShareFolderDialog.tsx:362
+#: packages/app-desktop/gui/ShareFolderDialog/ShareFolderDialog.tsx:363
 msgid "Synchronizing..."
 msgstr "Đang đồng bộ hóa..."
 
-#: packages/lib/models/settings/builtInMetadata.ts:1241
+#: packages/lib/models/settings/builtInMetadata.ts:1255
 msgid "Tabloid"
 msgstr "Tabloid"
 
@@ -5455,7 +5475,7 @@ msgstr ""
 msgid "Text document"
 msgstr "Câu lệnh trình duyệt chỉnh sửa văn bản"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1234
+#: packages/lib/models/settings/builtInMetadata.ts:1248
 msgid "Text editor command"
 msgstr "Câu lệnh trình duyệt chỉnh sửa văn bản"
 
@@ -5474,7 +5494,7 @@ msgid ""
 "again."
 msgstr ""
 
-#: packages/app-desktop/bridge.ts:499
+#: packages/app-desktop/bridge.ts:504
 msgid ""
 "The app is now going to close. Please relaunch it to complete the process."
 msgstr ""
@@ -5500,11 +5520,11 @@ msgstr "Ứng dụng đã được cho phép!"
 msgid "The application has been successfully authorised."
 msgstr "Ứng dụng đã được ủy quyền thành công."
 
-#: packages/app-desktop/gui/ConfigScreen/ConfigScreen.tsx:326
+#: packages/app-desktop/gui/ConfigScreen/ConfigScreen.tsx:327
 msgid "The application must be restarted for these changes to take effect."
 msgstr "Khởi động lại ứng dụng để các thay đổi có hiệu lực."
 
-#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:594
+#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:597
 msgid ""
 "The attachments will no longer be watched when you switch to a different "
 "note."
@@ -5543,7 +5563,7 @@ msgstr ""
 msgid "The default profile cannot be deleted"
 msgstr ""
 
-#: packages/lib/models/settings/builtInMetadata.ts:1234
+#: packages/lib/models/settings/builtInMetadata.ts:1248
 msgid ""
 "The editor command (may include arguments) that will be used to open a note. "
 "If none is provided it will try to auto-detect the default editor."
@@ -5552,9 +5572,9 @@ msgstr ""
 "note. Nếu không được cung cấp, câu lệnh trình duyệt văn bản sẽ tự động tìm "
 "trình duyệt chỉnh sửa văn bản mặc định."
 
-#: packages/lib/models/settings/builtInMetadata.ts:1507
-#: packages/lib/models/settings/builtInMetadata.ts:1522
-#: packages/lib/models/settings/builtInMetadata.ts:1537
+#: packages/lib/models/settings/builtInMetadata.ts:1521
+#: packages/lib/models/settings/builtInMetadata.ts:1536
+#: packages/lib/models/settings/builtInMetadata.ts:1551
 msgid ""
 "The factor property sets how the item will grow or shrink to fit the "
 "available space in its container with respect to the other items. Thus an "
@@ -5566,13 +5586,13 @@ msgstr ""
 "Do đó, một mục có hệ số 2 sẽ chiếm dung lượng gấp đôi so với một mục có hệ "
 "số 1. Khởi động lại ứng dụng để xem các thay đổi."
 
-#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:609
+#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:612
 #, fuzzy
 msgid "The following attachment matches your search query:"
 msgid_plural "The following attachments match your search query:"
 msgstr[0] "Những đính kèm sau đây đang được theo dõi thay đổi:"
 
-#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:593
+#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:596
 msgid "The following attachments are being watched for changes:"
 msgstr "Những đính kèm sau đây đang được theo dõi thay đổi:"
 
@@ -5651,7 +5671,7 @@ msgstr "Những notes đã được import: %s"
 msgid "The possible commands are:"
 msgstr "Những câu lệnh phụ hợp có thể là:"
 
-#: packages/app-desktop/gui/ShareFolderDialog/ShareFolderDialog.tsx:251
+#: packages/app-desktop/gui/ShareFolderDialog/ShareFolderDialog.tsx:252
 msgid ""
 "The recipient could not be removed from the list. Please try again.\n"
 "\n"
@@ -5712,11 +5732,11 @@ msgstr ""
 msgid "The Web Clipper needs your authorisation to access your data."
 msgstr "Web Clipper cần sự uỷ quyền của bạn để truy cập dữ liệu."
 
-#: packages/app-desktop/gui/ClipperConfigScreen.tsx:75
+#: packages/app-desktop/gui/ClipperConfigScreen.tsx:76
 msgid "The web clipper service is enabled and set to auto-start."
 msgstr "Dịch vụ web clipper đã được bật và tự động khởi động."
 
-#: packages/app-desktop/gui/ClipperConfigScreen.tsx:99
+#: packages/app-desktop/gui/ClipperConfigScreen.tsx:100
 msgid "The web clipper service is not enabled."
 msgstr "Dịch vụ web clipper chưa được bật."
 
@@ -5744,7 +5764,7 @@ msgstr "Hiện tại chưa có notes. Tạo một note bằng cách nút (+)"
 msgid "There are no notes in the trash folder."
 msgstr "Lưu giữ lịch sử note để"
 
-#: packages/app-mobile/components/screens/ConfigScreen/ConfigScreen.tsx:267
+#: packages/app-mobile/components/screens/ConfigScreen/ConfigScreen.tsx:268
 msgid "There are unsaved changes."
 msgstr ""
 
@@ -5813,11 +5833,11 @@ msgid "This attachment does not have OCR data (Status: %s)"
 msgstr ""
 
 #: packages/app-desktop/gui/NoteEditor/utils/contextMenu.ts:54
-#: packages/lib/services/ResourceEditWatcher/index.ts:234
+#: packages/lib/services/ResourceEditWatcher/index.ts:241
 msgid "This attachment is not downloaded or not decrypted yet"
 msgstr "Tệp đính kèm này chưa được tải xuống hoặc chưa được mã hoá"
 
-#: packages/app-desktop/gui/ClipperConfigScreen.tsx:146
+#: packages/app-desktop/gui/ClipperConfigScreen.tsx:147
 msgid ""
 "This authorisation token is only needed to allow third-party applications to "
 "access Joplin."
@@ -5825,7 +5845,7 @@ msgstr ""
 "Mã ủy quyền này chỉ cần sử dụng để cho phép ứng dụng bên thứ ba truy cập "
 "Joplin."
 
-#: packages/app-mobile/components/NoteEditor/ImageEditor/ImageEditor.tsx:104
+#: packages/app-mobile/components/NoteEditor/ImageEditor/ImageEditor.tsx:103
 msgid "This drawing may have unsaved changes."
 msgstr ""
 
@@ -5865,7 +5885,7 @@ msgstr "Note này không có thông tin vị trí."
 msgid "This note has been modified:"
 msgstr "Note này đã được chỉnh sửa:"
 
-#: packages/app-desktop/gui/NoteEditor/NoteBody/CodeMirror/v5/CodeMirror.tsx:628
+#: packages/app-desktop/gui/NoteEditor/NoteBody/CodeMirror/v5/CodeMirror.tsx:638
 #: packages/app-desktop/gui/NoteEditor/NoteBody/CodeMirror/v6/CodeMirror.tsx:237
 msgid ""
 "This note has no content. Click on \"%s\" to toggle the editor and edit the "
@@ -5874,7 +5894,7 @@ msgstr ""
 "Ghi chú này không có nội dung. Nhấn vào “%s” để bật trình soạn thảo và chỉnh "
 "sửa ghi chú."
 
-#: packages/app-desktop/gui/NoteRevisionViewer.tsx:129
+#: packages/app-desktop/gui/NoteRevisionViewer.tsx:130
 msgid "This note has no history"
 msgstr "Note này không có lịch sử"
 
@@ -5890,7 +5910,7 @@ msgstr ""
 "Trình soạn thảo văn bản Rich Text này có nhiều giới hạn, bạn nên cân nhắc "
 "trước khi sử dụng nó."
 
-#: packages/app-desktop/gui/ClipperConfigScreen.tsx:124
+#: packages/app-desktop/gui/ClipperConfigScreen.tsx:125
 msgid ""
 "This service allows the browser extension to communicate with Joplin. When "
 "enabling it your firewall may ask you to give permission to Joplin to listen "
@@ -5904,7 +5924,7 @@ msgstr ""
 msgid "This subfolder of the trash has no notes."
 msgstr ""
 
-#: packages/lib/models/settings/builtInMetadata.ts:995
+#: packages/lib/models/settings/builtInMetadata.ts:1009
 msgid ""
 "This will allow Joplin to run in the background. It is recommended to enable "
 "this setting so that your notes are constantly being synchronised, thus "
@@ -5913,7 +5933,7 @@ msgstr ""
 "Điều này cho phép Joplin chạy trong nền. Khuyến cáo sử dụng chức năng này để "
 "notes có thể liên tục đồng bộ hóa, giảm thiểu số lần xung đột."
 
-#: packages/app-desktop/gui/ConfigScreen/ConfigScreen.tsx:147
+#: packages/app-desktop/gui/ConfigScreen/ConfigScreen.tsx:148
 msgid "This will open a new screen. Save your current changes?"
 msgstr "Cửa sổ mới sẽ được mở. Lưu lại những thay đổi gần nhất?"
 
@@ -5927,7 +5947,7 @@ msgstr ""
 msgid "This will permanently delete the note \"%s\". Continue?"
 msgstr "Xóa note \"%s\"?"
 
-#: packages/app-desktop/gui/WindowCommandsAndDialogs/commands/leaveSharedFolder.ts:16
+#: packages/app-desktop/gui/WindowCommandsAndDialogs/commands/leaveSharedFolder.ts:17
 #: packages/app-mobile/components/screens/ShareManager/AcceptedShareItem.tsx:60
 #, fuzzy
 msgid ""
@@ -6021,7 +6041,7 @@ msgid ""
 "restart it."
 msgstr ""
 
-#: packages/app-mobile/components/screens/ConfigScreen/ConfigScreen.tsx:586
+#: packages/app-mobile/components/screens/ConfigScreen/ConfigScreen.tsx:587
 msgid ""
 "To work correctly, the app needs the following permissions. Please enable "
 "them in your phone settings, in Apps > Joplin > Permissions"
@@ -6101,7 +6121,7 @@ msgstr "Ẩn/hiện thanh bên"
 msgid "Toggle sort order field"
 msgstr "Bật/tắt chế độ an toàn"
 
-#: packages/app-desktop/gui/ClipperConfigScreen.tsx:33
+#: packages/app-desktop/gui/ClipperConfigScreen.tsx:34
 msgid "Token has been copied to the clipboard!"
 msgstr "Dữ liệu đã được sao chép!"
 
@@ -6177,7 +6197,7 @@ msgstr "HIển thị to-dos chưa hoàn thành lên đầu"
 
 #: packages/app-desktop/gui/MenuBar.tsx:750
 #: packages/app-desktop/gui/NoteEditor/editorCommandDeclarations.ts:118
-#: packages/app-mobile/components/NoteEditor/ImageEditor/ImageEditor.tsx:168
+#: packages/app-mobile/components/NoteEditor/ImageEditor/ImageEditor.tsx:167
 #: packages/app-mobile/components/ScreenHeader/index.tsx:341
 msgid "Undo"
 msgstr "Undo"
@@ -6193,7 +6213,7 @@ msgstr ""
 msgid "Unknown"
 msgstr "Không biết"
 
-#: packages/app-desktop/bridge.ts:441
+#: packages/app-desktop/bridge.ts:446
 #, fuzzy
 msgid "Unknown file type"
 msgstr "Không tìm thấy flag này: %s"
@@ -6202,7 +6222,7 @@ msgstr "Không tìm thấy flag này: %s"
 msgid "Unknown flag: %s"
 msgstr "Không tìm thấy flag này: %s"
 
-#: packages/lib/Synchronizer.ts:1126
+#: packages/lib/Synchronizer.ts:1128
 msgid ""
 "Unknown item type downloaded - please upgrade Joplin to the latest version"
 msgstr ""
@@ -6219,15 +6239,15 @@ msgstr "Không tìm thấy flag này: %s"
 msgid "Unordered list"
 msgstr "Đã tạo lúc: %s"
 
-#: packages/app-desktop/gui/ShareNoteDialog.tsx:164
+#: packages/app-desktop/gui/ShareNoteDialog.tsx:165
 msgid "Unpublish note"
 msgstr "Ngưng công khai ghi chú"
 
-#: packages/app-desktop/gui/ShareFolderDialog/ShareFolderDialog.tsx:167
+#: packages/app-desktop/gui/ShareFolderDialog/ShareFolderDialog.tsx:168
 msgid "Unshare"
 msgstr "Ngưng chia sẻ"
 
-#: packages/app-desktop/gui/ShareFolderDialog/ShareFolderDialog.tsx:386
+#: packages/app-desktop/gui/ShareFolderDialog/ShareFolderDialog.tsx:387
 msgid ""
 "Unshare this notebook? The recipients will no longer have access to its "
 "content."
@@ -6239,10 +6259,16 @@ msgstr ""
 msgid "Unsupported image type: %s"
 msgstr "Không hỗ trợ định dạng ảnh này: %s"
 
-#: packages/app-desktop/gui/NoteRevisionViewer.tsx:172
+#: packages/app-desktop/gui/NoteRevisionViewer.tsx:173
 #: packages/app-desktop/gui/WindowCommandsAndDialogs/commands/openItem.ts:47
-#: packages/app-mobile/commands/openItem.ts:43
 msgid "Unsupported link or message: %s"
+msgstr "Đường dẫn hoặc tin nhắn không được hỗ trợ: %s"
+
+#: packages/app-mobile/commands/openItem.ts:60
+#, fuzzy
+msgid ""
+"Unsupported link or message: %s.\n"
+"Error: %s"
 msgstr "Đường dẫn hoặc tin nhắn không được hỗ trợ: %s"
 
 #: packages/app-desktop/gui/ResourceScreen.tsx:123
@@ -6336,7 +6362,7 @@ msgstr "URL"
 msgid "Usage: %s"
 msgstr "Sử dụng: %s"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1587
+#: packages/lib/models/settings/builtInMetadata.ts:1601
 msgid "Use biometrics to secure access to the app"
 msgstr ""
 
@@ -6364,12 +6390,12 @@ msgstr ""
 msgid "Use the arrows to move the layout items. Press \"Escape\" to exit."
 msgstr "Sử dụng mũi tên để di chuyển các giao diện. Nhấn “Escape” để thoát."
 
-#: packages/lib/models/settings/builtInMetadata.ts:1333
+#: packages/lib/models/settings/builtInMetadata.ts:1347
 #, fuzzy
 msgid "Use the legacy Markdown editor"
 msgstr "Bật markdown emoji"
 
-#: packages/app-mobile/components/screens/ConfigScreen/ConfigScreen.tsx:551
+#: packages/app-mobile/components/screens/ConfigScreen/ConfigScreen.tsx:552
 msgid ""
 "Use this to rebuild the search index if there is a problem with search. It "
 "may take a long time depending on the number of notes."
@@ -6383,7 +6409,7 @@ msgid ""
 "it up later in Settings."
 msgstr ""
 
-#: packages/lib/models/settings/builtInMetadata.ts:1088
+#: packages/lib/models/settings/builtInMetadata.ts:1102
 msgid ""
 "Used for most text in the markdown editor. If not found, a generic "
 "proportional (variable width) font is used."
@@ -6391,7 +6417,7 @@ msgstr ""
 "Được sử dụng cho hầu hết văn bản trong trình soạn thảo Markdown. Nếu không "
 "tìm thấy, phông chữ tỷ lệ chung (chiều rộng thay đổi) được sử dụng."
 
-#: packages/lib/models/settings/builtInMetadata.ts:1101
+#: packages/lib/models/settings/builtInMetadata.ts:1115
 msgid ""
 "Used where a fixed width font is needed to lay out text legibly (e.g. "
 "tables, checkboxes, code). If not found, a generic monospace (fixed width) "
@@ -6446,20 +6472,20 @@ msgstr "Xem ngay"
 msgid "Viewer"
 msgstr "Trình xem"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1277
+#: packages/lib/models/settings/builtInMetadata.ts:1291
 msgid "Vim"
 msgstr "Vim"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1679
+#: packages/lib/models/settings/builtInMetadata.ts:1693
 msgid "Voice typing language files (URL)"
 msgstr ""
 
 #: packages/app-mobile/components/screens/Note/Note.tsx:1191
-#: packages/app-mobile/components/voiceTyping/VoiceTypingDialog.tsx:190
+#: packages/app-mobile/components/voiceTyping/VoiceTypingDialog.tsx:225
 msgid "Voice typing..."
 msgstr ""
 
-#: packages/lib/models/settings/builtInMetadata.ts:1698
+#: packages/lib/models/settings/builtInMetadata.ts:1712
 msgid "Vosk"
 msgstr ""
 
@@ -6468,8 +6494,8 @@ msgstr ""
 msgid "Waiting for authorisation..."
 msgstr "Cung cấp uỷ quyền"
 
-#: packages/app-desktop/gui/ConfigScreen/ConfigScreen.tsx:223
-#: packages/app-mobile/components/screens/ConfigScreen/ConfigScreen.tsx:121
+#: packages/app-desktop/gui/ConfigScreen/ConfigScreen.tsx:224
+#: packages/app-mobile/components/screens/ConfigScreen/ConfigScreen.tsx:122
 msgid "Warning"
 msgstr "Cảnh báo"
 
@@ -6563,7 +6589,7 @@ msgid ""
 "text from it. This will allow you to search for text in these attachments."
 msgstr ""
 
-#: packages/lib/models/settings/builtInMetadata.ts:1699
+#: packages/lib/models/settings/builtInMetadata.ts:1713
 msgid "Whisper"
 msgstr ""
 

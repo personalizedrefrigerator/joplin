@@ -1,5 +1,5 @@
 import ElectronAppWrapper from './ElectronAppWrapper';
-import shim from '@joplin/lib/shim';
+import shim, { MessageBoxType } from '@joplin/lib/shim';
 import { _, setLocale } from '@joplin/lib/locale';
 import { BrowserWindow, nativeTheme, nativeImage, shell, dialog, MessageBoxSyncOptions, safeStorage } from 'electron';
 import { dirname, toSystemSlashes } from '@joplin/lib/path-utils';
@@ -384,9 +384,14 @@ export class Bridge {
 
 	/* returns the index of the clicked button */
 	public showMessageBox(message: string, options: MessageDialogOptions = {}) {
+		const defaultButtons = [_('OK')];
+		if (options.type !== MessageBoxType.Error && options.type !== MessageBoxType.Info) {
+			defaultButtons.push(_('Cancel'));
+		}
+
 		const result = this.showMessageBox_(this.activeWindow(), { type: 'question',
 			message: message,
-			buttons: [_('OK'), _('Cancel')], ...options });
+			buttons: defaultButtons, ...options });
 
 		return result;
 	}

@@ -117,6 +117,18 @@
 		"v3.2.4": true,
 		"ios-v13.2.2": true,
 		"v3.2.5": true,
-		"v3.2.6": true
+		"v3.2.6": true,
+		"v3.2.7": true,
+		"android-v3.2.4": true,
+		"v3.2.8": true,
+		"android-v3.2.5": true,
+		"ios-v13.2.4": true,
+		"v3.2.9": true,
+		"v3.2.10": true,
+		"android-v3.2.6": true,
+		"v3.2.11": true,
+		"android-v3.2.7": true,
+		"ios-v13.2.5": true,
+		"v3.2.12": true
 	}
 }

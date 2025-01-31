@@ -808,6 +808,9 @@
 	"Delete local data and re-download from sync target": [
 		"Izbriši lokalne podatke i ponovo preuzmi iz izvora sinronizacije"
 	],
+	"Delete model and re-download?\nThis cannot be undone.": [
+		""
+	],
 	"Delete note": [
 		"Izbriši bilješku"
 	],
@@ -857,6 +860,9 @@
 		"Format odredišta: %s"
 	],
 	"Detailed": [
+		""
+	],
+	"Dev": [
 		""
 	],
 	"Directory": [
@@ -2296,6 +2302,9 @@
 	],
 	"Quit": [
 		"Zatvori program"
+	],
+	"Re-download model": [
+		""
 	],
 	"Re-encrypt data": [
 		"Ponovo šifriraj podatke"

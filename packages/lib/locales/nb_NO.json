@@ -765,6 +765,9 @@
 	"Delete local data and re-download from sync target": [
 		"Slett lokale date og last ned på nytt fra synkroniseringsmålet"
 	],
+	"Delete model and re-download?\nThis cannot be undone.": [
+		""
+	],
 	"Delete plugin \"%s\"?": [
 		"Slett utvidelse \"%s\"?"
 	],
@@ -799,6 +802,9 @@
 		"Målformat: %s"
 	],
 	"Detailed": [
+		""
+	],
+	"Dev": [
 		""
 	],
 	"Directory": [
@@ -2143,6 +2149,9 @@
 	],
 	"Quit": [
 		"Avslutt"
+	],
+	"Re-download model": [
+		""
 	],
 	"Re-encrypt data": [
 		"Rekrypter data"

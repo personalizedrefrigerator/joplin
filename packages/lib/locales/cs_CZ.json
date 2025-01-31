@@ -796,6 +796,9 @@
 	"Delete local data and re-download from sync target": [
 		"Smazat místní data a stáhnout je z cíle synchronizace"
 	],
+	"Delete model and re-download?\nThis cannot be undone.": [
+		""
+	],
 	"Delete plugin \"%s\"?": [
 		"Smazat rozšíření \"%s\"?"
 	],
@@ -839,6 +842,9 @@
 		"Cílový formát: %s"
 	],
 	"Detailed": [
+		""
+	],
+	"Dev": [
 		""
 	],
 	"Directory": [
@@ -2263,6 +2269,9 @@
 	],
 	"Quit": [
 		"Ukončit"
+	],
+	"Re-download model": [
+		""
 	],
 	"Re-encrypt data": [
 		"Znovu zašifrovat data"

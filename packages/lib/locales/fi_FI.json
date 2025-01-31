@@ -795,6 +795,9 @@
 	"Delete local data and re-download from sync target": [
 		"Poista paikalliset tiedot ja lataa uudelleen synkronointikohteesta"
 	],
+	"Delete model and re-download?\nThis cannot be undone.": [
+		""
+	],
 	"Delete plugin \"%s\"?": [
 		"Poista laajennus \"%s\"?"
 	],
@@ -838,6 +841,9 @@
 		"Kohteen muoto: %s"
 	],
 	"Detailed": [
+		""
+	],
+	"Dev": [
 		""
 	],
 	"Directory": [
@@ -2260,6 +2266,9 @@
 	],
 	"Quit": [
 		"Lopeta"
+	],
+	"Re-download model": [
+		""
 	],
 	"Re-encrypt data": [
 		"Salaa tiedot uudelleen"

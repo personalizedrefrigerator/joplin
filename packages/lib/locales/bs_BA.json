@@ -623,6 +623,9 @@
 	"Delete local data and re-download from sync target": [
 		""
 	],
+	"Delete model and re-download?\nThis cannot be undone.": [
+		""
+	],
 	"Delete the Inbox notebook?\n\nIf you delete the inbox notebook, any email that's recently been sent to it may be lost.": [
 		""
 	],
@@ -654,6 +657,9 @@
 		"Format: %s"
 	],
 	"Detailed": [
+		""
+	],
+	"Dev": [
 		""
 	],
 	"Directory": [
@@ -1768,6 +1774,9 @@
 	],
 	"Quit": [
 		"Zatvori"
+	],
+	"Re-download model": [
+		""
 	],
 	"Re-upload local data to sync target": [
 		""

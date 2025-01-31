@@ -711,6 +711,9 @@
 	"Delete local data and re-download from sync target": [
 		"Verwijder lokale gegevens en download opnieuw van synchronisatie locatie"
 	],
+	"Delete model and re-download?\nThis cannot be undone.": [
+		""
+	],
 	"Delete plugin \"%s\"?": [
 		"Plugin \"%s\" verwijderen?"
 	],
@@ -745,6 +748,9 @@
 		"Doelformaat: %s"
 	],
 	"Detailed": [
+		""
+	],
+	"Dev": [
 		""
 	],
 	"Directory": [
@@ -1999,6 +2005,9 @@
 	],
 	"Quit": [
 		"Stop"
+	],
+	"Re-download model": [
+		""
 	],
 	"Re-encrypt data": [
 		"Herencrypteer de gegevens"

@@ -19,7 +19,6 @@ import SpellCheckerService from '@joplin/lib/services/spellChecker/SpellCheckerS
 import SpellCheckerServiceDriverNative from './services/spellChecker/SpellCheckerServiceDriverNative';
 import bridge from './services/bridge';
 import menuCommandNames from './gui/menuCommandNames';
-import stateToWhenClauseContext from './services/commands/stateToWhenClauseContext';
 import ResourceService from '@joplin/lib/services/ResourceService';
 import ExternalEditWatcher from '@joplin/lib/services/ExternalEditWatcher';
 import appReducer, { createAppDefaultState } from './app.reducer';
@@ -35,29 +34,15 @@ const PluginManager = require('@joplin/lib/services/PluginManager');
 import RevisionService from '@joplin/lib/services/RevisionService';
 import MigrationService from '@joplin/lib/services/MigrationService';
 import { loadCustomCss } from '@joplin/lib/CssUtils';
-import mainScreenCommands from './gui/WindowCommandsAndDialogs/commands/index';
-import noteEditorCommands from './gui/NoteEditor/commands/index';
-import noteListCommands from './gui/NoteList/commands/index';
-import noteListControlsCommands from './gui/NoteListControls/commands/index';
-import sidebarCommands from './gui/Sidebar/commands/index';
-import appCommands from './commands/index';
-import libCommands from '@joplin/lib/commands/index';
 import { homedir } from 'os';
 import getDefaultPluginsInfo from '@joplin/lib/services/plugins/defaultPlugins/desktopDefaultPluginsInfo';
 const electronContextMenu = require('./services/electron-context-menu');
 // import  populateDatabase from '@joplin/lib/services/debug/populateDatabase';
 
-const commands = mainScreenCommands
-	.concat(noteEditorCommands)
-	.concat(noteListCommands)
-	.concat(noteListControlsCommands)
-	.concat(sidebarCommands);
 
 // Commands that are not tied to any particular component.
 // The runtime for these commands can be loaded when the app starts.
-const globalCommands = appCommands.concat(libCommands);
 
-import editorCommandDeclarations from './gui/NoteEditor/editorCommandDeclarations';
 import PerFolderSortOrderService from './services/sortOrder/PerFolderSortOrderService';
 import ShareService from '@joplin/lib/services/share/ShareService';
 import checkForUpdates from './checkForUpdates';
@@ -74,6 +59,7 @@ import SearchEngine from '@joplin/lib/services/search/SearchEngine';
 import { PackageInfo } from '@joplin/lib/versionInfo';
 import { CustomProtocolHandler } from './utils/customProtocols/handleCustomProtocols';
 import { refreshFolders } from '@joplin/lib/folders-screen-utils';
+import initializeCommandService from './utils/initializeCommandService';
 
 const pluginClasses = [
 	require('./plugins/GotoAnything').default,
@@ -492,20 +478,7 @@ class Application extends BaseApplication {
 
 		PerFolderSortOrderService.initialize();
 
-		CommandService.instance().initialize(this.store(), Setting.value('env') === 'dev', stateToWhenClauseContext);
-
-		for (const command of commands) {
-			CommandService.instance().registerDeclaration(command.declaration);
-		}
-
-		for (const command of globalCommands) {
-			CommandService.instance().registerDeclaration(command.declaration);
-			CommandService.instance().registerRuntime(command.declaration.name, command.runtime());
-		}
-
-		for (const declaration of editorCommandDeclarations) {
-			CommandService.instance().registerDeclaration(declaration);
-		}
+		initializeCommandService(this.store(), Setting.value('env') === 'dev');
 
 		const keymapService = KeymapService.instance();
 		// We only add the commands that appear in the menu because only

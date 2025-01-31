@@ -904,6 +904,9 @@
 	"Delete local data and re-download from sync target": [
 		"Supprimer les données locales et re‑télécharger depuis la cible de synchronisation"
 	],
+	"Delete model and re-download?\nThis cannot be undone.": [
+		"Supprimer le modèle et le retélécharger ?\nCette opération est irréversible."
+	],
 	"Delete note": [
 		"Supprimer la note"
 	],
@@ -963,6 +966,9 @@
 	],
 	"Detailed": [
 		"Détaillé"
+	],
+	"Dev": [
+		"Dev"
 	],
 	"Directory": [
 		"Dossier"
@@ -1047,6 +1053,9 @@
 	],
 	"Download and install the relevant extension for your browser:": [
 		"Téléchargez et installez le module complémentaire correspondant à votre navigateur :"
+	],
+	"Download updated model": [
+		"Télécharger le modèle mis à jour"
 	],
 	"Downloaded": [
 		"Téléchargé"
@@ -2622,6 +2631,9 @@
 	"Quit": [
 		"Quitter"
 	],
+	"Re-download model": [
+		"Re-télécharger le modèle"
+	],
 	"Re-encrypt data": [
 		"Re‑chiffrer les données"
 	],
@@ -3712,6 +3724,9 @@
 	],
 	"Unsupported link or message: %s": [
 		"Lien ou message non géré : %s"
+	],
+	"Unsupported link or message: %s.\nError: %s": [
+		"Lien ou message non pris en charge : %s.\nErreur : %s"
 	],
 	"Untitled": [
 		"Sans titre"

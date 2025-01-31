@@ -826,6 +826,9 @@
 	"Delete local data and re-download from sync target": [
 		"Ștergeți datele locale și descărcați din nou de la destinația de sincronizare"
 	],
+	"Delete model and re-download?\nThis cannot be undone.": [
+		""
+	],
 	"Delete note": [
 		"Ștergeți notița"
 	],
@@ -876,6 +879,9 @@
 	],
 	"Detailed": [
 		"Detaliat"
+	],
+	"Dev": [
+		""
 	],
 	"Directory": [
 		"Directoriu"
@@ -2332,6 +2338,9 @@
 	],
 	"Quit": [
 		"Ieșiți"
+	],
+	"Re-download model": [
+		""
 	],
 	"Re-encrypt data": [
 		"Re-criptați datele"

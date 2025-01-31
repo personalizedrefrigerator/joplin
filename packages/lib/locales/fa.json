@@ -864,6 +864,9 @@
 	"Delete local data and re-download from sync target": [
 		"حذف داده‌های محلی و دانلود مجدد از هدف همگام‌سازی"
 	],
+	"Delete model and re-download?\nThis cannot be undone.": [
+		""
+	],
 	"Delete note": [
 		"حذف یادداشت"
 	],
@@ -2482,6 +2485,9 @@
 	],
 	"Quit": [
 		"خروج"
+	],
+	"Re-download model": [
+		""
 	],
 	"Re-encrypt data": [
 		"رمزنگاری دوباره داده"

@@ -864,6 +864,9 @@
 	"Delete local data and re-download from sync target": [
 		"Ta bort lokala data och hämta igen från synkroniseringsmålet"
 	],
+	"Delete model and re-download?\nThis cannot be undone.": [
+		""
+	],
 	"Delete note": [
 		"Ta bort anteckning"
 	],
@@ -2485,6 +2488,9 @@
 	],
 	"Quit": [
 		"Avsluta"
+	],
+	"Re-download model": [
+		""
 	],
 	"Re-encrypt data": [
 		"Kryptera data igen"

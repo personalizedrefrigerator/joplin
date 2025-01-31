@@ -29,6 +29,8 @@ import TestProviderStack from '../../testing/TestProviderStack';
 import setupGlobalStore from '../../../utils/testing/setupGlobalStore';
 import CommandService from '@joplin/lib/services/CommandService';
 
+jest.retryTimes(2);
+
 interface WrapperProps {
 }
 

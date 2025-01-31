@@ -864,6 +864,9 @@
 	"Delete local data and re-download from sync target": [
 		"Διαγραφή τοπικών δεδομένων και εκ νέου λήψη από τον προορισμό"
 	],
+	"Delete model and re-download?\nThis cannot be undone.": [
+		""
+	],
 	"Delete note": [
 		"Διαγραφή σημείωσης"
 	],
@@ -2485,6 +2488,9 @@
 	],
 	"Quit": [
 		"Έξοδος"
+	],
+	"Re-download model": [
+		""
 	],
 	"Re-encrypt data": [
 		"Επανακρυπτογράφηση δεδομένων"

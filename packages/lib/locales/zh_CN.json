@@ -863,6 +863,9 @@
 	"Delete local data and re-download from sync target": [
 		"删除本地数据并从同步目标导入数据"
 	],
+	"Delete model and re-download?\nThis cannot be undone.": [
+		""
+	],
 	"Delete note": [
 		"删除笔记"
 	],
@@ -2482,6 +2485,9 @@
 	],
 	"Quit": [
 		"退出"
+	],
+	"Re-download model": [
+		""
 	],
 	"Re-encrypt data": [
 		"重新加密数据"

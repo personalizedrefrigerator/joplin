@@ -805,6 +805,9 @@
 	"Delete local data and re-download from sync target": [
 		"حذف البيانات المحليّة وإعادة تنزيل"
 	],
+	"Delete model and re-download?\nThis cannot be undone.": [
+		""
+	],
 	"Delete note": [
 		"حذف الملاحظة"
 	],
@@ -854,6 +857,9 @@
 		"التنسيق الوجهة: %s"
 	],
 	"Detailed": [
+		""
+	],
+	"Dev": [
 		""
 	],
 	"Directory": [
@@ -2236,6 +2242,9 @@
 	],
 	"Quit": [
 		"إغلاق"
+	],
+	"Re-download model": [
+		""
 	],
 	"Re-encrypt data": [
 		"إعادة تشفير البيانات"

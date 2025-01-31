@@ -653,6 +653,9 @@
 	"Delete local data and re-download from sync target": [
 		"Избришите локалне податке и поново их скините са одредишта за синхронизацију"
 	],
+	"Delete model and re-download?\nThis cannot be undone.": [
+		""
+	],
 	"Delete the Inbox notebook?\n\nIf you delete the inbox notebook, any email that's recently been sent to it may be lost.": [
 		""
 	],
@@ -684,6 +687,9 @@
 		"Формат одредишта: %s"
 	],
 	"Detailed": [
+		""
+	],
+	"Dev": [
 		""
 	],
 	"Directory": [
@@ -1834,6 +1840,9 @@
 	],
 	"Quit": [
 		"Излаз"
+	],
+	"Re-download model": [
+		""
 	],
 	"Re-upload local data to sync target": [
 		"Поново отпремите локалне податке на одредиште за синхронизацију"

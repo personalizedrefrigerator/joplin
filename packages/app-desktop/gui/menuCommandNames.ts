@@ -32,6 +32,7 @@ export default function() {
 		'textSelectAll',
 		'textBulletedList',
 		'toggleExternalEditing',
+		'openNoteInNewWindow',
 		'toggleLayoutMoveMode',
 		'resetLayout',
 		'toggleMenuBar',
@@ -41,6 +42,7 @@ export default function() {
 		'togglePerFolderSortOrder',
 		'toggleSideBar',
 		'toggleVisiblePanes',
+		'toggleTabMovesFocus',
 		'editor.deleteLine',
 		'editor.duplicateLine',
 		// We cannot put the undo/redo commands in the menu because they are

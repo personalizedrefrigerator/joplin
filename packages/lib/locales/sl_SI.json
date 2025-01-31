@@ -743,6 +743,9 @@
 	"Delete local data and re-download from sync target": [
 		"Izbriši lokalne podatke in jih ponovno prenesi iz sinhronizacijskega cilja"
 	],
+	"Delete model and re-download?\nThis cannot be undone.": [
+		""
+	],
 	"Delete plugin \"%s\"?": [
 		"Izbriši dodatek \"%s\"?"
 	],
@@ -777,6 +780,9 @@
 		"Format destinacije: %s"
 	],
 	"Detailed": [
+		""
+	],
+	"Dev": [
 		""
 	],
 	"Directory": [
@@ -2074,6 +2080,9 @@
 	],
 	"Quit": [
 		"Izhod"
+	],
+	"Re-download model": [
+		""
 	],
 	"Re-encrypt data": [
 		"Ponovno kodiraj podatke"
