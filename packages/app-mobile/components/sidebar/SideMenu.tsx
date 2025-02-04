@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { AccessibilityInfo, Animated, Dimensions, Easing, I18nManager, LayoutChangeEvent, PanResponder, Pressable, StyleSheet, useWindowDimensions, View, ViewStyle } from 'react-native';
+import { AccessibilityInfo, Animated, Easing, I18nManager, LayoutChangeEvent, PanResponder, Pressable, StyleSheet, useWindowDimensions, View, ViewStyle } from 'react-native';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import AccessibleView from '../accessibility/AccessibleView';
 import { _ } from '@joplin/lib/locale';
@@ -286,16 +286,34 @@ const usePanResponder = ({
 	}, [isLeftMenu, isBottomMenu, isRightMenu, isVerticalMenu, menuDragOffset, menuSize, contentSize, open, setIsOpen, disableGestures, updateMenuPosition, setIsAnimating]);
 };
 
+const useSizes = (isVerticalMenu: boolean, openMenuOffset: number) => {
+	const [contentSize, setContentSize] = useState(0);
+
+	const onLayoutChange = useCallback((e: LayoutChangeEvent) => {
+		const { width, height } = e.nativeEvent.layout;
+		// Get the size along the drag axis
+		const newContentSize = isVerticalMenu ? height : width;
+		setContentSize(newContentSize);
+	}, [isVerticalMenu]);
+	const { width: windowWidth, height: windowHeight } = useWindowDimensions();
+
+	const menuSize = useMemo(() => {
+		const windowSize = isVerticalMenu ? windowHeight : windowWidth;
+
+		const openMenuOffsetPercentage = openMenuOffset / windowSize;
+		return Math.floor(contentSize * openMenuOffsetPercentage);
+	}, [windowWidth, windowHeight, contentSize, openMenuOffset, isVerticalMenu]);
+
+	// menuSize: The size of the menu along the drag axis. In left/right mode, this is the width.
+	return { menuSize, onLayoutChange, contentSize };
+};
+
 const SideMenu: React.FC<Props> = props => {
 	const [open, setIsOpen] = useState(false);
 
 	useEffect(() => {
 		setIsOpen(props.isOpen);
 	}, [props.isOpen]);
-
-	// menuSize: The size of the menu along the drag axis. In left/right mode, this is the width.
-	const [menuSize, setMenuSize] = useState(0);
-	const [contentSize, setContentSize] = useState(0);
 
 	// In right-to-left layout, swap left and right to be consistent with other parts of
 	// the app's layout.
@@ -304,20 +322,7 @@ const SideMenu: React.FC<Props> = props => {
 	const isRightMenu = !isLeftMenu && !isBottomMenu;
 	const isVerticalMenu = isBottomMenu;
 
-	const onLayoutChange = useCallback((e: LayoutChangeEvent) => {
-		const { width, height } = e.nativeEvent.layout;
-		const { width: windowWidth, height: windowHeight } = Dimensions.get('window');
-
-		// Get the size along the drag axis
-		const newContentSize = isVerticalMenu ? height : width;
-		const windowSize = isVerticalMenu ? windowHeight : windowWidth;
-
-		const openMenuOffsetPercentage = props.openMenuOffset / windowSize;
-		const newMenuSize = Math.floor(newContentSize * openMenuOffsetPercentage);
-
-		setContentSize(newContentSize);
-		setMenuSize(newMenuSize);
-	}, [props.openMenuOffset, isVerticalMenu]);
+	const { menuSize, contentSize, onLayoutChange } = useSizes(isVerticalMenu, props.openMenuOffset);
 
 	const { animating, setIsAnimating, menuDragOffset, updateMenuPosition, menuOpenFraction } = useAnimations({
 		isLeftMenu, menuSize, open,
@@ -356,7 +361,7 @@ const SideMenu: React.FC<Props> = props => {
 	const styles = useStyles({ overlayColor: props.overlayColor, menuOpenFraction, menuSize, isLeftMenu, isVerticalMenu });
 
 	const menuComponent = (
-		<Animated.View style={[styles.menuWrapper, props.menuStyle]}>
+		<Animated.View style={[styles.menuWrapper, props.menuStyle]} key='menu'>
 			<AccessibleView
 				inert={!open}
 				style={styles.menuContent}
@@ -396,7 +401,7 @@ const SideMenu: React.FC<Props> = props => {
 		</Animated.View>
 	) : null;
 
-	const contentAndCloseButton = <Animated.View style={styles.contentOuterWrapper} testID='menu-content-wrapper'>
+	const contentAndCloseButton = <Animated.View style={styles.contentOuterWrapper} key='menu-content-wrapper'>
 		{contentComponent}
 		{closeButtonOverlay}
 	</Animated.View>;

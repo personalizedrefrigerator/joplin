@@ -1,14 +1,41 @@
 import * as React from 'react';
 import Modal from '../Modal';
 import SideMenu, { SideMenuPosition } from './SideMenu';
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { LayoutChangeEvent, ScrollView, View } from 'react-native';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { LayoutChangeEvent, ScrollView, StyleSheet, View } from 'react-native';
+import { ThemeStyle, themeStyle } from '../global-style';
+import { connect } from 'react-redux';
+import { AppState } from '../../utils/types';
 
 interface Props {
+	themeId: number;
 	children: React.ReactNode;
 	show: boolean;
 	onDismiss: ()=> void;
 }
+
+const useStyles = (theme: ThemeStyle, verticalPadding: number) => {
+	return useMemo(() => {
+		return StyleSheet.create({
+			scrollingContainer: {
+				flex: 1,
+				backgroundColor: theme.backgroundColor,
+				borderRadius: 10,
+				maxWidth: 400,
+			},
+			menuStyle: {
+				alignSelf: 'center',
+				left: undefined,
+				right: undefined,
+			},
+			contentContainer: {
+				padding: verticalPadding,
+				gap: 8,
+				flexDirection: 'row',
+			},
+		});
+	}, [theme, verticalPadding]);
+};
 
 const BottomDrawer: React.FC<Props> = props => {
 	const [isOpen, setIsOpen] = useState(false);
@@ -30,19 +57,16 @@ const BottomDrawer: React.FC<Props> = props => {
 	}, [isOpen, props.onDismiss]);
 
 	const [openMenuOffset, setOpenMenuOffset] = useState(400);
+	const verticalPadding = 20;
 	const onMenuLayout = useCallback((event: LayoutChangeEvent) => {
 		const height = event.nativeEvent.layout.height;
-		setOpenMenuOffset(height);
-	}, []);
+		setOpenMenuOffset(height + verticalPadding * 2);
+	}, [verticalPadding]);
 
-	const menu = <ScrollView style={{
-		height: openMenuOffset,
-		flex: 1,
-		backgroundColor: 'orange', // TODO
-		borderRadius: 10,
-		maxWidth: 400,
-	}}>
-		<View onLayout={onMenuLayout} style={{ padding: 20, gap: 8 }}>
+	const theme = themeStyle(props.themeId);
+	const styles = useStyles(theme, verticalPadding);
+	const menu = <ScrollView style={styles.scrollingContainer}>
+		<View onLayout={onMenuLayout} style={styles.contentContainer}>
 			{props.children}
 		</View>
 	</ScrollView>;
@@ -60,14 +84,14 @@ const BottomDrawer: React.FC<Props> = props => {
 
 			disableGestures={false}
 			openMenuOffset={openMenuOffset}
-			overlayColor='red' // TODO
-			menuStyle={{
-				alignSelf: 'center',
-				left: undefined,
-				right: undefined,
-			}}
+			overlayColor={theme.color}
+			menuStyle={styles.menuStyle}
 		><View/></SideMenu>
 	</Modal>;
 };
 
-export default BottomDrawer;
+export default connect((state: AppState) => {
+	return {
+		themeId: state.settings.theme,
+	};
+})(BottomDrawer);
