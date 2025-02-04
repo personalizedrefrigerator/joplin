@@ -86,8 +86,9 @@ const useStyles = ({ overlayColor, isLeftMenu, isVerticalMenu, menuSize, menuOpe
 			},
 			menuContent: {
 				flex: 1,
-				width: menuSize,
-				alignSelf: (isLeftMenu === !I18nManager.isRTL ? 'flex-end' : 'flex-start'),
+				width: isVerticalMenu ? undefined : menuSize,
+				height: isVerticalMenu ? menuSize : undefined,
+				alignSelf: isVerticalMenu ? 'stretch' : (isLeftMenu === !I18nManager.isRTL ? 'flex-end' : 'flex-start'),
 			},
 			closeButtonOverlay: {
 				position: 'absolute',
@@ -345,6 +346,7 @@ const SideMenu: React.FC<Props> = props => {
 			<AccessibleView
 				inert={!open}
 				style={styles.menuContent}
+				testID='menu-inner-wrapper'
 			>
 				<AccessibleView
 					// Auto-focuses an empty view at the beginning of the sidemenu -- if we instead
@@ -385,8 +387,9 @@ const SideMenu: React.FC<Props> = props => {
 			onLayout={onLayoutChange}
 			style={styles.mainContainer}
 			{...panResponder.panHandlers}
+			testID='menu-container'
 		>
-			<View style={styles.contentOuterWrapper}>
+			<View style={styles.contentOuterWrapper} testID='menu-content-wrapper'>
 				{contentComponent}
 				{closeButtonOverlay}
 			</View>
