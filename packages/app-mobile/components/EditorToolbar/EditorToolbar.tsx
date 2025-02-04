@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { AppState } from '../../utils/types';
 import { connect } from 'react-redux';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { LayoutChangeEvent, ScrollView, StyleSheet, View } from 'react-native';
 import { ToolbarButtonInfo, ToolbarItem } from '@joplin/lib/services/commands/ToolbarButtonUtils';
 import toolbarButtonsFromState from './utils/toolbarButtonsFromState';
 import { useCallback, useMemo, useRef, useState } from 'react';
@@ -12,6 +12,7 @@ import { EditorState } from './types';
 import ToolbarButton from './ToolbarButton';
 import isSelected from './utils/isSelected';
 import { _ } from '@joplin/lib/locale';
+import useButtonSize from './utils/useButtonSize';
 
 interface Props {
 	themeId: number;
@@ -19,7 +20,34 @@ interface Props {
 	editorState: EditorState;
 }
 
-const useStyles = (themeId: number) => {
+const useButtonGap = (buttonCount: number) => {
+	const { buttonSize } = useButtonSize();
+	const [containerWidth, setContainerWidth] = useState(0);
+
+	const onContainerLayout = useCallback((event: LayoutChangeEvent) => {
+		setContainerWidth(event.nativeEvent.layout.width);
+	}, []);
+
+	const buttonGap = useMemo(() => {
+		if (buttonCount <= 1) return 0;
+		// Number of offscreen buttons -- round up because we can't have negative padding
+		const overflowButtonCount = Math.max(0, Math.ceil((buttonCount * buttonSize - containerWidth) / buttonSize));
+		const visibleButtonCount = buttonCount - overflowButtonCount;
+		const allVisible = visibleButtonCount === buttonCount;
+		if (allVisible) return 0;
+
+		const targetContentWidth = containerWidth + buttonSize / 2;
+		const actualContentWidth = visibleButtonCount * buttonSize;
+		const widthDifference = targetContentWidth - actualContentWidth;
+		// Gaps are only present between buttons
+		const gapCount = visibleButtonCount - 1;
+		return widthDifference / gapCount;
+	}, [containerWidth, buttonCount, buttonSize]);
+
+	return { onContainerLayout, buttonGap };
+};
+
+const useStyles = (themeId: number, buttonGap: number) => {
 	return useMemo(() => {
 		const theme = themeStyle(themeId);
 		return StyleSheet.create({
@@ -29,6 +57,7 @@ const useStyles = (themeId: number) => {
 			},
 			contentContainer: {
 				flexGrow: 1,
+				gap: buttonGap,
 				paddingVertical: 0,
 				flexDirection: 'row',
 			},
@@ -36,7 +65,7 @@ const useStyles = (themeId: number) => {
 				flexGrow: 1,
 			},
 		});
-	}, [themeId]);
+	}, [themeId, buttonGap]);
 };
 
 type SetSettingsVisible = React.Dispatch<React.SetStateAction<boolean>>;
@@ -53,7 +82,6 @@ const useSettingButtonInfo = (setSettingsVisible: SetSettingsVisible) => {
 };
 
 const EditorToolbar: React.FC<Props> = props => {
-	const styles = useStyles(props.themeId);
 
 	const buttonInfos: ToolbarButtonInfo[] = [];
 
@@ -62,6 +90,10 @@ const EditorToolbar: React.FC<Props> = props => {
 			buttonInfos.push(info);
 		}
 	}
+
+	const buttonCount = buttonInfos.length + 1;
+	const { buttonGap, onContainerLayout } = useButtonGap(buttonCount);
+	const styles = useStyles(props.themeId, buttonGap);
 
 	const renderButton = (info: ToolbarButtonInfo) => {
 		return <ToolbarButton
@@ -99,6 +131,7 @@ const EditorToolbar: React.FC<Props> = props => {
 				horizontal={true}
 				style={styles.content}
 				contentContainerStyle={styles.contentContainer}
+				onLayout={onContainerLayout}
 			>
 				{buttonInfos.map(renderButton)}
 				<View style={styles.spacer}/>
