@@ -25,8 +25,8 @@ const useStyles = (theme: ThemeStyle, verticalPadding: number) => {
 			},
 			menuStyle: {
 				alignSelf: 'center',
-				left: undefined,
-				right: undefined,
+				left: 'auto',
+				right: 'auto',
 			},
 			contentContainer: {
 				padding: verticalPadding,
