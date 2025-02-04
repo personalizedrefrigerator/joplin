@@ -579,7 +579,7 @@ class MainScreenComponent extends React.Component<Props, State> {
 		}
 
 		return (
-			<div style={styles.messageBox} role='region' aria-label={_('Warnings')}>
+			<div style={styles.messageBox}>
 				<span style={theme.textStyle} role='alert'>{msg}</span>
 			</div>
 		);
