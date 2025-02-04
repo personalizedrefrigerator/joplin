@@ -427,6 +427,10 @@ const shim = {
 		return await shim.showMessageBox(message, { type: MessageBoxType.Confirm }) === 0;
 	},
 
+	announceForAccessibility: (_message: string): void => {
+		throw new Error('Not implemented: announceForAccessibility');
+	},
+
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	writeImageToFile: (_image: any, _format: any, _filePath: string): void => {
 		throw new Error('Not implemented');

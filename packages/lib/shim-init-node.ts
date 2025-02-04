@@ -211,6 +211,14 @@ function shimInit(options: ShimInitOptions = null) {
 		}
 	};
 
+	shim.announceForAccessibility = (message) => {
+		if (shim.isElectron()) {
+			return shim.electronBridge().announceForAccessibility(message);
+		} else {
+			throw new Error('Not implemented: announceForAccessibility');
+		}
+	};
+
 	const handleResizeImage_ = async function(filePath: string, targetPath: string, mime: string, resizeLargeImages: string) {
 		const maxDim = Resource.IMAGE_MAX_DIMENSION;
 

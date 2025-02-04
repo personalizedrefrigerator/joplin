@@ -404,6 +404,31 @@ export class Bridge {
 		return result === 0;
 	}
 
+	public announceForAccessibility(message: string) {
+		const window = this.activeWindow();
+		void window.webContents.executeJavaScript(`(() => {
+			const announcer = document.createElement('div');
+			announcer.role = 'status';
+			announcer.classList.add('a11y-announcement');
+
+			announcer.style.opacity = '0';
+			announcer.style.position = 'fixed';
+			announcer.style.width = '1px';
+			announcer.style.height = '1px';
+			announcer.style.overflow = 'hidden';
+			announcer.style.top = '0';
+
+			document.body.appendChild(announcer);
+
+			setTimeout(() => {
+				announcer.textContent = ${JSON.stringify(message)};
+				setTimeout(() => {
+					announcer.remove();
+				}, 1000);
+			}, 0);
+		})()`);
+	}
+
 	public setLocale(locale: string) {
 		setLocale(locale);
 	}
