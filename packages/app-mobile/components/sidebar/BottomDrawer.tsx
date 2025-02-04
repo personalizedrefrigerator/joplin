@@ -14,13 +14,15 @@ interface Props {
 	onDismiss: ()=> void;
 }
 
-const useStyles = (theme: ThemeStyle, verticalPadding: number) => {
+const useStyles = (theme: ThemeStyle) => {
 	return useMemo(() => {
 		return StyleSheet.create({
 			scrollingContainer: {
 				flex: 1,
 				backgroundColor: theme.backgroundColor,
 				borderRadius: 10,
+				borderBottomRightRadius: 0,
+				borderBottomLeftRadius: 0,
 				maxWidth: 400,
 			},
 			menuStyle: {
@@ -29,12 +31,18 @@ const useStyles = (theme: ThemeStyle, verticalPadding: number) => {
 				right: 'auto',
 			},
 			contentContainer: {
-				padding: verticalPadding,
+				padding: 20,
 				gap: 8,
 				flexDirection: 'row',
 			},
+			modalBackground: {
+				paddingTop: 0,
+				paddingLeft: 0,
+				paddingRight: 0,
+				paddingBottom: 0,
+			},
 		});
-	}, [theme, verticalPadding]);
+	}, [theme]);
 };
 
 const BottomDrawer: React.FC<Props> = props => {
@@ -57,21 +65,26 @@ const BottomDrawer: React.FC<Props> = props => {
 	}, [isOpen, props.onDismiss]);
 
 	const [openMenuOffset, setOpenMenuOffset] = useState(400);
-	const verticalPadding = 20;
 	const onMenuLayout = useCallback((event: LayoutChangeEvent) => {
 		const height = event.nativeEvent.layout.height;
-		setOpenMenuOffset(height + verticalPadding * 2);
-	}, [verticalPadding]);
+		const spacing = 10;
+		setOpenMenuOffset(height + spacing);
+	}, []);
 
 	const theme = themeStyle(props.themeId);
-	const styles = useStyles(theme, verticalPadding);
+	const styles = useStyles(theme);
 	const menu = <ScrollView style={styles.scrollingContainer}>
 		<View onLayout={onMenuLayout} style={styles.contentContainer}>
 			{props.children}
 		</View>
 	</ScrollView>;
 
-	return <Modal visible={props.show} transparent={true} animationType='fade'>
+	return <Modal
+		visible={props.show}
+		modalBackgroundStyle={styles.modalBackground}
+		transparent={true}
+		animationType='fade'
+	>
 		<SideMenu
 			menuPosition={SideMenuPosition.Bottom}
 			menu={menu}

@@ -7,6 +7,7 @@ interface ModalElementProps extends ModalProps {
 	children: React.ReactNode;
 	containerStyle?: ViewStyle;
 	backgroundColor?: string;
+	modalBackgroundStyle?: ViewStyle;
 
 	// If scrollOverflow is provided, the modal is wrapped in a vertical
 	// ScrollView. This allows the user to scroll parts of dialogs into
@@ -72,6 +73,7 @@ const ModalElement: React.FC<ModalElementProps> = ({
 	containerStyle,
 	backgroundColor,
 	scrollOverflow,
+	modalBackgroundStyle: extraModalBackgroundStyles,
 	...modalProps
 }) => {
 	const styles = useStyles(scrollOverflow, backgroundColor);
@@ -89,7 +91,7 @@ const ModalElement: React.FC<ModalElementProps> = ({
 
 	const contentAndBackdrop = <View
 		ref={backgroundRef}
-		style={styles.modalBackground}
+		style={[styles.modalBackground, extraModalBackgroundStyles]}
 		onStartShouldSetResponder={onShouldBackgroundCaptureTouch}
 		onResponderRelease={onBackgroundTouchFinished}
 	>{content}</View>;
