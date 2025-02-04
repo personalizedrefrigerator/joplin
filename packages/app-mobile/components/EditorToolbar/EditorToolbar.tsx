@@ -20,7 +20,7 @@ interface Props {
 	editorState: EditorState;
 }
 
-const useButtonGap = (buttonCount: number) => {
+const useButtonPadding = (buttonCount: number) => {
 	const { buttonSize } = useButtonSize();
 	const [containerWidth, setContainerWidth] = useState(0);
 
@@ -28,7 +28,7 @@ const useButtonGap = (buttonCount: number) => {
 		setContainerWidth(event.nativeEvent.layout.width);
 	}, []);
 
-	const buttonGap = useMemo(() => {
+	const buttonPadding = useMemo(() => {
 		if (buttonCount <= 1) return 0;
 		// Number of offscreen buttons -- round up because we can't have negative padding
 		const overflowButtonCount = Math.max(0, Math.ceil((buttonCount * buttonSize - containerWidth) / buttonSize));
@@ -39,12 +39,12 @@ const useButtonGap = (buttonCount: number) => {
 		const targetContentWidth = containerWidth + buttonSize / 2;
 		const actualContentWidth = visibleButtonCount * buttonSize;
 		const widthDifference = targetContentWidth - actualContentWidth;
-		// Gaps are only present between buttons
-		const gapCount = visibleButtonCount - 1;
+		// Only half of the gap for the rightmost visible button is on the screen
+		const gapCount = visibleButtonCount - 1 / 2;
 		return widthDifference / gapCount;
 	}, [containerWidth, buttonCount, buttonSize]);
 
-	return { onContainerLayout, buttonGap };
+	return { onContainerLayout, buttonPadding };
 };
 
 const useStyles = (themeId: number) => {
@@ -92,7 +92,7 @@ const EditorToolbar: React.FC<Props> = props => {
 
 	// Include setting button in the count
 	const buttonCount = buttonInfos.length + 1;
-	const { buttonGap, onContainerLayout } = useButtonGap(buttonCount);
+	const { buttonPadding, onContainerLayout } = useButtonPadding(buttonCount);
 	const styles = useStyles(props.themeId);
 
 	const renderButton = (info: ToolbarButtonInfo) => {
@@ -100,7 +100,7 @@ const EditorToolbar: React.FC<Props> = props => {
 			key={`command-${info.name}`}
 			buttonInfo={info}
 			themeId={props.themeId}
-			extraPadding={buttonGap}
+			extraPadding={buttonPadding}
 			selected={isSelected(info.name, props.editorState)}
 		/>;
 	};
@@ -122,7 +122,7 @@ const EditorToolbar: React.FC<Props> = props => {
 	const settingsButtonInfo = useSettingButtonInfo(setSettingsVisible);
 	const settingsButton = <ToolbarButton
 		buttonInfo={settingsButtonInfo}
-		extraPadding={buttonGap}
+		extraPadding={buttonPadding}
 		themeId={props.themeId}
 	/>;
 
