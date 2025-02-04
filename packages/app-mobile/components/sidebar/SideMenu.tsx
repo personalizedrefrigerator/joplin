@@ -38,10 +38,14 @@ interface UseStylesProps {
 const useStyles = ({ overlayColor, isLeftMenu, isVerticalMenu, menuSize, menuOpenFraction }: UseStylesProps) => {
 	const { height: windowHeight, width: windowWidth } = useWindowDimensions();
 	return useMemo(() => {
-		const menuWrapperSizeValue = menuOpenFraction.interpolate({
+		const contentTranslateX = !isVerticalMenu ? menuOpenFraction.interpolate({
+			inputRange: [0, 1],
+			outputRange: [0, isLeftMenu ? menuSize : -menuSize],
+		}) : 0;
+		const menuHeightAnimation = isVerticalMenu ? menuOpenFraction.interpolate({
 			inputRange: [0, 1],
 			outputRange: [0, menuSize],
-		});
+		}) : menuSize;
 
 		return StyleSheet.create({
 			mainContainer: {
@@ -56,6 +60,12 @@ const useStyles = ({ overlayColor, isLeftMenu, isVerticalMenu, menuSize, menuOpe
 				flexShrink: 1,
 				width: windowWidth,
 				height: windowHeight,
+				transform: [
+					{ translateX: contentTranslateX },
+					// The RN Animation docs suggests setting "perspective" while setting other transform styles:
+					// https://reactnative.dev/docs/animations#bear-in-mind
+					{ perspective: 1000 },
+				],
 			},
 			contentWrapper: {
 				display: 'flex',
@@ -69,10 +79,10 @@ const useStyles = ({ overlayColor, isLeftMenu, isVerticalMenu, menuSize, menuOpe
 				...(isVerticalMenu ? {
 					left: 0,
 					right: 0,
-					height: menuWrapperSizeValue,
+					height: menuHeightAnimation,
 				} : {
 					top: 0,
-					width: menuWrapperSizeValue,
+					width: menuSize,
 				}),
 				overflow: 'hidden',
 
@@ -382,6 +392,11 @@ const SideMenu: React.FC<Props> = props => {
 		</Animated.View>
 	) : null;
 
+	const contentAndCloseButton = <Animated.View style={styles.contentOuterWrapper} testID='menu-content-wrapper'>
+		{contentComponent}
+		{closeButtonOverlay}
+	</Animated.View>;
+
 	return (
 		<View
 			onLayout={onLayoutChange}
@@ -389,11 +404,15 @@ const SideMenu: React.FC<Props> = props => {
 			{...panResponder.panHandlers}
 			testID='menu-container'
 		>
-			<View style={styles.contentOuterWrapper} testID='menu-content-wrapper'>
-				{contentComponent}
-				{closeButtonOverlay}
-			</View>
-			{menuComponent}
+			{
+				// In vertical mode, the menu overlays the content and is thus
+				// drawn second
+				isVerticalMenu ? [
+					contentAndCloseButton, menuComponent,
+				] : [
+					menuComponent, contentAndCloseButton,
+				]
+			}
 		</View>
 	);
 };
