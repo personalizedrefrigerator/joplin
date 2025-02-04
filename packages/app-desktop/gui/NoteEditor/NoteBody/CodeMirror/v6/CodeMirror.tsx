@@ -372,10 +372,12 @@ const CodeMirror = (props: NoteBodyEditorProps, ref: ForwardedRef<NoteBodyEditor
 			spellcheckEnabled: Setting.value('editor.spellcheckBeta'),
 			keymap: keyboardMode,
 			indentWithTabs: true,
+			tabMovesFocus: props.tabMovesFocus,
 			editorLabel: _('Markdown editor'),
 		};
 	}, [
 		props.contentMarkupLanguage, props.disabled, props.keyboardMode, styles.globalTheme,
+		props.tabMovesFocus,
 	]);
 
 	// Update the editor's value

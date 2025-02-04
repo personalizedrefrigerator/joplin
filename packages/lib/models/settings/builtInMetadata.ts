@@ -683,6 +683,16 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 			appTypes: [AppType.Mobile],
 			label: () => 'buttons included in the editor toolbar',
 		},
+		'editor.tabMovesFocus': {
+			value: false,
+			type: SettingItemType.Bool,
+			public: false,
+			section: 'note',
+			appTypes: [AppType.Desktop],
+			label: () => _('Tab moves focus'),
+			storage: SettingStorage.File,
+			isGlobal: true,
+		},
 		'notes.columns': {
 			value: defaultListColumns(),
 			public: false,
@@ -1662,7 +1672,7 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 		'featureFlag.autoUpdaterServiceEnabled': {
 			value: false,
 			type: SettingItemType.Bool,
-			public: true,
+			public: false,
 			storage: SettingStorage.File,
 			appTypes: [AppType.Desktop],
 			label: () => 'Enable auto-updates',

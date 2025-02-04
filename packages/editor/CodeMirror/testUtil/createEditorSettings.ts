@@ -11,6 +11,7 @@ const createEditorSettings = (themeId: number) => {
 		automatchBraces: false,
 		ignoreModifiers: false,
 		autocompleteMarkup: true,
+		tabMovesFocus: false,
 
 		keymap: EditorKeymap.Default,
 		language: EditorLanguageType.Markdown,

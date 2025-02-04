@@ -62,6 +62,7 @@ const defaultKeymapItems = {
 		{ accelerator: 'Option+Cmd+3', command: 'switchProfile3' },
 		{ accelerator: 'Option+Cmd+Backspace', command: 'permanentlyDeleteNote' },
 		{ accelerator: 'Option+Cmd+N', command: 'openNoteInNewWindow' },
+		{ accelerator: 'Ctrl+M', command: 'toggleTabMovesFocus' },
 	],
 	default: [
 		{ accelerator: 'Ctrl+N', command: 'newNote' },
@@ -110,6 +111,7 @@ const defaultKeymapItems = {
 		{ accelerator: 'Ctrl+Alt+2', command: 'switchProfile2' },
 		{ accelerator: 'Ctrl+Alt+3', command: 'switchProfile3' },
 		{ accelerator: 'Ctrl+Alt+N', command: 'openNoteInNewWindow' },
+		{ accelerator: 'Ctrl+M', command: 'toggleTabMovesFocus' },
 	],
 };
 
@@ -415,6 +417,13 @@ export default class KeymapService extends BaseService {
 		if (electronKey && keysRegExp.test(electronKey)) parts.push(electronKey);
 
 		return parts.join('+');
+	}
+
+	// Electron and aria-keyshortcuts have slightly different formats for accelerators.
+	// See https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-keyshortcuts
+	public getAriaKeyShortcuts(commandName: string) {
+		const electronAccelerator = this.getAccelerator(commandName);
+		return electronAccelerator.replace('Ctrl', 'Control');
 	}
 
 	public on<Name extends EventName>(eventName: Name, callback: EventListenerCallback<Name>) {

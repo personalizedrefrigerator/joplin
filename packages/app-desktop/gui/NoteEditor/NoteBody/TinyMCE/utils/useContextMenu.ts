@@ -14,6 +14,9 @@ import Resource from '@joplin/lib/models/Resource';
 import { TinyMceEditorEvents } from './types';
 import { HtmlToMarkdownHandler, MarkupToHtmlHandler } from '../../../utils/types';
 import { Editor } from 'tinymce';
+import { EditDialogControl } from './useEditDialog';
+import { Dispatch } from 'redux';
+import { _ } from '@joplin/lib/locale';
 
 const Menu = bridge().Menu;
 const MenuItem = bridge().MenuItem;
@@ -52,23 +55,14 @@ interface ContextMenuActionOptions {
 
 const contextMenuActionOptions: ContextMenuActionOptions = { current: null };
 
-// eslint-disable-next-line @typescript-eslint/ban-types, @typescript-eslint/no-explicit-any -- Old code before rule was applied, Old code before rule was applied
-export default function(editor: Editor, plugins: PluginStates, dispatch: Function, htmlToMd: HtmlToMarkdownHandler, mdToHtml: MarkupToHtmlHandler) {
+export default function(editor: Editor, plugins: PluginStates, dispatch: Dispatch, htmlToMd: HtmlToMarkdownHandler, mdToHtml: MarkupToHtmlHandler, editDialog: EditDialogControl) {
 	useEffect(() => {
 		if (!editor) return () => {};
 
 		const contextMenuItems = menuItems(dispatch, htmlToMd, mdToHtml);
 		const targetWindow = bridge().activeWindow();
 
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-		function onContextMenu(event: ElectronEvent, params: any) {
-			const element = contextMenuElement(editor, params.x, params.y);
-			if (!element) return;
-
-			event.preventDefault();
-
-			const menu = new Menu();
-
+		const makeMainMenuItems = (element: Element) => {
 			let itemType: ContextMenuItemType = ContextMenuItemType.None;
 			let resourceId = '';
 			let linkToCopy = null;
@@ -103,29 +97,57 @@ export default function(editor: Editor, plugins: PluginStates, dispatch: Functio
 				mdToHtml,
 			};
 
+			const result = [];
 			for (const itemName in contextMenuItems) {
 				const item = contextMenuItems[itemName];
 
 				if (!item.isActive(itemType, contextMenuActionOptions.current)) continue;
 
-				menu.append(new MenuItem({
+				result.push(new MenuItem({
 					label: item.label,
 					click: () => {
 						item.onAction(contextMenuActionOptions.current);
 					},
 				}));
 			}
+			return result;
+		};
 
+		const makeEditableMenuItems = (element: Element) => {
+			if (editDialog.isEditable(element)) {
+				return [
+					new MenuItem({
+						type: 'normal',
+						label: _('Edit'),
+						click: () => {
+							editDialog.editExisting(element);
+						},
+					}),
+					new MenuItem({ type: 'separator' }),
+				];
+			}
+			return [];
+		};
+
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
+		function onContextMenu(event: ElectronEvent, params: any) {
+			const element = contextMenuElement(editor, params.x, params.y);
+			if (!element) return;
+
+			event.preventDefault();
+
+			const menu = new Menu();
+			const menuItems = [];
+
+			menuItems.push(...makeEditableMenuItems(element));
+			menuItems.push(...makeMainMenuItems(element));
 			const spellCheckerMenuItems = SpellCheckerService.instance().contextMenuItems(params.misspelledWord, params.dictionarySuggestions);
+			menuItems.push(...spellCheckerMenuItems);
+			menuItems.push(...menuUtils.pluginContextMenuItems(plugins, MenuItemLocation.EditorContextMenu));
 
-			for (const item of spellCheckerMenuItems) {
-				menu.append(new MenuItem(item));
+			for (const item of menuItems) {
+				menu.append(item);
 			}
-
-			for (const item of menuUtils.pluginContextMenuItems(plugins, MenuItemLocation.EditorContextMenu)) {
-				menu.append(new MenuItem(item));
-			}
-
 			menu.popup({ window: targetWindow });
 		}
 
@@ -136,5 +158,5 @@ export default function(editor: Editor, plugins: PluginStates, dispatch: Functio
 				targetWindow.webContents.off('context-menu', onContextMenu);
 			}
 		};
-	}, [editor, plugins, dispatch, htmlToMd, mdToHtml]);
+	}, [editor, plugins, dispatch, htmlToMd, mdToHtml, editDialog]);
 }
