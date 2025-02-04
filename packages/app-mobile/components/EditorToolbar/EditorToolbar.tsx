@@ -91,6 +91,7 @@ const EditorToolbar: React.FC<Props> = props => {
 		}
 	}
 
+	// Include setting button in the count
 	const buttonCount = buttonInfos.length + 1;
 	const { buttonGap, onContainerLayout } = useButtonGap(buttonCount);
 	const styles = useStyles(props.themeId, buttonGap);
