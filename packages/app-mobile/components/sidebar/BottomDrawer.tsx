@@ -35,13 +35,19 @@ const BottomDrawer: React.FC<Props> = props => {
 		setOpenMenuOffset(height);
 	}, []);
 
-	const menu = <ScrollView style={{ height: openMenuOffset, flex: 1 }}>
-		<View onLayout={onMenuLayout} style={{ padding: 10 }}>
+	const menu = <ScrollView style={{
+		height: openMenuOffset,
+		flex: 1,
+		backgroundColor: 'orange', // TODO
+		borderRadius: 10,
+		maxWidth: 400,
+	}}>
+		<View onLayout={onMenuLayout} style={{ padding: 20, gap: 8 }}>
 			{props.children}
 		</View>
 	</ScrollView>;
 
-	return <Modal visible={props.show} transparent={true}>
+	return <Modal visible={props.show} transparent={true} animationType='fade'>
 		<SideMenu
 			menuPosition={SideMenuPosition.Bottom}
 			menu={menu}
@@ -54,13 +60,11 @@ const BottomDrawer: React.FC<Props> = props => {
 
 			disableGestures={false}
 			openMenuOffset={openMenuOffset}
-			overlayColor='blue'
+			overlayColor='red' // TODO
 			menuStyle={{
-				maxWidth: 400,
-				marginLeft: 'auto',
-				marginRight: 'auto',
-				backgroundColor: 'white',
-				padding: 8,
+				alignSelf: 'center',
+				left: undefined,
+				right: undefined,
 			}}
 		><View/></SideMenu>
 	</Modal>;

@@ -21,7 +21,7 @@ interface Props {
 	overlayColor: string;
 	openMenuOffset: number;
 	menuPosition: SideMenuPosition;
-	menuStyle: ViewStyle;
+	menuStyle?: ViewStyle;
 
 	onChange: OnChangeCallback;
 	disableGestures: boolean;
@@ -42,10 +42,11 @@ const useStyles = ({ overlayColor, isLeftMenu, isVerticalMenu, menuSize, menuOpe
 			inputRange: [0, 1],
 			outputRange: [0, isLeftMenu ? menuSize : -menuSize],
 		}) : 0;
-		const menuHeightAnimation = isVerticalMenu ? menuOpenFraction.interpolate({
+		const menuTranslateY = isVerticalMenu ? menuOpenFraction.interpolate({
 			inputRange: [0, 1],
-			outputRange: [0, menuSize],
-		}) : menuSize;
+			outputRange: [menuSize, 0],
+			extrapolate: 'clamp',
+		}) : 0;
 
 		return StyleSheet.create({
 			mainContainer: {
@@ -79,7 +80,10 @@ const useStyles = ({ overlayColor, isLeftMenu, isVerticalMenu, menuSize, menuOpe
 				...(isVerticalMenu ? {
 					left: 0,
 					right: 0,
-					height: menuHeightAnimation,
+					transform: [
+						{ translateY: menuTranslateY },
+						{ perspective: 1000 },
+					],
 				} : {
 					top: 0,
 					width: menuSize,
