@@ -47,7 +47,7 @@ const useButtonGap = (buttonCount: number) => {
 	return { onContainerLayout, buttonGap };
 };
 
-const useStyles = (themeId: number, buttonGap: number) => {
+const useStyles = (themeId: number) => {
 	return useMemo(() => {
 		const theme = themeStyle(themeId);
 		return StyleSheet.create({
@@ -57,7 +57,6 @@ const useStyles = (themeId: number, buttonGap: number) => {
 			},
 			contentContainer: {
 				flexGrow: 1,
-				gap: buttonGap,
 				paddingVertical: 0,
 				flexDirection: 'row',
 			},
@@ -65,7 +64,7 @@ const useStyles = (themeId: number, buttonGap: number) => {
 				flexGrow: 1,
 			},
 		});
-	}, [themeId, buttonGap]);
+	}, [themeId]);
 };
 
 type SetSettingsVisible = React.Dispatch<React.SetStateAction<boolean>>;
@@ -94,13 +93,14 @@ const EditorToolbar: React.FC<Props> = props => {
 	// Include setting button in the count
 	const buttonCount = buttonInfos.length + 1;
 	const { buttonGap, onContainerLayout } = useButtonGap(buttonCount);
-	const styles = useStyles(props.themeId, buttonGap);
+	const styles = useStyles(props.themeId);
 
 	const renderButton = (info: ToolbarButtonInfo) => {
 		return <ToolbarButton
 			key={`command-${info.name}`}
 			buttonInfo={info}
 			themeId={props.themeId}
+			extraPadding={buttonGap}
 			selected={isSelected(info.name, props.editorState)}
 		/>;
 	};
@@ -122,6 +122,7 @@ const EditorToolbar: React.FC<Props> = props => {
 	const settingsButtonInfo = useSettingButtonInfo(setSettingsVisible);
 	const settingsButton = <ToolbarButton
 		buttonInfo={settingsButtonInfo}
+		extraPadding={buttonGap}
 		themeId={props.themeId}
 	/>;
 

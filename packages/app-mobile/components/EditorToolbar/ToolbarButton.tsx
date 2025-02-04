@@ -8,11 +8,12 @@ import useButtonSize from './utils/useButtonSize';
 
 interface Props {
 	themeId: number;
+	extraPadding: number;
 	buttonInfo: ToolbarButtonInfo;
 	selected?: boolean;
 }
 
-const useStyles = (themeId: number, selected: boolean, enabled: boolean) => {
+const useStyles = (themeId: number, selected: boolean, enabled: boolean, extraPadding: number) => {
 	const { buttonSize, iconSize } = useButtonSize();
 
 	return useMemo(() => {
@@ -23,7 +24,7 @@ const useStyles = (themeId: number, selected: boolean, enabled: boolean) => {
 				fontSize: iconSize,
 			},
 			button: {
-				width: buttonSize,
+				width: buttonSize + extraPadding,
 				height: buttonSize,
 				justifyContent: 'center',
 				alignItems: 'center',
@@ -31,11 +32,11 @@ const useStyles = (themeId: number, selected: boolean, enabled: boolean) => {
 				opacity: enabled ? 1 : theme.disabledOpacity,
 			},
 		});
-	}, [themeId, selected, enabled, buttonSize, iconSize]);
+	}, [themeId, selected, enabled, buttonSize, iconSize, extraPadding]);
 };
 
-const ToolbarButton: React.FC<Props> = memo(({ themeId, buttonInfo, selected }) => {
-	const styles = useStyles(themeId, selected, buttonInfo.enabled);
+const ToolbarButton: React.FC<Props> = memo(({ themeId, buttonInfo, selected, extraPadding }) => {
+	const styles = useStyles(themeId, selected, buttonInfo.enabled, extraPadding);
 	const isToggleButton = selected !== undefined;
 
 	return <IconButton
