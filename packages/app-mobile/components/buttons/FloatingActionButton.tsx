@@ -50,12 +50,13 @@ const FloatingActionButton = (props: ActionButtonProps) => {
 
 	const label = props.mainButton?.label ?? _('Add new');
 
+	const hasMenu = !!props.menuContent;
 	const menuButton = <FAB
 		icon={open ? openIcon : closedIcon}
 		accessibilityLabel={label}
 		onPress={props.mainButton?.onPress ?? onMenuToggled}
-		aria-expanded={open}
-		accessibilityState={{ expanded: open }}
+		aria-expanded={hasMenu ? open : undefined}
+		accessibilityState={hasMenu ? { expanded: open } : undefined}
 		style={{
 			alignSelf: 'flex-end',
 		}}
