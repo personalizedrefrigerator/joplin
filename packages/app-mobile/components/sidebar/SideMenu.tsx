@@ -102,6 +102,7 @@ const useStyles = ({ overlayColor, isLeftMenu, isVerticalMenu, menuSize, menuOpe
 				flex: 1,
 				width: isVerticalMenu ? undefined : menuSize,
 				height: isVerticalMenu ? menuSize : undefined,
+				flexBasis: menuSize,
 				alignSelf: isVerticalMenu ? 'stretch' : (isLeftMenu === !I18nManager.isRTL ? 'flex-end' : 'flex-start'),
 			},
 			closeButtonOverlay: {
