@@ -181,6 +181,10 @@ const createEditor = (
 		keyCommand('Mod-]', increaseIndent),
 		keyCommand('Mod-k', showLinkEditor),
 		keyCommand('Tab', (view: EditorView) => {
+			if (settings.tabMovesFocus) {
+				return false;
+			}
+
 			if (settings.autocompleteMarkup) {
 				return insertOrIncreaseIndent(view);
 			}
@@ -188,6 +192,10 @@ const createEditor = (
 			return insertTab(view);
 		}, true),
 		keyCommand('Shift-Tab', (view) => {
+			if (settings.tabMovesFocus) {
+				return false;
+			}
+
 			// When at the beginning of the editor, allow shift-tab to act
 			// normally.
 			if (isCursorAtBeginning(view.state)) {

@@ -160,3 +160,5 @@ Tebi
 unwatcher
 pedr
 Slotozilla
+keyshortcuts
+Siri

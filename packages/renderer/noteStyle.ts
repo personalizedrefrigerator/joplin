@@ -137,14 +137,13 @@ export default function(theme: any, options: Options = null) {
 			border: none;
 		}
 		::-webkit-scrollbar-thumb {
-			background: rgba(100, 100, 100, 0.3); 
-			border-radius: 5px;
+			background: ${theme.scrollbarThumbColor}; 
 		}
 		::-webkit-scrollbar-track:hover {
 			background: rgba(0, 0, 0, 0.1); 
 		}
 		::-webkit-scrollbar-thumb:hover {
-			background: rgba(100, 100, 100, 0.7); 
+			background: ${theme.scrollbarThumbColorHover}; 
 		}
 
 		${maxWidthCss}

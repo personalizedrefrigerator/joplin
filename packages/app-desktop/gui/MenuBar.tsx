@@ -165,6 +165,7 @@ interface Props {
 	showNoteCounts: boolean;
 	uncompletedTodosOnTop: boolean;
 	showCompletedTodos: boolean;
+	tabMovesFocus: boolean;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	pluginMenuItems: any[];
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
@@ -256,6 +257,7 @@ function useMenuStates(menu: any, props: Props) {
 			menuItemSetChecked('showNoteCounts', props.showNoteCounts);
 			menuItemSetChecked('uncompletedTodosOnTop', props.uncompletedTodosOnTop);
 			menuItemSetChecked('showCompletedTodos', props.showCompletedTodos);
+			menuItemSetChecked('toggleTabMovesFocus', props.tabMovesFocus);
 		}
 
 		timeoutId = setTimeout(scheduleUpdate, 150);
@@ -276,6 +278,7 @@ function useMenuStates(menu: any, props: Props) {
 		props['notes.sortOrder.reverse'],
 		// eslint-disable-next-line @seiyab/react-hooks/exhaustive-deps -- Old code before rule was applied
 		props['folders.sortOrder.reverse'],
+		props.tabMovesFocus,
 		props.noteListRendererId,
 		props.showNoteCounts,
 		props.uncompletedTodosOnTop,
@@ -825,6 +828,12 @@ function useMenu(props: Props) {
 						},
 						separator(),
 						{
+							...menuItemDic['toggleTabMovesFocus'],
+							label: Setting.settingMetadata('editor.tabMovesFocus').label(),
+							type: 'checkbox',
+						},
+						separator(),
+						{
 							label: _('Actual Size'),
 							click: () => {
 								Setting.setValue('windowContentZoomFactor', 100);
@@ -1145,6 +1154,7 @@ const mapStateToProps = (state: AppState): Partial<Props> => {
 		['folders.sortOrder.field']: state.settings['folders.sortOrder.field'],
 		['notes.sortOrder.reverse']: state.settings['notes.sortOrder.reverse'],
 		['folders.sortOrder.reverse']: state.settings['folders.sortOrder.reverse'],
+		tabMovesFocus: state.settings['editor.tabMovesFocus'],
 		pluginSettings: state.settings['plugins.states'],
 		showNoteCounts: state.settings.showNoteCounts,
 		uncompletedTodosOnTop: state.settings.uncompletedTodosOnTop,

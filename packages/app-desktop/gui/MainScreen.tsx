@@ -43,6 +43,7 @@ import UpdateNotification from './UpdateNotification/UpdateNotification';
 import NoteEditor from './NoteEditor/NoteEditor';
 import PluginNotification from './PluginNotification/PluginNotification';
 import { Toast } from '@joplin/lib/services/plugins/api/types';
+import PluginService from '@joplin/lib/services/plugins/PluginService';
 
 const ipcRenderer = require('electron').ipcRenderer;
 
@@ -119,6 +120,18 @@ const defaultLayout: LayoutItem = {
 		{ key: 'noteList', width: 250 },
 		{ key: 'editor' },
 	],
+};
+
+const layoutKeyToLabel = (key: string, plugins: PluginStates) => {
+	if (key === 'sideBar') return _('Sidebar');
+	if (key === 'noteList') return _('Note list');
+	if (key === 'editor') return _('Editor');
+
+	const viewInfo = pluginUtils.viewInfoByViewId(plugins, key);
+	if (viewInfo) {
+		return PluginService.instance().safePluginNameById(viewInfo.plugin.id);
+	}
+	return key;
 };
 
 class MainScreenComponent extends React.Component<Props, State> {
@@ -728,6 +741,10 @@ class MainScreenComponent extends React.Component<Props, State> {
 		);
 	}
 
+	private layoutKeyToLabel = (key: string) => {
+		return layoutKeyToLabel(key, this.props.plugins);
+	};
+
 	public render() {
 		const theme = themeStyle(this.props.themeId);
 		const style = {
@@ -746,6 +763,7 @@ class MainScreenComponent extends React.Component<Props, State> {
 				onResize={this.resizableLayout_resize}
 				onMoveButtonClick={this.resizableLayout_moveButtonClick}
 				renderItem={this.resizableLayout_renderItem}
+				layoutKeyToLabel={this.layoutKeyToLabel}
 				moveMode={this.props.layoutMoveMode}
 				moveModeMessage={_('Use the arrows to move the layout items. Press "Escape" to exit.')}
 			/>
