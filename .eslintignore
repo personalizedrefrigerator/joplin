@@ -695,6 +695,7 @@ packages/app-mobile/components/buttons/index.js
 packages/app-mobile/components/getResponsiveValue.test.js
 packages/app-mobile/components/getResponsiveValue.js
 packages/app-mobile/components/global-style.js
+packages/app-mobile/components/plugins/PluginNotification.js
 packages/app-mobile/components/plugins/PluginRunner.js
 packages/app-mobile/components/plugins/PluginRunnerWebView.js
 packages/app-mobile/components/plugins/backgroundPage/initializeDialogWebView.js

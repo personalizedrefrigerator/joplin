@@ -16,6 +16,7 @@ import usePrevious from '@joplin/lib/hooks/usePrevious';
 import PlatformImplementation from '../../services/plugins/PlatformImplementation';
 import AccessibleView from '../accessibility/AccessibleView';
 import useOnDevPluginsUpdated from './utils/useOnDevPluginsUpdated';
+import PluginNotification from './PluginNotification';
 
 const logger = Logger.create('PluginRunnerWebView');
 
@@ -183,6 +184,7 @@ const PluginRunnerWebViewComponent: React.FC<Props> = props => {
 					pluginHtmlContents={props.pluginHtmlContents}
 					pluginStates={props.pluginStates}
 				/>
+				<PluginNotification/>
 			</>
 		);
 	};
