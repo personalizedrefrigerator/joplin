@@ -1,6 +1,6 @@
 import * as React from 'react';
-import { AccessibilityInfo, Animated, Easing, I18nManager, LayoutChangeEvent, PanResponder, Pressable, StyleSheet, useWindowDimensions, View, ViewStyle } from 'react-native';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { AccessibilityInfo, Animated, Easing, I18nManager, LayoutChangeEvent, LayoutRectangle, PanResponder, Pressable, StyleSheet, useWindowDimensions, View, ViewStyle } from 'react-native';
+import { RefObject, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import AccessibleView from '../accessibility/AccessibleView';
 import { _ } from '@joplin/lib/locale';
 import useReduceMotionEnabled from '../../utils/hooks/useReduceMotionEnabled';
@@ -195,7 +195,7 @@ interface UsePanResponderProps {
 	isRightMenu: boolean;
 	isVerticalMenu: boolean;
 	menuDragOffset: Animated.Value;
-	menuSize: number;
+	menuLayoutRef: RefObject<LayoutRectangle>;
 	open: boolean;
 	setIsAnimating: React.Dispatch<React.SetStateAction<boolean>>;
 	setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
@@ -210,7 +210,7 @@ const usePanResponder = ({
 	isRightMenu,
 	isVerticalMenu,
 	menuDragOffset,
-	menuSize,
+	menuLayoutRef,
 	open,
 	setIsAnimating,
 	setIsOpen,
@@ -225,6 +225,18 @@ const usePanResponder = ({
 			onMoveShouldSetPanResponderCapture: (_event, gestureState) => {
 				if (disableGestures) {
 					return false;
+				}
+
+				const menuLayout = menuLayoutRef.current;
+				if (open) {
+					const centerX = menuLayout.x + menuLayout.width / 2;
+					const centerY = menuLayout.y + menuLayout.height / 2;
+					const distX = Math.abs(gestureState.moveX - centerX);
+					const distY = Math.abs(gestureState.moveY - centerY);
+					const withinMenu = distX < menuLayout.width / 2 - edgeHitWidth && distY < menuLayout.height / 2 - edgeHitWidth;
+					if (withinMenu) {
+						return false;
+					}
 				}
 
 				let startX;
@@ -252,7 +264,7 @@ const usePanResponder = ({
 				const motionWithinToleranceY = Math.abs(dy) <= toleranceY;
 				let startWithinTolerance, motionWithinToleranceX;
 				if (open) {
-					startWithinTolerance = startX >= menuSize - edgeHitWidth;
+					startWithinTolerance = true;
 					motionWithinToleranceX = dx <= -toleranceX;
 				} else {
 					startWithinTolerance = startX <= edgeHitWidth;
@@ -284,7 +296,7 @@ const usePanResponder = ({
 				}
 			},
 		});
-	}, [isLeftMenu, isBottomMenu, isRightMenu, isVerticalMenu, menuDragOffset, menuSize, contentSize, open, setIsOpen, disableGestures, updateMenuPosition, setIsAnimating]);
+	}, [isLeftMenu, isBottomMenu, isRightMenu, isVerticalMenu, menuDragOffset, menuLayoutRef, contentSize, open, setIsOpen, disableGestures, updateMenuPosition, setIsAnimating]);
 };
 
 const useSizes = (isVerticalMenu: boolean, openMenuOffset: number) => {
@@ -330,6 +342,10 @@ const SideMenu: React.FC<Props> = props => {
 		isLeftMenu, menuSize, open,
 	});
 
+	const menuLayoutRef = useRef<LayoutRectangle|null>();
+	const onMenuLayout = useCallback((event: LayoutChangeEvent) => {
+		menuLayoutRef.current = event.nativeEvent.layout;
+	}, []);
 	const panResponder = usePanResponder({
 		contentSize,
 		disableGestures: props.disableGestures,
@@ -338,7 +354,7 @@ const SideMenu: React.FC<Props> = props => {
 		isRightMenu,
 		isVerticalMenu,
 		menuDragOffset,
-		menuSize,
+		menuLayoutRef,
 		open,
 		setIsAnimating,
 		setIsOpen,
@@ -363,7 +379,7 @@ const SideMenu: React.FC<Props> = props => {
 	const styles = useStyles({ overlayColor: props.overlayColor, menuOpenFraction, menuSize, isLeftMenu, isVerticalMenu });
 
 	const menuComponent = (
-		<Animated.View style={[styles.menuWrapper, props.menuStyle]} key='menu'>
+		<Animated.View style={[styles.menuWrapper, props.menuStyle]} onLayout={onMenuLayout} key='menu'>
 			<AccessibleView
 				inert={!open}
 				style={styles.menuContent}
