@@ -5,6 +5,7 @@ import { _ } from '@joplin/lib/locale';
 import { Dispatch } from 'redux';
 import { View } from 'react-native';
 import BottomDrawer from '../sidebar/BottomDrawer';
+import { connect } from 'react-redux';
 const Icon = require('react-native-vector-icons/Ionicons').default;
 
 type OnButtonPress = ()=> void;
@@ -16,14 +17,12 @@ interface ButtonSpec {
 }
 
 interface ActionButtonProps {
-	buttons?: ButtonSpec[];
+	menuContent?: React.ReactNode;
 
 	// If not given, an "add" button will be used.
 	mainButton?: ButtonSpec;
 	dispatch: Dispatch;
 }
-
-const defaultOnPress = () => {};
 
 // Returns a render function compatible with React Native Paper.
 const getIconRenderFunction = (iconName: string) => {
@@ -46,14 +45,6 @@ const FloatingActionButton = (props: ActionButtonProps) => {
 		setOpen(open => !open);
 	}, [setOpen, props.dispatch]);
 
-	const actions = useMemo(() => (props.buttons ?? []).map(button => {
-		return {
-			...button,
-			icon: getIconRenderFunction(button.icon),
-			onPress: button.onPress ?? defaultOnPress,
-		};
-	}), [props.buttons]);
-
 	const closedIcon = useIcon(props.mainButton?.icon ?? 'add');
 	const openIcon = useIcon('close');
 
@@ -70,38 +61,22 @@ const FloatingActionButton = (props: ActionButtonProps) => {
 		}}
 	/>;
 
-	const actionButtons = actions.map((action, idx) => {
-		return <FAB
-			key={`option-${idx}`}
-			label={action.label}
-			icon={action.icon}
-			onPress={action.onPress}
-			size='small'
-		/>;
-	});
-
 	return (
 		<Portal>
 			<View
-				role='navigation'
-				aria-label={_('Actions')}
 				style={{
 					position: 'absolute',
 					bottom: 10,
 					right: 10,
-					// Reverse so that focus order goes from the open/close button,
-					// then to the options.
-					flexDirection: 'column-reverse',
-					gap: 10,
 				}}
 			>
 				{menuButton}
 			</View>
 			<BottomDrawer onDismiss={() => setOpen(false)} show={open}>
-				{actionButtons}
+				{props.menuContent}
 			</BottomDrawer>
 		</Portal>
 	);
 };
 
-export default FloatingActionButton;
+export default connect()(FloatingActionButton);
