@@ -24,10 +24,11 @@ const useStyles = (themeId: number) => {
 				width: 50,
 				height: 50,
 				textAlign: 'center',
+				overflow: 'hidden',
 
 				color: theme.color3,
 				borderColor: theme.codeBorderColor, // TODO: Use a different theme variable
-				borderRadius: 36,
+				borderRadius: 25,
 				padding: 8,
 				borderWidth: 2,
 				backgroundColor: theme.backgroundColor3,
