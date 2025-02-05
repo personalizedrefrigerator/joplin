@@ -6,6 +6,7 @@ import { AppState } from '../../utils/types';
 import { Toast } from '@joplin/lib/services/plugins/api/types';
 import { useCallback } from 'react';
 import { Dispatch } from 'redux';
+import { ViewStyle } from 'react-native';
 
 interface Props {
 	dispatch: Dispatch;
@@ -14,6 +15,11 @@ interface Props {
 
 const snackbarAction = {
 	label: _('Close'),
+};
+
+const wrapperStyle: ViewStyle = {
+	maxWidth: 600,
+	alignSelf: 'center',
 };
 
 const PluginNotification: React.FC<Props> = props => {
@@ -26,6 +32,7 @@ const PluginNotification: React.FC<Props> = props => {
 			visible={!!props.toast}
 			onDismiss={onDismiss}
 			duration={props.toast?.duration}
+			wrapperStyle={wrapperStyle}
 			action={snackbarAction}
 		>{props.toast?.message ?? ''}</Snackbar>
 	</Portal>;

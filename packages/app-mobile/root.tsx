@@ -139,6 +139,7 @@ import DialogManager from './components/DialogManager';
 import lockToSingleInstance from './utils/lockToSingleInstance';
 import { AppState } from './utils/types';
 import { getDisplayParentId } from '@joplin/lib/services/trash';
+import PluginNotification from './components/plugins/PluginNotification';
 
 const logger = Logger.create('root');
 
@@ -1302,8 +1303,12 @@ class AppComponent extends React.Component {
 		// a smaller edge hit width.
 		const menuEdgeHitWidth = menuPosition === 'right' ? 20 : 30;
 
+		// For toasts to be shown above most other content, including floating action buttons,
+		// they need to be before other components in the rendering order:
+		const toasts = <PluginNotification/>;
 		const mainContent = (
 			<View style={{ flex: 1, backgroundColor: theme.backgroundColor }}>
+				{toasts}
 				<SideMenu
 					menu={sideMenuContent}
 					edgeHitWidth={menuEdgeHitWidth}
