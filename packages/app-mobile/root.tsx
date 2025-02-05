@@ -354,10 +354,6 @@ const appReducer = (state = appDefaultState, action: any) => {
 					newState.selectedNoteHash = action.noteHash;
 				}
 
-				if ('newNoteAttachFileAction' in action) {
-					newState.newNoteAttachFileAction = action.newNoteAttachFileAction;
-				}
-
 				if ('sharedData' in action) {
 					newState.sharedData = action.sharedData;
 				} else {
