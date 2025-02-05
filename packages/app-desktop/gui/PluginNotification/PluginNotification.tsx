@@ -35,7 +35,7 @@ export default (props: Props) => {
 		};
 
 		notyfContext.open(options);
-	}, [toast.message, toast.duration, toast.type, notyfContext]);
+	}, [toast.message, toast.duration, toast.type, toast.timestamp, notyfContext]);
 
 	return <div style={{ display: 'none' }}/>;
 };
