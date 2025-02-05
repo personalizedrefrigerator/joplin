@@ -198,7 +198,7 @@ const createTheme = (theme: EditorTheme): Extension[] => {
 
 		// Override the default URL style when the URL is within a link
 		'& .tok-url.tok-link, & .tok-link.tok-meta, & .tok-link.tok-string': {
-			opacity: 0.6,
+			opacity: 0.661,
 		},
 
 		// Applying font size changes with CSS rather than the theme below works

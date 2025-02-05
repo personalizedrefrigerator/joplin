@@ -69,8 +69,20 @@ const emptyArray: any[] = [];
 
 const logger = Logger.create('screens/Note');
 
+interface InsertTextOptions {
+	newLine?: boolean;
+}
+
+interface NoteNavigation {
+	// Arguments passed to the NAV_GO action
+	state: {
+		newNoteAttachFileAction?: AttachFileAction;
+	};
+}
+
 interface Props extends BaseProps {
 	provisionalNoteIds: string[];
+	navigation: NoteNavigation;
 	dispatch: Dispatch;
 	noteId: string;
 	useEditorBeta: boolean;
@@ -78,13 +90,13 @@ interface Props extends BaseProps {
 	themeId: number;
 	editorFontSize: number;
 	editorFont: number; // e.g. Setting.FONT_MENLO
+	viewerFontSize: number;
 	showSideMenu: boolean;
 	searchQuery: string;
 	ftsEnabled: number;
 	highlightedWords: string[];
 	noteHash: string;
 	toolbarEnabled: boolean;
-	newNoteAttachFileAction: AttachFileAction;
 }
 
 interface ComponentProps extends Props {
@@ -526,13 +538,14 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 		// been granted, the popup will open anyway.
 		void this.requestGeoLocationPermissions();
 
-		if (this.props.newNoteAttachFileAction) {
+		const action = this.props.navigation.state?.newNoteAttachFileAction;
+		if (action) {
 			setTimeout(async () => {
-				if (this.props.newNoteAttachFileAction === AttachFileAction.AttachDrawing) {
+				if (action === AttachFileAction.AttachDrawing) {
 					await this.drawPicture_onPress();
 				} else {
 					const options: AttachFileOptions = {
-						action: this.props.newNoteAttachFileAction,
+						action: action,
 					};
 					await CommandService.instance().execute('attachFile', '', options);
 				}
@@ -721,20 +734,21 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 		return await saveOriginalImage();
 	}
 
-	private async insertText(text: string) {
+	private async insertText(text: string, { newLine = false }: InsertTextOptions = {}) {
 		const newNote = { ...this.state.note };
+		const separator = newLine ? '\n' : '';
 
 		if (this.state.mode === 'edit') {
 			let newText = '';
 
 			if (this.selection) {
-				newText = `\n${text}\n`;
+				newText = `${separator}${text}${separator}`;
 				const prefix = newNote.body.substring(0, this.selection.start);
 				const suffix = newNote.body.substring(this.selection.end);
 				newNote.body = `${prefix}${newText}${suffix}`;
 			} else {
-				newText = `\n${text}`;
-				newNote.body = `${newNote.body}\n${newText}`;
+				newText = `${separator}${separator}${text}`;
+				newNote.body = `${newNote.body}${newText}`;
 			}
 
 			if (this.useEditorBeta()) {
@@ -747,7 +761,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 				}
 			}
 		} else {
-			newNote.body += `\n${text}`;
+			newNote.body += `${separator}${text}`;
 		}
 
 		this.setState({ note: newNote });
@@ -830,7 +844,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 		resource = await Resource.save(resource, { isNew: true });
 
 		const resourceTag = Resource.markupTag(resource);
-		const newNote = await this.insertText(resourceTag);
+		const newNote = await this.insertText(resourceTag, { newLine: true });
 
 		void this.refreshResource(resource, newNote.body);
 
@@ -850,7 +864,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 
 	private cameraView_onInsertBarcode = (data: string) => {
 		this.setState({ showCamera: false });
-		void this.insertText(data);
+		void this.insertText(data, { newLine: true });
 	};
 
 	private cameraView_onCancel() {
@@ -1454,6 +1468,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 						noteResources={this.state.noteResources}
 						highlightedKeywords={keywords}
 						themeId={this.props.themeId}
+						fontSize={this.props.viewerFontSize}
 						noteHash={this.props.noteHash}
 						onCheckboxChange={this.onBodyViewerCheckboxChange}
 						onMarkForDownload={this.onMarkForDownload}
@@ -1543,7 +1558,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 
 			if (this.state.mode === 'edit') return null;
 
-			return <FloatingActionButton mainButton={editButton} dispatch={this.props.dispatch} />;
+			return <FloatingActionButton mainButton={editButton} />;
 		};
 
 		// Save button is not really needed anymore with the improved save logic
@@ -1625,13 +1640,13 @@ const NoteScreen = connect((state: AppState) => {
 	return {
 		noteId: state.selectedNoteIds.length ? state.selectedNoteIds[0] : null,
 		noteHash: state.selectedNoteHash,
-		newNoteAttachFileAction: state.newNoteAttachFileAction,
 		itemType: state.selectedItemType,
 		folders: state.folders,
 		searchQuery: state.searchQuery,
 		themeId: state.settings.theme,
 		editorFont: state.settings['style.editor.fontFamily'] as number,
 		editorFontSize: state.settings['style.editor.fontSize'],
+		viewerFontSize: state.settings['style.viewer.fontSize'],
 		toolbarEnabled: state.settings['editor.mobile.toolbarEnabled'],
 		ftsEnabled: state.settings['db.ftsEnabled'],
 		sharedData: state.sharedData,

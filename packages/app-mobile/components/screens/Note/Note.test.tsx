@@ -29,14 +29,17 @@ import TestProviderStack from '../../testing/TestProviderStack';
 import setupGlobalStore from '../../../utils/testing/setupGlobalStore';
 import CommandService from '@joplin/lib/services/CommandService';
 
+jest.retryTimes(2);
+
 interface WrapperProps {
 }
 
 let store: Store<AppState>;
 
+const mockNavigation = { state: { } };
 const WrappedNoteScreen: React.FC<WrapperProps> = _props => {
 	return <TestProviderStack store={store}>
-		<NoteScreen />
+		<NoteScreen navigation={mockNavigation}/>
 	</TestProviderStack>;
 };
 

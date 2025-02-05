@@ -23,6 +23,8 @@ const builtInCommandNames = [
 	EditorCommandType.IndentLess,
 	EditorCommandType.IndentMore,
 	'-',
+	'insertDateTime',
+	'-',
 	EditorCommandType.EditLink,
 	'setTags',
 	EditorCommandType.ToggleSearch,

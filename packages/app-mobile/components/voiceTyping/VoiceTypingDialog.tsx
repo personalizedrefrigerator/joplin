@@ -11,6 +11,9 @@ import { AppState } from '../../utils/types';
 import { connect } from 'react-redux';
 import { View, StyleSheet } from 'react-native';
 import AccessibleView from '../accessibility/AccessibleView';
+import Logger from '@joplin/utils/Logger';
+
+const logger = Logger.create('VoiceTypingDialog');
 
 interface Props {
 	locale: string;
@@ -34,10 +37,11 @@ interface UseVoiceTypingProps {
 	onText: OnTextCallback;
 }
 
-const useWhisper = ({ locale, provider, onSetPreview, onText }: UseVoiceTypingProps): [Error | null, boolean, VoiceTypingSession|null] => {
+const useVoiceTyping = ({ locale, provider, onSetPreview, onText }: UseVoiceTypingProps) => {
 	const [voiceTyping, setVoiceTyping] = useState<VoiceTypingSession>(null);
 	const [error, setError] = useState<Error>(null);
 	const [mustDownloadModel, setMustDownloadModel] = useState<boolean | null>(null);
+	const [modelIsOutdated, setModelIsOutdated] = useState(false);
 
 	const onTextRef = useRef(onText);
 	onTextRef.current = onText;
@@ -51,9 +55,20 @@ const useWhisper = ({ locale, provider, onSetPreview, onText }: UseVoiceTypingPr
 		return new VoiceTyping(locale, provider?.startsWith('whisper') ? [whisper] : [vosk]);
 	}, [locale, provider]);
 
+	const [redownloadCounter, setRedownloadCounter] = useState(0);
+
+	useEffect(() => {
+		if (modelIsOutdated) {
+			logger.info('The downloaded version of the model is from an outdated URL.');
+		}
+	}, [modelIsOutdated]);
+
 	useAsyncEffect(async (event: AsyncEffectEvent) => {
 		try {
 			await voiceTypingRef.current?.stop();
+			onSetPreviewRef.current?.('');
+
+			setModelIsOutdated(await builder.isDownloadedFromOutdatedUrl());
 
 			if (!await builder.isDownloaded()) {
 				if (event.cancelled) return;
@@ -72,7 +87,7 @@ const useWhisper = ({ locale, provider, onSetPreview, onText }: UseVoiceTypingPr
 		} finally {
 			setMustDownloadModel(false);
 		}
-	}, [builder]);
+	}, [builder, redownloadCounter]);
 
 	useAsyncEffect(async (_event: AsyncEffectEvent) => {
 		setMustDownloadModel(!(await builder.isDownloaded()));
@@ -82,7 +97,16 @@ const useWhisper = ({ locale, provider, onSetPreview, onText }: UseVoiceTypingPr
 		void voiceTypingRef.current?.stop();
 	}, []);
 
-	return [error, mustDownloadModel, voiceTyping];
+	const onRequestRedownload = useCallback(async () => {
+		await voiceTypingRef.current?.stop();
+		await builder.clearDownloads();
+		setMustDownloadModel(true);
+		setRedownloadCounter(value => value + 1);
+	}, [builder]);
+
+	return {
+		error, mustDownloadModel, voiceTyping, onRequestRedownload, modelIsOutdated,
+	};
 };
 
 const styles = StyleSheet.create({
@@ -112,7 +136,13 @@ const styles = StyleSheet.create({
 const VoiceTypingDialog: React.FC<Props> = props => {
 	const [recorderState, setRecorderState] = useState<RecorderState>(RecorderState.Loading);
 	const [preview, setPreview] = useState<string>('');
-	const [modelError, mustDownloadModel, voiceTyping] = useWhisper({
+	const {
+		error: modelError,
+		mustDownloadModel,
+		voiceTyping,
+		onRequestRedownload,
+		modelIsOutdated,
+	} = useVoiceTyping({
 		locale: props.locale,
 		onSetPreview: setPreview,
 		onText: props.onText,
@@ -172,6 +202,11 @@ const VoiceTypingDialog: React.FC<Props> = props => {
 		return <Text variant='labelSmall'>{preview}</Text>;
 	};
 
+	const reDownloadButton = <Button onPress={onRequestRedownload}>
+		{modelIsOutdated ? _('Download updated model') : _('Re-download model')}
+	</Button>;
+	const allowReDownload = recorderState === RecorderState.Error || modelIsOutdated;
+
 	return (
 		<Surface>
 			<View style={styles.container}>
@@ -203,6 +238,7 @@ const VoiceTypingDialog: React.FC<Props> = props => {
 					</View>
 				</View>
 				<View style={styles.actionContainer}>
+					{allowReDownload ? reDownloadButton : null}
 					<Button
 						onPress={onDismiss}
 						accessibilityHint={_('Ends voice typing')}

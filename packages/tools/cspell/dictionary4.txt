@@ -156,3 +156,8 @@ Edubirdie
 Useviral
 ldaps
 Bluesky
+Tebi
+unwatcher
+pedr
+Slotozilla
+keyshortcuts

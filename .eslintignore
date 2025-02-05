@@ -170,6 +170,7 @@ packages/app-desktop/commands/switchProfile2.js
 packages/app-desktop/commands/switchProfile3.js
 packages/app-desktop/commands/toggleExternalEditing.js
 packages/app-desktop/commands/toggleSafeMode.js
+packages/app-desktop/commands/toggleTabMovesFocus.js
 packages/app-desktop/gui/Button/Button.js
 packages/app-desktop/gui/ClipperConfigScreen.js
 packages/app-desktop/gui/ConfigScreen/ButtonBar.js
@@ -249,13 +250,15 @@ packages/app-desktop/gui/NoteEditor/NoteBody/CodeMirror/v6/utils/useRefocusOnVis
 packages/app-desktop/gui/NoteEditor/NoteBody/PlainEditor/PlainEditor.js
 packages/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/TinyMCE.js
 packages/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/styles/index.js
+packages/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/utils/enableTextAreaTab.js
 packages/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/utils/joplinCommandToTinyMceCommands.js
-packages/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/utils/openEditDialog.js
 packages/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/utils/setupToolbarButtons.js
 packages/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/utils/shouldPasteResources.test.js
 packages/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/utils/shouldPasteResources.js
 packages/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/utils/types.js
 packages/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/utils/useContextMenu.js
+packages/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/utils/useEditDialog.js
+packages/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/utils/useEditDialogEventListeners.js
 packages/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/utils/useKeyboardRefocusHandler.js
 packages/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/utils/useLinkTooltips.js
 packages/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/utils/useScroll.js
@@ -263,6 +266,7 @@ packages/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/utils/useTabIndenter.js
 packages/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/utils/useWebViewApi.js
 packages/app-desktop/gui/NoteEditor/NoteEditor.js
 packages/app-desktop/gui/NoteEditor/NoteTitle/NoteTitleBar.js
+packages/app-desktop/gui/NoteEditor/StatusBar.js
 packages/app-desktop/gui/NoteEditor/WarningBanner/BannerContent.js
 packages/app-desktop/gui/NoteEditor/WarningBanner/WarningBanner.js
 packages/app-desktop/gui/NoteEditor/commands/focusElementNoteBody.js
@@ -289,12 +293,12 @@ packages/app-desktop/gui/NoteEditor/utils/useEffectiveNoteId.js
 packages/app-desktop/gui/NoteEditor/utils/useFolder.js
 packages/app-desktop/gui/NoteEditor/utils/useFormNote.test.js
 packages/app-desktop/gui/NoteEditor/utils/useFormNote.js
-packages/app-desktop/gui/NoteEditor/utils/useMarkupToHtml.js
 packages/app-desktop/gui/NoteEditor/utils/useMessageHandler.js
 packages/app-desktop/gui/NoteEditor/utils/useNoteSearchBar.js
 packages/app-desktop/gui/NoteEditor/utils/usePluginEditorView.test.js
 packages/app-desktop/gui/NoteEditor/utils/usePluginEditorView.js
 packages/app-desktop/gui/NoteEditor/utils/usePluginServiceRegistration.js
+packages/app-desktop/gui/NoteEditor/utils/useResourceUnwatcher.js
 packages/app-desktop/gui/NoteEditor/utils/useScheduleSaveCallbacks.js
 packages/app-desktop/gui/NoteEditor/utils/useScrollWhenReadyOptions.js
 packages/app-desktop/gui/NoteEditor/utils/useSearchMarkers.js
@@ -312,6 +316,7 @@ packages/app-desktop/gui/NoteList/utils/useItemCss.js
 packages/app-desktop/gui/NoteList/utils/useMoveNote.js
 packages/app-desktop/gui/NoteList/utils/useOnKeyDown.js
 packages/app-desktop/gui/NoteList/utils/useOnNoteClick.js
+packages/app-desktop/gui/NoteList/utils/useOnNoteDoubleClick.js
 packages/app-desktop/gui/NoteList/utils/useScroll.js
 packages/app-desktop/gui/NoteList/utils/useVisibleRange.test.js
 packages/app-desktop/gui/NoteList/utils/useVisibleRange.js
@@ -352,7 +357,9 @@ packages/app-desktop/gui/PasswordInput/LabelledPasswordInput.js
 packages/app-desktop/gui/PasswordInput/PasswordInput.js
 packages/app-desktop/gui/PasswordInput/types.js
 packages/app-desktop/gui/PdfViewer.js
+packages/app-desktop/gui/PluginNotification/PluginNotification.js
 packages/app-desktop/gui/PromptDialog.js
+packages/app-desktop/gui/ResizableLayout/LayoutItemContainer.js
 packages/app-desktop/gui/ResizableLayout/MoveButtons.js
 packages/app-desktop/gui/ResizableLayout/ResizableLayout.js
 packages/app-desktop/gui/ResizableLayout/utils/findItemByKey.js
@@ -478,6 +485,7 @@ packages/app-desktop/gui/hooks/useDocument.js
 packages/app-desktop/gui/hooks/useEffectDebugger.js
 packages/app-desktop/gui/hooks/useElementHeight.js
 packages/app-desktop/gui/hooks/useImperativeHandlerDebugger.js
+packages/app-desktop/gui/hooks/useMarkupToHtml.js
 packages/app-desktop/gui/hooks/usePrevious.js
 packages/app-desktop/gui/hooks/usePropsDebugger.js
 packages/app-desktop/gui/lib/SearchInput/SearchInput.js
@@ -488,6 +496,7 @@ packages/app-desktop/gui/style/StyledInput.js
 packages/app-desktop/gui/style/StyledLink.js
 packages/app-desktop/gui/style/StyledMessage.js
 packages/app-desktop/gui/style/StyledTextInput.js
+packages/app-desktop/gui/utils/NoteListUtils.test.js
 packages/app-desktop/gui/utils/NoteListUtils.js
 packages/app-desktop/gui/utils/announceForAccessibility.js
 packages/app-desktop/gui/utils/convertToScreenCoordinates.js
@@ -497,6 +506,8 @@ packages/app-desktop/gulpfile.js
 packages/app-desktop/integration-tests/goToAnything.spec.js
 packages/app-desktop/integration-tests/main.spec.js
 packages/app-desktop/integration-tests/markdownEditor.spec.js
+packages/app-desktop/integration-tests/models/ChangeAppLayoutScreen.js
+packages/app-desktop/integration-tests/models/EditorCodeDialog.js
 packages/app-desktop/integration-tests/models/GoToAnything.js
 packages/app-desktop/integration-tests/models/MainScreen.js
 packages/app-desktop/integration-tests/models/NoteEditorScreen.js
@@ -505,6 +516,7 @@ packages/app-desktop/integration-tests/models/SettingsScreen.js
 packages/app-desktop/integration-tests/models/Sidebar.js
 packages/app-desktop/integration-tests/noteList.spec.js
 packages/app-desktop/integration-tests/pluginApi.spec.js
+packages/app-desktop/integration-tests/resizableLayout.spec.js
 packages/app-desktop/integration-tests/richTextEditor.spec.js
 packages/app-desktop/integration-tests/settings.spec.js
 packages/app-desktop/integration-tests/sidebar.spec.js
@@ -561,6 +573,7 @@ packages/app-desktop/utils/customProtocols/constants.js
 packages/app-desktop/utils/customProtocols/handleCustomProtocols.test.js
 packages/app-desktop/utils/customProtocols/handleCustomProtocols.js
 packages/app-desktop/utils/customProtocols/registerCustomProtocols.js
+packages/app-desktop/utils/initializeCommandService.js
 packages/app-desktop/utils/isSafeToOpen.test.js
 packages/app-desktop/utils/isSafeToOpen.js
 packages/app-desktop/utils/restartInSafeModeFromMain.test.js
@@ -639,10 +652,12 @@ packages/app-mobile/components/NoteEditor/ImageEditor/isEditableResource.js
 packages/app-mobile/components/NoteEditor/ImageEditor/js-draw/applyTemplateToEditor.js
 packages/app-mobile/components/NoteEditor/ImageEditor/js-draw/createJsDrawEditor.test.js
 packages/app-mobile/components/NoteEditor/ImageEditor/js-draw/createJsDrawEditor.js
+packages/app-mobile/components/NoteEditor/ImageEditor/js-draw/polyfills.js
 packages/app-mobile/components/NoteEditor/ImageEditor/js-draw/startAutosaveLoop.js
 packages/app-mobile/components/NoteEditor/ImageEditor/js-draw/types.js
 packages/app-mobile/components/NoteEditor/ImageEditor/js-draw/watchEditorForTemplateChanges.js
 packages/app-mobile/components/NoteEditor/ImageEditor/promptRestoreAutosave.js
+packages/app-mobile/components/NoteEditor/ImageEditor/utils/useEditorMessenger.js
 packages/app-mobile/components/NoteEditor/NoteEditor.test.js
 packages/app-mobile/components/NoteEditor/NoteEditor.js
 packages/app-mobile/components/NoteEditor/SearchPanel.js
@@ -663,11 +678,9 @@ packages/app-mobile/components/ScreenHeader/WarningBox.js
 packages/app-mobile/components/ScreenHeader/WebBetaButton.js
 packages/app-mobile/components/ScreenHeader/index.js
 packages/app-mobile/components/SelectDateTimeDialog.js
-packages/app-mobile/components/SideMenu.js
 packages/app-mobile/components/SideMenuContentNote.js
 packages/app-mobile/components/TextInput.js
 packages/app-mobile/components/ToggleSpaceButton.js
-packages/app-mobile/components/accessibility/AccessibleModalMenu.js
 packages/app-mobile/components/accessibility/AccessibleView.js
 packages/app-mobile/components/app-nav.js
 packages/app-mobile/components/base-screen.js
@@ -675,6 +688,7 @@ packages/app-mobile/components/biometrics/BiometricPopup.js
 packages/app-mobile/components/biometrics/biometricAuthenticate.js
 packages/app-mobile/components/biometrics/sensorInfo.js
 packages/app-mobile/components/buttons/FloatingActionButton.js
+packages/app-mobile/components/buttons/LabelledIconButton.js
 packages/app-mobile/components/buttons/TextButton.js
 packages/app-mobile/components/buttons/index.js
 packages/app-mobile/components/getResponsiveValue.test.js
@@ -756,11 +770,13 @@ packages/app-mobile/components/screens/Note/Note.js
 packages/app-mobile/components/screens/Note/commands/attachFile.js
 packages/app-mobile/components/screens/Note/commands/hideKeyboard.js
 packages/app-mobile/components/screens/Note/commands/index.js
+packages/app-mobile/components/screens/Note/commands/insertDateTime.js
 packages/app-mobile/components/screens/Note/commands/setTags.js
 packages/app-mobile/components/screens/Note/commands/toggleVisiblePanes.js
 packages/app-mobile/components/screens/Note/types.js
 packages/app-mobile/components/screens/NoteTagsDialog.js
-packages/app-mobile/components/screens/Notes.js
+packages/app-mobile/components/screens/Notes/NewNoteButton.js
+packages/app-mobile/components/screens/Notes/Notes.js
 packages/app-mobile/components/screens/SearchScreen/SearchResults.js
 packages/app-mobile/components/screens/SearchScreen/index.js
 packages/app-mobile/components/screens/ShareManager/AcceptedShareItem.js
@@ -773,6 +789,9 @@ packages/app-mobile/components/screens/encryption-config.js
 packages/app-mobile/components/screens/status.js
 packages/app-mobile/components/screens/tags.js
 packages/app-mobile/components/side-menu-content.js
+packages/app-mobile/components/sidebar/AppSideMenu.js
+packages/app-mobile/components/sidebar/BottomDrawer.js
+packages/app-mobile/components/sidebar/SideMenu.js
 packages/app-mobile/components/testing/TestProviderStack.js
 packages/app-mobile/components/voiceTyping/VoiceTypingDialog.js
 packages/app-mobile/gulpfile.js

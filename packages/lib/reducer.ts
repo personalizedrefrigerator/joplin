@@ -13,6 +13,7 @@ import { ProcessResultsRow } from './services/search/SearchEngine';
 import { getDisplayParentId } from './services/trash';
 import Logger from '@joplin/utils/Logger';
 import { SettingsRecord } from './models/settings/types';
+import { Toast, ToastType } from './services/plugins/api/types';
 const fastDeepEqual = require('fast-deep-equal');
 const { ALL_NOTES_FILTER_ID } = require('./reserved-ids');
 const { createSelectorCreator, defaultMemoize } = require('reselect');
@@ -168,6 +169,7 @@ export interface State extends WindowState {
 	lastDeletionNotificationTime: number;
 	mustUpgradeAppMessage: string;
 	mustAuthenticate: boolean;
+	toast: Toast | null;
 
 	allowSelectionInOtherFolders: boolean;
 
@@ -242,6 +244,7 @@ export const defaultState: State = {
 
 	pluginService: pluginServiceDefaultState,
 	shareService: shareServiceDefaultState,
+	toast: null,
 };
 
 for (const additionalReducer of additionalReducers) {
@@ -899,6 +902,27 @@ type WindowAction = {
 };
 
 const handleWindowActions = (draft: Draft<State>, action: WindowAction) => {
+	const handleFocus = (windowId: string) => {
+		// Only allow bringing a background window to the foreground
+		if (draft.windowId !== windowId) {
+			const previousWindowId = draft.windowId;
+
+			const focusingWindowState = draft.backgroundWindows[windowId];
+			const previousWindowState = { ...defaultWindowState };
+
+			for (const key of Object.keys(focusingWindowState)) {
+				const stateKey = key as keyof WindowState;
+
+				type AssignableWindowState = Record<keyof WindowState, unknown>;
+				(previousWindowState as AssignableWindowState)[stateKey] = draft[stateKey];
+				(draft as AssignableWindowState)[stateKey] = focusingWindowState[stateKey];
+			}
+
+			delete draft.backgroundWindows[windowId];
+			draft.backgroundWindows[previousWindowId] = previousWindowState;
+		}
+	};
+
 	switch (action.type) {
 
 	case 'WINDOW_OPEN': {
@@ -923,29 +947,15 @@ const handleWindowActions = (draft: Draft<State>, action: WindowAction) => {
 		};
 		break;
 	}
-	case 'WINDOW_FOCUS': {
-		// Only allow bringing a background window to the foreground
-		if (draft.windowId !== action.windowId) {
-			const windowId = action.windowId;
-			const previousWindowId = draft.windowId;
-
-			const focusingWindowState = draft.backgroundWindows[windowId];
-			const previousWindowState = { ...defaultWindowState };
-
-			for (const key of Object.keys(focusingWindowState)) {
-				const stateKey = key as keyof WindowState;
-
-				type AssignableWindowState = Record<keyof WindowState, unknown>;
-				(previousWindowState as AssignableWindowState)[stateKey] = draft[stateKey];
-				(draft as AssignableWindowState)[stateKey] = focusingWindowState[stateKey];
-			}
-
-			delete draft.backgroundWindows[windowId];
-			draft.backgroundWindows[previousWindowId] = previousWindowState;
-		}
+	case 'WINDOW_FOCUS':
+		handleFocus(action.windowId);
 		break;
-	}
 	case 'WINDOW_CLOSE': {
+		const isFocusedWindow = draft.windowId === action.windowId;
+		if (isFocusedWindow) {
+			const firstBackgroundWindow = Object.keys(draft.backgroundWindows)[0];
+			handleFocus(firstBackgroundWindow);
+		}
 		delete draft.backgroundWindows[action.windowId];
 		break;
 	}
@@ -1500,6 +1510,15 @@ const reducer = produce((draft: Draft<State> = defaultState, action: any) => {
 				noteListRendererIds.push(action.value);
 				draft.noteListRendererIds = noteListRendererIds;
 			}
+			break;
+
+		case 'TOAST_SHOW':
+			draft.toast = {
+				duration: 6000,
+				type: ToastType.Info,
+				...action.value,
+				timestamp: Date.now(),
+			};
 			break;
 
 		}

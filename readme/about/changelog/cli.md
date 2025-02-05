@@ -1,5 +1,10 @@
 # Joplin Terminal App Changelog
 
+## [cli-v3.2.3](https://github.com/laurent22/joplin/releases/tag/cli-v3.2.3) - 2025-01-16T01:14:35Z
+
+- Improved: Updated packages @rollup/plugin-node-resolve (v15.2.4), adm-zip (v0.5.16)
+- Fixed: Revert deprecation warning suppression (#11620) (#11577 by [@pedr](https://github.com/pedr))
+
 ## [cli-v3.2.2](https://github.com/laurent22/joplin/releases/tag/cli-v3.2.2) - 2024-12-12T15:44:50Z
 
 - Improved: Make Sharp package optional (388d124)

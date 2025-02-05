@@ -55,7 +55,7 @@ import Revision from '@joplin/lib/models/Revision';
 import RevisionService from '@joplin/lib/services/RevisionService';
 import JoplinDatabase from '@joplin/lib/JoplinDatabase';
 import Database from '@joplin/lib/database';
-import NotesScreen from './components/screens/Notes';
+import NotesScreen from './components/screens/Notes/Notes';
 import TagsScreen from './components/screens/tags';
 import ConfigScreen from './components/screens/ConfigScreen/ConfigScreen';
 const { FolderScreen } = require('./components/screens/folder.js');
@@ -66,7 +66,6 @@ const { OneDriveLoginScreen } = require('./components/screens/onedrive-login.js'
 import EncryptionConfigScreen from './components/screens/encryption-config';
 import DropboxLoginScreen from './components/screens/dropbox-login.js';
 import { MenuProvider } from 'react-native-popup-menu';
-import SideMenu, { SideMenuPosition } from './components/SideMenu';
 import SideMenuContent from './components/side-menu-content';
 import SideMenuContentNote from './components/SideMenuContentNote';
 import { reg } from '@joplin/lib/registry';
@@ -139,6 +138,8 @@ import DialogManager from './components/DialogManager';
 import lockToSingleInstance from './utils/lockToSingleInstance';
 import { AppState } from './utils/types';
 import { getDisplayParentId } from '@joplin/lib/services/trash';
+import AppSideMenu from './components/sidebar/AppSideMenu';
+import { SideMenuPosition } from './components/sidebar/SideMenu';
 
 const logger = Logger.create('root');
 
@@ -352,10 +353,6 @@ const appReducer = (state = appDefaultState, action: any) => {
 
 				if ('noteHash' in action) {
 					newState.selectedNoteHash = action.noteHash;
-				}
-
-				if ('newNoteAttachFileAction' in action) {
-					newState.newNoteAttachFileAction = action.newNoteAttachFileAction;
 				}
 
 				if ('sharedData' in action) {
@@ -1257,12 +1254,12 @@ class AppComponent extends React.Component {
 		let disableSideMenuGestures = this.props.disableSideMenuGestures;
 
 		if (this.props.routeName === 'Note') {
-			sideMenuContent = <SafeAreaView style={{ flex: 1, backgroundColor: theme.backgroundColor }}><SideMenuContentNote options={this.props.noteSideMenuOptions}/></SafeAreaView>;
+			sideMenuContent = <SafeAreaView style={{ flex: 1 }}><SideMenuContentNote options={this.props.noteSideMenuOptions}/></SafeAreaView>;
 			menuPosition = SideMenuPosition.Right;
 		} else if (this.props.routeName === 'Config') {
 			disableSideMenuGestures = true;
 		} else {
-			sideMenuContent = <SafeAreaView style={{ flex: 1, backgroundColor: theme.backgroundColor }}><SideMenuContent/></SafeAreaView>;
+			sideMenuContent = <SafeAreaView style={{ flex: 1 }}><SideMenuContent/></SafeAreaView>;
 		}
 
 		const appNavInit = {
@@ -1295,20 +1292,10 @@ class AppComponent extends React.Component {
 		logger.info('root.biometrics: shouldShowMainContent', shouldShowMainContent);
 		logger.info('root.biometrics: this.state.sensorInfo', this.state.sensorInfo);
 
-		// The right sidemenu can be difficult to close due to a bug in the sidemenu
-		// library (right sidemenus can't be swiped closed).
-		//
-		// Additionally, it can interfere with scrolling in the note viewer, so we use
-		// a smaller edge hit width.
-		const menuEdgeHitWidth = menuPosition === 'right' ? 20 : 30;
-
 		const mainContent = (
 			<View style={{ flex: 1, backgroundColor: theme.backgroundColor }}>
-				<SideMenu
+				<AppSideMenu
 					menu={sideMenuContent}
-					edgeHitWidth={menuEdgeHitWidth}
-					toleranceX={4}
-					toleranceY={20}
 					openMenuOffset={this.state.sideMenuWidth}
 					menuPosition={menuPosition}
 					onChange={(isOpen: boolean) => this.sideMenu_change(isOpen)}
@@ -1330,7 +1317,7 @@ class AppComponent extends React.Component {
 							/> }
 						</SafeAreaView>
 					</MenuProvider>
-				</SideMenu>
+				</AppSideMenu>
 				<PluginRunnerWebView />
 			</View>
 		);

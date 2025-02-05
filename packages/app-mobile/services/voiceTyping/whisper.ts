@@ -106,6 +106,10 @@ const whisper: VoiceTypingProvider = {
 
 		return urlTemplate.replace(/\{task\}/g, 'whisper_tiny.onnx');
 	},
+	deleteCachedModels: async (locale) => {
+		await shim.fsDriver().remove(modelLocalFilepath());
+		await shim.fsDriver().remove(whisper.getUuidPath(locale));
+	},
 	getUuidPath: () => {
 		return join(dirname(modelLocalFilepath()), 'uuid');
 	},

@@ -1,4 +1,4 @@
-#!/usr/bin/env -S NODE_OPTIONS=--no-deprecation node
+#!/usr/bin/env node
 
 // Use njstrace to find out what Node.js might be spending time on
 // var njstrace = require('njstrace').inject();
