@@ -289,7 +289,7 @@ const usePanResponder = ({
 const useSizes = (isVerticalMenu: boolean, openMenuOffset: number) => {
 	const [contentSize, setContentSize] = useState(0);
 
-	const onLayoutChange = useCallback((e: LayoutChangeEvent) => {
+	const onContainerLayout = useCallback((e: LayoutChangeEvent) => {
 		const { width, height } = e.nativeEvent.layout;
 		// Get the size along the drag axis
 		const newContentSize = isVerticalMenu ? height : width;
@@ -300,12 +300,13 @@ const useSizes = (isVerticalMenu: boolean, openMenuOffset: number) => {
 	const menuSize = useMemo(() => {
 		const windowSize = isVerticalMenu ? windowHeight : windowWidth;
 
-		const openMenuOffsetPercentage = openMenuOffset / windowSize;
-		return Math.floor(contentSize * openMenuOffsetPercentage);
+		const maximumOffsetFraction = 1;
+		const openMenuOffsetFraction = Math.min(openMenuOffset / windowSize, maximumOffsetFraction);
+		return Math.floor(contentSize * openMenuOffsetFraction);
 	}, [windowWidth, windowHeight, contentSize, openMenuOffset, isVerticalMenu]);
 
 	// menuSize: The size of the menu along the drag axis. In left/right mode, this is the width.
-	return { menuSize, onLayoutChange, contentSize };
+	return { menuSize, onContainerLayout, contentSize };
 };
 
 const SideMenu: React.FC<Props> = props => {
@@ -322,7 +323,7 @@ const SideMenu: React.FC<Props> = props => {
 	const isRightMenu = !isLeftMenu && !isBottomMenu;
 	const isVerticalMenu = isBottomMenu;
 
-	const { menuSize, contentSize, onLayoutChange } = useSizes(isVerticalMenu, props.openMenuOffset);
+	const { menuSize, contentSize, onContainerLayout } = useSizes(isVerticalMenu, props.openMenuOffset);
 
 	const { animating, setIsAnimating, menuDragOffset, updateMenuPosition, menuOpenFraction } = useAnimations({
 		isLeftMenu, menuSize, open,
@@ -408,7 +409,7 @@ const SideMenu: React.FC<Props> = props => {
 
 	return (
 		<View
-			onLayout={onLayoutChange}
+			onLayout={onContainerLayout}
 			style={styles.mainContainer}
 			{...panResponder.panHandlers}
 			testID='menu-container'
