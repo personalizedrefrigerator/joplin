@@ -3,6 +3,7 @@ import { AppState } from '../../utils/types';
 import { connect } from 'react-redux';
 import { themeStyle } from '../global-style';
 import SideMenu, { OnChangeCallback, SideMenuPosition } from './SideMenu';
+import { _ } from '@joplin/lib/locale';
 
 interface Props {
 	themeId: number;
@@ -21,6 +22,7 @@ const AppSideMenu: React.FC<Props> = props => {
 	const theme = themeStyle(props.themeId);
 
 	return <SideMenu
+		label={_('Side menu')}
 		overlayColor={theme.colorFaded}
 		menuStyle={{ backgroundColor: theme.backgroundColor }}
 		isOpen={props.open}

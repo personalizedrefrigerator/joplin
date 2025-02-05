@@ -16,6 +16,7 @@ export type OnChangeCallback = (isOpen: boolean)=> void;
 interface Props {
 	isOpen: boolean;
 
+	label: string;
 	menu: React.ReactNode;
 	children: React.ReactNode|React.ReactNode[];
 	overlayColor: string;
@@ -38,10 +39,12 @@ interface UseStylesProps {
 const useStyles = ({ overlayColor, isLeftMenu, isVerticalMenu, menuSize, menuOpenFraction }: UseStylesProps) => {
 	const { height: windowHeight, width: windowWidth } = useWindowDimensions();
 	return useMemo(() => {
+		// For horizontal non-overlay menus
 		const contentTranslateX = !isVerticalMenu ? menuOpenFraction.interpolate({
 			inputRange: [0, 1],
 			outputRange: [0, isLeftMenu ? menuSize : -menuSize],
 		}) : 0;
+		// For vertical overlay menus
 		const menuTranslateY = isVerticalMenu ? menuOpenFraction.interpolate({
 			inputRange: [0, 1],
 			outputRange: [menuSize, 0],
@@ -56,11 +59,12 @@ const useStyles = ({ overlayColor, isLeftMenu, isVerticalMenu, menuSize, menuOpe
 				flexGrow: 1,
 				flexShrink: 1,
 			},
-			contentOuterWrapper: {
+			contentAndCloseButtonWrapper: {
 				flexGrow: 1,
 				flexShrink: 1,
 				width: windowWidth,
 				height: windowHeight,
+
 				transform: [
 					{ translateX: contentTranslateX },
 					// The RN Animation docs suggests setting "perspective" while setting other transform styles:
@@ -80,15 +84,10 @@ const useStyles = ({ overlayColor, isLeftMenu, isVerticalMenu, menuSize, menuOpe
 				...(isVerticalMenu ? {
 					left: 0,
 					right: 0,
-					transform: [
-						{ translateY: menuTranslateY },
-						{ perspective: 1000 },
-					],
 				} : {
 					top: 0,
 					width: menuSize,
 				}),
-				overflow: 'hidden',
 
 				// In React Native, RTL replaces `left` with `right` and `right` with `left`.
 				// As such, we need to reverse the normal direction in RTL mode.
@@ -97,6 +96,12 @@ const useStyles = ({ overlayColor, isLeftMenu, isVerticalMenu, menuSize, menuOpe
 				} : {
 					right: 0,
 				}),
+
+				overflow: 'hidden',
+				transform: [
+					{ translateY: menuTranslateY },
+					{ perspective: 1000 },
+				],
 			},
 			menuContent: {
 				flex: 1,
@@ -221,32 +226,36 @@ const usePanResponder = ({
 		const toleranceY = 20;
 		const edgeHitWidth = 20;
 
+		const pointIsInsideMenu = (x: number, y: number, padding: number) => {
+			const menuLayout = menuLayoutRef.current;
+			const centerX = menuLayout.x + menuLayout.width / 2;
+			const centerY = menuLayout.y + menuLayout.height / 2;
+			const distX = Math.abs(x - centerX);
+			const distY = Math.abs(y - centerY);
+			const insideMenuX = distX <= menuLayout.width / 2 + padding;
+			const insideMenuY = distY <= menuLayout.height / 2 + padding;
+
+			return insideMenuX && insideMenuY;
+		};
+
 		return PanResponder.create({
 			onMoveShouldSetPanResponderCapture: (_event, gestureState) => {
 				if (disableGestures) {
 					return false;
 				}
 
-				const menuLayout = menuLayoutRef.current;
-				if (open) {
-					const centerX = menuLayout.x + menuLayout.width / 2;
-					const centerY = menuLayout.y + menuLayout.height / 2;
-					const distX = Math.abs(gestureState.moveX - centerX);
-					const distY = Math.abs(gestureState.moveY - centerY);
-					const withinMenu = distX < menuLayout.width / 2 - edgeHitWidth && distY < menuLayout.height / 2 - edgeHitWidth;
-					if (withinMenu) {
-						return false;
-					}
+				// Untransformed start position of the gesture -- moveX is the current position of
+				// the pointer. Subtracting dx gives us the original start position.
+				const gestureStartScreenX = gestureState.moveX - gestureState.dx;
+				const gestureStartScreenY = gestureState.moveY - gestureState.dy;
+
+				if (pointIsInsideMenu(gestureStartScreenX, gestureStartScreenY, -edgeHitWidth)) {
+					return false;
 				}
 
 				let startX;
 				let dx;
 				const dy = isVerticalMenu ? gestureState.dx : gestureState.dy;
-
-				// Untransformed start position of the gesture -- moveX is the current position of
-				// the pointer. Subtracting dx gives us the original start position.
-				const gestureStartScreenX = gestureState.moveX - gestureState.dx;
-				const gestureStartScreenY = gestureState.moveY - gestureState.dy;
 
 				// Transform x, dx such that they are relative to the target screen edge -- this simplifies later
 				// math.
@@ -360,13 +369,16 @@ const SideMenu: React.FC<Props> = props => {
 		setIsOpen,
 		updateMenuPosition,
 	});
+
+	const labelRef = useRef(props.label);
+	labelRef.current = props.label;
 	const onChangeRef = useRef(props.onChange);
 	onChangeRef.current = props.onChange;
 	useEffect(() => {
 		onChangeRef.current(open);
 
 		AccessibilityInfo.announceForAccessibility(
-			open ? _('Side menu opened') : _('Side menu closed'),
+			open ? _('%s opened', labelRef.current) : _('%s closed', labelRef.current),
 		);
 	}, [open]);
 
@@ -379,7 +391,11 @@ const SideMenu: React.FC<Props> = props => {
 	const styles = useStyles({ overlayColor: props.overlayColor, menuOpenFraction, menuSize, isLeftMenu, isVerticalMenu });
 
 	const menuComponent = (
-		<Animated.View style={[styles.menuWrapper, props.menuStyle]} onLayout={onMenuLayout} key='menu'>
+		<Animated.View
+			style={[styles.menuWrapper, props.menuStyle]}
+			onLayout={onMenuLayout}
+			key='menu'
+		>
 			<AccessibleView
 				inert={!open}
 				style={styles.menuContent}
@@ -411,15 +427,18 @@ const SideMenu: React.FC<Props> = props => {
 			style={styles.closeButtonOverlay}
 		>
 			<Pressable
-				aria-label={_('Close side menu')}
+				aria-label={_('Close %s', props.label)}
 				role='button'
 				onPress={onCloseButtonPress}
 				style={styles.overlayContent}
-			></Pressable>
+			/>
 		</Animated.View>
 	) : null;
 
-	const contentAndCloseButton = <Animated.View style={styles.contentOuterWrapper} key='menu-content-wrapper'>
+	const contentAndCloseButton = <Animated.View
+		style={styles.contentAndCloseButtonWrapper}
+		key='menu-content-wrapper'
+	>
 		{contentComponent}
 		{closeButtonOverlay}
 	</Animated.View>;
