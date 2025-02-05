@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { RefObject, useCallback, useMemo, useRef } from 'react';
-import { GestureResponderEvent, Modal, ModalProps, ScrollView, StyleSheet, View, ViewStyle, useWindowDimensions } from 'react-native';
-import { hasNotch } from 'react-native-device-info';
+import { GestureResponderEvent, Modal, ModalProps, ScrollView, StyleSheet, View, ViewStyle } from 'react-native';
+import useSafeAreaPadding from '../utils/hooks/useSafeAreaPadding';
 
 interface ModalElementProps extends ModalProps {
 	children: React.ReactNode;
@@ -16,21 +16,11 @@ interface ModalElementProps extends ModalProps {
 }
 
 const useStyles = (hasScrollView: boolean, backgroundColor: string|undefined) => {
-	const { width: windowWidth, height: windowHeight } = useWindowDimensions();
-	const isLandscape = windowWidth > windowHeight;
+	const safeAreaPadding = useSafeAreaPadding();
 	return useMemo(() => {
-		const backgroundPadding: ViewStyle = isLandscape ? {
-			paddingRight: hasNotch() ? 60 : 0,
-			paddingLeft: hasNotch() ? 60 : 0,
-			paddingTop: 15,
-			paddingBottom: 15,
-		} : {
-			paddingTop: hasNotch() ? 65 : 15,
-			paddingBottom: hasNotch() ? 35 : 15,
-		};
 		return StyleSheet.create({
 			modalBackground: {
-				...backgroundPadding,
+				...safeAreaPadding,
 				flexGrow: 1,
 				flexShrink: 1,
 
@@ -51,7 +41,7 @@ const useStyles = (hasScrollView: boolean, backgroundColor: string|undefined) =>
 				flexGrow: 1,
 			},
 		});
-	}, [hasScrollView, isLandscape, backgroundColor]);
+	}, [hasScrollView, safeAreaPadding, backgroundColor]);
 };
 
 const useBackgroundTouchListeners = (onRequestClose: (event: GestureResponderEvent)=> void, backdropRef: RefObject<View>) => {

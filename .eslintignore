@@ -846,6 +846,7 @@ packages/app-mobile/utils/getVersionInfoText.js
 packages/app-mobile/utils/hooks/useKeyboardVisible.js
 packages/app-mobile/utils/hooks/useOnLongPressProps.js
 packages/app-mobile/utils/hooks/useReduceMotionEnabled.js
+packages/app-mobile/utils/hooks/useSafeAreaPadding.js
 packages/app-mobile/utils/image/fileToImage.web.js
 packages/app-mobile/utils/image/getImageDimensions.js
 packages/app-mobile/utils/image/resizeImage.js

@@ -6,6 +6,7 @@ import { LayoutChangeEvent, ScrollView, StyleSheet, View } from 'react-native';
 import { ThemeStyle, themeStyle } from '../global-style';
 import { connect } from 'react-redux';
 import { AppState } from '../../utils/types';
+import useSafeAreaPadding from '../../utils/hooks/useSafeAreaPadding';
 
 interface Props {
 	themeId: number;
@@ -15,6 +16,7 @@ interface Props {
 }
 
 const useStyles = (theme: ThemeStyle) => {
+	const safeAreaPadding = useSafeAreaPadding();
 	return useMemo(() => {
 		return StyleSheet.create({
 			scrollingContainer: {
@@ -29,7 +31,9 @@ const useStyles = (theme: ThemeStyle) => {
 				alignSelf: 'center',
 				left: 'auto',
 				right: 0,
-				paddingHorizontal: 6,
+				paddingRight: safeAreaPadding.paddingRight + 6,
+				paddingLeft: safeAreaPadding.paddingLeft + 6,
+				paddingBottom: 0,
 			},
 			contentContainer: {
 				padding: 20,
@@ -44,7 +48,7 @@ const useStyles = (theme: ThemeStyle) => {
 				paddingBottom: 0,
 			},
 		});
-	}, [theme]);
+	}, [theme, safeAreaPadding]);
 };
 
 const BottomDrawer: React.FC<Props> = props => {
