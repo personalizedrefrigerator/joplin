@@ -20,7 +20,7 @@ const useStyles = (theme: ThemeStyle) => {
 			scrollingContainer: {
 				flex: 1,
 				backgroundColor: theme.backgroundColor,
-				borderRadius: 10,
+				borderRadius: 16,
 				borderBottomRightRadius: 0,
 				borderBottomLeftRadius: 0,
 				maxWidth: 400,
@@ -28,12 +28,14 @@ const useStyles = (theme: ThemeStyle) => {
 			menuStyle: {
 				alignSelf: 'center',
 				left: 'auto',
-				right: 'auto',
+				right: 0,
+				paddingHorizontal: 6,
 			},
 			contentContainer: {
 				padding: 20,
 				gap: 8,
 				flexDirection: 'row',
+				flexWrap: 'wrap',
 			},
 			modalBackground: {
 				paddingTop: 0,
