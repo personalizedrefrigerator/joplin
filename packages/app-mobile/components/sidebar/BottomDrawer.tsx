@@ -6,6 +6,7 @@ import { LayoutChangeEvent, ScrollView, StyleSheet, View } from 'react-native';
 import { ThemeStyle, themeStyle } from '../global-style';
 import { connect } from 'react-redux';
 import { AppState } from '../../utils/types';
+import { _ } from '@joplin/lib/locale';
 
 interface Props {
 	themeId: number;
@@ -94,6 +95,7 @@ const BottomDrawer: React.FC<Props> = props => {
 		onRequestClose={onModalDismiss}
 	>
 		<SideMenu
+			label={_('New note menu')}
 			menuPosition={SideMenuPosition.Bottom}
 			menu={menu}
 			isOpen={isOpen}

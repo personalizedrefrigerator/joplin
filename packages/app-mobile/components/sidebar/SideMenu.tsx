@@ -16,6 +16,7 @@ export type OnChangeCallback = (isOpen: boolean)=> void;
 interface Props {
 	isOpen: boolean;
 
+	label: string;
 	menu: React.ReactNode;
 	children: React.ReactNode|React.ReactNode[];
 	overlayColor: string;
@@ -368,13 +369,16 @@ const SideMenu: React.FC<Props> = props => {
 		setIsOpen,
 		updateMenuPosition,
 	});
+
+	const labelRef = useRef(props.label);
+	labelRef.current = props.label;
 	const onChangeRef = useRef(props.onChange);
 	onChangeRef.current = props.onChange;
 	useEffect(() => {
 		onChangeRef.current(open);
 
 		AccessibilityInfo.announceForAccessibility(
-			open ? _('Side menu opened') : _('Side menu closed'),
+			open ? _('%s opened', labelRef.current) : _('%s closed', labelRef.current),
 		);
 	}, [open]);
 
@@ -423,7 +427,7 @@ const SideMenu: React.FC<Props> = props => {
 			style={styles.closeButtonOverlay}
 		>
 			<Pressable
-				aria-label={_('Close side menu')}
+				aria-label={_('Close %s', props.label)}
 				role='button'
 				onPress={onCloseButtonPress}
 				style={styles.overlayContent}
