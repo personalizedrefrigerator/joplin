@@ -73,8 +73,16 @@ interface InsertTextOptions {
 	newLine?: boolean;
 }
 
+interface NoteNavigation {
+	// Arguments passed to the NAV_GO action
+	state: {
+		newNoteAttachFileAction?: AttachFileAction;
+	};
+}
+
 interface Props extends BaseProps {
 	provisionalNoteIds: string[];
+	navigation: NoteNavigation;
 	dispatch: Dispatch;
 	noteId: string;
 	useEditorBeta: boolean;
@@ -89,7 +97,6 @@ interface Props extends BaseProps {
 	highlightedWords: string[];
 	noteHash: string;
 	toolbarEnabled: boolean;
-	newNoteAttachFileAction: AttachFileAction;
 }
 
 interface ComponentProps extends Props {
@@ -531,13 +538,14 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 		// been granted, the popup will open anyway.
 		void this.requestGeoLocationPermissions();
 
-		if (this.props.newNoteAttachFileAction) {
+		const action = this.props.navigation.state?.newNoteAttachFileAction;
+		if (action) {
 			setTimeout(async () => {
-				if (this.props.newNoteAttachFileAction === AttachFileAction.AttachDrawing) {
+				if (action === AttachFileAction.AttachDrawing) {
 					await this.drawPicture_onPress();
 				} else {
 					const options: AttachFileOptions = {
-						action: this.props.newNoteAttachFileAction,
+						action: action,
 					};
 					await CommandService.instance().execute('attachFile', '', options);
 				}
@@ -1632,7 +1640,6 @@ const NoteScreen = connect((state: AppState) => {
 	return {
 		noteId: state.selectedNoteIds.length ? state.selectedNoteIds[0] : null,
 		noteHash: state.selectedNoteHash,
-		newNoteAttachFileAction: state.newNoteAttachFileAction,
 		itemType: state.selectedItemType,
 		folders: state.folders,
 		searchQuery: state.searchQuery,
