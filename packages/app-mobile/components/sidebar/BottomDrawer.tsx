@@ -66,6 +66,10 @@ const BottomDrawer: React.FC<Props> = props => {
 		lastOpen.current = isOpen;
 	}, [isOpen, props.onDismiss]);
 
+	const onModalDismiss = useCallback(() => {
+		setIsOpen(false);
+	}, []);
+
 	const [openMenuOffset, setOpenMenuOffset] = useState(400);
 	const onMenuLayout = useCallback((event: LayoutChangeEvent) => {
 		const height = event.nativeEvent.layout.height;
@@ -86,6 +90,8 @@ const BottomDrawer: React.FC<Props> = props => {
 		modalBackgroundStyle={styles.modalBackground}
 		transparent={true}
 		animationType='fade'
+		onDismiss={onModalDismiss}
+		onRequestClose={onModalDismiss}
 	>
 		<SideMenu
 			menuPosition={SideMenuPosition.Bottom}
