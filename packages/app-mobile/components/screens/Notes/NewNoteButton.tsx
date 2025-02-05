@@ -30,36 +30,6 @@ const styles = StyleSheet.create({
 });
 
 const NewNoteButton: React.FC<Props> = _props => {
-	const buttons = [];
-	buttons.push({
-		label: _('New to-do'),
-		onPress: () => {
-			makeNewNote(true);
-		},
-		color: '#9b59b6',
-		icon: 'checkbox-outline',
-	});
-
-	buttons.push({
-		label: _('New note'),
-		onPress: () => {
-			makeNewNote(false);
-		},
-		color: '#9b59b6',
-		icon: 'file-document-outline',
-	});
-
-
-	const actionButtons = buttons.map((action, idx) => {
-		return <FAB
-			key={`option-${idx}`}
-			label={action.label}
-			icon={action.icon}
-			onPress={action.onPress}
-			size='small'
-		/>;
-	});
-
 	const menuContent = <View style={styles.menuContent}>
 		<View style={styles.buttonRow}>
 			<LabelledIconButton
@@ -80,7 +50,22 @@ const NewNoteButton: React.FC<Props> = _props => {
 		</View>
 		<Divider/>
 		<View style={styles.buttonRow}>
-			{actionButtons}
+			<FAB
+				label={_('New to-do')}
+				icon='checkbox-outline'
+				onPress={() => {
+					makeNewNote(true);
+				}}
+				size='small'
+			/>
+			<FAB
+				label={_('New note')}
+				icon='file-document-outline'
+				onPress={() => {
+					makeNewNote(false);
+				}}
+				size='small'
+			/>
 		</View>
 	</View>;
 
