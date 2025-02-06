@@ -27,6 +27,8 @@ const PluginNotification: React.FC<Props> = props => {
 		props.dispatch({ type: 'TOAST_HIDE' });
 	}, [props.dispatch]);
 
+	// Reload the <Portal> for each new toast. This keeps the toast notification on top
+	// of other <Portal> components and resets the toast timestamp when its message changes.
 	return <Portal key={`toast-${props.toast?.timestamp}`}>
 		<Snackbar
 			visible={!!props.toast}
