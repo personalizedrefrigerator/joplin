@@ -27,7 +27,7 @@ const PluginNotification: React.FC<Props> = props => {
 		props.dispatch({ type: 'TOAST_HIDE' });
 	}, [props.dispatch]);
 
-	return <Portal>
+	return <Portal key={`toast-${props.toast?.timestamp}`}>
 		<Snackbar
 			visible={!!props.toast}
 			onDismiss={onDismiss}
