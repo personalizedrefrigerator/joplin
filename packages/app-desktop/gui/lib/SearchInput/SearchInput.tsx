@@ -51,6 +51,7 @@ interface Props {
 	searchStarted: boolean;
 	placeholder?: string;
 	disabled?: boolean;
+	'aria-controls'?: string;
 }
 
 export interface OnChangeEvent {
@@ -71,7 +72,7 @@ export default function(props: Props) {
 			<SearchInput
 				ref={props.inputRef}
 				value={props.value}
-				type="text"
+				type="search"
 				placeholder={props.placeholder || _('Search...')}
 				onChange={onChange}
 				onFocus={props.onFocus}
@@ -79,6 +80,7 @@ export default function(props: Props) {
 				onKeyDown={props.onKeyDown}
 				spellCheck={false}
 				disabled={props.disabled}
+				aria-controls={props['aria-controls']}
 			/>
 			<SearchButton
 				aria-label={iconLabel}

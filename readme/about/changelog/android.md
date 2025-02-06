@@ -1,5 +1,10 @@
 # Joplin Android Changelog
 
+## [android-v3.2.7](https://github.com/laurent22/joplin/releases/tag/android-v3.2.7) (Pre-release) - 2025-01-13T17:03:36Z
+
+- Fixed: Clicking on an external note link from within a note logs an error (#11619) (#11455 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Fix clicking "Draw picture" results in blank screen with very old WebView versions (#11604 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+
 ## [android-v3.2.5](https://github.com/laurent22/joplin/releases/tag/android-v3.2.5) (Pre-release) - 2025-01-07T23:35:43Z
 
 - Improved: Allow re-downloading voice typing models on URL change and error (#11557 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))

@@ -1,43 +1,32 @@
+import { RefObject, useMemo } from 'react';
+import type { Editor } from 'tinymce';
+import { DispatchDidUpdateCallback, TinyMceEditorEvents } from './types';
+import { MarkupToHtmlHandler } from '../../../utils/types';
 import { _ } from '@joplin/lib/locale';
+import enableTextAreaTab, { TextAreaTabHandler } from './enableTextAreaTab';
 import { MarkupToHtml } from '@joplin/renderer';
-import { TinyMceEditorEvents } from './types';
-import { focus } from '@joplin/lib/utils/focusHandler';
-const taboverride = require('taboverride');
+
+interface Props {
+	editor: Editor;
+	markupToHtml: RefObject<MarkupToHtmlHandler>;
+	dispatchDidUpdate: DispatchDidUpdateCallback;
+}
+
+export interface EditDialogControl {
+	editNew: ()=> void;
+	editExisting: (elementInEditable: Node)=> void;
+	isEditable: (element: Node)=> boolean;
+}
 
 interface SourceInfo {
 	openCharacters: string;
 	closeCharacters: string;
 	content: string;
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	node: any;
+	node: Element;
 	language: string;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-function dialogTextArea_keyDown(event: any) {
-	if (event.key === 'Tab') {
-		window.requestAnimationFrame(() => focus('openEditDialog::dialogTextArea_keyDown', event.target));
-	}
-}
-
-// Allows pressing tab in a textarea to input an actual tab (instead of changing focus)
-// taboverride will take care of actually inserting the tab character, while the keydown
-// event listener will override the default behaviour, which is to focus the next field.
-function enableTextAreaTab(enable: boolean) {
-	const textAreas = document.getElementsByClassName('tox-textarea');
-	for (const textArea of textAreas) {
-		taboverride.set(textArea, enable);
-
-		if (enable) {
-			textArea.addEventListener('keydown', dialogTextArea_keyDown);
-		} else {
-			textArea.removeEventListener('keydown', dialogTextArea_keyDown);
-		}
-	}
-}
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-function findBlockSource(node: any): SourceInfo {
+function findBlockSource(node: Element): SourceInfo {
 	const sources = node.getElementsByClassName('joplin-source');
 	if (!sources.length) throw new Error('No source for node');
 	const source = sources[0];
@@ -81,9 +70,14 @@ function editableInnerHtml(html: string): string {
 	return editable[0].innerHTML;
 }
 
-// eslint-disable-next-line @typescript-eslint/ban-types, @typescript-eslint/no-explicit-any -- Old code before rule was applied, Old code before rule was applied
-export default function openEditDialog(editor: any, markupToHtml: any, dispatchDidUpdate: Function, editable: any) {
+function openEditDialog(
+	editor: Editor,
+	markupToHtml: RefObject<MarkupToHtmlHandler>,
+	dispatchDidUpdate: DispatchDidUpdateCallback,
+	editable: Element,
+) {
 	const source = editable ? findBlockSource(editable) : newBlockSource();
+	let tabHandler: TextAreaTabHandler|null = null;
 
 	editor.windowManager.open({
 		title: _('Edit'),
@@ -113,7 +107,7 @@ export default function openEditDialog(editor: any, markupToHtml: any, dispatchD
 			dispatchDidUpdate(editor);
 		},
 		onClose: () => {
-			enableTextAreaTab(false);
+			tabHandler?.remove();
 		},
 		body: {
 			type: 'panel',
@@ -124,12 +118,11 @@ export default function openEditDialog(editor: any, markupToHtml: any, dispatchD
 					label: 'Language',
 					// Katex is a special case with special opening/closing tags
 					// and we don't currently handle switching the language in this case.
-					disabled: source.language === 'katex',
+					enabled: source.language !== 'katex',
 				},
 				{
 					type: 'textarea',
 					name: 'codeTextArea',
-					value: source.content,
 				},
 			],
 		},
@@ -142,6 +135,40 @@ export default function openEditDialog(editor: any, markupToHtml: any, dispatchD
 	});
 
 	window.requestAnimationFrame(() => {
-		enableTextAreaTab(true);
+		const containerDocument = editor.getContainer().ownerDocument;
+		const textAreas = containerDocument.querySelectorAll<HTMLTextAreaElement>('.tox-textarea');
+		tabHandler = enableTextAreaTab([...textAreas]);
 	});
 }
+
+const findEditableContainer = (node: Node) => {
+	if (node.nodeName.startsWith('#')) { // Not an element, e.g. #text
+		node = node.parentElement;
+	}
+	return (node as Element)?.closest('.joplin-editable');
+};
+
+const useEditDialog = ({
+	editor, markupToHtml, dispatchDidUpdate,
+}: Props): EditDialogControl => {
+	return useMemo(() => {
+		const edit = (editable: Element|null) => {
+			openEditDialog(editor, markupToHtml, dispatchDidUpdate, editable);
+		};
+
+		return {
+			isEditable: element => !!findEditableContainer(element),
+			editExisting: (element: Node) => {
+				const editable = findEditableContainer(element);
+				if (editable) {
+					edit(editable);
+				}
+			},
+			editNew: () => {
+				edit(null);
+			},
+		};
+	}, [editor, markupToHtml, dispatchDidUpdate]);
+};
+
+export default useEditDialog;

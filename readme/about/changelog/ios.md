@@ -1,5 +1,9 @@
 # Joplin iOS Changelog
 
+## [ios-v13.2.5](https://github.com/laurent22/joplin/releases/tag/ios-v13.2.5) - 2025-01-13T17:19:06Z
+
+- Fixed: Clicking on an external note link from within a note logs an error (#11619) (#11455 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+
 ## [ios-v13.2.4](https://github.com/laurent22/joplin/releases/tag/ios-v13.2.4) - 2025-01-08T00:11:58Z
 
 - New: Plugin API: Add support for the renderMarkup command (#11494 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))

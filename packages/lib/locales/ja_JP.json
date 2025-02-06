@@ -827,6 +827,9 @@
 	"Delete local data and re-download from sync target": [
 		"ローカルデータを削除して同期先から再ダウンロードする"
 	],
+	"Delete model and re-download?\nThis cannot be undone.": [
+		""
+	],
 	"Delete note": [
 		"ノートを削除"
 	],
@@ -2350,6 +2353,9 @@
 	],
 	"Quit": [
 		"終了"
+	],
+	"Re-download model": [
+		""
 	],
 	"Re-encrypt data": [
 		"データを再暗号化する"

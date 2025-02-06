@@ -719,6 +719,9 @@
 	"Delete local data and re-download from sync target": [
 		"Xóa dữ liệu cục bộ và tải xuống lại từ mục tiêu đồng bộ hóa"
 	],
+	"Delete model and re-download?\nThis cannot be undone.": [
+		""
+	],
 	"Delete plugin \"%s\"?": [
 		"Xoá phần mở rộng “%s”?"
 	],
@@ -753,6 +756,9 @@
 		"Định dạng của điểm đến: %s"
 	],
 	"Detailed": [
+		""
+	],
+	"Dev": [
 		""
 	],
 	"Directory": [
@@ -2047,6 +2053,9 @@
 	],
 	"Quit": [
 		"Thoát"
+	],
+	"Re-download model": [
+		""
 	],
 	"Re-encrypt data": [
 		"Mã hoá lại dữ liệu"

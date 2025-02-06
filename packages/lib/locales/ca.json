@@ -810,6 +810,9 @@
 	"Delete local data and re-download from sync target": [
 		"Suprimeix les dades locals i torna a baixar de la destinació de sincronització"
 	],
+	"Delete model and re-download?\nThis cannot be undone.": [
+		""
+	],
 	"Delete note": [
 		"Suprimeix la nota"
 	],
@@ -859,6 +862,9 @@
 		"Format destí: %s"
 	],
 	"Detailed": [
+		""
+	],
+	"Dev": [
 		""
 	],
 	"Directory": [
@@ -2311,6 +2317,9 @@
 	],
 	"Quit": [
 		"Surt"
+	],
+	"Re-download model": [
+		""
 	],
 	"Re-encrypt data": [
 		"Torna a xifrar les dades"

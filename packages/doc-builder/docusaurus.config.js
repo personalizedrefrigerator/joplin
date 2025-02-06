@@ -249,10 +249,6 @@ const config = {
 								href: 'https://bsky.app/profile/joplinapp.bsky.social',
 							},
 							{
-								label: 'Twitter',
-								href: 'https://twitter.com/joplinapp',
-							},
-							{
 								label: 'Patreon',
 								href: 'https://www.patreon.com/joplin',
 							},

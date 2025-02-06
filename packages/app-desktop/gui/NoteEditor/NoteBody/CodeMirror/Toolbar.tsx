@@ -33,6 +33,7 @@ function Toolbar(props: ToolbarProps) {
 	return (
 		<ToolbarBase
 			style={styles.root}
+			scrollable={true}
 			items={props.toolbarButtonInfos}
 			disabled={!!props.disabled}
 			aria-label={_('Editor actions')}

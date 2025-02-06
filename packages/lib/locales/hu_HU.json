@@ -771,6 +771,9 @@
 	"Delete local data and re-download from sync target": [
 		""
 	],
+	"Delete model and re-download?\nThis cannot be undone.": [
+		""
+	],
 	"Delete plugin \"%s\"?": [
 		"\"%s\" bővítmény törlése?"
 	],
@@ -805,6 +808,9 @@
 		"Cél formátum: %s"
 	],
 	"Detailed": [
+		""
+	],
+	"Dev": [
 		""
 	],
 	"Directory": [
@@ -2137,6 +2143,9 @@
 	],
 	"Quit": [
 		"Kilépés"
+	],
+	"Re-download model": [
+		""
 	],
 	"Re-encrypt data": [
 		"Adat újratitkosítása"

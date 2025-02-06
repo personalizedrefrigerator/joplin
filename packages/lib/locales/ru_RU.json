@@ -865,6 +865,9 @@
 	"Delete local data and re-download from sync target": [
 		"Удалить локальные данные и перегрузить данные с цели синхронизации"
 	],
+	"Delete model and re-download?\nThis cannot be undone.": [
+		""
+	],
 	"Delete note": [
 		"Удалить заметку"
 	],
@@ -2488,6 +2491,9 @@
 	],
 	"Quit": [
 		"Выход"
+	],
+	"Re-download model": [
+		""
 	],
 	"Re-encrypt data": [
 		"Повторно зашифровать данные"

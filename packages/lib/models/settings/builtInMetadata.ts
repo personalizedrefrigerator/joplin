@@ -19,6 +19,12 @@ export enum CameraDirection {
 	Front,
 }
 
+export enum ScrollbarSize {
+	Small = 7,
+	Medium = 12,
+	Large = 24,
+}
+
 const builtInMetadata = (Setting: typeof SettingType) => {
 	const platform = shim.platformName();
 	const mobilePlatform = shim.mobilePlatform();
@@ -677,6 +683,16 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 			appTypes: [AppType.Mobile],
 			label: () => 'buttons included in the editor toolbar',
 		},
+		'editor.tabMovesFocus': {
+			value: false,
+			type: SettingItemType.Bool,
+			public: false,
+			section: 'note',
+			appTypes: [AppType.Desktop],
+			label: () => _('Tab moves focus'),
+			storage: SettingStorage.File,
+			isGlobal: true,
+		},
 		'notes.columns': {
 			value: defaultListColumns(),
 			public: false,
@@ -1051,6 +1067,20 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 		// Deprecated in favour of windowContentZoomFactor
 		'style.zoom': { value: 100, type: SettingItemType.Int, public: false, storage: SettingStorage.File, isGlobal: true, appTypes: [AppType.Desktop], section: 'appearance', label: () => '', minimum: 50, maximum: 500, step: 10 },
 
+		'style.viewer.fontSize': {
+			value: 16,
+			type: SettingItemType.Int,
+			public: true,
+			storage: SettingStorage.File,
+			isGlobal: true,
+			appTypes: [AppType.Mobile],
+			section: 'appearance',
+			label: () => _('Viewer font size'),
+			minimum: 4,
+			maximum: 50,
+			step: 1,
+		},
+
 		'style.editor.fontSize': {
 			value: 15,
 			type: SettingItemType.Int,
@@ -1119,6 +1149,26 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 		},
 
 		'style.editor.contentMaxWidth': { value: 0, type: SettingItemType.Int, public: true, storage: SettingStorage.File, isGlobal: true, appTypes: [AppType.Desktop], section: 'appearance', label: () => _('Editor maximum width'), description: () => _('Set it to 0 to make it take the complete available space. Recommended width is 600.') },
+
+		'style.scrollbarSize': {
+			value: ScrollbarSize.Small,
+			type: SettingItemType.String,
+			public: true,
+			section: 'appearance',
+			appTypes: [AppType.Desktop],
+			isEnum: true,
+
+			options: () => ({
+				[ScrollbarSize.Small]: _('Small'),
+				[ScrollbarSize.Medium]: _('Medium'),
+				[ScrollbarSize.Large]: _('Large'),
+			}),
+
+			label: () => _('Scrollbar size'),
+			description: () => _('Configures the size of scrollbars used in the app.'),
+			storage: SettingStorage.File,
+			isGlobal: true,
+		},
 
 		'ui.layout': { value: {}, type: SettingItemType.Object, storage: SettingStorage.File, isGlobal: true, public: false, appTypes: [AppType.Desktop] },
 
@@ -1622,7 +1672,7 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 		'featureFlag.autoUpdaterServiceEnabled': {
 			value: false,
 			type: SettingItemType.Bool,
-			public: true,
+			public: false,
 			storage: SettingStorage.File,
 			appTypes: [AppType.Desktop],
 			label: () => 'Enable auto-updates',

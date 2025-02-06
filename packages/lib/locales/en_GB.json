@@ -904,6 +904,9 @@
 	"Delete local data and re-download from sync target": [
 		""
 	],
+	"Delete model and re-download?\nThis cannot be undone.": [
+		""
+	],
 	"Delete note": [
 		""
 	],
@@ -962,6 +965,9 @@
 		""
 	],
 	"Detailed": [
+		""
+	],
+	"Dev": [
 		""
 	],
 	"Directory": [
@@ -1046,6 +1052,9 @@
 		""
 	],
 	"Download and install the relevant extension for your browser:": [
+		""
+	],
+	"Download updated model": [
 		""
 	],
 	"Downloaded": [
@@ -2622,6 +2631,9 @@
 	"Quit": [
 		""
 	],
+	"Re-download model": [
+		""
+	],
 	"Re-encrypt data": [
 		""
 	],
@@ -3711,6 +3723,9 @@
 		""
 	],
 	"Unsupported link or message: %s": [
+		""
+	],
+	"Unsupported link or message: %s.\nError: %s": [
 		""
 	],
 	"Untitled": [

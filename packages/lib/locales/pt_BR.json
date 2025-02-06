@@ -864,6 +864,9 @@
 	"Delete local data and re-download from sync target": [
 		"Deletar dados locais e reenviar do alvo de sincronização"
 	],
+	"Delete model and re-download?\nThis cannot be undone.": [
+		""
+	],
 	"Delete note": [
 		"Excluir nota"
 	],
@@ -2482,6 +2485,9 @@
 	],
 	"Quit": [
 		"Sair"
+	],
+	"Re-download model": [
+		""
 	],
 	"Re-encrypt data": [
 		"Recriptografar dados"

@@ -120,6 +120,7 @@ async function createRelease(projectName: string, releaseConfig: ReleaseConfig, 
 
 	await execCommand('yarn install', { showStdout: false });
 	await execCommand('yarn tsc', { showStdout: false });
+	await execCommand('yarn buildParallel', { showStdout: false });
 
 	console.info(`Building APK file v${suffix}...`);
 

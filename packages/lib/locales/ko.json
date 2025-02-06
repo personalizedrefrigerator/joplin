@@ -836,6 +836,9 @@
 	"Delete local data and re-download from sync target": [
 		"로컬 데이터를 지우고 동기화 대상의 데이터를 다시 내려받기"
 	],
+	"Delete model and re-download?\nThis cannot be undone.": [
+		""
+	],
 	"Delete note": [
 		"메모 삭제"
 	],
@@ -2374,6 +2377,9 @@
 	],
 	"Quit": [
 		"종료"
+	],
+	"Re-download model": [
+		""
 	],
 	"Re-encrypt data": [
 		"데이터를 다시 암호화"
