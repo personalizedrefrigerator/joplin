@@ -161,4 +161,6 @@ unwatcher
 pedr
 Slotozilla
 keyshortcuts
+atag
+HMAC
 Siri

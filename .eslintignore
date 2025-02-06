@@ -202,6 +202,7 @@ packages/app-desktop/gui/FolderIconBox.js
 packages/app-desktop/gui/HelpButton.js
 packages/app-desktop/gui/IconButton.js
 packages/app-desktop/gui/ImportScreen.js
+packages/app-desktop/gui/InlineCombobox.js
 packages/app-desktop/gui/ItemList.js
 packages/app-desktop/gui/JoplinCloudConfigScreen.js
 packages/app-desktop/gui/JoplinCloudLoginScreen.js
@@ -618,6 +619,7 @@ packages/app-mobile/components/EditorToolbar/utils/allToolbarCommandNamesFromSta
 packages/app-mobile/components/EditorToolbar/utils/isSelected.js
 packages/app-mobile/components/EditorToolbar/utils/selectedCommandNamesFromState.js
 packages/app-mobile/components/EditorToolbar/utils/toolbarButtonsFromState.js
+packages/app-mobile/components/EditorToolbar/utils/useButtonSize.js
 packages/app-mobile/components/ExtendedWebView/index.jest.js
 packages/app-mobile/components/ExtendedWebView/index.js
 packages/app-mobile/components/ExtendedWebView/index.web.js
@@ -695,6 +697,7 @@ packages/app-mobile/components/buttons/index.js
 packages/app-mobile/components/getResponsiveValue.test.js
 packages/app-mobile/components/getResponsiveValue.js
 packages/app-mobile/components/global-style.js
+packages/app-mobile/components/plugins/PluginNotification.js
 packages/app-mobile/components/plugins/PluginRunner.js
 packages/app-mobile/components/plugins/PluginRunnerWebView.js
 packages/app-mobile/components/plugins/backgroundPage/initializeDialogWebView.js
@@ -894,6 +897,10 @@ packages/editor/CodeMirror/editorCommands/sortSelectedLines.test.js
 packages/editor/CodeMirror/editorCommands/sortSelectedLines.js
 packages/editor/CodeMirror/editorCommands/supportsCommand.js
 packages/editor/CodeMirror/getScrollFraction.js
+packages/editor/CodeMirror/markdown/MarkdownHighlightExtension.test.js
+packages/editor/CodeMirror/markdown/MarkdownHighlightExtension.js
+packages/editor/CodeMirror/markdown/MarkdownMathExtension.test.js
+packages/editor/CodeMirror/markdown/MarkdownMathExtension.js
 packages/editor/CodeMirror/markdown/codeBlockLanguages/allLanguages.js
 packages/editor/CodeMirror/markdown/codeBlockLanguages/defaultLanguage.js
 packages/editor/CodeMirror/markdown/codeBlockLanguages/lookUpLanguage.js
@@ -905,8 +912,6 @@ packages/editor/CodeMirror/markdown/markdownCommands.bulletedVsChecklist.test.js
 packages/editor/CodeMirror/markdown/markdownCommands.test.js
 packages/editor/CodeMirror/markdown/markdownCommands.toggleList.test.js
 packages/editor/CodeMirror/markdown/markdownCommands.js
-packages/editor/CodeMirror/markdown/markdownMathParser.test.js
-packages/editor/CodeMirror/markdown/markdownMathParser.js
 packages/editor/CodeMirror/markdown/utils/renumberSelectedLists.test.js
 packages/editor/CodeMirror/markdown/utils/renumberSelectedLists.js
 packages/editor/CodeMirror/markdown/utils/stripBlockquote.js
@@ -917,6 +922,7 @@ packages/editor/CodeMirror/pluginApi/customEditorCompletion.js
 packages/editor/CodeMirror/testUtil/createEditorControl.js
 packages/editor/CodeMirror/testUtil/createEditorSettings.js
 packages/editor/CodeMirror/testUtil/createTestEditor.js
+packages/editor/CodeMirror/testUtil/findNodesWithName.js
 packages/editor/CodeMirror/testUtil/forceFullParse.js
 packages/editor/CodeMirror/testUtil/loadLanguages.js
 packages/editor/CodeMirror/testUtil/pressReleaseKey.js

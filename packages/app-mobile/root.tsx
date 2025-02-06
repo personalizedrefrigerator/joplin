@@ -139,6 +139,7 @@ import DialogManager from './components/DialogManager';
 import lockToSingleInstance from './utils/lockToSingleInstance';
 import { AppState } from './utils/types';
 import { getDisplayParentId } from '@joplin/lib/services/trash';
+import PluginNotification from './components/plugins/PluginNotification';
 
 const logger = Logger.create('root');
 
@@ -352,10 +353,6 @@ const appReducer = (state = appDefaultState, action: any) => {
 
 				if ('noteHash' in action) {
 					newState.selectedNoteHash = action.noteHash;
-				}
-
-				if ('newNoteAttachFileAction' in action) {
-					newState.newNoteAttachFileAction = action.newNoteAttachFileAction;
 				}
 
 				if ('sharedData' in action) {
@@ -1332,6 +1329,7 @@ class AppComponent extends React.Component {
 					</MenuProvider>
 				</SideMenu>
 				<PluginRunnerWebView />
+				<PluginNotification/>
 			</View>
 		);
 
