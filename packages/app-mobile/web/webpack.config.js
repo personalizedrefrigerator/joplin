@@ -15,7 +15,8 @@ const resourceLoaderConfiguration = {
 const emptyLibraryMock = path.resolve(__dirname, 'mocks/empty.js');
 
 module.exports = (env) => {
-	const isDevMode = !env.production;
+	// True if using webpack-dev-server
+	const isServeMode = !!env.serve;
 
 	const babelLoaderConfiguration = {
 		test: /\.(tsx|jsx|ts|js|mjs)$/,
@@ -40,19 +41,19 @@ module.exports = (env) => {
 					'react-native-web',
 					'@babel/plugin-transform-export-namespace-from',
 					...(babelConfig.plugins ?? []),
-					...(isDevMode ? ['react-refresh/babel'] : []),
+					...(isServeMode ? ['react-refresh/babel'] : []),
 				],
 			},
 		},
 	};
 
 	return {
-		mode: isDevMode ? 'development' : 'production',
+		mode: isServeMode ? 'development' : 'production',
 		target: 'web',
 
 		entry: {
 			app: path.resolve(appDirectory, 'index.web.ts'),
-			...(isDevMode ? {} : {
+			...(isServeMode ? {} : {
 				// The service worker can cause issues with live reload in dev mode
 				// (and isn't necessary when using webpack-dev-server).
 				serviceWorker: path.resolve(appDirectory, 'web/serviceWorker.ts'),
@@ -70,7 +71,7 @@ module.exports = (env) => {
 				resourceLoaderConfiguration,
 			],
 		},
-		plugins: isDevMode ? [
+		plugins: isServeMode ? [
 			new ReactRefreshWebpackPlugin(),
 		] : [],
 
