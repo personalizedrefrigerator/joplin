@@ -385,8 +385,8 @@ export default function(theme: any, options: Options = null) {
 		}
 
 		mark {
-			background: #F7D26E;
-			color: black;
+			background: ${theme.markHighlightBackgroundColor};
+			color: ${theme.searchMarkerColor};
 		}
 
 		/* =============================================== */

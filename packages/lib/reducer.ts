@@ -1520,6 +1520,9 @@ const reducer = produce((draft: Draft<State> = defaultState, action: any) => {
 				timestamp: Date.now(),
 			};
 			break;
+		case 'TOAST_HIDE':
+			draft.toast = null;
+			break;
 
 		}
 	} catch (error) {

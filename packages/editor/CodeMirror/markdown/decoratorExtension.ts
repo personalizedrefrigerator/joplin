@@ -44,6 +44,10 @@ const htmlTagNameDecoration = Decoration.mark({
 	attributes: { class: 'cm-htmlTag', ...noSpellCheckAttrs },
 });
 
+const markDecoration = Decoration.mark({
+	attributes: { class: 'cm-highlighted' },
+});
+
 const blockQuoteDecoration = Decoration.line({
 	attributes: { class: 'cm-blockQuote' },
 });
@@ -136,6 +140,7 @@ const nodeNameToMarkDecoration: Record<string, Decoration> = {
 	'TagName': htmlTagNameDecoration,
 	'HorizontalRule': horizontalRuleDecoration,
 	'TaskMarker': taskMarkerDecoration,
+	'Highlight': markDecoration,
 };
 
 const multilineNodes = {
