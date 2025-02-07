@@ -151,7 +151,8 @@ const ProfileListItem: React.FC<ProfileItemProps> = ({ profile, profileConfig, s
 	});
 
 	const style = useStyle(themeId);
-	const titleStyle: TextStyle = { fontWeight: profile.id === profileConfig.currentProfileId ? 'bold' : 'normal' };
+	const isSelected = profile.id === profileConfig.currentProfileId;
+	const titleStyle: TextStyle = { fontWeight: isSelected ? 'bold' : 'normal' };
 	return (
 		<List.Item
 			title={profile.name}
@@ -161,6 +162,10 @@ const ProfileListItem: React.FC<ProfileItemProps> = ({ profile, profileConfig, s
 			key={profile.id}
 			onPress={() => { void onProfileItemPress(profile); }}
 			{...longPressProps}
+
+			accessibilityRole='button'
+			accessibilityState={isSelected ? { selected: true } : null}
+			aria-selected={isSelected ? true : null}
 		/>
 	);
 };
