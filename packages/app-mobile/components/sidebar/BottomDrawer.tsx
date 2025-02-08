@@ -2,7 +2,7 @@ import * as React from 'react';
 import Modal from '../Modal';
 import SideMenu, { SideMenuPosition } from './SideMenu';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { LayoutChangeEvent, ScrollView, StyleSheet, View } from 'react-native';
+import { LayoutChangeEvent, StyleSheet, useWindowDimensions, View } from 'react-native';
 import { ThemeStyle, themeStyle } from '../global-style';
 import { connect } from 'react-redux';
 import { AppState } from '../../utils/types';
@@ -17,23 +17,33 @@ interface Props {
 }
 
 const useStyles = (theme: ThemeStyle) => {
+	const { width: windowWidth } = useWindowDimensions();
 	const safeAreaPadding = useSafeAreaPadding();
+
 	return useMemo(() => {
+		const isSmallWidthScreen = windowWidth < 500;
+		const menuGapLeft = safeAreaPadding.paddingLeft + 6;
+		const menuGapRight = safeAreaPadding.paddingRight + 6;
+
 		return StyleSheet.create({
-			scrollingContainer: {
+			outerContainer: {
 				flex: 1,
 				backgroundColor: theme.backgroundColor,
 				borderRadius: 16,
 				borderBottomRightRadius: 0,
 				borderBottomLeftRadius: 0,
-				maxWidth: 400,
+				maxWidth: Math.min(400, windowWidth - menuGapRight - menuGapLeft),
 			},
 			menuStyle: {
 				alignSelf: 'center',
 				left: 'auto',
 				right: 0,
-				paddingRight: safeAreaPadding.paddingRight + 6,
-				paddingLeft: safeAreaPadding.paddingLeft + 6,
+				...(isSmallWidthScreen ? {
+					// Center on small screens, rather than float right.
+					right: 'auto',
+				} : {}),
+				paddingRight: menuGapRight,
+				paddingLeft: menuGapLeft,
 				paddingBottom: 0,
 			},
 			contentContainer: {
@@ -50,7 +60,7 @@ const useStyles = (theme: ThemeStyle) => {
 				paddingBottom: 0,
 			},
 		});
-	}, [theme, safeAreaPadding]);
+	}, [theme, safeAreaPadding, windowWidth]);
 };
 
 const BottomDrawer: React.FC<Props> = props => {
@@ -84,11 +94,11 @@ const BottomDrawer: React.FC<Props> = props => {
 
 	const theme = themeStyle(props.themeId);
 	const styles = useStyles(theme);
-	const menu = <ScrollView style={styles.scrollingContainer}>
+	const menu = <View style={styles.outerContainer}>
 		<View onLayout={onMenuLayout} style={styles.contentContainer}>
 			{props.children}
 		</View>
-	</ScrollView>;
+	</View>;
 
 	return <Modal
 		visible={props.show}
