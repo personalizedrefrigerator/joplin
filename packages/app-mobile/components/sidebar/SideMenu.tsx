@@ -331,8 +331,32 @@ const useSizes = (isVerticalMenu: boolean, openMenuOffset: number) => {
 	return { menuSize, onContainerLayout, contentSize };
 };
 
+const useOnChangeNotifier = (open: boolean, menuLabel: string, onChange: OnChangeCallback) => {
+	const labelRef = useRef(menuLabel);
+	labelRef.current = menuLabel;
+	const onChangeRef = useRef(onChange);
+	onChangeRef.current = onChange;
+
+	const isFirstNotificationRef = useRef(true);
+
+	useEffect(() => {
+		onChangeRef.current(open);
+
+		// Avoid announcing for accessibility when the sidemenu component first mounts
+		// (especially if closed). Such notifications are distracting.
+		if (!isFirstNotificationRef.current && !open) {
+			AccessibilityInfo.announceForAccessibility(
+				open ? _('%s opened', labelRef.current) : _('%s closed', labelRef.current),
+			);
+		}
+		isFirstNotificationRef.current = false;
+	}, [open]);
+};
+
 const SideMenu: React.FC<Props> = props => {
 	const [open, setIsOpen] = useState(false);
+	const hasBeenOpen = useRef(false);
+	hasBeenOpen.current ||= open;
 
 	useEffect(() => {
 		setIsOpen(props.isOpen);
@@ -370,18 +394,7 @@ const SideMenu: React.FC<Props> = props => {
 		updateMenuPosition,
 	});
 
-	const labelRef = useRef(props.label);
-	labelRef.current = props.label;
-	const onChangeRef = useRef(props.onChange);
-	onChangeRef.current = props.onChange;
-	useEffect(() => {
-		onChangeRef.current(open);
-
-		AccessibilityInfo.announceForAccessibility(
-			open ? _('%s opened', labelRef.current) : _('%s closed', labelRef.current),
-		);
-	}, [open]);
-
+	useOnChangeNotifier(open, props.label, props.onChange);
 	const onCloseButtonPress = useCallback(() => {
 		setIsOpen(false);
 		// Set isAnimating as soon as possible to avoid components disappearing, then reappearing.
@@ -401,13 +414,6 @@ const SideMenu: React.FC<Props> = props => {
 				style={styles.menuContent}
 				testID='menu-inner-wrapper'
 			>
-				<AccessibleView
-					// Auto-focuses an empty view at the beginning of the sidemenu -- if we instead
-					// focus the container view, VoiceOver fails to focus to any components within
-					// the sidebar.
-					refocusCounter={open ? 1 : undefined}
-				/>
-
 				{props.menu}
 			</AccessibleView>
 		</Animated.View>
@@ -418,7 +424,9 @@ const SideMenu: React.FC<Props> = props => {
 			inert={open}
 			style={styles.contentWrapper}
 		>
-			<AccessibleView refocusCounter={!open ? 1 : undefined} />
+			<AccessibleView
+				refocusCounter={!open && hasBeenOpen.current ? 1 : undefined}
+			/>
 			{props.children}
 		</AccessibleView>
 	);

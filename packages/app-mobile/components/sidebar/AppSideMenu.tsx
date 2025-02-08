@@ -4,6 +4,7 @@ import { connect } from 'react-redux';
 import { themeStyle } from '../global-style';
 import SideMenu, { OnChangeCallback, SideMenuPosition } from './SideMenu';
 import { _ } from '@joplin/lib/locale';
+import AccessibleView from '../accessibility/AccessibleView';
 
 interface Props {
 	themeId: number;
@@ -21,6 +22,16 @@ interface Props {
 const AppSideMenu: React.FC<Props> = props => {
 	const theme = themeStyle(props.themeId);
 
+	const menuContent = <>
+		<AccessibleView
+			// Auto-focuses an empty view at the beginning of the sidemenu -- if we instead
+			// focus the container view, VoiceOver fails to focus to any components within
+			// the sidebar.
+			refocusCounter={props.open ? 1 : undefined}
+		/>
+		{props.menu}
+	</>;
+
 	return <SideMenu
 		label={_('Side menu')}
 		overlayColor={theme.colorFaded}
@@ -31,7 +42,7 @@ const AppSideMenu: React.FC<Props> = props => {
 		disableGestures={props.disableGestures}
 
 		menuPosition={props.menuPosition}
-		menu={props.menu}
+		menu={menuContent}
 		openMenuOffset={props.openMenuOffset}
 	>{props.children}</SideMenu>;
 };
