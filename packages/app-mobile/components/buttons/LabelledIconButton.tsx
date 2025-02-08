@@ -20,16 +20,16 @@ const useStyles = (themeId: number) => {
 
 		return StyleSheet.create({
 			icon: {
-				fontSize: 32,
-				width: 50,
-				height: 50,
+				fontSize: 27,
+				width: 44,
+				height: 44,
 				textAlign: 'center',
 				overflow: 'hidden',
 
 				color: theme.color3,
 				borderColor: theme.codeBorderColor, // TODO: Use a different theme variable
-				borderRadius: 25,
-				padding: 8,
+				borderRadius: 22,
+				padding: 6,
 				borderWidth: 2,
 				backgroundColor: theme.backgroundColor3,
 			},
@@ -49,12 +49,14 @@ const useStyles = (themeId: number) => {
 const LabelledIconButton: React.FC<Props> = ({ title, icon, style, themeId, ...otherProps }) => {
 	const styles = useStyles(themeId);
 	return <TouchableRipple
+		role='button'
+		accessibilityRole='button'
 		{...otherProps}
 		style={[styles.button, style]}
 	>
 		<View style={styles.buttonContent}>
 			<Icon style={styles.icon} accessibilityLabel={null} name={icon}/>
-			<Text>{title}</Text>
+			<Text variant='labelMedium'>{title}</Text>
 		</View>
 	</TouchableRipple>;
 };

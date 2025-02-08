@@ -38,6 +38,7 @@ const useStyles = (theme: ThemeStyle) => {
 			},
 			contentContainer: {
 				padding: 20,
+				paddingBottom: 14,
 				gap: 8,
 				flexDirection: 'row',
 				flexWrap: 'wrap',
@@ -78,8 +79,7 @@ const BottomDrawer: React.FC<Props> = props => {
 	const [openMenuOffset, setOpenMenuOffset] = useState(400);
 	const onMenuLayout = useCallback((event: LayoutChangeEvent) => {
 		const height = event.nativeEvent.layout.height;
-		const spacing = 10;
-		setOpenMenuOffset(height + spacing);
+		setOpenMenuOffset(height);
 	}, []);
 
 	const theme = themeStyle(props.themeId);
