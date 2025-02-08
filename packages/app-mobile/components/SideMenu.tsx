@@ -260,10 +260,12 @@ const SideMenuComponent: React.FC<Props> = props => {
 	}, [open]);
 
 	const onCloseButtonPress = useCallback(() => {
+		if (!open) return;
+
 		setIsOpen(false);
 		// Set isAnimating as soon as possible to avoid components disappearing, then reappearing.
 		setIsAnimating(true);
-	}, [setIsAnimating]);
+	}, [setIsAnimating, open]);
 
 	const styles = useStyles({ themeId: props.themeId, menuOpenFraction, menuWidth, isLeftMenu });
 
@@ -271,6 +273,7 @@ const SideMenuComponent: React.FC<Props> = props => {
 		<AccessibleView
 			inert={!open}
 			style={styles.menuWrapper}
+			onAccessibilityEscape={onCloseButtonPress}
 		>
 			<AccessibleView
 				// Auto-focuses an empty view at the beginning of the sidemenu -- if we instead

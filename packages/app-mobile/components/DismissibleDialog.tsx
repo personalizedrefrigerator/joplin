@@ -90,6 +90,7 @@ const DismissibleDialog: React.FC<Props> = props => {
 			visible={props.visible}
 			onDismiss={props.onDismiss}
 			onRequestClose={props.onDismiss}
+			onAccessibilityEscape={props.onDismiss}
 			containerStyle={styles.dialogContainer}
 			animationType='fade'
 			backgroundColor='rgba(0, 0, 0, 0.1)'

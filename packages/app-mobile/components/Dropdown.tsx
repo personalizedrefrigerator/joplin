@@ -232,6 +232,7 @@ class Dropdown extends Component<DropdownProps, DropdownState> {
 					animationType='fade'
 					visible={this.state.listVisible}
 					onRequestClose={this.onCloseList}
+					onAccessibilityEscape={this.onCloseList}
 					supportedOrientations={['landscape', 'portrait']}
 				>
 					<TouchableWithoutFeedback
