@@ -20,8 +20,10 @@ const styles = StyleSheet.create({
 	buttonRow: {
 		flexDirection: 'row',
 		flexWrap: 'wrap',
-		justifyContent: 'space-between',
-		gap: 4,
+		gap: 2,
+	},
+	button: {
+		flexGrow: 1,
 	},
 	menuContent: {
 		gap: 12,
@@ -34,16 +36,19 @@ const NewNoteButton: React.FC<Props> = _props => {
 		<View style={styles.buttonRow}>
 			<LabelledIconButton
 				onPress={() => makeNewNote(false, AttachFileAction.AttachPhoto)}
+				style={styles.button}
 				title={_('Camera')}
 				icon='material camera'
 			/>
 			<LabelledIconButton
 				onPress={() => makeNewNote(false, AttachFileAction.AttachFile)}
+				style={styles.button}
 				title={_('Attachment')}
 				icon='material attachment'
 			/>
 			<LabelledIconButton
 				onPress={() => makeNewNote(false, AttachFileAction.AttachDrawing)}
+				style={styles.button}
 				title={_('Drawing')}
 				icon='material draw'
 			/>
