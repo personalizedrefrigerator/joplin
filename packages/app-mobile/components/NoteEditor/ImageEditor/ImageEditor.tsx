@@ -124,10 +124,10 @@ const ImageEditor = (props: Props) => {
 			onRequestCloseEditor(true);
 			return true;
 		};
-		BackHandler.addEventListener('hardwareBackPress', hardwareBackPressListener);
+		const handler = BackHandler.addEventListener('hardwareBackPress', hardwareBackPressListener);
 
 		return () => {
-			BackHandler.removeEventListener('hardwareBackPress', hardwareBackPressListener);
+			handler.remove();
 		};
 	}, [onRequestCloseEditor]);
 
