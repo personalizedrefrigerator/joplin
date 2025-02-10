@@ -164,3 +164,4 @@ keyshortcuts
 atag
 HMAC
 Siri
+cipherdecipher
