@@ -2,7 +2,9 @@
 // Based on https://necolas.github.io/react-native-web/docs/multi-platform/
 // See also https://dev.to/mikehamilton00/adding-web-support-to-a-react-native-project-in-2023-4m4l
 
-const path = require('path');
+import * as path from 'path';
+import * as webpack from 'webpack';
+import 'webpack-dev-server';
 const appDirectory = path.resolve(__dirname, '../');
 const babelConfig = require('../babel.config');
 
@@ -40,19 +42,11 @@ const resourceLoaderConfiguration = {
 
 const emptyLibraryMock = path.resolve(__dirname, 'mocks/empty.js');
 
-module.exports = {
-	target: 'web',
-
-	entry: {
-		app: path.resolve(appDirectory, 'index.web.ts'),
-		serviceWorker: path.resolve(appDirectory, 'web/serviceWorker.ts'),
-	},
-
+const configShared: webpack.Configuration = {
 	output: {
 		filename: '[name].bundle.js',
 		path: path.resolve(appDirectory, 'web/dist'),
 	},
-
 	module: {
 		rules: [
 			babelLoaderConfiguration,
@@ -106,6 +100,16 @@ module.exports = {
 			'crypto': require.resolve('crypto-browserify'),
 		},
 	},
+};
+
+const appConfig: webpack.Configuration = {
+	target: 'web',
+
+	entry: {
+		app: path.resolve(appDirectory, 'index.web.ts'),
+	},
+
+	...configShared,
 
 	devServer: {
 		// Required by @sqlite.org/sqlite-wasm
@@ -117,3 +121,13 @@ module.exports = {
 		port: 8088,
 	},
 };
+
+const serviceWorkerConfig: webpack.Configuration = {
+	target: 'webworker',
+	entry: {
+		serviceWorker: path.resolve(appDirectory, 'web/serviceWorker.ts'),
+	},
+	...configShared,
+};
+
+export default [serviceWorkerConfig, appConfig];
