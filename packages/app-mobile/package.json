@@ -9,7 +9,7 @@
     "android": "react-native run-android",
     "build": "NO_FLIPPER=1 gulp build",
     "web": "webpack --mode production --config ./web/webpack.config.ts --progress && cp -r ./web/public/* ./web/dist/",
-    "serve-web": "webpack serve --env serve --mode development --static ./web/public/ --config ./web/webpack.config.ts --progress",
+    "serve-web": "webpack serve --env HOT_RELOAD --mode development --static ./web/public/ --config ./web/webpack.config.ts --progress",
     "tsc": "tsc --project tsconfig.json",
     "watch": "tsc --watch --preserveWatchOutput --project tsconfig.json",
     "clean": "node tools/clean.js",
