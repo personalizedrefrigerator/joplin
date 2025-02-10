@@ -902,6 +902,27 @@ type WindowAction = {
 };
 
 const handleWindowActions = (draft: Draft<State>, action: WindowAction) => {
+	const handleFocus = (windowId: string) => {
+		// Only allow bringing a background window to the foreground
+		if (draft.windowId !== windowId) {
+			const previousWindowId = draft.windowId;
+
+			const focusingWindowState = draft.backgroundWindows[windowId];
+			const previousWindowState = { ...defaultWindowState };
+
+			for (const key of Object.keys(focusingWindowState)) {
+				const stateKey = key as keyof WindowState;
+
+				type AssignableWindowState = Record<keyof WindowState, unknown>;
+				(previousWindowState as AssignableWindowState)[stateKey] = draft[stateKey];
+				(draft as AssignableWindowState)[stateKey] = focusingWindowState[stateKey];
+			}
+
+			delete draft.backgroundWindows[windowId];
+			draft.backgroundWindows[previousWindowId] = previousWindowState;
+		}
+	};
+
 	switch (action.type) {
 
 	case 'WINDOW_OPEN': {
@@ -926,29 +947,15 @@ const handleWindowActions = (draft: Draft<State>, action: WindowAction) => {
 		};
 		break;
 	}
-	case 'WINDOW_FOCUS': {
-		// Only allow bringing a background window to the foreground
-		if (draft.windowId !== action.windowId) {
-			const windowId = action.windowId;
-			const previousWindowId = draft.windowId;
-
-			const focusingWindowState = draft.backgroundWindows[windowId];
-			const previousWindowState = { ...defaultWindowState };
-
-			for (const key of Object.keys(focusingWindowState)) {
-				const stateKey = key as keyof WindowState;
-
-				type AssignableWindowState = Record<keyof WindowState, unknown>;
-				(previousWindowState as AssignableWindowState)[stateKey] = draft[stateKey];
-				(draft as AssignableWindowState)[stateKey] = focusingWindowState[stateKey];
-			}
-
-			delete draft.backgroundWindows[windowId];
-			draft.backgroundWindows[previousWindowId] = previousWindowState;
-		}
+	case 'WINDOW_FOCUS':
+		handleFocus(action.windowId);
 		break;
-	}
 	case 'WINDOW_CLOSE': {
+		const isFocusedWindow = draft.windowId === action.windowId;
+		if (isFocusedWindow) {
+			const firstBackgroundWindow = Object.keys(draft.backgroundWindows)[0];
+			handleFocus(firstBackgroundWindow);
+		}
 		delete draft.backgroundWindows[action.windowId];
 		break;
 	}
@@ -1512,6 +1519,9 @@ const reducer = produce((draft: Draft<State> = defaultState, action: any) => {
 				...action.value,
 				timestamp: Date.now(),
 			};
+			break;
+		case 'TOAST_HIDE':
+			draft.toast = null;
 			break;
 
 		}

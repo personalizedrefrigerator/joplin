@@ -32,7 +32,10 @@ export default (props: Props) => {
 		popupManager.createPopup(() => toast.message, {
 			type: toast.type as string as NotificationType,
 		}).scheduleDismiss(toast.duration);
-	}, [toast.message, toast.duration, toast.type, popupManager]);
+		// toast.timestamp needs to be included in the dependency list to allow
+		// showing multiple toasts with the same message, one after another.
+		// See https://github.com/laurent22/joplin/issues/11783
+	}, [toast.message, toast.duration, toast.type, toast.timestamp, popupManager]);
 
 	return <div style={{ display: 'none' }}/>;
 };

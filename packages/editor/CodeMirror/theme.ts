@@ -8,7 +8,7 @@ import { tags } from '@lezer/highlight';
 import { EditorView } from '@codemirror/view';
 import { Extension } from '@codemirror/state';
 
-import { inlineMathTag, mathTag } from './markdown/markdownMathParser';
+import { inlineMathTag, mathTag } from './markdown/MarkdownMathExtension';
 import { EditorTheme } from '../types';
 
 // For an example on how to customize the theme, see:
@@ -201,6 +201,10 @@ const createTheme = (theme: EditorTheme): Extension[] => {
 			opacity: 0.661,
 		},
 
+		'& .cm-strike': {
+			textDecoration: 'line-through',
+		},
+
 		// Applying font size changes with CSS rather than the theme below works
 		// around an issue where the border for code blocks in headings was too
 		// small.
@@ -227,6 +231,11 @@ const createTheme = (theme: EditorTheme): Extension[] => {
 		'& .cm-h6': {
 			...baseHeadingStyle,
 			fontSize: '1.0em',
+		},
+
+		'& .cm-highlighted': {
+			color: theme.searchMarkerColor,
+			backgroundColor: theme.searchMarkerBackgroundColor,
 		},
 
 		// Style the search widget. Use ':root' to increase the selector's precedence

@@ -580,7 +580,14 @@ class MainScreenComponent extends React.Component<Props, State> {
 
 		return (
 			<div style={styles.messageBox}>
-				<span style={theme.textStyle}>{msg}</span>
+				<span
+					style={theme.textStyle}
+					role='alert'
+					// role='alert' has an implicit aria-live='assertive', which tells screen readers that changes
+					// to the warning's content should be announced as soon as possible. However, since it's generally
+					// okay for announcements related to these notifications to be delayed, use aria-live='polite'.
+					aria-live='polite'
+				>{msg}</span>
 			</div>
 		);
 	}

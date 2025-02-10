@@ -358,6 +358,7 @@ const CodeMirror = (props: NoteBodyEditorProps, ref: ForwardedRef<NoteBodyEditor
 		return {
 			language: isHTMLNote ? EditorLanguageType.Html : EditorLanguageType.Markdown,
 			readOnly: props.disabled,
+			markdownMarkEnabled: Setting.value('markdown.plugin.mark'),
 			katexEnabled: Setting.value('markdown.plugin.katex'),
 			themeData: {
 				...styles.globalTheme,

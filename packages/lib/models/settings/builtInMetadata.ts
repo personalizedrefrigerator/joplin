@@ -1677,7 +1677,7 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 			appTypes: [AppType.Desktop],
 			label: () => 'Enable auto-updates',
 			description: () => 'Enable this feature to receive notifications about updates and install them instead of manually downloading them. Restart app to start receiving auto-updates.',
-			show: () => shim.isWindows() || shim.isMac(),
+			show: () => shim.isWindows(),
 			section: 'application',
 			isGlobal: true,
 		},
