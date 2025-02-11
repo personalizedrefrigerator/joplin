@@ -46,6 +46,7 @@
 	],
 	"ignoreDeps": [
 		"@babel/core",
+		"@bam.tech/react-native-image-resizer",
 		"@codemirror/autocomplete",
 		"@codemirror/commands",
 		"@codemirror/lang-cpp",

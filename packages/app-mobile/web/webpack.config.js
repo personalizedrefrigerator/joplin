@@ -73,7 +73,7 @@ module.exports = {
 			'react-native-share': emptyLibraryMock,
 			'react-native-camera': emptyLibraryMock,
 			'react-native-zip-archive': emptyLibraryMock,
-			'react-native-document-picker': emptyLibraryMock,
+			'@react-native-documents/picker': emptyLibraryMock,
 			'react-native-exit-app': emptyLibraryMock,
 			'expo-camera': emptyLibraryMock,
 

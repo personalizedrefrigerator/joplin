@@ -9,6 +9,8 @@
 		"**/node_modules",
 		"gulpfile.ts",
 		"tools/*.ts",
+		// Dependency type definitions that conflict with global type definitions
+		"/node_modules/expo-modules-core/build/ts-declarations/global.d.ts"
 	],
 	"compilerOptions": {
 		"types": ["jest", "node"],

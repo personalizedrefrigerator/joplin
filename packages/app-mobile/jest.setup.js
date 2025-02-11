@@ -67,7 +67,7 @@ const emptyMockPackages = [
 	'react-native-share',
 	'react-native-file-viewer',
 	'react-native-image-picker',
-	'react-native-document-picker',
+	'@react-native-documents/picker',
 	'@joplin/react-native-saf-x',
 ];
 for (const packageName of emptyMockPackages) {
@@ -88,7 +88,7 @@ jest.mock('react-native-zip-archive', () => {
 	return { default: { } };
 });
 
-jest.mock('react-native-document-picker', () => ({ default: { } }));
+jest.mock('@react-native-documents/picker', () => ({ default: { } }));
 
 // Used by the renderer
 jest.doMock('react-native-vector-icons/Ionicons', () => {

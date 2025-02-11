@@ -5601,6 +5601,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@bam.tech/react-native-image-resizer@patch:@bam.tech/react-native-image-resizer@npm%3A3.0.10#./.yarn/patches/@bam.tech-react-native-image-resizer-npm-3.0.10-db5fa8a73d.patch::locator=root%40workspace%3A.":
+  version: 3.0.10
+  resolution: "@bam.tech/react-native-image-resizer@patch:@bam.tech/react-native-image-resizer@npm%3A3.0.10#./.yarn/patches/@bam.tech-react-native-image-resizer-npm-3.0.10-db5fa8a73d.patch::version=3.0.10&hash=282c5c&locator=root%40workspace%3A."
+  peerDependencies:
+    react: "*"
+    react-native: "*"
+  checksum: 96d5280b4f696d655e785935bfa2c214c1042f4f8ab95e72373ddeda8bc5c8215c3b6ded2d0b9974a627c6be70e4b831322fc47e2092078115556cd92956b418
+  languageName: node
+  linkType: hard
+
 "@bcoe/v8-coverage@npm:^0.2.3":
   version: 0.2.3
   resolution: "@bcoe/v8-coverage@npm:0.2.3"
@@ -8772,6 +8782,7 @@ __metadata:
     "@react-native-community/netinfo": 11.4.1
     "@react-native-community/push-notification-ios": 1.11.0
     "@react-native-community/slider": 4.5.5
+    "@react-native-documents/picker": 10.1.0
     "@react-native/babel-preset": 0.77.0
     "@react-native/metro-config": 0.77.0
     "@sqlite.org/sqlite-wasm": 3.46.0-build2
@@ -8781,7 +8792,7 @@ __metadata:
     "@types/fs-extra": 11.0.4
     "@types/jest": 29.5.12
     "@types/node": 18.19.64
-    "@types/react": ~18.3.12
+    "@types/react": 18.3.12
     "@types/react-native": 0.70.6
     "@types/react-redux": 7.1.33
     "@types/serviceworker": 0.0.95
@@ -8817,14 +8828,13 @@ __metadata:
     react-dom: 18.3.1
     react-native: 0.76.7
     react-native-device-info: 10.14.0
-    react-native-document-picker: 9.3.0
     react-native-dropdownalert: 5.1.0
     react-native-exit-app: 2.0.0
     react-native-file-viewer: 2.1.5
     react-native-fingerprint-scanner: 6.0.0
     react-native-fs: 2.20.0
     react-native-get-random-values: 1.11.0
-    react-native-image-picker: 7.1.1
+    react-native-image-picker: 8.0.0
     react-native-localize: 3.2.1
     react-native-modal-datetime-picker: 17.1.0
     react-native-paper: 5.12.5
@@ -11604,6 +11614,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@react-native-documents/picker@npm:10.1.0":
+  version: 10.1.0
+  resolution: "@react-native-documents/picker@npm:10.1.0"
+  peerDependencies:
+    react: "*"
+    react-native: "*"
+  checksum: b5876b164a30c54335f65a0f2eb5a9fe67a0fb3045166b6d56e1a40e610f13268d21593c82465bb3317194deca61b8a52d6546c0a1a50ce43e58417a6fd8214d
+  languageName: node
+  linkType: hard
+
 "@react-native/assets-registry@npm:0.76.7":
   version: 0.76.7
   resolution: "@react-native/assets-registry@npm:0.76.7"
@@ -14039,6 +14059,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/react@npm:18.3.12":
+  version: 18.3.12
+  resolution: "@types/react@npm:18.3.12"
+  dependencies:
+    "@types/prop-types": "*"
+    csstype: ^3.0.2
+  checksum: 4ab1577a8c2105a5e316536f724117c90eee5f4bd5c137fc82a2253d8c1fd299dedaa07e8dfc95d6e2f04a4be3cb8b0e1b06098c6233ebd55c508d88099395b7
+  languageName: node
+  linkType: hard
+
 "@types/react@npm:18.3.3":
   version: 18.3.3
   resolution: "@types/react@npm:18.3.3"
@@ -14057,16 +14087,6 @@ __metadata:
     "@types/scheduler": "*"
     csstype: ^3.0.2
   checksum: a51b98dd87838d161278fdf9dd78e6a4ff8c018f406d6647f77963e144fb52a8beee40c89fd0e7e840eaeaa8bd9fe2f34519410540b1a52d43a6f8b4d2fbce33
-  languageName: node
-  linkType: hard
-
-"@types/react@npm:~18.3.12":
-  version: 18.3.18
-  resolution: "@types/react@npm:18.3.18"
-  dependencies:
-    "@types/prop-types": "*"
-    csstype: ^3.0.2
-  checksum: 5933597bc9f53e282f0438f0bb76d0f0fab60faabe760ea806e05ffe6f5c61b9b4d363e1a03a8fea47c510d493c6cf926cdeeba9f7074fa97b61940c350245e7
   languageName: node
   linkType: hard
 
@@ -40068,22 +40088,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-document-picker@npm:9.3.0":
-  version: 9.3.0
-  resolution: "react-native-document-picker@npm:9.3.0"
-  dependencies:
-    invariant: ^2.2.4
-  peerDependencies:
-    react: "*"
-    react-native: "*"
-    react-native-windows: "*"
-  peerDependenciesMeta:
-    react-native-windows:
-      optional: true
-  checksum: 622c9bd3a17b7b92ff6b13571ccf2a916dd2477f2aa8c22b79e4b204156742ba95680dea912ee5ee56718f13c537107f5937e5bcf88d93cdf2142d508dc16351
-  languageName: node
-  linkType: hard
-
 "react-native-dropdownalert@npm:5.1.0":
   version: 5.1.0
   resolution: "react-native-dropdownalert@npm:5.1.0"
@@ -40150,13 +40154,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-image-picker@npm:7.1.1":
-  version: 7.1.1
-  resolution: "react-native-image-picker@npm:7.1.1"
+"react-native-image-picker@npm:8.0.0":
+  version: 8.0.0
+  resolution: "react-native-image-picker@npm:8.0.0"
   peerDependencies:
     react: "*"
     react-native: "*"
-  checksum: ae2a0f49d9405c490482fb4c8fb049ab0539d419860ec410485afdb8c92b7237c805a3189eb527fb5ac0fdab288d36a8b678350ff12a9a64d57c2fb46ceadffb
+  checksum: d1b90219f4ff77d700307bd3dfc7475463dfe5c1d9dc4da365535075df4baf44d0c411cf9f19a3f83226830ada18ad3728abc2b14f67c77b1f5e146ebbb0bdec
   languageName: node
   linkType: hard
 

@@ -1,0 +1,14 @@
+# Needed for compatibility with the new architecture on iOS.
+# See https://github.com/bamlab/react-native-image-resizer/issues/410
+diff --git a/react-native-image-resizer.podspec b/react-native-image-resizer.podspec
+index c7ba7d9e261abbb890cccf0c9dd58eba118083be..749803239f7765994408d525e3cf7cff787e847a 100644
+--- a/react-native-image-resizer.podspec
++++ b/react-native-image-resizer.podspec
+@@ -32,6 +32,7 @@ Pod::Spec.new do |s|
+     s.dependency "RCTRequired"
+     s.dependency "RCTTypeSafety"
+     s.dependency "ReactCommon/turbomodule/core"
++    install_modules_dependencies(s)
+   end
+ end
+ 
