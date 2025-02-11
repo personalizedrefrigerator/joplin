@@ -7061,6 +7061,19 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@dr.pogodin/react-native-fs@npm:2.30.3":
+  version: 2.30.3
+  resolution: "@dr.pogodin/react-native-fs@npm:2.30.3"
+  dependencies:
+    buffer: ^6.0.3
+    http-status-codes: ^2.3.0
+  peerDependencies:
+    react: "*"
+    react-native: "*"
+  checksum: 71fad35e51cf66d927c6f0b031142510f624dd61992c914f8375001e58eabe7540595faa58804b00dd3ea5fb05c18e92dbfec31f9219d3c7007a6d46667dbbcc
+  languageName: node
+  linkType: hard
+
 "@electron/asar@npm:^3.2.1":
   version: 3.2.4
   resolution: "@electron/asar@npm:3.2.4"
@@ -8765,6 +8778,7 @@ __metadata:
     "@babel/preset-env": 7.25.3
     "@babel/runtime": 7.25.0
     "@bam.tech/react-native-image-resizer": 3.0.10
+    "@dr.pogodin/react-native-fs": 2.30.3
     "@joplin/editor": ~3.3
     "@joplin/lib": ~3.3
     "@joplin/react-native-alarm-notification": ~3.3
@@ -8832,12 +8846,11 @@ __metadata:
     react-native-exit-app: 2.0.0
     react-native-file-viewer: 2.1.5
     react-native-fingerprint-scanner: 6.0.0
-    react-native-fs: 2.20.0
     react-native-get-random-values: 1.11.0
     react-native-image-picker: 8.0.0
     react-native-localize: 3.2.1
     react-native-modal-datetime-picker: 17.1.0
-    react-native-paper: 5.12.5
+    react-native-paper: 5.13.1
     react-native-popup-menu: 0.16.1
     react-native-quick-actions: 0.3.13
     react-native-quick-crypto: 0.7.5
@@ -17433,7 +17446,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"base-64@npm:0.1.0, base-64@npm:^0.1.0":
+"base-64@npm:0.1.0":
   version: 0.1.0
   resolution: "base-64@npm:0.1.0"
   checksum: 5a42938f82372ab5392cbacc85a5a78115cbbd9dbef9f7540fa47d78763a3a8bd7d598475f0d92341f66285afd377509851a9bb5c67bbecb89686e9255d5b3eb
@@ -28524,6 +28537,13 @@ __metadata:
     jsprim: ^1.2.2
     sshpk: ^1.7.0
   checksum: 3324598712266a9683585bb84a75dec4fd550567d5e0dd4a0fff6ff3f74348793404d3eeac4918fa0902c810eeee1a86419e4a2e92a164132dfe6b26743fb47c
+  languageName: node
+  linkType: hard
+
+"http-status-codes@npm:^2.3.0":
+  version: 2.3.0
+  resolution: "http-status-codes@npm:2.3.0"
+  checksum: dae3b99e0155441b6df28e8265ff27c56a45f82c6092f736414233e9ccf063d5ea93c1e1279e8b499c4642e2538b37995c76b1640ed3f615d0e2883d3a1dcfd5
   languageName: node
   linkType: hard
 
@@ -40120,22 +40140,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-fs@npm:2.20.0":
-  version: 2.20.0
-  resolution: "react-native-fs@npm:2.20.0"
-  dependencies:
-    base-64: ^0.1.0
-    utf8: ^3.0.0
-  peerDependencies:
-    react-native: "*"
-    react-native-windows: "*"
-  peerDependenciesMeta:
-    react-native-windows:
-      optional: true
-  checksum: 0be9bb9a5c13b501d0a3006efc3aa5c0b5b211456ee04718297f4e522532f3527f1daa220bd67d3b82d819ed8fdab8f64b7d6e0d7b768c1fd1d8ec9122d94316
-  languageName: node
-  linkType: hard
-
 "react-native-get-random-values@npm:1.11.0":
   version: 1.11.0
   resolution: "react-native-get-random-values@npm:1.11.0"
@@ -40190,9 +40194,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-paper@npm:5.12.5":
-  version: 5.12.5
-  resolution: "react-native-paper@npm:5.12.5"
+"react-native-paper@npm:5.13.1":
+  version: 5.13.1
+  resolution: "react-native-paper@npm:5.13.1"
   dependencies:
     "@callstack/react-theme-provider": ^3.0.9
     color: ^3.1.2
@@ -40202,7 +40206,7 @@ __metadata:
     react-native: "*"
     react-native-safe-area-context: "*"
     react-native-vector-icons: "*"
-  checksum: 35ce56e0bb19c46ce85adc47a504527b7ec455d1a15f3ace0d6fd438abd51b1fe30e1b44351950e16d6376ddbc18ecc94b558e267767d0a9fd886a5f66a4c322
+  checksum: ef16fbb57986f09f2080e98ddb7977c494d6accb36767101de32199849bba8764e2bcd528a5d1c08940f4430cb86dabb6baaf5b33a539670221cbbfcc01f2d5e
   languageName: node
   linkType: hard
 
@@ -48026,13 +48030,6 @@ __metadata:
   version: 1.0.4
   resolution: "utf8-byte-length@npm:1.0.4"
   checksum: f188ca076ec094d58e7009fcc32623c5830c7f0f3e15802bfa4fdd1e759454a481fc4ac05e0fa83b7736e77af628a9ee0e57dcc89683d688fde3811473e42143
-  languageName: node
-  linkType: hard
-
-"utf8@npm:^3.0.0":
-  version: 3.0.0
-  resolution: "utf8@npm:3.0.0"
-  checksum: cb89a69ad9ab393e3eae9b25305b3ff08bebca9adc839191a34f90777eb2942f86a96369d2839925fea58f8f722f7e27031d697f10f5f39690f8c5047303e62d
   languageName: node
   linkType: hard
 

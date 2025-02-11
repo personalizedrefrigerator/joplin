@@ -103,7 +103,7 @@ jest.doMock('react-native-vector-icons/Ionicons', () => {
 // Use a temporary folder instead.
 const tempDirectoryPath = path.join(tmpdir(), `appmobile-test-${uuid.createNano()}`);
 
-jest.doMock('react-native-fs', () => {
+jest.doMock('@dr.pogodin/react-native-fs', () => {
 	return {
 		CachesDirectoryPath: tempDirectoryPath,
 	};
