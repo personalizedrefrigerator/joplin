@@ -140,6 +140,7 @@ import lockToSingleInstance from './utils/lockToSingleInstance';
 import { AppState } from './utils/types';
 import { getDisplayParentId } from '@joplin/lib/services/trash';
 import PluginNotification from './components/plugins/PluginNotification';
+import NativeWhisperModule from './specs/NativeWhisperModule';
 
 const logger = Logger.create('root');
 
@@ -842,6 +843,7 @@ async function initialize(dispatch: Dispatch) {
 	if (Setting.value('env') === 'dev') {
 		if (Platform.OS !== 'web') {
 			await runRsaIntegrationTests();
+			alert('startup: ' + NativeWhisperModule.test());
 		} else {
 			logger.info('Skipping encryption tests -- not supported on web.');
 		}

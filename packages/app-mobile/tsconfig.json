@@ -9,6 +9,7 @@
 		"**/node_modules",
 		"gulpfile.ts",
 		"tools/*.ts",
+		"specs/*.ts"
 	],
 	"compilerOptions": {
 		"types": ["jest", "node"],

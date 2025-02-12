@@ -1,0 +1,3 @@
+[submodule "packages/app-mobile/vendor/whisper.cpp"]
+	path = packages/app-mobile/vendor/whisper.cpp
+	url = https://github.com/ggerganov/whisper.cpp.git
