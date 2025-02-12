@@ -18,6 +18,7 @@ interface ButtonSpec {
 
 interface ActionButtonProps {
 	menuContent?: React.ReactNode;
+	onMenuToggled?: (visible: boolean)=> void;
 
 	// If not given, an "add" button will be used.
 	mainButton?: ButtonSpec;
@@ -42,8 +43,10 @@ const FloatingActionButton = (props: ActionButtonProps) => {
 		props.dispatch({
 			type: 'SIDE_MENU_CLOSE',
 		});
-		setOpen(open => !open);
-	}, [setOpen, props.dispatch]);
+		const newOpen = !open;
+		setOpen(newOpen);
+		props.onMenuToggled?.(newOpen);
+	}, [setOpen, open, props.onMenuToggled, props.dispatch]);
 
 	const closedIcon = useIcon(props.mainButton?.icon ?? 'add');
 	const openIcon = useIcon('close');
