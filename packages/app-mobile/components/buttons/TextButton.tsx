@@ -18,10 +18,11 @@ export enum ButtonSize {
 	Larger,
 }
 
-interface Props extends Omit<ButtonProps, 'item'|'onPress'|'children'> {
+interface Props extends Omit<ButtonProps, 'item'|'onPress'|'children'|'style'> {
 	themeId: number;
 	type: ButtonType;
 	size?: ButtonSize;
+	style?: TextStyle;
 	onPress: ()=> void;
 	children: ReactNode;
 }
