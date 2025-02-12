@@ -8787,7 +8787,7 @@ __metadata:
     "@joplin/tools": ~3.3
     "@joplin/utils": ~3.3
     "@js-draw/material-icons": 1.27.2
-    "@pmmmwh/react-refresh-webpack-plugin": ^0.5.15
+    "@pmmmwh/react-refresh-webpack-plugin": 0.5.15
     "@react-native-clipboard/clipboard": 1.14.3
     "@react-native-community/cli": 15.0.1
     "@react-native-community/cli-platform-android": 15.0.1
@@ -11169,7 +11169,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@pmmmwh/react-refresh-webpack-plugin@npm:^0.5.15":
+"@pmmmwh/react-refresh-webpack-plugin@npm:0.5.15":
   version: 0.5.15
   resolution: "@pmmmwh/react-refresh-webpack-plugin@npm:0.5.15"
   dependencies:
@@ -20488,6 +20488,15 @@ __metadata:
   dependencies:
     browserslist: ^4.23.0
   checksum: 5e7430329358bced08c30950512d2081aea0a5652b4c5892cbb3c4a6db05b0d3893a191a955162a07fdb5f4fe74e61b6429fdb503f54e062336d76e43c9555d9
+  languageName: node
+  linkType: hard
+
+"core-js-compat@npm:^3.37.1, core-js-compat@npm:^3.38.0":
+  version: 3.40.0
+  resolution: "core-js-compat@npm:3.40.0"
+  dependencies:
+    browserslist: ^4.24.3
+  checksum: 7ad00607c481ab2ded13d72be9ca5db5bbf42e221a175e905fb425e1ef520864aea28736c7283f57e9552d570eb6204bed87fbc8b9eab0fcfd9a7830dacccd43
   languageName: node
   linkType: hard
 
