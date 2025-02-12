@@ -97,7 +97,6 @@ const useStyles = ({ overlayColor, isLeftMenu, isVerticalMenu, menuSize, menuOpe
 					right: 0,
 				}),
 
-				overflow: 'hidden',
 				transform: [
 					{ translateY: menuTranslateY },
 					{ perspective: 1000 },
