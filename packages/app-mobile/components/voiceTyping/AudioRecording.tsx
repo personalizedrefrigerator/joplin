@@ -135,10 +135,10 @@ const AudioRecording: React.FC<Props> = props => {
 	}, []);
 
 	const actions = <>
+		<SecondaryButton onPress={props.onDismiss}>{_('Cancel')}</SecondaryButton>
 		<PrimaryButton onPress={onStartStopRecording}>{
 			recordingState === RecorderState.Idle ? _('Start recording') : _('Done')
 		}</PrimaryButton>
-		<SecondaryButton onPress={props.onDismiss}>{_('Cancel')}</SecondaryButton>
 	</>;
 
 	const durationDescription = <Text>{

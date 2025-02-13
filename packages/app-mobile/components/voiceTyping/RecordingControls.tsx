@@ -28,6 +28,8 @@ const styles = StyleSheet.create({
 	actionContainer: {
 		flexDirection: 'row',
 		justifyContent: 'flex-end',
+		gap: 6,
+		marginBottom: 6,
 	},
 });
 
