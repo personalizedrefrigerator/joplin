@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Surface, SegmentedButtons } from 'react-native-paper';
 import { _ } from '@joplin/lib/locale';
 import { AppState } from '../../utils/types';
@@ -8,6 +8,7 @@ import { View, StyleSheet, Platform } from 'react-native';
 import SpeechToText from './SpeechToText';
 import { OnFileSavedCallback } from './types';
 import AudioRecording from './AudioRecording';
+import Setting from '@joplin/lib/models/Setting';
 
 enum VoiceTypingMode {
 	AudioRecording = 'record',
@@ -36,6 +37,13 @@ const supportsSpeechToText = Platform.OS === 'android';
 
 const VoiceTypingDialog: React.FC<Props> = props => {
 	const [voiceTypingMode, setVoiceTypingMode] = useState<VoiceTypingMode>(props.defaultVoiceTypingMode);
+
+	useEffect(() => {
+		if (voiceTypingMode !== props.defaultVoiceTypingMode) {
+			Setting.setValue('voiceTyping.mode', voiceTypingMode);
+		}
+	}, [voiceTypingMode, props.defaultVoiceTypingMode]);
+
 	let content;
 	if (voiceTypingMode === VoiceTypingMode.AudioRecording || !supportsSpeechToText) {
 		content = <AudioRecording
