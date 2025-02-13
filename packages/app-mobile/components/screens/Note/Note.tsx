@@ -41,7 +41,6 @@ import ImageEditor from '../../NoteEditor/ImageEditor/ImageEditor';
 import promptRestoreAutosave from '../../NoteEditor/ImageEditor/promptRestoreAutosave';
 import isEditableResource from '../../NoteEditor/ImageEditor/isEditableResource';
 import VoiceTypingDialog from '../../voiceTyping/VoiceTypingDialog';
-import { isSupportedLanguage } from '../../../services/voiceTyping/vosk';
 import { ChangeEvent as EditorChangeEvent, SelectionRangeChangeEvent, UndoRedoDepthChangeEvent } from '@joplin/editor/events';
 import { join } from 'path';
 import { Dispatch } from 'redux';
@@ -1194,17 +1193,14 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 			});
 		}
 
-		// Voice typing is enabled only on Android for now
-		if (shim.mobilePlatform() === 'android' && isSupportedLanguage(currentLocale())) {
-			output.push({
-				title: _('Voice typing...'),
-				onPress: () => {
-					// this.voiceRecording_onPress();
-					this.setState({ voiceTypingDialogShown: true });
-				},
-				disabled: readOnly,
-			});
-		}
+		output.push({
+			title: _('Voice typing...'),
+			onPress: () => {
+				// this.voiceRecording_onPress();
+				this.setState({ voiceTypingDialogShown: true });
+			},
+			disabled: readOnly,
+		});
 
 		const commandService = CommandService.instance();
 		const whenContext = commandService.currentWhenClauseContext();
@@ -1592,7 +1588,12 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 
 		const renderVoiceTypingDialog = () => {
 			if (!this.state.voiceTypingDialogShown) return null;
-			return <VoiceTypingDialog locale={currentLocale()} onText={this.voiceTypingDialog_onText} onDismiss={this.voiceTypingDialog_onDismiss}/>;
+			return <VoiceTypingDialog
+				locale={currentLocale()}
+				onText={this.voiceTypingDialog_onText}
+				onFile={event => this.attachFile(event, 'audio')}
+				onDismiss={this.voiceTypingDialog_onDismiss}
+			/>;
 		};
 
 		return (

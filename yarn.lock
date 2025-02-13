@@ -8396,6 +8396,7 @@ __metadata:
     deprecated-react-native-prop-types: 5.0.0
     events: 3.3.0
     expo: 51.0.26
+    expo-av: 15.0.2
     expo-camera: 15.0.16
     fast-deep-equal: 3.1.3
     fs-extra: 11.2.0
@@ -24698,6 +24699,21 @@ __metadata:
   peerDependencies:
     expo: "*"
   checksum: abf6afee29db1df356008b2260ecfd37eafdeeda989deeaf546d6c6857f82f71efe6d2f6e348d5bf0f077325f9ce2c8dad006ad5d8d2df35cdd9bf3dc15e714a
+  languageName: node
+  linkType: hard
+
+"expo-av@npm:15.0.2":
+  version: 15.0.2
+  resolution: "expo-av@npm:15.0.2"
+  peerDependencies:
+    expo: "*"
+    react: "*"
+    react-native: "*"
+    react-native-web: "*"
+  peerDependenciesMeta:
+    react-native-web:
+      optional: true
+  checksum: f4ffdfe2bd7b07c9dc08d8c30289968d2e15e4cb70cfc4a1c4659a86ceed86553d5aceac04809f33bdcc7dd93883b59c204e71bf1d4a3f21bfea02a9cbd3a90b
   languageName: node
   linkType: hard
 
