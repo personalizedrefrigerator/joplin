@@ -770,6 +770,7 @@ packages/app-mobile/components/screens/tags.js
 packages/app-mobile/components/side-menu-content.js
 packages/app-mobile/components/testing/TestProviderStack.js
 packages/app-mobile/components/voiceTyping/AudioRecording.js
+packages/app-mobile/components/voiceTyping/RecordingControls.js
 packages/app-mobile/components/voiceTyping/SpeechToText.js
 packages/app-mobile/components/voiceTyping/VoiceTypingDialog.js
 packages/app-mobile/components/voiceTyping/types.js

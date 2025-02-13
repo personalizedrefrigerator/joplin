@@ -1,14 +1,16 @@
 import * as React from 'react';
-import { PrimaryButton } from '../buttons';
+import { PrimaryButton, SecondaryButton } from '../buttons';
 import { _ } from '@joplin/lib/locale';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Audio } from 'expo-av';
 import Logger from '@joplin/utils/Logger';
-import { OnFileSavedCallback } from './types';
+import { OnFileSavedCallback, RecorderState } from './types';
 import { Platform } from 'react-native';
 import shim from '@joplin/lib/shim';
 import FsDriverWeb from '../../utils/fs-driver/fs-driver-rn.web';
 import uuid from '@joplin/lib/uuid';
+import RecordingControls from './RecordingControls';
+import { Text } from 'react-native-paper';
 
 const logger = Logger.create('AudioRecording');
 
@@ -17,43 +19,45 @@ interface Props {
 	onDismiss: ()=> void;
 }
 
-enum RecordingState {
-	NotStarted,
-	Starting,
-	Recording,
-}
-
 const recordingOptions = Audio.RecordingOptionsPresets.LOW_QUALITY;
 
 const AudioRecording: React.FC<Props> = props => {
 	const [permissionResponse, requestPermission] = Audio.usePermissions();
-	const [recordingState, setRecordingState] = useState<RecordingState>(RecordingState.NotStarted);
+	const [recordingState, setRecordingState] = useState<RecorderState>(RecorderState.Idle);
+	const [error, setError] = useState('');
+	const [duration, setDuration] = useState(0);
+
 	const recordingRef = useRef<Audio.Recording|null>();
 	const onStartStopRecording = useCallback(async () => {
-		if (recordingState === RecordingState.NotStarted) {
+		if (recordingState === RecorderState.Idle) {
 			try {
-				setRecordingState(RecordingState.Starting);
+				setRecordingState(RecorderState.Loading);
 				if (permissionResponse?.status !== 'granted') {
 					await requestPermission();
 				}
 				await Audio.setAudioModeAsync({
 					allowsRecordingIOS: true,
 				});
-				setRecordingState(RecordingState.Recording);
+				setRecordingState(RecorderState.Recording);
 				const recording = new Audio.Recording();
 				await recording.prepareToRecordAsync(recordingOptions);
+				recording.setOnRecordingStatusUpdate(status => {
+					setDuration(status.durationMillis);
+				});
 				recordingRef.current = recording;
 				await recording.startAsync();
 			} catch (error) {
 				logger.error('Error starting recording:', error);
-				setRecordingState(RecordingState.NotStarted);
+				setError(`Recording error: ${error}`);
+				setRecordingState(RecorderState.Error);
+
 				void recordingRef.current?.stopAndUnloadAsync();
 				recordingRef.current = null;
 			}
-		} else if (recordingState === RecordingState.Recording && recordingRef.current) {
+		} else if (recordingState === RecorderState.Recording && recordingRef.current) {
 			const recording = recordingRef.current;
 			recordingRef.current = null;
-			setRecordingState(RecordingState.NotStarted);
+			setRecordingState(RecorderState.Idle);
 			await recording.stopAndUnloadAsync();
 
 			await Audio.setAudioModeAsync({
@@ -102,12 +106,26 @@ const AudioRecording: React.FC<Props> = props => {
 		}
 	}, []);
 
-	return <>
+	const actions = <>
 		<PrimaryButton onPress={onStartStopRecording}>{
-			recordingState === RecordingState.NotStarted ? _('Start') : _('Done')
+			recordingState === RecorderState.Idle ? _('Start') : _('Done')
 		}</PrimaryButton>
-		<PrimaryButton onPress={props.onDismiss}>{_('Cancel')}</PrimaryButton>
+		<SecondaryButton onPress={props.onDismiss}>{_('Cancel')}</SecondaryButton>
 	</>;
+
+	const durationDescription = <Text>{
+		recordingState === RecorderState.Recording
+			? _('%ds', Math.floor(duration / 1000))
+			: ''
+	}</Text>;
+
+	return <RecordingControls
+		recorderState={recordingState}
+		heading={recordingState === RecorderState.Recording ? _('Recording...') : _('Voice recorder')}
+		content={error}
+		preview={durationDescription}
+		actions={actions}
+	/>;
 };
 
 export default AudioRecording;
