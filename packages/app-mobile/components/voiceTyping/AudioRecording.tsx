@@ -108,7 +108,7 @@ const AudioRecording: React.FC<Props> = props => {
 
 	const actions = <>
 		<PrimaryButton onPress={onStartStopRecording}>{
-			recordingState === RecorderState.Idle ? _('Start') : _('Done')
+			recordingState === RecorderState.Idle ? _('Start recording') : _('Done')
 		}</PrimaryButton>
 		<SecondaryButton onPress={props.onDismiss}>{_('Cancel')}</SecondaryButton>
 	</>;
@@ -122,7 +122,11 @@ const AudioRecording: React.FC<Props> = props => {
 	return <RecordingControls
 		recorderState={recordingState}
 		heading={recordingState === RecorderState.Recording ? _('Recording...') : _('Voice recorder')}
-		content={error}
+		content={
+			recordingState === RecorderState.Idle
+				? _('Click "start" to attach a new voice memo to the note.')
+				: error
+		}
 		preview={durationDescription}
 		actions={actions}
 	/>;

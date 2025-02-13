@@ -8,7 +8,7 @@ import { RecorderState } from './types';
 interface Props {
 	recorderState: RecorderState;
 	heading: string;
-	content: React.ReactNode;
+	content: React.ReactNode|string;
 	preview: React.ReactNode;
 	actions: React.ReactNode;
 }
