@@ -12,6 +12,7 @@ import uuid from '@joplin/lib/uuid';
 import RecordingControls from './RecordingControls';
 import { Text } from 'react-native-paper';
 import { AndroidAudioEncoder, AndroidOutputFormat, IOSAudioQuality, IOSOutputFormat, RecordingOptions } from 'expo-av/build/Audio';
+import time from '@joplin/lib/time';
 
 const logger = Logger.create('AudioRecording');
 
@@ -49,83 +50,101 @@ const recordingOptions: RecordingOptions = {
 	},
 };
 
-const AudioRecording: React.FC<Props> = props => {
+const getRecordingFileName = (extension: string) => {
+	return `recording-${time.formatDateToLocal(new Date())}${extension}`;
+};
+
+const recordingToSaveData = async (recording: Audio.Recording) => {
+	let uri = recording.getURI();
+	let type: string|undefined;
+	let fileName;
+
+	if (Platform.OS === 'web') {
+		// On web, we need to fetch the result (which is a blob URL) and save it in our
+		// virtual file system so that it can be processed elsewhere.
+		const fetchResult = await fetch(uri);
+		const blob = await fetchResult.blob();
+
+		// expo-av records to webm format on web
+		fileName = getRecordingFileName('.webm');
+		const file = new File([blob], fileName);
+		type = 'audio/webm';
+
+		const path = `/tmp/${uuid.create()}-${fileName}`;
+		await (shim.fsDriver() as FsDriverWeb).createReadOnlyVirtualFile(path, file);
+		uri = path;
+	} else {
+		const extension = Platform.select({
+			android: recordingOptions.android.extension,
+			ios: recordingOptions.ios.extension,
+			default: '',
+		});
+		fileName = getRecordingFileName(extension);
+	}
+
+	return { uri, fileName, type };
+};
+
+const useAudioRecorder = (onFileSaved: OnFileSavedCallback, onDismiss: ()=> void) => {
 	const [permissionResponse, requestPermission] = Audio.usePermissions();
 	const [recordingState, setRecordingState] = useState<RecorderState>(RecorderState.Idle);
 	const [error, setError] = useState('');
 	const [duration, setDuration] = useState(0);
 
 	const recordingRef = useRef<Audio.Recording|null>();
-	const onStartStopRecording = useCallback(async () => {
-		if (recordingState === RecorderState.Idle) {
-			try {
-				setRecordingState(RecorderState.Loading);
-				if (permissionResponse?.status !== 'granted') {
-					await requestPermission();
+	const onStartRecording = useCallback(async () => {
+		try {
+			setRecordingState(RecorderState.Loading);
+			if (permissionResponse?.status !== 'granted') {
+				const response = await requestPermission();
+				if (!response.granted) {
+					throw new Error(_('Missing permission to record audio.'));
 				}
-				await Audio.setAudioModeAsync({
-					allowsRecordingIOS: true,
-				});
-				setRecordingState(RecorderState.Recording);
-				const recording = new Audio.Recording();
-				await recording.prepareToRecordAsync(recordingOptions);
-				recording.setOnRecordingStatusUpdate(status => {
-					setDuration(status.durationMillis);
-				});
-				recordingRef.current = recording;
-				await recording.startAsync();
-			} catch (error) {
-				logger.error('Error starting recording:', error);
-				setError(`Recording error: ${error}`);
-				setRecordingState(RecorderState.Error);
-
-				void recordingRef.current?.stopAndUnloadAsync();
-				recordingRef.current = null;
 			}
-		} else if (recordingState === RecorderState.Recording && recordingRef.current) {
-			const recording = recordingRef.current;
-			recordingRef.current = null;
-			setRecordingState(RecorderState.Idle);
-			await recording.stopAndUnloadAsync();
 
 			await Audio.setAudioModeAsync({
-				allowsRecordingIOS: false,
+				allowsRecordingIOS: true,
 			});
-
-			let uri = recording.getURI();
-			let type: string|undefined;
-			let fileName;
-			if (Platform.OS === 'web') {
-				// On web, we need to fetch the result (which is a blob URL) and save it in our
-				// virtual file system so that it can be processed elsewhere.
-				const fetchResult = await fetch(uri);
-				const blob = await fetchResult.blob();
-
-				// expo-av records to webm format on web
-				fileName = `recording-${uuid.create()}.webm`;
-				const file = new File([blob], fileName);
-				type = 'audio/webm';
-
-				const path = `/tmp/${fileName}`;
-				await (shim.fsDriver() as FsDriverWeb).createReadOnlyVirtualFile(path, file);
-				uri = path;
-			} else {
-				const extension = Platform.select({
-					android: recordingOptions.android.extension,
-					ios: recordingOptions.ios.extension,
-					default: '',
-				});
-				fileName = `recording${extension}`;
-			}
-
-			props.onFileSaved({
-				uri,
-				type,
-				fileName,
+			setRecordingState(RecorderState.Recording);
+			const recording = new Audio.Recording();
+			await recording.prepareToRecordAsync(recordingOptions);
+			recording.setOnRecordingStatusUpdate(status => {
+				setDuration(status.durationMillis);
 			});
-			props.onDismiss();
+			recordingRef.current = recording;
+			await recording.startAsync();
+		} catch (error) {
+			logger.error('Error starting recording:', error);
+			setError(`Recording error: ${error}`);
+			setRecordingState(RecorderState.Error);
+
+			void recordingRef.current?.stopAndUnloadAsync();
+			recordingRef.current = null;
 		}
-	}, [recordingState, permissionResponse, requestPermission, props.onFileSaved, props.onDismiss]);
+	}, [permissionResponse, requestPermission]);
+
+	const onStopRecording = useCallback(async () => {
+		const recording = recordingRef.current;
+		recordingRef.current = null;
+		setRecordingState(RecorderState.Idle);
+		await recording.stopAndUnloadAsync();
+
+		await Audio.setAudioModeAsync({
+			allowsRecordingIOS: false,
+		});
+
+		const saveEvent = await recordingToSaveData(recording);
+		onFileSaved(saveEvent);
+		onDismiss();
+	}, [onFileSaved, onDismiss]);
+
+	const onStartStopRecording = useCallback(async () => {
+		if (recordingState === RecorderState.Idle) {
+			await onStartRecording();
+		} else if (recordingState === RecorderState.Recording && recordingRef.current) {
+			await onStopRecording();
+		}
+	}, [recordingState, onStartRecording, onStopRecording]);
 
 	useEffect(() => () => {
 		if (recordingRef.current) {
@@ -134,11 +153,17 @@ const AudioRecording: React.FC<Props> = props => {
 		}
 	}, []);
 
+	return { onStartStopRecording, error, duration, recordingState };
+};
+
+const AudioRecording: React.FC<Props> = props => {
+	const { recordingState, onStartStopRecording, duration, error } = useAudioRecorder(props.onFileSaved, props.onDismiss);
+
+	const startStopButtonLabel = recordingState === RecorderState.Idle ? _('Start recording') : _('Done');
+	const allowStartStop = recordingState === RecorderState.Idle || recordingState === RecorderState.Recording;
 	const actions = <>
 		<SecondaryButton onPress={props.onDismiss}>{_('Cancel')}</SecondaryButton>
-		<PrimaryButton onPress={onStartStopRecording}>{
-			recordingState === RecorderState.Idle ? _('Start recording') : _('Done')
-		}</PrimaryButton>
+		<PrimaryButton disabled={!allowStartStop} onPress={onStartStopRecording}>{startStopButtonLabel}</PrimaryButton>
 	</>;
 
 	const durationDescription = <Text>{
