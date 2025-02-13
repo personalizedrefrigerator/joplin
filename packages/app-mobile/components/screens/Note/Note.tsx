@@ -90,7 +90,6 @@ interface Props extends BaseProps {
 	themeId: number;
 	editorFontSize: number;
 	editorFont: number; // e.g. Setting.FONT_MENLO
-	viewerFontSize: number;
 	showSideMenu: boolean;
 	searchQuery: string;
 	ftsEnabled: number;
@@ -1467,15 +1466,12 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 						noteMarkupLanguage={note.markup_language}
 						noteResources={this.state.noteResources}
 						highlightedKeywords={keywords}
-						themeId={this.props.themeId}
-						fontSize={this.props.viewerFontSize}
 						noteHash={this.props.noteHash}
 						onCheckboxChange={this.onBodyViewerCheckboxChange}
 						onMarkForDownload={this.onMarkForDownload}
 						onRequestEditResource={this.onEditResource}
 						onScroll={this.onBodyViewerScroll}
 						initialScroll={this.lastBodyScroll}
-						pluginStates={this.props.plugins}
 					/>
 				);
 		} else {
@@ -1646,7 +1642,6 @@ const NoteScreen = connect((state: AppState) => {
 		themeId: state.settings.theme,
 		editorFont: state.settings['style.editor.fontFamily'] as number,
 		editorFontSize: state.settings['style.editor.fontSize'],
-		viewerFontSize: state.settings['style.viewer.fontSize'],
 		toolbarEnabled: state.settings['editor.mobile.toolbarEnabled'],
 		ftsEnabled: state.settings['db.ftsEnabled'],
 		sharedData: state.sharedData,

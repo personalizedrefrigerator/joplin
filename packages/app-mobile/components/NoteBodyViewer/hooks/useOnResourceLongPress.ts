@@ -8,6 +8,7 @@ import shim from '@joplin/lib/shim';
 import shareFile from '../../../utils/shareFile';
 import Logger from '@joplin/utils/Logger';
 import { DialogContext } from '../../DialogManager';
+import NavService from '@joplin/lib/services/NavService';
 
 const logger = Logger.create('useOnResourceLongPress');
 
@@ -41,6 +42,9 @@ export default function useOnResourceLongPress(callbacks: Callbacks) {
 			if (mime && isEditableResource(mime)) {
 				actions.push({ text: _('Edit'), id: 'edit' });
 			}
+			if (mime && mime.startsWith('audio/')) {
+				actions.push({ text: _('Transcribe'), id: 'transcribe' });
+			}
 			actions.push({ text: _('Share'), id: 'share' });
 
 			const action = await dialogManager.showMenu(name, actions);
@@ -50,6 +54,10 @@ export default function useOnResourceLongPress(callbacks: Callbacks) {
 			} else if (action === 'share') {
 				const fileToShare = await copyToCache(resource);
 				await shareFile(fileToShare, resource.mime);
+			} else if (action === 'transcribe') {
+				await NavService.go('AudioTranscription', {
+					resourceId,
+				});
 			} else if (action === 'edit') {
 				onRequestEditResource(`edit:${resourceId}`);
 			}

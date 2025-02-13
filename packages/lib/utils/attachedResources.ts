@@ -1,3 +1,4 @@
+import { ResourceInfos } from '@joplin/renderer/types';
 import BaseModel from '../BaseModel';
 import Note from '../models/Note';
 import Resource from '../models/Resource';
@@ -9,8 +10,7 @@ export function clearResourceCache() {
 	resourceCache_ = {};
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-export default async function attachedResources(noteBody: string): Promise<any> {
+export default async function attachedResources(noteBody: string): Promise<ResourceInfos> {
 	if (!noteBody) return {};
 	const resourceIds = await Note.linkedItemIdsByType(BaseModel.TYPE_RESOURCE, noteBody);
 

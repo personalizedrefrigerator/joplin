@@ -15,11 +15,15 @@ import uuid from '@joplin/lib/uuid';
 import { PluginStates } from '@joplin/lib/services/plugins/reducer';
 import useContentScripts from './hooks/useContentScripts';
 import { MarkupLanguage } from '@joplin/renderer';
+import { connect } from 'react-redux';
+import { AppState } from '../../utils/types';
 
 interface Props {
 	themeId: number;
-	style: ViewStyle;
 	fontSize: number;
+	pluginStates: PluginStates;
+
+	style: ViewStyle;
 	noteBody: string;
 	noteMarkupLanguage: MarkupLanguage;
 	highlightedKeywords: string[];
@@ -33,10 +37,9 @@ interface Props {
 	onMarkForDownload?: OnMarkForDownloadCallback;
 	onScroll: (scrollTop: number)=> void;
 	onLoadEnd?: ()=> void;
-	pluginStates: PluginStates;
 }
 
-export default function NoteBodyViewer(props: Props) {
+const NoteBodyViewer: React.FC<Props> = (props: Props) => {
 	const webviewRef = useRef<WebViewControl>(null);
 
 	const onScroll = useCallback(async (scrollTop: number) => {
@@ -117,4 +120,10 @@ export default function NoteBodyViewer(props: Props) {
 			/>
 		</View>
 	);
-}
+};
+
+export default connect((state: AppState) => ({
+	fontSize: state.settings['style.viewer.fontSize'],
+	themeId: state.settings.theme,
+	pluginStates: state.pluginService.plugins,
+}))(NoteBodyViewer);

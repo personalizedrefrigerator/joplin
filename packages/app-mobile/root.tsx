@@ -140,6 +140,7 @@ import lockToSingleInstance from './utils/lockToSingleInstance';
 import { AppState } from './utils/types';
 import { getDisplayParentId } from '@joplin/lib/services/trash';
 import PluginNotification from './components/plugins/PluginNotification';
+import AudioTranscription from './components/screens/AudioTranscription';
 
 const logger = Logger.create('root');
 
@@ -1276,6 +1277,7 @@ class AppComponent extends React.Component {
 			ProfileSwitcher: { screen: ProfileSwitcher },
 			ProfileEditor: { screen: ProfileEditor },
 			Log: { screen: LogScreen },
+			AudioTranscription: { screen: AudioTranscription },
 			Status: { screen: StatusScreen },
 			Search: { screen: SearchScreen },
 			Config: { screen: ConfigScreen },
