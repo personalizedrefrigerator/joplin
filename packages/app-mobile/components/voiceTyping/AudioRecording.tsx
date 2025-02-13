@@ -11,6 +11,7 @@ import FsDriverWeb from '../../utils/fs-driver/fs-driver-rn.web';
 import uuid from '@joplin/lib/uuid';
 import RecordingControls from './RecordingControls';
 import { Text } from 'react-native-paper';
+import { AndroidAudioEncoder, AndroidOutputFormat, IOSAudioQuality, IOSOutputFormat, RecordingOptions } from 'expo-av/build/Audio';
 
 const logger = Logger.create('AudioRecording');
 
@@ -19,7 +20,34 @@ interface Props {
 	onDismiss: ()=> void;
 }
 
-const recordingOptions = Audio.RecordingOptionsPresets.LOW_QUALITY;
+// Modified from the Expo default recording options to create
+// .m4a recordings on both Android and iOS (rather than .3gp on Android).
+const recordingOptions: RecordingOptions = {
+	isMeteringEnabled: true,
+	android: {
+		extension: '.m4a',
+		outputFormat: AndroidOutputFormat.MPEG_4,
+		audioEncoder: AndroidAudioEncoder.AAC,
+		sampleRate: 44100,
+		numberOfChannels: 2,
+		bitRate: 64000,
+	},
+	ios: {
+		extension: '.m4a',
+		audioQuality: IOSAudioQuality.MIN,
+		outputFormat: IOSOutputFormat.MPEG4AAC,
+		sampleRate: 44100,
+		numberOfChannels: 2,
+		bitRate: 64000,
+		linearPCMBitDepth: 16,
+		linearPCMIsBigEndian: false,
+		linearPCMIsFloat: false,
+	},
+	web: {
+		mimeType: 'audio/webm',
+		bitsPerSecond: 128000,
+	},
+};
 
 const AudioRecording: React.FC<Props> = props => {
 	const [permissionResponse, requestPermission] = Audio.usePermissions();
