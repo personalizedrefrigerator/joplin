@@ -167,6 +167,7 @@ export interface EditorSettings {
 	keymap: EditorKeymap;
 	tabMovesFocus: boolean;
 
+	markdownMarkEnabled: boolean;
 	katexEnabled: boolean;
 	spellcheckEnabled: boolean;
 	readOnly: boolean;

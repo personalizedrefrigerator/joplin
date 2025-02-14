@@ -205,8 +205,10 @@ const BlockMathConfig: MarkdownConfig = {
 	wrap: wrappedTeXParser(blockMathContentTagName),
 };
 
-/** Markdown configuration for block and inline math support. */
-export const MarkdownMathExtension: MarkdownConfig[] = [
+// Markdown configuration for block and inline math support.
+const MarkdownMathExtension: MarkdownConfig[] = [
 	InlineMathConfig,
 	BlockMathConfig,
 ];
+
+export default MarkdownMathExtension;

@@ -4,10 +4,10 @@ import Icon from '../Icon';
 import { themeStyle } from '../global-style';
 import { connect } from 'react-redux';
 import { AppState } from '../../utils/types';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, View, ViewProps } from 'react-native';
 import { useMemo } from 'react';
 
-interface Props {
+interface Props extends ViewProps {
 	themeId: number;
 	title: string;
 	icon: string;
@@ -20,15 +20,16 @@ const useStyles = (themeId: number) => {
 
 		return StyleSheet.create({
 			icon: {
-				fontSize: 32,
-				width: 50,
-				height: 50,
+				fontSize: 27,
+				width: 44,
+				height: 44,
 				textAlign: 'center',
+				overflow: 'hidden',
 
 				color: theme.color3,
 				borderColor: theme.codeBorderColor, // TODO: Use a different theme variable
-				borderRadius: 36,
-				padding: 8,
+				borderRadius: 22,
+				padding: 6,
 				borderWidth: 2,
 				backgroundColor: theme.backgroundColor3,
 			},
@@ -45,15 +46,17 @@ const useStyles = (themeId: number) => {
 	}, [themeId]);
 };
 
-const LabelledIconButton: React.FC<Props> = props => {
-	const styles = useStyles(props.themeId);
+const LabelledIconButton: React.FC<Props> = ({ title, icon, style, themeId, ...otherProps }) => {
+	const styles = useStyles(themeId);
 	return <TouchableRipple
-		onPress={props.onPress}
-		style={styles.button}
+		role='button'
+		accessibilityRole='button'
+		{...otherProps}
+		style={[styles.button, style]}
 	>
 		<View style={styles.buttonContent}>
-			<Icon style={styles.icon} accessibilityLabel={null} name={props.icon}/>
-			<Text>{props.title}</Text>
+			<Icon style={styles.icon} accessibilityLabel={null} name={icon}/>
+			<Text variant='labelMedium'>{title}</Text>
 		</View>
 	</TouchableRipple>;
 };

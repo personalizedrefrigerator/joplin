@@ -1,6 +1,6 @@
 import * as React from 'react';
-import { AccessibilityInfo, Animated, Easing, I18nManager, LayoutChangeEvent, PanResponder, Pressable, StyleSheet, useWindowDimensions, View, ViewStyle } from 'react-native';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { AccessibilityInfo, Animated, Easing, I18nManager, LayoutChangeEvent, LayoutRectangle, PanResponder, Pressable, StyleSheet, useWindowDimensions, View, ViewStyle } from 'react-native';
+import { RefObject, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import AccessibleView from '../accessibility/AccessibleView';
 import { _ } from '@joplin/lib/locale';
 import useReduceMotionEnabled from '../../utils/hooks/useReduceMotionEnabled';
@@ -16,6 +16,7 @@ export type OnChangeCallback = (isOpen: boolean)=> void;
 interface Props {
 	isOpen: boolean;
 
+	label: string;
 	menu: React.ReactNode;
 	children: React.ReactNode|React.ReactNode[];
 	overlayColor: string;
@@ -38,10 +39,12 @@ interface UseStylesProps {
 const useStyles = ({ overlayColor, isLeftMenu, isVerticalMenu, menuSize, menuOpenFraction }: UseStylesProps) => {
 	const { height: windowHeight, width: windowWidth } = useWindowDimensions();
 	return useMemo(() => {
+		// For horizontal non-overlay menus
 		const contentTranslateX = !isVerticalMenu ? menuOpenFraction.interpolate({
 			inputRange: [0, 1],
 			outputRange: [0, isLeftMenu ? menuSize : -menuSize],
 		}) : 0;
+		// For vertical overlay menus
 		const menuTranslateY = isVerticalMenu ? menuOpenFraction.interpolate({
 			inputRange: [0, 1],
 			outputRange: [menuSize, 0],
@@ -56,11 +59,12 @@ const useStyles = ({ overlayColor, isLeftMenu, isVerticalMenu, menuSize, menuOpe
 				flexGrow: 1,
 				flexShrink: 1,
 			},
-			contentOuterWrapper: {
+			contentAndCloseButtonWrapper: {
 				flexGrow: 1,
 				flexShrink: 1,
 				width: windowWidth,
 				height: windowHeight,
+
 				transform: [
 					{ translateX: contentTranslateX },
 					// The RN Animation docs suggests setting "perspective" while setting other transform styles:
@@ -80,15 +84,10 @@ const useStyles = ({ overlayColor, isLeftMenu, isVerticalMenu, menuSize, menuOpe
 				...(isVerticalMenu ? {
 					left: 0,
 					right: 0,
-					transform: [
-						{ translateY: menuTranslateY },
-						{ perspective: 1000 },
-					],
 				} : {
 					top: 0,
 					width: menuSize,
 				}),
-				overflow: 'hidden',
 
 				// In React Native, RTL replaces `left` with `right` and `right` with `left`.
 				// As such, we need to reverse the normal direction in RTL mode.
@@ -97,6 +96,11 @@ const useStyles = ({ overlayColor, isLeftMenu, isVerticalMenu, menuSize, menuOpe
 				} : {
 					right: 0,
 				}),
+
+				transform: [
+					{ translateY: menuTranslateY },
+					{ perspective: 1000 },
+				],
 			},
 			menuContent: {
 				flex: 1,
@@ -195,7 +199,7 @@ interface UsePanResponderProps {
 	isRightMenu: boolean;
 	isVerticalMenu: boolean;
 	menuDragOffset: Animated.Value;
-	menuSize: number;
+	menuLayoutRef: RefObject<LayoutRectangle>;
 	open: boolean;
 	setIsAnimating: React.Dispatch<React.SetStateAction<boolean>>;
 	setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
@@ -210,7 +214,7 @@ const usePanResponder = ({
 	isRightMenu,
 	isVerticalMenu,
 	menuDragOffset,
-	menuSize,
+	menuLayoutRef,
 	open,
 	setIsAnimating,
 	setIsOpen,
@@ -221,20 +225,36 @@ const usePanResponder = ({
 		const toleranceY = 20;
 		const edgeHitWidth = 20;
 
+		const pointIsInsideMenu = (x: number, y: number, padding: number) => {
+			const menuLayout = menuLayoutRef.current;
+			const centerX = menuLayout.x + menuLayout.width / 2;
+			const centerY = menuLayout.y + menuLayout.height / 2;
+			const distX = Math.abs(x - centerX);
+			const distY = Math.abs(y - centerY);
+			const insideMenuX = distX <= menuLayout.width / 2 + padding;
+			const insideMenuY = distY <= menuLayout.height / 2 + padding;
+
+			return insideMenuX && insideMenuY;
+		};
+
 		return PanResponder.create({
 			onMoveShouldSetPanResponderCapture: (_event, gestureState) => {
 				if (disableGestures) {
 					return false;
 				}
 
-				let startX;
-				let dx;
-				const dy = isVerticalMenu ? gestureState.dx : gestureState.dy;
-
 				// Untransformed start position of the gesture -- moveX is the current position of
 				// the pointer. Subtracting dx gives us the original start position.
 				const gestureStartScreenX = gestureState.moveX - gestureState.dx;
 				const gestureStartScreenY = gestureState.moveY - gestureState.dy;
+
+				if (pointIsInsideMenu(gestureStartScreenX, gestureStartScreenY, -edgeHitWidth)) {
+					return false;
+				}
+
+				let startX;
+				let dx;
+				const dy = isVerticalMenu ? gestureState.dx : gestureState.dy;
 
 				// Transform x, dx such that they are relative to the target screen edge -- this simplifies later
 				// math.
@@ -252,7 +272,7 @@ const usePanResponder = ({
 				const motionWithinToleranceY = Math.abs(dy) <= toleranceY;
 				let startWithinTolerance, motionWithinToleranceX;
 				if (open) {
-					startWithinTolerance = startX >= menuSize - edgeHitWidth;
+					startWithinTolerance = true;
 					motionWithinToleranceX = dx <= -toleranceX;
 				} else {
 					startWithinTolerance = startX <= edgeHitWidth;
@@ -284,7 +304,7 @@ const usePanResponder = ({
 				}
 			},
 		});
-	}, [isLeftMenu, isBottomMenu, isRightMenu, isVerticalMenu, menuDragOffset, menuSize, contentSize, open, setIsOpen, disableGestures, updateMenuPosition, setIsAnimating]);
+	}, [isLeftMenu, isBottomMenu, isRightMenu, isVerticalMenu, menuDragOffset, menuLayoutRef, contentSize, open, setIsOpen, disableGestures, updateMenuPosition, setIsAnimating]);
 };
 
 const useSizes = (isVerticalMenu: boolean, openMenuOffset: number) => {
@@ -310,8 +330,32 @@ const useSizes = (isVerticalMenu: boolean, openMenuOffset: number) => {
 	return { menuSize, onContainerLayout, contentSize };
 };
 
+const useOnChangeNotifier = (open: boolean, menuLabel: string, onChange: OnChangeCallback) => {
+	const labelRef = useRef(menuLabel);
+	labelRef.current = menuLabel;
+	const onChangeRef = useRef(onChange);
+	onChangeRef.current = onChange;
+
+	const isFirstNotificationRef = useRef(true);
+
+	useEffect(() => {
+		onChangeRef.current(open);
+
+		// Avoid announcing for accessibility when the sidemenu component first mounts
+		// (especially if closed). Such notifications are distracting.
+		if (!isFirstNotificationRef.current && !open) {
+			AccessibilityInfo.announceForAccessibility(
+				open ? _('%s opened', labelRef.current) : _('%s closed', labelRef.current),
+			);
+		}
+		isFirstNotificationRef.current = false;
+	}, [open]);
+};
+
 const SideMenu: React.FC<Props> = props => {
 	const [open, setIsOpen] = useState(false);
+	const hasBeenOpen = useRef(false);
+	hasBeenOpen.current ||= open;
 
 	useEffect(() => {
 		setIsOpen(props.isOpen);
@@ -330,6 +374,10 @@ const SideMenu: React.FC<Props> = props => {
 		isLeftMenu, menuSize, open,
 	});
 
+	const menuLayoutRef = useRef<LayoutRectangle|null>();
+	const onMenuLayout = useCallback((event: LayoutChangeEvent) => {
+		menuLayoutRef.current = event.nativeEvent.layout;
+	}, []);
 	const panResponder = usePanResponder({
 		contentSize,
 		disableGestures: props.disableGestures,
@@ -338,22 +386,14 @@ const SideMenu: React.FC<Props> = props => {
 		isRightMenu,
 		isVerticalMenu,
 		menuDragOffset,
-		menuSize,
+		menuLayoutRef,
 		open,
 		setIsAnimating,
 		setIsOpen,
 		updateMenuPosition,
 	});
-	const onChangeRef = useRef(props.onChange);
-	onChangeRef.current = props.onChange;
-	useEffect(() => {
-		onChangeRef.current(open);
 
-		AccessibilityInfo.announceForAccessibility(
-			open ? _('Side menu opened') : _('Side menu closed'),
-		);
-	}, [open]);
-
+	useOnChangeNotifier(open, props.label, props.onChange);
 	const onCloseButtonPress = useCallback(() => {
 		setIsOpen(false);
 		// Set isAnimating as soon as possible to avoid components disappearing, then reappearing.
@@ -363,19 +403,16 @@ const SideMenu: React.FC<Props> = props => {
 	const styles = useStyles({ overlayColor: props.overlayColor, menuOpenFraction, menuSize, isLeftMenu, isVerticalMenu });
 
 	const menuComponent = (
-		<Animated.View style={[styles.menuWrapper, props.menuStyle]} key='menu'>
+		<Animated.View
+			style={[styles.menuWrapper, props.menuStyle]}
+			onLayout={onMenuLayout}
+			key='menu'
+		>
 			<AccessibleView
 				inert={!open}
 				style={styles.menuContent}
 				testID='menu-inner-wrapper'
 			>
-				<AccessibleView
-					// Auto-focuses an empty view at the beginning of the sidemenu -- if we instead
-					// focus the container view, VoiceOver fails to focus to any components within
-					// the sidebar.
-					refocusCounter={open ? 1 : undefined}
-				/>
-
 				{props.menu}
 			</AccessibleView>
 		</Animated.View>
@@ -386,7 +423,9 @@ const SideMenu: React.FC<Props> = props => {
 			inert={open}
 			style={styles.contentWrapper}
 		>
-			<AccessibleView refocusCounter={!open ? 1 : undefined} />
+			<AccessibleView
+				refocusCounter={!open && hasBeenOpen.current ? 1 : undefined}
+			/>
 			{props.children}
 		</AccessibleView>
 	);
@@ -395,15 +434,18 @@ const SideMenu: React.FC<Props> = props => {
 			style={styles.closeButtonOverlay}
 		>
 			<Pressable
-				aria-label={_('Close side menu')}
+				aria-label={_('Close %s', props.label)}
 				role='button'
 				onPress={onCloseButtonPress}
 				style={styles.overlayContent}
-			></Pressable>
+			/>
 		</Animated.View>
 	) : null;
 
-	const contentAndCloseButton = <Animated.View style={styles.contentOuterWrapper} key='menu-content-wrapper'>
+	const contentAndCloseButton = <Animated.View
+		style={styles.contentAndCloseButtonWrapper}
+		key='menu-content-wrapper'
+	>
 		{contentComponent}
 		{closeButtonOverlay}
 	</Animated.View>;

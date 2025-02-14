@@ -2,10 +2,12 @@ import * as React from 'react';
 import Modal from '../Modal';
 import SideMenu, { SideMenuPosition } from './SideMenu';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { LayoutChangeEvent, ScrollView, StyleSheet, View } from 'react-native';
+import { LayoutChangeEvent, StyleSheet, useWindowDimensions, View } from 'react-native';
 import { ThemeStyle, themeStyle } from '../global-style';
 import { connect } from 'react-redux';
 import { AppState } from '../../utils/types';
+import useSafeAreaPadding from '../../utils/hooks/useSafeAreaPadding';
+import { _ } from '@joplin/lib/locale';
 
 interface Props {
 	themeId: number;
@@ -15,24 +17,38 @@ interface Props {
 }
 
 const useStyles = (theme: ThemeStyle) => {
+	const { width: windowWidth } = useWindowDimensions();
+	const safeAreaPadding = useSafeAreaPadding();
+
 	return useMemo(() => {
+		const isSmallWidthScreen = windowWidth < 500;
+		const menuGapLeft = safeAreaPadding.paddingLeft + 6;
+		const menuGapRight = safeAreaPadding.paddingRight + 6;
+
 		return StyleSheet.create({
-			scrollingContainer: {
+			outerContainer: {
 				flex: 1,
 				backgroundColor: theme.backgroundColor,
 				borderRadius: 16,
 				borderBottomRightRadius: 0,
 				borderBottomLeftRadius: 0,
-				maxWidth: 400,
+				maxWidth: Math.min(400, windowWidth - menuGapRight - menuGapLeft),
 			},
 			menuStyle: {
 				alignSelf: 'center',
 				left: 'auto',
 				right: 0,
-				paddingHorizontal: 6,
+				...(isSmallWidthScreen ? {
+					// Center on small screens, rather than float right.
+					right: 'auto',
+				} : {}),
+				paddingRight: menuGapRight,
+				paddingLeft: menuGapLeft,
+				paddingBottom: 0,
 			},
 			contentContainer: {
 				padding: 20,
+				paddingBottom: 14,
 				gap: 8,
 				flexDirection: 'row',
 				flexWrap: 'wrap',
@@ -44,7 +60,7 @@ const useStyles = (theme: ThemeStyle) => {
 				paddingBottom: 0,
 			},
 		});
-	}, [theme]);
+	}, [theme, safeAreaPadding, windowWidth]);
 };
 
 const BottomDrawer: React.FC<Props> = props => {
@@ -73,17 +89,16 @@ const BottomDrawer: React.FC<Props> = props => {
 	const [openMenuOffset, setOpenMenuOffset] = useState(400);
 	const onMenuLayout = useCallback((event: LayoutChangeEvent) => {
 		const height = event.nativeEvent.layout.height;
-		const spacing = 10;
-		setOpenMenuOffset(height + spacing);
+		setOpenMenuOffset(height);
 	}, []);
 
 	const theme = themeStyle(props.themeId);
 	const styles = useStyles(theme);
-	const menu = <ScrollView style={styles.scrollingContainer}>
+	const menu = <View style={styles.outerContainer}>
 		<View onLayout={onMenuLayout} style={styles.contentContainer}>
 			{props.children}
 		</View>
-	</ScrollView>;
+	</View>;
 
 	return <Modal
 		visible={props.show}
@@ -94,6 +109,7 @@ const BottomDrawer: React.FC<Props> = props => {
 		onRequestClose={onModalDismiss}
 	>
 		<SideMenu
+			label={_('New note menu')}
 			menuPosition={SideMenuPosition.Bottom}
 			menu={menu}
 			isOpen={isOpen}

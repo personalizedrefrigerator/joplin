@@ -1,31 +1,15 @@
-import { syntaxTree } from '@codemirror/language';
-import { SyntaxNode } from '@lezer/common';
 import { EditorSelection, EditorState } from '@codemirror/state';
-import { blockMathTagName, inlineMathContentTagName, inlineMathTagName } from './markdownMathParser';
+import { blockMathTagName, inlineMathContentTagName, inlineMathTagName } from './MarkdownMathExtension';
 
 import createTestEditor from '../testUtil/createTestEditor';
+import findNodesWithName from '../testUtil/findNodesWithName';
 
 // Creates an EditorState with math and markdown extensions
 const createEditorState = async (initialText: string, expectedTags: string[]): Promise<EditorState> => {
 	return (await createTestEditor(initialText, EditorSelection.cursor(0), expectedTags)).state;
 };
 
-// Returns a list of all nodes with the given name in the given editor's syntax tree.
-// Attempts to create the syntax tree if it doesn't exist.
-const findNodesWithName = (editor: EditorState, nodeName: string) => {
-	const result: SyntaxNode[] = [];
-	syntaxTree(editor).iterate({
-		enter: (node) => {
-			if (node.name === nodeName) {
-				result.push(node.node);
-			}
-		},
-	});
-
-	return result;
-};
-
-describe('markdownMathParser', () => {
+describe('MarkdownMathExtension', () => {
 
 	jest.retryTimes(2);
 

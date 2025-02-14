@@ -140,6 +140,7 @@ import { AppState } from './utils/types';
 import { getDisplayParentId } from '@joplin/lib/services/trash';
 import AppSideMenu from './components/sidebar/AppSideMenu';
 import { SideMenuPosition } from './components/sidebar/SideMenu';
+import PluginNotification from './components/plugins/PluginNotification';
 
 const logger = Logger.create('root');
 
@@ -1319,6 +1320,7 @@ class AppComponent extends React.Component {
 					</MenuProvider>
 				</AppSideMenu>
 				<PluginRunnerWebView />
+				<PluginNotification/>
 			</View>
 		);
 
