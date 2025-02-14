@@ -26,9 +26,10 @@ interface Props {
 
 const styles = StyleSheet.create({
 	container: {
-		marginHorizontal: 1,
-		width: '100%',
-		maxWidth: 680,
+		paddingHorizontal: 10,
+		width: 680,
+		flexShrink: 1,
+		maxWidth: '100%',
 		alignSelf: 'center',
 	},
 });

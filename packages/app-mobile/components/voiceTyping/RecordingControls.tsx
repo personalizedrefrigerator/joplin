@@ -22,6 +22,7 @@ const styles = StyleSheet.create({
 		marginTop: 16,
 	},
 	content: {
+		flexShrink: 1,
 		marginTop: 16,
 		marginHorizontal: 8,
 	},

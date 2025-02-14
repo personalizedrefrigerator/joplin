@@ -104,6 +104,7 @@ const useAudioRecorder = (onFileSaved: OnFileSavedCallback, onDismiss: ()=> void
 
 			await Audio.setAudioModeAsync({
 				allowsRecordingIOS: true,
+				playsInSilentModeIOS: true,
 			});
 			setRecordingState(RecorderState.Recording);
 			const recording = new Audio.Recording();
