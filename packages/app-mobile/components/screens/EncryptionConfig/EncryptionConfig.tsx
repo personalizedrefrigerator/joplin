@@ -1,12 +1,11 @@
 import * as React from 'react';
-import { TextInput, TouchableOpacity, Linking, View, StyleSheet, Text, Button, ScrollView } from 'react-native';
-const { connect } = require('react-redux');
-import ScreenHeader from '../ScreenHeader';
-import { themeStyle } from '../global-style';
+import { TextInput, TouchableOpacity, Linking, View, Text, Button, ScrollView } from 'react-native';
+import { connect } from 'react-redux';
+import ScreenHeader from '../../ScreenHeader';
+import { themeStyle } from '../../global-style';
 import EncryptionService from '@joplin/lib/services/e2ee/EncryptionService';
 import { _ } from '@joplin/lib/locale';
-import time from '@joplin/lib/time';
-import { decryptedStatText, enableEncryptionConfirmationMessages, onSavePasswordClick, useInputMasterPassword, useInputPasswords, usePasswordChecker, useStats } from '@joplin/lib/components/EncryptionConfigScreen/utils';
+import { decryptedStatText, enableEncryptionConfirmationMessages, useInputMasterPassword, usePasswordChecker, useStats } from '@joplin/lib/components/EncryptionConfigScreen/utils';
 import { MasterKeyEntity } from '@joplin/lib/services/e2ee/types';
 import { State } from '@joplin/lib/reducer';
 import { masterKeyEnabled, SyncInfo } from '@joplin/lib/services/synchronizer/syncInfoUtils';
@@ -14,10 +13,11 @@ import { getDefaultMasterKey, setupAndDisableEncryption, toggleAndSetupEncryptio
 import { useMemo, useState } from 'react';
 import { Divider, List } from 'react-native-paper';
 import shim from '@joplin/lib/shim';
+import EncryptionKeyItem from './EncryptionKeyItem';
+import useStyles from './utils/useStyles';
 
 interface Props {
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	themeId: any;
+	themeId: number;
 	masterKeys: MasterKeyEntity[];
 	passwords: Record<string, string>;
 	notLoadedMasterKeys: string[];
@@ -33,7 +33,6 @@ const EncryptionConfigScreen = (props: Props) => {
 	const [passwordPromptConfirmAnswer, setPasswordPromptConfirmAnswer] = useState('');
 	const stats = useStats();
 	const { passwordChecks, masterPasswordKeys } = usePasswordChecker(props.masterKeys, props.activeMasterKeyId, props.masterPassword, props.passwords);
-	const { inputPasswords, onInputPasswordChange } = useInputPasswords(props.passwords);
 	const { inputMasterPassword, onMasterPasswordSave, onMasterPasswordChange } = useInputMasterPassword(props.masterKeys, props.activeMasterKeyId);
 	const [showDisabledKeys, setShowDisabledKeys] = useState(false);
 
@@ -46,102 +45,19 @@ const EncryptionConfigScreen = (props: Props) => {
 		return themeStyle(props.themeId);
 	}, [props.themeId]);
 
-	const rootStyle = useMemo(() => {
-		return {
-			flex: 1,
-			backgroundColor: theme.backgroundColor,
-		};
-	}, [theme]);
+	const styles = useStyles(props.themeId);
 
-	const styles = useMemo(() => {
-		return StyleSheet.create({
-			titleText: {
-				flex: 1,
-				fontWeight: 'bold',
-				flexDirection: 'column',
-				fontSize: theme.fontSize,
-				paddingTop: 5,
-				paddingBottom: 5,
-				marginTop: theme.marginTop,
-				marginBottom: 5,
-				color: theme.color,
-			},
-			normalText: {
-				flex: 1,
-				fontSize: theme.fontSize,
-				color: theme.color,
-			},
-			normalTextInput: {
-				margin: 10,
-				color: theme.color,
-				borderWidth: 1,
-				borderColor: theme.dividerColor,
-			},
-			container: {
-				flex: 1,
-				padding: theme.margin,
-			},
-			disabledContainer: {
-				paddingLeft: theme.margin,
-				paddingRight: theme.margin,
-			},
-		});
-	}, [theme]);
 
 	const decryptedItemsInfo = props.encryptionEnabled ? <Text style={styles.normalText}>{decryptedStatText(stats)}</Text> : null;
 
 	const renderMasterKey = (mk: MasterKeyEntity) => {
-		const theme = themeStyle(props.themeId);
-
-		const password = inputPasswords[mk.id] ? inputPasswords[mk.id] : '';
-		const passwordOk = passwordChecks[mk.id] === true;
-		const passwordOkIcon = passwordOk ? '✔' : '❌';
-
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-		const inputStyle: any = { flex: 1, marginRight: 10, color: theme.color };
-		inputStyle.borderBottomWidth = 1;
-		inputStyle.borderBottomColor = theme.dividerColor;
-
-		const renderPasswordInput = (masterKeyId: string) => {
-			if (masterPasswordKeys[masterKeyId] || !passwordChecks['master']) {
-				return (
-					<Text style={{ ...styles.normalText, color: theme.colorFaded, fontStyle: 'italic' }}>({_('Master password')})</Text>
-				);
-			} else {
-				return (
-					<View style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }}>
-						<TextInput
-							selectionColor={theme.textSelectionColor}
-							keyboardAppearance={theme.keyboardAppearance}
-							secureTextEntry={true}
-							value={password}
-							onChangeText={(text: string) => onInputPasswordChange(mk, text)}
-							style={inputStyle}
-						></TextInput>
-						<Text
-							style={{ fontSize: theme.fontSize, marginRight: 10, color: theme.color }}
-							accessibilityRole='image'
-							accessibilityLabel={passwordOk ? _('Valid') : _('Invalid password')}
-						>{passwordOkIcon}</Text>
-						<Button title={_('Save')} onPress={() => onSavePasswordClick(mk, inputPasswords)}></Button>
-					</View>
-				);
-			}
-		};
-
-		return (
-			<View key={mk.id}>
-				<Text
-					style={styles.titleText}
-					accessibilityRole='header'
-				>{_('Master Key %s', mk.id.substr(0, 6))}</Text>
-				<Text style={styles.normalText}>{_('Created: %s', time.formatMsToLocal(mk.created_time))}</Text>
-				<View style={{ flexDirection: 'row', alignItems: 'center' }}>
-					<Text style={{ flex: 0, fontSize: theme.fontSize, marginRight: 10, color: theme.color }}>{_('Password:')}</Text>
-					{renderPasswordInput(mk.id)}
-				</View>
-			</View>
-		);
+		return <EncryptionKeyItem
+			key={mk.id}
+			themeId={props.themeId}
+			mk={mk}
+			masterPasswordKeys={masterPasswordKeys}
+			passwordChecks={passwordChecks}
+		/>;
 	};
 
 	const renderPasswordPrompt = () => {
@@ -334,7 +250,7 @@ const EncryptionConfigScreen = (props: Props) => {
 	</List.Accordion> : null;
 
 	return (
-		<View style={rootStyle}>
+		<View style={styles.rootStyle}>
 			<ScreenHeader title={_('Encryption Config')} />
 			<ScrollView>
 				<View style={styles.container}>
