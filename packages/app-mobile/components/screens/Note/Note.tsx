@@ -62,6 +62,7 @@ import { DialogContext, DialogControl } from '../../DialogManager';
 import { CommandRuntimeProps, EditorMode, PickerResponse } from './types';
 import commands from './commands';
 import { AttachFileAction, AttachFileOptions } from './commands/attachFile';
+import ToggleSpaceButton from '../../ToggleSpaceButton';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 const emptyArray: any[] = [];
@@ -446,6 +447,9 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 				fontFamily: editorFont(this.props.editorFont),
 			},
 			noteBodyViewer: {
+				flex: 1,
+			},
+			toggleSpaceButtonContent: {
 				flex: 1,
 			},
 			checkbox: {
@@ -1596,6 +1600,19 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 			/>;
 		};
 
+		const renderWrappedContent = () => {
+			const content = <>
+				{bodyComponent}
+				{renderVoiceTypingDialog()}
+			</>;
+
+			return this.state.mode === 'edit' ? (
+				<ToggleSpaceButton themeId={this.props.themeId} style={this.styles().toggleSpaceButtonContent}>
+					{content}
+				</ToggleSpaceButton>
+			) : content;
+		};
+
 		return (
 			<View style={this.rootStyle(this.props.themeId).root}>
 				<ScreenHeader
@@ -1614,9 +1631,8 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 					title={getDisplayParentTitle(this.state.note, this.state.folder)}
 				/>
 				{titleComp}
-				{bodyComponent}
+				{renderWrappedContent()}
 				{renderActionButton()}
-				{renderVoiceTypingDialog()}
 
 				<SelectDateTimeDialog themeId={this.props.themeId} shown={this.state.alarmDialogShown} date={dueDate} onAccept={this.onAlarmDialogAccept} onReject={this.onAlarmDialogReject} />
 
