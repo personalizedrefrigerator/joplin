@@ -2,7 +2,7 @@ import * as React from 'react';
 import { PrimaryButton, SecondaryButton } from '../buttons';
 import { _ } from '@joplin/lib/locale';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Audio } from 'expo-av';
+import { Audio, InterruptionModeIOS } from 'expo-av';
 import Logger from '@joplin/utils/Logger';
 import { OnFileSavedCallback, RecorderState } from './types';
 import { Platform } from 'react-native';
@@ -92,10 +92,10 @@ const resetAudioMode = async () => {
 		allowsRecordingIOS: false,
 		playsInSilentModeIOS: false,
 	});
+	await Audio.setIsEnabledAsync(false);
 };
 
 const useAudioRecorder = (onFileSaved: OnFileSavedCallback, onDismiss: ()=> void) => {
-	const [permissionResponse, requestPermission] = Audio.usePermissions();
 	const [recordingState, setRecordingState] = useState<RecorderState>(RecorderState.Idle);
 	const [error, setError] = useState('');
 	const [duration, setDuration] = useState(0);
@@ -104,8 +104,12 @@ const useAudioRecorder = (onFileSaved: OnFileSavedCallback, onDismiss: ()=> void
 	const onStartRecording = useCallback(async () => {
 		try {
 			setRecordingState(RecorderState.Loading);
-			if (permissionResponse?.status !== 'granted') {
-				const response = await requestPermission();
+			await Audio.setIsEnabledAsync(true);
+
+			const permissions = await Audio.getPermissionsAsync();
+
+			if (permissions?.status !== 'granted') {
+				const response = await Audio.requestPermissionsAsync();
 				if (!response.granted) {
 					throw new Error(_('Missing permission to record audio.'));
 				}
@@ -114,6 +118,10 @@ const useAudioRecorder = (onFileSaved: OnFileSavedCallback, onDismiss: ()=> void
 			await Audio.setAudioModeAsync({
 				allowsRecordingIOS: true,
 				playsInSilentModeIOS: true,
+				// Fixes an issue where opening a recording in the iOS audio player
+				// breaks creating new recordings.
+				// See https://github.com/expo/expo/issues/31152#issuecomment-2341811087
+				interruptionModeIOS: InterruptionModeIOS.DoNotMix,
 			});
 			setRecordingState(RecorderState.Recording);
 			const recording = new Audio.Recording();
@@ -131,7 +139,7 @@ const useAudioRecorder = (onFileSaved: OnFileSavedCallback, onDismiss: ()=> void
 			void recordingRef.current?.stopAndUnloadAsync();
 			recordingRef.current = null;
 		}
-	}, [permissionResponse, requestPermission]);
+	}, []);
 
 	const onStopRecording = useCallback(async () => {
 		const recording = recordingRef.current;
@@ -156,8 +164,8 @@ const useAudioRecorder = (onFileSaved: OnFileSavedCallback, onDismiss: ()=> void
 	useEffect(() => () => {
 		if (recordingRef.current) {
 			void recordingRef.current?.stopAndUnloadAsync();
-			void resetAudioMode();
 			recordingRef.current = null;
+			void resetAudioMode();
 		}
 	}, []);
 
