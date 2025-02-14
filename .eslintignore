@@ -797,7 +797,11 @@ packages/app-mobile/components/sidebar/AppSideMenu.js
 packages/app-mobile/components/sidebar/BottomDrawer.js
 packages/app-mobile/components/sidebar/SideMenu.js
 packages/app-mobile/components/testing/TestProviderStack.js
+packages/app-mobile/components/voiceTyping/AudioRecording.js
+packages/app-mobile/components/voiceTyping/RecordingControls.js
+packages/app-mobile/components/voiceTyping/SpeechToText.js
 packages/app-mobile/components/voiceTyping/VoiceTypingDialog.js
+packages/app-mobile/components/voiceTyping/types.js
 packages/app-mobile/gulpfile.js
 packages/app-mobile/index.web.js
 packages/app-mobile/root.js

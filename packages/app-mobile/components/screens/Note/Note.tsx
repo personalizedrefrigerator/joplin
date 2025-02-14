@@ -41,7 +41,6 @@ import ImageEditor from '../../NoteEditor/ImageEditor/ImageEditor';
 import promptRestoreAutosave from '../../NoteEditor/ImageEditor/promptRestoreAutosave';
 import isEditableResource from '../../NoteEditor/ImageEditor/isEditableResource';
 import VoiceTypingDialog from '../../voiceTyping/VoiceTypingDialog';
-import { isSupportedLanguage } from '../../../services/voiceTyping/vosk';
 import { ChangeEvent as EditorChangeEvent, SelectionRangeChangeEvent, UndoRedoDepthChangeEvent } from '@joplin/editor/events';
 import { join } from 'path';
 import { Dispatch } from 'redux';
@@ -63,6 +62,7 @@ import { DialogContext, DialogControl } from '../../DialogManager';
 import { CommandRuntimeProps, EditorMode, PickerResponse } from './types';
 import commands from './commands';
 import { AttachFileAction, AttachFileOptions } from './commands/attachFile';
+import ToggleSpaceButton from '../../ToggleSpaceButton';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 const emptyArray: any[] = [];
@@ -447,6 +447,9 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 				fontFamily: editorFont(this.props.editorFont),
 			},
 			noteBodyViewer: {
+				flex: 1,
+			},
+			toggleSpaceButtonContent: {
 				flex: 1,
 			},
 			checkbox: {
@@ -1194,17 +1197,14 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 			});
 		}
 
-		// Voice typing is enabled only on Android for now
-		if (shim.mobilePlatform() === 'android' && isSupportedLanguage(currentLocale())) {
-			output.push({
-				title: _('Voice typing...'),
-				onPress: () => {
-					// this.voiceRecording_onPress();
-					this.setState({ voiceTypingDialogShown: true });
-				},
-				disabled: readOnly,
-			});
-		}
+		output.push({
+			title: _('Voice typing...'),
+			onPress: () => {
+				// this.voiceRecording_onPress();
+				this.setState({ voiceTypingDialogShown: true });
+			},
+			disabled: readOnly,
+		});
 
 		const commandService = CommandService.instance();
 		const whenContext = commandService.currentWhenClauseContext();
@@ -1592,7 +1592,25 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 
 		const renderVoiceTypingDialog = () => {
 			if (!this.state.voiceTypingDialogShown) return null;
-			return <VoiceTypingDialog locale={currentLocale()} onText={this.voiceTypingDialog_onText} onDismiss={this.voiceTypingDialog_onDismiss}/>;
+			return <VoiceTypingDialog
+				locale={currentLocale()}
+				onText={this.voiceTypingDialog_onText}
+				onFile={event => this.attachFile(event, 'audio')}
+				onDismiss={this.voiceTypingDialog_onDismiss}
+			/>;
+		};
+
+		const renderWrappedContent = () => {
+			const content = <>
+				{bodyComponent}
+				{renderVoiceTypingDialog()}
+			</>;
+
+			return this.state.mode === 'edit' ? (
+				<ToggleSpaceButton themeId={this.props.themeId} style={this.styles().toggleSpaceButtonContent}>
+					{content}
+				</ToggleSpaceButton>
+			) : content;
 		};
 
 		return (
@@ -1613,9 +1631,8 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 					title={getDisplayParentTitle(this.state.note, this.state.folder)}
 				/>
 				{titleComp}
-				{bodyComponent}
+				{renderWrappedContent()}
 				{renderActionButton()}
-				{renderVoiceTypingDialog()}
 
 				<SelectDateTimeDialog themeId={this.props.themeId} shown={this.state.alarmDialogShown} date={dueDate} onAccept={this.onAlarmDialogAccept} onReject={this.onAlarmDialogReject} />
 
