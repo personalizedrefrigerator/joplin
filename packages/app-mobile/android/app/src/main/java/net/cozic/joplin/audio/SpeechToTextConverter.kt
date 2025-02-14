@@ -16,7 +16,7 @@ import kotlin.time.measureTimedValue
 class SpeechToTextConverter(
 	modelPath: String,
 	locale: String,
-	recorderFactory: AudioRecorderFactory,
+	recorderFactory: AudioStreamFactory,
 	private val environment: OrtEnvironment,
 	context: Context,
 ) : Closeable {
@@ -92,6 +92,10 @@ class SpeechToTextConverter(
 	// TODO .get() fails on older Android versions
 	@SuppressLint("NewApi")
 	private fun convert(data: FloatArray): String {
+		Log.d("Whisper", "Convert data of length ${data.size}")
+//		if (data.isEmpty()) {
+//			return "";
+//		}
 		val (inputs, convertInputsTime) = measureTimedValue {
 			getInputs(data)
 		}

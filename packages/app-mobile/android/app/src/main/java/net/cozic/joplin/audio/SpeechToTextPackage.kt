@@ -36,17 +36,19 @@ class SpeechToTextPackage : ReactPackage {
 			environment?.close()
 		}
 
-		@ReactMethod
-		fun openSession(modelPath: String, locale: String, promise: Promise) {
+		private fun makeSession(source: AudioStreamFactory, modelPath: String, locale: String, promise: Promise) {
 			val appContext = context.applicationContext
-			// Initialize environment as late as possible:
-			val ortEnvironment = environment ?: OrtEnvironment.getEnvironment()
-			if (environment != null) {
-				environment = ortEnvironment
-			}
+			val ortEnvironment = OrtEnvironment.getEnvironment()
+			environment = ortEnvironment
 
 			try {
-				val sessionId = sessionManager.openSession(modelPath, locale, ortEnvironment, appContext)
+				val sessionId = sessionManager.openSession(
+					source,
+					modelPath,
+					locale,
+					ortEnvironment,
+					appContext
+				)
 				promise.resolve(sessionId)
 			} catch (exception: Throwable) {
 				promise.reject(exception)
@@ -54,7 +56,17 @@ class SpeechToTextPackage : ReactPackage {
 		}
 
 		@ReactMethod
-		fun startRecording(sessionId: Int, promise: Promise) {
+		fun openSessionFromMic(modelPath: String, locale: String, promise: Promise) {
+			makeSession(AudioRecorder.factory, modelPath, locale, promise)
+		}
+
+		@ReactMethod
+		fun openSessionFromFile(filePath: String, modelPath: String, locale: String, promise: Promise) {
+			makeSession(AudioFile.makeFactory(filePath), modelPath, locale, promise)
+		}
+
+		@ReactMethod
+		fun start(sessionId: Int, promise: Promise) {
 			sessionManager.startRecording(sessionId, promise)
 		}
 

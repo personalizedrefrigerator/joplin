@@ -3,7 +3,7 @@ import ScreenHeader from '../ScreenHeader';
 import NoteBodyViewer from '../NoteBodyViewer/NoteBodyViewer';
 import { MarkupLanguage } from '@joplin/renderer';
 import { Text } from 'react-native-paper';
-import { _ } from '@joplin/lib/locale';
+import { _, currentLocale } from '@joplin/lib/locale';
 import { ResourceInfos } from '@joplin/renderer/types';
 import { useMemo, useState } from 'react';
 import useAsyncEffect from '@joplin/lib/hooks/useAsyncEffect';
@@ -12,6 +12,10 @@ import { themeStyle } from '../global-style';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { connect } from 'react-redux';
 import { AppState } from '../../utils/types';
+import useQueuedAsyncEffect from '@joplin/lib/hooks/useQueuedAsyncEffect';
+import whisper from '../../services/voiceTyping/whisper';
+import Resource from '@joplin/lib/models/Resource';
+import VoiceTyping from '../../services/voiceTyping/VoiceTyping';
 
 interface AudioNavigation {
 	state: {
@@ -60,11 +64,30 @@ const useResourceData = (resourceId: string|undefined) => {
 };
 
 const AudioTranscription: React.FC<Props> = props => {
-	const { resourceInfos, previewBody } = useResourceData(
-		props.navigation.state.resourceId,
-	);
-	const [transcription] = useState('');
+	const resourceId = props.navigation.state.resourceId;
+	const { resourceInfos, previewBody } = useResourceData(resourceId);
+	const [transcription, setTranscription] = useState('...');
 	const styles = useStyles(props.themeId);
+
+	useQueuedAsyncEffect(async () => {
+		if (!resourceId) return;
+
+		const resource = await Resource.load(resourceId);
+		const resourceFile = Resource.fullPath(resource, false);
+
+		const voiceTyping = new VoiceTyping(currentLocale(), [whisper]);
+		const session = await voiceTyping.build({
+			onPreview: (text) => {
+				console.log('PREVIEW', text);
+				setTranscription(transcription => `${transcription}\n${text}`);
+			},
+			onFinalize: (text) => {
+				console.log('FINAL', text);
+				setTranscription(text);
+			},
+		}, resourceFile);
+		await session.start();
+	}, [resourceId]);
 
 	return <View style={styles.rootStyle}>
 		<ScreenHeader title={_('Audio transcription')}/>

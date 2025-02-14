@@ -25,6 +25,7 @@ export interface BuildProviderOptions {
 	locale: string;
 	modelPath: string;
 	callbacks: SpeechToTextCallbacks;
+	audioSourceFile?: string;
 }
 
 export interface VoiceTypingProvider {
@@ -141,7 +142,7 @@ export default class VoiceTyping {
 		}
 	}
 
-	public async build(callbacks: SpeechToTextCallbacks) {
+	public async build(callbacks: SpeechToTextCallbacks, audioPath?: string) {
 		if (!this.provider) {
 			throw new Error('No supported provider found!');
 		}
@@ -159,6 +160,7 @@ export default class VoiceTyping {
 			locale: this.locale,
 			modelPath: this.getModelPath(),
 			callbacks,
+			audioSourceFile: audioPath,
 		});
 	}
 }

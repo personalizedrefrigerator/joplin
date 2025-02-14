@@ -7,22 +7,17 @@ import android.content.pm.PackageManager
 import android.media.AudioFormat
 import android.media.AudioRecord
 import android.media.MediaRecorder.AudioSource
-import java.io.Closeable
 import kotlin.math.max
 import kotlin.math.min
 
-typealias AudioRecorderFactory = (context: Context)->AudioRecorder;
 
-class AudioRecorder(context: Context) : Closeable {
-	private val sampleRate = 16_000
-	private val maxLengthSeconds = 30 // Whisper supports a maximum of 30s
-	private val maxBufferSize = sampleRate * maxLengthSeconds
+class AudioRecorder(context: Context) : AudioStreamSource() {
 	private val buffer = FloatArray(maxBufferSize)
 	private var bufferWriteOffset = 0
 
 	// Accessor must not modify result
-	val bufferedData: FloatArray get() = buffer.sliceArray(0 until bufferWriteOffset)
-	val bufferLengthSeconds: Double get() = bufferWriteOffset.toDouble() / sampleRate
+	override val bufferedData: FloatArray get() = buffer.sliceArray(0 until bufferWriteOffset)
+	override val bufferLengthSeconds: Double get() = bufferWriteOffset.toDouble() / sampleRate
 
 	init {
 		val permissionResult = context.checkSelfPermission(Manifest.permission.RECORD_AUDIO)
@@ -57,11 +52,11 @@ class AudioRecorder(context: Context) : Closeable {
 		bufferWriteOffset = max(bufferWriteOffset - samplesClamped, 0)
 	}
 
-	fun dropFirstSeconds(seconds: Double) {
+	override fun dropFirstSeconds(seconds: Double) {
 		advanceStartBySamples((seconds * sampleRate).toInt())
 	}
 
-	fun start() {
+	override fun start() {
 		recorder.startRecording()
 	}
 
@@ -74,11 +69,11 @@ class AudioRecorder(context: Context) : Closeable {
 	}
 
 	// Pulls all available data from the audio recorder's buffer
-	fun pullAvailable() {
+	override fun pullAvailable() {
 		return read(maxBufferSize, AudioRecord.READ_NON_BLOCKING)
 	}
 
-	fun pullNextSeconds(seconds: Double) {
+	override fun pullNextSeconds(seconds: Double) {
 		val remainingSize = maxBufferSize - bufferWriteOffset
 		val requestedSize = (seconds * sampleRate).toInt()
 
@@ -96,6 +91,6 @@ class AudioRecorder(context: Context) : Closeable {
 	}
 
 	companion object {
-		val factory: AudioRecorderFactory = { context -> AudioRecorder(context) }
+		val factory: AudioStreamFactory = { context -> AudioRecorder(context) }
 	}
 }

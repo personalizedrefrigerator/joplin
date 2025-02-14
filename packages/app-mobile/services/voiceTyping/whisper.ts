@@ -6,6 +6,7 @@ import { dirname, join } from 'path';
 import { NativeModules } from 'react-native';
 import { SpeechToTextCallbacks, VoiceTypingProvider, VoiceTypingSession } from './VoiceTyping';
 import splitWhisperText from './utils/splitWhisperText';
+import { msleep } from '@joplin/utils/time';
 
 const logger = Logger.create('voiceTyping/whisper');
 
@@ -35,7 +36,7 @@ class Whisper implements VoiceTypingSession {
 		}
 		try {
 			logger.debug('starting recorder');
-			await SpeechToTextModule.startRecording(this.sessionId);
+			await SpeechToTextModule.start(this.sessionId);
 			logger.debug('recorder started');
 
 			const loopStartCounter = this.closeCounter;
@@ -64,6 +65,8 @@ class Whisper implements VoiceTypingSession {
 					this.lastPreviewData = data;
 					this.callbacks.onPreview(postProcessSpeech(data));
 				}
+
+				await msleep(250); // TODO: Remove
 			}
 		} catch (error) {
 			logger.error('Whisper error:', error);
@@ -113,8 +116,13 @@ const whisper: VoiceTypingProvider = {
 	getUuidPath: () => {
 		return join(dirname(modelLocalFilepath()), 'uuid');
 	},
-	build: async ({ modelPath, callbacks, locale }) => {
-		const sessionId = await SpeechToTextModule.openSession(modelPath, locale);
+	build: async ({ modelPath, callbacks, locale, audioSourceFile }) => {
+		let sessionId;
+		if (audioSourceFile) {
+			sessionId = await SpeechToTextModule.openSessionFromFile(audioSourceFile, modelPath, locale);
+		} else {
+			sessionId = await SpeechToTextModule.openSessionFromMic(modelPath, locale);
+		}
 		return new Whisper(sessionId, callbacks);
 	},
 	modelName: 'whisper',

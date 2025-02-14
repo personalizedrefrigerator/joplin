@@ -2,6 +2,7 @@ package net.cozic.joplin.audio
 
 import ai.onnxruntime.OrtEnvironment
 import android.content.Context
+import android.util.Log
 import com.facebook.react.bridge.Promise
 import java.util.concurrent.Executor
 import java.util.concurrent.locks.ReentrantLock
@@ -19,6 +20,7 @@ class SpeechToTextSessionManager(
 	private var nextSessionId: Int = 0
 
 	fun openSession(
+		source: AudioStreamFactory,
 		modelPath: String,
 		locale: String,
 		environment: OrtEnvironment,
@@ -27,7 +29,7 @@ class SpeechToTextSessionManager(
 		val sessionId = nextSessionId++
 		sessions[sessionId] = SpeechToTextSession(
 			SpeechToTextConverter(
-				modelPath, locale, recorderFactory = AudioRecorder.factory, environment, context,
+				modelPath, locale, source, environment, context,
 			)
 		)
 		return sessionId
@@ -60,6 +62,8 @@ class SpeechToTextSessionManager(
 			try {
 				callback(session)
 			} catch (error: Throwable) {
+				Log.e("SpeechToTextSessionManager", error.toString());
+				error.printStackTrace();
 				onError(error)
 			}
 		}
