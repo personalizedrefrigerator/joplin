@@ -13,6 +13,7 @@ import RecordingControls from './RecordingControls';
 import { Text } from 'react-native-paper';
 import { AndroidAudioEncoder, AndroidOutputFormat, IOSAudioQuality, IOSOutputFormat, RecordingOptions } from 'expo-av/build/Audio';
 import time from '@joplin/lib/time';
+import { toFileExtension } from '@joplin/lib/mime-utils';
 
 const logger = Logger.create('AudioRecording');
 
@@ -23,7 +24,7 @@ interface Props {
 
 // Modified from the Expo default recording options to create
 // .m4a recordings on both Android and iOS (rather than .3gp on Android).
-const recordingOptions: RecordingOptions = {
+const recordingOptions = (): RecordingOptions => ({
 	isMeteringEnabled: true,
 	android: {
 		extension: '.m4a',
@@ -44,11 +45,11 @@ const recordingOptions: RecordingOptions = {
 		linearPCMIsBigEndian: false,
 		linearPCMIsFloat: false,
 	},
-	web: {
-		mimeType: 'audio/webm',
+	web: Platform.OS === 'web' ? {
+		mimeType: ['audio/webm', 'audio/mp4'].find(type => MediaRecorder.isTypeSupported(type)) ?? 'audio/webm',
 		bitsPerSecond: 128000,
-	},
-};
+	} : {},
+});
 
 const getRecordingFileName = (extension: string) => {
 	return `recording-${time.formatDateToLocal(new Date())}${extension}`;
@@ -65,18 +66,19 @@ const recordingToSaveData = async (recording: Audio.Recording) => {
 		const fetchResult = await fetch(uri);
 		const blob = await fetchResult.blob();
 
-		// expo-av records to webm format on web
-		fileName = getRecordingFileName('.webm');
+		type = recordingOptions().web.mimeType;
+		const extension = `.${toFileExtension(type)}`;
+		fileName = getRecordingFileName(extension);
 		const file = new File([blob], fileName);
-		type = 'audio/webm';
 
 		const path = `/tmp/${uuid.create()}-${fileName}`;
 		await (shim.fsDriver() as FsDriverWeb).createReadOnlyVirtualFile(path, file);
 		uri = path;
 	} else {
+		const options = recordingOptions();
 		const extension = Platform.select({
-			android: recordingOptions.android.extension,
-			ios: recordingOptions.ios.extension,
+			android: options.android.extension,
+			ios: options.ios.extension,
 			default: '',
 		});
 		fileName = getRecordingFileName(extension);
@@ -122,7 +124,7 @@ const useAudioRecorder = (onFileSaved: OnFileSavedCallback, onDismiss: ()=> void
 			});
 			setRecordingState(RecorderState.Recording);
 			const recording = new Audio.Recording();
-			await recording.prepareToRecordAsync(recordingOptions);
+			await recording.prepareToRecordAsync(recordingOptions());
 			recording.setOnRecordingStatusUpdate(status => {
 				setDuration(status.durationMillis);
 			});

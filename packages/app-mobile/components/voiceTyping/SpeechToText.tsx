@@ -11,6 +11,7 @@ import { connect } from 'react-redux';
 import Logger from '@joplin/utils/Logger';
 import { RecorderState } from './types';
 import RecordingControls from './RecordingControls';
+import { PrimaryButton } from '../buttons';
 
 const logger = Logger.create('VoiceTypingDialog');
 
@@ -165,10 +166,10 @@ const SpeechToTextComponent: React.FC<Props> = props => {
 
 	const actions = <>
 		{allowReDownload ? reDownloadButton : null}
-		<Button
+		<PrimaryButton
 			onPress={onDismiss}
 			accessibilityHint={_('Ends voice typing')}
-		>{_('Done')}</Button>
+		>{_('Done')}</PrimaryButton>
 	</>;
 
 	return <RecordingControls
