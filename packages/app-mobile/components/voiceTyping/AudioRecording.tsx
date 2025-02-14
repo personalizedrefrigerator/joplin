@@ -95,7 +95,7 @@ const resetAudioMode = async () => {
 };
 
 const useAudioRecorder = (onFileSaved: OnFileSavedCallback, onDismiss: ()=> void) => {
-	const [permissionResponse, requestPermissionsAsync] = Audio.usePermissions();
+	const [permissionResponse, requestPermissions] = Audio.usePermissions();
 	const [recordingState, setRecordingState] = useState<RecorderState>(RecorderState.Idle);
 	const [error, setError] = useState('');
 	const [duration, setDuration] = useState(0);
@@ -106,7 +106,7 @@ const useAudioRecorder = (onFileSaved: OnFileSavedCallback, onDismiss: ()=> void
 			setRecordingState(RecorderState.Loading);
 
 			if (permissionResponse?.status !== 'granted') {
-				const response = await requestPermissionsAsync();
+				const response = await requestPermissions();
 				if (!response.granted) {
 					throw new Error(_('Missing permission to record audio.'));
 				}
@@ -136,7 +136,7 @@ const useAudioRecorder = (onFileSaved: OnFileSavedCallback, onDismiss: ()=> void
 			void recordingRef.current?.stopAndUnloadAsync();
 			recordingRef.current = null;
 		}
-	}, [permissionResponse, requestPermissionsAsync]);
+	}, [permissionResponse, requestPermissions]);
 
 	const onStopRecording = useCallback(async () => {
 		const recording = recordingRef.current;
