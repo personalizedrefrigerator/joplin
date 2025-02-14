@@ -85,6 +85,15 @@ const recordingToSaveData = async (recording: Audio.Recording) => {
 	return { uri, fileName, type };
 };
 
+const resetAudioMode = async () => {
+	await Audio.setAudioModeAsync({
+		// When enabled, iOS may use the small (phone call) speaker
+		// instead of the default one, so it's disabled when not recording:
+		allowsRecordingIOS: false,
+		playsInSilentModeIOS: false,
+	});
+};
+
 const useAudioRecorder = (onFileSaved: OnFileSavedCallback, onDismiss: ()=> void) => {
 	const [permissionResponse, requestPermission] = Audio.usePermissions();
 	const [recordingState, setRecordingState] = useState<RecorderState>(RecorderState.Idle);
@@ -129,10 +138,7 @@ const useAudioRecorder = (onFileSaved: OnFileSavedCallback, onDismiss: ()=> void
 		recordingRef.current = null;
 		setRecordingState(RecorderState.Idle);
 		await recording.stopAndUnloadAsync();
-
-		await Audio.setAudioModeAsync({
-			allowsRecordingIOS: false,
-		});
+		await resetAudioMode();
 
 		const saveEvent = await recordingToSaveData(recording);
 		onFileSaved(saveEvent);
@@ -150,6 +156,7 @@ const useAudioRecorder = (onFileSaved: OnFileSavedCallback, onDismiss: ()=> void
 	useEffect(() => () => {
 		if (recordingRef.current) {
 			void recordingRef.current?.stopAndUnloadAsync();
+			void resetAudioMode();
 			recordingRef.current = null;
 		}
 	}, []);
