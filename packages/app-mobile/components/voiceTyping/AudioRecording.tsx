@@ -46,7 +46,13 @@ const recordingOptions = (): RecordingOptions => ({
 		linearPCMIsFloat: false,
 	},
 	web: Platform.OS === 'web' ? {
-		mimeType: ['audio/webm', 'audio/mp4'].find(type => MediaRecorder.isTypeSupported(type)) ?? 'audio/webm',
+		mimeType: [
+			// Different browsers support different audio formats.
+			// In most cases, prefer audio/ogg and audio/mp4 to audio/webm because
+			// Chrome and Firefox create .webm files without duration information.
+			// See https://issues.chromium.org/issues/40482588
+			'audio/ogg', 'audio/mp4', 'audio/webm',
+		].find(type => MediaRecorder.isTypeSupported(type)) ?? 'audio/webm',
 		bitsPerSecond: 128000,
 	} : {},
 });
