@@ -47,6 +47,7 @@ export const runtime = (props: CommandRuntimeProps): CommandRuntime => {
 		const response: ImagePickerResponse = await launchImageLibrary({
 			mediaType: 'mixed',
 			videoQuality: 'low',
+			formatAsMp4: true,
 			includeBase64: false,
 			selectionLimit: 200,
 		});
