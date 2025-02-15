@@ -54,9 +54,10 @@ const EncryptionConfigScreen = (props: Props) => {
 		return <EncryptionKeyItem
 			key={mk.id}
 			themeId={props.themeId}
-			mk={mk}
+			masterKey={mk}
 			masterPasswordKeys={masterPasswordKeys}
 			passwordChecks={passwordChecks}
+			passwords={props.passwords}
 		/>;
 	};
 
