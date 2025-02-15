@@ -5,6 +5,7 @@ import { Platform } from 'react-native';
 import pickDocument from '../../../../utils/pickDocument';
 import { ImagePickerResponse, launchImageLibrary } from 'react-native-image-picker';
 import Logger from '@joplin/utils/Logger';
+import { msleep } from '@joplin/utils/time';
 
 const logger = Logger.create('attachFile');
 
@@ -83,6 +84,13 @@ export const runtime = (props: CommandRuntimeProps): CommandRuntime => {
 			buttons.push({ text: _('Take photo'), id: AttachFileAction.TakePhoto });
 
 			buttonId = await props.dialogs.showMenu(_('Choose an option'), buttons) as AttachFileAction;
+
+			if (Platform.OS === 'ios') {
+				// Fixes an issue: The first time "attach file" or "attach photo" is chosen after starting Joplin
+				// on iOS, no attach dialog was shown. Adding a brief delay after the "choose an option" dialog is
+				// dismissed seems to fix the issue.
+				await msleep(1);
+			}
 		}
 
 		if (buttonId === AttachFileAction.TakePhoto) await takePhoto();
