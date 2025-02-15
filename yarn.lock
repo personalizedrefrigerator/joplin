@@ -8397,6 +8397,7 @@ __metadata:
     events: 3.3.0
     expo: 51.0.26
     expo-camera: 15.0.16
+    expo-image-picker: 15.1.0
     fast-deep-equal: 3.1.3
     fs-extra: 11.2.0
     gulp: 4.0.2
@@ -8422,7 +8423,6 @@ __metadata:
     react-native-fingerprint-scanner: 6.0.0
     react-native-fs: 2.20.0
     react-native-get-random-values: 1.11.0
-    react-native-image-picker: 7.1.1
     react-native-localize: 3.2.1
     react-native-modal-datetime-picker: 17.1.0
     react-native-paper: 5.12.5
@@ -24744,6 +24744,26 @@ __metadata:
   languageName: node
   linkType: hard
 
+"expo-image-loader@npm:~4.7.0":
+  version: 4.7.0
+  resolution: "expo-image-loader@npm:4.7.0"
+  peerDependencies:
+    expo: "*"
+  checksum: 1630e988443f87fe86761fb2909e3de88978004a55f769cce7d7965c3ff6e4497e73e9607e826d9a1d5588361b92350e8d4ec0111c9a3243d04a565eddfcf346
+  languageName: node
+  linkType: hard
+
+"expo-image-picker@npm:15.1.0":
+  version: 15.1.0
+  resolution: "expo-image-picker@npm:15.1.0"
+  dependencies:
+    expo-image-loader: ~4.7.0
+  peerDependencies:
+    expo: "*"
+  checksum: bc95921dca770130a8535563e48d23147dadbb7530ed3bc5d528337bd234c5d80c33dfe2a00031fd034d04a19d3ce89d171b10965e034b9e659e599dd9a470fc
+  languageName: node
+  linkType: hard
+
 "expo-keep-awake@npm:~13.0.2":
   version: 13.0.2
   resolution: "expo-keep-awake@npm:13.0.2"
@@ -39933,16 +39953,6 @@ __metadata:
   version: 0.70.3
   resolution: "react-native-gradle-plugin@npm:0.70.3"
   checksum: 04a3379842bcb4709ac6b37e093a3de59acd33b28b200885843b13908fac685a77ab81d732c34090c56e5c0eec971d578b227f302bd04fe7901e8792d434f41f
-  languageName: node
-  linkType: hard
-
-"react-native-image-picker@npm:7.1.1":
-  version: 7.1.1
-  resolution: "react-native-image-picker@npm:7.1.1"
-  peerDependencies:
-    react: "*"
-    react-native: "*"
-  checksum: ae2a0f49d9405c490482fb4c8fb049ab0539d419860ec410485afdb8c92b7237c805a3189eb527fb5ac0fdab288d36a8b678350ff12a9a64d57c2fb46ceadffb
   languageName: node
   linkType: hard
 

@@ -3,8 +3,9 @@ import { _ } from '@joplin/lib/locale';
 import { CommandRuntimeProps } from '../types';
 import { Platform } from 'react-native';
 import pickDocument from '../../../../utils/pickDocument';
-import { ImagePickerResponse, launchImageLibrary } from 'react-native-image-picker';
+import { launchImageLibraryAsync, MediaTypeOptions, UIImagePickerControllerQualityType } from 'expo-image-picker';
 import Logger from '@joplin/utils/Logger';
+import { msleep } from '@joplin/utils/time';
 
 const logger = Logger.create('attachFile');
 
@@ -44,20 +45,21 @@ export const runtime = (props: CommandRuntimeProps): CommandRuntime => {
 	};
 	const attachPhoto = async () => {
 		// the selection Limit should be specified. I think 200 is enough?
-		const response: ImagePickerResponse = await launchImageLibrary({ mediaType: 'photo', includeBase64: false, selectionLimit: 200 });
+		const response = await launchImageLibraryAsync({
+			mediaTypes: MediaTypeOptions.All,
+			allowsMultipleSelection: true,
+			base64: false,
+			// The default quality is high, which can lead to large attachments.
+			videoQuality: UIImagePickerControllerQualityType.Medium,
+		});
 
-		if (response.errorCode) {
-			logger.warn('Got error from picker', response.errorCode);
-			return;
-		}
-
-		if (response.didCancel) {
+		if (response.canceled) {
 			logger.info('User cancelled picker');
 			return;
 		}
 
 		for (const asset of response.assets) {
-			await props.attachFile(asset, 'image');
+			await props.attachFile(asset, asset.type);
 		}
 	};
 
@@ -83,6 +85,13 @@ export const runtime = (props: CommandRuntimeProps): CommandRuntime => {
 			buttons.push({ text: _('Take photo'), id: AttachFileAction.TakePhoto });
 
 			buttonId = await props.dialogs.showMenu(_('Choose an option'), buttons) as AttachFileAction;
+		}
+
+		// iOS seems to require a brief delay after dismissing the options menu for the first time.
+		// Without this delay, the first call to handleResult after startup will fail to show an
+		// attachment dialog.
+		if (Platform.OS === 'ios') {
+			await msleep(1);
 		}
 
 		if (buttonId === AttachFileAction.TakePhoto) await takePhoto();
