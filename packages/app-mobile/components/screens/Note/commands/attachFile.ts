@@ -44,7 +44,12 @@ export const runtime = (props: CommandRuntimeProps): CommandRuntime => {
 	};
 	const attachPhoto = async () => {
 		// the selection Limit should be specified. I think 200 is enough?
-		const response: ImagePickerResponse = await launchImageLibrary({ mediaType: 'photo', includeBase64: false, selectionLimit: 200 });
+		const response: ImagePickerResponse = await launchImageLibrary({
+			mediaType: 'mixed',
+			videoQuality: 'low',
+			includeBase64: false,
+			selectionLimit: 200,
+		});
 
 		if (response.errorCode) {
 			logger.warn('Got error from picker', response.errorCode);
@@ -57,7 +62,7 @@ export const runtime = (props: CommandRuntimeProps): CommandRuntime => {
 		}
 
 		for (const asset of response.assets) {
-			await props.attachFile(asset, 'image');
+			await props.attachFile(asset, asset.type);
 		}
 	};
 
