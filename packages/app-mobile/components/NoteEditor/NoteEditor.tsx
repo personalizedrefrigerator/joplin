@@ -387,8 +387,8 @@ function NoteEditor(props: Props, ref: any) {
 					window.cm = codeMirrorBundle.initCodeMirror(
 						parentElement,
 						initialText,
-						${JSON.stringify(props.noteId)}
-						settings,
+						${JSON.stringify(props.noteId)},
+						settings
 					);
 
 					${setInitialSelectionJS}
