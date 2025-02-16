@@ -155,7 +155,8 @@ export default class CodeMirrorControl extends CodeMirror5Emulation implements E
 				effects: updateNoteIdEffects,
 			}));
 
-			return true;
+			// Although the note ID field changed, the body is the same:
+			return false;
 		}
 
 		return false;
