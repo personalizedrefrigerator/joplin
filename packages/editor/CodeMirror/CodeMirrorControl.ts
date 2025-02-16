@@ -265,6 +265,8 @@ export default class CodeMirrorControl extends CodeMirror5Emulation implements E
 
 		// Allow accessing the current note ID
 		noteIdFacet: noteIdFacet.reader,
+		// Allows watching the note ID for changes
+		setNoteIdEffect,
 	};
 
 	public addExtension(extension: Extension) {

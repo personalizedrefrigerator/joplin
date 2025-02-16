@@ -636,6 +636,8 @@ export interface CodeMirrorControl {
 		 */
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- No better type available
 		noteIdFacet: any;
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- No better type available
+		setNoteIdEffect: any;
 	};
 }
 

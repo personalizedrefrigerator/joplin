@@ -636,6 +636,13 @@ export interface CodeMirrorControl {
 		 */
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- No better type available
 		noteIdFacet: any;
+		/**
+		 * A CodeMirror [StateEffect](https://codemirror.net/docs/ref/#state.StateEffect) that is
+		 * included in a [Transaction](https://codemirror.net/docs/ref/#state.Transaction) when the
+		 * note ID changes.
+		 */
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- No better type available
+		setNoteIdEffect: any;
 	};
 }
 
