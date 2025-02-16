@@ -381,9 +381,15 @@ const CodeMirror = (props: NoteBodyEditorProps, ref: ForwardedRef<NoteBodyEditor
 		props.tabMovesFocus,
 	]);
 
+	const noteIdRef = useRef(props.noteId);
+	noteIdRef.current = props.noteId;
+
 	// Update the editor's value
 	useEffect(() => {
-		if (editorRef.current?.updateBody(props.content)) {
+		// Include the noteId in the update props to give plugins access
+		// to the current note ID.
+		const updateProps = { noteId: noteIdRef.current };
+		if (editorRef.current?.updateBody(props.content, updateProps)) {
 			editorRef.current?.clearHistory();
 		}
 	}, [props.content]);
@@ -394,6 +400,7 @@ const CodeMirror = (props: NoteBodyEditorProps, ref: ForwardedRef<NoteBodyEditor
 				<Editor
 					style={styles.editor}
 					initialText={props.content}
+					initialNoteId={props.noteId}
 					ref={editorRef}
 					settings={editorSettings}
 					pluginStates={props.plugins}

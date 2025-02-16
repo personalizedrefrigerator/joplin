@@ -929,6 +929,7 @@ packages/editor/CodeMirror/utils/keyUpHandlerExtension.js
 packages/editor/CodeMirror/utils/overwriteModeExtension.test.js
 packages/editor/CodeMirror/utils/overwriteModeExtension.js
 packages/editor/CodeMirror/utils/searchExtension.js
+packages/editor/CodeMirror/utils/selectedNoteIdExtension.js
 packages/editor/CodeMirror/utils/setupVim.js
 packages/editor/SelectionFormatting.js
 packages/editor/events.js

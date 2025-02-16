@@ -1523,6 +1523,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 					ref={this.editorRef}
 					toolbarEnabled={this.props.toolbarEnabled}
 					themeId={this.props.themeId}
+					noteId={this.props.noteId}
 					initialText={note.body}
 					initialSelection={this.selection}
 					onChange={this.onMarkdownEditorTextChange}

@@ -208,4 +208,22 @@ describe('CodeMirrorControl', () => {
 
 		expect(control.editor.state.doc.toString()).toBe(expected);
 	});
+
+	it('updateBody should update the note ID, if provided', () => {
+		const control = createEditorControl('test');
+		const noteIdFacet = control.joplinExtensions.noteIdFacet;
+		const getFacet = () => control.editor.state.facet(noteIdFacet);
+
+		control.updateBody('Test', { noteId: 'updated' });
+		expect(getFacet()).toBe('updated');
+
+		// Updating the ID without updating the body should change the ID
+		control.updateBody('Test', { noteId: 'updated 2' });
+		expect(getFacet()).toBe('updated 2');
+
+		// Changing the body, without specifying a new note ID, should
+		// not update the facet.
+		control.updateBody('Test 2');
+		expect(getFacet()).toBe('updated 2');
+	});
 });
