@@ -40,7 +40,6 @@ import Logger from '@joplin/utils/Logger';
 import ImageEditor from '../../NoteEditor/ImageEditor/ImageEditor';
 import promptRestoreAutosave from '../../NoteEditor/ImageEditor/promptRestoreAutosave';
 import isEditableResource from '../../NoteEditor/ImageEditor/isEditableResource';
-import VoiceTypingDialog from '../../voiceTyping/VoiceTypingDialog';
 import { ChangeEvent as EditorChangeEvent, SelectionRangeChangeEvent, UndoRedoDepthChangeEvent } from '@joplin/editor/events';
 import { join } from 'path';
 import { Dispatch } from 'redux';
@@ -68,6 +67,8 @@ import PluginUserWebView from '../../plugins/dialogs/PluginUserWebView';
 import getShownPluginEditorView from '@joplin/lib/services/plugins/utils/getShownPluginEditorView';
 import getActivePluginEditorView from '@joplin/lib/services/plugins/utils/getActivePluginEditorView';
 import EditorPluginHandler from '@joplin/lib/services/plugins/EditorPluginHandler';
+import AudioRecordingBanner from '../../voiceTyping/AudioRecordingBanner';
+import SpeechToTextBanner from '../../voiceTyping/SpeechToTextBanner';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 const emptyArray: any[] = [];
@@ -126,6 +127,7 @@ interface State {
 	fromShare: boolean;
 	showCamera: boolean;
 	showImageEditor: boolean;
+	showAudioRecorder: boolean;
 	imageEditorResource: ResourceEntity;
 	imageEditorResourceFilepath: string;
 	noteResources: Record<string, ResourceInfo>;
@@ -137,7 +139,7 @@ interface State {
 		canRedo: boolean;
 	};
 
-	voiceTypingDialogShown: boolean;
+	showSpeechToTextDialog: boolean;
 }
 
 class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> implements BaseNoteScreenComponent {
@@ -195,6 +197,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 			fromShare: false,
 			showCamera: false,
 			showImageEditor: false,
+			showAudioRecorder: false,
 			imageEditorResource: null,
 			noteResources: {},
 			imageEditorResourceFilepath: null,
@@ -206,7 +209,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 				canRedo: false,
 			},
 
-			voiceTypingDialogShown: false,
+			showSpeechToTextDialog: false,
 		};
 
 		this.titleTextFieldRef = React.createRef();
@@ -324,7 +327,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 		this.onBodyViewerCheckboxChange = this.onBodyViewerCheckboxChange.bind(this);
 		this.onUndoRedoDepthChange = this.onUndoRedoDepthChange.bind(this);
 		this.voiceTypingDialog_onText = this.voiceTypingDialog_onText.bind(this);
-		this.voiceTypingDialog_onDismiss = this.voiceTypingDialog_onDismiss.bind(this);
+		this.audioRecorderDialog_onDismiss = this.audioRecorderDialog_onDismiss.bind(this);
 	}
 
 	private registerCommands() {
@@ -352,6 +355,9 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 					if (!this.state.note || !this.state.note.id) return;
 
 					this.setState({ noteTagDialogShown: visible });
+				},
+				setAudioRecorderVisible: (visible) => {
+					this.setState({ showAudioRecorder: visible });
 				},
 				getMode: () => this.state.mode,
 				setMode: (mode: 'view'|'edit') => {
@@ -1225,14 +1231,17 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 			});
 		}
 
-		output.push({
-			title: _('Voice typing...'),
-			onPress: () => {
-				// this.voiceRecording_onPress();
-				this.setState({ voiceTypingDialogShown: true });
-			},
-			disabled: readOnly,
-		});
+		const voiceTypingSupported = Platform.OS === 'android';
+		if (voiceTypingSupported) {
+			output.push({
+				title: _('Voice typing...'),
+				onPress: () => {
+					// this.voiceRecording_onPress();
+					this.setState({ showSpeechToTextDialog: true });
+				},
+				disabled: readOnly,
+			});
+		}
 
 		const commandService = CommandService.instance();
 		const whenContext = commandService.currentWhenClauseContext();
@@ -1433,9 +1442,13 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 		}
 	}
 
-	private voiceTypingDialog_onDismiss() {
-		this.setState({ voiceTypingDialogShown: false });
-	}
+	private audioRecorderDialog_onDismiss = () => {
+		this.setState({ showSpeechToTextDialog: false, showAudioRecorder: false });
+	};
+
+	private speechToTextDialog_onDismiss = () => {
+		this.setState({ showSpeechToTextDialog: false });
+	};
 
 	private noteEditorVisible() {
 		return !this.state.showCamera && !this.state.showImageEditor;
@@ -1590,7 +1603,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 		}
 
 		const renderActionButton = () => {
-			if (this.state.voiceTypingDialogShown) return null;
+			if (this.state.showSpeechToTextDialog) return null;
 			if (!this.state.note || !!this.state.note.deleted_time) return null;
 
 			const editButton = {
@@ -1637,20 +1650,30 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 
 		const noteTagDialog = !this.state.noteTagDialogShown ? null : <NoteTagsDialog onCloseRequested={this.noteTagDialog_closeRequested} />;
 
-		const renderVoiceTypingDialog = () => {
-			if (!this.state.voiceTypingDialogShown) return null;
-			return <VoiceTypingDialog
-				locale={currentLocale()}
-				onText={this.voiceTypingDialog_onText}
-				onFile={event => this.attachFile(event, 'audio')}
-				onDismiss={this.voiceTypingDialog_onDismiss}
-			/>;
+		const renderVoiceTypingDialogs = () => {
+			const result = [];
+			if (this.state.showAudioRecorder) {
+				result.push(<AudioRecordingBanner
+					key='audio-recorder'
+					onFileSaved={event => this.attachFile(event, 'audio')}
+					onDismiss={this.audioRecorderDialog_onDismiss}
+				/>);
+			}
+			if (this.state.showSpeechToTextDialog) {
+				result.push(<SpeechToTextBanner
+					key='speech-to-text'
+					locale={currentLocale()}
+					onText={this.voiceTypingDialog_onText}
+					onDismiss={this.speechToTextDialog_onDismiss}
+				/>);
+			}
+			return result;
 		};
 
 		const renderWrappedContent = () => {
 			const content = <>
 				{bodyComponent}
-				{renderVoiceTypingDialog()}
+				{renderVoiceTypingDialogs()}
 			</>;
 
 			return this.state.mode === 'edit' ? (

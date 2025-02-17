@@ -177,7 +177,7 @@ const useAudioRecorder = (onFileSaved: OnFileSavedCallback, onDismiss: ()=> void
 	return { onStartStopRecording, error, duration, recordingState };
 };
 
-const AudioRecording: React.FC<Props> = props => {
+const AudioRecordingBanner: React.FC<Props> = props => {
 	const { recordingState, onStartStopRecording, duration, error } = useAudioRecorder(props.onFileSaved, props.onDismiss);
 
 	const startStopButtonLabel = recordingState === RecorderState.Idle ? _('Start recording') : _('Done');
@@ -206,4 +206,4 @@ const AudioRecording: React.FC<Props> = props => {
 	/>;
 };
 
-export default AudioRecording;
+export default AudioRecordingBanner;
