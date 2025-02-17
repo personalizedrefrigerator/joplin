@@ -65,8 +65,8 @@ export const Week = 7 * Day;
 export const Month = 30 * Day;
 
 function initDayJs() {
-	dayjs.extend(dayJsRelativeTime);
 	dayjs.extend(dayJsDuration);
+	dayjs.extend(dayJsRelativeTime);
 }
 
 initDayJs();
