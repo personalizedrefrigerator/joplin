@@ -1765,14 +1765,6 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 			},
 		},
 
-		'voiceTyping.mode': {
-			type: SettingItemType.String,
-			value: '',
-			public: false,
-			appTypes: [AppType.Mobile],
-			label: () => 'Default voice typing mode (record or speech to text)',
-		},
-
 		'trash.autoDeletionEnabled': {
 			value: true,
 			type: SettingItemType.Bool,
