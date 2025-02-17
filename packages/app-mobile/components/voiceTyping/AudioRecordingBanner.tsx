@@ -180,10 +180,18 @@ const useAudioRecorder = (onFileSaved: OnFileSavedCallback, onDismiss: ()=> void
 const AudioRecordingBanner: React.FC<Props> = props => {
 	const { recordingState, onStartStopRecording, duration, error } = useAudioRecorder(props.onFileSaved, props.onDismiss);
 
+	const onCancelPress = useCallback(async () => {
+		if (recordingState === RecorderState.Recording) {
+			const message = _('Cancelling will discard the recording. This cannot be undone. Are you sure you want to proceed?');
+			if (!await shim.showConfirmationDialog(message)) return;
+		}
+		props.onDismiss();
+	}, [recordingState, props.onDismiss]);
+
 	const startStopButtonLabel = recordingState === RecorderState.Idle ? _('Start recording') : _('Done');
 	const allowStartStop = recordingState === RecorderState.Idle || recordingState === RecorderState.Recording;
 	const actions = <>
-		<SecondaryButton onPress={props.onDismiss}>{_('Cancel')}</SecondaryButton>
+		<SecondaryButton onPress={onCancelPress}>{_('Cancel')}</SecondaryButton>
 		<PrimaryButton disabled={!allowStartStop} onPress={onStartStopRecording}>{startStopButtonLabel}</PrimaryButton>
 	</>;
 
