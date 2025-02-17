@@ -14,6 +14,7 @@ import { Text } from 'react-native-paper';
 import { AndroidAudioEncoder, AndroidOutputFormat, IOSAudioQuality, IOSOutputFormat, RecordingOptions } from 'expo-av/build/Audio';
 import time from '@joplin/lib/time';
 import { toFileExtension } from '@joplin/lib/mime-utils';
+import { formatMsToDurationLocal } from '@joplin/utils/time';
 
 const logger = Logger.create('AudioRecording');
 
@@ -197,7 +198,7 @@ const AudioRecordingBanner: React.FC<Props> = props => {
 
 	const durationDescription = <Text>{
 		recordingState === RecorderState.Recording
-			? _('%ds', Math.floor(duration / 1000))
+			? formatMsToDurationLocal(duration)
 			: ''
 	}</Text>;
 

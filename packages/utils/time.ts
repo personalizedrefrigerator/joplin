@@ -10,6 +10,8 @@ import * as dayjs from 'dayjs';
 // - import * as dayJsRelativeTimeType causes a runtime error.
 import type * as dayJsRelativeTimeType from 'dayjs/plugin/relativeTime';
 const dayJsRelativeTime: typeof dayJsRelativeTimeType = require('dayjs/plugin/relativeTime');
+import type * as dayJsDurationType from 'dayjs/plugin/duration';
+const dayJsDuration: typeof dayJsDurationType = require('dayjs/plugin/duration');
 
 const supportedLocales: Record<string, unknown> = {
 	'ar': require('dayjs/locale/ar'),
@@ -64,6 +66,7 @@ export const Month = 30 * Day;
 
 function initDayJs() {
 	dayjs.extend(dayJsRelativeTime);
+	dayjs.extend(dayJsDuration);
 }
 
 initDayJs();
@@ -156,4 +159,16 @@ export const isValidDate = (anything: string) => {
 
 export const formatDateTimeLocalToMs = (anything: string) => {
 	return dayjs(anything).unix() * 1000;
+};
+
+export const formatMsToDurationLocal = (ms: number) => {
+	let format;
+	if (ms < Hour) {
+		format = 'm:ss';
+	} else if (ms < Day) {
+		format = 'H:mm:ss';
+	} else {
+		format = 'YYYY-MM-DDTHH:mm';
+	}
+	return dayjs.duration(ms).format(format);
 };
