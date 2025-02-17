@@ -326,7 +326,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 		this.screenHeader_redoButtonPress = this.screenHeader_redoButtonPress.bind(this);
 		this.onBodyViewerCheckboxChange = this.onBodyViewerCheckboxChange.bind(this);
 		this.onUndoRedoDepthChange = this.onUndoRedoDepthChange.bind(this);
-		this.voiceTypingDialog_onText = this.voiceTypingDialog_onText.bind(this);
+		this.speechToTextDialog_onText = this.speechToTextDialog_onText.bind(this);
 		this.audioRecorderDialog_onDismiss = this.audioRecorderDialog_onDismiss.bind(this);
 	}
 
@@ -1425,7 +1425,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 		void this.saveOneProperty('body', newBody);
 	}
 
-	private voiceTypingDialog_onText(text: string) {
+	private speechToTextDialog_onText(text: string) {
 		if (this.state.mode === 'view') {
 			const newNote: NoteEntity = { ...this.state.note };
 			newNote.body = `${newNote.body} ${text}`;
@@ -1441,6 +1441,10 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 			}
 		}
 	}
+
+	private audioRecordingDialog_onFile = (file: PickerResponse) => {
+		return this.attachFile(file, 'audio');
+	};
 
 	private audioRecorderDialog_onDismiss = () => {
 		this.setState({ showSpeechToTextDialog: false, showAudioRecorder: false });
@@ -1602,8 +1606,9 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 			}
 		}
 
+		const voiceTypingDialogShown = this.state.showSpeechToTextDialog || this.state.showAudioRecorder;
 		const renderActionButton = () => {
-			if (this.state.showSpeechToTextDialog) return null;
+			if (voiceTypingDialogShown) return null;
 			if (!this.state.note || !!this.state.note.deleted_time) return null;
 
 			const editButton = {
@@ -1655,7 +1660,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 			if (this.state.showAudioRecorder) {
 				result.push(<AudioRecordingBanner
 					key='audio-recorder'
-					onFileSaved={event => this.attachFile(event, 'audio')}
+					onFileSaved={this.audioRecordingDialog_onFile}
 					onDismiss={this.audioRecorderDialog_onDismiss}
 				/>);
 			}
@@ -1663,7 +1668,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 				result.push(<SpeechToTextBanner
 					key='speech-to-text'
 					locale={currentLocale()}
-					onText={this.voiceTypingDialog_onText}
+					onText={this.speechToTextDialog_onText}
 					onDismiss={this.speechToTextDialog_onDismiss}
 				/>);
 			}
