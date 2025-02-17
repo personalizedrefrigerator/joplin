@@ -1344,7 +1344,7 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: any) => {
 		editor.on(TinyMceEditorEvents.KeyUp, onKeyUp);
 		editor.on(TinyMceEditorEvents.KeyDown, onKeyDown);
 		editor.on(TinyMceEditorEvents.KeyPress, onKeypress);
-		editor.on(TinyMceEditorEvents.Paste, onPaste);
+		editor.on(TinyMceEditorEvents.Paste, onPaste, true);
 		editor.on(TinyMceEditorEvents.PasteAsText, onPasteAsText);
 		editor.on(TinyMceEditorEvents.Copy, onCopy);
 		// `compositionend` means that a user has finished entering a Chinese
