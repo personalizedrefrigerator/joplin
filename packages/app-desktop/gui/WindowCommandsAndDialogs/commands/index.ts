@@ -28,7 +28,6 @@ import * as restoreNote from './restoreNote';
 import * as revealResourceFile from './revealResourceFile';
 import * as search from './search';
 import * as setTags from './setTags';
-import * as showEditorPlugin from './showEditorPlugin';
 import * as showModalMessage from './showModalMessage';
 import * as showNoteContentProperties from './showNoteContentProperties';
 import * as showNoteProperties from './showNoteProperties';
@@ -36,7 +35,6 @@ import * as showPrompt from './showPrompt';
 import * as showShareFolderDialog from './showShareFolderDialog';
 import * as showShareNoteDialog from './showShareNoteDialog';
 import * as showSpellCheckerMenu from './showSpellCheckerMenu';
-import * as toggleEditorPlugin from './toggleEditorPlugin';
 import * as toggleEditors from './toggleEditors';
 import * as toggleLayoutMoveMode from './toggleLayoutMoveMode';
 import * as toggleMenuBar from './toggleMenuBar';
@@ -78,7 +76,6 @@ const index: any[] = [
 	revealResourceFile,
 	search,
 	setTags,
-	showEditorPlugin,
 	showModalMessage,
 	showNoteContentProperties,
 	showNoteProperties,
@@ -86,7 +83,6 @@ const index: any[] = [
 	showShareFolderDialog,
 	showShareNoteDialog,
 	showSpellCheckerMenu,
-	toggleEditorPlugin,
 	toggleEditors,
 	toggleLayoutMoveMode,
 	toggleMenuBar,
