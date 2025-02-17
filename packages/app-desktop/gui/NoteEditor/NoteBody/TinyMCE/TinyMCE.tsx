@@ -1344,6 +1344,8 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: any) => {
 		editor.on(TinyMceEditorEvents.KeyUp, onKeyUp);
 		editor.on(TinyMceEditorEvents.KeyDown, onKeyDown);
 		editor.on(TinyMceEditorEvents.KeyPress, onKeypress);
+		// Passing `true` adds the listener to the front of the listener list.
+		// This allows overriding TinyMCE's built-in paste handler with .preventDefault.
 		editor.on(TinyMceEditorEvents.Paste, onPaste, true);
 		editor.on(TinyMceEditorEvents.PasteAsText, onPasteAsText);
 		editor.on(TinyMceEditorEvents.Copy, onCopy);
