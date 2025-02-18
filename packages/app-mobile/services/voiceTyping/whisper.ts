@@ -15,7 +15,7 @@ const { SpeechToTextModule } = NativeModules;
 // - After long pauses.
 // - Between sentences (in pairs).
 // - At the beginning and end of a sequence.
-const timestampExp = /<\|(\d+\.\d*)\|>/g;
+const timestampExp = /<\|(\d+)\|>/g;
 const postProcessSpeech = (text: string) => {
 	return text.replace(timestampExp, '').replace(/\[BLANK_AUDIO\]/g, '');
 };
@@ -91,7 +91,7 @@ class Whisper implements VoiceTypingSession {
 }
 
 const modelLocalFilepath = () => {
-	return `${shim.fsDriver().getAppDirectoryPath()}/voice-typing-models/whisper_tiny.onnx`;
+	return `${shim.fsDriver().getAppDirectoryPath()}/voice-typing-models/ggml-base.bin`;
 };
 
 const whisper: VoiceTypingProvider = {
@@ -101,10 +101,10 @@ const whisper: VoiceTypingProvider = {
 		let urlTemplate = rtrimSlashes(Setting.value('voiceTypingBaseUrl').trim());
 
 		if (!urlTemplate) {
-			urlTemplate = 'https://github.com/personalizedrefrigerator/joplin-voice-typing-test/releases/download/test-release/{task}.zip';
+			urlTemplate = 'https://huggingface.co/ggerganov/whisper.cpp/resolve/main/{task}.bin?download=true';
 		}
 
-		return urlTemplate.replace(/\{task\}/g, 'whisper_tiny.onnx');
+		return urlTemplate.replace(/\{task\}/g, 'ggml-base-q8_0');
 	},
 	deleteCachedModels: async (locale) => {
 		await shim.fsDriver().remove(modelLocalFilepath());
@@ -114,6 +114,9 @@ const whisper: VoiceTypingProvider = {
 		return join(dirname(modelLocalFilepath()), 'uuid');
 	},
 	build: async ({ modelPath, callbacks, locale }) => {
+		logger.debug('Creating Whisper session from path', modelPath);
+		if (!await shim.fsDriver().exists(modelPath)) throw new Error(`No model found at path: ${JSON.stringify(modelPath)}`);
+
 		const sessionId = await SpeechToTextModule.openSession(modelPath, locale);
 		return new Whisper(sessionId, callbacks);
 	},

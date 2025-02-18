@@ -1,0 +1,17 @@
+package net.cozic.joplin.audio
+
+class NativeWhsiperLib {
+    companion object {
+        init {
+            System.loadLibrary("joplin")
+        }
+
+        // TODO: The example whisper.cpp project transfers pointers as Longs to the Kotlin code.
+        // This seems unsafe. Try changing how this is managed.
+        external fun init(modelPath: String): Long;
+        external fun free(pointer: Long): Unit;
+
+        external fun fullTranscribe(pointer: Long, languageCode: String, numThreads: Int, audioData: FloatArray): Array<String>;
+    }
+
+}

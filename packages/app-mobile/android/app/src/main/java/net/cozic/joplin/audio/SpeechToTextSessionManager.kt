@@ -1,6 +1,5 @@
 package net.cozic.joplin.audio
 
-import ai.onnxruntime.OrtEnvironment
 import android.content.Context
 import com.facebook.react.bridge.Promise
 import java.util.concurrent.Executor
@@ -21,13 +20,12 @@ class SpeechToTextSessionManager(
 	fun openSession(
 		modelPath: String,
 		locale: String,
-		environment: OrtEnvironment,
 		context: Context,
 	): Int {
 		val sessionId = nextSessionId++
 		sessions[sessionId] = SpeechToTextSession(
 			SpeechToTextConverter(
-				modelPath, locale, recorderFactory = AudioRecorder.factory, environment, context,
+				modelPath, locale, recorderFactory = AudioRecorder.factory, context,
 			)
 		)
 		return sessionId

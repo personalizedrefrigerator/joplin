@@ -1,5 +1,5 @@
 // Matches pairs of timestamps or single timestamps.
-const timestampExp = /<\|(\d+\.\d*)\|>(?:<\|(\d+\.\d*)\|>)?/g;
+const timestampExp = /<\|(\d+)\|>(?:<\|(\d+)\|>)?/g;
 
 const timestampMatchToNumber = (match: RegExpMatchArray) => {
 	const firstTimestamp = match[1];
@@ -10,7 +10,7 @@ const timestampMatchToNumber = (match: RegExpMatchArray) => {
 	// Should always be a finite number (i.e. not NaN)
 	if (!isFinite(timestamp)) throw new Error(`Timestamp match failed with ${match[0]}`);
 
-	return timestamp;
+	return timestamp / 1000;
 };
 
 const splitWhisperText = (textWithTimestamps: string, recordingLengthSeconds: number) => {

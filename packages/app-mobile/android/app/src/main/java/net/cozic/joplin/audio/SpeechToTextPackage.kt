@@ -1,6 +1,5 @@
 package net.cozic.joplin.audio
 
-import ai.onnxruntime.OrtEnvironment
 import com.facebook.react.ReactPackage
 import com.facebook.react.bridge.LifecycleEventListener
 import com.facebook.react.bridge.NativeModule
@@ -24,7 +23,6 @@ class SpeechToTextPackage : ReactPackage {
 	class SpeechToTextModule(
 		private var context: ReactApplicationContext,
 	) : ReactContextBaseJavaModule(context), LifecycleEventListener {
-		private var environment: OrtEnvironment? = null
 		private val executorService: ExecutorService = Executors.newFixedThreadPool(1)
 		private val sessionManager = SpeechToTextSessionManager(executorService)
 
@@ -33,20 +31,15 @@ class SpeechToTextPackage : ReactPackage {
 		override fun onHostResume() { }
 		override fun onHostPause() { }
 		override fun onHostDestroy() {
-			environment?.close()
+			// TODO: Cleanup here
 		}
 
 		@ReactMethod
 		fun openSession(modelPath: String, locale: String, promise: Promise) {
 			val appContext = context.applicationContext
-			// Initialize environment as late as possible:
-			val ortEnvironment = environment ?: OrtEnvironment.getEnvironment()
-			if (environment != null) {
-				environment = ortEnvironment
-			}
 
 			try {
-				val sessionId = sessionManager.openSession(modelPath, locale, ortEnvironment, appContext)
+				val sessionId = sessionManager.openSession(modelPath, locale, appContext)
 				promise.resolve(sessionId)
 			} catch (exception: Throwable) {
 				promise.reject(exception)
