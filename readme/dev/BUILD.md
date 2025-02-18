@@ -79,7 +79,13 @@ To run the mobile app in a web browser,
 	cd packages/app-mobile
 	yarn serve-web
 
-Above, `yarn serve-web` starts a development server on port `8088`. To create a release build, instead run `yarn web`. The built output will be stored in `packages/app-mobile/web/dist`.
+Above, `yarn serve-web` starts a development server on port `8088`. The built version of the web app auto-reloads the full page when a change is made to the source files.
+
+To instead reload individual components on change (hot reload), serve with the following command:
+
+	yarn serve-web-hot-reload
+
+To create a release build, run `yarn web`. The built output will be stored in `packages/app-mobile/web/dist`.
 
 Like the iOS and Android builds, it's necessary to compile TypeScript to JS. See "Watching files" below.
 

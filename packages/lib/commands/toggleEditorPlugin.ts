@@ -1,7 +1,7 @@
-import { CommandContext, CommandDeclaration, CommandRuntime } from '@joplin/lib/services/CommandService';
-import { _ } from '@joplin/lib/locale';
-import Setting from '@joplin/lib/models/Setting';
-import getActivePluginEditorView from '@joplin/lib/services/plugins/utils/getActivePluginEditorView';
+import { CommandContext, CommandDeclaration, CommandRuntime } from '../services/CommandService';
+import { _ } from '../locale';
+import Setting from '../models/Setting';
+import getActivePluginEditorView from '../services/plugins/utils/getActivePluginEditorView';
 import Logger from '@joplin/utils/Logger';
 
 const logger = Logger.create('toggleEditorPlugin');
@@ -24,14 +24,26 @@ export const runtime = (): CommandRuntime => {
 			}
 
 			const idx = shownEditorViewIds.indexOf(editorView.id);
+			let hasBeenHidden = false;
 
 			if (idx < 0) {
 				shownEditorViewIds.push(editorView.id);
 			} else {
 				shownEditorViewIds.splice(idx, 1);
+				hasBeenHidden = true;
 			}
 
+			logger.info('New shown editor views: ', shownEditorViewIds);
+
 			Setting.setValue('plugins.shownEditorViewIds', shownEditorViewIds);
+
+			if (hasBeenHidden) {
+				// When the plugin editor goes from visible to hidden, we need to reload the note
+				// because it may have been changed via the data API.
+				context.dispatch({
+					type: 'EDITOR_NOTE_NEEDS_RELOAD',
+				});
+			}
 		},
 	};
 };
