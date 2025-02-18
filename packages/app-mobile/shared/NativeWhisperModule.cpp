@@ -11,4 +11,8 @@ std::string NativeWhisperModule::test(jsi::Runtime& rt) {
     return std::string{"Test."};
 }
 
+std::string NativeWhisperModule::transcribe(jsi::Runtime &rt, std::string filePath, jsi::Object whisperParams) {
+
+}
+
 } // namespace facebook::react
