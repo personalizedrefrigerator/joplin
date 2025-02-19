@@ -170,6 +170,7 @@ export interface State extends WindowState {
 	mustUpgradeAppMessage: string;
 	mustAuthenticate: boolean;
 	toast: Toast | null;
+	editorNoteReloadTimeRequest: number;
 
 	allowSelectionInOtherFolders: boolean;
 
@@ -241,6 +242,7 @@ export const defaultState: State = {
 	mustUpgradeAppMessage: '',
 	mustAuthenticate: false,
 	allowSelectionInOtherFolders: false,
+	editorNoteReloadTimeRequest: 0,
 
 	pluginService: pluginServiceDefaultState,
 	shareService: shareServiceDefaultState,
@@ -1512,6 +1514,12 @@ const reducer = produce((draft: Draft<State> = defaultState, action: any) => {
 			}
 			break;
 
+		case 'EDITOR_NOTE_NEEDS_RELOAD':
+			{
+				draft.editorNoteReloadTimeRequest = Date.now();
+			}
+			break;
+
 		case 'TOAST_SHOW':
 			draft.toast = {
 				duration: 6000,
@@ -1519,6 +1527,9 @@ const reducer = produce((draft: Draft<State> = defaultState, action: any) => {
 				...action.value,
 				timestamp: Date.now(),
 			};
+			break;
+		case 'TOAST_HIDE':
+			draft.toast = null;
 			break;
 
 		}

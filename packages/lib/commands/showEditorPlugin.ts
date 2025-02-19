@@ -1,6 +1,6 @@
-import { CommandContext, CommandDeclaration, CommandRuntime } from '@joplin/lib/services/CommandService';
-import Setting from '@joplin/lib/models/Setting';
-import getActivePluginEditorView from '@joplin/lib/services/plugins/utils/getActivePluginEditorView';
+import { CommandContext, CommandDeclaration, CommandRuntime } from '../services/CommandService';
+import Setting from '../models/Setting';
+import getActivePluginEditorView from '../services/plugins/utils/getActivePluginEditorView';
 import Logger from '@joplin/utils/Logger';
 
 const logger = Logger.create('showEditorPlugin');

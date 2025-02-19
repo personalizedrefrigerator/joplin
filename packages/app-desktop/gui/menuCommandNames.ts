@@ -7,6 +7,7 @@ export default function() {
 		'focusElementNoteList',
 		'focusElementNoteTitle',
 		'focusElementSideBar',
+		'focusElementToolbar',
 		'focusSearch',
 		'historyBackward',
 		'historyForward',
