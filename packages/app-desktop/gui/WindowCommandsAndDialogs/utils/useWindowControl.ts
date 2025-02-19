@@ -2,8 +2,8 @@ import * as React from 'react';
 import { useMemo, useRef } from 'react';
 import { DialogState } from '../types';
 import { PrintCallback } from './usePrintToCallback';
-import shim from '@joplin/lib/shim';
 import { _ } from '@joplin/lib/locale';
+import announceForAccessibility from '../../utils/announceForAccessibility';
 
 export interface WindowControl {
 	setState: (update: Partial<DialogState>)=> void;
@@ -28,7 +28,7 @@ const useWindowControl = (setDialogState: OnSetDialogState, onPrint: PrintCallba
 			},
 			printTo: (target, options) => onPrintRef.current(target, options),
 			announcePanelVisibility: (panelName, visible) => {
-				shim.announceForAccessibility(
+				announceForAccessibility(
 					visible ? _('Panel "%s" is visible', panelName) : _('Panel %s is hidden', panelName),
 				);
 			},

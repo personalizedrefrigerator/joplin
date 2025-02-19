@@ -5,7 +5,7 @@ const { GeolocationReact } = require('../geolocation-react.js');
 import RNFetchBlob from 'rn-fetch-blob';
 import { generateSecureRandom } from 'react-native-securerandom';
 import FsDriverRN from '../fs-driver/fs-driver-rn';
-import { AccessibilityInfo, Linking, Platform } from 'react-native';
+import { Linking, Platform } from 'react-native';
 import crypto from '../../services/e2ee/crypto';
 const RNExitApp = require('react-native-exit-app').default;
 
@@ -29,10 +29,6 @@ export default function shimInit() {
 			temp.push(randomBytes[n]);
 		}
 		return temp;
-	};
-
-	shim.announceForAccessibility = (message) => {
-		AccessibilityInfo.announceForAccessibility(message);
 	};
 
 	// This function can be used to debug "Network Request Failed" errors. It
