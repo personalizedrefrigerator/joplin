@@ -1,7 +1,8 @@
 import * as React from 'react';
+import Modal from '../Modal';
 import SideMenu, { SideMenuPosition } from './SideMenu';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { LayoutChangeEvent, ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
+import { LayoutChangeEvent, StyleSheet, useWindowDimensions, View } from 'react-native';
 import { ThemeStyle, themeStyle } from '../global-style';
 import { connect } from 'react-redux';
 import { AppState } from '../../utils/types';
@@ -11,7 +12,6 @@ import { _ } from '@joplin/lib/locale';
 interface Props {
 	themeId: number;
 	children: React.ReactNode;
-	menu: React.ReactNode;
 	show: boolean;
 	onDismiss: ()=> void;
 }
@@ -82,6 +82,10 @@ const BottomDrawer: React.FC<Props> = props => {
 		lastOpen.current = isOpen;
 	}, [isOpen, props.onDismiss]);
 
+	const onModalDismiss = useCallback(() => {
+		setIsOpen(false);
+	}, []);
+
 	const [openMenuOffset, setOpenMenuOffset] = useState(400);
 	const onMenuLayout = useCallback((event: LayoutChangeEvent) => {
 		const height = event.nativeEvent.layout.height;
@@ -90,28 +94,37 @@ const BottomDrawer: React.FC<Props> = props => {
 
 	const theme = themeStyle(props.themeId);
 	const styles = useStyles(theme);
-	const menu = <ScrollView style={styles.outerContainer}>
+	const menu = <View style={styles.outerContainer}>
 		<View onLayout={onMenuLayout} style={styles.contentContainer}>
-			{props.menu}
+			{props.children}
 		</View>
-	</ScrollView>;
+	</View>;
 
-	return <SideMenu
-		label={_('New note menu')}
-		menuPosition={SideMenuPosition.Bottom}
-		menu={menu}
-		isOpen={isOpen}
-		onChange={(visible) => {
-			if (!visible) {
-				setIsOpen(false);
-			}
-		}}
+	return <Modal
+		visible={props.show}
+		modalBackgroundStyle={styles.modalBackground}
+		transparent={true}
+		animationType='fade'
+		onDismiss={onModalDismiss}
+		onRequestClose={onModalDismiss}
+	>
+		<SideMenu
+			label={_('New note menu')}
+			menuPosition={SideMenuPosition.Bottom}
+			menu={menu}
+			isOpen={isOpen}
+			onChange={(visible) => {
+				if (!visible) {
+					setIsOpen(false);
+				}
+			}}
 
-		disableGestures={false}
-		openMenuOffset={openMenuOffset}
-		overlayColor={theme.color}
-		menuStyle={styles.menuStyle}
-	>{props.children}</SideMenu>;
+			disableGestures={false}
+			openMenuOffset={openMenuOffset}
+			overlayColor={theme.color}
+			menuStyle={styles.menuStyle}
+		><View/></SideMenu>
+	</Modal>;
 };
 
 export default connect((state: AppState) => {

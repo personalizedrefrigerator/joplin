@@ -793,7 +793,6 @@ packages/app-mobile/components/screens/tags.js
 packages/app-mobile/components/side-menu-content.js
 packages/app-mobile/components/sidebar/AppSideMenu.js
 packages/app-mobile/components/sidebar/BottomDrawer.js
-packages/app-mobile/components/sidebar/BottomDrawerProvider.js
 packages/app-mobile/components/sidebar/SideMenu.js
 packages/app-mobile/components/testing/TestProviderStack.js
 packages/app-mobile/components/voiceTyping/AudioRecordingBanner.js

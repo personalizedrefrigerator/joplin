@@ -1,11 +1,11 @@
 import * as React from 'react';
-import { useState, useCallback, useMemo, useEffect, useContext } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { FAB, Portal } from 'react-native-paper';
 import { _ } from '@joplin/lib/locale';
 import { Dispatch } from 'redux';
 import { View } from 'react-native';
+import BottomDrawer from '../sidebar/BottomDrawer';
 import { connect } from 'react-redux';
-import { BottomDrawerContext } from '../sidebar/BottomDrawerProvider';
 const Icon = require('react-native-vector-icons/Ionicons').default;
 
 type OnButtonPress = ()=> void;
@@ -48,26 +48,6 @@ const FloatingActionButton = (props: ActionButtonProps) => {
 		props.onMenuToggled?.(newOpen);
 	}, [setOpen, open, props.onMenuToggled, props.dispatch]);
 
-	const drawerControl = useContext(BottomDrawerContext);
-	useEffect(() => {
-		if (open) {
-			const drawer = drawerControl.showDrawer({
-				renderContent: () => {
-					return props.menuContent;
-				},
-				onHide: () => {
-					setOpen(false);
-				},
-			});
-
-			return () => {
-				drawer.remove();
-			};
-		}
-
-		return () => {};
-	}, [open, drawerControl, props.menuContent]);
-
 	const closedIcon = useIcon(props.mainButton?.icon ?? 'add');
 	const openIcon = useIcon('close');
 
@@ -92,14 +72,13 @@ const FloatingActionButton = (props: ActionButtonProps) => {
 					position: 'absolute',
 					bottom: 10,
 					right: 10,
-					...(open ? {
-						opacity: 0,
-						pointerEvents: 'box-none',
-					} : null),
 				}}
 			>
 				{menuButton}
 			</View>
+			<BottomDrawer onDismiss={() => setOpen(false)} show={open}>
+				{props.menuContent}
+			</BottomDrawer>
 		</Portal>
 	);
 };

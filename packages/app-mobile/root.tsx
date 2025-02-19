@@ -141,7 +141,6 @@ import { getDisplayParentId } from '@joplin/lib/services/trash';
 import AppSideMenu from './components/sidebar/AppSideMenu';
 import { SideMenuPosition } from './components/sidebar/SideMenu';
 import PluginNotification from './components/plugins/PluginNotification';
-import BottomDrawerProvider from './components/sidebar/BottomDrawerProvider';
 
 const logger = Logger.create('root');
 
@@ -1365,9 +1364,7 @@ class AppComponent extends React.Component {
 				},
 			}}>
 				<DialogManager themeId={this.props.themeId}>
-					<BottomDrawerProvider>
-						{mainContent}
-					</BottomDrawerProvider>
+					{mainContent}
 				</DialogManager>
 			</PaperProvider>
 		);
