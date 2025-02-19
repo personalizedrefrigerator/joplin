@@ -42,6 +42,7 @@
     "deprecated-react-native-prop-types": "5.0.0",
     "events": "3.3.0",
     "expo": "51.0.26",
+    "expo-av": "14.0.7",
     "expo-camera": "15.0.16",
     "lodash": "4.17.21",
     "md5": "2.3.0",
