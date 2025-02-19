@@ -9,6 +9,7 @@ When creating new components, it's important to make sure that they're accessibl
 - **Minimum size**: Buttons should be at least 24px by 24px.
 - **Keyboard accessibility**: It shouldn't be necessary to use a mouse to use a component.
 - **Screen reader accessibility**: It should be possible to use the desktop and mobile apps with a [screen reader](https://en.wikipedia.org/wiki/Screen_reader).
+- **Contrast**: Text and images should have high contrast with the background (see [the WebAIM contrast checker](https://webaim.org/resources/contrastchecker/)).
 
 For a full list of accessibility guidelines, see [the WCAG 2.2](https://www.w3.org/TR/WCAG22/).
 
