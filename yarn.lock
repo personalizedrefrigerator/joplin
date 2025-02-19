@@ -31,10 +31,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@adobe/css-tools@npm:4.4.0":
-  version: 4.4.0
-  resolution: "@adobe/css-tools@npm:4.4.0"
-  checksum: 1f08fb49bf17fc7f2d1a86d3e739f29ca80063d28168307f1b0a962ef37501c5667271f6771966578897f2e94e43c4770fd802728a6e6495b812da54112d506a
+"@adobe/css-tools@npm:4.4.1":
+  version: 4.4.1
+  resolution: "@adobe/css-tools@npm:4.4.1"
+  checksum: bbded8a03c314afee0fb0b42922f664f437e0e2f0b86eeeb06dee9d02cd8fc958cf87aa3314952b00074e0b22fc5b8da23f45b61b6f8291c8aaa7cffc56a76e9
   languageName: node
   linkType: hard
 
@@ -1451,14 +1451,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@axe-core/playwright@npm:4.10.0":
-  version: 4.10.0
-  resolution: "@axe-core/playwright@npm:4.10.0"
+"@axe-core/playwright@npm:4.10.1":
+  version: 4.10.1
+  resolution: "@axe-core/playwright@npm:4.10.1"
   dependencies:
-    axe-core: ~4.10.0
+    axe-core: ~4.10.2
   peerDependencies:
     playwright-core: ">= 1.0.0"
-  checksum: cba9b7f625c8ed510e661d8d014f7e924fb85175b918b818cb808eec848c3e8a2cbbe2960ccf8dd4b9f84a4a4ea33eeeace48de2560a4a5777dd0ee6281d0c81
+  checksum: 53c5d9c7696a6ac20ec5d30c1bbcbb8c9cbb0b607ee53a022b3c935bf6110a78a243172c4ceed686c9675b3a241fe160277fd1f0974ab98c1678f9c7b14c7646
   languageName: node
   linkType: hard
 
@@ -8267,7 +8267,7 @@ __metadata:
   resolution: "@joplin/app-desktop@workspace:packages/app-desktop"
   dependencies:
     7zip-bin: 5.2.0
-    "@axe-core/playwright": 4.10.0
+    "@axe-core/playwright": 4.10.1
     "@electron/notarize": 2.3.2
     "@electron/rebuild": 3.6.0
     "@electron/remote": 2.1.2
@@ -8362,6 +8362,7 @@ __metadata:
     "@joplin/tools": ~3.3
     "@joplin/utils": ~3.3
     "@js-draw/material-icons": 1.27.2
+    "@pmmmwh/react-refresh-webpack-plugin": ^0.5.15
     "@react-native-clipboard/clipboard": 1.14.3
     "@react-native-community/datetimepicker": 8.2.0
     "@react-native-community/geolocation": 3.3.0
@@ -8394,6 +8395,7 @@ __metadata:
     deprecated-react-native-prop-types: 5.0.0
     events: 3.3.0
     expo: 51.0.26
+    expo-av: 14.0.7
     expo-camera: 15.0.16
     fast-deep-equal: 3.1.3
     fs-extra: 11.2.0
@@ -8440,6 +8442,7 @@ __metadata:
     react-native-webview: 13.10.5
     react-native-zip-archive: 6.1.2
     react-redux: 8.1.3
+    react-refresh: 0.16.0
     react-test-renderer: 18.3.1
     redux: 4.2.1
     rn-fetch-blob: 0.12.0
@@ -8575,7 +8578,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@joplin/htmlpack@workspace:packages/htmlpack"
   dependencies:
-    "@adobe/css-tools": 4.4.0
+    "@adobe/css-tools": 4.4.1
     "@joplin/fork-htmlparser2": ^4.1.57
     "@types/fs-extra": 11.0.4
     datauri: 4.1.0
@@ -8588,7 +8591,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@joplin/lib@workspace:packages/lib"
   dependencies:
-    "@adobe/css-tools": 4.4.0
+    "@adobe/css-tools": 4.4.1
     "@aws-sdk/client-s3": 3.296.0
     "@aws-sdk/s3-request-presigner": 3.296.0
     "@joplin/fork-htmlparser2": ^4.1.57
@@ -8891,7 +8894,7 @@ __metadata:
     "@types/markdown-it": 13.0.9
     "@types/mustache": 4.2.5
     "@types/node": 18.19.64
-    "@types/node-fetch": 2.6.11
+    "@types/node-fetch": 2.6.12
     "@types/yargs": 17.0.33
     compare-versions: 6.1.1
     dayjs: 1.11.12
@@ -8941,7 +8944,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@joplin/turndown@workspace:packages/turndown"
   dependencies:
-    "@adobe/css-tools": 4.4.0
+    "@adobe/css-tools": 4.4.1
     "@rollup/plugin-commonjs": 25.0.8
     "@rollup/plugin-node-resolve": 15.2.4
     "@rollup/plugin-replace": 5.0.7
@@ -8977,7 +8980,7 @@ __metadata:
     "@types/fs-extra": 11.0.4
     "@types/jest": 29.5.12
     "@types/markdown-it": 13.0.9
-    "@types/node-fetch": 2.6.11
+    "@types/node-fetch": 2.6.12
     async-mutex: 0.5.0
     dayjs: 1.11.12
     execa: 5.1.1
@@ -10737,6 +10740,43 @@ __metadata:
   dependencies:
     debug: ^4.3.1
   checksum: 663438d9154db3c11bc7d41a4838162542db9cb4cf989fe8936e9bd9e5b99e3a58d73c8888afa1180a8cb93375c1d165bb397939de8a5ab8507d13d2aed2a086
+  languageName: node
+  linkType: hard
+
+"@pmmmwh/react-refresh-webpack-plugin@npm:^0.5.15":
+  version: 0.5.15
+  resolution: "@pmmmwh/react-refresh-webpack-plugin@npm:0.5.15"
+  dependencies:
+    ansi-html: ^0.0.9
+    core-js-pure: ^3.23.3
+    error-stack-parser: ^2.0.6
+    html-entities: ^2.1.0
+    loader-utils: ^2.0.4
+    schema-utils: ^4.2.0
+    source-map: ^0.7.3
+  peerDependencies:
+    "@types/webpack": 4.x || 5.x
+    react-refresh: ">=0.10.0 <1.0.0"
+    sockjs-client: ^1.4.0
+    type-fest: ">=0.17.0 <5.0.0"
+    webpack: ">=4.43.0 <6.0.0"
+    webpack-dev-server: 3.x || 4.x || 5.x
+    webpack-hot-middleware: 2.x
+    webpack-plugin-serve: 0.x || 1.x
+  peerDependenciesMeta:
+    "@types/webpack":
+      optional: true
+    sockjs-client:
+      optional: true
+    type-fest:
+      optional: true
+    webpack-dev-server:
+      optional: true
+    webpack-hot-middleware:
+      optional: true
+    webpack-plugin-serve:
+      optional: true
+  checksum: 82df6244146209d63a12f0ca2e70b05274ee058c7e6d6eb4ced1228afde3b039a7f3f3cc0c76f1bb4b28deadbcf08bc2821c814f0bfee06979128578300fff3d
   languageName: node
   linkType: hard
 
@@ -13523,13 +13563,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node-fetch@npm:2.6.11":
-  version: 2.6.11
-  resolution: "@types/node-fetch@npm:2.6.11"
+"@types/node-fetch@npm:2.6.12":
+  version: 2.6.12
+  resolution: "@types/node-fetch@npm:2.6.12"
   dependencies:
     "@types/node": "*"
     form-data: ^4.0.0
-  checksum: 180e4d44c432839bdf8a25251ef8c47d51e37355ddd78c64695225de8bc5dc2b50b7bb855956d471c026bb84bd7295688a0960085e7158cbbba803053492568b
+  checksum: 9647e68f9a125a090220c38d77b3c8e669c488658ae7506f1b4f9568214beba087624b1705bba1dc76649a65281ce3fd5b400e15266cbef8088027fb88777557
   languageName: node
   linkType: hard
 
@@ -15594,6 +15634,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"ansi-html@npm:^0.0.9":
+  version: 0.0.9
+  resolution: "ansi-html@npm:0.0.9"
+  bin:
+    ansi-html: bin/ansi-html
+  checksum: a03754d6f66bae33938ed8bb3dd98174b7f4895ebe45226185036ed4a1388a7aaf2f2b9581608f0626432ba7add92cfc590aa6475a78bbb90d9d1e1d1af8cbe6
+  languageName: node
+  linkType: hard
+
 "ansi-regex@npm:^2.0.0":
   version: 2.1.1
   resolution: "ansi-regex@npm:2.1.1"
@@ -16650,10 +16699,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"axe-core@npm:~4.10.0":
-  version: 4.10.1
-  resolution: "axe-core@npm:4.10.1"
-  checksum: 1e71bc4b7cdad6e99dad9e4098a174932ed69052e7400e0fb57b585fff1764cc541580db375c643755250da7d68f811ba05fe0636c31d4238aa16e3f31587869
+"axe-core@npm:~4.10.2":
+  version: 4.10.2
+  resolution: "axe-core@npm:4.10.2"
+  checksum: 2b9b1c93ea73ea9f206604e4e17bd771d2d835f077bde54517d73028b8865c69b209460e73d5b109968cbdb39ab3d28943efa5695189bd79e16421ce1706719e
   languageName: node
   linkType: hard
 
@@ -20103,6 +20152,13 @@ __metadata:
   dependencies:
     browserslist: ^4.23.0
   checksum: 5e7430329358bced08c30950512d2081aea0a5652b4c5892cbb3c4a6db05b0d3893a191a955162a07fdb5f4fe74e61b6429fdb503f54e062336d76e43c9555d9
+  languageName: node
+  linkType: hard
+
+"core-js-pure@npm:^3.23.3":
+  version: 3.40.0
+  resolution: "core-js-pure@npm:3.40.0"
+  checksum: 14e7bd3ef1d39bbeb079b820b0f15f699a0f1589c640818c17679e00ae8c2baf1e0fe8e2734e04562d89b648626d4bc52660e5c44b216107160dbf2fe7e36c5a
   languageName: node
   linkType: hard
 
@@ -24645,6 +24701,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"expo-av@npm:14.0.7":
+  version: 14.0.7
+  resolution: "expo-av@npm:14.0.7"
+  peerDependencies:
+    expo: "*"
+  checksum: 7518a8972b0d1b3b362d4dc9c4d21a39c7cf98b46abbdbb2349451115f4edf6e97fb6c723674fd3c62fa037fc77e00172955082d21b1c3fdf5273f33781ce78d
+  languageName: node
+  linkType: hard
+
 "expo-camera@npm:15.0.16":
   version: 15.0.16
   resolution: "expo-camera@npm:15.0.16"
@@ -27834,17 +27899,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"html-entities@npm:^2.1.0, html-entities@npm:^2.4.0":
+  version: 2.5.2
+  resolution: "html-entities@npm:2.5.2"
+  checksum: b23f4a07d33d49ade1994069af4e13d31650e3fb62621e92ae10ecdf01d1a98065c78fd20fdc92b4c7881612210b37c275f2c9fba9777650ab0d6f2ceb3b99b6
+  languageName: node
+  linkType: hard
+
 "html-entities@npm:^2.3.2":
   version: 2.4.0
   resolution: "html-entities@npm:2.4.0"
   checksum: 25bea32642ce9ebd0eedc4d24381883ecb0335ccb8ac26379a0958b9b16652fdbaa725d70207ce54a51db24103436a698a8e454397d3ba8ad81460224751f1dc
-  languageName: node
-  linkType: hard
-
-"html-entities@npm:^2.4.0":
-  version: 2.5.2
-  resolution: "html-entities@npm:2.5.2"
-  checksum: b23f4a07d33d49ade1994069af4e13d31650e3fb62621e92ae10ecdf01d1a98065c78fd20fdc92b4c7881612210b37c275f2c9fba9777650ab0d6f2ceb3b99b6
   languageName: node
   linkType: hard
 
@@ -32404,7 +32469,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"loader-utils@npm:^2.0.0":
+"loader-utils@npm:^2.0.0, loader-utils@npm:^2.0.4":
   version: 2.0.4
   resolution: "loader-utils@npm:2.0.4"
   dependencies:
@@ -40309,6 +40374,13 @@ __metadata:
     redux:
       optional: true
   checksum: 192ea6f6053148ec80a4148ec607bc259403b937e515f616a1104ca5ab357e97e98b8245ed505a17afee67a72341d4a559eaca9607968b4a422aa9b44ba7eb89
+  languageName: node
+  linkType: hard
+
+"react-refresh@npm:0.16.0":
+  version: 0.16.0
+  resolution: "react-refresh@npm:0.16.0"
+  checksum: becff1ced3c9eb3631e06e038d7238c1badb329c1232a34694cc9983b1d176b6ffb74560d2dc4cc5e3353aa0041503ae2e71d5043ac82a2bcfb1fdf529dbe8b0
   languageName: node
   linkType: hard
 
