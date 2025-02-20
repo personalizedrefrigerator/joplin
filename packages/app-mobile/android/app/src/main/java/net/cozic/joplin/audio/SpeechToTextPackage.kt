@@ -62,13 +62,13 @@ class SpeechToTextPackage : ReactPackage {
 		}
 
 		@ReactMethod
-		fun expandBufferAndConvert(sessionId: Int, duration: Double, promise: Promise) {
-			sessionManager.expandBufferAndConvert(sessionId, duration, promise)
+		fun expandBufferAndConvert(sessionId: Int, duration: Double, prompt: String, promise: Promise) {
+			sessionManager.expandBufferAndConvert(sessionId, duration, prompt, promise)
 		}
 
 		@ReactMethod
-		fun convertAvailable(sessionId: Int, promise: Promise) {
-			sessionManager.convertAvailable(sessionId, promise)
+		fun convertAvailable(sessionId: Int, prompt: String, promise: Promise) {
+			sessionManager.convertAvailable(sessionId, prompt, promise)
 		}
 
 		@ReactMethod

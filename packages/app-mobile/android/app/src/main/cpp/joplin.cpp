@@ -37,9 +37,9 @@ jobjectArray buildWhisperResults(JNIEnv *env, whisper_context *pContext) {
     jobjectArray result = env->NewObjectArray(segmentCount, StringClass, nullptr);
     for (int i = 0; i < segmentCount; i++) {
         std::stringstream segmentText;
-        segmentText << " <|" << whisper_full_get_segment_t0(pContext, i) << "|> ";
+        segmentText << "<|" << whisper_full_get_segment_t0(pContext, i) << "|> ";
         segmentText << whisper_full_get_segment_text(pContext, i);
-        segmentText << " <|" << whisper_full_get_segment_t1(pContext, i) << "|> ";
+        segmentText << " <|" << whisper_full_get_segment_t1(pContext, i) << "|>";
 
         std::string segmentTextStr = segmentText.str();
         jobject value = env->NewStringUTF(segmentTextStr.c_str());
@@ -84,11 +84,13 @@ Java_net_cozic_joplin_audio_NativeWhsiperLib_00024Companion_fullTranscribe(JNIEn
                                                                            jlong pointer,
                                                                            jstring language_code_str,
                                                                            jint num_threads,
-                                                                           jfloatArray audio_data) {
+                                                                           jfloatArray audio_data,
+                                                                           jstring prompt_str) {
     whisper_context *pContext = reinterpret_cast<whisper_context *> (pointer);
     jfloat *pAudioData = env->GetFloatArrayElements(audio_data, nullptr);
     jsize lenAudioData = env->GetArrayLength(audio_data);
     const char *languageCode = env->GetStringUTFChars(language_code_str, nullptr);
+    const char *prompt = env->GetStringUTFChars(prompt_str, nullptr);
 
     whisper_full_params params = whisper_full_default_params(WHISPER_SAMPLING_GREEDY);
     params.print_realtime = false;
@@ -100,6 +102,7 @@ Java_net_cozic_joplin_audio_NativeWhsiperLib_00024Companion_fullTranscribe(JNIEn
     params.offset_ms = 0;
     params.no_context = true;
     params.single_segment = false;
+    params.initial_prompt = prompt;
 
     // May not be necessary (seems to be for benchmarking)
     whisper_reset_timings(pContext);
@@ -119,6 +122,7 @@ Java_net_cozic_joplin_audio_NativeWhsiperLib_00024Companion_fullTranscribe(JNIEn
     // changes (there should be no changes)
     env->ReleaseFloatArrayElements(audio_data, pAudioData, JNI_ABORT);
     env->ReleaseStringUTFChars(language_code_str, languageCode);
+    env->ReleaseStringUTFChars(prompt_str, prompt);
 
     return result;
 }
