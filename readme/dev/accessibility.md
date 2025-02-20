@@ -38,7 +38,13 @@ Most systems have a built-in screen reader that can be enabled and disabled in s
 
 Each of these screen readers has its own keyboard shortcuts and navigation methods. In general, however, it's possible to use keyboard shortcuts such as <kbd>tab</kbd> and <kbd>shift</kbd>-<kbd>tab</kbd> to navigate while a screen reader is enabled. See the documentation links above for documentation specific to each screen reader.
 
-**Note**: Joplin works best if the screen reader is started before launching Joplin.
+**Notes**:
+- Joplin works best if the screen reader is started before launching the app.
+- Screen readers usually have shortcuts for jumping to different parts of the page, including headings and [landmarks](https://www.w3.org/WAI/ARIA/apg/patterns/landmarks/examples/general-principles.html). See [the ARIA Authoring Practices Guide](https://www.w3.org/WAI/ARIA/apg/patterns/landmarks/examples/at.html) for a list of these shortcuts for different screen readers.
+- Screen readers often have different **focus** and **browse** modes.
+    - Focus mode is used, for example, when typing text in a text box. Keypresses are sent to the textbox rather than being interpreted as screen reader commands. 
+    - In browse mode, keyboard shortcuts can be used to more quickly jump between different parts of the page. For example, in the Orca screen reader, pressing <kbd>b</kbd> jumps to the next button, but only in browse mode.
+    - See also [NVDA browse and focus modes](https://download.nvaccess.org/documentation/userGuide.html#BrowseMode), [Orca: Filling out forms (discusses browse and focus modes)](https://help.gnome.org/users/orca/stable/howto_forms.html.en).
 
 ### Mobile: Setting up a screen reader
 
@@ -64,7 +70,7 @@ On a physical mobile device, VoiceOver and TalkBack share certain gestures:
 - **To focus the next item**: Swipe from left to right.
 - **To focus the previous item**: Swipe from right to left.
 - **To jump focus to a particular part of the screen**: Tap once on the part of the screen to focus.
-- **To click on the focused item**: Double-tap.
+- **To click on the focused item**: Double-tap anywhere on the screen.
 
 ## Adding automated tests to prevent regressions
 
