@@ -85,17 +85,17 @@ class SpeechToTextSessionManager(
 	}
 
 	// Waits for the next [duration] seconds to become available, then converts
-	fun expandBufferAndConvert(sessionId: Int, duration: Double, prompt: String, promise: Promise) {
+	fun convertNext(sessionId: Int, duration: Double, promise: Promise) {
 		this.concurrentWithSession(sessionId, promise::reject) { session ->
-			val result = session.converter.expandBufferAndConvert(duration, prompt)
+			val result = session.converter.convertNext(duration)
 			promise.resolve(result)
 		}
 	}
 
 	// Converts all available recorded data
-	fun convertAvailable(sessionId: Int, prompt: String, promise: Promise) {
+	fun convertAvailable(sessionId: Int, promise: Promise) {
 		this.concurrentWithSession(sessionId, promise::reject) { session ->
-			val result = session.converter.expandBufferAndConvert(prompt)
+			val result = session.converter.convertRemaining()
 			promise.resolve(result)
 		}
 	}

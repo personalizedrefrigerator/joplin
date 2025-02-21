@@ -5,7 +5,6 @@ import { rtrimSlashes } from '@joplin/utils/path';
 import { dirname, join } from 'path';
 import { NativeModules } from 'react-native';
 import { SpeechToTextCallbacks, VoiceTypingProvider, VoiceTypingSession } from './VoiceTyping';
-import splitWhisperText from './utils/splitWhisperText';
 
 const logger = Logger.create('voiceTyping/whisper');
 
@@ -21,8 +20,7 @@ const postProcessSpeech = (text: string) => {
 };
 
 class Whisper implements VoiceTypingSession {
-	private lastPreviewData: string;
-	private modelPrompt = '';
+	private lastPreviewData = '';
 	private closeCounter = 0;
 
 	public constructor(
@@ -38,25 +36,10 @@ class Whisper implements VoiceTypingSession {
 
 		const recordingLength = await SpeechToTextModule.getBufferLengthSeconds(sessionId);
 		logger.debug('recording length so far', recordingLength, 'with data:', data);
-		const { trimTo, dataBeforeTrim, dataAfterTrim } = splitWhisperText(data, recordingLength);
 
-		if (trimTo > 2) {
-			logger.debug('Trim to', trimTo, 'in recording with length', recordingLength);
-			const dataBefore = postProcessSpeech(dataBeforeTrim);
-			this.callbacks.onFinalize(dataBefore);
-			this.callbacks.onPreview(postProcessSpeech(dataAfterTrim));
-			this.lastPreviewData = dataAfterTrim;
-			await SpeechToTextModule.dropFirstSeconds(sessionId, trimTo);
-
-			// The previous output is used as a prompt for the next output.
-			this.modelPrompt += ` ${dataBefore}`;
-			// Keep only the last 150 chars
-			this.modelPrompt = this.modelPrompt.substring(Math.max(0, this.modelPrompt.length - 150), 150);
-		} else {
-			logger.debug('Preview');
-			this.lastPreviewData = data;
-			this.callbacks.onPreview(postProcessSpeech(data));
-		}
+		logger.debug('Preview');
+		this.lastPreviewData += data;
+		this.callbacks.onPreview(postProcessSpeech(this.lastPreviewData));
 	}
 
 	public async start() {
@@ -71,7 +54,7 @@ class Whisper implements VoiceTypingSession {
 			const loopStartCounter = this.closeCounter;
 			while (this.closeCounter === loopStartCounter && this.sessionId !== null) {
 				logger.debug('reading block');
-				const data: string = await SpeechToTextModule.expandBufferAndConvert(this.sessionId, 4, this.modelPrompt);
+				const data: string = await SpeechToTextModule.convertNext(this.sessionId, 6);
 				logger.debug('done reading block. Length', data?.length);
 				await this.processData(this.sessionId, data);
 			}
@@ -94,20 +77,11 @@ class Whisper implements VoiceTypingSession {
 		this.sessionId = null;
 		this.closeCounter ++;
 
-		try {
-			// Process any remaining data
-			logger.debug('ConvertAvailable');
-			const lastData = await SpeechToTextModule.convertAvailable(sessionId, this.modelPrompt);
-			logger.debug('Process');
-			await this.processData(sessionId, lastData);
-
-			if (this.lastPreviewData) {
-				this.callbacks.onFinalize(postProcessSpeech(this.lastPreviewData));
-			}
-		} finally {
-			this.modelPrompt = '';
-			await SpeechToTextModule.closeSession(sessionId);
+		if (this.lastPreviewData) {
+			this.callbacks.onFinalize(postProcessSpeech(this.lastPreviewData));
 		}
+
+		await SpeechToTextModule.closeSession(sessionId);
 	}
 }
 
@@ -125,7 +99,7 @@ const whisper: VoiceTypingProvider = {
 			urlTemplate = 'https://huggingface.co/ggerganov/whisper.cpp/resolve/main/{task}.bin?download=true';
 		}
 
-		return urlTemplate.replace(/\{task\}/g, 'ggml-base-q8_0');
+		return urlTemplate.replace(/\{task\}/g, 'ggml-tiny-q8_0');
 	},
 	deleteCachedModels: async (locale) => {
 		await shim.fsDriver().remove(modelLocalFilepath());

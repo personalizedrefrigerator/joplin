@@ -23,7 +23,7 @@ class SpeechToTextConverter(
 		recorder.start()
 	}
 
-	private fun convert(data: FloatArray, prompt: String): String {
+	private fun convert(data: FloatArray): String {
 		Log.i("Whisper", "PRE TRANSCRIBE ${data.size}")
 		val result = NativeWhsiperLib.fullTranscribe(whisper, data).joinToString(separator="")
 		Log.i("Whisper", "RES: ${result}")
@@ -37,19 +37,17 @@ class SpeechToTextConverter(
 
 	val bufferLengthSeconds: Double get() = recorder.bufferLengthSeconds
 
-	fun expandBufferAndConvert(seconds: Double, prompt: String): String {
-		recorder.pullNextSeconds(seconds)
-		// Also pull any extra available data, in case the speech-to-text converter
-		// is lagging behind the audio recorder.
-		recorder.pullAvailable()
-
-		return convert(recorder.bufferedData, prompt)
+	fun convertNext(seconds: Double): String {
+		val buffer = recorder.pullNextSeconds(seconds)
+		val result = convert(buffer)
+		dropFirstSeconds(seconds)
+		return result
 	}
 
 	// Converts as many seconds of buffered data as possible, without waiting
-	fun expandBufferAndConvert(prompt: String): String {
-		recorder.pullAvailable()
-		return convert(recorder.bufferedData, prompt)
+	fun convertRemaining(): String {
+		val buffer = recorder.pullAvailable()
+		return convert(buffer)
 	}
 
 	override fun close() {
