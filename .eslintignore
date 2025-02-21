@@ -768,9 +768,6 @@ packages/app-mobile/components/screens/ConfigScreen/plugins/utils/usePluginItem.
 packages/app-mobile/components/screens/ConfigScreen/plugins/utils/useRepoApi.js
 packages/app-mobile/components/screens/ConfigScreen/plugins/utils/useUpdateState.js
 packages/app-mobile/components/screens/ConfigScreen/types.js
-packages/app-mobile/components/screens/EncryptionConfig/EncryptionConfig.js
-packages/app-mobile/components/screens/EncryptionConfig/EncryptionKeyItem.js
-packages/app-mobile/components/screens/EncryptionConfig/utils/useStyles.js
 packages/app-mobile/components/screens/JoplinCloudLoginScreen.js
 packages/app-mobile/components/screens/LogScreen.js
 packages/app-mobile/components/screens/Note/Note.test.js
@@ -792,6 +789,7 @@ packages/app-mobile/components/screens/ShareManager/index.test.js
 packages/app-mobile/components/screens/ShareManager/index.js
 packages/app-mobile/components/screens/UpgradeSyncTargetScreen.js
 packages/app-mobile/components/screens/dropbox-login.js
+packages/app-mobile/components/screens/encryption-config.js
 packages/app-mobile/components/screens/status.js
 packages/app-mobile/components/screens/tags.js
 packages/app-mobile/components/side-menu-content.js

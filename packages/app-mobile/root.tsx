@@ -63,7 +63,7 @@ import LogScreen from './components/screens/LogScreen';
 import StatusScreen from './components/screens/status';
 import SearchScreen from './components/screens/SearchScreen';
 const { OneDriveLoginScreen } = require('./components/screens/onedrive-login.js');
-import EncryptionConfigScreen from './components/screens/EncryptionConfig/EncryptionConfig';
+import EncryptionConfigScreen from './components/screens/encryption-config';
 import DropboxLoginScreen from './components/screens/dropbox-login.js';
 import { MenuProvider } from 'react-native-popup-menu';
 import SideMenu, { SideMenuPosition } from './components/SideMenu';

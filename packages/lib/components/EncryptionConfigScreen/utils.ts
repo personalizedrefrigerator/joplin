@@ -11,7 +11,7 @@ import { reg } from '../../registry';
 import Setting from '../../models/Setting';
 const { useCallback, useEffect, useState } = shim.react();
 
-export type PasswordChecks = Record<string, boolean>;
+type PasswordChecks = Record<string, boolean>;
 
 export const useStats = () => {
 	const [stats, setStats] = useState<EncryptedItemsStats>({ encrypted: null, total: null });
@@ -88,7 +88,8 @@ export const onToggleEnabledClick = (mk: MasterKeyEntity) => {
 	setMasterKeyEnabled(mk.id, !masterKeyEnabled(mk));
 };
 
-export const onSavePasswordClick = (mk: MasterKeyEntity, password: string) => {
+export const onSavePasswordClick = (mk: MasterKeyEntity, passwords: Record<string, string>) => {
+	const password = passwords[mk.id];
 	if (!password) {
 		Setting.deleteObjectValue('encryption.passwordCache', mk.id);
 	} else {
@@ -124,6 +125,25 @@ export const useInputMasterPassword = (masterKeys: MasterKeyEntity[], activeMast
 	}, []);
 
 	return { inputMasterPassword, onMasterPasswordSave, onMasterPasswordChange };
+};
+
+export const useInputPasswords = (propsPasswords: Record<string, string>) => {
+	const [inputPasswords, setInputPasswords] = useState<Record<string, string>>(propsPasswords);
+
+	useEffect(() => {
+		setInputPasswords(propsPasswords);
+	}, [propsPasswords]);
+
+	const onInputPasswordChange = useCallback((mk: MasterKeyEntity, password: string) => {
+		setInputPasswords(current => {
+			return {
+				...current,
+				[mk.id]: password,
+			};
+		});
+	}, []);
+
+	return { inputPasswords, onInputPasswordChange };
 };
 
 export const usePasswordChecker = (masterKeys: MasterKeyEntity[], activeMasterKeyId: string, masterPassword: string, passwords: Record<string, string>) => {
