@@ -6,8 +6,8 @@ import EncryptionConfig from './encryption-config';
 import { loadEncryptionMasterKey, setupDatabaseAndSynchronizer, switchClient, synchronizerStart } from '@joplin/lib/testing/test-utils';
 import createMockReduxStore from '../../utils/testing/createMockReduxStore';
 import setupGlobalStore from '../../utils/testing/setupGlobalStore';
-import { setEncryptionEnabled } from '@joplin/lib/services/synchronizer/syncInfoUtils';
-import { render, screen } from '@testing-library/react-native';
+import { getActiveMasterKeyId, setEncryptionEnabled, setMasterKeyEnabled } from '@joplin/lib/services/synchronizer/syncInfoUtils';
+import { act, render, screen } from '@testing-library/react-native';
 import '@testing-library/jest-native/extend-expect';
 
 interface WrapperProps { }
@@ -19,17 +19,14 @@ const WrappedEncryptionConfigScreen: React.FC<WrapperProps> = _props => {
 	</TestProviderStack>;
 };
 
-const setUpEncryptionAndSync = async () => {
-	setEncryptionEnabled(true);
-	await loadEncryptionMasterKey();
-	await synchronizerStart();
-};
-
 describe('encryption-config', () => {
 	beforeEach(async () => {
 		await setupDatabaseAndSynchronizer(1);
 		await setupDatabaseAndSynchronizer(0);
 		await switchClient(0);
+
+		setEncryptionEnabled(true);
+		await loadEncryptionMasterKey();
 
 		store = createMockReduxStore();
 		setupGlobalStore(store);
@@ -39,10 +36,9 @@ describe('encryption-config', () => {
 	});
 
 	test('should show an input for entering the master password after an initial sync', async () => {
-		await setUpEncryptionAndSync();
-
 		// Switch to the other client and sync so that there's a master key missing
 		// a password
+		await synchronizerStart();
 		await switchClient(1);
 		await synchronizerStart();
 
@@ -55,6 +51,24 @@ describe('encryption-config', () => {
 
 		// Unmount here to prevent "An update to EncryptionConfigScreen inside a test was not wrapped in act(...)"
 		// errors
+		unmount();
+	});
+
+	test('should not show the "disabled keys" dropdown unless there are disabled keys', async () => {
+		const masterKeyId = getActiveMasterKeyId();
+		setMasterKeyEnabled(masterKeyId, false);
+
+		const { unmount } = render(<WrappedEncryptionConfigScreen/>);
+
+		const queryDisabledKeysButton = () => screen.queryByRole('button', { name: 'Disabled keys' });
+
+		// Should be visible when there are disabled keys
+		expect(queryDisabledKeysButton()).toBeVisible();
+
+		// Enabling the key should hide the button
+		act(() => setMasterKeyEnabled(masterKeyId, true));
+		expect(queryDisabledKeysButton()).toBeNull();
+
 		unmount();
 	});
 });
