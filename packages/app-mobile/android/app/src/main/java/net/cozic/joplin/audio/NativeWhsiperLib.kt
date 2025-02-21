@@ -8,10 +8,10 @@ class NativeWhsiperLib {
 
         // TODO: The example whisper.cpp project transfers pointers as Longs to the Kotlin code.
         // This seems unsafe. Try changing how this is managed.
-        external fun init(modelPath: String): Long;
+        external fun init(modelPath: String, languageCode: String): Long;
         external fun free(pointer: Long): Unit;
 
-        external fun fullTranscribe(pointer: Long, languageCode: String, numThreads: Int, audioData: FloatArray, prompt: String): Array<String>;
+        external fun fullTranscribe(pointer: Long, audioData: FloatArray): Array<String>;
     }
 
 }

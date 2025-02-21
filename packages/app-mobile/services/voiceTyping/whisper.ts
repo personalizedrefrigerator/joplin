@@ -37,7 +37,7 @@ class Whisper implements VoiceTypingSession {
 		}
 
 		const recordingLength = await SpeechToTextModule.getBufferLengthSeconds(sessionId);
-		logger.debug('recording length so far', recordingLength);
+		logger.debug('recording length so far', recordingLength, 'with data:', data);
 		const { trimTo, dataBeforeTrim, dataAfterTrim } = splitWhisperText(data, recordingLength);
 
 		if (trimTo > 2) {
@@ -53,7 +53,7 @@ class Whisper implements VoiceTypingSession {
 			// Keep only the last 150 chars
 			this.modelPrompt = this.modelPrompt.substring(Math.max(0, this.modelPrompt.length - 150), 150);
 		} else {
-			logger.debug('Preview', data);
+			logger.debug('Preview');
 			this.lastPreviewData = data;
 			this.callbacks.onPreview(postProcessSpeech(data));
 		}
@@ -92,6 +92,7 @@ class Whisper implements VoiceTypingSession {
 		logger.info('Closing session...');
 		const sessionId = this.sessionId;
 		this.sessionId = null;
+		this.closeCounter ++;
 
 		try {
 			// Process any remaining data
@@ -104,7 +105,6 @@ class Whisper implements VoiceTypingSession {
 				this.callbacks.onFinalize(postProcessSpeech(this.lastPreviewData));
 			}
 		} finally {
-			this.closeCounter ++;
 			this.modelPrompt = '';
 			await SpeechToTextModule.closeSession(sessionId);
 		}

@@ -27,12 +27,15 @@ project("joplin")
 # used in the AndroidManifest.xml file.
 add_library(${CMAKE_PROJECT_NAME} SHARED
     # List C/C++ source files with relative paths to this CMakeLists.txt.
-    joplin.cpp)
+        whisperWrapper.cpp
+        ./utils/WhisperSession.cpp
+)
+
 
 
 set(WHISPER_LIB_DIR ${CMAKE_SOURCE_DIR}/../../../../lib/whisper.cpp)
 
-# TODO (only for certain Android versions)
+# Based on the Whisper.cpp Android example:
 set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}   -O3 ")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -fvisibility=hidden -fvisibility-inlines-hidden -ffunction-sections -fdata-sections")
 

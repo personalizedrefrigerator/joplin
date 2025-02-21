@@ -16,8 +16,8 @@ class SpeechToTextConverter(
 	context: Context,
 ) : Closeable {
 	private val recorder = recorderFactory(context)
-	private val whisper = NativeWhsiperLib.init(modelPath)
 	private val languageCode = Regex("_.*").replace(locale, "")
+	private val whisper = NativeWhsiperLib.init(modelPath, languageCode)
 
 	fun start() {
 		recorder.start()
@@ -25,7 +25,7 @@ class SpeechToTextConverter(
 
 	private fun convert(data: FloatArray, prompt: String): String {
 		Log.i("Whisper", "PRE TRANSCRIBE ${data.size}")
-		val result = NativeWhsiperLib.fullTranscribe(whisper, languageCode, 6, data, prompt).joinToString(separator="")
+		val result = NativeWhsiperLib.fullTranscribe(whisper, data).joinToString(separator="")
 		Log.i("Whisper", "RES: ${result}")
 		return result;
 	}
