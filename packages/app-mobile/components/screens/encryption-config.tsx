@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { TextInput, TouchableOpacity, Linking, View, StyleSheet, Text, Button, ScrollView } from 'react-native';
-const { connect } = require('react-redux');
+import { connect } from 'react-redux';
 import ScreenHeader from '../ScreenHeader';
 import { themeStyle } from '../global-style';
 import EncryptionService from '@joplin/lib/services/e2ee/EncryptionService';
@@ -16,13 +16,11 @@ import { Divider, List } from 'react-native-paper';
 import shim from '@joplin/lib/shim';
 
 interface Props {
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	themeId: any;
+	themeId: number;
 	masterKeys: MasterKeyEntity[];
 	passwords: Record<string, string>;
 	notLoadedMasterKeys: string[];
 	encryptionEnabled: boolean;
-	shouldReencrypt: boolean;
 	activeMasterKeyId: string;
 	masterPassword: string;
 }
@@ -117,7 +115,7 @@ const EncryptionConfigScreen = (props: Props) => {
 							value={password}
 							onChangeText={(text: string) => onInputPasswordChange(mk, text)}
 							style={inputStyle}
-						></TextInput>
+						/>
 						<Text
 							style={{ fontSize: theme.fontSize, marginRight: 10, color: theme.color }}
 							accessibilityRole='image'
