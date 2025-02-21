@@ -11,35 +11,31 @@ import useStyles from './utils/useStyles';
 
 interface Props {
 	themeId: number;
-	masterKey: MasterKeyEntity;
-	passwords: Record<string, string>;
+	mk: MasterKeyEntity;
 	masterPasswordKeys: PasswordChecks;
 	passwordChecks: PasswordChecks;
 }
 
 const EncryptionKeyItem: React.FC<Props> = ({
-	themeId, masterKey: mk, masterPasswordKeys, passwordChecks, passwords,
+	themeId, mk, masterPasswordKeys, passwordChecks,
 }) => {
 	const theme = themeStyle(themeId);
 	const styles = useStyles(themeId);
 
-	const initialPassword = passwords[mk.id] ?? '';
-	const [password, setPassword] = useState(initialPassword);
+	const [password, setPassword] = useState('');
 	const passwordOk = passwordChecks[mk.id] === true;
-	const passwordStatusIcon = passwordOk ? '✔' : '❌';
+	const passwordOkIcon = passwordOk ? '✔' : '❌';
 
 	const onSaveClick = useCallback(async () => {
 		onSavePasswordClick(mk, password);
 	}, [mk, password]);
 
-	const renderPasswordInput = () => {
-		if (masterPasswordKeys[mk.id] || !passwordChecks['master']) {
+	const renderPasswordInput = (masterKeyId: string) => {
+		if (masterPasswordKeys[masterKeyId] || !passwordChecks['master']) {
 			return (
 				<Text style={{ ...styles.normalText, color: theme.colorFaded, fontStyle: 'italic' }}>({_('Master password')})</Text>
 			);
 		} else {
-			const saveTitle = _('Save');
-			const passwordStatusLabel = passwordOk ? _('Valid') : _('Invalid password');
 			return (
 				<View style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }}>
 					<TextInput
@@ -49,23 +45,23 @@ const EncryptionKeyItem: React.FC<Props> = ({
 						defaultValue={password}
 						onChangeText={setPassword}
 						style={styles.inputStyle}
-					/>
+					></TextInput>
 					<Text
 						style={styles.statusIcon}
 						accessibilityRole='image'
-						accessibilityLabel={passwordStatusLabel}
-					>{passwordStatusIcon}</Text>
+						accessibilityLabel={passwordOk ? _('Valid') : _('Invalid password')}
+					>{passwordOkIcon}</Text>
 					<Button
-						title={saveTitle}
+						title={_('Save')}
 						onPress={onSaveClick}
-					/>
+					></Button>
 				</View>
 			);
 		}
 	};
 
 	return (
-		<View>
+		<View key={mk.id}>
 			<Text
 				style={styles.titleText}
 				accessibilityRole='header'
@@ -73,7 +69,7 @@ const EncryptionKeyItem: React.FC<Props> = ({
 			<Text style={styles.normalText}>{_('Created: %s', time.formatMsToLocal(mk.created_time))}</Text>
 			<View style={{ flexDirection: 'row', alignItems: 'center' }}>
 				<Text style={{ flex: 0, fontSize: theme.fontSize, marginRight: 10, color: theme.color }}>{_('Password:')}</Text>
-				{renderPasswordInput()}
+				{renderPasswordInput(mk.id)}
 			</View>
 		</View>
 	);
