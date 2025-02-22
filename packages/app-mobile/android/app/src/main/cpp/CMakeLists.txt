@@ -34,7 +34,7 @@ add_library(${CMAKE_PROJECT_NAME} SHARED
 
 
 
-set(WHISPER_LIB_DIR ${CMAKE_SOURCE_DIR}/../../../../lib/whisper.cpp)
+set(WHISPER_LIB_DIR ${CMAKE_SOURCE_DIR}/../../../../vendor/whisper.cpp)
 
 # Based on the Whisper.cpp Android example:
 set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}   -O3 ")
