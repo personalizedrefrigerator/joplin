@@ -38,9 +38,10 @@ class Whisper implements VoiceTypingSession {
 		const recordingLength = await SpeechToTextModule.getBufferLengthSeconds(sessionId);
 		logger.debug('recording length so far', recordingLength, 'with data:', data);
 
+		data = postProcessSpeech(data);
 		if (data.length) {
 			const prefix = this.isFirstParagraph ? '' : '\n\n';
-			this.callbacks.onFinalize(`${prefix}${postProcessSpeech(data)}`);
+			this.callbacks.onFinalize(`${prefix}${data}`);
 			this.isFirstParagraph = false;
 		}
 	}

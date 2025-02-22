@@ -31,16 +31,26 @@ WhisperSession::~WhisperSession() {
 whisper_full_params
 WhisperSession::buildWhisperParams_() {
     whisper_full_params params = whisper_full_default_params(WHISPER_SAMPLING_GREEDY);
+    // WHISPER_SAMPLING_BEAM_SEARCH is an alternative to greedy:
+    // params.beam_search = { .beam_size = 2 };
     params.print_realtime = false;
     params.print_timestamps = true;
     params.print_progress = false;
     params.translate = false;
     params.n_threads = 4; // TODO: Calibrate the number of threads to the device.
     params.offset_ms = 0;
-    params.no_context = true;
     params.single_segment = true;
-    params.suppress_nst = true; // Avoid non-speech tokens (e.g. "(crackle)").
-    params.temperature_inc = 0.0f;
+    // Avoid non-speech tokens (e.g. "(crackle)"). For now, this is disabled because it seems to
+    // cause increased hallucinations (e.g. repeated "Thank you"s).
+    // params.suppress_nst = true;
+    params.temperature_inc = 0;
+    params.temperature = 0;
+
+    // Following the whisper streaming example in setting prompt_tokens to nullptr
+    // when using VAD (Voice Activity Detection)
+    params.initial_prompt = "";
+    params.prompt_tokens = nullptr;
+    params.prompt_n_tokens = 0;
 
     // Lifetime: lifetime(params) < lifetime(lang_) = lifetime(this).
     params.language = lang_.c_str();
@@ -50,17 +60,13 @@ WhisperSession::buildWhisperParams_() {
 
 std::string
 WhisperSession::transcribe_(const std::vector<float>& audio, size_t transcribeCount) {
-    int minTranscribeLength = WHISPER_SAMPLE_RATE / 3; // 0.33s
+    int minTranscribeLength = WHISPER_SAMPLE_RATE / 2; // 0.5s
     if (transcribeCount < minTranscribeLength) {
         return "";
     }
 
     whisper_full_params params = buildWhisperParams_();
 
-    // Following the whisper streaming example in setting prompt_tokens to nullptr
-    // when using VAD (Voice Activity Detection)
-    params.prompt_tokens = nullptr;
-    params.prompt_n_tokens = 0;
 
     whisper_reset_timings(pContext_);
 
