@@ -30,19 +30,8 @@ void log_android(enum ggml_log_level level, const char* message, void* user_data
     __android_log_print(priority, "Whisper::JNI::cpp", "%s", message);
 }
 
-jobjectArray stringArrayToJavaArray(JNIEnv *env, const std::vector<std::string>& vec) {
-    jclass StringClass = env->FindClass("java/lang/String");
-    jobjectArray result = env->NewObjectArray(vec.size(), StringClass, nullptr);
-
-    for (size_t i = 0; i < vec.size(); i++) {
-        const std::string& item = vec[i];
-        jobject value = env->NewStringUTF(item.c_str());
-        env->SetObjectArrayElement(result, i, value);
-        LOGI("Add result item");
-    }
-    LOGI("End result array");
-
-    return result;
+jstring stringToJava(JNIEnv *env, const std::string& source) {
+    return env->NewStringUTF(source.c_str());
 }
 
 extern "C"
@@ -72,7 +61,7 @@ Java_net_cozic_joplin_audio_NativeWhsiperLib_00024Companion_free(JNIEnv *env, jo
 }
 
 extern "C"
-JNIEXPORT jobjectArray JNICALL
+JNIEXPORT jstring JNICALL
 Java_net_cozic_joplin_audio_NativeWhsiperLib_00024Companion_fullTranscribe(JNIEnv *env,
                                                                            jobject thiz,
                                                                            jlong pointer,
@@ -89,5 +78,13 @@ Java_net_cozic_joplin_audio_NativeWhsiperLib_00024Companion_fullTranscribe(JNIEn
     // changes (there should be no changes)
     env->ReleaseFloatArrayElements(audio_data, pAudioData, JNI_ABORT);
 
-    return stringArrayToJavaArray(env, resultVector);
+    return stringToJava(env, resultVector);
+}
+extern "C"
+JNIEXPORT jstring JNICALL
+Java_net_cozic_joplin_audio_NativeWhsiperLib_00024Companion_getPreview(
+        JNIEnv *env, jobject thiz, jlong pointer
+) {
+    auto *pSession = reinterpret_cast<WhisperSession *> (pointer);
+    return stringToJava(env, pSession->getPreview());
 }

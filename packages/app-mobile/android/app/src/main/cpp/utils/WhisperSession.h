@@ -7,15 +7,19 @@ class WhisperSession {
 public:
     explicit WhisperSession(const std::string& modelPath, std::string lang);
     ~WhisperSession();
-    std::vector<std::string> transcribeNextChunk(const float *pAudio, int sizeAudio);
+    std::string transcribeNextChunk(const float *pAudio, int sizeAudio);
+    std::string getPreview();
 
 private:
-    whisper_params buildWhisperParams_();
+    // Current preview state
+    std::string previewText_;
+
+    whisper_full_params buildWhisperParams_();
+    std::string transcribe_(const std::vector<float>& audio, size_t samplesToTranscribe);
 
     whisper_context *pContext_;
     const std::string lang_;
 
-    std::vector<float> audioHistory_;
-    std::vector<int> promptTokens_;
+    std::vector<float> audioBuffer_;
 };
 

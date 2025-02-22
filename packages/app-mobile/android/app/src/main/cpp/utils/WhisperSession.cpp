@@ -2,12 +2,12 @@
 
 #include <utility>
 #include <sstream>
+#include <algorithm>
 #include "whisper.h"
+#include "findSilence.h"
 
 WhisperSession::WhisperSession(const std::string& modelPath, std::string lang)
-    : lang_ {std::move(lang)},
-      promptTokens_ { 0 },
-      audioHistory_ { 0 } {
+    : lang_ {std::move(lang)} {
     whisper_context_params contextParams = whisper_context_default_params();
 
     // Lifetime(pModelPath): Whisper.cpp creates a copy of pModelPath and stores it in a std::string.
@@ -44,60 +44,63 @@ WhisperSession::buildWhisperParams_() {
     // Lifetime: lifetime(params) < lifetime(lang_) = lifetime(this).
     params.language = lang_.c_str();
 
-    return std::move(params);
+    return params;
 }
 
-static int findSilence(const std::vector<float>& audio) {
-    // Step 1: Filter the audio
-    std::vector<float> data = power(highpass(lowpass(audio)));
-
-    for (int i = 0; i < data.size(); i++) {
-        if (data[i] < threshold) {
-            belowThresholdCounter++;
-        }
-
-        if (belowThresholdCounter > samplesPerSecond / 2) {
-            return i;
-        }
-    }
-    return -1;
-}
-
-std::vector<std::string>
-WhisperSession::transcribeNextChunk(const float *pAudio, int sizeAudio) {
+std::string
+WhisperSession::transcribe_(const std::vector<float>& audio, size_t transcribeCount) {
     whisper_full_params params = buildWhisperParams_();
 
     // Following the whisper streaming example in setting prompt_tokens to nullptr
     // when using VAD (Voice Activity Detection)
-    params.prompt_tokens = nullptr;//promptTokens_.data();
-    params.prompt_n_tokens = 0;// promptTokens_.size();
+    params.prompt_tokens = nullptr;
+    params.prompt_n_tokens = 0;
 
-    if (whisper_full(pContext_, params, pAudio, sizeAudio) != 0) {
+    transcribeCount = std::min(audio.size(), transcribeCount);
+
+    if (whisper_full(pContext_, params, audio.data(), transcribeCount) != 0) {
 //        LOGI("Failed to run Whisper"); TODO: Throw here!
     } else {
         whisper_print_timings(pContext_);
     }
 
     // Tokens to be used as a prompt for the next run of Whisper
-    promptTokens_.clear();
     unsigned int segmentCount = whisper_full_n_segments(pContext_);
-    for (int i = 0; i < segmentCount; i++) {
-        int tokenCount = whisper_full_n_tokens(pContext_, i);
-        for (int j = 0; j < tokenCount; j++) {
-            whisper_token id = whisper_full_get_token_id(pContext_, i, j);
-            promptTokens_.push_back(id);
-        }
-    }
 
     // Build the results
-    std::vector<std::string> results { segmentCount };
+    std::stringstream results;
     for (int i = 0; i < segmentCount; i++) {
-        std::stringstream segmentText;
-        segmentText << "<|" << whisper_full_get_segment_t0(pContext_, i) << "|> ";
-        segmentText << whisper_full_get_segment_text(pContext_, i);
-        segmentText << " <|" << whisper_full_get_segment_t1(pContext_, i) << "|>";
-
-        results.push_back(segmentText.str());
+        results << "<|" << whisper_full_get_segment_t0(pContext_, i) << "|> ";
+        results << whisper_full_get_segment_text(pContext_, i);
+        results << " <|" << whisper_full_get_segment_t1(pContext_, i) << "|>";
     }
-    return results;
+    return results.str();
+}
+
+std::string
+WhisperSession::transcribeNextChunk(const float *pAudio, int sizeAudio) {
+    std::string finalizedContent;
+
+    // Update the local audio buffer
+    for (int i = 0; i < sizeAudio; i++) {
+        audioBuffer_.push_back(pAudio[i]);
+    }
+
+    // Does the audio buffer need to be split somewhere?
+    if (audioBuffer_.size() > WHISPER_SAMPLE_RATE * 25) {
+        float minSilenceSeconds = 0.3f;
+        auto splitPoint = findLongestSilence(audioBuffer_, WHISPER_SAMPLE_RATE, minSilenceSeconds);
+        int halfBufferSize = audioBuffer_.size() / 2;
+        auto splitRange = splitPoint.value_or(std::tuple(halfBufferSize, halfBufferSize));
+
+        finalizedContent = transcribe_(audioBuffer_, std::get<0>(splitRange));
+        audioBuffer_ = std::vector(audioBuffer_.begin() + std::get<1>(splitRange), audioBuffer_.end());
+    }
+
+    previewText_ = transcribe_(audioBuffer_, audioBuffer_.size());
+    return finalizedContent;
+}
+
+std::string WhisperSession::getPreview() {
+    return previewText_;
 }

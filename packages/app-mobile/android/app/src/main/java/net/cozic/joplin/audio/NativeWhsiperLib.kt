@@ -11,7 +11,8 @@ class NativeWhsiperLib {
         external fun init(modelPath: String, languageCode: String): Long;
         external fun free(pointer: Long): Unit;
 
-        external fun fullTranscribe(pointer: Long, audioData: FloatArray): Array<String>;
+        external fun fullTranscribe(pointer: Long, audioData: FloatArray): String;
+        external fun getPreview(pointer: Long): String;
     }
 
 }
