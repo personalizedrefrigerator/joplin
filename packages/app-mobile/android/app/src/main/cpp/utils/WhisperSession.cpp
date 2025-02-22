@@ -4,7 +4,7 @@
 #include <sstream>
 #include <algorithm>
 #include "whisper.h"
-#include "findSilence.h"
+#include "findLongestSilence.h"
 #include "androidUtil.h"
 
 WhisperSession::WhisperSession(const std::string& modelPath, std::string lang)

@@ -1,4 +1,4 @@
-#include "findSilence.h"
+#include "findLongestSilence.h"
 #include "androidUtil.h"
 
 SilenceRange findLongestSilence(
