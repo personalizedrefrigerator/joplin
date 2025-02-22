@@ -37,7 +37,7 @@ WhisperSession::buildWhisperParams_() {
     params.translate = false;
     params.n_threads = 4; // TODO: Calibrate the number of threads to the device.
     params.offset_ms = 0;
-    params.no_context = false;
+    params.no_context = true;
     params.single_segment = true;
     params.suppress_nst = true; // Avoid non-speech tokens (e.g. "(crackle)").
     params.temperature_inc = 0.0f;
@@ -50,12 +50,19 @@ WhisperSession::buildWhisperParams_() {
 
 std::string
 WhisperSession::transcribe_(const std::vector<float>& audio, size_t transcribeCount) {
+    int minTranscribeLength = WHISPER_SAMPLE_RATE / 4; // 0.25s
+    if (transcribeCount < minTranscribeLength) {
+        return "";
+    }
+
     whisper_full_params params = buildWhisperParams_();
 
     // Following the whisper streaming example in setting prompt_tokens to nullptr
     // when using VAD (Voice Activity Detection)
     params.prompt_tokens = nullptr;
     params.prompt_n_tokens = 0;
+
+    whisper_reset_timings(pContext_);
 
     transcribeCount = std::min(audio.size(), transcribeCount);
 
@@ -77,7 +84,17 @@ WhisperSession::transcribe_(const std::vector<float>& audio, size_t transcribeCo
     }
 
     std::string result = results.str();
-    LOGD("Transcribed: %s", result.c_str());
+    LOGD("Transcribed: %s (audio len %.2f)", result.c_str(), audio.size() / (float) WHISPER_SAMPLE_RATE);
+    return result;
+}
+
+std::string
+WhisperSession::splitAndTranscribeBefore_(int transcribeUpTo, int trimTo) {
+    std::string result = transcribe_(audioBuffer_, transcribeUpTo);
+
+    // Trim
+    LOGI("Trim to %.2f s, transcribe to %.2f s", (float) trimTo / WHISPER_SAMPLE_RATE, (float) transcribeUpTo / WHISPER_SAMPLE_RATE);
+    audioBuffer_ = std::vector(audioBuffer_.begin() + trimTo, audioBuffer_.end());
     return result;
 }
 
@@ -91,16 +108,30 @@ WhisperSession::transcribeNextChunk(const float *pAudio, int sizeAudio) {
     }
 
     // Does the audio buffer need to be split somewhere?
-    if (audioBuffer_.size() > WHISPER_SAMPLE_RATE * 18) {
+    if (audioBuffer_.size() > WHISPER_SAMPLE_RATE * 25) {
         float minSilenceSeconds = 0.3f;
-        auto splitPoint = findLongestSilence(audioBuffer_, WHISPER_SAMPLE_RATE, minSilenceSeconds);
-        int halfBufferSize = audioBuffer_.size() / 2;
-        auto splitRange = splitPoint.value_or(std::tuple(halfBufferSize, halfBufferSize));
+        auto silenceRange = findLongestSilence(audioBuffer_, WHISPER_SAMPLE_RATE, minSilenceSeconds);
 
-        int trimStart = std::get<0>(splitRange);
-        LOGI("Trim to %.2f s", (float) trimStart / WHISPER_SAMPLE_RATE);
-        finalizedContent = transcribe_(audioBuffer_, trimStart);
-        audioBuffer_ = std::vector(audioBuffer_.begin() + std::get<1>(splitRange), audioBuffer_.end());
+        // In this case, the audio is long enough that it needs to be split somewhere. If there's
+        // no suitable pause available, default to splitting in the middle.
+        int halfBufferSize = audioBuffer_.size() / 2;
+        int transcribeTo = silenceRange.isValid ? silenceRange.start : halfBufferSize;
+        int trimTo = silenceRange.isValid ? silenceRange.end : halfBufferSize;
+
+        finalizedContent = splitAndTranscribeBefore_(transcribeTo, trimTo);
+    } else if (audioBuffer_.size() > WHISPER_SAMPLE_RATE * 3) {
+        // Allow brief pauses to create new paragraphs:
+        float minSilenceSeconds = 2.0f;
+        auto splitPoint = findLongestSilence(audioBuffer_, WHISPER_SAMPLE_RATE, minSilenceSeconds);
+        if (splitPoint.isValid) {
+            int tolerance = WHISPER_SAMPLE_RATE / 20; // 0.05s
+            bool isCompletelySilent = splitPoint.start < tolerance && splitPoint.end > audioBuffer_.size() - tolerance;
+            if (isCompletelySilent) {
+                audioBuffer_.clear();
+            } else {
+                finalizedContent = splitAndTranscribeBefore_(splitPoint.start, splitPoint.end);
+            }
+        }
     }
 
     previewText_ = transcribe_(audioBuffer_, audioBuffer_.size());

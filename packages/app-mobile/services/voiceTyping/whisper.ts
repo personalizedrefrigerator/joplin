@@ -22,6 +22,7 @@ const postProcessSpeech = (text: string) => {
 class Whisper implements VoiceTypingSession {
 	private lastPreviewData = '';
 	private closeCounter = 0;
+	private isFirstParagraph = true;
 
 	public constructor(
 		private sessionId: number|null,
@@ -38,7 +39,9 @@ class Whisper implements VoiceTypingSession {
 		logger.debug('recording length so far', recordingLength, 'with data:', data);
 
 		if (data.length) {
-			this.callbacks.onFinalize(`\n\n${postProcessSpeech(data)}`);
+			const prefix = this.isFirstParagraph ? '' : '\n\n';
+			this.callbacks.onFinalize(`${prefix}${postProcessSpeech(data)}`);
+			this.isFirstParagraph = false;
 		}
 	}
 
@@ -54,13 +57,14 @@ class Whisper implements VoiceTypingSession {
 			const loopStartCounter = this.closeCounter;
 			while (this.closeCounter === loopStartCounter && this.sessionId !== null) {
 				logger.debug('reading block');
-				const data: string = await SpeechToTextModule.convertNext(this.sessionId, 6);
+				const data: string = await SpeechToTextModule.convertNext(this.sessionId, 4);
 				await this.processData(this.sessionId, data);
 
 				logger.debug('done reading block. Length', data?.length);
 				if (this.sessionId !== null) {
+					this.lastPreviewData = await SpeechToTextModule.getPreview(this.sessionId);
 					this.callbacks.onPreview(
-						postProcessSpeech(await SpeechToTextModule.getPreview(this.sessionId)),
+						postProcessSpeech(this.lastPreviewData),
 					);
 				}
 			}

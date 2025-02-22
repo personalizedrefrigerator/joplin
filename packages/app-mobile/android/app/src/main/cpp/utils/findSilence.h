@@ -4,10 +4,13 @@
 #include <optional>
 #include <tuple>
 
-using AudioRange = std::tuple<int, int>;
-using OptionalAudioRange = std::optional<AudioRange>;
+struct SilenceRange {
+    bool isValid;
+    int start;
+    int end;
+};
 
-OptionalAudioRange findLongestSilence(
+SilenceRange findLongestSilence(
 	const std::vector<float>& audioData,
 	int sampleRate,
 	float minSilenceLength

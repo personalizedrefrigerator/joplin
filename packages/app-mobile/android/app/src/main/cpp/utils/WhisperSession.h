@@ -16,6 +16,7 @@ private:
 
     whisper_full_params buildWhisperParams_();
     std::string transcribe_(const std::vector<float>& audio, size_t samplesToTranscribe);
+    std::string splitAndTranscribeBefore_(int transcribeUpTo, int trimTo);
 
     whisper_context *pContext_;
     const std::string lang_;
