@@ -50,7 +50,7 @@ WhisperSession::buildWhisperParams_() {
 
 std::string
 WhisperSession::transcribe_(const std::vector<float>& audio, size_t transcribeCount) {
-    int minTranscribeLength = WHISPER_SAMPLE_RATE / 4; // 0.25s
+    int minTranscribeLength = WHISPER_SAMPLE_RATE / 3; // 0.33s
     if (transcribeCount < minTranscribeLength) {
         return "";
     }

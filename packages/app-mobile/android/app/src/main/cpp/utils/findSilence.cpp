@@ -15,19 +15,19 @@ SilenceRange findLongestSilence(
 	std::vector<float> processedAudio { audioData };
 
 	// Highpass. See https://en.wikipedia.org/wiki/High-pass_filter
-	float alpha = 0.95;
+	float alpha = 0.94;
 	for (int i = 1; i < processedAudio.size(); i++) {
 		processedAudio[i] = alpha * processedAudio[i - 1] + alpha * (audioData[i] - audioData[i - 1]);
 	}
 
-	int windowSize = 128;
+	int windowSize = 256;
 	int windowsPerSecond = sampleRate / windowSize;
 	int quietWindows = 0;
 	for (int windowOffset = 0; windowOffset < processedAudio.size(); windowOffset += windowSize) {
 		float absSum = 0;
-		int rollingAverageSize = 10;
+		int rollingAverageSize = 20;
 		int silentSamples = 0;
-		float threshold = 0.1;
+		float threshold = 0.2;
 		for (int i = windowOffset; i < windowOffset + windowSize && i < processedAudio.size(); i++) {
 			absSum += abs(processedAudio[i]);
 			if (i - rollingAverageSize >= windowOffset) {

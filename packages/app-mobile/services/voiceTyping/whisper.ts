@@ -109,7 +109,7 @@ const whisper: VoiceTypingProvider = {
 			urlTemplate = 'https://huggingface.co/ggerganov/whisper.cpp/resolve/main/{task}.bin?download=true';
 		}
 
-		return urlTemplate.replace(/\{task\}/g, 'ggml-tiny-q8_0');
+		return urlTemplate.replace(/\{task\}/g, 'ggml-base-q8_0');
 	},
 	deleteCachedModels: async (locale) => {
 		await shim.fsDriver().remove(modelLocalFilepath());
