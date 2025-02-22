@@ -1,13 +1,8 @@
 package net.cozic.joplin.audio
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.util.Log
 import java.io.Closeable
-import java.nio.FloatBuffer
-import java.nio.IntBuffer
-import kotlin.time.DurationUnit
-import kotlin.time.measureTimedValue
 
 class SpeechToTextConverter(
 	modelPath: String,
@@ -17,7 +12,7 @@ class SpeechToTextConverter(
 ) : Closeable {
 	private val recorder = recorderFactory(context)
 	private val languageCode = Regex("_.*").replace(locale, "")
-	private val whisper = NativeWhsiperLib.init(modelPath, languageCode)
+	private var whisper = NativeWhsiperLib.init(modelPath, languageCode)
 
 	fun start() {
 		recorder.start()
@@ -25,8 +20,8 @@ class SpeechToTextConverter(
 
 	private fun convert(data: FloatArray): String {
 		Log.i("Whisper", "PRE TRANSCRIBE ${data.size}")
-		val result = NativeWhsiperLib.fullTranscribe(whisper, data).joinToString(separator="")
-		Log.i("Whisper", "RES: ${result}")
+		val result = NativeWhsiperLib.fullTranscribe(whisper, data)
+		Log.i("Whisper", "RES: $result")
 		return result;
 	}
 
@@ -50,9 +45,14 @@ class SpeechToTextConverter(
 		return convert(buffer)
 	}
 
+	fun getPreview(): String {
+		return NativeWhsiperLib.getPreview(whisper)
+	}
+
 	override fun close() {
 		Log.d("Whisper", "Close")
 		recorder.close()
 		NativeWhsiperLib.free(whisper)
+		whisper = 0
 	}
 }

@@ -72,6 +72,11 @@ class SpeechToTextPackage : ReactPackage {
 		}
 
 		@ReactMethod
+		fun getPreview(sessionId: Int, promise: Promise) {
+			sessionManager.getPreview(sessionId, promise)
+		}
+
+		@ReactMethod
 		fun closeSession(sessionId: Int, promise: Promise) {
 			sessionManager.closeSession(sessionId, promise)
 		}

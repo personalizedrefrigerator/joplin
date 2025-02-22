@@ -5,6 +5,7 @@
 #include <algorithm>
 #include "whisper.h"
 #include "findSilence.h"
+#include "androidUtil.h"
 
 WhisperSession::WhisperSession(const std::string& modelPath, std::string lang)
     : lang_ {std::move(lang)} {
@@ -59,7 +60,7 @@ WhisperSession::transcribe_(const std::vector<float>& audio, size_t transcribeCo
     transcribeCount = std::min(audio.size(), transcribeCount);
 
     if (whisper_full(pContext_, params, audio.data(), transcribeCount) != 0) {
-//        LOGI("Failed to run Whisper"); TODO: Throw here!
+        LOGW("Failed to run Whisper");// TODO: Throw here!
     } else {
         whisper_print_timings(pContext_);
     }
@@ -74,7 +75,10 @@ WhisperSession::transcribe_(const std::vector<float>& audio, size_t transcribeCo
         results << whisper_full_get_segment_text(pContext_, i);
         results << " <|" << whisper_full_get_segment_t1(pContext_, i) << "|>";
     }
-    return results.str();
+
+    std::string result = results.str();
+    LOGD("Transcribed: %s", result.c_str());
+    return result;
 }
 
 std::string
@@ -87,13 +91,15 @@ WhisperSession::transcribeNextChunk(const float *pAudio, int sizeAudio) {
     }
 
     // Does the audio buffer need to be split somewhere?
-    if (audioBuffer_.size() > WHISPER_SAMPLE_RATE * 25) {
+    if (audioBuffer_.size() > WHISPER_SAMPLE_RATE * 18) {
         float minSilenceSeconds = 0.3f;
         auto splitPoint = findLongestSilence(audioBuffer_, WHISPER_SAMPLE_RATE, minSilenceSeconds);
         int halfBufferSize = audioBuffer_.size() / 2;
         auto splitRange = splitPoint.value_or(std::tuple(halfBufferSize, halfBufferSize));
 
-        finalizedContent = transcribe_(audioBuffer_, std::get<0>(splitRange));
+        int trimStart = std::get<0>(splitRange);
+        LOGI("Trim to %.2f s", (float) trimStart / WHISPER_SAMPLE_RATE);
+        finalizedContent = transcribe_(audioBuffer_, trimStart);
         audioBuffer_ = std::vector(audioBuffer_.begin() + std::get<1>(splitRange), audioBuffer_.end());
     }
 

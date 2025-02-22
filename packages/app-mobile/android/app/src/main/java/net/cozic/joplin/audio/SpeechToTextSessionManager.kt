@@ -100,6 +100,13 @@ class SpeechToTextSessionManager(
 		}
 	}
 
+	fun getPreview(sessionId: Int, promise: Promise) {
+		this.concurrentWithSession(sessionId, promise::reject) { session ->
+			val result = session.converter.getPreview()
+			promise.resolve(result)
+		}
+	}
+
 	fun closeSession(sessionId: Int, promise: Promise) {
 		this.concurrentWithSession(sessionId) { session ->
 			session.converter.close()

@@ -37,9 +37,9 @@ class Whisper implements VoiceTypingSession {
 		const recordingLength = await SpeechToTextModule.getBufferLengthSeconds(sessionId);
 		logger.debug('recording length so far', recordingLength, 'with data:', data);
 
-		logger.debug('Preview');
-		this.lastPreviewData += data;
-		this.callbacks.onPreview(postProcessSpeech(this.lastPreviewData));
+		if (data.length) {
+			this.callbacks.onFinalize(`\n\n${postProcessSpeech(data)}`);
+		}
 	}
 
 	public async start() {
@@ -55,8 +55,14 @@ class Whisper implements VoiceTypingSession {
 			while (this.closeCounter === loopStartCounter && this.sessionId !== null) {
 				logger.debug('reading block');
 				const data: string = await SpeechToTextModule.convertNext(this.sessionId, 6);
-				logger.debug('done reading block. Length', data?.length);
 				await this.processData(this.sessionId, data);
+
+				logger.debug('done reading block. Length', data?.length);
+				if (this.sessionId !== null) {
+					this.callbacks.onPreview(
+						postProcessSpeech(await SpeechToTextModule.getPreview(this.sessionId)),
+					);
+				}
 			}
 		} catch (error) {
 			logger.error('Whisper error:', error);

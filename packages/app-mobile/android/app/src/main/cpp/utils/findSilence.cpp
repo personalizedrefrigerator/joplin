@@ -1,4 +1,5 @@
 #include "findSilence.h"
+#include "androidUtil.h"
 
 OptionalAudioRange findLongestSilence(
 	const std::vector<float>& audioData,
@@ -26,7 +27,7 @@ OptionalAudioRange findLongestSilence(
 		float absSum = 0;
 		int rollingAverageSize = 10;
 		int silentSamples = 0;
-		float threshold = 0.1;
+		float threshold = 0.15;
 		for (int i = windowOffset; i < windowOffset + windowSize && i < processedAudio.size(); i++) {
 			absSum += abs(processedAudio[i]);
 			if (i - rollingAverageSize >= windowOffset) {
@@ -44,16 +45,17 @@ OptionalAudioRange findLongestSilence(
 		}
 
 		int minQuietWindows = windowsPerSecond * minSilenceLength;
-		if (quietWindows >= minQuietWindows) {
+		if (quietWindows >= minQuietWindows && currentCandidateStart == -1) {
 			// Found a candidate. Start it.
 			currentCandidateStart = windowOffset;
-		} else if (currentCandidateStart >= 0) {
+		} else if (currentCandidateStart >= 0 && quietWindows == 0) {
 			// Ended a candidate. Is it better than the best?
 			int currentCandidateLength = windowOffset - currentCandidateStart;
 			if (currentCandidateLength > bestCandidateLength) {
 				bestCandidateLength = currentCandidateLength;
 				bestCandidateStart = currentCandidateStart;
 				bestCandidateEnd = windowOffset;
+                LOGD("New best candidate with length %d", currentCandidateLength);
 			}
 
 			currentCandidateStart = -1;

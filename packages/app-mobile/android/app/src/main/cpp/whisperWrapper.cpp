@@ -22,8 +22,7 @@
 #include <android/log.h>
 #include "whisper.h"
 #include "utils/WhisperSession.h"
-
-#define LOGI(...) __android_log_print(ANDROID_LOG_INFO, "Whisper::JNI", __VA_ARGS__);
+#include "utils/androidUtil.h"
 
 void log_android(enum ggml_log_level level, const char* message, void* user_data) {
     android_LogPriority priority = level == 4 ? ANDROID_LOG_ERROR : ANDROID_LOG_INFO;
@@ -72,7 +71,8 @@ Java_net_cozic_joplin_audio_NativeWhsiperLib_00024Companion_fullTranscribe(JNIEn
 
     LOGI("Starting Whisper, transcribe %d", lenAudioData);
     auto resultVector = pSession->transcribeNextChunk(pAudioData, lenAudioData);
-    LOGI("Ran Whisper");
+    auto preview = pSession->getPreview();
+    LOGI("Ran Whisper. Got %s (preview %s)", resultVector.c_str(), preview.c_str());
 
     // JNI_ABORT: "free the buffer without copying back the possible changes", pass 0 to copy
     // changes (there should be no changes)
