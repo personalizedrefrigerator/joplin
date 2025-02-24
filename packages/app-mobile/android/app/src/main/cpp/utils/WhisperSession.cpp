@@ -110,9 +110,12 @@ WhisperSession::transcribeNextChunk(const float *pAudio, int sizeAudio) {
 	}
 
 	// Does the audio buffer need to be split somewhere?
-	if (audioBuffer_.size() > WHISPER_SAMPLE_RATE * 25) {
+	int maximumSamples = WHISPER_SAMPLE_RATE * 25;
+	if (audioBuffer_.size() >= maximumSamples) {
 		float minSilenceSeconds = 0.3f;
-		auto silenceRange = findLongestSilence(audioBuffer_, WHISPER_SAMPLE_RATE, minSilenceSeconds);
+		auto silenceRange = findLongestSilence(
+			audioBuffer_, WHISPER_SAMPLE_RATE, minSilenceSeconds, maximumSamples
+		);
 
 		// In this case, the audio is long enough that it needs to be split somewhere. If there's
 		// no suitable pause available, default to splitting in the middle.
@@ -124,7 +127,9 @@ WhisperSession::transcribeNextChunk(const float *pAudio, int sizeAudio) {
 	} else if (audioBuffer_.size() > WHISPER_SAMPLE_RATE * 3) {
 		// Allow brief pauses to create new paragraphs:
 		float minSilenceSeconds = 2.0f;
-		auto splitPoint = findLongestSilence(audioBuffer_, WHISPER_SAMPLE_RATE, minSilenceSeconds);
+		auto splitPoint = findLongestSilence(
+			audioBuffer_, WHISPER_SAMPLE_RATE, minSilenceSeconds, maximumSamples
+		);
 		if (splitPoint.isValid) {
 			int tolerance = WHISPER_SAMPLE_RATE / 20; // 0.05s
 			bool isCompletelySilent = splitPoint.start < tolerance && splitPoint.end > audioBuffer_.size() - tolerance;

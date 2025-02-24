@@ -13,7 +13,12 @@ struct SilenceRange {
 SilenceRange findLongestSilence(
 	const std::vector<float>& audioData,
 	int sampleRate,
-	float minSilenceLength
+
+	// Minimum length of silence in seconds
+	float minSilenceLengthSeconds,
+
+	// Doesn't check for silence at a position greater than maximumSilenceStart
+	int maximumSilenceStart
 );
 
 

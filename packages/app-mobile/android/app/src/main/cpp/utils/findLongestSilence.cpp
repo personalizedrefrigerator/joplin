@@ -4,7 +4,8 @@
 SilenceRange findLongestSilence(
 	const std::vector<float>& audioData,
 	int sampleRate,
-	float minSilenceLength
+	float minSilenceLengthSeconds,
+	int maxSilencePosition
 ) {
 	int bestCandidateLength = 0;
 	int bestCandidateStart = -1;
@@ -24,7 +25,27 @@ SilenceRange findLongestSilence(
 	int windowSize = 256;
 	int windowsPerSecond = sampleRate / windowSize;
 	int quietWindows = 0;
-	for (int windowOffset = 0; windowOffset < processedAudio.size(); windowOffset += windowSize) {
+
+	// Finishes the current candidate for longest silence
+	auto finalizeCandidate = [&] (int currentOffset) {
+		bool hasCandidate = currentCandidateStart >= 0;
+		if (!hasCandidate) {
+			return;
+		}
+
+		int currentCandidateLength = currentOffset - currentCandidateStart;
+		if (currentCandidateLength > bestCandidateLength && currentCandidateStart <= maxSilencePosition) {
+			bestCandidateLength = currentCandidateLength;
+			bestCandidateStart = currentCandidateStart;
+			bestCandidateEnd = currentOffset;
+			LOGD("New best candidate with length %d", currentCandidateLength);
+		}
+
+		currentCandidateStart = -1;
+	};
+
+	int windowOffset;
+	for (windowOffset = 0; windowOffset < processedAudio.size() && windowOffset <= maxSilencePosition; windowOffset += windowSize) {
 		// Count the number of samples that (when averaged with the nearyby samples)
 		// are below some threshold value.
 		float absSum = 0;
@@ -49,23 +70,17 @@ SilenceRange findLongestSilence(
 			quietWindows = 0;
 		}
 
-		int minQuietWindows = windowsPerSecond * minSilenceLength;
+		int minQuietWindows = windowsPerSecond * minSilenceLengthSeconds;
 		if (quietWindows >= minQuietWindows && currentCandidateStart == -1) {
 			// Found a candidate. Start it.
 			currentCandidateStart = windowOffset;
-		} else if (currentCandidateStart >= 0 && quietWindows == 0) {
+		} else if (quietWindows == 0) {
 			// Ended a candidate. Is it better than the best?
-			int currentCandidateLength = windowOffset - currentCandidateStart;
-			if (currentCandidateLength > bestCandidateLength) {
-				bestCandidateLength = currentCandidateLength;
-				bestCandidateStart = currentCandidateStart;
-				bestCandidateEnd = windowOffset;
-				LOGD("New best candidate with length %d", currentCandidateLength);
-			}
-
-			currentCandidateStart = -1;
+			finalizeCandidate(windowOffset);
 		}
 	}
+
+	finalizeCandidate(windowOffset);
 
 	// Return the best candidate.
 	if (bestCandidateLength == 0) {
