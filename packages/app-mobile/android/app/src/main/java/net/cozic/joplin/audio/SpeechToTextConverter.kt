@@ -13,7 +13,7 @@ class SpeechToTextConverter(
 ) : Closeable {
 	private val recorder = recorderFactory(context)
 	private val languageCode = Regex("_.*").replace(locale, "")
-	private var whisper = NativeWhisperLib.init(
+	private var whisper = NativeWhisperLib(
 		modelPath,
 		languageCode,
 		prompt,
@@ -24,9 +24,9 @@ class SpeechToTextConverter(
 	}
 
 	private fun convert(data: FloatArray): String {
-		Log.i("Whisper", "PRE TRANSCRIBE ${data.size}")
-		val result = NativeWhisperLib.fullTranscribe(whisper, data)
-		Log.i("Whisper", "RES: $result")
+		Log.d("Whisper", "Pre-transcribe data of size ${data.size}")
+		val result = whisper.transcribe(data)
+		Log.d("Whisper", "Post transcribe. Got $result")
 		return result;
 	}
 
@@ -51,13 +51,12 @@ class SpeechToTextConverter(
 	}
 
 	fun getPreview(): String {
-		return NativeWhisperLib.getPreview(whisper)
+		return whisper.getPreview()
 	}
 
 	override fun close() {
 		Log.d("Whisper", "Close")
 		recorder.close()
-		NativeWhisperLib.free(whisper)
-		whisper = 0
+		whisper.close()
 	}
 }
