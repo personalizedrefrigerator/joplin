@@ -7,8 +7,8 @@
 #include "findLongestSilence.h"
 #include "androidUtil.h"
 
-WhisperSession::WhisperSession(const std::string& modelPath, std::string lang)
-    : lang_ {std::move(lang)} {
+WhisperSession::WhisperSession(const std::string& modelPath, std::string lang, std::string prompt)
+    : lang_ {std::move(lang)}, prompt_ {std::move(prompt)} {
     whisper_context_params contextParams = whisper_context_default_params();
 
     // Lifetime(pModelPath): Whisper.cpp creates a copy of pModelPath and stores it in a std::string.
@@ -48,7 +48,7 @@ WhisperSession::buildWhisperParams_() {
 
     // Following the whisper streaming example in setting prompt_tokens to nullptr
     // when using VAD (Voice Activity Detection)
-    params.initial_prompt = "";
+    params.initial_prompt = prompt_.c_str();
     params.prompt_tokens = nullptr;
     params.prompt_n_tokens = 0;
 
@@ -66,8 +66,6 @@ WhisperSession::transcribe_(const std::vector<float>& audio, size_t transcribeCo
     }
 
     whisper_full_params params = buildWhisperParams_();
-
-
     whisper_reset_timings(pContext_);
 
     transcribeCount = std::min(audio.size(), transcribeCount);
@@ -84,13 +82,12 @@ WhisperSession::transcribe_(const std::vector<float>& audio, size_t transcribeCo
     // Build the results
     std::stringstream results;
     for (int i = 0; i < segmentCount; i++) {
-        results << "<|" << whisper_full_get_segment_t0(pContext_, i) << "|> ";
-        results << whisper_full_get_segment_text(pContext_, i);
-        results << " <|" << whisper_full_get_segment_t1(pContext_, i) << "|>";
+        results << " " << whisper_full_get_segment_text(pContext_, i);
     }
 
     std::string result = results.str();
     LOGD("Transcribed: %s (audio len %.2f)", result.c_str(), audio.size() / (float) WHISPER_SAMPLE_RATE);
+
     return result;
 }
 

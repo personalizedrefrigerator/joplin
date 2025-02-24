@@ -35,11 +35,11 @@ class SpeechToTextPackage : ReactPackage {
 		}
 
 		@ReactMethod
-		fun openSession(modelPath: String, locale: String, promise: Promise) {
+		fun openSession(modelPath: String, locale: String, prompt: String, promise: Promise) {
 			val appContext = context.applicationContext
 
 			try {
-				val sessionId = sessionManager.openSession(modelPath, locale, appContext)
+				val sessionId = sessionManager.openSession(modelPath, locale, prompt, appContext)
 				promise.resolve(sessionId)
 			} catch (exception: Throwable) {
 				promise.reject(exception)

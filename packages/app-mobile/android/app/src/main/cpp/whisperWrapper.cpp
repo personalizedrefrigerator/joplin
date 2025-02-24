@@ -33,35 +33,42 @@ jstring stringToJava(JNIEnv *env, const std::string& source) {
     return env->NewStringUTF(source.c_str());
 }
 
+std::string stringToCXX(JNIEnv *env, jstring jString) {
+    const char *jStringChars = env->GetStringUTFChars(jString, nullptr);
+    std::string result { jStringChars };
+    env->ReleaseStringUTFChars(jString, jStringChars);
+
+    return result;
+}
+
 extern "C"
 JNIEXPORT jlong JNICALL
-Java_net_cozic_joplin_audio_NativeWhsiperLib_00024Companion_init(
+Java_net_cozic_joplin_audio_NativeWhisperLib_00024Companion_init(
         JNIEnv *env,
         jobject thiz,
         jstring modelPath,
-        jstring language
+        jstring language,
+        jstring prompt
 ) {
     whisper_log_set(log_android, nullptr);
-    const char *modelPathChars = env->GetStringUTFChars(modelPath, nullptr);
-    const char *languageChars = env->GetStringUTFChars(language, nullptr);
 
-    auto *pSession = new WhisperSession(modelPathChars, languageChars);
+    auto *pSession = new WhisperSession(
+        stringToCXX(env, modelPath), stringToCXX(env, language), stringToCXX(env, prompt)
+    );
 
-    env->ReleaseStringUTFChars(modelPath, modelPathChars);
-    env->ReleaseStringUTFChars(language, languageChars);
     return (jlong) pSession;
 }
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_net_cozic_joplin_audio_NativeWhsiperLib_00024Companion_free(JNIEnv *env, jobject thiz,
+Java_net_cozic_joplin_audio_NativeWhisperLib_00024Companion_free(JNIEnv *env, jobject thiz,
                                                                  jlong pointer) {
     std::free(reinterpret_cast<WhisperSession *>(pointer));
 }
 
 extern "C"
 JNIEXPORT jstring JNICALL
-Java_net_cozic_joplin_audio_NativeWhsiperLib_00024Companion_fullTranscribe(JNIEnv *env,
+Java_net_cozic_joplin_audio_NativeWhisperLib_00024Companion_fullTranscribe(JNIEnv *env,
                                                                            jobject thiz,
                                                                            jlong pointer,
                                                                            jfloatArray audio_data) {
@@ -82,7 +89,7 @@ Java_net_cozic_joplin_audio_NativeWhsiperLib_00024Companion_fullTranscribe(JNIEn
 }
 extern "C"
 JNIEXPORT jstring JNICALL
-Java_net_cozic_joplin_audio_NativeWhsiperLib_00024Companion_getPreview(
+Java_net_cozic_joplin_audio_NativeWhisperLib_00024Companion_getPreview(
         JNIEnv *env, jobject thiz, jlong pointer
 ) {
     auto *pSession = reinterpret_cast<WhisperSession *> (pointer);

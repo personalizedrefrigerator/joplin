@@ -5,18 +5,20 @@ import { rtrimSlashes } from '@joplin/utils/path';
 import { dirname, join } from 'path';
 import { NativeModules } from 'react-native';
 import { SpeechToTextCallbacks, VoiceTypingProvider, VoiceTypingSession } from './VoiceTyping';
+import { languageCodeOnly } from '@joplin/lib/locale';
 
 const logger = Logger.create('voiceTyping/whisper');
 
 const { SpeechToTextModule } = NativeModules;
 
-// Timestamps are in the form <|0.00|>. They seem to be added:
-// - After long pauses.
-// - Between sentences (in pairs).
-// - At the beginning and end of a sequence.
-const timestampExp = /<\|(\d+)\|>/g;
 const postProcessSpeech = (text: string) => {
-	return text.replace(timestampExp, '').replace(/\[BLANK_AUDIO\]/g, '').trim();
+	text = text.trim();
+	text = text.replace(/\[BLANK_AUDIO\]/g, '');
+	// Remove non-speech output (e.g. "(music)" or "(silence)")
+	text = text.replace(/^(\(|\[)[^()[\].,?]*(\]|\))$/, '');
+	// Remove output that is just punctuation (which can happen while processing silence)
+	text = text.replace(/^[.,?!]$/, '');
+	return text;
 };
 
 class Whisper implements VoiceTypingSession {
@@ -96,6 +98,17 @@ class Whisper implements VoiceTypingSession {
 	}
 }
 
+const getPrompt = (locale: string) => {
+	// Different prompts can change the content/quality of the output. See
+	// https://cookbook.openai.com/examples/whisper_prompting_guide
+	const localeToPrompt = new Map([
+		['en', 'Joplin is a note-taking application. This is a Joplin note.'],
+		['fr', 'Joplin est une application. C\'est une note de Joplin.'],
+		['es', 'Joplin es una aplicación.'],
+	]);
+	return localeToPrompt.get(languageCodeOnly(locale)) ?? '';
+};
+
 const modelLocalFilepath = () => {
 	return `${shim.fsDriver().getAppDirectoryPath()}/voice-typing-models/ggml.bin`;
 };
@@ -123,7 +136,7 @@ const whisper: VoiceTypingProvider = {
 		logger.debug('Creating Whisper session from path', modelPath);
 		if (!await shim.fsDriver().exists(modelPath)) throw new Error(`No model found at path: ${JSON.stringify(modelPath)}`);
 
-		const sessionId = await SpeechToTextModule.openSession(modelPath, locale);
+		const sessionId = await SpeechToTextModule.openSession(modelPath, locale, getPrompt(locale));
 		return new Whisper(sessionId, callbacks);
 	},
 	modelName: 'whisper',
