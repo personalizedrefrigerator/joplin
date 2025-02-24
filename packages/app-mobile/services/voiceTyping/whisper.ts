@@ -111,8 +111,12 @@ const getPrompt = (locale: string) => {
 	return localeToPrompt.get(languageCodeOnly(locale)) ?? '';
 };
 
+const modelLocalDirectory = () => {
+	return `${shim.fsDriver().getAppDirectoryPath()}/voice-typing-models`;
+};
+
 const modelLocalFilepath = () => {
-	return `${shim.fsDriver().getAppDirectoryPath()}/voice-typing-models/ggml.bin`;
+	return `${modelLocalDirectory()}/ggml.bin`;
 };
 
 const whisper: VoiceTypingProvider = {
@@ -131,8 +135,18 @@ const whisper: VoiceTypingProvider = {
 		return urlTemplate.replace(/\{task\}/g, 'ggml-tiny-q8_0');
 	},
 	deleteCachedModels: async (locale) => {
-		await shim.fsDriver().remove(modelLocalFilepath());
-		await shim.fsDriver().remove(whisper.getUuidPath(locale));
+		const pathsToRemove = [
+			modelLocalFilepath(),
+			whisper.getUuidPath(locale),
+			// Legacy model filepath
+			join(modelLocalDirectory(), 'whisper_tiny.onnx'),
+		];
+
+		for (const path of pathsToRemove) {
+			if (await shim.fsDriver().exists(path)) {
+				await shim.fsDriver().remove(path);
+			}
+		}
 	},
 	getUuidPath: () => {
 		return join(dirname(modelLocalFilepath()), 'uuid');
