@@ -7,18 +7,20 @@ class NativeWhisperLib(
 	languageCode: String,
 	prompt: String,
 ) : Closeable {
-	private companion object {
+	companion object {
 		init {
 			System.loadLibrary("joplin")
 		}
 
+		external fun runTests(): Unit;
+
 		// TODO: The example whisper.cpp project transfers pointers as Longs to the Kotlin code.
 		// This seems unsafe. Try changing how this is managed.
-		external fun init(modelPath: String, languageCode: String, prompt: String): Long;
-		external fun free(pointer: Long): Unit;
+		private external fun init(modelPath: String, languageCode: String, prompt: String): Long;
+		private external fun free(pointer: Long): Unit;
 
-		external fun fullTranscribe(pointer: Long, audioData: FloatArray): String;
-		external fun getPreview(pointer: Long): String;
+		private external fun fullTranscribe(pointer: Long, audioData: FloatArray): String;
+		private external fun getPreview(pointer: Long): String;
 	}
 
 	private var closed = false

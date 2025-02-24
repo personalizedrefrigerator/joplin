@@ -30,6 +30,7 @@ add_library(${CMAKE_PROJECT_NAME} SHARED
 	whisperWrapper.cpp
 	utils/WhisperSession.cpp
 	utils/findLongestSilence.cpp
+	utils/findLongestSilence_test.cpp
 )
 
 

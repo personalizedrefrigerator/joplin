@@ -23,6 +23,7 @@
 #include "whisper.h"
 #include "utils/WhisperSession.h"
 #include "utils/androidUtil.h"
+#include "utils/findLongestSilence_test.h"
 
 void log_android(enum ggml_log_level level, const char* message, void* user_data) {
 	android_LogPriority priority = level == 4 ? ANDROID_LOG_ERROR : ANDROID_LOG_INFO;
@@ -110,4 +111,15 @@ Java_net_cozic_joplin_audio_NativeWhisperLib_00024Companion_getPreview(
 ) {
 	auto *pSession = reinterpret_cast<WhisperSession *> (pointer);
 	return stringToJava(env, pSession->getPreview());
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_net_cozic_joplin_audio_NativeWhisperLib_00024Companion_runTests(JNIEnv *env, jobject thiz) {
+	try {
+		findLongestSilence_test();
+	} catch (const std::exception& exception) {
+		LOGW("Failed to run tests: %s", exception.what());
+		throwException(env, exception.what());
+	}
 }

@@ -33,6 +33,16 @@ class SpeechToTextPackage : ReactPackage {
 		override fun onHostDestroy() { }
 
 		@ReactMethod
+		fun runTests(promise: Promise) {
+			try {
+				NativeWhisperLib.runTests()
+				promise.resolve(true)
+			} catch (exception: Throwable) {
+				promise.reject(exception)
+			}
+		}
+
+		@ReactMethod
 		fun openSession(modelPath: String, locale: String, prompt: String, promise: Promise) {
 			val appContext = context.applicationContext
 

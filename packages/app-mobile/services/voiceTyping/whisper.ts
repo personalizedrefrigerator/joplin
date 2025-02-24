@@ -1,4 +1,4 @@
-import Setting from '@joplin/lib/models/Setting';
+import Setting, { Env } from '@joplin/lib/models/Setting';
 import shim from '@joplin/lib/shim';
 import Logger from '@joplin/utils/Logger';
 import { rtrimSlashes } from '@joplin/utils/path';
@@ -29,7 +29,8 @@ class Whisper implements VoiceTypingSession {
 	public constructor(
 		private sessionId: number|null,
 		private callbacks: SpeechToTextCallbacks,
-	) { }
+	) {
+	}
 
 	private async processData(sessionId: number|null, data: string) {
 		if (sessionId === null) {
@@ -139,6 +140,16 @@ const whisper: VoiceTypingProvider = {
 	build: async ({ modelPath, callbacks, locale }) => {
 		logger.debug('Creating Whisper session from path', modelPath);
 		if (!await shim.fsDriver().exists(modelPath)) throw new Error(`No model found at path: ${JSON.stringify(modelPath)}`);
+
+
+		if (Setting.value('env') === Env.Dev) {
+			try {
+				await SpeechToTextModule.runTests();
+			} catch (error) {
+				logger.error('Testing error', error);
+				await shim.showErrorDialog(`Test failure: ${error}`);
+			}
+		}
 
 		const sessionId = await SpeechToTextModule.openSession(modelPath, locale, getPrompt(locale));
 		return new Whisper(sessionId, callbacks);

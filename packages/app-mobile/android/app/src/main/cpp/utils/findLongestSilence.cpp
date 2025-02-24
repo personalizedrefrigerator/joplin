@@ -1,6 +1,22 @@
 #include "findLongestSilence.h"
 #include "androidUtil.h"
 
+static void highpass(std::vector<float>& data, int sampleRate) {
+	// Highpass filter. See https://en.wikipedia.org/wiki/High-pass_filter and
+	// the example in whisper.cpp/streaming.
+	float highpassCutoffHz = 60.0f;
+	float RC = 1.0f / (2 * 3.1416f * highpassCutoffHz);
+	float timePerSample = 1.0f / sampleRate;
+	float alpha = RC / (RC + timePerSample);
+
+	float lastInput = data[0];
+	for (int i = 1; i < data.size(); i++) {
+		float currentInput = data[i];
+		data[i] = alpha * data[i - 1] + alpha * (currentInput - lastInput);
+		lastInput = currentInput;
+	}
+}
+
 SilenceRange findLongestSilence(
 	const std::vector<float>& audioData,
 	int sampleRate,
@@ -14,12 +30,7 @@ SilenceRange findLongestSilence(
 	int currentCandidateStart = -1;
 
 	std::vector<float> processedAudio { audioData };
-
-	// Highpass. See https://en.wikipedia.org/wiki/High-pass_filter
-	float alpha = 0.96;
-	for (int i = 1; i < processedAudio.size(); i++) {
-		processedAudio[i] = alpha * processedAudio[i - 1] + alpha * (audioData[i] - audioData[i - 1]);
-	}
+	highpass(processedAudio, sampleRate);
 
 	// Break into windows of size `windowSize`:
 	int windowSize = 256;
@@ -46,16 +57,20 @@ SilenceRange findLongestSilence(
 
 	int windowOffset;
 	for (windowOffset = 0; windowOffset < processedAudio.size() && windowOffset <= maxSilencePosition; windowOffset += windowSize) {
-		// Count the number of samples that (when averaged with the nearyby samples)
+		int rollingAverageSize = 24;
+		float threshold = static_cast<float>(rollingAverageSize) / 70.0f;
+
+		// Count the number of samples that (when averaged with the nearby samples)
 		// are below some threshold value.
 		float absSum = 0;
-		int rollingAverageSize = 20;
 		int silentSamples = 0;
-		float threshold = 0.234;
 		for (int i = windowOffset; i < windowOffset + windowSize && i < processedAudio.size(); i++) {
 			absSum += abs(processedAudio[i]);
-			if (i - rollingAverageSize >= windowOffset) {
+
+			bool isSumComplete = i - rollingAverageSize >= windowOffset;
+			if (isSumComplete) {
 				absSum -= abs(processedAudio[i - rollingAverageSize]);
+
 				if (absSum < threshold) {
 					silentSamples++;
 				}
@@ -70,7 +85,7 @@ SilenceRange findLongestSilence(
 			quietWindows = 0;
 		}
 
-		int minQuietWindows = windowsPerSecond * minSilenceLengthSeconds;
+		int minQuietWindows = static_cast<int>(windowsPerSecond * minSilenceLengthSeconds);
 		if (quietWindows >= minQuietWindows && currentCandidateStart == -1) {
 			// Found a candidate. Start it.
 			currentCandidateStart = windowOffset;
