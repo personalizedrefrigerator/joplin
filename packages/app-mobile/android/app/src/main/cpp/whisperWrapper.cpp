@@ -41,6 +41,11 @@ std::string stringToCXX(JNIEnv *env, jstring jString) {
 	return result;
 }
 
+void throwException(JNIEnv *env, const std::string& message) {
+    jclass errorClass = env->FindClass("java/lang/Exception");
+    env->ThrowNew(errorClass, message.c_str());
+}
+
 extern "C"
 JNIEXPORT jlong JNICALL
 Java_net_cozic_joplin_audio_NativeWhisperLib_00024Companion_init(
@@ -52,11 +57,16 @@ Java_net_cozic_joplin_audio_NativeWhisperLib_00024Companion_init(
 ) {
 	whisper_log_set(log_android, nullptr);
 
-	auto *pSession = new WhisperSession(
-		stringToCXX(env, modelPath), stringToCXX(env, language), stringToCXX(env, prompt)
-	);
-
-	return (jlong) pSession;
+    try {
+        auto *pSession = new WhisperSession(
+                stringToCXX(env, modelPath), stringToCXX(env, language), stringToCXX(env, prompt)
+        );
+        return (jlong) pSession;
+    } catch (const std::exception& exception) {
+        LOGW("Failed to init whisper: %s", exception.what());
+        throwException(env, exception.what());
+        return 0;
+    }
 }
 
 extern "C"
@@ -75,17 +85,23 @@ Java_net_cozic_joplin_audio_NativeWhisperLib_00024Companion_fullTranscribe(JNIEn
 	auto *pSession = reinterpret_cast<WhisperSession *> (pointer);
 	jfloat *pAudioData = env->GetFloatArrayElements(audio_data, nullptr);
 	jsize lenAudioData = env->GetArrayLength(audio_data);
+    std::string result;
 
-	LOGI("Starting Whisper, transcribe %d", lenAudioData);
-	auto resultVector = pSession->transcribeNextChunk(pAudioData, lenAudioData);
-	auto preview = pSession->getPreview();
-	LOGI("Ran Whisper. Got %s (preview %s)", resultVector.c_str(), preview.c_str());
+    try {
+        LOGD("Starting Whisper, transcribe %d", lenAudioData);
+        result = pSession->transcribeNextChunk(pAudioData, lenAudioData);
+        auto preview = pSession->getPreview();
+        LOGD("Ran Whisper. Got %s (preview %s)", result.c_str(), preview.c_str());
+    } catch (const std::exception& exception) {
+        LOGW("Failed to run whisper: %s", exception.what());
+        throwException(env, exception.what());
+    }
 
-	// JNI_ABORT: "free the buffer without copying back the possible changes", pass 0 to copy
-	// changes (there should be no changes)
-	env->ReleaseFloatArrayElements(audio_data, pAudioData, JNI_ABORT);
+    // JNI_ABORT: "free the buffer without copying back the possible changes", pass 0 to copy
+    // changes (there should be no changes)
+    env->ReleaseFloatArrayElements(audio_data, pAudioData, JNI_ABORT);
 
-	return stringToJava(env, resultVector);
+	return stringToJava(env, result);
 }
 extern "C"
 JNIEXPORT jstring JNICALL
