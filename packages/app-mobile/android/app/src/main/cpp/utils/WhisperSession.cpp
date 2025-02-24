@@ -42,8 +42,9 @@ WhisperSession::buildWhisperParams_() {
 	// Avoid non-speech tokens (e.g. "(crackle)"). For now, this is disabled because it seems to
 	// cause increased hallucinations (e.g. repeated "Thank you"s).
 	// params.suppress_nst = true;
-	params.temperature_inc = 0;
-	params.temperature = 0;
+	params.temperature = 0; // Initial randomness
+	// There's also a temperature_inc variable, which is used when decoding fails (Whisper increases
+	// the temperature by temperature_inc and retries).
 
 	// Following the whisper streaming example in setting prompt_tokens to nullptr
 	// when using VAD (Voice Activity Detection)
