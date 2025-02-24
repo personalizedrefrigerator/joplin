@@ -103,7 +103,8 @@ const getPrompt = (locale: string) => {
 	// https://cookbook.openai.com/examples/whisper_prompting_guide
 	const localeToPrompt = new Map([
 		['en', 'Joplin is a note-taking application. This is a Joplin note.'],
-		['fr', 'Joplin est une application. C\'est une note de Joplin.'],
+		// TODO: Find a better prompt for French (one that seems to produce better output than no prompt)
+		// ['fr', 'Joplin est une application. C\'est une note de Joplin.'],
 		['es', 'Joplin es una aplicación.'],
 	]);
 	return localeToPrompt.get(languageCodeOnly(locale)) ?? '';
@@ -123,6 +124,9 @@ const whisper: VoiceTypingProvider = {
 			urlTemplate = 'https://huggingface.co/ggerganov/whisper.cpp/resolve/main/{task}.bin?download=true';
 		}
 
+		// Note: ggml-base-q8_0 is also available and works on many Android devices. On some low
+		// resource devices, however, it will fail.
+		// TODO: Auto-select the model size?
 		return urlTemplate.replace(/\{task\}/g, 'ggml-tiny-q8_0');
 	},
 	deleteCachedModels: async (locale) => {
