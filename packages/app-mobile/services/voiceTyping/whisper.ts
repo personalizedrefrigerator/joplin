@@ -136,7 +136,7 @@ class Whisper implements VoiceTypingSession {
 		}
 	}
 
-	public async stop() {
+	public stop() {
 		if (this.sessionId === null) {
 			logger.debug('Session already closed.');
 			return;
@@ -151,7 +151,7 @@ class Whisper implements VoiceTypingSession {
 			this.onDataFinalize(this.lastPreviewData);
 		}
 
-		await SpeechToTextModule.closeSession(sessionId);
+		return SpeechToTextModule.closeSession(sessionId);
 	}
 }
 
