@@ -37,7 +37,6 @@ WhisperSession::buildWhisperParams_() {
 	params.print_timestamps = true;
 	params.print_progress = false;
 	params.translate = false;
-	params.n_threads = 4; // TODO: Calibrate the number of threads to the device.
 	params.offset_ms = 0;
 	params.single_segment = true;
 	// Avoid non-speech tokens (e.g. "(crackle)"). For now, this is disabled because it seems to
