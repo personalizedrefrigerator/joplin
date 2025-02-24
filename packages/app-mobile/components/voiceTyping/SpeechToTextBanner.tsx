@@ -12,6 +12,7 @@ import Logger from '@joplin/utils/Logger';
 import { RecorderState } from './types';
 import RecordingControls from './RecordingControls';
 import { PrimaryButton } from '../buttons';
+import useQueuedAsyncEffect from '@joplin/lib/hooks/useQueuedAsyncEffect';
 
 const logger = Logger.create('VoiceTypingDialog');
 
@@ -55,7 +56,7 @@ const useVoiceTyping = ({ locale, provider, onSetPreview, onText }: UseVoiceTypi
 		}
 	}, [modelIsOutdated]);
 
-	useAsyncEffect(async (event: AsyncEffectEvent) => {
+	useQueuedAsyncEffect(async (event: AsyncEffectEvent) => {
 		try {
 			await voiceTypingRef.current?.stop();
 			onSetPreviewRef.current?.('');

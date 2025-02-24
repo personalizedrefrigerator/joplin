@@ -11,15 +11,68 @@ const logger = Logger.create('voiceTyping/whisper');
 
 const { SpeechToTextModule } = NativeModules;
 
-const postProcessSpeech = (text: string) => {
-	text = text.trim();
-	text = text.replace(/\[BLANK_AUDIO\]/g, '');
-	// Remove non-speech output (e.g. "(music)" or "(silence)")
-	text = text.replace(/^(\(|\[)[^()[\].,?]*(\]|\))$/, '');
-	// Remove output that is just punctuation (which can happen while processing silence)
-	text = text.replace(/^[.,?!]$/, '');
-	return text;
-};
+class WhisperConfig {
+	public prompts: Map<string, string> = new Map();
+	public stringReplacements: [string, string][] = [];
+	public regexReplacements: [RegExp, string][] = [];
+
+	public constructor(json: unknown) {
+		const errorPrefix = 'Whisper config';
+		if (typeof json !== 'object') throw new Error('Whisper config is not an object');
+
+		const processPrompts = () => {
+			if (!('prompts' in json)) return;
+			if (typeof json.prompts !== 'object') {
+				throw new Error(`${errorPrefix}: Field "prompts" is not an object`);
+			}
+
+			for (const [key, value] of Object.entries(json.prompts)) {
+				if (typeof value !== 'string') {
+					throw new Error(`${errorPrefix}: Value for key ${key} is ${typeof value}, not string.`);
+				}
+				this.prompts.set(key, value);
+			}
+		};
+		const processOutputSettings = () => {
+			if (!('output' in json)) return;
+			if (typeof json.output !== 'object') {
+				throw new Error(`${errorPrefix}: Field "output" is not an object`);
+			}
+
+			const getReplacements = (key: string, value: unknown) => {
+				if (!Array.isArray(value)) {
+					throw new Error(`${errorPrefix}: ${key} must be an array`);
+				}
+
+				const results: [string, string][] = [];
+				for (const replacement of value) {
+					if (!Array.isArray(replacement)) {
+						throw new Error(`${errorPrefix}: values for ${key} must be arrays`);
+					}
+					if (typeof replacement[0] !== 'string' || typeof replacement[1] !== 'string') {
+						throw new Error(`${errorPrefix}: values for ${key} must be pairs of strings`);
+					}
+
+					results.push([replacement[0], replacement[1]]);
+				}
+				return results;
+			};
+
+			if ('stringReplacements' in json.output) {
+				this.stringReplacements = getReplacements('stringReplacements', json.output.stringReplacements);
+			}
+
+			if ('regexReplacements' in json.output) {
+				this.regexReplacements = getReplacements('regexReplacements', json.output.regexReplacements).map(([key, value]) => {
+					return [new RegExp(key, 'g'), value];
+				});
+			}
+		};
+
+		processPrompts();
+		processOutputSettings();
+	}
+}
 
 class Whisper implements VoiceTypingSession {
 	private lastPreviewData = '';
@@ -29,19 +82,24 @@ class Whisper implements VoiceTypingSession {
 	public constructor(
 		private sessionId: number|null,
 		private callbacks: SpeechToTextCallbacks,
+		private config: WhisperConfig,
 	) {
 	}
 
-	private async processData(sessionId: number|null, data: string) {
-		if (sessionId === null) {
-			logger.info('Session stopped. Not processing data.');
-			return;
+	private postProcessSpeech(data: string) {
+		data = data.trim();
+
+		for (const [key, value] of this.config.stringReplacements) {
+			data = data.split(key).join(value);
 		}
+		for (const [key, value] of this.config.regexReplacements) {
+			data = data.replace(key, value);
+		}
+		return data;
+	}
 
-		const recordingLength = await SpeechToTextModule.getBufferLengthSeconds(sessionId);
-		logger.debug('recording length so far', recordingLength, 'with data:', data);
-
-		data = postProcessSpeech(data);
+	private onDataFinalize(data: string) {
+		data = this.postProcessSpeech(data);
 		if (data.length) {
 			const prefix = this.isFirstParagraph ? '' : '\n\n';
 			this.callbacks.onFinalize(`${prefix}${data}`);
@@ -62,14 +120,12 @@ class Whisper implements VoiceTypingSession {
 			while (this.closeCounter === loopStartCounter && this.sessionId !== null) {
 				logger.debug('reading block');
 				const data: string = await SpeechToTextModule.convertNext(this.sessionId, 4);
-				await this.processData(this.sessionId, data);
+				this.onDataFinalize(data);
 
 				logger.debug('done reading block. Length', data?.length);
 				if (this.sessionId !== null) {
 					this.lastPreviewData = await SpeechToTextModule.getPreview(this.sessionId);
-					this.callbacks.onPreview(
-						postProcessSpeech(this.lastPreviewData),
-					);
+					this.callbacks.onPreview(this.postProcessSpeech(this.lastPreviewData));
 				}
 			}
 		} catch (error) {
@@ -92,22 +148,14 @@ class Whisper implements VoiceTypingSession {
 		this.closeCounter ++;
 
 		if (this.lastPreviewData) {
-			this.callbacks.onFinalize(postProcessSpeech(this.lastPreviewData));
+			this.onDataFinalize(this.lastPreviewData);
 		}
 
 		await SpeechToTextModule.closeSession(sessionId);
 	}
 }
 
-const getPrompt = (locale: string) => {
-	// Different prompts can change the content/quality of the output. See
-	// https://cookbook.openai.com/examples/whisper_prompting_guide
-	const localeToPrompt = new Map([
-		['en', 'Joplin is a note-taking application. This is a Joplin note.'],
-		// TODO: Find a better prompt for French (one that seems to produce better output than no prompt)
-		// ['fr', 'Joplin est une application. C\'est une note de Joplin.'],
-		['es', 'Joplin es una aplicación.'],
-	]);
+const getPrompt = (locale: string, localeToPrompt: Map<string, string>) => {
 	return localeToPrompt.get(languageCodeOnly(locale)) ?? '';
 };
 
@@ -116,7 +164,7 @@ const modelLocalDirectory = () => {
 };
 
 const modelLocalFilepath = () => {
-	return `${modelLocalDirectory()}/ggml.bin`;
+	return `${modelLocalDirectory()}/model/`;
 };
 
 const whisper: VoiceTypingProvider = {
@@ -126,13 +174,13 @@ const whisper: VoiceTypingProvider = {
 		let urlTemplate = rtrimSlashes(Setting.value('voiceTypingBaseUrl').trim());
 
 		if (!urlTemplate) {
-			urlTemplate = 'https://huggingface.co/ggerganov/whisper.cpp/resolve/main/{task}.bin?download=true';
+			urlTemplate = 'https://github.com/personalizedrefrigerator/joplin-voice-typing-test/releases/download/v0.0.2/{task}.zip';
 		}
 
-		// Note: ggml-base-q8_0 is also available and works on many Android devices. On some low
+		// Note: whisper-base-q8_0 is also available and works on many Android devices. On some low
 		// resource devices, however, it will fail.
 		// TODO: Auto-select the model size?
-		return urlTemplate.replace(/\{task\}/g, 'ggml-tiny-q8_0');
+		return urlTemplate.replace(/\{task\}/g, 'whisper-tiny-q8_0');
 	},
 	deleteCachedModels: async (locale) => {
 		const pathsToRemove = [
@@ -144,17 +192,17 @@ const whisper: VoiceTypingProvider = {
 
 		for (const path of pathsToRemove) {
 			if (await shim.fsDriver().exists(path)) {
-				await shim.fsDriver().remove(path);
+				logger.info('Remove', path);
+				await shim.fsDriver().remove(path, { recursive: true });
 			}
 		}
 	},
 	getUuidPath: () => {
 		return join(dirname(modelLocalFilepath()), 'uuid');
 	},
-	build: async ({ modelPath, callbacks, locale }) => {
-		logger.debug('Creating Whisper session from path', modelPath);
-		if (!await shim.fsDriver().exists(modelPath)) throw new Error(`No model found at path: ${JSON.stringify(modelPath)}`);
-
+	build: async ({ modelPath: modelFolderPath, callbacks, locale }) => {
+		logger.debug('Creating Whisper session from path', modelFolderPath);
+		if (!await shim.fsDriver().exists(modelFolderPath)) throw new Error(`No model found at path: ${JSON.stringify(modelFolderPath)}`);
 
 		if (Setting.value('env') === Env.Dev) {
 			try {
@@ -165,8 +213,19 @@ const whisper: VoiceTypingProvider = {
 			}
 		}
 
-		const sessionId = await SpeechToTextModule.openSession(modelPath, locale, getPrompt(locale));
-		return new Whisper(sessionId, callbacks);
+		const modelPath = join(modelFolderPath, 'model.bin');
+		const configJsonPath = join(modelFolderPath, 'config.json');
+		const configJson = JSON.parse(await shim.fsDriver().readFile(configJsonPath, 'utf-8'));
+		const config = new WhisperConfig(configJson);
+
+		if (!await shim.fsDriver().exists(modelPath)) {
+			throw new Error(`Model not found at path ${modelPath}`);
+		}
+
+		const sessionId = await SpeechToTextModule.openSession(
+			modelPath, locale, getPrompt(locale, config.prompts),
+		);
+		return new Whisper(sessionId, callbacks, config);
 	},
 	modelName: 'whisper',
 };
