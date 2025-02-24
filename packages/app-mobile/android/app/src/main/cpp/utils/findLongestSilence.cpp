@@ -58,7 +58,7 @@ SilenceRange findLongestSilence(
 	int windowOffset;
 	for (windowOffset = 0; windowOffset < processedAudio.size() && windowOffset <= maxSilencePosition; windowOffset += windowSize) {
 		int rollingAverageSize = 24;
-		float threshold = static_cast<float>(rollingAverageSize) / 70.0f;
+		float threshold = static_cast<float>(rollingAverageSize) / 80.0f;
 
 		// Count the number of samples that (when averaged with the nearby samples)
 		// are below some threshold value.
