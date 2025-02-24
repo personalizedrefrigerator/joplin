@@ -5,9 +5,9 @@
 #include <tuple>
 
 struct SilenceRange {
-    bool isValid;
-    int start;
-    int end;
+	bool isValid;
+	int start;
+	int end;
 };
 
 SilenceRange findLongestSilence(

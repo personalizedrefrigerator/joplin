@@ -26,10 +26,10 @@ project("joplin")
 # for GameActivity/NativeActivity derived applications, the same library name must be
 # used in the AndroidManifest.xml file.
 add_library(${CMAKE_PROJECT_NAME} SHARED
-    # List C/C++ source files with relative paths to this CMakeLists.txt.
-        whisperWrapper.cpp
-        utils/WhisperSession.cpp
-        utils/findLongestSilence.cpp
+	# List C/C++ source files with relative paths to this CMakeLists.txt.
+	whisperWrapper.cpp
+	utils/WhisperSession.cpp
+	utils/findLongestSilence.cpp
 )
 
 
@@ -45,10 +45,10 @@ add_subdirectory(${WHISPER_LIB_DIR} ./whisper)
 
 # Directories for header files
 target_include_directories(
-        ${CMAKE_PROJECT_NAME}
-        PUBLIC
-        ${PROJECT_BASE_DIR}/shared
-        ${WHISPER_LIB_DIR}/include
+	${CMAKE_PROJECT_NAME}
+	PUBLIC
+	${PROJECT_BASE_DIR}/shared
+	${WHISPER_LIB_DIR}/include
 )
 
 
@@ -56,7 +56,8 @@ target_include_directories(
 # can link libraries from various origins, such as libraries defined in this
 # build script, prebuilt third-party libraries, or Android system libraries.
 target_link_libraries(${CMAKE_PROJECT_NAME}
-    whisper
-    # List libraries link to the target library
-    android
-    log)
+	whisper
+	# List libraries link to the target library
+	android
+	log
+)

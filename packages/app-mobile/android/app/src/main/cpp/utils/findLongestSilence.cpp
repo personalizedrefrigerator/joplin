@@ -20,13 +20,13 @@ SilenceRange findLongestSilence(
 		processedAudio[i] = alpha * processedAudio[i - 1] + alpha * (audioData[i] - audioData[i - 1]);
 	}
 
-    // Break into windows of size `windowSize`:
+	// Break into windows of size `windowSize`:
 	int windowSize = 256;
 	int windowsPerSecond = sampleRate / windowSize;
 	int quietWindows = 0;
 	for (int windowOffset = 0; windowOffset < processedAudio.size(); windowOffset += windowSize) {
-        // Count the number of samples that (when averaged with the nearyby samples)
-        // are below some threshold value.
+		// Count the number of samples that (when averaged with the nearyby samples)
+		// are below some threshold value.
 		float absSum = 0;
 		int rollingAverageSize = 20;
 		int silentSamples = 0;
@@ -41,8 +41,8 @@ SilenceRange findLongestSilence(
 			}
 		}
 
-        // The window should be considered "quiet" if enough samples were below the threshold.
-        // Don't require all of them to be to allow clicks and pops.
+		// The window should be considered "quiet" if enough samples were below the threshold.
+		// Don't require all of them to be to allow clicks and pops.
 		if (silentSamples >= windowSize * 3 / 4) {
 			quietWindows ++;
 		} else {
@@ -60,7 +60,7 @@ SilenceRange findLongestSilence(
 				bestCandidateLength = currentCandidateLength;
 				bestCandidateStart = currentCandidateStart;
 				bestCandidateEnd = windowOffset;
-                LOGD("New best candidate with length %d", currentCandidateLength);
+				LOGD("New best candidate with length %d", currentCandidateLength);
 			}
 
 			currentCandidateStart = -1;
@@ -72,10 +72,10 @@ SilenceRange findLongestSilence(
 		return { .isValid = false, .start = 0, .end = 0 };
 	} else {
 		return {
-            .isValid=true,
-            .start=bestCandidateStart,
-            .end=bestCandidateEnd
-        };
+			.isValid=true,
+			.start=bestCandidateStart,
+			.end=bestCandidateEnd
+		};
 	}
 }
 
