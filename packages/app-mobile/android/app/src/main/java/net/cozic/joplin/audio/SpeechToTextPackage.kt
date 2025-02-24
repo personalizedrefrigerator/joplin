@@ -30,9 +30,7 @@ class SpeechToTextPackage : ReactPackage {
 
 		override fun onHostResume() { }
 		override fun onHostPause() { }
-		override fun onHostDestroy() {
-			// TODO: Cleanup here
-		}
+		override fun onHostDestroy() { }
 
 		@ReactMethod
 		fun openSession(modelPath: String, locale: String, prompt: String, promise: Promise) {
