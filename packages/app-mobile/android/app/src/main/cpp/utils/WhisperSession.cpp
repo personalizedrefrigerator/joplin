@@ -71,7 +71,7 @@ WhisperSession::transcribe_(const std::vector<float>& audio, size_t transcribeCo
 	transcribeCount = std::min(audio.size(), transcribeCount);
 
 	if (whisper_full(pContext_, params, audio.data(), transcribeCount) != 0) {
-        throw std::runtime_error("Failed to run Whisper (non-zero exit status).");
+		throw std::runtime_error("Failed to run Whisper (non-zero exit status).");
 	} else {
 		whisper_print_timings(pContext_);
 	}
