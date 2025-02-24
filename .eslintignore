@@ -787,6 +787,7 @@ packages/app-mobile/components/screens/ShareManager/index.test.js
 packages/app-mobile/components/screens/ShareManager/index.js
 packages/app-mobile/components/screens/UpgradeSyncTargetScreen.js
 packages/app-mobile/components/screens/dropbox-login.js
+packages/app-mobile/components/screens/encryption-config.test.js
 packages/app-mobile/components/screens/encryption-config.js
 packages/app-mobile/components/screens/status.js
 packages/app-mobile/components/screens/tags.js
