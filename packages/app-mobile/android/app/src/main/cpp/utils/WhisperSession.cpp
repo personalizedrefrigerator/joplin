@@ -34,7 +34,10 @@ WhisperSession::buildWhisperParams_() {
 	// WHISPER_SAMPLING_BEAM_SEARCH is an alternative to greedy:
 	// params.beam_search = { .beam_size = 2 };
 	params.print_realtime = false;
-	params.print_timestamps = true;
+    // Disable timestamps: They make creating custom Whisper models more difficult:
+	params.print_timestamps = false;
+    params.no_timestamps = true;
+
 	params.print_progress = false;
 	params.translate = false;
 	params.offset_ms = 0;
