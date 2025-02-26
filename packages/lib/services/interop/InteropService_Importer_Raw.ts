@@ -12,15 +12,32 @@ const { sprintf } = require('sprintf-js');
 import shim from '../../shim';
 const { fileExtension } = require('../../path-utils');
 import uuid from '../../uuid';
+import { BaseItemEntity } from '../database/types';
 
 export default class InteropService_Importer_Raw extends InteropService_Importer_Base {
 	public async exec(result: ImportExportResult) {
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-		const itemIdMap: any = {};
+		const itemIdMap: Map<string, string> = new Map();
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 		const createdResources: any = {};
 		const noteTagsToCreate = [];
 		const destinationFolderId = this.options_.destinationFolderId;
+
+		const toInternalId = async (itemOrId: BaseItemEntity|string) => {
+			const externalId = typeof itemOrId === 'string' ? itemOrId : itemOrId.id;
+			if (itemIdMap.has(externalId)) {
+				return itemIdMap.get(externalId);
+			}
+
+			const isUsed = !!await BaseItem.loadItemById(externalId);
+			let updatedId;
+			if (isUsed) {
+				updatedId = uuid.create();
+			} else {
+				updatedId = externalId;
+			}
+			itemIdMap.set(externalId, updatedId);
+			return updatedId;
+		};
 
 		const replaceLinkedItemIds = async (noteBody: string) => {
 			let output = noteBody;
@@ -28,8 +45,7 @@ export default class InteropService_Importer_Raw extends InteropService_Importer
 
 			for (let i = 0; i < itemIds.length; i++) {
 				const id = itemIds[i];
-				if (!itemIdMap[id]) itemIdMap[id] = uuid.create();
-				output = output.replace(new RegExp(id, 'gi'), itemIdMap[id]);
+				output = output.replace(new RegExp(id, 'gi'), await toInternalId(id));
 			}
 
 			return output;
@@ -65,15 +81,14 @@ export default class InteropService_Importer_Raw extends InteropService_Importer
 			// - If it doesn't exist, use the default folder. This is the case for example when importing JEX archives that contain only one or more notes, but no folder.
 			const itemParentExists = folderExists(stats, itemParentId);
 
-			if (!itemIdMap[itemParentId]) {
+			if (!itemIdMap.has(itemParentId)) {
 				if (destinationFolderId) {
-					itemIdMap[itemParentId] = destinationFolderId;
+					itemIdMap.set(itemParentId, destinationFolderId);
 				} else if (!itemParentExists) {
 					const parentFolder = await defaultFolder();
-					// eslint-disable-next-line require-atomic-updates
-					itemIdMap[itemParentId] = parentFolder.id;
+					itemIdMap.set(itemParentId, parentFolder.id);
 				} else {
-					itemIdMap[itemParentId] = uuid.create();
+					await toInternalId(itemParentId);
 				}
 			}
 		};
@@ -93,26 +108,23 @@ export default class InteropService_Importer_Raw extends InteropService_Importer
 			if (itemType === BaseModel.TYPE_NOTE) {
 				await setFolderToImportTo(item.parent_id);
 
-				if (!itemIdMap[item.id]) itemIdMap[item.id] = uuid.create();
-				item.id = itemIdMap[item.id];
-				item.parent_id = itemIdMap[item.parent_id];
+				item.id = await toInternalId(item.id);
+				item.parent_id = await toInternalId(item.parent_id);
 				item.body = await replaceLinkedItemIds(item.body);
 			} else if (itemType === BaseModel.TYPE_FOLDER) {
 				if (destinationFolderId) continue;
 
-				if (!itemIdMap[item.id]) itemIdMap[item.id] = uuid.create();
-				item.id = itemIdMap[item.id];
+				item.id = await toInternalId(item.id);
 
 				if (item.parent_id) {
 					await setFolderToImportTo(item.parent_id);
-					item.parent_id = itemIdMap[item.parent_id];
+					item.parent_id = itemIdMap.get(item.parent_id);
 				}
 
 				item.title = await Folder.findUniqueItemTitle(item.title, item.parent_id);
 			} else if (itemType === BaseModel.TYPE_RESOURCE) {
 				const sourceId = item.id;
-				if (!itemIdMap[item.id]) itemIdMap[item.id] = uuid.create();
-				item.id = itemIdMap[item.id];
+				item.id = await toInternalId(item);
 				createdResources[item.id] = item;
 
 				const sourceResourcePath = `${this.sourcePath_}/resources/${Resource.filename({ ...item, id: sourceId })}`;
@@ -126,12 +138,12 @@ export default class InteropService_Importer_Raw extends InteropService_Importer
 			} else if (itemType === BaseModel.TYPE_TAG) {
 				const tag = await Tag.loadByTitle(item.title);
 				if (tag) {
-					itemIdMap[item.id] = tag.id;
+					itemIdMap.set(item.id, tag.id);
 					continue;
 				}
 
 				const tagId = uuid.create();
-				itemIdMap[item.id] = tagId;
+				itemIdMap.set(item.id, tagId);
 				item.id = tagId;
 			} else if (itemType === BaseModel.TYPE_NOTE_TAG) {
 				noteTagsToCreate.push(item);
@@ -143,8 +155,8 @@ export default class InteropService_Importer_Raw extends InteropService_Importer
 
 		for (let i = 0; i < noteTagsToCreate.length; i++) {
 			const noteTag = noteTagsToCreate[i];
-			const newNoteId = itemIdMap[noteTag.note_id];
-			const newTagId = itemIdMap[noteTag.tag_id];
+			const newNoteId = itemIdMap.get(noteTag.note_id);
+			const newTagId = itemIdMap.get(noteTag.tag_id);
 
 			if (!newNoteId) {
 				result.warnings.push(sprintf('Non-existent note %s referenced in tag %s', noteTag.note_id, noteTag.tag_id));

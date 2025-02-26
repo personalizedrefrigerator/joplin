@@ -185,13 +185,13 @@ describe('InteropService_Importer_Raw', () => {
 		expect(note2).toBeTruthy();
 		expect(resource).toBeTruthy();
 
-		// Check that all IDs have been replaced - we don't keep the original
-		// IDs when importing data.
-		expect(folder1.id).not.toBe(extractId(rawFolder1));
-		expect(folder2.id).not.toBe(extractId(rawFolder2));
-		expect(note1.id).not.toBe(extractId(rawNote1));
-		expect(note2.id).not.toBe(extractId(rawNote2));
-		expect(resource.id).not.toBe(extractId(rawResource));
+		// Check that all IDs are the same - we keep the original IDs when importing
+		// data unless this would overwrite local data.
+		expect(note1.id).toBe(extractId(rawNote1));
+		expect(note2.id).toBe(extractId(rawNote2));
+		expect(resource.id).toBe(extractId(rawResource));
+		expect(folder1.id).toBe(extractId(rawFolder1));
+		expect(folder2.id).toBe(extractId(rawFolder2));
 
 		// Check that the notes are linked to the correct folder IDs
 		expect(folder1.parent_id).toBe('');
@@ -232,6 +232,10 @@ describe('InteropService_Importer_Raw', () => {
 		expect(tree[1].notes[0].title).toBe('Note 1');
 		expect(tree[1].children[0].title).toBe('sub-notebook');
 		expect(tree[1].children[0].notes[0].title).toBe('Note 2');
+
+		expect(
+			tree[1].notes.map((note: NoteEntity) => note.id),
+		).not.toContain(tree[0].notes[0].id);
 	});
 
 });
