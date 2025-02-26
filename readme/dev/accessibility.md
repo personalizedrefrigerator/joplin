@@ -5,11 +5,12 @@ Joplin has a strong focus on accessibility. It's important to make sure that new
 ## Making new components accessible
 
 When creating new components, it's important to make sure that they're accessible. How to do this varies a bit between desktop and mobile, but in general:
-- **Labels**: All focusable controls should have labels. Usually, these labels are provided by text inside the controls. Components that don't have any text may need to be labelled manually.
-- **Minimum size**: Buttons should be at least 24px by 24px.
-- **Keyboard accessibility**: It shouldn't be necessary to use a mouse to use a component.
-- **Screen reader accessibility**: It should be possible to use the desktop and mobile apps with a [screen reader](https://en.wikipedia.org/wiki/Screen_reader).
-- **Contrast**: Text and images should have high contrast with the background (see [the WebAIM contrast checker](https://webaim.org/resources/contrastchecker/)).
+- [All focusable controls should have labels.](https://www.w3.org/WAI/WCAG22/Understanding/info-and-relationships) (Usually, these labels are provided by text inside the controls.)
+- [Buttons should be at least 24px by 24px.](https://www.w3.org/WAI/WCAG22/Understanding/target-size-minimum.html)
+- [The app should be keyboard-accessible](https://www.w3.org/WAI/WCAG22/Understanding/keyboard.html).
+- [The app should be usable from a screen reader](#testing-with-a-screen-reader)
+- [Controls should have sufficient contrast](https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum.html).
+   - See [the WebAIM contrast checker](https://webaim.org/resources/contrastchecker/).
 
 For a full list of accessibility guidelines, see [the WCAG 2.2](https://www.w3.org/TR/WCAG22/).
 
@@ -23,7 +24,7 @@ For more information, see:
 
 ## Testing with a screen reader
 
-Joplin should be accessible to screen readers. A big part of this is testing changes to the UI with a screen reader. Here's how to do that.
+Joplin should be accessible to [screen readers](https://en.wikipedia.org/wiki/Screen_reader). A big part of this is testing changes to the UI with a screen reader. Here's how to do that.
 
 ### Desktop: Setting up a screen reader
 
