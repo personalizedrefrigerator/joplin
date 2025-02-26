@@ -170,17 +170,20 @@ const modelLocalFilepath = () => {
 const whisper: VoiceTypingProvider = {
 	supported: () => !!SpeechToTextModule,
 	modelLocalFilepath: modelLocalFilepath,
-	getDownloadUrl: () => {
+	getDownloadUrl: (locale) => {
+		const lang = languageCodeOnly(locale).toLowerCase();
 		let urlTemplate = rtrimSlashes(Setting.value('voiceTypingBaseUrl').trim());
 
 		if (!urlTemplate) {
-			urlTemplate = 'https://github.com/personalizedrefrigerator/joplin-voice-typing-test/releases/download/v0.0.2/{task}.zip';
+			urlTemplate = 'https://github.com/personalizedrefrigerator/joplin-voice-typing-test/releases/download/v0.0.3/{task}.zip';
 		}
 
 		// Note: whisper-base-q8_0 is also available and works on many Android devices. On some low
 		// resource devices, however, it will fail.
 		// TODO: Auto-select the model size?
-		return urlTemplate.replace(/\{task\}/g, 'whisper-tiny-q8_0');
+		return urlTemplate
+			.replace(/\{task\}/g, 'whisper-tiny-q8_0')
+			.replace(/\{lang\}/g, lang);
 	},
 	deleteCachedModels: async (locale) => {
 		const pathsToRemove = [
