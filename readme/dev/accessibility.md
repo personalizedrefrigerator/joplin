@@ -79,7 +79,7 @@ The desktop and mobile apps use different frameworks for checking for accessibil
 
 ### Desktop: Automated accessibility testing
 
-Existing Playwright automated tests can be found in `packages/app-desktop/integration-tests`. These tests can be run with `yarn test-ui` from `packages/app-desktop`. It's possible to run a subset of all tests using `yarn test-ui -g "test name search pattern"`, where `-g` stands for "grep".
+Existing Playwright automated tests can be found in `packages/app-desktop/integration-tests`. See the [integration-tests/README.md](https://github.com/laurent22/joplin/blob/dev/packages/app-desktop/integration-tests/README.md) file for details.
 
 For general accessibility issues (e.g. contrast, missing labels), we use [`@axe-core/playwright`](https://www.npmjs.com/package/@axe-core/playwright). This library scans everything visible on the screen and returns a set of errors. See `integration-tests/wcag.spec.ts` for existing tests that make use of this library.
 
