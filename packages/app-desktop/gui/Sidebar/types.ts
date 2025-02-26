@@ -21,7 +21,7 @@ interface BaseListItem {
 }
 
 interface ToplevelListItem extends BaseListItem {
-	depth: 0;
+	depth: 1;
 }
 
 export interface HeaderListItem extends ToplevelListItem {

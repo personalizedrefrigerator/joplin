@@ -59,10 +59,10 @@ test.describe('sidebar', () => {
 		await folderDHeader.dragTo(folderCHeader);
 
 		// Folders should have correct initial levels
-		await expect(folderAHeader).toHaveJSProperty('ariaLevel', '1');
-		await expect(folderBHeader).toHaveJSProperty('ariaLevel', '2');
-		await expect(folderCHeader).toHaveJSProperty('ariaLevel', '2');
-		await expect(folderDHeader).toHaveJSProperty('ariaLevel', '3');
+		await expect(folderAHeader).toHaveJSProperty('ariaLevel', '2');
+		await expect(folderBHeader).toHaveJSProperty('ariaLevel', '3');
+		await expect(folderCHeader).toHaveJSProperty('ariaLevel', '3');
+		await expect(folderDHeader).toHaveJSProperty('ariaLevel', '4');
 
 		await sidebar.forceUpdateSorting(electronApp);
 		await folderBHeader.click();
