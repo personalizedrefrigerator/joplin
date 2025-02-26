@@ -170,4 +170,4 @@ webm
 millis
 sideloading
 ggml
-aplicación
+Minidump
