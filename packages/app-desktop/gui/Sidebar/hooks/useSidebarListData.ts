@@ -40,7 +40,7 @@ const useSidebarListData = (props: Props): ListItem[] => {
 				kind: ListItemType.Folder,
 				folder,
 				hasChildren,
-				depth: depth + 1,
+				depth: depth,
 				key: folder.id,
 			};
 		});
