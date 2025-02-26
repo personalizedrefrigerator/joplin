@@ -74,10 +74,8 @@ const useOnSidebarKeyDownHandler = (props: Props) => {
 			if (isFolderWithParent) {
 				indexChange = getParentOffset(selectedIndex, listItems) ?? 0;
 			}
-		} else if (selectedItem && event.code === 'ArrowRight') { // Jump to first child
-			if (selectedItem.hasChildren) {
-				indexChange = 1;
-			}
+		} else if (selectedItem?.hasChildren && event.code === 'ArrowRight') { // Jump to first child
+			indexChange = 1;
 		} else if (event.code === 'ArrowUp') {
 			indexChange = -1;
 		} else if (event.code === 'ArrowDown') {
