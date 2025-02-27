@@ -4,6 +4,7 @@ import { RefObject, useCallback, useEffect, useMemo, useRef, useState } from 're
 import AccessibleView from '../accessibility/AccessibleView';
 import { _ } from '@joplin/lib/locale';
 import useReduceMotionEnabled from '../../utils/hooks/useReduceMotionEnabled';
+import BackButtonService from '../../services/BackButtonService';
 
 export enum SideMenuPosition {
 	Left = 'left',
@@ -350,7 +351,7 @@ const useOnChangeNotifier = ({ open, animating, menuLabel, onChangeStart, onChan
 	useEffect(() => {
 		// Avoid announcing for accessibility when the sidemenu component first mounts
 		// (especially if closed). Such notifications are distracting.
-		if (!isFirstNotificationRef.current && !open) {
+		if (!isFirstNotificationRef.current) {
 			AccessibilityInfo.announceForAccessibility(
 				open ? _('%s opened', labelRef.current) : _('%s closed', labelRef.current),
 			);
@@ -373,6 +374,27 @@ const useOnChangeNotifier = ({ open, animating, menuLabel, onChangeStart, onChan
 			onChangeRef.current.onChangeFinish?.(open);
 		}
 	}, [animating, open]);
+};
+
+// Handles dismiss when pressing the hardware back button on Android
+const useBackButtonHandler = (open: boolean, onBackPress: ()=> void) => {
+	const isOpenRef = useRef(open);
+	isOpenRef.current = open;
+
+	useEffect(() => {
+		const handler = () => {
+			if (isOpenRef.current) {
+				onBackPress();
+				return true;
+			}
+			return false;
+		};
+
+		BackButtonService.addHandler(handler);
+		return () => {
+			BackButtonService.removeHandler(handler);
+		};
+	}, [onBackPress]);
 };
 
 const SideMenu: React.FC<Props> = props => {
@@ -424,10 +446,10 @@ const SideMenu: React.FC<Props> = props => {
 		onChangeFinish: props.onChangeFinish,
 	});
 	const onCloseButtonPress = useCallback(() => {
-		setIsOpen(false);
-		// Set isAnimating as soon as possible to avoid components disappearing, then reappearing.
 		setIsAnimating(true);
+		setIsOpen(false);
 	}, [setIsAnimating]);
+	useBackButtonHandler(open, onCloseButtonPress);
 
 	const styles = useStyles({ overlayColor: props.overlayColor, menuOpenFraction, menuSize, isLeftMenu, isVerticalMenu });
 
@@ -435,6 +457,7 @@ const SideMenu: React.FC<Props> = props => {
 		<Animated.View
 			style={[styles.menuWrapper, props.menuStyle]}
 			onLayout={onMenuLayout}
+			onAccessibilityEscape={onCloseButtonPress}
 			key='menu'
 		>
 			<AccessibleView

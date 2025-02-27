@@ -1,8 +1,9 @@
 import * as React from 'react';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import BottomDrawer from './BottomDrawer';
 
 type DrawerSpec = {
+	key: string;
 	renderContent: ()=> React.ReactNode;
 	onHide: ()=> void;
 	label: string;
@@ -14,6 +15,7 @@ type DrawerHandle = {
 
 interface DrawerControl {
 	showDrawer(spec: DrawerSpec): DrawerHandle;
+	hideDrawer(key: string): void;
 }
 
 export const BottomDrawerContext = React.createContext<DrawerControl>(null);
@@ -24,6 +26,27 @@ interface Props {
 
 const BottomDrawerProvider: React.FC<Props> = props => {
 	const [drawers, setDrawers] = useState<DrawerSpec[]>([]);
+	const drawersRef = useRef(drawers);
+	drawersRef.current = drawers;
+
+	const addOrUpdateDrawer = useCallback((spec: DrawerSpec) => {
+		setDrawers(drawers => {
+			const result = [];
+			let added = false;
+			for (const drawer of drawers) {
+				if (drawer.key === spec.key) {
+					result.push(spec);
+					added = true;
+				} else {
+					result.push(drawer);
+				}
+			}
+			if (!added) {
+				result.push(spec);
+			}
+			return result;
+		});
+	}, []);
 
 	const drawerControl = useMemo((): DrawerControl => {
 		return {
@@ -41,8 +64,7 @@ const BottomDrawerProvider: React.FC<Props> = props => {
 						originalOnHide();
 					},
 				};
-
-				setDrawers(drawers => [...drawers, spec]);
+				addOrUpdateDrawer(spec);
 
 				return {
 					remove: () => {
@@ -50,8 +72,15 @@ const BottomDrawerProvider: React.FC<Props> = props => {
 					},
 				};
 			},
+			hideDrawer(key) {
+				for (const drawer of drawersRef.current) {
+					if (drawer.key === key) {
+						drawer.onHide();
+					}
+				}
+			},
 		};
-	}, []);
+	}, [addOrUpdateDrawer]);
 
 	const onDismiss = useCallback(() => {
 		drawers[drawers.length - 1]?.onHide();
