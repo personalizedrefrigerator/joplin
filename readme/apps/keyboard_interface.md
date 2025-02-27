@@ -23,7 +23,9 @@ Within the **main content**, Joplin has:
 3. **Editable**: A note editor.
 4. **Frame**: A note viewer.
 
-Many screen readers include shortcuts for jumping to the next/previous of each of these roles.
+Screen readers usually support jumping between these different regions. Here's the relevant documentation for some of the more popular screen readers:
+- [Orca](https://help.gnome.org/users/orca/stable/howto_structural_navigation.html.en) (Linux screen reader)
+- [NVDA](https://download.nvaccess.org/documentation/en/userGuide.html#SingleLetterNavigation)
 
 ### Finding notes, tags, and notebooks
 
