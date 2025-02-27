@@ -22,7 +22,7 @@ interface ActionButtonProps {
 	accessibilityActions?: readonly AccessibilityActionInfo[];
 	onAccessibilityAction?: (event: AccessibilityActionEvent)=> void;
 	accessibilityHint?: string;
-	menuLabel: string;
+	menuLabel?: string;
 
 	// If not given, an "add" button will be used.
 	mainButton?: ButtonSpec;
