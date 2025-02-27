@@ -3,11 +3,11 @@ import { _ } from '@joplin/lib/locale';
 import CommandService from '@joplin/lib/services/CommandService';
 import { Divider } from 'react-native-paper';
 import FloatingActionButton from '../../buttons/FloatingActionButton';
-import { StyleSheet, View } from 'react-native';
+import { AccessibilityActionEvent, AccessibilityActionInfo, StyleSheet, View } from 'react-native';
 import { AttachFileAction } from '../Note/commands/attachFile';
 import LabelledIconButton from '../../buttons/LabelledIconButton';
 import TextButton, { ButtonSize, ButtonType } from '../../buttons/TextButton';
-import { useCallback, useRef } from 'react';
+import { useCallback, useMemo, useRef } from 'react';
 import focusView from '../../../utils/focusView';
 
 interface Props {
@@ -109,13 +109,34 @@ const NewNoteButton: React.FC<Props> = _props => {
 		</View>
 	</View>;
 
+	// Accessibility actions simplify creating new notes and to-dos on Android and iOS:
+	const accessibilityActions = useMemo((): AccessibilityActionInfo[] => {
+		return [{
+			name: 'new-note',
+			label: _('New note'),
+		}, {
+			name: 'new-to-do',
+			label: _('New to-do'),
+		}];
+	}, []);
+	const onAccessibilityAction = useCallback((event: AccessibilityActionEvent) => {
+		if (event.nativeEvent.actionName === 'new-note') {
+			makeNewNote(false);
+		} else if (event.nativeEvent.actionName === 'new-to-do') {
+			makeNewNote(true);
+		}
+	}, []);
+
 	return <FloatingActionButton
 		mainButton={{
 			icon: 'add',
 			label: _('Add new'),
 		}}
+		menuLabel={_('New note menu')}
 		onMenuToggled={onMenuToggled}
 		menuContent={menuContent}
+		accessibilityActions={accessibilityActions}
+		onAccessibilityAction={onAccessibilityAction}
 	/>;
 };
 

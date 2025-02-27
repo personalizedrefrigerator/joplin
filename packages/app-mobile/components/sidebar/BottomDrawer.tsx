@@ -7,11 +7,11 @@ import { ThemeStyle, themeStyle } from '../global-style';
 import { connect } from 'react-redux';
 import { AppState } from '../../utils/types';
 import useSafeAreaPadding from '../../utils/hooks/useSafeAreaPadding';
-import { _ } from '@joplin/lib/locale';
 
 interface Props {
 	themeId: number;
 	children: React.ReactNode;
+	menuLabel: string;
 	show: boolean;
 	onDismiss: ()=> void;
 }
@@ -109,7 +109,7 @@ const BottomDrawer: React.FC<Props> = props => {
 		onRequestClose={onModalDismiss}
 	>
 		<SideMenu
-			label={_('New note menu')}
+			label={props.menuLabel}
 			menuPosition={SideMenuPosition.Bottom}
 			menu={menu}
 			isOpen={isOpen}

@@ -3,7 +3,7 @@ import { useState, useCallback, useMemo } from 'react';
 import { FAB, Portal } from 'react-native-paper';
 import { _ } from '@joplin/lib/locale';
 import { Dispatch } from 'redux';
-import { View } from 'react-native';
+import { AccessibilityActionEvent, AccessibilityActionInfo, View } from 'react-native';
 import BottomDrawer from '../sidebar/BottomDrawer';
 import { connect } from 'react-redux';
 const Icon = require('react-native-vector-icons/Ionicons').default;
@@ -19,6 +19,10 @@ interface ButtonSpec {
 interface ActionButtonProps {
 	menuContent?: React.ReactNode;
 	onMenuToggled?: (visible: boolean)=> void;
+	accessibilityActions?: readonly AccessibilityActionInfo[];
+	onAccessibilityAction?: (event: AccessibilityActionEvent)=> void;
+	accessibilityHint?: string;
+	menuLabel: string;
 
 	// If not given, an "add" button will be used.
 	mainButton?: ButtonSpec;
@@ -53,16 +57,15 @@ const FloatingActionButton = (props: ActionButtonProps) => {
 
 	const label = props.mainButton?.label ?? _('Add new');
 
-	const hasMenu = !!props.menuContent;
 	const menuButton = <FAB
 		icon={open ? openIcon : closedIcon}
 		accessibilityLabel={label}
 		onPress={props.mainButton?.onPress ?? onMenuToggled}
-		aria-expanded={hasMenu ? open : undefined}
-		accessibilityState={hasMenu ? { expanded: open } : undefined}
 		style={{
 			alignSelf: 'flex-end',
 		}}
+		accessibilityActions={props.accessibilityActions}
+		onAccessibilityAction={props.onAccessibilityAction}
 	/>;
 
 	return (
@@ -76,7 +79,7 @@ const FloatingActionButton = (props: ActionButtonProps) => {
 			>
 				{menuButton}
 			</View>
-			<BottomDrawer onDismiss={() => setOpen(false)} show={open}>
+			<BottomDrawer menuLabel={props.menuLabel} onDismiss={() => setOpen(false)} show={open}>
 				{props.menuContent}
 			</BottomDrawer>
 		</Portal>
