@@ -8,7 +8,6 @@ import { AttachFileAction } from '../Note/commands/attachFile';
 import LabelledIconButton from '../../buttons/LabelledIconButton';
 import TextButton, { ButtonSize, ButtonType } from '../../buttons/TextButton';
 import { useCallback, useMemo, useRef } from 'react';
-import focusView from '../../../utils/focusView';
 
 interface Props {
 
@@ -51,17 +50,6 @@ const styles = StyleSheet.create({
 
 const NewNoteButton: React.FC<Props> = _props => {
 	const newNoteRef = useRef<View|null>(null);
-
-	const onMenuToggled = useCallback((open: boolean) => {
-		if (open) {
-			// TODO: Auto-focus in a way that doesn't require a delay.
-			// To check: Are the auto-focus issues related to the duration of the slide-in
-			// animation?
-			setTimeout(() => {
-				focusView('NewNoteButton', newNoteRef.current);
-			}, 250);
-		}
-	}, []);
 
 	const renderShortcutButton = (action: AttachFileAction, icon: string, title: string) => {
 		return <LabelledIconButton
@@ -128,7 +116,6 @@ const NewNoteButton: React.FC<Props> = _props => {
 			label: _('Add new'),
 		}}
 		menuLabel={_('New note menu')}
-		onMenuToggled={onMenuToggled}
 		menuContent={menuContent}
 		accessibilityActions={accessibilityActions}
 		onAccessibilityAction={onAccessibilityAction}
