@@ -45,6 +45,9 @@ const styles = StyleSheet.create({
 	menuContent: {
 		gap: 12,
 		flexShrink: 1,
+		// Web: Use column-reverse to make focus order jump to the "new note"
+		// and "new to-do" items first.
+		flexDirection: 'column-reverse',
 	},
 });
 
@@ -62,12 +65,6 @@ const NewNoteButton: React.FC<Props> = _props => {
 	};
 
 	const menuContent = <View style={styles.menuContent}>
-		<View style={styles.buttonRow}>
-			{renderShortcutButton(AttachFileAction.AttachFile, 'material attachment', _('Attachment'))}
-			{renderShortcutButton(AttachFileAction.AttachPhoto, 'material camera', _('Camera'))}
-			{renderShortcutButton(AttachFileAction.AttachPhoto, 'material draw', _('Drawing'))}
-		</View>
-		<Divider/>
 		<View style={[styles.buttonRow, styles.mainButtonRow]}>
 			<TextButton
 				icon='checkbox-outline'
@@ -90,9 +87,18 @@ const NewNoteButton: React.FC<Props> = _props => {
 				size={ButtonSize.Larger}
 			>{_('New note')}</TextButton>
 		</View>
+		<Divider/>
+		<View style={styles.buttonRow}>
+			{renderShortcutButton(AttachFileAction.AttachFile, 'material attachment', _('Attachment'))}
+			{renderShortcutButton(AttachFileAction.AttachPhoto, 'material camera', _('Camera'))}
+			{renderShortcutButton(AttachFileAction.AttachPhoto, 'material draw', _('Drawing'))}
+		</View>
 	</View>;
 
-	// Accessibility actions simplify creating new notes and to-dos on Android and iOS:
+	// Android and iOS: Accessibility actions simplify creating new notes and to-dos. These
+	// are extra important because the "note with attachment" items are annoyingly first in
+	// the focus order (and it doesn't seem possible to change this without adding a new
+	// dependency).
 	const accessibilityActions = useMemo((): AccessibilityActionInfo[] => {
 		return [{
 			name: 'new-note',
