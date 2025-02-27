@@ -49,6 +49,7 @@ const useStyles = (themeId: number) => {
 const LabelledIconButton: React.FC<Props> = ({ title, icon, style, themeId, ...otherProps }) => {
 	const styles = useStyles(themeId);
 	return <TouchableRipple
+		borderless={true}
 		role='button'
 		accessibilityRole='button'
 		{...otherProps}

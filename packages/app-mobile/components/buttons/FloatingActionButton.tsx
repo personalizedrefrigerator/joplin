@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useState, useCallback, useMemo, useEffect, useContext, useRef } from 'react';
+import { useState, useCallback, useMemo, useEffect, useContext, useRef, useId } from 'react';
 import { FAB } from 'react-native-paper';
 import { _ } from '@joplin/lib/locale';
 import { Dispatch } from 'redux';
@@ -55,9 +55,18 @@ const FloatingActionButton = (props: ActionButtonProps) => {
 
 	const drawerControl = useContext(BottomDrawerContext);
 	const mainButtonRef = useRef<View>();
+	const drawerId = useId();
+
+	useEffect(() => {
+		return () => {
+			drawerControl.hideDrawer(drawerId);
+		};
+	}, [open, drawerControl, drawerId]);
+
 	useEffect(() => {
 		if (open) {
-			const drawer = drawerControl.showDrawer({
+			drawerControl.showDrawer({
+				key: drawerId,
 				renderContent: () => {
 					return props.menuContent;
 				},
@@ -67,15 +76,8 @@ const FloatingActionButton = (props: ActionButtonProps) => {
 				},
 				label: props.menuLabel,
 			});
-
-			return () => {
-				drawer.remove();
-			};
 		}
-
-		return () => {};
-	}, [open, drawerControl, props.menuContent, props.menuLabel]);
-
+	}, [open, drawerControl, drawerId, props.menuContent, props.menuLabel]);
 	const closedIcon = useIcon(props.mainButton?.icon ?? 'add');
 	const openIcon = useIcon('close');
 
