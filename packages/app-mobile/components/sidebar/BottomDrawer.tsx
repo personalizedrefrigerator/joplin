@@ -89,7 +89,7 @@ const BottomDrawer: React.FC<Props> = props => {
 	const [openMenuOffset, setOpenMenuOffset] = useState(400);
 	const onMenuLayout = useCallback((event: LayoutChangeEvent) => {
 		const height = event.nativeEvent.layout.height;
-		setOpenMenuOffset(height);
+		setOpenMenuOffset(height + 30);
 	}, []);
 
 	const theme = themeStyle(props.themeId);

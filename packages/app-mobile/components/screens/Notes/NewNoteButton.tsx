@@ -63,26 +63,21 @@ const NewNoteButton: React.FC<Props> = _props => {
 		}
 	}, []);
 
+	const renderShortcutButton = (action: AttachFileAction, icon: string, title: string) => {
+		return <LabelledIconButton
+			onPress={() => makeNewNote(false, action)}
+			style={styles.shortcutButton}
+			title={title}
+			accessibilityHint={_('New note from %s', title)}
+			icon={icon}
+		/>;
+	};
+
 	const menuContent = <View style={styles.menuContent}>
 		<View style={styles.buttonRow}>
-			<LabelledIconButton
-				onPress={() => makeNewNote(false, AttachFileAction.AttachPhoto)}
-				style={styles.shortcutButton}
-				title={_('Camera')}
-				icon='material camera'
-			/>
-			<LabelledIconButton
-				onPress={() => makeNewNote(false, AttachFileAction.AttachFile)}
-				style={styles.shortcutButton}
-				title={_('Attachment')}
-				icon='material attachment'
-			/>
-			<LabelledIconButton
-				onPress={() => makeNewNote(false, AttachFileAction.AttachDrawing)}
-				style={styles.shortcutButton}
-				title={_('Drawing')}
-				icon='material draw'
-			/>
+			{renderShortcutButton(AttachFileAction.AttachFile, 'material attachment', _('Attachment'))}
+			{renderShortcutButton(AttachFileAction.AttachPhoto, 'material camera', _('Camera'))}
+			{renderShortcutButton(AttachFileAction.AttachPhoto, 'material draw', _('Drawing'))}
 		</View>
 		<Divider/>
 		<View style={[styles.buttonRow, styles.mainButtonRow]}>
