@@ -85,7 +85,8 @@ const BottomDrawer: React.FC<Props> = props => {
 	const [openMenuOffset, setOpenMenuOffset] = useState(400);
 	const onMenuLayout = useCallback((event: LayoutChangeEvent) => {
 		const height = event.nativeEvent.layout.height;
-		setOpenMenuOffset(height + 30);
+		const extraPadding = 5;
+		setOpenMenuOffset(height + extraPadding);
 	}, []);
 
 	const theme = themeStyle(props.themeId);
@@ -101,7 +102,7 @@ const BottomDrawer: React.FC<Props> = props => {
 		menuPosition={SideMenuPosition.Bottom}
 		menu={menu}
 		isOpen={isOpen}
-		onChange={(visible) => {
+		onChangeFinish={(visible) => {
 			if (!visible) {
 				setIsOpen(false);
 			}

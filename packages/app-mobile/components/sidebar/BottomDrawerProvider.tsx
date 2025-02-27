@@ -5,6 +5,7 @@ import BottomDrawer from './BottomDrawer';
 type DrawerSpec = {
 	renderContent: ()=> React.ReactNode;
 	onHide: ()=> void;
+	label: string;
 };
 
 type DrawerHandle = {
@@ -59,6 +60,7 @@ const BottomDrawerProvider: React.FC<Props> = props => {
 	return <BottomDrawerContext.Provider value={drawerControl}>
 		<BottomDrawer
 			menu={drawers[drawers.length - 1]?.renderContent()}
+			menuLabel={drawers[drawers.length - 1]?.label}
 			show={drawers.length > 0}
 			onDismiss={onDismiss}
 		>

@@ -24,7 +24,8 @@ interface Props {
 	menuPosition: SideMenuPosition;
 	menuStyle?: ViewStyle;
 
-	onChange: OnChangeCallback;
+	onChangeStart?: OnChangeCallback;
+	onChangeFinish?: OnChangeCallback;
 	disableGestures: boolean;
 }
 
@@ -330,17 +331,23 @@ const useSizes = (isVerticalMenu: boolean, openMenuOffset: number) => {
 	return { menuSize, onContainerLayout, contentSize };
 };
 
-const useOnChangeNotifier = (open: boolean, menuLabel: string, onChange: OnChangeCallback) => {
+interface ChangeNotifierProps {
+	open: boolean;
+	animating: boolean;
+	menuLabel: string;
+	onChangeStart: OnChangeCallback|undefined;
+	onChangeFinish: OnChangeCallback|undefined;
+}
+
+const useOnChangeNotifier = ({ open, animating, menuLabel, onChangeStart, onChangeFinish }: ChangeNotifierProps) => {
 	const labelRef = useRef(menuLabel);
 	labelRef.current = menuLabel;
-	const onChangeRef = useRef(onChange);
-	onChangeRef.current = onChange;
+	const onChangeRef = useRef({ onChangeStart, onChangeFinish });
+	onChangeRef.current = { onChangeStart, onChangeFinish };
 
+	// Change accessibility announcements
 	const isFirstNotificationRef = useRef(true);
-
 	useEffect(() => {
-		onChangeRef.current(open);
-
 		// Avoid announcing for accessibility when the sidemenu component first mounts
 		// (especially if closed). Such notifications are distracting.
 		if (!isFirstNotificationRef.current && !open) {
@@ -350,6 +357,22 @@ const useOnChangeNotifier = (open: boolean, menuLabel: string, onChange: OnChang
 		}
 		isFirstNotificationRef.current = false;
 	}, [open]);
+
+	// Change notifiers
+	const lastOpenRef = useRef(open);
+	useEffect(() => {
+		// [open] changes at the start of the animation (if any). Always emit [onChangeStart]
+		// when [open] changes.
+		if (lastOpenRef.current !== open) {
+			onChangeRef.current.onChangeStart?.(open);
+			lastOpenRef.current = open;
+		}
+
+		// Only emit [onChangeFinish] when done animating.
+		if (!animating) {
+			onChangeRef.current.onChangeFinish?.(open);
+		}
+	}, [animating, open]);
 };
 
 const SideMenu: React.FC<Props> = props => {
@@ -393,7 +416,13 @@ const SideMenu: React.FC<Props> = props => {
 		updateMenuPosition,
 	});
 
-	useOnChangeNotifier(open, props.label, props.onChange);
+	useOnChangeNotifier({
+		open,
+		animating,
+		menuLabel: props.label,
+		onChangeStart: props.onChangeStart,
+		onChangeFinish: props.onChangeFinish,
+	});
 	const onCloseButtonPress = useCallback(() => {
 		setIsOpen(false);
 		// Set isAnimating as soon as possible to avoid components disappearing, then reappearing.
@@ -438,7 +467,7 @@ const SideMenu: React.FC<Props> = props => {
 				role='button'
 				onPress={onCloseButtonPress}
 				style={styles.overlayContent}
-			/>
+			><AccessibleView refocusCounter={1}/></Pressable>
 		</Animated.View>
 	) : null;
 
@@ -446,8 +475,8 @@ const SideMenu: React.FC<Props> = props => {
 		style={styles.contentAndCloseButtonWrapper}
 		key='menu-content-wrapper'
 	>
-		{contentComponent}
 		{closeButtonOverlay}
+		{contentComponent}
 	</Animated.View>;
 
 	return (

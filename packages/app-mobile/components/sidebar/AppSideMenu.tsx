@@ -37,7 +37,7 @@ const AppSideMenu: React.FC<Props> = props => {
 		overlayColor={theme.colorFaded}
 		menuStyle={{ backgroundColor: theme.backgroundColor }}
 		isOpen={props.open}
-		onChange={props.onChange}
+		onChangeStart={props.onChange}
 
 		disableGestures={props.disableGestures}
 

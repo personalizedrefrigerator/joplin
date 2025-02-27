@@ -1,11 +1,12 @@
 import * as React from 'react';
-import { useState, useCallback, useMemo, useEffect, useContext } from 'react';
-import { FAB, Portal } from 'react-native-paper';
+import { useState, useCallback, useMemo, useEffect, useContext, useRef } from 'react';
+import { FAB } from 'react-native-paper';
 import { _ } from '@joplin/lib/locale';
 import { Dispatch } from 'redux';
 import { AccessibilityActionEvent, AccessibilityActionInfo, View } from 'react-native';
 import { connect } from 'react-redux';
 import { BottomDrawerContext } from '../sidebar/BottomDrawerProvider';
+import focusView from '../../utils/focusView';
 const Icon = require('react-native-vector-icons/Ionicons').default;
 
 type OnButtonPress = ()=> void;
@@ -53,6 +54,7 @@ const FloatingActionButton = (props: ActionButtonProps) => {
 	}, [setOpen, open, props.onMenuToggled, props.dispatch]);
 
 	const drawerControl = useContext(BottomDrawerContext);
+	const mainButtonRef = useRef<View>();
 	useEffect(() => {
 		if (open) {
 			const drawer = drawerControl.showDrawer({
@@ -60,8 +62,10 @@ const FloatingActionButton = (props: ActionButtonProps) => {
 					return props.menuContent;
 				},
 				onHide: () => {
+					focusView('FloatingActionButton', mainButtonRef.current);
 					setOpen(false);
 				},
+				label: props.menuLabel,
 			});
 
 			return () => {
@@ -70,7 +74,7 @@ const FloatingActionButton = (props: ActionButtonProps) => {
 		}
 
 		return () => {};
-	}, [open, drawerControl, props.menuContent]);
+	}, [open, drawerControl, props.menuContent, props.menuLabel]);
 
 	const closedIcon = useIcon(props.mainButton?.icon ?? 'add');
 	const openIcon = useIcon('close');
@@ -78,6 +82,7 @@ const FloatingActionButton = (props: ActionButtonProps) => {
 	const label = props.mainButton?.label ?? _('Add new');
 
 	const menuButton = <FAB
+		ref={mainButtonRef}
 		icon={open ? openIcon : closedIcon}
 		accessibilityLabel={label}
 		onPress={props.mainButton?.onPress ?? onMenuToggled}
@@ -89,21 +94,15 @@ const FloatingActionButton = (props: ActionButtonProps) => {
 	/>;
 
 	return (
-		<Portal>
-			<View
-				style={{
-					position: 'absolute',
-					bottom: 10,
-					right: 10,
-					...(open ? {
-						opacity: 0,
-						pointerEvents: 'box-none',
-					} : null),
-				}}
-			>
-				{menuButton}
-			</View>
-		</Portal>
+		<View
+			style={{
+				position: 'absolute',
+				bottom: 10,
+				right: 10,
+			}}
+		>
+			{menuButton}
+		</View>
 	);
 };
 
