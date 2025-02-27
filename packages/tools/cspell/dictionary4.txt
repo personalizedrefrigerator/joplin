@@ -169,3 +169,4 @@ pmmmwh
 webm
 millis
 sideloading
+Minidump
