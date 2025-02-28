@@ -7,6 +7,7 @@ import { _ } from '@joplin/lib/locale';
 interface Props {
 	checked: boolean;
 	accessibilityLabel?: string;
+	accessibilityHint?: string;
 	onChange?: (checked: boolean)=> void;
 	style?: TextStyle;
 	iconStyle?: TextStyle;
@@ -41,11 +42,15 @@ const Checkbox: React.FC<Props> = props => {
 		setChecked(checked => {
 			const newChecked = !checked;
 			props.onChange?.(newChecked);
+
+			// An .announceForAccessibility is necessary here because VoiceOver doesn't announce this
+			// change on its own, even though we change [accessibilityState].
 			if (newChecked) {
 				AccessibilityInfo.announceForAccessibility(_('Checked'));
 			} else {
 				AccessibilityInfo.announceForAccessibility(_('Unchecked'));
 			}
+
 			return newChecked;
 		});
 	}, [props.onChange]);
@@ -64,6 +69,7 @@ const Checkbox: React.FC<Props> = props => {
 			accessibilityRole="checkbox"
 			accessibilityState={accessibilityState}
 			accessibilityLabel={props.accessibilityLabel ?? ''}
+			accessibilityHint={props.accessibilityHint}
 			// Web requires aria-checked
 			aria-checked={checked}
 		>
