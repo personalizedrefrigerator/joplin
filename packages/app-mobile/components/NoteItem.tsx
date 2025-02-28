@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { memo, useCallback, useMemo } from 'react';
 import { connect } from 'react-redux';
-import { Text, View, StyleSheet, TextStyle, ViewStyle, AccessibilityInfo, TouchableOpacity } from 'react-native';
+import { Text, StyleSheet, TextStyle, ViewStyle, AccessibilityInfo, AccessibilityActionEvent } from 'react-native';
 import Checkbox from './Checkbox';
 import Note from '@joplin/lib/models/Note';
 import time from '@joplin/lib/time';
@@ -11,6 +11,7 @@ import { AppState } from '../utils/types';
 import { Dispatch } from 'redux';
 import { NoteEntity } from '@joplin/lib/services/database/types';
 import useOnLongPressProps from '../utils/hooks/useOnLongPressProps';
+import MultiTouchableOpacity from './buttons/MultiTouchableOpacity';
 
 interface Props {
 	dispatch: Dispatch;
@@ -76,8 +77,46 @@ const useStyles = (themeId: number) => {
 				opacity: 0.4,
 			},
 			uncheckedOpacityStyle: { },
+			pressable: {
+				flexGrow: 1,
+				alignSelf: 'stretch',
+			},
 		});
 	}, [themeId]);
+};
+
+interface AccessibilityActionProps {
+	isTodo: boolean;
+	checkboxChecked: boolean;
+	isSelected: boolean;
+	onLongPress: ()=> void;
+	todoCheckbox_change: (checked: boolean)=> void;
+}
+
+const useAccessibilityAndLongPressActions = ({ isTodo, checkboxChecked, isSelected, onLongPress, todoCheckbox_change }: AccessibilityActionProps) => {
+	const selectDeselectLabel = isSelected ? _('Deselect') : _('Select');
+	const onLongPressProps = useOnLongPressProps({ onLongPress, actionDescription: selectDeselectLabel });
+	return useMemo(() => {
+		const toggleId = checkboxChecked ? 'mark-incomplete' : 'mark-complete';
+		const toggleActions = isTodo ? [
+			{ name: toggleId, label: checkboxChecked ? _('Mark as incomplete') : _('Mark as complete') },
+		] : [];
+
+		return {
+			...onLongPressProps,
+			accessibilityActions: [
+				...onLongPressProps.accessibilityActions,
+				...toggleActions,
+			],
+			onAccessibilityAction: (action: AccessibilityActionEvent) => {
+				if (action.nativeEvent.actionName === toggleId) {
+					todoCheckbox_change(!checkboxChecked);
+				} else {
+					onLongPressProps.onAccessibilityAction?.(action);
+				}
+			},
+		};
+	}, [onLongPressProps, checkboxChecked, isTodo, todoCheckbox_change]);
 };
 
 const NoteItemComponent: React.FC<Props> = memo(props => {
@@ -140,41 +179,33 @@ const NoteItemComponent: React.FC<Props> = memo(props => {
 	const selectionWrapperStyle = isSelected ? styles.selectionWrapperSelected : styles.selectionWrapper;
 
 	const noteTitle = Note.displayTitle(note);
+	const accessibilityActionProps = useAccessibilityAndLongPressActions({ isTodo, checkboxChecked, isSelected, onLongPress, todoCheckbox_change });
 
-	const selectDeselectLabel = isSelected ? _('Deselect') : _('Select');
-	const onLongPressProps = useOnLongPressProps({ onLongPress, actionDescription: selectDeselectLabel });
+	const todoCheckbox = isTodo ? <Checkbox
+		style={checkboxStyle}
+		checked={checkboxChecked}
+		onChange={todoCheckbox_change}
+		accessibilityLabel={_('to-do: %s', noteTitle)}
+	/> : null;
 
-	const contextMenuProps = {
-		// Web only.
-		onContextMenu: onLongPressProps.onContextMenu,
+	const pressableProps = {
+		style: styles.pressable,
+		accessibilityHint: props.noteSelectionEnabled ? '' : _('Opens note'),
+		'aria-pressed': props.noteSelectionEnabled ? isSelected : undefined,
+		accessibilityState: { selected: isSelected },
+		...accessibilityActionProps,
 	};
 	return (
-		<View
-			// context menu listeners need to be added to a parent view of the
-			// TouchableOpacity -- on web, TouchableOpacity registers a custom
-			// onContextMenu handler that can't be overridden.
-			{...contextMenuProps}
+		<MultiTouchableOpacity
+			containerProps={{
+				style: [selectionWrapperStyle, opacityStyle, listItemStyle],
+			}}
+			pressableProps={pressableProps}
+			onPress={onPress}
+			beforePressable={todoCheckbox}
 		>
-			<TouchableOpacity
-				activeOpacity={0.5}
-				onPress={onPress}
-				accessibilityRole='button'
-				accessibilityHint={props.noteSelectionEnabled ? '' : _('Opens note')}
-				aria-pressed={props.noteSelectionEnabled ? isSelected : undefined}
-				accessibilityState={{ selected: isSelected }}
-				{...onLongPressProps}
-			>
-				<View style={[selectionWrapperStyle, opacityStyle, listItemStyle]}>
-					{isTodo ? <Checkbox
-						style={checkboxStyle}
-						checked={checkboxChecked}
-						onChange={todoCheckbox_change}
-						accessibilityLabel={_('to-do: %s', noteTitle)}
-					/> : null }
-					<Text style={listItemTextStyle}>{noteTitle}</Text>
-				</View>
-			</TouchableOpacity>
-		</View>
+			<Text style={listItemTextStyle}>{noteTitle}</Text>
+		</MultiTouchableOpacity>
 	);
 });
 

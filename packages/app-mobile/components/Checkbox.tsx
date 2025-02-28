@@ -1,7 +1,8 @@
 import * as React from 'react';
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { TouchableHighlight, StyleSheet, TextStyle } from 'react-native';
+import { TouchableHighlight, StyleSheet, TextStyle, AccessibilityInfo } from 'react-native';
 import Icon from './Icon';
+import { _ } from '@joplin/lib/locale';
 
 interface Props {
 	checked: boolean;
@@ -40,6 +41,11 @@ const Checkbox: React.FC<Props> = props => {
 		setChecked(checked => {
 			const newChecked = !checked;
 			props.onChange?.(newChecked);
+			if (newChecked) {
+				AccessibilityInfo.announceForAccessibility(_('Checked'));
+			} else {
+				AccessibilityInfo.announceForAccessibility(_('Unchecked'));
+			}
 			return newChecked;
 		});
 	}, [props.onChange]);
