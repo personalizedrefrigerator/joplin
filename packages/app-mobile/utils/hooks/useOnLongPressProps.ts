@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { AccessibilityActionEvent, AccessibilityActionInfo, NativeSyntheticEvent } from 'react-native';
+import { AccessibilityActionEvent, NativeSyntheticEvent } from 'react-native';
 
 interface Props {
 	onLongPress: ()=> void;
@@ -26,7 +26,7 @@ const useOnLongPressProps = ({ onLongPress, actionDescription }: Props) => {
 			onLongPress,
 			accessibilityActions: [
 				{ name: 'longpress', label: actionDescription },
-			] satisfies AccessibilityActionInfo[],
+			],
 			onAccessibilityAction: (event: AccessibilityActionEvent)=>{
 				if (event.nativeEvent.actionName === 'longpress') {
 					onLongPress();
