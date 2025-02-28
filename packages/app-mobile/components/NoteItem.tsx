@@ -32,17 +32,24 @@ const useStyles = (themeId: number) => {
 			borderBottomWidth: 1,
 			borderBottomColor: theme.dividerColor,
 			alignItems: 'flex-start',
+			// backgroundColor: theme.backgroundColor,
+		};
+
+		const listItemPressable: ViewStyle = {
+			flexGrow: 1,
+			alignSelf: 'stretch',
+		};
+		const listItemPressableWithCheckbox: ViewStyle = {
+			...listItemPressable,
+			paddingRight: theme.marginRight,
+		};
+		const listItemPressableWithoutCheckbox: ViewStyle = {
+			...listItemPressable,
 			paddingLeft: theme.marginLeft,
 			paddingRight: theme.marginRight,
 			paddingTop: theme.itemMarginTop,
 			paddingBottom: theme.itemMarginBottom,
-			// backgroundColor: theme.backgroundColor,
 		};
-
-		const listItemWithCheckbox = { ...listItem };
-		delete listItemWithCheckbox.paddingTop;
-		delete listItemWithCheckbox.paddingBottom;
-		delete listItemWithCheckbox.paddingLeft;
 
 		const listItemText: TextStyle = {
 			flex: 1,
@@ -63,7 +70,8 @@ const useStyles = (themeId: number) => {
 			listItem,
 			listItemText,
 			selectionWrapper,
-			listItemWithCheckbox,
+			listItemPressableWithoutCheckbox,
+			listItemPressableWithCheckbox,
 			listItemTextWithCheckbox,
 			selectionWrapperSelected,
 			checkboxStyle: {
@@ -77,10 +85,6 @@ const useStyles = (themeId: number) => {
 				opacity: 0.4,
 			},
 			uncheckedOpacityStyle: { },
-			pressable: {
-				flexGrow: 1,
-				alignSelf: 'stretch',
-			},
 		});
 	}, [themeId]);
 };
@@ -137,7 +141,6 @@ const NoteItemComponent: React.FC<Props> = memo(props => {
 	const checkboxChecked = !!Number(note.todo_completed);
 
 	const checkboxStyle = styles.checkboxStyle;
-	const listItemStyle = isTodo ? styles.listItemWithCheckbox : styles.listItem;
 	const listItemTextStyle = isTodo ? styles.listItemTextWithCheckbox : styles.listItemText;
 	const opacityStyle = isTodo && checkboxChecked ? styles.checkedOpacityStyle : styles.uncheckedOpacityStyle;
 	const isSelected = props.noteSelectionEnabled && props.selectedNoteIds.includes(note.id);
@@ -156,7 +159,7 @@ const NoteItemComponent: React.FC<Props> = memo(props => {
 	/> : null;
 
 	const pressableProps = {
-		style: styles.pressable,
+		style: isTodo ? styles.listItemPressableWithCheckbox : styles.listItemPressableWithoutCheckbox,
 		accessibilityHint: props.noteSelectionEnabled ? '' : _('Opens note'),
 		'aria-pressed': props.noteSelectionEnabled ? isSelected : undefined,
 		accessibilityState: { selected: isSelected },
@@ -165,7 +168,7 @@ const NoteItemComponent: React.FC<Props> = memo(props => {
 	return (
 		<MultiTouchableOpacity
 			containerProps={{
-				style: [selectionWrapperStyle, opacityStyle, listItemStyle],
+				style: [selectionWrapperStyle, opacityStyle, styles.listItem],
 			}}
 			pressableProps={pressableProps}
 			onPress={onPress}
