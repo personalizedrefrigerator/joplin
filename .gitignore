@@ -1001,6 +1001,7 @@ packages/lib/commands/renderMarkup.test.js
 packages/lib/commands/renderMarkup.js
 packages/lib/commands/showEditorPlugin.js
 packages/lib/commands/synchronize.js
+packages/lib/commands/toggleAllFolders.test.js
 packages/lib/commands/toggleAllFolders.js
 packages/lib/commands/toggleEditorPlugin.js
 packages/lib/components/EncryptionConfigScreen/utils.test.js
