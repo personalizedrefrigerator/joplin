@@ -23,15 +23,11 @@ interface CollapseExpandAllButtonProps {
 
 const CollapseExpandAllButton = (props: CollapseExpandAllButtonProps) => {
 	const icon = props.allFoldersCollapsed ? 'far fa-caret-square-right' : 'far fa-caret-square-down';
-	const title = props.allFoldersCollapsed ? _('Expand all notebooks') : _('Collapse all notebooks');
+	const label = props.allFoldersCollapsed ? _('Expand all notebooks') : _('Collapse all notebooks');
 
-	return <button
-		onClick={() => onToggleAllFolders(props.allFoldersCollapsed)}
-		className='sidebar-header-button -collapseall'
-		title={title}
-	>
+	return <button onClick={() => onToggleAllFolders(props.allFoldersCollapsed)} className='sidebar-header-button -collapseall'>
 		<i
-			aria-label={title}
+			aria-label={label}
 			role='img'
 			className={icon}
 		/>
