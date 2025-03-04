@@ -2,6 +2,7 @@ import * as React from 'react';
 import { RefObject, useCallback, useMemo, useRef } from 'react';
 import { GestureResponderEvent, Modal, ModalProps, ScrollView, StyleSheet, View, ViewStyle, useWindowDimensions } from 'react-native';
 import { hasNotch } from 'react-native-device-info';
+import ModalContent from './accessibility/FocusControlProvider/ModalContent';
 
 interface ModalElementProps extends ModalProps {
 	children: React.ReactNode;
@@ -72,6 +73,7 @@ const ModalElement: React.FC<ModalElementProps> = ({
 	containerStyle,
 	backgroundColor,
 	scrollOverflow,
+	visible,
 	...modalProps
 }) => {
 	const styles = useStyles(scrollOverflow, backgroundColor);
@@ -98,14 +100,17 @@ const ModalElement: React.FC<ModalElementProps> = ({
 	return (
 		<Modal
 			supportedOrientations={['portrait', 'portrait-upside-down', 'landscape', 'landscape-left', 'landscape-right']}
+			visible={visible}
 			{...modalProps}
 		>
-			{scrollOverflow ? (
-				<ScrollView
-					style={styles.modalScrollView}
-					contentContainerStyle={styles.modalScrollViewContent}
-				>{contentAndBackdrop}</ScrollView>
-			) : contentAndBackdrop}
+			<ModalContent visible={visible}>
+				{scrollOverflow ? (
+					<ScrollView
+						style={styles.modalScrollView}
+						contentContainerStyle={styles.modalScrollViewContent}
+					>{contentAndBackdrop}</ScrollView>
+				) : contentAndBackdrop}
+			</ModalContent>
 		</Modal>
 	);
 };

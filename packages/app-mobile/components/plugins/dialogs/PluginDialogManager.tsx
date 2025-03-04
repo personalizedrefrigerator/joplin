@@ -7,6 +7,7 @@ import PluginService from '@joplin/lib/services/plugins/PluginService';
 import WebviewController, { ContainerType } from '@joplin/lib/services/plugins/WebviewController';
 import useViewInfos from './hooks/useViewInfos';
 import PluginPanelViewer from './PluginPanelViewer';
+import ModalContent from '../../accessibility/FocusControlProvider/ModalContent';
 
 interface Props {
 	themeId: number;
@@ -40,12 +41,14 @@ const PluginDialogManager: React.FC<Props> = props => {
 					visible={true}
 					onDismiss={() => dismissDialog(viewInfo)}
 				>
-					<PluginDialogWebView
-						viewInfo={viewInfo}
-						themeId={props.themeId}
-						pluginStates={props.pluginStates}
-						pluginHtmlContents={props.pluginHtmlContents}
-					/>
+					<ModalContent visible={true}>
+						<PluginDialogWebView
+							viewInfo={viewInfo}
+							themeId={props.themeId}
+							pluginStates={props.pluginStates}
+							pluginHtmlContents={props.pluginHtmlContents}
+						/>
+					</ModalContent>
 				</Modal>
 			</Portal>,
 		);

@@ -5,6 +5,7 @@ import { themeStyle } from '../global-style';
 import { Menu, MenuOption as MenuOptionComponent, MenuOptions, MenuTrigger } from 'react-native-popup-menu';
 import AccessibleView from '../accessibility/AccessibleView';
 import debounce from '../../utils/debounce';
+import ModalContent from '../accessibility/FocusControlProvider/ModalContent';
 
 interface MenuOptionDivider {
 	isDivider: true;
@@ -105,23 +106,28 @@ const MenuComponent: React.FC<Props> = props => {
 		}
 	}
 
+	const [open, setOpen] = useState(false);
+
 	const onMenuItemSelect = useCallback((value: unknown) => {
 		if (typeof value === 'function') {
 			value();
 		}
 		setRefocusCounter(undefined);
+		setOpen(false);
 	}, []);
 
 	// debounce: If the menu is focused during its transition animation, it briefly
 	// appears to be in the wrong place. As such, add a brief delay before focusing.
 	const onMenuOpen = useMemo(() => debounce(() => {
 		setRefocusCounter(counter => (counter ?? 0) + 1);
+		setOpen(true);
 	}, 200), []);
 
 	// Resetting the refocus counter to undefined causes the menu to not be focused immediately
 	// after opening.
 	const onMenuClose = useCallback(() => {
 		setRefocusCounter(undefined);
+		setOpen(false);
 	}, []);
 
 	return (
@@ -135,12 +141,12 @@ const MenuComponent: React.FC<Props> = props => {
 				{props.children}
 			</MenuTrigger>
 			<MenuOptions>
-				<ScrollView
-					style={styles.menuContentScroller}
-					aria-modal={true}
-					accessibilityViewIsModal={true}
-					testID={`menu-content-${refocusCounter ? 'refocusing' : ''}`}
-				>{menuOptionComponents}</ScrollView>
+				<ModalContent visible={open}>
+					<ScrollView
+						style={styles.menuContentScroller}
+						testID={`menu-content-${refocusCounter ? 'refocusing' : ''}`}
+					>{menuOptionComponents}</ScrollView>
+				</ModalContent>
 			</MenuOptions>
 		</Menu>
 	);

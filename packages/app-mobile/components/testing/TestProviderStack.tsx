@@ -4,6 +4,7 @@ import { MenuProvider } from 'react-native-popup-menu';
 import { Provider } from 'react-redux';
 import { Store } from 'redux';
 import { AppState } from '../../utils/types';
+import FocusControlProvider from '../accessibility/FocusControlProvider/FocusControlProvider';
 
 interface Props {
 	store: Store<AppState>;
@@ -12,11 +13,13 @@ interface Props {
 
 const TestProviderStack: React.FC<Props> = props => {
 	return <Provider store={props.store}>
-		<MenuProvider>
-			<PaperProvider>
-				{props.children}
-			</PaperProvider>
-		</MenuProvider>
+		<FocusControlProvider>
+			<MenuProvider>
+				<PaperProvider>
+					{props.children}
+				</PaperProvider>
+			</MenuProvider>
+		</FocusControlProvider>
 	</Provider>;
 };
 

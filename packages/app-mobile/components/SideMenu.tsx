@@ -271,6 +271,7 @@ const SideMenuComponent: React.FC<Props> = props => {
 		<AccessibleView
 			inert={!open}
 			style={styles.menuWrapper}
+			testID='menu-wrapper'
 		>
 			<AccessibleView
 				// Auto-focuses an empty view at the beginning of the sidemenu -- if we instead
@@ -287,6 +288,7 @@ const SideMenuComponent: React.FC<Props> = props => {
 		<AccessibleView
 			inert={open}
 			style={styles.contentWrapper}
+			testID='content-wrapper'
 		>
 			<AccessibleView refocusCounter={open ? 1 : undefined} />
 			{props.children}
