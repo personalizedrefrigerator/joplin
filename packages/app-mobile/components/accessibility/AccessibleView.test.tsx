@@ -1,0 +1,67 @@
+import * as React from 'react';
+import FocusControl from './FocusControl/FocusControl';
+import { render } from '@testing-library/react-native';
+import AccessibleView from './AccessibleView';
+import { AccessibilityInfo } from 'react-native';
+import ModalContent from './FocusControl/ModalContent';
+
+interface TestContentWrapperProps {
+	mainContent: React.ReactNode;
+	dialogs: React.ReactNode;
+}
+
+const TestContentWrapper: React.FC<TestContentWrapperProps> = props => {
+	return <FocusControl.Provider>
+		{props.dialogs}
+		<FocusControl.MainAppContent>
+			{props.mainContent}
+		</FocusControl.MainAppContent>
+	</FocusControl.Provider>;
+};
+
+jest.mock('react-native', () => {
+	const ReactNative = jest.requireActual('react-native');
+	ReactNative.AccessibilityInfo.setAccessibilityFocus = jest.fn();
+	return ReactNative;
+});
+
+describe('AccessibleView', () => {
+	test('should wait for the currently-open dialog to dismiss before applying focus requests', () => {
+		const setFocusMock = AccessibilityInfo.setAccessibilityFocus as jest.Mock;
+		setFocusMock.mockClear();
+
+		interface TestContentOptions {
+			dialogVisible: boolean;
+			refocusCounter: undefined|number;
+		}
+		const renderTestContent = ({ dialogVisible, refocusCounter }: TestContentOptions) => {
+			const mainContent = <AccessibleView refocusCounter={refocusCounter}/>;
+			const visibleDialog = <ModalContent visible={dialogVisible}>{null}</ModalContent>;
+			return <TestContentWrapper
+				mainContent={mainContent}
+				dialogs={visibleDialog}
+			/>;
+		};
+
+		render(renderTestContent({
+			refocusCounter: undefined,
+			dialogVisible: true,
+		}));
+
+		// Increasing the refocusCounter for a background view while a dialog is visible
+		// should not try to focus the background view.
+		render(renderTestContent({
+			refocusCounter: 1,
+			dialogVisible: true,
+		}));
+		expect(setFocusMock).not.toHaveBeenCalled();
+
+		// Keeping the same refocus counter, but dismissing the dialog should focus
+		// the test view.
+		render(renderTestContent({
+			refocusCounter: 1,
+			dialogVisible: false,
+		}));
+		expect(setFocusMock).toHaveBeenCalled();
+	});
+});

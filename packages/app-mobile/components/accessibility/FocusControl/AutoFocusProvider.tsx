@@ -42,12 +42,14 @@ const AutoFocusProvider: React.FC<Props> = ({ allowAutoFocus, children }) => {
 		});
 	}, []);
 
-	const autoFocusControl = useMemo(() => {
+	const autoFocusControl = useMemo((): AutoFocusControl => {
 		return {
 			canAutoFocus: () => {
 				return allowAutoFocusRef.current;
 			},
-			setAutofocusCallback,
+			setAutofocusCallback: (callback) => {
+				setAutofocusCallback(() => callback);
+			},
 			removeAutofocusCallback,
 		};
 	}, [removeAutofocusCallback, setAutofocusCallback]);
