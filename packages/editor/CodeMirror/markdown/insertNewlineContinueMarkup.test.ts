@@ -2,7 +2,7 @@ import { EditorSelection } from '@codemirror/state';
 import createTestEditor from '../testUtil/createTestEditor';
 import pressReleaseKey from '../testUtil/pressReleaseKey';
 import { keymap } from '@codemirror/view';
-import { insertNewlineContinueMarkup } from '@codemirror/lang-markdown';
+import insertNewlineContinueMarkup from './insertNewlineContinueMarkup';
 
 describe('insertNewlineContinueMarkup', () => {
 	jest.retryTimes(2);
@@ -23,12 +23,10 @@ describe('insertNewlineContinueMarkup', () => {
 			// Should continue bulleted lists separated by blank lines
 			before: [
 				'- Testing',
-				'- Testing',
 				'',
 				'- Test',
 			],
 			afterEnterPress: [
-				'- Testing',
 				'- Testing',
 				'',
 				// Note: This is our reason for forking the indentation logic. See
