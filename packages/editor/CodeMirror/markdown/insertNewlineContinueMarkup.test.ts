@@ -21,7 +21,6 @@ describe('insertNewlineContinueMarkup', () => {
 		},
 		{
 			// Should continue bulleted lists separated by blank lines
-			// Note: This is our reason for forking the indentation logic:
 			before: [
 				'- Testing',
 				'- Testing',
@@ -32,7 +31,17 @@ describe('insertNewlineContinueMarkup', () => {
 				'- Testing',
 				'- Testing',
 				'',
+				// Note: This is our reason for forking the indentation logic. See
+				// https://github.com/laurent22/joplin/issues/10226
 				'- Test',
+				'- ',
+			],
+			afterEnterPressTwice: [
+				'- Testing',
+				'- Testing',
+				'',
+				'- Test',
+				'',
 				'- ',
 			],
 		},
