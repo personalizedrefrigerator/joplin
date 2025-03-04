@@ -150,7 +150,7 @@ jobs:
       matrix:
         # Do not use unbuntu-latest because it causes `The operation was canceled` failures:
         # https://github.com/actions/runner-images/issues/6709
-        os: [ubuntu-20.04]
+        os: [ubuntu-22.04]
     steps:
 
       - name: Install Docker Engine
