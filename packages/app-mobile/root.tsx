@@ -1376,8 +1376,8 @@ class AppComponent extends React.Component {
 					},
 				}}>
 					<DialogManager themeId={this.props.themeId}>
-						<MenuProvider>
-							<DialogBlocksAccessibilityFocus>
+						<MenuProvider style={{ flex: 1 }}>
+							<DialogBlocksAccessibilityFocus style={{ flex: 1 }}>
 								{mainContent}
 							</DialogBlocksAccessibilityFocus>
 						</MenuProvider>
