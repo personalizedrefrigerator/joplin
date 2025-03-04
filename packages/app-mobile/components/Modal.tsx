@@ -2,7 +2,7 @@ import * as React from 'react';
 import { RefObject, useCallback, useMemo, useRef } from 'react';
 import { GestureResponderEvent, Modal, ModalProps, ScrollView, StyleSheet, View, ViewStyle, useWindowDimensions } from 'react-native';
 import { hasNotch } from 'react-native-device-info';
-import ModalContent from './accessibility/FocusControlProvider/ModalContent';
+import FocusControl from './accessibility/FocusControl/FocusControl';
 
 interface ModalElementProps extends ModalProps {
 	children: React.ReactNode;
@@ -103,14 +103,14 @@ const ModalElement: React.FC<ModalElementProps> = ({
 			visible={visible}
 			{...modalProps}
 		>
-			<ModalContent visible={visible}>
+			<FocusControl.ModalContent visible={visible}>
 				{scrollOverflow ? (
 					<ScrollView
 						style={styles.modalScrollView}
 						contentContainerStyle={styles.modalScrollViewContent}
 					>{contentAndBackdrop}</ScrollView>
 				) : contentAndBackdrop}
-			</ModalContent>
+			</FocusControl.ModalContent>
 		</Modal>
 	);
 };

@@ -5,7 +5,7 @@ import { themeStyle } from '../global-style';
 import { Menu, MenuOption as MenuOptionComponent, MenuOptions, MenuTrigger } from 'react-native-popup-menu';
 import AccessibleView from '../accessibility/AccessibleView';
 import debounce from '../../utils/debounce';
-import ModalContent from '../accessibility/FocusControlProvider/ModalContent';
+import FocusControl from '../accessibility/FocusControl/FocusControl';
 
 interface MenuOptionDivider {
 	isDivider: true;
@@ -148,13 +148,13 @@ const MenuComponent: React.FC<Props> = props => {
 				{props.children}
 			</MenuTrigger>
 			<MenuOptions>
-				<ModalContent visible={open}>
+				<FocusControl.ModalContent visible={open}>
 					<ScrollView
 						style={styles.menuContentScroller}
 						testID={`menu-content-${refocusCounter ? 'refocusing' : ''}`}
 						onAccessibilityEscape={onRequestMenuClose}
 					>{menuOptionComponents}</ScrollView>
-				</ModalContent>
+				</FocusControl.ModalContent>
 			</MenuOptions>
 		</Menu>
 	);

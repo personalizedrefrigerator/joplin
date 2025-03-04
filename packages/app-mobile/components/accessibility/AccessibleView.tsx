@@ -3,7 +3,7 @@ import Logger from '@joplin/utils/Logger';
 import * as React from 'react';
 import { useContext, useEffect, useRef, useState } from 'react';
 import { AccessibilityInfo, findNodeHandle, Platform, UIManager, View, ViewProps } from 'react-native';
-import { AutoFocusContext } from './FocusControlProvider/AutoFocusProvider';
+import { AutoFocusContext } from './FocusControl/AutoFocusProvider';
 
 const logger = Logger.create('AccessibleView');
 

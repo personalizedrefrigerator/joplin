@@ -140,8 +140,7 @@ import lockToSingleInstance from './utils/lockToSingleInstance';
 import { AppState } from './utils/types';
 import { getDisplayParentId } from '@joplin/lib/services/trash';
 import PluginNotification from './components/plugins/PluginNotification';
-import DialogBlocksAccessibilityFocus from './components/accessibility/FocusControlProvider/DialogBlocksAccessibilityFocus';
-import FocusControlProvider from './components/accessibility/FocusControlProvider/FocusControlProvider';
+import FocusControl from './components/accessibility/FocusControl/FocusControl';
 
 const logger = Logger.create('root');
 
@@ -1314,7 +1313,7 @@ class AppComponent extends React.Component {
 					disableGestures={disableSideMenuGestures}
 				>
 					<StatusBar barStyle={statusBarStyle} />
-					<DialogBlocksAccessibilityFocus style={{ flex: 1, flexBasis: '100%' }}>
+					<View style={{ flex: 1, flexBasis: '100%' }}>
 						<SafeAreaView style={{ flex: 0, backgroundColor: theme.backgroundColor2 }}/>
 						<SafeAreaView style={{ flex: 1 }}>
 							<View style={{ flex: 1, backgroundColor: theme.backgroundColor }}>
@@ -1328,7 +1327,7 @@ class AppComponent extends React.Component {
 								sensorInfo={this.state.sensorInfo}
 							/> }
 						</SafeAreaView>
-					</DialogBlocksAccessibilityFocus>
+					</View>
 				</SideMenu>
 				<PluginRunnerWebView />
 				<PluginNotification/>
@@ -1340,7 +1339,7 @@ class AppComponent extends React.Component {
 
 		// Wrap everything in a PaperProvider -- this allows using components from react-native-paper
 		return (
-			<FocusControlProvider>
+			<FocusControl.Provider>
 				<PaperProvider theme={{
 					...paperTheme,
 					version: 3,
@@ -1377,13 +1376,13 @@ class AppComponent extends React.Component {
 				}}>
 					<DialogManager themeId={this.props.themeId}>
 						<MenuProvider style={{ flex: 1 }}>
-							<DialogBlocksAccessibilityFocus style={{ flex: 1 }}>
+							<FocusControl.MainAppContent style={{ flex: 1 }}>
 								{mainContent}
-							</DialogBlocksAccessibilityFocus>
+							</FocusControl.MainAppContent>
 						</MenuProvider>
 					</DialogManager>
 				</PaperProvider>
-			</FocusControlProvider>
+			</FocusControl.Provider>
 		);
 	}
 }

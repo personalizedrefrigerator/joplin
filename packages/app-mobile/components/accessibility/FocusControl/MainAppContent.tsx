@@ -12,7 +12,7 @@ interface Props {
 
 // A region that should not be accessibility focusable while a dialog
 // is open.
-const DialogBlocksAccessibilityFocus: React.FC<Props> = props => {
+const MainAppContent: React.FC<Props> = props => {
 	const { isDialogOpen } = useContext(FocusControlContext);
 	const blockFocus = isDialogOpen;
 
@@ -23,4 +23,4 @@ const DialogBlocksAccessibilityFocus: React.FC<Props> = props => {
 	</AccessibleView>;
 };
 
-export default DialogBlocksAccessibilityFocus;
+export default MainAppContent;
