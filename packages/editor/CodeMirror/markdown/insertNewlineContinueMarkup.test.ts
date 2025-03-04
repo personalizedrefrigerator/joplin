@@ -36,11 +36,15 @@ describe('insertNewlineContinueMarkup', () => {
 				'- Test',
 				'- ',
 			],
-			afterEnterPressTwice: [
+		},
+		{
+			// Should allow creating non-tight lists
+			before: [
 				'- Testing',
+				'- ',
+			],
+			afterEnterPress: [
 				'- Testing',
-				'',
-				'- Test',
 				'',
 				'- ',
 			],
