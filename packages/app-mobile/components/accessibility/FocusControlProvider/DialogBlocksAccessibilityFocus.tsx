@@ -3,6 +3,7 @@ import AccessibleView from '../AccessibleView';
 import { FocusControlContext } from './FocusControlProvider';
 import { useContext } from 'react';
 import { StyleProp, ViewStyle } from 'react-native';
+import AutoFocusProvider from './AutoFocusProvider';
 
 interface Props {
 	children: React.ReactNode;
@@ -13,8 +14,12 @@ interface Props {
 // is open.
 const DialogBlocksAccessibilityFocus: React.FC<Props> = props => {
 	const { isDialogOpen } = useContext(FocusControlContext);
-	return <AccessibleView inert={isDialogOpen} style={props.style}>
-		{props.children}
+	const blockFocus = isDialogOpen;
+
+	return <AccessibleView inert={blockFocus} style={props.style}>
+		<AutoFocusProvider allowAutoFocus={!blockFocus}>
+			{props.children}
+		</AutoFocusProvider>
 	</AccessibleView>;
 };
 

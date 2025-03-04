@@ -686,6 +686,7 @@ packages/app-mobile/components/TextInput.js
 packages/app-mobile/components/ToggleSpaceButton.js
 packages/app-mobile/components/accessibility/AccessibleModalMenu.js
 packages/app-mobile/components/accessibility/AccessibleView.js
+packages/app-mobile/components/accessibility/FocusControlProvider/AutoFocusProvider.js
 packages/app-mobile/components/accessibility/FocusControlProvider/DialogBlocksAccessibilityFocus.js
 packages/app-mobile/components/accessibility/FocusControlProvider/FocusControlProvider.js
 packages/app-mobile/components/accessibility/FocusControlProvider/ModalContent.js

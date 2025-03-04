@@ -82,18 +82,19 @@ const MenuComponent: React.FC<Props> = props => {
 	// When undefined/null: Don't auto-focus anything.
 	const [refocusCounter, setRefocusCounter] = useState<number|undefined>(undefined);
 
-	let key = 0;
+	let keyCounter = 0;
 	let isFirst = true;
 	for (const option of props.options) {
 		if (option.isDivider === true) {
 			menuOptionComponents.push(
-				<View key={`menuOption_divider_${key++}`} style={styles.divider} />,
+				<View key={`menuOption_divider_${keyCounter++}`} style={styles.divider} />,
 			);
 		} else {
 			const canAutoFocus = isFirst;
+			const key = `menuOption_${option.key ?? keyCounter++}`;
 			menuOptionComponents.push(
-				<MenuOptionComponent value={option.onPress} key={`menuOption_${option.key ?? key++}`} style={styles.contextMenuItem} disabled={!!option.disabled}>
-					<AccessibleView refocusCounter={canAutoFocus ? refocusCounter : undefined}>
+				<MenuOptionComponent value={option.onPress} key={key} style={styles.contextMenuItem} disabled={!!option.disabled}>
+					<AccessibleView refocusCounter={canAutoFocus ? refocusCounter : undefined} testID={key}>
 						<Text
 							style={option.disabled ? styles.contextMenuItemTextDisabled : styles.contextMenuItemText}
 							disabled={!!option.disabled}

@@ -278,6 +278,7 @@ const SideMenuComponent: React.FC<Props> = props => {
 				// focus the container view, VoiceOver fails to focus to any components within
 				// the sidebar.
 				refocusCounter={!open ? 1 : undefined}
+				testID='sidemenu-menu-focus-region'
 			/>
 
 			{props.menu}
@@ -290,7 +291,7 @@ const SideMenuComponent: React.FC<Props> = props => {
 			style={styles.contentWrapper}
 			testID='content-wrapper'
 		>
-			<AccessibleView refocusCounter={open ? 1 : undefined} />
+			<AccessibleView refocusCounter={open ? 1 : undefined} testID='sidemenu-content-focus-region' />
 			{props.children}
 		</AccessibleView>
 	);
