@@ -49,3 +49,13 @@ The mobile app is divided into several screens. These are the main ones:
 
 By default, the sidebar is hidden and the notes list is visible. The configuration screen can be opened using a button in the sidebar.
 
+### Creating a new note
+
+An "add new" button is located near the end of the focus order in these cases:
+1. The sidebar is expanded, or
+2. The notes list screen is visible for an editable notebook.
+
+Clicking "add new" opens a menu with "new note" and "new to-do" menu items. These items are be located just before the toggle in the focus order.
+
+See [to-dos](./to-dos.md) for information about how notes and to-dos are different.
+
