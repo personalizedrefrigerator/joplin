@@ -5,8 +5,8 @@ import { ModalState } from './types';
 export interface FocusControl {
 	setModalState(dialogId: string, state: ModalState): void;
 
-	isModalOpen: boolean;
-	isModalClosing: boolean;
+	hasOpenModal: boolean;
+	hasClosingModal: boolean;
 }
 
 export const FocusControlContext = createContext<FocusControl|null>(null);
@@ -32,16 +32,16 @@ const FocusControlProvider: React.FC<Props> = props => {
 	}, []);
 
 	const modalStateValues = Object.values(modalStates);
-	const hasOpenDialog = modalStateValues.includes(ModalState.Open);
-	const hasClosingDialog = modalStateValues.includes(ModalState.Closing);
+	const hasOpenModal = modalStateValues.includes(ModalState.Open);
+	const hasClosingModal = modalStateValues.includes(ModalState.Closing);
 
 	const focusControl = useMemo((): FocusControl => {
 		return {
-			isModalOpen: hasOpenDialog,
-			isModalClosing: hasClosingDialog,
+			hasOpenModal: hasOpenModal,
+			hasClosingModal: hasClosingModal,
 			setModalState: setModalOpen,
 		};
-	}, [hasOpenDialog, hasClosingDialog, setModalOpen]);
+	}, [hasOpenModal, hasClosingModal, setModalOpen]);
 
 	return <FocusControlContext.Provider value={focusControl}>
 		{props.children}
