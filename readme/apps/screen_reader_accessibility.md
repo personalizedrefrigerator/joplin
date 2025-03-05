@@ -1,4 +1,4 @@
-# Keyboard interface
+# Screen reader accessibility
 
 This document includes tips for using Joplin from either:
 - a keyboard-only device (desktop)
