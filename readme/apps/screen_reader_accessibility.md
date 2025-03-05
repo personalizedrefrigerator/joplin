@@ -26,6 +26,7 @@ Within the **main content**, Joplin has:
 Screen readers usually support jumping between these different regions. Here's the relevant documentation for some of the more popular screen readers:
 - [Orca](https://help.gnome.org/users/orca/stable/howto_structural_navigation.html.en) (Linux screen reader)
 - [NVDA](https://download.nvaccess.org/documentation/en/userGuide.html#SingleLetterNavigation)
+- [Voice Over](https://www.apple.com/voiceover/info/guide/_1134.html#mchlp2719)
 
 ### Finding notes, tags, and notebooks
 
