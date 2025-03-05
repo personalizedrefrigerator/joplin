@@ -1313,7 +1313,7 @@ class AppComponent extends React.Component {
 					disableGestures={disableSideMenuGestures}
 				>
 					<StatusBar barStyle={statusBarStyle} />
-					<View style={{ flex: 1, flexBasis: '100%' }}>
+					<View style={{ flexGrow: 1, flexShrink: 1, flexBasis: '100%' }}>
 						<SafeAreaView style={{ flex: 0, backgroundColor: theme.backgroundColor2 }}/>
 						<SafeAreaView style={{ flex: 1 }}>
 							<View style={{ flex: 1, backgroundColor: theme.backgroundColor }}>
