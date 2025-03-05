@@ -5,6 +5,7 @@ import { hasNotch } from 'react-native-device-info';
 import FocusControl from './accessibility/FocusControl/FocusControl';
 import { msleep, Second } from '@joplin/utils/time';
 import useAsyncEffect from '@joplin/lib/hooks/useAsyncEffect';
+import { ModalState } from './accessibility/FocusControl/types';
 
 interface ModalElementProps extends ModalProps {
 	children: React.ReactNode;
@@ -70,7 +71,7 @@ const useBackgroundTouchListeners = (onRequestClose: (event: GestureResponderEve
 	return { onShouldBackgroundCaptureTouch, onBackgroundTouchFinished };
 };
 
-const useControlsFocus = (containerComponent: View|null) => {
+const useModalStatus = (containerComponent: View|null, visible: boolean) => {
 	const contentMounted = !!containerComponent;
 	const [controlsFocus, setControlsFocus] = useState(false);
 	useAsyncEffect(async (event) => {
@@ -90,7 +91,14 @@ const useControlsFocus = (containerComponent: View|null) => {
 			}
 		}
 	}, [contentMounted]);
-	return controlsFocus;
+
+	let modalStatus = ModalState.Closed;
+	if (controlsFocus) {
+		modalStatus = visible ? ModalState.Open : ModalState.Closing;
+	} else if (visible) {
+		modalStatus = ModalState.Open;
+	}
+	return modalStatus;
 };
 
 const ModalElement: React.FC<ModalElementProps> = ({
@@ -112,7 +120,7 @@ const ModalElement: React.FC<ModalElementProps> = ({
 
 
 	const [containerComponent, setContainerComponent] = useState<View|null>(null);
-	const modalControlsFocus = useControlsFocus(containerComponent);
+	const modalStatus = useModalStatus(containerComponent, modalProps.visible);
 
 	const containerRef = useRef<View|null>(null);
 	containerRef.current = containerComponent;
@@ -126,7 +134,7 @@ const ModalElement: React.FC<ModalElementProps> = ({
 	>{content}</View>;
 
 	return (
-		<FocusControl.ModalWrapper visible={modalControlsFocus}>
+		<FocusControl.ModalWrapper state={modalStatus}>
 			<Modal
 				// supportedOrientations: On iOS, this allows the dialog to be shown in non-portrait orientations.
 				supportedOrientations={['portrait', 'portrait-upside-down', 'landscape', 'landscape-left', 'landscape-right']}

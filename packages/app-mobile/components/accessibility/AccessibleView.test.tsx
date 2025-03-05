@@ -4,6 +4,7 @@ import { render } from '@testing-library/react-native';
 import AccessibleView from './AccessibleView';
 import { AccessibilityInfo } from 'react-native';
 import ModalWrapper from './FocusControl/ModalWrapper';
+import { ModalState } from './FocusControl/types';
 
 interface TestContentWrapperProps {
 	mainContent: React.ReactNode;
@@ -31,12 +32,12 @@ describe('AccessibleView', () => {
 		setFocusMock.mockClear();
 
 		interface TestContentOptions {
-			dialogVisible: boolean;
+			modalState: ModalState;
 			refocusCounter: undefined|number;
 		}
-		const renderTestContent = ({ dialogVisible, refocusCounter }: TestContentOptions) => {
+		const renderTestContent = ({ modalState, refocusCounter }: TestContentOptions) => {
 			const mainContent = <AccessibleView refocusCounter={refocusCounter}/>;
-			const visibleDialog = <ModalWrapper visible={dialogVisible}>{null}</ModalWrapper>;
+			const visibleDialog = <ModalWrapper state={modalState}>{null}</ModalWrapper>;
 			return <TestContentWrapper
 				mainContent={mainContent}
 				dialogs={visibleDialog}
@@ -45,14 +46,21 @@ describe('AccessibleView', () => {
 
 		render(renderTestContent({
 			refocusCounter: undefined,
-			dialogVisible: true,
+			modalState: ModalState.Open,
 		}));
 
 		// Increasing the refocusCounter for a background view while a dialog is visible
 		// should not try to focus the background view.
 		render(renderTestContent({
 			refocusCounter: 1,
-			dialogVisible: true,
+			modalState: ModalState.Open,
+		}));
+		expect(setFocusMock).not.toHaveBeenCalled();
+
+		// Focus should not be set until done closing
+		render(renderTestContent({
+			refocusCounter: 1,
+			modalState: ModalState.Closing,
 		}));
 		expect(setFocusMock).not.toHaveBeenCalled();
 
@@ -60,7 +68,7 @@ describe('AccessibleView', () => {
 		// the test view.
 		render(renderTestContent({
 			refocusCounter: 1,
-			dialogVisible: false,
+			modalState: ModalState.Closed,
 		}));
 		expect(setFocusMock).toHaveBeenCalled();
 	});

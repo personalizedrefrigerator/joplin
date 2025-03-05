@@ -6,6 +6,7 @@ import { Menu, MenuOption as MenuOptionComponent, MenuOptions, MenuTrigger } fro
 import AccessibleView from '../accessibility/AccessibleView';
 import debounce from '../../utils/debounce';
 import FocusControl from '../accessibility/FocusControl/FocusControl';
+import { ModalState } from '../accessibility/FocusControl/types';
 
 interface MenuOptionDivider {
 	isDivider: true;
@@ -148,7 +149,7 @@ const MenuComponent: React.FC<Props> = props => {
 				{props.children}
 			</MenuTrigger>
 			<MenuOptions>
-				<FocusControl.ModalWrapper visible={open}>
+				<FocusControl.ModalWrapper state={open ? ModalState.Open : ModalState.Closed}>
 					<ScrollView
 						style={styles.menuContentScroller}
 						testID={`menu-content-${refocusCounter ? 'refocusing' : ''}`}
