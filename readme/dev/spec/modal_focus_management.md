@@ -10,7 +10,7 @@ On mobile, the `<AccessibleView>` component allows moving focus to a component o
 ```jsx
 <AccessibleView inert={true}>{children}</AccessibleView>
 ```
-prevents `children` from being focused using accessibility tools in a cross-platform way.
+prevents `children` from being focused using accessibility tools in a cross-platform way. The `inert` prop is named after the [HTML `inert` attribute](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/inert).
 
 Similarly, the following logic auto-focuses `children` when the view first renders:
 ```jsx
