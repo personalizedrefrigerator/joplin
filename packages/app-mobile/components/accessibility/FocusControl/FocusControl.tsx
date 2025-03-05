@@ -1,10 +1,10 @@
 import FocusControlProvider from './FocusControlProvider';
 import MainAppContent from './MainAppContent';
-import ModalContent from './ModalContent';
+import ModalWrapper from './ModalWrapper';
 
 const FocusControl = {
 	Provider: FocusControlProvider,
-	ModalContent,
+	ModalWrapper,
 	MainAppContent,
 };
 

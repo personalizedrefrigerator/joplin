@@ -41,14 +41,14 @@ const PluginDialogManager: React.FC<Props> = props => {
 					visible={true}
 					onDismiss={() => dismissDialog(viewInfo)}
 				>
-					<FocusControl.ModalContent visible={true}>
+					<FocusControl.ModalWrapper visible={true}>
 						<PluginDialogWebView
 							viewInfo={viewInfo}
 							themeId={props.themeId}
 							pluginStates={props.pluginStates}
 							pluginHtmlContents={props.pluginHtmlContents}
 						/>
-					</FocusControl.ModalContent>
+					</FocusControl.ModalWrapper>
 				</Modal>
 			</Portal>,
 		);

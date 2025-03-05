@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { createContext, useCallback, useMemo, useState } from 'react';
+import { createContext, useCallback, useMemo, useRef, useState } from 'react';
 
 export interface FocusControl {
 	setDialogOpen(dialogId: string, open: boolean): void;
@@ -14,15 +14,22 @@ interface Props {
 
 const FocusControlProvider: React.FC<Props> = props => {
 	const [openDialogs, setOpenDialogs] = useState<string[]>([]);
+	const openDialogsRef = useRef(openDialogs);
+	openDialogsRef.current = openDialogs;
 
 	const setDialogOpen = useCallback((dialogId: string, open: boolean) => {
-		setOpenDialogs(openDialogs => {
-			openDialogs = openDialogs.filter(id => id !== dialogId);
-			if (open) {
-				openDialogs.push(dialogId);
-			}
-			return openDialogs;
-		});
+		const lastOpen = openDialogsRef.current.includes(dialogId);
+
+		if (lastOpen !== open) {
+			setOpenDialogs(openDialogs => {
+				openDialogs = openDialogs.filter(id => id !== dialogId);
+				if (open) {
+					openDialogs = [...openDialogs, dialogId];
+				}
+
+				return openDialogs;
+			});
+		}
 	}, []);
 
 	const hasOpenDialog = openDialogs.length > 0;

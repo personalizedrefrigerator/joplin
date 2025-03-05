@@ -3,7 +3,7 @@ import FocusControl from './FocusControl/FocusControl';
 import { render } from '@testing-library/react-native';
 import AccessibleView from './AccessibleView';
 import { AccessibilityInfo } from 'react-native';
-import ModalContent from './FocusControl/ModalContent';
+import ModalWrapper from './FocusControl/ModalWrapper';
 
 interface TestContentWrapperProps {
 	mainContent: React.ReactNode;
@@ -36,7 +36,7 @@ describe('AccessibleView', () => {
 		}
 		const renderTestContent = ({ dialogVisible, refocusCounter }: TestContentOptions) => {
 			const mainContent = <AccessibleView refocusCounter={refocusCounter}/>;
-			const visibleDialog = <ModalContent visible={dialogVisible}>{null}</ModalContent>;
+			const visibleDialog = <ModalWrapper visible={dialogVisible}>{null}</ModalWrapper>;
 			return <TestContentWrapper
 				mainContent={mainContent}
 				dialogs={visibleDialog}

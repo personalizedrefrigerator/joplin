@@ -148,13 +148,13 @@ const MenuComponent: React.FC<Props> = props => {
 				{props.children}
 			</MenuTrigger>
 			<MenuOptions>
-				<FocusControl.ModalContent visible={open}>
+				<FocusControl.ModalWrapper visible={open}>
 					<ScrollView
 						style={styles.menuContentScroller}
 						testID={`menu-content-${refocusCounter ? 'refocusing' : ''}`}
 						onAccessibilityEscape={onRequestMenuClose}
 					>{menuOptionComponents}</ScrollView>
-				</FocusControl.ModalContent>
+				</FocusControl.ModalWrapper>
 			</MenuOptions>
 		</Menu>
 	);

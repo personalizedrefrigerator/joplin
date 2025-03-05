@@ -4,30 +4,31 @@ import { FocusControlContext } from './FocusControlProvider';
 
 interface Props {
 	children: React.ReactNode;
+	// Should be true while the modal controls focus
 	visible: boolean;
 }
 
 // A wrapper component that notifies the focus handler that a modal-like component
 // is visible. Modals that capture focus should wrap their content in this component.
-const ModalContent: React.FC<Props> = props => {
-	const focusControl = useContext(FocusControlContext);
+const ModalWrapper: React.FC<Props> = props => {
+	const { setDialogOpen } = useContext(FocusControlContext);
 	const id = useId();
 	useEffect(() => {
-		if (!focusControl) {
+		if (!setDialogOpen) {
 			throw new Error('ModalContent components must have a FocusControlProvider as an ancestor. Is FocusControlProvider part of the provider stack?');
 		}
-		focusControl.setDialogOpen(id, props.visible);
-	}, [id, props.visible, focusControl]);
+		setDialogOpen(id, props.visible);
+	}, [id, props.visible, setDialogOpen]);
 
 	useEffect(() => {
 		return () => {
-			focusControl?.setDialogOpen(id, false);
+			setDialogOpen?.(id, false);
 		};
-	}, [id, focusControl]);
+	}, [id, setDialogOpen]);
 
 	return <>
 		{props.children}
 	</>;
 };
 
-export default ModalContent;
+export default ModalWrapper;
