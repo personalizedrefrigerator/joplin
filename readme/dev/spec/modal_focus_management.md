@@ -12,27 +12,28 @@ On mobile, the `<AccessibleView>` component allows moving focus to a component o
 ```
 prevents `children` from being focused using accessibility tools in a cross-platform way.
 
-Similarly, the following logic auto-focuses `children`:
+Similarly, the following logic auto-focuses `children` when the view first renders:
 ```jsx
 // Danger: This implicitly sets `accessible={true}`, which prevents
 // VoiceOver from focusing individual children in `children`.
 <AccessibleView refocusCounter={1}>{children}</AccessibleView>
 ```
-Don't use `refocusCounter={1}` on a view that wraps other views that should be individually focusable.
 
-Changing the `refocusCounter` prop will cause the `AccessibleView` to be focused again.
+Changing the `refocusCounter` prop causes the `AccessibleView` to be focused again.
 
 ### Native `Modal`s
 
-The `components/Modal` component wraps React Native's built-in `Modal` component. Among other things, this wrapper tracks whether `Modal`s are open, closing, or closed. This allows greater customization over where focus moves after modals are dismissed.
+React Native has a built-in `Modal` component.
 
-When a `Modal` is visible, it prevents the main app content from being focused. With the React Native built-in `Modal`, setting focus to items in the main app content while the `Modal` is open does nothing. On Android, this is also the case briefly after the `Modal` is dismissed.
+The `components/Modal` component wraps this built-in `Modal` component. Among other things, this wrapper tracks whether `Modal`s are open, closing, or closed. This allows greater customization over where focus moves after modals are dismissed.
 
-The custom `Modal` keeps track of the last `AccessibleView` in the main app content that was focused while the `Modal` was open. When the `Modal` is dismissed, it auto-focuses this `AccessibleView`. This is useful, for example, if an action in the `Modal` shows a banner with a header that should be auto-focused.
+When a `Modal` is visible, it prevents content behind it from being focused. With the React Native built-in `Modal`, setting focus to items behind a visible `Modal` does nothing. On Android, this is also the case briefly after the `Modal` is dismissed.
+
+The custom `Modal` works with `AccessibleView` to improve focus behavior. The `Modal` keeps track of the last `AccessibleView` that was focused while the `Modal` was open. When the `Modal` is dismissed, it auto-focuses this `AccessibleView`. This is useful, for example, if an button in a `Modal` shows UI that needs to be auto-focused when the `Modal` is dismissed. The custom `Modal` determines when the native `Modal` is dismissed, and could then move focus to the just-shown UI.
 
 ### Inaccessible 3rd-party modals
 
-Sometimes a library like [`react-native-paper`](https://github.com/callstack/react-native-paper/issues/3912) or [`react-native-popup-menu`](https://github.com/instea/react-native-popup-menu/issues/138) includes a component that should handle focus in a modal-like way, but doesn't. The components in the `FocusControl` object can often improve the focus management of these components.
+Sometimes a library includes a component that should handle focus in a modal-like way, but doesn't. Examples include [`react-native-paper`'s Modal](https://github.com/callstack/react-native-paper/issues/3912) and [`react-native-popup-menu`'s Menu](https://github.com/instea/react-native-popup-menu/issues/138). The components in the `FocusControl` object can often improve focus management for these libraries.
 
 `FocusControl` provides three components:
 - A `FocusControl.Provider` that sets up shared focus-related state.
@@ -40,7 +41,6 @@ Sometimes a library like [`react-native-paper`](https://github.com/callstack/rea
 - A `FocusControl.ModalWrapper` that should be used to wrap content within modals. This allows `FocusControl` to determine whether a modal is visible.
 
 When a modal is visible, the `MainAppContent` is wrapped with an `inert` `AccessibleView`, preventing it from receiving accessibility focus. This traps focus within the visible modal components.
-
 
 In general, prefer Joplin's `components/Modal` component to react-native-paper `Modal`s. As an example, however, a [`react-native-paper` `Modal`](https://callstack.github.io/react-native-paper/docs/components/Modal/) might be rendered with:
 ```tsx
