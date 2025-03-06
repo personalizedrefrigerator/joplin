@@ -16,6 +16,7 @@ import usePrevious from '@joplin/lib/hooks/usePrevious';
 import PlatformImplementation from '../../services/plugins/PlatformImplementation';
 import AccessibleView from '../accessibility/AccessibleView';
 import useOnDevPluginsUpdated from './utils/useOnDevPluginsUpdated';
+import loadBuiltInPlugins from './utils/loadBuiltInPlugins';
 
 const logger = Logger.create('PluginRunnerWebView');
 
@@ -65,6 +66,9 @@ const usePlugins = (
 			reloadAll: reloadAllRef.current,
 			cancelEvent: event,
 		});
+		if (!event.cancelled) {
+			await loadBuiltInPlugins(pluginSettings, event);
+		}
 
 		// A full reload, if it was necessary, has been completed.
 		if (!event.cancelled) {

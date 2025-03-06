@@ -40,7 +40,7 @@ const buildSharedConfig = (hotReload: boolean): webpack.Configuration => {
 	};
 
 	const resourceLoaderConfiguration = {
-		test: /\.(gif|jpe?g|png|svg|ttf)$/,
+		test: /\.(gif|jpe?g|png|svg|ttf|jpl)$/,
 		type: 'asset/resource',
 	};
 

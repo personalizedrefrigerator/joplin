@@ -76,3 +76,5 @@ utils/fs-driver-android.js
 android/app/build-*
 
 packageInfo.js
+
+/default-plugins/

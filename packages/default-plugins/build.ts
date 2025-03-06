@@ -1,5 +1,6 @@
 import buildAll from './commands/buildAll';
 import editPatch from './commands/editPatch';
+import { AppType } from './types';
 const yargs = require('yargs');
 
 
@@ -15,7 +16,7 @@ const build = () => {
 			});
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 		}, async (args: any) => {
-			await buildAll(args.outputDir);
+			await buildAll(AppType.All, args.outputDir);
 			process.exit(0);
 		})
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied

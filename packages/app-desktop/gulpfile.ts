@@ -5,6 +5,7 @@ const compilePackageInfo = require('@joplin/tools/compilePackageInfo');
 import buildDefaultPlugins from '@joplin/default-plugins/commands/buildAll';
 import copy7Zip from './tools/copy7Zip';
 import { remove } from 'fs-extra';
+import { AppType } from '@joplin/default-plugins/types';
 
 const tasks = {
 	compileScripts: {
@@ -36,7 +37,7 @@ const tasks = {
 		fn: async () => {
 			const outputDir = `${__dirname}/build/defaultPlugins/`;
 			await remove(outputDir);
-			await buildDefaultPlugins(outputDir);
+			await buildDefaultPlugins(AppType.Desktop, outputDir);
 		},
 	},
 	tsc: require('@joplin/tools/gulp/tasks/tsc'),

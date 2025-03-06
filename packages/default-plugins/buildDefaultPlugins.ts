@@ -2,24 +2,34 @@
 /* eslint-disable no-console */
 
 import { copy, exists, remove, readdir, mkdtemp } from 'fs-extra';
-import { join, resolve, basename } from 'path';
+import { join, resolve, basename, dirname } from 'path';
 import { tmpdir } from 'os';
 import { chdir, cwd } from 'process';
 import { execCommand } from '@joplin/utils';
 import { glob } from 'glob';
-import readRepositoryJson from './utils/readRepositoryJson';
 import waitForCliInput from './utils/waitForCliInput';
 import getPathToPatchFileFor from './utils/getPathToPatchFileFor';
+import isGitRepository from './utils/isGitRepository';
+import { AppType } from './types';
+import pluginRepositoryData from './pluginRepositoryData';
 import getCurrentCommitHash from './utils/getCurrentCommitHash';
 
-interface Options {
-	beforeInstall: (buildDir: string, pluginName: string)=> Promise<void>;
-	beforePatch: ()=> Promise<void>;
-}
 
-const buildDefaultPlugins = async (outputParentDir: string|null, options: Options) => {
+const monorepoRootDir = dirname(dirname(__dirname));
+
+type BeforeEachInstallCallback = (buildDir: string, pluginName: string)=> Promise<void>;
+
+// Copies everything except .git folders.
+const copyExcludingGit = (src: string, dst: string) => {
+	return copy(src, dst, {
+		filter: fileName => {
+			return basename(fileName) !== '.git';
+		},
+	});
+};
+
+const buildDefaultPlugins = async (appType: AppType, outputParentDir: string|null, beforeInstall: BeforeEachInstallCallback) => {
 	const pluginSourcesDir = resolve(join(__dirname, 'plugin-sources'));
-	const pluginRepositoryData = await readRepositoryJson(join(__dirname, 'pluginRepositories.json'));
 
 	const originalDirectory = cwd();
 
@@ -32,50 +42,61 @@ const buildDefaultPlugins = async (outputParentDir: string|null, options: Option
 	for (const pluginId in pluginRepositoryData) {
 		const repositoryData = pluginRepositoryData[pluginId];
 
+		if (appType !== AppType.All && !repositoryData.appTypes.includes(appType)) {
+			logStatus(`Skipping plugin ${pluginId} -- we're building for ${appType} and not ${repositoryData.appTypes}`);
+			continue;
+		}
+
 		const buildDir = await mkdtemp(join(tmpdir(), 'default-plugin-build'));
 		try {
 			logStatus('Building plugin', pluginId, 'at', buildDir);
 			const pluginDir = resolve(join(pluginSourcesDir, pluginId));
 
-			// Clone the repository if not done yet
-			if (!(await exists(pluginDir)) || (await readdir(pluginDir)).length === 0) {
-				logStatus(`Cloning from repository ${repositoryData.cloneUrl}`);
-				await execCommand(['git', 'clone', '--', repositoryData.cloneUrl, pluginDir]);
+			if (isGitRepository(repositoryData)) {
+				// Clone the repository if not done yet
+				if (!(await exists(pluginDir)) || (await readdir(pluginDir)).length === 0) {
+					logStatus(`Cloning from repository ${repositoryData.cloneUrl}`);
+					await execCommand(['git', 'clone', '--', repositoryData.cloneUrl, pluginDir]);
+					chdir(pluginDir);
+				}
+
 				chdir(pluginDir);
+				const expectedCommitHash = repositoryData.commit;
+
+				logStatus(`Switching to commit ${expectedCommitHash}`);
+				await execCommand(['git', 'switch', repositoryData.branch]);
+
+				try {
+					await execCommand(['git', 'checkout', expectedCommitHash]);
+				} catch (error) {
+					logStatus(`git checkout failed with error ${error}. Fetching...`);
+					await execCommand(['git', 'fetch']);
+					await execCommand(['git', 'checkout', expectedCommitHash]);
+				}
+
+				if (await getCurrentCommitHash() !== expectedCommitHash) {
+					throw new Error(`Unable to checkout commit ${expectedCommitHash}`);
+				}
+
+				logStatus('Copying repository files...');
+				await copyExcludingGit(pluginDir, buildDir);
+			} else {
+				const pathToSource = resolve(monorepoRootDir, repositoryData.path);
+
+				logStatus(`Copying from path ${pathToSource}`);
+				await copyExcludingGit(pathToSource, buildDir);
 			}
-
-			chdir(pluginDir);
-			const expectedCommitHash = repositoryData.commit;
-
-			logStatus(`Switching to commit ${expectedCommitHash}`);
-			await execCommand(['git', 'switch', repositoryData.branch]);
-
-			try {
-				await execCommand(['git', 'checkout', expectedCommitHash]);
-			} catch (error) {
-				logStatus(`git checkout failed with error ${error}. Fetching...`);
-				await execCommand(['git', 'fetch']);
-				await execCommand(['git', 'checkout', expectedCommitHash]);
-			}
-
-			if (await getCurrentCommitHash() !== expectedCommitHash) {
-				throw new Error(`Unable to checkout commit ${expectedCommitHash}`);
-			}
-
-			logStatus('Copying repository files...');
-			await copy(pluginDir, buildDir, {
-				filter: fileName => {
-					return basename(fileName) !== '.git';
-				},
-			});
 
 			chdir(buildDir);
 
 			logStatus('Initializing repository.');
 			await execCommand('git init . -b main');
 
-			logStatus('Running before-patch hook.');
-			await options.beforePatch();
+			logStatus('Creating initial commit.');
+			await execCommand('git add .');
+			await execCommand(['git', 'config', 'user.name', 'Build script']);
+			await execCommand(['git', 'config', 'user.email', '']);
+			await execCommand(['git', 'commit', '-m', 'Initial commit']);
 
 			const patchFile = getPathToPatchFileFor(pluginId);
 			if (await exists(patchFile)) {
@@ -83,7 +104,7 @@ const buildDefaultPlugins = async (outputParentDir: string|null, options: Option
 				await execCommand(['git', 'apply', patchFile]);
 			}
 
-			await options.beforeInstall(buildDir, pluginId);
+			await beforeInstall(buildDir, pluginId);
 
 			logStatus('Installing dependencies.');
 			await execCommand('npm install');

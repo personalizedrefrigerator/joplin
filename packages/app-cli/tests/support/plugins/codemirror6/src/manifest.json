@@ -8,6 +8,7 @@
 	"author": "",
 	"homepage_url": "",
 	"repository_url": "",
+	"platforms": ["mobile", "desktop"],
 	"keywords": [],
 	"categories": [],
 	"screenshots": [],
