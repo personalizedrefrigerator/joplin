@@ -9,7 +9,7 @@ import uuid from '@joplin/lib/uuid';
 const logger = Logger.create('loadBuiltInPlugins');
 
 const defaultPlugins: Record<string, string|number> = {
-	'com.example.codemirror6-line-numbers': require('../../../default-plugins/com.example.codemirror6-line-numbers.jpl'),
+	'org.joplinapp.voice-typing': require('../../../default-plugins/org.joplinapp.voice-typing.jpl'),
 };
 
 type CancelEvent = { cancelled: boolean };

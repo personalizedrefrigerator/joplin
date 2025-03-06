@@ -13,8 +13,8 @@ const pluginRepositoryData: AllRepositoryData = {
 		'commit': '94a78496fac0b3bc7b0f6a896a982480adad3994',
 		'appTypes': [AppType.Desktop],
 	},
-	'com.example.codemirror6-line-numbers': {
-		'path': 'packages/app-cli/tests/support/plugins/codemirror6',
+	'org.joplinapp.voice-typing': {
+		'path': 'packages/plugins/VoiceTyping',
 		'appTypes': [AppType.Mobile],
 	},
 };

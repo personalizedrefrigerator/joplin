@@ -1,0 +1,16 @@
+{
+	"manifest_version": 1,
+	"id": "org.joplinapp.voice-typing",
+	"app_min_version": "3.3",
+	"version": "1.0.0",
+	"name": "Voice typing",
+	"description": "Improves voice typing support",
+	"author": "Joplin",
+	"homepage_url": "https://joplinapp.org/",
+	"platforms": ["mobile"],
+	"keywords": [],
+	"categories": [],
+	"screenshots": [],
+	"icons": {},
+	"promo_tile": {}
+}
