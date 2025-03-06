@@ -1,7 +1,7 @@
 import { resolve } from 'path';
 import FsDriverBase, { ReadDirStatsOptions, RemoveOptions, Stat } from '@joplin/lib/fs-driver-base';
-import tarExtract, { TarExtractOptions } from './tarExtract';
-import tarCreate, { TarCreateOptions } from './tarCreate';
+import tarExtract, { TarExtractOptions } from './utils/tarExtract';
+import tarCreate, { TarCreateOptions } from './utils/tarCreate';
 import { Buffer } from 'buffer';
 import Logger, { LogLevel, TargetType } from '@joplin/utils/Logger';
 import RemoteMessenger from '@joplin/lib/utils/ipc/RemoteMessenger';

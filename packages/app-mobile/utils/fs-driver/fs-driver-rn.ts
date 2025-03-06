@@ -3,11 +3,12 @@ const RNFetchBlob = require('rn-fetch-blob').default;
 import * as RNFS from 'react-native-fs';
 import RNSAF, { DocumentFileDetail, openDocumentTree } from '@joplin/react-native-saf-x';
 import { Platform } from 'react-native';
-import tarCreate from './tarCreate';
-import tarExtract from './tarExtract';
+import tarCreate from './utils/tarCreate';
+import tarExtract from './utils/tarExtract';
 import JoplinError from '@joplin/lib/JoplinError';
 const md5 = require('md5');
 import { resolve } from 'path';
+import unzip from './utils/unzip';
 
 
 const ANDROID_URI_PREFIX = 'content://';
@@ -130,7 +131,11 @@ export default class FsDriverRN extends FsDriverBase {
 		let output: any[] = [];
 		for (let i = 0; i < stats.length; i++) {
 			const stat = stats[i];
-			const relativePath = (isScoped ? stat.uri : stat.path).substr(path.length + 1);
+			const relativePath = (isScoped ? stat.uri : stat.path)
+				// Trim the parent path
+				.substr(path.length)
+				// If the parent path ended with a /, that also needs to be removed:
+				.replace(/^[/]+/, '');
 			const standardStat = this.rnfsStatToStd_(stat, relativePath);
 			output.push(standardStat);
 
@@ -336,6 +341,10 @@ export default class FsDriverRN extends FsDriverBase {
 			cwd: RNFS.DocumentDirectoryPath,
 			...options,
 		}, filePaths);
+	}
+
+	public override async unzip(source: string, dest: string) {
+		await unzip(source, dest);
 	}
 
 	public async getExternalDirectoryPath(): Promise<string | undefined> {

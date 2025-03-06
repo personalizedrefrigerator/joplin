@@ -1,15 +1,5 @@
-import { VoiceTypingProvider } from './VoiceTyping';
+import { SpeechToTextProvider } from '@joplin/lib/services/speechToText/types';
 
-const vosk: VoiceTypingProvider = {
-	supported: () => false,
-	modelLocalFilepath: () => null,
-	getDownloadUrl: () => null,
-	getUuidPath: () => null,
-	deleteCachedModels: () => null,
-	build: async () => {
-		throw new Error('Unsupported!');
-	},
-	modelName: 'vosk',
-};
+const vosk: SpeechToTextProvider|null = null; // Unsupported
 
 export default vosk;

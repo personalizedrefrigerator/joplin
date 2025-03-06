@@ -3,9 +3,6 @@ import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { Text, Button } from 'react-native-paper';
 import { _, languageName } from '@joplin/lib/locale';
 import useAsyncEffect, { AsyncEffectEvent } from '@joplin/lib/hooks/useAsyncEffect';
-import VoiceTyping, { OnTextCallback, VoiceTypingSession } from '../../services/voiceTyping/VoiceTyping';
-import whisper from '../../services/voiceTyping/whisper';
-import vosk from '../../services/voiceTyping/vosk';
 import { AppState } from '../../utils/types';
 import { connect } from 'react-redux';
 import Logger from '@joplin/utils/Logger';
@@ -13,6 +10,9 @@ import { RecorderState } from './types';
 import RecordingControls from './RecordingControls';
 import { PrimaryButton } from '../buttons';
 import useQueuedAsyncEffect from '@joplin/lib/hooks/useQueuedAsyncEffect';
+import { AudioDataSourceType, OnTextCallback, SpeechToTextSession } from '@joplin/lib/services/speechToText/types';
+import SpeechToTextService from '@joplin/lib/services/speechToText/SpeechToTextService';
+import shim from '@joplin/lib/shim';
 
 const logger = Logger.create('VoiceTypingDialog');
 
@@ -25,13 +25,13 @@ interface Props {
 
 interface UseVoiceTypingProps {
 	locale: string;
-	provider: string;
+	providerSetting: string;
 	onSetPreview: OnTextCallback;
 	onText: OnTextCallback;
 }
 
-const useVoiceTyping = ({ locale, provider, onSetPreview, onText }: UseVoiceTypingProps) => {
-	const [voiceTyping, setVoiceTyping] = useState<VoiceTypingSession>(null);
+const useVoiceTyping = ({ locale, providerSetting, onSetPreview, onText }: UseVoiceTypingProps) => {
+	const [voiceTyping, setVoiceTyping] = useState<SpeechToTextSession>(null);
 	const [error, setError] = useState<Error|null>(null);
 	const [mustDownloadModel, setMustDownloadModel] = useState<boolean | null>(null);
 	const [modelIsOutdated, setModelIsOutdated] = useState(false);
@@ -44,9 +44,12 @@ const useVoiceTyping = ({ locale, provider, onSetPreview, onText }: UseVoiceTypi
 	const voiceTypingRef = useRef(voiceTyping);
 	voiceTypingRef.current = voiceTyping;
 
-	const builder = useMemo(() => {
-		return new VoiceTyping(locale, provider?.startsWith('whisper') ? [whisper] : [vosk]);
-	}, [locale, provider]);
+	const provider = useMemo(() => {
+		return SpeechToTextService.instance().getProvider(providerSetting);
+	}, [providerSetting]);
+	const downloadManager = useMemo(() => {
+		return provider.getDownloadManager(locale);
+	}, [provider, locale]);
 
 	const [redownloadCounter, setRedownloadCounter] = useState(0);
 
@@ -65,17 +68,21 @@ const useVoiceTyping = ({ locale, provider, onSetPreview, onText }: UseVoiceTypi
 			await voiceTypingRef.current?.stop();
 			onSetPreviewRef.current?.('');
 
-			setModelIsOutdated(await builder.isDownloadedFromOutdatedUrl());
+			setModelIsOutdated(await downloadManager.canUpdateModel());
 
-			if (!await builder.isDownloaded()) {
+			if (!await downloadManager.isDownloaded()) {
 				if (event.cancelled) return;
-				await builder.download();
+				await downloadManager.download();
 			}
 			if (event.cancelled) return;
 
-			const voiceTyping = await builder.build({
-				onPreview: (text) => onSetPreviewRef.current(text),
-				onFinalize: (text) => onTextRef.current(text),
+			const voiceTyping = await provider.start({
+				locale,
+				callbacks: {
+					onPreview: (text) => onSetPreviewRef.current(text),
+					onFinalize: (text) => onTextRef.current(text),
+				},
+				dataSource: { kind: AudioDataSourceType.Microphone },
 			});
 			if (event.cancelled) return;
 			setVoiceTyping(voiceTyping);
@@ -84,11 +91,13 @@ const useVoiceTyping = ({ locale, provider, onSetPreview, onText }: UseVoiceTypi
 		} finally {
 			setMustDownloadModel(false);
 		}
-	}, [builder, redownloadCounter]);
+	}, [downloadManager, redownloadCounter]);
 
-	useAsyncEffect(async (_event: AsyncEffectEvent) => {
-		setMustDownloadModel(!(await builder.isDownloaded()));
-	}, [builder]);
+	useAsyncEffect(async (event: AsyncEffectEvent) => {
+		const downloaded = await downloadManager.isDownloaded();
+		if (event.cancelled) return;
+		setMustDownloadModel(!downloaded);
+	}, [downloadManager]);
 
 	useEffect(() => () => {
 		void voiceTypingRef.current?.stop();
@@ -96,10 +105,13 @@ const useVoiceTyping = ({ locale, provider, onSetPreview, onText }: UseVoiceTypi
 
 	const onRequestRedownload = useCallback(async () => {
 		await voiceTypingRef.current?.stop();
-		await builder.clearDownloads();
-		setMustDownloadModel(true);
-		setRedownloadCounter(value => value + 1);
-	}, [builder]);
+		const result = await shim.showConfirmationDialog('This will delete the current model and re-download it. Continue?');
+		if (result) {
+			await downloadManager.clearCache();
+			setMustDownloadModel(true);
+			setRedownloadCounter(value => value + 1);
+		}
+	}, [downloadManager]);
 
 	return {
 		error, mustDownloadModel, voiceTyping, onRequestRedownload, modelIsOutdated,
@@ -119,7 +131,7 @@ const SpeechToTextComponent: React.FC<Props> = props => {
 		locale: props.locale,
 		onSetPreview: setPreview,
 		onText: props.onText,
-		provider: props.provider,
+		providerSetting: props.provider,
 	});
 
 	useEffect(() => {
@@ -135,12 +147,6 @@ const SpeechToTextComponent: React.FC<Props> = props => {
 			setRecorderState(RecorderState.Downloading);
 		}
 	}, [mustDownloadModel]);
-
-	useEffect(() => {
-		if (recorderState === RecorderState.Recording) {
-			void voiceTyping.start();
-		}
-	}, [recorderState, voiceTyping, props.onText]);
 
 	const onDismiss = useCallback(() => {
 		void voiceTyping?.stop();

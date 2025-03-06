@@ -1,7 +1,7 @@
 import { extract as tarStreamExtract } from 'tar-stream';
 import { resolve, dirname } from 'path';
 import shim from '@joplin/lib/shim';
-import { chunkSize } from './constants';
+import { chunkSize } from '../constants';
 
 export interface TarExtractOptions {
 	cwd: string;

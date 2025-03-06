@@ -140,6 +140,8 @@ import lockToSingleInstance from './utils/lockToSingleInstance';
 import { AppState } from './utils/types';
 import { getDisplayParentId } from '@joplin/lib/services/trash';
 import PluginNotification from './components/plugins/PluginNotification';
+import SpeechToTextService from '@joplin/lib/services/speechToText/SpeechToTextService';
+import vosk from './services/voiceTyping/vosk';
 
 const logger = Logger.create('root');
 
@@ -598,6 +600,8 @@ async function initialize(dispatch: Dispatch) {
 
 	// KeymapService is also present for plugin compatibility
 	KeymapService.instance().initialize();
+
+	SpeechToTextService.initialize(vosk ? [vosk] : []);
 
 	// Even if there are no plugins, we need to initialize the PluginService so that
 	// plugin search can work.

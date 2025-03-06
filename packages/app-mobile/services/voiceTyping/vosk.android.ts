@@ -5,8 +5,9 @@ import { rtrimSlashes } from '@joplin/lib/path-utils';
 import shim from '@joplin/lib/shim';
 import Vosk from 'react-native-vosk';
 import RNFetchBlob from 'rn-fetch-blob';
-import { VoiceTypingProvider, VoiceTypingSession } from './VoiceTyping';
+import SpeechToTextNativeDownloadManager from '@joplin/lib/services/speechToText/SpeechToTextNativeDownloadManager';
 import { join } from 'path';
+import { SpeechToTextProvider, SpeechToTextSession } from '@joplin/lib/services/speechToText/types';
 
 const logger = Logger.create('voiceTyping/vosk');
 
@@ -96,7 +97,7 @@ export const getVosk = async (modelDir: string, locale: string) => {
 	return vosk;
 };
 
-export const startRecording = (vosk: Vosk, options: StartOptions): VoiceTypingSession => {
+export const startRecording = async (vosk: Vosk, options: StartOptions): Promise<SpeechToTextSession> => {
 	if (state_ !== State.Idle) throw new Error('Vosk is already recording');
 
 	state_ = State.Recording;
@@ -154,12 +155,10 @@ export const startRecording = (vosk: Vosk, options: StartOptions): VoiceTypingSe
 		completeRecording(e.data, null);
 	}));
 
+	logger.info('Starting recording...');
+	const startPromise = vosk.start();
 
 	return {
-		start: async () => {
-			logger.info('Starting recording...');
-			await vosk.start();
-		},
 		stop: async () => {
 			if (state_ === State.Recording) {
 				logger.info('Cancelling...');
@@ -167,25 +166,32 @@ export const startRecording = (vosk: Vosk, options: StartOptions): VoiceTypingSe
 				vosk.stopOnly();
 				completeRecording('', null);
 			}
+
+			await startPromise;
 		},
 	};
 };
 
+const getDownloadManager = (locale: string) => {
+	return new SpeechToTextNativeDownloadManager({
+		modelId: `vosk-${locale}`,
+		modelLocalFilepath: getModelDir(locale),
+		downloadUrl: languageModelUrl(locale),
+		uuidPath: join(getModelDir(locale), 'uuid'),
+	});
+};
 
-const vosk: VoiceTypingProvider = {
-	supported: () => true,
-	modelLocalFilepath: (locale: string) => getModelDir(locale),
-	deleteCachedModels: async (locale: string) => {
-		const path = getModelDir(locale);
-		await shim.fsDriver().remove(path, { recursive: true });
+const vosk: SpeechToTextProvider = {
+	metadata: {
+		name: 'Vosk',
+		id: 'vosk',
 	},
-	getDownloadUrl: (locale) => languageModelUrl(locale),
-	getUuidPath: (locale: string) => join(getModelDir(locale), 'uuid'),
-	build: async ({ callbacks, locale, modelPath }) => {
+	getDownloadManager,
+	start: async ({ callbacks, locale }) => {
+		const modelPath = getDownloadManager(locale).getDownloadedModelPath();
 		const vosk = await getVosk(modelPath, locale);
 		return startRecording(vosk, { onResult: callbacks.onFinalize });
 	},
-	modelName: 'vosk',
 };
 
 export default vosk;

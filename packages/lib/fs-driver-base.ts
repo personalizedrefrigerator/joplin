@@ -258,4 +258,8 @@ export default class FsDriverBase {
 		throw new Error('Not implemented: tarCreate');
 	}
 
+	public async unzip(_sourcePath: string, _destPath: string) {
+		throw new Error('Not implemented: unzip');
+	}
+
 }

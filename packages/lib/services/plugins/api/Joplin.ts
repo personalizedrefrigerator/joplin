@@ -18,6 +18,7 @@ import { themeStyle } from '../../../theme';
 import Setting from '../../../models/Setting';
 import { ThemeAppearance } from '../../../themes/type';
 import JoplinFs from './JoplinFs';
+import JoplinVoiceTyping from './JoplinVoiceTyping';
 
 /**
  * This is the main entry point to the Joplin API. You can access various services using the provided accessors.
@@ -46,6 +47,7 @@ export default class Joplin {
 	private clipboard_: JoplinClipboard = null;
 	private window_: JoplinWindow = null;
 	private fs_: JoplinFs = null;
+	private voiceTyping_: JoplinVoiceTyping = null;
 	private implementation_: BasePlatformImplementation = null;
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
@@ -64,6 +66,7 @@ export default class Joplin {
 		this.clipboard_ = new JoplinClipboard(implementation.clipboard, implementation.nativeImage);
 		this.window_ = new JoplinWindow(plugin, store);
 		this.fs_ = new JoplinFs(plugin);
+		this.voiceTyping_ = new JoplinVoiceTyping(plugin);
 	}
 
 	public get data(): JoplinData {
@@ -122,6 +125,10 @@ export default class Joplin {
 
 	public get fs(): JoplinFs {
 		return this.fs_;
+	}
+
+	public get voiceTyping(): JoplinVoiceTyping {
+		return this.voiceTyping_;
 	}
 
 	/**
