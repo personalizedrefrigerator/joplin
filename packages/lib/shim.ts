@@ -4,6 +4,7 @@ import type FsDriverBase from './fs-driver-base';
 import type FileApiDriverLocal from './file-api-driver-local';
 import { Crypto } from './services/e2ee/types';
 import { MarkupLanguage } from '@joplin/renderer';
+import { FetchBlobOptions } from './types';
 
 export interface CreateResourceFromPathOptions {
 	resizeLargeImages?: 'always' | 'never' | 'ask';
@@ -352,7 +353,7 @@ const shim = {
 	},
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	fetchBlob: function(_url: string, _options: any = null): any {
+	fetchBlob: function(_url: string, _options: FetchBlobOptions = null): any {
 		throw new Error('Not implemented: fetchBlob');
 	},
 

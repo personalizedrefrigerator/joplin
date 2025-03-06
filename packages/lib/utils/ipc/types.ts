@@ -23,3 +23,18 @@ export type ReturnsPromises<Type> = {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	[functionName in keyof Type]: (...args: any[])=> Promise<any>;
 };
+
+// A version of `Type` where all properties are recursively optional and all
+// non-function (and non-object) properties are removed.
+// For example,
+//   { test: { a: ()=>void, b: number }, test2: ()=>void }
+// is mapped to
+//   { test?: { a?: ()=>void }, test2?: ()=>void }
+// eslint-disable-next-line @typescript-eslint/ban-types -- Function is used here to provide stronger types elsewhere
+export type OptionalNestedFunctions<Type> = Type extends Function
+	? Type
+	: Type extends object
+		? {
+			[key in keyof Type]?: OptionalNestedFunctions<Type[key]>;
+		}
+		: never;

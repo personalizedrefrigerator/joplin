@@ -179,4 +179,46 @@ describe('RemoteMessenger', () => {
 
 		expect(messenger1.getIdForCallback_(callback)).toBe(undefined);
 	});
+
+	it('should support overriding remote methods with custom local ones', async () => {
+		const makeTestApi = () => ({
+			test1: jest.fn(),
+			test2: jest.fn(),
+			nested: {
+				test3: jest.fn(),
+			},
+		});
+
+		const testApi1 = makeTestApi();
+		const testApi2 = makeTestApi();
+		type ApiType = typeof testApi1;
+		const messenger1 = new TestMessenger<ApiType, ApiType>('testid', testApi1);
+		const messenger2 = new TestMessenger<ApiType, ApiType>('testid', testApi2);
+
+		messenger1.connectTo(messenger2);
+
+		// Overridden methods should get called instead of the remote ones
+		const test1Override = jest.fn();
+		const test3Override = jest.fn();
+		messenger1.overrideRemoteMethods({
+			test1: test1Override,
+			nested: {
+				test3: test3Override,
+			},
+		});
+
+		// Call an overridden method
+		await messenger1.remoteApi.test1();
+		expect(test1Override).toHaveBeenCalled();
+		expect(testApi2.test1).not.toHaveBeenCalled();
+
+		// Call a method that has not been overridden
+		await messenger1.remoteApi.test2();
+		expect(testApi2.test2).toHaveBeenCalled();
+
+		// Call a nested overridden method
+		await messenger1.remoteApi.nested.test3();
+		expect(testApi2.nested.test3).not.toHaveBeenCalled();
+		expect(test3Override).toHaveBeenCalled();
+	});
 });

@@ -4,7 +4,7 @@ import Plugin from '@joplin/lib/services/plugins/Plugin';
 import { WebViewControl } from '../ExtendedWebView/types';
 import { RefObject } from 'react';
 import RNToWebViewMessenger from '../../utils/ipc/RNToWebViewMessenger';
-import { PluginMainProcessApi, PluginWebViewApi } from './types';
+import { PluginMainProcessApi, PluginWebViewApi, ReadFileBlobResult, ReadFileMethod } from './types';
 import shim from '@joplin/lib/shim';
 import Logger from '@joplin/utils/Logger';
 import createOnLogHander from './utils/createOnLogHandler';
@@ -32,10 +32,32 @@ export default class PluginRunner extends BasePluginRunner {
 			pluginLogger.error(message);
 			plugin.hasErrors = true;
 		};
+		const readFileBlob = async (rawPath: string): Promise<ReadFileBlobResult> => {
+			const pluginBaseDir = plugin.dataDir;
+			if (!await shim.fsDriver().exists(pluginBaseDir)) {
+				return { kind: ReadFileMethod.Disallow };
+			}
+
+			// Only allow plugins to read files within the pluginBaseDIr
+			const absolutePath = shim.fsDriver().resolveRelativePathWithinDir(pluginBaseDir, rawPath);
+			if (shim.mobilePlatform() === 'web') {
+				// On web,
+				// 1. `readFile` supports reading as a Buffer,
+				// 2. Sending large `Buffer`s over IPC isn't slow, and
+				// 3. `fetch` from within the WebView can't be used to request virtual files.
+				const buffer = await shim.fsDriver().readFile(absolutePath, 'Buffer');
+				return new Blob([buffer]);
+			} else {
+				return {
+					kind: ReadFileMethod.XmlHttpRequest,
+					url: absolutePath,
+				};
+			}
+		};
 
 		const messageChannelId = `plugin-message-channel-${pluginId}-${Date.now()}`;
 		const messenger = new RNToWebViewMessenger<PluginMainProcessApi, PluginWebViewApi>(
-			messageChannelId, this.webviewRef, { api: pluginApi, onError, onLog },
+			messageChannelId, this.webviewRef, { api: pluginApi, onError, onLog, readFileBlob },
 		);
 
 		this.messageEventListeners.push((event) => {

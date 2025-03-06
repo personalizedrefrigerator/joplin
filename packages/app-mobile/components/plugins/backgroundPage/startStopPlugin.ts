@@ -1,8 +1,9 @@
 import RemoteMessenger from '@joplin/lib/utils/ipc/RemoteMessenger';
-import { PluginMainProcessApi, PluginWebViewApi } from '../types';
+import { PluginMainProcessApi, PluginWebViewApi, ReadFileMethod } from '../types';
 import WebViewToRNMessenger from '../../../utils/ipc/WebViewToRNMessenger';
 import WindowMessenger from '@joplin/lib/utils/ipc/WindowMessenger';
 import makeSandboxedIframe from '@joplin/lib/utils/dom/makeSandboxedIframe';
+import fetchFileBlob from './utils/fetchFileBlob';
 
 type PluginRecord = {
 	iframe: HTMLIFrameElement;
@@ -74,6 +75,31 @@ export const runPlugin = (
 		connectionToIframe.setIsChainedMessenger(true);
 
 		connectionToParent.setLocalInterface(connectionToIframe.remoteApi);
+
+		// Some methods can only be implemented in the container WebView:
+		const readFileBlob = async (path: string) => {
+			const blobOrAction = await connectionToParent.remoteApi.readFileBlob(path);
+			if (blobOrAction instanceof Blob) {
+				return blobOrAction;
+			} else if (blobOrAction.kind === ReadFileMethod.XmlHttpRequest) {
+				// Only works on iOS and Android
+				return await fetchFileBlob(blobOrAction.url);
+			} else if (blobOrAction.kind === ReadFileMethod.Disallow) {
+				throw new Error(`Access to path ${path} is disallowed.`);
+			} else {
+				const exhaustivenessCheck: never = blobOrAction;
+				throw new Error(`Unknown message: ${exhaustivenessCheck}`);
+			}
+		};
+		connectionToParent.overrideRemoteMethods({
+			api: {
+				joplin: {
+					fs: {
+						readBlob: readFileBlob,
+					},
+				},
+			},
+		});
 
 		loadedPlugins[pluginId].connectionToIframe = connectionToIframe;
 		loadedPlugins[pluginId].connectionToParent = connectionToParent;

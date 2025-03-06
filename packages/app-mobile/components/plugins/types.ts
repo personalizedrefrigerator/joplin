@@ -9,10 +9,30 @@ export enum LogLevel {
 	Debug = 'debug',
 }
 
+export enum ReadFileMethod {
+	XmlHttpRequest = 'fetch-with-xml-http-request',
+	Disallow = 'disallow',
+}
+
+type ReadFileAction = {
+	kind: ReadFileMethod.XmlHttpRequest;
+	url: string;
+}|{
+	kind: ReadFileMethod.Disallow;
+};
+
+export type ReadFileBlobResult = Blob|ReadFileAction;
+
 export interface PluginMainProcessApi {
 	api: ApiGlobal;
 	onError: (message: string)=> Promise<void>;
 	onLog: (level: LogLevel, message: string)=> Promise<void>;
+
+	// On some platforms, it's efficient to send a Blob over IPC. In other cases, it's
+	// more efficient to fetch a blob using a different method. If sending the Blob over IPC is most
+	// feasible, this method returns the Blob directly. Otherwise, it suggests an action for the
+	// WebView logic to take.
+	readFileBlob: (path: string)=> Promise<ReadFileBlobResult>;
 }
 
 export interface PluginWebViewApi {

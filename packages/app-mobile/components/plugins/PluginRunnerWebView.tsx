@@ -173,6 +173,7 @@ const PluginRunnerWebViewComponent: React.FC<Props> = props => {
 					html={html}
 					injectedJavaScript={injectedJs}
 					hasPluginScripts={true}
+					allowFileAccessFromJs={true}
 					onMessage={pluginRunner.onWebviewMessage}
 					onLoadEnd={onLoadEnd}
 					onLoadStart={onLoadStart}

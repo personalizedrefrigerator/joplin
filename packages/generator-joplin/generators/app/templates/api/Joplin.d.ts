@@ -12,6 +12,7 @@ import JoplinClipboard from './JoplinClipboard';
 import JoplinWindow from './JoplinWindow';
 import BasePlatformImplementation from '../BasePlatformImplementation';
 import JoplinImaging from './JoplinImaging';
+import JoplinFs from './JoplinFs';
 /**
  * This is the main entry point to the Joplin API. You can access various services using the provided accessors.
  *
@@ -37,6 +38,7 @@ export default class Joplin {
     private contentScripts_;
     private clipboard_;
     private window_;
+    private fs_;
     private implementation_;
     constructor(implementation: BasePlatformImplementation, plugin: Plugin, store: any);
     get data(): JoplinData;
@@ -57,6 +59,7 @@ export default class Joplin {
     get views(): JoplinViews;
     get interop(): JoplinInterop;
     get settings(): JoplinSettings;
+    get fs(): JoplinFs;
     /**
      * It is not possible to bundle native packages with a plugin, because they
      * need to work cross-platforms. Instead access to certain useful native
@@ -73,4 +76,8 @@ export default class Joplin {
      */
     require(_path: string): any;
     versionInfo(): Promise<import("./types").VersionInfo>;
+    /**
+     * Tells whether the current theme is a dark one or not.
+     */
+    shouldUseDarkColors(): Promise<boolean>;
 }

@@ -23,4 +23,8 @@ export type FetchBlobOptions = {
 	timeout?: number;
 	headers?: Record<string, string>;
 	downloadController?: DownloadController;
+
+	maxRetry?: number;
+	overwrite?: boolean;
+	ignoreTlsErrors?: boolean;
 };

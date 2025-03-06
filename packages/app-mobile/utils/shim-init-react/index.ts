@@ -103,7 +103,8 @@ export default function shimInit() {
 			return RNFetchBlob.config({
 				path: localFilePath,
 				trusty: options.ignoreTlsErrors,
-			}).fetch(method, url, headers);
+				// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Partially-refactored old code from before rule
+			}).fetch(method as any, url, headers);
 		};
 
 		try {

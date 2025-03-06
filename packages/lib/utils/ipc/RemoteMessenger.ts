@@ -1,4 +1,4 @@
-import { CallbackIds as CallbackIds, SerializableData, SerializableDataAndCallbacks, TransferableCallback } from './types';
+import { CallbackIds as CallbackIds, OptionalNestedFunctions, SerializableData, SerializableDataAndCallbacks, TransferableCallback } from './types';
 import isTransferableObject from './utils/isTransferableObject';
 import mergeCallbacksAndSerializable from './utils/mergeCallbacksAndSerializable';
 import separateCallbacksFromSerializable from './utils/separateCallbacksFromSerializable';
@@ -92,6 +92,7 @@ export default abstract class RemoteMessenger<LocalInterface, RemoteInterface> {
 	private rejectMethodCallbacks: Record<string, OnMethodRejectListener> = Object.create(null);
 	private argumentCallbacks: Map<string, TransferableCallback> = new Map();
 	private callbackTracker: FinalizationRegistry|undefined = undefined;
+	private remoteOverrides_: Map<string, TransferableCallback> = new Map();
 
 	private numberUnrespondedToMethods = 0;
 	private noWaitingMethodsListeners: OnAllMethodsRespondedToListener[] = [];
@@ -134,7 +135,14 @@ export default abstract class RemoteMessenger<LocalInterface, RemoteInterface> {
 					}
 				},
 				apply: (_target, _thisArg, argumentsList: SerializableDataAndCallbacks[]) => {
-					return this.invokeRemoteMethod(methodPath, argumentsList);
+					// Handle user-specified overrides
+					const methodPathString = JSON.stringify(methodPath);
+					const methodOverride = this.remoteOverrides_.get(methodPathString);
+					if (methodOverride) {
+						return methodOverride(...argumentsList);
+					} else {
+						return this.invokeRemoteMethod(methodPath, argumentsList);
+					}
 				},
 			});
 		};
@@ -541,6 +549,21 @@ export default abstract class RemoteMessenger<LocalInterface, RemoteInterface> {
 			this.waitingForLocalInterface = false;
 			this.onReadyToReceive();
 		}
+	}
+
+	public overrideRemoteMethods(overrides: OptionalNestedFunctions<RemoteInterface>) {
+		const addOverrides = (methodPath: string[], object: unknown) => {
+			if (typeof object === 'function') {
+				this.remoteOverrides_.set(JSON.stringify(methodPath), object as TransferableCallback);
+			} else if (object && typeof object === 'object') {
+				for (const [key, value] of Object.entries(object)) {
+					addOverrides([...methodPath, key], value);
+				}
+			} else {
+				throw new Error(`Method overrides must be either functions or objects. Path: ${methodPath}`);
+			}
+		};
+		addOverrides([], overrides);
 	}
 
 	// Should be called if this messenger is in the middle (not on the edge) of a chain

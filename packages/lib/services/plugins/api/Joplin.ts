@@ -17,6 +17,7 @@ import JoplinImaging from './JoplinImaging';
 import { themeStyle } from '../../../theme';
 import Setting from '../../../models/Setting';
 import { ThemeAppearance } from '../../../themes/type';
+import JoplinFs from './JoplinFs';
 
 /**
  * This is the main entry point to the Joplin API. You can access various services using the provided accessors.
@@ -44,6 +45,7 @@ export default class Joplin {
 	private contentScripts_: JoplinContentScripts = null;
 	private clipboard_: JoplinClipboard = null;
 	private window_: JoplinWindow = null;
+	private fs_: JoplinFs = null;
 	private implementation_: BasePlatformImplementation = null;
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
@@ -61,6 +63,7 @@ export default class Joplin {
 		this.contentScripts_ = new JoplinContentScripts(plugin);
 		this.clipboard_ = new JoplinClipboard(implementation.clipboard, implementation.nativeImage);
 		this.window_ = new JoplinWindow(plugin, store);
+		this.fs_ = new JoplinFs(plugin);
 	}
 
 	public get data(): JoplinData {
@@ -115,6 +118,10 @@ export default class Joplin {
 
 	public get settings(): JoplinSettings {
 		return this.settings_;
+	}
+
+	public get fs(): JoplinFs {
+		return this.fs_;
 	}
 
 	/**
