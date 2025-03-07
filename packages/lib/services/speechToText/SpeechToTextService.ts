@@ -6,7 +6,7 @@ export default class SpeechToTextService {
 	private static instance_: SpeechToTextService|null = null;
 	public static instance() {
 		if (!this.instance_) {
-			throw new Error('SpeechToTextService has not been initialized.');
+			this.initialize([]);
 		}
 		return this.instance_;
 	}

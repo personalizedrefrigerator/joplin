@@ -7,6 +7,7 @@ import type SettingType from '../Setting';
 import { AppType, SettingItemSubType, SettingItemType, SettingStorage, SyncStartupOperation, SettingItem } from './types';
 import { defaultListColumns } from '../../services/plugins/api/noteListType';
 import type { PluginSettings } from '../../services/plugins/PluginService';
+import SpeechToTextService from '../../services/speechToText/SpeechToTextService';
 const ObjectUtils = require('../../ObjectUtils');
 const { toTitleCase } = require('../../string-utils.js');
 
@@ -1747,21 +1748,25 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 		},
 
 		'voiceTyping.preferredProvider': {
-			value: 'whisper-tiny',
+			value: 'vosk',
 			type: SettingItemType.String,
 			public: true,
 			appTypes: [AppType.Mobile],
 			label: () => _('Preferred voice typing provider'),
 			isEnum: true,
-			// For now, iOS and web don't support voice typing.
-			show: () => shim.mobilePlatform() === 'android',
 			section: 'note',
 
 			options: () => {
-				return {
-					'vosk': _('Vosk'),
-					'whisper-tiny': _('Whisper'),
-				};
+				const providers = SpeechToTextService.instance().providerMetadata;
+				const result: Record<string, string> = {};
+				for (const provider of providers) {
+					if (typeof provider.name !== 'string') {
+						throw new Error('Voice typing providers must have string names');
+					}
+
+					result[provider.id] = provider.name;
+				}
+				return result;
 			},
 		},
 
