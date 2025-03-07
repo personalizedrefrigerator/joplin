@@ -69,6 +69,7 @@ import getActivePluginEditorView from '@joplin/lib/services/plugins/utils/getAct
 import EditorPluginHandler from '@joplin/lib/services/plugins/EditorPluginHandler';
 import AudioRecordingBanner from '../../voiceTyping/AudioRecordingBanner';
 import SpeechToTextBanner from '../../voiceTyping/SpeechToTextBanner';
+import SpeechToTextService from '@joplin/lib/services/speechToText/SpeechToTextService';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 const emptyArray: any[] = [];
@@ -1231,7 +1232,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 			});
 		}
 
-		const voiceTypingSupported = Platform.OS === 'android';
+		const voiceTypingSupported = SpeechToTextService.instance().providerMetadata.length > 0;
 		if (voiceTypingSupported) {
 			output.push({
 				title: _('Voice typing...'),

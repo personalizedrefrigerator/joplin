@@ -4,6 +4,8 @@ import WebViewToRNMessenger from '../../../utils/ipc/WebViewToRNMessenger';
 import WindowMessenger from '@joplin/lib/utils/ipc/WindowMessenger';
 import makeSandboxedIframe from '@joplin/lib/utils/dom/makeSandboxedIframe';
 import fetchFileBlob from './utils/fetchFileBlob';
+import { AudioDataSourceType } from '@joplin/lib/services/speechToText/types';
+import createRecordingSessionManager from './utils/createRecordingSessionManager';
 
 type PluginRecord = {
 	iframe: HTMLIFrameElement;
@@ -91,11 +93,36 @@ export const runPlugin = (
 				throw new Error(`Unknown message: ${exhaustivenessCheck}`);
 			}
 		};
+		const recordingManager = createRecordingSessionManager(connectionToParent.remoteApi.getRecordingSession);
+
 		connectionToParent.overrideRemoteMethods({
 			api: {
 				joplin: {
 					fs: {
 						readBlob: readFileBlob,
+					},
+					voiceTyping: {
+						async nextAudioData(sessionId, durationSeconds) {
+							const voiceTyping = connectionToParent.remoteApi.api.joplin.voiceTyping;
+							const streamType = await voiceTyping.getAudioStreamType(sessionId);
+							if (streamType.kind === AudioDataSourceType.Microphone) {
+								const isNewStream = !recordingManager.hasAudioRecorder(sessionId);
+								const stream = await recordingManager.getAudioRecorder(sessionId);
+
+								if (isNewStream) {
+									await voiceTyping.addBeforeSessionClosedListener(sessionId, async () => {
+										await stream.close();
+									});
+								}
+
+								return {
+									data: await stream.nextData(durationSeconds),
+									sampleRate: await stream.sampleRate(),
+								};
+							} else {
+								throw new Error(`Media stream type ${streamType.kind} not yet supported (to-do).`);
+							}
+						},
 					},
 				},
 			},

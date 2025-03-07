@@ -1,6 +1,7 @@
 
 import ApiGlobal from '@joplin/lib/services/plugins/api/Global';
 import { SerializableData } from '@joplin/lib/utils/ipc/types';
+import type { RecorderInterface } from './backgroundPage/utils/createRecordingSessionManager';
 
 export enum LogLevel {
 	Error = 'error',
@@ -33,6 +34,10 @@ export interface PluginMainProcessApi {
 	// feasible, this method returns the Blob directly. Otherwise, it suggests an action for the
 	// WebView logic to take.
 	readFileBlob: (path: string)=> Promise<ReadFileBlobResult>;
+
+	// On web, it doesn't seem possible to create recording sessions from within the background iframe,
+	// so data needs to be transferred from the parent.
+	getRecordingSession: (sessionId: string)=> Promise<RecorderInterface>;
 }
 
 export interface PluginWebViewApi {

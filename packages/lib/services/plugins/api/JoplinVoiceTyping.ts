@@ -37,6 +37,13 @@ export interface VoiceTypingPlugin {
 	onStop(sessionId: VoiceTypingSessionId): Promise<void>;
 }
 
+type SessionCloseListener = ()=> void;
+
+export interface AudioSamples {
+	sampleRate: number;
+	data: Float32Array;
+}
+
 /**
  * This module provides cross-platform access to the file system.
  *
@@ -48,6 +55,7 @@ export default class JoplinVoiceTyping {
 	private voiceTypingProviders_: SpeechToTextProvider[] = [];
 	private sessionIdToAudioSource_: Map<VoiceTypingSessionId, AudioDataSource> = new Map();
 	private sessionIdToCallbacks_: Map<VoiceTypingSessionId, SpeechToTextCallbacks> = new Map();
+	private sessionCloseListeners_: Map<VoiceTypingSessionId, SessionCloseListener[]> = new Map();
 
 	public constructor(plugin: Plugin) {
 		this.plugin_ = plugin;
@@ -92,6 +100,15 @@ export default class JoplinVoiceTyping {
 
 				return {
 					stop: async () => {
+						// Session close listeners are used internally for, among other things,
+						// stopping the audio input stream. As a result, they should be called
+						// before onStop.
+						const sessionCloseListeners = this.sessionCloseListeners_.get(sessionId) ?? [];
+						for (const listener of sessionCloseListeners) {
+							listener();
+						}
+						this.sessionCloseListeners_.delete(sessionId);
+
 						await voiceTypingProvider.onStop(sessionId);
 						this.sessionIdToCallbacks_.delete(sessionId);
 						this.sessionIdToAudioSource_.delete(sessionId);
@@ -132,20 +149,34 @@ export default class JoplinVoiceTyping {
 		await callbacks.onPreview(preview);
 	}
 
-	/** @internal */
+	/**
+	 * Add a one-time listener for when a voice typing session is closed.
+	 * This is called immediately before .onStop for a voice typing provider.
+	 */
+	public async addBeforeSessionClosedListener(sessionId: VoiceTypingSessionId, listener: ()=> void) {
+		const existingListeners = this.sessionCloseListeners_.get(sessionId);
+		if (!existingListeners) {
+			this.sessionCloseListeners_.set(sessionId, [listener]);
+		} else {
+			existingListeners.push(listener);
+		}
+	}
+
+	/** @internal -- may be used to implement nextAudioData */
 	public async getAudioStreamType(sessionId: VoiceTypingSessionId): Promise<AudioDataSource> {
 		return this.sessionIdToAudioSource_.get(sessionId);
 	}
 
 	/**
-	 * Gets the audio input stream for the given voice typing session.
+	 * Gets the audio input data as a Float32Array.
 	 *
-	 * Voice typing plugins can get data from this stream using, for example,
-	 * [AudioContext.createMediaStreamSource](https://developer.mozilla.org/en-US/docs/Web/API/AudioContext/createMediaStreamSource).
+	 * This function waits until `durationSeconds` seconds of audio are available before returning.
+	 * If less data is available and the stream has closed, the returned data will be shorter than
+	 * `durationSeconds`.
 	 */
-	public async getAudioStream(_sessionId: VoiceTypingSessionId): Promise<MediaStream> {
+	public async nextAudioData(_sessionId: VoiceTypingSessionId, _durationSeconds: number): Promise<AudioSamples> {
 		// This must be implemented within the plugin runner webview,
-		// since MediaStreams can't be transferred via IPC.
+		// since Float32Arrays can't be transferred efficiently via IPC on all platforms.
 		throw new Error('Not implemented for this platform.');
 	}
 }

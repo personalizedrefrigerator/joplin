@@ -9,6 +9,8 @@ import shim from '@joplin/lib/shim';
 import Logger from '@joplin/utils/Logger';
 import createOnLogHander from './utils/createOnLogHandler';
 import { OnMessageEvent } from '../ExtendedWebView/types';
+import { Platform } from 'react-native';
+import createRecordingSessionManager from './backgroundPage/utils/createRecordingSessionManager';
 
 const logger = Logger.create('PluginRunner');
 
@@ -55,9 +57,14 @@ export default class PluginRunner extends BasePluginRunner {
 			}
 		};
 
+		// On web, recording sessions need to be made in the toplevel context (due to iframe
+		// sandboxing):
+		const recordingSessionManager = (Platform.OS === 'web' ? createRecordingSessionManager(()=>null) : null);
+		const getRecordingSession = recordingSessionManager?.getAudioRecorder ?? (() => Promise.resolve(null));
+
 		const messageChannelId = `plugin-message-channel-${pluginId}-${Date.now()}`;
 		const messenger = new RNToWebViewMessenger<PluginMainProcessApi, PluginWebViewApi>(
-			messageChannelId, this.webviewRef, { api: pluginApi, onError, onLog, readFileBlob },
+			messageChannelId, this.webviewRef, { api: pluginApi, onError, onLog, readFileBlob, getRecordingSession },
 		);
 
 		this.messageEventListeners.push((event) => {

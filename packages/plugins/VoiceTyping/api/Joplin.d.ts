@@ -13,6 +13,7 @@ import JoplinWindow from './JoplinWindow';
 import BasePlatformImplementation from '../BasePlatformImplementation';
 import JoplinImaging from './JoplinImaging';
 import JoplinFs from './JoplinFs';
+import JoplinVoiceTyping from './JoplinVoiceTyping';
 /**
  * This is the main entry point to the Joplin API. You can access various services using the provided accessors.
  *
@@ -39,6 +40,7 @@ export default class Joplin {
     private clipboard_;
     private window_;
     private fs_;
+    private voiceTyping_;
     private implementation_;
     constructor(implementation: BasePlatformImplementation, plugin: Plugin, store: any);
     get data(): JoplinData;
@@ -60,6 +62,7 @@ export default class Joplin {
     get interop(): JoplinInterop;
     get settings(): JoplinSettings;
     get fs(): JoplinFs;
+    get voiceTyping(): JoplinVoiceTyping;
     /**
      * It is not possible to bundle native packages with a plugin, because they
      * need to work cross-platforms. Instead access to certain useful native
