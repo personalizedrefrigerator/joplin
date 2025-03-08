@@ -185,6 +185,7 @@ const vosk: SpeechToTextProvider = {
 	metadata: {
 		name: 'Vosk',
 		id: 'vosk',
+		attribution: null,
 	},
 	getDownloadManager,
 	start: async ({ callbacks, locale }) => {

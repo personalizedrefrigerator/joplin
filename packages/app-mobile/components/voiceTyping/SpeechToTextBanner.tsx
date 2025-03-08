@@ -8,7 +8,7 @@ import { connect } from 'react-redux';
 import Logger from '@joplin/utils/Logger';
 import { RecorderState } from './types';
 import RecordingControls from './RecordingControls';
-import { PrimaryButton } from '../buttons';
+import { LinkButton, PrimaryButton } from '../buttons';
 import useQueuedAsyncEffect from '@joplin/lib/hooks/useQueuedAsyncEffect';
 import { AudioDataSourceType, OnTextCallback, SpeechToTextSession } from '@joplin/lib/services/speechToText/types';
 import SpeechToTextService from '@joplin/lib/services/speechToText/SpeechToTextService';
@@ -31,7 +31,7 @@ interface UseVoiceTypingProps {
 }
 
 const useVoiceTyping = ({ locale, providerSetting, onSetPreview, onText }: UseVoiceTypingProps) => {
-	const [voiceTyping, setVoiceTyping] = useState<SpeechToTextSession>(null);
+	const [voiceTyping, setVoiceTyping] = useState<SpeechToTextSession|null>(null);
 	const [error, setError] = useState<Error|null>(null);
 	const [mustDownloadModel, setMustDownloadModel] = useState<boolean | null>(null);
 	const [modelIsOutdated, setModelIsOutdated] = useState(false);
@@ -50,6 +50,9 @@ const useVoiceTyping = ({ locale, providerSetting, onSetPreview, onText }: UseVo
 	const downloadManager = useMemo(() => {
 		return provider.getDownloadManager(locale);
 	}, [provider, locale]);
+	const attribution = useMemo(() => {
+		return provider.metadata.attribution;
+	}, [provider]);
 
 	const [redownloadCounter, setRedownloadCounter] = useState(0);
 
@@ -114,7 +117,7 @@ const useVoiceTyping = ({ locale, providerSetting, onSetPreview, onText }: UseVo
 	}, [downloadManager]);
 
 	return {
-		error, mustDownloadModel, voiceTyping, onRequestRedownload, modelIsOutdated,
+		error, attribution, mustDownloadModel, voiceTyping, onRequestRedownload, modelIsOutdated,
 	};
 };
 
@@ -125,6 +128,7 @@ const SpeechToTextComponent: React.FC<Props> = props => {
 		error: modelError,
 		mustDownloadModel,
 		voiceTyping,
+		attribution,
 		onRequestRedownload,
 		modelIsOutdated,
 	} = useVoiceTyping({
@@ -153,6 +157,10 @@ const SpeechToTextComponent: React.FC<Props> = props => {
 		props.onDismiss();
 	}, [voiceTyping, props.onDismiss]);
 
+	const onAttributionLinkClick = useCallback(() => {
+		shim.openUrl(attribution.url);
+	}, [attribution]);
+
 	const renderContent = () => {
 		const components: Record<RecorderState, ()=> string> = {
 			[RecorderState.Loading]: () => _('Loading...'),
@@ -168,6 +176,12 @@ const SpeechToTextComponent: React.FC<Props> = props => {
 
 	const renderPreview = () => {
 		return <Text variant='labelSmall'>{preview}</Text>;
+	};
+
+	const renderAttribution = () => {
+		if (!attribution) return null;
+
+		return <LinkButton onPress={onAttributionLinkClick}>{_('Powered by %s', attribution.libraryName)}</LinkButton>;
 	};
 
 	const reDownloadButton = <Button onPress={onRequestRedownload}>
@@ -188,6 +202,7 @@ const SpeechToTextComponent: React.FC<Props> = props => {
 		heading={_('Voice typing...')}
 		content={renderContent()}
 		preview={renderPreview()}
+		attribution={renderAttribution()}
 		actions={actions}
 	/>;
 };

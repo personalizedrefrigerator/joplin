@@ -7,7 +7,7 @@ import Plugin from '../Plugin';
 export type VoiceTypingSessionId = `session-${string}`;
 
 export interface VoiceTypingPluginAttribution {
-	text: string;
+	libraryName: string;
 	url: string;
 }
 
@@ -73,6 +73,10 @@ export default class JoplinVoiceTyping {
 			metadata: {
 				id: `${this.plugin_.id}-${voiceTypingProvider.id}`,
 				name: voiceTypingProvider.name,
+				attribution: voiceTypingProvider.attribution ? {
+					libraryName: voiceTypingProvider.attribution.libraryName,
+					url: voiceTypingProvider.attribution.url,
+				} : null,
 			},
 			getDownloadManager: (_locale) => {
 				return {

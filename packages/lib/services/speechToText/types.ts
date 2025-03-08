@@ -23,9 +23,15 @@ interface ResourceDataSource {
 
 export type AudioDataSource = MicrophoneDataSource|ResourceDataSource;
 
+export interface SpeechToTextAttribution {
+	libraryName: string;
+	url: string;
+}
+
 export interface SpeechToTextProviderMetadata {
 	id: string;
 	name: string;
+	attribution: SpeechToTextAttribution|null;
 }
 
 export interface SpeechToTextDownloadManager {

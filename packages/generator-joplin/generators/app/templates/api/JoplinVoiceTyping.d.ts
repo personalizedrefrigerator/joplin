@@ -2,7 +2,7 @@ import { AudioDataSource } from '../../speechToText/types';
 import Plugin from '../Plugin';
 export type VoiceTypingSessionId = `session-${string}`;
 export interface VoiceTypingPluginAttribution {
-    text: string;
+    libraryName: string;
     url: string;
 }
 export interface VoiceTypingPlugin {

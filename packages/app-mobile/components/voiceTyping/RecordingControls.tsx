@@ -11,6 +11,7 @@ interface Props {
 	content: React.ReactNode|string;
 	preview: React.ReactNode;
 	actions: React.ReactNode;
+	attribution?: React.ReactNode;
 }
 
 const styles = StyleSheet.create({
@@ -38,6 +39,9 @@ const styles = StyleSheet.create({
 		justifyContent: 'flex-end',
 		gap: 6,
 		marginBottom: 6,
+	},
+	spacer: {
+		flexGrow: 1,
 	},
 });
 
@@ -85,6 +89,8 @@ const RecordingControls: React.FC<Props> = props => {
 				</View>
 			</View>
 			<View style={styles.actionContainer}>
+				{props.attribution}
+				<View style={styles.spacer}/>
 				{props.actions}
 			</View>
 		</View>
