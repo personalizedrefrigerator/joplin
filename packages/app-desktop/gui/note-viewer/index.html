@@ -377,6 +377,34 @@
 			contentElement.scrollTop = scrollTop;
 		}
 
+		const getLineCorrespondingTo = (editorLineNumber) => {
+			const lineElements = document.getElementsByClassName('maps-to-line');
+			let lastLineElement;
+			let lastLine = 0;
+			for (const element of lineElements) {
+				// Stop just before the element that corresponds to a greater position
+				if (Number(element.getAttribute('source-line')) > editorLineNumber) {
+					break;
+				}
+				lastLineElement = element;
+			}
+			return lastLineElement;
+		};
+
+		ipc.focusLine = (event) => {
+			const targetLine = event.line;
+			const lineElement = getLineCorrespondingTo(targetLine);
+			if (lineElement) {
+				const originalTabIndex = lineElement.getAttribute('tabindex');
+				lineElement.setAttribute('tabindex', 0);
+				lineElement.focus();
+
+				setTimeout(() => {
+					lineElement.setAttribute('tabindex', originalTabIndex);
+				}, 50);
+			}
+		}
+
 		const rewriteFileUrls = (accessKey) => {
 			if (!accessKey) return;
 

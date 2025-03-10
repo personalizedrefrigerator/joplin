@@ -479,6 +479,7 @@ function useMenu(props: Props) {
 				menuItemDic.focusElementNoteList,
 				menuItemDic.focusElementNoteTitle,
 				menuItemDic.focusElementNoteBody,
+				menuItemDic.focusElementNoteViewer,
 				menuItemDic.focusElementToolbar,
 			];
 
