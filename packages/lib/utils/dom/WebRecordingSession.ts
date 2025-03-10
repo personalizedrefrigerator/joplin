@@ -29,6 +29,8 @@ const getWorkletUrl = () => {
 	return URL.createObjectURL(workletBlob);
 };
 
+type AudioSourceFactory = (ctx: AudioContext)=> AudioNode;
+
 export default class WebRecordingSession {
 	private audioData_: Float32Array[] = [];
 	private bufferedDataDurationSeconds_ = 0;
@@ -63,7 +65,7 @@ export default class WebRecordingSession {
 
 	private enforceBufferSizeLimit_() {
 		// Start trimming data if too much is buffered
-		const maxBufferSizeSeconds = 30;
+		const maxBufferSizeSeconds = 60;
 		while (this.bufferedDataDurationSeconds_ > maxBufferSizeSeconds) {
 			const firstItem = this.audioData_[0];
 			this.bufferedDataDurationSeconds_ -= firstItem.length / this.sampleRate_;
@@ -111,6 +113,7 @@ export default class WebRecordingSession {
 		const result = this.getFullAudioBuffer_();
 		// Clear the buffered data so that future calls will return just new data
 		this.audioData_ = [];
+		this.bufferedDataDurationSeconds_ = 0;
 		return result;
 	}
 
@@ -123,28 +126,39 @@ export default class WebRecordingSession {
 	}
 
 	public static async fromMicrophone() {
-		if (!this.supported()) {
-			throw new Error('WebRecordingSession is not supported in this context.');
-		}
+		this.assertSupported();
 
 		const audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-		const audioContext = new AudioContext();
-		// Note: An alternative to data:text/javascript might be blob URLs (as is done
-		// in this StackOverflow post: https://stackoverflow.com/a/67350383)
+		const makeSource: AudioSourceFactory = (audioContext) => {
+			return audioContext.createMediaStreamSource(audioStream);
+		};
+		const onClose = () => {
+			for (const track of audioStream.getTracks()) {
+				track.stop();
+			}
+		};
+		return this.fromSource(makeSource, onClose);
+	}
+
+	private static async fromSource(sourceFactory: AudioSourceFactory, onClose: ()=> void) {
+		const audioContext = new AudioContext({
+			// Voice typing providers like Whisper and Kroko use a 16000 Hz sample rate,
+			// so default to that:
+			sampleRate: 16_000,
+		});
+
 		try {
 			await audioContext.audioWorklet.addModule(getWorkletUrl());
 		} catch (error) {
 			throw new Error(`Error creating audio worklet for data extraction: ${error}`);
 		}
-		const source = audioContext.createMediaStreamSource(audioStream);
+		const source = sourceFactory(audioContext);
 		const dataAccessNode = new AudioWorkletNode(audioContext, 'get-data-worklet');
 		source.connect(dataAccessNode);
 
 		const closeStream = async () => {
 			await audioContext.close();
-			for (const track of audioStream.getTracks()) {
-				track.stop();
-			}
+			onClose();
 		};
 
 		return new WebRecordingSession(closeStream, dataAccessNode);
@@ -152,5 +166,11 @@ export default class WebRecordingSession {
 
 	public static supported() {
 		return typeof AudioContext !== 'undefined' && typeof navigator !== 'undefined';
+	}
+
+	private static assertSupported() {
+		if (!this.supported()) {
+			throw new Error('WebRecordingSession is not supported in this context.');
+		}
 	}
 }

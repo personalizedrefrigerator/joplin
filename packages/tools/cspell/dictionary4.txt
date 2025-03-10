@@ -173,3 +173,5 @@ ggml
 Minidump
 collapseall
 newfolder
+Kroko
+paraformer

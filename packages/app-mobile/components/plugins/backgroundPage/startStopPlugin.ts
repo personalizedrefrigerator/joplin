@@ -105,7 +105,10 @@ export const runPlugin = (
 						async nextAudioData(sessionId, durationSeconds) {
 							const voiceTyping = connectionToParent.remoteApi.api.joplin.voiceTyping;
 							const streamType = await voiceTyping.getAudioStreamType(sessionId);
-							if (streamType.kind === AudioDataSourceType.Microphone) {
+							if (!streamType) {
+								// The stream has either been closed or has not started
+								return undefined;
+							} else if (streamType.kind === AudioDataSourceType.Microphone) {
 								const isNewStream = !recordingManager.hasAudioRecorder(sessionId);
 								const stream = await recordingManager.getAudioRecorder(sessionId);
 

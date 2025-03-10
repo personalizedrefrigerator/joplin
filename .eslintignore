@@ -64,6 +64,7 @@ packages/app-mobile/pluginAssets/
 packages/fork-*
 packages/default-plugins/plugin-base-repo/
 packages/default-plugins/plugin-sources/
+packages/plugins/VoiceTyping/src/vendor/
 packages/htmlpack/dist/
 packages/lib/assets/
 packages/lib/lib/lib.js

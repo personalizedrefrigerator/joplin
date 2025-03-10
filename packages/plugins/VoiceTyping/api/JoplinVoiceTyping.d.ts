@@ -2,7 +2,7 @@ import { AudioDataSource } from '../../speechToText/types';
 import Plugin from '../Plugin';
 export type VoiceTypingSessionId = `session-${string}`;
 export interface VoiceTypingPluginAttribution {
-    text: string;
+    libraryName: string;
     url: string;
 }
 export interface VoiceTypingPlugin {
@@ -26,17 +26,22 @@ export interface VoiceTypingPlugin {
     onStart(sessionId: VoiceTypingSessionId): Promise<void>;
     onStop(sessionId: VoiceTypingSessionId): Promise<void>;
 }
+export interface AudioSamples {
+    sampleRate: number;
+    data: Float32Array;
+}
 /**
  * This module provides cross-platform access to the file system.
  *
  * **Only supported on mobile**.
  */
 export default class JoplinVoiceTyping {
-    private pluginId_;
+    private plugin_;
     private nextSessionIdCounter_;
     private voiceTypingProviders_;
     private sessionIdToAudioSource_;
     private sessionIdToCallbacks_;
+    private sessionCloseListeners_;
     constructor(plugin: Plugin);
     /** Registers a voice typing source. */
     registerProvider(voiceTypingProvider: VoiceTypingPlugin): Promise<void>;
@@ -52,13 +57,19 @@ export default class JoplinVoiceTyping {
      * change.
      */
     updateRecognitionPreview(sessionId: VoiceTypingSessionId, preview: string): Promise<void>;
-    /** @internal */
+    /**
+     * Add a one-time listener for when a voice typing session is closed.
+     * This is called immediately before .onStop for a voice typing provider.
+     */
+    addBeforeSessionClosedListener(sessionId: VoiceTypingSessionId, listener: () => void): Promise<void>;
+    /** @internal -- may be used to implement nextAudioData */
     getAudioStreamType(sessionId: VoiceTypingSessionId): Promise<AudioDataSource>;
     /**
-     * Gets the audio input stream for the given voice typing session.
+     * Gets the audio input data as a Float32Array.
      *
-     * Voice typing plugins can get data from this stream using, for example,
-     * [AudioContext.createMediaStreamSource](https://developer.mozilla.org/en-US/docs/Web/API/AudioContext/createMediaStreamSource).
+     * This function waits until `durationSeconds` seconds of audio are available before returning.
+     * If less data is available and the stream has closed, the returned data will be shorter than
+     * `durationSeconds`.
      */
-    getAudioStream(_sessionId: VoiceTypingSessionId): Promise<MediaStream>;
+    nextAudioData(_sessionId: VoiceTypingSessionId, _durationSeconds: number): Promise<AudioSamples>;
 }

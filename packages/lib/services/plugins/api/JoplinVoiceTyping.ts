@@ -37,7 +37,7 @@ export interface VoiceTypingPlugin {
 	onStop(sessionId: VoiceTypingSessionId): Promise<void>;
 }
 
-type SessionCloseListener = ()=> void;
+type SessionCloseListener = ()=> void|Promise<void>;
 
 export interface AudioSamples {
 	sampleRate: number;
@@ -109,7 +109,7 @@ export default class JoplinVoiceTyping {
 						// before onStop.
 						const sessionCloseListeners = this.sessionCloseListeners_.get(sessionId) ?? [];
 						for (const listener of sessionCloseListeners) {
-							listener();
+							await listener();
 						}
 						this.sessionCloseListeners_.delete(sessionId);
 
