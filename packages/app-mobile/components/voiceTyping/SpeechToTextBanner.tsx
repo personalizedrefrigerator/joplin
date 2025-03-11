@@ -168,7 +168,7 @@ const SpeechToTextComponent: React.FC<Props> = props => {
 			[RecorderState.Recording]: () => _('Please record your voice...'),
 			[RecorderState.Processing]: () => _('Converting speech to text...'),
 			[RecorderState.Downloading]: () => _('Downloading %s language files...', languageName(props.locale)),
-			[RecorderState.Error]: () => _('Error: %s', modelError?.message),
+			[RecorderState.Error]: () => _('Error: %s', modelError?.message ?? `${modelError}`),
 		};
 
 		return components[recorderState]();

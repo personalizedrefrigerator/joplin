@@ -98,6 +98,7 @@ interface Props extends BaseProps {
 	editorFontSize: number;
 	editorFont: number; // e.g. Setting.FONT_MENLO
 	viewerFontSize: number;
+	locale: string;
 	showSideMenu: boolean;
 	searchQuery: string;
 	ftsEnabled: number;
@@ -1181,7 +1182,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 
 		const pluginCommands = pluginUtils.commandNamesFromViews(this.props.plugins, 'noteToolbar');
 
-		const cacheKey = md5([isTodo, isSaved, pluginCommands.join(','), readOnly].join('_'));
+		const cacheKey = md5([isTodo, isSaved, pluginCommands.join(','), readOnly, this.props.locale].join('_'));
 		if (!this.menuOptionsCache_) this.menuOptionsCache_ = {};
 
 		if (this.menuOptionsCache_[cacheKey]) return this.menuOptionsCache_[cacheKey];
@@ -1232,7 +1233,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 			});
 		}
 
-		const voiceTypingSupported = SpeechToTextService.instance().providerMetadata.length > 0;
+		const voiceTypingSupported = SpeechToTextService.instance().getProvidersSupportingLanguage(this.props.locale).length > 0;
 		if (voiceTypingSupported) {
 			output.push({
 				title: _('Voice typing...'),
@@ -1745,6 +1746,7 @@ const NoteScreen = connect((state: AppState) => {
 		viewerFontSize: state.settings['style.viewer.fontSize'],
 		toolbarEnabled: state.settings['editor.mobile.toolbarEnabled'],
 		ftsEnabled: state.settings['db.ftsEnabled'],
+		locale: state.settings.locale,
 		sharedData: state.sharedData,
 		showSideMenu: state.showSideMenu,
 		provisionalNoteIds: state.provisionalNoteIds,

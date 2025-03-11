@@ -1,4 +1,5 @@
 import joplin from 'api';
+import { VoiceTypingSessionInfo } from 'api/JoplinVoiceTyping';
 
 // Allow console.*: In mobile plugins, console.log is the way to add Joplin's log file (in debug mode).
 /* eslint-disable no-console */
@@ -6,7 +7,14 @@ import joplin from 'api';
 const { loadModule } = require('./vendor/sherpa/sherpa-onnx-wasm-main-asr');
 const { createOnlineRecognizer } = require('./vendor/sherpa/sherpa-onnx-asr');
 
-const voiceTypingAssets = (languageCode: string, baseUrl: string) => {
+const getLanguageCode = (locale: string) => {
+	return locale.substring(0, 2).toLowerCase();
+};
+
+const voiceTypingAssets = ({ locale, downloadUrlTemplate = 'http://localhost:8000/' }: VoiceTypingSessionInfo) => {
+	const languageCode = getLanguageCode(locale);
+	const baseUrl = downloadUrlTemplate.replace(/\{lang\}/g, languageCode);
+
 	const asset = (suffix: string, prefix: string = languageCode) => {
 		const fileName = `${prefix}${suffix}`;
 		return {
@@ -76,7 +84,11 @@ class VoiceTypingModule {
 
 	private static dataFileCache_: string;
 	private static async loadDataFile_(assets: VoiceTypingAssets) {
-		if (this.dataFileCache_) return this.dataFileCache_;
+		if (this.dataFileCache_) {
+			URL.revokeObjectURL(this.dataFileCache_);
+			this.dataFileCache_ = null;
+		}
+
 		const asset = assets.find(asset => asset.fileName.endsWith('asr.data'));
 		const data = await joplin.fs.readBlob(asset.fileName);
 		const url = URL.createObjectURL(data);
@@ -84,7 +96,15 @@ class VoiceTypingModule {
 		return url;
 	}
 
-	public static async create(assets: VoiceTypingAssets, callbacks: ModuleCallbacks) {
+	private static cachedRecognizers_ = new Map<string, OnlineRecognizer>();
+	public static async create(sessionInfo: VoiceTypingSessionInfo, callbacks: ModuleCallbacks) {
+		const locale = sessionInfo.locale;
+		const cachedRecognizer = this.cachedRecognizers_.get(locale);
+		if (cachedRecognizer) {
+			return new VoiceTypingModule(cachedRecognizer, callbacks);
+		}
+
+		const assets = voiceTypingAssets(sessionInfo);
 		const wasm = await joplin.fs.readBlob('./sherpa-onnx-wasm-main-asr.wasm');
 		const dataFileUrl = await this.loadDataFile_(assets);
 
@@ -99,15 +119,17 @@ class VoiceTypingModule {
 		});
 
 		for (const asset of assets) {
-			console.log('transferring asset', asset);
+			console.log('Transferring asset', asset.fileName);
 			// See https://emscripten.org/docs/api_reference/Filesystem-API.html#filesystem-api
 			const stream = FS.open(asset.fileName.replace(/^[a-z]{2}_/, ''), 'w+');
 			const array = new Uint8Array(await (await joplin.fs.readBlob(asset.fileName)).arrayBuffer());
 			FS.write(stream, array, 0, array.length, 0);
 			FS.close(stream);
+			console.log('Transferred asset', asset.fileName);
 		}
 
 		const recognizer = createOnlineRecognizer(Module);
+		this.cachedRecognizers_.set(locale, recognizer);
 		return new VoiceTypingModule(recognizer, callbacks);
 	}
 
@@ -148,9 +170,7 @@ class VoiceTypingModule {
 
 joplin.plugins.register({
 	onStart: async function() {
-		const languageCode = 'en';
-		const assets = voiceTypingAssets(languageCode, 'http://localhost:8000');
-		const isDownloaded = async () => {
+		const isDownloaded = async (assets: VoiceTypingAssets) => {
 			for (const asset of assets) {
 				if (!await joplin.fs.exists(asset.fileName)) {
 					return false;
@@ -159,7 +179,7 @@ joplin.plugins.register({
 			return true;
 		};
 
-		let recognizer: VoiceTypingModule;
+		let recognizer: VoiceTypingModule|null = null;
 		await joplin.voiceTyping.registerProvider({
 			name: 'Kroko',
 			id: 'kroko',
@@ -167,26 +187,34 @@ joplin.plugins.register({
 				url: 'https://huggingface.co/Banafo/Kroko-ASR',
 				libraryName: 'Kroko',
 			},
-			async download() {
-				await downloadVoiceTypingAssets(assets);
+			supportedLanguages: ['en', 'fr'],
+			async download(info: VoiceTypingSessionInfo) {
+				await downloadVoiceTypingAssets(voiceTypingAssets(info));
 			},
-			async isDownloaded() {
-				return await isDownloaded();
+			async isDownloaded(info) {
+				return await isDownloaded(voiceTypingAssets(info));
 			},
-			async canUpdateModel() {
-				return !await isDownloaded();
+			async canUpdateModel(info) {
+				return !await isDownloaded(voiceTypingAssets(info));
 			},
-			async clearCache() {
-				for (const asset of assets) {
+			async clearCache(info) {
+				for (const asset of voiceTypingAssets(info)) {
 					await joplin.fs.remove(asset.fileName);
 				}
 			},
-			async onStart(sessionId) {
-				recognizer = await VoiceTypingModule.create(assets, {
+			async onStart(sessionId, info) {
+				recognizer = await VoiceTypingModule.create(info, {
 					onPreview: (text) => {
+						if (!recognizer) {
+							console.log('Session closed');
+							return;
+						}
 						return joplin.voiceTyping.updateRecognitionPreview(sessionId, text);
 					},
 					onFinalize: (text) => {
+						// Session closed
+						if (!recognizer) return;
+
 						return joplin.voiceTyping.onTextRecognised(sessionId, text);
 					},
 				});
@@ -201,6 +229,7 @@ joplin.plugins.register({
 			},
 			async onStop(sessionId) {
 				console.log('Stopped voice typing session', sessionId);
+				recognizer = null;
 			},
 		});
 

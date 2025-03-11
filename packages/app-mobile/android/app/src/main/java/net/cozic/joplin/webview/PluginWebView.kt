@@ -159,7 +159,6 @@ class PluginWebView(
         webChromeClient = LocalContentChrome(context)
         settings.javaScriptEnabled = true
         settings.mediaPlaybackRequiresUserGesture = false
-        settings.allowContentAccess = true
         loadUrl("https://local-content.joplinapp.org/webview/")
 
         WebViewCompat.addWebMessageListener(

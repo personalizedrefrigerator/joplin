@@ -1,5 +1,6 @@
 /* eslint-disable multiline-comment-style */
 
+import Setting from '../../../models/Setting';
 import SpeechToTextService from '../../speechToText/SpeechToTextService';
 import { AudioDataSource, SpeechToTextCallbacks, SpeechToTextProvider } from '../../speechToText/types';
 import Plugin from '../Plugin';
@@ -12,7 +13,19 @@ export interface VoiceTypingPluginAttribution {
 }
 
 export interface VoiceTypingSessionInfo {
+	/**
+	 * The predicted language for voice typing based on the user's settings.
+	 * For example, `en_US`.
+	 */
 	locale: string;
+
+	/**
+	 * A URL pattern for downloading the model requested by the user in Joplin's settings.
+	 * Shared for all voice typing providers and may be ignored.
+	 *
+	 * When `undefined`, the default URL should be used.
+	 */
+	downloadUrlTemplate: string|undefined;
 }
 
 export interface VoiceTypingPlugin {
@@ -22,20 +35,26 @@ export interface VoiceTypingPlugin {
 	id: string;
 
 	/**
+	 * An array of language codes supported by the plugin (e.g. `en` for English).
+	 * Set to `['*']` to mark all languages as supported.
+	 */
+	supportedLanguages: string[];
+
+	/**
 	 * Used, for example, to display a "powered by [provider]" link
 	 * in the voice typing dialog.
 	 */
 	attribution?: VoiceTypingPluginAttribution;
 
-	download(): Promise<void>;
-	isDownloaded(): Promise<boolean>;
-	canUpdateModel(): Promise<boolean>;
+	download(options: VoiceTypingSessionInfo): Promise<void>;
+	isDownloaded(options: VoiceTypingSessionInfo): Promise<boolean>;
+	canUpdateModel(options: VoiceTypingSessionInfo): Promise<boolean>;
 
 	/**
 	 * Should remove any cached model data. May be called when the model
 	 * experiences an error or crash.
 	 */
-	clearCache(): Promise<void>;
+	clearCache(options: VoiceTypingSessionInfo): Promise<void>;
 
 	onStart(sessionId: VoiceTypingSessionId, options: VoiceTypingSessionInfo): Promise<void>;
 	onStop(sessionId: VoiceTypingSessionId): Promise<void>;
@@ -47,6 +66,15 @@ export interface AudioSamples {
 	sampleRate: number;
 	data: Float32Array;
 }
+
+const getDownloadUrlTemplate = () => {
+	const baseUrlSetting = Setting.value('voiceTypingBaseUrl');
+	if (baseUrlSetting.trim() === '') {
+		return undefined;
+	} else {
+		return baseUrlSetting;
+	}
+};
 
 /**
  * This module provides cross-platform access to the file system.
@@ -82,21 +110,30 @@ export default class JoplinVoiceTyping {
 					url: voiceTypingProvider.attribution.url,
 				} : null,
 			},
-			getDownloadManager: (_locale) => {
+			getDownloadManager: (locale) => {
+				const info = { locale, downloadUrlTemplate: getDownloadUrlTemplate() };
 				return {
 					download: async () => {
-						await voiceTypingProvider.download();
+						await voiceTypingProvider.download(info);
 					},
 					isDownloaded: async () => {
-						return !!await voiceTypingProvider.isDownloaded();
+						return !!await voiceTypingProvider.isDownloaded(info);
 					},
 					canUpdateModel: async () => {
-						return !!await voiceTypingProvider.canUpdateModel();
+						return !!await voiceTypingProvider.canUpdateModel(info);
 					},
 					clearCache: async () => {
-						await voiceTypingProvider.clearCache();
+						await voiceTypingProvider.clearCache(info);
 					},
 				};
+			},
+			supportsLanguage: (locale) => {
+				const languageCode = locale.substring(0, 2).toLowerCase();
+				const supportedLanguages = voiceTypingProvider.supportedLanguages;
+				if (!supportedLanguages) {
+					throw new Error(`Plugin ${this.plugin_.id} has a voice typing provider missing the "supportedLanguages" property.`);
+				}
+				return supportedLanguages.includes(languageCode) || supportedLanguages.includes('*');
 			},
 
 			start: async ({ dataSource, callbacks, locale }) => {
@@ -105,7 +142,7 @@ export default class JoplinVoiceTyping {
 				this.sessionIdToCallbacks_.set(sessionId, callbacks);
 
 				await voiceTypingProvider.onStart(sessionId, {
-					locale,
+					locale, downloadUrlTemplate: getDownloadUrlTemplate(),
 				});
 
 				return {

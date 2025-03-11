@@ -6,7 +6,16 @@ export interface VoiceTypingPluginAttribution {
     url: string;
 }
 export interface VoiceTypingSessionInfo {
+    /**
+     * The predicted language for voice typing based on the user's settings.
+     * For example, `en_US`.
+     */
     locale: string;
+    /**
+     * A URL pattern for downloading the model requested by the user in Joplin's settings.
+     * Shared for all voice typing providers and may be ignored.
+     */
+    downloadUrlTemplate: string;
 }
 export interface VoiceTypingPlugin {
     /** A short user-facing description of the provider */
@@ -14,18 +23,23 @@ export interface VoiceTypingPlugin {
     /** A unique ID for the provider */
     id: string;
     /**
+     * An array of language codes supported by the plugin (e.g. `en` for English).
+     * Set to `['*']` to mark all languages as supported.
+     */
+    supportedLanguages: string[];
+    /**
      * Used, for example, to display a "powered by [provider]" link
      * in the voice typing dialog.
      */
     attribution?: VoiceTypingPluginAttribution;
-    download(): Promise<void>;
-    isDownloaded(): Promise<boolean>;
-    canUpdateModel(): Promise<boolean>;
+    download(options: VoiceTypingSessionInfo): Promise<void>;
+    isDownloaded(options: VoiceTypingSessionInfo): Promise<boolean>;
+    canUpdateModel(options: VoiceTypingSessionInfo): Promise<boolean>;
     /**
      * Should remove any cached model data. May be called when the model
      * experiences an error or crash.
      */
-    clearCache(): Promise<void>;
+    clearCache(options: VoiceTypingSessionInfo): Promise<void>;
     onStart(sessionId: VoiceTypingSessionId, options: VoiceTypingSessionInfo): Promise<void>;
     onStop(sessionId: VoiceTypingSessionId): Promise<void>;
 }

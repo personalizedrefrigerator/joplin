@@ -30,6 +30,12 @@ export default class SpeechToTextService {
 		return this.providers_.map(provider => provider.metadata);
 	}
 
+	public getProvidersSupportingLanguage(locale: string) {
+		return this.providers_.filter(provider => {
+			return provider.supportsLanguage(locale);
+		}).map(provider => provider.metadata);
+	}
+
 	public getProvider(preferredProviderId: string) {
 		if (this.providers_.length === 0) {
 			throw new Error('No voice typing providers available.');

@@ -54,6 +54,7 @@ export interface SessionStartOptions {
 export interface SpeechToTextProvider {
 	metadata: SpeechToTextProviderMetadata;
 	getDownloadManager(locale: string): SpeechToTextDownloadManager;
+	supportsLanguage(locale: string): boolean;
 
 	start(options: SessionStartOptions): Promise<SpeechToTextSession>;
 }

@@ -187,6 +187,9 @@ const vosk: SpeechToTextProvider = {
 		id: 'vosk',
 		attribution: null,
 	},
+	supportsLanguage: (locale) => {
+		return isSupportedLanguage(locale);
+	},
 	getDownloadManager,
 	start: async ({ callbacks, locale }) => {
 		const modelPath = getDownloadManager(locale).getDownloadedModelPath();
