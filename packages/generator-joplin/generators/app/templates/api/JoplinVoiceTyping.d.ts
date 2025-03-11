@@ -5,6 +5,9 @@ export interface VoiceTypingPluginAttribution {
     libraryName: string;
     url: string;
 }
+export interface VoiceTypingSessionInfo {
+    locale: string;
+}
 export interface VoiceTypingPlugin {
     /** A short user-facing description of the provider */
     name: string;
@@ -23,7 +26,7 @@ export interface VoiceTypingPlugin {
      * experiences an error or crash.
      */
     clearCache(): Promise<void>;
-    onStart(sessionId: VoiceTypingSessionId): Promise<void>;
+    onStart(sessionId: VoiceTypingSessionId, options: VoiceTypingSessionInfo): Promise<void>;
     onStop(sessionId: VoiceTypingSessionId): Promise<void>;
 }
 export interface AudioSamples {

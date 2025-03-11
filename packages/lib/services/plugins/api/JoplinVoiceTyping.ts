@@ -11,6 +11,10 @@ export interface VoiceTypingPluginAttribution {
 	url: string;
 }
 
+export interface VoiceTypingSessionInfo {
+	locale: string;
+}
+
 export interface VoiceTypingPlugin {
 	/** A short user-facing description of the provider */
 	name: string;
@@ -33,7 +37,7 @@ export interface VoiceTypingPlugin {
 	 */
 	clearCache(): Promise<void>;
 
-	onStart(sessionId: VoiceTypingSessionId): Promise<void>;
+	onStart(sessionId: VoiceTypingSessionId, options: VoiceTypingSessionInfo): Promise<void>;
 	onStop(sessionId: VoiceTypingSessionId): Promise<void>;
 }
 
@@ -95,12 +99,14 @@ export default class JoplinVoiceTyping {
 				};
 			},
 
-			start: async ({ dataSource, callbacks }) => {
+			start: async ({ dataSource, callbacks, locale }) => {
 				const sessionId: VoiceTypingSessionId = `session-${this.nextSessionIdCounter_++}`;
 				this.sessionIdToAudioSource_.set(sessionId, dataSource);
 				this.sessionIdToCallbacks_.set(sessionId, callbacks);
 
-				await voiceTypingProvider.onStart(sessionId);
+				await voiceTypingProvider.onStart(sessionId, {
+					locale,
+				});
 
 				return {
 					stop: async () => {
