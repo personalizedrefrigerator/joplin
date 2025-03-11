@@ -105,13 +105,16 @@ class VoiceTypingModule {
 		}
 
 		const assets = voiceTypingAssets(sessionInfo);
-		const wasm = await joplin.fs.readBlob('./sherpa-onnx-wasm-main-asr.wasm');
+		const wasmAsset = assets.find(asset => asset.fileName.endsWith('.wasm'));
+		const wasm = await joplin.fs.readBlob(wasmAsset.fileName);
 		const dataFileUrl = await this.loadDataFile_(assets);
 
 		const { Module, FS } = await loadModule({
 			wasmBinary: await wasm.arrayBuffer(),
 			locateFile: (f: string) => {
 				if (f.includes('sherpa-onnx-wasm-main-asr.data')) {
+					// Custom logic for loading the .data file (which initializes the
+					// file system)
 					return dataFileUrl;
 				}
 				return f;
@@ -119,10 +122,17 @@ class VoiceTypingModule {
 		});
 
 		for (const asset of assets) {
+			if (asset === wasmAsset) {
+				console.log('Skipping already-used WASM asset', asset.fileName);
+				continue;
+			}
+
 			console.log('Transferring asset', asset.fileName);
+			const assetBlob = await joplin.fs.readBlob(asset.fileName);
+			const array = new Uint8Array(await assetBlob.arrayBuffer());
+
 			// See https://emscripten.org/docs/api_reference/Filesystem-API.html#filesystem-api
 			const stream = FS.open(asset.fileName.replace(/^[a-z]{2}_/, ''), 'w+');
-			const array = new Uint8Array(await (await joplin.fs.readBlob(asset.fileName)).arrayBuffer());
 			FS.write(stream, array, 0, array.length, 0);
 			FS.close(stream);
 			console.log('Transferred asset', asset.fileName);
