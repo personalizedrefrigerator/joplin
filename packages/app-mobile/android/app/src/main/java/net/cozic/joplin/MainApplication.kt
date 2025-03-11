@@ -18,6 +18,7 @@ import net.cozic.joplin.versioninfo.SystemVersionInformationPackage
 import net.cozic.joplin.share.SharePackage
 import net.cozic.joplin.ssl.SslPackage
 import net.cozic.joplin.textinput.TextInputPackage
+import net.cozic.joplin.webview.CustomWebViewPackage
 
 class MainApplication : Application(), ReactApplication {
     override val reactNativeHost: ReactNativeHost = ReactNativeHostWrapper(this, object : DefaultReactNativeHost(this) {
@@ -29,6 +30,7 @@ class MainApplication : Application(), ReactApplication {
                     add(TextInputPackage())
                     add(SystemVersionInformationPackage())
                     add(SpeechToTextPackage())
+                    add(CustomWebViewPackage())
                 }
 
         override fun getJSMainModuleName(): String = "index"

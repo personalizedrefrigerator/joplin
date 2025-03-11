@@ -128,7 +128,13 @@ export default class WebRecordingSession {
 	public static async fromMicrophone() {
 		this.assertSupported();
 
-		const audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+		let audioStream;
+		try {
+			audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+		} catch (error) {
+			throw new Error(`Error calling getUserMedia: ${error}`);
+		}
+
 		const makeSource: AudioSourceFactory = (audioContext) => {
 			return audioContext.createMediaStreamSource(audioStream);
 		};

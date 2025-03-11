@@ -17,6 +17,8 @@ import PlatformImplementation from '../../services/plugins/PlatformImplementatio
 import AccessibleView from '../accessibility/AccessibleView';
 import useOnDevPluginsUpdated from './utils/useOnDevPluginsUpdated';
 import loadBuiltInPlugins from './utils/loadBuiltInPlugins';
+import BackgroundWebView from './BackgroundWebView';
+import { Platform } from 'react-native';
 
 const logger = Logger.create('PluginRunnerWebView');
 
@@ -155,6 +157,8 @@ const PluginRunnerWebViewComponent: React.FC<Props> = props => {
 					<meta charset="utf-8"/>
 				</head>
 				<body>
+					<h1>Plugin background page</h1>
+					<p>This page should not be visible.</p>
 				</body>
 			</html>
 		`;
@@ -170,19 +174,28 @@ const PluginRunnerWebViewComponent: React.FC<Props> = props => {
 			}
 		`;
 
+		const sharedWebViewProps = {
+			onLoadEnd, onLoadStart, html, injectedJavaScript: injectedJs,
+			webviewInstanceId: 'PluginRunner2',
+			onMessage: pluginRunner.onWebviewMessage,
+		};
+		const webView = Platform.OS === 'android' ? (
+			<BackgroundWebView
+				ref={webviewRef}
+				{...sharedWebViewProps}
+			/>
+		) : (
+			<ExtendedWebView
+				{...sharedWebViewProps}
+				hasPluginScripts={true}
+				allowFileAccessFromJs={true}
+				ref={webviewRef}
+			/>
+		);
+
 		return (
 			<>
-				<ExtendedWebView
-					webviewInstanceId='PluginRunner2'
-					html={html}
-					injectedJavaScript={injectedJs}
-					hasPluginScripts={true}
-					allowFileAccessFromJs={true}
-					onMessage={pluginRunner.onWebviewMessage}
-					onLoadEnd={onLoadEnd}
-					onLoadStart={onLoadStart}
-					ref={webviewRef}
-				/>
+				{webView}
 				<PluginDialogManager
 					themeId={props.themeId}
 					pluginHtmlContents={props.pluginHtmlContents}
@@ -193,7 +206,7 @@ const PluginRunnerWebViewComponent: React.FC<Props> = props => {
 	};
 
 	return (
-		<AccessibleView style={{ display: 'none' }} inert={true}>
+		<AccessibleView style={{ display: 'none', width: 10, height: 10 }} inert={true}>
 			{renderWebView()}
 		</AccessibleView>
 	);
