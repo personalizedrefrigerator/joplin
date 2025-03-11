@@ -1,4 +1,5 @@
 import { DependencyType } from '../getLicenses';
+import apache2 from '../licenseText/apache2';
 import mitLicense from '../licenseText/mit';
 import fontAwesomeOverride from './fontAwesomeOverride';
 import fontIsoOverride from './fontIsoOverride';
@@ -31,6 +32,24 @@ const mitLicenseOverride = (
 			licenses: 'MIT',
 			repository: packageRepo,
 			licenseText: mitLicense(copyright),
+			path: null,
+		},
+	};
+};
+
+const apache2LicenseOverride = (
+	packageName: string,
+	packageRepo: `https://${string}`,
+	replaceMatching: RegExp|null = null,
+): LicenseOverride => {
+	return {
+		packageName: packageName,
+		replacePackagesMatching: replaceMatching,
+		mode: DependencyType.Production,
+		info: {
+			licenses: 'Apache-2.0',
+			repository: packageRepo,
+			licenseText: apache2,
 			path: null,
 		},
 	};
@@ -83,6 +102,10 @@ const licenseOverrides: LicenseOverrides = {
 			'whisper.cpp',
 			'https://github.com/ggerganov/whisper.cpp/blob/master/LICENSE',
 			'Copyright (c) 2023-2024 The ggml authors',
+		),
+		apache2LicenseOverride(
+			'sherpa-onnx',
+			'https://github.com/k2-fsa/sherpa-onnx/blob/master/LICENSE',
 		),
 
 		...allPackageOverrides,
