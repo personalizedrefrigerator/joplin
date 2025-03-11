@@ -17,7 +17,7 @@ import PlatformImplementation from '../../services/plugins/PlatformImplementatio
 import AccessibleView from '../accessibility/AccessibleView';
 import useOnDevPluginsUpdated from './utils/useOnDevPluginsUpdated';
 import loadBuiltInPlugins from './utils/loadBuiltInPlugins';
-import BackgroundWebView from './BackgroundWebView';
+import BackgroundWebViewAndroid from './webview/BackgroundWebView.android';
 import { Platform } from 'react-native';
 
 const logger = Logger.create('PluginRunnerWebView');
@@ -180,7 +180,7 @@ const PluginRunnerWebViewComponent: React.FC<Props> = props => {
 			onMessage: pluginRunner.onWebviewMessage,
 		};
 		const webView = Platform.OS === 'android' ? (
-			<BackgroundWebView
+			<BackgroundWebViewAndroid
 				ref={webviewRef}
 				{...sharedWebViewProps}
 			/>

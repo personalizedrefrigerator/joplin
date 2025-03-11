@@ -672,7 +672,6 @@ packages/app-mobile/components/buttons/index.js
 packages/app-mobile/components/getResponsiveValue.test.js
 packages/app-mobile/components/getResponsiveValue.js
 packages/app-mobile/components/global-style.js
-packages/app-mobile/components/plugins/BackgroundWebView.js
 packages/app-mobile/components/plugins/PluginNotification.js
 packages/app-mobile/components/plugins/PluginRunner.js
 packages/app-mobile/components/plugins/PluginRunnerWebView.js
@@ -698,6 +697,8 @@ packages/app-mobile/components/plugins/types.js
 packages/app-mobile/components/plugins/utils/createOnLogHandler.js
 packages/app-mobile/components/plugins/utils/loadBuiltInPlugins.js
 packages/app-mobile/components/plugins/utils/useOnDevPluginsUpdated.js
+packages/app-mobile/components/plugins/webview/BackgroundWebView.android.js
+packages/app-mobile/components/plugins/webview/RCTPluginWebView.js
 packages/app-mobile/components/screens/ConfigScreen/ConfigScreen.js
 packages/app-mobile/components/screens/ConfigScreen/FileSystemPathSelector.js
 packages/app-mobile/components/screens/ConfigScreen/JoplinCloudConfig.js

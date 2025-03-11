@@ -4,9 +4,10 @@ import { forwardRef, Ref, useCallback, useImperativeHandle, useMemo, useRef } fr
 import { WebViewErrorEvent } from 'react-native-webview/lib/WebViewTypes';
 
 import Logger from '@joplin/utils/Logger';
-import { OnMessageEvent, WebViewControl } from '../ExtendedWebView/types';
-import { findNodeHandle, Platform, requireNativeComponent, UIManager } from 'react-native';
+import { OnMessageEvent, WebViewControl } from '../../ExtendedWebView/types';
+import { findNodeHandle, UIManager } from 'react-native';
 import Setting from '@joplin/lib/models/Setting';
+import RCTPluginWebView from './RCTPluginWebView';
 
 interface Props {
 	webviewInstanceId: string;
@@ -19,19 +20,6 @@ interface Props {
 
 const logger = Logger.create('PluginBackgroundWebView');
 
-
-interface NativeProps {
-	html: string;
-	injectedJavaScript: string;
-	onError(event: { nativeEvent: { description: string } }): void;
-	onLoadStart: ()=> void;
-	onLoadEnd: ()=> void;
-	onMessage: (event: OnMessageEvent)=> void;
-	allowFileAccessToDirectories: string[];
-}
-const NativeWebView = Platform.OS === 'android' ? (
-	requireNativeComponent<NativeProps>('RCTPluginWebView')
-) : null;
 
 const BackgroundWebView = (props: Props, ref: Ref<WebViewControl>) => {
 	const webviewRef = useRef(null);
@@ -61,8 +49,14 @@ const BackgroundWebView = (props: Props, ref: Ref<WebViewControl>) => {
 					[wrappedJs],
 				);
 			},
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-			postMessage(message: any) {
+			postMessage(message: unknown) {
+				this.injectJS(`
+					window.dispatchEvent(
+						new MessageEvent(
+							'message', ${JSON.stringify({ data: message, origin: 'react-native' })}
+						)
+					)
+				`);
 				webviewRef.current.postMessage(JSON.stringify(message));
 			},
 		};
@@ -77,7 +71,7 @@ const BackgroundWebView = (props: Props, ref: Ref<WebViewControl>) => {
 	], []);
 
 	return (
-		<NativeWebView
+		<RCTPluginWebView
 			ref={webviewRef}
 			html={props.html}
 			onError={onError}
