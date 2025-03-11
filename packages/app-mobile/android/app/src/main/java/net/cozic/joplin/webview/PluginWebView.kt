@@ -3,6 +3,7 @@ package net.cozic.joplin.webview
 import android.Manifest
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.os.Build
 import android.util.Log
 import android.webkit.MimeTypeMap
 import android.webkit.PermissionRequest
@@ -26,7 +27,7 @@ private class LocalContentWebViewClient(
     private val onLoadFinished: ()->Unit,
     private val onLoadStart: ()->Unit
 ): WebViewClient() {
-    var defaultResponseHtml = "Test!";
+    var defaultResponseHtml = "Loading!";
     private var allowFileAccessTo = emptyList<String>()
 
     override fun shouldInterceptRequest(
@@ -169,7 +170,12 @@ class PluginWebView(
         )
         setWebContentsDebuggingEnabled(true)
 
-        setBackgroundColor(0xff0000)
+        // The WebView should be ignored
+        visibility = INVISIBLE
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            focusable = NOT_FOCUSABLE
+        }
+        importantForAccessibility = IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS
     }
     
     fun setInjectedJs(js: String) {
