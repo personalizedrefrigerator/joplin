@@ -1,20 +1,15 @@
 package net.cozic.joplin.webview
 
-import com.facebook.drawee.backends.pipeline.Fresco
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReadableArray
 import com.facebook.react.uimanager.SimpleViewManager
 import com.facebook.react.uimanager.ThemedReactContext
 import com.facebook.react.uimanager.annotations.ReactProp
 
-class PluginWebViewManager(
-    private val callerContext: ReactApplicationContext
-) : SimpleViewManager<PluginWebView>() {
+class PluginWebViewManager(callerContext: ReactApplicationContext) : SimpleViewManager<PluginWebView>() {
     override fun getName() = REACT_CLASS
 
-    override fun createViewInstance(context: ThemedReactContext) = PluginWebView(
-        context, Fresco.newDraweeControllerBuilder(), callerContext
-    )
+    override fun createViewInstance(context: ThemedReactContext) = PluginWebView(context)
 
     override fun getCommandsMap() = mapOf("injectJs" to COMMAND_INJECT_JS)
 
@@ -46,6 +41,11 @@ class PluginWebViewManager(
         if (js != null) {
             view.setInjectedJs(js)
         }
+    }
+
+    @ReactProp(name="debuggingEnabled", defaultBoolean = false)
+    fun setDebuggingEnabled(view: PluginWebView, allowDebugging: Boolean) {
+        view.setDebuggingEnabled(allowDebugging)
     }
 
     override fun getExportedCustomDirectEventTypeConstants() =

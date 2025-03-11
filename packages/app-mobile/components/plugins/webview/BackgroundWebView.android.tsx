@@ -80,6 +80,7 @@ const BackgroundWebView = (props: Props, ref: Ref<WebViewControl>) => {
 			onMessage={props.onMessage}
 			injectedJavaScript={props.injectedJavaScript}
 			allowFileAccessToDirectories={allowFileAccessToDirectories}
+			debuggingEnabled={Setting.value('env') === 'dev' || Setting.value('plugins.enableWebviewDebugging')}
 		/>
 	);
 };

@@ -17,6 +17,7 @@ interface NativeProps {
 	onLoadEnd: ()=> void;
 	onMessage: (event: OnMessageEvent)=> void;
 	allowFileAccessToDirectories: string[];
+	debuggingEnabled: boolean;
 }
 const RCTPluginWebView = Platform.OS === 'android' ? (
 	requireNativeComponent<NativeProps>('RCTPluginWebView')
