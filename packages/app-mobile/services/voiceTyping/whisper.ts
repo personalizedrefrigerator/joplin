@@ -75,9 +75,11 @@ class WhisperConfig {
 }
 
 class Whisper implements VoiceTypingSession {
-	private lastPreviewData = '';
 	private closeCounter = 0;
 	private isFirstParagraph = true;
+	// Voice typing output that hasn't been added to the document yet --
+	// this is usually the data last shown in the preview window.
+	private outputDraft = '';
 
 	public constructor(
 		private sessionId: number|null,
@@ -104,6 +106,10 @@ class Whisper implements VoiceTypingSession {
 			const prefix = this.isFirstParagraph ? '' : '\n\n';
 			this.callbacks.onFinalize(`${prefix}${data}`);
 			this.isFirstParagraph = false;
+			// The output draft usually contains some of the data being finalized.
+			// Clear it to prevent duplicate output (allows the last draft to be
+			// finalized)
+			this.outputDraft = '';
 		}
 	}
 
@@ -121,17 +127,16 @@ class Whisper implements VoiceTypingSession {
 				logger.debug('reading block');
 				const data: string = await SpeechToTextModule.convertNext(this.sessionId, 4);
 				this.onDataFinalize(data);
-				this.lastPreviewData = '';
 
 				logger.debug('done reading block. Length', data?.length);
 				if (this.sessionId !== null) {
-					this.lastPreviewData = await SpeechToTextModule.getPreview(this.sessionId);
-					this.callbacks.onPreview(this.postProcessSpeech(this.lastPreviewData));
+					this.outputDraft = await SpeechToTextModule.getPreview(this.sessionId);
+					this.callbacks.onPreview(this.postProcessSpeech(this.outputDraft));
 				}
 			}
 		} catch (error) {
 			logger.error('Whisper error:', error);
-			this.lastPreviewData = '';
+			this.outputDraft = '';
 			await this.stop();
 			throw error;
 		}
@@ -148,8 +153,8 @@ class Whisper implements VoiceTypingSession {
 		this.sessionId = null;
 		this.closeCounter ++;
 
-		if (this.lastPreviewData) {
-			this.onDataFinalize(this.lastPreviewData);
+		if (this.outputDraft) {
+			this.onDataFinalize(this.outputDraft);
 		}
 
 		return SpeechToTextModule.closeSession(sessionId);
