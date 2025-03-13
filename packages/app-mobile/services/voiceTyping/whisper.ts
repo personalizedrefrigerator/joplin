@@ -131,14 +131,30 @@ class Whisper implements VoiceTypingSession {
 		} catch (error) {
 			logger.error('Whisper error:', error);
 			this.lastPreviewData = '';
-			await this.stop();
+			await this.cancel();
 			throw error;
 		}
 	}
 
-	public stop() {
+	public async stop() {
 		if (this.sessionId === null) {
 			logger.debug('Session already closed.');
+			return;
+		}
+
+		try {
+			const data: string = await SpeechToTextModule.convertAvailable(this.sessionId);
+			this.onDataFinalize(data);
+		} catch (error) {
+			logger.error('Error stopping session: ', error);
+		}
+
+		return this.cancel();
+	}
+
+	public cancel() {
+		if (this.sessionId === null) {
+			logger.debug('No session to cancel.');
 			return;
 		}
 
@@ -146,10 +162,6 @@ class Whisper implements VoiceTypingSession {
 		const sessionId = this.sessionId;
 		this.sessionId = null;
 		this.closeCounter ++;
-
-		if (this.lastPreviewData) {
-			this.onDataFinalize(this.lastPreviewData);
-		}
 
 		return SpeechToTextModule.closeSession(sessionId);
 	}
