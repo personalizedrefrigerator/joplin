@@ -1,11 +1,12 @@
 import * as React from 'react';
-import { RefObject, useCallback, useMemo, useRef, useState } from 'react';
-import { GestureResponderEvent, Modal, ModalProps, Platform, ScrollView, StyleSheet, View, ViewStyle, useWindowDimensions } from 'react-native';
+import { useMemo, useRef, useState } from 'react';
+import { Modal, ModalProps, Platform, Pressable, ScrollView, StyleSheet, View, ViewStyle, useWindowDimensions } from 'react-native';
 import { hasNotch } from 'react-native-device-info';
 import FocusControl from './accessibility/FocusControl/FocusControl';
 import { msleep, Second } from '@joplin/utils/time';
 import useAsyncEffect from '@joplin/lib/hooks/useAsyncEffect';
 import { ModalState } from './accessibility/FocusControl/types';
+import { _ } from '@joplin/lib/locale';
 
 interface ModalElementProps extends ModalProps {
 	children: React.ReactNode;
@@ -53,22 +54,22 @@ const useStyles = (hasScrollView: boolean, backgroundColor: string|undefined) =>
 				// This makes it possible to vertically center the content of scrollable modals.
 				flexGrow: 1,
 			},
+			dismissButton: {
+				position: 'absolute',
+				top: 0,
+				right: 0,
+				left: 0,
+				bottom: 0,
+				height: '100%',
+				width: '100%',
+				cursor: 'auto',
+				zIndex: -1,
+			},
+			dismissButtonFocused: {
+				backgroundColor,
+			},
 		});
 	}, [hasScrollView, isLandscape, backgroundColor]);
-};
-
-const useBackgroundTouchListeners = (onRequestClose: (event: GestureResponderEvent)=> void, backdropRef: RefObject<View>) => {
-	const onShouldBackgroundCaptureTouch = useCallback((event: GestureResponderEvent) => {
-		return event.target === backdropRef.current && event.nativeEvent.touches.length === 1;
-	}, [backdropRef]);
-
-	const onBackgroundTouchFinished = useCallback((event: GestureResponderEvent) => {
-		if (event.target === backdropRef.current) {
-			onRequestClose?.(event);
-		}
-	}, [onRequestClose, backdropRef]);
-
-	return { onShouldBackgroundCaptureTouch, onBackgroundTouchFinished };
 };
 
 const useModalStatus = (containerComponent: View|null, visible: boolean) => {
@@ -124,14 +125,24 @@ const ModalElement: React.FC<ModalElementProps> = ({
 
 	const containerRef = useRef<View|null>(null);
 	containerRef.current = containerComponent;
-	const { onShouldBackgroundCaptureTouch, onBackgroundTouchFinished } = useBackgroundTouchListeners(modalProps.onRequestClose, containerRef);
+
+	const closeButton = <Pressable
+		style={state => [
+			'focused' in state && state.focused && styles.dismissButtonFocused,
+			styles.dismissButton,
+		]}
+		onPress={modalProps.onRequestClose}
+		accessibilityLabel={_('Close dialog')}
+		accessibilityRole='button'
+	/>;
 
 	const contentAndBackdrop = <View
 		ref={setContainerComponent}
 		style={styles.modalBackground}
-		onStartShouldSetResponder={onShouldBackgroundCaptureTouch}
-		onResponderRelease={onBackgroundTouchFinished}
-	>{content}</View>;
+	>
+		{content}
+		{closeButton}
+	</View>;
 
 	return (
 		<FocusControl.ModalWrapper state={modalStatus}>
