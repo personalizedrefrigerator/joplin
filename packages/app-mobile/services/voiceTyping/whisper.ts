@@ -121,6 +121,7 @@ class Whisper implements VoiceTypingSession {
 				logger.debug('reading block');
 				const data: string = await SpeechToTextModule.convertNext(this.sessionId, 4);
 				this.onDataFinalize(data);
+				this.lastPreviewData = '';
 
 				logger.debug('done reading block. Length', data?.length);
 				if (this.sessionId !== null) {
