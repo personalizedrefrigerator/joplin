@@ -75,7 +75,6 @@ class WhisperConfig {
 }
 
 class Whisper implements VoiceTypingSession {
-	private lastPreviewData = '';
 	private closeCounter = 0;
 	private isFirstParagraph = true;
 
@@ -124,13 +123,12 @@ class Whisper implements VoiceTypingSession {
 
 				logger.debug('done reading block. Length', data?.length);
 				if (this.sessionId !== null) {
-					this.lastPreviewData = await SpeechToTextModule.getPreview(this.sessionId);
-					this.callbacks.onPreview(this.postProcessSpeech(this.lastPreviewData));
+					const previewText = await SpeechToTextModule.getPreview(this.sessionId);
+					this.callbacks.onPreview(this.postProcessSpeech(previewText));
 				}
 			}
 		} catch (error) {
 			logger.error('Whisper error:', error);
-			this.lastPreviewData = '';
 			await this.cancel();
 			throw error;
 		}
