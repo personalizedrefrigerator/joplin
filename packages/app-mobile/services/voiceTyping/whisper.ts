@@ -107,8 +107,8 @@ class Whisper implements VoiceTypingSession {
 			this.callbacks.onFinalize(`${prefix}${data}`);
 			this.isFirstParagraph = false;
 			// The output draft usually contains some of the data being finalized.
-			// Clear it to prevent duplicate output (allows the last draft to be
-			// finalized)
+			// Clear it to prevent duplicate output should `outputDraft` be added
+			// to the note.
 			this.outputDraft = '';
 		}
 	}
