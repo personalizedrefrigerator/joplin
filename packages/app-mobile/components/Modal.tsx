@@ -61,9 +61,6 @@ const useStyles = (hasScrollView: boolean, backgroundColor: string|undefined) =>
 				width: '100%',
 				zIndex: -1,
 			},
-			dismissButtonFocused: {
-				backgroundColor,
-			},
 		});
 	}, [hasScrollView, isLandscape, backgroundColor]);
 };
