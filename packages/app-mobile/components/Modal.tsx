@@ -1,6 +1,6 @@
 import * as React from 'react';
-import { useMemo, useRef, useState } from 'react';
-import { Modal, ModalProps, Platform, Pressable, ScrollView, StyleSheet, View, ViewStyle, useWindowDimensions } from 'react-native';
+import { RefObject, useCallback, useMemo, useRef, useState } from 'react';
+import { GestureResponderEvent, Modal, ModalProps, Platform, Pressable, ScrollView, StyleSheet, View, ViewStyle, useWindowDimensions } from 'react-native';
 import { hasNotch } from 'react-native-device-info';
 import FocusControl from './accessibility/FocusControl/FocusControl';
 import { msleep, Second } from '@joplin/utils/time';
@@ -56,13 +56,9 @@ const useStyles = (hasScrollView: boolean, backgroundColor: string|undefined) =>
 			},
 			dismissButton: {
 				position: 'absolute',
-				top: 0,
-				right: 0,
-				left: 0,
 				bottom: 0,
-				height: '100%',
+				height: 12,
 				width: '100%',
-				cursor: 'auto',
 				zIndex: -1,
 			},
 			dismissButtonFocused: {
@@ -70,6 +66,20 @@ const useStyles = (hasScrollView: boolean, backgroundColor: string|undefined) =>
 			},
 		});
 	}, [hasScrollView, isLandscape, backgroundColor]);
+};
+
+const useBackgroundTouchListeners = (onRequestClose: (event: GestureResponderEvent)=> void, backdropRef: RefObject<View>) => {
+	const onShouldBackgroundCaptureTouch = useCallback((event: GestureResponderEvent) => {
+		return event.target === backdropRef.current && event.nativeEvent.touches.length === 1;
+	}, [backdropRef]);
+
+	const onBackgroundTouchFinished = useCallback((event: GestureResponderEvent) => {
+		if (event.target === backdropRef.current) {
+			onRequestClose?.(event);
+		}
+	}, [onRequestClose, backdropRef]);
+
+	return { onShouldBackgroundCaptureTouch, onBackgroundTouchFinished };
 };
 
 const useModalStatus = (containerComponent: View|null, visible: boolean) => {
@@ -125,20 +135,22 @@ const ModalElement: React.FC<ModalElementProps> = ({
 
 	const containerRef = useRef<View|null>(null);
 	containerRef.current = containerComponent;
+	const { onShouldBackgroundCaptureTouch, onBackgroundTouchFinished } = useBackgroundTouchListeners(modalProps.onRequestClose, containerRef);
 
-	const closeButton = <Pressable
-		style={state => [
-			'focused' in state && state.focused && styles.dismissButtonFocused,
-			styles.dismissButton,
-		]}
+
+	// A close button for accessibility tools. Since iOS accessibility focus order is based on the position
+	// of the element on the screen, the close button is placed after the modal content, rather than behind.
+	const closeButton = modalProps.onRequestClose ? <Pressable
+		style={styles.dismissButton}
 		onPress={modalProps.onRequestClose}
 		accessibilityLabel={_('Close dialog')}
 		accessibilityRole='button'
-	/>;
-
+	/> : null;
 	const contentAndBackdrop = <View
 		ref={setContainerComponent}
 		style={styles.modalBackground}
+		onStartShouldSetResponder={onShouldBackgroundCaptureTouch}
+		onResponderRelease={onBackgroundTouchFinished}
 	>
 		{content}
 		{closeButton}
