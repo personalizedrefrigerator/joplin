@@ -141,7 +141,6 @@ import { getDisplayParentId } from '@joplin/lib/services/trash';
 import AppSideMenu from './components/sidebar/AppSideMenu';
 import { SideMenuPosition } from './components/sidebar/SideMenu';
 import PluginNotification from './components/plugins/PluginNotification';
-import BottomDrawerProvider from './components/sidebar/BottomDrawerProvider';
 import FocusControl from './components/accessibility/FocusControl/FocusControl';
 
 const logger = Logger.create('root');
@@ -1371,11 +1370,9 @@ class AppComponent extends React.Component {
 							style={{ flex: 1 }}
 							closeButtonLabel={_('Dismiss')}
 						>
-							<BottomDrawerProvider>
-								<FocusControl.MainAppContent style={{ flex: 1 }}>
-									{mainContent}
-								</FocusControl.MainAppContent>
-							</BottomDrawerProvider>
+							<FocusControl.MainAppContent style={{ flex: 1 }}>
+								{mainContent}
+							</FocusControl.MainAppContent>
 						</MenuProvider>
 					</DialogManager>
 				</PaperProvider>

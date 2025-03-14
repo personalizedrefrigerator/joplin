@@ -1,12 +1,11 @@
 import * as React from 'react';
-import { useState, useCallback, useMemo, useEffect, useContext, useRef, useId } from 'react';
+import { useState, useCallback, useMemo, useRef } from 'react';
 import { FAB } from 'react-native-paper';
 import { _ } from '@joplin/lib/locale';
 import { Dispatch } from 'redux';
 import { AccessibilityActionEvent, AccessibilityActionInfo, View } from 'react-native';
 import { connect } from 'react-redux';
-import { BottomDrawerContext } from '../sidebar/BottomDrawerProvider';
-import focusView from '../../utils/focusView';
+import BottomDrawer from '../BottomDrawer';
 const Icon = require('react-native-vector-icons/Ionicons').default;
 
 type OnButtonPress = ()=> void;
@@ -53,31 +52,12 @@ const FloatingActionButton = (props: ActionButtonProps) => {
 		props.onMenuToggled?.(newOpen);
 	}, [setOpen, open, props.onMenuToggled, props.dispatch]);
 
-	const drawerControl = useContext(BottomDrawerContext);
+	const onDismiss = useCallback(() => {
+		if (open) onMenuToggled();
+	}, [open, onMenuToggled]);
+
 	const mainButtonRef = useRef<View>();
-	const drawerId = useId();
 
-	useEffect(() => {
-		return () => {
-			drawerControl.hideDrawer(drawerId);
-		};
-	}, [open, drawerControl, drawerId]);
-
-	useEffect(() => {
-		if (open) {
-			drawerControl.showDrawer({
-				key: drawerId,
-				renderContent: () => {
-					return props.menuContent;
-				},
-				onHide: () => {
-					focusView('FloatingActionButton', mainButtonRef.current);
-					setOpen(false);
-				},
-				label: props.menuLabel,
-			});
-		}
-	}, [open, drawerControl, drawerId, props.menuContent, props.menuLabel]);
 	const closedIcon = useIcon(props.mainButton?.icon ?? 'add');
 	const openIcon = useIcon('close');
 
@@ -95,7 +75,7 @@ const FloatingActionButton = (props: ActionButtonProps) => {
 		onAccessibilityAction={props.onAccessibilityAction}
 	/>;
 
-	return (
+	return <>
 		<View
 			style={{
 				position: 'absolute',
@@ -105,7 +85,13 @@ const FloatingActionButton = (props: ActionButtonProps) => {
 		>
 			{menuButton}
 		</View>
-	);
+		<BottomDrawer
+			visible={open}
+			onDismiss={onDismiss}
+		>
+			{props.menuContent}
+		</BottomDrawer>
+	</>;
 };
 
 export default connect()(FloatingActionButton);
