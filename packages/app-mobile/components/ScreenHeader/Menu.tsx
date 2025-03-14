@@ -92,8 +92,8 @@ const MenuComponent: React.FC<Props> = props => {
 			);
 		} else {
 			// Don't auto-focus on iOS -- as of RN 0.74, this causes focus to get stuck. However,
-			// the auto-focus seems to be necessary on web (and possibly Android) to avoid focusing
-			// the dismiss button first:
+			// the auto-focus seems to be necessary on web (and possibly Android) to avoid first focusing
+			// the dismiss button and other items not in the menu:
 			const canAutoFocus = isFirst && Platform.OS !== 'ios';
 			const key = `menuOption_${option.key ?? keyCounter++}`;
 			menuOptionComponents.push(
