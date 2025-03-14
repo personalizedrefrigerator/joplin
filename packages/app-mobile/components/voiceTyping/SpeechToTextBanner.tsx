@@ -12,6 +12,7 @@ import Logger from '@joplin/utils/Logger';
 import { RecorderState } from './types';
 import RecordingControls from './RecordingControls';
 import { PrimaryButton } from '../buttons';
+import useQueuedAsyncEffect from '@joplin/lib/hooks/useQueuedAsyncEffect';
 
 const logger = Logger.create('VoiceTypingDialog');
 
@@ -31,7 +32,7 @@ interface UseVoiceTypingProps {
 
 const useVoiceTyping = ({ locale, provider, onSetPreview, onText }: UseVoiceTypingProps) => {
 	const [voiceTyping, setVoiceTyping] = useState<VoiceTypingSession>(null);
-	const [error, setError] = useState<Error>(null);
+	const [error, setError] = useState<Error|null>(null);
 	const [mustDownloadModel, setMustDownloadModel] = useState<boolean | null>(null);
 	const [modelIsOutdated, setModelIsOutdated] = useState(false);
 
@@ -55,8 +56,12 @@ const useVoiceTyping = ({ locale, provider, onSetPreview, onText }: UseVoiceTypi
 		}
 	}, [modelIsOutdated]);
 
-	useAsyncEffect(async (event: AsyncEffectEvent) => {
+	useQueuedAsyncEffect(async (event: AsyncEffectEvent) => {
 		try {
+			// Reset the error: If starting voice typing again resolves the error, the error
+			// should be hidden (and voice typing should start).
+			setError(null);
+
 			await voiceTypingRef.current?.stop();
 			onSetPreviewRef.current?.('');
 
@@ -149,7 +154,7 @@ const SpeechToTextComponent: React.FC<Props> = props => {
 			[RecorderState.Recording]: () => _('Please record your voice...'),
 			[RecorderState.Processing]: () => _('Converting speech to text...'),
 			[RecorderState.Downloading]: () => _('Downloading %s language files...', languageName(props.locale)),
-			[RecorderState.Error]: () => _('Error: %s', modelError.message),
+			[RecorderState.Error]: () => _('Error: %s', modelError?.message),
 		};
 
 		return components[recorderState]();

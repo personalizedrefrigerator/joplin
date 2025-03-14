@@ -8284,7 +8284,7 @@ __metadata:
     "@testing-library/react-hooks": 8.0.1
     "@types/jest": 29.5.12
     "@types/mustache": 4.2.5
-    "@types/node": 18.19.65
+    "@types/node": 18.19.67
     "@types/react": 18.3.3
     "@types/react-dom": 18.3.0
     "@types/react-redux": 7.1.33
@@ -8378,7 +8378,7 @@ __metadata:
     "@tsconfig/react-native": 2.0.2
     "@types/fs-extra": 11.0.4
     "@types/jest": 29.5.12
-    "@types/node": 18.19.65
+    "@types/node": 18.19.67
     "@types/react": 18.3.3
     "@types/react-native": 0.70.6
     "@types/react-redux": 7.1.33
@@ -8426,7 +8426,7 @@ __metadata:
     react-native-image-picker: 7.1.1
     react-native-localize: 3.2.1
     react-native-modal-datetime-picker: 17.1.0
-    react-native-paper: 5.12.5
+    react-native-paper: 5.13.1
     react-native-popup-menu: 0.16.1
     react-native-quick-actions: 0.3.13
     react-native-quick-crypto: 0.7.5
@@ -8540,7 +8540,7 @@ __metadata:
   resolution: "@joplin/fork-htmlparser2@workspace:packages/fork-htmlparser2"
   dependencies:
     "@types/jest": 29.5.12
-    "@types/node": 18.19.65
+    "@types/node": 18.19.67
     "@typescript-eslint/eslint-plugin": 6.21.0
     "@typescript-eslint/parser": 6.21.0
     coveralls: 3.1.1
@@ -8605,7 +8605,7 @@ __metadata:
     "@joplin/turndown-plugin-gfm": ^1.0.61
     "@joplin/utils": ~3.3
     "@testing-library/react-hooks": 8.0.1
-    "@types/adm-zip": 0.5.6
+    "@types/adm-zip": 0.5.7
     "@types/fs-extra": 11.0.4
     "@types/jest": 29.5.12
     "@types/js-yaml": 4.0.9
@@ -8613,7 +8613,7 @@ __metadata:
     "@types/markdown-it": 13.0.9
     "@types/mustache": 4.2.5
     "@types/nanoid": 3.0.0
-    "@types/node": 18.19.65
+    "@types/node": 18.19.67
     "@types/node-rsa": 1.1.4
     "@types/react": 18.3.3
     "@types/uuid": 9.0.7
@@ -8729,7 +8729,7 @@ __metadata:
     "@joplin/utils": ~3.3
     "@types/fs-extra": 11.0.4
     "@types/jest": 29.5.12
-    "@types/node": 18.19.65
+    "@types/node": 18.19.67
     fs-extra: 11.2.0
     gh-release-assets: 2.0.1
     jest: 29.7.0
@@ -8784,7 +8784,7 @@ __metadata:
     "@joplin/utils": ~3.3
     "@types/jest": 29.5.12
     "@types/markdown-it": 13.0.9
-    "@types/node": 18.19.65
+    "@types/node": 18.19.67
     font-awesome-filetypes: 2.1.0
     fs-extra: 11.2.0
     highlight.js: 11.10.0
@@ -8894,7 +8894,7 @@ __metadata:
     "@types/js-yaml": 4.0.9
     "@types/markdown-it": 13.0.9
     "@types/mustache": 4.2.5
-    "@types/node": 18.19.65
+    "@types/node": 18.19.67
     "@types/node-fetch": 2.6.12
     "@types/yargs": 17.0.33
     compare-versions: 6.1.1
@@ -12610,12 +12610,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/adm-zip@npm:0.5.6":
-  version: 0.5.6
-  resolution: "@types/adm-zip@npm:0.5.6"
+"@types/adm-zip@npm:0.5.7":
+  version: 0.5.7
+  resolution: "@types/adm-zip@npm:0.5.7"
   dependencies:
     "@types/node": "*"
-  checksum: f4ff999cef5030dfea1252727f94647a63eee7438844c7a477b3859dd2971cce3542123ebaafa507ad4304a4a4f0f8553b7034d6ea8132c941c54ccba76bac65
+  checksum: 57fe73622e38234bc76786354237e8545eefa05d55e34aa3c7c51b33588bb9e80787f163fdb4fa3afc2c123cfd17e1619e37f6be57cde2e58b7949f30a8b093c
   languageName: node
   linkType: hard
 
@@ -13607,12 +13607,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:18.19.65":
-  version: 18.19.65
-  resolution: "@types/node@npm:18.19.65"
+"@types/node@npm:18.19.67":
+  version: 18.19.67
+  resolution: "@types/node@npm:18.19.67"
   dependencies:
     undici-types: ~5.26.4
-  checksum: 6f2fc7a47b72f7790f08bb20da539a974a136bfe1388ace44fd1bc1daf91a547ad8e42408020515269f198ec356cf0a498df88db4fc0bb343ffcf84394c8eef8
+  checksum: 700f92c6a0b63352ce6327286392adab30bb17623c2a788811e9cf092c4dc2fb5e36ca4727247a981b3f44185fdceef20950a3b7a8ab72721e514ac037022a08
   languageName: node
   linkType: hard
 
@@ -31086,7 +31086,7 @@ __metadata:
     "@joplin/utils": ~3.3
     "@types/fs-extra": 11.0.4
     "@types/jest": 29.5.12
-    "@types/node": 18.19.65
+    "@types/node": 18.19.67
     "@types/proper-lockfile": ^4.1.2
     aws-sdk: 2.1340.0
     chalk: 4.1.2
@@ -39983,9 +39983,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-paper@npm:5.12.5":
-  version: 5.12.5
-  resolution: "react-native-paper@npm:5.12.5"
+"react-native-paper@npm:5.13.1":
+  version: 5.13.1
+  resolution: "react-native-paper@npm:5.13.1"
   dependencies:
     "@callstack/react-theme-provider": ^3.0.9
     color: ^3.1.2
@@ -39995,7 +39995,23 @@ __metadata:
     react-native: "*"
     react-native-safe-area-context: "*"
     react-native-vector-icons: "*"
-  checksum: 35ce56e0bb19c46ce85adc47a504527b7ec455d1a15f3ace0d6fd438abd51b1fe30e1b44351950e16d6376ddbc18ecc94b558e267767d0a9fd886a5f66a4c322
+  checksum: ef16fbb57986f09f2080e98ddb7977c494d6accb36767101de32199849bba8764e2bcd528a5d1c08940f4430cb86dabb6baaf5b33a539670221cbbfcc01f2d5e
+  languageName: node
+  linkType: hard
+
+"react-native-paper@patch:react-native-paper@npm%3A5.13.1#./.yarn/patches/react-native-paper-npm-5.13.1-f153e542e2.patch::locator=root%40workspace%3A.":
+  version: 5.13.1
+  resolution: "react-native-paper@patch:react-native-paper@npm%3A5.13.1#./.yarn/patches/react-native-paper-npm-5.13.1-f153e542e2.patch::version=5.13.1&hash=3fecbb&locator=root%40workspace%3A."
+  dependencies:
+    "@callstack/react-theme-provider": ^3.0.9
+    color: ^3.1.2
+    use-latest-callback: ^0.1.5
+  peerDependencies:
+    react: "*"
+    react-native: "*"
+    react-native-safe-area-context: "*"
+    react-native-vector-icons: "*"
+  checksum: 381a35e3b26a177e2299fd0ce597e5b7bd0626276dc0116cc3eb1e0217634977c2f957c1985bb5938b1c88b4f1566273fa494c8a6bb6eb2a05c18f9a963e2743
   languageName: node
   linkType: hard
 
@@ -40003,6 +40019,13 @@ __metadata:
   version: 0.16.1
   resolution: "react-native-popup-menu@npm:0.16.1"
   checksum: 4a4cfdfdcd7ee0a2515dbd4fa427dd38af89121e375ea452a470091456ecb8fc35fd24d6a79936703ebc4a84905352e8df0de24d58b036f56d2a9ba61449a7d5
+  languageName: node
+  linkType: hard
+
+"react-native-popup-menu@patch:react-native-popup-menu@npm%3A0.16.1#./.yarn/patches/react-native-popup-menu-npm-0.16.1-28fd66ecb5.patch::locator=root%40workspace%3A.":
+  version: 0.16.1
+  resolution: "react-native-popup-menu@patch:react-native-popup-menu@npm%3A0.16.1#./.yarn/patches/react-native-popup-menu-npm-0.16.1-28fd66ecb5.patch::version=0.16.1&hash=42fb35&locator=root%40workspace%3A."
+  checksum: 50d91792b3f8cc2584ac22c537eebb8cf771ad1241843dd403395361f8465edb3628c5751671ad55c832a3a217a711dca72497b0bc34b21a3ce37ce1bd720d52
   languageName: node
   linkType: hard
 
