@@ -66,6 +66,7 @@ const { OneDriveLoginScreen } = require('./components/screens/onedrive-login.js'
 import EncryptionConfigScreen from './components/screens/encryption-config';
 import DropboxLoginScreen from './components/screens/dropbox-login.js';
 import { MenuProvider } from 'react-native-popup-menu';
+import SideMenu, { SideMenuPosition } from './components/SideMenu';
 import SideMenuContent from './components/side-menu-content';
 import SideMenuContentNote from './components/SideMenuContentNote';
 import { reg } from '@joplin/lib/registry';
@@ -138,8 +139,6 @@ import DialogManager from './components/DialogManager';
 import lockToSingleInstance from './utils/lockToSingleInstance';
 import { AppState } from './utils/types';
 import { getDisplayParentId } from '@joplin/lib/services/trash';
-import AppSideMenu from './components/sidebar/AppSideMenu';
-import { SideMenuPosition } from './components/sidebar/SideMenu';
 import PluginNotification from './components/plugins/PluginNotification';
 import FocusControl from './components/accessibility/FocusControl/FocusControl';
 
@@ -1256,12 +1255,12 @@ class AppComponent extends React.Component {
 		let disableSideMenuGestures = this.props.disableSideMenuGestures;
 
 		if (this.props.routeName === 'Note') {
-			sideMenuContent = <SafeAreaView style={{ flex: 1 }}><SideMenuContentNote options={this.props.noteSideMenuOptions}/></SafeAreaView>;
+			sideMenuContent = <SafeAreaView style={{ flex: 1, backgroundColor: theme.backgroundColor }}><SideMenuContentNote options={this.props.noteSideMenuOptions}/></SafeAreaView>;
 			menuPosition = SideMenuPosition.Right;
 		} else if (this.props.routeName === 'Config') {
 			disableSideMenuGestures = true;
 		} else {
-			sideMenuContent = <SafeAreaView style={{ flex: 1 }}><SideMenuContent/></SafeAreaView>;
+			sideMenuContent = <SafeAreaView style={{ flex: 1, backgroundColor: theme.backgroundColor }}><SideMenuContent/></SafeAreaView>;
 		}
 
 		const appNavInit = {
@@ -1294,10 +1293,20 @@ class AppComponent extends React.Component {
 		logger.info('root.biometrics: shouldShowMainContent', shouldShowMainContent);
 		logger.info('root.biometrics: this.state.sensorInfo', this.state.sensorInfo);
 
+		// The right sidemenu can be difficult to close due to a bug in the sidemenu
+		// library (right sidemenus can't be swiped closed).
+		//
+		// Additionally, it can interfere with scrolling in the note viewer, so we use
+		// a smaller edge hit width.
+		const menuEdgeHitWidth = menuPosition === 'right' ? 20 : 30;
+
 		const mainContent = (
 			<View style={{ flex: 1, backgroundColor: theme.backgroundColor }}>
-				<AppSideMenu
+				<SideMenu
 					menu={sideMenuContent}
+					edgeHitWidth={menuEdgeHitWidth}
+					toleranceX={4}
+					toleranceY={20}
 					openMenuOffset={this.state.sideMenuWidth}
 					menuPosition={menuPosition}
 					onChange={(isOpen: boolean) => this.sideMenu_change(isOpen)}
@@ -1319,7 +1328,7 @@ class AppComponent extends React.Component {
 							/> }
 						</SafeAreaView>
 					</View>
-				</AppSideMenu>
+				</SideMenu>
 				<PluginRunnerWebView />
 				<PluginNotification/>
 			</View>
