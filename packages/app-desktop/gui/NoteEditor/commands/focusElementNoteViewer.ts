@@ -1,6 +1,7 @@
 import { CommandRuntime, CommandDeclaration } from '@joplin/lib/services/CommandService';
 import { _ } from '@joplin/lib/locale';
 import { FocusElementOptions } from '../../../commands/focusElement';
+import { WindowCommandDependencies } from '../utils/types';
 
 export const declaration: CommandDeclaration = {
 	name: 'focusElementNoteViewer',
@@ -8,12 +9,14 @@ export const declaration: CommandDeclaration = {
 	parentLabel: () => _('Focus'),
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-export const runtime = (comp: any): CommandRuntime => {
+export const runtime = (dependencies: WindowCommandDependencies): CommandRuntime => {
 	return {
 		execute: async (_context: unknown, options?: FocusElementOptions) => {
-			comp.editorRef.current.execCommand({ name: 'viewer.focus', value: options });
+			await dependencies.editorRef.current.execCommand({
+				name: 'viewer.focus',
+				value: options,
+			});
 		},
-		// enabledCondition: 'markdownEditorVisible',
+		enabledCondition: 'markdownEditorVisible',
 	};
 };
