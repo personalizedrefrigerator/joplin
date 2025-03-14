@@ -175,3 +175,4 @@ collapseall
 newfolder
 Marijn
 Haverbeke
+unfocusable
