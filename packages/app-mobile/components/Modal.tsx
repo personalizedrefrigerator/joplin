@@ -131,7 +131,6 @@ const ModalElement: React.FC<ModalElementProps> = ({
 	containerRef.current = containerComponent;
 	const { onShouldBackgroundCaptureTouch, onBackgroundTouchFinished } = useBackgroundTouchListeners(modalProps.onRequestClose, containerRef);
 
-
 	// A close button for accessibility tools. Since iOS accessibility focus order is based on the position
 	// of the element on the screen, the close button is placed after the modal content, rather than behind.
 	const closeButton = modalProps.onRequestClose ? <Pressable
