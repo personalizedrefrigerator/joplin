@@ -59,7 +59,7 @@ const NewNoteButton: React.FC<Props> = _props => {
 			onPress={() => makeNewNote(false, action)}
 			style={styles.shortcutButton}
 			title={title}
-			accessibilityHint={_('New note from %s', title)}
+			accessibilityHint={_('Creates a new note with an attachment of type %s', title)}
 			icon={icon}
 		/>;
 	};
