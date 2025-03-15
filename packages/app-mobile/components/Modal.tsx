@@ -1,17 +1,22 @@
 import * as React from 'react';
 import { RefObject, useCallback, useMemo, useRef, useState } from 'react';
-import { GestureResponderEvent, Modal, ModalProps, Platform, ScrollView, StyleSheet, View, ViewStyle } from 'react-native';
+import { GestureResponderEvent, Modal, ModalProps, Platform, Pressable, ScrollView, StyleSheet, View, ViewStyle } from 'react-native';
 import FocusControl from './accessibility/FocusControl/FocusControl';
 import { msleep, Second } from '@joplin/utils/time';
 import useAsyncEffect from '@joplin/lib/hooks/useAsyncEffect';
 import { ModalState } from './accessibility/FocusControl/types';
 import useSafeAreaPadding from '../utils/hooks/useSafeAreaPadding';
+import { _ } from '@joplin/lib/locale';
 
 interface ModalElementProps extends ModalProps {
 	children: React.ReactNode;
 	containerStyle?: ViewStyle;
 	backgroundColor?: string;
 	modalBackgroundStyle?: ViewStyle;
+	// Extra styles for the accessibility tools dismiss button. For example,
+	// this might be used to display the dismiss button near the top of the
+	// screen (rather than the bottom).
+	dismissButtonStyle?: ViewStyle;
 
 	// If scrollOverflow is provided, the modal is wrapped in a vertical
 	// ScrollView. This allows the user to scroll parts of dialogs into
@@ -43,6 +48,13 @@ const useStyles = (hasScrollView: boolean, backgroundColor: string|undefined) =>
 				// Make the scroll view's scrolling region at least as tall as its container.
 				// This makes it possible to vertically center the content of scrollable modals.
 				flexGrow: 1,
+			},
+			dismissButton: {
+				position: 'absolute',
+				bottom: 0,
+				height: 12,
+				width: '100%',
+				zIndex: -1,
 			},
 		});
 	}, [hasScrollView, safeAreaPadding, backgroundColor]);
@@ -98,6 +110,7 @@ const ModalElement: React.FC<ModalElementProps> = ({
 	backgroundColor,
 	scrollOverflow,
 	modalBackgroundStyle: extraModalBackgroundStyles,
+	dismissButtonStyle,
 	...modalProps
 }) => {
 	const styles = useStyles(scrollOverflow, backgroundColor);
@@ -118,12 +131,25 @@ const ModalElement: React.FC<ModalElementProps> = ({
 	containerRef.current = containerComponent;
 	const { onShouldBackgroundCaptureTouch, onBackgroundTouchFinished } = useBackgroundTouchListeners(modalProps.onRequestClose, containerRef);
 
+
+	// A close button for accessibility tools. Since iOS accessibility focus order is based on the position
+	// of the element on the screen, the close button is placed after the modal content, rather than behind.
+	const closeButton = modalProps.onRequestClose ? <Pressable
+		style={[styles.dismissButton, dismissButtonStyle]}
+		onPress={modalProps.onRequestClose}
+		accessibilityLabel={_('Close dialog')}
+		accessibilityRole='button'
+	/> : null;
+
 	const contentAndBackdrop = <View
 		ref={setContainerComponent}
 		style={[styles.modalBackground, extraModalBackgroundStyles]}
 		onStartShouldSetResponder={onShouldBackgroundCaptureTouch}
 		onResponderRelease={onBackgroundTouchFinished}
-	>{content}</View>;
+	>
+		{content}
+		{closeButton}
+	</View>;
 
 	return (
 		<FocusControl.ModalWrapper state={modalStatus}>
