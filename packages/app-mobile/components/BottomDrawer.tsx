@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { connect } from 'react-redux';
-import { useMemo } from 'react';
-import { StyleSheet, useWindowDimensions, View } from 'react-native';
+import { useCallback, useMemo } from 'react';
+import { NativeScrollEvent, NativeSyntheticEvent, StyleSheet, useWindowDimensions, View } from 'react-native';
 import useSafeAreaPadding from '../utils/hooks/useSafeAreaPadding';
 import { themeStyle, ThemeStyle } from './global-style';
 import Modal from './Modal';
@@ -69,6 +69,13 @@ const BottomDrawer: React.FC<Props> = props => {
 	const theme = themeStyle(props.themeId);
 	const styles = useStyles(theme);
 
+	const onContainerScroll = useCallback((event: NativeSyntheticEvent<NativeScrollEvent>) => {
+		const offsetY = event.nativeEvent.contentOffset.y;
+		if (offsetY < -50) {
+			props.onDismiss();
+		}
+	}, [props.onDismiss]);
+
 	return <Modal
 		visible={props.visible}
 		onDismiss={props.onDismiss}
@@ -79,7 +86,10 @@ const BottomDrawer: React.FC<Props> = props => {
 		modalBackgroundStyle={styles.modalBackground}
 		dismissButtonStyle={styles.dismissButton}
 		containerStyle={styles.menuStyle}
-		scrollOverflow={true}
+		scrollOverflow={{
+			overScrollMode: 'always',
+			onScroll: onContainerScroll,
+		}}
 	>
 		<View style={styles.contentContainer}>
 			{props.children}

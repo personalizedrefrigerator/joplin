@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { RefObject, useCallback, useMemo, useRef, useState } from 'react';
-import { GestureResponderEvent, Modal, ModalProps, Platform, Pressable, ScrollView, StyleSheet, View, ViewStyle } from 'react-native';
+import { GestureResponderEvent, Modal, ModalProps, Platform, Pressable, ScrollView, ScrollViewProps, StyleSheet, View, ViewStyle } from 'react-native';
 import FocusControl from './accessibility/FocusControl/FocusControl';
 import { msleep, Second } from '@joplin/utils/time';
 import useAsyncEffect from '@joplin/lib/hooks/useAsyncEffect';
@@ -21,7 +21,7 @@ interface ModalElementProps extends ModalProps {
 	// If scrollOverflow is provided, the modal is wrapped in a vertical
 	// ScrollView. This allows the user to scroll parts of dialogs into
 	// view that would otherwise be clipped by the screen edge.
-	scrollOverflow?: boolean;
+	scrollOverflow?: boolean|ScrollViewProps;
 }
 
 const useStyles = (hasScrollView: boolean, backgroundColor: string|undefined) => {
@@ -113,7 +113,7 @@ const ModalElement: React.FC<ModalElementProps> = ({
 	dismissButtonStyle,
 	...modalProps
 }) => {
-	const styles = useStyles(scrollOverflow, backgroundColor);
+	const styles = useStyles(!!scrollOverflow, backgroundColor);
 
 	// contentWrapper adds padding. To allow styling the region outside of the modal
 	// (e.g. to add a background), the content is wrapped twice.
@@ -150,6 +150,7 @@ const ModalElement: React.FC<ModalElementProps> = ({
 		{closeButton}
 	</View>;
 
+	const extraScrollViewProps = (typeof scrollOverflow === 'object' ? scrollOverflow : {});
 	return (
 		<FocusControl.ModalWrapper state={modalStatus}>
 			<Modal
@@ -159,8 +160,9 @@ const ModalElement: React.FC<ModalElementProps> = ({
 			>
 				{scrollOverflow ? (
 					<ScrollView
-						style={styles.modalScrollView}
-						contentContainerStyle={styles.modalScrollViewContent}
+						{...extraScrollViewProps}
+						style={[styles.modalScrollView, extraScrollViewProps.style]}
+						contentContainerStyle={[styles.modalScrollViewContent, extraScrollViewProps.contentContainerStyle]}
 					>{contentAndBackdrop}</ScrollView>
 				) : contentAndBackdrop}
 			</Modal>
