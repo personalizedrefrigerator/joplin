@@ -20,7 +20,7 @@ with Playwright:
 
 # FAQ
 
-## Tests are timing out on my computer. How do I fix this?
+## How do I fix timeout-related test failures?
 
 If Playwright tests are timing out, consider modifying `playwright.config.ts` in the `app-desktop` folder. For example, increase the `timeout` option to `120_000` (2 minutes).
 
