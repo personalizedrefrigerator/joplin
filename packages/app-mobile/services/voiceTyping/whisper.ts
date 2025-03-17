@@ -86,15 +86,25 @@ class Whisper implements VoiceTypingSession {
 	}
 
 	private postProcessSpeech(data: string) {
-		data = data.trim();
+		const paragraphs = data.split('\n\n');
 
-		for (const [key, value] of this.config.stringReplacements) {
-			data = data.split(key).join(value);
+		const result = [];
+		for (let paragraph of paragraphs) {
+			paragraph = paragraph.trim();
+
+			for (const [key, value] of this.config.stringReplacements) {
+				paragraph = paragraph.split(key).join(value);
+			}
+			for (const [key, value] of this.config.regexReplacements) {
+				paragraph = paragraph.replace(key, value);
+			}
+
+			if (paragraph) {
+				result.push(paragraph);
+			}
 		}
-		for (const [key, value] of this.config.regexReplacements) {
-			data = data.replace(key, value);
-		}
-		return data;
+
+		return result.join('\n\n');
 	}
 
 	private onDataFinalize(data: string) {

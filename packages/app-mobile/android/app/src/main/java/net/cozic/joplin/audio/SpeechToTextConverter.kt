@@ -25,7 +25,8 @@ class SpeechToTextConverter(
 
 	private fun convert(data: FloatArray): String {
 		Log.d("Whisper", "Pre-transcribe data of size ${data.size}")
-		val result = whisper.transcribe(data)
+		whisper.addAudio(data)
+		val result = whisper.transcribeNextChunk()
 		Log.d("Whisper", "Post transcribe. Got $result")
 		return result;
 	}
@@ -47,7 +48,8 @@ class SpeechToTextConverter(
 	// Converts as many seconds of buffered data as possible, without waiting
 	fun convertRemaining(): String {
 		val buffer = recorder.pullAvailable()
-		return convert(buffer)
+		whisper.addAudio(buffer)
+		return whisper.transcribeRemaining()
 	}
 
 	fun getPreview(): String {
