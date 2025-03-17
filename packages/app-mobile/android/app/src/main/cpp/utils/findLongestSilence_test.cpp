@@ -122,12 +122,12 @@ static float samplesToSeconds(int samples, int sampleRate) {
 static void expectNoSilence(const GeneratedAudio& audio, const std::string& testLabel) {
 	auto silence = findLongestSilence(
 			audio.data,
-            LongestSilenceOptions {
-                .sampleRate = audio.sampleRate,
-                .minSilenceLengthSeconds = 0.02f,
-                .maximumSilenceStartSamples = audio.sampleCount,
-                .returnFirstMatch = false,
-            }
+			LongestSilenceOptions {
+				.sampleRate = audio.sampleRate,
+				.minSilenceLengthSeconds = 0.02f,
+				.maximumSilenceStartSamples = audio.sampleCount,
+				.returnFirstMatch = false,
+			}
 	);
 	if (silence.isValid) {
 		std::stringstream errorBuilder;
@@ -144,12 +144,12 @@ static void expectNoSilence(const GeneratedAudio& audio, const std::string& test
 static void expectSilenceBetween(const GeneratedAudio& audio, float startTimeSeconds, float stopTimeSeconds, const std::string& testLabel) {
 	auto silenceResult = findLongestSilence(
 			audio.data,
-            LongestSilenceOptions {
-                    .sampleRate = audio.sampleRate,
-                    .minSilenceLengthSeconds = 0.02f,
-                    .maximumSilenceStartSamples = audio.sampleCount,
-                    .returnFirstMatch = false,
-            }
+			LongestSilenceOptions {
+					.sampleRate = audio.sampleRate,
+					.minSilenceLengthSeconds = 0.02f,
+					.maximumSilenceStartSamples = audio.sampleCount,
+					.returnFirstMatch = false,
+			}
 	);
 
 	if (!silenceResult.isValid) {

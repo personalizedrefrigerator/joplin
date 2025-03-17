@@ -103,37 +103,37 @@ Java_net_cozic_joplin_audio_NativeWhisperLib_00024Companion_addAudio(JNIEnv *env
 extern "C"
 JNIEXPORT jstring JNICALL
 Java_net_cozic_joplin_audio_NativeWhisperLib_00024Companion_transcribeNextChunk(JNIEnv *env,
-                                                                                jobject thiz,
-                                                                                jlong pointer) {
-    auto *pSession = reinterpret_cast<WhisperSession *> (pointer);
-    std::string result;
+																				jobject thiz,
+																				jlong pointer) {
+	auto *pSession = reinterpret_cast<WhisperSession *> (pointer);
+	std::string result;
 
-    try {
-        result = pSession->transcribeNextChunk();
-    } catch (const std::exception& exception) {
-        LOGW("Failed to run whisper: %s", exception.what());
-        throwException(env, exception.what());
-    }
+	try {
+		result = pSession->transcribeNextChunk();
+	} catch (const std::exception& exception) {
+		LOGW("Failed to run whisper: %s", exception.what());
+		throwException(env, exception.what());
+	}
 
-    return stringToJava(env, result);
+	return stringToJava(env, result);
 }
 
 extern "C"
 JNIEXPORT jstring JNICALL
 Java_net_cozic_joplin_audio_NativeWhisperLib_00024Companion_transcribeRemaining(JNIEnv *env,
-                                                                                jobject thiz,
-                                                                                jlong pointer) {
-    auto *pSession = reinterpret_cast<WhisperSession *> (pointer);
-    std::string result;
+																				jobject thiz,
+																				jlong pointer) {
+	auto *pSession = reinterpret_cast<WhisperSession *> (pointer);
+	std::string result;
 
-    try {
-        result = pSession->transcribeAll();
-    } catch (const std::exception& exception) {
-        LOGW("Failed to run whisper: %s", exception.what());
-        throwException(env, exception.what());
-    }
+	try {
+		result = pSession->transcribeAll();
+	} catch (const std::exception& exception) {
+		LOGW("Failed to run whisper: %s", exception.what());
+		throwException(env, exception.what());
+	}
 
-    return stringToJava(env, result);
+	return stringToJava(env, result);
 }
 
 extern "C"
