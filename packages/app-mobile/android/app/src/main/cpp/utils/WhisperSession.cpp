@@ -122,10 +122,11 @@ std::string
 WhisperSession::transcribeNextChunkNoPreview_() {
 	std::stringstream result;
 
+	// Handles a silence detected between (splitStart, splitEnd).
 	auto splitAndProcess = [&] (int splitStart, int splitEnd) {
 		int tolerance = WHISPER_SAMPLE_RATE / 20; // 0.05s
 		bool isCompletelySilent = splitStart < tolerance && splitEnd > audioBuffer_.size() - tolerance;
-		LOGD("WhisperSession: Silence range %.2f -> %.2f", splitStart / (float) WHISPER_SAMPLE_RATE, splitEnd / (float) WHISPER_SAMPLE_RATE);
+		LOGD("WhisperSession: Found silence range from %.2f -> %.2f", splitStart / (float) WHISPER_SAMPLE_RATE, splitEnd / (float) WHISPER_SAMPLE_RATE);
 
 		if (isCompletelySilent) {
 			audioBuffer_.clear();
@@ -142,7 +143,7 @@ WhisperSession::transcribeNextChunkNoPreview_() {
 
 	// Handle paragraph breaks indicated by long pauses
 	while (audioBuffer_.size() > WHISPER_SAMPLE_RATE * 3) {
-		LOGD("WhisperSession: Checking for a longer paragraph break.");
+		LOGD("WhisperSession: Checking for a longer pauses.");
 		// Allow brief pauses to create new paragraphs:
 		float minSilenceSeconds = 1.5f;
 		auto splitPoint = findLongestSilence(
