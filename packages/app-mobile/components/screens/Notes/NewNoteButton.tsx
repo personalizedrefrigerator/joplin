@@ -8,12 +8,16 @@ import { AttachFileAction } from '../Note/commands/attachFile';
 import LabelledIconButton from '../../buttons/LabelledIconButton';
 import TextButton, { ButtonSize, ButtonType } from '../../buttons/TextButton';
 import { useCallback, useMemo, useRef } from 'react';
+import Logger from '@joplin/utils/Logger';
+
+const logger = Logger.create('NewNoteButton');
 
 interface Props {
 
 }
 
 const makeNewNote = (isTodo: boolean, action?: AttachFileAction) => {
+	logger.debug(`New ${isTodo ? 'to-do' : 'note'} with action`, action);
 	const body = '';
 	void CommandService.instance().execute('newNote', body, isTodo, { attachFileAction: action });
 };
@@ -90,8 +94,8 @@ const NewNoteButton: React.FC<Props> = _props => {
 		<Divider/>
 		<View style={styles.buttonRow}>
 			{renderShortcutButton(AttachFileAction.AttachFile, 'material attachment', _('Attachment'))}
-			{renderShortcutButton(AttachFileAction.AttachPhoto, 'material camera', _('Camera'))}
-			{renderShortcutButton(AttachFileAction.AttachPhoto, 'material draw', _('Drawing'))}
+			{renderShortcutButton(AttachFileAction.TakePhoto, 'material camera', _('Camera'))}
+			{renderShortcutButton(AttachFileAction.AttachDrawing, 'material draw', _('Drawing'))}
 		</View>
 	</View>;
 
