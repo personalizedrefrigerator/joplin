@@ -94,6 +94,7 @@ const NewNoteButton: React.FC<Props> = _props => {
 		<Divider/>
 		<View style={styles.buttonRow}>
 			{renderShortcutButton(AttachFileAction.AttachFile, 'material attachment', _('Attachment'))}
+			{renderShortcutButton(AttachFileAction.RecordAudio, 'material microphone', _('Recording'))}
 			{renderShortcutButton(AttachFileAction.TakePhoto, 'material camera', _('Camera'))}
 			{renderShortcutButton(AttachFileAction.AttachDrawing, 'material draw', _('Drawing'))}
 		</View>
