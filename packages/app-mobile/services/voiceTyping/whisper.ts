@@ -70,6 +70,8 @@ class WhisperConfig {
 			}
 		};
 
+		// Models fine-tuned as per https://github.com/futo-org/whisper-acft should have
+		// "shortAudioContext": true in their config.json.
 		if ('shortAudioContext' in json) {
 			this.supportsShortAudioCtx = !!json.shortAudioContext;
 		}
