@@ -114,6 +114,7 @@ Java_net_cozic_joplin_audio_NativeWhisperLib_00024Companion_transcribeNextChunk(
 	} catch (const std::exception& exception) {
 		LOGW("Failed to run whisper: %s", exception.what());
 		throwException(env, exception.what());
+        return nullptr;
 	}
 
 	return stringToJava(env, result);
@@ -132,6 +133,7 @@ Java_net_cozic_joplin_audio_NativeWhisperLib_00024Companion_transcribeRemaining(
 	} catch (const std::exception& exception) {
 		LOGW("Failed to run whisper: %s", exception.what());
 		throwException(env, exception.what());
+        return nullptr;
 	}
 
 	return stringToJava(env, result);

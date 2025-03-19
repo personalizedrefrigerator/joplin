@@ -69,11 +69,21 @@ WhisperSession::transcribe_(const std::vector<float>& audio, size_t transcribeCo
 		return "";
 	}
 
+    float seconds = static_cast<float>(audio.size()) / WHISPER_SAMPLE_RATE;
+    if (seconds > 30.0f) {
+        LOGW("Warning: Audio is longer than 30 seconds. Not all audio will be transcribed");
+    }
+
 	whisper_full_params params = buildWhisperParams_();
+
+    // If supported by the model, allow shortening the transcription. This can significantly
+    // improve performance, but requires a fine-tuned model.
+    // See https://github.com/futo-org/whisper-acft
     if (this->shortAudioContext_) {
-        float seconds = static_cast<float>(audio.size()) / WHISPER_SAMPLE_RATE;
+        // audio_ctx: 1500 every 30 seconds (50 units in one second).
         // See https://github.com/futo-org/whisper-acft/issues/6
-        params.audio_ctx = static_cast<int>(seconds * (1500.0f / 30.0f) + 64.0f);
+        float padding = 64.0f;
+        params.audio_ctx = static_cast<int>(seconds * (1500.0f / 30.0f) + padding);
 
         if (params.audio_ctx > 1500) {
             params.audio_ctx = 1500;
