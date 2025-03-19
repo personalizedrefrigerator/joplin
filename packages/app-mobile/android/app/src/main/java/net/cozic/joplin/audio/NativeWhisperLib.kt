@@ -6,6 +6,7 @@ class NativeWhisperLib(
 	modelPath: String,
 	languageCode: String,
 	prompt: String,
+	shortAudioContext: Boolean,
 ) : Closeable {
 	companion object {
 		init {
@@ -16,7 +17,7 @@ class NativeWhisperLib(
 
 		// TODO: The example whisper.cpp project transfers pointers as Longs to the Kotlin code.
 		// This seems unsafe. Try changing how this is managed.
-		private external fun init(modelPath: String, languageCode: String, prompt: String): Long;
+		private external fun init(modelPath: String, languageCode: String, prompt: String, shortAudioContext: Boolean): Long;
 		private external fun free(pointer: Long): Unit;
 
 		private external fun addAudio(pointer: Long, audioData: FloatArray): Unit;
@@ -26,7 +27,7 @@ class NativeWhisperLib(
 	}
 
 	private var closed = false
-	private val pointer: Long = init(modelPath, languageCode, prompt)
+	private val pointer: Long = init(modelPath, languageCode, prompt, shortAudioContext)
 
 	fun addAudio(audioData: FloatArray) {
 		if (closed) {

@@ -54,13 +54,14 @@ Java_net_cozic_joplin_audio_NativeWhisperLib_00024Companion_init(
 		jobject thiz,
 		jstring modelPath,
 		jstring language,
-		jstring prompt
+		jstring prompt,
+        jboolean useShortAudioContext
 ) {
 	whisper_log_set(log_android, nullptr);
 
 	try {
 		auto *pSession = new WhisperSession(
-				stringToCXX(env, modelPath), stringToCXX(env, language), stringToCXX(env, prompt)
+				stringToCXX(env, modelPath), stringToCXX(env, language), stringToCXX(env, prompt), useShortAudioContext
 		);
 		return (jlong) pSession;
 	} catch (const std::exception& exception) {

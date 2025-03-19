@@ -13,6 +13,7 @@ const { SpeechToTextModule } = NativeModules;
 
 class WhisperConfig {
 	public prompts: Map<string, string> = new Map();
+	public supportsShortAudioCtx = false;
 	public stringReplacements: [string, string][] = [];
 	public regexReplacements: [RegExp, string][] = [];
 
@@ -68,6 +69,10 @@ class WhisperConfig {
 				});
 			}
 		};
+
+		if ('shortAudioContext' in json) {
+			this.supportsShortAudioCtx = !!json.shortAudioContext;
+		}
 
 		processPrompts();
 		processOutputSettings();
@@ -245,8 +250,9 @@ const whisper: VoiceTypingProvider = {
 			throw new Error(`Model not found at path ${modelPath}`);
 		}
 
+		logger.debug('Starting whisper session', config.supportsShortAudioCtx ? '(short audio context)' : '');
 		const sessionId = await SpeechToTextModule.openSession(
-			modelPath, locale, getPrompt(locale, config.prompts),
+			modelPath, locale, getPrompt(locale, config.prompts), config.supportsShortAudioCtx,
 		);
 		return new Whisper(sessionId, callbacks, config);
 	},

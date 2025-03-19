@@ -7,8 +7,8 @@
 #include "findLongestSilence.h"
 #include "androidUtil.h"
 
-WhisperSession::WhisperSession(const std::string& modelPath, std::string lang, std::string prompt)
-	: lang_ {std::move(lang)}, prompt_ {std::move(prompt)} {
+WhisperSession::WhisperSession(const std::string& modelPath, std::string lang, std::string prompt, bool shortAudioContext)
+	: lang_ {std::move(lang)}, prompt_ {std::move(prompt)}, shortAudioContext_ {shortAudioContext} {
 	whisper_context_params contextParams = whisper_context_default_params();
 
 	// Lifetime(pModelPath): Whisper.cpp creates a copy of pModelPath and stores it in a std::string.
@@ -54,6 +54,7 @@ WhisperSession::buildWhisperParams_() {
 	params.initial_prompt = prompt_.c_str();
 	params.prompt_tokens = nullptr;
 	params.prompt_n_tokens = 0;
+    params.audio_ctx = 0;
 
 	// Lifetime: lifetime(params) < lifetime(lang_) = lifetime(this).
 	params.language = lang_.c_str();
@@ -69,6 +70,15 @@ WhisperSession::transcribe_(const std::vector<float>& audio, size_t transcribeCo
 	}
 
 	whisper_full_params params = buildWhisperParams_();
+    if (this->shortAudioContext_) {
+        float seconds = static_cast<float>(audio.size()) / WHISPER_SAMPLE_RATE;
+        // See https://github.com/futo-org/whisper-acft/issues/6
+        params.audio_ctx = static_cast<int>(seconds * (1500.0f / 30.0f) + 64.0f);
+
+        if (params.audio_ctx > 1500) {
+            params.audio_ctx = 1500;
+        }
+    }
 	whisper_reset_timings(pContext_);
 
 	transcribeCount = std::min(audio.size(), transcribeCount);

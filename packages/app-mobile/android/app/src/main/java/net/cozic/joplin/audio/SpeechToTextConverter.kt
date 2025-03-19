@@ -8,6 +8,7 @@ class SpeechToTextConverter(
 	modelPath: String,
 	locale: String,
 	prompt: String,
+	useShortAudioCtx: Boolean,
 	recorderFactory: AudioRecorderFactory,
 	context: Context,
 ) : Closeable {
@@ -17,6 +18,7 @@ class SpeechToTextConverter(
 		modelPath,
 		languageCode,
 		prompt,
+		useShortAudioCtx,
 	)
 
 	fun start() {

@@ -5,7 +5,7 @@
 
 class WhisperSession {
 public:
-	WhisperSession(const std::string& modelPath, std::string lang, std::string prompt);
+	WhisperSession(const std::string& modelPath, std::string lang, std::string prompt, bool shortAudioContext);
 	~WhisperSession();
 	// Adds to the buffer
 	void addAudio(const float *pAudio, int sizeAudio);
@@ -34,6 +34,7 @@ private:
 	whisper_context *pContext_;
 	const std::string lang_;
 	const std::string prompt_;
+    const bool shortAudioContext_;
 
 	std::vector<float> audioBuffer_;
 };
