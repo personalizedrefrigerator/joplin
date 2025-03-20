@@ -1,11 +1,12 @@
-import Logger, { LoggerWrapper } from '@joplin/utils/Logger';
+import Logger, { LoggerWrapper, TargetType } from '@joplin/utils/Logger';
 import { PluginMessage } from './services/plugins/PluginRunner';
 import AutoUpdaterService, { defaultUpdateInterval, initialUpdateStartup } from './services/autoUpdater/AutoUpdaterService';
 import type ShimType from '@joplin/lib/shim';
 const shim: typeof ShimType = require('@joplin/lib/shim').default;
 import { isCallbackUrl } from '@joplin/lib/callbackUrlUtils';
-
-import { BrowserWindow, Tray, WebContents, screen } from 'electron';
+import { FileLocker } from '@joplin/utils/fs';
+import { IpcMessageHandler, IpcServer, Message, newHttpError, sendMessage, SendMessageOptions, startServer, stopServer } from '@joplin/utils/ipc';
+import { BrowserWindow, Tray, WebContents, screen, App } from 'electron';
 import bridge from './bridge';
 const url = require('url');
 const path = require('path');
@@ -19,6 +20,7 @@ import handleCustomProtocols, { CustomProtocolHandler } from './utils/customProt
 import { clearTimeout, setTimeout } from 'timers';
 import { resolve } from 'path';
 import { defaultWindowId } from '@joplin/lib/reducer';
+import { msleep } from '@joplin/utils/time';
 
 interface RendererProcessQuitReply {
 	canClose: boolean;
@@ -36,8 +38,7 @@ interface SecondaryWindowData {
 
 export default class ElectronAppWrapper {
 	private logger_: Logger = null;
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	private electronApp_: any;
+	private electronApp_: App;
 	private env_: string;
 	private isDebugMode_: boolean;
 	private profilePath_: string;
@@ -58,13 +59,28 @@ export default class ElectronAppWrapper {
 	private customProtocolHandler_: CustomProtocolHandler = null;
 	private updatePollInterval_: ReturnType<typeof setTimeout>|null = null;
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	public constructor(electronApp: any, env: string, profilePath: string|null, isDebugMode: boolean, initialCallbackUrl: string) {
+	private profileLocker_: FileLocker|null = null;
+	private ipcServer_: IpcServer|null = null;
+	private ipcStartPort_ = 2658;
+
+	private ipcLogger_: Logger;
+
+	public constructor(electronApp: App, env: string, profilePath: string|null, isDebugMode: boolean, initialCallbackUrl: string) {
 		this.electronApp_ = electronApp;
 		this.env_ = env;
 		this.isDebugMode_ = isDebugMode;
 		this.profilePath_ = profilePath;
 		this.initialCallbackUrl_ = initialCallbackUrl;
+
+		this.profileLocker_ = new FileLocker(`${this.profilePath_}/lock`);
+
+		// Note: in certain contexts `this.logger_` doesn't seem to be available, especially for IPC
+		// calls, either because it hasn't been set or other issue. So we set one here specifically
+		// for this.
+		this.ipcLogger_ = new Logger();
+		this.ipcLogger_.addTarget(TargetType.File, {
+			path: `${profilePath}/log-cross-app-ipc.txt`,
+		});
 	}
 
 	public electronApp() {
@@ -410,7 +426,7 @@ export default class ElectronAppWrapper {
 				if (message.target === 'plugin') {
 					const win = this.pluginWindows_[message.pluginId];
 					if (!win) {
-						this.logger().error(`Trying to send IPC message to non-existing plugin window: ${message.pluginId}`);
+						this.ipcLogger_.error(`Trying to send IPC message to non-existing plugin window: ${message.pluginId}`);
 						return;
 					}
 
@@ -465,12 +481,24 @@ export default class ElectronAppWrapper {
 		});
 	}
 
-	public quit() {
+	private onExit() {
 		this.stopPeriodicUpdateCheck();
+		this.profileLocker_.unlockSync();
+
+		// Probably doesn't matter if the server is not closed cleanly? Thus the lack of `await`
+		// eslint-disable-next-line promise/prefer-await-to-then -- Needed here because onExit() is not async
+		void stopServer(this.ipcServer_).catch(_error => {
+			// Ignore it since we're stopping, and to prevent unnecessary messages.
+		});
+	}
+
+	public quit() {
+		this.onExit();
 		this.electronApp_.quit();
 	}
 
 	public exit(errorCode = 0) {
+		this.onExit();
 		this.electronApp_.exit(errorCode);
 	}
 
@@ -536,20 +564,26 @@ export default class ElectronAppWrapper {
 		this.tray_ = null;
 	}
 
-	public ensureSingleInstance() {
-		if (this.env_ === 'dev') return false;
+	public async sendCrossAppIpcMessage(message: Message, port: number|null = null, options: SendMessageOptions = null) {
+		this.ipcLogger_.info('Sending message:', message);
 
-		const gotTheLock = this.electronApp_.requestSingleInstanceLock();
+		if (port === null) port = this.ipcStartPort_;
 
-		if (!gotTheLock) {
-			// Another instance is already running - exit
-			this.quit();
-			return true;
+		return await sendMessage(port, { ...message, sourcePort: this.ipcServer_.port }, {
+			logger: this.ipcLogger_,
+			...options,
+		});
+	}
+
+	public async ensureSingleInstance() {
+		// if (this.env_ === 'dev') return false;
+
+		interface OnSecondInstanceMessageData {
+			profilePath: string;
+			argv: string[];
 		}
 
-		// Someone tried to open a second instance - focus our window instead
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-		this.electronApp_.on('second-instance', (_e: any, argv: string[]) => {
+		const activateWindow = (argv: string[]) => {
 			const win = this.mainWindow();
 			if (!win) return;
 			if (win.isMinimized()) win.restore();
@@ -562,9 +596,85 @@ export default class ElectronAppWrapper {
 					void this.openCallbackUrl(url);
 				}
 			}
+		};
+
+		const messageHandlers: Record<string, IpcMessageHandler> = {
+			'onSecondInstance': async (message) => {
+				const data = message.data as OnSecondInstanceMessageData;
+				if (data.profilePath === this.profilePath_) activateWindow(data.argv);
+			},
+
+			'restartAltInstance': async (message) => {
+				if (bridge().altInstanceId()) return false;
+
+				// We do this in a timeout after a short interval because we need this call to
+				// return the response immediately, so that the caller can call `quit()`
+				setTimeout(async () => {
+					const maxWait = 10000;
+					const interval = 300;
+					const loopCount = Math.ceil(maxWait / interval);
+					let callingAppGone = false;
+
+					for (let i = 0; i < loopCount; i++) {
+						const response = await this.sendCrossAppIpcMessage({
+							action: 'ping',
+							data: null,
+						}, message.sourcePort, {
+							sendToSpecificPortOnly: true,
+						});
+
+						if (!response.length) {
+							callingAppGone = true;
+							break;
+						}
+
+						await msleep(interval);
+					}
+
+					if (callingAppGone) {
+						this.ipcLogger_.warn('restartAltInstance: App is gone - restarting it');
+						void bridge().launchNewAppInstance(this.env());
+					} else {
+						this.ipcLogger_.warn('restartAltInstance: Could not restart calling app because it was still open');
+					}
+				}, 100);
+
+				return true;
+			},
+
+			'ping': async (_message) => {
+				return true;
+			},
+		};
+
+		this.ipcServer_ = await startServer(this.ipcStartPort_, async (message) => {
+			if (messageHandlers[message.action]) {
+				this.ipcLogger_.info('Got message:', message);
+				return messageHandlers[message.action](message);
+			}
+
+			throw newHttpError(404);
+		}, {
+			logger: this.ipcLogger_,
 		});
 
-		return false;
+		// First check that no other app is running from that profile folder
+		const gotAppLock = await this.profileLocker_.lock();
+		if (gotAppLock) return false;
+
+		const message: Message = {
+			action: 'onSecondInstance',
+			data: {
+				senderPort: this.ipcServer_.port,
+				profilePath: this.profilePath_,
+				argv: process.argv,
+			},
+		};
+
+		await this.sendCrossAppIpcMessage(message);
+
+		this.quit();
+		return true;
 	}
 
 	public initializeCustomProtocolHandler(logger: LoggerWrapper) {
@@ -606,7 +716,7 @@ export default class ElectronAppWrapper {
 		// the "ready" event. So we use the function below to make sure that the app is ready.
 		await this.waitForElectronAppReady();
 
-		const alreadyRunning = this.ensureSingleInstance();
+		const alreadyRunning = await this.ensureSingleInstance();
 		if (alreadyRunning) return;
 
 		this.createWindow();
