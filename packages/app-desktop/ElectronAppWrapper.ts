@@ -20,7 +20,7 @@ import handleCustomProtocols, { CustomProtocolHandler } from './utils/customProt
 import { clearTimeout, setTimeout } from 'timers';
 import { resolve } from 'path';
 import { defaultWindowId } from '@joplin/lib/reducer';
-import { msleep } from '@joplin/utils/time';
+import { msleep, Second } from '@joplin/utils/time';
 
 interface RendererProcessQuitReply {
 	canClose: boolean;
@@ -674,6 +674,7 @@ export default class ElectronAppWrapper {
 		await this.sendCrossAppIpcMessage(message);
 
 		this.quit();
+		if (this.env() === 'dev') console.warn(`Closing the application because another instance is already running, or the previous instance was force-quit within the last ${Math.round(this.profileLocker_.options.interval / Second)} seconds.`);
 		return true;
 	}
 

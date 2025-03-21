@@ -40,6 +40,10 @@ export class FileLocker {
 		this.filePath_ = filePath;
 	}
 
+	public get options() {
+		return this.options_;
+	}
+
 	public async lock() {
 		if (!(await this.canLock())) return false;
 
