@@ -1,5 +1,10 @@
 # Joplin Android Changelog
 
+## [android-v3.3.4](https://github.com/laurent22/joplin/releases/tag/android-v3.3.4) (Pre-release) - 2025-03-21T18:07:00Z
+
+- Improved: Voice typing: Improve processing with larger models (#11983 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Improved: Voice typing: Improve re-download button UI (#11979) (#11955 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+
 ## [android-v3.3.3](https://github.com/laurent22/joplin/releases/tag/android-v3.3.3) (Pre-release) - 2025-03-16T10:29:52Z
 
 - New: Add setting migration for ocr.enabled (ab86b95)
