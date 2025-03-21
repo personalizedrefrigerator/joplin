@@ -572,7 +572,7 @@ export class Bridge {
 			app.relaunch();
 		}
 
-		app.exit();
+		this.electronApp().exit();
 	}
 
 	public createImageFromPath(path: string) {

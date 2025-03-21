@@ -632,6 +632,9 @@ export default class ElectronAppWrapper {
 					}
 
 					if (callingAppGone) {
+						// Wait a bit more because even if the app is not responding, the process
+						// might still be there for a short while.
+						await msleep(1000);
 						this.ipcLogger_.warn('restartAltInstance: App is gone - restarting it');
 						void bridge().launchNewAppInstance(this.env());
 					} else {
