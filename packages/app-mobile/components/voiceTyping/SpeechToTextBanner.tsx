@@ -35,6 +35,7 @@ const useVoiceTyping = ({ locale, provider, onSetPreview, onText }: UseVoiceTypi
 	const [error, setError] = useState<Error|null>(null);
 	const [mustDownloadModel, setMustDownloadModel] = useState<boolean | null>(null);
 	const [modelIsOutdated, setModelIsOutdated] = useState(false);
+	const [stoppingSession, setIsStoppingSession] = useState(false);
 
 	const onTextRef = useRef(onText);
 	onTextRef.current = onText;
@@ -95,14 +96,16 @@ const useVoiceTyping = ({ locale, provider, onSetPreview, onText }: UseVoiceTypi
 	}, []);
 
 	const onRequestRedownload = useCallback(async () => {
+		setIsStoppingSession(true);
 		await voiceTypingRef.current?.cancel();
 		await builder.clearDownloads();
 		setMustDownloadModel(true);
+		setIsStoppingSession(false);
 		setRedownloadCounter(value => value + 1);
 	}, [builder]);
 
 	return {
-		error, mustDownloadModel, voiceTyping, onRequestRedownload, modelIsOutdated,
+		error, mustDownloadModel, stoppingSession, voiceTyping, onRequestRedownload, modelIsOutdated,
 	};
 };
 
@@ -113,6 +116,7 @@ const SpeechToTextComponent: React.FC<Props> = props => {
 		error: modelError,
 		mustDownloadModel,
 		voiceTyping,
+		stoppingSession,
 		onRequestRedownload,
 		modelIsOutdated,
 	} = useVoiceTyping({
@@ -137,6 +141,12 @@ const SpeechToTextComponent: React.FC<Props> = props => {
 	}, [mustDownloadModel]);
 
 	useEffect(() => {
+		if (stoppingSession) {
+			setRecorderState(RecorderState.Processing);
+		}
+	}, [stoppingSession]);
+
+	useEffect(() => {
 		if (recorderState === RecorderState.Recording) {
 			void voiceTyping.start();
 		}
@@ -156,7 +166,9 @@ const SpeechToTextComponent: React.FC<Props> = props => {
 			[RecorderState.Loading]: () => _('Loading...'),
 			[RecorderState.Idle]: () => 'Waiting...', // Not used for now
 			[RecorderState.Recording]: () => _('Please record your voice...'),
-			[RecorderState.Processing]: () => _('Converting speech to text...'),
+			[RecorderState.Processing]: () => (
+				stoppingSession ? _('Closing session...') : _('Converting speech to text...')
+			),
 			[RecorderState.Downloading]: () => _('Downloading %s language files...', languageName(props.locale)),
 			[RecorderState.Error]: () => _('Error: %s', modelError?.message),
 		};
@@ -171,7 +183,12 @@ const SpeechToTextComponent: React.FC<Props> = props => {
 		return <Text variant='labelSmall'>{preview}</Text>;
 	};
 
-	const reDownloadButton = <Button onPress={onRequestRedownload}>
+	const reDownloadButton = <Button
+		// Usually, stoppingSession is true because the re-download button has
+		// just been pressed.
+		disabled={stoppingSession}
+		onPress={onRequestRedownload}
+	>
 		{modelIsOutdated ? _('Download updated model') : _('Re-download model')}
 	</Button>;
 	const allowReDownload = recorderState === RecorderState.Error || modelIsOutdated;
