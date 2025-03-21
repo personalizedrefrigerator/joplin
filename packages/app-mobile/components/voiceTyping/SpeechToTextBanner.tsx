@@ -165,6 +165,9 @@ const SpeechToTextComponent: React.FC<Props> = props => {
 	};
 
 	const renderPreview = () => {
+		if (recorderState !== RecorderState.Recording) {
+			return null;
+		}
 		return <Text variant='labelSmall'>{preview}</Text>;
 	};
 

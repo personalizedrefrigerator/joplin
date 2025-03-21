@@ -13,6 +13,7 @@ const { SpeechToTextModule } = NativeModules;
 
 class WhisperConfig {
 	public prompts: Map<string, string> = new Map();
+	public supportsShortAudioCtx = false;
 	public stringReplacements: [string, string][] = [];
 	public regexReplacements: [RegExp, string][] = [];
 
@@ -69,6 +70,12 @@ class WhisperConfig {
 			}
 		};
 
+		// Models fine-tuned as per https://github.com/futo-org/whisper-acft should have
+		// "shortAudioContext": true in their config.json.
+		if ('shortAudioContext' in json) {
+			this.supportsShortAudioCtx = !!json.shortAudioContext;
+		}
+
 		processPrompts();
 		processOutputSettings();
 	}
@@ -86,15 +93,25 @@ class Whisper implements VoiceTypingSession {
 	}
 
 	private postProcessSpeech(data: string) {
-		data = data.trim();
+		const paragraphs = data.split('\n\n');
 
-		for (const [key, value] of this.config.stringReplacements) {
-			data = data.split(key).join(value);
+		const result = [];
+		for (let paragraph of paragraphs) {
+			paragraph = paragraph.trim();
+
+			for (const [key, value] of this.config.stringReplacements) {
+				paragraph = paragraph.split(key).join(value);
+			}
+			for (const [key, value] of this.config.regexReplacements) {
+				paragraph = paragraph.replace(key, value);
+			}
+
+			if (paragraph) {
+				result.push(paragraph);
+			}
 		}
-		for (const [key, value] of this.config.regexReplacements) {
-			data = data.replace(key, value);
-		}
-		return data;
+
+		return result.join('\n\n');
 	}
 
 	private onDataFinalize(data: string) {
@@ -235,8 +252,9 @@ const whisper: VoiceTypingProvider = {
 			throw new Error(`Model not found at path ${modelPath}`);
 		}
 
+		logger.debug('Starting whisper session', config.supportsShortAudioCtx ? '(short audio context)' : '');
 		const sessionId = await SpeechToTextModule.openSession(
-			modelPath, locale, getPrompt(locale, config.prompts),
+			modelPath, locale, getPrompt(locale, config.prompts), config.supportsShortAudioCtx,
 		);
 		return new Whisper(sessionId, callbacks, config);
 	},
