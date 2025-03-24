@@ -27,6 +27,3 @@ If Playwright tests are timing out, consider modifying `playwright.config.ts` in
 
 Alternatively, try temporarily disabling `fullyParallel` (which disables running tests in parallel).
 
-## How do I debug failing tests?
-
-One option 
