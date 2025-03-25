@@ -20,12 +20,13 @@ interface ActionButtonProps {
 	menuContent?: React.ReactNode;
 	onMenuToggled?: (visible: boolean)=> void;
 	accessibilityActions?: readonly AccessibilityActionInfo[];
-	onAccessibilityAction?: (event: AccessibilityActionEvent)=> void;
+	// Can return a Promise to simplify unit testing
+	onAccessibilityAction?: (event: AccessibilityActionEvent)=> void|Promise<void>;
 	accessibilityHint?: string;
 	menuLabel?: string;
 
 	// If not given, an "add" button will be used.
-	mainButton?: ButtonSpec;
+	mainButton: ButtonSpec;
 	dispatch: Dispatch;
 }
 

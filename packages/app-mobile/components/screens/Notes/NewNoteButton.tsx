@@ -19,7 +19,7 @@ interface Props {
 const makeNewNote = (isTodo: boolean, action?: AttachFileAction) => {
 	logger.debug(`New ${isTodo ? 'to-do' : 'note'} with action`, action);
 	const body = '';
-	void CommandService.instance().execute('newNote', body, isTodo, { attachFileAction: action });
+	return CommandService.instance().execute('newNote', body, isTodo, { attachFileAction: action });
 };
 
 const styles = StyleSheet.create({
@@ -74,7 +74,7 @@ const NewNoteButton: React.FC<Props> = _props => {
 				icon='checkbox-outline'
 				style={styles.mainButton}
 				onPress={() => {
-					makeNewNote(true);
+					void makeNewNote(true);
 				}}
 				type={ButtonType.Secondary}
 				size={ButtonSize.Larger}
@@ -85,7 +85,7 @@ const NewNoteButton: React.FC<Props> = _props => {
 				icon='file-document-outline'
 				style={styles.mainButton}
 				onPress={() => {
-					makeNewNote(false);
+					void makeNewNote(false);
 				}}
 				type={ButtonType.Primary}
 				size={ButtonSize.Larger}
@@ -115,10 +115,11 @@ const NewNoteButton: React.FC<Props> = _props => {
 	}, []);
 	const onAccessibilityAction = useCallback((event: AccessibilityActionEvent) => {
 		if (event.nativeEvent.actionName === 'new-note') {
-			makeNewNote(false);
+			return makeNewNote(false);
 		} else if (event.nativeEvent.actionName === 'new-to-do') {
-			makeNewNote(true);
+			return makeNewNote(true);
 		}
+		return Promise.resolve();
 	}, []);
 
 	return <FloatingActionButton
