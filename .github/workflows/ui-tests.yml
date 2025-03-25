@@ -10,7 +10,7 @@ jobs:
         os: [macos-13, ubuntu-22.04]
     steps:
       - name: Setup build environment
-        uses: ./.github/actions/workflows/shared/setup-build-environment
+        uses: .github/actions/workflows/shared/setup-build-environment
       - name: Run UI tests
         run: |
           "${GITHUB_WORKSPACE}/packages/app-desktop/integration-tests/run-ci.sh"
