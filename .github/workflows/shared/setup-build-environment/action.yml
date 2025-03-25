@@ -7,14 +7,17 @@ runs:
     # https://github.com/actions/runner-images/issues/1187#issuecomment-686735760
     - name: Disable TCP/UDP offload on Windows
       if: runner.os == 'Windows'
+      shell: pwsh
       run: Disable-NetAdapterChecksumOffload -Name * -TcpIPv4 -UdpIPv4 -TcpIPv6 -UdpIPv6
 
     - name: Disable TCP/UDP offload on Linux
       if: runner.os == 'Linux'
+      shell: bash
       run: sudo ethtool -K eth0 tx off rx off
 
     - name: Disable TCP/UDP offload on macOS
       if: runner.os == 'macOS'
+      shell: bash
       run: |
         sudo sysctl -w net.link.generic.system.hwcksum_tx=0
         sudo sysctl -w net.link.generic.system.hwcksum_rx=0
@@ -26,6 +29,7 @@ runs:
 
     - name: Install Linux dependencies
       if: runner.os == 'Linux'
+      shell: bash
       run: |
         sudo apt-get update || true
         sudo apt-get install -y gettext
@@ -38,6 +42,7 @@ runs:
 
     - name: Install macOs dependencies
       if: runner.os == 'macOS'
+      shell: bash
       run: |
         # Required for building the canvas package
         brew install pango
@@ -52,6 +57,7 @@ runs:
         cache: 'yarn'
 
     - name: Install Yarn
+      shell: bash
       run: |
         # https://yarnpkg.com/getting-started/install
         corepack enable
