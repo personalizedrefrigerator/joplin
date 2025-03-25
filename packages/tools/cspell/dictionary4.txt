@@ -169,3 +169,9 @@ pmmmwh
 webm
 millis
 sideloading
+ggml
+Minidump
+collapseall
+newfolder
+unfocusable
+unlocker

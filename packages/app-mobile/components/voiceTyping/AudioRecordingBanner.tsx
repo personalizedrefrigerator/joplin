@@ -14,7 +14,7 @@ import { Text } from 'react-native-paper';
 import { AndroidAudioEncoder, AndroidOutputFormat, IOSAudioQuality, IOSOutputFormat, RecordingOptions } from 'expo-av/build/Audio';
 import time from '@joplin/lib/time';
 import { toFileExtension } from '@joplin/lib/mime-utils';
-import { formatMsToDurationLocal } from '@joplin/utils/time';
+import { formatMsToDurationCompat } from '@joplin/utils/time';
 
 const logger = Logger.create('AudioRecording');
 
@@ -150,13 +150,20 @@ const useAudioRecorder = (onFileSaved: OnFileSavedCallback, onDismiss: ()=> void
 	const onStopRecording = useCallback(async () => {
 		const recording = recordingRef.current;
 		recordingRef.current = null;
-		setRecordingState(RecorderState.Idle);
-		await recording.stopAndUnloadAsync();
-		await resetAudioMode();
 
-		const saveEvent = await recordingToSaveData(recording);
-		onFileSaved(saveEvent);
-		onDismiss();
+		try {
+			setRecordingState(RecorderState.Processing);
+			await recording.stopAndUnloadAsync();
+			await resetAudioMode();
+
+			const saveEvent = await recordingToSaveData(recording);
+			onFileSaved(saveEvent);
+			onDismiss();
+		} catch (error) {
+			logger.error('Error saving recording:', error);
+			setError(`Save error: ${error}`);
+			setRecordingState(RecorderState.Error);
+		}
 	}, [onFileSaved, onDismiss]);
 
 	const onStartStopRecording = useCallback(async () => {
@@ -193,14 +200,24 @@ const AudioRecordingBanner: React.FC<Props> = props => {
 	const allowStartStop = recordingState === RecorderState.Idle || recordingState === RecorderState.Recording;
 	const actions = <>
 		<SecondaryButton onPress={onCancelPress}>{_('Cancel')}</SecondaryButton>
-		<PrimaryButton disabled={!allowStartStop} onPress={onStartStopRecording}>{startStopButtonLabel}</PrimaryButton>
+		<PrimaryButton
+			disabled={!allowStartStop}
+			onPress={onStartStopRecording}
+			// Add additional accessibility information to make it clear that "Done" is
+			// associated with the voice recording banner:
+			accessibilityHint={recordingState === RecorderState.Recording ? _('Finishes recording') : undefined}
+		>{startStopButtonLabel}</PrimaryButton>
 	</>;
 
-	const durationDescription = <Text>{
-		recordingState === RecorderState.Recording
-			? formatMsToDurationLocal(duration)
-			: ''
-	}</Text>;
+	const renderDuration = () => {
+		if (recordingState !== RecorderState.Recording) return null;
+
+		const durationValue = formatMsToDurationCompat(duration);
+		return <Text
+			accessibilityLabel={_('Duration: %s', durationValue)}
+			accessibilityRole='timer'
+		>{durationValue}</Text>;
+	};
 
 	return <RecordingControls
 		recorderState={recordingState}
@@ -210,7 +227,7 @@ const AudioRecordingBanner: React.FC<Props> = props => {
 				? _('Click "start" to attach a new voice memo to the note.')
 				: error
 		}
-		preview={durationDescription}
+		preview={renderDuration()}
 		actions={actions}
 	/>;
 };

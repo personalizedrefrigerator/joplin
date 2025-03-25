@@ -66,6 +66,7 @@ const { OneDriveLoginScreen } = require('./components/screens/onedrive-login.js'
 import EncryptionConfigScreen from './components/screens/encryption-config';
 import DropboxLoginScreen from './components/screens/dropbox-login.js';
 import { MenuProvider } from 'react-native-popup-menu';
+import SideMenu, { SideMenuPosition } from './components/SideMenu';
 import SideMenuContent from './components/side-menu-content';
 import SideMenuContentNote from './components/SideMenuContentNote';
 import { reg } from '@joplin/lib/registry';
@@ -138,9 +139,8 @@ import DialogManager from './components/DialogManager';
 import lockToSingleInstance from './utils/lockToSingleInstance';
 import { AppState } from './utils/types';
 import { getDisplayParentId } from '@joplin/lib/services/trash';
-import AppSideMenu from './components/sidebar/AppSideMenu';
-import { SideMenuPosition } from './components/sidebar/SideMenu';
 import PluginNotification from './components/plugins/PluginNotification';
+import FocusControl from './components/accessibility/FocusControl/FocusControl';
 
 const logger = Logger.create('root');
 
@@ -1255,12 +1255,12 @@ class AppComponent extends React.Component {
 		let disableSideMenuGestures = this.props.disableSideMenuGestures;
 
 		if (this.props.routeName === 'Note') {
-			sideMenuContent = <SafeAreaView style={{ flex: 1 }}><SideMenuContentNote options={this.props.noteSideMenuOptions}/></SafeAreaView>;
+			sideMenuContent = <SafeAreaView style={{ flex: 1, backgroundColor: theme.backgroundColor }}><SideMenuContentNote options={this.props.noteSideMenuOptions}/></SafeAreaView>;
 			menuPosition = SideMenuPosition.Right;
 		} else if (this.props.routeName === 'Config') {
 			disableSideMenuGestures = true;
 		} else {
-			sideMenuContent = <SafeAreaView style={{ flex: 1 }}><SideMenuContent/></SafeAreaView>;
+			sideMenuContent = <SafeAreaView style={{ flex: 1, backgroundColor: theme.backgroundColor }}><SideMenuContent/></SafeAreaView>;
 		}
 
 		const appNavInit = {
@@ -1293,17 +1293,27 @@ class AppComponent extends React.Component {
 		logger.info('root.biometrics: shouldShowMainContent', shouldShowMainContent);
 		logger.info('root.biometrics: this.state.sensorInfo', this.state.sensorInfo);
 
+		// The right sidemenu can be difficult to close due to a bug in the sidemenu
+		// library (right sidemenus can't be swiped closed).
+		//
+		// Additionally, it can interfere with scrolling in the note viewer, so we use
+		// a smaller edge hit width.
+		const menuEdgeHitWidth = menuPosition === 'right' ? 20 : 30;
+
 		const mainContent = (
 			<View style={{ flex: 1, backgroundColor: theme.backgroundColor }}>
-				<AppSideMenu
+				<SideMenu
 					menu={sideMenuContent}
+					edgeHitWidth={menuEdgeHitWidth}
+					toleranceX={4}
+					toleranceY={20}
 					openMenuOffset={this.state.sideMenuWidth}
 					menuPosition={menuPosition}
 					onChange={(isOpen: boolean) => this.sideMenu_change(isOpen)}
 					disableGestures={disableSideMenuGestures}
 				>
 					<StatusBar barStyle={statusBarStyle} />
-					<MenuProvider style={{ flex: 1 }}>
+					<View style={{ flexGrow: 1, flexShrink: 1, flexBasis: '100%' }}>
 						<SafeAreaView style={{ flex: 0, backgroundColor: theme.backgroundColor2 }}/>
 						<SafeAreaView style={{ flex: 1 }}>
 							<View style={{ flex: 1, backgroundColor: theme.backgroundColor }}>
@@ -1317,8 +1327,8 @@ class AppComponent extends React.Component {
 								sensorInfo={this.state.sensorInfo}
 							/> }
 						</SafeAreaView>
-					</MenuProvider>
-				</AppSideMenu>
+					</View>
+				</SideMenu>
 				<PluginRunnerWebView />
 				<PluginNotification/>
 			</View>
@@ -1329,44 +1339,53 @@ class AppComponent extends React.Component {
 
 		// Wrap everything in a PaperProvider -- this allows using components from react-native-paper
 		return (
-			<PaperProvider theme={{
-				...paperTheme,
-				version: 3,
-				colors: {
-					...paperTheme.colors,
-					onPrimaryContainer: theme.color5,
-					primaryContainer: theme.backgroundColor5,
+			<FocusControl.Provider>
+				<PaperProvider theme={{
+					...paperTheme,
+					version: 3,
+					colors: {
+						...paperTheme.colors,
+						onPrimaryContainer: theme.color5,
+						primaryContainer: theme.backgroundColor5,
 
-					outline: theme.codeBorderColor,
+						outline: theme.codeBorderColor,
 
-					primary: theme.color4,
-					onPrimary: theme.backgroundColor4,
+						primary: theme.color4,
+						onPrimary: theme.backgroundColor4,
 
-					background: theme.backgroundColor,
+						background: theme.backgroundColor,
 
-					surface: theme.backgroundColor,
-					onSurface: theme.color,
+						surface: theme.backgroundColor,
+						onSurface: theme.color,
 
-					secondaryContainer: theme.raisedBackgroundColor,
-					onSecondaryContainer: theme.raisedColor,
+						secondaryContainer: theme.raisedBackgroundColor,
+						onSecondaryContainer: theme.raisedColor,
 
-					surfaceVariant: theme.backgroundColor3,
-					onSurfaceVariant: theme.color3,
+						surfaceVariant: theme.backgroundColor3,
+						onSurfaceVariant: theme.color3,
 
-					elevation: {
-						level0: 'transparent',
-						level1: theme.oddBackgroundColor,
-						level2: theme.raisedBackgroundColor,
-						level3: theme.raisedBackgroundColor,
-						level4: theme.raisedBackgroundColor,
-						level5: theme.raisedBackgroundColor,
+						elevation: {
+							level0: 'transparent',
+							level1: theme.oddBackgroundColor,
+							level2: theme.raisedBackgroundColor,
+							level3: theme.raisedBackgroundColor,
+							level4: theme.raisedBackgroundColor,
+							level5: theme.raisedBackgroundColor,
+						},
 					},
-				},
-			}}>
-				<DialogManager themeId={this.props.themeId}>
-					{mainContent}
-				</DialogManager>
-			</PaperProvider>
+				}}>
+					<DialogManager themeId={this.props.themeId}>
+						<MenuProvider
+							style={{ flex: 1 }}
+							closeButtonLabel={_('Dismiss')}
+						>
+							<FocusControl.MainAppContent style={{ flex: 1 }}>
+								{mainContent}
+							</FocusControl.MainAppContent>
+						</MenuProvider>
+					</DialogManager>
+				</PaperProvider>
+			</FocusControl.Provider>
 		);
 	}
 }

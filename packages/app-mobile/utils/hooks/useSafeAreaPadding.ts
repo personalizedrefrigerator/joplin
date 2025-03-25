@@ -1,23 +1,24 @@
 import { useMemo } from 'react';
 import { useWindowDimensions } from 'react-native';
-import { hasNotch } from 'react-native-device-info';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const useSafeAreaPadding = () => {
 	const { width: windowWidth, height: windowHeight } = useWindowDimensions();
+	const safeAreaInsets = useSafeAreaInsets();
 	const isLandscape = windowWidth > windowHeight;
 	return useMemo(() => {
 		return isLandscape ? {
-			paddingRight: hasNotch() ? 60 : 0,
-			paddingLeft: hasNotch() ? 60 : 0,
+			paddingRight: safeAreaInsets.right,
+			paddingLeft: safeAreaInsets.left,
 			paddingTop: 15,
 			paddingBottom: 15,
 		} : {
-			paddingTop: hasNotch() ? 65 : 15,
-			paddingBottom: hasNotch() ? 35 : 15,
+			paddingTop: safeAreaInsets.top,
+			paddingBottom: safeAreaInsets.bottom,
 			paddingLeft: 0,
 			paddingRight: 0,
 		};
-	}, [isLandscape]);
+	}, [isLandscape, safeAreaInsets]);
 };
 
 export default useSafeAreaPadding;
