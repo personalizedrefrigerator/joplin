@@ -8841,7 +8841,6 @@ __metadata:
     "@types/zxcvbn": 4.4.5
     bcryptjs: 2.4.3
     bulma: 1.0.2
-    bulma-prefers-dark: 0.1.0-beta.1
     compare-versions: 6.1.1
     dayjs: 1.11.12
     formidable: 2.1.2
@@ -18078,13 +18077,6 @@ __metadata:
   dependencies:
     semver: ^7.0.0
   checksum: 66d204657fe36522822a95b288943ad11b58f5eaede235b11d8c4edaa28ce4800087d44a2681524c340494aadb120a0068011acabe99d30e8f11a7d826d83515
-  languageName: node
-  linkType: hard
-
-"bulma-prefers-dark@npm:0.1.0-beta.1":
-  version: 0.1.0-beta.1
-  resolution: "bulma-prefers-dark@npm:0.1.0-beta.1"
-  checksum: 26a88776a97ed0b57307a1aee60380a1b484ebd27d101c9995b5d220ff79fe909b060577c42c674c2863c52d4de85396c6f36031b3f7828386e21c1eda1e4445
   languageName: node
   linkType: hard
 
