@@ -11,6 +11,8 @@ jobs:
     steps:
       - name: Setup build environment
         uses: ./.github/workflows/shared/setup-build-environment
+      - name: Build
+        run: yarn install
       - name: Run UI tests
         run: |
           "${GITHUB_WORKSPACE}/packages/app-desktop/integration-tests/run-ci.sh"
