@@ -21,6 +21,8 @@ import { clearTimeout, setTimeout } from 'timers';
 import { resolve } from 'path';
 import { defaultWindowId } from '@joplin/lib/reducer';
 import { msleep, Second } from '@joplin/utils/time';
+import determineBaseAppDirs from '@joplin/lib/determineBaseAppDirs';
+import getAppName from '@joplin/lib/getAppName';
 
 interface RendererProcessQuitReply {
 	canClose: boolean;
@@ -579,7 +581,11 @@ export default class ElectronAppWrapper {
 
 		if (port === null) port = this.ipcStartPort_;
 
-		return await sendMessage(port, { ...message, sourcePort: this.ipcServer_.port }, {
+		return await sendMessage(port, {
+			...message,
+			sourcePort: this.ipcServer_.port,
+			secretKey: this.ipcServer_.secretKey,
+		}, {
 			logger: this.ipcLogger_,
 			...options,
 		});
@@ -631,6 +637,7 @@ export default class ElectronAppWrapper {
 						const response = await this.sendCrossAppIpcMessage({
 							action: 'ping',
 							data: null,
+							secretKey: this.ipcServer_.secretKey,
 						}, message.sourcePort, {
 							sendToSpecificPortOnly: true,
 						});
@@ -662,7 +669,12 @@ export default class ElectronAppWrapper {
 			},
 		};
 
-		this.ipcServer_ = await startServer(this.ipcStartPort_, async (message) => {
+		const defaultProfileDir = determineBaseAppDirs('', getAppName(true, this.env() === 'dev'), '').rootProfileDir;
+		const secretKeyFilePath = `${defaultProfileDir}/ipc_secret_key.txt`;
+
+		this.ipcLogger_.info('Starting server using secret key:', secretKeyFilePath);
+
+		this.ipcServer_ = await startServer(this.ipcStartPort_, secretKeyFilePath, async (message) => {
 			if (messageHandlers[message.action]) {
 				this.ipcLogger_.info('Got message:', message);
 				return messageHandlers[message.action](message);
@@ -684,6 +696,7 @@ export default class ElectronAppWrapper {
 				profilePath: this.profilePath_,
 				argv: process.argv,
 			},
+			secretKey: this.ipcServer_.secretKey,
 		};
 
 		await this.sendCrossAppIpcMessage(message);
