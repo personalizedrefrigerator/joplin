@@ -17,8 +17,6 @@ test.describe('main', () => {
 
 		const mainPage = await new MainScreen(mainWindow).setup();
 		await mainPage.waitFor();
-
-		throw new Error('Simulated failure');
 	});
 
 	test('should be able to create and edit a new note', async ({ mainWindow }) => {
