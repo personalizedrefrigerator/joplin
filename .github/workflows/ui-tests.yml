@@ -16,7 +16,8 @@ jobs:
         run: yarn install
       - name: Run UI tests
         run: |
-          "${GITHUB_WORKSPACE}/packages/app-desktop/integration-tests/run-ci.sh"
+          cd ${GITHUB_WORKSPACE}/packages/app-desktop/
+          bash ./integration-tests/run-ci.sh
       # See https://playwright.dev/docs/ci-intro#setting-up-github-actions
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
