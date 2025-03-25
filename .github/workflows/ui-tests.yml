@@ -1,5 +1,7 @@
 name: Joplin UI tests
 on: [push, pull_request]
+permissions:
+  contents: read
 jobs:
   Main:
     # Don't run on forks
