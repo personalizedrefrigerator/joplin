@@ -19,7 +19,10 @@ public:
 private:
 	// Current preview state
 	std::string previewText_;
+	bool previewEnabled_ = true;
 
+	// Only updates the preview if previewing is enabled.
+	void updatePreview_();
 	whisper_full_params buildWhisperParams_();
 	std::string transcribe_(const std::vector<float>& audio, size_t samplesToTranscribe);
 	std::string splitAndTranscribeBefore_(int transcribeUpTo, int trimTo);
@@ -34,7 +37,7 @@ private:
 	whisper_context *pContext_;
 	const std::string lang_;
 	const std::string prompt_;
-    const bool shortAudioContext_;
+	const bool shortAudioContext_;
 
 	std::vector<float> audioBuffer_;
 };

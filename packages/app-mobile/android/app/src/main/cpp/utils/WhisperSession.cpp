@@ -6,6 +6,9 @@
 #include "whisper.h"
 #include "findLongestSilence.h"
 #include "androidUtil.h"
+#include <chrono>
+
+using namespace std::chrono_literals;
 
 WhisperSession::WhisperSession(const std::string& modelPath, std::string lang, std::string prompt, bool shortAudioContext)
 	: lang_ {std::move(lang)}, prompt_ {std::move(prompt)}, shortAudioContext_ {shortAudioContext} {
@@ -54,7 +57,7 @@ WhisperSession::buildWhisperParams_() {
 	params.initial_prompt = prompt_.c_str();
 	params.prompt_tokens = nullptr;
 	params.prompt_n_tokens = 0;
-    params.audio_ctx = 0;
+	params.audio_ctx = 0;
 
 	// Lifetime: lifetime(params) < lifetime(lang_) = lifetime(this).
 	params.language = lang_.c_str();
@@ -69,26 +72,26 @@ WhisperSession::transcribe_(const std::vector<float>& audio, size_t transcribeCo
 		return "";
 	}
 
-    float seconds = static_cast<float>(audio.size()) / WHISPER_SAMPLE_RATE;
-    if (seconds > 30.0f) {
-        LOGW("Warning: Audio is longer than 30 seconds. Not all audio will be transcribed");
-    }
+	float seconds = static_cast<float>(audio.size()) / WHISPER_SAMPLE_RATE;
+	if (seconds > 30.0f) {
+		LOGW("Warning: Audio is longer than 30 seconds. Not all audio will be transcribed");
+	}
 
 	whisper_full_params params = buildWhisperParams_();
 
-    // If supported by the model, allow shortening the transcription. This can significantly
-    // improve performance, but requires a fine-tuned model.
-    // See https://github.com/futo-org/whisper-acft
-    if (this->shortAudioContext_) {
-        // audio_ctx: 1500 every 30 seconds (50 units in one second).
-        // See https://github.com/futo-org/whisper-acft/issues/6
-        float padding = 64.0f;
-        params.audio_ctx = static_cast<int>(seconds * (1500.0f / 30.0f) + padding);
+	// If supported by the model, allow shortening the transcription. This can significantly
+	// improve performance, but requires a fine-tuned model.
+	// See https://github.com/futo-org/whisper-acft
+	if (this->shortAudioContext_) {
+		// audio_ctx: 1500 every 30 seconds (50 units in one second).
+		// See https://github.com/futo-org/whisper-acft/issues/6
+		float padding = 64.0f;
+		params.audio_ctx = static_cast<int>(seconds * (1500.0f / 30.0f) + padding);
 
-        if (params.audio_ctx > 1500) {
-            params.audio_ctx = 1500;
-        }
-    }
+		if (params.audio_ctx > 1500) {
+			params.audio_ctx = 1500;
+		}
+	}
 	whisper_reset_timings(pContext_);
 
 	transcribeCount = std::min(audio.size(), transcribeCount);
@@ -208,6 +211,21 @@ WhisperSession::transcribeNextChunkNoPreview_() {
 	return result.str();
 }
 
+void WhisperSession::updatePreview_() {
+	if (previewEnabled_) {
+		auto start = std::chrono::steady_clock::now();
+		previewText_ = transcribe_(audioBuffer_, audioBuffer_.size());
+		auto stop = std::chrono::steady_clock::now();
+
+		// If it takes a long time to generate the preview, disable it.
+		if (stop - start >= 2s) {
+			previewEnabled_ = false;
+		}
+	} else {
+		previewText_ = "";
+	}
+}
+
 
 void WhisperSession::addAudio(const float *pAudio, int sizeAudio) {
 	// Update the local audio buffer
@@ -218,7 +236,7 @@ void WhisperSession::addAudio(const float *pAudio, int sizeAudio) {
 
 std::string WhisperSession::transcribeNextChunk() {
 	std::string finalizedContent = transcribeNextChunkNoPreview_();
-	previewText_ = transcribe_(audioBuffer_, audioBuffer_.size());
+	updatePreview_();
 	return finalizedContent;
 }
 
