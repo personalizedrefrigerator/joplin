@@ -6,6 +6,9 @@
 #include "whisper.h"
 #include "findLongestSilence.h"
 #include "androidUtil.h"
+#include <chrono>
+
+using namespace std::chrono_literals;
 
 WhisperSession::WhisperSession(const std::string& modelPath, std::string lang, std::string prompt, bool shortAudioContext)
 	: lang_ {std::move(lang)}, prompt_ {std::move(prompt)}, shortAudioContext_ {shortAudioContext} {
@@ -208,6 +211,21 @@ WhisperSession::transcribeNextChunkNoPreview_() {
 	return result.str();
 }
 
+void WhisperSession::updatePreview_() {
+    if (previewEnabled_) {
+        auto start = std::chrono::steady_clock::now();
+        previewText_ = transcribe_(audioBuffer_, audioBuffer_.size());
+        auto stop = std::chrono::steady_clock::now();
+
+        // If it takes a long time to generate the preview, disable it.
+        if (stop - start >= 3s) {
+            previewEnabled_ = false;
+        }
+    } else {
+        previewText_ = "";
+    }
+}
+
 
 void WhisperSession::addAudio(const float *pAudio, int sizeAudio) {
 	// Update the local audio buffer
@@ -218,7 +236,7 @@ void WhisperSession::addAudio(const float *pAudio, int sizeAudio) {
 
 std::string WhisperSession::transcribeNextChunk() {
 	std::string finalizedContent = transcribeNextChunkNoPreview_();
-	previewText_ = transcribe_(audioBuffer_, audioBuffer_.size());
+	updatePreview_();
 	return finalizedContent;
 }
 
