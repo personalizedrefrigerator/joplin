@@ -9,6 +9,8 @@ import LabelledIconButton from '../../buttons/LabelledIconButton';
 import TextButton, { ButtonSize, ButtonType } from '../../buttons/TextButton';
 import { useCallback, useMemo, useRef } from 'react';
 import Logger from '@joplin/utils/Logger';
+import focusView from '../../../utils/focusView';
+import shim from '@joplin/lib/shim';
 
 const logger = Logger.create('NewNoteButton');
 
@@ -121,14 +123,19 @@ const NewNoteButton: React.FC<Props> = _props => {
 		}
 		return Promise.resolve();
 	}, []);
+	const onMenuShown = useCallback(() => {
+		shim.setTimeout(() => {
+			focusView('NewNoteButton', newNoteRef.current);
+		}, 100);
+	}, []);
 
 	return <FloatingActionButton
 		mainButton={{
 			icon: 'add',
 			label: _('Add new'),
 		}}
-		menuLabel={_('New note menu')}
 		menuContent={menuContent}
+		onMenuShow={onMenuShown}
 		accessibilityActions={accessibilityActions}
 		onAccessibilityAction={onAccessibilityAction}
 	/>;
