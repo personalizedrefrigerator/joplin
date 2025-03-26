@@ -113,15 +113,24 @@ export const getEditPopupSource = (theme: Theme) => {
 	}`;
 
 	const createEditPopupSyntax = `(parent, resourceId, onclick) => {
-		if (window.editPopupTimeout) {
-			clearTimeout(window.editPopupTimeout);
-			window.editPopupTimeout = undefined;
-		}
+		const destroyEditPopup = ${destroyEditPopupSyntax};
 
-		window.editPopupTimeout = setTimeout(${destroyEditPopupSyntax}, ${editPopupDestroyDelay});
+		const setEditPopupTimeout = () => {
+			if (window.editPopupTimeout) {
+				clearTimeout(window.editPopupTimeout);
+			}
+			window.editPopupTimeout = setTimeout(() => {
+				if (popupButton.contains(document.activeElement)) {
+					setEditPopupTimeout();
+				} else {
+					destroyEditPopup();
+				}
+			}, ${editPopupDestroyDelay});
+		};
+		setEditPopupTimeout();
 
 		if (window.lastEditPopupTarget !== parent) {
-			(${destroyEditPopupSyntax})();
+			destroyEditPopup();
 		} else if (window.editPopup) {
 			return;
 		}
@@ -134,6 +143,7 @@ export const getEditPopupSource = (theme: Theme) => {
 		popupIcon.title = popupIcon.alt;
 		popupIcon.src = ${JSON.stringify(getEditIconSrc(theme))};
 		popupButton.appendChild(popupIcon);
+		popupButton.ariaControlsElements = [parent];
 
 		popupButton.onclick = onclick;
 		editPopup.appendChild(popupButton);
@@ -143,7 +153,7 @@ export const getEditPopupSource = (theme: Theme) => {
 
 		// Ensure that the edit popup is focused immediately by screen
 		// readers.
-		editPopup.focus();
+		popupButton.focus();
 		window.lastEditPopupTarget = parent;
 	}`;
 
