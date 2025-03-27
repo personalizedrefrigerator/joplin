@@ -6,9 +6,6 @@
 #include "whisper.h"
 #include "findLongestSilence.h"
 #include "androidUtil.h"
-#include <chrono>
-
-using namespace std::chrono_literals;
 
 WhisperSession::WhisperSession(const std::string& modelPath, std::string lang, std::string prompt, bool shortAudioContext)
 	: lang_ {std::move(lang)}, prompt_ {std::move(prompt)}, shortAudioContext_ {shortAudioContext} {
@@ -142,7 +139,7 @@ bool WhisperSession::isBufferSilent_() {
 }
 
 std::string
-WhisperSession::transcribeNextChunkNoPreview_() {
+WhisperSession::transcribeNextChunk() {
 	std::stringstream result;
 
 	// Handles a silence detected between (splitStart, splitEnd).
@@ -211,33 +208,12 @@ WhisperSession::transcribeNextChunkNoPreview_() {
 	return result.str();
 }
 
-void WhisperSession::updatePreview_() {
-	if (previewEnabled_) {
-		auto start = std::chrono::steady_clock::now();
-		previewText_ = transcribe_(audioBuffer_, audioBuffer_.size());
-		auto stop = std::chrono::steady_clock::now();
-
-		// If it takes a long time to generate the preview, disable it.
-		if (stop - start >= 2s) {
-			previewEnabled_ = false;
-		}
-	} else {
-		previewText_ = "";
-	}
-}
-
 
 void WhisperSession::addAudio(const float *pAudio, int sizeAudio) {
 	// Update the local audio buffer
 	for (int i = 0; i < sizeAudio; i++) {
 		audioBuffer_.push_back(pAudio[i]);
 	}
-}
-
-std::string WhisperSession::transcribeNextChunk() {
-	std::string finalizedContent = transcribeNextChunkNoPreview_();
-	updatePreview_();
-	return finalizedContent;
 }
 
 std::string WhisperSession::transcribeAll() {
@@ -249,7 +225,7 @@ std::string WhisperSession::transcribeAll() {
 
 	std::string transcribed;
 	auto update_transcribed = [&] {
-		transcribed = transcribeNextChunkNoPreview_();
+		transcribed = transcribeNextChunk();
 		return !transcribed.empty();
 	};
 	while (update_transcribed()) {
@@ -262,10 +238,5 @@ std::string WhisperSession::transcribeAll() {
 	}
 	audioBuffer_.clear();
 
-	previewText_ = "";
 	return result.str();
-}
-
-std::string WhisperSession::getPreview() {
-	return previewText_;
 }
