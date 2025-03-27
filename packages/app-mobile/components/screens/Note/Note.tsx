@@ -69,6 +69,7 @@ import getActivePluginEditorView from '@joplin/lib/services/plugins/utils/getAct
 import EditorPluginHandler from '@joplin/lib/services/plugins/EditorPluginHandler';
 import AudioRecordingBanner from '../../voiceTyping/AudioRecordingBanner';
 import SpeechToTextBanner from '../../voiceTyping/SpeechToTextBanner';
+import { defaultWindowId } from '@joplin/lib/reducer';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 const emptyArray: any[] = [];
@@ -572,10 +573,13 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 			}, 100);
 		}
 
-		await this.editorPluginHandler_.emitActivationCheck();
+		await this.editorPluginHandler_.emitActivationCheck({
+			noteId: this.props.noteId,
+			parentWindowId: defaultWindowId,
+		});
 
 		setTimeout(() => {
-			this.editorPluginHandler_.emitUpdate(this.props['plugins.shownEditorViewIds']);
+			this.emitEditorPluginUpdate_();
 		}, 300);
 	}
 
@@ -645,7 +649,14 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 		}
 
 		if (prevProps.noteId && this.props.noteId && prevProps.noteId !== this.props.noteId) {
-			void this.editorPluginHandler_.emitActivationCheck();
+			void this.editorPluginHandler_.emitActivationCheck({
+				noteId: this.props.noteId,
+				parentWindowId: defaultWindowId,
+			});
+		}
+
+		if (prevState.note.body !== this.state.note.body) {
+			this.emitEditorPluginUpdate_();
 		}
 	}
 
@@ -668,6 +679,14 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 	private title_changeText(text: string) {
 		shared.noteComponent_change(this, 'title', text);
 		this.setState({ newAndNoTitleChangeNoteId: null });
+	}
+
+	private emitEditorPluginUpdate_() {
+		this.editorPluginHandler_.emitUpdate({
+			parentWindowId: defaultWindowId,
+			noteId: this.props.noteId,
+			body: this.state.note.body,
+		}, this.props['plugins.shownEditorViewIds']);
 	}
 
 	private onPlainEditorTextChange = (text: string) => {

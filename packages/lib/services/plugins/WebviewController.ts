@@ -49,7 +49,11 @@ function findItemByKey(layout: any, key: string): any {
 	return recurseFind(layout);
 }
 
-interface UpdateEvent { noteId: string; newBody: string }
+interface UpdateEvent {
+	noteId: string;
+	newBody: string;
+	windowId: string;
+}
 type UpdateListener = (event: UpdateEvent)=> void;
 
 export default class WebviewController extends ViewController {
@@ -129,14 +133,14 @@ export default class WebviewController extends ViewController {
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	public postMessage(message: any) {
+	public postMessage(message: any, windowId: string|undefined) {
 
 		const messageId = `plugin_${Date.now()}${Math.random()}`;
 
 		void PostMessageService.instance().postMessage({
 			pluginId: this.pluginId,
 			viewId: this.handle,
-			windowId: defaultWindowId,
+			windowId: windowId ?? defaultWindowId,
 			contentScriptId: null,
 			from: MessageParticipant.Plugin,
 			to: MessageParticipant.UserWebview,

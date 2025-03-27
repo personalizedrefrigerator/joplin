@@ -106,7 +106,7 @@ export default class PostMessageService {
 
 	private viewMessageHandler(message: Message) {
 
-		const viewMessageHandler = this.viewMessageHandlers_[[ResponderComponentType.UserWebview, message.viewId].join(':')];
+		const viewMessageHandler = this.viewMessageHandlers_[[ResponderComponentType.UserWebview, message.viewId, message.windowId].join(':')];
 
 		if (!viewMessageHandler) {
 			logger.warn('Cannot receive message because no viewMessageHandler was found', message);
@@ -150,12 +150,12 @@ export default class PostMessageService {
 		delete this.responders_[[type, viewId, windowId].join(':')];
 	}
 
-	public registerViewMessageHandler(type: ResponderComponentType, viewId: string, callback: ViewMessageHandler) {
-		this.viewMessageHandlers_[[type, viewId].join(':')] = callback;
+	public registerViewMessageHandler(type: ResponderComponentType, viewId: string, windowId: string, callback: ViewMessageHandler) {
+		this.viewMessageHandlers_[[type, viewId, windowId].join(':')] = callback;
 	}
 
-	public unregisterViewMessageHandler(type: ResponderComponentType, viewId: string) {
-		delete this.viewMessageHandlers_[[type, viewId].join(':')];
+	public unregisterViewMessageHandler(type: ResponderComponentType, viewId: string, windowId: string) {
+		delete this.viewMessageHandlers_[[type, viewId, windowId].join(':')];
 	}
 
 }

@@ -80,6 +80,8 @@ function NoteEditorContent(props: NoteEditorProps) {
 	const isMountedRef = useRef(true);
 	const noteSearchBarRef = useRef(null);
 
+	const windowId = useContext(WindowIdContext);
+
 	const editorPluginHandler = useMemo(() => {
 		return new EditorPluginHandler(PluginService.instance());
 	}, []);
@@ -105,17 +107,6 @@ function NoteEditorContent(props: NoteEditorProps) {
 	}, []);
 
 	const effectiveNoteId = useEffectiveNoteId(props);
-
-	useAsyncEffect(async (_event) => {
-		if (!props.startupPluginsLoaded) return;
-		await editorPluginHandler.emitActivationCheck();
-	}, [effectiveNoteId, editorPluginHandler, props.startupPluginsLoaded]);
-
-	useEffect(() => {
-		if (!props.startupPluginsLoaded) return;
-		editorPluginHandler.emitUpdate(shownEditorViewIds);
-	}, [effectiveNoteId, editorPluginHandler, shownEditorViewIds, props.startupPluginsLoaded]);
-
 	const { editorPlugin, editorView } = usePluginEditorView(props.plugins, shownEditorViewIds);
 	const builtInEditorVisible = !editorPlugin;
 
@@ -134,6 +125,23 @@ function NoteEditorContent(props: NoteEditorProps) {
 	formNoteRef.current = { ...formNote };
 
 	const formNoteFolder = useFolder({ folderId: formNote.parent_id });
+
+	useAsyncEffect(async (_event) => {
+		if (!props.startupPluginsLoaded) return;
+		await editorPluginHandler.emitActivationCheck({
+			parentWindowId: windowId,
+			noteId: effectiveNoteId,
+		});
+	}, [windowId, effectiveNoteId, editorPluginHandler, props.startupPluginsLoaded]);
+
+	useEffect(() => {
+		if (!props.startupPluginsLoaded) return;
+		editorPluginHandler.emitUpdate({
+			noteId: effectiveNoteId,
+			body: formNote.body,
+			parentWindowId: windowId,
+		}, shownEditorViewIds);
+	}, [windowId, effectiveNoteId, formNote.body, editorPluginHandler, shownEditorViewIds, props.startupPluginsLoaded]);
 
 	const {
 		localSearch,
@@ -337,7 +345,6 @@ function NoteEditorContent(props: NoteEditorProps) {
 		lastEditorScrollPercents: props.lastEditorScrollPercents,
 		editorRef,
 	});
-	const windowId = useContext(WindowIdContext);
 	const onMessage = useMessageHandler(scrollWhenReady, clearScrollWhenReady, windowId, editorRef, setLocalSearchResultCount, props.dispatch, formNote, htmlToMarkdown, markupToHtml);
 
 	useResourceUnwatcher({ noteId: formNote.id, windowId });

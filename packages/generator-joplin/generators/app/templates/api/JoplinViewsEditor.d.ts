@@ -73,8 +73,12 @@ export default class JoplinViewsEditors {
     onUpdate(handle: ViewHandle, callback: UpdateCallback): Promise<void>;
     /**
      * See [[JoplinViewPanels]]
+     *
+     * **Note**: `windowId`, if given, should be the ID of the window containing
+     * the target editor plugin. If not given, the message is sent to the editor
+     * in the main window (if any).
      */
-    postMessage(handle: ViewHandle, message: any): void;
+    postMessage(handle: ViewHandle, message: any, windowId?: string): void;
     /**
      * Tells whether the editor is active or not.
      */

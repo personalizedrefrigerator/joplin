@@ -25,9 +25,14 @@ export default function(frameWindow: any, isReady: boolean, pluginId: string, vi
 			}
 
 			if (event.data.target === 'postMessageService.registerViewMessageHandler') {
-				PostMessageService.instance().registerViewMessageHandler(ResponderComponentType.UserWebview, viewId, (message: MessageResponse) => {
-					postMessage('postMessageService.plugin_message', { message });
-				});
+				PostMessageService.instance().registerViewMessageHandler(
+					ResponderComponentType.UserWebview,
+					viewId,
+					windowId,
+					(message: MessageResponse) => {
+						postMessage('postMessageService.plugin_message', { message });
+					},
+				);
 			} else if (event.data.target === 'postMessageService.message') {
 				void PostMessageService.instance().postMessage({
 					pluginId,

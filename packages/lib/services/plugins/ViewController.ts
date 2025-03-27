@@ -51,8 +51,8 @@ export default class ViewController {
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	public postMessage(message: any) {
-		console.warn('Calling ViewController.postMessage - but not implemented', message);
+	public postMessage(message: any, targetWindowId: string|undefined) {
+		console.warn('Calling ViewController.postMessage - but not implemented', message, targetWindowId);
 	}
 
 }

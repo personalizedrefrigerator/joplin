@@ -15,6 +15,12 @@ const logger = Logger.create('EditorPluginHandler');
 export interface EditorContentInfo {
 	noteId: string;
 	body: string;
+	parentWindowId: string;
+}
+
+interface EmitActivationCheckOptions {
+	noteId: string;
+	parentWindowId: string;
 }
 
 const makeNoteUpdateAction = (pluginService: PluginService, editorInfo: EditorContentInfo, shownEditorViewIds: string[]) => {
@@ -25,6 +31,7 @@ const makeNoteUpdateAction = (pluginService: PluginService, editorInfo: EditorCo
 				controller.emitUpdate({
 					noteId: editorInfo.noteId,
 					newBody: editorInfo.body,
+					windowId: editorInfo.parentWindowId,
 				});
 			}
 		}
@@ -42,13 +49,16 @@ export default class {
 
 	public emitUpdate(editorInfo: EditorContentInfo, shownEditorViewIds: string[]) {
 		logger.info('emitUpdate:', shownEditorViewIds);
-		this.viewUpdateAsyncQueue_.push(makeNoteUpdateAction(this.pluginService_, editorInfo, shownEditorViewIds));
+		if (shownEditorViewIds.length > 0) {
+			this.viewUpdateAsyncQueue_.push(makeNoteUpdateAction(this.pluginService_, editorInfo, shownEditorViewIds));
+		}
 	}
 
-	public async emitActivationCheck(editorNoteId: string) {
+	public async emitActivationCheck({ noteId, parentWindowId }: EmitActivationCheckOptions) {
 		let filterObject: EditorActivationCheckFilterObject = {
 			activatedEditors: [],
-			effectiveNoteId: editorNoteId,
+			effectiveNoteId: noteId,
+			windowId: parentWindowId,
 		};
 		filterObject = await eventManager.filterEmit('editorActivationCheck', filterObject);
 

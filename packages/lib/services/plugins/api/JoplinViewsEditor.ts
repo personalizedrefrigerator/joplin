@@ -100,7 +100,10 @@ export default class JoplinViewsEditors {
 	 */
 	public async onActivationCheck(handle: ViewHandle, callback: ActivationCheckCallback): Promise<void> {
 		const handler: FilterHandler<EditorActivationCheckFilterObject> = async (object) => {
-			const isActive = await callback({ noteId: object.effectiveNoteId });
+			const isActive = await callback({
+				noteId: object.effectiveNoteId,
+				windowId: object.windowId,
+			});
 			object.activatedEditors.push({
 				pluginId: this.plugin.id,
 				viewId: handle,
@@ -127,10 +130,14 @@ export default class JoplinViewsEditors {
 
 	/**
 	 * See [[JoplinViewPanels]]
+	 *
+	 * **Note**: `windowId`, if given, should be the ID of the window containing
+	 * the target editor plugin. If not given, the message is sent to the editor
+	 * in the main window (if any).
 	 */
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	public postMessage(handle: ViewHandle, message: any): void {
-		return this.controller(handle).postMessage(message);
+	public postMessage(handle: ViewHandle, message: any, windowId?: string): void {
+		return this.controller(handle).postMessage(message, windowId);
 	}
 
 	/**

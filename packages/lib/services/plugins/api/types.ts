@@ -397,18 +397,21 @@ export interface Rectangle {
 	height?: number;
 }
 
-interface ActivationCheckEvent {
+export interface EditorUpdateEvent {
+	newBody: string;
 	noteId: string;
+
+	/** The ID of the window containing the plugin. */
+	windowId: string;
+}
+
+export interface ActivationCheckEvent {
+	noteId: string;
+	windowId: string;
 }
 
 export type ActivationCheckCallback = (event: ActivationCheckEvent)=> Promise<boolean>;
-
-export interface UpdateEvent {
-	newBody: string;
-	noteId: string;
-}
-
-export type UpdateCallback = (event: UpdateEvent)=> Promise<void>;
+export type UpdateCallback = (event: EditorUpdateEvent)=> Promise<void>;
 
 export type VisibleHandler = ()=> Promise<void>;
 
@@ -418,6 +421,7 @@ export interface EditContextMenuFilterObject {
 
 export interface EditorActivationCheckFilterObject {
 	effectiveNoteId: string;
+	windowId: string;
 	activatedEditors: {
 		pluginId: string;
 		viewId: string;
