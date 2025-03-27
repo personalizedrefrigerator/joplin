@@ -102,20 +102,21 @@ test.describe('sidebar', () => {
 		await childFolderHeader.dragTo(parentFolderHeader);
 
 		// Verify that it's now a child folder -- expand and collapse the parent
+		await expect(childFolderHeader).toHaveJSProperty('ariaLevel', '3');
 		await expect(parentFolderHeader).toHaveJSProperty('ariaExpanded', 'true');
-		const toggleButton = parentFolderHeader.getByRole('button', { name: /^(Expand|Collapse)/ });
-		await toggleButton.click();
+		await parentFolderHeader.click();
+		await parentFolderHeader.press('ArrowLeft');
 
 		// Should be collapsed
 		await expect(childFolderHeader).not.toBeAttached();
 		await expect(parentFolderHeader).toHaveJSProperty('ariaExpanded', 'false');
 
-		await toggleButton.click();
+		await parentFolderHeader.press('ArrowRight');
 
 		// Should be possible to move back to the root
 		const rootFolderHeader = sidebar.container.getByText('Notebooks');
 		await childFolderHeader.dragTo(rootFolderHeader);
-		await expect(toggleButton).not.toBeVisible();
+		await expect(childFolderHeader).toHaveJSProperty('ariaLevel', '2');
 	});
 
 	test('all notes section should list all notes', async ({ electronApp, mainWindow }) => {
