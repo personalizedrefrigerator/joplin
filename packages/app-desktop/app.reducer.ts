@@ -36,7 +36,6 @@ export interface VisibleDialogs {
 
 export interface AppWindowState extends WindowState {
 	noteVisiblePanes: string[];
-	shownEditorPluginViewIds: string[];
 	editorCodeView: boolean;
 	visibleDialogs: VisibleDialogs;
 	dialogs: AppStateDialog[];

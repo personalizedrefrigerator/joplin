@@ -135,11 +135,6 @@ function NoteEditorContent(props: NoteEditorProps) {
 
 	const formNoteFolder = useFolder({ folderId: formNote.parent_id });
 
-	useEffect(() => {
-		if (!props.startupPluginsLoaded) return;
-		viewUpdateAsyncQueue_.current.push(makeNoteUpdateAction(shownEditorViewIds, formNoteRef.current));
-	}, [effectiveNoteId, shownEditorViewIds, props.startupPluginsLoaded]);
-
 	const {
 		localSearch,
 		onChange: localSearch_change,

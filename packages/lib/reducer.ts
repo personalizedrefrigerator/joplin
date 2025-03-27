@@ -91,6 +91,9 @@ export interface WindowState {
 	backwardHistoryNotes: NoteEntity[];
 	forwardHistoryNotes: NoteEntity[];
 	lastSelectedNotesIds: StateLastSelectedNotesIds;
+
+	// Per-window plugin state
+	shownEditorPluginViewIds: string[];
 }
 
 export const defaultWindowId = 'default';
@@ -115,6 +118,7 @@ export const defaultWindowState: WindowState = {
 		Tag: {},
 		Search: {},
 	},
+	shownEditorPluginViewIds: [],
 };
 
 export interface EditorNoteStatuses {

@@ -12,11 +12,21 @@ import WebviewController from './WebviewController';
 
 const logger = Logger.create('EditorPluginHandler');
 
-const makeNoteUpdateAction = (pluginService: PluginService, shownEditorViewIds: string[]) => {
+export interface EditorContentInfo {
+	noteId: string;
+	body: string;
+}
+
+const makeNoteUpdateAction = (pluginService: PluginService, editorInfo: EditorContentInfo, shownEditorViewIds: string[]) => {
 	return async () => {
 		for (const viewId of shownEditorViewIds) {
 			const controller = pluginService.viewControllerByViewId(viewId) as WebviewController;
-			if (controller) controller.emitUpdate();
+			if (controller) {
+				controller.emitUpdate({
+					noteId: editorInfo.noteId,
+					newBody: editorInfo.body,
+				});
+			}
 		}
 	};
 };
@@ -30,14 +40,15 @@ export default class {
 		this.pluginService_ = pluginService;
 	}
 
-	public emitUpdate(shownEditorViewIds: string[]) {
+	public emitUpdate(editorInfo: EditorContentInfo, shownEditorViewIds: string[]) {
 		logger.info('emitUpdate:', shownEditorViewIds);
-		this.viewUpdateAsyncQueue_.push(makeNoteUpdateAction(this.pluginService_, shownEditorViewIds));
+		this.viewUpdateAsyncQueue_.push(makeNoteUpdateAction(this.pluginService_, editorInfo, shownEditorViewIds));
 	}
 
-	public async emitActivationCheck() {
+	public async emitActivationCheck(editorNoteId: string) {
 		let filterObject: EditorActivationCheckFilterObject = {
 			activatedEditors: [],
+			effectiveNoteId: editorNoteId,
 		};
 		filterObject = await eventManager.filterEmit('editorActivationCheck', filterObject);
 
