@@ -636,7 +636,7 @@ export interface CodeMirrorControl {
 		/**
 		 * A CodeMirror [facet](https://codemirror.net/docs/ref/#state.EditorState.facet) that contains
 		 * the ID of the note currently open in the editor.
-		 * 
+		 *
 		 * Access the value of this facet using
 		 * ```ts
 		 * const noteIdFacet = editorControl.joplinExtensions.noteIdFacet;
@@ -646,6 +646,11 @@ export interface CodeMirrorControl {
 		 */
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- No better type available
 		noteIdFacet: any;
+		/**
+		 * A CodeMirror [StateEffect](https://codemirror.net/docs/ref/#state.StateEffect) that is
+		 * included in a [Transaction](https://codemirror.net/docs/ref/#state.Transaction) when the
+		 * note ID changes.
+		 */
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- No better type available
 		setNoteIdEffect: any;
 	};
