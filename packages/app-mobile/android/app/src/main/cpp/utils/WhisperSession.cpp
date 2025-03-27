@@ -64,7 +64,7 @@ WhisperSession::buildWhisperParams_() {
 
 std::string
 WhisperSession::transcribe_(const std::vector<float>& audio, size_t transcribeCount) {
-    // Whisper won't transcribe anything shorter than 1s.
+	// Whisper won't transcribe anything shorter than 1s.
 	int minTranscribeLength = WHISPER_SAMPLE_RATE; // 1s
 	if (transcribeCount < minTranscribeLength) {
 		return "";
@@ -153,11 +153,11 @@ WhisperSession::transcribeNextChunkNoPreview_() {
 			audioBuffer_.clear();
 			return false;
 		} else if (splitEnd > tolerance) { // Anything to transcribe?
-            // Include some of the silence between the start and the end. Excluding it
-            // seems to make Whisper more likely to omit trailing punctuation.
-            int maximumSilentSamples = WHISPER_SAMPLE_RATE;
-            int silentSamplesToAdd = std::min(maximumSilentSamples, (splitEnd - splitStart) / 2);
-            splitStart += silentSamplesToAdd;
+			// Include some of the silence between the start and the end. Excluding it
+			// seems to make Whisper more likely to omit trailing punctuation.
+			int maximumSilentSamples = WHISPER_SAMPLE_RATE;
+			int silentSamplesToAdd = std::min(maximumSilentSamples, (splitEnd - splitStart) / 2);
+			splitStart += silentSamplesToAdd;
 
 			result << splitAndTranscribeBefore_(splitStart, splitEnd) << "\n\n";
 			return true;
