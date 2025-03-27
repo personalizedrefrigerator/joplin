@@ -161,3 +161,17 @@ unwatcher
 pedr
 Slotozilla
 keyshortcuts
+atag
+HMAC
+Siri
+cipherdecipher
+pmmmwh
+webm
+millis
+sideloading
+ggml
+Minidump
+collapseall
+newfolder
+unfocusable
+unlocker

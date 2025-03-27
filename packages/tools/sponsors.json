@@ -35,6 +35,9 @@
 		},
 		{
 			"name": "Akhil-CM"
+		},
+		{
+			"name": "ugoertz"
 		}
 	],
 	"orgs": [
@@ -93,20 +96,9 @@
 			"githubUser": "route4me"
 		},
 		{
-			"url": "https://buyyoutubviews.com",
-			"title": "BYTV",
-			"imageName": "BYTV.png",
-			"githubUser": "bytv1"
-		},
-		{
 			"url": "https://casinoreviews.net",
 			"title": "Casino Reviews",
 			"imageName": "CasinoReviews.png"
-		},
-		{
-			"url": "https://useviral.com.br/",
-			"title": "Comprar seguidores Instagram",
-			"imageName": "Useviral.png"
 		},
 		{
 			"url": "https://ca.edubirdie.com/",
@@ -166,6 +158,12 @@
 			"title": "Famegear",
 			"imageName": "Famegear.png",
 			"githubUser": "rankmediateknologi"
+		},
+		{
+			"url": "https://buyyoutubviews.com",
+			"title": "BYTV",
+			"imageName": "BYTV.png",
+			"githubUser": "bytv1"
 		}
 	]
 }

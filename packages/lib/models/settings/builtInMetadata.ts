@@ -62,6 +62,16 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 			type: SettingItemType.String,
 			public: false,
 		},
+
+		'altInstanceId': {
+			value: '',
+			type: SettingItemType.String,
+			public: false,
+			appTypes: [AppType.Desktop],
+			storage: SettingStorage.File,
+			isGlobal: true,
+		},
+
 		'editor.codeView': {
 			value: true,
 			type: SettingItemType.Bool,
@@ -499,7 +509,7 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 		},
 
 		'ocr.enabled': {
-			value: false,
+			value: true,
 			type: SettingItemType.Bool,
 			public: true,
 			appTypes: [AppType.Desktop],
@@ -1677,7 +1687,7 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 			appTypes: [AppType.Desktop],
 			label: () => 'Enable auto-updates',
 			description: () => 'Enable this feature to receive notifications about updates and install them instead of manually downloading them. Restart app to start receiving auto-updates.',
-			show: () => shim.isWindows() || shim.isMac(),
+			show: () => shim.isWindows(),
 			section: 'application',
 			isGlobal: true,
 		},
