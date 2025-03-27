@@ -69,10 +69,10 @@ WhisperSession::transcribe_(const std::vector<float>& audio, size_t transcribeCo
 		return "";
 	}
 
-    float seconds = static_cast<float>(audio.size()) / WHISPER_SAMPLE_RATE;
-    if (seconds > 30.0f) {
-        LOGW("Warning: Audio is longer than 30 seconds. Not all audio will be transcribed");
-    }
+	float seconds = static_cast<float>(transcribeCount) / WHISPER_SAMPLE_RATE;
+	if (seconds > 30.0f) {
+		LOGW("Warning: Audio is longer than 30 seconds. Not all audio will be transcribed");
+	}
 
 	whisper_full_params params = buildWhisperParams_();
 
