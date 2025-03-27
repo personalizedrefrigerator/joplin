@@ -54,7 +54,7 @@ WhisperSession::buildWhisperParams_() {
 	params.initial_prompt = prompt_.c_str();
 	params.prompt_tokens = nullptr;
 	params.prompt_n_tokens = 0;
-    params.audio_ctx = 0;
+	params.audio_ctx = 0;
 
 	// Lifetime: lifetime(params) < lifetime(lang_) = lifetime(this).
 	params.language = lang_.c_str();
@@ -76,19 +76,19 @@ WhisperSession::transcribe_(const std::vector<float>& audio, size_t transcribeCo
 
 	whisper_full_params params = buildWhisperParams_();
 
-    // If supported by the model, allow shortening the transcription. This can significantly
-    // improve performance, but requires a fine-tuned model.
-    // See https://github.com/futo-org/whisper-acft
-    if (this->shortAudioContext_) {
-        // audio_ctx: 1500 every 30 seconds (50 units in one second).
-        // See https://github.com/futo-org/whisper-acft/issues/6
-        float padding = 64.0f;
-        params.audio_ctx = static_cast<int>(seconds * (1500.0f / 30.0f) + padding);
+	// If supported by the model, allow shortening the transcription. This can significantly
+	// improve performance, but requires a fine-tuned model.
+	// See https://github.com/futo-org/whisper-acft
+	if (this->shortAudioContext_) {
+		// audio_ctx: 1500 every 30 seconds (50 units in one second).
+		// See https://github.com/futo-org/whisper-acft/issues/6
+		float padding = 64.0f;
+		params.audio_ctx = static_cast<int>(seconds * (1500.0f / 30.0f) + padding);
 
-        if (params.audio_ctx > 1500) {
-            params.audio_ctx = 1500;
-        }
-    }
+		if (params.audio_ctx > 1500) {
+			params.audio_ctx = 1500;
+		}
+	}
 	whisper_reset_timings(pContext_);
 
 	transcribeCount = std::min(audio.size(), transcribeCount);
@@ -139,7 +139,7 @@ bool WhisperSession::isBufferSilent_() {
 }
 
 std::string
-WhisperSession::transcribeNextChunkNoPreview_() {
+WhisperSession::transcribeNextChunk() {
 	std::stringstream result;
 
 	// Handles a silence detected between (splitStart, splitEnd).
@@ -216,12 +216,6 @@ void WhisperSession::addAudio(const float *pAudio, int sizeAudio) {
 	}
 }
 
-std::string WhisperSession::transcribeNextChunk() {
-	std::string finalizedContent = transcribeNextChunkNoPreview_();
-	previewText_ = transcribe_(audioBuffer_, audioBuffer_.size());
-	return finalizedContent;
-}
-
 std::string WhisperSession::transcribeAll() {
 	if (isBufferSilent_()) {
 		return "";
@@ -231,7 +225,7 @@ std::string WhisperSession::transcribeAll() {
 
 	std::string transcribed;
 	auto update_transcribed = [&] {
-		transcribed = transcribeNextChunkNoPreview_();
+		transcribed = transcribeNextChunk();
 		return !transcribed.empty();
 	};
 	while (update_transcribed()) {
@@ -244,10 +238,5 @@ std::string WhisperSession::transcribeAll() {
 	}
 	audioBuffer_.clear();
 
-	previewText_ = "";
 	return result.str();
-}
-
-std::string WhisperSession::getPreview() {
-	return previewText_;
 }
