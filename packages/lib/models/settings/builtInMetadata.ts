@@ -841,14 +841,14 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 
 		// Works around a bug in which additional space is visible beneath the toolbar on some devices.
 		// See https://github.com/laurent22/joplin/pull/6823
+		// No longer needed:
 		'editor.mobile.removeSpaceBelowToolbar': {
 			value: false,
 			type: SettingItemType.Bool,
 			section: 'note',
 			public: true,
 			appTypes: [AppType.Mobile],
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-			show: (settings: any) => settings['editor.mobile.removeSpaceBelowToolbar'],
+			show: (_settings: unknown) => false, // settings['editor.mobile.removeSpaceBelowToolbar'],
 			label: () => 'Remove extra space below the markdown toolbar',
 			description: () => 'Works around bug on some devices where the markdown toolbar does not touch the bottom of the screen.',
 			storage: SettingStorage.File,
