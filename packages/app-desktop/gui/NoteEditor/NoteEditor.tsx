@@ -458,6 +458,7 @@ function NoteEditorContent(props: NoteEditorProps) {
 		searchMarkers: searchMarkers,
 		visiblePanes: props.noteVisiblePanes || ['editor', 'viewer'],
 		keyboardMode: Setting.value('editor.keyboardMode'),
+		enableTextPatterns: Setting.value('editor.enableTextPatterns'),
 		tabMovesFocus: props.tabMovesFocus,
 		locale: Setting.value('locale'),
 		onDrop: onDrop,

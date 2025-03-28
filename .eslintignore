@@ -583,6 +583,7 @@ packages/app-desktop/utils/restartInSafeModeFromMain.test.js
 packages/app-desktop/utils/restartInSafeModeFromMain.js
 packages/app-desktop/utils/window/types.js
 packages/app-mobile/PluginAssetsLoader.js
+packages/app-mobile/commands/dismissPluginPanels.js
 packages/app-mobile/commands/index.js
 packages/app-mobile/commands/newNote.test.js
 packages/app-mobile/commands/newNote.js
@@ -750,6 +751,8 @@ packages/app-mobile/components/screens/ConfigScreen/SettingItem.js
 packages/app-mobile/components/screens/ConfigScreen/SettingTextInput.js
 packages/app-mobile/components/screens/ConfigScreen/SettingsButton.js
 packages/app-mobile/components/screens/ConfigScreen/SettingsToggle.js
+packages/app-mobile/components/screens/ConfigScreen/ValidatedIntegerInput.test.js
+packages/app-mobile/components/screens/ConfigScreen/ValidatedIntegerInput.js
 packages/app-mobile/components/screens/ConfigScreen/configScreenStyles.js
 packages/app-mobile/components/screens/ConfigScreen/plugins/EnablePluginSupportPage.js
 packages/app-mobile/components/screens/ConfigScreen/plugins/InstalledPluginBox.js
