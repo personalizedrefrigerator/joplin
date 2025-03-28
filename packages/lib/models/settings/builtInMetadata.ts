@@ -684,6 +684,17 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 			storage: SettingStorage.File,
 			isGlobal: true,
 		},
+		'editor.enableTextPatterns': {
+			value: true,
+			type: SettingItemType.Bool,
+			public: true,
+			section: 'note',
+			appTypes: [AppType.Desktop],
+			label: () => _('Auto-format Markdown in the Rich Text Editor'),
+			description: () => _('Enables Markdown pattern replacement in the Rich Text Editor. For example, when enabled, typing **bold** creates bold text.'),
+			storage: SettingStorage.File,
+			isGlobal: true,
+		},
 		'editor.toolbarButtons': {
 			value: [] as string[],
 			public: false,
