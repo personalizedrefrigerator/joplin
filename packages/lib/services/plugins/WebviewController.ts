@@ -3,7 +3,7 @@ import shim from '../../shim';
 import { ButtonSpec, DialogResult, ViewHandle } from './api/types';
 const { toSystemSlashes } = require('../../path-utils');
 import PostMessageService, { MessageParticipant } from '../PostMessageService';
-import { PluginViewState } from './reducer';
+import { PluginEditorViewState, PluginViewState } from './reducer';
 import { defaultWindowId } from '../../reducer';
 import Logger from '@joplin/utils/Logger';
 import CommandService from '../CommandService';
@@ -77,11 +77,15 @@ export default class WebviewController extends ViewController {
 			containerType: containerType,
 			html: '',
 			scripts: [],
+			buttons: null,
+			fitToContent: true,
 			// Opened is used for dialogs and mobile panels (which are shown
 			// like dialogs):
 			opened: containerType === ContainerType.Panel,
-			buttons: null,
-			fitToContent: true,
+
+			// Only used by some plugin types
+			activeInWindows: [],
+			visibleInWindows: [],
 		};
 
 		this.store.dispatch({
@@ -153,19 +157,14 @@ export default class WebviewController extends ViewController {
 	public async emitMessage(event: EmitMessageEvent) {
 		if (!this.messageListener_) return;
 
-		if (this.containerType_ === ContainerType.Editor && !this.isActive()) {
-			logger.info('emitMessage: Not emitting message because editor is disabled:', this.pluginId, this.handle);
-			return;
-		}
-
 		return this.messageListener_(event.message);
 	}
 
 	public emitUpdate(event: UpdateEvent) {
 		if (!this.updateListener_) return;
 
-		if (this.containerType_ === ContainerType.Editor && (!this.isActive() || !this.isVisible())) {
-			logger.info('emitMessage: Not emitting update because editor is disabled or hidden:', this.pluginId, this.handle, this.isActive(), this.isVisible());
+		if (this.containerType_ === ContainerType.Editor && (!this.isActive(event.windowId) || !this.isVisible(event.windowId))) {
+			logger.info('emitMessage: Not emitting update because editor is disabled or hidden:', this.pluginId, this.handle, this.isActive(event.windowId), this.isVisible(event.windowId));
 			return;
 		}
 
@@ -277,18 +276,26 @@ export default class WebviewController extends ViewController {
 	// Specific to editors
 	// ---------------------------------------------
 
-	public setActive(active: boolean) {
-		this.setStoreProp('opened', active);
+	public setActive(active: boolean, windowId: string) {
+		logger.debug('Set active', active, 'in window', windowId);
+		this.store.dispatch({
+			type: 'PLUGIN_EDITOR_VIEW_SET_ACTIVE',
+			pluginId: this.pluginId,
+			viewId: this.storeView.id,
+			windowId,
+			active,
+		});
 	}
 
-	public isActive(): boolean {
-		return this.storeView.opened;
+	public isActive(windowId: string): boolean {
+		const state = this.storeView as PluginEditorViewState;
+		return state.activeInWindows.includes(windowId);
 	}
 
-	public isVisible(): boolean {
-		if (!this.storeView.opened) return false;
-		const shownEditorViewIds: string[] = this.store.getState().settings['plugins.shownEditorViewIds'];
-		return shownEditorViewIds.includes(this.handle);
+	public isVisible(windowId: string): boolean {
+		const state = this.storeView as PluginEditorViewState;
+		if (!state.activeInWindows.includes(windowId)) return false;
+		return state.visibleInWindows.includes(windowId);
 	}
 
 	public async setVisible(visible: boolean) {

@@ -1,8 +1,7 @@
-import { CommandContext, CommandDeclaration, CommandRuntime } from '../services/CommandService';
+import CommandService, { CommandContext, CommandDeclaration, CommandRuntime } from '../services/CommandService';
 import { _ } from '../locale';
-import Setting from '../models/Setting';
-import getActivePluginEditorView from '../services/plugins/utils/getActivePluginEditorView';
 import Logger from '@joplin/utils/Logger';
+import getActivePluginEditorViews from '../services/plugins/utils/getActivePluginEditorViews';
 
 const logger = Logger.create('toggleEditorPlugin');
 
@@ -15,28 +14,30 @@ export const declaration: CommandDeclaration = {
 export const runtime = (): CommandRuntime => {
 	return {
 		execute: async (context: CommandContext) => {
-			const shownEditorViewIds = [...context.state.shownEditorPluginViewIds];
-			const { editorPlugin, editorView } = getActivePluginEditorView(context.state.pluginService.plugins);
+			const activeWindowId = context.state.windowId;
+			const activePluginStates = getActivePluginEditorViews(context.state.pluginService.plugins, activeWindowId);
 
-			if (!editorPlugin) {
+			if (activePluginStates.length === 0) {
 				logger.warn('No editor plugin to toggle to');
 				return;
 			}
 
-			const idx = shownEditorViewIds.indexOf(editorView.id);
 			let hasBeenHidden = false;
-
-			if (idx < 0) {
-				shownEditorViewIds.push(editorView.id);
-			} else {
-				shownEditorViewIds.splice(idx, 1);
-				hasBeenHidden = true;
+			for (const { editorView } of activePluginStates) {
+				if (editorView.visibleInWindows.includes(activeWindowId)) {
+					await CommandService.instance().execute('showEditorPlugin', editorView.id, false);
+					hasBeenHidden = true;
+					break;
+				}
 			}
 
-			logger.info('New shown editor views: ', shownEditorViewIds);
+			if (!hasBeenHidden) {
+				const firstActiveEditorView = activePluginStates[0].editorView;
+				await CommandService.instance().execute('showEditorPlugin', firstActiveEditorView.id);
+			}
 
-			Setting.setValue('plugins.shownEditorViewIds', shownEditorViewIds);
-			context.dispatch({ type: 'EDITOR_PLUGIN_VIEW_IDS_CHANGED', value: shownEditorViewIds });
+			// TODO:
+			// Setting.setValue('plugins.shownEditorViewIds', shownEditorViewIds);
 
 			if (hasBeenHidden) {
 				// When the plugin editor goes from visible to hidden, we need to reload the note

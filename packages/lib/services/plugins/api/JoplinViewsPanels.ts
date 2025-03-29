@@ -1,5 +1,6 @@
 /* eslint-disable multiline-comment-style */
 
+import { defaultWindowId } from '../../../reducer';
 import Plugin from '../Plugin';
 import createViewHandle from '../utils/createViewHandle';
 import WebviewController, { ContainerType } from '../WebviewController';
@@ -130,8 +131,15 @@ export default class JoplinViewsPanels {
 		return this.controller(handle).visible;
 	}
 
-	public async isActive(handle: ViewHandle): Promise<boolean> {
-		return this.controller(handle).isActive();
+	/**
+	 * Assuming that the current panel is an editor plugin view, returns
+	 * whether the editor plugin view supports editing the current note.
+	 *
+	 * If `windowId` is not provided, this returns the activation state
+	 * in the default window.
+	 */
+	public async isActive(handle: ViewHandle, windowId?: string): Promise<boolean> {
+		return this.controller(handle).isActive(windowId ?? defaultWindowId);
 	}
 
 }

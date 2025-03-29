@@ -66,7 +66,7 @@ export default class {
 
 		for (const editor of filterObject.activatedEditors) {
 			const controller = this.pluginService_.pluginById(editor.pluginId).viewController(editor.viewId) as WebviewController;
-			controller.setActive(editor.isActive);
+			controller.setActive(editor.isActive, parentWindowId);
 		}
 	}
 

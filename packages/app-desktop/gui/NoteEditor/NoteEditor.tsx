@@ -56,6 +56,7 @@ import PluginService from '@joplin/lib/services/plugins/PluginService';
 import EditorPluginHandler from '@joplin/lib/services/plugins/EditorPluginHandler';
 import useResourceUnwatcher from './utils/useResourceUnwatcher';
 import StatusBar from './StatusBar';
+import getShownPluginEditorViewIds from '@joplin/lib/services/plugins/utils/getShownPluginEditorViewIds';
 
 const debounce = require('debounce');
 
@@ -107,7 +108,7 @@ function NoteEditorContent(props: NoteEditorProps) {
 	}, []);
 
 	const effectiveNoteId = useEffectiveNoteId(props);
-	const { editorPlugin, editorView } = usePluginEditorView(props.plugins, shownEditorViewIds);
+	const { editorPlugin, editorView } = usePluginEditorView(props.plugins);
 	const builtInEditorVisible = !editorPlugin;
 
 	const { formNote, setFormNote, isNewNote, resourceInfos } = useFormNote({
@@ -711,7 +712,7 @@ const mapStateToProps = (state: AppState, ownProps: ConnectProps) => {
 		highlightedWords: state.highlightedWords,
 		plugins: state.pluginService.plugins,
 		pluginHtmlContents: state.pluginService.pluginHtmlContents,
-		shownEditorPluginViewIds: windowState.shownEditorPluginViewIds,
+		shownEditorPluginViewIds: getShownPluginEditorViewIds(state.pluginService.plugins, windowState.windowId),
 		toolbarButtonInfos: toolbarButtonUtils.commandsToToolbarButtons([
 			'historyBackward',
 			'historyForward',

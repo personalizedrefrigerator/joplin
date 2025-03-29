@@ -1,6 +1,7 @@
 /* eslint-disable multiline-comment-style */
 
 import eventManager from '../../../eventManager';
+import { defaultWindowId } from '../../../reducer';
 import Plugin from '../Plugin';
 import createViewHandle from '../utils/createViewHandle';
 import WebviewController, { ContainerType } from '../WebviewController';
@@ -143,8 +144,8 @@ export default class JoplinViewsEditors {
 	/**
 	 * Tells whether the editor is active or not.
 	 */
-	public async isActive(handle: ViewHandle): Promise<boolean> {
-		return this.controller(handle).visible;
+	public async isActive(handle: ViewHandle, windowId?: string): Promise<boolean> {
+		return this.controller(handle).isActive(windowId ?? defaultWindowId);
 	}
 
 	/**
@@ -152,8 +153,8 @@ export default class JoplinViewsEditors {
 	 * return `false`. If the editor is active and the user has switched to it, it will return
 	 * `true`. Otherwise it will return `false`.
 	 */
-	public async isVisible(handle: ViewHandle): Promise<boolean> {
-		return this.controller(handle).isVisible();
+	public async isVisible(handle: ViewHandle, windowId?: string): Promise<boolean> {
+		return this.controller(handle).isVisible(windowId ?? defaultWindowId);
 	}
 
 }

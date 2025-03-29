@@ -1,7 +1,7 @@
 import { CommandContext, CommandDeclaration, CommandRuntime } from '../services/CommandService';
-import Setting from '../models/Setting';
 import getActivePluginEditorView from '../services/plugins/utils/getActivePluginEditorView';
 import Logger from '@joplin/utils/Logger';
+import getActivePluginEditorViews from '../services/plugins/utils/getActivePluginEditorViews';
 
 const logger = Logger.create('showEditorPlugin');
 
@@ -16,10 +16,10 @@ export const runtime = (): CommandRuntime => {
 		execute: async (context: CommandContext, editorViewId = '', show = true) => {
 			logger.info('View:', editorViewId, 'Show:', show);
 
-			const shownEditorViewIds = [...context.state.shownEditorPluginViewIds];
-
+			const pluginStates = context.state.pluginService.plugins;
+			const windowId = context.state.windowId;
 			if (!editorViewId) {
-				const { editorPlugin, editorView } = getActivePluginEditorView(context.state.pluginService.plugins);
+				const { editorPlugin, editorView } = getActivePluginEditorView(pluginStates, windowId);
 
 				if (!editorPlugin) {
 					logger.warn('No editor plugin to toggle to');
@@ -29,28 +29,32 @@ export const runtime = (): CommandRuntime => {
 				editorViewId = editorView.id;
 			}
 
-			const idx = shownEditorViewIds.indexOf(editorViewId);
+			const activePlugins = getActivePluginEditorViews(pluginStates, windowId);
+			const editorPluginData = activePlugins.find(({ editorView }) => editorView.id === editorViewId);
+			if (!editorPluginData) {
+				logger.warn(`No editor view with ID ${editorViewId} is active.`);
+				return;
+			}
+			const { editorView, editorPlugin } = editorPluginData;
+			const previousVisible = editorView.visibleInWindows.includes(windowId);
 
-			if (show) {
-				if (idx >= 0) {
-					logger.info(`Editor is already visible: ${editorViewId}`);
-					return;
-				}
-
-				shownEditorViewIds.push(editorViewId);
-			} else {
-				if (idx < 0) {
-					logger.info(`Editor is already hidden: ${editorViewId}`);
-					return;
-				}
-
-				shownEditorViewIds.splice(idx, 1);
+			if (show && previousVisible) {
+				logger.info(`Editor is already visible: ${editorViewId}`);
+				return;
+			} else if (!show && !previousVisible) {
+				logger.info(`Editor is already hidden: ${editorViewId}`);
+				return;
 			}
 
-			logger.info('Shown editor IDs:', shownEditorViewIds);
+			context.dispatch({
+				type: 'PLUGIN_EDITOR_VIEW_SET_VISIBLE',
+				pluginId: editorPlugin.id,
+				viewId: editorView.id,
+				visible: show,
+			});
 
-			Setting.setValue('plugins.shownEditorViewIds', shownEditorViewIds);
-			context.dispatch({ type: 'EDITOR_PLUGIN_VIEW_IDS_CHANGED', value: shownEditorViewIds });
+			// TODO -- save the currently visible ID set
+			// Setting.setValue('plugins.shownEditorViewIds', shownEditorViewIds);
 		},
 	};
 };

@@ -1,7 +1,7 @@
 import { setupDatabaseAndSynchronizer, switchClient } from '@joplin/lib/testing/test-utils';
 import { renderHook } from '@testing-library/react-hooks';
 import usePluginEditorView from './usePluginEditorView';
-import { PluginStates, PluginViewState } from '@joplin/lib/services/plugins/reducer';
+import { PluginEditorViewState, PluginStates, PluginViewState } from '@joplin/lib/services/plugins/reducer';
 import { ContainerType } from '@joplin/lib/services/plugins/WebviewController';
 
 const sampleView = (): PluginViewState => {
@@ -9,8 +9,9 @@ const sampleView = (): PluginViewState => {
 		buttons: [],
 		containerType: ContainerType.Editor,
 		id: 'view-1',
-		opened: true,
 		type: 'webview',
+		activeInWindows: [],
+		visibleInWindows: [],
 	};
 };
 
@@ -30,6 +31,7 @@ describe('usePluginEditorView', () => {
 						...sampleView(),
 						id: 'view-0',
 						containerType: ContainerType.Panel,
+						opened: true,
 					},
 				},
 			},
@@ -43,15 +45,15 @@ describe('usePluginEditorView', () => {
 		};
 
 		{
-			const test = renderHook(() => usePluginEditorView(pluginStates, ['view-1']));
+			const test = renderHook(() => usePluginEditorView(pluginStates));
 			expect(test.result.current.editorPlugin.id).toBe('1');
 			expect(test.result.current.editorView.id).toBe('view-1');
 			test.unmount();
 		}
 
 		{
-			pluginStates['1'].views['view-1'].opened = false;
-			const test = renderHook(() => usePluginEditorView(pluginStates, ['view-1']));
+			(pluginStates['1'].views['view-1'] as PluginEditorViewState).activeInWindows = [];
+			const test = renderHook(() => usePluginEditorView(pluginStates));
 			expect(test.result.current.editorPlugin).toBeFalsy();
 			test.unmount();
 		}
@@ -79,7 +81,7 @@ describe('usePluginEditorView', () => {
 		};
 
 		{
-			const test = renderHook(() => usePluginEditorView(pluginStates, ['view-1']));
+			const test = renderHook(() => usePluginEditorView(pluginStates));
 			expect(test.result.current.editorPlugin.id).toBe('1');
 			expect(test.result.current.editorView.id).toBe('view-1');
 			test.unmount();
