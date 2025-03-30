@@ -12,6 +12,18 @@ if [[ $GIT_TAG_NAME != $SERVER_TAG_PREFIX-* ]]; then
 	exit 0
 fi
 
+docker manifest inspect $SERVER_REPOSITORY:arm64-$VERSION > /dev/null 2>&1
+if [ $? -ne 0 ]; then
+	echo "Image $SERVER_REPOSITORY:arm64-$VERSION does not exist on the remote registry."
+	exit 0
+fi
+
+docker manifest inspect $SERVER_REPOSITORY:amd64-$VERSION > /dev/null 2>&1
+if [ $? -ne 0 ]; then
+	echo "Image $SERVER_REPOSITORY:amd64-$VERSION does not exist on the remote registry."
+	exit 0
+fi
+
 docker manifest create $SERVER_REPOSITORY:$VERSION \
 	$SERVER_REPOSITORY:arm64-$VERSION \
 	$SERVER_REPOSITORY:amd64-$VERSION
