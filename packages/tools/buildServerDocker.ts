@@ -72,7 +72,7 @@ export function getVersionFromTag(tagName: string, isPreRelease: boolean): strin
 export function getIsPreRelease(_tagName: string): boolean {
 	// For now we only create pre-releases from CI. It's after, once the release
 	// has been proven stable, that it is tagged as "latest".
-	return true;
+	return false;
 	// return tagName.indexOf('-beta') > 0;
 }
 
