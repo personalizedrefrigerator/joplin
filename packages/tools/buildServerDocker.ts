@@ -87,6 +87,7 @@ async function main() {
 	const tagName = argv.tagName || `server-${await execCommand('git describe --tags --match v*', { showStdout: false })}`;
 	const platform = argv.platform;
 	const source = argv.source;
+	const architecture = argv.platform.split('/')[1];
 
 	const isPreRelease = getIsPreRelease(tagName);
 	const imageVersion = getVersionFromTag(tagName, isPreRelease);
@@ -132,7 +133,7 @@ async function main() {
 
 	const cliArgs = ['--progress=plain'];
 	cliArgs.push(`--platform ${platform}`);
-	cliArgs.push(...dockerTags.map(tag => `--tag "${repository}:${tag}"`));
+	cliArgs.push(...dockerTags.map(tag => `--tag "${repository}:${architecture}-${tag}"`));
 	cliArgs.push(...buildArgs.map(arg => `--build-arg ${arg}`));
 	if (pushImages) {
 		cliArgs.push('--push');

@@ -84,6 +84,14 @@ jobs:
         run: |
           yarn install && cd packages/app-desktop && yarn dist --publish=never
 
+      - name: Publish Docker manifest
+        if: runner.os == 'Linux'
+        env:
+          SERVER_REPOSITORY: joplin/server
+          SERVER_TAG_PREFIX: server
+        run: |
+          "${GITHUB_WORKSPACE}/.github/scripts/publish_docker_manifest.sh"
+
   ServerDockerImage:
     if: github.repository == 'laurent22/joplin'
     runs-on: ${{ matrix.os }}
