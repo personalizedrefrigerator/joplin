@@ -35,6 +35,8 @@ else
 	IS_MACOS=1
 fi
 
+DOCKER_IMAGE_PLATFORM="linux/amd64"
+
 # Tests can randomly fail in some cases, so only run them when not publishing
 # a release
 RUN_TESTS=0
@@ -56,6 +58,8 @@ if [ "$RUNNER_ARCH" == "ARM64" ]; then
 	cd "$ROOT_DIR/packages/lib"
 	yarn remove canvas
 	cd "$ROOT_DIR"
+
+	DOCKER_IMAGE_PLATFORM="linux/arm64"
 
 	# Delete certain directories because `yarn install` will fail on ARM64.
 	rm -rf app-desktop
@@ -297,8 +301,8 @@ if [ "$IS_DESKTOP_RELEASE" == "1" ]; then
 	fi	
 elif [[ $IS_LINUX = 1 ]] && [ "$IS_SERVER_RELEASE" == "1" ]; then
 	echo "Step: Building Docker Image..."
-	cd "$ROOT_DIR"	
-	yarn buildServerDocker --tag-name $GIT_TAG_NAME --push-images --repository $SERVER_REPOSITORY
+	cd "$ROOT_DIR"
+	yarn buildServerDocker --platform $DOCKER_IMAGE_PLATFORM --tag-name $GIT_TAG_NAME --push-images --repository $SERVER_REPOSITORY
 else
 	echo "Step: Building but *not* publishing desktop application..."
 	
