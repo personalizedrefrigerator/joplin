@@ -1,7 +1,8 @@
 # Joplin Server Changelog
 
-## [server-v3.3.5](https://github.com/laurent22/joplin/releases/tag/server-v3.3.5) - 2025-03-30T08:31:41Z
+## [server-v3.3.6](https://github.com/laurent22/joplin/releases/tag/server-v3.3.6) - 2025-03-30T10:05:42Z
 
+- Improved: Buildx support for Docker images (#11582 by [@redrathnure](https://github.com/redrathnure))
 - New: Added links to social networks (04fc634)
 - Improved: Joplin Server Docker image for ARM64 (#12030)
 - Fixed: Disable faulty dark theme to prevent published notes from being unreadable (#11910)
