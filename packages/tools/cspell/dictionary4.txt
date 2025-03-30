@@ -176,3 +176,4 @@ collapseall
 newfolder
 unfocusable
 unlocker
+Tiktok
