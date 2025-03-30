@@ -1,6 +1,6 @@
 # Joplin Server Changelog
 
-## [server-v3.3.7](https://github.com/laurent22/joplin/releases/tag/server-v3.3.7) - 2025-03-30T10:56:24Z
+## [server-v3.3.8](https://github.com/laurent22/joplin/releases/tag/server-v3.3.8) - 2025-03-30T14:32:32Z
 
 - Improved: Buildx support for Docker images (#11582 by [@redrathnure](https://github.com/redrathnure))
 - New: Added links to social networks (04fc634)
