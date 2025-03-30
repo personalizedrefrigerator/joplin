@@ -90,6 +90,7 @@ jobs:
           SERVER_REPOSITORY: joplin/server
           SERVER_TAG_PREFIX: server
         run: |
+          chmod 700 "${GITHUB_WORKSPACE}/.github/scripts/publish_docker_manifest.sh"
           "${GITHUB_WORKSPACE}/.github/scripts/publish_docker_manifest.sh"
 
   ServerDockerImage:
