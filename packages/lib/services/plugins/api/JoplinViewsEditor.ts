@@ -1,6 +1,7 @@
 /* eslint-disable multiline-comment-style */
 
 import eventManager from '../../../eventManager';
+import Setting from '../../../models/Setting';
 import { defaultWindowId } from '../../../reducer';
 import Plugin from '../Plugin';
 import createViewHandle from '../utils/createViewHandle';
@@ -87,6 +88,8 @@ export default class JoplinViewsEditors {
 
 		const controller = new WebviewController(handle, this.plugin.id, this.store, this.plugin.baseDir, ContainerType.Editor, windowId);
 		this.plugin.addViewController(controller);
+		// Restore the last open/closed state for the editor
+		controller.setOpened(Setting.value('plugins.shownEditorViewIds').includes(handle));
 
 		// Call onActivationCheck immediately to prevent race conditions.
 		await this.onActivationCheck(handle, options.onActivationCheck);

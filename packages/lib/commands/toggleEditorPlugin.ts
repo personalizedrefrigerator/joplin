@@ -36,9 +36,6 @@ export const runtime = (): CommandRuntime => {
 				await CommandService.instance().execute('showEditorPlugin', firstActiveEditorView.id);
 			}
 
-			// TODO:
-			// Setting.setValue('plugins.shownEditorViewIds', shownEditorViewIds);
-
 			if (hasBeenHidden) {
 				// When the plugin editor goes from visible to hidden, we need to reload the note
 				// because it may have been changed via the data API.

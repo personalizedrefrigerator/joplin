@@ -4,6 +4,7 @@ import Logger from '@joplin/utils/Logger';
 import getActivePluginEditorViews from '../services/plugins/utils/getActivePluginEditorViews';
 import PluginService from '../services/plugins/PluginService';
 import WebviewController from '../services/plugins/WebviewController';
+import Setting from '../models/Setting';
 
 const logger = Logger.create('showEditorPlugin');
 
@@ -53,10 +54,21 @@ export const runtime = (): CommandRuntime => {
 				return;
 			}
 
-			await controller.setVisible(show);
+			const getUpdatedShownViewIds = () => {
+				let newShownViewIds = [...Setting.value('plugins.shownEditorViewIds')];
+				// Always filter out the current view, even if show is false. This prevents
+				// the view ID from being present multiple times.
+				const viewIdsWithoutCurrent = newShownViewIds.filter(id => id !== editorViewId);
+				newShownViewIds = viewIdsWithoutCurrent;
 
-			// TODO -- save the currently visible ID set
-			// Setting.setValue('plugins.shownEditorViewIds', shownEditorViewIds);
+				if (show) {
+					newShownViewIds.push(editorViewId);
+				}
+				return newShownViewIds;
+			};
+			Setting.setValue('plugins.shownEditorViewIds', getUpdatedShownViewIds());
+
+			controller.setOpened(show);
 		},
 	};
 };

@@ -292,14 +292,13 @@ export default class WebviewController extends ViewController {
 		return state.active;
 	}
 
-	public isVisible(): boolean {
-		const state = this.storeView as PluginEditorViewState;
-		if (!state.active) return false;
-		return state.active && state.opened;
+	public setOpened(visible: boolean) {
+		this.setStoreProp('opened', visible);
 	}
 
-	public async setVisible(visible: boolean) {
-		await this.setStoreProp('opened', visible);
+	public isVisible(): boolean {
+		const state = this.storeView as PluginEditorViewState;
+		return state.active && state.opened;
 	}
 
 	public async requestSaveNote(event: SaveNoteEvent) {

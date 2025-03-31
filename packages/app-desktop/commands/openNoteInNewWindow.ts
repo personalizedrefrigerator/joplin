@@ -11,7 +11,7 @@ export const declaration: CommandDeclaration = {
 	iconName: 'icon-share',
 };
 
-let idCounter = 0;
+let idCounter = 1;
 
 export const runtime = (): CommandRuntime => {
 	return {
@@ -23,7 +23,7 @@ export const runtime = (): CommandRuntime => {
 				type: 'WINDOW_OPEN',
 				noteId,
 				folderId: note.parent_id,
-				windowId: `window-${noteId}-${idCounter++}`,
+				windowId: `window-${idCounter++}`,
 				defaultAppWindowState: {
 					...createAppDefaultWindowState(),
 					noteVisiblePanes: Setting.value('noteVisiblePanes'),
