@@ -1517,6 +1517,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 		}
 
 		const renderPluginEditor = () => {
+			this.editorPluginHandler_.onEditorPluginShown(editorView.id);
 			return <PluginUserWebView
 				viewInfo={{ plugin: editorPlugin, view: editorView }}
 				themeId={this.props.themeId}

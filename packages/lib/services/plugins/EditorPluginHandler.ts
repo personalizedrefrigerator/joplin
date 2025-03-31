@@ -48,6 +48,7 @@ export default class {
 	private viewUpdateAsyncQueue_ = new AsyncActionQueue(100, IntervalType.Fixed);
 	private lastSaveBody_: string|null = null;
 	private lastSaveId_: string|null = null;
+	private lastEditorPluginShown_: string|null = null;
 
 	public constructor(
 		private pluginService_: PluginService,
@@ -83,15 +84,16 @@ export default class {
 	}
 
 	public onEditorPluginShown(editorViewId: string) {
+		// Don't double-register callbacks
+		if (editorViewId === this.lastEditorPluginShown_) {
+			return;
+		}
+		this.lastEditorPluginShown_ = editorViewId;
+
 		const controller = this.pluginService_.viewControllerByViewId(editorViewId) as WebviewController;
-		const handle = controller?.addRequestSaveNoteListener(event => {
+		controller?.onNoteSaveRequested(event => {
 			this.scheduleSaveNote_(event.noteId, event.body);
 		});
-
-		const cleanup = () => {
-			handle?.remove();
-		};
-		return cleanup;
 	}
 
 	private scheduleSaveNote_(noteId: string, noteBody: string) {

@@ -68,7 +68,7 @@ export default class WebviewController extends ViewController {
 	private updateListener_: EditorUpdateListener|null = null;
 	private closeResponse_: CloseResponse = null;
 	private containerType_: ContainerType = null;
-	private saveNoteListeners_: OnSaveNoteCallback[] = [];
+	private saveNoteListener_: OnSaveNoteCallback|null = null;
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	public constructor(handle: ViewHandle, pluginId: string, store: any, baseDir: string, containerType: ContainerType, parentWindowId: string|null) {
@@ -302,17 +302,10 @@ export default class WebviewController extends ViewController {
 	}
 
 	public async requestSaveNote(event: SaveNoteEvent) {
-		for (const listener of this.saveNoteListeners_) {
-			listener(event);
-		}
+		this.saveNoteListener_?.(event);
 	}
 
-	public addRequestSaveNoteListener(listener: OnSaveNoteCallback) {
-		this.saveNoteListeners_.push(listener);
-		return {
-			remove: () => {
-				this.saveNoteListeners_ = this.saveNoteListeners_.filter(other => other !== listener);
-			},
-		};
+	public onNoteSaveRequested(listener: OnSaveNoteCallback) {
+		this.saveNoteListener_ = listener;
 	}
 }
