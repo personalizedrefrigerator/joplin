@@ -25,6 +25,9 @@ interface NoteAlarmTriggerEvent {
 interface SyncCompleteEvent {
     withErrors: boolean;
 }
+interface WindowOpenEvent {
+    windowId: string;
+}
 type WorkspaceEventHandler<EventType> = (event: EventType) => void;
 type ItemChangeHandler = WorkspaceEventHandler<ItemChangeEvent>;
 type SyncStartHandler = () => void;
@@ -71,6 +74,14 @@ export default class JoplinWorkspace {
      * Called when the synchronisation process has finished.
      */
     onSyncComplete(callback: WorkspaceEventHandler<SyncCompleteEvent>): Promise<Disposable>;
+    /**
+     * Called when a secondary window is opened.
+     */
+    onWindowOpen(callback: WorkspaceEventHandler<WindowOpenEvent>): Promise<Disposable>;
+    /**
+     * Called when a secondary window is closed.
+     */
+    onWindowClose(callback: WorkspaceEventHandler<WindowOpenEvent>): Promise<Disposable>;
     /**
      * Called just before the editor context menu is about to open. Allows
      * adding items to it.

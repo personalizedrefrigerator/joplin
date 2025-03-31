@@ -1,5 +1,9 @@
 import Plugin from '../Plugin';
 import { ActivationCheckCallback, ViewHandle, UpdateCallback } from './types';
+export interface EditorPluginProps {
+    windowId: string;
+    onActivationCheck: ActivationCheckCallback;
+}
 export interface SaveEditorContentProps {
     body: string;
     noteId: string;
@@ -52,7 +56,7 @@ export default class JoplinViewsEditors {
     /**
      * Creates a new editor view
      */
-    create(id: string): Promise<ViewHandle>;
+    create(id: string, { windowId, onActivationCheck }?: EditorPluginProps): Promise<ViewHandle>;
     /**
      * Sets the editor HTML content
      */
@@ -66,7 +70,7 @@ export default class JoplinViewsEditors {
      */
     onMessage(handle: ViewHandle, callback: Function): Promise<void>;
     /**
-     * Saves the content of the editor.
+     * Saves the content of the editor, without calling `onUpdate` for editors in the same window.
      */
     saveNote(handle: ViewHandle, props: SaveEditorContentProps): Promise<void>;
     /**
@@ -92,11 +96,11 @@ export default class JoplinViewsEditors {
     /**
      * Tells whether the editor is active or not.
      */
-    isActive(handle: ViewHandle, windowId?: string): Promise<boolean>;
+    isActive(handle: ViewHandle): Promise<boolean>;
     /**
      * Tells whether the editor is effectively visible or not. If the editor is inactive, this will
      * return `false`. If the editor is active and the user has switched to it, it will return
      * `true`. Otherwise it will return `false`.
      */
-    isVisible(handle: ViewHandle, windowId?: string): Promise<boolean>;
+    isVisible(handle: ViewHandle): Promise<boolean>;
 }

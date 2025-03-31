@@ -129,6 +129,7 @@ function NoteEditorContent(props: NoteEditorProps) {
 		effectiveNoteId,
 		shownEditorViewIds,
 		activeEditorView: editorView,
+		plugins: props.plugins,
 	});
 
 	const {

@@ -1,15 +1,17 @@
-import useAsyncEffect from '@joplin/lib/hooks/useAsyncEffect';
 import EditorPluginHandler from '@joplin/lib/services/plugins/EditorPluginHandler';
 import PluginService from '@joplin/lib/services/plugins/PluginService';
 import { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { FormNote } from './types';
 import { WindowIdContext } from '../../NewWindowOrIFrame';
 import Logger from '@joplin/utils/Logger';
-import { PluginEditorViewState } from '@joplin/lib/services/plugins/reducer';
+import { PluginEditorViewState, PluginStates } from '@joplin/lib/services/plugins/reducer';
+import { ContainerType } from '@joplin/lib/services/plugins/WebviewController';
+import useQueuedAsyncEffect from '@joplin/lib/hooks/useQueuedAsyncEffect';
 
 const logger = Logger.create('useEditorPlugin');
 
 interface Props {
+	plugins: PluginStates;
 	startupPluginsLoaded: boolean;
 	formNote: FormNote;
 	activeEditorView: PluginEditorViewState;
@@ -20,7 +22,7 @@ interface Props {
 
 // Connects editor plugins to the current editor (handles editor plugin saving, loading).
 const useConnectToEditorPlugin = ({
-	startupPluginsLoaded, setFormNote, formNote, effectiveNoteId, activeEditorView, shownEditorViewIds,
+	plugins, startupPluginsLoaded, setFormNote, formNote, effectiveNoteId, activeEditorView, shownEditorViewIds,
 }: Props) => {
 	const formNoteRef = useRef(formNote);
 	formNoteRef.current = formNote;
@@ -48,14 +50,29 @@ const useConnectToEditorPlugin = ({
 	}, [setFormNote]);
 
 	const windowId = useContext(WindowIdContext);
+	const loadedViewIds = useMemo(() => {
+		const viewIds = [];
+		for (const plugin of Object.values(plugins)) {
+			for (const view of Object.values(plugin.views)) {
+				if (view.containerType === ContainerType.Editor && view.parentWindowId === windowId) {
+					viewIds.push(view.id);
+				}
+			}
+		}
+		return JSON.stringify(viewIds);
+	}, [windowId, plugins]);
 
-	useAsyncEffect(async (_event) => {
+	useQueuedAsyncEffect(async () => {
 		if (!startupPluginsLoaded) return;
+		logger.debug('Emitting activation check for views:', loadedViewIds);
+
 		await editorPluginHandler.emitActivationCheck({
 			parentWindowId: windowId,
 			noteId: effectiveNoteId,
 		});
-	}, [windowId, effectiveNoteId, editorPluginHandler, startupPluginsLoaded]);
+		// It's important to re-run the activation check when the loaded view IDs change.
+		// As such, `loadedViewIds` needs to be in the dependencies list:
+	}, [windowId, effectiveNoteId, loadedViewIds, editorPluginHandler, startupPluginsLoaded]);
 
 	const [externalChangeCounter, setExternalChangeCounter] = useState(0);
 	useEffect(() => {

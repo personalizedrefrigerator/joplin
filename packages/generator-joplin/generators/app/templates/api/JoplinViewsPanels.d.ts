@@ -87,5 +87,5 @@ export default class JoplinViewsPanels {
      * If `windowId` is not provided, this returns the activation state
      * in the default window.
      */
-    isActive(handle: ViewHandle, windowId?: string): Promise<boolean>;
+    isActive(handle: ViewHandle): Promise<boolean>;
 }

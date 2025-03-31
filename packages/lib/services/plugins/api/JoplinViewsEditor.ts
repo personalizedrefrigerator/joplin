@@ -7,6 +7,12 @@ import createViewHandle from '../utils/createViewHandle';
 import WebviewController, { ContainerType } from '../WebviewController';
 import { ActivationCheckCallback, EditorActivationCheckFilterObject, FilterHandler, ViewHandle, UpdateCallback } from './types';
 
+export interface EditorPluginProps {
+	/** The ID of the window to show the editor plugin. Use `undefined` for the main window. */
+	windowId: string|undefined;
+	onActivationCheck: ActivationCheckCallback;
+}
+
 export interface SaveEditorContentProps {
 	body: string;
 	noteId: string;
@@ -71,11 +77,21 @@ export default class JoplinViewsEditors {
 	/**
 	 * Creates a new editor view
 	 */
-	public async create(id: string, parentWindowId?: string): Promise<ViewHandle> {
-		parentWindowId ??= defaultWindowId;
-		const handle = createViewHandle(this.plugin, `${id}-${parentWindowId}`);
-		const controller = new WebviewController(handle, this.plugin.id, this.store, this.plugin.baseDir, ContainerType.Editor, parentWindowId);
+	public async create(
+		id: string,
+		options: EditorPluginProps = {
+			windowId: undefined,
+			onActivationCheck: async ()=>false,
+		},
+	): Promise<ViewHandle> {
+		const windowId = options.windowId ?? defaultWindowId;
+		const handle = createViewHandle(this.plugin, `${id}-${windowId}`);
+
+		const controller = new WebviewController(handle, this.plugin.id, this.store, this.plugin.baseDir, ContainerType.Editor, windowId);
 		this.plugin.addViewController(controller);
+
+		// Call onActivationCheck immediately to prevent race conditions.
+		await this.onActivationCheck(handle, options.onActivationCheck);
 		return handle;
 	}
 
