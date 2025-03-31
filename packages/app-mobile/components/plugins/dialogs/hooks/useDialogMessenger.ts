@@ -7,7 +7,6 @@ import RNToWebViewMessenger from '../../../../utils/ipc/RNToWebViewMessenger';
 import { SerializableData } from '@joplin/lib/utils/ipc/types';
 import PostMessageService, { ResponderComponentType } from '@joplin/lib/services/PostMessageService';
 import PluginService from '@joplin/lib/services/plugins/PluginService';
-import { defaultWindowId } from '@joplin/lib/reducer';
 
 interface Props {
 	pluginId: string;
@@ -28,11 +27,9 @@ const useDialogMessenger = (props: Props) => {
 				return await plugin.viewController(viewId).emitMessage({ message });
 			},
 			onMessage: async (callback) => {
-				const windowId = defaultWindowId;
 				PostMessageService.instance().registerViewMessageHandler(
 					ResponderComponentType.UserWebview,
 					viewId,
-					windowId,
 					(message: SerializableData) => {
 						// For compatibility with desktop, the message needs to be wrapped in
 						// an object.

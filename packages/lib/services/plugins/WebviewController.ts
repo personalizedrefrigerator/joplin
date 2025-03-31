@@ -51,7 +51,6 @@ function findItemByKey(layout: any, key: string): any {
 interface EditorUpdateEvent {
 	noteId: string;
 	newBody: string;
-	windowId: string;
 }
 type EditorUpdateListener = (event: EditorUpdateEvent)=> void;
 

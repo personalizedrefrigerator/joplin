@@ -107,7 +107,7 @@ export default class JoplinViewsPanels {
 	 */
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	public postMessage(handle: ViewHandle, message: any): void {
-		return this.controller(handle).postMessage(message, undefined);
+		return this.controller(handle).postMessage(message);
 	}
 
 	/**

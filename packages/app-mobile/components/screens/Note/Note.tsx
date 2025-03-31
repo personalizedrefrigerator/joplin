@@ -88,6 +88,7 @@ interface NoteNavigation {
 }
 
 interface Props extends BaseProps {
+	windowId: string;
 	provisionalNoteIds: string[];
 	navigation: NoteNavigation;
 	dispatch: Dispatch;
@@ -174,7 +175,9 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	public dialogbox: any;
 	private commandRegistration_: RegisteredRuntime|null = null;
-	private editorPluginHandler_ = new EditorPluginHandler(PluginService.instance());
+	private editorPluginHandler_ = new EditorPluginHandler(PluginService.instance(), saveEvent => {
+		return shared.noteComponent_change(this, 'body', saveEvent.body);
+	});
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	public static navigationOptions(): any {
@@ -642,7 +645,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 		}
 
 		if (this.props['plugins.shownEditorViewIds'] !== prevProps['plugins.shownEditorViewIds']) {
-			const { editorPlugin } = getShownPluginEditorView(this.props.plugins, this.props['plugins.shownEditorViewIds']);
+			const { editorPlugin } = getShownPluginEditorView(this.props.plugins, this.props.windowId);
 			if (!editorPlugin && this.props.editorNoteReloadTimeRequest > this.state.noteLastLoadTime) {
 				void shared.reloadNote(this);
 			}
@@ -683,9 +686,8 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 
 	private emitEditorPluginUpdate_() {
 		this.editorPluginHandler_.emitUpdate({
-			parentWindowId: defaultWindowId,
 			noteId: this.props.noteId,
-			body: this.state.note.body,
+			newBody: this.state.note.body,
 		}, this.props['plugins.shownEditorViewIds']);
 	}
 
@@ -1484,7 +1486,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 		// multiple times.
 		this.registerCommands();
 
-		const { editorPlugin, editorView } = getShownPluginEditorView(this.props.plugins, this.props['plugins.shownEditorViewIds']);
+		const { editorPlugin, editorView } = getShownPluginEditorView(this.props.plugins, this.props.windowId);
 
 		if (this.state.isLoading) {
 			return (
@@ -1707,7 +1709,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 			) : content;
 		};
 
-		const { editorPlugin: activeEditorPlugin } = getActivePluginEditorView(this.props.plugins);
+		const { editorPlugin: activeEditorPlugin } = getActivePluginEditorView(this.props.plugins, this.props.windowId);
 
 		return (
 			<View style={this.rootStyle(this.props.themeId).root}>
@@ -1752,6 +1754,7 @@ const NoteScreenWrapper = (props: Props) => {
 
 const NoteScreen = connect((state: AppState) => {
 	return {
+		windowId: state.windowId,
 		noteId: state.selectedNoteIds.length ? state.selectedNoteIds[0] : null,
 		noteHash: state.selectedNoteHash,
 		itemType: state.selectedItemType,

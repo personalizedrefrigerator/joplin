@@ -15,7 +15,6 @@ const logger = Logger.create('EditorPluginHandler');
 export interface UpdateEvent {
 	noteId: string;
 	newBody: string;
-	windowId: string;
 }
 
 interface EmitActivationCheckOptions {
@@ -38,7 +37,6 @@ const makeNoteUpdateAction = (pluginService: PluginService, event: UpdateEvent, 
 				controller.emitUpdate({
 					noteId: event.noteId,
 					newBody: event.newBody,
-					windowId: event.windowId,
 				});
 			}
 		}
@@ -48,6 +46,8 @@ const makeNoteUpdateAction = (pluginService: PluginService, event: UpdateEvent, 
 export default class {
 
 	private viewUpdateAsyncQueue_ = new AsyncActionQueue(100, IntervalType.Fixed);
+	private lastSaveBody_: string|null = null;
+	private lastSaveId_: string|null = null;
 
 	public constructor(
 		private pluginService_: PluginService,
@@ -56,8 +56,10 @@ export default class {
 	}
 
 	public emitUpdate(event: UpdateEvent, shownEditorViewIds: string[]) {
-		logger.info('emitUpdate:', shownEditorViewIds);
-		if (shownEditorViewIds.length > 0) {
+		// Avoid emitting update events if the source of the event was probably the last editor save:
+		const isDifferent = event.newBody !== this.lastSaveBody_ || event.noteId !== this.lastSaveId_;
+		if (shownEditorViewIds.length > 0 && isDifferent) {
+			logger.info('emitUpdate:', shownEditorViewIds);
 			this.viewUpdateAsyncQueue_.push(makeNoteUpdateAction(this.pluginService_, event, shownEditorViewIds));
 		}
 	}
@@ -93,6 +95,9 @@ export default class {
 	}
 
 	private scheduleSaveNote_(noteId: string, noteBody: string) {
+		this.lastSaveBody_ = noteBody;
+		this.lastSaveId_ = noteId;
+
 		return this.onSaveNote_({
 			id: noteId,
 			body: noteBody,

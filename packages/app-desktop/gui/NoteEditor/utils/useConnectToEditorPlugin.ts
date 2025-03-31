@@ -1,6 +1,6 @@
 import EditorPluginHandler from '@joplin/lib/services/plugins/EditorPluginHandler';
 import PluginService from '@joplin/lib/services/plugins/PluginService';
-import { useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { useContext, useEffect, useMemo, useRef } from 'react';
 import { FormNote } from './types';
 import { WindowIdContext } from '../../NewWindowOrIFrame';
 import Logger from '@joplin/utils/Logger';
@@ -76,13 +76,6 @@ const useConnectToEditorPlugin = ({
 		// As such, `loadedViewIds` needs to be in the dependencies list:
 	}, [windowId, effectiveNoteId, loadedViewIds, editorPluginHandler, startupPluginsLoaded]);
 
-	const [externalChangeCounter, setExternalChangeCounter] = useState(0);
-	useEffect(() => {
-		if (formNote.body !== lastEditorPluginSaveRef.current?.body) {
-			setExternalChangeCounter(counter => counter + 1);
-		}
-	}, [formNote.body]);
-
 	useEffect(() => {
 		if (!activeEditorView) return ()=>{};
 
@@ -92,16 +85,12 @@ const useConnectToEditorPlugin = ({
 
 	useEffect(() => {
 		if (!startupPluginsLoaded) return;
-		if (externalChangeCounter > 0) {
-			logger.debug(`Editor content changed externally. Counter: ${externalChangeCounter}`);
-		}
 
 		editorPluginHandler.emitUpdate({
 			noteId: effectiveNoteId,
-			newBody: formNoteRef.current.body,
-			windowId: windowId,
+			newBody: formNote.body,
 		}, shownEditorViewIds);
-	}, [windowId, effectiveNoteId, externalChangeCounter, editorPluginHandler, shownEditorViewIds, startupPluginsLoaded]);
+	}, [windowId, effectiveNoteId, formNote, editorPluginHandler, shownEditorViewIds, startupPluginsLoaded]);
 };
 
 export default useConnectToEditorPlugin;
