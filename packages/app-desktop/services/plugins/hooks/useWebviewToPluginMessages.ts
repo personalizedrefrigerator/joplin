@@ -28,7 +28,6 @@ export default function(frameWindow: any, isReady: boolean, pluginId: string, vi
 				PostMessageService.instance().registerViewMessageHandler(
 					ResponderComponentType.UserWebview,
 					viewId,
-					windowId,
 					(message: MessageResponse) => {
 						postMessage('postMessageService.plugin_message', { message });
 					},
