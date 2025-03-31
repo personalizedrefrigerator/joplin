@@ -1631,6 +1631,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 		const voiceTypingDialogShown = this.state.showSpeechToTextDialog || this.state.showAudioRecorder;
 		const renderActionButton = () => {
 			if (voiceTypingDialogShown) return null;
+			if (editorView) return null;
 			if (!this.state.note || !!this.state.note.deleted_time) return null;
 
 			const editButton = {
