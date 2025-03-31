@@ -11,8 +11,8 @@ const sampleView = (): PluginEditorViewState => {
 		containerType: ContainerType.Editor,
 		id: 'view-1',
 		type: 'webview',
-		opened: false,
-		active: false,
+		opened: true,
+		active: true,
 		parentWindowId: defaultWindowId,
 	};
 };
@@ -27,13 +27,12 @@ describe('usePluginEditorView', () => {
 		const pluginStates: PluginStates = {
 			'0': {
 				contentScripts: {},
-				id: '1',
+				id: '0',
 				views: {
 					'view-0': {
 						...sampleView(),
 						id: 'view-0',
 						containerType: ContainerType.Panel,
-						opened: true,
 					},
 				},
 			},
