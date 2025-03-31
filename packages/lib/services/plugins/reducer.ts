@@ -228,7 +228,7 @@ const reducer = (draftRoot: Draft<any>, action: any) => {
 			if (view.containerType === ContainerType.Editor) {
 				view.visibleInWindows = view.visibleInWindows.filter(id => id !== windowId);
 				if (action.visible) {
-					view.visibleInWindows.push(windowId);
+					view.visibleInWindows = [...view.visibleInWindows, windowId];
 				}
 			} else {
 				throw new Error(`Cannot show view of type ${view.containerType} as an editor plugin.`);
@@ -241,9 +241,9 @@ const reducer = (draftRoot: Draft<any>, action: any) => {
 			const windowId = action.windowId ?? draftRoot.windowId;
 
 			if (view.containerType === ContainerType.Editor) {
-				view.activeInWindows = view.visibleInWindows.filter(id => id !== windowId);
+				view.activeInWindows = view.activeInWindows.filter(id => id !== windowId);
 				if (action.active) {
-					view.activeInWindows.push(windowId);
+					view.activeInWindows = [...view.activeInWindows, windowId];
 				}
 			} else {
 				throw new Error(`View of type ${view.containerType} is not an editor plugin.`);
