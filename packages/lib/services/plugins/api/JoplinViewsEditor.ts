@@ -11,12 +11,24 @@ import { ActivationCheckCallback, EditorActivationCheckFilterObject, FilterHandl
 export interface EditorPluginProps {
 	/** The ID of the window to show the editor plugin. Use `undefined` for the main window. */
 	windowId: string|undefined;
+	/**
+	 * Called to determine whether the custom editor supports the current note.
+	 */
 	onActivationCheck: ActivationCheckCallback;
 }
 
 export interface SaveEditorContentProps {
-	body: string;
+	/**
+	 * The ID of the note to save. This should match either:
+	 * - The ID of the note currently being edited
+	 * - The ID of a note that was very recently open in the editor.
+	 *
+	 * This property is present to ensure that the note editor doesn't write
+	 * to the wrong note just after switching notes.
+	 */
 	noteId: string;
+	/** The note's new content. */
+	body: string;
 }
 
 /**
@@ -167,10 +179,6 @@ export default class JoplinViewsEditors {
 
 	/**
 	 * See [[JoplinViewPanels]]
-	 *
-	 * **Note**: `windowId`, if given, should be the ID of the window containing
-	 * the target editor plugin. If not given, the message is sent to the editor
-	 * in the main window (if any).
 	 */
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	public postMessage(handle: ViewHandle, message: any): void {

@@ -92,7 +92,7 @@ export default class JoplinWorkspace {
     /**
      * Gets the currently selected note. Will be `null` if no note is selected.
      */
-    selectedNote(): Promise<any>;
+    selectedNote(windowId?: string): Promise<any>;
     /**
      * Gets the currently selected folder. In some cases, for example during
      * search or when viewing a tag, no folder is actually selected in the user

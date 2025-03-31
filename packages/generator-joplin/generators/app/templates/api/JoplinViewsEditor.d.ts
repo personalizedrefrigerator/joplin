@@ -3,11 +3,23 @@ import { ActivationCheckCallback, ViewHandle, UpdateCallback } from './types';
 export interface EditorPluginProps {
     /** The ID of the window to show the editor plugin. Use `undefined` for the main window. */
     windowId: string | undefined;
+    /**
+     * Called to determine whether the custom editor supports the current note.
+     */
     onActivationCheck: ActivationCheckCallback;
 }
 export interface SaveEditorContentProps {
-    body: string;
+    /**
+     * The ID of the note to save. This should match either:
+     * - The ID of the note currently being edited
+     * - The ID of a note that was very recently open in the editor.
+     *
+     * This property is present to ensure that the note editor doesn't write
+     * to the wrong note just after switching notes.
+     */
     noteId: string;
+    /** The note's new content. */
+    body: string;
 }
 /**
  * Allows creating alternative note editors. You can create a view to handle loading and saving the
@@ -86,12 +98,8 @@ export default class JoplinViewsEditors {
     onUpdate(handle: ViewHandle, callback: UpdateCallback): Promise<void>;
     /**
      * See [[JoplinViewPanels]]
-     *
-     * **Note**: `windowId`, if given, should be the ID of the window containing
-     * the target editor plugin. If not given, the message is sent to the editor
-     * in the main window (if any).
      */
-    postMessage(handle: ViewHandle, message: any, windowId?: string): void;
+    postMessage(handle: ViewHandle, message: any): void;
     /**
      * Tells whether the editor is active or not.
      */

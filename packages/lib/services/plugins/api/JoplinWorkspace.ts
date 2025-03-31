@@ -17,6 +17,7 @@ import Note from '../../../models/Note';
  * @ignore
  */
 import Folder from '../../../models/Folder';
+import { stateUtils } from '../../../reducer';
 
 enum ItemChangeEventType {
 	Create = 1,
@@ -191,8 +192,12 @@ export default class JoplinWorkspace {
 	 * Gets the currently selected note. Will be `null` if no note is selected.
 	 */
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	public async selectedNote(): Promise<any> {
-		const noteIds = this.store.getState().selectedNoteIds;
+	public async selectedNote(windowId?: string): Promise<any> {
+		const globalState = this.store.getState();
+		const focusedWindowId = stateUtils.activeWindowId(globalState);
+		const windowState = stateUtils.windowStateById(globalState, windowId ?? focusedWindowId);
+
+		const noteIds = windowState.selectedNoteIds;
 		if (noteIds.length !== 1) { return null; }
 		return Note.load(noteIds[0]);
 	}
