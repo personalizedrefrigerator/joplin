@@ -125,6 +125,7 @@ function NoteEditorContent(props: NoteEditorProps) {
 	useConnectToEditorPlugin({
 		startupPluginsLoaded: props.startupPluginsLoaded,
 		setFormNote,
+		scheduleSaveNote,
 		formNote,
 		effectiveNoteId,
 		shownEditorViewIds,

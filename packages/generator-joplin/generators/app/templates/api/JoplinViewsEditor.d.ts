@@ -1,14 +1,13 @@
 import Plugin from '../Plugin';
 import { ActivationCheckCallback, ViewHandle, UpdateCallback } from './types';
 export interface EditorPluginProps {
-    windowId: string;
+    /** The ID of the window to show the editor plugin. Use `undefined` for the main window. */
+    windowId: string | undefined;
     onActivationCheck: ActivationCheckCallback;
 }
 export interface SaveEditorContentProps {
     body: string;
     noteId: string;
-    /** The ID of the window containing the editor. */
-    windowId: string;
 }
 /**
  * Allows creating alternative note editors. You can create a view to handle loading and saving the
@@ -56,7 +55,7 @@ export default class JoplinViewsEditors {
     /**
      * Creates a new editor view
      */
-    create(id: string, { windowId, onActivationCheck }?: EditorPluginProps): Promise<ViewHandle>;
+    create(id: string, options?: EditorPluginProps): Promise<ViewHandle>;
     /**
      * Sets the editor HTML content
      */

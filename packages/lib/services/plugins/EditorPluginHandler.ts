@@ -80,14 +80,10 @@ export default class {
 		}
 	}
 
-	public onEditorPluginShown(editorViewId: string, parentWindowId: string) {
+	public onEditorPluginShown(editorViewId: string) {
 		const controller = this.pluginService_.viewControllerByViewId(editorViewId) as WebviewController;
 		const handle = controller?.addRequestSaveNoteListener(event => {
-			if (event.windowId === parentWindowId) {
-				this.scheduleSaveNote_(event.noteId, event.newBody);
-				return true;
-			}
-			return false;
+			this.scheduleSaveNote_(event.noteId, event.body);
 		});
 
 		const cleanup = () => {
@@ -97,7 +93,7 @@ export default class {
 	}
 
 	private scheduleSaveNote_(noteId: string, noteBody: string) {
-		this.onSaveNote_({
+		return this.onSaveNote_({
 			id: noteId,
 			body: noteBody,
 		});

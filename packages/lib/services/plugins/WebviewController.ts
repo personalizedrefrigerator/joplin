@@ -55,7 +55,11 @@ interface EditorUpdateEvent {
 }
 type EditorUpdateListener = (event: EditorUpdateEvent)=> void;
 
-type OnSaveNoteCallback = (saveNoteEvent: EditorUpdateEvent)=> void;
+interface SaveNoteEvent {
+	noteId: string;
+	body: string;
+}
+type OnSaveNoteCallback = (saveNoteEvent: SaveNoteEvent)=> void;
 
 export default class WebviewController extends ViewController {
 
@@ -306,7 +310,7 @@ export default class WebviewController extends ViewController {
 		await this.setStoreProp('opened', visible);
 	}
 
-	public async requestSaveNote(event: EditorUpdateEvent) {
+	public async requestSaveNote(event: SaveNoteEvent) {
 		for (const listener of this.saveNoteListeners_) {
 			listener(event);
 		}

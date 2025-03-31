@@ -16,13 +16,14 @@ interface Props {
 	formNote: FormNote;
 	activeEditorView: PluginEditorViewState;
 	setFormNote: (formNote: FormNote)=> void;
+	scheduleSaveNote: (formNote: FormNote)=> Promise<void>;
 	effectiveNoteId: string;
 	shownEditorViewIds: string[];
 }
 
 // Connects editor plugins to the current editor (handles editor plugin saving, loading).
 const useConnectToEditorPlugin = ({
-	plugins, startupPluginsLoaded, setFormNote, formNote, effectiveNoteId, activeEditorView, shownEditorViewIds,
+	plugins, startupPluginsLoaded, setFormNote, formNote, scheduleSaveNote, effectiveNoteId, activeEditorView, shownEditorViewIds,
 }: Props) => {
 	const formNoteRef = useRef(formNote);
 	formNoteRef.current = formNote;
@@ -30,12 +31,12 @@ const useConnectToEditorPlugin = ({
 	const lastEditorPluginSaveRef = useRef<FormNote|null>(null);
 
 	const editorPluginHandler = useMemo(() => {
-		return new EditorPluginHandler(PluginService.instance(), newContent => {
+		return new EditorPluginHandler(PluginService.instance(), async newContent => {
 			const changed = newContent.body !== formNoteRef.current.body || newContent.id !== formNoteRef.current.id;
 			if (!changed) return;
 
 			const differentId = newContent.id !== formNoteRef.current.id;
-			const sameIdAsLastSave = newContent.id === lastEditorPluginSaveRef.current.id;
+			const sameIdAsLastSave = newContent.id === lastEditorPluginSaveRef.current?.id;
 			// Ensure that the note is being saved with the correct parent_id, title, etc.
 			const sourceFormNote = differentId && sameIdAsLastSave ? lastEditorPluginSaveRef.current : formNoteRef.current;
 			const newFormNote = {
@@ -46,8 +47,9 @@ const useConnectToEditorPlugin = ({
 
 			lastEditorPluginSaveRef.current = newFormNote;
 			setFormNote(newFormNote);
+			return scheduleSaveNote(newFormNote);
 		});
-	}, [setFormNote]);
+	}, [setFormNote, scheduleSaveNote]);
 
 	const windowId = useContext(WindowIdContext);
 	const loadedViewIds = useMemo(() => {
@@ -76,8 +78,7 @@ const useConnectToEditorPlugin = ({
 
 	const [externalChangeCounter, setExternalChangeCounter] = useState(0);
 	useEffect(() => {
-		// Use formNoteRef to prevent race conditions.
-		if (formNoteRef.current.body !== lastEditorPluginSaveRef.current?.body) {
+		if (formNote.body !== lastEditorPluginSaveRef.current?.body) {
 			setExternalChangeCounter(counter => counter + 1);
 		}
 	}, [formNote.body]);
@@ -85,9 +86,9 @@ const useConnectToEditorPlugin = ({
 	useEffect(() => {
 		if (!activeEditorView) return ()=>{};
 
-		const cleanup = editorPluginHandler.onEditorPluginShown(activeEditorView.id, windowId);
+		const cleanup = editorPluginHandler.onEditorPluginShown(activeEditorView.id);
 		return cleanup;
-	}, [activeEditorView, editorPluginHandler, windowId]);
+	}, [activeEditorView, editorPluginHandler]);
 
 	useEffect(() => {
 		if (!startupPluginsLoaded) return;

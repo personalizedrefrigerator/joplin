@@ -16,8 +16,6 @@ export interface EditorPluginProps {
 export interface SaveEditorContentProps {
 	body: string;
 	noteId: string;
-	/** The ID of the window containing the editor. */
-	windowId: string;
 }
 
 /**
@@ -123,8 +121,7 @@ export default class JoplinViewsEditors {
 	public async saveNote(handle: ViewHandle, props: SaveEditorContentProps): Promise<void> {
 		await this.controller(handle).requestSaveNote({
 			noteId: props.noteId,
-			newBody: props.body,
-			windowId: props.windowId,
+			body: props.body,
 		});
 	}
 
