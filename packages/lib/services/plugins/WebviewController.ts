@@ -6,7 +6,6 @@ import PostMessageService, { MessageParticipant } from '../PostMessageService';
 import { PluginEditorViewState, PluginViewState } from './reducer';
 import { stateUtils } from '../../reducer';
 import Logger from '@joplin/utils/Logger';
-import CommandService from '../CommandService';
 
 const logger = Logger.create('WebviewController');
 
@@ -69,7 +68,7 @@ export default class WebviewController extends ViewController {
 	private saveNoteListeners_: OnSaveNoteCallback[] = [];
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	public constructor(handle: ViewHandle, pluginId: string, store: any, baseDir: string, containerType: ContainerType) {
+	public constructor(handle: ViewHandle, pluginId: string, store: any, baseDir: string, containerType: ContainerType, parentWindowId: string|null) {
 		super(handle, pluginId, store);
 		this.baseDir_ = toSystemSlashes(baseDir, 'linux');
 		this.containerType_ = containerType;
@@ -85,10 +84,8 @@ export default class WebviewController extends ViewController {
 			// Opened is used for dialogs and mobile panels (which are shown
 			// like dialogs):
 			opened: containerType === ContainerType.Panel,
-
-			// Only used by some plugin types
-			activeInWindows: [],
-			visibleInWindows: [],
+			active: false,
+			parentWindowId,
 		};
 
 		this.store.dispatch({
@@ -100,6 +97,11 @@ export default class WebviewController extends ViewController {
 
 	public get type(): string {
 		return 'webview';
+	}
+
+	// Returns `null` if the view can be shown in any window.
+	public get parentWindowId(): string {
+		return this.storeView.parentWindowId;
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
@@ -172,8 +174,8 @@ export default class WebviewController extends ViewController {
 	public emitUpdate(event: EditorUpdateEvent) {
 		if (!this.updateListener_) return;
 
-		if (this.containerType_ === ContainerType.Editor && (!this.isActive(event.windowId) || !this.isVisible(event.windowId))) {
-			logger.info('emitMessage: Not emitting update because editor is disabled or hidden:', this.pluginId, this.handle, this.isActive(event.windowId), this.isVisible(event.windowId));
+		if (this.containerType_ === ContainerType.Editor && (!this.isActive() || !this.isVisible())) {
+			logger.info('emitMessage: Not emitting update because editor is disabled or hidden:', this.pluginId, this.handle, this.isActive(), this.isVisible());
 			return;
 		}
 
@@ -285,34 +287,23 @@ export default class WebviewController extends ViewController {
 	// Specific to editors
 	// ---------------------------------------------
 
-	public setActive(active: boolean, windowId: string|null) {
-		windowId ??= this.defaultTargetWindowId_;
-
-		logger.debug('Set active', active, 'in window', windowId);
-		this.store.dispatch({
-			type: 'PLUGIN_EDITOR_VIEW_SET_ACTIVE',
-			pluginId: this.pluginId,
-			viewId: this.storeView.id,
-			windowId,
-			active,
-		});
+	public setActive(active: boolean) {
+		this.setStoreProp('active', active);
 	}
 
-	public isActive(windowId: string|null): boolean {
-		windowId ??= this.defaultTargetWindowId_;
+	public isActive(): boolean {
 		const state = this.storeView as PluginEditorViewState;
-		return state.activeInWindows.includes(windowId);
+		return state.active;
 	}
 
-	public isVisible(windowId: string|null): boolean {
-		windowId ??= this.defaultTargetWindowId_;
+	public isVisible(): boolean {
 		const state = this.storeView as PluginEditorViewState;
-		if (!state.activeInWindows.includes(windowId)) return false;
-		return state.visibleInWindows.includes(windowId);
+		if (!state.active) return false;
+		return state.active && state.opened;
 	}
 
 	public async setVisible(visible: boolean) {
-		await CommandService.instance().execute('showEditorPlugin', this.handle, visible);
+		await this.setStoreProp('opened', visible);
 	}
 
 	public async requestSaveNote(event: EditorUpdateEvent) {

@@ -1,17 +1,19 @@
 import { setupDatabaseAndSynchronizer, switchClient } from '@joplin/lib/testing/test-utils';
 import { renderHook } from '@testing-library/react-hooks';
 import usePluginEditorView from './usePluginEditorView';
-import { PluginEditorViewState, PluginStates, PluginViewState } from '@joplin/lib/services/plugins/reducer';
+import { PluginEditorViewState, PluginStates } from '@joplin/lib/services/plugins/reducer';
 import { ContainerType } from '@joplin/lib/services/plugins/WebviewController';
+import { defaultWindowId } from '@joplin/lib/reducer';
 
-const sampleView = (): PluginViewState => {
+const sampleView = (): PluginEditorViewState => {
 	return {
 		buttons: [],
 		containerType: ContainerType.Editor,
 		id: 'view-1',
 		type: 'webview',
-		activeInWindows: [],
-		visibleInWindows: [],
+		opened: false,
+		active: false,
+		parentWindowId: defaultWindowId,
 	};
 };
 
@@ -52,7 +54,7 @@ describe('usePluginEditorView', () => {
 		}
 
 		{
-			(pluginStates['1'].views['view-1'] as PluginEditorViewState).activeInWindows = [];
+			pluginStates['1'].views['view-1'].opened = false;
 			const test = renderHook(() => usePluginEditorView(pluginStates));
 			expect(test.result.current.editorPlugin).toBeFalsy();
 			test.unmount();

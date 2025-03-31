@@ -11,7 +11,7 @@ export default (plugins: PluginStates, windowId: string, { mustBeVisible = false
 	for (const [, pluginState] of Object.entries(plugins)) {
 		for (const [, view] of Object.entries(pluginState.views)) {
 			if (view.type !== 'webview' || view.containerType !== ContainerType.Editor) continue;
-			if (!view.activeInWindows.includes(windowId)) continue;
+			if (view.parentWindowId !== windowId || !view.active) continue;
 
 			output.push({ editorPlugin: pluginState, editorView: view });
 		}
@@ -19,10 +19,7 @@ export default (plugins: PluginStates, windowId: string, { mustBeVisible = false
 
 	if (mustBeVisible) {
 		// Filter out views that haven't been shown:
-		return output.filter(({ editorView }) => {
-			const visible = editorView.visibleInWindows.includes(windowId);
-			return visible;
-		});
+		return output.filter(({ editorView }) => editorView.opened);
 	}
 
 	return output;

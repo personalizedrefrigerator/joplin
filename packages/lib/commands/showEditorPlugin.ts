@@ -2,6 +2,8 @@ import { CommandContext, CommandDeclaration, CommandRuntime } from '../services/
 import getActivePluginEditorView from '../services/plugins/utils/getActivePluginEditorView';
 import Logger from '@joplin/utils/Logger';
 import getActivePluginEditorViews from '../services/plugins/utils/getActivePluginEditorViews';
+import PluginService from '../services/plugins/PluginService';
+import WebviewController from '../services/plugins/WebviewController';
 
 const logger = Logger.create('showEditorPlugin');
 
@@ -35,8 +37,13 @@ export const runtime = (): CommandRuntime => {
 				logger.warn(`No editor view with ID ${editorViewId} is active.`);
 				return;
 			}
-			const { editorView, editorPlugin } = editorPluginData;
-			const previousVisible = editorView.visibleInWindows.includes(windowId);
+			const { editorView } = editorPluginData;
+			const controller = PluginService.instance().viewControllerByViewId(editorView.id) as WebviewController;
+			if (!controller) {
+				throw new Error(`No controller registered for editor view ${editorView.id}`);
+			}
+
+			const previousVisible = editorView.parentWindowId === windowId && controller.isVisible();
 
 			if (show && previousVisible) {
 				logger.info(`Editor is already visible: ${editorViewId}`);
@@ -46,12 +53,7 @@ export const runtime = (): CommandRuntime => {
 				return;
 			}
 
-			context.dispatch({
-				type: 'PLUGIN_EDITOR_VIEW_SET_VISIBLE',
-				pluginId: editorPlugin.id,
-				viewId: editorView.id,
-				visible: show,
-			});
+			await controller.setVisible(show);
 
 			// TODO -- save the currently visible ID set
 			// Setting.setValue('plugins.shownEditorViewIds', shownEditorViewIds);

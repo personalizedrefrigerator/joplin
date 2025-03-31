@@ -1,6 +1,7 @@
 /* eslint-disable multiline-comment-style */
 
 import eventManager from '../../../eventManager';
+import { defaultWindowId } from '../../../reducer';
 import Plugin from '../Plugin';
 import createViewHandle from '../utils/createViewHandle';
 import WebviewController, { ContainerType } from '../WebviewController';
@@ -70,9 +71,10 @@ export default class JoplinViewsEditors {
 	/**
 	 * Creates a new editor view
 	 */
-	public async create(id: string): Promise<ViewHandle> {
-		const handle = createViewHandle(this.plugin, id);
-		const controller = new WebviewController(handle, this.plugin.id, this.store, this.plugin.baseDir, ContainerType.Editor);
+	public async create(id: string, parentWindowId?: string): Promise<ViewHandle> {
+		parentWindowId ??= defaultWindowId;
+		const handle = createViewHandle(this.plugin, `${id}-${parentWindowId}`);
+		const controller = new WebviewController(handle, this.plugin.id, this.store, this.plugin.baseDir, ContainerType.Editor, parentWindowId);
 		this.plugin.addViewController(controller);
 		return handle;
 	}
@@ -118,7 +120,8 @@ export default class JoplinViewsEditors {
 	 */
 	public async onActivationCheck(handle: ViewHandle, callback: ActivationCheckCallback): Promise<void> {
 		const handler: FilterHandler<EditorActivationCheckFilterObject> = async (object) => {
-			const isActive = await callback({
+			const isCorrectWindow = object.windowId === this.controller(handle).parentWindowId;
+			const isActive = isCorrectWindow && await callback({
 				noteId: object.effectiveNoteId,
 				windowId: object.windowId,
 			});
@@ -161,8 +164,8 @@ export default class JoplinViewsEditors {
 	/**
 	 * Tells whether the editor is active or not.
 	 */
-	public async isActive(handle: ViewHandle, windowId?: string): Promise<boolean> {
-		return this.controller(handle).isActive(windowId ?? null);
+	public async isActive(handle: ViewHandle): Promise<boolean> {
+		return this.controller(handle).isActive();
 	}
 
 	/**
@@ -170,8 +173,8 @@ export default class JoplinViewsEditors {
 	 * return `false`. If the editor is active and the user has switched to it, it will return
 	 * `true`. Otherwise it will return `false`.
 	 */
-	public async isVisible(handle: ViewHandle, windowId?: string): Promise<boolean> {
-		return this.controller(handle).isVisible(windowId ?? null);
+	public async isVisible(handle: ViewHandle): Promise<boolean> {
+		return this.controller(handle).isVisible();
 	}
 
 }

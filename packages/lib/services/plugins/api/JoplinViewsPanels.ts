@@ -46,7 +46,7 @@ export default class JoplinViewsPanels {
 		}
 
 		const handle = createViewHandle(this.plugin, id);
-		const controller = new WebviewController(handle, this.plugin.id, this.store, this.plugin.baseDir, ContainerType.Panel);
+		const controller = new WebviewController(handle, this.plugin.id, this.store, this.plugin.baseDir, ContainerType.Panel, defaultWindowId);
 		this.plugin.addViewController(controller);
 		return handle;
 	}
@@ -138,8 +138,8 @@ export default class JoplinViewsPanels {
 	 * If `windowId` is not provided, this returns the activation state
 	 * in the default window.
 	 */
-	public async isActive(handle: ViewHandle, windowId?: string): Promise<boolean> {
-		return this.controller(handle).isActive(windowId ?? defaultWindowId);
+	public async isActive(handle: ViewHandle): Promise<boolean> {
+		return this.controller(handle).isActive();
 	}
 
 }

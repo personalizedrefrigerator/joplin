@@ -11,26 +11,22 @@ interface PluginViewStateBase {
 	html?: string;
 	commandName?: string;
 	location?: string;
+	opened: boolean;
 }
 
 export interface PluginEditorViewState extends PluginViewStateBase {
 	containerType: ContainerType.Editor;
 
-	// Windows in which the editor can be shown.
-	activeInWindows: string[];
-
-	// Windows in which the editor is shown.
-	visibleInWindows: string[];
+	parentWindowId: string;
+	active: boolean;
 }
 
 interface PluginDialogViewState extends PluginViewStateBase {
 	containerType: ContainerType.Dialog;
-	opened: boolean;
 }
 
 interface PluginPanelViewState extends PluginViewStateBase {
 	containerType: ContainerType.Panel;
-	opened: boolean;
 }
 
 export type PluginViewState = PluginEditorViewState|PluginDialogViewState|PluginPanelViewState;
@@ -220,36 +216,6 @@ const reducer = (draftRoot: Draft<any>, action: any) => {
 			delete draft.plugins[action.pluginId];
 			delete draft.pluginHtmlContents[action.pluginId];
 			break;
-
-		case 'PLUGIN_EDITOR_VIEW_SET_VISIBLE': {
-			const view = draft.plugins[action.pluginId].views[action.viewId];
-			const windowId = action.windowId ?? draftRoot.windowId;
-
-			if (view.containerType === ContainerType.Editor) {
-				view.visibleInWindows = view.visibleInWindows.filter(id => id !== windowId);
-				if (action.visible) {
-					view.visibleInWindows = [...view.visibleInWindows, windowId];
-				}
-			} else {
-				throw new Error(`Cannot show view of type ${view.containerType} as an editor plugin.`);
-			}
-			break;
-		}
-
-		case 'PLUGIN_EDITOR_VIEW_SET_ACTIVE': {
-			const view = draft.plugins[action.pluginId].views[action.viewId];
-			const windowId = action.windowId ?? draftRoot.windowId;
-
-			if (view.containerType === ContainerType.Editor) {
-				view.activeInWindows = view.activeInWindows.filter(id => id !== windowId);
-				if (action.active) {
-					view.activeInWindows = [...view.activeInWindows, windowId];
-				}
-			} else {
-				throw new Error(`View of type ${view.containerType} is not an editor plugin.`);
-			}
-			break;
-		}
 
 		}
 	} catch (error) {

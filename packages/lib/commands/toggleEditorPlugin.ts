@@ -24,7 +24,7 @@ export const runtime = (): CommandRuntime => {
 
 			let hasBeenHidden = false;
 			for (const { editorView } of activePluginStates) {
-				if (editorView.visibleInWindows.includes(activeWindowId)) {
+				if (editorView.opened) {
 					await CommandService.instance().execute('showEditorPlugin', editorView.id, false);
 					hasBeenHidden = true;
 					break;
