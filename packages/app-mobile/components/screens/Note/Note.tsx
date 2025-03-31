@@ -61,7 +61,6 @@ import { DialogContext, DialogControl } from '../../DialogManager';
 import { CommandRuntimeProps, EditorMode, PickerResponse } from './types';
 import commands from './commands';
 import { AttachFileAction, AttachFileOptions } from './commands/attachFile';
-import ToggleSpaceButton from '../../ToggleSpaceButton';
 import PluginService from '@joplin/lib/services/plugins/PluginService';
 import PluginUserWebView from '../../plugins/dialogs/PluginUserWebView';
 import getShownPluginEditorView from '@joplin/lib/services/plugins/utils/getShownPluginEditorView';
@@ -1698,19 +1697,6 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 			return result;
 		};
 
-		const renderWrappedContent = () => {
-			const content = <>
-				{bodyComponent}
-				{renderVoiceTypingDialogs()}
-			</>;
-
-			return this.state.mode === 'edit' ? (
-				<ToggleSpaceButton themeId={this.props.themeId} style={this.styles().toggleSpaceButtonContent}>
-					{content}
-				</ToggleSpaceButton>
-			) : content;
-		};
-
 		const { editorPlugin: activeEditorPlugin } = getActivePluginEditorView(this.props.plugins, this.props.windowId);
 
 		return (
@@ -1732,7 +1718,8 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 					title={getDisplayParentTitle(this.state.note, this.state.folder)}
 				/>
 				{titleComp}
-				{renderWrappedContent()}
+				{bodyComponent}
+				{renderVoiceTypingDialogs()}
 				{renderActionButton()}
 
 				<SelectDateTimeDialog themeId={this.props.themeId} shown={this.state.alarmDialogShown} date={dueDate} onAccept={this.onAlarmDialogAccept} onReject={this.onAlarmDialogReject} />
