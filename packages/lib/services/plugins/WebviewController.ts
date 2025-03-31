@@ -4,7 +4,7 @@ import { ButtonSpec, DialogResult, ViewHandle } from './api/types';
 const { toSystemSlashes } = require('../../path-utils');
 import PostMessageService, { MessageParticipant } from '../PostMessageService';
 import { PluginEditorViewState, PluginViewState } from './reducer';
-import { stateUtils } from '../../reducer';
+import { defaultWindowId } from '../../reducer';
 import Logger from '@joplin/utils/Logger';
 
 const logger = Logger.create('WebviewController');
@@ -131,11 +131,6 @@ export default class WebviewController extends ViewController {
 		return this.storeView.containerType;
 	}
 
-	private get defaultTargetWindowId_(): string {
-		// Default to the focused window ID
-		return stateUtils.activeWindowId(this.store.getState());
-	}
-
 	public async addScript(path: string) {
 		const fullPath = toSystemSlashes(shim.fsDriver().resolve(`${this.baseDir_}/${path}`), 'linux');
 
@@ -151,15 +146,13 @@ export default class WebviewController extends ViewController {
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	public postMessage(message: any, windowId: string|null) {
-		windowId ??= this.defaultTargetWindowId_;
-
+	public postMessage(message: any) {
 		const messageId = `plugin_${Date.now()}${Math.random()}`;
 
 		void PostMessageService.instance().postMessage({
 			pluginId: this.pluginId,
 			viewId: this.handle,
-			windowId: windowId,
+			windowId: defaultWindowId,
 			contentScriptId: null,
 			from: MessageParticipant.Plugin,
 			to: MessageParticipant.UserWebview,

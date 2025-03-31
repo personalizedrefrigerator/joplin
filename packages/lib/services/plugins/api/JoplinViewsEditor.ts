@@ -170,8 +170,8 @@ export default class JoplinViewsEditors {
 	 * in the main window (if any).
 	 */
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	public postMessage(handle: ViewHandle, message: any, windowId?: string): void {
-		return this.controller(handle).postMessage(message, windowId ?? null);
+	public postMessage(handle: ViewHandle, message: any): void {
+		return this.controller(handle).postMessage(message);
 	}
 
 	/**
