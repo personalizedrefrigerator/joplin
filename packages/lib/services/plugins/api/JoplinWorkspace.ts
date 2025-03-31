@@ -52,6 +52,10 @@ interface SyncCompleteEvent {
 	withErrors: boolean;
 }
 
+interface WindowOpenEvent {
+	windowId: string;
+}
+
 type WorkspaceEventHandler<EventType> = (event: EventType)=> void;
 
 type ItemChangeHandler = WorkspaceEventHandler<ItemChangeEvent>;
@@ -154,6 +158,20 @@ export default class JoplinWorkspace {
 	 */
 	public async onSyncComplete(callback: WorkspaceEventHandler<SyncCompleteEvent>): Promise<Disposable> {
 		return makeListener(this.plugin, eventManager, EventName.SyncComplete, callback);
+	}
+
+	/**
+	 * Called when a secondary window is opened.
+	 */
+	public async onWindowOpen(callback: WorkspaceEventHandler<WindowOpenEvent>): Promise<Disposable> {
+		return makeListener(this.plugin, eventManager, EventName.WindowOpen, callback);
+	}
+
+	/**
+	 * Called when a secondary window is closed.
+	 */
+	public async onWindowClose(callback: WorkspaceEventHandler<WindowOpenEvent>): Promise<Disposable> {
+		return makeListener(this.plugin, eventManager, EventName.WindowClose, callback);
 	}
 
 	/**
