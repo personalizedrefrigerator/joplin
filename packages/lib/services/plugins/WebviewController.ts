@@ -4,7 +4,7 @@ import { ButtonSpec, DialogResult, ViewHandle } from './api/types';
 const { toSystemSlashes } = require('../../path-utils');
 import PostMessageService, { MessageParticipant } from '../PostMessageService';
 import { PluginEditorViewState, PluginViewState } from './reducer';
-import { defaultWindowId } from '../../reducer';
+import { stateUtils } from '../../reducer';
 import Logger from '@joplin/utils/Logger';
 import CommandService from '../CommandService';
 
@@ -49,21 +49,24 @@ function findItemByKey(layout: any, key: string): any {
 	return recurseFind(layout);
 }
 
-interface UpdateEvent {
+interface EditorUpdateEvent {
 	noteId: string;
 	newBody: string;
 	windowId: string;
 }
-type UpdateListener = (event: UpdateEvent)=> void;
+type EditorUpdateListener = (event: EditorUpdateEvent)=> void;
+
+type OnSaveNoteCallback = (saveNoteEvent: EditorUpdateEvent)=> void;
 
 export default class WebviewController extends ViewController {
 
 	private baseDir_: string;
 	// eslint-disable-next-line @typescript-eslint/ban-types -- Old code before rule was applied
 	private messageListener_: Function = null;
-	private updateListener_: UpdateListener|null = null;
+	private updateListener_: EditorUpdateListener|null = null;
 	private closeResponse_: CloseResponse = null;
 	private containerType_: ContainerType = null;
+	private saveNoteListeners_: OnSaveNoteCallback[] = [];
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	public constructor(handle: ViewHandle, pluginId: string, store: any, baseDir: string, containerType: ContainerType) {
@@ -122,6 +125,11 @@ export default class WebviewController extends ViewController {
 		return this.storeView.containerType;
 	}
 
+	private get defaultTargetWindowId_(): string {
+		// Default to the focused window ID
+		return stateUtils.activeWindowId(this.store.getState());
+	}
+
 	public async addScript(path: string) {
 		const fullPath = toSystemSlashes(shim.fsDriver().resolve(`${this.baseDir_}/${path}`), 'linux');
 
@@ -137,14 +145,15 @@ export default class WebviewController extends ViewController {
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	public postMessage(message: any, windowId: string|undefined) {
+	public postMessage(message: any, windowId: string|null) {
+		windowId ??= this.defaultTargetWindowId_;
 
 		const messageId = `plugin_${Date.now()}${Math.random()}`;
 
 		void PostMessageService.instance().postMessage({
 			pluginId: this.pluginId,
 			viewId: this.handle,
-			windowId: windowId ?? defaultWindowId,
+			windowId: windowId,
 			contentScriptId: null,
 			from: MessageParticipant.Plugin,
 			to: MessageParticipant.UserWebview,
@@ -160,7 +169,7 @@ export default class WebviewController extends ViewController {
 		return this.messageListener_(event.message);
 	}
 
-	public emitUpdate(event: UpdateEvent) {
+	public emitUpdate(event: EditorUpdateEvent) {
 		if (!this.updateListener_) return;
 
 		if (this.containerType_ === ContainerType.Editor && (!this.isActive(event.windowId) || !this.isVisible(event.windowId))) {
@@ -176,7 +185,7 @@ export default class WebviewController extends ViewController {
 		this.messageListener_ = callback;
 	}
 
-	public onUpdate(callback: UpdateListener) {
+	public onUpdate(callback: EditorUpdateListener) {
 		this.updateListener_ = callback;
 	}
 
@@ -276,7 +285,9 @@ export default class WebviewController extends ViewController {
 	// Specific to editors
 	// ---------------------------------------------
 
-	public setActive(active: boolean, windowId: string) {
+	public setActive(active: boolean, windowId: string|null) {
+		windowId ??= this.defaultTargetWindowId_;
+
 		logger.debug('Set active', active, 'in window', windowId);
 		this.store.dispatch({
 			type: 'PLUGIN_EDITOR_VIEW_SET_ACTIVE',
@@ -287,12 +298,14 @@ export default class WebviewController extends ViewController {
 		});
 	}
 
-	public isActive(windowId: string): boolean {
+	public isActive(windowId: string|null): boolean {
+		windowId ??= this.defaultTargetWindowId_;
 		const state = this.storeView as PluginEditorViewState;
 		return state.activeInWindows.includes(windowId);
 	}
 
-	public isVisible(windowId: string): boolean {
+	public isVisible(windowId: string|null): boolean {
+		windowId ??= this.defaultTargetWindowId_;
 		const state = this.storeView as PluginEditorViewState;
 		if (!state.activeInWindows.includes(windowId)) return false;
 		return state.visibleInWindows.includes(windowId);
@@ -302,4 +315,18 @@ export default class WebviewController extends ViewController {
 		await CommandService.instance().execute('showEditorPlugin', this.handle, visible);
 	}
 
+	public async requestSaveNote(event: EditorUpdateEvent) {
+		for (const listener of this.saveNoteListeners_) {
+			listener(event);
+		}
+	}
+
+	public addRequestSaveNoteListener(listener: OnSaveNoteCallback) {
+		this.saveNoteListeners_.push(listener);
+		return {
+			remove: () => {
+				this.saveNoteListeners_ = this.saveNoteListeners_.filter(other => other !== listener);
+			},
+		};
+	}
 }

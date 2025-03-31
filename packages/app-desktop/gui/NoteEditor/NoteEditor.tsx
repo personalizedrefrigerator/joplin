@@ -52,11 +52,10 @@ import Logger from '@joplin/utils/Logger';
 import usePluginEditorView from './utils/usePluginEditorView';
 import { stateUtils } from '@joplin/lib/reducer';
 import { WindowIdContext } from '../NewWindowOrIFrame';
-import PluginService from '@joplin/lib/services/plugins/PluginService';
-import EditorPluginHandler from '@joplin/lib/services/plugins/EditorPluginHandler';
 import useResourceUnwatcher from './utils/useResourceUnwatcher';
 import StatusBar from './StatusBar';
 import getShownPluginEditorViewIds from '@joplin/lib/services/plugins/utils/getShownPluginEditorViewIds';
+import useConnectToEditorPlugin from './utils/useConnectToEditorPlugin';
 
 const debounce = require('debounce');
 
@@ -83,11 +82,6 @@ function NoteEditorContent(props: NoteEditorProps) {
 
 	const windowId = useContext(WindowIdContext);
 
-	const editorPluginHandler = useMemo(() => {
-		return new EditorPluginHandler(PluginService.instance());
-	}, []);
-
-	const shownEditorViewIds = props.shownEditorPluginViewIds;
 
 	// Should be constant and unique to this instance of the editor.
 	const editorId = useMemo(() => {
@@ -127,22 +121,15 @@ function NoteEditorContent(props: NoteEditorProps) {
 
 	const formNoteFolder = useFolder({ folderId: formNote.parent_id });
 
-	useAsyncEffect(async (_event) => {
-		if (!props.startupPluginsLoaded) return;
-		await editorPluginHandler.emitActivationCheck({
-			parentWindowId: windowId,
-			noteId: effectiveNoteId,
-		});
-	}, [windowId, effectiveNoteId, editorPluginHandler, props.startupPluginsLoaded]);
-
-	useEffect(() => {
-		if (!props.startupPluginsLoaded) return;
-		editorPluginHandler.emitUpdate({
-			noteId: effectiveNoteId,
-			body: formNote.body,
-			parentWindowId: windowId,
-		}, shownEditorViewIds);
-	}, [windowId, effectiveNoteId, formNote.body, editorPluginHandler, shownEditorViewIds, props.startupPluginsLoaded]);
+	const shownEditorViewIds = props.shownEditorPluginViewIds;
+	useConnectToEditorPlugin({
+		startupPluginsLoaded: props.startupPluginsLoaded,
+		setFormNote,
+		formNote,
+		effectiveNoteId,
+		shownEditorViewIds,
+		activeEditorView: editorView,
+	});
 
 	const {
 		localSearch,

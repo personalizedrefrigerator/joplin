@@ -12,10 +12,10 @@ import WebviewController from './WebviewController';
 
 const logger = Logger.create('EditorPluginHandler');
 
-export interface EditorContentInfo {
+export interface UpdateEvent {
 	noteId: string;
-	body: string;
-	parentWindowId: string;
+	newBody: string;
+	windowId: string;
 }
 
 interface EmitActivationCheckOptions {
@@ -23,15 +23,22 @@ interface EmitActivationCheckOptions {
 	parentWindowId: string;
 }
 
-const makeNoteUpdateAction = (pluginService: PluginService, editorInfo: EditorContentInfo, shownEditorViewIds: string[]) => {
+interface SaveNoteEvent {
+	id: string;
+	body: string;
+}
+
+export type OnSaveNoteCallback = (updatedNote: SaveNoteEvent)=> void;
+
+const makeNoteUpdateAction = (pluginService: PluginService, event: UpdateEvent, shownEditorViewIds: string[]) => {
 	return async () => {
 		for (const viewId of shownEditorViewIds) {
 			const controller = pluginService.viewControllerByViewId(viewId) as WebviewController;
 			if (controller) {
 				controller.emitUpdate({
-					noteId: editorInfo.noteId,
-					newBody: editorInfo.body,
-					windowId: editorInfo.parentWindowId,
+					noteId: event.noteId,
+					newBody: event.newBody,
+					windowId: event.windowId,
 				});
 			}
 		}
@@ -40,17 +47,18 @@ const makeNoteUpdateAction = (pluginService: PluginService, editorInfo: EditorCo
 
 export default class {
 
-	private pluginService_: PluginService;
 	private viewUpdateAsyncQueue_ = new AsyncActionQueue(100, IntervalType.Fixed);
 
-	public constructor(pluginService: PluginService) {
-		this.pluginService_ = pluginService;
+	public constructor(
+		private pluginService_: PluginService,
+		private onSaveNote_: OnSaveNoteCallback,
+	) {
 	}
 
-	public emitUpdate(editorInfo: EditorContentInfo, shownEditorViewIds: string[]) {
+	public emitUpdate(event: UpdateEvent, shownEditorViewIds: string[]) {
 		logger.info('emitUpdate:', shownEditorViewIds);
 		if (shownEditorViewIds.length > 0) {
-			this.viewUpdateAsyncQueue_.push(makeNoteUpdateAction(this.pluginService_, editorInfo, shownEditorViewIds));
+			this.viewUpdateAsyncQueue_.push(makeNoteUpdateAction(this.pluginService_, event, shownEditorViewIds));
 		}
 	}
 
@@ -70,4 +78,26 @@ export default class {
 		}
 	}
 
+	public onEditorPluginShown(editorViewId: string, parentWindowId: string) {
+		const controller = this.pluginService_.viewControllerByViewId(editorViewId) as WebviewController;
+		const handle = controller?.addRequestSaveNoteListener(event => {
+			if (event.windowId === parentWindowId) {
+				this.scheduleSaveNote_(event.noteId, event.newBody);
+				return true;
+			}
+			return false;
+		});
+
+		const cleanup = () => {
+			handle?.remove();
+		};
+		return cleanup;
+	}
+
+	private scheduleSaveNote_(noteId: string, noteBody: string) {
+		this.onSaveNote_({
+			id: noteId,
+			body: noteBody,
+		});
+	}
 }

@@ -1,11 +1,17 @@
 /* eslint-disable multiline-comment-style */
 
 import eventManager from '../../../eventManager';
-import { defaultWindowId } from '../../../reducer';
 import Plugin from '../Plugin';
 import createViewHandle from '../utils/createViewHandle';
 import WebviewController, { ContainerType } from '../WebviewController';
 import { ActivationCheckCallback, EditorActivationCheckFilterObject, FilterHandler, ViewHandle, UpdateCallback } from './types';
+
+export interface SaveEditorContentProps {
+	body: string;
+	noteId: string;
+	/** The ID of the window containing the editor. */
+	windowId: string;
+}
 
 /**
  * Allows creating alternative note editors. You can create a view to handle loading and saving the
@@ -94,6 +100,17 @@ export default class JoplinViewsEditors {
 	}
 
 	/**
+	 * Saves the content of the editor, without calling `onUpdate` for editors in the same window.
+	 */
+	public async saveNote(handle: ViewHandle, props: SaveEditorContentProps): Promise<void> {
+		await this.controller(handle).requestSaveNote({
+			noteId: props.noteId,
+			newBody: props.body,
+			windowId: props.windowId,
+		});
+	}
+
+	/**
 	 * Emitted when the editor can potentially be activated - this is for example when the current
 	 * note is changed, or when the application is opened. At that point you should check the
 	 * current note and decide whether your editor should be activated or not. If it should, return
@@ -138,14 +155,14 @@ export default class JoplinViewsEditors {
 	 */
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	public postMessage(handle: ViewHandle, message: any, windowId?: string): void {
-		return this.controller(handle).postMessage(message, windowId);
+		return this.controller(handle).postMessage(message, windowId ?? null);
 	}
 
 	/**
 	 * Tells whether the editor is active or not.
 	 */
 	public async isActive(handle: ViewHandle, windowId?: string): Promise<boolean> {
-		return this.controller(handle).isActive(windowId ?? defaultWindowId);
+		return this.controller(handle).isActive(windowId ?? null);
 	}
 
 	/**
@@ -154,7 +171,7 @@ export default class JoplinViewsEditors {
 	 * `true`. Otherwise it will return `false`.
 	 */
 	public async isVisible(handle: ViewHandle, windowId?: string): Promise<boolean> {
-		return this.controller(handle).isVisible(windowId ?? defaultWindowId);
+		return this.controller(handle).isVisible(windowId ?? null);
 	}
 
 }
