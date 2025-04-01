@@ -159,6 +159,7 @@ unwatcher
 pedr
 Slotozilla
 keyshortcuts
+buildx
 atag
 HMAC
 Siri
@@ -167,3 +168,10 @@ pmmmwh
 webm
 millis
 sideloading
+ggml
+Minidump
+collapseall
+newfolder
+unfocusable
+unlocker
+Tiktok
