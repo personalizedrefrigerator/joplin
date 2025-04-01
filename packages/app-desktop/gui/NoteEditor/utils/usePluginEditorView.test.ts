@@ -10,6 +10,7 @@ const sampleView = (): PluginEditorViewState => {
 		buttons: [],
 		containerType: ContainerType.Editor,
 		id: 'view-1',
+		editorTypeId: 'view-1',
 		type: 'webview',
 		opened: true,
 		active: true,
