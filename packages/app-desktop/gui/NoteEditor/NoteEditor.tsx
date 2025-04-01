@@ -121,7 +121,9 @@ function NoteEditorContent(props: NoteEditorProps) {
 
 	const formNoteFolder = useFolder({ folderId: formNote.parent_id });
 
-	const shownEditorViewIds = props.shownEditorPluginViewIds;
+	const shownEditorViewIds = useMemo(() => {
+		return getShownPluginEditorViewIds(props.plugins, windowId);
+	}, [props.plugins, windowId]);
 	useConnectToEditorPlugin({
 		startupPluginsLoaded: props.startupPluginsLoaded,
 		setFormNote,
@@ -701,7 +703,6 @@ const mapStateToProps = (state: AppState, ownProps: ConnectProps) => {
 		highlightedWords: state.highlightedWords,
 		plugins: state.pluginService.plugins,
 		pluginHtmlContents: state.pluginService.pluginHtmlContents,
-		shownEditorPluginViewIds: getShownPluginEditorViewIds(state.pluginService.plugins, windowState.windowId),
 		toolbarButtonInfos: toolbarButtonUtils.commandsToToolbarButtons([
 			'historyBackward',
 			'historyForward',

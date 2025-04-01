@@ -310,7 +310,11 @@ export default class WebviewController extends ViewController {
 	}
 
 	public async requestSaveNote(event: SaveNoteEvent) {
-		this.saveNoteListener_?.(event);
+		if (!this.saveNoteListener_) {
+			logger.warn('Note save requested, but no save handler was registered. View ID: ', this.storeView?.id);
+			return;
+		}
+		this.saveNoteListener_(event);
 	}
 
 	public onNoteSaveRequested(listener: OnSaveNoteCallback) {

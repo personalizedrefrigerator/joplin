@@ -43,6 +43,7 @@ const useConnectToEditorPlugin = ({
 				...sourceFormNote,
 				id: newContent.id,
 				body: newContent.body,
+				hasChanged: true,
 			};
 
 			lastEditorPluginSaveRef.current = newFormNote;
@@ -83,14 +84,18 @@ const useConnectToEditorPlugin = ({
 		return cleanup;
 	}, [activeEditorView, editorPluginHandler]);
 
+	const formNoteBody = formNote.body;
 	useEffect(() => {
 		if (!startupPluginsLoaded) return;
 
 		editorPluginHandler.emitUpdate({
 			noteId: effectiveNoteId,
-			newBody: formNote.body,
+			newBody: formNoteBody,
 		}, shownEditorViewIds);
-	}, [windowId, effectiveNoteId, formNote, editorPluginHandler, shownEditorViewIds, startupPluginsLoaded]);
+	}, [effectiveNoteId, formNoteBody, editorPluginHandler, shownEditorViewIds, startupPluginsLoaded]);
+	useEffect(() => {
+		logger.debug('shownEditorViewIds', shownEditorViewIds);
+	}, [shownEditorViewIds]);
 };
 
 export default useConnectToEditorPlugin;

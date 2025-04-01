@@ -6,6 +6,7 @@ import EditorCodeDialog from './EditorCodeDialog';
 export default class NoteEditorPage {
 	public readonly codeMirrorEditor: Locator;
 	public readonly noteViewerContainer: Locator;
+	public readonly editorPluginFrame: Locator;
 	public readonly richTextEditor: Locator;
 	public readonly noteTitleInput: Locator;
 
@@ -27,6 +28,7 @@ export default class NoteEditorPage {
 		this.containerLocator = page.locator('.rli-editor');
 		this.codeMirrorEditor = this.containerLocator.locator('.cm-editor');
 		this.richTextEditor = this.containerLocator.locator('iframe[title="Rich Text Area"]');
+		this.editorPluginFrame = this.containerLocator.locator('iframe[id^="plugin-view-"]');
 		this.noteTitleInput = this.containerLocator.locator('.title-input');
 		this.attachFileButton = this.containerLocator.getByRole('button', { name: 'Attach file' });
 		this.toggleCodeBlockButton = this.containerLocator.getByRole('button', { name: 'Code Block' });

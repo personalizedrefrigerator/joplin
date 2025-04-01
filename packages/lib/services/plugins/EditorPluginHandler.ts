@@ -46,8 +46,7 @@ const makeNoteUpdateAction = (pluginService: PluginService, event: UpdateEvent, 
 export default class {
 
 	private viewUpdateAsyncQueue_ = new AsyncActionQueue(100, IntervalType.Fixed);
-	private lastSaveBody_: string|null = null;
-	private lastSaveId_: string|null = null;
+	private lastSaveUpdate_: UpdateEvent|null = null;
 	private lastEditorPluginShown_: string|null = null;
 
 	public constructor(
@@ -57,9 +56,16 @@ export default class {
 	}
 
 	public emitUpdate(event: UpdateEvent, shownEditorViewIds: string[]) {
-		// Avoid emitting update events if the source of the event was probably the last editor save:
-		const isDifferent = event.newBody !== this.lastSaveBody_ || event.noteId !== this.lastSaveId_;
-		if (shownEditorViewIds.length > 0 && isDifferent) {
+		const isEventDifferentFrom = (other: UpdateEvent|null) => {
+			if (!other) return true;
+			return event.noteId !== other.noteId || event.newBody !== other.newBody;
+		};
+
+		// Avoid emitting update events if the event was created by this editor. Avoiding
+		// emitting these events helps prevent unnecessary editor refreshes:
+		const isDifferentFromSave = isEventDifferentFrom(this.lastSaveUpdate_);
+
+		if (shownEditorViewIds.length > 0 && isDifferentFromSave) {
 			logger.info('emitUpdate:', shownEditorViewIds);
 			this.viewUpdateAsyncQueue_.push(makeNoteUpdateAction(this.pluginService_, event, shownEditorViewIds));
 		}
@@ -97,8 +103,12 @@ export default class {
 	}
 
 	private scheduleSaveNote_(noteId: string, noteBody: string) {
-		this.lastSaveBody_ = noteBody;
-		this.lastSaveId_ = noteId;
+		this.lastSaveUpdate_ = {
+			noteId,
+			newBody: noteBody,
+		};
+
+		logger.debug('Note save scheduled', noteId, noteBody);
 
 		return this.onSaveNote_({
 			id: noteId,
