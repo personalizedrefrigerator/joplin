@@ -212,11 +212,12 @@ export default class JoplinViewsEditors {
 
 		this.activationCheckHandlers_[handle] = handler;
 
-		// Handle the case where an activation check was done before the onActivationCheck handler was registered.
+		// Handle the case where the activation check was done before this onActivationCheck handler was registered.
 		if (this.unhandledActivationCheck_.has(handle)) {
-			const activationCheckObject = this.unhandledActivationCheck_.get(handle);
+			const lastActivationCheckObject = this.unhandledActivationCheck_.get(handle);
 			this.unhandledActivationCheck_.delete(handle);
-			this.controller(handle).setActive(await isActive(activationCheckObject));
+
+			this.controller(handle).setActive(await isActive(lastActivationCheckObject));
 		}
 	}
 

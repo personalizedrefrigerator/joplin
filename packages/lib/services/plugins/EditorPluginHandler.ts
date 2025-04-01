@@ -108,8 +108,6 @@ export default class {
 			newBody: noteBody,
 		};
 
-		logger.debug('Note save scheduled for note', noteId);
-
 		return this.onSaveNote_({
 			id: noteId,
 			body: noteBody,
