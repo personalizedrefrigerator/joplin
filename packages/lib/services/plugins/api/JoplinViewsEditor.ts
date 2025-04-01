@@ -11,10 +11,6 @@ import { ActivationCheckCallback, EditorActivationCheckFilterObject, FilterHandl
 export interface EditorPluginProps {
 	/** The ID of the window to show the editor plugin. Use `undefined` for the main window. */
 	windowId: string|undefined;
-	/**
-	 * Called to determine whether the custom editor supports the current note.
-	 */
-	onActivationCheck: ActivationCheckCallback;
 }
 
 export interface SaveEditorContentProps {
@@ -30,6 +26,8 @@ export interface SaveEditorContentProps {
 	/** The note's new content. */
 	body: string;
 }
+
+type ActivationCheckSlice = Pick<EditorActivationCheckFilterObject, 'effectiveNoteId'|'windowId'|'activatedEditors'>;
 
 /**
  * Allows creating alternative note editors. You can create a view to handle loading and saving the
@@ -74,6 +72,7 @@ export default class JoplinViewsEditors {
 	private store: any;
 	private plugin: Plugin;
 	private activationCheckHandlers_: Record<string, FilterHandler<EditorActivationCheckFilterObject>> = {};
+	private unhandledActivationCheck_: Map<string, ActivationCheckSlice> = new Map();
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	public constructor(plugin: Plugin, store: any) {
@@ -92,19 +91,40 @@ export default class JoplinViewsEditors {
 		id: string,
 		options: EditorPluginProps = {
 			windowId: undefined,
-			onActivationCheck: async ()=>false,
 		},
 	): Promise<ViewHandle> {
 		const windowId = options.windowId ?? defaultWindowId;
 		const handle = createViewHandle(this.plugin, `${id}-${windowId}`);
 
-		const controller = new WebviewController(handle, this.plugin.id, this.store, this.plugin.baseDir, ContainerType.Editor, windowId);
-		this.plugin.addViewController(controller);
-		// Restore the last open/closed state for the editor
-		controller.setOpened(Setting.value('plugins.shownEditorViewIds').includes(handle));
+		const initializeController = () => {
+			const controller = new WebviewController(handle, this.plugin.id, this.store, this.plugin.baseDir, ContainerType.Editor, windowId);
+			this.plugin.addViewController(controller);
+			// Restore the last open/closed state for the editor
+			controller.setOpened(Setting.value('plugins.shownEditorViewIds').includes(handle));
+		};
+		// Register the activation check handler early to handle the case where the editorActivationCheck
+		// event is fired **before** an activation check handler is registered through the API.
+		const registerActivationCheckHandler = () => {
+			const onActivationCheck: FilterHandler<EditorActivationCheckFilterObject> = async object => {
+				if (this.activationCheckHandlers_[handle]) {
+					return this.activationCheckHandlers_[handle](object);
+				} else {
+					this.unhandledActivationCheck_.set(handle, {
+						...object,
+					});
+					return object;
+				}
+			};
+			eventManager.filterOn('editorActivationCheck', onActivationCheck);
+			this.plugin.addOnUnloadListener(() => {
+				eventManager.filterOff('editorActivationCheck', onActivationCheck);
+				this.unhandledActivationCheck_.delete(handle);
+			});
+		};
 
-		// Call onActivationCheck immediately to prevent race conditions.
-		await this.onActivationCheck(handle, options.onActivationCheck);
+		initializeController();
+		registerActivationCheckHandler();
+
 		return handle;
 	}
 
@@ -147,26 +167,31 @@ export default class JoplinViewsEditors {
 	 * `true`, otherwise return `false`.
 	 */
 	public async onActivationCheck(handle: ViewHandle, callback: ActivationCheckCallback): Promise<void> {
-		const handler: FilterHandler<EditorActivationCheckFilterObject> = async (object) => {
-			const isCorrectWindow = object.windowId === this.controller(handle).parentWindowId;
-			const isActive = isCorrectWindow && await callback({
-				noteId: object.effectiveNoteId,
-				windowId: object.windowId,
+		const isActive = async ({ windowId, effectiveNoteId }: ActivationCheckSlice) => {
+			const isCorrectWindow = windowId === this.controller(handle).parentWindowId;
+			const active = isCorrectWindow && await callback({
+				noteId: effectiveNoteId,
+				windowId: windowId,
 			});
+			return active;
+		};
+		const handler = async (object: ActivationCheckSlice) => {
 			object.activatedEditors.push({
 				pluginId: this.plugin.id,
 				viewId: handle,
-				isActive: isActive,
+				isActive: await isActive(object),
 			});
 			return object;
 		};
 
 		this.activationCheckHandlers_[handle] = handler;
 
-		eventManager.filterOn('editorActivationCheck', this.activationCheckHandlers_[handle]);
-		this.plugin.addOnUnloadListener(() => {
-			eventManager.filterOff('editorActivationCheck', this.activationCheckHandlers_[handle]);
-		});
+		// Handle the case where an activation check was done before the onActivationCheck handler was registered.
+		if (this.unhandledActivationCheck_.has(handle)) {
+			const activationCheckObject = this.unhandledActivationCheck_.get(handle);
+			this.unhandledActivationCheck_.delete(handle);
+			this.controller(handle).setActive(await isActive(activationCheckObject));
+		}
 	}
 
 	/**
