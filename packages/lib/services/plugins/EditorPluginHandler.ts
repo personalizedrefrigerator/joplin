@@ -108,7 +108,7 @@ export default class {
 			newBody: noteBody,
 		};
 
-		logger.debug('Note save scheduled', noteId, noteBody);
+		logger.debug('Note save scheduled for note', noteId);
 
 		return this.onSaveNote_({
 			id: noteId,
