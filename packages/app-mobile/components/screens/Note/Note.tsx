@@ -1763,7 +1763,6 @@ const NoteScreen = connect((state: AppState) => {
 		provisionalNoteIds: state.provisionalNoteIds,
 		highlightedWords: state.highlightedWords,
 		plugins: state.pluginService.plugins,
-		'plugins.shownEditorViewIds': state.settings['plugins.shownEditorViewIds'] || [],
 		pluginHtmlContents: state.pluginService.pluginHtmlContents,
 		editorNoteReloadTimeRequest: state.editorNoteReloadTimeRequest,
 
