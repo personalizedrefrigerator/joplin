@@ -190,6 +190,9 @@ export default class JoplinWorkspace {
 
 	/**
 	 * Gets the currently selected note. Will be `null` if no note is selected.
+     *
+	 * If `windowId` is not provided, this returns the activation state
+	 * in the focused window.
 	 */
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	public async selectedNote(windowId?: string): Promise<any> {
