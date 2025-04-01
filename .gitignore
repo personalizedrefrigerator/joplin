@@ -1055,7 +1055,7 @@ packages/lib/geolocation-node.js
 packages/lib/getAppName.test.js
 packages/lib/getAppName.js
 packages/lib/hooks/plugins/usePlugin.js
-packages/lib/hooks/plugins/useVisiblePluginEditorIds.js
+packages/lib/hooks/plugins/useVisiblePluginEditorViewIds.js
 packages/lib/hooks/useAsyncEffect.js
 packages/lib/hooks/useElementSize.js
 packages/lib/hooks/useEventListener.js

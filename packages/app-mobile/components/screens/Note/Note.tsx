@@ -69,7 +69,7 @@ import EditorPluginHandler from '@joplin/lib/services/plugins/EditorPluginHandle
 import AudioRecordingBanner from '../../voiceTyping/AudioRecordingBanner';
 import SpeechToTextBanner from '../../voiceTyping/SpeechToTextBanner';
 import { defaultWindowId } from '@joplin/lib/reducer';
-import useVisiblePluginEditorIds from '@joplin/lib/hooks/plugins/useVisiblePluginEditorIds';
+import useVisiblePluginEditorViewIds from '@joplin/lib/hooks/plugins/useVisiblePluginEditorViewIds';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 const emptyArray: any[] = [];
@@ -1737,7 +1737,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 // how the new note should be rendered
 const NoteScreenWrapper = (props: Props) => {
 	const dialogs = useContext(DialogContext);
-	const visibleEditorPluginIds = useVisiblePluginEditorIds(props.plugins, props.windowId);
+	const visibleEditorPluginIds = useVisiblePluginEditorViewIds(props.plugins, props.windowId);
 
 	return (
 		<NoteScreenComponent key={props.noteId} dialogs={dialogs} visibleEditorPluginIds={visibleEditorPluginIds} {...props} />
