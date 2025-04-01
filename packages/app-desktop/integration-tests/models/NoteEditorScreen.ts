@@ -16,6 +16,7 @@ export default class NoteEditorPage {
 	public readonly toggleEditorsButton: Locator;
 	public readonly toggleEditorLayoutButton: Locator;
 	private readonly disableTabNavigationButton: Locator;
+	public readonly toggleEditorPluginButton: Locator;
 
 	public readonly editorSearchInput: Locator;
 	public readonly viewerSearchInput: Locator;
@@ -36,6 +37,7 @@ export default class NoteEditorPage {
 		this.editorSearchInput = this.containerLocator.getByPlaceholder('Find');
 		this.viewerSearchInput = this.containerLocator.getByPlaceholder('Search...');
 		this.disableTabNavigationButton = this.containerLocator.getByRole('button', { name: 'Tab moves focus' });
+		this.toggleEditorPluginButton = this.containerLocator.getByRole('button', { name: 'Toggle editor plugin' });
 
 		this.richTextCodeEditor = new EditorCodeDialog(page);
 	}

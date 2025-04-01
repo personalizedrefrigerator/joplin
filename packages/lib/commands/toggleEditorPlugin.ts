@@ -2,6 +2,7 @@ import CommandService, { CommandContext, CommandDeclaration, CommandRuntime } fr
 import { _ } from '../locale';
 import Logger from '@joplin/utils/Logger';
 import getActivePluginEditorViews from '../services/plugins/utils/getActivePluginEditorViews';
+import getShownPluginEditorView from '../services/plugins/utils/getShownPluginEditorView';
 
 const logger = Logger.create('toggleEditorPlugin');
 
@@ -22,21 +23,26 @@ export const runtime = (): CommandRuntime => {
 				return;
 			}
 
-			let hasBeenHidden = false;
-			for (const { editorView } of activePluginStates) {
-				if (editorView.opened) {
-					await CommandService.instance().execute('showEditorPlugin', editorView.id, false);
-					hasBeenHidden = true;
-					break;
-				}
+			let showedView = false;
+			const setEditorPluginVisible = async (viewId: string, visible: boolean) => {
+				await CommandService.instance().execute('showEditorPlugin', viewId, visible);
+				showedView ||= visible;
+			};
+
+			const { editorView: visibleView } = getShownPluginEditorView(context.state.pluginService.plugins, activeWindowId);
+			// Hide the visible view
+			if (visibleView) {
+				await setEditorPluginVisible(visibleView.id, false);
 			}
 
-			if (!hasBeenHidden) {
-				const firstActiveEditorView = activePluginStates[0].editorView;
-				await CommandService.instance().execute('showEditorPlugin', firstActiveEditorView.id);
+			// Show the next view
+			const visibleViewIndex = activePluginStates.findIndex(state => state.editorView.id === visibleView?.id);
+			const nextIndex = visibleViewIndex + 1;
+			if (nextIndex < activePluginStates.length) {
+				await setEditorPluginVisible(activePluginStates[nextIndex].editorView.id, true);
 			}
 
-			if (hasBeenHidden) {
+			if (!showedView) {
 				// When the plugin editor goes from visible to hidden, we need to reload the note
 				// because it may have been changed via the data API.
 				context.dispatch({
