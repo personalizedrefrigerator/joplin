@@ -69,6 +69,7 @@ import EditorPluginHandler from '@joplin/lib/services/plugins/EditorPluginHandle
 import AudioRecordingBanner from '../../voiceTyping/AudioRecordingBanner';
 import SpeechToTextBanner from '../../voiceTyping/SpeechToTextBanner';
 import { defaultWindowId } from '@joplin/lib/reducer';
+import useVisiblePluginEditorIds from '@joplin/lib/hooks/plugins/useVisiblePluginEditorIds';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 const emptyArray: any[] = [];
@@ -104,13 +105,13 @@ interface Props extends BaseProps {
 	highlightedWords: string[];
 	noteHash: string;
 	toolbarEnabled: boolean;
-	'plugins.shownEditorViewIds': string[];
 	pluginHtmlContents: PluginHtmlContents;
 	editorNoteReloadTimeRequest: number;
 }
 
 interface ComponentProps extends Props {
 	dialogs: DialogControl;
+	visibleEditorPluginIds: string[];
 }
 
 interface State {
@@ -595,7 +596,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 		await ResourceFetcher.instance().markForDownload(resourceIds);
 	}
 
-	public componentDidUpdate(prevProps: Props, prevState: State) {
+	public componentDidUpdate(prevProps: ComponentProps, prevState: State) {
 		if (this.doFocusUpdate_) {
 			this.doFocusUpdate_ = false;
 			this.scheduleFocusUpdate();
@@ -643,7 +644,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 			});
 		}
 
-		if (this.props['plugins.shownEditorViewIds'] !== prevProps['plugins.shownEditorViewIds']) {
+		if (this.props.visibleEditorPluginIds !== prevProps.visibleEditorPluginIds) {
 			const { editorPlugin } = getShownPluginEditorView(this.props.plugins, this.props.windowId);
 			if (!editorPlugin && this.props.editorNoteReloadTimeRequest > this.state.noteLastLoadTime) {
 				void shared.reloadNote(this);
@@ -687,7 +688,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 		this.editorPluginHandler_.emitUpdate({
 			noteId: this.props.noteId,
 			newBody: this.state.note.body,
-		}, this.props['plugins.shownEditorViewIds']);
+		}, this.props.visibleEditorPluginIds);
 	}
 
 	private onPlainEditorTextChange = (text: string) => {
@@ -1736,8 +1737,10 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 // how the new note should be rendered
 const NoteScreenWrapper = (props: Props) => {
 	const dialogs = useContext(DialogContext);
+	const visibleEditorPluginIds = useVisiblePluginEditorIds(props.plugins, props.windowId);
+
 	return (
-		<NoteScreenComponent key={props.noteId} dialogs={dialogs} {...props} />
+		<NoteScreenComponent key={props.noteId} dialogs={dialogs} visibleEditorPluginIds={visibleEditorPluginIds} {...props} />
 	);
 };
 
