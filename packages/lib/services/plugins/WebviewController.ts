@@ -78,6 +78,7 @@ export default class WebviewController extends ViewController {
 
 		const view: PluginViewState = {
 			id: this.handle,
+			editorTypeId: '',
 			type: this.type,
 			containerType: containerType,
 			html: '',
@@ -290,6 +291,10 @@ export default class WebviewController extends ViewController {
 	// ---------------------------------------------
 	// Specific to editors
 	// ---------------------------------------------
+
+	public setEditorTypeId(id: string) {
+		this.setStoreProp('editorTypeId', id);
+	}
 
 	public setActive(active: boolean) {
 		this.setStoreProp('active', active);

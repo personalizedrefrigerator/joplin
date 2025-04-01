@@ -19,6 +19,10 @@ export interface PluginEditorViewState extends PluginViewStateBase {
 
 	parentWindowId: string;
 	active: boolean;
+
+	// A non-unique ID determined by the type of the editor. Unlike the id property,
+	// this is the same for editor views of the same type opened in different windows.
+	editorTypeId: string;
 }
 
 interface PluginDialogViewState extends PluginViewStateBase {

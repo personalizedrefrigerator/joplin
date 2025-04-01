@@ -97,10 +97,12 @@ export default class JoplinViewsEditors {
 		const handle = createViewHandle(this.plugin, `${id}-${windowId}`);
 
 		const initializeController = () => {
+			const editorTypeId = `${this.plugin.id}-${id}`;
 			const controller = new WebviewController(handle, this.plugin.id, this.store, this.plugin.baseDir, ContainerType.Editor, windowId);
+			controller.setEditorTypeId(editorTypeId);
 			this.plugin.addViewController(controller);
 			// Restore the last open/closed state for the editor
-			controller.setOpened(Setting.value('plugins.shownEditorViewIds').includes(handle));
+			controller.setOpened(Setting.value('plugins.shownEditorViewIds').includes(editorTypeId));
 
 			return () => {
 				this.plugin.removeViewController(controller);

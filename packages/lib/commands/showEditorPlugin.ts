@@ -55,16 +55,16 @@ export const runtime = (): CommandRuntime => {
 			}
 
 			const getUpdatedShownViewIds = () => {
-				let newShownViewIds = [...Setting.value('plugins.shownEditorViewIds')];
+				let newShownViewTypeIds = [...Setting.value('plugins.shownEditorViewIds')];
 				// Always filter out the current view, even if show is false. This prevents
 				// the view ID from being present multiple times.
-				const viewIdsWithoutCurrent = newShownViewIds.filter(id => id !== editorViewId);
-				newShownViewIds = viewIdsWithoutCurrent;
+				const viewIdsWithoutCurrent = newShownViewTypeIds.filter(id => id !== editorView.editorTypeId);
+				newShownViewTypeIds = viewIdsWithoutCurrent;
 
 				if (show) {
-					newShownViewIds.push(editorViewId);
+					newShownViewTypeIds.push(editorView.editorTypeId);
 				}
-				return newShownViewIds;
+				return newShownViewTypeIds;
 			};
 			Setting.setValue('plugins.shownEditorViewIds', getUpdatedShownViewIds());
 
