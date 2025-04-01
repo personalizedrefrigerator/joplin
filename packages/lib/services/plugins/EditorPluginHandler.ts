@@ -46,7 +46,8 @@ const makeNoteUpdateAction = (pluginService: PluginService, event: UpdateEvent, 
 export default class {
 
 	private viewUpdateAsyncQueue_ = new AsyncActionQueue(100, IntervalType.Fixed);
-	private lastSaveUpdate_: UpdateEvent|null = null;
+	private lastNoteState_: UpdateEvent|null = null;
+	private lastShownEditorViewIds_ = '';
 	private lastEditorPluginShown_: string|null = null;
 
 	public constructor(
@@ -61,13 +62,21 @@ export default class {
 			return event.noteId !== other.noteId || event.newBody !== other.newBody;
 		};
 
-		// Avoid emitting update events if the event was created by this editor. Avoiding
-		// emitting these events helps prevent unnecessary editor refreshes:
-		const isDifferentFromSave = isEventDifferentFrom(this.lastSaveUpdate_);
+		const shownEditorViewIdsString = shownEditorViewIds.join(',');
+		const differentEditorViewsShown = shownEditorViewIdsString !== this.lastShownEditorViewIds_;
 
-		if (shownEditorViewIds.length > 0 && isDifferentFromSave) {
+		// lastNoteState_ often contains the last change saved by the editor. As a result,
+		// if `event` matches `lastNoteState_`, the event was probably caused by the last save.
+		// In this case, avoid sending an update event (which plugins often interpret as refreshing
+		// the editor):
+		const isDifferentFromSave = isEventDifferentFrom(this.lastNoteState_);
+
+		if (isDifferentFromSave || differentEditorViewsShown) {
 			logger.info('emitUpdate:', shownEditorViewIds);
 			this.viewUpdateAsyncQueue_.push(makeNoteUpdateAction(this.pluginService_, event, shownEditorViewIds));
+
+			this.lastNoteState_ = { ...event };
+			this.lastShownEditorViewIds_ = shownEditorViewIdsString;
 		}
 	}
 
@@ -103,7 +112,7 @@ export default class {
 	}
 
 	private scheduleSaveNote_(noteId: string, noteBody: string) {
-		this.lastSaveUpdate_ = {
+		this.lastNoteState_ = {
 			noteId,
 			newBody: noteBody,
 		};
