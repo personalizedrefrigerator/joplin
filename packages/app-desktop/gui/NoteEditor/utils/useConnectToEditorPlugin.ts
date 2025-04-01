@@ -93,9 +93,6 @@ const useConnectToEditorPlugin = ({
 			newBody: formNoteBody,
 		}, shownEditorViewIds);
 	}, [effectiveNoteId, formNoteBody, editorPluginHandler, shownEditorViewIds, startupPluginsLoaded]);
-	useEffect(() => {
-		logger.debug('shownEditorViewIds', shownEditorViewIds);
-	}, [shownEditorViewIds]);
 };
 
 export default useConnectToEditorPlugin;
