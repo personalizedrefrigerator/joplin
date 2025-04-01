@@ -62,7 +62,7 @@ interface WindowOpenEvent {
 	windowId: string;
 }
 
-interface WindowCloseEvent {
+export interface WindowCloseEvent {
 	windowId: string;
 }
 

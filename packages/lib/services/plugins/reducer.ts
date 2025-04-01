@@ -178,6 +178,10 @@ const reducer = (draftRoot: Draft<any>, action: any) => {
 			draft.plugins[action.pluginId].views[action.view.id] = { ...action.view };
 			break;
 
+		case 'PLUGIN_VIEW_REMOVE':
+			delete draft.plugins[action.pluginId].views[action.viewId];
+			break;
+
 		case 'PLUGIN_VIEW_PROP_SET':
 
 			if (action.name !== 'html') {

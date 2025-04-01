@@ -1,6 +1,6 @@
 /* eslint-disable multiline-comment-style */
 
-import eventManager from '../../../eventManager';
+import eventManager, { EventName, WindowCloseEvent } from '../../../eventManager';
 import Setting from '../../../models/Setting';
 import { defaultWindowId } from '../../../reducer';
 import Plugin from '../Plugin';
@@ -101,6 +101,11 @@ export default class JoplinViewsEditors {
 			this.plugin.addViewController(controller);
 			// Restore the last open/closed state for the editor
 			controller.setOpened(Setting.value('plugins.shownEditorViewIds').includes(handle));
+
+			return () => {
+				this.plugin.removeViewController(controller);
+				controller.destroy();
+			};
 		};
 		// Register the activation check handler early to handle the case where the editorActivationCheck
 		// event is fired **before** an activation check handler is registered through the API.
@@ -116,14 +121,35 @@ export default class JoplinViewsEditors {
 				}
 			};
 			eventManager.filterOn('editorActivationCheck', onActivationCheck);
-			this.plugin.addOnUnloadListener(() => {
+			const cleanup = () => {
 				eventManager.filterOff('editorActivationCheck', onActivationCheck);
 				this.unhandledActivationCheck_.delete(handle);
-			});
+			};
+			this.plugin.addOnUnloadListener(cleanup);
+
+			return () => {
+				this.plugin.removeOnUnloadListener(cleanup);
+				cleanup();
+			};
+		};
+		const listenForWindowClose = (onClose: ()=> void) => {
+			const closeListener = (event: WindowCloseEvent) => {
+				if (event.windowId !== windowId) return;
+
+				onClose();
+				eventManager.off(EventName.WindowClose, closeListener);
+			};
+			eventManager.on(EventName.WindowClose, closeListener);
 		};
 
-		initializeController();
-		registerActivationCheckHandler();
+		const removeController = initializeController();
+		const removeActivationCheck = registerActivationCheckHandler();
+		listenForWindowClose(() => {
+			// Save resources by closing resources associated with
+			// closed windows:
+			removeController();
+			removeActivationCheck();
+		});
 
 		return handle;
 	}

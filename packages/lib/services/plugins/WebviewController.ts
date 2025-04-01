@@ -98,6 +98,14 @@ export default class WebviewController extends ViewController {
 		});
 	}
 
+	public destroy() {
+		this.store.dispatch({
+			type: 'PLUGIN_VIEW_REMOVE',
+			pluginId: this.pluginId,
+			viewId: this.storeView.id,
+		});
+	}
+
 	public get type(): string {
 		return 'webview';
 	}
