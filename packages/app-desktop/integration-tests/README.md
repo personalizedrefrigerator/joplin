@@ -17,3 +17,13 @@ with Playwright:
 - [The Playwright ElectronApp docs](https://playwright.dev/docs/api/class-electronapplication)
 - [Electron Playwright example repository](https://github.com/spaceagetv/electron-playwright-example)
 - [Playwright best practices](https://playwright.dev/docs/best-practices)
+- [Running and debugging tests from VSCode](https://playwright.dev/docs/getting-started-vscode#running-tests).
+
+# FAQ
+
+## How do I fix timeout-related test failures?
+
+If Playwright tests are timing out, consider modifying `playwright.config.ts` in the `app-desktop` folder. For example, increase the `timeout` option to `120_000` (2 minutes).
+
+Alternatively, try temporarily disabling `fullyParallel` (which disables running tests in parallel).
+

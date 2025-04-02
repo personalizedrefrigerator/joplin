@@ -161,6 +161,7 @@ unwatcher
 pedr
 Slotozilla
 keyshortcuts
+buildx
 atag
 HMAC
 Siri
@@ -176,3 +177,5 @@ newfolder
 Marijn
 Haverbeke
 unfocusable
+unlocker
+Tiktok

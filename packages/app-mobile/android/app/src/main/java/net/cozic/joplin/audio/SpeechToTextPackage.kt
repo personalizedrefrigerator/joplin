@@ -43,11 +43,11 @@ class SpeechToTextPackage : ReactPackage {
 		}
 
 		@ReactMethod
-		fun openSession(modelPath: String, locale: String, prompt: String, promise: Promise) {
+		fun openSession(modelPath: String, locale: String, prompt: String, useShortAudioCtx: Boolean, promise: Promise) {
 			val appContext = context.applicationContext
 
 			try {
-				val sessionId = sessionManager.openSession(modelPath, locale, prompt, appContext)
+				val sessionId = sessionManager.openSession(modelPath, locale, prompt, useShortAudioCtx, appContext)
 				promise.resolve(sessionId)
 			} catch (exception: Throwable) {
 				promise.reject(exception)
@@ -77,11 +77,6 @@ class SpeechToTextPackage : ReactPackage {
 		@ReactMethod
 		fun convertAvailable(sessionId: Int, promise: Promise) {
 			sessionManager.convertAvailable(sessionId, promise)
-		}
-
-		@ReactMethod
-		fun getPreview(sessionId: Int, promise: Promise) {
-			sessionManager.getPreview(sessionId, promise)
 		}
 
 		@ReactMethod
