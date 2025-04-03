@@ -142,13 +142,14 @@ export default class JoplinViewsEditors {
 		const createEditorViewForWindow = async (windowId: string) => {
 			const handle = createViewHandle(this.plugin, `${viewId}-${windowId}`);
 
-			// Register the activation check as soon as possible to avoid race conditions.
-			await this.onActivationCheck(handle, callbacks.onActivationCheck);
-
 			const removeController = initializeController(handle, windowId);
 			const removeActivationCheck = registerActivationCheckHandler(handle);
 
 			await callbacks.onSetup(handle);
+
+			// Register the activation check after calling onSetup to ensure that the editor
+			// is fully set up before it can be marked as active.
+			await this.onActivationCheck(handle, callbacks.onActivationCheck);
 
 			listenForWindowOrPluginClose(windowId, () => {
 				// Save resources by closing resources associated with
