@@ -57,6 +57,8 @@ export default class {
 	}
 
 	public emitUpdate(event: UpdateEvent, shownEditorViewIds: string[]) {
+		if (shownEditorViewIds.length === 0) return;
+
 		const isEventDifferentFrom = (other: UpdateEvent|null) => {
 			if (!other) return true;
 			return event.noteId !== other.noteId || event.newBody !== other.newBody;
