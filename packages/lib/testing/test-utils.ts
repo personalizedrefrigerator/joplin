@@ -550,7 +550,7 @@ function revisionService(id: number = null) {
 function decryptionWorker(id: number = null) {
 	if (id === null) id = currentClient_;
 	const o = decryptionWorkers_[id];
-	o.setKvStore(kvStore(id));
+	o?.setKvStore(kvStore(id));
 	return o;
 }
 
