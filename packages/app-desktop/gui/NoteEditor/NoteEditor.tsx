@@ -80,9 +80,6 @@ function NoteEditorContent(props: NoteEditorProps) {
 	const isMountedRef = useRef(true);
 	const noteSearchBarRef = useRef(null);
 
-	const windowId = useContext(WindowIdContext);
-
-
 	// Should be constant and unique to this instance of the editor.
 	const editorId = useMemo(() => {
 		return `editor-${editorIdCounter++}`;
@@ -121,6 +118,7 @@ function NoteEditorContent(props: NoteEditorProps) {
 
 	const formNoteFolder = useFolder({ folderId: formNote.parent_id });
 
+	const windowId = useContext(WindowIdContext);
 	const shownEditorViewIds = useVisiblePluginEditorViewIds(props.plugins, windowId);
 	useConnectToEditorPlugin({
 		startupPluginsLoaded: props.startupPluginsLoaded,
