@@ -1,10 +1,10 @@
 import Plugin from '../Plugin';
-import { ActivationCheckCallback, ViewHandle, UpdateCallback } from './types';
+import { ActivationCheckCallback, ViewHandle, UpdateCallback, EditorPluginCallbacks } from './types';
 export interface EditorPluginProps {
     /** The ID of the window to show the editor plugin. Use `undefined` for the main window. */
     windowId: string | undefined;
 }
-export interface SaveEditorContentProps {
+interface SaveNoteOptions {
     /**
      * The ID of the note to save. This should match either:
      * - The ID of the note currently being edited
@@ -17,6 +17,7 @@ export interface SaveEditorContentProps {
     /** The note's new content. */
     body: string;
 }
+type OnRegisterEditorPlugin = (handle: ViewHandle) => Promise<EditorPluginCallbacks>;
 /**
  * Allows creating alternative note editors. You can create a view to handle loading and saving the
  * note, and do your own rendering.
@@ -62,9 +63,16 @@ export default class JoplinViewsEditors {
     constructor(plugin: Plugin, store: any);
     private controller;
     /**
-     * Creates a new editor view
+     * Registers a new editor plugin. Joplin will call the provided callback to create new editor views
+     * associated with the plugin as necessary (e.g. when a new editor is created in a new window).
      */
-    create(id: string, options?: EditorPluginProps): Promise<ViewHandle>;
+    register(viewId: string, onRegister: OnRegisterEditorPlugin): Promise<void>;
+    /**
+     * Creates a new editor view
+     *
+     * @deprecated
+     */
+    create(id: string): Promise<ViewHandle>;
     /**
      * Sets the editor HTML content
      */
@@ -80,17 +88,21 @@ export default class JoplinViewsEditors {
     /**
      * Saves the content of the editor, without calling `onUpdate` for editors in the same window.
      */
-    saveNote(handle: ViewHandle, props: SaveEditorContentProps): Promise<void>;
+    saveNote(handle: ViewHandle, props: SaveNoteOptions): Promise<void>;
     /**
      * Emitted when the editor can potentially be activated - this is for example when the current
      * note is changed, or when the application is opened. At that point you should check the
      * current note and decide whether your editor should be activated or not. If it should, return
      * `true`, otherwise return `false`.
+     *
+     * @deprecated - Use the `editor.register` API's `onActivationCheck`.
      */
     onActivationCheck(handle: ViewHandle, callback: ActivationCheckCallback): Promise<void>;
     /**
      * Emitted when your editor content should be updated. This is for example when the currently
      * selected note changes, or when the user makes the editor visible.
+     *
+     * @deprecated - Use the `editor.register` API's `onUpdate`.
      */
     onUpdate(handle: ViewHandle, callback: UpdateCallback): Promise<void>;
     /**
@@ -108,3 +120,4 @@ export default class JoplinViewsEditors {
      */
     isVisible(handle: ViewHandle): Promise<boolean>;
 }
+export {};

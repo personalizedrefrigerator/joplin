@@ -409,6 +409,21 @@ export interface ActivationCheckEvent {
 }
 export type UpdateCallback = (event: EditorUpdateEvent)=> Promise<void>;
 
+export interface EditorPluginCallbacks {
+	/**
+	 * Emitted when the editor can potentially be activated - this is for example when the current
+	 * note is changed, or when the application is opened. At that point you should check the
+	 * current note and decide whether your editor should be activated or not. If it should, return
+	 * `true`, otherwise return `false`.
+	 */
+	onActivationCheck: ActivationCheckCallback;
+	/**
+	 * Emitted when your editor content should be updated. This is for example when the currently
+	 * selected note changes, or when the user makes the editor visible.
+	 */
+	onUpdate: UpdateCallback;
+}
+
 export type VisibleHandler = ()=> Promise<void>;
 
 export interface EditContextMenuFilterObject {

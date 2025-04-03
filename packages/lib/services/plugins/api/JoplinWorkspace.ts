@@ -17,7 +17,6 @@ import Note from '../../../models/Note';
  * @ignore
  */
 import Folder from '../../../models/Folder';
-import { stateUtils } from '../../../reducer';
 
 enum ItemChangeEventType {
 	Create = 1,
@@ -51,10 +50,6 @@ interface SyncCompleteEvent {
 	// Tells whether there were errors during sync or not. The log will
 	// have the complete information about any error.
 	withErrors: boolean;
-}
-
-interface WindowOpenEvent {
-	windowId: string;
 }
 
 type WorkspaceEventHandler<EventType> = (event: EventType)=> void;
@@ -162,20 +157,6 @@ export default class JoplinWorkspace {
 	}
 
 	/**
-	 * Called when a secondary window is opened.
-	 */
-	public async onWindowOpen(callback: WorkspaceEventHandler<WindowOpenEvent>): Promise<Disposable> {
-		return makeListener(this.plugin, eventManager, EventName.WindowOpen, callback);
-	}
-
-	/**
-	 * Called when a secondary window is closed.
-	 */
-	public async onWindowClose(callback: WorkspaceEventHandler<WindowOpenEvent>): Promise<Disposable> {
-		return makeListener(this.plugin, eventManager, EventName.WindowClose, callback);
-	}
-
-	/**
 	 * Called just before the editor context menu is about to open. Allows
 	 * adding items to it.
 	 *
@@ -191,16 +172,11 @@ export default class JoplinWorkspace {
 	/**
 	 * Gets the currently selected note. Will be `null` if no note is selected.
 	 *
-	 * If `windowId` is not provided, this returns the activation state
-	 * in the focused window.
+	 * On desktop, this returns the selected note in the focused window.
 	 */
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	public async selectedNote(windowId?: string): Promise<any> {
-		const globalState = this.store.getState();
-		const focusedWindowId = stateUtils.activeWindowId(globalState);
-		const windowState = stateUtils.windowStateById(globalState, windowId ?? focusedWindowId);
-
-		const noteIds = windowState.selectedNoteIds;
+	public async selectedNote(): Promise<any> {
+		const noteIds = this.store.getState().selectedNoteIds;
 		if (noteIds.length !== 1) { return null; }
 		return Note.load(noteIds[0]);
 	}

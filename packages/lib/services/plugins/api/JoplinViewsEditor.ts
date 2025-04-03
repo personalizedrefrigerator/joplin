@@ -1,19 +1,19 @@
 /* eslint-disable multiline-comment-style */
 
-import eventManager, { EventName, WindowCloseEvent } from '../../../eventManager';
+import eventManager, { EventName, WindowCloseEvent, WindowOpenEvent } from '../../../eventManager';
 import Setting from '../../../models/Setting';
 import { defaultWindowId } from '../../../reducer';
 import Plugin from '../Plugin';
 import createViewHandle from '../utils/createViewHandle';
 import WebviewController, { ContainerType } from '../WebviewController';
-import { ActivationCheckCallback, EditorActivationCheckFilterObject, FilterHandler, ViewHandle, UpdateCallback } from './types';
+import { ActivationCheckCallback, EditorActivationCheckFilterObject, FilterHandler, ViewHandle, UpdateCallback, EditorPluginCallbacks } from './types';
 
 export interface EditorPluginProps {
 	/** The ID of the window to show the editor plugin. Use `undefined` for the main window. */
 	windowId: string|undefined;
 }
 
-export interface SaveEditorContentProps {
+interface SaveNoteOptions {
 	/**
 	 * The ID of the note to save. This should match either:
 	 * - The ID of the note currently being edited
@@ -26,6 +26,8 @@ export interface SaveEditorContentProps {
 	/** The note's new content. */
 	body: string;
 }
+
+type OnRegisterEditorPlugin = (handle: ViewHandle)=> Promise<EditorPluginCallbacks>;
 
 type ActivationCheckSlice = Pick<EditorActivationCheckFilterObject, 'effectiveNoteId'|'windowId'|'activatedEditors'>;
 
@@ -85,19 +87,12 @@ export default class JoplinViewsEditors {
 	}
 
 	/**
-	 * Creates a new editor view
+	 * Registers a new editor plugin. Joplin will call the provided callback to create new editor views
+	 * associated with the plugin as necessary (e.g. when a new editor is created in a new window).
 	 */
-	public async create(
-		id: string,
-		options: EditorPluginProps = {
-			windowId: undefined,
-		},
-	): Promise<ViewHandle> {
-		const windowId = options.windowId ?? defaultWindowId;
-		const handle = createViewHandle(this.plugin, `${id}-${windowId}`);
-
-		const initializeController = () => {
-			const editorTypeId = `${this.plugin.id}-${id}`;
+	public async register(viewId: string, onRegister: OnRegisterEditorPlugin) {
+		const initializeController = (handle: ViewHandle, windowId: string) => {
+			const editorTypeId = `${this.plugin.id}-${viewId}`;
 			const controller = new WebviewController(handle, this.plugin.id, this.store, this.plugin.baseDir, ContainerType.Editor, windowId);
 			controller.setEditorTypeId(editorTypeId);
 			this.plugin.addViewController(controller);
@@ -109,18 +104,15 @@ export default class JoplinViewsEditors {
 				controller.destroy();
 			};
 		};
+
 		// Register the activation check handler early to handle the case where the editorActivationCheck
 		// event is fired **before** an activation check handler is registered through the API.
-		const registerActivationCheckHandler = () => {
+		const registerActivationCheckHandler = (handle: ViewHandle) => {
 			const onActivationCheck: FilterHandler<EditorActivationCheckFilterObject> = async object => {
 				if (this.activationCheckHandlers_[handle]) {
 					return this.activationCheckHandlers_[handle](object);
-				} else {
-					this.unhandledActivationCheck_.set(handle, {
-						...object,
-					});
-					return object;
 				}
+				return object;
 			};
 			eventManager.filterOn('editorActivationCheck', onActivationCheck);
 			const cleanup = () => {
@@ -134,7 +126,8 @@ export default class JoplinViewsEditors {
 				cleanup();
 			};
 		};
-		const listenForWindowClose = (onClose: ()=> void) => {
+
+		const listenForWindowClose = (windowId: string, onClose: ()=> void) => {
 			const closeListener = (event: WindowCloseEvent) => {
 				if (event.windowId !== windowId) return;
 
@@ -144,16 +137,54 @@ export default class JoplinViewsEditors {
 			eventManager.on(EventName.WindowClose, closeListener);
 		};
 
-		const removeController = initializeController();
-		const removeActivationCheck = registerActivationCheckHandler();
-		listenForWindowClose(() => {
-			// Save resources by closing resources associated with
-			// closed windows:
-			removeController();
-			removeActivationCheck();
-		});
+		const createEditorViewForWindow = async (windowId: string) => {
+			const handle = createViewHandle(this.plugin, `${viewId}-${windowId}`);
+			const callbacks = await onRegister(handle);
 
-		return handle;
+			// Register the activation check as soon as possible to avoid race conditions (before
+			// even creating the controller).
+			await this.onActivationCheck(handle, callbacks.onActivationCheck);
+			const removeController = initializeController(handle, windowId);
+			const removeActivationCheck = registerActivationCheckHandler(handle);
+			await this.onUpdate(handle, callbacks.onUpdate);
+
+			listenForWindowClose(windowId, () => {
+				// Save resources by closing resources associated with
+				// closed windows:
+				removeController();
+				removeActivationCheck();
+			});
+		};
+
+		await createEditorViewForWindow(defaultWindowId);
+
+		const onWindowOpen = (event: WindowOpenEvent) => createEditorViewForWindow(event.windowId);
+		eventManager.on(EventName.WindowOpen, onWindowOpen);
+		this.plugin.addOnUnloadListener(() => {
+			eventManager.off(EventName.WindowOpen, onWindowOpen);
+		});
+	}
+
+	/**
+	 * Creates a new editor view
+	 *
+	 * @deprecated
+	 */
+	public async create(id: string): Promise<ViewHandle> {
+		return new Promise<ViewHandle>(resolve => {
+			void this.register(id, async (handle) => {
+				resolve(handle);
+
+				// Set default callbacks (to be overridden when the plugin calls
+				// the legacy .onActivationCheck or .onUpdate APIs).
+				return {
+					async onActivationCheck() {
+						return false;
+					},
+					async onUpdate() { },
+				};
+			});
+		});
 	}
 
 	/**
@@ -181,7 +212,7 @@ export default class JoplinViewsEditors {
 	/**
 	 * Saves the content of the editor, without calling `onUpdate` for editors in the same window.
 	 */
-	public async saveNote(handle: ViewHandle, props: SaveEditorContentProps): Promise<void> {
+	public async saveNote(handle: ViewHandle, props: SaveNoteOptions): Promise<void> {
 		await this.controller(handle).requestSaveNote({
 			noteId: props.noteId,
 			body: props.body,
@@ -193,6 +224,8 @@ export default class JoplinViewsEditors {
 	 * note is changed, or when the application is opened. At that point you should check the
 	 * current note and decide whether your editor should be activated or not. If it should, return
 	 * `true`, otherwise return `false`.
+	 *
+	 * @deprecated - Use the `editor.register` API's `onActivationCheck`.
 	 */
 	public async onActivationCheck(handle: ViewHandle, callback: ActivationCheckCallback): Promise<void> {
 		const isActive = async ({ windowId, effectiveNoteId }: ActivationCheckSlice) => {
@@ -213,19 +246,13 @@ export default class JoplinViewsEditors {
 		};
 
 		this.activationCheckHandlers_[handle] = handler;
-
-		// Handle the case where the activation check was done before this onActivationCheck handler was registered.
-		if (this.unhandledActivationCheck_.has(handle)) {
-			const lastActivationCheckObject = this.unhandledActivationCheck_.get(handle);
-			this.unhandledActivationCheck_.delete(handle);
-
-			this.controller(handle).setActive(await isActive(lastActivationCheckObject));
-		}
 	}
 
 	/**
 	 * Emitted when your editor content should be updated. This is for example when the currently
 	 * selected note changes, or when the user makes the editor visible.
+	 *
+	 * @deprecated - Use the `editor.register` API's `onUpdate`.
 	 */
 	public async onUpdate(handle: ViewHandle, callback: UpdateCallback): Promise<void> {
 		this.controller(handle).onUpdate(callback);

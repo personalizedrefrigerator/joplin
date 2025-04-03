@@ -58,7 +58,7 @@ interface AlarmChangeEvent {
 	note: NoteEntity;
 }
 
-interface WindowOpenEvent {
+export interface WindowOpenEvent {
 	windowId: string;
 }
 
