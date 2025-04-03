@@ -283,8 +283,7 @@ export default class ReportService {
 						errorMessagesToItems.set(itemError, [item]);
 					}
 				} else {
-					// If there's no known error (e.g. the item was processed earlier and the
-					// error has been discarded), add the item directly:
+					// If there's no known error, add directly:
 					section.body.push(item);
 				}
 			}
