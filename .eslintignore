@@ -583,6 +583,7 @@ packages/app-desktop/utils/restartInSafeModeFromMain.test.js
 packages/app-desktop/utils/restartInSafeModeFromMain.js
 packages/app-desktop/utils/window/types.js
 packages/app-mobile/PluginAssetsLoader.js
+packages/app-mobile/commands/dismissPluginPanels.js
 packages/app-mobile/commands/index.js
 packages/app-mobile/commands/newNote.test.js
 packages/app-mobile/commands/newNote.js
@@ -686,7 +687,7 @@ packages/app-mobile/components/SelectDateTimeDialog.js
 packages/app-mobile/components/SideMenu.js
 packages/app-mobile/components/SideMenuContentNote.js
 packages/app-mobile/components/TextInput.js
-packages/app-mobile/components/ToggleSpaceButton.js
+packages/app-mobile/components/accessibility/AccessibleModalMenu.js
 packages/app-mobile/components/accessibility/AccessibleView.test.js
 packages/app-mobile/components/accessibility/AccessibleView.js
 packages/app-mobile/components/accessibility/FocusControl/AutoFocusProvider.js
@@ -748,8 +749,11 @@ packages/app-mobile/components/screens/ConfigScreen/SectionSelector/SectionTab.j
 packages/app-mobile/components/screens/ConfigScreen/SectionSelector/index.js
 packages/app-mobile/components/screens/ConfigScreen/SettingComponent.js
 packages/app-mobile/components/screens/ConfigScreen/SettingItem.js
+packages/app-mobile/components/screens/ConfigScreen/SettingTextInput.js
 packages/app-mobile/components/screens/ConfigScreen/SettingsButton.js
 packages/app-mobile/components/screens/ConfigScreen/SettingsToggle.js
+packages/app-mobile/components/screens/ConfigScreen/ValidatedIntegerInput.test.js
+packages/app-mobile/components/screens/ConfigScreen/ValidatedIntegerInput.js
 packages/app-mobile/components/screens/ConfigScreen/configScreenStyles.js
 packages/app-mobile/components/screens/ConfigScreen/plugins/EnablePluginSupportPage.js
 packages/app-mobile/components/screens/ConfigScreen/plugins/InstalledPluginBox.js
@@ -859,7 +863,7 @@ packages/app-mobile/utils/fs-driver/testUtil/createFilesFromPathRecord.js
 packages/app-mobile/utils/fs-driver/testUtil/verifyDirectoryMatches.js
 packages/app-mobile/utils/getPackageInfo.js
 packages/app-mobile/utils/getVersionInfoText.js
-packages/app-mobile/utils/hooks/useKeyboardVisible.js
+packages/app-mobile/utils/hooks/useKeyboardState.js
 packages/app-mobile/utils/hooks/useOnLongPressProps.js
 packages/app-mobile/utils/hooks/useReduceMotionEnabled.js
 packages/app-mobile/utils/hooks/useSafeAreaPadding.js
@@ -926,6 +930,8 @@ packages/editor/CodeMirror/markdown/computeSelectionFormatting.test.js
 packages/editor/CodeMirror/markdown/computeSelectionFormatting.js
 packages/editor/CodeMirror/markdown/decoratorExtension.test.js
 packages/editor/CodeMirror/markdown/decoratorExtension.js
+packages/editor/CodeMirror/markdown/insertNewlineContinueMarkup.test.js
+packages/editor/CodeMirror/markdown/insertNewlineContinueMarkup.js
 packages/editor/CodeMirror/markdown/markdownCommands.bulletedVsChecklist.test.js
 packages/editor/CodeMirror/markdown/markdownCommands.test.js
 packages/editor/CodeMirror/markdown/markdownCommands.toggleList.test.js
@@ -1078,6 +1084,8 @@ packages/lib/fs-driver-base.js
 packages/lib/fs-driver-node.js
 packages/lib/fsDriver.test.js
 packages/lib/geolocation-node.js
+packages/lib/getAppName.test.js
+packages/lib/getAppName.js
 packages/lib/hooks/useAsyncEffect.js
 packages/lib/hooks/useElementSize.js
 packages/lib/hooks/useEventListener.js
