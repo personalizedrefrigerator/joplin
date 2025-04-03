@@ -53,7 +53,7 @@ const useEditorPluginHandler = (formNote: FormNote, setFormNote: OnSetFormNote, 
 	}, [setFormNote, scheduleSaveNote]);
 };
 
-const useLoadedViewIds = (windowId: string, plugins: PluginStates) => {
+const useLoadedViewIdsCacheKey = (windowId: string, plugins: PluginStates) => {
 	return useMemo(() => {
 		const viewIds = [];
 		for (const plugin of Object.values(plugins)) {
@@ -63,6 +63,7 @@ const useLoadedViewIds = (windowId: string, plugins: PluginStates) => {
 				}
 			}
 		}
+		// Create a string that can be easily checked for changes as an effect dependency
 		return JSON.stringify(viewIds);
 	}, [windowId, plugins]);
 };
@@ -72,12 +73,12 @@ const useConnectToEditorPlugin = ({
 	plugins, startupPluginsLoaded, setFormNote, formNote, scheduleSaveNote, effectiveNoteId, activeEditorView, shownEditorViewIds,
 }: Props) => {
 	const windowId = useContext(WindowIdContext);
-	const loadedViewIds = useLoadedViewIds(windowId, plugins);
+	const loadedViewIdCacheKey = useLoadedViewIdsCacheKey(windowId, plugins);
 	const editorPluginHandler = useEditorPluginHandler(formNote, setFormNote, scheduleSaveNote);
 
 	useQueuedAsyncEffect(async () => {
 		if (!startupPluginsLoaded) return;
-		logger.debug('Emitting activation check for views:', loadedViewIds);
+		logger.debug('Emitting activation check for views:', loadedViewIdCacheKey);
 
 		await editorPluginHandler.emitActivationCheck({
 			parentWindowId: windowId,
@@ -85,7 +86,7 @@ const useConnectToEditorPlugin = ({
 		});
 		// It's important to re-run the activation check when the loaded view IDs change.
 		// As such, `loadedViewIds` needs to be in the dependencies list:
-	}, [loadedViewIds, windowId, effectiveNoteId, editorPluginHandler, startupPluginsLoaded]);
+	}, [loadedViewIdCacheKey, windowId, effectiveNoteId, editorPluginHandler, startupPluginsLoaded]);
 
 	useEffect(() => {
 		if (activeEditorView) {
