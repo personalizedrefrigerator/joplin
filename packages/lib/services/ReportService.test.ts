@@ -1,11 +1,13 @@
 import { _ } from '../locale';
 import ReportService, { ReportSection } from './ReportService';
-import { createNTestNotes, decryptionWorker, setupDatabaseAndSynchronizer, supportDir, switchClient, syncTargetId, synchronizer, synchronizerStart } from '../testing/test-utils';
+import { createNTestNotes, decryptionWorker, encryptionService, loadEncryptionMasterKey, setupDatabaseAndSynchronizer, supportDir, switchClient, syncTargetId, synchronizer, synchronizerStart } from '../testing/test-utils';
 import Folder from '../models/Folder';
 import BaseItem from '../models/BaseItem';
-import DecryptionWorker from './DecryptionWorker';
 import Note from '../models/Note';
 import shim from '../shim';
+import SyncTargetRegistry from '../SyncTargetRegistry';
+import { loadMasterKeysFromSettings, setupAndEnableEncryption } from './e2ee/utils';
+import Setting from '../models/Setting';
 
 
 const firstSectionWithTitle = (report: ReportSection[], title: string) => {
@@ -22,6 +24,10 @@ const getIgnoredSection = (report: ReportSection[]) => {
 	return firstSectionWithTitle(report, _('Ignored items that cannot be synchronised'));
 };
 
+const getDecryptionErrorSection = (report: ReportSection[]): ReportSection|null => {
+	return firstSectionWithTitle(report, _('Items that cannot be decrypted'));
+};
+
 const sectionBodyToText = (section: ReportSection) => {
 	return section.body.map(item => {
 		if (typeof item === 'string') {
@@ -32,13 +38,71 @@ const sectionBodyToText = (section: ReportSection) => {
 	}).join('\n');
 };
 
+const getListItemsInBodyStartingWith = (section: ReportSection, keyPrefix: string) => {
+	return section.body.filter(item =>
+		typeof item !== 'string' && item.type === 'openList' && item.key.startsWith(keyPrefix),
+	);
+};
+
+const addCannotDecryptNotes = async (corruptedNoteCount: number) => {
+	await switchClient(2);
+
+	const notes = [];
+	for (let i = 0; i < corruptedNoteCount; i++) {
+		notes.push(await Note.save({ title: `Note ${i}` }));
+	}
+
+	await synchronizerStart();
+	await switchClient(1);
+	await synchronizerStart();
+
+	// First, simulate a broken note and check that the decryption worker
+	// gives up decrypting after a number of tries. This is mainly relevant
+	// for data that crashes the mobile application - we don't want to keep
+	// decrypting these.
+
+	for (const note of notes) {
+		await Note.save({ id: note.id, encryption_cipher_text: 'bad' });
+	}
+
+	return notes.map(note => note.id);
+};
+
+const addRemoteNotes = async (noteCount: number) => {
+	await switchClient(2);
+
+	const notes = [];
+	for (let i = 0; i < noteCount; i++) {
+		notes.push(await Note.save({ title: `Test Note ${i}` }));
+	}
+
+	await synchronizerStart();
+	await switchClient(1);
+
+	return notes.map(note => note.id);
+};
+
+const setUpLocalAndRemoteEncryption = async () => {
+	await switchClient(2);
+
+	// Encryption setup
+	const masterKey = await loadEncryptionMasterKey();
+	await setupAndEnableEncryption(encryptionService(), masterKey, '123456');
+	await synchronizerStart();
+
+	// Give both clients the same master key
+	await switchClient(1);
+	await synchronizerStart();
+
+	Setting.setObjectValue('encryption.passwordCache', masterKey.id, '123456');
+	await loadMasterKeysFromSettings(encryptionService());
+};
+
 describe('ReportService', () => {
 	beforeEach(async () => {
 		await setupDatabaseAndSynchronizer(1);
 		await setupDatabaseAndSynchronizer(2);
 		await switchClient(1);
-		// For compatibility with code that calls DecryptionWorker.instance()
-		DecryptionWorker.instance_ = decryptionWorker();
 	});
 
 	it('should move sync errors to the "ignored" section after clicking "ignore"', async () => {
@@ -129,6 +193,7 @@ describe('ReportService', () => {
 		let report = await service.status(syncTargetId());
 
 		const unsyncableSection = getCannotSyncSection(report);
+		expect(unsyncableSection).not.toBeNull();
 		expect(sectionBodyToText(unsyncableSection)).toContain('could not be downloaded');
 
 		// Item for the download error should be ignorable
@@ -158,5 +223,44 @@ describe('ReportService', () => {
 		report = await service.status(syncTargetId());
 		expect(getIgnoredSection(report)).toBeNull();
 		expect(getCannotSyncSection(report)).toBeNull();
+	});
+
+	it('should associate decryption failures with error message headers when errors are known', async () => {
+		await setUpLocalAndRemoteEncryption();
+
+		const service = new ReportService();
+		const syncTargetId = SyncTargetRegistry.nameToId('joplinServer');
+		let report = await service.status(syncTargetId);
+
+		// Initially, should not have a "cannot be decrypted section"
+		expect(getDecryptionErrorSection(report)).toBeNull();
+
+		const corruptedNoteIds = await addCannotDecryptNotes(4);
+		await addRemoteNotes(10);
+		await synchronizerStart();
+
+		for (let i = 0; i < 3; i++) {
+			report = await service.status(syncTargetId);
+			expect(getDecryptionErrorSection(report)).toBeNull();
+
+			// .start needs to be run multiple times for items to be disabled and thus
+			// added to the report
+			await decryptionWorker().start();
+		}
+
+		// After adding corrupted notes, it should have such a section.
+		report = await service.status(syncTargetId);
+		const decryptionErrorsSection = getDecryptionErrorSection(report);
+		expect(decryptionErrorsSection).not.toBeNull();
+
+		// There should be a list of errors (all errors are known)
+		const errorLists = getListItemsInBodyStartingWith(decryptionErrorsSection, 'itemsWithError');
+		expect(errorLists).toHaveLength(1);
+
+		// There should, however, be testIds.length ReportItems with the IDs of the notes.
+		const decryptionErrorsText = sectionBodyToText(decryptionErrorsSection);
+		for (const noteId of corruptedNoteIds) {
+			expect(decryptionErrorsText).toContain(noteId);
+		}
 	});
 });
