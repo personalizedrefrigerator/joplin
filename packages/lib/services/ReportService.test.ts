@@ -8,6 +8,8 @@ import shim from '../shim';
 import SyncTargetRegistry from '../SyncTargetRegistry';
 import { loadMasterKeysFromSettings, setupAndEnableEncryption } from './e2ee/utils';
 import Setting from '../models/Setting';
+import DecryptionWorker from './DecryptionWorker';
+import { ModelType } from '../BaseModel';
 
 
 const firstSectionWithTitle = (report: ReportSection[], title: string) => {
@@ -261,6 +263,46 @@ describe('ReportService', () => {
 		const decryptionErrorsText = sectionBodyToText(decryptionErrorsSection);
 		for (const noteId of corruptedNoteIds) {
 			expect(decryptionErrorsText).toContain(noteId);
+		}
+	});
+
+	it('should not associate decryption failures with error message headers when errors are unknown', async () => {
+		const decryption = decryptionWorker();
+
+		// Create decryption errors:
+		const testIds = ['0123456789012345601234567890123456', '0123456789012345601234567890123457', '0123456789012345601234567890123458'];
+
+		const addIdsToDecryptionErrorList = async (worker: DecryptionWorker, ids: string[]) => {
+			for (const id of ids) {
+				// A value that is more than the maximum number of attempts:
+				const numDecryptionAttempts = 3;
+
+				// Add the failure manually so that the error message is unknown
+				await worker.kvStore().setValue(
+					`decrypt:${ModelType.Note}:${id}`, numDecryptionAttempts,
+				);
+			}
+		};
+
+		await addIdsToDecryptionErrorList(decryption, testIds);
+
+		const service = new ReportService();
+		const syncTargetId = SyncTargetRegistry.nameToId('joplinServer');
+		const report = await service.status(syncTargetId);
+
+		// Report should have an "Items that cannot be decrypted" section
+		const decryptionErrorSection = getDecryptionErrorSection(report);
+		expect(decryptionErrorSection).not.toBeNull();
+
+		// There should not be any lists of errors (no errors associated with the item).
+		const errorLists = getListItemsInBodyStartingWith(decryptionErrorSection, 'itemsWithError');
+		expect(errorLists).toHaveLength(0);
+
+		// There should be items with the correct messages:
+		const expectedMessages = testIds.map(id => `Note: ${id}`);
+		const bodyText = sectionBodyToText(decryptionErrorSection);
+		for (const message of expectedMessages) {
+			expect(bodyText).toContain(message);
 		}
 	});
 });
