@@ -17,27 +17,31 @@
 }
 */
 
-const registerEditorPlugin = async (editorViewId, windowId) => {
+const registerEditorPlugin = async (editorViewId) => {
 	const editors = joplin.views.editors;
-	const view = await editors.create(editorViewId, { windowId });
-	await editors.setHtml(
-		view,
-		`<div id="frame-summary">
-			Editor plugin:
-			<code id="view-id-base">${editorViewId}</code>
-			for window: <code>${encodeURI(windowId)}</code>
-		</div>`,
-	);
-	await editors.onActivationCheck(view, async _event => {
-		// Always enable
-		return true;
+	await editors.register(editorViewId, {
+		async onSetup(view) {
+			await editors.setHtml(
+				view,
+				`<div id="frame-summary">
+					Editor plugin:
+					<code id="view-id-base">${editorViewId}</code>
+					for view handle: <code>${encodeURI(view)}</code>
+				</div>`,
+			);
+		},
+		async onActivationCheck(_event) {
+			// Always enable
+			return true;
+		},
+		async onUpdate(_event) { },
 	});
 };
 
 joplin.plugins.register({
 	onStart: async function() {
-		// Register two different editor plugins with only the main window:
-		await registerEditorPlugin('test-editor-plugin-1', undefined);
-		await registerEditorPlugin('test-editor-plugin-2', undefined);
+		// Register two different editor plugins:
+		await registerEditorPlugin('test-editor-plugin-1');
+		await registerEditorPlugin('test-editor-plugin-2');
 	},
 });
