@@ -151,12 +151,13 @@ class StatusScreenComponent extends BaseScreenComponent<Props, State> {
 				paddingBottom: 5,
 			},
 			listBullet: {
-				fontSize: theme.fontSize / 4,
+				fontSize: theme.fontSize / 3,
+				color: theme.color,
 				alignSelf: 'center',
 				justifyContent: 'center',
 				flexGrow: 0,
 				marginStart: 12,
-				marginEnd: 4,
+				marginEnd: 2,
 			},
 			divider: {
 				borderBottomWidth: 1,
