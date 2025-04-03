@@ -272,6 +272,8 @@ describe('ReportService', () => {
 		// Create decryption errors:
 		const testIds = ['0123456789012345601234567890123456', '0123456789012345601234567890123457', '0123456789012345601234567890123458'];
 
+		// Adds items to the decryption error list **without also adding the reason**. This matches
+		// the format of older decryption errors.
 		const addIdsToDecryptionErrorList = async (worker: DecryptionWorker, ids: string[]) => {
 			for (const id of ids) {
 				// A value that is more than the maximum number of attempts:
