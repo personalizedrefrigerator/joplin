@@ -158,11 +158,16 @@ class StatusScreenComponent extends BaseScreenComponent<Props, State> {
 				marginStart: 12,
 				marginEnd: 4,
 			},
+			divider: {
+				borderBottomWidth: 1,
+				borderBottomColor: theme.dividerColor,
+				marginTop: 20,
+				marginBottom: 20,
+			},
 		});
 	}
 
 	public override render() {
-		const theme = themeStyle(this.props.themeId);
 		const styles = this.styles();
 
 		const renderItem = (item: ProcessedLine, inList: boolean) => {
@@ -200,15 +205,15 @@ class StatusScreenComponent extends BaseScreenComponent<Props, State> {
 
 			const textComponent = text ? <Text style={style} role={textRole}>{text}</Text> : null;
 			if (item.isDivider) {
-				return <View style={{ borderBottomWidth: 1, borderBottomColor: theme.dividerColor, marginTop: 20, marginBottom: 20 }} />;
+				return <View style={styles.divider} key={item.key} />;
 			} else if (item.listItems) {
-				return <View role='list' style={styles.listWrapper}>
+				return <View role='list' style={styles.listWrapper} key={item.key}>
 					{textComponent}
 					{item.listItems.map(item => renderItem(item, true))}
 				</View>;
 			} else {
 				return (
-					<View style={{ flex: 1, flexDirection: 'row' }}>
+					<View style={{ flex: 1, flexDirection: 'row' }} key={item.key}>
 						{inList ? <Icon style={styles.listBullet} name='fas fa-circle' accessibilityLabel={null} /> : null}
 						{textComponent}
 						{ignoreButton}
