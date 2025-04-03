@@ -94,14 +94,13 @@ export default class JoplinViewsEditors {
      * current note and decide whether your editor should be activated or not. If it should, return
      * `true`, otherwise return `false`.
      *
-     * @deprecated - Use the `editor.register` API's `onActivationCheck`.
+     * @deprecated - `onActivationCheck` should be provided when the editor is first created with
+     * 	`editor.register`.
      */
     onActivationCheck(handle: ViewHandle, callback: ActivationCheckCallback): Promise<void>;
     /**
      * Emitted when your editor content should be updated. This is for example when the currently
      * selected note changes, or when the user makes the editor visible.
-     *
-     * @deprecated - Use the `editor.register` API's `onUpdate`.
      */
     onUpdate(handle: ViewHandle, callback: UpdateCallback): Promise<void>;
     /**

@@ -20,7 +20,6 @@
 const registerEditorPlugin = async (editorViewId) => {
 	const editors = joplin.views.editors;
 	const saveCallbacks = [];
-	const editorToNoteId = new Map();
 
 	await editors.register(editorViewId, {
 		onSetup: async (viewHandle) => {
@@ -29,8 +28,12 @@ const registerEditorPlugin = async (editorViewId) => {
 				'<code>Loaded!</code>',
 			);
 
+			let noteId;
+			await editors.onUpdate(viewHandle, event => {
+				noteId = event.noteId;
+			});
+
 			saveCallbacks.push(() => {
-				const noteId = editorToNoteId.get(viewHandle);
 				void editors.saveNote(viewHandle, {
 					noteId,
 					body: `Changed by ${editorViewId}`,
@@ -41,9 +44,6 @@ const registerEditorPlugin = async (editorViewId) => {
 		onActivationCheck: async _event => {
 			// Always enable
 			return true;
-		},
-		onUpdate: event => {
-			editorToNoteId.set(event.handle, event.noteId);
 		},
 	});
 

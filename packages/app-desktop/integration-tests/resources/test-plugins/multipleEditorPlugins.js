@@ -34,7 +34,6 @@ const registerEditorPlugin = async (editorViewId) => {
 			// Always enable
 			return true;
 		},
-		async onUpdate(_event) { },
 	});
 };
 

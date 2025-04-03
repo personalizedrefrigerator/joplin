@@ -398,7 +398,6 @@ export interface Rectangle {
 }
 
 export interface EditorUpdateEvent {
-	handle: ViewHandle;
 	newBody: string;
 	noteId: string;
 }
@@ -412,6 +411,9 @@ export interface ActivationCheckEvent {
 }
 export type ActivationCheckCallback = (event: ActivationCheckEvent)=> Promise<boolean>;
 
+/**
+ * Required callbacks for creating an editor plugin.
+ */
 export interface EditorPluginCallbacks {
 	/**
 	 * Emitted when the editor can potentially be activated - this is for example when the current
@@ -420,13 +422,14 @@ export interface EditorPluginCallbacks {
 	 * `true`, otherwise return `false`.
 	 */
 	onActivationCheck: ActivationCheckCallback;
-	/**
-	 * Emitted when your editor content should be updated. This is for example when the currently
-	 * selected note changes, or when the user makes the editor visible.
-	 */
-	onUpdate: UpdateCallback;
 
-	/** Emitted when an editor view is created, though not necessarily shown. */
+	/**
+	 * Emitted when an editor view is created. This happens, for example, when a new window containing
+	 * a new editor is created.
+	 *
+	 * This callback should set the editor plugin's HTML using `editors.setHtml`, add scripts to the editor
+	 * with `editors.addScript`, and optionally listen for external changes using `editors.onUpdate`.
+	 */
 	onSetup: (handle: ViewHandle)=> Promise<void>;
 }
 

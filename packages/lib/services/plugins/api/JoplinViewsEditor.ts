@@ -148,7 +148,6 @@ export default class JoplinViewsEditors {
 			const removeController = initializeController(handle, windowId);
 			const removeActivationCheck = registerActivationCheckHandler(handle);
 
-			await this.onUpdate(handle, callbacks.onUpdate);
 			await callbacks.onSetup(handle);
 
 			listenForWindowOrPluginClose(windowId, () => {
@@ -182,7 +181,6 @@ export default class JoplinViewsEditors {
 				onActivationCheck: async () => {
 					return false;
 				},
-				onUpdate: async () => {},
 			});
 		});
 	}
@@ -225,7 +223,8 @@ export default class JoplinViewsEditors {
 	 * current note and decide whether your editor should be activated or not. If it should, return
 	 * `true`, otherwise return `false`.
 	 *
-	 * @deprecated - Use the `editor.register` API's `onActivationCheck`.
+	 * @deprecated - `onActivationCheck` should be provided when the editor is first created with
+	 * 	`editor.register`.
 	 */
 	public async onActivationCheck(handle: ViewHandle, callback: ActivationCheckCallback): Promise<void> {
 		const isActive = async ({ windowId, effectiveNoteId }: ActivationCheckSlice) => {
@@ -260,11 +259,9 @@ export default class JoplinViewsEditors {
 	/**
 	 * Emitted when your editor content should be updated. This is for example when the currently
 	 * selected note changes, or when the user makes the editor visible.
-	 *
-	 * @deprecated - Use the `editor.register` API's `onUpdate`.
 	 */
 	public async onUpdate(handle: ViewHandle, callback: UpdateCallback): Promise<void> {
-		this.controller(handle).onUpdate(event => callback({ handle, ...event }));
+		this.controller(handle).onUpdate(callback);
 	}
 
 	/**
