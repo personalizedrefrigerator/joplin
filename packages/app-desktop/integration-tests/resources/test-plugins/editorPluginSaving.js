@@ -17,21 +17,34 @@
 }
 */
 
-const registerEditorPlugin = async (editorViewId, windowId) => {
+const registerEditorPlugin = async (editorViewId) => {
 	const editors = joplin.views.editors;
-	const view = await editors.create(editorViewId);
-	await editors.setHtml(
-		view,
-		'<code>Loaded!</code>',
-	);
-	await editors.onActivationCheck(view, async _event => {
-		// Always enable
-		return true;
-	});
+	const saveCallbacks = [];
+	const editorToNoteId = new Map();
 
-	let noteId = joplin.workspace.selectedNote(windowId)?.id;
-	await editors.onUpdate(view, async event => {
-		noteId = event.noteId;
+	await editors.register(editorViewId, {
+		onSetup: async (viewHandle) => {
+			await editors.setHtml(
+				viewHandle,
+				'<code>Loaded!</code>',
+			);
+
+			saveCallbacks.push(() => {
+				const noteId = editorToNoteId.get(viewHandle);
+				void editors.saveNote(viewHandle, {
+					noteId,
+					body: `Changed by ${editorViewId}`,
+				});
+			});
+		},
+
+		onActivationCheck: async _event => {
+			// Always enable
+			return true;
+		},
+		onUpdate: event => {
+			editorToNoteId.set(event.handle, event.noteId);
+		},
 	});
 
 	await joplin.commands.register({
@@ -39,16 +52,15 @@ const registerEditorPlugin = async (editorViewId, windowId) => {
 		label: `Test editor plugin save for ${editorViewId}`,
 		iconName: 'fas fa-music',
 		execute: async () => {
-			await editors.saveNote(view, {
-				noteId,
-				body: `Changed by ${editorViewId}`,
-			});
+			for (const saveCallback of saveCallbacks) {
+				saveCallback();
+			}
 		},
 	});
 };
 
 joplin.plugins.register({
 	onStart: async function() {
-		await registerEditorPlugin('test-editor-plugin', undefined);
+		await registerEditorPlugin('test-editor-plugin');
 	},
 });
