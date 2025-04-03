@@ -16,7 +16,7 @@ enum CanRetryType {
 	ItemSync = 'itemSync',
 }
 
-enum ReportItemType {
+export enum ReportItemType {
 	OpenList = 'openList',
 	CloseList = 'closeList',
 }
