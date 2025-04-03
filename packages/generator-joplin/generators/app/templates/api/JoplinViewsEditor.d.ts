@@ -17,7 +17,6 @@ interface SaveNoteOptions {
     /** The note's new content. */
     body: string;
 }
-type OnRegisterEditorPlugin = (handle: ViewHandle) => Promise<EditorPluginCallbacks>;
 /**
  * Allows creating alternative note editors. You can create a view to handle loading and saving the
  * note, and do your own rendering.
@@ -66,7 +65,7 @@ export default class JoplinViewsEditors {
      * Registers a new editor plugin. Joplin will call the provided callback to create new editor views
      * associated with the plugin as necessary (e.g. when a new editor is created in a new window).
      */
-    register(viewId: string, onRegister: OnRegisterEditorPlugin): Promise<void>;
+    register(viewId: string, callbacks: EditorPluginCallbacks): Promise<void>;
     /**
      * Creates a new editor view
      *

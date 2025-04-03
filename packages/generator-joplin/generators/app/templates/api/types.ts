@@ -398,16 +398,19 @@ export interface Rectangle {
 }
 
 export interface EditorUpdateEvent {
+	handle: ViewHandle;
 	newBody: string;
 	noteId: string;
 }
-export type ActivationCheckCallback = (event: ActivationCheckEvent)=> Promise<boolean>;
+export type UpdateCallback = (event: EditorUpdateEvent)=> Promise<void>;
+
 
 export interface ActivationCheckEvent {
+	handle: ViewHandle;
 	noteId: string;
 	windowId: string;
 }
-export type UpdateCallback = (event: EditorUpdateEvent)=> Promise<void>;
+export type ActivationCheckCallback = (event: ActivationCheckEvent)=> Promise<boolean>;
 
 export interface EditorPluginCallbacks {
 	/**
@@ -422,6 +425,9 @@ export interface EditorPluginCallbacks {
 	 * selected note changes, or when the user makes the editor visible.
 	 */
 	onUpdate: UpdateCallback;
+
+	/** Emitted when an editor view is created, though not necessarily shown. */
+	onSetup: (handle: ViewHandle)=> Promise<void>;
 }
 
 export type VisibleHandler = ()=> Promise<void>;
