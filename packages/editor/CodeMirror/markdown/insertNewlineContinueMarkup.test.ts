@@ -36,7 +36,7 @@ describe('insertNewlineContinueMarkup', () => {
 			],
 		},
 		{
-			// Should not allow creating non-tight lists
+			// Should allow creating non-tight lists
 			before: [
 				'- Testing',
 				'- ',
@@ -44,6 +44,7 @@ describe('insertNewlineContinueMarkup', () => {
 			afterEnterPress: [
 				'- Testing',
 				'',
+				'- ',
 			],
 		},
 		{ // Should continue nested numbered lists
@@ -102,6 +103,7 @@ describe('insertNewlineContinueMarkup', () => {
 				'',
 			],
 		},
+
 	])('pressing enter should correctly end or continue lists (case %#)', async ({ before, afterEnterPress, afterEnterPressTwice }) => {
 		const initialDocText = before.join('\n');
 		const editor = await createTestEditor(
