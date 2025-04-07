@@ -19,7 +19,6 @@ jest.doMock('electron', () => {
 	};
 });
 
-import Logger from '@joplin/utils/Logger';
 import handleCustomProtocols from './handleCustomProtocols';
 import { supportDir } from '@joplin/lib/testing/test-utils';
 import { join } from 'path';
@@ -27,8 +26,7 @@ import { stat } from 'fs-extra';
 import { toForwardSlashes } from '@joplin/utils/path';
 
 const setUpProtocolHandler = () => {
-	const logger = Logger.create('test-logger');
-	const protocolHandler = handleCustomProtocols(logger);
+	const protocolHandler = handleCustomProtocols();
 
 	expect(handleProtocolMock).toHaveBeenCalledTimes(1);
 
