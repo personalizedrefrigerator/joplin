@@ -134,7 +134,7 @@ const webviewApi = {
 			setScript: (args) => {
 				const { script, key } = args;
 
-				const scriptPath = `joplin-content://plugin-webview/${script}`;
+				const scriptPath = `file:///${script}`;
 				const elementId = `joplin-script-${key}`;
 
 				if (addedScripts[elementId]) {
@@ -151,7 +151,7 @@ const webviewApi = {
 				if (!scripts) return;
 
 				for (let i = 0; i < scripts.length; i++) {
-					const scriptPath = `joplin-content://plugin-webview/${scripts[i]}`;
+					const scriptPath = `file://${scripts[i]}`;
 
 					if (addedScripts[scriptPath]) continue;
 					addedScripts[scriptPath] = true;

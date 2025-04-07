@@ -3,7 +3,6 @@ import { useRef, useImperativeHandle, forwardRef, useEffect, useMemo, useContext
 import useViewIsReady from './hooks/useViewIsReady';
 import useThemeCss from './hooks/useThemeCss';
 import useContentSize from './hooks/useContentSize';
-// import useSubmitHandler from './hooks/useSubmitHandler';
 import useHtmlLoader from './hooks/useHtmlLoader';
 import useWebviewToPluginMessages from './hooks/useWebviewToPluginMessages';
 import useScriptLoader from './hooks/useScriptLoader';
@@ -127,7 +126,7 @@ function UserWebview(props: Props, ref: any) {
 		style={style}
 		className={`plugin-user-webview ${props.fitToContent ? '-fit-to-content' : ''} ${props.borderBottom ? '-border-bottom' : ''}`}
 		ref={viewRef}
-		src={`joplin-content://plugin-webview/${__dirname}/UserWebviewIndex.html`}
+		src="services/plugins/UserWebviewIndex.html"
 	></iframe>;
 }
 
