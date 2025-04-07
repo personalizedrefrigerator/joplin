@@ -1,8 +1,9 @@
 import { net, protocol } from 'electron';
 import { dirname, resolve, normalize } from 'path';
 import { fileURLToPath, pathToFileURL } from 'url';
-import { appDir, contentProtocolName } from './constants';
+import { contentProtocolName } from './constants';
 import resolvePathWithinDir from '@joplin/lib/utils/resolvePathWithinDir';
+import { LoggerWrapper } from '@joplin/utils/Logger';
 import * as fs from 'fs-extra';
 import { createReadStream } from 'fs';
 import { fromFilename } from '@joplin/lib/mime-utils';
@@ -134,10 +135,10 @@ const handleRangeRequest = async (request: Request, targetPath: string) => {
 //
 // TODO: Use Logger.create (doesn't work for now because Logger is only initialized
 // in the main process.)
-const handleCustomProtocols = (): CustomProtocolHandler => {
-	const logger = {
-		// Disabled for now
-		debug: (..._message: unknown[]) => {},
+const handleCustomProtocols = (logger: LoggerWrapper): CustomProtocolHandler => {
+	logger = {
+		...logger,
+		debug: () => {},
 	};
 
 	// Allow-listed files/directories for joplin-content://note-viewer/
@@ -177,11 +178,6 @@ const handleCustomProtocols = (): CustomProtocolHandler => {
 			}
 
 			mediaOnly = false;
-		} else if (host === 'app') {
-			if (resolvePathWithinDir(appDir, pathname)) {
-				canRead = true;
-				mediaOnly = false;
-			}
 		} else if (host === 'file-media') {
 			if (!mediaAccessKey) {
 				return new Response('Media access denied. This must be enabled with .setMediaAccessEnabled', {

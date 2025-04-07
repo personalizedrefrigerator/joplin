@@ -19,7 +19,6 @@ const registerCustomProtocols = async () => {
 
 		corsEnabled: true,
 		codeCache: true,
-		allowServiceWorkers: true,
 	};
 	protocol.registerSchemesAsPrivileged([
 		{ scheme: contentProtocolName, privileges: protocolPrivileges },
