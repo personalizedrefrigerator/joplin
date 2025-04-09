@@ -6,7 +6,6 @@ import { dirname, toSystemSlashes } from '@joplin/lib/path-utils';
 import { fileUriToPath } from '@joplin/utils/url';
 import { urlDecode } from '@joplin/lib/string-utils';
 import * as Sentry from '@sentry/electron/main';
-import { ErrorEvent } from '@sentry/types/types';
 import { homedir } from 'os';
 import { msleep } from '@joplin/utils/time';
 import { pathExists, pathExistsSync, writeFileSync } from 'fs-extra';
@@ -101,9 +100,9 @@ export class Bridge {
 					if (logAttachment) hint.attachments = [logAttachment];
 					const date = (new Date()).toISOString().replace(/[:-]/g, '').split('.')[0];
 
-					interface ErrorEventWithLog extends ErrorEvent {
+					type ErrorEventWithLog = (typeof event) & {
 						log: string[];
-					}
+					};
 
 					const errorEventWithLog: ErrorEventWithLog = {
 						...event,
