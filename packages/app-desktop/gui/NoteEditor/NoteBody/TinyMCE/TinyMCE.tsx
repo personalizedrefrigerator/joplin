@@ -43,6 +43,7 @@ import useKeyboardRefocusHandler from './utils/useKeyboardRefocusHandler';
 import useDocument from '../../../hooks/useDocument';
 import useEditDialog from './utils/useEditDialog';
 import useEditDialogEventListeners from './utils/useEditDialogEventListeners';
+import Setting from '@joplin/lib/models/Setting';
 
 const logger = Logger.create('TinyMCE');
 
@@ -744,6 +745,7 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: any) => {
 					// See https://www.tiny.cloud/docs/tinymce/latest/content-behavior-options/#text_patterns
 					// for the default value
 					{ start: '==', end: '==', format: 'joplinHighlight' },
+					Setting.value('markdown.plugin.katex') && { start: '$', end: '$', cmd: 'joplinMath' },
 					{ start: '`', end: '`', format: 'code' },
 					{ start: '*', end: '*', format: 'italic' },
 					{ start: '**', end: '**', format: 'bold' },
@@ -756,17 +758,21 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: any) => {
 					{ start: '1.', cmd: 'InsertOrderedList' },
 					{ start: '*', cmd: 'InsertUnorderedList' },
 					{ start: '-', cmd: 'InsertUnorderedList' },
-					{ start: '$', end: '$', cmd: 'joplinMath' },
-				] : [],
+				].filter(pattern => !!pattern) : [],
 
 				setup: (editor: Editor) => {
 					editor.addCommand('joplinMath', async () => {
-						const md = `$${editor.selection.getContent()}$`;
+						const katex = editor.selection.getContent();
+						const md = `$${katex}$`;
+						editor.selection.setContent('');
 						const initialSelection = editor.selection.getBookmark();
 						const result = await markupToHtml.current(MarkupLanguage.Markdown, md, { bodyOnly: true });
 
+						const finalSelection = editor.selection.getBookmark();
 						editor.selection.moveToBookmark(initialSelection);
 						editor.selection.setContent(result.html);
+
+						editor.selection.moveToBookmark(finalSelection);
 						editor.fire(TinyMceEditorEvents.JoplinChange);
 						dispatchDidUpdate(editor);
 					});
