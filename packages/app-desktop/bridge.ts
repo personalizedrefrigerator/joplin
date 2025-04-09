@@ -122,6 +122,9 @@ export class Bridge {
 			},
 
 			integrations: [Sentry.electronMinidumpIntegration()],
+
+			// Using the default ipcMode value causes <iframe>s that use custom protocols to
+			// have isSecureOrigin: false, limiting which browser APIs are available.
 			ipcMode: Sentry.IPCMode.Classic,
 		};
 
