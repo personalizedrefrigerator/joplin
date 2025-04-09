@@ -3,7 +3,6 @@ import { useRef, useImperativeHandle, forwardRef, useEffect, useMemo, useContext
 import useViewIsReady from './hooks/useViewIsReady';
 import useThemeCss from './hooks/useThemeCss';
 import useContentSize from './hooks/useContentSize';
-// import useSubmitHandler from './hooks/useSubmitHandler';
 import useHtmlLoader from './hooks/useHtmlLoader';
 import useWebviewToPluginMessages from './hooks/useWebviewToPluginMessages';
 import useScriptLoader from './hooks/useScriptLoader';
