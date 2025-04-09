@@ -23,7 +23,6 @@ import { defaultWindowId } from '@joplin/lib/reducer';
 import { msleep, Second } from '@joplin/utils/time';
 import determineBaseAppDirs from '@joplin/lib/determineBaseAppDirs';
 import getAppName from '@joplin/lib/getAppName';
-import { contentProtocolName } from './utils/customProtocols/constants';
 
 interface RendererProcessQuitReply {
 	canClose: boolean;
@@ -281,8 +280,8 @@ export default class ElectronAppWrapper {
 		});
 
 		void this.win_.loadURL(url.format({
-			pathname: path.join('/app', __dirname, 'index.html'),
-			protocol: `${contentProtocolName}:`,
+			pathname: path.join(__dirname, 'index.html'),
+			protocol: 'file:',
 			slashes: true,
 		}));
 
