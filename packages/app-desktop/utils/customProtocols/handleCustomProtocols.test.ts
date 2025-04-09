@@ -54,9 +54,8 @@ const toAccessUrl = (path: string, { host = 'note-viewer' }: ExpectBlockedOption
 
 const expectPathToBeBlocked = async (onRequestListener: ProtocolHandler, filePath: string, options?: ExpectBlockedOptions) => {
 	const url = toAccessUrl(filePath, options);
-	await expect(
-		async () => await onRequestListener(new Request(url)),
-	).rejects.toThrow(/Read access not granted for URL|Invalid or missing media access key|Media access denied/);
+	const response = await onRequestListener(new Request(url));
+	expect(response.status).toBe(403); // Forbidden
 };
 
 const expectPathToBeUnblocked = async (onRequestListener: ProtocolHandler, filePath: string, options?: ExpectBlockedOptions) => {

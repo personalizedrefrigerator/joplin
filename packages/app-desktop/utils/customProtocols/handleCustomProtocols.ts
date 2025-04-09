@@ -124,6 +124,12 @@ const handleRangeRequest = async (request: Request, targetPath: string) => {
 	);
 };
 
+const makeAccessDeniedResponse = (message: string) => {
+	return new Response(message, {
+		status: 403, // Forbidden
+	});
+};
+
 // Creating a custom protocol allows us to isolate iframes by giving them
 // different domain names from the main Joplin app.
 //
@@ -179,9 +185,7 @@ const handleCustomProtocols = (): CustomProtocolHandler => {
 			mediaOnly = false;
 		} else if (host === 'file-media') {
 			if (!mediaAccessKey) {
-				return new Response('Media access denied. This must be enabled with .setMediaAccessEnabled', {
-					status: 400,
-				});
+				return makeAccessDeniedResponse('Media access denied. This must be enabled with .setMediaAccessEnabled');
 			}
 
 			canRead = true;
@@ -189,9 +193,7 @@ const handleCustomProtocols = (): CustomProtocolHandler => {
 
 			const accessKey = url.searchParams.get('access-key');
 			if (accessKey !== mediaAccessKey) {
-				return new Response('Invalid or missing media access key. An allow-listed ?access-key= parameter must be provided.', {
-					status: 403, // Forbidden
-				});
+				return makeAccessDeniedResponse('Invalid or missing media access key. An allow-listed ?access-key= parameter must be provided.');
 			}
 		} else {
 			return new Response(`Invalid request URL (${request.url})`, {
@@ -200,9 +202,7 @@ const handleCustomProtocols = (): CustomProtocolHandler => {
 		}
 
 		if (!canRead) {
-			return new Response(`Read access not granted for URL (${request.url})`, {
-				status: 403, // Forbidden
-			});
+			return makeAccessDeniedResponse(`Read access not granted for URL (${request.url})`);
 		}
 
 		const asFileUrl = pathToFileURL(pathname).toString();
@@ -224,9 +224,7 @@ const handleCustomProtocols = (): CustomProtocolHandler => {
 			// This is an extra check to prevent loading text/html and arbitrary non-media content from the URL.
 			const contentType = response.headers.get('Content-Type');
 			if (!contentType || !contentType.match(/^(image|video|audio)\//)) {
-				return new Response(`Attempted to access non-media file from ${request.url}, which is media-only. Content type was ${contentType}.`, {
-					status: 403, // Forbidden
-				});
+				return makeAccessDeniedResponse(`Attempted to access non-media file from ${request.url}, which is media-only. Content type was ${contentType}.`);
 			}
 		}
 
