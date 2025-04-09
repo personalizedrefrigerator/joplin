@@ -60,7 +60,7 @@ export default function(editor: Editor, plugins: PluginStates, dispatch: Dispatc
 	useEffect(() => {
 		if (!editor) return () => {};
 
-		const contextMenuItems = menuItems(dispatch, htmlToMd, mdToHtml);
+		const contextMenuItems = menuItems(dispatch);
 		const targetWindow = bridge().activeWindow();
 
 		const makeMainMenuItems = (element: Element) => {
