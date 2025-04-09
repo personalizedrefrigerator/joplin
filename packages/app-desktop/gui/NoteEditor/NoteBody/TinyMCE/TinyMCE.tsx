@@ -756,9 +756,21 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: any) => {
 					{ start: '1.', cmd: 'InsertOrderedList' },
 					{ start: '*', cmd: 'InsertUnorderedList' },
 					{ start: '-', cmd: 'InsertUnorderedList' },
+					{ start: '$', end: '$', cmd: 'joplinMath' },
 				] : [],
 
 				setup: (editor: Editor) => {
+					editor.addCommand('joplinMath', async () => {
+						const md = `$${editor.selection.getContent()}$`;
+						const initialSelection = editor.selection.getBookmark();
+						const result = await markupToHtml.current(MarkupLanguage.Markdown, md, { bodyOnly: true });
+
+						editor.selection.moveToBookmark(initialSelection);
+						editor.selection.setContent(result.html);
+						editor.fire(TinyMceEditorEvents.JoplinChange);
+						dispatchDidUpdate(editor);
+					});
+
 					editor.addCommand('joplinAttach', () => {
 						insertResourcesIntoContentRef.current();
 					});
