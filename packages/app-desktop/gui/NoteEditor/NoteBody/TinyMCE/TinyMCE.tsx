@@ -10,7 +10,6 @@ import { ToolbarItem } from '@joplin/lib/services/commands/ToolbarButtonUtils';
 import ToggleEditorsButton, { Value as ToggleEditorsButtonValue } from '../../../ToggleEditorsButton/ToggleEditorsButton';
 import ToolbarButton from '../../../../gui/ToolbarButton/ToolbarButton';
 import usePluginServiceRegistration from '../../utils/usePluginServiceRegistration';
-import { utils as pluginUtils } from '@joplin/lib/services/plugins/reducer';
 import { _, closestSupportedLocale } from '@joplin/lib/locale';
 import useContextMenu from './utils/useContextMenu';
 import { copyHtmlToClipboard } from '../../utils/clipboardUtils';
@@ -43,6 +42,7 @@ import useKeyboardRefocusHandler from './utils/useKeyboardRefocusHandler';
 import useDocument from '../../../hooks/useDocument';
 import useEditDialog from './utils/useEditDialog';
 import useEditDialogEventListeners from './utils/useEditDialogEventListeners';
+import useToolbarButtons from './utils/useToolbarButtons';
 
 const logger = Logger.create('TinyMCE');
 
@@ -654,42 +654,13 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: any) => {
 	// Create and setup the editor
 	// -----------------------------------------------------------------------------------------
 
+	const toolbar = useToolbarButtons({ plugins: props.plugins, editor });
 	useEffect(() => {
 		if (!scriptLoaded) return;
 		if (!editorContainer) return;
 
 		const loadEditor = async () => {
 			const language = closestSupportedLocale(props.locale, true, supportedLocales);
-
-			const pluginCommandNames: string[] = [];
-
-			const infos = pluginUtils.viewInfosByType(props.plugins, 'toolbarButton');
-
-			for (const info of infos) {
-				const view = info.view;
-				if (view.location !== 'editorToolbar') continue;
-				pluginCommandNames.push(view.commandName);
-			}
-
-			const toolbarPluginButtons = pluginCommandNames.length ? ` | ${pluginCommandNames.join(' ')}` : '';
-
-			// The toolbar is going to wrap based on groups of buttons
-			// (delimited by |). It means that if we leave large groups of
-			// buttons towards the end of the toolbar it's going to needlessly
-			// hide many buttons even when there is space. So this is why below,
-			// we create small groups of just one button towards the end.
-
-			const toolbar = [
-				'bold', 'italic', 'joplinHighlight', 'joplinStrikethrough', '|',
-				'joplinInsert', 'joplinSup', 'joplinSub', 'forecolor', '|',
-				'link', 'joplinInlineCode', 'joplinCodeBlock', 'joplinAttach', '|',
-				'bullist', 'numlist', 'joplinChecklist', '|',
-				'h1', 'h2', 'h3', '|',
-				'hr', '|',
-				'blockquote', '|',
-				'tableWithHeader', '|',
-				`joplinInsertDateTime${toolbarPluginButtons}`,
-			];
 
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 			const containerWindow = editorContainerDom.defaultView as any;
@@ -724,7 +695,7 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: any) => {
 				// https://www.tiny.cloud/docs/plugins/table/#table_header_type
 				table_header_type: 'sectionCells',
 				language_url: ['en_US', 'en_GB'].includes(language) ? undefined : `${bridge().vendorDir()}/lib/tinymce/langs/${language}`,
-				toolbar: toolbar.join(' '),
+				toolbar: toolbar,
 				localization_function: _,
 				contextmenu: false,
 				browser_spellcheck: true,
@@ -821,23 +792,6 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: any) => {
 							void CommandService.instance().execute('insertDateTime');
 						},
 					});
-
-					for (const pluginCommandName of pluginCommandNames) {
-						const iconClassName = CommandService.instance().iconName(pluginCommandName);
-
-						// Only allow characters that appear in Font Awesome class names: letters, spaces, and dashes.
-						const safeIconClassName = iconClassName.replace(/[^a-z0-9 -]/g, '');
-
-						editor.ui.registry.addIcon(pluginCommandName, `<i class="plugin-icon ${safeIconClassName}"></i>`);
-
-						editor.ui.registry.addButton(pluginCommandName, {
-							tooltip: CommandService.instance().label(pluginCommandName),
-							icon: pluginCommandName,
-							onAction: function() {
-								void CommandService.instance().execute(pluginCommandName);
-							},
-						});
-					}
 
 					editor.addShortcut('Meta+Shift+7', '', () => editor.execCommand('InsertOrderedList'));
 					editor.addShortcut('Meta+Shift+8', '', () => editor.execCommand('InsertUnorderedList'));
