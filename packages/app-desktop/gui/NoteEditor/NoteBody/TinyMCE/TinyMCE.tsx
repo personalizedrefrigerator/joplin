@@ -43,7 +43,7 @@ import useKeyboardRefocusHandler from './utils/useKeyboardRefocusHandler';
 import useDocument from '../../../hooks/useDocument';
 import useEditDialog from './utils/useEditDialog';
 import useEditDialogEventListeners from './utils/useEditDialogEventListeners';
-import Setting from '@joplin/lib/models/Setting';
+import useTextPatternsLookup from './utils/useTextPatternsLookup';
 
 const logger = Logger.create('TinyMCE');
 
@@ -655,6 +655,7 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: any) => {
 	// Create and setup the editor
 	// -----------------------------------------------------------------------------------------
 
+	const textPatternsLookupRef = useTextPatternsLookup({ enabled: props.enableTextPatterns, enableMath: props.mathEnabled });
 	useEffect(() => {
 		if (!scriptLoaded) return;
 		if (!editorContainer) return;
@@ -741,40 +742,36 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: any) => {
 					// button to work. See https://github.com/tinymce/tinymce/issues/5026.
 					forecolor: { inline: 'span', styles: { color: '%value' }, remove_similar: true },
 				},
-				text_patterns: props.enableTextPatterns ? [
-					// See https://www.tiny.cloud/docs/tinymce/latest/content-behavior-options/#text_patterns
-					// for the default value
-					{ start: '==', end: '==', format: 'joplinHighlight' },
-					Setting.value('markdown.plugin.katex') && { start: '$', end: '$', cmd: 'joplinMath' },
-					{ start: '`', end: '`', format: 'code' },
-					{ start: '*', end: '*', format: 'italic' },
-					{ start: '**', end: '**', format: 'bold' },
-					{ start: '#', format: 'h1' },
-					{ start: '##', format: 'h2' },
-					{ start: '###', format: 'h3' },
-					{ start: '####', format: 'h4' },
-					{ start: '#####', format: 'h5' },
-					{ start: '######', format: 'h6' },
-					{ start: '1.', cmd: 'InsertOrderedList' },
-					{ start: '*', cmd: 'InsertUnorderedList' },
-					{ start: '-', cmd: 'InsertUnorderedList' },
-				].filter(pattern => !!pattern) : [],
+				text_patterns: [],
+				text_patterns_lookup: () => textPatternsLookupRef.current(),
 
 				setup: (editor: Editor) => {
 					editor.addCommand('joplinMath', async () => {
 						const katex = editor.selection.getContent();
 						const md = `$${katex}$`;
-						editor.selection.setContent('');
-						const initialSelection = editor.selection.getBookmark();
+
+						// Save and clear the selection -- when this command is activated by a text pattern,
+						// TinyMCE:
+						// 1. Adjusts the selection just before calling the command to include the to-be-formatted text.
+						// 2. Calls the command.
+						// 3. Removes the "$" characters and restores the selection.
+						//
+						// As a result, the selection needs to be saved and restored.
+						const mathSelection = editor.selection.getBookmark();
+
 						const result = await markupToHtml.current(MarkupLanguage.Markdown, md, { bodyOnly: true });
 
+						// Replace the math...
 						const finalSelection = editor.selection.getBookmark();
-						editor.selection.moveToBookmark(initialSelection);
+						editor.selection.moveToBookmark(mathSelection);
 						editor.selection.setContent(result.html);
+						editor.selection.moveToBookmark(finalSelection); // ...then move the selection back.
 
-						editor.selection.moveToBookmark(finalSelection);
+						// Fire update events
 						editor.fire(TinyMceEditorEvents.JoplinChange);
 						dispatchDidUpdate(editor);
+						// The last replacement seems to need to be manually added to the undo history
+						editor.undoManager.add();
 					});
 
 					editor.addCommand('joplinAttach', () => {
