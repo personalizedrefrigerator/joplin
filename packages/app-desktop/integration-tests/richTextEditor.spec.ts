@@ -62,6 +62,9 @@ test.describe('richTextEditor', () => {
 		await setFilePickerResponse(electronApp, [pathToAttach]);
 		await editor.attachFileButton.click();
 
+		// Wait for it to render
+		await expect(editor.getNoteViewerFrameLocator().getByText('test-file.txt')).toBeVisible();
+
 		// Switch to the RTE
 		await editor.toggleEditorsButton.click();
 		await editor.richTextEditor.waitFor();
