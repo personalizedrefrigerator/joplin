@@ -1018,8 +1018,7 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: any) => {
 			// Use nextOnChangeEventInfo's noteId -- lastOnChangeEventInfo can be slightly out-of-date.
 			const differentNoteId = nextOnChangeEventInfo.current?.noteId !== props.noteId;
 			const differentContent = lastOnChangeEventInfo.current.content !== props.content;
-			const contentNeedsReload = differentNoteId || differentContent;
-			if (contentNeedsReload || !resourcesEqual) {
+			if (differentNoteId || differentContent || !resourcesEqual) {
 				const result = await props.markupToHtml(
 					props.contentMarkupLanguage,
 					props.content,
