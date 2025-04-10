@@ -1032,11 +1032,7 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: any) => {
 						allowedFilePrefixes: [props.resourceDirectory],
 					}),
 				);
-				if (cancelled) {
-					logger.debug('Content load cancelled');
-					return;
-				}
-				logger.debug('Got content to load', result.html);
+				if (cancelled) return;
 
 				// Use an offset bookmark -- the default bookmark type is not preserved after unloading
 				// and reloading the editor.
@@ -1073,8 +1069,6 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: any) => {
 					resourceInfos: props.resourceInfos,
 					contentKey: props.contentKey,
 				};
-			} else if (lastOnChangeEventInfo.current.content === props.content) {
-				logger.debug(JSON.stringify(lastOnChangeEventInfo.current.content), '===', JSON.stringify(props.content));
 			}
 
 			const allAssetsOptions: NoteStyleOptions = {
@@ -1090,7 +1084,6 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: any) => {
 			dispatchDidUpdate(editor);
 		};
 
-		logger.debug('RTE: Load content', props.content, '(start)');
 		void loadContent();
 
 		return () => {
