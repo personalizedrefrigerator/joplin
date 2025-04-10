@@ -1016,7 +1016,7 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: any) => {
 			const resourcesEqual = resourceInfosEqual(lastOnChangeEventInfo.current.resourceInfos, props.resourceInfos);
 
 			// Use nextOnChangeEventInfo's noteId -- lastOnChangeEventInfo can be slightly out-of-date.
-			const differentNoteId = nextOnChangeEventInfo.current.noteId !== props.noteId;
+			const differentNoteId = nextOnChangeEventInfo.current?.noteId !== props.noteId;
 			const differentContent = lastOnChangeEventInfo.current.content !== props.content;
 			const contentNeedsReload = differentNoteId || differentContent;
 			if (contentNeedsReload || !resourcesEqual) {
