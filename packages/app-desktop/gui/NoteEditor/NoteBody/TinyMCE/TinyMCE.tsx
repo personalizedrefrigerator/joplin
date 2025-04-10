@@ -82,7 +82,6 @@ function stripMarkup(markupLanguage: number, markup: string, options: any = null
 }
 
 interface LastOnChangeEventInfo {
-	outdated: boolean;
 	content: string;
 	resourceInfos: ResourceInfos;
 	contentKey: string;
@@ -114,7 +113,6 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: any) => {
 		content: null,
 		resourceInfos: null,
 		contentKey: null,
-		outdated: false,
 	});
 
 	const editorRef = useRef<Editor>(null);
@@ -1017,7 +1015,10 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: any) => {
 		const loadContent = async () => {
 			const resourcesEqual = resourceInfosEqual(lastOnChangeEventInfo.current.resourceInfos, props.resourceInfos);
 
-			const contentNeedsReload = lastOnChangeEventInfo.current.outdated || lastOnChangeEventInfo.current.content !== props.content;
+			// Use nextOnChangeEventInfo's noteId -- lastOnChangeEventInfo can be slightly out-of-date.
+			const differentNoteId = nextOnChangeEventInfo.current.noteId !== props.noteId;
+			const differentContent = lastOnChangeEventInfo.current.content !== props.content;
+			const contentNeedsReload = differentNoteId || differentContent;
 			if (contentNeedsReload || !resourcesEqual) {
 				const result = await props.markupToHtml(
 					props.contentMarkupLanguage,
@@ -1068,7 +1069,6 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: any) => {
 				}
 
 				lastOnChangeEventInfo.current = {
-					outdated: false,
 					content: props.content,
 					resourceInfos: props.resourceInfos,
 					contentKey: props.contentKey,
@@ -1097,7 +1097,7 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: any) => {
 			cancelled = true;
 		};
 		// eslint-disable-next-line @seiyab/react-hooks/exhaustive-deps -- Old code before rule was applied
-	}, [editor, props.themeId, props.scrollbarSize, props.markupToHtml, props.allAssets, props.content, props.resourceInfos, props.contentKey, props.contentMarkupLanguage, props.whiteBackgroundNoteRendering]);
+	}, [editor, props.noteId, props.themeId, props.scrollbarSize, props.markupToHtml, props.allAssets, props.content, props.resourceInfos, props.contentKey, props.contentMarkupLanguage, props.whiteBackgroundNoteRendering]);
 
 	useEffect(() => {
 		if (!editor) return () => {};
@@ -1213,7 +1213,6 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: any) => {
 				contentMarkupLanguage: props.contentMarkupLanguage,
 				contentOriginalCss: props.contentOriginalCss,
 			};
-			lastOnChangeEventInfo.current.outdated = true;
 
 			onChangeHandlerTimeoutRef.current = shim.setTimeout(async () => {
 				onChangeHandlerTimeoutRef.current = null;

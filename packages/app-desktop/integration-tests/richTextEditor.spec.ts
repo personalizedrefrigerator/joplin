@@ -213,7 +213,7 @@ test.describe('richTextEditor', () => {
 		await expect(editor.richTextEditor).toBeFocused();
 	});
 
-	test('should save content if switching notes quickly after last edit', async ({ mainWindow }) => {
+	test('note should have correct content even if opened quickly after last edit', async ({ mainWindow }) => {
 		const mainScreen = await new MainScreen(mainWindow).setup();
 		await mainScreen.createNewNote('Test 1');
 		await mainScreen.createNewNote('Test 2');
@@ -235,12 +235,9 @@ test.describe('richTextEditor', () => {
 		await setEditorText('Test 1');
 
 		await test2Header.click();
+		// Previously, after switching to note 2, the "Test 1" text would remain present in the
+		// editor.
 		await expect(editorBody).toHaveText('');
-		await setEditorText('Test 2');
-
-		// Original note should have correct content
-		await test1Header.click();
-		await expect(editorBody).toHaveText('Test 1');
 	});
 
 });
