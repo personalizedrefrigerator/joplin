@@ -1002,6 +1002,7 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: any) => {
 		return true;
 	}
 
+	const lastNoteIdRef = useRef(props.noteId);
 	useEffect(() => {
 		if (!editor) return () => {};
 
@@ -1016,7 +1017,7 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: any) => {
 			const resourcesEqual = resourceInfosEqual(lastOnChangeEventInfo.current.resourceInfos, props.resourceInfos);
 
 			// Use nextOnChangeEventInfo's noteId -- lastOnChangeEventInfo can be slightly out-of-date.
-			const differentNoteId = nextOnChangeEventInfo.current?.noteId !== props.noteId;
+			const differentNoteId = lastNoteIdRef.current !== props.noteId;
 			const differentContent = lastOnChangeEventInfo.current.content !== props.content;
 			if (differentNoteId || differentContent || !resourcesEqual) {
 				const result = await props.markupToHtml(
@@ -1041,6 +1042,7 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: any) => {
 				const offsetBookmarkId = 2;
 				const bookmark = editor.selection.getBookmark(offsetBookmarkId);
 				editor.setContent(awfulInitHack(result.html));
+				lastNoteIdRef.current = props.noteId;
 
 				if (lastOnChangeEventInfo.current.contentKey !== props.contentKey) {
 					// Need to clear UndoManager to avoid this problem:
