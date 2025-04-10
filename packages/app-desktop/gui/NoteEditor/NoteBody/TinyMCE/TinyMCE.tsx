@@ -82,6 +82,7 @@ function stripMarkup(markupLanguage: number, markup: string, options: any = null
 }
 
 interface LastOnChangeEventInfo {
+	outdated: boolean;
 	content: string;
 	resourceInfos: ResourceInfos;
 	contentKey: string;
@@ -113,6 +114,7 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: any) => {
 		content: null,
 		resourceInfos: null,
 		contentKey: null,
+		outdated: false,
 	});
 
 	const editorRef = useRef<Editor>(null);
@@ -1015,7 +1017,8 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: any) => {
 		const loadContent = async () => {
 			const resourcesEqual = resourceInfosEqual(lastOnChangeEventInfo.current.resourceInfos, props.resourceInfos);
 
-			if (lastOnChangeEventInfo.current.content !== props.content || !resourcesEqual) {
+			const contentNeedsReload = lastOnChangeEventInfo.current.outdated || lastOnChangeEventInfo.current.content !== props.content;
+			if (contentNeedsReload || !resourcesEqual) {
 				const result = await props.markupToHtml(
 					props.contentMarkupLanguage,
 					props.content,
@@ -1028,7 +1031,11 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: any) => {
 						allowedFilePrefixes: [props.resourceDirectory],
 					}),
 				);
-				if (cancelled) return;
+				if (cancelled) {
+					logger.debug('Content load cancelled');
+					return;
+				}
+				logger.debug('Got content to load', result.html);
 
 				// Use an offset bookmark -- the default bookmark type is not preserved after unloading
 				// and reloading the editor.
@@ -1061,10 +1068,13 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: any) => {
 				}
 
 				lastOnChangeEventInfo.current = {
+					outdated: false,
 					content: props.content,
 					resourceInfos: props.resourceInfos,
 					contentKey: props.contentKey,
 				};
+			} else if (lastOnChangeEventInfo.current.content === props.content) {
+				logger.debug(JSON.stringify(lastOnChangeEventInfo.current.content), '===', JSON.stringify(props.content));
 			}
 
 			const allAssetsOptions: NoteStyleOptions = {
@@ -1080,6 +1090,7 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: any) => {
 			dispatchDidUpdate(editor);
 		};
 
+		logger.debug('RTE: Load content', props.content, '(start)');
 		void loadContent();
 
 		return () => {
@@ -1202,6 +1213,7 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: any) => {
 				contentMarkupLanguage: props.contentMarkupLanguage,
 				contentOriginalCss: props.contentOriginalCss,
 			};
+			lastOnChangeEventInfo.current.outdated = true;
 
 			onChangeHandlerTimeoutRef.current = shim.setTimeout(async () => {
 				onChangeHandlerTimeoutRef.current = null;
