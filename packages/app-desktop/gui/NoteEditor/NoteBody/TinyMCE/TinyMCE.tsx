@@ -726,6 +726,11 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: any) => {
 				language_url: ['en_US', 'en_GB'].includes(language) ? undefined : `${bridge().vendorDir()}/lib/tinymce/langs/${language}`,
 				toolbar: toolbar.join(' '),
 				localization_function: _,
+				content_security_policy: `
+					default-src 'self';
+					script-src 'self';
+					style-src 'self' 'unsafe-inline';
+				`,
 				contextmenu: false,
 				browser_spellcheck: true,
 
