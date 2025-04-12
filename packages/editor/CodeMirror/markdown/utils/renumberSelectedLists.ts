@@ -50,10 +50,12 @@ const renumberSelectedLists = (state: EditorState): TransactionSpec => {
 
 			const indentationLen = tabsToSpaces(state, indentation).length;
 			let targetIndentLen = tabsToSpaces(state, currentGroupIndentation).length;
-			if (targetIndentLen < indentationLen) {
+			const indentIncreased = indentationLen > targetIndentLen;
+			const indentDecreased = indentationLen < targetIndentLen;
+			if (indentIncreased) {
 				listNumberStack.push({ nextListNumber, indentationLength: indentationLen });
 				nextListNumber = 1;
-			} else if (targetIndentLen > indentationLen) {
+			} else if (indentDecreased) {
 				nextListNumber = parseInt(match[2], 10);
 
 				// Handle the case where we deindent multiple times. For example,
@@ -74,9 +76,7 @@ const renumberSelectedLists = (state: EditorState): TransactionSpec => {
 
 			}
 
-			if (targetIndentLen !== indentationLen) {
-				currentGroupIndentation = indentation;
-			}
+			currentGroupIndentation = indentation;
 
 			const from = line.to - filteredText.length;
 			const to = from + match[0].length;

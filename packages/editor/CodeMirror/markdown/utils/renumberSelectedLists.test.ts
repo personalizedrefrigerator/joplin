@@ -64,4 +64,36 @@ describe('renumberSelectedLists', () => {
 			'# End',
 		].join('\n'));
 	});
+
+	it('should handle nested lists', async () => {
+		const listText = [
+			'2. This',
+			'\t1. is',
+			'\t2. a',
+			'\t\t3. test',
+			'\t4. test',
+			'\t5. test',
+			'\t6. test',
+		].join('\n');
+
+		const editor = await createTestEditor(
+			`${listText}\n\n# End`,
+			EditorSelection.range(0, listText.length),
+			['OrderedList', 'ATXHeading1'],
+		);
+
+		editor.dispatch(renumberSelectedLists(editor.state));
+
+		expect(editor.state.doc.toString()).toBe([
+			'2. This',
+			'\t1. is',
+			'\t2. a',
+			'\t\t1. test',
+			'\t3. test',
+			'\t4. test',
+			'\t5. test',
+			'',
+			'# End',
+		].join('\n'));
+	});
 });
