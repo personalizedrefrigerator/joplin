@@ -212,7 +212,6 @@ export default class ElectronAppWrapper {
 				spellcheck: true,
 				enableRemoteModule: true,
 			},
-			webviewTag: true,
 			// We start with a hidden window, which is then made visible depending on the showTrayIcon setting
 			// https://github.com/laurent22/joplin/issues/2031
 			//
