@@ -49,11 +49,14 @@ const renumberSelectedLists = (state: EditorState): TransactionSpec => {
 			const indentation = match[1];
 
 			const indentationLen = tabsToSpaces(state, indentation).length;
-			let targetIndentLen = tabsToSpaces(state, currentGroupIndentation).length;
-			const indentIncreased = indentationLen > targetIndentLen;
-			const indentDecreased = indentationLen < targetIndentLen;
+			let currentGroupIndentLength = tabsToSpaces(state, currentGroupIndentation).length;
+			const indentIncreased = indentationLen > currentGroupIndentLength;
+			const indentDecreased = indentationLen < currentGroupIndentLength;
 			if (indentIncreased) {
-				listNumberStack.push({ nextListNumber, indentationLength: indentationLen });
+				// Save the state of the previous group so that it can be restored later.
+				listNumberStack.push({
+					nextListNumber, indentationLength: currentGroupIndentLength,
+				});
 				nextListNumber = 1;
 			} else if (indentDecreased) {
 				nextListNumber = parseInt(match[2], 10);
@@ -63,13 +66,13 @@ const renumberSelectedLists = (state: EditorState): TransactionSpec => {
 				//    1. test
 				//      1. test
 				// 2. test
-				while (targetIndentLen > indentationLen) {
+				while (indentationLen < currentGroupIndentLength) {
 					const listNumberRecord = listNumberStack.pop();
 
 					if (!listNumberRecord) {
 						break;
 					} else {
-						targetIndentLen = listNumberRecord.indentationLength;
+						currentGroupIndentLength = listNumberRecord.indentationLength;
 						nextListNumber = listNumberRecord.nextListNumber;
 					}
 				}
