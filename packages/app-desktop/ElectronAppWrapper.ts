@@ -706,10 +706,6 @@ export default class ElectronAppWrapper {
 		return true;
 	}
 
-	public initializeCustomProtocolHandler(logger: LoggerWrapper) {
-		this.customProtocolHandler_ ??= handleCustomProtocols(logger);
-	}
-
 	// Electron's autoUpdater has to be init from the main process
 	public initializeAutoUpdaterService(logger: LoggerWrapper, devMode: boolean, includePreReleases: boolean) {
 		if (shim.isWindows() || shim.isMac()) {
@@ -748,6 +744,7 @@ export default class ElectronAppWrapper {
 		const alreadyRunning = await this.ensureSingleInstance();
 		if (alreadyRunning) return;
 
+		this.customProtocolHandler_ = handleCustomProtocols();
 		this.createWindow();
 
 		this.electronApp_.on('before-quit', () => {
