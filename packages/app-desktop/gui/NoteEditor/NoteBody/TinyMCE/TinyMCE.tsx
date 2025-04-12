@@ -1017,6 +1017,7 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: any) => {
 		return true;
 	}
 
+	const lastNoteIdRef = useRef(props.noteId);
 	useEffect(() => {
 		if (!editor) return () => {};
 
@@ -1030,7 +1031,10 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: any) => {
 		const loadContent = async () => {
 			const resourcesEqual = resourceInfosEqual(lastOnChangeEventInfo.current.resourceInfos, props.resourceInfos);
 
-			if (lastOnChangeEventInfo.current.content !== props.content || !resourcesEqual) {
+			// Use nextOnChangeEventInfo's noteId -- lastOnChangeEventInfo can be slightly out-of-date.
+			const differentNoteId = lastNoteIdRef.current !== props.noteId;
+			const differentContent = lastOnChangeEventInfo.current.content !== props.content;
+			if (differentNoteId || differentContent || !resourcesEqual) {
 				const result = await props.markupToHtml(
 					props.contentMarkupLanguage,
 					props.content,
@@ -1053,6 +1057,7 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: any) => {
 				const offsetBookmarkId = 2;
 				const bookmark = editor.selection.getBookmark(offsetBookmarkId);
 				editor.setContent(awfulInitHack(result.html));
+				lastNoteIdRef.current = props.noteId;
 
 				if (lastOnChangeEventInfo.current.contentKey !== props.contentKey) {
 					// Need to clear UndoManager to avoid this problem:
@@ -1101,7 +1106,7 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: any) => {
 			cancelled = true;
 		};
 		// eslint-disable-next-line @seiyab/react-hooks/exhaustive-deps -- Old code before rule was applied
-	}, [editor, props.themeId, props.scrollbarSize, props.markupToHtml, props.allAssets, props.content, props.resourceInfos, props.contentKey, props.contentMarkupLanguage, props.whiteBackgroundNoteRendering]);
+	}, [editor, props.noteId, props.themeId, props.scrollbarSize, props.markupToHtml, props.allAssets, props.content, props.resourceInfos, props.contentKey, props.contentMarkupLanguage, props.whiteBackgroundNoteRendering]);
 
 	useEffect(() => {
 		if (!editor) return () => {};

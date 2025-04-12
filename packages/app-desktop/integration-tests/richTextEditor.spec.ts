@@ -212,5 +212,33 @@ test.describe('richTextEditor', () => {
 		await expect(editor.noteTitleInput).not.toBeFocused();
 		await expect(editor.richTextEditor).toBeFocused();
 	});
+
+	test('note should have correct content even if opened quickly after last edit', async ({ mainWindow }) => {
+		const mainScreen = await new MainScreen(mainWindow).setup();
+		await mainScreen.createNewNote('Test 1');
+		await mainScreen.createNewNote('Test 2');
+		const test1Header = mainScreen.noteList.getNoteItemByTitle('Test 1');
+		const test2Header = mainScreen.noteList.getNoteItemByTitle('Test 2');
+
+		const editor = mainScreen.noteEditor;
+		await editor.toggleEditorsButton.click();
+		await editor.richTextEditor.waitFor();
+
+		const editorBody = editor.getRichTextEditorBody();
+		const setEditorText = async (targetText: string) => {
+			await editorBody.pressSequentially(targetText);
+			await expect(editorBody).toHaveText(targetText);
+		};
+
+		await test1Header.click();
+		await expect(editorBody).toHaveText('');
+		await setEditorText('Test 1');
+
+		await test2Header.click();
+		// Previously, after switching to note 2, the "Test 1" text would remain present in the
+		// editor.
+		await expect(editorBody).toHaveText('');
+	});
+
 });
 
