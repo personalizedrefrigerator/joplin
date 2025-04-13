@@ -17,7 +17,7 @@ const useFormData = (viewRef: RefObject<HTMLIFrameElement>, postMessage: PostMes
 			const listeners = [...formDataListenersRef.current];
 			formDataListenersRef.current = [];
 			for (const listener of listeners) {
-				listener(event.data.formData);
+				listener(formData);
 			}
 		}
 	});
@@ -26,7 +26,7 @@ const useFormData = (viewRef: RefObject<HTMLIFrameElement>, postMessage: PostMes
 		return {
 			getFormData: () => {
 				return new Promise<FormDataRecord>(resolve => {
-					postMessage('getFormData', null);
+					postMessage('serializeForms', null);
 					formDataListenersRef.current.push((data) => {
 						resolve(data);
 					});
