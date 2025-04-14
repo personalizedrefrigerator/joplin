@@ -193,19 +193,26 @@ const NoteList = (props: Props) => {
 		focusNote(activeNoteId);
 	});
 
+	const searching = props.notesParentType === 'Search';
+
 	const highlightedWords = useMemo(() => {
-		if (props.notesParentType === 'Search') {
+		if (searching) {
 			const query = BaseModel.byId(props.searches, props.selectedSearchId);
 			if (query) return props.highlightedWords;
 		}
 		return [];
-	}, [props.notesParentType, props.searches, props.selectedSearchId, props.highlightedWords]);
+	}, [searching, props.searches, props.selectedSearchId, props.highlightedWords]);
 
 	const renderEmptyList = () => {
 		if (props.notes.length) return null;
 		// Role status is necessary for the screenreader to announce that the list is empty, since when there are
 		// zero items there is not list to render
-		return <div className="emptylist" role="status">{getEmptyFolderMessage(props.folders, props.selectedFolderId)}</div>;
+		return <div
+			className="emptylist"
+			// Only announce when searching to avoid unnecessarily verbose
+			// folder-switch announcements.
+			role={searching ? 'status' : undefined}
+		>{getEmptyFolderMessage(props.folders, props.selectedFolderId)}</div>;
 	};
 
 	const renderFiller = (key: string, style: React.CSSProperties) => {
