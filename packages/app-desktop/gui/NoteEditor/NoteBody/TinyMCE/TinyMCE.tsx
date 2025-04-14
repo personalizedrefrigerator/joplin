@@ -43,6 +43,7 @@ import useKeyboardRefocusHandler from './utils/useKeyboardRefocusHandler';
 import useDocument from '../../../hooks/useDocument';
 import useEditDialog from './utils/useEditDialog';
 import useEditDialogEventListeners from './utils/useEditDialogEventListeners';
+import Setting from '@joplin/lib/models/Setting';
 
 const logger = Logger.create('TinyMCE');
 
@@ -726,11 +727,17 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: any) => {
 				language_url: ['en_US', 'en_GB'].includes(language) ? undefined : `${bridge().vendorDir()}/lib/tinymce/langs/${language}`,
 				toolbar: toolbar.join(' '),
 				localization_function: _,
-				content_security_policy: `
-					default-src 'self';
-					script-src 'self';
-					style-src 'self' 'unsafe-inline';
-				`,
+				// See https://www.tiny.cloud/docs/tinymce/latest/tinymce-and-csp/#content_security_policy
+				content_security_policy: Setting.value('featureFlag.richText.useStrictContentSecurityPolicy') ? [
+					'default-src \'self\'',
+					'script-src \'self\'',
+
+					// Styles: unsafe-inline: TinyMCE uses inline style="" styles.
+					// Styles: *: Allow users to include styles from the internet (e.g. <style src="https://example.com/style.css">)
+					'style-src \'self\' \'unsafe-inline\' *',
+					// Media: *: Allow users to include images and videos from the internet (e.g. ![](http://example.com/image.png)).
+					'media-src \'self\' *',
+				].join(' ; ') : undefined,
 				contextmenu: false,
 				browser_spellcheck: true,
 
