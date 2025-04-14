@@ -1,3 +1,5 @@
 {
-	"cSpell.enabled": true
+	"cSpell.enabled": true,
+	// Default to tab indentation for new files
+	"editor.insertSpaces": false
 }
