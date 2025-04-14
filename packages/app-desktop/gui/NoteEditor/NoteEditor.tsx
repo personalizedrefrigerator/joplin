@@ -423,6 +423,7 @@ function NoteEditorContent(props: NoteEditorProps) {
 
 	const searchMarkers = useSearchMarkers(showLocalSearch, localSearchMarkerOptions, props.searches, props.selectedSearchId, props.highlightedWords);
 
+	const markupLanguage = formNote.markup_language;
 	const editorProps: NoteBodyEditorProps = {
 		ref: editorRef,
 		contentKey: formNote.id,
@@ -432,7 +433,7 @@ function NoteEditorContent(props: NoteEditorProps) {
 		onWillChange: onBodyWillChange,
 		onMessage: onMessage,
 		content: formNote.body,
-		contentMarkupLanguage: formNote.markup_language,
+		contentMarkupLanguage: markupLanguage,
 		contentOriginalCss: formNote.originalCss,
 		resourceInfos: resourceInfos,
 		resourceDirectory: Setting.value('resourceDir'),
@@ -451,11 +452,14 @@ function NoteEditorContent(props: NoteEditorProps) {
 		searchMarkers: searchMarkers,
 		visiblePanes: props.noteVisiblePanes || ['editor', 'viewer'],
 		keyboardMode: Setting.value('editor.keyboardMode'),
+		enableTextPatterns: Setting.value('editor.enableTextPatterns'),
 		tabMovesFocus: props.tabMovesFocus,
 		locale: Setting.value('locale'),
 		onDrop: onDrop,
 		noteToolbarButtonInfos: props.toolbarButtonInfos,
 		plugins: props.plugins,
+		// KaTeX isn't supported in HTML notes
+		mathEnabled: markupLanguage === MarkupLanguage.Markdown && Setting.value('markdown.plugin.katex'),
 		fontSize: Setting.value('style.editor.fontSize'),
 		contentMaxWidth: props.contentMaxWidth,
 		scrollbarSize: props.scrollbarSize,

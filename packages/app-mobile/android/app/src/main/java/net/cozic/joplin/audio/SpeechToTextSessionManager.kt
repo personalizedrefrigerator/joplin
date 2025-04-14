@@ -21,12 +21,13 @@ class SpeechToTextSessionManager(
 		modelPath: String,
 		locale: String,
 		prompt: String,
+		useShortAudioCtx: Boolean,
 		context: Context,
 	): Int {
 		val sessionId = nextSessionId++
 		sessions[sessionId] = SpeechToTextSession(
 			SpeechToTextConverter(
-				modelPath, locale, prompt, recorderFactory = AudioRecorder.factory, context,
+				modelPath, locale, prompt, useShortAudioCtx, recorderFactory = AudioRecorder.factory, context,
 			)
 		)
 		return sessionId
@@ -97,13 +98,6 @@ class SpeechToTextSessionManager(
 	fun convertAvailable(sessionId: Int, promise: Promise) {
 		this.concurrentWithSession(sessionId, promise::reject) { session ->
 			val result = session.converter.convertRemaining()
-			promise.resolve(result)
-		}
-	}
-
-	fun getPreview(sessionId: Int, promise: Promise) {
-		this.concurrentWithSession(sessionId, promise::reject) { session ->
-			val result = session.converter.getPreview()
 			promise.resolve(result)
 		}
 	}

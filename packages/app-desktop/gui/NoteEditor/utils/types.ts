@@ -124,6 +124,7 @@ export interface NoteBodyEditorProps {
 	visiblePanes: string[];
 	keyboardMode: string;
 	tabMovesFocus: boolean;
+	enableTextPatterns: boolean;
 	resourceInfos: ResourceInfos;
 	resourceDirectory: string;
 	locale: string;
@@ -131,6 +132,7 @@ export interface NoteBodyEditorProps {
 	onDrop: DropHandler;
 	noteToolbarButtonInfos: ToolbarItem[];
 	plugins: PluginStates;
+	mathEnabled: boolean;
 	fontSize: number;
 	contentMaxWidth: number;
 	isSafeMode: boolean;

@@ -456,9 +456,6 @@ class Application extends BaseApplication {
 			bridge().openDevTools();
 		}
 
-		bridge().electronApp().initializeCustomProtocolHandler(
-			Logger.create('handleCustomProtocols'),
-		);
 		this.protocolHandler_ = bridge().electronApp().getCustomProtocolHandler();
 		this.protocolHandler_.allowReadAccessToDirectory(__dirname); // App bundle directory
 		this.protocolHandler_.allowReadAccessToDirectory(Setting.value('cacheDir'));
@@ -617,10 +614,11 @@ class Application extends BaseApplication {
 		clipperLogger.addTarget(TargetType.Console);
 
 		ClipperServer.instance().initialize(actionApi);
+		ClipperServer.instance().setEnabled(!Setting.value('altInstanceId'));
 		ClipperServer.instance().setLogger(clipperLogger);
 		ClipperServer.instance().setDispatch(this.store().dispatch);
 
-		if (Setting.value('clipperServer.autoStart')) {
+		if (ClipperServer.instance().enabled() && Setting.value('clipperServer.autoStart')) {
 			void ClipperServer.instance().start();
 		}
 

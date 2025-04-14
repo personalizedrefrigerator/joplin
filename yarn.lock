@@ -8279,7 +8279,7 @@ __metadata:
     "@joplin/renderer": ~3.3
     "@joplin/tools": ~3.3
     "@joplin/utils": ~3.3
-    "@playwright/test": 1.45.3
+    "@playwright/test": 1.51.1
     "@sentry/electron": 4.24.0
     "@testing-library/react-hooks": 8.0.1
     "@types/jest": 29.5.12
@@ -8297,7 +8297,7 @@ __metadata:
     compare-versions: 6.1.1
     countable: 3.0.1
     debounce: 1.2.1
-    electron: 34.0.0
+    electron: 35.1.4
     electron-builder: 24.13.3
     electron-updater: 6.2.1
     electron-window-state: 5.0.3
@@ -8319,7 +8319,6 @@ __metadata:
     node-fetch: 2.6.7
     node-notifier: 10.0.1
     node-rsa: 1.1.1
-    notyf: 3.10.0
     pdfjs-dist: 3.11.174
     pretty-bytes: 5.6.0
     re-resizable: 6.9.17
@@ -8362,14 +8361,13 @@ __metadata:
     "@joplin/renderer": ~3.3
     "@joplin/tools": ~3.3
     "@joplin/utils": ~3.3
-    "@js-draw/material-icons": 1.27.2
+    "@js-draw/material-icons": 1.29.1
     "@pmmmwh/react-refresh-webpack-plugin": ^0.5.15
     "@react-native-clipboard/clipboard": 1.14.3
     "@react-native-community/datetimepicker": 8.2.0
     "@react-native-community/geolocation": 3.3.0
     "@react-native-community/netinfo": 11.3.3
     "@react-native-community/push-notification-ios": 1.11.0
-    "@react-native-community/slider": 4.5.5
     "@react-native/babel-preset": 0.74.86
     "@react-native/metro-config": 0.74.87
     "@sqlite.org/sqlite-wasm": 3.46.0-build2
@@ -8404,7 +8402,7 @@ __metadata:
     jest: 29.7.0
     jest-environment-jsdom: 29.7.0
     jetifier: 2.0.0
-    js-draw: 1.27.2
+    js-draw: 1.29.2
     jsdom: 24.1.1
     lodash: 4.17.21
     md5: 2.3.0
@@ -8429,7 +8427,7 @@ __metadata:
     react-native-paper: 5.13.1
     react-native-popup-menu: 0.16.1
     react-native-quick-actions: 0.3.13
-    react-native-quick-crypto: 0.7.5
+    react-native-quick-crypto: 0.7.12
     react-native-rsa-native: 2.0.5
     react-native-safe-area-context: 4.10.8
     react-native-securerandom: 1.0.1
@@ -8841,7 +8839,6 @@ __metadata:
     "@types/zxcvbn": 4.4.5
     bcryptjs: 2.4.3
     bulma: 1.0.2
-    bulma-prefers-dark: 0.1.0-beta.1
     compare-versions: 6.1.1
     dayjs: 1.11.12
     formidable: 2.1.2
@@ -8993,6 +8990,7 @@ __metadata:
     moment: 2.30.1
     node-fetch: 2.6.7
     sprintf-js: 1.1.3
+    tcp-port-used: 1.0.2
     ts-jest: 29.1.5
     typescript: 5.4.5
   languageName: unknown
@@ -9133,21 +9131,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@js-draw/material-icons@npm:1.27.2":
-  version: 1.27.2
-  resolution: "@js-draw/material-icons@npm:1.27.2"
+"@js-draw/material-icons@npm:1.29.1":
+  version: 1.29.1
+  resolution: "@js-draw/material-icons@npm:1.29.1"
   peerDependencies:
     js-draw: ^1.0.1
-  checksum: dcaac6c45d20df6542fe874e0cd6f7a40f77faaebe494f4eb45c6b1c3595223a01b36067549159341a18af018253ea5c1c99bd82c47060a8b33596263ae83026
+  checksum: e3de5520b4154228ab3d593ae06d7310f3e1a100e5f2507e8b8b317a51cc3566d907c252e2cc92b89274059e05b0a57eb69b2f27483cab45fcbc1ccae7bac0d2
   languageName: node
   linkType: hard
 
-"@js-draw/math@npm:^1.27.2":
-  version: 1.27.2
-  resolution: "@js-draw/math@npm:1.27.2"
+"@js-draw/math@npm:^1.29.2":
+  version: 1.29.2
+  resolution: "@js-draw/math@npm:1.29.2"
   dependencies:
     bezier-js: 6.1.3
-  checksum: 021dce0af104890312cf4eeb8a645d89bb2eaf0d3cdc181cdfcb6bb7b90deeeae484f5bec06bc96ac1ebc4f83918eff9a63239d8165a493b3794fd36e92bd330
+  checksum: e8c1fa984a06d3f80351363c10c63d3f648df0de14a9a37f92cd4c1670dbecc1840cf9c837fdd7d436deb13648132288ef2bd8926d389100e0dc82ad2ba448cf
   languageName: node
   linkType: hard
 
@@ -10675,14 +10673,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@playwright/test@npm:1.45.3":
-  version: 1.45.3
-  resolution: "@playwright/test@npm:1.45.3"
+"@playwright/test@npm:1.51.1":
+  version: 1.51.1
+  resolution: "@playwright/test@npm:1.51.1"
   dependencies:
-    playwright: 1.45.3
+    playwright: 1.51.1
   bin:
     playwright: cli.js
-  checksum: 3e2c88d40f98cf94ab7947263804d1ee78c4bb21a35c8dbb64855eed5565ffc688509c5f07bda5438cba6c354374981448dcba3dbe326d1699b4fef75c9ce43d
+  checksum: c3c14f37451cc0323234e37fa559a075e5aee9f5e6ca06fa3b4a132ec6c809909b22877daca1fa48c95a1112d859346c10111e7003f44582a05100dd5385bbef
   languageName: node
   linkType: hard
 
@@ -11228,20 +11226,6 @@ __metadata:
     react: ">=16.6.3"
     react-native: ">=0.58.4"
   checksum: d8c8cdd0d4e8112752a13bf2c426618ec8edd91eacadf03f05375648b5f12ffa761e8676e9d6ac9e5bc5ded73c991ab2219c67fe02e110dfaf38f4cb59695868
-  languageName: node
-  linkType: hard
-
-"@react-native-community/slider@npm:4.4.4":
-  version: 4.4.4
-  resolution: "@react-native-community/slider@npm:4.4.4"
-  checksum: 65d79b72d100aab75e9051315798935a2419202e157f5e35dedb4e2843ccdd93816b553c9a7a41642f5140e5a05e20326a27ef65e9ed9c53efc59d8755a5d91f
-  languageName: node
-  linkType: hard
-
-"@react-native-community/slider@patch:@react-native-community/slider@npm%3A4.4.4#./.yarn/patches/@react-native-community-slider-npm-4.4.4-d78e472f48.patch::locator=root%40workspace%3A.":
-  version: 4.4.4
-  resolution: "@react-native-community/slider@patch:@react-native-community/slider@npm%3A4.4.4#./.yarn/patches/@react-native-community-slider-npm-4.4.4-d78e472f48.patch::version=4.4.4&hash=1120f2&locator=root%40workspace%3A."
-  checksum: c4397dd2e914f52e3d9b4058d3cf850e67d99c85a59492835647513af85ba62ba182c5c7655fd35d6f768155d45c0c8b5eb0adaad803165d9fec508b77b19a2b
   languageName: node
   linkType: hard
 
@@ -13632,12 +13616,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:^20.9.0":
-  version: 20.11.26
-  resolution: "@types/node@npm:20.11.26"
+"@types/node@npm:^22.7.7":
+  version: 22.13.10
+  resolution: "@types/node@npm:22.13.10"
   dependencies:
-    undici-types: ~5.26.4
-  checksum: 2cd5a373d2880b7f07ae65d4d23660cdcabddb12772ce631b6caad2f9283350b8a17c802590f67f0ccec5a9c7d43ae0ecd9637c5ad870b8f793328af8c61eae5
+    undici-types: ~6.20.0
+  checksum: 1cd6b899df728732c60c0defad63e26ca18d87a3b81bd75666fe9aed6cdf9e488433976b22ffcabfdeef9d351cf8ff94853b0686e6708ef62065482ccf5b0a6e
   languageName: node
   linkType: hard
 
@@ -18077,13 +18061,6 @@ __metadata:
   dependencies:
     semver: ^7.0.0
   checksum: 66d204657fe36522822a95b288943ad11b58f5eaede235b11d8c4edaa28ce4800087d44a2681524c340494aadb120a0068011acabe99d30e8f11a7d826d83515
-  languageName: node
-  linkType: hard
-
-"bulma-prefers-dark@npm:0.1.0-beta.1":
-  version: 0.1.0-beta.1
-  resolution: "bulma-prefers-dark@npm:0.1.0-beta.1"
-  checksum: 26a88776a97ed0b57307a1aee60380a1b484ebd27d101c9995b5d220ff79fe909b060577c42c674c2863c52d4de85396c6f36031b3f7828386e21c1eda1e4445
   languageName: node
   linkType: hard
 
@@ -22993,16 +22970,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"electron@npm:34.0.0":
-  version: 34.0.0
-  resolution: "electron@npm:34.0.0"
+"electron@npm:35.1.4":
+  version: 35.1.4
+  resolution: "electron@npm:35.1.4"
   dependencies:
     "@electron/get": ^2.0.0
-    "@types/node": ^20.9.0
+    "@types/node": ^22.7.7
     extract-zip: ^2.0.1
   bin:
     electron: cli.js
-  checksum: 0ee9a4bb3444cf13f8d0eeef928f9d8feee33d919c414672d794d6332d81fe3740c781060eba5374417742dd9f8159da2050c0fc14fac64d143be8ccb53e280c
+  checksum: 78ac69d76823d9f2096726684f57b9d9e1bbf90a2207aaa003d69ed96eb2c7d93b0b8a6cee25a99382332606f09ea3b6b9f0868a5a6eca53429b5ff087fa1c10
   languageName: node
   linkType: hard
 
@@ -31141,13 +31118,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"js-draw@npm:1.27.2":
-  version: 1.27.2
-  resolution: "js-draw@npm:1.27.2"
+"js-draw@npm:1.29.2":
+  version: 1.29.2
+  resolution: "js-draw@npm:1.29.2"
   dependencies:
-    "@js-draw/math": ^1.27.2
+    "@js-draw/math": ^1.29.2
     "@melloware/coloris": 0.22.0
-  checksum: 0dc5c1531ca7bd86dfe50817d00209d19836357fcdd58657cb83faa27a81d7f00327adcc5c668db17e026d7cec01c470a0da49d0163c2f83901bbcd3969adc74
+  checksum: 29937a44c048c3927f4851b8bac66ce71316ce36b2de2ab6bfa2d1a9c1f634f51a10126e3491a7de5559fc5af442822a6a66ebd892ac8d793923a9f9f958c8c9
   languageName: node
   linkType: hard
 
@@ -35836,13 +35813,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"notyf@npm:3.10.0":
-  version: 3.10.0
-  resolution: "notyf@npm:3.10.0"
-  checksum: 6cc533fccb0d74e544edf10e82d2942975adc4c993a68c966694bbb451dc06056d02e8dced4ecfce2c4586682223759cb1f9f3e3f609c83458e99c2bf5494b00
-  languageName: node
-  linkType: hard
-
 "now-and-later@npm:^2.0.0":
   version: 2.0.1
   resolution: "now-and-later@npm:2.0.1"
@@ -38000,27 +37970,27 @@ __metadata:
   languageName: node
   linkType: hard
 
-"playwright-core@npm:1.45.3":
-  version: 1.45.3
-  resolution: "playwright-core@npm:1.45.3"
+"playwright-core@npm:1.51.1":
+  version: 1.51.1
+  resolution: "playwright-core@npm:1.51.1"
   bin:
     playwright-core: cli.js
-  checksum: cecb58877b2c643403d7a72c24a7aa0fdd087a3c7f9a5ea5403851336ea831d8e304b1f159aacbbabd12e5c47eaac054333746c9e5431ec07b13d64dbf3b50ec
+  checksum: 1eb37e22e97435a5ed6389b4caa666fbe618348861cae97e67586e20c8fed9ac3d3dc899ff3b9237d0ddfcf087d5b552b80be247e246fc45b75282f96be714bb
   languageName: node
   linkType: hard
 
-"playwright@npm:1.45.3":
-  version: 1.45.3
-  resolution: "playwright@npm:1.45.3"
+"playwright@npm:1.51.1":
+  version: 1.51.1
+  resolution: "playwright@npm:1.51.1"
   dependencies:
     fsevents: 2.3.2
-    playwright-core: 1.45.3
+    playwright-core: 1.51.1
   dependenciesMeta:
     fsevents:
       optional: true
   bin:
     playwright: cli.js
-  checksum: d9d23b155ccd001553214f710561b01e48eb409676102f8ab94c0b4aa5ac5f398becc1a96528b0554944e07e34189503d891913e0e0a4aa58ad36b9c08747983
+  checksum: 2d78f53eed438d26df9743f98227d2e33bb5a378c8d0144a4ed75b4010c9c517d5a6ee6c1c9245ad61dc615054c5e19d2ded5a6e285e35d2bca39b05bc9c4a35
   languageName: node
   linkType: hard
 
@@ -40022,6 +39992,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-native-popup-menu@patch:react-native-popup-menu@npm%3A0.16.1#./.yarn/patches/react-native-popup-menu-npm-0.16.1-28fd66ecb5.patch::locator=root%40workspace%3A.":
+  version: 0.16.1
+  resolution: "react-native-popup-menu@patch:react-native-popup-menu@npm%3A0.16.1#./.yarn/patches/react-native-popup-menu-npm-0.16.1-28fd66ecb5.patch::version=0.16.1&hash=42fb35&locator=root%40workspace%3A."
+  checksum: 50d91792b3f8cc2584ac22c537eebb8cf771ad1241843dd403395361f8465edb3628c5751671ad55c832a3a217a711dca72497b0bc34b21a3ce37ce1bd720d52
+  languageName: node
+  linkType: hard
+
 "react-native-quick-actions@npm:0.3.13":
   version: 0.3.13
   resolution: "react-native-quick-actions@npm:0.3.13"
@@ -40041,19 +40018,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-quick-crypto@npm:0.7.5":
-  version: 0.7.5
-  resolution: "react-native-quick-crypto@npm:0.7.5"
+"react-native-quick-crypto@npm:0.7.12":
+  version: 0.7.12
+  resolution: "react-native-quick-crypto@npm:0.7.12"
   dependencies:
     "@craftzdog/react-native-buffer": ^6.0.5
     events: ^3.3.0
     readable-stream: ^4.5.2
     string_decoder: ^1.3.0
     util: ^0.12.5
-  peerDependencies:
-    react: "*"
-    react-native: "*"
-  checksum: 07f5abc4ddf7fbc8d5bfa9b459f04a7e1fbc3afe9b1add8e07d0918401abb2a8a987da00741b2baa4e94d2125cec10b3a77c4136250a20f6f3376cefba048135
+  checksum: f640cfc8dd3643d2530ef830c788033648311530c211385b2eaaa55bfc353b0af2400bd9a0df09338ee7ff4db2c72b99e06f06e7d6adf10a240db5ae82570896
   languageName: node
   linkType: hard
 
@@ -47192,6 +47166,13 @@ __metadata:
   version: 5.26.5
   resolution: "undici-types@npm:5.26.5"
   checksum: 3192ef6f3fd5df652f2dc1cd782b49d6ff14dc98e5dced492aa8a8c65425227da5da6aafe22523c67f035a272c599bb89cfe803c1db6311e44bed3042fc25487
+  languageName: node
+  linkType: hard
+
+"undici-types@npm:~6.20.0":
+  version: 6.20.0
+  resolution: "undici-types@npm:6.20.0"
+  checksum: b7bc50f012dc6afbcce56c9fd62d7e86b20a62ff21f12b7b5cbf1973b9578d90f22a9c7fe50e638e96905d33893bf2f9f16d98929c4673c2480de05c6c96ea8b
   languageName: node
   linkType: hard
 

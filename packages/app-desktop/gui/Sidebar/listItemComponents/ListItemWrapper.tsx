@@ -23,7 +23,9 @@ interface Props {
 	draggable?: boolean;
 	'data-folder-id'?: string;
 	'data-id'?: string;
+	'data-tag-id'?: string;
 	'data-type'?: ModelType;
+	'aria-labelledby'?: string;
 }
 
 const ListItemWrapper: React.FC<Props> = props => {
@@ -55,7 +57,9 @@ const ListItemWrapper: React.FC<Props> = props => {
 			style={style}
 			data-folder-id={props['data-folder-id']}
 			data-id={props['data-id']}
+			data-tag-id={props['data-tag-id']}
 			data-type={props['data-type']}
+			aria-labelledby={props['aria-labelledby']}
 		>
 			{props.children}
 		</div>
