@@ -731,14 +731,17 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: any) => {
 				localization_function: _,
 				// See https://www.tiny.cloud/docs/tinymce/latest/tinymce-and-csp/#content_security_policy
 				content_security_policy: Setting.value('featureFlag.richText.useStrictContentSecurityPolicy') ? [
-					'default-src \'self\'',
+					// Media: *: Allow users to include images and videos from the internet (e.g. ![](http://example.com/image.png)).
+					// Media: blob: Allow loading images/videos/audio from blob URLs (for plugins)
+					// Media: data: Allow loading images and other media from data: URLs
+					'default-src \'self\' blob: data: *',
+					'frame-src \'none\'', // Should not contain sub-frames
+					'worker-src \'none\'', // Should not need web workers
 					'script-src \'self\'',
 
 					// Styles: unsafe-inline: TinyMCE uses inline style="" styles.
 					// Styles: *: Allow users to include styles from the internet (e.g. <style src="https://example.com/style.css">)
-					'style-src \'self\' \'unsafe-inline\' *',
-					// Media: *: Allow users to include images and videos from the internet (e.g. ![](http://example.com/image.png)).
-					'media-src \'self\' *',
+					'style-src \'self\' \'unsafe-inline\' * data:',
 				].join(' ; ') : undefined,
 				contextmenu: false,
 				browser_spellcheck: true,
