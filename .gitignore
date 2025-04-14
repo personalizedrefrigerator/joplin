@@ -686,6 +686,7 @@ packages/app-mobile/components/biometrics/biometricAuthenticate.js
 packages/app-mobile/components/biometrics/sensorInfo.js
 packages/app-mobile/components/buttons/FloatingActionButton.js
 packages/app-mobile/components/buttons/LabelledIconButton.js
+packages/app-mobile/components/buttons/MultiTouchableOpacity.js
 packages/app-mobile/components/buttons/TextButton.js
 packages/app-mobile/components/buttons/index.js
 packages/app-mobile/components/getResponsiveValue.test.js
