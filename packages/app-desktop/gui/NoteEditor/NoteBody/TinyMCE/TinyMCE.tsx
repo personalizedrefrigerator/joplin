@@ -735,8 +735,7 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: any) => {
 					// Media: blob: Allow loading images/videos/audio from blob URLs (for plugins)
 					// Media: data: Allow loading images and other media from data: URLs
 					'default-src \'self\' blob: data: *',
-					'frame-src \'none\'', // Should not contain sub-frames
-					'worker-src \'none\'', // Should not need web workers
+					'child-src \'none\'', // Should not contain sub-frames
 					'script-src \'self\'',
 
 					// Styles: unsafe-inline: TinyMCE uses inline style="" styles.
