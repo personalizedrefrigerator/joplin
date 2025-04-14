@@ -1,12 +1,20 @@
-var should = require('should'),
-    uslug = require('../lib/uslug');
+/**
+ * Based on @joplin/fork-uslug
+ * 
+ * The original is Copyright (c) 2012 Jeremy Selier
+ * 
+ * MIT Licensed
+ * 
+ * You may find a copy of this license in the LICENSE file that should have been provided
+ * to you with a copy of this software.
+ */
+import uslug from "./uslug";
 
+const word0 = 'Ελληνικά';
+const word1 = [word0, word0].join('-');
+const word2 = [word0, word0].join(' - ');
 
-var word0 = 'Ελληνικά';
-var word1 = [word0, word0].join('-');
-var word2 = [word0, word0].join(' - ');
-
-var tests = [
+const tests: Array<[string, string]> = [
   ['', ''],
   ['The \u212B symbol invented by A. J. \u00C5ngstr\u00F6m (1814, L\u00F6gd\u00F6, \u2013 1874) denotes the length 10\u207B\u00B9\u2070 m.', 'the-å-symbol-invented-by-a-j-ångström-1814-lögdö-1874-denotes-the-length-1010-m'],
   ['Быстрее и лучше!', 'быстрее-и-лучше'],
@@ -35,10 +43,11 @@ var tests = [
   ['😁a', 'grina'],
   ['🐶🐶🐶🐱', 'dogdogdogcat'],
 ];
-
-for (var t in tests) {
-  var test = tests[t];
-  uslug(test[0]).should.equal(test[1]);
-}
-
-uslug('qbc,fe', { allowedChars: 'q' }).should.equal('qbcfe');
+describe('uslug', () => {
+  it.each(tests)('should convert %s to %s', (input, expected) => {
+	expect(uslug(input)).toBe(expected);
+  });
+  it('should support "allowedChars"', () => {
+	expect(uslug('qbc,fe', { allowedChars: 'q' })).toBe('qbcfe');
+  });
+});
