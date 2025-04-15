@@ -732,7 +732,8 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: any) => {
 				// See https://www.tiny.cloud/docs/tinymce/latest/tinymce-and-csp/#content_security_policy
 				content_security_policy: Setting.value('featureFlag.richText.useStrictContentSecurityPolicy') ? [
 					// Media: *: Allow users to include images and videos from the internet (e.g. ![](http://example.com/image.png)).
-					// Media: blob: Allow loading images/videos/audio from blob URLs (for plugins)
+					// Media: blob: Allow loading images/videos/audio from blob URLs. The Rich Text Editor
+					//      replaces certain base64 URLs with blob URLs.
 					// Media: data: Allow loading images and other media from data: URLs
 					'default-src \'self\'',
 					'img-src \'self\' blob: data: *', // Images
