@@ -734,9 +734,14 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: any) => {
 					// Media: *: Allow users to include images and videos from the internet (e.g. ![](http://example.com/image.png)).
 					// Media: blob: Allow loading images/videos/audio from blob URLs (for plugins)
 					// Media: data: Allow loading images and other media from data: URLs
-					'default-src \'self\' blob: data: *',
+					'default-src \'self\'',
+					'img-src \'self\' blob: data: *', // Images
+					'media-src \'self\' blob: data: *', // Audio and video players
+
+					// Disallow certain unused features
 					'child-src \'none\'', // Should not contain sub-frames
-					'script-src \'self\'',
+					'object-src \'none\'', // Objects can be used for script injection
+					'form-action \'none\'', // No submitting forms
 
 					// Styles: unsafe-inline: TinyMCE uses inline style="" styles.
 					// Styles: *: Allow users to include styles from the internet (e.g. <style src="https://example.com/style.css">)
