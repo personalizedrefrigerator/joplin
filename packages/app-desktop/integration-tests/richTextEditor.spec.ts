@@ -85,6 +85,44 @@ test.describe('richTextEditor', () => {
 		expect(await openPathResult).toContain(basename(pathToAttach));
 	});
 
+	test('should not remove text when pressing [enter] at the end of a line with an image', async ({ mainWindow }) => {
+		const mainScreen = await new MainScreen(mainWindow).setup();
+		await mainScreen.createNewNote('Testing pressing enter!');
+		const editor = mainScreen.noteEditor;
+
+		// Set the initial content
+		await editor.codeMirrorEditor.click();
+		await mainWindow.keyboard.type([
+			'<img',
+			' src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAMAAAADCAYAAABWKLW/AAAAEklEQVQIW2P8z8AARBDAiJMDAIzoBf635fcVAAAAAElFTkSuQmCC"',
+			' width="200"',
+			' height="200"',
+			' alt="test image"',
+			'/>',
+		].join(' '));
+		await mainWindow.keyboard.press('Enter');
+		await mainWindow.keyboard.press('Enter');
+		await mainWindow.keyboard.type('Test secondary paragraph.');
+
+		// Switch to the RTE
+		await editor.toggleEditorsButton.click();
+		await editor.richTextEditor.waitFor();
+
+		const richTextEditorFrame = editor.getRichTextFrameLocator();
+		const testParagraph = richTextEditorFrame.getByText('Test secondary paragraph.');
+		await expect(testParagraph).toBeAttached();
+
+		// Move the cursor just after the image, then press enter.
+		const testImage = richTextEditorFrame.getByRole('img', { name: 'test image' });
+		await testImage.click();
+		await mainWindow.keyboard.press('ArrowRight');
+		await mainWindow.keyboard.press('Enter');
+
+		// Should not have removed the image or the test paragraph.
+		await expect(testImage).toBeAttached();
+		await expect(testParagraph).toBeAttached();
+	});
+
 	test('pressing Tab should indent', async ({ mainWindow }) => {
 		const mainScreen = await new MainScreen(mainWindow).setup();
 		await mainScreen.createNewNote('Testing tabs!');
