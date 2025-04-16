@@ -5,7 +5,8 @@
 Modified for Joplin:
 
 - Added support for emojis - "🐶🐶🐶🐱" => "dogdogdogcat"
-- Migrated to TypeScript and removed dependencies on functionality now built-in to JavaScript (Unicode normalization, Unicode character class regular expressions).
+- Smaller package size: Removed dependencies on functionality that's now built-in to JavaScript (Unicode normalization, Unicode character class regular expressions).
+- Types: Migrated to TypeScript.
 
 * * *
 
