@@ -12,7 +12,7 @@ import { RegionSpec } from './utils/formatting/RegionSpec';
 import toggleInlineSelectionFormat from './utils/formatting/toggleInlineSelectionFormat';
 import getSearchState from './utils/getSearchState';
 import { noteIdFacet, setNoteIdEffect } from './utils/selectedNoteIdExtension';
-const uslug = require('@joplin/fork-uslug');
+import jumpToHash from './editorCommands/jumpToHash';
 
 interface Callbacks {
 	onUndoRedo(): void;
@@ -209,27 +209,7 @@ export default class CodeMirrorControl extends CodeMirror5Emulation implements E
 	}
 
 	public jumpToHash(hash: string) {
-		const doc = this.editor.state.doc;
-		for (let i = 1; i <= doc.lines; i++) {
-			const line = doc.line(i);
-
-			// Remove leading quotes
-			const lineText = line.text.replace(/^(>\s)+/, '');
-			if (lineText.startsWith('#')) {
-				// Remove heading markers
-				const headerValue = lineText.replace(/^#{1,6}\s+/, '');
-				const lineSlug = uslug(headerValue);
-
-				if (lineSlug === hash) {
-					this.editor.dispatch({
-						selection: EditorSelection.cursor(line.to),
-						scrollIntoView: true,
-					});
-					return true;
-				}
-			}
-		}
-		return false;
+		return jumpToHash(this.editor, hash);
 	}
 
 	public addStyles(...styles: Parameters<typeof EditorView.theme>) {
