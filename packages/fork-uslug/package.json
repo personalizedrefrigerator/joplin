@@ -26,9 +26,9 @@
   },
   "main": "./index",
   "exports": {
-    "default": "./index.js",
-    "uslug": {
-      "default": "./lib/uslug.js",
+    ".": "./index.js",
+    "./lib/uslug": {
+      "require": "./lib/uslug.js",
       "types": "./lib/uslug.ts"
     }
   },
