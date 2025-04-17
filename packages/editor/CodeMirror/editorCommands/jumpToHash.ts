@@ -72,7 +72,9 @@ const jumpToHash = (view: EditorView, hash: string) => {
 	if (targetLocation !== undefined) {
 		view.dispatch({
 			selection: EditorSelection.cursor(targetLocation),
-			scrollIntoView: true,
+			effects: [
+				EditorView.scrollIntoView(targetLocation, { y: 'start' }),
+			],
 		});
 		return true;
 	}
