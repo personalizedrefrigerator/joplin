@@ -435,8 +435,9 @@ function NoteEditor(props: Props, ref: any) {
 	// Scroll to the new hash, if it changes.
 	const isFirstScrollRef = useRef(true);
 	useEffect(() => {
+		// The first "jump to header" is handled during editor setup and shouldn't
+		// be handled a second time:
 		if (isFirstScrollRef.current) {
-			// The first "jump to header" is handled during editor setup.
 			isFirstScrollRef.current = false;
 			return;
 		}
