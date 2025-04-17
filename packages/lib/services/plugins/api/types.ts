@@ -407,7 +407,6 @@ export type UpdateCallback = (event: EditorUpdateEvent)=> Promise<void>;
 export interface ActivationCheckEvent {
 	handle: ViewHandle;
 	noteId: string;
-	windowId: string;
 }
 export type ActivationCheckCallback = (event: ActivationCheckEvent)=> Promise<boolean>;
 

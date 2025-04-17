@@ -233,7 +233,6 @@ export default class JoplinViewsEditors {
 			const active = isCorrectWindow && await callback({
 				handle,
 				noteId: effectiveNoteId,
-				windowId: windowId,
 			});
 			return active;
 		};
