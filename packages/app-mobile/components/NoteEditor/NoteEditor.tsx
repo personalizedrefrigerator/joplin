@@ -440,7 +440,9 @@ function NoteEditor(props: Props, ref: any) {
 			isFirstScrollRef.current = false;
 			return;
 		}
-		webviewRef.current?.injectJS(jumpToHashJs);
+		if (jumpToHashJs && webviewRef.current) {
+			webviewRef.current.injectJS(jumpToHashJs);
+		}
 	}, [jumpToHashJs]);
 
 	const html = useHtml(css);
