@@ -42,17 +42,25 @@ function folderIsCollapsed(context: RenderFoldersProps, folderId: string) {
 	}
 }
 
-function renderFoldersRecursive_<T>(props: RenderFoldersProps, renderItem: RenderFolderItem<T>, items: T[], parentId: string, depth: number, order: string[]): ItemsWithOrder<T> {
+function renderFoldersRecursive_<T>(props: RenderFoldersProps, renderItem: RenderFolderItem<T>, items: T[], depth: number, order: string[], parentIds: string[]): ItemsWithOrder<T> {
+	const parentId = parentIds[parentIds.length - 1];
+	if (!parentId) {
+		throw new Error('No parent ID specified');
+	}
+
 	const folders = props.folderTree.parentIdToChildren.get(parentId ?? '') ?? [];
 	const parentIdToChildren = props.folderTree.parentIdToChildren;
 	for (const folder of folders) {
-		if (folderIsCollapsed(props, folder.id)) continue;
+		if (parentIds.includes(folder.id)) {
+			throw new Error(`Folder is already in tree. ID: ${folder.id}`);
+		}
+		if (folderIsCollapsed(props, folder.id) || parentIds.includes(folder.id)) continue;
 
 		const hasChildren = parentIdToChildren.has(folder.id);
 		order.push(folder.id);
 		items.push(renderItem(folder, hasChildren, depth));
 		if (hasChildren) {
-			const result = renderFoldersRecursive_(props, renderItem, items, folder.id, depth + 1, order);
+			const result = renderFoldersRecursive_(props, renderItem, items, depth + 1, order, [...parentIds, folder.id]);
 			items = result.items;
 			order = result.order;
 		}
@@ -64,7 +72,7 @@ function renderFoldersRecursive_<T>(props: RenderFoldersProps, renderItem: Rende
 }
 
 export const renderFolders = <T> (props: RenderFoldersProps, renderItem: RenderFolderItem<T>): ItemsWithOrder<T> => {
-	return renderFoldersRecursive_(props, renderItem, [], '', 0, []);
+	return renderFoldersRecursive_(props, renderItem, [], 0, [], ['']);
 };
 
 export const buildFolderTree = (folders: FolderEntity[]): FolderTree => {

@@ -113,8 +113,7 @@ test.describe('sidebar', () => {
 		await toggleButton.click();
 
 		// Should be possible to move back to the root
-		const rootFolderHeader = sidebar.container.getByText('Notebooks');
-		await childFolderHeader.dragTo(rootFolderHeader);
+		await childFolderHeader.dragTo(sidebar.rootFolderHeader);
 		await expect(toggleButton).not.toBeVisible();
 	});
 
@@ -163,5 +162,27 @@ test.describe('sidebar', () => {
 		// Expand
 		await testFolderA.dblclick();
 		await expect(testFolderB).toBeVisible();
+	});
+
+	test('should be possible to quickly move folders in and out of trash', async ({ mainWindow }) => {
+		const mainScreen = await new MainScreen(mainWindow).setup();
+		const sidebar = mainScreen.sidebar;
+
+		const testFolderA = await sidebar.createNewFolder('Folder A');
+		const testSubFolder = await sidebar.createNewFolder('Sub folder 1');
+
+		// Convert to subfolder
+		await testSubFolder.dragTo(testFolderA);
+		await expect(testSubFolder).toHaveJSProperty('ariaLevel', '3');
+
+		await testFolderA.dragTo(sidebar.trashFolder);
+		await expect(testFolderA).toHaveJSProperty('ariaLevel', '3');
+		await expect(testSubFolder).toHaveJSProperty('ariaLevel', '4');
+
+		await testSubFolder.dragTo(sidebar.rootFolderHeader);
+		await testFolderA.dragTo(testSubFolder);
+
+		await expect(testFolderA).toHaveJSProperty('ariaLevel', '3');
+		await expect(testSubFolder).toHaveJSProperty('ariaLevel', '2');
 	});
 });

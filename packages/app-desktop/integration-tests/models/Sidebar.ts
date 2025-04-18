@@ -5,10 +5,18 @@ import { ElectronApplication, Locator, Page } from '@playwright/test';
 export default class Sidebar {
 	public readonly container: Locator;
 	public readonly allNotes: Locator;
+	public readonly trashFolder: Locator;
+	public readonly rootFolderHeader: Locator;
 
 	public constructor(page: Page, private mainScreen: MainScreen) {
 		this.container = page.locator('.rli-sideBar');
 		this.allNotes = this.container.getByText('All notes');
+		this.trashFolder = this.locateFolder('Trash');
+		this.rootFolderHeader = this.container.getByText('Notebooks');
+	}
+
+	private locateFolder(title: string) {
+		return this.container.getByRole('treeitem', { name: title });
 	}
 
 	public async createNewFolder(title: string) {
@@ -21,7 +29,7 @@ export default class Sidebar {
 		const submitButton = this.mainScreen.dialog.getByRole('button', { name: 'OK' });
 		await submitButton.click();
 
-		return this.container.getByRole('treeitem', { name: title });
+		return this.locateFolder(title);
 	}
 
 	private async sortBy(electronApp: ElectronApplication, option: string) {
