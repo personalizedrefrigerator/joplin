@@ -43,6 +43,7 @@ import useKeyboardRefocusHandler from './utils/useKeyboardRefocusHandler';
 import useDocument from '../../../hooks/useDocument';
 import useEditDialog from './utils/useEditDialog';
 import useEditDialogEventListeners from './utils/useEditDialogEventListeners';
+import Setting from '@joplin/lib/models/Setting';
 import useTextPatternsLookup from './utils/useTextPatternsLookup';
 
 const logger = Logger.create('TinyMCE');
@@ -57,7 +58,7 @@ const logger = Logger.create('TinyMCE');
 //
 // The problem is that the list plugin was, unknown to me, relying on this <br/>
 // being present. Without it, trying to add a bullet point or checkbox on an
-// empty document, does nothing. The exact reason for this is unclear
+// empty document, adds an empty paragraph. The exact reason for this is unclear
 // so as a workaround we manually add this <br> for empty documents,
 // which fixes the issue.
 //
@@ -70,8 +71,8 @@ const logger = Logger.create('TinyMCE');
 //
 // Perhaps upgrading the list plugin (which is a fork of TinyMCE own list plugin)
 // would help?
-function awfulInitHack(html: string): string {
-	return html === '<div id="rendered-md"></div>' ? '<div id="rendered-md"><p></p></div>' : html;
+function preprocessHtml(html: string): string {
+	return html === '' ? '<p></p>' : html;
 }
 
 
@@ -728,6 +729,25 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: any) => {
 				language_url: ['en_US', 'en_GB'].includes(language) ? undefined : `${bridge().vendorDir()}/lib/tinymce/langs/${language}`,
 				toolbar: toolbar.join(' '),
 				localization_function: _,
+				// See https://www.tiny.cloud/docs/tinymce/latest/tinymce-and-csp/#content_security_policy
+				content_security_policy: Setting.value('featureFlag.richText.useStrictContentSecurityPolicy') ? [
+					// Media: *: Allow users to include images and videos from the internet (e.g. ![](http://example.com/image.png)).
+					// Media: blob: Allow loading images/videos/audio from blob URLs. The Rich Text Editor
+					//      replaces certain base64 URLs with blob URLs.
+					// Media: data: Allow loading images and other media from data: URLs
+					'default-src \'self\'',
+					'img-src \'self\' blob: data: *', // Images
+					'media-src \'self\' blob: data: *', // Audio and video players
+
+					// Disallow certain unused features
+					'child-src \'none\'', // Should not contain sub-frames
+					'object-src \'none\'', // Objects can be used for script injection
+					'form-action \'none\'', // No submitting forms
+
+					// Styles: unsafe-inline: TinyMCE uses inline style="" styles.
+					// Styles: *: Allow users to include styles from the internet (e.g. <style src="https://example.com/style.css">)
+					'style-src \'self\' \'unsafe-inline\' * data:',
+				].join(' ; ') : undefined,
 				contextmenu: false,
 				browser_spellcheck: true,
 
@@ -1045,6 +1065,11 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: any) => {
 						// This prevents HTML-style resource URLs (e.g. <a href="file://path/to/resource/.../"></a>)
 						// from being discarded.
 						allowedFilePrefixes: [props.resourceDirectory],
+
+						// Remove the wrapping <div id="rendered-md">...</div>, which can cause
+						// TinyMCE to crash in some cases.
+						// See https://github.com/tinymce/tinymce/issues/10276
+						bodyOnly: true,
 					}),
 				);
 				if (cancelled) return;
@@ -1056,7 +1081,11 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: any) => {
 				// when the note content is updated externally.
 				const offsetBookmarkId = 2;
 				const bookmark = editor.selection.getBookmark(offsetBookmarkId);
-				editor.setContent(awfulInitHack(result.html));
+				const htmlAndCss = [
+					`<style>${result.cssStrings?.join('\n')}</style>`,
+					preprocessHtml(result.html),
+				].join('\n');
+				editor.setContent(htmlAndCss);
 				lastNoteIdRef.current = props.noteId;
 
 				if (lastOnChangeEventInfo.current.contentKey !== props.contentKey) {
@@ -1089,6 +1118,7 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: any) => {
 
 			const allAssetsOptions: NoteStyleOptions = {
 				contentMaxWidthTarget: '.mce-content-body',
+				contentWrapperSelector: '.mce-content-body',
 				scrollbarSize: props.scrollbarSize,
 				themeId: props.contentMarkupLanguage === MarkupLanguage.Html ? 1 : null,
 				whiteBackgroundNoteRendering: props.whiteBackgroundNoteRendering,
