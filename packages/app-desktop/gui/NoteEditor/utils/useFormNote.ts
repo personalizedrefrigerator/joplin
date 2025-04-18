@@ -15,7 +15,6 @@ import Logger from '@joplin/utils/Logger';
 import eventManager, { EventName } from '@joplin/lib/eventManager';
 import DecryptionWorker from '@joplin/lib/services/DecryptionWorker';
 import useQueuedAsyncEffect from '@joplin/lib/hooks/useQueuedAsyncEffect';
-import useAsyncEffect from '@joplin/lib/hooks/useAsyncEffect';
 
 const logger = Logger.create('useFormNote');
 
@@ -30,8 +29,8 @@ export interface HookDependencies {
 	titleInputRef: RefObject<HTMLInputElement>;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	editorRef: any;
-	onBeforeLoad(event: OnLoadEvent): void|Promise<void>;
-	onAfterLoad(event: OnLoadEvent): void|Promise<void>;
+	onBeforeLoad(event: OnLoadEvent): void;
+	onAfterLoad(event: OnLoadEvent): void;
 	builtInEditorVisible: boolean;
 }
 
@@ -68,8 +67,7 @@ function resourceInfosChanged(a: ResourceInfos, b: ResourceInfos): boolean {
 	return false;
 }
 
-type CancelEvent = { cancelled: boolean };
-type InitNoteStateCallback = (note: NoteEntity, isNew: boolean, cancelEvent: CancelEvent)=> Promise<FormNote>;
+type InitNoteStateCallback = (note: NoteEntity, isNew: boolean)=> Promise<FormNote>;
 const useRefreshFormNoteOnChange = (formNoteRef: RefObject<FormNote>, editorId: string, noteId: string, initNoteState: InitNoteStateCallback, builtInEditorVisible: boolean) => {
 	// Increasing the value of this counter cancels any ongoing note refreshes and starts
 	// a new refresh.
@@ -97,7 +95,7 @@ const useRefreshFormNoteOnChange = (formNoteRef: RefObject<FormNote>, editorId: 
 				return;
 			}
 
-			await initNoteState(n, false, event);
+			await initNoteState(n, false);
 			if (event.cancelled) return;
 			setFormNoteRefreshScheduled(oldValue => {
 				// If a new refresh was scheduled between initNoteState
@@ -167,7 +165,7 @@ export default function useFormNote(dependencies: HookDependencies) {
 	const formNoteRef = useRef(formNote);
 	formNoteRef.current = formNote;
 
-	const initNoteState: InitNoteStateCallback = useCallback(async (n, isNewNote, cancelEvent) => {
+	const initNoteState: InitNoteStateCallback = useCallback(async (n, isNewNote) => {
 		let originalCss = '';
 
 		if (n.markup_language === MarkupToHtml.MARKUP_LANGUAGE_HTML) {
@@ -203,7 +201,7 @@ export default function useFormNote(dependencies: HookDependencies) {
 
 		// If the user changes the note while resources are loading, this can lead to
 		// a note being incorrectly marked as "unchanged".
-		if (!isNewNote && (formNoteRef.current?.hasChanged || cancelEvent.cancelled)) {
+		if (!isNewNote && formNoteRef.current?.hasChanged) {
 			logger.info('Cancelled note refresh -- form note changed while loading attached resources.');
 			return null;
 		}
@@ -220,13 +218,15 @@ export default function useFormNote(dependencies: HookDependencies) {
 
 	useRefreshFormNoteOnChange(formNoteRef, editorId, noteId, initNoteState, builtInEditorVisible);
 
-	useAsyncEffect(async (event) => {
+	useEffect(() => {
 		if (!noteId) {
 			if (formNote.id) setFormNote(defaultFormNote());
-			return;
+			return () => {};
 		}
 
-		if (formNote.id === noteId) return;
+		if (formNote.id === noteId) return () => {};
+
+		let cancelled = false;
 
 		logger.debug('Loading existing note', noteId);
 
@@ -244,20 +244,29 @@ export default function useFormNote(dependencies: HookDependencies) {
 			});
 		}
 
-		const n = await Note.load(noteId);
-		if (event.cancelled) return;
-		if (!n) throw new Error(`Cannot find note with ID: ${noteId}`);
-		logger.debug('Loaded note:', n);
+		async function loadNote() {
+			const n = await Note.load(noteId);
+			if (cancelled) return;
+			if (!n) throw new Error(`Cannot find note with ID: ${noteId}`);
+			logger.debug('Loaded note:', n);
 
-		await onBeforeLoad({ formNote });
+			await onBeforeLoad({ formNote });
 
-		const newFormNote = await initNoteState(n, true, event);
+			const newFormNote = await initNoteState(n, true);
 
-		setIsNewNote(isProvisional);
+			setIsNewNote(isProvisional);
 
-		await onAfterLoad({ formNote: newFormNote });
+			await onAfterLoad({ formNote: newFormNote });
 
-		handleAutoFocus(!!n.is_todo);
+			handleAutoFocus(!!n.is_todo);
+		}
+
+		void loadNote();
+
+		return () => {
+			cancelled = true;
+		};
+		// eslint-disable-next-line @seiyab/react-hooks/exhaustive-deps -- Old code before rule was applied
 	}, [noteId, isProvisional, formNote]);
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
