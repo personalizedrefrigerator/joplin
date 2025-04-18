@@ -1608,6 +1608,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 						toolbarEnabled={this.props.toolbarEnabled}
 						themeId={this.props.themeId}
 						noteId={this.props.noteId}
+						noteHash={this.props.noteHash}
 						initialText={note.body}
 						initialSelection={this.selection}
 						onChange={this.onMarkdownEditorTextChange}
