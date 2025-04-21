@@ -950,6 +950,8 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: any) => {
 
 		const assetToUrl = (asset: RenderResultPluginAsset) => {
 			if (asset.pathIsAbsolute) {
+				// This is important on Windows, where the C:/ at the start of the path
+				// is interpreted as a relative subfolder without the file:// prefix.
 				return toFileProtocolPath(asset.path);
 			} else {
 				return asset.path;
