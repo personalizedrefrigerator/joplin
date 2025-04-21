@@ -948,7 +948,7 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: any) => {
 			return docHead_;
 		}
 
-		const assetUri = (asset: RenderResultPluginAsset) => {
+		const assetToUrl = (asset: RenderResultPluginAsset) => {
 			if (asset.pathIsAbsolute) {
 				return toFileProtocolPath(asset.path);
 			} else {
@@ -963,16 +963,14 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: any) => {
 			pluginAssets
 				// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 				.filter((a: any) => a.mime === 'text/css')
-				// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-				.map(assetUri),
+				.map(assetToUrl),
 		);
 
 		const allJsFiles = [].concat(
 			pluginAssets
 				// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 				.filter((a: any) => a.mime === 'application/javascript')
-				// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-				.map(assetUri),
+				.map(assetToUrl),
 		);
 
 		const filePathToElementId = (path: string) => {
