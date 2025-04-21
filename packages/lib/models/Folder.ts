@@ -248,12 +248,16 @@ export default class Folder extends BaseItem {
 			let parentId = noteCount.folder_id;
 
 			let i = 0;
+			let checkedForCycle = false;
 			do {
 				// Handle invalid state, preventing infinite loops -- check whether the current
 				// folder has itself as a parent.
-				if (i++ > 100 && Folder.checkForFolderHierarchyCycle_(foldersById, parentId)) {
-					logger.warn(`Invalid state: Folder ${parentId} has itself as a parent.`);
-					break;
+				if (i++ > 100 && !checkedForCycle) {
+					if (Folder.checkForFolderHierarchyCycle_(foldersById, parentId)) {
+						logger.warn(`Invalid state: Folder ${parentId} has itself as a parent.`);
+						break;
+					}
+					checkedForCycle = true;
 				}
 
 				const folder = foldersById[parentId];
