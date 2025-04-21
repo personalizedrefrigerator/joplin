@@ -45,6 +45,8 @@ import useEditDialog from './utils/useEditDialog';
 import useEditDialogEventListeners from './utils/useEditDialogEventListeners';
 import Setting from '@joplin/lib/models/Setting';
 import useTextPatternsLookup from './utils/useTextPatternsLookup';
+import { toFileProtocolPath } from '@joplin/utils/path';
+import { RenderResultPluginAsset } from '@joplin/renderer/types';
 
 const logger = Logger.create('TinyMCE');
 
@@ -946,6 +948,14 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: any) => {
 			return docHead_;
 		}
 
+		const assetUri = (asset: RenderResultPluginAsset) => {
+			if (asset.pathIsAbsolute) {
+				return toFileProtocolPath(asset.path);
+			} else {
+				return asset.path;
+			}
+		};
+
 		const allCssFiles = [
 			`${bridge().vendorDir()}/lib/@fortawesome/fontawesome-free/css/all.min.css`,
 			`gui/note-viewer/pluginAssets/highlight.js/${theme.codeThemeCss}`,
@@ -954,7 +964,7 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: any) => {
 				// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 				.filter((a: any) => a.mime === 'text/css')
 				// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-				.map((a: any) => a.path),
+				.map(assetUri),
 		);
 
 		const allJsFiles = [].concat(
@@ -962,7 +972,7 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: any) => {
 				// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 				.filter((a: any) => a.mime === 'application/javascript')
 				// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-				.map((a: any) => a.path),
+				.map(assetUri),
 		);
 
 		const filePathToElementId = (path: string) => {
