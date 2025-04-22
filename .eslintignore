@@ -889,6 +889,7 @@ packages/app-mobile/utils/makeShowMessageBox.js
 packages/app-mobile/utils/pickDocument.js
 packages/app-mobile/utils/polyfills/bufferPolyfill.js
 packages/app-mobile/utils/polyfills/index.js
+packages/app-mobile/utils/setAppLocale.js
 packages/app-mobile/utils/setupNotifications.js
 packages/app-mobile/utils/shareFile.js
 packages/app-mobile/utils/shareHandler.js

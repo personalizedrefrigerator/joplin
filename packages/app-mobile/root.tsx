@@ -141,6 +141,7 @@ import { AppState } from './utils/types';
 import { getDisplayParentId } from '@joplin/lib/services/trash';
 import PluginNotification from './components/plugins/PluginNotification';
 import FocusControl from './components/accessibility/FocusControl/FocusControl';
+import setAppLocale from './utils/setAppLocale';
 
 const logger = Logger.create('root');
 
@@ -192,6 +193,10 @@ const generalMiddleware = (store: any) => (next: any) => async (action: any) => 
 		const parentItem = action.originalItem?.parent_id ? await Folder.load(action.originalItem?.parent_id) : null;
 		const parentId = getDisplayParentId(action.originalItem, parentItem);
 		await NavService.go('Notes', { folderId: parentId });
+	}
+
+	if (action.type === 'SETTING_UPDATE_ONE' && action.key === 'locale' || action.type === 'SETTING_UPDATE_ALL') {
+		setAppLocale(newState.settings.locale);
 	}
 
 	if (action.type === 'SETTING_UPDATE_ONE' && action.key === 'sync.interval' || action.type === 'SETTING_UPDATE_ALL') {
