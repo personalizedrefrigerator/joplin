@@ -8674,8 +8674,7 @@ __metadata:
     "@types/fs-extra": 11.0.4
     "@types/jest": 29.5.12
     "@types/node": 18.19.67
-    "@types/react": 18.3.3
-    "@types/react-native": 0.70.6
+    "@types/react": 19.1.2
     "@types/react-redux": 7.1.33
     "@types/serviceworker": 0.0.95
     "@types/tar-stream": 3.1.3
@@ -8708,7 +8707,7 @@ __metadata:
     prop-types: 15.8.1
     punycode: 2.3.1
     react: 19.0.0
-    react-dom: 18.3.1
+    react-dom: 19.0.0
     react-native: 0.79.1
     react-native-device-info: 10.14.0
     react-native-document-picker: 9.3.0
@@ -8734,7 +8733,7 @@ __metadata:
     react-native-vector-icons: 10.1.0
     react-native-version-info: 1.1.1
     react-native-vosk: 0.1.12
-    react-native-web: 0.19.13
+    react-native-web: 0.20.0
     react-native-webview: 13.10.5
     react-native-zip-archive: 6.1.2
     react-redux: 8.1.3
@@ -13940,15 +13939,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react-native@npm:0.70.6":
-  version: 0.70.6
-  resolution: "@types/react-native@npm:0.70.6"
-  dependencies:
-    "@types/react": "*"
-  checksum: 1b620095ddf2fe85157df9d57435edc619587eacb1a4fadd91c977c200cef8008e7fec4d8c5429ce373e1a2158199f1162f9c84e8e5a7d0b71a2224f31b64dfd
-  languageName: node
-  linkType: hard
-
 "@types/react-redux@npm:7.1.33":
   version: 7.1.33
   resolution: "@types/react-redux@npm:7.1.33"
@@ -14020,6 +14010,15 @@ __metadata:
     "@types/prop-types": "*"
     csstype: ^3.0.2
   checksum: c63d6a78163244e2022b01ef79b0baec4fe4da3475dc4a90bb8accefad35ef0c43560fd0312e5974f92a0f1108aa4d669ac72d73d66396aa060ea03b5d2e3873
+  languageName: node
+  linkType: hard
+
+"@types/react@npm:19.1.2":
+  version: 19.1.2
+  resolution: "@types/react@npm:19.1.2"
+  dependencies:
+    csstype: ^3.0.2
+  checksum: 5a911a2c84be0c9451bb8a7c75c907af1f52afbb4d51b0d62e7516a9b0b1e63c3c1cdc35b79bfc6e66176c76cfff9d43023a781cd3dc59e2744715ced7d7e7c4
   languageName: node
   linkType: hard
 
@@ -25379,13 +25378,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"fast-loops@npm:^1.1.3":
-  version: 1.1.3
-  resolution: "fast-loops@npm:1.1.3"
-  checksum: b674378ba2ed8364ca1a00768636e88b22201c8d010fa62a8588a4cace04f90bac46714c13cf638be82b03438d2fe813600da32291fb47297a1bd7fa6cef0cee
-  languageName: node
-  linkType: hard
-
 "fast-safe-stringify@npm:^2.0.7":
   version: 2.1.1
   resolution: "fast-safe-stringify@npm:2.1.1"
@@ -29130,13 +29122,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"inline-style-prefixer@npm:^6.0.1":
-  version: 6.0.4
-  resolution: "inline-style-prefixer@npm:6.0.4"
+"inline-style-prefixer@npm:^7.0.1":
+  version: 7.0.1
+  resolution: "inline-style-prefixer@npm:7.0.1"
   dependencies:
     css-in-js-utils: ^3.1.0
-    fast-loops: ^1.1.3
-  checksum: caf7a75d18acbedc7e3b8bfac17563082becd2df6b65accad964a6afdf490329b42315c37fe65ba0177cc10fd32809eb40d62aba23a0118c74d87d4fc58defa2
+  checksum: 07a72573dfdac5e08fa18f5ce71d922861716955e230175ac415db227d9ed49443c764356cb407a92f4c85b30ebf39604165260b4dfbf3196b7736d7332c5c06
   languageName: node
   linkType: hard
 
@@ -40211,6 +40202,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-dom@npm:19.0.0":
+  version: 19.0.0
+  resolution: "react-dom@npm:19.0.0"
+  dependencies:
+    scheduler: ^0.25.0
+  peerDependencies:
+    react: ^19.0.0
+  checksum: 009cc6e575263a0d1906f9dd4aa6532d2d3d0d71e4c2b7777c8fe4de585fa06b5b77cdc2e0fbaa2f3a4a5e5d3305c189ba152153f358ee7da4d9d9ba5d3a8975
+  languageName: node
+  linkType: hard
+
 "react-dom@npm:^17.0.2":
   version: 17.0.2
   resolution: "react-dom@npm:17.0.2"
@@ -40665,22 +40667,22 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-web@npm:0.19.13":
-  version: 0.19.13
-  resolution: "react-native-web@npm:0.19.13"
+"react-native-web@npm:0.20.0":
+  version: 0.20.0
+  resolution: "react-native-web@npm:0.20.0"
   dependencies:
     "@babel/runtime": ^7.18.6
     "@react-native/normalize-colors": ^0.74.1
     fbjs: ^3.0.4
-    inline-style-prefixer: ^6.0.1
+    inline-style-prefixer: ^7.0.1
     memoize-one: ^6.0.0
     nullthrows: ^1.1.1
     postcss-value-parser: ^4.2.0
     styleq: ^0.1.3
   peerDependencies:
-    react: ^18.0.0
-    react-dom: ^18.0.0
-  checksum: 15077f88204cb980203b8e3784c092c8c25c972bf281db43fd4ccc9696b603380a49f5289fb9a742daddd8e7599baab5798a1f1c857bdd634add827bc39fd8d8
+    react: ^18.0.0 || ^19.0.0
+    react-dom: ^18.0.0 || ^19.0.0
+  checksum: 8a75802b8f281466ff07547de34df434c918c7102b7de4cbca19bd532e38c692e70fc318bc0f8f5507b6d00c64c46540c65e926f757dd74ae7f6d279d98a6ed8
   languageName: node
   linkType: hard
 
@@ -42853,7 +42855,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"scheduler@npm:0.25.0":
+"scheduler@npm:0.25.0, scheduler@npm:^0.25.0":
   version: 0.25.0
   resolution: "scheduler@npm:0.25.0"
   checksum: b7bb9fddbf743e521e9aaa5198a03ae823f5e104ebee0cb9ec625392bb7da0baa1c28ab29cee4b1e407a94e76acc6eee91eeb749614f91f853efda2613531566
