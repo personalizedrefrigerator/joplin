@@ -17,6 +17,7 @@ jobs:
       - name: Build
         run: yarn install
       - name: Run UI tests
+        shell: bash
         run: |
           cd ${GITHUB_WORKSPACE}/packages/app-desktop/
           bash ./integration-tests/run-ci.sh
