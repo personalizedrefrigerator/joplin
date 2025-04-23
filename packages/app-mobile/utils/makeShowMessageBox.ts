@@ -6,7 +6,7 @@ import { MessageBoxType, ShowMessageBoxOptions } from '@joplin/lib/shim';
 import { PromptButtonSpec } from '../components/DialogManager/types';
 
 
-const makeShowMessageBox = (dialogControl: null|RefObject<DialogControl>) => (message: string, options: ShowMessageBoxOptions = null) => {
+const makeShowMessageBox = (dialogControl: null|RefObject<DialogControl>) => (message: string, options: ShowMessageBoxOptions = {}) => {
 	return new Promise<number>(resolve => {
 		const okButton: PromptButtonSpec = {
 			text: _('OK'),
