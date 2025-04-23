@@ -149,7 +149,7 @@ const MenuComponent: React.FC<Props> = props => {
 				<FocusControl.ModalWrapper state={open ? ModalState.Open : ModalState.Closed}>
 					<ScrollView
 						style={styles.menuContentScroller}
-						testID={`menu-content-${refocusCounter ? 'refocusing' : ''}`}
+						testID={`menu-content-${open ? 'open' : 'closed'}`}
 					>{menuOptionComponents}</ScrollView>
 				</FocusControl.ModalWrapper>
 			</MenuOptions>

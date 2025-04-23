@@ -112,7 +112,7 @@ const openNoteActionsMenu = async () => {
 
 	// Wrap in act(...) -- this tells the test library that component state is intended to update (prevents
 	// warnings).
-	await act(async () => {
+	await waitFor(async () => {
 		await runWithFakeTimers(async () => {
 			await userEvent.press(actionMenuButton);
 		});
@@ -120,7 +120,7 @@ const openNoteActionsMenu = async () => {
 		// State can update until the menu content is marked as in the process of refocusing (part of the
 		// menu transition).
 		await waitFor(async () => {
-			expect(await screen.findByTestId('menu-content-refocusing')).toBeVisible();
+			expect(await screen.findByTestId('menu-content-open')).toBeVisible();
 		});
 	});
 };
