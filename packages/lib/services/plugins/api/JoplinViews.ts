@@ -8,6 +8,7 @@ import JoplinViewsToolbarButtons from './JoplinViewsToolbarButtons';
 import JoplinViewsPanels from './JoplinViewsPanels';
 import JoplinViewsNoteList from './JoplinViewsNoteList';
 import JoplinViewsEditors from './JoplinViewsEditor';
+import { JoplinViews as JoplinViewsImplementation } from '../BasePlatformImplementation';
 
 /**
  * This namespace provides access to view-related services.
@@ -29,27 +30,38 @@ export default class JoplinViews {
 	private editors_: JoplinViewsEditors = null;
 	private noteList_: JoplinViewsNoteList = null;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	private implementation_: any = null;
+	private implementation_: JoplinViewsImplementation = null;
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	public constructor(implementation: any, plugin: Plugin, store: any) {
+	public constructor(implementation: JoplinViewsImplementation, plugin: Plugin, store: any) {
 		this.store = store;
 		this.plugin = plugin;
 		this.implementation_ = implementation;
 	}
 
 	public get dialogs() {
-		if (!this.dialogs_) this.dialogs_ = new JoplinViewsDialogs(this.implementation_.dialogs, this.plugin, this.store);
+		if (!this.dialogs_) {
+			this.dialogs_ = new JoplinViewsDialogs(
+				this.implementation_.dialogs,
+				this.implementation_,
+				this.plugin,
+				this.store,
+			);
+		}
 		return this.dialogs_;
 	}
 
 	public get panels() {
-		if (!this.panels_) this.panels_ = new JoplinViewsPanels(this.plugin, this.store);
+		if (!this.panels_) {
+			this.panels_ = new JoplinViewsPanels(this.implementation_, this.plugin, this.store);
+		}
 		return this.panels_;
 	}
 
 	public get editors() {
-		if (!this.editors_) this.editors_ = new JoplinViewsEditors(this.plugin, this.store);
+		if (!this.editors_) {
+			this.editors_ = new JoplinViewsEditors(this.implementation_, this.plugin, this.store);
+		}
 		return this.editors_;
 	}
 

@@ -8,7 +8,7 @@ import shim from '@joplin/lib/shim';
 import { join } from 'path';
 import uuid, { uuidgen } from '@joplin/lib/uuid';
 import { hasProtocol } from '@joplin/utils/url';
-import { fileExtension } from '@joplin/utils/path';
+import { fileExtension, toForwardSlashes } from '@joplin/utils/path';
 const { clipboard, nativeImage } = require('electron');
 const packageInfo = require('../../packageInfo');
 
@@ -62,6 +62,9 @@ export default class PlatformImplementation extends BasePlatformImplementation {
 					showOpenDialog: async (options) => {
 						return bridge().showOpenDialog(options);
 					},
+				},
+				getWebViewAssetUri: async (filePath: string) => {
+					return `joplin-content://plugin-webview/${toForwardSlashes(filePath)}`;
 				},
 			},
 		};

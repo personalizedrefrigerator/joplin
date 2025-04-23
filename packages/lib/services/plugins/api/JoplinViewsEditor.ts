@@ -4,6 +4,7 @@ import eventManager from '../../../eventManager';
 import Plugin from '../Plugin';
 import createViewHandle from '../utils/createViewHandle';
 import WebviewController, { ContainerType } from '../WebviewController';
+import JoplinViewsBase, { Implementation as BaseImplementation } from './JoplinViewsBase';
 import { ActivationCheckCallback, EditorActivationCheckFilterObject, FilterHandler, ViewHandle, UpdateCallback } from './types';
 
 /**
@@ -43,21 +44,16 @@ import { ActivationCheckCallback, EditorActivationCheckFilterObject, FilterHandl
  * check the logic around `onActivationCheck` and `onUpdate` since this is the entry points for
  * using this API.
  */
-export default class JoplinViewsEditors {
+export default class JoplinViewsEditors extends JoplinViewsBase {
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	private store: any;
-	private plugin: Plugin;
 	private activationCheckHandlers_: Record<string, FilterHandler<EditorActivationCheckFilterObject>> = {};
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	public constructor(plugin: Plugin, store: any) {
+	public constructor(implementation: BaseImplementation, plugin: Plugin, store: any) {
+		super(implementation, plugin);
 		this.store = store;
-		this.plugin = plugin;
-	}
-
-	private controller(handle: ViewHandle): WebviewController {
-		return this.plugin.viewController(handle) as WebviewController;
 	}
 
 	/**
@@ -68,28 +64,6 @@ export default class JoplinViewsEditors {
 		const controller = new WebviewController(handle, this.plugin.id, this.store, this.plugin.baseDir, ContainerType.Editor);
 		this.plugin.addViewController(controller);
 		return handle;
-	}
-
-	/**
-	 * Sets the editor HTML content
-	 */
-	public async setHtml(handle: ViewHandle, html: string): Promise<string> {
-		return this.controller(handle).html = html;
-	}
-
-	/**
-	 * Adds and loads a new JS or CSS file into the panel.
-	 */
-	public async addScript(handle: ViewHandle, scriptPath: string): Promise<void> {
-		return this.controller(handle).addScript(scriptPath);
-	}
-
-	/**
-	 * See [[JoplinViewPanels]]
-	 */
-	// eslint-disable-next-line @typescript-eslint/ban-types -- Old code before rule was applied
-	public async onMessage(handle: ViewHandle, callback: Function): Promise<void> {
-		return this.controller(handle).onMessage(callback);
 	}
 
 	/**
@@ -123,14 +97,6 @@ export default class JoplinViewsEditors {
 	 */
 	public async onUpdate(handle: ViewHandle, callback: UpdateCallback): Promise<void> {
 		this.controller(handle).onUpdate(callback);
-	}
-
-	/**
-	 * See [[JoplinViewPanels]]
-	 */
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	public postMessage(handle: ViewHandle, message: any): void {
-		return this.controller(handle).postMessage(message);
 	}
 
 	/**

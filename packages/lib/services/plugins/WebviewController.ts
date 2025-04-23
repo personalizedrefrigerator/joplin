@@ -50,7 +50,6 @@ function findItemByKey(layout: any, key: string): any {
 }
 
 export default class WebviewController extends ViewController {
-
 	private baseDir_: string;
 	// eslint-disable-next-line @typescript-eslint/ban-types -- Old code before rule was applied
 	private messageListener_: Function = null;

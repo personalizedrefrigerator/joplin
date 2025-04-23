@@ -3,15 +3,15 @@
 
 import { VersionInfo } from './api/types';
 import { Implementation as ImagingImplementation } from './api/JoplinImaging';
+import { Implementation as DialogsImplementation } from './api/JoplinViewsDialogs';
+import { Implementation as ViewsBaseImplementation } from './api/JoplinViewsBase';
 
-export interface JoplinViewsDialogs {
-	showMessageBox(message: string): Promise<number>;
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	showOpenDialog(options: any): Promise<any>;
+export interface JoplinViewsBase {
+	getWebViewAssetUrl(filePath: string): Promise<string>;
 }
 
-export interface JoplinViews {
-	dialogs: JoplinViewsDialogs;
+export interface JoplinViews extends ViewsBaseImplementation {
+	dialogs: DialogsImplementation;
 }
 
 export interface Joplin {

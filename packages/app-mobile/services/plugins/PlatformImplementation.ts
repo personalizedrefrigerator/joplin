@@ -6,6 +6,8 @@ import { CreateFromPdfOptions, Implementation as ImagingImplementation } from '@
 import { _ } from '@joplin/lib/locale';
 import shim from '@joplin/lib/shim';
 import Clipboard from '@react-native-clipboard/clipboard';
+import { toFileProtocolPath } from '@joplin/utils/path';
+import { fromFilename as mimeFromFilename } from '@joplin/lib/mime-utils';
 
 
 
@@ -54,6 +56,15 @@ export default class PlatformImplementation extends BasePlatformImplementation {
 					showOpenDialog: async (_options) => {
 						throw new Error('Not implemented: showOpenDialog');
 					},
+				},
+
+				getWebViewAssetUri: async (assetPath: string) => {
+					if (shim.mobilePlatform() === 'web') {
+						const base64 = await shim.fsDriver().readFile(assetPath, 'base64');
+						return `data:${mimeFromFilename(assetPath)};base64,${base64}`;
+					} else {
+						return toFileProtocolPath(assetPath);
+					}
 				},
 			},
 		};

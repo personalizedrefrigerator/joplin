@@ -5,7 +5,13 @@ import createViewHandle from '../utils/createViewHandle';
 import WebviewController, { ContainerType } from '../WebviewController';
 import { ButtonSpec, ViewHandle, DialogResult, Toast } from './types';
 import { _ } from '../../../locale';
-import { JoplinViewsDialogs as JoplinViewsDialogsImplementation } from '../BasePlatformImplementation';
+import JoplinViewsBase, { Implementation as BaseImplementation } from './JoplinViewsBase';
+
+export interface Implementation {
+	showMessageBox(message: string): Promise<number>;
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
+	showOpenDialog(options: any): Promise<any>;
+}
 
 /**
  * Allows creating and managing dialogs. A dialog is modal window that
@@ -36,22 +42,22 @@ import { JoplinViewsDialogs as JoplinViewsDialogsImplementation } from '../BaseP
  * [View the demo
  * plugin](https://github.com/laurent22/joplin/tree/dev/packages/app-cli/tests/support/plugins/dialog)
  */
-export default class JoplinViewsDialogs {
+export default class JoplinViewsDialogs extends JoplinViewsBase {
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	private store: any;
-	private plugin: Plugin;
-	private implementation_: JoplinViewsDialogsImplementation;
+	private implementation_: Implementation;
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	public constructor(implementation: any, plugin: Plugin, store: any) {
+	public constructor(
+		implementation: Implementation,
+		baseImplementation: BaseImplementation,
+		plugin: Plugin,
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
+		store: any,
+	) {
+		super(baseImplementation, plugin);
 		this.store = store;
-		this.plugin = plugin;
 		this.implementation_ = implementation;
-	}
-
-	private controller(handle: ViewHandle): WebviewController {
-		return this.plugin.viewController(handle) as WebviewController;
 	}
 
 	/**
@@ -96,20 +102,6 @@ export default class JoplinViewsDialogs {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	public async showOpenDialog(options: any): Promise<any> {
 		return this.implementation_.showOpenDialog(options);
-	}
-
-	/**
-	 * Sets the dialog HTML content
-	 */
-	public async setHtml(handle: ViewHandle, html: string) {
-		return this.controller(handle).html = html;
-	}
-
-	/**
-	 * Adds and loads a new JS or CSS files into the dialog.
-	 */
-	public async addScript(handle: ViewHandle, scriptPath: string) {
-		return this.controller(handle).addScript(scriptPath);
 	}
 
 	/**
