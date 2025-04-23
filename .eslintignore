@@ -885,6 +885,7 @@ packages/app-mobile/utils/injectedJs.js
 packages/app-mobile/utils/ipc/RNToWebViewMessenger.js
 packages/app-mobile/utils/ipc/WebViewToRNMessenger.js
 packages/app-mobile/utils/lockToSingleInstance.js
+packages/app-mobile/utils/makeShowMessageBox.test.js
 packages/app-mobile/utils/makeShowMessageBox.js
 packages/app-mobile/utils/pickDocument.js
 packages/app-mobile/utils/polyfills/bufferPolyfill.js
