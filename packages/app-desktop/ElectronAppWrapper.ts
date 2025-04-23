@@ -288,7 +288,9 @@ export default class ElectronAppWrapper {
 		// Waiting for one of the ready events might work but they might not be triggered if there's an error, so
 		// the easiest is to use a timeout. Keep in mind that if you get a white window on Windows it might be due
 		// to this line though.
-		if (debugEarlyBugs) {
+		//
+		// Don't show the dev tools while end-to-end testing to simplify the logic that finds the main window.
+		if (debugEarlyBugs && !this.isEndToEndTesting_) {
 			// Since a recent release of Electron (v34?), calling openDevTools() here does nothing
 			// if a plugin devtool window is already opened. Maybe because they do a check on
 			// `isDevToolsOpened` which indeed returns `true` (but shouldn't since it's for a
