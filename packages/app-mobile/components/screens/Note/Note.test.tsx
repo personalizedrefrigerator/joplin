@@ -112,7 +112,7 @@ const openNoteActionsMenu = async () => {
 
 	// Wrap in act(...) -- this tells the test library that component state is intended to update (prevents
 	// warnings).
-	await act(async () => {
+	await waitFor(async () => {
 		await runWithFakeTimers(async () => {
 			await userEvent.press(actionMenuButton);
 		});
