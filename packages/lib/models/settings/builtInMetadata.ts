@@ -1732,6 +1732,7 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 			type: SettingItemType.Bool,
 			public: true,
 			storage: SettingStorage.File,
+			appTypes: [AppType.Desktop],
 			label: () => 'Stronger security controls in the Rich Text Editor',
 			description: () => 'Improves Rich Text Editor security by applying a strict content security policy to the Rich Text Editor\'s content.',
 			section: 'note',
