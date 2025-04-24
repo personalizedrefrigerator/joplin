@@ -288,7 +288,7 @@ describe('screens/Note', () => {
 		expect(titleInput).toBeDisabled();
 
 		await openNoteActionsMenu();
-		const deleteButton = await screen.findByText('Delete');
+		const deleteButton = await screen.findByRole('button', { name: 'Delete' });
 		expect(deleteButton).toBeDisabled();
 
 		cleanup();

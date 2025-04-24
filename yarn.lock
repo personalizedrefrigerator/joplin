@@ -39813,8 +39813,8 @@ __metadata:
 
 "react-native-popup-menu@patch:react-native-popup-menu@npm%3A0.17.0#./.yarn/patches/react-native-popup-menu-npm-0.17.0-8b745d88dd.patch::locator=root%40workspace%3A.":
   version: 0.17.0
-  resolution: "react-native-popup-menu@patch:react-native-popup-menu@npm%3A0.17.0#./.yarn/patches/react-native-popup-menu-npm-0.17.0-8b745d88dd.patch::version=0.17.0&hash=f186bb&locator=root%40workspace%3A."
-  checksum: ddcbcb0bab524f0d900b7381cc4a61f463c0c727ab63bb82bff95046721f9e552ae25dd4dbfaa628b055a150945547c92c791d75d5111efe5fec41789d4ba43b
+  resolution: "react-native-popup-menu@patch:react-native-popup-menu@npm%3A0.17.0#./.yarn/patches/react-native-popup-menu-npm-0.17.0-8b745d88dd.patch::version=0.17.0&hash=356dff&locator=root%40workspace%3A."
+  checksum: be271ee0003f3405ca373a455c7b1c6cdaa32e31a228ff3832c964b3dd5834f08c6c5b0da48f05ad2c3b9a602ac6ca18085702960445cb7aeca2195bbc763506
   languageName: node
   linkType: hard
 

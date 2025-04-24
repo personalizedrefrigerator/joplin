@@ -1,5 +1,5 @@
 diff --git a/build/rnpm.js b/build/rnpm.js
-index 47bc91a88b9e2246a0ce4295f9f932da6a572461..a1923776f17f299d06f7760fc124cc74cf99128c 100644
+index 47bc91a88b9e2246a0ce4295f9f932da6a572461..0137f4e6e57bd5bc6808e2bd0040d9c951e68f37 100644
 --- a/build/rnpm.js
 +++ b/build/rnpm.js
 @@ -1267,7 +1267,9 @@
@@ -13,6 +13,32 @@ index 47bc91a88b9e2246a0ce4295f9f932da6a572461..a1923776f17f299d06f7760fc124cc74
          }, React__default.createElement(reactNative.Animated.View, {
            style: [styles.fullscreen, {
              opacity: this.fadeAnim
+@@ -1282,7 +1284,8 @@
+   }(React.Component);
+ 
+   Backdrop.propTypes = {
+-    onPress: propTypes.func.isRequired
++    onPress: propTypes.func.isRequired,
++    accessibilityLabel: propTypes.string,
+   };
+   var styles = reactNative.StyleSheet.create({
+     fullscreen: {
+@@ -1352,6 +1355,7 @@
+           style: styles$1.placeholder
+         }, React__default.createElement(Backdrop, {
+           onPress: ctx._onBackdropPress,
++          accessibilityLabel: this.props.closeButtonLabel,
+           style: backdropStyles,
+           ref: ctx.onBackdropRef
+         }), ctx._makeOptions());
+@@ -1784,6 +1788,7 @@
+         }), React__default.createElement(MenuPlaceholder, {
+           ctx: this,
+           backdropStyles: customStyles.backdrop,
++          closeButtonLabel: this.props.closeButtonLabel,
+           ref: this._onPlaceholderRef
+         }))));
+       }
 diff --git a/src/index.d.ts b/src/index.d.ts
 index 7e1ef2e441a665e97c304984080399f9646395df..673c4f713757abfb1851cba0d4560020c83e5f50 100644
 --- a/src/index.d.ts
