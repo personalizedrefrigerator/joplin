@@ -1,3 +1,5 @@
+# This patch improves the note actions menu (the kebab menu)'s accessibility
+# by labelling its dismiss button.
 diff --git a/build/rnpm.js b/build/rnpm.js
 index 47bc91a88b9e2246a0ce4295f9f932da6a572461..0137f4e6e57bd5bc6808e2bd0040d9c951e68f37 100644
 --- a/build/rnpm.js
