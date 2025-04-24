@@ -196,6 +196,7 @@ Setting.setConstant('tempDir', baseTempDir);
 Setting.setConstant('cacheDir', baseTempDir);
 Setting.setConstant('resourceDir', baseTempDir);
 Setting.setConstant('pluginDataDir', `${profileDir}/profile/plugin-data`);
+Setting.setConstant('pluginAssetDir', `${require.resolve('@joplin/renderer')}/assets`);
 Setting.setConstant('profileDir', profileDir);
 Setting.setConstant('rootProfileDir', rootProfileDir);
 Setting.setConstant('env', Env.Dev);

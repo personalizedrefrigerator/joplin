@@ -800,6 +800,7 @@ packages/app-mobile/components/screens/Note/commands/hideKeyboard.js
 packages/app-mobile/components/screens/Note/commands/index.js
 packages/app-mobile/components/screens/Note/commands/insertDateTime.js
 packages/app-mobile/components/screens/Note/commands/setTags.js
+packages/app-mobile/components/screens/Note/commands/shareCurrentNote.js
 packages/app-mobile/components/screens/Note/commands/toggleVisiblePanes.js
 packages/app-mobile/components/screens/Note/types.js
 packages/app-mobile/components/screens/NoteTagsDialog.js
@@ -897,6 +898,7 @@ packages/app-mobile/utils/shim-init-react/index.js
 packages/app-mobile/utils/shim-init-react/index.web.js
 packages/app-mobile/utils/shim-init-react/injectedJs.js
 packages/app-mobile/utils/shim-init-react/shimInitShared.js
+packages/app-mobile/utils/showFile.js
 packages/app-mobile/utils/testing/createMockReduxStore.js
 packages/app-mobile/utils/testing/getWebViewDomById.js
 packages/app-mobile/utils/testing/getWebViewWindowById.js
@@ -1016,7 +1018,9 @@ packages/generator-joplin/generators/app/templates/api/types.js
 packages/generator-joplin/generators/app/templates/api_index.js
 packages/generator-joplin/generators/app/templates/src/index.js
 packages/generator-joplin/tools/updateCategories.js
-packages/htmlpack/src/index.js
+packages/htmlpack/index.js
+packages/htmlpack/packToString.js
+packages/htmlpack/utils/parseHtmlAsync.js
 packages/lib/ArrayUtils.js
 packages/lib/AsyncActionQueue.test.js
 packages/lib/AsyncActionQueue.js
