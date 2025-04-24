@@ -30,12 +30,15 @@ const makeShowMessageBox = (dialogControl: null|RefObject<DialogControl>) => (me
 				};
 			});
 		}
+		// This will be -1 for dialogs that don't include the default "cancel" button
+		const cancelIndex = buttons.indexOf(cancelButton);
 
 		// Web doesn't support Alert.alert -- prefer using the global dialogControl if available.
 		(dialogControl?.current?.prompt ?? Alert.alert)(
 			options?.title ?? '',
 			message,
 			buttons,
+			{ onDismiss: () => resolve(cancelIndex) },
 		);
 	});
 };

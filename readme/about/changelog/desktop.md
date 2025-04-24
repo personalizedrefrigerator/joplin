@@ -1,5 +1,14 @@
 # Joplin Desktop Changelog
 
+## [v3.3.6](https://github.com/laurent22/joplin/releases/tag/v3.3.6) (Pre-release) - 2025-04-24T12:27:20Z
+
+- Improved: Markdown editor: Scroll linked-to headers to the top of the editor ([#12125](https://github.com/laurent22/joplin/issues/12125) by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Disable WebView isolation by default, add feature flag ([#12149](https://github.com/laurent22/joplin/issues/12149)) ([#12143](https://github.com/laurent22/joplin/issues/12143) by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Fix infinite loop on startup after quickly moving folders ([#12140](https://github.com/laurent22/joplin/issues/12140) by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Make list continuation logic more predictable ([#11919](https://github.com/laurent22/joplin/issues/11919)) ([#10226](https://github.com/laurent22/joplin/issues/10226) by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Plugin API: Fix compatibility with YesYouKan plugin ([#12132](https://github.com/laurent22/joplin/issues/12132) by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Plugin API: Fix plugin renderer scripts fail to load in the Rich Text Editor ([#12141](https://github.com/laurent22/joplin/issues/12141)) ([#12137](https://github.com/laurent22/joplin/issues/12137) by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+
 ## [v3.3.5](https://github.com/laurent22/joplin/releases/tag/v3.3.5) (Pre-release) - 2025-04-17T13:40:31Z
 
 - New: Linux: Add more input-method-related start flags ([#12115](https://github.com/laurent22/joplin/issues/12115) by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
