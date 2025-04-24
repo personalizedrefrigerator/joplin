@@ -97,7 +97,7 @@ jest.mock('react-native-zip-archive', () => {
 	return { default: { } };
 });
 
-jest.mock('react-native-document-picker', () => ({ default: { } }));
+jest.mock('@react-native-documents/picker', () => ({ default: { } }));
 
 // Used by the renderer
 jest.doMock('react-native-vector-icons/Ionicons', () => {
