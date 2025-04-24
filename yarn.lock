@@ -8708,6 +8708,7 @@ __metadata:
     "@react-native-community/geolocation": 3.3.0
     "@react-native-community/netinfo": 11.4.1
     "@react-native-community/push-notification-ios": 1.11.0
+    "@react-native-documents/picker": 10.1.2
     "@react-native/babel-preset": 0.79.1
     "@react-native/metro-config": 0.79.1
     "@sqlite.org/sqlite-wasm": 3.46.0-build2
@@ -8752,7 +8753,6 @@ __metadata:
     react-dom: 19.0.0
     react-native: 0.79.1
     react-native-device-info: 10.14.0
-    react-native-document-picker: 9.3.0
     react-native-dropdownalert: 5.1.0
     react-native-exit-app: 2.0.0
     react-native-file-viewer: 2.1.5
@@ -11564,6 +11564,16 @@ __metadata:
     react: ">=16.6.3"
     react-native: ">=0.58.4"
   checksum: d8c8cdd0d4e8112752a13bf2c426618ec8edd91eacadf03f05375648b5f12ffa761e8676e9d6ac9e5bc5ded73c991ab2219c67fe02e110dfaf38f4cb59695868
+  languageName: node
+  linkType: hard
+
+"@react-native-documents/picker@npm:10.1.2":
+  version: 10.1.2
+  resolution: "@react-native-documents/picker@npm:10.1.2"
+  peerDependencies:
+    react: "*"
+    react-native: "*"
+  checksum: b25e7c6e96ec98bd407f2d520f79d9f0ef7018f9ab7080f39b69f38a3b1b50d976d83b31e1b6a318c2a2fd6c14d32d84d1df22254940174e4f8b61f2c67b4cc2
   languageName: node
   linkType: hard
 
@@ -39657,22 +39667,6 @@ __metadata:
   peerDependencies:
     react-native: "*"
   checksum: bf0630beef9c391498122cc66708fa9922bf8335701b0fe7f30642f509d60441338607a89daaa86eb9ced675926ee948da034c63c03659053ce34c10d50bd9e3
-  languageName: node
-  linkType: hard
-
-"react-native-document-picker@npm:9.3.0":
-  version: 9.3.0
-  resolution: "react-native-document-picker@npm:9.3.0"
-  dependencies:
-    invariant: ^2.2.4
-  peerDependencies:
-    react: "*"
-    react-native: "*"
-    react-native-windows: "*"
-  peerDependenciesMeta:
-    react-native-windows:
-      optional: true
-  checksum: 622c9bd3a17b7b92ff6b13571ccf2a916dd2477f2aa8c22b79e4b204156742ba95680dea912ee5ee56718f13c537107f5937e5bcf88d93cdf2142d508dc16351
   languageName: node
   linkType: hard
 
