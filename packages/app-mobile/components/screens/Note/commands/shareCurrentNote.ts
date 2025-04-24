@@ -38,8 +38,8 @@ export const runtime = (props: CommandRuntimeProps): CommandRuntime => {
 		const textId = 'text';
 		const answer = await props.dialogs.showMenu(
 			_('Share as...'), [
-				{ text: _('HTML'), id: htmlId },
-				{ text: _('Text'), id: textId },
+				{ text: _('Rich Text (HTML)'), id: htmlId },
+				{ text: _('Text only'), id: textId },
 			],
 		);
 
