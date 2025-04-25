@@ -5,14 +5,14 @@
   "main": "dist/index.js",
   "types": "index.ts",
   "exports": {
-	".": {
-		"default": "./dist/index.js",
-		"types": "./index.ts"
-	},
-	"./packToString": {
-		"default": "./dist/packToString.js",
-		"types": "./packToString.ts"
-	}
+    ".": {
+      "default": "./dist/index.js",
+      "types": "./index.ts"
+    },
+    "./packToString": {
+      "default": "./dist/packToString.js",
+      "types": "./packToString.ts"
+    }
   },
   "publishConfig": {
     "access": "public"
