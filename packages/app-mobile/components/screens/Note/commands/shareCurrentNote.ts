@@ -45,20 +45,26 @@ export const runtime = (props: CommandRuntimeProps): CommandRuntime => {
 
 		if (answer === htmlId) {
 			const exportDirectory = `${Setting.value('tempDir')}/export-note-${uuid.create()}`;
+			// Use the same exported-note.html file for all single-note exports -- removing the file immediately
+			// after sharing breaks the file viewer on Android.
+			const targetFile = `${Setting.value('tempDir')}/exported-note.html`;
 			await shim.fsDriver().mkdir(exportDirectory);
-			const exportPath = `${exportDirectory}/index.html`;
+			try {
+				const exportPath = `${exportDirectory}/index.html`;
 
+				await InteropService.instance().export({
+					path: exportPath,
+					format: ExportModuleOutputFormat.Html,
+					packIntoSingleFile: true,
+					target: FileSystemItem.File,
+				});
 
-			await InteropService.instance().export({
-				path: exportPath,
-				format: ExportModuleOutputFormat.Html,
-				packIntoSingleFile: true,
-				target: FileSystemItem.File,
-			});
+				await shim.fsDriver().copy(exportPath, targetFile);
+			} finally {
+				await shim.fsDriver().remove(exportDirectory, { recursive: true });
+			}
 
-			await showFile(exportPath);
-
-			await shim.fsDriver().remove(exportDirectory, { recursive: true });
+			await showFile(targetFile);
 		} else if (answer === textId) {
 			await shareText(note.title, note.body);
 		}
