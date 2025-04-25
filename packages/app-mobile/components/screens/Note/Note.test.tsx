@@ -209,12 +209,13 @@ describe('screens/Note', () => {
 		const noteId = await openNewNote({ title: 'Unchanged title', body: defaultBody });
 
 		const noteScreen = render(<WrappedNoteScreen />);
+		await openEditor();
 		await act(async () => await runWithFakeTimers(async () => {
-			await openEditor();
 			const editor = await getNoteEditorControl();
 			editor.select(defaultBody.length, defaultBody.length);
 
 			editor.insertText(' Testing!!!');
+			expect(editor.editor.state.doc.toString()).toBe('Change me! Testing!!!');
 			await waitForNoteToMatch(noteId, { body: 'Change me! Testing!!!' });
 
 			editor.insertText(' This is a test.');
@@ -288,8 +289,8 @@ describe('screens/Note', () => {
 		expect(titleInput).toBeDisabled();
 
 		await openNoteActionsMenu();
-		const deleteButton = await screen.findByRole('button', { name: 'Delete' });
-		expect(deleteButton).toBeDisabled();
+		const deleteButton = await screen.findByText(/^Delete/);
+		expect(deleteButton).toHaveAccessibleName('Delete (Disabled)');
 
 		cleanup();
 	});
