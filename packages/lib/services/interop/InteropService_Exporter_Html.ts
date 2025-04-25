@@ -193,7 +193,13 @@ export default class InteropService_Exporter_Html extends InteropService_Exporte
 		if (this.packIntoSingleFile_) {
 			const mainHtml = await shim.fsDriver().readFile(this.filePath_, 'utf8');
 			const resolveToAllowedDir = (path: string) => {
-				return shim.fsDriver().resolveRelativePathWithinDir(this.destDir_, path);
+				// TODO: Enable this for all platforms -- at present, this is mobile-only.
+				const restrictToDestDir = !!shim.mobilePlatform();
+				if (restrictToDestDir) {
+					return shim.fsDriver().resolveRelativePathWithinDir(this.destDir_, path);
+				} else {
+					return shim.fsDriver().resolve(this.destDir_, path);
+				}
 			};
 			const packedHtml = await packToString(
 				this.destDir_,
