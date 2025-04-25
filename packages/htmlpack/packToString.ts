@@ -92,7 +92,7 @@ const packToString = async (baseDir: string, inputFileText: string, fs: FileApi)
 								const cssFilePath = `${cssBaseDir}/${url}`;
 								let replacement;
 								if (await fs.exists(cssFilePath)) {
-									replacement = `url(${readFileDataUriSafe(cssFilePath)})`;
+									replacement = `url(${await readFileDataUriSafe(cssFilePath)})`;
 								} else {
 									replacement = `url(${url})`;
 								}
@@ -124,7 +124,7 @@ const packToString = async (baseDir: string, inputFileText: string, fs: FileApi)
 
 		if (!await fs.exists(filePath)) return null;
 		const content = await fs.readFileText(filePath);
-		return `<style>${processCssContent(dirname(filePath), content)}</style>`;
+		return `<style>${await processCssContent(dirname(filePath), content)}</style>`;
 	};
 
 	const processScriptTag = async (_name: string, attrs: HtmlAttrs) => {
