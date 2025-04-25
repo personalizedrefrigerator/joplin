@@ -10,6 +10,8 @@ import Note from '@joplin/lib/models/Note';
 import { NoteEntity } from '@joplin/lib/services/database/types';
 import InteropService from '@joplin/lib/services/interop/InteropService';
 import { ExportModuleOutputFormat, FileSystemItem } from '@joplin/lib/services/interop/types';
+import type FsDriverWeb from '../../../../utils/fs-driver/fs-driver-rn.web';
+import { filename } from '@joplin/utils/path';
 
 export const declaration: CommandDeclaration = {
 	name: 'shareCurrentNote',
@@ -25,11 +27,17 @@ export const runtime = (props: CommandRuntimeProps): CommandRuntime => {
 				message: `${title}\n\n${content}`,
 				title: title,
 			});
-		} else {
+		} else if (Platform.OS === 'web') {
 			const tempFilePath = `${Setting.value('tempDir')}/${uuid.create()}.md`;
-			await shim.fsDriver().writeFile(tempFilePath, message, 'utf8');
+
+			// The file doesn't need to be persistent to be shared -- write to a virtual file
+			const tempFileContent = new File([message], filename(tempFilePath));
+			await (shim.fsDriver() as FsDriverWeb).createReadOnlyVirtualFile(tempFilePath, tempFileContent);
+
+			// ...then share the virtual file.
 			await showFile(tempFilePath);
-			await shim.fsDriver().remove(tempFilePath);
+		} else {
+			throw new Error('Share unsupported');
 		}
 	};
 
