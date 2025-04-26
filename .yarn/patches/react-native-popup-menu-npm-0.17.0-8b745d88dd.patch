@@ -1,7 +1,7 @@
 # This patch improves the note actions menu (the kebab menu)'s accessibility
 # by labelling its dismiss button.
 diff --git a/build/rnpm.js b/build/rnpm.js
-index 47bc91a88b9e2246a0ce4295f9f932da6a572461..0137f4e6e57bd5bc6808e2bd0040d9c951e68f37 100644
+index 47bc91a88b9e2246a0ce4295f9f932da6a572461..75b5a22bdcbc2594238bcf953df6d54e18cc7793 100644
 --- a/build/rnpm.js
 +++ b/build/rnpm.js
 @@ -1267,7 +1267,9 @@
@@ -41,6 +41,15 @@ index 47bc91a88b9e2246a0ce4295f9f932da6a572461..0137f4e6e57bd5bc6808e2bd0040d9c9
            ref: this._onPlaceholderRef
          }))));
        }
+@@ -1854,7 +1859,7 @@
+         var _options$props = options.props,
+             optionsContainerStyle = _options$props.optionsContainerStyle,
+             renderOptionsContainer = _options$props.renderOptionsContainer,
+-            customStyles = _options$props.customStyles;
++            customStyles = _options$props.customStyles ?? {};
+         var optionsRenderer = renderOptionsContainer || defaultOptionsContainerRenderer;
+         var isOutside = !triggerLayout || !optionsLayout;
+ 
 diff --git a/src/index.d.ts b/src/index.d.ts
 index 7e1ef2e441a665e97c304984080399f9646395df..673c4f713757abfb1851cba0d4560020c83e5f50 100644
 --- a/src/index.d.ts

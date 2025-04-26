@@ -9,6 +9,9 @@
 import './utils/polyfills';
 
 import { LogBox, AppRegistry } from 'react-native';
+import shim from '@joplin/lib/shim';
+shim.setReact(require('react'));
+
 const Root = require('./root').default;
 
 // Seems JavaScript developers love adding warnings everywhere, even when these warnings can't be fixed
