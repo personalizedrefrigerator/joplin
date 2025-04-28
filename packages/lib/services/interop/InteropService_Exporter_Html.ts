@@ -9,7 +9,7 @@ import { MarkupToHtml } from '@joplin/renderer';
 import { NoteEntity, ResourceEntity, ResourceLocalStateEntity } from '../database/types';
 import { contentScriptsToRendererRules } from '../plugins/utils/loadContentScripts';
 import { basename, friendlySafeFilename, rtrimSlashes, dirname } from '../../path-utils';
-import packToString from '@joplin/htmlpack/packToString';
+import htmlpack from '@joplin/htmlpack';
 const { themeStyle } = require('../../theme');
 const { escapeHtml } = require('../../string-utils.js');
 import { assetsToHeaders } from '@joplin/renderer';
@@ -19,7 +19,6 @@ import Logger from '@joplin/utils/Logger';
 import { parseRenderedNoteMetadata } from './utils';
 import ResourceLocalState from '../../models/ResourceLocalState';
 import { ResourceInfos } from '@joplin/renderer/types';
-import { fromFilename } from '../../mime-utils';
 
 const logger = Logger.create('InteropService_Exporter_Html');
 
@@ -189,31 +188,10 @@ export default class InteropService_Exporter_Html extends InteropService_Exporte
 
 	public async close() {
 		if (this.packIntoSingleFile_) {
-			const mainHtml = await shim.fsDriver().readFile(this.filePath_, 'utf8');
-			const resolveToAbsolute = (path: string) => {
-				return shim.fsDriver().resolve(this.destDir_, path);
-			};
-			const packedHtml = await packToString(
-				this.destDir_,
-				mainHtml,
-				{
-					exists: (path) => {
-						path = resolveToAbsolute(path);
-						return shim.fsDriver().exists(path);
-					},
-					readFileDataUri: async (path) => {
-						path = resolveToAbsolute(path);
-						const mimeType = fromFilename(path);
-						const content = await shim.fsDriver().readFile(path, 'base64');
-						return `data:${mimeType};base64,${content}`;
-					},
-					readFileText: (path) => {
-						path = resolveToAbsolute(path);
-						return shim.fsDriver().readFile(path, 'utf8');
-					},
-				},
-			);
-			await shim.fsDriver().writeFile(this.filePath_, packedHtml, 'utf8');
+			const tempFilePath = `${this.filePath_}.tmp`;
+			await shim.fsDriver().move(this.filePath_, tempFilePath);
+			await htmlpack(tempFilePath, this.filePath_);
+			await shim.fsDriver().remove(tempFilePath);
 
 			for (const d of this.createdDirs_) {
 				await shim.fsDriver().remove(d);

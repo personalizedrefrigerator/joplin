@@ -19,7 +19,6 @@ import InteropService_Exporter_Md_frontmatter from './InteropService_Exporter_Md
 import InteropService_Importer_Base from './InteropService_Importer_Base';
 import InteropService_Exporter_Base from './InteropService_Exporter_Base';
 import Module, { dynamicRequireModuleFactory, makeExportModule, makeImportModule } from './Module';
-import InteropService_Exporter_Html from './InteropService_Exporter_Html';
 const { sprintf } = require('sprintf-js');
 const { fileExtension } = require('../../path-utils');
 const EventEmitter = require('events');
@@ -178,13 +177,15 @@ export default class InteropService {
 					target: FileSystemItem.File,
 					isNoteArchive: false,
 					description: _('HTML File'),
-				}, () => new InteropService_Exporter_Html()),
+					supportsMobile: false,
+				}, dynamicRequireModuleFactory('./InteropService_Exporter_Html')),
 
 				makeExportModule({
 					format: ExportModuleOutputFormat.Html,
 					target: FileSystemItem.Directory,
 					description: _('HTML Directory'),
-				}, () => new InteropService_Exporter_Html()),
+					supportsMobile: false,
+				}, dynamicRequireModuleFactory('./InteropService_Exporter_Html')),
 			];
 
 			this.defaultModules_ = (importModules as Module[]).concat(exportModules);
