@@ -49,7 +49,6 @@ export interface Constants {
 	appType: AppType;
 	resourceDirName: string;
 	resourceDir: string;
-	pluginAssetDir: string;
 	profileDir: string;
 	rootProfileDir: string;
 	tempDir: string;
@@ -218,7 +217,6 @@ class Setting extends BaseModel {
 		appType: 'SET_ME' as any, // 'cli' or 'mobile'
 		resourceDirName: '',
 		resourceDir: '',
-		pluginAssetDir: '',
 		profileDir: '',
 		rootProfileDir: '',
 		tempDir: '',

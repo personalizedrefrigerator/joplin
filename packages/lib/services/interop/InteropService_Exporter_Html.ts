@@ -139,11 +139,13 @@ export default class InteropService_Exporter_Html extends InteropService_Exporte
 			if (metadata.printTitle && item.title) noteContent.push(`<div class="exported-note-title">${escapeHtml(item.title)}</div>`);
 			if (result.html) noteContent.push(result.html);
 
+			const libRootPath = dirname(dirname(__dirname));
+
 			// We need to export all the plugin assets too and refer them from the header
 			// The source path is a bit hard-coded but shouldn't change.
 			for (let i = 0; i < result.pluginAssets.length; i++) {
 				const asset = result.pluginAssets[i];
-				const filePath = asset.pathIsAbsolute ? asset.path : `${Setting.value('pluginAssetDir')}/${asset.name}`;
+				const filePath = asset.pathIsAbsolute ? asset.path : `${libRootPath}/node_modules/@joplin/renderer/assets/${asset.name}`;
 				if (!(await shim.fsDriver().exists(filePath))) {
 					logger.warn(`File does not exist and cannot be exported: ${filePath}`);
 				} else {
@@ -174,12 +176,8 @@ export default class InteropService_Exporter_Html extends InteropService_Exporte
 		}
 	}
 
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	public async processResource(resource: ResourceEntity, filePath: string) {
-		if (!this.resourceDir_) return;
-		if (!await shim.fsDriver().exists(this.resourceDir_)) {
-			await shim.fsDriver().mkdir(this.resourceDir_);
-		}
-
 		const destResourcePath = `${this.resourceDir_}/${basename(filePath)}`;
 		await shim.fsDriver().copy(filePath, destResourcePath);
 		const localState: ResourceLocalStateEntity = await ResourceLocalState.load(resource.id);
@@ -192,31 +190,25 @@ export default class InteropService_Exporter_Html extends InteropService_Exporte
 	public async close() {
 		if (this.packIntoSingleFile_) {
 			const mainHtml = await shim.fsDriver().readFile(this.filePath_, 'utf8');
-			const resolveToAllowedDir = (path: string) => {
-				// TODO: Enable this for all platforms -- at present, this is mobile-only.
-				const restrictToDestDir = !!shim.mobilePlatform();
-				if (restrictToDestDir) {
-					return shim.fsDriver().resolveRelativePathWithinDir(this.destDir_, path);
-				} else {
-					return shim.fsDriver().resolve(this.destDir_, path);
-				}
+			const resolveToAbsolute = (path: string) => {
+				return shim.fsDriver().resolve(this.destDir_, path);
 			};
 			const packedHtml = await packToString(
 				this.destDir_,
 				mainHtml,
 				{
 					exists: (path) => {
-						path = resolveToAllowedDir(path);
+						path = resolveToAbsolute(path);
 						return shim.fsDriver().exists(path);
 					},
 					readFileDataUri: async (path) => {
-						path = resolveToAllowedDir(path);
+						path = resolveToAbsolute(path);
 						const mimeType = fromFilename(path);
 						const content = await shim.fsDriver().readFile(path, 'base64');
 						return `data:${mimeType};base64,${content}`;
 					},
 					readFileText: (path) => {
-						path = resolveToAllowedDir(path);
+						path = resolveToAbsolute(path);
 						return shim.fsDriver().readFile(path, 'utf8');
 					},
 				},

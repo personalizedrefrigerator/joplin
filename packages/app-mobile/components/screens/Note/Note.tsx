@@ -7,7 +7,7 @@ import NoteBodyViewer from '../../NoteBodyViewer/NoteBodyViewer';
 import checkPermissions from '../../../utils/checkPermissions';
 import NoteEditor from '../../NoteEditor/NoteEditor';
 import * as React from 'react';
-import { Keyboard, View, TextInput, StyleSheet, Linking, NativeSyntheticEvent } from 'react-native';
+import { Keyboard, View, TextInput, StyleSheet, Linking, Share, NativeSyntheticEvent } from 'react-native';
 import { Platform, PermissionsAndroid } from 'react-native';
 import { connect } from 'react-redux';
 import Note from '@joplin/lib/models/Note';
@@ -998,6 +998,13 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 		this.scheduleSave();
 	}
 
+	private async share_onPress() {
+		await Share.share({
+			message: `${this.state.note.title}\n\n${this.state.note.body}`,
+			title: this.state.note.title,
+		});
+	}
+
 	private properties_onPress() {
 		this.props.dispatch({ type: 'SIDE_MENU_OPEN' });
 	}
@@ -1212,14 +1219,16 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 			});
 		}
 
-		const commandService = CommandService.instance();
-		output.push({
-			title: _('Share'),
-			onPress: () => {
-				void commandService.execute('shareCurrentNote');
-			},
-			disabled: false,
-		});
+		const shareSupported = Platform.OS !== 'web' || !!navigator.share;
+		if (shareSupported) {
+			output.push({
+				title: _('Share'),
+				onPress: () => {
+					void this.share_onPress();
+				},
+				disabled: readOnly,
+			});
+		}
 
 		const voiceTypingSupported = Platform.OS === 'android';
 		if (voiceTypingSupported) {
@@ -1233,6 +1242,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 			});
 		}
 
+		const commandService = CommandService.instance();
 		const whenContext = commandService.currentWhenClauseContext();
 		const addButtonFromCommand = (commandName: string, title?: string) => {
 			if (commandName === '-') {
