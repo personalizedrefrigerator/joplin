@@ -133,7 +133,10 @@ export const startServer = async (startPort: number, secretKeyFilePath: string, 
 				if (logger) logger.error('Server error:', error);
 			});
 
-			server.listen(port, () => {
+			server.listen({
+				port,
+				host: 'localhost',
+			}, () => {
 				resolve({
 					httpServer: server,
 					port,
