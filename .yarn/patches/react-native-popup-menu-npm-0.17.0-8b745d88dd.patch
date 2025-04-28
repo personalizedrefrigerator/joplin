@@ -46,7 +46,7 @@ index 47bc91a88b9e2246a0ce4295f9f932da6a572461..75b5a22bdcbc2594238bcf953df6d54e
              optionsContainerStyle = _options$props.optionsContainerStyle,
              renderOptionsContainer = _options$props.renderOptionsContainer,
 -            customStyles = _options$props.customStyles;
-+            customStyles = _options$props.customStyles ?? {};
++            customStyles = _options$props.customStyles || {};
          var optionsRenderer = renderOptionsContainer || defaultOptionsContainerRenderer;
          var isOutside = !triggerLayout || !optionsLayout;
  

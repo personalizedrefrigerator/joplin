@@ -8,7 +8,8 @@
 
 import './utils/polyfills';
 
-import { LogBox, AppRegistry } from 'react-native';
+import { LogBox } from 'react-native';
+import { registerRootComponent } from 'expo';
 import shim from '@joplin/lib/shim';
 shim.setReact(require('react'));
 
@@ -48,7 +49,7 @@ LogBox.ignoreLogs([
 	'Did not receive response to shouldStartLoad in time, defaulting to YES',
 ]);
 
-AppRegistry.registerComponent('Joplin', () => Root);
+registerRootComponent(Root);
 
 // Using streams on react-native requires to polyfill process.nextTick()
 global.process.nextTick = setImmediate;

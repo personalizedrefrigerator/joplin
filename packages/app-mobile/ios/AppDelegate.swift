@@ -10,7 +10,7 @@ public class AppDelegate: ExpoAppDelegate {
   ) -> Bool {
     let delegate = ReactNativeDelegate()
     let factory = ExpoReactNativeFactory(delegate: delegate)
-    delegate.dependencyProvider = RCTAppDependencyProvider()
+    delegate.dependencyProvider = RCTAppDependencyProvider()    
 
     reactNativeFactoryDelegate = delegate
     reactNativeFactory = factory
@@ -18,7 +18,7 @@ public class AppDelegate: ExpoAppDelegate {
 #if os(iOS) || os(tvOS)
     window = UIWindow(frame: UIScreen.main.bounds)
     reactNativeFactory?.startReactNative(
-      withModuleName: "Joplin",
+      withModuleName: "main",
       in: window,
       launchOptions: launchOptions)
 #endif
@@ -58,7 +58,7 @@ class ReactNativeDelegate: ExpoReactNativeFactoryDelegate {
 #if DEBUG
     return RCTBundleURLProvider.sharedSettings().jsBundleURL(forBundleRoot: ".expo/.virtual-metro-entry")
 #else
-    return Bundle.main.url(forResource: "Joplin", withExtension: "jsbundle")
+    return Bundle.main.url(forResource: "main", withExtension: "jsbundle")
 #endif
   }
 }
