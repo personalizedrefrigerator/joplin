@@ -36,6 +36,7 @@ import isCursorAtBeginning from './utils/isCursorAtBeginning';
 import overwriteModeExtension from './utils/overwriteModeExtension';
 import handleLinkEditRequests, { showLinkEditor } from './utils/handleLinkEditRequests';
 import selectedNoteIdExtension, { setNoteIdEffect } from './utils/selectedNoteIdExtension';
+import accessibilityRoleExtension from './utils/accessibilityRoleExtension';
 
 // Newer versions of CodeMirror by default use Chrome's EditContext API.
 // While this might be stable enough for desktop use, it causes significant
@@ -270,6 +271,7 @@ const createEditor = (
 
 				// Apply styles to entire lines (block-display decorations)
 				decoratorExtension,
+				accessibilityRoleExtension,
 				dropCursor(),
 
 				biDirectionalTextExtension,
