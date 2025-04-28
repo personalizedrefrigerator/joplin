@@ -127,6 +127,7 @@ export interface StorageDriverConfig {
 	path?: string;
 	mode?: StorageDriverMode;
 	region?: string;
+	endpoint?: string;
 	accessKeyId?: string;
 	secretAccessKeyId?: string;
 	bucket?: string;
@@ -141,6 +142,7 @@ export interface LdapConfig {
 	baseDN: string;
 	bindDN: string;
 	bindPW: string;
+	tlsCaFile: string;
 }
 
 export interface Config extends EnvVariables {

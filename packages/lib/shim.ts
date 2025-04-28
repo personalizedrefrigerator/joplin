@@ -40,6 +40,20 @@ interface AttachFileToNoteOptions {
 	markupLanguage?: MarkupLanguage;
 }
 
+export enum MessageBoxType {
+	Confirm = 'question',
+	Error = 'error',
+	Info = 'info',
+}
+
+export interface ShowMessageBoxOptions {
+	title?: string;
+	buttons?: string[];
+	type?: MessageBoxType;
+	defaultId?: number;
+	cancelId?: number;
+}
+
 let isTestingEnv_ = false;
 
 // We need to ensure that there's only one instance of React being used by all
@@ -142,6 +156,12 @@ const shim = {
 		return typeof process !== 'undefined' && process.platform === 'darwin';
 	},
 
+	// Tells whether the computer **CPU** is an Apple Silicon (not whether the running version was
+	// built for ARM64)
+	isAppleSilicon: (): boolean => {
+		throw new Error('Not implemented: isAppleSilicon');
+	},
+
 	platformName: () => {
 		if (shim.isReactNative()) return shim.mobilePlatform();
 		if (shim.isMac()) return 'darwin';
@@ -150,6 +170,23 @@ const shim = {
 		if (shim.isFreeBSD()) return 'freebsd';
 		if (typeof process !== 'undefined' && process.platform) return process.platform;
 		throw new Error('Cannot determine platform');
+	},
+
+	// Tells the computer CPU architecture. Which if different from the architecture the running
+	// version was built for. For example, the laptop CPU may be an ARM64, while the version was
+	// built for x64 architecture. Here we want to know the laptop CPU.
+	platformArch: (): string => {
+		throw new Error('Not implemented: platformArch');
+	},
+
+	deviceString: () => {
+		const output: string[] = [];
+
+		output.push(shim.platformName());
+
+		if (shim.platformArch()) output.push(shim.platformArch());
+
+		return output.join(', ');
 	},
 
 	// "ios" or "android", or "" if not on mobile
@@ -285,6 +322,10 @@ const shim = {
 		throw new Error('Not implemented: fsDriver');
 	},
 
+	sharpEnabled: (): boolean => {
+		return true;
+	},
+
 	FileApiDriverLocal: null as typeof FileApiDriverLocal,
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
@@ -397,13 +438,16 @@ const shim = {
 	// Returns the index of the button that was clicked. By default,
 	// 0 -> OK
 	// 1 -> Cancel
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	showMessageBox: (_message: string, _options: any = null): Promise<number> => {
+	showMessageBox: (_message: string, _options: ShowMessageBoxOptions = null): Promise<number> => {
 		throw new Error('Not implemented');
 	},
 
+	showErrorDialog: async (message: string): Promise<void> => {
+		await shim.showMessageBox(message, { type: MessageBoxType.Error });
+	},
+
 	showConfirmationDialog: async (message: string): Promise<boolean> => {
-		return await shim.showMessageBox(message) === 0;
+		return await shim.showMessageBox(message, { type: MessageBoxType.Confirm }) === 0;
 	},
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied

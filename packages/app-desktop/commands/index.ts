@@ -7,8 +7,9 @@ import * as exportFolders from './exportFolders';
 import * as exportNotes from './exportNotes';
 import * as focusElement from './focusElement';
 import * as openNoteInNewWindow from './openNoteInNewWindow';
+import * as openPrimaryAppInstance from './openPrimaryAppInstance';
 import * as openProfileDirectory from './openProfileDirectory';
-import * as renderMarkup from './renderMarkup';
+import * as openSecondaryAppInstance from './openSecondaryAppInstance';
 import * as replaceMisspelling from './replaceMisspelling';
 import * as restoreNoteRevision from './restoreNoteRevision';
 import * as startExternalEditing from './startExternalEditing';
@@ -19,6 +20,7 @@ import * as switchProfile2 from './switchProfile2';
 import * as switchProfile3 from './switchProfile3';
 import * as toggleExternalEditing from './toggleExternalEditing';
 import * as toggleSafeMode from './toggleSafeMode';
+import * as toggleTabMovesFocus from './toggleTabMovesFocus';
 
 const index: any[] = [
 	copyDevCommand,
@@ -29,8 +31,9 @@ const index: any[] = [
 	exportNotes,
 	focusElement,
 	openNoteInNewWindow,
+	openPrimaryAppInstance,
 	openProfileDirectory,
-	renderMarkup,
+	openSecondaryAppInstance,
 	replaceMisspelling,
 	restoreNoteRevision,
 	startExternalEditing,
@@ -41,6 +44,7 @@ const index: any[] = [
 	switchProfile3,
 	toggleExternalEditing,
 	toggleSafeMode,
+	toggleTabMovesFocus,
 ];
 
 export default index;

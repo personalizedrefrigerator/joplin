@@ -57,6 +57,8 @@ module.exports = {
 		'tinymce': 'readonly',
 
 		'JSX': 'readonly',
+
+		'NodeJS': 'readonly',
 	},
 	'parserOptions': {
 		'ecmaVersion': 2018,
@@ -87,6 +89,7 @@ module.exports = {
 			allowEmptyReject: true,
 		}],
 		'no-throw-literal': ['error'],
+		'no-unused-expressions': ['error'],
 
 		// This rule should not be enabled since it matters in what order
 		// imports are done, in particular in relation to the shim.setReact
@@ -308,7 +311,7 @@ module.exports = {
 						selector: 'interface',
 						format: null,
 						'filter': {
-							'regex': '^(RSA|RSAKeyPair)$',
+							'regex': '^(RSA|RSAKeyPair|iOS.*)$',
 							'match': true,
 						},
 					},

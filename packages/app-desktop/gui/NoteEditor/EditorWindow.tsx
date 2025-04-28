@@ -21,6 +21,7 @@ interface Props {
 	newWindow: boolean;
 	windowId: string;
 	activeWindowId: string;
+	startupPluginsLoaded: boolean;
 }
 
 const emptyCallback = () => {};
@@ -45,6 +46,7 @@ const SecondaryWindow: React.FC<Props> = props => {
 		<NoteEditor
 			windowId={props.windowId}
 			onTitleChange={onNoteTitleChange}
+			startupPluginsLoaded={props.startupPluginsLoaded}
 		/>
 	</div>;
 
@@ -121,5 +123,6 @@ export default connect((state: AppState, ownProps: ConnectProps) => {
 		codeView: windowState?.editorCodeView ?? state.settings['editor.codeView'],
 		legacyMarkdown: state.settings['editor.legacyMarkdown'],
 		activeWindowId: stateUtils.activeWindowId(state),
+		startupPluginsLoaded: state.startupPluginsLoaded,
 	};
 })(SecondaryWindow);

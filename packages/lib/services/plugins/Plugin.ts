@@ -180,6 +180,10 @@ export default class Plugin {
 		this.viewControllers_[v.handle] = v;
 	}
 
+	public hasViewController(handle: ViewHandle) {
+		return !!this.viewControllers_[handle];
+	}
+
 	public viewController(handle: ViewHandle): ViewController {
 		if (!this.viewControllers_[handle]) throw new Error(`View not found: ${handle}`);
 		return this.viewControllers_[handle];

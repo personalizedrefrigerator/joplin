@@ -4,7 +4,7 @@ import { _electron as electron } from '@playwright/test';
 import { writeFile } from 'fs-extra';
 import { join } from 'path';
 import createStartupArgs from './util/createStartupArgs';
-import firstNonDevToolsWindow from './util/firstNonDevToolsWindow';
+import getMainWindow from './util/getMainWindow';
 import setFilePickerResponse from './util/setFilePickerResponse';
 import setMessageBoxResponse from './util/setMessageBoxResponse';
 import getImageSourceSize from './util/getImageSourceSize';
@@ -15,12 +15,12 @@ test.describe('main', () => {
 		// A window should open with the correct title
 		expect(await mainWindow.title()).toMatch(/^Joplin/);
 
-		const mainPage = new MainScreen(mainWindow);
+		const mainPage = await new MainScreen(mainWindow).setup();
 		await mainPage.waitFor();
 	});
 
 	test('should be able to create and edit a new note', async ({ mainWindow }) => {
-		const mainScreen = new MainScreen(mainWindow);
+		const mainScreen = await new MainScreen(mainWindow).setup();
 		const editor = await mainScreen.createNewNote('Test note');
 
 		// Note list should contain the new note
@@ -41,7 +41,7 @@ test.describe('main', () => {
 	});
 
 	test('mermaid and KaTeX should render', async ({ mainWindow }) => {
-		const mainScreen = new MainScreen(mainWindow);
+		const mainScreen = await new MainScreen(mainWindow).setup();
 		const editor = await mainScreen.createNewNote('🚧 Test 🚧');
 
 		const testCommitId = 'bf59b2';
@@ -97,7 +97,7 @@ test.describe('main', () => {
 	});
 
 	test('should correctly resize large images', async ({ electronApp, mainWindow }) => {
-		const mainScreen = new MainScreen(mainWindow);
+		const mainScreen = await new MainScreen(mainWindow).setup();
 		await mainScreen.createNewNote('Image resize test (part 1)');
 		const editor = mainScreen.noteEditor;
 
@@ -116,7 +116,10 @@ test.describe('main', () => {
 		await editor.attachFileButton.click();
 
 		const viewerFrame = editor.getNoteViewerFrameLocator();
-		const renderedImage = viewerFrame.getByAltText(filename);
+		const renderedImage = viewerFrame
+			.getByAltText(filename)
+			// Work around occasional "resolved to 2 elements" errors in CI
+			.last();
 
 		const fullSize = await getImageSourceSize(renderedImage);
 
@@ -138,7 +141,7 @@ test.describe('main', () => {
 
 	for (const target of ['', '_blank']) {
 		test(`clicking on an external link with target=${JSON.stringify(target)} should try to launch a browser`, async ({ electronApp, mainWindow }) => {
-			const mainScreen = new MainScreen(mainWindow);
+			const mainScreen = await new MainScreen(mainWindow).setup();
 			await mainScreen.waitFor();
 
 			// Mock openExternal
@@ -193,7 +196,7 @@ test.describe('main', () => {
 		// Open the app ourselves:
 		const startupArgs = createStartupArgs(profileDirectory);
 		const electronApp = await electron.launch({ args: startupArgs });
-		const mainWindow = await firstNonDevToolsWindow(electronApp);
+		const mainWindow = await getMainWindow(electronApp);
 
 		const safeModeDisableLink = mainWindow.getByText('Disable safe mode and restart');
 		await safeModeDisableLink.waitFor();

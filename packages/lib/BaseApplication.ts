@@ -39,7 +39,7 @@ const SyncTargetAmazonS3 = require('./SyncTargetAmazonS3.js');
 import EncryptionService from './services/e2ee/EncryptionService';
 import ResourceFetcher from './services/ResourceFetcher';
 import SearchEngineUtils from './services/search/SearchEngineUtils';
-import SearchEngine, { ProcessResultsRow } from './services/search/SearchEngine';
+import SearchEngine, { ComplexTerm, ProcessResultsRow } from './services/search/SearchEngine';
 import RevisionService from './services/RevisionService';
 import ResourceService from './services/ResourceService';
 import DecryptionWorker from './services/DecryptionWorker';
@@ -65,6 +65,7 @@ import processStartFlags from './utils/processStartFlags';
 import { setupAutoDeletion } from './services/trash/permanentlyDeleteOldItems';
 import determineProfileAndBaseDir from './determineBaseAppDirs';
 import NavService from './services/NavService';
+import getAppName from './getAppName';
 
 const appLogger: LoggerWrapper = Logger.create('App');
 
@@ -240,7 +241,7 @@ export default class BaseApplication {
 		});
 
 		let notes: NoteEntity[] = [];
-		let highlightedWords: string[] = [];
+		let highlightedWords: (ComplexTerm | string)[] = [];
 		let searchResults: ProcessResultsRow[] = [];
 
 		if (parentId) {
@@ -679,15 +680,16 @@ export default class BaseApplication {
 
 		let appName = options.appName;
 		if (!appName) {
-			appName = initArgs.env === 'dev' ? 'joplindev' : 'joplin';
-			if (Setting.value('appId').indexOf('-desktop') >= 0) appName += '-desktop';
+			appName = getAppName(Setting.value('appId').indexOf('-desktop') >= 0, initArgs.env === 'dev');
 		}
 		Setting.setConstant('appName', appName);
 
 		// https://immerjs.github.io/immer/docs/freezing
 		setAutoFreeze(initArgs.env === 'dev');
 
-		const { rootProfileDir, homeDir } = determineProfileAndBaseDir(options.rootProfileDir ?? initArgs.profileDir, appName);
+		const altInstanceId = initArgs.altInstanceId || '';
+
+		const { rootProfileDir, homeDir } = determineProfileAndBaseDir(options.rootProfileDir ?? initArgs.profileDir, appName, altInstanceId);
 		const { profileDir, profileConfig, isSubProfile } = await initProfile(rootProfileDir);
 		this.profileConfig_ = profileConfig;
 
@@ -780,6 +782,8 @@ export default class BaseApplication {
 		if (initArgs?.isSafeMode) {
 			Setting.setValue('isSafeMode', true);
 		}
+
+		Setting.setValue('altInstanceId', altInstanceId);
 
 		const safeModeFlagFile = join(profileDir, safeModeFlagFilename);
 		if (await fs.pathExists(safeModeFlagFile) && fs.readFileSync(safeModeFlagFile, 'utf8') === 'true') {

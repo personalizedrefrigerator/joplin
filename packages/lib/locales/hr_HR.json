@@ -62,7 +62,13 @@
 	"%s = %s (%s)": [
 		"%s = %s (%s)"
 	],
+	"%s cannot be less than %s": [
+		""
+	],
 	"%s is not optimised for synchronising many small files so your initial synchronisation will be slow.": [
+		""
+	],
+	"%s must be a valid whole number": [
 		""
 	],
 	"%s tab opened": [
@@ -106,6 +112,9 @@
 	],
 	"(In plugin: %s)": [
 		"(U dodatku: %s)"
+	],
+	"(level %d)": [
+		""
 	],
 	"(None)": [
 		"(Ništa)"
@@ -190,6 +199,9 @@
 	],
 	"Add recipient:": [
 		"Dodaj primaoca:"
+	],
+	"Add tag %s to note": [
+		""
 	],
 	"Add title": [
 		"Dodaj naslov"
@@ -278,6 +290,9 @@
 	"Aritim Dark": [
 		"Aritim tamna"
 	],
+	"At present, Joplin Web can only be open in one tab at a time. Please close the other instance of Joplin.": [
+		""
+	],
 	"Attach": [
 		"Priloži"
 	],
@@ -323,8 +338,14 @@
 	"Auto-add disabled accounts for deletion": [
 		"Automatski dodaj deaktivirane račune za brisanje"
 	],
+	"Auto-format Markdown in the Rich Text Editor": [
+		""
+	],
 	"Auto-pair braces, parentheses, quotations, etc.": [
 		"Automatski uskladi zagrade, navodnike itd."
+	],
+	"Autocomplete Markdown and HTML": [
+		""
 	],
 	"Automatically check for updates": [
 		"Automatski traži nove verzije"
@@ -344,9 +365,6 @@
 	"Beta": [
 		""
 	],
-	"Biometric unlock is not setup on the device. Please set it up in order to unlock Joplin. If the device is on lockout, consider switching it off and on to reset biometrics scanning.": [
-		"Biometrijsko otključavanje nije postavljeno na uređaju. Postavi ga za otključavanje Joplina. Ako je uređaj zaključan, pokušaj ga isključiti i ponovo uključiti za postavljanje biometrijskog skeniranja."
-	],
 	"Bold": [
 		"Podebljano"
 	],
@@ -365,6 +383,12 @@
 	"by %s": [
 		""
 	],
+	"by word": [
+		""
+	],
+	"Camera": [
+		""
+	],
 	"Can Share": [
 		"Može dijeliti"
 	],
@@ -379,6 +403,9 @@
 	],
 	"Cancelling background synchronisation... Please wait.": [
 		"Prekida se sinkronizacija u pozadini … Pričekaj."
+	],
+	"Cancelling will discard the recording. This cannot be undone. Are you sure you want to proceed?": [
+		""
 	],
 	"Cancelling...": [
 		"Prekida se …"
@@ -440,11 +467,17 @@
 	"Change language": [
 		"Promijeni jezik"
 	],
+	"Change shortcut for \"%s\"": [
+		""
+	],
 	"Characters": [
 		"Broj znakova"
 	],
 	"Characters excluding spaces": [
 		"Broj znakova bez razmaka"
+	],
+	"Check elements to display in the toolbar": [
+		""
 	],
 	"Check for updates...": [
 		"Traži nove verzije …"
@@ -476,6 +509,9 @@
 	"Click \"%s\" to restore the note. It will be copied in the notebook named \"%s\". The current version of the note will not be replaced or modified.": [
 		"Za obnavljanje bilješke pritisni „%s”. Kopirat će se u bilježnicu „%s”. Trenutačna verzija bilješke neće se zamijeniti niti promijeniti."
 	],
+	"Click \"start\" to attach a new voice memo to the note.": [
+		""
+	],
 	"Click to add tags...": [
 		"Pritisni za dodavanje oznaka …"
 	],
@@ -488,11 +524,17 @@
 	"Close dropdown": [
 		"Zatvori padajući izbornik"
 	],
+	"Close side menu": [
+		""
+	],
 	"Close the application, then delete your profile in \"%s\", and start the application again. Make sure you create a backup first by exporting all your notes as JEX.": [
 		""
 	],
 	"Close Window": [
 		"Zatvori prozor"
+	],
+	"Closing session...": [
+		""
 	],
 	"Cmd-click to open": [
 		""
@@ -511,9 +553,6 @@
 	],
 	"Collaborate on notebooks with others": [
 		"Surađuj s drugima na bilježnicama"
-	],
-	"Collapse": [
-		"Sklopi"
 	],
 	"Coming alarms": [
 		"Nadolazeća upozorenja"
@@ -553,6 +592,9 @@
 	],
 	"Configuration": [
 		"Konfiguracija"
+	],
+	"Configures the size of scrollbars used in the app.": [
+		""
 	],
 	"Confirm password cannot be empty": [
 		"Lozinka potvrde ne smije biti prazna"
@@ -838,6 +880,12 @@
 	"Detailed": [
 		""
 	],
+	"Dev": [
+		""
+	],
+	"Device: %s": [
+		""
+	],
 	"Directory": [
 		"Mapa"
 	],
@@ -967,9 +1015,6 @@
 	"Edit": [
 		"Uredi"
 	],
-	"Edit in external editor": [
-		"Uredi u vanjskom uređivaču"
-	],
 	"Edit link": [
 		"Uredi poveznicu"
 	],
@@ -1057,6 +1102,9 @@
 	"Enable encryption": [
 		"Aktiviraj šifriranje"
 	],
+	"Enable file:// URLs for images and videos": [
+		""
+	],
 	"Enable footnotes": [
 		"Aktiviraj fusnote"
 	],
@@ -1114,6 +1162,12 @@
 	"Enabled": [
 		"Aktivirano"
 	],
+	"Enables Markdown list continuation, auto-closing HTML tags, and other markup autocompletions.": [
+		""
+	],
+	"Enables Markdown pattern replacement in the Rich Text Editor. For example, when enabled, typing **bold** creates bold text.": [
+		""
+	],
 	"Enabling encryption means *all* your notes and attachments are going to be re-synchronised and sent encrypted to the sync target.": [
 		"Aktiviranje šifriranja znači, da će se *sve* tvoje bilješke i privici ponovo sinkronizirati i poslati šifrirano u cilj sinkronizacije."
 	],
@@ -1150,6 +1204,9 @@
 	"Enter notebook title": [
 		"Upiši naslov bilježnice"
 	],
+	"Entering selection mode": [
+		""
+	],
 	"Enum": [
 		"Prebrojavanje"
 	],
@@ -1176,9 +1233,6 @@
 	],
 	"Exits the application.": [
 		"Zatvara program."
-	],
-	"Expand": [
-		"Rasklopi"
 	],
 	"Export": [
 		"Izvezi"
@@ -1225,6 +1279,9 @@
 	"Fail-safe: Do not wipe out local data when sync target is empty (often the result of a misconfiguration or bug)": [
 		"Sigurnosni mehanizam: Ne briši lokalne podatke kad je cilj sinkronizacije prazan (često se radi o krivoj konfiguraciji ili o programskoj grešci)"
 	],
+	"Fail-safe: Sync was interrupted to prevent data loss, because the sync target is empty or damaged. To override this behaviour disable the fail-safe in the sync settings.": [
+		""
+	],
 	"Fatal error:": [
 		"Fatalna greška:"
 	],
@@ -1246,11 +1303,11 @@
 	"Filter tags": [
 		"Filtriraj oznake"
 	],
-	"Find and replace": [
-		"Pronađi i zamijeni"
-	],
 	"Find: ": [
 		"Pronađi: "
+	],
+	"Finishes recording": [
+		""
 	],
 	"Firefox Extension": [
 		"Firefox proširenje"
@@ -1270,6 +1327,9 @@
 	"Focus title": [
 		"Fokusiraj naslov"
 	],
+	"Follow link": [
+		""
+	],
 	"For debugging purpose only: export your profile to an external SD card.": [
 		"Samo za otklanjanje grešaka: izvezi tvoj profil na vanjsku SD karticu."
 	],
@@ -1287,9 +1347,6 @@
 	],
 	"Force path style": [
 		"Prisili stil putanje"
-	],
-	"Formatting": [
-		"Formatiranje"
 	],
 	"Forward": [
 		"Naprijed"
@@ -1329,6 +1386,15 @@
 	"Gets or sets a config value. If [value] is not provided, it will show the value of [name]. If neither [name] nor [value] is provided, it will list the current configuration.": [
 		"Nabavlja ili postavlja vrijednost konfiguracije. Ako vrijednost [value] nije zadana, prikazat će vrijednost imena [name]. Ako ime [name] niti vrijednost [value] nisu zadani, ispisat će trenutačnu konfiguraciju."
 	],
+	"go": [
+		""
+	],
+	"Go back": [
+		""
+	],
+	"Go to line": [
+		""
+	],
 	"Go to source URL": [
 		"Idi na URL izvora"
 	],
@@ -1343,9 +1409,6 @@
 	],
 	"Header %d": [
 		"Zaglavlje %d"
-	],
-	"Headers": [
-		"Zaglavlja"
 	],
 	"Heading": [
 		"Naslov"
@@ -1376,9 +1439,6 @@
 	],
 	"Hide keyboard": [
 		"Sakrij tipkovnicu"
-	],
-	"Hide more actions": [
-		"Sakrij daljnje radnje"
 	],
 	"Highlight": [
 		"Istaknuto"
@@ -1482,6 +1542,9 @@
 	"Indent more": [
 		"Uvuci više"
 	],
+	"Info": [
+		""
+	],
 	"Information": [
 		"Informacije"
 	],
@@ -1521,6 +1584,9 @@
 	"Invalid command: \"%s\"": [
 		"Neispravna naredba: „%s”"
 	],
+	"Invalid format. E.g.: 48.8581372, 2.2926735": [
+		""
+	],
 	"Invalid option value: \"%s\". Possible values are: %s.": [
 		"Neispravna vrijednost opcije: „%s”. Moguće vrijednosti su: %s."
 	],
@@ -1541,9 +1607,6 @@
 	],
 	"Items that cannot be synchronised": [
 		"Elementi koje se ne mogu sinkronizirati"
-	],
-	"Join us on Twitter": [
-		"Prati nas na Twitteru"
 	],
 	"Joplin can synchronise your notes using various providers. Select one from the list below.": [
 		"Joplin može sinkronizirati tvoje bilješke koristeći različite davatelje usluga. Odaberi jednog iz donjeg popisa."
@@ -1587,9 +1650,6 @@
 	"Joplin's own sync service. Also gives access to Joplin-specific features such as publishing notes or collaborating on notebooks with others.": [
 		"Joplinova vlastita usluga sinkronizacije. Također daje pristup Joplinskim funkcijama kao što su objavljivanje bilježaka ili suradnja na bilježnicama s drugima."
 	],
-	"KaTeX": [
-		"KaTeX"
-	],
 	"Keep note history for": [
 		"Čuvaj povijest bilježaka"
 	],
@@ -1613,6 +1673,9 @@
 	],
 	"Language": [
 		"Jezik"
+	],
+	"Large": [
+		""
 	],
 	"Last error: %s": [
 		"Zadnja greška: %s"
@@ -1664,14 +1727,8 @@
 	"Link text": [
 		"Poveži tekst"
 	],
-	"Links with protocol \"%s\" are not supported": [
-		"Poveznice s protokolom „%s” se ne podržavaju"
-	],
 	"List item": [
 		"Element popisa"
-	],
-	"Lists": [
-		"Popisi"
 	],
 	"Loaded": [
 		"Učitano"
@@ -1751,6 +1808,12 @@
 	"Master password:": [
 		"Glavna lozinka:"
 	],
+	"match case": [
+		""
+	],
+	"Math": [
+		""
+	],
 	"Max concurrent connections": [
 		"Najviše istovremenih veza"
 	],
@@ -1764,6 +1827,9 @@
 		"Maksimalna ukupna veličina"
 	],
 	"Media player, math, diagrams, table of contents": [
+		""
+	],
+	"Medium": [
 		""
 	],
 	"Minimise": [
@@ -1799,6 +1865,12 @@
 	"Move %d notes to notebook \"%s\"?": [
 		"Premjestiti %d bilješke u bilježnicu „%s”?"
 	],
+	"Move left": [
+		""
+	],
+	"Move right": [
+		""
+	],
 	"Move to notebook": [
 		"Premjesti u bilježnicu"
 	],
@@ -1807,6 +1879,9 @@
 	],
 	"Move to notebook:": [
 		"Premjesti u bilježnicu:"
+	],
+	"Move up": [
+		""
 	],
 	"Moves the given <item> to [notebook]": [
 		"Premješta zadani element <item> u bilježnicu [notebook]"
@@ -1818,9 +1893,6 @@
 		"N"
 	],
 	"Never resize": [
-		""
-	],
-	"New": [
 		""
 	],
 	"New note": [
@@ -1847,6 +1919,9 @@
 	"New version: %s": [
 		"Nova verzija: %s"
 	],
+	"next": [
+		""
+	],
 	"Next match": [
 		"Sljedeće poklapanje"
 	],
@@ -1870,9 +1945,6 @@
 	],
 	"No active notebook.": [
 		"Nema aktivne bilježnice."
-	],
-	"No item with ID %s": [
-		"Nema elementa s ID oznakom %s"
 	],
 	"No new invitations": [
 		""
@@ -1909,6 +1981,9 @@
 	],
 	"Not authenticated with %s. Please provide any missing credentials.": [
 		"Nije autentificirano s %s. Upiši sve nedostajuće podatke za prijavu."
+	],
+	"Not checked": [
+		""
 	],
 	"Not downloaded": [
 		"Nepreuzeto"
@@ -2000,6 +2075,9 @@
 	"Numbered List": [
 		"Numerirani popis"
 	],
+	"OCR: Clear cache and re-download language data files": [
+		""
+	],
 	"OK": [
 		"U redu"
 	],
@@ -2008,6 +2086,9 @@
 	],
 	"On %s: %s": [
 		"Na %s: %s"
+	],
+	"on line": [
+		""
 	],
 	"One of your master keys use an obsolete encryption method.": [
 		"Jedan od tvojih glavnih ključeva koristi zastarjelu metodu šifriranja."
@@ -2033,11 +2114,20 @@
 	"Open %s": [
 		"Otvori %s"
 	],
+	"Open in new window": [
+		""
+	],
 	"Open PDF viewer": [
 		"Otvori prikazivač PDF datoteka"
 	],
+	"Open primary app instance...": [
+		""
+	],
 	"Open profile directory": [
 		"Otvori mapu profila"
+	],
+	"Open secondary app instance...": [
+		""
 	],
 	"Open Sync Wizard...": [
 		"Otvori programčić za sinkronizaciju …"
@@ -2069,6 +2159,12 @@
 	"Page size for PDF export": [
 		"Veličina stranice za izvoz u PDF"
 	],
+	"Panel \"%s\" is visible": [
+		""
+	],
+	"Panel %s is hidden": [
+		""
+	],
 	"Password": [
 		"Lozinka"
 	],
@@ -2099,9 +2195,6 @@
 	"Permission needed": [
 		"Potrebna je dozvola"
 	],
-	"Permission to use camera": [
-		"Dozvola za korištenje kamere"
-	],
 	"Please click on \"%s\" to proceed, or set the passwords in the \"%s\" list below.": [
 		"Nastavi pritiskom na „%s” ili postavi lozinke u donjem popisu „%s”."
 	],
@@ -2116,6 +2209,9 @@
 	],
 	"Please open the following URL in your browser to authenticate the application. The application will create a directory in \"Apps/Joplin\" and will only read and write files in this directory. It will have no access to any files outside this directory nor to any other personal data. No data will be shared with any third party.": [
 		"Otvori sljedeći URL u pregledniku za autentificiranje programa. Program će stvoriti mapu u „Aplikacije/Joplin” dozvolama za čitanje i pisanje. Program neće moći pristupiti datotekama izvan ove mape niti bilo kojim drugim osobnim podacima. Nikoji podaci se neće dijeliti s drugima."
+	],
+	"Please provide the recipient email": [
+		""
 	],
 	"Please record your voice...": [
 		"Snimi svoj glas …"
@@ -2176,6 +2272,12 @@
 	],
 	"Preferred light theme": [
 		"Preferirana svijetla tema"
+	],
+	"Preferred voice typing provider": [
+		""
+	],
+	"Preserve colours when pasting text in Rich Text Editor": [
+		""
 	],
 	"Press Ctrl+D or type \"exit\" to exit the application": [
 		"Zatvori program pomoću prečaca Ctrl+D ili upiši „exit”"
@@ -2261,6 +2363,9 @@
 	"Quit": [
 		"Zatvori program"
 	],
+	"Re-download model": [
+		""
+	],
 	"Re-encrypt data": [
 		"Ponovo šifriraj podatke"
 	],
@@ -2287,6 +2392,9 @@
 	],
 	"Recipients:": [
 		"Primaoci:"
+	],
+	"Record audio": [
+		""
 	],
 	"Redo": [
 		"Ponovi"
@@ -2335,6 +2443,12 @@
 	],
 	"Replace: ": [
 		"Zamijeni: "
+	],
+	"replaced $ matches": [
+		""
+	],
+	"replaced match on line $": [
+		""
 	],
 	"Report an issue": [
 		""
@@ -2390,6 +2504,12 @@
 	"Revision: %s (%s)": [
 		"Revizija: %s (%s)"
 	],
+	"Rich Text": [
+		""
+	],
+	"Rich Text editor. Press Escape then Tab to escape focus.": [
+		""
+	],
 	"Runs the commands contained in the text file. There should be one command per line.": [
 		"Pokreće naredbe koje se nalaze u tekstualnoj datoteci. Naredbe se moraju zapisti pojedinačno u zasebne retke."
 	],
@@ -2431,6 +2551,12 @@
 	],
 	"Save geo-location with notes": [
 		"Spremi geografske podatke mjesta s bilješkama"
+	],
+	"Scanned code": [
+		""
+	],
+	"Scrollbar size": [
+		""
 	],
 	"Search": [
 		"Traži"
@@ -2498,6 +2624,9 @@
 	"Sets the property <name> of the given <note> to the given [value]. Possible properties are:\n\n%s": [
 		"Postavlja svojstvo imena <name> zadane bilješke <note> na zadanu vrijednost [value]. Moguća svojstva su:\n\n%s"
 	],
+	"Settings": [
+		""
+	],
 	"Share": [
 		"Dijeli"
 	],
@@ -2537,9 +2666,6 @@
 	"Show disabled keys": [
 		"Prikaži deaktivirane ključeve"
 	],
-	"Show more actions": [
-		"Prikaži više radnji"
-	],
 	"Show note counts": [
 		"Prikaži broj bilježaka"
 	],
@@ -2573,6 +2699,9 @@
 	"Skipped: %d.": [
 		"Preskočeno: %d."
 	],
+	"Small": [
+		""
+	],
 	"Solarised Dark": [
 		"Solarno tamna"
 	],
@@ -2593,6 +2722,12 @@
 	],
 	"Some items cannot be synchronised. Press for more info.": [
 		"Neki elementi se ne mogu sinkronizirati. Pritisni za daljnje inormacije."
+	],
+	"Sort \"%s\" in ascending order": [
+		""
+	],
+	"Sort \"%s\" in descending order": [
+		""
 	],
 	"Sort notebooks by": [
 		"Redoslijed bilježnica"
@@ -2629,6 +2764,9 @@
 	],
 	"Start application minimised in the tray icon": [
 		"Pokreni program u sklopljenom stanju u programskoj traci"
+	],
+	"Start recording": [
+		""
 	],
 	"Start, stop or check the API server. To specify on which port it should run, set the api.port config variable. Commands are (%s).": [
 		"Pokreni, prekini ili provjeri API poslužitelj. Za određivanje priključka na kojem se pokreće, postavi konfiguracijsku varijablu api.port. Naredbe su (%s)."
@@ -2708,6 +2846,9 @@
 	"Switch profile": [
 		"Promijeni profil"
 	],
+	"Switch to back-facing camera": [
+		""
+	],
 	"Switch to note type": [
 		"Promijeni u bilješku"
 	],
@@ -2776,6 +2917,12 @@
 	],
 	"Synchronizing...": [
 		"Sinkroniziranje …"
+	],
+	"Tab indents": [
+		""
+	],
+	"Tab moves focus": [
+		""
 	],
 	"Tabloid": [
 		"Tabloid"
@@ -2858,8 +3005,8 @@
 	"The following keys use an out-dated encryption algorithm and it is recommended to upgrade them. The upgraded key will still be able to decrypt and encrypt your data as usual.": [
 		"Sljedeći glavni ključevi koriste zastarjeli algoritam šifriranja i preporučujemo da ih nadogradiš. Nadograđeni ključ će i nadalje moći dešifrirati i šifrirati tvoje podatke."
 	],
-	"The Joplin mobile app does not currently support this type of link: %s": [
-		"Joplin program za mobilne uređaje trenutačno ne podržava ovu vrstu poveznice: %s"
+	"The following plugins may not support the current markdown editor:": [
+		""
 	],
 	"The Joplin team has vetted this plugin and it meets our standards for security and performance.": [
 		"Joplin tim je provjerio ovaj dodatak i on zadovoljava naše standarde za sigurnost i performansu."
@@ -2902,6 +3049,9 @@
 	],
 	"The target to synchronise to. Each sync target may have additional parameters which are named as `sync.NUM.NAME` (all documented below).": [
 		"Cilj za sinkronizaciju. Svaki cilj sinkronizacije može imati dodatne parametre koji se zovu `sync.NUM.NAME` (niže dolje dokumentirani)."
+	],
+	"The web client does not support accepting encrypted shared notebooks. Please switch to the desktop or mobile app before accepting the share.\n\nError: \"%s\"": [
+		""
 	],
 	"The Web Clipper needs your authorisation to access your data.": [
 		"Web Clipper treba tvoju autorizaciju za pristup podacima."
@@ -2950,9 +3100,6 @@
 	],
 	"This attachment is not downloaded or not decrypted yet": [
 		"Ovaj privitak još nije preuzet ili dešifriran"
-	],
-	"This attachment is not downloaded or not decrypted yet.": [
-		"Ovaj privitak još nije preuzet ili dešifriran."
 	],
 	"This authorisation token is only needed to allow third-party applications to access Joplin.": [
 		"Ovaj ključ za autorizaciju potreban je samo za dozvoljavanje drugim programima da pristupe Joplinu."
@@ -3128,6 +3275,9 @@
 	"Type: %s.": [
 		"Vrsta: %s."
 	],
+	"Unchecked": [
+		""
+	],
 	"Uncompleted to-dos on top": [
 		"Najprije nezavršeni zadaci"
 	],
@@ -3266,11 +3416,17 @@
 	"Vim": [
 		"Vim"
 	],
+	"Voice recorder": [
+		""
+	],
 	"Voice typing language files (URL)": [
 		"Jezične datoteke za tipkanje glasom (URL)"
 	],
 	"Voice typing...": [
 		"Tipkanje glasom …"
+	],
+	"Vosk": [
+		""
 	],
 	"Warning": [
 		"Upozorenje"
@@ -3320,6 +3476,9 @@
 	"When enabled, the application will scan your attachments and extract the text from it. This will allow you to search for text in these attachments.": [
 		""
 	],
+	"Whisper": [
+		""
+	],
 	"Window unresponsive.": [
 		""
 	],
@@ -3342,6 +3501,9 @@
 		"Priložit ćeš veliku sliku (%d × %d piksela). Želiš li je smanjiti na %d piksela prije prilaganja slike?"
 	],
 	"You are logged in into Joplin Cloud, you can leave this screen now.": [
+		""
+	],
+	"You are running the Intel version of Joplin on an Apple Silicon processor. Download the Apple Silicon one for better performance.": [
 		""
 	],
 	"You currently have no notebooks.": [
@@ -3373,9 +3535,6 @@
 	],
 	"Your password is needed to decrypt some of your data. Type `:e2ee decrypt` to set it.": [
 		"Tvoja lozinka je potrebna za dešifriranje nekih tvojih podataka. Za postavljanje utipkaj `:e2ee decrypt`."
-	],
-	"Your permission to use your camera is required.": [
-		"Za korištenje kamere potrebna je tvoja dozvola."
 	],
 	"Your version: %s": [
 		"Tvoja verzija: %s"

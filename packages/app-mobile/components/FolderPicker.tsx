@@ -1,5 +1,4 @@
-const React = require('react');
-
+import * as React from 'react';
 import { FunctionComponent, ReactElement } from 'react';
 import { _ } from '@joplin/lib/locale';
 import Folder, { FolderEntityWithChildren } from '@joplin/lib/models/Folder';
@@ -65,6 +64,7 @@ const FolderPicker: FunctionComponent<FolderPickerProps> = ({
 	return (
 		<Dropdown
 			items={titlePickerItems(!!mustSelect)}
+			accessibilityHint={_('Selects a notebook')}
 			disabled={disabled}
 			labelTransform="trim"
 			selectedValue={selectedFolderId || ''}

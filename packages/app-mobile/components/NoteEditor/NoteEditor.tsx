@@ -16,7 +16,6 @@ import { editorFont } from '../global-style';
 import { EditorControl as EditorBodyControl, ContentScriptData } from '@joplin/editor/types';
 import { EditorControl, EditorSettings, SelectionRange, WebViewToEditorApi } from './types';
 import { _ } from '@joplin/lib/locale';
-import MarkdownToolbar from './MarkdownToolbar/MarkdownToolbar';
 import { ChangeEvent, EditorEvent, EditorEventType, SelectionRangeChangeEvent, UndoRedoDepthChangeEvent } from '@joplin/editor/events';
 import { EditorCommandType, EditorKeymap, EditorLanguageType, SearchState } from '@joplin/editor/types';
 import SelectionFormatting, { defaultSelectionFormatting } from '@joplin/editor/SelectionFormatting';
@@ -30,6 +29,7 @@ import { OnMessageEvent } from '../ExtendedWebView/types';
 import { join, dirname } from 'path';
 import * as mimeUtils from '@joplin/lib/mime-utils';
 import uuid from '@joplin/lib/uuid';
+import EditorToolbar from '../EditorToolbar/EditorToolbar';
 
 type ChangeEventHandler = (event: ChangeEvent)=> void;
 type UndoRedoDepthChangeHandler = (event: UndoRedoDepthChangeEvent)=> void;
@@ -41,6 +41,8 @@ const logger = Logger.create('NoteEditor');
 interface Props {
 	themeId: number;
 	initialText: string;
+	noteId: string;
+	noteHash: string;
 	initialSelection?: SelectionRange;
 	style: ViewStyle;
 	toolbarEnabled: boolean;
@@ -184,7 +186,7 @@ const useEditorControl = (
 	setSearchState: OnSearchStateChangeCallback,
 ): EditorControl => {
 	return useMemo(() => {
-		const execCommand = (command: EditorCommandType) => {
+		const execEditorCommand = (command: EditorCommandType) => {
 			void bodyControl.execCommand(command);
 		};
 
@@ -229,25 +231,25 @@ const useEditorControl = (
 			},
 
 			toggleBolded() {
-				execCommand(EditorCommandType.ToggleBolded);
+				execEditorCommand(EditorCommandType.ToggleBolded);
 			},
 			toggleItalicized() {
-				execCommand(EditorCommandType.ToggleItalicized);
+				execEditorCommand(EditorCommandType.ToggleItalicized);
 			},
 			toggleOrderedList() {
-				execCommand(EditorCommandType.ToggleNumberedList);
+				execEditorCommand(EditorCommandType.ToggleNumberedList);
 			},
 			toggleUnorderedList() {
-				execCommand(EditorCommandType.ToggleBulletedList);
+				execEditorCommand(EditorCommandType.ToggleBulletedList);
 			},
 			toggleTaskList() {
-				execCommand(EditorCommandType.ToggleCheckList);
+				execEditorCommand(EditorCommandType.ToggleCheckList);
 			},
 			toggleCode() {
-				execCommand(EditorCommandType.ToggleCode);
+				execEditorCommand(EditorCommandType.ToggleCode);
 			},
 			toggleMath() {
-				execCommand(EditorCommandType.ToggleMath);
+				execEditorCommand(EditorCommandType.ToggleMath);
 			},
 			toggleHeaderLevel(level: number) {
 				const levelToCommand = [
@@ -264,19 +266,19 @@ const useEditorControl = (
 					throw new Error(`Unsupported header level ${level}`);
 				}
 
-				execCommand(levelToCommand[index]);
+				execEditorCommand(levelToCommand[index]);
 			},
 			increaseIndent() {
-				execCommand(EditorCommandType.IndentMore);
+				execEditorCommand(EditorCommandType.IndentMore);
 			},
 			decreaseIndent() {
-				execCommand(EditorCommandType.IndentLess);
+				execEditorCommand(EditorCommandType.IndentLess);
 			},
 			updateLink(label: string, url: string) {
 				bodyControl.updateLink(label, url);
 			},
 			scrollSelectionIntoView() {
-				execCommand(EditorCommandType.ScrollSelectionIntoView);
+				execEditorCommand(EditorCommandType.ScrollSelectionIntoView);
 			},
 			showLinkDialog() {
 				setLinkDialogVisible(true);
@@ -296,23 +298,23 @@ const useEditorControl = (
 
 			searchControl: {
 				findNext() {
-					execCommand(EditorCommandType.FindNext);
+					execEditorCommand(EditorCommandType.FindNext);
 				},
 				findPrevious() {
-					execCommand(EditorCommandType.FindPrevious);
+					execEditorCommand(EditorCommandType.FindPrevious);
 				},
 				replaceNext() {
-					execCommand(EditorCommandType.ReplaceNext);
+					execEditorCommand(EditorCommandType.ReplaceNext);
 				},
 				replaceAll() {
-					execCommand(EditorCommandType.ReplaceAll);
+					execEditorCommand(EditorCommandType.ReplaceAll);
 				},
 
 				showSearch() {
-					execCommand(EditorCommandType.ShowSearch);
+					execEditorCommand(EditorCommandType.ShowSearch);
 				},
 				hideSearch() {
-					execCommand(EditorCommandType.HideSearch);
+					execEditorCommand(EditorCommandType.HideSearch);
 				},
 
 				setSearchState: setSearchStateCallback,
@@ -331,10 +333,14 @@ function NoteEditor(props: Props, ref: any) {
 		cm.select(${props.initialSelection.start}, ${props.initialSelection.end});
 		cm.execCommand('scrollSelectionIntoView');
 	` : '';
+	const jumpToHashJs = props.noteHash ? `
+		cm.jumpToHash(${JSON.stringify(props.noteHash)});
+	` : '';
 
 	const editorSettings: EditorSettings = useMemo(() => ({
 		themeId: props.themeId,
 		themeData: editorTheme(props.themeId),
+		markdownMarkEnabled: Setting.value('markdown.plugin.mark'),
 		katexEnabled: Setting.value('markdown.plugin.katex'),
 		spellcheckEnabled: Setting.value('editor.mobile.spellcheckEnabled'),
 		language: EditorLanguageType.Markdown,
@@ -347,6 +353,8 @@ function NoteEditor(props: Props, ref: any) {
 		ignoreModifiers: false,
 		autocompleteMarkup: Setting.value('editor.autocompleteMarkup'),
 
+		// For now, mobile CodeMirror uses its built-in focus toggle shortcut.
+		tabMovesFocus: false,
 		indentWithTabs: true,
 
 		editorLabel: _('Markdown editor'),
@@ -374,16 +382,30 @@ function NoteEditor(props: Props, ref: any) {
 				${shim.injectedJs('codeMirrorBundle')};
 
 				const parentElement = document.getElementsByClassName('CodeMirror')[0];
-				const initialText = ${JSON.stringify(props.initialText)};
-				const settings = ${JSON.stringify(editorSettings)};
+				// On Android, injectJavaScript is run twice -- once before the parent element exists.
+				// To avoid logging unnecessary errors to the console, skip setup in this case:
+				if (parentElement) {
+					const initialText = ${JSON.stringify(props.initialText)};
+					const settings = ${JSON.stringify(editorSettings)};
 
-				window.cm = codeMirrorBundle.initCodeMirror(parentElement, initialText, settings);
+					window.cm = codeMirrorBundle.initCodeMirror(
+						parentElement,
+						initialText,
+						${JSON.stringify(props.noteId)},
+						settings
+					);
 
-				${setInitialSelectionJS}
+					${jumpToHashJs}
+					// Set the initial selection after jumping to the header -- the initial selection,
+					// if specified, should take precedence.
+					${setInitialSelectionJS}
 
-				window.onresize = () => {
-					cm.execCommand('scrollSelectionIntoView');
-				};
+					window.onresize = () => {
+						cm.execCommand('scrollSelectionIntoView');
+					};
+				} else {
+					console.warn('No parent element for the editor found. This may mean that the editor HTML is still loading.');
+				}
 			} catch (e) {
 				window.ReactNativeWebView.postMessage("error:" + e.message + ": " + JSON.stringify(e))
 			}
@@ -409,6 +431,20 @@ function NoteEditor(props: Props, ref: any) {
 			`);
 		}
 	}, [css]);
+
+	// Scroll to the new hash, if it changes.
+	const isFirstScrollRef = useRef(true);
+	useEffect(() => {
+		// The first "jump to header" is handled during editor setup and shouldn't
+		// be handled a second time:
+		if (isFirstScrollRef.current) {
+			isFirstScrollRef.current = false;
+			return;
+		}
+		if (jumpToHashJs && webviewRef.current) {
+			webviewRef.current.injectJS(jumpToHashJs);
+		}
+	}, [jumpToHashJs]);
 
 	const html = useHtml(css);
 	const [selectionState, setSelectionState] = useState<SelectionFormatting>(defaultSelectionFormatting);
@@ -535,20 +571,12 @@ function NoteEditor(props: Props, ref: any) {
 		}
 	}, []);
 
-	const toolbar = <MarkdownToolbar
-		style={{
-			// Don't show the markdown toolbar if there isn't enough space
-			// for it:
-			flexShrink: 1,
-		}}
-		editorSettings={editorSettings}
-		editorControl={editorControl}
-		selectionState={selectionState}
-		searchState={searchState}
-		pluginStates={props.plugins}
-		onAttach={props.onAttach}
-		readOnly={props.readOnly}
-	/>;
+	const toolbarEditorState = useMemo(() => ({
+		selectionState,
+		searchVisible: searchState.dialogVisible,
+	}), [selectionState, searchState.dialogVisible]);
+
+	const toolbar = <EditorToolbar editorState={toolbarEditorState} />;
 
 	return (
 		<View

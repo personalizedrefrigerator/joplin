@@ -15,6 +15,7 @@ const defaultFormNoteProps: HookDependencies = {
 	onBeforeLoad: () => { },
 	onAfterLoad: () => { },
 	editorId: 'editor',
+	builtInEditorVisible: false,
 };
 
 describe('useFormNote', () => {
@@ -76,7 +77,7 @@ describe('useFormNote', () => {
 				encryption_applied: 0,
 			});
 			// A larger-than-default timeout is needed to prevent CI failures:
-		}, { timeout: 5_000 });
+		}, { timeout: 15_000 });
 
 		formNote.unmount();
 	});

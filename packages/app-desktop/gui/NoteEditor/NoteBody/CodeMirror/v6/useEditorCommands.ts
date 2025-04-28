@@ -1,6 +1,6 @@
 
 import { RefObject, useMemo } from 'react';
-import { CommandValue, DropCommandValue } from '../../../utils/types';
+import { CommandValue, DropCommandValue, ScrollToTextValue } from '../../../utils/types';
 import { commandAttachFileToBody } from '../../../utils/resourceHandling';
 import { _ } from '@joplin/lib/locale';
 import dialogs from '../../../../dialogs';
@@ -129,8 +129,38 @@ const useEditorCommands = (props: Props) => {
 					props.webviewRef.current.send('focus');
 				}
 			},
+			'viewer.focus': () => {
+				if (props.visiblePanes.includes('viewer')) {
+					const editorCursorLine = editorRef.current.getCursor().line;
+					props.webviewRef.current.focusLine(editorCursorLine);
+				} else {
+					logger.info('Viewer not focused (not visible).');
+				}
+			},
 			search: () => {
 				return editorRef.current.execCommand(EditorCommandType.ShowSearch);
+			},
+			'editor.scrollToText': (value: ScrollToTextValue) => {
+				value = {
+					scrollStrategy: 'start',
+					...value,
+				};
+
+				const valueToMarkdown = (value: ScrollToTextValue) => {
+					const conv: Record<typeof value.element, (text: string)=> string> = {
+						h1: text => `# ${text}`,
+						h2: text => `## ${text}`,
+						h3: text => `### ${text}`,
+						h4: text => `#### ${text}`,
+						h5: text => `##### ${text}`,
+						strong: text => `**${text}**`,
+						ul: text => `- ${text}`,
+					};
+
+					return conv[value.element](value.text);
+				};
+
+				return editorRef.current.scrollToText(valueToMarkdown(value), value.scrollStrategy);
 			},
 		};
 	}, [

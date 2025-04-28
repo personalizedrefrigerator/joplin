@@ -59,7 +59,13 @@
 	"%s = %s (%s)": [
 		"%s = %s (%s)"
 	],
+	"%s cannot be less than %s": [
+		""
+	],
 	"%s is not optimised for synchronising many small files so your initial synchronisation will be slow.": [
+		""
+	],
+	"%s must be a valid whole number": [
 		""
 	],
 	"%s tab opened": [
@@ -102,6 +108,9 @@
 		"(%s)"
 	],
 	"(In plugin: %s)": [
+		""
+	],
+	"(level %d)": [
 		""
 	],
 	"(None)": [
@@ -187,6 +196,9 @@
 	],
 	"Add recipient:": [
 		"أضِف المستلم:"
+	],
+	"Add tag %s to note": [
+		""
 	],
 	"Add title": [
 		"أضف العنوان"
@@ -275,6 +287,9 @@
 	"Aritim Dark": [
 		"Aritim Dark"
 	],
+	"At present, Joplin Web can only be open in one tab at a time. Please close the other instance of Joplin.": [
+		""
+	],
 	"Attach": [
 		"إرفاق"
 	],
@@ -320,8 +335,14 @@
 	"Auto-add disabled accounts for deletion": [
 		""
 	],
+	"Auto-format Markdown in the Rich Text Editor": [
+		""
+	],
 	"Auto-pair braces, parentheses, quotations, etc.": [
 		"ادراج النصف الآخر للأقواس و علامات الإقتباس."
+	],
+	"Autocomplete Markdown and HTML": [
+		""
 	],
 	"Automatically check for updates": [
 		"البحت عن التحديثات بشكل تلقائي"
@@ -339,9 +360,6 @@
 		""
 	],
 	"Beta": [
-		""
-	],
-	"Biometric unlock is not setup on the device. Please set it up in order to unlock Joplin. If the device is on lockout, consider switching it off and on to reset biometrics scanning.": [
 		""
 	],
 	"Bold": [
@@ -362,6 +380,12 @@
 	"by %s": [
 		""
 	],
+	"by word": [
+		""
+	],
+	"Camera": [
+		""
+	],
 	"Can Share": [
 		"يمكن المشاركة"
 	],
@@ -376,6 +400,9 @@
 	],
 	"Cancelling background synchronisation... Please wait.": [
 		"يجري إلغاء مزامنة الخلفية... فضلاً انتظر."
+	],
+	"Cancelling will discard the recording. This cannot be undone. Are you sure you want to proceed?": [
+		""
 	],
 	"Cancelling...": [
 		"الإلغاء جارٍ..."
@@ -434,11 +461,17 @@
 	"Change language": [
 		"تغيّير اللغة"
 	],
+	"Change shortcut for \"%s\"": [
+		""
+	],
 	"Characters": [
 		"أحرف"
 	],
 	"Characters excluding spaces": [
 		"الأحرف بإستثناء المسافات"
+	],
+	"Check elements to display in the toolbar": [
+		""
 	],
 	"Check for updates...": [
 		"البحث جارٍ عن تحديثات..."
@@ -470,6 +503,9 @@
 	"Click \"%s\" to restore the note. It will be copied in the notebook named \"%s\". The current version of the note will not be replaced or modified.": [
 		"انقر \"%s\" لاستعادة الملاحظة. سيتم نسخه في دفتر الملاحظات المسمى \"%s\". لن يتم استبدال أو تعديل الإصدار الحالي من الملاحظة."
 	],
+	"Click \"start\" to attach a new voice memo to the note.": [
+		""
+	],
 	"Click to add tags...": [
 		"اضغط لإدراج سمات..."
 	],
@@ -482,11 +518,17 @@
 	"Close dropdown": [
 		"إغلاق القائمة المنسدلة"
 	],
+	"Close side menu": [
+		""
+	],
 	"Close the application, then delete your profile in \"%s\", and start the application again. Make sure you create a backup first by exporting all your notes as JEX.": [
 		""
 	],
 	"Close Window": [
 		"إغلاق النافذة"
+	],
+	"Closing session...": [
+		""
 	],
 	"Cmd-click to open": [
 		""
@@ -505,9 +547,6 @@
 	],
 	"Collaborate on notebooks with others": [
 		"تعاون مع الآخرين على دفاتر الملاحظات"
-	],
-	"Collapse": [
-		"طي"
 	],
 	"Coming alarms": [
 		"المنبّهات القادمة"
@@ -547,6 +586,9 @@
 	],
 	"Configuration": [
 		"الضبط"
+	],
+	"Configures the size of scrollbars used in the app.": [
+		""
 	],
 	"Confirm password cannot be empty": [
 		"تأكيد كلمة المرور لا يمكن أن تكون فارغة"
@@ -706,6 +748,9 @@
 	"Ctrl-click to open: %s": [
 		""
 	],
+	"current match": [
+		""
+	],
 	"Current version is up-to-date.": [
 		"النسخة الحالية محدَّثة."
 	],
@@ -830,6 +875,12 @@
 		"التنسيق الوجهة: %s"
 	],
 	"Detailed": [
+		""
+	],
+	"Dev": [
+		""
+	],
+	"Device: %s": [
 		""
 	],
 	"Directory": [
@@ -958,9 +1009,6 @@
 	"Edit": [
 		"تحرير"
 	],
-	"Edit in external editor": [
-		"التحرير في محرر خارجي"
-	],
 	"Edit link": [
 		"تحرير الرابط"
 	],
@@ -1048,6 +1096,9 @@
 	"Enable encryption": [
 		"تفعيل التشفير"
 	],
+	"Enable file:// URLs for images and videos": [
+		""
+	],
 	"Enable footnotes": [
 		"تمكين الحواشي السفلية"
 	],
@@ -1102,6 +1153,12 @@
 	"Enabled": [
 		"مفعَّل"
 	],
+	"Enables Markdown list continuation, auto-closing HTML tags, and other markup autocompletions.": [
+		""
+	],
+	"Enables Markdown pattern replacement in the Rich Text Editor. For example, when enabled, typing **bold** creates bold text.": [
+		""
+	],
 	"Enabling encryption means *all* your notes and attachments are going to be re-synchronised and sent encrypted to the sync target.": [
 		"تخويل التشفير يعني أن *كل* ملاحظاتك ومرفقاتها ستجري إعادة مزامنتها ثم ترسل مشفرة إلى وجهة المزامنة."
 	],
@@ -1129,6 +1186,9 @@
 	"End-to-end encryption": [
 		"تشفير شامل"
 	],
+	"Ends voice typing": [
+		""
+	],
 	"Enter code here": [
 		"أدخل الرمز هنا"
 	],
@@ -1137,6 +1197,9 @@
 	],
 	"Enter notebook title": [
 		"أدخل عنوان دفتر الملاحظات"
+	],
+	"Entering selection mode": [
+		""
 	],
 	"Enum": [
 		"سرد"
@@ -1164,9 +1227,6 @@
 	],
 	"Exits the application.": [
 		"الخروج من التطبيق."
-	],
-	"Expand": [
-		"تكبير"
 	],
 	"Export": [
 		"تصدير"
@@ -1207,6 +1267,9 @@
 	"Fail-safe: Do not wipe out local data when sync target is empty (often the result of a misconfiguration or bug)": [
 		"آمن من الفشل: لا تقم بمسح البيانات المحلية عندما يكون هدف المزامنة فارغًا (غالبًا ما يكون نتيجة لحدوث خطأ في التكوين أو خلل برمجي)"
 	],
+	"Fail-safe: Sync was interrupted to prevent data loss, because the sync target is empty or damaged. To override this behaviour disable the fail-safe in the sync settings.": [
+		""
+	],
 	"Fatal error:": [
 		"خطأ فادح:"
 	],
@@ -1228,11 +1291,11 @@
 	"Filter tags": [
 		"تصفية العلامات"
 	],
-	"Find and replace": [
-		"بحث و استبدال"
-	],
 	"Find: ": [
 		"بحث:"
+	],
+	"Finishes recording": [
+		""
 	],
 	"Firefox Extension": [
 		"إضافة Firefox"
@@ -1252,6 +1315,9 @@
 	"Focus title": [
 		"التركيز على العنوان"
 	],
+	"Follow link": [
+		""
+	],
 	"For debugging purpose only: export your profile to an external SD card.": [
 		"التصدير هذا لغرض التصحيح فقط: قم بتصدير ملف التعريف الخاص بك إلى بطاقة SD الخارجية."
 	],
@@ -1269,9 +1335,6 @@
 	],
 	"Force path style": [
 		""
-	],
-	"Formatting": [
-		"تنسيق"
 	],
 	"Forward": [
 		"إلى الأمام"
@@ -1314,6 +1377,15 @@
 	"Gets or sets a config value. If [value] is not provided, it will show the value of [name]. If neither [name] nor [value] is provided, it will list the current configuration.": [
 		"يستخرج قيمة إعداد أو يضبطها. إذا لم يجر التزويد بـ [value] (قيمة) فسيعرض التطبيق قيمة [name] (اسم). إذا لم يجر التزويد بـ [name] ولا [value] فسيسرد التطبيق الإعداد الحالي."
 	],
+	"go": [
+		""
+	],
+	"Go back": [
+		""
+	],
+	"Go to line": [
+		""
+	],
 	"Go to source URL": [
 		"الذهاب إلى عنوان URL المصدر"
 	],
@@ -1328,9 +1400,6 @@
 	],
 	"Header %d": [
 		"الرأس %d"
-	],
-	"Headers": [
-		"الرؤوس"
 	],
 	"Heading": [
 		"ترويسة"
@@ -1449,6 +1518,9 @@
 	"Indent more": [
 		"مسافة بادئة أكثر"
 	],
+	"Info": [
+		""
+	],
 	"Information": [
 		"معلومات"
 	],
@@ -1488,6 +1560,9 @@
 	"Invalid command: \"%s\"": [
 		"أمر غير صالح:\"%s\""
 	],
+	"Invalid format. E.g.: 48.8581372, 2.2926735": [
+		""
+	],
 	"Invalid option value: \"%s\". Possible values are: %s.": [
 		"قيمة خيار غير صحيحة: \"%s\". القيم الممكنة هي: %s."
 	],
@@ -1508,9 +1583,6 @@
 	],
 	"Items that cannot be synchronised": [
 		"العناصر التي لا يمكن مزامنتها"
-	],
-	"Join us on Twitter": [
-		"انضم إلينا على Twitter"
 	],
 	"Joplin can synchronise your notes using various providers. Select one from the list below.": [
 		"Joplin يستطيع مزامنة ملاحظاتك باستخدام العديد من المزوّدين. اختر واحداً من القائمة أدناه."
@@ -1554,9 +1626,6 @@
 	"Joplin's own sync service. Also gives access to Joplin-specific features such as publishing notes or collaborating on notebooks with others.": [
 		"خدمة المزامنة العائدة لـ Joplin.  وهي تتيح الوصول أيضاً إلى ميزات تخص Joplin فقط مثل نشر الملاحظات أو التعاون عليها مع الآخرين."
 	],
-	"KaTeX": [
-		""
-	],
 	"Keep note history for": [
 		"الاحتفاظ بتاريخ الملاحظة لـ"
 	],
@@ -1580,6 +1649,9 @@
 	],
 	"Language": [
 		"اللغة"
+	],
+	"Large": [
+		""
 	],
 	"Last error: %s": [
 		"آخر خطأ: %s"
@@ -1631,14 +1703,8 @@
 	"Link text": [
 		"ربط النص"
 	],
-	"Links with protocol \"%s\" are not supported": [
-		"الروابط مع البروتوكول \"%s\" غير مدعومة"
-	],
 	"List item": [
 		"عنصر قائمة"
-	],
-	"Lists": [
-		""
 	],
 	"Loading...": [
 		"جارٍ التنزيل..."
@@ -1712,6 +1778,12 @@
 	"Master password:": [
 		"كلمة المرور الرئيسة:"
 	],
+	"match case": [
+		""
+	],
+	"Math": [
+		""
+	],
 	"Max concurrent connections": [
 		"الاتصالات المتزامنة القصوى"
 	],
@@ -1719,6 +1791,9 @@
 		""
 	],
 	"Media player, math, diagrams, table of contents": [
+		""
+	],
+	"Medium": [
 		""
 	],
 	"Minimise": [
@@ -1748,6 +1823,12 @@
 	"Move %d notes to notebook \"%s\"?": [
 		"نقل %d ملاحظات إلى دفتر الملاحظات \"%s\" ؟"
 	],
+	"Move left": [
+		""
+	],
+	"Move right": [
+		""
+	],
 	"Move to notebook": [
 		"النقل إلى دفتر ملاحظات"
 	],
@@ -1757,6 +1838,9 @@
 	"Move to notebook:": [
 		"النقل إلى دفتر ملاحظات:"
 	],
+	"Move up": [
+		""
+	],
 	"n": [
 		"لا"
 	],
@@ -1764,9 +1848,6 @@
 		"لا"
 	],
 	"Never resize": [
-		""
-	],
-	"New": [
 		""
 	],
 	"New note": [
@@ -1793,6 +1874,9 @@
 	"New version: %s": [
 		"النسخة الجديدة: %s"
 	],
+	"next": [
+		""
+	],
 	"Next match": [
 		""
 	],
@@ -1816,9 +1900,6 @@
 	],
 	"No active notebook.": [
 		"لا يوجد دفتر ملاحظات نشط."
-	],
-	"No item with ID %s": [
-		"لا يوجد عنصر بالمعرّف %s"
 	],
 	"No new invitations": [
 		""
@@ -1855,6 +1936,9 @@
 	],
 	"Not authenticated with %s. Please provide any missing credentials.": [
 		"لا يمكن المصادقة باستخدام %s. يرجى التزويد بأي من بيانات اعتماد الدخول المفقودة."
+	],
+	"Not checked": [
+		""
 	],
 	"Not downloaded": [
 		"لم تنزّل"
@@ -1943,6 +2027,9 @@
 	"Numbered List": [
 		"قائمة مرقّمة"
 	],
+	"OCR: Clear cache and re-download language data files": [
+		""
+	],
 	"OK": [
 		"موافق"
 	],
@@ -1951,6 +2038,9 @@
 	],
 	"On %s: %s": [
 		"في %s: %s"
+	],
+	"on line": [
+		""
 	],
 	"One of your master keys use an obsolete encryption method.": [
 		"يستخدم أحد مفاتيحك الرئيسية طريقة تشفير قديمة."
@@ -1976,11 +2066,20 @@
 	"Open %s": [
 		"افتح %s"
 	],
+	"Open in new window": [
+		""
+	],
 	"Open PDF viewer": [
 		"فتح عارض PDF"
 	],
+	"Open primary app instance...": [
+		""
+	],
 	"Open profile directory": [
 		"فتح مجلّد ملف التعريف"
+	],
+	"Open secondary app instance...": [
+		""
 	],
 	"Open Sync Wizard...": [
 		"فتح معالج المزامنة..."
@@ -2008,6 +2107,12 @@
 	],
 	"Page size for PDF export": [
 		"حجم الصفحة لتصدير PDF"
+	],
+	"Panel \"%s\" is visible": [
+		""
+	],
+	"Panel %s is hidden": [
+		""
 	],
 	"Password": [
 		"كلمة المرور"
@@ -2039,9 +2144,6 @@
 	"Permission needed": [
 		"مطلوب الإذن"
 	],
-	"Permission to use camera": [
-		"الإذن باستخدام الكاميرا"
-	],
 	"Please click on \"%s\" to proceed, or set the passwords in the \"%s\" list below.": [
 		""
 	],
@@ -2056,6 +2158,9 @@
 	],
 	"Please open the following URL in your browser to authenticate the application. The application will create a directory in \"Apps/Joplin\" and will only read and write files in this directory. It will have no access to any files outside this directory nor to any other personal data. No data will be shared with any third party.": [
 		"فضلاً افتح عنوان URL التالي في المستعرض لديك لتمكين التطبيق من المصادقة سينشئ التطبيق دليلاً في \"Apps/Joplin\" ثم يقوم فقط بقراءة وكتابة الملفات في هذا الدليل. لن يكون لديه أي وصول لأي ملف خارج هذا الدليل أو لأي بيانات شخصية أخرى. لن نشارك البيانات مع أي طرف ثالث."
+	],
+	"Please provide the recipient email": [
+		""
 	],
 	"Please record your voice...": [
 		""
@@ -2117,6 +2222,12 @@
 	"Preferred light theme": [
 		"التنسيق الغامق المفضّل"
 	],
+	"Preferred voice typing provider": [
+		""
+	],
+	"Preserve colours when pasting text in Rich Text Editor": [
+		""
+	],
 	"Press Ctrl+D or type \"exit\" to exit the application": [
 		"اضغط Ctrl+D أو اكتب \"exit\" للخروج من التطبيق"
 	],
@@ -2128,6 +2239,9 @@
 	],
 	"Press to set the decryption password.": [
 		"إضغط لضبط كلمة مرور فك التشفير."
+	],
+	"previous": [
+		""
 	],
 	"Previous match": [
 		""
@@ -2189,6 +2303,9 @@
 	"Quit": [
 		"إغلاق"
 	],
+	"Re-download model": [
+		""
+	],
 	"Re-encrypt data": [
 		"إعادة تشفير البيانات"
 	],
@@ -2215,6 +2332,9 @@
 	],
 	"Recipients:": [
 		"المستلمون:"
+	],
+	"Record audio": [
+		""
 	],
 	"Redo": [
 		"إعادة التحميل"
@@ -2256,6 +2376,12 @@
 		""
 	],
 	"Replace: ": [
+		""
+	],
+	"replaced $ matches": [
+		""
+	],
+	"replaced match on line $": [
 		""
 	],
 	"Report an issue": [
@@ -2303,6 +2429,12 @@
 	"Revision: %s (%s)": [
 		"المراجعة: %s (%s)"
 	],
+	"Rich Text": [
+		""
+	],
+	"Rich Text editor. Press Escape then Tab to escape focus.": [
+		""
+	],
 	"Runs the commands contained in the text file. There should be one command per line.": [
 		"تشغيل الأوامر المضمنة في الملف النصي. يجب أن يكون هناك أمر واحد لكل سطر."
 	],
@@ -2329,6 +2461,12 @@
 	],
 	"Save geo-location with notes": [
 		"حفظ الموقع الجغرافي مع الملاحظات"
+	],
+	"Scanned code": [
+		""
+	],
+	"Scrollbar size": [
+		""
 	],
 	"Search": [
 		"بحث"
@@ -2380,6 +2518,9 @@
 	],
 	"Sets the property <name> of the given <note> to the given [value]. Possible properties are:\n\n%s": [
 		"يضبط الخاصية <name> للـ <note> المعطاة على [value] معطاة. الخصائص الممكنة هي:\n%s"
+	],
+	"Settings": [
+		""
 	],
 	"Share": [
 		"مشاركة"
@@ -2441,6 +2582,9 @@
 	"Skipped: %d.": [
 		"تم تخطيها: %d."
 	],
+	"Small": [
+		""
+	],
 	"Solarised Dark": [
 		"Solarised Dark"
 	],
@@ -2458,6 +2602,12 @@
 	],
 	"Some items cannot be synchronised.": [
 		"لا يمكن مزامنة بعض العناصر."
+	],
+	"Sort \"%s\" in ascending order": [
+		""
+	],
+	"Sort \"%s\" in descending order": [
+		""
 	],
 	"Sort notebooks by": [
 		"فرز دفاتر الملاحظات حسب"
@@ -2494,6 +2644,9 @@
 	],
 	"Start application minimised in the tray icon": [
 		"بدء التطبيق مصغراً في لوحة النظام"
+	],
+	"Start recording": [
+		""
 	],
 	"Start, stop or check the API server. To specify on which port it should run, set the api.port config variable. Commands are (%s).": [
 		"ابدأ، أوقف أو تحقق من خادم API. لتحديد أي منفذ يجب تشغيله، قم بتعيين متغير تكوين api.port. الأوامر هي (%s)."
@@ -2570,6 +2723,9 @@
 	"Switch between note and to-do type": [
 		"التبديل بين نوعي الملاحظة و قائمة المهام"
 	],
+	"Switch to back-facing camera": [
+		""
+	],
 	"Switch to note type": [
 		"التبديل إلى النوع ملاحظة"
 	],
@@ -2635,6 +2791,12 @@
 	],
 	"Synchronizing...": [
 		"المزامنة جارية..."
+	],
+	"Tab indents": [
+		""
+	],
+	"Tab moves focus": [
+		""
 	],
 	"Tabloid": [
 		"صحيفة شعبية"
@@ -2711,8 +2873,8 @@
 	"The following attachments are being watched for changes:": [
 		"تتم مراقبة المرفقات التالية للتغييرات:"
 	],
-	"The Joplin mobile app does not currently support this type of link: %s": [
-		"تطبيق Joplin على الهاتف الجوال لا يدعم حالياً هذا النوع من الربط : %s"
+	"The following plugins may not support the current markdown editor:": [
+		""
 	],
 	"The Joplin team has vetted this plugin and it meets our standards for security and performance.": [
 		""
@@ -2749,6 +2911,9 @@
 	],
 	"The target to synchronise to. Each sync target may have additional parameters which are named as `sync.NUM.NAME` (all documented below).": [
 		"الوجهة المستهدفة المزامنة إليها. كل وجهة مزامنة مستهدفة قد يكون لها معلمات إضافية تكون مسماة بـ `sync.NUM.NAME` (جميعها موثقة أدناه)."
+	],
+	"The web client does not support accepting encrypted shared notebooks. Please switch to the desktop or mobile app before accepting the share.\n\nError: \"%s\"": [
+		""
 	],
 	"The Web Clipper needs your authorisation to access your data.": [
 		"Web Clipper بحاجة لتصريحك من أجل الوصول لبياناتك."
@@ -2797,9 +2962,6 @@
 	],
 	"This attachment is not downloaded or not decrypted yet": [
 		"لم يجر تنزيل هذا المرفق أو فك تشفيره حتى الآن"
-	],
-	"This attachment is not downloaded or not decrypted yet.": [
-		"لم يجر تنزيل هذا المرفق أو فك تشفيره حتى الآن."
 	],
 	"This authorisation token is only needed to allow third-party applications to access Joplin.": [
 		"هذا الرمز المميز للتصريح مطلوب فقط للسماح لتطبيقات طرف ثالث للوصول إلى Joplin."
@@ -2948,6 +3110,9 @@
 	"Unable to share log data. Reason: %s": [
 		""
 	],
+	"Unchecked": [
+		""
+	],
 	"Uncompleted to-dos on top": [
 		"قوائم المهام غير المكتملة في الأعلى"
 	],
@@ -2956,6 +3121,9 @@
 	],
 	"Uninstall and reinstall the application. Make sure you create a backup first by exporting all your notes as JEX from the desktop application.": [
 		""
+	],
+	"Unknown": [
+		"مجهول"
 	],
 	"Unknown flag: %s": [
 		"علامة غير معروفة: %s"
@@ -3077,10 +3245,16 @@
 	"Vim": [
 		"Vim"
 	],
+	"Voice recorder": [
+		""
+	],
 	"Voice typing language files (URL)": [
 		""
 	],
 	"Voice typing...": [
+		""
+	],
+	"Vosk": [
 		""
 	],
 	"Warning": [
@@ -3128,6 +3302,9 @@
 	"When enabled, the application will scan your attachments and extract the text from it. This will allow you to search for text in these attachments.": [
 		""
 	],
+	"Whisper": [
+		""
+	],
 	"Window unresponsive.": [
 		""
 	],
@@ -3150,6 +3327,9 @@
 		"أنت على وشك إرفاق صورة كبيرة (%dx%d بكسل). هل ترغب في تغيّير حجمة إلى %d بكسل قبل إرفاقه؟"
 	],
 	"You are logged in into Joplin Cloud, you can leave this screen now.": [
+		""
+	],
+	"You are running the Intel version of Joplin on an Apple Silicon processor. Download the Apple Silicon one for better performance.": [
 		""
 	],
 	"You currently have no notebooks.": [
@@ -3181,9 +3361,6 @@
 	],
 	"Your password is needed to decrypt some of your data. Type `:e2ee decrypt` to set it.": [
 		""
-	],
-	"Your permission to use your camera is required.": [
-		"إذنك باستخدام كاميرا الجوال مطلوب."
 	],
 	"Your version: %s": [
 		"النسخة لديك: %s"

@@ -50,7 +50,13 @@
 	"%s = %s (%s)": [
 		"%s = %s (%s)"
 	],
+	"%s cannot be less than %s": [
+		""
+	],
 	"%s is not optimised for synchronising many small files so your initial synchronisation will be slow.": [
+		""
+	],
+	"%s must be a valid whole number": [
 		""
 	],
 	"%s tab opened": [
@@ -75,6 +81,9 @@
 		""
 	],
 	"(In plugin: %s)": [
+		""
+	],
+	"(level %d)": [
 		""
 	],
 	"(None)": [
@@ -155,6 +164,9 @@
 	"Add recipient:": [
 		""
 	],
+	"Add tag %s to note": [
+		""
+	],
 	"Add to dictionary": [
 		""
 	],
@@ -162,6 +174,9 @@
 		""
 	],
 	"Admin dashboard": [
+		""
+	],
+	"all": [
 		""
 	],
 	"All data, including notes, notebooks and tags will be permanently deleted.": [
@@ -218,6 +233,9 @@
 	"Apply": [
 		""
 	],
+	"Are you sure that you want to restore the default toolbar layout?\nThis cannot be undone.": [
+		""
+	],
 	"Are you sure you want to renew the authorisation token?": [
 		""
 	],
@@ -228,6 +246,9 @@
 		""
 	],
 	"Aritim Dark": [
+		""
+	],
+	"At present, Joplin Web can only be open in one tab at a time. Please close the other instance of Joplin.": [
 		""
 	],
 	"Attach file": [
@@ -260,7 +281,13 @@
 	"Auto-add disabled accounts for deletion": [
 		""
 	],
+	"Auto-format Markdown in the Rich Text Editor": [
+		""
+	],
 	"Auto-pair braces, parentheses, quotations, etc.": [
+		""
+	],
+	"Autocomplete Markdown and HTML": [
 		""
 	],
 	"Automatically delete notes in the trash after a number of days": [
@@ -276,9 +303,6 @@
 		""
 	],
 	"Beta": [
-		""
-	],
-	"Biometric unlock is not setup on the device. Please set it up in order to unlock Joplin. If the device is on lockout, consider switching it off and on to reset biometrics scanning.": [
 		""
 	],
 	"Bold": [
@@ -299,6 +323,12 @@
 	"by %s": [
 		""
 	],
+	"by word": [
+		""
+	],
+	"Camera": [
+		""
+	],
 	"Can Share": [
 		""
 	],
@@ -313,6 +343,9 @@
 	],
 	"Cancelling background synchronisation... Please wait.": [
 		"Cancelando sincronización en segundo plano... Agarde."
+	],
+	"Cancelling will discard the recording. This cannot be undone. Are you sure you want to proceed?": [
+		""
 	],
 	"Cancelling...": [
 		"Cancelando..."
@@ -353,10 +386,16 @@
 	"Change application layout": [
 		""
 	],
+	"Change shortcut for \"%s\"": [
+		""
+	],
 	"Characters": [
 		""
 	],
 	"Characters excluding spaces": [
+		""
+	],
+	"Check elements to display in the toolbar": [
 		""
 	],
 	"Check for updates...": [
@@ -371,6 +410,9 @@
 	"Checkbox list": [
 		""
 	],
+	"Checked": [
+		""
+	],
 	"Chrome Web Store": [
 		""
 	],
@@ -380,13 +422,25 @@
 	"Click \"%s\" to restore the note. It will be copied in the notebook named \"%s\". The current version of the note will not be replaced or modified.": [
 		""
 	],
+	"Click \"start\" to attach a new voice memo to the note.": [
+		""
+	],
+	"close": [
+		""
+	],
 	"Close": [
+		""
+	],
+	"Close side menu": [
 		""
 	],
 	"Close the application, then delete your profile in \"%s\", and start the application again. Make sure you create a backup first by exporting all your notes as JEX.": [
 		""
 	],
 	"Close Window": [
+		""
+	],
+	"Closing session...": [
 		""
 	],
 	"Cmd-click to open": [
@@ -401,10 +455,7 @@
 	"Code Block": [
 		""
 	],
-	"Collapse": [
-		""
-	],
-	"Collapse %s": [
+	"Collapsed": [
 		""
 	],
 	"Coming alarms": [
@@ -440,6 +491,9 @@
 	"Configuration": [
 		"Configuración"
 	],
+	"Configures the size of scrollbars used in the app.": [
+		""
+	],
 	"Conflicted: %d": [
 		"En conflito: %d"
 	],
@@ -450,6 +504,9 @@
 		""
 	],
 	"Continue": [
+		""
+	],
+	"Control character": [
 		""
 	],
 	"Convert to note": [
@@ -537,6 +594,9 @@
 	"Ctrl-click to open: %s": [
 		""
 	],
+	"current match": [
+		""
+	],
 	"Current version is up-to-date.": [
 		"A versión actual está actualizada."
 	],
@@ -621,6 +681,12 @@
 	"Detailed": [
 		""
 	],
+	"Dev": [
+		""
+	],
+	"Device: %s": [
+		""
+	],
 	"Directory": [
 		"Cartafol"
 	],
@@ -690,6 +756,9 @@
 	"Download and install the relevant extension for your browser:": [
 		""
 	],
+	"Download it now": [
+		""
+	],
 	"Downloaded": [
 		""
 	],
@@ -734,9 +803,6 @@
 	],
 	"Edit": [
 		"Edtar"
-	],
-	"Edit in external editor": [
-		""
 	],
 	"Edit note.": [
 		"Editar nota."
@@ -801,6 +867,9 @@
 	"Enable encryption": [
 		"Activar cifrado"
 	],
+	"Enable file:// URLs for images and videos": [
+		""
+	],
 	"Enable footnotes": [
 		""
 	],
@@ -828,6 +897,9 @@
 	"Enable soft breaks": [
 		""
 	],
+	"Enable spell checking in Markdown editor": [
+		""
+	],
 	"Enable spellcheck in the text editor": [
 		""
 	],
@@ -852,6 +924,12 @@
 	"Enabled": [
 		"Activado"
 	],
+	"Enables Markdown list continuation, auto-closing HTML tags, and other markup autocompletions.": [
+		""
+	],
+	"Enables Markdown pattern replacement in the Rich Text Editor. For example, when enabled, typing **bold** creates bold text.": [
+		""
+	],
 	"Encrypted": [
 		"Cifrado"
 	],
@@ -864,11 +942,17 @@
 	"Encryption is: %s": [
 		"O cifrado é: %s"
 	],
+	"Ends voice typing": [
+		""
+	],
 	"Enter code here": [
 		""
 	],
 	"Enter master password:": [
 		"Introducir contrasinal mestre:"
+	],
+	"Entering selection mode": [
+		""
 	],
 	"Enum": [
 		"Enum."
@@ -885,10 +969,10 @@
 	"Exits the application.": [
 		"Sae do aplicativo."
 	],
-	"Expand": [
+	"Expand %s": [
 		""
 	],
-	"Expand %s": [
+	"Expanded": [
 		""
 	],
 	"Export": [
@@ -918,6 +1002,9 @@
 	"Fail-safe: Do not wipe out local data when sync target is empty (often the result of a misconfiguration or bug)": [
 		""
 	],
+	"Fail-safe: Sync was interrupted to prevent data loss, because the sync target is empty or damaged. To override this behaviour disable the fail-safe in the sync settings.": [
+		""
+	],
 	"Fatal error:": [
 		"Erro fatal:"
 	],
@@ -933,7 +1020,7 @@
 	"File system": [
 		"Sistema de ficheiros"
 	],
-	"Find and replace": [
+	"Finishes recording": [
 		""
 	],
 	"Firefox Extension": [
@@ -950,6 +1037,9 @@
 	],
 	"Focus title": [
 		"Foco no título"
+	],
+	"Follow link": [
+		""
 	],
 	"For debugging purpose only: export your profile to an external SD card.": [
 		""
@@ -993,6 +1083,15 @@
 	"Gets or sets a config value. If [value] is not provided, it will show the value of [name]. If neither [name] nor [value] is provided, it will list the current configuration.": [
 		"Obtén ou estabelece un valor da configuración. Se non se indica [value], mostrará o valor de [name]. Se non se indica [name] nin [value] listará a configuración actual."
 	],
+	"go": [
+		""
+	],
+	"Go back": [
+		""
+	],
+	"Go to line": [
+		""
+	],
 	"Go to source URL": [
 		""
 	],
@@ -1006,9 +1105,6 @@
 		""
 	],
 	"Header %d": [
-		""
-	],
-	"Headers": [
 		""
 	],
 	"Heading": [
@@ -1119,6 +1215,9 @@
 	"Indent more": [
 		""
 	],
+	"Info": [
+		""
+	],
 	"Inline Code": [
 		""
 	],
@@ -1146,6 +1245,9 @@
 	"Invalid command: \"%s\"": [
 		"Orde incorrecta: «%s»"
 	],
+	"Invalid format. E.g.: 48.8581372, 2.2926735": [
+		""
+	],
 	"Invalid option value: \"%s\". Possible values are: %s.": [
 		"Valor incorrecto de opción: «%s». Os valores posíbeis son: %s."
 	],
@@ -1158,7 +1260,7 @@
 	"Items that cannot be synchronised": [
 		"Elementos que non se poden sincronizar"
 	],
-	"Join us on Twitter": [
+	"Join us on %s": [
 		""
 	],
 	"Joplin can synchronise your notes using various providers. Select one from the list below.": [
@@ -1176,6 +1278,9 @@
 	"Joplin failed to decrypt these items multiple times, possibly because they are corrupted or too large. These items will remain on the device but Joplin will no longer attempt to decrypt them.": [
 		""
 	],
+	"Joplin is already running.": [
+		""
+	],
 	"Joplin Server URL": [
 		""
 	],
@@ -1186,9 +1291,6 @@
 		"Sitio web de Joplin"
 	],
 	"Joplin's own sync service. Also gives access to Joplin-specific features such as publishing notes or collaborating on notebooks with others.": [
-		""
-	],
-	"KaTeX": [
 		""
 	],
 	"Keep note history for": [
@@ -1217,6 +1319,9 @@
 	],
 	"Language": [
 		"Idioma"
+	],
+	"Large": [
+		""
 	],
 	"Last error: %s": [
 		"Último erro: %s"
@@ -1261,13 +1366,7 @@
 	"Link text": [
 		""
 	],
-	"Links with protocol \"%s\" are not supported": [
-		""
-	],
 	"List item": [
-		""
-	],
-	"Lists": [
 		""
 	],
 	"Loaded": [
@@ -1321,6 +1420,12 @@
 	"Master Key %s": [
 		"Chave mestra %s"
 	],
+	"match case": [
+		""
+	],
+	"Math": [
+		""
+	],
 	"Max concurrent connections": [
 		""
 	],
@@ -1328,6 +1433,9 @@
 		""
 	],
 	"Media player, math, diagrams, table of contents": [
+		""
+	],
+	"Medium": [
 		""
 	],
 	"Minimise": [
@@ -1351,6 +1459,15 @@
 	"Move %d notes to notebook \"%s\"?": [
 		"Mover %d notas para o caderno \"%s\"?"
 	],
+	"Move left": [
+		""
+	],
+	"Move right": [
+		""
+	],
+	"Move up": [
+		""
+	],
 	"n": [
 		"n"
 	],
@@ -1358,9 +1475,6 @@
 		"N"
 	],
 	"Never resize": [
-		""
-	],
-	"New": [
 		""
 	],
 	"New invitations": [
@@ -1384,6 +1498,9 @@
 	"New version: %s": [
 		""
 	],
+	"next": [
+		""
+	],
 	"Next match": [
 		""
 	],
@@ -1404,9 +1521,6 @@
 	],
 	"No active notebook.": [
 		"Ningún caderno activo."
-	],
-	"No item with ID %s": [
-		""
 	],
 	"No new invitations": [
 		""
@@ -1438,11 +1552,17 @@
 	"No text editor is defined. Please set it using `config editor <editor-path>`": [
 		"Non se estabeleceu ningún editor de texto. Estabelézao usando «config editor <editor-path>»"
 	],
+	"None": [
+		""
+	],
 	"Nord": [
 		""
 	],
 	"Not authenticated with %s. Please provide any missing credentials.": [
 		"Non está autenticado en %s. Proporcione as credencias que faltan."
+	],
+	"Not checked": [
+		""
 	],
 	"Not downloaded": [
 		""
@@ -1495,11 +1615,17 @@
 	"Numbered List": [
 		""
 	],
+	"OCR: Clear cache and re-download language data files": [
+		""
+	],
 	"OK": [
 		"Aceptar"
 	],
 	"On %s: %s": [
 		"En %s: %s"
+	],
+	"on line": [
+		""
 	],
 	"One or more items are currently encrypted and you may need to supply a master password. To do so please type `e2ee decrypt`. If you have already supplied the password, the encrypted items are being decrypted in the background and will be available soon.": [
 		"Un ou máis elementos están actualmente cifrados e precisa indicar cal é o contrasinal mestre. Para facelo escriba «e2ee decrypt». Se xa subministrou o contrasinal, os elementos cifrados están sendo descifrados en segundo plano e estarán dispoñíbeis pronto."
@@ -1516,7 +1642,16 @@
 	"Open %s": [
 		"Abrir %s"
 	],
+	"Open in new window": [
+		""
+	],
 	"Open PDF viewer": [
+		""
+	],
+	"Open primary app instance...": [
+		""
+	],
+	"Open secondary app instance...": [
 		""
 	],
 	"Open Sync Wizard...": [
@@ -1538,6 +1673,12 @@
 		""
 	],
 	"Page size for PDF export": [
+		""
+	],
+	"Panel \"%s\" is visible": [
+		""
+	],
+	"Panel %s is hidden": [
 		""
 	],
 	"Password": [
@@ -1567,9 +1708,6 @@
 	"Permission needed": [
 		""
 	],
-	"Permission to use camera": [
-		""
-	],
 	"Please click on \"%s\" to proceed, or set the passwords in the \"%s\" list below.": [
 		""
 	],
@@ -1584,6 +1722,9 @@
 	],
 	"Please open the following URL in your browser to authenticate the application. The application will create a directory in \"Apps/Joplin\" and will only read and write files in this directory. It will have no access to any files outside this directory nor to any other personal data. No data will be shared with any third party.": [
 		"Abra o seguinte URL no navegador para autenticar o aplicativo. O programa creará un cartafol en «Apps/Joplin» e só lerá e escribirá ficheiros neste cartafol. Non terá acceso a ningún ficheiro fóra deste directorio nin a ningún dato persoal. Non se compartirá ningún dato con terceiros."
+	],
+	"Please provide the recipient email": [
+		""
 	],
 	"Please record your voice...": [
 		""
@@ -1657,6 +1798,12 @@
 	"Preferred light theme": [
 		""
 	],
+	"Preferred voice typing provider": [
+		""
+	],
+	"Preserve colours when pasting text in Rich Text Editor": [
+		""
+	],
 	"Press Ctrl+D or type \"exit\" to exit the application": [
 		"Prema Ctrl+D ou escriba «exit» para saír do aplicativo"
 	],
@@ -1668,6 +1815,9 @@
 	],
 	"Press to set the decryption password.": [
 		"Prema para estabelecer o contrasinal de descifrado."
+	],
+	"previous": [
+		""
 	],
 	"Previous match": [
 		""
@@ -1723,8 +1873,14 @@
 	"Publish notes to the internet": [
 		""
 	],
+	"QR Code": [
+		""
+	],
 	"Quit": [
 		"Saír"
+	],
+	"Re-download model": [
+		""
 	],
 	"Re-upload local data to sync target": [
 		""
@@ -1751,6 +1907,12 @@
 		""
 	],
 	"Recommended plugins": [
+		""
+	],
+	"Record audio": [
+		""
+	],
+	"Recording": [
 		""
 	],
 	"Redo": [
@@ -1787,6 +1949,12 @@
 		""
 	],
 	"Replace: ": [
+		""
+	],
+	"replaced $ matches": [
+		""
+	],
+	"replaced match on line $": [
 		""
 	],
 	"Report an issue": [
@@ -1834,6 +2002,12 @@
 	"Reverses the sorting order.": [
 		"Inverte a orde."
 	],
+	"Rich Text": [
+		""
+	],
+	"Rich Text editor. Press Escape then Tab to escape focus.": [
+		""
+	],
 	"Runs the commands contained in the text file. There should be one command per line.": [
 		""
 	],
@@ -1869,6 +2043,12 @@
 	],
 	"Save geo-location with notes": [
 		"Gardar xeolocalización coas notas"
+	],
+	"Scanned code": [
+		""
+	],
+	"Scrollbar size": [
+		""
 	],
 	"Search": [
 		"Buscar"
@@ -1912,6 +2092,9 @@
 	"Sets the property <name> of the given <note> to the given [value]. Possible properties are:\n\n%s": [
 		"Estabelece a propiedade <name> da <note> a [value]. As propiedades posíbeis son:\n\n%s"
 	],
+	"Settings": [
+		""
+	],
 	"Share": [
 		""
 	],
@@ -1919,6 +2102,9 @@
 		""
 	],
 	"Share permissions": [
+		""
+	],
+	"Shared": [
 		""
 	],
 	"Shares": [
@@ -1957,6 +2143,9 @@
 	"Skipped: %d.": [
 		"Ignorado: %d."
 	],
+	"Small": [
+		""
+	],
 	"Solarised Dark": [
 		""
 	],
@@ -1974,6 +2163,12 @@
 	],
 	"Some items cannot be synchronised.": [
 		"Non é posíbel sincronizar algúns elementos."
+	],
+	"Sort \"%s\" in ascending order": [
+		""
+	],
+	"Sort \"%s\" in descending order": [
+		""
 	],
 	"Sort notes by": [
 		"Ordenar notas por"
@@ -2003,6 +2198,9 @@
 		""
 	],
 	"Start application minimised in the tray icon": [
+		""
+	],
+	"Start recording": [
 		""
 	],
 	"Start, stop or check the API server. To specify on which port it should run, set the api.port config variable. Commands are (%s).": [
@@ -2059,6 +2257,12 @@
 	"Subscript": [
 		""
 	],
+	"Success": [
+		""
+	],
+	"Suggestions": [
+		""
+	],
 	"Superscript": [
 		""
 	],
@@ -2070,6 +2274,9 @@
 	],
 	"Switch between note and to-do type": [
 		"Cambiar entre notas e tarefas"
+	],
+	"Switch to back-facing camera": [
+		""
 	],
 	"Switches to [notebook] - all further operations will happen within this notebook.": [
 		"Cambia a [notebook] - todas as demais operacións sucederán neste caderno."
@@ -2112,6 +2319,12 @@
 	],
 	"Synchronises with remote storage.": [
 		"Sincroniza sen almacenaxe remoto."
+	],
+	"Tab indents": [
+		""
+	],
+	"Tab moves focus": [
+		""
 	],
 	"Tabloid": [
 		""
@@ -2186,7 +2399,7 @@
 	"The following keys use an out-dated encryption algorithm and it is recommended to upgrade them. The upgraded key will still be able to decrypt and encrypt your data as usual.": [
 		""
 	],
-	"The Joplin mobile app does not currently support this type of link: %s": [
+	"The following plugins may not support the current markdown editor:": [
 		""
 	],
 	"The Joplin team has vetted this plugin and it meets our standards for security and performance.": [
@@ -2235,7 +2448,13 @@
 	"The target to synchronise to. Each sync target may have additional parameters which are named as `sync.NUM.NAME` (all documented below).": [
 		"Destino co que sincronizar. Cada destino da sincronización pode ter parámetros adicionais que se chaman «sync.NUM.NAME» (documentados arriba)."
 	],
+	"The web client does not support accepting encrypted shared notebooks. Please switch to the desktop or mobile app before accepting the share.\n\nError: \"%s\"": [
+		""
+	],
 	"The Web Clipper needs your authorisation to access your data.": [
+		""
+	],
+	"The web clipper service cannot be enabled in this instance of Joplin.": [
 		""
 	],
 	"The web clipper service is enabled and set to auto-start.": [
@@ -2284,9 +2503,6 @@
 		""
 	],
 	"This attachment is not downloaded or not decrypted yet": [
-		""
-	],
-	"This attachment is not downloaded or not decrypted yet.": [
 		""
 	],
 	"This authorisation token is only needed to allow third-party applications to access Joplin.": [
@@ -2418,6 +2634,9 @@
 	"Unable to share log data. Reason: %s": [
 		""
 	],
+	"Unchecked": [
+		""
+	],
 	"Uncompleted to-dos on top": [
 		"Tarefas sen completar arriba"
 	],
@@ -2487,6 +2706,9 @@
 	"Use the arrows to move the layout items. Press \"Escape\" to exit.": [
 		""
 	],
+	"Use the legacy Markdown editor": [
+		""
+	],
 	"Use this to rebuild the search index if there is a problem with search. It may take a long time depending on the number of notes.": [
 		""
 	],
@@ -2520,10 +2742,16 @@
 	"Vim": [
 		""
 	],
+	"Voice recorder": [
+		""
+	],
 	"Voice typing language files (URL)": [
 		""
 	],
 	"Voice typing...": [
+		""
+	],
+	"Vosk": [
 		""
 	],
 	"Warning": [
@@ -2571,6 +2799,9 @@
 	"When enabled, the application will scan your attachments and extract the text from it. This will allow you to search for text in these attachments.": [
 		""
 	],
+	"Whisper": [
+		""
+	],
 	"Window unresponsive.": [
 		""
 	],
@@ -2590,6 +2821,9 @@
 		""
 	],
 	"You are logged in into Joplin Cloud, you can leave this screen now.": [
+		""
+	],
+	"You are running the Intel version of Joplin on an Apple Silicon processor. Download the Apple Silicon one for better performance.": [
 		""
 	],
 	"You do not have any installed plugin.": [
@@ -2617,9 +2851,6 @@
 		""
 	],
 	"Your password is needed to decrypt some of your data. Type `:e2ee decrypt` to set it.": [
-		""
-	],
-	"Your permission to use your camera is required.": [
 		""
 	],
 	"Your version: %s": [

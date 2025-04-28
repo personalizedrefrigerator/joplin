@@ -6,7 +6,7 @@ import * as React from 'react';
 import { themeStyle } from '@joplin/lib/theme';
 import { Theme } from '@joplin/lib/themes/type';
 import { useState, useMemo, useCallback, useRef } from 'react';
-import { Text, Pressable, ViewStyle, StyleSheet, LayoutChangeEvent, LayoutRectangle, Animated, AccessibilityState, AccessibilityRole, TextStyle, GestureResponderEvent, Platform } from 'react-native';
+import { Text, Pressable, ViewStyle, StyleSheet, LayoutChangeEvent, LayoutRectangle, Animated, AccessibilityState, AccessibilityRole, TextStyle, GestureResponderEvent, Platform, Role } from 'react-native';
 import { Menu, MenuOptions, MenuTrigger, renderers } from 'react-native-popup-menu';
 import Icon from './Icon';
 import AccessibleView from './accessibility/AccessibleView';
@@ -36,6 +36,8 @@ interface ButtonProps {
 	// Role of the button. Defaults to 'button'.
 	accessibilityRole?: AccessibilityRole;
 	accessibilityState?: AccessibilityState;
+	'aria-pressed'?: boolean;
+	role?: Role;
 
 	disabled?: boolean;
 }
@@ -102,7 +104,9 @@ const IconButton = (props: ButtonProps) => {
 			accessibilityLabel={props.description}
 			accessibilityHint={props.accessibilityHint}
 			accessibilityRole={props.accessibilityRole ?? 'button'}
+			role={props.role}
 			accessibilityState={props.accessibilityState}
+			aria-pressed={props['aria-pressed']}
 		>
 			<Animated.View style={{
 				opacity: fadeAnim,
@@ -194,8 +198,8 @@ const useTooltipStyles = (themeId: number) => {
 // On web, by default, pressing buttons defocuses the active edit control, dismissing the
 // virtual keyboard. This hook creates listeners that optionally prevent the keyboard from dismissing.
 const usePreventKeyboardDismissTouchListeners = (preventKeyboardDismiss: boolean, onPress: ()=> void, disabled: boolean) => {
-	const touchStartPointRef = useRef<[number, number]>();
-	const isTapRef = useRef<boolean>();
+	const touchStartPointRef = useRef<[number, number]>([-1, -1]);
+	const isTapRef = useRef<boolean>(false);
 	const onTouchStart = useCallback((event: GestureResponderEvent) => {
 		if (Platform.OS === 'web' && preventKeyboardDismiss) {
 			const touch = event.nativeEvent.touches[0];

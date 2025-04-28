@@ -6,7 +6,7 @@ import eventManager, { EventName } from '../../../eventManager';
 import Setting from '../../../models/Setting';
 import { FolderEntity } from '../../database/types';
 import makeListener from '../utils/makeListener';
-import { Disposable, MenuItem } from './types';
+import { Disposable, EditContextMenuFilterObject, FilterHandler } from './types';
 
 /**
  * @ignore
@@ -17,12 +17,6 @@ import Note from '../../../models/Note';
  * @ignore
  */
 import Folder from '../../../models/Folder';
-
-export interface EditContextMenuFilterObject {
-	items: MenuItem[];
-}
-
-type FilterHandler<T> = (object: T)=> Promise<void>;
 
 enum ItemChangeEventType {
 	Create = 1,
@@ -201,6 +195,16 @@ export default class JoplinWorkspace {
 	 */
 	public async selectedNoteIds(): Promise<string[]> {
 		return this.store.getState().selectedNoteIds.slice();
+	}
+
+	/**
+	 * Gets the last hash (note section ID) from cross-note link targeting specific section.
+	 * New hash is available after `onNoteSelectionChange()` is triggered.
+	 * Example of cross-note link where `hello-world` is a hash: [Other Note Title](:/9bc9a5cb83f04554bf3fd3e41b4bb415#hello-world).
+	 * Method returns empty value when a note was navigated with method other than cross-note link containing valid hash.
+	 */
+	public async selectedNoteHash(): Promise<string> {
+		return this.store.getState().selectedNoteHash;
 	}
 
 }

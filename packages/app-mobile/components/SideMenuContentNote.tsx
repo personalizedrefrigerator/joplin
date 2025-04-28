@@ -15,9 +15,11 @@ type Option = {
 	isDivider: true;
 };
 
+export type SideMenuContentOptions = Option[];
+
 interface Props {
 	themeId: number;
-	options: Option[];
+	options: SideMenuContentOptions;
 }
 
 const useStyles = (themeId: number) => {
@@ -91,7 +93,11 @@ const SideMenuContentNoteComponent: React.FC<Props> = props => {
 		if (!onPressHandler) return content;
 
 		return (
-			<TouchableOpacity key={key} onPress={onPressHandler}>
+			<TouchableOpacity
+				key={key}
+				onPress={onPressHandler}
+				accessibilityRole='button'
+			>
 				{content}
 			</TouchableOpacity>
 		);

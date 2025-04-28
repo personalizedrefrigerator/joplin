@@ -25,10 +25,12 @@ const { ResourceScreen } = require('./ResourceScreen.js');
 import Navigator from './Navigator';
 import WelcomeUtils from '@joplin/lib/WelcomeUtils';
 import JoplinCloudLoginScreen from './JoplinCloudLoginScreen';
+import InteropService from '@joplin/lib/services/interop/InteropService';
 import WindowCommandsAndDialogs from './WindowCommandsAndDialogs/WindowCommandsAndDialogs';
 import { defaultWindowId, stateUtils, WindowState } from '@joplin/lib/reducer';
 import bridge from '../services/bridge';
 import EditorWindow from './NoteEditor/EditorWindow';
+import PopupNotificationProvider from './PopupNotification/PopupNotificationProvider';
 const { ThemeProvider, StyleSheetManager, createGlobalStyle } = require('styled-components');
 
 interface Props {
@@ -91,6 +93,9 @@ async function initialize() {
 		type: 'NOTE_VISIBLE_PANES_SET',
 		panes: Setting.value('noteVisiblePanes'),
 	});
+
+	InteropService.instance().document = document;
+	InteropService.instance().xmlSerializer = new XMLSerializer();
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
@@ -193,13 +198,15 @@ class RootComponent extends React.Component<Props, any> {
 		return (
 			<StyleSheetManager disableVendorPrefixes>
 				<ThemeProvider theme={theme}>
-					<StyleSheetContainer/>
-					<MenuBar/>
-					<GlobalStyle/>
-					<WindowCommandsAndDialogs windowId={defaultWindowId} />
-					<Navigator style={navigatorStyle} screens={screens} className={`profile-${this.props.profileConfigCurrentProfileId}`} />
-					{this.renderSecondaryWindows()}
-					{this.renderModalMessage(this.modalDialogProps())}
+					<PopupNotificationProvider>
+						<StyleSheetContainer/>
+						<MenuBar/>
+						<GlobalStyle/>
+						<WindowCommandsAndDialogs windowId={defaultWindowId} />
+						<Navigator style={navigatorStyle} screens={screens} className={`profile-${this.props.profileConfigCurrentProfileId}`} />
+						{this.renderSecondaryWindows()}
+						{this.renderModalMessage(this.modalDialogProps())}
+					</PopupNotificationProvider>
 				</ThemeProvider>
 			</StyleSheetManager>
 		);

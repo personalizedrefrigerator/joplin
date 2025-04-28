@@ -1,31 +1,19 @@
 {
 	"github": [
 		{
-			"name": "tateisu"
-		},
-		{
-			"name": "matmoly"
+			"name": "felixstorm"
 		},
 		{
 			"name": "KentBrockman"
 		},
 		{
-			"name": "CyberXZT"
-		},
-		{
 			"name": "avanderberg"
-		},
-		{
-			"name": "dbrandonjohnson"
 		},
 		{
 			"name": "chr15m"
 		},
 		{
 			"name": "maxtruxa"
-		},
-		{
-			"name": "konishi-t"
 		},
 		{
 			"name": "marcdw1289"
@@ -37,34 +25,19 @@
 			"name": "sif"
 		},
 		{
-			"name": "saarantras"
-		},
-		{
 			"name": "Hegghammer"
-		},
-		{
-			"name": "jknowles"
-		},
-		{
-			"name": "fats"
-		},
-		{
-			"name": "dchecks"
 		},
 		{
 			"name": "Galliver7"
 		},
 		{
-			"name": "mu88"
-		},
-		{
 			"name": "andypiper"
 		},
 		{
-			"name": "jamesandariese"
+			"name": "Akhil-CM"
 		},
 		{
-			"name": "Akhil-CM"
+			"name": "ugoertz"
 		}
 	],
 	"orgs": [
@@ -123,21 +96,46 @@
 			"githubUser": "route4me"
 		},
 		{
-			"url": "https://buyyoutubviews.com",
-			"title": "BYTV",
-			"imageName": "BYTV.png",
-			"githubUser": "bytv1"
-		},
-		{
-			"url": "https://www.famegear.com",
-			"title": "Famegear",
-			"imageName": "Famegear.png",
-			"githubUser": "rankmediateknologi"
-		},
-		{
 			"url": "https://casinoreviews.net",
 			"title": "Casino Reviews",
 			"imageName": "CasinoReviews.png"
+		},
+		{
+			"url": "https://topagency.webflow.io",
+			"title": "WebDesignAgency",
+			"imageName": "WebDesignAgency.png",
+			"alt": "topagency"
+		},
+		{
+			"url": "https://realgambling.ca/",
+			"title": "RealGambling.ca",
+			"imageName": "RealGambling.png",
+			"alt": "RealGambling.ca"
+		},
+		{
+			"url": "https://essaypro.com/",
+			"title": "write an essay online with EssayPro",
+			"imageName": "EssayPro.png",
+			"alt": "write an essay online with EssayPro"
+		},
+		{
+			"url": "https://www.slotozilla.com/nz/no-deposit-bonus",
+			"title": "casino without making any upfront cost",
+			"imageName": "Slotozilla.png",
+			"alt": "casino without making any upfront cost"
+		},
+		{
+			"url": "https://www.reddit.com/r/tiktokRise/",
+			"title": "Tiktok Rise",
+			"imageName": "TiktokRise.jpg",
+			"alt": "Tiktok Rise",
+			"githubUser": "knickman"
+		},
+		{
+			"url": "https://essaywriter.pro",
+			"title": "write my essay services by EssayWriter",
+			"imageName": "EssayWriterPro.png",
+			"alt": "write my essay services by EssayWriter"
 		}
 	],
 	"orgsOld": [
@@ -161,6 +159,24 @@
 			"title": "SP Software GmbH",
 			"imageName": "Grundstueckspreise.png",
 			"githubUser": "PeterSchumacher22"
+		},
+		{
+			"url": "https://www.famegear.com",
+			"title": "Famegear",
+			"imageName": "Famegear.png",
+			"githubUser": "rankmediateknologi"
+		},
+		{
+			"url": "https://buyyoutubviews.com",
+			"title": "BYTV",
+			"imageName": "BYTV.png",
+			"githubUser": "bytv1"
+		},
+		{
+			"url": "https://ca.edubirdie.com/",
+			"title": "Achieve academic success with Edubirdie — your trusted partner for expert writing assistance and resources!",
+			"imageName": "Edubirdie.png",
+			"alt": "EduBirdie"
 		}
 	]
 }

@@ -19,7 +19,6 @@ import SpellCheckerService from '@joplin/lib/services/spellChecker/SpellCheckerS
 import SpellCheckerServiceDriverNative from './services/spellChecker/SpellCheckerServiceDriverNative';
 import bridge from './services/bridge';
 import menuCommandNames from './gui/menuCommandNames';
-import stateToWhenClauseContext from './services/commands/stateToWhenClauseContext';
 import ResourceService from '@joplin/lib/services/ResourceService';
 import ExternalEditWatcher from '@joplin/lib/services/ExternalEditWatcher';
 import appReducer, { createAppDefaultState } from './app.reducer';
@@ -29,35 +28,21 @@ import { reg } from '@joplin/lib/registry';
 const packageInfo: PackageInfo = require('./packageInfo.js');
 import DecryptionWorker from '@joplin/lib/services/DecryptionWorker';
 import ClipperServer from '@joplin/lib/ClipperServer';
-import { ipcRenderer, webFrame } from 'electron';
+import { ipcRenderer } from 'electron';
 const Menu = bridge().Menu;
 const PluginManager = require('@joplin/lib/services/PluginManager');
 import RevisionService from '@joplin/lib/services/RevisionService';
 import MigrationService from '@joplin/lib/services/MigrationService';
 import { loadCustomCss } from '@joplin/lib/CssUtils';
-import mainScreenCommands from './gui/WindowCommandsAndDialogs/commands/index';
-import noteEditorCommands from './gui/NoteEditor/commands/index';
-import noteListCommands from './gui/NoteList/commands/index';
-import noteListControlsCommands from './gui/NoteListControls/commands/index';
-import sidebarCommands from './gui/Sidebar/commands/index';
-import appCommands from './commands/index';
-import libCommands from '@joplin/lib/commands/index';
 import { homedir } from 'os';
 import getDefaultPluginsInfo from '@joplin/lib/services/plugins/defaultPlugins/desktopDefaultPluginsInfo';
 const electronContextMenu = require('./services/electron-context-menu');
 // import  populateDatabase from '@joplin/lib/services/debug/populateDatabase';
 
-const commands = mainScreenCommands
-	.concat(noteEditorCommands)
-	.concat(noteListCommands)
-	.concat(noteListControlsCommands)
-	.concat(sidebarCommands);
 
 // Commands that are not tied to any particular component.
 // The runtime for these commands can be loaded when the app starts.
-const globalCommands = appCommands.concat(libCommands);
 
-import editorCommandDeclarations from './gui/NoteEditor/editorCommandDeclarations';
 import PerFolderSortOrderService from './services/sortOrder/PerFolderSortOrderService';
 import ShareService from '@joplin/lib/services/share/ShareService';
 import checkForUpdates from './checkForUpdates';
@@ -74,6 +59,7 @@ import SearchEngine from '@joplin/lib/services/search/SearchEngine';
 import { PackageInfo } from '@joplin/lib/versionInfo';
 import { CustomProtocolHandler } from './utils/customProtocols/handleCustomProtocols';
 import { refreshFolders } from '@joplin/lib/folders-screen-utils';
+import initializeCommandService from './utils/initializeCommandService';
 
 const pluginClasses = [
 	require('./plugins/GotoAnything').default,
@@ -152,7 +138,7 @@ class Application extends BaseApplication {
 		}
 
 		if (action.type === 'SETTING_UPDATE_ONE' && action.key === 'windowContentZoomFactor' || action.type === 'SETTING_UPDATE_ALL') {
-			webFrame.setZoomFactor(Setting.value('windowContentZoomFactor') / 100);
+			bridge().setZoomFactor(Setting.value('windowContentZoomFactor') / 100);
 		}
 
 		if (action.type === 'SETTING_UPDATE_ONE' && action.key === 'linking.extraAllowedExtensions' || action.type === 'SETTING_UPDATE_ALL') {
@@ -470,9 +456,6 @@ class Application extends BaseApplication {
 			bridge().openDevTools();
 		}
 
-		bridge().electronApp().initializeCustomProtocolHandler(
-			Logger.create('handleCustomProtocols'),
-		);
 		this.protocolHandler_ = bridge().electronApp().getCustomProtocolHandler();
 		this.protocolHandler_.allowReadAccessToDirectory(__dirname); // App bundle directory
 		this.protocolHandler_.allowReadAccessToDirectory(Setting.value('cacheDir'));
@@ -492,20 +475,7 @@ class Application extends BaseApplication {
 
 		PerFolderSortOrderService.initialize();
 
-		CommandService.instance().initialize(this.store(), Setting.value('env') === 'dev', stateToWhenClauseContext);
-
-		for (const command of commands) {
-			CommandService.instance().registerDeclaration(command.declaration);
-		}
-
-		for (const command of globalCommands) {
-			CommandService.instance().registerDeclaration(command.declaration);
-			CommandService.instance().registerRuntime(command.declaration.name, command.runtime());
-		}
-
-		for (const declaration of editorCommandDeclarations) {
-			CommandService.instance().registerDeclaration(declaration);
-		}
+		initializeCommandService(this.store(), Setting.value('env') === 'dev');
 
 		const keymapService = KeymapService.instance();
 		// We only add the commands that appear in the menu because only
@@ -583,6 +553,12 @@ class Application extends BaseApplication {
 			value: Setting.value('flagOpenDevTools'),
 		});
 
+		// Always disable on Mac for now - and disable too for the few apps that may have the flag enabled.
+		// At present, it only seems to work on Windows.
+		if (shim.isMac()) {
+			Setting.setValue('featureFlag.autoUpdaterServiceEnabled', false);
+		}
+
 		// Note: Auto-update is a misnomer in the code.
 		// The code below only checks, if a new version is available.
 		// We only allow Windows and macOS users to automatically check for updates
@@ -638,10 +614,11 @@ class Application extends BaseApplication {
 		clipperLogger.addTarget(TargetType.Console);
 
 		ClipperServer.instance().initialize(actionApi);
+		ClipperServer.instance().setEnabled(!Setting.value('altInstanceId'));
 		ClipperServer.instance().setLogger(clipperLogger);
 		ClipperServer.instance().setDispatch(this.store().dispatch);
 
-		if (Setting.value('clipperServer.autoStart')) {
+		if (ClipperServer.instance().enabled() && Setting.value('clipperServer.autoStart')) {
 			void ClipperServer.instance().start();
 		}
 
@@ -653,6 +630,7 @@ class Application extends BaseApplication {
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 			(action: any) => { this.store().dispatch(action); },
 			(path: string) => bridge().openItem(path),
+			() => this.store().getState().windowId,
 		);
 
 		// Forwards the local event to the global event manager, so that it can
@@ -712,6 +690,9 @@ class Application extends BaseApplication {
 		eventManager.on(EventName.NoteResourceIndexed, async () => {
 			SearchEngine.instance().scheduleSyncTables();
 		});
+
+		// Used by tests
+		ipcRenderer.send('startup-finished');
 
 		// setTimeout(() => {
 		// 	void populateDatabase(reg.db(), {

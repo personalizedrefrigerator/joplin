@@ -1,11 +1,11 @@
 import paginationToSql from './models/utils/paginationToSql';
 import Database from './database';
-import uuid from './uuid';
 import time from './time';
 import JoplinDatabase, { TableField } from './JoplinDatabase';
 import { LoadOptions, SaveOptions } from './models/utils/types';
 import ActionLogger, { ItemActionType as ItemActionType } from './utils/ActionLogger';
 import { BaseItemEntity, SqlQuery } from './services/database/types';
+import uuid from './uuid';
 const Mutex = require('async-mutex').Mutex;
 
 // New code should make use of this enum
@@ -79,6 +79,8 @@ class BaseModel {
 		['TYPE_SMART_FILTER', ModelType.SmartFilter],
 		['TYPE_COMMAND', ModelType.Command],
 	];
+
+	private static uuidGenerator: ()=> string = uuid.create;
 
 	public static TYPE_NOTE = ModelType.Note;
 	public static TYPE_FOLDER = ModelType.Folder;
@@ -343,13 +345,17 @@ class BaseModel {
 		return this.modelSelectAll(q.sql, q.params);
 	}
 
+	public static escapeIdsForSql(ids: string[]) {
+		return this.db().escapeValues(ids).join(', ');
+	}
+
 	public static async byIds(ids: string[], options: LoadOptions = null) {
 		if (!ids.length) return [];
 		if (!options) options = {};
 		if (!options.fields) options.fields = '*';
 
 		let sql = `SELECT ${this.db().escapeFields(options.fields)} FROM \`${this.tableName()}\``;
-		sql += ` WHERE id IN ('${ids.join('\',\'')}')`;
+		sql += ` WHERE id IN (${this.escapeIdsForSql(ids)})`;
 		const q = this.applySqlOptions(options, sql);
 		return this.modelSelectAll(q.sql);
 	}
@@ -576,7 +582,7 @@ class BaseModel {
 
 		if (options.isNew) {
 			if (this.useUuid() && !o.id) {
-				modelId = uuid.create();
+				modelId = this.generateUuid();
 				o.id = modelId;
 			}
 
@@ -748,7 +754,7 @@ class BaseModel {
 
 		options = this.modOptions(options);
 		const idFieldName = options.idFieldName ? options.idFieldName : 'id';
-		const sql = `DELETE FROM ${this.tableName()} WHERE ${idFieldName} IN ('${ids.join('\',\'')}')`;
+		const sql = `DELETE FROM ${this.tableName()} WHERE ${idFieldName} IN (${this.escapeIdsForSql(ids)})`;
 		await this.db().exec(sql);
 	}
 
@@ -757,6 +763,15 @@ class BaseModel {
 		return this.db_;
 	}
 
+	public static generateUuid() {
+		return this.uuidGenerator();
+	}
+
+	public static setIdGenerator(generator: ()=> string) {
+		const previous = this.uuidGenerator;
+		this.uuidGenerator = generator;
+		return previous;
+	}
 	// static isReady() {
 	// 	return !!this.db_;
 	// }

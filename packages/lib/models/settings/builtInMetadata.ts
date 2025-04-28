@@ -19,6 +19,12 @@ export enum CameraDirection {
 	Front,
 }
 
+export enum ScrollbarSize {
+	Small = 7,
+	Medium = 12,
+	Large = 24,
+}
+
 const builtInMetadata = (Setting: typeof SettingType) => {
 	const platform = shim.platformName();
 	const mobilePlatform = shim.mobilePlatform();
@@ -56,6 +62,16 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 			type: SettingItemType.String,
 			public: false,
 		},
+
+		'altInstanceId': {
+			value: '',
+			type: SettingItemType.String,
+			public: false,
+			appTypes: [AppType.Desktop],
+			storage: SettingStorage.File,
+			isGlobal: true,
+		},
+
 		'editor.codeView': {
 			value: true,
 			type: SettingItemType.Bool,
@@ -493,7 +509,7 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 		},
 
 		'ocr.enabled': {
-			value: false,
+			value: true,
 			type: SettingItemType.Bool,
 			public: true,
 			appTypes: [AppType.Desktop],
@@ -658,6 +674,46 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 			storage: SettingStorage.File,
 			isGlobal: true,
 		},
+		'editor.pastePreserveColors': {
+			value: false,
+			type: SettingItemType.Bool,
+			public: true,
+			section: 'note',
+			appTypes: [AppType.Desktop],
+			label: () => _('Preserve colours when pasting text in Rich Text Editor'),
+			storage: SettingStorage.File,
+			isGlobal: true,
+		},
+		'editor.enableTextPatterns': {
+			value: true,
+			type: SettingItemType.Bool,
+			public: true,
+			section: 'note',
+			appTypes: [AppType.Desktop],
+			label: () => _('Auto-format Markdown in the Rich Text Editor'),
+			description: () => _('Enables Markdown pattern replacement in the Rich Text Editor. For example, when enabled, typing **bold** creates bold text.'),
+			storage: SettingStorage.File,
+			isGlobal: true,
+		},
+		'editor.toolbarButtons': {
+			value: [] as string[],
+			public: false,
+			type: SettingItemType.Array,
+			storage: SettingStorage.File,
+			isGlobal: true,
+			appTypes: [AppType.Mobile],
+			label: () => 'buttons included in the editor toolbar',
+		},
+		'editor.tabMovesFocus': {
+			value: false,
+			type: SettingItemType.Bool,
+			public: false,
+			section: 'note',
+			appTypes: [AppType.Desktop],
+			label: () => _('Tab moves focus'),
+			storage: SettingStorage.File,
+			isGlobal: true,
+		},
 		'notes.columns': {
 			value: defaultListColumns(),
 			public: false,
@@ -783,22 +839,6 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 			isGlobal: true,
 		},
 
-		// Works around a bug in which additional space is visible beneath the toolbar on some devices.
-		// See https://github.com/laurent22/joplin/pull/6823
-		'editor.mobile.removeSpaceBelowToolbar': {
-			value: false,
-			type: SettingItemType.Bool,
-			section: 'note',
-			public: true,
-			appTypes: [AppType.Mobile],
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-			show: (settings: any) => settings['editor.mobile.removeSpaceBelowToolbar'],
-			label: () => 'Remove extra space below the markdown toolbar',
-			description: () => 'Works around bug on some devices where the markdown toolbar does not touch the bottom of the screen.',
-			storage: SettingStorage.File,
-			isGlobal: true,
-		},
-
 		newTodoFocus: {
 			value: 'title',
 			type: SettingItemType.String,
@@ -888,7 +928,7 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 			advanced: true,
 
 			label: () => _('Plugin WebView debugging'),
-			description: () => _('Allows debugging mobile plugins. See %s for details.', 'https://https://joplinapp.org/help/api/references/mobile_plugin_debugging/'),
+			description: () => _('Allows debugging mobile plugins. See %s for details.', 'https://joplinapp.org/help/api/references/mobile_plugin_debugging/'),
 		},
 
 		'plugins.pluginSupportEnabled': {
@@ -910,10 +950,30 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 			section: 'plugins',
 			public: true,
 			advanced: true,
-			appTypes: [AppType.Desktop],
+			appTypes: [AppType.Desktop, AppType.Mobile],
+			// For now, development plugins are only enabled on desktop & web.
+			show: (settings) => {
+				if (shim.isElectron()) return true;
+				if (shim.mobilePlatform() !== 'web') return false;
+
+				const pluginSupportEnabled = settings['plugins.pluginSupportEnabled'];
+				return !!pluginSupportEnabled;
+			},
 			label: () => 'Development plugins',
-			description: () => 'You may add multiple plugin paths, each separated by a comma. You will need to restart the application for the changes to take effect.',
+			description: () => {
+				if (shim.mobilePlatform()) {
+					return 'The path to a plugin\'s development directory. When the plugin is rebuilt, Joplin reloads the plugin automatically.';
+				} else {
+					return 'You may add multiple plugin paths, each separated by a comma. You will need to restart the application for the changes to take effect.';
+				}
+			},
 			storage: SettingStorage.File,
+		},
+
+		'plugins.shownEditorViewIds': {
+			value: [] as string[],
+			type: SettingItemType.Array,
+			public: false,
 		},
 
 		// Deprecated - use markdown.plugin.*
@@ -1012,6 +1072,20 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 		// Deprecated in favour of windowContentZoomFactor
 		'style.zoom': { value: 100, type: SettingItemType.Int, public: false, storage: SettingStorage.File, isGlobal: true, appTypes: [AppType.Desktop], section: 'appearance', label: () => '', minimum: 50, maximum: 500, step: 10 },
 
+		'style.viewer.fontSize': {
+			value: 16,
+			type: SettingItemType.Int,
+			public: true,
+			storage: SettingStorage.File,
+			isGlobal: true,
+			appTypes: [AppType.Mobile],
+			section: 'appearance',
+			label: () => _('Viewer font size'),
+			minimum: 4,
+			maximum: 50,
+			step: 1,
+		},
+
 		'style.editor.fontSize': {
 			value: 15,
 			type: SettingItemType.Int,
@@ -1080,6 +1154,26 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 		},
 
 		'style.editor.contentMaxWidth': { value: 0, type: SettingItemType.Int, public: true, storage: SettingStorage.File, isGlobal: true, appTypes: [AppType.Desktop], section: 'appearance', label: () => _('Editor maximum width'), description: () => _('Set it to 0 to make it take the complete available space. Recommended width is 600.') },
+
+		'style.scrollbarSize': {
+			value: ScrollbarSize.Small,
+			type: SettingItemType.String,
+			public: true,
+			section: 'appearance',
+			appTypes: [AppType.Desktop],
+			isEnum: true,
+
+			options: () => ({
+				[ScrollbarSize.Small]: _('Small'),
+				[ScrollbarSize.Medium]: _('Medium'),
+				[ScrollbarSize.Large]: _('Large'),
+			}),
+
+			label: () => _('Scrollbar size'),
+			description: () => _('Configures the size of scrollbars used in the app.'),
+			storage: SettingStorage.File,
+			isGlobal: true,
+		},
 
 		'ui.layout': { value: {}, type: SettingItemType.Object, storage: SettingStorage.File, isGlobal: true, public: false, appTypes: [AppType.Desktop] },
 
@@ -1261,8 +1355,7 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 			type: SettingItemType.Bool,
 			public: true,
 			appTypes: [AppType.Desktop],
-			label: () => _('Enable spell checking in Markdown editor?'),
-			description: () => _('Checks spelling in most non-code regions of the Markdown editor.'),
+			label: () => _('Enable spell checking in Markdown editor'),
 			storage: SettingStorage.File,
 			isGlobal: true,
 		},
@@ -1307,7 +1400,7 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 			public: true,
 			appTypes: [AppType.Desktop],
 			label: () => _('Use the legacy Markdown editor'),
-			description: () => _('Enable the the legacy Markdown editor. Some plugins require this editor to function. However, it has accessibility issues and other plugins will not work.'),
+			description: () => 'Enable the the legacy Markdown editor. Some plugins require this editor to function. However, it has accessibility issues and other plugins will not work.',
 			storage: SettingStorage.File,
 			isGlobal: true,
 		},
@@ -1560,7 +1653,7 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 		'security.biometricsEnabled': {
 			value: false,
 			type: SettingItemType.Bool,
-			label: () => `${_('Use biometrics to secure access to the app')} (Beta)`,
+			label: () => `${_('Use biometrics to secure access to the app')}${shim.mobilePlatform() !== 'ios' ? ' (Beta)' : ''}`,
 			description: () => 'Important: This is a beta feature and it is not compatible with certain devices. If the app no longer starts after enabling this or is very slow to start, please uninstall and reinstall the app.',
 			show: () => shim.mobilePlatform() !== 'web',
 			public: true,
@@ -1589,19 +1682,8 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 			appTypes: [AppType.Desktop],
 			label: () => 'Enable auto-updates',
 			description: () => 'Enable this feature to receive notifications about updates and install them instead of manually downloading them. Restart app to start receiving auto-updates.',
-			show: () => shim.isWindows() || shim.isMac(),
+			show: () => shim.isWindows(),
 			section: 'application',
-			isGlobal: true,
-		},
-
-		'featureFlag.syncLockEnabled': {
-			value: true,
-			type: SettingItemType.Bool,
-			public: true,
-			storage: SettingStorage.File,
-			label: () => 'Enable sync locks',
-			description: () => 'This is an experimental setting to disable sync locks',
-			section: 'sync',
 			isGlobal: true,
 		},
 
@@ -1642,6 +1724,30 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 			label: () => 'Use beta encryption',
 			description: () => 'Set beta encryption methods as the default methods. This applies to all clients and takes effect after restarting the app.',
 			section: 'sync',
+			isGlobal: true,
+		},
+
+		'featureFlag.richText.useStrictContentSecurityPolicy': {
+			value: true,
+			type: SettingItemType.Bool,
+			public: true,
+			storage: SettingStorage.File,
+			appTypes: [AppType.Desktop],
+			label: () => 'Security: Stronger security controls in the Rich Text Editor',
+			description: () => 'Improves Rich Text Editor security by applying a strict content security policy to the Rich Text Editor\'s content.',
+			section: 'note',
+			isGlobal: true,
+		},
+
+		'featureFlag.plugins.isolatePluginWebViews': {
+			value: false,
+			type: SettingItemType.Bool,
+			public: true,
+			storage: SettingStorage.File,
+			appTypes: [AppType.Desktop],
+			label: () => 'Security: Improve plugin panel, editor, and dialog security',
+			description: () => 'Improves the security of plugin WebViews. This may break some plugins.',
+			section: 'note',
 			isGlobal: true,
 		},
 

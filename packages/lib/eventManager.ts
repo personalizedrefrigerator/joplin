@@ -137,7 +137,13 @@ export class EventManager {
 			// deep equality check to see if it's been changed. Normally the
 			// filter objects should be relatively small so there shouldn't be
 			// much of a performance hit.
-			const newOutput = await listener(output);
+			let newOutput = null;
+			try {
+				newOutput = await listener(output);
+			} catch (error) {
+				error.message = `Error in listener when calling: ${filterName}: ${error.message}`;
+				throw error;
+			}
 
 			// Plugin didn't return anything - so we leave the object as it is.
 			if (newOutput === undefined) continue;

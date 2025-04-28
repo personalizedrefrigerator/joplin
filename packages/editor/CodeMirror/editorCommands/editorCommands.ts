@@ -10,8 +10,10 @@ import {
 } from '../markdown/markdownCommands';
 import duplicateLine from './duplicateLine';
 import sortSelectedLines from './sortSelectedLines';
-import { closeSearchPanel, findNext, findPrevious, openSearchPanel, replaceAll, replaceNext } from '@codemirror/search';
+import { closeSearchPanel, findNext, findPrevious, openSearchPanel, replaceAll, replaceNext, searchPanelOpen } from '@codemirror/search';
 import { focus } from '@joplin/lib/utils/focusHandler';
+import { showLinkEditor } from '../utils/handleLinkEditRequests';
+import jumpToHash from './jumpToHash';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 export type EditorCommandFunction = (editor: EditorView, ...args: any[])=> void|any;
@@ -71,6 +73,15 @@ const editorCommands: Record<EditorCommandType, EditorCommandFunction> = {
 	[EditorCommandType.UndoSelection]: undoSelection,
 	[EditorCommandType.RedoSelection]: redoSelection,
 
+	[EditorCommandType.EditLink]: showLinkEditor,
+
+	[EditorCommandType.ToggleSearch]: (view) => {
+		if (searchPanelOpen(view.state)) {
+			return closeSearchPanel(view);
+		} else {
+			return openSearchPanel(view);
+		}
+	},
 	[EditorCommandType.ShowSearch]: openSearchPanel,
 	[EditorCommandType.HideSearch]: closeSearchPanel,
 	[EditorCommandType.FindNext]: findNext,
@@ -96,6 +107,10 @@ const editorCommands: Record<EditorCommandType, EditorCommandFunction> = {
 				insert: text,
 			}],
 		});
+	},
+
+	[EditorCommandType.JumpToHash]: (editor, hash: string) => {
+		return jumpToHash(editor, hash);
 	},
 };
 export default editorCommands;
