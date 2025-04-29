@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Joplin-CLI 1.0.0\n"
 "Report-Msgid-Bugs-To: \n"
-"Last-Translator: Laurent Cozic\n"
+"Last-Translator: Ismaël Moret <lanesh4d0w@gmail.com>\n"
 "Language-Team: \n"
 "Language: fr_FR\n"
 "MIME-Version: 1.0\n"
@@ -135,7 +135,7 @@ msgstr "%d Mo"
 #: packages/lib/utils/joplinCloud/index.ts:134
 #: packages/lib/utils/joplinCloud/index.ts:135
 msgid "%d MB per note or attachment"
-msgstr "%d Mo pour les notes et pièces jointes"
+msgstr "%d Mo par note ou pièce jointe"
 
 #: packages/lib/models/settings/builtInMetadata.ts:1279
 #: packages/lib/models/settings/builtInMetadata.ts:1280
@@ -167,7 +167,7 @@ msgstr "%s (%s) n'a pas pu être envoyé : %s"
 #: packages/app-desktop/gui/MainScreen.tsx:563
 #: packages/app-mobile/components/ScreenHeader/WarningBanner.tsx:68
 msgid "%s (%s) would like to share a notebook with you."
-msgstr "%s (%s) souhaiterais partager un carnet avec vous."
+msgstr "%s (%s) souhaiterait partager un carnet avec vous."
 
 #: packages/lib/services/ReportService.ts:340
 msgid "%s (%s): %s"
@@ -175,7 +175,7 @@ msgstr "%s (%s) : %s"
 
 #: packages/app-desktop/checkForUpdates.ts:103
 msgid "%s (pre-release)"
-msgstr "%s (pré‑release)"
+msgstr "%s (préversion)"
 
 #: packages/lib/models/settings/builtInMetadata.ts:625
 #: packages/lib/models/settings/builtInMetadata.ts:626
@@ -268,8 +268,8 @@ msgid ""
 "target is a regular note it will be converted to a to-do). Use \"clear\" to "
 "convert the to-do back to a regular note."
 msgstr ""
-"Gère le statut des tâches. <todo-command> peut être \"toggle\" ou \"clear\". "
-"Utilisez \"toggle\" pour basculer la tâche entre le status terminé et non-"
+"<todo-command> peut être \"toggle\" ou \"clear\". "
+"Utilisez \"toggle\" pour basculer la tâche entre le statut terminé et non "
 "terminé (Si la cible est une note, elle sera convertie en tâche). Utilisez "
 "\"clear\" pour convertir la tâche en note."
 
@@ -327,11 +327,11 @@ msgstr "Invitations acceptées"
 
 #: packages/lib/WebDavApi.js:460
 msgid "Access denied: Please check your username and password"
-msgstr "Accès non-autorisé : Veuillez vérifier votre nom et mot de passe"
+msgstr "Accès non autorisé : Veuillez vérifier votre nom d'utilisateur et mot de passe"
 
 #: packages/lib/WebDavApi.js:458
 msgid "Access denied: Please re-enter your password and/or username"
-msgstr "Accès non-autorisé : Veuillez ré-entrer votre nom ou mot de passe"
+msgstr "Accès non autorisé : Veuillez réécrire votre nom d'utilisateur et/ou mot de passe"
 
 #: packages/server/src/routes/admin/users.ts:144
 msgid "Account"
@@ -340,7 +340,7 @@ msgstr "Compte"
 #: packages/app-desktop/gui/JoplinCloudConfigScreen.tsx:31
 #: packages/app-mobile/components/screens/ConfigScreen/JoplinCloudConfig.tsx:48
 msgid "Account information"
-msgstr "Information de compte"
+msgstr "Informations du compte"
 
 #: packages/app-desktop/gui/JoplinCloudConfigScreen.tsx:35
 #: packages/app-mobile/components/screens/ConfigScreen/JoplinCloudConfig.tsx:51
@@ -413,7 +413,7 @@ msgstr "Options avancées"
 
 #: packages/app-mobile/components/screens/ConfigScreen/ConfigScreen.tsx:653
 msgid "Advanced settings"
-msgstr "Options avancées"
+msgstr "Paramètres avancés"
 
 #: packages/app-desktop/gui/StatusScreen/StatusScreen.tsx:196
 msgid "Advanced tools"
@@ -428,7 +428,7 @@ msgid ""
 "All data, including notes, notebooks and tags will be permanently deleted."
 msgstr ""
 "Toutes vos données, y compris les notes, carnets et étiquettes seront "
-"effacés de façon permanente."
+"effacées de façon permanente."
 
 #: packages/lib/services/ReportService.ts:227
 msgid "All item sync failures have been marked as \"ignored\"."
@@ -483,8 +483,8 @@ msgid ""
 "Ambiguous notebook \"%s\". Please use notebook id instead - press \"ti\" to "
 "see the short notebook id or use $b for current selected notebook"
 msgstr ""
-"Titre ambigu \"%s\". Veuillez entrer l'identifiant du carnet - pressez \"ti"
-"\" pour afficher les identifiants, ou utilisez $b pour le carnet en cours"
+"Carnet ambigu \"%s\". Veuillez utiliser l'identifiant du carnet – pressez \"ti\" "
+"pour afficher les identifiants abrégés ou utilisez $b pour le carnet sélectionné."
 
 #: packages/app-cli/app/command-mkbook.ts:33
 #: packages/app-cli/app/command-mv.ts:30
@@ -492,8 +492,8 @@ msgid ""
 "Ambiguous notebook \"%s\". Please use short notebook id instead - press \"ti"
 "\" to see the short notebook id"
 msgstr ""
-"Titre ambigu \"%s\". Veuillez entrer l'identifiant du carnet - pressez \"ti"
-"\" pour afficher les identifiants"
+"Carnet ambigu \"%s\". Veuillez utiliser l’identifiant abrégé du carnet – "
+"pressez \"ti\" pour afficher l’identifiant abrégé."
 
 #: packages/app-mobile/components/NoteEditor/ImageEditor/promptRestoreAutosave.ts:13
 msgid "An autosaved drawing was found. Attach a copy of it to the note?"
@@ -502,7 +502,7 @@ msgstr ""
 
 #: packages/app-desktop/ElectronAppWrapper.ts:161
 msgid "An error occurred: %s"
-msgstr "Erreur : %s"
+msgstr "Une erreur est survenue : %s"
 
 #: packages/app-desktop/checkForUpdates.ts:107
 msgid "An update is available, do you want to download it now?"
@@ -520,7 +520,7 @@ msgid ""
 "your collection. The note will be saved into the Inbox notebook"
 msgstr ""
 "Un email envoyé à cette adresse sera converti en note et ajouté à votre "
-"collection. La note sera sauvé dans votre carnet \"Inbox\""
+"collection. La note sera sauvegardée dans votre carnet \"Inbox\""
 
 #: packages/lib/models/Setting.ts:1177
 msgid "Appearance"
@@ -545,15 +545,15 @@ msgstr ""
 
 #: packages/app-desktop/gui/ClipperConfigScreen.tsx:39
 msgid "Are you sure you want to renew the authorisation token?"
-msgstr "Renouveler le code d'authentification ?"
+msgstr "Êtes-vous sûr de vouloir renouveler le jeton d'authentification ?"
 
 #: packages/app-desktop/gui/WindowCommandsAndDialogs/commands/resetLayout.ts:14
 msgid ""
 "Are you sure you want to return to the default layout? The current layout "
 "configuration will be lost."
 msgstr ""
-"Restaurer la disposition de l'interface ? La disposition en cours sera "
-"perdue."
+"Êtes-vous sûr de vouloir restaurer la disposition de l'interface ? La disposition en cours "
+"sera perdue."
 
 #: packages/app-desktop/gui/ConfigScreen/controls/SettingComponent.tsx:235
 msgid "Arguments:"
@@ -580,11 +580,11 @@ msgstr "Joindre"
 #: packages/app-mobile/components/screens/Note/commands/attachFile.ts:26
 #: packages/app-mobile/components/screens/Note/commands/attachFile.ts:90
 msgid "Attach file"
-msgstr "Attacher un fichier"
+msgstr "Joindre un fichier"
 
 #: packages/app-mobile/components/screens/Note/commands/attachFile.ts:95
 msgid "Attach photo"
-msgstr "Attacher une photo"
+msgstr "Joindre une photo"
 
 #: packages/app-mobile/components/screens/Note/Note.tsx:1200
 msgid "Attach..."
@@ -597,7 +597,7 @@ msgstr "Joindre le fichier fourni à la note."
 #: packages/server/src/models/UserModel.ts:247
 #: packages/server/src/models/UserModel.ts:264
 msgid "attachment"
-msgstr "fichier joint"
+msgstr "pièce jointe"
 
 #: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:72
 msgid "Attachment"
@@ -605,19 +605,19 @@ msgstr "Pièce jointe"
 
 #: packages/lib/models/Resource.ts:509
 msgid "Attachment conflict: \"%s\""
-msgstr "Conflit de fichier joint : \"%s\""
+msgstr "Conflit de pièce jointe : \"%s\""
 
 #: packages/lib/models/settings/builtInMetadata.ts:408
 msgid "Attachment download behaviour"
-msgstr "Téléchargement des ressources"
+msgstr "Comportement de téléchargement des pièces jointes"
 
 #: packages/lib/services/ReportService.ts:311
 msgid "Attachments"
-msgstr "Fichiers joints"
+msgstr "Pièces jointes"
 
 #: packages/lib/services/ReportService.ts:335
 msgid "Attachments that could not be downloaded"
-msgstr "Fichiers qui n'ont pas pu être téléchargé"
+msgstr "Pièces jointes qui n'ont pas pu être téléchargées"
 
 #: packages/lib/models/settings/builtInMetadata.ts:39
 msgid ""
@@ -634,11 +634,11 @@ msgstr ""
 #: packages/app-desktop/gui/OneDriveLoginScreen.tsx:49
 msgid ""
 "Authentication was not completed (did not receive an authentication token)."
-msgstr "Impossible d'autoriser le logiciel (jeton d'identification non‑reçu)."
+msgstr "L'authentification n'a pas été effectuée (jeton d'authentification non reçu)."
 
 #: packages/app-desktop/gui/ClipperConfigScreen.tsx:152
 msgid "Authorisation token:"
-msgstr "Code d'authentification :"
+msgstr "Jeton d'authentification :"
 
 #: packages/app-desktop/gui/JoplinCloudLoginScreen.tsx:88
 #: packages/app-mobile/components/screens/JoplinCloudLoginScreen.tsx:162
@@ -655,7 +655,7 @@ msgstr "Supprimer automatiquement les comptes désactivés"
 
 #: packages/lib/models/settings/builtInMetadata.ts:693
 msgid "Auto-format Markdown in the Rich Text Editor"
-msgstr "Formatage automatique de Markdown dans l'éditeur de texte enrichi"
+msgstr "Formatage automatique du Markdown dans l’éditeur de texte enrichi"
 
 #: packages/lib/models/settings/builtInMetadata.ts:661
 msgid "Auto-pair braces, parentheses, quotations, etc."
@@ -663,7 +663,7 @@ msgstr "Auto‑compléter les paires de parenthèses, guillemets, etc."
 
 #: packages/lib/models/settings/builtInMetadata.ts:672
 msgid "Autocomplete Markdown and HTML"
-msgstr "Complétion automatique Markdown et HTML"
+msgstr "Complétion automatique du Markdown et HTML"
 
 #: packages/lib/models/settings/builtInMetadata.ts:1253
 msgid "Automatically check for updates"
@@ -900,9 +900,9 @@ msgid ""
 "enabled end-to-end encryption. They may do so from the screen Configuration "
 "> Encryption."
 msgstr ""
-"Impossible de partager ce carnet chiffré car le destinataire %s car ils "
-"n'ont pas activé le chiffrement. Ils peuvent le faire à partir de l'écran "
-"Configuration > Chiffrement."
+"Impossible de partager ce carnet chiffré car les destinataires %s n'ont pas "
+"activé le chiffrement bout-à-bout. Ils peuvent le faire à partir de "
+"l'écran Configuration > Chiffrement."
 
 #: packages/app-mobile/components/NoteEditor/SearchPanel.tsx:331
 msgid "Case sensitive"
@@ -934,7 +934,7 @@ msgstr "Caractères sans espaces"
 
 #: packages/app-desktop/gui/SyncWizard/Dialog.tsx:163
 msgid "Check"
-msgstr "Coché"
+msgstr "Cocher"
 
 #: packages/app-mobile/components/EditorToolbar/ToolbarEditorDialog.tsx:168
 msgid "Check elements to display in the toolbar"
@@ -948,7 +948,7 @@ msgstr "Vérifier les mises à jour…"
 #: packages/app-desktop/gui/ConfigScreen/ConfigScreen.tsx:264
 #: packages/app-mobile/components/screens/ConfigScreen/ConfigScreen.tsx:465
 msgid "Check synchronisation configuration"
-msgstr "Vérifier config synchronisation"
+msgstr "Vérifier config. synchronisation"
 
 #: packages/app-desktop/gui/NoteEditor/editorCommandDeclarations.ts:90
 msgid "Checkbox"
@@ -1112,7 +1112,7 @@ msgstr ""
 "contenants des certificats, ou les chemins de certificats individuels. Par "
 "exemple : /my/cert_dir, /other/custom.pem. Remarquez que si vous changez les "
 "paramètres TLS, vous devez enregistrer vos changements avant de cliquer sur "
-"\"Vérifier config synchronisation\"."
+"\"Vérifier config. synchronisation\"."
 
 #: packages/lib/services/KeymapService.ts:331
 msgid "command"
@@ -1206,7 +1206,7 @@ msgstr "Conflits"
 
 #: packages/lib/models/Resource.ts:478
 msgid "Conflicts (attachments)"
-msgstr "Conflits (fichiers joints)"
+msgstr "Conflits (pièces jointes)"
 
 #: packages/app-desktop/gui/ConfigScreen/ConfigScreen.tsx:253
 #: packages/app-mobile/components/screens/ConfigScreen/ConfigScreen.tsx:462
@@ -1261,7 +1261,7 @@ msgstr "Copier"
 
 #: packages/app-desktop/commands/copyDevCommand.ts:9
 msgid "Copy dev mode command to clipboard"
-msgstr "Copier commande de développement dans presse papier"
+msgstr "Copier la commande de développement dans le presse papier"
 
 #: packages/app-desktop/gui/Sidebar/hooks/useOnRenderItem.tsx:229
 #: packages/app-desktop/gui/Sidebar/hooks/useOnRenderItem.tsx:243
@@ -1286,7 +1286,7 @@ msgstr "Copier le lien vers le site Web"
 #: packages/app-desktop/gui/utils/NoteListUtils.ts:121
 #: packages/app-mobile/components/screens/Note/Note.tsx:1275
 msgid "Copy Markdown link"
-msgstr "Copier lien Markdown"
+msgstr "Copier le lien Markdown"
 
 #: packages/app-desktop/gui/NoteEditor/utils/contextMenu.ts:156
 msgid "Copy path to clipboard"
@@ -1295,8 +1295,8 @@ msgstr "Copier le chemin"
 #: packages/app-desktop/gui/ShareNoteDialog.tsx:216
 msgid "Copy Shareable Link"
 msgid_plural "Copy Shareable Links"
-msgstr[0] "Copier lien partageable"
-msgstr[1] "Copier liens partageables"
+msgstr[0] "Copier le lien partageable"
+msgstr[1] "Copier les liens partageables"
 
 #: packages/app-desktop/gui/JoplinCloudConfigScreen.tsx:52
 #: packages/app-mobile/components/screens/ConfigScreen/JoplinCloudConfig.tsx:75
@@ -1305,7 +1305,7 @@ msgstr "Copier"
 
 #: packages/app-desktop/gui/ClipperConfigScreen.tsx:156
 msgid "Copy token"
-msgstr "Copier le code"
+msgstr "Copier le jeton"
 
 #: packages/app-mobile/components/screens/ConfigScreen/ConfigScreen.tsx:611
 msgid "Copy version info"
@@ -1332,14 +1332,14 @@ msgid ""
 "\n"
 "%s"
 msgstr ""
-"Impossible de se connecter au server Joplin. Veuillez vérifier la "
-"configuration. L'erreur complète était :\n"
+"Impossible de se connecter au server Joplin. Veuillez vérifier les options "
+"de synchronisation dans l'écran de configuration. L'erreur complète était :\n"
 "\n"
 "%s"
 
 #: packages/app-desktop/gui/ConfigScreen/controls/plugins/PluginsStates.tsx:319
 msgid "Could not connect to plugin repository."
-msgstr "Impossible de télécharger la liste des plugins."
+msgstr "Impossible de télécharger la liste des modules."
 
 #: packages/app-desktop/InteropServiceHelper.ts:220
 msgid "Could not export notes: %s"
@@ -1367,7 +1367,7 @@ msgstr "Impossible de changer de profil : %s"
 
 #: packages/lib/components/EncryptionConfigScreen/utils.ts:224
 msgid "Could not upgrade master key: %s"
-msgstr "Impossible de mettre la clef à niveau : %s"
+msgstr "Impossible de mettre à niveau la clef principale : %s"
 
 #: packages/app-desktop/gui/WindowCommandsAndDialogs/commands/leaveSharedFolder.ts:27
 msgid ""
@@ -1387,7 +1387,7 @@ msgstr "Créer"
 
 #: packages/app-cli/app/command-mkbook.ts:19
 msgid "Create a new notebook under a parent notebook."
-msgstr "Créer un carnet sous un carnet parent."
+msgstr "Créer un nouveau carnet sous un carnet parent."
 
 #: packages/app-mobile/components/NoteList.tsx:102
 msgid "Create a notebook"
@@ -1404,7 +1404,7 @@ msgstr "Créer un carnet"
 
 #: packages/server/src/routes/admin/users.ts:257
 msgid "Create user"
-msgstr "Créer utilisateur"
+msgstr "Créer un utilisateur"
 
 #: packages/app-desktop/gui/NoteListHeader/utils/getColumnTitle.ts:14
 #: packages/app-desktop/gui/NotePropertiesDialog.tsx:81
@@ -1463,7 +1463,7 @@ msgstr "Création d'une nouvelle note..."
 
 #: packages/app-desktop/gui/NoteEditor/NoteTitle/NoteTitleBar.tsx:123
 msgid "Creating new to-do..."
-msgstr "Création d'un nouveau to-do…"
+msgstr "Création d'une nouvelle tâche…"
 
 #: packages/app-mobile/components/screens/ConfigScreen/NoteExportSection/ExportDebugReportButton.tsx:29
 msgid "Creating report..."
@@ -1582,7 +1582,7 @@ msgstr "Supprimer"
 
 #: packages/app-desktop/gui/ResourceScreen.tsx:231
 msgid "Delete attachment \"%s\"?"
-msgstr "Supprimer fichier joint \"%s\" ?"
+msgstr "Supprimer la pièce jointe \"%s\" ?"
 
 #: packages/server/src/services/TaskService.ts:27
 msgid "Delete expired sessions"
@@ -1590,7 +1590,7 @@ msgstr "Supprimer les sessions expirées"
 
 #: packages/server/src/services/TaskService.ts:22
 msgid "Delete expired tokens"
-msgstr "Supprimer les tokens expirés"
+msgstr "Supprimer les jetons expirés"
 
 #: packages/app-desktop/gui/NoteEditor/editorCommandDeclarations.ts:110
 msgid "Delete line"
@@ -1834,9 +1834,9 @@ msgid ""
 "way to decrypt the data! To enable encryption, please enter your password "
 "below."
 msgstr ""
-"Ne perdez pas le mot de passe car, par sécurité, ce sera la seule façon de "
-"déchiffrer les données. Pour activer le chiffrement, veuillez entrer votre "
-"mot de passe ci-dessous."
+"Ne perdez pas le mot de passe car, pour des raisons de sécurité, ce sera "
+"la *seule* façon de déchiffrer les données. Pour activer le chiffrement, "
+"veuillez entrer votre mot de passe ci-dessous."
 
 #: packages/lib/models/Setting.ts:1223
 msgid "Donate, website"
@@ -2035,15 +2035,15 @@ msgstr "Email"
 #: packages/app-desktop/gui/JoplinCloudConfigScreen.tsx:47
 #: packages/app-mobile/components/screens/ConfigScreen/JoplinCloudConfig.tsx:23
 msgid "Email to note"
-msgstr "Conversion email en note"
+msgstr "Conversion de l'email en note"
 
 #: packages/lib/utils/joplinCloud/index.ts:187
 msgid "Email to Note"
-msgstr "Conversion email en note"
+msgstr "Conversion de l'email en note"
 
 #: packages/lib/models/Setting.ts:1216
 msgid "Email To Note, login information"
-msgstr "\"Email to note\", info de connexion"
+msgstr "\"Email to note\", information de connexion"
 
 #: packages/server/src/routes/admin/emails.ts:111
 #: packages/server/src/services/MustacheService.ts:133
@@ -2089,7 +2089,7 @@ msgstr "Activer la syntaxe pour abréviations"
 
 #: packages/lib/models/settings/builtInMetadata.ts:992
 msgid "Enable audio player"
-msgstr "Activer lecteur audio"
+msgstr "Activer le lecteur audio"
 
 #: packages/app-mobile/components/biometrics/BiometricPopup.tsx:82
 msgid "Enable biometrics authentication?"
@@ -2150,7 +2150,7 @@ msgstr "Activer ou désactiver les modules"
 
 #: packages/lib/models/settings/builtInMetadata.ts:994
 msgid "Enable PDF viewer"
-msgstr "Activer visionneuse PDF"
+msgstr "Activer la visionneuse PDF"
 
 #: packages/app-mobile/components/screens/ConfigScreen/plugins/EnablePluginSupportPage.tsx:119
 #: packages/lib/models/settings/builtInMetadata.ts:942
@@ -2159,7 +2159,7 @@ msgstr "Activer la prise en charge des plugins"
 
 #: packages/lib/models/settings/builtInMetadata.ts:984
 msgid "Enable soft breaks"
-msgstr "Activer retours à la ligne \"doux\""
+msgstr "Activer les retours à la ligne \"doux\""
 
 #: packages/lib/models/settings/builtInMetadata.ts:1358
 msgid "Enable spell checking in Markdown editor"
@@ -2183,7 +2183,7 @@ msgstr "Activer le typographe"
 
 #: packages/lib/models/settings/builtInMetadata.ts:993
 msgid "Enable video player"
-msgstr "Activer lecteur vidéo"
+msgstr "Activer le lecteur vidéo"
 
 #: packages/app-desktop/gui/ClipperConfigScreen.tsx:117
 msgid "Enable Web Clipper Service"
@@ -2237,7 +2237,7 @@ msgstr "Chiffrement"
 #: packages/app-mobile/components/screens/ConfigScreen/ConfigScreen.tsx:530
 #: packages/app-mobile/components/screens/encryption-config.tsx:334
 msgid "Encryption Config"
-msgstr "Config chiffrement"
+msgstr "Config. chiffrement"
 
 #: packages/app-cli/app/command-e2ee.ts:128
 #: packages/app-mobile/components/screens/encryption-config.tsx:353

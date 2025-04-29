@@ -1162,6 +1162,7 @@ packages/lib/models/settings/settingValidations.js
 packages/lib/models/settings/types.js
 packages/lib/models/utils/areAllFoldersCollapsed.test.js
 packages/lib/models/utils/areAllFoldersCollapsed.js
+packages/lib/models/utils/getCanBeCollapsedFolderIds.test.js
 packages/lib/models/utils/getCanBeCollapsedFolderIds.js
 packages/lib/models/utils/getCollator.js
 packages/lib/models/utils/getConflictFolderId.js
@@ -1634,6 +1635,7 @@ packages/tools/release-electron.js
 packages/tools/release-ios.js
 packages/tools/release-plugin-repo-cli.js
 packages/tools/release-server.js
+packages/tools/saveClaConsentRecords.js
 packages/tools/setupNewRelease.js
 packages/tools/spellcheck.js
 packages/tools/tagServerLatest.js
