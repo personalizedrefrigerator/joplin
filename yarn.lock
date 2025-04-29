@@ -8306,7 +8306,7 @@ __metadata:
     glob: 10.4.5
     gulp: 4.0.2
     highlight.js: 11.10.0
-    immer: 7.0.15
+    immer: 9.0.21
     jest: 29.7.0
     jest-environment-jsdom: 29.7.0
     js-sha512: 0.9.0
@@ -8639,7 +8639,7 @@ __metadata:
     html-entities: 1.4.0
     html-minifier: 4.0.0
     image-data-uri: 2.0.1
-    immer: 7.0.15
+    immer: 9.0.21
     jest: 29.7.0
     js-yaml: 4.1.0
     jsdom: 23.2.0
@@ -28529,14 +28529,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"immer@npm:7.0.15":
-  version: 7.0.15
-  resolution: "immer@npm:7.0.15"
-  checksum: d79deb76f8bce71fff95bfbfa6a614bf55dd1f500eea189d3dcc587d94ed911b048e875c810b4e1214b3a6a7c8db148628e0c62e6fd8a649e84002cba0053e34
-  languageName: node
-  linkType: hard
-
-"immer@npm:^9.0.7":
+"immer@npm:9.0.21, immer@npm:^9.0.7":
   version: 9.0.21
   resolution: "immer@npm:9.0.21"
   checksum: 70e3c274165995352f6936695f0ef4723c52c92c92dd0e9afdfe008175af39fa28e76aafb3a2ca9d57d1fb8f796efc4dd1e1cc36f18d33fa5b74f3dfb0375432
