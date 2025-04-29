@@ -1,5 +1,12 @@
 # Joplin Android Changelog
 
+## [android-v3.3.7](https://github.com/laurent22/joplin/releases/tag/android-v3.3.7) (Pre-release) - 2025-04-29T13:06:06Z
+
+- New: Add plural forms for notes, users, hours, minutes, days (#12171 by [@SilverGreen93](https://github.com/SilverGreen93))
+- Improved: Allow new note and new to-do buttons to wrap (#12163 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Improved: Update immer to v9.0.21 (#12182 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Editor: Allow syntax highlighting within ==highlight==s (#12167) (#12110 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+
 ## [android-v3.3.6](https://github.com/laurent22/joplin/releases/tag/android-v3.3.6) (Pre-release) - 2025-04-24T08:34:56Z
 
 - Improved: Improve UI for downloading updated models (#12145 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
