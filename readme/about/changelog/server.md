@@ -13,7 +13,7 @@
 
 ## [server-v3.3.3](https://github.com/laurent22/joplin/releases/tag/server-v3.3.3) - 2025-02-23T19:06:59Z
 
-- Security: Fixed patching user properties (12baa98)
+- Security: Fixed patching user properties (12baa98) (CVE-2025-27134 discovered by @zonia3000)
 
 ## [server-v3.3.2](https://github.com/laurent22/joplin/releases/tag/server-v3.3.2) - 2025-02-19T22:00:04Z
 
