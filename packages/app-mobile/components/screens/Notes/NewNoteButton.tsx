@@ -47,6 +47,7 @@ const styles = StyleSheet.create({
 	menuContent: {
 		gap: 12,
 		flexShrink: 1,
+		flexGrow: 1,
 		flexDirection: 'column',
 	},
 });
