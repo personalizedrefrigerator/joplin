@@ -9,6 +9,7 @@ export enum EditorEventType {
 	UpdateSearchDialog,
 	EditLink,
 	Scroll,
+	ShowOcrText,
 }
 
 export interface ChangeEvent {
@@ -56,10 +57,15 @@ export interface RequestEditLinkEvent {
 	kind: EditorEventType.EditLink;
 }
 
+export interface ShowOcrTextEvent {
+	kind: EditorEventType.ShowOcrText;
+	text: string;
+	itemId: string;
+}
 
 export type EditorEvent =
 		ChangeEvent|UndoRedoDepthChangeEvent|SelectionRangeChangeEvent|
 			EditorScrolledEvent|
 			SelectionFormattingChangeEvent|UpdateSearchDialogEvent|
-			RequestEditLinkEvent;
+			RequestEditLinkEvent|ShowOcrTextEvent;
 

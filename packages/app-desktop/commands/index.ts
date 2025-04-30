@@ -21,6 +21,7 @@ import * as switchProfile3 from './switchProfile3';
 import * as toggleExternalEditing from './toggleExternalEditing';
 import * as toggleSafeMode from './toggleSafeMode';
 import * as toggleTabMovesFocus from './toggleTabMovesFocus';
+import * as viewOcrText from './viewOcrText';
 
 const index: any[] = [
 	copyDevCommand,
@@ -45,6 +46,7 @@ const index: any[] = [
 	toggleExternalEditing,
 	toggleSafeMode,
 	toggleTabMovesFocus,
+	viewOcrText,
 ];
 
 export default index;

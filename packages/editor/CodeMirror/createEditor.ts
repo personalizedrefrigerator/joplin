@@ -275,7 +275,13 @@ const createEditor = (
 
 				biDirectionalTextExtension,
 				overwriteModeExtension,
-				imageDescriptionExtension,
+				imageDescriptionExtension((image) => {
+					props.onEvent({
+						kind: EditorEventType.ShowOcrText,
+						text: image.description,
+						itemId: image.id,
+					});
+				}),
 
 				selectedNoteIdExtension,
 

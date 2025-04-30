@@ -5,16 +5,15 @@ import bridge from '../../../services/bridge';
 import { ContextMenuItemType, ContextMenuOptions, ContextMenuItems, resourceInfo, textToDataUri, svgUriToPng, svgDimensions } from './contextMenuUtils';
 const Menu = bridge().Menu;
 const MenuItem = bridge().MenuItem;
-import Resource, { resourceOcrStatusToString } from '@joplin/lib/models/Resource';
+import Resource from '@joplin/lib/models/Resource';
 import BaseItem from '@joplin/lib/models/BaseItem';
 import BaseModel, { ModelType } from '@joplin/lib/BaseModel';
-import { NoteEntity, ResourceEntity, ResourceOcrStatus } from '@joplin/lib/services/database/types';
+import { NoteEntity, ResourceEntity } from '@joplin/lib/services/database/types';
 import { TinyMceEditorEvents } from '../NoteBody/TinyMCE/utils/types';
 import { itemIsReadOnlySync, ItemSlice } from '@joplin/lib/models/utils/readOnly';
 import Setting from '@joplin/lib/models/Setting';
 import ItemChange from '@joplin/lib/models/ItemChange';
-import shim from '@joplin/lib/shim';
-import { openFileWithExternalEditor } from '@joplin/lib/services/ExternalEditWatcher/utils';
+import CommandService from '@joplin/lib/services/CommandService';
 const fs = require('fs-extra');
 const { writeFile } = require('fs-extra');
 const { clipboard } = require('electron');
@@ -140,13 +139,7 @@ export function menuItems(dispatch: Function): ContextMenuItems {
 			onAction: async (options: ContextMenuOptions) => {
 				const { resource } = await resourceInfo(options);
 
-				if (resource.ocr_status === ResourceOcrStatus.Done) {
-					const tempFilePath = `${Setting.value('tempDir')}/${resource.id}_ocr.txt`;
-					await shim.fsDriver().writeFile(tempFilePath, resource.ocr_text, 'utf8');
-					await openFileWithExternalEditor(tempFilePath, bridge());
-				} else {
-					bridge().showInfoMessageBox(_('This attachment does not have OCR data (Status: %s)', resourceOcrStatusToString(resource.ocr_status)));
-				}
+				await CommandService.instance().execute('viewOcrText', resource.id);
 			},
 			isActive: (itemType: ContextMenuItemType, options: ContextMenuOptions) => {
 				return itemType === ContextMenuItemType.Resource || (itemType === ContextMenuItemType.Image && options.resourceId);

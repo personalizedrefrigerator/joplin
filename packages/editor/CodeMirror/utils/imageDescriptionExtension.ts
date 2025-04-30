@@ -6,23 +6,56 @@ export type ImageDescription = {
 	id: string;
 	description: string;
 };
+type OnOcrText = (image: ImageDescription)=> void;
 // Maps from id -> description
 type ImageDescriptions = Map<string, ImageDescription>;
 
 class OcrTextWidget extends WidgetType {
-	public constructor(private readonly text: string) {
+	public constructor(
+		private readonly image: ImageDescription,
+		private readonly onShowOcrText: OnOcrText,
+	) {
 		super();
 	}
+
 	public override eq(other: WidgetType) {
-		return other instanceof OcrTextWidget && other.text === this.text;
+		if (!(other instanceof OcrTextWidget)) return false;
+		return other.image.id === this.image.id && other.image.description === this.image.description;
 	}
 
-	public override toDOM() {
-		const wrapper = document.createElement('span');
-		wrapper.textContent = this.text;
+	public override toDOM(view: EditorView) {
+		const wrapper = document.createElement('button');
+		wrapper.classList.add('cm-ocr-text-button');
+
+		const icon = document.createElement('i');
+		icon.classList.add('fas', 'fa-eye');
+		icon.role = 'img';
+		icon.ariaHidden = 'true';
+
+		const content = document.createElement('span');
+		const ocrPhrase = view.state.phrase('OCR Text');
+
+		const fullLabel = `${ocrPhrase} ${this.image.description}`;
+		content.ariaLabel = fullLabel;
+		content.title = fullLabel;
+		content.textContent = ocrPhrase;
+
+		wrapper.appendChild(icon);
+		wrapper.appendChild(content);
+
+		wrapper.onclick = () => {
+			this.onShowOcrText(this.image);
+		};
+
 		return wrapper;
 	}
 }
+
+const onOcrTextHandlerFacet = Facet.define<OnOcrText>({
+	combine: values => [
+		values[0] ?? ((image) => alert(image.description)),
+	],
+});
 
 const imageDescriptionFacet = Facet.define<ImageDescriptions>({
 	combine: (values) => {
@@ -75,9 +108,9 @@ const imageDescriptionFacet = Facet.define<ImageDescriptions>({
 					}).find(description => !!description);
 					if (!description) return;
 
-					decorations.push(Decoration.widget({
-						widget: new OcrTextWidget(description.description),
-					}).range(pos));
+					decorations.push(Decoration.replace({
+						widget: new OcrTextWidget(description, state.facet(onOcrTextHandlerFacet)[0]),
+					}).range(pos - id.length, pos));
 				};
 
 				for (const { from, to } of view.visibleRanges) {
@@ -101,7 +134,14 @@ const imageDescriptionFacet = Facet.define<ImageDescriptions>({
 
 				return Decoration.set(decorations);
 			}
-		}, { decorations: plugin => plugin.decorations }),
+		}, {
+			decorations: plugin => plugin.decorations,
+			provide: plugin => {
+				return EditorView.atomicRanges.of(view => {
+					return view.plugin(plugin)?.decorations ?? Decoration.none;
+				});
+			},
+		}),
 	],
 });
 
@@ -141,7 +181,8 @@ const imageDescriptionState = StateField.define<ImageDescriptions>({
 	],
 });
 
-const imageDescriptionExtension: Extension = [
+const imageDescriptionExtension = (onOcrText: OnOcrText): Extension => [
+	onOcrTextHandlerFacet.of(onOcrText),
 	imageDescriptionState,
 ];
 

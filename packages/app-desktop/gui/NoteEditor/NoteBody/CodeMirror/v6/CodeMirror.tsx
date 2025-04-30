@@ -340,6 +340,10 @@ const CodeMirror = (props: NoteBodyEditorProps, ref: ForwardedRef<NoteBodyEditor
 				props.setShowLocalSearch(event.searchState.dialogVisible);
 			}
 			lastSearchState.current = event.searchState;
+		} else if (event.kind === EditorEventType.ShowOcrText) {
+			void CommandService.instance().execute(
+				'viewOcrText', event.itemId,
+			);
 		}
 	}, [editor_scroll, codeMirror_change, props.setLocalSearch, props.setShowLocalSearch]);
 
