@@ -15,6 +15,8 @@ import useEditorSearch from '../utils/useEditorSearchExtension';
 import CommandService from '@joplin/lib/services/CommandService';
 import { SearchMarkers } from '../../../utils/useSearchMarkers';
 import localisation from './utils/localisation';
+import useOcrTextDisplay from './utils/useOcrTextDisplay';
+import { ResourceInfos } from '../../../utils/types';
 
 interface Props extends EditorProps {
 	style: React.CSSProperties;
@@ -23,6 +25,7 @@ interface Props extends EditorProps {
 	onEditorPaste: (event: Event)=> void;
 	externalSearch: SearchMarkers;
 	useLocalSearch: boolean;
+	resourceInfos: ResourceInfos;
 }
 
 const Editor = (props: Props, ref: ForwardedRef<CodeMirrorControl>) => {
@@ -178,6 +181,7 @@ const Editor = (props: Props, ref: ForwardedRef<CodeMirrorControl>) => {
 	}, [editor]);
 
 	useKeymap(editor);
+	useOcrTextDisplay(editor, props.resourceInfos);
 
 	return (
 		<div

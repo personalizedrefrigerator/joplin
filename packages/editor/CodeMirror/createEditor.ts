@@ -36,6 +36,7 @@ import isCursorAtBeginning from './utils/isCursorAtBeginning';
 import overwriteModeExtension from './utils/overwriteModeExtension';
 import handleLinkEditRequests, { showLinkEditor } from './utils/handleLinkEditRequests';
 import selectedNoteIdExtension, { setNoteIdEffect } from './utils/selectedNoteIdExtension';
+import imageDescriptionExtension from './utils/imageDescriptionExtension';
 
 // Newer versions of CodeMirror by default use Chrome's EditContext API.
 // While this might be stable enough for desktop use, it causes significant
@@ -274,6 +275,7 @@ const createEditor = (
 
 				biDirectionalTextExtension,
 				overwriteModeExtension,
+				imageDescriptionExtension,
 
 				selectedNoteIdExtension,
 

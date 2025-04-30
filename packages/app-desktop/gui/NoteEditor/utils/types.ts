@@ -13,6 +13,7 @@ import { MarkupToHtmlOptions } from '../../hooks/useMarkupToHtml';
 import { ScrollbarSize } from '@joplin/lib/models/settings/builtInMetadata';
 import { RefObject, SetStateAction } from 'react';
 import * as React from 'react';
+import { ResourceEntity } from '@joplin/lib/services/database/types';
 
 export interface AllAssetsOptions {
 	contentMaxWidthTarget?: string;
@@ -211,8 +212,7 @@ export function defaultFormNote(): FormNote {
 export interface ResourceInfo {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	localState: any;
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	item: any;
+	item: ResourceEntity;
 }
 
 export interface ResourceInfos {

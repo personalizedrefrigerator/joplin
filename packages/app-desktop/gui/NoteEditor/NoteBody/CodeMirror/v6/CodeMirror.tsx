@@ -403,6 +403,7 @@ const CodeMirror = (props: NoteBodyEditorProps, ref: ForwardedRef<NoteBodyEditor
 					ref={editorRef}
 					settings={editorSettings}
 					pluginStates={props.plugins}
+					resourceInfos={props.resourceInfos}
 					onPasteFile={null}
 					onEvent={onEditorEvent}
 					onLogMessage={logDebug}

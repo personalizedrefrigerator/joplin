@@ -13,6 +13,7 @@ import toggleInlineSelectionFormat from './utils/formatting/toggleInlineSelectio
 import getSearchState from './utils/getSearchState';
 import { noteIdFacet, setNoteIdEffect } from './utils/selectedNoteIdExtension';
 import jumpToHash from './editorCommands/jumpToHash';
+import { ImageDescription, setImageDescriptions } from './utils/imageDescriptionExtension';
 
 interface Callbacks {
 	onUndoRedo(): void;
@@ -257,6 +258,10 @@ export default class CodeMirrorControl extends CodeMirror5Emulation implements E
 				});
 			},
 		};
+	}
+
+	public setImageDescriptions(descriptions: ImageDescription[]) {
+		setImageDescriptions(this.editor, descriptions);
 	}
 
 	public joplinExtensions = {
