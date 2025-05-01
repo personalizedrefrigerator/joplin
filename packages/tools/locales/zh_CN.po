@@ -60,45 +60,47 @@ msgstr "（兼容所见即所得编辑器：%s）"
 msgid "(You may disable this prompt in the options)"
 msgstr "（您可以在选项中禁用此提示）"
 
-#: packages/app-desktop/gui/MenuBar.tsx:1059
-#: packages/app-desktop/gui/MenuBar.tsx:750
+#: packages/app-desktop/gui/MenuBar.tsx:1063
+#: packages/app-desktop/gui/MenuBar.tsx:754
 msgid "&Edit"
 msgstr "编辑 (&E)"
 
-#: packages/app-desktop/gui/MenuBar.tsx:1055
-#: packages/app-desktop/gui/MenuBar.tsx:623
-#: packages/app-desktop/gui/MenuBar.tsx:700
+#: packages/app-desktop/gui/MenuBar.tsx:1059
+#: packages/app-desktop/gui/MenuBar.tsx:629
+#: packages/app-desktop/gui/MenuBar.tsx:706
 msgid "&File"
 msgstr "文件 (&F)"
 
-#: packages/app-desktop/gui/MenuBar.tsx:880
+#: packages/app-desktop/gui/MenuBar.tsx:884
 msgid "&Go"
 msgstr "跳转 (&G)"
 
-#: packages/app-desktop/gui/MenuBar.tsx:935
+#: packages/app-desktop/gui/MenuBar.tsx:939
 msgid "&Help"
 msgstr "帮助 (&H)"
 
-#: packages/app-desktop/gui/MenuBar.tsx:898
+#: packages/app-desktop/gui/MenuBar.tsx:902
 msgid "&Note"
 msgstr "笔记 (&N)"
 
-#: packages/app-desktop/gui/MenuBar.tsx:913
+#: packages/app-desktop/gui/MenuBar.tsx:917
 msgid "&Tools"
 msgstr "工具 (&T)"
 
-#: packages/app-desktop/gui/MenuBar.tsx:792
+#: packages/app-desktop/gui/MenuBar.tsx:796
 msgid "&View"
 msgstr "视图 (&V)"
 
-#: packages/app-desktop/gui/MenuBar.tsx:925
+#: packages/app-desktop/gui/MenuBar.tsx:929
 msgid "&Window"
 msgstr "窗口 (&W)"
 
 #: packages/lib/models/settings/builtInMetadata.ts:1538
 #: packages/lib/models/settings/builtInMetadata.ts:1814
-msgid "%d days"
-msgstr "%d 天"
+#, fuzzy
+msgid "%d day"
+msgid_plural "%d days"
+msgstr[0] "%d 天"
 
 #: packages/lib/utils/joplinCloud/index.ts:148
 #: packages/lib/utils/joplinCloud/index.ts:149
@@ -113,13 +115,12 @@ msgid "%d GB storage space"
 msgstr "%d GB 存储空间"
 
 #: packages/lib/models/settings/builtInMetadata.ts:1282
-msgid "%d hour"
-msgstr "%d 小时"
-
 #: packages/lib/models/settings/builtInMetadata.ts:1283
 #: packages/lib/models/settings/builtInMetadata.ts:1284
-msgid "%d hours"
-msgstr "%d 小时"
+#, fuzzy
+msgid "%d hour"
+msgid_plural "%d hours"
+msgstr[0] "%d 小时"
 
 #: packages/lib/utils/joplinCloud/index.ts:136
 #: packages/lib/utils/joplinCloud/index.ts:137
@@ -136,19 +137,25 @@ msgstr "每个笔记或附件大小 %d MB"
 #: packages/lib/models/settings/builtInMetadata.ts:1279
 #: packages/lib/models/settings/builtInMetadata.ts:1280
 #: packages/lib/models/settings/builtInMetadata.ts:1281
-msgid "%d minutes"
-msgstr "%d 分钟"
+#, fuzzy
+msgid "%d minute"
+msgid_plural "%d minutes"
+msgstr[0] "%d 分钟"
 
 #: packages/app-cli/app/command-rmnote.ts:34
-msgid "%d notes match this pattern. Delete them?"
-msgstr "有 %d 条笔记匹配。是否删除？"
+#, fuzzy
+msgid "%d note matches this pattern. Delete it?"
+msgid_plural "%d notes match this pattern. Delete them?"
+msgstr[0] "有 %d 条笔记匹配。是否删除？"
 
 #: packages/app-cli/app/command-rmnote.ts:40
-msgid "%d notes will be permanently deleted. Continue?"
-msgstr "%d 条笔记将被永久删除。是否继续？"
+#, fuzzy
+msgid "%d note will be permanently deleted. Continue?"
+msgid_plural "%d notes will be permanently deleted. Continue?"
+msgstr[0] "%d 条笔记将被永久删除。是否继续？"
 
-#: packages/app-desktop/gui/NoteListControls/NoteListControls.tsx:228
-#: packages/app-desktop/gui/NoteListControls/NoteListControls.tsx:238
+#: packages/app-desktop/gui/NoteListControls/NoteListControls.tsx:229
+#: packages/app-desktop/gui/NoteListControls/NoteListControls.tsx:239
 msgid "%s"
 msgstr "%s"
 
@@ -224,9 +231,11 @@ msgstr "%s 标签页已打开"
 msgid "%s: %d"
 msgstr "%s: %d"
 
-#: packages/lib/services/ReportService.ts:377
-msgid "%s: %d notes"
-msgstr "%s: %d 条笔记"
+#: packages/lib/services/ReportService.ts:378
+#, fuzzy
+msgid "%s: %d note"
+msgid_plural "%s: %d notes"
+msgstr[0] "%s: %d 条笔记"
 
 #: packages/lib/services/ReportService.ts:359
 msgid "%s: %d/%d"
@@ -285,8 +294,8 @@ msgstr "A5"
 msgid "About"
 msgstr "关于"
 
-#: packages/app-desktop/gui/MenuBar.tsx:629
-#: packages/app-desktop/gui/MenuBar.tsx:977
+#: packages/app-desktop/gui/MenuBar.tsx:635
+#: packages/app-desktop/gui/MenuBar.tsx:981
 msgid "About Joplin"
 msgstr "关于 Joplin"
 
@@ -350,7 +359,7 @@ msgid "Active"
 msgstr "正在使用"
 
 #: packages/app-desktop/gui/KeymapConfig/utils/getLabel.ts:18
-#: packages/app-desktop/gui/MenuBar.tsx:848
+#: packages/app-desktop/gui/MenuBar.tsx:852
 msgid "Actual Size"
 msgstr "实际大小"
 
@@ -359,7 +368,7 @@ msgid "Add body"
 msgstr "添加内容"
 
 #: packages/app-mobile/components/buttons/FloatingActionButton.tsx:64
-#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:131
+#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:127
 msgid "Add new"
 msgstr "新增"
 
@@ -576,7 +585,7 @@ msgstr "将选定文件添加到笔记中。"
 msgid "attachment"
 msgstr "附件"
 
-#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:72
+#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:69
 msgid "Attachment"
 msgstr "附件"
 
@@ -703,7 +712,7 @@ msgstr "由 %s"
 msgid "by word"
 msgstr "以文字"
 
-#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:74
+#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:71
 msgid "Camera"
 msgstr "相机"
 
@@ -902,8 +911,8 @@ msgstr "勾选"
 msgid "Check elements to display in the toolbar"
 msgstr "勾选要在工具栏中显示的元素"
 
-#: packages/app-desktop/gui/MenuBar.tsx:643
-#: packages/app-desktop/gui/MenuBar.tsx:951
+#: packages/app-desktop/gui/MenuBar.tsx:649
+#: packages/app-desktop/gui/MenuBar.tsx:955
 msgid "Check for updates..."
 msgstr "检查更新……"
 
@@ -1012,7 +1021,7 @@ msgstr ""
 "将所有笔记以 JEX 格式导出来创建备份。"
 
 #: packages/app-desktop/gui/KeymapConfig/utils/getLabel.ts:26
-#: packages/app-desktop/gui/MenuBar.tsx:708
+#: packages/app-desktop/gui/MenuBar.tsx:714
 msgid "Close Window"
 msgstr "关闭窗口"
 
@@ -1057,7 +1066,7 @@ msgstr "折叠所有笔记本"
 msgid "Collapsed"
 msgstr "已折叠"
 
-#: packages/lib/services/ReportService.ts:385
+#: packages/lib/services/ReportService.ts:386
 msgid "Coming alarms"
 msgstr "临近提醒"
 
@@ -1207,7 +1216,7 @@ msgstr "转换为待办事项"
 msgid "Converting speech to text..."
 msgstr "正在将语音转换为文本……"
 
-#: packages/app-desktop/gui/MenuBar.tsx:610
+#: packages/app-desktop/gui/MenuBar.tsx:616
 #: packages/app-desktop/gui/NoteEditor/editorCommandDeclarations.ts:35
 #: packages/app-desktop/gui/NoteEditor/NoteBody/CodeMirror/utils/useContextMenu.ts:95
 #: packages/app-desktop/gui/NoteEditor/utils/contextMenu.ts:188
@@ -1392,7 +1401,7 @@ msgstr "已创建：%d 条。"
 msgid "Created: %s"
 msgstr "已创建：%s"
 
-#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:65
+#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:62
 msgid "Creates a new note with an attachment of type %s"
 msgstr "以类型 %s 的附件创建一个新笔记本"
 
@@ -1836,7 +1845,7 @@ msgid "Draw picture"
 msgstr "添加绘图"
 
 #: packages/app-mobile/components/screens/Note/Note.tsx:917
-#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:75
+#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:72
 msgid "Drawing"
 msgstr "绘制中"
 
@@ -2147,8 +2156,9 @@ msgstr "启用 Markdown 列表续写、自动闭合 HTML 标签，以及其他�
 msgid ""
 "Enables Markdown pattern replacement in the Rich Text Editor. For example, "
 "when enabled, typing **bold** creates bold text."
-msgstr "在富文本编辑器中启用 Markdown 模式替换。例如，"
-"当启用时，键入 **粗体** 创建粗体文本。"
+msgstr ""
+"在富文本编辑器中启用 Markdown 模式替换。例如，当启用时，键入 **粗体** 创建粗"
+"体文本。"
 
 #: packages/lib/components/EncryptionConfigScreen/utils.ts:50
 msgid ""
@@ -2295,8 +2305,8 @@ msgstr "已展开"
 msgid "Export"
 msgstr "导出"
 
-#: packages/app-desktop/gui/MenuBar.tsx:662
-#: packages/app-desktop/gui/MenuBar.tsx:718
+#: packages/app-desktop/gui/MenuBar.tsx:668
+#: packages/app-desktop/gui/MenuBar.tsx:724
 msgid "Export all"
 msgstr "全部导出"
 
@@ -2369,8 +2379,9 @@ msgid ""
 "Fail-safe: Sync was interrupted to prevent data loss, because the sync "
 "target is empty or damaged. To override this behaviour disable the fail-safe "
 "in the sync settings."
-msgstr "故障保护：同步被中断以防数据丢失，因为同步目标为空或已损坏。"
-"若要覆盖这一行为，在同步设置中禁用故障保护。"
+msgstr ""
+"故障保护：同步被中断以防数据丢失，因为同步目标为空或已损坏。若要覆盖这一行"
+"为，在同步设置中禁用故障保护。"
 
 #: packages/app-cli/app/main.js:107
 msgid "Fatal error:"
@@ -2431,7 +2442,7 @@ msgstr "修复搜索索引"
 msgid "Fixing search index..."
 msgstr "正在修复搜索索引……"
 
-#: packages/app-desktop/gui/MenuBar.tsx:886
+#: packages/app-desktop/gui/MenuBar.tsx:890
 #: packages/app-desktop/gui/NoteEditor/commands/focusElementNoteBody.ts:8
 #: packages/app-desktop/gui/NoteEditor/commands/focusElementNoteTitle.ts:8
 #: packages/app-desktop/gui/NoteEditor/commands/focusElementNoteViewer.ts:9
@@ -2596,7 +2607,7 @@ msgstr "以下是我们为使插件更安全而采取的措施："
 msgid "Hermes enabled: %d"
 msgstr "已启用 Hermes：%d"
 
-#: packages/app-desktop/gui/MenuBar.tsx:679
+#: packages/app-desktop/gui/MenuBar.tsx:685
 msgid "Hide %s"
 msgstr "隐藏 %s"
 
@@ -2695,8 +2706,8 @@ msgid "Images"
 msgstr "图片"
 
 #: packages/app-desktop/gui/KeymapConfig/KeymapConfigScreen.tsx:181
-#: packages/app-desktop/gui/MenuBar.tsx:658
-#: packages/app-desktop/gui/MenuBar.tsx:715
+#: packages/app-desktop/gui/MenuBar.tsx:664
+#: packages/app-desktop/gui/MenuBar.tsx:721
 #: packages/app-desktop/gui/Root.tsx:192
 msgid "Import"
 msgstr "导入"
@@ -2961,7 +2972,7 @@ msgstr "无法同步的条目"
 msgid "Items with error: %s"
 msgstr "含错误的项目：%s"
 
-#: packages/app-desktop/gui/MenuBar.tsx:945
+#: packages/app-desktop/gui/MenuBar.tsx:949
 msgid "Join us on %s"
 msgstr "在 %s 上加入我们"
 
@@ -3009,7 +3020,7 @@ msgstr ""
 "Joplin 多次解密这些条目失败，可能由于它们太大或已经损坏。这些条目会保留在设备"
 "上，但 Joplin 不会再尝试解密它们。"
 
-#: packages/app-desktop/gui/MenuBar.tsx:942
+#: packages/app-desktop/gui/MenuBar.tsx:946
 msgid "Joplin Forum"
 msgstr "Joplin 论坛"
 
@@ -3116,7 +3127,7 @@ msgstr "纬度"
 msgid "Layout"
 msgstr "布局"
 
-#: packages/app-desktop/gui/MenuBar.tsx:803
+#: packages/app-desktop/gui/MenuBar.tsx:807
 msgid "Layout button sequence"
 msgstr "布局按钮序列"
 
@@ -3241,7 +3252,7 @@ msgstr "日志，配置档、同步状态"
 msgid "Longitude"
 msgstr "经度"
 
-#: packages/app-desktop/gui/MenuBar.tsx:948
+#: packages/app-desktop/gui/MenuBar.tsx:952
 #: packages/app-mobile/components/screens/ConfigScreen/ConfigScreen.tsx:604
 msgid "Make a donation"
 msgstr "捐助"
@@ -3413,8 +3424,10 @@ msgid ""
 msgstr "大多数插件的源代码可在插件网站上查阅。"
 
 #: packages/app-mobile/components/ScreenHeader/index.tsx:567
-msgid "Move %d notes to notebook \"%s\"?"
-msgstr "是否移动 %d 条笔记到笔记本 “%s”？"
+#, fuzzy
+msgid "Move %d note to notebook \"%s\"?"
+msgid_plural "Move %d notes to notebook \"%s\"?"
+msgstr[0] "是否移动 %d 条笔记到笔记本 “%s”？"
 
 #: packages/app-desktop/gui/ResizableLayout/MoveButtons.tsx:73
 msgid "Move down"
@@ -3494,11 +3507,11 @@ msgstr ""
 "新模型可用\n"
 "一个新的语音输入模型现在可用。是否下载它？"
 
-#: packages/app-desktop/gui/NoteListControls/NoteListControls.tsx:111
+#: packages/app-desktop/gui/NoteListControls/NoteListControls.tsx:112
 #: packages/app-desktop/gui/NoteListWrapper/NoteListWrapper.tsx:72
 #: packages/app-desktop/gui/WindowCommandsAndDialogs/commands/newNote.ts:10
-#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:109
-#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:98
+#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:105
+#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:94
 #: packages/app-mobile/setupQuickActions.ts:30
 msgid "New note"
 msgstr "新建笔记"
@@ -3533,11 +3546,11 @@ msgstr "新建子笔记本"
 msgid "New tags:"
 msgstr "新建标签："
 
-#: packages/app-desktop/gui/NoteListControls/NoteListControls.tsx:121
+#: packages/app-desktop/gui/NoteListControls/NoteListControls.tsx:122
 #: packages/app-desktop/gui/NoteListWrapper/NoteListWrapper.tsx:72
 #: packages/app-desktop/gui/WindowCommandsAndDialogs/commands/newTodo.ts:7
-#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:112
-#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:87
+#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:108
+#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:84
 #: packages/app-mobile/setupQuickActions.ts:31
 msgid "New to-do"
 msgstr "新建待办事项"
@@ -3661,7 +3674,7 @@ msgstr "未生成"
 msgid "Not now"
 msgstr "不是现在"
 
-#: packages/app-desktop/gui/NoteListControls/NoteListControls.tsx:109
+#: packages/app-desktop/gui/NoteListControls/NoteListControls.tsx:110
 #: packages/app-desktop/gui/NoteListWrapper/NoteListWrapper.tsx:71
 #: packages/server/src/models/UserModel.ts:247
 #: packages/server/src/models/UserModel.ts:264
@@ -3682,7 +3695,7 @@ msgstr "笔记区域增长系数"
 msgid "Note attachments"
 msgstr "笔记附件"
 
-#: packages/app-desktop/gui/MenuBar.tsx:583
+#: packages/app-desktop/gui/MenuBar.tsx:589
 msgid "Note attachments..."
 msgstr "笔记附件……"
 
@@ -3722,7 +3735,7 @@ msgstr "笔记列表"
 msgid "Note list growth factor"
 msgstr "笔记列表增长系数"
 
-#: packages/app-desktop/gui/MenuBar.tsx:807
+#: packages/app-desktop/gui/MenuBar.tsx:811
 msgid "Note list style"
 msgstr "笔记列表样式"
 
@@ -3750,7 +3763,7 @@ msgid ""
 "Note: When a note is shared, it will no longer be encrypted on the server."
 msgstr "注意：笔记共享后，便不再在服务器上加密。"
 
-#: packages/app-desktop/gui/MenuBar.tsx:892
+#: packages/app-desktop/gui/MenuBar.tsx:896
 msgid "Note&book"
 msgstr "笔记本 (&B)"
 
@@ -3817,7 +3830,7 @@ msgstr "OCR：语言数据 URL 或路径"
 #: packages/app-desktop/bridge.ts:399 packages/app-desktop/bridge.ts:415
 #: packages/app-desktop/gui/ConfigScreen/ButtonBar.tsx:34
 #: packages/app-desktop/gui/DialogButtonRow.tsx:71
-#: packages/app-desktop/gui/MenuBar.tsx:610
+#: packages/app-desktop/gui/MenuBar.tsx:616
 #: packages/app-desktop/gui/PromptDialog.tsx:282
 #: packages/app-desktop/services/plugins/UserWebviewDialogButtonBar.tsx:19
 #: packages/app-mobile/components/DialogManager/hooks/useDialogControl.ts:17
@@ -3841,7 +3854,7 @@ msgstr "确认"
 msgid "OLED Dark"
 msgstr "OLED 暗色"
 
-#: packages/lib/services/ReportService.ts:390
+#: packages/lib/services/ReportService.ts:391
 msgid "On %s: %s"
 msgstr "位于 %s: %s"
 
@@ -3958,7 +3971,7 @@ msgid "Operation cancelled"
 msgstr "操作已取消"
 
 #: packages/app-desktop/gui/KeymapConfig/utils/getLabel.ts:28
-#: packages/app-desktop/gui/MenuBar.tsx:572
+#: packages/app-desktop/gui/MenuBar.tsx:578
 #: packages/app-desktop/gui/Root.tsx:193
 msgid "Options"
 msgstr "选项"
@@ -4031,7 +4044,8 @@ msgid "PDF File"
 msgstr "PDF 文件"
 
 #: packages/lib/utils/joplinCloud/index.ts:408
-msgid "Per user. Minimum of %d users."
+#, fuzzy
+msgid "Per user. Minimum of 2 users."
 msgstr "每个用户。至少有 %d 个用户。"
 
 #: packages/lib/commands/permanentlyDeleteNote.ts:8
@@ -4053,8 +4067,10 @@ msgstr ""
 "所有在该笔记本内的笔记和子笔记本也将同时被删除。"
 
 #: packages/lib/models/Note.ts:944
-msgid "Permanently delete these %d notes?"
-msgstr "是否永久删除这 %d 条笔记？"
+#, fuzzy
+msgid "Permanently delete this note?"
+msgid_plural "Permanently delete these %d notes?"
+msgstr[0] "是否永久删除这 %d 条笔记？"
 
 #: packages/app-cli/app/command-rmbook.ts:20
 msgid "Permanently deletes the notebook, skipping the trash."
@@ -4203,7 +4219,7 @@ msgstr "可用值：%s。"
 msgid "Preferences"
 msgstr "偏好设置"
 
-#: packages/app-desktop/gui/MenuBar.tsx:636
+#: packages/app-desktop/gui/MenuBar.tsx:642
 msgid "Preferences..."
 msgstr "偏好设置……"
 
@@ -4409,7 +4425,7 @@ msgstr "推荐插件"
 msgid "Record audio"
 msgstr "录制音频"
 
-#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:73
+#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:70
 msgid "Recording"
 msgstr "录音中"
 
@@ -4417,7 +4433,7 @@ msgstr "录音中"
 msgid "Recording..."
 msgstr "正在录音……"
 
-#: packages/app-desktop/gui/MenuBar.tsx:767
+#: packages/app-desktop/gui/MenuBar.tsx:771
 #: packages/app-desktop/gui/NoteEditor/editorCommandDeclarations.ts:122
 #: packages/app-mobile/components/NoteEditor/ImageEditor/ImageEditor.tsx:168
 #: packages/app-mobile/components/ScreenHeader/index.tsx:353
@@ -5861,10 +5877,6 @@ msgstr "这将打开一个新页面。是否保存当前更改？"
 msgid "This will permanently delete all items in the trash. Continue?"
 msgstr "这将永久删除回收站中的所有条目。是否继续？"
 
-#: packages/app-cli/app/command-rmnote.ts:40
-msgid "This will permanently delete the note \"%s\". Continue?"
-msgstr "这将永久删除笔记“%s”。是否继续？"
-
 #: packages/app-desktop/gui/WindowCommandsAndDialogs/commands/leaveSharedFolder.ts:17
 #: packages/app-mobile/components/screens/ShareManager/AcceptedShareItem.tsx:60
 msgid ""
@@ -5955,7 +5967,7 @@ msgstr ""
 "本应用程序需要下列权限才能正常运作。请在您的手机设置（应用 > Joplin > 权限）"
 "中启用它们"
 
-#: packages/app-desktop/gui/NoteListControls/NoteListControls.tsx:119
+#: packages/app-desktop/gui/NoteListControls/NoteListControls.tsx:120
 #: packages/app-desktop/gui/NoteListWrapper/NoteListWrapper.tsx:71
 msgid "to-do"
 msgstr "待办事项"
@@ -5976,7 +5988,7 @@ msgstr "切换折叠所有笔记本"
 msgid "Toggle comment"
 msgstr "添加/删除注释"
 
-#: packages/app-desktop/gui/MenuBar.tsx:961
+#: packages/app-desktop/gui/MenuBar.tsx:965
 msgid "Toggle development tools"
 msgstr "打开/关闭开发者工具"
 
@@ -6116,7 +6128,7 @@ msgstr "已取消勾选"
 msgid "Uncompleted to-dos on top"
 msgstr "置顶未完成待办事项"
 
-#: packages/app-desktop/gui/MenuBar.tsx:763
+#: packages/app-desktop/gui/MenuBar.tsx:767
 #: packages/app-desktop/gui/NoteEditor/editorCommandDeclarations.ts:118
 #: packages/app-mobile/components/NoteEditor/ImageEditor/ImageEditor.tsx:167
 #: packages/app-mobile/components/ScreenHeader/index.tsx:343
@@ -6447,7 +6459,7 @@ msgid "WebDAV username"
 msgstr "WebDAV 用户名"
 
 #: packages/app-desktop/gui/KeymapConfig/utils/getLabel.ts:20
-#: packages/app-desktop/gui/MenuBar.tsx:938
+#: packages/app-desktop/gui/MenuBar.tsx:942
 msgid "Website and documentation"
 msgstr "网站与文档"
 
@@ -6546,8 +6558,9 @@ msgstr "您已登录到 Joplin 云，现在可以关闭此界面。"
 msgid ""
 "You are running the Intel version of Joplin on an Apple Silicon processor. "
 "Download the Apple Silicon one for better performance."
-msgstr "您正在苹果芯片处理器上运行 Intel 版本的 Joplin。"
-"下载苹果芯片的版本以取得更佳性能。"
+msgstr ""
+"您正在苹果芯片处理器上运行 Intel 版本的 Joplin。下载苹果芯片的版本以取得更佳"
+"性能。"
 
 #: packages/app-mobile/components/NoteList.tsx:98
 msgid "You currently have no notebooks."
@@ -6607,14 +6620,20 @@ msgstr "要解密您的某些数据，需要使用您的密码。键入 `:e2ee d
 msgid "Your version: %s"
 msgstr "您的版本：%s"
 
-#: packages/app-desktop/gui/MenuBar.tsx:859
-#: packages/app-desktop/gui/MenuBar.tsx:865
+#: packages/app-desktop/gui/MenuBar.tsx:863
+#: packages/app-desktop/gui/MenuBar.tsx:869
 msgid "Zoom In"
 msgstr "放大"
 
-#: packages/app-desktop/gui/MenuBar.tsx:872
+#: packages/app-desktop/gui/MenuBar.tsx:876
 msgid "Zoom Out"
 msgstr "缩小"
+
+#~ msgid "%d hours"
+#~ msgstr "%d 小时"
+
+#~ msgid "This will permanently delete the note \"%s\". Continue?"
+#~ msgstr "这将永久删除笔记“%s”。是否继续？"
 
 #~ msgid "Close menu"
 #~ msgstr "关闭菜单"

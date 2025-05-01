@@ -1,5 +1,18 @@
 # Joplin Desktop Changelog
 
+## [v3.3.7](https://github.com/laurent22/joplin/releases/tag/v3.3.7) (Pre-release) - 2025-04-29T13:47:19Z
+
+- New: Add plural forms for notes, users, hours, minutes, days ([#12171](https://github.com/laurent22/joplin/issues/12171) by [@SilverGreen93](https://github.com/SilverGreen93))
+- Improved: "Collapse all" button in sidebar doesn't collapse trash folder ([#12051](https://github.com/laurent22/joplin/issues/12051)) ([#12039](https://github.com/laurent22/joplin/issues/12039) by [@MorbidMiyako](https://github.com/MorbidMiyako))
+- Improved: Built-in plugins: Upgrade Backup to v1.4.3 ([#12180](https://github.com/laurent22/joplin/issues/12180) by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Improved: Update immer to v9.0.21 ([#12182](https://github.com/laurent22/joplin/issues/12182) by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Improved: Upgrade to Electron 35.2.1 ([#12178](https://github.com/laurent22/joplin/issues/12178) by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Accessibility: Fix "focus viewer" doesn't move foucs to the correct line for sufficiently large documents ([#12183](https://github.com/laurent22/joplin/issues/12183) by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Allow opening secondary app instances from the "File" menu ([#12181](https://github.com/laurent22/joplin/issues/12181)) ([#12177](https://github.com/laurent22/joplin/issues/12177) by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Editor: Allow syntax highlighting within ==highlight==s ([#12167](https://github.com/laurent22/joplin/issues/12167)) ([#12110](https://github.com/laurent22/joplin/issues/12110) by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Fix firewall warning on startup ([#12176](https://github.com/laurent22/joplin/issues/12176) by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Preserve search query when opening a note in a new window ([#12175](https://github.com/laurent22/joplin/issues/12175)) ([#12168](https://github.com/laurent22/joplin/issues/12168) by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+
 ## [v3.3.6](https://github.com/laurent22/joplin/releases/tag/v3.3.6) (Pre-release) - 2025-04-24T12:27:20Z
 
 - Improved: Markdown editor: Scroll linked-to headers to the top of the editor ([#12125](https://github.com/laurent22/joplin/issues/12125) by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
