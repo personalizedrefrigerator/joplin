@@ -1,5 +1,11 @@
 # Joplin iOS Changelog
 
+## [ios-v13.3.6](https://github.com/laurent22/joplin/releases/tag/ios-v13.3.6) - 2025-05-01T15:50:25Z
+
+- New: Force quick action shortcuts to have the same size (#12195 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Improved: Increase space between new note/to-do buttons (#12194 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Fix new note menu size (#12193) (#12191 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+
 ## [ios-v13.3.5](https://github.com/laurent22/joplin/releases/tag/ios-v13.3.5) - 2025-04-29T13:18:40Z
 
 - New: Add plural forms for notes, users, hours, minutes, days (#12171 by [@SilverGreen93](https://github.com/SilverGreen93))
