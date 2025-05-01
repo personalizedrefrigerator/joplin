@@ -38,6 +38,7 @@
     "@codemirror/state": "6.4.1",
     "@codemirror/view": "6.35.0",
     "@joplin/fork-uslug": "^2.0.0",
+    "@joplin/utils": "~3.3",
     "@lezer/common": "1.2.3",
     "@lezer/highlight": "1.2.1",
     "@lezer/markdown": "1.3.2",

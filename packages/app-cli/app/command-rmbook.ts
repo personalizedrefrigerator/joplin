@@ -3,7 +3,7 @@ import app from './app';
 import { _ } from '@joplin/lib/locale';
 import Folder from '@joplin/lib/models/Folder';
 import BaseModel from '@joplin/lib/BaseModel';
-import { substrWithEllipsis } from '@joplin/lib/string-utils';
+import { substrWithEllipsis } from '@joplin/utils/strings';
 
 class Command extends BaseCommand {
 	public override usage() {

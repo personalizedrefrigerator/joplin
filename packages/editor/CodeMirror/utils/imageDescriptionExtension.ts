@@ -1,6 +1,7 @@
 import { RegExpCursor } from '@codemirror/search';
 import { Extension, Facet, Range, StateEffect, StateField } from '@codemirror/state';
 import { Decoration, DecorationSet, EditorView, ViewPlugin, ViewUpdate, WidgetType } from '@codemirror/view';
+import { substrWithEllipsis } from '@joplin/lib/string-utils';
 
 export type ImageDescription = {
 	id: string;
@@ -12,6 +13,7 @@ type ImageDescriptions = Map<string, ImageDescription>;
 
 class OcrTextWidget extends WidgetType {
 	public constructor(
+		private readonly replacementText: string,
 		private readonly image: ImageDescription,
 		private readonly onShowOcrText: OnOcrText,
 	) {
@@ -20,12 +22,19 @@ class OcrTextWidget extends WidgetType {
 
 	public override eq(other: WidgetType) {
 		if (!(other instanceof OcrTextWidget)) return false;
+		if (other.replacementText !== this.replacementText) return false;
 		return other.image.id === this.image.id && other.image.description === this.image.description;
 	}
 
 	public override toDOM(view: EditorView) {
-		const wrapper = document.createElement('button');
-		wrapper.classList.add('cm-ocr-text-button');
+		const wrapper = document.createElement('span');
+		wrapper.classList.add('cm-ocr-text');
+
+		const button = document.createElement('button');
+		button.classList.add('cm-ocr-text-button');
+		button.onclick = () => {
+			this.onShowOcrText(this.image);
+		};
 
 		const icon = document.createElement('i');
 		icon.classList.add('fas', 'fa-eye');
@@ -35,17 +44,15 @@ class OcrTextWidget extends WidgetType {
 		const content = document.createElement('span');
 		const ocrPhrase = view.state.phrase('OCR Text');
 
-		const fullLabel = `${ocrPhrase} ${this.image.description}`;
-		content.ariaLabel = fullLabel;
-		content.title = fullLabel;
-		content.textContent = ocrPhrase;
+		const fullLabel = substrWithEllipsis(`${ocrPhrase}\n${this.image.description}`, 0, 256);
+		button.ariaLabel = fullLabel;
+		button.title = fullLabel;
 
-		wrapper.appendChild(icon);
-		wrapper.appendChild(content);
+		button.appendChild(icon);
+		button.appendChild(content);
 
-		wrapper.onclick = () => {
-			this.onShowOcrText(this.image);
-		};
+		wrapper.appendChild(button);
+		wrapper.appendChild(document.createTextNode(this.replacementText));
 
 		return wrapper;
 	}
@@ -56,6 +63,9 @@ const onOcrTextHandlerFacet = Facet.define<OnOcrText>({
 		values[0] ?? ((image) => alert(image.description)),
 	],
 });
+
+const addImageDescriptionEffect = StateEffect.define<ImageDescription>();
+const setImageDescriptionsEffect = StateEffect.define<ImageDescription[]>();
 
 const imageDescriptionFacet = Facet.define<ImageDescriptions>({
 	combine: (values) => {
@@ -88,7 +98,10 @@ const imageDescriptionFacet = Facet.define<ImageDescriptions>({
 			}
 
 			public update(viewUpdate: ViewUpdate) {
-				if (viewUpdate.docChanged || viewUpdate.viewportChanged) {
+				const hasDescriptionUpdate = viewUpdate.transactions.some(tr => {
+					return tr.effects.some(effect => effect.is(addImageDescriptionEffect) || effect.is(setImageDescriptionsEffect));
+				});
+				if (viewUpdate.docChanged || viewUpdate.viewportChanged || hasDescriptionUpdate) {
 					this.decorations = this.buildDecorations(viewUpdate.view);
 				}
 			}
@@ -108,9 +121,14 @@ const imageDescriptionFacet = Facet.define<ImageDescriptions>({
 					}).find(description => !!description);
 					if (!description) return;
 
+					// Use a .replace decoration so that it can be read inline by accessibility tools.
 					decorations.push(Decoration.replace({
-						widget: new OcrTextWidget(description, state.facet(onOcrTextHandlerFacet)[0]),
-					}).range(pos - id.length, pos));
+						widget: new OcrTextWidget(
+							state.sliceDoc(pos, pos + 1),
+							description,
+							state.facet(onOcrTextHandlerFacet)[0],
+						),
+					}).range(pos, pos + 1));
 				};
 
 				for (const { from, to } of view.visibleRanges) {
@@ -125,7 +143,7 @@ const imageDescriptionFacet = Facet.define<ImageDescriptions>({
 						const value = cursor.value;
 						if (value) {
 							const id = value.match[1];
-							addDecoration(id, value.to);
+							addDecoration(id, value.from);
 						}
 
 						cursor = cursor.next();
@@ -144,9 +162,6 @@ const imageDescriptionFacet = Facet.define<ImageDescriptions>({
 		}),
 	],
 });
-
-const addImageDescriptionEffect = StateEffect.define<ImageDescription>();
-const setImageDescriptionsEffect = StateEffect.define<ImageDescription[]>();
 
 export const addImageDescription = (view: EditorView, description: ImageDescription) => {
 	view.dispatch({
@@ -182,6 +197,15 @@ const imageDescriptionState = StateField.define<ImageDescriptions>({
 });
 
 const imageDescriptionExtension = (onOcrText: OnOcrText): Extension => [
+	EditorView.theme({
+		'& .cm-ocr-text-button': {
+			color: 'inherit',
+			background: 'transparent',
+			border: '1px solid currentColor',
+			borderRadius: '4px',
+			marginInlineEnd: '4px',
+		},
+	}),
 	onOcrTextHandlerFacet.of(onOcrText),
 	imageDescriptionState,
 ];

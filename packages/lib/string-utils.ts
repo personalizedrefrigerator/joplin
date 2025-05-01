@@ -2,6 +2,8 @@ const Entities = require('html-entities').AllHtmlEntities;
 const htmlentities = new Entities().encode;
 const stringUtilsCommon = require('./string-utils-common.js');
 
+export { substrWithEllipsis } from '@joplin/utils/strings';
+
 export const pregQuote = stringUtilsCommon.pregQuote as (str: string, delimiter?: string)=> string;
 export const replaceRegexDiacritics = stringUtilsCommon.replaceRegexDiacritics;
 
@@ -250,11 +252,6 @@ export function surroundKeywords(keywords: KeywordType, text: string, prefix: st
 				return encodedText;
 			}
 		}).join('');
-}
-
-export function substrWithEllipsis(s: string, start: number, length: number) {
-	if (s.length <= length) return s;
-	return `${s.substr(start, length - 3)}...`;
 }
 
 export function nextWhitespaceIndex(s: string, begin: number) {
