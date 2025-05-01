@@ -63,45 +63,48 @@ msgstr "(چیزی که بدست خواهی آورد: %s)"
 msgid "(You may disable this prompt in the options)"
 msgstr "(شما می توانید این درخواست را در گزینه ها غیرفعال کنید)"
 
-#: packages/app-desktop/gui/MenuBar.tsx:1059
-#: packages/app-desktop/gui/MenuBar.tsx:750
+#: packages/app-desktop/gui/MenuBar.tsx:1063
+#: packages/app-desktop/gui/MenuBar.tsx:754
 msgid "&Edit"
 msgstr "&ویرایش"
 
-#: packages/app-desktop/gui/MenuBar.tsx:1055
-#: packages/app-desktop/gui/MenuBar.tsx:623
-#: packages/app-desktop/gui/MenuBar.tsx:700
+#: packages/app-desktop/gui/MenuBar.tsx:1059
+#: packages/app-desktop/gui/MenuBar.tsx:629
+#: packages/app-desktop/gui/MenuBar.tsx:706
 msgid "&File"
 msgstr "&فایل"
 
-#: packages/app-desktop/gui/MenuBar.tsx:880
+#: packages/app-desktop/gui/MenuBar.tsx:884
 msgid "&Go"
 msgstr "&برو"
 
-#: packages/app-desktop/gui/MenuBar.tsx:935
+#: packages/app-desktop/gui/MenuBar.tsx:939
 msgid "&Help"
 msgstr "&کمک"
 
-#: packages/app-desktop/gui/MenuBar.tsx:898
+#: packages/app-desktop/gui/MenuBar.tsx:902
 msgid "&Note"
 msgstr "&یادداشت"
 
-#: packages/app-desktop/gui/MenuBar.tsx:913
+#: packages/app-desktop/gui/MenuBar.tsx:917
 msgid "&Tools"
 msgstr "&ابزارها"
 
-#: packages/app-desktop/gui/MenuBar.tsx:792
+#: packages/app-desktop/gui/MenuBar.tsx:796
 msgid "&View"
 msgstr "&نما"
 
-#: packages/app-desktop/gui/MenuBar.tsx:925
+#: packages/app-desktop/gui/MenuBar.tsx:929
 msgid "&Window"
 msgstr "&صفحه"
 
 #: packages/lib/models/settings/builtInMetadata.ts:1538
 #: packages/lib/models/settings/builtInMetadata.ts:1814
-msgid "%d days"
-msgstr "%d روز"
+#, fuzzy
+msgid "%d day"
+msgid_plural "%d days"
+msgstr[0] "%d روز"
+msgstr[1] "%d روز"
 
 #: packages/lib/utils/joplinCloud/index.ts:148
 #: packages/lib/utils/joplinCloud/index.ts:149
@@ -116,13 +119,13 @@ msgid "%d GB storage space"
 msgstr "%d گیگابایت فضای ذخیره‌سازی"
 
 #: packages/lib/models/settings/builtInMetadata.ts:1282
-msgid "%d hour"
-msgstr "%d ساعت"
-
 #: packages/lib/models/settings/builtInMetadata.ts:1283
 #: packages/lib/models/settings/builtInMetadata.ts:1284
-msgid "%d hours"
-msgstr "%d ساعت"
+#, fuzzy
+msgid "%d hour"
+msgid_plural "%d hours"
+msgstr[0] "%d ساعت"
+msgstr[1] "%d ساعت"
 
 #: packages/lib/utils/joplinCloud/index.ts:136
 #: packages/lib/utils/joplinCloud/index.ts:137
@@ -139,19 +142,28 @@ msgstr "%d مگابایت به ازای هر یادداشت یا فایل پیو
 #: packages/lib/models/settings/builtInMetadata.ts:1279
 #: packages/lib/models/settings/builtInMetadata.ts:1280
 #: packages/lib/models/settings/builtInMetadata.ts:1281
-msgid "%d minutes"
-msgstr "%d دقیقه"
+#, fuzzy
+msgid "%d minute"
+msgid_plural "%d minutes"
+msgstr[0] "%d دقیقه"
+msgstr[1] "%d دقیقه"
 
 #: packages/app-cli/app/command-rmnote.ts:34
-msgid "%d notes match this pattern. Delete them?"
-msgstr "%d یادداشت‌هایی که مطابق این الگو هستند. آیا حذف شوند؟"
+#, fuzzy
+msgid "%d note matches this pattern. Delete it?"
+msgid_plural "%d notes match this pattern. Delete them?"
+msgstr[0] "%d یادداشت‌هایی که مطابق این الگو هستند. آیا حذف شوند؟"
+msgstr[1] "%d یادداشت‌هایی که مطابق این الگو هستند. آیا حذف شوند؟"
 
 #: packages/app-cli/app/command-rmnote.ts:40
-msgid "%d notes will be permanently deleted. Continue?"
-msgstr "%d یادداشت برای همیشه حذف خواهد شد. ادامه هید؟"
+#, fuzzy
+msgid "%d note will be permanently deleted. Continue?"
+msgid_plural "%d notes will be permanently deleted. Continue?"
+msgstr[0] "%d یادداشت برای همیشه حذف خواهد شد. ادامه هید؟"
+msgstr[1] "%d یادداشت برای همیشه حذف خواهد شد. ادامه هید؟"
 
-#: packages/app-desktop/gui/NoteListControls/NoteListControls.tsx:228
-#: packages/app-desktop/gui/NoteListControls/NoteListControls.tsx:238
+#: packages/app-desktop/gui/NoteListControls/NoteListControls.tsx:229
+#: packages/app-desktop/gui/NoteListControls/NoteListControls.tsx:239
 msgid "%s"
 msgstr "%s"
 
@@ -230,9 +242,12 @@ msgstr "برگه %s باز شد"
 msgid "%s: %d"
 msgstr "%s: %d"
 
-#: packages/lib/services/ReportService.ts:377
-msgid "%s: %d notes"
-msgstr "%s: %d یادداشت"
+#: packages/lib/services/ReportService.ts:378
+#, fuzzy
+msgid "%s: %d note"
+msgid_plural "%s: %d notes"
+msgstr[0] "%s: %d یادداشت"
+msgstr[1] "%s: %d یادداشت"
 
 #: packages/lib/services/ReportService.ts:359
 msgid "%s: %d/%d"
@@ -295,8 +310,8 @@ msgstr "A5"
 msgid "About"
 msgstr "درباره"
 
-#: packages/app-desktop/gui/MenuBar.tsx:629
-#: packages/app-desktop/gui/MenuBar.tsx:977
+#: packages/app-desktop/gui/MenuBar.tsx:635
+#: packages/app-desktop/gui/MenuBar.tsx:981
 msgid "About Joplin"
 msgstr "درباره joplin"
 
@@ -362,7 +377,7 @@ msgid "Active"
 msgstr "فعال"
 
 #: packages/app-desktop/gui/KeymapConfig/utils/getLabel.ts:18
-#: packages/app-desktop/gui/MenuBar.tsx:848
+#: packages/app-desktop/gui/MenuBar.tsx:852
 msgid "Actual Size"
 msgstr "اندازه واقعی"
 
@@ -371,7 +386,7 @@ msgid "Add body"
 msgstr "افزودن بدنه"
 
 #: packages/app-mobile/components/buttons/FloatingActionButton.tsx:64
-#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:131
+#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:127
 msgid "Add new"
 msgstr "افزودن جدید"
 
@@ -602,7 +617,7 @@ msgstr "فایل مشخص شده را به یادداشت پیوست کن."
 msgid "attachment"
 msgstr "پیوست"
 
-#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:72
+#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:69
 #, fuzzy
 msgid "Attachment"
 msgstr "پیوست‌ها"
@@ -731,7 +746,7 @@ msgstr "توسط %s"
 msgid "by word"
 msgstr ""
 
-#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:74
+#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:71
 msgid "Camera"
 msgstr ""
 
@@ -937,8 +952,8 @@ msgstr "چک‌باکس"
 msgid "Check elements to display in the toolbar"
 msgstr ""
 
-#: packages/app-desktop/gui/MenuBar.tsx:643
-#: packages/app-desktop/gui/MenuBar.tsx:951
+#: packages/app-desktop/gui/MenuBar.tsx:649
+#: packages/app-desktop/gui/MenuBar.tsx:955
 msgid "Check for updates..."
 msgstr "بررسی برای بروزرسانی..."
 
@@ -1051,7 +1066,7 @@ msgstr ""
 "عنوان JEX یک نسخه پشتیبان ایجاد کرده اید."
 
 #: packages/app-desktop/gui/KeymapConfig/utils/getLabel.ts:26
-#: packages/app-desktop/gui/MenuBar.tsx:708
+#: packages/app-desktop/gui/MenuBar.tsx:714
 msgid "Close Window"
 msgstr "بستن صفحه"
 
@@ -1098,7 +1113,7 @@ msgstr "ایجاد دفترچه"
 msgid "Collapsed"
 msgstr "بستن"
 
-#: packages/lib/services/ReportService.ts:385
+#: packages/lib/services/ReportService.ts:386
 msgid "Coming alarms"
 msgstr "هشدار‌های آینده"
 
@@ -1254,7 +1269,7 @@ msgstr "تبدیل به کار"
 msgid "Converting speech to text..."
 msgstr "تبدیل صوت به متن..."
 
-#: packages/app-desktop/gui/MenuBar.tsx:610
+#: packages/app-desktop/gui/MenuBar.tsx:616
 #: packages/app-desktop/gui/NoteEditor/editorCommandDeclarations.ts:35
 #: packages/app-desktop/gui/NoteEditor/NoteBody/CodeMirror/utils/useContextMenu.ts:95
 #: packages/app-desktop/gui/NoteEditor/utils/contextMenu.ts:188
@@ -1444,7 +1459,7 @@ msgstr "ایجاد شده: %d."
 msgid "Created: %s"
 msgstr "ایجاد شده: %s"
 
-#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:65
+#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:62
 #, fuzzy
 msgid "Creates a new note with an attachment of type %s"
 msgstr "یک دفترچه‌ جدید در زیر دفترچه والد ایجاد نمایید."
@@ -1905,7 +1920,7 @@ msgid "Draw picture"
 msgstr "رسم تصویر"
 
 #: packages/app-mobile/components/screens/Note/Note.tsx:917
-#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:75
+#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:72
 msgid "Drawing"
 msgstr "طراحی"
 
@@ -2371,8 +2386,8 @@ msgstr "منبسط"
 msgid "Export"
 msgstr "صدور"
 
-#: packages/app-desktop/gui/MenuBar.tsx:662
-#: packages/app-desktop/gui/MenuBar.tsx:718
+#: packages/app-desktop/gui/MenuBar.tsx:668
+#: packages/app-desktop/gui/MenuBar.tsx:724
 msgid "Export all"
 msgstr "صدور همه"
 
@@ -2508,7 +2523,7 @@ msgstr "اصلاح فهرست جستجو"
 msgid "Fixing search index..."
 msgstr "در حال اصلاح فهرست جستجو..."
 
-#: packages/app-desktop/gui/MenuBar.tsx:886
+#: packages/app-desktop/gui/MenuBar.tsx:890
 #: packages/app-desktop/gui/NoteEditor/commands/focusElementNoteBody.ts:8
 #: packages/app-desktop/gui/NoteEditor/commands/focusElementNoteTitle.ts:8
 #: packages/app-desktop/gui/NoteEditor/commands/focusElementNoteViewer.ts:9
@@ -2681,7 +2696,7 @@ msgstr "کاری که ما برای ایمن‌تر کردن افزونه‌ها
 msgid "Hermes enabled: %d"
 msgstr "Hermes فعال شده: %d"
 
-#: packages/app-desktop/gui/MenuBar.tsx:679
+#: packages/app-desktop/gui/MenuBar.tsx:685
 msgid "Hide %s"
 msgstr "پنهان‌سازی %s"
 
@@ -2783,8 +2798,8 @@ msgid "Images"
 msgstr "تصاویر"
 
 #: packages/app-desktop/gui/KeymapConfig/KeymapConfigScreen.tsx:181
-#: packages/app-desktop/gui/MenuBar.tsx:658
-#: packages/app-desktop/gui/MenuBar.tsx:715
+#: packages/app-desktop/gui/MenuBar.tsx:664
+#: packages/app-desktop/gui/MenuBar.tsx:721
 #: packages/app-desktop/gui/Root.tsx:192
 msgid "Import"
 msgstr "وارد کردن"
@@ -3061,7 +3076,7 @@ msgstr "مواردی که نمی‌توانند همگام‌سازی شوند"
 msgid "Items with error: %s"
 msgstr "آخرین خطا: %s"
 
-#: packages/app-desktop/gui/MenuBar.tsx:945
+#: packages/app-desktop/gui/MenuBar.tsx:949
 #, fuzzy
 msgid "Join us on %s"
 msgstr "به توئیتر ما بپیوندید"
@@ -3115,7 +3130,7 @@ msgstr ""
 "خراب یا بسیار بزرگ هستند. این موارد بر روی دستگاه باقی می‌مانند اما joplin "
 "دیگر تلاشی برای رمزگشایی آن‌ها نخواهد کرد."
 
-#: packages/app-desktop/gui/MenuBar.tsx:942
+#: packages/app-desktop/gui/MenuBar.tsx:946
 msgid "Joplin Forum"
 msgstr "انجمن joplin"
 
@@ -3225,7 +3240,7 @@ msgstr "عرض جغرافیایی"
 msgid "Layout"
 msgstr "چیدمان"
 
-#: packages/app-desktop/gui/MenuBar.tsx:803
+#: packages/app-desktop/gui/MenuBar.tsx:807
 msgid "Layout button sequence"
 msgstr "دنباله دکمه چیدمان"
 
@@ -3355,7 +3370,7 @@ msgstr "لاگ‌ها، نمایه‌ها، وضعیت همسان سازی"
 msgid "Longitude"
 msgstr "طول جغرافیایی"
 
-#: packages/app-desktop/gui/MenuBar.tsx:948
+#: packages/app-desktop/gui/MenuBar.tsx:952
 #: packages/app-mobile/components/screens/ConfigScreen/ConfigScreen.tsx:604
 msgid "Make a donation"
 msgstr "کمک مالی"
@@ -3532,8 +3547,11 @@ msgid ""
 msgstr "اکثر افزونه ها دارای کد منبع برای بررسی در وب سایت افزونه هستند."
 
 #: packages/app-mobile/components/ScreenHeader/index.tsx:567
-msgid "Move %d notes to notebook \"%s\"?"
-msgstr "انتقال یادداشت‌های  %d به دفترچه «%s»؟"
+#, fuzzy
+msgid "Move %d note to notebook \"%s\"?"
+msgid_plural "Move %d notes to notebook \"%s\"?"
+msgstr[0] "انتقال یادداشت‌های  %d به دفترچه «%s»؟"
+msgstr[1] "انتقال یادداشت‌های  %d به دفترچه «%s»؟"
 
 #: packages/app-desktop/gui/ResizableLayout/MoveButtons.tsx:73
 #, fuzzy
@@ -3615,11 +3633,11 @@ msgid ""
 "A new voice typing model is available. Do you want to download it?"
 msgstr "یک بروزرسانی موجود است، آیا میخواهید الآن دانلود‌ شود؟"
 
-#: packages/app-desktop/gui/NoteListControls/NoteListControls.tsx:111
+#: packages/app-desktop/gui/NoteListControls/NoteListControls.tsx:112
 #: packages/app-desktop/gui/NoteListWrapper/NoteListWrapper.tsx:72
 #: packages/app-desktop/gui/WindowCommandsAndDialogs/commands/newNote.ts:10
-#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:109
-#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:98
+#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:105
+#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:94
 #: packages/app-mobile/setupQuickActions.ts:30
 msgid "New note"
 msgstr "یادداشت جدید"
@@ -3656,11 +3674,11 @@ msgstr "دفترچه فرزند جدید"
 msgid "New tags:"
 msgstr "برچسب جدید:"
 
-#: packages/app-desktop/gui/NoteListControls/NoteListControls.tsx:121
+#: packages/app-desktop/gui/NoteListControls/NoteListControls.tsx:122
 #: packages/app-desktop/gui/NoteListWrapper/NoteListWrapper.tsx:72
 #: packages/app-desktop/gui/WindowCommandsAndDialogs/commands/newTodo.ts:7
-#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:112
-#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:87
+#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:108
+#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:84
 #: packages/app-mobile/setupQuickActions.ts:31
 msgid "New to-do"
 msgstr "فهرست کار جدید"
@@ -3788,7 +3806,7 @@ msgstr "تولید نشده"
 msgid "Not now"
 msgstr "فعلاً نه"
 
-#: packages/app-desktop/gui/NoteListControls/NoteListControls.tsx:109
+#: packages/app-desktop/gui/NoteListControls/NoteListControls.tsx:110
 #: packages/app-desktop/gui/NoteListWrapper/NoteListWrapper.tsx:71
 #: packages/server/src/models/UserModel.ts:247
 #: packages/server/src/models/UserModel.ts:264
@@ -3809,7 +3827,7 @@ msgstr "فاکتور رشد فضای یادداشت"
 msgid "Note attachments"
 msgstr "پیوست‌های یادداشت"
 
-#: packages/app-desktop/gui/MenuBar.tsx:583
+#: packages/app-desktop/gui/MenuBar.tsx:589
 msgid "Note attachments..."
 msgstr "پیوست‌های یادداشت..."
 
@@ -3849,7 +3867,7 @@ msgstr "فهرست  یادداشت"
 msgid "Note list growth factor"
 msgstr "فاکتور رشد فهرست  یادداشت"
 
-#: packages/app-desktop/gui/MenuBar.tsx:807
+#: packages/app-desktop/gui/MenuBar.tsx:811
 msgid "Note list style"
 msgstr "استایل فهرست یادداشت"
 
@@ -3880,7 +3898,7 @@ msgstr ""
 "توجه: زمانی که یادداشتی به اشتراک گذاشته می شود، دیگر روی سرور رمزنگاری نمی "
 "شود."
 
-#: packages/app-desktop/gui/MenuBar.tsx:892
+#: packages/app-desktop/gui/MenuBar.tsx:896
 msgid "Note&book"
 msgstr "دفترچه"
 
@@ -3949,7 +3967,7 @@ msgstr "زبان، فرمت تاریخ"
 #: packages/app-desktop/bridge.ts:399 packages/app-desktop/bridge.ts:415
 #: packages/app-desktop/gui/ConfigScreen/ButtonBar.tsx:34
 #: packages/app-desktop/gui/DialogButtonRow.tsx:71
-#: packages/app-desktop/gui/MenuBar.tsx:610
+#: packages/app-desktop/gui/MenuBar.tsx:616
 #: packages/app-desktop/gui/PromptDialog.tsx:282
 #: packages/app-desktop/services/plugins/UserWebviewDialogButtonBar.tsx:19
 #: packages/app-mobile/components/DialogManager/hooks/useDialogControl.ts:17
@@ -3973,7 +3991,7 @@ msgstr "باشه"
 msgid "OLED Dark"
 msgstr "OLED Dark"
 
-#: packages/lib/services/ReportService.ts:390
+#: packages/lib/services/ReportService.ts:391
 msgid "On %s: %s"
 msgstr "در %s: %s"
 
@@ -4098,7 +4116,7 @@ msgid "Operation cancelled"
 msgstr "عملیات لغو شد"
 
 #: packages/app-desktop/gui/KeymapConfig/utils/getLabel.ts:28
-#: packages/app-desktop/gui/MenuBar.tsx:572
+#: packages/app-desktop/gui/MenuBar.tsx:578
 #: packages/app-desktop/gui/Root.tsx:193
 msgid "Options"
 msgstr "گزینه ها"
@@ -4171,7 +4189,8 @@ msgid "PDF File"
 msgstr "فایل PDF"
 
 #: packages/lib/utils/joplinCloud/index.ts:408
-msgid "Per user. Minimum of %d users."
+#, fuzzy
+msgid "Per user. Minimum of 2 users."
 msgstr "به ازای هر کاربر. حداقل %d کاربر."
 
 #: packages/lib/commands/permanentlyDeleteNote.ts:8
@@ -4193,8 +4212,11 @@ msgstr ""
 "همه یادداشت‌ها و زیر دفترچه‌های این دفترچه برای همیشه حذف خواهند شد."
 
 #: packages/lib/models/Note.ts:944
-msgid "Permanently delete these %d notes?"
-msgstr "آیا یادداشت‌های پوشه %d به طور دائم حذف شود؟"
+#, fuzzy
+msgid "Permanently delete this note?"
+msgid_plural "Permanently delete these %d notes?"
+msgstr[0] "آیا یادداشت‌های پوشه %d به طور دائم حذف شود؟"
+msgstr[1] "آیا یادداشت‌های پوشه %d به طور دائم حذف شود؟"
 
 #: packages/app-cli/app/command-rmbook.ts:20
 msgid "Permanently deletes the notebook, skipping the trash."
@@ -4355,7 +4377,7 @@ msgstr "مقادیر احتمالی: %s."
 msgid "Preferences"
 msgstr "تنظیمات"
 
-#: packages/app-desktop/gui/MenuBar.tsx:636
+#: packages/app-desktop/gui/MenuBar.tsx:642
 msgid "Preferences..."
 msgstr "تنظیمات..."
 
@@ -4567,7 +4589,7 @@ msgstr "افزونه های پیشنهادی"
 msgid "Record audio"
 msgstr ""
 
-#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:73
+#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:70
 #, fuzzy
 msgid "Recording"
 msgstr "سرفصل"
@@ -4577,7 +4599,7 @@ msgstr "سرفصل"
 msgid "Recording..."
 msgstr "در حال دانلود..."
 
-#: packages/app-desktop/gui/MenuBar.tsx:767
+#: packages/app-desktop/gui/MenuBar.tsx:771
 #: packages/app-desktop/gui/NoteEditor/editorCommandDeclarations.ts:122
 #: packages/app-mobile/components/NoteEditor/ImageEditor/ImageEditor.tsx:168
 #: packages/app-mobile/components/ScreenHeader/index.tsx:353
@@ -6104,10 +6126,6 @@ msgstr ""
 "با این کار همه موارد موجود در سطل زباله برای همیشه حذف می شوند. آیا ادامه "
 "هید؟"
 
-#: packages/app-cli/app/command-rmnote.ts:40
-msgid "This will permanently delete the note \"%s\". Continue?"
-msgstr "با این کار یادداشت \"%s\" برای همیشه حذف می شود. ادامه می‌دهید؟"
-
 #: packages/app-desktop/gui/WindowCommandsAndDialogs/commands/leaveSharedFolder.ts:17
 #: packages/app-mobile/components/screens/ShareManager/AcceptedShareItem.tsx:60
 msgid ""
@@ -6209,7 +6227,7 @@ msgstr ""
 "برای کارکرد صحیح، برنامه به این دسترسی‌ها نیاز دارد. لطفا آن‌ها را در تنظیمات "
 "گوشی خود در برنامه‌ها > joplin > دسترسی‌ها فعال کنید"
 
-#: packages/app-desktop/gui/NoteListControls/NoteListControls.tsx:119
+#: packages/app-desktop/gui/NoteListControls/NoteListControls.tsx:120
 #: packages/app-desktop/gui/NoteListWrapper/NoteListWrapper.tsx:71
 msgid "to-do"
 msgstr "فهرست کار"
@@ -6231,7 +6249,7 @@ msgstr "انتخاب دفترچه والد"
 msgid "Toggle comment"
 msgstr "تغییر وضعیت نظر"
 
-#: packages/app-desktop/gui/MenuBar.tsx:961
+#: packages/app-desktop/gui/MenuBar.tsx:965
 msgid "Toggle development tools"
 msgstr "تغییر وضعیت ابزار توسعه"
 
@@ -6377,7 +6395,7 @@ msgstr ""
 msgid "Uncompleted to-dos on top"
 msgstr "فهرست کار‌های کامل نشده در بالا"
 
-#: packages/app-desktop/gui/MenuBar.tsx:763
+#: packages/app-desktop/gui/MenuBar.tsx:767
 #: packages/app-desktop/gui/NoteEditor/editorCommandDeclarations.ts:118
 #: packages/app-mobile/components/NoteEditor/ImageEditor/ImageEditor.tsx:167
 #: packages/app-mobile/components/ScreenHeader/index.tsx:343
@@ -6727,7 +6745,7 @@ msgid "WebDAV username"
 msgstr "نام کاربری WebDAV"
 
 #: packages/app-desktop/gui/KeymapConfig/utils/getLabel.ts:20
-#: packages/app-desktop/gui/MenuBar.tsx:938
+#: packages/app-desktop/gui/MenuBar.tsx:942
 msgid "Website and documentation"
 msgstr "وب‌سایت و مستندات"
 
@@ -6893,14 +6911,20 @@ msgstr ""
 msgid "Your version: %s"
 msgstr "نسخه شما: %s"
 
-#: packages/app-desktop/gui/MenuBar.tsx:859
-#: packages/app-desktop/gui/MenuBar.tsx:865
+#: packages/app-desktop/gui/MenuBar.tsx:863
+#: packages/app-desktop/gui/MenuBar.tsx:869
 msgid "Zoom In"
 msgstr "بزرگنمایی"
 
-#: packages/app-desktop/gui/MenuBar.tsx:872
+#: packages/app-desktop/gui/MenuBar.tsx:876
 msgid "Zoom Out"
 msgstr "کوچک نمایی"
+
+#~ msgid "%d hours"
+#~ msgstr "%d ساعت"
+
+#~ msgid "This will permanently delete the note \"%s\". Continue?"
+#~ msgstr "با این کار یادداشت \"%s\" برای همیشه حذف می شود. ادامه می‌دهید؟"
 
 #, fuzzy
 #~ msgid "Close menu"
