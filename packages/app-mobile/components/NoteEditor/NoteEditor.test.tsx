@@ -2,6 +2,7 @@ import * as React from 'react';
 
 import { describe, it, expect, beforeEach } from '@jest/globals';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react-native';
+import '@testing-library/jest-native';
 
 import NoteEditor from './NoteEditor';
 import Setting from '@joplin/lib/models/Setting';

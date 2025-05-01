@@ -2,7 +2,8 @@ import * as React from 'react';
 import { ShareManagerComponent } from './index';
 import Setting from '@joplin/lib/models/Setting';
 import mockShareService from '@joplin/lib/testing/share/mockShareService';
-import { render, screen, userEvent, waitFor } from '@testing-library/react-native';
+import { fireEvent, render, screen, userEvent, waitFor } from '@testing-library/react-native';
+import '@testing-library/jest-native/extend-expect';
 import { ShareInvitation, ShareUserStatus } from '@joplin/lib/services/share/reducer';
 import { setupDatabaseAndSynchronizer, switchClient } from '@joplin/lib/testing/test-utils';
 import ShareService from '@joplin/lib/services/share/ShareService';
@@ -63,7 +64,7 @@ describe('ShareManager', () => {
 
 		// See https://github.com/callstack/react-native-testing-library/issues/809#issuecomment-984823700
 		const { refreshControl } = screen.getByTestId('refreshControl').props;
-		await refreshControl.props.onRefresh();
+		fireEvent(refreshControl, 'refresh');
 
 		// Should try to refresh shares
 		expect(getShareInvitationsMock).toHaveBeenCalled();

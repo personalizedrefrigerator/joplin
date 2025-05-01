@@ -2,6 +2,7 @@ import * as React from 'react';
 
 import { describe, it, beforeEach } from '@jest/globals';
 import { render, screen, waitFor } from '@testing-library/react-native';
+import '@testing-library/jest-native/extend-expect';
 
 
 import NoteBodyViewer from './NoteBodyViewer';

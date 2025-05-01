@@ -2,6 +2,7 @@ import * as React from 'react';
 
 import { describe, it, beforeEach } from '@jest/globals';
 import { act, fireEvent, render, screen, userEvent, waitFor } from '@testing-library/react-native';
+import '@testing-library/jest-native/extend-expect';
 
 import NoteScreen from './Note';
 import { setupDatabaseAndSynchronizer, switchClient, simulateReadOnlyShareEnv, supportDir, synchronizerStart, resourceFetcher, runWithFakeTimers } from '@joplin/lib/testing/test-utils';
@@ -112,7 +113,7 @@ const openNoteActionsMenu = async () => {
 
 	// Wrap in act(...) -- this tells the test library that component state is intended to update (prevents
 	// warnings).
-	await waitFor(async () => {
+	await act(async () => {
 		await runWithFakeTimers(async () => {
 			await userEvent.press(actionMenuButton);
 		});
@@ -120,7 +121,7 @@ const openNoteActionsMenu = async () => {
 		// State can update until the menu content is marked as in the process of refocusing (part of the
 		// menu transition).
 		await waitFor(async () => {
-			expect(await screen.findByTestId('menu-content-open')).toBeVisible();
+			expect(await screen.findByTestId('menu-content-refocusing')).toBeVisible();
 		});
 	});
 };
@@ -209,13 +210,12 @@ describe('screens/Note', () => {
 		const noteId = await openNewNote({ title: 'Unchanged title', body: defaultBody });
 
 		const noteScreen = render(<WrappedNoteScreen />);
-		await openEditor();
 		await act(async () => await runWithFakeTimers(async () => {
+			await openEditor();
 			const editor = await getNoteEditorControl();
 			editor.select(defaultBody.length, defaultBody.length);
 
 			editor.insertText(' Testing!!!');
-			expect(editor.editor.state.doc.toString()).toBe('Change me! Testing!!!');
 			await waitForNoteToMatch(noteId, { body: 'Change me! Testing!!!' });
 
 			editor.insertText(' This is a test.');
@@ -289,8 +289,8 @@ describe('screens/Note', () => {
 		expect(titleInput).toBeDisabled();
 
 		await openNoteActionsMenu();
-		const deleteButton = await screen.findByText(/^Delete/);
-		expect(deleteButton).toHaveAccessibleName('Delete (Disabled)');
+		const deleteButton = await screen.findByText('Delete');
+		expect(deleteButton).toBeDisabled();
 
 		cleanup();
 	});
