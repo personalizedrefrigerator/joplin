@@ -7,8 +7,6 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Joplin-CLI 1.0.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: \n"
-"PO-Revision-Date: \n"
 "Last-Translator: Mihai Vasiliu <mihai.vasiliu.93@gmail.com>\n"
 "Language-Team: \n"
 "Language: ro_MD\n"
@@ -70,45 +68,49 @@ msgstr "(wysiwyg: %s)"
 msgid "(You may disable this prompt in the options)"
 msgstr "(Puteți dezactiva această solicitare în opțiuni)"
 
-#: packages/app-desktop/gui/MenuBar.tsx:1059
-#: packages/app-desktop/gui/MenuBar.tsx:750
+#: packages/app-desktop/gui/MenuBar.tsx:1063
+#: packages/app-desktop/gui/MenuBar.tsx:754
 msgid "&Edit"
 msgstr "&Editează"
 
-#: packages/app-desktop/gui/MenuBar.tsx:1055
-#: packages/app-desktop/gui/MenuBar.tsx:623
-#: packages/app-desktop/gui/MenuBar.tsx:700
+#: packages/app-desktop/gui/MenuBar.tsx:1059
+#: packages/app-desktop/gui/MenuBar.tsx:629
+#: packages/app-desktop/gui/MenuBar.tsx:706
 msgid "&File"
 msgstr "&Fișier"
 
-#: packages/app-desktop/gui/MenuBar.tsx:880
+#: packages/app-desktop/gui/MenuBar.tsx:884
 msgid "&Go"
 msgstr "Navi&ghează"
 
-#: packages/app-desktop/gui/MenuBar.tsx:935
+#: packages/app-desktop/gui/MenuBar.tsx:939
 msgid "&Help"
 msgstr "&Ajutor"
 
-#: packages/app-desktop/gui/MenuBar.tsx:898
+#: packages/app-desktop/gui/MenuBar.tsx:902
 msgid "&Note"
 msgstr "&Notiță"
 
-#: packages/app-desktop/gui/MenuBar.tsx:913
+#: packages/app-desktop/gui/MenuBar.tsx:917
 msgid "&Tools"
 msgstr "&Unelte"
 
-#: packages/app-desktop/gui/MenuBar.tsx:792
+#: packages/app-desktop/gui/MenuBar.tsx:796
 msgid "&View"
 msgstr "&Vizualizează"
 
-#: packages/app-desktop/gui/MenuBar.tsx:925
+#: packages/app-desktop/gui/MenuBar.tsx:929
 msgid "&Window"
 msgstr "&Fereastră"
 
 #: packages/lib/models/settings/builtInMetadata.ts:1538
 #: packages/lib/models/settings/builtInMetadata.ts:1814
-msgid "%d days"
-msgstr "%d zile"
+#, fuzzy
+msgid "%d day"
+msgid_plural "%d days"
+msgstr[0] "%d zile"
+msgstr[1] "%d zile"
+msgstr[2] "%d zile"
 
 #: packages/lib/utils/joplinCloud/index.ts:148
 #: packages/lib/utils/joplinCloud/index.ts:149
@@ -123,13 +125,14 @@ msgid "%d GB storage space"
 msgstr "spațiu de stocare %d GO"
 
 #: packages/lib/models/settings/builtInMetadata.ts:1282
-msgid "%d hour"
-msgstr "%d oră"
-
 #: packages/lib/models/settings/builtInMetadata.ts:1283
 #: packages/lib/models/settings/builtInMetadata.ts:1284
-msgid "%d hours"
-msgstr "%d ore"
+#, fuzzy
+msgid "%d hour"
+msgid_plural "%d hours"
+msgstr[0] "%d oră"
+msgstr[1] "%d oră"
+msgstr[2] "%d oră"
 
 #: packages/lib/utils/joplinCloud/index.ts:136
 #: packages/lib/utils/joplinCloud/index.ts:137
@@ -146,19 +149,31 @@ msgstr "%d MO per notiță sau atașament"
 #: packages/lib/models/settings/builtInMetadata.ts:1279
 #: packages/lib/models/settings/builtInMetadata.ts:1280
 #: packages/lib/models/settings/builtInMetadata.ts:1281
-msgid "%d minutes"
-msgstr "%d minute"
+#, fuzzy
+msgid "%d minute"
+msgid_plural "%d minutes"
+msgstr[0] "%d minute"
+msgstr[1] "%d minute"
+msgstr[2] "%d minute"
 
 #: packages/app-cli/app/command-rmnote.ts:34
-msgid "%d notes match this pattern. Delete them?"
-msgstr "Notițile: %d se potrivesc acestui model. Doriți sa le ștergeți?"
+#, fuzzy
+msgid "%d note matches this pattern. Delete it?"
+msgid_plural "%d notes match this pattern. Delete them?"
+msgstr[0] "Notițile: %d se potrivesc acestui model. Doriți sa le ștergeți?"
+msgstr[1] "Notițile: %d se potrivesc acestui model. Doriți sa le ștergeți?"
+msgstr[2] "Notițile: %d se potrivesc acestui model. Doriți sa le ștergeți?"
 
 #: packages/app-cli/app/command-rmnote.ts:40
-msgid "%d notes will be permanently deleted. Continue?"
-msgstr "%d notițe vor fi șterse permanent. Continui?"
+#, fuzzy
+msgid "%d note will be permanently deleted. Continue?"
+msgid_plural "%d notes will be permanently deleted. Continue?"
+msgstr[0] "%d notițe vor fi șterse permanent. Continui?"
+msgstr[1] "%d notițe vor fi șterse permanent. Continui?"
+msgstr[2] "%d notițe vor fi șterse permanent. Continui?"
 
-#: packages/app-desktop/gui/NoteListControls/NoteListControls.tsx:228
-#: packages/app-desktop/gui/NoteListControls/NoteListControls.tsx:238
+#: packages/app-desktop/gui/NoteListControls/NoteListControls.tsx:229
+#: packages/app-desktop/gui/NoteListControls/NoteListControls.tsx:239
 msgid "%s"
 msgstr "%s"
 
@@ -236,9 +251,13 @@ msgstr "Fila %s a fost deschisă"
 msgid "%s: %d"
 msgstr "%s: %d"
 
-#: packages/lib/services/ReportService.ts:377
-msgid "%s: %d notes"
-msgstr "%s: %d notițe"
+#: packages/lib/services/ReportService.ts:378
+#, fuzzy
+msgid "%s: %d note"
+msgid_plural "%s: %d notes"
+msgstr[0] "%s: %d notițe"
+msgstr[1] "%s: %d notițe"
+msgstr[2] "%s: %d notițe"
 
 #: packages/lib/services/ReportService.ts:359
 msgid "%s: %d/%d"
@@ -300,8 +319,8 @@ msgstr "A5"
 msgid "About"
 msgstr "Despre"
 
-#: packages/app-desktop/gui/MenuBar.tsx:629
-#: packages/app-desktop/gui/MenuBar.tsx:977
+#: packages/app-desktop/gui/MenuBar.tsx:635
+#: packages/app-desktop/gui/MenuBar.tsx:981
 msgid "About Joplin"
 msgstr "Despre Joplin"
 
@@ -368,7 +387,7 @@ msgid "Active"
 msgstr "Activ"
 
 #: packages/app-desktop/gui/KeymapConfig/utils/getLabel.ts:18
-#: packages/app-desktop/gui/MenuBar.tsx:848
+#: packages/app-desktop/gui/MenuBar.tsx:852
 msgid "Actual Size"
 msgstr "Dimensiunea actuală"
 
@@ -377,7 +396,7 @@ msgid "Add body"
 msgstr "Adaugă corp"
 
 #: packages/app-mobile/components/buttons/FloatingActionButton.tsx:64
-#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:131
+#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:127
 msgid "Add new"
 msgstr "Adaugă un nou"
 
@@ -606,7 +625,7 @@ msgstr "Atașează fișierul în notiță."
 msgid "attachment"
 msgstr "atașament"
 
-#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:72
+#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:69
 msgid "Attachment"
 msgstr "Atașament"
 
@@ -736,7 +755,7 @@ msgstr "după %s"
 msgid "by word"
 msgstr "după cuvînt"
 
-#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:74
+#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:71
 msgid "Camera"
 msgstr "Aparat foto"
 
@@ -943,8 +962,8 @@ msgstr "Bifează"
 msgid "Check elements to display in the toolbar"
 msgstr "Bifează elementele ce vor fi afișate în bara de unelte"
 
-#: packages/app-desktop/gui/MenuBar.tsx:643
-#: packages/app-desktop/gui/MenuBar.tsx:951
+#: packages/app-desktop/gui/MenuBar.tsx:649
+#: packages/app-desktop/gui/MenuBar.tsx:955
 msgid "Check for updates..."
 msgstr "Verifică pentru actualizări..."
 
@@ -1054,7 +1073,7 @@ msgstr ""
 "exportarea tuturor notițelor ca fișier JEX."
 
 #: packages/app-desktop/gui/KeymapConfig/utils/getLabel.ts:26
-#: packages/app-desktop/gui/MenuBar.tsx:708
+#: packages/app-desktop/gui/MenuBar.tsx:714
 msgid "Close Window"
 msgstr "Închide fereastra"
 
@@ -1099,7 +1118,7 @@ msgstr "Restrînge toate caietele"
 msgid "Collapsed"
 msgstr "Restrîns"
 
-#: packages/lib/services/ReportService.ts:385
+#: packages/lib/services/ReportService.ts:386
 msgid "Coming alarms"
 msgstr "Alarmele următoare"
 
@@ -1254,7 +1273,7 @@ msgstr "Conversie în todo"
 msgid "Converting speech to text..."
 msgstr "Conversia vorbirii în text…"
 
-#: packages/app-desktop/gui/MenuBar.tsx:610
+#: packages/app-desktop/gui/MenuBar.tsx:616
 #: packages/app-desktop/gui/NoteEditor/editorCommandDeclarations.ts:35
 #: packages/app-desktop/gui/NoteEditor/NoteBody/CodeMirror/utils/useContextMenu.ts:95
 #: packages/app-desktop/gui/NoteEditor/utils/contextMenu.ts:188
@@ -1445,7 +1464,7 @@ msgstr "Creat: %d."
 msgid "Created: %s"
 msgstr "Creat: %s"
 
-#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:65
+#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:62
 msgid "Creates a new note with an attachment of type %s"
 msgstr "Creează o nouă notiță cu un atașament de tipul %s"
 
@@ -1898,7 +1917,7 @@ msgid "Draw picture"
 msgstr "Desenați imaginea"
 
 #: packages/app-mobile/components/screens/Note/Note.tsx:917
-#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:75
+#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:72
 msgid "Drawing"
 msgstr "Desen"
 
@@ -2362,8 +2381,8 @@ msgstr "Extins"
 msgid "Export"
 msgstr "Exportă"
 
-#: packages/app-desktop/gui/MenuBar.tsx:662
-#: packages/app-desktop/gui/MenuBar.tsx:718
+#: packages/app-desktop/gui/MenuBar.tsx:668
+#: packages/app-desktop/gui/MenuBar.tsx:724
 msgid "Export all"
 msgstr "Exportă tot"
 
@@ -2501,7 +2520,7 @@ msgstr "Fix search index"
 msgid "Fixing search index..."
 msgstr "Fixing search index…"
 
-#: packages/app-desktop/gui/MenuBar.tsx:886
+#: packages/app-desktop/gui/MenuBar.tsx:890
 #: packages/app-desktop/gui/NoteEditor/commands/focusElementNoteBody.ts:8
 #: packages/app-desktop/gui/NoteEditor/commands/focusElementNoteTitle.ts:8
 #: packages/app-desktop/gui/NoteEditor/commands/focusElementNoteViewer.ts:9
@@ -2675,7 +2694,7 @@ msgstr "Uite ceea ce facem pentru a face plugin-urile mai sigure:"
 msgid "Hermes enabled: %d"
 msgstr "Hermes activat: %d"
 
-#: packages/app-desktop/gui/MenuBar.tsx:679
+#: packages/app-desktop/gui/MenuBar.tsx:685
 msgid "Hide %s"
 msgstr "Ascundeți %s"
 
@@ -2776,8 +2795,8 @@ msgid "Images"
 msgstr "Imagini"
 
 #: packages/app-desktop/gui/KeymapConfig/KeymapConfigScreen.tsx:181
-#: packages/app-desktop/gui/MenuBar.tsx:658
-#: packages/app-desktop/gui/MenuBar.tsx:715
+#: packages/app-desktop/gui/MenuBar.tsx:664
+#: packages/app-desktop/gui/MenuBar.tsx:721
 #: packages/app-desktop/gui/Root.tsx:192
 msgid "Import"
 msgstr "Importă"
@@ -3055,7 +3074,7 @@ msgstr "Elementele nu pot fi sincronizați"
 msgid "Items with error: %s"
 msgstr "Elemente cu eroarea: %s"
 
-#: packages/app-desktop/gui/MenuBar.tsx:945
+#: packages/app-desktop/gui/MenuBar.tsx:949
 msgid "Join us on %s"
 msgstr "Alătură-te nouă pe %s"
 
@@ -3108,7 +3127,7 @@ msgstr ""
 "din cauză că sînt corupte sau prea mari. Aceste elemente vor rămîne pe "
 "dispozitiv, dar Joplin nu va mai încerca să le decripteze."
 
-#: packages/app-desktop/gui/MenuBar.tsx:942
+#: packages/app-desktop/gui/MenuBar.tsx:946
 msgid "Joplin Forum"
 msgstr "Forum Joplin"
 
@@ -3218,7 +3237,7 @@ msgstr "Latitudine"
 msgid "Layout"
 msgstr "Aspect"
 
-#: packages/app-desktop/gui/MenuBar.tsx:803
+#: packages/app-desktop/gui/MenuBar.tsx:807
 msgid "Layout button sequence"
 msgstr "Secvența butoanelor de aspect"
 
@@ -3349,7 +3368,7 @@ msgstr "Locuri, profiluri, stare de sincronizare"
 msgid "Longitude"
 msgstr "Longitudine"
 
-#: packages/app-desktop/gui/MenuBar.tsx:948
+#: packages/app-desktop/gui/MenuBar.tsx:952
 #: packages/app-mobile/components/screens/ConfigScreen/ConfigScreen.tsx:604
 msgid "Make a donation"
 msgstr "Donează"
@@ -3524,8 +3543,12 @@ msgstr ""
 "website-ul plugin-ului."
 
 #: packages/app-mobile/components/ScreenHeader/index.tsx:567
-msgid "Move %d notes to notebook \"%s\"?"
-msgstr "Muți %d notițe în caietul „%s”?"
+#, fuzzy
+msgid "Move %d note to notebook \"%s\"?"
+msgid_plural "Move %d notes to notebook \"%s\"?"
+msgstr[0] "Muți %d notițe în caietul „%s”?"
+msgstr[1] "Muți %d notițe în caietul „%s”?"
+msgstr[2] "Muți %d notițe în caietul „%s”?"
 
 #: packages/app-desktop/gui/ResizableLayout/MoveButtons.tsx:73
 msgid "Move down"
@@ -3606,11 +3629,11 @@ msgstr ""
 "Este disponibil un nou model\n"
 "Un nou model de transcriere vocală este disponibil. Dorești să îl descarci?"
 
-#: packages/app-desktop/gui/NoteListControls/NoteListControls.tsx:111
+#: packages/app-desktop/gui/NoteListControls/NoteListControls.tsx:112
 #: packages/app-desktop/gui/NoteListWrapper/NoteListWrapper.tsx:72
 #: packages/app-desktop/gui/WindowCommandsAndDialogs/commands/newNote.ts:10
-#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:109
-#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:98
+#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:105
+#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:94
 #: packages/app-mobile/setupQuickActions.ts:30
 msgid "New note"
 msgstr "Notiță nouă"
@@ -3645,11 +3668,11 @@ msgstr "Secțiune nouă"
 msgid "New tags:"
 msgstr "Etichete noi:"
 
-#: packages/app-desktop/gui/NoteListControls/NoteListControls.tsx:121
+#: packages/app-desktop/gui/NoteListControls/NoteListControls.tsx:122
 #: packages/app-desktop/gui/NoteListWrapper/NoteListWrapper.tsx:72
 #: packages/app-desktop/gui/WindowCommandsAndDialogs/commands/newTodo.ts:7
-#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:112
-#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:87
+#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:108
+#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:84
 #: packages/app-mobile/setupQuickActions.ts:31
 msgid "New to-do"
 msgstr "Listă de făcut nouă"
@@ -3777,7 +3800,7 @@ msgstr "Nu sînt generate"
 msgid "Not now"
 msgstr "Nu acum"
 
-#: packages/app-desktop/gui/NoteListControls/NoteListControls.tsx:109
+#: packages/app-desktop/gui/NoteListControls/NoteListControls.tsx:110
 #: packages/app-desktop/gui/NoteListWrapper/NoteListWrapper.tsx:71
 #: packages/server/src/models/UserModel.ts:247
 #: packages/server/src/models/UserModel.ts:264
@@ -3798,7 +3821,7 @@ msgstr "Factor de creștere zonă notiță"
 msgid "Note attachments"
 msgstr "Atașamente notiță"
 
-#: packages/app-desktop/gui/MenuBar.tsx:583
+#: packages/app-desktop/gui/MenuBar.tsx:589
 msgid "Note attachments..."
 msgstr "Atașamente notițe..."
 
@@ -3838,7 +3861,7 @@ msgstr "Listă de notițe"
 msgid "Note list growth factor"
 msgstr "Factor de creștere listă notițe"
 
-#: packages/app-desktop/gui/MenuBar.tsx:807
+#: packages/app-desktop/gui/MenuBar.tsx:811
 msgid "Note list style"
 msgstr "Stilul listei de notițe"
 
@@ -3867,7 +3890,7 @@ msgid ""
 msgstr ""
 "Notă: Cînd o notă este partajată, aceasta nu va mai fi criptată pe server."
 
-#: packages/app-desktop/gui/MenuBar.tsx:892
+#: packages/app-desktop/gui/MenuBar.tsx:896
 msgid "Note&book"
 msgstr "&Caiet"
 
@@ -3935,7 +3958,7 @@ msgstr "OCR: URL sau cale date lingvistice"
 #: packages/app-desktop/bridge.ts:399 packages/app-desktop/bridge.ts:415
 #: packages/app-desktop/gui/ConfigScreen/ButtonBar.tsx:34
 #: packages/app-desktop/gui/DialogButtonRow.tsx:71
-#: packages/app-desktop/gui/MenuBar.tsx:610
+#: packages/app-desktop/gui/MenuBar.tsx:616
 #: packages/app-desktop/gui/PromptDialog.tsx:282
 #: packages/app-desktop/services/plugins/UserWebviewDialogButtonBar.tsx:19
 #: packages/app-mobile/components/DialogManager/hooks/useDialogControl.ts:17
@@ -3959,7 +3982,7 @@ msgstr "OK"
 msgid "OLED Dark"
 msgstr "OLED întunecat"
 
-#: packages/lib/services/ReportService.ts:390
+#: packages/lib/services/ReportService.ts:391
 msgid "On %s: %s"
 msgstr "Pe %s: %s"
 
@@ -4079,7 +4102,7 @@ msgid "Operation cancelled"
 msgstr "Operațiunea a fost amînată"
 
 #: packages/app-desktop/gui/KeymapConfig/utils/getLabel.ts:28
-#: packages/app-desktop/gui/MenuBar.tsx:572
+#: packages/app-desktop/gui/MenuBar.tsx:578
 #: packages/app-desktop/gui/Root.tsx:193
 msgid "Options"
 msgstr "Opțiuni"
@@ -4152,7 +4175,8 @@ msgid "PDF File"
 msgstr "Fișier PDF"
 
 #: packages/lib/utils/joplinCloud/index.ts:408
-msgid "Per user. Minimum of %d users."
+#, fuzzy
+msgid "Per user. Minimum of 2 users."
 msgstr "Per utilizator. Minim %d utilizatori."
 
 #: packages/lib/commands/permanentlyDeleteNote.ts:8
@@ -4174,8 +4198,12 @@ msgstr ""
 "Toate notițele și secțiunile din acest caiet vor fi șterse permanent."
 
 #: packages/lib/models/Note.ts:944
-msgid "Permanently delete these %d notes?"
-msgstr "Șterge aceste %d notițe?"
+#, fuzzy
+msgid "Permanently delete this note?"
+msgid_plural "Permanently delete these %d notes?"
+msgstr[0] "Șterge aceste %d notițe?"
+msgstr[1] "Șterge aceste %d notițe?"
+msgstr[2] "Șterge aceste %d notițe?"
 
 #: packages/app-cli/app/command-rmbook.ts:20
 msgid "Permanently deletes the notebook, skipping the trash."
@@ -4336,7 +4364,7 @@ msgstr "Valori posibile: %s."
 msgid "Preferences"
 msgstr "Preferințe"
 
-#: packages/app-desktop/gui/MenuBar.tsx:636
+#: packages/app-desktop/gui/MenuBar.tsx:642
 msgid "Preferences..."
 msgstr "Preferințe..."
 
@@ -4544,7 +4572,7 @@ msgstr "Plugin-uri recomandate"
 msgid "Record audio"
 msgstr "Înregistrează audio"
 
-#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:73
+#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:70
 msgid "Recording"
 msgstr "Înregistrare"
 
@@ -4552,7 +4580,7 @@ msgstr "Înregistrare"
 msgid "Recording..."
 msgstr "Se înregistrează…"
 
-#: packages/app-desktop/gui/MenuBar.tsx:767
+#: packages/app-desktop/gui/MenuBar.tsx:771
 #: packages/app-desktop/gui/NoteEditor/editorCommandDeclarations.ts:122
 #: packages/app-mobile/components/NoteEditor/ImageEditor/ImageEditor.tsx:168
 #: packages/app-mobile/components/ScreenHeader/index.tsx:353
@@ -6100,10 +6128,6 @@ msgstr ""
 "Acest lucru va șterge permanent toate elementele din coșul de gunoi. "
 "Continui?"
 
-#: packages/app-cli/app/command-rmnote.ts:40
-msgid "This will permanently delete the note \"%s\". Continue?"
-msgstr "Acest lucru va șterge permanent notița „%s”. Continui?"
-
 #: packages/app-desktop/gui/WindowCommandsAndDialogs/commands/leaveSharedFolder.ts:17
 #: packages/app-mobile/components/screens/ShareManager/AcceptedShareItem.tsx:60
 msgid ""
@@ -6209,7 +6233,7 @@ msgstr ""
 "Te rog să le  în setările telefonului dumneavoastră, în Aplicații > Joplin > "
 "Permisiuni"
 
-#: packages/app-desktop/gui/NoteListControls/NoteListControls.tsx:119
+#: packages/app-desktop/gui/NoteListControls/NoteListControls.tsx:120
 #: packages/app-desktop/gui/NoteListWrapper/NoteListWrapper.tsx:71
 msgid "to-do"
 msgstr "de făcut"
@@ -6230,7 +6254,7 @@ msgstr "Comută toate caietele"
 msgid "Toggle comment"
 msgstr "Comută comentariu"
 
-#: packages/app-desktop/gui/MenuBar.tsx:961
+#: packages/app-desktop/gui/MenuBar.tsx:965
 msgid "Toggle development tools"
 msgstr "Comută instrumentele de dezvoltare"
 
@@ -6371,7 +6395,7 @@ msgstr "Debifat"
 msgid "Uncompleted to-dos on top"
 msgstr "Sarcini nefinalizate în partea de sus"
 
-#: packages/app-desktop/gui/MenuBar.tsx:763
+#: packages/app-desktop/gui/MenuBar.tsx:767
 #: packages/app-desktop/gui/NoteEditor/editorCommandDeclarations.ts:118
 #: packages/app-mobile/components/NoteEditor/ImageEditor/ImageEditor.tsx:167
 #: packages/app-mobile/components/ScreenHeader/index.tsx:343
@@ -6725,7 +6749,7 @@ msgid "WebDAV username"
 msgstr "Nume utilizator WebDAV"
 
 #: packages/app-desktop/gui/KeymapConfig/utils/getLabel.ts:20
-#: packages/app-desktop/gui/MenuBar.tsx:938
+#: packages/app-desktop/gui/MenuBar.tsx:942
 msgid "Website and documentation"
 msgstr "Website și documentație"
 
@@ -6896,14 +6920,20 @@ msgstr ""
 msgid "Your version: %s"
 msgstr "Versiunea ta: %s"
 
-#: packages/app-desktop/gui/MenuBar.tsx:859
-#: packages/app-desktop/gui/MenuBar.tsx:865
+#: packages/app-desktop/gui/MenuBar.tsx:863
+#: packages/app-desktop/gui/MenuBar.tsx:869
 msgid "Zoom In"
 msgstr "Mărește"
 
-#: packages/app-desktop/gui/MenuBar.tsx:872
+#: packages/app-desktop/gui/MenuBar.tsx:876
 msgid "Zoom Out"
 msgstr "Micșorează"
+
+#~ msgid "%d hours"
+#~ msgstr "%d ore"
+
+#~ msgid "This will permanently delete the note \"%s\". Continue?"
+#~ msgstr "Acest lucru va șterge permanent notița „%s”. Continui?"
 
 #~ msgid "Close menu"
 #~ msgstr "Închide meniul"

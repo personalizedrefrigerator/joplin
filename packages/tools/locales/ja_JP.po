@@ -63,46 +63,48 @@ msgstr "(WYSIWYG対応: %s)"
 msgid "(You may disable this prompt in the options)"
 msgstr ""
 
-#: packages/app-desktop/gui/MenuBar.tsx:1059
-#: packages/app-desktop/gui/MenuBar.tsx:750
+#: packages/app-desktop/gui/MenuBar.tsx:1063
+#: packages/app-desktop/gui/MenuBar.tsx:754
 msgid "&Edit"
 msgstr "編集(&E)"
 
-#: packages/app-desktop/gui/MenuBar.tsx:1055
-#: packages/app-desktop/gui/MenuBar.tsx:623
-#: packages/app-desktop/gui/MenuBar.tsx:700
+#: packages/app-desktop/gui/MenuBar.tsx:1059
+#: packages/app-desktop/gui/MenuBar.tsx:629
+#: packages/app-desktop/gui/MenuBar.tsx:706
 msgid "&File"
 msgstr "ファイル(&F)"
 
-#: packages/app-desktop/gui/MenuBar.tsx:880
+#: packages/app-desktop/gui/MenuBar.tsx:884
 msgid "&Go"
 msgstr "移動(&G)"
 
-#: packages/app-desktop/gui/MenuBar.tsx:935
+#: packages/app-desktop/gui/MenuBar.tsx:939
 msgid "&Help"
 msgstr "ヘルプ(&H)"
 
-#: packages/app-desktop/gui/MenuBar.tsx:898
+#: packages/app-desktop/gui/MenuBar.tsx:902
 msgid "&Note"
 msgstr "ノート(&N)"
 
-#: packages/app-desktop/gui/MenuBar.tsx:913
+#: packages/app-desktop/gui/MenuBar.tsx:917
 msgid "&Tools"
 msgstr "ツール(&T)"
 
-#: packages/app-desktop/gui/MenuBar.tsx:792
+#: packages/app-desktop/gui/MenuBar.tsx:796
 msgid "&View"
 msgstr "表示(&V)"
 
-#: packages/app-desktop/gui/MenuBar.tsx:925
+#: packages/app-desktop/gui/MenuBar.tsx:929
 #, fuzzy
 msgid "&Window"
 msgstr "ウィンドウを閉じる"
 
 #: packages/lib/models/settings/builtInMetadata.ts:1538
 #: packages/lib/models/settings/builtInMetadata.ts:1814
-msgid "%d days"
-msgstr "%d 日"
+#, fuzzy
+msgid "%d day"
+msgid_plural "%d days"
+msgstr[0] "%d 日"
 
 #: packages/lib/utils/joplinCloud/index.ts:148
 #: packages/lib/utils/joplinCloud/index.ts:149
@@ -117,13 +119,12 @@ msgid "%d GB storage space"
 msgstr "ストレージ容量 %d GB"
 
 #: packages/lib/models/settings/builtInMetadata.ts:1282
-msgid "%d hour"
-msgstr "%d 時間"
-
 #: packages/lib/models/settings/builtInMetadata.ts:1283
 #: packages/lib/models/settings/builtInMetadata.ts:1284
-msgid "%d hours"
-msgstr "%d 時間"
+#, fuzzy
+msgid "%d hour"
+msgid_plural "%d hours"
+msgstr[0] "%d 時間"
 
 #: packages/lib/utils/joplinCloud/index.ts:136
 #: packages/lib/utils/joplinCloud/index.ts:137
@@ -140,20 +141,25 @@ msgstr "ノート/添付ファイルあたり %d MB"
 #: packages/lib/models/settings/builtInMetadata.ts:1279
 #: packages/lib/models/settings/builtInMetadata.ts:1280
 #: packages/lib/models/settings/builtInMetadata.ts:1281
-msgid "%d minutes"
-msgstr "%d 分"
+#, fuzzy
+msgid "%d minute"
+msgid_plural "%d minutes"
+msgstr[0] "%d 分"
 
 #: packages/app-cli/app/command-rmnote.ts:34
-msgid "%d notes match this pattern. Delete them?"
-msgstr "%d 個のノートが一致しました。削除しますか？"
+#, fuzzy
+msgid "%d note matches this pattern. Delete it?"
+msgid_plural "%d notes match this pattern. Delete them?"
+msgstr[0] "%d 個のノートが一致しました。削除しますか？"
 
 #: packages/app-cli/app/command-rmnote.ts:40
 #, fuzzy
-msgid "%d notes will be permanently deleted. Continue?"
-msgstr "選択したノートを削除"
+msgid "%d note will be permanently deleted. Continue?"
+msgid_plural "%d notes will be permanently deleted. Continue?"
+msgstr[0] "選択したノートを削除"
 
-#: packages/app-desktop/gui/NoteListControls/NoteListControls.tsx:228
-#: packages/app-desktop/gui/NoteListControls/NoteListControls.tsx:238
+#: packages/app-desktop/gui/NoteListControls/NoteListControls.tsx:229
+#: packages/app-desktop/gui/NoteListControls/NoteListControls.tsx:239
 msgid "%s"
 msgstr "%s"
 
@@ -230,9 +236,11 @@ msgstr ""
 msgid "%s: %d"
 msgstr "%s: %d"
 
-#: packages/lib/services/ReportService.ts:377
-msgid "%s: %d notes"
-msgstr "%s: %d ノート"
+#: packages/lib/services/ReportService.ts:378
+#, fuzzy
+msgid "%s: %d note"
+msgid_plural "%s: %d notes"
+msgstr[0] "%s: %d ノート"
 
 #: packages/lib/services/ReportService.ts:359
 msgid "%s: %d/%d"
@@ -295,8 +303,8 @@ msgstr "A5"
 msgid "About"
 msgstr "詳細"
 
-#: packages/app-desktop/gui/MenuBar.tsx:629
-#: packages/app-desktop/gui/MenuBar.tsx:977
+#: packages/app-desktop/gui/MenuBar.tsx:635
+#: packages/app-desktop/gui/MenuBar.tsx:981
 msgid "About Joplin"
 msgstr "Joplinについて"
 
@@ -365,7 +373,7 @@ msgid "Active"
 msgstr "アクティブ"
 
 #: packages/app-desktop/gui/KeymapConfig/utils/getLabel.ts:18
-#: packages/app-desktop/gui/MenuBar.tsx:848
+#: packages/app-desktop/gui/MenuBar.tsx:852
 msgid "Actual Size"
 msgstr "100%%表示"
 
@@ -374,7 +382,7 @@ msgid "Add body"
 msgstr "本文を追加"
 
 #: packages/app-mobile/components/buttons/FloatingActionButton.tsx:64
-#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:131
+#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:127
 msgid "Add new"
 msgstr "新規追加"
 
@@ -596,7 +604,7 @@ msgstr "選択したファイルをノートに添付します。"
 msgid "attachment"
 msgstr "添付ファイル"
 
-#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:72
+#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:69
 #, fuzzy
 msgid "Attachment"
 msgstr "添付ファイル"
@@ -726,7 +734,7 @@ msgstr ""
 msgid "by word"
 msgstr ""
 
-#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:74
+#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:71
 msgid "Camera"
 msgstr ""
 
@@ -933,8 +941,8 @@ msgstr "チェックボックス"
 msgid "Check elements to display in the toolbar"
 msgstr ""
 
-#: packages/app-desktop/gui/MenuBar.tsx:643
-#: packages/app-desktop/gui/MenuBar.tsx:951
+#: packages/app-desktop/gui/MenuBar.tsx:649
+#: packages/app-desktop/gui/MenuBar.tsx:955
 msgid "Check for updates..."
 msgstr "アップデートのチェック..."
 
@@ -1045,7 +1053,7 @@ msgid ""
 msgstr ""
 
 #: packages/app-desktop/gui/KeymapConfig/utils/getLabel.ts:26
-#: packages/app-desktop/gui/MenuBar.tsx:708
+#: packages/app-desktop/gui/MenuBar.tsx:714
 msgid "Close Window"
 msgstr "ウィンドウを閉じる"
 
@@ -1093,7 +1101,7 @@ msgstr "ノートブックを作成します"
 msgid "Collapsed"
 msgstr "折りたたむ"
 
-#: packages/lib/services/ReportService.ts:385
+#: packages/lib/services/ReportService.ts:386
 msgid "Coming alarms"
 msgstr "直近のアラーム"
 
@@ -1248,7 +1256,7 @@ msgstr "ToDoに変換"
 msgid "Converting speech to text..."
 msgstr "音声をテキストに変換中..."
 
-#: packages/app-desktop/gui/MenuBar.tsx:610
+#: packages/app-desktop/gui/MenuBar.tsx:616
 #: packages/app-desktop/gui/NoteEditor/editorCommandDeclarations.ts:35
 #: packages/app-desktop/gui/NoteEditor/NoteBody/CodeMirror/utils/useContextMenu.ts:95
 #: packages/app-desktop/gui/NoteEditor/utils/contextMenu.ts:188
@@ -1438,7 +1446,7 @@ msgstr "新規作成: %d."
 msgid "Created: %s"
 msgstr "作成日時：%s"
 
-#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:65
+#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:62
 #, fuzzy
 msgid "Creates a new note with an attachment of type %s"
 msgstr "親ノートブックの下に新しいノートブックを作成します。"
@@ -1899,7 +1907,7 @@ msgid "Draw picture"
 msgstr ""
 
 #: packages/app-mobile/components/screens/Note/Note.tsx:917
-#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:75
+#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:72
 msgid "Drawing"
 msgstr ""
 
@@ -2369,8 +2377,8 @@ msgstr "展開する"
 msgid "Export"
 msgstr "エクスポート"
 
-#: packages/app-desktop/gui/MenuBar.tsx:662
-#: packages/app-desktop/gui/MenuBar.tsx:718
+#: packages/app-desktop/gui/MenuBar.tsx:668
+#: packages/app-desktop/gui/MenuBar.tsx:724
 msgid "Export all"
 msgstr "すべてをエクスポート"
 
@@ -2508,7 +2516,7 @@ msgstr "検索インデックスの修正"
 msgid "Fixing search index..."
 msgstr "検索インデックスの修正中..."
 
-#: packages/app-desktop/gui/MenuBar.tsx:886
+#: packages/app-desktop/gui/MenuBar.tsx:890
 #: packages/app-desktop/gui/NoteEditor/commands/focusElementNoteBody.ts:8
 #: packages/app-desktop/gui/NoteEditor/commands/focusElementNoteTitle.ts:8
 #: packages/app-desktop/gui/NoteEditor/commands/focusElementNoteViewer.ts:9
@@ -2677,7 +2685,7 @@ msgstr "プラグインを安全にするために次のことを行っていま
 msgid "Hermes enabled: %d"
 msgstr "Hermes有効: %d"
 
-#: packages/app-desktop/gui/MenuBar.tsx:679
+#: packages/app-desktop/gui/MenuBar.tsx:685
 msgid "Hide %s"
 msgstr "%s を隠す"
 
@@ -2778,8 +2786,8 @@ msgid "Images"
 msgstr "画像"
 
 #: packages/app-desktop/gui/KeymapConfig/KeymapConfigScreen.tsx:181
-#: packages/app-desktop/gui/MenuBar.tsx:658
-#: packages/app-desktop/gui/MenuBar.tsx:715
+#: packages/app-desktop/gui/MenuBar.tsx:664
+#: packages/app-desktop/gui/MenuBar.tsx:721
 #: packages/app-desktop/gui/Root.tsx:192
 msgid "Import"
 msgstr "インポート"
@@ -3054,7 +3062,7 @@ msgstr "同期ができなかったアイテム"
 msgid "Items with error: %s"
 msgstr "最新のエラー: %s"
 
-#: packages/app-desktop/gui/MenuBar.tsx:945
+#: packages/app-desktop/gui/MenuBar.tsx:949
 #, fuzzy
 msgid "Join us on %s"
 msgstr "X (Twitter)"
@@ -3108,7 +3116,7 @@ msgstr ""
 "回失敗しました。これらのアイテムはデバイス上に残りますが、Joplinはこれらの復"
 "号化は行いません。"
 
-#: packages/app-desktop/gui/MenuBar.tsx:942
+#: packages/app-desktop/gui/MenuBar.tsx:946
 msgid "Joplin Forum"
 msgstr "Joplinフォーラム"
 
@@ -3220,7 +3228,7 @@ msgstr "緯度"
 msgid "Layout"
 msgstr "レイアウト"
 
-#: packages/app-desktop/gui/MenuBar.tsx:803
+#: packages/app-desktop/gui/MenuBar.tsx:807
 msgid "Layout button sequence"
 msgstr "レイアウトボタンによる切り替え順"
 
@@ -3352,7 +3360,7 @@ msgstr "ログ、プロファイル、同期の状態"
 msgid "Longitude"
 msgstr "経度"
 
-#: packages/app-desktop/gui/MenuBar.tsx:948
+#: packages/app-desktop/gui/MenuBar.tsx:952
 #: packages/app-mobile/components/screens/ConfigScreen/ConfigScreen.tsx:604
 msgid "Make a donation"
 msgstr "寄付する"
@@ -3532,8 +3540,10 @@ msgstr ""
 "す。"
 
 #: packages/app-mobile/components/ScreenHeader/index.tsx:567
-msgid "Move %d notes to notebook \"%s\"?"
-msgstr "%d 個のノートを \"%s\" ノートブックに移動しますか？"
+#, fuzzy
+msgid "Move %d note to notebook \"%s\"?"
+msgid_plural "Move %d notes to notebook \"%s\"?"
+msgstr[0] "%d 個のノートを \"%s\" ノートブックに移動しますか？"
 
 #: packages/app-desktop/gui/ResizableLayout/MoveButtons.tsx:73
 #, fuzzy
@@ -3617,11 +3627,11 @@ msgid ""
 "A new voice typing model is available. Do you want to download it?"
 msgstr "アップデートがあります。すぐにダウンロードしますか？"
 
-#: packages/app-desktop/gui/NoteListControls/NoteListControls.tsx:111
+#: packages/app-desktop/gui/NoteListControls/NoteListControls.tsx:112
 #: packages/app-desktop/gui/NoteListWrapper/NoteListWrapper.tsx:72
 #: packages/app-desktop/gui/WindowCommandsAndDialogs/commands/newNote.ts:10
-#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:109
-#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:98
+#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:105
+#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:94
 #: packages/app-mobile/setupQuickActions.ts:30
 msgid "New note"
 msgstr "新しいノート"
@@ -3660,11 +3670,11 @@ msgstr "新しいサブノートブック"
 msgid "New tags:"
 msgstr "新しいタグ:"
 
-#: packages/app-desktop/gui/NoteListControls/NoteListControls.tsx:121
+#: packages/app-desktop/gui/NoteListControls/NoteListControls.tsx:122
 #: packages/app-desktop/gui/NoteListWrapper/NoteListWrapper.tsx:72
 #: packages/app-desktop/gui/WindowCommandsAndDialogs/commands/newTodo.ts:7
-#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:112
-#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:87
+#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:108
+#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:84
 #: packages/app-mobile/setupQuickActions.ts:31
 msgid "New to-do"
 msgstr "新しいToDo"
@@ -3793,7 +3803,7 @@ msgstr "生成されていません"
 msgid "Not now"
 msgstr "あとで"
 
-#: packages/app-desktop/gui/NoteListControls/NoteListControls.tsx:109
+#: packages/app-desktop/gui/NoteListControls/NoteListControls.tsx:110
 #: packages/app-desktop/gui/NoteListWrapper/NoteListWrapper.tsx:71
 #: packages/server/src/models/UserModel.ts:247
 #: packages/server/src/models/UserModel.ts:264
@@ -3814,7 +3824,7 @@ msgstr "ノートエリアのストレッチ係数"
 msgid "Note attachments"
 msgstr "添付ファイル一覧"
 
-#: packages/app-desktop/gui/MenuBar.tsx:583
+#: packages/app-desktop/gui/MenuBar.tsx:589
 msgid "Note attachments..."
 msgstr "添付ファイル一覧..."
 
@@ -3854,7 +3864,7 @@ msgstr "ノート一覧"
 msgid "Note list growth factor"
 msgstr "ノート一覧のストレッチ係数"
 
-#: packages/app-desktop/gui/MenuBar.tsx:807
+#: packages/app-desktop/gui/MenuBar.tsx:811
 msgid "Note list style"
 msgstr "ノート一覧のスタイル"
 
@@ -3884,7 +3894,7 @@ msgid ""
 msgstr ""
 "注意: ノートを共有すると、該当ノートはサーバー上で暗号化されなくなります。"
 
-#: packages/app-desktop/gui/MenuBar.tsx:892
+#: packages/app-desktop/gui/MenuBar.tsx:896
 msgid "Note&book"
 msgstr "ノートブック(&B)"
 
@@ -3956,7 +3966,7 @@ msgstr "言語、日付の形式"
 #: packages/app-desktop/bridge.ts:399 packages/app-desktop/bridge.ts:415
 #: packages/app-desktop/gui/ConfigScreen/ButtonBar.tsx:34
 #: packages/app-desktop/gui/DialogButtonRow.tsx:71
-#: packages/app-desktop/gui/MenuBar.tsx:610
+#: packages/app-desktop/gui/MenuBar.tsx:616
 #: packages/app-desktop/gui/PromptDialog.tsx:282
 #: packages/app-desktop/services/plugins/UserWebviewDialogButtonBar.tsx:19
 #: packages/app-mobile/components/DialogManager/hooks/useDialogControl.ts:17
@@ -3980,7 +3990,7 @@ msgstr "OK"
 msgid "OLED Dark"
 msgstr "ダークモード"
 
-#: packages/lib/services/ReportService.ts:390
+#: packages/lib/services/ReportService.ts:391
 msgid "On %s: %s"
 msgstr "日時 %s: %s"
 
@@ -4106,7 +4116,7 @@ msgid "Operation cancelled"
 msgstr "操作をキャンセルしました"
 
 #: packages/app-desktop/gui/KeymapConfig/utils/getLabel.ts:28
-#: packages/app-desktop/gui/MenuBar.tsx:572
+#: packages/app-desktop/gui/MenuBar.tsx:578
 #: packages/app-desktop/gui/Root.tsx:193
 msgid "Options"
 msgstr "オプション"
@@ -4179,7 +4189,8 @@ msgid "PDF File"
 msgstr "PDF ファイル"
 
 #: packages/lib/utils/joplinCloud/index.ts:408
-msgid "Per user. Minimum of %d users."
+#, fuzzy
+msgid "Per user. Minimum of 2 users."
 msgstr "ユーザーごと。%d ユーザーから。"
 
 #: packages/lib/commands/permanentlyDeleteNote.ts:8
@@ -4204,8 +4215,9 @@ msgstr ""
 
 #: packages/lib/models/Note.ts:944
 #, fuzzy
-msgid "Permanently delete these %d notes?"
-msgstr "これら %d のノートを削除しますか？"
+msgid "Permanently delete this note?"
+msgid_plural "Permanently delete these %d notes?"
+msgstr[0] "これら %d のノートを削除しますか？"
 
 #: packages/app-cli/app/command-rmbook.ts:20
 #, fuzzy
@@ -4366,7 +4378,7 @@ msgstr "取り得る値: %s."
 msgid "Preferences"
 msgstr "環境設定"
 
-#: packages/app-desktop/gui/MenuBar.tsx:636
+#: packages/app-desktop/gui/MenuBar.tsx:642
 msgid "Preferences..."
 msgstr "環境設定..."
 
@@ -4578,7 +4590,7 @@ msgstr "おすすめのプラグイン"
 msgid "Record audio"
 msgstr ""
 
-#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:73
+#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:70
 #, fuzzy
 msgid "Recording"
 msgstr "見出し"
@@ -4588,7 +4600,7 @@ msgstr "見出し"
 msgid "Recording..."
 msgstr "読み込み中..."
 
-#: packages/app-desktop/gui/MenuBar.tsx:767
+#: packages/app-desktop/gui/MenuBar.tsx:771
 #: packages/app-desktop/gui/NoteEditor/editorCommandDeclarations.ts:122
 #: packages/app-mobile/components/NoteEditor/ImageEditor/ImageEditor.tsx:168
 #: packages/app-mobile/components/ScreenHeader/index.tsx:353
@@ -6110,11 +6122,6 @@ msgstr "新しい画面を開きます。変更を保存しますか?"
 msgid "This will permanently delete all items in the trash. Continue?"
 msgstr ""
 
-#: packages/app-cli/app/command-rmnote.ts:40
-#, fuzzy
-msgid "This will permanently delete the note \"%s\". Continue?"
-msgstr "ノート \"%s\" を削除しますか？"
-
 #: packages/app-desktop/gui/WindowCommandsAndDialogs/commands/leaveSharedFolder.ts:17
 #: packages/app-mobile/components/screens/ShareManager/AcceptedShareItem.tsx:60
 msgid ""
@@ -6212,7 +6219,7 @@ msgstr ""
 "正しく動作するには、次の権限が必要です。スマートフォンのアプリ情報 > Joplin "
 "> 権限 で有効にしてください"
 
-#: packages/app-desktop/gui/NoteListControls/NoteListControls.tsx:119
+#: packages/app-desktop/gui/NoteListControls/NoteListControls.tsx:120
 #: packages/app-desktop/gui/NoteListWrapper/NoteListWrapper.tsx:71
 msgid "to-do"
 msgstr "ToDo"
@@ -6234,7 +6241,7 @@ msgstr "親ノートブックを選択"
 msgid "Toggle comment"
 msgstr "コメントの切り替え"
 
-#: packages/app-desktop/gui/MenuBar.tsx:961
+#: packages/app-desktop/gui/MenuBar.tsx:965
 msgid "Toggle development tools"
 msgstr "開発者ツールのオンオフを切り替える"
 
@@ -6381,7 +6388,7 @@ msgstr ""
 msgid "Uncompleted to-dos on top"
 msgstr "未完のToDoをリストの上部に表示"
 
-#: packages/app-desktop/gui/MenuBar.tsx:763
+#: packages/app-desktop/gui/MenuBar.tsx:767
 #: packages/app-desktop/gui/NoteEditor/editorCommandDeclarations.ts:118
 #: packages/app-mobile/components/NoteEditor/ImageEditor/ImageEditor.tsx:167
 #: packages/app-mobile/components/ScreenHeader/index.tsx:343
@@ -6728,7 +6735,7 @@ msgid "WebDAV username"
 msgstr "WebDAV ユーザー名"
 
 #: packages/app-desktop/gui/KeymapConfig/utils/getLabel.ts:20
-#: packages/app-desktop/gui/MenuBar.tsx:938
+#: packages/app-desktop/gui/MenuBar.tsx:942
 msgid "Website and documentation"
 msgstr "Webサイトとドキュメント"
 
@@ -6895,14 +6902,21 @@ msgstr ""
 msgid "Your version: %s"
 msgstr "あなたのバージョン: %s"
 
-#: packages/app-desktop/gui/MenuBar.tsx:859
-#: packages/app-desktop/gui/MenuBar.tsx:865
+#: packages/app-desktop/gui/MenuBar.tsx:863
+#: packages/app-desktop/gui/MenuBar.tsx:869
 msgid "Zoom In"
 msgstr "ズームイン"
 
-#: packages/app-desktop/gui/MenuBar.tsx:872
+#: packages/app-desktop/gui/MenuBar.tsx:876
 msgid "Zoom Out"
 msgstr "ズームアウト"
+
+#~ msgid "%d hours"
+#~ msgstr "%d 時間"
+
+#, fuzzy
+#~ msgid "This will permanently delete the note \"%s\". Continue?"
+#~ msgstr "ノート \"%s\" を削除しますか？"
 
 #, fuzzy
 #~ msgid "Close menu"
