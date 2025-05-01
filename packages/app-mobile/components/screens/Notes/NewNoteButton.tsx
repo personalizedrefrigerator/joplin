@@ -31,7 +31,7 @@ const styles = StyleSheet.create({
 	},
 	mainButtonRow: {
 		flexWrap: 'wrap',
-		gap: 6,
+		gap: 12,
 	},
 	shortcutButton: {
 		flexGrow: 1,
