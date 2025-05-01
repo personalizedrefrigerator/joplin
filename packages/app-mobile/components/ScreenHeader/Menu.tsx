@@ -7,7 +7,6 @@ import AccessibleView from '../accessibility/AccessibleView';
 import debounce from '../../utils/debounce';
 import FocusControl from '../accessibility/FocusControl/FocusControl';
 import { ModalState } from '../accessibility/FocusControl/types';
-import { _ } from '@joplin/lib/locale';
 
 interface MenuOptionDivider {
 	isDivider: true;
@@ -102,9 +101,7 @@ const MenuComponent: React.FC<Props> = props => {
 					<AccessibleView refocusCounter={canAutoFocus ? refocusCounter : undefined} testID={key}>
 						<Text
 							style={option.disabled ? styles.contextMenuItemTextDisabled : styles.contextMenuItemText}
-							// <MenuOptionComponent> doesn't seem to expose the `disabled` prop for accessibility tools.
-							// Expose this information through a hint:
-							accessibilityLabel={option.disabled ? `${option.title} ${_('(Disabled)')}` : undefined}
+							disabled={option.disabled}
 						>{option.title}</Text>
 					</AccessibleView>
 				</MenuOptionComponent>,
