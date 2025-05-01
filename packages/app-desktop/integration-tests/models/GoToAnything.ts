@@ -39,9 +39,15 @@ export default class GoToAnything {
 		await expect.poll(async () => {
 			await this.inputLocator.clear();
 			await this.inputLocator.fill(query);
-			await expect(resultLocator).toBeVisible({ timeout: 1600 });
+			try {
+				await expect(resultLocator).toBeVisible({ timeout: 1000 });
+			} catch (error) {
+				// Return, rather than throw, the error -- expect.poll doesn't retry
+				// if the callback throws.
+				return error;
+			}
 			return true;
-		}, { timeout: 12000 }).toBe(true);
+		}, { timeout: 10_000 }).toBe(true);
 	}
 
 	public async expectToBeClosed() {
