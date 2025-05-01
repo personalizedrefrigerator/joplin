@@ -65,22 +65,28 @@ test.describe('goToAnything', () => {
 		}
 	});
 
-	test('should be possible to show the set tags dialog from goToAnything', async ({ electronApp, mainWindow }) => {
-		const mainScreen = await new MainScreen(mainWindow).setup();
-		await mainScreen.createNewNote('Test note');
+	for (const activateWithClick of [true, false]) {
+		test(`should be possible to show the set tags dialog from goToAnything (show with click: ${activateWithClick})`, async ({ electronApp, mainWindow }) => {
+			const mainScreen = await new MainScreen(mainWindow).setup();
+			await mainScreen.createNewNote('Test note');
 
-		const goToAnything = mainScreen.goToAnything;
-		await goToAnything.open(electronApp);
-		await goToAnything.inputLocator.fill(':setTags');
+			const goToAnything = mainScreen.goToAnything;
+			await goToAnything.open(electronApp);
+			await goToAnything.inputLocator.fill(':setTags');
 
-		// Should show a matching command
-		await expect(goToAnything.containerLocator.getByText('Tags (setTags)')).toBeAttached();
+			// Should show a matching command
+			const result = goToAnything.containerLocator.getByText('Tags (setTags)');
+			await expect(result).toBeAttached();
+			if (activateWithClick) {
+				await result.click();
+			} else {
+				await mainWindow.keyboard.press('Enter');
+			}
+			await goToAnything.expectToBeClosed();
 
-		await mainWindow.keyboard.press('Enter');
-		await goToAnything.expectToBeClosed();
-
-		// Should show the "set tags" dialog
-		const setTagsLabel = mainWindow.getByText('Add or remove tags:');
-		await expect(setTagsLabel).toBeVisible();
-	});
+			// Should show the "set tags" dialog
+			const setTagsLabel = mainWindow.getByText('Add or remove tags:');
+			await expect(setTagsLabel).toBeVisible();
+		});
+	}
 });
