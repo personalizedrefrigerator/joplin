@@ -25,7 +25,7 @@ describe('locale', () => {
 
 	it('should translate plurals - fr_FR', () => {
 		setLocale('fr_FR');
-		expect(_n('Copy Shareable Link', 'Copy Shareable Links', 1)).toBe('Copier lien partageable');
+		expect(_n('Copy Shareable Link', 'Copy Shareable Links', 1)).toBe('Copier le lien partageable');
 		expect(_n('Copy Shareable Link', 'Copy Shareable Links', 2)).toBe('Copier liens partageables');
 	});
 
