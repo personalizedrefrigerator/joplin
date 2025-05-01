@@ -1,6 +1,6 @@
 # Joplin iOS Changelog
 
-## [ios-v13.3.6](https://github.com/laurent22/joplin/releases/tag/ios-v13.3.6) - 2025-05-01T15:50:25Z
+## [ios-v13.3.7](https://github.com/laurent22/joplin/releases/tag/ios-v13.3.7) - 2025-05-01T16:06:30Z
 
 - New: Force quick action shortcuts to have the same size (#12195 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
 - Improved: Increase space between new note/to-do buttons (#12194 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
