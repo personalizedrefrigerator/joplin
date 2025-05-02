@@ -572,6 +572,7 @@ packages/app-desktop/services/sortOrder/PerFolderSortOrderService.js
 packages/app-desktop/services/sortOrder/notesSortOrderUtils.test.js
 packages/app-desktop/services/sortOrder/notesSortOrderUtils.js
 packages/app-desktop/services/spellChecker/SpellCheckerServiceDriverNative.js
+packages/app-desktop/tools/bundleJs.js
 packages/app-desktop/tools/copy7Zip.js
 packages/app-desktop/tools/generateLatestArm64Yml.js
 packages/app-desktop/tools/githubReleasesUtils.js

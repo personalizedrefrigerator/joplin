@@ -4,9 +4,13 @@ const compileSass = require('@joplin/tools/compileSass');
 const compilePackageInfo = require('@joplin/tools/compilePackageInfo');
 import buildDefaultPlugins from '@joplin/default-plugins/commands/buildAll';
 import copy7Zip from './tools/copy7Zip';
+import bundleJs from './tools/bundleJs';
 import { remove } from 'fs-extra';
 
 const tasks = {
+	bundle: {
+		fn: bundleJs,
+	},
 	compileScripts: {
 		fn: require('./tools/compileScripts'),
 	},
@@ -55,6 +59,7 @@ const tasks = {
 utils.registerGulpTasks(gulp, tasks);
 
 const buildBeforeStartParallel = [
+	'bundle',
 	'compileScripts',
 	'compilePackageInfo',
 	'copyPluginAssets',
