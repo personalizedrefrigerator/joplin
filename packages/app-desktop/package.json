@@ -1,6 +1,6 @@
 {
   "name": "@joplin/app-desktop",
-  "version": "3.3.9",
+  "version": "3.3.10",
   "description": "Joplin for Desktop",
   "main": "main.js",
   "private": true,
@@ -180,6 +180,7 @@
     "fs-extra": "11.2.0",
     "highlight.js": "11.10.0",
     "immer": "9.0.21",
+    "is-apple-silicon": "1.1.2",
     "keytar": "7.9.0",
     "mark.js": "8.11.1",
     "md5": "2.3.0",
