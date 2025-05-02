@@ -8307,6 +8307,7 @@ __metadata:
     gulp: 4.0.2
     highlight.js: 11.10.0
     immer: 9.0.21
+    is-apple-silicon: 1.1.2
     jest: 29.7.0
     jest-environment-jsdom: 29.7.0
     js-sha512: 0.9.0
@@ -29101,6 +29102,13 @@ __metadata:
     is-alphabetical: ^1.0.0
     is-decimal: ^1.0.0
   checksum: e2e491acc16fcf5b363f7c726f666a9538dba0a043665740feb45bba1652457a73441e7c5179c6768a638ed396db3437e9905f403644ec7c468fb41f4813d03f
+  languageName: node
+  linkType: hard
+
+"is-apple-silicon@npm:1.1.2":
+  version: 1.1.2
+  resolution: "is-apple-silicon@npm:1.1.2"
+  checksum: a4b4a706c3ea3deb9b473d56e5235e46d465ae64ced528b738a34011ecf15fbf36ac5864cfd6ed56bb193e9262f300287a92175badb5df65c7f0549c4bf9de22
   languageName: node
   linkType: hard
 
