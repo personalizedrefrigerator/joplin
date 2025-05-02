@@ -1354,7 +1354,7 @@ PODS:
     - Yoga
   - react-native-rsa-native (2.0.5):
     - React
-  - react-native-saf-x (3.3.0):
+  - react-native-saf-x (3.3.1):
     - React-Core
   - react-native-safe-area-context (5.4.0):
     - React-Core
