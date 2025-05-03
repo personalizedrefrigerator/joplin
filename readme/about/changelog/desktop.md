@@ -1,5 +1,9 @@
 # Joplin Desktop Changelog
 
+## [v3.3.10](https://github.com/laurent22/joplin/releases/tag/v3.3.10) - 2025-05-02T19:46:15Z
+
+- Fixed: Notify user when they are using the Intel app on Apple Silicon ([#11989](https://github.com/laurent22/joplin/issues/11989))
+
 ## [v3.3.9](https://github.com/laurent22/joplin/releases/tag/v3.3.9) - 2025-05-01T21:02:12Z
 
 - Fixed: Fix inserting note links using the mouse ([#12199](https://github.com/laurent22/joplin/issues/12199)) ([#12197](https://github.com/laurent22/joplin/issues/12197) by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
