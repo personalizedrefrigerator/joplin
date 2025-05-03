@@ -57,7 +57,7 @@ msgid "(wysiwyg: %s)"
 msgstr "(支援所見即所得: %s)"
 
 #: packages/app-mobile/components/screens/Note/Note.tsx:757
-#: packages/lib/shim-init-node.ts:273
+#: packages/lib/shim-init-node.ts:277
 msgid "(You may disable this prompt in the options)"
 msgstr "（您可以在選項中停用此提示）"
 
@@ -212,7 +212,7 @@ msgstr "無法建立新筆記：%s"
 msgid "%s cannot be less than %s"
 msgstr ""
 
-#: packages/app-desktop/gui/SyncWizard/Dialog.tsx:231
+#: packages/app-desktop/gui/SyncWizard/Dialog.tsx:237
 msgid ""
 "%s is not optimised for synchronising many small files so your initial "
 "synchronisation will be slow."
@@ -370,7 +370,7 @@ msgid "Add body"
 msgstr "新增內文"
 
 #: packages/app-mobile/components/buttons/FloatingActionButton.tsx:64
-#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:127
+#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:130
 msgid "Add new"
 msgstr "新增"
 
@@ -590,7 +590,7 @@ msgstr "將特定的檔案附加到記事。"
 msgid "attachment"
 msgstr "附加檔案"
 
-#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:69
+#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:72
 #, fuzzy
 msgid "Attachment"
 msgstr "附加檔案"
@@ -631,7 +631,7 @@ msgstr "尚未完成驗證 (未收到身份驗證的 token)。"
 msgid "Authorisation token:"
 msgstr "授權 Token："
 
-#: packages/app-desktop/gui/JoplinCloudLoginScreen.tsx:88
+#: packages/app-desktop/gui/JoplinCloudLoginScreen.tsx:89
 #: packages/app-mobile/components/screens/JoplinCloudLoginScreen.tsx:162
 msgid "Authorise"
 msgstr "授權 Token"
@@ -718,7 +718,7 @@ msgstr "經由 %s"
 msgid "by word"
 msgstr ""
 
-#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:71
+#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:74
 msgid "Camera"
 msgstr ""
 
@@ -763,7 +763,7 @@ msgstr "可以查看和編輯"
 #: packages/app-mobile/components/voiceTyping/AudioRecordingBanner.tsx:202
 #: packages/app-mobile/utils/makeShowMessageBox.ts:16
 #: packages/lib/commands/permanentlyDeleteNote.ts:21
-#: packages/lib/shim-init-node.ts:274
+#: packages/lib/shim-init-node.ts:278
 msgid "Cancel"
 msgstr "取消"
 
@@ -786,7 +786,7 @@ msgstr "正在取消..."
 msgid "Cancelling... Please wait."
 msgstr "正在取消中...請稍候。"
 
-#: packages/lib/shim-init-node.ts:334
+#: packages/lib/shim-init-node.ts:338
 msgid "Cannot access %s"
 msgstr "無法存取 %s"
 
@@ -910,7 +910,7 @@ msgstr "字元數"
 msgid "Characters excluding spaces"
 msgstr "不含空格的字元"
 
-#: packages/app-desktop/gui/SyncWizard/Dialog.tsx:163
+#: packages/app-desktop/gui/SyncWizard/Dialog.tsx:164
 #, fuzzy
 msgid "Check"
 msgstr "核取方塊"
@@ -999,7 +999,7 @@ msgstr "關閉"
 #: packages/app-desktop/gui/NoteContentPropertiesDialog.tsx:175
 #: packages/app-desktop/gui/ShareFolderDialog/ShareFolderDialog.tsx:411
 #: packages/app-desktop/gui/ShareNoteDialog.tsx:223
-#: packages/app-desktop/gui/SyncWizard/Dialog.tsx:308
+#: packages/app-desktop/gui/SyncWizard/Dialog.tsx:315
 #: packages/app-desktop/services/plugins/UserWebviewDialogButtonBar.tsx:23
 #: packages/app-mobile/components/DismissibleDialog.tsx:83
 #: packages/app-mobile/components/NoteEditor/ImageEditor/ImageEditor.tsx:166
@@ -1065,7 +1065,7 @@ msgstr "程式碼檢視"
 msgid "Collaborate on a notebook with others"
 msgstr "與其他人在一份記事本協作"
 
-#: packages/app-desktop/gui/SyncWizard/Dialog.tsx:175
+#: packages/app-desktop/gui/SyncWizard/Dialog.tsx:176
 msgid "Collaborate on notebooks with others"
 msgstr "與其他人在記事本協作"
 
@@ -1102,7 +1102,7 @@ msgstr "命令"
 msgid "Command"
 msgstr "命令"
 
-#: packages/app-desktop/plugins/GotoAnything.tsx:791
+#: packages/app-desktop/plugins/GotoAnything.tsx:783
 msgid "Command palette"
 msgstr "命令模式"
 
@@ -1260,7 +1260,7 @@ msgstr "複製圖片"
 msgid "Copy Link Address"
 msgstr "複製鏈結位址"
 
-#: packages/app-desktop/gui/JoplinCloudLoginScreen.tsx:94
+#: packages/app-desktop/gui/JoplinCloudLoginScreen.tsx:95
 #: packages/app-mobile/components/screens/JoplinCloudLoginScreen.tsx:169
 msgid "Copy link to website"
 msgstr "Joplin 官方網站"
@@ -1418,7 +1418,7 @@ msgstr "建立：%d。"
 msgid "Created: %s"
 msgstr "已建立: %s"
 
-#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:62
+#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:65
 #, fuzzy
 msgid "Creates a new note with an attachment of type %s"
 msgstr "在父筆記本下創建一個新的筆記本。"
@@ -1871,7 +1871,7 @@ msgid "Draw picture"
 msgstr "繪製圖片"
 
 #: packages/app-mobile/components/screens/Note/Note.tsx:917
-#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:72
+#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:75
 msgid "Drawing"
 msgstr "繪畫"
 
@@ -2603,7 +2603,7 @@ msgid "Go to source URL"
 msgstr "前往來源網址"
 
 #: packages/app-desktop/gui/WindowCommandsAndDialogs/commands/gotoAnything.ts:18
-#: packages/app-desktop/plugins/GotoAnything.tsx:783
+#: packages/app-desktop/plugins/GotoAnything.tsx:775
 msgid "Goto Anything..."
 msgstr "前往任意內容..."
 
@@ -3013,7 +3013,7 @@ msgstr "上次錯誤: %s"
 msgid "Join us on %s"
 msgstr "在 Twitter 上加入我們"
 
-#: packages/app-desktop/gui/SyncWizard/Dialog.tsx:302
+#: packages/app-desktop/gui/SyncWizard/Dialog.tsx:309
 msgid ""
 "Joplin can synchronise your notes using various providers. Select one from "
 "the list below."
@@ -3553,8 +3553,8 @@ msgstr "已有更新，您想立即下載嗎？"
 #: packages/app-desktop/gui/NoteListControls/NoteListControls.tsx:112
 #: packages/app-desktop/gui/NoteListWrapper/NoteListWrapper.tsx:72
 #: packages/app-desktop/gui/WindowCommandsAndDialogs/commands/newNote.ts:10
-#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:105
-#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:94
+#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:108
+#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:97
 #: packages/app-mobile/setupQuickActions.ts:30
 msgid "New note"
 msgstr "新增記事"
@@ -3594,8 +3594,8 @@ msgstr "新增標籤："
 #: packages/app-desktop/gui/NoteListControls/NoteListControls.tsx:122
 #: packages/app-desktop/gui/NoteListWrapper/NoteListWrapper.tsx:72
 #: packages/app-desktop/gui/WindowCommandsAndDialogs/commands/newTodo.ts:7
-#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:108
-#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:84
+#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:111
+#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:87
 #: packages/app-mobile/setupQuickActions.ts:31
 msgid "New to-do"
 msgstr "新增待辦事項"
@@ -3634,7 +3634,7 @@ msgstr "否"
 
 #: packages/app-desktop/services/plugins/UserWebviewDialogButtonBar.tsx:22
 #: packages/app-mobile/components/screens/Note/Note.tsx:759
-#: packages/lib/shim-init-node.ts:274 packages/lib/versionInfo.ts:92
+#: packages/lib/shim-init-node.ts:278 packages/lib/versionInfo.ts:92
 msgid "No"
 msgstr "否"
 
@@ -3705,7 +3705,7 @@ msgstr "北歐藍"
 msgid "Not authenticated with %s. Please provide any missing credentials."
 msgstr "與 %s 認證失敗，請提供完整的身份驗證資訊。"
 
-#: packages/app-desktop/gui/SyncWizard/Dialog.tsx:163
+#: packages/app-desktop/gui/SyncWizard/Dialog.tsx:164
 msgid "Not checked"
 msgstr ""
 
@@ -3815,7 +3815,7 @@ msgstr "注意：分享記事後，該記事將不會在伺服器上加密。"
 msgid "Note&book"
 msgstr "記事本 (&B)"
 
-#: packages/app-desktop/plugins/GotoAnything.tsx:608
+#: packages/app-desktop/plugins/GotoAnything.tsx:600
 #: packages/lib/models/Setting.ts:1179
 msgid "Notebook"
 msgstr "記事本"
@@ -4410,7 +4410,7 @@ msgstr "上傳記事..."
 msgid "Publish Notes"
 msgstr "發布記事"
 
-#: packages/app-desktop/gui/SyncWizard/Dialog.tsx:174
+#: packages/app-desktop/gui/SyncWizard/Dialog.tsx:175
 #: packages/lib/utils/joplinCloud/index.ts:153
 msgid "Publish notes to the internet"
 msgstr "將記事發布至網路上"
@@ -4484,7 +4484,7 @@ msgstr "延伸模組推薦"
 msgid "Record audio"
 msgstr ""
 
-#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:70
+#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:73
 #, fuzzy
 msgid "Recording"
 msgstr "標題"
@@ -4829,7 +4829,7 @@ msgstr "在所有記事中搜尋"
 msgid "Search in current note"
 msgstr "在目前記事中搜尋"
 
-#: packages/app-desktop/plugins/GotoAnything.tsx:703
+#: packages/app-desktop/plugins/GotoAnything.tsx:695
 #, fuzzy
 msgid "Search results"
 msgstr "查無資料"
@@ -4863,7 +4863,7 @@ msgstr "完整更新內容"
 msgid "See the pre-release page for more details: %s"
 msgstr "詳細訊息請參考發行前測試版頁面: %s"
 
-#: packages/app-desktop/gui/SyncWizard/Dialog.tsx:205
+#: packages/app-desktop/gui/SyncWizard/Dialog.tsx:206
 #: packages/app-mobile/components/NoteItem.tsx:151
 msgid "Select"
 msgstr "選擇"
@@ -5077,6 +5077,11 @@ msgstr "側邊選單已打開"
 #: packages/app-mobile/components/ScreenHeader/index.tsx:264
 msgid "Sidebar"
 msgstr "側邊欄"
+
+#: packages/app-desktop/gui/JoplinCloudSignUpCallToAction.tsx:15
+#, fuzzy
+msgid "Sign up to Joplin Cloud"
+msgstr "登入Joplin Cloud."
 
 #: packages/app-desktop/gui/ResourceScreen.tsx:111
 msgid "Size"
@@ -5399,7 +5404,7 @@ msgstr "同步到已指明的目標 (預設是 sync.target 的設定值)"
 msgid "Sync Version: %s"
 msgstr "同步版本：%s"
 
-#: packages/app-desktop/gui/SyncWizard/Dialog.tsx:173
+#: packages/app-desktop/gui/SyncWizard/Dialog.tsx:174
 msgid "Sync your notes"
 msgstr "同步您的筆記"
 
@@ -5976,7 +5981,7 @@ msgid ""
 msgstr "請按照以下步驟，設定 Joplin 與 Dropbox 同步所需的選項："
 
 #: packages/app-cli/app/command-sync.ts:110
-#: packages/app-desktop/gui/JoplinCloudLoginScreen.tsx:84
+#: packages/app-desktop/gui/JoplinCloudLoginScreen.tsx:85
 #: packages/app-mobile/components/screens/JoplinCloudLoginScreen.tsx:153
 msgid ""
 "To allow Joplin to synchronise with Joplin Cloud, please login using this "
@@ -6164,7 +6169,7 @@ msgstr ""
 msgid "Type `joplin help` for usage information."
 msgstr "鍵入 `joplin help` 檢視使用說明。"
 
-#: packages/app-desktop/plugins/GotoAnything.tsx:716
+#: packages/app-desktop/plugins/GotoAnything.tsx:708
 msgid ""
 "Type a note title or part of its content to jump to it. Or type # followed "
 "by a tag name, or @ followed by a notebook name. Or type : to search for "
@@ -6173,7 +6178,7 @@ msgstr ""
 "輸入記事標題、部分記事內容、# 後輸入標籤名稱、@ 後輸入筆記本名稱等方式，可前"
 "往相應搜尋結果。或者可輸入 : 以搜尋其他指令。"
 
-#: packages/app-desktop/plugins/GotoAnything.tsx:714
+#: packages/app-desktop/plugins/GotoAnything.tsx:706
 #, fuzzy
 msgid "Type a note title to search for it."
 msgstr "輸入新標籤，或在清單中選擇"
@@ -6617,12 +6622,12 @@ msgstr "是"
 
 #: packages/app-desktop/services/plugins/UserWebviewDialogButtonBar.tsx:21
 #: packages/app-mobile/components/screens/Note/Note.tsx:758
-#: packages/lib/shim-init-node.ts:274 packages/lib/versionInfo.ts:92
+#: packages/lib/shim-init-node.ts:278 packages/lib/versionInfo.ts:92
 msgid "Yes"
 msgstr "是"
 
 #: packages/app-mobile/components/screens/Note/Note.tsx:757
-#: packages/lib/shim-init-node.ts:273
+#: packages/lib/shim-init-node.ts:277
 msgid ""
 "You are about to attach a large image (%dx%d pixels). Would you like to "
 "resize it down to %d pixels before attaching it?"

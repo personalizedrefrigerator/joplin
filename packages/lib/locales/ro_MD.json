@@ -2,17 +2,42 @@
 	"\"%s\" is missing the required \"%s\" property.": [
 		"„%s” nu are proprietatea necesară „%s”."
 	],
+	"%d day": [
+		"%d zi",
+		"%d zile",
+		"%d de zile"
+	],
 	"%d GB": [
 		"%d GO"
 	],
 	"%d GB storage space": [
 		"spațiu de stocare %d GO"
 	],
+	"%d hour": [
+		"%d oră",
+		"%d ore",
+		"%d de ore"
+	],
 	"%d MB": [
 		"%d MO"
 	],
 	"%d MB per note or attachment": [
 		"%d MO per notiță sau atașament"
+	],
+	"%d minute": [
+		"%d minut",
+		"%d minute",
+		"%d de minute"
+	],
+	"%d note matches this pattern. Delete it?": [
+		"%d notiță se potrivește acestui șablon. Dorești să o ștergi?",
+		"%d notițe se potrivesc acestui șablon. Dorești să le ștergi?",
+		"%d de notițe se potrivesc acestui șablon. Dorești să le ștergi?"
+	],
+	"%d note will be permanently deleted. Continue?": [
+		"%d notiță va fi ștearsă permanent. Continui?",
+		"%d notițe vor fi șterse permanent. Continui?",
+		"%d de notițe vor fi șterse permanent. Continui?"
 	],
 	"%s": [
 		"%s"
@@ -65,6 +90,11 @@
 	"%s: %d": [
 		"%s: %d"
 	],
+	"%s: %d note": [
+		"%s: %d notiță",
+		"%s: %d notițe",
+		"%s: %d de notițe"
+	],
 	"%s: %d/%d": [
 		"%s: %d/%d"
 	],
@@ -114,7 +144,7 @@
 		"(wysiwyg: %s)"
 	],
 	"(You may disable this prompt in the options)": [
-		"(Puteți dezactiva această solicitare în opțiuni)"
+		"(Poți dezactiva această solicitare în opțiuni)"
 	],
 	"- Camera: to allow taking a picture and attaching it to a note.": [
 		"- Aparat foto: pentru a permite realizarea unei fotografii și atașarea acesteia la o notă."
@@ -165,7 +195,7 @@
 		"Invitații acceptate"
 	],
 	"Access denied: Please check your username and password": [
-		"Acces refuzat: Te rog să vă verificați numele de utilizator și parola"
+		"Acces refuzat: Te rog să îți verifici numele de utilizator și parola"
 	],
 	"Access denied: Please re-enter your password and/or username": [
 		"Acces refuzat: Te rog să reîntroduci parola și/sau numele de utilizator"
@@ -351,7 +381,7 @@
 		"Acest fișier nu a putut fi descărcat: %s"
 	],
 	"Attention: If you change this location, make sure you copy all your content to it before syncing, otherwise all files will be removed! See the FAQ for more details: %s": [
-		"Atenție: dacă modificați această locație, asigurați-vă că copiați tot conținutul pe ea înainte de sincronizare, altfel toate fișierele vor fi eliminate! Consultați FAQ pentru mai multe detalii: %s"
+		"Atenție: dacă modifici această locație, asigură-te că copiezi tot conținutul în ea înainte de sincronizare, altfel toate fișierele vor fi șterse! Consultă FAQ pentru mai multe detalii: %s"
 	],
 	"Authentication was not completed (did not receive an authentication token).": [
 		"Autentificarea nu a fost finalizată (nu a primit un token de autentificare)."
@@ -399,7 +429,7 @@
 		"Aldin"
 	],
 	"Browse all plugins": [
-		"Navigați toate plugin-urile"
+		"Răsfoiește toate plugin-urile"
 	],
 	"Browse...": [
 		"Răsfoiește..."
@@ -414,7 +444,7 @@
 		"după %s"
 	],
 	"by word": [
-		"după cuvînt"
+		"cuvînt întreg"
 	],
 	"Camera": [
 		"Aparat foto"
@@ -519,7 +549,7 @@
 		"Verifică pentru actualizări..."
 	],
 	"Check synchronisation configuration": [
-		"Verificați configurația de sincronizare"
+		"Verifică configurația de sincronizare"
 	],
 	"Checkbox": [
 		"Căsuțe de selecție"
@@ -570,7 +600,7 @@
 		"Închide dialogul"
 	],
 	"Close dropdown": [
-		"Închideți meniul derulant"
+		"Închide meniul derulant"
 	],
 	"Close side menu": [
 		"Închide meniul lateral"
@@ -615,7 +645,7 @@
 		"Alarmele următoare"
 	],
 	"Comma-separated list of paths to directories to load the certificates from, or path to individual cert files. For example: /my/cert_dir, /other/custom.pem. Note that if you make changes to the TLS settings, you must save your changes before clicking on \"Check synchronisation configuration\".": [
-		"Listă de căi de acces la directoare din care se încarcă certificatele sau calea de acces la fișierele de certificate individuale. De exemplu: /my/cert_dir, /other/custom.pem. Rețineți că, dacă efectuați modificări la setările TLS, trebuie să salvați modificările înainte de a face clic pe “Check synchronisation configuration” (Verificați configurația de sincronizare)."
+		"Listă separată de virgule de căi de acces la dosare din care se încarcă certificatele sau calea de acces la fișierele de certificate individuale. De exemplu: /my/cert_dir, /other/custom.pem. Reține că, dacă faci modificări la setările TLS, trebuie să salvezi modificările înainte de a face clic pe „Verifică configurația de sincronizare”."
 	],
 	"command": [
 		"command"
@@ -722,7 +752,7 @@
 		"Copiază link-ul extern"
 	],
 	"Copy image": [
-		"Copie imagine"
+		"Copiază imaginea"
 	],
 	"Copy Link Address": [
 		"Copiază adresa link-ului"
@@ -737,9 +767,9 @@
 		"Copiază locația în clipboard"
 	],
 	"Copy Shareable Link": [
-		"Copiază linkul care se poate partaja",
-		"Distribuie",
-		"Distribuie"
+		"Copiază legătura partajabilă",
+		"Copiază legăturile partajabile",
+		"Copiază legăturile partajabile"
 	],
 	"Copy to clipboard": [
 		"Copiază locația în clipboard"
@@ -754,7 +784,7 @@
 		"Nu s-a putut autoriza aplicația:\n\n%s\n\nTe rog să încerci din nou."
 	],
 	"Could not connect to Joplin Server. Please check the Synchronisation options in the config screen. Full error was:\n\n%s": [
-		"Nu s-a putut conecta la serverul Joplin. Te rog să verificați opțiunile de sincronizare din ecranul de configurare. Eroarea completă a fost:\n\n%s"
+		"Nu s-a putut conecta la serverul Joplin. Te rog să verifici opțiunile de sincronizare din ecranul de configurare. Eroarea completă a fost:\n\n%s"
 	],
 	"Could not connect to plugin repository.": [
 		"Nu s-a putut conecta la repozitoriul de plugin-uri."
@@ -784,7 +814,7 @@
 		"Create"
 	],
 	"Create a new notebook under a parent notebook.": [
-		"Creează o nouă secțiune într-un caiet."
+		"Creează un nou sub-caiet într-un caiet."
 	],
 	"Create a notebook": [
 		"Creează un caiet"
@@ -874,7 +904,7 @@
 		"Certificate TLS cusomizate"
 	],
 	"Customise the note publishing banner": [
-		"Personalizați bannerul de publicare a notițelor"
+		"Personalizează banner-ul de publicare a notițelor"
 	],
 	"Cut": [
 		"Decupează"
@@ -895,7 +925,7 @@
 		"zile"
 	],
 	"Decrease indent level": [
-		"Reduceți nivelul de indentare"
+		"Micșorează nivelul de indentare"
 	],
 	"Decrypted items: %d": [
 		"Elemente decriptate: %d"
@@ -1024,16 +1054,16 @@
 		"Taste dezactivate"
 	],
 	"Disabling encryption means *all* your notes and attachments are going to be re-synchronised and sent unencrypted to the sync target. Do you wish to continue?": [
-		"Dezactivarea criptării înseamnă că *toate* notele și atașamentele dvs. vor fi resincronizate și trimise necriptate către ținta de sincronizare. Doriți să continuați?"
+		"Dezactivarea criptării înseamnă că *toate* notițele și atașamentele tale vor fi resincronizate și trimise necriptate către destinația de sincronizare. Dorești să continui?"
 	],
 	"Discard": [
-		"Renunțați"
+		"Renunță"
 	],
 	"Discard changes": [
-		"Renunțați la schimbări"
+		"Renunță la schimbări"
 	],
 	"Dismiss": [
-		"Respingeți"
+		"Respinge"
 	],
 	"Displays a geolocation URL for the note.": [
 		"Afișează o adresă URL de geolocație pentru notiță."
@@ -1057,7 +1087,7 @@
 		"Afișează notițele din caietul curent. Folosește 'ls /' pentru a afișa lista de caiete."
 	],
 	"Displays usage information.": [
-		"Afișați informațiile de utilizare."
+		"Afișează informațiile de utilizare."
 	],
 	"Displays version information": [
 		"Afișează informații despre versiune"
@@ -1108,13 +1138,13 @@
 		"Dracula"
 	],
 	"Draw picture": [
-		"Desenați imaginea"
+		"Desenează imagine"
 	],
 	"Drawing": [
 		"Desen"
 	],
 	"Drop notes or files here": [
-		"Plasați notițe sau fișiere aici"
+		"Plasează notițe sau fișiere aici"
 	],
 	"Dropbox": [
 		"Dropbox"
@@ -1315,13 +1345,13 @@
 		"Activează înlocuire cu șablon Markdown în editorul de text îmbogățit. De exemplu, dacă este activat, tastînd **aldin** va crea text aldin."
 	],
 	"Enabling encryption means *all* your notes and attachments are going to be re-synchronised and sent encrypted to the sync target.": [
-		"Activarea criptării înseamnă că *toate* notele și atașamentele dvs. vor fi resincronizate și trimise criptate către ținta de sincronizare."
+		"Activarea criptării înseamnă că *toate* notele și atașamentele dvs. vor fi resincronizate și trimise criptate către destinația de sincronizare."
 	],
 	"Encrypted": [
 		"Criptat"
 	],
 	"Encrypted items cannot be modified": [
-		"Itemii criptați nu pot fi editați"
+		"Elementele criptate nu pot fi editate"
 	],
 	"Encryption": [
 		"Criptare"
@@ -1345,16 +1375,16 @@
 		"Termină transcrierea vocală"
 	],
 	"Enter code here": [
-		"Introdu codul aici"
+		"Întrodu codul aici"
 	],
 	"Enter master password:": [
-		"Introdu parola principală:"
+		"Întrodu parola principală:"
 	],
 	"Enter notebook title": [
-		"Introdu titlul caietului"
+		"Întrodu titlul caietului"
 	],
 	"Enter password": [
-		"Introdu parola"
+		"Întrodu parola"
 	],
 	"Entering selection mode": [
 		"Se intră în modul de selecție"
@@ -1369,7 +1399,7 @@
 		"Eroare deschidere notiță în editor: %s"
 	],
 	"Error. Please check that URL, username, password, etc. are correct and that the sync target is accessible. The reported error was:": [
-		"Eroare. Te rog să verificați dacă adresa URL, numele de utilizator, parola etc. sînt corecte și că ținta de sincronizare este accesibilă. Eroarea raportată a fost:"
+		"Eroare. Te rog să verifici dacă adresa URL, numele de utilizator, parola etc. sînt corecte și că destinația de sincronizare este accesibilă. Eroarea raportată a fost:"
 	],
 	"Error: %s": [
 		"Eroare: %s"
@@ -1447,10 +1477,10 @@
 		"Fail-safe"
 	],
 	"Fail-safe: Do not wipe out local data when sync target is empty (often the result of a misconfiguration or bug)": [
-		"Fail-safe: Nu șterge datele locale atunci cînd ținta de sincronizare este goală (adesea rezultatul unei configurații greșite sau al unei erori)."
+		"Fail-safe: Nu șterge datele locale atunci cînd destinația de sincronizare este goală (adesea rezultatul unei configurații greșite sau al unei erori)."
 	],
 	"Fail-safe: Sync was interrupted to prevent data loss, because the sync target is empty or damaged. To override this behaviour disable the fail-safe in the sync settings.": [
-		"Fail-safe: Sincronizarea a fost întreruptă pentru a preveni pierderea de date, deoarece ținta sincronizării este goală sau eronată. Pentru a anula acest comportament, dezactivează mecanismul de fail-safe din setările de sincronizare."
+		"Fail-safe: Sincronizarea a fost întreruptă pentru a preveni pierderea de date, deoarece destinația sincronizării este goală sau eronată. Pentru a anula acest comportament, dezactivează mecanismul de fail-safe din setările de sincronizare."
 	],
 	"Fatal error:": [
 		"Eroare fatală:"
@@ -1480,7 +1510,7 @@
 		"Găsește"
 	],
 	"Find: ": [
-		"Găsiți: "
+		"Găsește: "
 	],
 	"Finishes recording": [
 		"Finalizează înregistrarea"
@@ -1507,22 +1537,22 @@
 		"Urmează legătura"
 	],
 	"For debugging purpose only: export your profile to an external SD card.": [
-		"Numai în scop de depanare: exportați profilul pe un card SD extern."
+		"Numai în scop de depanare: exportă profilul pe un card SD extern."
 	],
 	"For example \"%s\"": [
 		"De exemplu, „%s”"
 	],
 	"For information on how to customise the shortcuts please visit %s": [
-		"Pentru informații despre cum să personalizați comenzile rapide, vizitați %s"
+		"Pentru informații despre cum să personalizezi comenzile rapide, vizitează %s"
 	],
 	"For more information about End-To-End Encryption (E2EE) and advice on how to enable it please check the documentation:": [
-		"Pentru mai multe informații despre criptarea de la un capăt la altul (E2EE) și sfaturi despre cum să o , te rog să consultați documentația:"
+		"Pentru mai multe informații despre criptarea de la un capăt la altul (E2EE) și sfaturi despre cum să o activezi, te rog să consulți documentația:"
 	],
 	"For the list of keyboard shortcuts and config options, type `help keymap`": [
 		"Pentru lista de scurtături de la tastatură și opțiuni de configurare, tastează `help keymap`"
 	],
 	"Force path style": [
-		"Forțați path style"
+		"Forțează stil cale"
 	],
 	"Forward": [
 		"Înainte"
@@ -1546,9 +1576,9 @@
 		"Generate"
 	],
 	"Generating link...": [
-		"Se creează link...",
-		"Se crează un %s...",
-		"Se crează un %s..."
+		"Se generează legătura...",
+		"Se generează legăturile...",
+		"Se generează legăturile..."
 	],
 	"Geolocation, spellcheck, editor toolbar, image resize": [
 		"Geolocație, verificare ortografică, bara de instrumente a editorului, redimensionare imagine"
@@ -1575,7 +1605,7 @@
 		"Mergi la linia"
 	],
 	"Go to source URL": [
-		"Accesați sursa URL"
+		"Mergi la URL-ul sursă"
 	],
 	"Goto Anything...": [
 		"Mergi la..."
@@ -1602,22 +1632,22 @@
 		"Hermes activat: %d"
 	],
 	"Hide %s": [
-		"Ascundeți %s"
+		"Ascunde %s"
 	],
 	"Hide advanced": [
-		"Ascundeți avansat"
+		"Ascunde avansat"
 	],
 	"Hide disabled": [
-		"Ascundeți dezactivat"
+		"Ascunde dezactivat"
 	],
 	"Hide disabled keys": [
-		"Ascundeți cheile dezactivate"
+		"Ascunde cheile dezactivate"
 	],
 	"Hide Joplin": [
-		"Ascundeți Joplin"
+		"Ascunde Joplin"
 	],
 	"Hide keyboard": [
-		"Ascundeți tastatura"
+		"Ascunde tastatura"
 	],
 	"Hide password": [
 		"Ascunde parola"
@@ -1698,7 +1728,7 @@
 		"Se importă..."
 	],
 	"Imports data into Joplin.": [
-		"Importați date în Joplin."
+		"Importă date în Joplin."
 	],
 	"In \"Manual\" mode, attachments are downloaded only when you click on them. In \"Auto\", they are downloaded when you open the note. In \"Always\", all the attachments are downloaded whether you open the note or not.": [
 		"În modul „Manual”, atașamentele sînt descărcate numai atunci cînd faci clic pe ele. În modul „Auto”, acestea sînt descărcate cînd deschizi notița. În modul „Mereu”, toate atașamentele sînt descărcate indiferent dacă deschizi notița sau nu."
@@ -1707,7 +1737,7 @@
 		"În orice comandă, se poate face referire la o notă sau la un caiet de notițe prin titlu sau ID, sau folosind comenzile rapide `$n` sau `$b` pentru nota sau caietul selectat în acel moment. Se poate utiliza `$c` pentru a se referi la elementul selectat în mod curent."
 	],
 	"In order to associate a geo-location with the note, the app needs your permission to access your location.\n\nYou may turn off this option at any time in the Configuration screen.": [
-		"Pentru a asocia o geolocație cu nota, aplicația are nevoie de permisiunea dvs. de a vă accesa locația.\n\nPuteți dezactiva această opțiune în orice moment în ecranul de configurare."
+		"Pentru a asocia o geolocație cu notița, aplicația are nevoie de permisiunea de a îți accesa locația.\n\nPoți dezactiva această opțiune în orice moment din ecranul de configurare."
 	],
 	"In order to do so, your entire data set will have to be encrypted and synchronised, so it is best to run it overnight.\n\nTo start, please follow these instructions:\n\n1. Synchronise all your devices.\n2. Click \"%s\".\n3. Let it run to completion. While it runs, avoid changing any note on your other devices, to avoid conflicts.\n4. Once sync is done on this device, sync all your other devices and let it run to completion.\n\nImportant: you only need to run this ONCE on one device.": [
 		"Pentru a face acest lucru, întregul set de date va trebui să fie criptat și sincronizat, așa că cel mai bine este să îl execuți peste noapte.\n\nPentru a începe, te rog să urmezi aceste instrucțiuni:\n\n1. Sincronizează-ți toate dispozitivele.\n2. Fă clic pe „%s”.\n3. Lasă-l să se execute pînă la finalizare. În timp ce se execută, evită să modifici orice notiță pe celelalte dispozitive, pentru a evita conflictele.\n4. Odată ce sincronizarea este finalizată pe acest dispozitiv, sincronizează toate celelalte dispozitive și las-o să se execute pînă la finalizare.\n\nImportant: nu trebuie să execuți acest lucru decît O SINGURĂ dată pe un singur dispozitiv."
@@ -1737,7 +1767,7 @@
 		"Sarcini de făcut incomplete"
 	],
 	"Increase indent level": [
-		"Creșteți nivelul de indentare"
+		"Mărește nivelul de indentare"
 	],
 	"Indent less": [
 		"Indentează la stînga"
@@ -1755,7 +1785,7 @@
 		"Inline Cod"
 	],
 	"Insert": [
-		"Inserați"
+		"Inserează"
 	],
 	"Insert Hyperlink": [
 		"Inserează hyperlink"
@@ -1815,7 +1845,7 @@
 		"Elemente care nu pot fi decriptate"
 	],
 	"Items that cannot be synchronised": [
-		"Elementele nu pot fi sincronizați"
+		"Elementele nu pot fi sincronizate"
 	],
 	"Items with error: %s": [
 		"Elemente cu eroarea: %s"
@@ -1959,9 +1989,9 @@
 		"Descriere legătură"
 	],
 	"Link has been copied to clipboard!": [
-		"Legătura a fost copiată în clipboard!",
-		"Legăturile au fost copiate în clipboard!",
-		"Legăturile au fost copiate în clipboard!"
+		"Legătura a fost copiată în Clipboard!",
+		"Legăturile au fost copiate în Clipboard!",
+		"Legăturile au fost copiate în Clipboard!"
 	],
 	"Link text": [
 		"Text legătură"
@@ -2045,10 +2075,10 @@
 		"Editor Markdown"
 	],
 	"Marks a to-do as done.": [
-		"Marcați o sarcină ca fiind terminată."
+		"Marchează o sarcină ca fiind terminată."
 	],
 	"Marks a to-do as non-completed.": [
-		"Marcați o sarcină ca fiind necompletă."
+		"Marchează o sarcină ca fiind neterminată."
 	],
 	"Markup": [
 		"Markup"
@@ -2063,7 +2093,7 @@
 		"Parola principală:"
 	],
 	"match case": [
-		"potrivește mărimea"
+		"sensibil la verzale"
 	],
 	"Math": [
 		"Matematică"
@@ -2117,10 +2147,15 @@
 		"Informații suplimentare"
 	],
 	"More than one item match \"%s\". Please narrow down your query.": [
-		"Mai multe elemente se potrivesc cu „%s\". Te rog să restrîngeți interogarea."
+		"Mai multe elemente se potrivesc cu „%s\". Te rog să restrîngi interogarea."
 	],
 	"Most plugins have source code available for review on the plugin website.": [
 		"Majoritatea plugin-urilor au codul sursă disponibil pentru revizuire pe website-ul plugin-ului."
+	],
+	"Move %d note to notebook \"%s\"?": [
+		"Muți %d notiță în caietul „%s”?",
+		"Muți %d notițe în caietul „%s”?",
+		"Muți %d de notițe în caietul „%s”?"
 	],
 	"Move down": [
 		"Mută în jos"
@@ -2189,7 +2224,7 @@
 		"Profil nou"
 	],
 	"New sub-notebook": [
-		"Secțiune nouă"
+		"Sub-caiet nou"
 	],
 	"New tags:": [
 		"Etichete noi:"
@@ -2204,7 +2239,7 @@
 		"următoarea"
 	],
 	"Next match": [
-		"Next match"
+		"Următoarea potrivire"
 	],
 	"Nextcloud": [
 		"Nextcloud"
@@ -2399,7 +2434,7 @@
 		"Una dintre cheile dvs. master utilizează o metodă de criptare învechită."
 	],
 	"One or more items are currently encrypted and you may need to supply a master password. To do so please type `e2ee decrypt`. If you have already supplied the password, the encrypted items are being decrypted in the background and will be available soon.": [
-		"Unul sau mai multe elemente sînt criptate în prezent și este posibil să fie necesar să furnizați o parolă master. Pentru a face acest lucru, te rog să tastați `e2ee decriptare`. Dacă ați furnizat deja parola, elementele criptate sînt decriptate în fundal și vor fi disponibile în curînd."
+		"Unul sau mai multe elemente sînt criptate și este posibil să fie necesar să furnizezi o parolă master. Pentru a face acest lucru, te rog să tastezi `e2ee decrypt`. Dacă ai furnizat deja parola, elementele criptate sînt decriptate în fundal și vor fi disponibile în curînd."
 	],
 	"One or more master keys need a password.": [
 		"Una sau mai multe chei master au nevoie de o parolă."
@@ -2518,6 +2553,9 @@
 	"PDF File": [
 		"Fișier PDF"
 	],
+	"Per user. Minimum of 2 users.": [
+		"Per utilizator. Minim 2 utilizatori."
+	],
 	"Permanently delete note": [
 		"Șterge notița permanent"
 	],
@@ -2526,6 +2564,11 @@
 	],
 	"Permanently delete notebook \"%s\"?\n\nAll notes and sub-notebooks within this notebook will be permanently deleted.": [
 		"Ștergi caietul „%s” permanent?\n\nToate notițele și secțiunile din acest caiet vor fi șterse permanent."
+	],
+	"Permanently delete this note?": [
+		"Ștergi permanent această notiță?",
+		"Ștergi permanent aceste %d notițe?",
+		"Ștergi permanent aceste %d de notițe?"
 	],
 	"Permanently deletes the notebook, skipping the trash.": [
 		"Șterge permanent caietul, omițînd coșul."
@@ -2633,19 +2676,19 @@
 		"Păstrează culorile la lipirea textului în editorul de text îmbogățit"
 	],
 	"Press Ctrl+D or type \"exit\" to exit the application": [
-		"Apăsați Ctrl+D ori scrieți \"exit\" pentru a ieși din aplicație"
+		"Apasă Ctrl+D sau tastează „exit” pentru a ieși din aplicație"
 	],
 	"Press the shortcut": [
-		"Apăsați comanda rapidă"
+		"Apasă scurtătura"
 	],
 	"Press the shortcut and then press ENTER. Or, press BACKSPACE to clear the shortcut.": [
-		"Apăsați comanda rapidă și apoi apăsați ENTER. Sau apăsați BACKSPACE pentru a șterge comanda rapidă."
+		"Apasă scurtătura și apoi apasă ENTER. Sau apasă BACKSPACE pentru a șterge scurtătura."
 	],
 	"Press to set the decryption password.": [
-		"Apăsați pentru a seta parola de decriptare."
+		"Apasă pentru a seta parola de decriptare."
 	],
 	"previous": [
-		"anterior"
+		"anterioara"
 	],
 	"Previous match": [
 		"Potrivirea anterioară"
@@ -2729,19 +2772,19 @@
 		"Descarcă din nou modelul"
 	],
 	"Re-encrypt data": [
-		"Re-criptați datele"
+		"Re-criptează datele"
 	],
 	"Re-encryption": [
 		"Re-criptare"
 	],
 	"Re-enter password": [
-		"Introdu parola din nou"
+		"Întrodu parola din nou"
 	],
 	"Re-upload local data to sync target": [
 		"Reîncărcarea datelor locale către destinația de sincronizare"
 	],
 	"Read more about it": [
-		"Citiți mai multe despre aceasta"
+		"Citește mai multe despre acestea"
 	],
 	"Read time: %s min": [
 		"Durata lecturii: %s min"
@@ -2819,10 +2862,10 @@
 		"Înlocuiește"
 	],
 	"replace all": [
-		"înlocuiește tot"
+		"înlocuiește toate"
 	],
 	"Replace all": [
-		"Înlocuiește tot"
+		"Înlocuiește toate"
 	],
 	"Replace with...": [
 		"Înlocuiește cu…"
@@ -2906,7 +2949,7 @@
 		"Afișează fișierul în dosar"
 	],
 	"Reverse sort order": [
-		"Inversați ordinea sortării"
+		"Inversează ordinea sortării"
 	],
 	"Reverses the sorting order.": [
 		"Inversează ordinea sortării."
@@ -3008,7 +3051,7 @@
 		"Vezi lista de schimbări"
 	],
 	"See the pre-release page for more details: %s": [
-		"Pentru mai multe detalii, consultați pagina de pre-reluase: %s"
+		"Pentru mai multe detalii, consultă pagina de pre-release: %s"
 	],
 	"Select": [
 		"Selectează"
@@ -3032,7 +3075,7 @@
 		"Selectează un caiet"
 	],
 	"Send bug report": [
-		"Trimiteți un raport de eroare"
+		"Trimite un raport de eroare"
 	],
 	"Server is already running on port %d": [
 		"Serverul rulează deja pe portul %d"
@@ -3065,7 +3108,7 @@
 		"Distribuie"
 	],
 	"Share a copy of all notes in a file format that can be imported by Joplin on a computer.": [
-		"Partajați o copie a tuturor notițelor într-un format de fișier care poate fi importat de Joplin pe un computer."
+		"Partajează o copie a tuturor notițelor într-un format de fișier care poate fi importat de Joplin pe un calculator."
 	],
 	"Share a notebook with others": [
 		"Partajează un caiet cu alții"
@@ -3148,6 +3191,9 @@
 	"Sidebar": [
 		"Panou lateral"
 	],
+	"Sign up to Joplin Cloud": [
+		"Creează cont Joplin Cloud"
+	],
 	"Size": [
 		"Mărime"
 	],
@@ -3182,7 +3228,7 @@
 		"Unele elemente nu pot fi sincronizate."
 	],
 	"Some items cannot be synchronised. Press for more info.": [
-		"Unele elemente nu pot fi sincronizate. Apăsați pentru mai multe informații."
+		"Unele elemente nu pot fi sincronizate. Apasă pentru mai multe informații."
 	],
 	"Some items could not be synchronised. Please try to synchronise them first.": [
 		"Unele elemente nu au putut fi sincronizate. Te rog încearcă să le sincronizezi mai întîi."
@@ -3242,7 +3288,7 @@
 		"Se începe sincronizarea..."
 	],
 	"Starting to edit note. Close the editor to get back to the prompt.": [
-		"Începere să editeze nota. Închideți editorul pentru a reveni la prompt."
+		"Se începe editarea notiței. Închide editorul pentru a reveni la prompt."
 	],
 	"Statistics": [
 		"Statistici"
@@ -3263,10 +3309,10 @@
 		"Pasul 1: Activează clipper service"
 	],
 	"Step 1: Open this URL in your browser to authorise the application:": [
-		"Pasul 1: Deschideți adresa URL în navigatorul dumneavoastră web pentru a autoriza aplicația:"
+		"Pasul 1: Deschide adresa URL în navigatorul tău web pentru a autoriza aplicația:"
 	],
 	"Step 2: Enter the code provided by Dropbox:": [
-		"Pasul 2: Introdu codul oferit de Dropbox:"
+		"Pasul 2: Întrodu codul oferit de Dropbox:"
 	],
 	"Step 2: Install the extension": [
 		"Pasul 2: Instalează extensia"
@@ -3323,10 +3369,10 @@
 		"Comută la camera din față"
 	],
 	"Switch to note type": [
-		"Comută la tipul de notiță"
+		"Comută la tipul „notiță”"
 	],
 	"Switch to profile %d": [
-		"Treceți la profilul %d"
+		"Comută la profilul %d"
 	],
 	"Switch to the %s Editor": [
 		"Comută la editorul %s"
@@ -3335,13 +3381,13 @@
 		"Comută la editorul învechit"
 	],
 	"Switch to to-do type": [
-		"Treceți la tipul to-do"
+		"Comută la tipul „de făcut”"
 	],
 	"Switches to [notebook] - all further operations will happen within this notebook.": [
 		"Comută la [notebook] - toate operațiunile ulterioare vor avea loc în acest caiet."
 	],
 	"Sync as many devices as you want": [
-		"Sincronizați cît de multe dispozitive doriți"
+		"Sincronizează cît de multe dispozitive dorești"
 	],
 	"Sync Status": [
 		"Sync Status"
@@ -3350,13 +3396,13 @@
 		"Starea de sincronizare (elemente sincronizate / total elemente)"
 	],
 	"Sync target must be upgraded! Run `%s` to proceed.": [
-		"Obiectivul de sincronizare trebuie să fie actualizat! Rulați `%s` pentru a continua."
+		"Destinația de sincronizare trebuie să fie actualizată! Rulează `%s` pentru a continua."
 	],
 	"Sync Target Upgrade": [
 		"Sync Target Upgrade"
 	],
 	"Sync to provided target (defaults to sync.target config value)": [
-		"Sincronizarea cu o ținta specificată (presetat la valoare de configurare sync.target)"
+		"Sincronizarea cu o destinație specificată (presetat la valoarea de configurare sync.target)"
 	],
 	"Sync Version: %s": [
 		"Versiunea de sincronizare: %s"
@@ -3380,10 +3426,10 @@
 		"Starea sincronizării"
 	],
 	"Synchronisation target": [
-		"Țintă de sincronizare"
+		"Destinație sincronizare"
 	],
 	"Synchronisation target: %s (%s)": [
-		"Țintă sincronizare: %s (%s)"
+		"Destinație sincronizare: %s (%s)"
 	],
 	"Synchronise": [
 		"Sincronizează"
@@ -3443,13 +3489,13 @@
 		"[Web Clipper](%s) este o extensie pentru navigatorul web care îți permite să salvezi pagini web și capturi de ecran direct din acesta."
 	],
 	"The active profile cannot be deleted. Switch to a different profile and try again.": [
-		"Profilul activ nu poate fi șters. Treceți la un alt profil și încercați din nou."
+		"Profilul activ nu poate fi șters. Comută la un alt profil și încearcă din nou."
 	],
 	"The app is now going to close. Please relaunch it to complete the process.": [
-		"Aplicația se va închide acum. Te rog să o relansați pentru a finaliza procesul."
+		"Aplicația se va închide acum. Te rog să o lansezi din nou pentru a finaliza procesul."
 	],
 	"The application did not close properly. Would you like to start in safe mode?": [
-		"Aplicația nu s-a închis corect. Doriți să porniți în modul sigur?"
+		"Aplicația nu s-a închis corect. Dorești să o pornești în modul sigur?"
 	],
 	"The application has been authorised - you may now close this browser tab.": [
 		"Aplicația a fost autorizată - acum poți închide această fereastră browserului."
@@ -3464,7 +3510,7 @@
 		"Aplicația trebuie repornită pentru ca aceste modificări să intre în vigoare."
 	],
 	"The attachments will no longer be watched when you switch to a different note.": [
-		"Atașamentele nu vor mai fi urmărite atunci cînd treceți la o altă notă."
+		"Atașamentele nu vor mai fi urmărite atunci cînd treci la o altă notiță."
 	],
 	"The command \"%s\" is only available in GUI mode": [
 		"Comanda „%s” este disponibilă doar în modul GUI"
@@ -3473,10 +3519,10 @@
 		"Parola implicită a administratorului este nesigură și nu a fost schimbată! [Change it now](%s)"
 	],
 	"The default encryption method has been changed to a more secure one and it is recommended that you apply it to your data.": [
-		"Metoda implicită de criptare a fost schimbată într-una mai sigură și se recomandă să o aplicați datelor dumnevoastră."
+		"Metoda implicită de criptare a fost schimbată într-una mai sigură și se recomandă să o aplici datelor tale."
 	],
 	"The default encryption method has been changed, you should re-encrypt your data.": [
-		"Metoda implicită de criptare a fost modificată, ar trebui să vă criptați din nou datele."
+		"Metoda implicită de criptare a fost modificată, ar trebui să îți criptezi din nou datele."
 	],
 	"The default profile cannot be deleted": [
 		"Profilul implicit nu poate fi șters"
@@ -3485,12 +3531,12 @@
 		"Comanda editorului (poate include argumente) care va fi utilizată pentru a deschide o notă. Dacă nu este furnizat niciunul, se va încerca să se detecteze automat editorul implicit."
 	],
 	"The factor property sets how the item will grow or shrink to fit the available space in its container with respect to the other items. Thus an item with a factor of 2 will take twice as much space as an item with a factor of 1.Restart app to see changes.": [
-		"Proprietatea factor stabilește modul în care elementul va crește sau se va micșora pentru a se potrivi spațiului disponibil în containerul său în raport cu celelalte elemente. Astfel, un element cu un factor de 2 va ocupa de două ori mai mult spațiu decît un element cu un factor de 1. Reporniți aplicația pentru a vedea modificările."
+		"Proprietatea factor stabilește modul în care elementul va crește sau se va micșora pentru a se potrivi spațiului disponibil în containerul său în raport cu celelalte elemente. Astfel, un element cu un factor de 2 va ocupa de două ori mai mult spațiu decît un element cu un factor de 1. Repornește aplicația pentru a vedea modificările."
 	],
 	"The following attachment matches your search query:": [
-		"Următorul atașament corespunde căutării dumneavoastră:",
-		"Următoarele atașamente corespund căutării dumneavoastră:",
-		"Următoarele atașamente corespund căutării dumneavoastră:"
+		"Următorul atașament corespunde căutării tale:",
+		"Următoarele atașamente corespund căutării tale:",
+		"Următoarele atașamente corespund căutării tale:"
 	],
 	"The following attachments are being watched for changes:": [
 		"Următoarele atașamente sînt urmărite pentru modificări:"
@@ -3534,25 +3580,25 @@
 		"Comenzile posibile sînt:"
 	],
 	"The recipient could not be removed from the list. Please try again.\n\nThe error was: \"%s\"": [
-		"Destinatarul nu a putut fi eliminat din listă. Te rog să încercați din nou.\n\nEroarea a fost: „%s”"
+		"Destinatarul nu a putut fi eliminat din listă. Te rog să încerci din nou.\n\nEroarea a fost: „%s”"
 	],
 	"The sync target cannot be changed for the following reason: %s\n\nIf the issue cannot be resolved, you may need to clear your data first by following these instructions:\n\n%s": [
-		"Ținta sincronizării nu poate fi schimbată din următorul motiv: %s\n\nDacă problema nu poate fi rezolvată, va trebui să cureți datele mai întîi, urmînd următoarele instrucțiuni:\n\n%s"
+		"Destinația de sincronizare nu poate fi schimbată din următorul motiv: %s\n\nDacă problema nu poate fi rezolvată, va trebui să cureți datele mai întîi, urmînd următoarele instrucțiuni:\n\n%s"
 	],
 	"The sync target needs to be upgraded before Joplin can sync. The operation may take a few minutes to complete and the app needs to be restarted. To proceed please click on the link.": [
 		"Destinația de sincronizare trebuie să fie actualizată înainte ca Joplin să se poată sincroniza. Este posibil ca operațiunea să dureze cîteva minute pentru a fi finalizată, iar aplicația trebuie repornită. Pentru a continua, te rog să faci clic pe legătură."
 	],
 	"The sync target needs to be upgraded. Press this banner to proceed.": [
-		"Destinația de sincronizare trebuie să fie actualizată. Apăsați acest banner pentru a continua."
+		"Destinația de sincronizare trebuie să fie actualizată. Apasă pe acest banner pentru a continua."
 	],
 	"The synchronisation password is missing.": [
 		"Lipsește parola de sincronizare."
 	],
 	"The tag \"%s\" already exists. Please choose a different name.": [
-		"Eticheta „%s” există deja. Te rog să alegeți un alt nume."
+		"Eticheta „%s” există deja. Te rog să alegi un alt nume."
 	],
 	"The target to synchronise to. Each sync target may have additional parameters which are named as `sync.NUM.NAME` (all documented below).": [
-		"Ținta la care se sincronizează. Fiecare țintă de sincronizare poate avea parametri suplimentari care sînt numiți `sync.NUM.NAME` (toți documentați mai jos)."
+		"Destinația la care se sincronizează. Fiecare destinație de sincronizare poate avea parametri suplimentari care sînt numiți `sync.NUM.NAME` (toți documentați mai jos)."
 	],
 	"The web client does not support accepting encrypted shared notebooks. Please switch to the desktop or mobile app before accepting the share.\n\nError: \"%s\"": [
 		"Acceptarea caietelor partajate criptate din clientul web nu este suportată . Te rog comută la aplicația Desktop sau mobilă înainte de a accepta caietul partajat.\n\nEroare: „%s”"
@@ -3570,7 +3616,7 @@
 		"Serviciul web clipper nu este activat."
 	],
 	"The WebDAV implementation of %s is incompatible with Joplin, and as such is no longer supported. Please use a different sync method.": [
-		"Implementarea WebDAV a lui %s este incompatibilă cu Joplin și, ca atare, nu mai este susținută. Te rog să folosiți o altă metodă de sincronizare."
+		"Implementarea WebDAV a lui %s este incompatibilă cu Joplin și, ca atare, nu mai este suportată. Te rog să folosești o altă metodă de sincronizare."
 	],
 	"Theme": [
 		"Temă"
@@ -3600,7 +3646,7 @@
 		"Sincronizarea acestor elemente a eșuat și au fost marcate ca „ignorate”. Astfel ele nu vor mai cauza apariția atenționărilor de sincronizare, dar nici nu vor fi sincronizate. Pentru a nu le marca ca ignorate, apară pe „reîncearcă”."
 	],
 	"These items will remain on the device but will not be uploaded to the sync target. In order to find these items, either search for the title or the ID (which is displayed in brackets above).": [
-		"Aceste elemente vor rămîne pe dispozitiv, dar nu vor fi încărcate pe obiectivul de sincronizare. Pentru a găsi aceste elemente, căutați fie titlul, fie ID-ul (care este afișat în paranteze mai sus)."
+		"Aceste elemente vor rămîne pe dispozitiv, dar nu vor fi încărcate în destinația de sincronizare. Pentru a găsi aceste elemente, caută fie titlul, fie ID-ul (care este afișat în paranteze mai sus)."
 	],
 	"These plugins enhance the Markdown renderer with additional features. Please note that, while these features might be useful, they are not standard Markdown and thus most of them will only work in Joplin. Additionally, some of them are *incompatible* with the WYSIWYG editor. If you open a note that uses one of these plugins in that editor, you will lose the plugin formatting. It is indicated below which plugins are compatible or not with the WYSIWYG editor.": [
 		"Aceste plugin-uri îmbunătățesc funcția de redare Markdown cu caracteristici suplimentare. Te rog să reții că, deși aceste caracteristici ar putea fi utile, ele nu sînt Markdown standard și, prin urmare, cele mai multe dintre ele vor funcționa numai în Joplin. În plus, unele dintre ele sînt *incompatibile* cu editorul WYSIWYG. Dacă deschizi o notiță care utilizează unul dintre aceste plugin-uri în acel editor, vei pierde formatarea plugin-ului. Mai jos este indicat ce plugin-uri sînt compatibile sau nu cu editorul WYSIWYG."
@@ -3621,22 +3667,22 @@
 		"Acest desen poate avea modificări nesalvate."
 	],
 	"This is an advanced tool to show the attachments that are linked to your notes. Please be careful when deleting one of them as they cannot be restored afterwards.": [
-		"Acesta este un instrument avansat pentru a afișa atașamentele care sînt legate de notele dumnevoastră. Te rog să fiți atenți la ștergerea uneia dintre ele, deoarece acestea nu pot fi restaurate ulterior."
+		"Acesta este un instrument avansat pentru a afișa atașamentele care sînt legate de notele dumnevoastră. Te rog să fii atent la ștergerea uneia dintre ele, deoarece acestea nu pot fi restaurate ulterior."
 	],
 	"This note could not be deleted: %s": [
-		"Acest fișier nu a putut fi deschis: %s",
-		"Acest fișier nu a putut fi deschis: %s",
-		"Această notiță nu a putut fi ștearsă: %s"
+		"Această notiță nu a putut fi ștearsă: %s",
+		"Aceste notiție nu au putut fi șterse: %s",
+		"Aceste notițe nu au putut fi șterse: %s"
 	],
 	"This note could not be duplicated: %s": [
-		"Aceste notițe nu pot fi duplicate: %s",
-		"Caietul de notițe nu a puut fi salvat: %s",
-		"Caietul de notițe nu a puut fi salvat: %s"
+		"Această notiță nu a putut fi duplicată: %s",
+		"Aceste notițe nu au putut fi duplicate: %s",
+		"Aceste notițe nu au putut fi duplicate: %s"
 	],
 	"This note could not be moved: %s": [
-		"Aceste notițe nu pot fi mutate: %s",
-		"Caietul de notițe nu a puut fi salvat: %s",
-		"Caietul de notițe nu a puut fi salvat: %s"
+		"Această notiță nu a putut fi mutată: %s",
+		"Aceste notițe nu au putut fi mutate: %s",
+		"Aceste notițe nu au putut fi mutate: %s"
 	],
 	"This note does not have geolocation information.": [
 		"Această notă nu conține informații despre geolocalizare."
@@ -3654,7 +3700,7 @@
 		"Acest plugin nu suportă %s."
 	],
 	"This Rich Text editor has a number of limitations and it is recommended to be aware of them before using it.": [
-		"Acest editor Rich Text are o serie de limitări și este recomandat să le cunoașteți înainte de a-l utiliza."
+		"Acest editor de text îmbogățit are o serie de limitări și este recomandat să le cunoști înainte de a-l utiliza."
 	],
 	"This service allows the browser extension to communicate with Joplin. When enabling it your firewall may ask you to give permission to Joplin to listen to a particular port.": [
 		"Acest serviciu permite extensia browserul-ui pentru a comunica cu Joplin. Atunci cînd se permite firewall poate cere să dea permisiunea Joplin pentru a asculta un anumit port."
@@ -3666,7 +3712,7 @@
 		"Acest lucru va permite ca Joplin să ruleze în fundal. Se recomandă să  această setare pentru ca notele dvs. să fie sincronizate în mod constant, reducînd astfel numărul de conflicte."
 	],
 	"This will open a new screen. Save your current changes?": [
-		"Se va deschide un nou ecran. Doriți să salvați modificările dumnevoastră actuale?"
+		"Se va deschide un nou ecran. Dorești să îți salvezi modificările actuale?"
 	],
 	"This will permanently delete all items in the trash. Continue?": [
 		"Acest lucru va șterge permanent toate elementele din coșul de gunoi. Continui?"
@@ -3702,7 +3748,7 @@
 		"Pentru a intra în linia de comandă, tastează „:”"
 	],
 	"To exit command line mode, press ESCAPE": [
-		"Pentru a ieși din modul linie de comandă, apăsați ESCAPE"
+		"Pentru a ieși din modul linie de comandă, apasă ESCAPE"
 	],
 	"To manually sort the notes, the sort order must be changed to \"%s\" in the menu \"%s\" > \"%s\"": [
 		"Pentru a sorta notițele manual, ordinea trebuie sa fie schimbată în „%s” în meniu „%s” > „%s”"
@@ -3711,10 +3757,10 @@
 		"Pentru a maximiza/minimiza consola, tastează „tc”."
 	],
 	"To move from one pane to another, press Tab or Shift+Tab.": [
-		"Pentru a vă muta dintr-un panou în altul, apăsați Tab ori Shift+Tab."
+		"Pentru a te muta dintr-un panou în altul, apasă Tab sau Shift+Tab."
 	],
 	"To retry decryption of these items. Run `e2ee decrypt --retry-failed-items`": [
-		"Pentru a reîncerca decriptarea acestor elemente. Rulați `e2ee decrypt --retry-failed-items`"
+		"Pentru a reîncerca decriptarea acestor elemente. Rulează `e2ee decrypt --retry-failed-items`"
 	],
 	"To switch the profile, the app is going to close and you will need to restart it.": [
 		"Pentru a schimba profilul, aplicația se va închide și va trebui să o reporniți."
@@ -3804,13 +3850,13 @@
 		"Încearcă acum"
 	],
 	"Type `help [command]` for more information about a command; or type `help all` for the complete usage information.": [
-		"Tastați `help [command]` pentru mai multe informații despre o comandă; sau tastați „help all\" pentru informații complete de utilizare."
+		"Tastează `help [command]` pentru mai multe informații despre o comandă; sau tastează `help all` pentru informații complete de utilizare."
 	],
 	"Type `joplin help` for usage information.": [
-		"Tastați `joplin help` pentru informații de utilizare."
+		"Tastează `joplin help` pentru informații de utilizare."
 	],
 	"Type a note title or part of its content to jump to it. Or type # followed by a tag name, or @ followed by a notebook name. Or type : to search for commands.": [
-		"Tastați titlul unei notițe sau o parte din conținutul acesteia pentru a trece la ea. Sau tastați # urmat de numele unei etichete sau @ urmat de numele unui caiet. Sau tastați : pentru a căuta comenzi."
+		"Tastează titlul unei notițe sau o parte din conținutul acesteia pentru a trece la ea. Sau tastează # urmat de numele unei etichete sau @ urmat de numele unui caiet. Sau tastează : pentru a căuta comenzi."
 	],
 	"Type a note title to search for it.": [
 		"Tastează un titlu de notiță pentru a-l căuta."
@@ -3849,7 +3895,7 @@
 		"Unknown flag: %s"
 	],
 	"Unknown item type downloaded - please upgrade Joplin to the latest version": [
-		"Tip de element necunoscut descărcat - te rog să actualizați Joplin la cea mai recentă versiune"
+		"Tip de element necunoscut descărcat - te rog să actualizezi Joplin la cea mai recentă versiune"
 	],
 	"Unknown platform": [
 		"Platformă necunoscută"
@@ -3921,7 +3967,7 @@
 		"Actualizare majoră"
 	],
 	"Upgrade the sync target to the latest version.": [
-		"Actualizează ținta de sincronizare la cea mai recentă versiune."
+		"Actualizează destinația de sincronizare la cea mai recentă versiune."
 	],
 	"URL": [
 		"URL"
@@ -3942,7 +3988,7 @@
 		"Folosește săgețile și tastele „page up/down” pentru a derula listele și zonele de text (inclusiv această consolă)."
 	],
 	"Use the arrows to move the layout items. Press \"Escape\" to exit.": [
-		"Folosiți săgețile pentru a muta elementele de prezentare. Apăsați “Escape” pentru a ieși."
+		"Folosește săgețile pentru a muta elementele de aspect. Apasă „Escape” pentru a ieși."
 	],
 	"Use the legacy Markdown editor": [
 		"Folosește editorul Markdown învechit"
@@ -3951,7 +3997,7 @@
 		"Folosește această opțiune pentru a reconstrui indexul de căutare dacă există o problemă cu căutarea. Poate dura mult timp, în funcție de numărul de notițe."
 	],
 	"Use your biometrics to secure access to your application. You can always set it up later in Settings.": [
-		"Folosiți datele biometrice pentru a securiza accesul la aplicația dvs. Puteți oricînd să o configurați mai tîrziu în Setări."
+		"Folosește datele biometrice pentru a securiza accesul la aplicație. Poți oricînd să le configurezi mai tîrziu în Setări."
 	],
 	"Used for most text in the markdown editor. If not found, a generic proportional (variable width) font is used.": [
 		"Folosit pentru majoritatea textului din editorul markdown. Dacă nu se găsește, se utilizează un font generic proporțional (cu lățime variabilă)."
@@ -3969,7 +4015,7 @@
 		"Valid"
 	],
 	"Verify your identity": [
-		"Verificați identitatea dumneavoastră"
+		"Verifică-ți identitatea"
 	],
 	"View": [
 		"Vizualizează"
@@ -4059,7 +4105,7 @@
 		"Cînd este creată o nouă listă de făcut:"
 	],
 	"When enabled, the application will scan your attachments and extract the text from it. This will allow you to search for text in these attachments.": [
-		"Atunci cînd este activată, aplicația va scana atașamentele și va extrage textul din ele. Acest lucru vă va permite să căutați text în aceste atașamente."
+		"Atunci cînd este activată, aplicația va scana atașamentele și va extrage textul din ele. Acest lucru îți va permite să cauți text în atașamente."
 	],
 	"Whisper": [
 		"Whisper"
@@ -4083,7 +4129,7 @@
 		"Da"
 	],
 	"You are about to attach a large image (%dx%d pixels). Would you like to resize it down to %d pixels before attaching it?": [
-		"Ești pe cale să atașezi o imagine mare (%dx%d pixeli). Doriți să îl redimensionați pînă la %d pixeli înainte de a-l atașa?"
+		"Ești pe cale să atașezi o imagine mare (%dx%d pixeli). Dorești să o redimensionezi la %d pixeli înainte de a o atașa?"
 	],
 	"You are logged in into Joplin Cloud, you can leave this screen now.": [
 		"Ești autentificat la Joplin Cloud, poți acum să părăsești acest ecran."
@@ -4092,16 +4138,16 @@
 		"Rulezi versiunea Intel a Joplin pe un procesor cu siliciu Apple. Descarcă versiunea pentru procesoare Apple pentru o performanță mai mare."
 	],
 	"You currently have no notebooks.": [
-		"Nu aveți niciun caiet de notițe activ."
+		"Nu ai niciun caiet de notițe."
 	],
 	"You do not have any installed plugin.": [
-		"Nu aveți niciun plugin instalat."
+		"Nu ai niciun plugin instalat."
 	],
 	"You may also type `status` for more information.": [
 		"De asemenea, poți tasta `status` pentru mai multe informații."
 	],
 	"You may use the tool below to re-encrypt your data, for example if you know that some of your notes are encrypted with an obsolete encryption method.": [
-		"Puteți utiliza instrumentul de mai jos pentru a vă cripta din nou datele, de exemplu, dacă știți că unele note sînt criptate cu o metodă de criptare învechită."
+		"Poți utiliza instrumentul de mai jos pentru a îți cripta din nou datele, de exemplu, dacă știi că unele notițe sînt criptate cu o metodă de criptare învechită."
 	],
 	"You were unable to connect to Joplin Cloud. Please check your credentials and try again. Error:": [
 		"Nu ai putut să te conectezi la Joplin Cloud. Te rog verifică-ți datele de conectare și încearcă din nou. Eroare:"

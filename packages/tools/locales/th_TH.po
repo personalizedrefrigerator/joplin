@@ -57,7 +57,7 @@ msgid "(wysiwyg: %s)"
 msgstr ""
 
 #: packages/app-mobile/components/screens/Note/Note.tsx:757
-#: packages/lib/shim-init-node.ts:273
+#: packages/lib/shim-init-node.ts:277
 msgid "(You may disable this prompt in the options)"
 msgstr ""
 
@@ -217,7 +217,7 @@ msgstr "สร้างบันทึกใหม่"
 msgid "%s cannot be less than %s"
 msgstr ""
 
-#: packages/app-desktop/gui/SyncWizard/Dialog.tsx:231
+#: packages/app-desktop/gui/SyncWizard/Dialog.tsx:237
 msgid ""
 "%s is not optimised for synchronising many small files so your initial "
 "synchronisation will be slow."
@@ -376,7 +376,7 @@ msgid "Add body"
 msgstr "เพิ่มเนื้อความ"
 
 #: packages/app-mobile/components/buttons/FloatingActionButton.tsx:64
-#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:127
+#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:130
 #, fuzzy
 msgid "Add new"
 msgstr "เพิ่มชื่อเรื่อง"
@@ -601,7 +601,7 @@ msgstr "แนบไฟล์ที่ถูกเลือกกับบัน
 msgid "attachment"
 msgstr "ไฟล์แนบ"
 
-#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:69
+#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:72
 #, fuzzy
 msgid "Attachment"
 msgstr "ไฟล์แนบ"
@@ -642,7 +642,7 @@ msgstr "การขออนุมัติไม่สมบูรณ์ (ไ�
 msgid "Authorisation token:"
 msgstr "Token สำหรับการขออนุมัติ:"
 
-#: packages/app-desktop/gui/JoplinCloudLoginScreen.tsx:88
+#: packages/app-desktop/gui/JoplinCloudLoginScreen.tsx:89
 #: packages/app-mobile/components/screens/JoplinCloudLoginScreen.tsx:162
 #, fuzzy
 msgid "Authorise"
@@ -735,7 +735,7 @@ msgstr ""
 msgid "by word"
 msgstr ""
 
-#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:71
+#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:74
 msgid "Camera"
 msgstr ""
 
@@ -781,7 +781,7 @@ msgstr ""
 #: packages/app-mobile/components/voiceTyping/AudioRecordingBanner.tsx:202
 #: packages/app-mobile/utils/makeShowMessageBox.ts:16
 #: packages/lib/commands/permanentlyDeleteNote.ts:21
-#: packages/lib/shim-init-node.ts:274
+#: packages/lib/shim-init-node.ts:278
 msgid "Cancel"
 msgstr "ยกเลิก"
 
@@ -805,7 +805,7 @@ msgstr "กำลังยกเลิก..."
 msgid "Cancelling... Please wait."
 msgstr "กำลังยกเลิก... โปรดรอสักครู่..."
 
-#: packages/lib/shim-init-node.ts:334
+#: packages/lib/shim-init-node.ts:338
 msgid "Cannot access %s"
 msgstr "ไม่สามารถเข้าถึง %s"
 
@@ -935,7 +935,7 @@ msgstr "ตัวอักษร"
 msgid "Characters excluding spaces"
 msgstr "ตัวอักษรไม่รวมวรรค"
 
-#: packages/app-desktop/gui/SyncWizard/Dialog.tsx:163
+#: packages/app-desktop/gui/SyncWizard/Dialog.tsx:164
 #, fuzzy
 msgid "Check"
 msgstr "ช่องทำเครื่องหมาย"
@@ -1026,7 +1026,7 @@ msgstr "ปิด"
 #: packages/app-desktop/gui/NoteContentPropertiesDialog.tsx:175
 #: packages/app-desktop/gui/ShareFolderDialog/ShareFolderDialog.tsx:411
 #: packages/app-desktop/gui/ShareNoteDialog.tsx:223
-#: packages/app-desktop/gui/SyncWizard/Dialog.tsx:308
+#: packages/app-desktop/gui/SyncWizard/Dialog.tsx:315
 #: packages/app-desktop/services/plugins/UserWebviewDialogButtonBar.tsx:23
 #: packages/app-mobile/components/DismissibleDialog.tsx:83
 #: packages/app-mobile/components/NoteEditor/ImageEditor/ImageEditor.tsx:166
@@ -1093,7 +1093,7 @@ msgstr "Code"
 msgid "Collaborate on a notebook with others"
 msgstr "โปรดสร้างสมุดบันทึกก่อน"
 
-#: packages/app-desktop/gui/SyncWizard/Dialog.tsx:175
+#: packages/app-desktop/gui/SyncWizard/Dialog.tsx:176
 #, fuzzy
 msgid "Collaborate on notebooks with others"
 msgstr "โปรดสร้างสมุดบันทึกก่อน"
@@ -1127,7 +1127,7 @@ msgstr ""
 msgid "Command"
 msgstr ""
 
-#: packages/app-desktop/plugins/GotoAnything.tsx:791
+#: packages/app-desktop/plugins/GotoAnything.tsx:783
 msgid "Command palette"
 msgstr ""
 
@@ -1293,7 +1293,7 @@ msgstr "คัดลอก Token"
 msgid "Copy Link Address"
 msgstr "คัดลอกที่อยู่ลิงก์"
 
-#: packages/app-desktop/gui/JoplinCloudLoginScreen.tsx:94
+#: packages/app-desktop/gui/JoplinCloudLoginScreen.tsx:95
 #: packages/app-mobile/components/screens/JoplinCloudLoginScreen.tsx:169
 #, fuzzy
 msgid "Copy link to website"
@@ -1458,7 +1458,7 @@ msgstr "สร้างเมื่อ: %d"
 msgid "Created: %s"
 msgstr "สร้างเมื่อ: %s"
 
-#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:62
+#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:65
 #, fuzzy
 msgid "Creates a new note with an attachment of type %s"
 msgstr "สร้างสมุดบันทึกใหม่"
@@ -1926,7 +1926,7 @@ msgid "Draw picture"
 msgstr ""
 
 #: packages/app-mobile/components/screens/Note/Note.tsx:917
-#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:72
+#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:75
 msgid "Drawing"
 msgstr ""
 
@@ -2687,7 +2687,7 @@ msgid "Go to source URL"
 msgstr "ไปที่ URL แหล่งที่มา"
 
 #: packages/app-desktop/gui/WindowCommandsAndDialogs/commands/gotoAnything.ts:18
-#: packages/app-desktop/plugins/GotoAnything.tsx:783
+#: packages/app-desktop/plugins/GotoAnything.tsx:775
 msgid "Goto Anything..."
 msgstr ""
 
@@ -3093,7 +3093,7 @@ msgstr "ข้อผิดพลาดล่าสุด: %s"
 msgid "Join us on %s"
 msgstr ""
 
-#: packages/app-desktop/gui/SyncWizard/Dialog.tsx:302
+#: packages/app-desktop/gui/SyncWizard/Dialog.tsx:309
 msgid ""
 "Joplin can synchronise your notes using various providers. Select one from "
 "the list below."
@@ -3667,8 +3667,8 @@ msgstr "มีอัพเดทใหม่ คุณต้องการด�
 #: packages/app-desktop/gui/NoteListControls/NoteListControls.tsx:112
 #: packages/app-desktop/gui/NoteListWrapper/NoteListWrapper.tsx:72
 #: packages/app-desktop/gui/WindowCommandsAndDialogs/commands/newNote.ts:10
-#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:105
-#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:94
+#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:108
+#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:97
 #: packages/app-mobile/setupQuickActions.ts:30
 msgid "New note"
 msgstr "สร้างบันทึกใหม่"
@@ -3709,8 +3709,8 @@ msgstr "แท็กใหม่:"
 #: packages/app-desktop/gui/NoteListControls/NoteListControls.tsx:122
 #: packages/app-desktop/gui/NoteListWrapper/NoteListWrapper.tsx:72
 #: packages/app-desktop/gui/WindowCommandsAndDialogs/commands/newTodo.ts:7
-#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:108
-#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:84
+#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:111
+#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:87
 #: packages/app-mobile/setupQuickActions.ts:31
 msgid "New to-do"
 msgstr "สร้าง to-do"
@@ -3750,7 +3750,7 @@ msgstr "n"
 
 #: packages/app-desktop/services/plugins/UserWebviewDialogButtonBar.tsx:22
 #: packages/app-mobile/components/screens/Note/Note.tsx:759
-#: packages/lib/shim-init-node.ts:274 packages/lib/versionInfo.ts:92
+#: packages/lib/shim-init-node.ts:278 packages/lib/versionInfo.ts:92
 msgid "No"
 msgstr "ไม่"
 
@@ -3824,7 +3824,7 @@ msgstr "Nord"
 msgid "Not authenticated with %s. Please provide any missing credentials."
 msgstr ""
 
-#: packages/app-desktop/gui/SyncWizard/Dialog.tsx:163
+#: packages/app-desktop/gui/SyncWizard/Dialog.tsx:164
 msgid "Not checked"
 msgstr ""
 
@@ -3943,7 +3943,7 @@ msgstr ""
 msgid "Note&book"
 msgstr "สมุดบันทึก"
 
-#: packages/app-desktop/plugins/GotoAnything.tsx:608
+#: packages/app-desktop/plugins/GotoAnything.tsx:600
 #: packages/lib/models/Setting.ts:1179
 #, fuzzy
 msgid "Notebook"
@@ -4557,7 +4557,7 @@ msgstr "แบ่งปันบันทึก..."
 msgid "Publish Notes"
 msgstr ""
 
-#: packages/app-desktop/gui/SyncWizard/Dialog.tsx:174
+#: packages/app-desktop/gui/SyncWizard/Dialog.tsx:175
 #: packages/lib/utils/joplinCloud/index.ts:153
 msgid "Publish notes to the internet"
 msgstr ""
@@ -4633,7 +4633,7 @@ msgstr ""
 msgid "Record audio"
 msgstr ""
 
-#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:70
+#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:73
 #, fuzzy
 msgid "Recording"
 msgstr "หัวข้อ"
@@ -4999,7 +4999,7 @@ msgstr "ค้นหาในบันทึกทั้งหมด"
 msgid "Search in current note"
 msgstr "ค้นหาในบันทึกปัจจุบัน"
 
-#: packages/app-desktop/plugins/GotoAnything.tsx:703
+#: packages/app-desktop/plugins/GotoAnything.tsx:695
 #, fuzzy
 msgid "Search results"
 msgstr "ไม่มีทรัพยากร"
@@ -5034,7 +5034,7 @@ msgstr "บันทึกการเปลี่ยนแปลง"
 msgid "See the pre-release page for more details: %s"
 msgstr ""
 
-#: packages/app-desktop/gui/SyncWizard/Dialog.tsx:205
+#: packages/app-desktop/gui/SyncWizard/Dialog.tsx:206
 #: packages/app-mobile/components/NoteItem.tsx:151
 #, fuzzy
 msgid "Select"
@@ -5265,6 +5265,11 @@ msgstr ""
 #: packages/app-mobile/components/ScreenHeader/index.tsx:264
 msgid "Sidebar"
 msgstr "แถบด้านข้าง"
+
+#: packages/app-desktop/gui/JoplinCloudSignUpCallToAction.tsx:15
+#, fuzzy
+msgid "Sign up to Joplin Cloud"
+msgstr "Joplin Forum"
 
 #: packages/app-desktop/gui/ResourceScreen.tsx:111
 msgid "Size"
@@ -5599,7 +5604,7 @@ msgstr ""
 msgid "Sync Version: %s"
 msgstr "ซิงค์เวอร์ชั่น: %s"
 
-#: packages/app-desktop/gui/SyncWizard/Dialog.tsx:173
+#: packages/app-desktop/gui/SyncWizard/Dialog.tsx:174
 #, fuzzy
 msgid "Sync your notes"
 msgstr "จัดเรียงบันทึกโดย"
@@ -6158,7 +6163,7 @@ msgid ""
 msgstr ""
 
 #: packages/app-cli/app/command-sync.ts:110
-#: packages/app-desktop/gui/JoplinCloudLoginScreen.tsx:84
+#: packages/app-desktop/gui/JoplinCloudLoginScreen.tsx:85
 #: packages/app-mobile/components/screens/JoplinCloudLoginScreen.tsx:153
 #, fuzzy
 msgid ""
@@ -6362,14 +6367,14 @@ msgstr ""
 msgid "Type `joplin help` for usage information."
 msgstr "พิมพ์ `joplin help` สำหรับข้อมูลการใช้งาน"
 
-#: packages/app-desktop/plugins/GotoAnything.tsx:716
+#: packages/app-desktop/plugins/GotoAnything.tsx:708
 msgid ""
 "Type a note title or part of its content to jump to it. Or type # followed "
 "by a tag name, or @ followed by a notebook name. Or type : to search for "
 "commands."
 msgstr ""
 
-#: packages/app-desktop/plugins/GotoAnything.tsx:714
+#: packages/app-desktop/plugins/GotoAnything.tsx:706
 #, fuzzy
 msgid "Type a note title to search for it."
 msgstr "กรอกแท็กใหม่หรือเลือกจากรายการ"
@@ -6827,12 +6832,12 @@ msgstr "ใช่"
 
 #: packages/app-desktop/services/plugins/UserWebviewDialogButtonBar.tsx:21
 #: packages/app-mobile/components/screens/Note/Note.tsx:758
-#: packages/lib/shim-init-node.ts:274 packages/lib/versionInfo.ts:92
+#: packages/lib/shim-init-node.ts:278 packages/lib/versionInfo.ts:92
 msgid "Yes"
 msgstr "ใช่"
 
 #: packages/app-mobile/components/screens/Note/Note.tsx:757
-#: packages/lib/shim-init-node.ts:273
+#: packages/lib/shim-init-node.ts:277
 msgid ""
 "You are about to attach a large image (%dx%d pixels). Would you like to "
 "resize it down to %d pixels before attaching it?"

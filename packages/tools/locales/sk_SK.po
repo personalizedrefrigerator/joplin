@@ -6,8 +6,6 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Joplin v3.3.9\n"
-"POT-Creation-Date: \n"
-"PO-Revision-Date: \n"
 "Last-Translator: Jozef Gaal <preklady@mayday.sk>\n"
 "Language-Team: Jozef Gaal <preklady@mayday.sk>\n"
 "Language: sk_SK\n"
@@ -61,7 +59,7 @@ msgid "(wysiwyg: %s)"
 msgstr "(wysiwyg: %s)"
 
 #: packages/app-mobile/components/screens/Note/Note.tsx:757
-#: packages/lib/shim-init-node.ts:273
+#: packages/lib/shim-init-node.ts:277
 msgid "(You may disable this prompt in the options)"
 msgstr "(Túto výzvu môžete vypnúť v možnostiach)"
 
@@ -220,7 +218,7 @@ msgstr "%s nemôže byť väčšie ako %s"
 msgid "%s cannot be less than %s"
 msgstr "%s nemôže byť menej ako %s"
 
-#: packages/app-desktop/gui/SyncWizard/Dialog.tsx:231
+#: packages/app-desktop/gui/SyncWizard/Dialog.tsx:237
 msgid ""
 "%s is not optimised for synchronising many small files so your initial "
 "synchronisation will be slow."
@@ -386,7 +384,7 @@ msgid "Add body"
 msgstr "Pridať telo"
 
 #: packages/app-mobile/components/buttons/FloatingActionButton.tsx:64
-#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:127
+#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:130
 msgid "Add new"
 msgstr "Pridať novú"
 
@@ -611,7 +609,7 @@ msgstr "Pripojí daný súbor k poznámke."
 msgid "attachment"
 msgstr "príloha"
 
-#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:69
+#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:72
 msgid "Attachment"
 msgstr "Príloha"
 
@@ -652,7 +650,7 @@ msgstr "Overovanie nebolo dokončené (nebol prijatý overovací token)."
 msgid "Authorisation token:"
 msgstr "Overovací token:"
 
-#: packages/app-desktop/gui/JoplinCloudLoginScreen.tsx:88
+#: packages/app-desktop/gui/JoplinCloudLoginScreen.tsx:89
 #: packages/app-mobile/components/screens/JoplinCloudLoginScreen.tsx:162
 msgid "Authorise"
 msgstr "Overiť"
@@ -739,7 +737,7 @@ msgstr "od %s"
 msgid "by word"
 msgstr "podľa slova"
 
-#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:71
+#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:74
 msgid "Camera"
 msgstr "Kamera"
 
@@ -784,7 +782,7 @@ msgstr "Môže prezerať a upravovať"
 #: packages/app-mobile/components/voiceTyping/AudioRecordingBanner.tsx:202
 #: packages/app-mobile/utils/makeShowMessageBox.ts:16
 #: packages/lib/commands/permanentlyDeleteNote.ts:21
-#: packages/lib/shim-init-node.ts:274
+#: packages/lib/shim-init-node.ts:278
 msgid "Cancel"
 msgstr "Zrušiť"
 
@@ -809,7 +807,7 @@ msgstr "Prebieha rušenie..."
 msgid "Cancelling... Please wait."
 msgstr "Prebieha rušenie... Čakajte prosím."
 
-#: packages/lib/shim-init-node.ts:334
+#: packages/lib/shim-init-node.ts:338
 msgid "Cannot access %s"
 msgstr "Nedá sa získať prístup k %s"
 
@@ -938,7 +936,7 @@ msgstr "Znaky"
 msgid "Characters excluding spaces"
 msgstr "Znaky bez medzier"
 
-#: packages/app-desktop/gui/SyncWizard/Dialog.tsx:163
+#: packages/app-desktop/gui/SyncWizard/Dialog.tsx:164
 msgid "Check"
 msgstr "Označiť"
 
@@ -1025,7 +1023,7 @@ msgstr "zavrieť"
 #: packages/app-desktop/gui/NoteContentPropertiesDialog.tsx:175
 #: packages/app-desktop/gui/ShareFolderDialog/ShareFolderDialog.tsx:411
 #: packages/app-desktop/gui/ShareNoteDialog.tsx:223
-#: packages/app-desktop/gui/SyncWizard/Dialog.tsx:308
+#: packages/app-desktop/gui/SyncWizard/Dialog.tsx:315
 #: packages/app-desktop/services/plugins/UserWebviewDialogButtonBar.tsx:23
 #: packages/app-mobile/components/DismissibleDialog.tsx:83
 #: packages/app-mobile/components/NoteEditor/ImageEditor/ImageEditor.tsx:166
@@ -1091,7 +1089,7 @@ msgstr "Zobraziť kód"
 msgid "Collaborate on a notebook with others"
 msgstr "Spolupracujte na zápisníku s ostatnými"
 
-#: packages/app-desktop/gui/SyncWizard/Dialog.tsx:175
+#: packages/app-desktop/gui/SyncWizard/Dialog.tsx:176
 msgid "Collaborate on notebooks with others"
 msgstr "Spolupracujte na zápisníkoch s ostatnými"
 
@@ -1128,7 +1126,7 @@ msgstr "príkaz"
 msgid "Command"
 msgstr "Príkaz"
 
-#: packages/app-desktop/plugins/GotoAnything.tsx:791
+#: packages/app-desktop/plugins/GotoAnything.tsx:783
 msgid "Command palette"
 msgstr "Paleta príkazov"
 
@@ -1284,7 +1282,7 @@ msgstr "Kopírovať obrázok"
 msgid "Copy Link Address"
 msgstr "Kopírovať adresu odkazu"
 
-#: packages/app-desktop/gui/JoplinCloudLoginScreen.tsx:94
+#: packages/app-desktop/gui/JoplinCloudLoginScreen.tsx:95
 #: packages/app-mobile/components/screens/JoplinCloudLoginScreen.tsx:169
 msgid "Copy link to website"
 msgstr "Kopírovať odkaz na webovú stránku"
@@ -1448,7 +1446,7 @@ msgstr "Vytvorené: %d."
 msgid "Created: %s"
 msgstr "Vytvorené: %s"
 
-#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:62
+#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:65
 msgid "Creates a new note with an attachment of type %s"
 msgstr "Vytvorí novú poznámku s prílohou typu %s"
 
@@ -1898,7 +1896,7 @@ msgid "Draw picture"
 msgstr "Nakreslite obrázok"
 
 #: packages/app-mobile/components/screens/Note/Note.tsx:917
-#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:72
+#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:75
 msgid "Drawing"
 msgstr "Náčrt"
 
@@ -2638,7 +2636,7 @@ msgid "Go to source URL"
 msgstr "Prejsť na zdrojovú URL"
 
 #: packages/app-desktop/gui/WindowCommandsAndDialogs/commands/gotoAnything.ts:18
-#: packages/app-desktop/plugins/GotoAnything.tsx:783
+#: packages/app-desktop/plugins/GotoAnything.tsx:775
 msgid "Goto Anything..."
 msgstr "Prejsť na čokoľvek..."
 
@@ -3052,7 +3050,7 @@ msgstr "Položky s chybou: %s"
 msgid "Join us on %s"
 msgstr "Pripojte sa k nám na %s"
 
-#: packages/app-desktop/gui/SyncWizard/Dialog.tsx:302
+#: packages/app-desktop/gui/SyncWizard/Dialog.tsx:309
 msgid ""
 "Joplin can synchronise your notes using various providers. Select one from "
 "the list below."
@@ -3604,8 +3602,8 @@ msgstr ""
 #: packages/app-desktop/gui/NoteListControls/NoteListControls.tsx:112
 #: packages/app-desktop/gui/NoteListWrapper/NoteListWrapper.tsx:72
 #: packages/app-desktop/gui/WindowCommandsAndDialogs/commands/newNote.ts:10
-#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:105
-#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:94
+#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:108
+#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:97
 #: packages/app-mobile/setupQuickActions.ts:30
 msgid "New note"
 msgstr "Nová poznámka"
@@ -3643,8 +3641,8 @@ msgstr "Nové značky:"
 #: packages/app-desktop/gui/NoteListControls/NoteListControls.tsx:122
 #: packages/app-desktop/gui/NoteListWrapper/NoteListWrapper.tsx:72
 #: packages/app-desktop/gui/WindowCommandsAndDialogs/commands/newTodo.ts:7
-#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:108
-#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:84
+#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:111
+#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:87
 #: packages/app-mobile/setupQuickActions.ts:31
 msgid "New to-do"
 msgstr "Nová úloha"
@@ -3683,7 +3681,7 @@ msgstr "nie"
 
 #: packages/app-desktop/services/plugins/UserWebviewDialogButtonBar.tsx:22
 #: packages/app-mobile/components/screens/Note/Note.tsx:759
-#: packages/lib/shim-init-node.ts:274 packages/lib/versionInfo.ts:92
+#: packages/lib/shim-init-node.ts:278 packages/lib/versionInfo.ts:92
 msgid "No"
 msgstr "Nie"
 
@@ -3754,7 +3752,7 @@ msgstr "Nord"
 msgid "Not authenticated with %s. Please provide any missing credentials."
 msgstr "Nie je overené pomocou %s. Uveďte všetky chýbajúce poverenia."
 
-#: packages/app-desktop/gui/SyncWizard/Dialog.tsx:163
+#: packages/app-desktop/gui/SyncWizard/Dialog.tsx:164
 msgid "Not checked"
 msgstr "Neoznačené"
 
@@ -3863,7 +3861,7 @@ msgstr "Poznámka: Keď je poznámka zdieľaná, nebude už na serveri šifrovan
 msgid "Note&book"
 msgstr "Zápisník"
 
-#: packages/app-desktop/plugins/GotoAnything.tsx:608
+#: packages/app-desktop/plugins/GotoAnything.tsx:600
 #: packages/lib/models/Setting.ts:1179
 msgid "Notebook"
 msgstr "Zápisník"
@@ -4465,7 +4463,7 @@ msgstr "Zverejniť poznámku..."
 msgid "Publish Notes"
 msgstr "Zverejniť poznámky"
 
-#: packages/app-desktop/gui/SyncWizard/Dialog.tsx:174
+#: packages/app-desktop/gui/SyncWizard/Dialog.tsx:175
 #: packages/lib/utils/joplinCloud/index.ts:153
 msgid "Publish notes to the internet"
 msgstr "Zverejniť poznámky na internete"
@@ -4537,7 +4535,7 @@ msgstr "Odporúčané doplnky"
 msgid "Record audio"
 msgstr "Nahrať zvuk"
 
-#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:70
+#: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:73
 msgid "Recording"
 msgstr "Nahrávanie"
 
@@ -4882,7 +4880,7 @@ msgstr "Hľadať vo všetkých poznámkach"
 msgid "Search in current note"
 msgstr "Hľadať v aktuálnej poznámke"
 
-#: packages/app-desktop/plugins/GotoAnything.tsx:703
+#: packages/app-desktop/plugins/GotoAnything.tsx:695
 msgid "Search results"
 msgstr "Výsledky vyhľadávania"
 
@@ -4914,7 +4912,7 @@ msgstr "Zobraziť zoznam zmien"
 msgid "See the pre-release page for more details: %s"
 msgstr "Viac podrobností nájdete na stránke predbežného vydania: %s"
 
-#: packages/app-desktop/gui/SyncWizard/Dialog.tsx:205
+#: packages/app-desktop/gui/SyncWizard/Dialog.tsx:206
 #: packages/app-mobile/components/NoteItem.tsx:151
 msgid "Select"
 msgstr "Vybrať"
@@ -5127,6 +5125,11 @@ msgstr "Bočná ponuka otvorená"
 #: packages/app-mobile/components/ScreenHeader/index.tsx:264
 msgid "Sidebar"
 msgstr "Bočný panel"
+
+#: packages/app-desktop/gui/JoplinCloudSignUpCallToAction.tsx:15
+#, fuzzy
+msgid "Sign up to Joplin Cloud"
+msgstr "Prihláste sa do Joplin Cloud."
 
 #: packages/app-desktop/gui/ResourceScreen.tsx:111
 msgid "Size"
@@ -5464,7 +5467,7 @@ msgstr ""
 msgid "Sync Version: %s"
 msgstr "Verzia synchronizácie: %s"
 
-#: packages/app-desktop/gui/SyncWizard/Dialog.tsx:173
+#: packages/app-desktop/gui/SyncWizard/Dialog.tsx:174
 msgid "Sync your notes"
 msgstr "Synchronizujte svoje poznámky"
 
@@ -6107,7 +6110,7 @@ msgstr ""
 "nasledujúcich krokov:"
 
 #: packages/app-cli/app/command-sync.ts:110
-#: packages/app-desktop/gui/JoplinCloudLoginScreen.tsx:84
+#: packages/app-desktop/gui/JoplinCloudLoginScreen.tsx:85
 #: packages/app-mobile/components/screens/JoplinCloudLoginScreen.tsx:153
 msgid ""
 "To allow Joplin to synchronise with Joplin Cloud, please login using this "
@@ -6301,7 +6304,7 @@ msgstr ""
 msgid "Type `joplin help` for usage information."
 msgstr "Napíšte `joplin help` pre informácie o používaní."
 
-#: packages/app-desktop/plugins/GotoAnything.tsx:716
+#: packages/app-desktop/plugins/GotoAnything.tsx:708
 msgid ""
 "Type a note title or part of its content to jump to it. Or type # followed "
 "by a tag name, or @ followed by a notebook name. Or type : to search for "
@@ -6311,7 +6314,7 @@ msgstr ""
 "napíšte #, za ktorým nasleduje názov štítku, alebo @, za ktorým nasleduje "
 "názov zápisníka. Alebo napíšte : a vyhľadajte príkazy."
 
-#: packages/app-desktop/plugins/GotoAnything.tsx:714
+#: packages/app-desktop/plugins/GotoAnything.tsx:706
 msgid "Type a note title to search for it."
 msgstr "Zadaním názvu poznámky ju vyhľadáte."
 
@@ -6768,12 +6771,12 @@ msgstr "áno"
 
 #: packages/app-desktop/services/plugins/UserWebviewDialogButtonBar.tsx:21
 #: packages/app-mobile/components/screens/Note/Note.tsx:758
-#: packages/lib/shim-init-node.ts:274 packages/lib/versionInfo.ts:92
+#: packages/lib/shim-init-node.ts:278 packages/lib/versionInfo.ts:92
 msgid "Yes"
 msgstr "Áno"
 
 #: packages/app-mobile/components/screens/Note/Note.tsx:757
-#: packages/lib/shim-init-node.ts:273
+#: packages/lib/shim-init-node.ts:277
 msgid ""
 "You are about to attach a large image (%dx%d pixels). Would you like to "
 "resize it down to %d pixels before attaching it?"

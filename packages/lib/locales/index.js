@@ -59,7 +59,7 @@ stats['en_US'] = {"percentDone":100,"pluralForms":"nplurals=2; plural=(n != 1);"
 stats['es_ES'] = {"percentDone":94,"pluralForms":"nplurals=2; plural=(n != 1);"};
 stats['eo'] = {"percentDone":18,"pluralForms":"nplurals=2; plural=(n != 1);"};
 stats['fi_FI'] = {"percentDone":71,"pluralForms":"nplurals=2; plural=(n != 1);"};
-stats['fr_FR'] = {"percentDone":100,"pluralForms":"nplurals=2; plural=(n > 1);"};
+stats['fr_FR'] = {"percentDone":99,"pluralForms":"nplurals=2; plural=(n > 1);"};
 stats['gl_ES'] = {"percentDone":21,"pluralForms":"nplurals=2; plural=(n != 1);"};
 stats['id_ID'] = {"percentDone":99,"pluralForms":"nplurals=1; plural=0;"};
 stats['it_IT'] = {"percentDone":87,"pluralForms":"nplurals=2; plural=(n != 1);"};
@@ -69,9 +69,9 @@ stats['nl_NL'] = {"percentDone":73,"pluralForms":"nplurals=2; plural=(n != 1);"}
 stats['fa'] = {"percentDone":86,"pluralForms":"nplurals=2; plural=(n==0 || n==1);"};
 stats['pl_PL'] = {"percentDone":81,"pluralForms":"nplurals=3; plural=(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : 2);"};
 stats['pt_BR'] = {"percentDone":86,"pluralForms":"nplurals=2; plural=(n > 1);"};
-stats['pt_PT'] = {"percentDone":87,"pluralForms":"nplurals=2; plural=(n != 1);"};
-stats['ro_MD'] = {"percentDone":99,"pluralForms":"nplurals=3; plural=(n==1 ? 0 : n==0 || (n!=1 && n%100>=1 && n%100<=19) ? 1 : 2);"};
-stats['ro_RO'] = {"percentDone":99,"pluralForms":"nplurals=3; plural=(n==1 ? 0 : n==0 || (n!=1 && n%100>=1 && n%100<=19) ? 1 : 2);"};
+stats['pt_PT'] = {"percentDone":86,"pluralForms":"nplurals=2; plural=(n != 1);"};
+stats['ro_MD'] = {"percentDone":100,"pluralForms":"nplurals=3; plural=(n==1 ? 0 : n==0 || (n!=1 && n%100>=1 && n%100<=19) ? 1 : 2);"};
+stats['ro_RO'] = {"percentDone":100,"pluralForms":"nplurals=3; plural=(n==1 ? 0 : n==0 || (n!=1 && n%100>=1 && n%100<=19) ? 1 : 2);"};
 stats['sl_SI'] = {"percentDone":57,"pluralForms":"nplurals=4; plural=(n%100==1 ? 0 : n%100==2 ? 1 : n%100==3 || n%100==4 ? 2 : 3);"};
 stats['sk_SK'] = {"percentDone":99,"pluralForms":"nplurals=3; plural=(n==1 ? 0 : n>=2 && n<=4 ? 1 : 2);"};
 stats['sv'] = {"percentDone":94,"pluralForms":"nplurals=2; plural=(n != 1);"};
