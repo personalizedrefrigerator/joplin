@@ -515,7 +515,7 @@ msgstr ""
 msgid "An autosaved drawing was found. Attach a copy of it to the note?"
 msgstr "자동 저장된 그림을 찾았습니다. 노트에 사본을 첨부하시겠습니까?"
 
-#: packages/app-desktop/ElectronAppWrapper.ts:161
+#: packages/app-desktop/ElectronAppWrapper.ts:171
 msgid "An error occurred: %s"
 msgstr "오류가 발생했습니다: %s"
 
@@ -1346,7 +1346,7 @@ msgstr ""
 msgid "Could not connect to plugin repository."
 msgstr "플러그인 저장소에 연결할 수 없습니다."
 
-#: packages/app-desktop/InteropServiceHelper.ts:220
+#: packages/app-desktop/InteropServiceHelper.ts:222
 msgid "Could not export notes: %s"
 msgstr "노트를 내보낼 수 없습니다: %s"
 
@@ -2406,7 +2406,7 @@ msgstr "성공적으로 내보냈습니다!"
 msgid "Exporting profile..."
 msgstr "프로파일을 내보내는 중..."
 
-#: packages/app-desktop/InteropServiceHelper.ts:199
+#: packages/app-desktop/InteropServiceHelper.ts:201
 msgid "Exporting to \"%s\" as \"%s\" format. Please wait..."
 msgstr "\"%s\"에 \"%s\" 포맷으로 내보내는 중입니다. 잠시만 기다려주세요..."
 
@@ -2758,7 +2758,7 @@ msgstr ""
 "이미 승인하셨다면, 애플리케이션이 Joplin Cloud에 동기화될 때까지 기다려주세요"
 "Joplin Cloud."
 
-#: packages/app-desktop/ElectronAppWrapper.ts:155
+#: packages/app-desktop/ElectronAppWrapper.ts:165
 #: packages/app-desktop/gui/EncryptionConfigScreen/EncryptionConfigScreen.tsx:360
 #: packages/app-desktop/gui/StatusScreen/StatusScreen.tsx:121
 #: packages/app-mobile/components/screens/status.tsx:203
@@ -3947,6 +3947,7 @@ msgstr "언어, 날짜 형식"
 
 #: packages/app-desktop/bridge.ts:372 packages/app-desktop/bridge.ts:385
 #: packages/app-desktop/bridge.ts:399 packages/app-desktop/bridge.ts:415
+#: packages/app-desktop/bridge.ts:536
 #: packages/app-desktop/gui/ConfigScreen/ButtonBar.tsx:34
 #: packages/app-desktop/gui/DialogButtonRow.tsx:71
 #: packages/app-desktop/gui/MenuBar.tsx:616
@@ -4038,6 +4039,11 @@ msgstr ""
 #, fuzzy
 msgid "Open it"
 msgstr "열기"
+
+#: packages/app-desktop/bridge.ts:537
+#, fuzzy
+msgid "Open log"
+msgstr "%s 열기"
 
 #: packages/app-desktop/gui/WindowCommandsAndDialogs/commands/openPdfViewer.ts:7
 msgid "Open PDF viewer"
@@ -4502,7 +4508,7 @@ msgid "QR Code"
 msgstr "코드"
 
 #: packages/app-desktop/app.ts:205
-#: packages/app-desktop/ElectronAppWrapper.ts:151
+#: packages/app-desktop/ElectronAppWrapper.ts:161
 #: packages/app-desktop/gui/KeymapConfig/utils/getLabel.ts:16
 #: packages/app-desktop/gui/MenuBar.tsx:429
 msgid "Quit"
@@ -4716,7 +4722,7 @@ msgstr "리소스: %d."
 msgid "Restart and upgrade"
 msgstr "재시작 및 업그레이드"
 
-#: packages/app-desktop/ElectronAppWrapper.ts:158
+#: packages/app-desktop/ElectronAppWrapper.ts:168
 msgid "Restart in safe mode"
 msgstr "안전 모드에서 다시 시작"
 
@@ -5635,7 +5641,7 @@ msgid ""
 msgstr ""
 "활성 프로필은 삭제할 수 없습니다. 다른 프로필로 전환하고 다시 시도하세요."
 
-#: packages/app-desktop/bridge.ts:569
+#: packages/app-desktop/bridge.ts:583
 msgid ""
 "The app is now going to close. Please relaunch it to complete the process."
 msgstr "애플리케이션이 곧 종료됩니다. 프로세스를 완료하려면 다시 실행해주세요."
@@ -6751,7 +6757,7 @@ msgstr ""
 msgid "Whisper"
 msgstr ""
 
-#: packages/app-desktop/ElectronAppWrapper.ts:249
+#: packages/app-desktop/ElectronAppWrapper.ts:259
 msgid "Window unresponsive."
 msgstr "창이 응답하지 않습니다."
 

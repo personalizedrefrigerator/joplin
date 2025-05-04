@@ -520,7 +520,7 @@ msgstr ""
 "Otomatik kaydedilmiş bir çizim bulundu. Not'a bunun kopyasını iliştirmek "
 "ister misiniz?"
 
-#: packages/app-desktop/ElectronAppWrapper.ts:161
+#: packages/app-desktop/ElectronAppWrapper.ts:171
 msgid "An error occurred: %s"
 msgstr "Bir hata oluştu: %s"
 
@@ -1354,7 +1354,7 @@ msgstr ""
 msgid "Could not connect to plugin repository."
 msgstr "Eklenti sunucusuna bağlanılamadı."
 
-#: packages/app-desktop/InteropServiceHelper.ts:220
+#: packages/app-desktop/InteropServiceHelper.ts:222
 msgid "Could not export notes: %s"
 msgstr "Notlar dışarı aktarılamadı: %s"
 
@@ -2405,7 +2405,7 @@ msgstr "Başarıyla dışa aktarıldı!"
 msgid "Exporting profile..."
 msgstr "Profil dışa aktarılıyor..."
 
-#: packages/app-desktop/InteropServiceHelper.ts:199
+#: packages/app-desktop/InteropServiceHelper.ts:201
 msgid "Exporting to \"%s\" as \"%s\" format. Please wait..."
 msgstr "\"%s\" den \"%s\" biçiminde dışa aktarılıyor. Lütfen bekleyin..."
 
@@ -2765,7 +2765,7 @@ msgstr ""
 "Eğer hali hazırda giriş yaptıysanız, lütfen uygulamanın Joplin Cloud ile "
 "senkronizasyonu için kısa bir süre bekleyin."
 
-#: packages/app-desktop/ElectronAppWrapper.ts:155
+#: packages/app-desktop/ElectronAppWrapper.ts:165
 #: packages/app-desktop/gui/EncryptionConfigScreen/EncryptionConfigScreen.tsx:360
 #: packages/app-desktop/gui/StatusScreen/StatusScreen.tsx:121
 #: packages/app-mobile/components/screens/status.tsx:203
@@ -3944,6 +3944,7 @@ msgstr "OCR: Dil verisi URL ya da yolu"
 
 #: packages/app-desktop/bridge.ts:372 packages/app-desktop/bridge.ts:385
 #: packages/app-desktop/bridge.ts:399 packages/app-desktop/bridge.ts:415
+#: packages/app-desktop/bridge.ts:536
 #: packages/app-desktop/gui/ConfigScreen/ButtonBar.tsx:34
 #: packages/app-desktop/gui/DialogButtonRow.tsx:71
 #: packages/app-desktop/gui/MenuBar.tsx:616
@@ -4036,6 +4037,11 @@ msgstr "Yeni pencerede düzenle"
 #: packages/app-desktop/bridge.ts:466
 msgid "Open it"
 msgstr "Aç"
+
+#: packages/app-desktop/bridge.ts:537
+#, fuzzy
+msgid "Open log"
+msgstr "Aç %s"
 
 #: packages/app-desktop/gui/WindowCommandsAndDialogs/commands/openPdfViewer.ts:7
 msgid "Open PDF viewer"
@@ -4499,7 +4505,7 @@ msgid "QR Code"
 msgstr "Kare Kod"
 
 #: packages/app-desktop/app.ts:205
-#: packages/app-desktop/ElectronAppWrapper.ts:151
+#: packages/app-desktop/ElectronAppWrapper.ts:161
 #: packages/app-desktop/gui/KeymapConfig/utils/getLabel.ts:16
 #: packages/app-desktop/gui/MenuBar.tsx:429
 msgid "Quit"
@@ -4706,7 +4712,7 @@ msgstr "Kaynaklar: %d."
 msgid "Restart and upgrade"
 msgstr "Yeniden başlat ve güncelle"
 
-#: packages/app-desktop/ElectronAppWrapper.ts:158
+#: packages/app-desktop/ElectronAppWrapper.ts:168
 msgid "Restart in safe mode"
 msgstr "Güvenli modda yeniden başlat"
 
@@ -5627,7 +5633,7 @@ msgid ""
 "again."
 msgstr "Profil aktifken silinemez. Bir başka profile geçip yeniden deneyin."
 
-#: packages/app-desktop/bridge.ts:569
+#: packages/app-desktop/bridge.ts:583
 msgid ""
 "The app is now going to close. Please relaunch it to complete the process."
 msgstr ""
@@ -6784,7 +6790,7 @@ msgstr ""
 msgid "Whisper"
 msgstr "Whisper"
 
-#: packages/app-desktop/ElectronAppWrapper.ts:249
+#: packages/app-desktop/ElectronAppWrapper.ts:259
 msgid "Window unresponsive."
 msgstr "Pencere tepkisiz, cevap vermiyor."
 

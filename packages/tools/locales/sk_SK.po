@@ -512,7 +512,7 @@ msgstr ""
 msgid "An autosaved drawing was found. Attach a copy of it to the note?"
 msgstr "Bol nájdený automaticky uložený náčrt. Pripojiť jeho kópiu k poznámke?"
 
-#: packages/app-desktop/ElectronAppWrapper.ts:161
+#: packages/app-desktop/ElectronAppWrapper.ts:171
 msgid "An error occurred: %s"
 msgstr "Vyskytla sa chyba: %s"
 
@@ -1346,7 +1346,7 @@ msgstr ""
 msgid "Could not connect to plugin repository."
 msgstr "Nepodarilo sa pripojiť k úložisku doplnkov."
 
-#: packages/app-desktop/InteropServiceHelper.ts:220
+#: packages/app-desktop/InteropServiceHelper.ts:222
 msgid "Could not export notes: %s"
 msgstr "Nepodarilo sa exportovať poznámky: %s"
 
@@ -2392,7 +2392,7 @@ msgstr "Úspešne exportované!"
 msgid "Exporting profile..."
 msgstr "Exportuje sa profil..."
 
-#: packages/app-desktop/InteropServiceHelper.ts:199
+#: packages/app-desktop/InteropServiceHelper.ts:201
 msgid "Exporting to \"%s\" as \"%s\" format. Please wait..."
 msgstr "Exportuje sa do formátu „%s“ ako „%s“. Počkajte prosím..."
 
@@ -2751,7 +2751,7 @@ msgid ""
 msgstr ""
 "Ak ste už overili, počkajte, kým sa aplikácia zosynchronizuje s Joplin Cloud."
 
-#: packages/app-desktop/ElectronAppWrapper.ts:155
+#: packages/app-desktop/ElectronAppWrapper.ts:165
 #: packages/app-desktop/gui/EncryptionConfigScreen/EncryptionConfigScreen.tsx:360
 #: packages/app-desktop/gui/StatusScreen/StatusScreen.tsx:121
 #: packages/app-mobile/components/screens/status.tsx:203
@@ -3924,6 +3924,7 @@ msgstr "OCR: URL k údajom jazyka alebo cesta"
 
 #: packages/app-desktop/bridge.ts:372 packages/app-desktop/bridge.ts:385
 #: packages/app-desktop/bridge.ts:399 packages/app-desktop/bridge.ts:415
+#: packages/app-desktop/bridge.ts:536
 #: packages/app-desktop/gui/ConfigScreen/ButtonBar.tsx:34
 #: packages/app-desktop/gui/DialogButtonRow.tsx:71
 #: packages/app-desktop/gui/MenuBar.tsx:616
@@ -4013,6 +4014,11 @@ msgstr "Otvoriť v novom okne"
 #: packages/app-desktop/bridge.ts:466
 msgid "Open it"
 msgstr "Otvoriť s"
+
+#: packages/app-desktop/bridge.ts:537
+#, fuzzy
+msgid "Open log"
+msgstr "Otvoriť %s"
 
 #: packages/app-desktop/gui/WindowCommandsAndDialogs/commands/openPdfViewer.ts:7
 msgid "Open PDF viewer"
@@ -4473,7 +4479,7 @@ msgid "QR Code"
 msgstr "QR kód"
 
 #: packages/app-desktop/app.ts:205
-#: packages/app-desktop/ElectronAppWrapper.ts:151
+#: packages/app-desktop/ElectronAppWrapper.ts:161
 #: packages/app-desktop/gui/KeymapConfig/utils/getLabel.ts:16
 #: packages/app-desktop/gui/MenuBar.tsx:429
 msgid "Quit"
@@ -4678,7 +4684,7 @@ msgstr "Zdroje: %d."
 msgid "Restart and upgrade"
 msgstr "Reštartovať a aktualizovať"
 
-#: packages/app-desktop/ElectronAppWrapper.ts:158
+#: packages/app-desktop/ElectronAppWrapper.ts:168
 msgid "Restart in safe mode"
 msgstr "Reštartovať v núdzovom režime"
 
@@ -5599,7 +5605,7 @@ msgstr ""
 "Aktívny profil nie je možné odstrániť. Prepnite na iný profil a skúste to "
 "znova."
 
-#: packages/app-desktop/bridge.ts:569
+#: packages/app-desktop/bridge.ts:583
 msgid ""
 "The app is now going to close. Please relaunch it to complete the process."
 msgstr "Aplikácia sa teraz zatvorí. Na dokončenie procesu ju znovu spustite."
@@ -6748,7 +6754,7 @@ msgstr ""
 msgid "Whisper"
 msgstr "Whisper"
 
-#: packages/app-desktop/ElectronAppWrapper.ts:249
+#: packages/app-desktop/ElectronAppWrapper.ts:259
 msgid "Window unresponsive."
 msgstr "Okno nereaguje."
 

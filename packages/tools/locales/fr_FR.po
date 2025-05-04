@@ -514,7 +514,7 @@ msgid "An autosaved drawing was found. Attach a copy of it to the note?"
 msgstr ""
 "Un dessin automatiquement sauvegardé a été trouvé. Le joindre à la note ?"
 
-#: packages/app-desktop/ElectronAppWrapper.ts:161
+#: packages/app-desktop/ElectronAppWrapper.ts:171
 msgid "An error occurred: %s"
 msgstr "Une erreur est survenue : %s"
 
@@ -1356,7 +1356,7 @@ msgstr ""
 msgid "Could not connect to plugin repository."
 msgstr "Impossible de télécharger la liste des modules."
 
-#: packages/app-desktop/InteropServiceHelper.ts:220
+#: packages/app-desktop/InteropServiceHelper.ts:222
 msgid "Could not export notes: %s"
 msgstr "Impossible d'exporter les notes : %s"
 
@@ -2408,7 +2408,7 @@ msgstr "Exporté avec succès !"
 msgid "Exporting profile..."
 msgstr "Exportation du profil…"
 
-#: packages/app-desktop/InteropServiceHelper.ts:199
+#: packages/app-desktop/InteropServiceHelper.ts:201
 msgid "Exporting to \"%s\" as \"%s\" format. Please wait..."
 msgstr "Exportation en cours vers \"%s\" au format \"%s\". Veuillez patienter…"
 
@@ -2769,7 +2769,7 @@ msgstr ""
 "Si vous avez déjà autorisé, veuillez attendre que l'application se "
 "synchronise avec Joplin Cloud."
 
-#: packages/app-desktop/ElectronAppWrapper.ts:155
+#: packages/app-desktop/ElectronAppWrapper.ts:165
 #: packages/app-desktop/gui/EncryptionConfigScreen/EncryptionConfigScreen.tsx:360
 #: packages/app-desktop/gui/StatusScreen/StatusScreen.tsx:121
 #: packages/app-mobile/components/screens/status.tsx:203
@@ -3952,6 +3952,7 @@ msgstr "OCR : URL ou chemin d'accès aux données linguistiques"
 
 #: packages/app-desktop/bridge.ts:372 packages/app-desktop/bridge.ts:385
 #: packages/app-desktop/bridge.ts:399 packages/app-desktop/bridge.ts:415
+#: packages/app-desktop/bridge.ts:536
 #: packages/app-desktop/gui/ConfigScreen/ButtonBar.tsx:34
 #: packages/app-desktop/gui/DialogButtonRow.tsx:71
 #: packages/app-desktop/gui/MenuBar.tsx:616
@@ -4041,6 +4042,11 @@ msgstr "Ouvrir dans une nouvelle fenêtre"
 #: packages/app-desktop/bridge.ts:466
 msgid "Open it"
 msgstr "L'ouvrir"
+
+#: packages/app-desktop/bridge.ts:537
+#, fuzzy
+msgid "Open log"
+msgstr "Ouvrir %s"
 
 #: packages/app-desktop/gui/WindowCommandsAndDialogs/commands/openPdfViewer.ts:7
 msgid "Open PDF viewer"
@@ -4508,7 +4514,7 @@ msgid "QR Code"
 msgstr "Code QR"
 
 #: packages/app-desktop/app.ts:205
-#: packages/app-desktop/ElectronAppWrapper.ts:151
+#: packages/app-desktop/ElectronAppWrapper.ts:161
 #: packages/app-desktop/gui/KeymapConfig/utils/getLabel.ts:16
 #: packages/app-desktop/gui/MenuBar.tsx:429
 msgid "Quit"
@@ -4713,7 +4719,7 @@ msgstr "Ressources : %d."
 msgid "Restart and upgrade"
 msgstr "Redémarrer et mettre à jour"
 
-#: packages/app-desktop/ElectronAppWrapper.ts:158
+#: packages/app-desktop/ElectronAppWrapper.ts:168
 msgid "Restart in safe mode"
 msgstr "Redémarrer en mode sans échec"
 
@@ -5637,7 +5643,7 @@ msgid ""
 msgstr ""
 "Le profil actif ne peut pas être supprimé. Changez de profil et réessayez."
 
-#: packages/app-desktop/bridge.ts:569
+#: packages/app-desktop/bridge.ts:583
 msgid ""
 "The app is now going to close. Please relaunch it to complete the process."
 msgstr ""
@@ -6793,7 +6799,7 @@ msgstr ""
 msgid "Whisper"
 msgstr "Whisper"
 
-#: packages/app-desktop/ElectronAppWrapper.ts:249
+#: packages/app-desktop/ElectronAppWrapper.ts:259
 msgid "Window unresponsive."
 msgstr "La fenêtre ne répond pas."
 

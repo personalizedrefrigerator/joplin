@@ -491,7 +491,7 @@ msgstr "不明确的笔记本“%s”。请改用短笔记本 id - 按“ti”�
 msgid "An autosaved drawing was found. Attach a copy of it to the note?"
 msgstr "发现一张自动保存的绘图。是否将其添加到笔记中？"
 
-#: packages/app-desktop/ElectronAppWrapper.ts:161
+#: packages/app-desktop/ElectronAppWrapper.ts:171
 msgid "An error occurred: %s"
 msgstr "出现异常: %s"
 
@@ -1304,7 +1304,7 @@ msgstr ""
 msgid "Could not connect to plugin repository."
 msgstr "无法连接到插件库。"
 
-#: packages/app-desktop/InteropServiceHelper.ts:220
+#: packages/app-desktop/InteropServiceHelper.ts:222
 msgid "Could not export notes: %s"
 msgstr "无法导出笔记：%s"
 
@@ -2338,7 +2338,7 @@ msgstr "导出成功！"
 msgid "Exporting profile..."
 msgstr "正在导出配置档……"
 
-#: packages/app-desktop/InteropServiceHelper.ts:199
+#: packages/app-desktop/InteropServiceHelper.ts:201
 msgid "Exporting to \"%s\" as \"%s\" format. Please wait..."
 msgstr "导出到 “%s”，格式为 “%s”。请稍等……"
 
@@ -2686,7 +2686,7 @@ msgid ""
 "Joplin Cloud."
 msgstr "如果您已授权，请等待应用程序同步到 Joplin 云。"
 
-#: packages/app-desktop/ElectronAppWrapper.ts:155
+#: packages/app-desktop/ElectronAppWrapper.ts:165
 #: packages/app-desktop/gui/EncryptionConfigScreen/EncryptionConfigScreen.tsx:360
 #: packages/app-desktop/gui/StatusScreen/StatusScreen.tsx:121
 #: packages/app-mobile/components/screens/status.tsx:203
@@ -3828,6 +3828,7 @@ msgstr "OCR：语言数据 URL 或路径"
 
 #: packages/app-desktop/bridge.ts:372 packages/app-desktop/bridge.ts:385
 #: packages/app-desktop/bridge.ts:399 packages/app-desktop/bridge.ts:415
+#: packages/app-desktop/bridge.ts:536
 #: packages/app-desktop/gui/ConfigScreen/ButtonBar.tsx:34
 #: packages/app-desktop/gui/DialogButtonRow.tsx:71
 #: packages/app-desktop/gui/MenuBar.tsx:616
@@ -3915,6 +3916,11 @@ msgstr "在新窗口打开"
 #: packages/app-desktop/bridge.ts:466
 msgid "Open it"
 msgstr "打开它"
+
+#: packages/app-desktop/bridge.ts:537
+#, fuzzy
+msgid "Open log"
+msgstr "打开 %s"
 
 #: packages/app-desktop/gui/WindowCommandsAndDialogs/commands/openPdfViewer.ts:7
 msgid "Open PDF viewer"
@@ -4363,7 +4369,7 @@ msgid "QR Code"
 msgstr "二维码"
 
 #: packages/app-desktop/app.ts:205
-#: packages/app-desktop/ElectronAppWrapper.ts:151
+#: packages/app-desktop/ElectronAppWrapper.ts:161
 #: packages/app-desktop/gui/KeymapConfig/utils/getLabel.ts:16
 #: packages/app-desktop/gui/MenuBar.tsx:429
 msgid "Quit"
@@ -4568,7 +4574,7 @@ msgstr "资源：%d。"
 msgid "Restart and upgrade"
 msgstr "重启并升级"
 
-#: packages/app-desktop/ElectronAppWrapper.ts:158
+#: packages/app-desktop/ElectronAppWrapper.ts:168
 msgid "Restart in safe mode"
 msgstr "重启并进入安全模式"
 
@@ -5455,7 +5461,7 @@ msgid ""
 "again."
 msgstr "无法删除正在使用的配置档。请切换到另一配置档后再次尝试。"
 
-#: packages/app-desktop/bridge.ts:569
+#: packages/app-desktop/bridge.ts:583
 msgid ""
 "The app is now going to close. Please relaunch it to complete the process."
 msgstr "应用将要关闭。请重新启动它以完成此过程。"
@@ -6519,7 +6525,7 @@ msgstr ""
 msgid "Whisper"
 msgstr "Whisper"
 
-#: packages/app-desktop/ElectronAppWrapper.ts:249
+#: packages/app-desktop/ElectronAppWrapper.ts:259
 msgid "Window unresponsive."
 msgstr "窗口没有响应。"
 
