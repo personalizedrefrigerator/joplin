@@ -1,7 +1,7 @@
 import ElectronAppWrapper from './ElectronAppWrapper';
 import shim, { MessageBoxType } from '@joplin/lib/shim';
 import { _, setLocale } from '@joplin/lib/locale';
-import { BrowserWindow, nativeTheme, nativeImage, shell, dialog, MessageBoxSyncOptions, safeStorage } from 'electron';
+import { BrowserWindow, nativeTheme, nativeImage, shell, dialog, MessageBoxSyncOptions, safeStorage, Menu, MenuItemConstructorOptions, MenuItem } from 'electron';
 import { dirname, toSystemSlashes } from '@joplin/lib/path-utils';
 import { fileUriToPath } from '@joplin/utils/url';
 import { urlDecode } from '@joplin/lib/string-utils';
@@ -600,6 +600,11 @@ export class Bridge {
 
 	public createImageFromPath(path: string) {
 		return nativeImage.createFromPath(path);
+	}
+
+	public menuPopupFromTemplate(template: ((MenuItemConstructorOptions) | (MenuItem))[]) {
+		const menu = Menu.buildFromTemplate(template);
+		return menu.popup({ window: this.mainWindow() });
 	}
 
 	public safeStorage = {
