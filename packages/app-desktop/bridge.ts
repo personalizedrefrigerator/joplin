@@ -526,16 +526,30 @@ export class Bridge {
 		}
 	}
 
-	public async launchAltAppInstance(env: string) {
-		const cmd = this.appLaunchCommand(env, 'alt1');
+	private async launchAppInstanceById(env: string, altInstanceId: string) {
+		if (this.electronApp().ipcServerStarted()) {
+			const cmd = this.appLaunchCommand(env, altInstanceId);
+			await execCommand([cmd.execPath].concat(cmd.args), { detached: true });
+		} else {
+			const buttonIndex = this.showErrorMessageBox('Cannot launch another instance because IPC server could not start.', {
+				buttons: [
+					_('OK'),
+					_('Open log'),
+				],
+			});
 
-		await execCommand([cmd.execPath].concat(cmd.args), { detached: true });
+			if (buttonIndex === 1) {
+				void this.openItem(this.electronApp().ipcLoggerFilePath());
+			}
+		}
+	}
+
+	public async launchAltAppInstance(env: string) {
+		await this.launchAppInstanceById(env, 'alt1');
 	}
 
 	public async launchMainAppInstance(env: string) {
-		const cmd = this.appLaunchCommand(env, '');
-
-		await execCommand([cmd.execPath].concat(cmd.args), { detached: true });
+		await this.launchAppInstanceById(env, '');
 	}
 
 	public async restart() {
