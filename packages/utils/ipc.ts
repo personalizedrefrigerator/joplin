@@ -167,7 +167,7 @@ export const startServer = async (startPort: number, secretKeyFilePath: string, 
 	});
 };
 
-export const stopServer = async (server: IpcServer|null) => {
+export const stopServer = async (server: IpcServer|null): Promise<void> => {
 	if (!server) return;
 
 	return new Promise((resolve, reject) => {
@@ -175,7 +175,7 @@ export const stopServer = async (server: IpcServer|null) => {
 			if (error) {
 				reject(error);
 			} else {
-				resolve(null);
+				resolve();
 			}
 		});
 	});
