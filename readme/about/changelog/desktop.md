@@ -1,5 +1,20 @@
 # Joplin Desktop Changelog
 
+## [v3.3.12](https://github.com/laurent22/joplin/releases/tag/v3.3.12) - 2025-05-04T18:12:23Z
+
+- Improved: Plugins: Undeprecate joplin.settings.value() ([3f364a4](https://github.com/laurent22/joplin/commit/3f364a4))
+- Fixed: Fix crash after removing "toggle tab indentation" keyboard shortcut ([#12213](https://github.com/laurent22/joplin/issues/12213)) ([#12204](https://github.com/laurent22/joplin/issues/12204) by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Fix printing ([#12219](https://github.com/laurent22/joplin/issues/12219) by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Prevent application from hanging when multi-instance setup does not work ([#12222](https://github.com/laurent22/joplin/issues/12222))
+
+## [v3.3.10](https://github.com/laurent22/joplin/releases/tag/v3.3.10) - 2025-05-02T19:46:15Z
+
+- Fixed: Notify user when they are using the Intel app on Apple Silicon ([#11989](https://github.com/laurent22/joplin/issues/11989))
+
+## [v3.3.9](https://github.com/laurent22/joplin/releases/tag/v3.3.9) - 2025-05-01T21:02:12Z
+
+- Fixed: Fix inserting note links using the mouse ([#12199](https://github.com/laurent22/joplin/issues/12199)) ([#12197](https://github.com/laurent22/joplin/issues/12197) by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+
 ## [v3.3.7](https://github.com/laurent22/joplin/releases/tag/v3.3.7) (Pre-release) - 2025-04-29T13:47:19Z
 
 - New: Add plural forms for notes, users, hours, minutes, days ([#12171](https://github.com/laurent22/joplin/issues/12171) by [@SilverGreen93](https://github.com/SilverGreen93))

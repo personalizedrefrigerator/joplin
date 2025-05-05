@@ -17,7 +17,7 @@ import FileApiDriverLocal from './file-api-driver-local';
 import * as mimeUtils from './mime-utils';
 import BaseItem from './models/BaseItem';
 import { Size } from '@joplin/utils/types';
-import { arch } from 'os';
+import { cpus } from 'os';
 import type PdfJs from './utils/types/pdfJs';
 const { _ } = require('./locale');
 const http = require('http');
@@ -111,6 +111,7 @@ interface ShimInitOptions {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	nodeSqlite: any;
 	pdfJs: PdfJs;
+	isAppleSilicon?: ()=> boolean;
 }
 
 function shimInit(options: ShimInitOptions = null) {
@@ -122,6 +123,7 @@ function shimInit(options: ShimInitOptions = null) {
 		electronBridge: null,
 		nodeSqlite: null,
 		pdfJs: null,
+		isAppleSilicon: () => false,
 		...options,
 	};
 
@@ -171,11 +173,13 @@ function shimInit(options: ShimInitOptions = null) {
 	};
 
 	shim.isAppleSilicon = () => {
-		return shim.isMac() && arch() === 'arm64';
+		return options.isAppleSilicon ? options.isAppleSilicon() : false;
 	};
 
 	shim.platformArch = () => {
-		return arch();
+		const c = cpus();
+		if (!c.length) return '';
+		return c[0].model;
 	};
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
