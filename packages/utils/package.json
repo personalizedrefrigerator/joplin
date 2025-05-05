@@ -18,7 +18,8 @@
     "./types": "./dist/types.js",
     "./url": "./dist/url.js",
     "./ipc": "./dist/ipc.js",
-    "./path": "./dist/path.js"
+    "./path": "./dist/path.js",
+    "./strings": "./dist/strings.js"
   },
   "publishConfig": {
     "access": "public"
