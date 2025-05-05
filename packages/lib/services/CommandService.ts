@@ -8,8 +8,6 @@ import type { WhenClauseContext } from './commands/stateToWhenClauseContext';
 type LabelFunction = ()=> string;
 type EnabledCondition = string;
 
-export type CommandArgument = string|number|object|boolean|null;
-
 export interface CommandContext {
 	// The state may also be of type "AppState" (used by the desktop app), which inherits from "State" (used by all apps)
 	state: State;
@@ -19,7 +17,7 @@ export interface CommandContext {
 
 export interface CommandRuntime {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	execute(context: CommandContext, ...args: CommandArgument[]): Promise<any | void>;
+	execute(context: CommandContext, ...args: any[]): Promise<any | void>;
 	enabledCondition?: EnabledCondition;
 	// Used for the (optional) toolbar button title
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
@@ -319,7 +317,7 @@ export default class CommandService extends BaseService {
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	public async execute(commandName: string, ...args: CommandArgument[]): Promise<any | void> {
+	public async execute(commandName: string, ...args: any[]): Promise<any | void> {
 		const command = this.commandByName(commandName);
 		// Some commands such as "showModalMessage" can be executed many
 		// times per seconds, so we should only display this message in

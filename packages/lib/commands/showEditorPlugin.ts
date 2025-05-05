@@ -13,7 +13,7 @@ export const declaration: CommandDeclaration = {
 
 export const runtime = (): CommandRuntime => {
 	return {
-		execute: async (context: CommandContext, editorViewId:string = '', show:boolean = true) => {
+		execute: async (context: CommandContext, editorViewId = '', show = true) => {
 			logger.info('View:', editorViewId, 'Show:', show);
 
 			const shownEditorViewIds = Setting.value('plugins.shownEditorViewIds');
