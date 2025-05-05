@@ -834,7 +834,7 @@ function shimInit(options: ShimInitOptions = null) {
 	};
 
 	shim.pdfToImages = async (pdfPath: string, outputDirectoryPath: string, options?: CreatePdfFromImagesOptions): Promise<string[]> => {
-		if (!shim.isElectron()) {
+		if (typeof HTMLCanvasElement === 'undefined') {
 			throw new Error('Unsupported -- the Canvas element is required.');
 		}
 
@@ -866,6 +866,9 @@ function shimInit(options: ShimInitOptions = null) {
 				const viewport = page.getViewport({ scale: options?.scaleFactor ?? 2 });
 				const canvas = createCanvas();
 				const ctx = canvas.getContext('2d');
+				if (!ctx) {
+					throw new Error('Unable to get 2D rendering context from canvas.');
+				}
 
 				canvas.height = viewport.height;
 				canvas.width = viewport.width;
