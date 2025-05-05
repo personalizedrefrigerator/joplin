@@ -253,5 +253,19 @@ test.describe('markdownEditor', () => {
 		// Note viewer should be focused
 		await expect(noteEditor.noteViewerContainer).toBeFocused();
 	});
+
+	test('should show OCR text in the Markdown editor', async ({ mainWindow, electronApp }) => {
+		const mainScreen = await new MainScreen(mainWindow).setup();
+		await mainScreen.waitFor();
+		const editor = mainScreen.noteEditor;
+
+		await mainScreen.createNewNote('Note');
+
+		await setFilePickerResponse(electronApp, [join(__dirname, 'resources', 'multi_page__no_embedded_text.pdf')]);
+		await editor.attachFileButton.click();
+
+		const ocrButton = editor.codeMirrorEditor.getByRole('button', { name: /OCR Text/ });
+		await expect(ocrButton).toHaveAccessibleName('OCR Text This is a multi-page PDF with no embedded text. Page 2: more text. The third page.');
+	});
 });
 
