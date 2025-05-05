@@ -31,10 +31,12 @@ const styles = StyleSheet.create({
 	},
 	mainButtonRow: {
 		flexWrap: 'wrap',
-		gap: 6,
+		gap: 12,
 	},
 	shortcutButton: {
 		flexGrow: 1,
+		flexShrink: 1,
+		flexBasis: 0,
 	},
 	mainButton: {
 		flexShrink: 1,
@@ -47,6 +49,7 @@ const styles = StyleSheet.create({
 	menuContent: {
 		gap: 12,
 		flexShrink: 1,
+		flexGrow: 1,
 		flexDirection: 'column',
 	},
 });
