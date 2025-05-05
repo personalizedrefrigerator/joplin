@@ -12,7 +12,7 @@ export const declaration: CommandDeclaration = {
 
 export const runtime = (): CommandRuntime => {
 	return {
-		execute: async (_context: CommandContext, body = '', todo = false, options: GotoNoteOptions = null) => {
+		execute: async (_context: CommandContext, body:string = '', todo:boolean = false, options: GotoNoteOptions = null) => {
 			const folderId = Setting.value('activeFolderId');
 			if (!folderId) {
 				logger.warn('Not creating new note -- no active folder ID.');
