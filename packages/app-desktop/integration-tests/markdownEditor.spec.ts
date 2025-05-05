@@ -4,6 +4,7 @@ import { join } from 'path';
 import getImageSourceSize from './util/getImageSourceSize';
 import setFilePickerResponse from './util/setFilePickerResponse';
 import activateMainMenuItem from './util/activateMainMenuItem';
+import setSettingValue from './util/setSettingValue';
 
 
 test.describe('markdownEditor', () => {
@@ -258,6 +259,8 @@ test.describe('markdownEditor', () => {
 		const mainScreen = await new MainScreen(mainWindow).setup();
 		await mainScreen.waitFor();
 		const editor = mainScreen.noteEditor;
+
+		await setSettingValue(electronApp, mainWindow, 'editor.showOcrText', true);
 
 		await mainScreen.createNewNote('Note');
 

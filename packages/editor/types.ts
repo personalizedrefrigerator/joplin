@@ -172,6 +172,7 @@ export interface EditorSettings {
 	keymap: EditorKeymap;
 	tabMovesFocus: boolean;
 
+	showOcrTextInline: boolean;
 	markdownMarkEnabled: boolean;
 	katexEnabled: boolean;
 	spellcheckEnabled: boolean;

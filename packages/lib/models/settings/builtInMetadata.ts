@@ -674,6 +674,17 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 			storage: SettingStorage.File,
 			isGlobal: true,
 		},
+		'editor.showOcrText': {
+			value: false,
+			type: SettingItemType.Bool,
+			public: true,
+			section: 'note',
+			appTypes: [AppType.Desktop],
+			label: () => _('Markdown editor: Show "OCR text" buttons in the editor'),
+			description: () => _('Adds "OCR Text" buttons by attachments with OCR text in the Markdown editor. Screen readers can use this to describe attachments while editing notes.'),
+			storage: SettingStorage.File,
+			isGlobal: true,
+		},
 		'editor.pastePreserveColors': {
 			value: false,
 			type: SettingItemType.Bool,

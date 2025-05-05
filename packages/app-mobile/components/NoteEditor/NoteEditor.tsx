@@ -352,6 +352,7 @@ function NoteEditor(props: Props, ref: any) {
 		automatchBraces: false,
 		ignoreModifiers: false,
 		autocompleteMarkup: Setting.value('editor.autocompleteMarkup'),
+		showOcrTextInline: false,
 
 		// For now, mobile CodeMirror uses its built-in focus toggle shortcut.
 		tabMovesFocus: false,

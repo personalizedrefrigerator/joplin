@@ -374,6 +374,7 @@ const CodeMirror = (props: NoteBodyEditorProps, ref: ForwardedRef<NoteBodyEditor
 			},
 			automatchBraces: Setting.value('editor.autoMatchingBraces'),
 			autocompleteMarkup: Setting.value('editor.autocompleteMarkup'),
+			showOcrTextInline: Setting.value('editor.showOcrText'),
 			useExternalSearch: false,
 			ignoreModifiers: true,
 			spellcheckEnabled: Setting.value('editor.spellcheckBeta'),

@@ -1,6 +1,6 @@
 import { EditorView, keymap } from '@codemirror/view';
 import { closeBrackets, closeBracketsKeymap } from '@codemirror/autocomplete';
-import { EditorKeymap, EditorLanguageType, EditorSettings } from '../types';
+import { EditorKeymap, EditorLanguageType, EditorSettings, OnEventCallback } from '../types';
 import createTheme from './theme';
 import { EditorState } from '@codemirror/state';
 import { deleteMarkupBackward, markdown, markdownLanguage } from '@codemirror/lang-markdown';
@@ -14,8 +14,10 @@ import { vim } from '@replit/codemirror-vim';
 import { indentUnit } from '@codemirror/language';
 import { Prec } from '@codemirror/state';
 import insertNewlineContinueMarkup from './markdown/insertNewlineContinueMarkup';
+import imageDescriptionExtension from './utils/imageDescriptionExtension';
+import { EditorEventType } from '../events';
 
-const configFromSettings = (settings: EditorSettings) => {
+const configFromSettings = (settings: EditorSettings, onEditorEvent: OnEventCallback) => {
 	const languageExtension = (() => {
 		const openingBrackets = '`([{\'"‘“（《「『【〔〖〘〚'.split('');
 
@@ -82,6 +84,16 @@ const configFromSettings = (settings: EditorSettings) => {
 
 	if (!settings.ignoreModifiers) {
 		extensions.push(Prec.low(keymap.of(defaultKeymap)));
+	}
+
+	if (settings.showOcrTextInline) {
+		extensions.push(imageDescriptionExtension(image => {
+			onEditorEvent({
+				kind: EditorEventType.ShowOcrText,
+				text: image.description,
+				itemId: image.id,
+			});
+		}));
 	}
 
 	return extensions;
