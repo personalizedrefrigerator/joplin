@@ -523,6 +523,7 @@ function NoteEditor(props: Props, ref: any) {
 					editorControl.searchControl.hideSearch();
 				}
 				break;
+			case EditorEventType.ShowOcrText:
 			case EditorEventType.Scroll:
 				// Not handled
 				break;
