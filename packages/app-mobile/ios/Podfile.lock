@@ -2108,7 +2108,7 @@ SPEC CHECKSUMS:
   react-native-netinfo: cec9c4e86083cb5b6aba0e0711f563e2fbbff187
   react-native-quick-crypto: 43bac82b1ce916efb64a6dccb8e020678d8d9c14
   react-native-rsa-native: a7931cdda1f73a8576a46d7f431378c5550f0c38
-  react-native-saf-x: 318d0cdb38f4618bd7ef5840d4f5c12e097dfbe7
+  react-native-saf-x: d60328b397989ebec2a2ad7f531a9732e824f603
   react-native-safe-area-context: 9d72abf6d8473da73033b597090a80b709c0b2f1
   react-native-sqlite-storage: 0c84826214baaa498796c7e46a5ccc9a82e114ed
   react-native-version-info: f0b04e16111c4016749235ff6d9a757039189141
