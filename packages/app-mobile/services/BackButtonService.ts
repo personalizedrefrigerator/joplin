@@ -1,13 +1,17 @@
 import { BackHandler } from 'react-native';
+import { Store } from 'redux';
+import { AppState } from '../utils/types';
 
-export type BackButtonHandler = ()=> boolean|Promise<boolean>;
+export type BackButtonHandler = {
+	onBackPress: ()=> boolean|Promise<boolean>;
+	describeAction: ()=> string|null;
+};
 
 export default class BackButtonService {
-	private static handlers_: BackButtonHandler[] = [];
-	private static defaultHandler_: BackButtonHandler;
+	private static store: Store<AppState>|null = null;
 
-	public static initialize(defaultHandler: BackButtonHandler) {
-		this.defaultHandler_ = defaultHandler;
+	public static initialize(store: Store<AppState>) {
+		this.store = store;
 
 		BackHandler.addEventListener('hardwareBackPress', () => {
 			void this.back();
@@ -16,26 +20,15 @@ export default class BackButtonService {
 	}
 
 	public static async back() {
-		if (this.handlers_.length) {
-			const r = await this.handlers_[this.handlers_.length - 1]();
-			if (r) return r;
+		const handlers = this.store.getState().backHandlers;
+		for (let i = handlers.length - 1; i >= 0; i --) {
+			if (handlers[i].enabled) {
+				await handlers[i].onBack();
+				if (!handlers[i].runsParent) {
+					break;
+				}
+			}
 		}
-
-		return await this.defaultHandler_();
-	}
-
-	public static addHandler(handler: BackButtonHandler) {
-		for (let i = this.handlers_.length - 1; i >= 0; i--) {
-			const h = this.handlers_[i];
-			if (h === handler) return false;
-		}
-
-		this.handlers_.push(handler);
-		return true;
-	}
-
-	public static removeHandler(handler: BackButtonHandler) {
-		this.handlers_ = this.handlers_.filter(h => h !== handler);
 	}
 }
 

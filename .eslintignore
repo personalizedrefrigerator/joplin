@@ -604,6 +604,7 @@ packages/app-mobile/commands/openNote.js
 packages/app-mobile/commands/scrollToHash.js
 packages/app-mobile/commands/util/goToNote.js
 packages/app-mobile/commands/util/showResource.js
+packages/app-mobile/components/BackButtonHandler.js
 packages/app-mobile/components/BetaChip.js
 packages/app-mobile/components/BottomDrawer.js
 packages/app-mobile/components/CameraView/ActionButtons.js
@@ -689,6 +690,7 @@ packages/app-mobile/components/NoteList.js
 packages/app-mobile/components/ProfileSwitcher/ProfileEditor.js
 packages/app-mobile/components/ProfileSwitcher/ProfileSwitcher.js
 packages/app-mobile/components/ProfileSwitcher/useProfileConfig.js
+packages/app-mobile/components/ScreenHeader/BackButton.js
 packages/app-mobile/components/ScreenHeader/Menu.js
 packages/app-mobile/components/ScreenHeader/WarningBanner.test.js
 packages/app-mobile/components/ScreenHeader/WarningBanner.js
@@ -856,6 +858,7 @@ packages/app-mobile/utils/ShareUtils.test.js
 packages/app-mobile/utils/ShareUtils.js
 packages/app-mobile/utils/TlsUtils.js
 packages/app-mobile/utils/appDefaultState.js
+packages/app-mobile/utils/appReducer.js
 packages/app-mobile/utils/autodetectTheme.js
 packages/app-mobile/utils/checkPermissions.js
 packages/app-mobile/utils/createRootStyle.js
