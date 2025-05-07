@@ -2,17 +2,42 @@
 	"\"%s\" is missing the required \"%s\" property.": [
 		"\"%s\" chýba požadovaná vlastnosť \"%s\"."
 	],
+	"%d day": [
+		"%d deň",
+		"%d dni",
+		"%d dní"
+	],
 	"%d GB": [
 		"%d GB"
 	],
 	"%d GB storage space": [
 		"%d GB úložného priestoru"
 	],
+	"%d hour": [
+		"%d hodina",
+		"%d hodiny",
+		"%d hodín"
+	],
 	"%d MB": [
 		"%d MB"
 	],
 	"%d MB per note or attachment": [
 		"%d MB na poznámku alebo prílohu"
+	],
+	"%d minute": [
+		"%d minúta",
+		"%d minúty",
+		"%d minút"
+	],
+	"%d note matches this pattern. Delete it?": [
+		"%d poznámka zodpovedá tomuto vzoru. Vymazať ju?",
+		"%d poznámky zodpovedajú tomuto vzoru. Vymazať ich?",
+		"%d poznámok zodpovedá tomuto vzoru. Vymazať ich?"
+	],
+	"%d note will be permanently deleted. Continue?": [
+		"%d poznámka bude natrvalo vymazaná. Pokračovať?",
+		"%d poznámky budú natrvalo vymazané. Pokračovať?",
+		"%d poznámok bude natrvalo vymazaných. Pokračovať?"
 	],
 	"%s": [
 		"%s"
@@ -64,6 +89,11 @@
 	],
 	"%s: %d": [
 		"%s: %d"
+	],
+	"%s: %d note": [
+		"%s: %d poznámka",
+		"%s: %d poznámky",
+		"%s: %d poznámok"
 	],
 	"%s: %d/%d": [
 		"%s: %d/%d"
@@ -1234,7 +1264,7 @@
 		"Povoliť biometrické overenie?"
 	],
 	"Enable deflist syntax": [
-		"Povolenie syntax deflist"
+		"Povoliť syntax deflist"
 	],
 	"Enable encryption": [
 		"Povoliť šifrovanie"
@@ -2122,6 +2152,11 @@
 	"Most plugins have source code available for review on the plugin website.": [
 		"Väčšina doplnkov má zdrojový kód k dispozícii na kontrolu na webovej stránke doplnku."
 	],
+	"Move %d note to notebook \"%s\"?": [
+		"Presunúť %d poznámku do zápisníka „%s“?",
+		"Presunúť %d poznámky do zápisníka „%s“?",
+		"Presunúť %d poznámok do zápisníka „%s“?"
+	],
 	"Move down": [
 		"Presunúť nadol"
 	],
@@ -2518,6 +2553,9 @@
 	"PDF File": [
 		"Súbor PDF"
 	],
+	"Per user. Minimum of 2 users.": [
+		"Na používateľa. Minimálne 2 používatelia."
+	],
 	"Permanently delete note": [
 		"Natrvalo odstrániť poznámku"
 	],
@@ -2526,6 +2564,11 @@
 	],
 	"Permanently delete notebook \"%s\"?\n\nAll notes and sub-notebooks within this notebook will be permanently deleted.": [
 		"Trvalo odstrániť zápisník „%s“?\n\nVšetky poznámky a podradené zápisníky v rámci tohto zápisníka budú natrvalo vymazané."
+	],
+	"Permanently delete this note?": [
+		"Natrvalo odstrániť túto poznámku?",
+		"Natrvalo odstrániť tieto %d poznámky?",
+		"Natrvalo odstrániť týchto %d poznámok?"
 	],
 	"Permanently deletes the notebook, skipping the trash.": [
 		"Trvalo odstráni zápisník, pričom vynechá kôš."
