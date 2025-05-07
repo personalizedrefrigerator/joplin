@@ -8,10 +8,10 @@ import { ShareInvitation, ShareUserStatus } from '@joplin/lib/services/share/red
 import { setupDatabaseAndSynchronizer, switchClient } from '@joplin/lib/testing/test-utils';
 import ShareService from '@joplin/lib/services/share/ShareService';
 import makeMockShareInvitation from '@joplin/lib/testing/share/makeMockShareInvitation';
-import { Provider } from 'react-redux';
 import createMockReduxStore from '../../../utils/testing/createMockReduxStore';
 import { AppState } from '../../../utils/types';
 import { Store } from 'redux';
+import TestProviderStack from '../../testing/TestProviderStack';
 
 interface WrapperProps {
 	shareInvitations: ShareInvitation[];
@@ -20,13 +20,13 @@ interface WrapperProps {
 
 const ShareManagerWrapper: React.FC<WrapperProps> = props => {
 	return (
-		<Provider store={props.store}>
+		<TestProviderStack store={props.store}>
 			<ShareManagerComponent
 				themeId={Setting.THEME_LIGHT}
 				shareInvitations={props.shareInvitations}
 				processingShareInvitationResponse={false}
 			/>
-		</Provider>
+		</TestProviderStack>
 	);
 };
 
