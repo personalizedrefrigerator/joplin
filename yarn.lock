@@ -8829,8 +8829,8 @@ __metadata:
     deprecated-react-native-prop-types: 5.0.0
     events: 3.3.0
     expo: 52.0.46
-    expo-av: ~15.0.2
-    expo-camera: ~16.0.18
+    expo-av: 15.0.2
+    expo-camera: 16.0.18
     fast-deep-equal: 3.1.3
     fs-extra: 11.2.0
     gulp: 4.0.2
@@ -25076,7 +25076,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"expo-av@npm:~15.0.2":
+"expo-av@npm:15.0.2":
   version: 15.0.2
   resolution: "expo-av@npm:15.0.2"
   peerDependencies:
@@ -25091,7 +25091,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"expo-camera@npm:~16.0.18":
+"expo-camera@npm:16.0.18":
   version: 16.0.18
   resolution: "expo-camera@npm:16.0.18"
   dependencies:
