@@ -10,6 +10,8 @@ import './utils/polyfills';
 
 import { LogBox } from 'react-native';
 import { registerRootComponent } from 'expo';
+// Allows loading image assets. See https://github.com/expo/expo/issues/31240
+import 'expo-asset';
 import shim from '@joplin/lib/shim';
 shim.setReact(require('react'));
 
