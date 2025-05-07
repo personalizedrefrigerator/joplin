@@ -92,7 +92,7 @@ class Application extends BaseApplication {
 	public reducer(state: AppState = appDefaultState, action: any) {
 		let newState = appReducer(state, action);
 		newState = resourceEditWatcherReducer(newState, action);
-		newState = super.reducer(newState, action);
+		newState = super.reducer(newState, action) as AppState;
 		return newState;
 	}
 
@@ -147,6 +147,10 @@ class Application extends BaseApplication {
 
 		if (['EVENT_NOTE_ALARM_FIELD_CHANGE', 'NOTE_DELETE'].indexOf(action.type) >= 0) {
 			await AlarmService.updateNoteNotification(action.id, action.type === 'NOTE_DELETE');
+		}
+
+		if (action.type === 'SETTING_UPDATE_ONE' && action.key === 'featureFlag.autoUpdaterServiceEnabled' || action.type === 'SETTING_UPDATE_ALL') {
+			if (Setting.value('featureFlag.autoUpdaterServiceEnabled')) this.setupAutoUpdaterService();
 		}
 
 		const result = await super.generalMiddleware(store, next, action);
@@ -386,6 +390,8 @@ class Application extends BaseApplication {
 	}
 
 	private setupAutoUpdaterService() {
+		this.logger().info('Setting up auto-updater service...');
+
 		if (Setting.value('featureFlag.autoUpdaterServiceEnabled')) {
 			bridge().electronApp().initializeAutoUpdaterService(
 				Logger.create('AutoUpdaterService'),

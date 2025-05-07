@@ -45,6 +45,8 @@ import useEditDialog from './utils/useEditDialog';
 import useEditDialogEventListeners from './utils/useEditDialogEventListeners';
 import Setting from '@joplin/lib/models/Setting';
 import useTextPatternsLookup from './utils/useTextPatternsLookup';
+import { toFileProtocolPath } from '@joplin/utils/path';
+import { RenderResultPluginAsset } from '@joplin/renderer/types';
 
 const logger = Logger.create('TinyMCE');
 
@@ -946,6 +948,16 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: any) => {
 			return docHead_;
 		}
 
+		const assetToUrl = (asset: RenderResultPluginAsset) => {
+			if (asset.pathIsAbsolute) {
+				// This is important on Windows, where the C:/ at the start of the path
+				// is interpreted as a relative subfolder without the file:// prefix.
+				return toFileProtocolPath(asset.path);
+			} else {
+				return asset.path;
+			}
+		};
+
 		const allCssFiles = [
 			`${bridge().vendorDir()}/lib/@fortawesome/fontawesome-free/css/all.min.css`,
 			`gui/note-viewer/pluginAssets/highlight.js/${theme.codeThemeCss}`,
@@ -953,16 +965,14 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: any) => {
 			pluginAssets
 				// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 				.filter((a: any) => a.mime === 'text/css')
-				// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-				.map((a: any) => a.path),
+				.map(assetToUrl),
 		);
 
 		const allJsFiles = [].concat(
 			pluginAssets
 				// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 				.filter((a: any) => a.mime === 'application/javascript')
-				// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-				.map((a: any) => a.path),
+				.map(assetToUrl),
 		);
 
 		const filePathToElementId = (path: string) => {
