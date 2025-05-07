@@ -1,7 +1,8 @@
 // This is a fork of CodeMirror's insertNewlineContinueMarkup, which is based on the
 // version of the file before this commit: https://github.com/codemirror/lang-markdown/commit/fa289d542f65451957c562780d5dd846bee060d4
 //
-// **This file is modified to drop support for non-tight lists**.
+// Newer versions of the code handle non-tight lists in a way that many users find
+// unexpected.
 //
 // The original source has the following license:
 // !
@@ -128,19 +129,33 @@ const insertNewlineContinueMarkup: StateCommand = ({ state, dispatch }) => {
 
 		const emptyLine = pos >= (inner.to - inner.spaceAfter.length) && !/\S/.test(line.text.slice(inner.to));
 		// Empty line in list
-		if (inner.item && emptyLine) { // delete a level of markup
-			const next = context.length > 1 ? context[context.length - 2] : null;
-			let delTo, insert = '';
-			if (next && next.item) { // Re-add marker for the list at the next level
-				delTo = line.from + next.from;
-				insert = next.marker(doc, 1);
-			} else {
-				delTo = line.from + (next ? next.to : 0);
+		if (inner.item && emptyLine) {
+			// First list item or blank line before: delete a level of markup
+			if (inner.node.firstChild!.to >= pos ||
+				line.from > 0 && !/[^\s>]/.test(doc.lineAt(line.from - 1).text)) {
+				const next = context.length > 1 ? context[context.length - 2] : null;
+				let delTo, insert = '';
+				if (next && next.item) { // Re-add marker for the list at the next level
+					delTo = line.from + next.from;
+					insert = next.marker(doc, 1);
+				} else {
+					delTo = line.from + (next ? next.to : 0);
+				}
+				const changes: ChangeSpec[] = [{ from: delTo, to: pos, insert }];
+				if (inner.node.name === 'OrderedList') renumberList(inner.item!, doc, changes, -2);
+				if (next && next.node.name === 'OrderedList') renumberList(next.item!, doc, changes);
+				return { range: EditorSelection.cursor(delTo + insert.length), changes };
+			} else { // Move this line down
+				let insert = '';
+				for (let i = 0, e = context.length - 2; i <= e; i++) {
+					insert += context[i].blank(i < e ? countColumn(line.text, 4, context[i + 1].from) - insert.length : null, i < e);
+				}
+				insert = normalizeIndent(insert, state);
+				return {
+					range: EditorSelection.cursor(pos + insert.length + 1),
+					changes: { from: line.from, insert: insert + state.lineBreak },
+				};
 			}
-			const changes: ChangeSpec[] = [{ from: delTo, to: pos, insert }];
-			if (inner.node.name === 'OrderedList') renumberList(inner.item!, doc, changes, -2);
-			if (next && next.node.name === 'OrderedList') renumberList(next.item!, doc, changes);
-			return { range: EditorSelection.cursor(delTo + insert.length), changes };
 		}
 
 		if (inner.node.name === 'Blockquote' && emptyLine && line.from) {

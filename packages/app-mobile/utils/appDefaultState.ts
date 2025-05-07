@@ -16,6 +16,9 @@ const appDefaultState: AppState = {
 	isOnMobileData: false,
 	disableSideMenuGestures: false,
 	showPanelsDialog: false,
+	backHandlers: [],
+	activeBackHandler: null,
+	navHistory: [],
 	...defaultState,
 
 	// On mobile, it's possible to select notes that aren't in the selected folder/tag/etc.

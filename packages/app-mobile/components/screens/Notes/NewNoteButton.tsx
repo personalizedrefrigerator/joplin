@@ -9,6 +9,7 @@ import LabelledIconButton from '../../buttons/LabelledIconButton';
 import TextButton, { ButtonSize, ButtonType } from '../../buttons/TextButton';
 import { useCallback, useMemo, useRef } from 'react';
 import Logger from '@joplin/utils/Logger';
+import focusView from '../../../utils/focusView';
 
 const logger = Logger.create('NewNoteButton');
 
@@ -29,18 +30,17 @@ const styles = StyleSheet.create({
 		gap: 2,
 	},
 	mainButtonRow: {
-		flexWrap: 'nowrap',
-	},
-	spacer: {
-		flexShrink: 1,
-		flexGrow: 0,
-		width: 12,
+		flexWrap: 'wrap',
+		gap: 12,
 	},
 	shortcutButton: {
 		flexGrow: 1,
+		flexShrink: 1,
+		flexBasis: 0,
 	},
 	mainButton: {
 		flexShrink: 1,
+		flexGrow: 1,
 	},
 	mainButtonLabel: {
 		fontSize: 16,
@@ -49,9 +49,8 @@ const styles = StyleSheet.create({
 	menuContent: {
 		gap: 12,
 		flexShrink: 1,
-		// Web: Use column-reverse to make focus order jump to the "new note"
-		// and "new to-do" items first.
-		flexDirection: 'column-reverse',
+		flexGrow: 1,
+		flexDirection: 'column',
 	},
 });
 
@@ -69,6 +68,13 @@ const NewNoteButton: React.FC<Props> = _props => {
 	};
 
 	const menuContent = <View style={styles.menuContent}>
+		<View style={styles.buttonRow}>
+			{renderShortcutButton(AttachFileAction.AttachFile, 'material attachment', _('Attachment'))}
+			{renderShortcutButton(AttachFileAction.RecordAudio, 'material microphone', _('Recording'))}
+			{renderShortcutButton(AttachFileAction.TakePhoto, 'material camera', _('Camera'))}
+			{renderShortcutButton(AttachFileAction.AttachDrawing, 'material draw', _('Drawing'))}
+		</View>
+		<Divider/>
 		<View style={[styles.buttonRow, styles.mainButtonRow]}>
 			<TextButton
 				icon='checkbox-outline'
@@ -79,7 +85,6 @@ const NewNoteButton: React.FC<Props> = _props => {
 				type={ButtonType.Secondary}
 				size={ButtonSize.Larger}
 			>{_('New to-do')}</TextButton>
-			<View style={styles.spacer}/>
 			<TextButton
 				touchableRef={newNoteRef}
 				icon='file-document-outline'
@@ -90,13 +95,6 @@ const NewNoteButton: React.FC<Props> = _props => {
 				type={ButtonType.Primary}
 				size={ButtonSize.Larger}
 			>{_('New note')}</TextButton>
-		</View>
-		<Divider/>
-		<View style={styles.buttonRow}>
-			{renderShortcutButton(AttachFileAction.AttachFile, 'material attachment', _('Attachment'))}
-			{renderShortcutButton(AttachFileAction.RecordAudio, 'material microphone', _('Recording'))}
-			{renderShortcutButton(AttachFileAction.TakePhoto, 'material camera', _('Camera'))}
-			{renderShortcutButton(AttachFileAction.AttachDrawing, 'material draw', _('Drawing'))}
 		</View>
 	</View>;
 
@@ -121,14 +119,18 @@ const NewNoteButton: React.FC<Props> = _props => {
 		}
 		return Promise.resolve();
 	}, []);
+	const onMenuShown = useCallback(() => {
+		// Note: May apply only to web:
+		focusView('NewNoteButton', newNoteRef.current);
+	}, []);
 
 	return <FloatingActionButton
 		mainButton={{
 			icon: 'add',
 			label: _('Add new'),
 		}}
-		menuLabel={_('New note menu')}
 		menuContent={menuContent}
+		onMenuShow={onMenuShown}
 		accessibilityActions={accessibilityActions}
 		onAccessibilityAction={onAccessibilityAction}
 	/>;

@@ -4,7 +4,7 @@ import { AccessibilityInfo, findNodeHandle, Platform, UIManager, View } from 're
 
 const logger = Logger.create('focusView');
 
-const focusView = (source: string, view: View) => {
+const focusView = (source: string, view: View|HTMLElement) => {
 	const autoFocus = () => {
 		if (Platform.OS === 'web') {
 			// react-native-web defines UIManager.focus for setting the keyboard focus. However,
@@ -20,7 +20,7 @@ const focusView = (source: string, view: View) => {
 			// eslint-disable-next-line no-restricted-properties
 			UIManager.focus(view);
 		} else {
-			const handle = findNodeHandle(view);
+			const handle = findNodeHandle(view as View);
 			if (handle !== null) {
 				AccessibilityInfo.setAccessibilityFocus(handle);
 			} else {

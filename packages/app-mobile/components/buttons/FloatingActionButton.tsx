@@ -17,17 +17,17 @@ interface ButtonSpec {
 }
 
 interface ActionButtonProps {
+	// If not given, an "add" button will be used.
+	mainButton: ButtonSpec;
+	dispatch: Dispatch;
+
 	menuContent?: React.ReactNode;
-	onMenuToggled?: (visible: boolean)=> void;
+	onMenuShow?: ()=> void;
+
 	accessibilityActions?: readonly AccessibilityActionInfo[];
 	// Can return a Promise to simplify unit testing
 	onAccessibilityAction?: (event: AccessibilityActionEvent)=> void|Promise<void>;
 	accessibilityHint?: string;
-	menuLabel?: string;
-
-	// If not given, an "add" button will be used.
-	mainButton: ButtonSpec;
-	dispatch: Dispatch;
 }
 
 // Returns a render function compatible with React Native Paper.
@@ -50,14 +50,13 @@ const FloatingActionButton = (props: ActionButtonProps) => {
 		});
 		const newOpen = !open;
 		setOpen(newOpen);
-		props.onMenuToggled?.(newOpen);
-	}, [setOpen, open, props.onMenuToggled, props.dispatch]);
+	}, [setOpen, open, props.dispatch]);
 
 	const onDismiss = useCallback(() => {
 		if (open) onMenuToggled();
 	}, [open, onMenuToggled]);
 
-	const mainButtonRef = useRef<View>();
+	const mainButtonRef = useRef<View>(null);
 
 	const closedIcon = useIcon(props.mainButton?.icon ?? 'add');
 	const openIcon = useIcon('close');
@@ -89,6 +88,7 @@ const FloatingActionButton = (props: ActionButtonProps) => {
 		<BottomDrawer
 			visible={open}
 			onDismiss={onDismiss}
+			onShow={props.onMenuShow}
 		>
 			{props.menuContent}
 		</BottomDrawer>

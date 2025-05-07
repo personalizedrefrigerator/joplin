@@ -12,6 +12,7 @@ interface Props {
 	children: React.ReactNode;
 	visible: boolean;
 	onDismiss: ()=> void;
+	onShow: ()=> void;
 }
 
 const useStyles = (theme: ThemeStyle) => {
@@ -47,6 +48,8 @@ const useStyles = (theme: ThemeStyle) => {
 				gap: 8,
 				flexDirection: 'row',
 				flexWrap: 'wrap',
+				flexShrink: 1,
+				flexGrow: 1,
 			},
 			modalBackground: {
 				paddingTop: 0,
@@ -80,6 +83,7 @@ const BottomDrawer: React.FC<Props> = props => {
 		visible={props.visible}
 		onDismiss={props.onDismiss}
 		onRequestClose={props.onDismiss}
+		onShow={props.onShow}
 		animationType='fade'
 		backgroundColor={theme.backgroundColorTransparent2}
 		transparent
