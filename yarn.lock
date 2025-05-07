@@ -8830,7 +8830,7 @@ __metadata:
     events: 3.3.0
     expo: 52.0.46
     expo-av: 15.0.2
-    expo-camera: 16.0.18
+    expo-camera: 15.0.9
     fast-deep-equal: 3.1.3
     fs-extra: 11.2.0
     gulp: 4.0.2
@@ -25091,20 +25091,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"expo-camera@npm:16.0.18":
-  version: 16.0.18
-  resolution: "expo-camera@npm:16.0.18"
+"expo-camera@npm:15.0.9":
+  version: 15.0.9
+  resolution: "expo-camera@npm:15.0.9"
   dependencies:
     invariant: ^2.2.4
   peerDependencies:
     expo: "*"
-    react: "*"
-    react-native: "*"
-    react-native-web: "*"
-  peerDependenciesMeta:
-    react-native-web:
-      optional: true
-  checksum: 91c7f23bcb7567500277a0c5867aa3c1b9c5a6af82888514186a985fbb00b0682ee1ccd06a122484a2549ae00a7d8d83c2edeabdc273e284b0c23eb9a0892368
+  checksum: daba1536a3dcde16da5e8fb1193409cef580ac7d63615b7ebb888287a5fbf66f98a7b97363ab19340232728b2f70309af3ef819c4b52715e5f3f26b664bc5655
   languageName: node
   linkType: hard
 
