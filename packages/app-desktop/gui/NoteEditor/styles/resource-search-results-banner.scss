@@ -4,6 +4,16 @@
 	margin-left: 5px;
 	margin-bottom: 10px;
 	background-color: var(--joplin-warning-background-color);
+	display: none;
+	--marker-content: '[+]';
+
+	&[open] {
+		--marker-content: '[-]';
+	}
+
+	&.-visible {
+		display: block;
+	}
 
 	> summary {
 		cursor: pointer;
@@ -13,13 +23,12 @@
 			display: none;
 		}
 
-		&::before {
-			content: '[+]';
+		& > .marker {
+			&::before {
+				content: var(--marker-content);
+			}
 			float: right;
+            display: inline-block;
 		}
-	}
-
-	&[open] > summary::before {
-		content: '[-]';
 	}
 }

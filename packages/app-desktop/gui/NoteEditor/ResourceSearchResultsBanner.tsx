@@ -25,6 +25,7 @@ const ResourceResult: React.FC<ResourceResultProps> = ({ result, onResourceClick
 	return <button
 		onClick={onClick}
 		className='link-button'
+		role='link'
 	>{result.title}</button>;
 };
 
@@ -41,17 +42,17 @@ const ResourceSearchResultsBanner: React.FC<Props> = ({
 		</li>;
 	};
 
-	if (resourceResults.length) {
-		return (
-			<details className='resource-search-results-banner' open>
-				<summary className='description'>{_n('The following attachment matches your search query:', 'The following attachments match your search query:', resourceResults.length)}</summary>
-				<ul>
-					{resourceResults.map(r => renderResource(r))}
-				</ul>
-			</details>
-		);
-	}
-	return null;
+	return (
+		<details className={`resource-search-results-banner ${resourceResults.length ? '-visible' : ''}`} open>
+			<summary>
+				<div className='marker' aria-hidden/>
+				{_n('The following attachment matches your search query:', 'The following attachments match your search query:', resourceResults.length)}
+			</summary>
+			<ul>
+				{resourceResults.map(r => renderResource(r))}
+			</ul>
+		</details>
+	);
 };
 
 export default ResourceSearchResultsBanner;
