@@ -1,0 +1,25 @@
+
+.resource-search-results-banner {
+	padding: 10px;
+	margin-left: 5px;
+	margin-bottom: 10px;
+	background-color: var(--joplin-warning-background-color);
+
+	> summary {
+		cursor: pointer;
+
+		&::marker {
+			content: '';
+			display: none;
+		}
+
+		&::before {
+			content: '[+]';
+			float: right;
+		}
+	}
+
+	&[open] > summary::before {
+		content: '[-]';
+	}
+}

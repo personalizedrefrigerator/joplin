@@ -20,7 +20,7 @@ import Button, { ButtonLevel } from '../Button/Button';
 import eventManager, { EventName } from '@joplin/lib/eventManager';
 import { AppState } from '../../app.reducer';
 import ToolbarButtonUtils, { ToolbarButtonInfo } from '@joplin/lib/services/commands/ToolbarButtonUtils';
-import { _, _n } from '@joplin/lib/locale';
+import { _ } from '@joplin/lib/locale';
 import NoteTitleBar from './NoteTitle/NoteTitleBar';
 import markupLanguageUtils from '@joplin/lib/utils/markupLanguageUtils';
 import Setting from '@joplin/lib/models/Setting';
@@ -56,6 +56,7 @@ import PluginService from '@joplin/lib/services/plugins/PluginService';
 import EditorPluginHandler from '@joplin/lib/services/plugins/EditorPluginHandler';
 import useResourceUnwatcher from './utils/useResourceUnwatcher';
 import StatusBar from './StatusBar';
+import ResourceSearchResultsBanner, { OnBannerResourceClick } from './ResourceSearchResultsBanner';
 
 const debounce = require('debounce');
 
@@ -490,10 +491,8 @@ function NoteEditorContent(props: NoteEditorProps) {
 		setShowRevisions(false);
 	}, []);
 
-	const onBannerResourceClick = useCallback(async (event: React.MouseEvent<HTMLAnchorElement>) => {
-		event.preventDefault();
-		const resourceId = event.currentTarget.getAttribute('data-resource-id');
-		await openItemById(resourceId, props.dispatch);
+	const onBannerResourceClick: OnBannerResourceClick = useCallback(async (event) => {
+		await openItemById(event.item_id, props.dispatch);
 	}, [props.dispatch]);
 
 	if (showRevisions) {
@@ -569,21 +568,11 @@ function NoteEditorContent(props: NoteEditorProps) {
 	}
 
 	const renderResourceInSearchResultsNotification = () => {
-		const resourceResults = props.searchResults.filter(r => r.id === props.noteId && r.item_type === ModelType.Resource);
-		if (!resourceResults.length) return null;
-
-		const renderResource = (id: string, title: string) => {
-			return <li key={id}><a data-resource-id={id} onClick={onBannerResourceClick} href="#">{title}</a></li>;
-		};
-
-		return (
-			<div style={styles.resourceWatchBanner}>
-				<p style={styles.resourceWatchBannerLine}>{_n('The following attachment matches your search query:', 'The following attachments match your search query:', resourceResults.length)}</p>
-				<ul>
-					{resourceResults.map(r => renderResource(r.item_id, r.title))}
-				</ul>
-			</div>
-		);
+		return <ResourceSearchResultsBanner
+			searchResults={props.searchResults}
+			onResourceLinkClick={onBannerResourceClick}
+			noteId={props.noteId}
+		/>;
 	};
 
 	function renderSearchInfo() {
