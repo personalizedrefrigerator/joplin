@@ -3,7 +3,7 @@ import { useMemo, useRef } from 'react';
 import { DialogState } from '../types';
 import { PrintCallback } from './usePrintToCallback';
 import { _ } from '@joplin/lib/locale';
-import announceForAccessibility from '../../utils/announceForAccessibility';
+import announceForAccessibility from '@joplin/lib/utils/dom/announceForAccessibility';
 
 export interface WindowControl {
 	setState: (update: Partial<DialogState>)=> void;

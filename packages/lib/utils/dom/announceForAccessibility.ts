@@ -1,4 +1,4 @@
-import shim from '@joplin/lib/shim';
+import shim from '../../shim';
 import Logger from '@joplin/utils/Logger';
 
 const logger = Logger.create('announceForAccessibility');

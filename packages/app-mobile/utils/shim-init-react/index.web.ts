@@ -6,6 +6,7 @@ import FsDriverWeb from '../fs-driver/fs-driver-rn.web';
 import { FetchBlobOptions } from '@joplin/lib/types';
 import JoplinError from '@joplin/lib/JoplinError';
 import joplinCrypto from '@joplin/lib/services/e2ee/crypto';
+import announceForAccessibility from '@joplin/lib/utils/dom/announceForAccessibility';
 
 const shimInit = () => {
 	type GetLocationOptions = { timeout?: number };
@@ -105,6 +106,10 @@ const shimInit = () => {
 
 	shim.restartApp = () => {
 		location.reload();
+	};
+
+	shim.announceForAccessibility = (message) => {
+		announceForAccessibility(message);
 	};
 
 	shimInitShared();

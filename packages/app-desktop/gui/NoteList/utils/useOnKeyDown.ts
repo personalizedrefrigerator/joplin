@@ -8,7 +8,7 @@ import { Dispatch } from 'redux';
 import { FocusNote } from './useFocusNote';
 import { ItemFlow } from '@joplin/lib/services/plugins/api/noteListType';
 import { KeyboardEventKey } from '@joplin/lib/dom';
-import announceForAccessibility from '../../utils/announceForAccessibility';
+import announceForAccessibility from '@joplin/lib/utils/dom/announceForAccessibility';
 import { _ } from '@joplin/lib/locale';
 
 const useOnKeyDown = (

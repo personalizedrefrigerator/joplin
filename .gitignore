@@ -484,7 +484,6 @@ packages/app-desktop/gui/style/StyledMessage.js
 packages/app-desktop/gui/style/StyledTextInput.js
 packages/app-desktop/gui/utils/NoteListUtils.test.js
 packages/app-desktop/gui/utils/NoteListUtils.js
-packages/app-desktop/gui/utils/announceForAccessibility.js
 packages/app-desktop/gui/utils/convertToScreenCoordinates.js
 packages/app-desktop/gui/utils/dragAndDrop.js
 packages/app-desktop/gui/utils/loadScript.js
@@ -1468,6 +1467,7 @@ packages/lib/utils/ActionLogger.test.js
 packages/lib/utils/ActionLogger.js
 packages/lib/utils/attachedResources.js
 packages/lib/utils/credentialFiles.js
+packages/lib/utils/dom/announceForAccessibility.js
 packages/lib/utils/dom/makeSandboxedIframe.js
 packages/lib/utils/focusHandler.js
 packages/lib/utils/frontMatter.js

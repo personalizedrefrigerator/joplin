@@ -498,6 +498,10 @@ const shim = {
 		throw new Error('Not implemented');
 	},
 
+	announceForAccessibility: (_message: string): void => {
+		throw new Error('Not implemented');
+	},
+
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	setNodeSqlite: (nodeSqlite: any) => {
 		nodeSqlite_ = nodeSqlite;

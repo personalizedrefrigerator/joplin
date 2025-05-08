@@ -210,6 +210,7 @@ const appNavInit = {
 		label: () => _('Configuration'),
 	},
 };
+NavService.setRouteLabels(appNavInit);
 
 const describeRoute = (nextAction: NavAction, route: Route) => {
 	const routeName = nextAction?.routeName ?? route?.routeName ?? '';

@@ -5,7 +5,7 @@ const { GeolocationReact } = require('../geolocation-react.js');
 import RNFetchBlob from 'rn-fetch-blob';
 import { generateSecureRandom } from 'react-native-securerandom';
 import FsDriverRN from '../fs-driver/fs-driver-rn';
-import { Linking, Platform } from 'react-native';
+import { AccessibilityInfo, Linking, Platform } from 'react-native';
 import crypto from '../../services/e2ee/crypto';
 const RNExitApp = require('react-native-exit-app').default;
 
@@ -179,6 +179,10 @@ export default function shimInit() {
 
 	shim.restartApp = () => {
 		RNExitApp.exitApp();
+	};
+
+	shim.announceForAccessibility = (message) => {
+		AccessibilityInfo.announceForAccessibility(message);
 	};
 
 	shimInitShared();
