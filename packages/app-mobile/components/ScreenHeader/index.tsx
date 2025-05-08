@@ -3,6 +3,7 @@ import { PureComponent, ReactElement } from 'react';
 import { connect } from 'react-redux';
 import { View, Text, StyleSheet, TouchableOpacity, Image, ViewStyle, Platform } from 'react-native';
 const Icon = require('react-native-vector-icons/Ionicons').default;
+import BackButtonService from '../../services/BackButtonService';
 import NavService from '@joplin/lib/services/NavService';
 import { _, _n } from '@joplin/lib/locale';
 import Note from '@joplin/lib/models/Note';
@@ -25,7 +26,6 @@ import WebBetaButton from './WebBetaButton';
 import Menu, { MenuOptionType } from './Menu';
 import shim from '@joplin/lib/shim';
 import CommandService from '@joplin/lib/services/CommandService';
-import BackButton from './BackButton';
 export { MenuOptionType };
 
 // Rather than applying a padding to the whole bar, it is applied to each
@@ -189,6 +189,14 @@ class ScreenHeaderComponent extends PureComponent<ScreenHeaderProps, ScreenHeade
 		this.props.dispatch({ type: 'SIDE_MENU_TOGGLE' });
 	}
 
+	private async backButton_press() {
+		if (this.props.noteSelectionEnabled) {
+			this.props.dispatch({ type: 'NOTE_SELECTION_END' });
+		} else {
+			await BackButtonService.back();
+		}
+	}
+
 	private selectAllButton_press() {
 		this.props.dispatch({ type: 'NOTE_SELECT_ALL_TOGGLE' });
 	}
@@ -264,12 +272,22 @@ class ScreenHeaderComponent extends PureComponent<ScreenHeaderProps, ScreenHeade
 		}
 
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-		function backButton(styles: any) {
-			return <BackButton
-				iconStyle={styles.topIcon}
-				containerStyleEnabled={styles.backButton}
-				containerStyleDisabled={styles.backButtonDisabled}
-			/>;
+		function backButton(styles: any, onPress: OnPressCallback, disabled: boolean) {
+			return (
+				<TouchableOpacity
+					onPress={onPress}
+					disabled={disabled}
+
+					accessibilityLabel={_('Back')}
+					accessibilityRole="button">
+					<View style={disabled ? styles.backButtonDisabled : styles.backButton}>
+						<Icon
+							name="arrow-back"
+							style={styles.topIcon}
+						/>
+					</View>
+				</TouchableOpacity>
+			);
 		}
 
 		function saveButton(
@@ -593,10 +611,12 @@ class ScreenHeaderComponent extends PureComponent<ScreenHeaderProps, ScreenHeade
 		const showContextMenuButton = this.props.showContextMenuButton !== false;
 		const showBackButton = !!this.props.noteSelectionEnabled || this.props.showBackButton !== false;
 
+		let backButtonDisabled = !this.props.historyCanGoBack;
+		if (this.props.noteSelectionEnabled) backButtonDisabled = false;
 		const headerItemDisabled = !(this.props.selectedNoteIds.length > 0);
 
 		const sideMenuComp = !showSideMenuButton ? null : sideMenuButton(this.styles(), () => this.sideMenuButton_press());
-		const backButtonComp = !showBackButton ? null : backButton(this.styles());
+		const backButtonComp = !showBackButton ? null : backButton(this.styles(), () => this.backButton_press(), backButtonDisabled);
 		const pluginPanelsComp = pluginPanelToggleButton(this.styles(), () => this.pluginPanelToggleButton_press());
 		const betaIconComp = betaIconButton();
 		const selectAllButtonComp = !showSelectAllButton ? null : selectAllButton(this.styles(), () => this.selectAllButton_press());

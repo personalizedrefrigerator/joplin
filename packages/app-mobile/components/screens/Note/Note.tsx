@@ -16,6 +16,7 @@ import Resource from '@joplin/lib/models/Resource';
 import Folder from '@joplin/lib/models/Folder';
 const Clipboard = require('@react-native-clipboard/clipboard').default;
 const md5 = require('md5');
+import BackButtonService from '../../../services/BackButtonService';
 import NavService, { OnNavigateCallback as OnNavigateCallback } from '@joplin/lib/services/NavService';
 import { ModelType } from '@joplin/lib/BaseModel';
 import FloatingActionButton from '../../buttons/FloatingActionButton';
@@ -67,7 +68,6 @@ import getActivePluginEditorView from '@joplin/lib/services/plugins/utils/getAct
 import EditorPluginHandler from '@joplin/lib/services/plugins/EditorPluginHandler';
 import AudioRecordingBanner from '../../voiceTyping/AudioRecordingBanner';
 import SpeechToTextBanner from '../../voiceTyping/SpeechToTextBanner';
-import BackButtonHandler from '../../BackButtonHandler';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 const emptyArray: any[] = [];
@@ -154,6 +154,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 	private editorRef: any;
 	private titleTextFieldRef: RefObject<TextInput>;
 	private navHandler: OnNavigateCallback;
+	private backHandler: ()=> Promise<boolean>;
 	private undoRedoService_: UndoRedoService;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	private noteTagDialog_closeRequested: any;
@@ -238,6 +239,48 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 
 		this.navHandler = async () => {
 			return await saveDialog();
+		};
+
+		this.backHandler = async () => {
+
+			if (this.isModified()) {
+				await this.saveNoteButton_press();
+			}
+
+			const isProvisionalNote = this.props.provisionalNoteIds.includes(this.props.noteId);
+
+			if (isProvisionalNote) {
+				return false;
+			}
+
+			if (this.state.mode === 'edit') {
+				Keyboard.dismiss();
+
+				this.setState({
+					mode: 'view',
+				});
+
+				await this.undoRedoService_.reset();
+
+				return true;
+			}
+
+			if (this.state.fromShare) {
+				// Note: In the past, NAV_BACK caused undesired behaviour in this case:
+				// - share to Joplin from some other app
+				// - open Joplin and open any note
+				// - go back -- with NAV_BACK this causes the app to exit rather than just showing notes
+				// This no longer seems to happen, but this case should be checked when adjusting navigation
+				// history behavior.
+				this.props.dispatch({
+					type: 'NAV_BACK',
+				});
+
+				ShareExtension.close();
+				return true;
+			}
+
+			return false;
 		};
 
 		this.noteTagDialog_closeRequested = () => {
@@ -384,59 +427,6 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 		};
 	}
 
-	private getBackHandler = () => {
-		const saveIfModified = async () => {
-			if (this.isModified()) {
-				await this.saveNoteButton_press();
-			}
-		};
-
-		const isProvisional = this.props.provisionalNoteIds.includes(this.props.noteId);
-		if (isProvisional) {
-			return {
-				onBack: saveIfModified,
-				runParent: true,
-			};
-		}
-
-		if (this.state.mode === 'edit') {
-			return {
-				onBack: async () => {
-					Keyboard.dismiss();
-
-					this.setState({
-						mode: 'view',
-					});
-
-					await this.undoRedoService_.reset();
-				},
-				label: _('Show viewer'),
-			};
-		}
-
-		if (this.state.fromShare) {
-			// Note: In the past, NAV_BACK caused undesired behaviour in this case:
-			// - share to Joplin from some other app
-			// - open Joplin and open any note
-			// - go back -- with NAV_BACK this causes the app to exit rather than just showing notes
-			// This no longer seems to happen, but this case should be checked when adjusting navigation
-			// history behavior.
-			return {
-				onBack: () => {
-					this.props.dispatch({
-						type: 'NAV_BACK',
-					});
-
-					ShareExtension.close();
-				},
-				label: _('Show note list'),
-			};
-		}
-
-		return null;
-	};
-
-
 	public styles() {
 		const themeId = this.props.themeId;
 		const theme = themeStyle(themeId);
@@ -551,6 +541,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 	}
 
 	public async componentDidMount() {
+		BackButtonService.addHandler(this.backHandler);
 		NavService.addHandler(this.navHandler);
 
 		shared.clearResourceCache();
@@ -658,6 +649,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 	}
 
 	public componentWillUnmount() {
+		BackButtonService.removeHandler(this.backHandler);
 		NavService.removeHandler(this.navHandler);
 
 		shared.uninstallResourceHandling(this.refreshResource);
@@ -1683,7 +1675,6 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 		};
 
 		const { editorPlugin: activeEditorPlugin } = getActivePluginEditorView(this.props.plugins);
-		const backHandler = this.getBackHandler();
 
 		return (
 			<View style={this.rootStyle(this.props.themeId).root}>
@@ -1711,12 +1702,6 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 				<SelectDateTimeDialog themeId={this.props.themeId} shown={this.state.alarmDialogShown} date={dueDate} onAccept={this.onAlarmDialogAccept} onReject={this.onAlarmDialogReject} />
 
 				{noteTagDialog}
-				<BackButtonHandler
-					description={backHandler?.label}
-					enabled={!!backHandler}
-					runsParentAction={backHandler?.runParent}
-					onBack={backHandler?.onBack}
-				/>
 			</View>
 		);
 	}

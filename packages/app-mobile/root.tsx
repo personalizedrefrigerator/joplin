@@ -12,11 +12,9 @@ import BaseModel from '@joplin/lib/BaseModel';
 import BaseService from '@joplin/lib/services/BaseService';
 import ResourceService from '@joplin/lib/services/ResourceService';
 import KvStore from '@joplin/lib/services/KvStore';
-import NoteScreen from './components/screens/Note/Note';
-import UpgradeSyncTargetScreen from './components/screens/UpgradeSyncTargetScreen';
 import Setting, { AppType, Env } from '@joplin/lib/models/Setting';
 import PoorManIntervals from '@joplin/lib/PoorManIntervals';
-import { NotesParent, parseNotesParent, serializeNotesParent } from '@joplin/lib/reducer';
+import reducer, { NotesParent, parseNotesParent, serializeNotesParent } from '@joplin/lib/reducer';
 import ShareExtension, { UnsubscribeShareListener } from './utils/ShareExtension';
 import handleShared from './utils/shareHandler';
 import uuid from '@joplin/lib/uuid';
@@ -35,7 +33,9 @@ const DropdownAlert = require('react-native-dropdownalert').default;
 const AlarmServiceDriver = require('./services/AlarmServiceDriver').default;
 const SafeAreaView = require('./components/SafeAreaView');
 const { connect, Provider } = require('react-redux');
+import fastDeepEqual = require('fast-deep-equal');
 import { Provider as PaperProvider, MD3DarkTheme, MD3LightTheme } from 'react-native-paper';
+import BackButtonService, { BackButtonHandler } from './services/BackButtonService';
 import NavService from '@joplin/lib/services/NavService';
 import { createStore, applyMiddleware, Dispatch } from 'redux';
 import reduxSharedMiddleware from '@joplin/lib/components/shared/reduxSharedMiddleware';
@@ -53,16 +53,6 @@ import Revision from '@joplin/lib/models/Revision';
 import RevisionService from '@joplin/lib/services/RevisionService';
 import JoplinDatabase from '@joplin/lib/JoplinDatabase';
 import Database from '@joplin/lib/database';
-import NotesScreen from './components/screens/Notes/Notes';
-import TagsScreen from './components/screens/tags';
-import ConfigScreen from './components/screens/ConfigScreen/ConfigScreen';
-const { FolderScreen } = require('./components/screens/folder.js');
-import LogScreen from './components/screens/LogScreen';
-import StatusScreen from './components/screens/status';
-import SearchScreen from './components/screens/SearchScreen';
-const { OneDriveLoginScreen } = require('./components/screens/onedrive-login.js');
-import EncryptionConfigScreen from './components/screens/encryption-config';
-import DropboxLoginScreen from './components/screens/dropbox-login.js';
 import { MenuProvider } from 'react-native-popup-menu';
 import SideMenu, { SideMenuPosition } from './components/SideMenu';
 import SideMenuContent from './components/side-menu-content';
@@ -83,7 +73,6 @@ const SyncTargetAmazonS3 = require('@joplin/lib/SyncTargetAmazonS3.js');
 import BiometricPopup from './components/biometrics/BiometricPopup';
 import initLib from '@joplin/lib/initLib';
 import { isCallbackUrl, parseCallbackUrl, CallbackUrlCommand } from '@joplin/lib/callbackUrlUtils';
-import JoplinCloudLoginScreen from './components/screens/JoplinCloudLoginScreen';
 
 import SyncTargetNone from '@joplin/lib/SyncTargetNone';
 
@@ -113,8 +102,6 @@ import RSA from './services/e2ee/RSA.react-native';
 import { runIntegrationTests as runRsaIntegrationTests } from '@joplin/lib/services/e2ee/ppkTestUtils';
 import { runIntegrationTests as runCryptoIntegrationTests } from '@joplin/lib/services/e2ee/cryptoTestUtils';
 import { Theme, ThemeAppearance } from '@joplin/lib/themes/type';
-import ProfileSwitcher from './components/ProfileSwitcher/ProfileSwitcher';
-import ProfileEditor from './components/ProfileSwitcher/ProfileEditor';
 import sensorInfo, { SensorInfo } from './components/biometrics/sensorInfo';
 import { getCurrentProfile } from '@joplin/lib/services/profileConfig';
 import { getDatabaseName, getPluginDataDir, getProfilesRootDir, getResourceDir, setDispatch } from './services/profiles';
@@ -129,97 +116,16 @@ import KeymapService from '@joplin/lib/services/KeymapService';
 import PluginService from '@joplin/lib/services/plugins/PluginService';
 import initializeCommandService from './utils/initializeCommandService';
 import PlatformImplementation from './services/plugins/PlatformImplementation';
-import ShareManager from './components/screens/ShareManager';
+import appDefaultState, { DEFAULT_ROUTE } from './utils/appDefaultState';
 import { setDateFormat, setTimeFormat, setTimeLocale } from '@joplin/utils/time';
 import DatabaseDriverReactNative from './utils/database-driver-react-native';
 import DialogManager from './components/DialogManager';
 import lockToSingleInstance from './utils/lockToSingleInstance';
-import { AppState, NavAction, Route } from './utils/types';
+import { AppState } from './utils/types';
 import { getDisplayParentId } from '@joplin/lib/services/trash';
 import PluginNotification from './components/plugins/PluginNotification';
 import FocusControl from './components/accessibility/FocusControl/FocusControl';
-import appReducer from './utils/appReducer';
-import { DEFAULT_ROUTE } from './utils/appDefaultState';
-import BackButtonHandler from './components/BackButtonHandler';
-import BackButtonService from './services/BackButtonService';
-
-
-const appNavInit = {
-	Notes: {
-		screen: NotesScreen,
-		label: () => _('Note list'),
-	},
-	Note: {
-		screen: NoteScreen,
-		label: () => _('Note'),
-	},
-	Tags: {
-		screen: TagsScreen,
-		label: () => _('Tag list'),
-	},
-	Folder: {
-		screen: FolderScreen,
-		label: () => _('Folder editor'),
-	},
-	OneDriveLogin: {
-		screen: OneDriveLoginScreen,
-		label: () => _('OneDrive login'),
-	},
-	DropboxLogin: {
-		screen: DropboxLoginScreen,
-		label: () => _('Dropbox login'),
-	},
-	JoplinCloudLogin: {
-		screen: JoplinCloudLoginScreen,
-		label: () => _('Joplin Cloud login'),
-	},
-	EncryptionConfig: {
-		screen: EncryptionConfigScreen,
-		label: () => _('Encryption config'),
-	},
-	UpgradeSyncTarget: {
-		screen: UpgradeSyncTargetScreen,
-		label: () => _('Sync target upgrade'),
-	},
-	ShareManager: {
-		screen: ShareManager,
-		label: () => _('Share manager'),
-	},
-	ProfileSwitcher: {
-		screen: ProfileSwitcher,
-		label: () => _('Profile switcher'),
-	},
-	ProfileEditor: {
-		screen: ProfileEditor,
-		label: () => _('Profile editor'),
-	},
-	Log: {
-		screen: LogScreen,
-		label: () => _('Log viewer'),
-	},
-	Status: {
-		screen: StatusScreen,
-		label: () => _('Sync status'),
-	},
-	Search: {
-		screen: SearchScreen,
-		label: () => _('Search'),
-	},
-	Config: {
-		screen: ConfigScreen,
-		label: () => _('Configuration'),
-	},
-};
-NavService.setRouteLabels(appNavInit);
-
-const describeRoute = (nextAction: NavAction, route: Route) => {
-	const routeName = nextAction?.routeName ?? route?.routeName ?? '';
-
-	if (routeName in appNavInit) {
-		return appNavInit[routeName as keyof typeof appNavInit].label();
-	}
-	return _('Unknown');
-};
+import screens from './components/screens/screens';
 
 const logger = Logger.create('root');
 
@@ -346,6 +252,195 @@ const generalMiddleware = (store: any) => (next: any) => async (action: any) => 
 	return result;
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
+const navHistory: any[] = [];
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
+function historyCanGoBackTo(route: any) {
+	if (route.routeName === 'Folder') return false;
+
+	// There's no point going back to these screens in general and, at least in OneDrive case,
+	// it can be buggy to do so, due to incorrectly relying on global state (reg.syncTarget...)
+	if (route.routeName === 'OneDriveLogin') return false;
+	if (route.routeName === 'DropboxLogin') return false;
+
+	return true;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
+const appReducer = (state = appDefaultState, action: any) => {
+	let newState = state;
+	let historyGoingBack = false;
+
+	try {
+		switch (action.type) {
+
+		case 'NAV_BACK':
+		case 'NAV_GO':
+
+			if (action.type === 'NAV_BACK') {
+				if (!navHistory.length) break;
+
+				const newAction = navHistory.pop();
+				action = newAction ? newAction : navHistory.pop();
+
+				historyGoingBack = true;
+			}
+
+			{
+				const currentRoute = state.route;
+
+				if (!historyGoingBack && historyCanGoBackTo(currentRoute)) {
+					const previousRoute = navHistory.length && navHistory[navHistory.length - 1];
+					const isDifferentRoute = !previousRoute || !fastDeepEqual(navHistory[navHistory.length - 1], currentRoute);
+
+					// Avoid multiple consecutive duplicate screens in the navigation history -- these can make
+					// pressing "back" seem to have no effect.
+					if (isDifferentRoute) {
+						navHistory.push(currentRoute);
+					}
+				}
+
+				if (action.clearHistory) {
+					navHistory.splice(0, navHistory.length);
+				}
+
+				newState = { ...state };
+
+				newState.selectedNoteHash = '';
+
+				if (action.routeName === 'Search') {
+					newState.notesParentType = 'Search';
+				}
+
+				if ('noteId' in action) {
+					newState.selectedNoteIds = action.noteId ? [action.noteId] : [];
+				}
+
+				if ('folderId' in action) {
+					newState.selectedFolderId = action.folderId;
+					newState.notesParentType = 'Folder';
+				}
+
+				if ('tagId' in action) {
+					newState.selectedTagId = action.tagId;
+					newState.notesParentType = 'Tag';
+				}
+
+				if ('smartFilterId' in action) {
+					newState.smartFilterId = action.smartFilterId;
+					newState.selectedSmartFilterId = action.smartFilterId;
+					newState.notesParentType = 'SmartFilter';
+				}
+
+				if ('itemType' in action) {
+					newState.selectedItemType = action.itemType;
+				}
+
+				if ('noteHash' in action) {
+					newState.selectedNoteHash = action.noteHash;
+				}
+
+				if ('sharedData' in action) {
+					newState.sharedData = action.sharedData;
+				} else {
+					newState.sharedData = null;
+				}
+
+				newState.route = action;
+				newState.historyCanGoBack = !!navHistory.length;
+
+				logger.debug('Navigated to route:', newState.route?.routeName, 'with notesParentType:', newState.notesParentType);
+			}
+			break;
+
+		case 'SIDE_MENU_TOGGLE':
+
+			newState = { ...state };
+			newState.showSideMenu = !newState.showSideMenu;
+			break;
+
+		case 'SIDE_MENU_OPEN':
+
+			newState = { ...state };
+			newState.showSideMenu = true;
+			break;
+
+		case 'SIDE_MENU_CLOSE':
+
+			newState = { ...state };
+			newState.showSideMenu = false;
+			break;
+
+		case 'SET_PLUGIN_PANELS_DIALOG_VISIBLE':
+			newState = { ...state };
+			newState.showPanelsDialog = action.visible;
+			break;
+
+		case 'NOTE_SELECTION_TOGGLE':
+
+			{
+				newState = { ...state };
+
+				const noteId = action.id;
+				const newSelectedNoteIds = state.selectedNoteIds.slice();
+				const existingIndex = state.selectedNoteIds.indexOf(noteId);
+
+				if (existingIndex >= 0) {
+					newSelectedNoteIds.splice(existingIndex, 1);
+				} else {
+					newSelectedNoteIds.push(noteId);
+				}
+
+				newState.selectedNoteIds = newSelectedNoteIds;
+				newState.noteSelectionEnabled = !!newSelectedNoteIds.length;
+			}
+			break;
+
+		case 'NOTE_SELECTION_START':
+
+			if (!state.noteSelectionEnabled) {
+				newState = { ...state };
+				newState.noteSelectionEnabled = true;
+				newState.selectedNoteIds = [action.id];
+			}
+			break;
+
+		case 'NOTE_SELECTION_END':
+
+			newState = { ...state };
+			newState.noteSelectionEnabled = false;
+			newState.selectedNoteIds = [];
+			break;
+
+		case 'NOTE_SIDE_MENU_OPTIONS_SET':
+
+			newState = { ...state };
+			newState.noteSideMenuOptions = action.options;
+			break;
+
+		case 'SET_SIDE_MENU_TOUCH_GESTURES_DISABLED':
+			newState = { ...state };
+			newState.disableSideMenuGestures = action.disableSideMenuGestures;
+			break;
+
+		case 'MOBILE_DATA_WARNING_UPDATE':
+
+			newState = { ...state };
+			newState.isOnMobileData = action.isOnMobileData;
+			break;
+
+		case 'KEYBOARD_VISIBLE_CHANGE':
+			newState = { ...state, keyboardVisible: action.visible };
+			break;
+		}
+	} catch (error) {
+		error.message = `In reducer: ${error.message} Action: ${JSON.stringify(action)}`;
+		throw error;
+	}
+
+	return reducer(newState, action) as AppState;
+};
 
 const store = createStore(appReducer, applyMiddleware(generalMiddleware));
 storeDispatch = store.dispatch;
@@ -483,8 +578,6 @@ async function initialize(dispatch: Dispatch) {
 
 	AlarmService.setDriver(new AlarmServiceDriver(mainLogger));
 	AlarmService.setLogger(mainLogger);
-
-	BackButtonService.initialize(store);
 
 	// Currently CommandService is just used for plugins.
 	initializeCommandService(store);
@@ -755,7 +848,6 @@ interface AppComponentProps {
 	noteSideMenuOptions: SideMenuContentOptions;
 	disableSideMenuGestures: boolean;
 	historyCanGoBack: boolean;
-	parentScreenLabel: string;
 	showSideMenu: boolean;
 	noteSelectionEnabled: boolean;
 }
@@ -783,6 +875,7 @@ class AppComponent extends React.Component<AppComponentProps, AppComponentState>
 	private unsubscribeNetInfoHandler_: NetInfoSubscription|undefined;
 	private unsubscribeNewShareListener_: UnsubscribeShareListener|undefined;
 	private onAppStateChange_: ()=> void;
+	private backButtonHandler_: BackButtonHandler;
 	private handleNewShare_: ()=> void;
 	private handleOpenURL_: (event: unknown)=> void;
 
@@ -796,6 +889,10 @@ class AppComponent extends React.Component<AppComponentProps, AppComponentState>
 		};
 
 		this.lastSyncStarted_ = defaultState.syncStarted;
+
+		this.backButtonHandler_ = () => {
+			return this.backButtonHandler();
+		};
 
 		this.onAppStateChange_ = () => {
 			PoorManIntervals.update();
@@ -939,6 +1036,9 @@ class AppComponent extends React.Component<AppComponentProps, AppComponentState>
 
 		this.urlOpenListener_ = Linking.addEventListener('url', this.handleOpenURL_);
 
+		BackButtonService.initialize(this.backButtonHandler_);
+		NavService.setRouteLabels(screens);
+
 		AlarmService.setInAppNotificationHandler(async (alarmId: string) => {
 			const alarm = await Alarm.load(alarmId);
 			const notification = await Alarm.makeNotification(alarm);
@@ -1030,40 +1130,26 @@ class AppComponent extends React.Component<AppComponentProps, AppComponentState>
 		}
 	}
 
-	private backButtonDescription() {
-		if (this.props.noteSelectionEnabled) {
-			return _('Ends note selection');
-		}
-
-		if (this.props.showSideMenu) {
-			return _('Hides side menu');
-		}
-
-		if (this.props.historyCanGoBack) {
-			return _('Opens %s', this.props.parentScreenLabel);
-		}
-
-		return _('Exits the app');
-	}
-
-	private backButtonHandler = () => {
+	private async backButtonHandler() {
 		if (this.props.noteSelectionEnabled) {
 			this.props.dispatch({ type: 'NOTE_SELECTION_END' });
-			return;
+			return true;
 		}
 
 		if (this.props.showSideMenu) {
 			this.props.dispatch({ type: 'SIDE_MENU_CLOSE' });
-			return;
+			return true;
 		}
 
 		if (this.props.historyCanGoBack) {
 			this.props.dispatch({ type: 'NAV_BACK' });
-			return;
+			return true;
 		}
 
 		BackHandler.exitApp();
-	};
+
+		return false;
+	}
 
 	private async handleShareData() {
 		const sharedData = await ShareExtension.data();
@@ -1193,8 +1279,6 @@ class AppComponent extends React.Component<AppComponentProps, AppComponentState>
 			sideMenuContent = <SafeAreaView style={{ flex: 1, backgroundColor: theme.backgroundColor }}><SideMenuContent/></SafeAreaView>;
 		}
 
-
-
 		// const statusBarStyle = theme.appearance === 'light-content';
 		const statusBarStyle = 'light-content';
 
@@ -1229,15 +1313,10 @@ class AppComponent extends React.Component<AppComponentProps, AppComponentState>
 						<SafeAreaView style={{ flex: 0, backgroundColor: theme.backgroundColor2 }}/>
 						<SafeAreaView style={{ flex: 1 }}>
 							<View style={{ flex: 1, backgroundColor: theme.backgroundColor }}>
-								{ shouldShowMainContent && <AppNav screens={appNavInit} dispatch={this.props.dispatch} /> }
+								{ shouldShowMainContent && <AppNav screens={screens} dispatch={this.props.dispatch} /> }
 							</View>
 							{/* eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied */}
 							<DropdownAlert alert={(func: any) => (this.dropdownAlert_ = func)} />
-							<BackButtonHandler
-								description={this.backButtonDescription()}
-								enabled={true}
-								onBack={this.backButtonHandler}
-							/>
 							{ !shouldShowMainContent && <BiometricPopup
 								dispatch={this.props.dispatch}
 								themeId={this.props.themeId}
@@ -1316,7 +1395,6 @@ const mapStateToProps = (state: AppState) => {
 		noteSelectionEnabled: state.noteSelectionEnabled,
 		selectedFolderId: state.selectedFolderId,
 		routeName: state.route.routeName,
-		parentScreenLabel: describeRoute(state.navHistory[state.navHistory.length - 1], state.route),
 		themeId: state.settings.theme,
 		noteSideMenuOptions: state.noteSideMenuOptions,
 		disableSideMenuGestures: state.disableSideMenuGestures,

@@ -2,7 +2,7 @@ import * as React from 'react';
 import { Store } from 'redux';
 import { AppState } from '../../utils/types';
 import TestProviderStack from '../testing/TestProviderStack';
-import EncryptionConfig from './encryption-config';
+import EncryptionConfig from './EncryptionConfig';
 import { loadEncryptionMasterKey, setupDatabaseAndSynchronizer, switchClient, synchronizerStart } from '@joplin/lib/testing/test-utils';
 import createMockReduxStore from '../../utils/testing/createMockReduxStore';
 import setupGlobalStore from '../../utils/testing/setupGlobalStore';
@@ -19,7 +19,7 @@ const WrappedEncryptionConfigScreen: React.FC<WrapperProps> = _props => {
 	</TestProviderStack>;
 };
 
-describe('encryption-config', () => {
+describe('screens/EncryptionConfig', () => {
 	beforeEach(async () => {
 		await setupDatabaseAndSynchronizer(1);
 		await setupDatabaseAndSynchronizer(0);
