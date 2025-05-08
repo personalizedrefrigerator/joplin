@@ -1,6 +1,5 @@
 import * as React from 'react';
 import useSyncTargetUpgrade from '@joplin/lib/services/synchronizer/gui/useSyncTargetUpgrade';
-import { _ } from '@joplin/lib/locale';
 import { View, Text, ScrollView, TextStyle } from 'react-native';
 
 const { connect } = require('react-redux');
@@ -56,7 +55,7 @@ function UpgradeSyncTargetScreen(props: any) {
 
 	return (
 		<ScrollView style={{ flex: 1, flexDirection: 'column', backgroundColor: theme.backgroundColor }}>
-			<ScreenHeader title={_('Sync Target Upgrade')} showShouldUpgradeSyncTargetMessage={false} showSearchButton={false} showBackButton={upgradeResult.done}/>
+			<ScreenHeader showShouldUpgradeSyncTargetMessage={false} showSearchButton={false} showBackButton={upgradeResult.done}/>
 			<View style={{ padding: 15, flex: 1 }}>
 				{renderInProgress()}
 				{renderDone()}

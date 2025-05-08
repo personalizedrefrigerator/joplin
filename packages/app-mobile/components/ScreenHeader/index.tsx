@@ -11,7 +11,6 @@ import Folder from '@joplin/lib/models/Folder';
 import { themeStyle } from '../global-style';
 import { OnValueChangedListener } from '../Dropdown';
 import { FolderEntity } from '@joplin/lib/services/database/types';
-import { State } from '@joplin/lib/reducer';
 import IconButton from '../IconButton';
 import FolderPicker from '../FolderPicker';
 import { itemIsInTrash } from '@joplin/lib/services/trash';
@@ -26,6 +25,8 @@ import WebBetaButton from './WebBetaButton';
 import Menu, { MenuOptionType } from './Menu';
 import shim from '@joplin/lib/shim';
 import CommandService from '@joplin/lib/services/CommandService';
+import { AppState } from '../../utils/types';
+import { describeRoute } from '../screens/screens';
 export { MenuOptionType };
 
 // Rather than applying a padding to the whole bar, it is applied to each
@@ -54,6 +55,7 @@ interface ScreenHeaderProps {
 	showRedoButton: boolean;
 	menuOptions: MenuOptionType[];
 	title?: string|null;
+	routeName: string;
 	folders: FolderEntity[];
 	folderPickerOptions?: FolderPickerOptions;
 	plugins: PluginStates;
@@ -590,7 +592,7 @@ class ScreenHeaderComponent extends PureComponent<ScreenHeaderProps, ScreenHeade
 					/>
 				);
 			} else {
-				const title = 'title' in this.props && this.props.title !== null ? this.props.title : '';
+				const title = this.props.title ?? describeRoute(this.props.routeName) ?? '';
 				return (
 					<>
 						<Text
@@ -690,7 +692,7 @@ class ScreenHeaderComponent extends PureComponent<ScreenHeaderProps, ScreenHeade
 	};
 }
 
-const ScreenHeader = connect((state: State) => {
+const ScreenHeader = connect((state: AppState) => {
 	return {
 		historyCanGoBack: state.historyCanGoBack,
 		locale: state.settings.locale,
@@ -701,6 +703,7 @@ const ScreenHeader = connect((state: State) => {
 		selectedFolderId: state.selectedFolderId,
 		notesParentType: state.notesParentType,
 		plugins: state.pluginService.plugins,
+		routeName: state.route?.routeName,
 	};
 })(ScreenHeaderComponent);
 

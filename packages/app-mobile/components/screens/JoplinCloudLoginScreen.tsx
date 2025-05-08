@@ -145,7 +145,7 @@ const JoplinCloudScreenComponent = (props: Props) => {
 
 	return (
 		<View style={styles.root}>
-			<ScreenHeader title={_('Joplin Cloud Login')} />
+			<ScreenHeader />
 			<View style={styles.containerStyle}>
 				{ state.active !== 'COMPLETED' ?
 					<React.Fragment>

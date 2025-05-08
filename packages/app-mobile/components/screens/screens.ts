@@ -87,7 +87,7 @@ export const describeRoute = (routeName: string) => {
 	if (routeName in screens) {
 		return screens[routeName as keyof typeof screens].label();
 	}
-	return _('Unknown');
+	return null;
 };
 
 export default screens;

@@ -107,7 +107,7 @@ class OneDriveLoginScreenComponent extends BaseScreenComponent {
 
 		return (
 			<View style={this.styles().screen}>
-				<ScreenHeader title={_('Login with OneDrive')} />
+				<ScreenHeader />
 				<WebView
 					source={source}
 					onNavigationStateChange={o => {

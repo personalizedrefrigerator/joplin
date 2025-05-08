@@ -84,7 +84,7 @@ const TagsScreenComponent: React.FC<Props> = props => {
 
 	return (
 		<View style={styles.rootStyle}>
-			<ScreenHeader title={_('Tags')} showSearchButton={false} />
+			<ScreenHeader showSearchButton={false} />
 			<FlatList style={{ flex: 1 }} data={tags} renderItem={onRenderItem} keyExtractor={tag => tag.id} />
 		</View>
 	);

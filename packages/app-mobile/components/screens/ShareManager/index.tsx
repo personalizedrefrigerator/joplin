@@ -104,7 +104,7 @@ export const ShareManagerComponent: React.FC<Props> = props => {
 
 	return (
 		<View style={styles.root}>
-			<ScreenHeader title={_('Shares')} />
+			<ScreenHeader />
 			<ScrollView
 				style={styles.scrollingContainer}
 				refreshControl={

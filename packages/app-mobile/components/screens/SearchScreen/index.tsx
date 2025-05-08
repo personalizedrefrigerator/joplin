@@ -84,7 +84,6 @@ const SearchScreenComponent: React.FC<Props> = props => {
 	return (
 		<AccessibleView style={styles.rootStyle} inert={!props.visible}>
 			<ScreenHeader
-				title={_('Search')}
 				folderPickerOptions={{
 					visible: props.noteSelectionEnabled,
 					mustSelect: true,

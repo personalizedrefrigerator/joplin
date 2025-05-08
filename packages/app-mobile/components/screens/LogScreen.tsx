@@ -212,7 +212,6 @@ class LogScreenComponent extends BaseScreenComponent<Props, State> {
 		return (
 			<View style={this.rootStyle(this.props.themeId).root}>
 				<ScreenHeader
-					title={_('Log')}
 					menuOptions={this.menuOptions_}
 					showSearchButton={true}
 					onSearchButtonPress={this.onToggleFilterInput}/>

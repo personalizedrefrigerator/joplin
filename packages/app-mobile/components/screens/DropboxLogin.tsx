@@ -56,7 +56,7 @@ class DropboxLoginScreenComponent extends BaseScreenComponent {
 
 		return (
 			<View style={this.styles().screen}>
-				<ScreenHeader title={_('Login with Dropbox')} />
+				<ScreenHeader />
 
 				<ScrollView style={this.styles().container}>
 					<Text style={this.styles().stepText}>{_('To allow Joplin to synchronise with Dropbox, please follow the steps below:')}</Text>

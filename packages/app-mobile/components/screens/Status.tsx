@@ -243,7 +243,7 @@ class StatusScreenComponent extends BaseScreenComponent<Props, State> {
 
 		return (
 			<View style={this.rootStyle(this.props.themeId).root}>
-				<ScreenHeader title={_('Status')} />
+				<ScreenHeader />
 				<View style={styles.body}>{body}</View>
 				<Button title={_('Refresh')} onPress={() => this.refreshScreen()} />
 			</View>

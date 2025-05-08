@@ -196,7 +196,7 @@ export default (props: Props) => {
 
 	return (
 		<View style={style.root}>
-			<ScreenHeader title={_('Profiles')} showSaveButton={false} showSideMenuButton={false} showSearchButton={false} />
+			<ScreenHeader showSaveButton={false} showSideMenuButton={false} showSearchButton={false} />
 			<View>
 				<FlatList
 					data={profiles}

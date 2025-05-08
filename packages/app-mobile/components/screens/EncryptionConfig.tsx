@@ -331,7 +331,7 @@ const EncryptionConfigScreen = (props: Props) => {
 
 	return (
 		<View style={rootStyle}>
-			<ScreenHeader title={_('Encryption Config')} />
+			<ScreenHeader />
 			<ScrollView>
 				<View style={styles.container}>
 					<View style={{ backgroundColor: theme.warningBackgroundColor, paddingTop: 5, paddingBottom: 5, paddingLeft: 10, paddingRight: 10 }}>
