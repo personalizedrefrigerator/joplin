@@ -141,6 +141,7 @@ import { AppState } from './utils/types';
 import { getDisplayParentId } from '@joplin/lib/services/trash';
 import PluginNotification from './components/plugins/PluginNotification';
 import FocusControl from './components/accessibility/FocusControl/FocusControl';
+import FeedbackBanner from './components/FeedbackBanner';
 
 const logger = Logger.create('root');
 
@@ -1357,6 +1358,7 @@ class AppComponent extends React.Component<AppComponentProps, AppComponentState>
 								sensorInfo={this.state.sensorInfo}
 							/> }
 						</SafeAreaView>
+						<FeedbackBanner/>
 					</View>
 				</SideMenu>
 				<PluginRunnerWebView />
@@ -1370,51 +1372,51 @@ class AppComponent extends React.Component<AppComponentProps, AppComponentState>
 		// Wrap everything in a PaperProvider -- this allows using components from react-native-paper
 		return (
 			<FocusControl.Provider>
-				<PaperProvider theme={{
-					...paperTheme,
-					version: 3,
-					colors: {
-						...paperTheme.colors,
-						onPrimaryContainer: theme.color5,
-						primaryContainer: theme.backgroundColor5,
+				<MenuProvider
+					style={{ flex: 1 }}
+					closeButtonLabel={_('Dismiss')}
+				>
+					<PaperProvider theme={{
+						...paperTheme,
+						version: 3,
+						colors: {
+							...paperTheme.colors,
+							onPrimaryContainer: theme.color5,
+							primaryContainer: theme.backgroundColor5,
 
-						outline: theme.codeBorderColor,
+							outline: theme.codeBorderColor,
 
-						primary: theme.color4,
-						onPrimary: theme.backgroundColor4,
+							primary: theme.color4,
+							onPrimary: theme.backgroundColor4,
 
-						background: theme.backgroundColor,
+							background: theme.backgroundColor,
 
-						surface: theme.backgroundColor,
-						onSurface: theme.color,
+							surface: theme.backgroundColor,
+							onSurface: theme.color,
 
-						secondaryContainer: theme.raisedBackgroundColor,
-						onSecondaryContainer: theme.raisedColor,
+							secondaryContainer: theme.raisedBackgroundColor,
+							onSecondaryContainer: theme.raisedColor,
 
-						surfaceVariant: theme.backgroundColor3,
-						onSurfaceVariant: theme.color3,
+							surfaceVariant: theme.backgroundColor3,
+							onSurfaceVariant: theme.color3,
 
-						elevation: {
-							level0: 'transparent',
-							level1: theme.oddBackgroundColor,
-							level2: theme.raisedBackgroundColor,
-							level3: theme.raisedBackgroundColor,
-							level4: theme.raisedBackgroundColor,
-							level5: theme.raisedBackgroundColor,
+							elevation: {
+								level0: 'transparent',
+								level1: theme.oddBackgroundColor,
+								level2: theme.raisedBackgroundColor,
+								level3: theme.raisedBackgroundColor,
+								level4: theme.raisedBackgroundColor,
+								level5: theme.raisedBackgroundColor,
+							},
 						},
-					},
-				}}>
-					<DialogManager themeId={this.props.themeId}>
-						<MenuProvider
-							style={{ flex: 1 }}
-							closeButtonLabel={_('Dismiss')}
-						>
+					}}>
+						<DialogManager themeId={this.props.themeId}>
 							<FocusControl.MainAppContent style={{ flex: 1 }}>
 								{mainContent}
 							</FocusControl.MainAppContent>
-						</MenuProvider>
-					</DialogManager>
-				</PaperProvider>
+						</DialogManager>
+					</PaperProvider>
+				</MenuProvider>
 			</FocusControl.Provider>
 		);
 	}
