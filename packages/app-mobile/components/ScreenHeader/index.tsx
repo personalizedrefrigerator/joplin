@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { PureComponent, ReactElement } from 'react';
 import { connect } from 'react-redux';
-import { View, Text, StyleSheet, TouchableOpacity, Image, ViewStyle, Platform } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Image, ViewStyle, Platform } from 'react-native';
 const Icon = require('react-native-vector-icons/Ionicons').default;
 import BackButtonService from '../../services/BackButtonService';
 import NavService from '@joplin/lib/services/NavService';
@@ -26,6 +26,7 @@ import WebBetaButton from './WebBetaButton';
 import Menu, { MenuOptionType } from './Menu';
 import shim from '@joplin/lib/shim';
 import CommandService from '@joplin/lib/services/CommandService';
+import AccessibilityLiveText from '../accessibility/AccessibilityLiveText';
 export { MenuOptionType };
 
 // Rather than applying a padding to the whole bar, it is applied to each
@@ -593,12 +594,13 @@ class ScreenHeaderComponent extends PureComponent<ScreenHeaderProps, ScreenHeade
 				const title = 'title' in this.props && this.props.title !== null ? this.props.title : '';
 				return (
 					<>
-						<Text
+						<AccessibilityLiveText
 							ellipsizeMode={'tail'}
 							numberOfLines={1}
 							style={this.styles().titleText}
 							accessibilityRole='header'
-						>{title}</Text>
+							accessibilityLiveRegion='polite'
+						>{title}</AccessibilityLiveText>
 						{hideableAfterTitleComponents}
 					</>
 				);

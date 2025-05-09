@@ -16,6 +16,7 @@ interface FolderPickerProps {
 	darkText?: boolean;
 	themeId?: number;
 	coverableChildrenRight?: ReactElement|ReactElement[];
+	accessibilityLiveRegion?: 'polite';
 }
 
 
@@ -26,6 +27,7 @@ const FolderPicker: FunctionComponent<FolderPickerProps> = ({
 	mustSelect,
 	folders,
 	placeholder,
+	accessibilityLiveRegion,
 	darkText,
 	coverableChildrenRight,
 	themeId,
@@ -69,6 +71,7 @@ const FolderPicker: FunctionComponent<FolderPickerProps> = ({
 			labelTransform="trim"
 			selectedValue={selectedFolderId || ''}
 			coverableChildrenRight={coverableChildrenRight}
+			accessibilityLiveRegion={accessibilityLiveRegion}
 			itemListStyle={{
 				backgroundColor: theme.backgroundColor,
 			}}

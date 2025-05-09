@@ -2,6 +2,7 @@ import * as React from 'react';
 import { TouchableOpacity, TouchableWithoutFeedback, Dimensions, Text, Modal, View, LayoutRectangle, ViewStyle, TextStyle, FlatList } from 'react-native';
 import { Component, ReactElement } from 'react';
 import { _ } from '@joplin/lib/locale';
+import AccessibilityLiveText from './accessibility/AccessibilityLiveText';
 
 type ValueType = string;
 export interface DropdownListItem {
@@ -24,6 +25,7 @@ interface DropdownProps {
 	itemStyle?: TextStyle;
 	disabled?: boolean;
 	accessibilityHint?: string;
+	accessibilityLiveRegion?: 'polite';
 
 	labelTransform?: 'trim';
 	items: DropdownListItem[];
@@ -200,6 +202,8 @@ class Dropdown extends Component<DropdownProps, DropdownState> {
 			</TouchableWithoutFeedback>
 		);
 
+		const HeaderTextComponent = this.props.accessibilityLiveRegion ? AccessibilityLiveText : Text;
+
 		return (
 			<View style={{ flex: 1, flexDirection: 'column' }}>
 				<View
@@ -214,9 +218,9 @@ class Dropdown extends Component<DropdownProps, DropdownState> {
 						accessibilityRole='button'
 						accessibilityHint={[this.props.accessibilityHint, _('Opens dropdown')].join(' ')}
 					>
-						<Text ellipsizeMode="tail" numberOfLines={1} style={headerStyle}>
+						<HeaderTextComponent ellipsizeMode="tail" numberOfLines={1} style={headerStyle}>
 							{headerLabel}
-						</Text>
+						</HeaderTextComponent>
 						<Text
 							style={headerArrowStyle}
 							aria-hidden={true}
