@@ -1,6 +1,6 @@
 import { _ } from '@joplin/lib/locale';
 import * as React from 'react';
-import { View, StyleSheet, useWindowDimensions, TextStyle } from 'react-native';
+import { View, StyleSheet, useWindowDimensions, TextStyle, Platform } from 'react-native';
 import { Portal, Text } from 'react-native-paper';
 import IconButton from './IconButton';
 import { useCallback, useMemo } from 'react';
@@ -9,9 +9,11 @@ import { Dispatch } from 'redux';
 import { themeStyle } from './global-style';
 import { AppState } from '../utils/types';
 import { connect } from 'react-redux';
+import Setting from '@joplin/lib/models/Setting';
 
 interface Props {
 	dispatch: Dispatch;
+	dismissed: boolean;
 	themeId: number;
 }
 
@@ -82,23 +84,32 @@ const useStyles = (themeId: number) => {
 	}, [themeId, windowWidth]);
 };
 
+const onDismiss = () => {
+	Setting.setValue('survey.webClientEval2025.dismissed', true);
+};
+
 const FeedbackBanner: React.FC<Props> = props => {
-	const onDismiss = useCallback(() => {
-		props.dispatch({ type: 'FEEDBACK_BANNER_DISMISS' });
-	}, [props.dispatch]);
+	const sendSurveyResponse = useCallback(async (surveyResponse: string) => {
+		const fetchUrl = `https://survey.joplinusercontent.com/web-app-eval/?r=${encodeURIComponent(surveyResponse)}`;
+		const response = await shim.fetch(fetchUrl);
+		if (response.ok) {
+			onDismiss();
+		} else {
+			void shim.showMessageBox(_('Error: %s', response.statusText));
+		}
+	}, []);
 
 	const onNotUsefulClick = useCallback(() => {
-		void shim.showMessageBox('To-do');
-		onDismiss();
-	}, [onDismiss]);
+		void sendSurveyResponse('not-useful');
+	}, [sendSurveyResponse]);
 
 	const onUsefulClick = useCallback(() => {
-		void shim.showMessageBox('To-do');
-		onDismiss();
-	}, [onDismiss]);
+		void sendSurveyResponse('useful');
+	}, [sendSurveyResponse]);
 
 	const styles = useStyles(props.themeId);
 
+	if (Platform.OS !== 'web' || props.dismissed) return null;
 	return <Portal>
 		<View style={styles.container}>
 			<View>
@@ -140,4 +151,5 @@ const FeedbackBanner: React.FC<Props> = props => {
 
 export default connect((state: AppState) => ({
 	themeId: state.settings.theme,
+	dismissed: state.settings['survey.webClientEval2025.dismissed'],
 }))(FeedbackBanner);

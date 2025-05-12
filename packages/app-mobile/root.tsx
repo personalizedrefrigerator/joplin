@@ -141,7 +141,6 @@ import { AppState } from './utils/types';
 import { getDisplayParentId } from '@joplin/lib/services/trash';
 import PluginNotification from './components/plugins/PluginNotification';
 import FocusControl from './components/accessibility/FocusControl/FocusControl';
-import FeedbackBanner from './components/FeedbackBanner';
 
 const logger = Logger.create('root');
 
@@ -1358,7 +1357,6 @@ class AppComponent extends React.Component<AppComponentProps, AppComponentState>
 								sensorInfo={this.state.sensorInfo}
 							/> }
 						</SafeAreaView>
-						<FeedbackBanner/>
 					</View>
 				</SideMenu>
 				<PluginRunnerWebView />
