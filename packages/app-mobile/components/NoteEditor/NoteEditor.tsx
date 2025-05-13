@@ -457,10 +457,7 @@ function NoteEditor(props: Props, ref: any) {
 	const html = useHtml(css);
 	const [selectionState, setSelectionState] = useState<SelectionFormatting>(defaultSelectionFormatting);
 	const [linkDialogVisible, setLinkDialogVisible] = useState(false);
-	const [searchState, setSearchState] = useState({
-		...defaultSearchState,
-		searchText: props.globalSearch,
-	});
+	const [searchState, setSearchState] = useState(defaultSearchState);
 
 	const onEditorEvent = useRef((_event: EditorEvent) => {});
 
