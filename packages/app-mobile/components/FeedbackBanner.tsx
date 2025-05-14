@@ -3,7 +3,7 @@ import * as React from 'react';
 import { View, StyleSheet, useWindowDimensions, TextStyle, Platform, Linking } from 'react-native';
 import { Portal, Text } from 'react-native-paper';
 import IconButton from './IconButton';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo } from 'react';
 import shim from '@joplin/lib/shim';
 import { Dispatch } from 'redux';
 import { themeStyle } from './global-style';
@@ -12,12 +12,13 @@ import { connect } from 'react-redux';
 import Setting from '@joplin/lib/models/Setting';
 import { LinkButton } from './buttons';
 import Logger from '@joplin/utils/Logger';
+import { SurveyProgress } from '@joplin/lib/models/settings/builtInMetadata';
 
 const logger = Logger.create('FeedbackBanner');
 
 interface Props {
 	dispatch: Dispatch;
-	dismissed: boolean;
+	progress: SurveyProgress;
 	surveyKey: string;
 	themeId: number;
 }
@@ -100,14 +101,17 @@ const useSurveyUrl = (surveyKey: string) => {
 	}, [surveyKey]);
 };
 
+const setProgress = (progress: SurveyProgress) => {
+	Setting.setValue('survey.webClientEval2025.progress', progress);
+};
+
 const onDismiss = () => {
-	Setting.setValue('survey.webClientEval2025.dismissed', true);
+	setProgress(SurveyProgress.Dismissed);
 };
 
 const FeedbackBanner: React.FC<Props> = props => {
 	const surveyUrl = useSurveyUrl(props.surveyKey);
-	const [followUpUrl, setFollowUpUrl] = useState('');
-	const sentFeedback = !!followUpUrl;
+	const sentFeedback = props.progress === SurveyProgress.Started;
 
 	const sendSurveyResponse = useCallback(async (surveyResponse: number) => {
 		const fetchUrl = `${surveyUrl}?response=${surveyResponse}`;
@@ -120,17 +124,7 @@ const FeedbackBanner: React.FC<Props> = props => {
 		try {
 			const response = await shim.fetch(fetchUrl);
 			if (response.ok) {
-				const responseData: unknown = await response.json();
-				if (typeof responseData !== 'object') {
-					showError(`Server returned an unexpected response: ${JSON.stringify(responseData)}`);
-					return;
-				} else if (!('surveyUrl' in responseData) || typeof responseData.surveyUrl !== 'string') {
-					logger.error('Missing surveyUrl in JSON response:', responseData);
-					showError('Server did return a surveyUrl in its response.');
-					return;
-				}
-
-				setFollowUpUrl(responseData.surveyUrl);
+				setProgress(SurveyProgress.Started);
 			} else {
 				showError(response.statusText);
 			}
@@ -140,9 +134,9 @@ const FeedbackBanner: React.FC<Props> = props => {
 	}, [surveyUrl]);
 
 	const onSurveyLinkClick = useCallback(() => {
-		void Linking.openURL(followUpUrl);
+		void Linking.openURL(surveyUrl);
 		onDismiss();
-	}, [followUpUrl]);
+	}, [surveyUrl]);
 
 	const onNotUsefulClick = useCallback(() => {
 		void sendSurveyResponse(0); // 'not-useful'
@@ -165,7 +159,7 @@ const FeedbackBanner: React.FC<Props> = props => {
 		}
 	};
 
-	if (Platform.OS !== 'web' || props.dismissed) return null;
+	if (Platform.OS !== 'web' || props.progress === SurveyProgress.Dismissed) return null;
 
 	return <Portal>
 		<View style={styles.container}>
@@ -209,5 +203,5 @@ const FeedbackBanner: React.FC<Props> = props => {
 export default connect((state: AppState) => ({
 	themeId: state.settings.theme,
 	surveyKey: 'web-app-test',
-	dismissed: state.settings['survey.webClientEval2025.dismissed'],
+	progress: state.settings['survey.webClientEval2025.progress'],
 }))(FeedbackBanner);
