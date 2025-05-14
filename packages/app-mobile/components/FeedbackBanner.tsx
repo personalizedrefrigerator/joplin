@@ -11,10 +11,14 @@ import { AppState } from '../utils/types';
 import { connect } from 'react-redux';
 import Setting from '@joplin/lib/models/Setting';
 import { LinkButton } from './buttons';
+import Logger from '@joplin/utils/Logger';
+
+const logger = Logger.create('FeedbackBanner');
 
 interface Props {
 	dispatch: Dispatch;
 	dismissed: boolean;
+	surveyKey: string;
 	themeId: number;
 }
 
@@ -85,34 +89,64 @@ const useStyles = (themeId: number, sentFeedback: boolean) => {
 	}, [themeId, windowWidth, sentFeedback]);
 };
 
+const useSurveyUrl = (surveyKey: string) => {
+	return useMemo(() => {
+		let baseUrl = 'https://objects.joplinusercontent.com/';
+		if (Setting.value('env') === 'dev') {
+			baseUrl = 'http://localhost:3430/';
+		}
+
+		return `${baseUrl}survey/${encodeURIComponent(surveyKey)}`;
+	}, [surveyKey]);
+};
+
 const onDismiss = () => {
 	Setting.setValue('survey.webClientEval2025.dismissed', true);
 };
 
 const FeedbackBanner: React.FC<Props> = props => {
-	const [sentFeedback, setSentFeedback] = useState(false);
+	const surveyUrl = useSurveyUrl(props.surveyKey);
+	const [followUpUrl, setFollowUpUrl] = useState('');
+	const sentFeedback = !!followUpUrl;
 
-	const sendSurveyResponse = useCallback(async (surveyResponse: string) => {
-		const fetchUrl = `https://survey.joplinusercontent.com/r/web-app-eval/?r=${encodeURIComponent(surveyResponse)}`;
+	const sendSurveyResponse = useCallback(async (surveyResponse: number) => {
+		const fetchUrl = `${surveyUrl}?response=${surveyResponse}`;
+		logger.debug('sending response to', fetchUrl);
+
 		const response = await shim.fetch(fetchUrl);
+		const showError = (message: string) => {
+			logger.error('Error', message);
+			void shim.showMessageBox(_('Error: %s', message));
+		};
+
 		if (response.ok) {
-			setSentFeedback(true);
+			const responseData: unknown = await response.json();
+			if (typeof responseData !== 'object') {
+				showError(`Server returned an unexpected response: ${JSON.stringify(responseData)}`);
+				return;
+			} else if (!('surveyUrl' in responseData) || typeof responseData.surveyUrl !== 'string') {
+				logger.error('Missing surveyUrl in JSON response:', responseData);
+				showError('Server did return a surveyUrl in its response.');
+				return;
+			}
+
+			setFollowUpUrl(responseData.surveyUrl);
 		} else {
-			void shim.showMessageBox(_('Error: %s', response.statusText));
+			showError(response.statusText);
 		}
-	}, []);
+	}, [surveyUrl]);
 
 	const onSurveyLinkClick = useCallback(() => {
-		void Linking.openURL('https://survey.joplinusercontent.com/o/web-app-eval');
-		setSentFeedback(true);
-	}, []);
+		void Linking.openURL(followUpUrl);
+		onDismiss();
+	}, [followUpUrl]);
 
 	const onNotUsefulClick = useCallback(() => {
-		void sendSurveyResponse('not-useful');
+		void sendSurveyResponse(0); // 'not-useful'
 	}, [sendSurveyResponse]);
 
 	const onUsefulClick = useCallback(() => {
-		void sendSurveyResponse('useful');
+		void sendSurveyResponse(1); // 'useful'
 	}, [sendSurveyResponse]);
 
 	const styles = useStyles(props.themeId, sentFeedback);
@@ -171,5 +205,6 @@ const FeedbackBanner: React.FC<Props> = props => {
 
 export default connect((state: AppState) => ({
 	themeId: state.settings.theme,
+	surveyKey: 'web-app-test',
 	dismissed: state.settings['survey.webClientEval2025.dismissed'],
 }))(FeedbackBanner);
