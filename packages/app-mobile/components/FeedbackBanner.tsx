@@ -112,27 +112,30 @@ const FeedbackBanner: React.FC<Props> = props => {
 	const sendSurveyResponse = useCallback(async (surveyResponse: number) => {
 		const fetchUrl = `${surveyUrl}?response=${surveyResponse}`;
 		logger.debug('sending response to', fetchUrl);
-
-		const response = await shim.fetch(fetchUrl);
 		const showError = (message: string) => {
 			logger.error('Error', message);
-			void shim.showMessageBox(_('Error: %s', message));
+			void shim.showErrorDialog(_('Error: %s', message));
 		};
 
-		if (response.ok) {
-			const responseData: unknown = await response.json();
-			if (typeof responseData !== 'object') {
-				showError(`Server returned an unexpected response: ${JSON.stringify(responseData)}`);
-				return;
-			} else if (!('surveyUrl' in responseData) || typeof responseData.surveyUrl !== 'string') {
-				logger.error('Missing surveyUrl in JSON response:', responseData);
-				showError('Server did return a surveyUrl in its response.');
-				return;
-			}
+		try {
+			const response = await shim.fetch(fetchUrl);
+			if (response.ok) {
+				const responseData: unknown = await response.json();
+				if (typeof responseData !== 'object') {
+					showError(`Server returned an unexpected response: ${JSON.stringify(responseData)}`);
+					return;
+				} else if (!('surveyUrl' in responseData) || typeof responseData.surveyUrl !== 'string') {
+					logger.error('Missing surveyUrl in JSON response:', responseData);
+					showError('Server did return a surveyUrl in its response.');
+					return;
+				}
 
-			setFollowUpUrl(responseData.surveyUrl);
-		} else {
-			showError(response.statusText);
+				setFollowUpUrl(responseData.surveyUrl);
+			} else {
+				showError(response.statusText);
+			}
+		} catch (error) {
+			showError(`Error: ${error}`);
 		}
 	}, [surveyUrl]);
 
