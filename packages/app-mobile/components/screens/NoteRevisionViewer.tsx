@@ -25,6 +25,8 @@ import { DialogContext } from '../DialogManager';
 interface Props {
 	themeId: number;
 	selectedNoteId: string;
+
+	// Properties passed by the navigation logic
 	navigation?: {
 		state?: {
 			noteId: string;
@@ -189,5 +191,5 @@ const NoteRevisionViewer: React.FC<Props> = props => {
 
 export default connect((state: AppState) => ({
 	themeId: state.settings.theme,
-	noteId: state.selectedNoteIds[0] ?? '',
+	selectedNoteId: state.selectedNoteIds[0] ?? '',
 }))(NoteRevisionViewer);
