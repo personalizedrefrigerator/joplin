@@ -94,9 +94,14 @@ export function timerPop() {
 	console.info(`Time: ${t.name}: ${Date.now() - t.startTime}`);
 }
 
+// Workaround for "dayjs is not a function (it is Object)" in React Native.
+// It seems that React Native handles dayjs-related imports differently from NodeJS,
+// such that `dayjs.default` contains the expected property.
+const dayJsFunction = typeof dayjs === 'object' ? (dayjs as { default: typeof dayjs }).default : dayjs;
+
 export const formatMsToRelative = (ms: number) => {
 	if (Date.now() - ms > 2 * Day) return formatMsToLocal(ms);
-	const d = dayjs(ms);
+	const d = dayJsFunction(ms);
 
 	// The expected pattern for invalid date formatting in JS is to return the string "Invalid
 	// Date", so we do that here. If we don't, dayjs will process the invalid date and return "a
@@ -143,7 +148,7 @@ const dateTimeFormat = () => {
 
 export const formatMsToLocal = (ms: number, format: string|null = null) => {
 	if (format === null) format = dateTimeFormat();
-	return dayjs(ms).format(format);
+	return dayJsFunction(ms).format(format);
 };
 
 export const formatMsToDateTimeLocal = (ms: number) => {
@@ -151,11 +156,11 @@ export const formatMsToDateTimeLocal = (ms: number) => {
 };
 
 export const isValidDate = (anything: string) => {
-	return dayjs(anything).isValid();
+	return dayJsFunction(anything).isValid();
 };
 
 export const formatDateTimeLocalToMs = (anything: string) => {
-	return dayjs(anything).unix() * 1000;
+	return dayJsFunction(anything).unix() * 1000;
 };
 
 export const formatMsToDurationCompat = (ms: number) => {
