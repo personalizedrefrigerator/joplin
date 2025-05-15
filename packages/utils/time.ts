@@ -94,9 +94,12 @@ export function timerPop() {
 	console.info(`Time: ${t.name}: ${Date.now() - t.startTime}`);
 }
 
-// Workaround for "dayjs is not a function (it is Object)" in React Native.
-// It seems that React Native handles dayjs-related imports differently from NodeJS,
-// such that `dayjs.default` contains the expected property.
+// In React Native, attempting to call dayjs as a function fails with:
+//     dayjs is not a function (it is Object)
+//
+// It seems that React Native the dayjs import differently from NodeJS.
+// This dayJsFunction variable is a workaround that allows accessing
+// dayjs on both mobile and desktop:
 const dayJsFunction = typeof dayjs === 'object' ? (dayjs as { default: typeof dayjs }).default : dayjs;
 
 export const formatMsToRelative = (ms: number) => {
