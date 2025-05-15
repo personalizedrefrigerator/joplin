@@ -164,6 +164,7 @@ const NoteRevisionViewer: React.FC<Props> = props => {
 				headerStyle={styles.dropdownHeaderStyle}
 				itemStyle={styles.dropdownItemStyle}
 				accessibilityHint={dropdownLabelText}
+				defaultHeaderLabel={_('Select a revision...')}
 			/>
 			<PrimaryButton
 				onPress={onRestore}

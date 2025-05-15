@@ -3,10 +3,10 @@ import { Store } from 'redux';
 import { AppState } from '../../utils/types';
 import TestProviderStack from '../testing/TestProviderStack';
 import NoteRevisionViewer from './NoteRevisionViewer';
-import { setupDatabaseAndSynchronizer, switchClient, revisionService } from '@joplin/lib/testing/test-utils';
+import { setupDatabaseAndSynchronizer, switchClient, revisionService, waitFor } from '@joplin/lib/testing/test-utils';
 import createMockReduxStore from '../../utils/testing/createMockReduxStore';
 import setupGlobalStore from '../../utils/testing/setupGlobalStore';
-import { render } from '@testing-library/react-native';
+import { act, fireEvent, render, screen } from '@testing-library/react-native';
 import '@testing-library/jest-native/extend-expect';
 import Note from '@joplin/lib/models/Note';
 import { useMemo } from 'react';
@@ -39,8 +39,8 @@ const createNoteWithTestRevisions = async (count: number) => {
 		jest.advanceTimersByTime(1000 * 60 * 10);
 		await Note.save({
 			id: noteId,
-			title: `Note - Updated (x${i})`,
-			body: `Update ${i}`,
+			title: `Note - Updated (x${i + 1})`,
+			body: `Update ${i + 1}`,
 		});
 		await revisionService().collectRevisions();
 	}
@@ -71,6 +71,9 @@ describe('screens/NoteRevisionViewer', () => {
 
 		jest.useFakeTimers({ advanceTimers: true });
 	});
+	afterEach(() => {
+		screen.unmount();
+	});
 
 	test('should render "No revision selected" when no revisions are selected', async () => {
 		const note = await createNoteWithTestRevisions(3);
@@ -78,6 +81,25 @@ describe('screens/NoteRevisionViewer', () => {
 
 		expect(await getRevisionViewerText()).toBe('No revision selected');
 
+		unmount();
+	});
+
+	test('selecting a revision should render its content', async () => {
+		const note = await createNoteWithTestRevisions(3);
+		const { unmount } = render(<WrappedRevisionViewerScreen noteId={note.id}/>);
+
+		const dropdown = screen.getByRole('button', { name: 'Select a revision...' });
+		fireEvent.press(dropdown);
+
+		// Select the second revision
+		await act(() => waitFor(async () => {
+			const firstRevision = screen.getAllByRole('menuitem')[1];
+			fireEvent.press(firstRevision);
+		}));
+
+		await act(() => waitFor(async () => {
+			expect(await getRevisionViewerText()).toBe('Update 2');
+		}));
 		unmount();
 	});
 });
