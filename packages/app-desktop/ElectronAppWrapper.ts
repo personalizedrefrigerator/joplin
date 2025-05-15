@@ -214,7 +214,10 @@ export default class ElectronAppWrapper {
 			height: windowState.height,
 			minWidth: 100,
 			minHeight: 100,
-			backgroundColor: nativeTheme.shouldUseDarkColors ? '#333' : '#fff',
+			// A backgroundColor is needed to enable sub-pixel rendering.
+			// Based on https://github.com/electron/electron/issues/10955#issuecomment-437182679, both #000 and #fff
+			// should work:
+			backgroundColor: nativeTheme.shouldUseDarkColors ? '#000' : '#fff',
 			webPreferences: {
 				nodeIntegration: true,
 				contextIsolation: false,
