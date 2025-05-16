@@ -93,11 +93,12 @@ const useStyles = (themeId: number, sentFeedback: boolean) => {
 const useSurveyUrl = (surveyKey: string) => {
 	return useMemo(() => {
 		let baseUrl = 'https://objects.joplinusercontent.com/';
+		// the app is in dev mode.
 		if (Setting.value('env') === 'dev') {
 			baseUrl = 'http://localhost:3430/';
 		}
 
-		return `${baseUrl}survey/${encodeURIComponent(surveyKey)}`;
+		return `${baseUrl}r/survey--${encodeURIComponent(surveyKey)}`;
 	}, [surveyKey]);
 };
 
@@ -113,8 +114,8 @@ const FeedbackBanner: React.FC<Props> = props => {
 	const surveyUrl = useSurveyUrl(props.surveyKey);
 	const sentFeedback = props.progress === SurveyProgress.Started;
 
-	const sendSurveyResponse = useCallback(async (surveyResponse: number) => {
-		const fetchUrl = `${surveyUrl}?response=${surveyResponse}`;
+	const sendSurveyResponse = useCallback(async (surveyResponse: string) => {
+		const fetchUrl = `${surveyUrl}--${encodeURIComponent(surveyResponse)}`;
 		logger.debug('sending response to', fetchUrl);
 		const showError = (message: string) => {
 			logger.error('Error', message);
@@ -139,11 +140,11 @@ const FeedbackBanner: React.FC<Props> = props => {
 	}, [surveyUrl]);
 
 	const onNotUsefulClick = useCallback(() => {
-		void sendSurveyResponse(0); // 'not-useful'
+		void sendSurveyResponse('unhelpful');
 	}, [sendSurveyResponse]);
 
 	const onUsefulClick = useCallback(() => {
-		void sendSurveyResponse(1); // 'useful'
+		void sendSurveyResponse('helpful');
 	}, [sendSurveyResponse]);
 
 	const styles = useStyles(props.themeId, sentFeedback);
