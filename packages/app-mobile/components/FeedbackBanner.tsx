@@ -124,10 +124,14 @@ const FeedbackBanner: React.FC<Props> = props => {
 
 		try {
 			const response = await shim.fetch(fetchUrl);
-			if (response.ok) {
+			// The server currently redirects (status 302) in response
+			// to many survey-related requests. This may be returned by
+			// the web app service worker as a 200 OK response, however. Support both:
+			if (response.ok || response.status === 302) {
 				setProgress(SurveyProgress.Started);
 			} else {
-				showError(response.statusText);
+				const body = await response.text();
+				showError(`Server error: ${response.status} ${body}`);
 			}
 		} catch (error) {
 			showError(`Error: ${error}`);

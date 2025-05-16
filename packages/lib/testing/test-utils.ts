@@ -1185,4 +1185,28 @@ export const runWithFakeTimers = async (callback: ()=> Promise<void>) => {
 	}
 };
 
+// null => Use default
+type MockFetchRequestHandler = (request: Request)=> Response|null;
+
+// Mocks shim.fetch, may not mock other fetch-related methods
+export const mockFetch = (requestHandler: MockFetchRequestHandler) => {
+	const originalFetch = shim.fetch;
+
+	shim.fetch = (url: string, options) => {
+		const request = new Request(url, options);
+		const mockResponse = requestHandler(request);
+		if (mockResponse) {
+			return Promise.resolve(mockResponse);
+		} else {
+			return originalFetch(url, options);
+		}
+	};
+
+	return {
+		reset: () => {
+			shim.fetch = originalFetch;
+		},
+	};
+};
+
 export { supportDir, createNoteAndResource, createTempFile, createTestShareData, simulateReadOnlyShareEnv, waitForFolderCount, afterAllCleanUp, exportDir, synchronizerStart, afterEachCleanUp, syncTargetName, setSyncTargetName, syncDir, createTempDir, isNetworkSyncTarget, kvStore, expectThrow, logger, expectNotThrow, resourceService, resourceFetcher, tempFilePath, allSyncTargetItemsEncrypted, msleep, setupDatabase, revisionService, setupDatabaseAndSynchronizer, db, synchronizer, fileApi, sleep, clearDatabase, switchClient, syncTargetId, objectsEqual, checkThrowAsync, checkThrow, encryptionService, loadEncryptionMasterKey, fileContentEqual, decryptionWorker, currentClientId, id, ids, sortedIds, at, createNTestNotes, createNTestFolders, createNTestTags, TestApp };
