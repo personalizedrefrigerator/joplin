@@ -1,6 +1,6 @@
 import { _ } from '@joplin/lib/locale';
 import * as React from 'react';
-import { View, StyleSheet, useWindowDimensions, TextStyle, Platform, Linking } from 'react-native';
+import { View, StyleSheet, useWindowDimensions, TextStyle, Linking } from 'react-native';
 import { Portal, Text } from 'react-native-paper';
 import IconButton from './IconButton';
 import { useCallback, useMemo } from 'react';
@@ -160,7 +160,7 @@ const FeedbackBanner: React.FC<Props> = props => {
 		}
 	};
 
-	if (Platform.OS !== 'web' || props.progress === SurveyProgress.Dismissed) return null;
+	if (shim.mobilePlatform() !== 'web' || props.progress === SurveyProgress.Dismissed) return null;
 
 	return <Portal>
 		<View style={styles.container}>
