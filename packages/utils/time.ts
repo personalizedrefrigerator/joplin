@@ -3,7 +3,9 @@
 // added here, and should be based on dayjs (not moment)
 // -----------------------------------------------------------------------------------------------
 
-import * as dayjs from 'dayjs';
+import type * as dayjsImport from 'dayjs';
+// A require() is needed here for this to work in React Native.
+const dayjs: typeof dayjsImport = require('dayjs');
 
 // Separating this into a type import and a require seems to be necessary to support mobile:
 // - import = require syntax doesn't work when bundling
@@ -94,17 +96,9 @@ export function timerPop() {
 	console.info(`Time: ${t.name}: ${Date.now() - t.startTime}`);
 }
 
-// In React Native, attempting to call dayjs as a function fails with:
-//     dayjs is not a function (it is Object)
-//
-// It seems that React Native the dayjs import differently from NodeJS.
-// This dayJsFunction variable is a workaround that allows accessing
-// dayjs on both mobile and desktop:
-const dayJsFunction = typeof dayjs === 'object' ? (dayjs as { default: typeof dayjs }).default : dayjs;
-
 export const formatMsToRelative = (ms: number) => {
 	if (Date.now() - ms > 2 * Day) return formatMsToLocal(ms);
-	const d = dayJsFunction(ms);
+	const d = dayjs(ms);
 
 	// The expected pattern for invalid date formatting in JS is to return the string "Invalid
 	// Date", so we do that here. If we don't, dayjs will process the invalid date and return "a
@@ -151,7 +145,7 @@ const dateTimeFormat = () => {
 
 export const formatMsToLocal = (ms: number, format: string|null = null) => {
 	if (format === null) format = dateTimeFormat();
-	return dayJsFunction(ms).format(format);
+	return dayjs(ms).format(format);
 };
 
 export const formatMsToDateTimeLocal = (ms: number) => {
@@ -159,11 +153,11 @@ export const formatMsToDateTimeLocal = (ms: number) => {
 };
 
 export const isValidDate = (anything: string) => {
-	return dayJsFunction(anything).isValid();
+	return dayjs(anything).isValid();
 };
 
 export const formatDateTimeLocalToMs = (anything: string) => {
-	return dayJsFunction(anything).unix() * 1000;
+	return dayjs(anything).unix() * 1000;
 };
 
 export const formatMsToDurationCompat = (ms: number) => {
