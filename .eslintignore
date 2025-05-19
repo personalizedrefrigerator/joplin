@@ -535,6 +535,7 @@ packages/app-desktop/integration-tests/sidebar.spec.js
 packages/app-desktop/integration-tests/simpleBackup.spec.js
 packages/app-desktop/integration-tests/util/activateMainMenuItem.js
 packages/app-desktop/integration-tests/util/createStartupArgs.js
+packages/app-desktop/integration-tests/util/evaluateWithRetry.js
 packages/app-desktop/integration-tests/util/extendedExpect.js
 packages/app-desktop/integration-tests/util/getImageSourceSize.js
 packages/app-desktop/integration-tests/util/getMainWindow.js
