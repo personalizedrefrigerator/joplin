@@ -335,18 +335,6 @@ class Application extends BaseApplication {
 		}, 500);
 	}
 
-	public crashDetectionHandler() {
-		// This handler conflicts with the single instance behaviour, so it's
-		// not used for now.
-		// https://discourse.joplinapp.org/t/pre-release-v2-8-is-now-available-updated-27-april/25158/56?u=laurent
-		if (!Setting.value('wasClosedSuccessfully')) {
-			const answer = confirm(_('The application did not close properly. Would you like to start in safe mode?'));
-			Setting.setValue('isSafeMode', !!answer);
-		}
-
-		Setting.setValue('wasClosedSuccessfully', false);
-	}
-
 	private async setupOcrService() {
 		if (Setting.value('ocr.clearLanguageDataCache')) {
 			Setting.setValue('ocr.clearLanguageDataCache', false);
