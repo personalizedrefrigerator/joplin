@@ -418,6 +418,14 @@ class Application extends BaseApplication {
 		});
 	}
 
+	private async setupIntegrationTestUtils() {
+		// Events used by Playwright tests to quickly change the value of a setting.
+		ipcRenderer.on('testing--setSetting', (_event, key, value) => {
+			this.logger().info('Updating setting using testing API: %s = %s', key, JSON.stringify(value));
+			Setting.setValue(key, value);
+		});
+	}
+
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	public async start(argv: string[], startOptions: StartOptions = null): Promise<any> {
 		// If running inside a package, the command line, instead of being "node.exe <path> <flags>" is "joplin.exe <flags>" so
@@ -425,6 +433,8 @@ class Application extends BaseApplication {
 		if (!bridge().electronIsDev()) argv.splice(1, 0, '.');
 
 		argv = await super.start(argv, startOptions);
+
+		await this.setupIntegrationTestUtils();
 
 		bridge().setLogFilePath(Logger.globalLogger.logFilePath());
 
