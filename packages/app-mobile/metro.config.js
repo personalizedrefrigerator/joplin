@@ -11,7 +11,8 @@
 // https://github.com/facebook/metro/issues/1#issuecomment-511228599
 
 const path = require('path');
-const { getDefaultConfig, mergeConfig } = require('@react-native/metro-config');
+const { mergeConfig, getDefaultConfig } = require('@react-native/metro-config');
+const { getDefaultConfig: getExpoDefaultConfig } = require('expo/metro-config');
 
 const localPackages = {
 	'@joplin/lib': path.resolve(__dirname, '../lib/'),
@@ -28,20 +29,22 @@ const localPackages = {
 	'@joplin/fork-sax': path.resolve(__dirname, '../fork-sax/'),
 };
 
-const remappedPackages = {
-	...localPackages,
-};
-
 // cSpell:disable
 // Some packages aren't available in react-native and thus must be polyfilled
 // For example, this allows us to `import {resolve} from 'path'` rather than
 // `const { resolve } = require('path-browserify')` ('path-browerify' doesn't have its own type
 // definitions).
 // cSpell:enable
-const polyfilledPackages = ['path'];
-for (const package of polyfilledPackages) {
-	remappedPackages[package] = path.resolve(__dirname, `./node_modules/${package}-browserify/`);
-}
+
+const polyfilledPackages = {
+	path: path.resolve(__dirname, './node_modules/path-browserify/'),
+	crypto: path.resolve(__dirname, './utils/polyfills/crypto-polyfill/'),
+};
+
+const remappedPackages = {
+	...localPackages,
+	...polyfilledPackages,
+};
 
 const watchedFolders = [];
 for (const [, v] of Object.entries(localPackages)) {
@@ -98,4 +101,4 @@ const config = {
 	watchFolders: watchedFolders,
 };
 
-module.exports = mergeConfig(defaultConfig, config);
+module.exports = mergeConfig(defaultConfig, getExpoDefaultConfig(__dirname), config);
