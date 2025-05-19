@@ -1587,6 +1587,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 						noteHash={this.props.noteHash}
 						initialText={note.body}
 						initialSelection={this.selection}
+						globalSearch={this.props.searchQuery}
 						onChange={this.onMarkdownEditorTextChange}
 						onSelectionChange={this.onMarkdownEditorSelectionChange}
 						onUndoRedoDepthChange={this.onUndoRedoDepthChange}
