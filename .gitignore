@@ -995,7 +995,10 @@ packages/generator-joplin/generators/app/templates/api/types.js
 packages/generator-joplin/generators/app/templates/api_index.js
 packages/generator-joplin/generators/app/templates/src/index.js
 packages/generator-joplin/tools/updateCategories.js
-packages/htmlpack/src/index.js
+packages/htmlpack/index.test.js
+packages/htmlpack/index.js
+packages/htmlpack/packToString.js
+packages/htmlpack/utils/parseHtmlAsync.js
 packages/lib/ArrayUtils.js
 packages/lib/AsyncActionQueue.test.js
 packages/lib/AsyncActionQueue.js

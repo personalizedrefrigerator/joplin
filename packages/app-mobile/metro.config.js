@@ -27,6 +27,7 @@ const localPackages = {
 	'@joplin/react-native-saf-x': path.resolve(__dirname, '../react-native-saf-x/'),
 	'@joplin/react-native-alarm-notification': path.resolve(__dirname, '../react-native-alarm-notification/'),
 	'@joplin/fork-sax': path.resolve(__dirname, '../fork-sax/'),
+	'@joplin/htmlpack': path.resolve(__dirname, '../htmlpack/'),
 };
 
 // cSpell:disable

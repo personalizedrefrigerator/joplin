@@ -9017,9 +9017,12 @@ __metadata:
     "@adobe/css-tools": 4.4.2
     "@joplin/fork-htmlparser2": ^4.1.58
     "@types/fs-extra": 11.0.4
+    "@types/jest": 29.5.12
     datauri: 4.1.0
     fs-extra: 11.2.0
     html-entities: 1.4.0
+    jest: 29.7.0
+    typescript: 5.4.5
   languageName: unknown
   linkType: soft
 
