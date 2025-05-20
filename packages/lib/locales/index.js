@@ -56,7 +56,7 @@ stats['de_DE'] = {"percentDone":94,"pluralForms":"nplurals=2; plural=(n != 1);"}
 stats['et_EE'] = {"percentDone":31,"pluralForms":"nplurals=2; plural=(n != 1);"};
 stats['en_GB'] = {"percentDone":100};
 stats['en_US'] = {"percentDone":100,"pluralForms":"nplurals=2; plural=(n != 1);"};
-stats['es_ES'] = {"percentDone":94,"pluralForms":"nplurals=2; plural=(n != 1);"};
+stats['es_ES'] = {"percentDone":99,"pluralForms":"nplurals=2; plural=(n != 1);"};
 stats['eo'] = {"percentDone":18,"pluralForms":"nplurals=2; plural=(n != 1);"};
 stats['fi_FI'] = {"percentDone":71,"pluralForms":"nplurals=2; plural=(n != 1);"};
 stats['fr_FR'] = {"percentDone":99,"pluralForms":"nplurals=2; plural=(n > 1);"};

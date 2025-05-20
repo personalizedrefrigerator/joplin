@@ -1,5 +1,12 @@
 # Joplin Desktop Changelog
 
+## [v3.3.12](https://github.com/laurent22/joplin/releases/tag/v3.3.12) - 2025-05-04T18:12:23Z
+
+- Improved: Plugins: Undeprecate joplin.settings.value() ([3f364a4](https://github.com/laurent22/joplin/commit/3f364a4))
+- Fixed: Fix crash after removing "toggle tab indentation" keyboard shortcut ([#12213](https://github.com/laurent22/joplin/issues/12213)) ([#12204](https://github.com/laurent22/joplin/issues/12204) by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Fix printing ([#12219](https://github.com/laurent22/joplin/issues/12219) by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Prevent application from hanging when multi-instance setup does not work ([#12222](https://github.com/laurent22/joplin/issues/12222))
+
 ## [v3.3.10](https://github.com/laurent22/joplin/releases/tag/v3.3.10) - 2025-05-02T19:46:15Z
 
 - Fixed: Notify user when they are using the Intel app on Apple Silicon ([#11989](https://github.com/laurent22/joplin/issues/11989))

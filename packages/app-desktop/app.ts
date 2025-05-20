@@ -149,6 +149,10 @@ class Application extends BaseApplication {
 			await AlarmService.updateNoteNotification(action.id, action.type === 'NOTE_DELETE');
 		}
 
+		if (action.type === 'SETTING_UPDATE_ONE' && action.key === 'featureFlag.autoUpdaterServiceEnabled' || action.type === 'SETTING_UPDATE_ALL') {
+			if (Setting.value('featureFlag.autoUpdaterServiceEnabled')) this.setupAutoUpdaterService();
+		}
+
 		const result = await super.generalMiddleware(store, next, action);
 		const newState = store.getState();
 
@@ -386,6 +390,8 @@ class Application extends BaseApplication {
 	}
 
 	private setupAutoUpdaterService() {
+		this.logger().info('Setting up auto-updater service...');
+
 		if (Setting.value('featureFlag.autoUpdaterServiceEnabled')) {
 			bridge().electronApp().initializeAutoUpdaterService(
 				Logger.create('AutoUpdaterService'),
