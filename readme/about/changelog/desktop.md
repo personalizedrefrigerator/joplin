@@ -1,5 +1,19 @@
 # Joplin Desktop Changelog
 
+## [v3.4.1](https://github.com/laurent22/joplin/releases/tag/v3.4.1) (Pre-release) - 2025-05-20T09:59:39Z
+
+- New: Plugins: Added copyToClipboard command ([067ce65](https://github.com/laurent22/joplin/commit/067ce65))
+- New: Plugins: Added the webviewApi.menuPopupFromTemplate() API to create context menus ([370f6bd](https://github.com/laurent22/joplin/commit/370f6bd))
+- Improved: Built-in plugins: Update Freehand Drawing to v3.1.0 ([#12323](https://github.com/laurent22/joplin/issues/12323) by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Improved: Make default window color match system theme ([#12303](https://github.com/laurent22/joplin/issues/12303) by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Improved: Set new encryption methods as default ([#12229](https://github.com/laurent22/joplin/issues/12229) by Self Not Found)
+- Improved: Setup auto-update service when the feature flag is set in config ([318ca3d](https://github.com/laurent22/joplin/commit/318ca3d))
+- Improved: Updated packages @adobe/css-tools (v4.4.2)
+- Fixed: //" URLs setting does not allow loading local images ([#12281](https://github.com/laurent22/joplin/issues/12281) by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Fix "Open" option for attachments shown in context menu for web links ([#12215](https://github.com/laurent22/joplin/issues/12215) by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Fix keyboard can't add text after certain confirm dialogs are shown ([#12200](https://github.com/laurent22/joplin/issues/12200) by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Rich Text Editor: Fix dropping a URL from the Firefox addressbar inserts nothing ([#12282](https://github.com/laurent22/joplin/issues/12282) by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+
 ## [v3.3.12](https://github.com/laurent22/joplin/releases/tag/v3.3.12) - 2025-05-04T18:12:23Z
 
 - Improved: Plugins: Undeprecate joplin.settings.value() ([3f364a4](https://github.com/laurent22/joplin/commit/3f364a4))

@@ -1,4 +1,5 @@
-import { Fragment, useEffect, useMemo, useReducer, useState } from 'react';
+import * as React from 'react';
+import { useEffect, useMemo, useReducer, useState } from 'react';
 import ButtonBar from './ConfigScreen/ButtonBar';
 import { _ } from '@joplin/lib/locale';
 import { clipboard } from 'electron';
@@ -81,7 +82,7 @@ const JoplinCloudScreenComponent = (props: Props) => {
 		<div className="login-page">
 			<div className="page-container">
 				{state.active !== 'COMPLETED' ? (
-					<Fragment>
+					<>
 						<p className="text">{_('To allow Joplin to synchronise with Joplin Cloud, please login using this URL:')}</p>
 						<div className="buttons-container">
 							<Button
@@ -98,7 +99,7 @@ const JoplinCloudScreenComponent = (props: Props) => {
 							/>
 
 						</div>
-					</Fragment>
+					</>
 				) : null}
 				<p className={state.className}>{state.message()}
 					{state.active === 'ERROR' ? (
