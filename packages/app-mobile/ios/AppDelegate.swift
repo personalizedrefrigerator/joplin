@@ -2,8 +2,9 @@ import Expo
 import React
 import ReactAppDependencyProvider
  
+// Note: UNUserNotificationCenterDelegate is required by @react-native-community/push-notification-ios
 @UIApplicationMain
-public class AppDelegate: ExpoAppDelegate {
+public class AppDelegate: ExpoAppDelegate, UNUserNotificationCenterDelegate {
   var window: UIWindow?
  
   var reactNativeDelegate: ExpoReactNativeFactoryDelegate?
@@ -28,6 +29,10 @@ public class AppDelegate: ExpoAppDelegate {
       in: window,
       launchOptions: launchOptions)
 #endif
+    
+    // Define UNUserNotificationCenter -- required by @react-native-community/push-notification-ios
+    let center = UNUserNotificationCenter.current();
+    center.delegate = self;
  
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
@@ -58,6 +63,17 @@ public class AppDelegate: ExpoAppDelegate {
     completionHandler: @escaping (Bool) -> Void
   ) {
     RNQuickActionManager.onQuickActionPress(shortcutItem, completionHandler: completionHandler)
+  }
+  
+  // Notifications with @react-native-community/push-notification-ios
+  // IOS 10+ Required for localNotification event
+  public func userNotificationCenter(
+    _ center: UNUserNotificationCenter,
+    didReceive response: UNNotificationResponse,
+    withCompletionHandler completionHandler: @escaping () -> Void
+  ) {
+    RNCPushNotificationIOS.didReceive(response);
+    completionHandler();
   }
 }
  
