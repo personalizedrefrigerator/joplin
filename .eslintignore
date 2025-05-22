@@ -645,6 +645,10 @@ packages/app-mobile/components/ExtendedWebView/types.js
 packages/app-mobile/components/FolderPicker.js
 packages/app-mobile/components/Icon.js
 packages/app-mobile/components/IconButton.js
+packages/app-mobile/components/ImageCropper/DragPoint.js
+packages/app-mobile/components/ImageCropper/ImageProcessorView.js
+packages/app-mobile/components/ImageCropper/ResizeOverlay.js
+packages/app-mobile/components/ImageCropper/utils/ImageProcessor.js
 packages/app-mobile/components/Modal.js
 packages/app-mobile/components/ModalDialog.js
 packages/app-mobile/components/NoteBodyViewer/NoteBodyViewer.test.js

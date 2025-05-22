@@ -68,6 +68,7 @@ import getActivePluginEditorView from '@joplin/lib/services/plugins/utils/getAct
 import EditorPluginHandler from '@joplin/lib/services/plugins/EditorPluginHandler';
 import AudioRecordingBanner from '../../voiceTyping/AudioRecordingBanner';
 import SpeechToTextBanner from '../../voiceTyping/SpeechToTextBanner';
+import ImageProcessorView from '../../ImageCropper/ImageProcessorView';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 const emptyArray: any[] = [];
@@ -965,7 +966,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 		});
 	};
 
-	private async editDrawing(item: BaseItem) {
+	private async editImage(item: BaseItem) {
 		const filePath = Resource.fullPath(item);
 		this.setState({
 			showImageEditor: true,
@@ -986,7 +987,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 		await Resource.requireIsReady(resource);
 
 		if (isEditableResource(resource.mime)) {
-			await this.editDrawing(resource);
+			await this.editImage(resource);
 		} else {
 			throw new Error(_('Unable to edit resource of type %s', resource.mime));
 		}
@@ -1486,12 +1487,19 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 				onCancel={this.cameraView_onCancel}
 			/>;
 		} else if (this.state.showImageEditor) {
-			return <ImageEditor
-				resourceFilename={this.state.imageEditorResourceFilepath}
-				themeId={this.props.themeId}
-				onSave={this.onSaveDrawing}
-				onExit={this.onCloseDrawing}
-			/>;
+			if (this.state.imageEditorResource?.mime === 'image/png') {
+				return <ImageProcessorView
+					imageMime={this.state.imageEditorResource.mime}
+					imageUri={this.state.imageEditorResourceFilepath}
+				/>;
+			} else {
+				return <ImageEditor
+					resourceFilename={this.state.imageEditorResourceFilepath}
+					themeId={this.props.themeId}
+					onSave={this.onSaveDrawing}
+					onExit={this.onCloseDrawing}
+				/>;
+			}
 		}
 
 		const renderPluginEditor = () => {
