@@ -68,6 +68,8 @@ import getActivePluginEditorView from '@joplin/lib/services/plugins/utils/getAct
 import EditorPluginHandler from '@joplin/lib/services/plugins/EditorPluginHandler';
 import AudioRecordingBanner from '../../voiceTyping/AudioRecordingBanner';
 import SpeechToTextBanner from '../../voiceTyping/SpeechToTextBanner';
+import ShareNoteDialog from '../ShareNoteDialog';
+import stateToWhenClauseContext from '../../../services/commands/stateToWhenClauseContext';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 const emptyArray: any[] = [];
@@ -105,6 +107,7 @@ interface Props extends BaseProps {
 	'plugins.shownEditorViewIds': string[];
 	pluginHtmlContents: PluginHtmlContents;
 	editorNoteReloadTimeRequest: number;
+	canPublish: boolean;
 }
 
 interface ComponentProps extends Props {
@@ -123,6 +126,7 @@ interface State {
 	alarmDialogShown: boolean;
 	heightBumpView: number;
 	noteTagDialogShown: boolean;
+	publishDialogShown: boolean;
 	fromShare: boolean;
 	showCamera: boolean;
 	showImageEditor: boolean;
@@ -193,6 +197,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 			alarmDialogShown: false,
 			heightBumpView: 0,
 			noteTagDialogShown: false,
+			publishDialogShown: false,
 			fromShare: false,
 			showCamera: false,
 			showImageEditor: false,
@@ -426,6 +431,18 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 			body: noteBody === null ? this.state.note.body : noteBody,
 		};
 	}
+
+	private onPublishDialogClose_ = () => {
+		this.setState({
+			publishDialogShown: false,
+		});
+	};
+
+	private onPublishDialogShow_ = () => {
+		this.setState({
+			publishDialogShown: true,
+		});
+	};
 
 	public styles() {
 		const themeId = this.props.themeId;
@@ -1099,6 +1116,12 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 				},
 			});
 		}
+		if (this.props.canPublish) {
+			output.push({
+				title: _('Publish/unpublish'),
+				onPress: this.onPublishDialogShow_,
+			});
+		}
 
 		return output;
 	}
@@ -1703,6 +1726,11 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 				<SelectDateTimeDialog themeId={this.props.themeId} shown={this.state.alarmDialogShown} date={dueDate} onAccept={this.onAlarmDialogAccept} onReject={this.onAlarmDialogReject} />
 
 				{noteTagDialog}
+				<ShareNoteDialog
+					noteId={this.props.noteId}
+					visible={this.state.publishDialogShown}
+					onClose={this.onPublishDialogClose_}
+				/>
 			</View>
 		);
 	}
@@ -1720,6 +1748,7 @@ const NoteScreenWrapper = (props: Props) => {
 };
 
 const NoteScreen = connect((state: AppState) => {
+	const whenClause = stateToWhenClauseContext(state);
 	return {
 		noteId: state.selectedNoteIds.length ? state.selectedNoteIds[0] : null,
 		noteHash: state.selectedNoteHash,
@@ -1745,6 +1774,7 @@ const NoteScreen = connect((state: AppState) => {
 		// default) CodeMirror editor. That should be refactored to make it less
 		// confusing.
 		useEditorBeta: !state.settings['editor.usePlainText'],
+		canPublish: whenClause.joplinServerConnected && !whenClause.inTrash,
 	};
 })(NoteScreenWrapper);
 
