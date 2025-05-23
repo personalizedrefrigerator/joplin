@@ -141,7 +141,7 @@ interface State {
 	showSpeechToTextDialog: boolean;
 }
 
-class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> implements BaseNoteScreenComponent {
+class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> implements BaseNoteScreenComponent<State> {
 	// This isn't in this.state because we don't want changing scroll to trigger
 	// a re-render.
 	private lastBodyScroll: number|undefined = undefined;
@@ -696,9 +696,9 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 		this.selection = { start: event.from, end: event.to };
 	};
 
-	public makeSaveAction() {
+	public makeSaveAction(state: State) {
 		return async () => {
-			return shared.saveNoteButton_press(this, null, null);
+			return shared.saveNoteButton_press(this, state, null, null);
 		};
 	}
 
@@ -709,12 +709,12 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 		return this.saveActionQueues_[noteId];
 	}
 
-	public scheduleSave() {
-		this.saveActionQueue(this.state.note.id).push(this.makeSaveAction());
+	public scheduleSave(state: State) {
+		this.saveActionQueue(state.note.id).push(this.makeSaveAction(state));
 	}
 
 	private async saveNoteButton_press(folderId: string = null) {
-		await shared.saveNoteButton_press(this, folderId, null);
+		await shared.saveNoteButton_press(this, this.state, folderId, null);
 
 		Keyboard.dismiss();
 	}
@@ -884,7 +884,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 
 		void this.refreshResource(resource, newNote.body);
 
-		this.scheduleSave();
+		this.scheduleSave({ ...this.state, note: newNote });
 
 		return resource;
 	}
@@ -995,7 +995,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 	private toggleIsTodo_onPress() {
 		shared.toggleIsTodo_onPress(this);
 
-		this.scheduleSave();
+		this.scheduleSave(this.state);
 	}
 
 	private async share_onPress() {
@@ -1429,7 +1429,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 			const newNote: NoteEntity = { ...this.state.note };
 			newNote.body = `${newNote.body} ${text}`;
 			this.setState({ note: newNote });
-			this.scheduleSave();
+			this.scheduleSave(this.state);
 		} else {
 			if (this.useEditorBeta()) {
 				// We add a space so that if the feature is used twice in a row,
