@@ -16,7 +16,7 @@ import useBarcodeScanner from './utils/useBarcodeScanner';
 import ScannedBarcodes from './ScannedBarcodes';
 import { CameraRef } from './Camera/types';
 import Camera from './Camera/index.jest';
-import { CameraResult } from './types';
+import { CameraResult, OnInsertBarcode } from './types';
 import Logger from '@joplin/utils/Logger';
 import useBackHandler from '../../utils/hooks/useBackHandler';
 
@@ -31,7 +31,7 @@ interface Props {
 	// If null, cancelling should be handled by the parent
 	// component
 	onCancel: (()=> void)|null;
-	onInsertBarcode: (barcodeText: string)=> void;
+	onInsertBarcode: OnInsertBarcode;
 }
 
 interface UseStyleProps {

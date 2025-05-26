@@ -9,10 +9,12 @@ import { _ } from '@joplin/lib/locale';
 import useAsyncEffect from '@joplin/lib/hooks/useAsyncEffect';
 import shim from '@joplin/lib/shim';
 
+export type OnComplete = (photos: CameraResult[])=> void;
+
 interface Props {
 	themeId: number;
 	onCancel: ()=> void;
-	onComplete: (photos: CameraResult[])=> void;
+	onComplete: OnComplete;
 	onInsertBarcode: (barcodeText: string)=> void;
 }
 
@@ -30,16 +32,16 @@ const useStyle = (themeId: number) => {
 			bottomRow: {
 				flexDirection: 'row',
 				alignItems: 'center',
-				height: 82,
 			},
 			photoWrapper: {
 				flexGrow: 1,
+				minHeight: 82,
 				flexDirection: 'row',
 				justifyContent: 'center',
 			},
 
 			imagePreview: {
-				flexBasis: 150,
+				maxWidth: 70,
 				flexShrink: 1,
 				flexGrow: 1,
 				alignContent: 'center',
@@ -48,6 +50,7 @@ const useStyle = (themeId: number) => {
 			imageCountText: {
 				marginLeft: 'auto',
 				marginRight: 'auto',
+				marginTop: 'auto',
 				padding: 2,
 				borderRadius: 4,
 				backgroundColor: theme.backgroundColor2,
@@ -88,7 +91,10 @@ const PhotoPreview: React.FC<PhotoProps> = ({ source, label, backgroundStyle, te
 		source={{ uri }}
 		accessibilityLabel={_('%d photo(s) taken', label)}
 	>
-		<Text style={textStyle}>{label}</Text>
+		<Text
+			style={textStyle}
+			testID='photo-count'
+		>{label}</Text>
 	</ImageBackground>;
 };
 
