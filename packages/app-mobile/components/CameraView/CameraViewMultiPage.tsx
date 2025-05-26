@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { CameraResult } from './types';
-import { View, StyleSheet, ScrollView, Platform, ImageBackground, ViewStyle, TextStyle } from 'react-native';
+import { View, StyleSheet, Platform, ImageBackground, ViewStyle, TextStyle } from 'react-native';
 import CameraView from './CameraView';
 import { useCallback, useMemo, useState } from 'react';
 import { themeStyle } from '../global-style';
@@ -29,21 +29,23 @@ const useStyle = (themeId: number) => {
 			},
 			bottomRow: {
 				flexDirection: 'row',
+				alignItems: 'center',
+				height: 82,
 			},
-			previousPhotos: {
+			photoWrapper: {
+				flexGrow: 1,
 				flexDirection: 'row',
-			},
-			previousPhotosContent: {
-				marginLeft: 'auto',
-				marginRight: 'auto',
+				justifyContent: 'center',
 			},
 
 			imagePreview: {
-				minWidth: 40,
+				flexBasis: 150,
+				flexShrink: 1,
+				flexGrow: 1,
 				alignContent: 'center',
 				justifyContent: 'center',
 			},
-			imageText: {
+			imageCountText: {
 				marginLeft: 'auto',
 				marginRight: 'auto',
 				padding: 2,
@@ -59,10 +61,10 @@ interface PhotoProps {
 	source: CameraResult;
 	backgroundStyle: ViewStyle;
 	textStyle: TextStyle;
-	index: number;
+	label: number;
 }
 
-const PhotoPreview: React.FC<PhotoProps> = ({ source, index, backgroundStyle, textStyle }) => {
+const PhotoPreview: React.FC<PhotoProps> = ({ source, label, backgroundStyle, textStyle }) => {
 	const [uri, setUri] = useState('');
 
 	useAsyncEffect(async (event) => {
@@ -84,9 +86,9 @@ const PhotoPreview: React.FC<PhotoProps> = ({ source, index, backgroundStyle, te
 		style={backgroundStyle}
 		resizeMode='contain'
 		source={{ uri }}
-		accessibilityLabel={_('Photo preview: %d', index + 1)}
+		accessibilityLabel={_('%d photo(s) taken', label)}
 	>
-		<Text style={textStyle}>{index + 1}</Text>
+		<Text style={textStyle}>{label}</Text>
 	</ImageBackground>;
 };
 
@@ -103,16 +105,15 @@ const CameraViewMultiPage: React.FC<Props> = ({
 	}, [photos, onComplete]);
 
 	const styles = useStyle(themeId);
-	const renderPhotos = () => {
-		return photos.map((photo, index) => {
-			return <PhotoPreview
-				index={index}
-				source={photo}
-				backgroundStyle={styles.imagePreview}
-				textStyle={styles.imageText}
-				key={`photo-${index}`}
-			/>;
-		});
+	const renderLastPhoto = () => {
+		if (!photos.length) return null;
+
+		return <PhotoPreview
+			label={photos.length}
+			source={photos[photos.length - 1]}
+			backgroundStyle={styles.imagePreview}
+			textStyle={styles.imageCountText}
+		/>;
 	};
 
 	return <View style={styles.root}>
@@ -124,14 +125,14 @@ const CameraViewMultiPage: React.FC<Props> = ({
 		/>
 		<View style={styles.bottomRow}>
 			<Button icon='arrow-left' onPress={onCancel}>{_('Back')}</Button>
-			<ScrollView
-				style={styles.previousPhotos}
-				contentContainerStyle={styles.previousPhotosContent}
-				horizontal={true}
-			>
-				{renderPhotos()}
-			</ScrollView>
-			<Button icon='arrow-right' onPress={onDonePressed}>{_('Next')}</Button>
+			<View style={styles.photoWrapper}>
+				{renderLastPhoto()}
+			</View>
+			<Button
+				icon='arrow-right'
+				disabled={photos.length === 0}
+				onPress={onDonePressed}
+			>{_('Next')}</Button>
 		</View>
 	</View>;
 };
