@@ -34,7 +34,6 @@ import { themeStyle, editorFont } from '../../global-style';
 import shared, { BaseNoteScreenComponent, Props as BaseProps } from '@joplin/lib/components/shared/note-screen-shared';
 import SelectDateTimeDialog from '../../SelectDateTimeDialog';
 import ShareExtension from '../../../utils/ShareExtension.js';
-import CameraViewMultiPage from '../../CameraView/CameraViewMultiPage';
 import { FolderEntity, NoteEntity, ResourceEntity } from '@joplin/lib/services/database/types';
 import Logger from '@joplin/utils/Logger';
 import ImageEditor from '../../NoteEditor/ImageEditor/ImageEditor';
@@ -68,6 +67,7 @@ import getActivePluginEditorView from '@joplin/lib/services/plugins/utils/getAct
 import EditorPluginHandler from '@joplin/lib/services/plugins/EditorPluginHandler';
 import AudioRecordingBanner from '../../voiceTyping/AudioRecordingBanner';
 import SpeechToTextBanner from '../../voiceTyping/SpeechToTextBanner';
+import CameraView from '../../CameraView/CameraView';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 const emptyArray: any[] = [];
@@ -1486,11 +1486,11 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 		const isTodo = !!Number(note.is_todo);
 
 		if (this.state.showCamera) {
-			return <CameraViewMultiPage
-				themeId={this.props.themeId}
-				onComplete={this.cameraView_onPhoto}
+			return <CameraView
+				onPhoto={this.cameraView_onPhoto}
 				onInsertBarcode={this.cameraView_onInsertBarcode}
 				onCancel={this.cameraView_onCancel}
+				style={{ flex: 1 }}
 			/>;
 		} else if (this.state.showImageEditor) {
 			return <ImageEditor
