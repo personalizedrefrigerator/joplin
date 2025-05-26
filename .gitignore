@@ -588,6 +588,7 @@ packages/app-mobile/components/CameraView/Camera/index.js
 packages/app-mobile/components/CameraView/Camera/types.js
 packages/app-mobile/components/CameraView/CameraView.test.js
 packages/app-mobile/components/CameraView/CameraView.js
+packages/app-mobile/components/CameraView/CameraViewMultiPage.js
 packages/app-mobile/components/CameraView/ScannedBarcodes.js
 packages/app-mobile/components/CameraView/types.js
 packages/app-mobile/components/CameraView/utils/fitRectIntoBounds.js

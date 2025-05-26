@@ -34,7 +34,7 @@ import { themeStyle, editorFont } from '../../global-style';
 import shared, { BaseNoteScreenComponent, Props as BaseProps } from '@joplin/lib/components/shared/note-screen-shared';
 import SelectDateTimeDialog from '../../SelectDateTimeDialog';
 import ShareExtension from '../../../utils/ShareExtension.js';
-import CameraView from '../../CameraView/CameraView';
+import CameraViewMultiPage from '../../CameraView/CameraViewMultiPage';
 import { FolderEntity, NoteEntity, ResourceEntity } from '@joplin/lib/services/database/types';
 import Logger from '@joplin/utils/Logger';
 import ImageEditor from '../../NoteEditor/ImageEditor/ImageEditor';
@@ -808,6 +808,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 		pickerResponse: PickerResponse,
 		fileType: string,
 	): Promise<ResourceEntity|null> {
+		logger.debug('Attaching file:', pickerResponse?.uri);
 		if (!pickerResponse) {
 			// User has cancelled
 			return null;
@@ -889,11 +890,17 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 		return resource;
 	}
 
-	private cameraView_onPhoto(data: CameraResult) {
-		void this.attachFile(
-			data,
-			'image',
-		);
+	private async cameraView_onPhoto(data: CameraResult|CameraResult[]) {
+		if (!Array.isArray(data)) {
+			data = [data];
+		}
+
+		for (const item of data) {
+			await this.attachFile(
+				item,
+				'image',
+			);
+		}
 
 		this.setState({ showCamera: false });
 	}
@@ -1479,9 +1486,9 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 		const isTodo = !!Number(note.is_todo);
 
 		if (this.state.showCamera) {
-			return <CameraView
-				style={{ flex: 1 }}
-				onPhoto={this.cameraView_onPhoto}
+			return <CameraViewMultiPage
+				themeId={this.props.themeId}
+				onComplete={this.cameraView_onPhoto}
 				onInsertBarcode={this.cameraView_onInsertBarcode}
 				onCancel={this.cameraView_onCancel}
 			/>;

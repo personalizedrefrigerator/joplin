@@ -28,7 +28,9 @@ interface Props {
 	cameraType: CameraDirection;
 	cameraRatio: string;
 	onPhoto: (data: CameraResult)=> void;
-	onCancel: ()=> void;
+	// If null, cancelling should be handled by the parent
+	// component
+	onCancel: (()=> void)|null;
 	onInsertBarcode: (barcodeText: string)=> void;
 }
 
@@ -108,6 +110,8 @@ const CameraViewComponent: React.FC<Props> = props => {
 	const [cameraReady, setCameraReady] = useState(false);
 
 	useEffect(() => {
+		if (!props.onCancel) return () => {};
+
 		const handler = () => {
 			props.onCancel();
 			return true;
@@ -166,7 +170,7 @@ const CameraViewComponent: React.FC<Props> = props => {
 		overlay = <View style={styles.errorContainer}>
 			<Text>{_('Missing camera permission')}</Text>
 			<LinkButton onPress={() => Linking.openSettings()}>{_('Open settings')}</LinkButton>
-			<PrimaryButton onPress={props.onCancel}>{_('Go back')}</PrimaryButton>
+			{props.onCancel && <PrimaryButton onPress={props.onCancel}>{_('Go back')}</PrimaryButton>}
 		</View>;
 	} else {
 		overlay = <>
