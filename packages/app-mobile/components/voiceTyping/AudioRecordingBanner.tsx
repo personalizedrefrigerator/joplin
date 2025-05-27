@@ -100,6 +100,7 @@ const resetAudioMode = async () => {
 		// instead of the default one, so it's disabled when not recording:
 		allowsRecordingIOS: false,
 		playsInSilentModeIOS: false,
+		staysActiveInBackground: false,
 	});
 };
 
@@ -129,6 +130,7 @@ const useAudioRecorder = (onFileSaved: OnFileSavedCallback, onDismiss: ()=> void
 			await Audio.setAudioModeAsync({
 				allowsRecordingIOS: true,
 				playsInSilentModeIOS: true,
+				staysActiveInBackground: true,
 				// Fixes an issue where opening a recording in the iOS audio player
 				// breaks creating new recordings.
 				// See https://github.com/expo/expo/issues/31152#issuecomment-2341811087
