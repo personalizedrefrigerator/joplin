@@ -7,7 +7,6 @@ import { setupDatabaseAndSynchronizer, switchClient, revisionService, waitFor } 
 import createMockReduxStore from '../../utils/testing/createMockReduxStore';
 import setupGlobalStore from '../../utils/testing/setupGlobalStore';
 import { act, fireEvent, render, screen } from '@testing-library/react-native';
-import '@testing-library/jest-native/extend-expect';
 import Note from '@joplin/lib/models/Note';
 import { useMemo } from 'react';
 import Revision from '@joplin/lib/models/Revision';
