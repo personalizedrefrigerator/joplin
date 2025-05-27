@@ -19,10 +19,6 @@ import DismissibleDialog, { DialogSize } from '../DismissibleDialog';
 import { _, _n } from '@joplin/lib/locale';
 import { LinkButton, PrimaryButton } from '../buttons';
 import { themeStyle } from '../global-style';
-import Logger from '@joplin/utils/Logger';
-import shim from '@joplin/lib/shim';
-
-const logger = Logger.create('ShareNoteDialog');
 
 interface Props {
 	themeId: number;
@@ -106,14 +102,7 @@ const ShareNoteDialogContent: React.FC<Props> = ({
 	const onCopyLinks = useCallback(async (links: string[]) => {
 		setShareLinks(links);
 		const linkText = links.join('\n');
-		try {
-			await Clipboard.setString(linkText);
-		} catch (error) {
-			// setString can fail with permission errors on web -- provide an alternate way
-			// to get links.
-			logger.warn('Clipboard copy failed with error', error);
-			await shim.showMessageBox(_('Links: %s', linkText));
-		}
+		Clipboard.setString(linkText);
 	}, []);
 
 	const onUnpublishStart = useCallback(() => {
