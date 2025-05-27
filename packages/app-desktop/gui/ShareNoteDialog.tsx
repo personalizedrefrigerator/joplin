@@ -160,7 +160,7 @@ export function ShareNoteDialog(props: Props) {
 				{renderNoteList(notes)}
 				{renderRecursiveShareCheckbox()}
 				<button disabled={[SharingStatus.Creating, SharingStatus.Synchronizing].indexOf(sharesState) >= 0} style={styles.copyShareLinkButton} onClick={shareLinkButton_click}>{_n('Copy Shareable Link', 'Copy Shareable Links', noteCount)}</button>
-				<div style={theme.textStyle}>{statusMessage(sharesState)}</div>
+				<div style={theme.textStyle}>{statusMessage}</div>
 				{renderEncryptionWarningMessage()}
 				<DialogButtonRow
 					themeId={props.themeId}
