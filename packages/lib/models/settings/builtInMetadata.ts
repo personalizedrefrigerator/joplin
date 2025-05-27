@@ -1152,6 +1152,19 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 			isGlobal: true,
 			subType: SettingItemSubType.MonospaceFontFamily,
 		},
+		'style.viewer.fontFamily': {
+			value: '',
+			type: SettingItemType.String,
+			public: true,
+			appTypes: [AppType.Desktop],
+			section: 'appearance',
+			label: () => _('Viewer and Rich Text Editor font family'),
+			description: () =>
+				_('Used for most text in the note viewer and Rich Text Editor.'),
+			storage: SettingStorage.File,
+			isGlobal: true,
+			subType: SettingItemSubType.FontFamily,
+		},
 
 		'style.editor.contentMaxWidth': { value: 0, type: SettingItemType.Int, public: true, storage: SettingStorage.File, isGlobal: true, appTypes: [AppType.Desktop], section: 'appearance', label: () => _('Editor maximum width'), description: () => _('Set it to 0 to make it take the complete available space. Recommended width is 600.') },
 

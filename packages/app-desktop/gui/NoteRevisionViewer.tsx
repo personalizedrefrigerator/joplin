@@ -30,6 +30,7 @@ interface Props {
 	onBack: ()=> void;
 	customCss: string;
 	scrollbarSize: ScrollbarSize;
+	fontFamily: string;
 }
 
 const useNoteContent = (
@@ -39,6 +40,7 @@ const useNoteContent = (
 	themeId: number,
 	customCss: string,
 	scrollbarSize: ScrollbarSize,
+	fontFamily: string,
 ) => {
 	const [note, setNote] = useState<NoteEntity>(null);
 
@@ -48,6 +50,7 @@ const useNoteContent = (
 		plugins: {},
 		whiteBackgroundNoteRendering: false,
 		scrollbarSize,
+		baseFontFamily: fontFamily,
 	});
 
 	useAsyncEffect(async (event) => {
@@ -77,7 +80,7 @@ const useNoteContent = (
 	return note;
 };
 
-const NoteRevisionViewerComponent: React.FC<Props> = ({ themeId, noteId, onBack, customCss, scrollbarSize }) => {
+const NoteRevisionViewerComponent: React.FC<Props> = ({ themeId, noteId, onBack, customCss, scrollbarSize, fontFamily }) => {
 	const helpButton_onClick = useCallback(() => {}, []);
 	const viewerRef = useRef<NoteViewerControl|null>(null);
 	const revisionListRef = useRef<HTMLSelectElement|null>(null);
@@ -86,7 +89,9 @@ const NoteRevisionViewerComponent: React.FC<Props> = ({ themeId, noteId, onBack,
 	const [currentRevId, setCurrentRevId] = useState('');
 	const [restoring, setRestoring] = useState(false);
 
-	const note = useNoteContent(viewerRef, currentRevId, revisions, themeId, customCss, scrollbarSize);
+	const note = useNoteContent(
+		viewerRef, currentRevId, revisions, themeId, customCss, scrollbarSize, fontFamily,
+	);
 
 	const viewer_domReady = useCallback(async () => {
 		// this.viewerRef_.current.openDevTools();
@@ -202,6 +207,7 @@ const mapStateToProps = (state: AppState) => {
 	return {
 		themeId: state.settings.theme,
 		scrollbarSize: state.settings['style.scrollbarSize'],
+		fontFamily: state.settings['style.viewer.fontFamily'],
 	};
 };
 
