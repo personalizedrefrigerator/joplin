@@ -167,8 +167,11 @@ const ShareNoteDialogContent: React.FC<Props> = ({
 		return <>
 			<Divider/>
 			<Text variant='titleMedium' accessibilityRole='header'>{_('Links')}</Text>
-			{shareLinks.map(link => {
-				return <LinkButton onPress={() => Linking.openURL(link)}>{link}</LinkButton>;
+			{shareLinks.map((link, index) => {
+				return <LinkButton
+					onPress={() => Linking.openURL(link)}
+					key={`link-${index}`}
+				>{link}</LinkButton>;
 			})}
 		</>;
 	};

@@ -1,3 +1,4 @@
+import Logger from '@joplin/utils/Logger';
 import JoplinServerApi from '../../../JoplinServerApi';
 import { reg } from '../../../registry';
 import { NoteEntity } from '../../../services/database/types';
@@ -6,6 +7,8 @@ import { StateShare } from '../../../services/share/reducer';
 import shim from '../../../shim';
 import { SharingStatus } from './types';
 const { useCallback } = shim.react();
+
+const logger = Logger.create('useOnShareLinkClick');
 
 interface Props {
 	notes: NoteEntity[];
@@ -17,6 +20,10 @@ interface Props {
 const getShareLinks = (shares: StateShare[]) => {
 	const links = [];
 	for (const share of shares) {
+		if (!share) {
+			throw new Error('Error: Empty share.');
+		}
+
 		links.push(ShareService.instance().shareUrl(ShareService.instance().userId, share));
 	}
 
@@ -61,12 +68,13 @@ const useOnShareLinkClick = ({
 				await ShareService.instance().refreshShares();
 			} catch (error) {
 				if (error.code === 404 && !hasSynced) {
-					reg.logger().info('ShareNoteDialog: Note does not exist on server - trying to sync it.', error);
+					logger.info('ShareNoteDialog: Note does not exist on server - trying to sync it.', error);
 					tryToSync = true;
 					continue;
 				}
 
-				reg.logger().error('ShareNoteDialog: Cannot publish note:', error);
+				console.error(error);
+				logger.error('ShareNoteDialog: Cannot publish note:', error);
 
 				setSharesState(SharingStatus.Idle);
 				void shim.showErrorDialog(JoplinServerApi.connectionErrorMessage(error));
