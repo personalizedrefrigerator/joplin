@@ -8,7 +8,7 @@ import NoteBodyViewer from './NoteBodyViewer';
 import Setting from '@joplin/lib/models/Setting';
 import { resourceFetcher, setupDatabaseAndSynchronizer, supportDir, switchClient, synchronizerStart } from '@joplin/lib/testing/test-utils';
 import { MarkupLanguage } from '@joplin/renderer';
-import { HandleMessageCallback, OnMarkForDownloadCallback } from './hooks/useOnMessage';
+import { OnMarkForDownloadCallback } from './hooks/useOnMessage';
 import Resource from '@joplin/lib/models/Resource';
 import shim from '@joplin/lib/shim';
 import Note from '@joplin/lib/models/Note';
@@ -21,7 +21,6 @@ interface WrapperProps {
 	noteBody: string;
 	highlightedKeywords?: string[];
 	noteResources?: Record<string, ResourceInfo>;
-	onJoplinLinkClick?: HandleMessageCallback;
 	onScroll?: (percent: number)=> void;
 	onMarkForDownload?: OnMarkForDownloadCallback;
 }
@@ -35,16 +34,13 @@ const WrappedNoteViewer: React.FC<WrapperProps> = (
 		noteBody,
 		highlightedKeywords = emptyArray,
 		noteResources = emptyObject,
-		onJoplinLinkClick = noOpFunction,
 		onScroll = noOpFunction,
 		onMarkForDownload,
 	}: WrapperProps,
 ) => {
 	return <TestProviderStack store={testStore}>
 		<NoteBodyViewer
-			themeId={Setting.THEME_LIGHT}
 			style={emptyObject}
-			fontSize={12}
 			noteBody={noteBody}
 			noteMarkupLanguage={MarkupLanguage.Markdown}
 			highlightedKeywords={highlightedKeywords}
@@ -52,10 +48,8 @@ const WrappedNoteViewer: React.FC<WrapperProps> = (
 			paddingBottom={0}
 			initialScroll={0}
 			noteHash={''}
-			onJoplinLinkClick={onJoplinLinkClick}
 			onMarkForDownload={onMarkForDownload}
 			onScroll={onScroll}
-			pluginStates={emptyObject}
 		/>
 	</TestProviderStack>;
 };
