@@ -62,5 +62,8 @@ describe('ShareNoteDialog', () => {
 		fireEvent.press(linkButton);
 
 		expect(await screen.findByText('Link has been copied to clipboard!')).toBeVisible();
+		expect(await Note.load(note.id)).toMatchObject({
+			is_shared: 1,
+		});
 	});
 });
