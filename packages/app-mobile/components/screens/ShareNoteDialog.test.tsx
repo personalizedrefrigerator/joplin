@@ -9,7 +9,7 @@ import TestProviderStack from '../testing/TestProviderStack';
 import ShareNoteDialog from './ShareNoteDialog';
 import Note from '@joplin/lib/models/Note';
 import mockShareService from '@joplin/lib/testing/share/mockShareService';
-import { fireEvent, render, screen } from '@testing-library/react-native';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react-native';
 import Folder from '@joplin/lib/models/Folder';
 import ShareService from '@joplin/lib/services/share/ShareService';
 
@@ -61,7 +61,9 @@ describe('ShareNoteDialog', () => {
 		expect(linkButton).not.toBeDisabled();
 		fireEvent.press(linkButton);
 
-		expect(await screen.findByText('Link has been copied to clipboard!')).toBeVisible();
+		await waitFor(() => {
+			expect(screen.getByText('Link has been copied to clipboard!')).toBeVisible();
+		});
 		expect(await Note.load(note.id)).toMatchObject({
 			is_shared: 1,
 		});
