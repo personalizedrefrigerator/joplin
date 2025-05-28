@@ -39,14 +39,17 @@ const renumberSelectedLists = (state: EditorState): TransactionSpec => {
 			prevLineNumber = line.number;
 
 			const filteredText = stripBlockquote(line);
+			if (!filteredText.trim()) continue;
+
 			const match = filteredText.match(listItemRegex);
 
 			// Skip lines that aren't the correct type (e.g. blank lines)
-			if (!match) {
-				continue;
+			let indentation;
+			if (match) {
+				indentation = match[1];
+			} else {
+				indentation = filteredText.match(/^\s+/)?.[0] ?? '';
 			}
-
-			const indentation = match[1];
 
 			const indentationLen = tabsToSpaces(state, indentation).length;
 			let currentGroupIndentLength = tabsToSpaces(state, currentGroupIndentation).length;
@@ -78,19 +81,20 @@ const renumberSelectedLists = (state: EditorState): TransactionSpec => {
 				}
 
 			}
-
 			currentGroupIndentation = indentation;
 
-			const from = line.to - filteredText.length;
-			const to = from + match[0].length;
-			const inserted = `${indentation}${nextListNumber}. `;
-			nextListNumber++;
+			if (match) {
+				const from = line.to - filteredText.length;
+				const to = from + match[0].length;
+				const inserted = `${indentation}${nextListNumber}. `;
+				nextListNumber++;
 
-			changes.push({
-				from,
-				to,
-				insert: inserted,
-			});
+				changes.push({
+					from,
+					to,
+					insert: inserted,
+				});
+			}
 		}
 
 		return changes;

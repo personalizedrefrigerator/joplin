@@ -269,6 +269,10 @@ export const toggleList = (listType: ListType): Command => {
 		});
 
 		view.dispatch(changes);
+		// Fix any selected lists. Do this as a separate .dispatch
+		// so that it can be undone separately.
+		view.dispatch(renumberSelectedLists(view.state));
+
 		return true;
 	};
 };

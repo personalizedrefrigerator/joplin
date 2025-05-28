@@ -312,7 +312,7 @@ A block quote:
  
  			- TEST
  		- Test (cursor)
- 	- a
+ 	- a (cursor)
  - test
  		`.trim();
 
@@ -340,8 +340,8 @@ A block quote:
  		
  
  			- TEST
- 		1. Test (cursor)
- 	- a
+ 		2. Test (cursor)
+ 	1. a (cursor)
  - test
 		`.trim());
 		expect(
