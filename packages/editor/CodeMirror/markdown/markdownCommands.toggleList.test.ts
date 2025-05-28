@@ -63,34 +63,20 @@ describe('markdownCommands.toggleList', () => {
 		);
 	});
 
-	it('should not toggle a the full list when the cursor is on a blank line', async () => {
-		const checklistStartText = [
-			'# Test',
-			'',
-			'- [ ] This',
-			'- [ ] is',
-			'',
-		].join('\n');
+	it('should not toggle the full list when the cursor is on a blank line', async () => {
+		const checklistStartText = ['- [ ] This', '- [ ] is'].join('\n');
+		const checklistEndText = ['- [ ] a', '- [ ] test'].join('\n');
 
-		const checklistEndText = [
-			'- [ ] a',
-			'- [ ] test',
-		].join('\n');
+		const input = `${checklistStartText}\n\n${checklistEndText}`;
+		const expected = `${checklistStartText}\n\n${checklistEndText}`; // no change
 
 		const editor = await createTestEditor(
-			`${checklistStartText}\n${checklistEndText}`,
-
-			// Place the cursor on the blank line between the checklist
-			// regions
-			EditorSelection.cursor(unorderedListText.length + 1),
-			['BulletList', 'ATXHeading1'],
+			input,
+			EditorSelection.cursor(checklistStartText.length + 1), // place cursor on the blank line
+			['BulletList'],
 		);
-
-		// Should create a checkbox on the blank line
 		toggleList(ListType.CheckList)(editor);
-		expect(editor.state.doc.toString()).toBe(
-			`${checklistStartText}- [ ] \n${checklistEndText}`,
-		);
+		expect(editor.state.doc.toString()).toBe(expected);
 	});
 
 	// it('should correctly replace an unordered list with a checklist', async () => {
@@ -246,5 +232,32 @@ describe('markdownCommands.toggleList', () => {
 		expect(editor.state.doc.toString()).toBe(
 			'- 192.168.1.1. This\n- 127.0.0.1. is\n- 0.0.0.0. a list',
 		);
+	});
+
+	it('should preserve blank lines when toggling a checklist with blank lines', async () => {
+		const listWithGaps = [
+			'- A',
+			'',
+			'- B',
+			'',
+			'- C',
+		].join('\n');
+
+		const expectedAfterToggle = [
+			'- [ ] A',
+			'',
+			'- [ ] B',
+			'',
+			'- [ ] C',
+		].join('\n');
+
+		const editor = await createTestEditor(
+			listWithGaps,
+			EditorSelection.range(0, listWithGaps.length),
+			['BulletList'],
+		);
+
+		toggleList(ListType.CheckList)(editor);
+		expect(editor.state.doc.toString()).toBe(expectedAfterToggle);
 	});
 });
