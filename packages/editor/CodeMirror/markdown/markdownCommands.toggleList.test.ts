@@ -300,4 +300,54 @@ A block quote:
 > 2. test
 		`.trim());
 	});
+
+	it('should correctly toggle sublists when there are multiple cursors', async () => {
+		const testDocument = `
+- This (cursor)
+ 	- is
+ 	  
+ 		- a test. (cursor)
+   
+ 		
+ 
+ 			- TEST
+ 		- Test (cursor)
+ 	- a
+ - test
+ 		`.trim();
+
+		const getExpectedCursorLocations = (docText: string) => {
+			return [...docText.matchAll(/\(cursor\)/g)]
+				.map(match => match.index + match[0].length);
+		};
+		const initialCursors = getExpectedCursorLocations(testDocument)
+			.map(location => EditorSelection.cursor(location));
+
+		const editor = await createTestEditor(
+			testDocument,
+			initialCursors,
+			['BulletList'],
+		);
+
+		toggleList(ListType.OrderedList)(editor);
+		// Should renumber each line with a cursor separately
+		expect(editor.state.doc.toString()).toBe(`
+1. This (cursor)
+ 	- is
+ 	  
+ 		1. a test. (cursor)
+   
+ 		
+ 
+ 			- TEST
+ 		1. Test (cursor)
+ 	- a
+ - test
+		`.trim());
+		expect(
+			editor.state.selection.ranges.map(range => range.anchor),
+		).toEqual(
+			getExpectedCursorLocations(editor.state.doc.toString()),
+		);
+	});
 });

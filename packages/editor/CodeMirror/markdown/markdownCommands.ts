@@ -141,34 +141,64 @@ export const toggleList = (listType: ListType): Command => {
 			return null;
 		};
 
-		const fromLine = doc.lineAt(state.selection.main.from);
-		const toLine = doc.lineAt(state.selection.main.to);
-		let baselineIndent = Infinity;
-		for (let lineNum = fromLine.number; lineNum <= toLine.number; lineNum++) {
-			const line = doc.line(lineNum);
-			const content = stripBlockquote(line);
-			if (content.trim() !== '') {
-				const indent = (content.match(startingSpaceRegex)?.[0] || '').length;
-				baselineIndent = Math.min(baselineIndent, indent);
-			}
-		}
-		if (baselineIndent === Infinity) baselineIndent = 0;
+		// Maximum line number in the original document that has
+		// been processed
+		let maximumChangedLine = -1;
+		const getNextLineRange = (sel: SelectionRange) => {
+			let fromLine = doc.lineAt(sel.from);
+			const toLine = doc.lineAt(sel.to);
 
-		let isEntirelyTargetList = true;
-		for (let lineNum = fromLine.number; lineNum <= toLine.number; lineNum++) {
-			const line = doc.line(lineNum);
-			const content = stripBlockquote(line);
-			if (content.trim() === '') continue;
-			if (getContainerType(line) !== listType) {
-				isEntirelyTargetList = false;
-				break;
+			// Full selection already processed.
+			if (toLine.number <= maximumChangedLine) {
+				return null;
 			}
-		}
 
-		let outerCounter = 1;
-		const stack: { indent: number; counter: number }[] = [];
+			if (fromLine.number <= maximumChangedLine) {
+				fromLine = doc.line(maximumChangedLine);
+			}
+			maximumChangedLine = toLine.number;
+
+			return { fromLine, toLine };
+		};
+
+		const getIsEntirelyTargetList = (fromLine: Line, toLine: Line) => {
+			for (let lineNum = fromLine.number; lineNum <= toLine.number; lineNum++) {
+				const line = doc.line(lineNum);
+				const content = stripBlockquote(line);
+				if (content.trim() === '') continue;
+				if (getContainerType(line) !== listType) {
+					return false;
+				}
+			}
+			return true;
+		};
+
+		const getBaselineIndent = (fromLine: Line, toLine: Line) => {
+			let baselineIndent = Infinity;
+			for (let lineNum = fromLine.number; lineNum <= toLine.number; lineNum++) {
+				const line = doc.line(lineNum);
+				const content = stripBlockquote(line);
+				if (content.trim() !== '') {
+					const indent = (content.match(startingSpaceRegex)?.[0] || '').length;
+					baselineIndent = Math.min(baselineIndent, indent);
+				}
+			}
+			if (baselineIndent === Infinity) baselineIndent = 0;
+
+			return baselineIndent;
+		};
 
 		const changes: TransactionSpec = state.changeByRange((sel: SelectionRange) => {
+			const lineRange = getNextLineRange(sel);
+			if (!lineRange) return { range: sel };
+			const { fromLine, toLine } = lineRange;
+			const baselineIndent = getBaselineIndent(fromLine, toLine);
+			const isEntirelyTargetList = getIsEntirelyTargetList(fromLine, toLine);
+
+			// Outermost list item number
+			let outerCounter = 1;
+			// Stack mapping parent indentation to item numbers
+			const stack: { indent: number; counter: number }[] = [];
 			const changes: ChangeSpec[] = [];
 			let charsAdded = 0;
 
