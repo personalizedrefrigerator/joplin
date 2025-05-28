@@ -260,4 +260,44 @@ describe('markdownCommands.toggleList', () => {
 		toggleList(ListType.CheckList)(editor);
 		expect(editor.state.doc.toString()).toBe(expectedAfterToggle);
 	});
+
+	it('should correctly toggle sublists within block quotes', async () => {
+		const listInBlockQuote = `
+A block quote:
+> - This *
+>	- is
+>	  
+>		- a test. *
+>  
+>		
+>
+>			- TEST
+>		- Test *
+>	- a
+> - test`.trim();
+		const editor = await createTestEditor(
+			listInBlockQuote,
+			EditorSelection.range(
+				'A block quote:'.length + 1,
+				listInBlockQuote.length,
+			),
+			['BlockQuote', 'BulletList'],
+		);
+
+		toggleList(ListType.OrderedList)(editor);
+		expect(editor.state.doc.toString()).toBe(`
+A block quote:
+> 1. This *
+>	1. is
+>	  
+>		1. a test. *
+>  
+>		
+>
+>			1. TEST
+>		2. Test *
+>	2. a
+> 2. test
+		`.trim());
+	});
 });
