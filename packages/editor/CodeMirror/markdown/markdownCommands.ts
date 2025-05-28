@@ -179,6 +179,7 @@ export const toggleList = (listType: ListType): Command => {
 					continue; // skip blank lines
 				}
 
+				// Content excluding the block quote start
 				const lineContentFrom = line.to - origLineContent.length;
 				const indentation = origLineContent.match(startingSpaceRegex)?.[0] || '';
 				const currentIndent = indentation.length;

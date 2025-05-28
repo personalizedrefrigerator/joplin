@@ -265,15 +265,15 @@ describe('markdownCommands.toggleList', () => {
 		const listInBlockQuote = `
 A block quote:
 > - This *
->	- is
+> 	- is
 >	  
->		- a test. *
+> 		- a test. *
 >  
 >		
 >
->			- TEST
->		- Test *
->	- a
+> 			- TEST
+> 		- Test *
+> 	- a
 > - test`.trim();
 		const editor = await createTestEditor(
 			listInBlockQuote,
@@ -288,15 +288,15 @@ A block quote:
 		expect(editor.state.doc.toString()).toBe(`
 A block quote:
 > 1. This *
->	1. is
+> 	1. is
 >	  
->		1. a test. *
+> 		1. a test. *
 >  
 >		
 >
->			1. TEST
->		2. Test *
->	2. a
+> 			1. TEST
+> 		2. Test *
+> 	2. a
 > 2. test
 		`.trim());
 	});
