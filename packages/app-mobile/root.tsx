@@ -141,6 +141,7 @@ import { AppState } from './utils/types';
 import { getDisplayParentId } from '@joplin/lib/services/trash';
 import PluginNotification from './components/plugins/PluginNotification';
 import FocusControl from './components/accessibility/FocusControl/FocusControl';
+import NoteRevisionViewer from './components/screens/NoteRevisionViewer';
 
 const logger = Logger.create('root');
 
@@ -454,7 +455,7 @@ const appReducer = (state = appDefaultState, action: any) => {
 		throw error;
 	}
 
-	return reducer(newState, action);
+	return reducer(newState, action) as AppState;
 };
 
 const store = createStore(appReducer, applyMiddleware(generalMiddleware));
@@ -1306,6 +1307,7 @@ class AppComponent extends React.Component<AppComponentProps, AppComponentState>
 			ShareManager: { screen: ShareManager },
 			ProfileSwitcher: { screen: ProfileSwitcher },
 			ProfileEditor: { screen: ProfileEditor },
+			NoteRevisionViewer: { screen: NoteRevisionViewer },
 			Log: { screen: LogScreen },
 			Status: { screen: StatusScreen },
 			Search: { screen: SearchScreen },
