@@ -34,6 +34,9 @@ const pdfJs = require('pdfjs-dist');
 const { isAppleSilicon } = require('is-apple-silicon');
 require('@sentry/electron/renderer');
 
+// Allows components to use React as a global
+window.React = React;
+
 
 const main = async () => {
 	if (bridge().env() === 'dev') {
