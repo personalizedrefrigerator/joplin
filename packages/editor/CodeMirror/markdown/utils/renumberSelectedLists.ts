@@ -62,7 +62,9 @@ const renumberSelectedLists = (state: EditorState): TransactionSpec => {
 				});
 				nextListNumber = 1;
 			} else if (indentDecreased) {
-				nextListNumber = parseInt(match[2], 10);
+				if (match) {
+					nextListNumber = parseInt(match[2], 10);
+				}
 
 				// Handle the case where we deindent multiple times. For example,
 				// 1. test
