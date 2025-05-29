@@ -38212,7 +38212,7 @@ __metadata:
 
 "pdfjs-dist@patch:pdfjs-dist@npm%3A3.11.174#./.yarn/patches/pdfjs-dist-npm-3.11.174-67f2fee6d6.patch::locator=root%40workspace%3A.":
   version: 3.11.174
-  resolution: "pdfjs-dist@patch:pdfjs-dist@npm%3A3.11.174#./.yarn/patches/pdfjs-dist-npm-3.11.174-67f2fee6d6.patch::version=3.11.174&hash=4ecadb&locator=root%40workspace%3A."
+  resolution: "pdfjs-dist@patch:pdfjs-dist@npm%3A3.11.174#./.yarn/patches/pdfjs-dist-npm-3.11.174-67f2fee6d6.patch::version=3.11.174&hash=d35ec8&locator=root%40workspace%3A."
   dependencies:
     path2d-polyfill: ^2.0.1
   dependenciesMeta:
@@ -38220,7 +38220,7 @@ __metadata:
       optional: true
     path2d-polyfill:
       optional: true
-  checksum: bc7597789b13b3ea59ee4ff29db40a15f0a20094ef8f6fa9ba59a80db0501a9b94d0fb3602515666057ebe9c92e59d938ac157f4d2852a125ccc1511c9d8adf6
+  checksum: aef2f87e478a66541311228716cd91834d4c83320d0fbf9bb0fcbb427f503c125edfb6c5def77d2d4c57db27b92de652752783b50c3edb4a059c4d2b84e1c913
   languageName: node
   linkType: hard
 

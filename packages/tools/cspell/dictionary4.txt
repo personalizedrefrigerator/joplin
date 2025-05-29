@@ -178,3 +178,6 @@ unfocusable
 unlocker
 Tiktok
 topagency
+esbuild
+mapbox
+outfile

@@ -5,7 +5,7 @@
 
 import type * as dayjsImport from 'dayjs';
 // A require() is needed here for this to work in React Native.
-const dayjs: typeof dayjsImport = require('dayjs');
+const dayjs: typeof dayjsImport['default'] = require('dayjs');
 
 // Separating this into a type import and a require seems to be necessary to support mobile:
 // - import = require syntax doesn't work when bundling

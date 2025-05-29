@@ -591,6 +591,7 @@ packages/app-desktop/utils/customProtocols/constants.js
 packages/app-desktop/utils/customProtocols/handleCustomProtocols.test.js
 packages/app-desktop/utils/customProtocols/handleCustomProtocols.js
 packages/app-desktop/utils/customProtocols/registerCustomProtocols.js
+packages/app-desktop/utils/getAssetPath.js
 packages/app-desktop/utils/initializeCommandService.js
 packages/app-desktop/utils/isSafeToOpen.test.js
 packages/app-desktop/utils/isSafeToOpen.js
