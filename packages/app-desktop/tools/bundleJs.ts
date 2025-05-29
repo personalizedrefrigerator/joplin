@@ -6,7 +6,7 @@ import { dirname, join } from 'path';
 import * as posixPath from 'path/posix';
 
 // Set to true to print a summary of which files contribute most to the output
-const computeFileSizeStats = true;
+const computeFileSizeStats = false;
 
 // Note: Roughly based on js-draw's use of esbuild:
 // https://github.com/personalizedrefrigerator/js-draw/blob/6fe6d6821402a08a8d17f15a8f48d95e5d7b084f/packages/build-tool/src/BundledFile.ts#L64
