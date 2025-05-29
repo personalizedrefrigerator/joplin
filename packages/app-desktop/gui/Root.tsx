@@ -21,7 +21,7 @@ import DialogButtonRow, { ButtonSpec, ClickEvent, ClickEventHandler } from './Di
 import Dialog from './Dialog';
 import StyleSheetContainer from './StyleSheets/StyleSheetContainer';
 import ImportScreen from './ImportScreen';
-const { ResourceScreen } = require('./ResourceScreen.js');
+import ResourceScreen from './ResourceScreen';
 import Navigator from './Navigator';
 import WelcomeUtils from '@joplin/lib/WelcomeUtils';
 import JoplinCloudLoginScreen from './JoplinCloudLoginScreen';

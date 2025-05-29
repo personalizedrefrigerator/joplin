@@ -3,7 +3,7 @@ import { ImportExportResult, ImportModuleOutputFormat, ImportOptions } from './t
 import InteropService_Importer_Base from './InteropService_Importer_Base';
 import { NoteEntity } from '../database/types';
 import { rtrimSlashes } from '../../path-utils';
-import * as AdmZip from 'adm-zip';
+import AdmZip from 'adm-zip';
 import InteropService_Importer_Md from './InteropService_Importer_Md';
 import { join, resolve, normalize, sep, dirname } from 'path';
 import Logger from '@joplin/utils/Logger';

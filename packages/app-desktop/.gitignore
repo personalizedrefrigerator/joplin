@@ -1,6 +1,7 @@
 node_modules/
 packageInfo.js
 dist/
+*.bundle.js
 *.min.js
 .DS_Store
 gui/note-viewer/pluginAssets/
