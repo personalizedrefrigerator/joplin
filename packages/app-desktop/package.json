@@ -5,7 +5,7 @@
   "main": "main.bundle.js",
   "private": true,
   "scripts": {
-    "dist": "yarn electronRebuild && npx electron-builder",
+    "dist": "gulp before-dist && yarn electronRebuild && npx electron-builder",
     "build": "gulp build",
     "bundle": "gulp bundleWithStats",
     "electronBuilder": "gulp electronBuilder",

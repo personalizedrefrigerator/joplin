@@ -63,8 +63,7 @@ const tasks = {
 
 utils.registerGulpTasks(gulp, tasks);
 
-const buildBeforeStartParallel = [
-	'bundle',
+const buildBeforeStartParallel = gulp.parallel(
 	'compileScripts',
 	'compilePackageInfo',
 	'copyPluginAssets',
@@ -72,14 +71,21 @@ const buildBeforeStartParallel = [
 	'updateIgnoredTypeScriptBuild',
 	'buildScriptIndexes',
 	'compileSass',
-];
+);
+const buildRequiresTsc = gulp.series('bundle');
 
-gulp.task('before-start', gulp.parallel(...buildBeforeStartParallel));
+gulp.task('before-start', gulp.series(
+	buildRequiresTsc,
+	buildBeforeStartParallel,
+));
+gulp.task('before-dist', buildRequiresTsc);
 
-const buildAllSequential = [
-	'before-start',
+// Since "build" runs before "tsc", exclude tasks that require
+// other packages to be built (i.e. don't include buildRequiresTsc).
+const buildSequential = [
+	buildBeforeStartParallel,
 	'copyDefaultPluginsAssets',
 	'buildDefaultPlugins',
 ];
 
-gulp.task('build', gulp.series(buildAllSequential));
+gulp.task('build', gulp.series(buildSequential));
