@@ -15,9 +15,9 @@
   "scripts": {
     "buildApiDoc": "yarn workspace joplin start apidoc ../../readme/api/references/rest_api.md",
     "buildScriptIndexes": "node packages/tools/gulp/tasks/buildScriptIndexesRun.js",
-    "buildParallel": "yarn workspaces foreach --verbose --interlaced --parallel --jobs 2 --topological run build && yarn tsc",
+    "buildParallel": "yarn workspaces foreach --verbose --interlaced --parallel --jobs 2 --topological-dev run build && yarn tsc",
     "buildPluginDoc": "cd packages/generate-plugin-doc && yarn buildPluginDoc_",
-    "buildSequential": "yarn workspaces foreach --verbose --interlaced --topological run build && yarn tsc",
+    "buildSequential": "yarn workspaces foreach --verbose --interlaced --topological-dev run build && yarn tsc",
     "buildServerDocker": "node packages/tools/buildServerDocker.js",
     "buildSettingJsonSchema": "yarn workspace joplin start settingschema ../../../joplin-website/docs/schema/settings.json",
     "buildTranslations": "node packages/tools/build-translation.js",
