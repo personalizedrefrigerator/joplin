@@ -2,8 +2,7 @@ import { filename, toForwardSlashes } from '@joplin/utils/path';
 import * as esbuild from 'esbuild';
 import { existsSync } from 'fs';
 import { writeFile } from 'fs/promises';
-import { dirname, join } from 'path';
-import * as posixPath from 'path/posix';
+import { dirname, join, relative } from 'path';
 
 // Note: Roughly based on js-draw's use of esbuild:
 // https://github.com/personalizedrefrigerator/js-draw/blob/6fe6d6821402a08a8d17f15a8f48d95e5d7b084f/packages/build-tool/src/BundledFile.ts#L64
@@ -35,10 +34,10 @@ const makeBuildContext = (entryPoint: string, renderer: boolean, computeFileSize
 						}
 
 						// Other packages may need relative requires
-						let path = posixPath.relative(
+						let path = toForwardSlashes(relative(
 							baseDir,
-							toForwardSlashes(require.resolve(args.path, { paths: [baseNodeModules, args.resolveDir, baseDir] })),
-						);
+							require.resolve(args.path, { paths: [baseNodeModules, args.resolveDir, baseDir] }),
+						));
 						if (!path.startsWith('.')) {
 							path = `./${path}`;
 						}
@@ -69,7 +68,8 @@ const makeBuildContext = (entryPoint: string, renderer: boolean, computeFileSize
 					// Rewrite all relative imports
 					build.onResolve({ filter: /^\./ }, args => {
 						try {
-							let path = require.resolve(args.path, { paths: [args.resolveDir, baseNodeModules, baseDir] });
+							const importPath = args.path === '.' ? './index' : args.path;
+							let path = require.resolve(importPath, { paths: [args.resolveDir, baseNodeModules, baseDir] });
 							// require.resolve **can** return paths with .ts extensions, presumably because
 							// this build script is a .ts file.
 							if (path.endsWith('.ts')) {
