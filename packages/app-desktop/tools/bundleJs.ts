@@ -20,16 +20,21 @@ const makeBuildContext = (entryPoint: string, renderer: boolean, computeFileSize
 		mainFields: renderer ? ['browser', 'main'] : ['main'],
 		plugins: [
 			{
-				name: 'joplin--load-imports',
+				// Configures ESBuild to require(...) certain libraries that cause issues if included directly
+				// in the bundle. Some of these are transitive dependencies and so need to have relative paths
+				// in the final bundle.
+				name: 'joplin--relative-imports-for-externals',
 				setup: build => {
 					const externalRegex = /^(.*\.node|sqlite3|electron|@electron\/remote\/.*|electron\/.*|@mapbox\/node-pre-gyp|jsdom)$/;
 					const baseDir = dirname(__dirname);
 					const baseNodeModules = join(baseDir, 'node_modules');
 					build.onResolve({ filter: externalRegex }, args => {
+						// Electron packages don't need relative requires
 						if (args.path === 'electron' || args.path.startsWith('electron/')) {
 							return { path: args.path, external: true, namespace: 'node' };
 						}
 
+						// Other packages may need relative requires
 						let path = posixPath.relative(
 							baseDir,
 							toForwardSlashes(require.resolve(args.path, { paths: [baseNodeModules, args.resolveDir, baseDir] })),
@@ -38,42 +43,45 @@ const makeBuildContext = (entryPoint: string, renderer: boolean, computeFileSize
 							path = `./${path}`;
 						}
 
-						if (args.path.endsWith('.node') && path.endsWith('.ts')) {
-							// Normal .ts file -- continue.
+						// Some files have .node.* extensions but are not native modules. These files are often required using
+						// require('./something.node') rather than require('./something.node.js'). Skip path remapping for
+						// these files:
+						if (args.path.endsWith('.node') && (path.endsWith('.ts') || path.endsWith('.js'))) {
+							// Normal .ts or .js file -- continue.
 							return null;
 						}
 
+						// Log that this is external -- it should be included in "dependencies" and not "devDependencies" in package.json:
 						console.log('External path:', path, args.importer);
-
 						return {
 							path,
 							external: true,
 						};
 					});
-
-					// Rewrite imports to prefer .js files to .ts. Otherwise, certain files are duplicated when
-					// resolved.
+				},
+			},
+			{
+				// Rewrite imports to prefer .js files to .ts. Otherwise, certain files are duplicated in the final bundle
+				name: 'joplin--prefer-js-imports',
+				setup: build => {
+					const baseDir = dirname(__dirname);
+					const baseNodeModules = join(baseDir, 'node_modules');
+					// Rewrite all relative imports
 					build.onResolve({ filter: /^\./ }, args => {
 						try {
 							let path = require.resolve(args.path, { paths: [args.resolveDir, baseNodeModules, baseDir] });
+							// require.resolve **can** return paths with .ts extensions, presumably because
+							// this build script is a .ts file.
 							if (path.endsWith('.ts')) {
 								const alternative = path.replace(/\.ts$/, '.js');
 								if (existsSync(alternative)) {
 									path = alternative;
 								}
 							}
-							return {
-								path,
-							};
+							return { path };
 						} catch (error) {
 							return {
-								errors: [
-									{
-										text: `Failed to import: ${error}`,
-										detail: error,
-										location: { file: args.importer },
-									},
-								],
+								errors: [{ text: `Failed to import: ${error}`, detail: error }],
 							};
 						}
 					});
