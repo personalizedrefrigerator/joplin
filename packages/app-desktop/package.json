@@ -14,7 +14,7 @@
     "watch": "tsc --watch --preserveWatchOutput --project tsconfig.json",
     "start": "gulp before-start && electron . --env dev --log-level debug --open-dev-tools --no-welcome",
     "test": "jest",
-    "test-ui": "playwright test",
+    "test-ui": "gulp before-start && playwright test",
     "test-ci": "yarn test",
     "modifyReleaseAssets": "node tools/modifyReleaseAssets.js"
   },
