@@ -1,4 +1,4 @@
-import execa from 'execa';
+import * as execa from 'execa';
 import commandToString from './commandToString';
 import splitCommandString from './splitCommandString';
 import { stdout } from 'process';

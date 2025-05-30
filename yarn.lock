@@ -8882,6 +8882,7 @@ __metadata:
     "@joplin/default-plugins": ~3.4
     "@joplin/editor": ~3.4
     "@joplin/lib": ~3.4
+    "@joplin/onenote-converter": ~3.4
     "@joplin/renderer": ~3.4
     "@joplin/tools": ~3.4
     "@joplin/utils": ~3.4

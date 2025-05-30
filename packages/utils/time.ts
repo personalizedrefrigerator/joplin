@@ -5,12 +5,12 @@
 
 import type * as dayjsImport from 'dayjs';
 // A require() is needed here for this to work in React Native.
-const dayjs: typeof dayjsImport['default'] = require('dayjs');
+const dayjs: typeof dayjsImport = require('dayjs');
 
 // Separating this into a type import and a require seems to be necessary to support mobile:
 // - import = require syntax doesn't work when bundling
 // - import * as dayJsRelativeTimeType causes a runtime error.
-import type dayJsRelativeTimeType from 'dayjs/plugin/relativeTime';
+import type * as dayJsRelativeTimeType from 'dayjs/plugin/relativeTime';
 const dayJsRelativeTime: typeof dayJsRelativeTimeType = require('dayjs/plugin/relativeTime');
 
 const supportedLocales: Record<string, unknown> = {

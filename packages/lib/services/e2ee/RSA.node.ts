@@ -1,5 +1,5 @@
 import { RSA, RSAKeyPair } from './types';
-import NodeRSA from 'node-rsa';
+import * as NodeRSA from 'node-rsa';
 
 const nodeRSAOptions: NodeRSA.Options = {
 	// Must use pkcs1 otherwise any data encrypted with NodeRSA will crash the
