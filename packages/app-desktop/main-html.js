@@ -86,6 +86,7 @@ const main = async () => {
 
 	Setting.setConstant('appId', bridge().appId());
 	Setting.setConstant('appType', 'desktop');
+	Setting.setConstant('pluginAssetDir', `${__dirname}/pluginAssets`);
 
 	// eslint-disable-next-line no-console
 	console.info(`appId: ${Setting.value('appId')}`);

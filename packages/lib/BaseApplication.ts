@@ -66,7 +66,6 @@ import { setupAutoDeletion } from './services/trash/permanentlyDeleteOldItems';
 import determineProfileAndBaseDir from './determineBaseAppDirs';
 import NavService from './services/NavService';
 import getAppName from './getAppName';
-import { dirname } from '@joplin/utils/path';
 
 const appLogger: LoggerWrapper = Logger.create('App');
 
@@ -702,7 +701,6 @@ export default class BaseApplication {
 		Setting.setConstant('env', initArgs.env as Env);
 		Setting.setConstant('resourceDirName', resourceDirName);
 		Setting.setConstant('resourceDir', resourceDir);
-		Setting.setConstant('pluginAssetDir', `${dirname(require.resolve('@joplin/renderer'))}/assets`);
 		Setting.setConstant('tempDir', tempDir);
 		Setting.setConstant('pluginDataDir', `${profileDir}/plugin-data`);
 		Setting.setConstant('cacheDir', cacheDir);
