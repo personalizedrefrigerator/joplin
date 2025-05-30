@@ -5,12 +5,9 @@ import { writeFile } from 'fs/promises';
 import { dirname, join } from 'path';
 import * as posixPath from 'path/posix';
 
-// Set to true to print a summary of which files contribute most to the output
-const computeFileSizeStats = false;
-
 // Note: Roughly based on js-draw's use of esbuild:
 // https://github.com/personalizedrefrigerator/js-draw/blob/6fe6d6821402a08a8d17f15a8f48d95e5d7b084f/packages/build-tool/src/BundledFile.ts#L64
-const makeBuildContext = (entryPoint: string, renderer: boolean) => {
+const makeBuildContext = (entryPoint: string, renderer: boolean, computeFileSizeStats: boolean) => {
 	return esbuild.context({
 		entryPoints: [entryPoint],
 		outfile: `${filename(entryPoint)}.bundle.js`,
@@ -86,16 +83,18 @@ const makeBuildContext = (entryPoint: string, renderer: boolean) => {
 	});
 };
 
-const bundleJs = async () => {
+const bundleJs = async (writeStats: boolean) => {
 	const entryPoints = [
 		{ fileName: 'main.js', renderer: false },
 		{ fileName: 'main-html.js', renderer: true },
 	];
 	for (const { fileName, renderer } of entryPoints) {
-		const compiler = await makeBuildContext(fileName, renderer);
+		const compiler = await makeBuildContext(fileName, renderer, writeStats);
 		const result = await compiler.rebuild();
-		if (computeFileSizeStats) {
-			await writeFile(`${fileName}.meta.json`, JSON.stringify(result.metafile));
+		if (writeStats) {
+			const outPath = `${dirname(__dirname)}/${fileName}.meta.json`;
+			console.log('Writing bundle stats to ', outPath);
+			await writeFile(outPath, JSON.stringify(result.metafile, undefined, '\t'));
 		}
 		await compiler.dispose();
 	}

@@ -1,7 +1,6 @@
 node_modules/
 packageInfo.js
 dist/
-*.bundle.js
 *.min.js
 .DS_Store
 gui/note-viewer/pluginAssets/
@@ -26,3 +25,7 @@ build/7zip/7za
 build/7zip/7za.exe
 sentry.properties
 downloads/
+
+# Bundler output
+*.js.meta.json
+*.bundle.js

@@ -9,7 +9,12 @@ import { remove } from 'fs-extra';
 
 const tasks = {
 	bundle: {
-		fn: bundleJs,
+		fn: () => bundleJs(false),
+	},
+	// Bundles and computes additional information that can be analysed with
+	// locally or with https://esbuild.github.io/analyze/.
+	bundleWithStats: {
+		fn: () => bundleJs(true),
 	},
 	compileScripts: {
 		fn: require('./tools/compileScripts'),

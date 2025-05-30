@@ -7,7 +7,7 @@
   "scripts": {
     "dist": "yarn electronRebuild && npx electron-builder",
     "build": "gulp build",
-    "bundle": "gulp bundle",
+    "bundle": "gulp bundleWithStats",
     "electronBuilder": "gulp electronBuilder",
     "electronRebuild": "gulp electronRebuild",
     "tsc": "tsc --project tsconfig.json",
