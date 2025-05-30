@@ -3,6 +3,7 @@ import * as attachFile from './attachFile';
 import * as hideKeyboard from './hideKeyboard';
 import * as insertDateTime from './insertDateTime';
 import * as setTags from './setTags';
+import * as shareCurrentNote from './shareCurrentNote';
 import * as toggleVisiblePanes from './toggleVisiblePanes';
 
 const index: any[] = [
@@ -10,6 +11,7 @@ const index: any[] = [
 	hideKeyboard,
 	insertDateTime,
 	setTags,
+	shareCurrentNote,
 	toggleVisiblePanes,
 ];
 
