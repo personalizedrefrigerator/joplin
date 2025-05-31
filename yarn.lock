@@ -40010,6 +40010,58 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-native@patch:react-native@npm%3A0.79.2#./.yarn/patches/react-native-npm-0.79.2-9db13eddfe.patch::locator=root%40workspace%3A.":
+  version: 0.79.2
+  resolution: "react-native@patch:react-native@npm%3A0.79.2#./.yarn/patches/react-native-npm-0.79.2-9db13eddfe.patch::version=0.79.2&hash=3aa006&locator=root%40workspace%3A."
+  dependencies:
+    "@jest/create-cache-key-function": ^29.7.0
+    "@react-native/assets-registry": 0.79.2
+    "@react-native/codegen": 0.79.2
+    "@react-native/community-cli-plugin": 0.79.2
+    "@react-native/gradle-plugin": 0.79.2
+    "@react-native/js-polyfills": 0.79.2
+    "@react-native/normalize-colors": 0.79.2
+    "@react-native/virtualized-lists": 0.79.2
+    abort-controller: ^3.0.0
+    anser: ^1.4.9
+    ansi-regex: ^5.0.0
+    babel-jest: ^29.7.0
+    babel-plugin-syntax-hermes-parser: 0.25.1
+    base64-js: ^1.5.1
+    chalk: ^4.0.0
+    commander: ^12.0.0
+    event-target-shim: ^5.0.1
+    flow-enums-runtime: ^0.0.6
+    glob: ^7.1.1
+    invariant: ^2.2.4
+    jest-environment-node: ^29.7.0
+    memoize-one: ^5.0.0
+    metro-runtime: ^0.82.0
+    metro-source-map: ^0.82.0
+    nullthrows: ^1.1.1
+    pretty-format: ^29.7.0
+    promise: ^8.3.0
+    react-devtools-core: ^6.1.1
+    react-refresh: ^0.14.0
+    regenerator-runtime: ^0.13.2
+    scheduler: 0.25.0
+    semver: ^7.1.3
+    stacktrace-parser: ^0.1.10
+    whatwg-fetch: ^3.0.0
+    ws: ^6.2.3
+    yargs: ^17.6.2
+  peerDependencies:
+    "@types/react": ^19.0.0
+    react: ^19.0.0
+  peerDependenciesMeta:
+    "@types/react":
+      optional: true
+  bin:
+    react-native: cli.js
+  checksum: 166339f2be5f54b55eca795b1b64fa03fa327c511581fdc57488850efbdbc8571fca6deba190fa4dc9316fa825c9c02fe0fa1d5ceeb44f6d58324f3a9463291b
+  languageName: node
+  linkType: hard
+
 "react-reconciler@npm:^0.26.2":
   version: 0.26.2
   resolution: "react-reconciler@npm:0.26.2"
