@@ -118,6 +118,12 @@ export const toggleMath: Command = (view: EditorView): boolean => {
 };
 
 export const toggleList = (listType: ListType): Command => {
+	enum ListAction {
+		AddList,
+		RemoveList,
+		SwitchFormatting,
+	}
+
 	return (view: EditorView): boolean => {
 		const state = view.state;
 		const doc = state.doc;
@@ -161,16 +167,9 @@ export const toggleList = (listType: ListType): Command => {
 			return { fromLine, toLine };
 		};
 
-		const getIsEntirelyTargetList = (fromLine: Line, toLine: Line) => {
-			for (let lineNum = fromLine.number; lineNum <= toLine.number; lineNum++) {
-				const line = doc.line(lineNum);
-				const content = stripBlockquote(line);
-				if (content.trim() === '') continue;
-				if (getContainerType(line) !== listType) {
-					return false;
-				}
-			}
-			return true;
+		const getIndent = (line: Line) => {
+			const content = stripBlockquote(line);
+			return (content.match(startingSpaceRegex)?.[0] || '').length;
 		};
 
 		const getBaselineIndent = (fromLine: Line, toLine: Line) => {
@@ -179,8 +178,7 @@ export const toggleList = (listType: ListType): Command => {
 				const line = doc.line(lineNum);
 				const content = stripBlockquote(line);
 				if (content.trim() !== '') {
-					const indent = (content.match(startingSpaceRegex)?.[0] || '').length;
-					baselineIndent = Math.min(baselineIndent, indent);
+					baselineIndent = Math.min(baselineIndent, getIndent(line));
 				}
 			}
 			if (baselineIndent === Infinity) baselineIndent = 0;
@@ -188,12 +186,39 @@ export const toggleList = (listType: ListType): Command => {
 			return baselineIndent;
 		};
 
+		const getFirstBaselineIndentLine = (fromLine: Line, toLine: Line) => {
+			const baselineIndent = getBaselineIndent(fromLine, toLine);
+			for (let lineNum = fromLine.number; lineNum <= toLine.number; lineNum++) {
+				const line = doc.line(lineNum);
+				const content = stripBlockquote(line);
+				if (content.trim() === '') continue;
+
+				const indent = getIndent(line);
+				if (indent === baselineIndent) {
+					return line;
+				}
+			}
+			return fromLine;
+		};
+
+		const getAction = (fromLine: Line, toLine: Line) => {
+			const firstLine = getFirstBaselineIndentLine(fromLine, toLine);
+
+			const currentListType = getContainerType(firstLine);
+			if (!currentListType) {
+				return ListAction.AddList;
+			} else if (currentListType === listType) {
+				return ListAction.RemoveList;
+			}
+			return ListAction.SwitchFormatting;
+		};
+
 		const changes: TransactionSpec = state.changeByRange((sel: SelectionRange) => {
 			const lineRange = getNextLineRange(sel);
 			if (!lineRange) return { range: sel };
 			const { fromLine, toLine } = lineRange;
 			const baselineIndent = getBaselineIndent(fromLine, toLine);
-			const isEntirelyTargetList = getIsEntirelyTargetList(fromLine, toLine);
+			const action = getAction(fromLine, toLine);
 
 			// Outermost list item number
 			let outerCounter = 1;
@@ -218,17 +243,23 @@ export const toggleList = (listType: ListType): Command => {
 				const currentContainer = getContainerType(line);
 				const deleteFrom = lineContentFrom;
 				let deleteTo = deleteFrom + indentation.length;
+				let isAlreadyListItem = false;
 				if (currentContainer !== null) {
 					const containerRegex = listRegexes[currentContainer];
 					const containerMatch = origLineContent.match(containerRegex);
 					if (containerMatch) {
 						deleteTo = lineContentFrom + containerMatch[0].length;
+						isAlreadyListItem = true;
 					}
 				}
 
-				let replacementString = '';
-				if (!isEntirelyTargetList) {
-					if (listType === ListType.OrderedList) {
+				let replacementString = indentation;
+				if (action === ListAction.AddList || action === ListAction.SwitchFormatting) {
+					if (action === ListAction.SwitchFormatting && !isAlreadyListItem) {
+						// Skip replacement if the line didn't previously have list formatting
+						deleteTo = deleteFrom;
+						replacementString = '';
+					} else if (listType === ListType.OrderedList) {
 						if (normalizedIndent <= 0) {
 							// Top-level item
 							stack.length = 0;
