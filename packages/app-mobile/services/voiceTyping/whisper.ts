@@ -179,7 +179,12 @@ class Whisper implements VoiceTypingSession {
 }
 
 const getPrompt = (locale: string, localeToPrompt: Map<string, string>) => {
-	return localeToPrompt.get(languageCodeOnly(locale)) ?? '';
+	const promptOverride = Setting.value('voiceTyping.prompt');
+	if (promptOverride) {
+		return promptOverride;
+	} else {
+		return localeToPrompt.get(languageCodeOnly(locale)) ?? '';
+	}
 };
 
 const modelLocalDirectory = () => {

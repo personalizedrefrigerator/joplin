@@ -14,6 +14,11 @@ const customCssFilePath = (Setting: typeof SettingType, filename: string): strin
 	return `${Setting.value('rootProfileDir')}/${filename}`;
 };
 
+const showVoiceTypingSettings = () => (
+	// For now, iOS and web don't support voice typing.
+	shim.mobilePlatform() === 'android'
+);
+
 export enum CameraDirection {
 	Back,
 	Front,
@@ -1792,8 +1797,7 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 			appTypes: [AppType.Mobile],
 			description: () => _('Leave it blank to download the language files from the default website'),
 			label: () => _('Voice typing language files (URL)'),
-			// For now, iOS and web don't support voice typing.
-			show: () => shim.mobilePlatform() === 'android',
+			show: showVoiceTypingSettings,
 			section: 'note',
 		},
 
@@ -1804,8 +1808,7 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 			appTypes: [AppType.Mobile],
 			label: () => _('Preferred voice typing provider'),
 			isEnum: true,
-			// For now, iOS and web don't support voice typing.
-			show: () => shim.mobilePlatform() === 'android',
+			show: showVoiceTypingSettings,
 			section: 'note',
 
 			options: () => {
@@ -1814,6 +1817,17 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 					'whisper-tiny': _('Whisper'),
 				};
 			},
+		},
+
+		'voiceTyping.prompt': {
+			value: '',
+			type: SettingItemType.String,
+			public: true,
+			appTypes: [AppType.Mobile],
+			label: () => _('Voice typing prompt'),
+			description: () => _('A short example of transcribed text. A prompt can help correct voice typing spelling or change the style of transcription. Leave empty to use the default prompt. Example: "Glossary: Scott Joplin, ragtime."'),
+			show: (settings) => showVoiceTypingSettings() && settings['voiceTyping.preferredProvider'].startsWith('whisper'),
+			section: 'note',
 		},
 
 		'trash.autoDeletionEnabled': {
