@@ -398,4 +398,38 @@ A block quote:
 
 		expect(editor.state.doc.toString()).toBe(expectedDocText);
 	});
+
+	it('should preserve non-list sub-items when changing list formatting', async () => {
+		const initialDocText = `1. Item 1
+			1. Sub-item 1
+
+			   \`\`\`
+			   code
+			   \`\`\`
+			2. Sub-item 2
+			   Not part of the list
+			   Also not part of the list
+		2. Item 2`;
+
+		const expectedDocText = `- Item 1
+			- Sub-item 1
+
+			   \`\`\`
+			   code
+			   \`\`\`
+			- Sub-item 2
+			   Not part of the list
+			   Also not part of the list
+		- Item 2`;
+
+		const editor = await createTestEditor(
+			initialDocText,
+			EditorSelection.range(0, initialDocText.length),
+			['OrderedList'],
+		);
+
+		toggleList(ListType.UnorderedList)(editor);
+
+		expect(editor.state.doc.toString()).toBe(expectedDocText);
+	});
 });
