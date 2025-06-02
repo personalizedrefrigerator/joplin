@@ -1825,7 +1825,7 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 			public: true,
 			appTypes: [AppType.Mobile],
 			label: () => _('Voice typing prompt'),
-			description: () => _('A short example of transcribed text. A prompt can help correct voice typing spelling or change the style of transcription. Leave empty to use the default prompt. Example: "Glossary: Scott Joplin, ragtime."'),
+			description: () => _('A short example of transcribed text. A prompt can help correct voice typing spelling or change the style of transcription. Leave empty to use the default prompt.'),
 			show: (settings) => showVoiceTypingSettings() && settings['voiceTyping.preferredProvider'].startsWith('whisper'),
 			section: 'note',
 		},

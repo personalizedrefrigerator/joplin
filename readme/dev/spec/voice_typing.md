@@ -10,6 +10,12 @@ By default, Joplin uses Whisper.cpp for voice typing.
 
 Whisper.cpp provides a number of pre-trained models for transcribing speech in different languages. Both [English-only and multilingual models](https://github.com/openai/whisper?tab=readme-ov-file#available-models-and-languages) are available. The multilingual models support a variety of different languages. Joplin uses the smallest of the multilingual models by default.
 
+### Preventing spelling mistakes
+
+Joplin allows customizing the voice typing prompt in settings using the "Voice typing prompt" setting (in the "Note" section of settings). Including names in the prompt can help prevent misspellings. For example, providing `Glossary: Scott Joplin, ragtime.` as the prompt may help voice typing correctly spell "Scott Joplin" and "ragtime".
+
+See [the Whisper prompting guide](https://cookbook.openai.com/examples/whisper_prompting_guide#pass-names-in-the-prompt-to-prevent-misspellings) for further details.
+
 ### Downloading the models
 
 By default, Joplin downloads Whisper models from [this GitHub repository](https://github.com/joplin/voice-typing-models). It's possible to download models from a custom location by changing the **Voice typing language files (URL)** in from the "Note" tab of the configuration screen.
