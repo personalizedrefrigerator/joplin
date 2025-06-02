@@ -205,7 +205,7 @@ export const toggleList = (listType: ListType): Command => {
 			const firstLine = getFirstBaselineIndentLine(fromLine, toLine);
 
 			const currentListType = getContainerType(firstLine);
-			if (!currentListType) {
+			if (currentListType === null) {
 				return ListAction.AddList;
 			} else if (currentListType === listType) {
 				return ListAction.RemoveList;
