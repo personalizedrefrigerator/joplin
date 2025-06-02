@@ -432,4 +432,38 @@ A block quote:
 
 		expect(editor.state.doc.toString()).toBe(expectedDocText);
 	});
+
+	it('should remove list formatting when toggling formatting in an existing list item', async () => {
+		const initialDocText = `- [ ] Item 1
+			- [ ] Sub-item 1
+
+			   \`\`\`
+			   code
+			   \`\`\`
+			- [ ] Sub-item 2
+			   Not part of the list
+			   Also not part of the list
+		- [ ] Item 2`;
+
+		const expectedDocText = `Item 1
+			Sub-item 1
+
+			   \`\`\`
+			   code
+			   \`\`\`
+			Sub-item 2
+			   Not part of the list
+			   Also not part of the list
+		Item 2`;
+
+		const editor = await createTestEditor(
+			initialDocText,
+			EditorSelection.range(0, initialDocText.length),
+			['BulletList'],
+		);
+
+		toggleList(ListType.CheckList)(editor);
+
+		expect(editor.state.doc.toString()).toBe(expectedDocText);
+	});
 });
