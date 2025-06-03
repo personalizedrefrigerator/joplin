@@ -164,24 +164,6 @@ export default class JoplinViewsEditors {
 	}
 
 	/**
-	 * Creates a new editor view
-	 *
-	 * @deprecated
-	 */
-	public async create(id: string): Promise<ViewHandle> {
-		return new Promise<ViewHandle>(resolve => {
-			void this.register(id, {
-				onSetup: async (handle) => {
-					resolve(handle);
-				},
-				onActivationCheck: async () => {
-					return false;
-				},
-			});
-		});
-	}
-
-	/**
 	 * Sets the editor HTML content
 	 */
 	public async setHtml(handle: ViewHandle, html: string): Promise<string> {
@@ -213,16 +195,8 @@ export default class JoplinViewsEditors {
 		});
 	}
 
-	/**
-	 * Emitted when the editor can potentially be activated - this is for example when the current
-	 * note is changed, or when the application is opened. At that point you should check the
-	 * current note and decide whether your editor should be activated or not. If it should, return
-	 * `true`, otherwise return `false`.
-	 *
-	 * @deprecated - `onActivationCheck` should be provided when the editor is first created with
-	 * 	`editor.register`.
-	 */
-	public async onActivationCheck(handle: ViewHandle, callback: ActivationCheckCallback): Promise<void> {
+	// Internal helper for registering an activation check. Plugins should use editor.register.
+	private async onActivationCheck(handle: ViewHandle, callback: ActivationCheckCallback): Promise<void> {
 		const isActive = async ({ windowId, effectiveNoteId }: ActivationCheckSlice) => {
 			const isCorrectWindow = windowId === this.controller(handle).parentWindowId;
 			const active = isCorrectWindow && await callback({
