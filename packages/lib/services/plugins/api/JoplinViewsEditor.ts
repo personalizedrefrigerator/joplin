@@ -8,11 +8,6 @@ import createViewHandle from '../utils/createViewHandle';
 import WebviewController, { ContainerType } from '../WebviewController';
 import { ActivationCheckCallback, EditorActivationCheckFilterObject, FilterHandler, ViewHandle, UpdateCallback, EditorPluginCallbacks } from './types';
 
-export interface EditorPluginProps {
-	/** The ID of the window to show the editor plugin. Use `undefined` for the main window. */
-	windowId: string|undefined;
-}
-
 interface SaveNoteOptions {
 	/**
 	 * The ID of the note to save. This should match either:
