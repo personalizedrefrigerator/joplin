@@ -1,3 +1,4 @@
+import * as React from 'react';
 import app from '../app';
 import { AppState, AppStateDialog } from '../app.reducer';
 import MainScreen from './MainScreen';
@@ -10,7 +11,6 @@ import { themeStyle } from '@joplin/lib/theme';
 import { Size } from './ResizableLayout/utils/types';
 import MenuBar from './MenuBar';
 import { _ } from '@joplin/lib/locale';
-const React = require('react');
 const { createRoot } = require('react-dom/client');
 const { connect, Provider } = require('react-redux');
 import Setting from '@joplin/lib/models/Setting';
@@ -30,12 +30,15 @@ import WindowCommandsAndDialogs from './WindowCommandsAndDialogs/WindowCommandsA
 import { defaultWindowId, stateUtils, WindowState } from '@joplin/lib/reducer';
 import bridge from '../services/bridge';
 import EditorWindow from './NoteEditor/EditorWindow';
+import SsoLoginScreen from './SsoLoginScreen/SsoLoginScreen';
+import SamlShared from '@joplin/lib/components/shared/SamlShared';
 import PopupNotificationProvider from './PopupNotification/PopupNotificationProvider';
 const { ThemeProvider, StyleSheetManager, createGlobalStyle } = require('styled-components');
 
 interface Props {
 	themeId: number;
 	appState: string;
+	profileConfigCurrentProfileId: string;
 	// eslint-disable-next-line @typescript-eslint/ban-types -- Old code before rule was applied
 	dispatch: Function;
 	size: Size;
@@ -189,6 +192,7 @@ class RootComponent extends React.Component<Props, any> {
 			OneDriveLogin: { screen: OneDriveLoginScreen, title: () => _('OneDrive Login') },
 			DropboxLogin: { screen: DropboxLoginScreen, title: () => _('Dropbox Login') },
 			JoplinCloudLogin: { screen: JoplinCloudLoginScreen, title: () => _('Joplin Cloud Login') },
+			JoplinServerSamlLogin: { screen: SsoLoginScreen(new SamlShared()), title: () => _('Joplin Server Login') },
 			Import: { screen: ImportScreen, title: () => _('Import') },
 			Config: { screen: ConfigScreen, title: () => _('Options') },
 			Resources: { screen: ResourceScreen, title: () => _('Note attachments') },
