@@ -407,7 +407,6 @@ export type UpdateCallback = (event: EditorUpdateEvent)=> Promise<void>;
 export interface ActivationCheckEvent {
 	handle: ViewHandle;
 	noteId: string;
-	windowId: string;
 }
 export type ActivationCheckCallback = (event: ActivationCheckEvent)=> Promise<boolean>;
 
@@ -426,7 +425,7 @@ export interface EditorPluginCallbacks {
 	/**
 	 * Emitted when an editor view is created. This happens, for example, when a new window containing
 	 * a new editor is created.
-	 * 
+	 *
 	 * This callback should set the editor plugin's HTML using `editors.setHtml`, add scripts to the editor
 	 * with `editors.addScript`, and optionally listen for external changes using `editors.onUpdate`.
 	 */
@@ -450,6 +449,20 @@ export interface EditorActivationCheckFilterObject {
 }
 
 export type FilterHandler<T> = (object: T)=> Promise<T>;
+
+export type CommandArgument = string|number|object|boolean|null;
+
+export interface MenuTemplateItem {
+	label?: string;
+	command?: string;
+	commandArgs?: CommandArgument[];
+}
+
+export interface WebviewApi {
+	postMessage: (message: object)=> unknown;
+	onMessage: (message: object)=> void;
+	menuPopupFromTemplate: (template: MenuTemplateItem[])=> void;
+}
 
 // =================================================================
 // Settings types
