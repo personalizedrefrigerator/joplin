@@ -65,10 +65,7 @@ const pluginClasses = [
 	require('./plugins/GotoAnything').default,
 ];
 
-const appDefaultState = createAppDefaultState(
-	bridge().windowContentSize(),
-	resourceEditWatcherDefaultState,
-);
+const appDefaultState = createAppDefaultState(resourceEditWatcherDefaultState);
 
 class Application extends BaseApplication {
 
