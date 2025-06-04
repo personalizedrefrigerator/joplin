@@ -90,12 +90,12 @@ export function menuItems(dispatch: Function): ContextMenuItems {
 				} else if (options.linkToOpen) {
 					await CommandService.instance().execute('openItem', options.linkToOpen);
 				} else {
-					await shim.showErrorDialog('Unsupported item type');
+					await shim.showErrorDialog('No link found');
 				}
 			},
 			isActive: (itemType: ContextMenuItemType, options: ContextMenuOptions) => (
 				(!options.textToCopy && (itemType === ContextMenuItemType.Image || itemType === ContextMenuItemType.Resource))
-				|| (itemType === ContextMenuItemType.Link && !!options.linkToOpen)
+				|| (!!options.linkToOpen && itemType === ContextMenuItemType.Link)
 			),
 		},
 		saveAs: {
