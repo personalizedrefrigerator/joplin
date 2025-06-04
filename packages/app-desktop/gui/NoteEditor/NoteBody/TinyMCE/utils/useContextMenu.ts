@@ -40,6 +40,7 @@ export default function(editor: Editor, plugins: PluginStates, dispatch: Dispatc
 			let itemType: ContextMenuItemType = ContextMenuItemType.None;
 			let resourceId = '';
 			let linkToCopy = null;
+			let targetLink = null;
 
 			const pathToId = (path: string) => {
 				const id = Resource.pathToId(path);
@@ -53,6 +54,7 @@ export default function(editor: Editor, plugins: PluginStates, dispatch: Dispatc
 				resourceId = pathToId((element as HTMLAnchorElement).href);
 				itemType = resourceId ? ContextMenuItemType.Resource : ContextMenuItemType.Link;
 				linkToCopy = element.getAttribute('href') || '';
+				targetLink = linkToCopy;
 			} else {
 				itemType = ContextMenuItemType.Text;
 			}
@@ -63,6 +65,7 @@ export default function(editor: Editor, plugins: PluginStates, dispatch: Dispatc
 				filename: null,
 				mime: null,
 				linkToCopy,
+				linkToOpen: targetLink,
 				textToCopy: null,
 				htmlToCopy: editor.selection ? editor.selection.getContent() : '',
 				insertContent: (content: string) => {
