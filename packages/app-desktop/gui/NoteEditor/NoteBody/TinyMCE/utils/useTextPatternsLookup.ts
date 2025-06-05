@@ -32,7 +32,7 @@ const useTextPatternsLookup = ({ enabled, enableMath }: TextPatternOptions) => {
 			{ start: '1.', cmd: 'InsertOrderedList' },
 			{ start: '*', cmd: 'InsertUnorderedList' },
 			{ start: '-', cmd: 'InsertUnorderedList' },
-			// Only do <hr/> replacements if the full line is an <hr/>
+			// To more closely match Markdown, only do <hr/> replacements if the full line matches the pattern.
 			['---', '***'].includes(ctx.text) && { start: ctx.text, replacement: '<hr/>' },
 		].filter(pattern => !!pattern);
 	};
