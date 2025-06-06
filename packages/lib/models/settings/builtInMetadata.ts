@@ -1159,8 +1159,6 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 			appTypes: [AppType.Desktop],
 			section: 'appearance',
 			label: () => _('Viewer and Rich Text Editor font family'),
-			description: () =>
-				_('Used for most text in the note viewer and Rich Text Editor.'),
 			storage: SettingStorage.File,
 			isGlobal: true,
 			subType: SettingItemSubType.FontFamily,
