@@ -12,9 +12,9 @@ Whisper.cpp provides a number of pre-trained models for transcribing speech in d
 
 ### Preventing spelling mistakes
 
-Joplin allows customizing the voice typing prompt in settings using the "Voice typing prompt" setting (in the "Note" section of settings). Including names in the prompt can help prevent misspellings. For example, providing `Glossary: Scott Joplin, ragtime.` as the prompt may help voice typing correctly spell "Scott Joplin" and "ragtime".
+Joplin allows specifying a glossary for voice typing using the "Voice typing: Glossary" setting (in the "Note" section of settings). Including uncommon words in the glossary makes voice typing more likely to spell them correctly. For example, providing `Scott Joplin, ragtime.` as the prompt helps voice typing correctly spell "Scott Joplin" and "ragtime".
 
-See [the Whisper prompting guide](https://cookbook.openai.com/examples/whisper_prompting_guide#pass-names-in-the-prompt-to-prevent-misspellings) for further details.
+Internally, this is implemented using [prompting](https://cookbook.openai.com/examples/whisper_prompting_guide#pass-names-in-the-prompt-to-prevent-misspellings).
 
 ### Downloading the models
 

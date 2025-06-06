@@ -1819,13 +1819,13 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 			},
 		},
 
-		'voiceTyping.prompt': {
+		'voiceTyping.glossary': {
 			value: '',
 			type: SettingItemType.String,
 			public: true,
 			appTypes: [AppType.Mobile],
-			label: () => _('Voice typing prompt'),
-			description: () => _('A short example of transcribed text. A prompt can help correct voice typing spelling or change the style of transcription. Leave empty to use the default prompt.'),
+			label: () => _('Voice typing: Glossary'),
+			description: () => _('A comma-separated list of words'),
 			show: (settings) => showVoiceTypingSettings() && settings['voiceTyping.preferredProvider'].startsWith('whisper'),
 			section: 'note',
 		},
