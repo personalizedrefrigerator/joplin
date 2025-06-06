@@ -70,6 +70,8 @@ import AudioRecordingBanner from '../../voiceTyping/AudioRecordingBanner';
 import SpeechToTextBanner from '../../voiceTyping/SpeechToTextBanner';
 import ShareNoteDialog from '../ShareNoteDialog';
 import stateToWhenClauseContext from '../../../services/commands/stateToWhenClauseContext';
+import { defaultWindowId } from '@joplin/lib/reducer';
+import useVisiblePluginEditorViewIds from '@joplin/lib/hooks/plugins/useVisiblePluginEditorViewIds';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 const emptyArray: any[] = [];
@@ -88,6 +90,7 @@ interface NoteNavigation {
 }
 
 interface Props extends BaseProps {
+	windowId: string;
 	provisionalNoteIds: string[];
 	navigation: NoteNavigation;
 	dispatch: Dispatch;
@@ -104,7 +107,6 @@ interface Props extends BaseProps {
 	highlightedWords: string[];
 	noteHash: string;
 	toolbarEnabled: boolean;
-	'plugins.shownEditorViewIds': string[];
 	pluginHtmlContents: PluginHtmlContents;
 	editorNoteReloadTimeRequest: number;
 	canPublish: boolean;
@@ -112,6 +114,7 @@ interface Props extends BaseProps {
 
 interface ComponentProps extends Props {
 	dialogs: DialogControl;
+	visibleEditorPluginIds: string[];
 }
 
 interface State {
@@ -174,7 +177,9 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	public dialogbox: any;
 	private commandRegistration_: RegisteredRuntime|null = null;
-	private editorPluginHandler_ = new EditorPluginHandler(PluginService.instance());
+	private editorPluginHandler_ = new EditorPluginHandler(PluginService.instance(), saveEvent => {
+		return shared.noteComponent_change(this, 'body', saveEvent.body);
+	});
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	public static navigationOptions(): any {
@@ -578,10 +583,13 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 			}, 100);
 		}
 
-		await this.editorPluginHandler_.emitActivationCheck();
+		await this.editorPluginHandler_.emitActivationCheck({
+			noteId: this.props.noteId,
+			parentWindowId: defaultWindowId,
+		});
 
 		setTimeout(() => {
-			this.editorPluginHandler_.emitUpdate(this.props['plugins.shownEditorViewIds']);
+			this.emitEditorPluginUpdate_();
 		}, 300);
 	}
 
@@ -595,7 +603,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 		await ResourceFetcher.instance().markForDownload(resourceIds);
 	}
 
-	public componentDidUpdate(prevProps: Props, prevState: State) {
+	public componentDidUpdate(prevProps: ComponentProps, prevState: State) {
 		if (this.doFocusUpdate_) {
 			this.doFocusUpdate_ = false;
 			this.scheduleFocusUpdate();
@@ -643,15 +651,22 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 			});
 		}
 
-		if (this.props['plugins.shownEditorViewIds'] !== prevProps['plugins.shownEditorViewIds']) {
-			const { editorPlugin } = getShownPluginEditorView(this.props.plugins, this.props['plugins.shownEditorViewIds']);
+		if (this.props.visibleEditorPluginIds !== prevProps.visibleEditorPluginIds) {
+			const { editorPlugin } = getShownPluginEditorView(this.props.plugins, this.props.windowId);
 			if (!editorPlugin && this.props.editorNoteReloadTimeRequest > this.state.noteLastLoadTime) {
 				void shared.reloadNote(this);
 			}
 		}
 
 		if (prevProps.noteId && this.props.noteId && prevProps.noteId !== this.props.noteId) {
-			void this.editorPluginHandler_.emitActivationCheck();
+			void this.editorPluginHandler_.emitActivationCheck({
+				noteId: this.props.noteId,
+				parentWindowId: defaultWindowId,
+			});
+		}
+
+		if (prevState.note.body !== this.state.note.body) {
+			this.emitEditorPluginUpdate_();
 		}
 	}
 
@@ -674,6 +689,13 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 	private title_changeText(text: string) {
 		shared.noteComponent_change(this, 'title', text);
 		this.setState({ newAndNoTitleChangeNoteId: null });
+	}
+
+	private emitEditorPluginUpdate_() {
+		this.editorPluginHandler_.emitUpdate({
+			noteId: this.props.noteId,
+			newBody: this.state.note.body,
+		}, this.props.visibleEditorPluginIds);
 	}
 
 	private onPlainEditorTextChange = (text: string) => {
@@ -1486,7 +1508,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 		// multiple times.
 		this.registerCommands();
 
-		const { editorPlugin, editorView } = getShownPluginEditorView(this.props.plugins, this.props['plugins.shownEditorViewIds']);
+		const { editorPlugin, editorView } = getShownPluginEditorView(this.props.plugins, this.props.windowId);
 
 		if (this.state.isLoading) {
 			return (
@@ -1517,6 +1539,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 		}
 
 		const renderPluginEditor = () => {
+			this.editorPluginHandler_.onEditorPluginShown(editorView.id);
 			return <PluginUserWebView
 				viewInfo={{ plugin: editorPlugin, view: editorView }}
 				themeId={this.props.themeId}
@@ -1627,6 +1650,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 		const voiceTypingDialogShown = this.state.showSpeechToTextDialog || this.state.showAudioRecorder;
 		const renderActionButton = () => {
 			if (voiceTypingDialogShown) return null;
+			if (editorView) return null;
 			if (!this.state.note || !!this.state.note.deleted_time) return null;
 
 			const editButton = {
@@ -1693,7 +1717,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 			return result;
 		};
 
-		const { editorPlugin: activeEditorPlugin } = getActivePluginEditorView(this.props.plugins);
+		const { editorPlugin: activeEditorPlugin } = getActivePluginEditorView(this.props.plugins, this.props.windowId);
 
 		return (
 			<View style={this.rootStyle(this.props.themeId).root}>
@@ -1737,14 +1761,17 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 // how the new note should be rendered
 const NoteScreenWrapper = (props: Props) => {
 	const dialogs = useContext(DialogContext);
+	const visibleEditorPluginIds = useVisiblePluginEditorViewIds(props.plugins, props.windowId);
+
 	return (
-		<NoteScreenComponent key={props.noteId} dialogs={dialogs} {...props} />
+		<NoteScreenComponent key={props.noteId} dialogs={dialogs} visibleEditorPluginIds={visibleEditorPluginIds} {...props} />
 	);
 };
 
 const NoteScreen = connect((state: AppState) => {
 	const whenClause = stateToWhenClauseContext(state);
 	return {
+		windowId: state.windowId,
 		noteId: state.selectedNoteIds.length ? state.selectedNoteIds[0] : null,
 		noteHash: state.selectedNoteHash,
 		itemType: state.selectedItemType,
@@ -1761,7 +1788,6 @@ const NoteScreen = connect((state: AppState) => {
 		provisionalNoteIds: state.provisionalNoteIds,
 		highlightedWords: state.highlightedWords,
 		plugins: state.pluginService.plugins,
-		'plugins.shownEditorViewIds': state.settings['plugins.shownEditorViewIds'] || [],
 		pluginHtmlContents: state.pluginService.pluginHtmlContents,
 		editorNoteReloadTimeRequest: state.editorNoteReloadTimeRequest,
 
