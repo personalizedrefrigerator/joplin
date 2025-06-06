@@ -97,6 +97,7 @@ const bundleJs = async (writeStats: boolean) => {
 		{ fileName: 'main-html.js', renderer: true },
 	];
 	for (const { fileName, renderer } of entryPoints) {
+		console.log('Bundling', fileName);
 		const compiler = await makeBuildContext(fileName, renderer, writeStats);
 		const result = await compiler.rebuild();
 		if (writeStats) {
@@ -106,6 +107,8 @@ const bundleJs = async (writeStats: boolean) => {
 		}
 		await compiler.dispose();
 	}
+
+	console.log('Finished bundling JS.');
 };
 
 export default bundleJs;

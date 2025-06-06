@@ -100,7 +100,9 @@ echo "Rust $( rustc --version )"
 # =============================================================================
 
 cd "$ROOT_DIR"
-yarn install
+# --inline-builds causes build steps of dependencies to be logged. Useful for
+# debugging certain types of CI failures.
+yarn install --inline-builds
 testResult=$?
 if [ $testResult -ne 0 ]; then
 	echo "Yarn installation failed. Search for 'exit code 1' in the log for more information."
