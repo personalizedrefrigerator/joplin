@@ -665,13 +665,15 @@ class Application extends BaseApplication {
 			Setting.setValue('linking.extraAllowedExtensions', newExtensions);
 		});
 
-		window.addEventListener('focus', () => {
+		ipcRenderer.on('window-focused', (_event, newWindowId) => {
 			const currentWindowId = this.store().getState().windowId;
-			this.dispatch({
-				type: 'WINDOW_FOCUS',
-				windowId: 'default',
-				lastWindowId: currentWindowId,
-			});
+			if (newWindowId !== currentWindowId) {
+				this.dispatch({
+					type: 'WINDOW_FOCUS',
+					windowId: newWindowId,
+					lastWindowId: currentWindowId,
+				});
+			}
 		});
 
 		await this.initPluginService();
