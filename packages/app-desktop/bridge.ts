@@ -313,13 +313,6 @@ export class Bridge {
 		return new BrowserWindow(options);
 	}
 
-	// Note: This provides the size of the main window. Prefer CSS where possible.
-	public windowContentSize() {
-		if (!this.mainWindow()) return { width: 0, height: 0 };
-		const s = this.mainWindow().getContentSize();
-		return { width: s[0], height: s[1] };
-	}
-
 	public windowSetSize(width: number, height: number) {
 		if (!this.mainWindow()) return;
 		return this.mainWindow().setSize(width, height);
