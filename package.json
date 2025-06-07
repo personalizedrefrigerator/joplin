@@ -114,6 +114,6 @@
     "pdfjs-dist@2.16.105": "patch:pdfjs-dist@npm%3A3.11.174#./.yarn/patches/pdfjs-dist-npm-3.11.174-67f2fee6d6.patch",
     "pdfjs-dist@*": "patch:pdfjs-dist@npm%3A3.11.174#./.yarn/patches/pdfjs-dist-npm-3.11.174-67f2fee6d6.patch",
     "pdfjs-dist@3.11.174": "patch:pdfjs-dist@npm%3A3.11.174#./.yarn/patches/pdfjs-dist-npm-3.11.174-67f2fee6d6.patch",
-    "canvas@npm:^2.11.2": "file:./packages/empty"
+    "canvas@npm:^2.11.2": "link:./.yarn/joplin-empty-package/"
   }
 }
