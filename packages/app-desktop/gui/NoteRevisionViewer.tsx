@@ -24,6 +24,7 @@ import useMarkupToHtml from './hooks/useMarkupToHtml';
 import useAsyncEffect from '@joplin/lib/hooks/useAsyncEffect';
 import { ScrollbarSize } from '@joplin/lib/models/settings/builtInMetadata';
 import { focus } from '@joplin/lib/utils/focusHandler';
+import useDeleteHistoryClick from '@joplin/lib/components/shared/NoteRevisionViewer/useDeleteHistoryClick';
 
 interface Props {
 	themeId: number;
@@ -89,6 +90,7 @@ const NoteRevisionViewerComponent: React.FC<Props> = ({ themeId, noteId, onBack,
 	const [revisions, setRevisions] = useState<RevisionEntity[]>([]);
 	const [currentRevId, setCurrentRevId] = useState('');
 	const [restoring, setRestoring] = useState(false);
+	const [deleting, setDeleting] = useState(false);
 
 	const note = useNoteContent(
 		viewerRef, currentRevId, revisions, themeId, customCss, scrollbarSize, fontFamily,
@@ -110,6 +112,17 @@ const NoteRevisionViewerComponent: React.FC<Props> = ({ themeId, noteId, onBack,
 		setRestoring(false);
 		await shim.showMessageBox(RevisionService.instance().restoreSuccessMessage(note), { type: MessageBoxType.Info });
 	}, [note]);
+
+	const resetScreenState = useCallback(() => {
+		setRevisions([]);
+		setCurrentRevId(null);
+	}, []);
+
+	const deleteHistoryButton_onClick = useDeleteHistoryClick({
+		noteId: note?.id,
+		setDeleting,
+		resetScreenState,
+	});
 
 	const backButton_click = useCallback(() => {
 		if (onBack) onBack();
@@ -169,6 +182,7 @@ const NoteRevisionViewerComponent: React.FC<Props> = ({ themeId, noteId, onBack,
 	}
 
 	const restoreButtonTitle = _('Restore');
+	const deleteHistoryButtonTitle = _('Delete history');
 	const helpMessage = getHelpMessage(restoreButtonTitle);
 
 	const titleInput = (
@@ -182,6 +196,9 @@ const NoteRevisionViewerComponent: React.FC<Props> = ({ themeId, noteId, onBack,
 			</select>
 			<button disabled={!revisions.length || restoring} onClick={importButton_onClick} className='restore'style={{ ...theme.buttonStyle, marginLeft: 10, height: theme.inputStyle.height }}>
 				{restoreButtonTitle}
+			</button>
+			<button disabled={!revisions.length || deleting} onClick={deleteHistoryButton_onClick} className='deleteHistory'style={{ ...theme.buttonStyle, marginLeft: 10, height: theme.inputStyle.height }}>
+				{deleteHistoryButtonTitle}
 			</button>
 			<HelpButton tip={helpMessage} id="noteRevisionHelpButton" onClick={helpButton_onClick} />
 		</div>
