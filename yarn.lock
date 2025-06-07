@@ -19105,8 +19105,8 @@ __metadata:
 
 "canvas@file:./packages/empty::locator=root%40workspace%3A.":
   version: 0.0.0
-  resolution: "canvas@file:./packages/empty#./packages/empty::hash=6dec87&locator=root%40workspace%3A."
-  checksum: 10/36400d7771e9e5b7bc71e965e57e507c3c4283ef37d636f2fa8948e36f16d1c067f98963ae376c795cdbbe2ce42fc861aa33c76857f063bbec68c70c4b87b47a
+  resolution: "canvas@file:./packages/empty#./packages/empty::hash=1472c1&locator=root%40workspace%3A."
+  checksum: 10/6c8d1bf3ccce6ed69ccbb4ca5586a05a0233b2e8d02809511b3a3f689b2fa4f56fc144ae1f97f8981f56cd8394fe632dd909a8624b00ba599d592c8568413da3
   languageName: node
   linkType: hard
 
