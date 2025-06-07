@@ -9165,6 +9165,12 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@joplin/empty@workspace:packages/empty":
+  version: 0.0.0-use.local
+  resolution: "@joplin/empty@workspace:packages/empty"
+  languageName: unknown
+  linkType: soft
+
 "@joplin/fork-htmlparser2@npm:^4.1.58, @joplin/fork-htmlparser2@workspace:packages/fork-htmlparser2":
   version: 0.0.0-use.local
   resolution: "@joplin/fork-htmlparser2@workspace:packages/fork-htmlparser2"
@@ -19094,6 +19100,13 @@ __metadata:
   version: 1.0.30001692
   resolution: "caniuse-lite@npm:1.0.30001692"
   checksum: 10/92449ec9e9ac6cd8ce7ecc18a8759ae34e4b3ef412acd998714ee9d70dc286bc8d0d6e4917fa454798da9b37667eb5b3b41386bc9d25e4274d0b9c7af8339b0e
+  languageName: node
+  linkType: hard
+
+"canvas@file:./packages/empty::locator=root%40workspace%3A.":
+  version: 0.0.0
+  resolution: "canvas@file:./packages/empty#./packages/empty::hash=6dec87&locator=root%40workspace%3A."
+  checksum: 10/36400d7771e9e5b7bc71e965e57e507c3c4283ef37d636f2fa8948e36f16d1c067f98963ae376c795cdbbe2ce42fc861aa33c76857f063bbec68c70c4b87b47a
   languageName: node
   linkType: hard
 
@@ -38271,8 +38284,11 @@ __metadata:
   version: 3.11.174
   resolution: "pdfjs-dist@npm:3.11.174"
   dependencies:
+    canvas: "npm:^2.11.2"
     path2d-polyfill: "npm:^2.0.1"
   dependenciesMeta:
+    canvas:
+      optional: true
     path2d-polyfill:
       optional: true
   checksum: 10/f739ffd451718d214e664c943a066dcb4020bc1ed92b5639ae38d6a25ef0bddcc05b35a68c3dfeb95fcfb852377bcb2aef935c780312a229f1f34e682627a8ae
@@ -38283,8 +38299,11 @@ __metadata:
   version: 3.11.174
   resolution: "pdfjs-dist@patch:pdfjs-dist@npm%3A3.11.174#./.yarn/patches/pdfjs-dist-npm-3.11.174-67f2fee6d6.patch::version=3.11.174&hash=d35ec8&locator=root%40workspace%3A."
   dependencies:
+    canvas: "npm:^2.11.2"
     path2d-polyfill: "npm:^2.0.1"
   dependenciesMeta:
+    canvas:
+      optional: true
     path2d-polyfill:
       optional: true
   checksum: 10/a2c542ce985c8f5af5d35367e29f4e44dcc061fd508c97dea51a82b8597d49e3cfc49d6f5bbb4676f9e0e849164c6167d610f27d72e08940b0d9b2981e8eba24
