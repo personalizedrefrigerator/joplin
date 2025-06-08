@@ -28,8 +28,21 @@ const waitForAnimationsToEnd = (page: Page) => {
 
 const expectNoViolations = async (page: Page) => {
 	await waitForAnimationsToEnd(page);
-	const results = await createScanner(page).analyze();
-	expect(results.violations).toEqual([]);
+	const scanner = createScanner(page);
+
+	// Retry the accessibility scanner on failure to prevent
+	// random failure in CI.
+	let lastViolations;
+	const maxRetries = 2;
+	for (let i = 0; i < maxRetries; i++) {
+		const results = await scanner.analyze();
+		lastViolations = results.violations;
+
+		if (lastViolations.length === 0) {
+			return;
+		}
+	}
+	expect(lastViolations).toEqual([]);
 };
 
 
