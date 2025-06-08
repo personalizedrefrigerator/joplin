@@ -32,19 +32,11 @@ const expectNoViolations = async (page: Page) => {
 
 	// Retry the accessibility scanner on failure to prevent
 	// random failure in CI.
-	let lastViolations;
-	const maxRetries = 2;
-	for (let i = 0; i < maxRetries; i++) {
+	await expect.poll(async () => {
 		const results = await scanner.analyze();
-		lastViolations = results.violations;
-
-		if (lastViolations.length === 0) {
-			return;
-		}
-	}
-	expect(lastViolations).toEqual([]);
+		return results.violations;
+	}).toEqual([]);
 };
-
 
 test.describe('wcag', () => {
 	for (const tabName of ['General', 'Plugins']) {
