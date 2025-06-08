@@ -9028,6 +9028,7 @@ __metadata:
     expo: "npm:52.0.46"
     expo-av: "npm:15.0.2"
     expo-camera: "npm:16.0.18"
+    expo-local-authentication: "npm:15.0.2"
     fast-deep-equal: "npm:3.1.3"
     fs-extra: "npm:11.2.0"
     gulp: "npm:4.0.2"
@@ -9049,7 +9050,6 @@ __metadata:
     react-native-dropdownalert: "npm:5.1.0"
     react-native-exit-app: "npm:2.0.0"
     react-native-file-viewer: "npm:2.1.5"
-    react-native-fingerprint-scanner: "npm:6.0.0"
     react-native-fs: "npm:2.20.0"
     react-native-get-random-values: "npm:1.11.0"
     react-native-image-picker: "npm:7.1.1"
@@ -25443,6 +25443,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"expo-local-authentication@npm:15.0.2":
+  version: 15.0.2
+  resolution: "expo-local-authentication@npm:15.0.2"
+  dependencies:
+    invariant: "npm:^2.2.4"
+  peerDependencies:
+    expo: "*"
+  checksum: 10/f3548960a6827c4f04360b595a6b571ca4c840b30544f3d9a73a8dd72f75273c72326d9eadc667ffafbf6ba7e35b708d3b7a33031582e504e1b28cb4b651ca67
+  languageName: node
+  linkType: hard
+
 "expo-modules-autolinking@npm:2.0.8":
   version: 2.0.8
   resolution: "expo-modules-autolinking@npm:2.0.8"
@@ -40477,15 +40488,6 @@ __metadata:
   peerDependencies:
     react-native: ">=0.47"
   checksum: 10/0a99496d193dedf51e3773a0703a79b7517b5266df49bcf994dafaf845705112ed8e11a1ffde2e923d3fbea6afbda559c057b81e9711fe4116ff09eac1f30f23
-  languageName: node
-  linkType: hard
-
-"react-native-fingerprint-scanner@npm:6.0.0":
-  version: 6.0.0
-  resolution: "react-native-fingerprint-scanner@npm:6.0.0"
-  peerDependencies:
-    react-native: ">=0.60 <1.0.0"
-  checksum: 10/4718071a612cc70ec7fe49f8a97c5d7dc4126422db52bef61b513ab1162f458dc7d635da2897467d11757f668e49e839626dd413464ec6181f0435914b055d8a
   languageName: node
   linkType: hard
 
