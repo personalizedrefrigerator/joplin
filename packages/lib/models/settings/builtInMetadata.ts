@@ -1825,7 +1825,7 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 			public: true,
 			appTypes: [AppType.Mobile],
 			label: () => _('Voice typing: Glossary'),
-			description: () => _('A comma-separated list of words'),
+			description: () => _('A comma-separated list of words. May be used for uncommon words, to help voice typing spell them correctly.'),
 			show: (settings) => showVoiceTypingSettings() && settings['voiceTyping.preferredProvider'].startsWith('whisper'),
 			section: 'note',
 		},
