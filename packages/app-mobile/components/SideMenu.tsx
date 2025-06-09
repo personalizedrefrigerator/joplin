@@ -166,12 +166,25 @@ const useAnimations = ({ menuWidth, isLeftMenu, open }: UseAnimationsProps) => {
 	return { setIsAnimating, animating, updateMenuPosition, menuOpenFraction, menuDragOffset };
 };
 
-const SideMenuComponent: React.FC<Props> = props => {
-	const [open, setIsOpen] = useState(false);
+// Syncs the local `open` with the `isOpen` prop. Changing the `isOpen` prop
+// updates the local `open`, but not necessarily the other way around.
+const useIsOpen = (requestedOpen: boolean) => {
+	const [open, setOpen] = useState(false);
 
+	const openRef = useRef(open);
+	openRef.current = open;
 	useEffect(() => {
-		setIsOpen(props.isOpen);
-	}, [props.isOpen]);
+		// Compare with openRef to avoid unnecessary rerenders
+		if (requestedOpen !== openRef.current) {
+			setOpen(requestedOpen);
+		}
+	}, [requestedOpen]);
+
+	return { open, setIsOpen: setOpen };
+};
+
+const SideMenuComponent: React.FC<Props> = props => {
+	const { open, setIsOpen } = useIsOpen(props.isOpen);
 
 	const [menuWidth, setMenuWidth] = useState(0);
 	const [contentWidth, setContentWidth] = useState(0);
@@ -247,7 +260,7 @@ const SideMenuComponent: React.FC<Props> = props => {
 				}
 			},
 		});
-	}, [isLeftMenu, menuDragOffset, menuWidth, props.toleranceX, props.toleranceY, contentWidth, open, props.disableGestures, props.edgeHitWidth, updateMenuPosition, setIsAnimating]);
+	}, [isLeftMenu, menuDragOffset, menuWidth, props.toleranceX, props.toleranceY, contentWidth, open, props.disableGestures, props.edgeHitWidth, updateMenuPosition, setIsAnimating, setIsOpen]);
 
 	const onChangeRef = useRef(props.onChange);
 	onChangeRef.current = props.onChange;
@@ -263,7 +276,7 @@ const SideMenuComponent: React.FC<Props> = props => {
 		setIsOpen(false);
 		// Set isAnimating as soon as possible to avoid components disappearing, then reappearing.
 		setIsAnimating(true);
-	}, [setIsAnimating]);
+	}, [setIsAnimating, setIsOpen]);
 
 	const styles = useStyles({ themeId: props.themeId, menuOpenFraction, menuWidth, isLeftMenu });
 
@@ -326,7 +339,6 @@ const SideMenuComponent: React.FC<Props> = props => {
 const SideMenu = connect((state: State) => {
 	return {
 		themeId: state.settings.theme,
-		isOpen: state.showSideMenu,
 	};
 })(SideMenuComponent);
 
