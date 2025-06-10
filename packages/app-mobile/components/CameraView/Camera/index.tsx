@@ -67,7 +67,7 @@ const Camera = (props: Props, ref: ForwardedRef<CameraRef>) => {
 		}
 	}, [camera, props.onCameraReady]);
 
-	return hasPermission ? <CameraView
+	return hasPermission?.granted ? <CameraView
 		ref={setCamera}
 		style={props.style}
 		facing={props.cameraType === CameraDirection.Front ? 'front' : 'back'}
