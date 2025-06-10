@@ -22,9 +22,7 @@ const Camera = (props: Props, ref: ForwardedRef<CameraRef>) => {
 
 	useImperativeHandle(ref, () => ({
 		takePictureAsync: async () => {
-			logger.debug('Taking picture...');
 			const result = await cameraRef.current.takePictureAsync();
-			logger.debug('Took picture.');
 			return {
 				uri: result.uri,
 				type: 'image/jpg',
@@ -67,7 +65,7 @@ const Camera = (props: Props, ref: ForwardedRef<CameraRef>) => {
 			if (event.cancelled) return;
 			props.onCameraReady();
 		}
-	}, [camera, hasPermission, props.onCameraReady]);
+	}, [camera, props.onCameraReady]);
 
 	return hasPermission ? <CameraView
 		ref={setCamera}
