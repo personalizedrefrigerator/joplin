@@ -127,7 +127,7 @@
     "react-native-web": "0.20.0",
     "react-refresh": "0.16.0",
     "react-test-renderer": "19.0.0",
-    "sharp": "0.33.4",
+    "sharp": "0.33.5",
     "sqlite3": "5.1.6",
     "timers-browserify": "2.0.12",
     "ts-jest": "29.1.5",
