@@ -1,5 +1,9 @@
 # Joplin Android Changelog
 
+## [android-v3.3.10](https://github.com/laurent22/joplin/releases/tag/android-v3.3.10) (Pre-release) - 2025-06-10T08:07:25Z
+
+- New: Add additional checks when updating sidebar state (#12428 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+
 ## [android-v3.3.9](https://github.com/laurent22/joplin/releases/tag/android-v3.3.9) (Pre-release) - 2025-06-09T17:11:04Z
 
 - Fixed: Voice typing: Fix memory leak (#12402 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
