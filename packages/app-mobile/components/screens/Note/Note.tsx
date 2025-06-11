@@ -68,6 +68,8 @@ import getActivePluginEditorView from '@joplin/lib/services/plugins/utils/getAct
 import EditorPluginHandler from '@joplin/lib/services/plugins/EditorPluginHandler';
 import AudioRecordingBanner from '../../voiceTyping/AudioRecordingBanner';
 import SpeechToTextBanner from '../../voiceTyping/SpeechToTextBanner';
+import ShareNoteDialog from '../ShareNoteDialog';
+import stateToWhenClauseContext from '../../../services/commands/stateToWhenClauseContext';
 import { defaultWindowId } from '@joplin/lib/reducer';
 import useVisiblePluginEditorViewIds from '@joplin/lib/hooks/plugins/useVisiblePluginEditorViewIds';
 
@@ -107,6 +109,7 @@ interface Props extends BaseProps {
 	toolbarEnabled: boolean;
 	pluginHtmlContents: PluginHtmlContents;
 	editorNoteReloadTimeRequest: number;
+	canPublish: boolean;
 }
 
 interface ComponentProps extends Props {
@@ -126,6 +129,7 @@ interface State {
 	alarmDialogShown: boolean;
 	heightBumpView: number;
 	noteTagDialogShown: boolean;
+	publishDialogShown: boolean;
 	fromShare: boolean;
 	showCamera: boolean;
 	showImageEditor: boolean;
@@ -144,7 +148,7 @@ interface State {
 	showSpeechToTextDialog: boolean;
 }
 
-class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> implements BaseNoteScreenComponent {
+class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> implements BaseNoteScreenComponent<State> {
 	// This isn't in this.state because we don't want changing scroll to trigger
 	// a re-render.
 	private lastBodyScroll: number|undefined = undefined;
@@ -196,6 +200,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 			alarmDialogShown: false,
 			heightBumpView: 0,
 			noteTagDialogShown: false,
+			publishDialogShown: false,
 			fromShare: false,
 			showCamera: false,
 			showImageEditor: false,
@@ -421,6 +426,18 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 			body: noteBody === null ? this.state.note.body : noteBody,
 		};
 	}
+
+	private onPublishDialogClose_ = () => {
+		this.setState({
+			publishDialogShown: false,
+		});
+	};
+
+	private onPublishDialogShow_ = () => {
+		this.setState({
+			publishDialogShown: true,
+		});
+	};
 
 	public styles() {
 		const themeId = this.props.themeId;
@@ -708,9 +725,9 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 		this.selection = { start: event.from, end: event.to };
 	};
 
-	public makeSaveAction() {
+	public makeSaveAction(state: State) {
 		return async () => {
-			return shared.saveNoteButton_press(this, null, null);
+			return shared.saveNoteButton_press(this, state, null, null);
 		};
 	}
 
@@ -721,12 +738,12 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 		return this.saveActionQueues_[noteId];
 	}
 
-	public scheduleSave() {
-		this.saveActionQueue(this.state.note.id).push(this.makeSaveAction());
+	public scheduleSave(state: State) {
+		this.saveActionQueue(state.note.id).push(this.makeSaveAction(state));
 	}
 
 	private async saveNoteButton_press(folderId: string = null) {
-		await shared.saveNoteButton_press(this, folderId, null);
+		await shared.saveNoteButton_press(this, this.state, folderId, null);
 
 		Keyboard.dismiss();
 	}
@@ -896,7 +913,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 
 		void this.refreshResource(resource, newNote.body);
 
-		this.scheduleSave();
+		this.scheduleSave({ ...this.state, note: newNote });
 
 		return resource;
 	}
@@ -1007,7 +1024,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 	private toggleIsTodo_onPress() {
 		shared.toggleIsTodo_onPress(this);
 
-		this.scheduleSave();
+		this.scheduleSave(this.state);
 	}
 
 	private async share_onPress() {
@@ -1118,6 +1135,12 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 				onPress: () => {
 					void this.showSource_onPress();
 				},
+			});
+		}
+		if (this.props.canPublish) {
+			output.push({
+				title: _('Publish/unpublish'),
+				onPress: this.onPublishDialogShow_,
 			});
 		}
 
@@ -1450,7 +1473,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 			const newNote: NoteEntity = { ...this.state.note };
 			newNote.body = `${newNote.body} ${text}`;
 			this.setState({ note: newNote });
-			this.scheduleSave();
+			this.scheduleSave(this.state);
 		} else {
 			if (this.useEditorBeta()) {
 				// We add a space so that if the feature is used twice in a row,
@@ -1722,6 +1745,11 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 				<SelectDateTimeDialog themeId={this.props.themeId} shown={this.state.alarmDialogShown} date={dueDate} onAccept={this.onAlarmDialogAccept} onReject={this.onAlarmDialogReject} />
 
 				{noteTagDialog}
+				<ShareNoteDialog
+					noteId={this.props.noteId}
+					visible={this.state.publishDialogShown}
+					onClose={this.onPublishDialogClose_}
+				/>
 			</View>
 		);
 	}
@@ -1741,6 +1769,7 @@ const NoteScreenWrapper = (props: Props) => {
 };
 
 const NoteScreen = connect((state: AppState) => {
+	const whenClause = stateToWhenClauseContext(state);
 	return {
 		windowId: state.windowId,
 		noteId: state.selectedNoteIds.length ? state.selectedNoteIds[0] : null,
@@ -1766,6 +1795,7 @@ const NoteScreen = connect((state: AppState) => {
 		// default) CodeMirror editor. That should be refactored to make it less
 		// confusing.
 		useEditorBeta: !state.settings['editor.usePlainText'],
+		canPublish: whenClause.joplinServerConnected && !whenClause.inTrash,
 	};
 })(NoteScreenWrapper);
 
