@@ -23,8 +23,14 @@ const useSearchResults = (search: string, options: string[]) => {
 	return useMemo(() => {
 		return options
 			.filter(option => option.startsWith(search))
-			// Sort longer items first
-			.sort((a, b) => b.length - a.length);
+			.sort((a, b) => {
+				if (a === b) return 0;
+				// Full matches should go first
+				if (a === search) return -1;
+				if (b === search) return 1;
+				// Sort longer items first
+				return b.length - a.length;
+			});
 	}, [search, options]);
 };
 
