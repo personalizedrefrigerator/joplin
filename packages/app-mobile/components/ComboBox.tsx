@@ -1,12 +1,12 @@
 import * as React from 'react';
 import { FlatList, NativeSyntheticEvent, StyleSheet, View } from 'react-native';
-import { TouchableRipple, Text } from 'react-native-paper';
+import { TouchableRipple, Text, Searchbar } from 'react-native-paper';
 import { connect } from 'react-redux';
 import { AppState } from '../utils/types';
 import { themeStyle } from './global-style';
 import Icon from './Icon';
-import TextInput from './TextInput';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
+import { _ } from '@joplin/lib/locale';
 
 interface Props {
 	themeId: number;
@@ -53,17 +53,23 @@ const useSelectedIndex = (searchResults: string[]) => {
 const useStyles = (themeId: number) => {
 	return React.useMemo(() => {
 		const theme = themeStyle(themeId);
+		const borderRadius = 15;
 		return StyleSheet.create({
 			root: {
 				height: 200,
 				flexDirection: 'column',
 				borderColor: theme.dividerColor,
 				borderWidth: 1,
-				borderRadius: 15,
+				borderRadius,
+				overflow: 'hidden',
+			},
+			searchInputContainer: {
+				borderRadius,
+				borderBottomLeftRadius: 0,
+				borderBottomRightRadius: 0,
 			},
 			searchInput: {
-				color: theme.color,
-				fontSize: theme.fontSize,
+				minHeight: 48,
 			},
 			searchResults: {
 
@@ -71,6 +77,8 @@ const useStyles = (themeId: number) => {
 			tagIcon: {
 				color: theme.color,
 				fontSize: theme.fontSize,
+				paddingLeft: 4,
+				paddingRight: 12,
 			},
 			tagLabel: {
 				fontSize: theme.fontSize,
@@ -98,15 +106,21 @@ interface SearchResultProps {
 	selected: boolean;
 	onPress: ()=> void;
 	styles: Styles;
+	id: string;
+	index: number;
+	'aria-posinset': number;
+	'aria-setsize': number;
 }
 
 const SearchResult: React.FC<SearchResultProps> = ({
-	text, onPress, styles, selected,
+	text, onPress, styles, selected, id, ...rest
 }) => {
 	return <TouchableRipple
 		onPress={onPress}
 		role='menuitem'
 		aria-selected={selected}
+		nativeID={id}
+		{...rest}
 	>
 		<View style={[styles.menuItemContent, selected && styles.menuItemContentSelected]}>
 			<Icon
@@ -122,25 +136,43 @@ const SearchResult: React.FC<SearchResultProps> = ({
 
 
 const ComboBox: React.FC<Props> = ({
-	themeId, items, onItemSelected, placeholder,
+	themeId, items, onItemSelected: propsOnItemSelected, placeholder,
 }) => {
 	const styles = useStyles(themeId);
 	const [search, setSearch] = useState('');
 	const results = useSearchResults(search, items);
 	const { selectedIndex, onNextResult, onPreviousResult } = useSelectedIndex(results);
+	const listRef = useRef<FlatList|null>(null);
+
+	useEffect(() => {
+		listRef.current?.scrollToIndex({ index: selectedIndex, animated: false, viewPosition: 0.5 });
+	}, [selectedIndex]);
+
+	const propsOnItemSelectedRef = useRef(propsOnItemSelected);
+	propsOnItemSelectedRef.current = propsOnItemSelected;
+
+	const onItemSelected = useCallback((item: string) => {
+		propsOnItemSelectedRef.current(item);
+		setSearch(item);
+	}, []);
+
+	const baseId = useId();
 
 	type RenderEvent = { item: string; index: number };
-	const renderTag = ({ item, index }: RenderEvent) => {
+	const renderTag = useCallback(({ item, index }: RenderEvent) => {
 		return <SearchResult
 			text={item}
 			onPress={() => {
-				setSearch(item);
 				onItemSelected(item);
 			}}
 			styles={styles}
 			selected={selectedIndex === index}
+			id={`${baseId}-${index}`}
+			index={index}
+			aria-setsize={results.length}
+			aria-posinset={index + 1}
 		/>;
-	};
+	}, [results.length, baseId, selectedIndex, onItemSelected, styles]);
 
 	// For now, onKeyPress only works on web.
 	// See https://github.com/react-native-community/discussions-and-proposals/issues/249
@@ -153,27 +185,32 @@ const ComboBox: React.FC<Props> = ({
 		} else if (nativeEvent.key === 'Enter') {
 			const item = results[selectedIndex];
 			if (item) {
-				setSearch(item);
 				onItemSelected(item);
 			}
 		}
 	}, [selectedIndex, results, onItemSelected, onNextResult, onPreviousResult]);
 
 	return <View style={styles.root}>
-		<TextInput
-			style={styles.searchInput}
-			themeId={themeId}
+		<Searchbar
+			style={styles.searchInputContainer}
+			inputStyle={styles.searchInput}
 			value={search}
+			mode='view'
 			onChangeText={setSearch}
 			onKeyPress={onKeyPress}
 			placeholder={placeholder}
+			searchAccessibilityLabel={_('Search')}
+			clearAccessibilityLabel={_('Clear search')}
+			aria-activedescendant={`${baseId}-${selectedIndex}`}
 		/>
 		<FlatList
+			ref={listRef}
 			data={results}
 			role='menu'
+			aria-setsize={results.length}
 			style={styles.searchResults}
 			keyExtractor={tagKeyExtractor}
-			extraData={selectedIndex}
+			extraData={renderTag}
 			renderItem={renderTag}
 		/>
 	</View>;
