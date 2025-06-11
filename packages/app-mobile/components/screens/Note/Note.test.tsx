@@ -288,7 +288,7 @@ describe('screens/Note', () => {
 		const deleteButton = await screen.findByText('Delete');
 		expect(deleteButton).toHaveProp('disabled', true);
 
-		cleanup();
+		act(() => cleanup());
 	});
 
 	it.each([
