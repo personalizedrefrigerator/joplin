@@ -599,6 +599,8 @@ packages/app-mobile/components/CameraView/types.js
 packages/app-mobile/components/CameraView/utils/fitRectIntoBounds.js
 packages/app-mobile/components/CameraView/utils/useBarcodeScanner.js
 packages/app-mobile/components/Checkbox.js
+packages/app-mobile/components/ComboBox.test.js
+packages/app-mobile/components/ComboBox.js
 packages/app-mobile/components/DialogManager/PromptButton.js
 packages/app-mobile/components/DialogManager/PromptDialog.js
 packages/app-mobile/components/DialogManager/hooks/useDialogControl.js
