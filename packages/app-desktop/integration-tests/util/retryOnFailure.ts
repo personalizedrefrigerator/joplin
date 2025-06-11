@@ -9,6 +9,7 @@ const retryOnFailure = async <T> (callback: ()=> Promise<T>, { maxRetries }: Opt
 		try {
 			return await callback();
 		} catch (error) {
+			console.error('retry failed:', error, `Retrying... ${i + 1}/${maxRetries}`);
 			lastError = error;
 		}
 	}
