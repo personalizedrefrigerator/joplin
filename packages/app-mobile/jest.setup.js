@@ -12,6 +12,7 @@ const uuid = require('@joplin/lib/uuid').default;
 const Setting = require('@joplin/lib/models/Setting').default;
 const sqlite3 = require('sqlite3');
 const React = require('react');
+const { configure: configureTestingLibrary } = require('@testing-library/react-native');
 require('../../jest.base-setup.js')();
 
 import { setImmediate } from 'timers';
@@ -124,6 +125,9 @@ shim.fsDriver().getCacheDirectoryPath = () => {
 
 beforeAll(async () => {
 	await mkdir(tempDirectoryPath);
+
+	// The default timeout of 1_000 ms is often too low in CI.
+	configureTestingLibrary({ asyncUtilTimeout: 5_000 });
 });
 
 afterEach(async () => {
