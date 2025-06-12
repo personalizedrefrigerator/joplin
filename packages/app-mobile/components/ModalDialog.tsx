@@ -12,7 +12,7 @@ interface Props {
 	children: React.ReactNode;
 
 	buttonBarEnabled: boolean;
-	title: string;
+	title: string|null;
 	onOkPress: ()=> void;
 	onCancelPress: ()=> void;
 }
@@ -53,7 +53,7 @@ const ModalDialog: React.FC<Props> = props => {
 
 	return (
 		<Modal transparent={true} visible={true} onRequestClose={() => {}} containerStyle={styles.container} backgroundColor={theme.backgroundColorTransparent2}>
-			<Text style={styles.title} role='heading'>{props.title}</Text>
+			{props.title ? <Text style={styles.title} role='heading'>{props.title}</Text> : null}
 			<View style={styles.contentWrapper}>{props.children}</View>
 			<View style={styles.buttonRow}>
 				<View style={{ flex: 1, marginLeft: 5 }}>

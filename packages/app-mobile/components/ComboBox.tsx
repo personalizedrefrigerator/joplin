@@ -7,6 +7,7 @@ import { themeStyle } from './global-style';
 import Icon from './Icon';
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
 import { _ } from '@joplin/lib/locale';
+const naturalCompare = require('string-natural-compare');
 
 interface Option {
 	id?: string;
@@ -41,13 +42,12 @@ const useSearchResults = ({ search, options, onAddItem }: SearchResultsOptions) 
 				// Full matches should go first
 				if (a.title === search) return -1;
 				if (b.title === search) return 1;
-				// Sort longer items first
-				return b.title.length - a.title.length;
+				return naturalCompare(a.title, b.title);
 			});
 	}, [search, options]);
 
 	return useMemo(() => {
-		if (!onAddItem || results[0]?.title === search) return results;
+		if (!onAddItem || !search || results[0]?.title === search) return results;
 
 		return [
 			...results,

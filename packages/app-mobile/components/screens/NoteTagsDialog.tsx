@@ -1,15 +1,11 @@
 import * as React from 'react';
 
-import { StyleSheet, View, Text, TextInput } from 'react-native';
 import { connect } from 'react-redux';
 import Tag from '@joplin/lib/models/Tag';
-import { _ } from '@joplin/lib/locale';
-import { themeStyle } from '../global-style';
 import ModalDialog from '../ModalDialog';
 import { AppState } from '../../utils/types';
 import { TagEntity } from '@joplin/lib/services/database/types';
-import ComboBox from '../ComboBox';
-const naturalCompare = require('string-natural-compare');
+import TagEditor from '../TagEditor';
 
 interface Props {
 	themeId: number;
@@ -18,81 +14,27 @@ interface Props {
 	tags: TagEntity[];
 }
 
-interface TagListRecord {
-	id: string;
-	title: string;
-	selected: boolean;
-}
-
 interface State {
-	noteTagIds: string[];
-	tagListData: TagListRecord[];
 	noteId: string|null;
-	newTags: string;
 	savingTags: boolean;
-	tagFilter: string;
+	noteTags: string[];
 }
-
-let idCounter = 0;
 
 class NoteTagsDialogComponent extends React.Component<Props, State> {
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	private styles_: any;
-	private labelId_ = `tag-input-${idCounter++}`;
-
 	public constructor(props: Props) {
 		super(props);
-		this.styles_ = {};
 		this.state = {
-			noteTagIds: [],
 			noteId: null,
-			tagListData: [],
-			newTags: '',
 			savingTags: false,
-			tagFilter: '',
+			noteTags: [],
 		};
 	}
-
-	// private noteHasTag(tagId: string) {
-	// 	for (let i = 0; i < this.state.tagListData.length; i++) {
-	// 		if (this.state.tagListData[i].id === tagId) return this.state.tagListData[i].selected;
-	// 	}
-	// 	return false;
-	// }
-
-	private newTagTitles() {
-		return this.state.newTags
-			.split(',')
-			.map(t => t.trim().toLowerCase())
-			.filter(t => !!t);
-	}
-
-	private tag_press = (item: { id?: string }) => {
-		const newData = this.state.tagListData.slice();
-		for (let i = 0; i < newData.length; i++) {
-			const t = newData[i];
-			if (t.id === item.id) {
-				const newTag = { ...t };
-				newTag.selected = !newTag.selected;
-				newData[i] = newTag;
-				break;
-			}
-		}
-
-		this.setState({ tagListData: newData });
-	};
 
 	private okButton_press = async () => {
 		this.setState({ savingTags: true });
 
 		try {
-			const tagIds = this.state.tagListData.filter(t => t.selected).map(t => t.id);
-			await Tag.setNoteTagsByIds(this.state.noteId, tagIds);
-
-			const extraTitles = this.newTagTitles();
-			for (let i = 0; i < extraTitles.length; i++) {
-				await Tag.addNoteTagByTitle(this.state.noteId, extraTitles[i]);
-			}
+			await Tag.setNoteTagsByTitles(this.state.noteId, this.state.noteTags);
 		} finally {
 			this.setState({ savingTags: false });
 		}
@@ -112,102 +54,40 @@ class NoteTagsDialogComponent extends React.Component<Props, State> {
 
 	private async loadNoteTags(noteId: string) {
 		const tags = await Tag.tagsByNoteId(noteId);
-		const tagIds = tags.map(t => t.id);
+		const noteTags = tags.map(t => t.title);
 
-		const tagListData = this.props.tags.map(tag => {
-			return {
-				id: tag.id,
-				title: tag.title,
-				selected: tagIds.indexOf(tag.id) >= 0,
-			};
-		});
-
-		tagListData.sort((a, b) => {
-			if (a.selected === b.selected) return naturalCompare(a.title, b.title, { caseInsensitive: true });
-			else if (b.selected === true) return 1;
-			else return -1;
-		});
-
-		this.setState({ tagListData: tagListData });
+		this.setState({ noteTags: noteTags });
 	}
 
-	private styles() {
-		const themeId = this.props.themeId;
-		const theme = themeStyle(themeId);
+	private onAddTag_ = (tag: string) => {
+		this.setState(state => ({
+			noteTags: !state.noteTags.includes(tag) ? [...state.noteTags, tag] : state.noteTags,
+		}));
+	};
 
-		if (this.styles_[themeId]) return this.styles_[themeId];
-		this.styles_ = {};
+	private onRemoveTag_ = (tag: string) => {
+		this.setState(state => ({
+			noteTags: state.noteTags.filter(other => other !== tag),
+		}));
+	};
 
-		const styles = StyleSheet.create({
-			tag: {
-				padding: 10,
-				borderBottomWidth: 1,
-				borderBottomColor: theme.dividerColor,
-			},
-			tagIconText: {
-				flexDirection: 'row',
-				alignItems: 'center',
-			},
-			tagText: { ...theme.normalText },
-			tagCheckbox: {
-				marginRight: 8,
-				fontSize: 20,
-				color: theme.color,
-			},
-			tagBox: {
-				flexDirection: 'row',
-				alignItems: 'center',
-				paddingLeft: 10,
-				paddingRight: 10,
-				borderBottomWidth: 1,
-				borderBottomColor: theme.dividerColor,
-			},
-			newTagBoxLabel: { ...theme.normalText, marginRight: 8 },
-			tagBoxInput: { ...theme.lineInput, flex: 1 },
-		});
-
-		this.styles_[themeId] = styles;
-		return this.styles_[themeId];
-	}
 
 	public override render() {
-		const theme = themeStyle(this.props.themeId);
-
-		const dialogContent = (
-			<View style={{ flex: 1 }}>
-				<View style={this.styles().tagBox}>
-					<Text style={this.styles().newTagBoxLabel} nativeID={this.labelId_}>{_('New tags:')}</Text>
-					<TextInput
-						selectionColor={theme.textSelectionColor}
-						keyboardAppearance={theme.keyboardAppearance}
-						value={this.state.newTags}
-						onChangeText={value => {
-							this.setState({ newTags: value });
-						}}
-						style={this.styles().tagBoxInput}
-						placeholder={_('tag1, tag2, ...')}
-						accessibilityLabelledBy={this.labelId_}
-					/>
-				</View>
-				<ComboBox
-					placeholder={_('Search for tags...')}
-					items={this.state.tagListData}
-					onItemSelected={this.tag_press}
-					onAddItem={(item: string) => {
-						this.setState(state => ({ newTags: `${state.newTags},${item}` }));
-					}}
-				/>
-			</View>
-		);
-
+		const allTags = this.state.noteTags;
 		return <ModalDialog
+			title={null}
 			themeId={this.props.themeId}
-			title={_('Type new tags or select from list')}
 			onOkPress={this.okButton_press}
 			onCancelPress={this.cancelButton_press}
 			buttonBarEnabled={!this.state.savingTags}
 		>
-			{dialogContent}
+			<TagEditor
+				themeId={this.props.themeId}
+				tags={allTags}
+				allTags={this.props.tags}
+				onRemoveTag={this.onRemoveTag_}
+				onAddTag={this.onAddTag_}
+			/>
 		</ModalDialog>;
 	}
 }
