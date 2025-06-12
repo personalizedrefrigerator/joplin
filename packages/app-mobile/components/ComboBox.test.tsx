@@ -4,9 +4,11 @@ import createMockReduxStore from '../utils/testing/createMockReduxStore';
 import TestProviderStack from './testing/TestProviderStack';
 import ComboBox from './ComboBox';
 
+interface Item { label: string }
+
 interface WrapperProps {
-	items: string[];
-	onItemSelected?: (item: string)=> void;
+	items: Item[];
+	onItemSelected?: (item: Item)=> void;
 }
 
 const store = createMockReduxStore();
@@ -18,7 +20,6 @@ const WrappedComboBox: React.FC<WrapperProps> = ({
 		<ComboBox
 			items={items}
 			onItemSelected={onItemSelected}
-			allowNewItems={false}
 			placeholder={'Test combobox'}
 		/>
 	</TestProviderStack>;
@@ -33,9 +34,14 @@ const getSearchResults = () => {
 
 describe('ComboBox', () => {
 	test('should list all items when the search query is empty', () => {
+		const testItems = [
+			{ label: 'test 1' },
+			{ label: 'test 2' },
+			{ label: 'test 3' },
+		];
 		render(
 			<WrappedComboBox
-				items={['test 1', 'test 2', 'test 3']}
+				items={testItems}
 			/>,
 		);
 

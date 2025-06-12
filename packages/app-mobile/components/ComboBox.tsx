@@ -8,33 +8,58 @@ import Icon from './Icon';
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
 import { _ } from '@joplin/lib/locale';
 
+interface Option {
+	label: string;
+	onPress?: ()=> void;
+}
+
 interface Props {
 	themeId: number;
-	items: string[];
-	onItemSelected: (item: string)=> void;
-	allowNewItems: boolean;
+	items: Option[];
+	onItemSelected: (item: Option)=> void;
+	onAddItem?: (content: string)=> void;
 	placeholder: string;
 }
 
 
-const tagKeyExtractor = (tag: string) => tag;
+const optionKeyExtractor = (option: Option) => option.label;
 
-const useSearchResults = (search: string, options: string[]) => {
-	return useMemo(() => {
+interface SearchResultsOptions {
+	search: string;
+	options: Option[];
+	onAddItem: (content: string)=> void;
+}
+
+const useSearchResults = ({ search, options, onAddItem }: SearchResultsOptions) => {
+	const results = useMemo(() => {
 		return options
-			.filter(option => option.startsWith(search))
+			.filter(option => option.label.startsWith(search))
 			.sort((a, b) => {
-				if (a === b) return 0;
+				if (a.label === b.label) return 0;
 				// Full matches should go first
-				if (a === search) return -1;
-				if (b === search) return 1;
+				if (a.label === search) return -1;
+				if (b.label === search) return 1;
 				// Sort longer items first
-				return b.length - a.length;
+				return b.label.length - a.label.length;
 			});
 	}, [search, options]);
+
+	return useMemo(() => {
+		if (!onAddItem || results[0]?.label === search) return results;
+
+		return [
+			...results,
+			{
+				label: _('Add new'),
+				onPress: () => {
+					onAddItem(search);
+				},
+			},
+		];
+	}, [search, results, onAddItem]);
 };
 
-const useSelectedIndex = (searchResults: string[]) => {
+const useSelectedIndex = (searchResults: Option[]) => {
 	const [selectedIndex, setSelectedIndex] = useState(0);
 
 	useEffect(() => {
@@ -142,11 +167,16 @@ const SearchResult: React.FC<SearchResultProps> = ({
 
 
 const ComboBox: React.FC<Props> = ({
-	themeId, items, onItemSelected: propsOnItemSelected, placeholder,
+	themeId, items, onItemSelected: propsOnItemSelected, placeholder, onAddItem,
 }) => {
 	const styles = useStyles(themeId);
 	const [search, setSearch] = useState('');
-	const results = useSearchResults(search, items);
+
+	const results = useSearchResults({
+		search,
+		options: items,
+		onAddItem,
+	});
 	const { selectedIndex, onNextResult, onPreviousResult } = useSelectedIndex(results);
 	const listRef = useRef<FlatList|null>(null);
 
@@ -157,17 +187,21 @@ const ComboBox: React.FC<Props> = ({
 	const propsOnItemSelectedRef = useRef(propsOnItemSelected);
 	propsOnItemSelectedRef.current = propsOnItemSelected;
 
-	const onItemSelected = useCallback((item: string) => {
-		propsOnItemSelectedRef.current(item);
-		setSearch(item);
+	const onItemSelected = useCallback((item: Option) => {
+		if (item.onPress) {
+			item.onPress();
+		} else {
+			propsOnItemSelectedRef.current(item);
+			setSearch(item.label);
+		}
 	}, []);
 
 	const baseId = useId();
 
-	type RenderEvent = { item: string; index: number };
-	const renderTag = useCallback(({ item, index }: RenderEvent) => {
+	type RenderEvent = { item: Option; index: number };
+	const renderItem = useCallback(({ item, index }: RenderEvent) => {
 		return <SearchResult
-			text={item}
+			text={item.label}
 			onPress={() => {
 				onItemSelected(item);
 			}}
@@ -215,9 +249,9 @@ const ComboBox: React.FC<Props> = ({
 			role='menu'
 			aria-setsize={results.length}
 			style={styles.searchResults}
-			keyExtractor={tagKeyExtractor}
-			extraData={renderTag}
-			renderItem={renderTag}
+			keyExtractor={optionKeyExtractor}
+			extraData={renderItem}
+			renderItem={renderItem}
 		/>
 	</View>;
 };
