@@ -9,7 +9,8 @@ import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
 import { _ } from '@joplin/lib/locale';
 
 interface Option {
-	label: string;
+	id?: string;
+	title: string;
 	onPress?: ()=> void;
 }
 
@@ -22,7 +23,7 @@ interface Props {
 }
 
 
-const optionKeyExtractor = (option: Option) => option.label;
+const optionKeyExtractor = (option: Option) => option.title;
 
 interface SearchResultsOptions {
 	search: string;
@@ -33,24 +34,24 @@ interface SearchResultsOptions {
 const useSearchResults = ({ search, options, onAddItem }: SearchResultsOptions) => {
 	const results = useMemo(() => {
 		return options
-			.filter(option => option.label.startsWith(search))
+			.filter(option => option.title.startsWith(search))
 			.sort((a, b) => {
-				if (a.label === b.label) return 0;
+				if (a.title === b.title) return 0;
 				// Full matches should go first
-				if (a.label === search) return -1;
-				if (b.label === search) return 1;
+				if (a.title === search) return -1;
+				if (b.title === search) return 1;
 				// Sort longer items first
-				return b.label.length - a.label.length;
+				return b.title.length - a.title.length;
 			});
 	}, [search, options]);
 
 	return useMemo(() => {
-		if (!onAddItem || results[0]?.label === search) return results;
+		if (!onAddItem || results[0]?.title === search) return results;
 
 		return [
 			...results,
 			{
-				label: _('Add new'),
+				title: _('Add new'),
 				onPress: () => {
 					onAddItem(search);
 				},
@@ -180,8 +181,12 @@ const ComboBox: React.FC<Props> = ({
 	const { selectedIndex, onNextResult, onPreviousResult } = useSelectedIndex(results);
 	const listRef = useRef<FlatList|null>(null);
 
+	const resultsRef = useRef(results);
+	resultsRef.current = results;
 	useEffect(() => {
-		listRef.current?.scrollToIndex({ index: selectedIndex, animated: false, viewPosition: 0.5 });
+		if (resultsRef.current?.length) {
+			listRef.current?.scrollToIndex({ index: selectedIndex, animated: false, viewPosition: 0.5 });
+		}
 	}, [selectedIndex]);
 
 	const propsOnItemSelectedRef = useRef(propsOnItemSelected);
@@ -192,7 +197,7 @@ const ComboBox: React.FC<Props> = ({
 			item.onPress();
 		} else {
 			propsOnItemSelectedRef.current(item);
-			setSearch(item.label);
+			setSearch(item.title);
 		}
 	}, []);
 
@@ -201,7 +206,7 @@ const ComboBox: React.FC<Props> = ({
 	type RenderEvent = { item: Option; index: number };
 	const renderItem = useCallback(({ item, index }: RenderEvent) => {
 		return <SearchResult
-			text={item.label}
+			text={item.title}
 			onPress={() => {
 				onItemSelected(item);
 			}}

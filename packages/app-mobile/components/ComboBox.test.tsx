@@ -4,7 +4,7 @@ import createMockReduxStore from '../utils/testing/createMockReduxStore';
 import TestProviderStack from './testing/TestProviderStack';
 import ComboBox from './ComboBox';
 
-interface Item { label: string }
+interface Item { title: string }
 
 interface WrapperProps {
 	items: Item[];
@@ -35,9 +35,9 @@ const getSearchResults = () => {
 describe('ComboBox', () => {
 	test('should list all items when the search query is empty', () => {
 		const testItems = [
-			{ label: 'test 1' },
-			{ label: 'test 2' },
-			{ label: 'test 3' },
+			{ title: 'test 1' },
+			{ title: 'test 2' },
+			{ title: 'test 3' },
 		];
 		render(
 			<WrappedComboBox

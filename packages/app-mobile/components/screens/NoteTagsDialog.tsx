@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { StyleSheet, View, Text, FlatList, TouchableOpacity, TextInput } from 'react-native';
+import { StyleSheet, View, Text, TextInput } from 'react-native';
 import { connect } from 'react-redux';
 import Tag from '@joplin/lib/models/Tag';
 import { _ } from '@joplin/lib/locale';
@@ -8,7 +8,7 @@ import { themeStyle } from '../global-style';
 import ModalDialog from '../ModalDialog';
 import { AppState } from '../../utils/types';
 import { TagEntity } from '@joplin/lib/services/database/types';
-import Icon from '../Icon';
+import ComboBox from '../ComboBox';
 const naturalCompare = require('string-natural-compare');
 
 interface Props {
@@ -53,12 +53,12 @@ class NoteTagsDialogComponent extends React.Component<Props, State> {
 		};
 	}
 
-	private noteHasTag(tagId: string) {
-		for (let i = 0; i < this.state.tagListData.length; i++) {
-			if (this.state.tagListData[i].id === tagId) return this.state.tagListData[i].selected;
-		}
-		return false;
-	}
+	// private noteHasTag(tagId: string) {
+	// 	for (let i = 0; i < this.state.tagListData.length; i++) {
+	// 		if (this.state.tagListData[i].id === tagId) return this.state.tagListData[i].selected;
+	// 	}
+	// 	return false;
+	// }
 
 	private newTagTitles() {
 		return this.state.newTags
@@ -67,11 +67,11 @@ class NoteTagsDialogComponent extends React.Component<Props, State> {
 			.filter(t => !!t);
 	}
 
-	private tag_press = (tagId: string) => {
+	private tag_press = (item: { id?: string }) => {
 		const newData = this.state.tagListData.slice();
 		for (let i = 0; i < newData.length; i++) {
 			const t = newData[i];
-			if (t.id === tagId) {
+			if (t.id === item.id) {
 				const newTag = { ...t };
 				newTag.selected = !newTag.selected;
 				newData[i] = newTag;
@@ -81,29 +81,6 @@ class NoteTagsDialogComponent extends React.Component<Props, State> {
 
 		this.setState({ tagListData: newData });
 	};
-
-	private renderTag = (data: { item: TagListRecord }) => {
-		const tag = data.item;
-		const hasTag = this.noteHasTag(tag.id);
-		const iconName = hasTag ? 'ionicon checkbox-outline' : 'ionicon square-outline';
-		return (
-			<TouchableOpacity
-				key={tag.id} onPress={() => this.tag_press(tag.id)}
-				style={this.styles().tag}
-				accessibilityRole='checkbox'
-				accessibilityHint={_('Add tag %s to note', tag.title)}
-				aria-checked={hasTag}
-				accessibilityState={{ checked: hasTag }}
-			>
-				<View style={this.styles().tagIconText}>
-					<Icon name={iconName} style={this.styles().tagCheckbox} accessibilityLabel={null} />
-					<Text style={this.styles().tagText}>{tag.title}</Text>
-				</View>
-			</TouchableOpacity>
-		);
-	};
-
-	private tagKeyExtractor = (tag: TagListRecord) => tag.id;
 
 	private okButton_press = async () => {
 		this.setState({ savingTags: true });
@@ -126,10 +103,6 @@ class NoteTagsDialogComponent extends React.Component<Props, State> {
 	private cancelButton_press = () => {
 		if (this.props.onCloseRequested) this.props.onCloseRequested();
 	};
-
-	private filterTags(allTags: TagListRecord[]) {
-		return allTags.filter((tag) => tag.title.toLowerCase().includes(this.state.tagFilter.toLowerCase()), allTags);
-	}
 
 	public override UNSAFE_componentWillMount() {
 		const noteId = this.props.noteId;
@@ -216,23 +189,23 @@ class NoteTagsDialogComponent extends React.Component<Props, State> {
 						accessibilityLabelledBy={this.labelId_}
 					/>
 				</View>
-				<View style={this.styles().tagBox}>
-					<TextInput
-						selectionColor={theme.textSelectionColor}
-						keyboardAppearance={theme.keyboardAppearance}
-						value={this.state.tagFilter}
-						onChangeText={value => {
-							this.setState({ tagFilter: value });
-						}}
-						placeholder={_('Filter tags')}
-						style={this.styles().tagBoxInput}
-					/>
-				</View>
-				<FlatList data={this.filterTags(this.state.tagListData)} renderItem={this.renderTag} keyExtractor={this.tagKeyExtractor} />
+				<ComboBox
+					placeholder={_('Search for tags...')}
+					items={this.state.tagListData}
+					onItemSelected={this.tag_press}
+				/>
 			</View>
 		);
 
-		return <ModalDialog themeId={this.props.themeId} ContentComponent={dialogContent} title={_('Type new tags or select from list')} onOkPress={this.okButton_press} onCancelPress={this.cancelButton_press} buttonBarEnabled={!this.state.savingTags} />;
+		return <ModalDialog
+			themeId={this.props.themeId}
+			title={_('Type new tags or select from list')}
+			onOkPress={this.okButton_press}
+			onCancelPress={this.cancelButton_press}
+			buttonBarEnabled={!this.state.savingTags}
+		>
+			{dialogContent}
+		</ModalDialog>;
 	}
 }
 
