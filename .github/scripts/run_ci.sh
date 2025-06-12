@@ -117,11 +117,25 @@ if [ "$RUN_TESTS" == "1" ]; then
 	# On Linux, we run the Joplin Server tests using PostgreSQL
 	if [ "$IS_LINUX" == "1" ]; then
 		echo "Running Joplin Server tests using PostgreSQL..."
-		sudo docker compose --file docker-compose.db-dev.yml up -d
-		cmdResult=$?
+
+		# Retry on failure. In the past, docker compose has occasionally failed
+		# with "fatal error: concurrent map writes". See https://github.com/laurent22/joplin/issues/12500.
+		cmdResult=0
+		for retryCount in $(seq 1 2); do
+			sudo docker compose --file docker-compose.db-dev.yml up -d
+			cmdResult=$?
+			if [ $cmdResult -eq 0 ]; then
+				break
+			else
+				echo "Docker setup failed. Retrying ($retryCount)..."
+			fi
+		done
+
 		if [ $cmdResult -ne 0 ]; then
+			echo "Docker setup failed with exit code $cmdResult"
 			exit $cmdResult
 		fi
+
 		export JOPLIN_TESTS_SERVER_DB=pg
 	else
 		echo "Running Joplin Server tests using SQLite..."
