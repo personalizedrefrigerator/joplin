@@ -84,7 +84,6 @@ class NoteTagsDialogComponent extends React.Component<Props, State> {
 			<TagEditor
 				themeId={this.props.themeId}
 				tags={allTags}
-				allTags={this.props.tags}
 				onRemoveTag={this.onRemoveTag_}
 				onAddTag={this.onAddTag_}
 			/>

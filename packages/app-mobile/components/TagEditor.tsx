@@ -8,6 +8,8 @@ import IconButton from './IconButton';
 import { useCallback, useMemo } from 'react';
 import { Divider } from 'react-native-paper';
 import { TagEntity } from '@joplin/lib/services/database/types';
+import { connect } from 'react-redux';
+import { AppState } from '../utils/types';
 
 interface Props {
 	themeId: number;
@@ -112,12 +114,24 @@ const TagEditor: React.FC<Props> = props => {
 			.filter(tag => !props.tags.includes(tag.title))
 			.map(tag => ({
 				title: tag.title ?? 'Untitled',
+				icon: 'fas fa-tag',
 			}));
 	}, [props.tags, props.allTags]);
 
 	const onComboBoxSelect = useCallback((item: { title: string }) => {
 		props.onAddTag(item.title.toLowerCase());
 	}, [props.onAddTag]);
+
+	const allTagsSet = useMemo(() => {
+		return new Set([
+			...props.allTags.map(tag => tag.title),
+			...props.tags,
+		]);
+	}, [props.allTags, props.tags]);
+
+	const onCanAddTag = useCallback((tag: string) => {
+		return !allTagsSet.has(tag);
+	}, [allTagsSet]);
 
 	return <View>
 		<TagsBox
@@ -132,9 +146,12 @@ const TagEditor: React.FC<Props> = props => {
 			items={comboBoxItems}
 			onItemSelected={onComboBoxSelect}
 			onAddItem={props.onAddTag}
+			canAddItem={onCanAddTag}
 			placeholder={_('Search for tags...')}
 		/>
 	</View>;
 };
 
-export default TagEditor;
+export default connect((state: AppState) => ({
+	allTags: state.tags,
+}))(TagEditor);

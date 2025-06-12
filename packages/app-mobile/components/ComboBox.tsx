@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { FlatList, NativeSyntheticEvent, StyleSheet, View } from 'react-native';
+import { AccessibilityInfo, FlatList, NativeSyntheticEvent, Platform, StyleSheet, View } from 'react-native';
 import { TouchableRipple, Text, Searchbar } from 'react-native-paper';
 import { connect } from 'react-redux';
 import { AppState } from '../utils/types';
@@ -16,24 +16,32 @@ interface Option {
 	onPress?: ()=> void;
 }
 
-interface Props {
+interface BaseProps {
 	themeId: number;
 	items: Option[];
-	onItemSelected: (item: Option)=> void;
-	onAddItem?: (content: string)=> void;
 	placeholder: string;
+	onItemSelected: (item: Option)=> void;
 }
 
+type Props = BaseProps & ({
+	onAddItem: ((content: string)=> void)|null;
+	canAddItem: (item: string)=> boolean;
+}|{
+	onAddItem?: undefined;
+	canAddItem?: undefined;
+});
 
 const optionKeyExtractor = (option: Option) => option.title;
 
 interface SearchResultsOptions {
 	search: string;
+	setSearch: (search: string)=> void;
 	options: Option[];
-	onAddItem: (content: string)=> void;
+	onAddItem: null|((content: string)=> void);
+	canAddItem: (content: string)=> boolean;
 }
 
-const useSearchResults = ({ search, options, onAddItem }: SearchResultsOptions) => {
+const useSearchResults = ({ search, setSearch, options, onAddItem, canAddItem }: SearchResultsOptions) => {
 	const results = useMemo(() => {
 		return options
 			.filter(option => option.title.startsWith(search))
@@ -46,8 +54,23 @@ const useSearchResults = ({ search, options, onAddItem }: SearchResultsOptions) 
 			});
 	}, [search, options]);
 
+	const canAdd = (
+		!!onAddItem
+		&& search.trim()
+		&& results[0]?.title !== search
+		&& canAddItem(search)
+	);
+
+	// Use a ref to prevent unnecessary rerenders if onAddItem changes
+	const addCurrentSearch = useRef<()=> void>(()=>{});
+	addCurrentSearch.current = () => {
+		onAddItem(search);
+		AccessibilityInfo.announceForAccessibility(_('Added new: %s', search));
+		setSearch('');
+	};
+
 	return useMemo(() => {
-		if (!onAddItem || !search || results[0]?.title === search) return results;
+		if (!canAdd) return results;
 
 		return [
 			...results,
@@ -55,11 +78,11 @@ const useSearchResults = ({ search, options, onAddItem }: SearchResultsOptions) 
 				title: _('Add new'),
 				icon: 'fas fa-plus',
 				onPress: () => {
-					onAddItem(search);
+					addCurrentSearch.current?.();
 				},
 			},
 		];
-	}, [search, results, onAddItem]);
+	}, [canAdd, results]);
 };
 
 const useSelectedIndex = (search: string, searchResults: Option[]) => {
@@ -166,6 +189,10 @@ const SearchResult: React.FC<SearchResultProps> = ({
 		onPress={onPress}
 		role='menuitem'
 		aria-selected={selected}
+		// On web, focus is controlled using the arrow keys. On other
+		// platforms, arrow key navigation is not available and each item
+		// needs to be focusable
+		tabIndex={Platform.OS === 'web' ? -1 : undefined}
 		nativeID={id}
 		{...rest}
 	>
@@ -178,15 +205,17 @@ const SearchResult: React.FC<SearchResultProps> = ({
 
 
 const ComboBox: React.FC<Props> = ({
-	themeId, items, onItemSelected: propsOnItemSelected, placeholder, onAddItem,
+	themeId, items, onItemSelected: propsOnItemSelected, placeholder, onAddItem, canAddItem,
 }) => {
 	const styles = useStyles(themeId);
 	const [search, setSearch] = useState('');
 
 	const results = useSearchResults({
 		search,
+		setSearch,
 		options: items,
 		onAddItem,
+		canAddItem,
 	});
 	const { selectedIndex, onNextResult, onPreviousResult } = useSelectedIndex(search, results);
 	const listRef = useRef<FlatList|null>(null);
@@ -207,7 +236,7 @@ const ComboBox: React.FC<Props> = ({
 			item.onPress();
 		} else {
 			propsOnItemSelectedRef.current(item);
-			setSearch(item.title);
+			setSearch('');
 		}
 	}, []);
 
@@ -250,7 +279,10 @@ const ComboBox: React.FC<Props> = ({
 		}
 	}, [selectedIndex, results, onItemSelected, onNextResult, onPreviousResult]);
 
-	return <View style={styles.root}>
+	const webProps = {
+		onKeyDown: onKeyPress,
+	};
+	return <View style={styles.root} {...webProps}>
 		<Searchbar
 			style={styles.searchInputContainer}
 			inputStyle={styles.searchInput}
@@ -266,8 +298,10 @@ const ComboBox: React.FC<Props> = ({
 		<FlatList
 			ref={listRef}
 			data={results}
-			role='menu'
+			// A better role would be 'listbox', but that isn't supported by RN.
+			role={'menu'}
 			aria-setsize={results.length}
+			aria-activedescendant={`${baseId}-${selectedIndex}`}
 			style={styles.searchResults}
 			keyExtractor={optionKeyExtractor}
 			extraData={renderItem}

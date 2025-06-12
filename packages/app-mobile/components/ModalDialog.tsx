@@ -52,7 +52,7 @@ const ModalDialog: React.FC<Props> = props => {
 	const theme = themeStyle(props.themeId);
 
 	return (
-		<Modal transparent={true} visible={true} onRequestClose={() => {}} containerStyle={styles.container} backgroundColor={theme.backgroundColorTransparent2}>
+		<Modal transparent={true} visible={true} onRequestClose={null} containerStyle={styles.container} backgroundColor={theme.backgroundColorTransparent2}>
 			{props.title ? <Text style={styles.title} role='heading'>{props.title}</Text> : null}
 			<View style={styles.contentWrapper}>{props.children}</View>
 			<View style={styles.buttonRow}>
