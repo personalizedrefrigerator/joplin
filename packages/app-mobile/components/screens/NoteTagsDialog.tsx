@@ -193,6 +193,9 @@ class NoteTagsDialogComponent extends React.Component<Props, State> {
 					placeholder={_('Search for tags...')}
 					items={this.state.tagListData}
 					onItemSelected={this.tag_press}
+					onAddItem={(item: string) => {
+						this.setState(state => ({ newTags: `${state.newTags},${item}` }));
+					}}
 				/>
 			</View>
 		);

@@ -11,6 +11,7 @@ import { _ } from '@joplin/lib/locale';
 interface Option {
 	id?: string;
 	title: string;
+	icon?: string;
 	onPress?: ()=> void;
 }
 
@@ -52,6 +53,7 @@ const useSearchResults = ({ search, options, onAddItem }: SearchResultsOptions) 
 			...results,
 			{
 				title: _('Add new'),
+				icon: 'fas fa-plus',
 				onPress: () => {
 					onAddItem(search);
 				},
@@ -60,12 +62,16 @@ const useSearchResults = ({ search, options, onAddItem }: SearchResultsOptions) 
 	}, [search, results, onAddItem]);
 };
 
-const useSelectedIndex = (searchResults: Option[]) => {
+const useSelectedIndex = (search: string, searchResults: Option[]) => {
 	const [selectedIndex, setSelectedIndex] = useState(0);
 
 	useEffect(() => {
-		setSelectedIndex(0);
-	}, [searchResults]);
+		if (search) {
+			setSelectedIndex(0);
+		} else {
+			setSelectedIndex(-1);
+		}
+	}, [searchResults, search]);
 
 	const onNextResult = useCallback(() => {
 		setSelectedIndex(index => {
@@ -109,8 +115,9 @@ const useStyles = (themeId: number) => {
 			tagIcon: {
 				color: theme.color,
 				fontSize: theme.fontSize,
+				width: 30,
 				paddingLeft: 4,
-				paddingRight: 12,
+				paddingRight: 4,
 			},
 			tagLabel: {
 				fontSize: theme.fontSize,
@@ -135,6 +142,7 @@ type Styles = ReturnType<typeof useStyles>;
 
 interface SearchResultProps {
 	text: string;
+	icon: string;
 	selected: boolean;
 	onPress: ()=> void;
 	styles: Styles;
@@ -145,8 +153,15 @@ interface SearchResultProps {
 }
 
 const SearchResult: React.FC<SearchResultProps> = ({
-	text, onPress, styles, selected, id, ...rest
+	text, onPress, styles, selected, id, icon: iconName, ...rest
 }) => {
+	const icon = iconName ? <Icon
+		style={styles.tagIcon}
+		name={iconName}
+		// Description is provided by adjacent text
+		accessibilityLabel={null}
+	/> : <View style={styles.tagIcon}/>;
+
 	return <TouchableRipple
 		onPress={onPress}
 		role='menuitem'
@@ -155,12 +170,7 @@ const SearchResult: React.FC<SearchResultProps> = ({
 		{...rest}
 	>
 		<View style={[styles.menuItemContent, selected && styles.menuItemContentSelected]}>
-			<Icon
-				style={styles.tagIcon}
-				name='fas fa-tag'
-				// Description is provided by adjacent text
-				accessibilityLabel={null}
-			/>
+			{icon}
 			<Text style={styles.tagLabel}>{text}</Text>
 		</View>
 	</TouchableRipple>;
@@ -178,13 +188,13 @@ const ComboBox: React.FC<Props> = ({
 		options: items,
 		onAddItem,
 	});
-	const { selectedIndex, onNextResult, onPreviousResult } = useSelectedIndex(results);
+	const { selectedIndex, onNextResult, onPreviousResult } = useSelectedIndex(search, results);
 	const listRef = useRef<FlatList|null>(null);
 
 	const resultsRef = useRef(results);
 	resultsRef.current = results;
 	useEffect(() => {
-		if (resultsRef.current?.length) {
+		if (resultsRef.current?.length && selectedIndex >= 0) {
 			listRef.current?.scrollToIndex({ index: selectedIndex, animated: false, viewPosition: 0.5 });
 		}
 	}, [selectedIndex]);
@@ -213,6 +223,7 @@ const ComboBox: React.FC<Props> = ({
 			styles={styles}
 			selected={selectedIndex === index}
 			id={`${baseId}-${index}`}
+			icon={item.icon ?? ''}
 			index={index}
 			aria-setsize={results.length}
 			aria-posinset={index + 1}
@@ -222,16 +233,20 @@ const ComboBox: React.FC<Props> = ({
 	// For now, onKeyPress only works on web.
 	// See https://github.com/react-native-community/discussions-and-proposals/issues/249
 	type KeyPressEvent = { key: string };
-	const onKeyPress = useCallback(({ nativeEvent }: NativeSyntheticEvent<KeyPressEvent>) => {
-		if (nativeEvent.key === 'ArrowDown') {
+	const onKeyPress = useCallback((event: NativeSyntheticEvent<KeyPressEvent>) => {
+		const key = event.nativeEvent.key;
+		if (key === 'ArrowDown') {
 			onNextResult();
-		} else if (nativeEvent.key === 'ArrowUp') {
+			event.preventDefault();
+		} else if (key === 'ArrowUp') {
 			onPreviousResult();
-		} else if (nativeEvent.key === 'Enter') {
+			event.preventDefault();
+		} else if (key === 'Enter') {
 			const item = results[selectedIndex];
 			if (item) {
 				onItemSelected(item);
 			}
+			event.preventDefault();
 		}
 	}, [selectedIndex, results, onItemSelected, onNextResult, onPreviousResult]);
 
