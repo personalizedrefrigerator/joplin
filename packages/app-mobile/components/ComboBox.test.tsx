@@ -19,6 +19,7 @@ const WrappedComboBox: React.FC<WrapperProps> = ({
 	return <TestProviderStack store={store}>
 		<ComboBox
 			items={items}
+			style={{}}
 			onItemSelected={onItemSelected}
 			placeholder={'Test combobox'}
 		/>

@@ -85,6 +85,7 @@ class NoteTagsDialogComponent extends React.Component<Props, State> {
 				themeId={this.props.themeId}
 				tags={allTags}
 				onRemoveTag={this.onRemoveTag_}
+				style={{ flex: 1 }}
 				onAddTag={this.onAddTag_}
 			/>
 		</ModalDialog>;

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { AccessibilityInfo, FlatList, NativeSyntheticEvent, Platform, StyleSheet, View } from 'react-native';
+import { AccessibilityInfo, FlatList, NativeSyntheticEvent, Platform, Role, StyleSheet, View, ViewProps, ViewStyle } from 'react-native';
 import { TouchableRipple, Text, Searchbar } from 'react-native-paper';
 import { connect } from 'react-redux';
 import { AppState } from '../utils/types';
@@ -21,6 +21,7 @@ interface BaseProps {
 	items: Option[];
 	placeholder: string;
 	onItemSelected: (item: Option)=> void;
+	style: ViewStyle;
 }
 
 type Props = BaseProps & ({
@@ -111,13 +112,14 @@ const useSelectedIndex = (search: string, searchResults: Option[]) => {
 	return { selectedIndex, onNextResult, onPreviousResult };
 };
 
+const menuItemHeight = 48;
 const useStyles = (themeId: number) => {
 	return React.useMemo(() => {
 		const theme = themeStyle(themeId);
 		const borderRadius = 15;
 		return StyleSheet.create({
 			root: {
-				height: 200,
+				height: 300,
 				flexDirection: 'column',
 				borderColor: theme.dividerColor,
 				borderWidth: 1,
@@ -130,10 +132,11 @@ const useStyles = (themeId: number) => {
 				borderBottomRightRadius: 0,
 			},
 			searchInput: {
-				minHeight: 48,
+				minHeight: menuItemHeight,
 			},
 			searchResults: {
-
+				flexGrow: 1,
+				flexShrink: 1,
 			},
 			tagIcon: {
 				color: theme.color,
@@ -151,8 +154,8 @@ const useStyles = (themeId: number) => {
 				flexDirection: 'row',
 				paddingRight: theme.marginRight,
 				paddingLeft: theme.marginLeft,
-				paddingTop: theme.marginTop,
-				paddingBottom: theme.marginBottom,
+				height: menuItemHeight,
+				alignItems: 'center',
 			},
 			menuItemContentSelected: {
 				backgroundColor: theme.selectedColor,
@@ -169,14 +172,10 @@ interface SearchResultProps {
 	selected: boolean;
 	onPress: ()=> void;
 	styles: Styles;
-	id: string;
-	index: number;
-	'aria-posinset': number;
-	'aria-setsize': number;
 }
 
 const SearchResult: React.FC<SearchResultProps> = ({
-	text, onPress, styles, selected, id, icon: iconName, ...rest
+	text, onPress, styles, selected, icon: iconName, ...rest
 }) => {
 	const icon = iconName ? <Icon
 		style={styles.tagIcon}
@@ -187,13 +186,10 @@ const SearchResult: React.FC<SearchResultProps> = ({
 
 	return <TouchableRipple
 		onPress={onPress}
-		role='menuitem'
-		aria-selected={selected}
 		// On web, focus is controlled using the arrow keys. On other
 		// platforms, arrow key navigation is not available and each item
 		// needs to be focusable
 		tabIndex={Platform.OS === 'web' ? -1 : undefined}
-		nativeID={id}
 		{...rest}
 	>
 		<View style={[styles.menuItemContent, selected && styles.menuItemContentSelected]}>
@@ -203,9 +199,29 @@ const SearchResult: React.FC<SearchResultProps> = ({
 	</TouchableRipple>;
 };
 
+interface ResultWrapperProps extends ViewProps {
+	index: number;
+	item: Option;
+}
+
+const useSearchResultWrapper = (
+	selectedIndex: number, baseId: string, resultCount: number,
+): React.FC<ResultWrapperProps> => {
+	return useMemo(() => ({ index, item, ...rest }) => (
+		<View
+			{...rest}
+			role='menuitem'
+			aria-selected={index === selectedIndex}
+			nativeID={`${baseId}-${item.title}`}
+			aria-setsize={resultCount}
+			aria-posinset={index + 1}
+		/>
+	), [selectedIndex, baseId, resultCount]);
+};
+
 
 const ComboBox: React.FC<Props> = ({
-	themeId, items, onItemSelected: propsOnItemSelected, placeholder, onAddItem, canAddItem,
+	themeId, items, onItemSelected: propsOnItemSelected, placeholder, onAddItem, canAddItem, style: rootStyle,
 }) => {
 	const styles = useStyles(themeId);
 	const [search, setSearch] = useState('');
@@ -241,6 +257,7 @@ const ComboBox: React.FC<Props> = ({
 	}, []);
 
 	const baseId = useId();
+	const SearchResultWrapper = useSearchResultWrapper(selectedIndex, baseId, results.length);
 
 	type RenderEvent = { item: Option; index: number };
 	const renderItem = useCallback(({ item, index }: RenderEvent) => {
@@ -250,14 +267,10 @@ const ComboBox: React.FC<Props> = ({
 				onItemSelected(item);
 			}}
 			styles={styles}
-			selected={selectedIndex === index}
-			id={`${baseId}-${index}`}
+			selected={index === selectedIndex}
 			icon={item.icon ?? ''}
-			index={index}
-			aria-setsize={results.length}
-			aria-posinset={index + 1}
 		/>;
-	}, [results.length, baseId, selectedIndex, onItemSelected, styles]);
+	}, [selectedIndex, onItemSelected, styles]);
 
 	// For now, onKeyPress only works on web.
 	// See https://github.com/react-native-community/discussions-and-proposals/issues/249
@@ -282,7 +295,7 @@ const ComboBox: React.FC<Props> = ({
 	const webProps = {
 		onKeyDown: onKeyPress,
 	};
-	return <View style={styles.root} {...webProps}>
+	return <View style={[styles.root, rootStyle]} {...webProps}>
 		<Searchbar
 			style={styles.searchInputContainer}
 			inputStyle={styles.searchInput}
@@ -294,14 +307,21 @@ const ComboBox: React.FC<Props> = ({
 			searchAccessibilityLabel={_('Search')}
 			clearAccessibilityLabel={_('Clear search')}
 			aria-activedescendant={`${baseId}-${selectedIndex}`}
+			aria-controls={`menuBox-${baseId}`}
 		/>
 		<FlatList
 			ref={listRef}
 			data={results}
+			getItemLayout={(_data, index) => ({
+				length: menuItemHeight, offset: menuItemHeight * index, index,
+			})}
+			CellRendererComponent={SearchResultWrapper}
 			// A better role would be 'listbox', but that isn't supported by RN.
-			role={'menu'}
+			role={Platform.OS === 'web' ? 'listbox' as Role : 'menu'}
 			aria-setsize={results.length}
 			aria-activedescendant={`${baseId}-${selectedIndex}`}
+			nativeID={`menuBox-${baseId}`}
+
 			style={styles.searchResults}
 			keyExtractor={optionKeyExtractor}
 			extraData={renderItem}

@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { StyleSheet, View, Text, ScrollView } from 'react-native';
+import { StyleSheet, View, Text, ScrollView, ViewStyle } from 'react-native';
 import { _ } from '@joplin/lib/locale';
 import { themeStyle } from './global-style';
 import ComboBox from './ComboBox';
@@ -15,6 +15,7 @@ interface Props {
 	themeId: number;
 	tags: string[];
 	allTags: TagEntity[];
+	style: ViewStyle;
 	onRemoveTag: (tag: string)=> void;
 	onAddTag: (tag: string)=> void;
 }
@@ -26,17 +27,25 @@ const useStyles = (themeId: number) => {
 			tag: {
 				borderRadius: 16,
 				paddingInlineStart: 8,
-				backgroundColor: theme.color2,
+				backgroundColor: theme.backgroundColor3,
+				color: theme.color3,
 				flexDirection: 'row',
 				alignItems: 'center',
 				gap: 4,
 			},
+			tagText: {
+				color: theme.color3,
+				fontSize: theme.fontSize,
+			},
 			removeTagButton: {
-				fontSize: 12,
+				color: theme.color3,
+				fontSize: theme.fontSize,
 				padding: 8,
 			},
 			tagBoxRoot: {
 				flexDirection: 'column',
+				flexGrow: 1,
+				flexShrink: 1,
 			},
 			tagBoxScrollView: {
 				borderColor: theme.dividerColor,
@@ -48,12 +57,20 @@ const useStyles = (themeId: number) => {
 			tagBoxContent: {
 				flexDirection: 'row',
 				gap: 4,
+				padding: 4,
 				flexWrap: 'wrap',
 				maxWidth: '100%',
 			},
 			header: {
 				...theme.headerStyle,
 				fontSize: theme.fontSize,
+			},
+			divider: {
+				marginVertical: theme.margin,
+			},
+			tagSearch: {
+				flexBasis: 300,
+				flexShrink: 1,
 			},
 		});
 	}, [themeId]);
@@ -70,7 +87,7 @@ interface TagChipProps {
 
 const TagCard: React.FC<TagChipProps> = props => {
 	return <View style={props.styles.tag}>
-		<Text>{props.title}</Text>
+		<Text style={props.styles.tagText}>{props.title}</Text>
 		<IconButton
 			themeId={props.themeId}
 			description={_('Remove %s', props.title)}
@@ -133,20 +150,21 @@ const TagEditor: React.FC<Props> = props => {
 		return !allTagsSet.has(tag);
 	}, [allTagsSet]);
 
-	return <View>
+	return <View style={props.style}>
 		<TagsBox
 			themeId={props.themeId}
 			styles={styles}
 			tags={props.tags}
 			onRemoveTag={props.onRemoveTag}
 		/>
-		<Divider/>
+		<Divider style={styles.divider}/>
 		<Text style={styles.header} role='heading'>{_('Add tags')}</Text>
 		<ComboBox
 			items={comboBoxItems}
 			onItemSelected={onComboBoxSelect}
 			onAddItem={props.onAddTag}
 			canAddItem={onCanAddTag}
+			style={styles.tagSearch}
 			placeholder={_('Search for tags...')}
 		/>
 	</View>;

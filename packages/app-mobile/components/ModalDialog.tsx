@@ -37,11 +37,13 @@ const useStyles = (themeId: number) => {
 			title: theme.headerStyle,
 			contentWrapper: {
 				flexGrow: 1,
+				flexShrink: 1,
 			},
 			buttonRow: {
 				flexDirection: 'row',
-				alignContent: 'flex-end',
+				justifyContent: 'flex-end',
 				gap: theme.margin,
+				marginTop: theme.marginTop,
 			},
 		});
 	}, [themeId]);
@@ -56,12 +58,8 @@ const ModalDialog: React.FC<Props> = props => {
 			{props.title ? <Text style={styles.title} role='heading'>{props.title}</Text> : null}
 			<View style={styles.contentWrapper}>{props.children}</View>
 			<View style={styles.buttonRow}>
-				<View style={{ flex: 1, marginLeft: 5 }}>
-					<SecondaryButton disabled={!props.buttonBarEnabled} onPress={props.onCancelPress}>{_('Cancel')}</SecondaryButton>
-				</View>
-				<View style={{ flex: 1 }}>
-					<PrimaryButton disabled={!props.buttonBarEnabled} onPress={props.onOkPress}>{_('OK')}</PrimaryButton>
-				</View>
+				<SecondaryButton disabled={!props.buttonBarEnabled} onPress={props.onCancelPress}>{_('Cancel')}</SecondaryButton>
+				<PrimaryButton disabled={!props.buttonBarEnabled} onPress={props.onOkPress}>{_('OK')}</PrimaryButton>
 			</View>
 		</Modal>
 	);
