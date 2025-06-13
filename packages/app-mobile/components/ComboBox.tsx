@@ -116,14 +116,14 @@ const useSelectedIndex = (search: string, searchResults: Option[]) => {
 
 const useStyles = (themeId: number) => {
 	const { fontScale } = useWindowDimensions();
-	const menuItemHeight = 48 * fontScale;
+	const menuItemHeight = 44 * fontScale;
 
 	const styles = React.useMemo(() => {
 		const theme = themeStyle(themeId);
 		const borderRadius = 15;
 		return StyleSheet.create({
 			root: {
-				height: 300,
+				height: 200,
 				flexDirection: 'column',
 				borderColor: theme.dividerColor,
 				borderWidth: 1,

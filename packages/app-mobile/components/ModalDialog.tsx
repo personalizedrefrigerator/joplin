@@ -1,8 +1,7 @@
 import * as React from 'react';
 import { useMemo } from 'react';
-import { Text, View, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import { themeStyle } from './global-style';
-import { _ } from '@joplin/lib/locale';
 
 import Modal from './Modal';
 import { PrimaryButton, SecondaryButton } from './buttons';
@@ -12,7 +11,8 @@ interface Props {
 	children: React.ReactNode;
 
 	buttonBarEnabled: boolean;
-	title: string|null;
+	okTitle: string;
+	cancelTitle: string;
 	onOkPress: ()=> void;
 	onCancelPress: ()=> void;
 }
@@ -54,12 +54,17 @@ const ModalDialog: React.FC<Props> = props => {
 	const theme = themeStyle(props.themeId);
 
 	return (
-		<Modal transparent={true} visible={true} onRequestClose={null} containerStyle={styles.container} backgroundColor={theme.backgroundColorTransparent2}>
-			{props.title ? <Text style={styles.title} role='heading'>{props.title}</Text> : null}
+		<Modal
+			transparent={true}
+			visible={true}
+			onRequestClose={null}
+			containerStyle={styles.container}
+			backgroundColor={theme.backgroundColorTransparent2}
+		>
 			<View style={styles.contentWrapper}>{props.children}</View>
 			<View style={styles.buttonRow}>
-				<SecondaryButton disabled={!props.buttonBarEnabled} onPress={props.onCancelPress}>{_('Cancel')}</SecondaryButton>
-				<PrimaryButton disabled={!props.buttonBarEnabled} onPress={props.onOkPress}>{_('OK')}</PrimaryButton>
+				<SecondaryButton disabled={!props.buttonBarEnabled} onPress={props.onCancelPress}>{props.cancelTitle}</SecondaryButton>
+				<PrimaryButton disabled={!props.buttonBarEnabled} onPress={props.onOkPress}>{props.okTitle}</PrimaryButton>
 			</View>
 		</Modal>
 	);

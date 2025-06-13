@@ -38,7 +38,7 @@ const useStyles = (themeId: number) => {
 			},
 			removeTagButton: {
 				color: theme.color3,
-				fontSize: theme.fontSizeLarge,
+				fontSize: theme.fontSize,
 				padding: 3,
 			},
 			tagBoxRoot: {
@@ -56,7 +56,10 @@ const useStyles = (themeId: number) => {
 			tagBoxContent: {
 				flexDirection: 'row',
 				gap: 4,
-				padding: 4,
+				paddingTop: theme.itemMarginTop,
+				paddingBottom: theme.itemMarginBottom,
+				paddingLeft: 4,
+				paddingRight: 4,
 				flexWrap: 'wrap',
 				maxWidth: '100%',
 			},
@@ -69,7 +72,7 @@ const useStyles = (themeId: number) => {
 				marginVertical: theme.margin,
 			},
 			tagSearch: {
-				flexBasis: 300,
+				flexBasis: 240,
 				flexShrink: 1,
 			},
 		});
@@ -107,7 +110,7 @@ interface TagsBoxProps {
 
 const TagsBox: React.FC<TagsBoxProps> = props => {
 	return <View style={props.styles.tagBoxRoot}>
-		<Text style={props.styles.header} role='heading'>{_('Associated tags')}</Text>
+		<Text style={props.styles.header} role='heading'>{_('Associated tags:')}</Text>
 		<ScrollView style={props.styles.tagBoxScrollView} contentContainerStyle={props.styles.tagBoxContent}>
 			{props.tags.map(tag => (
 				<TagCard
@@ -133,7 +136,6 @@ const TagEditor: React.FC<Props> = props => {
 			.filter(tag => !props.tags.includes(tag.title))
 			.map(tag => ({
 				title: tag.title ?? 'Untitled',
-				icon: 'fas fa-tag',
 			}));
 	}, [props.tags, props.allTags]);
 
@@ -164,7 +166,7 @@ const TagEditor: React.FC<Props> = props => {
 			onRemoveTag={props.onRemoveTag}
 		/>
 		<View style={styles.divider}/>
-		<Text style={styles.header} role='heading'>{_('Add tags')}</Text>
+		<Text style={styles.header} role='heading'>{_('Add tags:')}</Text>
 		<ComboBox
 			items={comboBoxItems}
 			onItemSelected={onComboBoxSelect}

@@ -6,6 +6,7 @@ import ModalDialog from '../ModalDialog';
 import { AppState } from '../../utils/types';
 import { TagEntity } from '@joplin/lib/services/database/types';
 import TagEditor from '../TagEditor';
+import { _ } from '@joplin/lib/locale';
 
 interface Props {
 	themeId: number;
@@ -75,11 +76,12 @@ class NoteTagsDialogComponent extends React.Component<Props, State> {
 	public override render() {
 		const allTags = this.state.noteTags;
 		return <ModalDialog
-			title={null}
 			themeId={this.props.themeId}
 			onOkPress={this.okButton_press}
 			onCancelPress={this.cancelButton_press}
 			buttonBarEnabled={!this.state.savingTags}
+			okTitle={_('Apply')}
+			cancelTitle={_('Cancel')}
 		>
 			<TagEditor
 				themeId={this.props.themeId}
