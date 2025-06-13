@@ -122,6 +122,8 @@ const TagsBox: React.FC<TagsBoxProps> = props => {
 	</View>;
 };
 
+const normalizeTag = (tagText: string) => tagText.trim().toLowerCase();
+
 const TagEditor: React.FC<Props> = props => {
 	const styles = useStyles(props.themeId);
 
@@ -135,9 +137,13 @@ const TagEditor: React.FC<Props> = props => {
 			}));
 	}, [props.tags, props.allTags]);
 
-	const onComboBoxSelect = useCallback((item: { title: string }) => {
-		props.onAddTag(item.title.toLowerCase());
+	const onAddTag = useCallback((title: string) => {
+		props.onAddTag(normalizeTag(title));
 	}, [props.onAddTag]);
+
+	const onComboBoxSelect = useCallback((item: { title: string }) => {
+		onAddTag(item.title);
+	}, [onAddTag]);
 
 	const allTagsSet = useMemo(() => {
 		return new Set([
@@ -147,7 +153,7 @@ const TagEditor: React.FC<Props> = props => {
 	}, [props.allTags, props.tags]);
 
 	const onCanAddTag = useCallback((tag: string) => {
-		return !allTagsSet.has(tag);
+		return !allTagsSet.has(normalizeTag(tag));
 	}, [allTagsSet]);
 
 	return <View style={props.style}>

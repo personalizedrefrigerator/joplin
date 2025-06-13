@@ -283,6 +283,13 @@ const ComboBox: React.FC<Props> = ({
 		/>;
 	}, [selectedIndex, styles]);
 
+	const onSubmit = useCallback(() => {
+		const item = results[selectedIndex];
+		if (item) {
+			onItemSelected(item);
+		}
+	}, [onItemSelected, results, selectedIndex]);
+
 	// For now, onKeyPress only works on web.
 	// See https://github.com/react-native-community/discussions-and-proposals/issues/249
 	type KeyPressEvent = { key: string };
@@ -295,13 +302,13 @@ const ComboBox: React.FC<Props> = ({
 			onPreviousResult();
 			event.preventDefault();
 		} else if (key === 'Enter') {
-			const item = results[selectedIndex];
-			if (item) {
-				onItemSelected(item);
-			}
+			// This case is necessary on web to prevent the
+			// search input from becoming defocused after
+			// pressing "enter".
+			onSubmit();
 			event.preventDefault();
 		}
-	}, [selectedIndex, results, onItemSelected, onNextResult, onPreviousResult]);
+	}, [onSubmit, onNextResult, onPreviousResult]);
 
 	const webProps = {
 		onKeyDown: onKeyPress,
@@ -315,6 +322,7 @@ const ComboBox: React.FC<Props> = ({
 			mode='view'
 			onChangeText={setSearch}
 			onKeyPress={onKeyPress}
+			onSubmitEditing={onSubmit}
 			placeholder={placeholder}
 			searchAccessibilityLabel={_('Search')}
 			clearAccessibilityLabel={_('Clear search')}
