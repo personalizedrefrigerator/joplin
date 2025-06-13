@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { AccessibilityInfo, FlatList, NativeSyntheticEvent, Platform, Role, StyleSheet, View, ViewProps, ViewStyle } from 'react-native';
+import { AccessibilityInfo, FlatList, NativeSyntheticEvent, Platform, Role, StyleSheet, useWindowDimensions, View, ViewProps, ViewStyle } from 'react-native';
 import { TouchableRipple, Text, Searchbar } from 'react-native-paper';
 import { connect } from 'react-redux';
 import { AppState } from '../utils/types';
@@ -114,9 +114,11 @@ const useSelectedIndex = (search: string, searchResults: Option[]) => {
 	return { selectedIndex, onNextResult, onPreviousResult };
 };
 
-const menuItemHeight = 48;
 const useStyles = (themeId: number) => {
-	return React.useMemo(() => {
+	const { fontScale } = useWindowDimensions();
+	const menuItemHeight = 48 * fontScale;
+
+	const styles = React.useMemo(() => {
 		const theme = themeStyle(themeId);
 		const borderRadius = 15;
 		return StyleSheet.create({
@@ -140,33 +142,35 @@ const useStyles = (themeId: number) => {
 				flexGrow: 1,
 				flexShrink: 1,
 			},
-			tagIcon: {
+			optionIcon: {
 				color: theme.color,
 				fontSize: theme.fontSize,
 				width: 30,
 				paddingLeft: 4,
 				paddingRight: 4,
 			},
-			tagLabel: {
+			optionLabel: {
 				fontSize: theme.fontSize,
 				color: theme.color,
 				paddingInlineStart: 6,
 			},
-			menuItemContent: {
+			optionContent: {
 				flexDirection: 'row',
 				paddingRight: theme.marginRight,
 				paddingLeft: theme.marginLeft,
 				height: menuItemHeight,
 				alignItems: 'center',
 			},
-			menuItemContentSelected: {
+			optionContentSelected: {
 				backgroundColor: theme.selectedColor,
 			},
 		});
-	}, [themeId]);
+	}, [themeId, menuItemHeight]);
+
+	return { menuItemHeight, styles };
 };
 
-type Styles = ReturnType<typeof useStyles>;
+type Styles = ReturnType<typeof useStyles>['styles'];
 
 interface SearchResultProps {
 	text: string;
@@ -179,16 +183,16 @@ const SearchResult: React.FC<SearchResultProps> = ({
 	text, styles, selected, icon: iconName,
 }) => {
 	const icon = iconName ? <Icon
-		style={styles.tagIcon}
+		style={styles.optionIcon}
 		name={iconName}
 		// Description is provided by adjacent text
 		accessibilityLabel={null}
-	/> : <View style={styles.tagIcon}/>;
+	/> : <View style={styles.optionIcon}/>;
 
 	return (
-		<View style={[styles.menuItemContent, selected && styles.menuItemContentSelected]}>
+		<View style={[styles.optionContent, selected && styles.optionContentSelected]}>
 			{icon}
-			<Text style={styles.tagLabel}>{text}</Text>
+			<Text style={styles.optionLabel}>{text}</Text>
 		</View>
 	);
 };
@@ -229,7 +233,7 @@ const useSearchResultWrapper = (
 const ComboBox: React.FC<Props> = ({
 	themeId, items, onItemSelected: propsOnItemSelected, placeholder, onAddItem, canAddItem, style: rootStyle,
 }) => {
-	const styles = useStyles(themeId);
+	const { styles, menuItemHeight } = useStyles(themeId);
 	const [search, setSearch] = useState('');
 
 	const results = useSearchResults({
