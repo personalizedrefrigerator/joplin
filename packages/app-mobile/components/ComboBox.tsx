@@ -16,11 +16,13 @@ interface Option {
 	onPress?: ()=> void;
 }
 
+type OnItemSelected = (item: Option)=> void;
+
 interface BaseProps {
 	themeId: number;
 	items: Option[];
 	placeholder: string;
-	onItemSelected: (item: Option)=> void;
+	onItemSelected: OnItemSelected;
 	style: ViewStyle;
 }
 
@@ -170,12 +172,11 @@ interface SearchResultProps {
 	text: string;
 	icon: string;
 	selected: boolean;
-	onPress: ()=> void;
 	styles: Styles;
 }
 
 const SearchResult: React.FC<SearchResultProps> = ({
-	text, onPress, styles, selected, icon: iconName, ...rest
+	text, styles, selected, icon: iconName,
 }) => {
 	const icon = iconName ? <Icon
 		style={styles.tagIcon}
@@ -184,19 +185,12 @@ const SearchResult: React.FC<SearchResultProps> = ({
 		accessibilityLabel={null}
 	/> : <View style={styles.tagIcon}/>;
 
-	return <TouchableRipple
-		onPress={onPress}
-		// On web, focus is controlled using the arrow keys. On other
-		// platforms, arrow key navigation is not available and each item
-		// needs to be focusable
-		tabIndex={Platform.OS === 'web' ? -1 : undefined}
-		{...rest}
-	>
+	return (
 		<View style={[styles.menuItemContent, selected && styles.menuItemContentSelected]}>
 			{icon}
 			<Text style={styles.tagLabel}>{text}</Text>
 		</View>
-	</TouchableRipple>;
+	);
 };
 
 interface ResultWrapperProps extends ViewProps {
@@ -205,17 +199,29 @@ interface ResultWrapperProps extends ViewProps {
 }
 
 const useSearchResultWrapper = (
-	selectedIndex: number, baseId: string, resultCount: number,
+	onItemSelected: OnItemSelected,
+	selectedIndex: number,
+	baseId: string,
+	resultCount: number,
 ): React.FC<ResultWrapperProps> => {
-	return useMemo(() => ({ index, item, ...rest }) => (
-		<View
+	const onItemSelectedRef = useRef(onItemSelected);
+	onItemSelectedRef.current = onItemSelected;
+
+	// For the correct accessibility structure, the `TouchableRipple`s need to be siblings.
+	return useMemo(() => ({ index, item, children, ...rest }) => (
+		<TouchableRipple
 			{...rest}
-			role='menuitem'
+			onPress={() => { onItemSelectedRef.current(item); }}
+			// On web, focus is controlled using the arrow keys. On other
+			// platforms, arrow key navigation is not available and each item
+			// needs to be focusable
+			tabIndex={Platform.OS === 'web' ? -1 : undefined}
+			role={Platform.OS === 'web' ? 'option' : 'menuitem'}
 			aria-selected={index === selectedIndex}
-			nativeID={`${baseId}-${item.title}`}
+			nativeID={`${baseId}-${index}`}
 			aria-setsize={resultCount}
 			aria-posinset={index + 1}
-		/>
+		><View>{children}</View></TouchableRipple>
 	), [selectedIndex, baseId, resultCount]);
 };
 
@@ -257,20 +263,19 @@ const ComboBox: React.FC<Props> = ({
 	}, []);
 
 	const baseId = useId();
-	const SearchResultWrapper = useSearchResultWrapper(selectedIndex, baseId, results.length);
+	const SearchResultWrapper = useSearchResultWrapper(
+		onItemSelected, selectedIndex, baseId, results.length,
+	);
 
 	type RenderEvent = { item: Option; index: number };
 	const renderItem = useCallback(({ item, index }: RenderEvent) => {
 		return <SearchResult
 			text={item.title}
-			onPress={() => {
-				onItemSelected(item);
-			}}
 			styles={styles}
 			selected={index === selectedIndex}
 			icon={item.icon ?? ''}
 		/>;
-	}, [selectedIndex, onItemSelected, styles]);
+	}, [selectedIndex, styles]);
 
 	// For now, onKeyPress only works on web.
 	// See https://github.com/react-native-community/discussions-and-proposals/issues/249
@@ -295,6 +300,7 @@ const ComboBox: React.FC<Props> = ({
 	const webProps = {
 		onKeyDown: onKeyPress,
 	};
+	const activeId = `${baseId}-${selectedIndex}`;
 	return <View style={[styles.root, rootStyle]} {...webProps}>
 		<Searchbar
 			style={styles.searchInputContainer}
@@ -306,7 +312,7 @@ const ComboBox: React.FC<Props> = ({
 			placeholder={placeholder}
 			searchAccessibilityLabel={_('Search')}
 			clearAccessibilityLabel={_('Clear search')}
-			aria-activedescendant={`${baseId}-${selectedIndex}`}
+			aria-activedescendant={activeId}
 			aria-controls={`menuBox-${baseId}`}
 		/>
 		<FlatList
@@ -319,7 +325,7 @@ const ComboBox: React.FC<Props> = ({
 			// A better role would be 'listbox', but that isn't supported by RN.
 			role={Platform.OS === 'web' ? 'listbox' as Role : 'menu'}
 			aria-setsize={results.length}
-			aria-activedescendant={`${baseId}-${selectedIndex}`}
+			aria-activedescendant={activeId}
 			nativeID={`menuBox-${baseId}`}
 
 			style={styles.searchResults}
