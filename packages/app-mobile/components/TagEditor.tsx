@@ -170,7 +170,7 @@ const TagEditor: React.FC<Props> = props => {
 		<ComboBox
 			items={comboBoxItems}
 			onItemSelected={onComboBoxSelect}
-			onAddItem={props.onAddTag}
+			onAddItem={onAddTag}
 			canAddItem={onCanAddTag}
 			style={styles.tagSearch}
 			placeholder={_('Search for tags...')}

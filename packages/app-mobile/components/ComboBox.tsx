@@ -117,9 +117,9 @@ const useSelectedIndex = (search: string, searchResults: Option[]) => {
 const useStyles = (themeId: number) => {
 	const { fontScale } = useWindowDimensions();
 	const menuItemHeight = 44 * fontScale;
+	const theme = themeStyle(themeId);
 
 	const styles = React.useMemo(() => {
-		const theme = themeStyle(themeId);
 		const borderRadius = 15;
 		return StyleSheet.create({
 			root: {
@@ -138,7 +138,6 @@ const useStyles = (themeId: number) => {
 			},
 			searchInput: {
 				minHeight: menuItemHeight,
-				color: theme.color,
 			},
 			searchResults: {
 				flexGrow: 1,
@@ -167,9 +166,20 @@ const useStyles = (themeId: number) => {
 				backgroundColor: theme.selectedColor,
 			},
 		});
-	}, [themeId, menuItemHeight]);
+	}, [theme, menuItemHeight]);
 
-	return { menuItemHeight, styles };
+	const searchInputColors = useMemo(() => {
+		return {
+			colors: {
+				// Input text
+				onSurfaceVariant: theme.color,
+				// Placeholder
+				onSurface: theme.colorFaded,
+			},
+		};
+	}, [theme]);
+
+	return { menuItemHeight, styles, searchInputColors };
 };
 
 type Styles = ReturnType<typeof useStyles>['styles'];
@@ -235,7 +245,7 @@ const useSearchResultWrapper = (
 const ComboBox: React.FC<Props> = ({
 	themeId, items, onItemSelected: propsOnItemSelected, placeholder, onAddItem, canAddItem, style: rootStyle,
 }) => {
-	const { styles, menuItemHeight } = useStyles(themeId);
+	const { styles, searchInputColors, menuItemHeight } = useStyles(themeId);
 	const [search, setSearch] = useState('');
 
 	const results = useSearchResults({
@@ -318,6 +328,7 @@ const ComboBox: React.FC<Props> = ({
 		<Searchbar
 			style={styles.searchInputContainer}
 			inputStyle={styles.searchInput}
+			theme={searchInputColors}
 			value={search}
 			mode='view'
 			onChangeText={setSearch}
