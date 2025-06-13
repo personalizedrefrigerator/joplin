@@ -134,9 +134,11 @@ const useStyles = (themeId: number) => {
 				borderRadius,
 				borderBottomLeftRadius: 0,
 				borderBottomRightRadius: 0,
+				backgroundColor: theme.backgroundColor,
 			},
 			searchInput: {
 				minHeight: menuItemHeight,
+				color: theme.color,
 			},
 			searchResults: {
 				flexGrow: 1,

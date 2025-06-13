@@ -6,7 +6,6 @@ import { themeStyle } from './global-style';
 import ComboBox from './ComboBox';
 import IconButton from './IconButton';
 import { useCallback, useMemo } from 'react';
-import { Divider } from 'react-native-paper';
 import { TagEntity } from '@joplin/lib/services/database/types';
 import { connect } from 'react-redux';
 import { AppState } from '../utils/types';
@@ -39,8 +38,8 @@ const useStyles = (themeId: number) => {
 			},
 			removeTagButton: {
 				color: theme.color3,
-				fontSize: theme.fontSize,
-				padding: 8,
+				fontSize: theme.fontSizeLarge,
+				padding: 3,
 			},
 			tagBoxRoot: {
 				flexDirection: 'column',
@@ -64,6 +63,7 @@ const useStyles = (themeId: number) => {
 			header: {
 				...theme.headerStyle,
 				fontSize: theme.fontSize,
+				marginBottom: theme.itemMarginTop,
 			},
 			divider: {
 				marginVertical: theme.margin,
@@ -91,7 +91,7 @@ const TagCard: React.FC<TagChipProps> = props => {
 		<IconButton
 			themeId={props.themeId}
 			description={_('Remove %s', props.title)}
-			iconName='fas fa-times'
+			iconName='fas fa-times-circle'
 			iconStyle={props.styles.removeTagButton}
 			onPress={props.onRemove}
 		/>
@@ -157,7 +157,7 @@ const TagEditor: React.FC<Props> = props => {
 			tags={props.tags}
 			onRemoveTag={props.onRemoveTag}
 		/>
-		<Divider style={styles.divider}/>
+		<View style={styles.divider}/>
 		<Text style={styles.header} role='heading'>{_('Add tags')}</Text>
 		<ComboBox
 			items={comboBoxItems}
