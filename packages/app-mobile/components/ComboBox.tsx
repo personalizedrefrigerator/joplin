@@ -232,7 +232,7 @@ const useSearchResultWrapper = (
 			// platforms, arrow key navigation is not available and each item
 			// needs to be focusable
 			tabIndex={Platform.OS === 'web' ? -1 : undefined}
-			role={Platform.OS === 'web' ? 'option' : 'menuitem'}
+			role={Platform.OS === 'web' ? 'option' : 'button'}
 			aria-selected={index === selectedIndex}
 			nativeID={`${baseId}-${index}`}
 			aria-setsize={resultCount}
@@ -348,7 +348,7 @@ const ComboBox: React.FC<Props> = ({
 			})}
 			CellRendererComponent={SearchResultWrapper}
 			// A better role would be 'listbox', but that isn't supported by RN.
-			role={Platform.OS === 'web' ? 'listbox' as Role : 'menu'}
+			role={Platform.OS === 'web' ? 'listbox' as Role : undefined}
 			aria-setsize={results.length}
 			aria-activedescendant={activeId}
 			nativeID={`menuBox-${baseId}`}
