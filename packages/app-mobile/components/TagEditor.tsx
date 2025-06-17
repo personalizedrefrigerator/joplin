@@ -25,7 +25,7 @@ const useStyles = (themeId: number) => {
 		return StyleSheet.create({
 			tag: {
 				borderRadius: 16,
-				paddingInlineStart: 8,
+				paddingStart: 8,
 				backgroundColor: theme.backgroundColor3,
 				color: theme.color3,
 				flexDirection: 'row',
