@@ -231,6 +231,7 @@ const useSearchResultWrapper = (
 			accessibilityHint={item.accessibilityHint}
 			aria-selected={index === selectedIndex}
 			nativeID={`${baseId}-${index}`}
+			testID={`search-result-${index}`}
 			aria-setsize={resultCount}
 			aria-posinset={index + 1}
 		><View>{children}</View></TouchableRipple>

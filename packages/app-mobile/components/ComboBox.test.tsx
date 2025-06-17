@@ -41,7 +41,7 @@ const getSearchInput = () => {
 	return screen.getByPlaceholderText('Test combobox');
 };
 const getSearchResults = () => {
-	return screen.getAllByRole('menuitem');
+	return screen.getAllByTestId(/^search-result-/);
 };
 
 describe('ComboBox', () => {
@@ -51,7 +51,7 @@ describe('ComboBox', () => {
 			{ title: 'test 2' },
 			{ title: 'test 3' },
 		];
-		render(
+		const { unmount } = render(
 			<WrappedComboBox
 				items={testItems}
 			/>,
@@ -59,5 +59,7 @@ describe('ComboBox', () => {
 
 		expect(getSearchInput()).toHaveTextContent('');
 		expect(getSearchResults()).toHaveLength(3);
+
+		unmount();
 	});
 });
