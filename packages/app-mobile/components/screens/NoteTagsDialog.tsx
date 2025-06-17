@@ -7,6 +7,8 @@ import { AppState } from '../../utils/types';
 import { TagEntity } from '@joplin/lib/services/database/types';
 import TagEditor from '../TagEditor';
 import { _ } from '@joplin/lib/locale';
+import { useCallback, useEffect, useState } from 'react';
+import useAsyncEffect from '@joplin/lib/hooks/useAsyncEffect';
 
 interface Props {
 	themeId: number;
@@ -15,84 +17,68 @@ interface Props {
 	tags: TagEntity[];
 }
 
-interface State {
-	noteId: string|null;
-	savingTags: boolean;
-	noteTags: string[];
-}
+const NoteTagsDialogComponent: React.FC<Props> = props => {
+	const [noteId, setNoteId] = useState(props.noteId);
+	const [savingTags, setSavingTags] = useState(false);
+	const [noteTags, setNoteTags] = useState<string[]>([]);
 
-class NoteTagsDialogComponent extends React.Component<Props, State> {
-	public constructor(props: Props) {
-		super(props);
-		this.state = {
-			noteId: null,
-			savingTags: false,
-			noteTags: [],
-		};
-	}
+	useEffect(() => {
+		if (props.noteId) setNoteId(props.noteId);
+	}, [props.noteId]);
 
-	private okButton_press = async () => {
-		this.setState({ savingTags: true });
+	const onOkayPress = useCallback(async () => {
+		setSavingTags(true);
 
 		try {
-			await Tag.setNoteTagsByTitles(this.state.noteId, this.state.noteTags);
+			await Tag.setNoteTagsByTitles(noteId, noteTags);
 		} finally {
-			this.setState({ savingTags: false });
+			setSavingTags(false);
 		}
 
-		if (this.props.onCloseRequested) this.props.onCloseRequested();
-	};
+		props.onCloseRequested?.();
+	}, [props.onCloseRequested, noteId, noteTags]);
 
-	private cancelButton_press = () => {
-		if (this.props.onCloseRequested) this.props.onCloseRequested();
-	};
+	const onCancelPress = useCallback(() => {
+		props.onCloseRequested?.();
+	}, [props.onCloseRequested]);
 
-	public override UNSAFE_componentWillMount() {
-		const noteId = this.props.noteId;
-		this.setState({ noteId: noteId });
-		void this.loadNoteTags(noteId);
-	}
-
-	private async loadNoteTags(noteId: string) {
+	useAsyncEffect(async (event) => {
 		const tags = await Tag.tagsByNoteId(noteId);
 		const noteTags = tags.map(t => t.title);
+		if (!event.cancelled) {
+			setNoteTags(noteTags);
+		}
+	}, [noteId]);
 
-		this.setState({ noteTags: noteTags });
-	}
+	const onAddTag = useCallback((tag: string) => {
+		setNoteTags(oldTags => {
+			return oldTags.includes(tag) ? oldTags : [...oldTags, tag];
+		});
+	}, []);
 
-	private onAddTag_ = (tag: string) => {
-		this.setState(state => ({
-			noteTags: !state.noteTags.includes(tag) ? [...state.noteTags, tag] : state.noteTags,
-		}));
-	};
+	const onRemoveTag = useCallback((tag: string) => {
+		setNoteTags(oldTags => {
+			return oldTags.filter(other => other !== tag);
+		});
+	}, []);
 
-	private onRemoveTag_ = (tag: string) => {
-		this.setState(state => ({
-			noteTags: state.noteTags.filter(other => other !== tag),
-		}));
-	};
-
-
-	public override render() {
-		const allTags = this.state.noteTags;
-		return <ModalDialog
-			themeId={this.props.themeId}
-			onOkPress={this.okButton_press}
-			onCancelPress={this.cancelButton_press}
-			buttonBarEnabled={!this.state.savingTags}
-			okTitle={_('Apply')}
-			cancelTitle={_('Cancel')}
-		>
-			<TagEditor
-				themeId={this.props.themeId}
-				tags={allTags}
-				onRemoveTag={this.onRemoveTag_}
-				style={{ flex: 1 }}
-				onAddTag={this.onAddTag_}
-			/>
-		</ModalDialog>;
-	}
-}
+	return <ModalDialog
+		themeId={props.themeId}
+		onOkPress={onOkayPress}
+		onCancelPress={onCancelPress}
+		buttonBarEnabled={!savingTags}
+		okTitle={_('Apply')}
+		cancelTitle={_('Cancel')}
+	>
+		<TagEditor
+			themeId={props.themeId}
+			tags={noteTags}
+			onRemoveTag={onRemoveTag}
+			style={{ flex: 1 }}
+			onAddTag={onAddTag}
+		/>
+	</ModalDialog>;
+};
 
 const NoteTagsDialog = connect((state: AppState) => {
 	return {
