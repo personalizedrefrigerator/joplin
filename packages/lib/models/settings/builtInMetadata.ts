@@ -349,6 +349,37 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 			label: () => _('Joplin Server password'),
 			secure: true,
 		},
+		'sync.11.path': {
+			value: '',
+			type: SettingItemType.String,
+			section: 'sync',
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
+			show: (settings: any) => {
+				return settings['sync.target'] === SyncTargetRegistry.nameToId('joplinServerSaml');
+			},
+			public: true,
+			label: () => _('Joplin Server URL'),
+			description: () => emptyDirWarning,
+			storage: SettingStorage.File,
+		},
+		'sync.11.userContentPath': {
+			value: '',
+			type: SettingItemType.String,
+			public: false,
+			storage: SettingStorage.Database,
+		},
+		'sync.11.id': {
+			value: '',
+			type: SettingItemType.String,
+			public: false,
+			storage: SettingStorage.Database,
+		},
+		'sync.11.userId': {
+			value: '',
+			type: SettingItemType.String,
+			public: false,
+			storage: SettingStorage.Database,
+		},
 
 		// Although sync.10.path is essentially a constant, we still define
 		// it here so that both Joplin Server and Joplin Cloud can be
@@ -433,6 +464,7 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 		'sync.8.context': { value: '', type: SettingItemType.String, public: false },
 		'sync.9.context': { value: '', type: SettingItemType.String, public: false },
 		'sync.10.context': { value: '', type: SettingItemType.String, public: false },
+		'sync.11.context': { value: '', type: SettingItemType.String, public: false },
 
 		'sync.maxConcurrentConnections': { value: 5, type: SettingItemType.Int, storage: SettingStorage.File, isGlobal: true, public: true, advanced: true, section: 'sync', label: () => _('Max concurrent connections'), minimum: 1, maximum: 20, step: 1 },
 
@@ -1152,6 +1184,17 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 			isGlobal: true,
 			subType: SettingItemSubType.MonospaceFontFamily,
 		},
+		'style.viewer.fontFamily': {
+			value: '',
+			type: SettingItemType.String,
+			public: true,
+			appTypes: [AppType.Desktop],
+			section: 'appearance',
+			label: () => _('Viewer and Rich Text Editor font family'),
+			storage: SettingStorage.File,
+			isGlobal: true,
+			subType: SettingItemSubType.FontFamily,
+		},
 
 		'style.editor.contentMaxWidth': { value: 0, type: SettingItemType.Int, public: true, storage: SettingStorage.File, isGlobal: true, appTypes: [AppType.Desktop], section: 'appearance', label: () => _('Editor maximum width'), description: () => _('Set it to 0 to make it take the complete available space. Recommended width is 600.') },
 
@@ -1447,6 +1490,7 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 						SyncTargetRegistry.nameToId('nextcloud'),
 						SyncTargetRegistry.nameToId('webdav'),
 						SyncTargetRegistry.nameToId('joplinServer'),
+						SyncTargetRegistry.nameToId('joplinServerSaml'),
 						// Needs to be enabled for Joplin Cloud too because
 						// some companies filter all traffic and swap TLS
 						// certificates, which result in error
@@ -1532,7 +1576,7 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 			type: SettingItemType.Int,
 			public: true,
 			minimum: 1,
-			maximum: 365 * 2,
+			maximum: 99999,
 			step: 1,
 			unitLabel: (value: number = null) => {
 				return value === null ? _('days') : _n('%d day', '%d days', value, value);
