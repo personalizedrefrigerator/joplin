@@ -2,9 +2,12 @@ import * as React from 'react';
 import { render, screen } from '@testing-library/react-native';
 import createMockReduxStore from '../utils/testing/createMockReduxStore';
 import TestProviderStack from './testing/TestProviderStack';
-import ComboBox from './ComboBox';
+import ComboBox, { Option } from './ComboBox';
+import { useMemo } from 'react';
 
-interface Item { title: string }
+interface Item {
+	title: string;
+}
 
 interface WrapperProps {
 	items: Item[];
@@ -16,9 +19,17 @@ const WrappedComboBox: React.FC<WrapperProps> = ({
 	items,
 	onItemSelected = jest.fn(),
 }: WrapperProps) => {
+	const mappedItems = useMemo(() => {
+		return items.map((item): Option => ({
+			title: item.title,
+			icon: undefined,
+			accessibilityHint: undefined,
+		}));
+	}, [items]);
+
 	return <TestProviderStack store={store}>
 		<ComboBox
-			items={items}
+			items={mappedItems}
 			style={{}}
 			onItemSelected={onItemSelected}
 			placeholder={'Test combobox'}

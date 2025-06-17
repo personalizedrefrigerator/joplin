@@ -134,9 +134,14 @@ const TagEditor: React.FC<Props> = props => {
 		return props.allTags
 			// Exclude tags already associated with the note
 			.filter(tag => !props.tags.includes(tag.title))
-			.map(tag => ({
-				title: tag.title ?? 'Untitled',
-			}));
+			.map(tag => {
+				const title = tag.title ?? 'Untitled';
+				return {
+					title,
+					icon: 'fas fa-tag',
+					accessibilityHint: _('Adds tag'),
+				};
+			});
 	}, [props.tags, props.allTags]);
 
 	const onAddTag = useCallback((title: string) => {

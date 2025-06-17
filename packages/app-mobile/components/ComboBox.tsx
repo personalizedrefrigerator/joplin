@@ -1,18 +1,19 @@
 import * as React from 'react';
 import { AccessibilityInfo, FlatList, NativeSyntheticEvent, Platform, Role, StyleSheet, useWindowDimensions, View, ViewProps, ViewStyle } from 'react-native';
-import { TouchableRipple, Text, Searchbar } from 'react-native-paper';
+import { TouchableRipple, Text } from 'react-native-paper';
 import { connect } from 'react-redux';
 import { AppState } from '../utils/types';
 import { themeStyle } from './global-style';
 import Icon from './Icon';
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
 import { _ } from '@joplin/lib/locale';
+import SearchInput from './SearchInput';
 const naturalCompare = require('string-natural-compare');
 
-interface Option {
-	id?: string;
+export interface Option {
 	title: string;
-	icon?: string;
+	icon: string|undefined;
+	accessibilityHint: string|undefined;
 	onPress?: ()=> void;
 }
 
@@ -80,6 +81,7 @@ const useSearchResults = ({ search, setSearch, options, onAddItem, canAddItem }:
 			{
 				title: _('Add new'),
 				icon: 'fas fa-plus',
+				accessibilityHint: undefined,
 				onPress: () => {
 					addCurrentSearch.current?.();
 				},
@@ -135,6 +137,8 @@ const useStyles = (themeId: number) => {
 				borderBottomLeftRadius: 0,
 				borderBottomRightRadius: 0,
 				backgroundColor: theme.backgroundColor,
+				borderBottomColor: theme.dividerColor,
+				borderBottomWidth: 1,
 			},
 			searchInput: {
 				minHeight: menuItemHeight,
@@ -168,18 +172,7 @@ const useStyles = (themeId: number) => {
 		});
 	}, [theme, menuItemHeight]);
 
-	const searchInputColors = useMemo(() => {
-		return {
-			colors: {
-				// Input text
-				onSurfaceVariant: theme.color,
-				// Placeholder
-				onSurface: theme.colorFaded,
-			},
-		};
-	}, [theme]);
-
-	return { menuItemHeight, styles, searchInputColors };
+	return { menuItemHeight, styles };
 };
 
 type Styles = ReturnType<typeof useStyles>['styles'];
@@ -204,7 +197,9 @@ const SearchResult: React.FC<SearchResultProps> = ({
 	return (
 		<View style={[styles.optionContent, selected && styles.optionContentSelected]}>
 			{icon}
-			<Text style={styles.optionLabel}>{text}</Text>
+			<Text
+				style={styles.optionLabel}
+			>{text}</Text>
 		</View>
 	);
 };
@@ -233,6 +228,7 @@ const useSearchResultWrapper = (
 			// needs to be focusable
 			tabIndex={Platform.OS === 'web' ? -1 : undefined}
 			role={Platform.OS === 'web' ? 'option' : 'button'}
+			accessibilityHint={item.accessibilityHint}
 			aria-selected={index === selectedIndex}
 			nativeID={`${baseId}-${index}`}
 			aria-setsize={resultCount}
@@ -245,7 +241,7 @@ const useSearchResultWrapper = (
 const ComboBox: React.FC<Props> = ({
 	themeId, items, onItemSelected: propsOnItemSelected, placeholder, onAddItem, canAddItem, style: rootStyle,
 }) => {
-	const { styles, searchInputColors, menuItemHeight } = useStyles(themeId);
+	const { styles, menuItemHeight } = useStyles(themeId);
 	const [search, setSearch] = useState('');
 
 	const results = useSearchResults({
@@ -325,18 +321,15 @@ const ComboBox: React.FC<Props> = ({
 	};
 	const activeId = `${baseId}-${selectedIndex}`;
 	return <View style={[styles.root, rootStyle]} {...webProps}>
-		<Searchbar
-			style={styles.searchInputContainer}
-			inputStyle={styles.searchInput}
-			theme={searchInputColors}
+		<SearchInput
+			themeId={themeId}
+			containerStyle={styles.searchInputContainer}
+			style={styles.searchInput}
 			value={search}
-			mode='view'
 			onChangeText={setSearch}
 			onKeyPress={onKeyPress}
 			onSubmitEditing={onSubmit}
 			placeholder={placeholder}
-			searchAccessibilityLabel={_('Search')}
-			clearAccessibilityLabel={_('Clear search')}
 			aria-activedescendant={activeId}
 			aria-controls={`menuBox-${baseId}`}
 		/>

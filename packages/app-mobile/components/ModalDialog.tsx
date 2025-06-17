@@ -5,6 +5,7 @@ import { themeStyle } from './global-style';
 
 import Modal from './Modal';
 import { PrimaryButton, SecondaryButton } from './buttons';
+import { _ } from '@joplin/lib/locale';
 
 interface Props {
 	themeId: number;
@@ -45,6 +46,10 @@ const useStyles = (themeId: number) => {
 				gap: theme.margin,
 				marginTop: theme.marginTop,
 			},
+			// Ensures that screen-reader-only headings have size (necessary for focusing/reading them).
+			invisibleHeading: {
+				flexGrow: 1,
+			},
 		});
 	}, [themeId]);
 };
@@ -63,6 +68,14 @@ const ModalDialog: React.FC<Props> = props => {
 		>
 			<View style={styles.contentWrapper}>{props.children}</View>
 			<View style={styles.buttonRow}>
+				<View
+					// This heading makes it easier for screen readers to jump to the
+					// actions list. Without a heading here, it can be difficult to locate the "ok" and "cancel"
+					// buttons.
+					role='heading'
+					aria-label={_('Actions')}
+					style={styles.invisibleHeading}
+				/>
 				<SecondaryButton disabled={!props.buttonBarEnabled} onPress={props.onCancelPress}>{props.cancelTitle}</SecondaryButton>
 				<PrimaryButton disabled={!props.buttonBarEnabled} onPress={props.onOkPress}>{props.okTitle}</PrimaryButton>
 			</View>

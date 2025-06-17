@@ -679,6 +679,7 @@ packages/app-mobile/components/ScreenHeader/WarningBanner.js
 packages/app-mobile/components/ScreenHeader/WarningBox.js
 packages/app-mobile/components/ScreenHeader/WebBetaButton.js
 packages/app-mobile/components/ScreenHeader/index.js
+packages/app-mobile/components/SearchInput.js
 packages/app-mobile/components/SelectDateTimeDialog.js
 packages/app-mobile/components/SideMenu.js
 packages/app-mobile/components/SideMenuContentNote.js
