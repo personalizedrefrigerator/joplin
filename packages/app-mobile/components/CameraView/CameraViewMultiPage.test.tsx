@@ -6,7 +6,6 @@ import { Store } from 'redux';
 import { AppState } from '../../utils/types';
 import TestProviderStack from '../testing/TestProviderStack';
 import createMockReduxStore from '../../utils/testing/createMockReduxStore';
-import '@testing-library/jest-native/extend-expect';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react-native';
 import { startCamera, takePhoto } from './utils/testing';
 
