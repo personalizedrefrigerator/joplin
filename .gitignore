@@ -1614,6 +1614,7 @@ packages/tools/checkIgnoredFiles.js
 packages/tools/checkLibPaths.test.js
 packages/tools/checkLibPaths.js
 packages/tools/convertThemesToCss.js
+packages/tools/fuzzer/sync-fuzzer.js
 packages/tools/generate-database-types.js
 packages/tools/generate-images.js
 packages/tools/git-changelog.test.js
