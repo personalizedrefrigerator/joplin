@@ -3,12 +3,10 @@ import * as React from 'react';
 import { StyleSheet, View, Text, ScrollView, ViewStyle } from 'react-native';
 import { _ } from '@joplin/lib/locale';
 import { themeStyle } from './global-style';
-import ComboBox from './ComboBox';
+import ComboBox, { Option } from './ComboBox';
 import IconButton from './IconButton';
 import { useCallback, useMemo } from 'react';
 import { TagEntity } from '@joplin/lib/services/database/types';
-import { connect } from 'react-redux';
-import { AppState } from '../utils/types';
 
 interface Props {
 	themeId: number;
@@ -75,6 +73,10 @@ const useStyles = (themeId: number) => {
 				flexBasis: 240,
 				flexShrink: 1,
 			},
+			noTagsLabel: {
+				fontSize: theme.fontSize,
+				color: theme.colorFaded,
+			},
 		});
 	}, [themeId]);
 };
@@ -109,10 +111,9 @@ interface TagsBoxProps {
 }
 
 const TagsBox: React.FC<TagsBoxProps> = props => {
-	return <View style={props.styles.tagBoxRoot}>
-		<Text style={props.styles.header} role='heading'>{_('Associated tags:')}</Text>
-		<ScrollView style={props.styles.tagBoxScrollView} contentContainerStyle={props.styles.tagBoxContent}>
-			{props.tags.map(tag => (
+	const renderContent = () => {
+		if (props.tags.length) {
+			return props.tags.map(tag => (
 				<TagCard
 					key={`tag-${tag}`}
 					title={tag}
@@ -120,7 +121,22 @@ const TagsBox: React.FC<TagsBoxProps> = props => {
 					themeId={props.themeId}
 					onRemove={() => props.onRemoveTag(tag)}
 				/>
-			))}
+			));
+		} else {
+			return <Text
+				style={props.styles.noTagsLabel}
+			>{_('No tags')}</Text>;
+		}
+
+	};
+
+	return <View style={props.styles.tagBoxRoot}>
+		<Text style={props.styles.header} role='heading'>{_('Associated tags:')}</Text>
+		<ScrollView
+			style={props.styles.tagBoxScrollView}
+			contentContainerStyle={props.styles.tagBoxContent}
+		>
+			{renderContent()}
 		</ScrollView>
 	</View>;
 };
@@ -134,11 +150,11 @@ const TagEditor: React.FC<Props> = props => {
 		return props.allTags
 			// Exclude tags already associated with the note
 			.filter(tag => !props.tags.includes(tag.title))
-			.map(tag => {
+			.map((tag): Option => {
 				const title = tag.title ?? 'Untitled';
 				return {
 					title,
-					icon: 'fas fa-tag',
+					icon: null,
 					accessibilityHint: _('Adds tag'),
 				};
 			});
@@ -178,11 +194,9 @@ const TagEditor: React.FC<Props> = props => {
 			onAddItem={onAddTag}
 			canAddItem={onCanAddTag}
 			style={styles.tagSearch}
-			placeholder={_('Search for tags...')}
+			placeholder={_('Search tags')}
 		/>
 	</View>;
 };
 
-export default connect((state: AppState) => ({
-	allTags: state.tags,
-}))(TagEditor);
+export default TagEditor;

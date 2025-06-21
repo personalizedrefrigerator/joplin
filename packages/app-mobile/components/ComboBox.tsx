@@ -97,7 +97,8 @@ const useSelectedIndex = (search: string, searchResults: Option[]) => {
 		if (search) {
 			setSelectedIndex(0);
 		} else {
-			setSelectedIndex(-1);
+			const hasResults = !!searchResults.length;
+			setSelectedIndex(hasResults ? 0 : -1);
 		}
 	}, [searchResults, search]);
 
@@ -122,14 +123,11 @@ const useStyles = (themeId: number) => {
 	const theme = themeStyle(themeId);
 
 	const styles = React.useMemo(() => {
-		const borderRadius = 15;
+		const borderRadius = 18;
 		return StyleSheet.create({
 			root: {
 				height: 200,
 				flexDirection: 'column',
-				borderColor: theme.dividerColor,
-				borderWidth: 1,
-				borderRadius,
 				overflow: 'hidden',
 			},
 			searchInputContainer: {
@@ -137,8 +135,8 @@ const useStyles = (themeId: number) => {
 				borderBottomLeftRadius: 0,
 				borderBottomRightRadius: 0,
 				backgroundColor: theme.backgroundColor,
-				borderBottomColor: theme.dividerColor,
-				borderBottomWidth: 1,
+				borderColor: theme.dividerColor,
+				borderWidth: 1,
 			},
 			searchInput: {
 				minHeight: menuItemHeight,
@@ -146,6 +144,11 @@ const useStyles = (themeId: number) => {
 			searchResults: {
 				flexGrow: 1,
 				flexShrink: 1,
+				borderColor: theme.dividerColor,
+				borderWidth: 1,
+				borderTopWidth: 0,
+				borderBottomLeftRadius: borderRadius,
+				borderBottomRightRadius: borderRadius,
 			},
 			optionIcon: {
 				color: theme.color,
@@ -209,7 +212,7 @@ interface ResultWrapperProps extends ViewProps {
 	item: Option;
 }
 
-const useSearchResultWrapper = (
+const useSearchResultContainerComponent = (
 	onItemSelected: OnItemSelected,
 	selectedIndex: number,
 	baseId: string,
@@ -276,7 +279,7 @@ const ComboBox: React.FC<Props> = ({
 	}, []);
 
 	const baseId = useId();
-	const SearchResultWrapper = useSearchResultWrapper(
+	const SearchResultWrapper = useSearchResultContainerComponent(
 		onItemSelected, selectedIndex, baseId, results.length,
 	);
 

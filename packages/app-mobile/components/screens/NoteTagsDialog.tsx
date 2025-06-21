@@ -73,6 +73,7 @@ const NoteTagsDialogComponent: React.FC<Props> = props => {
 		<TagEditor
 			themeId={props.themeId}
 			tags={noteTags}
+			allTags={props.tags}
 			onRemoveTag={onRemoveTag}
 			style={{ flex: 1 }}
 			onAddTag={onAddTag}

@@ -14,7 +14,7 @@ interface SearchInputProps extends TextInputProps {
 	containerStyle: ViewStyle;
 }
 
-const useStyles = (themeId: number) => {
+const useStyles = (themeId: number, hasContent: boolean) => {
 	return useMemo(() => {
 		const theme = themeStyle(themeId);
 		return StyleSheet.create({
@@ -32,12 +32,15 @@ const useStyles = (themeId: number) => {
 				paddingTop: 0,
 				paddingBottom: 0,
 			},
+			closeButton: hasContent ? {} : {
+				opacity: 0,
+			},
 		});
-	}, [themeId]);
+	}, [themeId, hasContent]);
 };
 
 const SearchInput: React.FC<SearchInputProps> = ({ themeId, value, containerStyle, style, onChangeText, ...rest }) => {
-	const styles = useStyles(themeId);
+	const styles = useStyles(themeId, !!value);
 
 	const onClear = useCallback(() => {
 		onChangeText('');
@@ -62,6 +65,7 @@ const SearchInput: React.FC<SearchInputProps> = ({ themeId, value, containerStyl
 			onPress={onClear}
 			accessibilityLabel={_('Clear search')}
 			disabled={value.length === 0}
+			style={styles.closeButton}
 		/>
 	</View>;
 };

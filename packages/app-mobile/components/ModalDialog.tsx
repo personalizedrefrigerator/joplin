@@ -4,8 +4,9 @@ import { View, StyleSheet } from 'react-native';
 import { themeStyle } from './global-style';
 
 import Modal from './Modal';
-import { PrimaryButton, SecondaryButton } from './buttons';
+import { PrimaryButton } from './buttons';
 import { _ } from '@joplin/lib/locale';
+import { Button } from 'react-native-paper';
 
 interface Props {
 	themeId: number;
@@ -76,7 +77,7 @@ const ModalDialog: React.FC<Props> = props => {
 					aria-label={_('Actions')}
 					style={styles.invisibleHeading}
 				/>
-				<SecondaryButton disabled={!props.buttonBarEnabled} onPress={props.onCancelPress}>{props.cancelTitle}</SecondaryButton>
+				<Button disabled={!props.buttonBarEnabled} onPress={props.onCancelPress}>{props.cancelTitle}</Button>
 				<PrimaryButton disabled={!props.buttonBarEnabled} onPress={props.onOkPress}>{props.okTitle}</PrimaryButton>
 			</View>
 		</Modal>

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { render, screen } from '@testing-library/react-native';
+import { fireEvent, render, screen } from '@testing-library/react-native';
 import createMockReduxStore from '../utils/testing/createMockReduxStore';
 import TestProviderStack from './testing/TestProviderStack';
 import ComboBox, { Option } from './ComboBox';
@@ -59,6 +59,29 @@ describe('ComboBox', () => {
 
 		expect(getSearchInput()).toHaveTextContent('');
 		expect(getSearchResults()).toHaveLength(3);
+
+		// Manually unmounting prevents a warning
+		unmount();
+	});
+
+	test('changing the search query should limit which items are visible', () => {
+		const testItems = [
+			{ title: 'a' },
+			{ title: 'b' },
+			{ title: 'c' },
+			{ title: 'aa' },
+		];
+		const { unmount } = render(
+			<WrappedComboBox items={testItems}/>,
+		);
+
+		expect(getSearchResults()).toHaveLength(4);
+		fireEvent.changeText(getSearchInput(), 'a');
+
+		const updatedResults = getSearchResults();
+		expect(updatedResults[0]).toHaveTextContent('a');
+		expect(updatedResults[1]).toHaveTextContent('aa');
+		expect(updatedResults).toHaveLength(2);
 
 		unmount();
 	});
