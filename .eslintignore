@@ -122,8 +122,11 @@ packages/app-cli/app/command-rmnote.test.js
 packages/app-cli/app/command-rmnote.js
 packages/app-cli/app/command-set.js
 packages/app-cli/app/command-settingschema.js
+packages/app-cli/app/command-share.test.js
+packages/app-cli/app/command-share.js
 packages/app-cli/app/command-sync.js
 packages/app-cli/app/command-testing.js
+packages/app-cli/app/command-unshare.js
 packages/app-cli/app/command-use.js
 packages/app-cli/app/command-version.js
 packages/app-cli/app/gui/FolderListWidget.js

@@ -76,6 +76,12 @@ class Application extends BaseApplication {
 		}
 	}
 
+	public async loadItemOrFail(type: ModelType | 'folderOrNote', pattern: string) {
+		const output = await this.loadItem(type, pattern);
+		if (!output) throw new Error(_('Cannot find "%s".', pattern));
+		return output;
+	}
+
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	public async loadItems(type: ModelType | 'folderOrNote', pattern: string, options: any = null): Promise<(FolderEntity | NoteEntity)[]> {
 		if (type === 'folderOrNote') {
