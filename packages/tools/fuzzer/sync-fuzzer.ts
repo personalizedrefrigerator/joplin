@@ -53,7 +53,9 @@ const packagesDir = dirname(dirname(__dirname));
 const cliDirectory = join(packagesDir, 'app-cli');
 
 interface ActionableClient {
-	createFolder(data: FolderMetadata, parent?: string|null): Promise<void>;
+	createFolder(data: FolderMetadata, parent: string|null): Promise<void>;
+	deleteFolder(id: string): Promise<void>;
+	createNote(data: NoteData, parent: string|null): Promise<void>;
 	sync(): Promise<void>;
 }
 
@@ -179,11 +181,16 @@ class Client implements ActionableClient {
 		});
 	}
 
-	public async trashFolder(idOrTitle: string) {
-		await this.execCliCommand('rmbook', '--force', idOrTitle);
+	public async createNote(note: NoteData, parentId: string|null) {
+		await this.execApiCommand('POST', '/folders', {
+			id: note.id,
+			title: note.title,
+			body: note.body,
+			parent_id: parentId ?? '',
+		});
 	}
 
-	public async permanentDeleteFolder(idOrTitle: string) {
+	public async deleteFolder(idOrTitle: string) {
 		await this.execCliCommand('rmbook', '--permanent', '--force', idOrTitle);
 	}
 
@@ -222,48 +229,53 @@ type FolderMetadata = { id: string; title: string; sharedWith: string[] };
 type FolderData = FolderMetadata & {
 	children: (NoteData|FolderData)[];
 };
+type TreeItem = NoteData|FolderData;
+
+const isFolder = (item: TreeItem): item is FolderData => {
+	return 'children' in item;
+};
 
 class ActionTracker implements ActionableClient {
 	private tree_: FolderData[] = [];
 	public constructor(private target_: ActionableClient) {}
 
-	private reduceTree_<T>(
-		reducer: (current: FolderData|NoteData, last: T)=> T,
-		initial: T,
-	) {
-		const reduceTree = (tree: (FolderData|NoteData)[], initial: T) => {
-			let result: T = initial;
-			for (const item of tree) {
-				result = reducer(item, result);
+	private findFolder_(predicate: (item: TreeItem)=> boolean) {
+		if (!this.tree_.length) return null;
 
-				if ('children' in item) {
-					result = reduceTree(item.children, result);
+		const stack: TreeItem[] = [this.tree_[0]];
+		while (stack.length) {
+			const current = stack.pop();
+			if (predicate(current)) {
+				return current;
+			}
+
+			if (isFolder(current)) {
+				for (let i = current.children.length - 1; i >= 0; i--) {
+					stack.push(current.children[i]);
 				}
 			}
-			return result;
-		};
-		return reduceTree(this.tree_, initial);
+		}
+
+		return null;
 	}
 
-	private findFolder_(titleOrId: string) {
-		return this.reduceTree_<FolderData>((item, match) => {
-			if (match) return match;
+	private findFolderWithId_(titleOrId: string) {
+		return this.findFolder_(item => {
+			return isFolder(item) && (item.title === titleOrId || item.id === titleOrId);
+		}) as FolderData|null;
+	}
 
-			const matchingTitleOrId = item.title === titleOrId || item.id === titleOrId;
-			if (matchingTitleOrId && 'children' in item) {
-				return item;
-			}
-
-			return null;
-		}, null);
+	private findFolderContaining_(titleOrId: string) {
+		return this.findFolder_(item => {
+			return isFolder(item) && item.children.some(child => child.title === titleOrId || child.id === titleOrId);
+		}) as FolderData|null;
 	}
 
 	public async createFolder(data: FolderMetadata, parent?: string | null): Promise<void> {
 		logger.info('Create folder', data.title);
 		await this.target_.createFolder(data, parent);
 
-		const modelParent = parent && this.findFolder_(parent);
-
+		const modelParent = parent && this.findFolderWithId_(parent);
 		const newFolder: FolderData = {
 			...data,
 			children: [],
@@ -273,6 +285,39 @@ class ActionTracker implements ActionableClient {
 			modelParent.children.push(newFolder);
 		} else {
 			this.tree_.push(newFolder);
+		}
+	}
+
+	public async createNote(data: NoteData, parent: string | null): Promise<void> {
+		logger.info('Create note', data.title);
+		await this.target_.createNote(data, parent);
+
+		const modelParent = parent && this.findFolderWithId_(parent);
+		const newNote: NoteData = {
+			...data,
+		};
+		if (modelParent) {
+			modelParent.children.push(newNote);
+		} else {
+			throw new Error(`No suitable parent for note with parent ${parent} found.`);
+		}
+	}
+
+	public async deleteFolder(titleOrId: string): Promise<void> {
+		logger.info('Delete folder', titleOrId);
+		await this.target_.deleteFolder(titleOrId);
+		const parentFolder = this.findFolderContaining_(titleOrId);
+
+		const filter = (child: TreeItem) => child.id !== titleOrId && child.title !== titleOrId;
+		if (parentFolder) {
+			parentFolder.children = parentFolder.children.filter(filter);
+		} else {
+			const originalLength = this.tree_.length;
+			this.tree_ = this.tree_.filter(filter);
+
+			if (this.tree_.length === originalLength) {
+				throw new Error(`No folder found with title/ID ${titleOrId} in model. Cannot delete.`);
+			}
 		}
 	}
 
@@ -397,6 +442,14 @@ const main = async () => {
 				title: 'Test...',
 				sharedWith: [],
 			}, folder1Id);
+			await client.actionTracker.createNote({
+				title: 'Test',
+				body: 'Testing...',
+				id: uuid.create(),
+			}, folder1Id);
+			await client.actionTracker.sync();
+
+			await client.actionTracker.deleteFolder(folder1Id);
 			await client.actionTracker.sync();
 		}
 	} catch (error) {
