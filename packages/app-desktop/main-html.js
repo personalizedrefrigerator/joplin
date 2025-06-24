@@ -33,6 +33,7 @@ const initLib = require('@joplin/lib/initLib').default;
 const pdfJs = require('pdfjs-dist');
 const { isAppleSilicon } = require('is-apple-silicon');
 require('@sentry/electron/renderer');
+require('source-map-support').install();
 
 // Allows components to use React as a global
 window.React = React;

@@ -196,6 +196,7 @@
     "reselect": "4.1.8",
     "roboto-fontface": "0.10.0",
     "smalltalk": "2.5.1",
+    "source-map-support": "0.5.21",
     "styled-components": "5.3.11",
     "styled-system": "5.1.5",
     "taboverride": "4.0.3",
