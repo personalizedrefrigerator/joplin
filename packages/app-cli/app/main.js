@@ -81,6 +81,26 @@ initLib(logger);
 
 const application = app();
 
+shim.showMessageBox = async (message, options) => {
+	let answers = options.buttons ?? [_('Ok'), _('Cancel')];
+
+	if (options.type === 'error' || options.type === 'info') {
+		answers = [];
+	}
+
+	message += answers.length ? `(${answers.join(', ')})` : '';
+
+	const answer = await application.gui().prompt(options.title ?? '', `${message} `, { answers });
+
+	if (answers.includes(answer)) {
+		return answers.indexOf(answer);
+	} else if (answer) {
+		return answers.findIndex(a => a.startsWith(answer));
+	}
+
+	return -1;
+};
+
 if (process.platform === 'win32') {
 	const rl = require('readline').createInterface({
 		input: process.stdin,

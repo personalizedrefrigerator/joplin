@@ -48,6 +48,7 @@ describe('command-share', () => {
 
 		const { command } = setUpCommand();
 		await command.action({
+			'command': 'add',
 			'notebook': 'folder1',
 			'user': 'test@localhost',
 			options: {},
