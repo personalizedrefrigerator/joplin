@@ -196,7 +196,6 @@
     "reselect": "4.1.8",
     "roboto-fontface": "0.10.0",
     "smalltalk": "2.5.1",
-    "source-map-support": "0.5.21",
     "styled-components": "5.3.11",
     "styled-system": "5.1.5",
     "taboverride": "4.0.3",
@@ -204,7 +203,8 @@
     "tinymce": "6.8.5",
     "ts-jest": "29.1.5",
     "ts-node": "10.9.2",
-    "typescript": "5.4.5"
+    "typescript": "5.4.5",
+    "@cspotcode/source-map-support": "0.8.1"
   },
   "dependencies": {
     "@electron/remote": "2.1.2",
