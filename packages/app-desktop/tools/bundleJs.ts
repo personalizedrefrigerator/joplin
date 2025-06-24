@@ -15,6 +15,7 @@ const makeBuildContext = (entryPoint: string, renderer: boolean, computeFileSize
 		keepNames: true,
 		format: 'iife', // Immediately invoked function expression
 		sourcemap: true,
+		sourcesContent: false, // Do not embed full source file content in the .map file
 		metafile: computeFileSizeStats,
 		platform: 'node',
 		target: ['node20.0'],
