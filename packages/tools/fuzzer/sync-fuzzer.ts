@@ -89,46 +89,54 @@ class Client implements ActionableClient {
 			await context.execApi('DELETE', userRoute, {});
 		};
 
-		const userData = {
-			email: getStringProperty(apiOutput, 'email'),
-			password,
-		};
+		try {
+			const userData = {
+				email: getStringProperty(apiOutput, 'email'),
+				password,
+			};
 
-		assert.equal(email, userData.email);
+			assert.equal(email, userData.email);
 
-		const apiToken = createSecureRandom();
-		const apiPort = await ClipperServer.instance().findAvailablePort();
+			const apiToken = createSecureRandom();
+			const apiPort = await ClipperServer.instance().findAvailablePort();
 
-		const client = new Client(
-			userData,
-			profileDirectory,
-			apiPort,
-			apiToken,
-			closeAccount,
-		);
+			const client = new Client(
+				userData,
+				profileDirectory,
+				apiPort,
+				apiToken,
+				closeAccount,
+			);
 
-		// Joplin Server sync
-		await client.execCliCommand('config', 'sync.target', '9');
-		await client.execCliCommand('config', 'sync.9.path', context.serverUrl);
-		await client.execCliCommand('config', 'sync.9.username', userData.email);
-		await client.execCliCommand('config', 'sync.9.password', userData.password);
-		await client.execCliCommand('config', 'api.token', apiToken);
-		await client.execCliCommand('config', 'api.port', String(apiPort));
-		logger.info('Created and configured client');
+			// Joplin Server sync
+			await client.execCliCommand('config', 'sync.target', '9');
+			await client.execCliCommand('config', 'sync.9.path', context.serverUrl);
+			await client.execCliCommand('config', 'sync.9.username', userData.email);
+			await client.execCliCommand('config', 'sync.9.password', userData.password);
+			await client.execCliCommand('config', 'api.token', apiToken);
+			await client.execCliCommand('config', 'api.port', String(apiPort));
 
-		// Run asynchronously -- the API server command doesn't exit until the server
-		// is closed.
-		void (async () => {
-			try {
-				await client.execCliCommand('server', 'start');
-			} catch (error) {
-				logger.info('API server exited');
-				logger.debug('API server exit status', error);
-			}
-		})();
+			const e2eePassword = createSecureRandom().replace(/^-/, '_');
+			await client.execCliCommand('e2ee', 'enable', '--password', e2eePassword);
+			logger.info('Created and configured client');
 
-		await client.sync();
-		return client;
+			// Run asynchronously -- the API server command doesn't exit until the server
+			// is closed.
+			void (async () => {
+				try {
+					await client.execCliCommand('server', 'start');
+				} catch (error) {
+					logger.info('API server exited');
+					logger.debug('API server exit status', error);
+				}
+			})();
+
+			await client.sync();
+			return client;
+		} catch (error) {
+			await closeAccount();
+			throw error;
+		}
 	}
 
 	private constructor(
@@ -207,6 +215,7 @@ class Client implements ActionableClient {
 		assert.strictEqual(
 			(await this.execCliCommand('cat', note.id)).stdout,
 			`${note.title}\n\n${note.body}`,
+			'note should exist',
 		);
 	}
 
@@ -219,6 +228,7 @@ class Client implements ActionableClient {
 		await this.execCliCommand('share', 'add', id, shareWith.email);
 		await this.sync();
 		await shareWith.sync();
+
 		const shareWithIncoming = JSON.parse((await shareWith.execCliCommand('share', 'list', '--json')).stdout);
 		const pendingInvitations = shareWithIncoming.invitations.filter((invitation: unknown) => {
 			if (typeof invitation !== 'object' || !('accepted' in invitation)) {
@@ -236,7 +246,8 @@ class Client implements ActionableClient {
 					email: this.email,
 				},
 			},
-		]);
+		], 'there should be a single incoming share from the expected user');
+
 		await shareWith.execCliCommand('share', 'accept', id);
 	}
 
