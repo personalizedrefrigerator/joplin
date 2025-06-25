@@ -217,6 +217,7 @@ class Client implements ActionableClient {
 	}
 
 	public async createFolder(folder: FolderMetadata) {
+		logger.info('Create folder', folder.id, 'in', this.email);
 		await this.tracker_.createFolder(folder);
 
 		await this.execApiCommand('POST', '/folders', {
@@ -227,6 +228,7 @@ class Client implements ActionableClient {
 	}
 
 	public async createNote(note: NoteData) {
+		logger.info('Create note', note.id, 'in', this.email);
 		await this.tracker_.createNote(note);
 
 		await this.execApiCommand('POST', '/notes', {
@@ -375,6 +377,34 @@ class ActionTracker {
 	private tree_: Map<string, ItemId[]> = new Map();
 	public constructor() {}
 
+	private checkRep_() {
+		const checkItem = (itemId: ItemId) => {
+			const item = this.idToItem_.get(itemId);
+			assert.ok(!!item, `should find item with ID ${itemId}`);
+
+			if (item.parentId) {
+				assert.ok(this.idToItem_.has(item.parentId), `should find parent (id: ${item.parentId})`);
+			}
+
+			if (isFolder(item)) {
+				for (const childId of item.childIds) {
+					checkItem(childId);
+				}
+			}
+		};
+
+		for (const childIds of this.tree_.keys()) {
+			for (const childId of childIds) {
+				assert.ok(this.idToItem_.has(childId), `root item ${childId} should exist`);
+
+				const item = this.idToItem_.get(childId);
+				assert.equal(item.parentId, '', `${childId} should not have a parent`);
+
+				checkItem(childId);
+			}
+		}
+	}
+
 	public track(client: { email: string }) {
 		const clientId = client.email;
 		this.tree_.set(clientId, []);
@@ -394,6 +424,24 @@ class ActionTracker {
 				childIds: updateFn(parent.childIds),
 			});
 		};
+		const addRootItem = (itemId: ItemId) => {
+			this.tree_.set(clientId, [...this.tree_.get(clientId), itemId]);
+		};
+		const removeRootItem = (itemId: ItemId) => {
+			let removed = false;
+			// Check each client -- if shared, a root item can be present in multiple
+			// clients:
+			for (const [clientId, previous] of this.tree_) {
+				if (previous.includes(itemId)) {
+					this.tree_.set(clientId, previous.filter(otherId => otherId !== itemId));
+					removed = true;
+				}
+			}
+
+			if (!removed) {
+				throw new Error(`Not a root item: ${itemId}`);
+			}
+		};
 		const addChild = (parentId: ItemId, childId: ItemId) => {
 			updateChildren(parentId, (oldChildren) => {
 				if (oldChildren.includes(childId)) return oldChildren;
@@ -402,28 +450,30 @@ class ActionTracker {
 		};
 		const removeChild = (parentId: ItemId, childId: ItemId) => {
 			updateChildren(parentId, (oldChildren) => {
-				return oldChildren.filter(other => other !== childId);
+				return oldChildren.filter(otherId => otherId !== childId);
 			});
 		};
 		const removeItemRecursive = (id: ItemId) => {
 			const item = this.idToItem_.get(id);
 			if (!item) throw new Error(`Item with ID ${id} not found.`);
 
-			removeChild(item.parentId, item.id);
+			if (item.parentId) {
+				removeChild(item.parentId, item.id);
+			} else {
+
+				removeRootItem(item.id);
+			}
+
 			if (isFolder(item)) {
 				for (const childId of item.childIds) {
+					const child = this.idToItem_.get(childId);
+					assert.equal(child?.parentId, id, `child ${childId} should have accurate parent ID`);
+
 					removeItemRecursive(childId);
 				}
 			}
 
 			this.idToItem_.delete(id);
-		};
-		const addRootItem = (itemId: ItemId) => {
-			this.tree_.set(clientId, [...this.tree_.get(clientId), itemId]);
-		};
-		const removeRootItem = (itemId: ItemId) => {
-			const previous = this.tree_.get(clientId);
-			this.tree_.set(clientId, previous.filter(otherId => otherId !== itemId));
 		};
 		const mapItems = <T> (map: (item: TreeItem)=> T) => {
 			const workList: ItemId[] = [...this.tree_.get(clientId)];
@@ -447,9 +497,20 @@ class ActionTracker {
 		};
 
 		const tracker: ActionableClient = {
+			createNote: (data: NoteData) => {
+				this.idToItem_.set(data.id, {
+					...data,
+				});
+				assert.ok(!!data.parentId, `note ${data.id} should have a parentId`);
+				addChild(data.parentId, data.id);
+
+				this.checkRep_();
+				return Promise.resolve();
+			},
 			createFolder: (data: FolderMetadata) => {
 				this.idToItem_.set(data.id, {
 					...data,
+					parentId: data.parentId ?? '',
 					childIds: getChildIds(data.id),
 				});
 				if (data.parentId) {
@@ -458,27 +519,19 @@ class ActionTracker {
 					addRootItem(data.id);
 				}
 
+				this.checkRep_();
 				return Promise.resolve();
 			},
 			deleteFolder: (id: ItemId) => {
+				this.checkRep_();
+
 				const item = this.idToItem_.get(id);
 				if (!item) throw new Error(`Not found ${id}`);
 				if (!isFolder(item)) throw new Error(`Not a folder ${id}`);
 
-				if (item.parentId) {
-					removeItemRecursive(id);
-				} else {
-					removeRootItem(id);
-				}
+				removeItemRecursive(id);
 
-				return Promise.resolve();
-			},
-			createNote: (data: NoteData) => {
-				this.idToItem_.set(data.id, {
-					...data,
-				});
-				addChild(data.parentId, data.id);
-
+				this.checkRep_();
 				return Promise.resolve();
 			},
 			shareFolder: (id: ItemId, shareWith: Client) => {
@@ -488,6 +541,7 @@ class ActionTracker {
 				}
 				this.tree_.set(shareWith.email, [...otherFolders, id]);
 
+				this.checkRep_();
 				return Promise.resolve();
 			},
 			sync: () => Promise.resolve(),
@@ -495,6 +549,8 @@ class ActionTracker {
 				const notes = mapItems(item => {
 					return isFolder(item) ? null : item;
 				}).filter(item => !!item);
+
+				this.checkRep_();
 				return Promise.resolve(notes);
 			},
 		};
