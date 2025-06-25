@@ -10,6 +10,7 @@ import { ShareUserStatus } from '@joplin/lib/services/share/reducer';
 import Folder from '@joplin/lib/models/Folder';
 import invitationRespond from '@joplin/lib/services/share/invitationRespond';
 import CommandService from '@joplin/lib/services/CommandService';
+import { substrWithEllipsis } from '@joplin/lib/string-utils';
 
 const logger = Logger.create('command-share');
 
@@ -20,6 +21,7 @@ type Args = {
 	user?: string;
 	options: {
 		'read-only'?: boolean;
+		json?: boolean;
 	};
 };
 
@@ -37,12 +39,17 @@ class Command extends BaseCommand {
 	public options() {
 		return [
 			['--read-only', _('Don\'t allow the share recipient to write to the shared notebook. Valid only for the `add` subcommand.')],
+			['--json', _('Prefer JSON output.')],
 		];
 	}
 
 	public async action(args: Args) {
 		const cancelCounter = this.cancelCounter_;
 		const cancelled = () => cancelCounter !== this.cancelCounter_;
+
+		const folderTitle = (folder: FolderEntity|null) => {
+			return folder ? substrWithEllipsis(folder.title, 0, 32) : _('[None]');
+		};
 
 		const commandShareAdd = async (folder: FolderEntity, email: string) => {
 			await reg.waitForSyncFinishedThenSync();
@@ -111,55 +118,103 @@ class Command extends BaseCommand {
 				folder = await app().loadItemOrFail(ModelType.Folder, args.notebook);
 			}
 
-			await ShareService.instance().refreshShares();
+			await ShareService.instance().maintenance();
 			if (cancelled()) return;
 
 			if (folder) {
-				this.stdout(_('Folder "%s" is shared with:', folder.title));
+				const share = getShareFromFolderId(folder.id);
+				await ShareService.instance().refreshShareUsers(share.id);
+
 				const shareUsers = getShareUsers(folder.id);
-				for (const user of shareUsers) {
-					this.stdout(`${user.user.email}\t(${user.can_write ? _('Can write') : _('Read-only')})`);
+				const output = {
+					folderTitle: folderTitle(folder),
+					sharedWith: (shareUsers ?? []).map(user => ({
+						email: user.user.email,
+						readOnly: user.can_read && !user.can_write,
+					})),
+				};
+
+				if (args.options.json) {
+					this.stdout(JSON.stringify(output));
+				} else {
+					this.stdout(_('Folder "%s" is shared with:', output.folderTitle));
+					for (const user of output.sharedWith) {
+						this.stdout(`\t${user.email}\t${user.readOnly ? _('(Read-only)') : ''}`);
+					}
 				}
 			} else {
-				this.stdout(_('Incoming shares:'));
-
 				const shareState = getShareState();
-				let loggedShare = false;
-				for (const invitation of shareState.shareInvitations) {
-					let status = '';
-					if (invitation.status === ShareUserStatus.Waiting) {
-						status = _('Waiting');
-					} else if (invitation.status === ShareUserStatus.Accepted) {
-						status = _('Accepted');
+				const output = {
+					invitations: shareState.shareInvitations.map(invitation => ({
+						accepted: invitation.status === ShareUserStatus.Accepted,
+						waiting: invitation.status === ShareUserStatus.Waiting,
+						rejected: invitation.status === ShareUserStatus.Rejected,
+						folderId: invitation.share.folder_id,
+						fromUser: {
+							email: invitation.share.user?.email,
+						},
+					})),
+					shares: shareState.shares.map(share => ({
+						isFolder: !!share.folder_id,
+						isNote: !!share.note_id,
+						itemId: share.folder_id ?? share.note_id,
+						fromUser: {
+							email: share.user?.email,
+						},
+					})),
+				};
+
+				if (args.options.json) {
+					this.stdout(JSON.stringify(output));
+				} else {
+					this.stdout(_('Incoming shares:'));
+					let loggedInvitation = false;
+					for (const invitation of output.invitations) {
+						let message;
+						if (invitation.waiting) {
+							message = _('Waiting: Notebook %s from %s', invitation.folderId, invitation.fromUser.email);
+						}
+						if (invitation.accepted) {
+							const folder = await Folder.load(invitation.folderId);
+							message = _('Accepted: Notebook %s from %s', folderTitle(folder), invitation.fromUser.email);
+						}
+
+						if (message) {
+							this.stdout(`\t${message}`);
+							loggedInvitation = true;
+						}
+					}
+					if (!loggedInvitation) {
+						this.stdout(`\t${_('None')}`);
 					}
 
-					if (status) {
-						this.stdout(`\t${_('%s: Folder %s from %s', status, invitation.share.folder_id, invitation.share.user?.email)}`);
-						loggedShare = true;
+					this.stdout(_('All shared folders:'));
+					if (output.shares.length) {
+						for (const share of output.shares) {
+							let title;
+							if (share.isFolder) {
+								title = folderTitle(await Folder.load(share.itemId));
+							} else {
+								title = share.itemId;
+							}
+
+							if (share.fromUser?.email) {
+								this.stdout(`\t${_('%s from %s', title, share.fromUser?.email)}`);
+							} else {
+								this.stdout(`\t${title} - ${share.itemId}`);
+							}
+						}
+					} else {
+						this.stdout(`\t${_('None')}`);
 					}
-				}
-
-				if (!loggedShare) {
-					this.stdout(`\t${_('No incoming shares')}`);
-				}
-
-				this.stdout(_('All shared folders:'));
-				let loggedSharedFolder = false;
-				for (const share of shareState.shares) {
-					if (!share.folder_id) continue;
-
-					const folder = await Folder.load(share.folder_id);
-					this.stdout(`\t${_('%s from %s', folder?.title ?? 'Unknown', share.user?.email)}`);
-					loggedSharedFolder = true;
-				}
-
-				if (!loggedSharedFolder) {
-					this.stdout(`\t${_('No shared folders')}`);
 				}
 			}
 		};
 
 		const commandShareAcceptOrReject = async (folderId: string, accept: boolean) => {
+			await ShareService.instance().maintenance();
+			if (cancelled()) return;
+
 			const shareState = getShareState();
 			const invitation = shareState.shareInvitations.find(invitation => {
 				return invitation.share.folder_id === folderId;
@@ -185,6 +240,10 @@ class Command extends BaseCommand {
 
 		if (args.command === 'leave') {
 			const folder = args.notebook ? await app().loadItemOrFail(ModelType.Folder, args.notebook) : null;
+
+			await ShareService.instance().maintenance();
+			if (cancelled()) return;
+
 			return CommandService.instance().execute('leaveSharedFolder', folder.id);
 		}
 
