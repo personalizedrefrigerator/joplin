@@ -8,6 +8,7 @@ import * as execa from 'execa';
 import { msleep } from '@joplin/utils/time';
 import Setting, { Env } from '@joplin/lib/models/Setting';
 import Logger, { TargetType } from '@joplin/utils/Logger';
+import { waitForCliInput } from '@joplin/utils/cli';
 const { shimInit } = require('@joplin/lib/shim-init-node');
 
 const globalLogger = new Logger();
@@ -18,7 +19,7 @@ const logger = Logger.create('fuzzer');
 // See https://www.typescriptlang.org/play/?#example/recursive-type-references
 type Json = string|number|Json[]|{ [key: string]: Json };
 
-type HttpMethod = 'GET'|'POST'|'PUT'|'PATCH';
+type HttpMethod = 'GET'|'POST'|'DELETE'|'PUT'|'PATCH';
 
 interface FuzzContext {
 	serverUrl: string;
@@ -56,11 +57,13 @@ interface ActionableClient {
 	createFolder(data: FolderMetadata, parent: string|null): Promise<void>;
 	deleteFolder(id: string): Promise<void>;
 	createNote(data: NoteData, parent: string|null): Promise<void>;
+	shareFolder(id: string, shareWith: Client): Promise<void>;
 	sync(): Promise<void>;
 }
 
 class Client implements ActionableClient {
 	public readonly actionTracker = new ActionTracker(this);
+	public readonly email: string;
 
 	public static async create(context: FuzzContext) {
 		const id = uuid.create();
@@ -75,10 +78,16 @@ class Client implements ActionableClient {
 		const serverId = getStringProperty(apiOutput, 'id');
 
 		// The password needs to be set *after* creating the user.
-		await context.execApi('PATCH', `api/users/${encodeURIComponent(serverId)}`, {
+		const userRoute = `api/users/${encodeURIComponent(serverId)}`;
+		await context.execApi('PATCH', userRoute, {
 			email,
 			password,
+			email_confirmed: 1,
 		});
+
+		const closeAccount = async () => {
+			await context.execApi('DELETE', userRoute, {});
+		};
 
 		const userData = {
 			email: getStringProperty(apiOutput, 'email'),
@@ -91,9 +100,11 @@ class Client implements ActionableClient {
 		const apiPort = await ClipperServer.instance().findAvailablePort();
 
 		const client = new Client(
+			userData,
 			profileDirectory,
 			apiPort,
 			apiToken,
+			closeAccount,
 		);
 
 		// Joplin Server sync
@@ -121,13 +132,18 @@ class Client implements ActionableClient {
 	}
 
 	private constructor(
+		userData: UserData,
 		private readonly profileDirectory: string,
 		private readonly apiPort_: number,
 		private readonly apiToken_: string,
-	) { }
+		private readonly cleanUp_: ()=> Promise<void>,
+	) {
+		this.email = userData.email;
+	}
 
 	public async close() {
 		await this.execCliCommand('server', 'stop');
+		await this.cleanUp_();
 	}
 
 	public async execCliCommand(commandName: string, ...args: string[]) {
@@ -182,21 +198,51 @@ class Client implements ActionableClient {
 	}
 
 	public async createNote(note: NoteData, parentId: string|null) {
-		await this.execApiCommand('POST', '/folders', {
+		await this.execApiCommand('POST', '/notes', {
 			id: note.id,
 			title: note.title,
 			body: note.body,
 			parent_id: parentId ?? '',
 		});
+		assert.strictEqual(
+			(await this.execCliCommand('cat', note.id)).stdout,
+			`${note.title}\n\n${note.body}`,
+		);
 	}
 
 	public async deleteFolder(idOrTitle: string) {
 		await this.execCliCommand('rmbook', '--permanent', '--force', idOrTitle);
 	}
 
-//	public async shareFolder(id: string, shareWith: Client) {
-//		TODO(id, shareWith);
-//	}
+	public async shareFolder(id: string, shareWith: Client) {
+		logger.info('Share', id, 'with', shareWith.email);
+		await this.execCliCommand('share', 'add', id, shareWith.email);
+		await this.sync();
+		await shareWith.sync();
+		const shareWithIncoming = JSON.parse((await shareWith.execCliCommand('share', 'list', '--json')).stdout);
+		const pendingInvitations = shareWithIncoming.invitations.filter((invitation: unknown) => {
+			if (typeof invitation !== 'object' || !('accepted' in invitation)) {
+				throw new Error('Invalid invitation format');
+			}
+			return !invitation.accepted;
+		});
+		assert.deepStrictEqual(pendingInvitations, [
+			{
+				accepted: false,
+				waiting: true,
+				rejected: false,
+				folderId: id,
+				fromUser: {
+					email: this.email,
+				},
+			},
+		]);
+		await shareWith.execCliCommand('share', 'accept', id);
+	}
+
+	public checkState(_allClients: Client[]) {
+		// this.actionTracker.checkState(allClients);
+	}
 //
 //	public async unshareFolder(id: string) {
 //		TODO(id);
@@ -220,6 +266,11 @@ const createClientPool = async (
 		clients: clientPool,
 		randomClient: () => {
 			return clientPool[Math.floor(Math.random() * clientPool.length)];
+		},
+		checkState: () => {
+			for (const client of clientPool) {
+				client.checkState(clientPool);
+			}
 		},
 	};
 };
@@ -321,6 +372,13 @@ class ActionTracker implements ActionableClient {
 		}
 	}
 
+	public async shareFolder(id: string, shareWith: Client) {
+		await this.target_.shareFolder(id, shareWith);
+
+		const target = this.findFolderWithId_(id);
+		target.sharedWith = [...target.sharedWith, shareWith.email];
+	}
+
 	public async sync() {
 		logger.info('Sync');
 		await this.target_.sync();
@@ -382,6 +440,7 @@ const startServer = async (serverUrl: string, adminAuth: UserData) => {
 		},
 		close: async () => {
 			server.cancel();
+			logger.info('Closed the server.');
 		},
 	};
 };
@@ -431,29 +490,42 @@ const main = async () => {
 
 		for (let i = 0; i < 3; i++) {
 			const client = clientPool.randomClient();
+			const actionTracker = client.actionTracker;
 			const folder1Id = uuid.create();
-			await client.actionTracker.createFolder({
+			await actionTracker.createFolder({
 				id: folder1Id,
 				title: 'Test.',
 				sharedWith: [],
 			}, null);
-			await client.actionTracker.createFolder({
+			await actionTracker.createFolder({
 				id: uuid.create(),
 				title: 'Test...',
 				sharedWith: [],
 			}, folder1Id);
-			await client.actionTracker.createNote({
+			await actionTracker.createNote({
 				title: 'Test',
 				body: 'Testing...',
 				id: uuid.create(),
 			}, folder1Id);
-			await client.actionTracker.sync();
+			await actionTracker.sync();
+			clientPool.checkState();
 
-			await client.actionTracker.deleteFolder(folder1Id);
-			await client.actionTracker.sync();
+			const other = clientPool.randomClient();
+			if (other !== client) {
+				await actionTracker.shareFolder(folder1Id, other);
+				await actionTracker.sync();
+				await other.actionTracker.sync();
+				clientPool.checkState();
+			}
+
+			await actionTracker.deleteFolder(folder1Id);
+			await actionTracker.sync();
 		}
 	} catch (error) {
 		logger.error(error);
+		logger.info('An error occurred. Pausing before continuing cleanup.');
+		await waitForCliInput();
+		process.exitCode = 1;
 	} finally {
 		// Clean up more recent items first -- later items may depend on earlier
 		// items.
@@ -461,6 +533,9 @@ const main = async () => {
 		for (const task of cleanupTasks) {
 			await task();
 		}
+
+		logger.info('Cleanup complete');
+		process.exit();
 	}
 //	const randomClient = () => clientPool[Math.floor(Math.random() * clientPool.length)];
 //
