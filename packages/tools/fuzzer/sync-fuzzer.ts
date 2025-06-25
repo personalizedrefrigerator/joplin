@@ -3,7 +3,7 @@ import JoplinServerApi from '@joplin/lib/JoplinServerApi';
 import ClipperServer from '@joplin/lib/ClipperServer';
 import { dirname, join } from 'path';
 import { mkdir, remove } from 'fs-extra';
-import * as assert from 'assert';
+import { strict as assert } from 'assert';
 import * as execa from 'execa';
 import { msleep } from '@joplin/utils/time';
 import Setting, { Env } from '@joplin/lib/models/Setting';
@@ -25,6 +25,7 @@ interface FuzzContext {
 	serverUrl: string;
 	baseDir: string;
 	execApi: (method: HttpMethod, route: string, debugAction: Json)=> Promise<Json>;
+	actionTracker: ActionTracker;
 }
 
 interface UserData {
@@ -32,7 +33,8 @@ interface UserData {
 	password: string;
 }
 
-const getStringProperty = (object: unknown, propertyName: string) => {
+
+const getProperty = (object: unknown, propertyName: string) => {
 	if (typeof object !== 'object') {
 		throw new Error(`Cannot access property ${JSON.stringify(propertyName)} on non-object`);
 	}
@@ -41,12 +43,14 @@ const getStringProperty = (object: unknown, propertyName: string) => {
 		throw new Error(`No such property ${JSON.stringify(propertyName)} in object`);
 	}
 
-	const value = object[propertyName as keyof object];
+	return object[propertyName as keyof object];
+};
 
+const getStringProperty = (object: unknown, propertyName: string) => {
+	const value = getProperty(object, propertyName);
 	if (typeof value !== 'string') {
-		throw new Error('Property value is not a string');
+		throw new Error(`Property value is not a string (is ${typeof value})`);
 	}
-
 	return value;
 };
 
@@ -54,15 +58,15 @@ const packagesDir = dirname(dirname(__dirname));
 const cliDirectory = join(packagesDir, 'app-cli');
 
 interface ActionableClient {
-	createFolder(data: FolderMetadata, parent: string|null): Promise<void>;
+	createFolder(data: FolderMetadata): Promise<void>;
 	deleteFolder(id: string): Promise<void>;
-	createNote(data: NoteData, parent: string|null): Promise<void>;
+	createNote(data: NoteData): Promise<void>;
 	shareFolder(id: string, shareWith: Client): Promise<void>;
+	listNotes(): Promise<NoteData[]>;
 	sync(): Promise<void>;
 }
 
 class Client implements ActionableClient {
-	public readonly actionTracker = new ActionTracker(this);
 	public readonly email: string;
 
 	public static async create(context: FuzzContext) {
@@ -97,10 +101,11 @@ class Client implements ActionableClient {
 
 			assert.equal(email, userData.email);
 
-			const apiToken = createSecureRandom();
+			const apiToken = createSecureRandom().replace(/[-]/g, '_');
 			const apiPort = await ClipperServer.instance().findAvailablePort();
 
 			const client = new Client(
+				context.actionTracker.track({ email }),
 				userData,
 				profileDirectory,
 				apiPort,
@@ -140,6 +145,7 @@ class Client implements ActionableClient {
 	}
 
 	private constructor(
+		private readonly tracker_: ActionableClient,
 		userData: UserData,
 		private readonly profileDirectory: string,
 		private readonly apiPort_: number,
@@ -154,7 +160,7 @@ class Client implements ActionableClient {
 		await this.cleanUp_();
 	}
 
-	public async execCliCommand(commandName: string, ...args: string[]) {
+	private async execCliCommand(commandName: string, ...args: string[]) {
 		assert.match(commandName, /^[a-z]/, 'Command name must start with a lowercase letter.');
 		const commandResult = await execa('yarn', [
 			'run', 'start-no-build',
@@ -169,11 +175,11 @@ class Client implements ActionableClient {
 	}
 
 	// eslint-disable-next-line no-dupe-class-members -- This is not a duplicate class member
-	public async execApiCommand(method: 'GET', route: string): Promise<Json>;
+	private async execApiCommand(method: 'GET', route: string): Promise<Json>;
 	// eslint-disable-next-line no-dupe-class-members -- This is not a duplicate class member
-	public async execApiCommand(method: 'POST'|'PUT', route: string, data: Json): Promise<Json>;
+	private async execApiCommand(method: 'POST'|'PUT', route: string, data: Json): Promise<Json>;
 	// eslint-disable-next-line no-dupe-class-members -- This is not a duplicate class member
-	public async execApiCommand(method: HttpMethod, route: string, data: Json|null = null): Promise<Json> {
+	private async execApiCommand(method: HttpMethod, route: string, data: Json|null = null): Promise<Json> {
 		route = route.replace(/^[/]/, '');
 		const url = new URL(`http://localhost:${this.apiPort_}/${route}`);
 		url.searchParams.append('token', this.apiToken_);
@@ -190,40 +196,61 @@ class Client implements ActionableClient {
 		return await response.json();
 	}
 
+	private async decrypt() {
+		const result = await this.execCliCommand('e2ee', 'decrypt');
+		if (!result.stdout.includes('Completed decryption.')) {
+			throw new Error(`Decryption did not complete: ${result.stdout}`);
+		}
+	}
+
 	public async sync() {
+		logger.info('Sync', this.email);
+
+		await this.tracker_.sync();
+
 		const result = await this.execCliCommand('sync');
 		if (result.stdout.match(/Last error:/i)) {
 			throw new Error(`Sync failed: ${result.stdout}`);
 		}
+
+		await this.decrypt();
 	}
 
-	public async createFolder(folder: FolderMetadata, parentId: string|null) {
+	public async createFolder(folder: FolderMetadata) {
+		await this.tracker_.createFolder(folder);
+
 		await this.execApiCommand('POST', '/folders', {
 			id: folder.id,
 			title: folder.title,
-			parent_id: parentId ?? '',
+			parent_id: folder.parentId ?? '',
 		});
 	}
 
-	public async createNote(note: NoteData, parentId: string|null) {
+	public async createNote(note: NoteData) {
+		await this.tracker_.createNote(note);
+
 		await this.execApiCommand('POST', '/notes', {
 			id: note.id,
 			title: note.title,
 			body: note.body,
-			parent_id: parentId ?? '',
+			parent_id: note.parentId ?? '',
 		});
-		assert.strictEqual(
+		assert.equal(
 			(await this.execCliCommand('cat', note.id)).stdout,
 			`${note.title}\n\n${note.body}`,
 			'note should exist',
 		);
 	}
 
-	public async deleteFolder(idOrTitle: string) {
-		await this.execCliCommand('rmbook', '--permanent', '--force', idOrTitle);
+	public async deleteFolder(id: string) {
+		await this.tracker_.deleteFolder(id);
+
+		await this.execCliCommand('rmbook', '--permanent', '--force', id);
 	}
 
 	public async shareFolder(id: string, shareWith: Client) {
+		await this.tracker_.shareFolder(id, shareWith);
+
 		logger.info('Share', id, 'with', shareWith.email);
 		await this.execCliCommand('share', 'add', id, shareWith.email);
 		await this.sync();
@@ -236,7 +263,7 @@ class Client implements ActionableClient {
 			}
 			return !invitation.accepted;
 		});
-		assert.deepStrictEqual(pendingInvitations, [
+		assert.deepEqual(pendingInvitations, [
 			{
 				accepted: false,
 				waiting: true,
@@ -251,8 +278,53 @@ class Client implements ActionableClient {
 		await shareWith.execCliCommand('share', 'accept', id);
 	}
 
-	public checkState(_allClients: Client[]) {
-		// this.actionTracker.checkState(allClients);
+	public async listNotes() {
+		const notes: NoteData[] = [];
+		let page = 0;
+		let hasMore = true;
+		for (; hasMore; page++) {
+			const pageQuery = page === 0 ? '' : `&page=${page}`;
+			const fields = 'id,parent_id,body,title';
+			const response = await this.execApiCommand(
+				'GET', `/notes?fields=${fields}&include_deleted=1&limit=4${pageQuery}`,
+			);
+			if (
+				typeof response !== 'object'
+				|| !('has_more' in response)
+				|| !('items' in response)
+				|| !Array.isArray(response.items)
+			) {
+				throw new Error(`Invalid response: ${JSON.stringify(response)}`);
+			}
+			hasMore = !!response.has_more;
+
+			for (const item of response.items) {
+				notes.push({
+					id: getStringProperty(item, 'id'),
+					parentId: getStringProperty(item, 'parent_id'),
+					title: getStringProperty(item, 'title'),
+					body: getStringProperty(item, 'body'),
+				});
+			}
+		}
+
+		return notes;
+	}
+
+	public async checkState(_allClients: Client[]) {
+		logger.info('Check state', this.email);
+
+		const notes = [...await this.listNotes()];
+		const expectedNotes = [...await this.tracker_.listNotes()];
+
+		const compare = (a: NoteData, b: NoteData) => {
+			if (a.id === b.id) return 0;
+			return a.id < b.id ? -1 : 1;
+		};
+		notes.sort(compare);
+		expectedNotes.sort(compare);
+
+		assert.deepEqual(notes, expectedNotes);
 	}
 //
 //	public async unshareFolder(id: string) {
@@ -278,123 +350,156 @@ const createClientPool = async (
 		randomClient: () => {
 			return clientPool[Math.floor(Math.random() * clientPool.length)];
 		},
-		checkState: () => {
+		checkState: async () => {
 			for (const client of clientPool) {
-				client.checkState(clientPool);
+				await client.checkState(clientPool);
 			}
 		},
 	};
 };
 
-type NoteData = { id: string; title: string; body: string };
-type FolderMetadata = { id: string; title: string; sharedWith: string[] };
+type ItemId = string;
+type NoteData = { parentId: ItemId; id: ItemId; title: string; body: string };
+type FolderMetadata = { parentId: ItemId; id: ItemId; title: string };
 type FolderData = FolderMetadata & {
-	children: (NoteData|FolderData)[];
+	childIds: ItemId[];
 };
 type TreeItem = NoteData|FolderData;
 
 const isFolder = (item: TreeItem): item is FolderData => {
-	return 'children' in item;
+	return 'childIds' in item;
 };
 
-class ActionTracker implements ActionableClient {
-	private tree_: FolderData[] = [];
-	public constructor(private target_: ActionableClient) {}
+class ActionTracker {
+	private idToItem_: Map<ItemId, TreeItem> = new Map();
+	private tree_: Map<string, ItemId[]> = new Map();
+	public constructor() {}
 
-	private findFolder_(predicate: (item: TreeItem)=> boolean) {
-		if (!this.tree_.length) return null;
+	public track(client: { email: string }) {
+		const clientId = client.email;
+		this.tree_.set(clientId, []);
 
-		const stack: TreeItem[] = [this.tree_[0]];
-		while (stack.length) {
-			const current = stack.pop();
-			if (predicate(current)) {
-				return current;
-			}
+		const getChildIds = (itemId: ItemId) => {
+			const item = this.idToItem_.get(itemId);
+			if (!item || !isFolder(item)) return [];
+			return item.childIds;
+		};
+		const updateChildren = (parentId: ItemId, updateFn: (oldChildren: ItemId[])=> ItemId[]) => {
+			const parent = this.idToItem_.get(parentId);
+			if (!parent) throw new Error(`Parent with ID ${parentId} not found.`);
+			if (!isFolder(parent)) throw new Error(`Item ${parentId} is not a folder`);
 
-			if (isFolder(current)) {
-				for (let i = current.children.length - 1; i >= 0; i--) {
-					stack.push(current.children[i]);
+			this.idToItem_.set(parentId, {
+				...parent,
+				childIds: updateFn(parent.childIds),
+			});
+		};
+		const addChild = (parentId: ItemId, childId: ItemId) => {
+			updateChildren(parentId, (oldChildren) => {
+				if (oldChildren.includes(childId)) return oldChildren;
+				return [...oldChildren, childId];
+			});
+		};
+		const removeChild = (parentId: ItemId, childId: ItemId) => {
+			updateChildren(parentId, (oldChildren) => {
+				return oldChildren.filter(other => other !== childId);
+			});
+		};
+		const removeItemRecursive = (id: ItemId) => {
+			const item = this.idToItem_.get(id);
+			if (!item) throw new Error(`Item with ID ${id} not found.`);
+
+			removeChild(item.parentId, item.id);
+			if (isFolder(item)) {
+				for (const childId of item.childIds) {
+					removeItemRecursive(childId);
 				}
 			}
-		}
 
-		return null;
-	}
-
-	private findFolderWithId_(titleOrId: string) {
-		return this.findFolder_(item => {
-			return isFolder(item) && (item.title === titleOrId || item.id === titleOrId);
-		}) as FolderData|null;
-	}
-
-	private findFolderContaining_(titleOrId: string) {
-		return this.findFolder_(item => {
-			return isFolder(item) && item.children.some(child => child.title === titleOrId || child.id === titleOrId);
-		}) as FolderData|null;
-	}
-
-	public async createFolder(data: FolderMetadata, parent?: string | null): Promise<void> {
-		logger.info('Create folder', data.title);
-		await this.target_.createFolder(data, parent);
-
-		const modelParent = parent && this.findFolderWithId_(parent);
-		const newFolder: FolderData = {
-			...data,
-			children: [],
-			sharedWith: [...data.sharedWith],
+			this.idToItem_.delete(id);
 		};
-		if (modelParent) {
-			modelParent.children.push(newFolder);
-		} else {
-			this.tree_.push(newFolder);
-		}
-	}
-
-	public async createNote(data: NoteData, parent: string | null): Promise<void> {
-		logger.info('Create note', data.title);
-		await this.target_.createNote(data, parent);
-
-		const modelParent = parent && this.findFolderWithId_(parent);
-		const newNote: NoteData = {
-			...data,
+		const addRootItem = (itemId: ItemId) => {
+			this.tree_.set(clientId, [...this.tree_.get(clientId), itemId]);
 		};
-		if (modelParent) {
-			modelParent.children.push(newNote);
-		} else {
-			throw new Error(`No suitable parent for note with parent ${parent} found.`);
-		}
-	}
+		const removeRootItem = (itemId: ItemId) => {
+			const previous = this.tree_.get(clientId);
+			this.tree_.set(clientId, previous.filter(otherId => otherId !== itemId));
+		};
+		const mapItems = <T> (map: (item: TreeItem)=> T) => {
+			const workList: ItemId[] = [...this.tree_.get(clientId)];
+			const result: T[] = [];
 
-	public async deleteFolder(titleOrId: string): Promise<void> {
-		logger.info('Delete folder', titleOrId);
-		await this.target_.deleteFolder(titleOrId);
-		const parentFolder = this.findFolderContaining_(titleOrId);
+			while (workList.length > 0) {
+				const id = workList.pop();
+				const item = this.idToItem_.get(id);
+				if (!item) throw new Error(`Not found: ${id}`);
 
-		const filter = (child: TreeItem) => child.id !== titleOrId && child.title !== titleOrId;
-		if (parentFolder) {
-			parentFolder.children = parentFolder.children.filter(filter);
-		} else {
-			const originalLength = this.tree_.length;
-			this.tree_ = this.tree_.filter(filter);
+				result.push(map(item));
 
-			if (this.tree_.length === originalLength) {
-				throw new Error(`No folder found with title/ID ${titleOrId} in model. Cannot delete.`);
+				if (isFolder(item)) {
+					for (const childId of item.childIds) {
+						workList.push(childId);
+					}
+				}
 			}
-		}
+
+			return result;
+		};
+
+		const tracker: ActionableClient = {
+			createFolder: (data: FolderMetadata) => {
+				this.idToItem_.set(data.id, {
+					...data,
+					childIds: getChildIds(data.id),
+				});
+				if (data.parentId) {
+					addChild(data.parentId, data.id);
+				} else {
+					addRootItem(data.id);
+				}
+
+				return Promise.resolve();
+			},
+			deleteFolder: (id: ItemId) => {
+				const item = this.idToItem_.get(id);
+				if (!item) throw new Error(`Not found ${id}`);
+				if (!isFolder(item)) throw new Error(`Not a folder ${id}`);
+
+				if (item.parentId) {
+					removeItemRecursive(id);
+				} else {
+					removeRootItem(id);
+				}
+
+				return Promise.resolve();
+			},
+			createNote: (data: NoteData) => {
+				this.idToItem_.set(data.id, {
+					...data,
+				});
+				addChild(data.parentId, data.id);
+
+				return Promise.resolve();
+			},
+			shareFolder: (id: ItemId, shareWith: Client) => {
+				const otherFolders = this.tree_.get(shareWith.email);
+				if (otherFolders.includes(id)) {
+					throw new Error(`Folder ${id} already shared with ${shareWith.email}`);
+				}
+				this.tree_.set(shareWith.email, [...otherFolders, id]);
+
+				return Promise.resolve();
+			},
+			sync: () => Promise.resolve(),
+			listNotes: () => {
+				const notes = mapItems(item => {
+					return isFolder(item) ? null : item;
+				}).filter(item => !!item);
+				return Promise.resolve(notes);
+			},
+		};
+		return tracker;
 	}
-
-	public async shareFolder(id: string, shareWith: Client) {
-		await this.target_.shareFolder(id, shareWith);
-
-		const target = this.findFolderWithId_(id);
-		target.sharedWith = [...target.sharedWith, shareWith.email];
-	}
-
-	public async sync() {
-		logger.info('Sync');
-		await this.target_.sync();
-	}
-
 }
 
 const startServer = async (serverUrl: string, adminAuth: UserData) => {
@@ -472,6 +577,21 @@ const main = async () => {
 	Setting.setConstant('env', Env.Dev);
 
 	const cleanupTasks: CleanupTask[] = [];
+
+	const cleanUp = async () => {
+		while (cleanupTasks.length) {
+			const task = cleanupTasks.pop();
+			await task();
+		}
+	};
+
+	// Run cleanup on Ctrl-C
+	process.on('SIGINT', async () => {
+		logger.info('Intercepted ctrl-c. Cleaning up...');
+		await cleanUp();
+		process.exit(1);
+	});
+
 	try {
 		const joplinServerUrl = 'http://localhost:22300/';
 		const server = await startServer(joplinServerUrl, {
@@ -492,6 +612,7 @@ const main = async () => {
 			serverUrl: joplinServerUrl,
 			baseDir: profilesDirectory.path,
 			execApi: server.execApi,
+			actionTracker: new ActionTracker(),
 		};
 		const clientPool = await createClientPool(
 			fuzzContext,
@@ -501,49 +622,45 @@ const main = async () => {
 
 		for (let i = 0; i < 3; i++) {
 			const client = clientPool.randomClient();
-			const actionTracker = client.actionTracker;
+			const actionTracker = client;
 			const folder1Id = uuid.create();
 			await actionTracker.createFolder({
+				parentId: null,
 				id: folder1Id,
 				title: 'Test.',
-				sharedWith: [],
-			}, null);
+			});
 			await actionTracker.createFolder({
+				parentId: folder1Id,
 				id: uuid.create(),
 				title: 'Test...',
-				sharedWith: [],
-			}, folder1Id);
+			});
 			await actionTracker.createNote({
-				title: 'Test',
+				parentId: folder1Id,
+				title: `Test (x${i})`,
 				body: 'Testing...',
 				id: uuid.create(),
-			}, folder1Id);
+			});
 			await actionTracker.sync();
-			clientPool.checkState();
+			await clientPool.checkState();
 
-			const other = clientPool.randomClient();
+			const other = clientPool.clients[0];
 			if (other !== client) {
 				await actionTracker.shareFolder(folder1Id, other);
 				await actionTracker.sync();
-				await other.actionTracker.sync();
-				clientPool.checkState();
+				await other.sync();
+				await clientPool.checkState();
 			}
 
 			await actionTracker.deleteFolder(folder1Id);
 			await actionTracker.sync();
 		}
 	} catch (error) {
-		logger.error(error);
+		logger.error('ERROR', error);
 		logger.info('An error occurred. Pausing before continuing cleanup.');
 		await waitForCliInput();
 		process.exitCode = 1;
 	} finally {
-		// Clean up more recent items first -- later items may depend on earlier
-		// items.
-		cleanupTasks.reverse();
-		for (const task of cleanupTasks) {
-			await task();
-		}
+		await cleanUp();
 
 		logger.info('Cleanup complete');
 		process.exit();
