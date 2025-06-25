@@ -33,7 +33,7 @@ class Command extends BaseCommand {
 	}
 
 	public async action(args: Args) {
-		const folder = await app().loadItem(ModelType.Folder, args.notebook);
+		const folder = await app().loadItemOrFail(ModelType.Folder, args.notebook);
 
 		const ellipsizedFolderTitle = substrWithEllipsis(folder.title, 0, 32);
 		if (!folder.is_shared) {
