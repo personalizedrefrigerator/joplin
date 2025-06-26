@@ -83,8 +83,9 @@ class ActionTracker {
 				childIds: [...clientData.childIds, itemId],
 			});
 		};
-		const removeRootItem = (itemId: ItemId) => {
 
+		// Returns true iff the given item ID is now unused.
+		const removeRootItem = (itemId: ItemId) => {
 			const removeForClient = (clientId: string) => {
 				const clientData = this.tree_.get(clientId);
 				const childIds = clientData.childIds;
@@ -129,31 +130,41 @@ class ActionTracker {
 				assert.ok(hasBeenCompletelyRemoved(), 'item should be removed from all clients');
 
 				// The item is unshared and can be removed entirely
-				this.idToItem_.delete(itemId);
+				return true;
 			} else {
 				// Otherwise, even if part of a share, removing the
 				// notebook just leaves the share.
 				removed = removeForClient(clientId);
 
 				if (hasBeenCompletelyRemoved()) {
-					this.idToItem_.delete(itemId);
+					return true;
 				}
 			}
 
 			if (!removed) {
 				throw new Error(`Not a root item: ${itemId}`);
 			}
+
+			return false;
 		};
 		const addChild = (parentId: ItemId, childId: ItemId) => {
-			updateChildren(parentId, (oldChildren) => {
-				if (oldChildren.includes(childId)) return oldChildren;
-				return [...oldChildren, childId];
-			});
+			if (parentId) {
+				updateChildren(parentId, (oldChildren) => {
+					if (oldChildren.includes(childId)) return oldChildren;
+					return [...oldChildren, childId];
+				});
+			} else {
+				addRootItem(childId);
+			}
 		};
 		const removeChild = (parentId: ItemId, childId: ItemId) => {
-			updateChildren(parentId, (oldChildren) => {
-				return oldChildren.filter(otherId => otherId !== childId);
-			});
+			if (!parentId) {
+				removeRootItem(childId);
+			} else {
+				updateChildren(parentId, (oldChildren) => {
+					return oldChildren.filter(otherId => otherId !== childId);
+				});
+			}
 		};
 		const removeItemRecursive = (id: ItemId) => {
 			const item = this.idToItem_.get(id);
@@ -167,7 +178,10 @@ class ActionTracker {
 
 				this.idToItem_.delete(id);
 			} else {
-				removeRootItem(item.id);
+				const idIsUnused = removeRootItem(item.id);
+				if (idIsUnused) {
+					this.idToItem_.delete(id);
+				}
 			}
 
 			if (isFolder(item)) {
@@ -208,10 +222,10 @@ class ActionTracker {
 
 		const tracker: ActionableClient = {
 			createNote: (data: NoteData) => {
+				assert.ok(!!data.parentId, `note ${data.id} should have a parentId`);
 				this.idToItem_.set(data.id, {
 					...data,
 				});
-				assert.ok(!!data.parentId, `note ${data.id} should have a parentId`);
 				addChild(data.parentId, data.id);
 
 				this.checkRep_();
@@ -222,13 +236,9 @@ class ActionTracker {
 					...data,
 					parentId: data.parentId ?? '',
 					childIds: getChildIds(data.id),
-					isShared: false,
+					isShareRoot: false,
 				});
-				if (data.parentId) {
-					addChild(data.parentId, data.id);
-				} else {
-					addRootItem(data.id);
-				}
+				addChild(data.parentId, data.id);
 
 				this.checkRep_();
 				return Promise.resolve();
@@ -267,7 +277,26 @@ class ActionTracker {
 
 				this.idToItem_.set(id, {
 					...this.idToItem_.get(id),
-					isShared: true,
+					isShareRoot: true,
+				});
+
+				this.checkRep_();
+				return Promise.resolve();
+			},
+			moveItem: (itemId, newParentId) => {
+				const item = this.idToItem_.get(itemId);
+				assert.ok(item, `item with ${itemId} should exist`);
+				const parent = this.idToItem_.get(newParentId);
+				assert.ok(parent, `parent with ID ${newParentId} should exist`);
+				if (isFolder(item)) {
+					assert.equal(item.isShareRoot, false, 'cannot move toplevel shared folders without first unsharing');
+				}
+
+				removeChild(item.parentId, itemId);
+				addChild(newParentId, itemId);
+				this.idToItem_.set(itemId, {
+					...item,
+					parentId: newParentId,
 				});
 
 				this.checkRep_();

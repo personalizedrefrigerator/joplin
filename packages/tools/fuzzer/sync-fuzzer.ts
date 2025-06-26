@@ -55,11 +55,7 @@ const doRandomAction = async (context: FuzzContext, client: Client, clientPool: 
 		},
 		newNote: async () => {
 			const parentId = (await client.randomFolder({}))?.id;
-
-			// Handles the case where no parent folder exists
-			if (!parentId) {
-				await actions.newToplevelFolder();
-			}
+			if (!parentId) return false;
 
 			await client.createNote({
 				parentId: parentId,
@@ -73,7 +69,7 @@ const doRandomAction = async (context: FuzzContext, client: Client, clientPool: 
 		shareFolder: async () => {
 			const target = await client.randomFolder({
 				filter: candidate => (
-					!candidate.parentId && !candidate.isShared
+					!candidate.parentId && !candidate.isShareRoot
 				),
 			});
 			if (!target) return false;
@@ -87,6 +83,15 @@ const doRandomAction = async (context: FuzzContext, client: Client, clientPool: 
 			if (!target) return false;
 
 			await client.deleteFolder(target.id);
+			return true;
+		},
+		moveFolderToToplevel: async () => {
+			const target = await client.randomFolder({
+				filter: item => !item.isShareRoot,
+			});
+			if (!target) return false;
+
+			await client.moveItem(target.id, '');
 			return true;
 		},
 	};

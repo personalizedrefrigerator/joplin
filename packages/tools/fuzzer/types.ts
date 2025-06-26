@@ -18,7 +18,7 @@ export type FolderMetadata = {
 };
 export type FolderData = FolderMetadata & {
 	childIds: ItemId[];
-	isShared: boolean;
+	isShareRoot: boolean;
 };
 export type TreeItem = NoteData|FolderData;
 
@@ -39,13 +39,15 @@ export interface RandomFolderOptions {
 
 export interface ActionableClient {
 	createFolder(data: FolderMetadata): Promise<void>;
-	deleteFolder(id: string): Promise<void>;
+	shareFolder(id: ItemId, shareWith: Client): Promise<void>;
+	deleteFolder(id: ItemId): Promise<void>;
 	createNote(data: NoteData): Promise<void>;
-	shareFolder(id: string, shareWith: Client): Promise<void>;
+	moveItem(itemId: ItemId, newParentId: ItemId): Promise<void>;
+	sync(): Promise<void>;
+
 	listNotes(): Promise<NoteData[]>;
 	listFolders(): Promise<FolderMetadata[]>;
 	randomFolder(options: RandomFolderOptions): Promise<FolderMetadata>;
-	sync(): Promise<void>;
 }
 
 export interface UserData {

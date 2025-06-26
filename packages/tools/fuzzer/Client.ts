@@ -1,5 +1,5 @@
 import uuid, { createSecureRandom } from '@joplin/lib/uuid';
-import { ActionableClient, FolderMetadata, FuzzContext, HttpMethod, Json, NoteData, RandomFolderOptions, UserData } from './types';
+import { ActionableClient, FolderMetadata, FuzzContext, HttpMethod, ItemId, Json, NoteData, RandomFolderOptions, UserData } from './types';
 import { join } from 'path';
 import { mkdir } from 'fs-extra';
 import getStringProperty from './utils/getStringProperty';
@@ -262,6 +262,10 @@ class Client implements ActionableClient {
 		await shareWith.execCliCommand_('share', 'accept', id);
 	}
 
+	public async moveItem(itemId: ItemId, newParentId: ItemId) {
+		await this.tracker_.moveItem(itemId, newParentId);
+		await this.execCliCommand_('mv', itemId, newParentId);
+	}
 
 	public async listNotes() {
 		const params = {
