@@ -1,5 +1,5 @@
 import { strict as assert } from 'assert';
-import { ActionableClient, FolderMetadata, FuzzContext, ItemId, NoteData, TreeItem, isFolder } from './types';
+import { ActionableClient, FolderData, FolderMetadata, FuzzContext, ItemId, NoteData, TreeItem, isFolder } from './types';
 import type Client from './Client';
 
 interface ClientData {
@@ -200,6 +200,12 @@ class ActionTracker {
 			return result;
 		};
 
+		const listFoldersDetailed = () => {
+			return mapItems((item): FolderData => {
+				return isFolder(item) ? item : null;
+			}).filter(item => !!item);
+		};
+
 		const tracker: ActionableClient = {
 			createNote: (data: NoteData) => {
 				this.idToItem_.set(data.id, {
@@ -216,6 +222,7 @@ class ActionTracker {
 					...data,
 					parentId: data.parentId ?? '',
 					childIds: getChildIds(data.id),
+					isShared: false,
 				});
 				if (data.parentId) {
 					addChild(data.parentId, data.id);
@@ -243,6 +250,8 @@ class ActionTracker {
 				if (shareWithChildIds.includes(id)) {
 					throw new Error(`Folder ${id} already shared with ${shareWith.email}`);
 				}
+				assert.ok(this.idToItem_.has(id), 'should exist');
+
 				const sharerClient = this.tree_.get(clientId);
 				if (!sharerClient.sharedFolderIds.includes(id)) {
 					this.tree_.set(clientId, {
@@ -256,6 +265,10 @@ class ActionTracker {
 					childIds: [...shareWithChildIds, id],
 				});
 
+				this.idToItem_.set(id, {
+					...this.idToItem_.get(id),
+					isShared: true,
+				});
 
 				this.checkRep_();
 				return Promise.resolve();
@@ -270,19 +283,17 @@ class ActionTracker {
 				return Promise.resolve(notes);
 			},
 			listFolders: () => {
-				const folders = mapItems((item): FolderMetadata => {
-					return isFolder(item) ? {
-						id: item.id,
-						title: item.title,
-						parentId: item.parentId,
-					} : null;
-				}).filter(item => !!item);
-
 				this.checkRep_();
-				return Promise.resolve(folders);
+				const folderData = listFoldersDetailed().map(item => ({
+					id: item.id,
+					title: item.title,
+					parentId: item.parentId,
+				}));
+
+				return Promise.resolve(folderData);
 			},
 			randomFolder: async (options) => {
-				let folders = await tracker.listFolders();
+				let folders = listFoldersDetailed();
 				if (options.filter) {
 					folders = folders.filter(options.filter);
 				}

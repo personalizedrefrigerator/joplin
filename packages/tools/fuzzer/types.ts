@@ -18,6 +18,7 @@ export type FolderMetadata = {
 };
 export type FolderData = FolderMetadata & {
 	childIds: ItemId[];
+	isShared: boolean;
 };
 export type TreeItem = NoteData|FolderData;
 
@@ -33,7 +34,7 @@ export interface FuzzContext {
 }
 
 export interface RandomFolderOptions {
-	filter?: (folder: FolderMetadata)=> boolean;
+	filter?: (folder: FolderData)=> boolean;
 }
 
 export interface ActionableClient {
