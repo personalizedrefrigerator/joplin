@@ -46,7 +46,7 @@ export default class SeededRandom {
 	public nextInRange(a: number, b: number) {
 		if (b <= a + 1) return a;
 
-		const range = b - a - 1; // subtract 1 to exclude b
+		const range = b - a;
 		return Number(this.next() % BigInt(range)) + a;
 	}
 }
