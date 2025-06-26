@@ -2,9 +2,15 @@ import { strict as assert } from 'assert';
 import { ActionableClient, FolderMetadata, FuzzContext, ItemId, NoteData, TreeItem, isFolder } from './types';
 import type Client from './Client';
 
+interface ClientData {
+	childIds: ItemId[];
+	// Shared folders belonging to the client
+	sharedFolderIds: ItemId[];
+}
+
 class ActionTracker {
 	private idToItem_: Map<ItemId, TreeItem> = new Map();
-	private tree_: Map<string, ItemId[]> = new Map();
+	private tree_: Map<string, ClientData> = new Map();
 	public constructor(private readonly context_: FuzzContext) {}
 
 	private checkRep_() {
@@ -25,8 +31,8 @@ class ActionTracker {
 			}
 		};
 
-		for (const childIds of this.tree_.values()) {
-			for (const childId of childIds) {
+		for (const clientData of this.tree_.values()) {
+			for (const childId of clientData.childIds) {
 				assert.ok(this.idToItem_.has(childId), `root item ${childId} should exist`);
 
 				const item = this.idToItem_.get(childId);
@@ -40,7 +46,10 @@ class ActionTracker {
 
 	public track(client: { email: string }) {
 		const clientId = client.email;
-		this.tree_.set(clientId, []);
+		this.tree_.set(clientId, {
+			childIds: [],
+			sharedFolderIds: [],
+		});
 
 		const getChildIds = (itemId: ItemId) => {
 			const item = this.idToItem_.get(itemId);
@@ -58,17 +67,47 @@ class ActionTracker {
 			});
 		};
 		const addRootItem = (itemId: ItemId) => {
-			this.tree_.set(clientId, [...this.tree_.get(clientId), itemId]);
+			const clientData = this.tree_.get(clientId);
+			this.tree_.set(clientId, {
+				...clientData,
+				childIds: [...clientData.childIds, itemId],
+			});
 		};
 		const removeRootItem = (itemId: ItemId) => {
-			let removed = false;
-			// Check each client -- if shared, a root item can be present in multiple
-			// clients:
-			for (const [clientId, previous] of this.tree_) {
-				if (previous.includes(itemId)) {
-					this.tree_.set(clientId, previous.filter(otherId => otherId !== itemId));
-					removed = true;
+
+			const removeForClient = (clientId: string) => {
+				const clientData = this.tree_.get(clientId);
+				const childIds = clientData.childIds;
+
+				if (childIds.includes(itemId)) {
+					const newChildIds = childIds.filter(otherId => otherId !== itemId);
+					this.tree_.set(clientId, {
+						...clientData,
+						childIds: newChildIds,
+					});
+					return true;
 				}
+
+				return false;
+			};
+
+			const isOwnedByThis = this.tree_.get(clientId).sharedFolderIds.includes(itemId);
+
+			let removed = false;
+			if (isOwnedByThis) { // Unshare
+				for (const id of this.tree_.keys()) {
+					removed ||= removeForClient(id);
+				}
+
+				const clientData = this.tree_.get(clientId);
+				this.tree_.set(clientId, {
+					...clientData,
+					sharedFolderIds: clientData.sharedFolderIds.filter(id => id !== itemId),
+				});
+			} else {
+				// Otherwise, even if part of a share, removing the
+				// notebook just leaves the share.
+				removed = removeForClient(clientId);
 			}
 
 			if (!removed) {
@@ -93,7 +132,6 @@ class ActionTracker {
 			if (item.parentId) {
 				removeChild(item.parentId, item.id);
 			} else {
-
 				removeRootItem(item.id);
 			}
 
@@ -109,7 +147,7 @@ class ActionTracker {
 			this.idToItem_.delete(id);
 		};
 		const mapItems = <T> (map: (item: TreeItem)=> T) => {
-			const workList: ItemId[] = [...this.tree_.get(clientId)];
+			const workList: ItemId[] = [...this.tree_.get(clientId).childIds];
 			const result: T[] = [];
 
 			while (workList.length > 0) {
@@ -168,11 +206,23 @@ class ActionTracker {
 				return Promise.resolve();
 			},
 			shareFolder: (id: ItemId, shareWith: Client) => {
-				const otherFolders = this.tree_.get(shareWith.email);
-				if (otherFolders.includes(id)) {
+				const shareWithChildIds = this.tree_.get(shareWith.email).childIds;
+				if (shareWithChildIds.includes(id)) {
 					throw new Error(`Folder ${id} already shared with ${shareWith.email}`);
 				}
-				this.tree_.set(shareWith.email, [...otherFolders, id]);
+				const sharerClient = this.tree_.get(clientId);
+				if (!sharerClient.sharedFolderIds.includes(id)) {
+					this.tree_.set(clientId, {
+						...sharerClient,
+						sharedFolderIds: [...sharerClient.sharedFolderIds, id],
+					});
+				}
+
+				this.tree_.set(shareWith.email, {
+					...this.tree_.get(shareWith.email),
+					childIds: [...shareWithChildIds, id],
+				});
+
 
 				this.checkRep_();
 				return Promise.resolve();
