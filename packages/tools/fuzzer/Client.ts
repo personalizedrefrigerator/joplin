@@ -198,7 +198,7 @@ class Client implements ActionableClient {
 	}
 
 	public async createFolder(folder: FolderMetadata) {
-		logger.info('Create folder', folder.id, 'in', this.email);
+		logger.info('Create folder', folder.id, 'in', `${folder.parentId ?? 'root'}/${this.email}`);
 		await this.tracker_.createFolder(folder);
 
 		await this.execApiCommand_('POST', '/folders', {
@@ -317,6 +317,18 @@ class Client implements ActionableClient {
 			return a.id < b.id ? -1 : 1;
 		};
 
+		const assertNoAdjacentEqualIds = (sortedById: ItemSlice[], assertionLabel: string) => {
+			for (let i = 1; i < sortedById.length; i++) {
+				const current = sortedById[i];
+				const previous = sortedById[i - 1];
+				assert.notEqual(
+					current.id,
+					previous.id,
+					`[${assertionLabel}] item ${i} should have a different ID from item ${i - 1}`,
+				);
+			}
+		};
+
 		const checkNoteState = async () => {
 			const notes = [...await this.listNotes()];
 			const expectedNotes = [...await this.tracker_.listNotes()];
@@ -324,6 +336,8 @@ class Client implements ActionableClient {
 			notes.sort(compare);
 			expectedNotes.sort(compare);
 
+			assertNoAdjacentEqualIds(notes, 'notes');
+			assertNoAdjacentEqualIds(expectedNotes, 'expectedNotes');
 			assert.deepEqual(notes, expectedNotes, 'should have the same notes as the expected state');
 		};
 
@@ -334,6 +348,8 @@ class Client implements ActionableClient {
 			folders.sort(compare);
 			expectedFolders.sort(compare);
 
+			assertNoAdjacentEqualIds(folders, 'folders');
+			assertNoAdjacentEqualIds(expectedFolders, 'expectedFolders');
 			assert.deepEqual(folders, expectedFolders, 'should have the same folders as the expected state');
 		};
 

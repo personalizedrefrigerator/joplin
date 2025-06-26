@@ -54,7 +54,7 @@ const doRandomAction = async (context: FuzzContext, client: Client, clientPool: 
 			await client.createFolder({
 				parentId: parentId,
 				id: folderId,
-				title: 'Some title',
+				title: 'Subfolder',
 			});
 
 			return true;
@@ -164,7 +164,7 @@ const main = async () => {
 		const profilesDirectory = await createProfilesDirectory();
 		cleanupTasks.push(profilesDirectory.remove);
 
-		const random = new SeededRandom(1234);
+		const random = new SeededRandom(12345);
 		const fuzzContext: FuzzContext = {
 			serverUrl: joplinServerUrl,
 			baseDir: profilesDirectory.path,
@@ -177,7 +177,7 @@ const main = async () => {
 			task => { cleanupTasks.push(task); },
 		);
 
-		const maxSteps = 20;
+		const maxSteps = 50;
 		for (let i = 1; i <= maxSteps; i++) {
 			const client = clientPool.randomClient();
 

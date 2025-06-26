@@ -78,10 +78,12 @@ class ActionTracker {
 		};
 		const addRootItem = (itemId: ItemId) => {
 			const clientData = this.tree_.get(clientId);
-			this.tree_.set(clientId, {
-				...clientData,
-				childIds: [...clientData.childIds, itemId],
-			});
+			if (!clientData.childIds.includes(itemId)) {
+				this.tree_.set(clientId, {
+					...clientData,
+					childIds: [...clientData.childIds, itemId],
+				});
+			}
 		};
 
 		// Returns true iff the given item ID is now unused.
@@ -113,8 +115,8 @@ class ActionTracker {
 
 			const isOwnedByThis = this.tree_.get(clientId).sharedFolderIds.includes(itemId);
 
-			let removed = false;
 			if (isOwnedByThis) { // Unshare
+				let removed = false;
 				for (const id of this.tree_.keys()) {
 					const result = removeForClient(id);
 					removed ||= result;
@@ -128,21 +130,19 @@ class ActionTracker {
 
 				// At this point, the item shouldn't be a child of any clients:
 				assert.ok(hasBeenCompletelyRemoved(), 'item should be removed from all clients');
+				assert.ok(removed, 'should be a toplevel item');
 
 				// The item is unshared and can be removed entirely
 				return true;
 			} else {
 				// Otherwise, even if part of a share, removing the
 				// notebook just leaves the share.
-				removed = removeForClient(clientId);
+				const removed = removeForClient(clientId);
+				assert.ok(removed, 'should be a toplevel item');
 
 				if (hasBeenCompletelyRemoved()) {
 					return true;
 				}
-			}
-
-			if (!removed) {
-				throw new Error(`Not a root item: ${itemId}`);
 			}
 
 			return false;
@@ -291,7 +291,7 @@ class ActionTracker {
 					const parent = this.idToItem_.get(newParentId);
 					assert.ok(parent, `parent with ID ${newParentId} should exist`);
 				} else {
-					assert.equal(newParentId, '', 'should be a toplevel folder if parentId is falsy');
+					assert.equal(newParentId, '', 'parentId should be empty if a toplevel folder');
 				}
 
 				if (isFolder(item)) {
