@@ -21,13 +21,23 @@ class ActionTracker {
 			assert.ok(!!item, `should find item with ID ${itemId}`);
 
 			if (item.parentId) {
-				assert.ok(this.idToItem_.has(item.parentId), `should find parent (id: ${item.parentId})`);
+				const parent = this.idToItem_.get(item.parentId);
+				assert.ok(parent, `should find parent (id: ${item.parentId})`);
+
+				assert.ok(isFolder(parent), 'parent should be a folder');
+				assert.ok(parent.childIds.includes(itemId), 'parent should include the current item in its children');
 			}
 
 			if (isFolder(item)) {
 				for (const childId of item.childIds) {
 					checkItem(childId);
 				}
+
+				assert.equal(
+					item.childIds.length,
+					[...new Set(item.childIds)].length,
+					'child IDs should be unique',
+				);
 			}
 		};
 
@@ -104,6 +114,9 @@ class ActionTracker {
 					...clientData,
 					sharedFolderIds: clientData.sharedFolderIds.filter(id => id !== itemId),
 				});
+
+				// The item is unshared and can be removed entirely
+				this.idToItem_.delete(itemId);
 			} else {
 				// Otherwise, even if part of a share, removing the
 				// notebook just leaves the share.
@@ -131,6 +144,7 @@ class ActionTracker {
 
 			if (item.parentId) {
 				removeChild(item.parentId, item.id);
+				this.idToItem_.delete(id);
 			} else {
 				removeRootItem(item.id);
 			}
@@ -143,8 +157,6 @@ class ActionTracker {
 					removeItemRecursive(childId);
 				}
 			}
-
-			this.idToItem_.delete(id);
 		};
 		const mapItems = <T> (map: (item: TreeItem)=> T) => {
 			const workList: ItemId[] = [...this.tree_.get(clientId).childIds];

@@ -212,7 +212,7 @@ class Client implements ActionableClient {
 	}
 
 	public async createNote(note: NoteData) {
-		logger.info('Create note', note.id, 'in', this.email);
+		logger.info('Create note', note.id, 'in', `${note.parentId}/${this.email}`);
 		await this.tracker_.createNote(note);
 
 		await this.execApiCommand_('POST', '/notes', {

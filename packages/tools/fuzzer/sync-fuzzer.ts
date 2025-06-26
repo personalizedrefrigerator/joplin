@@ -7,6 +7,7 @@ import { waitForCliInput } from '@joplin/utils/cli';
 import Server from './Server';
 import { CleanupTask, FuzzContext } from './types';
 import ClientPool from './ClientPool';
+import retryWithCount from './utils/retryWithCount';
 const { shimInit } = require('@joplin/lib/shim-init-node');
 
 const globalLogger = new Logger();
@@ -117,11 +118,17 @@ const main = async () => {
 					});
 				},
 				shareFolder: async () => {
-					const target = await client.randomFolder({
+					const getTarget = () => client.randomFolder({
 						filter: candidate => (
 							!candidate.parentId && !sharedFolders.has(candidate.id)
 						),
 					});
+
+					let target = await getTarget();
+					if (!target) {
+						await actions.newToplevelFolder();
+						target = await getTarget();
+					}
 
 					if (target) {
 						const other = clientPool.randomClient(c => c !== client);
@@ -144,8 +151,19 @@ const main = async () => {
 			await actions[randomAction]();
 
 			await client.sync();
-			await clientPool.syncAll();
-			await clientPool.checkState();
+
+			// .checkState can fail occasionally due to incomplete
+			// syncs (perhaps because the server is still processing
+			// share-related changes?). Allow this to be retried:
+			await retryWithCount(async () => {
+				await clientPool.checkState();
+			}, {
+				count: 3,
+				onFail: async () => {
+					logger.info('.checkState failed. Syncing all clients...');
+					await clientPool.syncAll();
+				},
+			});
 		}
 	} catch (error) {
 		logger.error('ERROR', error);
