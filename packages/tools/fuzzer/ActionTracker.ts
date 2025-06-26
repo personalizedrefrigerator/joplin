@@ -101,12 +101,22 @@ class ActionTracker {
 				return false;
 			};
 
+			const hasBeenCompletelyRemoved = () => {
+				for (const clientData of this.tree_.values()) {
+					if (clientData.childIds.includes(itemId)) {
+						return false;
+					}
+				}
+				return true;
+			};
+
 			const isOwnedByThis = this.tree_.get(clientId).sharedFolderIds.includes(itemId);
 
 			let removed = false;
 			if (isOwnedByThis) { // Unshare
 				for (const id of this.tree_.keys()) {
-					removed ||= removeForClient(id);
+					const result = removeForClient(id);
+					removed ||= result;
 				}
 
 				const clientData = this.tree_.get(clientId);
@@ -115,12 +125,19 @@ class ActionTracker {
 					sharedFolderIds: clientData.sharedFolderIds.filter(id => id !== itemId),
 				});
 
+				// At this point, the item shouldn't be a child of any clients:
+				assert.ok(hasBeenCompletelyRemoved(), 'item should be removed from all clients');
+
 				// The item is unshared and can be removed entirely
 				this.idToItem_.delete(itemId);
 			} else {
 				// Otherwise, even if part of a share, removing the
 				// notebook just leaves the share.
 				removed = removeForClient(clientId);
+
+				if (hasBeenCompletelyRemoved()) {
+					this.idToItem_.delete(itemId);
+				}
 			}
 
 			if (!removed) {
@@ -143,7 +160,11 @@ class ActionTracker {
 			if (!item) throw new Error(`Item with ID ${id} not found.`);
 
 			if (item.parentId) {
-				removeChild(item.parentId, item.id);
+				// The parent may already be removed
+				if (this.idToItem_.has(item.parentId)) {
+					removeChild(item.parentId, item.id);
+				}
+
 				this.idToItem_.delete(id);
 			} else {
 				removeRootItem(item.id);
