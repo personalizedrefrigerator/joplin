@@ -63,6 +63,7 @@ interface ActionableClient {
 	createNote(data: NoteData): Promise<void>;
 	shareFolder(id: string, shareWith: Client): Promise<void>;
 	listNotes(): Promise<NoteData[]>;
+	listFolders(): Promise<FolderMetadata[]>;
 	sync(): Promise<void>;
 }
 
@@ -114,22 +115,22 @@ class Client implements ActionableClient {
 			);
 
 			// Joplin Server sync
-			await client.execCliCommand('config', 'sync.target', '9');
-			await client.execCliCommand('config', 'sync.9.path', context.serverUrl);
-			await client.execCliCommand('config', 'sync.9.username', userData.email);
-			await client.execCliCommand('config', 'sync.9.password', userData.password);
-			await client.execCliCommand('config', 'api.token', apiToken);
-			await client.execCliCommand('config', 'api.port', String(apiPort));
+			await client.execCliCommand_('config', 'sync.target', '9');
+			await client.execCliCommand_('config', 'sync.9.path', context.serverUrl);
+			await client.execCliCommand_('config', 'sync.9.username', userData.email);
+			await client.execCliCommand_('config', 'sync.9.password', userData.password);
+			await client.execCliCommand_('config', 'api.token', apiToken);
+			await client.execCliCommand_('config', 'api.port', String(apiPort));
 
 			const e2eePassword = createSecureRandom().replace(/^-/, '_');
-			await client.execCliCommand('e2ee', 'enable', '--password', e2eePassword);
+			await client.execCliCommand_('e2ee', 'enable', '--password', e2eePassword);
 			logger.info('Created and configured client');
 
 			// Run asynchronously -- the API server command doesn't exit until the server
 			// is closed.
 			void (async () => {
 				try {
-					await client.execCliCommand('server', 'start');
+					await client.execCliCommand_('server', 'start');
 				} catch (error) {
 					logger.info('API server exited');
 					logger.debug('API server exit status', error);
@@ -156,11 +157,11 @@ class Client implements ActionableClient {
 	}
 
 	public async close() {
-		await this.execCliCommand('server', 'stop');
+		await this.execCliCommand_('server', 'stop');
 		await this.cleanUp_();
 	}
 
-	private async execCliCommand(commandName: string, ...args: string[]) {
+	private async execCliCommand_(commandName: string, ...args: string[]) {
 		assert.match(commandName, /^[a-z]/, 'Command name must start with a lowercase letter.');
 		const commandResult = await execa('yarn', [
 			'run', 'start-no-build',
@@ -175,11 +176,11 @@ class Client implements ActionableClient {
 	}
 
 	// eslint-disable-next-line no-dupe-class-members -- This is not a duplicate class member
-	private async execApiCommand(method: 'GET', route: string): Promise<Json>;
+	private async execApiCommand_(method: 'GET', route: string): Promise<Json>;
 	// eslint-disable-next-line no-dupe-class-members -- This is not a duplicate class member
-	private async execApiCommand(method: 'POST'|'PUT', route: string, data: Json): Promise<Json>;
+	private async execApiCommand_(method: 'POST'|'PUT', route: string, data: Json): Promise<Json>;
 	// eslint-disable-next-line no-dupe-class-members -- This is not a duplicate class member
-	private async execApiCommand(method: HttpMethod, route: string, data: Json|null = null): Promise<Json> {
+	private async execApiCommand_(method: HttpMethod, route: string, data: Json|null = null): Promise<Json> {
 		route = route.replace(/^[/]/, '');
 		const url = new URL(`http://localhost:${this.apiPort_}/${route}`);
 		url.searchParams.append('token', this.apiToken_);
@@ -196,8 +197,45 @@ class Client implements ActionableClient {
 		return await response.json();
 	}
 
-	private async decrypt() {
-		const result = await this.execCliCommand('e2ee', 'decrypt');
+	private async execPagedApiCommand_<Result>(
+		method: 'GET',
+		route: string,
+		params: Record<string, string>,
+		deserializeItem: (data: Json)=> Result,
+	): Promise<Result[]> {
+		const searchParams = new URLSearchParams(params);
+
+		const results: Result[] = [];
+		let page = 0;
+		let hasMore = true;
+		for (; hasMore; page++) {
+			if (page > 0) {
+				searchParams.set('page', String(page));
+			}
+			searchParams.set('limit', '10');
+			const response = await this.execApiCommand_(
+				method, `${route}?${searchParams}`,
+			);
+			if (
+				typeof response !== 'object'
+				|| !('has_more' in response)
+				|| !('items' in response)
+				|| !Array.isArray(response.items)
+			) {
+				throw new Error(`Invalid response: ${JSON.stringify(response)}`);
+			}
+			hasMore = !!response.has_more;
+
+			for (const item of response.items) {
+				results.push(deserializeItem(item));
+			}
+		}
+
+		return results;
+	}
+
+	private async decrypt_() {
+		const result = await this.execCliCommand_('e2ee', 'decrypt');
 		if (!result.stdout.includes('Completed decryption.')) {
 			throw new Error(`Decryption did not complete: ${result.stdout}`);
 		}
@@ -208,19 +246,19 @@ class Client implements ActionableClient {
 
 		await this.tracker_.sync();
 
-		const result = await this.execCliCommand('sync');
+		const result = await this.execCliCommand_('sync');
 		if (result.stdout.match(/Last error:/i)) {
 			throw new Error(`Sync failed: ${result.stdout}`);
 		}
 
-		await this.decrypt();
+		await this.decrypt_();
 	}
 
 	public async createFolder(folder: FolderMetadata) {
 		logger.info('Create folder', folder.id, 'in', this.email);
 		await this.tracker_.createFolder(folder);
 
-		await this.execApiCommand('POST', '/folders', {
+		await this.execApiCommand_('POST', '/folders', {
 			id: folder.id,
 			title: folder.title,
 			parent_id: folder.parentId ?? '',
@@ -231,34 +269,35 @@ class Client implements ActionableClient {
 		logger.info('Create note', note.id, 'in', this.email);
 		await this.tracker_.createNote(note);
 
-		await this.execApiCommand('POST', '/notes', {
+		await this.execApiCommand_('POST', '/notes', {
 			id: note.id,
 			title: note.title,
 			body: note.body,
 			parent_id: note.parentId ?? '',
 		});
 		assert.equal(
-			(await this.execCliCommand('cat', note.id)).stdout,
+			(await this.execCliCommand_('cat', note.id)).stdout,
 			`${note.title}\n\n${note.body}`,
 			'note should exist',
 		);
 	}
 
 	public async deleteFolder(id: string) {
+		logger.info('Delete folder', id, 'in', this.email);
 		await this.tracker_.deleteFolder(id);
 
-		await this.execCliCommand('rmbook', '--permanent', '--force', id);
+		await this.execCliCommand_('rmbook', '--permanent', '--force', id);
 	}
 
 	public async shareFolder(id: string, shareWith: Client) {
 		await this.tracker_.shareFolder(id, shareWith);
 
 		logger.info('Share', id, 'with', shareWith.email);
-		await this.execCliCommand('share', 'add', id, shareWith.email);
+		await this.execCliCommand_('share', 'add', id, shareWith.email);
 		await this.sync();
 		await shareWith.sync();
 
-		const shareWithIncoming = JSON.parse((await shareWith.execCliCommand('share', 'list', '--json')).stdout);
+		const shareWithIncoming = JSON.parse((await shareWith.execCliCommand_('share', 'list', '--json')).stdout);
 		const pendingInvitations = shareWithIncoming.invitations.filter((invitation: unknown) => {
 			if (typeof invitation !== 'object' || !('accepted' in invitation)) {
 				throw new Error('Invalid invitation format');
@@ -277,61 +316,77 @@ class Client implements ActionableClient {
 			},
 		], 'there should be a single incoming share from the expected user');
 
-		await shareWith.execCliCommand('share', 'accept', id);
+		await shareWith.execCliCommand_('share', 'accept', id);
 	}
 
+
 	public async listNotes() {
-		const notes: NoteData[] = [];
-		let page = 0;
-		let hasMore = true;
-		for (; hasMore; page++) {
-			const pageQuery = page === 0 ? '' : `&page=${page}`;
-			const fields = 'id,parent_id,body,title';
-			const response = await this.execApiCommand(
-				'GET', `/notes?fields=${fields}&include_deleted=1&limit=4${pageQuery}`,
-			);
-			if (
-				typeof response !== 'object'
-				|| !('has_more' in response)
-				|| !('items' in response)
-				|| !Array.isArray(response.items)
-			) {
-				throw new Error(`Invalid response: ${JSON.stringify(response)}`);
-			}
-			hasMore = !!response.has_more;
+		const params = {
+			fields: 'id,parent_id,body,title',
+			include_deleted: '1',
+		};
+		return await this.execPagedApiCommand_(
+			'GET',
+			'/notes',
+			params,
+			item => ({
+				id: getStringProperty(item, 'id'),
+				parentId: getStringProperty(item, 'parent_id'),
+				title: getStringProperty(item, 'title'),
+				body: getStringProperty(item, 'body'),
+			}),
+		);
+	}
 
-			for (const item of response.items) {
-				notes.push({
-					id: getStringProperty(item, 'id'),
-					parentId: getStringProperty(item, 'parent_id'),
-					title: getStringProperty(item, 'title'),
-					body: getStringProperty(item, 'body'),
-				});
-			}
-		}
-
-		return notes;
+	public async listFolders() {
+		const params = {
+			fields: 'id,parent_id,title',
+			include_deleted: '1',
+		};
+		return await this.execPagedApiCommand_(
+			'GET',
+			'/folders',
+			params,
+			item => ({
+				id: getStringProperty(item, 'id'),
+				parentId: getStringProperty(item, 'parent_id'),
+				title: getStringProperty(item, 'title'),
+			}),
+		);
 	}
 
 	public async checkState(_allClients: Client[]) {
 		logger.info('Check state', this.email);
 
-		const notes = [...await this.listNotes()];
-		const expectedNotes = [...await this.tracker_.listNotes()];
-
-		const compare = (a: NoteData, b: NoteData) => {
+		type ItemSlice = { id: string };
+		const compare = (a: ItemSlice, b: ItemSlice) => {
 			if (a.id === b.id) return 0;
 			return a.id < b.id ? -1 : 1;
 		};
-		notes.sort(compare);
-		expectedNotes.sort(compare);
 
-		assert.deepEqual(notes, expectedNotes);
+		const checkNoteState = async () => {
+			const notes = [...await this.listNotes()];
+			const expectedNotes = [...await this.tracker_.listNotes()];
+
+			notes.sort(compare);
+			expectedNotes.sort(compare);
+
+			assert.deepEqual(notes, expectedNotes, 'should have the same notes as the expected state');
+		};
+
+		const checkFolderState = async () => {
+			const folders = [...await this.listFolders()];
+			const expectedFolders = [...await this.tracker_.listFolders()];
+
+			folders.sort(compare);
+			expectedFolders.sort(compare);
+
+			assert.deepEqual(folders, expectedFolders, 'should have the same folders as the expected state');
+		};
+
+		await checkNoteState();
+		await checkFolderState();
 	}
-//
-//	public async unshareFolder(id: string) {
-//		TODO(id);
-//	}
 }
 
 type CleanupTask = ()=> Promise<void>;
@@ -357,6 +412,11 @@ const createClientPool = async (
 				await client.checkState(clientPool);
 			}
 		},
+		syncAll: async () => {
+			for (const client of clientPool) {
+				await client.sync();
+			}
+		},
 	};
 };
 
@@ -379,6 +439,8 @@ class ActionTracker {
 
 	private checkRep_() {
 		const checkItem = (itemId: ItemId) => {
+			assert.match(itemId, /^[a-zA-Z0-9]{32}$/, 'item IDs should be 32 character alphanumeric strings');
+
 			const item = this.idToItem_.get(itemId);
 			assert.ok(!!item, `should find item with ID ${itemId}`);
 
@@ -393,7 +455,7 @@ class ActionTracker {
 			}
 		};
 
-		for (const childIds of this.tree_.keys()) {
+		for (const childIds of this.tree_.values()) {
 			for (const childId of childIds) {
 				assert.ok(this.idToItem_.has(childId), `root item ${childId} should exist`);
 
@@ -553,6 +615,18 @@ class ActionTracker {
 				this.checkRep_();
 				return Promise.resolve(notes);
 			},
+			listFolders: () => {
+				const folders = mapItems((item): FolderMetadata => {
+					return isFolder(item) ? {
+						id: item.id,
+						title: item.title,
+						parentId: item.parentId,
+					} : null;
+				}).filter(item => !!item);
+
+				this.checkRep_();
+				return Promise.resolve(folders);
+			},
 		};
 		return tracker;
 	}
@@ -567,7 +641,7 @@ const startServer = async (serverUrl: string, adminAuth: UserData) => {
 		env: { JOPLIN_IS_TESTING: '1' },
 		cwd: join(packagesDir, 'server'),
 		// For debugging:
-		// stderr: process.stderr,
+		stderr: process.stderr,
 		// stdout: process.stdout,
 	});
 
@@ -678,37 +752,38 @@ const main = async () => {
 
 		for (let i = 0; i < 3; i++) {
 			const client = clientPool.randomClient();
-			const actionTracker = client;
 			const folder1Id = uuid.create();
-			await actionTracker.createFolder({
+			await client.createFolder({
 				parentId: null,
 				id: folder1Id,
 				title: 'Test.',
 			});
-			await actionTracker.createFolder({
+			await client.createFolder({
 				parentId: folder1Id,
 				id: uuid.create(),
 				title: 'Test...',
 			});
-			await actionTracker.createNote({
+			await client.createNote({
 				parentId: folder1Id,
 				title: `Test (x${i})`,
 				body: 'Testing...',
 				id: uuid.create(),
 			});
-			await actionTracker.sync();
+			await client.sync();
 			await clientPool.checkState();
 
 			const other = clientPool.clients[0];
 			if (other !== client) {
-				await actionTracker.shareFolder(folder1Id, other);
-				await actionTracker.sync();
+				await client.shareFolder(folder1Id, other);
+				await client.sync();
 				await other.sync();
 				await clientPool.checkState();
 			}
 
-			await actionTracker.deleteFolder(folder1Id);
-			await actionTracker.sync();
+			await client.deleteFolder(folder1Id);
+			await client.sync();
+			await clientPool.syncAll();
+			await clientPool.checkState();
 		}
 	} catch (error) {
 		logger.error('ERROR', error);
