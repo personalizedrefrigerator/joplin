@@ -2,13 +2,16 @@ import ActionTracker from './ActionTracker';
 import Client from './Client';
 import { CleanupTask, FuzzContext } from './types';
 
+type AddCleanupTask = (task: CleanupTask)=> void;
+type ClientFilter = (client: Client)=> boolean;
+
 export default class ClientPool {
 	public static async create(
 		context: FuzzContext,
 		clientCount: number,
-		addCleanupTask: (task: CleanupTask)=> void,
+		addCleanupTask: AddCleanupTask,
 	) {
-		const actionTracker = new ActionTracker();
+		const actionTracker = new ActionTracker(context);
 		const clientPool: Client[] = [];
 		for (let i = 0; i < clientCount; i++) {
 			const client = await Client.create(actionTracker, context);
@@ -16,14 +19,18 @@ export default class ClientPool {
 			clientPool.push(client);
 		}
 
-		return new ClientPool(clientPool);
+		return new ClientPool(context, clientPool);
 	}
 	public constructor(
+		private readonly context_: FuzzContext,
 		public readonly clients: Client[],
 	) { }
 
-	public randomClient() {
-		return this.clients[Math.floor(Math.random() * this.clients.length)];
+	public randomClient(filter: ClientFilter = ()=>true) {
+		const clients = this.clients.filter(filter);
+		return clients[
+			this.context_.randInt(0, clients.length)
+		];
 	}
 
 	public async checkState() {

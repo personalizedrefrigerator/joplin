@@ -65,6 +65,7 @@ const main = async () => {
 			serverUrl: joplinServerUrl,
 			baseDir: profilesDirectory.path,
 			execApi: server.execApi.bind(server),
+			randInt: (a, b) => Math.floor((a - b) * Math.random() + b),
 		};
 		const clientPool = await ClientPool.create(
 			fuzzContext,
@@ -72,37 +73,76 @@ const main = async () => {
 			task => { cleanupTasks.push(task); },
 		);
 
-		for (let i = 0; i < 3; i++) {
+		const sharedFolders = new Set<string>();
+
+		for (let i = 0; i < 20; i++) {
 			const client = clientPool.randomClient();
-			const folder1Id = uuid.create();
-			await client.createFolder({
-				parentId: null,
-				id: folder1Id,
-				title: 'Test.',
-			});
-			await client.createFolder({
-				parentId: folder1Id,
-				id: uuid.create(),
-				title: 'Test...',
-			});
-			await client.createNote({
-				parentId: folder1Id,
-				title: `Test (x${i})`,
-				body: 'Testing...',
-				id: uuid.create(),
-			});
-			await client.sync();
-			await clientPool.checkState();
 
-			const other = clientPool.clients[0];
-			if (other !== client) {
-				await client.shareFolder(folder1Id, other);
-				await client.sync();
-				await other.sync();
-				await clientPool.checkState();
-			}
+			const actions = {
+				newSubfolder: async () => {
+					const folderId = uuid.create();
+					const parent = await client.randomFolder({});
+					await client.createFolder({
+						parentId: parent?.id ?? null,
+						id: folderId,
+						title: 'Some title',
+					});
+				},
+				newToplevelFolder: async () => {
+					const folderId = uuid.create();
+					await client.createFolder({
+						parentId: null,
+						id: folderId,
+						title: `Folder ${i}`,
+					});
+				},
+				newNote: async () => {
+					let parentId = (await client.randomFolder({}))?.id;
 
-			await client.deleteFolder(folder1Id);
+					// Handles the case where no parent folder exists
+					if (!parentId) {
+						parentId = uuid.create();
+						await client.createFolder({
+							parentId: null,
+							id: parentId,
+							title: 'Test folder',
+						});
+					}
+
+					await client.createNote({
+						parentId: parentId,
+						title: `Test (x${i})`,
+						body: 'Testing...',
+						id: uuid.create(),
+					});
+				},
+				shareFolder: async () => {
+					const target = await client.randomFolder({
+						filter: candidate => (
+							!candidate.parentId && !sharedFolders.has(candidate.id)
+						),
+					});
+
+					if (target) {
+						const other = clientPool.randomClient(c => c !== client);
+						await client.shareFolder(target.id, other);
+						sharedFolders.add(target.id);
+					}
+				},
+				deleteFolder: async () => {
+					const target = await client.randomFolder({});
+					if (target) {
+						await client.deleteFolder(target.id);
+					}
+				},
+			};
+
+			const actionKeys = [...Object.keys(actions)] as (keyof typeof actions)[];
+			const randomAction = actionKeys[fuzzContext.randInt(0, actionKeys.length)];
+
+			logger.info(`Action ${i}: ${randomAction}`);
+			await actions[randomAction]();
+
 			await client.sync();
 			await clientPool.syncAll();
 			await clientPool.checkState();
@@ -118,15 +158,6 @@ const main = async () => {
 		logger.info('Cleanup complete');
 		process.exit();
 	}
-//	const randomClient = () => clientPool[Math.floor(Math.random() * clientPool.length)];
-//
-//	const maxActions = Math.ceil(Math.random() * 100);
-//	for (let i = 0; i < maxActions; i++) {
-//		const action = randomAction();
-//		const client = randomClient();
-//		client.applyAction(action);
-//		client.checkRep();
-//	}
 };
 
 void main();

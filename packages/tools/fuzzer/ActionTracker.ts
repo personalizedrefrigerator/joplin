@@ -1,11 +1,11 @@
 import { strict as assert } from 'assert';
-import { ActionableClient, FolderMetadata, ItemId, NoteData, TreeItem, isFolder } from './types';
+import { ActionableClient, FolderMetadata, FuzzContext, ItemId, NoteData, TreeItem, isFolder } from './types';
 import type Client from './Client';
 
 class ActionTracker {
 	private idToItem_: Map<ItemId, TreeItem> = new Map();
 	private tree_: Map<string, ItemId[]> = new Map();
-	public constructor() {}
+	public constructor(private readonly context_: FuzzContext) {}
 
 	private checkRep_() {
 		const checkItem = (itemId: ItemId) => {
@@ -197,6 +197,15 @@ class ActionTracker {
 
 				this.checkRep_();
 				return Promise.resolve(folders);
+			},
+			randomFolder: async (options) => {
+				let folders = await tracker.listFolders();
+				if (options.filter) {
+					folders = folders.filter(options.filter);
+				}
+
+				const folderIndex = this.context_.randInt(0, folders.length);
+				return folders.length ? folders[folderIndex] : null;
 			},
 		};
 		return tracker;

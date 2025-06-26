@@ -1,5 +1,5 @@
 import uuid, { createSecureRandom } from '@joplin/lib/uuid';
-import { ActionableClient, FolderMetadata, FuzzContext, HttpMethod, Json, NoteData, UserData } from './types';
+import { ActionableClient, FolderMetadata, FuzzContext, HttpMethod, Json, NoteData, RandomFolderOptions, UserData } from './types';
 import { join } from 'path';
 import { mkdir } from 'fs-extra';
 import getStringProperty from './utils/getStringProperty';
@@ -299,6 +299,10 @@ class Client implements ActionableClient {
 				title: getStringProperty(item, 'title'),
 			}),
 		);
+	}
+
+	public async randomFolder(options: RandomFolderOptions) {
+		return this.tracker_.randomFolder(options);
 	}
 
 	public async checkState(_allClients: Client[]) {

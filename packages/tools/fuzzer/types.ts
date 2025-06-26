@@ -29,6 +29,11 @@ export interface FuzzContext {
 	serverUrl: string;
 	baseDir: string;
 	execApi: (method: HttpMethod, route: string, debugAction: Json)=> Promise<Json>;
+	randInt: (low: number, high: number)=> number;
+}
+
+export interface RandomFolderOptions {
+	filter?: (folder: FolderMetadata)=> boolean;
 }
 
 export interface ActionableClient {
@@ -38,6 +43,7 @@ export interface ActionableClient {
 	shareFolder(id: string, shareWith: Client): Promise<void>;
 	listNotes(): Promise<NoteData[]>;
 	listFolders(): Promise<FolderMetadata[]>;
+	randomFolder(options: RandomFolderOptions): Promise<FolderMetadata>;
 	sync(): Promise<void>;
 }
 
