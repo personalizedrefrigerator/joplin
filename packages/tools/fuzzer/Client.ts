@@ -152,12 +152,9 @@ class Client implements ActionableClient {
 		const searchParams = new URLSearchParams(params);
 
 		const results: Result[] = [];
-		let page = 0;
 		let hasMore = true;
-		for (; hasMore; page++) {
-			if (page > 0) {
-				searchParams.set('page', String(page));
-			}
+		for (let page = 1; hasMore; page++) {
+			searchParams.set('page', String(page));
 			searchParams.set('limit', '10');
 			const response = await this.execApiCommand_(
 				method, `${route}?${searchParams}`,
