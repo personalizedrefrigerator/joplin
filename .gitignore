@@ -1617,7 +1617,15 @@ packages/tools/checkIgnoredFiles.js
 packages/tools/checkLibPaths.test.js
 packages/tools/checkLibPaths.js
 packages/tools/convertThemesToCss.js
+packages/tools/fuzzer/ActionTracker.js
+packages/tools/fuzzer/Client.js
+packages/tools/fuzzer/ClientPool.js
+packages/tools/fuzzer/Server.js
+packages/tools/fuzzer/constants.js
 packages/tools/fuzzer/sync-fuzzer.js
+packages/tools/fuzzer/types.js
+packages/tools/fuzzer/utils/getProperty.js
+packages/tools/fuzzer/utils/getStringProperty.js
 packages/tools/generate-database-types.js
 packages/tools/generate-images.js
 packages/tools/git-changelog.test.js
