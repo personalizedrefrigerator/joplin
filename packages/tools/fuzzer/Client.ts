@@ -263,8 +263,10 @@ class Client implements ActionableClient {
 	}
 
 	public async moveItem(itemId: ItemId, newParentId: ItemId) {
+		logger.info('Move', itemId, 'to', newParentId);
 		await this.tracker_.moveItem(itemId, newParentId);
-		await this.execCliCommand_('mv', itemId, newParentId);
+		const movingToRoot = !newParentId;
+		await this.execCliCommand_('mv', itemId, movingToRoot ? 'root' : newParentId);
 	}
 
 	public async listNotes() {

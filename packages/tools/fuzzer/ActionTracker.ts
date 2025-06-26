@@ -286,8 +286,14 @@ class ActionTracker {
 			moveItem: (itemId, newParentId) => {
 				const item = this.idToItem_.get(itemId);
 				assert.ok(item, `item with ${itemId} should exist`);
-				const parent = this.idToItem_.get(newParentId);
-				assert.ok(parent, `parent with ID ${newParentId} should exist`);
+
+				if (newParentId) {
+					const parent = this.idToItem_.get(newParentId);
+					assert.ok(parent, `parent with ID ${newParentId} should exist`);
+				} else {
+					assert.equal(newParentId, '', 'should be a toplevel folder if parentId is falsy');
+				}
+
 				if (isFolder(item)) {
 					assert.equal(item.isShareRoot, false, 'cannot move toplevel shared folders without first unsharing');
 				}

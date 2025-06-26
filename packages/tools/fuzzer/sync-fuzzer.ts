@@ -29,14 +29,30 @@ const createProfilesDirectory = async () => {
 };
 
 const doRandomAction = async (context: FuzzContext, client: Client, clientPool: ClientPool) => {
+	const selectOrCreateParentFolder = async () => {
+		let parentId = (await client.randomFolder({}))?.id;
+
+		// Create a toplevel folder to serve as this
+		// folder's parent if none exist yet
+		if (!parentId) {
+			parentId = uuid.create();
+			await client.createFolder({
+				parentId: '',
+				id: parentId,
+				title: 'Parent folder',
+			});
+		}
+
+		return parentId;
+	};
+
 	const actions = {
 		newSubfolder: async () => {
 			const folderId = uuid.create();
-			const parent = await client.randomFolder({});
-			if (!parent) return false;
+			const parentId = await selectOrCreateParentFolder();
 
 			await client.createFolder({
-				parentId: parent.id,
+				parentId: parentId,
 				id: folderId,
 				title: 'Some title',
 			});
@@ -54,9 +70,7 @@ const doRandomAction = async (context: FuzzContext, client: Client, clientPool: 
 			return true;
 		},
 		newNote: async () => {
-			const parentId = (await client.randomFolder({}))?.id;
-			if (!parentId) return false;
-
+			const parentId = await selectOrCreateParentFolder();
 			await client.createNote({
 				parentId: parentId,
 				title: `Test (x${context.randInt(0, 1000)})`,
@@ -87,7 +101,8 @@ const doRandomAction = async (context: FuzzContext, client: Client, clientPool: 
 		},
 		moveFolderToToplevel: async () => {
 			const target = await client.randomFolder({
-				filter: item => !item.isShareRoot,
+				// Don't choose items that are already toplevel
+				filter: item => !!item.parentId,
 			});
 			if (!target) return false;
 
