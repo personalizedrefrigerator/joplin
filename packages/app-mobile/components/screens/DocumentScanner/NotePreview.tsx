@@ -49,6 +49,15 @@ const useStyles = (themeId: number) => {
 
 			},
 			tagEditor: {},
+			folderPickerLine: {
+				flexDirection: 'row',
+				justifyContent: 'space-between',
+				gap: theme.margin,
+				margin: theme.margin,
+			},
+			folderPicker: {
+				flexGrow: 1,
+			},
 		});
 	}, [themeId]);
 };
@@ -81,7 +90,7 @@ const NotePreview: React.FC<Props> = ({
 			value={title}
 			onChangeText={setTitle}
 		/>
-		<View>
+		<View style={styles.folderPickerLine}>
 			<PhotoPreview
 				source={sourceImage}
 				backgroundStyle={styles.photoBackground}
