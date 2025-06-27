@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useCallback } from 'react';
 import { themeStyle } from '../../global-style';
 import { StyleSheet, View } from 'react-native';
 import { CameraResult } from '../../CameraView/types';
@@ -9,14 +9,23 @@ import TagEditor from '../../TagEditor';
 import { AppState } from '../../../utils/types';
 import { connect } from 'react-redux';
 import { TagEntity } from '@joplin/lib/services/database/types';
+import { Button } from 'react-native-paper';
+import { _ } from '@joplin/lib/locale';
+
+interface CreateNoteEvent {
+	sourceImage: CameraResult;
+	title: string;
+	tags: string[];
+}
 
 interface Props {
 	themeId: number;
 	photoIndex: number;
 	titleTemplate: string;
 	sourceImage: CameraResult;
-
 	allTags: TagEntity[];
+
+	onCreateNote: (event: CreateNoteEvent)=> void;
 }
 
 const useStyles = (themeId: number) => {
@@ -38,10 +47,18 @@ const useStyles = (themeId: number) => {
 	}, [themeId]);
 };
 
-const NotePreview: React.FC<Props> = ({ themeId, sourceImage, photoIndex, allTags }) => {
+const NotePreview: React.FC<Props> = ({ themeId, sourceImage, photoIndex, allTags, onCreateNote }) => {
 	const styles = useStyles(themeId);
 	const [title, setTitle] = useState('...');
 	const [tags, setTags] = useState([]);
+
+	const onNewNote = useCallback(() => {
+		onCreateNote({
+			tags,
+			title,
+			sourceImage,
+		});
+	}, [onCreateNote, tags, title, sourceImage]);
 
 	return <>
 		<TextInput
@@ -65,6 +82,7 @@ const NotePreview: React.FC<Props> = ({ themeId, sourceImage, photoIndex, allTag
 			style={styles.tagEditor}
 			onTagsChange={setTags}
 		/>
+		<Button onPress={onNewNote}>{_('Create note')}</Button>
 	</>;
 };
 

@@ -42,6 +42,13 @@ const DocumentScanner: React.FC<Props> = ({ themeId, dispatch }) => {
 		});
 	}, []);
 
+	const onCreateNote = useCallback(() => {
+		// TODO: Show toast message?
+		// TODO: Remove last photo
+		onDeleteLastPhoto();
+		// TODO: Hide the scanner if out of photos
+	}, [onDeleteLastPhoto]);
+
 	const content = photos.length === 0 ? (
 		<CameraViewMultiPage
 			themeId={themeId}
@@ -56,6 +63,7 @@ const DocumentScanner: React.FC<Props> = ({ themeId, dispatch }) => {
 			photoIndex={photos.length}
 			titleTemplate={'photo-test'}
 			sourceImage={photos[photos.length - 1]}
+			onCreateNote={onCreateNote}
 		/>
 	</>;
 
