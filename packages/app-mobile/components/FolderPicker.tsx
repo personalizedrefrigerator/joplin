@@ -107,7 +107,7 @@ const FolderPicker: FunctionComponent<FolderPickerProps> = ({
 				style={{ alignSelf: 'flex-end' }}
 				icon='plus'
 				onPress={onNewFolderPress}
-			>{_('Create new')}</Button>
+			>{_('Create new notebook')}</Button>
 		</View>;
 	} else {
 		return dropdown;

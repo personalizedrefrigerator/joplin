@@ -100,7 +100,7 @@ const NotePreview: React.FC<Props> = ({
 			<FolderPicker
 				themeId={themeId}
 				darkText
-				placeholder={_('Notebook')}
+				placeholder={_('Select notebook')}
 				folders={allFolders}
 				onValueChange={setSelectedFolderId}
 				selectedFolderId={selectedFolderId}
