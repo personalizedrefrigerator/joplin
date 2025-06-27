@@ -8,9 +8,11 @@ import PhotoPreview from '../../CameraView/PhotoPreview';
 import TagEditor from '../../TagEditor';
 import { AppState } from '../../../utils/types';
 import { connect } from 'react-redux';
-import { TagEntity } from '@joplin/lib/services/database/types';
+import { FolderEntity, TagEntity } from '@joplin/lib/services/database/types';
 import { Button } from 'react-native-paper';
 import { _ } from '@joplin/lib/locale';
+import FolderPicker from '../../FolderPicker';
+import Folder from '@joplin/lib/models/Folder';
 
 interface CreateNoteEvent {
 	sourceImage: CameraResult;
@@ -24,6 +26,7 @@ interface Props {
 	titleTemplate: string;
 	sourceImage: CameraResult;
 	allTags: TagEntity[];
+	allFolders: FolderEntity[];
 
 	onCreateNote: (event: CreateNoteEvent)=> void;
 }
@@ -50,10 +53,13 @@ const useStyles = (themeId: number) => {
 	}, [themeId]);
 };
 
-const NotePreview: React.FC<Props> = ({ themeId, sourceImage, photoIndex, allTags, onCreateNote }) => {
+const NotePreview: React.FC<Props> = ({
+	themeId, sourceImage, photoIndex, allTags, onCreateNote, allFolders,
+}) => {
 	const styles = useStyles(themeId);
 	const [title, setTitle] = useState('...');
 	const [tags, setTags] = useState([]);
+	const [selectedFolderId, setSelectedFolderId] = useState('');
 
 	const onNewNote = useCallback(() => {
 		onCreateNote({
@@ -62,6 +68,11 @@ const NotePreview: React.FC<Props> = ({ themeId, sourceImage, photoIndex, allTag
 			sourceImage,
 		});
 	}, [onCreateNote, tags, title, sourceImage]);
+
+	const onNewFolder = useCallback(async (title: string) => {
+		const folder = await Folder.save({ title });
+		setSelectedFolderId(folder.id);
+	}, []);
 
 	return <ScrollView style={styles.rootScrollView}>
 		<TextInput
@@ -76,6 +87,16 @@ const NotePreview: React.FC<Props> = ({ themeId, sourceImage, photoIndex, allTag
 				backgroundStyle={styles.photoBackground}
 				textStyle={styles.photoLabel}
 				label={photoIndex}
+			/>
+			<FolderPicker
+				themeId={themeId}
+				darkText
+				placeholder={_('Notebook')}
+				folders={allFolders}
+				onValueChange={setSelectedFolderId}
+				selectedFolderId={selectedFolderId}
+				mustSelect={true}
+				onNewFolder={onNewFolder}
 			/>
 		</View>
 		<TagEditor
@@ -92,4 +113,6 @@ const NotePreview: React.FC<Props> = ({ themeId, sourceImage, photoIndex, allTag
 
 export default connect((state: AppState) => ({
 	allTags: state.tags,
+	allFolders: state.folders,
+	themeId: state.settings.theme,
 }))(NotePreview);

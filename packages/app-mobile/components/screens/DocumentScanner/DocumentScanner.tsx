@@ -59,7 +59,6 @@ const DocumentScanner: React.FC<Props> = ({ themeId, dispatch }) => {
 	) : <>
 		<ScreenHeader title={_('Note preview')} onDeleteButtonPress={onDeleteLastPhoto}/>
 		<NotePreview
-			themeId={themeId}
 			photoIndex={photos.length}
 			titleTemplate={'photo-test'}
 			sourceImage={photos[photos.length - 1]}
@@ -73,5 +72,5 @@ const DocumentScanner: React.FC<Props> = ({ themeId, dispatch }) => {
 };
 
 export default connect((state: AppState) => ({
-	theme: state.settings.theme,
+	themeId: state.settings.theme,
 }))(DocumentScanner);
