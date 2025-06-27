@@ -64,6 +64,7 @@ interface ScreenHeaderProps {
 	onSaveButtonPress: OnPressCallback;
 	sortButton_press?: OnPressCallback;
 	onSearchButtonPress?: OnPressCallback;
+	onDeleteButtonPress?: OnPressCallback;
 
 	showSideMenuButton?: boolean;
 	showSearchButton?: boolean;
@@ -389,6 +390,22 @@ class ScreenHeaderComponent extends PureComponent<ScreenHeaderProps, ScreenHeade
 		}
 
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
+		const customDeleteButton = (styles: any, onPress: OnPressCallback) => {
+			return (
+				<IconButton
+					onPress={onPress}
+
+					description={_('Delete')}
+					themeId={themeId}
+					contentWrapperStyle={styles.iconButton}
+
+					iconName='fas trash'
+					iconStyle={styles.topIcon}
+				/>
+			);
+		};
+
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 		const pluginPanelToggleButton = (styles: any, onPress: OnPressCallback) => {
 			const allPluginViews = Object.values(this.props.plugins).map(plugin => Object.values(plugin.views)).flat();
 			const allVisiblePanels = allPluginViews.filter(
@@ -610,6 +627,7 @@ class ScreenHeaderComponent extends PureComponent<ScreenHeaderProps, ScreenHeade
 		const showSearchButton = !!this.props.showSearchButton && !this.props.noteSelectionEnabled;
 		const showContextMenuButton = this.props.showContextMenuButton !== false;
 		const showBackButton = !!this.props.noteSelectionEnabled || this.props.showBackButton !== false;
+		const showStandardDeleteButton = !this.props.onDeleteButtonPress && !selectedFolderInTrash && this.props.noteSelectionEnabled;
 
 		let backButtonDisabled = !this.props.historyCanGoBack;
 		if (this.props.noteSelectionEnabled) backButtonDisabled = false;
@@ -621,7 +639,8 @@ class ScreenHeaderComponent extends PureComponent<ScreenHeaderProps, ScreenHeade
 		const betaIconComp = betaIconButton();
 		const selectAllButtonComp = !showSelectAllButton ? null : selectAllButton(this.styles(), () => this.selectAllButton_press());
 		const searchButtonComp = !showSearchButton ? null : searchButton(this.styles(), () => this.searchButton_press());
-		const deleteButtonComp = !selectedFolderInTrash && this.props.noteSelectionEnabled ? deleteButton(this.styles(), () => this.deleteButton_press(), headerItemDisabled) : null;
+		const customDeleteButtonComp = this.props.onDeleteButtonPress ? customDeleteButton(this.styles(), this.props.onDeleteButtonPress) : null;
+		const deleteButtonComp = showStandardDeleteButton ? deleteButton(this.styles(), () => this.deleteButton_press(), headerItemDisabled) : null;
 		const restoreButtonComp = selectedFolderInTrash && this.props.noteSelectionEnabled ? restoreButton(this.styles(), () => this.restoreButton_press(), headerItemDisabled) : null;
 		const duplicateButtonComp = !selectedFolderInTrash && this.props.noteSelectionEnabled ? duplicateButton(this.styles(), () => this.duplicateButton_press(), headerItemDisabled) : null;
 		const sortButtonComp = !this.props.noteSelectionEnabled && this.props.sortButton_press ? sortButton(this.styles(), () => this.props.sortButton_press()) : null;
@@ -673,6 +692,7 @@ class ScreenHeaderComponent extends PureComponent<ScreenHeaderProps, ScreenHeade
 					{selectAllButtonComp}
 					{searchButtonComp}
 					{deleteButtonComp}
+					{customDeleteButtonComp}
 					{restoreButtonComp}
 					{duplicateButtonComp}
 					{sortButtonComp}
