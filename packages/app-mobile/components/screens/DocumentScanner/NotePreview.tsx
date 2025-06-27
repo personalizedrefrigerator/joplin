@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useMemo, useState, useCallback } from 'react';
 import { themeStyle } from '../../global-style';
-import { StyleSheet, View } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import { CameraResult } from '../../CameraView/types';
 import TextInput from '../../TextInput';
 import PhotoPreview from '../../CameraView/PhotoPreview';
@@ -36,6 +36,9 @@ const useStyles = (themeId: number) => {
 				color: theme.color,
 				fontSize: theme.fontSize,
 			},
+			rootScrollView: {
+				flex: 1,
+			},
 			photoBackground: {
 
 			},
@@ -60,7 +63,7 @@ const NotePreview: React.FC<Props> = ({ themeId, sourceImage, photoIndex, allTag
 		});
 	}, [onCreateNote, tags, title, sourceImage]);
 
-	return <>
+	return <ScrollView style={styles.rootScrollView}>
 		<TextInput
 			style={styles.titleInput}
 			themeId={themeId}
@@ -81,9 +84,10 @@ const NotePreview: React.FC<Props> = ({ themeId, sourceImage, photoIndex, allTag
 			allTags={allTags}
 			style={styles.tagEditor}
 			onTagsChange={setTags}
+			nestedScrollingEnabled={true}
 		/>
 		<Button onPress={onNewNote}>{_('Create note')}</Button>
-	</>;
+	</ScrollView>;
 };
 
 export default connect((state: AppState) => ({

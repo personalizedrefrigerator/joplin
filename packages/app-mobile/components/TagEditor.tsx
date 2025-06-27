@@ -14,6 +14,9 @@ interface Props {
 	allTags: TagEntity[];
 	style: ViewStyle;
 	onTagsChange: (newTags: string[])=> void;
+
+	// Forwarded ScrollView props
+	nestedScrollingEnabled?: boolean;
 }
 
 const useStyles = (themeId: number) => {
@@ -196,6 +199,7 @@ const TagEditor: React.FC<Props> = props => {
 			onItemSelected={onComboBoxSelect}
 			onAddItem={onAddTag}
 			canAddItem={onCanAddTag}
+			nestedScrollingEnabled={props.nestedScrollingEnabled}
 			style={styles.tagSearch}
 			placeholder={_('Search tags')}
 		/>

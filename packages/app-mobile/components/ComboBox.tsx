@@ -25,6 +25,10 @@ interface BaseProps {
 	placeholder: string;
 	onItemSelected: OnItemSelected;
 	style: ViewStyle;
+
+	// Forwarded ScrollView props -- must be set on Android if included within another
+	// ScrollView
+	nestedScrollingEnabled?: boolean;
 }
 
 type Props = BaseProps & ({
@@ -243,7 +247,7 @@ const useSearchResultContainerComponent = (
 
 
 const ComboBox: React.FC<Props> = ({
-	themeId, items, onItemSelected: propsOnItemSelected, placeholder, onAddItem, canAddItem, style: rootStyle,
+	themeId, items, onItemSelected: propsOnItemSelected, placeholder, onAddItem, canAddItem, style: rootStyle, nestedScrollingEnabled,
 }) => {
 	const { styles, menuItemHeight } = useStyles(themeId);
 	const [search, setSearch] = useState('');
@@ -349,6 +353,7 @@ const ComboBox: React.FC<Props> = ({
 			aria-setsize={results.length}
 			aria-activedescendant={activeId}
 			nativeID={`menuBox-${baseId}`}
+			nestedScrollEnabled={nestedScrollingEnabled}
 
 			style={styles.searchResults}
 			keyExtractor={optionKeyExtractor}
