@@ -50,18 +50,6 @@ const NoteTagsDialogComponent: React.FC<Props> = props => {
 		}
 	}, [noteId]);
 
-	const onAddTag = useCallback((tag: string) => {
-		setNoteTags(oldTags => {
-			return oldTags.includes(tag) ? oldTags : [...oldTags, tag];
-		});
-	}, []);
-
-	const onRemoveTag = useCallback((tag: string) => {
-		setNoteTags(oldTags => {
-			return oldTags.filter(other => other !== tag);
-		});
-	}, []);
-
 	return <ModalDialog
 		themeId={props.themeId}
 		onOkPress={onOkayPress}
@@ -74,9 +62,8 @@ const NoteTagsDialogComponent: React.FC<Props> = props => {
 			themeId={props.themeId}
 			tags={noteTags}
 			allTags={props.tags}
-			onRemoveTag={onRemoveTag}
+			onTagsChange={setNoteTags}
 			style={{ flex: 1 }}
-			onAddTag={onAddTag}
 		/>
 	</ModalDialog>;
 };

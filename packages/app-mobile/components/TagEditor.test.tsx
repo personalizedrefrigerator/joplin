@@ -3,7 +3,7 @@ import { fireEvent, render, screen } from '@testing-library/react-native';
 import createMockReduxStore from '../utils/testing/createMockReduxStore';
 import TestProviderStack from './testing/TestProviderStack';
 import { TagEntity } from '@joplin/lib/services/database/types';
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import TagEditor from './TagEditor';
 import Setting from '@joplin/lib/models/Setting';
 
@@ -19,13 +19,6 @@ const store = createMockReduxStore();
 const WrappedTagEditor: React.FC<WrapperProps> = props => {
 	const [tags, setTags] = useState(props.initialTags);
 
-	const onAddTag = useCallback((tag: string) => {
-		setTags(tags => [...tags, tag]);
-	}, []);
-	const onRemoveTag = useCallback((tag: string) => {
-		setTags(tags => tags.filter(t => t !== tag));
-	}, []);
-
 	useEffect(() => {
 		props.onTagsChanged(tags);
 	}, [tags, props.onTagsChanged]);
@@ -34,8 +27,7 @@ const WrappedTagEditor: React.FC<WrapperProps> = props => {
 		<TagEditor
 			themeId={Setting.THEME_LIGHT}
 			style={emptyStyle}
-			onRemoveTag={onRemoveTag}
-			onAddTag={onAddTag}
+			onTagsChange={setTags}
 			allTags={props.allTags}
 			tags={tags}
 		/>

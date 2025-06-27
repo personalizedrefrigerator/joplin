@@ -13,8 +13,7 @@ interface Props {
 	tags: string[];
 	allTags: TagEntity[];
 	style: ViewStyle;
-	onRemoveTag: (tag: string)=> void;
-	onAddTag: (tag: string)=> void;
+	onTagsChange: (newTags: string[])=> void;
 }
 
 const useStyles = (themeId: number) => {
@@ -161,8 +160,12 @@ const TagEditor: React.FC<Props> = props => {
 	}, [props.tags, props.allTags]);
 
 	const onAddTag = useCallback((title: string) => {
-		props.onAddTag(normalizeTag(title));
-	}, [props.onAddTag]);
+		props.onTagsChange([...props.tags, normalizeTag(title)]);
+	}, [props.tags, props.onTagsChange]);
+
+	const onRemoveTag = useCallback((title: string) => {
+		props.onTagsChange(props.tags.filter(tag => tag !== title));
+	}, [props.tags, props.onTagsChange]);
 
 	const onComboBoxSelect = useCallback((item: { title: string }) => {
 		onAddTag(item.title);
@@ -184,7 +187,7 @@ const TagEditor: React.FC<Props> = props => {
 			themeId={props.themeId}
 			styles={styles}
 			tags={props.tags}
-			onRemoveTag={props.onRemoveTag}
+			onRemoveTag={onRemoveTag}
 		/>
 		<View style={styles.divider}/>
 		<Text style={styles.header} role='heading'>{_('Add tags:')}</Text>
