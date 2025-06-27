@@ -116,7 +116,7 @@ const doRandomAction = async (context: FuzzContext, client: Client, clientPool: 
 	let result = false;
 	while (!result) { // Loop until an action was done
 		const randomAction = actionKeys[context.randInt(0, actionKeys.length)];
-		logger.info(`Action: ${randomAction}`);
+		logger.info(`Action: ${randomAction} in ${client.email}`);
 		result = await actions[randomAction]();
 		if (!result) {
 			logger.info(`  ${randomAction} was skipped.`);
