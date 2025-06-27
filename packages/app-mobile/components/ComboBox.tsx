@@ -119,24 +119,30 @@ const useSelectedIndex = (search: string, searchResults: Option[]) => {
 
 const useStyles = (themeId: number) => {
 	const { fontScale } = useWindowDimensions();
-	const menuItemHeight = 44 * fontScale;
+	const menuItemHeight = 42 * fontScale;
 	const theme = themeStyle(themeId);
 
 	const styles = React.useMemo(() => {
-		const borderRadius = 18;
+		const borderRadius = 6;
 		return StyleSheet.create({
 			root: {
 				height: 200,
 				flexDirection: 'column',
 				overflow: 'hidden',
-			},
-			searchInputContainer: {
+
 				borderRadius,
-				borderBottomLeftRadius: 0,
-				borderBottomRightRadius: 0,
 				backgroundColor: theme.backgroundColor,
 				borderColor: theme.dividerColor,
 				borderWidth: 1,
+			},
+			searchInputContainer: {
+				borderRadius,
+				backgroundColor: theme.backgroundColor,
+				borderColor: theme.dividerColor,
+				borderWidth: 1,
+				borderTopWidth: 0,
+				borderLeftWidth: 0,
+				borderRightWidth: 0,
 			},
 			searchInput: {
 				minHeight: menuItemHeight,
@@ -144,18 +150,12 @@ const useStyles = (themeId: number) => {
 			searchResults: {
 				flexGrow: 1,
 				flexShrink: 1,
-				borderColor: theme.dividerColor,
-				borderWidth: 1,
-				borderTopWidth: 0,
-				borderBottomLeftRadius: borderRadius,
-				borderBottomRightRadius: borderRadius,
 			},
 			optionIcon: {
 				color: theme.color,
 				fontSize: theme.fontSize,
-				width: 30,
-				paddingLeft: 4,
-				paddingRight: 4,
+				paddingLeft: 8,
+				paddingRight: 8,
 			},
 			optionLabel: {
 				fontSize: theme.fontSize,
@@ -164,10 +164,12 @@ const useStyles = (themeId: number) => {
 			},
 			optionContent: {
 				flexDirection: 'row',
-				paddingRight: theme.marginRight,
-				paddingLeft: theme.marginLeft,
-				height: menuItemHeight,
 				alignItems: 'center',
+				borderRadius,
+
+				height: menuItemHeight - theme.margin,
+				marginTop: theme.margin / 2,
+				marginBottom: theme.margin / 2,
 			},
 			optionContentSelected: {
 				backgroundColor: theme.selectedColor,
@@ -195,7 +197,7 @@ const SearchResult: React.FC<SearchResultProps> = ({
 		name={iconName}
 		// Description is provided by adjacent text
 		accessibilityLabel={null}
-	/> : <View style={styles.optionIcon}/>;
+	/> : null;
 
 	return (
 		<View style={[styles.optionContent, selected && styles.optionContentSelected]}>
