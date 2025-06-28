@@ -100,7 +100,7 @@ const FolderPicker: FunctionComponent<FolderPickerProps> = ({
 		/>
 	);
 
-	if (onNewFolderPress) {
+	if (onNewFolder) {
 		return <View style={{ flexDirection: 'column', flex: 1 }}>
 			{dropdown}
 			<Button
