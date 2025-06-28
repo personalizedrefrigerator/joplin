@@ -5,7 +5,7 @@ import { ScrollView, StyleSheet, View } from 'react-native';
 import { CameraResult } from '../../CameraView/types';
 import TextInput from '../../TextInput';
 import PhotoPreview from '../../CameraView/PhotoPreview';
-import TagEditor from '../../TagEditor';
+import TagEditor, { TagEditorMode } from '../../TagEditor';
 import { AppState } from '../../../utils/types';
 import { connect } from 'react-redux';
 import { FolderEntity, TagEntity } from '@joplin/lib/services/database/types';
@@ -62,6 +62,11 @@ const useStyles = (themeId: number) => {
 	}, [themeId]);
 };
 
+const tagSearchResultsProps = {
+	// Required on Android when including one <ScrollView> inside another:
+	nestedScrollEnabled: true,
+};
+
 const NotePreview: React.FC<Props> = ({
 	themeId, sourceImage, photoIndex, allTags, onCreateNote, allFolders,
 }) => {
@@ -111,10 +116,11 @@ const NotePreview: React.FC<Props> = ({
 		<TagEditor
 			themeId={themeId}
 			tags={tags}
+			mode={TagEditorMode.Compact}
 			allTags={allTags}
 			style={styles.tagEditor}
 			onTagsChange={setTags}
-			nestedScrollingEnabled={true}
+			searchResultProps={tagSearchResultsProps}
 		/>
 		<Button onPress={onNewNote}>{_('Create note')}</Button>
 	</ScrollView>;
