@@ -22,6 +22,7 @@ const useStyles = (themeId: number, hasContent: boolean) => {
 			root: {
 				flexDirection: 'row',
 				justifyContent: 'center',
+				alignItems: 'center',
 			},
 			inputStyle: {
 				fontSize: theme.fontSize,
@@ -37,13 +38,12 @@ const useStyles = (themeId: number, hasContent: boolean) => {
 				opacity: 0,
 			},
 			icon: {
+				color: theme.colorFaded,
 				fontSize: theme.fontSizeLarger,
 				width: 32,
-				height: 32,
-				alignContent: 'center',
-				justifyContent: 'center',
+				verticalAlign: 'middle',
 				textAlign: 'center',
-				color: theme.colorFaded,
+				alignContent: 'center',
 			},
 		});
 	}, [themeId, hasContent]);
