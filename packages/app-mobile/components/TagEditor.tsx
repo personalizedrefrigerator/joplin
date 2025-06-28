@@ -7,6 +7,7 @@ import ComboBox, { Option } from './ComboBox';
 import IconButton from './IconButton';
 import { useCallback, useMemo } from 'react';
 import { TagEntity } from '@joplin/lib/services/database/types';
+import { Divider } from 'react-native-paper';
 
 interface Props {
 	themeId: number;
@@ -46,7 +47,7 @@ const useStyles = (themeId: number) => {
 			tagBoxScrollView: {
 				borderColor: theme.dividerColor,
 				borderWidth: 1,
-				borderRadius: 8,
+				borderRadius: 4,
 				height: 80,
 				flexShrink: 1,
 			},
@@ -63,10 +64,12 @@ const useStyles = (themeId: number) => {
 			header: {
 				...theme.headerStyle,
 				fontSize: theme.fontSize,
-				marginBottom: theme.itemMarginTop,
+				marginBottom: theme.itemMarginBottom,
 			},
 			divider: {
-				marginVertical: theme.margin,
+				marginTop: theme.margin * 1.4,
+				marginBottom: theme.margin,
+				backgroundColor: theme.dividerColor,
 			},
 			tagSearch: {
 				flexBasis: 240,
@@ -189,7 +192,7 @@ const TagEditor: React.FC<Props> = props => {
 			tags={props.tags}
 			onRemoveTag={onRemoveTag}
 		/>
-		<View style={styles.divider}/>
+		<Divider style={styles.divider}/>
 		<Text style={styles.header} role='heading'>{_('Add tags:')}</Text>
 		<ComboBox
 			items={comboBoxItems}
