@@ -269,7 +269,9 @@ const useShowSearchResults = (alwaysExpand: boolean, search: string) => {
 	showResultsRef.current = showSearchResults;
 
 	useEffect(() => {
-		setShowSearchResults(true);
+		if (alwaysExpand) {
+			setShowSearchResults(true);
+		}
 	}, [alwaysExpand]);
 
 	useEffect(() => {
