@@ -3,7 +3,10 @@
 // added here, and should be based on dayjs (not moment)
 // -----------------------------------------------------------------------------------------------
 
-import * as dayjs from 'dayjs';
+import type * as dayjsImport from 'dayjs';
+import * as dayJsUtc from 'dayjs/plugin/utc';
+// A require() is needed here for this to work in React Native.
+const dayjs: typeof dayjsImport = require('dayjs');
 
 // Separating this into a type import and a require seems to be necessary to support mobile:
 // - import = require syntax doesn't work when bundling
@@ -66,7 +69,7 @@ export const Month = 30 * Day;
 
 function initDayJs() {
 	dayjs.extend(dayJsRelativeTime);
-	dayjs.extend(dayJsDuration);
+	dayjs.extend(dayJsUtc);
 }
 
 initDayJs();
@@ -168,4 +171,14 @@ export const formatMsToDurationCompat = (ms: number) => {
 	const minutes = Math.floor(ms / Minute);
 	const paddedSeconds = `${seconds}`.padStart(2, '0');
 	return `${minutes}:${paddedSeconds}`;
+};
+
+
+export const goBackInTime = (startDateMs: number, n: number, period: dayjsImport.ManipulateType) => {
+	return dayjs(startDateMs).subtract(n, period);
+};
+
+export const formatMsToUTC = (ms: number, format: string|null = null) => {
+	if (format === null) format = dateTimeFormat();
+	return dayjs(ms).utc().format(format);
 };

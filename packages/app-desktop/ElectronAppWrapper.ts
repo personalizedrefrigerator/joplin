@@ -6,7 +6,7 @@ const shim: typeof ShimType = require('@joplin/lib/shim').default;
 import { isCallbackUrl } from '@joplin/lib/callbackUrlUtils';
 import { FileLocker } from '@joplin/utils/fs';
 import { IpcMessageHandler, IpcServer, Message, newHttpError, sendMessage, SendMessageOptions, startServer, stopServer } from '@joplin/utils/ipc';
-import { BrowserWindow, Tray, WebContents, screen, App } from 'electron';
+import { BrowserWindow, Tray, WebContents, screen, App, nativeTheme } from 'electron';
 import bridge from './bridge';
 const url = require('url');
 const path = require('path');
@@ -137,6 +137,24 @@ export default class ElectronAppWrapper {
 		return null;
 	}
 
+	private windowIdFromWebContents(webContents: WebContents): SecondaryWindowId|null {
+		const browserWindow = BrowserWindow.fromWebContents(webContents);
+		// Convert from electron IDs to Joplin IDs.
+		const targetElectronId = browserWindow.id;
+
+		if (this.win_?.id === targetElectronId) {
+			return 'default';
+		}
+
+		for (const [joplinId, { electronId }] of this.secondaryWindows_) {
+			if (electronId === targetElectronId) {
+				return joplinId;
+			}
+		}
+
+		return null;
+	}
+
 	public allAppWindows() {
 		const allWindowIds = [...this.secondaryWindows_.keys(), defaultWindowId];
 		return allWindowIds.map(id => this.windowById(id));
@@ -215,7 +233,10 @@ export default class ElectronAppWrapper {
 			height: windowState.height,
 			minWidth: 100,
 			minHeight: 100,
-			backgroundColor: '#fff', // required to enable sub pixel rendering, can't be in css
+			// A backgroundColor is needed to enable sub-pixel rendering.
+			// Based on https://www.electronjs.org/docs/latest/faq#the-font-looks-blurry-what-is-this-and-what-can-i-do,
+			// this needs to be a non-transparent color:
+			backgroundColor: nativeTheme.shouldUseDarkColors ? '#333' : '#fff',
 			webPreferences: {
 				nodeIntegration: true,
 				contextIsolation: false,
@@ -353,6 +374,14 @@ export default class ElectronAppWrapper {
 
 			webContents.on('did-create-window', (event) => {
 				addWindowEventHandlers(event.webContents);
+			});
+
+			webContents.on('focus', () => {
+				const joplinId = this.windowIdFromWebContents(webContents);
+
+				if (joplinId !== null) {
+					this.win_.webContents.send('window-focused', joplinId);
+				}
 			});
 		};
 		addWindowEventHandlers(this.win_.webContents);

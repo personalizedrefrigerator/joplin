@@ -80,6 +80,7 @@ const SyncTargetNextcloud = require('@joplin/lib/SyncTargetNextcloud.js');
 const SyncTargetWebDAV = require('@joplin/lib/SyncTargetWebDAV.js');
 const SyncTargetDropbox = require('@joplin/lib/SyncTargetDropbox.js');
 const SyncTargetAmazonS3 = require('@joplin/lib/SyncTargetAmazonS3.js');
+import SyncTargetJoplinServerSAML from '@joplin/lib/SyncTargetJoplinServerSAML';
 import BiometricPopup from './components/biometrics/BiometricPopup';
 import initLib from '@joplin/lib/initLib';
 import { isCallbackUrl, parseCallbackUrl, CallbackUrlCommand } from '@joplin/lib/callbackUrlUtils';
@@ -97,6 +98,7 @@ SyncTargetRegistry.addClass(SyncTargetDropbox);
 SyncTargetRegistry.addClass(SyncTargetFilesystem);
 SyncTargetRegistry.addClass(SyncTargetAmazonS3);
 SyncTargetRegistry.addClass(SyncTargetJoplinServer);
+SyncTargetRegistry.addClass(SyncTargetJoplinServerSAML);
 SyncTargetRegistry.addClass(SyncTargetJoplinCloud);
 
 import FsDriverRN from './utils/fs-driver/fs-driver-rn';
@@ -138,87 +140,9 @@ import { AppState, NavAction, Route } from './utils/types';
 import { getDisplayParentId } from '@joplin/lib/services/trash';
 import PluginNotification from './components/plugins/PluginNotification';
 import FocusControl from './components/accessibility/FocusControl/FocusControl';
-import appReducer from './utils/appReducer';
-import { DEFAULT_ROUTE } from './utils/appDefaultState';
-import BackButtonHandler from './components/BackButtonHandler';
-import BackButtonService from './services/BackButtonService';
-
-
-const appNavInit = {
-	Notes: {
-		screen: NotesScreen,
-		label: () => _('Note list'),
-	},
-	Note: {
-		screen: NoteScreen,
-		label: () => _('Note'),
-	},
-	Tags: {
-		screen: TagsScreen,
-		label: () => _('Tag list'),
-	},
-	Folder: {
-		screen: FolderScreen,
-		label: () => _('Folder editor'),
-	},
-	OneDriveLogin: {
-		screen: OneDriveLoginScreen,
-		label: () => _('OneDrive login'),
-	},
-	DropboxLogin: {
-		screen: DropboxLoginScreen,
-		label: () => _('Dropbox login'),
-	},
-	JoplinCloudLogin: {
-		screen: JoplinCloudLoginScreen,
-		label: () => _('Joplin Cloud login'),
-	},
-	EncryptionConfig: {
-		screen: EncryptionConfigScreen,
-		label: () => _('Encryption config'),
-	},
-	UpgradeSyncTarget: {
-		screen: UpgradeSyncTargetScreen,
-		label: () => _('Sync target upgrade'),
-	},
-	ShareManager: {
-		screen: ShareManager,
-		label: () => _('Share manager'),
-	},
-	ProfileSwitcher: {
-		screen: ProfileSwitcher,
-		label: () => _('Profile switcher'),
-	},
-	ProfileEditor: {
-		screen: ProfileEditor,
-		label: () => _('Profile editor'),
-	},
-	Log: {
-		screen: LogScreen,
-		label: () => _('Log viewer'),
-	},
-	Status: {
-		screen: StatusScreen,
-		label: () => _('Sync status'),
-	},
-	Search: {
-		screen: SearchScreen,
-		label: () => _('Search'),
-	},
-	Config: {
-		screen: ConfigScreen,
-		label: () => _('Configuration'),
-	},
-};
-
-const describeRoute = (nextAction: NavAction, route: Route) => {
-	const routeName = nextAction?.routeName ?? route?.routeName ?? '';
-
-	if (routeName in appNavInit) {
-		return appNavInit[routeName as keyof typeof appNavInit].label();
-	}
-	return _('Unknown');
-};
+import SsoLoginScreen from './components/screens/SsoLoginScreen';
+import SamlShared from '@joplin/lib/components/shared/SamlShared';
+import NoteRevisionViewer from './components/screens/NoteRevisionViewer';
 
 const logger = Logger.create('root');
 
@@ -411,6 +335,7 @@ async function initialize(dispatch: Dispatch) {
 	Setting.setConstant('cacheDir', `${getProfilesRootDir()}/cache`);
 	const resourceDir = getResourceDir(currentProfile, isSubProfile);
 	Setting.setConstant('resourceDir', resourceDir);
+	Setting.setConstant('pluginAssetDir', `${Setting.value('resourceDir')}/pluginAssets`);
 	Setting.setConstant('pluginDir', `${getProfilesRootDir()}/plugins`);
 	Setting.setConstant('pluginDataDir', getPluginDataDir(currentProfile, isSubProfile));
 
@@ -1125,7 +1050,6 @@ class AppComponent extends React.Component<AppComponentProps, AppComponentState>
 				folderId: params.id,
 			});
 			break;
-
 		}
 	}
 
@@ -1142,13 +1066,16 @@ class AppComponent extends React.Component<AppComponentProps, AppComponentState>
 		}
 	}
 
-	private sideMenu_change(isOpen: boolean) {
+	private sideMenu_change = (isOpen: boolean) => {
 		// Make sure showSideMenu property of state is updated
 		// when the menu is open/closed.
-		this.props.dispatch({
-			type: isOpen ? 'SIDE_MENU_OPEN' : 'SIDE_MENU_CLOSE',
-		});
-	}
+		// Avoid dispatching unnecessarily. See https://github.com/laurent22/joplin/issues/12427
+		if (isOpen !== this.props.showSideMenu) {
+			this.props.dispatch({
+				type: isOpen ? 'SIDE_MENU_OPEN' : 'SIDE_MENU_CLOSE',
+			});
+		}
+	};
 
 	private getSideMenuWidth = () => {
 		const sideMenuWidth = getResponsiveValue({
@@ -1192,6 +1119,26 @@ class AppComponent extends React.Component<AppComponentProps, AppComponentState>
 			sideMenuContent = <SafeAreaView style={{ flex: 1, backgroundColor: theme.backgroundColor }}><SideMenuContent/></SafeAreaView>;
 		}
 
+		const appNavInit = {
+			Notes: { screen: NotesScreen },
+			Note: { screen: NoteScreen },
+			Tags: { screen: TagsScreen },
+			Folder: { screen: FolderScreen },
+			OneDriveLogin: { screen: OneDriveLoginScreen },
+			DropboxLogin: { screen: DropboxLoginScreen },
+			JoplinCloudLogin: { screen: JoplinCloudLoginScreen },
+			JoplinServerSamlLogin: { screen: SsoLoginScreen(new SamlShared()) },
+			EncryptionConfig: { screen: EncryptionConfigScreen },
+			UpgradeSyncTarget: { screen: UpgradeSyncTargetScreen },
+			ShareManager: { screen: ShareManager },
+			ProfileSwitcher: { screen: ProfileSwitcher },
+			ProfileEditor: { screen: ProfileEditor },
+			NoteRevisionViewer: { screen: NoteRevisionViewer },
+			Log: { screen: LogScreen },
+			Status: { screen: StatusScreen },
+			Search: { screen: SearchScreen },
+			Config: { screen: ConfigScreen },
+		};
 
 
 		// const statusBarStyle = theme.appearance === 'light-content';
@@ -1220,7 +1167,8 @@ class AppComponent extends React.Component<AppComponentProps, AppComponentState>
 					toleranceY={20}
 					openMenuOffset={this.state.sideMenuWidth}
 					menuPosition={menuPosition}
-					onChange={(isOpen: boolean) => this.sideMenu_change(isOpen)}
+					onChange={this.sideMenu_change}
+					isOpen={this.props.showSideMenu}
 					disableGestures={disableSideMenuGestures}
 				>
 					<StatusBar barStyle={statusBarStyle} />

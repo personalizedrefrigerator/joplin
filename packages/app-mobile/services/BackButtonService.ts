@@ -1,6 +1,4 @@
-import { BackHandler } from 'react-native';
-import { Store } from 'redux';
-import { AppState } from '../utils/types';
+import { BackHandler, Platform } from 'react-native';
 
 export type BackButtonHandler = {
 	onBackPress: ()=> boolean|Promise<boolean>;
@@ -13,10 +11,13 @@ export default class BackButtonService {
 	public static initialize(store: Store<AppState>) {
 		this.store = store;
 
-		BackHandler.addEventListener('hardwareBackPress', () => {
-			void this.back();
-			return true;
-		});
+		// On web, `BackHandler.addEventListener` fails with warning "BackHandler is not supported on web and should not be used."
+		if (Platform.OS !== 'web') {
+			BackHandler.addEventListener('hardwareBackPress', () => {
+				void this.back();
+				return true;
+			});
+		}
 	}
 
 	public static async back() {

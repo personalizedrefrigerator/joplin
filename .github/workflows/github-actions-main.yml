@@ -10,7 +10,7 @@ jobs:
       matrix:
         # Do not use unbuntu-latest because it causes `The operation was canceled` failures:
         # https://github.com/actions/runner-images/issues/6709
-        os: [macos-13, ubuntu-22.04, windows-2019, ubuntu-22.04-arm]
+        os: [macos-13, ubuntu-22.04, windows-2025, ubuntu-22.04-arm]
     steps:
       - uses: actions/checkout@v4
 
@@ -123,7 +123,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '18'
-          cache: 'yarn'
 
       - name: Install Yarn
         run: |
@@ -142,11 +141,6 @@ jobs:
           echo "RUNNER_ARCH=$RUNNER_ARCH"
           echo "DOCKER_IMAGE_PLATFORM=$DOCKER_IMAGE_PLATFORM"
 
-          # Canvas is only needed for tests and it doesn't build in ARM64 so remove it
-          cd packages/lib
-          yarn remove canvas
-          cd ../..
-          
           yarn install
           yarn buildServerDocker --platform $DOCKER_IMAGE_PLATFORM --tag-name server-v0.0.0 --repository joplin/server
 
