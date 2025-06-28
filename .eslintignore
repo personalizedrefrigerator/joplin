@@ -620,9 +620,12 @@ packages/app-mobile/components/CameraView/Camera/index.js
 packages/app-mobile/components/CameraView/Camera/types.js
 packages/app-mobile/components/CameraView/CameraView.test.js
 packages/app-mobile/components/CameraView/CameraView.js
+packages/app-mobile/components/CameraView/CameraViewMultiPage.test.js
+packages/app-mobile/components/CameraView/CameraViewMultiPage.js
 packages/app-mobile/components/CameraView/ScannedBarcodes.js
 packages/app-mobile/components/CameraView/types.js
 packages/app-mobile/components/CameraView/utils/fitRectIntoBounds.js
+packages/app-mobile/components/CameraView/utils/testing.js
 packages/app-mobile/components/CameraView/utils/useBarcodeScanner.js
 packages/app-mobile/components/Checkbox.js
 packages/app-mobile/components/DialogManager/PromptButton.js
@@ -888,6 +891,7 @@ packages/app-mobile/utils/fs-driver/testUtil/createFilesFromPathRecord.js
 packages/app-mobile/utils/fs-driver/testUtil/verifyDirectoryMatches.js
 packages/app-mobile/utils/getPackageInfo.js
 packages/app-mobile/utils/getVersionInfoText.js
+packages/app-mobile/utils/hooks/useBackHandler.js
 packages/app-mobile/utils/hooks/useKeyboardState.js
 packages/app-mobile/utils/hooks/useOnLongPressProps.js
 packages/app-mobile/utils/hooks/useReduceMotionEnabled.js
