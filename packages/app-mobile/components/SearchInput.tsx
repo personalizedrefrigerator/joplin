@@ -1,10 +1,11 @@
 import * as React from 'react';
 import TextInput from './TextInput';
 import { View, StyleSheet, TextInputProps, ViewStyle } from 'react-native';
-import { IconButton } from 'react-native-paper';
 import { _ } from '@joplin/lib/locale';
 import { useCallback, useMemo } from 'react';
 import { themeStyle } from './global-style';
+import IconButton from './IconButton';
+import Icon from './Icon';
 
 
 interface SearchInputProps extends TextInputProps {
@@ -35,6 +36,15 @@ const useStyles = (themeId: number, hasContent: boolean) => {
 			closeButton: hasContent ? {} : {
 				opacity: 0,
 			},
+			icon: {
+				fontSize: theme.fontSizeLarger,
+				width: 32,
+				height: 32,
+				alignContent: 'center',
+				justifyContent: 'center',
+				textAlign: 'center',
+				color: theme.color,
+			},
 		});
 	}, [themeId, hasContent]);
 };
@@ -47,10 +57,11 @@ const SearchInput: React.FC<SearchInputProps> = ({ themeId, value, containerStyl
 	}, [onChangeText]);
 
 	return <View style={[styles.root, containerStyle]}>
-		<IconButton
+		<Icon
 			aria-hidden={true}
-			icon='magnify'
-			role='img'
+			name='material magnify'
+			accessibilityLabel={null}
+			style={styles.icon}
 		/>
 		<TextInput
 			style={[styles.inputStyle, style]}
@@ -61,11 +72,12 @@ const SearchInput: React.FC<SearchInputProps> = ({ themeId, value, containerStyl
 			{...rest}
 		/>
 		<IconButton
-			icon='close'
+			iconName='material close'
 			onPress={onClear}
-			accessibilityLabel={_('Clear search')}
+			description={_('Clear search')}
 			disabled={value.length === 0}
-			style={styles.closeButton}
+			iconStyle={[styles.icon, styles.closeButton]}
+			themeId={themeId}
 		/>
 	</View>;
 };

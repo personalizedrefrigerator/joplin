@@ -119,11 +119,12 @@ const useSelectedIndex = (search: string, searchResults: Option[]) => {
 
 const useStyles = (themeId: number) => {
 	const { fontScale } = useWindowDimensions();
-	const menuItemHeight = 42 * fontScale;
+	const menuItemHeight = 32 * fontScale;
 	const theme = themeStyle(themeId);
 
 	const styles = React.useMemo(() => {
-		const borderRadius = 6;
+		const borderRadius = 4;
+		const itemMarginVertical = 8;
 		return StyleSheet.create({
 			root: {
 				height: 200,
@@ -145,7 +146,7 @@ const useStyles = (themeId: number) => {
 				borderRightWidth: 0,
 			},
 			searchInput: {
-				minHeight: menuItemHeight,
+				minHeight: 32,
 			},
 			searchResults: {
 				flexGrow: 1,
@@ -153,23 +154,25 @@ const useStyles = (themeId: number) => {
 			},
 			optionIcon: {
 				color: theme.color,
-				fontSize: theme.fontSize,
-				paddingLeft: 8,
-				paddingRight: 8,
+				fontSize: theme.fontSizeSmaller,
+				textAlign: 'center',
+				paddingLeft: 4,
+				paddingRight: 4,
 			},
 			optionLabel: {
 				fontSize: theme.fontSize,
 				color: theme.color,
-				paddingInlineStart: 6,
+				paddingInlineStart: 3,
 			},
 			optionContent: {
 				flexDirection: 'row',
 				alignItems: 'center',
 				borderRadius,
 
-				height: menuItemHeight - theme.margin,
-				marginTop: theme.margin / 2,
-				marginBottom: theme.margin / 2,
+				height: menuItemHeight - itemMarginVertical,
+				marginTop: itemMarginVertical / 2,
+				marginBottom: itemMarginVertical / 2,
+				paddingHorizontal: 3,
 			},
 			optionContentSelected: {
 				backgroundColor: theme.selectedColor,
