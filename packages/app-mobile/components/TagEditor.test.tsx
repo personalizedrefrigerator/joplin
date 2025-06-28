@@ -4,7 +4,7 @@ import createMockReduxStore from '../utils/testing/createMockReduxStore';
 import TestProviderStack from './testing/TestProviderStack';
 import { TagEntity } from '@joplin/lib/services/database/types';
 import { useEffect, useState } from 'react';
-import TagEditor from './TagEditor';
+import TagEditor, { TagEditorMode } from './TagEditor';
 import Setting from '@joplin/lib/models/Setting';
 
 interface WrapperProps {
@@ -28,6 +28,7 @@ const WrappedTagEditor: React.FC<WrapperProps> = props => {
 			themeId={Setting.THEME_LIGHT}
 			style={emptyStyle}
 			onTagsChange={setTags}
+			mode={TagEditorMode.Large}
 			allTags={props.allTags}
 			tags={tags}
 		/>

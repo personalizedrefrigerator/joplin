@@ -9,10 +9,16 @@ import { useCallback, useMemo } from 'react';
 import { TagEntity } from '@joplin/lib/services/database/types';
 import { Divider } from 'react-native-paper';
 
+export enum TagEditorMode {
+	Large,
+	Compact,
+}
+
 interface Props {
 	themeId: number;
 	tags: string[];
 	allTags: TagEntity[];
+	mode: TagEditorMode;
 	style: ViewStyle;
 	onTagsChange: (newTags: string[])=> void;
 }
@@ -72,7 +78,6 @@ const useStyles = (themeId: number) => {
 				backgroundColor: theme.dividerColor,
 			},
 			tagSearch: {
-				flexBasis: 240,
 				flexShrink: 1,
 			},
 			noTagsLabel: {
@@ -185,20 +190,25 @@ const TagEditor: React.FC<Props> = props => {
 		return !allTagsSet.has(normalizeTag(tag));
 	}, [allTagsSet]);
 
+	const showAssociatedTags = props.mode === TagEditorMode.Large || props.tags.length > 0;
+
 	return <View style={props.style}>
-		<TagsBox
-			themeId={props.themeId}
-			styles={styles}
-			tags={props.tags}
-			onRemoveTag={onRemoveTag}
-		/>
-		<Divider style={styles.divider}/>
+		{showAssociatedTags && <>
+			<TagsBox
+				themeId={props.themeId}
+				styles={styles}
+				tags={props.tags}
+				onRemoveTag={onRemoveTag}
+			/>
+			<Divider style={styles.divider}/>
+		</>}
 		<Text style={styles.header} role='heading'>{_('Add tags:')}</Text>
 		<ComboBox
 			items={comboBoxItems}
 			onItemSelected={onComboBoxSelect}
 			onAddItem={onAddTag}
 			canAddItem={onCanAddTag}
+			alwaysExpand={props.mode === TagEditorMode.Large}
 			style={styles.tagSearch}
 			placeholder={_('Search tags')}
 		/>

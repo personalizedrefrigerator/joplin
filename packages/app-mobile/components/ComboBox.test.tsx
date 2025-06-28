@@ -30,6 +30,7 @@ const WrappedComboBox: React.FC<WrapperProps> = ({
 	return <TestProviderStack store={store}>
 		<ComboBox
 			items={mappedItems}
+			alwaysExpand={true}
 			style={{}}
 			onItemSelected={onItemSelected}
 			placeholder={'Test combobox'}
