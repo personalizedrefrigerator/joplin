@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { connect } from 'react-redux';
 import { Text, StyleSheet, Linking, View, Platform, useWindowDimensions } from 'react-native';
@@ -10,6 +10,7 @@ import ActionButtons from './ActionButtons';
 import { CameraDirection } from '@joplin/lib/models/settings/builtInMetadata';
 import Setting from '@joplin/lib/models/Setting';
 import { LinkButton, PrimaryButton } from '../buttons';
+import BackButtonService from '../../services/BackButtonService';
 import { themeStyle } from '../global-style';
 import fitRectIntoBounds from './utils/fitRectIntoBounds';
 import useBarcodeScanner from './utils/useBarcodeScanner';
@@ -106,6 +107,17 @@ const CameraViewComponent: React.FC<Props> = props => {
 	const cameraRef = useRef<CameraRef|null>(null);
 	const [cameraReady, setCameraReady] = useState(false);
 
+	useEffect(() => {
+		const handler = () => {
+			props.onCancel();
+			return true;
+		};
+		BackButtonService.addHandler(handler);
+		return () => {
+			BackButtonService.removeHandler(handler);
+		};
+	}, [props.onCancel]);
+
 	const onCameraReverse = useCallback(() => {
 		const newDirection = props.cameraType === CameraDirection.Front ? CameraDirection.Back : CameraDirection.Front;
 		Setting.setValue('camera.type', newDirection);
@@ -193,11 +205,6 @@ const CameraViewComponent: React.FC<Props> = props => {
 				onHasPermission={onHasPermission}
 			/>
 			{overlay}
-			<BackButtonHandler
-				enabled={true}
-				onBack={props.onCancel}
-				description={_('Cancel')}
-			/>
 		</View>
 	);
 };

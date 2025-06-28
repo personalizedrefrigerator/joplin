@@ -49,10 +49,8 @@ const WebBetaButton: React.FC<Props> = props => {
 				onDismiss={onHideDialog}
 			>
 				<Text>{'At present, the web client is in beta. In the future, it may change significantly, or be removed.'}</Text>
-				<Text>{'NOTE: This deployment of the web client is intended to allow users to test proposed changes to Joplin. See app.joplincloud.com for the production version of the web app.'}</Text>
 				<View style={feedbackContainerStyles}>
-					<LinkButton onPress={onLeaveFeedback}>{_('Give feedback')}</LinkButton>
-					<LinkButton onPress={() => Linking.openURL('https://app.joplincloud.com/')}>{'app.joplincloud.com'}</LinkButton>
+					<LinkButton onPress={onLeaveFeedback}>{'Give feedback'}</LinkButton>
 				</View>
 			</DismissibleDialog>
 		</>

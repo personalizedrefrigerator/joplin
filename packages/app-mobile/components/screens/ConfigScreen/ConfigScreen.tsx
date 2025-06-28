@@ -7,6 +7,7 @@ import checkPermissions from '../../../utils/checkPermissions';
 import setIgnoreTlsErrors from '../../../utils/TlsUtils';
 import { reg } from '@joplin/lib/registry';
 import { State } from '@joplin/lib/reducer';
+import BackButtonService from '../../../services/BackButtonService';
 import { connect } from 'react-redux';
 import ScreenHeader from '../../ScreenHeader';
 import { _ } from '@joplin/lib/locale';
@@ -36,7 +37,6 @@ import JoplinCloudConfig, { emailToNoteDescription, emailToNoteLabel } from './J
 import shim from '@joplin/lib/shim';
 import SettingsToggle from './SettingsToggle';
 import { UpdateSettingValueCallback } from './types';
-import BackButtonHandler from '../../BackButtonHandler';
 
 interface ConfigScreenState {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
@@ -293,37 +293,33 @@ class ConfigScreenComponent extends BaseScreenComponent<ConfigScreenProps, Confi
 		return false;
 	};
 
-	private handleBackButtonPress = () => {
+	private handleBackButtonPress = (): boolean => {
+		const goBack = async () => {
+			BackButtonService.removeHandler(this.handleBackButtonPress);
+			await BackButtonService.back();
+		};
+
 		// Cancel search on back
 		if (this.state.searching) {
-			return {
-				onBack: () => {
-					this.setShowSearch_(false);
-				},
-				label: _('Cancel search'),
-			};
+			this.setShowSearch_(false);
+			return true;
 		}
 
 		// Show navigation when pressing "back" (unless always visible).
 		if (this.state.selectedSectionName && this.navigationFillsScreen()) {
-			return {
-				onBack: () => {
-					this.showSectionNavigation_();
-				},
-				label: _('Show navigation'),
-			};
+			this.showSectionNavigation_();
+			return true;
 		}
 
 		if (this.hasUnsavedChanges()) {
-			return {
-				onBack: async () => {
-					await this.promptSaveChanges();
-				},
-				runsParentAction: true,
-			};
+			void (async () => {
+				await this.promptSaveChanges();
+				await goBack();
+			})();
+			return true;
 		}
 
-		return null;
+		return false;
 	};
 
 	public componentDidMount() {
@@ -338,12 +334,14 @@ class ConfigScreenComponent extends BaseScreenComponent<ConfigScreenProps, Confi
 			}, 200);
 		}
 
+		BackButtonService.addHandler(this.handleBackButtonPress);
 		NavService.addHandler(this.handleNavigateToNewScreen);
 		Dimensions.addEventListener('change', this.updateSidebarWidth);
 		this.updateSidebarWidth();
 	}
 
 	public componentWillUnmount() {
+		BackButtonService.removeHandler(this.handleBackButtonPress);
 		NavService.removeHandler(this.handleNavigateToNewScreen);
 	}
 
@@ -844,7 +842,6 @@ class ConfigScreenComponent extends BaseScreenComponent<ConfigScreenProps, Confi
 			showSearchButton = currentSectionName !== 'plugins';
 		}
 
-		const backAction = this.handleBackButtonPress();
 		return (
 			<View style={this.rootStyle(this.props.themeId).root}>
 				<ScreenHeader
@@ -857,12 +854,6 @@ class ConfigScreenComponent extends BaseScreenComponent<ConfigScreenProps, Confi
 					onSearchButtonPress={this.onSearchButtonPress_}
 				/>
 				{mainComponent}
-				<BackButtonHandler
-					enabled={!!backAction}
-					onBack={backAction?.onBack}
-					runsParentAction={backAction?.runsParentAction}
-					description={backAction?.label}
-				/>
 			</View>
 		);
 	}

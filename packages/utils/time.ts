@@ -13,8 +13,6 @@ const dayjs: typeof dayjsImport = require('dayjs');
 // - import * as dayJsRelativeTimeType causes a runtime error.
 import type * as dayJsRelativeTimeType from 'dayjs/plugin/relativeTime';
 const dayJsRelativeTime: typeof dayJsRelativeTimeType = require('dayjs/plugin/relativeTime');
-import type * as dayJsDurationType from 'dayjs/plugin/duration';
-const dayJsDuration: typeof dayJsDurationType = require('dayjs/plugin/duration');
 
 const supportedLocales: Record<string, unknown> = {
 	'ar': require('dayjs/locale/ar'),
