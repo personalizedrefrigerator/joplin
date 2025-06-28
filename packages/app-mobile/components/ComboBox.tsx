@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { AccessibilityInfo, FlatList, NativeSyntheticEvent, Platform, Role, StyleSheet, useWindowDimensions, View, ViewProps, ViewStyle } from 'react-native';
+import { AccessibilityInfo, FlatList, NativeSyntheticEvent, Platform, Role, StyleSheet, TextInputProps, useWindowDimensions, View, ViewProps, ViewStyle } from 'react-native';
 import { TouchableRipple, Text } from 'react-native-paper';
 import { connect } from 'react-redux';
 import { AppState } from '../utils/types';
@@ -26,6 +26,7 @@ interface BaseProps {
 	placeholder: string;
 	onItemSelected: OnItemSelected;
 	style: ViewStyle;
+	searchInputProps?: TextInputProps;
 }
 
 type Props = BaseProps & ({
@@ -289,6 +290,7 @@ const ComboBox: React.FC<Props> = ({
 	canAddItem,
 	style: rootStyle,
 	alwaysExpand,
+	searchInputProps,
 }) => {
 	const [search, setSearch] = useState('');
 	const { showSearchResults, setShowSearchResults } = useShowSearchResults(alwaysExpand, search);
@@ -420,6 +422,7 @@ const ComboBox: React.FC<Props> = ({
 			placeholder={placeholder}
 			aria-activedescendant={showSearchResults ? activeId : undefined}
 			aria-controls={`menuBox-${baseId}`}
+			{...searchInputProps}
 		/>
 		{showSearchResults && searchResults}
 		{!showSearchResults && helpComponent}

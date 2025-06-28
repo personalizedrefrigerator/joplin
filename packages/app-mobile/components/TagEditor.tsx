@@ -211,6 +211,9 @@ const TagEditor: React.FC<Props> = props => {
 			alwaysExpand={props.mode === TagEditorMode.Large}
 			style={styles.tagSearch}
 			placeholder={_('Search tags')}
+			searchInputProps={{
+				autoCapitalize: 'none',
+			}}
 		/>
 	</View>;
 };
