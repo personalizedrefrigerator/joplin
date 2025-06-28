@@ -1,22 +1,27 @@
 import * as React from 'react';
 
-import { StyleSheet, View, Text, ScrollView, ViewStyle } from 'react-native';
+import { StyleSheet, View, Text, ScrollView, ViewStyle, ScrollViewProps } from 'react-native';
 import { _ } from '@joplin/lib/locale';
 import { themeStyle } from './global-style';
 import ComboBox, { Option } from './ComboBox';
 import IconButton from './IconButton';
 import { useCallback, useMemo } from 'react';
 import { TagEntity } from '@joplin/lib/services/database/types';
+import { Divider } from 'react-native-paper';
+
+export enum TagEditorMode {
+	Large,
+	Compact,
+}
 
 interface Props {
 	themeId: number;
 	tags: string[];
 	allTags: TagEntity[];
+	mode: TagEditorMode;
 	style: ViewStyle;
 	onTagsChange: (newTags: string[])=> void;
-
-	// Forwarded ScrollView props
-	nestedScrollingEnabled?: boolean;
+	searchResultProps?: ScrollViewProps;
 }
 
 const useStyles = (themeId: number) => {
@@ -49,7 +54,7 @@ const useStyles = (themeId: number) => {
 			tagBoxScrollView: {
 				borderColor: theme.dividerColor,
 				borderWidth: 1,
-				borderRadius: 8,
+				borderRadius: 4,
 				height: 80,
 				flexShrink: 1,
 			},
@@ -66,13 +71,14 @@ const useStyles = (themeId: number) => {
 			header: {
 				...theme.headerStyle,
 				fontSize: theme.fontSize,
-				marginBottom: theme.itemMarginTop,
+				marginBottom: theme.itemMarginBottom,
 			},
 			divider: {
-				marginVertical: theme.margin,
+				marginTop: theme.margin * 1.4,
+				marginBottom: theme.margin,
+				backgroundColor: theme.dividerColor,
 			},
 			tagSearch: {
-				flexBasis: 240,
 				flexShrink: 1,
 			},
 			noTagsLabel: {
@@ -185,23 +191,31 @@ const TagEditor: React.FC<Props> = props => {
 		return !allTagsSet.has(normalizeTag(tag));
 	}, [allTagsSet]);
 
+	const showAssociatedTags = props.mode === TagEditorMode.Large || props.tags.length > 0;
+
 	return <View style={props.style}>
-		<TagsBox
-			themeId={props.themeId}
-			styles={styles}
-			tags={props.tags}
-			onRemoveTag={onRemoveTag}
-		/>
-		<View style={styles.divider}/>
+		{showAssociatedTags && <>
+			<TagsBox
+				themeId={props.themeId}
+				styles={styles}
+				tags={props.tags}
+				onRemoveTag={onRemoveTag}
+			/>
+			<Divider style={styles.divider}/>
+		</>}
 		<Text style={styles.header} role='heading'>{_('Add tags:')}</Text>
 		<ComboBox
 			items={comboBoxItems}
 			onItemSelected={onComboBoxSelect}
 			onAddItem={onAddTag}
 			canAddItem={onCanAddTag}
-			nestedScrollingEnabled={props.nestedScrollingEnabled}
+			alwaysExpand={props.mode === TagEditorMode.Large}
 			style={styles.tagSearch}
 			placeholder={_('Search tags')}
+			searchInputProps={{
+				autoCapitalize: 'none',
+			}}
+			searchResultProps={props.searchResultProps}
 		/>
 	</View>;
 };

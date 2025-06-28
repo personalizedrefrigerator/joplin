@@ -4,7 +4,7 @@ import createMockReduxStore from '../utils/testing/createMockReduxStore';
 import TestProviderStack from './testing/TestProviderStack';
 import { TagEntity } from '@joplin/lib/services/database/types';
 import { useEffect, useState } from 'react';
-import TagEditor from './TagEditor';
+import TagEditor, { TagEditorMode } from './TagEditor';
 import Setting from '@joplin/lib/models/Setting';
 
 interface WrapperProps {
@@ -28,6 +28,7 @@ const WrappedTagEditor: React.FC<WrapperProps> = props => {
 			themeId={Setting.THEME_LIGHT}
 			style={emptyStyle}
 			onTagsChange={setTags}
+			mode={TagEditorMode.Large}
 			allTags={props.allTags}
 			tags={tags}
 		/>
@@ -53,6 +54,32 @@ describe('TagEditor', () => {
 		const removeButton = screen.getByRole('button', { name: 'Remove testing' });
 		fireEvent.press(removeButton);
 		expect(currentTags).toEqual(['test']);
+
+		// Manually unmount to prevent warnings
+		unmount();
+	});
+
+	test('clicking on search result should add it as a tag', () => {
+		const initialTags = ['test'];
+		let currentTags = initialTags;
+		const onTagsChanged = (tags: string[]) => {
+			currentTags = tags;
+		};
+
+		const { unmount } = render(
+			<WrappedTagEditor
+				allTags={[...initialTags, 'new tag 1'].map(t => ({ title: t }))}
+				initialTags={initialTags}
+				onTagsChanged={onTagsChanged}
+			/>,
+		);
+
+		const searchInput = screen.getByPlaceholderText('Search tags');
+		fireEvent.changeText(searchInput, 'new');
+
+		const searchResult = screen.getByRole('button', { name: 'new tag 1' });
+		fireEvent.press(searchResult);
+		expect(currentTags).toEqual(['test', 'new tag 1']);
 
 		// Manually unmount to prevent warnings
 		unmount();

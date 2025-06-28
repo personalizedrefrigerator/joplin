@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { AccessibilityInfo, FlatList, NativeSyntheticEvent, Platform, Role, StyleSheet, useWindowDimensions, View, ViewProps, ViewStyle } from 'react-native';
+import { AccessibilityInfo, FlatList, NativeSyntheticEvent, Platform, Role, ScrollViewProps, StyleSheet, TextInputProps, useWindowDimensions, View, ViewProps, ViewStyle } from 'react-native';
 import { TouchableRipple, Text } from 'react-native-paper';
 import { connect } from 'react-redux';
 import { AppState } from '../utils/types';
@@ -22,13 +22,12 @@ type OnItemSelected = (item: Option)=> void;
 interface BaseProps {
 	themeId: number;
 	items: Option[];
+	alwaysExpand: boolean;
 	placeholder: string;
 	onItemSelected: OnItemSelected;
 	style: ViewStyle;
-
-	// Forwarded ScrollView props -- must be set on Android if included within another
-	// ScrollView
-	nestedScrollingEnabled?: boolean;
+	searchInputProps?: TextInputProps;
+	searchResultProps?: ScrollViewProps;
 }
 
 type Props = BaseProps & ({
@@ -118,66 +117,85 @@ const useSelectedIndex = (search: string, searchResults: Option[]) => {
 		});
 	}, []);
 
-	return { selectedIndex, onNextResult, onPreviousResult };
+	const onFirstResult = useCallback(() => {
+		setSelectedIndex(0);
+	}, []);
+
+	const onLastResult = useCallback(() => {
+		setSelectedIndex(searchResults.length - 1);
+	}, [searchResults]);
+
+	return { selectedIndex, onNextResult, onPreviousResult, onFirstResult, onLastResult };
 };
 
-const useStyles = (themeId: number) => {
+const useStyles = (themeId: number, showSearchResults: boolean) => {
 	const { fontScale } = useWindowDimensions();
-	const menuItemHeight = 44 * fontScale;
+	const menuItemHeight = 40 * fontScale;
 	const theme = themeStyle(themeId);
 
-	const styles = React.useMemo(() => {
-		const borderRadius = 18;
+	const styles = useMemo(() => {
+		const borderRadius = 4;
+		const itemMarginVertical = 8;
 		return StyleSheet.create({
 			root: {
-				height: 200,
 				flexDirection: 'column',
 				overflow: 'hidden',
+
+				borderRadius,
+				backgroundColor: theme.backgroundColor,
+				borderColor: theme.dividerColor,
+				borderWidth: showSearchResults ? 1 : 0,
 			},
 			searchInputContainer: {
 				borderRadius,
-				borderBottomLeftRadius: 0,
-				borderBottomRightRadius: 0,
 				backgroundColor: theme.backgroundColor,
 				borderColor: theme.dividerColor,
 				borderWidth: 1,
+				...(showSearchResults ? {
+					borderTopWidth: 0,
+					borderLeftWidth: 0,
+					borderRightWidth: 0,
+				} : {}),
+			},
+			tagSearchHelp: {
+				color: theme.colorFaded,
+				marginTop: 6,
 			},
 			searchInput: {
-				minHeight: menuItemHeight,
+				minHeight: 32,
 			},
 			searchResults: {
+				height: 200,
 				flexGrow: 1,
 				flexShrink: 1,
-				borderColor: theme.dividerColor,
-				borderWidth: 1,
-				borderTopWidth: 0,
-				borderBottomLeftRadius: borderRadius,
-				borderBottomRightRadius: borderRadius,
 			},
 			optionIcon: {
 				color: theme.color,
-				fontSize: theme.fontSize,
-				width: 30,
+				fontSize: theme.fontSizeSmaller,
+				textAlign: 'center',
 				paddingLeft: 4,
 				paddingRight: 4,
 			},
 			optionLabel: {
 				fontSize: theme.fontSize,
 				color: theme.color,
-				paddingInlineStart: 6,
+				paddingInlineStart: 3,
 			},
 			optionContent: {
 				flexDirection: 'row',
-				paddingRight: theme.marginRight,
-				paddingLeft: theme.marginLeft,
-				height: menuItemHeight,
 				alignItems: 'center',
+				borderRadius,
+
+				height: menuItemHeight - itemMarginVertical,
+				marginTop: itemMarginVertical / 2,
+				marginBottom: itemMarginVertical / 2,
+				paddingHorizontal: 3,
 			},
 			optionContentSelected: {
 				backgroundColor: theme.selectedColor,
 			},
 		});
-	}, [theme, menuItemHeight]);
+	}, [theme, menuItemHeight, showSearchResults]);
 
 	return { menuItemHeight, styles };
 };
@@ -199,7 +217,7 @@ const SearchResult: React.FC<SearchResultProps> = ({
 		name={iconName}
 		// Description is provided by adjacent text
 		accessibilityLabel={null}
-	/> : <View style={styles.optionIcon}/>;
+	/> : null;
 
 	return (
 		<View style={[styles.optionContent, selected && styles.optionContentSelected]}>
@@ -245,12 +263,40 @@ const useSearchResultContainerComponent = (
 	), [selectedIndex, baseId, resultCount]);
 };
 
+const useShowSearchResults = (alwaysExpand: boolean, search: string) => {
+	const [showSearchResults, setShowSearchResults] = useState(alwaysExpand);
+
+	const showResultsRef = useRef(showSearchResults);
+	showResultsRef.current = showSearchResults;
+
+	useEffect(() => {
+		setShowSearchResults(true);
+	}, [alwaysExpand]);
+
+	useEffect(() => {
+		if (search.length > 0 && !showResultsRef.current) {
+			setShowSearchResults(true);
+		}
+	}, [search]);
+
+	return { showSearchResults, setShowSearchResults };
+};
 
 const ComboBox: React.FC<Props> = ({
-	themeId, items, onItemSelected: propsOnItemSelected, placeholder, onAddItem, canAddItem, style: rootStyle, nestedScrollingEnabled,
+	themeId,
+	items,
+	onItemSelected: propsOnItemSelected,
+	placeholder,
+	onAddItem,
+	canAddItem,
+	style: rootStyle,
+	alwaysExpand,
+	searchInputProps,
+	searchResultProps,
 }) => {
-	const { styles, menuItemHeight } = useStyles(themeId);
 	const [search, setSearch] = useState('');
+	const { showSearchResults, setShowSearchResults } = useShowSearchResults(alwaysExpand, search);
+	const { styles, menuItemHeight } = useStyles(themeId, showSearchResults);
 
 	const results = useSearchResults({
 		search,
@@ -259,7 +305,7 @@ const ComboBox: React.FC<Props> = ({
 		onAddItem,
 		canAddItem,
 	});
-	const { selectedIndex, onNextResult, onPreviousResult } = useSelectedIndex(search, results);
+	const { selectedIndex, onNextResult, onPreviousResult, onFirstResult, onLastResult } = useSelectedIndex(search, results);
 	const listRef = useRef<FlatList|null>(null);
 
 	const resultsRef = useRef(results);
@@ -302,14 +348,28 @@ const ComboBox: React.FC<Props> = ({
 		if (item) {
 			onItemSelected(item);
 		}
-	}, [onItemSelected, results, selectedIndex]);
+
+		if (!alwaysExpand) {
+			setShowSearchResults(false);
+		}
+	}, [onItemSelected, setShowSearchResults, alwaysExpand, results, selectedIndex]);
 
 	// For now, onKeyPress only works on web.
 	// See https://github.com/react-native-community/discussions-and-proposals/issues/249
 	type KeyPressEvent = { key: string };
 	const onKeyPress = useCallback((event: NativeSyntheticEvent<KeyPressEvent>) => {
 		const key = event.nativeEvent.key;
-		if (key === 'ArrowDown') {
+		const isDownArrow = key === 'ArrowDown';
+		const isUpArrow = key === 'ArrowUp';
+		if (!showSearchResults && (isDownArrow || isUpArrow)) {
+			setShowSearchResults(true);
+			if (isUpArrow) {
+				onLastResult();
+			} else {
+				onFirstResult();
+			}
+			event.preventDefault();
+		} else if (key === 'ArrowDown') {
 			onNextResult();
 			event.preventDefault();
 		} else if (key === 'ArrowUp') {
@@ -319,15 +379,41 @@ const ComboBox: React.FC<Props> = ({
 			// This case is necessary on web to prevent the
 			// search input from becoming defocused after
 			// pressing "enter".
+			event.preventDefault();
 			onSubmit();
+		} else if (key === 'Escape' && !alwaysExpand) {
+			setShowSearchResults(false);
 			event.preventDefault();
 		}
-	}, [onSubmit, onNextResult, onPreviousResult]);
+	}, [onSubmit, onNextResult, setShowSearchResults, onPreviousResult, onFirstResult, onLastResult, showSearchResults, alwaysExpand]);
 
 	const webProps = {
 		onKeyDown: onKeyPress,
 	};
 	const activeId = `${baseId}-${selectedIndex}`;
+	const searchResults = <FlatList
+		ref={listRef}
+		data={results}
+		{...searchResultProps}
+
+		getItemLayout={(_data, index) => ({
+			length: menuItemHeight, offset: menuItemHeight * index, index,
+		})}
+		CellRendererComponent={SearchResultWrapper}
+		// A better role would be 'listbox', but that isn't supported by RN.
+		role={Platform.OS === 'web' ? 'listbox' as Role : undefined}
+		aria-setsize={results.length}
+		aria-activedescendant={activeId}
+		nativeID={`menuBox-${baseId}`}
+
+		style={styles.searchResults}
+		keyExtractor={optionKeyExtractor}
+		extraData={renderItem}
+		renderItem={renderItem}
+	/>;
+
+	const helpComponent = <Text style={styles.tagSearchHelp}>{_('To create a new tag, type the name and press enter.')}</Text>;
+
 	return <View style={[styles.root, rootStyle]} {...webProps}>
 		<SearchInput
 			themeId={themeId}
@@ -338,28 +424,12 @@ const ComboBox: React.FC<Props> = ({
 			onKeyPress={onKeyPress}
 			onSubmitEditing={onSubmit}
 			placeholder={placeholder}
-			aria-activedescendant={activeId}
+			aria-activedescendant={showSearchResults ? activeId : undefined}
 			aria-controls={`menuBox-${baseId}`}
+			{...searchInputProps}
 		/>
-		<FlatList
-			ref={listRef}
-			data={results}
-			getItemLayout={(_data, index) => ({
-				length: menuItemHeight, offset: menuItemHeight * index, index,
-			})}
-			CellRendererComponent={SearchResultWrapper}
-			// A better role would be 'listbox', but that isn't supported by RN.
-			role={Platform.OS === 'web' ? 'listbox' as Role : undefined}
-			aria-setsize={results.length}
-			aria-activedescendant={activeId}
-			nativeID={`menuBox-${baseId}`}
-			nestedScrollEnabled={nestedScrollingEnabled}
-
-			style={styles.searchResults}
-			keyExtractor={optionKeyExtractor}
-			extraData={renderItem}
-			renderItem={renderItem}
-		/>
+		{showSearchResults && searchResults}
+		{!showSearchResults && helpComponent}
 	</View>;
 };
 

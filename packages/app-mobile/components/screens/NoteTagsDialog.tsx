@@ -5,7 +5,7 @@ import Tag from '@joplin/lib/models/Tag';
 import ModalDialog from '../ModalDialog';
 import { AppState } from '../../utils/types';
 import { TagEntity } from '@joplin/lib/services/database/types';
-import TagEditor from '../TagEditor';
+import TagEditor, { TagEditorMode } from '../TagEditor';
 import { _ } from '@joplin/lib/locale';
 import { useCallback, useEffect, useState } from 'react';
 import useAsyncEffect from '@joplin/lib/hooks/useAsyncEffect';
@@ -63,6 +63,7 @@ const NoteTagsDialogComponent: React.FC<Props> = props => {
 			tags={noteTags}
 			allTags={props.tags}
 			onTagsChange={setNoteTags}
+			mode={TagEditorMode.Large}
 			style={{ flex: 1 }}
 		/>
 	</ModalDialog>;

@@ -6,7 +6,7 @@ import * as React from 'react';
 import { themeStyle } from '@joplin/lib/theme';
 import { Theme } from '@joplin/lib/themes/type';
 import { useState, useMemo, useCallback, useRef } from 'react';
-import { Text, Pressable, ViewStyle, StyleSheet, LayoutChangeEvent, LayoutRectangle, Animated, AccessibilityState, AccessibilityRole, TextStyle, GestureResponderEvent, Platform, Role } from 'react-native';
+import { Text, Pressable, ViewStyle, StyleSheet, LayoutChangeEvent, LayoutRectangle, Animated, AccessibilityState, AccessibilityRole, TextStyle, GestureResponderEvent, Platform, Role, StyleProp } from 'react-native';
 import { Menu, MenuOptions, MenuTrigger, renderers } from 'react-native-popup-menu';
 import Icon from './Icon';
 import AccessibleView from './accessibility/AccessibleView';
@@ -19,7 +19,7 @@ interface ButtonProps {
 	description: string;
 
 	iconName: string;
-	iconStyle: TextStyle;
+	iconStyle: StyleProp<TextStyle>;
 
 	themeId: number;
 
