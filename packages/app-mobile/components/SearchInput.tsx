@@ -43,7 +43,7 @@ const useStyles = (themeId: number, hasContent: boolean) => {
 				alignContent: 'center',
 				justifyContent: 'center',
 				textAlign: 'center',
-				color: theme.color,
+				color: theme.colorFaded,
 			},
 		});
 	}, [themeId, hasContent]);
