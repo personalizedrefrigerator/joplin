@@ -129,7 +129,7 @@ const useSelectedIndex = (search: string, searchResults: Option[]) => {
 
 const useStyles = (themeId: number, showSearchResults: boolean) => {
 	const { fontScale } = useWindowDimensions();
-	const menuItemHeight = 32 * fontScale;
+	const menuItemHeight = 40 * fontScale;
 	const theme = themeStyle(themeId);
 
 	const styles = useMemo(() => {
