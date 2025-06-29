@@ -43,6 +43,9 @@
 		"packages/generate-plugin-doc/**",
 		"packages/plugins/**",
 		"packages/doc-builder/**",
+
+		// We don't build or run this package on CI so it should be upgraded manually
+		"packages/onenote-converter/**",
 	],
 	"ignoreDeps": [
 		"@babel/core",
