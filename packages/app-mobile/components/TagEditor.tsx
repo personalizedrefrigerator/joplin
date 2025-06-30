@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { StyleSheet, View, Text, ScrollView, ViewStyle, ScrollViewProps } from 'react-native';
+import { StyleSheet, View, Text, ScrollView, ViewStyle, ScrollViewProps, Platform, AccessibilityInfo } from 'react-native';
 import { _ } from '@joplin/lib/locale';
 import { themeStyle } from './global-style';
 import ComboBox, { Option } from './ComboBox';
@@ -143,6 +143,9 @@ const TagsBox: React.FC<TagsBoxProps> = props => {
 		<ScrollView
 			style={props.styles.tagBoxScrollView}
 			contentContainerStyle={props.styles.tagBoxContent}
+			// On web, specifying aria-live here announces changes to the associated tags.
+			// However, on Android (and possibly iOS), this breaks focus behavior:
+			aria-live={Platform.OS === 'web' ? 'polite' : undefined}
 		>
 			{renderContent()}
 		</ScrollView>
@@ -169,10 +172,12 @@ const TagEditor: React.FC<Props> = props => {
 	}, [props.tags, props.allTags]);
 
 	const onAddTag = useCallback((title: string) => {
+		AccessibilityInfo.announceForAccessibility(_('Added tag: %s', title));
 		props.onTagsChange([...props.tags, normalizeTag(title)]);
 	}, [props.tags, props.onTagsChange]);
 
 	const onRemoveTag = useCallback((title: string) => {
+		AccessibilityInfo.announceForAccessibility(_('Removed tag: %s', title));
 		props.onTagsChange(props.tags.filter(tag => tag !== title));
 	}, [props.tags, props.onTagsChange]);
 
