@@ -94,18 +94,22 @@ interface TagChipProps {
 	title: string;
 	themeId: number;
 	styles: Styles;
-	onRemove: ()=> void;
+	onRemove: (title: string)=> void;
 }
 
 const TagCard: React.FC<TagChipProps> = props => {
-	return <View style={props.styles.tag}>
+	const onRemove = useCallback(() => {
+		props.onRemove(props.title);
+	}, [props.title, props.onRemove]);
+
+	return <View style={props.styles.tag} role='listitem'>
 		<Text style={props.styles.tagText}>{props.title}</Text>
 		<IconButton
 			themeId={props.themeId}
 			description={_('Remove %s', props.title)}
 			iconName='fas fa-times-circle'
 			iconStyle={props.styles.removeTagButton}
-			onPress={props.onRemove}
+			onPress={onRemove}
 		/>
 	</View>;
 };
@@ -118,6 +122,11 @@ interface TagsBoxProps {
 }
 
 const TagsBox: React.FC<TagsBoxProps> = props => {
+	const onRemoveTag = useCallback((tag: string) => {
+		props.onRemoveTag(tag);
+		// Focus something to prevent focus jumps?
+	}, [props.onRemoveTag]);
+
 	const renderContent = () => {
 		if (props.tags.length) {
 			return props.tags.map(tag => (
@@ -126,7 +135,7 @@ const TagsBox: React.FC<TagsBoxProps> = props => {
 					title={tag}
 					styles={props.styles}
 					themeId={props.themeId}
-					onRemove={() => props.onRemoveTag(tag)}
+					onRemove={onRemoveTag}
 				/>
 			));
 		} else {
@@ -141,12 +150,18 @@ const TagsBox: React.FC<TagsBoxProps> = props => {
 		<Text style={props.styles.header} role='heading'>{_('Associated tags:')}</Text>
 		<ScrollView
 			style={props.styles.tagBoxScrollView}
-			contentContainerStyle={props.styles.tagBoxContent}
 			// On web, specifying aria-live here announces changes to the associated tags.
 			// However, on Android (and possibly iOS), this breaks focus behavior:
 			aria-live={Platform.OS === 'web' ? 'polite' : undefined}
 		>
-			{renderContent()}
+			<View
+				// Accessibility: Marking the list of tags as a list seems to prevent focus from jumping
+				// to the top of the modal after removing a tag.
+				role='list'
+				style={props.styles.tagBoxContent}
+			>
+				{renderContent()}
+			</View>
 		</ScrollView>
 	</View>;
 };
