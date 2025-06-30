@@ -15,7 +15,7 @@ import fitRectIntoBounds from './utils/fitRectIntoBounds';
 import useBarcodeScanner from './utils/useBarcodeScanner';
 import ScannedBarcodes from './ScannedBarcodes';
 import { CameraRef } from './Camera/types';
-import Camera from './Camera/index.jest';
+import Camera from './Camera/index';
 import { CameraResult, OnInsertBarcode } from './types';
 import Logger from '@joplin/utils/Logger';
 import useBackHandler from '../../utils/hooks/useBackHandler';
