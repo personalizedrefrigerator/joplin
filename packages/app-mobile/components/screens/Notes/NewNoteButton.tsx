@@ -3,13 +3,14 @@ import { _ } from '@joplin/lib/locale';
 import CommandService from '@joplin/lib/services/CommandService';
 import { Divider } from 'react-native-paper';
 import FloatingActionButton from '../../buttons/FloatingActionButton';
-import { AccessibilityActionEvent, AccessibilityActionInfo, StyleSheet, View } from 'react-native';
+import { AccessibilityActionEvent, AccessibilityActionInfo, ScrollView, StyleSheet, View } from 'react-native';
 import { AttachFileAction } from '../Note/commands/attachFile';
 import LabelledIconButton from '../../buttons/LabelledIconButton';
 import TextButton, { ButtonSize, ButtonType } from '../../buttons/TextButton';
 import { useCallback, useMemo, useRef } from 'react';
 import Logger from '@joplin/utils/Logger';
 import focusView from '../../../utils/focusView';
+import NavService from '@joplin/lib/services/NavService';
 
 const logger = Logger.create('NewNoteButton');
 
@@ -36,7 +37,7 @@ const styles = StyleSheet.create({
 	shortcutButton: {
 		flexGrow: 1,
 		flexShrink: 1,
-		flexBasis: 0,
+		width: 82,
 	},
 	mainButton: {
 		flexShrink: 1,
@@ -57,9 +58,12 @@ const styles = StyleSheet.create({
 const NewNoteButton: React.FC<Props> = _props => {
 	const newNoteRef = useRef<View|null>(null);
 
-	const renderShortcutButton = (action: AttachFileAction, icon: string, title: string) => {
+	type ActionType = AttachFileAction|(()=> void);
+	const renderShortcutButton = (action: ActionType, icon: string, title: string) => {
+		const actionSource = typeof action === 'function' ? null : action;
+		action = typeof action === 'function' ? action : () => makeNewNote(false, actionSource);
 		return <LabelledIconButton
-			onPress={() => makeNewNote(false, action)}
+			onPress={action}
 			style={styles.shortcutButton}
 			title={title}
 			accessibilityHint={_('Creates a new note with an attachment of type %s', title)}
@@ -68,12 +72,13 @@ const NewNoteButton: React.FC<Props> = _props => {
 	};
 
 	const menuContent = <View style={styles.menuContent}>
-		<View style={styles.buttonRow}>
+		<ScrollView horizontal style={styles.buttonRow}>
 			{renderShortcutButton(AttachFileAction.AttachFile, 'material attachment', _('Attachment'))}
 			{renderShortcutButton(AttachFileAction.RecordAudio, 'material microphone', _('Recording'))}
 			{renderShortcutButton(AttachFileAction.TakePhoto, 'material camera', _('Camera'))}
 			{renderShortcutButton(AttachFileAction.AttachDrawing, 'material draw', _('Drawing'))}
-		</View>
+			{renderShortcutButton(() => NavService.go('DocumentScanner'), 'material data-matrix-scan', _('Scan notebook'))}
+		</ScrollView>
 		<Divider/>
 		<View style={[styles.buttonRow, styles.mainButtonRow]}>
 			<TextButton

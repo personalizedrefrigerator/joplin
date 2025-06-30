@@ -9,7 +9,10 @@ import { Dispatch } from 'redux';
 import ScreenHeader from '../../ScreenHeader';
 import { _ } from '@joplin/lib/locale';
 import { CameraResult } from '../../CameraView/types';
-import NotePreview from './NotePreview';
+import NotePreview, { CreateNoteEvent } from './NotePreview';
+import shim from '@joplin/lib/shim';
+import Note from '@joplin/lib/models/Note';
+import Tag from '@joplin/lib/models/Tag';
 
 interface Props {
 	dispatch: Dispatch;
@@ -42,10 +45,22 @@ const DocumentScanner: React.FC<Props> = ({ themeId, dispatch }) => {
 		});
 	}, []);
 
-	const onCreateNote = useCallback(() => {
+	const onCreateNote = useCallback(async (event: CreateNoteEvent) => {
+		onDeleteLastPhoto();
+
+		const resource = await shim.createResourceFromPath(
+			event.sourceImage.uri,
+			{ title: event.title, mime: event.sourceImage.type /* ocr_something: ... */ },
+		);
+		const note = await Note.save({
+			title: event.title,
+			body: `![${event.title}](:/${resource.id})`,
+			parent_id: event.parentId,
+		});
+		await Tag.setNoteTagsByTitles(note.id, event.tags);
+
 		// TODO: Show toast message?
 		// TODO: Remove last photo
-		onDeleteLastPhoto();
 		// TODO: Hide the scanner if out of photos
 	}, [onDeleteLastPhoto]);
 

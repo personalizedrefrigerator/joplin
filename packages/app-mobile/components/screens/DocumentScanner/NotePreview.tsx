@@ -14,10 +14,11 @@ import { _ } from '@joplin/lib/locale';
 import FolderPicker from '../../FolderPicker';
 import Folder from '@joplin/lib/models/Folder';
 
-interface CreateNoteEvent {
+export interface CreateNoteEvent {
 	sourceImage: CameraResult;
 	title: string;
 	tags: string[];
+	parentId: string;
 }
 
 interface Props {
@@ -80,8 +81,9 @@ const NotePreview: React.FC<Props> = ({
 			tags,
 			title,
 			sourceImage,
+			parentId: selectedFolderId ?? '',
 		});
-	}, [onCreateNote, tags, title, sourceImage]);
+	}, [onCreateNote, tags, title, sourceImage, selectedFolderId]);
 
 	const onNewFolder = useCallback(async (title: string) => {
 		const folder = await Folder.save({ title });
