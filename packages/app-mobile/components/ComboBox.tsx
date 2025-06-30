@@ -328,7 +328,11 @@ const ComboBox: React.FC<Props> = ({
 			propsOnItemSelectedRef.current(item);
 			setSearch('');
 		}
-	}, []);
+
+		if (!alwaysExpand) {
+			setShowSearchResults(false);
+		}
+	}, [setShowSearchResults, alwaysExpand]);
 
 	const baseId = useId();
 	const SearchResultWrapper = useSearchResultContainerComponent(
@@ -350,11 +354,7 @@ const ComboBox: React.FC<Props> = ({
 		if (item) {
 			onItemSelected(item);
 		}
-
-		if (!alwaysExpand) {
-			setShowSearchResults(false);
-		}
-	}, [onItemSelected, setShowSearchResults, alwaysExpand, results, selectedIndex]);
+	}, [onItemSelected, results, selectedIndex]);
 
 	// For now, onKeyPress only works on web.
 	// See https://github.com/react-native-community/discussions-and-proposals/issues/249
