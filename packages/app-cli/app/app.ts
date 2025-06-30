@@ -6,7 +6,7 @@ import Folder from '@joplin/lib/models/Folder';
 import BaseItem from '@joplin/lib/models/BaseItem';
 import Note from '@joplin/lib/models/Note';
 import Tag from '@joplin/lib/models/Tag';
-import Setting from '@joplin/lib/models/Setting';
+import Setting, { Env } from '@joplin/lib/models/Setting';
 import { reg } from '@joplin/lib/registry.js';
 import { dirname, fileExtension } from '@joplin/lib/path-utils';
 import { splitCommandString } from '@joplin/utils';
@@ -16,6 +16,8 @@ import RevisionService from '@joplin/lib/services/RevisionService';
 import shim from '@joplin/lib/shim';
 import setupCommand from './setupCommand';
 import { FolderEntity, NoteEntity } from '@joplin/lib/services/database/types';
+import initializeCommandService from './utils/initializeCommandService';
+import { Gui } from './types';
 const { cliUtils } = require('./cli-utils.js');
 const Cache = require('@joplin/lib/Cache');
 const { splitCommandBatch } = require('@joplin/lib/string-utils');
@@ -29,8 +31,7 @@ class Application extends BaseApplication {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	private activeCommand_: any = null;
 	private allCommandsLoaded_ = false;
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	private gui_: any = null;
+	private gui_: Gui|null = null;
 	private cache_ = new Cache();
 
 	public gui() {
@@ -74,6 +75,12 @@ class Application extends BaseApplication {
 		} else {
 			return output.length ? output[0] : null;
 		}
+	}
+
+	public async loadItemOrFail(type: ModelType | 'folderOrNote', pattern: string) {
+		const output = await this.loadItem(type, pattern);
+		if (!output) throw new Error(_('Cannot find "%s".', pattern));
+		return output;
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
@@ -414,6 +421,8 @@ class Application extends BaseApplication {
 
 		if (!shim.sharpEnabled()) this.logger().warn('Sharp is disabled - certain image-related features will not be available');
 
+		initializeCommandService(this.store(), Setting.value('env') === Env.Dev);
+
 		// If we have some arguments left at this point, it's a command
 		// so execute it.
 		if (argv.length) {
@@ -448,9 +457,10 @@ class Application extends BaseApplication {
 			const keymap = await this.loadKeymaps();
 
 			const AppGui = require('./app-gui.js');
-			this.gui_ = new AppGui(this, this.store(), keymap);
-			this.gui_.setLogger(this.logger());
-			await this.gui_.start();
+			const gui = new AppGui(this, this.store(), keymap);
+			gui.setLogger(this.logger());
+			await gui.start();
+			this.gui_ = gui;
 
 			// Since the settings need to be loaded before the store is created, it will never
 			// receive the SETTING_UPDATE_ALL even, which mean state.settings will not be

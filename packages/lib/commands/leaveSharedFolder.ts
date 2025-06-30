@@ -1,8 +1,8 @@
-import { CommandRuntime, CommandDeclaration, CommandContext } from '@joplin/lib/services/CommandService';
-import { _ } from '@joplin/lib/locale';
-import ShareService from '@joplin/lib/services/share/ShareService';
+import { CommandRuntime, CommandDeclaration, CommandContext } from '../services/CommandService';
+import { _ } from '../locale';
+import ShareService from '../services/share/ShareService';
 import Logger from '@joplin/utils/Logger';
-import shim from '@joplin/lib/shim';
+import shim from '../shim';
 
 const logger = Logger.create('leaveSharedFolder');
 

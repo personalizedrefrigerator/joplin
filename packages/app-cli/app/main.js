@@ -30,6 +30,7 @@ const EncryptionService = require('@joplin/lib/services/e2ee/EncryptionService')
 const envFromArgs = require('@joplin/lib/envFromArgs');
 const nodeSqlite = require('sqlite3');
 const initLib = require('@joplin/lib/initLib').default;
+const makeShowMessageBox = require('./utils/makeShowMessageBox').default;
 
 let sharp = null;
 try {
@@ -80,6 +81,8 @@ Logger.initializeGlobalLogger(logger);
 initLib(logger);
 
 const application = app();
+
+shim.showMessageBox = makeShowMessageBox(application.gui());
 
 if (process.platform === 'win32') {
 	const rl = require('readline').createInterface({
