@@ -26,8 +26,6 @@ type Args = {
 };
 
 class Command extends BaseCommand {
-	private cancelCounter_ = 0;
-
 	public usage() {
 		return 'share <command> [notebook] [user]';
 	}
@@ -44,19 +42,14 @@ class Command extends BaseCommand {
 	}
 
 	public async action(args: Args) {
-		const cancelCounter = this.cancelCounter_;
-		const cancelled = () => cancelCounter !== this.cancelCounter_;
-
 		const folderTitle = (folder: FolderEntity|null) => {
 			return folder ? substrWithEllipsis(folder.title, 0, 32) : _('[None]');
 		};
 
 		const commandShareAdd = async (folder: FolderEntity, email: string) => {
 			await reg.waitForSyncFinishedThenSync();
-			if (cancelled()) return;
 
 			const share = await ShareService.instance().shareFolder(folder.id);
-			if (cancelled()) return;
 
 			const permissions = {
 				can_read: 1,
@@ -68,7 +61,6 @@ class Command extends BaseCommand {
 
 			await ShareService.instance().refreshShares();
 			await ShareService.instance().refreshShareUsers(share.id);
-			if (cancelled()) return;
 
 			await reg.waitForSyncFinishedThenSync();
 		};
@@ -91,7 +83,6 @@ class Command extends BaseCommand {
 
 		const commandShareRemove = async (folder: FolderEntity, email: string) => {
 			await ShareService.instance().refreshShares();
-			if (cancelled()) return;
 
 			const share = getShareFromFolderId(folder.id);
 			if (!share) {
@@ -99,7 +90,6 @@ class Command extends BaseCommand {
 			}
 
 			await ShareService.instance().refreshShareUsers(share.id);
-			if (cancelled()) return;
 
 			const shareUsers = getShareUsers(folder.id);
 			if (!shareUsers) {
@@ -119,7 +109,6 @@ class Command extends BaseCommand {
 			}
 
 			await ShareService.instance().maintenance();
-			if (cancelled()) return;
 
 			if (folder) {
 				const share = getShareFromFolderId(folder.id);
@@ -213,7 +202,6 @@ class Command extends BaseCommand {
 
 		const commandShareAcceptOrReject = async (folderId: string, accept: boolean) => {
 			await ShareService.instance().maintenance();
-			if (cancelled()) return;
 
 			const shareState = getShareState();
 			const invitation = shareState.shareInvitations.find(invitation => {
@@ -242,7 +230,6 @@ class Command extends BaseCommand {
 			const folder = args.notebook ? await app().loadItemOrFail(ModelType.Folder, args.notebook) : null;
 
 			await ShareService.instance().maintenance();
-			if (cancelled()) return;
 
 			return CommandService.instance().execute('leaveSharedFolder', folder.id);
 		}
@@ -260,19 +247,6 @@ class Command extends BaseCommand {
 		}
 
 		throw new Error(`Unknown subcommand: ${args.command}`);
-	}
-
-	public async cancel() {
-		logger.info('Cancelling share...');
-		this.stdout(_('Cancelling... Please wait.'));
-		this.cancelCounter_ ++;
-
-		const synchronizer = await reg.syncTarget()?.synchronizer();
-		synchronizer?.cancel();
-	}
-
-	public cancellable() {
-		return true;
 	}
 }
 
