@@ -13,6 +13,7 @@ import NotePreview, { CreateNoteEvent } from './NotePreview';
 import shim from '@joplin/lib/shim';
 import Note from '@joplin/lib/models/Note';
 import Tag from '@joplin/lib/models/Tag';
+import { Portal, Snackbar } from 'react-native-paper';
 
 interface Props {
 	dispatch: Dispatch;
@@ -32,12 +33,14 @@ const useStyles = (themeId: number) => {
 const DocumentScanner: React.FC<Props> = ({ themeId, dispatch }) => {
 	const styles = useStyles(themeId);
 	const [photos, setPhotos] = useState<CameraResult[]>([]);
+	const [snackbarMessage, setSnackbarMessage] = useState('');
 
 	const onCloseScreen = useCallback(() => {
 		dispatch({ type: 'NAV_BACK' });
 	}, [dispatch]);
 
 	const onDeleteLastPhoto = useCallback(() => {
+		setSnackbarMessage('');
 		setPhotos(photos => {
 			const result = [...photos];
 			result.pop();
@@ -59,10 +62,16 @@ const DocumentScanner: React.FC<Props> = ({ themeId, dispatch }) => {
 		});
 		await Tag.setNoteTagsByTitles(note.id, event.tags);
 
+		setSnackbarMessage(_('Created note: "%s"', note.title));
+
 		// TODO: Show toast message?
 		// TODO: Remove last photo
 		// TODO: Hide the scanner if out of photos
 	}, [onDeleteLastPhoto]);
+
+	const onDismissSnackbar = useCallback(() => {
+		setSnackbarMessage('');
+	}, []);
 
 	const content = photos.length === 0 ? (
 		<CameraViewMultiPage
@@ -74,11 +83,22 @@ const DocumentScanner: React.FC<Props> = ({ themeId, dispatch }) => {
 	) : <>
 		<ScreenHeader title={_('Note preview')} onDeleteButtonPress={onDeleteLastPhoto}/>
 		<NotePreview
+			key={`note-preview-${photos.length}`}
 			photoIndex={photos.length}
-			titleTemplate={'photo-test'}
 			sourceImage={photos[photos.length - 1]}
 			onCreateNote={onCreateNote}
 		/>
+		<Portal>
+			<Snackbar
+				key={`snackbar--${snackbarMessage}`}
+				visible={!!snackbarMessage}
+				onDismiss={onDismissSnackbar}
+				action={{
+					label: _('Dismiss'),
+					onPress: onDismissSnackbar,
+				}}
+			>{snackbarMessage}</Snackbar>
+		</Portal>
 	</>;
 
 	return <View style={styles.root}>

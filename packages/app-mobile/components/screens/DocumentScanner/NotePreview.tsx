@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useMemo, useState, useCallback } from 'react';
+import { useMemo, useState, useCallback, useEffect } from 'react';
 import { themeStyle } from '../../global-style';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { CameraResult } from '../../CameraView/types';
@@ -13,6 +13,8 @@ import { Button } from 'react-native-paper';
 import { _ } from '@joplin/lib/locale';
 import FolderPicker from '../../FolderPicker';
 import Folder from '@joplin/lib/models/Folder';
+import Setting from '@joplin/lib/models/Setting';
+import { formatMsToLocal } from '@joplin/utils/time';
 
 export interface CreateNoteEvent {
 	sourceImage: CameraResult;
@@ -24,7 +26,6 @@ export interface CreateNoteEvent {
 interface Props {
 	themeId: number;
 	photoIndex: number;
-	titleTemplate: string;
 	sourceImage: CameraResult;
 	allTags: TagEntity[];
 	allFolders: FolderEntity[];
@@ -72,9 +73,18 @@ const NotePreview: React.FC<Props> = ({
 	themeId, sourceImage, photoIndex, allTags, onCreateNote, allFolders,
 }) => {
 	const styles = useStyles(themeId);
-	const [title, setTitle] = useState('...');
+	const [title, setTitle] = useState('');
 	const [tags, setTags] = useState([]);
 	const [selectedFolderId, setSelectedFolderId] = useState('');
+
+	useEffect(() => {
+		const template = Setting.value('scanner.titleTemplate');
+		const date = formatMsToLocal(Date.now(), Setting.value('dateFormat'));
+		setTitle(
+			template.replace(/{date}/g, date)
+				.replace(/{page}/g, `${photoIndex + 1}`),
+		);
+	}, [photoIndex]);
 
 	const onNewNote = useCallback(() => {
 		onCreateNote({
