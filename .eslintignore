@@ -1650,6 +1650,7 @@ packages/tools/fuzzer/constants.js
 packages/tools/fuzzer/sync-fuzzer.js
 packages/tools/fuzzer/types.js
 packages/tools/fuzzer/utils/SeededRandom.js
+packages/tools/fuzzer/utils/getNumberProperty.js
 packages/tools/fuzzer/utils/getProperty.js
 packages/tools/fuzzer/utils/getStringProperty.js
 packages/tools/fuzzer/utils/retryWithCount.js

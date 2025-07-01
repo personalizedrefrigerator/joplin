@@ -11,6 +11,7 @@ import execa = require('execa');
 import { cliDirectory } from './constants';
 import { commandToString } from '@joplin/utils';
 import { quotePath } from '@joplin/utils/path';
+import getNumberProperty from './utils/getNumberProperty';
 
 const logger = Logger.create('Client');
 
@@ -286,8 +287,9 @@ class Client implements ActionableClient {
 
 	public async listNotes() {
 		const params = {
-			fields: 'id,parent_id,body,title',
+			fields: 'id,parent_id,body,title,is_conflict',
 			include_deleted: '1',
+			include_conflicts: '1',
 		};
 		return await this.execPagedApiCommand_(
 			'GET',
@@ -295,7 +297,9 @@ class Client implements ActionableClient {
 			params,
 			item => ({
 				id: getStringProperty(item, 'id'),
-				parentId: getStringProperty(item, 'parent_id'),
+				parentId: getNumberProperty(item, 'is_conflict') === 1 ? (
+					`[conflicts for ${this.email}]`
+				) : getStringProperty(item, 'parent_id'),
 				title: getStringProperty(item, 'title'),
 				body: getStringProperty(item, 'body'),
 			}),
