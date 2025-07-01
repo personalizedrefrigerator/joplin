@@ -100,6 +100,10 @@ const NotePreview: React.FC<Props> = ({
 		setSelectedFolderId(folder.id);
 	}, []);
 
+	const realFolders = useMemo(() => {
+		return Folder.getRealFolders(allFolders);
+	}, [allFolders]);
+
 	return <ScrollView style={styles.rootScrollView}>
 		<TextInput
 			style={styles.titleInput}
@@ -118,7 +122,7 @@ const NotePreview: React.FC<Props> = ({
 				themeId={themeId}
 				darkText
 				placeholder={_('Select notebook')}
-				folders={allFolders}
+				folders={realFolders}
 				onValueChange={setSelectedFolderId}
 				selectedFolderId={selectedFolderId}
 				mustSelect={true}
