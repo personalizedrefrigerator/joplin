@@ -148,6 +148,8 @@ const main = async () => {
 		process.exit(1);
 	});
 
+	let clientHelpText;
+
 	try {
 		const joplinServerUrl = 'http://localhost:22300/';
 		const server = new Server(joplinServerUrl, {
@@ -176,6 +178,7 @@ const main = async () => {
 			3,
 			task => { cleanupTasks.push(task); },
 		);
+		clientHelpText = clientPool.helpText();
 
 		const maxSteps = 50;
 		for (let i = 1; i <= maxSteps; i++) {
@@ -200,6 +203,9 @@ const main = async () => {
 		}
 	} catch (error) {
 		logger.error('ERROR', error);
+		if (clientHelpText) {
+			logger.info('Client information:\n', clientHelpText);
+		}
 		logger.info('An error occurred. Pausing before continuing cleanup.');
 		await waitForCliInput();
 		process.exitCode = 1;

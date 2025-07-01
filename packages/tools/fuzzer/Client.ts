@@ -9,6 +9,8 @@ import ActionTracker from './ActionTracker';
 import Logger from '@joplin/utils/Logger';
 import execa = require('execa');
 import { cliDirectory } from './constants';
+import { commandToString } from '@joplin/utils';
+import { quotePath } from '@joplin/utils/path';
 
 const logger = Logger.create('Client');
 
@@ -107,12 +109,25 @@ class Client implements ActionableClient {
 		await this.cleanUp_();
 	}
 
+	private get cliCommandArguments() {
+		return [
+			'start-no-build',
+			'--profile', this.profileDirectory,
+			'--env', 'dev',
+		];
+	}
+
+	public getHelpText() {
+		return [
+			`Client ${this.email}:`,
+			`\tCommand: cd ${quotePath(cliDirectory)} && ${commandToString('yarn', this.cliCommandArguments)}`,
+		].join('\n');
+	}
+
 	private async execCliCommand_(commandName: string, ...args: string[]) {
 		assert.match(commandName, /^[a-z]/, 'Command name must start with a lowercase letter.');
 		const commandResult = await execa('yarn', [
-			'run', 'start-no-build',
-			'--profile', this.profileDirectory,
-			'--env', 'dev',
+			...this.cliCommandArguments,
 			commandName,
 			...args,
 		], { cwd: cliDirectory });

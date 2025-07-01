@@ -44,5 +44,9 @@ export default class ClientPool {
 			await client.sync();
 		}
 	}
+
+	public helpText() {
+		return this.clients.map(client => client.getHelpText()).join('\n\n');
+	}
 }
 
