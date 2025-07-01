@@ -229,7 +229,10 @@ void yargs
 	.usage('$0 <cmd>')
 	.command(
 		'start',
-		'Starts the fuzzer. Use FUZZER_SERVER_ADMIN_PASSWORD to specify the admin@localhost password for Joplin Server.',
+		[
+			'Starts the synchronization fuzzer. The fuzzer starts Joplin Server and creates a few CLI clients and attempts to find sync bugs.',
+			'Use FUZZER_SERVER_ADMIN_PASSWORD to specify the admin@localhost password for Joplin Server.',
+		].join('\n'),
 		(yargs) => {
 			return yargs.options({
 				'seed': { type: 'number', default: 12345 },
