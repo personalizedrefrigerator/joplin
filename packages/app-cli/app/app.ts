@@ -249,7 +249,7 @@ class Application extends BaseApplication {
 		return this.commands_[name];
 	}
 
-	public dummyGui() {
+	public dummyGui(): Gui {
 		return {
 			isDummy: () => {
 				return true;
@@ -274,6 +274,7 @@ class Application extends BaseApplication {
 			forceRender: () => {},
 			termSaveState: () => {},
 			termRestoreState: () => {},
+			keymap: () => [],
 		};
 	}
 
