@@ -11,10 +11,16 @@ export const declaration: CommandDeclaration = {
 	label: () => _('Leave notebook...'),
 };
 
+interface Options {
+	force?: boolean;
+}
+
 export const runtime = (): CommandRuntime => {
 	return {
-		execute: async (_context: CommandContext, folderId: string = null) => {
-			const answer = await shim.showConfirmationDialog(_('This will remove the notebook from your collection and you will no longer have access to its content. Do you wish to continue?'));
+		execute: async (_context: CommandContext, folderId: string = null, { force = false }: Options = {}) => {
+			const answer = force ? true : await shim.showConfirmationDialog(
+				_('This will remove the notebook from your collection and you will no longer have access to its content. Do you wish to continue?'),
+			);
 			if (!answer) return;
 
 			try {

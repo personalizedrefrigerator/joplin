@@ -22,6 +22,7 @@ type Args = {
 	options: {
 		'read-only'?: boolean;
 		json?: boolean;
+		force?: boolean;
 	};
 };
 
@@ -53,12 +54,16 @@ class Command extends BaseCommand {
 	}
 
 	public description() {
-		return _('Shares or unshares the specified [notebook] with [user]. Requires Joplin Cloud or Joplin Server.\nCommands: `add`, `remove`, `list`, `accept`, `leave`, and `reject`.');
+		return [
+			_('Shares or unshares the specified [notebook] with [user]. Requires Joplin Cloud or Joplin Server.'),
+			_('Commands: `add`, `remove`, `list`, `delete`, `accept`, `leave`, and `reject`.'),
+		].join('\n');
 	}
 
 	public options() {
 		return [
 			['--read-only', _('Don\'t allow the share recipient to write to the shared notebook. Valid only for the `add` subcommand.')],
+			['-f, --force', _('Do not ask for user confirmation.')],
 			['--json', _('Prefer JSON output.')],
 		];
 	}
@@ -223,16 +228,39 @@ class Command extends BaseCommand {
 			commandShareAcceptOrReject(folderId, false)
 		);
 
-		if (args.command === 'add' || args.command === 'remove') {
-			if (!args.notebook) throw new Error('[notebook] is required');
-			if (!args.user) throw new Error('[user] is required');
+		const commandShareDelete = async (folder: FolderEntity) => {
+			const title = folderTitle(folder);
+			if (!folder.is_shared) {
+				throw new Error(_('Notebook "%s" is not shared', title));
+			}
 
-			const email = args.user;
+			const force = args.options.force;
+			const ok = force ? true : await this.prompt(
+				_('Unshare notebook "%s"? This may cause other users to lose access to the notebook.', title),
+				{ booleanAnswerDefault: 'n' },
+			);
+			if (!ok) return;
+
+			logger.info('Unsharing folder', folder.id);
+			await ShareService.instance().unshareFolder(folder.id);
+			await reg.scheduleSync();
+		};
+
+		if (args.command === 'add' || args.command === 'remove' || args.command === 'delete') {
+			if (!args.notebook) throw new Error('[notebook] is required');
 			const folder = await app().loadItemOrFail(ModelType.Folder, args.notebook);
-			if (args.command === 'add') {
-				return commandShareAdd(folder, email);
-			} else if (args.command === 'remove') {
-				return commandShareRemove(folder, email);
+
+			if (args.command === 'delete') {
+				return commandShareDelete(folder);
+			} else {
+				if (!args.user) throw new Error('[user] is required');
+
+				const email = args.user;
+				if (args.command === 'add') {
+					return commandShareAdd(folder, email);
+				} else if (args.command === 'remove') {
+					return commandShareRemove(folder, email);
+				}
 			}
 		}
 
@@ -241,7 +269,9 @@ class Command extends BaseCommand {
 
 			await ShareService.instance().maintenance();
 
-			return CommandService.instance().execute('leaveSharedFolder', folder.id);
+			return CommandService.instance().execute(
+				'leaveSharedFolder', folder.id, { force: args.options.force },
+			);
 		}
 
 		if (args.command === 'list') {
