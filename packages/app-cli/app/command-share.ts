@@ -211,10 +211,16 @@ class Command extends BaseCommand {
 			await ShareService.instance().maintenance();
 
 			const shareState = getShareState();
-			const invitation = shareState.shareInvitations.find(invitation => {
-				return invitation.share.folder_id === folderId;
+			const invitations = shareState.shareInvitations.filter(invitation => {
+				return invitation.share.folder_id === folderId && invitation.status === ShareUserStatus.Waiting;
 			});
-			if (!invitation) throw new Error('No such invitation found');
+			if (invitations.length === 0) throw new Error('No such invitation found');
+
+			// If there are multiple invitations for the same folder, stop early to avoid
+			// accepting the wrong invitation.
+			if (invitations.length > 1) throw new Error('Multiple invitations found with the same ID');
+
+			const invitation = invitations[0];
 
 			this.stdout(accept ? _('Accepting share...') : _('Rejecting share...'));
 			await invitationRespond(invitation.id, invitation.share.folder_id, invitation.master_key, accept);
