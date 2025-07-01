@@ -25,13 +25,35 @@ type Args = {
 	};
 };
 
+
+const folderTitle = (folder: FolderEntity|null) => {
+	return folder ? substrWithEllipsis(folder.title, 0, 32) : _('[None]');
+};
+
+const getShareState = () => app().store().getState().shareService;
+const getShareFromFolderId = (folderId: string) => {
+	const shareState = getShareState();
+	const allShares = shareState.shares;
+	const share = allShares.find(share => share.folder_id === folderId);
+	return share;
+};
+
+const getShareUsers = (folderId: string) => {
+	const share = getShareFromFolderId(folderId);
+	if (!share) {
+		throw new Error(`No share found for folder ${folderId}`);
+	}
+	return getShareState().shareUsers[share.id];
+};
+
+
 class Command extends BaseCommand {
 	public usage() {
 		return 'share <command> [notebook] [user]';
 	}
 
 	public description() {
-		return _('Shares or unshares the specified [notebook] with [user]. Requires Joplin Cloud or Joplin Server.\nCommands: `add`, `remove`, `list`, `accept`, and `reject`.');
+		return _('Shares or unshares the specified [notebook] with [user]. Requires Joplin Cloud or Joplin Server.\nCommands: `add`, `remove`, `list`, `accept`, `leave`, and `reject`.');
 	}
 
 	public options() {
@@ -42,10 +64,6 @@ class Command extends BaseCommand {
 	}
 
 	public async action(args: Args) {
-		const folderTitle = (folder: FolderEntity|null) => {
-			return folder ? substrWithEllipsis(folder.title, 0, 32) : _('[None]');
-		};
-
 		const commandShareAdd = async (folder: FolderEntity, email: string) => {
 			await reg.waitForSyncFinishedThenSync();
 
@@ -63,22 +81,6 @@ class Command extends BaseCommand {
 			await ShareService.instance().refreshShareUsers(share.id);
 
 			await reg.waitForSyncFinishedThenSync();
-		};
-
-		const getShareState = () => app().store().getState().shareService;
-		const getShareFromFolderId = (folderId: string) => {
-			const shareState = getShareState();
-			const allShares = shareState.shares;
-			const share = allShares.find(share => share.folder_id === folderId);
-			return share;
-		};
-
-		const getShareUsers = (folderId: string) => {
-			const share = getShareFromFolderId(folderId);
-			if (!share) {
-				throw new Error(`No share found for folder ${folderId}`);
-			}
-			return getShareState().shareUsers[share.id];
 		};
 
 		const commandShareRemove = async (folder: FolderEntity, email: string) => {
@@ -213,6 +215,14 @@ class Command extends BaseCommand {
 			await invitationRespond(invitation.id, invitation.share.folder_id, invitation.master_key, accept);
 		};
 
+		const commandShareAccept = (folderId: string) => (
+			commandShareAcceptOrReject(folderId, true)
+		);
+
+		const commandShareReject = (folderId: string) => (
+			commandShareAcceptOrReject(folderId, false)
+		);
+
 		if (args.command === 'add' || args.command === 'remove') {
 			if (!args.notebook) throw new Error('[notebook] is required');
 			if (!args.user) throw new Error('[user] is required');
@@ -239,11 +249,11 @@ class Command extends BaseCommand {
 		}
 
 		if (args.command === 'accept') {
-			return commandShareAcceptOrReject(args.notebook, true);
+			return commandShareAccept(args.notebook);
 		}
 
 		if (args.command === 'reject') {
-			return commandShareAcceptOrReject(args.notebook, false);
+			return commandShareReject(args.notebook);
 		}
 
 		throw new Error(`Unknown subcommand: ${args.command}`);
