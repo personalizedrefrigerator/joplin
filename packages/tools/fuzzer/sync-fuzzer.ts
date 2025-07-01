@@ -230,7 +230,7 @@ void yargs
 	.command(
 		'start',
 		[
-			'Starts the synchronization fuzzer. The fuzzer starts Joplin Server and creates a few CLI clients and attempts to find sync bugs.',
+			'Starts the synchronization fuzzer. The fuzzer starts Joplin Server, creates multiple CLI clients, and attempts to find sync bugs.',
 			'Use FUZZER_SERVER_ADMIN_PASSWORD to specify the admin@localhost password for Joplin Server.',
 		].join('\n'),
 		(yargs) => {
