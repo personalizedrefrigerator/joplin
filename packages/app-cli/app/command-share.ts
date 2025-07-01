@@ -104,6 +104,9 @@ class Command extends BaseCommand {
 			}
 
 			const targetUser = shareUsers.find(user => user.user?.email === email);
+			if (!targetUser) {
+				throw new Error(`No recipient found with email ${email}`);
+			}
 
 			await ShareService.instance().deleteShareRecipient(targetUser.id);
 			this.stdout(_('Removed %s from share.', targetUser.user.email));
@@ -235,14 +238,9 @@ class Command extends BaseCommand {
 		);
 
 		const commandShareDelete = async (folder: FolderEntity) => {
-			const title = folderTitle(folder);
-			if (!folder.is_shared) {
-				throw new Error(_('Notebook "%s" is not shared', title));
-			}
-
 			const force = args.options.force;
 			const ok = force ? true : await this.prompt(
-				_('Unshare notebook "%s"? This may cause other users to lose access to the notebook.', title),
+				_('Unshare notebook "%s"? This may cause other users to lose access to the notebook.', folderTitle(folder)),
 				{ booleanAnswerDefault: 'n' },
 			);
 			if (!ok) return;
@@ -276,7 +274,7 @@ class Command extends BaseCommand {
 			await ShareService.instance().maintenance();
 
 			return CommandService.instance().execute(
-				'leaveSharedFolder', folder.id, { force: args.options.force },
+				'leaveSharedFolder', folder?.id, { force: args.options.force },
 			);
 		}
 
