@@ -135,7 +135,7 @@ packages/app-cli/app/services/plugins/PluginRunner.js
 packages/app-cli/app/setupCommand.js
 packages/app-cli/app/types.js
 packages/app-cli/app/utils/initializeCommandService.js
-packages/app-cli/app/utils/makeShowMessageBox.js
+packages/app-cli/app/utils/shimInitCli.js
 packages/app-cli/app/utils/testUtils.js
 packages/app-cli/tests/HtmlToMd.js
 packages/app-cli/tests/MarkupToHtml.js
