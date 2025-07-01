@@ -10,6 +10,8 @@ import ClientPool from './ClientPool';
 import retryWithCount from './utils/retryWithCount';
 import Client from './Client';
 import SeededRandom from './utils/SeededRandom';
+import { env } from 'process';
+import yargs = require('yargs');
 const { shimInit } = require('@joplin/lib/shim-init-node');
 
 const globalLogger = new Logger();
@@ -124,7 +126,11 @@ const doRandomAction = async (context: FuzzContext, client: Client, clientPool: 
 	}
 };
 
-const main = async () => {
+interface Options {
+	seed: number;
+}
+
+const main = async (options: Options) => {
 	shimInit();
 	Setting.setConstant('env', Env.Dev);
 
@@ -154,8 +160,7 @@ const main = async () => {
 		const joplinServerUrl = 'http://localhost:22300/';
 		const server = new Server(joplinServerUrl, {
 			email: 'admin@localhost',
-			// TODO: Admin password from an environment variable?
-			password: 'admin',
+			password: env['FUZZER_SERVER_ADMIN_PASSWORD'] ?? 'admin',
 		});
 		cleanupTasks.push(() => server.close());
 
@@ -166,7 +171,9 @@ const main = async () => {
 		const profilesDirectory = await createProfilesDirectory();
 		cleanupTasks.push(profilesDirectory.remove);
 
-		const random = new SeededRandom(12345);
+		logger.info('Starting with seed', options.seed);
+		const random = new SeededRandom(options.seed);
+
 		const fuzzContext: FuzzContext = {
 			serverUrl: joplinServerUrl,
 			baseDir: profilesDirectory.path,
@@ -217,4 +224,20 @@ const main = async () => {
 	}
 };
 
-void main();
+
+void yargs
+	.usage('$0 <cmd>')
+	.command(
+		'start',
+		'Starts the fuzzer. Use FUZZER_SERVER_ADMIN_PASSWORD to specify the admin@localhost password for Joplin Server.',
+		(yargs) => {
+			return yargs.options({
+				'seed': { type: 'number', default: 12345 },
+			});
+		},
+		async (argv) => {
+			await main({ seed: argv.seed });
+		},
+	)
+	.help()
+	.argv;
