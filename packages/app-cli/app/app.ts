@@ -17,6 +17,7 @@ import shim from '@joplin/lib/shim';
 import setupCommand from './setupCommand';
 import { FolderEntity, NoteEntity } from '@joplin/lib/services/database/types';
 import initializeCommandService from './utils/initializeCommandService';
+import { Gui } from './types';
 const { cliUtils } = require('./cli-utils.js');
 const Cache = require('@joplin/lib/Cache');
 const { splitCommandBatch } = require('@joplin/lib/string-utils');
@@ -30,8 +31,7 @@ class Application extends BaseApplication {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	private activeCommand_: any = null;
 	private allCommandsLoaded_ = false;
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	private gui_: any = null;
+	private gui_: Gui|null = null;
 	private cache_ = new Cache();
 
 	public gui() {
@@ -457,9 +457,10 @@ class Application extends BaseApplication {
 			const keymap = await this.loadKeymaps();
 
 			const AppGui = require('./app-gui.js');
-			this.gui_ = new AppGui(this, this.store(), keymap);
-			this.gui_.setLogger(this.logger());
-			await this.gui_.start();
+			const gui = new AppGui(this, this.store(), keymap);
+			gui.setLogger(this.logger());
+			await gui.start();
+			this.gui_ = gui;
 
 			// Since the settings need to be loaded before the store is created, it will never
 			// receive the SETTING_UPDATE_ALL even, which mean state.settings will not be

@@ -22,41 +22,57 @@ type Args = {
 	options: {
 		'read-only'?: boolean;
 		json?: boolean;
+		force?: boolean;
 	};
 };
 
-class Command extends BaseCommand {
-	private cancelCounter_ = 0;
 
+const folderTitle = (folder: FolderEntity|null) => {
+	return folder ? substrWithEllipsis(folder.title, 0, 32) : _('[None]');
+};
+
+const getShareState = () => app().store().getState().shareService;
+const getShareFromFolderId = (folderId: string) => {
+	const shareState = getShareState();
+	const allShares = shareState.shares;
+	const share = allShares.find(share => share.folder_id === folderId);
+	return share;
+};
+
+const getShareUsers = (folderId: string) => {
+	const share = getShareFromFolderId(folderId);
+	if (!share) {
+		throw new Error(`No share found for folder ${folderId}`);
+	}
+	return getShareState().shareUsers[share.id];
+};
+
+
+class Command extends BaseCommand {
 	public usage() {
 		return 'share <command> [notebook] [user]';
 	}
 
 	public description() {
-		return _('Shares or unshares the specified [notebook] with [user]. Requires Joplin Cloud or Joplin Server.\nCommands: `add`, `remove`, `list`, `accept`, and `reject`.');
+		return [
+			_('Shares or unshares the specified [notebook] with [user]. Requires Joplin Cloud or Joplin Server.'),
+			_('Commands: `add`, `remove`, `list`, `delete`, `accept`, `leave`, and `reject`.'),
+		].join('\n');
 	}
 
 	public options() {
 		return [
 			['--read-only', _('Don\'t allow the share recipient to write to the shared notebook. Valid only for the `add` subcommand.')],
+			['-f, --force', _('Do not ask for user confirmation.')],
 			['--json', _('Prefer JSON output.')],
 		];
 	}
 
 	public async action(args: Args) {
-		const cancelCounter = this.cancelCounter_;
-		const cancelled = () => cancelCounter !== this.cancelCounter_;
-
-		const folderTitle = (folder: FolderEntity|null) => {
-			return folder ? substrWithEllipsis(folder.title, 0, 32) : _('[None]');
-		};
-
 		const commandShareAdd = async (folder: FolderEntity, email: string) => {
 			await reg.waitForSyncFinishedThenSync();
-			if (cancelled()) return;
 
 			const share = await ShareService.instance().shareFolder(folder.id);
-			if (cancelled()) return;
 
 			const permissions = {
 				can_read: 1,
@@ -68,30 +84,12 @@ class Command extends BaseCommand {
 
 			await ShareService.instance().refreshShares();
 			await ShareService.instance().refreshShareUsers(share.id);
-			if (cancelled()) return;
 
 			await reg.waitForSyncFinishedThenSync();
 		};
 
-		const getShareState = () => app().store().getState().shareService;
-		const getShareFromFolderId = (folderId: string) => {
-			const shareState = getShareState();
-			const allShares = shareState.shares;
-			const share = allShares.find(share => share.folder_id === folderId);
-			return share;
-		};
-
-		const getShareUsers = (folderId: string) => {
-			const share = getShareFromFolderId(folderId);
-			if (!share) {
-				throw new Error(`No share found for folder ${folderId}`);
-			}
-			return getShareState().shareUsers[share.id];
-		};
-
 		const commandShareRemove = async (folder: FolderEntity, email: string) => {
 			await ShareService.instance().refreshShares();
-			if (cancelled()) return;
 
 			const share = getShareFromFolderId(folder.id);
 			if (!share) {
@@ -99,7 +97,6 @@ class Command extends BaseCommand {
 			}
 
 			await ShareService.instance().refreshShareUsers(share.id);
-			if (cancelled()) return;
 
 			const shareUsers = getShareUsers(folder.id);
 			if (!shareUsers) {
@@ -119,7 +116,6 @@ class Command extends BaseCommand {
 			}
 
 			await ShareService.instance().maintenance();
-			if (cancelled()) return;
 
 			if (folder) {
 				const share = getShareFromFolderId(folder.id);
@@ -213,28 +209,64 @@ class Command extends BaseCommand {
 
 		const commandShareAcceptOrReject = async (folderId: string, accept: boolean) => {
 			await ShareService.instance().maintenance();
-			if (cancelled()) return;
 
 			const shareState = getShareState();
-			const invitation = shareState.shareInvitations.find(invitation => {
-				return invitation.share.folder_id === folderId;
+			const invitations = shareState.shareInvitations.filter(invitation => {
+				return invitation.share.folder_id === folderId && invitation.status === ShareUserStatus.Waiting;
 			});
-			if (!invitation) throw new Error('No such invitation found');
+			if (invitations.length === 0) throw new Error('No such invitation found');
+
+			// If there are multiple invitations for the same folder, stop early to avoid
+			// accepting the wrong invitation.
+			if (invitations.length > 1) throw new Error('Multiple invitations found with the same ID');
+
+			const invitation = invitations[0];
 
 			this.stdout(accept ? _('Accepting share...') : _('Rejecting share...'));
 			await invitationRespond(invitation.id, invitation.share.folder_id, invitation.master_key, accept);
 		};
 
-		if (args.command === 'add' || args.command === 'remove') {
-			if (!args.notebook) throw new Error('[notebook] is required');
-			if (!args.user) throw new Error('[user] is required');
+		const commandShareAccept = (folderId: string) => (
+			commandShareAcceptOrReject(folderId, true)
+		);
 
-			const email = args.user;
+		const commandShareReject = (folderId: string) => (
+			commandShareAcceptOrReject(folderId, false)
+		);
+
+		const commandShareDelete = async (folder: FolderEntity) => {
+			const title = folderTitle(folder);
+			if (!folder.is_shared) {
+				throw new Error(_('Notebook "%s" is not shared', title));
+			}
+
+			const force = args.options.force;
+			const ok = force ? true : await this.prompt(
+				_('Unshare notebook "%s"? This may cause other users to lose access to the notebook.', title),
+				{ booleanAnswerDefault: 'n' },
+			);
+			if (!ok) return;
+
+			logger.info('Unsharing folder', folder.id);
+			await ShareService.instance().unshareFolder(folder.id);
+			await reg.scheduleSync();
+		};
+
+		if (args.command === 'add' || args.command === 'remove' || args.command === 'delete') {
+			if (!args.notebook) throw new Error('[notebook] is required');
 			const folder = await app().loadItemOrFail(ModelType.Folder, args.notebook);
-			if (args.command === 'add') {
-				return commandShareAdd(folder, email);
-			} else if (args.command === 'remove') {
-				return commandShareRemove(folder, email);
+
+			if (args.command === 'delete') {
+				return commandShareDelete(folder);
+			} else {
+				if (!args.user) throw new Error('[user] is required');
+
+				const email = args.user;
+				if (args.command === 'add') {
+					return commandShareAdd(folder, email);
+				} else if (args.command === 'remove') {
+					return commandShareRemove(folder, email);
+				}
 			}
 		}
 
@@ -242,9 +274,10 @@ class Command extends BaseCommand {
 			const folder = args.notebook ? await app().loadItemOrFail(ModelType.Folder, args.notebook) : null;
 
 			await ShareService.instance().maintenance();
-			if (cancelled()) return;
 
-			return CommandService.instance().execute('leaveSharedFolder', folder.id);
+			return CommandService.instance().execute(
+				'leaveSharedFolder', folder.id, { force: args.options.force },
+			);
 		}
 
 		if (args.command === 'list') {
@@ -252,27 +285,14 @@ class Command extends BaseCommand {
 		}
 
 		if (args.command === 'accept') {
-			return commandShareAcceptOrReject(args.notebook, true);
+			return commandShareAccept(args.notebook);
 		}
 
 		if (args.command === 'reject') {
-			return commandShareAcceptOrReject(args.notebook, false);
+			return commandShareReject(args.notebook);
 		}
 
 		throw new Error(`Unknown subcommand: ${args.command}`);
-	}
-
-	public async cancel() {
-		logger.info('Cancelling share...');
-		this.stdout(_('Cancelling... Please wait.'));
-		this.cancelCounter_ ++;
-
-		const synchronizer = await reg.syncTarget()?.synchronizer();
-		synchronizer?.cancel();
-	}
-
-	public cancellable() {
-		return true;
 	}
 }
 
