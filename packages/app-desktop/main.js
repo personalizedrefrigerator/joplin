@@ -1,6 +1,6 @@
 // This is the basic initialization for the Electron MAIN process
 
-require('source-map-support').install();
+require('./utils/sourceMapSetup.js');
 const electronApp = require('electron').app;
 require('@electron/remote/main').initialize();
 const ElectronAppWrapper = require('./ElectronAppWrapper').default;
