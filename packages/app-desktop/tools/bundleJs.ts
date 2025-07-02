@@ -26,7 +26,7 @@ const makeBuildContext = (entryPoint: string, renderer: boolean, computeFileSize
 				// in the final bundle.
 				name: 'joplin--relative-imports-for-externals',
 				setup: build => {
-					const externalRegex = /^(.*\.node|@cspotcode\/source-map-support|sqlite3|electron|@electron\/remote\/.*|electron\/.*|@mapbox\/node-pre-gyp|jsdom)$/;
+					const externalRegex = /^(.*\.node|sqlite3|electron|@electron\/remote\/.*|electron\/.*|@mapbox\/node-pre-gyp|jsdom)$/;
 					const baseDir = dirname(__dirname);
 					const baseNodeModules = join(baseDir, 'node_modules');
 					build.onResolve({ filter: externalRegex }, args => {

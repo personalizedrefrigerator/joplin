@@ -6437,7 +6437,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@cspotcode/source-map-support@npm:0.8.1, @cspotcode/source-map-support@npm:^0.8.0":
+"@cspotcode/source-map-support@npm:^0.8.0":
   version: 0.8.1
   resolution: "@cspotcode/source-map-support@npm:0.8.1"
   dependencies:
@@ -8825,7 +8825,6 @@ __metadata:
   dependencies:
     7zip-bin: "npm:5.2.0"
     "@axe-core/playwright": "npm:4.10.1"
-    "@cspotcode/source-map-support": "npm:0.8.1"
     "@electron/notarize": "npm:2.3.2"
     "@electron/rebuild": "npm:3.6.0"
     "@electron/remote": "npm:2.1.2"
@@ -8894,6 +8893,7 @@ __metadata:
     reselect: "npm:4.1.8"
     roboto-fontface: "npm:0.10.0"
     smalltalk: "npm:2.5.1"
+    source-map-support: "npm:0.5.21"
     sqlite3: "npm:5.1.6"
     styled-components: "npm:5.3.11"
     styled-system: "npm:5.1.5"
