@@ -5,9 +5,10 @@ import { _ } from '@joplin/lib/locale';
 import { themeStyle } from './global-style';
 import ComboBox, { Option } from './ComboBox';
 import IconButton from './IconButton';
-import { useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { TagEntity } from '@joplin/lib/services/database/types';
 import { Divider } from 'react-native-paper';
+import focusView from '../utils/focusView';
 
 export enum TagEditorMode {
 	Large,
@@ -95,6 +96,9 @@ interface TagChipProps {
 	themeId: number;
 	styles: Styles;
 	onRemove: (title: string)=> void;
+
+	autofocus: boolean;
+	onAutoFocusComplete: ()=> void;
 }
 
 const TagCard: React.FC<TagChipProps> = props => {
@@ -102,9 +106,21 @@ const TagCard: React.FC<TagChipProps> = props => {
 		props.onRemove(props.title);
 	}, [props.title, props.onRemove]);
 
-	return <View style={props.styles.tag} role='listitem'>
+	const removeButtonRef = useRef<View>(null);
+	useEffect(() => {
+		if (props.autofocus) {
+			focusView('TagEditor::TagCard', removeButtonRef.current);
+			props.onAutoFocusComplete();
+		}
+	}, [props.autofocus, props.onAutoFocusComplete]);
+
+	return <View
+		style={props.styles.tag}
+		role='listitem'
+	>
 		<Text style={props.styles.tagText}>{props.title}</Text>
 		<IconButton
+			pressableRef={removeButtonRef}
 			themeId={props.themeId}
 			description={_('Remove %s', props.title)}
 			iconName='fas fa-times-circle'
@@ -116,6 +132,8 @@ const TagCard: React.FC<TagChipProps> = props => {
 
 interface TagsBoxProps {
 	tags: string[];
+	autofocusTag: string;
+	onAutoFocusComplete: ()=> void;
 	styles: Styles;
 	themeId: number;
 	onRemoveTag: (tag: string)=> void;
@@ -136,6 +154,8 @@ const TagsBox: React.FC<TagsBoxProps> = props => {
 					styles={props.styles}
 					themeId={props.themeId}
 					onRemove={onRemoveTag}
+					autofocus={props.autofocusTag === tag}
+					onAutoFocusComplete={props.onAutoFocusComplete}
 				/>
 			));
 		} else {
@@ -185,12 +205,22 @@ const TagEditor: React.FC<Props> = props => {
 			});
 	}, [props.tags, props.allTags]);
 
+	const [autofocusTag, setAutofocusTag] = useState('');
+	const onAutoFocusComplete = useCallback(() => {
+		// Clear the auto-focus state so that a different view can be auto-focused in the future
+		setAutofocusTag('');
+	}, []);
+
 	const onAddTag = useCallback((title: string) => {
 		AccessibilityInfo.announceForAccessibility(_('Added tag: %s', title));
 		props.onTagsChange([...props.tags, normalizeTag(title)]);
 	}, [props.tags, props.onTagsChange]);
 
 	const onRemoveTag = useCallback((title: string) => {
+		const previousTagIndex = props.tags.indexOf(title) - 1;
+		const targetTag = props.tags[Math.max(previousTagIndex, 0)];
+		setAutofocusTag(targetTag);
+
 		AccessibilityInfo.announceForAccessibility(_('Removed tag: %s', title));
 		props.onTagsChange(props.tags.filter(tag => tag !== title));
 	}, [props.tags, props.onTagsChange]);
@@ -219,6 +249,8 @@ const TagEditor: React.FC<Props> = props => {
 				styles={styles}
 				tags={props.tags}
 				onRemoveTag={onRemoveTag}
+				autofocusTag={autofocusTag}
+				onAutoFocusComplete={onAutoFocusComplete}
 			/>
 			<Divider style={styles.divider}/>
 		</>}
