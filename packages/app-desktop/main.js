@@ -1,8 +1,8 @@
 // This is the basic initialization for the Electron MAIN process
 
+require('source-map-support').install();
 const electronApp = require('electron').app;
 require('@electron/remote/main').initialize();
-require('source-map-support').install();
 const ElectronAppWrapper = require('./ElectronAppWrapper').default;
 const { pathExistsSync, readFileSync, mkdirpSync } = require('fs-extra');
 const { initBridge } = require('./bridge');

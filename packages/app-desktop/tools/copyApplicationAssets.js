@@ -91,7 +91,6 @@ async function main() {
 		'smalltalk/img/IDR_CLOSE_DIALOG_H.png',
 		'smalltalk/img/IDR_CLOSE_DIALOG.png',
 		'tesseract.js/dist/tesseract.min.js',
-		'source-map-support/browser-source-map-support.js',
 		{
 			src: resolve(__dirname, '../../lib/services/plugins/sandboxProxy.js'),
 			dest: `${buildLibDir}/@joplin/lib/services/plugins/sandboxProxy.js`,
