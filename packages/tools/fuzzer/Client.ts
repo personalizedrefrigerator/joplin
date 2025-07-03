@@ -306,7 +306,7 @@ class Client implements ActionableClient {
 
 	public async listNotes() {
 		const params = {
-			fields: 'id,parent_id,body,title,is_conflict',
+			fields: 'id,parent_id,body,title,is_conflict,conflict_original_id',
 			include_deleted: '1',
 			include_conflicts: '1',
 		};
@@ -317,7 +317,7 @@ class Client implements ActionableClient {
 			item => ({
 				id: getStringProperty(item, 'id'),
 				parentId: getNumberProperty(item, 'is_conflict') === 1 ? (
-					`[conflicts for ${this.email}]`
+					`[conflicts for ${getStringProperty(item, 'conflict_original_id')} in ${this.email}]`
 				) : getStringProperty(item, 'parent_id'),
 				title: getStringProperty(item, 'title'),
 				body: getStringProperty(item, 'body'),
