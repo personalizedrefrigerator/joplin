@@ -218,8 +218,8 @@ const TagEditor: React.FC<Props> = props => {
 	}, [props.tags, props.onTagsChange]);
 
 	const onRemoveTag = useCallback((title: string) => {
-		const previousTagIndex = props.tags.indexOf(title) - 1;
-		const targetTag = props.tags[Math.max(previousTagIndex, 0)];
+		const previousTagIndex = props.tags.indexOf(title);
+		const targetTag = props.tags[previousTagIndex + 1] ?? props.tags[previousTagIndex - 1];
 		setAutofocusTag(targetTag);
 
 		AccessibilityInfo.announceForAccessibility(_('Removed tag: %s', title));
