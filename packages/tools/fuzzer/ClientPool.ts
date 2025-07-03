@@ -11,6 +11,8 @@ export default class ClientPool {
 		clientCount: number,
 		addCleanupTask: AddCleanupTask,
 	) {
+		if (clientCount <= 0) throw new Error('There must be at least 1 client');
+
 		const actionTracker = new ActionTracker(context);
 		const clientPool: Client[] = [];
 		for (let i = 0; i < clientCount; i++) {

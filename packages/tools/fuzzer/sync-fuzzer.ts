@@ -1,6 +1,6 @@
 import uuid from '@joplin/lib/uuid';
 import { join } from 'path';
-import { mkdir, remove } from 'fs-extra';
+import { exists, mkdir, remove } from 'fs-extra';
 import Setting, { Env } from '@joplin/lib/models/Setting';
 import Logger, { TargetType } from '@joplin/utils/Logger';
 import { waitForCliInput } from '@joplin/utils/cli';
@@ -21,6 +21,14 @@ const logger = Logger.create('fuzzer');
 
 const createProfilesDirectory = async () => {
 	const path = join(__dirname, 'profiles-tmp');
+	if (await exists(path)) {
+		throw new Error([
+			'Another instance of the sync fuzzer may be running!',
+			'The parent directory for test profiles already exists. An instance of the fuzzer is either already running or was closed before it could clean up.',
+			`To ignore this issue, delete ${JSON.stringify(path)} and re-run the fuzzer.`,
+		].join('\n'));
+	}
+
 	await mkdir(path);
 	return {
 		path,
@@ -121,7 +129,7 @@ const doRandomAction = async (context: FuzzContext, client: Client, clientPool: 
 		logger.info(`Action: ${randomAction} in ${client.email}`);
 		result = await actions[randomAction]();
 		if (!result) {
-			logger.info(`  ${randomAction} was skipped.`);
+			logger.info(`  ${randomAction} was skipped (preconditions not met).`);
 		}
 	}
 };
@@ -129,6 +137,8 @@ const doRandomAction = async (context: FuzzContext, client: Client, clientPool: 
 interface Options {
 	seed: number;
 	maximumSteps: number;
+	maximumStepsBetweenSyncs: number;
+	clientCount: number;
 }
 
 const main = async (options: Options) => {
@@ -183,7 +193,7 @@ const main = async (options: Options) => {
 		};
 		const clientPool = await ClientPool.create(
 			fuzzContext,
-			3,
+			options.clientCount,
 			task => { cleanupTasks.push(task); },
 		);
 		clientHelpText = clientPool.helpText();
@@ -192,8 +202,14 @@ const main = async (options: Options) => {
 		for (let i = 1; maxSteps <= 0 || i <= maxSteps; i++) {
 			const client = clientPool.randomClient();
 
-			logger.info('Step', i, '/', maxSteps);
-			await doRandomAction(fuzzContext, client, clientPool);
+			logger.info('Step', i, '/', maxSteps > 0 ? maxSteps : 'Infinity');
+			const actionsBeforeFullSync = fuzzContext.randInt(1, options.maximumStepsBetweenSyncs);
+			for (let j = 0; j < actionsBeforeFullSync; j++) {
+				if (actionsBeforeFullSync > 1) {
+					logger.info('Sub-step', j, '/', actionsBeforeFullSync, '(in step', i, ')');
+				}
+				await doRandomAction(fuzzContext, client, clientPool);
+			}
 			await client.sync();
 
 			// .checkState can fail occasionally due to incomplete
@@ -231,17 +247,40 @@ void yargs
 	.command(
 		'start',
 		[
-			'Starts the synchronization fuzzer. The fuzzer starts Joplin Server, creates multiple CLI clients, and attempts to find sync bugs.',
-			'Use FUZZER_SERVER_ADMIN_PASSWORD to specify the admin@localhost password for Joplin Server.',
-		].join('\n'),
+			'Starts the synchronization fuzzer. The fuzzer starts Joplin Server, creates multiple CLI clients, and attempts to find sync bugs.\n\n',
+			'The fuzzer starts Joplin Server in development mode, using the existing development mode database and uses the admin@localhost user to',
+			'create and set up user accounts.\n',
+			'Use the FUZZER_SERVER_ADMIN_PASSWORD environment variable to specify the admin@localhost password for this dev version of Joplin Server.\n\n',
+			'If the fuzzer detects incorrect/unexpected client state, it pauses, allowing the profile directories and databases',
+			'of the clients to be inspected.',
+		].join(' '),
 		(yargs) => {
 			return yargs.options({
 				'seed': { type: 'number', default: 12345 },
-				'steps': { type: 'number', default: 12345 },
+				'steps': {
+					type: 'number',
+					default: 0,
+					defaultDescription: 'The maximum number of steps to take before stopping the fuzzer. Set to zero for an unlimited number of steps.',
+				},
+				'steps-between-syncs': {
+					type: 'number',
+					default: 3,
+					defaultDescription: 'The maximum number of sub-steps taken before all clients are synchronised.',
+				},
+				'clients': {
+					type: 'number',
+					default: 3,
+					defaultDescription: 'Number of client apps to create.',
+				},
 			});
 		},
 		async (argv) => {
-			await main({ seed: argv.seed, maximumSteps: argv.steps });
+			await main({
+				seed: argv.seed,
+				maximumSteps: argv.steps,
+				clientCount: argv.clients,
+				maximumStepsBetweenSyncs: argv['steps-between-syncs'],
+			});
 		},
 	)
 	.help()
