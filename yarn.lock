@@ -9084,7 +9084,7 @@ __metadata:
     react: "npm:19.0.0"
     react-dom: "npm:19.0.0"
     react-native: "npm:0.79.2"
-    react-native-device-info: "npm:14.0.1"
+    react-native-device-info: "npm:14.0.4"
     react-native-dropdownalert: "npm:5.1.0"
     react-native-exit-app: "npm:2.0.0"
     react-native-file-viewer: "npm:2.1.5"
@@ -9093,7 +9093,7 @@ __metadata:
     react-native-get-random-values: "npm:1.11.0"
     react-native-image-picker: "npm:7.2.3"
     react-native-localize: "npm:3.4.1"
-    react-native-modal-datetime-picker: "npm:17.1.0"
+    react-native-modal-datetime-picker: "npm:18.0.0"
     react-native-paper: "npm:5.13.4"
     react-native-popup-menu: "npm:0.17.0"
     react-native-quick-actions: "npm:0.3.13"
@@ -9101,7 +9101,7 @@ __metadata:
     react-native-rsa-native: "npm:2.0.5"
     react-native-safe-area-context: "npm:5.4.0"
     react-native-securerandom: "npm:1.0.1"
-    react-native-share: "npm:10.2.1"
+    react-native-share: "npm:12.0.9"
     react-native-sqlite-storage: "npm:6.0.1"
     react-native-url-polyfill: "npm:2.0.0"
     react-native-vector-icons: "npm:10.2.0"
@@ -9109,7 +9109,7 @@ __metadata:
     react-native-vosk: "npm:0.1.12"
     react-native-web: "npm:0.20.0"
     react-native-webview: "npm:13.13.5"
-    react-native-zip-archive: "npm:6.1.2"
+    react-native-zip-archive: "npm:7.0.1"
     react-redux: "npm:8.1.3"
     react-refresh: "npm:0.16.0"
     react-test-renderer: "npm:19.0.0"
@@ -9349,7 +9349,7 @@ __metadata:
     typescript: "npm:5.4.5"
     uglifycss: "npm:0.0.29"
     url-parse: "npm:1.5.10"
-    uuid: "npm:9.0.1"
+    uuid: "npm:11.1.0"
     word-wrap: "npm:1.2.5"
     xml2js: "npm:0.4.23"
   languageName: unknown
@@ -9549,7 +9549,7 @@ __metadata:
     sqlite3: "npm:5.1.6"
     stripe: "npm:8.222.0"
     typescript: "npm:5.4.5"
-    uuid: "npm:9.0.1"
+    uuid: "npm:11.1.0"
     yargs: "npm:17.7.2"
     zxcvbn: "npm:4.4.2"
   languageName: unknown
@@ -41441,12 +41441,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-device-info@npm:14.0.1":
-  version: 14.0.1
-  resolution: "react-native-device-info@npm:14.0.1"
+"react-native-device-info@npm:14.0.4":
+  version: 14.0.4
+  resolution: "react-native-device-info@npm:14.0.4"
   peerDependencies:
     react-native: "*"
-  checksum: 10/9c83692c11be5a4c86a41df0476155592348b46e8155e63648670037a4210d66c159bc11633cc361209bda0de180a5c2c6f99d3c8da9072e4c5a2c5e9f333801
+  checksum: 10/bf031048551597b1a9ab2965d498cbd073eacf50005dffa4e3496286578734a45854141d47654e7e58ef8531b8c2cd6d1670bfd75625271c91aab3b3b8d0a8d8
   languageName: node
   linkType: hard
 
@@ -41550,15 +41550,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-modal-datetime-picker@npm:17.1.0":
-  version: 17.1.0
-  resolution: "react-native-modal-datetime-picker@npm:17.1.0"
+"react-native-modal-datetime-picker@npm:18.0.0":
+  version: 18.0.0
+  resolution: "react-native-modal-datetime-picker@npm:18.0.0"
   dependencies:
     prop-types: "npm:^15.7.2"
   peerDependencies:
     "@react-native-community/datetimepicker": ">=6.7.0"
     react-native: ">=0.65.0"
-  checksum: 10/fcb20d62885b0a288719c21b731fb4129be9f5e3a78e0d9971bfcc8e6083164434da13ddab0079d0924074b3324f5ec7d664598127db5470b4eb7278960e01df
+  checksum: 10/8f065f4ee6572f7cd6731fb049b71653ce73dd7ce564a4cf4f310f6a25a659c388b46f8b51625ea8671c5f139439a0c1824ac0cec787832a36d799982d1e51d9
   languageName: node
   linkType: hard
 
@@ -41652,10 +41652,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-share@npm:10.2.1":
-  version: 10.2.1
-  resolution: "react-native-share@npm:10.2.1"
-  checksum: 10/6b579233f521a9c2e47181b80992f5e8da730b7711b7108111b2be13f202b6ce2845799fba2a44e15810c12e0240fc540772e16b3e98aafe3f7baa17130d3c06
+"react-native-share@npm:12.0.9":
+  version: 12.0.9
+  resolution: "react-native-share@npm:12.0.9"
+  checksum: 10/ecef9bdaff0303ebefc023f934360a45f14efadba298d97a42dc0c1c8cc7418dc1672103362bd84785f8f646b09ecefcaa8c313d481233116783b81e5b8f93a8
   languageName: node
   linkType: hard
 
@@ -41764,13 +41764,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-zip-archive@npm:6.1.2":
-  version: 6.1.2
-  resolution: "react-native-zip-archive@npm:6.1.2"
+"react-native-zip-archive@npm:7.0.1":
+  version: 7.0.1
+  resolution: "react-native-zip-archive@npm:7.0.1"
   peerDependencies:
     react: ">=16.8.6"
     react-native: ">=0.60.0"
-  checksum: 10/06a9f94392b98b4ed75fca2ff90dbf0eeed730aaa0fcc8725ec5857e814ab0cdae34c4fe3a21854884463e8b3b08387df26551bf90aeff8b6477c75f110f98b4
+  checksum: 10/833c4f67d4916a921e78efebf159ed6007b5f57bb22d2da31cdfc9a6398922f6213ea519c3b79c4bc48ad7e306ae783b955e7e64cf932f36fd83e6e969506904
   languageName: node
   linkType: hard
 
@@ -49827,6 +49827,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"uuid@npm:11.1.0, uuid@npm:~11.1.0":
+  version: 11.1.0
+  resolution: "uuid@npm:11.1.0"
+  bin:
+    uuid: dist/esm/bin/uuid
+  checksum: 10/d2da43b49b154d154574891ced66d0c83fc70caaad87e043400cf644423b067542d6f3eb641b7c819224a7cd3b4c2f21906acbedd6ec9c6a05887aa9115a9cf5
+  languageName: node
+  linkType: hard
+
 "uuid@npm:8.0.0":
   version: 8.0.0
   resolution: "uuid@npm:8.0.0"
@@ -49842,15 +49851,6 @@ __metadata:
   bin:
     uuid: dist/bin/uuid
   checksum: 10/9a5f7aa1d6f56dd1e8d5f2478f855f25c645e64e26e347a98e98d95781d5ed20062d6cca2eecb58ba7c84bc3910be95c0451ef4161906abaab44f9cb68ffbdd1
-  languageName: node
-  linkType: hard
-
-"uuid@npm:9.0.1, uuid@npm:^9.0.1":
-  version: 9.0.1
-  resolution: "uuid@npm:9.0.1"
-  bin:
-    uuid: dist/bin/uuid
-  checksum: 10/9d0b6adb72b736e36f2b1b53da0d559125ba3e39d913b6072f6f033e0c87835b414f0836b45bcfaf2bdf698f92297fea1c3cc19b0b258bc182c9c43cc0fab9f2
   languageName: node
   linkType: hard
 
@@ -49881,12 +49881,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"uuid@npm:~11.1.0":
-  version: 11.1.0
-  resolution: "uuid@npm:11.1.0"
+"uuid@npm:^9.0.1":
+  version: 9.0.1
+  resolution: "uuid@npm:9.0.1"
   bin:
-    uuid: dist/esm/bin/uuid
-  checksum: 10/d2da43b49b154d154574891ced66d0c83fc70caaad87e043400cf644423b067542d6f3eb641b7c819224a7cd3b4c2f21906acbedd6ec9c6a05887aa9115a9cf5
+    uuid: dist/bin/uuid
+  checksum: 10/9d0b6adb72b736e36f2b1b53da0d559125ba3e39d913b6072f6f033e0c87835b414f0836b45bcfaf2bdf698f92297fea1c3cc19b0b258bc182c9c43cc0fab9f2
   languageName: node
   linkType: hard
 
