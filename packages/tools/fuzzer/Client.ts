@@ -131,7 +131,7 @@ class Client implements ActionableClient {
 			...this.cliCommandArguments,
 			commandName,
 			...args,
-		], { cwd: cliDirectory });
+		], { cwd: cliDirectory, stdin: 'ignore' });
 		logger.debug('Ran command: ', commandResult.command, commandResult.exitCode);
 		logger.debug('     Output: ', commandResult.stdout);
 		return commandResult;
