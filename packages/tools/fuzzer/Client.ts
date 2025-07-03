@@ -12,6 +12,7 @@ import { cliDirectory } from './constants';
 import { commandToString } from '@joplin/utils';
 import { quotePath } from '@joplin/utils/path';
 import getNumberProperty from './utils/getNumberProperty';
+import retryWithCount from './utils/retryWithCount';
 
 const logger = Logger.create('Client');
 
@@ -198,10 +199,19 @@ class Client implements ActionableClient {
 	}
 
 	private async decrypt_() {
-		const result = await this.execCliCommand_('e2ee', 'decrypt', '--force');
-		if (!result.stdout.includes('Completed decryption.')) {
-			throw new Error(`Decryption did not complete: ${result.stdout}`);
-		}
+		// E2EE decryption can occasionally fail with "Master key is not loaded:".
+		// Allow e2ee decryption to be retried:
+		await retryWithCount(async () => {
+			const result = await this.execCliCommand_('e2ee', 'decrypt', '--force');
+			if (!result.stdout.includes('Completed decryption.')) {
+				throw new Error(`Decryption did not complete: ${result.stdout}`);
+			}
+		}, {
+			count: 3,
+			onFail: async (error)=>{
+				logger.warn('E2EE decryption failed:', error);
+			},
+		});
 	}
 
 	public async sync() {
