@@ -42,12 +42,14 @@ export interface ActionableClient {
 	shareFolder(id: ItemId, shareWith: Client): Promise<void>;
 	deleteFolder(id: ItemId): Promise<void>;
 	createNote(data: NoteData): Promise<void>;
+	updateNote(data: NoteData): Promise<void>;
 	moveItem(itemId: ItemId, newParentId: ItemId): Promise<void>;
 	sync(): Promise<void>;
 
 	listNotes(): Promise<NoteData[]>;
 	listFolders(): Promise<FolderMetadata[]>;
 	randomFolder(options: RandomFolderOptions): Promise<FolderMetadata>;
+	randomNote(): Promise<NoteData>;
 }
 
 export interface UserData {

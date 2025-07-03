@@ -223,6 +223,21 @@ class ActionTracker {
 		const tracker: ActionableClient = {
 			createNote: (data: NoteData) => {
 				assert.ok(!!data.parentId, `note ${data.id} should have a parentId`);
+				assert.ok(!this.idToItem_.has(data.id), `note ${data.id} should not yet exist`);
+				this.idToItem_.set(data.id, {
+					...data,
+				});
+				addChild(data.parentId, data.id);
+
+				this.checkRep_();
+				return Promise.resolve();
+			},
+			updateNote: (data: NoteData) => {
+				const oldItem = this.idToItem_.get(data.id);
+				assert.ok(oldItem, `note ${data.id} should exist`);
+				assert.ok(!!data.parentId, `note ${data.id} should have a parentId`);
+
+				removeChild(oldItem.parentId, data.id);
 				this.idToItem_.set(data.id, {
 					...data,
 				});
@@ -335,6 +350,11 @@ class ActionTracker {
 
 				const folderIndex = this.context_.randInt(0, folders.length);
 				return folders.length ? folders[folderIndex] : null;
+			},
+			randomNote: async () => {
+				const notes = await tracker.listNotes();
+				const noteIndex = this.context_.randInt(0, notes.length);
+				return notes.length ? notes[noteIndex] : null;
 			},
 		};
 		return tracker;

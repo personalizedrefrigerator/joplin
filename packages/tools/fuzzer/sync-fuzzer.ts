@@ -12,6 +12,7 @@ import Client from './Client';
 import SeededRandom from './utils/SeededRandom';
 import { env } from 'process';
 import yargs = require('yargs');
+import { strict as assert } from 'assert';
 const { shimInit } = require('@joplin/lib/shim-init-node');
 
 const globalLogger = new Logger();
@@ -56,6 +57,24 @@ const doRandomAction = async (context: FuzzContext, client: Client, clientPool: 
 		return parentId;
 	};
 
+	const selectOrCreateNote = async () => {
+		let note = await client.randomNote();
+
+		if (!note) {
+			await client.createNote({
+				parentId: await selectOrCreateParentFolder(),
+				id: uuid.create(),
+				title: 'Test note',
+				body: 'Body',
+			});
+
+			note = await client.randomNote();
+			assert.ok(note, 'should have selected a random note');
+		}
+
+		return note;
+	};
+
 	const actions = {
 		newSubfolder: async () => {
 			const folderId = uuid.create();
@@ -86,6 +105,26 @@ const doRandomAction = async (context: FuzzContext, client: Client, clientPool: 
 				title: `Test (x${context.randInt(0, 1000)})`,
 				body: 'Testing...',
 				id: uuid.create(),
+			});
+
+			return true;
+		},
+		renameNote: async () => {
+			const note = await selectOrCreateNote();
+
+			await client.updateNote({
+				...note,
+				title: `Renamed (${context.randInt(0, 1000)})`,
+			});
+
+			return true;
+		},
+		updateNoteBody: async () => {
+			const note = await selectOrCreateNote();
+
+			await client.updateNote({
+				...note,
+				body: `${note.body}\n\nUpdated.\n`,
 			});
 
 			return true;
@@ -199,14 +238,14 @@ const main = async (options: Options) => {
 		clientHelpText = clientPool.helpText();
 
 		const maxSteps = options.maximumSteps;
-		for (let i = 1; maxSteps <= 0 || i <= maxSteps; i++) {
+		for (let stepIndex = 1; maxSteps <= 0 || stepIndex <= maxSteps; stepIndex++) {
 			const client = clientPool.randomClient();
 
-			logger.info('Step', i, '/', maxSteps > 0 ? maxSteps : 'Infinity');
+			logger.info('Step', stepIndex, '/', maxSteps > 0 ? maxSteps : 'Infinity');
 			const actionsBeforeFullSync = fuzzContext.randInt(1, options.maximumStepsBetweenSyncs);
-			for (let j = 0; j < actionsBeforeFullSync; j++) {
+			for (let subStepIndex = 1; subStepIndex <= actionsBeforeFullSync; subStepIndex++) {
 				if (actionsBeforeFullSync > 1) {
-					logger.info('Sub-step', j, '/', actionsBeforeFullSync, '(in step', i, ')');
+					logger.info('Sub-step', subStepIndex, '/', actionsBeforeFullSync, '(in step', stepIndex, ')');
 				}
 				await doRandomAction(fuzzContext, client, clientPool);
 			}

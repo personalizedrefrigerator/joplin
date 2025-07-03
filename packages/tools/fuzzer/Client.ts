@@ -224,6 +224,14 @@ class Client implements ActionableClient {
 		});
 	}
 
+	private async assertNoteMatchesState_(expected: NoteData) {
+		assert.equal(
+			(await this.execCliCommand_('cat', expected.id)).stdout,
+			`${expected.title}\n\n${expected.body}`,
+			'note should exist',
+		);
+	}
+
 	public async createNote(note: NoteData) {
 		logger.info('Create note', note.id, 'in', `${note.parentId}/${this.email}`);
 		await this.tracker_.createNote(note);
@@ -234,11 +242,18 @@ class Client implements ActionableClient {
 			body: note.body,
 			parent_id: note.parentId ?? '',
 		});
-		assert.equal(
-			(await this.execCliCommand_('cat', note.id)).stdout,
-			`${note.title}\n\n${note.body}`,
-			'note should exist',
-		);
+		await this.assertNoteMatchesState_(note);
+	}
+
+	public async updateNote(note: NoteData) {
+		logger.info('Update note', note.id, 'in', `${note.parentId}/${this.email}`);
+		await this.tracker_.updateNote(note);
+		await this.execApiCommand_('PUT', `/notes/${encodeURIComponent(note.id)}`, {
+			title: note.title,
+			body: note.body,
+			parent_id: note.parentId ?? '',
+		});
+		await this.assertNoteMatchesState_(note);
 	}
 
 	public async deleteFolder(id: string) {
@@ -325,6 +340,10 @@ class Client implements ActionableClient {
 
 	public async randomFolder(options: RandomFolderOptions) {
 		return this.tracker_.randomFolder(options);
+	}
+
+	public async randomNote() {
+		return this.tracker_.randomNote();
 	}
 
 	public async checkState(_allClients: Client[]) {
