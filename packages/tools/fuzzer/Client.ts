@@ -198,7 +198,7 @@ class Client implements ActionableClient {
 	}
 
 	private async decrypt_() {
-		const result = await this.execCliCommand_('e2ee', 'decrypt');
+		const result = await this.execCliCommand_('e2ee', 'decrypt', '--force');
 		if (!result.stdout.includes('Completed decryption.')) {
 			throw new Error(`Decryption did not complete: ${result.stdout}`);
 		}
