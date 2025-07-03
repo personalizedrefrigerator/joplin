@@ -128,6 +128,7 @@ const doRandomAction = async (context: FuzzContext, client: Client, clientPool: 
 
 interface Options {
 	seed: number;
+	maximumSteps: number;
 }
 
 const main = async (options: Options) => {
@@ -187,8 +188,8 @@ const main = async (options: Options) => {
 		);
 		clientHelpText = clientPool.helpText();
 
-		const maxSteps = 50;
-		for (let i = 1; i <= maxSteps; i++) {
+		const maxSteps = options.maximumSteps;
+		for (let i = 1; maxSteps <= 0 || i <= maxSteps; i++) {
 			const client = clientPool.randomClient();
 
 			logger.info('Step', i, '/', maxSteps);
@@ -236,10 +237,11 @@ void yargs
 		(yargs) => {
 			return yargs.options({
 				'seed': { type: 'number', default: 12345 },
+				'steps': { type: 'number', default: 12345 },
 			});
 		},
 		async (argv) => {
-			await main({ seed: argv.seed });
+			await main({ seed: argv.seed, maximumSteps: argv.steps });
 		},
 	)
 	.help()
