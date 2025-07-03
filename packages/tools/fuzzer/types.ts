@@ -48,6 +48,7 @@ export interface ActionableClient {
 
 	listNotes(): Promise<NoteData[]>;
 	listFolders(): Promise<FolderMetadata[]>;
+	allFolderDescendants(parentId: ItemId): Promise<ItemId[]>;
 	randomFolder(options: RandomFolderOptions): Promise<FolderMetadata>;
 	randomNote(): Promise<NoteData>;
 }

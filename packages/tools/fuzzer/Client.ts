@@ -346,6 +346,10 @@ class Client implements ActionableClient {
 		return this.tracker_.randomFolder(options);
 	}
 
+	public async allFolderDescendants(parentId: ItemId) {
+		return this.tracker_.allFolderDescendants(parentId);
+	}
+
 	public async randomNote() {
 		return this.tracker_.randomNote();
 	}

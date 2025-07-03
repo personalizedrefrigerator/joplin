@@ -342,6 +342,29 @@ class ActionTracker {
 
 				return Promise.resolve(folderData);
 			},
+			allFolderDescendants: (parentId) => {
+				this.checkRep_();
+
+				const descendants: ItemId[] = [];
+				const addDescendants = (id: ItemId) => {
+					const item = this.idToItem_.get(id);
+					assert.ok(isFolder(item), 'should be a folder');
+
+					for (const id of item.childIds) {
+						descendants.push(id);
+
+						const item = this.idToItem_.get(id);
+						if (isFolder(item)) {
+							addDescendants(item.id);
+						}
+					}
+				};
+
+				descendants.push(parentId);
+				addDescendants(parentId);
+
+				return Promise.resolve(descendants);
+			},
 			randomFolder: async (options) => {
 				let folders = listFoldersDetailed();
 				if (options.filter) {

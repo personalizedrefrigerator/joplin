@@ -170,18 +170,19 @@ const doRandomAction = async (context: FuzzContext, client: Client, clientPool: 
 			await client.moveItem(target.id, '');
 			return true;
 		},
-		moveFolderToEmptyFolder: async () => {
+		moveFolderTo: async () => {
 			const target = await client.randomFolder({
 				// Don't move shared folders (should not be allowed by the GUI in the main apps).
 				filter: item => !item.isShareRoot,
 			});
 			if (!target) return false;
 
+			const targetDescendants = new Set(await client.allFolderDescendants(target.id));
+
 			const newParent = await client.randomFolder({
-				// For simplicity, target only folders with no children. This allows us to avoid
-				// handling the case where the chosen parent folder is a child of `target`.
 				filter: (item) => {
-					return item.childIds.length === 0 && item.id !== target.id;
+					// Avoid making the folder a child of itself
+					return !targetDescendants.has(item.id);
 				},
 			});
 			if (!newParent) return false;
