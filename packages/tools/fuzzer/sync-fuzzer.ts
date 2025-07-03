@@ -129,6 +129,21 @@ const doRandomAction = async (context: FuzzContext, client: Client, clientPool: 
 
 			return true;
 		},
+		moveNote: async () => {
+			const note = await client.randomNote();
+			if (!note) return false;
+			const targetParent = await client.randomFolder({
+				filter: folder => folder.id !== note.parentId,
+			});
+			if (!targetParent) return false;
+
+			await client.updateNote({
+				...note,
+				parentId: targetParent.id,
+			});
+
+			return true;
+		},
 		shareFolder: async () => {
 			const target = await client.randomFolder({
 				filter: candidate => (
@@ -242,7 +257,7 @@ const main = async (options: Options) => {
 			const client = clientPool.randomClient();
 
 			logger.info('Step', stepIndex, '/', maxSteps > 0 ? maxSteps : 'Infinity');
-			const actionsBeforeFullSync = fuzzContext.randInt(1, options.maximumStepsBetweenSyncs);
+			const actionsBeforeFullSync = fuzzContext.randInt(1, options.maximumStepsBetweenSyncs + 1);
 			for (let subStepIndex = 1; subStepIndex <= actionsBeforeFullSync; subStepIndex++) {
 				if (actionsBeforeFullSync > 1) {
 					logger.info('Sub-step', subStepIndex, '/', actionsBeforeFullSync, '(in step', stepIndex, ')');
