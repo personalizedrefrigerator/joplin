@@ -275,6 +275,9 @@ const main = async (options: Options) => {
 		for (let stepIndex = 1; maxSteps <= 0 || stepIndex <= maxSteps; stepIndex++) {
 			const client = clientPool.randomClient();
 
+			// Ensure that the client starts up-to-date with the other synced clients.
+			await client.sync();
+
 			logger.info('Step', stepIndex, '/', maxSteps > 0 ? maxSteps : 'Infinity');
 			const actionsBeforeFullSync = fuzzContext.randInt(1, options.maximumStepsBetweenSyncs + 1);
 			for (let subStepIndex = 1; subStepIndex <= actionsBeforeFullSync; subStepIndex++) {
