@@ -137,10 +137,7 @@ const doRandomAction = async (context: FuzzContext, client: Client, clientPool: 
 			});
 			if (!targetParent) return false;
 
-			await client.updateNote({
-				...note,
-				parentId: targetParent.id,
-			});
+			await client.moveItem(note.id, targetParent.id);
 
 			return true;
 		},
