@@ -37,6 +37,7 @@ export default class Server {
 		], {
 			env: { JOPLIN_IS_TESTING: '1' },
 			cwd: join(packagesDir, 'server'),
+			stdin: 'ignore', // No stdin
 			// For debugging:
 			// stderr: process.stderr,
 			// stdout: process.stdout,

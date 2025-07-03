@@ -184,7 +184,7 @@ const doRandomAction = async (context: FuzzContext, client: Client, clientPool: 
 				// For simplicity, target only folders with no children. This allows us to avoid
 				// handling the case where the chosen parent folder is a child of `target`.
 				filter: (item) => {
-					return item.childIds.length === 0;
+					return item.childIds.length === 0 && item.id !== target.id;
 				},
 			});
 			if (!newParent) return false;
