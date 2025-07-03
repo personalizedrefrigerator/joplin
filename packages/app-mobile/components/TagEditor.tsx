@@ -201,6 +201,7 @@ const TagEditor: React.FC<Props> = props => {
 					title,
 					icon: null,
 					accessibilityHint: _('Adds tag'),
+					willRemoveOnPress: true,
 				};
 			});
 	}, [props.tags, props.allTags]);
@@ -227,6 +228,7 @@ const TagEditor: React.FC<Props> = props => {
 
 	const onComboBoxSelect = useCallback((item: { title: string }) => {
 		onAddTag(item.title);
+		return { willRemove: true };
 	}, [onAddTag]);
 
 	const allTagsSet = useMemo(() => {

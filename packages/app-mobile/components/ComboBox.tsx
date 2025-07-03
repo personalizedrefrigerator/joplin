@@ -1,23 +1,30 @@
 import * as React from 'react';
-import { AccessibilityInfo, FlatList, NativeSyntheticEvent, Platform, Role, StyleSheet, TextInputProps, useWindowDimensions, View, ViewProps, ViewStyle } from 'react-native';
+import { AccessibilityInfo, FlatList, NativeSyntheticEvent, Platform, Role, StyleSheet, TextInput, TextInputProps, useWindowDimensions, View, ViewProps, ViewStyle } from 'react-native';
 import { TouchableRipple, Text } from 'react-native-paper';
 import { connect } from 'react-redux';
 import { AppState } from '../utils/types';
 import { themeStyle } from './global-style';
 import Icon from './Icon';
-import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
+import { RefObject, useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
 import { _ } from '@joplin/lib/locale';
 import SearchInput from './SearchInput';
+import focusView from '../utils/focusView';
+import AsyncActionQueue from '@joplin/lib/AsyncActionQueue';
 const naturalCompare = require('string-natural-compare');
+
 
 export interface Option {
 	title: string;
 	icon: string|undefined;
 	accessibilityHint: string|undefined;
 	onPress?: ()=> void;
+
+	// To work around an accessibility focus bug on Android, it's necessary to know whether
+	// the item will be removed by the event handler:
+	willRemoveOnPress: boolean;
 }
 
-type OnItemSelected = (item: Option)=> void;
+export type OnItemSelected = (item: Option, index: number)=> void;
 
 interface BaseProps {
 	themeId: number;
@@ -84,6 +91,7 @@ const useSearchResults = ({ search, setSearch, options, onAddItem, canAddItem }:
 				title: _('Add new'),
 				icon: 'fas fa-plus',
 				accessibilityHint: undefined,
+				willRemoveOnPress: true,
 				onPress: () => {
 					addCurrentSearch.current?.();
 				},
@@ -233,20 +241,55 @@ interface ResultWrapperProps extends ViewProps {
 	item: Option;
 }
 
-const useSearchResultContainerComponent = (
-	onItemSelected: OnItemSelected,
-	selectedIndex: number,
-	baseId: string,
-	resultCount: number,
-): React.FC<ResultWrapperProps> => {
-	const onItemSelectedRef = useRef(onItemSelected);
-	onItemSelectedRef.current = onItemSelected;
+interface SearchResultContainerProps {
+	onItemSelected: OnItemSelected;
+	selectedIndex: number;
+	baseId: string;
+	resultCount: number;
+	searchInputRef: RefObject<TextInput>;
+}
+
+const useSearchResultContainerComponent = ({
+	onItemSelected, selectedIndex, baseId, resultCount, searchInputRef,
+}: SearchResultContainerProps): React.FC<ResultWrapperProps> => {
+	const listItemsRef = useRef<Record<number, View>>({});
+
+	const eventQueue = useMemo(() => {
+		const queue = new AsyncActionQueue(100);
+		// Don't allow skipping any onItemSelected calls:
+		queue.setCanSkipTaskHandler(() => false);
+		return queue;
+	}, []);
+	const onItemPressRef = useRef(onItemSelected);
+	onItemPressRef.current = (item, index) => {
+		if (Platform.OS === 'android' && item.willRemoveOnPress) {
+			// Workaround for an accessibility bug on Android: By default, when an item is removed
+			// from the list of results, focus can occasionally jump to the start of the document.
+			// To prevent this, manually move focus to the next item before the results list changes:
+			const adjacentView = listItemsRef.current[index + 1] ?? listItemsRef.current[index - 1];
+
+			if (adjacentView) {
+				focusView('ComboBox::focusAdjacent', adjacentView);
+			} else {
+				focusView('ComboBox::focusTitle', searchInputRef.current);
+			}
+
+			eventQueue.push(() => {
+				onItemSelected(item, index);
+			});
+		} else {
+			onItemSelected(item, index);
+		}
+	};
 
 	// For the correct accessibility structure, the `TouchableRipple`s need to be siblings.
 	return useMemo(() => ({ index, item, children, ...rest }) => (
 		<TouchableRipple
 			{...rest}
-			onPress={() => { onItemSelectedRef.current(item); }}
+			ref={(item) => {
+				listItemsRef.current[index] = item;
+			}}
+			onPress={() => { onItemPressRef.current(item, index); }}
 			// On web, focus is controlled using the arrow keys. On other
 			// platforms, arrow key navigation is not available and each item
 			// needs to be focusable
@@ -306,6 +349,7 @@ const ComboBox: React.FC<Props> = ({
 		canAddItem,
 	});
 	const { selectedIndex, onNextResult, onPreviousResult, onFirstResult, onLastResult } = useSelectedIndex(search, results);
+	const searchInputRef = useRef<TextInput|null>(null);
 	const listRef = useRef<FlatList|null>(null);
 
 	const resultsRef = useRef(results);
@@ -319,23 +363,25 @@ const ComboBox: React.FC<Props> = ({
 	const propsOnItemSelectedRef = useRef(propsOnItemSelected);
 	propsOnItemSelectedRef.current = propsOnItemSelected;
 
-	const onItemSelected = useCallback((item: Option) => {
+	const onItemSelected = useCallback((item: Option, index: number) => {
+		let result;
 		if (item.onPress) {
-			item.onPress();
+			result = item.onPress();
 		} else {
-			propsOnItemSelectedRef.current(item);
-			setSearch('');
+			result = propsOnItemSelectedRef.current(item, index);
 		}
 
 		if (!alwaysExpand) {
 			setShowSearchResults(false);
 		}
+
+		return result;
 	}, [setShowSearchResults, alwaysExpand]);
 
 	const baseId = useId();
-	const SearchResultWrapper = useSearchResultContainerComponent(
-		onItemSelected, selectedIndex, baseId, results.length,
-	);
+	const SearchResultWrapper = useSearchResultContainerComponent({
+		onItemSelected, selectedIndex, baseId, searchInputRef, resultCount: results.length,
+	});
 
 	type RenderEvent = { item: Option; index: number };
 	const renderItem = useCallback(({ item, index }: RenderEvent) => {
@@ -350,7 +396,8 @@ const ComboBox: React.FC<Props> = ({
 	const onSubmit = useCallback(() => {
 		const item = results[selectedIndex];
 		if (item) {
-			onItemSelected(item);
+			onItemSelected(item, selectedIndex);
+			setSearch('');
 		}
 	}, [onItemSelected, results, selectedIndex]);
 
@@ -381,6 +428,7 @@ const ComboBox: React.FC<Props> = ({
 			// pressing "enter".
 			event.preventDefault();
 			onSubmit();
+			setSearch('');
 		} else if (key === 'Escape' && !alwaysExpand) {
 			setShowSearchResults(false);
 			event.preventDefault();
@@ -414,6 +462,7 @@ const ComboBox: React.FC<Props> = ({
 
 	return <View style={[styles.root, rootStyle]} {...webProps}>
 		<SearchInput
+			inputRef={searchInputRef}
 			themeId={themeId}
 			containerStyle={styles.searchInputContainer}
 			style={styles.searchInput}
