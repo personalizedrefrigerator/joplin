@@ -219,6 +219,7 @@ const main = async (options: Options) => {
 	const cleanupTasks: CleanupTask[] = [];
 
 	const cleanUp = async () => {
+		logger.info('Cleaning up....');
 		while (cleanupTasks.length) {
 			const task = cleanupTasks.pop();
 			try {

@@ -210,6 +210,8 @@ class Client implements ActionableClient {
 			count: 3,
 			onFail: async (error)=>{
 				logger.warn('E2EE decryption failed:', error);
+				logger.info('Syncing before retry...');
+				await this.execCliCommand_('sync');
 			},
 		});
 	}
