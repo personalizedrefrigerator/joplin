@@ -211,13 +211,22 @@ const doRandomAction = async (context: FuzzContext, client: Client, clientPool: 
 						body: 'Test note',
 					});
 
-					await clone.sync();
+					await retryWithCount(async () => {
+						await clone.sync();
+					}, {
+						count: 3,
+						onFail: async (_error) => {
+							logger.info('Temporary client: Initial sync failed. This is expected if E2EE is enabled (retrying...).');
+						},
+					});
 					await clone.checkState();
 				} catch (error) {
 					logger.warn('Error checking temporary client state. Client info: ', clone.getHelpText());
 					throw error;
 				}
 			});
+			await client.sync();
+
 			return true;
 		},
 	};
