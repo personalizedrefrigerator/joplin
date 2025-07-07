@@ -37,7 +37,7 @@ export default class ClientPool {
 
 	public async checkState() {
 		for (const client of this.clients) {
-			await client.checkState(this.clients);
+			await client.checkState();
 		}
 	}
 

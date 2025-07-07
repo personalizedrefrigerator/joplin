@@ -190,6 +190,36 @@ const doRandomAction = async (context: FuzzContext, client: Client, clientPool: 
 			await client.moveItem(target.id, newParent.id);
 			return true;
 		},
+		syncNewClient: async () => {
+			const withWelcomeNotes = context.randInt(0, 2) === 0;
+			logger.info(`Syncing a new temporary client ${withWelcomeNotes ? '(with initial notes)' : ''}`);
+			await client.sync();
+			await client.withTemporaryClone(async clone => {
+				try {
+					// Create a new folder. Usually, new clients have a default set of
+					// welcome notes when first syncing.
+					const testNotesFolderId = uuid.create();
+					await clone.createFolder({
+						id: testNotesFolderId,
+						title: 'Test -- from temporary client',
+						parentId: '',
+					});
+					await clone.createNote({
+						parentId: testNotesFolderId,
+						id: uuid.create(),
+						title: 'Test initial note',
+						body: 'Test note',
+					});
+
+					await clone.sync();
+					await clone.checkState();
+				} catch (error) {
+					logger.warn('Error checking temporary client state. Client info: ', clone.getHelpText());
+					throw error;
+				}
+			});
+			return true;
+		},
 	};
 
 	const actionKeys = [...Object.keys(actions)] as (keyof typeof actions)[];
@@ -269,6 +299,7 @@ const main = async (options: Options) => {
 			task => { cleanupTasks.push(task); },
 		);
 		clientHelpText = clientPool.helpText();
+		await clientPool.syncAll();
 
 		const maxSteps = options.maximumSteps;
 		for (let stepIndex = 1; maxSteps <= 0 || stepIndex <= maxSteps; stepIndex++) {

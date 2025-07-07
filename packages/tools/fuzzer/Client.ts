@@ -1,7 +1,7 @@
 import uuid, { createSecureRandom } from '@joplin/lib/uuid';
-import { ActionableClient, FolderMetadata, FuzzContext, HttpMethod, ItemId, Json, NoteData, RandomFolderOptions, UserData } from './types';
+import { ActionableClient, FolderMetadata, FuzzContext, HttpMethod, ItemId, Json, NoteData, RandomFolderOptions } from './types';
 import { join } from 'path';
-import { mkdir } from 'fs-extra';
+import { mkdir, remove } from 'fs-extra';
 import getStringProperty from './utils/getStringProperty';
 import { strict as assert } from 'assert';
 import ClipperServer from '@joplin/lib/ClipperServer';
@@ -13,102 +13,159 @@ import { commandToString } from '@joplin/utils';
 import { quotePath } from '@joplin/utils/path';
 import getNumberProperty from './utils/getNumberProperty';
 import retryWithCount from './utils/retryWithCount';
+import resolvePathWithinDir from '@joplin/lib/utils/resolvePathWithinDir';
+import { msleep } from '@joplin/utils/time';
+import shim from '@joplin/lib/shim';
 
 const logger = Logger.create('Client');
 
+type AccountData = Readonly<{
+	email: string;
+	password: string;
+	serverId: string;
+	e2eePassword: string;
+	onClose: ()=> Promise<void>;
+}>;
+
+const createNewAccount = async (email: string, context: FuzzContext): Promise<AccountData> => {
+	const password = createSecureRandom();
+	const apiOutput = await context.execApi('POST', 'api/users', {
+		email,
+	});
+	const serverId = getStringProperty(apiOutput, 'id');
+
+	// The password needs to be set *after* creating the user.
+	const userRoute = `api/users/${encodeURIComponent(serverId)}`;
+	await context.execApi('PATCH', userRoute, {
+		email,
+		password,
+		email_confirmed: 1,
+	});
+
+	const closeAccount = async () => {
+		await context.execApi('DELETE', userRoute, {});
+	};
+
+	const e2eePassword = createSecureRandom().replace(/^-/, '_');
+	return {
+		email,
+		password,
+		e2eePassword,
+		serverId,
+		onClose: closeAccount,
+	};
+};
+
+type ApiData = Readonly<{
+	port: number;
+	token: string;
+}>;
 
 class Client implements ActionableClient {
 	public readonly email: string;
 
 	public static async create(actionTracker: ActionTracker, context: FuzzContext) {
 		const id = uuid.create();
-		const profileDirectory = join(context.baseDir, id);
-		await mkdir(profileDirectory);
-
-		const email = `${id}@localhost`;
-		const password = createSecureRandom();
-		const apiOutput = await context.execApi('POST', 'api/users', {
-			email,
-		});
-		const serverId = getStringProperty(apiOutput, 'id');
-
-		// The password needs to be set *after* creating the user.
-		const userRoute = `api/users/${encodeURIComponent(serverId)}`;
-		await context.execApi('PATCH', userRoute, {
-			email,
-			password,
-			email_confirmed: 1,
-		});
-
-		const closeAccount = async () => {
-			await context.execApi('DELETE', userRoute, {});
-		};
+		const account = await createNewAccount(`${id}@localhost`, context);
 
 		try {
-			const userData = {
-				email: getStringProperty(apiOutput, 'email'),
-				password,
-			};
-
-			assert.equal(email, userData.email);
-
-			const apiToken = createSecureRandom().replace(/[-]/g, '_');
-			const apiPort = await ClipperServer.instance().findAvailablePort();
-
-			const client = new Client(
-				actionTracker.track({ email }),
-				userData,
-				profileDirectory,
-				apiPort,
-				apiToken,
-				closeAccount,
-			);
-
-			// Joplin Server sync
-			await client.execCliCommand_('config', 'sync.target', '9');
-			await client.execCliCommand_('config', 'sync.9.path', context.serverUrl);
-			await client.execCliCommand_('config', 'sync.9.username', userData.email);
-			await client.execCliCommand_('config', 'sync.9.password', userData.password);
-			await client.execCliCommand_('config', 'api.token', apiToken);
-			await client.execCliCommand_('config', 'api.port', String(apiPort));
-
-			const e2eePassword = createSecureRandom().replace(/^-/, '_');
-			await client.execCliCommand_('e2ee', 'enable', '--password', e2eePassword);
-			logger.info('Created and configured client');
-
-			// Run asynchronously -- the API server command doesn't exit until the server
-			// is closed.
-			void (async () => {
-				try {
-					await client.execCliCommand_('server', 'start');
-				} catch (error) {
-					logger.info('API server exited');
-					logger.debug('API server exit status', error);
-				}
-			})();
-
-			await client.sync();
-			return client;
+			return await this.fromAccount(account, actionTracker, context);
 		} catch (error) {
-			await closeAccount();
+			await account.onClose();
 			throw error;
 		}
 	}
 
+	private static async fromAccount(account: AccountData, actionTracker: ActionTracker, context: FuzzContext) {
+		const id = uuid.create();
+		const profileDirectory = join(context.baseDir, id);
+		await mkdir(profileDirectory);
+
+		const apiData: ApiData = {
+			token: createSecureRandom().replace(/[-]/g, '_'),
+			port: await ClipperServer.instance().findAvailablePort(),
+		};
+
+		const client = new Client(
+			context,
+			actionTracker,
+			actionTracker.track({ email: account.email }),
+			account,
+			profileDirectory,
+			apiData,
+		);
+
+		// Joplin Server sync
+		await client.execCliCommand_('config', 'sync.target', '9');
+		await client.execCliCommand_('config', 'sync.9.path', context.serverUrl);
+		await client.execCliCommand_('config', 'sync.9.username', account.email);
+		await client.execCliCommand_('config', 'sync.9.password', account.password);
+		await client.execCliCommand_('config', 'api.token', apiData.token);
+		await client.execCliCommand_('config', 'api.port', String(apiData.port));
+
+		await client.execCliCommand_('e2ee', 'enable', '--password', account.e2eePassword);
+		logger.info('Created and configured client');
+
+		await client.startClipperServer_();
+		return client;
+	}
+
 	private constructor(
+		private readonly context_: FuzzContext,
+		private readonly globalActionTracker_: ActionTracker,
 		private readonly tracker_: ActionableClient,
-		userData: UserData,
+		private account_: AccountData,
 		private readonly profileDirectory: string,
-		private readonly apiPort_: number,
-		private readonly apiToken_: string,
-		private readonly cleanUp_: ()=> Promise<void>,
+		private readonly apiData_: ApiData,
 	) {
-		this.email = userData.email;
+		this.email = account_.email;
+	}
+
+	private async startClipperServer_() {
+		// Run asynchronously -- the API server command doesn't exit until the server
+		// is closed.
+		void (async () => {
+			try {
+				await this.execCliCommand_('server', 'start');
+			} catch (error) {
+				logger.info('API server exited');
+				logger.debug('API server exit status', error);
+			}
+		})();
+
+		// Wait for the server to start
+		await retryWithCount(async () => {
+			await this.execApiCommand_('GET', '/ping');
+		}, {
+			count: 3,
+			onFail: async () => {
+				await msleep(1000);
+			},
+		});
 	}
 
 	public async close() {
 		await this.execCliCommand_('server', 'stop');
-		await this.cleanUp_();
+		await this.account_.onClose();
+
+		// Before removing the profile directory, verify that the profile directory is in the
+		// expected location:
+		const profileDirectory = resolvePathWithinDir(this.context_.baseDir, this.profileDirectory);
+		assert.ok(profileDirectory, 'profile directory for client should be contained within the main temporary profiles directory (should be safe to delete)');
+		await remove(profileDirectory);
+	}
+
+	public async withTemporaryClone(callback: (clone: Client)=> Promise<void>) {
+		const clone = await Client.fromAccount({
+			...this.account_,
+			// Do not delete the account when closing the other client
+			onClose: ()=>Promise.resolve(),
+		}, this.globalActionTracker_, this.context_);
+		try {
+			await callback(clone);
+		} finally {
+			await clone.close();
+		}
 	}
 
 	private get cliCommandArguments() {
@@ -143,25 +200,25 @@ class Client implements ActionableClient {
 	}
 
 	// eslint-disable-next-line no-dupe-class-members -- This is not a duplicate class member
-	private async execApiCommand_(method: 'GET', route: string): Promise<Json>;
+	private async execApiCommand_(method: 'GET', route: string): Promise<string>;
 	// eslint-disable-next-line no-dupe-class-members -- This is not a duplicate class member
-	private async execApiCommand_(method: 'POST'|'PUT', route: string, data: Json): Promise<Json>;
+	private async execApiCommand_(method: 'POST'|'PUT', route: string, data: Json): Promise<string>;
 	// eslint-disable-next-line no-dupe-class-members -- This is not a duplicate class member
-	private async execApiCommand_(method: HttpMethod, route: string, data: Json|null = null): Promise<Json> {
+	private async execApiCommand_(method: HttpMethod, route: string, data: Json|null = null): Promise<string> {
 		route = route.replace(/^[/]/, '');
-		const url = new URL(`http://localhost:${this.apiPort_}/${route}`);
-		url.searchParams.append('token', this.apiToken_);
+		const url = new URL(`http://localhost:${this.apiData_.port}/${route}`);
+		url.searchParams.append('token', this.apiData_.token);
 
-		const response = await fetch(url, {
+		const response = await shim.fetch(url.toString(), {
 			method,
-			body: data ? JSON.stringify(data) : undefined,
+			...(data ? { body: JSON.stringify(data) } : undefined),
 		});
 
 		if (!response.ok) {
 			throw new Error(`Request to ${route} failed with error: ${await response.text()}`);
 		}
 
-		return await response.json();
+		return await response.text();
 	}
 
 	private async execPagedApiCommand_<Result>(
@@ -177,9 +234,9 @@ class Client implements ActionableClient {
 		for (let page = 1; hasMore; page++) {
 			searchParams.set('page', String(page));
 			searchParams.set('limit', '10');
-			const response = await this.execApiCommand_(
+			const response = JSON.parse(await this.execApiCommand_(
 				method, `${route}?${searchParams}`,
-			);
+			));
 			if (
 				typeof response !== 'object'
 				|| !('has_more' in response)
@@ -366,7 +423,7 @@ class Client implements ActionableClient {
 		return this.tracker_.randomNote();
 	}
 
-	public async checkState(_allClients: Client[]) {
+	public async checkState() {
 		logger.info('Check state', this.email);
 
 		type ItemSlice = { id: string };
