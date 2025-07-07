@@ -191,34 +191,36 @@ const doRandomAction = async (context: FuzzContext, client: Client, clientPool: 
 			return true;
 		},
 		syncNewClient: async () => {
-			const withWelcomeNotes = context.randInt(0, 2) === 0;
-			logger.info(`Syncing a new temporary client ${withWelcomeNotes ? '(with initial notes)' : ''}`);
+			const createWelcomeNotes = context.randInt(0, 2) === 0;
+			logger.info(`Syncing a new temporary client ${createWelcomeNotes ? '(with initial notes)' : ''}`);
+			const createClientInitialNotes = async (client: Client) => {
+				if (!createWelcomeNotes) return;
+
+				// Create a new folder. Usually, new clients have a default set of
+				// welcome notes when first syncing.
+				const testNotesFolderId = uuid.create();
+				await client.createFolder({
+					id: testNotesFolderId,
+					title: 'Test -- from temporary client',
+					parentId: '',
+				});
+
+				for (let i = 0; i < 5; i++) {
+					await client.createNote({
+						parentId: testNotesFolderId,
+						id: uuid.create(),
+						title: `Test note ${i}`,
+						body: `Test note (in account ${client.email})`,
+					});
+				}
+			};
+
 			await client.sync();
 			await client.withTemporaryClone(async clone => {
 				try {
-					// Create a new folder. Usually, new clients have a default set of
-					// welcome notes when first syncing.
-					const testNotesFolderId = uuid.create();
-					await clone.createFolder({
-						id: testNotesFolderId,
-						title: 'Test -- from temporary client',
-						parentId: '',
-					});
-					await clone.createNote({
-						parentId: testNotesFolderId,
-						id: uuid.create(),
-						title: 'Test initial note',
-						body: 'Test note',
-					});
+					await createClientInitialNotes(clone);
 
-					await retryWithCount(async () => {
-						await clone.sync();
-					}, {
-						count: 3,
-						onFail: async (_error) => {
-							logger.info('Temporary client: Initial sync failed. This is expected if E2EE is enabled (retrying...).');
-						},
-					});
+					await clone.syncWithRetry('The initial sync of secondary clients with E2EE may fail if the master key hasn\'t downloaded.');
 					await clone.checkState();
 				} catch (error) {
 					logger.warn('Error checking temporary client state. Client info: ', clone.getHelpText());

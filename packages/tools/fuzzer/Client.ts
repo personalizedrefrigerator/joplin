@@ -286,6 +286,17 @@ class Client implements ActionableClient {
 		await this.decrypt_();
 	}
 
+	public async syncWithRetry(reason: string) {
+		await retryWithCount(async () => {
+			await this.sync();
+		}, {
+			count: 3,
+			onFail: async (_error) => {
+				logger.info(`Sync failed: ${reason}`);
+			},
+		});
+	}
+
 	public async createFolder(folder: FolderMetadata) {
 		logger.info('Create folder', folder.id, 'in', `${folder.parentId ?? 'root'}/${this.email}`);
 		await this.tracker_.createFolder(folder);
