@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react-native';
+import { act, fireEvent, render, screen } from '@testing-library/react-native';
 import createMockReduxStore from '../utils/testing/createMockReduxStore';
 import TestProviderStack from './testing/TestProviderStack';
 import { TagEntity } from '@joplin/lib/services/database/types';
@@ -36,7 +36,11 @@ const WrappedTagEditor: React.FC<WrapperProps> = props => {
 };
 
 describe('TagEditor', () => {
-	test('clicking "remove" should remove a tag', () => {
+	beforeEach(() => {
+		jest.useFakeTimers({ advanceTimers: true });
+	});
+
+	test('clicking "remove" should remove a tag', async () => {
 		const initialTags = ['test', 'testing'];
 		let currentTags = initialTags;
 		const onTagsChanged = (tags: string[]) => {
@@ -53,6 +57,12 @@ describe('TagEditor', () => {
 
 		const removeButton = screen.getByRole('button', { name: 'Remove testing' });
 		fireEvent.press(removeButton);
+
+		await act(async () => {
+			jest.advanceTimersByTime(200);
+			await jest.runAllTimersAsync();
+		});
+
 		expect(currentTags).toEqual(['test']);
 
 		// Manually unmount to prevent warnings

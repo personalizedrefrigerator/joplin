@@ -9,6 +9,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { TagEntity } from '@joplin/lib/services/database/types';
 import { Divider } from 'react-native-paper';
 import focusView from '../utils/focusView';
+import { msleep } from '@joplin/utils/time';
 
 export enum TagEditorMode {
 	Large,
@@ -217,11 +218,13 @@ const TagEditor: React.FC<Props> = props => {
 		props.onTagsChange([...props.tags, normalizeTag(title)]);
 	}, [props.tags, props.onTagsChange]);
 
-	const onRemoveTag = useCallback((title: string) => {
+	const onRemoveTag = useCallback(async (title: string) => {
 		const previousTagIndex = props.tags.indexOf(title);
 		const targetTag = props.tags[previousTagIndex + 1] ?? props.tags[previousTagIndex - 1];
 		setAutofocusTag(targetTag);
 
+		// Workaround: Delay auto-focusing the next tag. On iOS, a brief delay is required.
+		await msleep(100);
 		AccessibilityInfo.announceForAccessibility(_('Removed tag: %s', title));
 		props.onTagsChange(props.tags.filter(tag => tag !== title));
 	}, [props.tags, props.onTagsChange]);
