@@ -41,9 +41,9 @@
     "crypto-browserify": "3.12.1",
     "deprecated-react-native-prop-types": "5.0.0",
     "events": "3.3.0",
-    "expo": "53.0.9",
-    "expo-av": "15.1.4",
-    "expo-camera": "16.1.6",
+    "expo": "53.0.19",
+    "expo-av": "15.1.7",
+    "expo-camera": "16.1.10",
     "expo-local-authentication": "16.0.5",
     "lodash": "4.17.21",
     "md5": "2.3.0",
@@ -145,7 +145,6 @@
   "expo": {
     "autolinking": {
       "exclude": [
-        "expo-application",
         "expo-keep-awake"
       ]
     },
