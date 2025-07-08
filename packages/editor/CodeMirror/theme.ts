@@ -188,8 +188,7 @@ const createTheme = (theme: EditorTheme): Extension[] => {
 		'& .cm-tableHeader, & .cm-tableRow, & .cm-tableDelimiter': monospaceStyle,
 		'& .cm-taskMarker': monospaceStyle,
 
-		// Apply maximum width styles to individual lines.
-		'& .cm-line': theme.contentMaxWidth ? {
+		'&.cm-editor .cm-content': theme.contentMaxWidth ? {
 			maxWidth: theme.contentMaxWidth,
 
 			// Center
