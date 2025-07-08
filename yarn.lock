@@ -34656,7 +34656,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"make-fetch-happen@npm:^11.0.0, make-fetch-happen@npm:^11.0.1, make-fetch-happen@npm:^11.0.3, make-fetch-happen@npm:^11.1.1":
+"make-fetch-happen@npm:^11.0.0, make-fetch-happen@npm:^11.0.1, make-fetch-happen@npm:^11.1.1":
   version: 11.1.1
   resolution: "make-fetch-happen@npm:11.1.1"
   dependencies:
@@ -37032,7 +37032,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"node-gyp@npm:11.2.0":
+"node-gyp@npm:11.2.0, node-gyp@npm:latest":
   version: 11.2.0
   resolution: "node-gyp@npm:11.2.0"
   dependencies:
@@ -37090,27 +37090,6 @@ __metadata:
   bin:
     node-gyp: bin/node-gyp.js
   checksum: 10/be9b4eb6df3ed2d14528b8c61d87d8d77b5d0865a4a2a88cc8610871309c610fc5ecc08f5d16a0c2b7eb97053e76e920faaffdedbe3eeca888b71cd4dd60e389
-  languageName: node
-  linkType: hard
-
-"node-gyp@npm:^9.0.0, node-gyp@npm:latest":
-  version: 9.4.0
-  resolution: "node-gyp@npm:9.4.0"
-  dependencies:
-    env-paths: "npm:^2.2.0"
-    exponential-backoff: "npm:^3.1.1"
-    glob: "npm:^7.1.4"
-    graceful-fs: "npm:^4.2.6"
-    make-fetch-happen: "npm:^11.0.3"
-    nopt: "npm:^6.0.0"
-    npmlog: "npm:^6.0.0"
-    rimraf: "npm:^3.0.2"
-    semver: "npm:^7.3.5"
-    tar: "npm:^6.1.2"
-    which: "npm:^2.0.2"
-  bin:
-    node-gyp: bin/node-gyp.js
-  checksum: 10/458317127c63877365f227b18ef2362b013b7f8440b35ae722935e61b31e6b84ec0e3625ab07f90679e2f41a1d5a7df6c4049fdf8e7b3c81fcf22775147b47ac
   languageName: node
   linkType: hard
 
