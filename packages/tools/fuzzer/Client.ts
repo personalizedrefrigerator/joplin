@@ -24,7 +24,9 @@ type AccountData = Readonly<{
 	password: string;
 	serverId: string;
 	e2eePassword: string;
-	onClose: ()=> Promise<void>;
+	associatedClientCount: number;
+	onClientConnected: ()=> void;
+	onClientDisconnected: ()=> Promise<void>;
 }>;
 
 const createNewAccount = async (email: string, context: FuzzContext): Promise<AccountData> => {
@@ -46,13 +48,25 @@ const createNewAccount = async (email: string, context: FuzzContext): Promise<Ac
 		await context.execApi('DELETE', userRoute, {});
 	};
 
-	const e2eePassword = createSecureRandom().replace(/^-/, '_');
+	let referenceCounter = 0;
 	return {
 		email,
 		password,
-		e2eePassword,
+		e2eePassword: createSecureRandom().replace(/^-/, '_'),
 		serverId,
-		onClose: closeAccount,
+		get associatedClientCount() {
+			return referenceCounter;
+		},
+		onClientConnected: () => {
+			referenceCounter++;
+		},
+		onClientDisconnected: async () => {
+			referenceCounter --;
+			assert.ok(referenceCounter >= 0, 'reference counter should be non-negative');
+			if (referenceCounter === 0) {
+				await closeAccount();
+			}
+		},
 	};
 };
 
@@ -61,17 +75,18 @@ type ApiData = Readonly<{
 	token: string;
 }>;
 
+type OnCloseListener = ()=> void;
+
 class Client implements ActionableClient {
 	public readonly email: string;
 
 	public static async create(actionTracker: ActionTracker, context: FuzzContext) {
-		const id = uuid.create();
-		const account = await createNewAccount(`${id}@localhost`, context);
+		const account = await createNewAccount(`${uuid.create()}@localhost`, context);
 
 		try {
 			return await this.fromAccount(account, actionTracker, context);
 		} catch (error) {
-			await account.onClose();
+			await account.onClientDisconnected();
 			throw error;
 		}
 	}
@@ -93,7 +108,10 @@ class Client implements ActionableClient {
 			account,
 			profileDirectory,
 			apiData,
+			`${account.email}${account.associatedClientCount ? ` (${account.associatedClientCount})` : ''}`,
 		);
+
+		account.onClientConnected();
 
 		// Joplin Server sync
 		await client.execCliCommand_('config', 'sync.target', '9');
@@ -110,13 +128,16 @@ class Client implements ActionableClient {
 		return client;
 	}
 
+	private onCloseListeners_: OnCloseListener[] = [];
+
 	private constructor(
 		private readonly context_: FuzzContext,
 		private readonly globalActionTracker_: ActionTracker,
 		private readonly tracker_: ActionableClient,
-		private account_: AccountData,
+		private readonly account_: AccountData,
 		private readonly profileDirectory: string,
 		private readonly apiData_: ApiData,
+		private readonly clientLabel_: string,
 	) {
 		this.email = account_.email;
 	}
@@ -144,28 +165,39 @@ class Client implements ActionableClient {
 		});
 	}
 
+	private closed_ = false;
 	public async close() {
-		await this.execCliCommand_('server', 'stop');
-		await this.account_.onClose();
+		assert.ok(!this.closed_, 'should not be closed');
+
+		try {
+			await this.execCliCommand_('server', 'stop');
+		} catch (error) {
+			logger.warn('Failed to stop API server:', error);
+		}
+		await this.account_.onClientDisconnected();
 
 		// Before removing the profile directory, verify that the profile directory is in the
 		// expected location:
 		const profileDirectory = resolvePathWithinDir(this.context_.baseDir, this.profileDirectory);
 		assert.ok(profileDirectory, 'profile directory for client should be contained within the main temporary profiles directory (should be safe to delete)');
 		await remove(profileDirectory);
+
+		for (const listener of this.onCloseListeners_) {
+			listener();
+		}
+		this.closed_ = true;
 	}
 
-	public async withTemporaryClone(callback: (clone: Client)=> Promise<void>) {
-		const clone = await Client.fromAccount({
-			...this.account_,
-			// Do not delete the account when closing the other client
-			onClose: ()=>Promise.resolve(),
-		}, this.globalActionTracker_, this.context_);
-		try {
-			await callback(clone);
-		} finally {
-			await clone.close();
-		}
+	public onClose(listener: OnCloseListener) {
+		this.onCloseListeners_.push(listener);
+	}
+
+	public async createClientOnSameAccount() {
+		return await Client.fromAccount(this.account_, this.globalActionTracker_, this.context_);
+	}
+
+	public hasSameAccount(other: Client) {
+		return other.account_ === this.account_;
 	}
 
 	private get cliCommandArguments() {
@@ -178,7 +210,7 @@ class Client implements ActionableClient {
 
 	public getHelpText() {
 		return [
-			`Client ${this.email}:`,
+			`Client ${this.clientLabel_}:`,
 			`\tCommand: cd ${quotePath(cliDirectory)} && ${commandToString('yarn', this.cliCommandArguments)}`,
 		].join('\n');
 	}
@@ -274,7 +306,7 @@ class Client implements ActionableClient {
 	}
 
 	public async sync() {
-		logger.info('Sync', this.email);
+		logger.info('Sync', this.clientLabel_);
 
 		await this.tracker_.sync();
 
@@ -298,7 +330,7 @@ class Client implements ActionableClient {
 	}
 
 	public async createFolder(folder: FolderMetadata) {
-		logger.info('Create folder', folder.id, 'in', `${folder.parentId ?? 'root'}/${this.email}`);
+		logger.info('Create folder', folder.id, 'in', `${folder.parentId ?? 'root'}/${this.clientLabel_}`);
 		await this.tracker_.createFolder(folder);
 
 		await this.execApiCommand_('POST', '/folders', {
@@ -317,7 +349,7 @@ class Client implements ActionableClient {
 	}
 
 	public async createNote(note: NoteData) {
-		logger.info('Create note', note.id, 'in', `${note.parentId}/${this.email}`);
+		logger.info('Create note', note.id, 'in', `${note.parentId}/${this.clientLabel_}`);
 		await this.tracker_.createNote(note);
 
 		await this.execApiCommand_('POST', '/notes', {
@@ -330,7 +362,7 @@ class Client implements ActionableClient {
 	}
 
 	public async updateNote(note: NoteData) {
-		logger.info('Update note', note.id, 'in', `${note.parentId}/${this.email}`);
+		logger.info('Update note', note.id, 'in', `${note.parentId}/${this.clientLabel_}`);
 		await this.tracker_.updateNote(note);
 		await this.execApiCommand_('PUT', `/notes/${encodeURIComponent(note.id)}`, {
 			title: note.title,
@@ -341,7 +373,7 @@ class Client implements ActionableClient {
 	}
 
 	public async deleteFolder(id: string) {
-		logger.info('Delete folder', id, 'in', this.email);
+		logger.info('Delete folder', id, 'in', this.clientLabel_);
 		await this.tracker_.deleteFolder(id);
 
 		await this.execCliCommand_('rmbook', '--permanent', '--force', id);
@@ -350,8 +382,16 @@ class Client implements ActionableClient {
 	public async shareFolder(id: string, shareWith: Client) {
 		await this.tracker_.shareFolder(id, shareWith);
 
-		logger.info('Share', id, 'with', shareWith.email);
+		logger.info('Share', id, 'with', shareWith.clientLabel_);
 		await this.execCliCommand_('share', 'add', id, shareWith.email);
+
+		await this.sync();
+		await shareWith.sync();
+
+		// TODO: Sometimes, it seems necessary to sync multiple times. Without this, a secondary client on the same
+		// account as `shareWith` may fail to sync due to a missing decryption key.
+		// It should be investigated whether this is an avoidable bug or a consequence of how the sync process
+		// is designed:
 		await this.sync();
 		await shareWith.sync();
 
@@ -397,7 +437,7 @@ class Client implements ActionableClient {
 			item => ({
 				id: getStringProperty(item, 'id'),
 				parentId: getNumberProperty(item, 'is_conflict') === 1 ? (
-					`[conflicts for ${getStringProperty(item, 'conflict_original_id')} in ${this.email}]`
+					`[conflicts for ${getStringProperty(item, 'conflict_original_id')} in ${this.clientLabel_}]`
 				) : getStringProperty(item, 'parent_id'),
 				title: getStringProperty(item, 'title'),
 				body: getStringProperty(item, 'body'),
@@ -435,7 +475,7 @@ class Client implements ActionableClient {
 	}
 
 	public async checkState() {
-		logger.info('Check state', this.email);
+		logger.info('Check state', this.clientLabel_);
 
 		type ItemSlice = { id: string };
 		const compare = (a: ItemSlice, b: ItemSlice) => {

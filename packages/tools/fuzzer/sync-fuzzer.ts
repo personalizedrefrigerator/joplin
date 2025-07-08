@@ -149,7 +149,7 @@ const doRandomAction = async (context: FuzzContext, client: Client, clientPool: 
 			});
 			if (!target) return false;
 
-			const other = clientPool.randomClient(c => c !== client);
+			const other = clientPool.randomClient(c => !c.hasSameAccount(client));
 			await client.shareFolder(target.id, other);
 			return true;
 		},
@@ -190,45 +190,49 @@ const doRandomAction = async (context: FuzzContext, client: Client, clientPool: 
 			await client.moveItem(target.id, newParent.id);
 			return true;
 		},
-		syncNewClient: async () => {
-			const createWelcomeNotes = context.randInt(0, 2) === 0;
-			logger.info(`Syncing a new temporary client ${createWelcomeNotes ? '(with initial notes)' : ''}`);
+		newClientOnSameAccount: async () => {
+			const welcomeNoteCount = context.randInt(0, 30);
+			logger.info(`Syncing a new client on the same account ${welcomeNoteCount > 0 ? `(with ${welcomeNoteCount} initial notes)` : ''}`);
 			const createClientInitialNotes = async (client: Client) => {
-				if (!createWelcomeNotes) return;
+				if (welcomeNoteCount === 0) return;
 
 				// Create a new folder. Usually, new clients have a default set of
 				// welcome notes when first syncing.
 				const testNotesFolderId = uuid.create();
 				await client.createFolder({
 					id: testNotesFolderId,
-					title: 'Test -- from temporary client',
+					title: 'Test -- from secondary client',
 					parentId: '',
 				});
 
-				for (let i = 0; i < 5; i++) {
+				for (let i = 0; i < welcomeNoteCount; i++) {
 					await client.createNote({
 						parentId: testNotesFolderId,
 						id: uuid.create(),
-						title: `Test note ${i}`,
-						body: `Test note (in account ${client.email})`,
+						title: `Test note ${i}/${welcomeNoteCount}`,
+						body: `Test note (in account ${client.email}), created ${Date.now()}.`,
 					});
 				}
 			};
 
 			await client.sync();
-			await client.withTemporaryClone(async clone => {
-				try {
-					await createClientInitialNotes(clone);
 
-					await clone.syncWithRetry('The initial sync of secondary clients with E2EE may fail if the master key hasn\'t downloaded.');
-					await clone.checkState();
-				} catch (error) {
-					logger.warn('Error checking temporary client state. Client info: ', clone.getHelpText());
-					throw error;
-				}
-			});
+			const other = await clientPool.newWithSameAccount(client);
+			await createClientInitialNotes(other);
+			await other.syncWithRetry('The initial sync of secondary clients with E2EE may fail if the master key hasn\'t downloaded.');
+			await other.checkState();
+
 			await client.sync();
+			return true;
+		},
+		removeClientsOnSameAccount: async () => {
+			const others = clientPool.othersWithSameAccount(client);
+			if (others.length === 0) return false;
 
+			for (const otherClient of others) {
+				assert.notEqual(otherClient, client);
+				await otherClient.close();
+			}
 			return true;
 		},
 	};
@@ -278,7 +282,7 @@ const main = async (options: Options) => {
 		process.exit(1);
 	});
 
-	let clientHelpText;
+	let clientPool: ClientPool|null = null;
 
 	try {
 		const joplinServerUrl = 'http://localhost:22300/';
@@ -304,12 +308,11 @@ const main = async (options: Options) => {
 			execApi: server.execApi.bind(server),
 			randInt: (a, b) => random.nextInRange(a, b),
 		};
-		const clientPool = await ClientPool.create(
+		clientPool = await ClientPool.create(
 			fuzzContext,
 			options.clientCount,
 			task => { cleanupTasks.push(task); },
 		);
-		clientHelpText = clientPool.helpText();
 		await clientPool.syncAll();
 
 		const maxSteps = options.maximumSteps;
@@ -344,8 +347,8 @@ const main = async (options: Options) => {
 		}
 	} catch (error) {
 		logger.error('ERROR', error);
-		if (clientHelpText) {
-			logger.info('Client information:\n', clientHelpText);
+		if (clientPool) {
+			logger.info('Client information:\n', clientPool.helpText());
 		}
 		logger.info('An error occurred. Pausing before continuing cleanup.');
 		await waitForCliInput();
