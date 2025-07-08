@@ -388,13 +388,6 @@ class Client implements ActionableClient {
 		await this.sync();
 		await shareWith.sync();
 
-		// TODO: Sometimes, it seems necessary to sync multiple times. Without this, a secondary client on the same
-		// account as `shareWith` may fail to sync due to a missing decryption key.
-		// It should be investigated whether this is an avoidable bug or a consequence of how the sync process
-		// is designed:
-		await this.sync();
-		await shareWith.sync();
-
 		const shareWithIncoming = JSON.parse((await shareWith.execCliCommand_('share', 'list', '--json')).stdout);
 		const pendingInvitations = shareWithIncoming.invitations.filter((invitation: unknown) => {
 			if (typeof invitation !== 'object' || !('accepted' in invitation)) {
@@ -415,6 +408,7 @@ class Client implements ActionableClient {
 		], 'there should be a single incoming share from the expected user');
 
 		await shareWith.execCliCommand_('share', 'accept', id);
+		await shareWith.sync();
 	}
 
 	public async moveItem(itemId: ItemId, newParentId: ItemId) {
