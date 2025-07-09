@@ -2,18 +2,21 @@ import * as React from 'react';
 import { CameraResult } from './types';
 import { View, StyleSheet } from 'react-native';
 import CameraView from './CameraView';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo } from 'react';
 import { themeStyle } from '../global-style';
 import { Button } from 'react-native-paper';
 import { _ } from '@joplin/lib/locale';
 import PhotoPreview from './PhotoPreview';
 
-export type OnComplete = (photos: CameraResult[])=> void;
+export type OnPhotosChange = (photos: CameraResult[])=> void;
+export type OnComplete = ()=> void;
 
 interface Props {
 	themeId: number;
 	onCancel: ()=> void;
 	onComplete: OnComplete;
+	photos: CameraResult[];
+	onSetPhotos: OnPhotosChange;
 	onInsertBarcode: (barcodeText: string)=> void;
 }
 
@@ -52,16 +55,11 @@ const useStyle = (themeId: number) => {
 
 
 const CameraViewMultiPage: React.FC<Props> = ({
-	onInsertBarcode, onCancel, onComplete, themeId,
+	onInsertBarcode, onCancel, onComplete, themeId, photos, onSetPhotos,
 }) => {
-	const [photos, setPhotos] = useState<CameraResult[]>([]);
 	const onPhoto = useCallback((data: CameraResult) => {
-		setPhotos(photos => [...photos, data]);
-	}, []);
-
-	const onDonePressed = useCallback(() => {
-		onComplete(photos);
-	}, [photos, onComplete]);
+		onSetPhotos([...photos, data]);
+	}, [photos, onSetPhotos]);
 
 	const styles = useStyle(themeId);
 	const renderLastPhoto = () => {
@@ -90,7 +88,7 @@ const CameraViewMultiPage: React.FC<Props> = ({
 			<Button
 				icon='arrow-right'
 				disabled={photos.length === 0}
-				onPress={onDonePressed}
+				onPress={onComplete}
 			>{_('Next')}</Button>
 		</View>
 	</View>;

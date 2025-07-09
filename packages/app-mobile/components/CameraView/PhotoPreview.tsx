@@ -36,7 +36,9 @@ const PhotoPreview: React.FC<PhotoProps> = ({ source, label, backgroundStyle, te
 	const [uri, setUri] = useState('');
 
 	useAsyncEffect(async (event) => {
-		if (Platform.OS === 'web') {
+		if (!source) {
+			setUri('');
+		} else if (Platform.OS === 'web') {
 			const file = await shim.fsDriver().fileAtPath(source.uri);
 			if (event.cancelled) return;
 

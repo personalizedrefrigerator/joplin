@@ -86,7 +86,6 @@ const tagSearchResultsProps = {
 const NotePreview: React.FC<Props> = ({
 	themeId, sourceImage, photoIndex, allTags, onCreateNote, allFolders, selectedFolderId: propsSelectedFolderId,
 }) => {
-
 	const styles = useStyles(themeId);
 	const [title, setTitle] = useState('');
 	const [tags, setTags] = useState([]);
@@ -108,7 +107,7 @@ const NotePreview: React.FC<Props> = ({
 		const date = formatMsToLocal(Date.now(), Setting.value('dateFormat'));
 		setTitle(
 			template.replace(/{date}/g, date)
-				.replace(/{page}/g, `${photoIndex + 1}`),
+				.replace(/{page}/g, `${photoIndex}`),
 		);
 	}, [photoIndex]);
 
@@ -138,7 +137,7 @@ const NotePreview: React.FC<Props> = ({
 				source={sourceImage}
 				backgroundStyle={styles.photoBackground}
 				textStyle={styles.photoLabel}
-				label={photoIndex + 1}
+				label={photoIndex}
 			/>
 			<FolderPicker
 				themeId={themeId}
