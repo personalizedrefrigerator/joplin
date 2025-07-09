@@ -600,6 +600,7 @@ packages/app-mobile/components/CameraView/Camera/index.web.js
 packages/app-mobile/components/CameraView/Camera/types.js
 packages/app-mobile/components/CameraView/CameraView.test.js
 packages/app-mobile/components/CameraView/CameraView.js
+packages/app-mobile/components/CameraView/CameraView.web.js
 packages/app-mobile/components/CameraView/CameraViewMultiPage.test.js
 packages/app-mobile/components/CameraView/CameraViewMultiPage.js
 packages/app-mobile/components/CameraView/PhotoPreview.js
