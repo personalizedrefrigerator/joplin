@@ -9,12 +9,12 @@ import TagEditor, { TagEditorMode } from '../../TagEditor';
 import { AppState } from '../../../utils/types';
 import { connect } from 'react-redux';
 import { FolderEntity, TagEntity } from '@joplin/lib/services/database/types';
-import { Button } from 'react-native-paper';
 import { _ } from '@joplin/lib/locale';
 import FolderPicker from '../../FolderPicker';
 import Folder from '@joplin/lib/models/Folder';
 import Setting from '@joplin/lib/models/Setting';
 import { formatMsToLocal } from '@joplin/utils/time';
+import { PrimaryButton } from '../../buttons';
 
 export interface CreateNoteEvent {
 	sourceImage: CameraResult;
@@ -43,22 +43,35 @@ const useStyles = (themeId: number) => {
 			},
 			rootScrollView: {
 				flex: 1,
+				width: '100%',
+				maxWidth: 700,
+				alignSelf: 'center',
 			},
 			photoBackground: {
 
 			},
 			photoLabel: {
-
+				
 			},
-			tagEditor: {},
+			tagEditor: {
+				marginHorizontal: theme.margin,
+			},
+			tagEditorHeader: {
+				fontWeight: 'normal',
+			},
 			folderPickerLine: {
 				flexDirection: 'row',
 				justifyContent: 'space-between',
-				gap: theme.margin,
+				gap: theme.margin * 2,
 				margin: theme.margin,
+				marginBottom: theme.margin * 2,
 			},
 			folderPicker: {
 				flexGrow: 1,
+			},
+			actionButton: {
+				alignSelf: 'flex-end',
+				margin: theme.margin,
 			},
 		});
 	}, [themeId]);
@@ -116,7 +129,7 @@ const NotePreview: React.FC<Props> = ({
 				source={sourceImage}
 				backgroundStyle={styles.photoBackground}
 				textStyle={styles.photoLabel}
-				label={photoIndex}
+				label={photoIndex + 1}
 			/>
 			<FolderPicker
 				themeId={themeId}
@@ -136,9 +149,10 @@ const NotePreview: React.FC<Props> = ({
 			allTags={allTags}
 			style={styles.tagEditor}
 			onTagsChange={setTags}
+			headerStyle={styles.tagEditorHeader}
 			searchResultProps={tagSearchResultsProps}
 		/>
-		<Button onPress={onNewNote}>{_('Create note')}</Button>
+		<PrimaryButton onPress={onNewNote} style={styles.actionButton}>{_('Create note')}</PrimaryButton>
 	</ScrollView>;
 };
 
