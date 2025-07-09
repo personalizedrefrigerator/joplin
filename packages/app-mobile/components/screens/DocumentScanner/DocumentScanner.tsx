@@ -53,7 +53,7 @@ const DocumentScanner: React.FC<Props> = ({ themeId, dispatch }) => {
 
 		const resource = await shim.createResourceFromPath(
 			event.sourceImage.uri,
-			{ title: event.title, mime: event.sourceImage.type /* ocr_something: ... */ },
+			{ title: event.title, mime: event.sourceImage.type },
 		);
 		const note = await Note.save({
 			title: event.title,
@@ -63,10 +63,6 @@ const DocumentScanner: React.FC<Props> = ({ themeId, dispatch }) => {
 		await Tag.setNoteTagsByTitles(note.id, event.tags);
 
 		setSnackbarMessage(_('Created note: "%s"', note.title));
-
-		// TODO: Show toast message?
-		// TODO: Remove last photo
-		// TODO: Hide the scanner if out of photos
 	}, [onDeleteLastPhoto]);
 
 	const onDismissSnackbar = useCallback(() => {

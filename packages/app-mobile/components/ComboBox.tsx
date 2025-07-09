@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { AccessibilityInfo, FlatList, NativeSyntheticEvent, Platform, Role, StyleSheet, TextInput, TextInputProps, useWindowDimensions, View, ViewProps, ViewStyle } from 'react-native';
+import { AccessibilityInfo, FlatList, NativeSyntheticEvent, Platform, Role, ScrollViewProps, StyleSheet, TextInput, TextInputProps, useWindowDimensions, View, ViewProps, ViewStyle } from 'react-native';
 import { TouchableRipple, Text } from 'react-native-paper';
 import { connect } from 'react-redux';
 import { AppState } from '../utils/types';
