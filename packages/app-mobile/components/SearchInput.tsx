@@ -1,14 +1,15 @@
 import * as React from 'react';
 import TextInput from './TextInput';
-import { View, StyleSheet, TextInputProps, ViewStyle } from 'react-native';
+import { View, StyleSheet, TextInputProps, ViewStyle, TextInput as ReactNativeTextInput } from 'react-native';
 import { _ } from '@joplin/lib/locale';
-import { useCallback, useMemo } from 'react';
+import { Ref, useCallback, useMemo } from 'react';
 import { themeStyle } from './global-style';
 import IconButton from './IconButton';
 import Icon from './Icon';
 
 
 interface SearchInputProps extends TextInputProps {
+	inputRef?: Ref<ReactNativeTextInput>;
 	value: string;
 	onChangeText: (text: string)=> void;
 	themeId: number;
@@ -49,7 +50,7 @@ const useStyles = (themeId: number, hasContent: boolean) => {
 	}, [themeId, hasContent]);
 };
 
-const SearchInput: React.FC<SearchInputProps> = ({ themeId, value, containerStyle, style, onChangeText, ...rest }) => {
+const SearchInput: React.FC<SearchInputProps> = ({ inputRef, themeId, value, containerStyle, style, onChangeText, ...rest }) => {
 	const styles = useStyles(themeId, !!value);
 
 	const onClear = useCallback(() => {
@@ -64,6 +65,7 @@ const SearchInput: React.FC<SearchInputProps> = ({ themeId, value, containerStyl
 			style={styles.icon}
 		/>
 		<TextInput
+			ref={inputRef}
 			style={[styles.inputStyle, style]}
 			themeId={themeId}
 			value={value}
