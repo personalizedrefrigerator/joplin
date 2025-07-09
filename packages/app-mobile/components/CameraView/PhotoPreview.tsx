@@ -25,8 +25,10 @@ const styles = StyleSheet.create({
 		marginLeft: 'auto',
 		marginRight: 'auto',
 		marginTop: 'auto',
-		padding: 2,
-		borderRadius: 4,
+		padding: 4,
+		borderRadius: 32,
+		color: 'white',
+		backgroundColor: '#11c',
 	},
 });
 

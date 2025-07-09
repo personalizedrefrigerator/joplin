@@ -79,7 +79,6 @@ const DocumentScanner: React.FC<Props> = ({ themeId, dispatch }) => {
 	) : <>
 		<ScreenHeader title={_('Note preview')} onDeleteButtonPress={onDeleteLastPhoto}/>
 		<NotePreview
-			key={`note-preview-${photos.length}`}
 			photoIndex={photos.length}
 			sourceImage={photos[photos.length - 1]}
 			onCreateNote={onCreateNote}
