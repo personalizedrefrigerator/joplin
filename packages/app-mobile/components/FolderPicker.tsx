@@ -69,7 +69,9 @@ const FolderPicker: FunctionComponent<FolderPickerProps> = ({
 	const dialogs = useContext(DialogContext);
 	const onNewFolderPress = useCallback(async () => {
 		const title = await dialogs.promptForText(_('New notebook title'));
-		onNewFolder(title);
+		if (title !== null) {
+			onNewFolder(title);
+		}
 	}, [dialogs, onNewFolder]);
 
 	const dropdown = (
