@@ -29,6 +29,7 @@ interface Props {
 	sourceImage: CameraResult;
 	allTags: TagEntity[];
 	allFolders: FolderEntity[];
+	selectedFolderId: string;
 
 	onCreateNote: (event: CreateNoteEvent)=> void;
 }
@@ -51,7 +52,7 @@ const useStyles = (themeId: number) => {
 
 			},
 			photoLabel: {
-				
+
 			},
 			tagEditor: {
 				marginHorizontal: theme.margin,
@@ -83,12 +84,24 @@ const tagSearchResultsProps = {
 };
 
 const NotePreview: React.FC<Props> = ({
-	themeId, sourceImage, photoIndex, allTags, onCreateNote, allFolders,
+	themeId, sourceImage, photoIndex, allTags, onCreateNote, allFolders, selectedFolderId: propsSelectedFolderId,
 }) => {
+
 	const styles = useStyles(themeId);
 	const [title, setTitle] = useState('');
 	const [tags, setTags] = useState([]);
-	const [selectedFolderId, setSelectedFolderId] = useState('');
+	const [selectedFolderId, setSelectedFolderId] = useState(propsSelectedFolderId);
+
+	const realFolders = useMemo(() => {
+		return Folder.getRealFolders(allFolders);
+	}, [allFolders]);
+
+	useEffect(() => {
+		// Don't allow selecting a virtual folder
+		if (selectedFolderId && realFolders.every(folder => folder.id !== selectedFolderId)) {
+			setSelectedFolderId('');
+		}
+	}, [realFolders, selectedFolderId]);
 
 	useEffect(() => {
 		const template = Setting.value('scanner.titleTemplate');
@@ -112,10 +125,6 @@ const NotePreview: React.FC<Props> = ({
 		const folder = await Folder.save({ title });
 		setSelectedFolderId(folder.id);
 	}, []);
-
-	const realFolders = useMemo(() => {
-		return Folder.getRealFolders(allFolders);
-	}, [allFolders]);
 
 	return <ScrollView style={styles.rootScrollView}>
 		<TextInput
@@ -152,12 +161,16 @@ const NotePreview: React.FC<Props> = ({
 			headerStyle={styles.tagEditorHeader}
 			searchResultProps={tagSearchResultsProps}
 		/>
-		<PrimaryButton onPress={onNewNote} style={styles.actionButton}>{_('Create note')}</PrimaryButton>
+		<PrimaryButton
+			onPress={onNewNote}
+			style={styles.actionButton}
+		>{_('Create note')}</PrimaryButton>
 	</ScrollView>;
 };
 
 export default connect((state: AppState) => ({
 	allTags: state.tags,
 	allFolders: state.folders,
+	selectedFolderId: state.selectedFolderId,
 	themeId: state.settings.theme,
 }))(NotePreview);
