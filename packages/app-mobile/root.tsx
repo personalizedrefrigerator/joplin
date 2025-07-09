@@ -1346,7 +1346,6 @@ class AppComponent extends React.Component<AppComponentProps, AppComponentState>
 					isOpen={this.props.showSideMenu}
 					disableGestures={disableSideMenuGestures}
 				>
-					<StatusBar barStyle={statusBarStyle} />
 					<View style={{ flexGrow: 1, flexShrink: 1, flexBasis: '100%' }}>
 						<SafeAreaView style={{ flex: 0, backgroundColor: theme.backgroundColor2 }}/>
 						<SafeAreaView style={{ flex: 1 }}>
@@ -1355,11 +1354,6 @@ class AppComponent extends React.Component<AppComponentProps, AppComponentState>
 							</View>
 							{/* eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied */}
 							<DropdownAlert alert={(func: any) => (this.dropdownAlert_ = func)} />
-							{ !shouldShowMainContent && <BiometricPopup
-								dispatch={this.props.dispatch}
-								themeId={this.props.themeId}
-								sensorInfo={this.state.sensorInfo}
-							/> }
 						</SafeAreaView>
 					</View>
 				</SideMenu>
@@ -1409,12 +1403,21 @@ class AppComponent extends React.Component<AppComponentProps, AppComponentState>
 					},
 				}}>
 					<DialogManager themeId={this.props.themeId}>
+						<StatusBar barStyle={statusBarStyle} />
 						<MenuProvider
 							style={{ flex: 1 }}
 							closeButtonLabel={_('Dismiss')}
 						>
 							<FocusControl.MainAppContent style={{ flex: 1 }}>
-								{mainContent}
+								{shouldShowMainContent ? mainContent : (
+									<SafeAreaView>
+										<BiometricPopup
+											dispatch={this.props.dispatch}
+											themeId={this.props.themeId}
+											sensorInfo={this.state.sensorInfo}
+										/>
+									</SafeAreaView>
+								)}
 							</FocusControl.MainAppContent>
 						</MenuProvider>
 					</DialogManager>
