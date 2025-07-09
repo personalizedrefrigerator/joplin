@@ -1,13 +1,15 @@
 import * as React from 'react';
 
-import { StyleSheet, View, Text, ScrollView, ViewStyle } from 'react-native';
+import { StyleSheet, View, Text, ScrollView, ViewStyle, Platform, AccessibilityInfo, ScrollViewProps, TextStyle } from 'react-native';
 import { _ } from '@joplin/lib/locale';
 import { themeStyle } from './global-style';
 import ComboBox, { Option } from './ComboBox';
 import IconButton from './IconButton';
-import { useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { TagEntity } from '@joplin/lib/services/database/types';
 import { Divider } from 'react-native-paper';
+import focusView from '../utils/focusView';
+import { msleep } from '@joplin/utils/time';
 
 export enum TagEditorMode {
 	Large,
@@ -21,9 +23,11 @@ interface Props {
 	mode: TagEditorMode;
 	style: ViewStyle;
 	onTagsChange: (newTags: string[])=> void;
+	headerStyle?: TextStyle;
+	searchResultProps?: ScrollViewProps;
 }
 
-const useStyles = (themeId: number) => {
+const useStyles = (themeId: number, headerStyle: TextStyle|undefined) => {
 	return useMemo(() => {
 		const theme = themeStyle(themeId);
 		return StyleSheet.create({
@@ -71,6 +75,7 @@ const useStyles = (themeId: number) => {
 				...theme.headerStyle,
 				fontSize: theme.fontSize,
 				marginBottom: theme.itemMarginBottom,
+				...headerStyle,
 			},
 			divider: {
 				marginTop: theme.margin * 1.4,
@@ -85,7 +90,7 @@ const useStyles = (themeId: number) => {
 				color: theme.colorFaded,
 			},
 		});
-	}, [themeId]);
+	}, [themeId, headerStyle]);
 };
 
 type Styles = ReturnType<typeof useStyles>;
@@ -94,30 +99,56 @@ interface TagChipProps {
 	title: string;
 	themeId: number;
 	styles: Styles;
-	onRemove: ()=> void;
+	onRemove: (title: string)=> void;
+
+	autofocus: boolean;
+	onAutoFocusComplete: ()=> void;
 }
 
 const TagCard: React.FC<TagChipProps> = props => {
-	return <View style={props.styles.tag}>
+	const onRemove = useCallback(() => {
+		props.onRemove(props.title);
+	}, [props.title, props.onRemove]);
+
+	const removeButtonRef = useRef<View>(null);
+	useEffect(() => {
+		if (props.autofocus) {
+			focusView('TagEditor::TagCard', removeButtonRef.current);
+			props.onAutoFocusComplete();
+		}
+	}, [props.autofocus, props.onAutoFocusComplete]);
+
+	return <View
+		style={props.styles.tag}
+		role='listitem'
+	>
 		<Text style={props.styles.tagText}>{props.title}</Text>
 		<IconButton
+			pressableRef={removeButtonRef}
 			themeId={props.themeId}
 			description={_('Remove %s', props.title)}
 			iconName='fas fa-times-circle'
 			iconStyle={props.styles.removeTagButton}
-			onPress={props.onRemove}
+			onPress={onRemove}
 		/>
 	</View>;
 };
 
 interface TagsBoxProps {
 	tags: string[];
+	autofocusTag: string;
+	onAutoFocusComplete: ()=> void;
 	styles: Styles;
 	themeId: number;
 	onRemoveTag: (tag: string)=> void;
 }
 
 const TagsBox: React.FC<TagsBoxProps> = props => {
+	const onRemoveTag = useCallback((tag: string) => {
+		props.onRemoveTag(tag);
+		// Focus something to prevent focus jumps?
+	}, [props.onRemoveTag]);
+
 	const renderContent = () => {
 		if (props.tags.length) {
 			return props.tags.map(tag => (
@@ -126,7 +157,9 @@ const TagsBox: React.FC<TagsBoxProps> = props => {
 					title={tag}
 					styles={props.styles}
 					themeId={props.themeId}
-					onRemove={() => props.onRemoveTag(tag)}
+					onRemove={onRemoveTag}
+					autofocus={props.autofocusTag === tag}
+					onAutoFocusComplete={props.onAutoFocusComplete}
 				/>
 			));
 		} else {
@@ -141,9 +174,18 @@ const TagsBox: React.FC<TagsBoxProps> = props => {
 		<Text style={props.styles.header} role='heading'>{_('Associated tags:')}</Text>
 		<ScrollView
 			style={props.styles.tagBoxScrollView}
-			contentContainerStyle={props.styles.tagBoxContent}
+			// On web, specifying aria-live here announces changes to the associated tags.
+			// However, on Android (and possibly iOS), this breaks focus behavior:
+			aria-live={Platform.OS === 'web' ? 'polite' : undefined}
 		>
-			{renderContent()}
+			<View
+				// Accessibility: Marking the list of tags as a list seems to prevent focus from jumping
+				// to the top of the modal after removing a tag.
+				role='list'
+				style={props.styles.tagBoxContent}
+			>
+				{renderContent()}
+			</View>
 		</ScrollView>
 	</View>;
 };
@@ -151,7 +193,7 @@ const TagsBox: React.FC<TagsBoxProps> = props => {
 const normalizeTag = (tagText: string) => tagText.trim().toLowerCase();
 
 const TagEditor: React.FC<Props> = props => {
-	const styles = useStyles(props.themeId);
+	const styles = useStyles(props.themeId, props.headerStyle);
 
 	const comboBoxItems = useMemo(() => {
 		return props.allTags
@@ -163,20 +205,36 @@ const TagEditor: React.FC<Props> = props => {
 					title,
 					icon: null,
 					accessibilityHint: _('Adds tag'),
+					willRemoveOnPress: true,
 				};
 			});
 	}, [props.tags, props.allTags]);
 
+	const [autofocusTag, setAutofocusTag] = useState('');
+	const onAutoFocusComplete = useCallback(() => {
+		// Clear the auto-focus state so that a different view can be auto-focused in the future
+		setAutofocusTag('');
+	}, []);
+
 	const onAddTag = useCallback((title: string) => {
+		AccessibilityInfo.announceForAccessibility(_('Added tag: %s', title));
 		props.onTagsChange([...props.tags, normalizeTag(title)]);
 	}, [props.tags, props.onTagsChange]);
 
-	const onRemoveTag = useCallback((title: string) => {
+	const onRemoveTag = useCallback(async (title: string) => {
+		const previousTagIndex = props.tags.indexOf(title);
+		const targetTag = props.tags[previousTagIndex + 1] ?? props.tags[previousTagIndex - 1];
+		setAutofocusTag(targetTag);
+
+		// Workaround: Delay auto-focusing the next tag. On iOS, a brief delay is required.
+		await msleep(100);
+		AccessibilityInfo.announceForAccessibility(_('Removed tag: %s', title));
 		props.onTagsChange(props.tags.filter(tag => tag !== title));
 	}, [props.tags, props.onTagsChange]);
 
 	const onComboBoxSelect = useCallback((item: { title: string }) => {
 		onAddTag(item.title);
+		return { willRemove: true };
 	}, [onAddTag]);
 
 	const allTagsSet = useMemo(() => {
@@ -199,6 +257,8 @@ const TagEditor: React.FC<Props> = props => {
 				styles={styles}
 				tags={props.tags}
 				onRemoveTag={onRemoveTag}
+				autofocusTag={autofocusTag}
+				onAutoFocusComplete={onAutoFocusComplete}
 			/>
 			<Divider style={styles.divider}/>
 		</>}
@@ -214,6 +274,7 @@ const TagEditor: React.FC<Props> = props => {
 			searchInputProps={{
 				autoCapitalize: 'none',
 			}}
+			searchResultProps={props.searchResultProps}
 		/>
 	</View>;
 };

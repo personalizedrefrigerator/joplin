@@ -146,6 +146,7 @@ import FocusControl from './components/accessibility/FocusControl/FocusControl';
 import SsoLoginScreen from './components/screens/SsoLoginScreen';
 import SamlShared from '@joplin/lib/components/shared/SamlShared';
 import NoteRevisionViewer from './components/screens/NoteRevisionViewer';
+import DocumentScanner from './components/screens/DocumentScanner/DocumentScanner';
 
 const logger = Logger.create('root');
 
@@ -1320,6 +1321,7 @@ class AppComponent extends React.Component<AppComponentProps, AppComponentState>
 			Status: { screen: StatusScreen },
 			Search: { screen: SearchScreen },
 			Config: { screen: ConfigScreen },
+			DocumentScanner: { screen: DocumentScanner },
 		};
 
 

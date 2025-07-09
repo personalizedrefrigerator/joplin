@@ -2,7 +2,7 @@ import * as React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react-native';
 import createMockReduxStore from '../utils/testing/createMockReduxStore';
 import TestProviderStack from './testing/TestProviderStack';
-import ComboBox, { Option } from './ComboBox';
+import ComboBox, { OnItemSelected, Option } from './ComboBox';
 import { useMemo } from 'react';
 
 interface Item {
@@ -11,7 +11,7 @@ interface Item {
 
 interface WrapperProps {
 	items: Item[];
-	onItemSelected?: (item: Item)=> void;
+	onItemSelected?: OnItemSelected;
 }
 
 const store = createMockReduxStore();
@@ -24,6 +24,7 @@ const WrappedComboBox: React.FC<WrapperProps> = ({
 			title: item.title,
 			icon: undefined,
 			accessibilityHint: undefined,
+			willRemoveOnPress: false,
 		}));
 	}, [items]);
 
