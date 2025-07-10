@@ -28,7 +28,7 @@ export const setUpLogger = () => {
 	}
 };
 
-export const initCodeMirror = (
+export const initializeEditor = (
 	parentElement: HTMLElement,
 	initialText: string,
 	initialNoteId: string,

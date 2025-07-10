@@ -396,7 +396,7 @@ function NoteEditor(props: Props, ref: any) {
 					const initialText = ${JSON.stringify(props.initialText)};
 					const settings = ${JSON.stringify(editorSettings)};
 
-					window.cm = codeMirrorBundle.initCodeMirror(
+					window.cm = codeMirrorBundle.initializeEditor(
 						parentElement,
 						initialText,
 						${JSON.stringify(props.noteId)},
