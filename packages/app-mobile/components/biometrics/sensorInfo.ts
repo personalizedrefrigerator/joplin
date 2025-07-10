@@ -26,7 +26,7 @@ export default async (): Promise<SensorInfo> => {
 	}
 
 	let hasChanged = false;
-	const supportedSensors = '';
+	let supportedSensors = '';
 
 	try {
 		logger.info('Getting isSensorAvailable...');
@@ -43,7 +43,7 @@ export default async (): Promise<SensorInfo> => {
 		// fingerprint when the user turns on the feature and at that point we
 		// know if the device supports biometrics or not.
 		const hasSensor = await hasHardwareAsync();
-		const supportedSensors = (await supportedAuthenticationTypesAsync()).map(sensor => {
+		supportedSensors = (await supportedAuthenticationTypesAsync()).map(sensor => {
 			if (sensor === AuthenticationType.FINGERPRINT) {
 				return 'Touch ID';
 			} else if (sensor === AuthenticationType.FACIAL_RECOGNITION) {
