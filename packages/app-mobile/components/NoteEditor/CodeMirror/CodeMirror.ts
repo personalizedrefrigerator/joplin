@@ -10,7 +10,7 @@
 // from NoteEditor.tsx.
 
 import { EditorSettings } from '@joplin/editor/types';
-import createEditor from '@joplin/editor/CodeMirror/createEditor';
+import { createEditor } from '@joplin/editor/CodeMirror';
 import CodeMirrorControl from '@joplin/editor/CodeMirror/CodeMirrorControl';
 import WebViewToRNMessenger from '../../../utils/ipc/WebViewToRNMessenger';
 import { WebViewToEditorApi } from '../types';
