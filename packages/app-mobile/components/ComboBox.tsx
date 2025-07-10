@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { AccessibilityInfo, FlatList, NativeSyntheticEvent, Platform, Role, StyleSheet, TextInput, TextInputProps, useWindowDimensions, View, ViewProps, ViewStyle } from 'react-native';
+import { AccessibilityInfo, NativeSyntheticEvent, Platform, Role, StyleSheet, TextInput, TextInputProps, useWindowDimensions, View, ViewProps, ViewStyle } from 'react-native';
 import { TouchableRipple, Text } from 'react-native-paper';
 import { connect } from 'react-redux';
 import { AppState } from '../utils/types';
@@ -10,6 +10,7 @@ import { _ } from '@joplin/lib/locale';
 import SearchInput from './SearchInput';
 import focusView from '../utils/focusView';
 import AsyncActionQueue from '@joplin/lib/AsyncActionQueue';
+import NestableFlatList, { NestableFlatListControl } from './NestableFlatList';
 const naturalCompare = require('string-natural-compare');
 
 
@@ -175,6 +176,9 @@ const useStyles = (themeId: number, showSearchResults: boolean) => {
 				height: 200,
 				flexGrow: 1,
 				flexShrink: 1,
+				...(showSearchResults ? {} : {
+					display: 'none',
+				}),
 			},
 			optionIcon: {
 				color: theme.color,
@@ -247,10 +251,12 @@ interface SearchResultContainerProps {
 	baseId: string;
 	resultCount: number;
 	searchInputRef: RefObject<TextInput>;
+	// Used to determine focus
+	resultsHideOnPress: boolean;
 }
 
 const useSearchResultContainerComponent = ({
-	onItemSelected, selectedIndex, baseId, resultCount, searchInputRef,
+	onItemSelected, selectedIndex, baseId, resultCount, searchInputRef, resultsHideOnPress,
 }: SearchResultContainerProps): React.FC<ResultWrapperProps> => {
 	const listItemsRef = useRef<Record<number, View>>({});
 
@@ -262,17 +268,21 @@ const useSearchResultContainerComponent = ({
 	}, []);
 	const onItemPressRef = useRef(onItemSelected);
 	onItemPressRef.current = (item, index) => {
-		if (Platform.OS === 'android' && item.willRemoveOnPress) {
+		let focusTarget = null;
+
+		if (resultsHideOnPress) {
+			focusTarget = searchInputRef.current;
+		} else if (Platform.OS === 'android' && item.willRemoveOnPress) {
 			// Workaround for an accessibility bug on Android: By default, when an item is removed
 			// from the list of results, focus can occasionally jump to the start of the document.
 			// To prevent this, manually move focus to the next item before the results list changes:
 			const adjacentView = listItemsRef.current[index + 1] ?? listItemsRef.current[index - 1];
 
-			if (adjacentView) {
-				focusView('ComboBox::focusAdjacent', adjacentView);
-			} else {
-				focusView('ComboBox::focusTitle', searchInputRef.current);
-			}
+			focusTarget = adjacentView ?? searchInputRef.current;
+		}
+
+		if (focusTarget) {
+			focusView('ComboBox::focusAfterPress', focusTarget);
 
 			eventQueue.push(() => {
 				onItemSelected(item, index);
@@ -326,6 +336,31 @@ const useShowSearchResults = (alwaysExpand: boolean, search: string) => {
 	return { showSearchResults, setShowSearchResults };
 };
 
+interface AnnounceSelectionOptions {
+	enabled: boolean;
+	selectedResultTitle: string|undefined;
+	resultCount: number;
+	searchQuery: string;
+}
+
+const useAnnounceSelection = ({ selectedResultTitle, resultCount, enabled, searchQuery }: AnnounceSelectionOptions) => {
+	const enabledRef = useRef(enabled);
+	enabledRef.current = enabled;
+
+	const announcement = (() => {
+		if (!searchQuery) return '';
+		if (resultCount === 0) return _('No results');
+		if (selectedResultTitle) return _('Selected: %s', selectedResultTitle);
+		return '';
+	})();
+
+	useEffect(() => {
+		if (enabledRef.current && announcement) {
+			AccessibilityInfo.announceForAccessibility(announcement);
+		}
+	}, [announcement]);
+};
+
 const ComboBox: React.FC<Props> = ({
 	themeId,
 	items,
@@ -350,15 +385,24 @@ const ComboBox: React.FC<Props> = ({
 	});
 	const { selectedIndex, onNextResult, onPreviousResult, onFirstResult, onLastResult } = useSelectedIndex(search, results);
 	const searchInputRef = useRef<TextInput|null>(null);
-	const listRef = useRef<FlatList|null>(null);
+	const listRef = useRef<NestableFlatListControl|null>(null);
 
 	const resultsRef = useRef(results);
 	resultsRef.current = results;
 	useEffect(() => {
 		if (resultsRef.current?.length && selectedIndex >= 0) {
-			listRef.current?.scrollToIndex({ index: selectedIndex, animated: false, viewPosition: 0.5 });
+			listRef.current?.scrollToIndex({ index: selectedIndex, animated: false, viewPosition: 0.4 });
 		}
 	}, [selectedIndex]);
+
+	useAnnounceSelection({
+		// On web, announcements are handled natively based on accessibility roles.
+		// Manual announcements are only needed on iOS and Android:
+		enabled: Platform.OS !== 'web',
+		selectedResultTitle: results[selectedIndex]?.title,
+		searchQuery: search,
+		resultCount: results.length,
+	});
 
 	const propsOnItemSelectedRef = useRef(propsOnItemSelected);
 	propsOnItemSelectedRef.current = propsOnItemSelected;
@@ -372,6 +416,7 @@ const ComboBox: React.FC<Props> = ({
 		}
 
 		if (!alwaysExpand) {
+			setSearch('');
 			setShowSearchResults(false);
 		}
 
@@ -381,6 +426,7 @@ const ComboBox: React.FC<Props> = ({
 	const baseId = useId();
 	const SearchResultWrapper = useSearchResultContainerComponent({
 		onItemSelected, selectedIndex, baseId, searchInputRef, resultCount: results.length,
+		resultsHideOnPress: !alwaysExpand,
 	});
 
 	type RenderEvent = { item: Option; index: number };
@@ -439,18 +485,24 @@ const ComboBox: React.FC<Props> = ({
 		onKeyDown: onKeyPress,
 	};
 	const activeId = `${baseId}-${selectedIndex}`;
-	const searchResults = <FlatList
+	const searchResults = <NestableFlatList
 		ref={listRef}
 		data={results}
-		getItemLayout={(_data, index) => ({
-			length: menuItemHeight, offset: menuItemHeight * index, index,
-		})}
+
 		CellRendererComponent={SearchResultWrapper}
-		// A better role would be 'listbox', but that isn't supported by RN.
-		role={Platform.OS === 'web' ? 'listbox' as Role : undefined}
-		aria-setsize={results.length}
-		aria-activedescendant={activeId}
-		nativeID={`menuBox-${baseId}`}
+		itemHeight={menuItemHeight}
+
+		contentWrapperProps={{
+			// A better role would be 'listbox', but that isn't supported by RN.
+			role: Platform.OS === 'web' ? 'listbox' as Role : undefined,
+			'aria-activedescendant': activeId,
+			nativeID: `menuBox-${baseId}`,
+			onKeyPress,
+			// Allow focusing the results list directly on web. It has been observed
+			// that certain screen readers on web sometimes fail to read changes to the results list.
+			// Being able to navigate directly to the results list may help users in this case.
+			tabIndex: Platform.OS === 'web' ? 0 : undefined,
+		} as ViewProps}
 
 		style={styles.searchResults}
 		keyExtractor={optionKeyExtractor}
@@ -473,9 +525,17 @@ const ComboBox: React.FC<Props> = ({
 			placeholder={placeholder}
 			aria-activedescendant={showSearchResults ? activeId : undefined}
 			aria-controls={`menuBox-${baseId}`}
+
+			// Certain accessibility properties only work well on web:
+			{...(Platform.OS === 'web' ? {
+				role: 'combobox',
+				'aria-autocomplete': 'list',
+				'aria-expanded': showSearchResults,
+				'aria-label': placeholder,
+			} : {})}
 			{...searchInputProps}
 		/>
-		{showSearchResults && searchResults}
+		{searchResults}
 		{!showSearchResults && helpComponent}
 	</View>;
 };
