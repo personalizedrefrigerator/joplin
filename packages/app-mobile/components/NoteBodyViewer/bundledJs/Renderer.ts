@@ -84,7 +84,7 @@ export default class Renderer {
 		extraContentScripts: ExtraContentScriptSource[],
 	) {
 		this.extraContentScripts = extraContentScripts.map(script => {
-			const scriptModule = (eval(script.js))({
+			const scriptModule = ((0, eval)(script.js))({
 				pluginId: script.pluginId,
 				contentScriptId: script.id,
 			});
