@@ -42,6 +42,11 @@ export default async (): Promise<SensorInfo> => {
 		// `isSensorAvailable()` is pretty much useless. Instead we ask for
 		// fingerprint when the user turns on the feature and at that point we
 		// know if the device supports biometrics or not.
+		//
+		// 2025-07-10: isSensorAvailable has been replaced with hasHardwareAsync,
+		// which may be more reliable. However, hasHardwareAsync may return false
+		// if the user has locked the app with a PIN (rather than biometrics). Test
+		// carefully when changing this behavior:
 		const hasSensor = await hasHardwareAsync();
 		supportedSensors = (await supportedAuthenticationTypesAsync()).map(sensor => {
 			if (sensor === AuthenticationType.FINGERPRINT) {
