@@ -1842,7 +1842,7 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 		},
 
 		'scanner.titleTemplate': {
-			value: 'Page: {date} ({page})',
+			value: 'Scan: {date} ({count})',
 			type: SettingItemType.String,
 			public: true,
 			appTypes: [AppType.Mobile],

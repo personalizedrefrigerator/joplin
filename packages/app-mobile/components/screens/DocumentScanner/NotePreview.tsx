@@ -17,21 +17,22 @@ import { formatMsToLocal } from '@joplin/utils/time';
 import { PrimaryButton } from '../../buttons';
 
 export interface CreateNoteEvent {
-	sourceImage: CameraResult;
 	title: string;
 	tags: string[];
 	parentId: string;
 }
 
+type OnCreateNote = (event: CreateNoteEvent)=> void;
+
 interface Props {
 	themeId: number;
-	photoIndex: number;
-	sourceImage: CameraResult;
+	imageCount: number;
+	lastImage: CameraResult;
 	allTags: TagEntity[];
 	allFolders: FolderEntity[];
 	selectedFolderId: string;
 
-	onCreateNote: (event: CreateNoteEvent)=> void;
+	onCreateNote: null|OnCreateNote;
 }
 
 const useStyles = (themeId: number) => {
@@ -84,7 +85,7 @@ const tagSearchResultsProps = {
 };
 
 const NotePreview: React.FC<Props> = ({
-	themeId, sourceImage, photoIndex, allTags, onCreateNote, allFolders, selectedFolderId: propsSelectedFolderId,
+	themeId, lastImage, imageCount, allTags, onCreateNote, allFolders, selectedFolderId: propsSelectedFolderId,
 }) => {
 	const styles = useStyles(themeId);
 	const [title, setTitle] = useState('');
@@ -107,18 +108,19 @@ const NotePreview: React.FC<Props> = ({
 		const date = formatMsToLocal(Date.now(), Setting.value('dateFormat'));
 		setTitle(
 			template.replace(/{date}/g, date)
-				.replace(/{page}/g, `${photoIndex}`),
+				.replace(/{count}/g, `${imageCount}`),
 		);
-	}, [photoIndex]);
+	}, [imageCount]);
 
 	const onNewNote = useCallback(() => {
+		if (!onCreateNote) return;
+
 		onCreateNote({
 			tags,
 			title,
-			sourceImage,
 			parentId: selectedFolderId ?? '',
 		});
-	}, [onCreateNote, tags, title, sourceImage, selectedFolderId]);
+	}, [onCreateNote, tags, title, selectedFolderId]);
 
 	const onNewFolder = useCallback(async (title: string) => {
 		const folder = await Folder.save({ title });
@@ -134,10 +136,10 @@ const NotePreview: React.FC<Props> = ({
 		/>
 		<View style={styles.folderPickerLine}>
 			<PhotoPreview
-				source={sourceImage}
+				source={lastImage}
 				backgroundStyle={styles.photoBackground}
 				textStyle={styles.photoLabel}
-				label={photoIndex}
+				label={imageCount}
 			/>
 			<FolderPicker
 				themeId={themeId}
@@ -163,6 +165,7 @@ const NotePreview: React.FC<Props> = ({
 		<PrimaryButton
 			onPress={onNewNote}
 			style={styles.actionButton}
+			disabled={!onCreateNote}
 		>{_('Create note')}</PrimaryButton>
 	</ScrollView>;
 };
