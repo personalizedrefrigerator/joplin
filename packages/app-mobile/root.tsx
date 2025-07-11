@@ -280,6 +280,10 @@ const navHistory: any[] = [];
 function historyCanGoBackTo(route: any) {
 	if (route.routeName === 'Folder') return false;
 
+	// This is an intermediate screen that acts more like a modal -- it should be skipped in the
+	// navigation history.
+	if (route.routeName === 'DocumentScanner') return false;
+
 	// There's no point going back to these screens in general and, at least in OneDrive case,
 	// it can be buggy to do so, due to incorrectly relying on global state (reg.syncTarget...)
 	if (route.routeName === 'OneDriveLogin') return false;

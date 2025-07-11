@@ -13,9 +13,12 @@ import NotePreview, { CreateNoteEvent } from './NotePreview';
 import shim from '@joplin/lib/shim';
 import Note from '@joplin/lib/models/Note';
 import Tag from '@joplin/lib/models/Tag';
-import { Portal, Snackbar, Text } from 'react-native-paper';
+import { Portal, ProgressBar, Snackbar } from 'react-native-paper';
 import useBackHandler from '../../../utils/hooks/useBackHandler';
-import { PrimaryButton } from '../../buttons';
+import Logger from '@joplin/utils/Logger';
+import NavService from '@joplin/lib/services/NavService';
+
+const logger = Logger.create('DocumentScanner');
 
 interface Props {
 	dispatch: Dispatch;
@@ -31,6 +34,9 @@ const useStyles = (themeId: number) => {
 				margin: theme.margin,
 				gap: theme.margin,
 			},
+			progressBarContainer: {
+				flexGrow: 0,
+			},
 		});
 	}, [themeId]);
 };
@@ -40,6 +46,7 @@ const DocumentScanner: React.FC<Props> = ({ themeId, dispatch }) => {
 	const [cameraVisible, setCameraVisible] = useState(true);
 	const [photos, setPhotos] = useState<CameraResult[]>([]);
 	const [snackbarMessage, setSnackbarMessage] = useState('');
+	const [creatingNote, setCreatingNote] = useState(false);
 
 	useBackHandler(() => {
 		if (photos.length && !cameraVisible) {
@@ -50,13 +57,17 @@ const DocumentScanner: React.FC<Props> = ({ themeId, dispatch }) => {
 	});
 
 	const onDeleteLastPhoto = useCallback(() => {
+		if (photos.length <= 1) {
+			setCameraVisible(true);
+		}
+
 		setSnackbarMessage('');
 		setPhotos(photos => {
 			const result = [...photos];
 			result.pop();
 			return result;
 		});
-	}, []);
+	}, [photos]);
 
 	const onCloseScreen = useCallback(() => {
 		setPhotos([]);
@@ -64,21 +75,35 @@ const DocumentScanner: React.FC<Props> = ({ themeId, dispatch }) => {
 	}, [dispatch]);
 
 	const onCreateNote = useCallback(async (event: CreateNoteEvent) => {
-		onDeleteLastPhoto();
+		setSnackbarMessage(_('Creating note "%s"...', event.title));
+		setCreatingNote(true);
 
-		const resource = await shim.createResourceFromPath(
-			event.sourceImage.uri,
-			{ title: event.title, mime: event.sourceImage.type },
-		);
-		const note = await Note.save({
-			title: event.title,
-			body: `![${event.title}](:/${resource.id})`,
-			parent_id: event.parentId,
-		});
-		await Tag.setNoteTagsByTitles(note.id, event.tags);
+		try {
+			const resources = [];
+			for (const image of photos) {
+				resources.push(await shim.createResourceFromPath(
+					image.uri,
+					{ title: event.title, mime: image.type },
+				));
+			}
 
-		setSnackbarMessage(_('Created note: "%s"', note.title));
-	}, [onDeleteLastPhoto]);
+			const note = await Note.save({
+				title: event.title,
+				body: resources.map(
+					(image, index) => `![${_('Photo %d', index + 1)}](:/${image.id})`,
+				).join('\n\n'),
+				parent_id: event.parentId,
+			});
+			await Tag.setNoteTagsByTitles(note.id, event.tags);
+
+			await NavService.go('Note', { noteId: note.id });
+		} catch (error) {
+			logger.error('Error creating note', error);
+			await shim.showErrorDialog(`Failed to create note: ${error}`);
+		} finally {
+			setCreatingNote(false);
+		}
+	}, [photos]);
 
 	const onDismissSnackbar = useCallback(() => {
 		setSnackbarMessage('');
@@ -101,19 +126,19 @@ const DocumentScanner: React.FC<Props> = ({ themeId, dispatch }) => {
 		} else if (photos.length > 0) {
 			return <>
 				<ScreenHeader title={_('Note preview')} onDeleteButtonPress={onDeleteLastPhoto}/>
+				{creatingNote && <View style={styles.progressBarContainer}>
+					<ProgressBar visible indeterminate aria-label={_('Creating note.')}/>
+				</View>}
 				<NotePreview
-					photoIndex={photos.length}
-					sourceImage={photos[photos.length - 1]}
-					onCreateNote={onCreateNote}
+					imageCount={photos.length}
+					lastImage={photos[photos.length - 1]}
+					onCreateNote={creatingNote ? null : onCreateNote}
 				/>
 			</>;
 		} else {
+			// Error/loading state
 			return <>
-				<ScreenHeader title={_('Document scanner')}/>
-				<View style={styles.noRemainingPhotosContainer}>
-					<Text>{_('No photos remaining.')}</Text>
-					<PrimaryButton onPress={onCloseScreen}>{_('Done')}</PrimaryButton>
-				</View>
+				<ScreenHeader title={'Document scanner'}/>
 			</>;
 		}
 	};
