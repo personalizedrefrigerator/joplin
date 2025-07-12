@@ -9,11 +9,6 @@ const codeMirrorBundle = new BundledFile(
 	`${mobileDir}/components/NoteEditor/CodeMirror/CodeMirror.ts`,
 );
 
-const tipTapBundle = new BundledFile(
-	'tipTapBundle',
-	`${mobileDir}/components/NoteEditor/TipTap/TipTap.ts`,
-);
-
 const jsDrawBundle = new BundledFile(
 	'svgEditorBundle',
 	`${mobileDir}/components/NoteEditor/ImageEditor/js-draw/createJsDrawEditor.ts`,
@@ -36,9 +31,6 @@ const gulpTasks = {
 	buildCodeMirrorEditor: {
 		fn: () => codeMirrorBundle.build(),
 	},
-	buildTipTapEditor: {
-		fn: () => tipTapBundle.build(),
-	},
 	buildJsDrawEditor: {
 		fn: () => jsDrawBundle.build(),
 	},
@@ -50,9 +42,6 @@ const gulpTasks = {
 	},
 	watchJsDrawEditor: {
 		fn: () => jsDrawBundle.startWatching(),
-	},
-	watchTipTapBundle: {
-		fn: () => tipTapBundle.startWatching(),
 	},
 	buildPluginBackgroundScript: {
 		fn: () => pluginBackgroundPageBundle.build(),

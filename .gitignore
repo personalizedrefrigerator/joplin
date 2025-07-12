@@ -670,7 +670,6 @@ packages/app-mobile/components/NoteEditor/ImageEditor/utils/useEditorMessenger.j
 packages/app-mobile/components/NoteEditor/NoteEditor.test.js
 packages/app-mobile/components/NoteEditor/NoteEditor.js
 packages/app-mobile/components/NoteEditor/SearchPanel.js
-packages/app-mobile/components/NoteEditor/TipTap/TipTap.js
 packages/app-mobile/components/NoteEditor/commandDeclarations.js
 packages/app-mobile/components/NoteEditor/hooks/useCodeMirrorPlugins.js
 packages/app-mobile/components/NoteEditor/hooks/useEditorCommandHandler.test.js
@@ -933,6 +932,7 @@ packages/editor/CodeMirror/editorCommands/sortSelectedLines.test.js
 packages/editor/CodeMirror/editorCommands/sortSelectedLines.js
 packages/editor/CodeMirror/editorCommands/supportsCommand.js
 packages/editor/CodeMirror/getScrollFraction.js
+packages/editor/CodeMirror/index.js
 packages/editor/CodeMirror/markdown/MarkdownHighlightExtension.test.js
 packages/editor/CodeMirror/markdown/MarkdownHighlightExtension.js
 packages/editor/CodeMirror/markdown/MarkdownMathExtension.test.js
@@ -993,7 +993,6 @@ packages/editor/CodeMirror/utils/searchExtension.js
 packages/editor/CodeMirror/utils/selectedNoteIdExtension.js
 packages/editor/CodeMirror/utils/setupVim.js
 packages/editor/SelectionFormatting.js
-packages/editor/TipTap/createEditor.js
 packages/editor/events.js
 packages/editor/types.js
 packages/fork-htmlparser2/src/CollectingHandler.js
