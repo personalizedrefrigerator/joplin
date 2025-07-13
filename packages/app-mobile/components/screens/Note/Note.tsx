@@ -43,7 +43,6 @@ import { ChangeEvent as EditorChangeEvent, SelectionRangeChangeEvent, UndoRedoDe
 import { join } from 'path';
 import { Dispatch } from 'redux';
 import { RefObject, useContext } from 'react';
-import { SelectionRange } from '../../NoteEditor/types';
 import { getNoteCallbackUrl } from '@joplin/lib/callbackUrlUtils';
 import { AppState } from '../../../utils/types';
 import restoreItems from '@joplin/lib/services/trash/restoreItems';
@@ -72,6 +71,7 @@ import ShareNoteDialog from '../ShareNoteDialog';
 import stateToWhenClauseContext from '../../../services/commands/stateToWhenClauseContext';
 import { defaultWindowId } from '@joplin/lib/reducer';
 import useVisiblePluginEditorViewIds from '@joplin/lib/hooks/plugins/useVisiblePluginEditorViewIds';
+import { SelectionRange } from '../../../contentScripts/markdownEditor/types';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 const emptyArray: any[] = [];

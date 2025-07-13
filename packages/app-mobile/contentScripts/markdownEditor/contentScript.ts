@@ -1,21 +1,8 @@
-/* eslint-disable import/prefer-default-export */
-
-// This contains the CodeMirror instance, which needs to be built into a bundle
-// using `yarn buildInjectedJs`. This bundle is then loaded from
-// NoteEditor.tsx into the webview.
-//
-// In general, since this file is harder to debug due to the intermediate built
-// step, it's better to keep it as light as possible - it should just be a light
-// wrapper to access CodeMirror functionalities. Anything else should be done
-// from NoteEditor.tsx.
-
-import { EditorSettings } from '@joplin/editor/types';
 import { createEditor } from '@joplin/editor/CodeMirror';
-import CodeMirrorControl from '@joplin/editor/CodeMirror/CodeMirrorControl';
-import WebViewToRNMessenger from '../../../utils/ipc/WebViewToRNMessenger';
-import { WebViewToEditorApi } from '../types';
 import { focus } from '@joplin/lib/utils/focusHandler';
 import Logger, { TargetType } from '@joplin/utils/Logger';
+import WebViewToRNMessenger from '../../utils/ipc/WebViewToRNMessenger';
+import { EditorProcessApi, EditorProps, MainProcessApi } from './types';
 
 let loggerCreated = false;
 export const setUpLogger = () => {
@@ -28,13 +15,18 @@ export const setUpLogger = () => {
 	}
 };
 
-export const initializeEditor = (
-	parentElement: HTMLElement,
-	initialText: string,
-	initialNoteId: string,
-	settings: EditorSettings,
-): CodeMirrorControl => {
-	const messenger = new WebViewToRNMessenger<CodeMirrorControl, WebViewToEditorApi>('editor', null);
+export const initializeEditor = ({
+	parentElementClassName,
+	initialText,
+	initialNoteId,
+	settings,
+}: EditorProps) => {
+	const messenger = new WebViewToRNMessenger<EditorProcessApi, MainProcessApi>('markdownEditor', null);
+
+	const parentElement = document.getElementsByClassName(parentElementClassName)[0] as HTMLElement;
+	if (!parentElement) {
+		throw new Error(`Unable to find parent element for editor (class name: ${JSON.stringify(parentElementClassName)})`);
+	}
 
 	const control = createEditor(parentElement, {
 		initialText,
@@ -86,6 +78,8 @@ export const initializeEditor = (
 		}
 	});
 
-	messenger.setLocalInterface(control);
+	messenger.setLocalInterface({
+		editor: control,
+	});
 	return control;
 };

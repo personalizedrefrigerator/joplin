@@ -58,10 +58,11 @@ export default class BundledFile {
 					name: 'joplin--copy-final',
 					setup: build => {
 						build.onEnd(async (result) => {
-							if (result.outputFiles?.length === 1) {
+							if (result.errors.length === 0) {
+								console.log('copy output');
 								await this.copyToImportableFile();
 							} else {
-								console.warn('Copying skipped. Build produced', result.outputFiles?.length, 'output file(s).');
+								console.warn('Copying skipped. Build produced errors');
 							}
 						});
 					},

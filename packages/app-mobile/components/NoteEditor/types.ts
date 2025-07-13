@@ -49,11 +49,6 @@ export interface EditorSettings extends EditorBodySettings {
 	themeId: number;
 }
 
-export interface SelectionRange {
-	start: number;
-	end: number;
-}
-
 export interface WebViewToEditorApi {
 	onEditorEvent(event: EditorEvent): Promise<void>;
 	logMessage(message: string): Promise<void>;

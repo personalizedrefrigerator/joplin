@@ -5,8 +5,8 @@ import copyJs from './copyJs';
 
 
 const codeMirrorBundle = new BundledFile(
-	'codeMirrorBundle',
-	`${mobileDir}/components/NoteEditor/CodeMirror/CodeMirror.ts`,
+	'markdownEditorBundle',
+	`${mobileDir}/contentScripts/markdownEditor/contentScript.ts`,
 );
 
 const jsDrawBundle = new BundledFile(

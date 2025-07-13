@@ -653,7 +653,6 @@ packages/app-mobile/components/NoteBodyViewer/hooks/useRenderer.js
 packages/app-mobile/components/NoteBodyViewer/hooks/useRerenderHandler.js
 packages/app-mobile/components/NoteBodyViewer/hooks/useSource.js
 packages/app-mobile/components/NoteBodyViewer/types.js
-packages/app-mobile/components/NoteEditor/CodeMirror/CodeMirror.js
 packages/app-mobile/components/NoteEditor/EditLinkDialog.js
 packages/app-mobile/components/NoteEditor/ImageEditor/ImageEditor.js
 packages/app-mobile/components/NoteEditor/ImageEditor/autosave.js
@@ -822,6 +821,12 @@ packages/app-mobile/components/voiceTyping/AudioRecordingBanner.js
 packages/app-mobile/components/voiceTyping/RecordingControls.js
 packages/app-mobile/components/voiceTyping/SpeechToTextBanner.js
 packages/app-mobile/components/voiceTyping/types.js
+packages/app-mobile/contentScripts/markdownEditor/contentScript.js
+packages/app-mobile/contentScripts/markdownEditor/types.js
+packages/app-mobile/contentScripts/markdownEditor/useWebViewSetup.js
+packages/app-mobile/contentScripts/plugins/types.js
+packages/app-mobile/contentScripts/renderer/types.js
+packages/app-mobile/contentScripts/types.js
 packages/app-mobile/gulpfile.js
 packages/app-mobile/index.web.js
 packages/app-mobile/root.js
@@ -880,7 +885,6 @@ packages/app-mobile/utils/image/fileToImage.web.js
 packages/app-mobile/utils/image/getImageDimensions.js
 packages/app-mobile/utils/image/resizeImage.js
 packages/app-mobile/utils/initializeCommandService.js
-packages/app-mobile/utils/injectedJs.js
 packages/app-mobile/utils/ipc/RNToWebViewMessenger.js
 packages/app-mobile/utils/ipc/WebViewToRNMessenger.js
 packages/app-mobile/utils/lockToSingleInstance.js

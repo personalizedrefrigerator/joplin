@@ -1,5 +1,4 @@
 import Setting from '@joplin/lib/models/Setting';
-import shim from '@joplin/lib/shim';
 import { themeStyle } from '@joplin/lib/theme';
 import themeToCss from '@joplin/lib/services/style/themeToCss';
 import EditLinkDialog from './EditLinkDialog';
@@ -14,22 +13,20 @@ import { LayoutChangeEvent, NativeSyntheticEvent, View, ViewStyle } from 'react-
 import { editorFont } from '../global-style';
 
 import { EditorControl as EditorBodyControl, ContentScriptData } from '@joplin/editor/types';
-import { EditorControl, EditorSettings, SelectionRange, WebViewToEditorApi } from './types';
+import { EditorControl, EditorSettings } from './types';
 import { _ } from '@joplin/lib/locale';
 import { ChangeEvent, EditorEvent, EditorEventType, SelectionRangeChangeEvent, UndoRedoDepthChangeEvent } from '@joplin/editor/events';
 import { EditorCommandType, EditorKeymap, EditorLanguageType, SearchState } from '@joplin/editor/types';
 import SelectionFormatting, { defaultSelectionFormatting } from '@joplin/editor/SelectionFormatting';
 import useCodeMirrorPlugins from './hooks/useCodeMirrorPlugins';
-import RNToWebViewMessenger from '../../utils/ipc/RNToWebViewMessenger';
 import { WebViewErrorEvent } from 'react-native-webview/lib/RNCWebViewNativeComponent';
 import Logger from '@joplin/utils/Logger';
 import { PluginStates } from '@joplin/lib/services/plugins/reducer';
 import useEditorCommandHandler from './hooks/useEditorCommandHandler';
 import { OnMessageEvent } from '../ExtendedWebView/types';
-import { join, dirname } from 'path';
-import * as mimeUtils from '@joplin/lib/mime-utils';
-import uuid from '@joplin/lib/uuid';
 import EditorToolbar from '../EditorToolbar/EditorToolbar';
+import useWebViewSetup from '../../contentScripts/markdownEditor/useWebViewSetup';
+import { SelectionRange } from '../../contentScripts/markdownEditor/types';
 
 type ChangeEventHandler = (event: ChangeEvent)=> void;
 type UndoRedoDepthChangeHandler = (event: UndoRedoDepthChangeEvent)=> void;
@@ -330,20 +327,6 @@ const useEditorControl = (
 function NoteEditor(props: Props, ref: any) {
 	const webviewRef = useRef<WebViewControl>(null);
 
-	const setInitialSelectionJs = props.initialSelection ? `
-		cm.select(${props.initialSelection.start}, ${props.initialSelection.end});
-		cm.execCommand('scrollSelectionIntoView');
-	` : '';
-	const jumpToHashJs = props.noteHash ? `
-		cm.jumpToHash(${JSON.stringify(props.noteHash)});
-	` : '';
-	const setInitialSearchJs = props.globalSearch ? `
-		cm.setSearchState(${JSON.stringify({
-		...defaultSearchState,
-		searchText: props.globalSearch,
-	})})
-	` : '';
-
 	const editorSettings: EditorSettings = useMemo(() => ({
 		themeId: props.themeId,
 		themeData: editorTheme(props.themeId),
@@ -367,8 +350,72 @@ function NoteEditor(props: Props, ref: any) {
 		editorLabel: _('Markdown editor'),
 	}), [props.themeId, props.readOnly]);
 
+	const [selectionState, setSelectionState] = useState<SelectionFormatting>(defaultSelectionFormatting);
+	const [linkDialogVisible, setLinkDialogVisible] = useState(false);
+	const [searchState, setSearchState] = useState(defaultSearchState);
+
+	const editorControlRef = useRef<EditorControl|null>(null);
+	const onEditorEvent = (event: EditorEvent) => {
+		let exhaustivenessCheck: never;
+		switch (event.kind) {
+		case EditorEventType.Change:
+			props.onChange(event);
+			break;
+		case EditorEventType.UndoRedoDepthChange:
+			props.onUndoRedoDepthChange(event);
+			break;
+		case EditorEventType.SelectionRangeChange:
+			props.onSelectionChange(event);
+			break;
+		case EditorEventType.SelectionFormattingChange:
+			setSelectionState(event.formatting);
+			break;
+		case EditorEventType.EditLink:
+			editorControl.showLinkDialog();
+			break;
+		case EditorEventType.UpdateSearchDialog:
+			setSearchState(event.searchState);
+
+			if (event.searchState.dialogVisible) {
+				editorControl.searchControl.showSearch();
+			} else {
+				editorControl.searchControl.hideSearch();
+			}
+			break;
+		case EditorEventType.Scroll:
+			// Not handled
+			break;
+		default:
+			exhaustivenessCheck = event;
+			return exhaustivenessCheck;
+		}
+		return;
+	};
+
+	const editorWebViewSetup = useWebViewSetup({
+		initialSelection: props.initialSelection,
+		noteHash: props.noteHash,
+		globalSearch: props.globalSearch,
+		onEditorEvent,
+		onAttachFile: props.onAttach,
+		editorOptions: {
+			parentElementClassName: 'CodeMirror',
+			initialText: props.initialText,
+			initialNoteId: props.noteId,
+			globalSearch: props.globalSearch,
+			settings: editorSettings,
+		},
+		webviewRef,
+	});
+	const editorControl = useEditorControl(
+		editorWebViewSetup.api.editor, webviewRef, setLinkDialogVisible, setSearchState,
+	);
+	editorControlRef.current = editorControl;
+
+
 	const injectedJavaScript = `
 		window.onerror = (message, source, lineno) => {
+			console.error(message);
 			window.ReactNativeWebView.postMessage(
 				"error: " + message + " in file://" + source + ", line " + lineno
 			);
@@ -378,47 +425,14 @@ function NoteEditor(props: Props, ref: any) {
 				"error: Unhandled promise rejection: " + event
 			);
 		};
-
-		if (!window.cm) {
-			// This variable is not used within this script
-			// but is called using "injectJavaScript" from
-			// the wrapper component.
-			window.cm = null;
-
-			try {
-				${shim.injectedJs('codeMirrorBundle')};
-				codeMirrorBundle.setUpLogger();
-
-				const parentElement = document.getElementsByClassName('CodeMirror')[0];
-				// On Android, injectJavaScript is run twice -- once before the parent element exists.
-				// To avoid logging unnecessary errors to the console, skip setup in this case:
-				if (parentElement) {
-					const initialText = ${JSON.stringify(props.initialText)};
-					const settings = ${JSON.stringify(editorSettings)};
-
-					window.cm = codeMirrorBundle.initializeEditor(
-						parentElement,
-						initialText,
-						${JSON.stringify(props.noteId)},
-						settings
-					);
-
-					${jumpToHashJs}
-					// Set the initial selection after jumping to the header -- the initial selection,
-					// if specified, should take precedence.
-					${setInitialSelectionJs}
-					${setInitialSearchJs}
-
-					window.onresize = () => {
-						cm.execCommand('scrollSelectionIntoView');
-					};
-				} else {
-					console.warn('No parent element for the editor found. This may mean that the editor HTML is still loading.');
-				}
-			} catch (e) {
-				window.ReactNativeWebView.postMessage("error:" + e.message + ": " + JSON.stringify(e))
-			}
+		
+		try {
+			${editorWebViewSetup.injectedJavaScript}
+		} catch (e) {
+			console.error('Setup error: ', e);
+			window.ReactNativeWebView.postMessage("error:" + e.message + ": " + JSON.stringify(e))
 		}
+
 		true;
 	`;
 
@@ -441,58 +455,7 @@ function NoteEditor(props: Props, ref: any) {
 		}
 	}, [css]);
 
-	// Scroll to the new hash, if it changes.
-	const isFirstScrollRef = useRef(true);
-	useEffect(() => {
-		// The first "jump to header" is handled during editor setup and shouldn't
-		// be handled a second time:
-		if (isFirstScrollRef.current) {
-			isFirstScrollRef.current = false;
-			return;
-		}
-		if (jumpToHashJs && webviewRef.current) {
-			webviewRef.current.injectJS(jumpToHashJs);
-		}
-	}, [jumpToHashJs]);
-
 	const html = useHtml(css);
-	const [selectionState, setSelectionState] = useState<SelectionFormatting>(defaultSelectionFormatting);
-	const [linkDialogVisible, setLinkDialogVisible] = useState(false);
-	const [searchState, setSearchState] = useState(defaultSearchState);
-
-	const onEditorEvent = useRef((_event: EditorEvent) => {});
-
-	const onAttachRef = useRef(props.onAttach);
-	onAttachRef.current = props.onAttach;
-
-	const editorMessenger = useMemo(() => {
-		const localApi: WebViewToEditorApi = {
-			async onEditorEvent(event) {
-				onEditorEvent.current(event);
-			},
-			async logMessage(message) {
-				logger.debug('CodeMirror:', message);
-			},
-			async onPasteFile(type, data) {
-				const tempFilePath = join(Setting.value('tempDir'), `paste.${uuid.createNano()}.${mimeUtils.toFileExtension(type)}`);
-				await shim.fsDriver().mkdir(dirname(tempFilePath));
-				try {
-					await shim.fsDriver().writeFile(tempFilePath, data, 'base64');
-					await onAttachRef.current(tempFilePath);
-				} finally {
-					await shim.fsDriver().remove(tempFilePath);
-				}
-			},
-		};
-		const messenger = new RNToWebViewMessenger<WebViewToEditorApi, EditorBodyControl>(
-			'editor', webviewRef, localApi,
-		);
-		return messenger;
-	}, []);
-
-	const editorControl = useEditorControl(
-		editorMessenger.remoteApi, webviewRef, setLinkDialogVisible, setSearchState,
-	);
 
 	useEffect(() => {
 		editorControl.updateSettings(editorSettings);
@@ -504,53 +467,10 @@ function NoteEditor(props: Props, ref: any) {
 		return editorControl;
 	});
 
-	useEffect(() => {
-		onEditorEvent.current = (event: EditorEvent) => {
-			let exhaustivenessCheck: never;
-			switch (event.kind) {
-			case EditorEventType.Change:
-				props.onChange(event);
-				break;
-			case EditorEventType.UndoRedoDepthChange:
-				props.onUndoRedoDepthChange(event);
-				break;
-			case EditorEventType.SelectionRangeChange:
-				props.onSelectionChange(event);
-				break;
-			case EditorEventType.SelectionFormattingChange:
-				setSelectionState(event.formatting);
-				break;
-			case EditorEventType.EditLink:
-				editorControl.showLinkDialog();
-				break;
-			case EditorEventType.UpdateSearchDialog:
-				setSearchState(event.searchState);
-
-				if (event.searchState.dialogVisible) {
-					editorControl.searchControl.showSearch();
-				} else {
-					editorControl.searchControl.hideSearch();
-				}
-				break;
-			case EditorEventType.Scroll:
-				// Not handled
-				break;
-			default:
-				exhaustivenessCheck = event;
-				return exhaustivenessCheck;
-			}
-			return;
-		};
-	}, [props.onChange, props.onUndoRedoDepthChange, props.onSelectionChange, editorControl]);
-
 	const codeMirrorPlugins = useCodeMirrorPlugins(props.plugins);
 	useEffect(() => {
 		void editorControl.setContentScripts(codeMirrorPlugins);
 	}, [codeMirrorPlugins, editorControl]);
-
-	const onLoadEnd = useCallback(() => {
-		editorMessenger.onWebViewLoaded();
-	}, [editorMessenger]);
 
 	const onMessage = useCallback((event: OnMessageEvent) => {
 		const data = event.nativeEvent.data;
@@ -560,8 +480,8 @@ function NoteEditor(props: Props, ref: any) {
 			return;
 		}
 
-		editorMessenger.onWebViewMessage(event);
-	}, [editorMessenger]);
+		editorWebViewSetup.webViewEventHandlers.onMessage(event);
+	}, [editorWebViewSetup]);
 
 	const onError = useCallback((event: NativeSyntheticEvent<WebViewErrorEvent>) => {
 		logger.error(`Load error: Code ${event.nativeEvent.code}: ${event.nativeEvent.description}`);
@@ -616,7 +536,7 @@ function NoteEditor(props: Props, ref: any) {
 					injectedJavaScript={injectedJavaScript}
 					hasPluginScripts={codeMirrorPlugins.length > 0}
 					onMessage={onMessage}
-					onLoadEnd={onLoadEnd}
+					onLoadEnd={editorWebViewSetup.webViewEventHandlers.onLoadEnd}
 					onError={onError}
 				/>
 			</View>
