@@ -2,22 +2,25 @@ import { MarkupLanguage, MarkupToHtml } from '@joplin/renderer';
 import type { MarkupToHtmlConverter, RenderOptions, RenderResultPluginAsset, FsDriver as RendererFsDriver, ResourceInfos } from '@joplin/renderer/types';
 import makeResourceModel from './utils/makeResourceModel';
 import addPluginAssets from './utils/addPluginAssets';
-import { ExtraContentScriptSource } from '../types';
+import { ExtraContentScriptSource, ForwardedJoplinSettings, MarkupRecord, RenderingTarget } from '../types';
 import { ExtraContentScript } from '@joplin/lib/services/plugins/utils/loadContentScripts';
-import { RendererWebViewOptions } from '../types';
+import { PluginOptions } from '@joplin/renderer/MarkupToHtml';
 
-export interface RendererSetupOptions extends RendererWebViewOptions {
+export interface RendererSetupOptions {
+	settings: ForwardedJoplinSettings;
+	useTransferredFiles: boolean;
+	pluginOptions: PluginOptions;
 	fsDriver: RendererFsDriver;
 }
 
-export interface RendererSettings {
+export interface RenderSettings {
 	theme: string;
-	onResourceLoaded: ()=> void;
 	highlightedKeywords: string[];
 	resources: ResourceInfos;
 	codeTheme: string;
 	noteHash: string;
 	initialScroll: number;
+	renderingTarget: RenderingTarget;
 
 	createEditPopupSyntax: string;
 	destroyEditPopupSyntax: string;
@@ -29,17 +32,12 @@ export interface RendererSettings {
 
 export interface RendererOutput {
 	getOutputElement: ()=> HTMLElement;
-	afterRender: (setupOptions: RendererSetupOptions, renderSettings: RendererSettings)=> void;
-}
-
-export interface MarkupRecord {
-	language: MarkupLanguage;
-	markup: string;
+	afterRender: (setupOptions: RendererSetupOptions, renderSettings: RenderSettings)=> void;
 }
 
 export default class Renderer {
 	private markupToHtml_: MarkupToHtmlConverter;
-	private lastSettings_: RendererSettings|null = null;
+	private lastSettings_: RenderSettings|null = null;
 	private extraContentScripts_: ExtraContentScript[] = [];
 	private lastRenderMarkup_: MarkupRecord|null = null;
 	private resourcePathOverrides_: Record<string, string> = Object.create(null);
@@ -102,12 +100,11 @@ export default class Renderer {
 		}
 	}
 
-	public async rerender(markup: MarkupRecord, settings: RendererSettings) {
+	public async rerender(markup: MarkupRecord, settings: RenderSettings) {
 		this.lastSettings_ = settings;
 		this.lastRenderMarkup_ = markup;
 
 		const options: RenderOptions = {
-			onResourceLoaded: settings.onResourceLoaded,
 			highlightedKeywords: settings.highlightedKeywords,
 			resources: settings.resources,
 			codeTheme: settings.codeTheme,
@@ -136,7 +133,9 @@ export default class Renderer {
 
 		this.markupToHtml_.clearCache(markup.language);
 
-		const contentContainer = this.output_.getOutputElement();
+		const contentContainer = settings.renderingTarget === RenderingTarget.FullPage ? (
+			this.output_.getOutputElement()
+		) : null;
 
 		let html = '';
 		let pluginAssets: RenderResultPluginAsset[] = [];
@@ -162,7 +161,9 @@ export default class Renderer {
 			throw error;
 		}
 
-		contentContainer.innerHTML = html;
+		if (contentContainer) {
+			contentContainer.innerHTML = html;
+		}
 
 		// Adding plugin assets can be slow -- run it asynchronously.
 		void (async () => {
@@ -175,29 +176,16 @@ export default class Renderer {
 			document.dispatchEvent(new Event('joplin-noteDidUpdate'));
 		})();
 
-		this.afterRender(settings);
 
-		return html;
-	}
-
-	private afterRender(renderSettings: RendererSettings) {
-		this.output_.afterRender(this.setupOptions_, renderSettings);
+		if (contentContainer) {
+			this.output_.afterRender(this.setupOptions_, settings);
+			return null;
+		} else {
+			return html;
+		}
 	}
 
 	public clearCache(markupLanguage: MarkupLanguage) {
 		this.markupToHtml_.clearCache(markupLanguage);
-	}
-
-	private extraCssElements: Record<string, HTMLStyleElement> = {};
-	public setExtraCss(key: string, css: string) {
-		if (this.extraCssElements.hasOwnProperty(key)) {
-			this.extraCssElements[key].remove();
-		}
-
-		const extraCssElement = document.createElement('style');
-		extraCssElement.appendChild(document.createTextNode(css));
-		document.head.appendChild(extraCssElement);
-
-		this.extraCssElements[key] = extraCssElement;
 	}
 }

@@ -1,25 +1,26 @@
 /** @jest-environment jsdom */
 import Setting from '@joplin/lib/models/Setting';
-import Renderer, { RendererSettings, RendererSetupOptions } from './Renderer';
+import Renderer, { RenderSettings, RendererSetupOptions } from './Renderer';
 import shim from '@joplin/lib/shim';
 import { MarkupLanguage } from '@joplin/renderer';
 import afterFullPageRender from './utils/afterFullPageRender';
+import { RenderingTarget } from '../types';
 
-const defaultRendererSettings: RendererSettings = {
+const defaultRendererSettings: RenderSettings = {
 	theme: JSON.stringify({ cacheKey: 'test' }),
-	onResourceLoaded: ()=>{},
 	highlightedKeywords: [],
 	resources: {},
 	codeTheme: 'atom-one-light.css',
 	noteHash: '',
 	initialScroll: 0,
-	readAssetBlob: async (_path: string)=>new Blob(),
+	readAssetBlob: async (_path: string) => new Blob(),
 
 	createEditPopupSyntax: '',
 	destroyEditPopupSyntax: '',
 
 	pluginSettings: {},
-	requestPluginSetting: ()=>{},
+	requestPluginSetting: () => { },
+	renderingTarget: RenderingTarget.FullPage,
 };
 
 const makeRenderer = (options: Partial<RendererSetupOptions>) => {

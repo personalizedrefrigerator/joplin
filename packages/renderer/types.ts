@@ -67,7 +67,6 @@ export interface RenderOptions {
 
 	resources?: ResourceInfos;
 
-	onResourceLoaded?: ()=> void;
 	editPopupFiletypes?: string[];
 	createEditPopupSyntax?: string;
 	destroyEditPopupSyntax?: string;

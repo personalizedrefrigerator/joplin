@@ -4,6 +4,6 @@ const injectedJs = {
 	markdownEditorBundle: require('../../lib/rnInjectedJs/markdownEditorBundle.bundle'),
 	svgEditorBundle: require('../../lib/rnInjectedJs/svgEditorBundle.bundle'),
 	pluginBackgroundPage: require('../../lib/rnInjectedJs/pluginBackgroundPage.bundle'),
-	noteBodyViewerBundle: require('../../lib/rnInjectedJs/noteBodyViewerBundle.bundle'),
+	rendererBundle: require('../../lib/rnInjectedJs/rendererBundle.bundle'),
 };
 export default injectedJs;

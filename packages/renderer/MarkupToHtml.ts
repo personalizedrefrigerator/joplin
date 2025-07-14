@@ -13,6 +13,10 @@ export enum MarkupLanguage {
 	Any = 3,
 }
 
+export interface PluginOptions {
+	[id: string]: { enabled: boolean };
+}
+
 export interface Options {
 	isSafeMode?: boolean;
 	ResourceModel?: OptionsResourceModel;
@@ -20,8 +24,7 @@ export interface Options {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	extraRendererRules?: any[];
 	resourceBaseUrl?: string;
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	pluginOptions?: any; // Not sure if needed
+	pluginOptions?: PluginOptions; // Not sure if needed
 	tempDir?: string; // Not sure if needed
 	fsDriver?: FsDriver; // Not sure if needed
 }

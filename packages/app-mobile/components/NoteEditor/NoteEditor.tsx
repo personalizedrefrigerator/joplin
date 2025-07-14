@@ -427,7 +427,7 @@ function NoteEditor(props: Props, ref: any) {
 		};
 		
 		try {
-			${editorWebViewSetup.injectedJavaScript}
+			${editorWebViewSetup.pageSetup.js}
 		} catch (e) {
 			console.error('Setup error: ', e);
 			window.ReactNativeWebView.postMessage("error:" + e.message + ": " + JSON.stringify(e))

@@ -1,4 +1,4 @@
-import { RefObject, useMemo, useRef } from 'react';
+import { RefObject, useEffect, useMemo, useRef } from 'react';
 import shim from '@joplin/lib/shim';
 import Setting from '@joplin/lib/models/Setting';
 import { Platform } from 'react-native';
@@ -6,27 +6,30 @@ import { SetUpResult } from '../types';
 import { themeStyle } from '../../components/global-style';
 import Logger from '@joplin/utils/Logger';
 import { WebViewControl } from '../../components/ExtendedWebView/types';
-import { MainProcessApi, OnScrollCallback, RendererProcessApi, RendererWebViewOptions } from './types';
+import { MainProcessApi, OnScrollCallback, RendererControl, RendererProcessApi, RendererWebViewOptions } from './types';
 import PluginService from '@joplin/lib/services/plugins/PluginService';
 import RNToWebViewMessenger from '../../utils/ipc/RNToWebViewMessenger';
 import useEditPopup from './utils/useEditPopup';
 import { PluginStates } from '@joplin/lib/services/plugins/reducer';
+import { RenderSettings } from './contentScript/Renderer';
+import resolvePathWithinDir from '@joplin/lib/utils/resolvePathWithinDir';
+import Resource from '@joplin/lib/models/Resource';
+import { ResourceInfos } from '@joplin/renderer/types';
+import useContentScripts from './utils/useContentScripts';
 
 const logger = Logger.create('renderer/useWebViewSetup');
 
 interface Props {
 	webviewRef: RefObject<WebViewControl>;
-	onScroll: OnScrollCallback;
+	onBodyScroll: OnScrollCallback|null;
 	onPostMessage: (message: string)=> void;
 	pluginStates: PluginStates;
 
 	themeId: number;
-	tempDir: string;
+	tempDirPath: string;
 }
 
-const useSource = (tempDirPath: string, themeId: number) => {
-	const { editPopupCss } = useEditPopup(themeId);
-
+const useSource = ({ tempDirPath }: Props) => {
 	const injectedJs = useMemo(() => {
 		const subValues = Setting.subValues('markdown.plugin', Setting.toPlainObject());
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
@@ -35,7 +38,7 @@ const useSource = (tempDirPath: string, themeId: number) => {
 			pluginOptions[n] = { enabled: subValues[n] };
 		}
 
-		const rendererWebViewOptions: RendererWebViewOptions = {
+		const rendererWebViewStaticOptions: RendererWebViewOptions = {
 			settings: {
 				safeMode: Setting.value('isSafeMode'),
 				tempDir: tempDirPath,
@@ -55,45 +58,12 @@ const useSource = (tempDirPath: string, themeId: number) => {
 				${shim.injectedJs('webviewLib')}
 				${shim.injectedJs('rendererBundle')}
 
-				rendererBundle.initializeForFullPageRendering(${JSON.stringify(rendererWebViewOptions)});
+				rendererBundle.initialize(${JSON.stringify(rendererWebViewStaticOptions)});
 			}
 		`;
 	}, [tempDirPath]);
 
-	const [paddingLeft, paddingRight] = useMemo(() => {
-		const theme = themeStyle(themeId);
-		return [theme.marginLeft, theme.marginRight];
-	}, [themeId]);
-
-	const css = useMemo(() => {
-		// iOS doesn't automatically adjust the WebView's font size to match users'
-		// accessibility settings. To do this, we need to tell it to match the system font.
-		// See https://github.com/ionic-team/capacitor/issues/2748#issuecomment-612923135
-		const iOSSpecificCss = `
-			@media screen {
-				:root body {
-					font: -apple-system-body;
-				}
-			}
-		`;
-		const defaultCss = `
-			code {
-				white-space: pre-wrap;
-				overflow-x: hidden;
-			}
-
-			body {
-				padding-left: ${Number(paddingLeft)}px;
-				padding-right: ${Number(paddingRight)}px;
-			}
-
-			${editPopupCss}
-		`;
-
-		return [defaultCss, iOSSpecificCss].join('\n\n');
-	}, [paddingLeft, paddingRight, editPopupCss]);
-
-	return { css, injectedJs };
+	return { css: '', injectedJs };
 };
 
 const onPostPluginMessage = async (contentScriptId: string, message: unknown) => {
@@ -110,8 +80,8 @@ const onPostPluginMessage = async (contentScriptId: string, message: unknown) =>
 };
 
 const useMessenger = (props: Props) => {
-	const onScrollRef = useRef(props.onScroll);
-	onScrollRef.current = props.onScroll;
+	const onScrollRef = useRef(props.onBodyScroll);
+	onScrollRef.current = props.onBodyScroll;
 
 	const onPostMessageRef = useRef(props.onPostMessage);
 	onPostMessageRef.current = props.onPostMessage;
@@ -124,12 +94,12 @@ const useMessenger = (props: Props) => {
 			onPostPluginMessage,
 			fsDriver: {
 				writeFile: async (path: string, content: string, encoding?: string) => {
-					if (!await fsDriver.exists(props.tempDir)) {
-						await fsDriver.mkdir(props.tempDir);
+					if (!await fsDriver.exists(props.tempDirPath)) {
+						await fsDriver.mkdir(props.tempDirPath);
 					}
 					// To avoid giving the WebView access to the entire main tempDir,
 					// we use props.tempDir (which should be different).
-					path = fsDriver.resolveRelativePathWithinDir(props.tempDir, path);
+					path = fsDriver.resolveRelativePathWithinDir(props.tempDirPath, path);
 					return await fsDriver.writeFile(path, content, encoding);
 				},
 				exists: fsDriver.exists,
@@ -139,25 +109,126 @@ const useMessenger = (props: Props) => {
 		return new RNToWebViewMessenger<MainProcessApi, RendererProcessApi>(
 			'renderer', props.webviewRef, localApi,
 		);
-	}, [props.webviewRef, props.tempDir]);
+	}, [props.webviewRef, props.tempDirPath]);
 
 	return messenger;
 };
 
-const useWebViewSetup = (props: Props): SetUpResult<RendererProcessApi> => {
-	const { css, injectedJs } = useSource(props.tempDir, props.themeId);
+const useWebViewSetup = (props: Props): SetUpResult<RendererControl> => {
+	const { css, injectedJs } = useSource(props);
+	const { editPopupCss, createEditPopupSyntax, destroyEditPopupSyntax } = useEditPopup(props.themeId);
+
 	const messenger = useMessenger(props);
+	const pluginSettingKeysRef = useRef(new Set<string>());
+
+	const contentScripts = useContentScripts(props.pluginStates);
+	useEffect(() => {
+		void messenger.remoteApi.renderer.setExtraContentScriptsAndRerender(contentScripts);
+	}, [messenger, contentScripts]);
+
+	const rendererControl = useMemo((): RendererControl => {
+		const renderer = messenger.remoteApi.renderer;
+
+		const transferResources = async (resources: ResourceInfos) => {
+			// On web, resources are virtual files and thus need to be transferred to the WebView.
+			if (shim.mobilePlatform() === 'web') {
+				for (const [resourceId, resource] of Object.entries(resources)) {
+					try {
+						await renderer.setResourceFile(
+							resourceId,
+							await shim.fsDriver().fileAtPath(Resource.fullPath(resource.item)),
+						);
+					} catch (error) {
+						if (error.code !== 'ENOENT') {
+							throw error;
+						}
+
+						// This can happen if a resource hasn't been downloaded yet
+						logger.warn('Error: Resource file not found (ENOENT)', Resource.fullPath(resource.item), 'for ID', resource.item.id);
+					}
+				}
+			}
+		};
+
+		return {
+			rerender: async (markup, options, cancelEvent) => {
+				const theme = themeStyle(options.themeId);
+
+				const loadPluginSettings = () => {
+					const output: Record<string, unknown> = Object.create(null);
+					for (const key of pluginSettingKeysRef.current) {
+						output[key] = Setting.value(`plugin-${key}`);
+					}
+					return output;
+				};
+
+				let settingsChanged = false;
+				const settings: RenderSettings = {
+					...options,
+					codeTheme: theme.codeThemeCss,
+					// We .stringify the theme to avoid a JSON serialization error involving
+					// the color package.
+					theme: JSON.stringify({
+						...theme,
+						...options.themeOverrides,
+					}),
+					createEditPopupSyntax,
+					destroyEditPopupSyntax,
+					pluginSettings: loadPluginSettings(),
+					requestPluginSetting: (pluginId: string, settingKey: string) => {
+						const key = `${pluginId}.${settingKey}`;
+						if (!pluginSettingKeysRef.current.has(key)) {
+							pluginSettingKeysRef.current.add(key);
+							settingsChanged = true;
+						}
+					},
+					readAssetBlob: (assetPath: string): Promise<Blob> => {
+						// Built-in assets are in resourceDir, external plugin assets are in cacheDir.
+						const assetsDirs = [Setting.value('resourceDir'), Setting.value('cacheDir')];
+
+						let resolvedPath = null;
+						for (const assetDir of assetsDirs) {
+							resolvedPath ??= resolvePathWithinDir(assetDir, assetPath);
+							if (resolvedPath) break;
+						}
+
+						if (!resolvedPath) {
+							throw new Error(`Failed to load asset at ${assetPath} -- not in any of the allowed asset directories: ${assetsDirs.join(',')}.`);
+						}
+						return shim.fsDriver().fileAtPath(resolvedPath);
+					},
+				};
+
+				await transferResources(options.resources);
+				if (cancelEvent?.cancelled) return null;
+
+				const output = await renderer.rerender(markup, settings);
+				if (cancelEvent?.cancelled) return null;
+
+				if (settingsChanged) {
+					return await renderer.rerender(markup, settings);
+				}
+				return output;
+			},
+			clearCache: async markupLanguage => {
+				await renderer.clearCache(markupLanguage);
+			},
+		};
+	}, [createEditPopupSyntax, destroyEditPopupSyntax, messenger]);
 
 	return useMemo(() => {
 		return {
-			api: messenger.remoteApi,
-			pageSetup: { css, js: injectedJs },
+			api: rendererControl,
+			pageSetup: {
+				css: `${css} ${editPopupCss}`,
+				js: injectedJs,
+			},
 			webViewEventHandlers: {
 				onLoadEnd: messenger.onWebViewLoaded,
 				onMessage: messenger.onWebViewMessage,
 			},
 		};
-	}, [css, injectedJs, messenger]);
+	}, [css, injectedJs, messenger, editPopupCss, rendererControl]);
 };
 
 export default useWebViewSetup;

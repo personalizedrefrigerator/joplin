@@ -1,4 +1,4 @@
-import { RendererSettings, RendererSetupOptions } from '../Renderer';
+import { RenderSettings, RendererSetupOptions } from '../Renderer';
 import { WebViewLib } from '../types';
 
 interface ExtendedWindow extends Window {
@@ -9,7 +9,7 @@ declare const window: ExtendedWindow;
 
 const afterFullPageRender = (
 	setupOptions: RendererSetupOptions,
-	renderSettings: RendererSettings,
+	renderSettings: RenderSettings,
 ) => {
 	const readyStateCheckInterval = setInterval(() => {
 		if (document.readyState === 'complete') {

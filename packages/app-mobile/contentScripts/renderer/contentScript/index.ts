@@ -20,7 +20,7 @@ interface ExtendedWindow extends Window {
 declare const window: ExtendedWindow;
 declare const webviewLib: WebViewLib;
 
-export const initializeForPartialPageRendering = (output: RendererOutput, options: RendererWebViewOptions) => {
+const initializeMessenger = (output: RendererOutput, options: RendererWebViewOptions) => {
 	const messenger = new WebViewToRNMessenger<RendererProcessApi, MainProcessApi>(
 		'renderer',
 		null,
@@ -57,8 +57,9 @@ export const initializeForPartialPageRendering = (output: RendererOutput, option
 	return { messenger };
 };
 
-export const initializeForFullPageRendering = (options: RendererWebViewOptions) => {
-	const { messenger } = initializeForPartialPageRendering({
+// eslint-disable-next-line import/prefer-default-export -- This is a bundle entrypoint
+export const initialize = (options: RendererWebViewOptions) => {
+	const { messenger } = initializeMessenger({
 		afterRender: afterFullPageRender,
 		getOutputElement: () => {
 			return document.getElementById('joplin-container-content');

@@ -5,13 +5,13 @@ interface WebViewEventHandlers {
 	onMessage: (event: OnMessageEvent)=> void;
 }
 
-interface PageSetupCode {
+export interface PageSetupSources {
 	css: string;
 	js: string;
 }
 
 export interface SetUpResult<Api> {
 	api: Api;
-	pageSetup: PageSetupCode;
+	pageSetup: PageSetupSources;
 	webViewEventHandlers: WebViewEventHandlers;
 }

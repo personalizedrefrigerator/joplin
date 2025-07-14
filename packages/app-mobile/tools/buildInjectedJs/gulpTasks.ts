@@ -20,8 +20,8 @@ const pluginBackgroundPageBundle = new BundledFile(
 );
 
 const noteViewerBundle = new BundledFile(
-	'noteBodyViewerBundle',
-	`${mobileDir}/components/NoteBodyViewer/bundledJs/noteBodyViewerBundle.ts`,
+	'rendererBundle',
+	`${mobileDir}/contentScripts/renderer/contentScript/index.ts`,
 );
 
 const gulpTasks = {
