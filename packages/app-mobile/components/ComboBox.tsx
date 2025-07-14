@@ -20,8 +20,8 @@ export interface Option {
 	accessibilityHint: string|undefined;
 	onPress?: ()=> void;
 
-	// To work around an accessibility focus bug on Android, it's necessary to know whether
-	// the item will be removed by the event handler:
+	// True if pressing this option removes it. Used for working around
+	// focus issues.
 	willRemoveOnPress: boolean;
 }
 
@@ -37,9 +37,12 @@ interface BaseProps {
 	searchInputProps?: TextInputProps;
 }
 
+type OnAddItem = (content: string)=> void;
+type OnCanAddItem = (item: string)=> boolean;
+
 type Props = BaseProps & ({
-	onAddItem: ((content: string)=> void)|null;
-	canAddItem: (item: string)=> boolean;
+	onAddItem: OnAddItem|null;
+	canAddItem: OnCanAddItem;
 }|{
 	onAddItem?: undefined;
 	canAddItem?: undefined;
@@ -47,15 +50,18 @@ type Props = BaseProps & ({
 
 const optionKeyExtractor = (option: Option) => option.title;
 
-interface SearchResultsOptions {
+interface UseSearchResultsOptions {
 	search: string;
 	setSearch: (search: string)=> void;
+
 	options: Option[];
-	onAddItem: null|((content: string)=> void);
-	canAddItem: (content: string)=> boolean;
+	onAddItem: null|OnAddItem;
+	canAddItem: OnCanAddItem;
 }
 
-const useSearchResults = ({ search, setSearch, options, onAddItem, canAddItem }: SearchResultsOptions) => {
+const useSearchResults = ({
+	search, setSearch, options, onAddItem, canAddItem,
+}: UseSearchResultsOptions) => {
 	const results = useMemo(() => {
 		return options
 			.filter(option => option.title.startsWith(search))
@@ -76,7 +82,7 @@ const useSearchResults = ({ search, setSearch, options, onAddItem, canAddItem }:
 	);
 
 	// Use a ref to prevent unnecessary rerenders if onAddItem changes
-	const addCurrentSearch = useRef<()=> void>(()=>{});
+	const addCurrentSearch = useRef(()=>{});
 	addCurrentSearch.current = () => {
 		onAddItem(search);
 		AccessibilityInfo.announceForAccessibility(_('Added new: %s', search));
@@ -101,6 +107,13 @@ const useSearchResults = ({ search, setSearch, options, onAddItem, canAddItem }:
 	}, [canAdd, results]);
 };
 
+interface SelectedIndexControl {
+	onNextResult: ()=> void;
+	onPreviousResult: ()=> void;
+	onFirstResult: ()=> void;
+	onLastResult: ()=> void;
+}
+
 const useSelectedIndex = (search: string, searchResults: Option[]) => {
 	const [selectedIndex, setSelectedIndex] = useState(0);
 
@@ -113,27 +126,27 @@ const useSelectedIndex = (search: string, searchResults: Option[]) => {
 		}
 	}, [searchResults, search]);
 
-	const onNextResult = useCallback(() => {
-		setSelectedIndex(index => {
-			return Math.min(index + 1, searchResults.length - 1);
-		});
-	}, [searchResults]);
+	const resultCount = searchResults.length;
+	const selectedIndexControl: SelectedIndexControl = useMemo(() => ({
+		onNextResult: () => {
+			setSelectedIndex(index => {
+				return Math.min(index + 1, resultCount - 1);
+			});
+		},
+		onPreviousResult: () => {
+			setSelectedIndex(index => {
+				return Math.max(index - 1, 0);
+			});
+		},
+		onFirstResult: () => {
+			setSelectedIndex(0);
+		},
+		onLastResult: () => {
+			setSelectedIndex(resultCount - 1);
+		},
+	}), [resultCount]);
 
-	const onPreviousResult = useCallback(() => {
-		setSelectedIndex(index => {
-			return Math.max(index - 1, 0);
-		});
-	}, []);
-
-	const onFirstResult = useCallback(() => {
-		setSelectedIndex(0);
-	}, []);
-
-	const onLastResult = useCallback(() => {
-		setSelectedIndex(searchResults.length - 1);
-	}, [searchResults]);
-
-	return { selectedIndex, onNextResult, onPreviousResult, onFirstResult, onLastResult };
+	return { selectedIndex, selectedIndexControl };
 };
 
 const useStyles = (themeId: number, showSearchResults: boolean) => {
@@ -361,6 +374,100 @@ const useAnnounceSelection = ({ selectedResultTitle, resultCount, enabled, searc
 	}, [announcement]);
 };
 
+const useSelectionAutoScroll = (
+	listRef: RefObject<NestableFlatListControl|null>, results: Option[], selectedIndex: number,
+) => {
+	const resultsRef = useRef(results);
+	resultsRef.current = results;
+	useEffect(() => {
+		if (resultsRef.current?.length && selectedIndex >= 0) {
+			listRef.current?.scrollToIndex({ index: selectedIndex, animated: false, viewPosition: 0.4 });
+		}
+	}, [selectedIndex]);
+};
+
+interface UseInputEventHandlersProps {
+	selectedIndexControl: SelectedIndexControl;
+	onItemSelected: OnItemSelected;
+
+	selectedIndex: number;
+	selectedResult: Option|null;
+	alwaysExpand: boolean;
+	showSearchResults: boolean;
+	setShowSearchResults: (show: boolean)=> void;
+	setSearch: (search: string)=> void;
+}
+
+const useInputEventHandlers = ({
+	selectedIndexControl,
+	onItemSelected: propsOnItemSelected, setShowSearchResults, alwaysExpand,
+	setSearch, selectedResult, selectedIndex, showSearchResults,
+}: UseInputEventHandlersProps) => {
+
+	const propsOnItemSelectedRef = useRef(propsOnItemSelected);
+	propsOnItemSelectedRef.current = propsOnItemSelected;
+
+	const onItemSelected = useCallback((item: Option, index: number) => {
+		let result;
+		if (item.onPress) {
+			result = item.onPress();
+		} else {
+			result = propsOnItemSelectedRef.current(item, index);
+		}
+
+		if (!alwaysExpand) {
+			setSearch('');
+			setShowSearchResults(false);
+		}
+
+		return result;
+	}, [setShowSearchResults, alwaysExpand]);
+
+	const onSubmit = useCallback(() => {
+		if (selectedResult) {
+			onItemSelected(selectedResult, selectedIndex);
+			setSearch('');
+		}
+	}, [onItemSelected, selectedResult, selectedIndex, setSearch]);
+
+	// For now, onKeyPress only works on web.
+	// See https://github.com/react-native-community/discussions-and-proposals/issues/249
+	type KeyPressEvent = { key: string };
+	const onKeyPress = useCallback((event: NativeSyntheticEvent<KeyPressEvent>) => {
+		const key = event.nativeEvent.key;
+		const isDownArrow = key === 'ArrowDown';
+		const isUpArrow = key === 'ArrowUp';
+		if (!showSearchResults && (isDownArrow || isUpArrow)) {
+			setShowSearchResults(true);
+			if (isUpArrow) {
+				selectedIndexControl.onLastResult();
+			} else {
+				selectedIndexControl.onFirstResult();
+			}
+			event.preventDefault();
+		} else if (key === 'ArrowDown') {
+			selectedIndexControl.onNextResult();
+			event.preventDefault();
+		} else if (key === 'ArrowUp') {
+			selectedIndexControl.onPreviousResult();
+			event.preventDefault();
+		} else if (key === 'Enter') {
+			// This case is necessary on web to prevent the
+			// search input from becoming defocused after
+			// pressing "enter".
+			event.preventDefault();
+			onSubmit();
+			setSearch('');
+		} else if (key === 'Escape' && !alwaysExpand) {
+			setShowSearchResults(false);
+			event.preventDefault();
+		}
+	}, [onSubmit, setSearch, selectedIndexControl, setShowSearchResults, showSearchResults, alwaysExpand]);
+
+	return { onKeyPress, onItemSelected, onSubmit };
+};
+
+
 const ComboBox: React.FC<Props> = ({
 	themeId,
 	items,
@@ -383,17 +490,11 @@ const ComboBox: React.FC<Props> = ({
 		onAddItem,
 		canAddItem,
 	});
-	const { selectedIndex, onNextResult, onPreviousResult, onFirstResult, onLastResult } = useSelectedIndex(search, results);
+	const { selectedIndex, selectedIndexControl } = useSelectedIndex(search, results);
 	const searchInputRef = useRef<TextInput|null>(null);
 	const listRef = useRef<NestableFlatListControl|null>(null);
 
-	const resultsRef = useRef(results);
-	resultsRef.current = results;
-	useEffect(() => {
-		if (resultsRef.current?.length && selectedIndex >= 0) {
-			listRef.current?.scrollToIndex({ index: selectedIndex, animated: false, viewPosition: 0.4 });
-		}
-	}, [selectedIndex]);
+	useSelectionAutoScroll(listRef, results, selectedIndex);
 
 	useAnnounceSelection({
 		// On web, announcements are handled natively based on accessibility roles.
@@ -404,24 +505,17 @@ const ComboBox: React.FC<Props> = ({
 		resultCount: results.length,
 	});
 
-	const propsOnItemSelectedRef = useRef(propsOnItemSelected);
-	propsOnItemSelectedRef.current = propsOnItemSelected;
+	const { onItemSelected, onKeyPress, onSubmit } = useInputEventHandlers({
+		selectedIndexControl,
+		onItemSelected: propsOnItemSelected,
 
-	const onItemSelected = useCallback((item: Option, index: number) => {
-		let result;
-		if (item.onPress) {
-			result = item.onPress();
-		} else {
-			result = propsOnItemSelectedRef.current(item, index);
-		}
-
-		if (!alwaysExpand) {
-			setSearch('');
-			setShowSearchResults(false);
-		}
-
-		return result;
-	}, [setShowSearchResults, alwaysExpand]);
+		selectedIndex,
+		selectedResult: results[selectedIndex],
+		alwaysExpand,
+		showSearchResults,
+		setShowSearchResults,
+		setSearch,
+	});
 
 	const baseId = useId();
 	const SearchResultWrapper = useSearchResultContainerComponent({
@@ -438,48 +532,6 @@ const ComboBox: React.FC<Props> = ({
 			icon={item.icon ?? ''}
 		/>;
 	}, [selectedIndex, styles]);
-
-	const onSubmit = useCallback(() => {
-		const item = results[selectedIndex];
-		if (item) {
-			onItemSelected(item, selectedIndex);
-			setSearch('');
-		}
-	}, [onItemSelected, results, selectedIndex]);
-
-	// For now, onKeyPress only works on web.
-	// See https://github.com/react-native-community/discussions-and-proposals/issues/249
-	type KeyPressEvent = { key: string };
-	const onKeyPress = useCallback((event: NativeSyntheticEvent<KeyPressEvent>) => {
-		const key = event.nativeEvent.key;
-		const isDownArrow = key === 'ArrowDown';
-		const isUpArrow = key === 'ArrowUp';
-		if (!showSearchResults && (isDownArrow || isUpArrow)) {
-			setShowSearchResults(true);
-			if (isUpArrow) {
-				onLastResult();
-			} else {
-				onFirstResult();
-			}
-			event.preventDefault();
-		} else if (key === 'ArrowDown') {
-			onNextResult();
-			event.preventDefault();
-		} else if (key === 'ArrowUp') {
-			onPreviousResult();
-			event.preventDefault();
-		} else if (key === 'Enter') {
-			// This case is necessary on web to prevent the
-			// search input from becoming defocused after
-			// pressing "enter".
-			event.preventDefault();
-			onSubmit();
-			setSearch('');
-		} else if (key === 'Escape' && !alwaysExpand) {
-			setShowSearchResults(false);
-			event.preventDefault();
-		}
-	}, [onSubmit, onNextResult, setShowSearchResults, onPreviousResult, onFirstResult, onLastResult, showSearchResults, alwaysExpand]);
 
 	const webProps = {
 		onKeyDown: onKeyPress,

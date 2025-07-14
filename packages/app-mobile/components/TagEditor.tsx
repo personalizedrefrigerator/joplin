@@ -143,7 +143,6 @@ interface TagsBoxProps {
 const TagsBox: React.FC<TagsBoxProps> = props => {
 	const onRemoveTag = useCallback((tag: string) => {
 		props.onRemoveTag(tag);
-		// Focus something to prevent focus jumps?
 	}, [props.onRemoveTag]);
 
 	const renderContent = () => {
@@ -164,7 +163,6 @@ const TagsBox: React.FC<TagsBoxProps> = props => {
 				style={props.styles.noTagsLabel}
 			>{_('No tags')}</Text>;
 		}
-
 	};
 
 	return <View style={props.styles.tagBoxRoot}>
@@ -223,7 +221,8 @@ const TagEditor: React.FC<Props> = props => {
 		const targetTag = props.tags[previousTagIndex + 1] ?? props.tags[previousTagIndex - 1];
 		setAutofocusTag(targetTag);
 
-		// Workaround: Delay auto-focusing the next tag. On iOS, a brief delay is required.
+		// Workaround: Delay auto-focusing the next tag. On iOS, a brief delay is required to
+		// prevent focus from occasionally jumping away from the tag box.
 		await msleep(100);
 		AccessibilityInfo.announceForAccessibility(_('Removed tag: %s', title));
 		props.onTagsChange(props.tags.filter(tag => tag !== title));
