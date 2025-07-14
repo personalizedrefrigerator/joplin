@@ -383,7 +383,7 @@ const useSelectionAutoScroll = (
 		if (resultsRef.current?.length && selectedIndex >= 0) {
 			listRef.current?.scrollToIndex({ index: selectedIndex, animated: false, viewPosition: 0.4 });
 		}
-	}, [selectedIndex]);
+	}, [selectedIndex, listRef]);
 };
 
 interface UseInputEventHandlersProps {
@@ -421,7 +421,7 @@ const useInputEventHandlers = ({
 		}
 
 		return result;
-	}, [setShowSearchResults, alwaysExpand]);
+	}, [setShowSearchResults, alwaysExpand, setSearch]);
 
 	const onSubmit = useCallback(() => {
 		if (selectedResult) {
