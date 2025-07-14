@@ -134,7 +134,10 @@ const useWebViewSetup = ({
 	}, [editorMessenger]);
 
 	return useMemo(() => ({
-		injectedJavaScript,
+		pageSetup: {
+			js: injectedJavaScript,
+			css: '',
+		},
 		api,
 		webViewEventHandlers,
 	}), [injectedJavaScript, api, webViewEventHandlers]);

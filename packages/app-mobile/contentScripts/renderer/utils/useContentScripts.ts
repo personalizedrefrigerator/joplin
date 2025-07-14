@@ -4,8 +4,8 @@ import { ContentScriptType } from '@joplin/lib/services/plugins/api/types';
 import { PluginStates } from '@joplin/lib/services/plugins/reducer';
 import shim from '@joplin/lib/shim';
 import { useRef, useState } from 'react';
-import { ExtraContentScriptSource } from '../bundledJs/types';
 import Logger from '@joplin/utils/Logger';
+import { ExtraContentScriptSource } from '../types';
 
 const logger = Logger.create('NoteBodyViewer/hooks/useContentScripts');
 

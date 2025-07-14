@@ -3,6 +3,7 @@ import Setting from '@joplin/lib/models/Setting';
 import Renderer, { RendererSettings, RendererSetupOptions } from './Renderer';
 import shim from '@joplin/lib/shim';
 import { MarkupLanguage } from '@joplin/renderer';
+import afterFullPageRender from './utils/afterFullPageRender';
 
 const defaultRendererSettings: RendererSettings = {
 	theme: JSON.stringify({ cacheKey: 'test' }),
@@ -33,7 +34,10 @@ const makeRenderer = (options: Partial<RendererSetupOptions>) => {
 		fsDriver: shim.fsDriver(),
 		pluginOptions: {},
 	};
-	return new Renderer({ ...options, ...defaultSetupOptions });
+	return new Renderer({
+		getOutputElement: () => document.getElementById('joplin-container-content'),
+		afterRender: afterFullPageRender,
+	}, { ...options, ...defaultSetupOptions });
 };
 
 const getRenderedContent = () => {

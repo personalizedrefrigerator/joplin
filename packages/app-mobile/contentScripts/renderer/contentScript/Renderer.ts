@@ -1,33 +1,20 @@
 import { MarkupLanguage, MarkupToHtml } from '@joplin/renderer';
-import type { MarkupToHtmlConverter, RenderOptions, RenderResultPluginAsset, FsDriver as RendererFsDriver } from '@joplin/renderer/types';
+import type { MarkupToHtmlConverter, RenderOptions, RenderResultPluginAsset, FsDriver as RendererFsDriver, ResourceInfos } from '@joplin/renderer/types';
 import makeResourceModel from './utils/makeResourceModel';
 import addPluginAssets from './utils/addPluginAssets';
-import { ExtraContentScriptSource } from './types';
+import { ExtraContentScriptSource } from '../types';
 import { ExtraContentScript } from '@joplin/lib/services/plugins/utils/loadContentScripts';
+import { RendererWebViewOptions } from '../types';
 
-export interface RendererSetupOptions {
-	settings: {
-		safeMode: boolean;
-		tempDir: string;
-		resourceDir: string;
-		resourceDownloadMode: string;
-	};
-	// True if asset and resource files should be transferred to the WebView before rendering.
-	// This must be true on web, where asset and resource files are virtual and can't be accessed
-	// without transferring.
-	useTransferredFiles: boolean;
-
+export interface RendererSetupOptions extends RendererWebViewOptions {
 	fsDriver: RendererFsDriver;
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	pluginOptions: Record<string, any>;
 }
 
 export interface RendererSettings {
 	theme: string;
 	onResourceLoaded: ()=> void;
 	highlightedKeywords: string[];
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	resources: Record<string, any>;
+	resources: ResourceInfos;
 	codeTheme: string;
 	noteHash: string;
 	initialScroll: number;
@@ -35,10 +22,14 @@ export interface RendererSettings {
 	createEditPopupSyntax: string;
 	destroyEditPopupSyntax: string;
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	pluginSettings: Record<string, any>;
+	pluginSettings: Record<string, unknown>;
 	requestPluginSetting: (pluginId: string, settingKey: string)=> void;
 	readAssetBlob: (assetPath: string)=> Promise<Blob>;
+}
+
+export interface RendererOutput {
+	getOutputElement: ()=> HTMLElement;
+	afterRender: (setupOptions: RendererSetupOptions, renderSettings: RendererSettings)=> void;
 }
 
 export interface MarkupRecord {
@@ -47,35 +38,35 @@ export interface MarkupRecord {
 }
 
 export default class Renderer {
-	private markupToHtml: MarkupToHtmlConverter;
-	private lastSettings: RendererSettings|null = null;
-	private extraContentScripts: ExtraContentScript[] = [];
-	private lastRenderMarkup: MarkupRecord|null = null;
-	private resourcePathOverrides: Record<string, string> = Object.create(null);
+	private markupToHtml_: MarkupToHtmlConverter;
+	private lastSettings_: RendererSettings|null = null;
+	private extraContentScripts_: ExtraContentScript[] = [];
+	private lastRenderMarkup_: MarkupRecord|null = null;
+	private resourcePathOverrides_: Record<string, string> = Object.create(null);
 
-	public constructor(private setupOptions: RendererSetupOptions) {
-		this.recreateMarkupToHtml();
+	public constructor(private output_: RendererOutput, private setupOptions_: RendererSetupOptions) {
+		this.recreateMarkupToHtml_();
 	}
 
-	private recreateMarkupToHtml() {
-		this.markupToHtml = new MarkupToHtml({
-			extraRendererRules: this.extraContentScripts,
-			fsDriver: this.setupOptions.fsDriver,
-			isSafeMode: this.setupOptions.settings.safeMode,
-			tempDir: this.setupOptions.settings.tempDir,
-			ResourceModel: makeResourceModel(this.setupOptions.settings.resourceDir),
-			pluginOptions: this.setupOptions.pluginOptions,
+	private recreateMarkupToHtml_() {
+		this.markupToHtml_ = new MarkupToHtml({
+			extraRendererRules: this.extraContentScripts_,
+			fsDriver: this.setupOptions_.fsDriver,
+			isSafeMode: this.setupOptions_.settings.safeMode,
+			tempDir: this.setupOptions_.settings.tempDir,
+			ResourceModel: makeResourceModel(this.setupOptions_.settings.resourceDir),
+			pluginOptions: this.setupOptions_.pluginOptions,
 		});
 	}
 
 	// Intended for web, where resources can't be linked to normally.
 	public async setResourceFile(id: string, file: Blob) {
-		this.resourcePathOverrides[id] = URL.createObjectURL(file);
+		this.resourcePathOverrides_[id] = URL.createObjectURL(file);
 	}
 
 	public getResourcePathOverride(resourceId: string) {
-		if (Object.prototype.hasOwnProperty.call(this.resourcePathOverrides, resourceId)) {
-			return this.resourcePathOverrides[resourceId];
+		if (Object.prototype.hasOwnProperty.call(this.resourcePathOverrides_, resourceId)) {
+			return this.resourcePathOverrides_[resourceId];
 		}
 		return null;
 	}
@@ -83,7 +74,7 @@ export default class Renderer {
 	public async setExtraContentScriptsAndRerender(
 		extraContentScripts: ExtraContentScriptSource[],
 	) {
-		this.extraContentScripts = extraContentScripts.map(script => {
+		this.extraContentScripts_ = extraContentScripts.map(script => {
 			const scriptModule = ((0, eval)(script.js))({
 				pluginId: script.pluginId,
 				contentScriptId: script.id,
@@ -101,19 +92,19 @@ export default class Renderer {
 				module: scriptModule,
 			};
 		});
-		this.recreateMarkupToHtml();
+		this.recreateMarkupToHtml_();
 
 		// If possible, rerenders with the last rendering settings. The goal
 		// of this is to reduce the number of IPC calls between the viewer and
 		// React Native. We want the first render to be as fast as possible.
-		if (this.lastRenderMarkup) {
-			await this.rerender(this.lastRenderMarkup, this.lastSettings);
+		if (this.lastRenderMarkup_) {
+			await this.rerender(this.lastRenderMarkup_, this.lastSettings_);
 		}
 	}
 
 	public async rerender(markup: MarkupRecord, settings: RendererSettings) {
-		this.lastSettings = settings;
-		this.lastRenderMarkup = markup;
+		this.lastSettings_ = settings;
+		this.lastRenderMarkup_ = markup;
 
 		const options: RenderOptions = {
 			onResourceLoaded: settings.onResourceLoaded,
@@ -127,7 +118,7 @@ export default class Renderer {
 			editPopupFiletypes: ['image/svg+xml'],
 			createEditPopupSyntax: settings.createEditPopupSyntax,
 			destroyEditPopupSyntax: settings.destroyEditPopupSyntax,
-			itemIdToUrl: this.setupOptions.useTransferredFiles ? (id: string) => this.getResourcePathOverride(id) : undefined,
+			itemIdToUrl: this.setupOptions_.useTransferredFiles ? (id: string) => this.getResourcePathOverride(id) : undefined,
 
 			settingValue: (pluginId: string, settingName: string) => {
 				const settingKey = `${pluginId}.${settingName}`;
@@ -143,14 +134,14 @@ export default class Renderer {
 			whiteBackgroundNoteRendering: markup.language === MarkupLanguage.Html,
 		};
 
-		this.markupToHtml.clearCache(markup.language);
+		this.markupToHtml_.clearCache(markup.language);
 
-		const contentContainer = document.getElementById('joplin-container-content');
+		const contentContainer = this.output_.getOutputElement();
 
 		let html = '';
 		let pluginAssets: RenderResultPluginAsset[] = [];
 		try {
-			const result = await this.markupToHtml.render(
+			const result = await this.markupToHtml_.render(
 				markup.language,
 				markup.markup,
 				JSON.parse(settings.theme),
@@ -162,7 +153,7 @@ export default class Renderer {
 			if (!contentContainer) {
 				alert(`Renderer error: ${error}`);
 			} else {
-				contentContainer.innerText = `
+				contentContainer.textContent = `
 					Error: ${error}
 					
 					${error.stack ?? ''}
@@ -176,7 +167,7 @@ export default class Renderer {
 		// Adding plugin assets can be slow -- run it asynchronously.
 		void (async () => {
 			await addPluginAssets(pluginAssets, {
-				inlineAssets: this.setupOptions.useTransferredFiles,
+				inlineAssets: this.setupOptions_.useTransferredFiles,
 				readAssetBlob: settings.readAssetBlob,
 			});
 
@@ -185,43 +176,16 @@ export default class Renderer {
 		})();
 
 		this.afterRender(settings);
+
+		return html;
 	}
 
 	private afterRender(renderSettings: RendererSettings) {
-		const readyStateCheckInterval = setInterval(() => {
-			if (document.readyState === 'complete') {
-				clearInterval(readyStateCheckInterval);
-				if (this.setupOptions.settings.resourceDownloadMode === 'manual') {
-					// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-					(window as any).webviewLib.setupResourceManualDownload();
-				}
-
-				const hash = renderSettings.noteHash;
-				const initialScroll = renderSettings.initialScroll;
-
-				// Don't scroll to a hash if we're given initial scroll (initial scroll
-				// overrides scrolling to a hash).
-				if ((initialScroll ?? null) !== null) {
-					const scrollingElement = document.scrollingElement ?? document.documentElement;
-					scrollingElement.scrollTop = initialScroll;
-				} else if (hash) {
-					// Gives it a bit of time before scrolling to the anchor
-					// so that images are loaded.
-					setTimeout(() => {
-						const e = document.getElementById(hash);
-						if (!e) {
-							console.warn('Cannot find hash', hash);
-							return;
-						}
-						e.scrollIntoView();
-					}, 500);
-				}
-			}
-		}, 10);
+		this.output_.afterRender(this.setupOptions_, renderSettings);
 	}
 
 	public clearCache(markupLanguage: MarkupLanguage) {
-		this.markupToHtml.clearCache(markupLanguage);
+		this.markupToHtml_.clearCache(markupLanguage);
 	}
 
 	private extraCssElements: Record<string, HTMLStyleElement> = {};
