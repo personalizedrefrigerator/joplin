@@ -38,7 +38,7 @@ const styles = StyleSheet.create({
 	shortcutButton: {
 		flexGrow: 0,
 		flexShrink: 1,
-		width: 82,
+		width: 88,
 	},
 	mainButton: {
 		flexShrink: 1,
