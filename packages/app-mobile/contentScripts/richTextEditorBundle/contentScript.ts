@@ -2,10 +2,27 @@ import { createEditor } from '@joplin/editor/ProseMirror';
 import { EditorProcessApi, EditorProps, MainProcessApi } from './types';
 import WebViewToRNMessenger from '../../utils/ipc/WebViewToRNMessenger';
 import { MarkupLanguage } from '@joplin/renderer';
+import '@joplin/editor/ProseMirror/styles';
+
 const TurndownService = require('@joplin/turndown');
 const { gfm: turndownPluginGfm } = require('@joplin/turndown-plugin-gfm');
 
-const htmlToMarkdown = (html: string) => {
+const postprocessHtml = (html: HTMLElement) => {
+	html = html.cloneNode(true) as HTMLElement;
+
+	// Fix resource URLs
+	const resources = html.querySelectorAll<HTMLImageElement>('img[data-resource-id]');
+	for (const resource of resources) {
+		const resourceId = resource.getAttribute('data-resource-id');
+		resource.src = `:/${resourceId}`;
+	}
+
+	return html;
+};
+
+const htmlToMarkdown = (html: HTMLElement) => {
+	html = postprocessHtml(html);
+
 	const turndownService = new TurndownService();
 	turndownService.use(turndownPluginGfm);
 	return turndownService.turndown(html);

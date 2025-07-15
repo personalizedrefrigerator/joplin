@@ -13,7 +13,7 @@ import { EditorEventType } from '../events';
 import { RenderResult } from '../../renderer/types';
 
 type MarkupToHtml = (markup: string)=> Promise<RenderResult>;
-type HtmlToMarkup = (html: string)=> string;
+type HtmlToMarkup = (html: HTMLElement)=> string;
 
 const createEditor = async (
 	parentElement: HTMLElement,
@@ -23,7 +23,6 @@ const createEditor = async (
 ): Promise<EditorControl> => {
 	const proseMirrorParser = ProseMirrorDomParser.fromSchema(schema);
 	const proseMirrorSerializer = ProseMirrorDomSerializer.fromSchema(schema);
-	const xmlSerializer = new XMLSerializer();
 
 	const createInitialState = async (markup: string) => {
 		const renderResult = (await renderToHtml(markup)).html;
@@ -45,10 +44,12 @@ const createEditor = async (
 		dispatchTransaction: transaction => {
 			if (transaction.docChanged) {
 				const finalDoc = proseMirrorSerializer.serializeFragment(transaction.doc.content);
-				const html = xmlSerializer.serializeToString(finalDoc);
+				const element = document.createElement('div');
+				element.appendChild(finalDoc);
+
 				props.onEvent({
 					kind: EditorEventType.Change,
-					value: renderToMarkup(html),
+					value: renderToMarkup(element),
 				});
 			}
 

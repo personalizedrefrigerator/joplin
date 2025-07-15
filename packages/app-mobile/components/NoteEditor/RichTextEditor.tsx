@@ -39,6 +39,7 @@ function useCss(themeId: number): string {
 				padding-top: 10px;
 
 				font-size: 13pt;
+				font-family: ${JSON.stringify(theme.fontFamily)}, sans-serif;
 			}
 
 			* {

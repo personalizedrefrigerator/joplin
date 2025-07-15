@@ -1,9 +1,21 @@
 import { Command } from 'prosemirror-state';
 import { EditorCommandType } from '../types';
 import { redo, undo } from 'prosemirror-history';
-import { selectAll, toggleMark } from 'prosemirror-commands';
+import { selectAll, setBlockType, toggleMark } from 'prosemirror-commands';
 import { focus } from '@joplin/lib/utils/focusHandler';
 import schema from './schema';
+
+const toggleHeading = (level: number): Command => {
+	const enableCommand = setBlockType(schema.nodes.heading, { level });
+	const resetCommand = setBlockType(schema.nodes.paragraph);
+
+	return (state, dispatch, view) => {
+		if (enableCommand(state, dispatch, view)) {
+			return true;
+		}
+		return resetCommand(state, dispatch, view);
+	};
+};
 
 const commands: Record<EditorCommandType, Command|null> = {
 	[EditorCommandType.Undo]: undo,
@@ -16,8 +28,8 @@ const commands: Record<EditorCommandType, Command|null> = {
 		return true;
 	},
 	[EditorCommandType.ToggleBolded]: toggleMark(schema.marks.strong),
-	[EditorCommandType.ToggleItalicized]: null,
-	[EditorCommandType.ToggleCode]: null,
+	[EditorCommandType.ToggleItalicized]: toggleMark(schema.marks.emphasis),
+	[EditorCommandType.ToggleCode]: toggleMark(schema.marks.code),
 	[EditorCommandType.ToggleMath]: null,
 	[EditorCommandType.ToggleComment]: null,
 	[EditorCommandType.DuplicateLine]: null,
@@ -25,12 +37,12 @@ const commands: Record<EditorCommandType, Command|null> = {
 	[EditorCommandType.ToggleNumberedList]: null,
 	[EditorCommandType.ToggleBulletedList]: null,
 	[EditorCommandType.ToggleCheckList]: null,
-	[EditorCommandType.ToggleHeading]: null,
-	[EditorCommandType.ToggleHeading1]: null,
-	[EditorCommandType.ToggleHeading2]: null,
-	[EditorCommandType.ToggleHeading3]: null,
-	[EditorCommandType.ToggleHeading4]: null,
-	[EditorCommandType.ToggleHeading5]: null,
+	[EditorCommandType.ToggleHeading]: toggleHeading(2),
+	[EditorCommandType.ToggleHeading1]: toggleHeading(1),
+	[EditorCommandType.ToggleHeading2]: toggleHeading(2),
+	[EditorCommandType.ToggleHeading3]: toggleHeading(3),
+	[EditorCommandType.ToggleHeading4]: toggleHeading(4),
+	[EditorCommandType.ToggleHeading5]: toggleHeading(5),
 	[EditorCommandType.InsertHorizontalRule]: null,
 	[EditorCommandType.ToggleSearch]: null,
 	[EditorCommandType.ShowSearch]: null,
