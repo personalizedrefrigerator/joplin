@@ -41,6 +41,10 @@ export const initialize = async ({
 		throw new Error('Parent node is not an element.');
 	}
 
+	const assetContainer = document.createElement('div');
+	assetContainer.id = 'joplin-container-pluginAssetsContainer';
+	document.body.appendChild(assetContainer);
+
 	const editor = await createEditor(parentElement, {
 		settings,
 		initialText,
@@ -55,10 +59,13 @@ export const initialize = async ({
 		onEvent: (event) => {
 			void messenger.remoteApi.onEditorEvent(event);
 		},
-	}, (markup) => {
-		return messenger.remoteApi.onRender({
+	}, async (markup) => {
+		return await messenger.remoteApi.onRender({
 			markup,
 			language: MarkupLanguage.Markdown,
+		}, {
+			pluginAssetContainerSelector: `#${assetContainer.id}`,
+			splitted: true,
 		});
 	}, htmlToMarkdown);
 

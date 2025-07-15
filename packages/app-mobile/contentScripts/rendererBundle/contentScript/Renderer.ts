@@ -1,5 +1,5 @@
 import { MarkupLanguage, MarkupToHtml } from '@joplin/renderer';
-import type { MarkupToHtmlConverter, RenderOptions, RenderResultPluginAsset, FsDriver as RendererFsDriver, ResourceInfos } from '@joplin/renderer/types';
+import type { MarkupToHtmlConverter, RenderOptions, FsDriver as RendererFsDriver, ResourceInfos } from '@joplin/renderer/types';
 import makeResourceModel from './utils/makeResourceModel';
 import addPluginAssets from './utils/addPluginAssets';
 import { ExtraContentScriptSource, ForwardedJoplinSettings, MarkupRecord } from '../types';
@@ -20,6 +20,10 @@ export interface RenderSettings {
 	codeTheme: string;
 	noteHash: string;
 	initialScroll: number;
+	// If [null], plugin assets are not added to the document
+	pluginAssetContainerSelector: string|null;
+	// Move more CSS into the external cssStrings:
+	splitted?: boolean;
 
 	createEditPopupSyntax: string;
 	destroyEditPopupSyntax: string;
@@ -124,15 +128,32 @@ export default class Renderer {
 
 				return settings.pluginSettings[settingKey];
 			},
+			splitted: settings.splitted,
 			whiteBackgroundNoteRendering: markup.language === MarkupLanguage.Html,
 		};
 
-		return await this.markupToHtml_.render(
+		const result = await this.markupToHtml_.render(
 			markup.language,
 			markup.markup,
 			JSON.parse(settings.theme),
 			options,
 		);
+
+		// Adding plugin assets can be slow -- run it asynchronously.
+		if (settings.pluginAssetContainerSelector) {
+			void (async () => {
+				await addPluginAssets(result.pluginAssets, {
+					inlineAssets: this.setupOptions_.useTransferredFiles,
+					readAssetBlob: settings.readAssetBlob,
+					container: document.querySelector(settings.pluginAssetContainerSelector),
+				});
+
+				// Some plugins require this event to be dispatched just after being added.
+				document.dispatchEvent(new Event('joplin-noteDidUpdate'));
+			})();
+		}
+
+		return result;
 	}
 
 	public async rerenderToBody(markup: MarkupRecord, settings: RenderSettings) {
@@ -142,11 +163,9 @@ export default class Renderer {
 		const contentContainer = this.output_.getOutputElement();
 
 		let html = '';
-		let pluginAssets: RenderResultPluginAsset[] = [];
 		try {
 			const result = await this.render(markup, settings);
 			html = result.html;
-			pluginAssets = result.pluginAssets;
 		} catch (error) {
 			if (!contentContainer) {
 				alert(`Renderer error: ${error}`);
@@ -163,17 +182,6 @@ export default class Renderer {
 		if (contentContainer) {
 			contentContainer.innerHTML = html;
 		}
-
-		// Adding plugin assets can be slow -- run it asynchronously.
-		void (async () => {
-			await addPluginAssets(pluginAssets, {
-				inlineAssets: this.setupOptions_.useTransferredFiles,
-				readAssetBlob: settings.readAssetBlob,
-			});
-
-			// Some plugins require this event to be dispatched just after being added.
-			document.dispatchEvent(new Event('joplin-noteDidUpdate'));
-		})();
 
 		this.output_.afterRender(this.setupOptions_, settings);
 	}

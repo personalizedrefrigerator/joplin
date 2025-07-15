@@ -9,7 +9,7 @@ import { EditorEvent } from '@joplin/editor/events';
 import Logger from '@joplin/utils/Logger';
 import shim from '@joplin/lib/shim';
 import { PluginStates } from '@joplin/lib/services/plugins/reducer';
-import { MarkupRecord, RendererControl, RenderOptions } from '../rendererBundle/types';
+import { RendererControl, RenderOptions } from '../rendererBundle/types';
 import { ResourceInfos } from '@joplin/renderer/types';
 
 const logger = Logger.create('useWebViewSetup');
@@ -44,6 +44,7 @@ const useMessenger = (props: UseMessengerProps) => {
 		themeOverrides: {},
 		noteHash: '',
 		initialScroll: 0,
+		pluginAssetContainerSelector: null,
 	};
 
 	return useMemo(() => {
@@ -56,10 +57,14 @@ const useMessenger = (props: UseMessengerProps) => {
 				logger.info(message);
 				return Promise.resolve();
 			},
-			onRender: async (markup: MarkupRecord) => {
+			onRender: async (markup, options) => {
 				const renderResult = await rendererRef.current.api.render(
 					markup,
-					markupRenderingSettings.current,
+					{
+						...markupRenderingSettings.current,
+						splitted: options.splitted,
+						pluginAssetContainerSelector: options.pluginAssetContainerSelector,
+					},
 				);
 				return renderResult;
 			},

@@ -54,6 +54,11 @@ export interface RenderOptions {
 	highlightedKeywords: string[];
 	resources: ResourceInfos;
 	themeOverrides: Record<string, string|number>;
+	// If null, plugin assets will not be added to the document.
+	pluginAssetContainerSelector: string|null;
+
+	// Forwarded renderer settings
+	splitted?: boolean;
 
 	noteHash: string;
 	initialScroll: number;

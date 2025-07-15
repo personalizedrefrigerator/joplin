@@ -14,10 +14,15 @@ export interface EditorProcessApi {
 	editor: EditorControl;
 }
 
+type RenderOptionsSlice = {
+	pluginAssetContainerSelector: string;
+	splitted: boolean;
+};
+
 export interface MainProcessApi {
 	onEditorEvent(event: EditorEvent): Promise<void>;
 	logMessage(message: string): Promise<void>;
-	onRender(markup: MarkupRecord): Promise<RenderResult>;
+	onRender(markup: MarkupRecord, options: RenderOptionsSlice): Promise<RenderResult>;
 }
 
 export interface RichTextEditorControl {

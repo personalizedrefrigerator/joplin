@@ -1,11 +1,35 @@
 import { DOMOutputSpec, MarkSpec, NodeSpec, Schema } from 'prosemirror-model';
+import sanitizeHtml from './utils/sanitizeHtml';
 
 const domOutputSpecs = {
 	paragraph: ['p', 0],
 	strong: ['strong', 0],
-	code: ['code', 0],
+	code: ['code', { class: 'inline-code' }, 0],
 	emphasis: ['em', 0],
 } satisfies Record<string, DOMOutputSpec>;
+
+const makeJoplinEditableSpec = (inline: boolean): NodeSpec => ({
+	group: inline ? 'inline' : 'block',
+	inline: inline,
+	draggable: true,
+	attrs: {
+		contentHtml: { default: '', validate: 'string' },
+	},
+	parseDOM: [
+		{
+			tag: `${inline ? 'span' : 'div'}.joplin-editable`,
+			getAttrs: node => ({
+				contentHtml: node.innerHTML,
+			}),
+		},
+	],
+	toDOM: node => {
+		const content = document.createElement(inline ? 'span' : 'div');
+		content.classList.add('joplin-editable');
+		content.innerHTML = sanitizeHtml(node.attrs.contentHtml);
+		return content;
+	},
+});
 
 const nodes = {
 	doc: { content: 'block+' },
@@ -65,6 +89,8 @@ const nodes = {
 			];
 		},
 	},
+	joplinEditableInline: makeJoplinEditableSpec(true),
+	joplinEditableBlock: makeJoplinEditableSpec(false),
 } satisfies Record<string, NodeSpec>;
 
 const marks = {

@@ -39,6 +39,7 @@ const rewriteInternalAssetLinks = async (asset: RenderResultPluginAsset, content
 
 interface Options {
 	inlineAssets: boolean;
+	container: HTMLElement;
 	readAssetBlob?(path: string): Promise<Blob>;
 }
 
@@ -47,7 +48,7 @@ interface Options {
 const addPluginAssets = async (assets: RenderResultPluginAsset[], options: Options) => {
 	if (!assets) return;
 
-	const pluginAssetsContainer = document.getElementById('joplin-container-pluginAssetsContainer');
+	const pluginAssetsContainer = options.container;
 
 	const prepareAssetBlobUrls = () => {
 		for (const asset of assets) {

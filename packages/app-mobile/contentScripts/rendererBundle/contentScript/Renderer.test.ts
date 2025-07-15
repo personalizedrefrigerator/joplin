@@ -16,6 +16,8 @@ const defaultRendererSettings: RenderSettings = {
 
 	createEditPopupSyntax: '',
 	destroyEditPopupSyntax: '',
+	pluginAssetContainerSelector: '#asset-container',
+	splitted: false,
 
 	pluginSettings: {},
 	requestPluginSetting: () => { },
@@ -50,13 +52,13 @@ describe('Renderer', () => {
 		document.body.appendChild(contentContainer);
 
 		const pluginAssetsContainer = document.createElement('div');
-		pluginAssetsContainer.id = 'joplin-container-pluginAssetsContainer';
+		pluginAssetsContainer.id = 'asset-container';
 		document.body.appendChild(pluginAssetsContainer);
 	});
 
 	afterEach(() => {
 		document.querySelector('#joplin-container-content')?.remove();
-		document.querySelector('#joplin-container-pluginAssetsContainer')?.remove();
+		document.querySelector('#asset-container')?.remove();
 	});
 
 	test('should support rendering markdown', async () => {

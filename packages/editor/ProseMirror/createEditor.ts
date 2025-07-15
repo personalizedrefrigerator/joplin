@@ -25,9 +25,16 @@ const createEditor = async (
 	const proseMirrorParser = ProseMirrorDomParser.fromSchema(schema);
 	const proseMirrorSerializer = ProseMirrorDomSerializer.fromSchema(schema);
 
+	const cssContainer = document.createElement('style');
+	parentElement.appendChild(cssContainer);
+
 	const createInitialState = async (markup: string) => {
-		const renderResult = (await renderToHtml(markup)).html;
-		const dom = new DOMParser().parseFromString(renderResult, 'text/html');
+		const renderResult = await renderToHtml(markup);
+		cssContainer.replaceChildren(
+			document.createTextNode(renderResult.cssStrings.join('\n')),
+		);
+
+		const dom = new DOMParser().parseFromString(renderResult.html, 'text/html');
 
 		return EditorState.create({
 			doc: proseMirrorParser.parse(dom),

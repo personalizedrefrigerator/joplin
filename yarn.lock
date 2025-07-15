@@ -9201,6 +9201,7 @@ __metadata:
     "@types/react": "npm:18.3.20"
     "@types/react-redux": "npm:7.1.33"
     "@types/styled-components": "npm:5.1.32"
+    dompurify: "npm:3.2.6"
     jest: "npm:29.7.0"
     jest-environment-jsdom: "npm:29.7.0"
     prosemirror-commands: "npm:1.7.1"
@@ -23611,7 +23612,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"dompurify@npm:^3.2.1":
+"dompurify@npm:3.2.6, dompurify@npm:^3.2.1":
   version: 3.2.6
   resolution: "dompurify@npm:3.2.6"
   dependencies:

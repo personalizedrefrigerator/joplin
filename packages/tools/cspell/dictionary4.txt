@@ -190,3 +190,4 @@ Etf
 prosemirror
 gapcursor
 dropcursor
+dompurify
