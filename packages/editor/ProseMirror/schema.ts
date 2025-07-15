@@ -1,5 +1,7 @@
 import { DOMOutputSpec, MarkSpec, NodeSpec, Schema } from 'prosemirror-model';
 import sanitizeHtml from './utils/sanitizeHtml';
+import { addListNodes } from 'prosemirror-schema-list';
+import OrderedMap from 'orderedmap';
 
 const domOutputSpecs = {
 	paragraph: ['p', 0],
@@ -110,7 +112,8 @@ const marks = {
 } satisfies Record<string, MarkSpec>;
 
 const schema: Schema = new Schema({
-	marks, nodes,
+	marks,
+	nodes: addListNodes(OrderedMap.from(nodes), 'paragraph block*', 'block'),
 });
 
 export default schema;

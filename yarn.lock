@@ -9204,6 +9204,7 @@ __metadata:
     dompurify: "npm:3.2.6"
     jest: "npm:29.7.0"
     jest-environment-jsdom: "npm:29.7.0"
+    orderedmap: "npm:2.1.1"
     prosemirror-commands: "npm:1.7.1"
     prosemirror-dropcursor: "npm:1.8.2"
     prosemirror-gapcursor: "npm:1.3.2"
@@ -38231,7 +38232,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"orderedmap@npm:^2.0.0":
+"orderedmap@npm:2.1.1, orderedmap@npm:^2.0.0":
   version: 2.1.1
   resolution: "orderedmap@npm:2.1.1"
   checksum: 10/082cf970b0b66d1c5a904b07880534092ce8a2f2eea7a52cf111f6c956210fa88226c13866aef4d22a3abe56924f21ead12f7ee8c1dfaf2f63d897a4e7c23328
