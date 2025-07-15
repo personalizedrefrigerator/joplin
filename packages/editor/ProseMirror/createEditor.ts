@@ -11,6 +11,7 @@ import { keymap } from 'prosemirror-keymap';
 import { baseKeymap } from 'prosemirror-commands';
 import { EditorEventType } from '../events';
 import { RenderResult } from '../../renderer/types';
+import UndoStackSynchronizer from './utils/UndoStackSynchronizer';
 
 type MarkupToHtml = (markup: string)=> Promise<RenderResult>;
 type HtmlToMarkup = (html: HTMLElement)=> string;
@@ -39,6 +40,8 @@ const createEditor = async (
 		});
 	};
 
+	const undoStackSynchronizer = new UndoStackSynchronizer(props.onEvent);
+
 	const view = new EditorView(parentElement, {
 		state: await createInitialState(props.initialText),
 		dispatchTransaction: transaction => {
@@ -52,6 +55,8 @@ const createEditor = async (
 					value: renderToMarkup(element),
 				});
 			}
+
+			undoStackSynchronizer.schedulePostUndoRedoDepthChange(view);
 
 			view.updateState(view.state.apply(transaction));
 		},

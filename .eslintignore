@@ -1035,6 +1035,7 @@ packages/editor/ProseMirror/createEditor.js
 packages/editor/ProseMirror/index.js
 packages/editor/ProseMirror/schema.js
 packages/editor/ProseMirror/styles.js
+packages/editor/ProseMirror/utils/UndoStackSynchronizer.js
 packages/editor/SelectionFormatting.js
 packages/editor/events.js
 packages/editor/types.js
