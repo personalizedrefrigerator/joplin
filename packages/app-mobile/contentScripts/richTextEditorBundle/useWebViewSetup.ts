@@ -4,9 +4,13 @@ import { SetUpResult } from '../types';
 import { EditorControl, EditorSettings } from '@joplin/editor/types';
 import RNToWebViewMessenger from '../../utils/ipc/RNToWebViewMessenger';
 import { EditorProcessApi, EditorProps, MainProcessApi } from './types';
+import useRendererSetup from '../rendererBundle/useWebViewSetup';
 import { EditorEvent } from '@joplin/editor/events';
 import Logger from '@joplin/utils/Logger';
 import shim from '@joplin/lib/shim';
+import { PluginStates } from '@joplin/lib/services/plugins/reducer';
+import { MarkupRecord, RendererControl, RenderOptions } from '../rendererBundle/types';
+import { ResourceInfos } from '@joplin/renderer/types';
 
 const logger = Logger.create('useWebViewSetup');
 
@@ -15,13 +19,32 @@ interface Props {
 	noteId: string;
 	settings: EditorSettings;
 	parentElementClassName: string;
+	themeId: number;
+	pluginStates: PluginStates;
+	noteResources: ResourceInfos;
+
+	onPostMessage: (message: string)=> void;
 	onEditorEvent: (event: EditorEvent)=> void;
 	webviewRef: RefObject<WebViewControl>;
 }
 
-const useMessenger = (props: Props) => {
+type UseMessengerProps = Props & { renderer: SetUpResult<RendererControl> };
+
+const useMessenger = (props: UseMessengerProps) => {
 	const onEditorEventRef = useRef(props.onEditorEvent);
 	onEditorEventRef.current = props.onEditorEvent;
+	const rendererRef = useRef(props.renderer);
+	rendererRef.current = props.renderer;
+
+	const markupRenderingSettings = useRef<RenderOptions>(null);
+	markupRenderingSettings.current = {
+		themeId: props.themeId,
+		highlightedKeywords: [],
+		resources: props.noteResources,
+		themeOverrides: {},
+		noteHash: '',
+		initialScroll: 0,
+	};
 
 	return useMemo(() => {
 		const api: MainProcessApi = {
@@ -32,6 +55,13 @@ const useMessenger = (props: Props) => {
 			logMessage: (message: string) => {
 				logger.info(message);
 				return Promise.resolve();
+			},
+			onRender: async (markup: MarkupRecord) => {
+				const renderResult = await rendererRef.current.api.render(
+					markup,
+					markupRenderingSettings.current,
+				);
+				return renderResult;
 			},
 		};
 
@@ -44,9 +74,14 @@ const useMessenger = (props: Props) => {
 	}, [props.webviewRef]);
 };
 
-const useSource = (props: Props) => {
+type UseSourceProps = Props & { renderer: SetUpResult<RendererControl> };
+
+const useSource = (props: UseSourceProps) => {
 	const propsRef = useRef(props);
 	propsRef.current = props;
+
+	const rendererJs = props.renderer.pageSetup.js;
+	const rendererCss = props.renderer.pageSetup.css;
 
 	return useMemo(() => {
 		const editorOptions: EditorProps = {
@@ -57,8 +92,10 @@ const useSource = (props: Props) => {
 		};
 
 		return {
-			css: '',
+			css: rendererCss,
 			js: `
+				${rendererJs}
+
 				if (!window.richTextEditorCreated) {
 					window.richTextEditorCreated = true;
 					${shim.injectedJs('richTextEditorBundle')}
@@ -67,12 +104,19 @@ const useSource = (props: Props) => {
 				}
 			`,
 		};
-	}, []);
+	}, [rendererJs, rendererCss]);
 };
 
 const useWebViewSetup = (props: Props): SetUpResult<EditorControl> => {
-	const messenger = useMessenger(props);
-	const pageSetup = useSource(props);
+	const renderer = useRendererSetup({
+		webviewRef: props.webviewRef,
+		onBodyScroll: null,
+		onPostMessage: props.onPostMessage,
+		pluginStates: props.pluginStates,
+		themeId: props.themeId,
+	});
+	const messenger = useMessenger({ ...props, renderer });
+	const pageSetup = useSource({ ...props, renderer });
 
 	useEffect(() => {
 		void messenger.remoteApi.editor.updateSettings(props.settings);
@@ -83,11 +127,17 @@ const useWebViewSetup = (props: Props): SetUpResult<EditorControl> => {
 			api: messenger.remoteApi.editor,
 			pageSetup: pageSetup,
 			webViewEventHandlers: {
-				onLoadEnd: messenger.onWebViewLoaded,
-				onMessage: messenger.onWebViewMessage,
+				onLoadEnd: () => {
+					messenger.onWebViewLoaded();
+					renderer.webViewEventHandlers.onLoadEnd();
+				},
+				onMessage: (event) => {
+					messenger.onWebViewMessage(event);
+					renderer.webViewEventHandlers.onMessage(event);
+				},
 			},
 		};
-	}, [messenger, pageSetup]);
+	}, [messenger, pageSetup, renderer.webViewEventHandlers]);
 };
 
 export default useWebViewSetup;

@@ -1,15 +1,13 @@
 import * as React from 'react';
 
 import useOnMessage, { HandleMessageCallback, OnMarkForDownloadCallback } from './hooks/useOnMessage';
-import { useRef, useCallback, useMemo } from 'react';
+import { useRef, useCallback } from 'react';
 import { View, ViewStyle } from 'react-native';
 import ExtendedWebView from '../ExtendedWebView';
 import { WebViewControl } from '../ExtendedWebView/types';
 import useOnResourceLongPress from './hooks/useOnResourceLongPress';
 import useRerenderHandler, { ResourceInfo } from './hooks/useRerenderHandler';
 import useSource from './hooks/useSource';
-import Setting from '@joplin/lib/models/Setting';
-import uuid from '@joplin/lib/uuid';
 import { PluginStates } from '@joplin/lib/services/plugins/reducer';
 import { MarkupLanguage } from '@joplin/renderer';
 import shim from '@joplin/lib/shim';
@@ -67,19 +65,12 @@ function NoteBodyViewer(props: Props) {
 		onResourceLongPress,
 	});
 
-	// The renderer can write to whichever temporary directory we choose. As such,
-	// we use a subdirectory of the main temporary directory for security reasons.
-	const tempDir = useMemo(() => {
-		return `${Setting.value('tempDir')}/${uuid.createNano()}`;
-	}, []);
-
 	const { api: renderer, pageSetup, webViewEventHandlers } = useWebViewSetup({
 		webviewRef,
 		onBodyScroll: onScroll,
 		onPostMessage,
 		pluginStates: props.pluginStates,
 		themeId: props.themeId,
-		tempDirPath: tempDir,
 	});
 
 	useRerenderHandler({

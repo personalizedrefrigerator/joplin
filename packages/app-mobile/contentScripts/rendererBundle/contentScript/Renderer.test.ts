@@ -4,7 +4,6 @@ import Renderer, { RenderSettings, RendererSetupOptions } from './Renderer';
 import shim from '@joplin/lib/shim';
 import { MarkupLanguage } from '@joplin/renderer';
 import afterFullPageRender from './utils/afterFullPageRender';
-import { RenderingTarget } from '../types';
 
 const defaultRendererSettings: RenderSettings = {
 	theme: JSON.stringify({ cacheKey: 'test' }),
@@ -20,7 +19,6 @@ const defaultRendererSettings: RenderSettings = {
 
 	pluginSettings: {},
 	requestPluginSetting: () => { },
-	renderingTarget: RenderingTarget.FullPage,
 };
 
 const makeRenderer = (options: Partial<RendererSetupOptions>) => {
@@ -63,14 +61,14 @@ describe('Renderer', () => {
 
 	test('should support rendering markdown', async () => {
 		const renderer = makeRenderer({});
-		await renderer.rerender(
+		await renderer.rerenderToBody(
 			{ language: MarkupLanguage.Markdown, markup: '**test**' },
 			defaultRendererSettings,
 		);
 
 		expect(getRenderedContent().innerHTML.trim()).toBe('<p><strong>test</strong></p>');
 
-		await renderer.rerender(
+		await renderer.rerenderToBody(
 			{ language: MarkupLanguage.Markdown, markup: '*test*' },
 			defaultRendererSettings,
 		);
@@ -97,7 +95,7 @@ describe('Renderer', () => {
 				pluginId: 'com.example.test-plugin',
 			},
 		]);
-		await renderer.rerender(
+		await renderer.rerenderToBody(
 			{ language: MarkupLanguage.Markdown, markup: '```\ntest\n```' },
 			defaultRendererSettings,
 		);
@@ -105,7 +103,7 @@ describe('Renderer', () => {
 
 		// Should support removing plugin scripts
 		await renderer.setExtraContentScriptsAndRerender([]);
-		await renderer.rerender(
+		await renderer.rerenderToBody(
 			{ language: MarkupLanguage.Markdown, markup: '```\ntest\n```' },
 			defaultRendererSettings,
 		);
@@ -118,14 +116,14 @@ describe('Renderer', () => {
 
 		const requestPluginSetting = jest.fn();
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-		const rerender = (pluginSettings: Record<string, any>) => {
-			return renderer.rerender(
+		const rerenderToBody = (pluginSettings: Record<string, any>) => {
+			return renderer.rerenderToBody(
 				{ language: MarkupLanguage.Markdown, markup: '```\ntest\n```' },
 				{ ...defaultRendererSettings, pluginSettings, requestPluginSetting },
 			);
 		};
 
-		await rerender({});
+		await rerenderToBody({});
 		expect(requestPluginSetting).toHaveBeenCalledTimes(0);
 
 		const pluginId = 'com.example.test-plugin';
@@ -151,7 +149,7 @@ describe('Renderer', () => {
 
 		// Should call .requestPluginSetting for missing settings
 		expect(requestPluginSetting).toHaveBeenCalledTimes(1);
-		await rerender({});
+		await rerenderToBody({});
 		expect(requestPluginSetting).toHaveBeenCalledTimes(2);
 		expect(requestPluginSetting).toHaveBeenLastCalledWith('com.example.test-plugin', 'setting');
 
@@ -159,11 +157,11 @@ describe('Renderer', () => {
 		expect(getRenderedContent().querySelector('#setting-value').innerHTML).toBe('Setting value: undefined');
 
 		// Should expect only namespaced plugin settings
-		await rerender({ 'setting': 'test' });
+		await rerenderToBody({ 'setting': 'test' });
 		expect(requestPluginSetting).toHaveBeenCalledTimes(3);
 
 		// Should not request plugin settings when all settings are present.
-		await rerender({ [`${pluginId}.setting`]: 'test' });
+		await rerenderToBody({ [`${pluginId}.setting`]: 'test' });
 		expect(requestPluginSetting).toHaveBeenCalledTimes(3);
 		expect(getRenderedContent().querySelector('#setting-value').innerHTML).toBe('Setting value: test');
 	});

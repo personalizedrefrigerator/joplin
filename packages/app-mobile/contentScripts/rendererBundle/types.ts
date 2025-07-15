@@ -1,13 +1,6 @@
-import type { FsDriver as RendererFsDriver, ResourceInfos } from '@joplin/renderer/types';
+import type { FsDriver as RendererFsDriver, RenderResult, ResourceInfos } from '@joplin/renderer/types';
 import type Renderer from './contentScript/Renderer';
 import { MarkupLanguage, PluginOptions } from '@joplin/renderer/MarkupToHtml';
-
-export enum RenderingTarget {
-	// Renders directly to the body. To limit IPC, does not return the result as a string
-	FullPage = 'replace-full-page',
-	// Returns a string with the rendered content
-	String = 'return-string',
-}
 
 // Joplin settings (as from Setting.value(...)) that should
 // remain constant during editing.
@@ -58,7 +51,6 @@ export interface MarkupRecord {
 
 export interface RenderOptions {
 	themeId: number;
-	renderingTarget: RenderingTarget;
 	highlightedKeywords: string[];
 	resources: ResourceInfos;
 	themeOverrides: Record<string, string|number>;
@@ -70,6 +62,7 @@ export interface RenderOptions {
 type CancelEvent = { cancelled: boolean };
 
 export interface RendererControl {
-	rerender(markup: MarkupRecord, options: RenderOptions, cancelEvent?: CancelEvent): Promise<string|void>;
+	rerenderToBody(markup: MarkupRecord, options: RenderOptions, cancelEvent?: CancelEvent): Promise<string|void>;
+	render(markup: MarkupRecord, options: RenderOptions): Promise<RenderResult>;
 	clearCache(markupLanguage: MarkupLanguage): void;
 }

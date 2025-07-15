@@ -22,6 +22,7 @@ import EditorToolbar from '../EditorToolbar/EditorToolbar';
 import { SelectionRange } from '../../contentScripts/markdownEditorBundle/types';
 import MarkdownEditor from './MarkdownEditor';
 import RichTextEditor from './RichTextEditor';
+import { ResourceInfos } from '@joplin/renderer/types';
 
 type ChangeEventHandler = (event: ChangeEvent)=> void;
 type UndoRedoDepthChangeHandler = (event: UndoRedoDepthChangeEvent)=> void;
@@ -46,6 +47,7 @@ interface Props {
 	toolbarEnabled: boolean;
 	readOnly: boolean;
 	plugins: PluginStates;
+	noteResources: ResourceInfos;
 
 	onChange: ChangeEventHandler;
 	onSelectionChange: SelectionChangeEventHandler;
@@ -363,6 +365,7 @@ function NoteEditor(props: Props) {
 					editorSettings={editorSettings}
 					globalSearch={props.globalSearch}
 					onEditorEvent={onEditorEvent}
+					noteResources={props.noteResources}
 					plugins={props.plugins}
 					onAttach={props.onAttach}
 				/>

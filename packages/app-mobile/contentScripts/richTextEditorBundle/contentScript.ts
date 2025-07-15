@@ -1,8 +1,9 @@
 import { createEditor } from '@joplin/editor/ProseMirror';
 import { EditorProcessApi, EditorProps, MainProcessApi } from './types';
 import WebViewToRNMessenger from '../../utils/ipc/WebViewToRNMessenger';
+import { MarkupLanguage } from '@joplin/renderer';
 
-export const initialize = ({
+export const initialize = async ({
 	settings,
 	initialText,
 	initialNoteId,
@@ -15,7 +16,7 @@ export const initialize = ({
 		throw new Error('Parent node is not an element.');
 	}
 
-	const editor = createEditor(parentElement, {
+	const editor = await createEditor(parentElement, {
 		settings,
 		initialText,
 		initialNoteId,
@@ -29,6 +30,11 @@ export const initialize = ({
 		onEvent: (event) => {
 			void messenger.remoteApi.onEditorEvent(event);
 		},
+	}, (markup) => {
+		return messenger.remoteApi.onRender({
+			markup,
+			language: MarkupLanguage.Markdown,
+		});
 	});
 
 	messenger.setLocalInterface({

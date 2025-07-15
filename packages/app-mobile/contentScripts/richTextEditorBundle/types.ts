@@ -1,5 +1,7 @@
 import { EditorEvent } from '@joplin/editor/events';
 import { EditorControl, EditorSettings } from '@joplin/editor/types';
+import { MarkupRecord, RendererControl } from '../rendererBundle/types';
+import { RenderResult } from '@joplin/renderer/types';
 
 export interface EditorProps {
 	initialText: string;
@@ -15,5 +17,10 @@ export interface EditorProcessApi {
 export interface MainProcessApi {
 	onEditorEvent(event: EditorEvent): Promise<void>;
 	logMessage(message: string): Promise<void>;
+	onRender(markup: MarkupRecord): Promise<RenderResult>;
 }
 
+export interface RichTextEditorControl {
+	editor: EditorControl;
+	renderer: RendererControl;
+}

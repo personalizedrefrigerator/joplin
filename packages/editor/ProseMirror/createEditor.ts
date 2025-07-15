@@ -10,27 +10,34 @@ import { dropCursor } from 'prosemirror-dropcursor';
 import { keymap } from 'prosemirror-keymap';
 import { baseKeymap } from 'prosemirror-commands';
 import { EditorEventType } from '../events';
+import { RenderResult } from '../../renderer/types';
 
-// type Renderer = (markdown: string)=> Promise<string>;
+type OnRender = (markdown: string)=> Promise<RenderResult>;
 
-const createEditor = (
-	parentElement: HTMLElement, props: EditorProps,
-): EditorControl => {
-	const initialDom = new DOMParser().parseFromString(props.initialText, 'text/html');
+const createEditor = async (
+	parentElement: HTMLElement, props: EditorProps, onRender: OnRender,
+): Promise<EditorControl> => {
 	const proseMirrorParser = ProseMirrorDomParser.fromSchema(schema);
 	const proseMirrorSerializer = ProseMirrorDomSerializer.fromSchema(schema);
 	const xmlSerializer = new XMLSerializer();
 
-	const view = new EditorView(parentElement, {
-		state: EditorState.create({
-			doc: proseMirrorParser.parse(initialDom),
+	const createInitialState = async (markup: string) => {
+		const renderResult = (await onRender(markup)).html;
+		const dom = new DOMParser().parseFromString(renderResult, 'text/html');
+
+		return EditorState.create({
+			doc: proseMirrorParser.parse(dom),
 			plugins: [
 				keymap(baseKeymap),
 				gapCursor(),
 				dropCursor(),
 				history(),
 			],
-		}),
+		});
+	};
+
+	const view = new EditorView(parentElement, {
+		state: await createInitialState(props.initialText),
 		dispatchTransaction: transaction => {
 			if (transaction.docChanged) {
 				const finalDoc = proseMirrorSerializer.serializeFragment(transaction.doc.content);
@@ -79,9 +86,8 @@ const createEditor = (
 		insertText: (text: string, _source?: UserEventSource) => {
 			view.dispatch(view.state.tr.insertText(text));
 		},
-		updateBody: function(_newBody: string, _updateBodyOptions?: UpdateBodyOptions): void {
-			// Note: Will probably require rendering, then parsing to nodes.
-			throw new Error('Not implemented: updateBody');
+		updateBody: async (newBody: string, _updateBodyOptions?: UpdateBodyOptions) => {
+			view.updateState(await createInitialState(newBody));
 		},
 		updateSettings: function(_newSettings: EditorSettings): void {
 			// throw new Error("Function not implemented.");

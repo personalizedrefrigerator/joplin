@@ -108,6 +108,10 @@ function useHtml(initialCss: string): string {
 	`, []);
 }
 
+const mockOnPostMessage = (message: string) => {
+	logger.warn(`Not implemented: postMessage. Called with ${JSON.stringify(message)}`);
+};
+
 const RichTextEditor: React.FC<EditorProps> = props => {
 	const webviewRef = props.webviewRef;
 
@@ -118,6 +122,10 @@ const RichTextEditor: React.FC<EditorProps> = props => {
 		noteId: props.noteId,
 		settings: props.editorSettings,
 		webviewRef,
+		themeId: props.themeId,
+		pluginStates: props.plugins,
+		noteResources: props.noteResources,
+		onPostMessage: mockOnPostMessage,
 	});
 
 	props.editorRef.current = editorWebViewSetup.api;

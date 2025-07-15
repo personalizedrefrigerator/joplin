@@ -6,6 +6,7 @@ import { WebViewControl } from '../ExtendedWebView/types';
 import { SelectionRange } from '../../contentScripts/markdownEditorBundle/types';
 import { PluginStates } from '@joplin/lib/services/plugins/reducer';
 import { EditorEvent } from '@joplin/editor/events';
+import { ResourceInfos } from '@joplin/renderer/types';
 
 export interface SearchControl {
 	findNext(): void;
@@ -55,6 +56,7 @@ export interface EditorSettings extends EditorBodySettings {
 
 type OnAttachCallback = (filePath?: string)=> Promise<void>;
 export interface EditorProps {
+	noteResources: ResourceInfos;
 	editorRef: RefObject<EditorBodyControl>;
 	webviewRef: RefObject<WebViewControl>;
 	themeId: number;

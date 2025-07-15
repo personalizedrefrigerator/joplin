@@ -6,7 +6,7 @@ import { SetUpResult } from '../types';
 import { themeStyle } from '../../components/global-style';
 import Logger from '@joplin/utils/Logger';
 import { WebViewControl } from '../../components/ExtendedWebView/types';
-import { MainProcessApi, OnScrollCallback, RendererControl, RendererProcessApi, RendererWebViewOptions } from './types';
+import { MainProcessApi, OnScrollCallback, RendererControl, RendererProcessApi, RendererWebViewOptions, RenderOptions } from './types';
 import PluginService from '@joplin/lib/services/plugins/PluginService';
 import RNToWebViewMessenger from '../../utils/ipc/RNToWebViewMessenger';
 import useEditPopup from './utils/useEditPopup';
@@ -16,6 +16,7 @@ import resolvePathWithinDir from '@joplin/lib/utils/resolvePathWithinDir';
 import Resource from '@joplin/lib/models/Resource';
 import { ResourceInfos } from '@joplin/renderer/types';
 import useContentScripts from './utils/useContentScripts';
+import uuid from '@joplin/lib/uuid';
 
 const logger = Logger.create('renderer/useWebViewSetup');
 
@@ -26,10 +27,9 @@ interface Props {
 	pluginStates: PluginStates;
 
 	themeId: number;
-	tempDirPath: string;
 }
 
-const useSource = ({ tempDirPath }: Props) => {
+const useSource = (tempDirPath: string) => {
 	const injectedJs = useMemo(() => {
 		const subValues = Setting.subValues('markdown.plugin', Setting.toPlainObject());
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
@@ -79,7 +79,9 @@ const onPostPluginMessage = async (contentScriptId: string, message: unknown) =>
 	return plugin.emitContentScriptMessage(contentScriptId, message);
 };
 
-const useMessenger = (props: Props) => {
+type UseMessengerProps = Props & { tempDirPath: string };
+
+const useMessenger = (props: UseMessengerProps) => {
 	const onScrollRef = useRef(props.onBodyScroll);
 	onScrollRef.current = props.onBodyScroll;
 
@@ -114,11 +116,32 @@ const useMessenger = (props: Props) => {
 	return messenger;
 };
 
+const useTempDirPath = () => {
+	// The renderer can write to whichever temporary directory is chosen here. As such,
+	// use a subdirectory of the main temporary directory for security reasons.
+	const tempDirPath = useMemo(() => {
+		return `${Setting.value('tempDir')}/${uuid.createNano()}`;
+	}, []);
+
+	useEffect(() => {
+		return () => {
+			void (async () => {
+				if (await shim.fsDriver().exists(tempDirPath)) {
+					await shim.fsDriver().remove(tempDirPath);
+				}
+			})();
+		};
+	}, [tempDirPath]);
+
+	return tempDirPath;
+};
+
 const useWebViewSetup = (props: Props): SetUpResult<RendererControl> => {
-	const { css, injectedJs } = useSource(props);
+	const tempDirPath = useTempDirPath();
+	const { css, injectedJs } = useSource(tempDirPath);
 	const { editPopupCss, createEditPopupSyntax, destroyEditPopupSyntax } = useEditPopup(props.themeId);
 
-	const messenger = useMessenger(props);
+	const messenger = useMessenger({ ...props, tempDirPath });
 	const pluginSettingKeysRef = useRef(new Set<string>());
 
 	const contentScripts = useContentScripts(props.pluginStates);
@@ -150,63 +173,83 @@ const useWebViewSetup = (props: Props): SetUpResult<RendererControl> => {
 			}
 		};
 
-		return {
-			rerender: async (markup, options, cancelEvent) => {
-				const theme = themeStyle(options.themeId);
+		const prepareRenderer = async (options: RenderOptions) => {
+			const theme = themeStyle(options.themeId);
 
-				const loadPluginSettings = () => {
-					const output: Record<string, unknown> = Object.create(null);
-					for (const key of pluginSettingKeysRef.current) {
-						output[key] = Setting.value(`plugin-${key}`);
+			const loadPluginSettings = () => {
+				const output: Record<string, unknown> = Object.create(null);
+				for (const key of pluginSettingKeysRef.current) {
+					output[key] = Setting.value(`plugin-${key}`);
+				}
+				return output;
+			};
+
+			let settingsChanged = false;
+			const settings: RenderSettings = {
+				...options,
+				codeTheme: theme.codeThemeCss,
+				// We .stringify the theme to avoid a JSON serialization error involving
+				// the color package.
+				theme: JSON.stringify({
+					...theme,
+					...options.themeOverrides,
+				}),
+				createEditPopupSyntax,
+				destroyEditPopupSyntax,
+				pluginSettings: loadPluginSettings(),
+				requestPluginSetting: (pluginId: string, settingKey: string) => {
+					const key = `${pluginId}.${settingKey}`;
+					if (!pluginSettingKeysRef.current.has(key)) {
+						pluginSettingKeysRef.current.add(key);
+						settingsChanged = true;
 					}
-					return output;
-				};
+				},
+				readAssetBlob: (assetPath: string): Promise<Blob> => {
+					// Built-in assets are in resourceDir, external plugin assets are in cacheDir.
+					const assetsDirs = [Setting.value('resourceDir'), Setting.value('cacheDir')];
 
-				let settingsChanged = false;
-				const settings: RenderSettings = {
-					...options,
-					codeTheme: theme.codeThemeCss,
-					// We .stringify the theme to avoid a JSON serialization error involving
-					// the color package.
-					theme: JSON.stringify({
-						...theme,
-						...options.themeOverrides,
-					}),
-					createEditPopupSyntax,
-					destroyEditPopupSyntax,
-					pluginSettings: loadPluginSettings(),
-					requestPluginSetting: (pluginId: string, settingKey: string) => {
-						const key = `${pluginId}.${settingKey}`;
-						if (!pluginSettingKeysRef.current.has(key)) {
-							pluginSettingKeysRef.current.add(key);
-							settingsChanged = true;
-						}
-					},
-					readAssetBlob: (assetPath: string): Promise<Blob> => {
-						// Built-in assets are in resourceDir, external plugin assets are in cacheDir.
-						const assetsDirs = [Setting.value('resourceDir'), Setting.value('cacheDir')];
+					let resolvedPath = null;
+					for (const assetDir of assetsDirs) {
+						resolvedPath ??= resolvePathWithinDir(assetDir, assetPath);
+						if (resolvedPath) break;
+					}
 
-						let resolvedPath = null;
-						for (const assetDir of assetsDirs) {
-							resolvedPath ??= resolvePathWithinDir(assetDir, assetPath);
-							if (resolvedPath) break;
-						}
+					if (!resolvedPath) {
+						throw new Error(`Failed to load asset at ${assetPath} -- not in any of the allowed asset directories: ${assetsDirs.join(',')}.`);
+					}
+					return shim.fsDriver().fileAtPath(resolvedPath);
+				},
+			};
 
-						if (!resolvedPath) {
-							throw new Error(`Failed to load asset at ${assetPath} -- not in any of the allowed asset directories: ${assetsDirs.join(',')}.`);
-						}
-						return shim.fsDriver().fileAtPath(resolvedPath);
-					},
-				};
+			await transferResources(options.resources);
 
-				await transferResources(options.resources);
+			return {
+				settings,
+				getSettingsChanged() {
+					return settingsChanged;
+				},
+			};
+		};
+
+		return {
+			rerenderToBody: async (markup, options, cancelEvent) => {
+				const { settings, getSettingsChanged } = await prepareRenderer(options);
 				if (cancelEvent?.cancelled) return null;
 
-				const output = await renderer.rerender(markup, settings);
+				const output = await renderer.rerenderToBody(markup, settings);
 				if (cancelEvent?.cancelled) return null;
 
-				if (settingsChanged) {
-					return await renderer.rerender(markup, settings);
+				if (getSettingsChanged()) {
+					return await renderer.rerenderToBody(markup, settings);
+				}
+				return output;
+			},
+			render: async (markup, options) => {
+				const { settings, getSettingsChanged } = await prepareRenderer(options);
+				const output = await renderer.render(markup, settings);
+
+				if (getSettingsChanged()) {
+					return await renderer.render(markup, settings);
 				}
 				return output;
 			},

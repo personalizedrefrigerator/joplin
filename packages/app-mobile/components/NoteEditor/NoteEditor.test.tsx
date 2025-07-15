@@ -58,6 +58,7 @@ describe('NoteEditor', () => {
 					onSelectionChange={()=>{}}
 					onUndoRedoDepthChange={()=>{}}
 					onAttach={async ()=>{}}
+					noteResources={{}}
 					plugins={{}}
 					mode={EditorMode.Markdown}
 				/>

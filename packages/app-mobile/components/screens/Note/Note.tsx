@@ -1640,6 +1640,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 						onSelectionChange={this.onMarkdownEditorSelectionChange}
 						onUndoRedoDepthChange={this.onUndoRedoDepthChange}
 						onAttach={this.onAttach}
+						noteResources={this.state.noteResources}
 						readOnly={this.state.readOnly}
 						plugins={this.props.plugins}
 						style={{

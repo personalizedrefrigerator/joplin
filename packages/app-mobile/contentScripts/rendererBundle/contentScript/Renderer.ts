@@ -2,7 +2,7 @@ import { MarkupLanguage, MarkupToHtml } from '@joplin/renderer';
 import type { MarkupToHtmlConverter, RenderOptions, RenderResultPluginAsset, FsDriver as RendererFsDriver, ResourceInfos } from '@joplin/renderer/types';
 import makeResourceModel from './utils/makeResourceModel';
 import addPluginAssets from './utils/addPluginAssets';
-import { ExtraContentScriptSource, ForwardedJoplinSettings, MarkupRecord, RenderingTarget } from '../types';
+import { ExtraContentScriptSource, ForwardedJoplinSettings, MarkupRecord } from '../types';
 import { ExtraContentScript } from '@joplin/lib/services/plugins/utils/loadContentScripts';
 import { PluginOptions } from '@joplin/renderer/MarkupToHtml';
 
@@ -20,7 +20,6 @@ export interface RenderSettings {
 	codeTheme: string;
 	noteHash: string;
 	initialScroll: number;
-	renderingTarget: RenderingTarget;
 
 	createEditPopupSyntax: string;
 	destroyEditPopupSyntax: string;
@@ -37,9 +36,9 @@ export interface RendererOutput {
 
 export default class Renderer {
 	private markupToHtml_: MarkupToHtmlConverter;
-	private lastSettings_: RenderSettings|null = null;
+	private lastBodyRenderSettings_: RenderSettings|null = null;
 	private extraContentScripts_: ExtraContentScript[] = [];
-	private lastRenderMarkup_: MarkupRecord|null = null;
+	private lastBodyMarkup_: MarkupRecord|null = null;
 	private resourcePathOverrides_: Record<string, string> = Object.create(null);
 
 	public constructor(private output_: RendererOutput, private setupOptions_: RendererSetupOptions) {
@@ -95,15 +94,12 @@ export default class Renderer {
 		// If possible, rerenders with the last rendering settings. The goal
 		// of this is to reduce the number of IPC calls between the viewer and
 		// React Native. We want the first render to be as fast as possible.
-		if (this.lastRenderMarkup_) {
-			await this.rerender(this.lastRenderMarkup_, this.lastSettings_);
+		if (this.lastBodyMarkup_) {
+			await this.rerenderToBody(this.lastBodyMarkup_, this.lastBodyRenderSettings_);
 		}
 	}
 
-	public async rerender(markup: MarkupRecord, settings: RenderSettings) {
-		this.lastSettings_ = settings;
-		this.lastRenderMarkup_ = markup;
-
+	public async render(markup: MarkupRecord, settings: RenderSettings) {
 		const options: RenderOptions = {
 			highlightedKeywords: settings.highlightedKeywords,
 			resources: settings.resources,
@@ -131,21 +127,24 @@ export default class Renderer {
 			whiteBackgroundNoteRendering: markup.language === MarkupLanguage.Html,
 		};
 
-		this.markupToHtml_.clearCache(markup.language);
+		return await this.markupToHtml_.render(
+			markup.language,
+			markup.markup,
+			JSON.parse(settings.theme),
+			options,
+		);
+	}
 
-		const contentContainer = settings.renderingTarget === RenderingTarget.FullPage ? (
-			this.output_.getOutputElement()
-		) : null;
+	public async rerenderToBody(markup: MarkupRecord, settings: RenderSettings) {
+		this.lastBodyMarkup_ = markup;
+		this.lastBodyRenderSettings_ = settings;
+
+		const contentContainer = this.output_.getOutputElement();
 
 		let html = '';
 		let pluginAssets: RenderResultPluginAsset[] = [];
 		try {
-			const result = await this.markupToHtml_.render(
-				markup.language,
-				markup.markup,
-				JSON.parse(settings.theme),
-				options,
-			);
+			const result = await this.render(markup, settings);
 			html = result.html;
 			pluginAssets = result.pluginAssets;
 		} catch (error) {
@@ -176,13 +175,7 @@ export default class Renderer {
 			document.dispatchEvent(new Event('joplin-noteDidUpdate'));
 		})();
 
-
-		if (contentContainer) {
-			this.output_.afterRender(this.setupOptions_, settings);
-			return null;
-		} else {
-			return html;
-		}
+		this.output_.afterRender(this.setupOptions_, settings);
 	}
 
 	public clearCache(markupLanguage: MarkupLanguage) {

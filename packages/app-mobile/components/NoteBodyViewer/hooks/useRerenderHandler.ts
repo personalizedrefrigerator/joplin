@@ -3,7 +3,7 @@ import { MarkupLanguage } from '@joplin/renderer';
 import { useEffect, useRef, useState } from 'react';
 import Logger from '@joplin/utils/Logger';
 import { ResourceEntity, ResourceLocalStateEntity } from '@joplin/lib/services/database/types';
-import { RendererControl, RenderingTarget, RenderOptions } from '../../../contentScripts/rendererBundle/types';
+import { RendererControl, RenderOptions } from '../../../contentScripts/rendererBundle/types';
 import useQueuedAsyncEffect from '@joplin/lib/hooks/useQueuedAsyncEffect';
 import Resource from '@joplin/lib/models/Resource';
 
@@ -124,7 +124,6 @@ const useRerenderHandler = (props: Props) => {
 
 		const config: RenderOptions = {
 			themeId: props.themeId,
-			renderingTarget: RenderingTarget.FullPage,
 			themeOverrides: {
 				bodyPaddingTop: '0.8em',
 				bodyPaddingBottom: props.paddingBottom,
@@ -142,7 +141,7 @@ const useRerenderHandler = (props: Props) => {
 		try {
 			logger.debug('Starting render...');
 
-			await props.renderer.rerender({
+			await props.renderer.rerenderToBody({
 				language: props.noteMarkupLanguage,
 				markup: props.noteBody,
 			}, config, event);
