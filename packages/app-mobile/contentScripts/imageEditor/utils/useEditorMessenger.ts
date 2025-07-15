@@ -1,25 +1,30 @@
-import { RefObject, useMemo } from 'react';
-import { WebViewControl } from '../../../ExtendedWebView/types';
-import { ImageEditorCallbacks, ImageEditorControl } from '../js-draw/types';
+import { RefObject, useMemo, useRef } from 'react';
 import Setting from '@joplin/lib/models/Setting';
-import RNToWebViewMessenger from '../../../../utils/ipc/RNToWebViewMessenger';
-import { writeAutosave } from '../autosave';
 import Clipboard from '@react-native-clipboard/clipboard';
+import { MainProcessApi, EditorProcessApi } from '../contentScript/types';
+import { WebViewControl } from '../../../components/ExtendedWebView/types';
+import RNToWebViewMessenger from '../../../utils/ipc/RNToWebViewMessenger';
 
 interface Props {
-	webviewRef: RefObject<WebViewControl>;
+	webViewRef: RefObject<WebViewControl>;
 	setImageChanged(changed: boolean): void;
 
 	onReadyToLoadData(): void;
 	onSave(data: string): void;
+	onAutoSave(data: string): void;
 	onRequestCloseEditor(promptIfUnsaved: boolean): void;
 }
 
 const useEditorMessenger = ({
-	webviewRef, setImageChanged, onReadyToLoadData, onRequestCloseEditor, onSave,
+	webViewRef: webviewRef, setImageChanged, onReadyToLoadData, onRequestCloseEditor, onSave, onAutoSave,
 }: Props) => {
+	const events = { onRequestCloseEditor, onSave, onAutoSave, onReadyToLoadData };
+	// Use a ref to avoid unnecessary rerenders
+	const eventsRef = useRef(events);
+	eventsRef.current = events;
+
 	return useMemo(() => {
-		const localApi: ImageEditorCallbacks = {
+		const localApi: MainProcessApi = {
 			updateEditorTemplate: newTemplate => {
 				Setting.setValue('imageeditor.imageTemplate', newTemplate);
 			},
@@ -30,21 +35,21 @@ const useEditorMessenger = ({
 				setImageChanged(hasChanges);
 			},
 			onLoadedEditor: () => {
-				onReadyToLoadData();
+				eventsRef.current.onReadyToLoadData();
 			},
 			saveThenClose: svgData => {
-				onSave(svgData);
-				onRequestCloseEditor(false);
+				eventsRef.current.onSave(svgData);
+				eventsRef.current.onRequestCloseEditor(false);
 			},
 			save: (svgData, isAutosave) => {
 				if (isAutosave) {
-					return writeAutosave(svgData);
+					return eventsRef.current.onAutoSave(svgData);
 				} else {
-					return onSave(svgData);
+					return eventsRef.current.onSave(svgData);
 				}
 			},
 			closeEditor: promptIfUnsaved => {
-				onRequestCloseEditor(promptIfUnsaved);
+				eventsRef.current.onRequestCloseEditor(promptIfUnsaved);
 			},
 			writeClipboardText: async text => {
 				Clipboard.setString(text);
@@ -53,11 +58,11 @@ const useEditorMessenger = ({
 				return Clipboard.getString();
 			},
 		};
-		const messenger = new RNToWebViewMessenger<ImageEditorCallbacks, ImageEditorControl>(
+		const messenger = new RNToWebViewMessenger<MainProcessApi, EditorProcessApi>(
 			'image-editor', webviewRef, localApi,
 		);
 		return messenger;
-	}, [webviewRef, setImageChanged, onReadyToLoadData, onRequestCloseEditor, onSave]);
+	}, [webviewRef, setImageChanged]);
 };
 
 export default useEditorMessenger;

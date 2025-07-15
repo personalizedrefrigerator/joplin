@@ -9,18 +9,18 @@ window.ResizeObserver = class { public observe() { } } as any;
 import { describe, it, expect, jest } from '@jest/globals';
 import { Color4, EditorImage, EditorSettings, Path, pathToRenderable, StrokeComponent } from 'js-draw';
 import { RenderingMode } from 'js-draw';
-import createJsDrawEditor from './createJsDrawEditor';
+import { createJsDrawEditor } from './index';
 import { BackgroundComponent } from 'js-draw';
 import { BackgroundComponentBackgroundType } from 'js-draw';
-import { ImageEditorCallbacks } from './types';
+import { MainProcessApi } from './types';
 import applyTemplateToEditor from './applyTemplateToEditor';
 
 
-const createEditorWithCallbacks = (callbacks: Partial<ImageEditorCallbacks>) => {
+const createEditorWithCallbacks = (callbacks: Partial<MainProcessApi>) => {
 	const toolbarState = '';
 	const locale = 'en';
 
-	const allCallbacks: ImageEditorCallbacks = {
+	const allCallbacks: MainProcessApi = {
 		save: () => {},
 		saveThenClose: ()=> {},
 		closeEditor: ()=> {},
@@ -49,7 +49,7 @@ const createEditorWithCallbacks = (callbacks: Partial<ImageEditorCallbacks>) => 
 	return createJsDrawEditor(allCallbacks, toolbarState, locale, localizations, editorOptions);
 };
 
-describe('createJsDrawEditor', () => {
+describe('imageEditor/contentScript/index', () => {
 	it('should trigger autosave callback every few minutes', async () => {
 		let calledAutosaveCount = 0;
 

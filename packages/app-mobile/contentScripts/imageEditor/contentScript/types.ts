@@ -3,7 +3,7 @@ export type SaveDrawingCallback = (svgData: string, isAutosave: boolean)=> void;
 export type UpdateEditorTemplateCallback = (newTemplate: string)=> void;
 export type UpdateToolbarCallback = (toolbarData: string)=> void;
 
-export interface ImageEditorCallbacks {
+export interface MainProcessApi {
 	onLoadedEditor: ()=> void;
 
 	save: SaveDrawingCallback;
@@ -18,7 +18,10 @@ export interface ImageEditorCallbacks {
 	readClipboardText: ()=> Promise<string>;
 }
 
-export interface ImageEditorControl {}
+export interface EditorProcessApi {
+	saveThenExit(): Promise<void>;
+	onThemeUpdate(newCss: string): Promise<void>;
+}
 
 // Overrides translations in js-draw -- as of the time of this writing,
 // Joplin has many common strings localized better than js-draw.

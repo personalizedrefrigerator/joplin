@@ -9,9 +9,9 @@ const codeMirrorBundle = new BundledFile(
 	`${mobileDir}/contentScripts/markdownEditor/contentScript.ts`,
 );
 
-const jsDrawBundle = new BundledFile(
-	'svgEditorBundle',
-	`${mobileDir}/components/NoteEditor/ImageEditor/js-draw/createJsDrawEditor.ts`,
+const imageEditorBundle = new BundledFile(
+	'imageEditorBundle',
+	`${mobileDir}/contentScripts/imageEditor/contentScript/index.ts`,
 );
 
 const pluginBackgroundPageBundle = new BundledFile(
@@ -32,7 +32,7 @@ const gulpTasks = {
 		fn: () => codeMirrorBundle.build(),
 	},
 	buildJsDrawEditor: {
-		fn: () => jsDrawBundle.build(),
+		fn: () => imageEditorBundle.build(),
 	},
 	buildNoteViewerBundle: {
 		fn: () => noteViewerBundle.build(),
@@ -41,7 +41,7 @@ const gulpTasks = {
 		fn: () => codeMirrorBundle.startWatching(),
 	},
 	watchJsDrawEditor: {
-		fn: () => jsDrawBundle.startWatching(),
+		fn: () => imageEditorBundle.startWatching(),
 	},
 	buildPluginBackgroundScript: {
 		fn: () => pluginBackgroundPageBundle.build(),

@@ -4,10 +4,10 @@ import { MaterialIconProvider } from '@js-draw/material-icons';
 import 'js-draw/bundledStyles';
 import applyTemplateToEditor from './applyTemplateToEditor';
 import watchEditorForTemplateChanges from './watchEditorForTemplateChanges';
-import { ImageEditorCallbacks, ImageEditorControl, LocalizedStrings } from './types';
+import { MainProcessApi, LocalizedStrings, EditorProcessApi } from './types';
 import startAutosaveLoop from './startAutosaveLoop';
-import WebViewToRNMessenger from '../../../../utils/ipc/WebViewToRNMessenger';
 import './polyfills';
+import WebViewToRNMessenger from '../../../utils/ipc/WebViewToRNMessenger';
 
 
 const restoreToolbarState = (toolbar: AbstractToolbar, state: string) => {
@@ -21,15 +21,8 @@ const restoreToolbarState = (toolbar: AbstractToolbar, state: string) => {
 	}
 };
 
-export const createMessenger = () => {
-	const messenger = new WebViewToRNMessenger<ImageEditorControl, ImageEditorCallbacks>(
-		'image-editor', {},
-	);
-	return messenger;
-};
-
 export const createJsDrawEditor = (
-	callbacks: ImageEditorCallbacks,
+	callbacks: MainProcessApi,
 	initialToolbarState: string,
 	locale: string,
 	defaultLocalizations: LocalizedStrings,
@@ -177,6 +170,9 @@ export const createJsDrawEditor = (
 		});
 	};
 
+	const themeStyles = document.createElement('style');
+	parentElement.appendChild(themeStyles);
+
 	const editorControl = {
 		editor,
 		loadImageOrTemplate: async (resourceUrl: string, templateData: string, svgData: string|undefined) => {
@@ -200,7 +196,11 @@ export const createJsDrawEditor = (
 			void startAutosaveLoop(editor, callbacks.save);
 			watchEditorForTemplateChanges(editor, templateData, callbacks.updateEditorTemplate);
 		},
-		onThemeUpdate: () => {
+		onThemeUpdate: (css: string|null) => {
+			if (css) {
+				themeStyles.textContent = css;
+			}
+
 			// Slightly adjusts the given editor's theme colors. This ensures that the colors chosen for
 			// the editor have proper contrast.
 			adjustEditorThemeForContrast(editor);
@@ -211,12 +211,24 @@ export const createJsDrawEditor = (
 		},
 	};
 
-	editorControl.onThemeUpdate();
+	editorControl.onThemeUpdate(null);
 
 	callbacks.onLoadedEditor();
 
 	return editorControl;
 };
 
+type EditorControl = ReturnType<typeof createJsDrawEditor>;
+export const createMessenger = (getEditor: ()=> EditorControl) => {
+	const messenger = new WebViewToRNMessenger<EditorProcessApi, MainProcessApi>(
+		'image-editor', {
+			onThemeUpdate: async (css: string) => {
+				getEditor().onThemeUpdate(css);
+			},
+			saveThenExit: () => getEditor().saveThenExit(),
+		},
+	);
+	return messenger;
+};
 
 export default createJsDrawEditor;
