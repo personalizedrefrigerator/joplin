@@ -59,10 +59,12 @@ const useSource = (props: Props) => {
 		return {
 			css: '',
 			js: `
-				${shim.injectedJs('richTextEditorBundle')}
-				void richTextEditorBundle.initialize(${
-	JSON.stringify(editorOptions)
-});
+				if (!window.richTextEditorCreated) {
+					window.richTextEditorCreated = true;
+					${shim.injectedJs('richTextEditorBundle')}
+					richTextEditorBundle.setUpLogger();
+					void richTextEditorBundle.initialize(${JSON.stringify(editorOptions)});
+				}
 			`,
 		};
 	}, []);
