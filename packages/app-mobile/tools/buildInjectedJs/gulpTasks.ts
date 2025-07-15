@@ -1,7 +1,7 @@
 import BundledFile from './BundledFile';
 import { mkdirp } from 'fs-extra';
 import { mobileDir, outputDir } from './constants';
-import copyJs from './copyJs';
+import copyAssets from './copyAssets';
 import { readdir, existsSync } from 'fs-extra';
 import { join } from 'path';
 
@@ -52,7 +52,7 @@ const gulpTasks = {
 		},
 	},
 	copyWebviewLib: {
-		fn: () => copyJs('webviewLib', `${mobileDir}/../lib/renderers/webviewLib.js`),
+		fn: () => copyAssets('webviewLib', { js: `${mobileDir}/../lib/renderers/webviewLib.js` }),
 	},
 };
 

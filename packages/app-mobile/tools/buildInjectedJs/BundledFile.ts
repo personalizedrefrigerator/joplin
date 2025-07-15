@@ -6,27 +6,27 @@
 import { dirname, extname, basename } from 'path';
 
 import * as esbuild from 'esbuild';
-import copyJs from './copyJs';
+import copyAssets from './copyAssets';
 import { writeFile } from 'fs-extra';
 
 export default class BundledFile {
-	private readonly bundleOutputPath: string;
-	private readonly bundleBaseName: string;
-	private readonly rootFileDirectory: string;
+	private readonly bundleOutputPathBase_: string;
+	private readonly bundleBaseName_: string;
+	private readonly rootFileDirectory_: string;
 
 	public constructor(
 		public readonly bundleName: string,
-		private readonly sourceFilePath: string,
+		private readonly sourceFilePath_: string,
 	) {
-		this.rootFileDirectory = dirname(sourceFilePath);
-		this.bundleBaseName = basename(sourceFilePath, extname(sourceFilePath));
-		this.bundleOutputPath = `${this.rootFileDirectory}/${this.bundleBaseName}.bundle.js`;
+		this.rootFileDirectory_ = dirname(sourceFilePath_);
+		this.bundleBaseName_ = basename(sourceFilePath_, extname(sourceFilePath_));
+		this.bundleOutputPathBase_ = `${this.rootFileDirectory_}/${this.bundleBaseName_}.bundle`;
 	}
 
 	private makeBuildContext(mode: 'production' | 'development') {
 		return esbuild.context({
-			entryPoints: [this.sourceFilePath],
-			outfile: this.bundleOutputPath,
+			entryPoints: [this.sourceFilePath_],
+			outfile: `${this.bundleOutputPathBase_}.js`,
 			minify: mode === 'production',
 			bundle: true,
 			sourcemap: true,
@@ -60,7 +60,7 @@ export default class BundledFile {
 						build.onEnd(async (result) => {
 							if (result.errors.length === 0) {
 								console.log('copy output');
-								await this.copyToImportableFile();
+								await this.copyToImportableFile_();
 							} else {
 								console.warn('Copying skipped. Build produced errors');
 							}
@@ -73,8 +73,11 @@ export default class BundledFile {
 
 	// Creates a file that can be imported by React native. This file contains the
 	// bundled JS as a string.
-	private async copyToImportableFile() {
-		await copyJs(`${this.bundleName}.bundle`, this.bundleOutputPath);
+	private async copyToImportableFile_() {
+		await copyAssets(`${this.bundleName}.bundle`, {
+			js: `${this.bundleOutputPathBase_}.js`,
+			css: `${this.bundleOutputPathBase_}.css`,
+		});
 	}
 
 	// Create a minified JS file in the same directory as `this.sourceFilePath` with
@@ -86,7 +89,7 @@ export default class BundledFile {
 		await compiler.dispose();
 
 		if (result?.metafile) {
-			await writeFile(`${this.bundleOutputPath}.meta.json`, JSON.stringify(result.metafile, undefined, '\t'));
+			await writeFile(`${this.bundleOutputPathBase_}.meta.json`, JSON.stringify(result.metafile, undefined, '\t'));
 		}
 	}
 

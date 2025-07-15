@@ -30,7 +30,13 @@ shim.injectedJs = (name) => {
 	if (!(name in injectedJs)) {
 		throw new Error(`Cannot find injected JS with ID ${name}`);
 	}
-	return injectedJs[name];
+	return injectedJs[name].js;
+};
+shim.injectedCss = (name) => {
+	if (!(name in injectedJs)) {
+		throw new Error(`Cannot find injected CSS with ID ${name}`);
+	}
+	return injectedJs[name].css;
 };
 shim.fsDriver().getAppDirectoryPath = () => {
 	// On mobile, the rootProfileDirectory and the app directory

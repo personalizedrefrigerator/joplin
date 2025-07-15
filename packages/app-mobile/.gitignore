@@ -68,6 +68,7 @@ lib/csstojs/
 lib/rnInjectedJs/
 dist/
 /**/*.bundle.js
+/**/*.bundle.css
 components/**/*.bundle.js.LICENSE.txt
 components/**/*.bundle.js.md5
 components/**/*.bundle.min.js

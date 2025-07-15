@@ -92,7 +92,10 @@ const useSource = (props: UseSourceProps) => {
 		};
 
 		return {
-			css: rendererCss,
+			css: `
+				${shim.injectedCss('richTextEditorBundle')}
+				${rendererCss}
+			`,
 			js: `
 				${rendererJs}
 
