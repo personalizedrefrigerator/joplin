@@ -75,6 +75,7 @@ const ModalDialog: React.FC<Props> = props => {
 					// buttons.
 					role='heading'
 					aria-label={_('Actions')}
+					accessible={true}
 					style={styles.invisibleHeading}
 				/>
 				<Button disabled={!props.buttonBarEnabled} onPress={props.onCancelPress}>{props.cancelTitle}</Button>

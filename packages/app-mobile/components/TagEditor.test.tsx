@@ -94,5 +94,30 @@ describe('TagEditor', () => {
 		// Manually unmount to prevent warnings
 		unmount();
 	});
+
+	test('searching for a tag and pressing "add new" should add a new tag', () => {
+		const initialTags = ['test'];
+		let currentTags = initialTags;
+		const onTagsChanged = (tags: string[]) => {
+			currentTags = tags;
+		};
+
+		const { unmount } = render(
+			<WrappedTagEditor
+				allTags={initialTags.map(t => ({ title: t }))}
+				initialTags={initialTags}
+				onTagsChanged={onTagsChanged}
+			/>,
+		);
+
+		const searchInput = screen.getByPlaceholderText('Search tags');
+		fireEvent.changeText(searchInput, 'create');
+
+		const addNewButton = screen.getByRole('button', { name: 'Add new' });
+		fireEvent.press(addNewButton);
+		expect(currentTags).toEqual(['test', 'create']);
+
+		unmount();
+	});
 });
 
