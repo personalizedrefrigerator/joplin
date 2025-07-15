@@ -9030,6 +9030,8 @@ __metadata:
     "@joplin/react-native-saf-x": "npm:~3.4"
     "@joplin/renderer": "npm:~3.4"
     "@joplin/tools": "npm:~3.4"
+    "@joplin/turndown": "npm:~4.0.80"
+    "@joplin/turndown-plugin-gfm": "npm:~1.0.62"
     "@joplin/utils": "npm:~3.4"
     "@js-draw/material-icons": "npm:1.30.0"
     "@pmmmwh/react-refresh-webpack-plugin": "npm:^0.5.15"
@@ -9644,7 +9646,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@joplin/turndown-plugin-gfm@npm:^1.0.62, @joplin/turndown-plugin-gfm@workspace:packages/turndown-plugin-gfm":
+"@joplin/turndown-plugin-gfm@npm:^1.0.62, @joplin/turndown-plugin-gfm@npm:~1.0.62, @joplin/turndown-plugin-gfm@workspace:packages/turndown-plugin-gfm":
   version: 0.0.0-use.local
   resolution: "@joplin/turndown-plugin-gfm@workspace:packages/turndown-plugin-gfm"
   dependencies:
@@ -9656,7 +9658,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@joplin/turndown@npm:^4.0.80, @joplin/turndown@workspace:packages/turndown":
+"@joplin/turndown@npm:^4.0.80, @joplin/turndown@npm:~4.0.80, @joplin/turndown@workspace:packages/turndown":
   version: 0.0.0-use.local
   resolution: "@joplin/turndown@workspace:packages/turndown"
   dependencies:

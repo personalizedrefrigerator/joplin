@@ -3,7 +3,7 @@ import * as React from 'react';
 import { describe, it, expect, beforeEach } from '@jest/globals';
 import { act, fireEvent, render, screen, waitFor } from '../../utils/testing/testingLibrary';
 
-import NoteEditor, { EditorMode } from './NoteEditor';
+import NoteEditor, { EditorType } from './NoteEditor';
 import Setting from '@joplin/lib/models/Setting';
 import { _ } from '@joplin/lib/locale';
 import { setupDatabaseAndSynchronizer, switchClient } from '@joplin/lib/testing/test-utils';
@@ -60,7 +60,7 @@ describe('NoteEditor', () => {
 					onAttach={async ()=>{}}
 					noteResources={{}}
 					plugins={{}}
-					mode={EditorMode.Markdown}
+					mode={EditorType.Markdown}
 				/>
 			</TestProviderStack>,
 		);

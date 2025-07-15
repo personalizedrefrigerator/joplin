@@ -92,6 +92,8 @@
     "@babel/preset-env": "7.25.3",
     "@babel/runtime": "7.25.0",
     "@joplin/tools": "~3.4",
+    "@joplin/turndown": "~4.0.80",
+    "@joplin/turndown-plugin-gfm": "~1.0.62",
     "@js-draw/material-icons": "1.30.0",
     "@pmmmwh/react-refresh-webpack-plugin": "^0.5.15",
     "@react-native-community/cli": "16.0.2",

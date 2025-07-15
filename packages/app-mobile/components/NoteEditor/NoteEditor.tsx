@@ -29,7 +29,7 @@ type UndoRedoDepthChangeHandler = (event: UndoRedoDepthChangeEvent)=> void;
 type SelectionChangeEventHandler = (event: SelectionRangeChangeEvent)=> void;
 type OnAttachCallback = (filePath?: string)=> Promise<void>;
 
-export enum EditorMode {
+export enum EditorType {
 	Markdown = 'markdown',
 	RichText = 'rich-text',
 }
@@ -38,7 +38,7 @@ interface Props {
 	ref: Ref<EditorControl>;
 	themeId: number;
 	initialText: string;
-	mode: EditorMode;
+	mode: EditorType;
 	noteId: string;
 	noteHash: string;
 	globalSearch: string;
@@ -332,7 +332,7 @@ function NoteEditor(props: Props) {
 	}), [selectionState, searchState.dialogVisible]);
 
 	const toolbar = <EditorToolbar editorState={toolbarEditorState} />;
-	const EditorComponent = props.mode === EditorMode.Markdown ? MarkdownEditor : RichTextEditor;
+	const EditorComponent = props.mode === EditorType.Markdown ? MarkdownEditor : RichTextEditor;
 
 	return (
 		<View

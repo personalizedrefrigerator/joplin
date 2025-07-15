@@ -5,7 +5,7 @@ import shim from '@joplin/lib/shim';
 import UndoRedoService from '@joplin/lib/services/UndoRedoService';
 import NoteBodyViewer from '../../NoteBodyViewer/NoteBodyViewer';
 import checkPermissions from '../../../utils/checkPermissions';
-import NoteEditor, { EditorMode } from '../../NoteEditor/NoteEditor';
+import NoteEditor, { EditorType as EditorType } from '../../NoteEditor/NoteEditor';
 import * as React from 'react';
 import { Keyboard, View, TextInput, StyleSheet, Linking, Share, NativeSyntheticEvent } from 'react-native';
 import { Platform, PermissionsAndroid } from 'react-native';
@@ -95,6 +95,7 @@ interface Props extends BaseProps {
 	navigation: NoteNavigation;
 	dispatch: Dispatch;
 	noteId: string;
+	editorType: EditorType;
 	useEditorBeta: boolean;
 	plugins: PluginStates;
 	themeId: number;
@@ -1230,7 +1231,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 
 		const pluginCommands = pluginUtils.commandNamesFromViews(this.props.plugins, 'noteToolbar');
 
-		const cacheKey = md5([isTodo, isSaved, pluginCommands.join(','), readOnly].join('_'));
+		const cacheKey = md5([isTodo, isSaved, pluginCommands.join(','), readOnly, this.state.mode].join('_'));
 		if (!this.menuOptionsCache_) this.menuOptionsCache_ = {};
 
 		if (this.menuOptionsCache_[cacheKey]) return this.menuOptionsCache_[cacheKey];
@@ -1346,6 +1347,15 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 				this.properties_onPress();
 			},
 		});
+
+		if (this.state.mode === 'edit') {
+			output.push({
+				title: _('Toggle editors'),
+				onPress: () => {
+					Setting.setValue('editor.codeView', !Setting.value('editor.codeView'));
+				},
+			});
+		}
 
 		if (isDeleted) {
 			output.push({
@@ -1650,7 +1660,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 							paddingLeft: 0,
 							paddingRight: 0,
 						}}
-						mode={EditorMode.RichText}
+						mode={this.props.editorType}
 					/>;
 				}
 			}
@@ -1799,6 +1809,8 @@ const NoteScreen = connect((state: AppState) => {
 		plugins: state.pluginService.plugins,
 		pluginHtmlContents: state.pluginService.pluginHtmlContents,
 		editorNoteReloadTimeRequest: state.editorNoteReloadTimeRequest,
+
+		editorType: state.settings['editor.codeView'] ? EditorType.Markdown : EditorType.RichText,
 
 		// What we call "beta editor" in this component is actually the (now
 		// default) CodeMirror editor. That should be refactored to make it less

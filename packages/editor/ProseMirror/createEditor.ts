@@ -12,17 +12,21 @@ import { baseKeymap } from 'prosemirror-commands';
 import { EditorEventType } from '../events';
 import { RenderResult } from '../../renderer/types';
 
-type OnRender = (markdown: string)=> Promise<RenderResult>;
+type MarkupToHtml = (markup: string)=> Promise<RenderResult>;
+type HtmlToMarkup = (html: string)=> string;
 
 const createEditor = async (
-	parentElement: HTMLElement, props: EditorProps, onRender: OnRender,
+	parentElement: HTMLElement,
+	props: EditorProps,
+	renderToHtml: MarkupToHtml,
+	renderToMarkup: HtmlToMarkup,
 ): Promise<EditorControl> => {
 	const proseMirrorParser = ProseMirrorDomParser.fromSchema(schema);
 	const proseMirrorSerializer = ProseMirrorDomSerializer.fromSchema(schema);
 	const xmlSerializer = new XMLSerializer();
 
 	const createInitialState = async (markup: string) => {
-		const renderResult = (await onRender(markup)).html;
+		const renderResult = (await renderToHtml(markup)).html;
 		const dom = new DOMParser().parseFromString(renderResult, 'text/html');
 
 		return EditorState.create({
@@ -44,7 +48,7 @@ const createEditor = async (
 				const html = xmlSerializer.serializeToString(finalDoc);
 				props.onEvent({
 					kind: EditorEventType.Change,
-					value: html,
+					value: renderToMarkup(html),
 				});
 			}
 

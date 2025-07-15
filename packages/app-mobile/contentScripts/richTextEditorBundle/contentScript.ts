@@ -2,6 +2,14 @@ import { createEditor } from '@joplin/editor/ProseMirror';
 import { EditorProcessApi, EditorProps, MainProcessApi } from './types';
 import WebViewToRNMessenger from '../../utils/ipc/WebViewToRNMessenger';
 import { MarkupLanguage } from '@joplin/renderer';
+const TurndownService = require('@joplin/turndown');
+const { gfm: turndownPluginGfm } = require('@joplin/turndown-plugin-gfm');
+
+const htmlToMarkdown = (html: string) => {
+	const turndownService = new TurndownService();
+	turndownService.use(turndownPluginGfm);
+	return turndownService.turndown(html);
+};
 
 export const initialize = async ({
 	settings,
@@ -35,7 +43,7 @@ export const initialize = async ({
 			markup,
 			language: MarkupLanguage.Markdown,
 		});
-	});
+	}, htmlToMarkdown);
 
 	messenger.setLocalInterface({
 		editor,
