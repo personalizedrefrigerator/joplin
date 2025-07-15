@@ -18,7 +18,6 @@ export interface EditorProps {
 	parentElementClassName: string;
 	initialText: string;
 	initialNoteId: string;
-	globalSearch: string;
 	settings: EditorSettings;
 }
 

@@ -52,7 +52,7 @@ const useWebViewSetup = ({
 	})})
 	` : '';
 
-	const injectedJavaScript = `
+	const injectedJavaScript = useMemo(() => `
 		if (!window.cm) {
 			${shim.injectedJs('markdownEditorBundle')};
 			markdownEditorBundle.setUpLogger();
@@ -71,7 +71,7 @@ const useWebViewSetup = ({
 				cm.execCommand('scrollSelectionIntoView');
 			};
 		}
-	`;
+	`, [jumpToHashJs, setInitialSearchJs, setInitialSelectionJs, editorOptions]);
 
 	// Scroll to the new hash, if it changes.
 	const isFirstScrollRef = useRef(true);
@@ -132,6 +132,11 @@ const useWebViewSetup = ({
 	const api = useMemo(() => {
 		return editorMessenger.remoteApi;
 	}, [editorMessenger]);
+
+	const editorSettings = editorOptions.settings;
+	useEffect(() => {
+		api.editor.updateSettings(editorSettings);
+	}, [api, editorSettings]);
 
 	return useMemo(() => ({
 		pageSetup: {

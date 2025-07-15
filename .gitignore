@@ -631,6 +631,7 @@ packages/app-mobile/components/ExtendedWebView/index.jest.js
 packages/app-mobile/components/ExtendedWebView/index.js
 packages/app-mobile/components/ExtendedWebView/index.web.js
 packages/app-mobile/components/ExtendedWebView/types.js
+packages/app-mobile/components/ExtendedWebView/utils/useCss.js
 packages/app-mobile/components/FolderPicker.js
 packages/app-mobile/components/Icon.js
 packages/app-mobile/components/IconButton.js
@@ -648,8 +649,10 @@ packages/app-mobile/components/NoteEditor/ImageEditor/ImageEditor.js
 packages/app-mobile/components/NoteEditor/ImageEditor/autosave.js
 packages/app-mobile/components/NoteEditor/ImageEditor/isEditableResource.js
 packages/app-mobile/components/NoteEditor/ImageEditor/promptRestoreAutosave.js
+packages/app-mobile/components/NoteEditor/MarkdownEditor.js
 packages/app-mobile/components/NoteEditor/NoteEditor.test.js
 packages/app-mobile/components/NoteEditor/NoteEditor.js
+packages/app-mobile/components/NoteEditor/RichTextEditor.js
 packages/app-mobile/components/NoteEditor/SearchPanel.js
 packages/app-mobile/components/NoteEditor/commandDeclarations.js
 packages/app-mobile/components/NoteEditor/hooks/useCodeMirrorPlugins.js
@@ -827,7 +830,11 @@ packages/app-mobile/contentScripts/rendererBundle/useWebViewSetup.js
 packages/app-mobile/contentScripts/rendererBundle/utils/useContentScripts.js
 packages/app-mobile/contentScripts/rendererBundle/utils/useEditPopup.test.js
 packages/app-mobile/contentScripts/rendererBundle/utils/useEditPopup.js
+packages/app-mobile/contentScripts/richTextEditorBundle/contentScript.js
+packages/app-mobile/contentScripts/richTextEditorBundle/types.js
+packages/app-mobile/contentScripts/richTextEditorBundle/useWebViewSetup.js
 packages/app-mobile/contentScripts/types.js
+packages/app-mobile/contentScripts/utils/setUpLogger.js
 packages/app-mobile/gulpfile.js
 packages/app-mobile/index.web.js
 packages/app-mobile/root.js
@@ -997,6 +1004,10 @@ packages/editor/CodeMirror/utils/overwriteModeExtension.js
 packages/editor/CodeMirror/utils/searchExtension.js
 packages/editor/CodeMirror/utils/selectedNoteIdExtension.js
 packages/editor/CodeMirror/utils/setupVim.js
+packages/editor/ProseMirror/commands.js
+packages/editor/ProseMirror/createEditor.js
+packages/editor/ProseMirror/index.js
+packages/editor/ProseMirror/schema.js
 packages/editor/SelectionFormatting.js
 packages/editor/events.js
 packages/editor/types.js

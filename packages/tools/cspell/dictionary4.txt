@@ -187,3 +187,6 @@ fuzzer
 Freespinny
 BestEtf
 Etf
+prosemirror
+gapcursor
+dropcursor

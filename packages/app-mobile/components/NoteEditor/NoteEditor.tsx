@@ -1,15 +1,13 @@
 import Setting from '@joplin/lib/models/Setting';
 import { themeStyle } from '@joplin/lib/theme';
-import themeToCss from '@joplin/lib/services/style/themeToCss';
 import EditLinkDialog from './EditLinkDialog';
 import { defaultSearchState, SearchPanel } from './SearchPanel';
-import ExtendedWebView from '../ExtendedWebView';
 import { WebViewControl } from '../ExtendedWebView/types';
 
 import * as React from 'react';
-import { forwardRef, RefObject, useEffect, useImperativeHandle } from 'react';
+import { Ref, RefObject, useEffect, useImperativeHandle } from 'react';
 import { useMemo, useState, useCallback, useRef } from 'react';
-import { LayoutChangeEvent, NativeSyntheticEvent, View, ViewStyle } from 'react-native';
+import { LayoutChangeEvent, View, ViewStyle } from 'react-native';
 import { editorFont } from '../global-style';
 
 import { EditorControl as EditorBodyControl, ContentScriptData } from '@joplin/editor/types';
@@ -18,26 +16,28 @@ import { _ } from '@joplin/lib/locale';
 import { ChangeEvent, EditorEvent, EditorEventType, SelectionRangeChangeEvent, UndoRedoDepthChangeEvent } from '@joplin/editor/events';
 import { EditorCommandType, EditorKeymap, EditorLanguageType, SearchState } from '@joplin/editor/types';
 import SelectionFormatting, { defaultSelectionFormatting } from '@joplin/editor/SelectionFormatting';
-import useCodeMirrorPlugins from './hooks/useCodeMirrorPlugins';
-import { WebViewErrorEvent } from 'react-native-webview/lib/RNCWebViewNativeComponent';
-import Logger from '@joplin/utils/Logger';
 import { PluginStates } from '@joplin/lib/services/plugins/reducer';
 import useEditorCommandHandler from './hooks/useEditorCommandHandler';
-import { OnMessageEvent } from '../ExtendedWebView/types';
 import EditorToolbar from '../EditorToolbar/EditorToolbar';
-import useWebViewSetup from '../../contentScripts/markdownEditorBundle/useWebViewSetup';
 import { SelectionRange } from '../../contentScripts/markdownEditorBundle/types';
+import MarkdownEditor from './MarkdownEditor';
+import RichTextEditor from './RichTextEditor';
 
 type ChangeEventHandler = (event: ChangeEvent)=> void;
 type UndoRedoDepthChangeHandler = (event: UndoRedoDepthChangeEvent)=> void;
 type SelectionChangeEventHandler = (event: SelectionRangeChangeEvent)=> void;
 type OnAttachCallback = (filePath?: string)=> Promise<void>;
 
-const logger = Logger.create('NoteEditor');
+export enum EditorMode {
+	Markdown = 'markdown',
+	RichText = 'rich-text',
+}
 
 interface Props {
+	ref: Ref<EditorControl>;
 	themeId: number;
 	initialText: string;
+	mode: EditorMode;
 	noteId: string;
 	noteHash: string;
 	globalSearch: string;
@@ -56,103 +56,6 @@ interface Props {
 function fontFamilyFromSettings() {
 	const font = editorFont(Setting.value('style.editor.fontFamily') as number);
 	return font ? `${font}, sans-serif` : 'sans-serif';
-}
-
-function useCss(themeId: number): string {
-	return useMemo(() => {
-		const theme = themeStyle(themeId);
-		const themeVariableCss = themeToCss(theme);
-		return `
-			${themeVariableCss}
-
-			:root {
-				background-color: ${theme.backgroundColor};
-			}
-
-			body {
-				margin: 0;
-				height: 100vh;
-				/* Prefer 100% -- 100vw shows an unnecessary horizontal scrollbar in Google Chrome (desktop). */
-				width: 100%;
-				box-sizing: border-box;
-
-				padding-left: 1px;
-				padding-right: 1px;
-				padding-bottom: 1px;
-				padding-top: 10px;
-
-				font-size: 13pt;
-			}
-
-			* {
-				scrollbar-width: thin;
-				scrollbar-color: rgba(100, 100, 100, 0.7) rgba(0, 0, 0, 0.1);
-			}
-
-			@supports selector(::-webkit-scrollbar) {
-				*::-webkit-scrollbar {
-					width: 7px;
-					height: 7px;
-				}
-
-				*::-webkit-scrollbar-corner {
-					background: none;
-				}
-
-				*::-webkit-scrollbar-track {
-					border: none;
-				}
-
-				*::-webkit-scrollbar-thumb {
-					background: rgba(100, 100, 100, 0.3);
-					border-radius: 5px;
-				}
-
-				*::-webkit-scrollbar-track:hover {
-					background: rgba(0, 0, 0, 0.1);
-				}
-
-				*::-webkit-scrollbar-thumb:hover {
-					background: rgba(100, 100, 100, 0.7);
-				}
-
-				* {
-					scrollbar-width: unset;
-					scrollbar-color: unset;
-				}
-			}
-		`;
-	}, [themeId]);
-}
-
-const themeStyleSheetClassName = 'note-editor-styles';
-function useHtml(initialCss: string): string {
-	const cssRef = useRef(initialCss);
-	cssRef.current = initialCss;
-
-	return useMemo(() => `
-		<!DOCTYPE html>
-		<html>
-			<head>
-				<meta charset="UTF-8">
-				<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-				<title>${_('Note editor')}</title>
-				<style>
-					/* For better scrolling on iOS (working scrollbar) we use external, rather than internal,
-						scrolling. */
-					.cm-scroller {
-						overflow: none;
-					}
-				</style>
-				<style class=${JSON.stringify(themeStyleSheetClassName)}>
-					${cssRef.current}
-				</style>
-			</head>
-			<body>
-				<div class="CodeMirror" style="height:100%;" autocapitalize="on"></div>
-			</body>
-		</html>
-	`, []);
 }
 
 function editorTheme(themeId: number) {
@@ -178,54 +81,54 @@ function editorTheme(themeId: number) {
 type OnSetVisibleCallback = (visible: boolean)=> void;
 type OnSearchStateChangeCallback = (state: SearchState)=> void;
 const useEditorControl = (
-	bodyControl: EditorBodyControl,
+	editorRef: RefObject<EditorBodyControl>,
 	webviewRef: RefObject<WebViewControl>,
 	setLinkDialogVisible: OnSetVisibleCallback,
 	setSearchState: OnSearchStateChangeCallback,
 ): EditorControl => {
 	return useMemo(() => {
 		const execEditorCommand = (command: EditorCommandType) => {
-			void bodyControl.execCommand(command);
+			void editorRef.current.execCommand(command);
 		};
 
 		const setSearchStateCallback = (state: SearchState) => {
-			bodyControl.setSearchState(state);
+			editorRef.current.setSearchState(state);
 			setSearchState(state);
 		};
 
 		const control: EditorControl = {
 			supportsCommand(command: EditorCommandType) {
-				return bodyControl.supportsCommand(command);
+				return editorRef.current.supportsCommand(command);
 			},
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 			execCommand(command, ...args: any[]) {
-				return bodyControl.execCommand(command, ...args);
+				return editorRef.current.execCommand(command, ...args);
 			},
 
 			focus() {
-				void bodyControl.execCommand(EditorCommandType.Focus);
+				void editorRef.current.execCommand(EditorCommandType.Focus);
 			},
 
 			undo() {
-				bodyControl.undo();
+				editorRef.current.undo();
 			},
 			redo() {
-				bodyControl.redo();
+				editorRef.current.redo();
 			},
 			select(anchor: number, head: number) {
-				bodyControl.select(anchor, head);
+				editorRef.current.select(anchor, head);
 			},
 			setScrollPercent(fraction: number) {
-				bodyControl.setScrollPercent(fraction);
+				editorRef.current.setScrollPercent(fraction);
 			},
 			insertText(text: string) {
-				bodyControl.insertText(text);
+				editorRef.current.insertText(text);
 			},
 			updateBody(newBody: string) {
-				bodyControl.updateBody(newBody);
+				editorRef.current.updateBody(newBody);
 			},
 			updateSettings(newSettings: EditorSettings) {
-				bodyControl.updateSettings(newSettings);
+				editorRef.current.updateSettings(newSettings);
 			},
 
 			toggleBolded() {
@@ -273,7 +176,7 @@ const useEditorControl = (
 				execEditorCommand(EditorCommandType.IndentLess);
 			},
 			updateLink(label: string, url: string) {
-				bodyControl.updateLink(label, url);
+				editorRef.current.updateLink(label, url);
 			},
 			scrollSelectionIntoView() {
 				execEditorCommand(EditorCommandType.ScrollSelectionIntoView);
@@ -289,7 +192,7 @@ const useEditorControl = (
 			},
 
 			setContentScripts: async (plugins: ContentScriptData[]) => {
-				return bodyControl.setContentScripts(plugins);
+				return editorRef.current.setContentScripts(plugins);
 			},
 
 			setSearchState: setSearchStateCallback,
@@ -320,11 +223,10 @@ const useEditorControl = (
 		};
 
 		return control;
-	}, [webviewRef, bodyControl, setLinkDialogVisible, setSearchState]);
+	}, [webviewRef, editorRef, setLinkDialogVisible, setSearchState]);
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-function NoteEditor(props: Props, ref: any) {
+function NoteEditor(props: Props) {
 	const webviewRef = useRef<WebViewControl>(null);
 
 	const editorSettings: EditorSettings = useMemo(() => ({
@@ -392,70 +294,12 @@ function NoteEditor(props: Props, ref: any) {
 		return;
 	};
 
-	const editorWebViewSetup = useWebViewSetup({
-		initialSelection: props.initialSelection,
-		noteHash: props.noteHash,
-		globalSearch: props.globalSearch,
-		onEditorEvent,
-		onAttachFile: props.onAttach,
-		editorOptions: {
-			parentElementClassName: 'CodeMirror',
-			initialText: props.initialText,
-			initialNoteId: props.noteId,
-			globalSearch: props.globalSearch,
-			settings: editorSettings,
-		},
-		webviewRef,
-	});
+	const editorRef = useRef<EditorBodyControl|null>(null);
 	const editorControl = useEditorControl(
-		editorWebViewSetup.api.editor, webviewRef, setLinkDialogVisible, setSearchState,
+		editorRef, webviewRef, setLinkDialogVisible, setSearchState,
 	);
 	editorControlRef.current = editorControl;
 
-
-	const injectedJavaScript = `
-		window.onerror = (message, source, lineno) => {
-			console.error(message);
-			window.ReactNativeWebView.postMessage(
-				"error: " + message + " in file://" + source + ", line " + lineno
-			);
-		};
-		window.onunhandledrejection = (event) => {
-			window.ReactNativeWebView.postMessage(
-				"error: Unhandled promise rejection: " + event
-			);
-		};
-		
-		try {
-			${editorWebViewSetup.pageSetup.js}
-		} catch (e) {
-			console.error('Setup error: ', e);
-			window.ReactNativeWebView.postMessage("error:" + e.message + ": " + JSON.stringify(e))
-		}
-
-		true;
-	`;
-
-	const css = useCss(props.themeId);
-
-	useEffect(() => {
-		if (webviewRef.current) {
-			webviewRef.current.injectJS(`
-				const styleClass = ${JSON.stringify(themeStyleSheetClassName)};
-				for (const oldStyle of [...document.getElementsByClassName(styleClass)]) {
-					oldStyle.remove();
-				}
-
-				const style = document.createElement('style');
-				style.classList.add(styleClass);
-
-				style.appendChild(document.createTextNode(${JSON.stringify(css)}));
-				document.head.appendChild(style);
-			`);
-		}
-	}, [css]);
-
-	const html = useHtml(css);
 
 	useEffect(() => {
 		editorControl.updateSettings(editorSettings);
@@ -463,29 +307,9 @@ function NoteEditor(props: Props, ref: any) {
 
 	useEditorCommandHandler(editorControl);
 
-	useImperativeHandle(ref, () => {
+	useImperativeHandle(props.ref, () => {
 		return editorControl;
 	});
-
-	const codeMirrorPlugins = useCodeMirrorPlugins(props.plugins);
-	useEffect(() => {
-		void editorControl.setContentScripts(codeMirrorPlugins);
-	}, [codeMirrorPlugins, editorControl]);
-
-	const onMessage = useCallback((event: OnMessageEvent) => {
-		const data = event.nativeEvent.data;
-
-		if (typeof data === 'string' && data.indexOf('error:') === 0) {
-			logger.error('CodeMirror error', data);
-			return;
-		}
-
-		editorWebViewSetup.webViewEventHandlers.onMessage(event);
-	}, [editorWebViewSetup]);
-
-	const onError = useCallback((event: NativeSyntheticEvent<WebViewErrorEvent>) => {
-		logger.error(`Load error: Code ${event.nativeEvent.code}: ${event.nativeEvent.description}`);
-	}, []);
 
 	const [hasSpaceForToolbar, setHasSpaceForToolbar] = useState(true);
 	const toolbarEnabled = props.toolbarEnabled && hasSpaceForToolbar;
@@ -506,6 +330,7 @@ function NoteEditor(props: Props, ref: any) {
 	}), [selectionState, searchState.dialogVisible]);
 
 	const toolbar = <EditorToolbar editorState={toolbarEditorState} />;
+	const EditorComponent = props.mode === EditorMode.Markdown ? MarkdownEditor : RichTextEditor;
 
 	return (
 		<View
@@ -527,17 +352,19 @@ function NoteEditor(props: Props, ref: any) {
 				flexShrink: 0,
 				minHeight: '30%',
 			}}>
-				<ExtendedWebView
-					webviewInstanceId='NoteEditor'
-					testID='NoteEditor'
-					scrollEnabled={true}
-					ref={webviewRef}
-					html={html}
-					injectedJavaScript={injectedJavaScript}
-					hasPluginScripts={codeMirrorPlugins.length > 0}
-					onMessage={onMessage}
-					onLoadEnd={editorWebViewSetup.webViewEventHandlers.onLoadEnd}
-					onError={onError}
+				<EditorComponent
+					editorRef={editorRef}
+					webviewRef={webviewRef}
+					themeId={props.themeId}
+					noteId={props.noteId}
+					noteHash={props.noteHash}
+					initialText={props.initialText}
+					initialSelection={props.initialSelection}
+					editorSettings={editorSettings}
+					globalSearch={props.globalSearch}
+					onEditorEvent={onEditorEvent}
+					plugins={props.plugins}
+					onAttach={props.onAttach}
 				/>
 			</View>
 
@@ -552,4 +379,4 @@ function NoteEditor(props: Props, ref: any) {
 	);
 }
 
-export default forwardRef(NoteEditor);
+export default NoteEditor;

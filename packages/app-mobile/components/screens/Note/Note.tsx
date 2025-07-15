@@ -5,7 +5,7 @@ import shim from '@joplin/lib/shim';
 import UndoRedoService from '@joplin/lib/services/UndoRedoService';
 import NoteBodyViewer from '../../NoteBodyViewer/NoteBodyViewer';
 import checkPermissions from '../../../utils/checkPermissions';
-import NoteEditor from '../../NoteEditor/NoteEditor';
+import NoteEditor, { EditorMode } from '../../NoteEditor/NoteEditor';
 import * as React from 'react';
 import { Keyboard, View, TextInput, StyleSheet, Linking, Share, NativeSyntheticEvent } from 'react-native';
 import { Platform, PermissionsAndroid } from 'react-native';
@@ -56,7 +56,7 @@ import getImageDimensions from '../../../utils/image/getImageDimensions';
 import resizeImage from '../../../utils/image/resizeImage';
 import { CameraResult } from '../../CameraView/types';
 import { DialogContext, DialogControl } from '../../DialogManager';
-import { CommandRuntimeProps, EditorMode, PickerResponse } from './types';
+import { CommandRuntimeProps, NoteViewerMode, PickerResponse } from './types';
 import commands from './commands';
 import { AttachFileAction, AttachFileOptions } from './commands/attachFile';
 import PluginService from '@joplin/lib/services/plugins/PluginService';
@@ -119,7 +119,7 @@ interface ComponentProps extends Props {
 
 interface State {
 	note: NoteEntity;
-	mode: EditorMode;
+	mode: NoteViewerMode;
 	readOnly: boolean;
 	folder: FolderEntity|null;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
@@ -1649,6 +1649,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 							paddingLeft: 0,
 							paddingRight: 0,
 						}}
+						mode={EditorMode.RichText}
 					/>;
 				}
 			}

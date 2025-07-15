@@ -1,19 +1,9 @@
 import { createEditor } from '@joplin/editor/CodeMirror';
 import { focus } from '@joplin/lib/utils/focusHandler';
-import Logger, { TargetType } from '@joplin/utils/Logger';
 import WebViewToRNMessenger from '../../utils/ipc/WebViewToRNMessenger';
 import { EditorProcessApi, EditorProps, MainProcessApi } from './types';
 
-let loggerCreated = false;
-export const setUpLogger = () => {
-	if (!loggerCreated) {
-		const logger = new Logger();
-		logger.addTarget(TargetType.Console);
-		logger.setLevel(Logger.LEVEL_WARN);
-		Logger.initializeGlobalLogger(logger);
-		loggerCreated = true;
-	}
-};
+export { default as setUpLogger } from '../utils/setUpLogger';
 
 export const initializeEditor = ({
 	parentElementClassName,
