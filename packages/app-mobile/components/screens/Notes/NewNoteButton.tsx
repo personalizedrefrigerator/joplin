@@ -3,7 +3,7 @@ import { _ } from '@joplin/lib/locale';
 import CommandService from '@joplin/lib/services/CommandService';
 import { Divider } from 'react-native-paper';
 import FloatingActionButton from '../../buttons/FloatingActionButton';
-import { AccessibilityActionEvent, AccessibilityActionInfo, ScrollView, StyleSheet, View } from 'react-native';
+import { AccessibilityActionEvent, AccessibilityActionInfo, StyleSheet, View } from 'react-native';
 import { AttachFileAction } from '../Note/commands/attachFile';
 import LabelledIconButton from '../../buttons/LabelledIconButton';
 import TextButton, { ButtonSize, ButtonType } from '../../buttons/TextButton';
@@ -27,7 +27,8 @@ const makeNewNote = (isTodo: boolean, action?: AttachFileAction) => {
 const styles = StyleSheet.create({
 	buttonRow: {
 		flexDirection: 'row',
-		flexWrap: 'wrap',
+		flexWrap: 'wrap-reverse',
+		justifyContent: 'space-between',
 		gap: 2,
 	},
 	mainButtonRow: {
@@ -35,7 +36,7 @@ const styles = StyleSheet.create({
 		gap: 12,
 	},
 	shortcutButton: {
-		flexGrow: 1,
+		flexGrow: 0,
 		flexShrink: 1,
 		width: 82,
 	},
@@ -72,13 +73,13 @@ const NewNoteButton: React.FC<Props> = _props => {
 	};
 
 	const menuContent = <View style={styles.menuContent}>
-		<ScrollView horizontal style={styles.buttonRow}>
+		<View style={styles.buttonRow}>
 			{renderShortcutButton(AttachFileAction.AttachFile, 'material attachment', _('Attachment'))}
 			{renderShortcutButton(AttachFileAction.RecordAudio, 'material microphone', _('Recording'))}
 			{renderShortcutButton(AttachFileAction.TakePhoto, 'material camera', _('Camera'))}
 			{renderShortcutButton(AttachFileAction.AttachDrawing, 'material draw', _('Drawing'))}
 			{renderShortcutButton(() => NavService.go('DocumentScanner'), 'material data-matrix-scan', _('Scan notebook'))}
-		</ScrollView>
+		</View>
 		<Divider/>
 		<View style={[styles.buttonRow, styles.mainButtonRow]}>
 			<TextButton
