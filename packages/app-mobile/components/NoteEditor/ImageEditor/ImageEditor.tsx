@@ -7,7 +7,7 @@ import { OnMessageEvent, WebViewControl } from '../../ExtendedWebView/types';
 import { clearAutosave, writeAutosave } from './autosave';
 import { DialogContext } from '../../DialogManager';
 import BackButtonService from '../../../services/BackButtonService';
-import useWebViewSetup, { ImageEditorControl } from '../../../contentScripts/imageEditor/useWebViewSetup';
+import useWebViewSetup, { ImageEditorControl } from '../../../contentScripts/imageEditorBundle/useWebViewSetup';
 
 const logger = Logger.create('ImageEditor');
 

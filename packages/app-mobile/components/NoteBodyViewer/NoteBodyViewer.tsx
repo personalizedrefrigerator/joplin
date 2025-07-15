@@ -16,7 +16,7 @@ import shim from '@joplin/lib/shim';
 import CommandService from '@joplin/lib/services/CommandService';
 import { AppState } from '../../utils/types';
 import { connect } from 'react-redux';
-import useWebViewSetup from '../../contentScripts/renderer/useWebViewSetup';
+import useWebViewSetup from '../../contentScripts/rendererBundle/useWebViewSetup';
 
 interface Props {
 	themeId: number;

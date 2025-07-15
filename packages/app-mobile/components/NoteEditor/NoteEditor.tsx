@@ -25,8 +25,8 @@ import { PluginStates } from '@joplin/lib/services/plugins/reducer';
 import useEditorCommandHandler from './hooks/useEditorCommandHandler';
 import { OnMessageEvent } from '../ExtendedWebView/types';
 import EditorToolbar from '../EditorToolbar/EditorToolbar';
-import useWebViewSetup from '../../contentScripts/markdownEditor/useWebViewSetup';
-import { SelectionRange } from '../../contentScripts/markdownEditor/types';
+import useWebViewSetup from '../../contentScripts/markdownEditorBundle/useWebViewSetup';
+import { SelectionRange } from '../../contentScripts/markdownEditorBundle/types';
 
 type ChangeEventHandler = (event: ChangeEvent)=> void;
 type UndoRedoDepthChangeHandler = (event: UndoRedoDepthChangeEvent)=> void;
