@@ -14,6 +14,7 @@ import { RenderResult } from '../../renderer/types';
 import UndoStackSynchronizer from './utils/UndoStackSynchronizer';
 import computeSelectionFormatting from './utils/computeSelectionFormatting';
 import { defaultSelectionFormatting, selectionFormattingEqual } from '../SelectionFormatting';
+import joplinEditablePlugin from './plugins/joplinEditablePlugin';
 
 type MarkupToHtml = (markup: string)=> Promise<RenderResult>;
 type HtmlToMarkup = (html: HTMLElement)=> string;
@@ -46,6 +47,7 @@ const createEditor = async (
 				gapCursor(),
 				dropCursor(),
 				history(),
+				joplinEditablePlugin,
 			],
 		});
 	};

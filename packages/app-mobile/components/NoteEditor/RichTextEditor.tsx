@@ -15,12 +15,13 @@ import useWebViewSetup from '../../contentScripts/richTextEditorBundle/useWebVie
 
 const logger = Logger.create('NoteEditor');
 
-function useCss(themeId: number): string {
+function useCss(themeId: number, editorCss: string): string {
 	return useMemo(() => {
 		const theme = themeStyle(themeId);
 		const themeVariableCss = themeToCss(theme);
 		return `
 			${themeVariableCss}
+			${editorCss}
 
 			:root {
 				background-color: ${theme.backgroundColor};
@@ -33,8 +34,8 @@ function useCss(themeId: number): string {
 				width: 100%;
 				box-sizing: border-box;
 
-				padding-left: 1px;
-				padding-right: 1px;
+				padding-left: 4px;
+				padding-right: 4px;
 				padding-bottom: 1px;
 				padding-top: 10px;
 
@@ -80,7 +81,7 @@ function useCss(themeId: number): string {
 				}
 			}
 		`;
-	}, [themeId]);
+	}, [themeId, editorCss]);
 }
 
 function useHtml(initialCss: string): string {
@@ -154,7 +155,7 @@ const RichTextEditor: React.FC<EditorProps> = props => {
 		true;
 	`;
 
-	const css = useCss(props.themeId);
+	const css = useCss(props.themeId, editorWebViewSetup.pageSetup.css);
 	const html = useHtml(css);
 
 	const onMessage = useCallback((event: OnMessageEvent) => {
