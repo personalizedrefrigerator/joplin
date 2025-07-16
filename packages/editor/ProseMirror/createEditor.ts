@@ -7,14 +7,14 @@ import commands from './commands';
 import schema from './schema';
 import { gapCursor } from 'prosemirror-gapcursor';
 import { dropCursor } from 'prosemirror-dropcursor';
-import { keymap } from 'prosemirror-keymap';
-import { baseKeymap } from 'prosemirror-commands';
 import { EditorEventType } from '../events';
 import { RenderResult } from '../../renderer/types';
 import UndoStackSynchronizer from './utils/UndoStackSynchronizer';
 import computeSelectionFormatting from './utils/computeSelectionFormatting';
 import { defaultSelectionFormatting, selectionFormattingEqual } from '../SelectionFormatting';
 import joplinEditablePlugin from './plugins/joplinEditablePlugin';
+import keymapExtension from './plugins/keymapExtension';
+import inputRulesExtension from './plugins/inputRulesExtension';
 
 type MarkupToHtml = (markup: string)=> Promise<RenderResult>;
 type HtmlToMarkup = (html: HTMLElement)=> string;
@@ -43,12 +43,13 @@ const createEditor = async (
 		return EditorState.create({
 			doc: proseMirrorParser.parse(dom),
 			plugins: [
-				keymap(baseKeymap),
+				inputRulesExtension,
+				keymapExtension,
 				gapCursor(),
 				dropCursor(),
 				history(),
 				joplinEditablePlugin,
-			],
+			].flat(),
 		});
 	};
 
