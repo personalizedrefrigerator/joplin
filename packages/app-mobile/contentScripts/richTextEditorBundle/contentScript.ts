@@ -14,7 +14,13 @@ const postprocessHtml = (html: HTMLElement) => {
 	const resources = html.querySelectorAll<HTMLImageElement>('img[data-resource-id]');
 	for (const resource of resources) {
 		const resourceId = resource.getAttribute('data-resource-id');
-		resource.src = `:/${resourceId}`;
+
+		// By default, if `src` is specified, the browser will try to load the image, even if it isn't added
+		// to the DOM.
+		// Since :/resourceId isn't a valid image URI, this results in a large number of warnings. As a workaround,
+		// use `data-src` to store the `src`. The `src` will be restored when saving.
+		resource.setAttribute('data-src', `:/${resourceId}`);
+		resource.src = '';
 	}
 
 	// Re-add newlines to data-joplin-source-* that were removed
