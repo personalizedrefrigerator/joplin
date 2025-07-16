@@ -13,6 +13,7 @@ const domOutputSpecs = {
 	code: ['code', { class: 'inline-code', spellcheck: false }, 0],
 	emphasis: ['em', 0],
 	pre: ['pre', { class: 'code-block' }, ['code', 0]],
+	br: ['br'],
 } satisfies Record<string, DOMOutputSpec>;
 
 
@@ -32,6 +33,17 @@ const nodes = {
 		parseDOM: [1, 2, 3, 4, 5, 6].map(level => ({ tag: `h${level}`, attrs: { level } })),
 		toDOM: (node) => [`h${node.attrs.level}`, 0],
 	},
+	pre_block: {
+		content: 'text*',
+		group: 'block',
+		marks: '',
+		code: true,
+		defining: true, // Preserve the node during replacement operations
+		parseDOM: [{ tag: 'pre' }],
+		toDOM: () => domOutputSpecs.pre,
+	},
+	...joplinEditableNodes,
+
 	text: {
 		group: 'inline',
 	},
@@ -75,16 +87,13 @@ const nodes = {
 			];
 		},
 	},
-	pre_block: {
-		content: 'text*',
-		group: 'block',
-		marks: '',
-		code: true,
-		defining: true, // Preserve the node during replacement operations
-		parseDOM: [{ tag: 'pre' }],
-		toDOM: () => domOutputSpecs.pre,
+	hard_break: {
+		inline: true,
+		group: 'inline',
+		selectable: false,
+		parseDOM: [{ tag: 'br' }],
+		toDOM: () => domOutputSpecs.br,
 	},
-	...joplinEditableNodes,
 } satisfies Record<string, NodeSpec>;
 
 const marks = {
