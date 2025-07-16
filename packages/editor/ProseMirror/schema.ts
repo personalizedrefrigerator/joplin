@@ -18,8 +18,7 @@ const domOutputSpecs = {
 
 
 const nodes = {
-	// Always end the document with a paragraph. Doing so makes it easier to add new content after large blocks.
-	doc: { content: 'block* paragraph' },
+	doc: { content: 'block+' },
 	paragraph: {
 		group: 'block',
 		content: 'inline*',
