@@ -1,7 +1,7 @@
 import { ContentScriptData, EditorCommandType, EditorControl, EditorProps, EditorSettings, SearchState, UpdateBodyOptions, UserEventSource } from '../types';
 import { EditorState, TextSelection, Transaction } from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';
-import { DOMSerializer as ProseMirrorDomSerializer, DOMParser as ProseMirrorDomParser } from 'prosemirror-model';
+import { DOMParser as ProseMirrorDomParser } from 'prosemirror-model';
 import { history } from 'prosemirror-history';
 import commands from './commands';
 import schema from './schema';
@@ -15,6 +15,7 @@ import { defaultSelectionFormatting, selectionFormattingEqual } from '../Selecti
 import joplinEditablePlugin from './plugins/joplinEditablePlugin';
 import keymapExtension from './plugins/keymapExtension';
 import inputRulesExtension from './plugins/inputRulesExtension';
+import originalMarkupPlugin from './plugins/originalMarkupPlugin';
 
 type MarkupToHtml = (markup: string)=> Promise<RenderResult>;
 type HtmlToMarkup = (html: HTMLElement)=> string;
@@ -25,11 +26,18 @@ const createEditor = async (
 	renderToHtml: MarkupToHtml,
 	renderToMarkup: HtmlToMarkup,
 ): Promise<EditorControl> => {
+	const renderNodeToMarkup = (node: Node|DocumentFragment) => {
+		const element = document.createElement('div');
+		element.appendChild(node);
+		return renderToMarkup(element);
+	};
+
 	const proseMirrorParser = ProseMirrorDomParser.fromSchema(schema);
-	const proseMirrorSerializer = ProseMirrorDomSerializer.fromSchema(schema);
 
 	const cssContainer = document.createElement('style');
 	parentElement.appendChild(cssContainer);
+
+	const { plugin: markupTracker, stateToMarkup } = originalMarkupPlugin(renderNodeToMarkup);
 
 	let settings = props.settings;
 	const createInitialState = async (markup: string) => {
@@ -49,19 +57,16 @@ const createEditor = async (
 				dropCursor(),
 				history(),
 				joplinEditablePlugin,
+				markupTracker,
 			].flat(),
 		});
 	};
 
 	const undoStackSynchronizer = new UndoStackSynchronizer(props.onEvent);
-	const onDocumentUpdate = (transaction: Transaction) => {
-		const finalDoc = proseMirrorSerializer.serializeFragment(transaction.doc.content);
-		const element = document.createElement('div');
-		element.appendChild(finalDoc);
-
+	const onDocumentUpdate = (newState: EditorState) => {
 		props.onEvent({
 			kind: EditorEventType.Change,
-			value: renderToMarkup(element),
+			value: stateToMarkup(newState),
 		});
 	};
 	let lastSelectionFormatting = defaultSelectionFormatting;
@@ -79,8 +84,10 @@ const createEditor = async (
 	const view = new EditorView(parentElement, {
 		state: await createInitialState(props.initialText),
 		dispatchTransaction: transaction => {
+			const newState = view.state.apply(transaction);
+
 			if (transaction.docChanged) {
-				onDocumentUpdate(transaction);
+				onDocumentUpdate(newState);
 			}
 
 			if (transaction.selectionSet || transaction.docChanged) {
@@ -89,7 +96,7 @@ const createEditor = async (
 
 			undoStackSynchronizer.schedulePostUndoRedoDepthChange(view);
 
-			view.updateState(view.state.apply(transaction));
+			view.updateState(newState);
 		},
 		attributes: {
 			'aria-label': settings.editorLabel,

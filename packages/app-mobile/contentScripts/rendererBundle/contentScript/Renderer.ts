@@ -22,8 +22,9 @@ export interface RenderSettings {
 	initialScroll: number;
 	// If [null], plugin assets are not added to the document
 	pluginAssetContainerSelector: string|null;
-	// Move more CSS into the external cssStrings:
-	splitted?: boolean;
+
+	splitted?: boolean; // Move CSS into a separate output
+	mapsToLine?: boolean; // Sourcemaps
 
 	createEditPopupSyntax: string;
 	destroyEditPopupSyntax: string;
@@ -129,6 +130,7 @@ export default class Renderer {
 				return settings.pluginSettings[settingKey];
 			},
 			splitted: settings.splitted,
+			mapsToLine: settings.mapsToLine,
 			whiteBackgroundNoteRendering: markup.language === MarkupLanguage.Html,
 		};
 

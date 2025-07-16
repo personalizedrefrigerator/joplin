@@ -64,6 +64,7 @@ const useMessenger = (props: UseMessengerProps) => {
 						...markupRenderingSettings.current,
 						splitted: options.splitted,
 						pluginAssetContainerSelector: options.pluginAssetContainerSelector,
+						mapsToLine: options.mapsToLine,
 					},
 				);
 				return renderResult;

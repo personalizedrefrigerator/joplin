@@ -17,6 +17,7 @@ export interface EditorProcessApi {
 type RenderOptionsSlice = {
 	pluginAssetContainerSelector: string;
 	splitted: boolean;
+	mapsToLine: true;
 };
 
 export interface MainProcessApi {

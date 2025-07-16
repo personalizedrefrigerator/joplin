@@ -75,6 +75,7 @@ packages/lib/services/database/types.ts
 packages/lib/vendor/
 packages/lib/vendor/fountain.min.js
 packages/lib/welcomeAssets.js
+packages/editor/*/vendor/
 packages/plugins/**/api
 packages/plugins/**/dist
 packages/server/dist/
@@ -1036,11 +1037,13 @@ packages/editor/ProseMirror/index.js
 packages/editor/ProseMirror/plugins/inputRulesExtension.js
 packages/editor/ProseMirror/plugins/joplinEditablePlugin.js
 packages/editor/ProseMirror/plugins/keymapExtension.js
+packages/editor/ProseMirror/plugins/originalMarkupPlugin.js
 packages/editor/ProseMirror/schema.js
 packages/editor/ProseMirror/styles.js
 packages/editor/ProseMirror/utils/UndoStackSynchronizer.js
 packages/editor/ProseMirror/utils/computeSelectionFormatting.js
 packages/editor/ProseMirror/utils/sanitizeHtml.js
+packages/editor/ProseMirror/vendor/changedDescendants.js
 packages/editor/SelectionFormatting.js
 packages/editor/events.js
 packages/editor/types.js

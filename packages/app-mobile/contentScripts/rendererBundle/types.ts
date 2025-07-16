@@ -56,12 +56,12 @@ export interface RenderOptions {
 	themeOverrides: Record<string, string|number>;
 	// If null, plugin assets will not be added to the document.
 	pluginAssetContainerSelector: string|null;
+	noteHash: string;
+	initialScroll: number;
 
 	// Forwarded renderer settings
 	splitted?: boolean;
-
-	noteHash: string;
-	initialScroll: number;
+	mapsToLine?: boolean;
 }
 
 type CancelEvent = { cancelled: boolean };

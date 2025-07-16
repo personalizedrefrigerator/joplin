@@ -89,6 +89,7 @@ export const initialize = async ({
 		}, {
 			pluginAssetContainerSelector: `#${assetContainer.id}`,
 			splitted: true,
+			mapsToLine: true,
 		});
 	}, htmlToMarkdown);
 
