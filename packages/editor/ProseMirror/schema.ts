@@ -6,7 +6,7 @@ import OrderedMap from 'orderedmap';
 const domOutputSpecs = {
 	paragraph: ['p', 0],
 	strong: ['strong', 0],
-	code: ['code', { class: 'inline-code' }, 0],
+	code: ['code', { class: 'inline-code', spellcheck: false }, 0],
 	emphasis: ['em', 0],
 } satisfies Record<string, DOMOutputSpec>;
 
