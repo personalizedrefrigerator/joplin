@@ -105,13 +105,9 @@ const createEditor = async (
 		},
 		undo: () => {
 			void editorControl.execCommand(EditorCommandType.Undo);
-
-			// TODO: Dispatch related event
 		},
 		redo: () => {
 			void editorControl.execCommand(EditorCommandType.Redo);
-
-			// TODO: Dispatch related event
 		},
 		select: function(anchor: number, head: number): void {
 			const transaction = view.state.tr;
@@ -120,8 +116,9 @@ const createEditor = async (
 			);
 			view.dispatch(transaction);
 		},
-		setScrollPercent: (_fraction: number) => {
-			throw new Error('setScrollPercent: not implemented');
+		setScrollPercent: (fraction: number) => {
+			// TODO: Handle this in a better way?
+			document.scrollingElement.scrollTop = fraction * document.scrollingElement.scrollHeight;
 		},
 		insertText: (text: string, _source?: UserEventSource) => {
 			view.dispatch(view.state.tr.insertText(text));

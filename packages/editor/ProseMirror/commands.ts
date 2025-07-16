@@ -4,6 +4,8 @@ import { redo, undo } from 'prosemirror-history';
 import { selectAll, setBlockType, toggleMark } from 'prosemirror-commands';
 import { focus } from '@joplin/lib/utils/focusHandler';
 import schema from './schema';
+import { liftListItem, wrapInList } from 'prosemirror-schema-list';
+import { NodeType } from 'prosemirror-model';
 
 const toggleHeading = (level: number): Command => {
 	const enableCommand = setBlockType(schema.nodes.heading, { level });
@@ -14,6 +16,15 @@ const toggleHeading = (level: number): Command => {
 			return true;
 		}
 		return resetCommand(state, dispatch, view);
+	};
+};
+
+const toggleList = (type: NodeType): Command => {
+	const enableCommand = wrapInList(type);
+	const liftCommand = liftListItem(schema.nodes.list_item);
+
+	return (state, dispatch, view) => {
+		return enableCommand(state, dispatch, view) || liftCommand(state, dispatch, view);
 	};
 };
 
@@ -34,8 +45,8 @@ const commands: Record<EditorCommandType, Command|null> = {
 	[EditorCommandType.ToggleComment]: null,
 	[EditorCommandType.DuplicateLine]: null,
 	[EditorCommandType.SortSelectedLines]: null,
-	[EditorCommandType.ToggleNumberedList]: null,
-	[EditorCommandType.ToggleBulletedList]: null,
+	[EditorCommandType.ToggleNumberedList]: toggleList(schema.nodes.ordered_list),
+	[EditorCommandType.ToggleBulletedList]: toggleList(schema.nodes.bullet_list),
 	[EditorCommandType.ToggleCheckList]: null,
 	[EditorCommandType.ToggleHeading]: toggleHeading(2),
 	[EditorCommandType.ToggleHeading1]: toggleHeading(1),
