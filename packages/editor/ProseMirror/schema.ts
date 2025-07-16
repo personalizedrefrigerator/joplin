@@ -111,7 +111,10 @@ const marks = {
 	},
 } satisfies Record<string, MarkSpec>;
 
-const schema: Schema = new Schema({
+type NodeKeys = (keyof typeof nodes)|'ordered_list'|'bullet_list'|'list_item';
+type MarkKeys = keyof typeof marks;
+
+const schema = new Schema<NodeKeys, MarkKeys>({
 	marks,
 	nodes: addListNodes(OrderedMap.from(nodes), 'paragraph block*', 'block'),
 });

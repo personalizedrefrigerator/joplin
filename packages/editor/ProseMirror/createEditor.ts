@@ -1,5 +1,5 @@
 import { ContentScriptData, EditorCommandType, EditorControl, EditorProps, EditorSettings, SearchState, UpdateBodyOptions, UserEventSource } from '../types';
-import { EditorState, TextSelection } from 'prosemirror-state';
+import { EditorState, TextSelection, Transaction } from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';
 import { DOMSerializer as ProseMirrorDomSerializer, DOMParser as ProseMirrorDomParser } from 'prosemirror-model';
 import { history } from 'prosemirror-history';
@@ -12,6 +12,8 @@ import { baseKeymap } from 'prosemirror-commands';
 import { EditorEventType } from '../events';
 import { RenderResult } from '../../renderer/types';
 import UndoStackSynchronizer from './utils/UndoStackSynchronizer';
+import computeSelectionFormatting from './utils/computeSelectionFormatting';
+import { defaultSelectionFormatting, selectionFormattingEqual } from '../SelectionFormatting';
 
 type MarkupToHtml = (markup: string)=> Promise<RenderResult>;
 type HtmlToMarkup = (html: HTMLElement)=> string;
@@ -28,6 +30,7 @@ const createEditor = async (
 	const cssContainer = document.createElement('style');
 	parentElement.appendChild(cssContainer);
 
+	let settings = props.settings;
 	const createInitialState = async (markup: string) => {
 		const renderResult = await renderToHtml(markup);
 		cssContainer.replaceChildren(
@@ -48,19 +51,37 @@ const createEditor = async (
 	};
 
 	const undoStackSynchronizer = new UndoStackSynchronizer(props.onEvent);
+	const onDocumentUpdate = (transaction: Transaction) => {
+		const finalDoc = proseMirrorSerializer.serializeFragment(transaction.doc.content);
+		const element = document.createElement('div');
+		element.appendChild(finalDoc);
+
+		props.onEvent({
+			kind: EditorEventType.Change,
+			value: renderToMarkup(element),
+		});
+	};
+	let lastSelectionFormatting = defaultSelectionFormatting;
+	const onUpdateSelection = (transaction: Transaction) => {
+		const selectionFormatting = computeSelectionFormatting(transaction.doc, transaction.selection, settings);
+		if (!selectionFormattingEqual(lastSelectionFormatting, selectionFormatting)) {
+			lastSelectionFormatting = selectionFormatting;
+			props.onEvent({
+				kind: EditorEventType.SelectionFormattingChange,
+				formatting: selectionFormatting,
+			});
+		}
+	};
 
 	const view = new EditorView(parentElement, {
 		state: await createInitialState(props.initialText),
 		dispatchTransaction: transaction => {
 			if (transaction.docChanged) {
-				const finalDoc = proseMirrorSerializer.serializeFragment(transaction.doc.content);
-				const element = document.createElement('div');
-				element.appendChild(finalDoc);
+				onDocumentUpdate(transaction);
+			}
 
-				props.onEvent({
-					kind: EditorEventType.Change,
-					value: renderToMarkup(element),
-				});
+			if (transaction.selectionSet || transaction.docChanged) {
+				onUpdateSelection(transaction);
 			}
 
 			undoStackSynchronizer.schedulePostUndoRedoDepthChange(view);
@@ -106,8 +127,8 @@ const createEditor = async (
 		updateBody: async (newBody: string, _updateBodyOptions?: UpdateBodyOptions) => {
 			view.updateState(await createInitialState(newBody));
 		},
-		updateSettings: function(_newSettings: EditorSettings): void {
-			// throw new Error("Function not implemented.");
+		updateSettings: (newSettings: EditorSettings) => {
+			settings = newSettings;
 		},
 		updateLink: function(_label: string, _url: string): void {
 			throw new Error('Function not implemented.');
