@@ -1,6 +1,6 @@
 import { buildInputRules } from 'prosemirror-example-setup';
 import schema from '../schema';
-import { MarkType } from 'prosemirror-model';
+import { MarkType, ResolvedPos } from 'prosemirror-model';
 import { EditorState, Plugin, Transaction } from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';
 import { closeHistory } from 'prosemirror-history';
@@ -17,8 +17,7 @@ interface InlineInputRule {
 // Ref: https://github.com/ProseMirror/prosemirror-inputrules/blob/43ef04ce9c1512ef8f2289578309c40b431ed3c5/src/inputrules.ts#L82
 // See https://discuss.prosemirror.net/t/trigger-inputrule-on-enter/1118 for why this approach is needed.
 const inlineInputRules = (rules: InlineInputRule[], commitCharacterExpression: RegExp) => {
-	const getContentBeforeCursor = (state: EditorState, cursor: number) => {
-		const cursorInformation = state.doc.resolve(cursor);
+	const getContentBeforeCursor = (cursorInformation: ResolvedPos) => {
 		const parent = cursorInformation.parent;
 		const offsetInParent = cursorInformation.parentOffset;
 		const maxLength = 256;
@@ -26,8 +25,15 @@ const inlineInputRules = (rules: InlineInputRule[], commitCharacterExpression: R
 	};
 
 	const getApplicableRule = (state: EditorState, cursor: number, justTypedText: string) => {
-		if (!rules.some(rule => justTypedText.endsWith(rule.matchEndCharacter))) return false;
-		const beforeCursor = getContentBeforeCursor(state, cursor) + justTypedText;
+		if (!rules.some(rule => justTypedText.endsWith(rule.matchEndCharacter))) {
+			return false;
+		}
+		const cursorInformation = state.doc.resolve(cursor);
+		const inCode = cursorInformation.parent.type.spec.code;
+		if (inCode) {
+			return false;
+		}
+		const beforeCursor = getContentBeforeCursor(cursorInformation) + justTypedText;
 
 		for (const rule of rules) {
 			const match = beforeCursor.match(rule.match);
@@ -48,7 +54,7 @@ const inlineInputRules = (rules: InlineInputRule[], commitCharacterExpression: R
 		const availableRule = plugin.getState(view.state)?.pendingRule;
 		if (!availableRule) return false;
 
-		const beforeCursor = getContentBeforeCursor(view.state, cursor);
+		const beforeCursor = getContentBeforeCursor(view.state.doc.resolve(cursor));
 		const match = beforeCursor.match(availableRule.match);
 		if (match) {
 			const transaction = availableRule.handler(view.state, match, cursor - match[0].length, cursor, commitCharacter);

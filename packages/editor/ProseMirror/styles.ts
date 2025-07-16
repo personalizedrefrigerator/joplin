@@ -1,3 +1,4 @@
 
 import 'prosemirror-view/style/prosemirror.css';
 import './styles/joplin-editable.css';
+import './styles/prosemirror-editor.css';

@@ -23,6 +23,9 @@ const computeSelectionFormatting = (doc: Node, selection: Selection, settings: E
 			formatting.inUnorderedList = true;
 			formatting.listLevel ++;
 		}
+		if (node.type === schema.nodes.pre_block) {
+			formatting.inCode = true;
+		}
 	});
 
 	const hasMark = (type: MarkType) => {
@@ -37,7 +40,7 @@ const computeSelectionFormatting = (doc: Node, selection: Selection, settings: E
 		return doc.rangeHasMark(from, to, type);
 	};
 
-	formatting.inCode = hasMark(schema.marks.code);
+	formatting.inCode ||= hasMark(schema.marks.code);
 	if (formatting.inCode) {
 		formatting.unspellCheckableRegion = true;
 	}

@@ -3,16 +3,22 @@ import { addListNodes } from 'prosemirror-schema-list';
 import OrderedMap from 'orderedmap';
 import { nodeSpecs as joplinEditableNodes } from './plugins/joplinEditablePlugin';
 
+// For reference, see:
+// - https://prosemirror.net/docs/guide/#schema
+// - https://github.com/ProseMirror/prosemirror-schema-basic/blob/master/src/schema-basic.ts
+
 const domOutputSpecs = {
 	paragraph: ['p', 0],
 	strong: ['strong', 0],
 	code: ['code', { class: 'inline-code', spellcheck: false }, 0],
 	emphasis: ['em', 0],
+	pre: ['pre', { class: 'code-block' }, ['code', 0]],
 } satisfies Record<string, DOMOutputSpec>;
 
 
 const nodes = {
-	doc: { content: 'block+' },
+	// Always end the document with a paragraph. Doing so makes it easier to add new content after large blocks.
+	doc: { content: 'block* paragraph' },
 	paragraph: {
 		group: 'block',
 		content: 'inline*',
@@ -68,6 +74,15 @@ const nodes = {
 				outputAttrs,
 			];
 		},
+	},
+	pre_block: {
+		content: 'text*',
+		group: 'block',
+		marks: '',
+		code: true,
+		defining: true, // Preserve the node during replacement operations
+		parseDOM: [{ tag: 'pre' }],
+		toDOM: () => domOutputSpecs.pre,
 	},
 	...joplinEditableNodes,
 } satisfies Record<string, NodeSpec>;

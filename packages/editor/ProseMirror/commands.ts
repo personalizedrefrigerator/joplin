@@ -28,6 +28,10 @@ const toggleList = (type: NodeType): Command => {
 	};
 };
 
+const toggleCode: Command = (state, dispatch, view) => {
+	return toggleMark(schema.marks.code)(state, dispatch, view) || setBlockType(schema.nodes.paragraph)(state, dispatch, view);
+};
+
 const commands: Record<EditorCommandType, Command|null> = {
 	[EditorCommandType.Undo]: undo,
 	[EditorCommandType.Redo]: redo,
@@ -40,7 +44,7 @@ const commands: Record<EditorCommandType, Command|null> = {
 	},
 	[EditorCommandType.ToggleBolded]: toggleMark(schema.marks.strong),
 	[EditorCommandType.ToggleItalicized]: toggleMark(schema.marks.emphasis),
-	[EditorCommandType.ToggleCode]: toggleMark(schema.marks.code),
+	[EditorCommandType.ToggleCode]: toggleCode,
 	[EditorCommandType.ToggleMath]: null,
 	[EditorCommandType.ToggleComment]: null,
 	[EditorCommandType.DuplicateLine]: null,

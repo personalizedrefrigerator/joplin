@@ -91,6 +91,10 @@ const createEditor = async (
 
 			view.updateState(view.state.apply(transaction));
 		},
+		attributes: {
+			'aria-label': settings.editorLabel,
+			class: 'prosemirror-editor',
+		},
 	});
 
 	const editorControl: EditorControl = {
