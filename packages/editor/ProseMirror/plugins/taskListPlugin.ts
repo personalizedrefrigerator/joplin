@@ -60,7 +60,7 @@ export const nodeSpecs = {
 		],
 		toDOM: (node) => [
 			'label',
-			['input', {type: 'checkbox', checked: node.attrs.checked ? true : undefined }],
+			['input', { type: 'checkbox', checked: node.attrs.checked ? true : undefined }],
 			['span', 0],
 		],
 	},
@@ -96,7 +96,6 @@ class TaskListItemView implements NodeView {
 		this.dom.appendChild(this.contentDOM);
 
 		this.checkbox_.onchange = () => {
-			console.log('changed', this.checkbox_.checked, node.attrs.checked, getPosition());
 			if (node.attrs.checked !== this.checkbox_.checked) {
 				view.dispatch(view.state.tr.setNodeAttribute(
 					getPosition(), 'checked', this.checkbox_.checked,
