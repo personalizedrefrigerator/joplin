@@ -12,6 +12,8 @@ import { WebViewErrorEvent } from 'react-native-webview/lib/RNCWebViewNativeComp
 import Logger from '@joplin/utils/Logger';
 import { OnMessageEvent } from '../ExtendedWebView/types';
 import useWebViewSetup from '../../contentScripts/richTextEditorBundle/useWebViewSetup';
+import CommandService from '@joplin/lib/services/CommandService';
+import shim from '@joplin/lib/shim';
 
 const logger = Logger.create('NoteEditor');
 
@@ -110,8 +112,12 @@ function useHtml(initialCss: string): string {
 	`, []);
 }
 
-const mockOnPostMessage = (message: string) => {
-	logger.warn(`Not implemented: postMessage. Called with ${JSON.stringify(message)}`);
+const onPostMessage = async (message: string) => {
+	try {
+		await CommandService.instance().execute('openItem', message);
+	} catch (error) {
+		void shim.showErrorDialog(`postMessage failed: ${message}`);
+	}
 };
 
 const RichTextEditor: React.FC<EditorProps> = props => {
@@ -127,7 +133,7 @@ const RichTextEditor: React.FC<EditorProps> = props => {
 		themeId: props.themeId,
 		pluginStates: props.plugins,
 		noteResources: props.noteResources,
-		onPostMessage: mockOnPostMessage,
+		onPostMessage: onPostMessage,
 	});
 
 	props.editorRef.current = editorWebViewSetup.api;

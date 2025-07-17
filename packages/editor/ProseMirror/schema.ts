@@ -198,6 +198,24 @@ const marks = {
 		toDOM: () => domOutputSpecs.code,
 		excludes: '_',
 	},
+	link: {
+		attrs: {
+			href: { validate: 'string' },
+			title: { validate: 'string' },
+		},
+		inclusive: false,
+		parseDOM: [{
+			tag: 'a[href]',
+			getAttrs: node => ({
+				href: node.getAttribute('href'),
+				title: node.getAttribute('title'),
+			}),
+		}],
+		toDOM: node => [
+			'a',
+			{ href: node.attrs.href, title: node.attrs.title },
+		],
+	},
 } satisfies Record<string, MarkSpec>;
 
 type NodeKeys = keyof typeof nodes;
