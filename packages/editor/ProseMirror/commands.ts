@@ -1,4 +1,4 @@
-import { Command } from 'prosemirror-state';
+import { Command, EditorState } from 'prosemirror-state';
 import { EditorCommandType } from '../types';
 import { redo, undo } from 'prosemirror-history';
 import { selectAll, setBlockType, toggleMark } from 'prosemirror-commands';
@@ -8,6 +8,8 @@ import { liftListItem, sinkListItem, wrapInList } from 'prosemirror-schema-list'
 import { NodeType } from 'prosemirror-model';
 import { getSearchVisible, setSearchVisible } from './plugins/searchExtension';
 import { findNext, findPrev, replaceAll, replaceNext } from 'prosemirror-search';
+import { getEditorEventHandler } from './plugins/editorEventStatePlugin';
+import { EditorEventType } from '../events';
 
 const toggleHeading = (level: number): Command => {
 	const enableCommand = setBlockType(schema.nodes.heading, { level });
@@ -73,7 +75,16 @@ const commands: Record<EditorCommandType, Command|null> = {
 	[EditorCommandType.FindPrevious]: findPrev,
 	[EditorCommandType.ReplaceNext]: replaceNext,
 	[EditorCommandType.ReplaceAll]: replaceAll,
-	[EditorCommandType.EditLink]: null,
+	[EditorCommandType.EditLink]: (state: EditorState, dispatch) => {
+		if (dispatch) {
+			const onEvent = getEditorEventHandler(state);
+			onEvent({
+				kind: EditorEventType.EditLink,
+			});
+		}
+
+		return true;
+	},
 	[EditorCommandType.ScrollSelectionIntoView]: null,
 	[EditorCommandType.DeleteLine]: null,
 	[EditorCommandType.DeleteToLineEnd]: null,

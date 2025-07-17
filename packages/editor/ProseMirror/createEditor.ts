@@ -20,6 +20,7 @@ import { tableEditing } from 'prosemirror-tables';
 import preprocessEditorInput from './utils/preprocessEditorInput';
 import taskListPlugin from './plugins/taskListPlugin';
 import searchExtension from './plugins/searchExtension';
+import editorEventStatePlugin, { setEditorEventHandler } from './plugins/editorEventStatePlugin';
 
 type MarkupToHtml = (markup: string)=> Promise<RenderResult>;
 type HtmlToMarkup = (html: HTMLElement)=> string;
@@ -54,7 +55,7 @@ const createEditor = async (
 		const dom = new DOMParser().parseFromString(renderResult.html, 'text/html');
 		preprocessEditorInput(dom, markup);
 
-		return EditorState.create({
+		let state = EditorState.create({
 			doc: proseMirrorParser.parse(dom),
 			plugins: [
 				inputRulesExtension,
@@ -67,8 +68,13 @@ const createEditor = async (
 				markupTracker,
 				taskListPlugin,
 				tableEditing({ allowTableNodeSelection: true }),
+				editorEventStatePlugin,
 			].flat(),
 		});
+
+		state = state.apply(setEditorEventHandler(state.tr, props.onEvent));
+
+		return state;
 	};
 
 	const undoStackSynchronizer = new UndoStackSynchronizer(props.onEvent);
@@ -150,8 +156,51 @@ const createEditor = async (
 		updateSettings: (newSettings: EditorSettings) => {
 			settings = newSettings;
 		},
-		updateLink: function(_label: string, _url: string): void {
-			throw new Error('Function not implemented.');
+		updateLink: (label: string, url: string) => {
+			const doc = view.state.doc;
+			const selection = view.state.selection;
+			let transaction: Transaction = view.state.tr;
+
+			// Helper functions that return the selection at the current stage of
+			// the transaction:
+			const selectionFrom = () => transaction.mapping.map(selection.from);
+			const selectionTo = () => transaction.mapping.map(selection.to);
+
+
+			let linkFrom = selectionFrom();
+			let linkTo = selectionTo();
+			doc.nodesBetween(selection.from, selection.to, (node, position) => {
+				const linkMark = node.marks.find(mark => mark.type === schema.marks.link);
+				if (linkMark) {
+					linkFrom = position;
+					linkTo = position + node.nodeSize;
+					transaction = transaction.removeMark(
+						position, position + node.nodeSize, schema.marks.link,
+					);
+				}
+			});
+
+			// Update the link text -- if an existing link, replace just the text
+			// in that link.
+			if (label !== transaction.doc.textBetween(linkFrom, linkTo)) {
+				transaction = transaction.insertText(
+					label,
+					linkFrom,
+					linkTo,
+				);
+			}
+
+			// Add the URL
+			if (url) {
+				transaction = transaction.addMark(
+					// Use the entire selection,
+					linkFrom,
+					linkTo,
+					schema.mark(schema.marks.link, { href: url }),
+				);
+			}
+
+			view.dispatch(transaction);
 		},
 		setSearchState: (newState: SearchState) => {
 			view.dispatch(updateSearchState(view.state, newState));

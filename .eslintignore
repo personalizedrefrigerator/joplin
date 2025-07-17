@@ -1034,6 +1034,7 @@ packages/editor/CodeMirror/utils/setupVim.js
 packages/editor/ProseMirror/commands.js
 packages/editor/ProseMirror/createEditor.js
 packages/editor/ProseMirror/index.js
+packages/editor/ProseMirror/plugins/editorEventStatePlugin.js
 packages/editor/ProseMirror/plugins/inputRulesExtension.js
 packages/editor/ProseMirror/plugins/joplinEditablePlugin.js
 packages/editor/ProseMirror/plugins/keymapExtension.js

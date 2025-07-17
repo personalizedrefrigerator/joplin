@@ -201,7 +201,7 @@ const marks = {
 	link: {
 		attrs: {
 			href: { validate: 'string' },
-			title: { validate: 'string' },
+			title: { default: '', validate: 'string' },
 		},
 		inclusive: false,
 		parseDOM: [{

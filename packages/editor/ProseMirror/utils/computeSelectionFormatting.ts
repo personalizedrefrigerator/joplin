@@ -26,6 +26,14 @@ const computeSelectionFormatting = (doc: Node, selection: Selection, settings: E
 		if (node.type === schema.nodes.pre_block) {
 			formatting.inCode = true;
 		}
+		const linkMark = node.marks.find(mark => mark.type === schema.marks.link);
+		if (linkMark) {
+			formatting.linkData = {
+				linkText: node.textContent,
+				linkURL: linkMark.attrs.href,
+			};
+			formatting.inLink = true;
+		}
 	});
 
 	const hasMark = (type: MarkType) => {
