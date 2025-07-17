@@ -20,6 +20,7 @@ const keymapExtension = [
 		'Mod-k': commands[EditorCommandType.EditLink],
 		'Mod-i': commands[EditorCommandType.ToggleItalicized],
 		'Mod-`': commands[EditorCommandType.ToggleCode],
+		'Mod-f': commands[EditorCommandType.ToggleSearch],
 	}),
 	keymap(buildBaseKeymap(schema)),
 	keymap(baseKeymap),
