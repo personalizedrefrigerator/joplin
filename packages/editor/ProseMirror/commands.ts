@@ -6,6 +6,8 @@ import { focus } from '@joplin/lib/utils/focusHandler';
 import schema from './schema';
 import { liftListItem, wrapInList } from 'prosemirror-schema-list';
 import { NodeType } from 'prosemirror-model';
+import { getSearchVisible, setSearchVisible } from './plugins/searchExtension';
+import { findNext, findPrev, replaceAll, replaceNext } from 'prosemirror-search';
 
 const toggleHeading = (level: number): Command => {
 	const enableCommand = setBlockType(schema.nodes.heading, { level });
@@ -59,13 +61,16 @@ const commands: Record<EditorCommandType, Command|null> = {
 	[EditorCommandType.ToggleHeading4]: toggleHeading(4),
 	[EditorCommandType.ToggleHeading5]: toggleHeading(5),
 	[EditorCommandType.InsertHorizontalRule]: null,
-	[EditorCommandType.ToggleSearch]: null,
-	[EditorCommandType.ShowSearch]: null,
-	[EditorCommandType.HideSearch]: null,
-	[EditorCommandType.FindNext]: null,
-	[EditorCommandType.FindPrevious]: null,
-	[EditorCommandType.ReplaceNext]: null,
-	[EditorCommandType.ReplaceAll]: null,
+	[EditorCommandType.ToggleSearch]: (state, dispatch, view) => {
+		const command = setSearchVisible(!getSearchVisible(state));
+		return command(state, dispatch, view);
+	},
+	[EditorCommandType.ShowSearch]: setSearchVisible(true),
+	[EditorCommandType.HideSearch]: setSearchVisible(false),
+	[EditorCommandType.FindNext]: findNext,
+	[EditorCommandType.FindPrevious]: findPrev,
+	[EditorCommandType.ReplaceNext]: replaceNext,
+	[EditorCommandType.ReplaceAll]: replaceAll,
 	[EditorCommandType.EditLink]: null,
 	[EditorCommandType.ScrollSelectionIntoView]: null,
 	[EditorCommandType.DeleteLine]: null,

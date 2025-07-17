@@ -19,6 +19,7 @@ import originalMarkupPlugin from './plugins/originalMarkupPlugin';
 import { tableEditing } from 'prosemirror-tables';
 import preprocessEditorInput from './utils/preprocessEditorInput';
 import taskListPlugin from './plugins/taskListPlugin';
+import searchExtension from './plugins/searchExtension';
 
 type MarkupToHtml = (markup: string)=> Promise<RenderResult>;
 type HtmlToMarkup = (html: HTMLElement)=> string;
@@ -41,6 +42,7 @@ const createEditor = async (
 	parentElement.appendChild(cssContainer);
 
 	const { plugin: markupTracker, stateToMarkup } = originalMarkupPlugin(renderNodeToMarkup);
+	const { plugin: searchPlugin, updateState: updateSearchState } = searchExtension(props.onEvent);
 
 	let settings = props.settings;
 	const createInitialState = async (markup: string) => {
@@ -60,6 +62,7 @@ const createEditor = async (
 				gapCursor(),
 				dropCursor(),
 				history(),
+				searchPlugin,
 				joplinEditablePlugin,
 				markupTracker,
 				taskListPlugin,
@@ -150,8 +153,8 @@ const createEditor = async (
 		updateLink: function(_label: string, _url: string): void {
 			throw new Error('Function not implemented.');
 		},
-		setSearchState: function(_state: SearchState): void {
-			throw new Error('Function not implemented.');
+		setSearchState: (newState: SearchState) => {
+			view.dispatch(updateSearchState(view.state, newState));
 		},
 		setContentScripts: function(_plugins: ContentScriptData[]): Promise<void> {
 			throw new Error('Function not implemented.');
