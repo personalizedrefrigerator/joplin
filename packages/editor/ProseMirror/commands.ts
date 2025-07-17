@@ -4,7 +4,7 @@ import { redo, undo } from 'prosemirror-history';
 import { selectAll, setBlockType, toggleMark } from 'prosemirror-commands';
 import { focus } from '@joplin/lib/utils/focusHandler';
 import schema from './schema';
-import { liftListItem, wrapInList } from 'prosemirror-schema-list';
+import { liftListItem, sinkListItem, wrapInList } from 'prosemirror-schema-list';
 import { NodeType } from 'prosemirror-model';
 import { getSearchVisible, setSearchVisible } from './plugins/searchExtension';
 import { findNext, findPrev, replaceAll, replaceNext } from 'prosemirror-search';
@@ -33,6 +33,8 @@ const toggleList = (type: NodeType): Command => {
 const toggleCode: Command = (state, dispatch, view) => {
 	return toggleMark(schema.marks.code)(state, dispatch, view) || setBlockType(schema.nodes.paragraph)(state, dispatch, view);
 };
+
+const listItemTypes = [schema.nodes.list_item, schema.nodes.taskListItem];
 
 const commands: Record<EditorCommandType, Command|null> = {
 	[EditorCommandType.Undo]: undo,
@@ -76,8 +78,12 @@ const commands: Record<EditorCommandType, Command|null> = {
 	[EditorCommandType.DeleteLine]: null,
 	[EditorCommandType.DeleteToLineEnd]: null,
 	[EditorCommandType.DeleteToLineStart]: null,
-	[EditorCommandType.IndentMore]: null,
-	[EditorCommandType.IndentLess]: null,
+	[EditorCommandType.IndentMore]: (state, dispatch, view) => {
+		return listItemTypes.some(type => sinkListItem(type)(state, dispatch, view));
+	},
+	[EditorCommandType.IndentLess]: (state, dispatch, view) => {
+		return listItemTypes.some(type => liftListItem(type)(state, dispatch, view));
+	},
 	[EditorCommandType.IndentAuto]: null,
 	[EditorCommandType.InsertNewlineAndIndent]: null,
 	[EditorCommandType.SwapLineUp]: null,
