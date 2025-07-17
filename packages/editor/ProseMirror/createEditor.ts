@@ -18,6 +18,7 @@ import inputRulesExtension from './plugins/inputRulesExtension';
 import originalMarkupPlugin from './plugins/originalMarkupPlugin';
 import { tableEditing } from 'prosemirror-tables';
 import preprocessEditorInput from './utils/preprocessEditorInput';
+import taskListPlugin from './plugins/taskListPlugin';
 
 type MarkupToHtml = (markup: string)=> Promise<RenderResult>;
 type HtmlToMarkup = (html: HTMLElement)=> string;
@@ -61,6 +62,7 @@ const createEditor = async (
 				history(),
 				joplinEditablePlugin,
 				markupTracker,
+				taskListPlugin,
 				tableEditing({ allowTableNodeSelection: true }),
 			].flat(),
 		});

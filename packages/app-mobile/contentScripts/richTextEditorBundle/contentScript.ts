@@ -3,9 +3,7 @@ import { EditorProcessApi, EditorProps, MainProcessApi } from './types';
 import WebViewToRNMessenger from '../../utils/ipc/WebViewToRNMessenger';
 import { MarkupLanguage } from '@joplin/renderer';
 import '@joplin/editor/ProseMirror/styles';
-
-const TurndownService = require('@joplin/turndown');
-const { gfm: turndownPluginGfm } = require('@joplin/turndown-plugin-gfm');
+import HtmlToMd from '@joplin/lib/HtmlToMd';
 
 const postprocessHtml = (html: HTMLElement) => {
 	html = html.cloneNode(true) as HTMLElement;
@@ -43,12 +41,11 @@ const postprocessHtml = (html: HTMLElement) => {
 };
 
 
+const htmlToMd = new HtmlToMd();
 const htmlToMarkdown = (html: HTMLElement): string => {
 	html = postprocessHtml(html);
 
-	const turndownService = new TurndownService();
-	turndownService.use(turndownPluginGfm);
-	return turndownService.turndown(html);
+	return htmlToMd.parse(html);
 };
 
 export const initialize = async ({

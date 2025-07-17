@@ -1,0 +1,6 @@
+
+li.checklist-item.-flex {
+	display: flex;
+	flex-direction: row;
+	align-items: baseline;
+}

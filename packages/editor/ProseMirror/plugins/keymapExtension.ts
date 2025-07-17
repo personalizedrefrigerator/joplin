@@ -2,10 +2,20 @@ import { buildKeymap as buildBaseKeymap } from 'prosemirror-example-setup';
 import schema from '../schema';
 import { keymap } from 'prosemirror-keymap';
 import { baseKeymap } from 'prosemirror-commands';
+import { liftListItem, sinkListItem, splitListItem } from 'prosemirror-schema-list';
 
 const keymapExtension = [
+	[
+		// Apply the list item keymap to all list item types
+		// Ref: Default keymap in prosemirror-example-setup.
+		schema.nodes.taskListItem, schema.nodes.list_item,
+	].map(itemType => keymap({
+		'Enter': splitListItem(itemType),
+		'Mod-[': liftListItem(itemType),
+		'Mod-]': sinkListItem(itemType),
+	})),
 	keymap(buildBaseKeymap(schema)),
 	keymap(baseKeymap),
-];
+].flat();
 
 export default keymapExtension;

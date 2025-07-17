@@ -1,0 +1,99 @@
+import { Plugin } from 'prosemirror-state';
+import { Node, NodeSpec } from 'prosemirror-model';
+import { EditorView, NodeView } from 'prosemirror-view';
+import trimEmptyParagraphs from '../utils/trimEmptyParagraphs';
+
+// See the fold example for more information about
+// writing similar ProseMirror plugins:
+// https://prosemirror.net/examples/fold/
+
+
+export const nodeSpecs = {
+	taskList: {
+		content: 'taskListItem+',
+		group: 'block',
+		parseDOM: [{ tag: 'ul[data-is-checklist]' }],
+		toDOM: () => ['ul', { class: 'task-list', 'data-is-checklist': '1' }, 0],
+	},
+	taskListItem: {
+		attrs: { checked: { default: false, validate: 'boolean' } },
+
+		content: 'taskListLabel block*',
+		defining: true,
+
+		parseDOM: [
+			{
+				tag: 'li.md-checkbox',
+				getAttrs: (node) => {
+					const checkbox = node.querySelector<HTMLInputElement>('input[type=checkbox]');
+					return { checked: !!checkbox?.checked };
+				},
+				contentElement(node) {
+					const result = node.cloneNode(true) as HTMLElement;
+					trimEmptyParagraphs(result);
+
+					const firstChild = () => node.children[0];
+					if (firstChild()?.matches('div.checkbox-wrapper')) {
+						firstChild().replaceWith(...firstChild().childNodes);
+					}
+					return result;
+				},
+			},
+		],
+		toDOM: (node) => [
+			'li', { class: 'md-checkbox checklist-item -flex' },
+			['input', { type: 'checkbox', checked: node.attrs.checked || undefined }],
+			// Wrap the content in a <span> -- ProseMirror requires holes to be the
+			// only child of some container element.
+			// This needs to be a <span> for correct processing by Turndown.
+			['span', 0],
+		],
+	},
+	taskListLabel: {
+		content: 'inline*',
+		parseDOM: [{ tag: 'label' }],
+		toDOM: () => ['label', 0],
+	},
+} satisfies Record<string, NodeSpec>;
+
+type GetPosition = ()=> number;
+
+class TaskListItemView implements NodeView {
+	public readonly dom: HTMLElement;
+	public contentDOM: HTMLElement;
+	private checkbox_: HTMLInputElement;
+
+	public constructor(node: Node, view: EditorView, getPosition: GetPosition) {
+		if ((node.attrs.checked ?? undefined) === undefined) {
+			throw new Error(`Missing checked attribute. Node: ${node}.`);
+		}
+
+		this.dom = document.createElement('li');
+		this.dom.classList.add('md-checkbox', 'checklist-item', '-flex');
+
+		this.checkbox_ = document.createElement('input');
+		this.checkbox_.type = 'checkbox';
+		this.checkbox_.checked = node.attrs.checked;
+
+		this.contentDOM = document.createElement('div');
+
+		this.dom.appendChild(this.checkbox_);
+		this.dom.appendChild(this.contentDOM);
+
+		this.checkbox_.onclick = () => {
+			view.dispatch(view.state.tr.setNodeAttribute(
+				getPosition(), 'checked', !node.attrs.checked,
+			));
+		};
+	}
+}
+
+const taskListPlugin = new Plugin({
+	props: {
+		nodeViews: {
+			taskListItem: (node, view, getPos) => new TaskListItemView(node, view, getPos),
+		},
+	},
+});
+
+export default taskListPlugin;

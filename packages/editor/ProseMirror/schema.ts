@@ -1,6 +1,7 @@
 import { AttributeSpec, DOMOutputSpec, MarkSpec, NodeSpec, Schema } from 'prosemirror-model';
 import { nodeSpecs as joplinEditableNodes } from './plugins/joplinEditablePlugin';
 import { tableNodes } from 'prosemirror-tables';
+import { nodeSpecs as taskListNodes } from './plugins/taskListPlugin';
 
 // For reference, see:
 // - https://prosemirror.net/docs/guide/#schema
@@ -77,6 +78,7 @@ const nodes = {
 		parseDOM: [{ tag: 'hr' }],
 		toDOM: () => domOutputSpecs.hr,
 	},
+	...taskListNodes,
 	ordered_list: {
 		content: 'list_item+',
 		group: listGroup,
@@ -103,13 +105,13 @@ const nodes = {
 		content: 'list_item+',
 		group: listGroup,
 
-		parseDOM: [{ tag: 'ol', getAttrs: getDefaultToplevelAttrs }],
+		parseDOM: [{ tag: 'ul:not([data-is-checklist])', getAttrs: getDefaultToplevelAttrs }],
 		toDOM: () => domOutputSpecs.unorderedList,
 		attrs: defaultToplevelAttrs,
 	},
 	list_item: {
 		content: 'paragraph block*',
-		parseDOM: [{ tag: 'li', getAttrs: getDefaultToplevelAttrs }],
+		parseDOM: [{ tag: 'li:not(.md-checkbox)', getAttrs: getDefaultToplevelAttrs }],
 		toDOM: () => domOutputSpecs.listItem,
 		attrs: defaultToplevelAttrs,
 	},
