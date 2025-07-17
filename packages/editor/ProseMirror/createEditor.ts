@@ -16,6 +16,7 @@ import joplinEditablePlugin from './plugins/joplinEditablePlugin';
 import keymapExtension from './plugins/keymapExtension';
 import inputRulesExtension from './plugins/inputRulesExtension';
 import originalMarkupPlugin from './plugins/originalMarkupPlugin';
+import { tableEditing } from 'prosemirror-tables';
 
 type MarkupToHtml = (markup: string)=> Promise<RenderResult>;
 type HtmlToMarkup = (html: HTMLElement)=> string;
@@ -96,6 +97,7 @@ const createEditor = async (
 				history(),
 				joplinEditablePlugin,
 				markupTracker,
+				tableEditing({ allowTableNodeSelection: true }),
 			].flat(),
 		});
 	};

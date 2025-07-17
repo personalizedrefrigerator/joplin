@@ -1,5 +1,6 @@
 import { AttributeSpec, DOMOutputSpec, MarkSpec, NodeSpec, Schema } from 'prosemirror-model';
 import { nodeSpecs as joplinEditableNodes } from './plugins/joplinEditablePlugin';
+import { tableNodes } from 'prosemirror-tables';
 
 // For reference, see:
 // - https://prosemirror.net/docs/guide/#schema
@@ -15,6 +16,8 @@ const domOutputSpecs = {
 	orderedList: ['ol', 0],
 	unorderedList: ['ul', 0],
 	listItem: ['li', 0],
+	blockQuote: ['blockquote', 0],
+	hr: ['hr'],
 } satisfies Record<string, DOMOutputSpec>;
 
 type AttributeSpecs = Record<string, AttributeSpec>;
@@ -62,12 +65,24 @@ const nodes = {
 
 		attrs: defaultToplevelAttrs,
 	},
+	blockquote: {
+		content: 'block+',
+		group: 'block',
+		parseDOM: [{ tag: 'blockquote', getAttrs: getDefaultToplevelAttrs }],
+		toDOM: () => domOutputSpecs.blockQuote,
+		attrs: defaultToplevelAttrs,
+	},
+	horizontal_rule: {
+		group: 'block',
+		parseDOM: [{ tag: 'hr' }],
+		toDOM: () => domOutputSpecs.hr,
+	},
 	ordered_list: {
 		content: 'list_item+',
 		group: listGroup,
 
 		// Match attributes from https://github.com/ProseMirror/prosemirror-schema-list/blob/master/src/schema-list.ts
-		attrs: { order: { default: 1, validate: 'number' } },
+		attrs: { order: { default: 1, validate: 'number' }, ...defaultToplevelAttrs },
 		parseDOM: [
 			{
 				tag: 'ol',
@@ -90,13 +105,30 @@ const nodes = {
 
 		parseDOM: [{ tag: 'ol', getAttrs: getDefaultToplevelAttrs }],
 		toDOM: () => domOutputSpecs.unorderedList,
+		attrs: defaultToplevelAttrs,
 	},
 	list_item: {
 		content: 'paragraph block*',
 		parseDOM: [{ tag: 'li', getAttrs: getDefaultToplevelAttrs }],
 		toDOM: () => domOutputSpecs.listItem,
+		attrs: defaultToplevelAttrs,
 	},
 	...joplinEditableNodes,
+	...tableNodes({
+		tableGroup: 'block',
+		cellContent: 'inline*',
+		cellAttributes: {},
+	}),
+	// Override the default `table` node to include the default toplevel attributes
+	table: {
+		content: 'table_row+',
+		tableRole: 'table',
+		isolating: true,
+		group: 'block',
+		parseDOM: [{ tag: 'table', getAttrs: getDefaultToplevelAttrs }],
+		toDOM: () => ['table', ['tbody', 0]],
+		attrs: defaultToplevelAttrs,
+	},
 
 	text: {
 		group: 'inline',
