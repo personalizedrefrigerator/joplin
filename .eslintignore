@@ -633,6 +633,8 @@ packages/app-mobile/components/CameraView/utils/fitRectIntoBounds.js
 packages/app-mobile/components/CameraView/utils/testing.js
 packages/app-mobile/components/CameraView/utils/useBarcodeScanner.js
 packages/app-mobile/components/Checkbox.js
+packages/app-mobile/components/ComboBox.test.js
+packages/app-mobile/components/ComboBox.js
 packages/app-mobile/components/DialogManager/PromptButton.js
 packages/app-mobile/components/DialogManager/PromptDialog.js
 packages/app-mobile/components/DialogManager/hooks/useDialogControl.js
@@ -661,6 +663,7 @@ packages/app-mobile/components/Icon.js
 packages/app-mobile/components/IconButton.js
 packages/app-mobile/components/Modal.js
 packages/app-mobile/components/ModalDialog.js
+packages/app-mobile/components/NestableFlatList.js
 packages/app-mobile/components/NoteBodyViewer/NoteBodyViewer.test.js
 packages/app-mobile/components/NoteBodyViewer/NoteBodyViewer.js
 packages/app-mobile/components/NoteBodyViewer/bundledJs/Renderer.test.js
@@ -711,9 +714,12 @@ packages/app-mobile/components/ScreenHeader/WarningBanner.js
 packages/app-mobile/components/ScreenHeader/WarningBox.js
 packages/app-mobile/components/ScreenHeader/WebBetaButton.js
 packages/app-mobile/components/ScreenHeader/index.js
+packages/app-mobile/components/SearchInput.js
 packages/app-mobile/components/SelectDateTimeDialog.js
 packages/app-mobile/components/SideMenu.js
 packages/app-mobile/components/SideMenuContentNote.js
+packages/app-mobile/components/TagEditor.test.js
+packages/app-mobile/components/TagEditor.js
 packages/app-mobile/components/TextInput.js
 packages/app-mobile/components/accessibility/AccessibleView.test.js
 packages/app-mobile/components/accessibility/AccessibleView.js
