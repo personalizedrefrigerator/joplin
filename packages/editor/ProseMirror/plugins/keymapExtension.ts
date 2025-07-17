@@ -3,6 +3,8 @@ import schema from '../schema';
 import { keymap } from 'prosemirror-keymap';
 import { baseKeymap } from 'prosemirror-commands';
 import { liftListItem, sinkListItem, splitListItem } from 'prosemirror-schema-list';
+import commands from '../commands';
+import { EditorCommandType } from '../../types';
 
 const keymapExtension = [
 	[
@@ -14,6 +16,11 @@ const keymapExtension = [
 		'Mod-[': liftListItem(itemType),
 		'Mod-]': sinkListItem(itemType),
 	})),
+	keymap({
+		'Mod-k': commands[EditorCommandType.EditLink],
+		'Mod-i': commands[EditorCommandType.ToggleItalicized],
+		'Mod-`': commands[EditorCommandType.ToggleCode],
+	}),
 	keymap(buildBaseKeymap(schema)),
 	keymap(baseKeymap),
 ].flat();
