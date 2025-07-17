@@ -1,5 +1,5 @@
 import { Plugin } from 'prosemirror-state';
-import { Node, NodeSpec, Schema } from 'prosemirror-model';
+import { Node, NodeSpec } from 'prosemirror-model';
 import { EditorView, NodeView } from 'prosemirror-view';
 import trimEmptyParagraphs from '../utils/trimEmptyParagraphs';
 
@@ -41,39 +41,38 @@ export const nodeSpecs = {
 		],
 	},
 	taskListLabel: {
-		content: 'checkBox inline*',
-		group: 'block',
+		attrs: { checked: { default: false, validate: 'boolean' } },
+		content: 'inline*',
 		parseDOM: [
 			{
 				tag: 'div.checkbox-wrapper',
-			},
-		],
-		toDOM: () => [
-			'label',
-			0,
-		],
-	},
-	checkBox: {
-		attrs: { checked: { default: false, validate: 'boolean' } },
-		inline: true,
-		parseDOM: [
-			{
-				tag: 'input[type=checkbox]',
 				getAttrs: (node) => {
-					return { checked: !!(node as HTMLInputElement)?.checked };
+					const checkbox = node.querySelector<HTMLInputElement>('input[type=checkbox]');
+					return { checked: !!checkbox?.checked };
+				},
+				contentElement(node) {
+					const result = node.cloneNode(true) as HTMLElement;
+					const checkbox = result.querySelector('input[type=checkbox]');
+					checkbox?.remove();
+					return result;
 				},
 			},
 		],
 		toDOM: (node) => [
-			'input', { type: 'checkbox', checked: node.attrs.checked ? true : undefined },
+			'label',
+			['input', {type: 'checkbox', checked: node.attrs.checked ? true : undefined }],
+			['span', 0],
 		],
 	},
 } satisfies Record<string, NodeSpec>;
 
 type GetPosition = ()=> number;
 
-export class CheckBoxItemView implements NodeView {
-	public readonly dom: HTMLInputElement;
+let idCounter = 0;
+class TaskListItemView implements NodeView {
+	public readonly dom: HTMLElement;
+	public contentDOM: HTMLElement;
+	private checkbox_: HTMLInputElement;
 
 	public constructor(node: Node, view: EditorView, getPosition: GetPosition) {
 		if ((node.attrs.checked ?? undefined) === undefined) {
@@ -82,44 +81,35 @@ export class CheckBoxItemView implements NodeView {
 
 		// Don't use a <label> element as a container -- clicking on the container
 		// should move focus to the task item, not focus the checkbox.
-		this.dom = document.createElement('input');
-		this.dom.type = 'checkbox';
-		this.dom.checked = node.attrs.checked;
+		this.dom = document.createElement('div');
+		this.dom.id = `${(idCounter++)}-checkbox-container`;
+		this.dom.classList.add('checklist-item', '-flex');
 
-		this.dom.onchange = () => {
-			if (node.attrs.checked !== this.dom.checked) {
+		this.checkbox_ = document.createElement('input');
+		this.checkbox_.type = 'checkbox';
+		this.checkbox_.checked = node.attrs.checked;
+		this.checkbox_.setAttribute('aria-labelledby', this.dom.id);
+
+		this.contentDOM = document.createElement('div');
+
+		this.dom.appendChild(this.checkbox_);
+		this.dom.appendChild(this.contentDOM);
+
+		this.checkbox_.onchange = () => {
+			console.log('changed', this.checkbox_.checked, node.attrs.checked, getPosition());
+			if (node.attrs.checked !== this.checkbox_.checked) {
 				view.dispatch(view.state.tr.setNodeAttribute(
-					getPosition(), 'checked', this.dom.checked,
+					getPosition(), 'checked', this.checkbox_.checked,
 				));
 			}
 		};
 	}
 }
 
-const taskListPlugin = (schema: Schema<'checkBox'>) => new Plugin({
+const taskListPlugin = new Plugin({
 	props: {
 		nodeViews: {
-			checkBox: (node, view, getPos) => new CheckBoxItemView(node, view, getPos),
-		},
-		handleKeyDown: (view, event) => {
-			if (event.key !== 'Enter' && event.code !== 'Space') {
-				return false;
-			}
-
-			const selectionContent = view.state.selection.content().content;
-			if (selectionContent.content.length !== 1) {
-				return false;
-			}
-
-			const selectedNode = selectionContent.content[0];
-			if (selectedNode.type === schema.nodes.checkBox) {
-				view.dispatch(view.state.tr.setNodeAttribute(
-					view.state.selection.from, 'checked', !selectedNode.attrs.checked,
-				));
-				return true;
-			}
-
-			return false;
+			taskListLabel: (node, view, getPos) => new TaskListItemView(node, view, getPos),
 		},
 	},
 });
