@@ -78,7 +78,17 @@ const originalMarkupPlugin = (htmlToMarkup: (html: Node)=> string) => {
 			// that the decorations will be returned by .find() in any particular order.
 			decorations.sort((a, b) => a.from - b.from);
 
-			return decorations.map(decoration => decoration.spec.markup).join('\n\n');
+			const result = [];
+			for (const decoration of decorations) {
+				const markup: string = decoration.spec.markup;
+				result.push(markup);
+
+				if (!markup.endsWith('\n\n')) {
+					result.push('\n\n');
+				}
+			}
+
+			return result.join('');
 		},
 	};
 };
