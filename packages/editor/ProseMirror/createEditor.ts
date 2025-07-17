@@ -20,6 +20,43 @@ import originalMarkupPlugin from './plugins/originalMarkupPlugin';
 type MarkupToHtml = (markup: string)=> Promise<RenderResult>;
 type HtmlToMarkup = (html: HTMLElement)=> string;
 
+// Uses the renderer's source-line and source-line-end attributes to
+// reconstruct the original Markdown for different parts of the given
+// DOM.
+const addOriginalMarkdownAttrs = (dom: Document, originalMarkup: string) => {
+	const lines = originalMarkup.split('\n');
+
+	const isOnlyChild = (element: Element) => {
+		return element.parentElement && element.parentElement.children.length === 1;
+	};
+	const root = dom.querySelector('body > #rendered-md') ?? dom.body ?? dom.getRootNode();
+	const isToplevel = (element: Element): boolean => {
+		return element.parentElement === root || (isOnlyChild(element) && isToplevel(element.parentElement));
+	};
+	const sourceMappedToplevelElements = [
+		...dom.querySelectorAll('.maps-to-line[source-line][source-line-end]'),
+	].filter(isToplevel);
+
+	let lastEndLine = -1;
+	let lastElement: Element = null;
+	for (const elem of sourceMappedToplevelElements) {
+		const startLine = Number(elem.getAttribute('source-line'));
+		const endLine = Number(elem.getAttribute('source-line-end'));
+
+		// If the source map of two adjacent nodes overlaps, we can't know which
+		// part of which source line corresponds to the element.
+		if (startLine <= lastEndLine) {
+			lastElement?.removeAttribute('data-original-markup');
+			lastElement = null;
+			continue;
+		}
+
+		elem.setAttribute('data-original-markup', lines.slice(startLine, endLine).join('\n'));
+		lastEndLine = endLine;
+		lastElement = elem;
+	}
+};
+
 const createEditor = async (
 	parentElement: HTMLElement,
 	props: EditorProps,
@@ -47,6 +84,7 @@ const createEditor = async (
 		);
 
 		const dom = new DOMParser().parseFromString(renderResult.html, 'text/html');
+		addOriginalMarkdownAttrs(dom, markup);
 
 		return EditorState.create({
 			doc: proseMirrorParser.parse(dom),

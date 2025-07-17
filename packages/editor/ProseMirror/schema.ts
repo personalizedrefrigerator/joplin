@@ -1,6 +1,4 @@
-import { DOMOutputSpec, MarkSpec, NodeSpec, Schema } from 'prosemirror-model';
-import { addListNodes } from 'prosemirror-schema-list';
-import OrderedMap from 'orderedmap';
+import { AttributeSpec, DOMOutputSpec, MarkSpec, NodeSpec, Schema } from 'prosemirror-model';
 import { nodeSpecs as joplinEditableNodes } from './plugins/joplinEditablePlugin';
 
 // For reference, see:
@@ -14,22 +12,43 @@ const domOutputSpecs = {
 	emphasis: ['em', 0],
 	pre: ['pre', { class: 'code-block' }, ['code', 0]],
 	br: ['br'],
+	orderedList: ['ol', 0],
+	unorderedList: ['ul', 0],
+	listItem: ['li', 0],
 } satisfies Record<string, DOMOutputSpec>;
 
+type AttributeSpecs = Record<string, AttributeSpec>;
+
+// Default attributes that should be valid for all toplevel blocks:
+const defaultToplevelAttrs: AttributeSpecs = {
+	// Stores the original markdown used to generate a node.
+	originalMarkup: { default: '', validate: 'string' },
+};
+const getDefaultToplevelAttrs = (node: Element) => ({
+	originalMarkup: node.getAttribute('data-original-markup'),
+});
+
+const listGroup = 'block';
 
 const nodes = {
 	doc: { content: 'block+' },
 	paragraph: {
 		group: 'block',
 		content: 'inline*',
-		parseDOM: [{ tag: 'p' }],
+		parseDOM: [{ tag: 'p', getAttrs: getDefaultToplevelAttrs }],
+		attrs: defaultToplevelAttrs,
 		toDOM: () => domOutputSpecs.paragraph,
 	},
 	heading: { // See prosemirror-schema-basic's `heading`
-		attrs: { level: { default: 2, validate: 'number' } },
+		attrs: {
+			...defaultToplevelAttrs,
+			level: { default: 2, validate: 'number' },
+		},
 		group: 'block',
 		content: 'inline*',
-		parseDOM: [1, 2, 3, 4, 5, 6].map(level => ({ tag: `h${level}`, attrs: { level } })),
+		parseDOM: [1, 2, 3, 4, 5, 6].map(level => ({
+			tag: `h${level}`, getAttrs: node => ({ ...getDefaultToplevelAttrs(node), level }),
+		})),
 		toDOM: (node) => [`h${node.attrs.level}`, 0],
 	},
 	pre_block: {
@@ -38,8 +57,44 @@ const nodes = {
 		marks: '',
 		code: true,
 		defining: true, // Preserve the node during replacement operations
-		parseDOM: [{ tag: 'pre' }],
+		parseDOM: [{ tag: 'pre', getAttrs: getDefaultToplevelAttrs }],
 		toDOM: () => domOutputSpecs.pre,
+
+		attrs: defaultToplevelAttrs,
+	},
+	ordered_list: {
+		content: 'list_item+',
+		group: listGroup,
+
+		// Match attributes from https://github.com/ProseMirror/prosemirror-schema-list/blob/master/src/schema-list.ts
+		attrs: { order: { default: 1, validate: 'number' } },
+		parseDOM: [
+			{
+				tag: 'ol',
+				getAttrs: node => {
+					const start = node.hasAttribute('start') ? Number(node.getAttribute('start')) : 1;
+					return {
+						...getDefaultToplevelAttrs(node),
+						order: isFinite(start) ? start : 1,
+					};
+				},
+			},
+		],
+		toDOM: node => (
+			node.attrs.order === 1 ? domOutputSpecs.orderedList : ['ol', { start: node.attrs.order }, 0]
+		),
+	},
+	bullet_list: {
+		content: 'list_item+',
+		group: listGroup,
+
+		parseDOM: [{ tag: 'ol', getAttrs: getDefaultToplevelAttrs }],
+		toDOM: () => domOutputSpecs.unorderedList,
+	},
+	list_item: {
+		content: 'paragraph block*',
+		parseDOM: [{ tag: 'li', getAttrs: getDefaultToplevelAttrs }],
+		toDOM: () => domOutputSpecs.listItem,
 	},
 	...joplinEditableNodes,
 
@@ -111,12 +166,12 @@ const marks = {
 	},
 } satisfies Record<string, MarkSpec>;
 
-type NodeKeys = (keyof typeof nodes)|'ordered_list'|'bullet_list'|'list_item';
+type NodeKeys = keyof typeof nodes;
 type MarkKeys = keyof typeof marks;
 
 const schema = new Schema<NodeKeys, MarkKeys>({
 	marks,
-	nodes: addListNodes(OrderedMap.from(nodes), 'paragraph block*', 'block'),
+	nodes,
 });
 
 export default schema;

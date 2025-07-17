@@ -7,20 +7,27 @@ import changedDescendants from '../vendor/changedDescendants';
 const originalMarkupPlugin = (htmlToMarkup: (html: Node)=> string) => {
 	const proseMirrorSerializer = DOMSerializer.fromSchema(schema);
 
+	const makeDecoration = (position: number, node: ProseMirrorNode, markup: string) => {
+		return Decoration.node(
+			position,
+			position + node.nodeSize,
+			{ 'data-markup': markup }, // For debugging
+			{ markup },
+		);
+	};
+
 	const addMissingMarkup = (doc: ProseMirrorNode, decorations: DecorationSet) => {
 		doc.content.nodesBetween(0, doc.content.size, (node: ProseMirrorNode, position: number) => {
-			const matchingValues = decorations.find(position + 1, position + 1);
+			// All markup decorations that cover the start of the node and the next character
+			const possibleDecorations = decorations.find(position, position + 1);
+			// Only consider the decorations that match the node's boundaries exactly.
+			const matchingDecorations = possibleDecorations.filter(decoration => {
+				return decoration.from === position && decoration.to === position + node.nodeSize;
+			});
 
-			if (matchingValues.length === 0) {
+			if (matchingDecorations.length === 0) {
 				const markup = htmlToMarkup(proseMirrorSerializer.serializeNode(node));
-				decorations = decorations.add(doc, [
-					Decoration.node(
-						position,
-						position + node.nodeSize,
-						{ 'data-markup': markup }, // For debugging
-						{ markup },
-					),
-				]);
+				decorations = decorations.add(doc, [makeDecoration(position, node, markup)]);
 			}
 
 			// Only visit toplevel nodes
@@ -32,7 +39,18 @@ const originalMarkupPlugin = (htmlToMarkup: (html: Node)=> string) => {
 
 	const plugin = new Plugin<DecorationSet>({
 		state: {
-			init: (_config, state) => addMissingMarkup(state.doc, DecorationSet.empty),
+			init: (_config, state) => {
+				let decorations = DecorationSet.empty;
+				state.doc.nodesBetween(0, state.doc.content.size, (node, position) => {
+					const originalMarkup = node.attrs.originalMarkup;
+					if (originalMarkup?.trim()) {
+						decorations = decorations.add(state.doc, [makeDecoration(position, node, node.attrs.originalMarkup)]);
+					}
+
+					return false;
+				});
+				return addMissingMarkup(state.doc, decorations);
+			},
 			apply: (tr, value, oldState, newState) => {
 				value = value.map(tr.mapping, tr.doc);
 
