@@ -16,20 +16,15 @@ export const nodeSpecs = {
 		toDOM: () => ['ul', { class: 'task-list', 'data-is-checklist': '1' }, 0],
 	},
 	taskListItem: {
-		attrs: { checked: { default: false, validate: 'boolean' } },
-
 		content: 'taskListLabel block*',
 		defining: true,
 
 		parseDOM: [
 			{
 				tag: 'li.md-checkbox',
-				getAttrs: (node) => {
-					const checkbox = node.querySelector<HTMLInputElement>('input[type=checkbox]');
-					return { checked: !!checkbox?.checked };
-				},
 				contentElement(node) {
 					const result = node.cloneNode(true) as HTMLElement;
+					// Empty paragraphs can cause rendering issues
 					trimEmptyParagraphs(result);
 
 					const firstChild = () => node.children[0];
@@ -40,24 +35,40 @@ export const nodeSpecs = {
 				},
 			},
 		],
-		toDOM: (node) => [
-			'li', { class: 'md-checkbox checklist-item -flex' },
-			['input', { type: 'checkbox', checked: node.attrs.checked || undefined }],
-			// Wrap the content in a <span> -- ProseMirror requires holes to be the
-			// only child of some container element.
-			// This needs to be a <span> for correct processing by Turndown.
-			['span', 0],
+		toDOM: () => [
+			'li', { class: 'md-checkbox' },
+			0,
 		],
 	},
 	taskListLabel: {
+		attrs: { checked: { default: false, validate: 'boolean' } },
 		content: 'inline*',
-		parseDOM: [{ tag: 'label' }],
-		toDOM: () => ['label', 0],
+		parseDOM: [
+			{
+				tag: 'div.checkbox-wrapper',
+				getAttrs: (node) => {
+					const checkbox = node.querySelector<HTMLInputElement>('input[type=checkbox]');
+					return { checked: !!checkbox?.checked };
+				},
+				contentElement(node) {
+					const result = node.cloneNode(true) as HTMLElement;
+					const checkbox = result.querySelector('input[type=checkbox]');
+					checkbox?.remove();
+					return result;
+				},
+			},
+		],
+		toDOM: (node) => [
+			'label',
+			['input', {type: 'checkbox', checked: node.attrs.checked ? true : undefined }],
+			['span', 0],
+		],
 	},
 } satisfies Record<string, NodeSpec>;
 
 type GetPosition = ()=> number;
 
+let idCounter = 0;
 class TaskListItemView implements NodeView {
 	public readonly dom: HTMLElement;
 	public contentDOM: HTMLElement;
@@ -68,22 +79,29 @@ class TaskListItemView implements NodeView {
 			throw new Error(`Missing checked attribute. Node: ${node}.`);
 		}
 
-		this.dom = document.createElement('li');
-		this.dom.classList.add('md-checkbox', 'checklist-item', '-flex');
+		// Don't use a <label> element as a container -- clicking on the container
+		// should move focus to the task item, not focus the checkbox.
+		this.dom = document.createElement('div');
+		this.dom.id = `${(idCounter++)}-checkbox-container`;
+		this.dom.classList.add('checklist-item', '-flex');
 
 		this.checkbox_ = document.createElement('input');
 		this.checkbox_.type = 'checkbox';
 		this.checkbox_.checked = node.attrs.checked;
+		this.checkbox_.setAttribute('aria-labelledby', this.dom.id);
 
 		this.contentDOM = document.createElement('div');
 
 		this.dom.appendChild(this.checkbox_);
 		this.dom.appendChild(this.contentDOM);
 
-		this.checkbox_.onclick = () => {
-			view.dispatch(view.state.tr.setNodeAttribute(
-				getPosition(), 'checked', !node.attrs.checked,
-			));
+		this.checkbox_.onchange = () => {
+			console.log('changed', this.checkbox_.checked, node.attrs.checked, getPosition());
+			if (node.attrs.checked !== this.checkbox_.checked) {
+				view.dispatch(view.state.tr.setNodeAttribute(
+					getPosition(), 'checked', this.checkbox_.checked,
+				));
+			}
 		};
 	}
 }
@@ -91,7 +109,7 @@ class TaskListItemView implements NodeView {
 const taskListPlugin = new Plugin({
 	props: {
 		nodeViews: {
-			taskListItem: (node, view, getPos) => new TaskListItemView(node, view, getPos),
+			taskListLabel: (node, view, getPos) => new TaskListItemView(node, view, getPos),
 		},
 	},
 });
