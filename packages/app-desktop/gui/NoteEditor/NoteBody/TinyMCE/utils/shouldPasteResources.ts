@@ -24,8 +24,6 @@ const logger = Logger.create('shouldPasteResources');
 export default (pastedText: string, pastedHtml: string, resourceMds: string[]) => {
 	const debugInformation = JSON.stringify({ pastedText, pastedHtml, resourceMds }, undefined, '\t');
 	logger.debug('Input data:', debugInformation);
-	// eslint-disable-next-line no-console -- Intentionally log with console.log to avoid adding to the log file in release mode.
-	console.log('shouldPasteResources. Input data:', debugInformation);
 
 	if (pastedText) {
 		logger.info('Not pasting resources only because the clipboard contains plain text');
