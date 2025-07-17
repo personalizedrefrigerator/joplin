@@ -81,7 +81,7 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 			value: true,
 			type: SettingItemType.Bool,
 			public: false,
-			appTypes: [AppType.Desktop],
+			appTypes: [AppType.Desktop, AppType.Mobile],
 			storage: SettingStorage.File,
 			isGlobal: true,
 		},

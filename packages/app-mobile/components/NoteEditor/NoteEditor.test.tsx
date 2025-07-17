@@ -3,7 +3,7 @@ import * as React from 'react';
 import { describe, it, expect, beforeEach } from '@jest/globals';
 import { act, fireEvent, render, screen, waitFor } from '../../utils/testing/testingLibrary';
 
-import NoteEditor from './NoteEditor';
+import NoteEditor, { EditorType } from './NoteEditor';
 import Setting from '@joplin/lib/models/Setting';
 import { _ } from '@joplin/lib/locale';
 import { setupDatabaseAndSynchronizer, switchClient } from '@joplin/lib/testing/test-utils';
@@ -45,6 +45,7 @@ describe('NoteEditor', () => {
 		const wrappedNoteEditor = render(
 			<TestProviderStack store={store}>
 				<NoteEditor
+					ref={undefined}
 					themeId={Setting.THEME_ARITIM_DARK}
 					initialText='Testing...'
 					globalSearch=''
@@ -57,7 +58,9 @@ describe('NoteEditor', () => {
 					onSelectionChange={()=>{}}
 					onUndoRedoDepthChange={()=>{}}
 					onAttach={async ()=>{}}
+					noteResources={{}}
 					plugins={{}}
+					mode={EditorType.Markdown}
 				/>
 			</TestProviderStack>,
 		);

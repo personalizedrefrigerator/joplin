@@ -599,7 +599,7 @@ function imageMarkdownFromNode(node, options = null) {
 
   return imageMarkdownFromAttributes({
     alt: node.alt,
-    src: node.getAttribute('src'),
+    src: node.getAttribute('src') || node.getAttribute('data-src'),
     title: node.title,
   });
 }

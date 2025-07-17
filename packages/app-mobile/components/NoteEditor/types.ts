@@ -1,7 +1,12 @@
 // Types related to the NoteEditor
 
-import { EditorEvent } from '@joplin/editor/events';
 import { EditorControl as EditorBodyControl, EditorSettings as EditorBodySettings, SearchState } from '@joplin/editor/types';
+import { RefObject } from 'react';
+import { WebViewControl } from '../ExtendedWebView/types';
+import { SelectionRange } from '../../contentScripts/markdownEditorBundle/types';
+import { PluginStates } from '@joplin/lib/services/plugins/reducer';
+import { EditorEvent } from '@joplin/editor/events';
+import { ResourceInfos } from '@joplin/renderer/types';
 
 export interface SearchControl {
 	findNext(): void;
@@ -49,13 +54,20 @@ export interface EditorSettings extends EditorBodySettings {
 	themeId: number;
 }
 
-export interface SelectionRange {
-	start: number;
-	end: number;
-}
+type OnAttachCallback = (filePath?: string)=> Promise<void>;
+export interface EditorProps {
+	noteResources: ResourceInfos;
+	editorRef: RefObject<EditorBodyControl>;
+	webviewRef: RefObject<WebViewControl>;
+	themeId: number;
+	noteId: string;
+	noteHash: string;
+	initialText: string;
+	initialSelection: SelectionRange;
+	editorSettings: EditorSettings;
+	globalSearch: string;
+	plugins: PluginStates;
 
-export interface WebViewToEditorApi {
-	onEditorEvent(event: EditorEvent): Promise<void>;
-	logMessage(message: string): Promise<void>;
-	onPasteFile(type: string, dataBase64: string): Promise<void>;
+	onAttach: OnAttachCallback;
+	onEditorEvent: (event: EditorEvent)=> void;
 }

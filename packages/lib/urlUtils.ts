@@ -8,13 +8,13 @@ export const hash = (url: string) => {
 };
 
 export const urlWithoutPath = (url: string) => {
-	const parsed = require('url').parse(url, true);
+	const parsed = new URL(url);
 	return `${parsed.protocol}//${parsed.host}`;
 };
 
 export const urlProtocol = (url: string) => {
 	if (!url) return '';
-	const parsed = require('url').parse(url, true);
+	const parsed = new URL(url);
 	return parsed.protocol;
 };
 

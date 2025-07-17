@@ -1,13 +1,14 @@
 import * as React from 'react';
 
 import {
-	forwardRef, Ref, useEffect, useImperativeHandle, useMemo, useRef,
+	forwardRef, Ref, useCallback, useEffect, useImperativeHandle, useMemo, useRef,
 } from 'react';
 
 import { View } from 'react-native';
 import Logger from '@joplin/utils/Logger';
 import { Props, WebViewControl } from './types';
 import { JSDOM } from 'jsdom';
+import useCss from './utils/useCss';
 
 const logger = Logger.create('ExtendedWebView');
 
@@ -18,11 +19,13 @@ const ExtendedWebView = (props: Props, ref: Ref<WebViewControl>) => {
 		return new JSDOM(props.html, { runScripts: 'dangerously', pretendToBeVisual: true });
 	}, [props.html]);
 
+	const injectJs = useCallback((js: string) => {
+		return dom.window.eval(js);
+	}, [dom]);
+
 	useImperativeHandle(ref, (): WebViewControl => {
 		const result = {
-			injectJS(js: string) {
-				return dom.window.eval(js);
-			},
+			injectJS: injectJs,
 			postMessage(message: unknown) {
 				const messageEventContent = {
 					data: message,
@@ -36,14 +39,19 @@ const ExtendedWebView = (props: Props, ref: Ref<WebViewControl>) => {
 			},
 		};
 		return result;
-	}, [dom]);
+	}, [dom, injectJs]);
 
 	const onMessageRef = useRef(props.onMessage);
 	onMessageRef.current = props.onMessage;
 
+	const { injectedJs: cssInjectedJavaScript } = useCss(
+		injectJs,
+		props.css,
+	);
+
 	// Don't re-load when injected JS changes. This should match the behavior of the native webview.
 	const injectedJavaScriptRef = useRef(props.injectedJavaScript);
-	injectedJavaScriptRef.current = props.injectedJavaScript;
+	injectedJavaScriptRef.current = props.injectedJavaScript + cssInjectedJavaScript;
 
 	useEffect(() => {
 		// JSDOM polyfills
@@ -79,7 +87,6 @@ const ExtendedWebView = (props: Props, ref: Ref<WebViewControl>) => {
 
 		dom.window.eval(injectedJavaScriptRef.current);
 	}, [dom]);
-
 
 	const onLoadEndRef = useRef(props.onLoadEnd);
 	onLoadEndRef.current = props.onLoadEnd;
