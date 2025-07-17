@@ -62,7 +62,7 @@ const createEditor = async (
 				history(),
 				joplinEditablePlugin,
 				markupTracker,
-				taskListPlugin,
+				taskListPlugin(schema),
 				tableEditing({ allowTableNodeSelection: true }),
 			].flat(),
 		});
