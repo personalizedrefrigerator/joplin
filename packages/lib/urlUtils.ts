@@ -14,13 +14,14 @@ export const urlWithoutPath = (url: string) => {
 
 export const urlProtocol = (url: string) => {
 	if (!url) return '';
-	// Check whether the URL is missing a protocol, return null to match the behavior of the
-	// NodeJS 'url' library.
-	//
-	// See https://www.rfc-editor.org/rfc/rfc3986#section-3.1 for valid URI schemes.
-	if (!url.match(/^[a-zA-Z][a-zA-Z0-9+\-.]+:/)) return null;
 
-	const parsed = new URL(url);
+	let parsed;
+	try {
+		parsed = new URL(url);
+	} catch (error) {
+		// Match the NodeJS url.parse behavior in the case of an invalid URL:
+		return null;
+	}
 	return parsed.protocol;
 };
 
