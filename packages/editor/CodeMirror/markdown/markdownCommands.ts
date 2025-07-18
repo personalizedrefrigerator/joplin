@@ -213,12 +213,28 @@ export const toggleList = (listType: ListType): Command => {
 			return ListAction.SwitchFormatting;
 		};
 
+		const areAllLinesBlankInRange = (fromLine: Line, toLine: Line) => {
+			for (let lineNumber = fromLine.number; lineNumber <= toLine.number; lineNumber++) {
+				const line = state.doc.line(lineNumber);
+
+				// Consider lines within block quotes with no other content to be blank (this
+				// command should behave similarly regardless of whether in or out of a block
+				// quote).
+				if (stripBlockquote(line).trim() !== '') {
+					return false;
+				}
+			}
+
+			return true;
+		};
+
 		const changes: TransactionSpec = state.changeByRange((sel: SelectionRange) => {
 			const lineRange = getNextLineRange(sel);
 			if (!lineRange) return { range: sel };
 			const { fromLine, toLine } = lineRange;
 			const baselineIndent = getBaselineIndent(fromLine, toLine);
 			const action = getAction(fromLine, toLine);
+			const allLinesBlank = areAllLinesBlankInRange(fromLine, toLine);
 
 			// Outermost list item number
 			let outerCounter = 1;
@@ -230,7 +246,8 @@ export const toggleList = (listType: ListType): Command => {
 			for (let lineNum = fromLine.number; lineNum <= toLine.number; lineNum++) {
 				const line = doc.line(lineNum);
 				const origLineContent = stripBlockquote(line);
-				if (origLineContent.trim() === '') {
+				const currentLineBlank = origLineContent.trim() === '';
+				if (!allLinesBlank && currentLineBlank) {
 					continue; // skip blank lines
 				}
 
