@@ -8,13 +8,19 @@ export const hash = (url: string) => {
 };
 
 export const urlWithoutPath = (url: string) => {
-	const parsed = require('url').parse(url, true);
+	const parsed = new URL(url);
 	return `${parsed.protocol}//${parsed.host}`;
 };
 
 export const urlProtocol = (url: string) => {
 	if (!url) return '';
-	const parsed = require('url').parse(url, true);
+	// Check whether the URL is missing a protocol, return null to match the behavior of the
+	// NodeJS 'url' library.
+	//
+	// See https://www.rfc-editor.org/rfc/rfc3986#section-3.1 for valid URI schemes.
+	if (!url.match(/^[a-zA-Z][a-zA-Z0-9+\-.]+:/)) return null;
+
+	const parsed = new URL(url);
 	return parsed.protocol;
 };
 
