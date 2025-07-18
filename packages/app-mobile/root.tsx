@@ -146,6 +146,7 @@ import FocusControl from './components/accessibility/FocusControl/FocusControl';
 import SsoLoginScreen from './components/screens/SsoLoginScreen';
 import SamlShared from '@joplin/lib/components/shared/SamlShared';
 import NoteRevisionViewer from './components/screens/NoteRevisionViewer';
+import DocumentScanner from './components/screens/DocumentScanner/DocumentScanner';
 
 const logger = Logger.create('root');
 
@@ -278,6 +279,10 @@ const navHistory: any[] = [];
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 function historyCanGoBackTo(route: any) {
 	if (route.routeName === 'Folder') return false;
+
+	// This is an intermediate screen that acts more like a modal -- it should be skipped in the
+	// navigation history.
+	if (route.routeName === 'DocumentScanner') return false;
 
 	// There's no point going back to these screens in general and, at least in OneDrive case,
 	// it can be buggy to do so, due to incorrectly relying on global state (reg.syncTarget...)
@@ -1320,6 +1325,7 @@ class AppComponent extends React.Component<AppComponentProps, AppComponentState>
 			Status: { screen: StatusScreen },
 			Search: { screen: SearchScreen },
 			Config: { screen: ConfigScreen },
+			DocumentScanner: { screen: DocumentScanner },
 		};
 
 
@@ -1353,7 +1359,6 @@ class AppComponent extends React.Component<AppComponentProps, AppComponentState>
 					isOpen={this.props.showSideMenu}
 					disableGestures={disableSideMenuGestures}
 				>
-					<StatusBar barStyle={statusBarStyle} />
 					<View style={{ flexGrow: 1, flexShrink: 1, flexBasis: '100%' }}>
 						<SafeAreaView style={{ flex: 0, backgroundColor: theme.backgroundColor2 }}/>
 						<SafeAreaView style={{ flex: 1 }}>
@@ -1362,11 +1367,6 @@ class AppComponent extends React.Component<AppComponentProps, AppComponentState>
 							</View>
 							{/* eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied */}
 							<DropdownAlert alert={(func: any) => (this.dropdownAlert_ = func)} />
-							{ !shouldShowMainContent && <BiometricPopup
-								dispatch={this.props.dispatch}
-								themeId={this.props.themeId}
-								sensorInfo={this.state.sensorInfo}
-							/> }
 						</SafeAreaView>
 					</View>
 				</SideMenu>
@@ -1416,12 +1416,21 @@ class AppComponent extends React.Component<AppComponentProps, AppComponentState>
 					},
 				}}>
 					<DialogManager themeId={this.props.themeId}>
+						<StatusBar barStyle={statusBarStyle} />
 						<MenuProvider
 							style={{ flex: 1 }}
 							closeButtonLabel={_('Dismiss')}
 						>
 							<FocusControl.MainAppContent style={{ flex: 1 }}>
-								{mainContent}
+								{shouldShowMainContent ? mainContent : (
+									<SafeAreaView>
+										<BiometricPopup
+											dispatch={this.props.dispatch}
+											themeId={this.props.themeId}
+											sensorInfo={this.state.sensorInfo}
+										/>
+									</SafeAreaView>
+								)}
 							</FocusControl.MainAppContent>
 						</MenuProvider>
 					</DialogManager>
