@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { AccessibilityInfo, NativeSyntheticEvent, Platform, Role, StyleSheet, TextInput, TextInputProps, useWindowDimensions, View, ViewProps, ViewStyle } from 'react-native';
+import { AccessibilityInfo, NativeSyntheticEvent, Platform, Role, ScrollViewProps, StyleSheet, TextInput, TextInputProps, useWindowDimensions, View, ViewProps, ViewStyle } from 'react-native';
 import { TouchableRipple, Text } from 'react-native-paper';
 import { connect } from 'react-redux';
 import { AppState } from '../utils/types';
@@ -35,6 +35,7 @@ interface BaseProps {
 	onItemSelected: OnItemSelected;
 	style: ViewStyle;
 	searchInputProps?: TextInputProps;
+	searchResultProps?: ScrollViewProps;
 }
 
 type OnAddItem = (content: string)=> void;
@@ -478,6 +479,7 @@ const ComboBox: React.FC<Props> = ({
 	style: rootStyle,
 	alwaysExpand,
 	searchInputProps,
+	searchResultProps,
 }) => {
 	const [search, setSearch] = useState('');
 	const { showSearchResults, setShowSearchResults } = useShowSearchResults(alwaysExpand, search);
@@ -540,6 +542,7 @@ const ComboBox: React.FC<Props> = ({
 	const searchResults = <NestableFlatList
 		ref={listRef}
 		data={results}
+		{...searchResultProps}
 
 		CellRendererComponent={SearchResultWrapper}
 		itemHeight={menuItemHeight}

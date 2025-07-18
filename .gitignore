@@ -600,8 +600,10 @@ packages/app-mobile/components/CameraView/Camera/index.web.js
 packages/app-mobile/components/CameraView/Camera/types.js
 packages/app-mobile/components/CameraView/CameraView.test.js
 packages/app-mobile/components/CameraView/CameraView.js
+packages/app-mobile/components/CameraView/CameraView.web.js
 packages/app-mobile/components/CameraView/CameraViewMultiPage.test.js
 packages/app-mobile/components/CameraView/CameraViewMultiPage.js
+packages/app-mobile/components/CameraView/PhotoPreview.js
 packages/app-mobile/components/CameraView/ScannedBarcodes.js
 packages/app-mobile/components/CameraView/types.js
 packages/app-mobile/components/CameraView/utils/fitRectIntoBounds.js
@@ -612,6 +614,7 @@ packages/app-mobile/components/ComboBox.test.js
 packages/app-mobile/components/ComboBox.js
 packages/app-mobile/components/DialogManager/PromptButton.js
 packages/app-mobile/components/DialogManager/PromptDialog.js
+packages/app-mobile/components/DialogManager/TextInputDialog.js
 packages/app-mobile/components/DialogManager/hooks/useDialogControl.js
 packages/app-mobile/components/DialogManager/index.js
 packages/app-mobile/components/DialogManager/types.js
@@ -790,6 +793,8 @@ packages/app-mobile/components/screens/ConfigScreen/plugins/utils/usePluginItem.
 packages/app-mobile/components/screens/ConfigScreen/plugins/utils/useRepoApi.js
 packages/app-mobile/components/screens/ConfigScreen/plugins/utils/useUpdateState.js
 packages/app-mobile/components/screens/ConfigScreen/types.js
+packages/app-mobile/components/screens/DocumentScanner/DocumentScanner.js
+packages/app-mobile/components/screens/DocumentScanner/NotePreview.js
 packages/app-mobile/components/screens/JoplinCloudLoginScreen.js
 packages/app-mobile/components/screens/LogScreen.js
 packages/app-mobile/components/screens/Note/Note.test.js

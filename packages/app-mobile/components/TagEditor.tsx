@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { StyleSheet, View, Text, ScrollView, ViewStyle, Platform, AccessibilityInfo } from 'react-native';
+import { StyleSheet, View, Text, ScrollView, ViewStyle, Platform, AccessibilityInfo, ScrollViewProps, TextStyle } from 'react-native';
 import { _ } from '@joplin/lib/locale';
 import { themeStyle } from './global-style';
 import ComboBox, { Option } from './ComboBox';
@@ -23,9 +23,11 @@ interface Props {
 	mode: TagEditorMode;
 	style: ViewStyle;
 	onTagsChange: (newTags: string[])=> void;
+	headerStyle?: TextStyle;
+	searchResultProps?: ScrollViewProps;
 }
 
-const useStyles = (themeId: number) => {
+const useStyles = (themeId: number, headerStyle: TextStyle|undefined) => {
 	return useMemo(() => {
 		const theme = themeStyle(themeId);
 		return StyleSheet.create({
@@ -73,6 +75,7 @@ const useStyles = (themeId: number) => {
 				...theme.headerStyle,
 				fontSize: theme.fontSize,
 				marginBottom: theme.itemMarginBottom,
+				...headerStyle,
 			},
 			divider: {
 				marginTop: theme.margin * 1.4,
@@ -87,7 +90,7 @@ const useStyles = (themeId: number) => {
 				color: theme.colorFaded,
 			},
 		});
-	}, [themeId]);
+	}, [themeId, headerStyle]);
 };
 
 type Styles = ReturnType<typeof useStyles>;
@@ -188,7 +191,7 @@ const TagsBox: React.FC<TagsBoxProps> = props => {
 const normalizeTag = (tagText: string) => tagText.trim().toLowerCase();
 
 const TagEditor: React.FC<Props> = props => {
-	const styles = useStyles(props.themeId);
+	const styles = useStyles(props.themeId, props.headerStyle);
 
 	const comboBoxItems = useMemo(() => {
 		return props.allTags
@@ -270,6 +273,7 @@ const TagEditor: React.FC<Props> = props => {
 			searchInputProps={{
 				autoCapitalize: 'none',
 			}}
+			searchResultProps={props.searchResultProps}
 		/>
 	</View>;
 };

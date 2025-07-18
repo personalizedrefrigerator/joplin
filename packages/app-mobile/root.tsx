@@ -146,6 +146,7 @@ import FocusControl from './components/accessibility/FocusControl/FocusControl';
 import SsoLoginScreen from './components/screens/SsoLoginScreen';
 import SamlShared from '@joplin/lib/components/shared/SamlShared';
 import NoteRevisionViewer from './components/screens/NoteRevisionViewer';
+import DocumentScanner from './components/screens/DocumentScanner/DocumentScanner';
 
 const logger = Logger.create('root');
 
@@ -278,6 +279,10 @@ const navHistory: any[] = [];
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 function historyCanGoBackTo(route: any) {
 	if (route.routeName === 'Folder') return false;
+
+	// This is an intermediate screen that acts more like a modal -- it should be skipped in the
+	// navigation history.
+	if (route.routeName === 'DocumentScanner') return false;
 
 	// There's no point going back to these screens in general and, at least in OneDrive case,
 	// it can be buggy to do so, due to incorrectly relying on global state (reg.syncTarget...)
@@ -1320,6 +1325,7 @@ class AppComponent extends React.Component<AppComponentProps, AppComponentState>
 			Status: { screen: StatusScreen },
 			Search: { screen: SearchScreen },
 			Config: { screen: ConfigScreen },
+			DocumentScanner: { screen: DocumentScanner },
 		};
 
 

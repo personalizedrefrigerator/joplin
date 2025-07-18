@@ -1841,6 +1841,16 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 			section: 'note',
 		},
 
+		'scanner.titleTemplate': {
+			value: 'Scan: {date} ({count})',
+			type: SettingItemType.String,
+			public: true,
+			appTypes: [AppType.Mobile],
+			label: () => _('Document scanner: Title template'),
+			description: () => _('Default title to use for documents created by the scanner.'),
+			section: 'note',
+		},
+
 		'trash.autoDeletionEnabled': {
 			value: true,
 			type: SettingItemType.Bool,
