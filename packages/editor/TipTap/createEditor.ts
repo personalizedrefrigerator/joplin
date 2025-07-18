@@ -1,5 +1,7 @@
 import { Editor } from '@tiptap/core';
 import StarterKit from '@tiptap/starter-kit';
+import ImageKit from '@tiptap/extension-image';
+import { TableKit } from '@tiptap/extension-table';
 import { ContentScriptData, EditorCommandType, EditorControl, EditorProps, EditorSettings, SearchState, UpdateBodyOptions, UserEventSource } from '../types';
 import commands from './commands';
 import { EditorEventType } from '../events';
@@ -11,9 +13,11 @@ import originalMarkupPlugin from './plugins/originalMarkupPlugin';
 import preprocessEditorInput from './utils/preprocessEditorInput';
 import searchExtension from './plugins/searchExtension';
 import editorEventStatePlugin, { setEditorEventHandler } from './plugins/editorEventStatePlugin';
-import { ListKit } from '@tiptap/extension-list';
+import { TaskItem, TaskList } from '@tiptap/extension-list';
 import { TextSelection, Transaction } from '@tiptap/pm/state';
 import wrapProseMirrorPlugin from './utils/wrapProseMirrorPlugin';
+import joplinEditablePlugin from './plugins/joplinEditablePlugin';
+import Link from '@tiptap/extension-link';
 
 type MarkupToHtml = (markup: string)=> Promise<RenderResult>;
 type HtmlToMarkup = (html: HTMLElement)=> string;
@@ -74,8 +78,13 @@ const createEditor = async (
 		element: parentElement,
 		extensions: [
 			StarterKit,
-			ListKit,
+			TaskList,
+			TaskItem,
+			ImageKit.configure(),
+			TableKit,
+			Link,
 			wrapProseMirrorPlugin(editorEventStatePlugin),
+			...joplinEditablePlugin,
 			markupTracker,
 			wrapProseMirrorPlugin(searchPlugin),
 		],
@@ -126,7 +135,19 @@ const createEditor = async (
 			settings = newSettings;
 		},
 		updateLink: (label: string, url: string) => {
-			editor.commands.insertContent(label);
+			const selection = editor.state.selection;
+			// Replace the selection with the new link text
+			const transaction = editor.state.tr.insertText(label, selection.from, selection.to);
+			editor.view.dispatch(
+				// Ensure that the just-inserted content remains selected (if it was before)
+				transaction.setSelection(
+					TextSelection.create(
+						transaction.doc,
+						transaction.mapping.map(selection.from),
+						transaction.mapping.map(selection.to),
+					),
+				),
+			);
 			editor.commands.setLink({ href: url });
 		},
 		setSearchState: (newState: SearchState) => {

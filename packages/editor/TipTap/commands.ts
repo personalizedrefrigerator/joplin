@@ -1,4 +1,4 @@
-import { Command as ProseMirrorCommand, EditorState } from '@tiptap/pm/state';
+import { Command as ProseMirrorCommand, TextSelection } from '@tiptap/pm/state';
 import { EditorCommandType } from '../types';
 import { focus } from '@joplin/lib/utils/focusHandler';
 import { getSearchVisible, setSearchVisible } from './plugins/searchExtension';
@@ -56,16 +56,31 @@ const commands: Record<EditorCommandType, TipTapCommand|null> = {
 	[EditorCommandType.FindPrevious]: toEditorCommand(findPrev),
 	[EditorCommandType.ReplaceNext]: toEditorCommand(replaceNext),
 	[EditorCommandType.ReplaceAll]: toEditorCommand(replaceAll),
-	[EditorCommandType.EditLink]: toEditorCommand((state: EditorState, dispatch) => {
-		if (dispatch) {
-			const onEvent = getEditorEventHandler(state);
-			onEvent({
-				kind: EditorEventType.EditLink,
-			});
+	[EditorCommandType.EditLink]: (editor) => {
+		const state = editor.state;
+		const selection = state.selection;
+		const schema = editor.schema;
+
+		let linkFrom = -1;
+		let linkTo = -1;
+		let hasLink = false;
+		state.doc.nodesBetween(selection.from, selection.to, (node, position) => {
+			const linkMark = node.marks.find(mark => mark.type === schema.marks.link);
+			if (linkMark) {
+				hasLink = true;
+				linkFrom = position;
+				linkTo = position + node.nodeSize;
+			}
+		});
+		if (hasLink) {
+			editor.view.dispatch(state.tr.setSelection(TextSelection.create(state.doc, linkFrom, linkTo)));
 		}
 
-		return true;
-	}),
+		const onEvent = getEditorEventHandler(state);
+		onEvent({
+			kind: EditorEventType.EditLink,
+		});
+	},
 	[EditorCommandType.ScrollSelectionIntoView]: null,
 	[EditorCommandType.DeleteLine]: null,
 	[EditorCommandType.DeleteToLineEnd]: null,

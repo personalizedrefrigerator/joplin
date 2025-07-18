@@ -9200,7 +9200,9 @@ __metadata:
     "@replit/codemirror-vim": "npm:6.2.1"
     "@testing-library/react-hooks": "npm:8.0.1"
     "@tiptap/core": "npm:3.0.7"
+    "@tiptap/extension-image": "npm:3.0.7"
     "@tiptap/extension-list": "npm:3.0.7"
+    "@tiptap/extension-table": "npm:3.0.7"
     "@tiptap/pm": "npm:3.0.7"
     "@tiptap/starter-kit": "npm:3.0.7"
     "@types/jest": "npm:29.5.12"
@@ -13407,6 +13409,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@tiptap/extension-image@npm:3.0.7":
+  version: 3.0.7
+  resolution: "@tiptap/extension-image@npm:3.0.7"
+  peerDependencies:
+    "@tiptap/core": ^3.0.7
+  checksum: 10/7440bdbc2cf2da27ddb92c24046da628870ec8904411332b0a0abc946268ec13e3143aed5feb64dcb540bcc8e06eefd0a97c58df4c0b1858d8bac3c91b3e74a2
+  languageName: node
+  linkType: hard
+
 "@tiptap/extension-italic@npm:^3.0.7":
   version: 3.0.7
   resolution: "@tiptap/extension-italic@npm:3.0.7"
@@ -13480,6 +13491,16 @@ __metadata:
   peerDependencies:
     "@tiptap/core": ^3.0.7
   checksum: 10/6ac3e127990ff95bd4c47d43d9ad29e634db1c867b2eac69ee04ab948c6f229197792a4d1a90dea4e18093baae568127f62abea897a1aadfbafd5ae767193eca
+  languageName: node
+  linkType: hard
+
+"@tiptap/extension-table@npm:3.0.7":
+  version: 3.0.7
+  resolution: "@tiptap/extension-table@npm:3.0.7"
+  peerDependencies:
+    "@tiptap/core": ^3.0.7
+    "@tiptap/pm": ^3.0.7
+  checksum: 10/8f09cf081b78a6ba993d2e43c5f71f59e753df6f243504930413e2b1a850816cd75ec7f6171d7d6eae531b25c0cf9da7e838a3cf34972b49edc940d9f88a49ce
   languageName: node
   linkType: hard
 

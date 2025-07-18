@@ -1,21 +1,23 @@
 import { Plugin } from 'prosemirror-state';
-import { Node, NodeSpec } from 'prosemirror-model';
+import { Node } from 'prosemirror-model';
 import { NodeView } from 'prosemirror-view';
 import sanitizeHtml from '../utils/sanitizeHtml';
+import { Extension, NodeConfig, Node as TipTapNode } from '@tiptap/core';
 
 // See the fold example for more information about
 // writing similar ProseMirror plugins:
 // https://prosemirror.net/examples/fold/
 
 
-const makeJoplinEditableSpec = (inline: boolean): NodeSpec => ({
+const makeJoplinEditableSpec = (inline: boolean): NodeConfig => ({
+	name: `joplin-editable-${inline}`,
 	group: inline ? 'inline' : 'block',
 	inline: inline,
 	draggable: true,
-	attrs: {
+	addAttributes: () => ({
 		contentHtml: { default: '', validate: 'string' },
-	},
-	parseDOM: [
+	}),
+	parseHTML: () => [
 		{
 			tag: `${inline ? 'span' : 'div'}.joplin-editable`,
 			getAttrs: node => ({
@@ -23,18 +25,17 @@ const makeJoplinEditableSpec = (inline: boolean): NodeSpec => ({
 			}),
 		},
 	],
-	toDOM: node => {
+	renderHTML: ({ node, HTMLAttributes }) => {
 		const content = document.createElement(inline ? 'span' : 'div');
 		content.classList.add('joplin-editable');
 		content.innerHTML = sanitizeHtml(node.attrs.contentHtml);
+		for (const [key, value] of Object.entries(HTMLAttributes)) {
+			content.setAttribute(key, value);
+		}
+
 		return content;
 	},
 });
-
-export const nodeSpecs = {
-	joplinEditableInline: makeJoplinEditableSpec(true),
-	joplinEditableBlock: makeJoplinEditableSpec(false),
-};
 
 class SourceBlockView implements NodeView {
 	public readonly dom: HTMLElement;
@@ -57,7 +58,7 @@ class SourceBlockView implements NodeView {
 	}
 }
 
-const joplinEditablePlugin = new Plugin({
+const proseMirrorPlugin = new Plugin({
 	props: {
 		nodeViews: {
 			joplinEditableInline: node => new SourceBlockView(node, true),
@@ -66,4 +67,16 @@ const joplinEditablePlugin = new Plugin({
 	},
 });
 
-export default joplinEditablePlugin;
+export default [
+	Extension.create({
+		addProseMirrorPlugins() {
+			return [proseMirrorPlugin];
+		},
+	}),
+	TipTapNode.create({
+		...makeJoplinEditableSpec(true),
+	}),
+	TipTapNode.create({
+		...makeJoplinEditableSpec(false),
+	}),
+];
