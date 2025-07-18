@@ -1,11 +1,16 @@
 import { EditorState, Plugin } from 'prosemirror-state';
-import { Node as ProseMirrorNode, DOMSerializer } from 'prosemirror-model';
+import { Node as ProseMirrorNode, DOMSerializer, Schema } from 'prosemirror-model';
 import { Decoration, DecorationSet } from 'prosemirror-view';
-import schema from '../schema';
 import changedDescendants from '../vendor/changedDescendants';
+import { Extension } from '@tiptap/core';
 
 const originalMarkupPlugin = (htmlToMarkup: (html: Node)=> string) => {
-	const proseMirrorSerializer = DOMSerializer.fromSchema(schema);
+	let schema: Schema;
+	let serializer_: DOMSerializer;
+	const proseMirrorSerializer = () => {
+		serializer_ ??= DOMSerializer.fromSchema(schema);
+		return serializer_;
+	};
 
 	const makeDecoration = (position: number, node: ProseMirrorNode, markup: string) => {
 		return Decoration.node(
@@ -26,7 +31,7 @@ const originalMarkupPlugin = (htmlToMarkup: (html: Node)=> string) => {
 			});
 
 			if (matchingDecorations.length === 0) {
-				const markup = htmlToMarkup(proseMirrorSerializer.serializeNode(node));
+				const markup = htmlToMarkup(proseMirrorSerializer().serializeNode(node));
 				decorations = decorations.add(doc, [makeDecoration(position, node, markup)]);
 			}
 
@@ -71,7 +76,12 @@ const originalMarkupPlugin = (htmlToMarkup: (html: Node)=> string) => {
 	});
 
 	return {
-		plugin,
+		plugin: Extension.create({
+			addProseMirrorPlugins() {
+				schema = this.editor.schema;
+				return [plugin];
+			},
+		}),
 		stateToMarkup: (state: EditorState) => {
 			const decorations = plugin.getState(state).find();
 			// Sort the decorations in increasing order -- the documentation does not guarantee

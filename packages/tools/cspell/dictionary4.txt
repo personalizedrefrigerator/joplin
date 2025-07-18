@@ -193,3 +193,4 @@ dropcursor
 dompurify
 orderedmap
 labelledby
+tiptap

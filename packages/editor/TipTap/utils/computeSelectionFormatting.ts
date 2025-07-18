@@ -1,10 +1,9 @@
-import { MarkType, Node } from 'prosemirror-model';
+import { MarkType, Node, Schema } from 'prosemirror-model';
 import { Selection } from 'prosemirror-state';
 import SelectionFormatting, { MutableSelectionFormatting, defaultSelectionFormatting } from '../../SelectionFormatting';
-import schema from '../schema';
 import { EditorSettings } from '../../types';
 
-const computeSelectionFormatting = (doc: Node, selection: Selection, settings: EditorSettings): SelectionFormatting => {
+const computeSelectionFormatting = (doc: Node, schema: Schema, selection: Selection, settings: EditorSettings): SelectionFormatting => {
 	const formatting: MutableSelectionFormatting = {
 		...defaultSelectionFormatting,
 		selectedText: doc.textBetween(selection.from, selection.to),
@@ -52,8 +51,8 @@ const computeSelectionFormatting = (doc: Node, selection: Selection, settings: E
 	if (formatting.inCode) {
 		formatting.unspellCheckableRegion = true;
 	}
-	formatting.italicized = hasMark(schema.marks.emphasis);
-	formatting.bolded = hasMark(schema.marks.strong);
+	formatting.italicized = hasMark(schema.marks.italic);
+	formatting.bolded = hasMark(schema.marks.bold);
 
 	if (formatting.unspellCheckableRegion) {
 		formatting.spellChecking = false;

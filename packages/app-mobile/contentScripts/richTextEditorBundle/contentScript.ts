@@ -1,8 +1,8 @@
-import { createEditor } from '@joplin/editor/ProseMirror';
+import { createEditor } from '@joplin/editor/TipTap';
 import { EditorProcessApi, EditorProps, MainProcessApi } from './types';
 import WebViewToRNMessenger from '../../utils/ipc/WebViewToRNMessenger';
 import { MarkupLanguage } from '@joplin/renderer';
-import '@joplin/editor/ProseMirror/styles';
+import '@joplin/editor/TipTap/styles';
 import HtmlToMd from '@joplin/lib/HtmlToMd';
 
 const postprocessHtml = (html: HTMLElement) => {

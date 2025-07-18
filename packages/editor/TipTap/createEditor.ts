@@ -1,26 +1,19 @@
+import { Editor } from '@tiptap/core';
+import StarterKit from '@tiptap/starter-kit';
 import { ContentScriptData, EditorCommandType, EditorControl, EditorProps, EditorSettings, SearchState, UpdateBodyOptions, UserEventSource } from '../types';
-import { EditorState, TextSelection, Transaction } from 'prosemirror-state';
-import { EditorView } from 'prosemirror-view';
-import { DOMParser as ProseMirrorDomParser } from 'prosemirror-model';
-import { history } from 'prosemirror-history';
 import commands from './commands';
-import schema from './schema';
-import { gapCursor } from 'prosemirror-gapcursor';
-import { dropCursor } from 'prosemirror-dropcursor';
 import { EditorEventType } from '../events';
 import { RenderResult } from '../../renderer/types';
 import UndoStackSynchronizer from './utils/UndoStackSynchronizer';
 import computeSelectionFormatting from './utils/computeSelectionFormatting';
 import { defaultSelectionFormatting, selectionFormattingEqual } from '../SelectionFormatting';
-import joplinEditablePlugin from './plugins/joplinEditablePlugin';
-import keymapExtension from './plugins/keymapExtension';
-import inputRulesExtension from './plugins/inputRulesExtension';
 import originalMarkupPlugin from './plugins/originalMarkupPlugin';
-import { tableEditing } from 'prosemirror-tables';
 import preprocessEditorInput from './utils/preprocessEditorInput';
-import taskListPlugin from './plugins/taskListPlugin';
 import searchExtension from './plugins/searchExtension';
 import editorEventStatePlugin, { setEditorEventHandler } from './plugins/editorEventStatePlugin';
+import { ListKit } from '@tiptap/extension-list';
+import { TextSelection, Transaction } from '@tiptap/pm/state';
+import wrapProseMirrorPlugin from './utils/wrapProseMirrorPlugin';
 
 type MarkupToHtml = (markup: string)=> Promise<RenderResult>;
 type HtmlToMarkup = (html: HTMLElement)=> string;
@@ -37,8 +30,6 @@ const createEditor = async (
 		return renderToMarkup(element);
 	};
 
-	const proseMirrorParser = ProseMirrorDomParser.fromSchema(schema);
-
 	const cssContainer = document.createElement('style');
 	parentElement.appendChild(cssContainer);
 
@@ -46,7 +37,7 @@ const createEditor = async (
 	const { plugin: searchPlugin, updateState: updateSearchState } = searchExtension(props.onEvent);
 
 	let settings = props.settings;
-	const createInitialState = async (markup: string) => {
+	const renderInitialMarkup = async (markup: string) => {
 		const renderResult = await renderToHtml(markup);
 		cssContainer.replaceChildren(
 			document.createTextNode(renderResult.cssStrings.join('\n')),
@@ -54,39 +45,22 @@ const createEditor = async (
 
 		const dom = new DOMParser().parseFromString(renderResult.html, 'text/html');
 		preprocessEditorInput(dom, markup);
-
-		let state = EditorState.create({
-			doc: proseMirrorParser.parse(dom),
-			plugins: [
-				inputRulesExtension,
-				keymapExtension,
-				gapCursor(),
-				dropCursor(),
-				history(),
-				searchPlugin,
-				joplinEditablePlugin,
-				markupTracker,
-				taskListPlugin,
-				tableEditing({ allowTableNodeSelection: true }),
-				editorEventStatePlugin,
-			].flat(),
-		});
-
-		state = state.apply(setEditorEventHandler(state.tr, props.onEvent));
-
-		return state;
+		return new XMLSerializer().serializeToString(dom.body);
 	};
 
 	const undoStackSynchronizer = new UndoStackSynchronizer(props.onEvent);
-	const onDocumentUpdate = (newState: EditorState) => {
+	type TipTapEditorEvent = { editor: Editor; transaction: Transaction };
+	const onDocumentUpdate = ({ editor }: TipTapEditorEvent) => {
 		props.onEvent({
 			kind: EditorEventType.Change,
-			value: stateToMarkup(newState),
+			value: stateToMarkup(editor.view.state),
 		});
+
+		undoStackSynchronizer.schedulePostUndoRedoDepthChange(editor.view);
 	};
 	let lastSelectionFormatting = defaultSelectionFormatting;
-	const onUpdateSelection = (transaction: Transaction) => {
-		const selectionFormatting = computeSelectionFormatting(transaction.doc, transaction.selection, settings);
+	const onUpdateSelection = ({ transaction }: TipTapEditorEvent) => {
+		const selectionFormatting = computeSelectionFormatting(transaction.doc, editor.schema, transaction.selection, settings);
 		if (!selectionFormattingEqual(lastSelectionFormatting, selectionFormatting)) {
 			lastSelectionFormatting = selectionFormatting;
 			props.onEvent({
@@ -96,28 +70,22 @@ const createEditor = async (
 		}
 	};
 
-	const view = new EditorView(parentElement, {
-		state: await createInitialState(props.initialText),
-		dispatchTransaction: transaction => {
-			const newState = view.state.apply(transaction);
-
-			if (transaction.docChanged) {
-				onDocumentUpdate(newState);
-			}
-
-			if (transaction.selectionSet || transaction.docChanged) {
-				onUpdateSelection(transaction);
-			}
-
-			undoStackSynchronizer.schedulePostUndoRedoDepthChange(view);
-
-			view.updateState(newState);
-		},
-		attributes: {
-			'aria-label': settings.editorLabel,
-			class: 'prosemirror-editor',
-		},
+	const editor = new Editor({
+		element: parentElement,
+		extensions: [
+			StarterKit,
+			ListKit,
+			wrapProseMirrorPlugin(editorEventStatePlugin),
+			markupTracker,
+			wrapProseMirrorPlugin(searchPlugin),
+		],
+		content: await renderInitialMarkup(props.initialText),
 	});
+	editor.view.dispatch(
+		setEditorEventHandler(editor.view.state.tr, props.onEvent),
+	);
+	editor.on('selectionUpdate', onUpdateSelection);
+	editor.on('update', onDocumentUpdate);
 
 	const editorControl: EditorControl = {
 		supportsCommand: (name: EditorCommandType | string) => {
@@ -128,7 +96,7 @@ const createEditor = async (
 				throw new Error(`Unsupported command: ${name}`);
 			}
 
-			commands[name as keyof typeof commands](view.state, view.dispatch, view);
+			commands[name as keyof typeof commands](editor);
 		},
 		undo: () => {
 			void editorControl.execCommand(EditorCommandType.Undo);
@@ -137,73 +105,32 @@ const createEditor = async (
 			void editorControl.execCommand(EditorCommandType.Redo);
 		},
 		select: function(anchor: number, head: number): void {
-			const transaction = view.state.tr;
+			const transaction = editor.view.state.tr;
 			transaction.setSelection(
 				TextSelection.create(transaction.doc, anchor, head),
 			);
-			view.dispatch(transaction);
+			editor.view.dispatch(transaction);
 		},
 		setScrollPercent: (fraction: number) => {
 			// TODO: Handle this in a better way?
 			document.scrollingElement.scrollTop = fraction * document.scrollingElement.scrollHeight;
 		},
 		insertText: (text: string, _source?: UserEventSource) => {
-			view.dispatch(view.state.tr.insertText(text));
+			editor.commands.insertContent(text);
 		},
 		updateBody: async (newBody: string, _updateBodyOptions?: UpdateBodyOptions) => {
-			view.updateState(await createInitialState(newBody));
+			editor.commands.selectAll();
+			editor.commands.insertContent(await renderInitialMarkup(newBody));
 		},
 		updateSettings: (newSettings: EditorSettings) => {
 			settings = newSettings;
 		},
 		updateLink: (label: string, url: string) => {
-			const doc = view.state.doc;
-			const selection = view.state.selection;
-			let transaction: Transaction = view.state.tr;
-
-			// Helper functions that return the selection at the current stage of
-			// the transaction:
-			const selectionFrom = () => transaction.mapping.map(selection.from);
-			const selectionTo = () => transaction.mapping.map(selection.to);
-
-
-			let linkFrom = selectionFrom();
-			let linkTo = selectionTo();
-			doc.nodesBetween(selection.from, selection.to, (node, position) => {
-				const linkMark = node.marks.find(mark => mark.type === schema.marks.link);
-				if (linkMark) {
-					linkFrom = position;
-					linkTo = position + node.nodeSize;
-					transaction = transaction.removeMark(
-						position, position + node.nodeSize, schema.marks.link,
-					);
-				}
-			});
-
-			// Update the link text -- if an existing link, replace just the text
-			// in that link.
-			if (label !== transaction.doc.textBetween(linkFrom, linkTo)) {
-				transaction = transaction.insertText(
-					label,
-					linkFrom,
-					linkTo,
-				);
-			}
-
-			// Add the URL
-			if (url) {
-				transaction = transaction.addMark(
-					// Use the entire selection,
-					linkFrom,
-					linkTo,
-					schema.mark(schema.marks.link, { href: url }),
-				);
-			}
-
-			view.dispatch(transaction);
+			editor.commands.insertContent(label);
+			editor.commands.setLink({ href: url });
 		},
 		setSearchState: (newState: SearchState) => {
-			view.dispatch(updateSearchState(view.state, newState));
+			editor.view.dispatch(updateSearchState(editor.view.state, newState));
 		},
 		setContentScripts: function(_plugins: ContentScriptData[]): Promise<void> {
 			throw new Error('Function not implemented.');
