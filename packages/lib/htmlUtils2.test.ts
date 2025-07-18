@@ -58,24 +58,31 @@ describe('htmlUtils', () => {
 		}
 	}));
 
-	it.each([
-		[
-			'<a href="a.html">Something</a>',
-			'http://test.com',
-			'<a href="http://test.com/a.html">Something</a>',
-		],
-		[
-			'<a href="a.html">a</a> <a href="b.html">b</a>',
-			'http://test.com',
-			'<a href="http://test.com/a.html">a</a> <a href="http://test.com/b.html">b</a>',
-		],
-		[
-			'<a href="a.html">a</a> <a href="b.html">b</a>',
-			'http://test.com',
-			'<a href="http://test.com/a.html">a</a> <a href="http://test.com/b.html">b</a>',
-		],
-	])('should prepend a base URL (html: %j, baseUrl: %j)', (html, baseUrl, expected) => {
-		expect(htmlUtils.prependBaseUrl(html, baseUrl)).toBe(expected);
-	});
+	it('should prepend a base URL', (async () => {
+		const testCases = [
+			[
+				'<a href="a.html">Something</a>',
+				'http://test.com',
+				'<a href="http://test.com/a.html">Something</a>',
+			],
+			[
+				'<a href="a.html">a</a> <a href="b.html">b</a>',
+				'http://test.com',
+				'<a href="http://test.com/a.html">a</a> <a href="http://test.com/b.html">b</a>',
+			],
+			[
+				'<a href="a.html">a</a> <a href="b.html">b</a>',
+				'http://test.com',
+				'<a href="http://test.com/a.html">a</a> <a href="http://test.com/b.html">b</a>',
+			],
+		];
+
+		for (let i = 0; i < testCases.length; i++) {
+			const html = testCases[i][0];
+			const baseUrl = testCases[i][1];
+			const expected = testCases[i][2];
+			expect(htmlUtils.prependBaseUrl(html, baseUrl)).toBe(expected);
+		}
+	}));
 
 });
