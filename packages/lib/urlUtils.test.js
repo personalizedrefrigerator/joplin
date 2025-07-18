@@ -14,6 +14,7 @@ describe('urlUtils', () => {
 		expect(urlUtils.prependBaseUrl('//somewhereelse.com/testing.html', 'http://example.com/something')).toBe('http://somewhereelse.com/testing.html');
 		expect(urlUtils.prependBaseUrl('', 'http://example.com/something')).toBe('http://example.com/something');
 		expect(urlUtils.prependBaseUrl('testing.html', '')).toBe('testing.html');
+		expect(urlUtils.prependBaseUrl('/testing.html', '')).toBe('/testing.html');
 
 		// It shouldn't prepend anything for these:
 		expect(urlUtils.prependBaseUrl('mailto:emailme@example.com', 'http://example.com')).toBe('mailto:emailme@example.com');
