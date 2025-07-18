@@ -11,8 +11,8 @@ import intersectsSyntaxNode from '../utils/isInSyntaxNode';
 import toggleRegionFormatGlobally from '../utils/formatting/toggleRegionFormatGlobally';
 import { RegionSpec } from '../utils/formatting/RegionSpec';
 import toggleInlineFormatGlobally from '../utils/formatting/toggleInlineFormatGlobally';
-import stripBlockquote from './utils/stripBlockquote';
-import renumberSelectedLists from './utils/renumberSelectedLists';
+import stripBlockquote from '../utils/markdown/stripBlockquote';
+import renumberSelectedLists from '../utils/markdown/renumberSelectedLists';
 import toggleSelectedLinesStartWith from '../utils/formatting/toggleSelectedLinesStartWith';
 
 
