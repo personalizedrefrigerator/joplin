@@ -247,8 +247,17 @@ export const toggleList = (listType: ListType): Command => {
 				const line = doc.line(lineNum);
 				const origLineContent = stripBlockquote(line);
 				const currentLineBlank = origLineContent.trim() === '';
-				if (!allLinesBlank && currentLineBlank) {
-					continue; // skip blank lines
+
+				// To support changing the formatting of non-tight lists, skip blank lines within
+				// larger content. This allows changing the list format without adding a potentially
+				// large number of empty list items.
+				//
+				// However, if all lines are blank (e.g. if the cursor at the beginning of an empty)
+				// document, we're not changing the formatting of an existing list. In this case,
+				// skipping blank lines would cause the command to do nothing.
+				// See https://github.com/laurent22/joplin/pull/12745.
+				if (currentLineBlank && !allLinesBlank) {
+					continue;
 				}
 
 				// Content excluding the block quote start
