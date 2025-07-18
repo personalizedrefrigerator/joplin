@@ -1408,6 +1408,29 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 			isGlobal: true,
 		},
 
+		'editor.inlineRendering': {
+			value: true,
+			type: SettingItemType.Bool,
+			public: true,
+			appTypes: [AppType.Desktop, AppType.Mobile],
+			label: () => _('Markdown editor: Render markup in editor'),
+			description: () => _('Renders markup on all lines that don\'t include the cursor.'),
+			section: 'note',
+			storage: SettingStorage.File,
+			isGlobal: true,
+		},
+
+		'editor.linkTooltip': {
+			value: true,
+			type: SettingItemType.Bool,
+			public: true,
+			appTypes: [AppType.Desktop, AppType.Mobile],
+			label: () => _('Markdown editor: Show tooltips when clicking on links'),
+			section: 'note',
+			storage: SettingStorage.File,
+			isGlobal: true,
+		},
+
 		'imageeditor.jsdrawToolbar': {
 			value: '',
 			type: SettingItemType.String,

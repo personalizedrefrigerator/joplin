@@ -187,3 +187,4 @@ fuzzer
 Freespinny
 BestEtf
 Etf
+currentcolor

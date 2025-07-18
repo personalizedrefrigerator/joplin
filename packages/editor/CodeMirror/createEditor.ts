@@ -228,7 +228,7 @@ const createEditor = (
 			extensions: [
 				keymapConfig,
 
-				dynamicConfig.of(configFromSettings(props.settings)),
+				dynamicConfig.of(configFromSettings(props.settings, props.onEvent)),
 				historyCompartment.of(history()),
 				searchExtension(props.onEvent, props.settings),
 
@@ -320,7 +320,7 @@ const createEditor = (
 			settings = newSettings;
 			editor.dispatch({
 				effects: dynamicConfig.reconfigure(
-					configFromSettings(newSettings),
+					configFromSettings(newSettings, props.onEvent),
 				),
 			});
 		},

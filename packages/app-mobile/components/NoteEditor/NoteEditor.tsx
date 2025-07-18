@@ -30,6 +30,7 @@ import { join, dirname } from 'path';
 import * as mimeUtils from '@joplin/lib/mime-utils';
 import uuid from '@joplin/lib/uuid';
 import EditorToolbar from '../EditorToolbar/EditorToolbar';
+import CommandService from '@joplin/lib/services/CommandService';
 
 type ChangeEventHandler = (event: ChangeEvent)=> void;
 type UndoRedoDepthChangeHandler = (event: UndoRedoDepthChangeEvent)=> void;
@@ -350,6 +351,8 @@ function NoteEditor(props: Props, ref: any) {
 		markdownMarkEnabled: Setting.value('markdown.plugin.mark'),
 		katexEnabled: Setting.value('markdown.plugin.katex'),
 		spellcheckEnabled: Setting.value('editor.mobile.spellcheckEnabled'),
+		inlineRenderingEnabled: Setting.value('editor.inlineRendering'),
+		linkTooltipEnabled: Setting.value('editor.linkTooltip'),
 		language: EditorLanguageType.Markdown,
 		useExternalSearch: true,
 		readOnly: props.readOnly,
@@ -534,6 +537,9 @@ function NoteEditor(props: Props, ref: any) {
 				break;
 			case EditorEventType.Scroll:
 				// Not handled
+				break;
+			case EditorEventType.FollowLink:
+				void CommandService.instance().execute('openItem', event.link);
 				break;
 			default:
 				exhaustivenessCheck = event;
