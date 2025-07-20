@@ -287,12 +287,17 @@ export const sqliteSyncSlave = async (master: DbConnection, slave: DbConnection)
 	await reconnectDb(slave);
 };
 
+// This can be used to fix migration names, once the migration has already been deployed.
+// Incorrectly named migrations may end up being applied in the wrong order.
 const fixMigrationNames = async (db: DbConnection) => {
-	// This can be used to fix migration names, once the migration has already been deployed.
-	// Incorrectly named migrations may end up being applied in the wrong order.
-	await db('knex_migrations')
-		.update({ name: '20250404091200_user_auth_code.js' })
-		.where('name', '=', '202504040912000_user_auth_code.js');
+	try {
+		await db('knex_migrations')
+			.update({ name: '20250404091200_user_auth_code.js' })
+			.where('name', '=', '202504040912000_user_auth_code.js');
+	} catch (error) {
+		if (isNoSuchTableError(error)) return;
+		throw error;
+	}
 };
 
 export async function migrateLatest(db: DbConnection, disableTransactions = false) {
