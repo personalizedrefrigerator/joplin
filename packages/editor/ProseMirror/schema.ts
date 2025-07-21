@@ -195,6 +195,7 @@ const marks = {
 	},
 	code: {
 		parseDOM: [{ tag: 'code' }],
+		code: true,
 		toDOM: () => domOutputSpecs.code,
 		excludes: '_',
 	},
