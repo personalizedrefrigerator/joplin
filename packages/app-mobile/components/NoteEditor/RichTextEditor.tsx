@@ -182,8 +182,8 @@ const RichTextEditor: React.FC<EditorProps> = props => {
 	return (
 		<ExtendedWebView
 			ref={webviewRef}
-			webviewInstanceId='MarkdownEditor'
-			testID='MarkdownEditor'
+			webviewInstanceId='RichTextEditor'
+			testID='RichTextEditor'
 			scrollEnabled={true}
 			html={html}
 			injectedJavaScript={injectedJavaScript}

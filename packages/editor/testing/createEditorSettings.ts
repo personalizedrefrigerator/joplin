@@ -1,5 +1,5 @@
 import { themeStyle } from '@joplin/lib/theme';
-import { EditorKeymap, EditorLanguageType, EditorSettings } from '../../types';
+import { EditorKeymap, EditorLanguageType, EditorSettings } from '../types';
 
 const createEditorSettings = (themeId: number) => {
 	const themeData = themeStyle(themeId);

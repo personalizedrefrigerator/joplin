@@ -658,12 +658,14 @@ packages/app-mobile/components/NoteEditor/ImageEditor/promptRestoreAutosave.js
 packages/app-mobile/components/NoteEditor/MarkdownEditor.js
 packages/app-mobile/components/NoteEditor/NoteEditor.test.js
 packages/app-mobile/components/NoteEditor/NoteEditor.js
+packages/app-mobile/components/NoteEditor/RichTextEditor.test.js
 packages/app-mobile/components/NoteEditor/RichTextEditor.js
 packages/app-mobile/components/NoteEditor/SearchPanel.js
 packages/app-mobile/components/NoteEditor/commandDeclarations.js
 packages/app-mobile/components/NoteEditor/hooks/useCodeMirrorPlugins.js
 packages/app-mobile/components/NoteEditor/hooks/useEditorCommandHandler.test.js
 packages/app-mobile/components/NoteEditor/hooks/useEditorCommandHandler.js
+packages/app-mobile/components/NoteEditor/testing/createTestEditorProps.js
 packages/app-mobile/components/NoteEditor/types.js
 packages/app-mobile/components/NoteItem.js
 packages/app-mobile/components/NoteList.js
@@ -979,7 +981,6 @@ packages/editor/CodeMirror/pluginApi/codeMirrorRequire.js
 packages/editor/CodeMirror/pluginApi/customEditorCompletion.test.js
 packages/editor/CodeMirror/pluginApi/customEditorCompletion.js
 packages/editor/CodeMirror/testing/createEditorControl.js
-packages/editor/CodeMirror/testing/createEditorSettings.js
 packages/editor/CodeMirror/testing/createTestEditor.js
 packages/editor/CodeMirror/testing/findNodesWithName.js
 packages/editor/CodeMirror/testing/forceFullParse.js
@@ -1036,6 +1037,7 @@ packages/editor/ProseMirror/vendor/changedDescendants.js
 packages/editor/ProseMirror/vendor/splitBlockAs.js
 packages/editor/SelectionFormatting.js
 packages/editor/events.js
+packages/editor/testing/createEditorSettings.js
 packages/editor/types.js
 packages/fork-htmlparser2/src/CollectingHandler.js
 packages/fork-htmlparser2/src/FeedHandler.spec.js
