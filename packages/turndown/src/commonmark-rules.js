@@ -218,6 +218,21 @@ function isOrderedList(e) {
   return e.style && e.style.listStyleType === 'decimal';
 }
 
+// `content` should be the part of the item after the list marker (e.g. "[ ] test" in "- [ ] test").
+const removeListItemLeadingNewlines = (content) => {
+  const itemStartRegex = /(^\[ \]|^)([ \n]+)/;
+  const startingSpaceMatch = content.match(itemStartRegex);
+  if (!startingSpaceMatch) return content;
+
+  const checkbox = startingSpaceMatch[1];
+  const space = startingSpaceMatch[2];
+  if (space.includes('\n')) {
+    content = content.replace(itemStartRegex, `${checkbox} `);
+  }
+
+  return content;
+};
+
 rules.listItem = {
   filter: 'li',
 
@@ -266,7 +281,10 @@ rules.listItem = {
           prefix = indexStr + '.' + ' '.repeat(3 - indexStr.length)
         }
       }
-    } 
+    }
+
+    // Prevent the item from starting with a blank line (which breaks rendering)
+    content = removeListItemLeadingNewlines(content);
 
     return (
       prefix + content + (node.nextSibling && !/\n$/.test(content) ? '\n' : '')
