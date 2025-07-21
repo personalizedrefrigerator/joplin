@@ -21,6 +21,7 @@ import preprocessEditorInput from './utils/preprocessEditorInput';
 import taskListPlugin from './plugins/taskListPlugin';
 import searchExtension from './plugins/searchExtension';
 import editorEventStatePlugin, { setEditorEventHandler } from './plugins/editorEventStatePlugin';
+import linkTooltipPlugin from './plugins/linkTooltipPlugin';
 
 type MarkupToHtml = (markup: string)=> Promise<RenderResult>;
 type HtmlToMarkup = (html: HTMLElement)=> string;
@@ -67,6 +68,7 @@ const createEditor = async (
 				joplinEditablePlugin,
 				markupTracker,
 				taskListPlugin,
+				linkTooltipPlugin,
 				tableEditing({ allowTableNodeSelection: true }),
 				editorEventStatePlugin,
 			].flat(),

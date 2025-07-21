@@ -5,3 +5,4 @@ import './styles/joplin-editable.css';
 import './styles/prosemirror-editor.css';
 import './styles/table.css';
 import './styles/checklist-item.css';
+import './styles/link-tooltip.css';

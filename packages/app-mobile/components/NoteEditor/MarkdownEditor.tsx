@@ -15,7 +15,7 @@ import Logger from '@joplin/utils/Logger';
 import { OnMessageEvent } from '../ExtendedWebView/types';
 import useWebViewSetup from '../../contentScripts/markdownEditorBundle/useWebViewSetup';
 
-const logger = Logger.create('NoteEditor');
+const logger = Logger.create('MarkdownEditor');
 
 function useCss(themeId: number): string {
 	return useMemo(() => {

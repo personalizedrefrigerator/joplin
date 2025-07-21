@@ -23,6 +23,7 @@ import { SelectionRange } from '../../contentScripts/markdownEditorBundle/types'
 import MarkdownEditor from './MarkdownEditor';
 import RichTextEditor from './RichTextEditor';
 import { ResourceInfos } from '@joplin/renderer/types';
+import CommandService from '@joplin/lib/services/CommandService';
 
 type ChangeEventHandler = (event: ChangeEvent)=> void;
 type UndoRedoDepthChangeHandler = (event: UndoRedoDepthChangeEvent)=> void;
@@ -276,6 +277,9 @@ function NoteEditor(props: Props) {
 			break;
 		case EditorEventType.EditLink:
 			editorControl.showLinkDialog();
+			break;
+		case EditorEventType.FollowLink:
+			void CommandService.instance().execute('openItem', event.link);
 			break;
 		case EditorEventType.UpdateSearchDialog:
 			setSearchState(event.searchState);
