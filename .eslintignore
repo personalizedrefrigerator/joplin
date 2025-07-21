@@ -1060,6 +1060,7 @@ packages/editor/ProseMirror/utils/preprocessEditorInput.js
 packages/editor/ProseMirror/utils/sanitizeHtml.js
 packages/editor/ProseMirror/utils/trimEmptyParagraphs.js
 packages/editor/ProseMirror/vendor/changedDescendants.js
+packages/editor/ProseMirror/vendor/splitBlockAs.js
 packages/editor/SelectionFormatting.js
 packages/editor/events.js
 packages/editor/types.js
