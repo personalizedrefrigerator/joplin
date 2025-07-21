@@ -1,7 +1,7 @@
 import { buildKeymap as buildBaseKeymap } from 'prosemirror-example-setup';
 import schema from '../schema';
 import { keymap } from 'prosemirror-keymap';
-import { baseKeymap, chainCommands, exitCode } from 'prosemirror-commands';
+import { baseKeymap, chainCommands, exitCode, liftEmptyBlock, newlineInCode } from 'prosemirror-commands';
 import { liftListItem, sinkListItem, splitListItem } from 'prosemirror-schema-list';
 import commands from '../commands';
 import { EditorCommandType } from '../../types';
@@ -70,7 +70,9 @@ const keymapExtension = [
 	})),
 	keymap({
 		'Enter': chainCommands(
+			newlineInCode,
 			exitCode,
+			liftEmptyBlock,
 			convertDoubleHardBreakToNewParagraph,
 			insertHardBreak,
 		),
