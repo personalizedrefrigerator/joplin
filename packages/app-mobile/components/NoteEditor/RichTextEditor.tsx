@@ -15,7 +15,7 @@ import useWebViewSetup from '../../contentScripts/richTextEditorBundle/useWebVie
 import CommandService from '@joplin/lib/services/CommandService';
 import shim from '@joplin/lib/shim';
 
-const logger = Logger.create('NoteEditor');
+const logger = Logger.create('RichTextEditor');
 
 function useCss(themeId: number, editorCss: string): string {
 	return useMemo(() => {
@@ -168,7 +168,7 @@ const RichTextEditor: React.FC<EditorProps> = props => {
 		const data = event.nativeEvent.data;
 
 		if (typeof data === 'string' && data.indexOf('error:') === 0) {
-			logger.error('CodeMirror error', data);
+			logger.error('Rich Text Editor error', data);
 			return;
 		}
 
