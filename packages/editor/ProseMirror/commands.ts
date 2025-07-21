@@ -213,8 +213,28 @@ const commands: Record<EditorCommandType, Command|null> = {
 
 		return true;
 	},
-	[EditorCommandType.ScrollSelectionIntoView]: null,
-	[EditorCommandType.DeleteLine]: null,
+	[EditorCommandType.ScrollSelectionIntoView]: (state, dispatch) => {
+		if (dispatch) {
+			dispatch(state.tr.scrollIntoView());
+		}
+		return true;
+	},
+	[EditorCommandType.DeleteLine]: (state, dispatch) => {
+		const anchor = state.selection.$anchor;
+		const transaction = state.tr;
+		for (let i = anchor.depth; i > 0; i--) {
+			if (anchor.node(i).isBlock) {
+				const deleteFrom = anchor.before(i);
+				const deleteTo = anchor.after(i);
+				if (dispatch) {
+					dispatch(transaction.deleteRange(deleteFrom, deleteTo));
+				}
+				return true;
+			}
+		}
+
+		return false;
+	},
 	[EditorCommandType.DeleteToLineEnd]: null,
 	[EditorCommandType.DeleteToLineStart]: null,
 	[EditorCommandType.IndentMore]: (state, dispatch, view) => {

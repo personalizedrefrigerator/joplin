@@ -1,7 +1,6 @@
-import Renderer, { RendererOutput } from './Renderer';
+import Renderer from './Renderer';
 import WebViewToRNMessenger from '../../../utils/ipc/WebViewToRNMessenger';
 import { RendererProcessApi, MainProcessApi, RendererWebViewOptions } from '../types';
-import afterFullPageRender from './utils/afterFullPageRender';
 
 interface WebViewLib {
 	initialize(config: unknown): void;
@@ -20,7 +19,7 @@ interface ExtendedWindow extends Window {
 declare const window: ExtendedWindow;
 declare const webviewLib: WebViewLib;
 
-const initializeMessenger = (output: RendererOutput, options: RendererWebViewOptions) => {
+const initializeMessenger = (options: RendererWebViewOptions) => {
 	const messenger = new WebViewToRNMessenger<RendererProcessApi, MainProcessApi>(
 		'renderer',
 		null,
@@ -42,7 +41,7 @@ const initializeMessenger = (output: RendererOutput, options: RendererWebViewOpt
 	// Share the webview library globally so that the renderer can access it.
 	window.webviewLib = webviewLib;
 
-	const renderer = new Renderer(output, {
+	const renderer = new Renderer({
 		...options,
 		fsDriver: messenger.remoteApi.fsDriver,
 	});
@@ -59,12 +58,7 @@ const initializeMessenger = (output: RendererOutput, options: RendererWebViewOpt
 
 // eslint-disable-next-line import/prefer-default-export -- This is a bundle entrypoint
 export const initialize = (options: RendererWebViewOptions) => {
-	const { messenger } = initializeMessenger({
-		afterRender: afterFullPageRender,
-		getOutputElement: () => {
-			return document.getElementById('joplin-container-content');
-		},
-	}, options);
+	const { messenger } = initializeMessenger(options);
 
 	const lastScrollTop: number|null = null;
 	const onMainContentScroll = () => {

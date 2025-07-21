@@ -85,8 +85,8 @@ const createEditor = async (
 		});
 	};
 	let lastSelectionFormatting = defaultSelectionFormatting;
-	const onUpdateSelection = (transaction: Transaction) => {
-		const selectionFormatting = computeSelectionFormatting(transaction.doc, transaction.selection, settings);
+	const onUpdateSelection = (newState: EditorState) => {
+		const selectionFormatting = computeSelectionFormatting(newState, settings);
 		if (!selectionFormattingEqual(lastSelectionFormatting, selectionFormatting)) {
 			lastSelectionFormatting = selectionFormatting;
 			props.onEvent({
@@ -105,8 +105,8 @@ const createEditor = async (
 				onDocumentUpdate(newState);
 			}
 
-			if (transaction.selectionSet || transaction.docChanged) {
-				onUpdateSelection(transaction);
+			if (transaction.selectionSet || transaction.docChanged || transaction.storedMarksSet) {
+				onUpdateSelection(newState);
 			}
 
 			undoStackSynchronizer.schedulePostUndoRedoDepthChange(view);
@@ -205,8 +205,8 @@ const createEditor = async (
 		setSearchState: (newState: SearchState) => {
 			view.dispatch(updateSearchState(view.state, newState));
 		},
-		setContentScripts: function(_plugins: ContentScriptData[]): Promise<void> {
-			throw new Error('Function not implemented.');
+		setContentScripts: (_plugins: ContentScriptData[]) => {
+			throw new Error('setContentScripts not implemented.');
 		},
 	};
 	return editorControl;
