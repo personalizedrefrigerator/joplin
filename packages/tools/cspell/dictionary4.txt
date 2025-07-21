@@ -193,3 +193,5 @@ dropcursor
 dompurify
 orderedmap
 labelledby
+isTextblock
+deflt
