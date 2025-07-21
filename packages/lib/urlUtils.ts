@@ -14,7 +14,14 @@ export const urlWithoutPath = (url: string) => {
 
 export const urlProtocol = (url: string) => {
 	if (!url) return '';
-	const parsed = new URL(url);
+
+	let parsed;
+	try {
+		parsed = new URL(url);
+	} catch (error) {
+		// Match the NodeJS url.parse behavior in the case of an invalid URL:
+		return null;
+	}
 	return parsed.protocol;
 };
 
