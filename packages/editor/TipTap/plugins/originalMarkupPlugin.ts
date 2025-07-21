@@ -4,11 +4,33 @@ import { Decoration, DecorationSet } from 'prosemirror-view';
 import changedDescendants from '../vendor/changedDescendants';
 import { Extension } from '@tiptap/core';
 
+// Creates a custom serializer that can preserve empty paragraphs.
+// See https://discuss.prosemirror.net/t/how-to-preserve-br-tags-in-empty-paragraphs/2051/8.
+const createSerializer = (schema: Schema) => {
+	const baseSerializer = DOMSerializer.fromSchema(schema);
+	return new DOMSerializer({
+		...baseSerializer.nodes,
+		paragraph: (node) => {
+			if (node.content.size === 0) {
+				return ['p', '&nbsp;'];
+			} else {
+				return ['p', 0];
+			}
+		},
+
+		// Preserve repeated spaces -- ProseMirror visually preserves spaces with "white-space: break-spaces".
+		text: (node) => {
+			// Replace repeated spaces with a space followed by a nonbreaking space:
+			return node.text.replace(/ {2}/g, ' &nbsp;');
+		},
+	}, baseSerializer.marks);
+};
+
 const originalMarkupPlugin = (htmlToMarkup: (html: Node)=> string) => {
 	let schema: Schema;
 	let serializer_: DOMSerializer;
 	const proseMirrorSerializer = () => {
-		serializer_ ??= DOMSerializer.fromSchema(schema);
+		serializer_ ??= createSerializer(schema);
 		return serializer_;
 	};
 

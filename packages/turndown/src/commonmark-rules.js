@@ -220,7 +220,7 @@ function isOrderedList(e) {
 
 // `content` should be the part of the item after the list marker (e.g. "[ ] test" in "- [ ] test").
 const removeListItemLeadingNewlines = (content) => {
-  const itemStartRegex = /(^\[ \]|^)([ \n]+)/;
+  const itemStartRegex = /(^\[[Xx ]\]|^)([ \n]+)/;
   const startingSpaceMatch = content.match(itemStartRegex);
   if (!startingSpaceMatch) return content;
 
@@ -231,6 +231,10 @@ const removeListItemLeadingNewlines = (content) => {
   }
 
   return content;
+};
+
+const isEmptyTaskListItem = (content) => {
+  return content.match(/^\[[xX \][ \n\t]*$/);
 };
 
 rules.listItem = {
@@ -285,6 +289,12 @@ rules.listItem = {
 
     // Prevent the item from starting with a blank line (which breaks rendering)
     content = removeListItemLeadingNewlines(content);
+
+    // Prevent the item from being empty (which also prevents the item from rendering as a list
+    // item).
+    if (isEmptyTaskListItem(content)) {
+      content += '&nbsp;';
+    }
 
     return (
       prefix + content + (node.nextSibling && !/\n$/.test(content) ? '\n' : '')

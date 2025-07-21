@@ -194,3 +194,5 @@ dompurify
 orderedmap
 labelledby
 tiptap
+isTextblock
+deflt
