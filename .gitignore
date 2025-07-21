@@ -973,6 +973,7 @@ packages/editor/CodeMirror/extensions/overwriteModeExtension.js
 packages/editor/CodeMirror/extensions/searchExtension.js
 packages/editor/CodeMirror/extensions/selectedNoteIdExtension.js
 packages/editor/CodeMirror/getScrollFraction.js
+packages/editor/CodeMirror/index.js
 packages/editor/CodeMirror/pluginApi/PluginLoader.js
 packages/editor/CodeMirror/pluginApi/codeMirrorRequire.js
 packages/editor/CodeMirror/pluginApi/customEditorCompletion.test.js
