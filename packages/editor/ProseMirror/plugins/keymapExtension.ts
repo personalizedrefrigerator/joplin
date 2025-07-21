@@ -5,7 +5,7 @@ import { baseKeymap, chainCommands, exitCode } from 'prosemirror-commands';
 import { liftListItem, sinkListItem, splitListItem } from 'prosemirror-schema-list';
 import commands from '../commands';
 import { EditorCommandType } from '../../types';
-import { Command, TextSelection } from 'prosemirror-state';
+import { Command, EditorState, TextSelection } from 'prosemirror-state';
 import splitBlockAs from '../vendor/splitBlockAs';
 
 const convertDoubleHardBreakToNewParagraph: Command = (state, dispatch) => {
@@ -35,7 +35,23 @@ const convertDoubleHardBreakToNewParagraph: Command = (state, dispatch) => {
 	return false;
 };
 
+const listItemTypes = [
+	// Apply the list item keymap to all list item types
+	// Ref: Default keymap in prosemirror-example-setup.
+	schema.nodes.taskListItem, schema.nodes.list_item,
+];
+
+const isInEmptyListItem = (state: EditorState) => {
+	const anchor = state.selection.$anchor;
+	const selectionGrandparent = anchor.node(Math.max(0, anchor.depth - 1));
+	const inList = listItemTypes.includes(selectionGrandparent?.type);
+
+	return inList && anchor.parent.content.size === 0;
+};
+
 const insertHardBreak: Command = (state, dispatch) => {
+	if (isInEmptyListItem(state)) return false;
+
 	if (dispatch) {
 		// Default to inserting a hard break. See https://github.com/ProseMirror/prosemirror-example-setup/blob/8c11be6850604081dceda8f36e08d2426875e19a/src/keymap.ts#L77C26-L77C39
 		dispatch(
@@ -47,11 +63,7 @@ const insertHardBreak: Command = (state, dispatch) => {
 };
 
 const keymapExtension = [
-	[
-		// Apply the list item keymap to all list item types
-		// Ref: Default keymap in prosemirror-example-setup.
-		schema.nodes.taskListItem, schema.nodes.list_item,
-	].map(itemType => keymap({
+	listItemTypes.map(itemType => keymap({
 		'Enter': splitListItem(itemType),
 		'Mod-[': liftListItem(itemType),
 		'Mod-]': sinkListItem(itemType),
