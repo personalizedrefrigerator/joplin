@@ -21,18 +21,6 @@ const postprocessHtml = (html: HTMLElement) => {
 		resource.src = '';
 	}
 
-	// Preserve repeated spaces -- ProseMirror visually preserves spaces with "white-space: break-spaces".
-	const replaceRepeatedSpace = (node: Node) => {
-		if (node.nodeType === Node.TEXT_NODE) {
-			node.textContent = node.textContent.replace(/ {2}/g, ' &nbsp;');
-		}
-
-		for (const child of node.childNodes) {
-			replaceRepeatedSpace(child);
-		}
-	};
-	replaceRepeatedSpace(html);
-
 	// Re-add newlines to data-joplin-source-* that were removed
 	// by ProseMirror.
 	// TODO: Try to find a better solution
