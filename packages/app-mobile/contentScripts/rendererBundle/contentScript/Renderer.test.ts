@@ -3,7 +3,6 @@ import Setting from '@joplin/lib/models/Setting';
 import Renderer, { RenderSettings, RendererSetupOptions } from './Renderer';
 import shim from '@joplin/lib/shim';
 import { MarkupLanguage } from '@joplin/renderer';
-import afterFullPageRender from './utils/afterFullPageRender';
 
 const defaultRendererSettings: RenderSettings = {
 	theme: JSON.stringify({ cacheKey: 'test' }),
@@ -35,10 +34,7 @@ const makeRenderer = (options: Partial<RendererSetupOptions>) => {
 		fsDriver: shim.fsDriver(),
 		pluginOptions: {},
 	};
-	return new Renderer({
-		getOutputElement: () => document.getElementById('joplin-container-content'),
-		afterRender: afterFullPageRender,
-	}, { ...options, ...defaultSetupOptions });
+	return new Renderer({ ...options, ...defaultSetupOptions });
 };
 
 const getRenderedContent = () => {
@@ -151,7 +147,7 @@ describe('Renderer', () => {
 
 		// Should call .requestPluginSetting for missing settings
 		expect(requestPluginSetting).toHaveBeenCalledTimes(1);
-		await rerenderToBody({});
+		await rerenderToBody({ someOtherSetting: 1 });
 		expect(requestPluginSetting).toHaveBeenCalledTimes(2);
 		expect(requestPluginSetting).toHaveBeenLastCalledWith('com.example.test-plugin', 'setting');
 
