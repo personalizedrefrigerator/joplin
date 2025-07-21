@@ -57,7 +57,7 @@ const commands: Record<EditorCommandType, Command|null> = {
 	[EditorCommandType.SortSelectedLines]: null,
 	[EditorCommandType.ToggleNumberedList]: toggleList(schema.nodes.ordered_list),
 	[EditorCommandType.ToggleBulletedList]: toggleList(schema.nodes.bullet_list),
-	[EditorCommandType.ToggleCheckList]: null,
+	[EditorCommandType.ToggleCheckList]: toggleList(schema.nodes.taskList),
 	[EditorCommandType.ToggleHeading]: toggleHeading(2),
 	[EditorCommandType.ToggleHeading1]: toggleHeading(1),
 	[EditorCommandType.ToggleHeading2]: toggleHeading(2),

@@ -16,12 +16,17 @@ export const nodeSpecs = {
 		toDOM: () => ['ul', { class: 'task-list', 'data-is-checklist': '1' }, 0],
 	},
 	taskListItem: {
-		content: 'taskListLabel block*',
+		content: 'paragraph block*',
+		attrs: { checked: { default: false, validate: 'boolean' } },
 		defining: true,
 
 		parseDOM: [
 			{
 				tag: 'li.md-checkbox',
+				getAttrs(node) {
+					const checkbox = node.querySelector<HTMLInputElement>('input[type=checkbox]');
+					return { checked: !!checkbox?.checked };
+				},
 				contentElement(node) {
 					const result = node.cloneNode(true) as HTMLElement;
 					// Empty paragraphs can cause rendering issues
@@ -35,33 +40,10 @@ export const nodeSpecs = {
 				},
 			},
 		],
-		toDOM: () => [
-			'li', { class: 'md-checkbox' },
-			0,
-		],
-	},
-	taskListLabel: {
-		attrs: { checked: { default: false, validate: 'boolean' } },
-		content: 'inline*',
-		parseDOM: [
-			{
-				tag: 'div.checkbox-wrapper',
-				getAttrs: (node) => {
-					const checkbox = node.querySelector<HTMLInputElement>('input[type=checkbox]');
-					return { checked: !!checkbox?.checked };
-				},
-				contentElement(node) {
-					const result = node.cloneNode(true) as HTMLElement;
-					const checkbox = result.querySelector('input[type=checkbox]');
-					checkbox?.remove();
-					return result;
-				},
-			},
-		],
 		toDOM: (node) => [
-			'label',
+			'li', { class: 'md-checkbox' },
 			['input', { type: 'checkbox', checked: node.attrs.checked ? true : undefined }],
-			['span', 0],
+			['div', 0],
 		],
 	},
 } satisfies Record<string, NodeSpec>;
@@ -81,9 +63,9 @@ class TaskListItemView implements NodeView {
 
 		// Don't use a <label> element as a container -- clicking on the container
 		// should move focus to the task item, not focus the checkbox.
-		this.dom = document.createElement('div');
+		this.dom = document.createElement('li');
 		this.dom.id = `${(idCounter++)}-checkbox-container`;
-		this.dom.classList.add('checklist-item', '-flex');
+		this.dom.classList.add('checklist-item', 'md-checkbox', '-flex');
 
 		this.checkbox_ = document.createElement('input');
 		this.checkbox_.type = 'checkbox';
@@ -108,7 +90,7 @@ class TaskListItemView implements NodeView {
 const taskListPlugin = new Plugin({
 	props: {
 		nodeViews: {
-			taskListLabel: (node, view, getPos) => new TaskListItemView(node, view, getPos),
+			taskListItem: (node, view, getPos) => new TaskListItemView(node, view, getPos),
 		},
 	},
 });
