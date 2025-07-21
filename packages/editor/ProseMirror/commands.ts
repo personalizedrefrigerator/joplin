@@ -1,7 +1,7 @@
 import { Command, EditorState, Selection, TextSelection, Transaction } from 'prosemirror-state';
 import { EditorCommandType } from '../types';
 import { redo, undo } from 'prosemirror-history';
-import { selectAll, setBlockType, toggleMark } from 'prosemirror-commands';
+import { autoJoin, selectAll, setBlockType, toggleMark } from 'prosemirror-commands';
 import { focus } from '@joplin/lib/utils/focusHandler';
 import schema from './schema';
 import { liftListItem, sinkListItem, wrapRangeInList } from 'prosemirror-schema-list';
@@ -131,7 +131,7 @@ const toggleHeading = (level: number): Command => {
 };
 
 const toggleList = (type: NodeType): Command => {
-	const enableCommand: Command = (state, dispatch) => {
+	const enableCommand: Command = autoJoin((state, dispatch) => {
 		const extractionResult = extractSelectedLinesTo(
 			schema.nodes.paragraph,
 			{ },
@@ -147,12 +147,12 @@ const toggleList = (type: NodeType): Command => {
 		const range = selection.$from.blockRange(selection.$to);
 		const result = wrapRangeInList(transaction, range, type);
 
-		if (dispatch) {
+		if (dispatch && result) {
 			dispatch(transaction);
 		}
 
 		return result;
-	};
+	}, [type.name]);
 	const liftCommand = liftListItem(schema.nodes.list_item);
 
 	return (state, dispatch, view) => {

@@ -10,6 +10,8 @@ const createSerializer = () => {
 	const baseSerializer = DOMSerializer.fromSchema(schema);
 	return new DOMSerializer({
 		...baseSerializer.nodes,
+
+		// Prevent empty paragraphs from being removed by padding them with &nbsp;s:
 		paragraph: (node) => {
 			if (node.content.size === 0) {
 				return ['p', '&nbsp;'];
@@ -20,8 +22,24 @@ const createSerializer = () => {
 
 		// Preserve repeated spaces -- ProseMirror visually preserves spaces with "white-space: break-spaces".
 		text: (node) => {
+			if (node.marks.some(mark => mark.type.spec.code)) {
+				// Within code, &nbsp;s render as text, not nonbreaking spaces.
+				// Avoid including them:
+				return node.text;
+			}
+
 			// Replace repeated spaces with a space followed by a nonbreaking space:
 			return node.text.replace(/ {2}/g, ' &nbsp;');
+		},
+
+		// However, &nbsp;s don't render as nonbreaking spaces in code blocks.
+		// Create a custom output specification to avoid using the default text output:
+		pre_block: (node) => {
+			const result = document.createElement('pre');
+			const content = document.createElement('code');
+			content.appendChild(document.createTextNode(node.textContent));
+			result.appendChild(content);
+			return { dom: result };
 		},
 	}, baseSerializer.marks);
 };
