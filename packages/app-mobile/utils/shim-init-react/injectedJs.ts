@@ -1,6 +1,6 @@
 
 const injectedJs = {
-	webviewLib: { js: require('@joplin/lib/rnInjectedJs/webviewLib') },
+	webviewLib: { js: require('../../lib/rnInjectedJs/webviewLib') },
 	markdownEditorBundle: require('../../lib/rnInjectedJs/markdownEditorBundle.bundle'),
 	richTextEditorBundle: require('../../lib/rnInjectedJs/richTextEditorBundle.bundle'),
 	imageEditorBundle: require('../../lib/rnInjectedJs/imageEditorBundle.bundle'),
