@@ -1,18 +1,125 @@
-import { Command, EditorState } from 'prosemirror-state';
+import { Command, EditorState, Selection, TextSelection, Transaction } from 'prosemirror-state';
 import { EditorCommandType } from '../types';
 import { redo, undo } from 'prosemirror-history';
 import { selectAll, setBlockType, toggleMark } from 'prosemirror-commands';
 import { focus } from '@joplin/lib/utils/focusHandler';
 import schema from './schema';
-import { liftListItem, sinkListItem, wrapInList } from 'prosemirror-schema-list';
-import { NodeType } from 'prosemirror-model';
+import { liftListItem, sinkListItem, wrapRangeInList } from 'prosemirror-schema-list';
+import { NodeType, Attrs, Node } from 'prosemirror-model';
 import { getSearchVisible, setSearchVisible } from './plugins/searchExtension';
 import { findNext, findPrev, replaceAll, replaceNext } from 'prosemirror-search';
 import { getEditorEventHandler } from './plugins/editorEventStatePlugin';
 import { EditorEventType } from '../events';
+import { canSplit } from 'prosemirror-transform';
+
+const extractSelectedLinesTo = (type: NodeType, attrs: Attrs, transaction: Transaction, selection: Selection) => {
+	let firstParagraphPos = -1;
+	let lastParagraphPos = -1;
+	let foundParagraph = false;
+	transaction.doc.nodesBetween(selection.from, selection.to, (node, pos) => {
+		if (node.type === schema.nodes.paragraph) {
+			if (!foundParagraph) {
+				firstParagraphPos = pos;
+				lastParagraphPos = pos;
+			}
+
+			firstParagraphPos = Math.min(pos, firstParagraphPos);
+			lastParagraphPos = Math.max(pos, lastParagraphPos);
+			foundParagraph = true;
+		}
+	});
+
+	if (!foundParagraph) return null;
+
+	const firstParagraphFrom = firstParagraphPos;
+	const lastParagraph = transaction.doc.nodeAt(lastParagraphPos);
+	const lastParagraphTo = lastParagraphPos + lastParagraph.nodeSize;
+
+	// Find the previous and next <br/>s (or the start/end of the paragraph)
+	let fromBreakPosition = firstParagraphFrom;
+	let fromBreak: Node|null = null;
+	let toBreakPosition = lastParagraphTo;
+	let toBreak: Node|null = null;
+
+	transaction.doc.nodesBetween(firstParagraphFrom, lastParagraphTo, (node, pos) => {
+		if (node.type === schema.nodes.hard_break) {
+			if (pos + node.nodeSize <= selection.from && fromBreakPosition <= pos) {
+				fromBreakPosition = Math.max(fromBreakPosition, pos);
+				fromBreak = node;
+			} else if (pos >= selection.to && toBreakPosition >= pos) {
+				toBreakPosition = Math.min(toBreakPosition, pos);
+				toBreak = node;
+			}
+		}
+	});
+
+	// Check whether this would result in a change
+	if (!fromBreak && !toBreak) {
+		const wouldChange = (blockNode: Node) => {
+			if (blockNode.type !== type) return true;
+
+			let changesAttributes = false;
+			for (const [key, value] of Object.entries(attrs)) {
+				if (blockNode.attrs[key] !== value) {
+					changesAttributes = true;
+				}
+			}
+			return changesAttributes;
+		};
+
+		const candidateNodes = transaction.doc.slice(firstParagraphFrom, lastParagraphTo).content;
+		let changes = false;
+		for (const node of candidateNodes.content) {
+			if (wouldChange(node)) {
+				changes = true;
+				break;
+			}
+		}
+
+		if (!changes) {
+			return null; // the transaction would do nothing -- skip
+		}
+	}
+
+	const map = (position: number, associativity?: number) => transaction.mapping.map(position, associativity);
+	const replaceBreakWithSplit = (hardBreak: Node, position: number) => {
+		if (hardBreak && canSplit(transaction.doc, map(position))) {
+			transaction = transaction.split(map(position));
+			transaction = transaction.delete(
+				map(position),
+				map(position + hardBreak.nodeSize),
+			);
+		}
+	};
+
+	// Replace the starting <br/> with a split
+	replaceBreakWithSplit(fromBreak, fromBreakPosition);
+	// ...and the ending <br/> (if any)
+	replaceBreakWithSplit(toBreak, toBreakPosition);
+
+	transaction = transaction.setBlockType(map(fromBreakPosition, 1), map(toBreakPosition, -1), type, attrs);
+
+	// Build a custom final selection -- the default mapping grows the selection, but we want it to shrink,
+	// to avoid moving the cursor to the beginning of the content after the current item:
+	let finalSelection: Selection = TextSelection.create(transaction.doc, map(toBreakPosition, -1));
+	if (!selection.empty) {
+		finalSelection = TextSelection.create(transaction.doc, map(fromBreakPosition, 1), map(toBreakPosition, -1));
+	}
+	transaction = transaction.setSelection(finalSelection);
+
+	return { transaction, finalSelection };
+};
 
 const toggleHeading = (level: number): Command => {
-	const enableCommand = setBlockType(schema.nodes.heading, { level });
+	const enableCommand: Command = (state, dispatch) => {
+		const result = extractSelectedLinesTo(schema.nodes.heading, { level }, state.tr, state.selection);
+		if (!result) return false;
+
+		if (dispatch) {
+			dispatch(result.transaction);
+		}
+		return true;
+	};
 	const resetCommand = setBlockType(schema.nodes.paragraph);
 
 	return (state, dispatch, view) => {
@@ -24,7 +131,28 @@ const toggleHeading = (level: number): Command => {
 };
 
 const toggleList = (type: NodeType): Command => {
-	const enableCommand = wrapInList(type);
+	const enableCommand: Command = (state, dispatch) => {
+		const extractionResult = extractSelectedLinesTo(
+			schema.nodes.paragraph,
+			{ },
+			state.tr,
+			state.selection,
+		);
+		let transaction = extractionResult?.transaction;
+		if (!transaction) {
+			transaction = state.tr;
+		}
+
+		const selection = extractionResult?.finalSelection ?? state.selection;
+		const range = selection.$from.blockRange(selection.$to);
+		const result = wrapRangeInList(transaction, range, type);
+
+		if (dispatch) {
+			dispatch(transaction);
+		}
+
+		return result;
+	};
 	const liftCommand = liftListItem(schema.nodes.list_item);
 
 	return (state, dispatch, view) => {
