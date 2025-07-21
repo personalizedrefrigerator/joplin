@@ -205,8 +205,8 @@ const createEditor = async (
 		setSearchState: (newState: SearchState) => {
 			view.dispatch(updateSearchState(view.state, newState));
 		},
-		setContentScripts: function(_plugins: ContentScriptData[]): Promise<void> {
-			throw new Error('Function not implemented.');
+		setContentScripts: (_plugins: ContentScriptData[]) => {
+			throw new Error('setContentScripts not implemented.');
 		},
 	};
 	return editorControl;

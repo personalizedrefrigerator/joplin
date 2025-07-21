@@ -638,6 +638,13 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 			});
 		}
 
+		if (prevState.mode !== this.state.mode) {
+			this.props.dispatch({
+				type: 'NOTE_EDITOR_VISIBLE_CHANGE',
+				visible: this.state.mode === 'edit' && !this.state.showCamera && !this.state.showImageEditor,
+			});
+		}
+
 		if (prevProps.noteId && this.props.noteId && prevProps.noteId !== this.props.noteId) {
 			// Easier to just go back, then go to the note since
 			// the Note screen doesn't handle reloading a different note
@@ -685,6 +692,11 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 
 		this.commandRegistration_?.deregister();
 		this.commandRegistration_ = null;
+
+		this.props.dispatch({
+			type: 'SET_NOTE_EDITOR_VISIBLE',
+			visible: false,
+		});
 	}
 
 	private title_changeText(text: string) {
