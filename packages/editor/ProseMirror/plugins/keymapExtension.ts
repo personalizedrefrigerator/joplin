@@ -53,8 +53,21 @@ const isInEmptyListItem = (state: EditorState) => {
 	return inList && anchor.parent.content.size === 0;
 };
 
+const isInEmptyParagraph = (state: EditorState) => {
+	const selectionParent = state.selection.$anchor.parent;
+	return state.selection.empty &&
+		state.selection.$anchor.parent.type === schema.nodes.paragraph &&
+		selectionParent.content.size === 0;
+};
+
 const insertHardBreak: Command = (state, dispatch) => {
+	// Avoid adding hard breaks at the beginning of list items
 	if (isInEmptyListItem(state)) return false;
+	// Avoid adding hard breaks at the beginning of paragraphs -- certain input rules
+	// only work when the cursor is at the beginning of a paragraph. If a paragraph
+	// starts with a hard break, it may incorrectly appear to the user that the cursor is at the
+	// start of a paragraph, leading to unexpected behavior related to input rules.
+	if (isInEmptyParagraph(state)) return false;
 	if (!canReplaceSelectionWith(state.selection, schema.nodes.hard_break)) return false;
 
 	if (dispatch) {
