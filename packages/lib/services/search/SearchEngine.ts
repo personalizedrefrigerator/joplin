@@ -17,6 +17,9 @@ import replaceUnsupportedCharacters from '../../utils/replaceUnsupportedCharacte
 import { htmlentitiesDecode } from '@joplin/utils/html';
 const { sprintf } = require('sprintf-js');
 import { pregQuote, scriptType, removeDiacritics } from '../../string-utils';
+import PerformanceLogger from '../../PerformanceLogger';
+
+const perfLogger = PerformanceLogger.create('SearchEngine');
 
 enum SearchType {
 	Auto = 'auto',
@@ -188,6 +191,8 @@ export default class SearchEngine {
 
 	private async syncTables_() {
 		if (this.isIndexing_) return;
+
+		using _syncTask = perfLogger.taskStart('syncTables');
 
 		this.isIndexing_ = true;
 

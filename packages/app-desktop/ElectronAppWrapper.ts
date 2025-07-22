@@ -8,7 +8,7 @@ import { FileLocker } from '@joplin/utils/fs';
 import { IpcMessageHandler, IpcServer, Message, newHttpError, sendMessage, SendMessageOptions, startServer, stopServer } from '@joplin/utils/ipc';
 import { BrowserWindow, Tray, WebContents, screen, App, nativeTheme } from 'electron';
 import bridge from './bridge';
-const url = require('url');
+import * as url from 'url';
 const path = require('path');
 const { dirname } = require('@joplin/lib/path-utils');
 const fs = require('fs-extra');
@@ -23,9 +23,6 @@ import { defaultWindowId } from '@joplin/lib/reducer';
 import { msleep, Second } from '@joplin/utils/time';
 import determineBaseAppDirs from '@joplin/lib/determineBaseAppDirs';
 import getAppName from '@joplin/lib/getAppName';
-import PerformanceLogger from '@joplin/lib/PerformanceLogger';
-
-const performanceLogger = PerformanceLogger.create('ElectronAppWrapper');
 
 interface RendererProcessQuitReply {
 	canClose: boolean;
@@ -81,8 +78,6 @@ export default class ElectronAppWrapper {
 	private ipcLoggerFilePath_: string;
 
 	public constructor(electronApp: App, { env, profilePath, isDebugMode, initialCallbackUrl, isEndToEndTesting }: Options) {
-		performanceLogger.mark('create');
-
 		this.electronApp_ = electronApp;
 		this.env_ = env;
 		this.isDebugMode_ = isDebugMode;
@@ -212,8 +207,6 @@ export default class ElectronAppWrapper {
 	}
 
 	public createWindow() {
-		const createTask = performanceLogger.taskStart('createWindow');
-
 		// Set to true to view errors if the application does not start
 		const debugEarlyBugs = this.env_ === 'dev' || this.isDebugMode_;
 
@@ -529,8 +522,6 @@ export default class ElectronAppWrapper {
 		if (!windowOptions.show) {
 			this.win_.hide();
 		}
-
-		performanceLogger.taskEnd(createTask);
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
@@ -806,11 +797,9 @@ export default class ElectronAppWrapper {
 	}
 
 	public async start() {
-		performanceLogger.mark('start');
 		// Since we are doing other async things before creating the window, we might miss
 		// the "ready" event. So we use the function below to make sure that the app is ready.
 		await this.waitForElectronAppReady();
-		performanceLogger.mark('ready');
 
 		const alreadyRunning = await this.ensureSingleInstance();
 		if (alreadyRunning) return;
