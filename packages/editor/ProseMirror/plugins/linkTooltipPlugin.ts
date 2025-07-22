@@ -36,9 +36,21 @@ class LinkTooltip {
 			return;
 		}
 
+		const getMarksNearSelection = () => {
+			let marks = state.selection.$from.marks();
 
-		const selectionMarks = state.selection.$anchor.marks();
-		const linkMark = selectionMarks.find(mark => mark.type === schema.marks.link);
+			const parentStart = state.selection.$from.posAtIndex(0);
+			const indexBefore = state.selection.from - 1;
+			if (indexBefore >= parentStart) {
+				const beforeSelection = state.doc.resolve(indexBefore);
+				const marksJustBeforeSelection = beforeSelection.marks();
+				marks = marks.concat(marksJustBeforeSelection);
+			}
+
+			return marks;
+		};
+
+		const linkMark = getMarksNearSelection().find(mark => mark.type === schema.marks.link);
 		const show = state.selection.empty && linkMark;
 
 		if (!show) {
