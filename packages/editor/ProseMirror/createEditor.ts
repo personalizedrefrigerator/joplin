@@ -46,15 +46,21 @@ const createEditor = async (
 	const { plugin: markupTracker, stateToMarkup } = originalMarkupPlugin(renderNodeToMarkup);
 	const { plugin: searchPlugin, updateState: updateSearchState } = searchExtension(props.onEvent);
 
-	let settings = props.settings;
-	const createInitialState = async (markup: string) => {
+	const renderAndPostprocessHtml = async (markup: string) => {
 		const renderResult = await renderToHtml(markup);
-		cssContainer.replaceChildren(
-			document.createTextNode(renderResult.cssStrings.join('\n')),
-		);
 
 		const dom = new DOMParser().parseFromString(renderResult.html, 'text/html');
 		preprocessEditorInput(dom, markup);
+
+		return { renderResult, dom };
+	};
+
+	let settings = props.settings;
+	const createInitialState = async (markup: string) => {
+		const { renderResult, dom } = await renderAndPostprocessHtml(markup);
+		cssContainer.replaceChildren(
+			document.createTextNode(renderResult.cssStrings.join('\n')),
+		);
 
 		let state = EditorState.create({
 			doc: proseMirrorParser.parse(dom),
@@ -149,8 +155,9 @@ const createEditor = async (
 			// TODO: Handle this in a better way?
 			document.scrollingElement.scrollTop = fraction * document.scrollingElement.scrollHeight;
 		},
-		insertText: (text: string, _source?: UserEventSource) => {
-			view.dispatch(view.state.tr.insertText(text));
+		insertText: async (text: string, _source?: UserEventSource) => {
+			const { dom } = await renderAndPostprocessHtml(text);
+			view.pasteHTML(new XMLSerializer().serializeToString(dom));
 		},
 		updateBody: async (newBody: string, _updateBodyOptions?: UpdateBodyOptions) => {
 			view.updateState(await createInitialState(newBody));
