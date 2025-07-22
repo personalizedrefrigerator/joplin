@@ -1049,6 +1049,7 @@ packages/lib/JoplinDatabase.js
 packages/lib/JoplinError.js
 packages/lib/JoplinServerApi.js
 packages/lib/ObjectUtils.js
+packages/lib/PerformanceLogger.js
 packages/lib/PoorManIntervals.js
 packages/lib/RotatingLogs.test.js
 packages/lib/RotatingLogs.js
