@@ -199,6 +199,23 @@ const marks = {
 		toDOM: () => domOutputSpecs.code,
 		excludes: '_',
 	},
+	color: {
+		inclusive: false,
+		parseDOM: [{
+			style: 'color',
+			getAttrs: (styleValue: string) => {
+				return { color: styleValue };
+			},
+		}],
+		attrs: {
+			color: { validate: 'string' },
+		},
+		toDOM: node => {
+			const result = document.createElement('span');
+			result.style.color = node.attrs.color;
+			return result;
+		},
+	},
 	link: {
 		attrs: {
 			href: { validate: 'string' },

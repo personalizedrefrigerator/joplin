@@ -45,7 +45,7 @@ const htmlToMd = new HtmlToMd();
 const htmlToMarkdown = (html: HTMLElement): string => {
 	html = postprocessHtml(html);
 
-	return htmlToMd.parse(html);
+	return htmlToMd.parse(html, { preserveColorStyles: true });
 };
 
 export const initialize = async ({
