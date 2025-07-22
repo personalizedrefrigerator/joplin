@@ -29,12 +29,20 @@ export const nodeSpecs = {
 				},
 				contentElement(node) {
 					const result = node.cloneNode(true) as HTMLElement;
-					// Empty paragraphs can cause rendering issues
+
+					// Empty paragraphs can cause rendering issues.
 					trimEmptyParagraphs(result);
 
-					const firstChild = () => node.children[0];
-					if (firstChild()?.matches('div.checkbox-wrapper')) {
-						firstChild().replaceWith(...firstChild().childNodes);
+					const firstChild = result.children[0];
+					if (firstChild?.matches('div.checkbox-wrapper')) {
+						firstChild.remove();
+
+						// Trim empty paragraphs without the first child.
+						// Without this, multiple empty paragraphs can accumulate between
+						// the list item and its sub-lists.
+						trimEmptyParagraphs(result);
+
+						result.prepend(...firstChild.childNodes);
 					}
 					return result;
 				},
