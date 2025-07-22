@@ -32,20 +32,52 @@ const getDefaultToplevelAttrs = (node: Element) => ({
 	originalMarkup: node.getAttribute('data-original-markup'),
 });
 
+const addDefaultToplevelAttributes = <Nodes extends Record<string, NodeSpec>> (nodes: Nodes) => {
+	const result: Partial<Nodes> = {};
+	for (const key in nodes) {
+		if (nodes[key].group === 'block') {
+			result[key] = {
+				...nodes[key],
+				attrs: {
+					...defaultToplevelAttrs,
+					...nodes[key].attrs,
+				},
+				parseDOM: nodes[key].parseDOM?.map(rule => {
+					if (!rule.tag) return rule;
+
+					return {
+						...rule,
+						getAttrs: (node) => {
+							const attrs = rule.getAttrs?.(node);
+							if (attrs === false) return attrs;
+
+							return {
+								...getDefaultToplevelAttrs(node),
+								...(attrs ?? rule.attrs ?? {}),
+							};
+						},
+					};
+				}),
+			};
+		} else {
+			result[key] = nodes[key];
+		}
+	}
+	return result as Nodes;
+};
+
 const listGroup = 'block';
 
-const nodes = {
+const nodes = addDefaultToplevelAttributes({
 	doc: { content: 'block+' },
 	paragraph: {
 		group: 'block',
 		content: '(inline|hard_break)*',
-		parseDOM: [{ tag: 'p', getAttrs: getDefaultToplevelAttrs }],
-		attrs: defaultToplevelAttrs,
+		parseDOM: [{ tag: 'p' }],
 		toDOM: () => domOutputSpecs.paragraph,
 	},
 	heading: { // See prosemirror-schema-basic's `heading`
 		attrs: {
-			...defaultToplevelAttrs,
 			level: { default: 2, validate: 'number' },
 		},
 		group: 'block',
@@ -61,17 +93,14 @@ const nodes = {
 		marks: '',
 		code: true,
 		defining: true, // Preserve the node during replacement operations
-		parseDOM: [{ tag: 'pre', getAttrs: getDefaultToplevelAttrs }],
+		parseDOM: [{ tag: 'pre' }],
 		toDOM: () => domOutputSpecs.pre,
-
-		attrs: defaultToplevelAttrs,
 	},
 	blockquote: {
 		content: 'block+',
 		group: 'block',
-		parseDOM: [{ tag: 'blockquote', getAttrs: getDefaultToplevelAttrs }],
+		parseDOM: [{ tag: 'blockquote' }],
 		toDOM: () => domOutputSpecs.blockQuote,
-		attrs: defaultToplevelAttrs,
 	},
 	horizontal_rule: {
 		group: 'block',
@@ -105,15 +134,13 @@ const nodes = {
 		content: 'list_item+',
 		group: listGroup,
 
-		parseDOM: [{ tag: 'ul:not([data-is-checklist])', getAttrs: getDefaultToplevelAttrs }],
+		parseDOM: [{ tag: 'ul:not([data-is-checklist])' }],
 		toDOM: () => domOutputSpecs.unorderedList,
-		attrs: defaultToplevelAttrs,
 	},
 	list_item: {
 		content: 'paragraph block*',
-		parseDOM: [{ tag: 'li:not(.md-checkbox)', getAttrs: getDefaultToplevelAttrs }],
+		parseDOM: [{ tag: 'li:not(.md-checkbox)' }],
 		toDOM: () => domOutputSpecs.listItem,
-		attrs: defaultToplevelAttrs,
 	},
 	...joplinEditableNodes,
 	...tableNodes({
@@ -127,9 +154,8 @@ const nodes = {
 		tableRole: 'table',
 		isolating: true,
 		group: 'block',
-		parseDOM: [{ tag: 'table', getAttrs: getDefaultToplevelAttrs }],
+		parseDOM: [{ tag: 'table' }],
 		toDOM: () => ['table', ['tbody', 0]],
-		attrs: defaultToplevelAttrs,
 	},
 
 	text: {
@@ -182,7 +208,7 @@ const nodes = {
 		parseDOM: [{ tag: 'br' }],
 		toDOM: () => domOutputSpecs.br,
 	},
-} satisfies Record<string, NodeSpec>;
+});
 
 const marks = {
 	strong: {
