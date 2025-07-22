@@ -1,7 +1,7 @@
 import { AttributeSpec, DOMOutputSpec, MarkSpec, NodeSpec, Schema } from 'prosemirror-model';
 import { nodeSpecs as joplinEditableNodes } from './plugins/joplinEditablePlugin';
 import { tableNodes } from 'prosemirror-tables';
-import { nodeSpecs as taskListNodes } from './plugins/taskListPlugin';
+import { nodeSpecs as listNodes } from './plugins/listPlugin';
 
 // For reference, see:
 // - https://prosemirror.net/docs/guide/#schema
@@ -66,8 +66,6 @@ const addDefaultToplevelAttributes = <Nodes extends Record<string, NodeSpec>> (n
 	return result as Nodes;
 };
 
-const listGroup = 'block';
-
 const nodes = addDefaultToplevelAttributes({
 	doc: { content: 'block+' },
 	paragraph: {
@@ -107,41 +105,7 @@ const nodes = addDefaultToplevelAttributes({
 		parseDOM: [{ tag: 'hr' }],
 		toDOM: () => domOutputSpecs.hr,
 	},
-	...taskListNodes,
-	ordered_list: {
-		content: 'list_item+',
-		group: listGroup,
-
-		// Match attributes from https://github.com/ProseMirror/prosemirror-schema-list/blob/master/src/schema-list.ts
-		attrs: { order: { default: 1, validate: 'number' }, ...defaultToplevelAttrs },
-		parseDOM: [
-			{
-				tag: 'ol',
-				getAttrs: node => {
-					const start = node.hasAttribute('start') ? Number(node.getAttribute('start')) : 1;
-					return {
-						...getDefaultToplevelAttrs(node),
-						order: isFinite(start) ? start : 1,
-					};
-				},
-			},
-		],
-		toDOM: node => (
-			node.attrs.order === 1 ? domOutputSpecs.orderedList : ['ol', { start: node.attrs.order }, 0]
-		),
-	},
-	bullet_list: {
-		content: 'list_item+',
-		group: listGroup,
-
-		parseDOM: [{ tag: 'ul:not([data-is-checklist])' }],
-		toDOM: () => domOutputSpecs.unorderedList,
-	},
-	list_item: {
-		content: 'paragraph block*',
-		parseDOM: [{ tag: 'li:not(.md-checkbox)' }],
-		toDOM: () => domOutputSpecs.listItem,
-	},
+	...listNodes,
 	...joplinEditableNodes,
 	...tableNodes({
 		tableGroup: 'block',

@@ -18,7 +18,7 @@ import inputRulesExtension from './plugins/inputRulesExtension';
 import originalMarkupPlugin from './plugins/originalMarkupPlugin';
 import { tableEditing } from 'prosemirror-tables';
 import preprocessEditorInput from './utils/preprocessEditorInput';
-import taskListPlugin from './plugins/taskListPlugin';
+import listPlugin from './plugins/listPlugin';
 import searchExtension from './plugins/searchExtension';
 import editorEventStatePlugin, { setEditorEventHandler } from './plugins/editorEventStatePlugin';
 import linkTooltipPlugin from './plugins/linkTooltipPlugin';
@@ -67,7 +67,7 @@ const createEditor = async (
 				searchPlugin,
 				joplinEditablePlugin,
 				markupTracker,
-				taskListPlugin,
+				listPlugin,
 				linkTooltipPlugin,
 				tableEditing({ allowTableNodeSelection: true }),
 				editorEventStatePlugin,

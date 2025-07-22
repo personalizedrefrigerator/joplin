@@ -7,25 +7,67 @@ import trimEmptyParagraphs from '../utils/trimEmptyParagraphs';
 // writing similar ProseMirror plugins:
 // https://prosemirror.net/examples/fold/
 
+const listGroup = 'block';
 
+// Note: Use snake_case for schema keys for compatibility with certain default ProseMirror code
+// (e.g. default input rules from prosemirror-example-setup).
 export const nodeSpecs = {
-	taskList: {
-		content: 'taskListItem+',
-		group: 'block',
+	task_list: {
+		content: 'task_list_item+',
+		group: listGroup,
 		parseDOM: [{ tag: 'ul[data-is-checklist]' }],
 		toDOM: () => ['ul', { class: 'task-list', 'data-is-checklist': '1' }, 0],
 	},
-	taskListItem: {
+	ordered_list: {
+		content: 'list_item+',
+		group: listGroup,
+
+		// Match attributes from https://github.com/ProseMirror/prosemirror-schema-list/blob/master/src/schema-list.ts
+		attrs: { order: { default: 1, validate: 'number' } },
+		parseDOM: [
+			{
+				tag: 'ol',
+				getAttrs: node => {
+					const start = node.hasAttribute('start') ? Number(node.getAttribute('start')) : 1;
+					return {
+						order: isFinite(start) ? start : 1,
+					};
+				},
+			},
+		],
+		toDOM: node => (
+			node.attrs.order === 1 ? ['ol', 0] : ['ol', { start: node.attrs.order }, 0]
+		),
+	},
+	bullet_list: {
+		content: 'list_item+',
+		group: listGroup,
+
+		parseDOM: [{ tag: 'ul:not([data-is-checklist])' }],
+		toDOM: () => ['ul', 0],
+	},
+	list_item: {
 		content: 'paragraph block*',
-		attrs: { checked: { default: false, validate: 'boolean' } },
 		defining: true,
+		draggable: true,
+
+		parseDOM: [{ tag: 'li:not(.md-checkbox)' }],
+		toDOM: () => ['li', 0],
+	},
+	task_list_item: {
+		content: 'paragraph block*',
+		attrs: {
+			checked: { default: false, validate: 'boolean' },
+		},
+		defining: true,
+		draggable: true,
 
 		parseDOM: [
 			{
 				tag: 'li.md-checkbox',
 				getAttrs(node) {
 					const checkbox = node.querySelector<HTMLInputElement>('input[type=checkbox]');
-					return { checked: !!checkbox?.checked };
+					return { checked: checkbox?.checked ?? false };
 				},
 				contentElement(node) {
 					const result = node.cloneNode(true) as HTMLElement;
@@ -48,11 +90,13 @@ export const nodeSpecs = {
 				},
 			},
 		],
-		toDOM: (node) => [
-			'li', { class: 'md-checkbox' },
-			['input', { type: 'checkbox', checked: node.attrs.checked ? true : undefined }],
-			['div', 0],
-		],
+		toDOM: (node) => {
+			return [
+				'li', { class: 'md-checkbox' },
+				['input', { type: 'checkbox', checked: node.attrs.checked ? true : undefined }],
+				['div', 0],
+			];
+		},
 	},
 } satisfies Record<string, NodeSpec>;
 
@@ -65,12 +109,6 @@ class TaskListItemView implements NodeView {
 	private checkbox_: HTMLInputElement;
 
 	public constructor(node: Node, view: EditorView, getPosition: GetPosition) {
-		if ((node.attrs.checked ?? undefined) === undefined) {
-			throw new Error(`Missing checked attribute. Node: ${node}.`);
-		}
-
-		// Don't use a <label> element as a container -- clicking on the container
-		// should move focus to the task item, not focus the checkbox.
 		this.dom = document.createElement('li');
 		this.dom.id = `${(idCounter++)}-checkbox-container`;
 		this.dom.classList.add('checklist-item', 'md-checkbox', '-flex');
@@ -78,6 +116,9 @@ class TaskListItemView implements NodeView {
 		this.checkbox_ = document.createElement('input');
 		this.checkbox_.type = 'checkbox';
 		this.checkbox_.checked = node.attrs.checked;
+		// Don't use a <label> element as a container since clicking on the container
+		// should move focus to the task item, not focus the checkbox.
+		// Instead use aria-labelledby for accessibility:
 		this.checkbox_.setAttribute('aria-labelledby', this.dom.id);
 
 		this.contentDOM = document.createElement('div');
@@ -95,12 +136,12 @@ class TaskListItemView implements NodeView {
 	}
 }
 
-const taskListPlugin = new Plugin({
+const listPlugin = new Plugin({
 	props: {
 		nodeViews: {
-			taskListItem: (node, view, getPos) => new TaskListItemView(node, view, getPos),
+			task_list_item: (node, view, getPos) => new TaskListItemView(node, view, getPos),
 		},
 	},
 });
 
-export default taskListPlugin;
+export default listPlugin;

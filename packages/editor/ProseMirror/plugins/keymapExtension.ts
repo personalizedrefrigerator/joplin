@@ -42,7 +42,7 @@ const convertDoubleHardBreakToNewParagraph: Command = (state, dispatch) => {
 const listItemTypes = [
 	// Apply the list item keymap to all list item types
 	// Ref: Default keymap in prosemirror-example-setup.
-	schema.nodes.taskListItem, schema.nodes.list_item,
+	schema.nodes.list_item, schema.nodes.task_list_item,
 ];
 
 const isInEmptyListItem = (state: EditorState) => {
