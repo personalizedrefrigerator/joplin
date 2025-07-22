@@ -1,6 +1,5 @@
 // This is the initialization for the Electron RENDERER process
 
-
 // Disable React message in console "Download the React DevTools for a better development experience"
 // https://stackoverflow.com/questions/42196819/disable-hide-download-the-react-devtools#42196820
 // eslint-disable-next-line no-undef, @typescript-eslint/no-explicit-any
