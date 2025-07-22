@@ -38,7 +38,7 @@ const nodes = {
 	doc: { content: 'block+' },
 	paragraph: {
 		group: 'block',
-		content: 'inline*',
+		content: '(inline|hard_break)*',
 		parseDOM: [{ tag: 'p', getAttrs: getDefaultToplevelAttrs }],
 		attrs: defaultToplevelAttrs,
 		toDOM: () => domOutputSpecs.paragraph,
@@ -177,7 +177,7 @@ const nodes = {
 	},
 	hard_break: {
 		inline: true,
-		group: 'inline',
+		group: 'inlineBreak',
 		selectable: false,
 		parseDOM: [{ tag: 'br' }],
 		toDOM: () => domOutputSpecs.br,
