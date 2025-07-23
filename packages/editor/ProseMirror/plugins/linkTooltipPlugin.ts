@@ -67,7 +67,8 @@ class LinkTooltip {
 
 			this.tooltip_.classList.remove('-hidden');
 			const position = view.coordsAtPos(state.selection.from);
-			const parentBox = this.tooltip_.offsetParent.getBoundingClientRect();
+			// Fall back to document.body to support testing environments:
+			const parentBox = (this.tooltip_.offsetParent ?? document.body).getBoundingClientRect();
 			const tooltipBox = this.tooltip_.getBoundingClientRect();
 			this.tooltip_.style.top = `${position.top - parentBox.top + tooltipBox.height}px`;
 			this.tooltip_.style.left = `${Math.max(position.left - parentBox.left - tooltipBox.width / 2, 0)}px`;

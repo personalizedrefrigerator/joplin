@@ -17,12 +17,13 @@ import Note from '@joplin/lib/models/Note';
 import shim from '@joplin/lib/shim';
 import Resource from '@joplin/lib/models/Resource';
 import { ResourceInfos } from '@joplin/renderer/types';
-import { EditorControl } from './types';
+import { EditorControl } from '@joplin/editor/types';
 
 interface WrapperProps {
 	ref?: RefObject<EditorControl>;
 	noteResources?: ResourceInfos;
 	onBodyChange: (newBody: string)=> void;
+	onLinkClick?: (link: string)=> void;
 	noteBody: string;
 }
 
@@ -32,6 +33,7 @@ const WrappedEditor: React.FC<WrapperProps> = (
 	{
 		noteBody,
 		onBodyChange,
+		onLinkClick,
 		noteResources,
 		ref,
 	}: WrapperProps,
@@ -39,8 +41,14 @@ const WrappedEditor: React.FC<WrapperProps> = (
 	const onEvent = useCallback((event: EditorEvent) => {
 		if (event.kind === EditorEventType.Change) {
 			onBodyChange(event.value);
+		} else if (event.kind === EditorEventType.FollowLink) {
+			if (!onLinkClick) {
+				throw new Error('No mock function for onLinkClick registered.');
+			}
+
+			onLinkClick(event.link);
 		}
-	}, [onBodyChange]);
+	}, [onBodyChange, onLinkClick]);
 
 	return <TestProviderStack store={testStore}>
 		<RichTextEditor
@@ -57,7 +65,16 @@ const getEditorWindow = async () => {
 	return await getWebViewWindowById('RichTextEditor');
 };
 
-const mockTyping = (document: Document, window: Window&typeof globalThis, text: string) => {
+type EditorWindow = Window&typeof globalThis;
+const getEditorControl = (window: EditorWindow) => {
+	if ('joplinRichTextEditor_' in window) {
+		return window.joplinRichTextEditor_ as EditorControl;
+	}
+	throw new Error('No editor control found. Is the editor loaded?');
+};
+
+const mockTyping = (window: EditorWindow, text: string) => {
+	const document = window.document;
 	const editor = document.querySelector('div[contenteditable]');
 
 	for (const character of text.split('')) {
@@ -66,6 +83,19 @@ const mockTyping = (document: Document, window: Window&typeof globalThis, text: 
 		(paragraphs[paragraphs.length - 1] ?? editor).appendChild(document.createTextNode(character));
 		editor.dispatchEvent(new window.KeyboardEvent('keyup', { key: character }));
 	}
+};
+
+const mockSelectionMovement = (window: EditorWindow, position: number) => {
+	getEditorControl(window).select(position, position);
+};
+
+const findElement = async function<ElementType extends Element = Element>(selector: string) {
+	const window = await getEditorWindow();
+	return await waitFor(() => {
+		const element = window.document.querySelector<ElementType>(selector);
+		expect(element).toBeTruthy();
+		return element;
+	});
 };
 
 const createRemoteResourceAndNote = async (remoteClientId: number) => {
@@ -114,8 +144,7 @@ describe('RichTextEditor', () => {
 		/>);
 
 		const window = await getEditorWindow();
-		const dom = window.document;
-		mockTyping(dom, window, ' test');
+		mockTyping(window, ' test');
 
 		await waitFor(async () => {
 			expect(body.trim()).toBe('**bold** normal test');
@@ -141,17 +170,9 @@ describe('RichTextEditor', () => {
 			/>,
 		);
 
-		const editorWindow = await getEditorWindow();
-		const dom = editorWindow.document;
-
 		// The resource placeholder should have rendered
-		await waitFor(() => {
-			const placeholders = dom.querySelectorAll<HTMLElement>(`span[data-resource-id=${JSON.stringify(localResource.id)}]`);
-			expect(placeholders).toHaveLength(1);
-
-			const resourcePlaceholder = placeholders[0];
-			expect([...resourcePlaceholder.classList]).toContain('not-loaded-resource');
-		});
+		const placeholder = await findElement(`span[data-resource-id=${JSON.stringify(localResource.id)}]`);
+		expect([...placeholder.classList]).toContain('not-loaded-resource');
 
 		await resourceFetcher().markForDownload([localResource.id]);
 
@@ -170,11 +191,32 @@ describe('RichTextEditor', () => {
 		);
 		editorRef.current.onResourceDownloaded(localResource.id);
 
+		expect(
+			await findElement(`img[data-resource-id=${JSON.stringify(localResource.id)}]`),
+		).toBeTruthy();
+	});
+
+	it('should render clickable internal note links', async () => {
+		const linkTarget = await Note.save({ title: 'test' });
+		const body = `[link](:/${linkTarget.id})`;
+		const onLinkClick = jest.fn();
+		render(<WrappedEditor
+			noteBody={body}
+			onBodyChange={jest.fn()}
+			onLinkClick={onLinkClick}
+		/>);
+
+		const window = await getEditorWindow();
+
+		const link = await findElement<HTMLAnchorElement>('a[href]');
+		expect(link.href).toBe(`:/${linkTarget.id}`);
+		mockSelectionMovement(window, 2);
+
+		const tooltipButton = await findElement<HTMLButtonElement>('.link-tooltip:not(.-hidden) > button');
+		tooltipButton.click();
+
 		await waitFor(() => {
-			const renderedImage = dom.querySelector<HTMLElement>(
-				`img[data-resource-id=${JSON.stringify(localResource.id)}]`,
-			);
-			expect(renderedImage).toBeTruthy();
+			expect(onLinkClick).toHaveBeenCalledWith(`:/${linkTarget.id}`);
 		});
 	});
 });

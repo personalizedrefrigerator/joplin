@@ -109,7 +109,10 @@ const useSource = (props: UseSourceProps) => {
 					window.richTextEditorCreated = true;
 					${shim.injectedJs('richTextEditorBundle')}
 					richTextEditorBundle.setUpLogger();
-					void richTextEditorBundle.initialize(${JSON.stringify(editorOptions)});
+					richTextEditorBundle.initialize(${JSON.stringify(editorOptions)}).then(function(editor) {
+						/* For testing */
+						window.joplinRichTextEditor_ = editor;
+					});
 				}
 			`,
 		};
