@@ -122,6 +122,7 @@ class TaskListItemView implements NodeView {
 		this.checkbox_.setAttribute('aria-labelledby', this.dom.id);
 
 		this.contentDOM = document.createElement('div');
+		this.contentDOM.classList.add('content');
 
 		this.dom.appendChild(this.checkbox_);
 		this.dom.appendChild(this.contentDOM);
