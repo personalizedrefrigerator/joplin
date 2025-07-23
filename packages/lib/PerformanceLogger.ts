@@ -1,4 +1,3 @@
-import Logger from '@joplin/utils/Logger';
 import { Second } from '@joplin/utils/time';
 
 const formatDuration = (durationMs: number) => {
@@ -35,17 +34,32 @@ type LogEntry = {
 	message: string;
 };
 
+type LoggerSlice = {
+	info: (message: string)=> void;
+	debug: (message: string)=> void;
+};
+
 export default class PerformanceLogger {
 	// Since one of the performance logger's uses is profiling
 	// startup code, it's useful to have a default log implementation
 	// (for before the logger is initialized).
 	private static logBuffer_: LogEntry[] = [];
-	private static log_: LogCallback = message => {
+	private static readonly defaultLog_: LogCallback = message => {
 		this.logBuffer_.push({ message, isDebug: false });
 	};
-	private static logDebug_: LogCallback = message => {
+	private static readonly defaultLogDebug_: LogCallback = message => {
 		this.logBuffer_.push({ message, isDebug: true });
 	};
+	private static log_: LogCallback = this.defaultLog_;
+	private static logDebug_: LogCallback = this.defaultLogDebug_;
+
+	// For testing
+	public static reset_() {
+		timeOrigin = 0;
+		this.logBuffer_ = [];
+		this.log_ = this.defaultLog_;
+		this.logDebug_ = this.defaultLogDebug_;
+	}
 
 	// In some environments, performance.now() gives the number of milliseconds since
 	// application startup. This does not seem to be the case on all environments, however,
@@ -57,7 +71,7 @@ export default class PerformanceLogger {
 		this.log_(`Starting application at ${formatDuration(now)}`);
 	}
 
-	public static setLogger(logger: Logger) {
+	public static setLogger(logger: LoggerSlice) {
 		const tag = 'Performance';
 		this.log_ = (message) => logger.info(`${tag}: ${message}`);
 		this.logDebug_ = (message) => logger.debug(`${tag}: ${message}`);
