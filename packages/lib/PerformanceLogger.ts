@@ -99,7 +99,7 @@ export default class PerformanceLogger {
 		}
 
 		const startTime = performance.now();
-		PerformanceLogger.log_(`${name}: Start at ${formatAbsoluteTime(startTime)}`);
+		PerformanceLogger.logDebug_(`${name}: Start at ${formatAbsoluteTime(startTime)}`);
 
 		const onEnd = () => {
 			const now = performance.now();
@@ -108,7 +108,12 @@ export default class PerformanceLogger {
 				performance.measure(name, `${name}-start`, `${name}-end`);
 			}
 
-			PerformanceLogger.log_(`${name}: End at ${formatAbsoluteTime(now)} (+${formatTaskDuration(now - startTime)})`);
+			const duration = now - startTime;
+			// Increase the log level for long-running tasks
+			const isLong = duration >= Second / 10;
+			const log = isLong ? PerformanceLogger.log_ : PerformanceLogger.logDebug_;
+
+			log(`${name}: End at ${formatAbsoluteTime(now)} (took ${formatTaskDuration(now - startTime)})`);
 		};
 		return {
 			onEnd,
