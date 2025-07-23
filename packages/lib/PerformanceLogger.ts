@@ -1,19 +1,30 @@
 import Logger from '@joplin/utils/Logger';
 import { Second } from '@joplin/utils/time';
 
-const formatTaskDuration = (durationMs: number) => {
+const formatDuration = (durationMs: number) => {
 	const round = (n: number) => Math.round(n * 100) / 100;
 	if (durationMs < Second / 4) {
 		return `${round(durationMs)}ms`;
 	} else {
-		// Render [[ ]]s around longer durations to make them more visible
-		return `[[ ${round(durationMs / Second)}s ]]`;
+		return `${round(durationMs / Second)}s`;
+	}
+};
+
+const formatTaskDuration = (durationMs: number) => {
+	const formatted = formatDuration(durationMs);
+	if (durationMs < Second / 2) {
+		return formatted;
+	} else if (durationMs < Second) {
+		return `[ ${formatted} ]`;
+	} else {
+		// Wrap in [[ ]]s to make longer durations more visible.
+		return `[[ ${formatted} ]]`;
 	}
 };
 
 let timeOrigin = 0;
 const formatAbsoluteTime = (time: number) => {
-	return formatTaskDuration(time - timeOrigin);
+	return formatDuration(time - timeOrigin);
 };
 
 const hasPerformanceMarkApi = typeof performance.mark === 'function' && typeof performance.measure === 'function';
@@ -43,7 +54,7 @@ export default class PerformanceLogger {
 		const now = performance.now();
 		timeOrigin = now;
 
-		this.log_(`Starting application at ${formatTaskDuration(now)}`);
+		this.log_(`Starting application at ${formatDuration(now)}`);
 	}
 
 	public static setLogger(logger: Logger) {
@@ -80,7 +91,7 @@ export default class PerformanceLogger {
 		const now = performance.now();
 		const timeDelta = now - this.lastLogTime_;
 		this.lastLogTime_ = now;
-		PerformanceLogger.log_(`${name}: Mark at ${formatAbsoluteTime(now)}   +${formatTaskDuration(timeDelta)}`);
+		PerformanceLogger.log_(`${name}: Mark at ${formatAbsoluteTime(now)}   +${formatDuration(timeDelta)}`);
 	}
 
 	public async track<T>(name: string, task: ()=> Promise<T>): Promise<T> {
