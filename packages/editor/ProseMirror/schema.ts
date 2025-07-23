@@ -216,10 +216,16 @@ const marks = {
 		inclusive: false,
 		parseDOM: [{
 			tag: 'a[href]',
-			getAttrs: node => ({
-				href: node.getAttribute('href'),
-				title: node.getAttribute('title'),
-			}),
+			getAttrs: node => {
+				const resourceId = node.getAttribute('data-resource-id');
+				const href = node.getAttribute('href');
+				const isResourceLink = resourceId && href === '#';
+
+				return {
+					href: isResourceLink ? `:/${resourceId}` : href,
+					title: node.getAttribute('title'),
+				};
+			},
 		}],
 		toDOM: node => [
 			'a',
