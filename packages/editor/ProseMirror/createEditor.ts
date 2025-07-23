@@ -170,14 +170,8 @@ const createEditor = async (
 			const selection = view.state.selection;
 			let transaction: Transaction = view.state.tr;
 
-			// Helper functions that return the selection at the current stage of
-			// the transaction:
-			const selectionFrom = () => transaction.mapping.map(selection.from);
-			const selectionTo = () => transaction.mapping.map(selection.to);
-
-
-			let linkFrom = selectionFrom();
-			let linkTo = selectionTo();
+			let linkFrom = selection.from;
+			let linkTo = selection.to;
 			doc.nodesBetween(selection.from, selection.to, (node, position) => {
 				const linkMark = node.marks.find(mark => mark.type === schema.marks.link);
 				if (linkMark) {
@@ -189,6 +183,10 @@ const createEditor = async (
 				}
 			});
 
+			// Helper functions that return a point at the current stage of
+			// the transaction:
+			const map = (position: number, associativity: number) => transaction.mapping.map(position, associativity);
+
 			// Update the link text -- if an existing link, replace just the text
 			// in that link.
 			if (label !== transaction.doc.textBetween(linkFrom, linkTo)) {
@@ -197,6 +195,8 @@ const createEditor = async (
 					linkFrom,
 					linkTo,
 				);
+				linkFrom = map(linkFrom, -1); // Ensure that linkFrom is to the left of the text
+				linkTo = map(linkTo, 1); // Ensure that linkTo is to the right of the text
 			}
 
 			// Add the URL
