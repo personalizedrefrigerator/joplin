@@ -75,8 +75,8 @@ module.exports = {
 		// -------------------------------
 		'react/jsx-uses-react': 'error',
 		'react/jsx-uses-vars': 'error',
-		'no-unused-vars': ['error', { 'argsIgnorePattern': '^_', 'varsIgnorePattern': '^_.*Task$' }],
-		'@typescript-eslint/no-unused-vars': ['error', { 'argsIgnorePattern': '^_', 'varsIgnorePattern': '^_.*Task$' }],
+		'no-unused-vars': ['error', { 'argsIgnorePattern': '^_' }],
+		'@typescript-eslint/no-unused-vars': ['error', { 'argsIgnorePattern': '^_' }],
 		'@typescript-eslint/explicit-member-accessibility': 'off',
 		'no-constant-condition': 0,
 		'no-prototype-builtins': 0,

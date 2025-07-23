@@ -6,7 +6,8 @@ const formatTaskDuration = (durationMs: number) => {
 	if (durationMs < Second / 4) {
 		return `${round(durationMs)}ms`;
 	} else {
-		return `${round(durationMs / Second)}s`;
+		// Render [[ ]]s around longer durations to make them more visible
+		return `[[ ${round(durationMs / Second)}s ]]`;
 	}
 };
 
