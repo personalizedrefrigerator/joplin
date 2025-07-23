@@ -553,6 +553,8 @@ packages/app-desktop/integration-tests/util/setSettingValue.js
 packages/app-desktop/integration-tests/util/test.js
 packages/app-desktop/integration-tests/util/waitForNextOpenPath.js
 packages/app-desktop/integration-tests/wcag.spec.js
+packages/app-desktop/main-html.js
+packages/app-desktop/main.js
 packages/app-desktop/playwright.config.js
 packages/app-desktop/plugins/GotoAnything.js
 packages/app-desktop/services/autoUpdater/AutoUpdaterService.test.js
