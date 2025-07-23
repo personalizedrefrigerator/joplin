@@ -1,7 +1,7 @@
 import { Plugin } from 'prosemirror-state';
 import { AttributeSpec, Node, NodeSpec } from 'prosemirror-model';
 import { Decoration, DecorationSet, EditorView, NodeView } from 'prosemirror-view';
-import schema from '../schema';
+import changedDescendants from '../vendor/changedDescendants';
 
 // See the fold example for more information about
 // writing similar ProseMirror plugins:
@@ -31,7 +31,6 @@ const attrsSpec = {
 const placeholderSpec: NodeSpec = {
 	group: 'inline',
 	inline: true,
-	atom: true,
 	attrs: attrsSpec,
 	parseDOM: [
 		{
@@ -50,9 +49,8 @@ const placeholderSpec: NodeSpec = {
 		},
 	],
 	toDOM: (node) => [
-		'div',
+		'span',
 		{
-			contenteditable: false,
 			'data-resource-id': node.attrs.itemId,
 			'data-original-alt': node.attrs.alt,
 			'data-original-title': node.attrs.title,
@@ -92,6 +90,7 @@ class ResourcePlaceholderView implements NodeView {
 				dom.appendChild(image);
 			} else {
 				dom = image;
+				dom.classList.add('late-loaded-resource');
 			}
 			// For testing
 			dom.setAttribute('data-resource-id', this.resourceId_);
@@ -115,6 +114,8 @@ class ResourcePlaceholderView implements NodeView {
 	}
 
 	public update(node: Node, decorations: readonly Decoration[]) {
+		if (node.type.spec !== placeholderSpec) return false;
+
 		for (const decoration of decorations) {
 			if (decoration.spec.resourceId === this.resourceId_) {
 				this.dom.replaceWith(this.createDom_(node, decorations));
@@ -138,11 +139,38 @@ export const onResourceDownloaded = (view: EditorView, resourceId: string, newSr
 	);
 };
 
-const resourcePlaceholderPlugin: Plugin<DecorationSet> = new Plugin({
+interface PluginState {
+	decorations: DecorationSet;
+	idToSrc: Record<string, string>;
+}
+
+const resourcePlaceholderPlugin: Plugin<PluginState> = new Plugin({
 	state: {
-		init: () => DecorationSet.empty,
-		apply: (tr, oldValue) => {
-			let value = oldValue.map(tr.mapping, tr.doc);
+		init: (): PluginState => ({
+			decorations: DecorationSet.empty,
+			idToSrc: Object.create(null),
+		}),
+		apply: (tr, oldValue, oldState, newState) => {
+			let decorations = oldValue.decorations.map(tr.mapping, tr.doc);
+			let idToSrc = oldValue.idToSrc;
+
+			const tryAddDecoration = (node: Node, pos: number) => {
+				if (node.type.spec === placeholderSpec && decorations.find(pos, pos + node.nodeSize).length === 0) {
+					const attrs = node.attrs as NodeAttrs;
+					const itemId = attrs.itemId;
+
+					if (Object.hasOwnProperty.call(idToSrc, itemId)) {
+						const spec: PluginMeta = {
+							newSrc: idToSrc[attrs.itemId],
+							resourceId: attrs.itemId,
+						};
+
+						decorations = decorations.add(tr.doc, [
+							Decoration.node(pos, pos + node.nodeSize, {}, spec),
+						]);
+					}
+				}
+			};
 
 			const meta: PluginMeta|undefined = tr.getMeta(resourcePlaceholderPlugin);
 			if (meta) {
@@ -151,19 +179,21 @@ const resourcePlaceholderPlugin: Plugin<DecorationSet> = new Plugin({
 					throw new Error('Invalid .setMeta for resourcePlaceholderPlugin');
 				}
 
+				idToSrc = { ...idToSrc, [resourceId]: newSrc };
+
 				tr.doc.descendants((node, pos) => {
-					if (node.type === schema.nodes.resourcePlaceholder) {
-						const attrs = node.attrs as NodeAttrs;
-						if (attrs.itemId === resourceId) {
-							value = value.add(tr.doc, [
-								Decoration.node(pos, pos + node.nodeSize, {}, meta),
-							]);
-						}
-					}
+					tryAddDecoration(node, pos);
 				});
 			}
 
-			return value;
+			changedDescendants(oldState.doc, newState.doc, 0, (node, pos) => {
+				tryAddDecoration(node, pos);
+			});
+
+			return {
+				decorations,
+				idToSrc,
+			};
 		},
 	},
 	props: {
@@ -173,7 +203,7 @@ const resourcePlaceholderPlugin: Plugin<DecorationSet> = new Plugin({
 			},
 		},
 		decorations(state) {
-			return this.getState(state);
+			return this.getState(state).decorations;
 		},
 	},
 });
