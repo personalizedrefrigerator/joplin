@@ -45,7 +45,7 @@ export default class PerformanceLogger {
 		this.log_(`Starting application at ${formatTaskDuration(now)}`);
 	}
 
-	public static initialize(logger: Logger) {
+	public static setLogger(logger: Logger) {
 		const tag = 'Performance';
 		this.log_ = (message) => logger.info(`${tag}: ${message}`);
 		this.logDebug_ = (message) => logger.debug(`${tag}: ${message}`);

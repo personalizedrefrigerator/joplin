@@ -205,7 +205,7 @@ const buildStartupTasks = (
 		initLib(mainLogger);
 		reg.setLogger(mainLogger);
 		BaseService.logger_ = mainLogger;
-		PerformanceLogger.initialize(mainLogger);
+		PerformanceLogger.setLogger(mainLogger);
 	});
 	addTask('set up database', async () => {
 		reg.setShowErrorMessageBoxHandler((message: string) => { alert(message); });
