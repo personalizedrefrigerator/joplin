@@ -1,6 +1,9 @@
 import * as React from 'react';
 import shim from '@joplin/lib/shim';
+import PerformanceLogger from '@joplin/lib/PerformanceLogger';
+
 shim.setReact(React);
+PerformanceLogger.onAppStartBegin();
 
 import setupQuickActions from './setupQuickActions';
 import AlarmService from '@joplin/lib/services/AlarmService';
@@ -103,7 +106,6 @@ import SsoLoginScreen from './components/screens/SsoLoginScreen';
 import SamlShared from '@joplin/lib/components/shared/SamlShared';
 import NoteRevisionViewer from './components/screens/NoteRevisionViewer';
 import DocumentScanner from './components/screens/DocumentScanner/DocumentScanner';
-import PerformanceLogger from '@joplin/lib/PerformanceLogger';
 import buildStartupTasks from './utils/buildStartupTasks';
 
 const logger = Logger.create('root');
@@ -590,9 +592,7 @@ class AppComponent extends React.Component<AppComponentProps, AppComponentState>
 			}
 
 			try {
-				using _initTask = perfLogger.taskStart('initialize');
-
-				await initialize(this.props.dispatch);
+				await perfLogger.track('initialize', () => initialize(this.props.dispatch));
 			} catch (error) {
 				alert(`Something went wrong while starting the application: ${error}`);
 				this.props.dispatch({

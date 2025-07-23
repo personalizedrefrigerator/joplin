@@ -192,7 +192,7 @@ export default class SearchEngine {
 	private async syncTables_() {
 		if (this.isIndexing_) return;
 
-		using _syncTask = perfLogger.taskStart('syncTables');
+		const syncTask = perfLogger.taskStart('syncTables');
 
 		this.isIndexing_ = true;
 
@@ -335,6 +335,7 @@ export default class SearchEngine {
 		this.logger().info(sprintf('SearchEngine: Updated FTS table in %dms. Inserted: %d. Deleted: %d', Date.now() - startTime, report.inserted, report.deleted));
 
 		this.isIndexing_ = false;
+		syncTask.onEnd();
 	}
 
 	public async syncTables() {

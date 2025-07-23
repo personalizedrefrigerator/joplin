@@ -327,12 +327,13 @@ export default class DecryptionWorker {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	public async start(options: any = {}) {
 		this.startCalls_.push(true);
-		using _startTask = perfLogger.taskStart('start');
+		const startTask = perfLogger.taskStart('start');
 		let output = null;
 		try {
 			output = await this.start_(options);
 		} finally {
 			this.startCalls_.pop();
+			startTask.onEnd();
 		}
 		return output;
 	}
