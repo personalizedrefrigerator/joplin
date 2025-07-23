@@ -122,7 +122,7 @@ describe('RichTextEditor', () => {
 		});
 	});
 
-	it('should reload resource placeholders when the item downloads', async () => {
+	it('should reload resource placeholders when the corresponding item downloads', async () => {
 		Setting.setValue('sync.resourceDownloadMode', 'manual');
 		const { noteId, resourceId } = await createRemoteResourceAndNote(1);
 
