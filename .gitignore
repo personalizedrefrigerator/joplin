@@ -864,6 +864,7 @@ packages/app-mobile/utils/ShareUtils.js
 packages/app-mobile/utils/TlsUtils.js
 packages/app-mobile/utils/appDefaultState.js
 packages/app-mobile/utils/autodetectTheme.js
+packages/app-mobile/utils/buildStartupTasks.js
 packages/app-mobile/utils/checkPermissions.js
 packages/app-mobile/utils/createRootStyle.js
 packages/app-mobile/utils/database-driver-react-native.js
