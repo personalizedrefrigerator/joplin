@@ -222,12 +222,17 @@ const createEditor = async (
 		},
 		onResourceDownloaded: async (resourceId: string) => {
 			const rendered = await renderAndPostprocessHtml(`<img src=":/${resourceId}"/>`);
-			const resourceSrc = rendered.dom.querySelector('img')?.src;
+			const renderedImage = rendered.dom.querySelector('img');
 
-			if (!resourceSrc) {
-				throw new Error(`No SRC for resource ${resourceId} found`);
+			if (!renderedImage) {
+				throw new Error('Rendering failed -- no rendered image found.');
+			}
+			// The resource might not be an image. If so, skip.
+			if (renderedImage.classList.contains('not-loaded-resource')) {
+				return;
 			}
 
+			const resourceSrc = renderedImage?.src;
 			onResourceDownloaded(view, resourceId, resourceSrc);
 		},
 	};
