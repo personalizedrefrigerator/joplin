@@ -79,16 +79,19 @@ export const initialize = async ({
 		onEvent: (event) => {
 			void messenger.remoteApi.onEditorEvent(event);
 		},
-	}, async (markup) => {
-		return await messenger.remoteApi.onRender({
-			markup,
-			language: MarkupLanguage.Markdown,
-		}, {
-			pluginAssetContainerSelector: `#${assetContainer.id}`,
-			splitted: true,
-			mapsToLine: true,
-		});
-	}, htmlToMarkdown);
+	}, {
+		renderMarkupToHtml: async (markup) => {
+			return await messenger.remoteApi.onRender({
+				markup,
+				language: MarkupLanguage.Markdown,
+			}, {
+				pluginAssetContainerSelector: `#${assetContainer.id}`,
+				splitted: true,
+				mapsToLine: true,
+			});
+		},
+		renderHtmlToMarkup: htmlToMarkdown,
+	});
 
 	messenger.setLocalInterface({
 		editor,

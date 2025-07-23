@@ -2,7 +2,7 @@
 import { EditorState, Plugin } from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';
 import schema from '../schema';
-import { getEditorEventHandler } from './editorEventStatePlugin';
+import { getEditorApi } from './joplinEditorApiPlugin';
 import { EditorEventType } from '../../events';
 import { OnEventCallback } from '../../types';
 
@@ -28,7 +28,7 @@ class LinkTooltip {
 
 	public update(view: EditorView, lastState: EditorState) {
 		const state = view.state;
-		this.onEditorEvent_ = getEditorEventHandler(state);
+		this.onEditorEvent_ = getEditorApi(state).onEvent;
 
 		const sameSelection = lastState && state.selection.eq(lastState.selection);
 		const sameDoc = lastState && state.doc.eq(lastState.doc);

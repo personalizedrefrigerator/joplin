@@ -2,6 +2,7 @@ import { AttributeSpec, DOMOutputSpec, MarkSpec, NodeSpec, Schema } from 'prosem
 import { nodeSpecs as joplinEditableNodes } from './plugins/joplinEditablePlugin';
 import { tableNodes } from 'prosemirror-tables';
 import { nodeSpecs as listNodes } from './plugins/listPlugin';
+import { nodeSpecs as placeholderNodes } from './plugins/resourcePlaceholderPlugin';
 
 // For reference, see:
 // - https://prosemirror.net/docs/guide/#schema
@@ -105,43 +106,7 @@ const nodes = addDefaultToplevelAttributes({
 		parseDOM: [{ tag: 'hr' }],
 		toDOM: () => domOutputSpecs.hr,
 	},
-	resource_placeholder: {
-		group: 'block',
-		inline: false,
-		content: 'image',
-		atom: true,
-		draggable: false,
-		attrs: {
-			itemId: { validate: 'string' },
-			alt: { default: '', validate: 'string' },
-			title: { default: '', validate: 'string' },
-			isImage: { validate: 'boolean' },
-		},
-		parseDOM: [
-			{
-				tag: 'div[data-resource-id].not-loaded-resource',
-				getAttrs: (node) => {
-					return {
-						itemId: node.getAttribute('data-resource-id'),
-						alt: node.getAttribute('data-original-alt'),
-						title: node.getAttribute('data-original-title'),
-						isImage: node.classList.contains('not-loaded-image-resource'),
-					};
-				},
-			},
-		],
-		toDOM: (node) => [
-			'div',
-			{
-				contenteditable: false,
-				'data-resource-id': node.attrs.itemId,
-				'data-original-alt': node.attrs.alt,
-				'data-original-title': node.attrs.title,
-				class: `not-loaded-resource ${node.attrs.isImage ? 'not-loaded-image-resource' : null}`.trim(),
-			},
-			0,
-		],
-	},
+	...placeholderNodes,
 	...listNodes,
 	...joplinEditableNodes,
 	...tableNodes({

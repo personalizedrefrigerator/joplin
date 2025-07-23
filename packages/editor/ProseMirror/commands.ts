@@ -8,7 +8,7 @@ import { liftListItem, sinkListItem, wrapRangeInList } from 'prosemirror-schema-
 import { NodeType, Attrs, Node } from 'prosemirror-model';
 import { getSearchVisible, setSearchVisible } from './plugins/searchExtension';
 import { findNext, findPrev, replaceAll, replaceNext } from 'prosemirror-search';
-import { getEditorEventHandler } from './plugins/editorEventStatePlugin';
+import { getEditorApi } from './plugins/joplinEditorApiPlugin';
 import { EditorEventType } from '../events';
 import { canSplit } from 'prosemirror-transform';
 
@@ -205,7 +205,7 @@ const commands: Record<EditorCommandType, Command|null> = {
 	[EditorCommandType.ReplaceAll]: replaceAll,
 	[EditorCommandType.EditLink]: (state: EditorState, dispatch) => {
 		if (dispatch) {
-			const onEvent = getEditorEventHandler(state);
+			const onEvent = getEditorApi(state).onEvent;
 			onEvent({
 				kind: EditorEventType.EditLink,
 			});

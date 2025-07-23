@@ -24,6 +24,7 @@ import MarkdownEditor from './MarkdownEditor';
 import RichTextEditor from './RichTextEditor';
 import { ResourceInfos } from '@joplin/renderer/types';
 import CommandService from '@joplin/lib/services/CommandService';
+import Resource from '@joplin/lib/models/Resource';
 
 type ChangeEventHandler = (event: ChangeEvent)=> void;
 type UndoRedoDepthChangeHandler = (event: UndoRedoDepthChangeEvent)=> void;
@@ -223,6 +224,10 @@ const useEditorControl = (
 
 				setSearchState: setSearchStateCallback,
 			},
+
+			onResourceDownloaded: (id: string) => {
+				editorRef.current.onResourceDownloaded(id);
+			},
 		};
 
 		return control;
@@ -310,6 +315,19 @@ function NoteEditor(props: Props) {
 	useEffect(() => {
 		editorControl.updateSettings(editorSettings);
 	}, [editorSettings, editorControl]);
+
+	const lastNoteResources = useRef<ResourceInfos>(props.noteResources);
+	useEffect(() => {
+		const isDownloaded = (resourceInfos: ResourceInfos, resourceId: string) => {
+			return resourceInfos[resourceId]?.localState?.fetch_status === Resource.FETCH_STATUS_DONE;
+		};
+		for (const key in props.noteResources) {
+			const wasDownloaded = isDownloaded(lastNoteResources.current, key);
+			if (!wasDownloaded && isDownloaded(props.noteResources, key)) {
+				editorControl.onResourceDownloaded(key);
+			}
+		}
+	}, [props.noteResources, editorControl]);
 
 	useEditorCommandHandler(editorControl);
 

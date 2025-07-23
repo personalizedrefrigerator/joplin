@@ -8,7 +8,6 @@ import schema from './schema';
 import { gapCursor } from 'prosemirror-gapcursor';
 import { dropCursor } from 'prosemirror-dropcursor';
 import { EditorEventType } from '../events';
-import { RenderResult } from '../../renderer/types';
 import UndoStackSynchronizer from './utils/UndoStackSynchronizer';
 import computeSelectionFormatting from './utils/computeSelectionFormatting';
 import { defaultSelectionFormatting, selectionFormattingEqual } from '../SelectionFormatting';
@@ -20,22 +19,20 @@ import { tableEditing } from 'prosemirror-tables';
 import preprocessEditorInput from './utils/preprocessEditorInput';
 import listPlugin from './plugins/listPlugin';
 import searchExtension from './plugins/searchExtension';
-import editorEventStatePlugin, { setEditorEventHandler } from './plugins/editorEventStatePlugin';
+import joplinEditorApiPlugin, { setEditorApi } from './plugins/joplinEditorApiPlugin';
 import linkTooltipPlugin from './plugins/linkTooltipPlugin';
-
-type MarkupToHtml = (markup: string)=> Promise<RenderResult>;
-type HtmlToMarkup = (html: HTMLElement)=> string;
+import { RendererControl } from './types';
+import resourcePlaceholderPlugin, { onResourceDownloaded } from './plugins/resourcePlaceholderPlugin';
 
 const createEditor = async (
 	parentElement: HTMLElement,
 	props: EditorProps,
-	renderToHtml: MarkupToHtml,
-	renderToMarkup: HtmlToMarkup,
+	renderer: RendererControl,
 ): Promise<EditorControl> => {
 	const renderNodeToMarkup = (node: Node|DocumentFragment) => {
 		const element = document.createElement('div');
 		element.appendChild(node);
-		return renderToMarkup(element);
+		return renderer.renderHtmlToMarkup(element);
 	};
 
 	const proseMirrorParser = ProseMirrorDomParser.fromSchema(schema);
@@ -47,7 +44,7 @@ const createEditor = async (
 	const { plugin: searchPlugin, updateState: updateSearchState } = searchExtension(props.onEvent);
 
 	const renderAndPostprocessHtml = async (markup: string) => {
-		const renderResult = await renderToHtml(markup);
+		const renderResult = await renderer.renderMarkupToHtml(markup);
 
 		const dom = new DOMParser().parseFromString(renderResult.html, 'text/html');
 		preprocessEditorInput(dom, markup);
@@ -76,11 +73,17 @@ const createEditor = async (
 				listPlugin,
 				linkTooltipPlugin,
 				tableEditing({ allowTableNodeSelection: true }),
-				editorEventStatePlugin,
+				joplinEditorApiPlugin,
+				resourcePlaceholderPlugin,
 			].flat(),
 		});
 
-		state = state.apply(setEditorEventHandler(state.tr, props.onEvent));
+		state = state.apply(
+			setEditorApi(state.tr, {
+				onEvent: props.onEvent,
+				renderer,
+			}),
+		);
 
 		return state;
 	};
@@ -216,6 +219,16 @@ const createEditor = async (
 		},
 		setContentScripts: (_plugins: ContentScriptData[]) => {
 			throw new Error('setContentScripts not implemented.');
+		},
+		onResourceDownloaded: async (resourceId: string) => {
+			const rendered = await renderAndPostprocessHtml(`<img src=":/${resourceId}"/>`);
+			const resourceSrc = rendered.dom.querySelector('img')?.src;
+
+			if (!resourceSrc) {
+				throw new Error(`No SRC for resource ${resourceId} found`);
+			}
+
+			onResourceDownloaded(view, resourceId, resourceSrc);
 		},
 	};
 	return editorControl;
