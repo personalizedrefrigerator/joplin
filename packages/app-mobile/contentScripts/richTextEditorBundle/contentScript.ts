@@ -45,7 +45,7 @@ const htmlToMd = new HtmlToMd();
 const htmlToMarkdown = (html: HTMLElement): string => {
 	html = postprocessHtml(html);
 
-	return htmlToMd.parse(html);
+	return htmlToMd.parse(html, { preserveColorStyles: true });
 };
 
 export const initialize = async ({
@@ -79,16 +79,19 @@ export const initialize = async ({
 		onEvent: (event) => {
 			void messenger.remoteApi.onEditorEvent(event);
 		},
-	}, async (markup) => {
-		return await messenger.remoteApi.onRender({
-			markup,
-			language: MarkupLanguage.Markdown,
-		}, {
-			pluginAssetContainerSelector: `#${assetContainer.id}`,
-			splitted: true,
-			mapsToLine: true,
-		});
-	}, htmlToMarkdown);
+	}, {
+		renderMarkupToHtml: async (markup) => {
+			return await messenger.remoteApi.onRender({
+				markup,
+				language: MarkupLanguage.Markdown,
+			}, {
+				pluginAssetContainerSelector: `#${assetContainer.id}`,
+				splitted: true,
+				mapsToLine: true,
+			});
+		},
+		renderHtmlToMarkup: htmlToMarkdown,
+	});
 
 	messenger.setLocalInterface({
 		editor,

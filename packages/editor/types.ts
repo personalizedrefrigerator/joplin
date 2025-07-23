@@ -125,6 +125,9 @@ export interface EditorControl {
 	setSearchState(state: SearchState): void;
 
 	setContentScripts(plugins: ContentScriptData[]): Promise<void>;
+
+	// Called when a resource associated with the current note finishes downloading.
+	onResourceDownloaded(id: string): void;
 }
 
 export enum EditorLanguageType {

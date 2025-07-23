@@ -8,7 +8,6 @@ import schema from './schema';
 import { gapCursor } from 'prosemirror-gapcursor';
 import { dropCursor } from 'prosemirror-dropcursor';
 import { EditorEventType } from '../events';
-import { RenderResult } from '../../renderer/types';
 import UndoStackSynchronizer from './utils/UndoStackSynchronizer';
 import computeSelectionFormatting from './utils/computeSelectionFormatting';
 import { defaultSelectionFormatting, selectionFormattingEqual } from '../SelectionFormatting';
@@ -18,24 +17,22 @@ import inputRulesExtension from './plugins/inputRulesExtension';
 import originalMarkupPlugin from './plugins/originalMarkupPlugin';
 import { tableEditing } from 'prosemirror-tables';
 import preprocessEditorInput from './utils/preprocessEditorInput';
-import taskListPlugin from './plugins/taskListPlugin';
+import listPlugin from './plugins/listPlugin';
 import searchExtension from './plugins/searchExtension';
-import editorEventStatePlugin, { setEditorEventHandler } from './plugins/editorEventStatePlugin';
+import joplinEditorApiPlugin, { setEditorApi } from './plugins/joplinEditorApiPlugin';
 import linkTooltipPlugin from './plugins/linkTooltipPlugin';
-
-type MarkupToHtml = (markup: string)=> Promise<RenderResult>;
-type HtmlToMarkup = (html: HTMLElement)=> string;
+import { RendererControl } from './types';
+import resourcePlaceholderPlugin, { onResourceDownloaded } from './plugins/resourcePlaceholderPlugin';
 
 const createEditor = async (
 	parentElement: HTMLElement,
 	props: EditorProps,
-	renderToHtml: MarkupToHtml,
-	renderToMarkup: HtmlToMarkup,
+	renderer: RendererControl,
 ): Promise<EditorControl> => {
 	const renderNodeToMarkup = (node: Node|DocumentFragment) => {
 		const element = document.createElement('div');
 		element.appendChild(node);
-		return renderToMarkup(element);
+		return renderer.renderHtmlToMarkup(element);
 	};
 
 	const proseMirrorParser = ProseMirrorDomParser.fromSchema(schema);
@@ -46,15 +43,21 @@ const createEditor = async (
 	const { plugin: markupTracker, stateToMarkup } = originalMarkupPlugin(renderNodeToMarkup);
 	const { plugin: searchPlugin, updateState: updateSearchState } = searchExtension(props.onEvent);
 
-	let settings = props.settings;
-	const createInitialState = async (markup: string) => {
-		const renderResult = await renderToHtml(markup);
-		cssContainer.replaceChildren(
-			document.createTextNode(renderResult.cssStrings.join('\n')),
-		);
+	const renderAndPostprocessHtml = async (markup: string) => {
+		const renderResult = await renderer.renderMarkupToHtml(markup);
 
 		const dom = new DOMParser().parseFromString(renderResult.html, 'text/html');
 		preprocessEditorInput(dom, markup);
+
+		return { renderResult, dom };
+	};
+
+	let settings = props.settings;
+	const createInitialState = async (markup: string) => {
+		const { renderResult, dom } = await renderAndPostprocessHtml(markup);
+		cssContainer.replaceChildren(
+			document.createTextNode(renderResult.cssStrings.join('\n')),
+		);
 
 		let state = EditorState.create({
 			doc: proseMirrorParser.parse(dom),
@@ -67,14 +70,20 @@ const createEditor = async (
 				searchPlugin,
 				joplinEditablePlugin,
 				markupTracker,
-				taskListPlugin,
+				listPlugin,
 				linkTooltipPlugin,
 				tableEditing({ allowTableNodeSelection: true }),
-				editorEventStatePlugin,
+				joplinEditorApiPlugin,
+				resourcePlaceholderPlugin,
 			].flat(),
 		});
 
-		state = state.apply(setEditorEventHandler(state.tr, props.onEvent));
+		state = state.apply(
+			setEditorApi(state.tr, {
+				onEvent: props.onEvent,
+				renderer,
+			}),
+		);
 
 		return state;
 	};
@@ -149,8 +158,9 @@ const createEditor = async (
 			// TODO: Handle this in a better way?
 			document.scrollingElement.scrollTop = fraction * document.scrollingElement.scrollHeight;
 		},
-		insertText: (text: string, _source?: UserEventSource) => {
-			view.dispatch(view.state.tr.insertText(text));
+		insertText: async (text: string, _source?: UserEventSource) => {
+			const { dom } = await renderAndPostprocessHtml(text);
+			view.pasteHTML(new XMLSerializer().serializeToString(dom));
 		},
 		updateBody: async (newBody: string, _updateBodyOptions?: UpdateBodyOptions) => {
 			view.updateState(await createInitialState(newBody));
@@ -163,14 +173,8 @@ const createEditor = async (
 			const selection = view.state.selection;
 			let transaction: Transaction = view.state.tr;
 
-			// Helper functions that return the selection at the current stage of
-			// the transaction:
-			const selectionFrom = () => transaction.mapping.map(selection.from);
-			const selectionTo = () => transaction.mapping.map(selection.to);
-
-
-			let linkFrom = selectionFrom();
-			let linkTo = selectionTo();
+			let linkFrom = selection.from;
+			let linkTo = selection.to;
 			doc.nodesBetween(selection.from, selection.to, (node, position) => {
 				const linkMark = node.marks.find(mark => mark.type === schema.marks.link);
 				if (linkMark) {
@@ -182,6 +186,10 @@ const createEditor = async (
 				}
 			});
 
+			// Helper functions that return a point at the current stage of
+			// the transaction:
+			const map = (position: number, associativity: number) => transaction.mapping.map(position, associativity);
+
 			// Update the link text -- if an existing link, replace just the text
 			// in that link.
 			if (label !== transaction.doc.textBetween(linkFrom, linkTo)) {
@@ -190,6 +198,8 @@ const createEditor = async (
 					linkFrom,
 					linkTo,
 				);
+				linkFrom = map(linkFrom, -1); // Ensure that linkFrom is to the left of the text
+				linkTo = map(linkTo, 1); // Ensure that linkTo is to the right of the text
 			}
 
 			// Add the URL
@@ -209,6 +219,21 @@ const createEditor = async (
 		},
 		setContentScripts: (_plugins: ContentScriptData[]) => {
 			throw new Error('setContentScripts not implemented.');
+		},
+		onResourceDownloaded: async (resourceId: string) => {
+			const rendered = await renderAndPostprocessHtml(`<img src=":/${resourceId}"/>`);
+			const renderedImage = rendered.dom.querySelector('img');
+
+			if (!renderedImage) {
+				throw new Error('Rendering failed -- no rendered image found.');
+			}
+			// The resource might not be an image. If so, skip.
+			if (renderedImage.classList.contains('not-loaded-resource')) {
+				return;
+			}
+
+			const resourceSrc = renderedImage?.src;
+			onResourceDownloaded(view, resourceId, resourceSrc);
 		},
 	};
 	return editorControl;

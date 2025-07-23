@@ -25,6 +25,10 @@ const computeSelectionFormatting = (state: EditorState, settings: EditorSettings
 			formatting.inUnorderedList = true;
 			formatting.listLevel ++;
 		}
+		if (node.type === schema.nodes.task_list) {
+			formatting.inChecklist = true;
+			formatting.listLevel ++;
+		}
 		if (node.type === schema.nodes.pre_block) {
 			formatting.inCode = true;
 		}

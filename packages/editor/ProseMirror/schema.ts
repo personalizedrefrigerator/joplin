@@ -1,7 +1,8 @@
 import { AttributeSpec, DOMOutputSpec, MarkSpec, NodeSpec, Schema } from 'prosemirror-model';
 import { nodeSpecs as joplinEditableNodes } from './plugins/joplinEditablePlugin';
 import { tableNodes } from 'prosemirror-tables';
-import { nodeSpecs as taskListNodes } from './plugins/taskListPlugin';
+import { nodeSpecs as listNodes } from './plugins/listPlugin';
+import { nodeSpecs as placeholderNodes } from './plugins/resourcePlaceholderPlugin';
 
 // For reference, see:
 // - https://prosemirror.net/docs/guide/#schema
@@ -32,20 +33,50 @@ const getDefaultToplevelAttrs = (node: Element) => ({
 	originalMarkup: node.getAttribute('data-original-markup'),
 });
 
-const listGroup = 'block';
+const addDefaultToplevelAttributes = <Nodes extends Record<string, NodeSpec>> (nodes: Nodes) => {
+	const result: Partial<Nodes> = {};
+	for (const key in nodes) {
+		if (nodes[key].group === 'block') {
+			result[key] = {
+				...nodes[key],
+				attrs: {
+					...defaultToplevelAttrs,
+					...nodes[key].attrs,
+				},
+				parseDOM: nodes[key].parseDOM?.map(rule => {
+					if (!rule.tag) return rule;
 
-const nodes = {
+					return {
+						...rule,
+						getAttrs: (node) => {
+							const attrs = rule.getAttrs?.(node);
+							if (attrs === false) return attrs;
+
+							return {
+								...getDefaultToplevelAttrs(node),
+								...(attrs ?? rule.attrs ?? {}),
+							};
+						},
+					};
+				}),
+			};
+		} else {
+			result[key] = nodes[key];
+		}
+	}
+	return result as Nodes;
+};
+
+const nodes = addDefaultToplevelAttributes({
 	doc: { content: 'block+' },
 	paragraph: {
 		group: 'block',
-		content: 'inline*',
-		parseDOM: [{ tag: 'p', getAttrs: getDefaultToplevelAttrs }],
-		attrs: defaultToplevelAttrs,
+		content: '(inline|hard_break)*',
+		parseDOM: [{ tag: 'p' }],
 		toDOM: () => domOutputSpecs.paragraph,
 	},
 	heading: { // See prosemirror-schema-basic's `heading`
 		attrs: {
-			...defaultToplevelAttrs,
 			level: { default: 2, validate: 'number' },
 		},
 		group: 'block',
@@ -61,60 +92,22 @@ const nodes = {
 		marks: '',
 		code: true,
 		defining: true, // Preserve the node during replacement operations
-		parseDOM: [{ tag: 'pre', getAttrs: getDefaultToplevelAttrs }],
+		parseDOM: [{ tag: 'pre' }],
 		toDOM: () => domOutputSpecs.pre,
-
-		attrs: defaultToplevelAttrs,
 	},
 	blockquote: {
 		content: 'block+',
 		group: 'block',
-		parseDOM: [{ tag: 'blockquote', getAttrs: getDefaultToplevelAttrs }],
+		parseDOM: [{ tag: 'blockquote' }],
 		toDOM: () => domOutputSpecs.blockQuote,
-		attrs: defaultToplevelAttrs,
 	},
 	horizontal_rule: {
 		group: 'block',
 		parseDOM: [{ tag: 'hr' }],
 		toDOM: () => domOutputSpecs.hr,
 	},
-	...taskListNodes,
-	ordered_list: {
-		content: 'list_item+',
-		group: listGroup,
-
-		// Match attributes from https://github.com/ProseMirror/prosemirror-schema-list/blob/master/src/schema-list.ts
-		attrs: { order: { default: 1, validate: 'number' }, ...defaultToplevelAttrs },
-		parseDOM: [
-			{
-				tag: 'ol',
-				getAttrs: node => {
-					const start = node.hasAttribute('start') ? Number(node.getAttribute('start')) : 1;
-					return {
-						...getDefaultToplevelAttrs(node),
-						order: isFinite(start) ? start : 1,
-					};
-				},
-			},
-		],
-		toDOM: node => (
-			node.attrs.order === 1 ? domOutputSpecs.orderedList : ['ol', { start: node.attrs.order }, 0]
-		),
-	},
-	bullet_list: {
-		content: 'list_item+',
-		group: listGroup,
-
-		parseDOM: [{ tag: 'ul:not([data-is-checklist])', getAttrs: getDefaultToplevelAttrs }],
-		toDOM: () => domOutputSpecs.unorderedList,
-		attrs: defaultToplevelAttrs,
-	},
-	list_item: {
-		content: 'paragraph block*',
-		parseDOM: [{ tag: 'li:not(.md-checkbox)', getAttrs: getDefaultToplevelAttrs }],
-		toDOM: () => domOutputSpecs.listItem,
-		attrs: defaultToplevelAttrs,
-	},
+	...placeholderNodes,
+	...listNodes,
 	...joplinEditableNodes,
 	...tableNodes({
 		tableGroup: 'block',
@@ -127,9 +120,8 @@ const nodes = {
 		tableRole: 'table',
 		isolating: true,
 		group: 'block',
-		parseDOM: [{ tag: 'table', getAttrs: getDefaultToplevelAttrs }],
+		parseDOM: [{ tag: 'table' }],
 		toDOM: () => ['table', ['tbody', 0]],
-		attrs: defaultToplevelAttrs,
 	},
 
 	text: {
@@ -177,12 +169,12 @@ const nodes = {
 	},
 	hard_break: {
 		inline: true,
-		group: 'inline',
+		group: 'inlineBreak',
 		selectable: false,
 		parseDOM: [{ tag: 'br' }],
 		toDOM: () => domOutputSpecs.br,
 	},
-} satisfies Record<string, NodeSpec>;
+});
 
 const marks = {
 	strong: {
@@ -199,6 +191,23 @@ const marks = {
 		toDOM: () => domOutputSpecs.code,
 		excludes: '_',
 	},
+	color: {
+		inclusive: false,
+		parseDOM: [{
+			style: 'color',
+			getAttrs: (styleValue: string) => {
+				return { color: styleValue };
+			},
+		}],
+		attrs: {
+			color: { validate: 'string' },
+		},
+		toDOM: node => {
+			const result = document.createElement('span');
+			result.style.color = node.attrs.color;
+			return result;
+		},
+	},
 	link: {
 		attrs: {
 			href: { validate: 'string' },
@@ -207,10 +216,16 @@ const marks = {
 		inclusive: false,
 		parseDOM: [{
 			tag: 'a[href]',
-			getAttrs: node => ({
-				href: node.getAttribute('href'),
-				title: node.getAttribute('title'),
-			}),
+			getAttrs: node => {
+				const resourceId = node.getAttribute('data-resource-id');
+				const href = node.getAttribute('href');
+				const isResourceLink = resourceId && href === '#';
+
+				return {
+					href: isResourceLink ? `:/${resourceId}` : href,
+					title: node.getAttribute('title'),
+				};
+			},
 		}],
 		toDOM: node => [
 			'a',

@@ -8,7 +8,7 @@ import { liftListItem, sinkListItem, wrapRangeInList } from 'prosemirror-schema-
 import { NodeType, Attrs, Node } from 'prosemirror-model';
 import { getSearchVisible, setSearchVisible } from './plugins/searchExtension';
 import { findNext, findPrev, replaceAll, replaceNext } from 'prosemirror-search';
-import { getEditorEventHandler } from './plugins/editorEventStatePlugin';
+import { getEditorApi } from './plugins/joplinEditorApiPlugin';
 import { EditorEventType } from '../events';
 import { canSplit } from 'prosemirror-transform';
 
@@ -164,7 +164,7 @@ const toggleCode: Command = (state, dispatch, view) => {
 	return toggleMark(schema.marks.code)(state, dispatch, view) || setBlockType(schema.nodes.paragraph)(state, dispatch, view);
 };
 
-const listItemTypes = [schema.nodes.list_item, schema.nodes.taskListItem];
+const listItemTypes = [schema.nodes.list_item, schema.nodes.task_list_item];
 
 const commands: Record<EditorCommandType, Command|null> = {
 	[EditorCommandType.Undo]: undo,
@@ -185,7 +185,7 @@ const commands: Record<EditorCommandType, Command|null> = {
 	[EditorCommandType.SortSelectedLines]: null,
 	[EditorCommandType.ToggleNumberedList]: toggleList(schema.nodes.ordered_list),
 	[EditorCommandType.ToggleBulletedList]: toggleList(schema.nodes.bullet_list),
-	[EditorCommandType.ToggleCheckList]: toggleList(schema.nodes.taskList),
+	[EditorCommandType.ToggleCheckList]: toggleList(schema.nodes.task_list),
 	[EditorCommandType.ToggleHeading]: toggleHeading(2),
 	[EditorCommandType.ToggleHeading1]: toggleHeading(1),
 	[EditorCommandType.ToggleHeading2]: toggleHeading(2),
@@ -205,7 +205,7 @@ const commands: Record<EditorCommandType, Command|null> = {
 	[EditorCommandType.ReplaceAll]: replaceAll,
 	[EditorCommandType.EditLink]: (state: EditorState, dispatch) => {
 		if (dispatch) {
-			const onEvent = getEditorEventHandler(state);
+			const onEvent = getEditorApi(state).onEvent;
 			onEvent({
 				kind: EditorEventType.EditLink,
 			});
