@@ -95,6 +95,10 @@ const findElement = async function<ElementType extends Element = Element>(select
 		const element = window.document.querySelector<ElementType>(selector);
 		expect(element).toBeTruthy();
 		return element;
+	}, {
+		onTimeout: (error) => {
+			return new Error(`Failed to find element from selector ${selector}. DOM: ${window?.document?.body?.innerHTML}. \n\nFull error: ${error}`);
+		},
 	});
 };
 
@@ -131,7 +135,7 @@ describe('RichTextEditor', () => {
 		/>);
 
 		const dom = (await getEditorWindow()).document;
-		expect(dom.querySelector('h3').textContent).toBe('Test');
+		expect((await findElement('h3')).textContent).toBe('Test');
 		expect(dom.querySelector('p').textContent).toBe('Paragraph test');
 		expect(dom.querySelector('p code').textContent).toBe('test');
 	});
@@ -148,6 +152,37 @@ describe('RichTextEditor', () => {
 
 		await waitFor(async () => {
 			expect(body.trim()).toBe('**bold** normal test');
+		});
+	});
+
+	it('should render clickable checkboxes', async () => {
+		let body = '- [ ] Test\n- [x] Another test';
+		render(<WrappedEditor
+			noteBody={body}
+			onBodyChange={newBody => { body = newBody; }}
+		/>);
+
+		const firstCheckbox = await findElement<HTMLInputElement>('input[type=checkbox]');
+		const dom = (await getEditorWindow()).document;
+		const getCheckboxLabel = (checkbox: HTMLElement) => {
+			const labelledByAttr = checkbox.getAttribute('aria-labelledby');
+			const label = dom.getElementById(labelledByAttr);
+			return label;
+		};
+
+		// Should have the correct labels
+		expect(firstCheckbox.getAttribute('aria-labelledby')).toBeTruthy();
+		expect(getCheckboxLabel(firstCheckbox).textContent).toBe('Test');
+
+		// Should be correctly checked/unchecked
+		expect(firstCheckbox.checked).toBe(false);
+
+		// Clicking a checkbox should toggle it
+		firstCheckbox.click();
+
+		await waitFor(async () => {
+			// At present, lists are saved as non-tight lists:
+			expect(body.trim()).toBe('- [x] Test\n    \n- [x] Another test');
 		});
 	});
 
