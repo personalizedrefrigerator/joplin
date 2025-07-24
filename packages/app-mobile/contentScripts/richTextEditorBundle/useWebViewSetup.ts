@@ -107,6 +107,11 @@ const useSource = (props: UseSourceProps) => {
 			css: `
 				${shim.injectedCss('richTextEditorBundle')}
 				${rendererCss}
+
+				/* Increase the size of the editor to make it easier to focus the editor. */
+				.prosemirror-editor {
+					min-height: 75vh;
+				}
 			`,
 			js: `
 				${rendererJs}
