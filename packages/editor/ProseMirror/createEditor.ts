@@ -23,7 +23,6 @@ import joplinEditorApiPlugin, { setEditorApi } from './plugins/joplinEditorApiPl
 import linkTooltipPlugin from './plugins/linkTooltipPlugin';
 import { RendererControl } from './types';
 import resourcePlaceholderPlugin, { onResourceDownloaded } from './plugins/resourcePlaceholderPlugin';
-import postprocessEditorOutput from './utils/postprocessEditorOutput';
 
 const createEditor = async (
 	parentElement: HTMLElement,
@@ -33,7 +32,6 @@ const createEditor = async (
 	const renderNodeToMarkup = (node: Node|DocumentFragment) => {
 		const element = document.createElement('div');
 		element.appendChild(node);
-		postprocessEditorOutput(element);
 		return renderer.renderHtmlToMarkup(element);
 	};
 
