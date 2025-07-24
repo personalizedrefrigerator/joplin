@@ -19,7 +19,10 @@ The `PerformanceLogger` class has a few methods that can help debug performance 
 - `.track(name, task)`: Logs information about how long it takes the async `task` to complete.
 - `.taskStart(name)`: Marks the start of a task with some `name`.
 
-Performance marks can be found by searching for `Performance:` in Joplin's logs. Be aware that more information is logged in development mode (or with debug logging enabled) than in release mode.
+Performance marks can be found by searching for `Performance:` in Joplin's logs. Be aware that more information is logged in development mode (or with debug logging enabled) than in release mode. In particular:
+- **.mark**: Performance `.mark`s are logged with level `info`.
+- **.taskStart**: The start of tasks logged with `.track` or `.taskStart` are logged with `debug`.
+- **.onEnd**: Information about the end of tasks are logged with `info` **if** the task takes longer than 0.1s. Otherwise, the information is logged with level `debug`.
 
 On desktop and web (in Chrome), `PerformanceLogger` tasks and marks are added to the "Timings" tab of the performance timeline (see ["Using the profiler"](#using-the-profiler)). 
 
