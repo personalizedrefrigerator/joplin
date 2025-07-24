@@ -15,6 +15,7 @@ import mockCommandRuntimes from '../EditorToolbar/testing/mockCommandRuntimes';
 import setupGlobalStore from '../../utils/testing/setupGlobalStore';
 import { Store } from 'redux';
 import { AppState } from '../../utils/types';
+import { MarkupLanguage } from '@joplin/renderer';
 
 let store: Store<AppState>;
 let registeredRuntime: RegisteredRuntime;
@@ -47,6 +48,7 @@ describe('NoteEditor', () => {
 				<NoteEditor
 					ref={undefined}
 					themeId={Setting.THEME_ARITIM_DARK}
+					markupLanguage={MarkupLanguage.Markdown}
 					initialText='Testing...'
 					globalSearch=''
 					noteId=''

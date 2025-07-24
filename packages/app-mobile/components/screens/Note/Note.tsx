@@ -1657,6 +1657,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 						noteHash={this.props.noteHash}
 						initialText={note.body}
 						initialSelection={this.selection}
+						markupLanguage={this.state.note.markup_language}
 						globalSearch={this.props.searchQuery}
 						onChange={this.onMarkdownEditorTextChange}
 						onSelectionChange={this.onMarkdownEditorSelectionChange}

@@ -30,6 +30,7 @@ import uuid from '@joplin/lib/uuid';
 import shim from '@joplin/lib/shim';
 import { dirname } from '@joplin/utils/path';
 import { toFileExtension } from '@joplin/lib/mime-utils';
+import { MarkupLanguage } from '@joplin/renderer';
 
 type ChangeEventHandler = (event: ChangeEvent)=> void;
 type UndoRedoDepthChangeHandler = (event: UndoRedoDepthChangeEvent)=> void;
@@ -46,6 +47,7 @@ interface Props {
 	themeId: number;
 	initialText: string;
 	mode: EditorType;
+	markupLanguage: MarkupLanguage;
 	noteId: string;
 	noteHash: string;
 	globalSearch: string;
@@ -248,7 +250,7 @@ function NoteEditor(props: Props) {
 		markdownMarkEnabled: Setting.value('markdown.plugin.mark'),
 		katexEnabled: Setting.value('markdown.plugin.katex'),
 		spellcheckEnabled: Setting.value('editor.mobile.spellcheckEnabled'),
-		language: EditorLanguageType.Markdown,
+		language: props.markupLanguage === MarkupLanguage.Html ? EditorLanguageType.Html : EditorLanguageType.Markdown,
 		useExternalSearch: true,
 		readOnly: props.readOnly,
 
@@ -263,7 +265,7 @@ function NoteEditor(props: Props) {
 		indentWithTabs: true,
 
 		editorLabel: _('Markdown editor'),
-	}), [props.themeId, props.readOnly]);
+	}), [props.themeId, props.readOnly, props.markupLanguage]);
 
 	const [selectionState, setSelectionState] = useState<SelectionFormatting>(defaultSelectionFormatting);
 	const [linkDialogVisible, setLinkDialogVisible] = useState(false);
