@@ -1,7 +1,8 @@
 import { Plugin } from 'prosemirror-state';
 import { Node, NodeSpec } from 'prosemirror-model';
-import { EditorView, NodeView } from 'prosemirror-view';
+import { Decoration, DecorationSet, EditorView, NodeView } from 'prosemirror-view';
 import trimEmptyParagraphs from '../utils/trimEmptyParagraphs';
+import changedDescendants from '../vendor/changedDescendants';
 
 // See the fold example for more information about
 // writing similar ProseMirror plugins:
@@ -13,7 +14,7 @@ const listGroup = 'block';
 // (e.g. default input rules from prosemirror-example-setup).
 export const nodeSpecs = {
 	task_list: {
-		content: 'task_list_item+',
+		content: 'list_item+',
 		group: listGroup,
 		parseDOM: [{ tag: 'ul[data-is-checklist]' }],
 		toDOM: () => ['ul', { class: 'task-list', 'data-is-checklist': '1' }, 0],
@@ -48,16 +49,8 @@ export const nodeSpecs = {
 	},
 	list_item: {
 		content: 'paragraph block*',
-		defining: true,
-		draggable: true,
-
-		parseDOM: [{ tag: 'li:not(.md-checkbox)' }],
-		toDOM: () => ['li', 0],
-	},
-	task_list_item: {
-		content: 'paragraph block*',
 		attrs: {
-			checked: { default: false, validate: 'boolean' },
+			checked: { default: undefined as boolean|undefined, validate: 'boolean|undefined' },
 		},
 		defining: true,
 		draggable: true,
@@ -67,7 +60,7 @@ export const nodeSpecs = {
 				tag: 'li.md-checkbox',
 				getAttrs(node) {
 					const checkbox = node.querySelector<HTMLInputElement>('input[type=checkbox]');
-					return { checked: checkbox?.checked ?? false };
+					return { checked: checkbox?.checked };
 				},
 				contentElement(node) {
 					const result = node.cloneNode(true) as HTMLElement;
@@ -91,11 +84,15 @@ export const nodeSpecs = {
 			},
 		],
 		toDOM: (node) => {
-			return [
-				'li', { class: 'md-checkbox' },
-				['input', { type: 'checkbox', checked: node.attrs.checked ? true : undefined }],
-				['div', 0],
-			];
+			if (node.attrs.checked !== undefined) {
+				return [
+					'li', { class: 'md-checkbox' },
+					['input', { type: 'checkbox', checked: node.attrs.checked ? true : undefined }],
+					['div', 0],
+				];
+			} else {
+				return ['li', 0];
+			}
 		},
 	},
 } satisfies Record<string, NodeSpec>;
@@ -106,16 +103,46 @@ let idCounter = 0;
 class TaskListItemView implements NodeView {
 	public readonly dom: HTMLElement;
 	public contentDOM: HTMLElement;
-	private checkbox_: HTMLInputElement;
+	private checkbox_: HTMLInputElement|null = null;
 
-	public constructor(node: Node, view: EditorView, getPosition: GetPosition) {
+	public constructor(private node_: Node, private view_: EditorView, private getPosition_: GetPosition, decorations: readonly Decoration[]) {
 		this.dom = document.createElement('li');
+		if (decorations.some(deco => deco.spec.isTaskList)) {
+			this.createCheckbox_();
+		} else {
+			this.contentDOM = this.dom;
+		}
+	}
+
+	public update(node: Node, decorations: readonly Decoration[]) {
+		if (node.type.spec !== nodeSpecs.list_item) return false;
+
+		const isTaskList = decorations.some(deco => deco.spec.isTaskList);
+		const wasTaskList = !!this.checkbox_;
+		if (isTaskList !== wasTaskList) return false;
+
+		if (isTaskList) {
+			this.node_ = node;
+			this.checkbox_.checked = node.attrs.checked;
+		}
+		return true;
+	}
+
+	private createCheckbox_() {
+		// Already a checkbox? No need to recreate it.
+		if (this.checkbox_) {
+			this.checkbox_.checked = this.node_.attrs.checked;
+			return;
+		}
+
+		this.dom.replaceChildren();
+
 		this.dom.id = `${(idCounter++)}-checkbox-container`;
 		this.dom.classList.add('checklist-item', 'md-checkbox', '-flex');
 
 		this.checkbox_ = document.createElement('input');
 		this.checkbox_.type = 'checkbox';
-		this.checkbox_.checked = node.attrs.checked;
+		this.checkbox_.checked = this.node_.attrs.checked;
 		// Don't use a <label> element as a container since clicking on the container
 		// should move focus to the task item, not focus the checkbox.
 		// Instead use aria-labelledby for accessibility:
@@ -128,9 +155,9 @@ class TaskListItemView implements NodeView {
 		this.dom.appendChild(this.contentDOM);
 
 		this.checkbox_.onchange = () => {
-			if (node.attrs.checked !== this.checkbox_.checked) {
-				view.dispatch(view.state.tr.setNodeAttribute(
-					getPosition(), 'checked', this.checkbox_.checked,
+			if (this.node_.attrs.checked !== this.checkbox_.checked) {
+				this.view_.dispatch(this.view_.state.tr.setNodeAttribute(
+					this.getPosition_(), 'checked', this.checkbox_.checked,
 				));
 			}
 		};
@@ -138,9 +165,53 @@ class TaskListItemView implements NodeView {
 }
 
 const listPlugin = new Plugin({
+	state: {
+		init: (_config, state) => {
+			const decorations = DecorationSet.empty;
+			const taskListDecorations: Decoration[] = [];
+			state.doc.descendants((node, pos) => {
+				if (node.type.name === 'list_item') {
+					const resolved = state.doc.resolve(pos);
+					if (resolved.parent.type.name === 'task_list') {
+						taskListDecorations.push(
+							Decoration.node(pos, pos + node.nodeSize, { 'data-isTask': 'true' }, { isTaskList: true }),
+						);
+					}
+				}
+				return !node.isInline;
+			});
+
+			return decorations.add(state.doc, taskListDecorations);
+		},
+		apply: (tr, decorations, oldState, _newState) => {
+			decorations = decorations.map(tr.mapping, tr.doc);
+			changedDescendants(oldState.doc, tr.doc, 0, (node, pos) => {
+				if (node.type.spec === nodeSpecs.list_item) {
+					const resolved = tr.doc.resolve(pos);
+					const isTaskList = resolved.parent.type.name === 'task_list';
+					const oldTaskListDecorations = decorations.find(pos, pos + node.nodeSize).filter(
+						d => d.from === pos && d.to === pos + node.nodeSize && d.spec.isTaskList,
+					);
+					const wasTaskList = oldTaskListDecorations.length > 0;
+
+					if (wasTaskList && !isTaskList) {
+						decorations = decorations.remove(oldTaskListDecorations);
+					} else if (isTaskList) {
+						decorations = decorations.add(tr.doc, [
+							Decoration.node(pos, pos + node.nodeSize, { 'data-isTask': 'true' }, { isTaskList }),
+						]);
+					}
+				}
+			});
+			return decorations;
+		},
+	},
 	props: {
 		nodeViews: {
-			task_list_item: (node, view, getPos) => new TaskListItemView(node, view, getPos),
+			list_item: (node, view, getPos, decorations) => new TaskListItemView(node, view, getPos, decorations),
+		},
+		decorations(state) {
+			return this.getState(state);
 		},
 	},
 });
