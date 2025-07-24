@@ -25,6 +25,11 @@ import RichTextEditor from './RichTextEditor';
 import { ResourceInfos } from '@joplin/renderer/types';
 import CommandService from '@joplin/lib/services/CommandService';
 import Resource from '@joplin/lib/models/Resource';
+import { join } from 'path';
+import uuid from '@joplin/lib/uuid';
+import shim from '@joplin/lib/shim';
+import { dirname } from '@joplin/utils/path';
+import { toFileExtension } from '@joplin/lib/mime-utils';
 
 type ChangeEventHandler = (event: ChangeEvent)=> void;
 type UndoRedoDepthChangeHandler = (event: UndoRedoDepthChangeEvent)=> void;
@@ -348,6 +353,17 @@ function NoteEditor(props: Props) {
 		}
 	}, []);
 
+	const onAttach = useCallback(async (type: string, base64: string) => {
+		const tempFilePath = join(Setting.value('tempDir'), `paste.${uuid.createNano()}.${toFileExtension(type)}`);
+		await shim.fsDriver().mkdir(dirname(tempFilePath));
+		try {
+			await shim.fsDriver().writeFile(tempFilePath, base64, 'base64');
+			await props.onAttach(tempFilePath);
+		} finally {
+			await shim.fsDriver().remove(tempFilePath);
+		}
+	}, [props.onAttach]);
+
 	const toolbarEditorState = useMemo(() => ({
 		selectionState,
 		searchVisible: searchState.dialogVisible,
@@ -389,7 +405,7 @@ function NoteEditor(props: Props) {
 					onEditorEvent={onEditorEvent}
 					noteResources={props.noteResources}
 					plugins={props.plugins}
-					onAttach={props.onAttach}
+					onAttach={onAttach}
 				/>
 			</View>
 

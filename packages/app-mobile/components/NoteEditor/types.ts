@@ -54,7 +54,7 @@ export interface EditorSettings extends EditorBodySettings {
 	themeId: number;
 }
 
-type OnAttachCallback = (filePath?: string)=> Promise<void>;
+type OnAttachCallback = (mime: string, base64: string)=> Promise<void>;
 export interface EditorProps {
 	noteResources: ResourceInfos;
 	editorRef: RefObject<EditorBodyControl>;

@@ -24,6 +24,7 @@ export interface MainProcessApi {
 	onEditorEvent(event: EditorEvent): Promise<void>;
 	logMessage(message: string): Promise<void>;
 	onRender(markup: MarkupRecord, options: RenderOptionsSlice): Promise<RenderResult>;
+	onPasteFile(type: string, base64: string): Promise<void>;
 }
 
 export interface RichTextEditorControl {

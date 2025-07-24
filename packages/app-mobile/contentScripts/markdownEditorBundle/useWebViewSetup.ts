@@ -6,11 +6,6 @@ import { RefObject, useEffect, useMemo, useRef } from 'react';
 import { OnMessageEvent, WebViewControl } from '../../components/ExtendedWebView/types';
 import { EditorEvent } from '@joplin/editor/events';
 import Logger from '@joplin/utils/Logger';
-import { join } from 'path';
-import Setting from '@joplin/lib/models/Setting';
-import uuid from '@joplin/lib/uuid';
-import * as mimeUtils from '@joplin/lib/mime-utils';
-import { dirname } from '@joplin/utils/path';
 import RNToWebViewMessenger from '../../utils/ipc/RNToWebViewMessenger';
 
 const logger = Logger.create('markdownEditor');
@@ -21,7 +16,7 @@ interface Props {
 	noteHash: string;
 	globalSearch: string;
 	onEditorEvent: (event: EditorEvent)=> void;
-	onAttachFile: (path: string)=> void;
+	onAttachFile: (mime: string, base64: string)=> void;
 
 	webviewRef: RefObject<WebViewControl>;
 }
@@ -102,14 +97,7 @@ const useWebViewSetup = ({
 				logger.debug('CodeMirror:', message);
 			},
 			async onPasteFile(type, data) {
-				const tempFilePath = join(Setting.value('tempDir'), `paste.${uuid.createNano()}.${mimeUtils.toFileExtension(type)}`);
-				await shim.fsDriver().mkdir(dirname(tempFilePath));
-				try {
-					await shim.fsDriver().writeFile(tempFilePath, data, 'base64');
-					await onAttachRef.current(tempFilePath);
-				} finally {
-					await shim.fsDriver().remove(tempFilePath);
-				}
+				onAttachRef.current(type, data);
 			},
 		};
 		const messenger = new RNToWebViewMessenger<MainProcessApi, EditorProcessApi>(

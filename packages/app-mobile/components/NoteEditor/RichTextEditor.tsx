@@ -89,6 +89,7 @@ const RichTextEditor: React.FC<EditorProps> = props => {
 		pluginStates: props.plugins,
 		noteResources: props.noteResources,
 		onPostMessage: onPostMessage,
+		onAttachFile: props.onAttach,
 	});
 
 	props.editorRef.current = editorWebViewSetup.api;

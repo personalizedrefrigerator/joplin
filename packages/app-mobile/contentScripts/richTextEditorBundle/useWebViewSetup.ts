@@ -22,6 +22,7 @@ interface Props {
 	themeId: number;
 	pluginStates: PluginStates;
 	noteResources: ResourceInfos;
+	onAttachFile: (mime: string, base64: string)=> void;
 
 	onPostMessage: (message: string)=> void;
 	onEditorEvent: (event: EditorEvent)=> void;
@@ -35,6 +36,8 @@ const useMessenger = (props: UseMessengerProps) => {
 	onEditorEventRef.current = props.onEditorEvent;
 	const rendererRef = useRef(props.renderer);
 	rendererRef.current = props.renderer;
+	const onAttachRef = useRef(props.onAttachFile);
+	onAttachRef.current = props.onAttachFile;
 
 	const markupRenderingSettings = useRef<RenderOptions>(null);
 	markupRenderingSettings.current = {
@@ -68,6 +71,9 @@ const useMessenger = (props: UseMessengerProps) => {
 					},
 				);
 				return renderResult;
+			},
+			onPasteFile: async (type: string, base64: string) => {
+				onAttachRef.current(type, base64);
 			},
 		};
 

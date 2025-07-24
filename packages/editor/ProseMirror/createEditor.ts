@@ -23,6 +23,7 @@ import joplinEditorApiPlugin, { setEditorApi } from './plugins/joplinEditorApiPl
 import linkTooltipPlugin from './plugins/linkTooltipPlugin';
 import { RendererControl } from './types';
 import resourcePlaceholderPlugin, { onResourceDownloaded } from './plugins/resourcePlaceholderPlugin';
+import getFileFromPasteEvent from '../utils/getFileFromPasteEvent';
 
 const createEditor = async (
 	parentElement: HTMLElement,
@@ -127,6 +128,17 @@ const createEditor = async (
 		attributes: {
 			'aria-label': settings.editorLabel,
 			class: 'prosemirror-editor',
+		},
+		handleDOMEvents: {
+			paste: (_view, event) => {
+				const fileToPaste = getFileFromPasteEvent(event);
+				if (fileToPaste) {
+					event.preventDefault();
+					void props.onPasteFile(fileToPaste);
+					return true;
+				}
+				return false;
+			},
 		},
 	});
 
