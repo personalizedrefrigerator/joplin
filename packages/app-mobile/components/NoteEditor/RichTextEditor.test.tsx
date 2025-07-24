@@ -275,7 +275,7 @@ describe('RichTextEditor', () => {
 
 	it.each([
 		MarkupLanguage.Markdown, MarkupLanguage.Html,
-	])('should preserve attachments on edit (case %#)', async (markupLanguage) => {
+	])('should preserve image attachments on edit (case %#)', async (markupLanguage) => {
 		const { note, resource } = await createNoteAndResource({ markupLanguage });
 		let body = note.body;
 
