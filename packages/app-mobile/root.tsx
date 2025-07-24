@@ -1360,8 +1360,8 @@ class AppComponent extends React.Component<AppComponentProps, AppComponentState>
 					isOpen={this.props.showSideMenu}
 					disableGestures={disableSideMenuGestures}
 				>
-					<View style={{ flexGrow: 1, flexShrink: 1, flexBasis: '100%', backgroundColor: theme.backgroundColor2 }}>
-						<SafeAreaView style={{ flex: 1 }}>
+					<View style={{ flexGrow: 1, flexShrink: 1, flexBasis: '100%' }}>
+						<SafeAreaView style={{ flex: 1 }} titleBarUnderlayColor={theme.backgroundColor2}>
 							<View style={{ flex: 1, backgroundColor: theme.backgroundColor }}>
 								{ shouldShowMainContent && <AppNav screens={appNavInit} dispatch={this.props.dispatch} /> }
 							</View>
