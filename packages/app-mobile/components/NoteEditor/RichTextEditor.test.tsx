@@ -5,25 +5,32 @@ import { render, waitFor } from '../../utils/testing/testingLibrary';
 
 
 import Setting from '@joplin/lib/models/Setting';
-import { resourceFetcher, setupDatabaseAndSynchronizer, supportDir, switchClient, synchronizerStart } from '@joplin/lib/testing/test-utils';
+import { createNoteAndResource, resourceFetcher, setupDatabaseAndSynchronizer, supportDir, switchClient, synchronizerStart } from '@joplin/lib/testing/test-utils';
 import getWebViewWindowById from '../../utils/testing/getWebViewWindowById';
 import TestProviderStack from '../testing/TestProviderStack';
 import createMockReduxStore from '../../utils/testing/createMockReduxStore';
 import RichTextEditor from './RichTextEditor';
 import createTestEditorProps from './testing/createTestEditorProps';
 import { EditorEvent, EditorEventType } from '@joplin/editor/events';
-import { RefObject, useCallback } from 'react';
+import { RefObject, useCallback, useMemo } from 'react';
 import Note from '@joplin/lib/models/Note';
 import shim from '@joplin/lib/shim';
 import Resource from '@joplin/lib/models/Resource';
 import { ResourceInfos } from '@joplin/renderer/types';
-import { EditorControl } from '@joplin/editor/types';
+import { EditorControl, EditorLanguageType } from '@joplin/editor/types';
+import attachedResources from '@joplin/lib/utils/attachedResources';
+import { MarkupLanguage } from '@joplin/renderer';
+import { NoteEntity } from '@joplin/lib/services/database/types';
+import { EditorSettings } from './types';
+import { pregQuote } from '@joplin/lib/string-utils';
+
 
 interface WrapperProps {
 	ref?: RefObject<EditorControl>;
 	noteResources?: ResourceInfos;
 	onBodyChange: (newBody: string)=> void;
 	onLinkClick?: (link: string)=> void;
+	note?: NoteEntity;
 	noteBody: string;
 }
 
@@ -32,6 +39,7 @@ const testStore = createMockReduxStore();
 const WrappedEditor: React.FC<WrapperProps> = (
 	{
 		noteBody,
+		note,
 		onBodyChange,
 		onLinkClick,
 		noteResources,
@@ -50,11 +58,21 @@ const WrappedEditor: React.FC<WrapperProps> = (
 		}
 	}, [onBodyChange, onLinkClick]);
 
+	const editorSettings = useMemo((): EditorSettings => {
+		const isHtml = note?.markup_language === MarkupLanguage.Html;
+		return {
+			...defaultEditorProps.editorSettings,
+			language: isHtml ? EditorLanguageType.Html : EditorLanguageType.Markdown,
+		};
+	}, [note]);
+
 	return <TestProviderStack store={testStore}>
 		<RichTextEditor
 			{...defaultEditorProps}
+			editorSettings={editorSettings}
 			onEditorEvent={onEvent}
 			initialText={noteBody}
+			noteId={note?.id ?? defaultEditorProps.noteId}
 			noteResources={noteResources ?? defaultEditorProps.noteResources}
 			editorRef={ref ?? defaultEditorProps.editorRef}
 		/>
@@ -252,6 +270,39 @@ describe('RichTextEditor', () => {
 
 		await waitFor(() => {
 			expect(onLinkClick).toHaveBeenCalledWith(`:/${linkTarget.id}`);
+		});
+	});
+
+	it.each([
+		MarkupLanguage.Markdown, MarkupLanguage.Html,
+	])('should preserve attachments on edit (case %#)', async (markupLanguage) => {
+		const { note, resource } = await createNoteAndResource({ markupLanguage });
+		let body = note.body;
+
+		const resources = await attachedResources(body);
+		render(<WrappedEditor
+			noteBody={note.body}
+			note={note}
+			onBodyChange={newBody => { body = newBody; }}
+			noteResources={resources}
+		/>);
+
+		const renderedImage = await findElement<HTMLImageElement>(`img[data-resource-id=${JSON.stringify(resource.id)}]`);
+		expect(renderedImage).toBeTruthy();
+
+		const window = await getEditorWindow();
+		mockTyping(window, ' test');
+
+		// The rendered image should still have the correct ALT and source
+		await waitFor(async () => {
+			const editorContent = body.trim();
+			if (markupLanguage === MarkupLanguage.Html) {
+				expect(editorContent).toMatch(
+					new RegExp(`^<p><img src=":/${pregQuote(resource.id)}" alt="${pregQuote(renderedImage.alt)}"[^>]*> test</p>$`),
+				);
+			} else {
+				expect(editorContent).toBe(`![${renderedImage.alt}](:/${resource.id}) test`);
+			}
 		});
 	});
 });

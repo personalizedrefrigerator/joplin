@@ -32,9 +32,7 @@ const createEditor = async (
 	renderer: RendererControl,
 ): Promise<EditorControl> => {
 	const renderNodeToMarkup = (node: Node|DocumentFragment) => {
-		const element = document.createElement('div');
-		element.appendChild(node);
-		return renderer.renderHtmlToMarkup(element);
+		return renderer.renderHtmlToMarkup(node);
 	};
 
 	const proseMirrorParser = ProseMirrorDomParser.fromSchema(schema);
