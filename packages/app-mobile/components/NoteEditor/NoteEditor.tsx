@@ -78,6 +78,7 @@ function editorTheme(themeId: number) {
 	const estimatedFontSizeInEm = fontSizeInPx / 16;
 
 	return {
+		themeId,
 		...themeStyle(themeId),
 
 		// To allow accessibility font scaling, we also need to set the
@@ -245,7 +246,6 @@ function NoteEditor(props: Props) {
 	const webviewRef = useRef<WebViewControl>(null);
 
 	const editorSettings: EditorSettings = useMemo(() => ({
-		themeId: props.themeId,
 		themeData: editorTheme(props.themeId),
 		markdownMarkEnabled: Setting.value('markdown.plugin.mark'),
 		katexEnabled: Setting.value('markdown.plugin.katex'),

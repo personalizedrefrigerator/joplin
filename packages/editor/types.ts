@@ -142,6 +142,7 @@ export enum EditorKeymap {
 }
 
 export interface EditorTheme extends Theme {
+	themeId: number;
 	fontFamily: string;
 	fontSize?: number;
 	fontSizeUnits?: string;

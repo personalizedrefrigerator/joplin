@@ -1,12 +1,8 @@
 import { EditorEvent } from '@joplin/editor/events';
-import { EditorControl, EditorSettings as EditorBodySettings } from '@joplin/editor/types';
+import { EditorControl, EditorSettings } from '@joplin/editor/types';
 
 export interface EditorProcessApi {
 	editor: EditorControl;
-}
-
-export interface EditorSettings extends EditorBodySettings {
-	themeId: number;
 }
 
 export interface SelectionRange {
