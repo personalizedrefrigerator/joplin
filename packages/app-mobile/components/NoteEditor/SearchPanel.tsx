@@ -192,7 +192,7 @@ export const SearchPanel = (props: SearchPanelProps) => {
 	}, [state.dialogVisible, control]);
 
 
-	const themeId = props.editorSettings.themeId;
+	const themeId = props.editorSettings.themeData.themeId;
 	const closeButton = (
 		<ActionButton
 			themeId={themeId}

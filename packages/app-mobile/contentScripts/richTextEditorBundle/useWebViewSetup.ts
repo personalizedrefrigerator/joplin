@@ -22,6 +22,7 @@ interface Props {
 	themeId: number;
 	pluginStates: PluginStates;
 	noteResources: ResourceInfos;
+	onAttachFile: (mime: string, base64: string)=> void;
 
 	onPostMessage: (message: string)=> void;
 	onEditorEvent: (event: EditorEvent)=> void;
@@ -35,6 +36,8 @@ const useMessenger = (props: UseMessengerProps) => {
 	onEditorEventRef.current = props.onEditorEvent;
 	const rendererRef = useRef(props.renderer);
 	rendererRef.current = props.renderer;
+	const onAttachRef = useRef(props.onAttachFile);
+	onAttachRef.current = props.onAttachFile;
 
 	const markupRenderingSettings = useRef<RenderOptions>(null);
 	markupRenderingSettings.current = {
@@ -69,6 +72,9 @@ const useMessenger = (props: UseMessengerProps) => {
 				);
 				return renderResult;
 			},
+			onPasteFile: async (type: string, base64: string) => {
+				onAttachRef.current(type, base64);
+			},
 		};
 
 		const messenger = new RNToWebViewMessenger<MainProcessApi, EditorProcessApi>(
@@ -101,6 +107,11 @@ const useSource = (props: UseSourceProps) => {
 			css: `
 				${shim.injectedCss('richTextEditorBundle')}
 				${rendererCss}
+
+				/* Increase the size of the editor to make it easier to focus the editor. */
+				.prosemirror-editor {
+					min-height: 75vh;
+				}
 			`,
 			js: `
 				${rendererJs}
@@ -109,7 +120,10 @@ const useSource = (props: UseSourceProps) => {
 					window.richTextEditorCreated = true;
 					${shim.injectedJs('richTextEditorBundle')}
 					richTextEditorBundle.setUpLogger();
-					void richTextEditorBundle.initialize(${JSON.stringify(editorOptions)});
+					richTextEditorBundle.initialize(${JSON.stringify(editorOptions)}).then(function(editor) {
+						/* For testing */
+						window.joplinRichTextEditor_ = editor;
+					});
 				}
 			`,
 		};

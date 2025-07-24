@@ -2,6 +2,7 @@ import { createEditor } from '@joplin/editor/CodeMirror';
 import { focus } from '@joplin/lib/utils/focusHandler';
 import WebViewToRNMessenger from '../../utils/ipc/WebViewToRNMessenger';
 import { EditorProcessApi, EditorProps, MainProcessApi } from './types';
+import readFileToBase64 from '../utils/readFileToBase64';
 
 export { default as setUpLogger } from '../utils/setUpLogger';
 
@@ -24,18 +25,8 @@ export const initializeEditor = ({
 		settings,
 
 		onPasteFile: async (data) => {
-			const reader = new FileReader();
-			return new Promise<void>((resolve, reject) => {
-				reader.onload = async () => {
-					const dataUrl = reader.result as string;
-					const base64 = dataUrl.replace(/^data:.*;base64,/, '');
-					await messenger.remoteApi.onPasteFile(data.type, base64);
-					resolve();
-				};
-				reader.onerror = () => reject(new Error('Failed to load file.'));
-
-				reader.readAsDataURL(data);
-			});
+			const base64 = await readFileToBase64(data);
+			await messenger.remoteApi.onPasteFile(data.type, base64);
 		},
 
 		onLogMessage: message => {

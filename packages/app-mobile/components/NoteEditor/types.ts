@@ -50,11 +50,9 @@ export interface EditorControl extends EditorBodyControl {
 	searchControl: SearchControl;
 }
 
-export interface EditorSettings extends EditorBodySettings {
-	themeId: number;
-}
+export type EditorSettings = EditorBodySettings;
 
-type OnAttachCallback = (filePath?: string)=> Promise<void>;
+type OnAttachCallback = (mime: string, base64: string)=> Promise<void>;
 export interface EditorProps {
 	noteResources: ResourceInfos;
 	editorRef: RefObject<EditorBodyControl>;

@@ -4,6 +4,8 @@ import WebViewToRNMessenger from '../../utils/ipc/WebViewToRNMessenger';
 import { MarkupLanguage } from '@joplin/renderer';
 import '@joplin/editor/ProseMirror/styles';
 import HtmlToMd from '@joplin/lib/HtmlToMd';
+import readFileToBase64 from '../utils/readFileToBase64';
+import { EditorLanguageType } from '@joplin/editor/types';
 
 const postprocessHtml = (html: HTMLElement) => {
 	html = html.cloneNode(true) as HTMLElement;
@@ -70,8 +72,9 @@ export const initialize = async ({
 		initialText,
 		initialNoteId,
 
-		onPasteFile: () => {
-			throw new Error('Not implemented: onPasteFile');
+		onPasteFile: async (data) => {
+			const base64 = await readFileToBase64(data);
+			await messenger.remoteApi.onPasteFile(data.type, base64);
 		},
 		onLogMessage: (message: string) => {
 			void messenger.remoteApi.logMessage(message);
@@ -83,14 +86,20 @@ export const initialize = async ({
 		renderMarkupToHtml: async (markup) => {
 			return await messenger.remoteApi.onRender({
 				markup,
-				language: MarkupLanguage.Markdown,
+				language: settings.language === EditorLanguageType.Html ? MarkupLanguage.Html : MarkupLanguage.Markdown,
 			}, {
 				pluginAssetContainerSelector: `#${assetContainer.id}`,
 				splitted: true,
 				mapsToLine: true,
 			});
 		},
-		renderHtmlToMarkup: htmlToMarkdown,
+		renderHtmlToMarkup: (html) => {
+			if (settings.language === EditorLanguageType.Markdown) {
+				return htmlToMarkdown(html);
+			} else {
+				return html.outerHTML;
+			}
+		},
 	});
 
 	messenger.setLocalInterface({

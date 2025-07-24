@@ -874,6 +874,7 @@ packages/app-mobile/contentScripts/richTextEditorBundle/contentScript.js
 packages/app-mobile/contentScripts/richTextEditorBundle/types.js
 packages/app-mobile/contentScripts/richTextEditorBundle/useWebViewSetup.js
 packages/app-mobile/contentScripts/types.js
+packages/app-mobile/contentScripts/utils/readFileToBase64.js
 packages/app-mobile/contentScripts/utils/setUpLogger.js
 packages/app-mobile/gulpfile.js
 packages/app-mobile/index.web.js
@@ -1068,8 +1069,10 @@ packages/editor/ProseMirror/vendor/changedDescendants.js
 packages/editor/ProseMirror/vendor/splitBlockAs.js
 packages/editor/SelectionFormatting.js
 packages/editor/events.js
+packages/editor/polyfills.js
 packages/editor/testing/createEditorSettings.js
 packages/editor/types.js
+packages/editor/utils/getFileFromPasteEvent.js
 packages/fork-htmlparser2/src/CollectingHandler.js
 packages/fork-htmlparser2/src/FeedHandler.spec.js
 packages/fork-htmlparser2/src/FeedHandler.js

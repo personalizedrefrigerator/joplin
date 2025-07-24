@@ -23,6 +23,8 @@ import joplinEditorApiPlugin, { setEditorApi } from './plugins/joplinEditorApiPl
 import linkTooltipPlugin from './plugins/linkTooltipPlugin';
 import { RendererControl } from './types';
 import resourcePlaceholderPlugin, { onResourceDownloaded } from './plugins/resourcePlaceholderPlugin';
+import getFileFromPasteEvent from '../utils/getFileFromPasteEvent';
+import { RenderResult } from '../../renderer/types';
 
 const createEditor = async (
 	parentElement: HTMLElement,
@@ -51,13 +53,16 @@ const createEditor = async (
 
 		return { renderResult, dom };
 	};
+	const updateGlobalCss = (renderResult: RenderResult) => {
+		cssContainer.replaceChildren(
+			document.createTextNode(renderResult.cssStrings.join('\n')),
+		);
+	};
 
 	let settings = props.settings;
 	const createInitialState = async (markup: string) => {
 		const { renderResult, dom } = await renderAndPostprocessHtml(markup);
-		cssContainer.replaceChildren(
-			document.createTextNode(renderResult.cssStrings.join('\n')),
-		);
+		updateGlobalCss(renderResult);
 
 		let state = EditorState.create({
 			doc: proseMirrorParser.parse(dom),
@@ -128,6 +133,17 @@ const createEditor = async (
 			'aria-label': settings.editorLabel,
 			class: 'prosemirror-editor',
 		},
+		handleDOMEvents: {
+			paste: (_view, event) => {
+				const fileToPaste = getFileFromPasteEvent(event);
+				if (fileToPaste) {
+					event.preventDefault();
+					void props.onPasteFile(fileToPaste);
+					return true;
+				}
+				return false;
+			},
+		},
 	});
 
 	const editorControl: EditorControl = {
@@ -165,8 +181,16 @@ const createEditor = async (
 		updateBody: async (newBody: string, _updateBodyOptions?: UpdateBodyOptions) => {
 			view.updateState(await createInitialState(newBody));
 		},
-		updateSettings: (newSettings: EditorSettings) => {
+		updateSettings: async (newSettings: EditorSettings) => {
+			const oldSettings = settings;
 			settings = newSettings;
+
+			if (oldSettings.themeData.themeId !== newSettings.themeData.themeId) {
+				// Refresh global CSS when the theme changes -- render the full document
+				// to avoid required CSS being omitted due to missing markup.
+				const { renderResult } = await renderAndPostprocessHtml(stateToMarkup(view.state));
+				updateGlobalCss(renderResult);
+			}
 		},
 		updateLink: (label: string, url: string) => {
 			const doc = view.state.doc;
