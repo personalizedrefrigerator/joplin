@@ -212,6 +212,7 @@ const marks = {
 		attrs: {
 			href: { validate: 'string' },
 			title: { default: '', validate: 'string' },
+			dataResourceId: { default: undefined as string|undefined, validate: 'string|undefined' },
 		},
 		inclusive: false,
 		parseDOM: [{
@@ -224,12 +225,13 @@ const marks = {
 				return {
 					href: isResourceLink ? `:/${resourceId}` : href,
 					title: node.getAttribute('title'),
+					dataResourceId: node.getAttribute('data-resource-id'),
 				};
 			},
 		}],
 		toDOM: node => [
 			'a',
-			{ href: node.attrs.href, title: node.attrs.title },
+			{ href: node.attrs.href, title: node.attrs.title, 'data-resource-id': node.attrs.dataResourceId },
 		],
 	},
 } satisfies Record<string, MarkSpec>;

@@ -246,11 +246,12 @@ const createEditor = async (
 			const rendered = await renderAndPostprocessHtml(`<img src=":/${resourceId}"/>`);
 			const renderedImage = rendered.dom.querySelector('img');
 
-			if (!renderedImage) {
-				throw new Error('Rendering failed -- no rendered image found.');
-			}
 			// The resource might not be an image. If so, skip.
-			if (renderedImage.classList.contains('not-loaded-resource')) {
+			if (!renderedImage) {
+				return;
+			}
+			const stillNotLoaded = renderedImage.classList.contains('not-loaded-resource');
+			if (stillNotLoaded) {
 				return;
 			}
 
