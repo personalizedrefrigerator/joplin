@@ -8,19 +8,12 @@ import readFileToBase64 from '../utils/readFileToBase64';
 import { EditorLanguageType } from '@joplin/editor/types';
 
 const postprocessHtml = (html: HTMLElement) => {
-	html = html.cloneNode(true) as HTMLElement;
 
 	// Fix resource URLs
 	const resources = html.querySelectorAll<HTMLImageElement>('img[data-resource-id]');
 	for (const resource of resources) {
 		const resourceId = resource.getAttribute('data-resource-id');
-
-		// By default, if `src` is specified, the browser will try to load the image, even if it isn't added
-		// to the DOM.
-		// Since :/resourceId isn't a valid image URI, this results in a large number of warnings. As a workaround,
-		// use `data-src` to store the `src`. The `src` will be restored when saving.
-		resource.setAttribute('data-src', `:/${resourceId}`);
-		resource.src = '';
+		resource.src = `:/${resourceId}`;
 	}
 
 	// Re-add newlines to data-joplin-source-* that were removed
@@ -93,11 +86,27 @@ export const initialize = async ({
 				mapsToLine: true,
 			});
 		},
-		renderHtmlToMarkup: (html) => {
+		renderHtmlToMarkup: (node) => {
+			// By default, if `src` is specified on an image, the browser will try to load the image, even if it isn't added
+			// to the DOM. (A similar problem is described here: https://stackoverflow.com/q/62019538).
+			// Since :/resourceId isn't a valid image URI, this results in a large number of warnings. As a workaround,
+			// move the element to a temporary document before processing:
+			const dom = document.implementation.createHTMLDocument();
+			node = dom.importNode(node, true);
+
+			let html: HTMLElement;
+			if ((node instanceof HTMLElement)) {
+				html = node;
+			} else {
+				const container = document.createElement('div');
+				container.appendChild(html);
+				html = container;
+			}
+
 			if (settings.language === EditorLanguageType.Markdown) {
 				return htmlToMarkdown(html);
 			} else {
-				return html.outerHTML;
+				return postprocessHtml(html).outerHTML;
 			}
 		},
 	});
