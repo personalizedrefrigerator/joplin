@@ -305,4 +305,34 @@ describe('RichTextEditor', () => {
 			}
 		});
 	});
+
+	it.each([
+		{ useValidSyntax: false },
+		{ useValidSyntax: true },
+	])('should preserve inline math on edit (%j)', async ({ useValidSyntax }) => {
+		const macros = '\\def\\<{\\langle} \\def\\>{\\rangle}';
+		let inlineMath = '| \\< u, v \\> |^2 \\leq \\< u, u \\>\\< v, v \\>';
+		// The \\< escapes are invalid without the above custom macro definitions.
+		// It should be possible for the editor to preserve invalid math syntax.
+		if (useValidSyntax) {
+			inlineMath = macros + inlineMath;
+		}
+
+		let body = `Inline math: $${inlineMath}$...`;
+
+		render(<WrappedEditor
+			noteBody={body}
+			onBodyChange={newBody => { body = newBody; }}
+		/>);
+
+		const renderedInlineMath = await findElement<HTMLElement>('span.joplin-editable');
+		expect(renderedInlineMath).toBeTruthy();
+
+		const window = await getEditorWindow();
+		mockTyping(window, ' testing');
+
+		await waitFor(async () => {
+			expect(body.trim()).toBe(`Inline math: $${inlineMath}$... testing`);
+		});
+	});
 });
