@@ -1,18 +1,18 @@
 // This is the basic initialization for the Electron MAIN process
 
-require('./utils/sourceMapSetup');
-const electronApp = require('electron').app;
+import './utils/sourceMapSetup';
+import { app as electronApp } from 'electron';
 require('@electron/remote/main').initialize();
-const ElectronAppWrapper = require('./ElectronAppWrapper').default;
-const { pathExistsSync, readFileSync, mkdirpSync } = require('fs-extra');
-const { initBridge } = require('./bridge');
-const Logger = require('@joplin/utils/Logger').default;
-const FsDriverNode = require('@joplin/lib/fs-driver-node').default;
+import ElectronAppWrapper from './ElectronAppWrapper';
+import { pathExistsSync, readFileSync, mkdirpSync } from 'fs-extra';
+import { initBridge } from './bridge';
+import Logger from '@joplin/utils/Logger';
+import FsDriverNode from '@joplin/lib/fs-driver-node';
 const envFromArgs = require('@joplin/lib/envFromArgs');
 const packageInfo = require('./packageInfo.js');
-const { isCallbackUrl } = require('@joplin/lib/callbackUrlUtils');
-const determineBaseAppDirs = require('@joplin/lib/determineBaseAppDirs').default;
-const registerCustomProtocols = require('./utils/customProtocols/registerCustomProtocols').default;
+import { isCallbackUrl } from '@joplin/lib/callbackUrlUtils';
+import determineBaseAppDirs from '@joplin/lib/determineBaseAppDirs';
+import registerCustomProtocols from './utils/customProtocols/registerCustomProtocols';
 
 // Electron takes the application name from package.json `name` and
 // displays this in the tray icon toolip and message box titles, however in
@@ -26,7 +26,7 @@ process.on('unhandledRejection', (reason, p) => {
 	process.exit(1);
 });
 
-const getFlagValueFromArgs = (args, flag, defaultValue) => {
+const getFlagValueFromArgs = (args: string[], flag: string, defaultValue: string|null) => {
 	if (!args) return null;
 	const index = args.indexOf(flag);
 	if (index <= 0 || index >= args.length - 1) return defaultValue;
@@ -75,7 +75,13 @@ const wrapper = new ElectronAppWrapper(electronApp, {
 	env, profilePath: rootProfileDir, isDebugMode, initialCallbackUrl, isEndToEndTesting,
 });
 
-globalThis.joplinBridge = initBridge(wrapper, appId, appName, rootProfileDir, autoUploadCrashDumps, altInstanceId);
+
+type ExtendedGlobal = {
+	joplinBridge: unknown;
+};
+(globalThis as unknown as ExtendedGlobal).joplinBridge = (
+	initBridge(wrapper, appId, appName, rootProfileDir, autoUploadCrashDumps, altInstanceId)
+);
 
 wrapper.start().catch((error) => {
 	console.error('Electron App fatal error:');

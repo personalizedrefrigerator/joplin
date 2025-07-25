@@ -66,7 +66,6 @@ const DialogManager: React.FC<Props> = props => {
 	const dialogComponents: React.ReactNode[] = [];
 	for (const dialog of dialogModels) {
 		const dialogProps = {
-			key: dialog.key,
 			containerStyle: styles.dialogContainer,
 			themeId: props.themeId,
 		};
@@ -75,6 +74,7 @@ const DialogManager: React.FC<Props> = props => {
 				<PromptDialog
 					dialog={dialog}
 					{...dialogProps}
+					key={dialog.key}
 				/>,
 			);
 		} else if (dialog.type === DialogType.TextInput) {
@@ -82,6 +82,7 @@ const DialogManager: React.FC<Props> = props => {
 				<TextInputDialog
 					dialog={dialog}
 					{...dialogProps}
+					key={dialog.key}
 				/>,
 			);
 		} else {

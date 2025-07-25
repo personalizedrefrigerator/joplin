@@ -26,7 +26,8 @@ import { AppState as RNAppState, EmitterSubscription, View, Text, Linking, Nativ
 import getResponsiveValue from './components/getResponsiveValue';
 import NetInfo, { NetInfoSubscription } from '@react-native-community/netinfo';
 const DropdownAlert = require('react-native-dropdownalert').default;
-const SafeAreaView = require('./components/SafeAreaView');
+const AlarmServiceDriver = require('./services/AlarmServiceDriver').default;
+import SafeAreaView from './components/SafeAreaView';
 const { connect, Provider } = require('react-redux');
 import fastDeepEqual = require('fast-deep-equal');
 import { Provider as PaperProvider, MD3DarkTheme, MD3LightTheme } from 'react-native-paper';
@@ -107,6 +108,7 @@ import SamlShared from '@joplin/lib/components/shared/SamlShared';
 import NoteRevisionViewer from './components/screens/NoteRevisionViewer';
 import DocumentScanner from './components/screens/DocumentScanner/DocumentScanner';
 import buildStartupTasks from './utils/buildStartupTasks';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 const logger = Logger.create('root');
 const perfLogger = PerformanceLogger.create('root');
@@ -950,8 +952,7 @@ class AppComponent extends React.Component<AppComponentProps, AppComponentState>
 					disableGestures={disableSideMenuGestures}
 				>
 					<View style={{ flexGrow: 1, flexShrink: 1, flexBasis: '100%' }}>
-						<SafeAreaView style={{ flex: 0, backgroundColor: theme.backgroundColor2 }}/>
-						<SafeAreaView style={{ flex: 1 }}>
+						<SafeAreaView style={{ flex: 1 }} titleBarUnderlayColor={theme.backgroundColor2}>
 							<View style={{ flex: 1, backgroundColor: theme.backgroundColor }}>
 								{ shouldShowMainContent && <AppNav screens={appNavInit} dispatch={this.props.dispatch} /> }
 							</View>
@@ -1011,17 +1012,19 @@ class AppComponent extends React.Component<AppComponentProps, AppComponentState>
 							style={{ flex: 1 }}
 							closeButtonLabel={_('Dismiss')}
 						>
-							<FocusControl.MainAppContent style={{ flex: 1 }}>
-								{shouldShowMainContent ? mainContent : (
-									<SafeAreaView>
-										<BiometricPopup
-											dispatch={this.props.dispatch}
-											themeId={this.props.themeId}
-											sensorInfo={this.state.sensorInfo}
-										/>
-									</SafeAreaView>
-								)}
-							</FocusControl.MainAppContent>
+							<SafeAreaProvider>
+								<FocusControl.MainAppContent style={{ flex: 1 }}>
+									{shouldShowMainContent ? mainContent : (
+										<SafeAreaView>
+											<BiometricPopup
+												dispatch={this.props.dispatch}
+												themeId={this.props.themeId}
+												sensorInfo={this.state.sensorInfo}
+											/>
+										</SafeAreaView>
+									)}
+								</FocusControl.MainAppContent>
+							</SafeAreaProvider>
 						</MenuProvider>
 					</DialogManager>
 				</PaperProvider>
