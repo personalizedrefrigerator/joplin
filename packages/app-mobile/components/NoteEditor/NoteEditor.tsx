@@ -11,7 +11,7 @@ import { LayoutChangeEvent, View, ViewStyle } from 'react-native';
 import { editorFont } from '../global-style';
 
 import { EditorControl as EditorBodyControl, ContentScriptData } from '@joplin/editor/types';
-import { EditorControl, EditorSettings } from './types';
+import { EditorControl, EditorSettings, EditorType } from './types';
 import { _ } from '@joplin/lib/locale';
 import { ChangeEvent, EditorEvent, EditorEventType, SelectionRangeChangeEvent, UndoRedoDepthChangeEvent } from '@joplin/editor/events';
 import { EditorCommandType, EditorKeymap, EditorLanguageType, SearchState } from '@joplin/editor/types';
@@ -31,16 +31,12 @@ import shim from '@joplin/lib/shim';
 import { dirname } from '@joplin/utils/path';
 import { toFileExtension } from '@joplin/lib/mime-utils';
 import { MarkupLanguage } from '@joplin/renderer';
+import WarningBanner from './WarningBanner';
 
 type ChangeEventHandler = (event: ChangeEvent)=> void;
 type UndoRedoDepthChangeHandler = (event: UndoRedoDepthChangeEvent)=> void;
 type SelectionChangeEventHandler = (event: SelectionRangeChangeEvent)=> void;
 type OnAttachCallback = (filePath?: string)=> Promise<void>;
-
-export enum EditorType {
-	Markdown = 'markdown',
-	RichText = 'rich-text',
-}
 
 interface Props {
 	ref: Ref<EditorControl>;
@@ -410,6 +406,8 @@ function NoteEditor(props: Props) {
 					onAttach={onAttach}
 				/>
 			</View>
+
+			<WarningBanner editorType={props.mode}/>
 
 			<SearchPanel
 				editorSettings={editorSettings}

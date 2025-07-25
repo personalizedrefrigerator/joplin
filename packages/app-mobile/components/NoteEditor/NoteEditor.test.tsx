@@ -3,7 +3,7 @@ import * as React from 'react';
 import { describe, it, expect, beforeEach } from '@jest/globals';
 import { act, fireEvent, render, screen, waitFor } from '../../utils/testing/testingLibrary';
 
-import NoteEditor, { EditorType } from './NoteEditor';
+import NoteEditor from './NoteEditor';
 import Setting from '@joplin/lib/models/Setting';
 import { _ } from '@joplin/lib/locale';
 import { setupDatabaseAndSynchronizer, switchClient } from '@joplin/lib/testing/test-utils';
@@ -16,9 +16,29 @@ import setupGlobalStore from '../../utils/testing/setupGlobalStore';
 import { Store } from 'redux';
 import { AppState } from '../../utils/types';
 import { MarkupLanguage } from '@joplin/renderer';
+import { EditorType } from './types';
 
 let store: Store<AppState>;
 let registeredRuntime: RegisteredRuntime;
+
+const defaultEditorProps = {
+	themeId: Setting.THEME_ARITIM_DARK,
+	markupLanguage: MarkupLanguage.Markdown,
+	initialText: 'Testing...',
+	globalSearch: '',
+	noteId: '',
+	noteHash: '',
+	style: {},
+	toolbarEnabled: true,
+	readOnly: false,
+	onChange: ()=>{},
+	onSelectionChange: ()=>{},
+	onUndoRedoDepthChange: ()=>{},
+	onAttach: async ()=>{},
+	noteResources: {},
+	plugins: {},
+	mode: EditorType.Markdown,
+};
 
 describe('NoteEditor', () => {
 	beforeAll(() => {
@@ -47,22 +67,7 @@ describe('NoteEditor', () => {
 			<TestProviderStack store={store}>
 				<NoteEditor
 					ref={undefined}
-					themeId={Setting.THEME_ARITIM_DARK}
-					markupLanguage={MarkupLanguage.Markdown}
-					initialText='Testing...'
-					globalSearch=''
-					noteId=''
-					noteHash=''
-					style={{}}
-					toolbarEnabled={true}
-					readOnly={false}
-					onChange={()=>{}}
-					onSelectionChange={()=>{}}
-					onUndoRedoDepthChange={()=>{}}
-					onAttach={async ()=>{}}
-					noteResources={{}}
-					plugins={{}}
-					mode={EditorType.Markdown}
+					{...defaultEditorProps}
 				/>
 			</TestProviderStack>,
 		);
@@ -101,6 +106,29 @@ describe('NoteEditor', () => {
 				}
 			});
 		}
+
+		wrappedNoteEditor.unmount();
+	});
+
+	it('should show a warning banner the first time the Rich Text Editor is used', () => {
+		const wrappedNoteEditor = render(
+			<TestProviderStack store={store}>
+				<NoteEditor
+					ref={undefined}
+					{...defaultEditorProps}
+					mode={EditorType.RichText}
+				/>
+			</TestProviderStack>,
+		);
+
+		const warningBannerQuery = /This Rich Text editor has a number of limitations.*/;
+		const warning = screen.getByText(warningBannerQuery);
+		expect(warning).toBeVisible();
+
+		// Pressing dismiss should dismiss the warning
+		const dismissButton = screen.getByHintText('Hides warning');
+		fireEvent.press(dismissButton);
+		expect(screen.queryByText(warningBannerQuery)).toBeNull();
 
 		wrappedNoteEditor.unmount();
 	});

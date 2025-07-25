@@ -69,3 +69,8 @@ export interface EditorProps {
 	onAttach: OnAttachCallback;
 	onEditorEvent: (event: EditorEvent)=> void;
 }
+
+export enum EditorType {
+	Markdown = 'markdown',
+	RichText = 'rich-text',
+}

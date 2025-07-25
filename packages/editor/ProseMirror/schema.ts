@@ -2,7 +2,7 @@ import { AttributeSpec, DOMOutputSpec, MarkSpec, NodeSpec, Schema } from 'prosem
 import { nodeSpecs as joplinEditableNodes } from './plugins/joplinEditablePlugin';
 import { tableNodes } from 'prosemirror-tables';
 import { nodeSpecs as listNodes } from './plugins/listPlugin';
-import { nodeSpecs as placeholderNodes } from './plugins/resourcePlaceholderPlugin';
+import { nodeSpecs as resourcePlaceholderNodes } from './plugins/resourcePlaceholderPlugin';
 
 // For reference, see:
 // - https://prosemirror.net/docs/guide/#schema
@@ -106,7 +106,30 @@ const nodes = addDefaultToplevelAttributes({
 		parseDOM: [{ tag: 'hr' }],
 		toDOM: () => domOutputSpecs.hr,
 	},
-	...placeholderNodes,
+	style_placeholder: {
+		group: 'block',
+		parseDOM: [
+			{
+				tag: 'style',
+				getAttrs: node => ({ content: node.textContent }),
+			},
+			{
+				tag: 'div.joplin-style-placeholder',
+				getAttrs: node => ({ content: node.getAttribute('data-style-content') }),
+			},
+		],
+		attrs: {
+			content: { validate: 'string' },
+		},
+		toDOM: (node) => {
+			const result = document.createElement('div');
+			result.classList.add('joplin-style-placeholder');
+			result.setAttribute('data-style-content', node.attrs.content);
+			result.textContent = 'CSS';
+			return result;
+		},
+	},
+	...resourcePlaceholderNodes,
 	...listNodes,
 	...joplinEditableNodes,
 	...tableNodes({
