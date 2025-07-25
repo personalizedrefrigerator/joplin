@@ -1063,10 +1063,13 @@ packages/editor/ProseMirror/plugins/resourcePlaceholderPlugin.js
 packages/editor/ProseMirror/plugins/searchExtension.js
 packages/editor/ProseMirror/schema.js
 packages/editor/ProseMirror/styles.js
+packages/editor/ProseMirror/testing/createTestEditor.js
 packages/editor/ProseMirror/types.js
 packages/editor/ProseMirror/utils/UndoStackSynchronizer.js
 packages/editor/ProseMirror/utils/canReplaceSelectionWith.js
 packages/editor/ProseMirror/utils/computeSelectionFormatting.js
+packages/editor/ProseMirror/utils/extractSelectedLinesTo.test.js
+packages/editor/ProseMirror/utils/extractSelectedLinesTo.js
 packages/editor/ProseMirror/utils/preprocessEditorInput.test.js
 packages/editor/ProseMirror/utils/preprocessEditorInput.js
 packages/editor/ProseMirror/utils/sanitizeHtml.js
