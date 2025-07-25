@@ -36,7 +36,7 @@ export const nodeSpecs = {
 	joplinEditableBlock: makeJoplinEditableSpec(false),
 };
 
-class SourceBlockView implements NodeView {
+class EditableSourceBlockView implements NodeView {
 	public readonly dom: HTMLElement;
 	public constructor(node: Node, inline: boolean) {
 		if ((node.attrs.contentHtml ?? undefined) === undefined) {
@@ -60,8 +60,8 @@ class SourceBlockView implements NodeView {
 const joplinEditablePlugin = new Plugin({
 	props: {
 		nodeViews: {
-			joplinEditableInline: node => new SourceBlockView(node, true),
-			joplinEditableBlock: node => new SourceBlockView(node, false),
+			joplinEditableInline: node => new EditableSourceBlockView(node, true),
+			joplinEditableBlock: node => new EditableSourceBlockView(node, false),
 		},
 	},
 });
