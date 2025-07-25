@@ -8,7 +8,6 @@ import readFileToBase64 from '../utils/readFileToBase64';
 import { EditorLanguageType } from '@joplin/editor/types';
 
 const postprocessHtml = (html: HTMLElement) => {
-
 	// Fix resource URLs
 	const resources = html.querySelectorAll<HTMLImageElement>('img[data-resource-id]');
 	for (const resource of resources) {
@@ -33,6 +32,15 @@ const postprocessHtml = (html: HTMLElement) => {
 	}
 
 	return html;
+};
+
+const wrapHtmlForMarkdownConversion = (html: HTMLElement) => {
+	// Add a container element -- when converting to HTML, Turndown
+	// sometimes doesn't process the toplevel element in the same way
+	// as other elements (e.g. in the case of Joplin source blocks).
+	const wrapper = html.ownerDocument.createElement('div');
+	wrapper.appendChild(html.cloneNode(true));
+	return wrapper;
 };
 
 
@@ -104,7 +112,7 @@ export const initialize = async ({
 			}
 
 			if (settings.language === EditorLanguageType.Markdown) {
-				return htmlToMarkdown(html);
+				return htmlToMarkdown(wrapHtmlForMarkdownConversion(html));
 			} else {
 				return postprocessHtml(html).outerHTML;
 			}

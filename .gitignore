@@ -528,6 +528,8 @@ packages/app-desktop/integration-tests/util/setSettingValue.js
 packages/app-desktop/integration-tests/util/test.js
 packages/app-desktop/integration-tests/util/waitForNextOpenPath.js
 packages/app-desktop/integration-tests/wcag.spec.js
+packages/app-desktop/main-html.js
+packages/app-desktop/main.js
 packages/app-desktop/playwright.config.js
 packages/app-desktop/plugins/GotoAnything.js
 packages/app-desktop/services/autoUpdater/AutoUpdaterService.test.js
@@ -672,6 +674,7 @@ packages/app-mobile/components/NoteList.js
 packages/app-mobile/components/ProfileSwitcher/ProfileEditor.js
 packages/app-mobile/components/ProfileSwitcher/ProfileSwitcher.js
 packages/app-mobile/components/ProfileSwitcher/useProfileConfig.js
+packages/app-mobile/components/SafeAreaView.js
 packages/app-mobile/components/ScreenHeader/Menu.js
 packages/app-mobile/components/ScreenHeader/WarningBanner.test.js
 packages/app-mobile/components/ScreenHeader/WarningBanner.js
@@ -880,6 +883,7 @@ packages/app-mobile/utils/ShareUtils.js
 packages/app-mobile/utils/TlsUtils.js
 packages/app-mobile/utils/appDefaultState.js
 packages/app-mobile/utils/autodetectTheme.js
+packages/app-mobile/utils/buildStartupTasks.js
 packages/app-mobile/utils/checkPermissions.js
 packages/app-mobile/utils/createRootStyle.js
 packages/app-mobile/utils/database-driver-react-native.js
@@ -1035,6 +1039,7 @@ packages/editor/ProseMirror/types.js
 packages/editor/ProseMirror/utils/UndoStackSynchronizer.js
 packages/editor/ProseMirror/utils/canReplaceSelectionWith.js
 packages/editor/ProseMirror/utils/computeSelectionFormatting.js
+packages/editor/ProseMirror/utils/preprocessEditorInput.test.js
 packages/editor/ProseMirror/utils/preprocessEditorInput.js
 packages/editor/ProseMirror/utils/sanitizeHtml.js
 packages/editor/ProseMirror/utils/trimEmptyParagraphs.js
@@ -1090,6 +1095,8 @@ packages/lib/JoplinDatabase.js
 packages/lib/JoplinError.js
 packages/lib/JoplinServerApi.js
 packages/lib/ObjectUtils.js
+packages/lib/PerformanceLogger.test.js
+packages/lib/PerformanceLogger.js
 packages/lib/PoorManIntervals.js
 packages/lib/RotatingLogs.test.js
 packages/lib/RotatingLogs.js

@@ -1240,10 +1240,11 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 		const isSaved = note && note.id;
 		const readOnly = this.state.readOnly;
 		const isDeleted = !!this.state.note.deleted_time;
+		const isCodeView = this.props.editorType === EditorType.Markdown;
 
 		const pluginCommands = pluginUtils.commandNamesFromViews(this.props.plugins, 'noteToolbar');
 
-		const cacheKey = md5([isTodo, isSaved, pluginCommands.join(','), readOnly, this.state.mode].join('_'));
+		const cacheKey = md5([isTodo, isSaved, pluginCommands.join(','), readOnly, this.state.mode, isCodeView].join('_'));
 		if (!this.menuOptionsCache_) this.menuOptionsCache_ = {};
 
 		if (this.menuOptionsCache_[cacheKey]) return this.menuOptionsCache_[cacheKey];
@@ -1361,10 +1362,11 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 		});
 
 		if (this.state.mode === 'edit') {
+			const newCodeView = !isCodeView;
 			output.push({
-				title: _('Toggle editors'),
+				title: newCodeView ? _('Edit as Markdown') : _('Edit as Rich Text'),
 				onPress: () => {
-					Setting.setValue('editor.codeView', !Setting.value('editor.codeView'));
+					Setting.setValue('editor.codeView', newCodeView);
 				},
 			});
 		}

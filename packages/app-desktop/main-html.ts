@@ -2,35 +2,35 @@
 
 // Disable React message in console "Download the React DevTools for a better development experience"
 // https://stackoverflow.com/questions/42196819/disable-hide-download-the-react-devtools#42196820
-// eslint-disable-next-line no-undef
-window.__REACT_DEVTOOLS_GLOBAL_HOOK__ = {
+// eslint-disable-next-line no-undef, @typescript-eslint/no-explicit-any
+(window as any).__REACT_DEVTOOLS_GLOBAL_HOOK__ = {
 	supportsFiber: true,
 	inject: function() {},
 	onCommitFiberRoot: function() {},
 	onCommitFiberUnmount: function() {},
 };
 
-require('./utils/sourceMapSetup');
-const app = require('./app').default;
-const Folder = require('@joplin/lib/models/Folder').default;
-const Resource = require('@joplin/lib/models/Resource').default;
-const BaseItem = require('@joplin/lib/models/BaseItem').default;
-const Note = require('@joplin/lib/models/Note').default;
-const Tag = require('@joplin/lib/models/Tag').default;
-const NoteTag = require('@joplin/lib/models/NoteTag').default;
-const MasterKey = require('@joplin/lib/models/MasterKey').default;
-const Setting = require('@joplin/lib/models/Setting').default;
-const Revision = require('@joplin/lib/models/Revision').default;
-const Logger = require('@joplin/utils/Logger').default;
-const FsDriverNode = require('@joplin/lib/fs-driver-node').default;
-const bridge = require('./services/bridge').default;
-const shim = require('@joplin/lib/shim').default;
+import './utils/sourceMapSetup';
+import app from './app';
+import Folder from '@joplin/lib/models/Folder';
+import Resource from '@joplin/lib/models/Resource';
+import BaseItem from '@joplin/lib/models/BaseItem';
+import Note from '@joplin/lib/models/Note';
+import Tag from '@joplin/lib/models/Tag';
+import NoteTag from '@joplin/lib/models/NoteTag';
+import MasterKey from '@joplin/lib/models/MasterKey';
+import Setting, { AppType } from '@joplin/lib/models/Setting';
+import Revision from '@joplin/lib/models/Revision';
+import Logger from '@joplin/utils/Logger';
+import FsDriverNode from '@joplin/lib/fs-driver-node';
+import bridge from './services/bridge';
+import shim from '@joplin/lib/shim';
 const { shimInit } = require('@joplin/lib/shim-init-node.js');
-const EncryptionService = require('@joplin/lib/services/e2ee/EncryptionService').default;
-const FileApiDriverLocal = require('@joplin/lib/file-api-driver-local').default;
-const React = require('react');
-const nodeSqlite = require('sqlite3');
-const initLib = require('@joplin/lib/initLib').default;
+import EncryptionService from '@joplin/lib/services/e2ee/EncryptionService';
+import FileApiDriverLocal from '@joplin/lib/file-api-driver-local';
+import * as React from 'react';
+import nodeSqlite = require('sqlite3');
+import initLib from '@joplin/lib/initLib';
 const pdfJs = require('pdfjs-dist');
 const { isAppleSilicon } = require('is-apple-silicon');
 require('@sentry/electron/renderer');
@@ -60,7 +60,7 @@ const main = async () => {
 	BaseItem.loadClass('Revision', Revision);
 
 	Setting.setConstant('appId', bridge().appId());
-	Setting.setConstant('appType', 'desktop');
+	Setting.setConstant('appType', AppType.Desktop);
 	Setting.setConstant('pluginAssetDir', `${__dirname}/pluginAssets`);
 
 	// eslint-disable-next-line no-console
@@ -127,6 +127,6 @@ main().catch((error) => {
 	// In dev, we give the option to leave the app open as debug statements in the
 	// console can be useful
 	const canIgnore = env === 'dev';
-	bridge().electronApp().handleAppFailure(errorMessage, canIgnore);
+	void bridge().electronApp().handleAppFailure(errorMessage, canIgnore);
 });
 

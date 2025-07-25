@@ -31,7 +31,7 @@ const addListSourceMapInfo = (dom: Document) => {
 // Uses the renderer's source-line and source-line-end attributes to
 // reconstruct the original Markdown for different parts of the given
 // DOM.
-const addOriginalMarkdownAttrs = (dom: Document, originalMarkup: string) => {
+const addOriginalMarkdownAttributes = (dom: Document, originalMarkup: string) => {
 	const lines = originalMarkup.split('\n');
 
 	const root = getRootNode(dom);
@@ -65,7 +65,7 @@ const addOriginalMarkdownAttrs = (dom: Document, originalMarkup: string) => {
 
 const preprocessEditorInput = (dom: Document, originalMarkup: string) => {
 	addListSourceMapInfo(dom);
-	addOriginalMarkdownAttrs(dom, originalMarkup);
+	addOriginalMarkdownAttributes(dom, originalMarkup);
 };
 
 export default preprocessEditorInput;
