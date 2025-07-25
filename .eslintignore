@@ -892,6 +892,7 @@ packages/app-mobile/utils/ShareUtils.js
 packages/app-mobile/utils/TlsUtils.js
 packages/app-mobile/utils/appDefaultState.js
 packages/app-mobile/utils/autodetectTheme.js
+packages/app-mobile/utils/buildStartupTasks.js
 packages/app-mobile/utils/checkPermissions.js
 packages/app-mobile/utils/createRootStyle.js
 packages/app-mobile/utils/database-driver-react-native.js
@@ -1077,6 +1078,8 @@ packages/lib/JoplinDatabase.js
 packages/lib/JoplinError.js
 packages/lib/JoplinServerApi.js
 packages/lib/ObjectUtils.js
+packages/lib/PerformanceLogger.test.js
+packages/lib/PerformanceLogger.js
 packages/lib/PoorManIntervals.js
 packages/lib/RotatingLogs.test.js
 packages/lib/RotatingLogs.js
