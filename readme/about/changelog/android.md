@@ -1,5 +1,10 @@
 # Joplin Android Changelog
 
+## [android-v3.4.2](https://github.com/laurent22/joplin/releases/tag/android-v3.4.2) (Pre-release) - 2025-07-25T08:30:30Z
+
+- Improved: Updated packages react-native-paper (v5.13.5)
+- Fixed: Fix title bar is partially hidden by the screen header (#12785 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+
 ## [android-v3.4.1](https://github.com/laurent22/joplin/releases/tag/android-v3.4.1) (Pre-release) - 2025-07-24T10:57:44Z
 
 - New: Add Joplin Server SAML support (#11865 by [@ttcchhmm](https://github.com/ttcchhmm))
