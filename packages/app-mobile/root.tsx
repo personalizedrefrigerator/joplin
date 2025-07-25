@@ -26,7 +26,6 @@ import { AppState as RNAppState, EmitterSubscription, View, Text, Linking, Nativ
 import getResponsiveValue from './components/getResponsiveValue';
 import NetInfo, { NetInfoSubscription } from '@react-native-community/netinfo';
 const DropdownAlert = require('react-native-dropdownalert').default;
-const AlarmServiceDriver = require('./services/AlarmServiceDriver').default;
 import SafeAreaView from './components/SafeAreaView';
 const { connect, Provider } = require('react-redux');
 import fastDeepEqual = require('fast-deep-equal');
