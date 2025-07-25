@@ -335,4 +335,23 @@ describe('RichTextEditor', () => {
 			expect(body.trim()).toBe(`Inline math: $${inlineMath}$... testing`);
 		});
 	});
+
+	it('should preserve block math on edit', async () => {
+		let body = 'Test:\n\n$$3^2 + 4^2 = \\sqrt{625}$$\n\nTest.';
+
+		render(<WrappedEditor
+			noteBody={body}
+			onBodyChange={newBody => { body = newBody; }}
+		/>);
+
+		const renderedInlineMath = await findElement<HTMLElement>('div.joplin-editable');
+		expect(renderedInlineMath).toBeTruthy();
+
+		const window = await getEditorWindow();
+		mockTyping(window, ' testing');
+
+		await waitFor(async () => {
+			expect(body.trim()).toBe('Test:\n\n$$\n3^2 + 4^2 = \\sqrt{625}\n$$\n\nTest. testing');
+		});
+	});
 });
