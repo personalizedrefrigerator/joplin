@@ -11,6 +11,16 @@ const createSerializer = () => {
 	return new DOMSerializer({
 		...baseSerializer.nodes,
 
+		// When converting back to markup, restore the <style> blocks.
+		// TODO: This is currently only effective for short, simple CSS blocks.
+		// @joplin/turndown will need to be adjusted to properly support preserving CSS:
+		style_placeholder: (node) => {
+			const result = document.createElement('style');
+			result.appendChild(document.createTextNode(node.attrs.content));
+			result.classList.add('jop-noMdConv');
+			return result;
+		},
+
 		// Prevent empty paragraphs from being removed by padding them with &nbsp;s:
 		paragraph: (node) => {
 			if (node.content.size === 0) {
