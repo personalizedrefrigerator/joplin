@@ -6,7 +6,7 @@ import { focus } from '@joplin/lib/utils/focusHandler';
 import schema from './schema';
 import { liftListItem, sinkListItem, wrapRangeInList } from 'prosemirror-schema-list';
 import { NodeType } from 'prosemirror-model';
-import { getSearchVisible, setSearchVisible } from './plugins/searchExtension';
+import { getSearchVisible, setSearchVisible } from './plugins/searchPlugin';
 import { findNext, findPrev, replaceAll, replaceNext } from 'prosemirror-search';
 import { getEditorApi } from './plugins/joplinEditorApiPlugin';
 import { EditorEventType } from '../events';
