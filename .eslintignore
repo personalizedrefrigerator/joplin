@@ -1066,6 +1066,7 @@ packages/editor/ProseMirror/types.js
 packages/editor/ProseMirror/utils/UndoStackSynchronizer.js
 packages/editor/ProseMirror/utils/canReplaceSelectionWith.js
 packages/editor/ProseMirror/utils/computeSelectionFormatting.js
+packages/editor/ProseMirror/utils/preprocessEditorInput.test.js
 packages/editor/ProseMirror/utils/preprocessEditorInput.js
 packages/editor/ProseMirror/utils/sanitizeHtml.js
 packages/editor/ProseMirror/utils/trimEmptyParagraphs.js
