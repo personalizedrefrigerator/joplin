@@ -78,6 +78,8 @@ const validateComments = (comments: IssueComment[], expectedClaAuthorId: number)
 };
 
 const main = async () => {
+	console.info('To generate an accurate record, remember to merge the cla_signatures branch into dev first.');
+
 	const consentRecordsDir = `${await getRootDir()}/readme/cla/consent_records`;
 	await mkdirp(consentRecordsDir);
 
