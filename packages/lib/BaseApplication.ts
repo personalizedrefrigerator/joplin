@@ -9,6 +9,7 @@ import KeychainServiceDriverElectron from './services/keychain/KeychainServiceDr
 import { setLocale } from './locale';
 import KvStore from './services/KvStore';
 import SyncTargetJoplinServer from './SyncTargetJoplinServer';
+import SyncTargetJoplinServerSAML from './SyncTargetJoplinServerSAML';
 import SyncTargetOneDrive from './SyncTargetOneDrive';
 import { createStore, applyMiddleware, Store } from 'redux';
 import { defaultState, stateUtils } from './reducer';
@@ -48,7 +49,7 @@ import MigrationService from './services/MigrationService';
 import ShareService from './services/share/ShareService';
 import handleSyncStartupOperation from './services/synchronizer/utils/handleSyncStartupOperation';
 import SyncTargetJoplinCloud from './SyncTargetJoplinCloud';
-const { setAutoFreeze } = require('immer');
+import { setAutoFreeze } from 'immer';
 import { getEncryptionEnabled } from './services/synchronizer/syncInfoUtils';
 import { loadMasterKeysFromSettings, migrateMasterPassword } from './services/e2ee/utils';
 import SyncTargetNone from './SyncTargetNone';
@@ -66,8 +67,10 @@ import { setupAutoDeletion } from './services/trash/permanentlyDeleteOldItems';
 import determineProfileAndBaseDir from './determineBaseAppDirs';
 import NavService from './services/NavService';
 import getAppName from './getAppName';
+import PerformanceLogger from './PerformanceLogger';
 
 const appLogger: LoggerWrapper = Logger.create('App');
+const perfLogger = PerformanceLogger.create('BaseApplication');
 
 // const ntpClient = require('./vendor/ntp-client');
 // ntpClient.dgram = require('dgram');
@@ -672,6 +675,7 @@ export default class BaseApplication {
 			...options,
 		};
 
+		const startTask = perfLogger.taskStart('start');
 		const startFlags = await this.handleStartFlags_(argv);
 
 		argv = startFlags.argv;
@@ -715,6 +719,7 @@ export default class BaseApplication {
 		SyncTargetRegistry.addClass(SyncTargetDropbox);
 		SyncTargetRegistry.addClass(SyncTargetAmazonS3);
 		SyncTargetRegistry.addClass(SyncTargetJoplinServer);
+		SyncTargetRegistry.addClass(SyncTargetJoplinServerSAML);
 		SyncTargetRegistry.addClass(SyncTargetJoplinCloud);
 
 		try {
@@ -745,6 +750,8 @@ export default class BaseApplication {
 			}
 			globalLogger.setLevel(initArgs.logLevel);
 		}
+
+		PerformanceLogger.setLogger(globalLogger);
 
 		reg.setLogger(Logger.create('') as Logger);
 		// reg.dispatch = () => {};
@@ -888,6 +895,7 @@ export default class BaseApplication {
 
 		await MigrationService.instance().run();
 
+		startTask.onEnd();
 		return argv;
 	}
 }

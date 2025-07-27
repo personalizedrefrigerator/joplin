@@ -13,6 +13,7 @@ export interface Options {
 	contentMaxWidthTarget?: string;
 	contentWrapperSelector?: string;
 	scrollbarSize?: number;
+	baseFontFamily?: string;
 	themeId?: number;
 	whiteBackgroundNoteRendering?: boolean;
 }
@@ -83,7 +84,7 @@ export default function(theme: any, options: Options = null) {
 
 	theme = theme ? theme : {};
 
-	const fontFamily = '\'Avenir Next\', \'Avenir\', \'Arial\', sans-serif';
+	const fontFamily = options.baseFontFamily || '\'Avenir Next\', \'Avenir\', \'Arial\', sans-serif';
 
 	const contentWrapperTarget = options.contentWrapperSelector ?? '#rendered-md';
 	const maxWidthTarget = options.contentMaxWidthTarget ? options.contentMaxWidthTarget : contentWrapperTarget;
@@ -226,6 +227,16 @@ export default function(theme: any, options: Options = null) {
 		li p {
 			margin-top: 0.2em;
 			margin-bottom: 0;
+		}
+
+		dt {
+			font-weight: bold;
+			margin-bottom: 0.25em;
+		}
+
+		dd {
+			margin-inline-start: 2.5em;
+			margin-bottom: 0.5em;
 		}
 
 		.resource-icon {

@@ -1,5 +1,15 @@
 # Joplin Server Changelog
 
+## [server-v3.4.1](https://github.com/laurent22/joplin/releases/tag/server-v3.4.1) - 2025-07-17T09:28:41Z
+
+- New: Add Joplin Server SAML support (#11865 by [@ttcchhmm](https://github.com/ttcchhmm))
+- New: Added endpoint configuration for StorageDriverS3 (#12032 by [@forsaken628](https://github.com/forsaken628))
+- Improved: Add CSS style for description list elements (#12158) (#12138 by [@pedr](https://github.com/pedr))
+- Improved: Ensure shares are writable (#12651)
+- Improved: Updated packages @adobe/css-tools (v4.4.2), @rollup/plugin-commonjs (v28.0.3), @rollup/plugin-node-resolve (v16.0.1), @rollup/plugin-replace (v6.0.2), bulma (v1.0.3), dayjs (v1.11.13), domutils (v3.2.2), form-data (v4.0.2), glob (v11.0.1), highlight.js (v11.11.1), jsdom (v25), katex (v0.16.22), koa (v2.16.1), ldapts (v7.3.3), license-checker-rseidelsohn (v4.4.2), mermaid (v11.4.1), nanoid (v3.3.9), node (v18.20.7), node-mocks-http (v1.16.2), nodemailer (v6.10.1), pg (v8.14.1), pm2 (v5.4.3), rate-limiter-flexible (v5.0.5), raw-body (v3), react, sass (v1.86.3), sharp (v0.33.5), standard (v17.1.2), style-to-js (v1.1.16), tesseract.js (v5.1.1), uuid (v11.1.0)
+- Fixed: Prevent PM2 logs from accumulating in the image container (#12723) (#12721)
+- Security: SAML: Update samlify to v2.10.0 (#12371 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+
 ## [server-v3.3.13](https://github.com/laurent22/joplin/releases/tag/server-v3.3.13) - 2025-03-30T18:28:47Z
 
 - Improved: Buildx support for Docker images (#11582 by [@redrathnure](https://github.com/redrathnure))
@@ -9,11 +19,11 @@
 
 ## [server-v3.3.4](https://github.com/laurent22/joplin/releases/tag/server-v3.3.4) - 2025-03-03T22:29:29Z
 
-- Security: Improve request validation in default route (#11916 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Security: Improve request validation in default route (#11916 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator)) (CVE-2025-27409 discovered by @zonia3000)
 
 ## [server-v3.3.3](https://github.com/laurent22/joplin/releases/tag/server-v3.3.3) - 2025-02-23T19:06:59Z
 
-- Security: Fixed patching user properties (12baa98)
+- Security: Fixed patching user properties (12baa98) (CVE-2025-27134 discovered by @zonia3000)
 
 ## [server-v3.3.2](https://github.com/laurent22/joplin/releases/tag/server-v3.3.2) - 2025-02-19T22:00:04Z
 

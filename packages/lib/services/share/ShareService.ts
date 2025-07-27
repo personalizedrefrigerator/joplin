@@ -83,6 +83,16 @@ export default class ShareService {
 			userContentBaseUrl: () => Setting.value(`sync.${syncTargetId}.userContentPath`),
 			username: () => Setting.value(`sync.${syncTargetId}.username`),
 			password: () => Setting.value(`sync.${syncTargetId}.password`),
+			session: () => {
+				if (syncTargetId === 11) {
+					return {
+						id: Setting.value('sync.11.id'),
+						user_id: Setting.value('sync.11.userId'),
+					};
+				} else {
+					return null;
+				}
+			},
 		});
 
 		return this.api_;
@@ -127,7 +137,7 @@ export default class ShareService {
 		// Note: race condition if the share is created but the app crashes
 		// before setting share_id on the folder. See unshareFolder() for info.
 		await Folder.save({ id: folder.id, share_id: share.id });
-		await Folder.updateAllShareIds(ResourceService.instance());
+		await Folder.updateAllShareIds(ResourceService.instance(), this.shares);
 
 		return share;
 	}
@@ -172,7 +182,7 @@ export default class ShareService {
 
 		// It's ok if updateAllShareIds() doesn't run because it's executed on
 		// each sync too.
-		await Folder.updateAllShareIds(ResourceService.instance());
+		await Folder.updateAllShareIds(ResourceService.instance(), this.shares);
 	}
 
 	// This is when a share recipient decides to leave the shared folder.
@@ -206,7 +216,7 @@ export default class ShareService {
 
 		// We call this to make sure all items are correctly linked before we
 		// call deleteAllByShareId()
-		await Folder.updateAllShareIds(ResourceService.instance());
+		await Folder.updateAllShareIds(ResourceService.instance(), this.shares);
 
 		const source = 'ShareService.leaveSharedFolder';
 		await Folder.delete(folderId, { deleteChildren: false, disableReadOnlyCheck: true, sourceDescription: source });
@@ -218,7 +228,7 @@ export default class ShareService {
 	// necessary otherwise sync will try to update items that are not longer
 	// accessible and will throw the error "Could not find share with ID: xxxx")
 	public async checkShareConsistency() {
-		const rootSharedFolders = await Folder.rootSharedFolders();
+		const rootSharedFolders = await Folder.rootSharedFolders(this.shares);
 		let hasRefreshedShares = false;
 		let shares = this.shares;
 

@@ -2,20 +2,11 @@
 	"\"%s\" is missing the required \"%s\" property.": [
 		"В \"%s\" отсутствует необходимое свойство \"%s\"."
 	],
-	"%d days": [
-		"%d дней"
-	],
 	"%d GB": [
 		"%d ГБ"
 	],
 	"%d GB storage space": [
 		"%d ГБ дискового пространства"
-	],
-	"%d hour": [
-		"%d час"
-	],
-	"%d hours": [
-		"%d часов"
 	],
 	"%d MB": [
 		"%d МБ"
@@ -23,14 +14,8 @@
 	"%d MB per note or attachment": [
 		"%d МБ на заметку или вложение"
 	],
-	"%d minutes": [
-		"%d минут"
-	],
-	"%d notes match this pattern. Delete them?": [
-		"%d заметок соответствуют указанному выражению. Удалить их?"
-	],
-	"%d notes will be permanently deleted. Continue?": [
-		"%d заметок будут удалены навсегда. Продолжить?"
+	"%d photo(s) taken": [
+		""
 	],
 	"%s": [
 		"%s"
@@ -80,9 +65,6 @@
 	"%s: %d": [
 		"%s: %d"
 	],
-	"%s: %d notes": [
-		"%s: %d заметок"
-	],
 	"%s: %d/%d": [
 		"%s: %d/%d"
 	],
@@ -128,6 +110,9 @@
 	"(None)": [
 		"(Нет)"
 	],
+	"(Read-only)": [
+		""
+	],
 	"(wysiwyg: %s)": [
 		"(wysiwyg: %s)"
 	],
@@ -148,6 +133,9 @@
 	],
 	"<todo-command> can either be \"toggle\" or \"clear\". Use \"toggle\" to toggle the given to-do between completed and uncompleted state (If the target is a regular note it will be converted to a to-do). Use \"clear\" to convert the to-do back to a regular note.": [
 		"<todo-command> может принимать значения \"toggle\" или \"clear\". \"toggle\" переключает статус выбранной задачи (с завершенной на незавершенную и наоборот). При применении к обычной заметке она преобразуется в задачу. \"clear\" преобразует выбранную задачу в обычную заметку."
+	],
+	"A comma-separated list of words. May be used for uncommon words, to help voice typing spell them correctly.": [
+		""
 	],
 	"A new update (%s) is available": [
 		"Доступно новое (%s) обновление"
@@ -262,6 +250,9 @@
 	],
 	"All potential ports are in use - please report the issue at %s": [
 		"Все возможные порты заняты - пожалуйста, сообщите о проблеме в %s"
+	],
+	"All shared folders:": [
+		""
 	],
 	"Allows debugging mobile plugins. See %s for details.": [
 		"Позволяет отлаживать мобильные плагины. Подробности см. в разделе %s."
@@ -626,6 +617,9 @@
 	"Command palette...": [
 		"Палитра команд..."
 	],
+	"Commands: `add`, `remove`, `list`, `delete`, `accept`, `leave`, and `reject`.": [
+		""
+	],
 	"Compact": [
 		"Компактный"
 	],
@@ -679,6 +673,9 @@
 	],
 	"Connect to Joplin Cloud": [
 		"Подключение к Joplin Cloud"
+	],
+	"Connect using your organisation account": [
+		""
 	],
 	"Consolidated billing": [
 		"Консолидированный биллинг"
@@ -1062,6 +1059,9 @@
 	"Do not lose the password as, for security purposes, this will be the *only* way to decrypt the data! To enable encryption, please enter your password below.": [
 		"Не теряйте пароль, так как в целях безопасности это будет *единственный* способ расшифровать данные! Чтобы включить шифрование введите свой пароль ниже."
 	],
+	"Don't allow the share recipient to write to the shared notebook. Valid only for the `add` subcommand.": [
+		""
+	],
 	"Donate, website": [
 		"Пожертвовать, сайт"
 	],
@@ -1353,6 +1353,9 @@
 	"Error opening note in editor: %s": [
 		"Ошибка при открытии заметки в редакторе: %s"
 	],
+	"Error starting camera: %s": [
+		""
+	],
 	"Error. Please check that URL, username, password, etc. are correct and that the sync target is accessible. The reported error was:": [
 		"Ошибка. Пожалуйста, убедитесь, что URL-адрес, имя пользователя, пароль и т.д. верны и что цель синхронизации доступна. Сообщение об ошибке:"
 	],
@@ -1431,6 +1434,9 @@
 	"Fail-safe: Sync was interrupted to prevent data loss, because the sync target is empty or damaged. To override this behaviour disable the fail-safe in the sync settings.": [
 		""
 	],
+	"Failed to connect to your account. Please try again.": [
+		""
+	],
 	"Fatal error:": [
 		"Фатальная ошибка:"
 	],
@@ -1482,6 +1488,9 @@
 	"Focus title": [
 		"Фокус на названии"
 	],
+	"Folder \"%s\" is shared with:": [
+		""
+	],
 	"Follow link": [
 		"Перейти по ссылке"
 	],
@@ -1532,6 +1541,9 @@
 	"Geolocation, spellcheck, editor toolbar, image resize": [
 		"Геолокация, проверка орфографии, панель инструментов редактора, изменение размера изображения"
 	],
+	"Get a quote": [
+		""
+	],
 	"Get it now:": [
 		"Загрузить сейчас:"
 	],
@@ -1540,6 +1552,9 @@
 	],
 	"Gets or sets a config value. If [value] is not provided, it will show the value of [name]. If neither [name] nor [value] is provided, it will list the current configuration.": [
 		"Выводит или задает значение параметра конфигурации. Если значение [value] не указано, выведет текущее значение параметра [name]. Если не указаны ни имя [name], ни значение [value], выведет всю текущую конфигурацию."
+	],
+	"Glossary:": [
+		""
 	],
 	"go": [
 		"перейти"
@@ -1844,6 +1859,9 @@
 	"Joplin Server URL": [
 		"URL сервера Joplin"
 	],
+	"Joplin SSO Authentication": [
+		""
+	],
 	"Joplin Web Clipper allows saving web pages and screenshots from your browser to Joplin.": [
 		"Веб-клиппер Joplin позволяет сохранять веб-страницы и скриншоты из вашего браузера в Joplin."
 	],
@@ -2092,9 +2110,6 @@
 	"Most plugins have source code available for review on the plugin website.": [
 		"Большинство плагинов имеют исходный код, доступный для просмотра на сайте плагина."
 	],
-	"Move %d notes to notebook \"%s\"?": [
-		"Переместить %d заметок в блокнот \"%s\"?"
-	],
 	"Move left": [
 		""
 	],
@@ -2341,6 +2356,9 @@
 	"OCR: Language data URL or path": [
 		"OCR: URL-адрес или путь к языковым данным"
 	],
+	"Ok": [
+		""
+	],
 	"OK": [
 		"OK"
 	],
@@ -2470,9 +2488,6 @@
 	"PDF File": [
 		"Файл PDF"
 	],
-	"Per user. Minimum of %d users.": [
-		"На каждого пользователя. Минимум %d пользователей."
-	],
 	"Permanently delete note": [
 		"Безвозвратно удалить заметку"
 	],
@@ -2481,9 +2496,6 @@
 	],
 	"Permanently delete notebook \"%s\"?\n\nAll notes and sub-notebooks within this notebook will be permanently deleted.": [
 		"Удалить безвозвратно блокнот “%s”?\n\nВсе заметки и вложенные блокноты также будут безвозвратно удалены."
-	],
-	"Permanently delete these %d notes?": [
-		"Удалить безвозвратно эти %d заметки?"
 	],
 	"Permanently deletes the notebook, skipping the trash.": [
 		"Безвозвратно удаляет блокнот, минуя корзину."
@@ -2533,6 +2545,9 @@
 	"Please wait for all attachments to be downloaded and decrypted. You may also switch to %s to edit the note.": [
 		"Пожалуйста, дождитесь окончания загрузки и расшифровки всех вложений. Вы можете переключиться на %s для редактирования заметки."
 	],
+	"Please wait while we load your organisation sign-in page...": [
+		""
+	],
 	"Please wait...": [
 		"Пожалуйста, подождите…"
 	],
@@ -2571,6 +2586,9 @@
 	],
 	"Possible values: %s.": [
 		"Возможные значения: %s."
+	],
+	"Prefer JSON output.": [
+		""
 	],
 	"Preferences": [
 		"Настройки"
@@ -2676,6 +2694,9 @@
 	],
 	"Publish notes to the internet": [
 		"Опубликовать заметки в Интернет"
+	],
+	"Publish/unpublish": [
+		""
 	],
 	"QR Code": [
 		"QR код"
@@ -2983,6 +3004,9 @@
 	"Selects a notebook": [
 		"Выбор блокнота"
 	],
+	"Self-hosted": [
+		""
+	],
 	"Send bug report": [
 		"Отправить отчёт об ошибке"
 	],
@@ -3039,6 +3063,9 @@
 	],
 	"Shares": [
 		"Поделиться"
+	],
+	"Shares or unshares the specified [notebook] with [user]. Requires Joplin Cloud or Joplin Server.": [
+		""
 	],
 	"Sharing notebook...": [
 		"Поделиться блокнотом..."
@@ -3385,17 +3412,11 @@
 	"Text editor command": [
 		"Команда запуска текстового редактора"
 	],
-	"The [Web Clipper](%s) is a browser extension that allows you to save web pages and screenshots from your browser.": [
-		"[Веб-клиппер](%s) это расширение для браузера, которое позволяет сохранять веб-страницы и скриншоты в Joplin."
-	],
 	"The active profile cannot be deleted. Switch to a different profile and try again.": [
 		"Активный профиль не может быть удален. Переключитесь на другой профиль и повторите попытку."
 	],
 	"The app is now going to close. Please relaunch it to complete the process.": [
 		"Приложение будет закрыто. Пожалуйста, перезапустите его чтобы завершить установку."
-	],
-	"The application did not close properly. Would you like to start in safe mode?": [
-		"Приложение не завершилось должным образом. Хотите запустить в безопасном режиме?"
 	],
 	"The application has been authorised - you may now close this browser tab.": [
 		"Приложение авторизовано - можно закрыть вкладку браузера."
@@ -3452,6 +3473,9 @@
 	],
 	"The keys with these IDs are used to encrypt some of your items, however the application does not currently have access to them. It is likely they will eventually be downloaded via synchronisation.": [
 		"Ключи с этими идентификаторами используются для шифрования некоторых ваших элементов, однако в настоящее время приложение не имеет к ним доступа. Вероятно, со временем они будут загружены через синхронизацию."
+	],
+	"The legacy Markdown editor appears to have crashed due to an incompatibility with a plugin. We recommend using the new editor.": [
+		""
 	],
 	"The master key has been upgraded successfully!": [
 		"Мастер-ключ был успешно обновлен!"
@@ -3613,9 +3637,6 @@
 	],
 	"This will permanently delete all items in the trash. Continue?": [
 		"Это приведет к безвозвратному удалению всех элементов в корзине. Продолжить?"
-	],
-	"This will permanently delete the note \"%s\". Continue?": [
-		"Заметка \"%s\" будет безвозвратно удалена. Продолжить?"
 	],
 	"This will remove the notebook from your collection and you will no longer have access to its content. Do you wish to continue?": [
 		"Это удалит блокнот из вашей коллекции, и вы больше не будете иметь доступа к его содержимому. Хотите продолжить?"
@@ -3793,6 +3814,9 @@
 	],
 	"Unshare": [
 		"Отмена доступа"
+	],
+	"Unshare notebook \"%s\"? This may cause other users to lose access to the notebook.": [
+		""
 	],
 	"Unshare this notebook? The recipients will no longer have access to its content.": [
 		"Снять общий доступ? Получатели больше не смогут получить доступ к этому содержимому."
@@ -4015,6 +4039,12 @@
 	],
 	"You are logged in into Joplin Cloud, you can leave this screen now.": [
 		"Вы вошли в систему Joplin Cloud, теперь вы можете уйти с этого экрана."
+	],
+	"You are now logged into your account.": [
+		""
+	],
+	"You are now using the latest version of the Markdown editor.": [
+		""
 	],
 	"You are running the Intel version of Joplin on an Apple Silicon processor. Download the Apple Silicon one for better performance.": [
 		""

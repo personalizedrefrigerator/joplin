@@ -1,7 +1,7 @@
 import ElectronAppWrapper from './ElectronAppWrapper';
 import shim, { MessageBoxType } from '@joplin/lib/shim';
 import { _, setLocale } from '@joplin/lib/locale';
-import { BrowserWindow, nativeTheme, nativeImage, shell, dialog, MessageBoxSyncOptions, safeStorage } from 'electron';
+import { BrowserWindow, nativeTheme, nativeImage, shell, dialog, MessageBoxSyncOptions, safeStorage, Menu, MenuItemConstructorOptions, MenuItem } from 'electron';
 import { dirname, toSystemSlashes } from '@joplin/lib/path-utils';
 import { fileUriToPath } from '@joplin/utils/url';
 import { urlDecode } from '@joplin/lib/string-utils';
@@ -246,7 +246,7 @@ export class Bridge {
 	// version of electron-context-menu.
 	// eslint-disable-next-line @typescript-eslint/ban-types -- Old code before rule was applied
 	public setupContextMenu(_spellCheckerMenuItemsHandler: Function) {
-		require('electron-context-menu')({
+		require('./services/electron-context-menu')({
 			allWindows: [this.mainWindow()],
 
 			electronApp: this.electronApp(),
@@ -311,13 +311,6 @@ export class Bridge {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	public newBrowserWindow(options: any) {
 		return new BrowserWindow(options);
-	}
-
-	// Note: This provides the size of the main window. Prefer CSS where possible.
-	public windowContentSize() {
-		if (!this.mainWindow()) return { width: 0, height: 0 };
-		const s = this.mainWindow().getContentSize();
-		return { width: s[0], height: s[1] };
 	}
 
 	public windowSetSize(width: number, height: number) {
@@ -526,16 +519,30 @@ export class Bridge {
 		}
 	}
 
-	public async launchAltAppInstance(env: string) {
-		const cmd = this.appLaunchCommand(env, 'alt1');
+	private async launchAppInstanceById(env: string, altInstanceId: string) {
+		if (this.electronApp().ipcServerStarted()) {
+			const cmd = this.appLaunchCommand(env, altInstanceId);
+			await execCommand([cmd.execPath].concat(cmd.args), { detached: true });
+		} else {
+			const buttonIndex = this.showErrorMessageBox('Cannot launch another instance because IPC server could not start.', {
+				buttons: [
+					_('OK'),
+					_('Open log'),
+				],
+			});
 
-		await execCommand([cmd.execPath].concat(cmd.args), { detached: true });
+			if (buttonIndex === 1) {
+				void this.openItem(this.electronApp().ipcLoggerFilePath());
+			}
+		}
+	}
+
+	public async launchAltAppInstance(env: string) {
+		await this.launchAppInstanceById(env, 'alt1');
 	}
 
 	public async launchMainAppInstance(env: string) {
-		const cmd = this.appLaunchCommand(env, '');
-
-		await execCommand([cmd.execPath].concat(cmd.args), { detached: true });
+		await this.launchAppInstanceById(env, '');
 	}
 
 	public async restart() {
@@ -586,6 +593,11 @@ export class Bridge {
 
 	public createImageFromPath(path: string) {
 		return nativeImage.createFromPath(path);
+	}
+
+	public menuPopupFromTemplate(template: ((MenuItemConstructorOptions) | (MenuItem))[]) {
+		const menu = Menu.buildFromTemplate(template);
+		return menu.popup({ window: this.mainWindow() });
 	}
 
 	public safeStorage = {

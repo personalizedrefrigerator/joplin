@@ -10,6 +10,7 @@ import TextButton, { ButtonSize, ButtonType } from '../../buttons/TextButton';
 import { useCallback, useMemo, useRef } from 'react';
 import Logger from '@joplin/utils/Logger';
 import focusView from '../../../utils/focusView';
+import NavService from '@joplin/lib/services/NavService';
 
 const logger = Logger.create('NewNoteButton');
 
@@ -26,22 +27,22 @@ const makeNewNote = (isTodo: boolean, action?: AttachFileAction) => {
 const styles = StyleSheet.create({
 	buttonRow: {
 		flexDirection: 'row',
-		flexWrap: 'wrap',
+		flexWrap: 'wrap-reverse',
+		justifyContent: 'space-between',
 		gap: 2,
 	},
 	mainButtonRow: {
-		flexWrap: 'nowrap',
-	},
-	spacer: {
-		flexShrink: 1,
-		flexGrow: 0,
-		width: 12,
+		flexWrap: 'wrap',
+		gap: 12,
 	},
 	shortcutButton: {
-		flexGrow: 1,
+		flexGrow: 0,
+		flexShrink: 1,
+		width: 88,
 	},
 	mainButton: {
 		flexShrink: 1,
+		flexGrow: 1,
 	},
 	mainButtonLabel: {
 		fontSize: 16,
@@ -50,6 +51,7 @@ const styles = StyleSheet.create({
 	menuContent: {
 		gap: 12,
 		flexShrink: 1,
+		flexGrow: 1,
 		flexDirection: 'column',
 	},
 });
@@ -57,9 +59,12 @@ const styles = StyleSheet.create({
 const NewNoteButton: React.FC<Props> = _props => {
 	const newNoteRef = useRef<View|null>(null);
 
-	const renderShortcutButton = (action: AttachFileAction, icon: string, title: string) => {
+	type ActionType = AttachFileAction|(()=> void);
+	const renderShortcutButton = (action: ActionType, icon: string, title: string) => {
+		const actionSource = typeof action === 'function' ? null : action;
+		action = typeof action === 'function' ? action : () => makeNewNote(false, actionSource);
 		return <LabelledIconButton
-			onPress={() => makeNewNote(false, action)}
+			onPress={action}
 			style={styles.shortcutButton}
 			title={title}
 			accessibilityHint={_('Creates a new note with an attachment of type %s', title)}
@@ -73,6 +78,7 @@ const NewNoteButton: React.FC<Props> = _props => {
 			{renderShortcutButton(AttachFileAction.RecordAudio, 'material microphone', _('Recording'))}
 			{renderShortcutButton(AttachFileAction.TakePhoto, 'material camera', _('Camera'))}
 			{renderShortcutButton(AttachFileAction.AttachDrawing, 'material draw', _('Drawing'))}
+			{renderShortcutButton(() => NavService.go('DocumentScanner'), 'material data-matrix-scan', _('Scan notebook'))}
 		</View>
 		<Divider/>
 		<View style={[styles.buttonRow, styles.mainButtonRow]}>
@@ -85,7 +91,6 @@ const NewNoteButton: React.FC<Props> = _props => {
 				type={ButtonType.Secondary}
 				size={ButtonSize.Larger}
 			>{_('New to-do')}</TextButton>
-			<View style={styles.spacer}/>
 			<TextButton
 				touchableRef={newNoteRef}
 				icon='file-document-outline'

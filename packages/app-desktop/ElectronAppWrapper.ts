@@ -6,9 +6,9 @@ const shim: typeof ShimType = require('@joplin/lib/shim').default;
 import { isCallbackUrl } from '@joplin/lib/callbackUrlUtils';
 import { FileLocker } from '@joplin/utils/fs';
 import { IpcMessageHandler, IpcServer, Message, newHttpError, sendMessage, SendMessageOptions, startServer, stopServer } from '@joplin/utils/ipc';
-import { BrowserWindow, Tray, WebContents, screen, App } from 'electron';
+import { BrowserWindow, Tray, WebContents, screen, App, nativeTheme } from 'electron';
 import bridge from './bridge';
-const url = require('url');
+import * as url from 'url';
 const path = require('path');
 const { dirname } = require('@joplin/lib/path-utils');
 const fs = require('fs-extra');
@@ -75,6 +75,7 @@ export default class ElectronAppWrapper {
 	private ipcStartPort_ = 2658;
 
 	private ipcLogger_: Logger;
+	private ipcLoggerFilePath_: string;
 
 	public constructor(electronApp: App, { env, profilePath, isDebugMode, initialCallbackUrl, isEndToEndTesting }: Options) {
 		this.electronApp_ = electronApp;
@@ -90,8 +91,9 @@ export default class ElectronAppWrapper {
 		// calls, either because it hasn't been set or other issue. So we set one here specifically
 		// for this.
 		this.ipcLogger_ = new Logger();
+		this.ipcLoggerFilePath_ = `${profilePath}/log-cross-app-ipc.txt`;
 		this.ipcLogger_.addTarget(TargetType.File, {
-			path: `${profilePath}/log-cross-app-ipc.txt`,
+			path: this.ipcLoggerFilePath_,
 		});
 	}
 
@@ -115,6 +117,14 @@ export default class ElectronAppWrapper {
 		return BrowserWindow.getFocusedWindow() ?? this.win_;
 	}
 
+	public ipcServerStarted() {
+		return !!this.ipcServer_;
+	}
+
+	public ipcLoggerFilePath() {
+		return this.ipcLoggerFilePath_;
+	}
+
 	public windowById(joplinId: string) {
 		if (joplinId === defaultWindowId) {
 			return this.mainWindow();
@@ -124,6 +134,24 @@ export default class ElectronAppWrapper {
 		if (windowData !== undefined) {
 			return BrowserWindow.fromId(windowData.electronId);
 		}
+		return null;
+	}
+
+	private windowIdFromWebContents(webContents: WebContents): SecondaryWindowId|null {
+		const browserWindow = BrowserWindow.fromWebContents(webContents);
+		// Convert from electron IDs to Joplin IDs.
+		const targetElectronId = browserWindow.id;
+
+		if (this.win_?.id === targetElectronId) {
+			return 'default';
+		}
+
+		for (const [joplinId, { electronId }] of this.secondaryWindows_) {
+			if (electronId === targetElectronId) {
+				return joplinId;
+			}
+		}
+
 		return null;
 	}
 
@@ -205,7 +233,10 @@ export default class ElectronAppWrapper {
 			height: windowState.height,
 			minWidth: 100,
 			minHeight: 100,
-			backgroundColor: '#fff', // required to enable sub pixel rendering, can't be in css
+			// A backgroundColor is needed to enable sub-pixel rendering.
+			// Based on https://www.electronjs.org/docs/latest/faq#the-font-looks-blurry-what-is-this-and-what-can-i-do,
+			// this needs to be a non-transparent color:
+			backgroundColor: nativeTheme.shouldUseDarkColors ? '#333' : '#fff',
 			webPreferences: {
 				nodeIntegration: true,
 				contextIsolation: false,
@@ -312,6 +343,14 @@ export default class ElectronAppWrapper {
 			}, 1000);
 		}
 
+		const sendWindowFocused = (focusedWebContents: WebContents) => {
+			const joplinId = this.windowIdFromWebContents(focusedWebContents);
+
+			if (joplinId !== null) {
+				this.win_.webContents.send('window-focused', joplinId);
+			}
+		};
+
 		const addWindowEventHandlers = (webContents: WebContents) => {
 			// will-frame-navigate is fired by clicking on a link within the BrowserWindow.
 			webContents.on('will-frame-navigate', event => {
@@ -344,6 +383,11 @@ export default class ElectronAppWrapper {
 			webContents.on('did-create-window', (event) => {
 				addWindowEventHandlers(event.webContents);
 			});
+
+			const onFocus = () => {
+				sendWindowFocused(webContents);
+			};
+			webContents.on('focus', onFocus);
 		};
 		addWindowEventHandlers(this.win_.webContents);
 
@@ -415,6 +459,10 @@ export default class ElectronAppWrapper {
 					this.win_.close();
 				}
 			});
+
+			if (window.isFocused()) {
+				sendWindowFocused(window.webContents);
+			}
 		});
 
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
@@ -582,14 +630,18 @@ export default class ElectronAppWrapper {
 
 		if (port === null) port = this.ipcStartPort_;
 
-		return await sendMessage(port, {
-			...message,
-			sourcePort: this.ipcServer_.port,
-			secretKey: this.ipcServer_.secretKey,
-		}, {
-			logger: this.ipcLogger_,
-			...options,
-		});
+		if (this.ipcServer_) {
+			return await sendMessage(port, {
+				...message,
+				sourcePort: this.ipcServer_.port,
+				secretKey: this.ipcServer_.secretKey,
+			}, {
+				logger: this.ipcLogger_,
+				...options,
+			});
+		} else {
+			return [];
+		}
 	}
 
 	public async ensureSingleInstance() {
@@ -675,32 +727,39 @@ export default class ElectronAppWrapper {
 
 		this.ipcLogger_.info('Starting server using secret key:', secretKeyFilePath);
 
-		this.ipcServer_ = await startServer(this.ipcStartPort_, secretKeyFilePath, async (message) => {
-			if (messageHandlers[message.action]) {
-				this.ipcLogger_.info('Got message:', message);
-				return messageHandlers[message.action](message);
-			}
+		try {
+			this.ipcServer_ = await startServer(this.ipcStartPort_, secretKeyFilePath, async (message) => {
+				if (messageHandlers[message.action]) {
+					this.ipcLogger_.info('Got message:', message);
+					return messageHandlers[message.action](message);
+				}
 
-			throw newHttpError(404);
-		}, {
-			logger: this.ipcLogger_,
-		});
+				throw newHttpError(404);
+			}, {
+				logger: this.ipcLogger_,
+			});
+		} catch (error) {
+			this.ipcLogger_.error('Could not start server:', error);
+			this.ipcServer_ = null;
+		}
 
 		// First check that no other app is running from that profile folder
 		const gotAppLock = await this.profileLocker_.lock();
 		if (gotAppLock) return false;
 
-		const message: Message = {
-			action: 'onSecondInstance',
-			data: {
-				senderPort: this.ipcServer_.port,
-				profilePath: this.profilePath_,
-				argv: process.argv,
-			},
-			secretKey: this.ipcServer_.secretKey,
-		};
+		if (this.ipcServer_) {
+			const message: Message = {
+				action: 'onSecondInstance',
+				data: {
+					senderPort: this.ipcServer_.port,
+					profilePath: this.profilePath_,
+					argv: process.argv,
+				},
+				secretKey: this.ipcServer_.secretKey,
+			};
 
-		await this.sendCrossAppIpcMessage(message);
+			await this.sendCrossAppIpcMessage(message);
+		}
 
 		this.quit();
 		if (this.env() === 'dev') console.warn(`Closing the application because another instance is already running, or the previous instance was force-quit within the last ${Math.round(this.profileLocker_.options.interval / Second)} seconds.`);

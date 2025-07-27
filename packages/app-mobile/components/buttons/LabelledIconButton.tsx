@@ -42,6 +42,9 @@ const useStyles = (themeId: number) => {
 				borderRadius: 8,
 				padding: 8,
 			},
+			buttonText: {
+				textAlign: 'center',
+			},
 		});
 	}, [themeId]);
 };
@@ -57,7 +60,12 @@ const LabelledIconButton: React.FC<Props> = ({ title, icon, style, themeId, ...o
 	>
 		<View style={styles.buttonContent}>
 			<Icon style={styles.icon} accessibilityLabel={null} name={icon}/>
-			<Text variant='labelMedium'>{title}</Text>
+			<Text
+				variant='labelMedium'
+				ellipsizeMode='tail'
+				numberOfLines={2}
+				style={styles.buttonText}
+			>{title}</Text>
 		</View>
 	</TouchableRipple>;
 };

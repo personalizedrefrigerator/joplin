@@ -1,7 +1,7 @@
 {
   "name": "@joplin/fork-htmlparser2",
   "description": "Fast & forgiving HTML/XML/RSS parser",
-  "version": "4.1.57",
+  "version": "4.1.58",
   "author": "Felix Boehm <me@feedic.com>",
   "publishConfig": {
     "access": "public"
@@ -41,12 +41,12 @@
   "dependencies": {
     "domelementtype": "2.3.0",
     "domhandler": "5.0.3",
-    "domutils": "3.1.0",
+    "domutils": "3.2.2",
     "entities": "2.2.0"
   },
   "devDependencies": {
     "@types/jest": "29.5.12",
-    "@types/node": "18.19.67",
+    "@types/node": "18.19.87",
     "@typescript-eslint/eslint-plugin": "6.21.0",
     "@typescript-eslint/parser": "6.21.0",
     "coveralls": "3.1.1",
