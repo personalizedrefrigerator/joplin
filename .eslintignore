@@ -853,7 +853,6 @@ packages/app-mobile/components/voiceTyping/types.js
 packages/app-mobile/contentScripts/imageEditorBundle/contentScript/applyTemplateToEditor.js
 packages/app-mobile/contentScripts/imageEditorBundle/contentScript/index.test.js
 packages/app-mobile/contentScripts/imageEditorBundle/contentScript/index.js
-packages/app-mobile/contentScripts/imageEditorBundle/contentScript/polyfills.js
 packages/app-mobile/contentScripts/imageEditorBundle/contentScript/startAutosaveLoop.js
 packages/app-mobile/contentScripts/imageEditorBundle/contentScript/types.js
 packages/app-mobile/contentScripts/imageEditorBundle/contentScript/watchEditorForTemplateChanges.js
@@ -878,6 +877,7 @@ packages/app-mobile/contentScripts/richTextEditorBundle/contentScript.js
 packages/app-mobile/contentScripts/richTextEditorBundle/types.js
 packages/app-mobile/contentScripts/richTextEditorBundle/useWebViewSetup.js
 packages/app-mobile/contentScripts/types.js
+packages/app-mobile/contentScripts/utils/polyfills.js
 packages/app-mobile/contentScripts/utils/readFileToBase64.js
 packages/app-mobile/contentScripts/utils/setUpLogger.js
 packages/app-mobile/gulpfile.js

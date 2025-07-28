@@ -1,3 +1,4 @@
+import '../utils/polyfills';
 import { createEditor } from '@joplin/editor/ProseMirror';
 import { EditorProcessApi, EditorProps, MainProcessApi } from './types';
 import WebViewToRNMessenger from '../../utils/ipc/WebViewToRNMessenger';
