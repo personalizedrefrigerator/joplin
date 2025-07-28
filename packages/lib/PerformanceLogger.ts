@@ -125,10 +125,12 @@ export default class PerformanceLogger {
 		}
 
 		const startTime = performance.now();
+		this.lastLogTime_ = startTime;
 		PerformanceLogger.logDebug_(`${name}: Start at ${formatAbsoluteTime(startTime)}`);
 
 		const onEnd = () => {
 			const now = performance.now();
+			this.lastLogTime_ = now;
 			if (hasPerformanceMarkApi) {
 				performance.mark(`${name}-end`);
 				performance.measure(name, `${name}-start`, `${name}-end`);
