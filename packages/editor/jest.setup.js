@@ -1,6 +1,9 @@
 require('../../jest.base-setup.js')();
 require('./polyfills.js');
 
+const setUpLogger = require('./testing/setUpLogger').default;
+setUpLogger();
+
 // JSDOM overrides (don't include in polyfills.js):
 
 // Override .createRange. By default, document.createRange creates

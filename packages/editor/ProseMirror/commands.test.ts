@@ -72,9 +72,9 @@ describe('ProseMirror/commands', () => {
 		};
 
 		expect(jumpToHash('test-heading-1')).toBe(true);
-		expect(editor.state.selection.$anchor.nodeBefore.textContent).toBe('Test heading 1');
+		expect(editor.state.selection.$anchor.parent.textContent).toBe('Test heading 1');
 
 		expect(jumpToHash('test-heading-2')).toBe(true);
-		expect(editor.state.selection.$anchor.nodeBefore.textContent).toBe('Test heading 2');
+		expect(editor.state.selection.$anchor.parent.textContent).toBe('Test heading 2');
 	});
 });

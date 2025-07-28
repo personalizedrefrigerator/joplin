@@ -1083,6 +1083,7 @@ packages/editor/SelectionFormatting.js
 packages/editor/events.js
 packages/editor/polyfills.js
 packages/editor/testing/createEditorSettings.js
+packages/editor/testing/setUpLogger.js
 packages/editor/types.js
 packages/editor/utils/getFileFromPasteEvent.js
 packages/fork-htmlparser2/src/CollectingHandler.js

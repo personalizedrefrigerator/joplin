@@ -46,6 +46,6 @@ describe('linkTooltipPlugin', () => {
 
 		getTooltip().querySelector('button').click();
 
-		expect(editor.state.selection.$to.nodeBefore.textContent).toBe('Test heading');
+		expect(editor.state.selection.$to.parent.textContent).toBe('Test heading');
 	});
 });
