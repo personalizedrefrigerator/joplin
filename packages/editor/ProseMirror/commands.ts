@@ -13,6 +13,7 @@ import { EditorEventType } from '../events';
 import extractSelectedLinesTo from './utils/extractSelectedLinesTo';
 import { EditorView } from 'prosemirror-view';
 import jumpToHash from './utils/jumpToHash';
+import canReplaceSelectionWith from './utils/canReplaceSelectionWith';
 
 type Dispatch = (tr: Transaction)=> void;
 type ExtendedCommand = (state: EditorState, dispatch: Dispatch, view?: EditorView, options?: string[])=> boolean;
@@ -89,7 +90,26 @@ const commands: Record<EditorCommandType, ExtendedCommand|null> = {
 	[EditorCommandType.ToggleBolded]: toggleMark(schema.marks.strong),
 	[EditorCommandType.ToggleItalicized]: toggleMark(schema.marks.emphasis),
 	[EditorCommandType.ToggleCode]: toggleCode,
-	[EditorCommandType.ToggleMath]: null,
+	[EditorCommandType.ToggleMath]: (state, _dispatch, view) => {
+		const renderer = getEditorApi(state).renderer;
+		const selectedText = state.doc.textBetween(state.selection.from, state.selection.to);
+
+		const block = selectedText.includes('\n');
+		const nodeType = block ? schema.nodes.joplinEditableBlock : schema.nodes.joplinEditableInline;
+		if (canReplaceSelectionWith(state.selection, nodeType)) {
+			void (async () => {
+				const separator = block ? '$$' : '$';
+				const rendered = await renderer.renderMarkupToHtml(`${separator}${selectedText}${separator}`);
+
+				if (view) {
+					view.pasteHTML(rendered.html);
+				}
+			})();
+
+			return true;
+		}
+		return false;
+	},
 	[EditorCommandType.ToggleComment]: null,
 	[EditorCommandType.DuplicateLine]: null,
 	[EditorCommandType.SortSelectedLines]: null,
