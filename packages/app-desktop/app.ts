@@ -565,7 +565,22 @@ class Application extends BaseApplication {
 			});
 		});
 
-		addTask('start check for updates', async () => {
+		addTask('initializeUserFetcher', async () => {
+			initializeUserFetcher();
+			shim.setInterval(() => { void userFetcher(); }, 1000 * 60 * 60);
+		});
+
+		addTask('updateTray', () => this.updateTray());
+
+		addTask('set main window state', () => {
+			if (Setting.value('startMinimized') && Setting.value('showTrayIcon')) {
+				bridge().mainWindow().hide();
+			} else {
+				bridge().mainWindow().show();
+			}
+		});
+
+		addTask('start maintenance tasks', () => {
 			// Always disable on Mac for now - and disable too for the few apps that may have the flag enabled.
 			// At present, it only seems to work on Windows.
 			if (shim.isMac()) {
@@ -589,24 +604,7 @@ class Application extends BaseApplication {
 					shim.setInterval(() => { runAutoUpdateCheck(); }, 12 * 60 * 60 * 1000);
 				}
 			}
-		});
 
-		addTask('initializeUserFetcher', async () => {
-			initializeUserFetcher();
-			shim.setInterval(() => { void userFetcher(); }, 1000 * 60 * 60);
-		});
-
-		addTask('updateTray', () => this.updateTray());
-
-		addTask('set main window state', () => {
-			if (Setting.value('startMinimized') && Setting.value('showTrayIcon')) {
-				bridge().mainWindow().hide();
-			} else {
-				bridge().mainWindow().show();
-			}
-		});
-
-		addTask('start maintenance tasks', () => {
 			shim.setTimeout(() => {
 				void AlarmService.garbageCollect();
 			}, 1000 * 60 * 60);
@@ -687,12 +685,9 @@ class Application extends BaseApplication {
 
 		addTask('listen for main process events', () => {
 			bridge().addEventListener('nativeThemeUpdated', this.bridge_nativeThemeUpdated);
-			perfLogger.mark('nativeTheme listener added');
 			bridge().setOnAllowedExtensionsChangeListener((newExtensions) => {
 				Setting.setValue('linking.extraAllowedExtensions', newExtensions);
 			});
-			perfLogger.mark('extensions change listener added');
-
 
 			ipcRenderer.on('window-focused', (_event, newWindowId) => {
 				const currentWindowId = this.store().getState().windowId;
