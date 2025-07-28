@@ -1,4 +1,4 @@
-import { Command, EditorState, TextSelection, Transaction } from 'prosemirror-state';
+import { Command, EditorState, Transaction } from 'prosemirror-state';
 import { EditorCommandType } from '../types';
 import { redo, undo } from 'prosemirror-history';
 import { autoJoin, selectAll, setBlockType, toggleMark } from 'prosemirror-commands';
@@ -12,7 +12,7 @@ import { getEditorApi } from './plugins/joplinEditorApiPlugin';
 import { EditorEventType } from '../events';
 import extractSelectedLinesTo from './utils/extractSelectedLinesTo';
 import { EditorView } from 'prosemirror-view';
-import uslug from '@joplin/fork-uslug/lib/uslug';
+import jumpToHash from './utils/jumpToHash';
 
 type Dispatch = (tr: Transaction)=> void;
 type ExtendedCommand = (state: EditorState, dispatch: Dispatch, view?: EditorView, options?: string[])=> boolean;
@@ -73,33 +73,6 @@ const toggleCode: Command = (state, dispatch, view) => {
 	return toggleMark(schema.marks.code)(state, dispatch, view) || setBlockType(schema.nodes.paragraph)(state, dispatch, view);
 };
 
-const jumpToHash = (targetHash: string): Command => (state, dispatch) => {
-	let targetHeaderPos: number|null = null;
-	state.doc.descendants((node, pos) => {
-		if (node.type === schema.nodes.heading) {
-			const hash = uslug(node.textContent);
-			if (hash === targetHash) {
-				targetHeaderPos = pos + node.nodeSize;
-			}
-		}
-
-		return targetHeaderPos !== null;
-	});
-
-	if (targetHeaderPos !== null) {
-		const newSelection = TextSelection.create(state.doc, targetHeaderPos);
-		if (dispatch) {
-			dispatch(
-				state.tr.setSelection(newSelection)
-					.scrollIntoView(),
-			);
-		}
-
-		return true;
-	}
-
-	return false;
-};
 
 const listItemTypes = [schema.nodes.list_item, schema.nodes.task_list_item];
 
@@ -206,7 +179,7 @@ const commands: Record<EditorCommandType, ExtendedCommand|null> = {
 	[EditorCommandType.ReplaceSelection]: null,
 	[EditorCommandType.SetText]: null,
 	[EditorCommandType.JumpToHash]: (state, dispatch, view, [targetHash]) => {
-		return jumpToHash(targetHash)(state, dispatch, view);
+		return jumpToHash(targetHash, schema.nodes.heading)(state, dispatch, view);
 	},
 };
 

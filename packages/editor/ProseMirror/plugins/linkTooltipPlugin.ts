@@ -5,6 +5,7 @@ import schema from '../schema';
 import { getEditorApi } from './joplinEditorApiPlugin';
 import { EditorEventType } from '../../events';
 import { OnEventCallback } from '../../types';
+import jumpToHash from '../utils/jumpToHash';
 
 // This plugin is similar to https://prosemirror.net/examples/tooltip/
 
@@ -59,10 +60,16 @@ class LinkTooltip {
 		} else {
 			this.tooltipContent_.textContent = linkMark.attrs.href;
 			this.tooltipContent_.onclick = () => {
-				this.onEditorEvent_({
-					kind: EditorEventType.FollowLink,
-					link: linkMark.attrs.href,
-				});
+				const href = linkMark.attrs.href;
+				if (href.startsWith('#')) {
+					const command = jumpToHash(href.substring(1), schema.nodes.heading);
+					command(view.state, view.dispatch, view);
+				} else {
+					this.onEditorEvent_({
+						kind: EditorEventType.FollowLink,
+						link: linkMark.attrs.href,
+					});
+				}
 			};
 
 			this.tooltip_.classList.remove('-hidden');

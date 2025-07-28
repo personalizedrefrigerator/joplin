@@ -1057,6 +1057,7 @@ packages/editor/ProseMirror/plugins/inputRulesPlugin.js
 packages/editor/ProseMirror/plugins/joplinEditablePlugin.js
 packages/editor/ProseMirror/plugins/joplinEditorApiPlugin.js
 packages/editor/ProseMirror/plugins/keymapPlugin.js
+packages/editor/ProseMirror/plugins/linkTooltipPlugin.test.js
 packages/editor/ProseMirror/plugins/linkTooltipPlugin.js
 packages/editor/ProseMirror/plugins/listPlugin.js
 packages/editor/ProseMirror/plugins/originalMarkupPlugin.js
@@ -1071,6 +1072,7 @@ packages/editor/ProseMirror/utils/canReplaceSelectionWith.js
 packages/editor/ProseMirror/utils/computeSelectionFormatting.js
 packages/editor/ProseMirror/utils/extractSelectedLinesTo.test.js
 packages/editor/ProseMirror/utils/extractSelectedLinesTo.js
+packages/editor/ProseMirror/utils/jumpToHash.js
 packages/editor/ProseMirror/utils/preprocessEditorInput.test.js
 packages/editor/ProseMirror/utils/preprocessEditorInput.js
 packages/editor/ProseMirror/utils/sanitizeHtml.js
