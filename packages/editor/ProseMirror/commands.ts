@@ -1,4 +1,4 @@
-import { Command, EditorState } from 'prosemirror-state';
+import { Command, EditorState, TextSelection, Transaction } from 'prosemirror-state';
 import { EditorCommandType } from '../types';
 import { redo, undo } from 'prosemirror-history';
 import { autoJoin, selectAll, setBlockType, toggleMark } from 'prosemirror-commands';
@@ -11,7 +11,11 @@ import { findNext, findPrev, replaceAll, replaceNext } from 'prosemirror-search'
 import { getEditorApi } from './plugins/joplinEditorApiPlugin';
 import { EditorEventType } from '../events';
 import extractSelectedLinesTo from './utils/extractSelectedLinesTo';
+import { EditorView } from 'prosemirror-view';
+import uslug from '@joplin/fork-uslug/lib/uslug';
 
+type Dispatch = (tr: Transaction)=> void;
+type ExtendedCommand = (state: EditorState, dispatch: Dispatch, view?: EditorView, options?: string[])=> boolean;
 
 const toggleHeading = (level: number): Command => {
 	const enableCommand: Command = (state, dispatch) => {
@@ -69,9 +73,37 @@ const toggleCode: Command = (state, dispatch, view) => {
 	return toggleMark(schema.marks.code)(state, dispatch, view) || setBlockType(schema.nodes.paragraph)(state, dispatch, view);
 };
 
+const jumpToHash = (targetHash: string): Command => (state, dispatch) => {
+	let targetHeaderPos: number|null = null;
+	state.doc.descendants((node, pos) => {
+		if (node.type === schema.nodes.heading) {
+			const hash = uslug(node.textContent);
+			if (hash === targetHash) {
+				targetHeaderPos = pos + node.nodeSize;
+			}
+		}
+
+		return targetHeaderPos !== null;
+	});
+
+	if (targetHeaderPos !== null) {
+		const newSelection = TextSelection.create(state.doc, targetHeaderPos);
+		if (dispatch) {
+			dispatch(
+				state.tr.setSelection(newSelection)
+					.scrollIntoView(),
+			);
+		}
+
+		return true;
+	}
+
+	return false;
+};
+
 const listItemTypes = [schema.nodes.list_item, schema.nodes.task_list_item];
 
-const commands: Record<EditorCommandType, Command|null> = {
+const commands: Record<EditorCommandType, ExtendedCommand|null> = {
 	[EditorCommandType.Undo]: undo,
 	[EditorCommandType.Redo]: redo,
 	[EditorCommandType.SelectAll]: selectAll,
@@ -165,10 +197,17 @@ const commands: Record<EditorCommandType, Command|null> = {
 	[EditorCommandType.UndoSelection]: null,
 	[EditorCommandType.RedoSelection]: null,
 	[EditorCommandType.SelectedText]: null,
-	[EditorCommandType.InsertText]: null,
+	[EditorCommandType.InsertText]: (state, dispatch, _view, [text]) => {
+		if (dispatch) {
+			dispatch(state.tr.insertText(text));
+		}
+		return true;
+	},
 	[EditorCommandType.ReplaceSelection]: null,
 	[EditorCommandType.SetText]: null,
-	[EditorCommandType.JumpToHash]: null,
+	[EditorCommandType.JumpToHash]: (state, dispatch, view, [targetHash]) => {
+		return jumpToHash(targetHash)(state, dispatch, view);
+	},
 };
 
 export default commands;
