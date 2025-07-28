@@ -9195,6 +9195,7 @@ __metadata:
     "@codemirror/view": "npm:6.35.0"
     "@joplin/fork-uslug": "npm:^2.0.0"
     "@joplin/lib": "npm:~3.4"
+    "@joplin/utils": "npm:~3.4"
     "@lezer/common": "npm:1.2.3"
     "@lezer/highlight": "npm:1.2.1"
     "@lezer/markdown": "npm:1.3.2"

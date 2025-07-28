@@ -148,12 +148,12 @@ const createEditor = async (
 		supportsCommand: (name: EditorCommandType | string) => {
 			return name in commands && !!commands[name as keyof typeof commands];
 		},
-		execCommand: (name: EditorCommandType | string, ..._args: unknown[]) => {
+		execCommand: (name: EditorCommandType | string, ...args) => {
 			if (!editorControl.supportsCommand(name)) {
 				throw new Error(`Unsupported command: ${name}`);
 			}
 
-			commands[name as keyof typeof commands](view.state, view.dispatch, view);
+			commands[name as keyof typeof commands](view.state, view.dispatch, view, args);
 		},
 		undo: () => {
 			void editorControl.execCommand(EditorCommandType.Undo);

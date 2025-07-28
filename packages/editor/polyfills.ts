@@ -1,6 +1,6 @@
 
 //
-// JSDOM polyfills:
+// JSDOM and browser polyfills:
 //
 // If running in JSDOM, a number of visual browser APIs are missing
 // or incomplete.

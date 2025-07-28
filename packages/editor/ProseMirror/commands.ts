@@ -1,4 +1,4 @@
-import { Command, EditorState } from 'prosemirror-state';
+import { Command, EditorState, Transaction } from 'prosemirror-state';
 import { EditorCommandType } from '../types';
 import { redo, undo } from 'prosemirror-history';
 import { autoJoin, selectAll, setBlockType, toggleMark } from 'prosemirror-commands';
@@ -11,7 +11,12 @@ import { findNext, findPrev, replaceAll, replaceNext } from 'prosemirror-search'
 import { getEditorApi } from './plugins/joplinEditorApiPlugin';
 import { EditorEventType } from '../events';
 import extractSelectedLinesTo from './utils/extractSelectedLinesTo';
+import { EditorView } from 'prosemirror-view';
+import jumpToHash from './utils/jumpToHash';
+import canReplaceSelectionWith from './utils/canReplaceSelectionWith';
 
+type Dispatch = (tr: Transaction)=> void;
+type ExtendedCommand = (state: EditorState, dispatch: Dispatch, view?: EditorView, options?: string[])=> boolean;
 
 const toggleHeading = (level: number): Command => {
 	const enableCommand: Command = (state, dispatch) => {
@@ -69,9 +74,10 @@ const toggleCode: Command = (state, dispatch, view) => {
 	return toggleMark(schema.marks.code)(state, dispatch, view) || setBlockType(schema.nodes.paragraph)(state, dispatch, view);
 };
 
+
 const listItemTypes = [schema.nodes.list_item, schema.nodes.task_list_item];
 
-const commands: Record<EditorCommandType, Command|null> = {
+const commands: Record<EditorCommandType, ExtendedCommand|null> = {
 	[EditorCommandType.Undo]: undo,
 	[EditorCommandType.Redo]: redo,
 	[EditorCommandType.SelectAll]: selectAll,
@@ -84,7 +90,26 @@ const commands: Record<EditorCommandType, Command|null> = {
 	[EditorCommandType.ToggleBolded]: toggleMark(schema.marks.strong),
 	[EditorCommandType.ToggleItalicized]: toggleMark(schema.marks.emphasis),
 	[EditorCommandType.ToggleCode]: toggleCode,
-	[EditorCommandType.ToggleMath]: null,
+	[EditorCommandType.ToggleMath]: (state, _dispatch, view) => {
+		const renderer = getEditorApi(state).renderer;
+		const selectedText = state.doc.textBetween(state.selection.from, state.selection.to);
+
+		const block = selectedText.includes('\n');
+		const nodeType = block ? schema.nodes.joplinEditableBlock : schema.nodes.joplinEditableInline;
+		if (canReplaceSelectionWith(state.selection, nodeType)) {
+			void (async () => {
+				const separator = block ? '$$' : '$';
+				const rendered = await renderer.renderMarkupToHtml(`${separator}${selectedText}${separator}`);
+
+				if (view) {
+					view.pasteHTML(rendered.html);
+				}
+			})();
+
+			return true;
+		}
+		return false;
+	},
 	[EditorCommandType.ToggleComment]: null,
 	[EditorCommandType.DuplicateLine]: null,
 	[EditorCommandType.SortSelectedLines]: null,
@@ -165,10 +190,17 @@ const commands: Record<EditorCommandType, Command|null> = {
 	[EditorCommandType.UndoSelection]: null,
 	[EditorCommandType.RedoSelection]: null,
 	[EditorCommandType.SelectedText]: null,
-	[EditorCommandType.InsertText]: null,
+	[EditorCommandType.InsertText]: (state, dispatch, _view, [text]) => {
+		if (dispatch) {
+			dispatch(state.tr.insertText(text));
+		}
+		return true;
+	},
 	[EditorCommandType.ReplaceSelection]: null,
 	[EditorCommandType.SetText]: null,
-	[EditorCommandType.JumpToHash]: null,
+	[EditorCommandType.JumpToHash]: (state, dispatch, view, [targetHash]) => {
+		return jumpToHash(targetHash, schema.nodes.heading)(state, dispatch, view);
+	},
 };
 
 export default commands;
