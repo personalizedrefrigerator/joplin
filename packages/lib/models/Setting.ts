@@ -133,6 +133,18 @@ const globalMigrations: GlobalMigration[] = [
 		name: 'ui.layout',
 		wasGlobal: true,
 	},
+	{
+		name: 'notes.sortOrder.field',
+		wasGlobal: true,
+	},
+	{
+		name: 'notes.sortOrder.reverse',
+		wasGlobal: true,
+	},
+	{
+		name: 'notes.listRendererId',
+		wasGlobal: true,
+	},
 ];
 
 // "UserSettingMigration" are used to migrate existing user setting to a new setting. With a way
