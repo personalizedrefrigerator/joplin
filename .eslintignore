@@ -873,7 +873,8 @@ packages/app-mobile/contentScripts/rendererBundle/useWebViewSetup.js
 packages/app-mobile/contentScripts/rendererBundle/utils/useContentScripts.js
 packages/app-mobile/contentScripts/rendererBundle/utils/useEditPopup.test.js
 packages/app-mobile/contentScripts/rendererBundle/utils/useEditPopup.js
-packages/app-mobile/contentScripts/richTextEditorBundle/contentScript.js
+packages/app-mobile/contentScripts/richTextEditorBundle/contentScript/convertHtmlToMarkdown.js
+packages/app-mobile/contentScripts/richTextEditorBundle/contentScript/index.js
 packages/app-mobile/contentScripts/richTextEditorBundle/types.js
 packages/app-mobile/contentScripts/richTextEditorBundle/useWebViewSetup.js
 packages/app-mobile/contentScripts/types.js
