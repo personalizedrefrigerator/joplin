@@ -4,8 +4,8 @@ import JoplinDatabase from '../../JoplinDatabase';
 import Setting from '../../models/Setting';
 import BaseItem from '../../models/BaseItem';
 import { State } from '../../reducer';
-import { PublicPrivateKeyPair } from '../e2ee/ppk';
-import { MasterKeyEntity } from '../e2ee/types';
+import { PublicPrivateKeyPair, PublicPrivateKeyPairs } from '../e2ee/ppk/ppk';
+import { MasterKeyEntity, PublicKeyAlgorithm } from '../e2ee/types';
 import { compareVersions } from 'compare-versions';
 import { _ } from '../../locale';
 import JoplinError from '../../JoplinError';
@@ -24,10 +24,15 @@ export interface SyncInfoValueString {
 	updatedTime: number;
 }
 
-export interface SyncInfoValuePublicPrivateKeyPair {
+export interface SyncInfoValuePublicPrivateKeyPairLegacy {
 	value: PublicPrivateKeyPair;
 	updatedTime: number;
 }
+
+export type SyncInfoValueKeyPairs = {
+	value: PublicPrivateKeyPairs;
+	updatedTime: number;
+};
 
 // This should be set to the client version whenever we require all the clients to be at the same
 // version in order to synchronise. One example is when adding support for the trash feature - if an
@@ -253,13 +258,16 @@ export class SyncInfo {
 	private e2ee_: SyncInfoValueBoolean;
 	private activeMasterKeyId_: SyncInfoValueString;
 	private masterKeys_: MasterKeyEntity[] = [];
-	private ppk_: SyncInfoValuePublicPrivateKeyPair;
+	/** @deprecated */
+	private ppk_: SyncInfoValuePublicPrivateKeyPairLegacy;
+	private keyPairs_: SyncInfoValueKeyPairs;
 	private appMinVersion_: string = appMinVersion_;
 
 	public constructor(serialized: string = null) {
 		this.e2ee_ = { value: false, updatedTime: 0 };
 		this.activeMasterKeyId_ = { value: '', updatedTime: 0 };
 		this.ppk_ = { value: null, updatedTime: 0 };
+		this.keyPairs_ = { value: {}, updatedTime: 0 };
 
 		if (serialized) this.load(serialized);
 	}
@@ -271,6 +279,7 @@ export class SyncInfo {
 			e2ee: this.e2ee_,
 			activeMasterKeyId: this.activeMasterKeyId_,
 			masterKeys: this.masterKeys,
+			keyPairs: this.keyPairs_,
 			ppk: this.ppk_,
 			appMinVersion: this.appMinVersion,
 		};
@@ -309,12 +318,14 @@ export class SyncInfo {
 		} catch (error) {
 			logger.error(`Error parsing sync info, using default values. Sync info: ${JSON.stringify(serialized)}`, error);
 		}
+		console.log('to-do: Add validation');
 		this.version = 'version' in s ? s.version : 0;
 		this.e2ee_ = 'e2ee' in s ? s.e2ee : { value: false, updatedTime: 0 };
 		this.activeMasterKeyId_ = 'activeMasterKeyId' in s ? s.activeMasterKeyId : { value: '', updatedTime: 0 };
 		this.masterKeys_ = 'masterKeys' in s ? s.masterKeys : [];
 		this.ppk_ = 'ppk' in s ? s.ppk : { value: null, updatedTime: 0 };
 		this.appMinVersion_ = s.appMinVersion ? s.appMinVersion : '0.0.0';
+		this.keyPairs_ = 'keyPairs' in s ? s.keyPairs : { value: [], updatedTime: 0 };
 
 		// Migration for master keys that didn't have "hasBeenUsed" property -
 		// in that case we assume they've been used at least once.
@@ -344,14 +355,24 @@ export class SyncInfo {
 		this.version_ = v;
 	}
 
-	public get ppk() {
+	public get ppkLegacy() {
 		return this.ppk_.value;
 	}
 
-	public set ppk(v: PublicPrivateKeyPair) {
+	public set ppkLegacy(v: PublicPrivateKeyPair) {
 		if (v === this.ppk_.value) return;
 
 		this.ppk_ = { value: v, updatedTime: Date.now() };
+	}
+
+	public get keyPairs() {
+		return this.keyPairs_.value;
+	}
+
+	public set keyPairs(v: PublicPrivateKeyPairs) {
+		if (v === this.keyPairs_.value) return;
+
+		this.keyPairs_ = { value: v, updatedTime: Date.now() };
 	}
 
 	public get e2ee(): boolean {
@@ -485,9 +506,10 @@ export function addMasterKey(syncInfo: SyncInfo, masterKey: MasterKeyEntity) {
 	saveLocalSyncInfo(syncInfo);
 }
 
-export function setPpk(ppk: PublicPrivateKeyPair) {
+export function setPpk(ppk: PublicPrivateKeyPairs) {
 	const syncInfo = localSyncInfo();
-	syncInfo.ppk = ppk;
+	syncInfo.ppkLegacy = ppk[PublicKeyAlgorithm.RsaLegacy];
+	syncInfo.keyPairs = ppk;
 	saveLocalSyncInfo(syncInfo);
 }
 

@@ -15,7 +15,7 @@ import resetPasswordTemplate from '../views/emails/resetPasswordTemplate';
 import { betaStartSubUrl, betaUserDateRange, betaUserTrialPeriodDays, isBetaUser, stripeConfig } from '../utils/stripe';
 import endOfBetaTemplate from '../views/emails/endOfBetaTemplate';
 import Logger from '@joplin/utils/Logger';
-import { PublicPrivateKeyPair } from '@joplin/lib/services/e2ee/ppk';
+import { PublicPrivateKeyPair, PublicPrivateKeyPairs } from '@joplin/lib/services/e2ee/ppk/ppk';
 import paymentFailedUploadDisabledTemplate from '../views/emails/paymentFailedUploadDisabledTemplate';
 import oversizedAccount1 from '../views/emails/oversizedAccount1';
 import oversizedAccount2 from '../views/emails/oversizedAccount2';
@@ -736,6 +736,11 @@ export default class UserModel extends BaseModel<User> {
 	public async publicPrivateKey(userId: string): Promise<PublicPrivateKeyPair> {
 		const syncInfo = await this.syncInfo(userId);
 		return syncInfo.ppk?.value || null;
+	}
+
+	public async publicPrivateKeys(userId: string): Promise<PublicPrivateKeyPairs> {
+		const syncInfo = await this.syncInfo(userId);
+		return syncInfo.keyPairs?.value || null;
 	}
 
 	// Note that when the "password" property is provided, it is going to be

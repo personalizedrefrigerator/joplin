@@ -33,7 +33,7 @@ export interface EncryptionCustomHandler {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	encrypt(context: any, hexaBytes: string, password: string): Promise<string>;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	decrypt(context: any, hexaBytes: string, password: string): Promise<string>;
+	decrypt(context: any, data: string, password: string): Promise<string>;
 }
 
 export enum EncryptionMethod {
@@ -272,7 +272,9 @@ export default class EncryptionService {
 	public async reencryptMasterKey(model: MasterKeyEntity, decryptionPassword: string, encryptionPassword: string, decryptOptions: EncryptOptions = null, encryptOptions: EncryptOptions = null): Promise<MasterKeyEntity> {
 		const newEncryptionMethod = this.defaultMasterKeyEncryptionMethod_;
 		const plainText = await this.decryptMasterKeyContent(model, decryptionPassword, decryptOptions);
-		const newContent = await this.encryptMasterKeyContent(newEncryptionMethod, plainText, encryptionPassword, encryptOptions);
+		const newContent = await this.encryptMasterKeyContent(
+			newEncryptionMethod, plainText, encryptionPassword, encryptOptions,
+		);
 		return { ...model, ...newContent };
 	}
 
@@ -526,7 +528,7 @@ export default class EncryptionService {
 		return handlers[method]();
 	}
 
-	public async decrypt(method: EncryptionMethod, key: string, cipherText: string) {
+	public async decrypt(method: EncryptionMethod, key: string, cipherText: string): Promise<string> {
 		if (!method) throw new Error('Encryption method is required');
 		if (!key) throw new Error('Encryption key is required');
 

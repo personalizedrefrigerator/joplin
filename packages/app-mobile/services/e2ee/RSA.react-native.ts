@@ -1,9 +1,11 @@
-import { RSA } from '@joplin/lib/services/e2ee/types';
+import WebCryptoRsa, { WebCryptoSlice } from '@joplin/lib/services/e2ee/ppk/WebCryptoRsa';
+import { PublicKeyAlgorithm, PublicKeyCrypto, RSA } from '@joplin/lib/services/e2ee/types';
 import shim from '@joplin/lib/shim';
 import Logger from '@joplin/utils/Logger';
+import QuickCrypto from 'react-native-quick-crypto';
 const RnRSA = require('react-native-rsa-native').RSA;
 
-interface RSAKeyPair {
+interface LegacyRSAKeyPair {
 	public: string;
 	private: string;
 	keySizeBits: number;
@@ -11,9 +13,8 @@ interface RSAKeyPair {
 
 const logger = Logger.create('RSA');
 
-const rsa: RSA = {
-
-	generateKeyPair: async (keySize: number): Promise<RSAKeyPair> => {
+const legacyRsa: PublicKeyCrypto = {
+	generateKeyPair: async () => {
 		if (shim.mobilePlatform() === 'web') {
 			// TODO: Try to implement with SubtleCrypto. May require migrating the RSA algorithm used on
 			// desktop and mobile (which is not supported on web). See commit 12adcd9dbc3f723bac36ff4447701573084c4694.
@@ -21,25 +22,30 @@ const rsa: RSA = {
 			return null;
 		}
 
-		const keys: RSAKeyPair = await RnRSA.generateKeys(keySize);
+		const keySize = 2048;
+		const keys: LegacyRSAKeyPair = await RnRSA.generateKeys(keySize);
 
 		// Sanity check
 		if (!keys.private) throw new Error('No private key was generated');
 		if (!keys.public) throw new Error('No public key was generated');
 
-		return rsa.loadKeys(keys.public, keys.private, keySize);
+		const keyPair = await legacyRsa.loadKeys(keys.public, keys.private, keySize);
+		return {
+			keyPair,
+			keySize,
+		};
 	},
 
-	loadKeys: async (publicKey: string, privateKey: string, keySizeBits: number): Promise<RSAKeyPair> => {
+	loadKeys: async (publicKey: string, privateKey: string, keySizeBits: number): Promise<LegacyRSAKeyPair> => {
 		return { public: publicKey, private: privateKey, keySizeBits };
 	},
 
-	encrypt: async (plaintextUtf8: string, rsaKeyPair: RSAKeyPair): Promise<string> => {
+	encrypt: async (plaintextUtf8: string, rsaKeyPair: LegacyRSAKeyPair): Promise<string> => {
 		// TODO: Support long-data encryption in a way compatible with node-rsa.
 		return RnRSA.encrypt(plaintextUtf8, rsaKeyPair.public);
 	},
 
-	decrypt: async (ciphertextBase64: string, rsaKeyPair: RSAKeyPair): Promise<string> => {
+	decrypt: async (ciphertextBase64: string, rsaKeyPair: LegacyRSAKeyPair): Promise<string> => {
 		const ciphertextBuffer = Buffer.from(ciphertextBase64, 'base64');
 		const maximumEncryptedSize = Math.floor(rsaKeyPair.keySizeBits / 8); // Usually 256
 
@@ -81,14 +87,48 @@ const rsa: RSA = {
 		}
 	},
 
-	publicKey: (rsaKeyPair: RSAKeyPair): string => {
+	publicKey: async (rsaKeyPair: LegacyRSAKeyPair) => {
 		return rsaKeyPair.public;
 	},
 
-	privateKey: (rsaKeyPair: RSAKeyPair): string => {
+	privateKey: async (rsaKeyPair: LegacyRSAKeyPair) => {
 		return rsaKeyPair.private;
 	},
+};
 
+const webCryptoRsa = new WebCryptoRsa({
+	subtle: QuickCrypto.subtle
+} as WebCryptoSlice);
+
+const rsa: RSA = {
+	fromAlgorithm: (algorithm: PublicKeyAlgorithm): PublicKeyCrypto => {
+		if (algorithm === PublicKeyAlgorithm.RsaLegacy) {
+			return legacyRsa;
+		} else if (algorithm === PublicKeyAlgorithm.RsaOaep) {
+			return webCryptoRsa;
+		} else {
+			const exhaustivenessCheck: never = algorithm;
+			throw new Error(`Unsupported public key algorithm: ${exhaustivenessCheck}`);
+		}
+	},
+	algorithmInfo: (algorithm) => {
+		if (algorithm === PublicKeyAlgorithm.RsaLegacy) {
+			return {
+				supported: shim.mobilePlatform() !== 'web',
+				deprecated: true,
+			};
+		} else if (algorithm === PublicKeyAlgorithm.RsaOaep) {
+			return {
+				supported: true,
+				deprecated: false,
+			};
+		} else {
+			return {
+				supported: false,
+				deprecated: undefined,
+			};
+		}
+	}
 };
 
 export default rsa;

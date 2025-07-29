@@ -6,7 +6,7 @@ import { MasterKeyEntity } from './types';
 import EncryptionService from './EncryptionService';
 import { getActiveMasterKey, getActiveMasterKeyId, localSyncInfo, masterKeyEnabled, saveLocalSyncInfo, setActiveMasterKeyId, setEncryptionEnabled, SyncInfo } from '../synchronizer/syncInfoUtils';
 import JoplinError from '../../JoplinError';
-import { generateKeyPair, pkReencryptPrivateKey, ppkPasswordIsValid } from './ppk';
+import { generateKeyPairs, generateLegacyKeyPair, pkReencryptPrivateKey, ppkPasswordIsValid } from './ppk/ppk';
 import KvStore from '../KvStore';
 import Folder from '../../models/Folder';
 import ShareService from '../share/ShareService';
@@ -83,11 +83,11 @@ export async function migrateMasterPassword() {
 
 	// If a PPK is defined it means the master password has been set at some
 	// point so no need to run the migration
-	if (localSyncInfo().ppk) return;
+	if (localSyncInfo().ppkLegacy) return;
 
 	// If a PPK is defined it means the master password has been set at some
 	// point so no need to run the migration
-	if (localSyncInfo().ppk) return;
+	if (localSyncInfo().ppkLegacy) return;
 
 	logger.info('Master password is not set - trying to get it from the active master key...');
 
@@ -244,9 +244,9 @@ export async function updateMasterPassword(currentPassword: string, newPassword:
 			}
 		}
 
-		if (localSyncInfo().ppk) {
+		if (localSyncInfo().ppkLegacy) {
 			try {
-				reencryptedPpk = await pkReencryptPrivateKey(EncryptionService.instance(), localSyncInfo().ppk, currentPassword, newPassword);
+				reencryptedPpk = await pkReencryptPrivateKey(EncryptionService.instance(), localSyncInfo().ppkLegacy, currentPassword, newPassword);
 			} catch (error) {
 				error.message = `Private key could not be reencrypted - this is most likely due to an incorrect password. Please try again. Error was: ${error.message}`;
 				throw error;
@@ -259,7 +259,7 @@ export async function updateMasterPassword(currentPassword: string, newPassword:
 
 		if (reencryptedPpk) {
 			const syncInfo = localSyncInfo();
-			syncInfo.ppk = reencryptedPpk;
+			syncInfo.ppkLegacy = reencryptedPpk;
 			saveLocalSyncInfo(syncInfo);
 		}
 	} else {
@@ -300,9 +300,10 @@ export async function resetMasterPassword(encryptionService: EncryptionService, 
 	}
 
 	const syncInfo = localSyncInfo();
-	if (syncInfo.ppk) {
-		await kvStore.setValue(`oldppk::${Date.now()}`, JSON.stringify(syncInfo.ppk));
-		syncInfo.ppk = await generateKeyPair(encryptionService, newPassword);
+	if (syncInfo.ppkLegacy) {
+		await kvStore.setValue(`oldppk::${Date.now()}`, JSON.stringify(syncInfo.ppkLegacy));
+		syncInfo.ppkLegacy = await generateLegacyKeyPair(encryptionService, newPassword);
+		syncInfo.keyPairs = await generateKeyPairs(encryptionService, newPassword);
 		saveLocalSyncInfo(syncInfo);
 	}
 
@@ -331,7 +332,7 @@ export async function getMasterPasswordStatus(password: string = null): Promise<
 
 export async function checkHasMasterPasswordEncryptedData(syncInfo: SyncInfo = null): Promise<boolean> {
 	syncInfo = syncInfo ? syncInfo : localSyncInfo();
-	return !!syncInfo.ppk || !!syncInfo.masterKeys.length;
+	return !!syncInfo.ppkLegacy || !!syncInfo.masterKeys.length;
 }
 
 const masterPasswordStatusMessages = {
@@ -353,7 +354,7 @@ export async function masterPasswordIsValid(masterPassword: string, activeMaster
 
 	if (!masterPassword) throw new Error('Password is empty');
 
-	const ppk = localSyncInfo().ppk;
+	const ppk = localSyncInfo().ppkLegacy;
 	if (ppk) {
 		return ppkPasswordIsValid(EncryptionService.instance(), ppk, masterPassword);
 	}

@@ -30,16 +30,47 @@ router.get('api/users/:id', async (path: SubPath, ctx: AppContext) => {
 router.publicSchemas.push('api/users/:id/public_key');
 
 // "id" in this case is actually the email address
+// @deprecated - use api/users/:id/public_keys.
 router.get('api/users/:id/public_key', async (path: SubPath, ctx: AppContext) => {
 	const user = await ctx.joplin.models.user().loadByEmail(path.id);
 	if (!user) return ''; // Don't throw an error to prevent polling the end point
 
 	const ppk = await ctx.joplin.models.user().publicPrivateKey(user.id);
 	if (!ppk) return '';
+	if (typeof ppk !== 'object') return '';
 
 	return {
 		id: ppk.id,
+		algorithm: ppk.algorithm,
 		publicKey: ppk.publicKey,
+	};
+});
+
+router.publicSchemas.push('api/users/:id/public_keys');
+router.get('api/users/:id/public_keys', async (path: SubPath, ctx: AppContext) => {
+	const email = path.id;
+	const user = await ctx.joplin.models.user().loadByEmail(email);
+	if (!user) return ''; // Don't throw an error to prevent polling the end point
+
+	const ppks = await ctx.joplin.models.user().publicPrivateKeys(user.id);
+	if (!ppks || typeof ppks !== 'object') return '';
+
+	const result = [];
+	for (const value of Object.values(ppks)) {
+		// Public-private keys are supplied by the user -- do extra validation
+		// to ensure that accessing properties on value won't cause an error.
+		if (typeof value !== 'object') return '';
+
+		result.push({
+			id: value.id,
+			algorithm: value.algorithm,
+			publicKey: value.publicKey,
+		});
+	}
+
+	return {
+		items: result,
+		has_more: false,
 	};
 });
 

@@ -439,6 +439,16 @@ export async function deleteFolder(userId: string, folderJopId: string): Promise
 	await models().item().delete(item.id);
 }
 
+export const createSyncTargetInfo = (user: User, syncTargetInfo: Record<string, unknown>) => {
+	return models().item().saveFromRawContent(user, {
+		body: Buffer.from(JSON.stringify({
+			'version': 1,
+			...syncTargetInfo,
+		})),
+		name: 'info.json',
+	});
+};
+
 export async function createFolder(sessionId: string, folder: FolderEntity): Promise<Item> {
 	folder = {
 		id: '000000000000000000000000000000F1',

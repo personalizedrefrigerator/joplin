@@ -4,7 +4,7 @@ import ShareService from './ShareService';
 import { NoteEntity, ResourceEntity } from '../database/types';
 import Folder from '../../models/Folder';
 import { setEncryptionEnabled, setPpk } from '../synchronizer/syncInfoUtils';
-import { generateKeyPair } from '../e2ee/ppk';
+import { generateKeyPairs } from '../e2ee/ppk/ppk';
 import MasterKey from '../../models/MasterKey';
 import { MasterKeyEntity } from '../e2ee/types';
 import { loadMasterKeysFromSettings, setupAndEnableEncryption, updateMasterPassword } from '../e2ee/utils';
@@ -173,8 +173,8 @@ describe('ShareService', () => {
 	it('should share a folder - E2EE', async () => {
 		const masterKey = await loadEncryptionMasterKey();
 		await setupAndEnableEncryption(encryptionService(), masterKey, '111111');
-		const ppk = await generateKeyPair(encryptionService(), '111111');
-		setPpk(ppk);
+		const ppks = await generateKeyPairs(encryptionService(), '111111');
+		setPpk(ppks);
 
 		let shareService = testShareFolderService();
 
@@ -237,10 +237,14 @@ describe('ShareService', () => {
 	it('should add a recipient', async () => {
 		setEncryptionEnabled(true);
 		await updateMasterPassword('', '111111');
-		const ppk = await generateKeyPair(encryptionService(), '111111');
-		setPpk(ppk);
-		const recipientPpk = await generateKeyPair(encryptionService(), '222222');
-		expect(ppk.id).not.toBe(recipientPpk.id);
+		const ppks = await generateKeyPairs(encryptionService(), '111111');
+		setPpk(ppks);
+		const recipientPpk = await generateKeyPairs(encryptionService(), '222222');
+
+		const recipientPpkIds = Object.values(recipientPpk).map(ppk => ppk.id)
+		for (const ppk of Object.values(ppks)) {
+			expect(recipientPpkIds).not.toContain(ppk.id);
+		}
 
 		let uploadedEmail = '';
 		let uploadedMasterKey: MasterKeyEntity = null;
@@ -271,7 +275,7 @@ describe('ShareService', () => {
 		expect(uploadedEmail).toBe('toto@example.com');
 
 		const content = JSON.parse(uploadedMasterKey.content);
-		expect(content.ppkId).toBe(recipientPpk.id);
+		expect(recipientPpkIds).toContain(content.ppkId);
 	});
 
 	it('should leave folders that are no longer with the user', async () => {

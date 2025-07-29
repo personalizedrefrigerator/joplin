@@ -8,8 +8,8 @@ import Note from '../../models/Note';
 import Setting from '../../models/Setting';
 import { FolderEntity } from '../database/types';
 import EncryptionService from '../e2ee/EncryptionService';
-import { PublicPrivateKeyPair, mkReencryptFromPasswordToPublicKey, mkReencryptFromPublicKeyToPassword } from '../e2ee/ppk';
-import { MasterKeyEntity } from '../e2ee/types';
+import { PublicPrivateKeyPair, getPreferredAlgorithm, mkReencryptFromPasswordToPublicKey, mkReencryptFromPublicKeyToPassword } from '../e2ee/ppk/ppk';
+import { MasterKeyEntity, PublicKeyAlgorithm } from '../e2ee/types';
 import { getMasterPassword } from '../e2ee/utils';
 import ResourceService from '../ResourceService';
 import { addMasterKey, getEncryptionEnabled, localSyncInfo } from '../synchronizer/syncInfoUtils';
@@ -110,7 +110,7 @@ export default class ShareService {
 			const syncInfo = localSyncInfo();
 
 			// Shouldn't happen
-			if (!syncInfo.ppk) throw new Error('Cannot share notebook because E2EE is enabled and no Public Private Key pair exists.');
+			if (!syncInfo.ppkLegacy) throw new Error('Cannot share notebook because E2EE is enabled and no Public Private Key pair exists.');
 
 			// TODO: handle "undefinedMasterPassword" error - show master password dialog
 			folderMasterKey = await this.encryptionService_.generateMasterKey(getMasterPassword());
@@ -333,7 +333,30 @@ export default class ShareService {
 		return this.state.shareInvitations;
 	}
 
-	private async userPublicKey(userEmail: string): Promise<PublicPrivateKeyPair> {
+	private async userPublicKey(userEmail: string): Promise<PublicPrivateKeyPair|''> {
+		// Joplin Server supports both a legacy API and a modern API for accessing keys.
+		// To allow sharing with old versions of Joplin Server, this method checks both APIs.
+		try {
+			const publicKeys = await this.api().exec('GET', `api/users/${encodeURIComponent(userEmail)}/public_keys`);
+			const publicKeyAlgorithms = publicKeys.map((key: unknown) => {
+				if (typeof key !== 'object') {
+					throw new Error(`Invalid key: type: ${typeof key}`);
+				}
+				if (!('algorithm' in key)) {
+					throw new Error(`Invalid key: Missing algorithm property.`);
+				}
+
+				return key.algorithm as PublicKeyAlgorithm;
+			});
+			const preferredAlgorithm = getPreferredAlgorithm(publicKeyAlgorithms);
+
+			if (preferredAlgorithm) {
+				return publicKeys.find((key: PublicPrivateKeyPair) => key.algorithm === preferredAlgorithm);
+			}
+		} catch (error) {
+			logger.info('Failed to access new public key API. Falling back to the legacy API. Error: ', error);
+		}
+
 		return this.api().exec('GET', `api/users/${encodeURIComponent(userEmail)}/public_key`);
 	}
 
@@ -346,7 +369,7 @@ export default class ShareService {
 			const masterKey = syncInfo.masterKeys.find(m => m.id === masterKeyId);
 			if (!masterKey) throw new Error(`Cannot find master key with ID "${masterKeyId}"`);
 
-			const recipientPublicKey: PublicPrivateKeyPair = await this.userPublicKey(recipientEmail);
+			const recipientPublicKey = await this.userPublicKey(recipientEmail);
 			if (!recipientPublicKey) throw new Error(_('Cannot share encrypted notebook with recipient %s because they have not enabled end-to-end encryption. They may do so from the screen Configuration > Encryption.', recipientEmail));
 
 			logger.info('Reencrypting master key with recipient public key', recipientPublicKey);
@@ -420,7 +443,7 @@ export default class ShareService {
 				const reencryptedMasterKey = await mkReencryptFromPublicKeyToPassword(
 					this.encryptionService_,
 					masterKey,
-					localSyncInfo().ppk,
+					localSyncInfo().ppkLegacy,
 					getMasterPassword(),
 					getMasterPassword(),
 				);

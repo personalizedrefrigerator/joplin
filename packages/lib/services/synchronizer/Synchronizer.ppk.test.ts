@@ -14,11 +14,11 @@ describe('Synchronizer.ppk', () => {
 
 	it('should not create a public private key pair if not using E2EE', async () => {
 		await Folder.save({});
-		expect(localSyncInfo().ppk).toBeFalsy();
+		expect(localSyncInfo().ppkLegacy).toBeFalsy();
 		await synchronizerStart();
 		const remoteInfo = await fetchSyncInfo(fileApi());
-		expect(localSyncInfo().ppk).toBeFalsy();
-		expect(remoteInfo.ppk).toBeFalsy();
+		expect(localSyncInfo().ppkLegacy).toBeFalsy();
+		expect(remoteInfo.ppkLegacy).toBeFalsy();
 	});
 
 	it('should create a public private key pair if it does not exist', async () => {
@@ -29,13 +29,13 @@ describe('Synchronizer.ppk', () => {
 		const beforeTime = Date.now();
 
 		await Folder.save({});
-		expect(localSyncInfo().ppk).toBeFalsy();
+		expect(localSyncInfo().ppkLegacy).toBeFalsy();
 
 		await synchronizerStart();
 		const remoteInfo = await fetchSyncInfo(fileApi());
-		expect(localSyncInfo().ppk).toBeTruthy();
-		expect(remoteInfo.ppk).toBeTruthy();
-		const clientLocalPPK1 = localSyncInfo().ppk;
+		expect(localSyncInfo().ppkLegacy).toBeTruthy();
+		expect(remoteInfo.ppkLegacy).toBeTruthy();
+		const clientLocalPPK1 = localSyncInfo().ppkLegacy;
 		expect(clientLocalPPK1.createdTime).toBeGreaterThanOrEqual(beforeTime);
 		expect(clientLocalPPK1.privateKey.encryptionMethod).toBe(EncryptionMethod.SJCL4);
 
@@ -47,10 +47,10 @@ describe('Synchronizer.ppk', () => {
 
 		await switchClient(2);
 
-		expect(localSyncInfo().ppk).toBeFalsy();
+		expect(localSyncInfo().ppkLegacy).toBeFalsy();
 		await synchronizerStart();
-		expect(localSyncInfo().ppk).toBeTruthy();
-		const clientLocalPPK2 = localSyncInfo().ppk;
+		expect(localSyncInfo().ppkLegacy).toBeTruthy();
+		const clientLocalPPK2 = localSyncInfo().ppkLegacy;
 		expect(clientLocalPPK1.privateKey.ciphertext).toBe(clientLocalPPK2.privateKey.ciphertext);
 		expect(clientLocalPPK1.publicKey).toBe(clientLocalPPK2.publicKey);
 	});
