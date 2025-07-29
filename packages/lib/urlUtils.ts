@@ -1,4 +1,4 @@
-import { rtrimSlashes, toFileProtocolPath } from './path-utils';
+import { rtrimSlashes, toFileProtocolPath } from '@joplin/utils/path';
 import { urlDecode } from './string-utils';
 
 export const hash = (url: string) => {
