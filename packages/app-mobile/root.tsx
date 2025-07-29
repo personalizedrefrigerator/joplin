@@ -420,6 +420,10 @@ const appReducer = (state = appDefaultState, action: any) => {
 		case 'KEYBOARD_VISIBLE_CHANGE':
 			newState = { ...state, keyboardVisible: action.visible };
 			break;
+
+		case 'NOTE_EDITOR_VISIBLE_CHANGE':
+			newState = { ...state, noteEditorVisible: action.visible };
+			break;
 		}
 	} catch (error) {
 		error.message = `In reducer: ${error.message} Action: ${JSON.stringify(action)}`;
