@@ -30,7 +30,7 @@ On desktop and web (in Chrome), `PerformanceLogger` tasks and marks are added to
 
 **Example**:
 ```ts
-const perfLogger = PerformanceLogger.create('VerySlowThing');
+const perfLogger = PerformanceLogger.create();
 
 class VerySlowThing {
 	public doSomethingSlow() {
