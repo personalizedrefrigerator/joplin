@@ -106,17 +106,13 @@ export default class PerformanceLogger {
 		PerformanceLogger.log_(`${name}: Mark at ${formatAbsoluteTime(now)}   +${formatDuration(timeDelta)}`);
 	}
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Using "any" to specify an upper bound, similar to TypeScript's definition of Parameters<>, ReturnType<>, etc.
-	public tracked<TaskType extends(...args: any)=> any>(name: string, task: TaskType) {
-		type TaskOutput = Awaited<ReturnType<TaskType>>;
-		return async (...args: Parameters<TaskType>): Promise<TaskOutput> => {
-			const tracker = this.taskStart(name);
-			try {
-				return await task(...args);
-			} finally {
-				tracker.onEnd();
-			}
-		};
+	public async track<T>(name: string, task: ()=> Promise<T>): Promise<T> {
+		const tracker = this.taskStart(name);
+		try {
+			return await task();
+		} finally {
+			tracker.onEnd();
+		}
 	}
 
 	public taskStart(name: string) {

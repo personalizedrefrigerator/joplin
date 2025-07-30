@@ -179,7 +179,7 @@ export default class EncryptionService {
 	public async loadMasterKey(model: MasterKeyEntity, getPassword: string|GetPasswordCallback, makeActive = false) {
 		if (!model.id) throw new Error('Master key does not have an ID - save it first');
 
-		const loadKey = perfLogger.tracked('EncryptionService/loadKey', async () => {
+		const loadKey = () => perfLogger.track('EncryptionService/loadKey', async () => {
 			logger.info(`Loading master key: ${model.id}. Make active:`, makeActive);
 
 			const password = typeof getPassword === 'string' ? getPassword : (await getPassword());
@@ -272,12 +272,10 @@ export default class EncryptionService {
 	}
 
 	public async reencryptMasterKey(model: MasterKeyEntity, decryptionPassword: string, encryptionPassword: string, decryptOptions: EncryptOptions = null, encryptOptions: EncryptOptions = null): Promise<MasterKeyEntity> {
-		return perfLogger.tracked('EncryptionService/reencryptMasterKey', async () => {
-			const newEncryptionMethod = this.defaultMasterKeyEncryptionMethod_;
-			const plainText = await this.decryptMasterKeyContent(model, decryptionPassword, decryptOptions);
-			const newContent = await this.encryptMasterKeyContent(newEncryptionMethod, plainText, encryptionPassword, encryptOptions);
-			return { ...model, ...newContent };
-		})();
+		const newEncryptionMethod = this.defaultMasterKeyEncryptionMethod_;
+		const plainText = await this.decryptMasterKeyContent(model, decryptionPassword, decryptOptions);
+		const newContent = await this.encryptMasterKeyContent(newEncryptionMethod, plainText, encryptionPassword, encryptOptions);
+		return { ...model, ...newContent };
 	}
 
 	public async encryptMasterKeyContent(encryptionMethod: EncryptionMethod, hexaBytes: string, password: string, options: EncryptOptions = null): Promise<MasterKeyEntity> {

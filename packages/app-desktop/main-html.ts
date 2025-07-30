@@ -109,7 +109,7 @@ const main = async () => {
 	}
 };
 
-perfLogger.tracked('main', main)().catch((error) => {
+perfLogger.track('main', main).catch((error) => {
 	const env = bridge().env();
 	console.error(error);
 

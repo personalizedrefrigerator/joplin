@@ -442,12 +442,14 @@ async function initialize(dispatch: Dispatch) {
 	const startupTasks = buildStartupTasks(dispatch, store);
 
 	for (const [name, task] of startupTasks) {
-		try {
-			await perfLogger.tracked(name, task)();
-		} catch (error) {
-			logger.error(`Startup failure during task: ${name}`);
-			throw error;
-		}
+		await perfLogger.track(name, async () => {
+			try {
+				await task();
+			} catch (error) {
+				logger.error(`Startup failure during task: ${name}`);
+				throw error;
+			}
+		});
 	}
 
 	logger.info('Application initialized');
@@ -595,7 +597,7 @@ class AppComponent extends React.Component<AppComponentProps, AppComponentState>
 			}
 
 			try {
-				await perfLogger.tracked('root/initialize', initialize)(this.props.dispatch);
+				await perfLogger.track('root/initialize', () => initialize(this.props.dispatch));
 			} catch (error) {
 				alert(`Something went wrong while starting the application: ${error}`);
 				this.props.dispatch({
@@ -671,9 +673,13 @@ class AppComponent extends React.Component<AppComponentProps, AppComponentState>
 		);
 		onSystemColorSchemeChange(Appearance.getColorScheme());
 
-		this.quickActionShortcutListener_ = await perfLogger.tracked('root/setupQuickActions', setupQuickActions)(this.props.dispatch);
+		this.quickActionShortcutListener_ = await perfLogger.track('root/setupQuickActions',
+			() => setupQuickActions(this.props.dispatch),
+		);
 
-		await perfLogger.tracked('root/setupNotifications', setupNotifications)(this.props.dispatch);
+		await perfLogger.track('root/setupNotifications',
+			() => setupNotifications(this.props.dispatch),
+		);
 
 		this.keyboardShowListener_ = Keyboard.addListener('keyboardDidShow', () => {
 			this.props.dispatch({
