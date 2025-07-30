@@ -413,12 +413,11 @@ class Setting extends BaseModel {
 			for (let i = 0; i < globalMigrations.length; i++) {
 				if (i <= lastGlobalMigration) continue;
 				const migration = globalMigrations[i];
-				const metadata = this.settingMetadata(migration.name);
 
 				// Skip migrations if the setting is stored in the database and thus
 				// probably can't be fetched from the root profile. This is, for example,
 				// the case on mobile.
-				if (metadata.storage !== SettingStorage.File) {
+				if (this.keyStorage(migration.name) !== SettingStorage.File) {
 					logger.info('Skipped global value migration -- setting is not stored as a file.');
 					continue;
 				}
