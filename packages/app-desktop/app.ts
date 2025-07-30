@@ -752,7 +752,7 @@ class Application extends BaseApplication {
 
 		const startupTasks = this.buildStartupTasks_();
 		for (const task of startupTasks) {
-			await perfLogger.track(task.label, async () => task.task());
+			await perfLogger.tracked(task.label, task.task)();
 		}
 
 

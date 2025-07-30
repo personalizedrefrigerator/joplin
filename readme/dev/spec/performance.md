@@ -16,7 +16,7 @@ For React Native, see:
 
 The `PerformanceLogger` class has a few methods that can help debug performance issues:
 - `.mark(name)`: Adds a performance mark with a timestamp. For tasks with duration, prefer `.track` or `.taskStart`.
-- `.track(name, task)`: Logs information about how long it takes the async `task` to complete.
+- `.tracked(name, task)`: Wraps `task`. Returns a callback that logs information about how long it takes the async `task` to complete.
 - `.taskStart(name)`: Marks the start of a task with some `name`.
 
 ### Naming conventions
@@ -60,13 +60,13 @@ class VerySlowThing {
 
 	public async doSomethingElse() {
 		// .track wraps an async callback.
-		await perfLogger.track('VerySlowThing/doSomethingElse', async () => {
+		await perfLogger.tracked('VerySlowThing/doSomethingElse', async () => {
 			await someBackgroundTask();
 
 			// Even if the callback throws an Error, .track
 			// ends the task in the log file.
 			throw new Error('An error!');
-		});
+		})();
 	}
 }
 ```
