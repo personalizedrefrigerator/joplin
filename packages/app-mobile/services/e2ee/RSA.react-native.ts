@@ -1,7 +1,5 @@
 import WebCryptoRsa, { WebCryptoSlice } from '@joplin/lib/services/e2ee/ppk/WebCryptoRsa';
 import { PublicKeyAlgorithm, PublicKeyCrypto, RSA } from '@joplin/lib/services/e2ee/types';
-import shim from '@joplin/lib/shim';
-import Logger from '@joplin/utils/Logger';
 import QuickCrypto from 'react-native-quick-crypto';
 const RnRSA = require('react-native-rsa-native').RSA;
 
@@ -11,17 +9,8 @@ interface LegacyRsaKeyPair {
 	keySizeBits: number;
 }
 
-const logger = Logger.create('RSA');
-
 const legacyRsa: PublicKeyCrypto = {
 	generateKeyPair: async () => {
-		if (shim.mobilePlatform() === 'web') {
-			// TODO: Try to implement with SubtleCrypto. May require migrating the RSA algorithm used on
-			// desktop and mobile (which is not supported on web). See commit 12adcd9dbc3f723bac36ff4447701573084c4694.
-			logger.warn('RSA on web is not yet supported.');
-			return null;
-		}
-
 		const keySize = 2048;
 		const keys: LegacyRsaKeyPair = await RnRSA.generateKeys(keySize);
 
@@ -114,7 +103,7 @@ const rsa: RSA = {
 	algorithmInfo: (algorithm) => {
 		if (algorithm === PublicKeyAlgorithm.RsaLegacy) {
 			return {
-				supported: shim.mobilePlatform() !== 'web',
+				supported: true,
 				deprecated: true,
 			};
 		} else if (algorithm === PublicKeyAlgorithm.RsaV2) {

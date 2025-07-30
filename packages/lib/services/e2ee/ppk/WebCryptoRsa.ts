@@ -9,9 +9,9 @@ interface KeyPair {
 	privateKey: CryptoKey|null;
 }
 
-const isHexadecimalString = (text: string) => {
+const isLowercaseHexadecimalString = (text: string) => {
 	for (let i = 0; i < text.length; i += 2) {
-		if (!text.substring(i, i + 2).match(/^[a-fA-F0-9]{2}/)) {
+		if (!text.substring(i, i + 2).match(/^[a-f0-9]{2}/)) {
 			return false;
 		}
 	}
@@ -55,9 +55,12 @@ export default class WebCryptoRsa implements PublicKeyCrypto {
 		if (!rsaKeyPair.publicKey) {
 			throw new Error('Missing public key');
 		}
-		const isHex = isHexadecimalString(plaintext);
+		// To avoid data loss when restoring (whether everything is capital or lowercase), work only
+		// with lowercase hexadecimal.
+		const isHex = isLowercaseHexadecimalString(plaintext);
 
-		// RSA can only encrypt a limited amount of data. If given hexadecimal data, try to encrypt in that format.
+		// RSA can only encrypt a limited amount of data. If given hexadecimal data (e.g. when given
+		// a Joplin master key), try to encrypt in that format.
 		let data = isHex ? Buffer.from(plaintext, 'hex') : Buffer.from(plaintext, 'utf8');
 
 		// Store the original data format
@@ -100,10 +103,27 @@ export default class WebCryptoRsa implements PublicKeyCrypto {
 		return Buffer.from(buffer).toString(encoding);
 	}
 
+	private async exportKey(key: CryptoKey) {
+		const exported = { ...await this.webCrypto_.subtle.exportKey('jwk', key) };
+
+		// Remove padding -- When running in React Native, JWK base64URL fields are padded with "."s.
+		// Chromium fails to import such keys.
+		// See https://github.com/chromium/chromium/blob/dd96966cf845460bad4bc352625b9188e98ae501/components/webcrypto/jwk.cc#L309
+		const base64Members = ['n', 'e', 'qi', 'dp', 'dq', 'q', 'p', 'd'];
+		const result = Object.create(null);
+		for (const [key, value] of Object.entries(exported)) {
+			if (base64Members.includes(key) && typeof value === 'string') {
+				result[key] = value.replace(/\.+$/, '');
+			} else {
+				result[key] = value;
+			}
+		}
+
+		return JSON.stringify(result);
+	}
+
 	public async publicKey(rsaKeyPair: KeyPair) {
-		return JSON.stringify(
-			await this.webCrypto_.subtle.exportKey('jwk', rsaKeyPair.publicKey),
-		);
+		return this.exportKey(rsaKeyPair.publicKey);
 	}
 
 	public async privateKey(rsaKeyPair: KeyPair) {
@@ -111,8 +131,6 @@ export default class WebCryptoRsa implements PublicKeyCrypto {
 			throw new Error('Missing private key');
 		}
 
-		return JSON.stringify(
-			await this.webCrypto_.subtle.exportKey('jwk', rsaKeyPair.privateKey),
-		);
+		return this.exportKey(rsaKeyPair.privateKey);
 	}
 }

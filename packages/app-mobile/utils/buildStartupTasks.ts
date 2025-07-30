@@ -466,11 +466,7 @@ const buildStartupTasks = (
 		// just print some messages in the console.
 		// ----------------------------------------------------------------------------
 		if (Setting.value('env') === 'dev') {
-			if (Platform.OS !== 'web') {
-				await runRsaIntegrationTests();
-			} else {
-				logger.info('Skipping encryption tests -- not supported on web.');
-			}
+			await runRsaIntegrationTests();
 			await runCryptoIntegrationTests();
 			await runOnDeviceFsDriverTests();
 		}

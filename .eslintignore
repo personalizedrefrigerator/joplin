@@ -890,6 +890,7 @@ packages/app-mobile/services/AlarmServiceDriver.web.js
 packages/app-mobile/services/BackButtonService.js
 packages/app-mobile/services/commands/stateToWhenClauseContext.js
 packages/app-mobile/services/e2ee/RSA.react-native.js
+packages/app-mobile/services/e2ee/RSA.react-native.web.js
 packages/app-mobile/services/e2ee/crypto.js
 packages/app-mobile/services/plugins/PlatformImplementation.js
 packages/app-mobile/services/profiles/index.js
@@ -949,6 +950,7 @@ packages/app-mobile/utils/pickDocument.js
 packages/app-mobile/utils/polyfills/bufferPolyfill.js
 packages/app-mobile/utils/polyfills/crypto-polyfill/index.js
 packages/app-mobile/utils/polyfills/index.js
+packages/app-mobile/utils/polyfills/index.web.js
 packages/app-mobile/utils/setupNotifications.js
 packages/app-mobile/utils/shareFile.js
 packages/app-mobile/utils/shareHandler.js
