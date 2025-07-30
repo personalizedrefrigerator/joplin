@@ -361,7 +361,7 @@ describe('models/Setting', () => {
 		expect(globalSettings['ui.layout']).toEqual(initialLayout);
 	}));
 
-	it('skipping global->local value migrations should still result in local settings', async () => {
+	it('migrated settings should still be local even if global->local migrations are skipped', async () => {
 		await Setting.reset();
 		const defaultSettingValue = Setting.value('notes.listRendererId');
 
