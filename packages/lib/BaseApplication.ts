@@ -51,7 +51,7 @@ import handleSyncStartupOperation from './services/synchronizer/utils/handleSync
 import SyncTargetJoplinCloud from './SyncTargetJoplinCloud';
 import { setAutoFreeze } from 'immer';
 import { getEncryptionEnabled } from './services/synchronizer/syncInfoUtils';
-import { loadMasterKeysFromSettings, migrateMasterPassword } from './services/e2ee/utils';
+import { loadMasterKeysFromSettings, migrateMasterPassword, migratePpk } from './services/e2ee/utils';
 import SyncTargetNone from './SyncTargetNone';
 import { setRSA } from './services/e2ee/ppk/ppk';
 import RSA from './services/e2ee/ppk/RSA.node';
@@ -780,6 +780,7 @@ export default class BaseApplication {
 			options.keychainEnabled ? [KeychainServiceDriverElectron, KeychainServiceDriverNode] : [],
 		);
 		await migrateMasterPassword();
+		await migratePpk();
 		await handleSyncStartupOperation();
 
 		appLogger.info(`Client ID: ${Setting.value('clientId')}`);

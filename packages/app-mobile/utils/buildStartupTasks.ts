@@ -67,7 +67,7 @@ import MigrationService from '@joplin/lib/services/MigrationService';
 import { clearSharedFilesCache } from '../utils/ShareUtils';
 import setIgnoreTlsErrors from '../utils/TlsUtils';
 import ShareService from '@joplin/lib/services/share/ShareService';
-import { loadMasterKeysFromSettings, migrateMasterPassword } from '@joplin/lib/services/e2ee/utils';
+import { loadMasterKeysFromSettings, migrateMasterPassword, migratePpk } from '@joplin/lib/services/e2ee/utils';
 import { setRSA } from '@joplin/lib/services/e2ee/ppk/ppk';
 import RSA from '../services/e2ee/RSA.react-native';
 import { runIntegrationTests as runRsaIntegrationTests } from '@joplin/lib/services/e2ee/ppk/ppkTestUtils';
@@ -355,6 +355,9 @@ const buildStartupTasks = (
 	});
 	addTask('set up sharing', async () => {
 		await ShareService.instance().initialize(store, EncryptionService.instance());
+	});
+	addTask('migrate PPK', async () => {
+		await migratePpk();
 	});
 	addTask('load folders', async () => {
 		await refreshFolders(dispatch, '');

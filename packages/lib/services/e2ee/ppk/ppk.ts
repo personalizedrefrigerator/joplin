@@ -22,6 +22,8 @@ export type PublicPrivateKeyPairs = {
 	[algorithm in PublicKeyAlgorithm]?: PublicPrivateKeyPair;
 };
 
+const defaultPpkAlgorithm = PublicKeyAlgorithm.RsaOaep;
+
 let rsa_: RSA = null;
 
 export const setRSA = (rsa: RSA) => {
@@ -74,7 +76,7 @@ export const generateKeyPairWithAlgorithm = async (algorithm: PublicKeyAlgorithm
 };
 
 export async function generateKeyPair(encryptionService: EncryptionService, password: string): Promise<PublicPrivateKeyPair> {
-	return generateKeyPairWithAlgorithm(PublicKeyAlgorithm.RsaOaep, encryptionService, password);
+	return generateKeyPairWithAlgorithm(defaultPpkAlgorithm, encryptionService, password);
 }
 
 export async function pkReencryptPrivateKey(encryptionService: EncryptionService, ppk: PublicPrivateKeyPair, decryptionPassword: string, encryptionPassword: string): Promise<PublicPrivateKeyPair> {
@@ -97,6 +99,10 @@ export async function ppkPasswordIsValid(service: EncryptionService, ppk: Public
 
 	return true;
 }
+
+export const shouldUpdatePpk = (oldPpk: PublicPrivateKeyPair) => {
+	return oldPpk.algorithm !== defaultPpkAlgorithm && rsa().algorithmInfo(defaultPpkAlgorithm).supported;
+};
 
 const ppkToAlgorithm = (ppk: PublicPrivateKeyPair) => {
 	return ppk.algorithm ?? PublicKeyAlgorithm.RsaLegacy;
