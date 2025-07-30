@@ -52,7 +52,7 @@ describe('e2ee/utils', () => {
 
 		expect(localSyncInfo().ppk.algorithm).toBe(PublicKeyAlgorithm.RsaLegacy);
 		await migratePpk();
-		expect(localSyncInfo().ppk.algorithm).toBe(PublicKeyAlgorithm.RsaOaep);
+		expect(localSyncInfo().ppk.algorithm).toBe(PublicKeyAlgorithm.RsaV2);
 	});
 
 	it('should do the master password migration', async () => {

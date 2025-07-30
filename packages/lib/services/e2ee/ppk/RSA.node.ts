@@ -58,7 +58,7 @@ const rsa: RSA = {
 	fromAlgorithm: (algorithm) => {
 		if (algorithm === PublicKeyAlgorithm.RsaLegacy) {
 			return legacyRsa;
-		} else if (algorithm === PublicKeyAlgorithm.RsaOaep) {
+		} else if (algorithm === PublicKeyAlgorithm.RsaV2) {
 			return webCryptoRsa;
 		} else {
 			const exhaustivenessCheck: never = algorithm;
@@ -68,12 +68,12 @@ const rsa: RSA = {
 	algorithmInfo: (algorithm) => {
 		if (algorithm === PublicKeyAlgorithm.RsaLegacy) {
 			return { supported: true, deprecated: true };
-		} else if (algorithm === PublicKeyAlgorithm.RsaOaep) {
+		} else if (algorithm === PublicKeyAlgorithm.RsaV2) {
 			return { supported: true, deprecated: false };
 		} else {
 			return { supported: false, deprecated: undefined };
 		}
-	}
-}
+	},
+};
 
 export default rsa;

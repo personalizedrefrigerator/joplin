@@ -22,7 +22,7 @@ export type PublicPrivateKeyPairs = {
 	[algorithm in PublicKeyAlgorithm]?: PublicPrivateKeyPair;
 };
 
-const defaultPpkAlgorithm = PublicKeyAlgorithm.RsaOaep;
+const defaultPpkAlgorithm = PublicKeyAlgorithm.RsaV2;
 
 let rsa_: RSA = null;
 
@@ -35,18 +35,16 @@ export const rsa = (): RSA => {
 	return rsa_;
 };
 
-export const getPreferredAlgorithm = (algorithms: PublicKeyAlgorithm[]) => {
-	const supported = algorithms.filter(algorithm => rsa().algorithmInfo(algorithm).supported);
-	const nonDeprecated = supported.filter(algorithm => !rsa().algorithmInfo(algorithm).deprecated);
-
-	if (nonDeprecated.length) {
-		return nonDeprecated[0];
+export const guessPpkAlgorithm = (ppk: PublicPrivateKeyPair) => {
+	if (ppk.publicKey.startsWith('-----BEGIN RSA')) {
+		return PublicKeyAlgorithm.RsaLegacy;
+	} else {
+		return PublicKeyAlgorithm.RsaV2;
 	}
-	if (supported.length) {
-		return supported[0];
-	}
+};
 
-	return null;
+const ppkToAlgorithm = (ppk: PublicPrivateKeyPair) => {
+	return ppk.algorithm ?? guessPpkAlgorithm(ppk);
 };
 
 async function encryptPrivateKey(encryptionService: EncryptionService, password: string, plainText: string): Promise<PrivateKey> {
@@ -102,10 +100,6 @@ export async function ppkPasswordIsValid(service: EncryptionService, ppk: Public
 
 export const shouldUpdatePpk = (oldPpk: PublicPrivateKeyPair) => {
 	return oldPpk.algorithm !== defaultPpkAlgorithm && rsa().algorithmInfo(defaultPpkAlgorithm).supported;
-};
-
-const ppkToAlgorithm = (ppk: PublicPrivateKeyPair) => {
-	return ppk.algorithm ?? PublicKeyAlgorithm.RsaLegacy;
 };
 
 async function loadPpk(service: EncryptionService, ppk: PublicPrivateKeyPair, password: string): Promise<RSAKeyPair> {

@@ -8,7 +8,7 @@ import Note from '../../models/Note';
 import Setting from '../../models/Setting';
 import { FolderEntity } from '../database/types';
 import EncryptionService from '../e2ee/EncryptionService';
-import { PublicPrivateKeyPair, mkReencryptFromPasswordToPublicKey, mkReencryptFromPublicKeyToPassword } from '../e2ee/ppk/ppk';
+import { PublicPrivateKeyPair, guessPpkAlgorithm, mkReencryptFromPasswordToPublicKey, mkReencryptFromPublicKeyToPassword } from '../e2ee/ppk/ppk';
 import { MasterKeyEntity } from '../e2ee/types';
 import { getMasterPassword } from '../e2ee/utils';
 import ResourceService from '../ResourceService';
@@ -334,7 +334,12 @@ export default class ShareService {
 	}
 
 	private async userPublicKey(userEmail: string): Promise<PublicPrivateKeyPair|''> {
-		return await this.api().exec('GET', `api/users/${encodeURIComponent(userEmail)}/public_key`);
+		const response = await this.api().exec('GET', `api/users/${encodeURIComponent(userEmail)}/public_key`);
+		return {
+			// Older versions of Joplin Server don't include the PPK algorithm in the response.
+			algorithm: response.algorithm ?? guessPpkAlgorithm(response),
+			...response,
+		};
 	}
 
 	public async addShareRecipient(shareId: string, masterKeyId: string, recipientEmail: string, permissions: SharePermissions) {

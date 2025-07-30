@@ -5,7 +5,7 @@ import Logger from '@joplin/utils/Logger';
 import QuickCrypto from 'react-native-quick-crypto';
 const RnRSA = require('react-native-rsa-native').RSA;
 
-interface LegacyRSAKeyPair {
+interface LegacyRsaKeyPair {
 	public: string;
 	private: string;
 	keySizeBits: number;
@@ -23,7 +23,7 @@ const legacyRsa: PublicKeyCrypto = {
 		}
 
 		const keySize = 2048;
-		const keys: LegacyRSAKeyPair = await RnRSA.generateKeys(keySize);
+		const keys: LegacyRsaKeyPair = await RnRSA.generateKeys(keySize);
 
 		// Sanity check
 		if (!keys.private) throw new Error('No private key was generated');
@@ -36,16 +36,16 @@ const legacyRsa: PublicKeyCrypto = {
 		};
 	},
 
-	loadKeys: async (publicKey: string, privateKey: string, keySizeBits: number): Promise<LegacyRSAKeyPair> => {
+	loadKeys: async (publicKey: string, privateKey: string, keySizeBits: number): Promise<LegacyRsaKeyPair> => {
 		return { public: publicKey, private: privateKey, keySizeBits };
 	},
 
-	encrypt: async (plaintextUtf8: string, rsaKeyPair: LegacyRSAKeyPair): Promise<string> => {
+	encrypt: async (plaintextUtf8: string, rsaKeyPair: LegacyRsaKeyPair): Promise<string> => {
 		// TODO: Support long-data encryption in a way compatible with node-rsa.
 		return RnRSA.encrypt(plaintextUtf8, rsaKeyPair.public);
 	},
 
-	decrypt: async (ciphertextBase64: string, rsaKeyPair: LegacyRSAKeyPair): Promise<string> => {
+	decrypt: async (ciphertextBase64: string, rsaKeyPair: LegacyRsaKeyPair): Promise<string> => {
 		const ciphertextBuffer = Buffer.from(ciphertextBase64, 'base64');
 		const maximumEncryptedSize = Math.floor(rsaKeyPair.keySizeBits / 8); // Usually 256
 
@@ -87,24 +87,24 @@ const legacyRsa: PublicKeyCrypto = {
 		}
 	},
 
-	publicKey: async (rsaKeyPair: LegacyRSAKeyPair) => {
+	publicKey: async (rsaKeyPair: LegacyRsaKeyPair) => {
 		return rsaKeyPair.public;
 	},
 
-	privateKey: async (rsaKeyPair: LegacyRSAKeyPair) => {
+	privateKey: async (rsaKeyPair: LegacyRsaKeyPair) => {
 		return rsaKeyPair.private;
 	},
 };
 
 const webCryptoRsa = new WebCryptoRsa({
-	subtle: QuickCrypto.subtle
+	subtle: QuickCrypto.subtle,
 } as WebCryptoSlice);
 
 const rsa: RSA = {
 	fromAlgorithm: (algorithm: PublicKeyAlgorithm): PublicKeyCrypto => {
 		if (algorithm === PublicKeyAlgorithm.RsaLegacy) {
 			return legacyRsa;
-		} else if (algorithm === PublicKeyAlgorithm.RsaOaep) {
+		} else if (algorithm === PublicKeyAlgorithm.RsaV2) {
 			return webCryptoRsa;
 		} else {
 			const exhaustivenessCheck: never = algorithm;
@@ -117,7 +117,7 @@ const rsa: RSA = {
 				supported: shim.mobilePlatform() !== 'web',
 				deprecated: true,
 			};
-		} else if (algorithm === PublicKeyAlgorithm.RsaOaep) {
+		} else if (algorithm === PublicKeyAlgorithm.RsaV2) {
 			return {
 				supported: true,
 				deprecated: false,
@@ -128,7 +128,7 @@ const rsa: RSA = {
 				deprecated: undefined,
 			};
 		}
-	}
+	},
 };
 
 export default rsa;

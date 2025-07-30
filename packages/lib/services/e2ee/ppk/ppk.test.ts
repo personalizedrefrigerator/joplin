@@ -16,7 +16,7 @@ describe('e2ee/ppk', () => {
 
 	describe.each([
 		PublicKeyAlgorithm.RsaLegacy,
-		PublicKeyAlgorithm.RsaOaep,
+		PublicKeyAlgorithm.RsaV2,
 	])('(algorithm %j)', (algorithm) => {
 		it('should create a public private key pair', async () => {
 			const ppk = await generateKeyPairWithAlgorithm(algorithm, encryptionService(), '111111');

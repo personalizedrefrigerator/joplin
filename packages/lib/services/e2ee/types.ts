@@ -13,11 +13,11 @@ export interface MasterKeyEntity {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 export type RSAKeyPair = any; // Depends on implementation
-export type RSAKeyPairAndSize = { keyPair: RSAKeyPair, keySize: number };
+export type RSAKeyPairAndSize = { keyPair: RSAKeyPair; keySize: number };
 
 export enum PublicKeyAlgorithm {
-	RsaLegacy = 1,//'rsa-pkcs1-v1.5',
-	RsaOaep,//'rsa-pkcs1-oaep',
+	RsaLegacy = 1, // 'rsa-pkcs1-v1.5',
+	RsaV2, // 'rsa-pkcs1-oaep',
 }
 
 export interface PublicKeyCrypto {
