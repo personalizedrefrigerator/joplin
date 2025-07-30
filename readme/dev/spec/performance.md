@@ -21,7 +21,9 @@ The `PerformanceLogger` class has a few methods that can help debug performance 
 
 ### Naming conventions
 
-The `name` provided to `.mark`, `.track`, and `.taskStart` should have the form `filename/marker name`. For example, in `root.tsx`, a performance task might be named `root/application setup`. To allow quickly finding a particular task name, these names should be unique inline string literals.
+The `name` provided to `.mark`, `.track`, and `.taskStart` should have the form `filename/marker name`. For example, in `root.tsx`, a performance task might be named `root/application setup`.
+
+These names should be unique inline string literals so that they can be quickly found with a global search.
 
 ### Finding performance markers
 
