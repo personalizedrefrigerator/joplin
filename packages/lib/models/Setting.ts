@@ -128,6 +128,7 @@ interface GlobalMigration {
 	wasGlobal: boolean;
 }
 
+// The array index is the migration ID -- items should not be removed from this array.
 const globalMigrations: GlobalMigration[] = [
 	{
 		name: 'ui.layout',

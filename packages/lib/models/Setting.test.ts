@@ -349,8 +349,6 @@ describe('models/Setting', () => {
 		await switchToSubProfileSettings();
 
 		// The migrations should fetch the previous initial layout from the global settings
-		// TODO: Even on a new profile? This should be addressed during or before pull request
-		// review.
 		expect(Setting.value('ui.layout')).toEqual({});
 		await Setting.applyMigrations();
 		expect(Setting.value('ui.layout')).toEqual(initialLayout);
@@ -362,6 +360,30 @@ describe('models/Setting', () => {
 		const globalSettings = await loadDefaultProfileSettings();
 		expect(globalSettings['ui.layout']).toEqual(initialLayout);
 	}));
+
+	it('skipping global->local value migrations should still result in local settings', async () => {
+		await Setting.reset();
+		const defaultSettingValue = Setting.value('notes.listRendererId');
+
+		// Set an initial value -- should store in the global settings
+		Setting.setValue('notes.listRendererId', 'global-setting-value');
+		await Setting.saveAll();
+
+		await switchToSubProfileSettings();
+		expect(Setting.value('notes.listRendererId')).toBe(defaultSettingValue);
+
+		// .applyMigrations should not apply skipped migrations
+		Setting.skipMigrations();
+		await Setting.applyMigrations();
+		expect(Setting.value('notes.listRendererId')).toBe(defaultSettingValue);
+
+		// The setting should be local -- the parent setting should not be overwritten
+		Setting.setValue('notes.listRendererId', 'some-other-value');
+		await Setting.saveAll();
+
+		const globalSettings = await loadDefaultProfileSettings();
+		expect(globalSettings['notes.listRendererId']).toBe('global-setting-value');
+	});
 
 	it('should load sub-profile settings', async () => {
 		await Setting.reset();
