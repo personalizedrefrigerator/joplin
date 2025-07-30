@@ -58,7 +58,7 @@ export async function decryptPrivateKey(encryptionService: EncryptionService, en
 	return encryptionService.decrypt(encryptedKey.encryptionMethod, password, encryptedKey.ciphertext);
 }
 
-export async function generateKeyPair(algorithm: PublicKeyAlgorithm, encryptionService: EncryptionService, password: string): Promise<PublicPrivateKeyPair> {
+export const generateKeyPairWithAlgorithm = async (algorithm: PublicKeyAlgorithm, encryptionService: EncryptionService, password: string): Promise<PublicPrivateKeyPair> => {
 	const { keyPair, keySize } = await rsa().fromAlgorithm(algorithm).generateKeyPair();
 
 	return {
@@ -71,23 +71,10 @@ export async function generateKeyPair(algorithm: PublicKeyAlgorithm, encryptionS
 		publicKey: await rsa().fromAlgorithm(algorithm).publicKey(keyPair),
 		createdTime: Date.now(),
 	};
-}
+};
 
-export async function generateLegacyKeyPair(encryptionService: EncryptionService, password: string): Promise<PublicPrivateKeyPair> {
-	return generateKeyPair(PublicKeyAlgorithm.RsaLegacy, encryptionService, password);
-}
-
-export async function generateKeyPairs(encryptionService: EncryptionService, password: string): Promise<PublicPrivateKeyPairs> {
-	const algorithms = [
-		PublicKeyAlgorithm.RsaLegacy,
-		PublicKeyAlgorithm.RsaOaep,
-	];
-
-	const result = Object.create(null);
-	for (const algorithm of algorithms) {
-		result[algorithm] = await generateKeyPair(algorithm, encryptionService, password);
-	}
-	return result;
+export async function generateKeyPair(encryptionService: EncryptionService, password: string): Promise<PublicPrivateKeyPair> {
+	return generateKeyPairWithAlgorithm(PublicKeyAlgorithm.RsaOaep, encryptionService, password);
 }
 
 export async function pkReencryptPrivateKey(encryptionService: EncryptionService, ppk: PublicPrivateKeyPair, decryptionPassword: string, encryptionPassword: string): Promise<PublicPrivateKeyPair> {
@@ -111,9 +98,13 @@ export async function ppkPasswordIsValid(service: EncryptionService, ppk: Public
 	return true;
 }
 
+const ppkToAlgorithm = (ppk: PublicPrivateKeyPair) => {
+	return ppk.algorithm ?? PublicKeyAlgorithm.RsaLegacy;
+};
+
 async function loadPpk(service: EncryptionService, ppk: PublicPrivateKeyPair, password: string): Promise<RSAKeyPair> {
 	const privateKeyPlainText = await decryptPrivateKey(service, ppk.privateKey, password);
-	return rsa().fromAlgorithm(ppk.algorithm).loadKeys(ppk.publicKey, privateKeyPlainText, ppk.keySize);
+	return rsa().fromAlgorithm(ppkToAlgorithm(ppk)).loadKeys(ppk.publicKey, privateKeyPlainText, ppk.keySize);
 }
 
 async function loadPublicKey(algorithm: PublicKeyAlgorithm, publicKey: PublicKey, keySize: number): Promise<RSAKeyPair> {
@@ -150,7 +141,7 @@ function ppkEncryptionHandler(algorithm: PublicKeyAlgorithm, ppkId: string, rsaK
 // Generates a master key and encrypts it using the provided PPK
 export async function ppkGenerateMasterKey(service: EncryptionService, ppk: PublicPrivateKeyPair, password: string): Promise<MasterKeyEntity> {
 	const nodeRSA = await loadPpk(service, ppk, password);
-	const handler = ppkEncryptionHandler(ppk.algorithm, ppk.id, nodeRSA);
+	const handler = ppkEncryptionHandler(ppkToAlgorithm(ppk), ppk.id, nodeRSA);
 
 	return service.generateMasterKey('', {
 		encryptionMethod: EncryptionMethod.Custom,
@@ -161,7 +152,7 @@ export async function ppkGenerateMasterKey(service: EncryptionService, ppk: Publ
 // Decrypt the content of a master key that was encrypted using ppkGenerateMasterKey()
 export async function ppkDecryptMasterKeyContent(service: EncryptionService, masterKey: MasterKeyEntity, ppk: PublicPrivateKeyPair, password: string): Promise<string> {
 	const nodeRSA = await loadPpk(service, ppk, password);
-	const handler = ppkEncryptionHandler(ppk.algorithm, ppk.id, nodeRSA);
+	const handler = ppkEncryptionHandler(ppkToAlgorithm(ppk), ppk.id, nodeRSA);
 
 	return service.decryptMasterKeyContent(masterKey, '', {
 		encryptionHandler: handler,
@@ -169,10 +160,11 @@ export async function ppkDecryptMasterKeyContent(service: EncryptionService, mas
 }
 
 export async function mkReencryptFromPasswordToPublicKey(service: EncryptionService, masterKey: MasterKeyEntity, decryptionPassword: string, encryptionPublicKey: PublicPrivateKeyPair): Promise<MasterKeyEntity> {
+	const algorithm = ppkToAlgorithm(encryptionPublicKey);
 	const loadedPublicKey = await loadPublicKey(
-		encryptionPublicKey.algorithm, encryptionPublicKey.publicKey, encryptionPublicKey.keySize,
+		algorithm, encryptionPublicKey.publicKey, encryptionPublicKey.keySize,
 	);
-	const encryptionHandler = ppkEncryptionHandler(encryptionPublicKey.algorithm, encryptionPublicKey.id, loadedPublicKey);
+	const encryptionHandler = ppkEncryptionHandler(algorithm, encryptionPublicKey.id, loadedPublicKey);
 
 	const plainText = await service.decryptMasterKeyContent(masterKey, decryptionPassword);
 	const newContent = await service.encryptMasterKeyContent(EncryptionMethod.Custom, plainText, '', { encryptionHandler });
@@ -182,7 +174,7 @@ export async function mkReencryptFromPasswordToPublicKey(service: EncryptionServ
 
 export async function mkReencryptFromPublicKeyToPassword(service: EncryptionService, masterKey: MasterKeyEntity, decryptionPpk: PublicPrivateKeyPair, decryptionPassword: string, encryptionPassword: string): Promise<MasterKeyEntity> {
 	const decryptionHandler = ppkEncryptionHandler(
-		decryptionPpk.algorithm, decryptionPpk.id, await loadPpk(service, decryptionPpk, decryptionPassword),
+		ppkToAlgorithm(decryptionPpk), decryptionPpk.id, await loadPpk(service, decryptionPpk, decryptionPassword),
 	);
 
 	const plainText = await service.decryptMasterKeyContent(masterKey, '', { encryptionHandler: decryptionHandler });

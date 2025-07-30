@@ -3,7 +3,7 @@ import MasterKey from '../../models/MasterKey';
 import { activeMasterKeySanityCheck, migrateMasterPassword, resetMasterPassword, showMissingMasterKeyMessage, updateMasterPassword } from './utils';
 import { localSyncInfo, masterKeyById, masterKeyEnabled, setActiveMasterKeyId, setMasterKeyEnabled, setPpk } from '../synchronizer/syncInfoUtils';
 import Setting from '../../models/Setting';
-import { generateKeyPairs, ppkPasswordIsValid } from './ppk/ppk';
+import { generateKeyPair, ppkPasswordIsValid } from './ppk/ppk';
 
 describe('e2ee/utils', () => {
 
@@ -78,13 +78,13 @@ describe('e2ee/utils', () => {
 		const mk1 = await MasterKey.save(await encryptionService().generateMasterKey(masterPassword1));
 		const mk2 = await MasterKey.save(await encryptionService().generateMasterKey(masterPassword1));
 
-		setPpk(await generateKeyPairs(encryptionService(), masterPassword1));
+		setPpk(await generateKeyPair(encryptionService(), masterPassword1));
 
 		await updateMasterPassword(masterPassword1, masterPassword2);
 
 		expect(Setting.value('encryption.masterPassword')).toBe(masterPassword2);
-		expect(await ppkPasswordIsValid(encryptionService(), localSyncInfo().ppkLegacy, masterPassword1)).toBe(false);
-		expect(await ppkPasswordIsValid(encryptionService(), localSyncInfo().ppkLegacy, masterPassword2)).toBe(true);
+		expect(await ppkPasswordIsValid(encryptionService(), localSyncInfo().ppk, masterPassword1)).toBe(false);
+		expect(await ppkPasswordIsValid(encryptionService(), localSyncInfo().ppk, masterPassword2)).toBe(true);
 		expect(await encryptionService().checkMasterKeyPassword(await MasterKey.load(mk1.id), masterPassword1)).toBe(false);
 		expect(await encryptionService().checkMasterKeyPassword(await MasterKey.load(mk2.id), masterPassword1)).toBe(false);
 		expect(await encryptionService().checkMasterKeyPassword(await MasterKey.load(mk1.id), masterPassword2)).toBe(true);
@@ -106,7 +106,7 @@ describe('e2ee/utils', () => {
 	it('should set and verify master password when a private key exists', async () => {
 		const password = '111111';
 
-		setPpk(await generateKeyPairs(encryptionService(), password));
+		setPpk(await generateKeyPair(encryptionService(), password));
 
 		await expectThrow(async () => updateMasterPassword('', 'wrong'));
 		await expectNotThrow(async () => updateMasterPassword('', password));
@@ -114,10 +114,10 @@ describe('e2ee/utils', () => {
 	});
 
 	it('should only set the master password if not already set', async () => {
-		expect(localSyncInfo().ppkLegacy).toBeFalsy();
+		expect(localSyncInfo().ppk).toBeFalsy();
 		await updateMasterPassword('', '111111');
 		expect(Setting.value('encryption.masterPassword')).toBe('111111');
-		expect(localSyncInfo().ppkLegacy).toBeFalsy();
+		expect(localSyncInfo().ppk).toBeFalsy();
 		expect(localSyncInfo().masterKeys.length).toBe(0);
 	});
 
@@ -135,16 +135,16 @@ describe('e2ee/utils', () => {
 		Setting.setValue('encryption.masterPassword', masterPassword1);
 		const mk1 = await MasterKey.save(await encryptionService().generateMasterKey(masterPassword1));
 		const mk2 = await MasterKey.save(await encryptionService().generateMasterKey(masterPassword1));
-		setPpk(await generateKeyPairs(encryptionService(), masterPassword1));
+		setPpk(await generateKeyPair(encryptionService(), masterPassword1));
 
-		const previousPpk = localSyncInfo().ppkLegacy;
+		const previousPpk = localSyncInfo().ppk;
 		await resetMasterPassword(encryptionService(), kvStore(), null, masterPassword2);
 
 		expect(masterKeyEnabled(masterKeyById(mk1.id))).toBe(false);
 		expect(masterKeyEnabled(masterKeyById(mk2.id))).toBe(false);
-		expect(localSyncInfo().ppkLegacy.id).not.toBe(previousPpk.id);
-		expect(localSyncInfo().ppkLegacy.privateKey.ciphertext).not.toBe(previousPpk.privateKey.ciphertext);
-		expect(localSyncInfo().ppkLegacy.publicKey).not.toBe(previousPpk.publicKey);
+		expect(localSyncInfo().ppk.id).not.toBe(previousPpk.id);
+		expect(localSyncInfo().ppk.privateKey.ciphertext).not.toBe(previousPpk.privateKey.ciphertext);
+		expect(localSyncInfo().ppk.publicKey).not.toBe(previousPpk.publicKey);
 
 		// Also check that a new master key has been created, that it is active and enabled
 		expect(localSyncInfo().masterKeys.length).toBe(3);

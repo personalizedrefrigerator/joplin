@@ -1,6 +1,6 @@
 import { afterAllCleanUp, encryptionService, expectNotThrow, expectThrow, setupDatabaseAndSynchronizer, switchClient } from '../../../testing/test-utils';
 import { PublicKeyAlgorithm } from '../types';
-import { decryptPrivateKey, generateKeyPair, ppkDecryptMasterKeyContent, ppkGenerateMasterKey, ppkPasswordIsValid, mkReencryptFromPasswordToPublicKey, mkReencryptFromPublicKeyToPassword } from './ppk';
+import { decryptPrivateKey, ppkDecryptMasterKeyContent, ppkGenerateMasterKey, ppkPasswordIsValid, mkReencryptFromPasswordToPublicKey, mkReencryptFromPublicKeyToPassword, generateKeyPairWithAlgorithm } from './ppk';
 import { runIntegrationTests } from './ppkTestUtils';
 
 describe('e2ee/ppk', () => {
@@ -19,7 +19,7 @@ describe('e2ee/ppk', () => {
 		PublicKeyAlgorithm.RsaOaep,
 	])('(algorithm %j)', (algorithm) => {
 		it('should create a public private key pair', async () => {
-			const ppk = await generateKeyPair(algorithm, encryptionService(), '111111');
+			const ppk = await generateKeyPairWithAlgorithm(algorithm, encryptionService(), '111111');
 
 			const privateKey = await decryptPrivateKey(encryptionService(), ppk.privateKey, '111111');
 			const publicKey = ppk.publicKey;
@@ -47,8 +47,8 @@ describe('e2ee/ppk', () => {
 		});
 
 		it('should create different key pairs every time', async () => {
-			const ppk1 = await generateKeyPair(algorithm, encryptionService(), '111111');
-			const ppk2 = await generateKeyPair(algorithm, encryptionService(), '111111');
+			const ppk1 = await generateKeyPairWithAlgorithm(algorithm, encryptionService(), '111111');
+			const ppk2 = await generateKeyPairWithAlgorithm(algorithm, encryptionService(), '111111');
 
 			const privateKey1 = await decryptPrivateKey(encryptionService(), ppk1.privateKey, '111111');
 			const privateKey2 = await decryptPrivateKey(encryptionService(), ppk2.privateKey, '111111');
@@ -60,7 +60,7 @@ describe('e2ee/ppk', () => {
 		});
 
 		it('should encrypt a master key using PPK', (async () => {
-			const ppk = await generateKeyPair(algorithm, encryptionService(), '111111');
+			const ppk = await generateKeyPairWithAlgorithm(algorithm, encryptionService(), '111111');
 			const masterKey = await ppkGenerateMasterKey(encryptionService(), ppk, '111111');
 			const plainText = await ppkDecryptMasterKeyContent(encryptionService(), masterKey, ppk, '111111');
 			expect(plainText.length).toBeGreaterThan(50); // Just checking it's not empty
@@ -68,7 +68,7 @@ describe('e2ee/ppk', () => {
 		}));
 
 		it('should check if a PPK password is valid', (async () => {
-			const ppk = await generateKeyPair(algorithm, encryptionService(), '111111');
+			const ppk = await generateKeyPairWithAlgorithm(algorithm, encryptionService(), '111111');
 			expect(await ppkPasswordIsValid(encryptionService(), ppk, '222')).toBe(false);
 			expect(await ppkPasswordIsValid(encryptionService(), ppk, '111111')).toBe(true);
 			await expectThrow(async () => ppkPasswordIsValid(encryptionService(), null, '111111'));
@@ -83,7 +83,7 @@ describe('e2ee/ppk', () => {
 			const key1 = await encryptionService().generateMasterKey('mk_1111');
 
 			// Using user 2 private key, he reencrypts the master key
-			const ppk2 = await generateKeyPair(algorithm, encryptionService(), 'ppk_1111');
+			const ppk2 = await generateKeyPairWithAlgorithm(algorithm, encryptionService(), 'ppk_1111');
 			const ppkEncrypted = await mkReencryptFromPasswordToPublicKey(encryptionService(), key1, 'mk_1111', ppk2);
 
 			// Once user 2 gets the master key, he can decrypt it using his private key

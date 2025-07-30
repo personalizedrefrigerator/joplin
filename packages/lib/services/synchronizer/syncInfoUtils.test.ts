@@ -322,7 +322,7 @@ describe('syncInfoUtils', () => {
 
 		expect(result.activeMasterKeyId).toEqual('');
 		expect(result.version).toEqual(0);
-		expect(result.ppkLegacy).toEqual(null);
+		expect(result.ppk).toEqual(null);
 		expect(result.e2ee).toEqual(false);
 		expect(result.appMinVersion).toEqual('3.0.0');
 		expect(result.masterKeys).toEqual([]);

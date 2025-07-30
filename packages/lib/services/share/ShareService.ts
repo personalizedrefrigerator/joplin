@@ -110,7 +110,7 @@ export default class ShareService {
 			const syncInfo = localSyncInfo();
 
 			// Shouldn't happen
-			if (!syncInfo.ppkLegacy) throw new Error('Cannot share notebook because E2EE is enabled and no Public Private Key pair exists.');
+			if (!syncInfo.ppk) throw new Error('Cannot share notebook because E2EE is enabled and no Public Private Key pair exists.');
 
 			// TODO: handle "undefinedMasterPassword" error - show master password dialog
 			folderMasterKey = await this.encryptionService_.generateMasterKey(getMasterPassword());
@@ -343,7 +343,7 @@ export default class ShareService {
 					throw new Error(`Invalid key: type: ${typeof key}`);
 				}
 				if (!('algorithm' in key)) {
-					throw new Error(`Invalid key: Missing algorithm property.`);
+					throw new Error('Invalid key: Missing algorithm property.');
 				}
 
 				return key.algorithm as PublicKeyAlgorithm;
@@ -443,7 +443,7 @@ export default class ShareService {
 				const reencryptedMasterKey = await mkReencryptFromPublicKeyToPassword(
 					this.encryptionService_,
 					masterKey,
-					localSyncInfo().ppkLegacy,
+					localSyncInfo().ppk,
 					getMasterPassword(),
 					getMasterPassword(),
 				);

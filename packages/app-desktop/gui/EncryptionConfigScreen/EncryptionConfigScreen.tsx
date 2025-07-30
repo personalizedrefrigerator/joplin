@@ -15,7 +15,7 @@ import { connect } from 'react-redux';
 import { AppState } from '../../app.reducer';
 import Setting from '@joplin/lib/models/Setting';
 import CommandService from '@joplin/lib/services/CommandService';
-import { PublicPrivateKeyPair, PublicPrivateKeyPairs } from '@joplin/lib/services/e2ee/ppk/ppk';
+import { PublicPrivateKeyPair } from '@joplin/lib/services/e2ee/ppk/ppk';
 import ToggleAdvancedSettingsButton from '../ConfigScreen/controls/ToggleAdvancedSettingsButton';
 import MacOSMissingPasswordHelpLink from '../ConfigScreen/controls/MissingPasswordHelpLink';
 
@@ -29,8 +29,7 @@ interface Props {
 	shouldReencrypt: boolean;
 	activeMasterKeyId: string;
 	masterPassword: string;
-	ppkLegacy: PublicPrivateKeyPair;
-	publicPrivateKeys: PublicPrivateKeyPairs;
+	ppk: PublicPrivateKeyPair;
 }
 
 const EncryptionConfigScreen = (props: Props) => {
@@ -230,7 +229,6 @@ const EncryptionConfigScreen = (props: Props) => {
 		);
 		const needUpgradeSection = renderNeedUpgradeSection();
 
-		console.log('to-do: Handle modern PPK');
 		return (
 			<div className="section">
 				<div className="encryption-section">
@@ -239,7 +237,7 @@ const EncryptionConfigScreen = (props: Props) => {
 						{_('Encryption:')} <strong>{props.encryptionEnabled ? _('Enabled') : _('Disabled')}</strong>
 					</p>
 					<p>
-						{_('Public-private key pair:')} <strong>{props.ppkLegacy ? _('Generated') : _('Not generated')}</strong>
+						{_('Public-private key pair:')} <strong>{props.ppk ? _('Generated') : _('Not generated')}</strong>
 					</p>
 					{decryptedItemsInfo}
 					{toggleButton}
@@ -416,8 +414,7 @@ const mapStateToProps = (state: AppState) => {
 		shouldReencrypt: state.settings['encryption.shouldReencrypt'] >= Setting.SHOULD_REENCRYPT_YES,
 		notLoadedMasterKeys: state.notLoadedMasterKeys,
 		masterPassword: state.settings['encryption.masterPassword'],
-		ppkLegacy: syncInfo.ppkLegacy,
-		publicPrivateKeys: syncInfo.keyPairs,
+		ppk: syncInfo.ppk,
 	};
 };
 

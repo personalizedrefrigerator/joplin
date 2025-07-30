@@ -116,56 +116,28 @@ describe('api/users', () => {
 		expect(reloadedUser.full_name).toBe('New Name');
 	});
 
-	test.each([
-		{ hasNewKeyFormat: false },	
-		{ hasNewKeyFormat: true },	
-	])('should allow accessing public keys (%j)', async ({ hasNewKeyFormat }) => {
+	test('should return the algorithm when accessing public keys (%j)', async () => {
 		const { session, user } = await createUserAndSession(1, false);
 
 		const fullLegacyKey = mockPublicKeyOfType(PublicKeyAlgorithm.RsaLegacy, 'test-id');
 		await createSyncTargetInfo(user, {
-			...(hasNewKeyFormat ? {
-				keyPairs: {
-					value: {
-						[PublicKeyAlgorithm.RsaLegacy]: fullLegacyKey,
-						[PublicKeyAlgorithm.RsaOaep]: mockPublicKeyOfType(PublicKeyAlgorithm.RsaOaep, 'test-id-2'),
-					},
-				},
-			}: {}),
 			ppk: { value: fullLegacyKey },
 		});
 
-		const legacyKeyInfo = { publicKey: `...public ${PublicKeyAlgorithm.RsaLegacy}...`, algorithm: PublicKeyAlgorithm.RsaLegacy, id: 'test-id' };
-		expect(await getApi(session.id, `users/${user.email}/public_key`)).toEqual(legacyKeyInfo);
-
-		const newKeysResult = await getApi(session.id, `users/${user.email}/public_keys`);
-		if (hasNewKeyFormat) {
-			expect(newKeysResult).toEqual({
-				items: [
-					legacyKeyInfo,
-					{ publicKey: `...public ${PublicKeyAlgorithm.RsaOaep}...`, algorithm: PublicKeyAlgorithm.RsaOaep, id: 'test-id-2' },
-				],
-				has_more: false,
-			});
-		} else {
-			// Should not return anything if the corresponding Joplin client hasn't uploaded
-			// keys in the new format.
-			expect(newKeysResult).toBe('');
-		}
+		expect(await getApi(session.id, `users/${user.email}/public_key`)).toMatchObject({
+			algorithm: PublicKeyAlgorithm.RsaLegacy,
+		});
 	});
 
 	test('should return the empty string when accessing an invalid public key', async () => {
 		const { session, user } = await createUserAndSession(1, false);
 
 		await createSyncTargetInfo(user, {
-			keyPairs: {
-				value: {
-					[PublicKeyAlgorithm.RsaOaep]: 3,
-				},
+			ppk: {
+				value: 5,
 			},
 		});
 
-		expect(await getApi(session.id, `users/${user.email}/public_keys`)).toBe('');
 		expect(await getApi(session.id, `users/${user.email}/public_key`)).toBe('');
 	});
 });

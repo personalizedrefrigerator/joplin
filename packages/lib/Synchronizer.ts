@@ -24,7 +24,7 @@ import { FileApi, getSupportsDeltaWithItems, PaginatedList, RemoteItem } from '.
 import JoplinDatabase from './JoplinDatabase';
 import { checkIfCanSync, fetchSyncInfo, checkSyncTargetIsValid, getActiveMasterKey, localSyncInfo, mergeSyncInfos, saveLocalSyncInfo, setMasterKeyHasBeenUsed, SyncInfo, syncInfoEquals, uploadSyncInfo } from './services/synchronizer/syncInfoUtils';
 import { getMasterPassword, setupAndDisableEncryption, setupAndEnableEncryption } from './services/e2ee/utils';
-import { generateKeyPair, generateKeyPairs } from './services/e2ee/ppk/ppk';
+import { generateKeyPair } from './services/e2ee/ppk/ppk';
 import syncDebugLog from './services/synchronizer/syncDebugLog';
 import handleConflictAction from './services/synchronizer/utils/handleConflictAction';
 import resourceRemotePath from './services/synchronizer/utils/resourceRemotePath';
@@ -32,7 +32,6 @@ import syncDeleteStep from './services/synchronizer/utils/syncDeleteStep';
 import { ErrorCode } from './errors';
 import { SyncAction } from './services/synchronizer/utils/types';
 import checkDisabledSyncItemsNotification from './services/synchronizer/utils/checkDisabledSyncItemsNotification';
-import { PublicKeyAlgorithm } from './services/e2ee/types';
 const { sprintf } = require('sprintf-js');
 const { Dirnames } = require('./services/synchronizer/utils/types');
 
@@ -347,28 +346,17 @@ export default class Synchronizer {
 	}
 
 	private async setPpkIfNotExist(localInfo: SyncInfo, remoteInfo: SyncInfo) {
-		console.log('to-do: Check that doing nothing if !!remoteInfo.ppk is valid');
-		let password_: string|null = null;
-		const password = () => {
-			password_ ??= getMasterPassword(false);
-			return password_;
-		};
+		if (localInfo.ppk || remoteInfo.ppk) return localInfo;
 
-		// Legacy
-		if (!localInfo.ppkLegacy && !remoteInfo.ppkLegacy && !!password()) {
-			try {
-				localInfo.ppkLegacy = await generateKeyPair(PublicKeyAlgorithm.RsaLegacy, this.encryptionService(), password());
-			} catch (error) {
-				// TODO: Remove after RSA encryption is supported on all platforms.
-				logger.error('Failed to generate RSA key pair', error);
-			}
+		const password = getMasterPassword(false);
+		if (!password) return localInfo;
+
+		try {
+			localInfo.ppk = await generateKeyPair(this.encryptionService(), password);
+		} catch (error) {
+			// TODO: Remove after RSA encryption is supported on all platforms.
+			logger.error('Failed to generate RSA key pair', error);
 		}
-
-		// New
-		if (!localInfo.keyPairs && !remoteInfo.keyPairs && !!password()) {
-			localInfo.keyPairs = await generateKeyPairs(this.encryptionService(), password());
-		}
-
 		return localInfo;
 	}
 
