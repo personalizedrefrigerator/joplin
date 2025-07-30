@@ -1,4 +1,4 @@
-import { PublicKeyCrypto } from "../types";
+import { PublicKeyCrypto } from '../types';
 
 export type WebCryptoSlice = {
 	subtle: Pick<SubtleCrypto, 'generateKey'|'importKey'|'encrypt'|'decrypt'|'exportKey'>;
@@ -42,7 +42,7 @@ export default class WebCryptoRsa implements PublicKeyCrypto {
 			return this.webCrypto_.subtle.importKey(
 				'jwk', JSON.parse(keySource), { name: 'RSA-OAEP', hash: 'SHA-256' }, true, usages,
 			);
-		}
+		};
 		const publicKey = await importKey(publicKeySource, ['encrypt']);
 		const privateKey = privateKeySource ? await importKey(privateKeySource, ['decrypt']) : null;
 		return {
@@ -89,7 +89,7 @@ export default class WebCryptoRsa implements PublicKeyCrypto {
 		));
 
 		let encoding: BufferEncoding;
-		const isHex = buffer.readUint8(buffer.byteLength - 1) === 1;
+		const isHex = buffer.readUInt8(buffer.byteLength - 1) === 1;
 		if (isHex) {
 			encoding = 'hex';
 		} else {
@@ -102,7 +102,7 @@ export default class WebCryptoRsa implements PublicKeyCrypto {
 
 	public async publicKey(rsaKeyPair: KeyPair) {
 		return JSON.stringify(
-			await this.webCrypto_.subtle.exportKey('jwk', rsaKeyPair.publicKey)
+			await this.webCrypto_.subtle.exportKey('jwk', rsaKeyPair.publicKey),
 		);
 	}
 
@@ -112,7 +112,7 @@ export default class WebCryptoRsa implements PublicKeyCrypto {
 		}
 
 		return JSON.stringify(
-			await this.webCrypto_.subtle.exportKey('jwk', rsaKeyPair.privateKey)
+			await this.webCrypto_.subtle.exportKey('jwk', rsaKeyPair.privateKey),
 		);
 	}
 }
