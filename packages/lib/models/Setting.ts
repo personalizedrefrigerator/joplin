@@ -123,9 +123,13 @@ const defaultMigrations: DefaultMigration[] = [
 	},
 ];
 
+// Global migrations migrate a setting from a global (all-profile) setting to a
+// local (per-profile) setting. When adding a new global migration, the setting
+// should be set to "isGlobal: true" in "builtInMetadata.ts".
 interface GlobalMigration {
 	name: string;
-	wasGlobal: boolean;
+	// At present, this should always be true:
+	wasGlobal: true;
 }
 
 // The array index is the migration ID -- items should not be removed from this array.
@@ -409,6 +413,15 @@ class Setting extends BaseModel {
 			for (let i = 0; i < globalMigrations.length; i++) {
 				if (i <= lastGlobalMigration) continue;
 				const migration = globalMigrations[i];
+				const metadata = this.settingMetadata(migration.name);
+
+				// Skip migrations if the setting is stored in the database and thus
+				// probably can't be fetched from the root profile. This is, for example,
+				// the case on mobile.
+				if (metadata.storage !== SettingStorage.File) {
+					logger.info('Skipped global value migration -- setting is not stored as a file.');
+					continue;
+				}
 
 				logger.info(`Applying global migration: ${migration.name}`);
 				if (!migration.wasGlobal) {
