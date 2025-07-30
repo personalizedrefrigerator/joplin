@@ -8,8 +8,8 @@ import Note from '../../models/Note';
 import Setting from '../../models/Setting';
 import { FolderEntity } from '../database/types';
 import EncryptionService from '../e2ee/EncryptionService';
-import { PublicPrivateKeyPair, getPreferredAlgorithm, mkReencryptFromPasswordToPublicKey, mkReencryptFromPublicKeyToPassword } from '../e2ee/ppk/ppk';
-import { MasterKeyEntity, PublicKeyAlgorithm } from '../e2ee/types';
+import { PublicPrivateKeyPair, mkReencryptFromPasswordToPublicKey, mkReencryptFromPublicKeyToPassword } from '../e2ee/ppk/ppk';
+import { MasterKeyEntity } from '../e2ee/types';
 import { getMasterPassword } from '../e2ee/utils';
 import ResourceService from '../ResourceService';
 import { addMasterKey, getEncryptionEnabled, localSyncInfo } from '../synchronizer/syncInfoUtils';
@@ -334,30 +334,7 @@ export default class ShareService {
 	}
 
 	private async userPublicKey(userEmail: string): Promise<PublicPrivateKeyPair|''> {
-		// Joplin Server supports both a legacy API and a modern API for accessing keys.
-		// To allow sharing with old versions of Joplin Server, this method checks both APIs.
-		try {
-			const publicKeys = await this.api().exec('GET', `api/users/${encodeURIComponent(userEmail)}/public_keys`);
-			const publicKeyAlgorithms = publicKeys.map((key: unknown) => {
-				if (typeof key !== 'object') {
-					throw new Error(`Invalid key: type: ${typeof key}`);
-				}
-				if (!('algorithm' in key)) {
-					throw new Error('Invalid key: Missing algorithm property.');
-				}
-
-				return key.algorithm as PublicKeyAlgorithm;
-			});
-			const preferredAlgorithm = getPreferredAlgorithm(publicKeyAlgorithms);
-
-			if (preferredAlgorithm) {
-				return publicKeys.find((key: PublicPrivateKeyPair) => key.algorithm === preferredAlgorithm);
-			}
-		} catch (error) {
-			logger.info('Failed to access new public key API. Falling back to the legacy API. Error: ', error);
-		}
-
-		return this.api().exec('GET', `api/users/${encodeURIComponent(userEmail)}/public_key`);
+		return await this.api().exec('GET', `api/users/${encodeURIComponent(userEmail)}/public_key`);
 	}
 
 	public async addShareRecipient(shareId: string, masterKeyId: string, recipientEmail: string, permissions: SharePermissions) {
