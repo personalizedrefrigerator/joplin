@@ -36,7 +36,6 @@ router.get('api/users/:id/public_key', async (path: SubPath, ctx: AppContext) =>
 
 	const ppk = await ctx.joplin.models.user().publicPrivateKey(user.id);
 	if (!ppk) return '';
-	if (typeof ppk !== 'object') return '';
 
 	return {
 		id: ppk.id,

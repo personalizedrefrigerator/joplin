@@ -1,19 +1,7 @@
 import { User } from '../../services/database/types';
 import { deleteApi, getApi, patchApi, postApi } from '../../utils/testing/apiUtils';
-import { beforeAllDb, afterAllTests, beforeEachDb, createUserAndSession, models, expectHttpError, createSyncTargetInfo } from '../../utils/testing/testUtils';
+import { beforeAllDb, afterAllTests, beforeEachDb, createUserAndSession, models, expectHttpError } from '../../utils/testing/testUtils';
 import { ErrorForbidden } from '../../utils/errors';
-import { PublicKeyAlgorithm } from '@joplin/lib/services/e2ee/types';
-
-
-const mockPublicKeyOfType = (type: PublicKeyAlgorithm, id: string) => ({
-	id,
-	keySize: 4096,
-	publicKey: `...public ${type}...`,
-	privateKey: `...private ${type}...`,
-	algorithm: type,
-	createdTime: 1234,
-});
-
 
 describe('api/users', () => {
 
@@ -116,28 +104,4 @@ describe('api/users', () => {
 		expect(reloadedUser.full_name).toBe('New Name');
 	});
 
-	test('should return the algorithm when accessing public keys (%j)', async () => {
-		const { session, user } = await createUserAndSession(1, false);
-
-		const fullLegacyKey = mockPublicKeyOfType(PublicKeyAlgorithm.RsaLegacy, 'test-id');
-		await createSyncTargetInfo(user, {
-			ppk: { value: fullLegacyKey },
-		});
-
-		expect(await getApi(session.id, `users/${user.email}/public_key`)).toMatchObject({
-			algorithm: PublicKeyAlgorithm.RsaLegacy,
-		});
-	});
-
-	test('should return the empty string when accessing an invalid public key', async () => {
-		const { session, user } = await createUserAndSession(1, false);
-
-		await createSyncTargetInfo(user, {
-			ppk: {
-				value: 5,
-			},
-		});
-
-		expect(await getApi(session.id, `users/${user.email}/public_key`)).toBe('');
-	});
 });
