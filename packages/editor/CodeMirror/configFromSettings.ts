@@ -88,7 +88,7 @@ const configFromSettings = (settings: EditorSettings, onEditorEvent: OnEventCall
 	}
 
 	if (settings.inlineRenderingEnabled) {
-		extensions.push(renderingExtension(settings.themeData));
+		extensions.push(renderingExtension());
 	}
 
 	if (settings.linkTooltipEnabled) {

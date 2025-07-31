@@ -1013,7 +1013,6 @@ packages/editor/CodeMirror/extensions/markdownMathExtension.js
 packages/editor/CodeMirror/extensions/overwriteModeExtension.test.js
 packages/editor/CodeMirror/extensions/overwriteModeExtension.js
 packages/editor/CodeMirror/extensions/rendering/addFormattingClasses.js
-packages/editor/CodeMirror/extensions/rendering/listIndentationExtension.js
 packages/editor/CodeMirror/extensions/rendering/renderingExtension.js
 packages/editor/CodeMirror/extensions/rendering/replaceBulletLists.js
 packages/editor/CodeMirror/extensions/rendering/replaceCheckboxes.js
@@ -1027,16 +1026,12 @@ packages/editor/CodeMirror/extensions/rendering/utils/nodeIntersectsSelection.js
 packages/editor/CodeMirror/extensions/searchExtension.js
 packages/editor/CodeMirror/extensions/selectedNoteIdExtension.js
 packages/editor/CodeMirror/getScrollFraction.js
-packages/editor/CodeMirror/extensions/searchExtension.js
-packages/editor/CodeMirror/extensions/selectedNoteIdExtension.js
-packages/editor/CodeMirror/getScrollFraction.js
 packages/editor/CodeMirror/index.js
 packages/editor/CodeMirror/pluginApi/PluginLoader.js
 packages/editor/CodeMirror/pluginApi/codeMirrorRequire.js
 packages/editor/CodeMirror/pluginApi/customEditorCompletion.test.js
 packages/editor/CodeMirror/pluginApi/customEditorCompletion.js
 packages/editor/CodeMirror/testing/createEditorControl.js
-packages/editor/CodeMirror/testing/createEditorSettings.js
 packages/editor/CodeMirror/testing/createTestEditor.js
 packages/editor/CodeMirror/testing/findNodesWithName.js
 packages/editor/CodeMirror/testing/forceFullParse.js
