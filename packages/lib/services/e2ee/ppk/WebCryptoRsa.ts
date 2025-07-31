@@ -1,7 +1,13 @@
+import type { webcrypto } from 'node:crypto';
 import { PublicKeyCrypto } from '../types';
 
 export type WebCryptoSlice = {
-	subtle: Pick<SubtleCrypto, 'generateKey'|'importKey'|'encrypt'|'decrypt'|'exportKey'>;
+	subtle: Pick<
+		// Only allow functionality compatible with both NodeJS and web:
+		SubtleCrypto|webcrypto.SubtleCrypto,
+		// Restrict to methods that are known to be supported on mobile:
+		'generateKey'|'importKey'|'encrypt'|'decrypt'|'exportKey'
+	>;
 };
 
 interface KeyPair {

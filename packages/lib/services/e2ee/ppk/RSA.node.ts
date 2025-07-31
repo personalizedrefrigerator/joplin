@@ -1,6 +1,7 @@
 import { PublicKeyAlgorithm, PublicKeyCrypto, PublicKeyCryptoProvider } from '../types';
 import * as NodeRSA from 'node-rsa';
 import WebCryptoRsa from './WebCryptoRsa';
+import { webcrypto } from 'node:crypto';
 
 const legacyRSAOptions: NodeRSA.Options = {
 	// Must use pkcs1 otherwise any data encrypted with NodeRSA will crash the
@@ -53,7 +54,7 @@ const legacyRsa: PublicKeyCrypto<NodeRSA> = {
 
 };
 
-const webCryptoRsa = new WebCryptoRsa(crypto);
+const webCryptoRsa = new WebCryptoRsa(webcrypto);
 
 const rsa: PublicKeyCryptoProvider = {
 	from: (algorithm) => {
