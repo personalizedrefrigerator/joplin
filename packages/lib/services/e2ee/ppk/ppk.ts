@@ -56,7 +56,7 @@ export const rsa = (): PublicKeyCryptoProvider => {
 // For example "[rsa-v2]...some-public-key-here..."
 // This function extracts the algorithm prefix from the given raw public key.
 const splitPpkPublicKey = (publicKey: PublicKey) => {
-	const algorithmMatch = publicKey.match(/^([^;]+;)/);
+	const algorithmMatch = publicKey.match(/^([^; ]+;)/);
 
 	let algorithm = PublicKeyAlgorithm.RsaLegacy;
 	if (algorithmMatch) {
