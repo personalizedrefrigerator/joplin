@@ -19,7 +19,25 @@ export interface PublicPrivateKeyPair {
 	createdTime: number;
 }
 
-const defaultPpkAlgorithm = PublicKeyAlgorithm.RsaV2;
+// To indicate that clients should migrate to a new PublicKeyAlgorithm, add it to the end of
+// "ppkMigrations".
+let ppkMigrations = [
+	PublicKeyAlgorithm.RsaLegacy,
+	PublicKeyAlgorithm.RsaV2,
+];
+const getDefaultPpkAlgorithm = () => ppkMigrations[ppkMigrations.length - 1];
+
+// Exported for testing purposes
+export const testing__setPpkMigrations_ = (migrations: PublicKeyAlgorithm[]) => {
+	const original = ppkMigrations;
+	ppkMigrations = migrations;
+
+	return {
+		reset: () => {
+			ppkMigrations = original;
+		},
+	};
+};
 
 let rsa_: PublicKeyCryptoProvider = null;
 
@@ -27,6 +45,7 @@ export const setRSA = (rsa: PublicKeyCryptoProvider) => {
 	rsa_ = rsa;
 };
 
+// Exported for testing purposes
 export const rsa = (): PublicKeyCryptoProvider => {
 	if (!rsa_) throw new Error('RSA handler has not been set!!');
 	return rsa_;
@@ -99,7 +118,7 @@ export const generateKeyPairWithAlgorithm = async (algorithm: PublicKeyAlgorithm
 };
 
 export async function generateKeyPair(encryptionService: EncryptionService, password: string): Promise<PublicPrivateKeyPair> {
-	return generateKeyPairWithAlgorithm(defaultPpkAlgorithm, encryptionService, password);
+	return generateKeyPairWithAlgorithm(getDefaultPpkAlgorithm(), encryptionService, password);
 }
 
 export async function pkReencryptPrivateKey(encryptionService: EncryptionService, ppk: PublicPrivateKeyPair, decryptionPassword: string, encryptionPassword: string): Promise<PublicPrivateKeyPair> {
@@ -125,7 +144,10 @@ export async function ppkPasswordIsValid(service: EncryptionService, ppk: Public
 
 export const shouldUpdatePpk = (oldPpk: PublicPrivateKeyPair) => {
 	const algorithm = getPpkAlgorithm(oldPpk);
-	return algorithm !== defaultPpkAlgorithm && rsa().supportsAlgorithm(defaultPpkAlgorithm);
+	const migrationIndex = ppkMigrations.indexOf(algorithm);
+	const isUpToDate = algorithm === getDefaultPpkAlgorithm();
+
+	return migrationIndex > -1 && !isUpToDate && rsa().supportsAlgorithm(getDefaultPpkAlgorithm());
 };
 
 type KeyPair = VirtualOpaqueType<'ppk.keyPair'>;

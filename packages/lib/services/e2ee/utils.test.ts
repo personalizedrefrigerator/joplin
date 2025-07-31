@@ -3,7 +3,7 @@ import MasterKey from '../../models/MasterKey';
 import { activeMasterKeySanityCheck, migrateMasterPassword, migratePpk, resetMasterPassword, showMissingMasterKeyMessage, updateMasterPassword } from './utils';
 import { localSyncInfo, masterKeyById, masterKeyEnabled, saveLocalSyncInfo, setActiveMasterKeyId, setMasterKeyEnabled, setPpk } from '../synchronizer/syncInfoUtils';
 import Setting from '../../models/Setting';
-import { generateKeyPair, generateKeyPairWithAlgorithm, getPpkAlgorithm, ppkPasswordIsValid } from './ppk/ppk';
+import { generateKeyPair, generateKeyPairWithAlgorithm, getPpkAlgorithm, ppkPasswordIsValid, testing__setPpkMigrations_ } from './ppk/ppk';
 import { PublicKeyAlgorithm } from './types';
 
 describe('e2ee/utils', () => {
@@ -44,15 +44,35 @@ describe('e2ee/utils', () => {
 	});
 
 	it('should do ppk migration', async () => {
+		const { reset } = testing__setPpkMigrations_([PublicKeyAlgorithm.RsaLegacy, PublicKeyAlgorithm.RsaV2]);
+
+		try {
+			const syncInfo = localSyncInfo();
+			const testPassword = 'test--TEST';
+			Setting.setValue('encryption.masterPassword', testPassword);
+			syncInfo.ppk = await generateKeyPairWithAlgorithm(PublicKeyAlgorithm.RsaLegacy, encryptionService(), testPassword);
+			saveLocalSyncInfo(syncInfo);
+
+			expect(getPpkAlgorithm(localSyncInfo().ppk)).toBe(PublicKeyAlgorithm.RsaLegacy);
+			await migratePpk();
+			expect(getPpkAlgorithm(localSyncInfo().ppk)).toBe(PublicKeyAlgorithm.RsaV2);
+		} finally {
+			reset();
+		}
+	});
+
+	it('should not migrate ppk if the key is up-to-date', async () => {
 		const syncInfo = localSyncInfo();
-		const testPassword = 'test--TEST';
+		const testPassword = 'test 🔑';
 		Setting.setValue('encryption.masterPassword', testPassword);
-		syncInfo.ppk = await generateKeyPairWithAlgorithm(PublicKeyAlgorithm.RsaLegacy, encryptionService(), testPassword);
+		const originalPpk = await generateKeyPair(encryptionService(), testPassword);
+		syncInfo.ppk = originalPpk;
 		saveLocalSyncInfo(syncInfo);
 
-		expect(getPpkAlgorithm(localSyncInfo().ppk)).toBe(PublicKeyAlgorithm.RsaLegacy);
+		const lastChangeTime = localSyncInfo().keyTimestamp('ppk');
 		await migratePpk();
-		expect(getPpkAlgorithm(localSyncInfo().ppk)).toBe(PublicKeyAlgorithm.RsaV2);
+		expect(localSyncInfo().keyTimestamp('ppk')).toBe(lastChangeTime);
+		expect(localSyncInfo().ppk.createdTime).toBe(originalPpk.createdTime);
 	});
 
 	it('should do the master password migration', async () => {
