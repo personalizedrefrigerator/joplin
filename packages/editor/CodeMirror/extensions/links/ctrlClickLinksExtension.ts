@@ -25,8 +25,12 @@ const ctrlClickLinksExtension = (onOpenExternalLink: OnOpenLink) => {
 					if (event.ctrlKey) {
 						const target = view.posAtCoords(event);
 						const url = getUrlAtPosition(target, syntaxTree(view.state), view.state);
+						const hasMultipleCursors = view.state.selection.ranges.length > 1;
 
-						if (url) {
+						// The default CodeMirror action for ctrl-click is to add another cursor
+						// to the document. If the user already has multiple cursors, assume that
+						// the ctrl-click action is intended to add another.
+						if (url && !hasMultipleCursors) {
 							openLink(url.url, view, onOpenExternalLink);
 							event.preventDefault();
 							return true;
