@@ -556,6 +556,16 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 			isGlobal: true,
 		},
 
+		'ocr.handwrittenTextDriverEnabled': {
+			value: true,
+			type: SettingItemType.Bool,
+			public: true,
+			appTypes: [AppType.Desktop],
+			label: () => _('Enable handwritten transcription'),
+			storage: SettingStorage.File,
+			isGlobal: true,
+		},
+
 		'ocr.languageDataPath': {
 			value: '',
 			type: SettingItemType.String,
