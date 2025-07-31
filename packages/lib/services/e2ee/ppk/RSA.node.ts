@@ -56,7 +56,7 @@ const legacyRsa: PublicKeyCrypto<NodeRSA> = {
 
 const webCryptoRsa = new WebCryptoRsa(
 	// Cast: Old versions of @types/node don't include crypto.subtle:
-	webcrypto as WebCryptoSlice,
+	webcrypto as unknown as WebCryptoSlice,
 );
 
 const rsa: PublicKeyCryptoProvider = {
