@@ -32,6 +32,7 @@ export const ctrlKeyDownField = StateField.define<boolean>({
 					keydown: onEvent,
 					keyup: onEvent,
 					mouseenter: onEvent,
+					mousemove: onEvent,
 				}),
 			];
 		})(),
