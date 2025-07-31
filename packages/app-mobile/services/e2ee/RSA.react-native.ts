@@ -1,5 +1,5 @@
 import WebCryptoRsa, { WebCryptoSlice } from '@joplin/lib/services/e2ee/ppk/WebCryptoRsa';
-import { PublicKeyAlgorithm, PublicKeyCrypto, RSA } from '@joplin/lib/services/e2ee/types';
+import { PublicKeyAlgorithm, PublicKeyCrypto, PublicKeyCryptoProvider } from '@joplin/lib/services/e2ee/types';
 import QuickCrypto from 'react-native-quick-crypto';
 const RnRSA = require('react-native-rsa-native').RSA;
 
@@ -89,8 +89,8 @@ const webCryptoRsa = new WebCryptoRsa({
 	subtle: QuickCrypto.subtle,
 } as WebCryptoSlice);
 
-const rsa: RSA = {
-	fromAlgorithm: (algorithm: PublicKeyAlgorithm): PublicKeyCrypto => {
+const rsa: PublicKeyCryptoProvider = {
+	from: (algorithm: PublicKeyAlgorithm): PublicKeyCrypto => {
 		if (algorithm === PublicKeyAlgorithm.RsaLegacy) {
 			return legacyRsa;
 		} else if (algorithm === PublicKeyAlgorithm.RsaV2) {
@@ -100,23 +100,8 @@ const rsa: RSA = {
 			throw new Error(`Unsupported public key algorithm: ${exhaustivenessCheck}`);
 		}
 	},
-	algorithmInfo: (algorithm) => {
-		if (algorithm === PublicKeyAlgorithm.RsaLegacy) {
-			return {
-				supported: true,
-				deprecated: true,
-			};
-		} else if (algorithm === PublicKeyAlgorithm.RsaV2) {
-			return {
-				supported: true,
-				deprecated: false,
-			};
-		} else {
-			return {
-				supported: false,
-				deprecated: undefined,
-			};
-		}
+	supportsAlgorithm: (algorithm) => {
+		return algorithm === PublicKeyAlgorithm.RsaLegacy || algorithm === PublicKeyAlgorithm.RsaV2;
 	},
 };
 

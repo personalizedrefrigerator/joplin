@@ -27,13 +27,11 @@ interface DecryptedMasterKey {
 	plainText: string;
 }
 
-export interface EncryptionCustomHandler {
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	context?: any;
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	encrypt(context: any, hexaBytes: string, password: string): Promise<string>;
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	decrypt(context: any, data: string, password: string): Promise<string>;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
+export interface EncryptionCustomHandler<Context = any> {
+	context?: Context;
+	encrypt(context: Context, hexaBytes: string, password: string): Promise<string>;
+	decrypt(context: Context, data: string, password: string): Promise<string>;
 }
 
 export enum EncryptionMethod {

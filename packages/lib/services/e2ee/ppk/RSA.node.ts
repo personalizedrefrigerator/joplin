@@ -1,4 +1,4 @@
-import { PublicKeyAlgorithm, PublicKeyCrypto, RSA, RSAKeyPair } from '../types';
+import { PublicKeyAlgorithm, PublicKeyCrypto, PublicKeyCryptoProvider } from '../types';
 import * as NodeRSA from 'node-rsa';
 import WebCryptoRsa from './WebCryptoRsa';
 
@@ -9,7 +9,7 @@ const legacyRSAOptions: NodeRSA.Options = {
 	encryptionScheme: 'pkcs1',
 };
 
-const legacyRsa: PublicKeyCrypto = {
+const legacyRsa: PublicKeyCrypto<NodeRSA> = {
 
 	generateKeyPair: async () => {
 		const keys = new NodeRSA();
@@ -24,7 +24,7 @@ const legacyRsa: PublicKeyCrypto = {
 		return { keyPair: keys, keySize };
 	},
 
-	loadKeys: async (publicKey: string, privateKey: string): Promise<RSAKeyPair> => {
+	loadKeys: async (publicKey: string, privateKey: string) => {
 		const keys = new NodeRSA();
 		keys.setOptions(legacyRSAOptions);
 		// Don't specify the import format, and let it auto-detect because
@@ -34,19 +34,20 @@ const legacyRsa: PublicKeyCrypto = {
 		return keys;
 	},
 
-	encrypt: async (plaintextUtf8: string, rsaKeyPair: RSAKeyPair): Promise<string> => {
-		return rsaKeyPair.encrypt(plaintextUtf8, 'base64', 'utf8');
+	encrypt: async (plaintextUtf8: string, rsaKeyPair: NodeRSA) => {
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Workaround for incorrect types after improving type safety
+		return rsaKeyPair.encrypt(plaintextUtf8 as any, 'base64', 'utf8');
 	},
 
-	decrypt: async (ciphertextBase64: string, rsaKeyPair: RSAKeyPair): Promise<string> => {
+	decrypt: async (ciphertextBase64: string, rsaKeyPair: NodeRSA) => {
 		return rsaKeyPair.decrypt(ciphertextBase64, 'utf8');
 	},
 
-	publicKey: async (rsaKeyPair: RSAKeyPair) => {
+	publicKey: async (rsaKeyPair: NodeRSA) => {
 		return rsaKeyPair.exportKey('pkcs1-public-pem');
 	},
 
-	privateKey: async (rsaKeyPair: RSAKeyPair) => {
+	privateKey: async (rsaKeyPair: NodeRSA) => {
 		return rsaKeyPair.exportKey('pkcs1-private-pem');
 	},
 
@@ -54,8 +55,8 @@ const legacyRsa: PublicKeyCrypto = {
 
 const webCryptoRsa = new WebCryptoRsa(crypto);
 
-const rsa: RSA = {
-	fromAlgorithm: (algorithm) => {
+const rsa: PublicKeyCryptoProvider = {
+	from: (algorithm) => {
 		if (algorithm === PublicKeyAlgorithm.RsaLegacy) {
 			return legacyRsa;
 		} else if (algorithm === PublicKeyAlgorithm.RsaV2) {
@@ -65,14 +66,8 @@ const rsa: RSA = {
 			throw new Error(`Unknown algorithm: ${exhaustivenessCheck}`);
 		}
 	},
-	algorithmInfo: (algorithm) => {
-		if (algorithm === PublicKeyAlgorithm.RsaLegacy) {
-			return { supported: true, deprecated: true };
-		} else if (algorithm === PublicKeyAlgorithm.RsaV2) {
-			return { supported: true, deprecated: false };
-		} else {
-			return { supported: false, deprecated: undefined };
-		}
+	supportsAlgorithm: (algorithm) => {
+		return algorithm === PublicKeyAlgorithm.RsaLegacy || algorithm === PublicKeyAlgorithm.RsaV2;
 	},
 };
 

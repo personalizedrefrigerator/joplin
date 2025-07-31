@@ -1,6 +1,7 @@
+import { VirtualOpaqueType } from '@joplin/utils/types';
 import uuid from '../../../uuid';
 import EncryptionService, { EncryptionCustomHandler, EncryptionMethod } from '../EncryptionService';
-import { MasterKeyEntity, PublicKeyAlgorithm, RSA, RSAKeyPair } from '../types';
+import { MasterKeyEntity, PublicKeyAlgorithm, PublicKeyCryptoProvider } from '../types';
 
 interface PrivateKey {
 	encryptionMethod: EncryptionMethod;
@@ -24,13 +25,13 @@ export type PublicPrivateKeyPairs = {
 
 const defaultPpkAlgorithm = PublicKeyAlgorithm.RsaV2;
 
-let rsa_: RSA = null;
+let rsa_: PublicKeyCryptoProvider = null;
 
-export const setRSA = (rsa: RSA) => {
+export const setRSA = (rsa: PublicKeyCryptoProvider) => {
 	rsa_ = rsa;
 };
 
-export const rsa = (): RSA => {
+export const rsa = (): PublicKeyCryptoProvider => {
 	if (!rsa_) throw new Error('RSA handler has not been set!!');
 	return rsa_;
 };
@@ -59,16 +60,16 @@ export async function decryptPrivateKey(encryptionService: EncryptionService, en
 }
 
 export const generateKeyPairWithAlgorithm = async (algorithm: PublicKeyAlgorithm, encryptionService: EncryptionService, password: string): Promise<PublicPrivateKeyPair> => {
-	const { keyPair, keySize } = await rsa().fromAlgorithm(algorithm).generateKeyPair();
+	const { keyPair, keySize } = await rsa().from(algorithm).generateKeyPair();
 
 	return {
 		id: uuid.createNano(),
 		algorithm,
 		keySize,
 		privateKey: await encryptPrivateKey(
-			encryptionService, password, await rsa().fromAlgorithm(algorithm).privateKey(keyPair),
+			encryptionService, password, await rsa().from(algorithm).privateKey(keyPair),
 		),
-		publicKey: await rsa().fromAlgorithm(algorithm).publicKey(keyPair),
+		publicKey: await rsa().from(algorithm).publicKey(keyPair),
 		createdTime: Date.now(),
 	};
 };
@@ -99,21 +100,23 @@ export async function ppkPasswordIsValid(service: EncryptionService, ppk: Public
 }
 
 export const shouldUpdatePpk = (oldPpk: PublicPrivateKeyPair) => {
-	return oldPpk.algorithm !== defaultPpkAlgorithm && rsa().algorithmInfo(defaultPpkAlgorithm).supported;
+	return oldPpk.algorithm !== defaultPpkAlgorithm && rsa().supportsAlgorithm(defaultPpkAlgorithm);
 };
 
-async function loadPpk(service: EncryptionService, ppk: PublicPrivateKeyPair, password: string): Promise<RSAKeyPair> {
+type KeyPair = VirtualOpaqueType<'ppk.keyPair'>;
+
+async function loadPpk(service: EncryptionService, ppk: PublicPrivateKeyPair, password: string): Promise<KeyPair> {
 	const privateKeyPlainText = await decryptPrivateKey(service, ppk.privateKey, password);
-	return rsa().fromAlgorithm(ppkToAlgorithm(ppk)).loadKeys(ppk.publicKey, privateKeyPlainText, ppk.keySize);
+	return rsa().from(ppkToAlgorithm(ppk)).loadKeys(ppk.publicKey, privateKeyPlainText, ppk.keySize);
 }
 
-async function loadPublicKey(algorithm: PublicKeyAlgorithm, publicKey: PublicKey, keySize: number): Promise<RSAKeyPair> {
-	return rsa().fromAlgorithm(algorithm).loadKeys(publicKey, '', keySize);
+async function loadPublicKey(algorithm: PublicKeyAlgorithm, publicKey: PublicKey, keySize: number): Promise<KeyPair> {
+	return rsa().from(algorithm).loadKeys(publicKey, '', keySize);
 }
 
-function ppkEncryptionHandler(algorithm: PublicKeyAlgorithm, ppkId: string, rsaKeyPair: RSAKeyPair): EncryptionCustomHandler {
+function ppkEncryptionHandler(algorithm: PublicKeyAlgorithm, ppkId: string, rsaKeyPair: KeyPair): EncryptionCustomHandler {
 	interface Context {
-		rsaKeyPair: RSAKeyPair;
+		rsaKeyPair: KeyPair;
 		ppkId: string;
 		algorithm: PublicKeyAlgorithm;
 	}
@@ -127,13 +130,13 @@ function ppkEncryptionHandler(algorithm: PublicKeyAlgorithm, ppkId: string, rsaK
 		encrypt: async (context: Context, hexaBytes: string, _password: string): Promise<string> => {
 			return JSON.stringify({
 				ppkId: context.ppkId,
-				ciphertext: await rsa().fromAlgorithm(context.algorithm).encrypt(hexaBytes, context.rsaKeyPair),
+				ciphertext: await rsa().from(context.algorithm).encrypt(hexaBytes, context.rsaKeyPair),
 			});
 		},
 		decrypt: async (context: Context, ciphertext: string, _password: string): Promise<string> => {
 			const parsed = JSON.parse(ciphertext);
 			if (parsed.ppkId !== context.ppkId) throw new Error(`Needs private key ${parsed.ppkId} to decrypt, but using ${context.ppkId}`);
-			return rsa().fromAlgorithm(context.algorithm).decrypt(parsed.ciphertext, context.rsaKeyPair);
+			return rsa().from(context.algorithm).decrypt(parsed.ciphertext, context.rsaKeyPair);
 		},
 	};
 }

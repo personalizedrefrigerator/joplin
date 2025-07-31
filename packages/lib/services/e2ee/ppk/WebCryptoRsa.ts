@@ -19,7 +19,7 @@ const isLowercaseHexadecimalString = (text: string) => {
 };
 
 const modulusLength = 4096;
-export default class WebCryptoRsa implements PublicKeyCrypto {
+export default class WebCryptoRsa implements PublicKeyCrypto<CryptoKeyPair> {
 	public constructor(private webCrypto_: WebCryptoSlice) {}
 
 	public async generateKeyPair() {
@@ -37,7 +37,7 @@ export default class WebCryptoRsa implements PublicKeyCrypto {
 		}, true, ['encrypt', 'decrypt']);
 
 		return {
-			keyPair: keyPair as CryptoKeyPair,
+			keyPair,
 			keySize: modulusLength,
 		};
 	}
