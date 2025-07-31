@@ -240,7 +240,7 @@ describe('ShareService', () => {
 		const ppk = await generateKeyPair(encryptionService(), '111111');
 		setPpk(ppk);
 		const recipientPpk = await generateKeyPair(encryptionService(), '222222');
-		expect(recipientPpk).not.toBe(ppk.id);
+		expect(ppk.id).not.toBe(recipientPpk.id);
 
 		let uploadedEmail = '';
 		let uploadedMasterKey: MasterKeyEntity = null;
