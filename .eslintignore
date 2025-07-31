@@ -997,13 +997,16 @@ packages/editor/CodeMirror/editorCommands/sortSelectedLines.test.js
 packages/editor/CodeMirror/editorCommands/sortSelectedLines.js
 packages/editor/CodeMirror/editorCommands/supportsCommand.js
 packages/editor/CodeMirror/extensions/biDirectionalTextExtension.js
+packages/editor/CodeMirror/extensions/ctrlKeyStateClassExtension.js
 packages/editor/CodeMirror/extensions/keyUpHandlerExtension.js
+packages/editor/CodeMirror/extensions/links/ctrlClickLinksExtension.js
 packages/editor/CodeMirror/extensions/links/followLinkTooltipExtension.test.js
 packages/editor/CodeMirror/extensions/links/followLinkTooltipExtension.js
 packages/editor/CodeMirror/extensions/links/referenceLinksStateField.js
 packages/editor/CodeMirror/extensions/links/utils/findLineMatchingLink.test.js
 packages/editor/CodeMirror/extensions/links/utils/findLineMatchingLink.js
 packages/editor/CodeMirror/extensions/links/utils/getUrlAtPosition.js
+packages/editor/CodeMirror/extensions/links/utils/openLink.js
 packages/editor/CodeMirror/extensions/markdownDecorationExtension.test.js
 packages/editor/CodeMirror/extensions/markdownDecorationExtension.js
 packages/editor/CodeMirror/extensions/markdownHighlightExtension.test.js

@@ -2,8 +2,9 @@ import { syntaxTree } from '@codemirror/language';
 import { EditorState, StateField } from '@codemirror/state';
 import { EditorView, showTooltip, Tooltip } from '@codemirror/view';
 import referenceLinkStateField from './referenceLinksStateField';
-import findLineMatchingLink from './utils/findLineMatchingLink';
 import getUrlAtPosition from './utils/getUrlAtPosition';
+import openLink from './utils/openLink';
+import ctrlClickLinksExtension from './ctrlClickLinksExtension';
 
 
 type OnOpenLink = (url: string, view: EditorView)=> void;
@@ -40,31 +41,18 @@ const getLinkTooltips = (onOpenLink: OnOpenLink, state: EditorState) => {
 };
 
 const followLinkTooltip = (onOpenExternalLink: OnOpenLink) => {
-	const openLink = (link: string, view: EditorView) => {
-		const targetLine = findLineMatchingLink(link, view.state);
-		if (targetLine) {
-			view.dispatch({
-				selection: { anchor: targetLine.to },
-				scrollIntoView: true,
-				effects: [
-					EditorView.announce.of(`Jumped to line ${targetLine.number}`),
-				],
-			});
-			// eslint-disable-next-line no-restricted-properties -- Old code from before rule was applied
-			view.focus();
-		} else {
-			onOpenExternalLink(link, view);
-		}
+	const onOpenLink = (link: string, view: EditorView) => {
+		openLink(link, view, onOpenExternalLink);
 	};
 
 	const followLinkTooltipField = StateField.define<readonly Tooltip[]>({
-		create: state => getLinkTooltips(openLink, state),
+		create: state => getLinkTooltips(onOpenLink, state),
 		update: (tooltips, transaction) => {
 			if (!transaction.docChanged && !transaction.selection) {
 				return tooltips;
 			}
 
-			return getLinkTooltips(openLink, transaction.state);
+			return getLinkTooltips(onOpenLink, transaction.state);
 		},
 		provide: field => {
 			const tooltipsFromState = (state: EditorState) => state.field(field);
@@ -91,6 +79,7 @@ const followLinkTooltip = (onOpenExternalLink: OnOpenLink) => {
 			},
 		}),
 		followLinkTooltipField,
+		ctrlClickLinksExtension(onOpenExternalLink),
 	];
 };
 
