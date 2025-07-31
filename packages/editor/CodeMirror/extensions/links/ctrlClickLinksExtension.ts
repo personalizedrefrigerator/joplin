@@ -22,7 +22,7 @@ const ctrlClickLinksExtension = (onOpenExternalLink: OnOpenLink) => {
 		Prec.high([
 			EditorView.domEventHandlers({
 				mousedown: (event: MouseEvent, view: EditorView) => {
-					if (event.ctrlKey) {
+					if (event.ctrlKey || event.metaKey) {
 						const target = view.posAtCoords(event);
 						const url = getUrlAtPosition(target, syntaxTree(view.state), view.state);
 						const hasMultipleCursors = view.state.selection.ranges.length > 1;

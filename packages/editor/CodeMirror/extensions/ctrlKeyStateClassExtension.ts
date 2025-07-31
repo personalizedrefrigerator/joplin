@@ -18,10 +18,11 @@ export const ctrlKeyDownField = StateField.define<boolean>({
 		})),
 		...(() => {
 			const onEvent = (event: KeyboardEvent|MouseEvent, view: EditorView) => {
-				if (event.ctrlKey !== view.state.field(ctrlKeyDownField)) {
+				const ctrlOrCmdPressed = event.ctrlKey || event.metaKey;
+				if (ctrlOrCmdPressed !== view.state.field(ctrlKeyDownField)) {
 					view.dispatch({
 						effects: [
-							ctrlKeyToggleEffect.of(event.ctrlKey),
+							ctrlKeyToggleEffect.of(ctrlOrCmdPressed),
 						],
 					});
 				}
