@@ -23,7 +23,8 @@ export interface PublicPrivateKeyPair {
 // "ppkMigrations".
 let ppkMigrations = [
 	PublicKeyAlgorithm.RsaLegacy,
-	PublicKeyAlgorithm.RsaV2,
+	// Uncomment to migrate to RSA v2
+	// PublicKeyAlgorithm.RsaV2,
 ];
 const getDefaultPpkAlgorithm = () => ppkMigrations[ppkMigrations.length - 1];
 
