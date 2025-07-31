@@ -3,7 +3,7 @@ import MasterKey from '../../models/MasterKey';
 import { activeMasterKeySanityCheck, migrateMasterPassword, migratePpk, resetMasterPassword, showMissingMasterKeyMessage, updateMasterPassword } from './utils';
 import { localSyncInfo, masterKeyById, masterKeyEnabled, saveLocalSyncInfo, setActiveMasterKeyId, setMasterKeyEnabled, setPpk } from '../synchronizer/syncInfoUtils';
 import Setting from '../../models/Setting';
-import { generateKeyPair, generateKeyPairWithAlgorithm, ppkPasswordIsValid } from './ppk/ppk';
+import { generateKeyPair, generateKeyPairWithAlgorithm, getPpkAlgorithm, ppkPasswordIsValid } from './ppk/ppk';
 import { PublicKeyAlgorithm } from './types';
 
 describe('e2ee/utils', () => {
@@ -50,9 +50,9 @@ describe('e2ee/utils', () => {
 		syncInfo.ppk = await generateKeyPairWithAlgorithm(PublicKeyAlgorithm.RsaLegacy, encryptionService(), testPassword);
 		saveLocalSyncInfo(syncInfo);
 
-		expect(localSyncInfo().ppk.algorithm).toBe(PublicKeyAlgorithm.RsaLegacy);
+		expect(getPpkAlgorithm(localSyncInfo().ppk)).toBe(PublicKeyAlgorithm.RsaLegacy);
 		await migratePpk();
-		expect(localSyncInfo().ppk.algorithm).toBe(PublicKeyAlgorithm.RsaV2);
+		expect(getPpkAlgorithm(localSyncInfo().ppk)).toBe(PublicKeyAlgorithm.RsaV2);
 	});
 
 	it('should do the master password migration', async () => {

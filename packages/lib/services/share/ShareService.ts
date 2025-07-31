@@ -8,7 +8,7 @@ import Note from '../../models/Note';
 import Setting from '../../models/Setting';
 import { FolderEntity } from '../database/types';
 import EncryptionService from '../e2ee/EncryptionService';
-import { PublicPrivateKeyPair, guessPpkAlgorithm, mkReencryptFromPasswordToPublicKey, mkReencryptFromPublicKeyToPassword } from '../e2ee/ppk/ppk';
+import { PublicPrivateKeyPair, mkReencryptFromPasswordToPublicKey, mkReencryptFromPublicKeyToPassword, supportsPpkAlgorithm } from '../e2ee/ppk/ppk';
 import { MasterKeyEntity } from '../e2ee/types';
 import { getMasterPassword } from '../e2ee/utils';
 import ResourceService from '../ResourceService';
@@ -111,6 +111,12 @@ export default class ShareService {
 
 			// Shouldn't happen
 			if (!syncInfo.ppk) throw new Error('Cannot share notebook because E2EE is enabled and no Public Private Key pair exists.');
+
+			// This can happen if using an outdated Joplin client, where the PPK
+			// was generated on a different device with a newer PPK implementation.
+			if (!supportsPpkAlgorithm(syncInfo.ppk)) {
+				throw new Error('The local public private key pair uses an unsupported algorithm. It may be necessary to upgrade Joplin or share from a different device.');
+			}
 
 			// TODO: handle "undefinedMasterPassword" error - show master password dialog
 			folderMasterKey = await this.encryptionService_.generateMasterKey(getMasterPassword());
@@ -334,12 +340,7 @@ export default class ShareService {
 	}
 
 	private async userPublicKey(userEmail: string): Promise<PublicPrivateKeyPair|''> {
-		const response = await this.api().exec('GET', `api/users/${encodeURIComponent(userEmail)}/public_key`);
-		return {
-			// Older versions of Joplin Server don't include the PPK algorithm in the response.
-			algorithm: response.algorithm ?? guessPpkAlgorithm(response),
-			...response,
-		};
+		return await this.api().exec('GET', `api/users/${encodeURIComponent(userEmail)}/public_key`);
 	}
 
 	public async addShareRecipient(shareId: string, masterKeyId: string, recipientEmail: string, permissions: SharePermissions) {

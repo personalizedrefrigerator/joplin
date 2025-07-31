@@ -40,7 +40,6 @@ router.get('api/users/:id/public_key', async (path: SubPath, ctx: AppContext) =>
 
 	return {
 		id: ppk.id,
-		algorithm: ppk.algorithm,
 		publicKey: ppk.publicKey,
 	};
 });

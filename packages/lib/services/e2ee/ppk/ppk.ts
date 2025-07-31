@@ -13,15 +13,11 @@ export type PublicKey = string;
 export interface PublicPrivateKeyPair {
 	id: string;
 	keySize: number;
+	// The raw public key + identifier
 	publicKey: PublicKey;
 	privateKey: PrivateKey;
-	algorithm: PublicKeyAlgorithm;
 	createdTime: number;
 }
-
-export type PublicPrivateKeyPairs = {
-	[algorithm in PublicKeyAlgorithm]?: PublicPrivateKeyPair;
-};
 
 const defaultPpkAlgorithm = PublicKeyAlgorithm.RsaV2;
 
@@ -36,16 +32,45 @@ export const rsa = (): PublicKeyCryptoProvider => {
 	return rsa_;
 };
 
-export const guessPpkAlgorithm = (ppk: PublicPrivateKeyPair) => {
-	if (ppk.publicKey.startsWith('-----BEGIN RSA')) {
-		return PublicKeyAlgorithm.RsaLegacy;
-	} else {
-		return PublicKeyAlgorithm.RsaV2;
+// Non-legacy encryption methods prefix the public key with the algorithm.
+// For example "[rsa-v2]...some-public-key-here..."
+// This function extracts the algorithm prefix from the given raw public key.
+const splitPpkPublicKey = (publicKey: PublicKey) => {
+	const algorithmMatch = publicKey.match(/^([^;]+;)/);
+
+	let algorithm = PublicKeyAlgorithm.RsaLegacy;
+	if (algorithmMatch) {
+		const algorithmNameAndSeparator = algorithmMatch[0];
+		const algorithmName = algorithmNameAndSeparator.replace(/[;]$/, '');
+
+		if (Object.values<string>(PublicKeyAlgorithm).includes(algorithmName)) {
+			algorithm = algorithmName as PublicKeyAlgorithm;
+		} else {
+			algorithm = PublicKeyAlgorithm.Unknown;
+		}
+
+		publicKey = publicKey.substring(algorithmNameAndSeparator.length);
 	}
+
+	return { algorithm, publicKey };
 };
 
-const ppkToAlgorithm = (ppk: PublicPrivateKeyPair) => {
-	return ppk.algorithm ?? guessPpkAlgorithm(ppk);
+const attachPpkAlgorithm = (publicKey: PublicKey, algorithm: PublicKeyAlgorithm): PublicKey => {
+	// Legacy PPK format didn't include the algorithm in the public key:
+	if (algorithm === PublicKeyAlgorithm.RsaLegacy) {
+		return publicKey;
+	}
+
+	return `${algorithm};${publicKey}`;
+};
+
+type KeyPairPublicKeySlice = { publicKey: PublicKey };
+export const getPpkAlgorithm = (ppk: KeyPairPublicKeySlice) => {
+	return splitPpkPublicKey(ppk.publicKey).algorithm;
+};
+
+export const supportsPpkAlgorithm = (ppk: KeyPairPublicKeySlice) => {
+	return rsa().supportsAlgorithm(getPpkAlgorithm(ppk));
 };
 
 async function encryptPrivateKey(encryptionService: EncryptionService, password: string, plainText: string): Promise<PrivateKey> {
@@ -64,12 +89,11 @@ export const generateKeyPairWithAlgorithm = async (algorithm: PublicKeyAlgorithm
 
 	return {
 		id: uuid.createNano(),
-		algorithm,
 		keySize,
 		privateKey: await encryptPrivateKey(
 			encryptionService, password, await rsa().from(algorithm).privateKey(keyPair),
 		),
-		publicKey: await rsa().from(algorithm).publicKey(keyPair),
+		publicKey: attachPpkAlgorithm(await rsa().from(algorithm).publicKey(keyPair), algorithm),
 		createdTime: Date.now(),
 	};
 };
@@ -100,21 +124,27 @@ export async function ppkPasswordIsValid(service: EncryptionService, ppk: Public
 }
 
 export const shouldUpdatePpk = (oldPpk: PublicPrivateKeyPair) => {
-	return oldPpk.algorithm !== defaultPpkAlgorithm && rsa().supportsAlgorithm(defaultPpkAlgorithm);
+	const algorithm = getPpkAlgorithm(oldPpk);
+	return algorithm !== defaultPpkAlgorithm && rsa().supportsAlgorithm(defaultPpkAlgorithm);
 };
 
 type KeyPair = VirtualOpaqueType<'ppk.keyPair'>;
 
+async function loadKeys(publicKey: PublicKey, privateKeyPlainText: string, keySize: number): Promise<KeyPair> {
+	const split = splitPpkPublicKey(publicKey);
+	return rsa().from(split.algorithm).loadKeys(split.publicKey, privateKeyPlainText, keySize);
+}
+
 async function loadPpk(service: EncryptionService, ppk: PublicPrivateKeyPair, password: string): Promise<KeyPair> {
 	const privateKeyPlainText = await decryptPrivateKey(service, ppk.privateKey, password);
-	return rsa().from(ppkToAlgorithm(ppk)).loadKeys(ppk.publicKey, privateKeyPlainText, ppk.keySize);
+	return loadKeys(ppk.publicKey, privateKeyPlainText, ppk.keySize);
 }
 
-async function loadPublicKey(algorithm: PublicKeyAlgorithm, publicKey: PublicKey, keySize: number): Promise<KeyPair> {
-	return rsa().from(algorithm).loadKeys(publicKey, '', keySize);
+async function loadPublicKey(publicKey: PublicKey, keySize: number): Promise<KeyPair> {
+	return loadKeys(publicKey, '', keySize);
 }
 
-function ppkEncryptionHandler(algorithm: PublicKeyAlgorithm, ppkId: string, rsaKeyPair: KeyPair): EncryptionCustomHandler {
+function ppkEncryptionHandler(ppk: PublicPrivateKeyPair, rsaKeyPair: KeyPair): EncryptionCustomHandler {
 	interface Context {
 		rsaKeyPair: KeyPair;
 		ppkId: string;
@@ -124,8 +154,8 @@ function ppkEncryptionHandler(algorithm: PublicKeyAlgorithm, ppkId: string, rsaK
 	return {
 		context: {
 			rsaKeyPair,
-			ppkId,
-			algorithm,
+			ppkId: ppk.id,
+			algorithm: getPpkAlgorithm(ppk),
 		},
 		encrypt: async (context: Context, hexaBytes: string, _password: string): Promise<string> => {
 			return JSON.stringify({
@@ -144,7 +174,7 @@ function ppkEncryptionHandler(algorithm: PublicKeyAlgorithm, ppkId: string, rsaK
 // Generates a master key and encrypts it using the provided PPK
 export async function ppkGenerateMasterKey(service: EncryptionService, ppk: PublicPrivateKeyPair, password: string): Promise<MasterKeyEntity> {
 	const nodeRSA = await loadPpk(service, ppk, password);
-	const handler = ppkEncryptionHandler(ppkToAlgorithm(ppk), ppk.id, nodeRSA);
+	const handler = ppkEncryptionHandler(ppk, nodeRSA);
 
 	return service.generateMasterKey('', {
 		encryptionMethod: EncryptionMethod.Custom,
@@ -155,7 +185,7 @@ export async function ppkGenerateMasterKey(service: EncryptionService, ppk: Publ
 // Decrypt the content of a master key that was encrypted using ppkGenerateMasterKey()
 export async function ppkDecryptMasterKeyContent(service: EncryptionService, masterKey: MasterKeyEntity, ppk: PublicPrivateKeyPair, password: string): Promise<string> {
 	const nodeRSA = await loadPpk(service, ppk, password);
-	const handler = ppkEncryptionHandler(ppkToAlgorithm(ppk), ppk.id, nodeRSA);
+	const handler = ppkEncryptionHandler(ppk, nodeRSA);
 
 	return service.decryptMasterKeyContent(masterKey, '', {
 		encryptionHandler: handler,
@@ -163,11 +193,8 @@ export async function ppkDecryptMasterKeyContent(service: EncryptionService, mas
 }
 
 export async function mkReencryptFromPasswordToPublicKey(service: EncryptionService, masterKey: MasterKeyEntity, decryptionPassword: string, encryptionPublicKey: PublicPrivateKeyPair): Promise<MasterKeyEntity> {
-	const algorithm = ppkToAlgorithm(encryptionPublicKey);
-	const loadedPublicKey = await loadPublicKey(
-		algorithm, encryptionPublicKey.publicKey, encryptionPublicKey.keySize,
-	);
-	const encryptionHandler = ppkEncryptionHandler(algorithm, encryptionPublicKey.id, loadedPublicKey);
+	const loadedPublicKey = await loadPublicKey(encryptionPublicKey.publicKey, encryptionPublicKey.keySize);
+	const encryptionHandler = ppkEncryptionHandler(encryptionPublicKey, loadedPublicKey);
 
 	const plainText = await service.decryptMasterKeyContent(masterKey, decryptionPassword);
 	const newContent = await service.encryptMasterKeyContent(EncryptionMethod.Custom, plainText, '', { encryptionHandler });
@@ -177,7 +204,7 @@ export async function mkReencryptFromPasswordToPublicKey(service: EncryptionServ
 
 export async function mkReencryptFromPublicKeyToPassword(service: EncryptionService, masterKey: MasterKeyEntity, decryptionPpk: PublicPrivateKeyPair, decryptionPassword: string, encryptionPassword: string): Promise<MasterKeyEntity> {
 	const decryptionHandler = ppkEncryptionHandler(
-		ppkToAlgorithm(decryptionPpk), decryptionPpk.id, await loadPpk(service, decryptionPpk, decryptionPassword),
+		decryptionPpk, await loadPpk(service, decryptionPpk, decryptionPassword),
 	);
 
 	const plainText = await service.decryptMasterKeyContent(masterKey, '', { encryptionHandler: decryptionHandler });

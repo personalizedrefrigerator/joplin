@@ -14,8 +14,9 @@ export interface MasterKeyEntity {
 export type KeyPairAndSize<KeyPair> = { keyPair: KeyPair; keySize: number };
 
 export enum PublicKeyAlgorithm {
-	RsaLegacy = 1, // 'rsa-pkcs1-v1.5',
-	RsaV2, // 'rsa-pkcs1-oaep',
+	Unknown = 'unknown',
+	RsaLegacy = 'legacy', // 'rsa-pkcs1-v1.5',
+	RsaV2 = 'rsa-v2', // 'rsa-pkcs1-oaep',
 }
 
 export interface PublicKeyCrypto<

@@ -95,6 +95,8 @@ const rsa: PublicKeyCryptoProvider = {
 			return legacyRsa;
 		} else if (algorithm === PublicKeyAlgorithm.RsaV2) {
 			return webCryptoRsa;
+		} else if (algorithm === PublicKeyAlgorithm.Unknown) {
+			throw new Error('Unsupported algorithm');
 		} else {
 			const exhaustivenessCheck: never = algorithm;
 			throw new Error(`Unsupported public key algorithm: ${exhaustivenessCheck}`);

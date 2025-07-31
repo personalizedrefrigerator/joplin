@@ -40,11 +40,12 @@ describe('e2ee/ppk', () => {
 					key_ops: ['decrypt'],
 					// ...other properties...
 				});
-				expect(JSON.parse(publicKey)).toMatchObject({
+				expect(JSON.parse(publicKey.replace(/^[^;]+;/, ''))).toMatchObject({
 					alg: 'RSA-OAEP-256',
 					key_ops: ['encrypt'],
 					// ...other properties...
 				});
+				expect(publicKey.startsWith('rsa-v2;')).toBe(true);
 			}
 		});
 
