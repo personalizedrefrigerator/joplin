@@ -227,8 +227,6 @@ const createEditor = (
 			// See https://github.com/codemirror/basic-setup/blob/main/src/codemirror.ts
 			// for a sample configuration.
 			extensions: [
-				ctrlKeyStateClassExtension,
-
 				keymapConfig,
 
 				dynamicConfig.of(configFromSettings(props.settings, props.onEvent)),
@@ -277,6 +275,7 @@ const createEditor = (
 
 				biDirectionalTextExtension,
 				overwriteModeExtension,
+				ctrlKeyStateClassExtension,
 
 				selectedNoteIdExtension,
 
