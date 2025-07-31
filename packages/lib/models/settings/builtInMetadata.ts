@@ -697,7 +697,7 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 				return options;
 			},
 			storage: SettingStorage.File,
-			isGlobal: true,
+			isGlobal: false,
 		},
 		'editor.autoMatchingBraces': {
 			value: true,
@@ -769,7 +769,16 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 			isGlobal: false,
 		},
 
-		'notes.sortOrder.reverse': { value: true, type: SettingItemType.Bool, storage: SettingStorage.File, isGlobal: true, section: 'note', public: true, label: () => _('Reverse sort order'), appTypes: [AppType.Cli] },
+		'notes.sortOrder.reverse': {
+			value: true,
+			type: SettingItemType.Bool,
+			storage: SettingStorage.File,
+			isGlobal: false,
+			section: 'note',
+			public: true,
+			label: () => _('Reverse sort order'),
+			appTypes: [AppType.Cli],
+		},
 		// NOTE: A setting whose name starts with 'notes.sortOrder' is special,
 		// which implies changing the setting automatically triggers the refresh of notes.
 		// See lib/BaseApplication.ts/generalMiddleware() for details.
@@ -946,7 +955,7 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 			public: false,
 			appTypes: [AppType.Desktop],
 			storage: SettingStorage.File,
-			isGlobal: true,
+			isGlobal: false,
 		},
 
 		'plugins.states': {
@@ -1233,7 +1242,14 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 			isGlobal: true,
 		},
 
-		'ui.layout': { value: {}, type: SettingItemType.Object, storage: SettingStorage.File, isGlobal: true, public: false, appTypes: [AppType.Desktop] },
+		'ui.layout': {
+			value: {},
+			type: SettingItemType.Object,
+			storage: SettingStorage.File,
+			isGlobal: false,
+			public: false,
+			appTypes: [AppType.Desktop],
+		},
 
 		'ui.lastSelectedPluginPanel': {
 			value: '',
@@ -1685,6 +1701,12 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 		},
 
 		lastSettingDefaultMigration: {
+			value: -1,
+			type: SettingItemType.Int,
+			public: false,
+		},
+
+		lastSettingGlobalMigration: {
 			value: -1,
 			type: SettingItemType.Int,
 			public: false,
