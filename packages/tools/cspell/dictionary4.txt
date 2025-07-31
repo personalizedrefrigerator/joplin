@@ -188,3 +188,11 @@ Freespinny
 BestEtf
 Etf
 currentcolor
+prosemirror
+gapcursor
+dropcursor
+dompurify
+orderedmap
+labelledby
+isTextblock
+deflt

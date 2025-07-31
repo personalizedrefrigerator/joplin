@@ -1486,7 +1486,7 @@ PODS:
     - React-Core
   - react-native-netinfo (11.4.1):
     - React-Core
-  - react-native-quick-crypto (0.7.12):
+  - react-native-quick-crypto (0.7.13):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -2341,7 +2341,7 @@ SPEC CHECKSUMS:
   react-native-image-picker: 99fbcec11cf4679170a7cfba4e4d9f598297448c
   react-native-image-resizer: 24c5d06fae2176dc0caed4b6396e02befb44064a
   react-native-netinfo: cec9c4e86083cb5b6aba0e0711f563e2fbbff187
-  react-native-quick-crypto: b8e25bc5d0c241f631f4ddae9cd06107edfc26e8
+  react-native-quick-crypto: 988d8d57cd720dbe218272b60775a8e0210d0b80
   react-native-rsa-native: a7931cdda1f73a8576a46d7f431378c5550f0c38
   react-native-saf-x: 24ebe9aa153f82ec6726de459ae77508d68d5599
   react-native-safe-area-context: 9d72abf6d8473da73033b597090a80b709c0b2f1

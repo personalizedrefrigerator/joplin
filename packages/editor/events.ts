@@ -62,7 +62,6 @@ export interface FollowLinkEvent {
 	link: string;
 }
 
-
 export type EditorEvent =
 		ChangeEvent|UndoRedoDepthChangeEvent|SelectionRangeChangeEvent|
 			EditorScrolledEvent|
