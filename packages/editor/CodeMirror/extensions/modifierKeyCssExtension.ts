@@ -1,12 +1,12 @@
 import { StateEffect, StateField, Transaction } from '@codemirror/state';
 import { EditorView } from '@codemirror/view';
 
-const ctrlKeyToggleEffect = StateEffect.define<boolean>();
+const ctrlOrMetaChangedEffect = StateEffect.define<boolean>();
 
-export const ctrlKeyDownField = StateField.define<boolean>({
+const ctrlOrMetaPressedField = StateField.define<boolean>({
 	create: () => false,
 	update: (value: boolean, transaction: Transaction) => {
-		const toggleEffect = transaction.effects.find(effect => effect.is(ctrlKeyToggleEffect));
+		const toggleEffect = transaction.effects.find(effect => effect.is(ctrlOrMetaChangedEffect));
 		if (toggleEffect) {
 			return toggleEffect.value;
 		}
@@ -14,15 +14,15 @@ export const ctrlKeyDownField = StateField.define<boolean>({
 	},
 	provide: (field) => [
 		EditorView.editorAttributes.from(field, on => ({
-			class: on ? '-ctrl-key-pressed' : '',
+			class: on ? '-ctrl-or-cmd-pressed' : '',
 		})),
 		...(() => {
 			const onEvent = (event: KeyboardEvent|MouseEvent, view: EditorView) => {
 				const ctrlOrCmdPressed = event.ctrlKey || event.metaKey;
-				if (ctrlOrCmdPressed !== view.state.field(ctrlKeyDownField)) {
+				if (ctrlOrCmdPressed !== view.state.field(ctrlOrMetaPressedField)) {
 					view.dispatch({
 						effects: [
-							ctrlKeyToggleEffect.of(ctrlOrCmdPressed),
+							ctrlOrMetaChangedEffect.of(ctrlOrCmdPressed),
 						],
 					});
 				}
@@ -41,5 +41,5 @@ export const ctrlKeyDownField = StateField.define<boolean>({
 });
 
 export default [
-	ctrlKeyDownField,
+	ctrlOrMetaPressedField,
 ];

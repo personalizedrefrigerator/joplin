@@ -1,6 +1,6 @@
 import { EditorView } from '@codemirror/view';
 import referenceLinkStateField from './referenceLinksStateField';
-import { ctrlKeyDownField } from '../ctrlKeyStateClassExtension';
+import modifierKeyCssExtension from '../modifierKeyCssExtension';
 import openLink from './utils/openLink';
 import getUrlAtPosition from './utils/getUrlAtPosition';
 import { syntaxTree } from '@codemirror/language';
@@ -12,10 +12,10 @@ type OnOpenLink = (url: string, view: EditorView)=> void;
 
 const ctrlClickLinksExtension = (onOpenExternalLink: OnOpenLink) => {
 	return [
-		ctrlKeyDownField,
+		modifierKeyCssExtension,
 		referenceLinkStateField,
 		EditorView.theme({
-			'&.-ctrl-key-pressed .cm-url, &.-ctrl-key-pressed .tok-link': {
+			'&.-ctrl-or-cmd-pressed .cm-url, &.-ctrl-or-cmd-pressed .tok-link': {
 				cursor: 'pointer',
 			},
 		}),

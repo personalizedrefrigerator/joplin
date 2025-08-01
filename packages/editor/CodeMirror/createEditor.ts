@@ -36,7 +36,7 @@ import isCursorAtBeginning from './utils/isCursorAtBeginning';
 import overwriteModeExtension from './extensions/overwriteModeExtension';
 import handleLinkEditRequests, { showLinkEditor } from './utils/handleLinkEditRequests';
 import selectedNoteIdExtension, { setNoteIdEffect } from './extensions/selectedNoteIdExtension';
-import ctrlKeyStateClassExtension from './extensions/ctrlKeyStateClassExtension';
+import ctrlKeyStateClassExtension from './extensions/modifierKeyCssExtension';
 
 // Newer versions of CodeMirror by default use Chrome's EditContext API.
 // While this might be stable enough for desktop use, it causes significant
