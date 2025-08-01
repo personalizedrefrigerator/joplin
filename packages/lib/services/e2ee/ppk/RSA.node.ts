@@ -8,6 +8,9 @@ const legacyRSAOptions: NodeRSA.Options = {
 	// app when decrypted by RN-RSA.
 	// https://github.com/amitaymolko/react-native-rsa-native/issues/66#issuecomment-932768139
 	encryptionScheme: 'pkcs1',
+
+	// Allows NodeRSA to work with pkcs1-v1.5 in newer NodeJS versions:
+	environment: 'browser',
 };
 
 const legacyRsa: PublicKeyCrypto<NodeRSA> = {
