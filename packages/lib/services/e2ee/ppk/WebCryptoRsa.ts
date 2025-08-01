@@ -1,4 +1,5 @@
 import { PublicKeyCrypto } from '../types';
+import type { webcrypto } from 'node:crypto';
 
 // The web crypto API is available in both NodeJS and browsers
 export type WebCryptoSlice = {
@@ -15,17 +16,19 @@ interface KeyPair {
 }
 
 const isLowercaseHexadecimalString = (text: string) => {
-	for (let i = 0; i < text.length; i += 2) {
-		if (!text.substring(i, i + 2).match(/^[a-f0-9]{2}/)) {
-			return false;
-		}
-	}
-	return true;
+	return text.match(/^[a-f0-9]+$/) && text.length % 2 === 0;
 };
 
-const modulusLength = 4096;
+const modulusLengthBits = 4096;
 export default class WebCryptoRsa implements PublicKeyCrypto<CryptoKeyPair> {
 	public constructor(private webCrypto_: WebCryptoSlice) {}
+
+	public static fromNodeCrypto(crypto: typeof webcrypto) {
+		return new WebCryptoRsa(
+			// Cast: Old versions of @types/node don't include crypto.subtle:
+			crypto as unknown as WebCryptoSlice,
+		);
+	}
 
 	public async generateKeyPair() {
 		// See the RSA dom example:
@@ -34,7 +37,7 @@ export default class WebCryptoRsa implements PublicKeyCrypto<CryptoKeyPair> {
 		// https://developer.mozilla.org/en-US/docs/Web/API/RsaHashedKeyGenParams
 		const keyPair = await this.webCrypto_.subtle.generateKey({
 			name: 'RSA-OAEP',
-			modulusLength,
+			modulusLength: modulusLengthBits,
 			// From https://developer.mozilla.org/en-US/docs/Web/API/RsaHashedKeyGenParams#publicexponent
 			// "Unless you have a good reason to use something else, specify 65537 here ([0x01, 0x00, 0x01])."
 			publicExponent: new Uint8Array([1, 0, 1]),
@@ -43,7 +46,7 @@ export default class WebCryptoRsa implements PublicKeyCrypto<CryptoKeyPair> {
 
 		return {
 			keyPair,
-			keySize: modulusLength,
+			keySize: modulusLengthBits,
 		};
 	}
 
@@ -94,13 +97,23 @@ export default class WebCryptoRsa implements PublicKeyCrypto<CryptoKeyPair> {
 		return Buffer.from(buffer).toString(encoding);
 	}
 
+	private get maximumPlaintextLengthBytes() {
+		// See https://www.rfc-editor.org/rfc/rfc8017#section-7.1.1,
+		// and https://crypto.stackexchange.com/a/42100
+		const modulusLengthBytes = Math.ceil(modulusLengthBits / 8);
+		const hashLengthBytes = 256 / 8;
+		// Subtract an additional -1 to account for metadata added by WebCryptoRsa:
+		const maximumMessageSize = modulusLengthBytes - 2 * hashLengthBytes - 2 - 1;
+		return maximumMessageSize;
+	}
+
 	public async encrypt(plaintextUtf8: string, rsaKeyPair: KeyPair) {
 		if (!rsaKeyPair.publicKey) {
 			throw new Error('Missing public key');
 		}
 
 		const plaintextBuffer = this.textToBuffer_(plaintextUtf8);
-		if (plaintextBuffer.byteLength >= modulusLength / 8) {
+		if (plaintextBuffer.byteLength > this.maximumPlaintextLengthBytes) {
 			// Fail early -- the error provided by webCrypto when the data is too long is often
 			// difficult to understand.
 			throw new Error('Data too long');
