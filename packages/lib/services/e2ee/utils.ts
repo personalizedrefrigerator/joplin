@@ -121,6 +121,16 @@ export const migratePpk = async () => {
 	const password = getMasterPassword(false);
 	if (!password) return;
 
+	logger.info('Migrating PPK');
+
+	// Cache the previous PPK locally. If a share was created with the old public key,
+	// the user should still be able to accept it (even if the old public key
+	// is no longer published).
+	Setting.setValue(
+		'encryption.cachedPpk',
+		{ ppk, timestamp: Date.now() },
+	);
+
 	syncInfo.ppk = await generateKeyPair(EncryptionService.instance(), password);
 	saveLocalSyncInfo(syncInfo);
 };

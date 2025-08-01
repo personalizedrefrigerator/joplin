@@ -423,14 +423,38 @@ export default class ShareService {
 
 		if (accept) {
 			if (masterKey) {
-				const reencryptedMasterKey = await mkReencryptFromPublicKeyToPassword(
-					this.encryptionService_,
-					masterKey,
-					localSyncInfo().ppk,
-					getMasterPassword(),
-					getMasterPassword(),
-				);
+				const getReEncryptedKey = async (ppkCandidates: PublicPrivateKeyPair[]) => {
+					let lastError: Error = null;
+					for (const ppk of ppkCandidates) {
+						lastError = null;
+						try {
+							return await mkReencryptFromPublicKeyToPassword(
+								this.encryptionService_,
+								masterKey,
+								ppk,
+								getMasterPassword(),
+								getMasterPassword(),
+							);
+						} catch (error) {
+							logger.warn('Failed to decrypt master key. Has the public key been migrated since the item was shared? Error:', error);
+							lastError = error;
+						}
+					}
 
+					throw lastError;
+				};
+
+				// The invitation's masterKey may be encrypted with either the current PPK or a PPK from
+				// before a recent migration. Check the old PPK to prevent the sharer from having to
+				// create a new invitation just after the recipient runs a migration.
+				const ppkCandidates = [localSyncInfo().ppk];
+
+				const cachedPpk = Setting.value('encryption.cachedPpk');
+				if ('ppk' in cachedPpk) {
+					ppkCandidates.push(cachedPpk.ppk);
+				}
+
+				const reencryptedMasterKey = await getReEncryptedKey(ppkCandidates);
 				logger.info('respondInvitation: Key has been reencrypted using master password', reencryptedMasterKey);
 
 				await MasterKey.save(reencryptedMasterKey);
