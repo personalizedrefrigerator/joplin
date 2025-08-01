@@ -123,6 +123,7 @@ export default class PerformanceLogger {
 		// to handle the case where two tasks with the otherwise same name run at the same
 		// time:
 		const uniqueTaskId = `${name}-${(this.startCounter_++)}`;
+
 		if (typeof performance.mark === 'function') {
 			performance.mark(`${uniqueTaskId}-start`);
 		}
