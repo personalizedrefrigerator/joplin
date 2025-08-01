@@ -1,6 +1,7 @@
-import WebCryptoRsa, { WebCryptoSlice } from './WebCryptoRsa';
+import { webcrypto } from 'node:crypto';
+import WebCryptoRsa from './WebCryptoRsa';
 
-const rsaProvider = new WebCryptoRsa(crypto as unknown as WebCryptoSlice);
+const rsaProvider = WebCryptoRsa.fromNodeCrypto(webcrypto);
 
 describe('WebCryptoRsa', () => {
 	// The default error message when a message is larger than the maximum length
