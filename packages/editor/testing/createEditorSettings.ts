@@ -21,6 +21,7 @@ const createEditorSettings = (themeId: number) => {
 
 		indentWithTabs: true,
 		editorLabel: 'Markdown editor',
+		imageRenderingEnabled: false,
 	};
 
 	return editorSettings;
