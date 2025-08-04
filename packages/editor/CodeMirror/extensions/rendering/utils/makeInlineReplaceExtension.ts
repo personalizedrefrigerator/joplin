@@ -61,8 +61,13 @@ export const makeInlineReplaceExtension = (extensionSpec: ReplacementExtension) 
 					const nodeLineFrom = doc.lineAt(node.from);
 					const nodeLineTo = doc.lineAt(node.from);
 					const nodeLineContainsSelection = cursorLine.number === nodeLineFrom.number || cursorLine.number === nodeLineTo.number;
+					const shouldHide = (
+						(extensionSpec.hideWhenContainsSelection ?? true) && (
+							nodeIntersectsSelection(selection, node) || nodeLineContainsSelection
+						)
+					);
 
-					if (!nodeIntersectsSelection(selection, node) && !nodeLineContainsSelection) {
+					if (!shouldHide) {
 						decorateNode(node);
 					}
 				},

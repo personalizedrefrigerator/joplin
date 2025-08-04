@@ -81,7 +81,7 @@ class CheckboxWidget extends WidgetType {
 	}
 }
 
-const completedTaskClassName = 'cm-ext-completed-item';
+const completedTaskClassName = 'cm-md-completed-item';
 const completedListItemDecoration = Decoration.line({ class: completedTaskClassName, isFullLine: true });
 
 const replaceCheckboxes = [

@@ -247,6 +247,7 @@ function NoteEditor(props: Props) {
 		katexEnabled: Setting.value('markdown.plugin.katex'),
 		spellcheckEnabled: Setting.value('editor.mobile.spellcheckEnabled'),
 		inlineRenderingEnabled: Setting.value('editor.inlineRendering'),
+		imageRenderingEnabled: Setting.value('editor.imageRendering'),
 		language: props.markupLanguage === MarkupLanguage.Html ? EditorLanguageType.Html : EditorLanguageType.Markdown,
 		useExternalSearch: true,
 		readOnly: props.readOnly,
