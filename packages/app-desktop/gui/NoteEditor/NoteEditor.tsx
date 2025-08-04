@@ -56,6 +56,7 @@ import useResourceUnwatcher from './utils/useResourceUnwatcher';
 import StatusBar from './StatusBar';
 import useVisiblePluginEditorViewIds from '@joplin/lib/hooks/plugins/useVisiblePluginEditorViewIds';
 import useConnectToEditorPlugin from './utils/useConnectToEditorPlugin';
+import getResourceBaseUrl from './utils/getResourceBaseUrl';
 
 const debounce = require('debounce');
 
@@ -169,7 +170,7 @@ function NoteEditorContent(props: NoteEditorProps) {
 		const theme = themeStyle(options.themeId ? options.themeId : props.themeId);
 
 		const markupToHtml = markupLanguageUtils.newMarkupToHtml(props.plugins, {
-			resourceBaseUrl: `joplin-content://note-viewer/${Setting.value('resourceDir')}/`,
+			resourceBaseUrl: getResourceBaseUrl(),
 			customCss: props.customCss,
 		});
 

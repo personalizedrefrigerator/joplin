@@ -41,6 +41,7 @@ describe('createEditor', () => {
 			onEvent: _event => {},
 			onLogMessage: _message => {},
 			onPasteFile: null,
+			resolveImageSrc: src => Promise.resolve(src),
 		});
 
 		// Force the generation of the syntax tree now.
@@ -70,6 +71,7 @@ describe('createEditor', () => {
 			onEvent: _event => {},
 			onLogMessage: _message => {},
 			onPasteFile: null,
+			resolveImageSrc: src=>Promise.resolve(src),
 		});
 
 		const getContentScriptJs = jest.fn(async () => {
@@ -139,6 +141,7 @@ describe('createEditor', () => {
 			onEvent: _event => {},
 			onLogMessage: _message => {},
 			onPasteFile: null,
+			resolveImageSrc: src=>Promise.resolve(src),
 		});
 
 		const getContentScriptJs = jest.fn(async () => {
@@ -189,6 +192,7 @@ describe('createEditor', () => {
 			onEvent: () => {},
 			onLogMessage: () => {},
 			onPasteFile: null,
+			resolveImageSrc: src=>Promise.resolve(src),
 		});
 		const editorState = editor.editor.state;
 		const idFacet = editor.joplinExtensions.noteIdFacet;

@@ -15,8 +15,9 @@ import { indentUnit } from '@codemirror/language';
 import { Prec } from '@codemirror/state';
 import insertNewlineContinueMarkup from './editorCommands/insertNewlineContinueMarkup';
 import renderingExtension from './extensions/rendering/renderingExtension';
+import { RenderedContentContext } from './extensions/rendering/types';
 
-const configFromSettings = (settings: EditorSettings) => {
+const configFromSettings = (settings: EditorSettings, context: RenderedContentContext) => {
 	const languageExtension = (() => {
 		const openingBrackets = '`([{\'"‘“（《「『【〔〖〘〚'.split('');
 
@@ -86,7 +87,9 @@ const configFromSettings = (settings: EditorSettings) => {
 	}
 
 	if (settings.inlineRenderingEnabled) {
-		extensions.push(renderingExtension());
+		extensions.push(renderingExtension(context, {
+			renderImages: settings.imageRenderingEnabled,
+		}));
 	}
 
 	return extensions;

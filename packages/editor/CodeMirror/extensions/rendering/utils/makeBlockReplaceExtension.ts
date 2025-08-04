@@ -17,8 +17,13 @@ const updateDecorations = (state: EditorState, extensionSpec: ReplacementExtensi
 			const nodeLineFrom = doc.lineAt(node.from);
 			const nodeLineTo = doc.lineAt(node.to);
 			const selectionIsNearNode = Math.abs(nodeLineFrom.number - cursorLine.number) <= 1 || Math.abs(nodeLineTo.number - cursorLine.number) <= 1;
+			const shouldHide = (
+				(extensionSpec.hideWhenContainsSelection ?? true) && (
+					nodeIntersectsSelection(state.selection, node) || selectionIsNearNode
+				)
+			);
 
-			if (!nodeIntersectsSelection(state.selection, node) && !selectionIsNearNode) {
+			if (!shouldHide) {
 				const widget = extensionSpec.createDecoration(node, state, parentTagCounts);
 				if (widget) {
 					let decoration;
@@ -31,7 +36,22 @@ const updateDecorations = (state: EditorState, extensionSpec: ReplacementExtensi
 						decoration = widget;
 					}
 
-					widgets.push(decoration.range(nodeLineFrom.from, nodeLineTo.to));
+					let rangeFrom = nodeLineFrom.from;
+					let rangeTo = nodeLineTo.to;
+					let skip = false;
+					if (extensionSpec.getDecorationRange) {
+						const range = extensionSpec.getDecorationRange(node, state);
+						if (range) {
+							rangeFrom = range[0];
+							rangeTo = range.length === 1 ? range[0] : range[1];
+						} else {
+							skip = true;
+						}
+					}
+
+					if (!skip) {
+						widgets.push(decoration.range(rangeFrom, rangeTo));
+					}
 				}
 			}
 		},

@@ -38,6 +38,7 @@ import handleLinkEditRequests, { showLinkEditor } from './utils/handleLinkEditRe
 import selectedNoteIdExtension, { setNoteIdEffect } from './extensions/selectedNoteIdExtension';
 import ctrlKeyStateClassExtension from './extensions/modifierKeyCssExtension';
 import ctrlClickLinksExtension from './extensions/links/ctrlClickLinksExtension';
+import { RenderedContentContext } from './extensions/rendering/types';
 
 // Newer versions of CodeMirror by default use Chrome's EditContext API.
 // While this might be stable enough for desktop use, it causes significant
@@ -49,13 +50,25 @@ import ctrlClickLinksExtension from './extensions/links/ctrlClickLinksExtension'
 type ExtendedEditorView = typeof EditorView & { EDIT_CONTEXT: boolean };
 (EditorView as ExtendedEditorView).EDIT_CONTEXT = false;
 
+export type ResolveImageCallback = (imageSrc: string)=> Promise<string>;
+
+interface CodeMirrorProps {
+	resolveImageSrc: ResolveImageCallback;
+}
+
 const createEditor = (
-	parentElement: HTMLElement, props: EditorProps,
+	parentElement: HTMLElement, props: EditorProps&CodeMirrorProps,
 ): CodeMirrorControl => {
 	const initialText = props.initialText;
 	let settings = props.settings;
 
 	props.onLogMessage('Initializing CodeMirror...');
+
+	const context: RenderedContentContext = {
+		resolveImageSrc: (src) => {
+			return props.resolveImageSrc(src);
+		},
+	};
 
 
 	// Handles firing an event when the undo/redo stack changes
@@ -230,7 +243,7 @@ const createEditor = (
 			extensions: [
 				keymapConfig,
 
-				dynamicConfig.of(configFromSettings(props.settings)),
+				dynamicConfig.of(configFromSettings(props.settings, context)),
 				historyCompartment.of(history()),
 				searchExtension(props.onEvent, props.settings),
 
@@ -326,7 +339,7 @@ const createEditor = (
 			settings = newSettings;
 			editor.dispatch({
 				effects: dynamicConfig.reconfigure(
-					configFromSettings(newSettings),
+					configFromSettings(newSettings, context),
 				),
 			});
 		},
