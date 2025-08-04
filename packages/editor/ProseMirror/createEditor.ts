@@ -25,6 +25,7 @@ import { RendererControl } from './types';
 import resourcePlaceholderPlugin, { onResourceDownloaded } from './plugins/resourcePlaceholderPlugin';
 import getFileFromPasteEvent from '../utils/getFileFromPasteEvent';
 import { RenderResult } from '../../renderer/types';
+import tableOfContentsPlugin from './plugins/tableOfContentsPlugin';
 
 const createEditor = async (
 	parentElement: HTMLElement,
@@ -75,6 +76,7 @@ const createEditor = async (
 				markupTracker,
 				listPlugin,
 				linkTooltipPlugin,
+				tableOfContentsPlugin,
 				tableEditing({ allowTableNodeSelection: true }),
 				joplinEditorApiPlugin,
 				resourcePlaceholderPlugin,

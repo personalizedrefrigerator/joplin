@@ -3,6 +3,7 @@ import { nodeSpecs as joplinEditableNodes } from './plugins/joplinEditablePlugin
 import { tableNodes } from 'prosemirror-tables';
 import { nodeSpecs as listNodes } from './plugins/listPlugin';
 import { nodeSpecs as resourcePlaceholderNodes } from './plugins/resourcePlaceholderPlugin';
+import { nodeSpecs as tableOfContentsNodes } from './plugins/tableOfContentsPlugin';
 
 // For reference, see:
 // - https://prosemirror.net/docs/guide/#schema
@@ -133,6 +134,7 @@ const nodes = addDefaultToplevelAttributes({
 	...resourcePlaceholderNodes,
 	...listNodes,
 	...joplinEditableNodes,
+	...tableOfContentsNodes,
 	...tableNodes({
 		tableGroup: 'block',
 		cellContent: 'inline*',
