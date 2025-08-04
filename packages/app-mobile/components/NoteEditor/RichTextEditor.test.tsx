@@ -354,4 +354,19 @@ describe('RichTextEditor', () => {
 			expect(body.trim()).toBe('Test:\n\n$$\n3^2 + 4^2 = \\sqrt{625}\n$$\n\nTest. testing');
 		});
 	});
+
+	it('should preserve ==mark==s', async () => {
+		let body = '==Test:== Test.';
+		render(<WrappedEditor
+			noteBody={body}
+			onBodyChange={newBody => { body = newBody; }}
+		/>);
+
+		const window = await getEditorWindow();
+		mockTyping(window, ' Testing!');
+
+		await waitFor(async () => {
+			expect(body.trim()).toBe('==Test:== Test. Testing!');
+		});
+	});
 });

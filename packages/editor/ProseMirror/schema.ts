@@ -19,6 +19,7 @@ const domOutputSpecs = {
 	unorderedList: ['ul', 0],
 	listItem: ['li', 0],
 	blockQuote: ['blockquote', 0],
+	mark: ['mark', 0],
 	hr: ['hr'],
 } satisfies Record<string, DOMOutputSpec>;
 
@@ -256,6 +257,10 @@ const marks = {
 			'a',
 			{ href: node.attrs.href, title: node.attrs.title, 'data-resource-id': node.attrs.dataResourceId },
 		],
+	},
+	highlight: {
+		parseDOM: [{ tag: 'mark' }],
+		toDOM: () => domOutputSpecs.mark,
 	},
 } satisfies Record<string, MarkSpec>;
 
