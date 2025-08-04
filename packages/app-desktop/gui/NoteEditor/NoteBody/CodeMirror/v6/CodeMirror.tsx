@@ -365,7 +365,6 @@ const CodeMirror = (props: NoteBodyEditorProps, ref: ForwardedRef<NoteBodyEditor
 			markdownMarkEnabled: Setting.value('markdown.plugin.mark'),
 			katexEnabled: Setting.value('markdown.plugin.katex'),
 			inlineRenderingEnabled: Setting.value('editor.inlineRendering'),
-			linkTooltipEnabled: Setting.value('editor.linkTooltip'),
 			themeData: {
 				...styles.globalTheme,
 				marginLeft: 0,
