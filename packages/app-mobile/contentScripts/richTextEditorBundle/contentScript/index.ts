@@ -56,6 +56,7 @@ export const initialize = async ({
 	initialText,
 	initialNoteId,
 	parentElementClassName,
+	initialSearch,
 }: EditorProps) => {
 	const messenger = new WebViewToRNMessenger<EditorProcessApi, MainProcessApi>('rich-text-editor', null);
 	const parentElement = document.getElementsByClassName(parentElementClassName)[0];
@@ -118,6 +119,7 @@ export const initialize = async ({
 			}
 		},
 	});
+	editor.setSearchState(initialSearch);
 
 	messenger.setLocalInterface({
 		editor,
