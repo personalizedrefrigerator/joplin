@@ -49,6 +49,7 @@ export interface Constants {
 	appType: AppType;
 	resourceDirName: string;
 	resourceDir: string;
+	pluginAssetDir: string;
 	profileDir: string;
 	rootProfileDir: string;
 	tempDir: string;
@@ -119,6 +120,35 @@ const defaultMigrations: DefaultMigration[] = [
 	{
 		name: 'ocr.enabled',
 		previousDefault: false,
+	},
+];
+
+// Global migrations migrate a setting from a global (all-profile) setting to a
+// local (per-profile) setting. When adding a new global migration, the setting
+// should be set to "isGlobal: true" in "builtInMetadata.ts".
+interface GlobalMigration {
+	name: string;
+	// At present, this should always be true:
+	wasGlobal: true;
+}
+
+// The array index is the migration ID -- items should not be removed from this array.
+const globalMigrations: GlobalMigration[] = [
+	{
+		name: 'ui.layout',
+		wasGlobal: true,
+	},
+	{
+		name: 'notes.sortOrder.field',
+		wasGlobal: true,
+	},
+	{
+		name: 'notes.sortOrder.reverse',
+		wasGlobal: true,
+	},
+	{
+		name: 'notes.listRendererId',
+		wasGlobal: true,
 	},
 ];
 
@@ -217,6 +247,7 @@ class Setting extends BaseModel {
 		appType: 'SET_ME' as any, // 'cli' or 'mobile'
 		resourceDirName: '',
 		resourceDir: '',
+		pluginAssetDir: '',
 		profileDir: '',
 		rootProfileDir: '',
 		tempDir: '',
@@ -340,44 +371,85 @@ class Setting extends BaseModel {
 		return `${this.value('rootProfileDir')}/${filename}`;
 	}
 
-	public static skipDefaultMigrations() {
+	public static skipMigrations() {
 		logger.info('Skipping all default migrations...');
 
 		this.setValue('lastSettingDefaultMigration', defaultMigrations.length - 1);
+		this.setValue('lastSettingGlobalMigration', globalMigrations.length - 1);
 	}
 
-	public static applyDefaultMigrations() {
-		logger.info('Applying default migrations...');
-		const lastSettingDefaultMigration: number = this.value('lastSettingDefaultMigration');
+	public static async applyMigrations() {
+		const applyDefaultMigrations = () => {
+			logger.info('Applying default migrations...');
+			const lastSettingDefaultMigration: number = this.value('lastSettingDefaultMigration');
 
-		for (let i = 0; i < defaultMigrations.length; i++) {
-			if (i <= lastSettingDefaultMigration) continue;
+			for (let i = 0; i < defaultMigrations.length; i++) {
+				if (i <= lastSettingDefaultMigration) continue;
 
-			const migration = defaultMigrations[i];
+				const migration = defaultMigrations[i];
 
-			logger.info(`Applying default migration: ${migration.name}`);
+				logger.info(`Applying default migration: ${migration.name}`);
 
-			if (this.isSet(migration.name)) {
-				logger.info('Skipping because value is already set');
-				continue;
-			} else {
-				logger.info(`Applying previous default: ${migration.previousDefault}`);
-				this.setValue(migration.name, migration.previousDefault);
+				if (this.isSet(migration.name)) {
+					logger.info('Skipping because value is already set');
+					continue;
+				} else {
+					logger.info(`Applying previous default: ${migration.previousDefault}`);
+					this.setValue(migration.name, migration.previousDefault);
+				}
 			}
-		}
 
-		this.setValue('lastSettingDefaultMigration', defaultMigrations.length - 1);
-	}
+			this.setValue('lastSettingDefaultMigration', defaultMigrations.length - 1);
+		};
 
-	public static applyUserSettingMigration() {
-		// Function to translate existing user settings to new setting.
-		// eslint-disable-next-line github/array-foreach -- Old code before rule was applied
-		userSettingMigration.forEach(userMigration => {
-			if (!this.isSet(userMigration.newName) && this.isSet(userMigration.oldName)) {
-				this.setValue(userMigration.newName, userMigration.transformValue(this.value(userMigration.oldName)));
-				logger.info(`Migrating ${userMigration.oldName} to ${userMigration.newName}`);
+		const applyGlobalMigrations = async () => {
+			const lastGlobalMigration = this.value('lastSettingGlobalMigration');
+			let rootFileSettings_: SettingValues|null = null;
+			const rootFileSettings = async () => {
+				rootFileSettings_ ??= await this.rootFileHandler.load();
+				return rootFileSettings_;
+			};
+
+			for (let i = 0; i < globalMigrations.length; i++) {
+				if (i <= lastGlobalMigration) continue;
+				const migration = globalMigrations[i];
+
+				// Skip migrations if the setting is stored in the database and thus
+				// probably can't be fetched from the root profile. This is, for example,
+				// the case on mobile.
+				if (this.keyStorage(migration.name) !== SettingStorage.File) {
+					logger.info('Skipped global value migration -- setting is not stored as a file.');
+					continue;
+				}
+
+				logger.info(`Applying global migration: ${migration.name}`);
+				if (!migration.wasGlobal) {
+					throw new Error('Converting a non-global setting to a global setting is not supported.');
+				}
+
+				const rootSettings = await rootFileSettings();
+				if (Object.prototype.hasOwnProperty.call(rootSettings, migration.name)) {
+					this.setValue(migration.name, rootSettings[migration.name]);
+				}
 			}
-		});
+
+			this.setValue('lastSettingGlobalMigration', globalMigrations.length - 1);
+		};
+
+		const applyUserSettingMigrations = () => {
+			// Function to translate existing user settings to new setting.
+			// eslint-disable-next-line github/array-foreach -- Old code before rule was applied
+			userSettingMigration.forEach(userMigration => {
+				if (!this.isSet(userMigration.newName) && this.isSet(userMigration.oldName)) {
+					this.setValue(userMigration.newName, userMigration.transformValue(this.value(userMigration.oldName)));
+					logger.info(`Migrating ${userMigration.oldName} to ${userMigration.newName}`);
+				}
+			});
+		};
+
+		applyDefaultMigrations();
+		await applyGlobalMigrations();
+		applyUserSettingMigrations();
 	}
 
 	public static featureFlagKeys(appType: AppType): string[] {
@@ -655,11 +727,18 @@ class Setting extends BaseModel {
 		value = this.formatValue(key, value);
 		value = this.filterValue(key, value);
 
+		const md = this.settingMetadata(key);
+		const enforceLimits = (value: SettingValueType<T>) => {
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Partial refactor of old code before rule was applied
+			if ('minimum' in md && value < md.minimum) value = md.minimum as any;
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Partial refactor of old code before rule was applied
+			if ('maximum' in md && value > md.maximum) value = md.maximum as any;
+			return value;
+		};
+
 		for (let i = 0; i < this.cache_.length; i++) {
 			const c = this.cache_[i];
 			if (c.key === key) {
-				const md = this.settingMetadata(key);
-
 				if (md.isEnum === true) {
 					if (!this.isAllowedEnumOption(key, value)) {
 						throw new Error(_('Invalid option value: "%s". Possible values are: %s.', value, this.enumOptionsDoc(key)));
@@ -673,12 +752,7 @@ class Setting extends BaseModel {
 				// Don't log this to prevent sensitive info (passwords, auth tokens...) to end up in logs
 				// logger.info('Setting: ' + key + ' = ' + c.value + ' => ' + value);
 
-				// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Partial refactor of old code before rule was applied
-				if ('minimum' in md && value < md.minimum) value = md.minimum as any;
-				// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Partial refactor of old code before rule was applied
-				if ('maximum' in md && value > md.maximum) value = md.maximum as any;
-
-				c.value = value;
+				c.value = enforceLimits(value);
 
 				this.dispatch({
 					type: 'SETTING_UPDATE_ONE',
@@ -691,6 +765,8 @@ class Setting extends BaseModel {
 				return;
 			}
 		}
+
+		value = enforceLimits(value);
 
 		this.cache_.push({
 			key: key,

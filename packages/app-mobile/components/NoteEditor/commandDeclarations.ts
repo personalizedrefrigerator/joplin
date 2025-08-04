@@ -2,10 +2,21 @@ import { EditorCommandType } from '@joplin/editor/types';
 import { _ } from '@joplin/lib/locale';
 import { CommandDeclaration } from '@joplin/lib/services/CommandService';
 
-export const enabledCondition = (_commandName: string) => {
+const markdownEditorOnlyCommands = [
+	EditorCommandType.DuplicateLine,
+	EditorCommandType.SortSelectedLines,
+	EditorCommandType.SwapLineUp,
+	EditorCommandType.SwapLineDown,
+].map(command => `editor.${command}`);
+
+export const enabledCondition = (commandName: string) => {
 	const output = [
 		'!noteIsReadOnly',
 	];
+
+	if (markdownEditorOnlyCommands.includes(commandName)) {
+		output.push('!richTextEditorVisible');
+	}
 
 	return output.filter(c => !!c).join(' && ');
 };
@@ -106,6 +117,21 @@ const declarations: CommandDeclaration[] = [
 		name: `editor.${EditorCommandType.SwapLineUp}`,
 		label: () => _('Swap line up'),
 		iconName: 'material chevron-double-up',
+	},
+	{
+		name: `editor.${EditorCommandType.DeleteLine}`,
+		label: () => _('Delete line'),
+		iconName: 'material close',
+	},
+	{
+		name: `editor.${EditorCommandType.DuplicateLine}`,
+		label: () => _('Duplicate line'),
+		iconName: 'material content-duplicate',
+	},
+	{
+		name: `editor.${EditorCommandType.SortSelectedLines}`,
+		label: () => _('Sort selected lines'),
+		iconName: 'material sort-alphabetical-ascending',
 	},
 	{
 		name: EditorCommandType.ToggleSearch,
