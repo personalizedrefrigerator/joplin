@@ -180,7 +180,6 @@ export interface EditorSettings {
 	katexEnabled: boolean;
 	spellcheckEnabled: boolean;
 	inlineRenderingEnabled: boolean;
-	linkTooltipEnabled: boolean;
 	readOnly: boolean;
 
 	indentWithTabs: boolean;

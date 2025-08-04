@@ -1,6 +1,6 @@
 import { EditorView, keymap } from '@codemirror/view';
 import { closeBrackets, closeBracketsKeymap } from '@codemirror/autocomplete';
-import { EditorKeymap, EditorLanguageType, EditorSettings, OnEventCallback } from '../types';
+import { EditorKeymap, EditorLanguageType, EditorSettings } from '../types';
 import createTheme from './theme';
 import { EditorState } from '@codemirror/state';
 import { deleteMarkupBackward, markdown, markdownLanguage } from '@codemirror/lang-markdown';
@@ -15,10 +15,8 @@ import { indentUnit } from '@codemirror/language';
 import { Prec } from '@codemirror/state';
 import insertNewlineContinueMarkup from './editorCommands/insertNewlineContinueMarkup';
 import renderingExtension from './extensions/rendering/renderingExtension';
-import followLinkTooltip from './extensions/links/followLinkTooltipExtension';
-import { EditorEventType } from '../events';
 
-const configFromSettings = (settings: EditorSettings, onEditorEvent: OnEventCallback) => {
+const configFromSettings = (settings: EditorSettings) => {
 	const languageExtension = (() => {
 		const openingBrackets = '`([{\'"‘“（《「『【〔〖〘〚'.split('');
 
@@ -89,15 +87,6 @@ const configFromSettings = (settings: EditorSettings, onEditorEvent: OnEventCall
 
 	if (settings.inlineRenderingEnabled) {
 		extensions.push(renderingExtension());
-	}
-
-	if (settings.linkTooltipEnabled) {
-		extensions.push(followLinkTooltip(link => {
-			onEditorEvent({
-				kind: EditorEventType.FollowLink,
-				link,
-			});
-		}));
 	}
 
 	return extensions;

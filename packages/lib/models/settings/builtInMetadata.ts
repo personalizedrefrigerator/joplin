@@ -1446,17 +1446,6 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 			isGlobal: true,
 		},
 
-		'editor.linkTooltip': {
-			value: true,
-			type: SettingItemType.Bool,
-			public: true,
-			appTypes: [AppType.Desktop, AppType.Mobile],
-			label: () => _('Markdown editor: Show tooltips when clicking on links'),
-			section: 'note',
-			storage: SettingStorage.File,
-			isGlobal: true,
-		},
-
 		'imageeditor.jsdrawToolbar': {
 			value: '',
 			type: SettingItemType.String,
