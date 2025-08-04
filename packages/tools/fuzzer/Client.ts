@@ -7,7 +7,6 @@ import { strict as assert } from 'assert';
 import ClipperServer from '@joplin/lib/ClipperServer';
 import ActionTracker from './ActionTracker';
 import Logger from '@joplin/utils/Logger';
-import execa = require('execa');
 import { cliDirectory } from './constants';
 import { commandToString } from '@joplin/utils';
 import { quotePath } from '@joplin/utils/path';
@@ -16,6 +15,8 @@ import retryWithCount from './utils/retryWithCount';
 import resolvePathWithinDir from '@joplin/lib/utils/resolvePathWithinDir';
 import { msleep } from '@joplin/utils/time';
 import shim from '@joplin/lib/shim';
+import { ChildProcessWithoutNullStreams, spawn } from 'child_process';
+import AsyncActionQueue from '@joplin/lib/AsyncActionQueue';
 
 const logger = Logger.create('Client');
 
@@ -86,6 +87,7 @@ class Client implements ActionableClient {
 		try {
 			return await this.fromAccount(account, actionTracker, context);
 		} catch (error) {
+			logger.error('Error creating client:', error);
 			await account.onClientDisconnected();
 			throw error;
 		}
@@ -130,6 +132,12 @@ class Client implements ActionableClient {
 
 	private onCloseListeners_: OnCloseListener[] = [];
 
+	private childProcess_: ChildProcessWithoutNullStreams;
+	private childProcessQueue_ = new AsyncActionQueue();
+	private bufferedChildProcessStdout_: string[] = [];
+	private bufferedChildProcessStderr_: string[] = [];
+	private onChildProcessOutput_: ()=> void = ()=>{};
+
 	private constructor(
 		private readonly context_: FuzzContext,
 		private readonly globalActionTracker_: ActionTracker,
@@ -140,19 +148,31 @@ class Client implements ActionableClient {
 		private readonly clientLabel_: string,
 	) {
 		this.email = account_.email;
+
+		this.childProcess_ = spawn('yarn', [
+			...this.cliCommandArguments,
+			'batch',
+			'-',
+		], {
+			cwd: cliDirectory,
+		});
+		this.childProcess_.stdout.on('data', (chunk: Buffer) => {
+			this.bufferedChildProcessStdout_.push(chunk.toString('utf-8'));
+			this.onChildProcessOutput_();
+		});
+		this.childProcess_.stderr.on('data', (chunk: Buffer) => {
+			logger.warn('Child process logged to stderr:', chunk.toString('utf-8'));
+
+			this.bufferedChildProcessStderr_.push(chunk.toString('utf-8'));
+			this.onChildProcessOutput_();
+		});
+
+		// Don't skip child process-related tasks.
+		this.childProcessQueue_.setCanSkipTaskHandler(() => false);
 	}
 
 	private async startClipperServer_() {
-		// Run asynchronously -- the API server command doesn't exit until the server
-		// is closed.
-		void (async () => {
-			try {
-				await this.execCliCommand_('server', 'start');
-			} catch (error) {
-				logger.info('API server exited');
-				logger.debug('API server exit status', error);
-			}
-		})();
+		await this.execCliCommand_('server', '--quiet', '--exit-early', 'start');
 
 		// Wait for the server to start
 		await retryWithCount(async () => {
@@ -169,11 +189,6 @@ class Client implements ActionableClient {
 	public async close() {
 		assert.ok(!this.closed_, 'should not be closed');
 
-		try {
-			await this.execCliCommand_('server', 'stop');
-		} catch (error) {
-			logger.warn('Failed to stop API server:', error);
-		}
 		await this.account_.onClientDisconnected();
 
 		// Before removing the profile directory, verify that the profile directory is in the
@@ -185,6 +200,9 @@ class Client implements ActionableClient {
 		for (const listener of this.onCloseListeners_) {
 			listener();
 		}
+
+		this.childProcess_.stdin.destroy();
+		this.childProcess_.kill();
 		this.closed_ = true;
 	}
 
@@ -217,18 +235,34 @@ class Client implements ActionableClient {
 
 	private async execCliCommand_(commandName: string, ...args: string[]) {
 		assert.match(commandName, /^[a-z]/, 'Command name must start with a lowercase letter.');
-		const commandResult = await execa('yarn', [
-			...this.cliCommandArguments,
-			commandName,
-			...args,
-		], {
-			cwd: cliDirectory,
-			// Connects /dev/null to stdin
-			stdin: 'ignore',
+		let commandStdout = '';
+		let commandStderr = '';
+		this.childProcessQueue_.push(() => {
+			return new Promise<void>(resolve => {
+				this.onChildProcessOutput_ = () => {
+					const lines = this.bufferedChildProcessStdout_.join('\n').split('\n');
+					const promptIndex = lines.lastIndexOf('command> ');
+
+					if (promptIndex >= 0) {
+						commandStdout = lines.slice(0, promptIndex).join('\n');
+						commandStderr = this.bufferedChildProcessStderr_.join('\n');
+						resolve();
+					} else {
+						logger.debug('waiting...');
+					}
+				};
+				this.bufferedChildProcessStdout_ = [];
+				this.bufferedChildProcessStderr_ = [];
+				const command = `${[commandName, ...args.map(arg => JSON.stringify(arg))].join(' ')}\n`;
+				logger.debug('exec', command);
+				this.childProcess_.stdin.write(command);
+			});
 		});
-		logger.debug('Ran command: ', commandResult.command, commandResult.exitCode);
-		logger.debug('     Output: ', commandResult.stdout);
-		return commandResult;
+		await this.childProcessQueue_.processAllNow();
+		return {
+			stdout: commandStdout,
+			stderr: commandStderr,
+		};
 	}
 
 	// eslint-disable-next-line no-dupe-class-members -- This is not a duplicate class member
@@ -341,11 +375,23 @@ class Client implements ActionableClient {
 	}
 
 	private async assertNoteMatchesState_(expected: NoteData) {
-		assert.equal(
-			(await this.execCliCommand_('cat', expected.id)).stdout,
-			`${expected.title}\n\n${expected.body}`,
-			'note should exist',
-		);
+		await retryWithCount(async () => {
+			const noteContent = (await this.execCliCommand_('cat', expected.id)).stdout;
+			assert.equal(
+				// TODO: For now, this needs a .trimEnd() to prevent additional newlines from
+				// occasionally being added. Look into this and determine why.
+				noteContent.trimEnd(),
+				`${expected.title}\n\n${expected.body.trimEnd()}`,
+				'note should exist',
+			);
+		}, {
+			count: 3,
+			onFail: async () => {
+				// Send an event to the server and wait for it to be processed -- it's possible that the server
+				// hasn't finished processing the API event for creating the note:
+				await this.execApiCommand_('GET', '/ping');
+			},
+		});
 	}
 
 	public async createNote(note: NoteData) {

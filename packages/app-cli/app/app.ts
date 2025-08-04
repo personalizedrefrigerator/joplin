@@ -19,7 +19,8 @@ import { FolderEntity, NoteEntity } from '@joplin/lib/services/database/types';
 import initializeCommandService from './utils/initializeCommandService';
 const { cliUtils } = require('./cli-utils.js');
 const Cache = require('@joplin/lib/Cache');
-const { splitCommandBatch } = require('@joplin/lib/string-utils');
+import { splitCommandBatch } from '@joplin/lib/string-utils';
+import iterateStdin from './utils/iterateStdin';
 
 class Application extends BaseApplication {
 
@@ -381,21 +382,35 @@ class Application extends BaseApplication {
 		return output;
 	}
 
-	public async commandList(argv: string[]) {
-		if (argv.length && argv[0] === 'batch') {
-			const commands = [];
-			const commandLines = splitCommandBatch(await readFile(argv[1], 'utf-8'));
-
-			for (const commandLine of commandLines) {
-				if (!commandLine.trim()) continue;
-				const splitted = splitCommandString(commandLine.trim());
-				commands.push(splitted);
-			}
-			return commands;
-		} else {
-			return [argv];
+	public commandList = async function*(argv: string[]) {
+		if (!argv.length || argv[0] !== 'batch') {
+			yield argv;
+			return;
 		}
-	}
+
+		const processLines = function*(lines: string) {
+			const commandLines = splitCommandBatch(lines);
+
+			for (const command of commandLines) {
+				if (!command.trim()) continue;
+				const splitted = splitCommandString(command.trim());
+				yield splitted;
+			}
+		};
+
+		if (argv[1] === '-') { // stdin
+			for await (const lines of iterateStdin('command> ')) {
+				try {
+					yield* processLines(lines);
+				} catch (error) {
+					this.logger().error(error);
+				}
+			}
+		} else {
+			const data = await readFile(argv[1], 'utf-8');
+			yield* processLines(data);
+		}
+	};
 
 	// We need this special case here because by the time the `version` command
 	// runs, the keychain has already been setup.
@@ -433,22 +448,24 @@ class Application extends BaseApplication {
 		if (argv.length) {
 			this.gui_ = this.dummyGui();
 
-			this.currentFolder_ = await Folder.load(Setting.value('activeFolderId'));
-
 			await this.applySettingsSideEffects();
 
-			try {
-				const commands = await this.commandList(argv);
-				for (const command of commands) {
+			let failed = false;
+			for await (const command of this.commandList(argv)) {
+				try {
+					await this.refreshCurrentFolder();
 					await this.execCommand(command);
+				} catch (error) {
+					if (this.showStackTraces_) {
+						console.error(error);
+					} else {
+						// eslint-disable-next-line no-console
+						console.info(error.message);
+					}
+					failed = true;
 				}
-			} catch (error) {
-				if (this.showStackTraces_) {
-					console.error(error);
-				} else {
-					// eslint-disable-next-line no-console
-					console.info(error.message);
-				}
+			}
+			if (failed) {
 				process.exit(1);
 			}
 
