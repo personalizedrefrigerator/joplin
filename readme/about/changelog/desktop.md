@@ -1,5 +1,11 @@
 # Joplin Desktop Changelog
 
+## [v3.4.3](https://github.com/laurent22/joplin/releases/tag/v3.4.3) (Pre-release) - 2025-07-25T19:49:44Z
+
+- Improved: Updated packages glob (v11.0.2), mermaid (v11.6.0)
+- Fixed: Markdown editor: Make list indentation size equivalent to four spaces ([#12794](https://github.com/laurent22/joplin/issues/12794)) ([#12573](https://github.com/laurent22/joplin/issues/12573) by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Plugins: Fix importing sqlite3 ([#12792](https://github.com/laurent22/joplin/issues/12792)) ([#12790](https://github.com/laurent22/joplin/issues/12790) by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+
 ## [v3.4.2](https://github.com/laurent22/joplin/releases/tag/v3.4.2) (Pre-release) - 2025-07-24T10:43:55Z
 
 - New: Add Joplin Server SAML support ([#11865](https://github.com/laurent22/joplin/issues/11865) by [@ttcchhmm](https://github.com/ttcchhmm))

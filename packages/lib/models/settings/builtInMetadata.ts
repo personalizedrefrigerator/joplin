@@ -556,6 +556,16 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 			isGlobal: true,
 		},
 
+		'ocr.handwrittenTextDriverEnabled': {
+			value: true,
+			type: SettingItemType.Bool,
+			public: true,
+			appTypes: [AppType.Desktop],
+			label: () => _('Enable handwritten transcription'),
+			storage: SettingStorage.File,
+			isGlobal: true,
+		},
+
 		'ocr.languageDataPath': {
 			value: '',
 			type: SettingItemType.String,
@@ -687,7 +697,7 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 				return options;
 			},
 			storage: SettingStorage.File,
-			isGlobal: true,
+			isGlobal: false,
 		},
 		'editor.autoMatchingBraces': {
 			value: true,
@@ -759,7 +769,16 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 			isGlobal: false,
 		},
 
-		'notes.sortOrder.reverse': { value: true, type: SettingItemType.Bool, storage: SettingStorage.File, isGlobal: true, section: 'note', public: true, label: () => _('Reverse sort order'), appTypes: [AppType.Cli] },
+		'notes.sortOrder.reverse': {
+			value: true,
+			type: SettingItemType.Bool,
+			storage: SettingStorage.File,
+			isGlobal: false,
+			section: 'note',
+			public: true,
+			label: () => _('Reverse sort order'),
+			appTypes: [AppType.Cli],
+		},
 		// NOTE: A setting whose name starts with 'notes.sortOrder' is special,
 		// which implies changing the setting automatically triggers the refresh of notes.
 		// See lib/BaseApplication.ts/generalMiddleware() for details.
@@ -936,7 +955,7 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 			public: false,
 			appTypes: [AppType.Desktop],
 			storage: SettingStorage.File,
-			isGlobal: true,
+			isGlobal: false,
 		},
 
 		'plugins.states': {
@@ -1223,7 +1242,14 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 			isGlobal: true,
 		},
 
-		'ui.layout': { value: {}, type: SettingItemType.Object, storage: SettingStorage.File, isGlobal: true, public: false, appTypes: [AppType.Desktop] },
+		'ui.layout': {
+			value: {},
+			type: SettingItemType.Object,
+			storage: SettingStorage.File,
+			isGlobal: false,
+			public: false,
+			appTypes: [AppType.Desktop],
+		},
 
 		'ui.lastSelectedPluginPanel': {
 			value: '',
@@ -1404,6 +1430,29 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 			public: true,
 			appTypes: [AppType.Desktop],
 			label: () => _('Enable spell checking in Markdown editor'),
+			storage: SettingStorage.File,
+			isGlobal: true,
+		},
+
+		'editor.inlineRendering': {
+			value: true,
+			type: SettingItemType.Bool,
+			public: true,
+			appTypes: [AppType.Desktop, AppType.Mobile],
+			label: () => _('Markdown editor: Render markup in editor'),
+			description: () => _('Renders markup on all lines that don\'t include the cursor.'),
+			section: 'note',
+			storage: SettingStorage.File,
+			isGlobal: true,
+		},
+
+		'editor.linkTooltip': {
+			value: true,
+			type: SettingItemType.Bool,
+			public: true,
+			appTypes: [AppType.Desktop, AppType.Mobile],
+			label: () => _('Markdown editor: Show tooltips when clicking on links'),
+			section: 'note',
 			storage: SettingStorage.File,
 			isGlobal: true,
 		},
@@ -1675,6 +1724,12 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 		},
 
 		lastSettingDefaultMigration: {
+			value: -1,
+			type: SettingItemType.Int,
+			public: false,
+		},
+
+		lastSettingGlobalMigration: {
 			value: -1,
 			type: SettingItemType.Int,
 			public: false,

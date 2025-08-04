@@ -36,6 +36,7 @@ import isCursorAtBeginning from './utils/isCursorAtBeginning';
 import overwriteModeExtension from './extensions/overwriteModeExtension';
 import handleLinkEditRequests, { showLinkEditor } from './utils/handleLinkEditRequests';
 import selectedNoteIdExtension, { setNoteIdEffect } from './extensions/selectedNoteIdExtension';
+import ctrlKeyStateClassExtension from './extensions/modifierKeyCssExtension';
 
 // Newer versions of CodeMirror by default use Chrome's EditContext API.
 // While this might be stable enough for desktop use, it causes significant
@@ -228,7 +229,7 @@ const createEditor = (
 			extensions: [
 				keymapConfig,
 
-				dynamicConfig.of(configFromSettings(props.settings)),
+				dynamicConfig.of(configFromSettings(props.settings, props.onEvent)),
 				historyCompartment.of(history()),
 				searchExtension(props.onEvent, props.settings),
 
@@ -274,6 +275,7 @@ const createEditor = (
 
 				biDirectionalTextExtension,
 				overwriteModeExtension,
+				ctrlKeyStateClassExtension,
 
 				selectedNoteIdExtension,
 
@@ -320,7 +322,7 @@ const createEditor = (
 			settings = newSettings;
 			editor.dispatch({
 				effects: dynamicConfig.reconfigure(
-					configFromSettings(newSettings),
+					configFromSettings(newSettings, props.onEvent),
 				),
 			});
 		},
