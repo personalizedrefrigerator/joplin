@@ -101,6 +101,8 @@ const PluginUserWebView = (props: Props) => {
 		return `
 			if (!window.backgroundPageLoaded) {
 				${shim.injectedJs('pluginBackgroundPage')}
+				window.pluginBackgroundPage = pluginBackgroundPage;
+
 				pluginBackgroundPage.initializeDialogWebView(
 					${JSON.stringify(messageChannelId)}
 				);
