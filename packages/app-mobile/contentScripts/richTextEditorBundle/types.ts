@@ -1,5 +1,5 @@
 import { EditorEvent } from '@joplin/editor/events';
-import { EditorControl, EditorSettings } from '@joplin/editor/types';
+import { EditorControl, EditorSettings, OnLocalize } from '@joplin/editor/types';
 import { MarkupRecord, RendererControl } from '../rendererBundle/types';
 import { RenderResult } from '@joplin/renderer/types';
 
@@ -7,6 +7,7 @@ export interface EditorProps {
 	initialText: string;
 	initialNoteId: string;
 	parentElementClassName: string;
+	onLocalize: OnLocalize;
 	settings: EditorSettings;
 }
 

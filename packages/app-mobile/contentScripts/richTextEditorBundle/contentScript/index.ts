@@ -7,7 +7,6 @@ import '@joplin/editor/ProseMirror/styles';
 import readFileToBase64 from '../../utils/readFileToBase64';
 import { EditorLanguageType } from '@joplin/editor/types';
 import convertHtmlToMarkdown from './convertHtmlToMarkdown';
-import { _ } from '@joplin/lib/locale';
 
 const postprocessHtml = (html: HTMLElement) => {
 	// Fix resource URLs
@@ -41,6 +40,7 @@ export const initialize = async ({
 	initialText,
 	initialNoteId,
 	parentElementClassName,
+	onLocalize,
 }: EditorProps) => {
 	const messenger = new WebViewToRNMessenger<EditorProcessApi, MainProcessApi>('rich-text-editor', null);
 	const parentElement = document.getElementsByClassName(parentElementClassName)[0];
@@ -57,7 +57,7 @@ export const initialize = async ({
 		settings,
 		initialText,
 		initialNoteId,
-		onLocalize: _,
+		onLocalize,
 
 		onPasteFile: async (data) => {
 			const base64 = await readFileToBase64(data);

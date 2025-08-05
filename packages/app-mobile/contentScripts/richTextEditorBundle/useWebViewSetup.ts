@@ -11,6 +11,7 @@ import shim from '@joplin/lib/shim';
 import { PluginStates } from '@joplin/lib/services/plugins/reducer';
 import { RendererControl, RenderOptions } from '../rendererBundle/types';
 import { ResourceInfos } from '@joplin/renderer/types';
+import { _ } from '@joplin/lib/locale';
 
 const logger = Logger.create('useWebViewSetup');
 
@@ -103,6 +104,7 @@ const useSource = (props: UseSourceProps) => {
 			initialText: propsRef.current.initialText,
 			initialNoteId: propsRef.current.noteId,
 			settings: propsRef.current.settings,
+			onLocalize: _,
 		};
 
 		return {
