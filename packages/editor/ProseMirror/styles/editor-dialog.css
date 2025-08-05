@@ -1,0 +1,10 @@
+
+.editor-dialog {
+	display: flex;
+	flex-direction: column;
+}
+
+.editor-dialog > textarea {
+	flex-grow: 1;
+	min-height: min(70vh, 400px);
+}

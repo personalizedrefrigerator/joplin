@@ -74,9 +74,7 @@ class EditableSourceBlockView implements NodeView {
 
 	private showEditDialog_() {
 		let saveCounter = 0;
-		const editorSettings = getEditorApi(this.view.state).settings;
 		createEditorDialog({
-			settings: editorSettings,
 			block: {
 				content: this.node.attrs.source,
 				start: this.node.attrs.openCharacters,

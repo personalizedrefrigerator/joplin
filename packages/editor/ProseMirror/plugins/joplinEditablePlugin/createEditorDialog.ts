@@ -1,7 +1,3 @@
-import { EditorSettings } from '../../../types';
-import createEditor from '../../../CodeMirror/createEditor';
-import { EditorEvent, EditorEventType } from '../../../events';
-
 interface SourceBlockData {
 	start: string;
 	content: string;
@@ -11,10 +7,9 @@ interface SourceBlockData {
 interface Options {
 	block: SourceBlockData;
 	onSave: (newContent: SourceBlockData)=> void;
-	settings: EditorSettings;
 }
 
-const createEditorDialog = ({ settings, block, onSave }: Options) => {
+const createEditorDialog = ({ block, onSave }: Options) => {
 	const dialog = document.createElement('dialog');
 	dialog.classList.add('editor-dialog');
 	document.body.appendChild(dialog);
@@ -24,35 +19,29 @@ const createEditorDialog = ({ settings, block, onSave }: Options) => {
 		dialog.remove();
 	};
 
-	createEditor(dialog, {
-		settings,
-		initialNoteId: '',
-		initialText: [
-			block.start,
-			block.content,
-			block.end,
-		].join(''),
-		onLocalize: (input)=>input, // TODO
-		onPasteFile: null,
-		onEvent: (event: EditorEvent) => {
-			if (event.kind === EditorEventType.Change) {
-				onSave({
-					start: '',
-					end: '',
-					content: event.value,
-				});
-			}
-		},
-		onLogMessage: (_message) => {
-			// silent
-		},
-	});
+	const editor = document.createElement('textarea');
+	editor.spellcheck = false;
+	editor.oninput = () => {
+		onSave({
+			start: '',
+			end: '',
+			content: editor.value,
+		});
+	};
+	editor.value = [
+		block.start,
+		block.content,
+		block.end,
+	].join('');
 
 	const submitButton = document.createElement('button');
 	submitButton.textContent = 'Done';
 	submitButton.onclick = () => {
 		dialog.close();
 	};
+
+
+	dialog.appendChild(editor);
 	dialog.appendChild(submitButton);
 
 	return {};
