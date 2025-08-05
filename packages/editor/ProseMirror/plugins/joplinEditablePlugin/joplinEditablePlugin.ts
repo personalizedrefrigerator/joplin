@@ -151,8 +151,9 @@ class EditableSourceBlockView implements NodeView {
 			editButton.textContent = await _('Edit');
 		})();
 
-		editButton.onclick = () => {
+		editButton.onclick = (event) => {
 			this.showEditDialog_();
+			event.preventDefault();
 		};
 		this.dom.appendChild(editButton);
 	}
@@ -163,6 +164,11 @@ class EditableSourceBlockView implements NodeView {
 
 	public deselectNode() {
 		this.dom.classList.remove('-selected');
+	}
+
+	public stopEvent(event: Event) {
+		// Allow using the keyboard to activate the "edit" button:
+		return event.target === this.dom.querySelector('button.edit');
 	}
 
 	public update(node: Node) {
