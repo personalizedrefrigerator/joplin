@@ -49,9 +49,8 @@ const useWebViewSetup = ({
 
 	const injectedJavaScript = useMemo(() => `
 		if (!window.cm) {
-			const foundParent = document.getElementsByClassName(${
-	JSON.stringify(editorOptions.parentElementClassName)
-}).length > 0;
+			const parentClassName = ${JSON.stringify(editorOptions.parentElementClassName)};
+			const foundParent = document.getElementsByClassName(parentClassName).length > 0;
 
 			// On Android, injectedJavaScript can be run multiple times, including once before the
 			// document has loaded. To avoid logging an error each time the editor starts, don't throw
@@ -74,7 +73,7 @@ const useWebViewSetup = ({
 					cm.execCommand('scrollSelectionIntoView');
 				};
 			} else {
-				console.log('Parent element for editor not found');
+				console.log('No parent element found with class name ', parentClassName);
 			}
 		}
 	`, [jumpToHashJs, setInitialSearchJs, setInitialSelectionJs, editorOptions]);
