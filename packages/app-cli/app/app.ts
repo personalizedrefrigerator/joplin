@@ -448,11 +448,11 @@ class Application extends BaseApplication {
 		if (argv.length) {
 			this.gui_ = this.dummyGui();
 
-			await this.applySettingsSideEffects();
 
 			let failed = false;
 			for await (const command of this.commandList(argv)) {
 				try {
+					await this.applySettingsSideEffects();
 					await this.refreshCurrentFolder();
 					await this.execCommand(command);
 				} catch (error) {

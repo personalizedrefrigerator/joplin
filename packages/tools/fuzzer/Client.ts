@@ -220,7 +220,7 @@ class Client implements ActionableClient {
 
 	private get cliCommandArguments() {
 		return [
-			'start-no-build',
+			'start',
 			'--profile', this.profileDirectory,
 			'--env', 'dev',
 		];
