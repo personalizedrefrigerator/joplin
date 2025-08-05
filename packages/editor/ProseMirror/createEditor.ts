@@ -11,7 +11,7 @@ import { EditorEventType } from '../events';
 import UndoStackSynchronizer from './utils/UndoStackSynchronizer';
 import computeSelectionFormatting from './utils/computeSelectionFormatting';
 import { defaultSelectionFormatting, selectionFormattingEqual } from '../SelectionFormatting';
-import joplinEditablePlugin from './plugins/joplinEditablePlugin';
+import joplinEditablePlugin from './plugins/joplinEditablePlugin/joplinEditablePlugin';
 import keymapExtension from './plugins/keymapPlugin';
 import inputRulesExtension from './plugins/inputRulesPlugin';
 import originalMarkupPlugin from './plugins/originalMarkupPlugin';
@@ -19,7 +19,7 @@ import { tableEditing } from 'prosemirror-tables';
 import preprocessEditorInput from './utils/preprocessEditorInput';
 import listPlugin from './plugins/listPlugin';
 import searchExtension from './plugins/searchPlugin';
-import joplinEditorApiPlugin, { setEditorApi } from './plugins/joplinEditorApiPlugin';
+import joplinEditorApiPlugin, { getEditorApi, setEditorApi } from './plugins/joplinEditorApiPlugin';
 import linkTooltipPlugin from './plugins/linkTooltipPlugin';
 import { RendererControl } from './types';
 import resourcePlaceholderPlugin, { onResourceDownloaded } from './plugins/resourcePlaceholderPlugin';
@@ -44,7 +44,10 @@ const createEditor = async (
 	const { plugin: searchPlugin, updateState: updateSearchState } = searchExtension(props.onEvent);
 
 	const renderAndPostprocessHtml = async (markup: string) => {
-		const renderResult = await renderer.renderMarkupToHtml(markup);
+		const renderResult = await renderer.renderMarkupToHtml(markup, {
+			forceMarkdown: false,
+			isFullPageRender: true,
+		});
 
 		const dom = new DOMParser().parseFromString(renderResult.html, 'text/html');
 		preprocessEditorInput(dom, markup);
@@ -81,10 +84,21 @@ const createEditor = async (
 			].flat(),
 		});
 
+		const cachedLocalizations = new Map<string, string|Promise<string>>();
 		state = state.apply(
 			setEditorApi(state.tr, {
 				onEvent: props.onEvent,
 				renderer,
+				settings,
+				localize: async (input: string) => {
+					if (cachedLocalizations.has(input)) {
+						return cachedLocalizations.get(input);
+					}
+
+					const result = props.onLocalize(input);
+					cachedLocalizations.set(input, result);
+					return result;
+				},
 			}),
 		);
 
@@ -182,6 +196,13 @@ const createEditor = async (
 		updateSettings: async (newSettings: EditorSettings) => {
 			const oldSettings = settings;
 			settings = newSettings;
+
+			view.dispatch(
+				setEditorApi(view.state.tr, {
+					...getEditorApi(view.state),
+					settings,
+				}),
+			);
 
 			if (oldSettings.themeData.themeId !== newSettings.themeData.themeId) {
 				// Refresh global CSS when the theme changes -- render the full document

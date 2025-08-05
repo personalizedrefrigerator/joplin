@@ -18,6 +18,7 @@ type RenderOptionsSlice = {
 	pluginAssetContainerSelector: string;
 	splitted: boolean;
 	mapsToLine: true;
+	removeUnusedPluginAssets: boolean;
 };
 
 export interface MainProcessApi {

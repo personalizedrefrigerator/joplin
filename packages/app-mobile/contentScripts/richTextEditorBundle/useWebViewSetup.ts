@@ -48,6 +48,7 @@ const useMessenger = (props: UseMessengerProps) => {
 		noteHash: '',
 		initialScroll: 0,
 		pluginAssetContainerSelector: null,
+		removeUnusedPluginAssets: true,
 	};
 
 	return useMemo(() => {
@@ -68,6 +69,7 @@ const useMessenger = (props: UseMessengerProps) => {
 						splitted: options.splitted,
 						pluginAssetContainerSelector: options.pluginAssetContainerSelector,
 						mapsToLine: options.mapsToLine,
+						removeUnusedPluginAssets: options.removeUnusedPluginAssets,
 					},
 				);
 				return renderResult;

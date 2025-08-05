@@ -1,10 +1,12 @@
 import { EditorState, Plugin, Transaction } from 'prosemirror-state';
-import { OnEventCallback } from '../../types';
+import { EditorSettings, OnEventCallback, OnLocalize } from '../../types';
 import { RendererControl } from '../types';
 
 export interface EditorApi {
 	renderer: RendererControl;
 	onEvent: OnEventCallback;
+	settings: EditorSettings;
+	localize: OnLocalize;
 }
 
 
@@ -29,6 +31,8 @@ const joplinEditorApiPlugin = new Plugin<EditorApi>({
 					throw new Error('Not initialized');
 				},
 			},
+			settings: null,
+			localize: input => input,
 		}),
 		apply: (tr, value) => {
 			const proposedValue = tr.getMeta(joplinEditorApiPlugin);

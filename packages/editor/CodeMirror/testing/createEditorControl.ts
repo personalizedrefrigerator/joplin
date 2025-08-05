@@ -12,6 +12,7 @@ const createEditorControl = (initialText: string) => {
 		onEvent: _event => {},
 		onLogMessage: _message => {},
 		onPasteFile: null,
+		onLocalize: input=>input,
 	});
 };
 
