@@ -68,6 +68,10 @@ export default class ClientPool {
 		}
 	}
 
+	public get clients() {
+		return [...this.clients_];
+	}
+
 	public helpText() {
 		return this.clients_.map(client => client.getHelpText()).join('\n\n');
 	}

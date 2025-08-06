@@ -15,8 +15,10 @@ import retryWithCount from './utils/retryWithCount';
 import resolvePathWithinDir from '@joplin/lib/utils/resolvePathWithinDir';
 import { msleep } from '@joplin/utils/time';
 import shim from '@joplin/lib/shim';
-import { ChildProcessWithoutNullStreams, spawn } from 'child_process';
+import { spawn } from 'child_process';
 import AsyncActionQueue from '@joplin/lib/AsyncActionQueue';
+import { createInterface } from 'readline/promises';
+import Stream = require('stream');
 
 const logger = Logger.create('Client');
 
@@ -78,6 +80,16 @@ type ApiData = Readonly<{
 
 type OnCloseListener = ()=> void;
 
+type ChildProcessWrapper = {
+	stdout: Stream.Readable;
+	stderr: Stream.Readable;
+	writeStdin: (data: Buffer|string)=> void;
+	close: ()=> void;
+};
+
+// Should match the prompt used by the CLI "batch" command.
+const cliProcessPromptString = 'command> ';
+
 class Client implements ActionableClient {
 	public readonly email: string;
 
@@ -132,11 +144,13 @@ class Client implements ActionableClient {
 
 	private onCloseListeners_: OnCloseListener[] = [];
 
-	private childProcess_: ChildProcessWithoutNullStreams;
+	private childProcess_: ChildProcessWrapper;
 	private childProcessQueue_ = new AsyncActionQueue();
 	private bufferedChildProcessStdout_: string[] = [];
 	private bufferedChildProcessStderr_: string[] = [];
 	private onChildProcessOutput_: ()=> void = ()=>{};
+
+	private transcript_: string[] = [];
 
 	private constructor(
 		private readonly context_: FuzzContext,
@@ -149,26 +163,47 @@ class Client implements ActionableClient {
 	) {
 		this.email = account_.email;
 
-		this.childProcess_ = spawn('yarn', [
-			...this.cliCommandArguments,
-			'batch',
-			'-',
-		], {
-			cwd: cliDirectory,
-		});
-		this.childProcess_.stdout.on('data', (chunk: Buffer) => {
-			this.bufferedChildProcessStdout_.push(chunk.toString('utf-8'));
-			this.onChildProcessOutput_();
-		});
-		this.childProcess_.stderr.on('data', (chunk: Buffer) => {
-			logger.warn('Child process logged to stderr:', chunk.toString('utf-8'));
-
-			this.bufferedChildProcessStderr_.push(chunk.toString('utf-8'));
-			this.onChildProcessOutput_();
-		});
-
 		// Don't skip child process-related tasks.
 		this.childProcessQueue_.setCanSkipTaskHandler(() => false);
+
+		const initializeChildProcess = () => {
+			const rawChildProcess = spawn('yarn', [
+				...this.cliCommandArguments,
+				'batch',
+				'-',
+			], {
+				cwd: cliDirectory,
+			});
+			rawChildProcess.stdout.on('data', (chunk: Buffer) => {
+				const chunkString = chunk.toString('utf-8');
+				this.transcript_.push(chunkString);
+
+				this.bufferedChildProcessStdout_.push(chunkString);
+				this.onChildProcessOutput_();
+			});
+			rawChildProcess.stderr.on('data', (chunk: Buffer) => {
+				const chunkString = chunk.toString('utf-8');
+				logger.warn('Child process', this.label, 'stderr:', chunkString);
+
+				this.transcript_.push(chunkString);
+				this.bufferedChildProcessStderr_.push(chunkString);
+				this.onChildProcessOutput_();
+			});
+
+			this.childProcess_ = {
+				writeStdin: (data: Buffer|string) => {
+					this.transcript_.push(data.toString());
+					rawChildProcess.stdin.write(data);
+				},
+				stderr: rawChildProcess.stderr,
+				stdout: rawChildProcess.stdout,
+				close: () => {
+					rawChildProcess.stdin.destroy();
+					rawChildProcess.kill();
+				},
+			};
+		};
+		initializeChildProcess();
 	}
 
 	private async startClipperServer_() {
@@ -201,8 +236,7 @@ class Client implements ActionableClient {
 			listener();
 		}
 
-		this.childProcess_.stdin.destroy();
-		this.childProcess_.kill();
+		this.childProcess_.close();
 		this.closed_ = true;
 	}
 
@@ -218,6 +252,10 @@ class Client implements ActionableClient {
 		return other.account_ === this.account_;
 	}
 
+	public get label() {
+		return this.clientLabel_;
+	}
+
 	private get cliCommandArguments() {
 		return [
 			'start',
@@ -228,9 +266,63 @@ class Client implements ActionableClient {
 
 	public getHelpText() {
 		return [
-			`Client ${this.clientLabel_}:`,
+			`Client ${this.label}:`,
 			`\tCommand: cd ${quotePath(cliDirectory)} && ${commandToString('yarn', this.cliCommandArguments)}`,
 		].join('\n');
+	}
+
+	public getTranscript() {
+		const lines = this.transcript_.join('').split('\n');
+		return (
+			lines
+				// indent, for readability
+				.map(line => `  ${line}`)
+				// Since the server could still be running, don't include web clipper tokens in the output:
+				.map(line => line.replace(/token=[a-z0-9A-Z_]+/g, 'token=*****'))
+				// Don't include the sync password in the output
+				.map(line => line.replace(/(config "sync.9.password") ".*"/, '$1 "****"'))
+				.join('\n')
+		);
+	}
+
+	// Connects the child process to the main terminal interface.
+	// Useful for debugging.
+	public async startCliDebugSession() {
+		this.childProcessQueue_.push(async () => {
+			this.onChildProcessOutput_ = () => {
+				process.stdout.write(this.bufferedChildProcessStdout_.join('\n'));
+				process.stderr.write(this.bufferedChildProcessStderr_.join('\n'));
+				this.bufferedChildProcessStdout_ = [];
+				this.bufferedChildProcessStderr_ = [];
+			};
+			this.bufferedChildProcessStdout_ = [];
+			this.bufferedChildProcessStderr_ = [];
+			process.stdout.write('CLI debug session. Enter a blank line or "exit" to exit.\n');
+			process.stdout.write('To review a transcript of all interactions with this client,\n');
+			process.stdout.write('enter "[transcript]".\n\n');
+			process.stdout.write(cliProcessPromptString);
+
+			const isExitRequest = (input: string) => {
+				return input === 'exit' || input === '';
+			};
+
+			// Per https://github.com/nodejs/node/issues/32291, we can't pipe process.stdin
+			// to childProcess_.stdin without causing issues. Forward using readline instead:
+			const readline = createInterface({ input: process.stdin, output: process.stdout });
+			let lastInput = '';
+			do {
+				lastInput = await readline.question('');
+				if (lastInput === '[transcript]') {
+					process.stdout.write(`\n\n# Transcript\n\n${this.getTranscript()}\n\n# End transcript\n\n`);
+				} else if (!isExitRequest(lastInput)) {
+					this.childProcess_.writeStdin(`${lastInput}\n`);
+				}
+			} while (!isExitRequest(lastInput));
+
+			this.onChildProcessOutput_ = () => {};
+			readline.close();
+		});
+		await this.childProcessQueue_.processAllNow();
 	}
 
 	private async execCliCommand_(commandName: string, ...args: string[]) {
@@ -241,11 +333,12 @@ class Client implements ActionableClient {
 			return new Promise<void>(resolve => {
 				this.onChildProcessOutput_ = () => {
 					const lines = this.bufferedChildProcessStdout_.join('\n').split('\n');
-					const promptIndex = lines.lastIndexOf('command> ');
+					const promptIndex = lines.lastIndexOf(cliProcessPromptString);
 
 					if (promptIndex >= 0) {
 						commandStdout = lines.slice(0, promptIndex).join('\n');
 						commandStderr = this.bufferedChildProcessStderr_.join('\n');
+
 						resolve();
 					} else {
 						logger.debug('waiting...');
@@ -255,7 +348,7 @@ class Client implements ActionableClient {
 				this.bufferedChildProcessStderr_ = [];
 				const command = `${[commandName, ...args.map(arg => JSON.stringify(arg))].join(' ')}\n`;
 				logger.debug('exec', command);
-				this.childProcess_.stdin.write(command);
+				this.childProcess_.writeStdin(command);
 			});
 		});
 		await this.childProcessQueue_.processAllNow();
@@ -274,6 +367,8 @@ class Client implements ActionableClient {
 		route = route.replace(/^[/]/, '');
 		const url = new URL(`http://localhost:${this.apiData_.port}/${route}`);
 		url.searchParams.append('token', this.apiData_.token);
+
+		this.transcript_.push(`\n[[${method} ${url}; body: ${JSON.stringify(data)}]]\n`);
 
 		const response = await shim.fetch(url.toString(), {
 			method,
@@ -340,7 +435,7 @@ class Client implements ActionableClient {
 	}
 
 	public async sync() {
-		logger.info('Sync', this.clientLabel_);
+		logger.info('Sync', this.label);
 
 		await this.tracker_.sync();
 
@@ -364,7 +459,7 @@ class Client implements ActionableClient {
 	}
 
 	public async createFolder(folder: FolderMetadata) {
-		logger.info('Create folder', folder.id, 'in', `${folder.parentId ?? 'root'}/${this.clientLabel_}`);
+		logger.info('Create folder', folder.id, 'in', `${folder.parentId ?? 'root'}/${this.label}`);
 		await this.tracker_.createFolder(folder);
 
 		await this.execApiCommand_('POST', '/folders', {
@@ -395,7 +490,7 @@ class Client implements ActionableClient {
 	}
 
 	public async createNote(note: NoteData) {
-		logger.info('Create note', note.id, 'in', `${note.parentId}/${this.clientLabel_}`);
+		logger.info('Create note', note.id, 'in', `${note.parentId}/${this.label}`);
 		await this.tracker_.createNote(note);
 
 		await this.execApiCommand_('POST', '/notes', {
@@ -408,7 +503,7 @@ class Client implements ActionableClient {
 	}
 
 	public async updateNote(note: NoteData) {
-		logger.info('Update note', note.id, 'in', `${note.parentId}/${this.clientLabel_}`);
+		logger.info('Update note', note.id, 'in', `${note.parentId}/${this.label}`);
 		await this.tracker_.updateNote(note);
 		await this.execApiCommand_('PUT', `/notes/${encodeURIComponent(note.id)}`, {
 			title: note.title,
@@ -419,7 +514,7 @@ class Client implements ActionableClient {
 	}
 
 	public async deleteFolder(id: string) {
-		logger.info('Delete folder', id, 'in', this.clientLabel_);
+		logger.info('Delete folder', id, 'in', this.label);
 		await this.tracker_.deleteFolder(id);
 
 		await this.execCliCommand_('rmbook', '--permanent', '--force', id);
@@ -428,7 +523,7 @@ class Client implements ActionableClient {
 	public async shareFolder(id: string, shareWith: Client) {
 		await this.tracker_.shareFolder(id, shareWith);
 
-		logger.info('Share', id, 'with', shareWith.clientLabel_);
+		logger.info('Share', id, 'with', shareWith.label);
 		await this.execCliCommand_('share', 'add', id, shareWith.email);
 
 		await this.sync();
@@ -477,7 +572,7 @@ class Client implements ActionableClient {
 			item => ({
 				id: getStringProperty(item, 'id'),
 				parentId: getNumberProperty(item, 'is_conflict') === 1 ? (
-					`[conflicts for ${getStringProperty(item, 'conflict_original_id')} in ${this.clientLabel_}]`
+					`[conflicts for ${getStringProperty(item, 'conflict_original_id')} in ${this.label}]`
 				) : getStringProperty(item, 'parent_id'),
 				title: getStringProperty(item, 'title'),
 				body: getStringProperty(item, 'body'),
@@ -515,7 +610,7 @@ class Client implements ActionableClient {
 	}
 
 	public async checkState() {
-		logger.info('Check state', this.clientLabel_);
+		logger.info('Check state', this.label);
 
 		type ItemSlice = { id: string };
 		const compare = (a: ItemSlice, b: ItemSlice) => {
