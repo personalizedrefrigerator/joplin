@@ -6,6 +6,7 @@ import createEditorDialog from './createEditorDialog';
 import { getEditorApi } from '../joplinEditorApiPlugin';
 import { msleep } from '@joplin/utils/time';
 import createTextNode from '../../utils/dom/createTextNode';
+import postProcessRenderedHtml from './postProcessRenderedHtml';
 
 // See the fold example for more information about
 // writing similar ProseMirror plugins:
@@ -109,9 +110,10 @@ class EditableSourceBlockView implements NodeView {
 				);
 				if (cancelled()) return;
 
+				const html = postProcessRenderedHtml(rendered.html, this.node.isInline);
 				this.view.dispatch(
 					this.view.state.tr.setNodeAttribute(
-						this.getPosition(), 'contentHtml', rendered.html,
+						this.getPosition(), 'contentHtml', html,
 					),
 				);
 			},
@@ -121,27 +123,6 @@ class EditableSourceBlockView implements NodeView {
 	private updateContent_(unsafeHtml: string) {
 		const setDomContentSafe = (html: string) => {
 			this.dom.innerHTML = sanitizeHtml(html);
-		};
-
-		const postProcessDom = () => {
-			const replaceChildMatching = (selector: string) => {
-				const toReplace = [...this.dom.children].find(
-					child => child.matches(selector),
-				);
-				toReplace?.replaceWith(...toReplace.childNodes);
-			};
-			// If the original HTML is from .renderToMarkup, it may have a <div> wrapper:
-			replaceChildMatching('#rendered-md');
-
-			if (this.dom.children.length === 1 && this.node.isInline) {
-				replaceChildMatching('p, div');
-			}
-
-			// Remove the 'joplin-editable' container if it's the only thing in the content
-			// (since this.dom is itself a joplin-editable)
-			if (this.dom.children.length === 1) {
-				replaceChildMatching('.joplin-editable');
-			}
 		};
 
 		const addEditButton = () => {
@@ -159,7 +140,7 @@ class EditableSourceBlockView implements NodeView {
 		};
 
 		setDomContentSafe(unsafeHtml);
-		postProcessDom();
+		postProcessRenderedHtml(this.dom, this.node.isInline);
 		addEditButton();
 	}
 
