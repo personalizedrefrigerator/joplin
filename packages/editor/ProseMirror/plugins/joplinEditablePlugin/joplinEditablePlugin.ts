@@ -5,6 +5,7 @@ import sanitizeHtml from '../../utils/sanitizeHtml';
 import createEditorDialog from './createEditorDialog';
 import { getEditorApi } from '../joplinEditorApiPlugin';
 import { msleep } from '@joplin/utils/time';
+import createTextNode from '../../utils/dom/createTextNode';
 
 // See the fold example for more information about
 // writing similar ProseMirror plugins:
@@ -69,12 +70,15 @@ class EditableSourceBlockView implements NodeView {
 
 		this.dom = document.createElement(inline ? 'span' : 'div');
 		this.dom.classList.add('joplin-editable');
-		this.setDomHtmlSafe_(node.attrs.contentHtml);
+		this.updateContent_(node.attrs.contentHtml);
 	}
 
 	private showEditDialog_() {
+		const { localize: _ } = getEditorApi(this.view.state);
+
 		let saveCounter = 0;
 		createEditorDialog({
+			doneLabel: _('Done'),
 			block: {
 				content: this.node.attrs.source,
 				start: this.node.attrs.openCharacters,
@@ -96,7 +100,7 @@ class EditableSourceBlockView implements NodeView {
 				const cancelled = () => saveCounter !== initialSaveCounter;
 
 				// Debounce rendering
-				await msleep(100);
+				await msleep(400);
 				if (cancelled()) return;
 
 				const rendered = await getEditorApi(this.view.state).renderer.renderMarkupToHtml(
@@ -114,8 +118,10 @@ class EditableSourceBlockView implements NodeView {
 		});
 	}
 
-	private setDomHtmlSafe_(unsafeHtml: string) {
-		this.dom.innerHTML = sanitizeHtml(unsafeHtml);
+	private updateContent_(unsafeHtml: string) {
+		const setDomContentSafe = (html: string) => {
+			this.dom.innerHTML = sanitizeHtml(html);
+		};
 
 		const postProcessDom = () => {
 			const replaceChildMatching = (selector: string) => {
@@ -138,24 +144,23 @@ class EditableSourceBlockView implements NodeView {
 			}
 		};
 
-		postProcessDom();
+		const addEditButton = () => {
+			const editButton = document.createElement('button');
+			editButton.classList.add('edit');
 
+			const { localize: _ } = getEditorApi(this.view.state);
 
-		const editButton = document.createElement('button');
-		editButton.classList.add('edit');
-
-		const { localize: _ } = getEditorApi(this.view.state);
-
-		editButton.textContent = 'Edit';
-		void (async () => {
-			editButton.textContent = await _('Edit');
-		})();
-
-		editButton.onclick = (event) => {
-			this.showEditDialog_();
-			event.preventDefault();
+			editButton.appendChild(createTextNode(_('Edit')));
+			editButton.onclick = (event) => {
+				this.showEditDialog_();
+				event.preventDefault();
+			};
+			this.dom.appendChild(editButton);
 		};
-		this.dom.appendChild(editButton);
+
+		setDomContentSafe(unsafeHtml);
+		postProcessDom();
+		addEditButton();
 	}
 
 	public selectNode() {
@@ -177,7 +182,7 @@ class EditableSourceBlockView implements NodeView {
 		}
 
 		this.node = node;
-		this.setDomHtmlSafe_(node.attrs.contentHtml);
+		this.updateContent_(node.attrs.contentHtml);
 
 		return true;
 	}

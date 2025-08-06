@@ -80,6 +80,7 @@ const useMessenger = (props: UseMessengerProps) => {
 			onPasteFile: async (type: string, base64: string) => {
 				onAttachRef.current(type, base64);
 			},
+			onLocalize: _,
 		};
 
 		const messenger = new RNToWebViewMessenger<MainProcessApi, EditorProcessApi>(
@@ -110,7 +111,6 @@ const useSource = (props: UseSourceProps) => {
 				searchText: propsRef.current.globalSearch,
 			},
 			settings: propsRef.current.settings,
-			onLocalize: _,
 		};
 
 		return {

@@ -40,7 +40,6 @@ export const initialize = async ({
 	initialText,
 	initialNoteId,
 	parentElementClassName,
-	onLocalize,
 	initialSearch,
 }: EditorProps) => {
 	const messenger = new WebViewToRNMessenger<EditorProcessApi, MainProcessApi>('rich-text-editor', null);
@@ -58,7 +57,7 @@ export const initialize = async ({
 		settings,
 		initialText,
 		initialNoteId,
-		onLocalize,
+		onLocalize: messenger.remoteApi.onLocalize,
 
 		onPasteFile: async (data) => {
 			const base64 = await readFileToBase64(data);

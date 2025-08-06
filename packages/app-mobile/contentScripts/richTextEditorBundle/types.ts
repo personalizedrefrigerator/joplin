@@ -8,7 +8,6 @@ export interface EditorProps {
 	initialSearch: SearchState;
 	initialNoteId: string;
 	parentElementClassName: string;
-	onLocalize: OnLocalize;
 	settings: EditorSettings;
 }
 
@@ -28,6 +27,7 @@ export interface MainProcessApi {
 	logMessage(message: string): Promise<void>;
 	onRender(markup: MarkupRecord, options: RenderOptionsSlice): Promise<RenderResult>;
 	onPasteFile(type: string, base64: string): Promise<void>;
+	onLocalize: OnLocalize;
 }
 
 export interface RichTextEditorControl {

@@ -1,3 +1,5 @@
+import createTextNode from '../../utils/dom/createTextNode';
+
 interface SourceBlockData {
 	start: string;
 	content: string;
@@ -5,11 +7,12 @@ interface SourceBlockData {
 }
 
 interface Options {
+	doneLabel: string|Promise<string>;
 	block: SourceBlockData;
 	onSave: (newContent: SourceBlockData)=> void;
 }
 
-const createEditorDialog = ({ block, onSave }: Options) => {
+const createEditorDialog = ({ doneLabel, block, onSave }: Options) => {
 	const dialog = document.createElement('dialog');
 	dialog.classList.add('editor-dialog');
 	document.body.appendChild(dialog);
@@ -35,11 +38,10 @@ const createEditorDialog = ({ block, onSave }: Options) => {
 	].join('');
 
 	const submitButton = document.createElement('button');
-	submitButton.textContent = 'Done';
+	submitButton.appendChild(createTextNode(doneLabel));
 	submitButton.onclick = () => {
 		dialog.close();
 	};
-
 
 	dialog.appendChild(editor);
 	dialog.appendChild(submitButton);

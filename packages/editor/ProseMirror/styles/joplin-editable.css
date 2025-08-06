@@ -1,6 +1,8 @@
 
 .joplin-editable {
 	position: relative;
+	/* Override the "white-space" setting for the editor */
+	white-space: normal;
 }
 
 .joplin-editable > .edit {
@@ -10,7 +12,10 @@
 	opacity: 0;
 
 	display: none;
-	transition: 0.4s ease opacity;
+
+	transition-behavior: allow-discrete;
+	transition-duration: 0.2s;
+	transition-property: opacity, display;
 }
 
 .joplin-editable.-selected {
