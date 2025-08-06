@@ -21,7 +21,6 @@ const openDebugSession = async (clients: ClientPool) => {
 			const clientChoice = await readlineInterface.question(
 				`${questionPrefix}Select a client from:\n${clientChoices}\nclient: `,
 			);
-			console.log('choice', clientChoice);
 			if (clientChoice.trim() === '' || clientChoice === 'exit') {
 				return null;
 			}
