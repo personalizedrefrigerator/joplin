@@ -1,3 +1,4 @@
+import { focus } from '@joplin/lib/utils/focusHandler';
 import createTextNode from '../../utils/dom/createTextNode';
 
 interface SourceBlockData {
@@ -14,9 +15,8 @@ interface Options {
 
 const createEditorDialog = ({ doneLabel, block, onSave }: Options) => {
 	const dialog = document.createElement('dialog');
-	dialog.classList.add('editor-dialog');
+	dialog.classList.add('editor-dialog', '-visible');
 	document.body.appendChild(dialog);
-	dialog.showModal();
 
 	dialog.onclose = () => {
 		dialog.remove();
@@ -39,12 +39,24 @@ const createEditorDialog = ({ doneLabel, block, onSave }: Options) => {
 
 	const submitButton = document.createElement('button');
 	submitButton.appendChild(createTextNode(doneLabel));
+	submitButton.classList.add('submit');
 	submitButton.onclick = () => {
-		dialog.close();
+		// .remove the dialog in browsers with limited support for
+		// HTMLDialogElement (and in JSDOM).
+		(dialog.close ?? dialog.remove)();
 	};
 
 	dialog.appendChild(editor);
 	dialog.appendChild(submitButton);
+
+
+	// .showModal is not defined in JSDOM and some older (pre-2022) browsers
+	if (dialog.showModal) {
+		dialog.showModal();
+	} else {
+		dialog.classList.add('-fake-modal');
+		focus('createEditorDialog/legacy', editor);
+	}
 
 	return {};
 };

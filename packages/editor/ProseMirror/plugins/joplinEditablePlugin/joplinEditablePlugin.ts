@@ -71,7 +71,7 @@ class EditableSourceBlockView implements NodeView {
 
 		this.dom = document.createElement(inline ? 'span' : 'div');
 		this.dom.classList.add('joplin-editable');
-		this.updateContent_(node.attrs.contentHtml);
+		this.updateContent_();
 	}
 
 	private showEditDialog_() {
@@ -120,7 +120,7 @@ class EditableSourceBlockView implements NodeView {
 		});
 	}
 
-	private updateContent_(unsafeHtml: string) {
+	private updateContent_() {
 		const setDomContentSafe = (html: string) => {
 			this.dom.innerHTML = sanitizeHtml(html);
 		};
@@ -139,7 +139,7 @@ class EditableSourceBlockView implements NodeView {
 			this.dom.appendChild(editButton);
 		};
 
-		setDomContentSafe(unsafeHtml);
+		setDomContentSafe(this.node.attrs.contentHtml);
 		postProcessRenderedHtml(this.dom, this.node.isInline);
 		addEditButton();
 	}
@@ -163,7 +163,7 @@ class EditableSourceBlockView implements NodeView {
 		}
 
 		this.node = node;
-		this.updateContent_(node.attrs.contentHtml);
+		this.updateContent_();
 
 		return true;
 	}
