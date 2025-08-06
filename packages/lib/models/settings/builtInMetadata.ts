@@ -731,6 +731,17 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 			storage: SettingStorage.File,
 			isGlobal: true,
 		},
+		'editor.enableHtmlToMarkdownBanner': {
+			value: true,
+			advanced: true,
+			type: SettingItemType.Bool,
+			public: true,
+			section: 'note',
+			appTypes: [AppType.Desktop],
+			label: () => _('Enable HTML-to-Markdown conversion banner'),
+			storage: SettingStorage.File,
+			isGlobal: true,
+		},
 		'editor.pastePreserveColors': {
 			value: false,
 			type: SettingItemType.Bool,
