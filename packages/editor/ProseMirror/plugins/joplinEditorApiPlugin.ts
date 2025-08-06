@@ -1,11 +1,10 @@
 import { EditorState, Plugin, Transaction } from 'prosemirror-state';
-import { EditorSettings, OnEventCallback, OnLocalize } from '../../types';
+import { OnEventCallback, OnLocalize } from '../../types';
 import { RendererControl } from '../types';
 
 export interface EditorApi {
 	renderer: RendererControl;
 	onEvent: OnEventCallback;
-	settings: EditorSettings;
 	localize: OnLocalize;
 }
 

@@ -19,7 +19,7 @@ import { tableEditing } from 'prosemirror-tables';
 import preprocessEditorInput from './utils/preprocessEditorInput';
 import listPlugin from './plugins/listPlugin';
 import searchExtension from './plugins/searchPlugin';
-import joplinEditorApiPlugin, { getEditorApi, setEditorApi } from './plugins/joplinEditorApiPlugin';
+import joplinEditorApiPlugin, { setEditorApi } from './plugins/joplinEditorApiPlugin';
 import linkTooltipPlugin from './plugins/linkTooltipPlugin';
 import { RendererControl } from './types';
 import resourcePlaceholderPlugin, { onResourceDownloaded } from './plugins/resourcePlaceholderPlugin';
@@ -89,7 +89,6 @@ const createEditor = async (
 			setEditorApi(state.tr, {
 				onEvent: props.onEvent,
 				renderer,
-				settings,
 				localize: async (input: string) => {
 					if (cachedLocalizations.has(input)) {
 						return cachedLocalizations.get(input);
@@ -196,13 +195,6 @@ const createEditor = async (
 		updateSettings: async (newSettings: EditorSettings) => {
 			const oldSettings = settings;
 			settings = newSettings;
-
-			view.dispatch(
-				setEditorApi(view.state.tr, {
-					...getEditorApi(view.state),
-					settings,
-				}),
-			);
 
 			if (oldSettings.themeData.themeId !== newSettings.themeData.themeId) {
 				// Refresh global CSS when the theme changes -- render the full document
