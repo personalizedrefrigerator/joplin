@@ -19,11 +19,12 @@ const findImage = (editor: EditorView) => {
 
 describe('renderBlockImages', () => {
 	test.each([
-		{ spaceBefore: '', spaceAfter: '', alt: 'test' },
+		{ spaceBefore: '', spaceAfter: '\n\n', alt: 'test' },
 		{ spaceBefore: '', spaceAfter: '', alt: 'This is a test!' },
 		{ spaceBefore: '   ', spaceAfter: ' ', alt: 'test' },
+		{ spaceBefore: '', spaceAfter: '', alt: '!!!!' },
 	])('should render images below their Markdown source (case %#)', async ({ spaceBefore, spaceAfter, alt }) => {
-		const editor = await createEditor(`${spaceBefore}![${alt}](:/0123456789abcdef0123456789abcdef)${spaceAfter}\n\n`, true);
+		const editor = await createEditor(`${spaceBefore}![${alt}](:/0123456789abcdef0123456789abcdef)${spaceAfter}`, true);
 
 		const image = findImage(editor);
 		expect(image).toBeTruthy();
@@ -35,12 +36,6 @@ describe('renderBlockImages', () => {
 	// potentially-unwanted web requests when opening a note with only the editor open.
 	test('should not render web images', async () => {
 		const editor = await createEditor('![test](https://example.com/test.png)\n\n', true);
-		const image = findImage(editor);
-		expect(image).toBeNull();
-	});
-
-	test('should not render images if not followed by a blank line', async () => {
-		const editor = await createEditor('![test](:/0123456789abcdef0123456789abcdef)\ntest.\n', true);
 		const image = findImage(editor);
 		expect(image).toBeNull();
 	});
