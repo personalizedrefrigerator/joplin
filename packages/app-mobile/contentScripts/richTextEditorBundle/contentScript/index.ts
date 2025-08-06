@@ -16,22 +16,6 @@ const postprocessHtml = (html: HTMLElement) => {
 		resource.src = `:/${resourceId}`;
 	}
 
-	// Re-add newlines to data-joplin-source-* that were removed
-	// by ProseMirror.
-	// TODO: Try to find a better solution
-	const sourceBlocks = html.querySelectorAll<HTMLPreElement>(
-		'pre[data-joplin-source-open][data-joplin-source-close].joplin-source',
-	);
-	for (const sourceBlock of sourceBlocks) {
-		const isBlock = sourceBlock.parentElement.tagName !== 'SPAN';
-		if (isBlock) {
-			const originalOpen = sourceBlock.getAttribute('data-joplin-source-open');
-			const originalClose = sourceBlock.getAttribute('data-joplin-source-close');
-			sourceBlock.setAttribute('data-joplin-source-open', `${originalOpen}\n`);
-			sourceBlock.setAttribute('data-joplin-source-close', `\n${originalClose}`);
-		}
-	}
-
 	return html;
 };
 
@@ -73,6 +57,7 @@ export const initialize = async ({
 		settings,
 		initialText,
 		initialNoteId,
+		onLocalize: messenger.remoteApi.onLocalize,
 
 		onPasteFile: async (data) => {
 			const base64 = await readFileToBase64(data);
@@ -85,14 +70,20 @@ export const initialize = async ({
 			void messenger.remoteApi.onEditorEvent(event);
 		},
 	}, {
-		renderMarkupToHtml: async (markup) => {
+		renderMarkupToHtml: async (markup, options) => {
+			let language = MarkupLanguage.Markdown;
+			if (settings.language === EditorLanguageType.Html && !options.forceMarkdown) {
+				language = MarkupLanguage.Html;
+			}
+
 			return await messenger.remoteApi.onRender({
 				markup,
-				language: settings.language === EditorLanguageType.Html ? MarkupLanguage.Html : MarkupLanguage.Markdown,
+				language,
 			}, {
 				pluginAssetContainerSelector: `#${assetContainer.id}`,
 				splitted: true,
 				mapsToLine: true,
+				removeUnusedPluginAssets: options.isFullPageRender,
 			});
 		},
 		renderHtmlToMarkup: (node) => {

@@ -13,6 +13,7 @@ const createEditorControl = (initialText: string) => {
 		onLogMessage: _message => {},
 		onPasteFile: null,
 		resolveImageSrc: (src)=>Promise.resolve(src),
+		onLocalize: input=>input,
 	});
 };
 

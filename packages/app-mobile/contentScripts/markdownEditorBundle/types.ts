@@ -1,5 +1,5 @@
 import { EditorEvent } from '@joplin/editor/events';
-import { EditorControl, EditorSettings } from '@joplin/editor/types';
+import { EditorControl, EditorSettings, OnLocalize } from '@joplin/editor/types';
 
 export interface EditorProcessApi {
 	editor: EditorControl;
@@ -14,6 +14,7 @@ export interface EditorProps {
 	parentElementClassName: string;
 	initialText: string;
 	initialNoteId: string;
+	onLocalize: OnLocalize;
 	settings: EditorSettings;
 }
 

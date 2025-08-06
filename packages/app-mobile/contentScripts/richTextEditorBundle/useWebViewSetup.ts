@@ -11,6 +11,7 @@ import shim from '@joplin/lib/shim';
 import { PluginStates } from '@joplin/lib/services/plugins/reducer';
 import { RendererControl, RenderOptions } from '../rendererBundle/types';
 import { ResourceInfos } from '@joplin/renderer/types';
+import { _ } from '@joplin/lib/locale';
 import { defaultSearchState } from '../../components/NoteEditor/SearchPanel';
 
 const logger = Logger.create('useWebViewSetup');
@@ -50,6 +51,7 @@ const useMessenger = (props: UseMessengerProps) => {
 		noteHash: '',
 		initialScroll: 0,
 		pluginAssetContainerSelector: null,
+		removeUnusedPluginAssets: true,
 	};
 
 	return useMemo(() => {
@@ -70,6 +72,7 @@ const useMessenger = (props: UseMessengerProps) => {
 						splitted: options.splitted,
 						pluginAssetContainerSelector: options.pluginAssetContainerSelector,
 						mapsToLine: options.mapsToLine,
+						removeUnusedPluginAssets: options.removeUnusedPluginAssets,
 					},
 				);
 				return renderResult;
@@ -77,6 +80,7 @@ const useMessenger = (props: UseMessengerProps) => {
 			onPasteFile: async (type: string, base64: string) => {
 				onAttachRef.current(type, base64);
 			},
+			onLocalize: _,
 		};
 
 		const messenger = new RNToWebViewMessenger<MainProcessApi, EditorProcessApi>(
