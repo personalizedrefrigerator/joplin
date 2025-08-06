@@ -1,8 +1,9 @@
+import { LocalizationResult } from '../../../types';
 import createTextNode from './createTextNode';
 import createUniqueId from './createUniqueId';
 
 interface Options {
-	label: string|Promise<string>;
+	label: LocalizationResult;
 	spellCheck: boolean;
 	initialContent: string;
 	onChange: (newContent: string)=> void;

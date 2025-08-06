@@ -190,7 +190,8 @@ export type LogMessageCallback = (message: string)=> void;
 export type OnEventCallback = (event: EditorEvent)=> void;
 export type PasteFileCallback = (data: File)=> Promise<void>;
 type OnScrollPastBeginningCallback = ()=> void;
-export type OnLocalize = (input: string)=> Promise<string>|string;
+export type LocalizationResult = Promise<string>|string;
+export type OnLocalize = (input: string)=> LocalizationResult;
 
 interface Localisations {
 	[editorString: string]: string;
