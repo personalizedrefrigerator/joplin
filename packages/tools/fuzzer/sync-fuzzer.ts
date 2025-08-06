@@ -220,8 +220,20 @@ const doRandomAction = async (context: FuzzContext, client: Client, clientPool: 
 
 			const other = await clientPool.newWithSameAccount(client);
 			await createClientInitialNotes(other);
-			await other.sync();
-			await other.checkState();
+
+			// Sometimes, a delay is needed between client creation
+			// and initial sync. Retry the initial sync and the checkState
+			// on failure:
+			await retryWithCount(async () => {
+				await other.sync();
+				await other.checkState();
+			}, {
+				delayOnFailure: (count) => Second * count,
+				count: 3,
+				onFail: async (error) => {
+					logger.warn('other.sync/other.checkState failed with', error, 'retrying...');
+				},
+			});
 
 			await client.sync();
 			return true;
