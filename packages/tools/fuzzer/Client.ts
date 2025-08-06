@@ -13,7 +13,7 @@ import { quotePath } from '@joplin/utils/path';
 import getNumberProperty from './utils/getNumberProperty';
 import retryWithCount from './utils/retryWithCount';
 import resolvePathWithinDir from '@joplin/lib/utils/resolvePathWithinDir';
-import { msleep } from '@joplin/utils/time';
+import { msleep, Second } from '@joplin/utils/time';
 import shim from '@joplin/lib/shim';
 import { spawn } from 'child_process';
 import AsyncActionQueue from '@joplin/lib/AsyncActionQueue';
@@ -417,45 +417,31 @@ class Client implements ActionableClient {
 	}
 
 	private async decrypt_() {
-		// E2EE decryption can occasionally fail with "Master key is not loaded:".
-		// Allow e2ee decryption to be retried:
-		await retryWithCount(async () => {
-			const result = await this.execCliCommand_('e2ee', 'decrypt', '--force');
-			if (!result.stdout.includes('Completed decryption.')) {
-				throw new Error(`Decryption did not complete: ${result.stdout}`);
-			}
-		}, {
-			count: 3,
-			onFail: async (error)=>{
-				logger.warn('E2EE decryption failed:', error);
-				logger.info('Retrying...');
-			},
-		});
+		const result = await this.execCliCommand_('e2ee', 'decrypt', '--force');
+		if (!result.stdout.includes('Completed decryption.')) {
+			throw new Error(`Decryption did not complete: ${result.stdout}`);
+		}
 	}
 
 	public async sync() {
 		logger.info('Sync', this.label);
-
 		await this.tracker_.sync();
 
-		const result = await this.execCliCommand_('sync');
-		if (result.stdout.match(/Last error:/i)) {
-			throw new Error(`Sync failed: ${result.stdout}`);
-		}
-
-		await this.decrypt_();
-	}
-
-	public async syncWithRetry(reason: string) {
 		await retryWithCount(async () => {
-			await this.sync();
+			const result = await this.execCliCommand_('sync');
+			if (result.stdout.match(/Last error:/i)) {
+				throw new Error(`Sync failed: ${result.stdout}`);
+			}
+
+			await this.decrypt_();
 		}, {
-			count: 3,
+			count: 4,
 			// Certain sync failures self-resolve after a background task is allowed to
 			// run. Delay:
-			delayOnFailure: 3000,
-			onFail: async (_error) => {
-				logger.info(`Sync failed: ${reason}`);
+			delayOnFailure: retry => retry * Second * 2,
+			onFail: async (error) => {
+				logger.debug('Sync error: ', error);
+				logger.info('Sync failed. Retrying...');
 			},
 		});
 	}

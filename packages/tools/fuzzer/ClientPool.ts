@@ -68,12 +68,6 @@ export default class ClientPool {
 		}
 	}
 
-	public async syncAllWithRetry(reason: string) {
-		for (const client of this.clients_) {
-			await client.syncWithRetry(reason);
-		}
-	}
-
 	public get clients() {
 		return [...this.clients_];
 	}

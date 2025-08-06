@@ -13,6 +13,7 @@ import { env } from 'process';
 import yargs = require('yargs');
 import { strict as assert } from 'assert';
 import openDebugSession from './utils/openDebugSession';
+import { Second } from '@joplin/utils/time';
 const { shimInit } = require('@joplin/lib/shim-init-node');
 
 const globalLogger = new Logger();
@@ -219,7 +220,7 @@ const doRandomAction = async (context: FuzzContext, client: Client, clientPool: 
 
 			const other = await clientPool.newWithSameAccount(client);
 			await createClientInitialNotes(other);
-			await other.syncWithRetry('The initial sync of secondary clients with E2EE may fail if the master key hasn\'t downloaded.');
+			await other.sync();
 			await other.checkState();
 
 			await client.sync();
@@ -338,10 +339,11 @@ const main = async (options: Options) => {
 			await retryWithCount(async () => {
 				await clientPool.checkState();
 			}, {
-				count: 3,
+				count: 4,
+				delayOnFailure: count => count * Second * 2,
 				onFail: async () => {
 					logger.info('.checkState failed. Syncing all clients...');
-					await clientPool.syncAllWithRetry('A .checkState failed, syncing all clients and retrying...');
+					await clientPool.syncAll();
 				},
 			});
 		}
