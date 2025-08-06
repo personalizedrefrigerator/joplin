@@ -1,9 +1,12 @@
+import { msleep } from '@joplin/utils/time';
+
 interface Options {
 	count: number;
+	delayOnFailure?: number;
 	onFail: (error: Error)=> Promise<void>;
 }
 
-const retryWithCount = async (task: ()=> Promise<void>, { count, onFail }: Options) => {
+const retryWithCount = async (task: ()=> Promise<void>, { count, delayOnFailure = 0, onFail }: Options) => {
 	let lastError: Error|null = null;
 	for (let retry = 0; retry < count; retry ++) {
 		try {
@@ -11,6 +14,11 @@ const retryWithCount = async (task: ()=> Promise<void>, { count, onFail }: Optio
 		} catch (error) {
 			await onFail(error);
 			lastError = error;
+
+			const willRetry = retry + 1 < count;
+			if (willRetry && delayOnFailure) {
+				await msleep(delayOnFailure);
+			}
 		}
 	}
 

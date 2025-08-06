@@ -428,8 +428,7 @@ class Client implements ActionableClient {
 			count: 3,
 			onFail: async (error)=>{
 				logger.warn('E2EE decryption failed:', error);
-				logger.info('Syncing before retry...');
-				await this.execCliCommand_('sync');
+				logger.info('Retrying...');
 			},
 		});
 	}
@@ -452,6 +451,9 @@ class Client implements ActionableClient {
 			await this.sync();
 		}, {
 			count: 3,
+			// Certain sync failures self-resolve after a background task is allowed to
+			// run. Delay:
+			delayOnFailure: 3000,
 			onFail: async (_error) => {
 				logger.info(`Sync failed: ${reason}`);
 			},

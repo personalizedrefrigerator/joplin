@@ -341,7 +341,7 @@ const main = async (options: Options) => {
 				count: 3,
 				onFail: async () => {
 					logger.info('.checkState failed. Syncing all clients...');
-					await clientPool.syncAll();
+					await clientPool.syncAllWithRetry('A .checkState failed, syncing all clients and retrying...');
 				},
 			});
 		}
