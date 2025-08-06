@@ -12,6 +12,7 @@ import { PluginStates } from '@joplin/lib/services/plugins/reducer';
 import { RendererControl, RenderOptions } from '../rendererBundle/types';
 import { ResourceInfos } from '@joplin/renderer/types';
 import { _ } from '@joplin/lib/locale';
+import { defaultSearchState } from '../../components/NoteEditor/SearchPanel';
 
 const logger = Logger.create('useWebViewSetup');
 
@@ -20,6 +21,7 @@ interface Props {
 	noteId: string;
 	settings: EditorSettings;
 	parentElementClassName: string;
+	globalSearch: string;
 	themeId: number;
 	pluginStates: PluginStates;
 	noteResources: ResourceInfos;
@@ -103,6 +105,10 @@ const useSource = (props: UseSourceProps) => {
 			parentElementClassName: propsRef.current.parentElementClassName,
 			initialText: propsRef.current.initialText,
 			initialNoteId: propsRef.current.noteId,
+			initialSearch: {
+				...defaultSearchState,
+				searchText: propsRef.current.globalSearch,
+			},
 			settings: propsRef.current.settings,
 			onLocalize: _,
 		};
