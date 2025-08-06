@@ -80,6 +80,7 @@ class EditableSourceBlockView implements NodeView {
 		let saveCounter = 0;
 		createEditorDialog({
 			doneLabel: _('Done'),
+			editorLabel: _('Code:'),
 			block: {
 				content: this.node.attrs.source,
 				start: this.node.attrs.openCharacters,

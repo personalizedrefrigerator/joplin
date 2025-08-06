@@ -1,5 +1,6 @@
 import { focus } from '@joplin/lib/utils/focusHandler';
 import createTextNode from '../../utils/dom/createTextNode';
+import createTextArea from '../../utils/dom/createTextArea';
 
 interface SourceBlockData {
 	start: string;
@@ -8,12 +9,13 @@ interface SourceBlockData {
 }
 
 interface Options {
+	editorLabel: string|Promise<string>;
 	doneLabel: string|Promise<string>;
 	block: SourceBlockData;
 	onSave: (newContent: SourceBlockData)=> void;
 }
 
-const createEditorDialog = ({ doneLabel, block, onSave }: Options) => {
+const createEditorDialog = ({ editorLabel, doneLabel, block, onSave }: Options) => {
 	const dialog = document.createElement('dialog');
 	dialog.classList.add('editor-dialog', '-visible');
 	document.body.appendChild(dialog);
@@ -22,31 +24,35 @@ const createEditorDialog = ({ doneLabel, block, onSave }: Options) => {
 		dialog.remove();
 	};
 
-	const editor = document.createElement('textarea');
-	editor.spellcheck = false;
-	editor.oninput = () => {
-		onSave({
-			start: '',
-			end: '',
-			content: editor.value,
-		});
-	};
-	editor.value = [
-		block.start,
-		block.content,
-		block.end,
-	].join('');
+	const { textArea, label: textAreaLabel } = createTextArea({
+		label: editorLabel,
+		initialContent: block.content,
+		onChange: (newContent) => {
+			block = {
+				...block,
+				content: newContent,
+			};
+			onSave(block);
+		},
+		spellCheck: false,
+	});
+
 
 	const submitButton = document.createElement('button');
 	submitButton.appendChild(createTextNode(doneLabel));
 	submitButton.classList.add('submit');
 	submitButton.onclick = () => {
-		// .remove the dialog in browsers with limited support for
-		// HTMLDialogElement (and in JSDOM).
-		(dialog.close ?? dialog.remove)();
+		if (dialog.close) {
+			dialog.close();
+		} else {
+			// .remove the dialog in browsers with limited support for
+			// HTMLDialogElement (and in JSDOM).
+			dialog.remove();
+		}
 	};
 
-	dialog.appendChild(editor);
+	dialog.appendChild(textAreaLabel);
+	dialog.appendChild(textArea);
 	dialog.appendChild(submitButton);
 
 
@@ -55,7 +61,7 @@ const createEditorDialog = ({ doneLabel, block, onSave }: Options) => {
 		dialog.showModal();
 	} else {
 		dialog.classList.add('-fake-modal');
-		focus('createEditorDialog/legacy', editor);
+		focus('createEditorDialog/legacy', textArea);
 	}
 
 	return {};
