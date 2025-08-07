@@ -19,17 +19,19 @@ import { tableEditing } from 'prosemirror-tables';
 import preprocessEditorInput from './utils/preprocessEditorInput';
 import listPlugin from './plugins/listPlugin';
 import searchExtension from './plugins/searchPlugin';
-import joplinEditorApiPlugin, { setEditorApi } from './plugins/joplinEditorApiPlugin';
+import joplinEditorApiPlugin, { getEditorApi, setEditorApi } from './plugins/joplinEditorApiPlugin';
 import linkTooltipPlugin from './plugins/linkTooltipPlugin';
-import { RendererControl } from './types';
+import { OnCreateTextEditor, RendererControl } from './types';
 import resourcePlaceholderPlugin, { onResourceDownloaded } from './plugins/resourcePlaceholderPlugin';
 import getFileFromPasteEvent from '../utils/getFileFromPasteEvent';
 import { RenderResult } from '../../renderer/types';
+
 
 const createEditor = async (
 	parentElement: HTMLElement,
 	props: EditorProps,
 	renderer: RendererControl,
+	createTextEditor: OnCreateTextEditor,
 ): Promise<EditorControl> => {
 	const renderNodeToMarkup = (node: Node|DocumentFragment) => {
 		return renderer.renderHtmlToMarkup(node);
@@ -89,6 +91,7 @@ const createEditor = async (
 			setEditorApi(state.tr, {
 				onEvent: props.onEvent,
 				renderer,
+				createTextEditor,
 				localize: async (input: string) => {
 					if (cachedLocalizations.has(input)) {
 						return cachedLocalizations.get(input);
@@ -98,6 +101,7 @@ const createEditor = async (
 					cachedLocalizations.set(input, result);
 					return result;
 				},
+				editorSettings: props.settings,
 			}),
 		);
 
@@ -195,6 +199,13 @@ const createEditor = async (
 		updateSettings: async (newSettings: EditorSettings) => {
 			const oldSettings = settings;
 			settings = newSettings;
+
+			view.dispatch(
+				setEditorApi(view.state.tr, {
+					...getEditorApi(view.state),
+					editorSettings: props.settings,
+				}),
+			);
 
 			if (oldSettings.themeData.themeId !== newSettings.themeData.themeId) {
 				// Refresh global CSS when the theme changes -- render the full document

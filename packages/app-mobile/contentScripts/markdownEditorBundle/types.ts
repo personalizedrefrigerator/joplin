@@ -1,5 +1,5 @@
 import { EditorEvent } from '@joplin/editor/events';
-import { EditorControl, EditorSettings, OnLocalize } from '@joplin/editor/types';
+import { EditorControl, EditorSettings, LocalizationResult } from '@joplin/editor/types';
 
 export interface EditorProcessApi {
 	editor: EditorControl;
@@ -11,14 +11,18 @@ export interface SelectionRange {
 }
 
 export interface EditorProps {
-	parentElementClassName: string;
+	parentElementOrClassName: HTMLElement|string;
 	initialText: string;
-	initialNoteId: string;
-	onLocalize: OnLocalize;
+	initialNoteId: string|null;
 	settings: EditorSettings;
 }
 
+export interface EditorWithParentProps extends EditorProps {
+	onEvent: (editorEvent: EditorEvent)=> void;
+}
+
 export interface MainProcessApi {
+	onLocalize(text: string): LocalizationResult;
 	onEditorEvent(event: EditorEvent): Promise<void>;
 	logMessage(message: string): Promise<void>;
 	onPasteFile(type: string, dataBase64: string): Promise<void>;

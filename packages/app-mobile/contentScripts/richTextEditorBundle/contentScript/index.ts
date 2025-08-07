@@ -5,8 +5,9 @@ import WebViewToRNMessenger from '../../../utils/ipc/WebViewToRNMessenger';
 import { MarkupLanguage } from '@joplin/renderer/types';
 import '@joplin/editor/ProseMirror/styles';
 import readFileToBase64 from '../../utils/readFileToBase64';
-import { EditorLanguageType } from '@joplin/editor/types';
+import { EditorControl, EditorLanguageType } from '@joplin/editor/types';
 import convertHtmlToMarkdown from './convertHtmlToMarkdown';
+import { EditorWithParentProps } from '../../markdownEditorBundle/types';
 
 const postprocessHtml = (html: HTMLElement) => {
 	// Fix resource URLs
@@ -35,13 +36,18 @@ const htmlToMarkdown = (html: HTMLElement): string => {
 	return convertHtmlToMarkdown(html);
 };
 
-export const initialize = async ({
-	settings,
-	initialText,
-	initialNoteId,
-	parentElementClassName,
-	initialSearch,
-}: EditorProps) => {
+type CreateMarkdownEditor = (markdownEditorOptions: EditorWithParentProps)=> EditorControl;
+
+export const initialize = async (
+	{
+		settings,
+		initialText,
+		initialNoteId,
+		parentElementClassName,
+		initialSearch,
+	}: EditorProps,
+	createMarkdownEditor: CreateMarkdownEditor,
+) => {
 	const messenger = new WebViewToRNMessenger<EditorProcessApi, MainProcessApi>('rich-text-editor', null);
 	const parentElement = document.getElementsByClassName(parentElementClassName)[0];
 	if (!parentElement) throw new Error('Parent element not found');
@@ -109,6 +115,14 @@ export const initialize = async ({
 				return postprocessHtml(html).outerHTML;
 			}
 		},
+	}, (parent, settings, onEvent) => {
+		return createMarkdownEditor({
+			initialText: '',
+			initialNoteId: '',
+			parentElementOrClassName: parent,
+			settings,
+			onEvent,
+		});
 	});
 	editor.setSearchState(initialSearch);
 

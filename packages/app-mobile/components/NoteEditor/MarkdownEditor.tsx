@@ -117,11 +117,10 @@ const MarkdownEditor: React.FC<EditorProps> = props => {
 		onEditorEvent: props.onEditorEvent,
 		onAttachFile: props.onAttach,
 		editorOptions: {
-			parentElementClassName: 'CodeMirror',
+			parentElementOrClassName: 'CodeMirror',
 			initialText: props.initialText,
 			initialNoteId: props.noteId,
 			settings: props.editorSettings,
-			onLocalize: _,
 		},
 		webviewRef,
 	});

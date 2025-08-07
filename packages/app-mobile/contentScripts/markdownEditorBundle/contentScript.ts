@@ -1,30 +1,42 @@
 import { createEditor } from '@joplin/editor/CodeMirror';
 import { focus } from '@joplin/lib/utils/focusHandler';
 import WebViewToRNMessenger from '../../utils/ipc/WebViewToRNMessenger';
-import { EditorProcessApi, EditorProps, MainProcessApi } from './types';
+import { EditorProcessApi, EditorProps, EditorWithParentProps, MainProcessApi } from './types';
 import readFileToBase64 from '../utils/readFileToBase64';
+import { EditorControl } from '@joplin/editor/types';
 
 export { default as setUpLogger } from '../utils/setUpLogger';
 
-export const initializeEditor = ({
-	parentElementClassName,
+let mainEditor: EditorControl|null = null;
+const messenger = new WebViewToRNMessenger<EditorProcessApi, MainProcessApi>('markdownEditor', {
+	get editor() {
+		return mainEditor;
+	},
+});
+
+
+export const createEditorWithParent = ({
+	parentElementOrClassName,
 	initialText,
 	initialNoteId,
 	settings,
-	onLocalize,
-}: EditorProps) => {
-	const messenger = new WebViewToRNMessenger<EditorProcessApi, MainProcessApi>('markdownEditor', null);
-
-	const parentElement = document.getElementsByClassName(parentElementClassName)[0] as HTMLElement;
+	onEvent,
+}: EditorWithParentProps) => {
+	const parentElement = (() => {
+		if (parentElementOrClassName instanceof HTMLElement) {
+			return parentElementOrClassName;
+		}
+		return document.getElementsByClassName(parentElementOrClassName)[0] as HTMLElement;
+	})();
 	if (!parentElement) {
-		throw new Error(`Unable to find parent element for editor (class name: ${JSON.stringify(parentElementClassName)})`);
+		throw new Error(`Unable to find parent element for editor (class name: ${JSON.stringify(parentElementOrClassName)})`);
 	}
 
 	const control = createEditor(parentElement, {
 		initialText,
 		initialNoteId,
 		settings,
-		onLocalize,
+		onLocalize: messenger.remoteApi.onLocalize,
 
 		onPasteFile: async (data) => {
 			const base64 = await readFileToBase64(data);
@@ -34,7 +46,18 @@ export const initializeEditor = ({
 		onLogMessage: message => {
 			void messenger.remoteApi.logMessage(message);
 		},
-		onEvent: (event): void => {
+		onEvent: (event) => {
+			onEvent(event);
+		},
+	});
+
+	return control;
+};
+
+export const createMainEditor = (props: EditorProps) => {
+	const control = createEditorWithParent({
+		...props,
+		onEvent: (event) => {
 			void messenger.remoteApi.onEditorEvent(event);
 		},
 	});
@@ -54,6 +77,7 @@ export const initializeEditor = ({
 
 	// Note: Just adding an onclick listener seems sufficient to focus the editor when its background
 	// is tapped.
+	const parentElement = control.editor.dom.parentElement;
 	parentElement.addEventListener('click', (event) => {
 		const activeElement = document.querySelector(':focus');
 		if (!parentElement.contains(activeElement) && event.target === parentElement) {
@@ -61,8 +85,6 @@ export const initializeEditor = ({
 		}
 	});
 
-	messenger.setLocalInterface({
-		editor: control,
-	});
+	mainEditor = control;
 	return control;
 };

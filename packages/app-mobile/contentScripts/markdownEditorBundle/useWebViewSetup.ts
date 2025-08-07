@@ -7,12 +7,13 @@ import { OnMessageEvent, WebViewControl } from '../../components/ExtendedWebView
 import { EditorEvent } from '@joplin/editor/events';
 import Logger from '@joplin/utils/Logger';
 import RNToWebViewMessenger from '../../utils/ipc/RNToWebViewMessenger';
+import { _ } from '@joplin/lib/locale';
 
 const logger = Logger.create('markdownEditor');
 
 interface Props {
 	editorOptions: EditorOptions;
-	initialSelection: SelectionRange;
+	initialSelection: SelectionRange|null;
 	noteHash: string;
 	globalSearch: string;
 	onEditorEvent: (event: EditorEvent)=> void;
@@ -48,20 +49,28 @@ const useWebViewSetup = ({
 	` : '';
 
 	const injectedJavaScript = useMemo(() => `
+		function getMarkdownEditorBundle() {
+			if (typeof markdownEditorBundle === 'undefined') {
+				${shim.injectedJs('markdownEditorBundle')};
+				window.markdownEditorBundle = markdownEditorBundle;
+				markdownEditorBundle.setUpLogger();
+			}
+			return markdownEditorBundle;
+		}
+
+		window.createSecondaryEditor = function(options) {
+			return getMarkdownEditorBundle().createEditorWithParent(options);
+		};
+
 		if (!window.cm) {
-			const parentClassName = ${JSON.stringify(editorOptions.parentElementClassName)};
-			const foundParent = document.getElementsByClassName(parentClassName).length > 0;
+			const parentClassName = ${JSON.stringify(editorOptions?.parentElementOrClassName)};
+			const foundParent = !!parentClassName && document.getElementsByClassName(parentClassName).length > 0;
 
 			// On Android, injectedJavaScript can be run multiple times, including once before the
 			// document has loaded. To avoid logging an error each time the editor starts, don't throw
 			// if the parent element can't be found:
 			if (foundParent) {
-				${shim.injectedJs('markdownEditorBundle')};
-				markdownEditorBundle.setUpLogger();
-
-				window.cm = markdownEditorBundle.initializeEditor(
-					${JSON.stringify(editorOptions)}
-				);
+				window.cm = getMarkdownEditorBundle().createMainEditor(${JSON.stringify(editorOptions)});
 
 				${jumpToHashJs}
 				// Set the initial selection after jumping to the header -- the initial selection,
@@ -108,6 +117,10 @@ const useWebViewSetup = ({
 			},
 			async onPasteFile(type, data) {
 				onAttachRef.current(type, data);
+			},
+			async onLocalize(text) {
+				const localizationFunction = _;
+				return localizationFunction(text);
 			},
 		};
 		const messenger = new RNToWebViewMessenger<MainProcessApi, EditorProcessApi>(
