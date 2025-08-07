@@ -95,7 +95,7 @@ const useMessenger = (props: UseMessengerProps) => {
 
 type UseSourceProps = Props & {
 	renderer: SetUpResult<RendererControl>;
-	markdownEditor: SetUpResult<EditorProcessApi>;
+	markdownEditor: SetUpResult<unknown>;
 };
 
 const useSource = (props: UseSourceProps) => {
@@ -172,6 +172,7 @@ const useWebViewSetup = (props: Props): SetUpResult<EditorControl> => {
 			initialText: '',
 		},
 		onEditorEvent: (_event)=>{},
+		pluginStates: props.pluginStates,
 	});
 	const messenger = useMessenger({ ...props, renderer });
 	const pageSetup = useSource({ ...props, renderer, markdownEditor });
@@ -188,14 +189,16 @@ const useWebViewSetup = (props: Props): SetUpResult<EditorControl> => {
 				onLoadEnd: () => {
 					messenger.onWebViewLoaded();
 					renderer.webViewEventHandlers.onLoadEnd();
+					markdownEditor.webViewEventHandlers.onLoadEnd();
 				},
 				onMessage: (event) => {
 					messenger.onWebViewMessage(event);
 					renderer.webViewEventHandlers.onMessage(event);
+					markdownEditor.webViewEventHandlers.onMessage(event);
 				},
 			},
 		};
-	}, [messenger, pageSetup, renderer.webViewEventHandlers]);
+	}, [messenger, pageSetup, renderer.webViewEventHandlers, markdownEditor.webViewEventHandlers]);
 };
 
 export default useWebViewSetup;

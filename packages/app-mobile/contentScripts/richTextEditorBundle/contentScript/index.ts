@@ -36,7 +36,7 @@ const htmlToMarkdown = (html: HTMLElement): string => {
 	return convertHtmlToMarkdown(html);
 };
 
-type CreateMarkdownEditor = (markdownEditorOptions: EditorWithParentProps)=> EditorControl;
+type CreateCodeEditor = (markdownEditorOptions: EditorWithParentProps)=> EditorControl;
 
 export const initialize = async (
 	{
@@ -46,7 +46,7 @@ export const initialize = async (
 		parentElementClassName,
 		initialSearch,
 	}: EditorProps,
-	createMarkdownEditor: CreateMarkdownEditor,
+	createCodeEditor: CreateCodeEditor,
 ) => {
 	const messenger = new WebViewToRNMessenger<EditorProcessApi, MainProcessApi>('rich-text-editor', null);
 	const parentElement = document.getElementsByClassName(parentElementClassName)[0];
@@ -116,7 +116,7 @@ export const initialize = async (
 			}
 		},
 	}, (parent, settings, onEvent) => {
-		return createMarkdownEditor({
+		return createCodeEditor({
 			initialText: '',
 			initialNoteId: '',
 			parentElementOrClassName: parent,

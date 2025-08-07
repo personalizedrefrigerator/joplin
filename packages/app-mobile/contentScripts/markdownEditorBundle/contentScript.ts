@@ -8,9 +8,20 @@ import { EditorControl } from '@joplin/editor/types';
 export { default as setUpLogger } from '../utils/setUpLogger';
 
 let mainEditor: EditorControl|null = null;
+const allEditors: EditorControl[] = [];
 const messenger = new WebViewToRNMessenger<EditorProcessApi, MainProcessApi>('markdownEditor', {
-	get editor() {
+	get mainEditor() {
 		return mainEditor;
+	},
+	updatePlugins(contentScripts) {
+		for (const editor of allEditors) {
+			void editor.setContentScripts(contentScripts);
+		}
+	},
+	updateSettings(settings) {
+		for (const editor of allEditors) {
+			editor.updateSettings(settings);
+		}
 	},
 });
 
@@ -50,6 +61,9 @@ export const createEditorWithParent = ({
 			onEvent(event);
 		},
 	});
+
+	allEditors.push(control);
+	void messenger.remoteApi.onEditorAdded();
 
 	return control;
 };
