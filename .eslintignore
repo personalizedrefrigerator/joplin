@@ -1059,7 +1059,10 @@ packages/editor/ProseMirror/commands.js
 packages/editor/ProseMirror/createEditor.js
 packages/editor/ProseMirror/index.js
 packages/editor/ProseMirror/plugins/inputRulesPlugin.js
-packages/editor/ProseMirror/plugins/joplinEditablePlugin.js
+packages/editor/ProseMirror/plugins/joplinEditablePlugin/createEditorDialog.js
+packages/editor/ProseMirror/plugins/joplinEditablePlugin/joplinEditablePlugin.test.js
+packages/editor/ProseMirror/plugins/joplinEditablePlugin/joplinEditablePlugin.js
+packages/editor/ProseMirror/plugins/joplinEditablePlugin/postProcessRenderedHtml.js
 packages/editor/ProseMirror/plugins/joplinEditorApiPlugin.js
 packages/editor/ProseMirror/plugins/keymapPlugin.js
 packages/editor/ProseMirror/plugins/linkTooltipPlugin.test.js
@@ -1075,6 +1078,9 @@ packages/editor/ProseMirror/types.js
 packages/editor/ProseMirror/utils/UndoStackSynchronizer.js
 packages/editor/ProseMirror/utils/canReplaceSelectionWith.js
 packages/editor/ProseMirror/utils/computeSelectionFormatting.js
+packages/editor/ProseMirror/utils/dom/createTextArea.js
+packages/editor/ProseMirror/utils/dom/createTextNode.js
+packages/editor/ProseMirror/utils/dom/createUniqueId.js
 packages/editor/ProseMirror/utils/extractSelectedLinesTo.test.js
 packages/editor/ProseMirror/utils/extractSelectedLinesTo.js
 packages/editor/ProseMirror/utils/jumpToHash.js

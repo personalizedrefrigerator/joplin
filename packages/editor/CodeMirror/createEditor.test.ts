@@ -40,6 +40,7 @@ describe('createEditor', () => {
 			settings: editorSettings,
 			onEvent: _event => {},
 			onLogMessage: _message => {},
+			onLocalize: input => input,
 			onPasteFile: null,
 		});
 
@@ -69,6 +70,7 @@ describe('createEditor', () => {
 			settings: editorSettings,
 			onEvent: _event => {},
 			onLogMessage: _message => {},
+			onLocalize: input => input,
 			onPasteFile: null,
 		});
 
@@ -138,6 +140,7 @@ describe('createEditor', () => {
 			settings: editorSettings,
 			onEvent: _event => {},
 			onLogMessage: _message => {},
+			onLocalize: input => input,
 			onPasteFile: null,
 		});
 
@@ -188,6 +191,7 @@ describe('createEditor', () => {
 			settings: editorSettings,
 			onEvent: () => {},
 			onLogMessage: () => {},
+			onLocalize: input => input,
 			onPasteFile: null,
 		});
 		const editorState = editor.editor.state;
