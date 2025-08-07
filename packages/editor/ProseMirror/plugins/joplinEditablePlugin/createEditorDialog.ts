@@ -1,7 +1,6 @@
 import { focus } from '@joplin/lib/utils/focusHandler';
 import createTextNode from '../../utils/dom/createTextNode';
 import { EditorApi } from '../joplinEditorApiPlugin';
-import { EditorEventType } from '../../../events';
 import { EditorLanguageType } from '../../../types';
 
 interface SourceBlockData {
@@ -25,21 +24,20 @@ const createEditorDialog = ({ editorApi, doneLabel, block, onSave }: Options) =>
 
 	dialog.onclose = () => {
 		dialog.remove();
+		editor.remove();
 	};
 
-	const editor = editorApi.createTextEditor(
+	const editor = editorApi.createCodeEditor(
 		dialog,
-		{ ...editorApi.editorSettings, language: EditorLanguageType.Markdown },
-		(event) => {
-			if (event.kind === EditorEventType.Change) {
-				block = {
-					...block,
-					start: '',
-					end: '',
-					content: event.value,
-				};
-				onSave(block);
-			}
+		EditorLanguageType.Markdown,
+		(newContent) => {
+			block = {
+				...block,
+				start: '',
+				end: '',
+				content: newContent,
+			};
+			onSave(block);
 		},
 	);
 	editor.updateBody([
@@ -55,9 +53,9 @@ const createEditorDialog = ({ editorApi, doneLabel, block, onSave }: Options) =>
 		if (dialog.close) {
 			dialog.close();
 		} else {
-			// .remove the dialog in browsers with limited support for
-			// HTMLDialogElement (and in JSDOM).
-			dialog.remove();
+			// Handle the case where the dialog element is not supported by the
+			// browser/testing environment.
+			dialog.onclose(new Event('close'));
 		}
 	};
 

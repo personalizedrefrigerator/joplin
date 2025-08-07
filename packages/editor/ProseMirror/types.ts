@@ -1,5 +1,5 @@
 import { RenderResult } from '../../renderer/types';
-import { EditorControl, EditorSettings, OnEventCallback } from '../types';
+import { EditorLanguageType } from '../types';
 
 interface MarkupToHtmlOptions {
 	isFullPageRender: boolean;
@@ -14,6 +14,14 @@ export interface RendererControl {
 	renderHtmlToMarkup: HtmlToMarkup;
 }
 
-export type OnCreateTextEditor = (
-	parent: HTMLElement, settings: EditorSettings, onEvent: OnEventCallback
-)=> EditorControl;
+export interface CodeEditorControl {
+	focus: ()=> void;
+	remove: ()=> void;
+	updateBody: (newValue: string)=> void;
+}
+export type OnCodeEditorChange = (newValue: string)=> void;
+
+// Creates a text editor for editing code blocks
+export type OnCreateCodeEditor = (
+	parent: HTMLElement, language: EditorLanguageType, onChange: OnCodeEditorChange,
+)=> CodeEditorControl;

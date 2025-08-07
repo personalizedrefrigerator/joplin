@@ -1,11 +1,13 @@
 import { EditorState, Plugin, Transaction } from 'prosemirror-state';
 import { EditorSettings, OnEventCallback, OnLocalize } from '../../types';
-import { OnCreateTextEditor, RendererControl } from '../types';
+import { OnCreateCodeEditor, RendererControl } from '../types';
+import { focus } from '@joplin/lib/utils/focusHandler';
+import createTextArea from '../utils/dom/createTextArea';
 
 export interface EditorApi {
 	renderer: RendererControl;
 	onEvent: OnEventCallback;
-	createTextEditor: OnCreateTextEditor;
+	createCodeEditor: OnCreateCodeEditor;
 	editorSettings: EditorSettings;
 	localize: OnLocalize;
 }
@@ -34,8 +36,21 @@ const joplinEditorApiPlugin = new Plugin<EditorApi>({
 			},
 			editorSettings: null,
 			localize: input => input,
-			createTextEditor: (_parent, _settings, _onEvent) => {
-				return null;
+
+			// A default implementation for testing environments
+			createCodeEditor: (parent, _language, onChange) => {
+				const editor = createTextArea({ label: 'Editor', initialContent: '', onChange });
+				parent.appendChild(editor.textArea);
+
+				return {
+					focus: () => focus('joplinEditorApiPlugin', editor.textArea),
+					remove: () => {
+						editor.textArea.remove();
+					},
+					updateBody: (newValue) => {
+						editor.textArea.value = newValue;
+					},
+				};
 			},
 		}),
 		apply: (tr, value) => {

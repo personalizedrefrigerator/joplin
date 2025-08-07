@@ -4,11 +4,12 @@ import WebViewToRNMessenger from '../../utils/ipc/WebViewToRNMessenger';
 import { EditorProcessApi, EditorProps, EditorWithParentProps, MainProcessApi } from './types';
 import readFileToBase64 from '../utils/readFileToBase64';
 import { EditorControl } from '@joplin/editor/types';
+import { EditorEventType } from '@joplin/editor/events';
 
 export { default as setUpLogger } from '../utils/setUpLogger';
 
 let mainEditor: EditorControl|null = null;
-const allEditors: EditorControl[] = [];
+let allEditors: EditorControl[] = [];
 const messenger = new WebViewToRNMessenger<EditorProcessApi, MainProcessApi>('markdownEditor', {
 	get mainEditor() {
 		return mainEditor;
@@ -59,6 +60,10 @@ export const createEditorWithParent = ({
 		},
 		onEvent: (event) => {
 			onEvent(event);
+
+			if (event.kind === EditorEventType.Remove) {
+				allEditors = allEditors.filter(other => other !== control);
+			}
 		},
 	});
 
