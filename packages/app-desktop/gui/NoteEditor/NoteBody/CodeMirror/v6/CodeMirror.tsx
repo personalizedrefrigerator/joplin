@@ -414,6 +414,7 @@ const CodeMirror = (props: NoteBodyEditorProps, ref: ForwardedRef<NoteBodyEditor
 					onSelectPastBeginning={onSelectPastBeginning}
 					externalSearch={props.searchMarkers}
 					useLocalSearch={props.useLocalSearch}
+					onLocalize={_}
 				/>
 			</div>
 		);

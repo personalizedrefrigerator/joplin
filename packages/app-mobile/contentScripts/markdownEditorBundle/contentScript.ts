@@ -11,6 +11,7 @@ export const initializeEditor = ({
 	initialText,
 	initialNoteId,
 	settings,
+	onLocalize,
 }: EditorProps) => {
 	const messenger = new WebViewToRNMessenger<EditorProcessApi, MainProcessApi>('markdownEditor', null);
 
@@ -23,6 +24,7 @@ export const initializeEditor = ({
 		initialText,
 		initialNoteId,
 		settings,
+		onLocalize,
 
 		onPasteFile: async (data) => {
 			const base64 = await readFileToBase64(data);

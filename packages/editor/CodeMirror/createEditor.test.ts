@@ -40,6 +40,7 @@ describe('createEditor', () => {
 			settings: editorSettings,
 			onEvent: _event => {},
 			onLogMessage: _message => {},
+			onLocalize: input => input,
 			onPasteFile: null,
 			resolveImageSrc: src => Promise.resolve(src),
 		});
@@ -70,6 +71,7 @@ describe('createEditor', () => {
 			settings: editorSettings,
 			onEvent: _event => {},
 			onLogMessage: _message => {},
+			onLocalize: input => input,
 			onPasteFile: null,
 			resolveImageSrc: src=>Promise.resolve(src),
 		});
@@ -140,6 +142,7 @@ describe('createEditor', () => {
 			settings: editorSettings,
 			onEvent: _event => {},
 			onLogMessage: _message => {},
+			onLocalize: input => input,
 			onPasteFile: null,
 			resolveImageSrc: src=>Promise.resolve(src),
 		});
@@ -191,6 +194,7 @@ describe('createEditor', () => {
 			settings: editorSettings,
 			onEvent: () => {},
 			onLogMessage: () => {},
+			onLocalize: input => input,
 			onPasteFile: null,
 			resolveImageSrc: src=>Promise.resolve(src),
 		});

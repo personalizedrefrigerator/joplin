@@ -1,5 +1,5 @@
 import { EditorEvent } from '@joplin/editor/events';
-import { EditorControl, EditorSettings, SearchState } from '@joplin/editor/types';
+import { EditorControl, EditorSettings, OnLocalize, SearchState } from '@joplin/editor/types';
 import { MarkupRecord, RendererControl } from '../rendererBundle/types';
 import { RenderResult } from '@joplin/renderer/types';
 
@@ -19,6 +19,7 @@ type RenderOptionsSlice = {
 	pluginAssetContainerSelector: string;
 	splitted: boolean;
 	mapsToLine: true;
+	removeUnusedPluginAssets: boolean;
 };
 
 export interface MainProcessApi {
@@ -26,6 +27,7 @@ export interface MainProcessApi {
 	logMessage(message: string): Promise<void>;
 	onRender(markup: MarkupRecord, options: RenderOptionsSlice): Promise<RenderResult>;
 	onPasteFile(type: string, base64: string): Promise<void>;
+	onLocalize: OnLocalize;
 }
 
 export interface RichTextEditorControl {
