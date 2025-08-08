@@ -10,14 +10,18 @@ import RNToWebViewMessenger from '../../utils/ipc/RNToWebViewMessenger';
 import Resource from '@joplin/lib/models/Resource';
 import { parseResourceUrl } from '@joplin/lib/urlUtils';
 const { isImageMimeType } = require('@joplin/lib/resourceUtils');
+import { _ } from '@joplin/lib/locale';
+import { PluginStates } from '@joplin/lib/services/plugins/reducer';
+import useCodeMirrorPlugins from './utils/useCodeMirrorPlugins';
 
 const logger = Logger.create('markdownEditor');
 
 interface Props {
 	editorOptions: EditorOptions;
-	initialSelection: SelectionRange;
+	initialSelection: SelectionRange|null;
 	noteHash: string;
 	globalSearch: string;
+	pluginStates: PluginStates;
 	onEditorEvent: (event: EditorEvent)=> void;
 	onAttachFile: (mime: string, base64: string)=> void;
 
@@ -33,9 +37,11 @@ const defaultSearchState: SearchState = {
 	dialogVisible: false,
 };
 
+type Result = SetUpResult<EditorProcessApi> & { hasPlugins: boolean };
+
 const useWebViewSetup = ({
-	editorOptions, initialSelection, noteHash, globalSearch, webviewRef, onEditorEvent, onAttachFile,
-}: Props): SetUpResult<EditorProcessApi> => {
+	editorOptions, pluginStates, initialSelection, noteHash, globalSearch, webviewRef, onEditorEvent, onAttachFile,
+}: Props): Result => {
 	const setInitialSelectionJs = initialSelection ? `
 		cm.select(${initialSelection.start}, ${initialSelection.end});
 		cm.execCommand('scrollSelectionIntoView');
@@ -51,20 +57,28 @@ const useWebViewSetup = ({
 	` : '';
 
 	const injectedJavaScript = useMemo(() => `
+		if (typeof markdownEditorBundle === 'undefined') {
+			${shim.injectedJs('markdownEditorBundle')};
+			window.markdownEditorBundle = markdownEditorBundle;
+			markdownEditorBundle.setUpLogger();
+		}
+		function getMarkdownEditorBundle() {
+			return markdownEditorBundle;
+		}
+
+		window.createSecondaryEditor = function(options) {
+			return getMarkdownEditorBundle().createEditorWithParent(options);
+		};
+
 		if (!window.cm) {
-			const parentClassName = ${JSON.stringify(editorOptions.parentElementClassName)};
-			const foundParent = document.getElementsByClassName(parentClassName).length > 0;
+			const parentClassName = ${JSON.stringify(editorOptions?.parentElementOrClassName)};
+			const foundParent = !!parentClassName && document.getElementsByClassName(parentClassName).length > 0;
 
 			// On Android, injectedJavaScript can be run multiple times, including once before the
 			// document has loaded. To avoid logging an error each time the editor starts, don't throw
 			// if the parent element can't be found:
 			if (foundParent) {
-				${shim.injectedJs('markdownEditorBundle')};
-				markdownEditorBundle.setUpLogger();
-
-				window.cm = markdownEditorBundle.initializeEditor(
-					${JSON.stringify(editorOptions)}
-				);
+				window.cm = getMarkdownEditorBundle().createMainEditor(${JSON.stringify(editorOptions)});
 
 				${jumpToHashJs}
 				// Set the initial selection after jumping to the header -- the initial selection,
@@ -101,6 +115,10 @@ const useWebViewSetup = ({
 	const onAttachRef = useRef(onAttachFile);
 	onAttachRef.current = onAttachFile;
 
+	const codeMirrorPlugins = useCodeMirrorPlugins(pluginStates);
+	const codeMirrorPluginsRef = useRef(codeMirrorPlugins);
+	codeMirrorPluginsRef.current = codeMirrorPlugins;
+
 	const editorMessenger = useMemo(() => {
 		const localApi: MainProcessApi = {
 			async onEditorEvent(event) {
@@ -129,6 +147,13 @@ const useWebViewSetup = ({
 					return Resource.fullPath(item);
 				}
 			},
+			async onLocalize(text) {
+				const localizationFunction = _;
+				return localizationFunction(text);
+			},
+			async onEditorAdded() {
+				messenger.remoteApi.updatePlugins(codeMirrorPluginsRef.current);
+			},
 		};
 		const messenger = new RNToWebViewMessenger<MainProcessApi, EditorProcessApi>(
 			'markdownEditor', webviewRef, localApi,
@@ -153,17 +178,22 @@ const useWebViewSetup = ({
 
 	const editorSettings = editorOptions.settings;
 	useEffect(() => {
-		api.editor.updateSettings(editorSettings);
+		api.updateSettings(editorSettings);
 	}, [api, editorSettings]);
+
+	useEffect(() => {
+		api.updatePlugins(codeMirrorPlugins);
+	}, [codeMirrorPlugins, api]);
 
 	return useMemo(() => ({
 		pageSetup: {
 			js: injectedJavaScript,
 			css: '',
 		},
+		hasPlugins: codeMirrorPlugins.length > 0,
 		api,
 		webViewEventHandlers,
-	}), [injectedJavaScript, api, webViewEventHandlers]);
+	}), [injectedJavaScript, api, webViewEventHandlers, codeMirrorPlugins]);
 };
 
 export default useWebViewSetup;

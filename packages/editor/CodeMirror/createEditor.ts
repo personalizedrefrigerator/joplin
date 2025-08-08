@@ -351,6 +351,9 @@ const createEditor = (
 		onLogMessage: props.onLogMessage,
 		onRemove: () => {
 			editor.destroy();
+			props.onEvent({
+				kind: EditorEventType.Remove,
+			});
 		},
 	});
 
