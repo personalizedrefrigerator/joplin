@@ -1,9 +1,6 @@
 import { createInterface } from 'readline/promises';
 
 const iterateStdin = async function*(prompt: string) {
-	let done = false;
-	let buffer: string[] = [];
-
 	let nextLineListeners: (()=> void)[] = [];
 	const dispatchAllListeners = () => {
 		const listeners = nextLineListeners;
@@ -18,16 +15,20 @@ const iterateStdin = async function*(prompt: string) {
 		output: process.stdout,
 	});
 	rl.setPrompt(prompt);
+
+	let buffer: string[] = [];
 	rl.on('line', (line) => {
 		buffer.push(line);
 		dispatchAllListeners();
 	});
+
+	let done = false;
 	rl.on('close', () => {
 		done = true;
 		dispatchAllListeners();
 	});
 
-	const nextLines = () => {
+	const readNextLines = () => {
 		return new Promise<string|null>(resolve => {
 			if (done) {
 				resolve(null);
@@ -45,7 +46,7 @@ const iterateStdin = async function*(prompt: string) {
 
 	while (!done) {
 		rl.prompt();
-		const lines = await nextLines();
+		const lines = await readNextLines();
 		yield lines;
 	}
 };
