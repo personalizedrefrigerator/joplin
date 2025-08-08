@@ -1,5 +1,7 @@
 const TurndownService = require('@joplin/turndown');
 const turndownPluginGfm = require('@joplin/turndown-plugin-gfm').gfm;
+const baseOptions = require('@joplin/turndown/src/joplin-config.js');
+
 import markdownUtils from './markdownUtils';
 
 const pdfUrlRegex = /[\s\S]*?\.pdf$/i;
@@ -19,21 +21,11 @@ export default class HtmlToMd {
 	public parse(html: string|HTMLElement, options: ParseOptions = {}) {
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 		const turndownOpts: any = {
-			headingStyle: 'atx',
+			...baseOptions,
 			anchorNames: options.anchorNames ? options.anchorNames.map(n => n.trim().toLowerCase()) : [],
-			codeBlockStyle: 'fenced',
 			preserveImageTagsWithSize: !!options.preserveImageTagsWithSize,
 			preserveNestedTables: !!options.preserveNestedTables,
 			preserveColorStyles: !!options.preserveColorStyles,
-			bulletListMarker: '-',
-			emDelimiter: '*',
-			strongDelimiter: '**',
-			allowResourcePlaceholders: true,
-
-			// If soft-breaks are enabled, lines need to end with two or more spaces for
-			// trailing <br/>s to render. See
-			// https://github.com/laurent22/joplin/issues/8430
-			br: '  ',
 
 			disableEscapeContent: 'disableEscapeContent' in options ? options.disableEscapeContent : false,
 		};

@@ -923,7 +923,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 
 		resource = await Resource.save(resource, { isNew: true });
 
-		const resourceTag = Resource.markupTag(resource);
+		const resourceTag = Resource.markupTag(resource, this.state.note.markup_language);
 		const newNote = await this.insertText(resourceTag, { newLine: true });
 
 		void this.refreshResource(resource, newNote.body);

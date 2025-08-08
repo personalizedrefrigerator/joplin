@@ -54,6 +54,7 @@ export default function TurndownService (options) {
     preformattedCode: false,
     preserveNestedTables: false,
     preserveColorStyles: false,
+    expandNonbreakingSpaces: false,
     blankReplacement: function (content, node) {
       return node.isBlock ? '\n\n' : ''
     },
@@ -210,6 +211,10 @@ function process (parentNode, escapeContent = 'auto') {
         // Escape < and > so that, for example, this kind of HTML text: "This is a tag: &lt;p&gt;" is still rendered as "This is a tag: &lt;p&gt;"
         // and not "This is a tag: <p>". If the latter, it means the HTML will be rendered if the viewer supports HTML (which, in Joplin, it does).
         replacement = replacement.replace(/<(.+?)>/g, '&lt;$1&gt;');
+
+        if (this.options.expandNonbreakingSpaces) {
+          replacement = replacement.replace(/\u00A0/, '&nbsp;');
+        }
       }
     } else if (node.nodeType === 1) {
       replacement = replacementForNode.call(this, node, previousNode);
