@@ -184,7 +184,7 @@ describe('RichTextEditor', () => {
 		mockTyping(window, '  test');
 
 		await waitFor(async () => {
-			expect(body.trim()).toBe('Test &nbsp;test');
+			expect(body.trim()).toBe('Test \u00A0test');
 		});
 	});
 

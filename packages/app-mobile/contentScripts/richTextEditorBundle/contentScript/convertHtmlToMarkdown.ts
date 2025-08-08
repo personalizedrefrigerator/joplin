@@ -8,7 +8,6 @@ const joplinTurndownOptions = require('@joplin/turndown/src/joplin-config.js');
 const convertHtmlToMarkdown = (html: string|HTMLElement) => {
 	const turndown = new TurndownService({
 		...joplinTurndownOptions,
-		expandNonbreakingSpaces: true,
 	});
 	turndown.use(turndownPluginGfm);
 	turndown.remove('script');
