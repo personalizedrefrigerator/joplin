@@ -9,7 +9,6 @@ module.exports = {
 	emDelimiter: '*',
 	strongDelimiter: '**',
 	allowResourcePlaceholders: true,
-	expandNonbreakingSpaces: true,
 
 	// If soft-breaks are enabled, lines need to end with two or more spaces for
 	// trailing <br/>s to render. See

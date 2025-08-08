@@ -6,7 +6,10 @@ const joplinTurndownOptions = require('@joplin/turndown/src/joplin-config.js');
 // of additional JavaScript and supporting data to be included.
 
 const convertHtmlToMarkdown = (html: string|HTMLElement) => {
-	const turndown = new TurndownService(joplinTurndownOptions);
+	const turndown = new TurndownService({
+		...joplinTurndownOptions,
+		expandNonbreakingSpaces: true,
+	});
 	turndown.use(turndownPluginGfm);
 	turndown.remove('script');
 	turndown.remove('style');
