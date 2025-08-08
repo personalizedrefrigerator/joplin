@@ -382,33 +382,30 @@ class Application extends BaseApplication {
 		return output;
 	}
 
-	public commandList = async function*(argv: string[]) {
+	private commandList_ = async function*(argv: string[]) {
 		if (!argv.length || argv[0] !== 'batch') {
-			yield argv;
+			yield [argv];
 			return;
 		}
 
-		const processLines = function*(lines: string) {
+		const linesToCommands = (lines: string) => {
 			const commandLines = splitCommandBatch(lines);
 
+			const result = [];
 			for (const command of commandLines) {
 				if (!command.trim()) continue;
-				const splitted = splitCommandString(command.trim());
-				yield splitted;
+				result.push(splitCommandString(command.trim()));
 			}
+			return result;
 		};
 
 		if (argv[1] === '-') { // stdin
 			for await (const lines of iterateStdin('command> ')) {
-				try {
-					yield* processLines(lines);
-				} catch (error) {
-					this.logger().error(error);
-				}
+				yield linesToCommands(lines);
 			}
 		} else {
 			const data = await readFile(argv[1], 'utf-8');
-			yield* processLines(data);
+			yield linesToCommands(data);
 		}
 	};
 
@@ -450,11 +447,15 @@ class Application extends BaseApplication {
 
 
 			let failed = false;
-			for await (const command of this.commandList(argv)) {
+			for await (const commandGroup of this.commandList_(argv)) {
+				// When commands are being streamed to the application, it should be possible to send further
+				// commands to the app, even after an error.
 				try {
-					await this.applySettingsSideEffects();
-					await this.refreshCurrentFolder();
-					await this.execCommand(command);
+					for (const command of commandGroup) {
+						await this.applySettingsSideEffects();
+						await this.refreshCurrentFolder();
+						await this.execCommand(command);
+					}
 				} catch (error) {
 					if (this.showStackTraces_) {
 						console.error(error);
