@@ -131,6 +131,7 @@ class Client implements ActionableClient {
 			const rawChildProcess = spawn('yarn', [
 				...this.cliCommandArguments,
 				'batch',
+				'--continue-on-failure',
 				'-',
 			], {
 				cwd: cliDirectory,
