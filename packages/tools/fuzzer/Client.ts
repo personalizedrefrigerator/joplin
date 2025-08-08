@@ -1,5 +1,5 @@
 import uuid, { createSecureRandom } from '@joplin/lib/uuid';
-import { ActionableClient, FolderMetadata, FuzzContext, HttpMethod, ItemId, Json, NoteData, RandomFolderOptions } from './types';
+import { ActionableClient, FolderMetadata, FuzzContext, HttpMethod, ItemId, Json, NoteData, RandomFolderOptions, UserData } from './types';
 import { join } from 'path';
 import { mkdir, remove } from 'fs-extra';
 import getStringProperty from './utils/getStringProperty';
@@ -12,7 +12,6 @@ import { commandToString } from '@joplin/utils';
 import { quotePath } from '@joplin/utils/path';
 import getNumberProperty from './utils/getNumberProperty';
 import retryWithCount from './utils/retryWithCount';
-import resolvePathWithinDir from '@joplin/lib/utils/resolvePathWithinDir';
 import { msleep, Second } from '@joplin/utils/time';
 import shim from '@joplin/lib/shim';
 import { spawn } from 'child_process';
@@ -21,62 +20,6 @@ import { createInterface } from 'readline/promises';
 import Stream = require('stream');
 
 const logger = Logger.create('Client');
-
-type AccountData = Readonly<{
-	email: string;
-	password: string;
-	serverId: string;
-	e2eePassword: string;
-	associatedClientCount: number;
-	onClientConnected: ()=> void;
-	onClientDisconnected: ()=> Promise<void>;
-}>;
-
-const createNewAccount = async (email: string, context: FuzzContext): Promise<AccountData> => {
-	const password = createSecureRandom();
-	const apiOutput = await context.execApi('POST', 'api/users', {
-		email,
-	});
-	const serverId = getStringProperty(apiOutput, 'id');
-
-	// The password needs to be set *after* creating the user.
-	const userRoute = `api/users/${encodeURIComponent(serverId)}`;
-	await context.execApi('PATCH', userRoute, {
-		email,
-		password,
-		email_confirmed: 1,
-	});
-
-	const closeAccount = async () => {
-		await context.execApi('DELETE', userRoute, {});
-	};
-
-	let referenceCounter = 0;
-	return {
-		email,
-		password,
-		e2eePassword: createSecureRandom().replace(/^-/, '_'),
-		serverId,
-		get associatedClientCount() {
-			return referenceCounter;
-		},
-		onClientConnected: () => {
-			referenceCounter++;
-		},
-		onClientDisconnected: async () => {
-			referenceCounter --;
-			assert.ok(referenceCounter >= 0, 'reference counter should be non-negative');
-			if (referenceCounter === 0) {
-				await closeAccount();
-			}
-		},
-	};
-};
-
-type ApiData = Readonly<{
-	port: number;
-	token: string;
-}>;
 
 type OnCloseListener = ()=> void;
 
@@ -90,56 +33,76 @@ type ChildProcessWrapper = {
 // Should match the prompt used by the CLI "batch" command.
 const cliProcessPromptString = 'command> ';
 
+
+
 class Client implements ActionableClient {
 	public readonly email: string;
 
 	public static async create(actionTracker: ActionTracker, context: FuzzContext) {
-		const account = await createNewAccount(`${uuid.create()}@localhost`, context);
-
-		try {
-			return await this.fromAccount(account, actionTracker, context);
-		} catch (error) {
-			logger.error('Error creating client:', error);
-			await account.onClientDisconnected();
-			throw error;
-		}
-	}
-
-	private static async fromAccount(account: AccountData, actionTracker: ActionTracker, context: FuzzContext) {
 		const id = uuid.create();
 		const profileDirectory = join(context.baseDir, id);
 		await mkdir(profileDirectory);
 
-		const apiData: ApiData = {
-			token: createSecureRandom().replace(/[-]/g, '_'),
-			port: await ClipperServer.instance().findAvailablePort(),
+		const email = `${id}@localhost`;
+		const password = createSecureRandom();
+		const apiOutput = await context.execApi('POST', 'api/users', {
+			email,
+		});
+		const serverId = getStringProperty(apiOutput, 'id');
+
+		// The password needs to be set *after* creating the user.
+		const userRoute = `api/users/${encodeURIComponent(serverId)}`;
+		await context.execApi('PATCH', userRoute, {
+			email,
+			password,
+			email_confirmed: 1,
+		});
+
+		const closeAccount = async () => {
+			await context.execApi('DELETE', userRoute, {});
 		};
 
-		const client = new Client(
-			context,
-			actionTracker,
-			actionTracker.track({ email: account.email }),
-			account,
-			profileDirectory,
-			apiData,
-			`${account.email}${account.associatedClientCount ? ` (${account.associatedClientCount})` : ''}`,
-		);
+		try {
+			const userData = {
+				email: getStringProperty(apiOutput, 'email'),
+				password,
+			};
 
-		account.onClientConnected();
+			assert.equal(email, userData.email);
 
-		// Joplin Server sync
-		await client.execCliCommand_('config', 'sync.target', '9');
-		await client.execCliCommand_('config', 'sync.9.path', context.serverUrl);
-		await client.execCliCommand_('config', 'sync.9.username', account.email);
-		await client.execCliCommand_('config', 'sync.9.password', account.password);
-		await client.execCliCommand_('config', 'api.token', apiData.token);
-		await client.execCliCommand_('config', 'api.port', String(apiData.port));
+			const apiToken = createSecureRandom().replace(/[-]/g, '_');
+			const apiPort = await ClipperServer.instance().findAvailablePort();
 
-		await client.execCliCommand_('e2ee', 'enable', '--password', account.e2eePassword);
-		logger.info('Created and configured client');
+			const client = new Client(
+				actionTracker.track({ email }),
+				userData,
+				profileDirectory,
+				apiPort,
+				apiToken,
+			);
 
-		await client.startClipperServer_();
-		return client;
+			client.onClose(closeAccount);
+
+			// Joplin Server sync
+			await client.execCliCommand_('config', 'sync.target', '9');
+			await client.execCliCommand_('config', 'sync.9.path', context.serverUrl);
+			await client.execCliCommand_('config', 'sync.9.username', userData.email);
+			await client.execCliCommand_('config', 'sync.9.password', userData.password);
+			await client.execCliCommand_('config', 'api.token', apiToken);
+			await client.execCliCommand_('config', 'api.port', String(apiPort));
+
+			const e2eePassword = createSecureRandom().replace(/^-/, '_');
+			await client.execCliCommand_('e2ee', 'enable', '--password', e2eePassword);
+			logger.info('Created and configured client');
+
+			await client.startClipperServer_();
+
+			await client.sync();
+			return client;
+		} catch (error) {
+			await closeAccount();
+			throw error;
+		}
 	}
 
 	private onCloseListeners_: OnCloseListener[] = [];
@@ -153,15 +116,13 @@ class Client implements ActionableClient {
 	private transcript_: string[] = [];
 
 	private constructor(
-		private readonly context_: FuzzContext,
-		private readonly globalActionTracker_: ActionTracker,
 		private readonly tracker_: ActionableClient,
-		private readonly account_: AccountData,
+		userData: UserData,
 		private readonly profileDirectory: string,
-		private readonly apiData_: ApiData,
-		private readonly clientLabel_: string,
+		private readonly apiPort_: number,
+		private readonly apiToken_: string,
 	) {
-		this.email = account_.email;
+		this.email = userData.email;
 
 		// Don't skip child process-related tasks.
 		this.childProcessQueue_.setCanSkipTaskHandler(() => false);
@@ -224,11 +185,9 @@ class Client implements ActionableClient {
 	public async close() {
 		assert.ok(!this.closed_, 'should not be closed');
 
-		await this.account_.onClientDisconnected();
-
 		// Before removing the profile directory, verify that the profile directory is in the
 		// expected location:
-		const profileDirectory = resolvePathWithinDir(this.context_.baseDir, this.profileDirectory);
+		const profileDirectory = this.profileDirectory;
 		assert.ok(profileDirectory, 'profile directory for client should be contained within the main temporary profiles directory (should be safe to delete)');
 		await remove(profileDirectory);
 
@@ -244,16 +203,8 @@ class Client implements ActionableClient {
 		this.onCloseListeners_.push(listener);
 	}
 
-	public async createClientOnSameAccount() {
-		return await Client.fromAccount(this.account_, this.globalActionTracker_, this.context_);
-	}
-
-	public hasSameAccount(other: Client) {
-		return other.account_ === this.account_;
-	}
-
 	public get label() {
-		return this.clientLabel_;
+		return this.email;
 	}
 
 	private get cliCommandArguments() {
@@ -365,8 +316,8 @@ class Client implements ActionableClient {
 	// eslint-disable-next-line no-dupe-class-members -- This is not a duplicate class member
 	private async execApiCommand_(method: HttpMethod, route: string, data: Json|null = null): Promise<string> {
 		route = route.replace(/^[/]/, '');
-		const url = new URL(`http://localhost:${this.apiData_.port}/${route}`);
-		url.searchParams.append('token', this.apiData_.token);
+		const url = new URL(`http://localhost:${this.apiPort_}/${route}`);
+		url.searchParams.append('token', this.apiToken_);
 
 		this.transcript_.push(`\n[[${method} ${url}; body: ${JSON.stringify(data)}]]\n`);
 
@@ -461,8 +412,8 @@ class Client implements ActionableClient {
 		await retryWithCount(async () => {
 			const noteContent = (await this.execCliCommand_('cat', expected.id)).stdout;
 			assert.equal(
-				// TODO: For now, this needs a .trimEnd() to prevent additional newlines from
-				// occasionally being added. Look into this and determine why.
+				// Compare without trailing newlines for consistency, the output from "cat"
+				// can sometimes have an extra newline (due to the CLI prompt)
 				noteContent.trimEnd(),
 				`${expected.title}\n\n${expected.body.trimEnd()}`,
 				'note should exist',
