@@ -398,7 +398,6 @@ export default class BaseApplication {
 				appLogger.info('"syncInfoCache" was changed - setting up encryption related code');
 
 				await loadMasterKeysFromSettings(EncryptionService.instance());
-				void DecryptionWorker.instance().scheduleStart();
 				const loadedMasterKeyIds = EncryptionService.instance().loadedMasterKeyIds();
 
 				this.dispatch({
@@ -407,6 +406,8 @@ export default class BaseApplication {
 				});
 
 				if (this.hasGui()) {
+					void DecryptionWorker.instance().scheduleStart();
+
 					// Schedule a sync operation so that items that need to be encrypted
 					// are sent to sync target.
 					void reg.scheduleSync();
