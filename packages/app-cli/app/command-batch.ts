@@ -40,6 +40,11 @@ class Command extends BaseCommand {
 		};
 
 		if (filePath === '-') { // stdin
+			// Iterating over standard input conflicts with the CLI app's GUI.
+			if (app().hasGui()) {
+				throw new Error(_('Reading commands from standard input is only available in CLI mode.'));
+			}
+
 			for await (const lines of iterateStdin('command> ')) {
 				yield* processLines(lines);
 			}
