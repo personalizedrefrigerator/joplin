@@ -14,7 +14,7 @@
 
 .editor-dialog > textarea {
 	flex-grow: 1;
-	min-height: min(70vh, 400px);
+	height: 400px;
 	resize: none;
 	color: var(--joplin-color);
 	background-color: var(--joplin-background-color);
@@ -27,4 +27,5 @@
 
 	border-radius: 8px;
 	height: 38px;
+	flex-shrink: 0;
 }
