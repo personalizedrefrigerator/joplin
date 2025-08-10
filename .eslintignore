@@ -98,6 +98,7 @@ packages/app-cli/app/app.js
 packages/app-cli/app/base-command.js
 packages/app-cli/app/command-apidoc.js
 packages/app-cli/app/command-attach.js
+packages/app-cli/app/command-batch.js
 packages/app-cli/app/command-cat.js
 packages/app-cli/app/command-config.js
 packages/app-cli/app/command-cp.js
@@ -135,6 +136,7 @@ packages/app-cli/app/gui/StatusBarWidget.js
 packages/app-cli/app/services/plugins/PluginRunner.js
 packages/app-cli/app/setupCommand.js
 packages/app-cli/app/utils/initializeCommandService.js
+packages/app-cli/app/utils/iterateStdin.js
 packages/app-cli/app/utils/shimInitCli.js
 packages/app-cli/app/utils/testUtils.js
 packages/app-cli/tests/HtmlToMd.js
@@ -1747,6 +1749,7 @@ packages/tools/fuzzer/utils/SeededRandom.js
 packages/tools/fuzzer/utils/getNumberProperty.js
 packages/tools/fuzzer/utils/getProperty.js
 packages/tools/fuzzer/utils/getStringProperty.js
+packages/tools/fuzzer/utils/openDebugSession.js
 packages/tools/fuzzer/utils/retryWithCount.js
 packages/tools/generate-database-types.js
 packages/tools/generate-images.js
