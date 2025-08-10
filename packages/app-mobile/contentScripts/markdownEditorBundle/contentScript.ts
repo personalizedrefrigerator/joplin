@@ -37,6 +37,9 @@ export const initializeEditor = ({
 		onEvent: (event): void => {
 			void messenger.remoteApi.onEditorEvent(event);
 		},
+		resolveImageSrc: (src) => {
+			return messenger.remoteApi.onResolveImageSrc(src);
+		},
 	});
 
 	// Works around https://github.com/laurent22/joplin/issues/10047 by handling

@@ -7,6 +7,9 @@ import { OnMessageEvent, WebViewControl } from '../../components/ExtendedWebView
 import { EditorEvent } from '@joplin/editor/events';
 import Logger from '@joplin/utils/Logger';
 import RNToWebViewMessenger from '../../utils/ipc/RNToWebViewMessenger';
+import Resource from '@joplin/lib/models/Resource';
+import { parseResourceUrl } from '@joplin/lib/urlUtils';
+const { isImageMimeType } = require('@joplin/lib/resourceUtils');
 
 const logger = Logger.create('markdownEditor');
 
@@ -108,6 +111,23 @@ const useWebViewSetup = ({
 			},
 			async onPasteFile(type, data) {
 				onAttachRef.current(type, data);
+			},
+			async onResolveImageSrc(src) {
+				const url = parseResourceUrl(src);
+				if (!url.itemId) return null;
+				const item = await Resource.load(url.itemId);
+
+				if (shim.mobilePlatform() === 'web') {
+					// Maximum 6 MiB on web
+					const maximumSize = 6 * 1024 * 1024;
+					if (isImageMimeType(item.mime) && item.size < maximumSize) {
+						const data = await shim.fsDriver().readFile(Resource.fullPath(item), 'base64');
+						return `data:${item.mime};base64,${data}`;
+					}
+					return null;
+				} else {
+					return Resource.fullPath(item);
+				}
 			},
 		};
 		const messenger = new RNToWebViewMessenger<MainProcessApi, EditorProcessApi>(

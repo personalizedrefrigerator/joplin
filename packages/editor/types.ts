@@ -179,6 +179,8 @@ export interface EditorSettings {
 	markdownMarkEnabled: boolean;
 	katexEnabled: boolean;
 	spellcheckEnabled: boolean;
+	inlineRenderingEnabled: boolean;
+	imageRenderingEnabled: boolean;
 	readOnly: boolean;
 
 	indentWithTabs: boolean;
