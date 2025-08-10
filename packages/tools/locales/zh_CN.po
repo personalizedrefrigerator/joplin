@@ -104,8 +104,8 @@ msgstr "视图 (&V)"
 msgid "&Window"
 msgstr "窗口 (&W)"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1634
-#: packages/lib/models/settings/builtInMetadata.ts:1924
+#: packages/lib/models/settings/builtInMetadata.ts:1655
+#: packages/lib/models/settings/builtInMetadata.ts:1945
 msgid "%d day"
 msgid_plural "%d days"
 msgstr[0] "%d 天"
@@ -285,7 +285,7 @@ msgstr ""
 "完成/未完成状态（若目标为普通笔记则将会转换成待办）。使用 “clear” 命令来把待"
 "办转换到普通笔记。"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1892
+#: packages/lib/models/settings/builtInMetadata.ts:1913
 msgid ""
 "A comma-separated list of words. May be used for uncommon words, to help "
 "voice typing spell them correctly."
@@ -717,7 +717,7 @@ msgstr "自动补全 Markdown 和 HTML"
 msgid "Automatically check for updates"
 msgstr "自动检查更新"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1911
+#: packages/lib/models/settings/builtInMetadata.ts:1932
 msgid "Automatically delete notes in the trash after a number of days"
 msgstr "几天后自动删除回收站中的笔记"
 
@@ -827,7 +827,7 @@ msgstr "可以查看和编辑"
 msgid "Cancel"
 msgstr "取消"
 
-#: packages/app-cli/app/app.ts:149
+#: packages/app-cli/app/app.ts:147
 msgid "Cancelling background synchronisation... Please wait."
 msgstr "正在取消后台同步…… 请稍候。"
 
@@ -862,7 +862,7 @@ msgstr "无法复制笔记到笔记本 “%s”"
 msgid "Cannot create a new note: %s"
 msgstr "无法创建新笔记：%s"
 
-#: packages/app-cli/app/app.ts:82 packages/app-cli/app/command-attach.ts:22
+#: packages/app-cli/app/app.ts:80 packages/app-cli/app/command-attach.ts:22
 #: packages/app-cli/app/command-cat.ts:26 packages/app-cli/app/command-cp.ts:25
 #: packages/app-cli/app/command-cp.ts:28
 #: packages/app-cli/app/command-done.ts:22
@@ -1141,7 +1141,7 @@ msgstr "已折叠"
 msgid "Coming alarms"
 msgstr "临近提醒"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1529
+#: packages/lib/models/settings/builtInMetadata.ts:1550
 msgid ""
 "Comma-separated list of paths to directories to load the certificates from, "
 "or path to individual cert files. For example: /my/cert_dir, /other/"
@@ -1287,7 +1287,7 @@ msgstr "继续"
 msgid "Control character"
 msgstr "控制字符"
 
-#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:659
+#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:660
 #, fuzzy
 msgid "Convert it"
 msgstr "转换为笔记"
@@ -1584,7 +1584,7 @@ msgstr "适用于 Joplin 全域应用样式的自定义样式表"
 msgid "Custom stylesheet for rendered Markdown"
 msgstr "适用于已渲染 Markdown 的自定义样式表"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1528
+#: packages/lib/models/settings/builtInMetadata.ts:1549
 msgid "Custom TLS certificates"
 msgstr "自定义 TLS 证书"
 
@@ -1614,8 +1614,8 @@ msgstr "日期"
 msgid "Date format"
 msgstr "日期格式"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1634
-#: packages/lib/models/settings/builtInMetadata.ts:1924
+#: packages/lib/models/settings/builtInMetadata.ts:1655
+#: packages/lib/models/settings/builtInMetadata.ts:1945
 msgid "days"
 msgstr "天"
 
@@ -1642,7 +1642,7 @@ msgstr "正在解密条目：%d/%d"
 msgid "Default"
 msgstr "默认"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1903
+#: packages/lib/models/settings/builtInMetadata.ts:1924
 msgid "Default title to use for documents created by the scanner."
 msgstr ""
 
@@ -1926,7 +1926,7 @@ msgstr ""
 "请妥善保管密码，因为出于安全考虑，这将是解密数据的 *唯一* 方式！要启用加密功"
 "能，请在下面输入密码。"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1902
+#: packages/lib/models/settings/builtInMetadata.ts:1923
 msgid "Document scanner: Title template"
 msgstr ""
 
@@ -1936,7 +1936,7 @@ msgid ""
 "for the `add` subcommand."
 msgstr ""
 
-#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:661
+#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:662
 msgid "Don't show this message again"
 msgstr ""
 
@@ -2259,7 +2259,7 @@ msgstr "启用 Mermaid 流程图支持"
 msgid "Enable multimarkdown table extension"
 msgstr "启用 MultiMarkdown 表格扩展"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1624
+#: packages/lib/models/settings/builtInMetadata.ts:1645
 msgid "Enable note history"
 msgstr "启用笔记历史"
 
@@ -2550,11 +2550,11 @@ msgstr "仅导出给定笔记。"
 msgid "Exports only the given notebook."
 msgstr "仅导出给定笔记本。"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1595
+#: packages/lib/models/settings/builtInMetadata.ts:1616
 msgid "Fail-safe"
 msgstr "故障保护"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1596
+#: packages/lib/models/settings/builtInMetadata.ts:1617
 msgid ""
 "Fail-safe: Do not wipe out local data when sync target is empty (often the "
 "result of a misconfiguration or bug)"
@@ -2663,7 +2663,7 @@ msgstr "打开链接"
 msgid "For debugging purpose only: export your profile to an external SD card."
 msgstr "仅用于调试目的：将您的配置档案导出到外部 SD 卡。"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1575
+#: packages/lib/models/settings/builtInMetadata.ts:1596
 msgid "For example \"%s\""
 msgstr "例如“%s”"
 
@@ -2887,6 +2887,12 @@ msgstr "ID"
 msgid "Idle"
 msgstr "空闲"
 
+#: packages/lib/models/settings/builtInMetadata.ts:1474
+msgid ""
+"If an image attachment is on its own line and followed by a blank line, it "
+"will be rendered just below its Markdown source."
+msgstr ""
+
 #: packages/lib/services/joplinCloudUtils.ts:37
 msgid ""
 "If you have already authorised, please wait for the application to sync to "
@@ -2900,7 +2906,7 @@ msgstr "如果您已授权，请等待应用程序同步到 Joplin 云。"
 msgid "Ignore"
 msgstr "忽略"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1554
+#: packages/lib/models/settings/builtInMetadata.ts:1575
 msgid "Ignore TLS certificate errors"
 msgstr "忽略 TLS 证书错误"
 
@@ -3038,7 +3044,7 @@ msgstr "要使用网页剪藏器，您需要执行以下步骤："
 msgid "In progress"
 msgstr "正在处理"
 
-#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:607
+#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:608
 msgid "In: %s"
 msgstr "归属于：%s"
 
@@ -3295,11 +3301,11 @@ msgstr ""
 "Joplin 自己的同步服务。还可以访问 Joplin 的特定功能，比如发布笔记或者与他人协"
 "作笔记本。"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1636
+#: packages/lib/models/settings/builtInMetadata.ts:1657
 msgid "Keep note history for"
 msgstr "保留笔记历史"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1928
+#: packages/lib/models/settings/builtInMetadata.ts:1949
 msgid "Keep notes in the trash for"
 msgstr "将笔记移到回收站"
 
@@ -3366,7 +3372,7 @@ msgstr "布局按钮序列"
 msgid "Learn more"
 msgstr "了解更多"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1862
+#: packages/lib/models/settings/builtInMetadata.ts:1883
 msgid "Leave it blank to download the language files from the default website"
 msgstr "留空可从默认网站下载语言文件"
 
@@ -3557,10 +3563,19 @@ msgstr "Markdown"
 msgid "Markdown + Front Matter"
 msgstr "Markdown + 文章前言"
 
-#: packages/app-desktop/gui/NoteEditor/NoteBody/CodeMirror/v6/CodeMirror.tsx:379
-#: packages/app-mobile/components/NoteEditor/NoteEditor.tsx:263
+#: packages/app-desktop/gui/NoteEditor/NoteBody/CodeMirror/v6/CodeMirror.tsx:383
+#: packages/app-mobile/components/NoteEditor/NoteEditor.tsx:265
 msgid "Markdown editor"
 msgstr "Markdown 编辑器"
+
+#: packages/lib/models/settings/builtInMetadata.ts:1473
+#, fuzzy
+msgid "Markdown editor: Render images"
+msgstr "Markdown 编辑器"
+
+#: packages/lib/models/settings/builtInMetadata.ts:1463
+msgid "Markdown editor: Render markup in editor"
+msgstr ""
 
 #: packages/app-cli/app/command-done.ts:15
 msgid "Marks a to-do as done."
@@ -3661,7 +3676,7 @@ msgstr "更多信息"
 msgid "More information"
 msgstr "更多信息"
 
-#: packages/app-cli/app/app.ts:68
+#: packages/app-cli/app/app.ts:66
 msgid "More than one item match \"%s\". Please narrow down your query."
 msgstr "不止一项匹配 “%s”。请缩小您的检索范围。"
 
@@ -3854,11 +3869,11 @@ msgstr "无活动的笔记本。"
 msgid "No new invitations"
 msgstr "没有新的邀请"
 
-#: packages/app-cli/app/app.ts:111
+#: packages/app-cli/app/app.ts:109
 msgid "No notebook has been specified."
 msgstr "未指定笔记本。"
 
-#: packages/app-cli/app/app.ts:105
+#: packages/app-cli/app/app.ts:103
 msgid "No notebook selected."
 msgstr "未选择笔记本。"
 
@@ -3884,7 +3899,7 @@ msgstr "无结果"
 msgid "No revision selected"
 msgstr "未选择标签页"
 
-#: packages/app-cli/app/app.ts:238
+#: packages/app-cli/app/app.ts:236
 msgid "No such command: %s"
 msgstr "不存在该命令：%s"
 
@@ -3953,7 +3968,7 @@ msgstr "笔记"
 msgid "Note"
 msgstr "笔记"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1700
+#: packages/lib/models/settings/builtInMetadata.ts:1721
 msgid "Note area growth factor"
 msgstr "笔记区域增长系数"
 
@@ -4008,7 +4023,7 @@ msgstr "笔记不是一个待办：“%s”"
 msgid "Note list"
 msgstr "笔记列表"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1685
+#: packages/lib/models/settings/builtInMetadata.ts:1706
 msgid "Note list growth factor"
 msgstr "笔记列表增长系数"
 
@@ -4054,7 +4069,7 @@ msgstr "笔记本 (&B)"
 msgid "Notebook"
 msgstr "笔记本"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1670
+#: packages/lib/models/settings/builtInMetadata.ts:1691
 msgid "Notebook list growth factor"
 msgstr "笔记本列表增长系数"
 
@@ -4536,7 +4551,7 @@ msgstr "首选暗色主题"
 msgid "Preferred light theme"
 msgstr "首选亮色主题"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1873
+#: packages/lib/models/settings/builtInMetadata.ts:1894
 msgid "Preferred voice typing provider"
 msgstr "首选语音输入提供者"
 
@@ -4639,15 +4654,15 @@ msgstr "配置档案"
 msgid "Properties"
 msgstr "笔记属性"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1564
+#: packages/lib/models/settings/builtInMetadata.ts:1585
 msgid "Proxy enabled"
 msgstr "启用代理"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1586
+#: packages/lib/models/settings/builtInMetadata.ts:1607
 msgid "Proxy timeout (seconds)"
 msgstr "代理超时(秒)"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1574
+#: packages/lib/models/settings/builtInMetadata.ts:1595
 msgid "Proxy URL"
 msgstr "代理 URL"
 
@@ -4720,6 +4735,11 @@ msgstr "进一步了解"
 #: packages/app-desktop/gui/NoteContentPropertiesDialog.tsx:159
 msgid "Read time: %s min"
 msgstr "阅读时间：%s 分钟"
+
+#: packages/app-cli/app/command-batch.ts:45
+#, fuzzy
+msgid "Reading commands from standard input is only available in CLI mode."
+msgstr "命令 “%s” 仅在 GUI 模式下可用"
 
 #: packages/app-desktop/gui/ShareFolderDialog/ShareFolderDialog.tsx:314
 msgid "Recipient has accepted the invitation"
@@ -4837,6 +4857,10 @@ msgstr "重命名标签："
 #: packages/app-cli/app/command-ren.ts:14
 msgid "Renames the given <item> (note or notebook) to <name>."
 msgstr "重命名选定的 <item> （笔记或笔记本）到 <name>。"
+
+#: packages/lib/models/settings/builtInMetadata.ts:1464
+msgid "Renders markup on all lines that don't include the cursor."
+msgstr ""
 
 #: packages/app-desktop/gui/ClipperConfigScreen.tsx:162
 msgid "Renew token"
@@ -5007,7 +5031,7 @@ msgstr "富文本"
 msgid "Rich Text editor. Press Escape then Tab to escape focus."
 msgstr "富文本编辑器。按 ESC 键后再按 Tab 键以退出焦点。"
 
-#: packages/app-cli/app/command-batch.js:10
+#: packages/app-cli/app/command-batch.ts:29
 msgid ""
 "Runs the commands contained in the text file. There should be one command "
 "per line."
@@ -5214,16 +5238,16 @@ msgstr ""
 msgid "Send bug report"
 msgstr "发送错误报告"
 
-#: packages/app-cli/app/command-server.js:38
+#: packages/app-cli/app/command-server.js:46
 msgid "Server is already running on port %d"
 msgstr "服务已在端口 %d 上运行"
 
-#: packages/app-cli/app/command-server.js:44
-#: packages/app-cli/app/command-server.js:47
+#: packages/app-cli/app/command-server.js:56
+#: packages/app-cli/app/command-server.js:59
 msgid "Server is not running."
 msgstr "服务没有运行。"
 
-#: packages/app-cli/app/command-server.js:44
+#: packages/app-cli/app/command-server.js:56
 msgid "Server is running on port %d"
 msgstr "服务正在端口 %d 上运行"
 
@@ -5505,7 +5529,7 @@ msgstr "来源："
 msgid "Spacer"
 msgstr "间隔"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1614
+#: packages/lib/models/settings/builtInMetadata.ts:1635
 msgid ""
 "Specify the port that should be used by the API server. If not set, a "
 "default will be used."
@@ -5866,13 +5890,13 @@ msgstr "已成功授予本应用程序权限。"
 msgid "The application must be restarted for these changes to take effect."
 msgstr "必须重新启动应用程序才能使这些更改生效。"
 
-#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:576
+#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:577
 msgid ""
 "The attachments will no longer be watched when you switch to a different "
 "note."
 msgstr "当您切换到其他笔记时，这些附件将不再被监控。"
 
-#: packages/app-cli/app/app.ts:289
+#: packages/app-cli/app/app.ts:287
 msgid "The command \"%s\" is only available in GUI mode"
 msgstr "命令 “%s” 仅在 GUI 模式下可用"
 
@@ -5906,9 +5930,9 @@ msgstr ""
 "该文本编辑器命令（可包含参数）将会被用于打开笔记。若未提供，它将尝试自动检测"
 "默认编辑器。"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1672
-#: packages/lib/models/settings/builtInMetadata.ts:1687
-#: packages/lib/models/settings/builtInMetadata.ts:1702
+#: packages/lib/models/settings/builtInMetadata.ts:1693
+#: packages/lib/models/settings/builtInMetadata.ts:1708
+#: packages/lib/models/settings/builtInMetadata.ts:1723
 msgid ""
 "The factor property sets how the item will grow or shrink to fit the "
 "available space in its container with respect to the other items. Thus an "
@@ -5918,12 +5942,12 @@ msgstr ""
 "系数属性用于指定条目在其容器的可用空间中，如何根据其他条目进行增大或缩小。例"
 "如，系数为 2 的条目所占容量是系数为 1 的条目的两倍。该更改在应用重启后生效。"
 
-#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:591
+#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:592
 msgid "The following attachment matches your search query:"
 msgid_plural "The following attachments match your search query:"
 msgstr[0] "以下附件与您的搜索匹配："
 
-#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:575
+#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:576
 msgid "The following attachments are being watched for changes:"
 msgstr "下列附件发生的改动正在被监控："
 
@@ -6252,7 +6276,7 @@ msgstr "该笔记没有内容。点击 “%s” 切换到编辑器并编辑笔�
 msgid "This note has no history"
 msgstr "该笔记没有历史记录"
 
-#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:657
+#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:658
 msgid ""
 "This note is in HTML format. Convert it to Markdown to edit it more easily."
 msgstr ""
@@ -6736,7 +6760,7 @@ msgstr "URL"
 msgid "Usage: %s"
 msgstr "使用情况：%s"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1758
+#: packages/lib/models/settings/builtInMetadata.ts:1779
 msgid "Use biometrics to secure access to the app"
 msgstr "使用生物识别技术确保对应用程序的访问安全"
 
@@ -6762,7 +6786,7 @@ msgstr "通过方向键与 PageUp/PageDown 键来滚动列表与文本区域（�
 msgid "Use the arrows to move the layout items. Press \"Escape\" to exit."
 msgstr "使用箭头移动布局项目。按“ESC”退出。"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1497
+#: packages/lib/models/settings/builtInMetadata.ts:1518
 msgid "Use the legacy Markdown editor"
 msgstr "使用传统的 Markdown 编辑器"
 
@@ -6856,11 +6880,11 @@ msgstr "Vim"
 msgid "Voice recorder"
 msgstr "语音录音器"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1863
+#: packages/lib/models/settings/builtInMetadata.ts:1884
 msgid "Voice typing language files (URL)"
 msgstr "语音输入语言文件（URL）"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1891
+#: packages/lib/models/settings/builtInMetadata.ts:1912
 #, fuzzy
 msgid "Voice typing: Glossary"
 msgstr "使用语音输入……"
@@ -6870,7 +6894,7 @@ msgstr "使用语音输入……"
 msgid "Voice typing..."
 msgstr "使用语音输入……"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1880
+#: packages/lib/models/settings/builtInMetadata.ts:1901
 msgid "Vosk"
 msgstr "Vosk"
 
@@ -6975,7 +6999,7 @@ msgstr ""
 "启用后，应用程序将扫描您的附件并从中提取文本。这将允许您搜索这些附件中的文"
 "本。"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1881
+#: packages/lib/models/settings/builtInMetadata.ts:1902
 msgid "Whisper"
 msgstr "Whisper"
 

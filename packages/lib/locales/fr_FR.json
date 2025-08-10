@@ -1793,6 +1793,9 @@
 	"Idle": [
 		"Arrêté"
 	],
+	"If an image attachment is on its own line and followed by a blank line, it will be rendered just below its Markdown source.": [
+		"Si un lien vers une image est sur sa propre ligne et suivi d'une ligne vide, l'image sera affichée juste en dessous."
+	],
 	"If you have already authorised, please wait for the application to sync to Joplin Cloud.": [
 		"Si vous avez déjà autorisé, veuillez attendre que l'application se synchronise avec Joplin Cloud."
 	],
@@ -2205,6 +2208,12 @@
 	],
 	"Markdown editor": [
 		"Éditeur Markdown"
+	],
+	"Markdown editor: Render images": [
+		"Éditeur Markdown : rendu d'images"
+	],
+	"Markdown editor: Render markup in editor": [
+		"Éditeur Markdown : rendu du balisage dans l'éditeur"
 	],
 	"Marks a to-do as done.": [
 		"Marquer la tâche comme complétée."
@@ -2964,6 +2973,9 @@
 	"Read time: %s min": [
 		"Temps de lecture : %s min"
 	],
+	"Reading commands from standard input is only available in CLI mode.": [
+		"La lecture des commandes à partir de l'entrée standard n'est disponible qu'en mode CLI."
+	],
 	"Recipient has accepted the invitation": [
 		"Le destinataire a accepté l'invitation"
 	],
@@ -3041,6 +3053,9 @@
 	],
 	"Renames the given <item> (note or notebook) to <name>.": [
 		"Renommer l'objet <item> (note ou carnet) en <name>."
+	],
+	"Renders markup on all lines that don't include the cursor.": [
+		"Affiche le balisage sur toutes les lignes qui n'incluent pas le curseur."
 	],
 	"Renew token": [
 		"Renouveler le code"

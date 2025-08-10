@@ -111,8 +111,8 @@ msgstr "&Weergave"
 msgid "&Window"
 msgstr "&Venster"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1634
-#: packages/lib/models/settings/builtInMetadata.ts:1924
+#: packages/lib/models/settings/builtInMetadata.ts:1655
+#: packages/lib/models/settings/builtInMetadata.ts:1945
 #, fuzzy
 msgid "%d day"
 msgid_plural "%d days"
@@ -310,7 +310,7 @@ msgstr ""
 "gewone notitie is, zal ze geconverteerd worden naar een to-do). Gebruik "
 "\"clear\" om terug te wisselen naar een standaard notitie."
 
-#: packages/lib/models/settings/builtInMetadata.ts:1892
+#: packages/lib/models/settings/builtInMetadata.ts:1913
 msgid ""
 "A comma-separated list of words. May be used for uncommon words, to help "
 "voice typing spell them correctly."
@@ -763,7 +763,7 @@ msgstr "Markdown en HTML automatisch aanvullen"
 msgid "Automatically check for updates"
 msgstr "Automtisch controleren op updates"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1911
+#: packages/lib/models/settings/builtInMetadata.ts:1932
 msgid "Automatically delete notes in the trash after a number of days"
 msgstr "Notities in de prullenmand automatisch verwijderen na een aantal dagen"
 
@@ -874,7 +874,7 @@ msgstr "Kan bekijken en bewerken"
 msgid "Cancel"
 msgstr "Annuleer"
 
-#: packages/app-cli/app/app.ts:149
+#: packages/app-cli/app/app.ts:147
 msgid "Cancelling background synchronisation... Please wait."
 msgstr "Achtergrond-synchronisatie wordt geannuleerd... Even geduld."
 
@@ -909,7 +909,7 @@ msgstr "Kan notitie niet naar notitieboek \"%s\" kopiëren"
 msgid "Cannot create a new note: %s"
 msgstr "Kan geen nieuwe notitie maken: %s"
 
-#: packages/app-cli/app/app.ts:82 packages/app-cli/app/command-attach.ts:22
+#: packages/app-cli/app/app.ts:80 packages/app-cli/app/command-attach.ts:22
 #: packages/app-cli/app/command-cat.ts:26 packages/app-cli/app/command-cp.ts:25
 #: packages/app-cli/app/command-cp.ts:28
 #: packages/app-cli/app/command-done.ts:22
@@ -1204,7 +1204,7 @@ msgstr ""
 msgid "Coming alarms"
 msgstr "Komende alarmen"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1529
+#: packages/lib/models/settings/builtInMetadata.ts:1550
 msgid ""
 "Comma-separated list of paths to directories to load the certificates from, "
 "or path to individual cert files. For example: /my/cert_dir, /other/"
@@ -1352,7 +1352,7 @@ msgstr "Doorgaan"
 msgid "Control character"
 msgstr "Controleteken"
 
-#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:659
+#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:660
 #, fuzzy
 msgid "Convert it"
 msgstr "Converteer naar notitie"
@@ -1661,7 +1661,7 @@ msgstr "Aangepast stijlblad voor Joplin-brede appstijlen"
 msgid "Custom stylesheet for rendered Markdown"
 msgstr "Aangepast stijlblad voor gerenderde Markdown"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1528
+#: packages/lib/models/settings/builtInMetadata.ts:1549
 msgid "Custom TLS certificates"
 msgstr "Aangepaste TLS-certificaten"
 
@@ -1691,8 +1691,8 @@ msgstr "Datum"
 msgid "Date format"
 msgstr "Datumformaat"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1634
-#: packages/lib/models/settings/builtInMetadata.ts:1924
+#: packages/lib/models/settings/builtInMetadata.ts:1655
+#: packages/lib/models/settings/builtInMetadata.ts:1945
 msgid "days"
 msgstr "dagen"
 
@@ -1719,7 +1719,7 @@ msgstr "Items ontsleutelen: %d/%d"
 msgid "Default"
 msgstr "Standaard"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1903
+#: packages/lib/models/settings/builtInMetadata.ts:1924
 msgid "Default title to use for documents created by the scanner."
 msgstr ""
 
@@ -2015,7 +2015,7 @@ msgstr ""
 "manier om je data te ontsleutelen! Gelieve je wachtwoord hieronder in te "
 "geven om encryptie in te schakelen."
 
-#: packages/lib/models/settings/builtInMetadata.ts:1902
+#: packages/lib/models/settings/builtInMetadata.ts:1923
 msgid "Document scanner: Title template"
 msgstr ""
 
@@ -2025,7 +2025,7 @@ msgid ""
 "for the `add` subcommand."
 msgstr ""
 
-#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:661
+#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:662
 msgid "Don't show this message again"
 msgstr ""
 
@@ -2356,7 +2356,7 @@ msgstr "Ondersteuning van Mermaid diagrammen inschakelen"
 msgid "Enable multimarkdown table extension"
 msgstr "Multimarkdown tabel extensie inschakelen"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1624
+#: packages/lib/models/settings/builtInMetadata.ts:1645
 msgid "Enable note history"
 msgstr "Notitiehistoriek inschakelen"
 
@@ -2655,11 +2655,11 @@ msgstr "Exporteert alleen de opgegeven notitie."
 msgid "Exports only the given notebook."
 msgstr "Exporteert alleen het opgegeven notitieboek."
 
-#: packages/lib/models/settings/builtInMetadata.ts:1595
+#: packages/lib/models/settings/builtInMetadata.ts:1616
 msgid "Fail-safe"
 msgstr "Faalbeveiliging"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1596
+#: packages/lib/models/settings/builtInMetadata.ts:1617
 msgid ""
 "Fail-safe: Do not wipe out local data when sync target is empty (often the "
 "result of a misconfiguration or bug)"
@@ -2766,7 +2766,7 @@ msgstr "Volg link"
 msgid "For debugging purpose only: export your profile to an external SD card."
 msgstr "Alleen voor debugging: exporteer je profiel naar een externe SD-kaart."
 
-#: packages/lib/models/settings/builtInMetadata.ts:1575
+#: packages/lib/models/settings/builtInMetadata.ts:1596
 msgid "For example \"%s\""
 msgstr "Bijvoorbeeld \"%s\""
 
@@ -2999,6 +2999,12 @@ msgstr "ID"
 msgid "Idle"
 msgstr "Inactief"
 
+#: packages/lib/models/settings/builtInMetadata.ts:1474
+msgid ""
+"If an image attachment is on its own line and followed by a blank line, it "
+"will be rendered just below its Markdown source."
+msgstr ""
+
 #: packages/lib/services/joplinCloudUtils.ts:37
 msgid ""
 "If you have already authorised, please wait for the application to sync to "
@@ -3014,7 +3020,7 @@ msgstr ""
 msgid "Ignore"
 msgstr "Negeren"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1554
+#: packages/lib/models/settings/builtInMetadata.ts:1575
 msgid "Ignore TLS certificate errors"
 msgstr "Negeer TLS-certificaatfouten"
 
@@ -3164,7 +3170,7 @@ msgstr "Om de web clipper te gebruiken, moet je het volgende doen:"
 msgid "In progress"
 msgstr "Bezig"
 
-#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:607
+#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:608
 msgid "In: %s"
 msgstr "In: %s"
 
@@ -3431,11 +3437,11 @@ msgstr ""
 "features zoals het publiceren van notities of samenwerken aan notitieboeken "
 "met anderen."
 
-#: packages/lib/models/settings/builtInMetadata.ts:1636
+#: packages/lib/models/settings/builtInMetadata.ts:1657
 msgid "Keep note history for"
 msgstr "Bewaar notitiehistoriek gedurende"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1928
+#: packages/lib/models/settings/builtInMetadata.ts:1949
 msgid "Keep notes in the trash for"
 msgstr "Bewaar notities in de prullenmand gedurende"
 
@@ -3502,7 +3508,7 @@ msgstr "Volgorde layout-knoppen"
 msgid "Learn more"
 msgstr "Meer leren"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1862
+#: packages/lib/models/settings/builtInMetadata.ts:1883
 msgid "Leave it blank to download the language files from the default website"
 msgstr "Laat leeg om de taalbestanden van de standard website te downloaden"
 
@@ -3701,10 +3707,19 @@ msgstr "Markdown"
 msgid "Markdown + Front Matter"
 msgstr "Markdown + Front Matter"
 
-#: packages/app-desktop/gui/NoteEditor/NoteBody/CodeMirror/v6/CodeMirror.tsx:379
-#: packages/app-mobile/components/NoteEditor/NoteEditor.tsx:263
+#: packages/app-desktop/gui/NoteEditor/NoteBody/CodeMirror/v6/CodeMirror.tsx:383
+#: packages/app-mobile/components/NoteEditor/NoteEditor.tsx:265
 msgid "Markdown editor"
 msgstr "Markdown editor"
+
+#: packages/lib/models/settings/builtInMetadata.ts:1473
+#, fuzzy
+msgid "Markdown editor: Render images"
+msgstr "Markdown editor"
+
+#: packages/lib/models/settings/builtInMetadata.ts:1463
+msgid "Markdown editor: Render markup in editor"
+msgstr ""
 
 #: packages/app-cli/app/command-done.ts:15
 msgid "Marks a to-do as done."
@@ -3806,7 +3821,7 @@ msgstr "Meer informatie"
 msgid "More information"
 msgstr "Meer informatie"
 
-#: packages/app-cli/app/app.ts:68
+#: packages/app-cli/app/app.ts:66
 msgid "More than one item match \"%s\". Please narrow down your query."
 msgstr ""
 "Meer dan één item voldoet aan de zoekterm \"%s\". Verfijn je zoekopdracht."
@@ -4008,11 +4023,11 @@ msgstr "Geen actief notitieboek."
 msgid "No new invitations"
 msgstr "Geen nieuwe uitnodigingen"
 
-#: packages/app-cli/app/app.ts:111
+#: packages/app-cli/app/app.ts:109
 msgid "No notebook has been specified."
 msgstr "Geen notitieboek is gespecifieerd."
 
-#: packages/app-cli/app/app.ts:105
+#: packages/app-cli/app/app.ts:103
 msgid "No notebook selected."
 msgstr "Geen notitieboek geselecteerd."
 
@@ -4039,7 +4054,7 @@ msgstr "Geen resultaten"
 msgid "No revision selected"
 msgstr "Geen tab geselecteerd"
 
-#: packages/app-cli/app/app.ts:238
+#: packages/app-cli/app/app.ts:236
 msgid "No such command: %s"
 msgstr "Geen commando gevonden: %s"
 
@@ -4108,7 +4123,7 @@ msgstr "notitie"
 msgid "Note"
 msgstr "Notitie"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1700
+#: packages/lib/models/settings/builtInMetadata.ts:1721
 msgid "Note area growth factor"
 msgstr "Groeifactor notitiegebied"
 
@@ -4163,7 +4178,7 @@ msgstr "Notitie is geen taak: \"%s\""
 msgid "Note list"
 msgstr "Notitielijst"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1685
+#: packages/lib/models/settings/builtInMetadata.ts:1706
 msgid "Note list growth factor"
 msgstr "Groeifactor notitielijst"
 
@@ -4214,7 +4229,7 @@ msgstr "Notitie&boek"
 msgid "Notebook"
 msgstr "Notitieboek"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1670
+#: packages/lib/models/settings/builtInMetadata.ts:1691
 msgid "Notebook list growth factor"
 msgstr "Groeifactor notitieboeklijst"
 
@@ -4726,7 +4741,7 @@ msgstr "Voorkeurthema donker"
 msgid "Preferred light theme"
 msgstr "Voorkeurthema licht"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1873
+#: packages/lib/models/settings/builtInMetadata.ts:1894
 msgid "Preferred voice typing provider"
 msgstr "Voorkeursleverancier voor steminvoer"
 
@@ -4831,15 +4846,15 @@ msgstr "Profielen"
 msgid "Properties"
 msgstr "Eigenschappen"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1564
+#: packages/lib/models/settings/builtInMetadata.ts:1585
 msgid "Proxy enabled"
 msgstr "Proxy ingeschakeld"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1586
+#: packages/lib/models/settings/builtInMetadata.ts:1607
 msgid "Proxy timeout (seconds)"
 msgstr "Proxy timeout (seconden)"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1574
+#: packages/lib/models/settings/builtInMetadata.ts:1595
 msgid "Proxy URL"
 msgstr "Proxy URL"
 
@@ -4912,6 +4927,11 @@ msgstr "Lees meer hierover"
 #: packages/app-desktop/gui/NoteContentPropertiesDialog.tsx:159
 msgid "Read time: %s min"
 msgstr "Leestijd: %s min"
+
+#: packages/app-cli/app/command-batch.ts:45
+#, fuzzy
+msgid "Reading commands from standard input is only available in CLI mode."
+msgstr "Het commando \"%s\" is alleen beschikbaar in de GUI-modus"
 
 #: packages/app-desktop/gui/ShareFolderDialog/ShareFolderDialog.tsx:314
 msgid "Recipient has accepted the invitation"
@@ -5031,6 +5051,10 @@ msgstr "Hernoem label:"
 #: packages/app-cli/app/command-ren.ts:14
 msgid "Renames the given <item> (note or notebook) to <name>."
 msgstr "Hernoemt het gegeven <item> (notitie of notitieboek) naar <name>."
+
+#: packages/lib/models/settings/builtInMetadata.ts:1464
+msgid "Renders markup on all lines that don't include the cursor."
+msgstr ""
 
 #: packages/app-desktop/gui/ClipperConfigScreen.tsx:162
 msgid "Renew token"
@@ -5203,7 +5227,7 @@ msgstr ""
 "Rich Text editor. Druk op Escape en vervolgens op Tab om de focus te "
 "verbreken."
 
-#: packages/app-cli/app/command-batch.js:10
+#: packages/app-cli/app/command-batch.ts:29
 msgid ""
 "Runs the commands contained in the text file. There should be one command "
 "per line."
@@ -5415,16 +5439,16 @@ msgstr ""
 msgid "Send bug report"
 msgstr "Foutopsportingsrapport verzenden"
 
-#: packages/app-cli/app/command-server.js:38
+#: packages/app-cli/app/command-server.js:46
 msgid "Server is already running on port %d"
 msgstr "Server is reeds actief op poort %d"
 
-#: packages/app-cli/app/command-server.js:44
-#: packages/app-cli/app/command-server.js:47
+#: packages/app-cli/app/command-server.js:56
+#: packages/app-cli/app/command-server.js:59
 msgid "Server is not running."
 msgstr "Server is niet actief."
 
-#: packages/app-cli/app/command-server.js:44
+#: packages/app-cli/app/command-server.js:56
 msgid "Server is running on port %d"
 msgstr "Server is actief op poort %d"
 
@@ -5724,7 +5748,7 @@ msgstr "Bron: "
 msgid "Spacer"
 msgstr "Tussenstuk"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1614
+#: packages/lib/models/settings/builtInMetadata.ts:1635
 msgid ""
 "Specify the port that should be used by the API server. If not set, a "
 "default will be used."
@@ -6106,7 +6130,7 @@ msgstr ""
 "worden."
 
 # Suggestion for English: ... to another note.
-#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:576
+#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:577
 msgid ""
 "The attachments will no longer be watched when you switch to a different "
 "note."
@@ -6114,7 +6138,7 @@ msgstr ""
 "De bijlagen worden niet langer opgevolgd wanneer je naar een andere notitie "
 "wisselt."
 
-#: packages/app-cli/app/app.ts:289
+#: packages/app-cli/app/app.ts:287
 msgid "The command \"%s\" is only available in GUI mode"
 msgstr "Het commando \"%s\" is alleen beschikbaar in de GUI-modus"
 
@@ -6155,9 +6179,9 @@ msgstr ""
 "notitie te openen in de externe editor. Als er geen opgegeven wordt, zal het "
 "programma de standaard editor proberen te detecteren."
 
-#: packages/lib/models/settings/builtInMetadata.ts:1672
-#: packages/lib/models/settings/builtInMetadata.ts:1687
-#: packages/lib/models/settings/builtInMetadata.ts:1702
+#: packages/lib/models/settings/builtInMetadata.ts:1693
+#: packages/lib/models/settings/builtInMetadata.ts:1708
+#: packages/lib/models/settings/builtInMetadata.ts:1723
 msgid ""
 "The factor property sets how the item will grow or shrink to fit the "
 "available space in its container with respect to the other items. Thus an "
@@ -6169,13 +6193,13 @@ msgstr ""
 "items. Zo zal een item met factor 2 twee keer zoveel ruimte innemen als een "
 "item met factor 1. Herstart de app om de veranderingen te zien."
 
-#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:591
+#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:592
 msgid "The following attachment matches your search query:"
 msgid_plural "The following attachments match your search query:"
 msgstr[0] "De volgende bijlage komt overeen met je zoekopdracht:"
 msgstr[1] "De volgende bijlagen komen overeen met je zoekopdracht:"
 
-#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:575
+#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:576
 msgid "The following attachments are being watched for changes:"
 msgstr "De volgende bijlagen worden gecontroleerd op wijzigingen:"
 
@@ -6543,7 +6567,7 @@ msgstr ""
 msgid "This note has no history"
 msgstr "Deze notitie heeft geen historiek"
 
-#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:657
+#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:658
 msgid ""
 "This note is in HTML format. Convert it to Markdown to edit it more easily."
 msgstr ""
@@ -7066,7 +7090,7 @@ msgstr "URL"
 msgid "Usage: %s"
 msgstr "Gebruik: %s"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1758
+#: packages/lib/models/settings/builtInMetadata.ts:1779
 msgid "Use biometrics to secure access to the app"
 msgstr "Gebruik biometrie om toegang tot de app te beveiligen"
 
@@ -7096,7 +7120,7 @@ msgstr ""
 "Gebruik de pijlen om schermonderdelen te verplaatsen. Druk op \"Escape\" om "
 "te eindigen."
 
-#: packages/lib/models/settings/builtInMetadata.ts:1497
+#: packages/lib/models/settings/builtInMetadata.ts:1518
 msgid "Use the legacy Markdown editor"
 msgstr "Gebruik de oudere Markdown-editor"
 
@@ -7200,11 +7224,11 @@ msgstr "Vim"
 msgid "Voice recorder"
 msgstr ""
 
-#: packages/lib/models/settings/builtInMetadata.ts:1863
+#: packages/lib/models/settings/builtInMetadata.ts:1884
 msgid "Voice typing language files (URL)"
 msgstr "Taalbestanden voor steminvoer (URL)"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1891
+#: packages/lib/models/settings/builtInMetadata.ts:1912
 #, fuzzy
 msgid "Voice typing: Glossary"
 msgstr "Steminvoer..."
@@ -7214,7 +7238,7 @@ msgstr "Steminvoer..."
 msgid "Voice typing..."
 msgstr "Steminvoer..."
 
-#: packages/lib/models/settings/builtInMetadata.ts:1880
+#: packages/lib/models/settings/builtInMetadata.ts:1901
 msgid "Vosk"
 msgstr "Vosk"
 
@@ -7327,7 +7351,7 @@ msgstr ""
 "Wanneer ingeschakeld, zal de applicatie je bijlagen scannen en de tekst "
 "ervan extraheren. Dit zal je toelaten om tekst te zoeken in deze bijlagen."
 
-#: packages/lib/models/settings/builtInMetadata.ts:1881
+#: packages/lib/models/settings/builtInMetadata.ts:1902
 msgid "Whisper"
 msgstr "Fluister"
 

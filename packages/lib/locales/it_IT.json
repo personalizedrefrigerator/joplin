@@ -1588,6 +1588,9 @@
 	"Idle": [
 		"Inattivo"
 	],
+	"If an image attachment is on its own line and followed by a blank line, it will be rendered just below its Markdown source.": [
+		""
+	],
 	"If you have already authorised, please wait for the application to sync to Joplin Cloud.": [
 		"Se hai già concesso l'autorizzazione, aspetta che l'app si sincronizzi con Joplin Cloud."
 	],
@@ -1957,6 +1960,9 @@
 	],
 	"Markdown + Front Matter": [
 		"Markdown + Front Matter"
+	],
+	"Markdown editor: Render markup in editor": [
+		""
 	],
 	"Marks a to-do as done.": [
 		"Segna un \"Cose-da-fare\" come completato."
@@ -2653,6 +2659,9 @@
 	],
 	"Renames the given <item> (note or notebook) to <name>.": [
 		"Rinomina <item> (Nota o Taccuino) in <name>."
+	],
+	"Renders markup on all lines that don't include the cursor.": [
+		""
 	],
 	"Renew token": [
 		"Rinnova token"

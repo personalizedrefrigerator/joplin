@@ -1646,6 +1646,9 @@
 	"Idle": [
 		"Бездіяльність"
 	],
+	"If an image attachment is on its own line and followed by a blank line, it will be rendered just below its Markdown source.": [
+		""
+	],
 	"If you have already authorised, please wait for the application to sync to Joplin Cloud.": [
 		"Якщо ви вже авторизувалися, зачекайте, поки додаток синхронізується з Joplin Cloud."
 	],
@@ -2034,6 +2037,9 @@
 	],
 	"Markdown editor": [
 		"Редактор Markdown"
+	],
+	"Markdown editor: Render markup in editor": [
+		""
 	],
 	"Marks a to-do as done.": [
 		"Позначити завдання як виконане."
@@ -2778,6 +2784,9 @@
 	],
 	"Renames the given <item> (note or notebook) to <name>.": [
 		"Перейменовує даний <item> (нотатку або блокнот) на <name>."
+	],
+	"Renders markup on all lines that don't include the cursor.": [
+		""
 	],
 	"Renew token": [
 		"Оновити токен"

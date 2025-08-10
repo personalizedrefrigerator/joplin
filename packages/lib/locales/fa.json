@@ -1588,6 +1588,9 @@
 	"Idle": [
 		"بیکار"
 	],
+	"If an image attachment is on its own line and followed by a blank line, it will be rendered just below its Markdown source.": [
+		""
+	],
 	"If you have already authorised, please wait for the application to sync to Joplin Cloud.": [
 		"اگر قبلاً احراز هویت شده‌اید، لطفاً منتظر بمانید تا برنامه با سرویس ابری Joplin همگام شود."
 	],
@@ -1954,6 +1957,9 @@
 	],
 	"Markdown + Front Matter": [
 		"نشانه گذاری + موضوع روبه‌رو"
+	],
+	"Markdown editor: Render markup in editor": [
+		""
 	],
 	"Marks a to-do as done.": [
 		"یک فهرست کار را به عنوان انجام شده علامت می‌زند."
@@ -2650,6 +2656,9 @@
 	],
 	"Renames the given <item> (note or notebook) to <name>.": [
 		"تغییر نام مورد <item> (یادداشت یا دفترچه) به <name>."
+	],
+	"Renders markup on all lines that don't include the cursor.": [
+		""
 	],
 	"Renew token": [
 		"تمدید توکن"

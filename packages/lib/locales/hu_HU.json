@@ -1745,6 +1745,9 @@
 	"Idle": [
 		"Tétlen"
 	],
+	"If an image attachment is on its own line and followed by a blank line, it will be rendered just below its Markdown source.": [
+		""
+	],
 	"If you have already authorised, please wait for the application to sync to Joplin Cloud.": [
 		"Ha már engedélyezte, várja meg, amíg az alkalmazás szinkronizálódik a Joplin Clouddal."
 	],
@@ -2157,6 +2160,9 @@
 	],
 	"Markdown editor": [
 		"Markdown szerkesztő"
+	],
+	"Markdown editor: Render markup in editor": [
+		""
 	],
 	"Marks a to-do as done.": [
 		"Egy teendő elkészültnek jelölése."
@@ -2969,6 +2975,9 @@
 	],
 	"Renames the given <item> (note or notebook) to <name>.": [
 		"A megadott <item> (jegyzet vagy jegyzetfüzet) átnevezése <name> névre."
+	],
+	"Renders markup on all lines that don't include the cursor.": [
+		""
 	],
 	"Renew token": [
 		"Token megújítása"

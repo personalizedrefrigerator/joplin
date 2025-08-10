@@ -1547,6 +1547,9 @@
 	"Idle": [
 		"대기"
 	],
+	"If an image attachment is on its own line and followed by a blank line, it will be rendered just below its Markdown source.": [
+		""
+	],
 	"If you have already authorised, please wait for the application to sync to Joplin Cloud.": [
 		"이미 승인하셨다면, 애플리케이션이 Joplin Cloud에 동기화될 때까지 기다려주세요Joplin Cloud."
 	],
@@ -1876,6 +1879,9 @@
 	],
 	"Markdown + Front Matter": [
 		"마크다운 + Front Matter"
+	],
+	"Markdown editor: Render markup in editor": [
+		""
 	],
 	"Marks a to-do as done.": [
 		"목록 항목을 완료로 표시합니다."
@@ -2539,6 +2545,9 @@
 	],
 	"Renames the given <item> (note or notebook) to <name>.": [
 		"해당 <item> (노트 또는 노트북)의 이름을 <name>로 바꿉니다."
+	],
+	"Renders markup on all lines that don't include the cursor.": [
+		""
 	],
 	"Renew token": [
 		"인증 토큰 새로 고침"

@@ -1503,6 +1503,9 @@
 	"Idle": [
 		"Bez aktivnosti"
 	],
+	"If an image attachment is on its own line and followed by a blank line, it will be rendered just below its Markdown source.": [
+		""
+	],
 	"If you have already authorised, please wait for the application to sync to Joplin Cloud.": [
 		""
 	],
@@ -1825,6 +1828,9 @@
 	],
 	"Markdown + Front Matter": [
 		"Markdown + Front Matter"
+	],
+	"Markdown editor: Render markup in editor": [
+		""
 	],
 	"Marks a to-do as done.": [
 		"Označava zadatak završenim."
@@ -2470,6 +2476,9 @@
 	],
 	"Renames the given <item> (note or notebook) to <name>.": [
 		"Preimenuje zadani element <item> (bilješka ili bilježnica) u ime <name>."
+	],
+	"Renders markup on all lines that don't include the cursor.": [
+		""
 	],
 	"Renew token": [
 		"Obnovi ključ"

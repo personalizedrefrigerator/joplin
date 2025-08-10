@@ -1745,6 +1745,9 @@
 	"Idle": [
 		"Boşta"
 	],
+	"If an image attachment is on its own line and followed by a blank line, it will be rendered just below its Markdown source.": [
+		""
+	],
 	"If you have already authorised, please wait for the application to sync to Joplin Cloud.": [
 		"Eğer hali hazırda giriş yaptıysanız, lütfen uygulamanın Joplin Cloud ile senkronizasyonu için kısa bir süre bekleyin."
 	],
@@ -2157,6 +2160,9 @@
 	],
 	"Markdown editor": [
 		"Markdown düzenleyici"
+	],
+	"Markdown editor: Render markup in editor": [
+		""
 	],
 	"Marks a to-do as done.": [
 		"Yapılacakları yapıldı olarak işaretler."
@@ -2969,6 +2975,9 @@
 	],
 	"Renames the given <item> (note or notebook) to <name>.": [
 		"<item> öğesini <name> ile yeniden adlandırır (not veya not defteri)."
+	],
+	"Renders markup on all lines that don't include the cursor.": [
+		""
 	],
 	"Renew token": [
 		"Jetonu yenile"

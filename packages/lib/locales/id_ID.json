@@ -1736,6 +1736,9 @@
 	"Idle": [
 		"Menganggur"
 	],
+	"If an image attachment is on its own line and followed by a blank line, it will be rendered just below its Markdown source.": [
+		""
+	],
 	"If you have already authorised, please wait for the application to sync to Joplin Cloud.": [
 		"Jika Anda telah memberi izin, silakan tunggu aplikasi menyelaraskan ke Joplin Cloud."
 	],
@@ -2146,6 +2149,9 @@
 	],
 	"Markdown editor": [
 		"Penyunting Markdown"
+	],
+	"Markdown editor: Render markup in editor": [
+		""
 	],
 	"Marks a to-do as done.": [
 		"Tandai tugas telah selesai."
@@ -2956,6 +2962,9 @@
 	],
 	"Renames the given <item> (note or notebook) to <name>.": [
 		"Mengganti nama <item> yang diberikan (catatan atau buku catatan) menjadi <name>."
+	],
+	"Renders markup on all lines that don't include the cursor.": [
+		""
 	],
 	"Renew token": [
 		"Perbarui token"

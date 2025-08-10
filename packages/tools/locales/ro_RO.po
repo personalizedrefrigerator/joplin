@@ -111,8 +111,8 @@ msgstr "&Vizualizează"
 msgid "&Window"
 msgstr "&Fereastră"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1634
-#: packages/lib/models/settings/builtInMetadata.ts:1924
+#: packages/lib/models/settings/builtInMetadata.ts:1655
+#: packages/lib/models/settings/builtInMetadata.ts:1945
 msgid "%d day"
 msgid_plural "%d days"
 msgstr[0] "%d zi"
@@ -308,7 +308,7 @@ msgstr ""
 "notiță obișnuită, aceasta va fi transformată în listă de făcut). Folosește "
 "„clear” pentru a converti lista de făcut înapoi la o notiță obișnuită."
 
-#: packages/lib/models/settings/builtInMetadata.ts:1892
+#: packages/lib/models/settings/builtInMetadata.ts:1913
 msgid ""
 "A comma-separated list of words. May be used for uncommon words, to help "
 "voice typing spell them correctly."
@@ -756,7 +756,7 @@ msgstr "Autocompletare Markdown și HTML"
 msgid "Automatically check for updates"
 msgstr "Verificarea automată a actualizărilor"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1911
+#: packages/lib/models/settings/builtInMetadata.ts:1932
 msgid "Automatically delete notes in the trash after a number of days"
 msgstr ""
 "Șterge automat notițele din coșul de gunoi după un anumit număr de zile"
@@ -867,7 +867,7 @@ msgstr "Se poate vizualiza și edita"
 msgid "Cancel"
 msgstr "Anulează"
 
-#: packages/app-cli/app/app.ts:149
+#: packages/app-cli/app/app.ts:147
 msgid "Cancelling background synchronisation... Please wait."
 msgstr "Se anulează sincronizarea... Te rog să aștepți."
 
@@ -904,7 +904,7 @@ msgstr "Nu se poate copia notița în caietul de notițe „%s”"
 msgid "Cannot create a new note: %s"
 msgstr "Nu se poate create o notiță nouă: %s"
 
-#: packages/app-cli/app/app.ts:82 packages/app-cli/app/command-attach.ts:22
+#: packages/app-cli/app/app.ts:80 packages/app-cli/app/command-attach.ts:22
 #: packages/app-cli/app/command-cat.ts:26 packages/app-cli/app/command-cp.ts:25
 #: packages/app-cli/app/command-cp.ts:28
 #: packages/app-cli/app/command-done.ts:22
@@ -1190,7 +1190,7 @@ msgstr "Restrâns"
 msgid "Coming alarms"
 msgstr "Alarmele următoare"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1529
+#: packages/lib/models/settings/builtInMetadata.ts:1550
 msgid ""
 "Comma-separated list of paths to directories to load the certificates from, "
 "or path to individual cert files. For example: /my/cert_dir, /other/"
@@ -1341,7 +1341,7 @@ msgstr "Continuă"
 msgid "Control character"
 msgstr "Caracter de control"
 
-#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:659
+#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:660
 #, fuzzy
 msgid "Convert it"
 msgstr "Convertește în notiță"
@@ -1644,7 +1644,7 @@ msgstr "Stylesheet personalizat pentru stilurile aplicației Joplin-wide"
 msgid "Custom stylesheet for rendered Markdown"
 msgstr "Stylesheet personalizat pentru Markdown redat"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1528
+#: packages/lib/models/settings/builtInMetadata.ts:1549
 msgid "Custom TLS certificates"
 msgstr "Certificate TLS cusomizate"
 
@@ -1674,8 +1674,8 @@ msgstr "Data"
 msgid "Date format"
 msgstr "Format dată"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1634
-#: packages/lib/models/settings/builtInMetadata.ts:1924
+#: packages/lib/models/settings/builtInMetadata.ts:1655
+#: packages/lib/models/settings/builtInMetadata.ts:1945
 msgid "days"
 msgstr "zile"
 
@@ -1702,7 +1702,7 @@ msgstr "Se decriptează elementele: %d/%d"
 msgid "Default"
 msgstr "Mod implicit"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1903
+#: packages/lib/models/settings/builtInMetadata.ts:1924
 msgid "Default title to use for documents created by the scanner."
 msgstr ""
 
@@ -1994,7 +1994,7 @@ msgstr ""
 "modalitate de decriptare a datelor! Pentru a activa criptarea, te rog să "
 "introduci parola mai jos."
 
-#: packages/lib/models/settings/builtInMetadata.ts:1902
+#: packages/lib/models/settings/builtInMetadata.ts:1923
 msgid "Document scanner: Title template"
 msgstr ""
 
@@ -2006,7 +2006,7 @@ msgstr ""
 "Nu permite destinatarii partajării să scrie în caietul comun. Valid doar "
 "pentru subcomanda `add`."
 
-#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:661
+#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:662
 msgid "Don't show this message again"
 msgstr ""
 
@@ -2329,7 +2329,7 @@ msgstr "Activează suportul pentru diagramele Mermaid"
 msgid "Enable multimarkdown table extension"
 msgstr "Activează extensia de tabel multimarkdown"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1624
+#: packages/lib/models/settings/builtInMetadata.ts:1645
 msgid "Enable note history"
 msgstr "Activează istoricul notițelor"
 
@@ -2622,11 +2622,11 @@ msgstr "Exportă numai notița specificată."
 msgid "Exports only the given notebook."
 msgstr "Exportă doar caietul specificat."
 
-#: packages/lib/models/settings/builtInMetadata.ts:1595
+#: packages/lib/models/settings/builtInMetadata.ts:1616
 msgid "Fail-safe"
 msgstr "Fail-safe"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1596
+#: packages/lib/models/settings/builtInMetadata.ts:1617
 msgid ""
 "Fail-safe: Do not wipe out local data when sync target is empty (often the "
 "result of a misconfiguration or bug)"
@@ -2737,7 +2737,7 @@ msgstr "Urmează legătura"
 msgid "For debugging purpose only: export your profile to an external SD card."
 msgstr "Numai în scop de depanare: exportă profilul pe un card SD extern."
 
-#: packages/lib/models/settings/builtInMetadata.ts:1575
+#: packages/lib/models/settings/builtInMetadata.ts:1596
 msgid "For example \"%s\""
 msgstr "De exemplu, „%s”"
 
@@ -2970,6 +2970,12 @@ msgstr "ID"
 msgid "Idle"
 msgstr "Inactiv"
 
+#: packages/lib/models/settings/builtInMetadata.ts:1474
+msgid ""
+"If an image attachment is on its own line and followed by a blank line, it "
+"will be rendered just below its Markdown source."
+msgstr ""
+
 #: packages/lib/services/joplinCloudUtils.ts:37
 msgid ""
 "If you have already authorised, please wait for the application to sync to "
@@ -2985,7 +2991,7 @@ msgstr ""
 msgid "Ignore"
 msgstr "Ignoră"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1554
+#: packages/lib/models/settings/builtInMetadata.ts:1575
 msgid "Ignore TLS certificate errors"
 msgstr "Ignoră erorile de certificat TLS"
 
@@ -3136,7 +3142,7 @@ msgstr "Pentru a utiliza web clipper, trebuie să faci următoarele:"
 msgid "In progress"
 msgstr "În progres"
 
-#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:607
+#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:608
 msgid "In: %s"
 msgstr "În: %s"
 
@@ -3398,11 +3404,11 @@ msgstr ""
 "caracteristici specifice Joplin, cum ar fi publicarea de notițe sau "
 "colaborarea la caiete cu alte persoane."
 
-#: packages/lib/models/settings/builtInMetadata.ts:1636
+#: packages/lib/models/settings/builtInMetadata.ts:1657
 msgid "Keep note history for"
 msgstr "Păstrează istoricul notițelor pentru"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1928
+#: packages/lib/models/settings/builtInMetadata.ts:1949
 msgid "Keep notes in the trash for"
 msgstr "Păstrează notițele în coș pentru"
 
@@ -3469,7 +3475,7 @@ msgstr "Secvența butoanelor de aspect"
 msgid "Learn more"
 msgstr "Află mai multe"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1862
+#: packages/lib/models/settings/builtInMetadata.ts:1883
 msgid "Leave it blank to download the language files from the default website"
 msgstr ""
 "Lăsați-l gol pentru a descărca fișierele de limbă de pe site-ul web implicit"
@@ -3665,10 +3671,19 @@ msgstr "Markdown"
 msgid "Markdown + Front Matter"
 msgstr "Markdown + Front Matter"
 
-#: packages/app-desktop/gui/NoteEditor/NoteBody/CodeMirror/v6/CodeMirror.tsx:379
-#: packages/app-mobile/components/NoteEditor/NoteEditor.tsx:263
+#: packages/app-desktop/gui/NoteEditor/NoteBody/CodeMirror/v6/CodeMirror.tsx:383
+#: packages/app-mobile/components/NoteEditor/NoteEditor.tsx:265
 msgid "Markdown editor"
 msgstr "Editor Markdown"
+
+#: packages/lib/models/settings/builtInMetadata.ts:1473
+#, fuzzy
+msgid "Markdown editor: Render images"
+msgstr "Editor Markdown"
+
+#: packages/lib/models/settings/builtInMetadata.ts:1463
+msgid "Markdown editor: Render markup in editor"
+msgstr ""
 
 #: packages/app-cli/app/command-done.ts:15
 msgid "Marks a to-do as done."
@@ -3769,7 +3784,7 @@ msgstr "Informații suplimentare"
 msgid "More information"
 msgstr "Informații suplimentare"
 
-#: packages/app-cli/app/app.ts:68
+#: packages/app-cli/app/app.ts:66
 msgid "More than one item match \"%s\". Please narrow down your query."
 msgstr ""
 "Mai multe elemente se potrivesc cu „%s\". Te rog să restrângi interogarea."
@@ -3967,11 +3982,11 @@ msgstr "Niciun caiet de notițe activ."
 msgid "No new invitations"
 msgstr "Nicio nouă invitație"
 
-#: packages/app-cli/app/app.ts:111
+#: packages/app-cli/app/app.ts:109
 msgid "No notebook has been specified."
 msgstr "Niciun caiet de notițe nu a fost specificat."
 
-#: packages/app-cli/app/app.ts:105
+#: packages/app-cli/app/app.ts:103
 msgid "No notebook selected."
 msgstr "Niciun caiet de notițe nu a fost selectat."
 
@@ -3998,7 +4013,7 @@ msgstr "Fără rezultate"
 msgid "No revision selected"
 msgstr "Nicio revizie selectată"
 
-#: packages/app-cli/app/app.ts:238
+#: packages/app-cli/app/app.ts:236
 msgid "No such command: %s"
 msgstr "Nu există o asemenea comandă: %s"
 
@@ -4069,7 +4084,7 @@ msgstr "notiță"
 msgid "Note"
 msgstr "Notițe"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1700
+#: packages/lib/models/settings/builtInMetadata.ts:1721
 msgid "Note area growth factor"
 msgstr "Factor de creștere zonă notiță"
 
@@ -4122,7 +4137,7 @@ msgstr "Notița nu este o sarcină: „%s”"
 msgid "Note list"
 msgstr "Listă de notițe"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1685
+#: packages/lib/models/settings/builtInMetadata.ts:1706
 msgid "Note list growth factor"
 msgstr "Factor de creștere listă notițe"
 
@@ -4169,7 +4184,7 @@ msgstr "&Caiet"
 msgid "Notebook"
 msgstr "Caiet"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1670
+#: packages/lib/models/settings/builtInMetadata.ts:1691
 msgid "Notebook list growth factor"
 msgstr "Factor de mărire listă caiete de notițe"
 
@@ -4671,7 +4686,7 @@ msgstr "Tema întunecată preferată"
 msgid "Preferred light theme"
 msgstr "Tema luminoasă preferată"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1873
+#: packages/lib/models/settings/builtInMetadata.ts:1894
 msgid "Preferred voice typing provider"
 msgstr "Furnizorul preferat de transcriere vocală"
 
@@ -4775,15 +4790,15 @@ msgstr "Profiluri"
 msgid "Properties"
 msgstr "Proprietăți"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1564
+#: packages/lib/models/settings/builtInMetadata.ts:1585
 msgid "Proxy enabled"
 msgstr "Proxy activat"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1586
+#: packages/lib/models/settings/builtInMetadata.ts:1607
 msgid "Proxy timeout (seconds)"
 msgstr "Timeout proxy (secunde)"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1574
+#: packages/lib/models/settings/builtInMetadata.ts:1595
 msgid "Proxy URL"
 msgstr "URL proxy"
 
@@ -4855,6 +4870,11 @@ msgstr "Citește mai multe despre acestea"
 #: packages/app-desktop/gui/NoteContentPropertiesDialog.tsx:159
 msgid "Read time: %s min"
 msgstr "Durata lecturii: %s min"
+
+#: packages/app-cli/app/command-batch.ts:45
+#, fuzzy
+msgid "Reading commands from standard input is only available in CLI mode."
+msgstr "Comanda „%s” este disponibilă doar în modul GUI"
 
 #: packages/app-desktop/gui/ShareFolderDialog/ShareFolderDialog.tsx:314
 msgid "Recipient has accepted the invitation"
@@ -4970,6 +4990,10 @@ msgstr "Redenumește eticheta:"
 #: packages/app-cli/app/command-ren.ts:14
 msgid "Renames the given <item> (note or notebook) to <name>."
 msgstr "Redenumește <item> dat (notiță sau caiet) în <name>."
+
+#: packages/lib/models/settings/builtInMetadata.ts:1464
+msgid "Renders markup on all lines that don't include the cursor."
+msgstr ""
 
 #: packages/app-desktop/gui/ClipperConfigScreen.tsx:162
 msgid "Renew token"
@@ -5140,7 +5164,7 @@ msgstr "Text îmbogățit"
 msgid "Rich Text editor. Press Escape then Tab to escape focus."
 msgstr "Editor text îmbogățit. Apasă Escape, apoi Tab pentru a pierde focusul."
 
-#: packages/app-cli/app/command-batch.js:10
+#: packages/app-cli/app/command-batch.ts:29
 msgid ""
 "Runs the commands contained in the text file. There should be one command "
 "per line."
@@ -5350,16 +5374,16 @@ msgstr "Auto-găzduit"
 msgid "Send bug report"
 msgstr "Trimite un raport de eroare"
 
-#: packages/app-cli/app/command-server.js:38
+#: packages/app-cli/app/command-server.js:46
 msgid "Server is already running on port %d"
 msgstr "Serverul rulează deja pe portul %d"
 
-#: packages/app-cli/app/command-server.js:44
-#: packages/app-cli/app/command-server.js:47
+#: packages/app-cli/app/command-server.js:56
+#: packages/app-cli/app/command-server.js:59
 msgid "Server is not running."
 msgstr "Serverul nu rulează."
 
-#: packages/app-cli/app/command-server.js:44
+#: packages/app-cli/app/command-server.js:56
 msgid "Server is running on port %d"
 msgstr "Serverul rulează pe portul %d"
 
@@ -5657,7 +5681,7 @@ msgstr "Sursă: "
 msgid "Spacer"
 msgstr "Distanțier"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1614
+#: packages/lib/models/settings/builtInMetadata.ts:1635
 msgid ""
 "Specify the port that should be used by the API server. If not set, a "
 "default will be used."
@@ -6038,14 +6062,14 @@ msgid "The application must be restarted for these changes to take effect."
 msgstr ""
 "Aplicația trebuie repornită pentru ca aceste modificări să intre în vigoare."
 
-#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:576
+#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:577
 msgid ""
 "The attachments will no longer be watched when you switch to a different "
 "note."
 msgstr ""
 "Atașamentele nu vor mai fi urmărite atunci când treci la o altă notiță."
 
-#: packages/app-cli/app/app.ts:289
+#: packages/app-cli/app/app.ts:287
 msgid "The command \"%s\" is only available in GUI mode"
 msgstr "Comanda „%s” este disponibilă doar în modul GUI"
 
@@ -6086,9 +6110,9 @@ msgstr ""
 "deschide o notă. Dacă nu este furnizat niciunul, se va încerca să se "
 "detecteze automat editorul implicit."
 
-#: packages/lib/models/settings/builtInMetadata.ts:1672
-#: packages/lib/models/settings/builtInMetadata.ts:1687
-#: packages/lib/models/settings/builtInMetadata.ts:1702
+#: packages/lib/models/settings/builtInMetadata.ts:1693
+#: packages/lib/models/settings/builtInMetadata.ts:1708
+#: packages/lib/models/settings/builtInMetadata.ts:1723
 msgid ""
 "The factor property sets how the item will grow or shrink to fit the "
 "available space in its container with respect to the other items. Thus an "
@@ -6101,14 +6125,14 @@ msgstr ""
 "de două ori mai mult spațiu decât un element cu un factor de 1. Repornește "
 "aplicația pentru a vedea modificările."
 
-#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:591
+#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:592
 msgid "The following attachment matches your search query:"
 msgid_plural "The following attachments match your search query:"
 msgstr[0] "Următorul atașament corespunde căutării tale:"
 msgstr[1] "Următoarele atașamente corespund căutării tale:"
 msgstr[2] "Următoarele atașamente corespund căutării tale:"
 
-#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:575
+#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:576
 msgid "The following attachments are being watched for changes:"
 msgstr "Următoarele atașamente sunt urmărite pentru modificări:"
 
@@ -6478,7 +6502,7 @@ msgstr ""
 msgid "This note has no history"
 msgstr "Această notă nu are istoric"
 
-#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:657
+#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:658
 msgid ""
 "This note is in HTML format. Convert it to Markdown to edit it more easily."
 msgstr ""
@@ -6991,7 +7015,7 @@ msgstr "URL"
 msgid "Usage: %s"
 msgstr "Utilizare: %s"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1758
+#: packages/lib/models/settings/builtInMetadata.ts:1779
 msgid "Use biometrics to secure access to the app"
 msgstr "Folosește date biometrice pentru a securiza accesul la aplicație"
 
@@ -7021,7 +7045,7 @@ msgstr ""
 "Folosește săgețile pentru a muta elementele de aspect. Apasă „Escape” pentru "
 "a ieși."
 
-#: packages/lib/models/settings/builtInMetadata.ts:1497
+#: packages/lib/models/settings/builtInMetadata.ts:1518
 msgid "Use the legacy Markdown editor"
 msgstr "Folosește editorul Markdown învechit"
 
@@ -7122,11 +7146,11 @@ msgstr "Vim"
 msgid "Voice recorder"
 msgstr "Înregistrator vocal"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1863
+#: packages/lib/models/settings/builtInMetadata.ts:1884
 msgid "Voice typing language files (URL)"
 msgstr "Fișiere de limbă de tastare vocală (URL)"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1891
+#: packages/lib/models/settings/builtInMetadata.ts:1912
 msgid "Voice typing: Glossary"
 msgstr "Transcriere vocală: Glosar"
 
@@ -7135,7 +7159,7 @@ msgstr "Transcriere vocală: Glosar"
 msgid "Voice typing..."
 msgstr "Tastarea vocală…"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1880
+#: packages/lib/models/settings/builtInMetadata.ts:1901
 msgid "Vosk"
 msgstr "Vosk"
 
@@ -7247,7 +7271,7 @@ msgstr ""
 "Atunci când este activată, aplicația va scana atașamentele și va extrage "
 "textul din ele. Acest lucru îți va permite să cauți text în atașamente."
 
-#: packages/lib/models/settings/builtInMetadata.ts:1881
+#: packages/lib/models/settings/builtInMetadata.ts:1902
 msgid "Whisper"
 msgstr "Whisper"
 

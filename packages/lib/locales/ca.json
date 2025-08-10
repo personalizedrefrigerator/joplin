@@ -1745,6 +1745,9 @@
 	"Idle": [
 		"Ociós"
 	],
+	"If an image attachment is on its own line and followed by a blank line, it will be rendered just below its Markdown source.": [
+		""
+	],
 	"If you have already authorised, please wait for the application to sync to Joplin Cloud.": [
 		"Si ja heu autoritzat, espereu que l'aplicació es sincronitzi amb Joplin Cloud."
 	],
@@ -2157,6 +2160,9 @@
 	],
 	"Markdown editor": [
 		"Editor Markdown"
+	],
+	"Markdown editor: Render markup in editor": [
+		""
 	],
 	"Marks a to-do as done.": [
 		"Marca un llistat de tasques pendents com a fet."
@@ -2969,6 +2975,9 @@
 	],
 	"Renames the given <item> (note or notebook) to <name>.": [
 		"Canvia el nom de la nota o de la llibreta indicat de <item> a <name>."
+	],
+	"Renders markup on all lines that don't include the cursor.": [
+		""
 	],
 	"Renew token": [
 		"Renova el testimoni"

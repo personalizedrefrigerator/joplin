@@ -1586,6 +1586,9 @@
 	"Idle": [
 		"閒置"
 	],
+	"If an image attachment is on its own line and followed by a blank line, it will be rendered just below its Markdown source.": [
+		""
+	],
 	"If you have already authorised, please wait for the application to sync to Joplin Cloud.": [
 		"如果您已經授權，請等待應用程式同步到Joplin Cloud。"
 	],
@@ -1954,6 +1957,9 @@
 	],
 	"Markdown + Front Matter": [
 		"Markdown + Front Matter"
+	],
+	"Markdown editor: Render markup in editor": [
+		""
 	],
 	"Marks a to-do as done.": [
 		"標記待辦事項為完成。"
@@ -2650,6 +2656,9 @@
 	],
 	"Renames the given <item> (note or notebook) to <name>.": [
 		"將特定的 <item> (記事或記事本) 重新命名為 <name>。"
+	],
+	"Renders markup on all lines that don't include the cursor.": [
+		""
 	],
 	"Renew token": [
 		"換一組 token"

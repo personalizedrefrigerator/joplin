@@ -1655,6 +1655,9 @@
 	"Idle": [
 		"Inactief"
 	],
+	"If an image attachment is on its own line and followed by a blank line, it will be rendered just below its Markdown source.": [
+		""
+	],
 	"If you have already authorised, please wait for the application to sync to Joplin Cloud.": [
 		"Als je al geautoriseerd hebt, gelieve te wachten terwijl de toepassing synchroniseert met Joplin Cloud."
 	],
@@ -2042,6 +2045,9 @@
 	],
 	"Markdown editor": [
 		"Markdown editor"
+	],
+	"Markdown editor: Render markup in editor": [
+		""
 	],
 	"Marks a to-do as done.": [
 		"Markeert een taak als voltooid."
@@ -2786,6 +2792,9 @@
 	],
 	"Renames the given <item> (note or notebook) to <name>.": [
 		"Hernoemt het gegeven <item> (notitie of notitieboek) naar <name>."
+	],
+	"Renders markup on all lines that don't include the cursor.": [
+		""
 	],
 	"Renew token": [
 		"Token vernieuwen"

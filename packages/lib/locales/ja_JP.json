@@ -1526,6 +1526,9 @@
 	"Idle": [
 		"待機中"
 	],
+	"If an image attachment is on its own line and followed by a blank line, it will be rendered just below its Markdown source.": [
+		""
+	],
 	"If you have already authorised, please wait for the application to sync to Joplin Cloud.": [
 		""
 	],
@@ -1861,6 +1864,9 @@
 	],
 	"Markdown + Front Matter": [
 		"Markdown + Front Matter"
+	],
+	"Markdown editor: Render markup in editor": [
+		""
 	],
 	"Marks a to-do as done.": [
 		"ToDoを完了としてマークします。"
@@ -2521,6 +2527,9 @@
 	],
 	"Renames the given <item> (note or notebook) to <name>.": [
 		"<item> (ノートまたはノートブック)の名前を、<name>に変更します。"
+	],
+	"Renders markup on all lines that don't include the cursor.": [
+		""
 	],
 	"Renew token": [
 		"トークンを更新する"

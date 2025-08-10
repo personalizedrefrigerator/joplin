@@ -1754,6 +1754,9 @@
 	"Idle": [
 		"Nečinné"
 	],
+	"If an image attachment is on its own line and followed by a blank line, it will be rendered just below its Markdown source.": [
+		""
+	],
 	"If you have already authorised, please wait for the application to sync to Joplin Cloud.": [
 		"Ak ste už overili, počkajte, kým sa aplikácia zosynchronizuje s Joplin Cloud."
 	],
@@ -2168,6 +2171,9 @@
 	],
 	"Markdown editor": [
 		"Editor Markdown"
+	],
+	"Markdown editor: Render markup in editor": [
+		""
 	],
 	"Marks a to-do as done.": [
 		"Označí úlohu ako hotovú."
@@ -2982,6 +2988,9 @@
 	],
 	"Renames the given <item> (note or notebook) to <name>.": [
 		"Premenuje danú <item> (poznámku alebo zápisník) na <name>."
+	],
+	"Renders markup on all lines that don't include the cursor.": [
+		""
 	],
 	"Renew token": [
 		"Obnoviť token"

@@ -108,8 +108,8 @@ msgstr "&Widok"
 msgid "&Window"
 msgstr "&Okno"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1634
-#: packages/lib/models/settings/builtInMetadata.ts:1924
+#: packages/lib/models/settings/builtInMetadata.ts:1655
+#: packages/lib/models/settings/builtInMetadata.ts:1945
 msgid "%d day"
 msgid_plural "%d days"
 msgstr[0] "%d dzień"
@@ -306,7 +306,7 @@ msgstr ""
 "przekształcony w zadanie). Użyj „clear”, aby przywrócić zadanie do formy "
 "zwykłej notatki."
 
-#: packages/lib/models/settings/builtInMetadata.ts:1892
+#: packages/lib/models/settings/builtInMetadata.ts:1913
 msgid ""
 "A comma-separated list of words. May be used for uncommon words, to help "
 "voice typing spell them correctly."
@@ -755,7 +755,7 @@ msgstr "Automatycznie uzupełniaj znaczniki Markdown i HTML"
 msgid "Automatically check for updates"
 msgstr "Automatycznie sprawdzaj dostępność aktualizacji"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1911
+#: packages/lib/models/settings/builtInMetadata.ts:1932
 msgid "Automatically delete notes in the trash after a number of days"
 msgstr "Automatycznie usuwaj notatki z kosza po upływie określonej liczby dni"
 
@@ -865,7 +865,7 @@ msgstr "Może przeglądać i edytować"
 msgid "Cancel"
 msgstr "Anuluj"
 
-#: packages/app-cli/app/app.ts:149
+#: packages/app-cli/app/app.ts:147
 msgid "Cancelling background synchronisation... Please wait."
 msgstr "Anulowanie synchronizacji w tle... Proszę czekać."
 
@@ -902,7 +902,7 @@ msgstr "Nie można skopiować notatki do notatnika „%s”"
 msgid "Cannot create a new note: %s"
 msgstr "Nie można utworzyć nowej notatki: %s"
 
-#: packages/app-cli/app/app.ts:82 packages/app-cli/app/command-attach.ts:22
+#: packages/app-cli/app/app.ts:80 packages/app-cli/app/command-attach.ts:22
 #: packages/app-cli/app/command-cat.ts:26 packages/app-cli/app/command-cp.ts:25
 #: packages/app-cli/app/command-cp.ts:28
 #: packages/app-cli/app/command-done.ts:22
@@ -1190,7 +1190,7 @@ msgstr "Zwinięte"
 msgid "Coming alarms"
 msgstr "Nadchodzące alarmy"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1529
+#: packages/lib/models/settings/builtInMetadata.ts:1550
 msgid ""
 "Comma-separated list of paths to directories to load the certificates from, "
 "or path to individual cert files. For example: /my/cert_dir, /other/"
@@ -1342,7 +1342,7 @@ msgstr "Kontynuuj"
 msgid "Control character"
 msgstr "Znak sterujący"
 
-#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:659
+#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:660
 #, fuzzy
 msgid "Convert it"
 msgstr "Konwertuj na notatkę"
@@ -1646,7 +1646,7 @@ msgstr "Niestandardowy arkusz stylów dla aplikacji Joplin"
 msgid "Custom stylesheet for rendered Markdown"
 msgstr "Niestandardowy arkusz stylów dla renderowanego formatowania Markdown"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1528
+#: packages/lib/models/settings/builtInMetadata.ts:1549
 msgid "Custom TLS certificates"
 msgstr "Niestandardowe certyfikaty TLS"
 
@@ -1676,8 +1676,8 @@ msgstr "Data"
 msgid "Date format"
 msgstr "Format daty"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1634
-#: packages/lib/models/settings/builtInMetadata.ts:1924
+#: packages/lib/models/settings/builtInMetadata.ts:1655
+#: packages/lib/models/settings/builtInMetadata.ts:1945
 msgid "days"
 msgstr "dni"
 
@@ -1704,7 +1704,7 @@ msgstr "Odszyfrowywanie elementów: %d/%d"
 msgid "Default"
 msgstr "Domyślne"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1903
+#: packages/lib/models/settings/builtInMetadata.ts:1924
 msgid "Default title to use for documents created by the scanner."
 msgstr ""
 
@@ -1996,7 +1996,7 @@ msgstr ""
 "sposób na odszyfrowanie danych! Aby włączyć szyfrowanie, wprowadź poniżej "
 "swoje hasło."
 
-#: packages/lib/models/settings/builtInMetadata.ts:1902
+#: packages/lib/models/settings/builtInMetadata.ts:1923
 msgid "Document scanner: Title template"
 msgstr ""
 
@@ -2008,7 +2008,7 @@ msgstr ""
 "Nie zezwalaj odbiorcy udostępnienia na zapisywanie w udostępnionym "
 "notatniku. Działa tylko dla podpolecenia `add`."
 
-#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:661
+#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:662
 msgid "Don't show this message again"
 msgstr ""
 
@@ -2333,7 +2333,7 @@ msgstr "Włącz obsługę diagramów Mermaid"
 msgid "Enable multimarkdown table extension"
 msgstr "Włącz rozszerzenie tabeli multimarkdown"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1624
+#: packages/lib/models/settings/builtInMetadata.ts:1645
 msgid "Enable note history"
 msgstr "Włącz historię notatek"
 
@@ -2627,11 +2627,11 @@ msgstr "Eksportuje tylko daną notatkę."
 msgid "Exports only the given notebook."
 msgstr "Eksportuje tylko podany notatnik."
 
-#: packages/lib/models/settings/builtInMetadata.ts:1595
+#: packages/lib/models/settings/builtInMetadata.ts:1616
 msgid "Fail-safe"
 msgstr "Zabezpieczenie przed awarią"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1596
+#: packages/lib/models/settings/builtInMetadata.ts:1617
 msgid ""
 "Fail-safe: Do not wipe out local data when sync target is empty (often the "
 "result of a misconfiguration or bug)"
@@ -2747,7 +2747,7 @@ msgid "For debugging purpose only: export your profile to an external SD card."
 msgstr ""
 "Tylko w celu debugowania: wyeksportuj swój profil na zewnętrzną kartę SD."
 
-#: packages/lib/models/settings/builtInMetadata.ts:1575
+#: packages/lib/models/settings/builtInMetadata.ts:1596
 msgid "For example \"%s\""
 msgstr "Na przykład „%s”"
 
@@ -2980,6 +2980,12 @@ msgstr "ID"
 msgid "Idle"
 msgstr "Bezczynny"
 
+#: packages/lib/models/settings/builtInMetadata.ts:1474
+msgid ""
+"If an image attachment is on its own line and followed by a blank line, it "
+"will be rendered just below its Markdown source."
+msgstr ""
+
 #: packages/lib/services/joplinCloudUtils.ts:37
 msgid ""
 "If you have already authorised, please wait for the application to sync to "
@@ -2995,7 +3001,7 @@ msgstr ""
 msgid "Ignore"
 msgstr "Ignoruj"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1554
+#: packages/lib/models/settings/builtInMetadata.ts:1575
 msgid "Ignore TLS certificate errors"
 msgstr "Ignoruj błędy certyfikatu TLS"
 
@@ -3144,7 +3150,7 @@ msgstr ""
 msgid "In progress"
 msgstr "W toku"
 
-#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:607
+#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:608
 msgid "In: %s"
 msgstr "W: %s"
 
@@ -3406,11 +3412,11 @@ msgstr ""
 "specyficznych dla Joplin, takich jak publikowanie notatek lub współpraca z "
 "innymi użytkownikami nad notatnikami."
 
-#: packages/lib/models/settings/builtInMetadata.ts:1636
+#: packages/lib/models/settings/builtInMetadata.ts:1657
 msgid "Keep note history for"
 msgstr "Zachowaj historię notatek przez"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1928
+#: packages/lib/models/settings/builtInMetadata.ts:1949
 msgid "Keep notes in the trash for"
 msgstr "Zachowaj notatki w koszu przez"
 
@@ -3477,7 +3483,7 @@ msgstr "Układ przycisków"
 msgid "Learn more"
 msgstr "Dowiedz się więcej"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1862
+#: packages/lib/models/settings/builtInMetadata.ts:1883
 msgid "Leave it blank to download the language files from the default website"
 msgstr ""
 "Pozostaw puste, aby pobrać pliki językowe z domyślnej strony internetowej"
@@ -3674,10 +3680,19 @@ msgstr "Markdown"
 msgid "Markdown + Front Matter"
 msgstr "Markdown + materiały wprowadzające"
 
-#: packages/app-desktop/gui/NoteEditor/NoteBody/CodeMirror/v6/CodeMirror.tsx:379
-#: packages/app-mobile/components/NoteEditor/NoteEditor.tsx:263
+#: packages/app-desktop/gui/NoteEditor/NoteBody/CodeMirror/v6/CodeMirror.tsx:383
+#: packages/app-mobile/components/NoteEditor/NoteEditor.tsx:265
 msgid "Markdown editor"
 msgstr "Edytor Markdown"
+
+#: packages/lib/models/settings/builtInMetadata.ts:1473
+#, fuzzy
+msgid "Markdown editor: Render images"
+msgstr "Edytor Markdown"
+
+#: packages/lib/models/settings/builtInMetadata.ts:1463
+msgid "Markdown editor: Render markup in editor"
+msgstr ""
 
 #: packages/app-cli/app/command-done.ts:15
 msgid "Marks a to-do as done."
@@ -3778,7 +3793,7 @@ msgstr "Więcej informacji"
 msgid "More information"
 msgstr "Więcej informacji"
 
-#: packages/app-cli/app/app.ts:68
+#: packages/app-cli/app/app.ts:66
 msgid "More than one item match \"%s\". Please narrow down your query."
 msgstr ""
 "Znaleziono więcej niż jeden wynik odpowiadający zapytaniu „%s”. Zawęź swoje "
@@ -3979,11 +3994,11 @@ msgstr "Brak aktywnego notatnika."
 msgid "No new invitations"
 msgstr "Brak nowych zaproszeń"
 
-#: packages/app-cli/app/app.ts:111
+#: packages/app-cli/app/app.ts:109
 msgid "No notebook has been specified."
 msgstr "Nie określono żadnego notatnika."
 
-#: packages/app-cli/app/app.ts:105
+#: packages/app-cli/app/app.ts:103
 msgid "No notebook selected."
 msgstr "Nie wybrano żadnego notatnika."
 
@@ -4008,7 +4023,7 @@ msgstr "Brak wyników"
 msgid "No revision selected"
 msgstr "Nie wybrano żadnej poprawki"
 
-#: packages/app-cli/app/app.ts:238
+#: packages/app-cli/app/app.ts:236
 msgid "No such command: %s"
 msgstr "Nie znaleziono polecenia: %s"
 
@@ -4080,7 +4095,7 @@ msgstr "notatka"
 msgid "Note"
 msgstr "Notatka"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1700
+#: packages/lib/models/settings/builtInMetadata.ts:1721
 msgid "Note area growth factor"
 msgstr "Współczynnik wzrostu obszaru notatek"
 
@@ -4135,7 +4150,7 @@ msgstr "Notatka nie jest zadaniem: „%s”"
 msgid "Note list"
 msgstr "Lista notatek"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1685
+#: packages/lib/models/settings/builtInMetadata.ts:1706
 msgid "Note list growth factor"
 msgstr "Współczynnik wzrostu listy notatek"
 
@@ -4182,7 +4197,7 @@ msgstr "Notatnik"
 msgid "Notebook"
 msgstr "Notatnik"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1670
+#: packages/lib/models/settings/builtInMetadata.ts:1691
 msgid "Notebook list growth factor"
 msgstr "Współczynnik wzrostu listy notatników"
 
@@ -4681,7 +4696,7 @@ msgstr "Preferuj ciemny motyw"
 msgid "Preferred light theme"
 msgstr "Preferuj jasny motyw"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1873
+#: packages/lib/models/settings/builtInMetadata.ts:1894
 msgid "Preferred voice typing provider"
 msgstr "Preferowany dostawca usług pisania głosowego"
 
@@ -4788,15 +4803,15 @@ msgid "Properties"
 msgstr "Właściwości"
 
 # Lub "Włączono proxy"
-#: packages/lib/models/settings/builtInMetadata.ts:1564
+#: packages/lib/models/settings/builtInMetadata.ts:1585
 msgid "Proxy enabled"
 msgstr "Proxy włączone"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1586
+#: packages/lib/models/settings/builtInMetadata.ts:1607
 msgid "Proxy timeout (seconds)"
 msgstr "Limit czasu proxy (w sekundach)"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1574
+#: packages/lib/models/settings/builtInMetadata.ts:1595
 msgid "Proxy URL"
 msgstr "Adres URL serwera proxy"
 
@@ -4868,6 +4883,11 @@ msgstr "Dowiedz się więcej"
 #: packages/app-desktop/gui/NoteContentPropertiesDialog.tsx:159
 msgid "Read time: %s min"
 msgstr "Czas czytania: %s min"
+
+#: packages/app-cli/app/command-batch.ts:45
+#, fuzzy
+msgid "Reading commands from standard input is only available in CLI mode."
+msgstr "Polecenie „%s” jest dostępne tylko w trybie graficznym (GUI)"
 
 #: packages/app-desktop/gui/ShareFolderDialog/ShareFolderDialog.tsx:314
 msgid "Recipient has accepted the invitation"
@@ -4983,6 +5003,10 @@ msgstr "Zmień nazwę etykiety:"
 #: packages/app-cli/app/command-ren.ts:14
 msgid "Renames the given <item> (note or notebook) to <name>."
 msgstr "Zmienia nazwę podanego <item> (notatki lub notatnika) na <name>."
+
+#: packages/lib/models/settings/builtInMetadata.ts:1464
+msgid "Renders markup on all lines that don't include the cursor."
+msgstr ""
 
 #: packages/app-desktop/gui/ClipperConfigScreen.tsx:162
 msgid "Renew token"
@@ -5154,7 +5178,7 @@ msgstr ""
 "Edytor tekstu sformatowanego. Naciśnij klawisz Escape, a następnie Tab, aby "
 "anulować skupienie."
 
-#: packages/app-cli/app/command-batch.js:10
+#: packages/app-cli/app/command-batch.ts:29
 msgid ""
 "Runs the commands contained in the text file. There should be one command "
 "per line."
@@ -5365,16 +5389,16 @@ msgstr "Własny hosting"
 msgid "Send bug report"
 msgstr "Wyślij raport o błędzie"
 
-#: packages/app-cli/app/command-server.js:38
+#: packages/app-cli/app/command-server.js:46
 msgid "Server is already running on port %d"
 msgstr "Serwer jest już uruchomiony na porcie %d"
 
-#: packages/app-cli/app/command-server.js:44
-#: packages/app-cli/app/command-server.js:47
+#: packages/app-cli/app/command-server.js:56
+#: packages/app-cli/app/command-server.js:59
 msgid "Server is not running."
 msgstr "Serwer nie został uruchomiony."
 
-#: packages/app-cli/app/command-server.js:44
+#: packages/app-cli/app/command-server.js:56
 msgid "Server is running on port %d"
 msgstr "Serwer działa na porcie %d"
 
@@ -5674,7 +5698,7 @@ msgstr "Źródło: "
 msgid "Spacer"
 msgstr "Separator"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1614
+#: packages/lib/models/settings/builtInMetadata.ts:1635
 msgid ""
 "Specify the port that should be used by the API server. If not set, a "
 "default will be used."
@@ -6059,14 +6083,14 @@ msgid "The application must be restarted for these changes to take effect."
 msgstr "Ta aplikacja musi być zrestartowana, aby zastosować zmiany."
 
 # obserwowane czy wyświetlane?
-#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:576
+#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:577
 #, fuzzy
 msgid ""
 "The attachments will no longer be watched when you switch to a different "
 "note."
 msgstr "Załączniki nie będą obserwowane gdy przejdziesz do innej notatki."
 
-#: packages/app-cli/app/app.ts:289
+#: packages/app-cli/app/app.ts:287
 msgid "The command \"%s\" is only available in GUI mode"
 msgstr "Polecenie „%s” jest dostępne tylko w trybie graficznym (GUI)"
 
@@ -6106,9 +6130,9 @@ msgstr ""
 "otwierać notatkę. Jeżeli nie zostanie podana, program spróbuje wykryć "
 "domyślny edytor."
 
-#: packages/lib/models/settings/builtInMetadata.ts:1672
-#: packages/lib/models/settings/builtInMetadata.ts:1687
-#: packages/lib/models/settings/builtInMetadata.ts:1702
+#: packages/lib/models/settings/builtInMetadata.ts:1693
+#: packages/lib/models/settings/builtInMetadata.ts:1708
+#: packages/lib/models/settings/builtInMetadata.ts:1723
 msgid ""
 "The factor property sets how the item will grow or shrink to fit the "
 "available space in its container with respect to the other items. Thus an "
@@ -6121,14 +6145,14 @@ msgstr ""
 "miejsca niż element z wartością 1. Uruchom ponownie aplikację, aby zobaczyć "
 "zmiany."
 
-#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:591
+#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:592
 msgid "The following attachment matches your search query:"
 msgid_plural "The following attachments match your search query:"
 msgstr[0] "Poniższy załącznik pasuje do Twojego zapytania:"
 msgstr[1] "Poniższe załączniki pasują do Twojego zapytania:"
 msgstr[2] "Poniższe załączniki pasują do Twojego zapytania:"
 
-#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:575
+#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:576
 msgid "The following attachments are being watched for changes:"
 msgstr "Następujące załączniki są obserwowane pod kątem zmian:"
 
@@ -6495,7 +6519,7 @@ msgstr ""
 msgid "This note has no history"
 msgstr "Ta notatka nie ma historii"
 
-#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:657
+#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:658
 msgid ""
 "This note is in HTML format. Convert it to Markdown to edit it more easily."
 msgstr ""
@@ -7005,7 +7029,7 @@ msgstr "Adres URL"
 msgid "Usage: %s"
 msgstr "Sposób użycia: %s"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1758
+#: packages/lib/models/settings/builtInMetadata.ts:1779
 msgid "Use biometrics to secure access to the app"
 msgstr "Użyj danych biometrycznych, żeby zabezpieczyć dostęp do aplikacji"
 
@@ -7035,7 +7059,7 @@ msgstr ""
 "Użyj strzałek, aby przesuwać elementy układu. Naciśnij klawisz „Escape”, aby "
 "wyjść."
 
-#: packages/lib/models/settings/builtInMetadata.ts:1497
+#: packages/lib/models/settings/builtInMetadata.ts:1518
 msgid "Use the legacy Markdown editor"
 msgstr "Użyj starszej wersji edytora Markdown"
 
@@ -7137,11 +7161,11 @@ msgstr "Vim"
 msgid "Voice recorder"
 msgstr "Dyktafon"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1863
+#: packages/lib/models/settings/builtInMetadata.ts:1884
 msgid "Voice typing language files (URL)"
 msgstr "Pliki językowe do pisania głosowego (URL)"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1891
+#: packages/lib/models/settings/builtInMetadata.ts:1912
 msgid "Voice typing: Glossary"
 msgstr "Pisanie głosowe: Słownik"
 
@@ -7151,7 +7175,7 @@ msgid "Voice typing..."
 msgstr "Pisanie głosowe..."
 
 # Vosk to zestaw narzędzi do rozpoznawania mowy.
-#: packages/lib/models/settings/builtInMetadata.ts:1880
+#: packages/lib/models/settings/builtInMetadata.ts:1901
 msgid "Vosk"
 msgstr "Vosk"
 
@@ -7262,7 +7286,7 @@ msgstr ""
 "tekst. Umożliwi to wyszukiwanie tekstu w tych załącznikach."
 
 # Whisper to model uczenia maszynowego do rozpoznawania i transkrypcji mowy.
-#: packages/lib/models/settings/builtInMetadata.ts:1881
+#: packages/lib/models/settings/builtInMetadata.ts:1902
 msgid "Whisper"
 msgstr "Whisper"
 

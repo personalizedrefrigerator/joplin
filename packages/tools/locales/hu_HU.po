@@ -110,8 +110,8 @@ msgstr "&Nézet"
 msgid "&Window"
 msgstr "&Ablak"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1634
-#: packages/lib/models/settings/builtInMetadata.ts:1924
+#: packages/lib/models/settings/builtInMetadata.ts:1655
+#: packages/lib/models/settings/builtInMetadata.ts:1945
 msgid "%d day"
 msgid_plural "%d days"
 msgstr[0] "%d nap"
@@ -302,7 +302,7 @@ msgstr ""
 "állapot között (ha a cél egy normál jegyzet, akkor az teendővé alakul). A "
 "„clear” segítségével a teendőt visszaalakíthatja normál jegyzetté."
 
-#: packages/lib/models/settings/builtInMetadata.ts:1892
+#: packages/lib/models/settings/builtInMetadata.ts:1913
 msgid ""
 "A comma-separated list of words. May be used for uncommon words, to help "
 "voice typing spell them correctly."
@@ -747,7 +747,7 @@ msgstr "Automatikus kiegészítés Markdown és HTML esetén"
 msgid "Automatically check for updates"
 msgstr "Frissítések automatikus ellenőrzése"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1911
+#: packages/lib/models/settings/builtInMetadata.ts:1932
 msgid "Automatically delete notes in the trash after a number of days"
 msgstr "Automatikusan törölje a kuka tartalmát bizonyos napok elteltével"
 
@@ -857,7 +857,7 @@ msgstr "Megtekinthető és szerkeszthető"
 msgid "Cancel"
 msgstr "Mégse"
 
-#: packages/app-cli/app/app.ts:149
+#: packages/app-cli/app/app.ts:147
 msgid "Cancelling background synchronisation... Please wait."
 msgstr "A háttérben történő szinkronizálás megszakítása… Kis türelmet."
 
@@ -894,7 +894,7 @@ msgstr "Nem lehet másolni a jegyzetet a(z) „%s” jegyzetfüzetbe"
 msgid "Cannot create a new note: %s"
 msgstr "Nem lehet létrehozni az új jegyzetet: %s"
 
-#: packages/app-cli/app/app.ts:82 packages/app-cli/app/command-attach.ts:22
+#: packages/app-cli/app/app.ts:80 packages/app-cli/app/command-attach.ts:22
 #: packages/app-cli/app/command-cat.ts:26 packages/app-cli/app/command-cp.ts:25
 #: packages/app-cli/app/command-cp.ts:28
 #: packages/app-cli/app/command-done.ts:22
@@ -1188,7 +1188,7 @@ msgstr "Összecsukva"
 msgid "Coming alarms"
 msgstr "Következő riasztások"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1529
+#: packages/lib/models/settings/builtInMetadata.ts:1550
 msgid ""
 "Comma-separated list of paths to directories to load the certificates from, "
 "or path to individual cert files. For example: /my/cert_dir, /other/"
@@ -1338,7 +1338,7 @@ msgstr "Folytatás"
 msgid "Control character"
 msgstr "Vezérlőkarakter"
 
-#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:659
+#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:660
 #, fuzzy
 msgid "Convert it"
 msgstr "Átalakítás jegyzetté"
@@ -1640,7 +1640,7 @@ msgstr "Egyéni stíluslap a Joplin globális stílusaihoz"
 msgid "Custom stylesheet for rendered Markdown"
 msgstr "Egyéni stíluslap a renderelt Markdownhoz"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1528
+#: packages/lib/models/settings/builtInMetadata.ts:1549
 msgid "Custom TLS certificates"
 msgstr "Egyéni TLS-bizonyítvány"
 
@@ -1670,8 +1670,8 @@ msgstr "Dátum"
 msgid "Date format"
 msgstr "Dátumformátum"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1634
-#: packages/lib/models/settings/builtInMetadata.ts:1924
+#: packages/lib/models/settings/builtInMetadata.ts:1655
+#: packages/lib/models/settings/builtInMetadata.ts:1945
 msgid "days"
 msgstr "nap"
 
@@ -1698,7 +1698,7 @@ msgstr "Elemek visszafejtése: %d/%d"
 msgid "Default"
 msgstr "Alapértelmezett"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1903
+#: packages/lib/models/settings/builtInMetadata.ts:1924
 msgid "Default title to use for documents created by the scanner."
 msgstr ""
 
@@ -1988,7 +1988,7 @@ msgstr ""
 "módja az adatok visszafejtésének! A titkosítás engedélyezéséhez adja meg a "
 "jelszavát alább."
 
-#: packages/lib/models/settings/builtInMetadata.ts:1902
+#: packages/lib/models/settings/builtInMetadata.ts:1923
 msgid "Document scanner: Title template"
 msgstr ""
 
@@ -2000,7 +2000,7 @@ msgstr ""
 "Ne engedélyezze, hogy a megosztás címzettje írjon a megosztott "
 "jegyzetfüzetbe. Csak az `add` alparancsra érvényes."
 
-#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:661
+#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:662
 msgid "Don't show this message again"
 msgstr ""
 
@@ -2324,7 +2324,7 @@ msgstr "Mermaid-diagram támogatásának engedélyezése"
 msgid "Enable multimarkdown table extension"
 msgstr "Multimarkdown-táblázatkiegészítő engedélyezése"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1624
+#: packages/lib/models/settings/builtInMetadata.ts:1645
 msgid "Enable note history"
 msgstr "Jegyzetelőzmények engedélyezése"
 
@@ -2619,11 +2619,11 @@ msgstr "Csak a megadott jegyzet exportálása."
 msgid "Exports only the given notebook."
 msgstr "Csak a megadott jegyzetfüzet exportálása."
 
-#: packages/lib/models/settings/builtInMetadata.ts:1595
+#: packages/lib/models/settings/builtInMetadata.ts:1616
 msgid "Fail-safe"
 msgstr "Hibabiztos"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1596
+#: packages/lib/models/settings/builtInMetadata.ts:1617
 msgid ""
 "Fail-safe: Do not wipe out local data when sync target is empty (often the "
 "result of a misconfiguration or bug)"
@@ -2734,7 +2734,7 @@ msgstr "Hivatkozás követése"
 msgid "For debugging purpose only: export your profile to an external SD card."
 msgstr "Csak hibakeresési célra: exportálja a profilját egy külső SD-kártyára."
 
-#: packages/lib/models/settings/builtInMetadata.ts:1575
+#: packages/lib/models/settings/builtInMetadata.ts:1596
 msgid "For example \"%s\""
 msgstr "Például: „%s”"
 
@@ -2968,6 +2968,12 @@ msgstr "Azonosító"
 msgid "Idle"
 msgstr "Tétlen"
 
+#: packages/lib/models/settings/builtInMetadata.ts:1474
+msgid ""
+"If an image attachment is on its own line and followed by a blank line, it "
+"will be rendered just below its Markdown source."
+msgstr ""
+
 #: packages/lib/services/joplinCloudUtils.ts:37
 msgid ""
 "If you have already authorised, please wait for the application to sync to "
@@ -2983,7 +2989,7 @@ msgstr ""
 msgid "Ignore"
 msgstr "Mellőzés"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1554
+#: packages/lib/models/settings/builtInMetadata.ts:1575
 msgid "Ignore TLS certificate errors"
 msgstr "TLS-tanúsítvány hibáinak mellőzése"
 
@@ -3133,7 +3139,7 @@ msgstr "A Web Clipper használatához kövesse az alábbi lépéseket:"
 msgid "In progress"
 msgstr "Folyamatban"
 
-#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:607
+#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:608
 msgid "In: %s"
 msgstr "Ebben: %s"
 
@@ -3395,11 +3401,11 @@ msgstr ""
 "a Joplin speciális funkcióihoz, például jegyzetek közzétételéhez vagy a "
 "jegyzetfüzetek megosztása másokkal a közös használathoz."
 
-#: packages/lib/models/settings/builtInMetadata.ts:1636
+#: packages/lib/models/settings/builtInMetadata.ts:1657
 msgid "Keep note history for"
 msgstr "Jegyzetelőzmények megőrzése egy adott napig"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1928
+#: packages/lib/models/settings/builtInMetadata.ts:1949
 msgid "Keep notes in the trash for"
 msgstr "Jegyzetek megőrzése a kukában"
 
@@ -3466,7 +3472,7 @@ msgstr "Elrendezésgomb sorrendje"
 msgid "Learn more"
 msgstr "Tudjon meg többet"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1862
+#: packages/lib/models/settings/builtInMetadata.ts:1883
 msgid "Leave it blank to download the language files from the default website"
 msgstr ""
 "Hagyja üresen, hogy a nyelvi fájlok az alapértelmezett webhelyről "
@@ -3663,10 +3669,19 @@ msgstr "Markdown"
 msgid "Markdown + Front Matter"
 msgstr "Markdown előtétadatokkal (Front Matter)"
 
-#: packages/app-desktop/gui/NoteEditor/NoteBody/CodeMirror/v6/CodeMirror.tsx:379
-#: packages/app-mobile/components/NoteEditor/NoteEditor.tsx:263
+#: packages/app-desktop/gui/NoteEditor/NoteBody/CodeMirror/v6/CodeMirror.tsx:383
+#: packages/app-mobile/components/NoteEditor/NoteEditor.tsx:265
 msgid "Markdown editor"
 msgstr "Markdown szerkesztő"
+
+#: packages/lib/models/settings/builtInMetadata.ts:1473
+#, fuzzy
+msgid "Markdown editor: Render images"
+msgstr "Markdown szerkesztő"
+
+#: packages/lib/models/settings/builtInMetadata.ts:1463
+msgid "Markdown editor: Render markup in editor"
+msgstr ""
 
 #: packages/app-cli/app/command-done.ts:15
 msgid "Marks a to-do as done."
@@ -3767,7 +3782,7 @@ msgstr "További információ"
 msgid "More information"
 msgstr "További információ"
 
-#: packages/app-cli/app/app.ts:68
+#: packages/app-cli/app/app.ts:66
 msgid "More than one item match \"%s\". Please narrow down your query."
 msgstr ""
 "Több elem is megfelel a(z) „%s” kifejezésnek. Pontosítsa a lekérdezést."
@@ -3966,11 +3981,11 @@ msgstr "Nincs aktív jegyzetfüzet."
 msgid "No new invitations"
 msgstr "Nincsenek új meghívók"
 
-#: packages/app-cli/app/app.ts:111
+#: packages/app-cli/app/app.ts:109
 msgid "No notebook has been specified."
 msgstr "Nincs megadva jegyzetfüzet."
 
-#: packages/app-cli/app/app.ts:105
+#: packages/app-cli/app/app.ts:103
 msgid "No notebook selected."
 msgstr "Nincs kijelölve jegyzetfüzet."
 
@@ -3996,7 +4011,7 @@ msgstr "Nincs eredmény"
 msgid "No revision selected"
 msgstr "Nincs kiválasztva felülvizsgálat"
 
-#: packages/app-cli/app/app.ts:238
+#: packages/app-cli/app/app.ts:236
 msgid "No such command: %s"
 msgstr "Nem létezik ilyen parancs: %s"
 
@@ -4069,7 +4084,7 @@ msgstr "jegyzet"
 msgid "Note"
 msgstr "Jegyzet"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1700
+#: packages/lib/models/settings/builtInMetadata.ts:1721
 msgid "Note area growth factor"
 msgstr "Jegyzetterület növekedési tényezője"
 
@@ -4122,7 +4137,7 @@ msgstr "A jegyzet nem egy teendő: „%s”"
 msgid "Note list"
 msgstr "Jegyzetlista"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1685
+#: packages/lib/models/settings/builtInMetadata.ts:1706
 msgid "Note list growth factor"
 msgstr "Jegyzetlista növekedési tényezője"
 
@@ -4170,7 +4185,7 @@ msgstr "Jegy&zetfüzet"
 msgid "Notebook"
 msgstr "Jegyzetfüzet"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1670
+#: packages/lib/models/settings/builtInMetadata.ts:1691
 msgid "Notebook list growth factor"
 msgstr "Jegyzetfüzetlista növekedési tényezője"
 
@@ -4668,7 +4683,7 @@ msgstr "Előnyben részesített sötét téma"
 msgid "Preferred light theme"
 msgstr "Előnyben részesített világos téma"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1873
+#: packages/lib/models/settings/builtInMetadata.ts:1894
 msgid "Preferred voice typing provider"
 msgstr "Előnyben részesített hangalapú beviteli szolgáltató"
 
@@ -4775,15 +4790,15 @@ msgstr "Profilok"
 msgid "Properties"
 msgstr "Tulajdonságok"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1564
+#: packages/lib/models/settings/builtInMetadata.ts:1585
 msgid "Proxy enabled"
 msgstr "Proxy engedélyezése"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1586
+#: packages/lib/models/settings/builtInMetadata.ts:1607
 msgid "Proxy timeout (seconds)"
 msgstr "Proxy-időtúllépés (másodpercben)"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1574
+#: packages/lib/models/settings/builtInMetadata.ts:1595
 msgid "Proxy URL"
 msgstr "Proxy-webcím"
 
@@ -4855,6 +4870,11 @@ msgstr "Olvasson erről többet"
 #: packages/app-desktop/gui/NoteContentPropertiesDialog.tsx:159
 msgid "Read time: %s min"
 msgstr "Olvasási idő: %s perc"
+
+#: packages/app-cli/app/command-batch.ts:45
+#, fuzzy
+msgid "Reading commands from standard input is only available in CLI mode."
+msgstr "A(z) „%s” parancs csak GUI módban érhető el"
 
 #: packages/app-desktop/gui/ShareFolderDialog/ShareFolderDialog.tsx:314
 msgid "Recipient has accepted the invitation"
@@ -4970,6 +4990,10 @@ msgstr "Címke átnevezése:"
 #: packages/app-cli/app/command-ren.ts:14
 msgid "Renames the given <item> (note or notebook) to <name>."
 msgstr "A megadott <item> (jegyzet vagy jegyzetfüzet) átnevezése <name> névre."
+
+#: packages/lib/models/settings/builtInMetadata.ts:1464
+msgid "Renders markup on all lines that don't include the cursor."
+msgstr ""
 
 #: packages/app-desktop/gui/ClipperConfigScreen.tsx:162
 msgid "Renew token"
@@ -5141,7 +5165,7 @@ msgstr ""
 "Formázott szöveges szerkesztő. Nyomja meg az ESC, majd a Tab billentyűt a "
 "fókusz elhagyásához."
 
-#: packages/app-cli/app/command-batch.js:10
+#: packages/app-cli/app/command-batch.ts:29
 msgid ""
 "Runs the commands contained in the text file. There should be one command "
 "per line."
@@ -5351,16 +5375,16 @@ msgstr "Saját üzemeltetésű"
 msgid "Send bug report"
 msgstr "Hibajelentés küldése"
 
-#: packages/app-cli/app/command-server.js:38
+#: packages/app-cli/app/command-server.js:46
 msgid "Server is already running on port %d"
 msgstr "A kiszolgáló már fut a(z) %d porton"
 
-#: packages/app-cli/app/command-server.js:44
-#: packages/app-cli/app/command-server.js:47
+#: packages/app-cli/app/command-server.js:56
+#: packages/app-cli/app/command-server.js:59
 msgid "Server is not running."
 msgstr "A kiszolgáló nem fut."
 
-#: packages/app-cli/app/command-server.js:44
+#: packages/app-cli/app/command-server.js:56
 msgid "Server is running on port %d"
 msgstr "A kiszolgáló fut a(z) %d porton"
 
@@ -5659,7 +5683,7 @@ msgstr "Forrás: "
 msgid "Spacer"
 msgstr "Elválasztó"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1614
+#: packages/lib/models/settings/builtInMetadata.ts:1635
 msgid ""
 "Specify the port that should be used by the API server. If not set, a "
 "default will be used."
@@ -6035,13 +6059,13 @@ msgstr "Az alkalmazás sikeresen hitelesítve."
 msgid "The application must be restarted for these changes to take effect."
 msgstr "Az alkalmazást újra kell indítani a módosítások érvényesítéséhez."
 
-#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:576
+#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:577
 msgid ""
 "The attachments will no longer be watched when you switch to a different "
 "note."
 msgstr "A mellékletek figyelése megszűnik, ha átvált egy másik jegyzetre."
 
-#: packages/app-cli/app/app.ts:289
+#: packages/app-cli/app/app.ts:287
 msgid "The command \"%s\" is only available in GUI mode"
 msgstr "A(z) „%s” parancs csak GUI módban érhető el"
 
@@ -6082,9 +6106,9 @@ msgstr ""
 "argumentumokat). Ha nincs megadva, a program megpróbálja automatikusan "
 "felismerni az alapértelmezett szerkesztőt."
 
-#: packages/lib/models/settings/builtInMetadata.ts:1672
-#: packages/lib/models/settings/builtInMetadata.ts:1687
-#: packages/lib/models/settings/builtInMetadata.ts:1702
+#: packages/lib/models/settings/builtInMetadata.ts:1693
+#: packages/lib/models/settings/builtInMetadata.ts:1708
+#: packages/lib/models/settings/builtInMetadata.ts:1723
 msgid ""
 "The factor property sets how the item will grow or shrink to fit the "
 "available space in its container with respect to the other items. Thus an "
@@ -6097,13 +6121,13 @@ msgstr ""
 "mint egy 1 faktorú elem. A módosítások megtekintéséhez indítsa újra az "
 "alkalmazást."
 
-#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:591
+#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:592
 msgid "The following attachment matches your search query:"
 msgid_plural "The following attachments match your search query:"
 msgstr[0] "A következő melléklet megfelel a keresési lekérdezésnek:"
 msgstr[1] "A következő mellékletek megfelelnek a keresési lekérdezésnek:"
 
-#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:575
+#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:576
 msgid "The following attachments are being watched for changes:"
 msgstr "A következő mellékletek módosítása figyelve van:"
 
@@ -6474,7 +6498,7 @@ msgstr ""
 msgid "This note has no history"
 msgstr "Ennek a jegyzetnek nincsenek előzményei"
 
-#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:657
+#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:658
 msgid ""
 "This note is in HTML format. Convert it to Markdown to edit it more easily."
 msgstr ""
@@ -6982,7 +7006,7 @@ msgstr "Webcím"
 msgid "Usage: %s"
 msgstr "Használat: %s"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1758
+#: packages/lib/models/settings/builtInMetadata.ts:1779
 msgid "Use biometrics to secure access to the app"
 msgstr ""
 "Biometrikus adatok használata az alkalmazáshoz való hozzáférés biztosításához"
@@ -7013,7 +7037,7 @@ msgstr ""
 "A nyilak segítségével mozgathatja az elrendezési elemeket. A kilépéshez "
 "nyomja meg az „ESC” gombot."
 
-#: packages/lib/models/settings/builtInMetadata.ts:1497
+#: packages/lib/models/settings/builtInMetadata.ts:1518
 msgid "Use the legacy Markdown editor"
 msgstr "Régi Markdown szerkesztő használata"
 
@@ -7113,11 +7137,11 @@ msgstr "Vim"
 msgid "Voice recorder"
 msgstr "Hangrögzítő"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1863
+#: packages/lib/models/settings/builtInMetadata.ts:1884
 msgid "Voice typing language files (URL)"
 msgstr "Hanggépelési nyelvi fájlok (webcím)"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1891
+#: packages/lib/models/settings/builtInMetadata.ts:1912
 msgid "Voice typing: Glossary"
 msgstr "Hanggépelés: Szójegyzék"
 
@@ -7126,7 +7150,7 @@ msgstr "Hanggépelés: Szójegyzék"
 msgid "Voice typing..."
 msgstr "Hanggépelés…"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1880
+#: packages/lib/models/settings/builtInMetadata.ts:1901
 msgid "Vosk"
 msgstr "Vosk"
 
@@ -7237,7 +7261,7 @@ msgstr ""
 "kivonatolja belőlük a szöveget. Ez lehetővé teszi a szöveg keresését ezekben "
 "a mellékletekben."
 
-#: packages/lib/models/settings/builtInMetadata.ts:1881
+#: packages/lib/models/settings/builtInMetadata.ts:1902
 msgid "Whisper"
 msgstr "Whisper"
 
