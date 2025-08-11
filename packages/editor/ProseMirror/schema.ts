@@ -20,6 +20,8 @@ const domOutputSpecs = {
 	listItem: ['li', 0],
 	blockQuote: ['blockquote', 0],
 	mark: ['mark', 0],
+	sub: ['sub', 0],
+	sup: ['sup', 0],
 	hr: ['hr'],
 } satisfies Record<string, DOMOutputSpec>;
 
@@ -261,6 +263,14 @@ const marks = {
 	highlight: {
 		parseDOM: [{ tag: 'mark' }],
 		toDOM: () => domOutputSpecs.mark,
+	},
+	sub: {
+		parseDOM: [{ tag: 'sub' }],
+		toDOM: () => domOutputSpecs.sub,
+	},
+	sup: {
+		parseDOM: [{ tag: 'sup' }],
+		toDOM: () => domOutputSpecs.sup,
 	},
 } satisfies Record<string, MarkSpec>;
 
