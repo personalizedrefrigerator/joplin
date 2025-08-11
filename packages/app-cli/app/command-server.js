@@ -16,8 +16,8 @@ class Command extends BaseCommand {
 
 	options() {
 		return [
-			['--exit-early', _('Don\'t wait for the server to exit. Valid only for the `start` subcommand.')],
-			['--quiet', _('Log less information to stdout.')],
+			['--exit-early', 'Allow the command to exit while the server is still running. The server will still stop when the app exits. Valid only for the `start` subcommand.'],
+			['--quiet', 'Log less information to the console. More verbose logs will still be available through log-clipper.txt.'],
 		];
 	}
 

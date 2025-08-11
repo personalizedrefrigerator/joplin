@@ -277,10 +277,11 @@ class Client implements ActionableClient {
 			lines
 				// indent, for readability
 				.map(line => `  ${line}`)
-				// Since the server could still be running, don't include web clipper tokens in the output:
+				// Since the server could still be running if the user posts the log, don't including
+				// web clipper tokens in the output:
 				.map(line => line.replace(/token=[a-z0-9A-Z_]+/g, 'token=*****'))
 				// Don't include the sync password in the output
-				.map(line => line.replace(/(config "sync.9.password") ".*"/, '$1 "****"'))
+				.map(line => line.replace(/(config "(sync.9.password|api.token)") ".*"/, '$1 "****"'))
 				.join('\n')
 		);
 	}
@@ -461,8 +462,8 @@ class Client implements ActionableClient {
 		await retryWithCount(async () => {
 			const noteContent = (await this.execCliCommand_('cat', expected.id)).stdout;
 			assert.equal(
-				// TODO: For now, this needs a .trimEnd() to prevent additional newlines from
-				// occasionally being added. Look into this and determine why.
+				// Compare without trailing newlines for consistency, the output from "cat"
+				// can sometimes have an extra newline (due to the CLI prompt)
 				noteContent.trimEnd(),
 				`${expected.title}\n\n${expected.body.trimEnd()}`,
 				'note should exist',
