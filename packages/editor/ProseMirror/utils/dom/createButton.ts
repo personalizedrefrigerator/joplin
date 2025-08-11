@@ -7,8 +7,8 @@ const createButton = (label: LocalizationResult, onClick: OnClick) => {
 	const button = document.createElement('button');
 	button.appendChild(createTextNode(label));
 
-	// Works around an issue on iOS in which certain <button> elements within a contenteditable
-	// container do not emit a "click" event when tapped with a touchscreen.
+	// Works around an issue on iOS in which certain <button> elements within the selected
+	// region of a contenteditable container do not emit a "click" event when tapped with a touchscreen.
 	const applyIOSClickWorkaround = () => {
 		// touchend events can be received even when a touch is no longer contained within
 		// the initial element.
