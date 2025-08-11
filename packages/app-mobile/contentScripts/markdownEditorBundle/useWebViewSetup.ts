@@ -59,13 +59,6 @@ const useWebViewSetup = ({
 			window.markdownEditorBundle = markdownEditorBundle;
 			markdownEditorBundle.setUpLogger();
 		}
-		function getMarkdownEditorBundle() {
-			return markdownEditorBundle;
-		}
-
-		window.createSecondaryEditor = function(options) {
-			return getMarkdownEditorBundle().createEditorWithParent(options);
-		};
 
 		if (!window.cm) {
 			const parentClassName = ${JSON.stringify(editorOptions?.parentElementOrClassName)};
@@ -75,7 +68,7 @@ const useWebViewSetup = ({
 			// document has loaded. To avoid logging an error each time the editor starts, don't throw
 			// if the parent element can't be found:
 			if (foundParent) {
-				window.cm = getMarkdownEditorBundle().createMainEditor(${JSON.stringify(editorOptions)});
+				window.cm = markdownEditorBundle.createMainEditor(${JSON.stringify(editorOptions)});
 
 				${jumpToHashJs}
 				// Set the initial selection after jumping to the header -- the initial selection,
@@ -86,7 +79,7 @@ const useWebViewSetup = ({
 				window.onresize = () => {
 					cm.execCommand('scrollSelectionIntoView');
 				};
-			} else {
+			} else if (parentClassName) {
 				console.log('No parent element found with class name ', parentClassName);
 			}
 		}

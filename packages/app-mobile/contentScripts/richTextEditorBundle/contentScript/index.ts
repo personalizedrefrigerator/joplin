@@ -5,9 +5,9 @@ import WebViewToRNMessenger from '../../../utils/ipc/WebViewToRNMessenger';
 import { MarkupLanguage } from '@joplin/renderer/types';
 import '@joplin/editor/ProseMirror/styles';
 import readFileToBase64 from '../../utils/readFileToBase64';
-import { EditorControl, EditorLanguageType } from '@joplin/editor/types';
+import { EditorLanguageType } from '@joplin/editor/types';
 import convertHtmlToMarkdown from './convertHtmlToMarkdown';
-import { EditorWithParentProps } from '../../markdownEditorBundle/types';
+import { ExportedWebViewGlobals as MarkdownEditorWebViewGlobals } from '../../markdownEditorBundle/types';
 import { EditorEventType } from '@joplin/editor/events';
 
 const postprocessHtml = (html: HTMLElement) => {
@@ -37,8 +37,6 @@ const htmlToMarkdown = (html: HTMLElement): string => {
 	return convertHtmlToMarkdown(html);
 };
 
-type CreateCodeEditor = (markdownEditorOptions: EditorWithParentProps)=> EditorControl;
-
 export const initialize = async (
 	{
 		settings,
@@ -47,7 +45,7 @@ export const initialize = async (
 		parentElementClassName,
 		initialSearch,
 	}: EditorProps,
-	createCodeEditor: CreateCodeEditor,
+	markdownEditorApi: MarkdownEditorWebViewGlobals,
 ) => {
 	const messenger = new WebViewToRNMessenger<EditorProcessApi, MainProcessApi>('rich-text-editor', null);
 	const parentElement = document.getElementsByClassName(parentElementClassName)[0];
@@ -117,7 +115,7 @@ export const initialize = async (
 			}
 		},
 	}, (parent, language, onChange) => {
-		return createCodeEditor({
+		return markdownEditorApi.createEditorWithParent({
 			initialText: '',
 			initialNoteId: '',
 			parentElementOrClassName: parent,

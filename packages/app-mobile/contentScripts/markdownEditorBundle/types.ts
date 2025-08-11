@@ -1,16 +1,6 @@
 import { EditorEvent } from '@joplin/editor/events';
 import { ContentScriptData, EditorControl, EditorSettings, LocalizationResult } from '@joplin/editor/types';
 
-export interface EditorProcessApi {
-	mainEditor: EditorControl;
-	updateSettings: (settings: EditorSettings)=> void;
-	updatePlugins: (contentScripts: ContentScriptData[])=> void;
-}
-
-export interface SelectionRange {
-	start: number;
-	end: number;
-}
 
 export interface EditorProps {
 	parentElementOrClassName: HTMLElement|string;
@@ -21,6 +11,24 @@ export interface EditorProps {
 
 export interface EditorWithParentProps extends EditorProps {
 	onEvent: (editorEvent: EditorEvent)=> void;
+}
+
+// The Markdown editor exposes global functions within its <WebView>.
+// These functions can be used externally.
+export interface ExportedWebViewGlobals {
+	createEditorWithParent: (options: EditorWithParentProps)=> EditorControl;
+	createMainEditor: (props: EditorProps)=> EditorControl;
+}
+
+export interface EditorProcessApi {
+	mainEditor: EditorControl;
+	updateSettings: (settings: EditorSettings)=> void;
+	updatePlugins: (contentScripts: ContentScriptData[])=> void;
+}
+
+export interface SelectionRange {
+	start: number;
+	end: number;
 }
 
 export interface MainProcessApi {
