@@ -3,14 +3,6 @@ const getRootNode = (dom: Document) => {
 	return dom.querySelector('body > #rendered-md') ?? dom.body ?? dom.getRootNode();
 };
 
-const isOnlyChild = (element: Element) => {
-	return element.parentElement && element.parentElement.children.length === 1;
-};
-
-const isToplevel = (element: Element, root: Node): boolean => {
-	return element.parentElement === root || (isOnlyChild(element) && isToplevel(element.parentElement, root));
-};
-
 // The renderer attaches source map info to individual list items,
 // rather than the toplevel list block.
 // The markup restoration logic, however, needs this information on
@@ -20,7 +12,7 @@ const addListSourceMapInfo = (dom: Document) => {
 
 	const lists = [
 		...dom.querySelectorAll('ol, ul'),
-	].filter(node => isToplevel(node, root));
+	].filter(node => node.parentElement === root);
 
 	for (const list of lists) {
 		const firstChild = list.children.item(0);
@@ -39,13 +31,13 @@ const addListSourceMapInfo = (dom: Document) => {
 // Uses the renderer's source-line and source-line-end attributes to
 // reconstruct the original Markdown for different parts of the given
 // DOM.
-const addOriginalMarkdownAttrs = (dom: Document, originalMarkup: string) => {
+const addOriginalMarkdownAttributes = (dom: Document, originalMarkup: string) => {
 	const lines = originalMarkup.split('\n');
 
 	const root = getRootNode(dom);
 	const sourceMappedToplevelElements = [
 		...dom.querySelectorAll('.maps-to-line[source-line][source-line-end]'),
-	].filter(node => isToplevel(node, root));
+	].filter(node => node.parentElement === root);
 
 	let lastEndLine = -1;
 	let lastElement: Element = null;
@@ -73,7 +65,7 @@ const addOriginalMarkdownAttrs = (dom: Document, originalMarkup: string) => {
 
 const preprocessEditorInput = (dom: Document, originalMarkup: string) => {
 	addListSourceMapInfo(dom);
-	addOriginalMarkdownAttrs(dom, originalMarkup);
+	addOriginalMarkdownAttributes(dom, originalMarkup);
 };
 
 export default preprocessEditorInput;

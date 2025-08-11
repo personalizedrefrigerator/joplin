@@ -12,26 +12,24 @@ import { defaultSelectionFormatting, selectionFormattingEqual } from '../Selecti
 import originalMarkupPlugin from './plugins/originalMarkupPlugin';
 import preprocessEditorInput from './utils/preprocessEditorInput';
 import searchExtension from './plugins/searchExtension';
-import editorEventStatePlugin, { setEditorEventHandler } from './plugins/editorEventStatePlugin';
 import { TaskItem, TaskList } from '@tiptap/extension-list';
 import { TextSelection, Transaction } from '@tiptap/pm/state';
 import wrapProseMirrorPlugin from './utils/wrapProseMirrorPlugin';
-import joplinEditablePlugin from './plugins/joplinEditablePlugin';
+import joplinEditablePlugin from './plugins/joplinEditablePlugin/joplinEditablePlugin';
 import Link from '@tiptap/extension-link';
+import { RendererControl } from './types';
 
-type MarkupToHtml = (markup: string)=> Promise<RenderResult>;
-type HtmlToMarkup = (html: HTMLElement)=> string;
+import joplinEditorApiPlugin, { setEditorApi } from './plugins/joplinEditorApiPlugin';
+import linkTooltipPlugin from './plugins/linkTooltipPlugin';
+import resourcePlaceholderPlugin, { onResourceDownloaded } from './plugins/resourcePlaceholderPlugin';
 
 const createEditor = async (
 	parentElement: HTMLElement,
 	props: EditorProps,
-	renderToHtml: MarkupToHtml,
-	renderToMarkup: HtmlToMarkup,
+	renderer: RendererControl,
 ): Promise<EditorControl> => {
 	const renderNodeToMarkup = (node: Node|DocumentFragment) => {
-		const element = document.createElement('div');
-		element.appendChild(node);
-		return renderToMarkup(element);
+		return renderer.renderHtmlToMarkup(node);
 	};
 
 	const cssContainer = document.createElement('style');
@@ -41,15 +39,32 @@ const createEditor = async (
 	const { plugin: searchPlugin, updateState: updateSearchState } = searchExtension(props.onEvent);
 
 	let settings = props.settings;
-	const renderInitialMarkup = async (markup: string) => {
-		const renderResult = await renderToHtml(markup);
-		cssContainer.replaceChildren(
-			document.createTextNode(renderResult.cssStrings.join('\n')),
-		);
+	const renderAndPostprocessHtml = async (markup: string) => {
+		const renderResult = await renderer.renderMarkupToHtml(markup, {
+			forceMarkdown: false,
+			isFullPageRender: true,
+		});
 
 		const dom = new DOMParser().parseFromString(renderResult.html, 'text/html');
 		preprocessEditorInput(dom, markup);
-		return new XMLSerializer().serializeToString(dom.body);
+
+		return {
+			renderResult,
+			dom,
+			getHtmlString: () => {
+				return new XMLSerializer().serializeToString(dom.body);
+			}
+		};
+	};
+	const updateGlobalCss = (renderResult: RenderResult) => {
+		cssContainer.replaceChildren(
+			document.createTextNode(renderResult.cssStrings.join('\n')),
+		);
+	};
+	const renderInitialHtml = async (markup: string) => {
+		const rendered = await renderAndPostprocessHtml(markup);
+		updateGlobalCss(rendered.renderResult);
+		return rendered.getHtmlString();
 	};
 
 	const undoStackSynchronizer = new UndoStackSynchronizer(props.onEvent);
@@ -64,7 +79,7 @@ const createEditor = async (
 	};
 	let lastSelectionFormatting = defaultSelectionFormatting;
 	const onUpdateSelection = ({ transaction }: TipTapEditorEvent) => {
-		const selectionFormatting = computeSelectionFormatting(transaction.doc, editor.schema, transaction.selection, settings);
+		const selectionFormatting = computeSelectionFormatting(transaction.doc, transaction.selection, editor.state, editor.schema, settings);
 		if (!selectionFormattingEqual(lastSelectionFormatting, selectionFormatting)) {
 			lastSelectionFormatting = selectionFormatting;
 			props.onEvent({
@@ -83,15 +98,21 @@ const createEditor = async (
 			ImageKit.configure(),
 			TableKit,
 			Link,
-			wrapProseMirrorPlugin(editorEventStatePlugin),
-			...joplinEditablePlugin,
-			markupTracker,
+			wrapProseMirrorPlugin(joplinEditablePlugin),
+			wrapProseMirrorPlugin(markupTracker),
 			wrapProseMirrorPlugin(searchPlugin),
+			wrapProseMirrorPlugin(resourcePlaceholderPlugin),
+			wrapProseMirrorPlugin(linkTooltipPlugin),
+			wrapProseMirrorPlugin(joplinEditorApiPlugin),
 		],
-		content: await renderInitialMarkup(props.initialText),
+		content: await renderInitialHtml(props.initialText),
 	});
 	editor.view.dispatch(
-		setEditorEventHandler(editor.view.state.tr, props.onEvent),
+		setEditorApi(editor.view.state.tr, {
+			onEvent: props.onEvent,
+			localize: props.onLocalize,
+			renderer: renderer,
+		}),
 	);
 	editor.on('selectionUpdate', onUpdateSelection);
 	editor.on('update', onDocumentUpdate);
@@ -100,12 +121,12 @@ const createEditor = async (
 		supportsCommand: (name: EditorCommandType | string) => {
 			return name in commands && !!commands[name as keyof typeof commands];
 		},
-		execCommand: (name: EditorCommandType | string, ..._args: unknown[]) => {
+		execCommand: (name: EditorCommandType | string, ...args: string[]) => {
 			if (!editorControl.supportsCommand(name)) {
 				throw new Error(`Unsupported command: ${name}`);
 			}
 
-			commands[name as keyof typeof commands](editor);
+			commands[name as keyof typeof commands](editor, args);
 		},
 		undo: () => {
 			void editorControl.execCommand(EditorCommandType.Undo);
@@ -129,10 +150,18 @@ const createEditor = async (
 		},
 		updateBody: async (newBody: string, _updateBodyOptions?: UpdateBodyOptions) => {
 			editor.commands.selectAll();
-			editor.commands.insertContent(await renderInitialMarkup(newBody));
+			editor.commands.insertContent(renderInitialHtml(newBody));
 		},
-		updateSettings: (newSettings: EditorSettings) => {
+		updateSettings: async (newSettings: EditorSettings) => {
+			const oldSettings = settings;
 			settings = newSettings;
+
+			if (oldSettings.themeData.themeId !== newSettings.themeData.themeId) {
+				// Refresh global CSS when the theme changes -- render the full document
+				// to avoid required CSS being omitted due to missing markup.
+				const { renderResult } = await renderAndPostprocessHtml(stateToMarkup(editor.view.state));
+				updateGlobalCss(renderResult);
+			}
 		},
 		updateLink: (label: string, url: string) => {
 			const selection = editor.state.selection;
@@ -153,8 +182,24 @@ const createEditor = async (
 		setSearchState: (newState: SearchState) => {
 			editor.view.dispatch(updateSearchState(editor.view.state, newState));
 		},
-		setContentScripts: function(_plugins: ContentScriptData[]): Promise<void> {
-			throw new Error('Function not implemented.');
+		setContentScripts: (_plugins: ContentScriptData[]) => {
+			throw new Error('setContentScripts not implemented.');
+		},
+		onResourceDownloaded: async (resourceId) => {
+			const rendered = await renderAndPostprocessHtml(`<img src=":/${resourceId}"/>`);
+			const renderedImage = rendered.dom.querySelector('img');
+
+			// The resource might not be an image. If so, skip.
+			if (!renderedImage) {
+				return;
+			}
+			const stillNotLoaded = renderedImage.classList.contains('not-loaded-resource');
+			if (stillNotLoaded) {
+				return;
+			}
+
+			const resourceSrc = renderedImage?.src;
+			onResourceDownloaded(editor.view, resourceId, resourceSrc);
 		},
 	};
 	return editorControl;

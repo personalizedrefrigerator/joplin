@@ -1,18 +1,32 @@
 import { EditorState, Plugin } from 'prosemirror-state';
-import { Node as ProseMirrorNode, DOMSerializer, Schema } from 'prosemirror-model';
+import { Node as ProseMirrorNode, DOMSerializer } from 'prosemirror-model';
 import { Decoration, DecorationSet } from 'prosemirror-view';
+import schema from '../schema';
 import changedDescendants from '../vendor/changedDescendants';
-import { Extension } from '@tiptap/core';
+
+const nonbreakingSpace = '\u00A0';
 
 // Creates a custom serializer that can preserve empty paragraphs.
 // See https://discuss.prosemirror.net/t/how-to-preserve-br-tags-in-empty-paragraphs/2051/8.
-const createSerializer = (schema: Schema) => {
+const createSerializer = () => {
 	const baseSerializer = DOMSerializer.fromSchema(schema);
 	return new DOMSerializer({
 		...baseSerializer.nodes,
+
+		// When converting back to markup, restore the <style> blocks.
+		// TODO: This is currently only effective for short, simple CSS blocks.
+		// @joplin/turndown will need to be adjusted to properly support preserving CSS:
+		style_placeholder: (node) => {
+			const result = document.createElement('style');
+			result.appendChild(document.createTextNode(node.attrs.content));
+			result.classList.add('jop-noMdConv');
+			return result;
+		},
+
+		// Prevent empty paragraphs from being removed by padding them with nonbreaking spaces:
 		paragraph: (node) => {
 			if (node.content.size === 0) {
-				return ['p', '&nbsp;'];
+				return ['p', nonbreakingSpace];
 			} else {
 				return ['p', 0];
 			}
@@ -20,19 +34,31 @@ const createSerializer = (schema: Schema) => {
 
 		// Preserve repeated spaces -- ProseMirror visually preserves spaces with "white-space: break-spaces".
 		text: (node) => {
+			if (node.marks.some(mark => mark.type.spec.code)) {
+				// Within code, &nbsp;s render as text, not nonbreaking spaces.
+				// Avoid including them:
+				return node.text;
+			}
+
 			// Replace repeated spaces with a space followed by a nonbreaking space:
-			return node.text.replace(/ {2}/g, ' &nbsp;');
+			// Use \u00A0 as the nonbreaking space character, since &nbsp; will be escaped.
+			return node.text.replace(/ {2}/g, ` ${nonbreakingSpace}`);
+		},
+
+		// However, &nbsp;s don't render as nonbreaking spaces in code blocks.
+		// Create a custom output specification to avoid using the default text output:
+		pre_block: (node) => {
+			const result = document.createElement('pre');
+			const content = document.createElement('code');
+			content.appendChild(document.createTextNode(node.textContent));
+			result.appendChild(content);
+			return { dom: result };
 		},
 	}, baseSerializer.marks);
 };
 
 const originalMarkupPlugin = (htmlToMarkup: (html: Node)=> string) => {
-	let schema: Schema;
-	let serializer_: DOMSerializer;
-	const proseMirrorSerializer = () => {
-		serializer_ ??= createSerializer(schema);
-		return serializer_;
-	};
+	const proseMirrorSerializer = createSerializer();
 
 	const makeDecoration = (position: number, node: ProseMirrorNode, markup: string) => {
 		return Decoration.node(
@@ -53,7 +79,8 @@ const originalMarkupPlugin = (htmlToMarkup: (html: Node)=> string) => {
 			});
 
 			if (matchingDecorations.length === 0) {
-				const markup = htmlToMarkup(proseMirrorSerializer().serializeNode(node));
+				const serialized = proseMirrorSerializer.serializeNode(node);
+				const markup = htmlToMarkup(serialized);
 				decorations = decorations.add(doc, [makeDecoration(position, node, markup)]);
 			}
 
@@ -98,12 +125,7 @@ const originalMarkupPlugin = (htmlToMarkup: (html: Node)=> string) => {
 	});
 
 	return {
-		plugin: Extension.create({
-			addProseMirrorPlugins() {
-				schema = this.editor.schema;
-				return [plugin];
-			},
-		}),
+		plugin,
 		stateToMarkup: (state: EditorState) => {
 			const decorations = plugin.getState(state).find();
 			// Sort the decorations in increasing order -- the documentation does not guarantee

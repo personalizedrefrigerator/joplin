@@ -4,8 +4,8 @@ import { useEffect, useRef, useState } from 'react';
 import Logger from '@joplin/utils/Logger';
 import { ResourceEntity, ResourceLocalStateEntity } from '@joplin/lib/services/database/types';
 import { RendererControl, RenderOptions } from '../../../contentScripts/rendererBundle/types';
-import useQueuedAsyncEffect from '@joplin/lib/hooks/useQueuedAsyncEffect';
 import Resource from '@joplin/lib/models/Resource';
+import useAsyncEffect from '@joplin/lib/hooks/useAsyncEffect';
 
 
 export interface ResourceInfo {
@@ -116,7 +116,7 @@ const useRerenderHandler = (props: Props) => {
 	const previousHash = usePrevious(props.noteHash, '');
 	const hashChanged = previousHash !== props.noteHash;
 
-	useQueuedAsyncEffect(async (event) => {
+	useAsyncEffect(async (event) => {
 		if (onlyNoteBodyHasChanged && onlyCheckboxesHaveChanged) {
 			logger.info('Only a checkbox has changed - not updating HTML');
 			return;
@@ -132,6 +132,7 @@ const useRerenderHandler = (props: Props) => {
 			highlightedKeywords: props.highlightedKeywords,
 			resources: props.noteResources,
 			pluginAssetContainerSelector: '#joplin-container-pluginAssetsContainer',
+			removeUnusedPluginAssets: true,
 
 			// If the hash changed, we don't set initial scroll -- we want to scroll to the hash
 			// instead.

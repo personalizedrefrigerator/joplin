@@ -15,7 +15,7 @@ import useWebViewSetup from '../../contentScripts/richTextEditorBundle/useWebVie
 import CommandService from '@joplin/lib/services/CommandService';
 import shim from '@joplin/lib/shim';
 
-const logger = Logger.create('NoteEditor');
+const logger = Logger.create('RichTextEditor');
 
 function useCss(themeId: number, editorCss: string): string {
 	return useMemo(() => {
@@ -44,44 +44,6 @@ function useCss(themeId: number, editorCss: string): string {
 				font-size: 13pt;
 				font-family: ${JSON.stringify(theme.fontFamily)}, sans-serif;
 			}
-
-			* {
-				scrollbar-width: thin;
-				scrollbar-color: rgba(100, 100, 100, 0.7) rgba(0, 0, 0, 0.1);
-			}
-
-			@supports selector(::-webkit-scrollbar) {
-				*::-webkit-scrollbar {
-					width: 7px;
-					height: 7px;
-				}
-
-				*::-webkit-scrollbar-corner {
-					background: none;
-				}
-
-				*::-webkit-scrollbar-track {
-					border: none;
-				}
-
-				*::-webkit-scrollbar-thumb {
-					background: rgba(100, 100, 100, 0.3);
-					border-radius: 5px;
-				}
-
-				*::-webkit-scrollbar-track:hover {
-					background: rgba(0, 0, 0, 0.1);
-				}
-
-				*::-webkit-scrollbar-thumb:hover {
-					background: rgba(100, 100, 100, 0.7);
-				}
-
-				* {
-					scrollbar-width: unset;
-					scrollbar-color: unset;
-				}
-			}
 		`;
 	}, [themeId, editorCss]);
 }
@@ -97,13 +59,6 @@ function useHtml(initialCss: string): string {
 				<meta charset="UTF-8">
 				<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 				<title>${_('Note editor')}</title>
-				<style>
-					/* For better scrolling on iOS (working scrollbar) we use external, rather than internal,
-						scrolling. */
-					.cm-scroller {
-						overflow: none;
-					}
-				</style>
 			</head>
 			<body>
 				<div class="RichTextEditor" style="height:100%;" autocapitalize="on"></div>
@@ -129,11 +84,13 @@ const RichTextEditor: React.FC<EditorProps> = props => {
 		initialText: props.initialText,
 		noteId: props.noteId,
 		settings: props.editorSettings,
+		globalSearch: props.globalSearch,
 		webviewRef,
 		themeId: props.themeId,
 		pluginStates: props.plugins,
 		noteResources: props.noteResources,
 		onPostMessage: onPostMessage,
+		onAttachFile: props.onAttach,
 	});
 
 	props.editorRef.current = editorWebViewSetup.api;
@@ -168,7 +125,7 @@ const RichTextEditor: React.FC<EditorProps> = props => {
 		const data = event.nativeEvent.data;
 
 		if (typeof data === 'string' && data.indexOf('error:') === 0) {
-			logger.error('CodeMirror error', data);
+			logger.error('Rich Text Editor error', data);
 			return;
 		}
 
@@ -182,8 +139,8 @@ const RichTextEditor: React.FC<EditorProps> = props => {
 	return (
 		<ExtendedWebView
 			ref={webviewRef}
-			webviewInstanceId='MarkdownEditor'
-			testID='MarkdownEditor'
+			webviewInstanceId='RichTextEditor'
+			testID='RichTextEditor'
 			scrollEnabled={true}
 			html={html}
 			injectedJavaScript={injectedJavaScript}

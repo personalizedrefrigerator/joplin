@@ -11,7 +11,7 @@ import { LayoutChangeEvent, View, ViewStyle } from 'react-native';
 import { editorFont } from '../global-style';
 
 import { EditorControl as EditorBodyControl, ContentScriptData } from '@joplin/editor/types';
-import { EditorControl, EditorSettings } from './types';
+import { EditorControl, EditorSettings, EditorType } from './types';
 import { _ } from '@joplin/lib/locale';
 import { ChangeEvent, EditorEvent, EditorEventType, SelectionRangeChangeEvent, UndoRedoDepthChangeEvent } from '@joplin/editor/events';
 import { EditorCommandType, EditorKeymap, EditorLanguageType, SearchState } from '@joplin/editor/types';
@@ -23,22 +23,27 @@ import { SelectionRange } from '../../contentScripts/markdownEditorBundle/types'
 import MarkdownEditor from './MarkdownEditor';
 import RichTextEditor from './RichTextEditor';
 import { ResourceInfos } from '@joplin/renderer/types';
+import CommandService from '@joplin/lib/services/CommandService';
+import Resource from '@joplin/lib/models/Resource';
+import { join } from 'path';
+import uuid from '@joplin/lib/uuid';
+import shim from '@joplin/lib/shim';
+import { dirname } from '@joplin/utils/path';
+import { toFileExtension } from '@joplin/lib/mime-utils';
+import { MarkupLanguage } from '@joplin/renderer';
+import WarningBanner from './WarningBanner';
 
 type ChangeEventHandler = (event: ChangeEvent)=> void;
 type UndoRedoDepthChangeHandler = (event: UndoRedoDepthChangeEvent)=> void;
 type SelectionChangeEventHandler = (event: SelectionRangeChangeEvent)=> void;
 type OnAttachCallback = (filePath?: string)=> Promise<void>;
 
-export enum EditorType {
-	Markdown = 'markdown',
-	RichText = 'rich-text',
-}
-
 interface Props {
 	ref: Ref<EditorControl>;
 	themeId: number;
 	initialText: string;
 	mode: EditorType;
+	markupLanguage: MarkupLanguage;
 	noteId: string;
 	noteHash: string;
 	globalSearch: string;
@@ -69,6 +74,7 @@ function editorTheme(themeId: number) {
 	const estimatedFontSizeInEm = fontSizeInPx / 16;
 
 	return {
+		themeId,
 		...themeStyle(themeId),
 
 		// To allow accessibility font scaling, we also need to set the
@@ -222,6 +228,10 @@ const useEditorControl = (
 
 				setSearchState: setSearchStateCallback,
 			},
+
+			onResourceDownloaded: (id: string) => {
+				editorRef.current.onResourceDownloaded(id);
+			},
 		};
 
 		return control;
@@ -232,12 +242,13 @@ function NoteEditor(props: Props) {
 	const webviewRef = useRef<WebViewControl>(null);
 
 	const editorSettings: EditorSettings = useMemo(() => ({
-		themeId: props.themeId,
 		themeData: editorTheme(props.themeId),
 		markdownMarkEnabled: Setting.value('markdown.plugin.mark'),
 		katexEnabled: Setting.value('markdown.plugin.katex'),
 		spellcheckEnabled: Setting.value('editor.mobile.spellcheckEnabled'),
-		language: EditorLanguageType.Markdown,
+		inlineRenderingEnabled: Setting.value('editor.inlineRendering'),
+		imageRenderingEnabled: Setting.value('editor.imageRendering'),
+		language: props.markupLanguage === MarkupLanguage.Html ? EditorLanguageType.Html : EditorLanguageType.Markdown,
 		useExternalSearch: true,
 		readOnly: props.readOnly,
 
@@ -252,7 +263,7 @@ function NoteEditor(props: Props) {
 		indentWithTabs: true,
 
 		editorLabel: _('Markdown editor'),
-	}), [props.themeId, props.readOnly]);
+	}), [props.themeId, props.readOnly, props.markupLanguage]);
 
 	const [selectionState, setSelectionState] = useState<SelectionFormatting>(defaultSelectionFormatting);
 	const [linkDialogVisible, setLinkDialogVisible] = useState(false);
@@ -276,6 +287,9 @@ function NoteEditor(props: Props) {
 			break;
 		case EditorEventType.EditLink:
 			editorControl.showLinkDialog();
+			break;
+		case EditorEventType.FollowLink:
+			void CommandService.instance().execute('openItem', event.link);
 			break;
 		case EditorEventType.UpdateSearchDialog:
 			setSearchState(event.searchState);
@@ -307,6 +321,19 @@ function NoteEditor(props: Props) {
 		editorControl.updateSettings(editorSettings);
 	}, [editorSettings, editorControl]);
 
+	const lastNoteResources = useRef<ResourceInfos>(props.noteResources);
+	useEffect(() => {
+		const isDownloaded = (resourceInfos: ResourceInfos, resourceId: string) => {
+			return resourceInfos[resourceId]?.localState?.fetch_status === Resource.FETCH_STATUS_DONE;
+		};
+		for (const key in props.noteResources) {
+			const wasDownloaded = isDownloaded(lastNoteResources.current, key);
+			if (!wasDownloaded && isDownloaded(props.noteResources, key)) {
+				editorControl.onResourceDownloaded(key);
+			}
+		}
+	}, [props.noteResources, editorControl]);
+
 	useEditorCommandHandler(editorControl);
 
 	useImperativeHandle(props.ref, () => {
@@ -325,6 +352,17 @@ function NoteEditor(props: Props) {
 			setHasSpaceForToolbar(true);
 		}
 	}, []);
+
+	const onAttach = useCallback(async (type: string, base64: string) => {
+		const tempFilePath = join(Setting.value('tempDir'), `paste.${uuid.createNano()}.${toFileExtension(type)}`);
+		await shim.fsDriver().mkdir(dirname(tempFilePath));
+		try {
+			await shim.fsDriver().writeFile(tempFilePath, base64, 'base64');
+			await props.onAttach(tempFilePath);
+		} finally {
+			await shim.fsDriver().remove(tempFilePath);
+		}
+	}, [props.onAttach]);
 
 	const toolbarEditorState = useMemo(() => ({
 		selectionState,
@@ -367,9 +405,11 @@ function NoteEditor(props: Props) {
 					onEditorEvent={onEditorEvent}
 					noteResources={props.noteResources}
 					plugins={props.plugins}
-					onAttach={props.onAttach}
+					onAttach={onAttach}
 				/>
 			</View>
+
+			<WarningBanner editorType={props.mode}/>
 
 			<SearchPanel
 				editorSettings={editorSettings}

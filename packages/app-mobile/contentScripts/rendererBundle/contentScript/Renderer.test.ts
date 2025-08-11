@@ -13,6 +13,7 @@ const defaultRendererSettings: RenderSettings = {
 	noteHash: '',
 	initialScroll: 0,
 	readAssetBlob: async (_path: string) => new Blob(),
+	removeUnusedPluginAssets: true,
 
 	createEditPopupSyntax: '',
 	destroyEditPopupSyntax: '',
@@ -151,7 +152,7 @@ describe('Renderer', () => {
 
 		// Should call .requestPluginSetting for missing settings
 		expect(requestPluginSetting).toHaveBeenCalledTimes(1);
-		await rerenderToBody({});
+		await rerenderToBody({ someOtherSetting: 1 });
 		expect(requestPluginSetting).toHaveBeenCalledTimes(2);
 		expect(requestPluginSetting).toHaveBeenLastCalledWith('com.example.test-plugin', 'setting');
 

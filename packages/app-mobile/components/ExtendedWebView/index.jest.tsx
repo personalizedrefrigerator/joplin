@@ -15,7 +15,7 @@ const logger = Logger.create('ExtendedWebView');
 const ExtendedWebView = (props: Props, ref: Ref<WebViewControl>) => {
 	const dom = useMemo(() => {
 		// Note: Adding `runScripts: 'dangerously'` to allow running inline <script></script>s.
-		// Use with caution.
+		// Use with caution -- don't load untrusted WebView HTML while testing.
 		return new JSDOM(props.html, { runScripts: 'dangerously', pretendToBeVisual: true });
 	}, [props.html]);
 
@@ -56,21 +56,44 @@ const ExtendedWebView = (props: Props, ref: Ref<WebViewControl>) => {
 	useEffect(() => {
 		// JSDOM polyfills
 		dom.window.eval(`
-			// Prevents the CodeMirror error "getClientRects is undefined".
-			// See https://github.com/jsdom/jsdom/issues/3002#issue-652790925
-			document.createRange = () => {
-				const range = new Range();
-				range.getBoundingClientRect = () => {};
-				range.getClientRects = () => {
-					return {
-						length: 0,
-						item: () => null,
-						[Symbol.iterator]: () => {},
-					};
-				};
+			window.scrollBy = (_amount) => { };
 
-				return range;
+			// JSDOM iframes are missing certain functionality required by Joplin,
+			// including:
+			// - MessageEvent.source: Should point to the window that created a message.
+			//   Joplin uses this to determine the source of messages in iframe-related IPC.
+			// - iframe.srcdoc: Used by Joplin to create plugin windows.
+			const polyfillIframeContentWindow = (contentWindow) => {
+				contentWindow.addEventListener('message', event => {
+					// Work around a missing ".source" property on events.
+					// See https://github.com/jsdom/jsdom/issues/2745#issuecomment-1207414024
+					if (!event.source) {
+						contentWindow.dispatchEvent(new MessageEvent('message', {
+							source: window,
+							data: event.data,
+						}));
+						event.stopImmediatePropagation();
+					}
+				});
+
+				contentWindow.parent.postMessage = (message) => {
+					window.dispatchEvent(new MessageEvent('message', {
+						data: message,
+						source: contentWindow,
+					}));
+				};
 			};
+
+			Object.defineProperty(HTMLIFrameElement.prototype, 'srcdoc', {
+				set(value) {
+					this.src = 'about:blank';
+					setTimeout(() => {
+						this.contentDocument.write(value);
+
+						polyfillIframeContentWindow(this.contentWindow);
+					}, 0);
+				},
+			});
 		`);
 
 		dom.window.eval(`
@@ -85,7 +108,12 @@ const ExtendedWebView = (props: Props, ref: Ref<WebViewControl>) => {
 			},
 		});
 
-		dom.window.eval(injectedJavaScriptRef.current);
+		// Wrap the injected JavaScript in (() => {...})() to more closely
+		// match the behavior of injectedJavaScript on Android -- variables
+		// declared with "var" or "const" should not become global variables.
+		dom.window.eval(`(() => {
+			${injectedJavaScriptRef.current}
+		})()`);
 	}, [dom]);
 
 	const onLoadEndRef = useRef(props.onLoadEnd);

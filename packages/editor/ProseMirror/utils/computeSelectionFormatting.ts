@@ -1,9 +1,12 @@
-import { MarkType, Node, Schema } from 'prosemirror-model';
-import { Selection } from 'prosemirror-state';
+import { MarkType } from 'prosemirror-model';
+import { EditorState } from 'prosemirror-state';
 import SelectionFormatting, { MutableSelectionFormatting, defaultSelectionFormatting } from '../../SelectionFormatting';
+import schema from '../schema';
 import { EditorSettings } from '../../types';
 
-const computeSelectionFormatting = (doc: Node, schema: Schema, selection: Selection, settings: EditorSettings): SelectionFormatting => {
+const computeSelectionFormatting = (state: EditorState, settings: EditorSettings): SelectionFormatting => {
+	const doc = state.doc;
+	const selection = state.selection;
 	const formatting: MutableSelectionFormatting = {
 		...defaultSelectionFormatting,
 		selectedText: doc.textBetween(selection.from, selection.to),
@@ -20,6 +23,10 @@ const computeSelectionFormatting = (doc: Node, schema: Schema, selection: Select
 		}
 		if (node.type === schema.nodes.bullet_list) {
 			formatting.inUnorderedList = true;
+			formatting.listLevel ++;
+		}
+		if (node.type === schema.nodes.task_list) {
+			formatting.inChecklist = true;
 			formatting.listLevel ++;
 		}
 		if (node.type === schema.nodes.pre_block) {
@@ -40,19 +47,24 @@ const computeSelectionFormatting = (doc: Node, schema: Schema, selection: Select
 			throw new Error(`Type not found in schema: ${type}`);
 		}
 
-		// If rangeHasMark is given an empty selection, it always returns false.
-		// For cursor selections, also check one character to the left.
-		const from = selection.empty ? Math.max(0, selection.from - 1) : selection.from;
-		const to = selection.to;
-		return doc.rangeHasMark(from, to, type);
+		// See the corresponding logic in prosemirror-example-setup:
+		// https://github.com/ProseMirror/prosemirror-example-setup/blob/8c11be6850604081dceda8f36e08d2426875e19a/src/menu.ts#L58
+		//
+		// Using state.storedMarks with an empty selection is important to accurately reflect changes made
+		// **by the user** to the current marks associated with the cursor.
+		if (selection.empty) {
+			return !!type.isInSet(state.storedMarks ?? selection.$head.marks());
+		} else {
+			return doc.rangeHasMark(selection.from, selection.to, type);
+		}
 	};
 
 	formatting.inCode ||= hasMark(schema.marks.code);
 	if (formatting.inCode) {
 		formatting.unspellCheckableRegion = true;
 	}
-	formatting.italicized = hasMark(schema.marks.italic);
-	formatting.bolded = hasMark(schema.marks.bold);
+	formatting.italicized = hasMark(schema.marks.emphasis);
+	formatting.bolded = hasMark(schema.marks.strong);
 
 	if (formatting.unspellCheckableRegion) {
 		formatting.spellChecking = false;

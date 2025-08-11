@@ -11,6 +11,8 @@ import shim from '@joplin/lib/shim';
 import { PluginStates } from '@joplin/lib/services/plugins/reducer';
 import { RendererControl, RenderOptions } from '../rendererBundle/types';
 import { ResourceInfos } from '@joplin/renderer/types';
+import { _ } from '@joplin/lib/locale';
+import { defaultSearchState } from '../../components/NoteEditor/SearchPanel';
 
 const logger = Logger.create('useWebViewSetup');
 
@@ -19,9 +21,11 @@ interface Props {
 	noteId: string;
 	settings: EditorSettings;
 	parentElementClassName: string;
+	globalSearch: string;
 	themeId: number;
 	pluginStates: PluginStates;
 	noteResources: ResourceInfos;
+	onAttachFile: (mime: string, base64: string)=> void;
 
 	onPostMessage: (message: string)=> void;
 	onEditorEvent: (event: EditorEvent)=> void;
@@ -35,6 +39,8 @@ const useMessenger = (props: UseMessengerProps) => {
 	onEditorEventRef.current = props.onEditorEvent;
 	const rendererRef = useRef(props.renderer);
 	rendererRef.current = props.renderer;
+	const onAttachRef = useRef(props.onAttachFile);
+	onAttachRef.current = props.onAttachFile;
 
 	const markupRenderingSettings = useRef<RenderOptions>(null);
 	markupRenderingSettings.current = {
@@ -45,6 +51,7 @@ const useMessenger = (props: UseMessengerProps) => {
 		noteHash: '',
 		initialScroll: 0,
 		pluginAssetContainerSelector: null,
+		removeUnusedPluginAssets: true,
 	};
 
 	return useMemo(() => {
@@ -65,10 +72,15 @@ const useMessenger = (props: UseMessengerProps) => {
 						splitted: options.splitted,
 						pluginAssetContainerSelector: options.pluginAssetContainerSelector,
 						mapsToLine: options.mapsToLine,
+						removeUnusedPluginAssets: options.removeUnusedPluginAssets,
 					},
 				);
 				return renderResult;
 			},
+			onPasteFile: async (type: string, base64: string) => {
+				onAttachRef.current(type, base64);
+			},
+			onLocalize: _,
 		};
 
 		const messenger = new RNToWebViewMessenger<MainProcessApi, EditorProcessApi>(
@@ -94,6 +106,10 @@ const useSource = (props: UseSourceProps) => {
 			parentElementClassName: propsRef.current.parentElementClassName,
 			initialText: propsRef.current.initialText,
 			initialNoteId: propsRef.current.noteId,
+			initialSearch: {
+				...defaultSearchState,
+				searchText: propsRef.current.globalSearch,
+			},
 			settings: propsRef.current.settings,
 		};
 
@@ -101,6 +117,11 @@ const useSource = (props: UseSourceProps) => {
 			css: `
 				${shim.injectedCss('richTextEditorBundle')}
 				${rendererCss}
+
+				/* Increase the size of the editor to make it easier to focus the editor. */
+				.prosemirror-editor {
+					min-height: 75vh;
+				}
 			`,
 			js: `
 				${rendererJs}
@@ -109,7 +130,10 @@ const useSource = (props: UseSourceProps) => {
 					window.richTextEditorCreated = true;
 					${shim.injectedJs('richTextEditorBundle')}
 					richTextEditorBundle.setUpLogger();
-					void richTextEditorBundle.initialize(${JSON.stringify(editorOptions)});
+					richTextEditorBundle.initialize(${JSON.stringify(editorOptions)}).then(function(editor) {
+						/* For testing */
+						window.joplinRichTextEditor_ = editor;
+					});
 				}
 			`,
 		};

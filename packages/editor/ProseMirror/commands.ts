@@ -6,12 +6,20 @@ import { getEditorEventHandler } from './plugins/editorEventStatePlugin';
 import { EditorEventType } from '../events';
 import { Editor } from '@tiptap/core';
 import { findNext, findPrev, replaceAll, replaceNext } from 'prosemirror-search';
+import extractSelectedLinesTo from './utils/extractSelectedLinesTo';
+import jumpToHash from './utils/jumpToHash';
 
 
-type TipTapCommand = (editor: Editor)=> void;
+type TipTapCommand = (editor: Editor, args: string[])=> void;
 
 const toggleHeading = (level: 1|2|3|4|5|6): TipTapCommand => {
 	return (editor) => {
+		const { transaction } = extractSelectedLinesTo({
+			type: editor.schema.nodes.paragraph,
+			attrs: {},
+		}, editor.state.tr, editor.state.selection);
+		editor.view.dispatch(transaction);
+
 		return editor.commands.toggleHeading({ level });
 	};
 };
@@ -104,10 +112,14 @@ const commands: Record<EditorCommandType, TipTapCommand|null> = {
 	[EditorCommandType.UndoSelection]: null,
 	[EditorCommandType.RedoSelection]: null,
 	[EditorCommandType.SelectedText]: null,
-	[EditorCommandType.InsertText]: null,
+	[EditorCommandType.InsertText]: (editor, [text]) => {
+		editor.state.tr.insertText(text);
+	},
 	[EditorCommandType.ReplaceSelection]: null,
 	[EditorCommandType.SetText]: null,
-	[EditorCommandType.JumpToHash]: null,
+	[EditorCommandType.JumpToHash]: (editor, [targetHash]) => {
+		return jumpToHash(targetHash, editor.schema.nodes.heading)(editor.state, editor.view.dispatch, editor.view);
+	},
 };
 
 export default commands;

@@ -6,12 +6,10 @@ import { RefObject, useEffect, useMemo, useRef } from 'react';
 import { OnMessageEvent, WebViewControl } from '../../components/ExtendedWebView/types';
 import { EditorEvent } from '@joplin/editor/events';
 import Logger from '@joplin/utils/Logger';
-import { join } from 'path';
-import Setting from '@joplin/lib/models/Setting';
-import uuid from '@joplin/lib/uuid';
-import * as mimeUtils from '@joplin/lib/mime-utils';
-import { dirname } from '@joplin/utils/path';
 import RNToWebViewMessenger from '../../utils/ipc/RNToWebViewMessenger';
+import Resource from '@joplin/lib/models/Resource';
+import { parseResourceUrl } from '@joplin/lib/urlUtils';
+const { isImageMimeType } = require('@joplin/lib/resourceUtils');
 
 const logger = Logger.create('markdownEditor');
 
@@ -21,7 +19,7 @@ interface Props {
 	noteHash: string;
 	globalSearch: string;
 	onEditorEvent: (event: EditorEvent)=> void;
-	onAttachFile: (path: string)=> void;
+	onAttachFile: (mime: string, base64: string)=> void;
 
 	webviewRef: RefObject<WebViewControl>;
 }
@@ -54,22 +52,32 @@ const useWebViewSetup = ({
 
 	const injectedJavaScript = useMemo(() => `
 		if (!window.cm) {
-			${shim.injectedJs('markdownEditorBundle')};
-			markdownEditorBundle.setUpLogger();
+			const parentClassName = ${JSON.stringify(editorOptions.parentElementClassName)};
+			const foundParent = document.getElementsByClassName(parentClassName).length > 0;
 
-			window.cm = markdownEditorBundle.initializeEditor(
-				${JSON.stringify(editorOptions)}
-			);
+			// On Android, injectedJavaScript can be run multiple times, including once before the
+			// document has loaded. To avoid logging an error each time the editor starts, don't throw
+			// if the parent element can't be found:
+			if (foundParent) {
+				${shim.injectedJs('markdownEditorBundle')};
+				markdownEditorBundle.setUpLogger();
 
-			${jumpToHashJs}
-			// Set the initial selection after jumping to the header -- the initial selection,
-			// if specified, should take precedence.
-			${setInitialSelectionJs}
-			${setInitialSearchJs}
+				window.cm = markdownEditorBundle.initializeEditor(
+					${JSON.stringify(editorOptions)}
+				);
 
-			window.onresize = () => {
-				cm.execCommand('scrollSelectionIntoView');
-			};
+				${jumpToHashJs}
+				// Set the initial selection after jumping to the header -- the initial selection,
+				// if specified, should take precedence.
+				${setInitialSelectionJs}
+				${setInitialSearchJs}
+
+				window.onresize = () => {
+					cm.execCommand('scrollSelectionIntoView');
+				};
+			} else {
+				console.log('No parent element found with class name ', parentClassName);
+			}
 		}
 	`, [jumpToHashJs, setInitialSearchJs, setInitialSelectionJs, editorOptions]);
 
@@ -102,13 +110,23 @@ const useWebViewSetup = ({
 				logger.debug('CodeMirror:', message);
 			},
 			async onPasteFile(type, data) {
-				const tempFilePath = join(Setting.value('tempDir'), `paste.${uuid.createNano()}.${mimeUtils.toFileExtension(type)}`);
-				await shim.fsDriver().mkdir(dirname(tempFilePath));
-				try {
-					await shim.fsDriver().writeFile(tempFilePath, data, 'base64');
-					await onAttachRef.current(tempFilePath);
-				} finally {
-					await shim.fsDriver().remove(tempFilePath);
+				onAttachRef.current(type, data);
+			},
+			async onResolveImageSrc(src) {
+				const url = parseResourceUrl(src);
+				if (!url.itemId) return null;
+				const item = await Resource.load(url.itemId);
+
+				if (shim.mobilePlatform() === 'web') {
+					// Maximum 6 MiB on web
+					const maximumSize = 6 * 1024 * 1024;
+					if (isImageMimeType(item.mime) && item.size < maximumSize) {
+						const data = await shim.fsDriver().readFile(Resource.fullPath(item), 'base64');
+						return `data:${item.mime};base64,${data}`;
+					}
+					return null;
+				} else {
+					return Resource.fullPath(item);
 				}
 			},
 		};

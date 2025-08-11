@@ -1,4 +1,4 @@
-
+import '../../utils/polyfills';
 import { Editor, AbstractToolbar, EditorEventType, EditorSettings, getLocalizationTable, adjustEditorThemeForContrast, BaseWidget } from 'js-draw';
 import { MaterialIconProvider } from '@js-draw/material-icons';
 import 'js-draw/bundledStyles';
@@ -6,7 +6,6 @@ import applyTemplateToEditor from './applyTemplateToEditor';
 import watchEditorForTemplateChanges from './watchEditorForTemplateChanges';
 import { MainProcessApi, LocalizedStrings, EditorProcessApi } from './types';
 import startAutosaveLoop from './startAutosaveLoop';
-import './polyfills';
 import WebViewToRNMessenger from '../../../utils/ipc/WebViewToRNMessenger';
 
 

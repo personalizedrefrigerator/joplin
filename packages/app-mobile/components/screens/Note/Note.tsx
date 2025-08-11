@@ -72,6 +72,7 @@ import stateToWhenClauseContext from '../../../services/commands/stateToWhenClau
 import { defaultWindowId } from '@joplin/lib/reducer';
 import useVisiblePluginEditorViewIds from '@joplin/lib/hooks/plugins/useVisiblePluginEditorViewIds';
 import { SelectionRange } from '../../../contentScripts/markdownEditorBundle/types';
+import { EditorType } from '../../NoteEditor/types';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 const emptyArray: any[] = [];
@@ -638,6 +639,13 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 			});
 		}
 
+		if (prevState.mode !== this.state.mode) {
+			this.props.dispatch({
+				type: 'NOTE_EDITOR_VISIBLE_CHANGE',
+				visible: this.state.mode === 'edit' && !this.state.showCamera && !this.state.showImageEditor,
+			});
+		}
+
 		if (prevProps.noteId && this.props.noteId && prevProps.noteId !== this.props.noteId) {
 			// Easier to just go back, then go to the note since
 			// the Note screen doesn't handle reloading a different note
@@ -685,6 +693,11 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 
 		this.commandRegistration_?.deregister();
 		this.commandRegistration_ = null;
+
+		this.props.dispatch({
+			type: 'SET_NOTE_EDITOR_VISIBLE',
+			visible: false,
+		});
 	}
 
 	private title_changeText(text: string) {
@@ -910,7 +923,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 
 		resource = await Resource.save(resource, { isNew: true });
 
-		const resourceTag = Resource.markupTag(resource);
+		const resourceTag = Resource.markupTag(resource, this.state.note.markup_language);
 		const newNote = await this.insertText(resourceTag, { newLine: true });
 
 		void this.refreshResource(resource, newNote.body);
@@ -1030,9 +1043,9 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 	};
 
 	private toggleIsTodo_onPress() {
-		shared.toggleIsTodo_onPress(this);
+		const newNote = shared.toggleIsTodo_onPress(this);
 
-		this.scheduleSave(this.state);
+		this.scheduleSave({ ...this.state, note: newNote });
 	}
 
 	private async share_onPress() {
@@ -1228,10 +1241,11 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 		const isSaved = note && note.id;
 		const readOnly = this.state.readOnly;
 		const isDeleted = !!this.state.note.deleted_time;
+		const isCodeView = this.props.editorType === EditorType.Markdown;
 
 		const pluginCommands = pluginUtils.commandNamesFromViews(this.props.plugins, 'noteToolbar');
 
-		const cacheKey = md5([isTodo, isSaved, pluginCommands.join(','), readOnly, this.state.mode].join('_'));
+		const cacheKey = md5([isTodo, isSaved, pluginCommands.join(','), readOnly, this.state.mode, isCodeView].join('_'));
 		if (!this.menuOptionsCache_) this.menuOptionsCache_ = {};
 
 		if (this.menuOptionsCache_[cacheKey]) return this.menuOptionsCache_[cacheKey];
@@ -1349,10 +1363,11 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 		});
 
 		if (this.state.mode === 'edit') {
+			const newCodeView = !isCodeView;
 			output.push({
-				title: _('Toggle editors'),
+				title: newCodeView ? _('Edit as Markdown') : _('Edit as Rich Text'),
 				onPress: () => {
-					Setting.setValue('editor.codeView', !Setting.value('editor.codeView'));
+					Setting.setValue('editor.codeView', newCodeView);
 				},
 			});
 		}
@@ -1645,6 +1660,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 						noteHash={this.props.noteHash}
 						initialText={note.body}
 						initialSelection={this.selection}
+						markupLanguage={this.state.note.markup_language}
 						globalSearch={this.props.searchQuery}
 						onChange={this.onMarkdownEditorTextChange}
 						onSelectionChange={this.onMarkdownEditorSelectionChange}

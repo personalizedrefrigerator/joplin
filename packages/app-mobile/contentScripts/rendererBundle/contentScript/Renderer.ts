@@ -5,6 +5,7 @@ import addPluginAssets from './utils/addPluginAssets';
 import { ExtraContentScriptSource, ForwardedJoplinSettings, MarkupRecord } from '../types';
 import { ExtraContentScript } from '@joplin/lib/services/plugins/utils/loadContentScripts';
 import { PluginOptions } from '@joplin/renderer/MarkupToHtml';
+import afterFullPageRender from './utils/afterFullPageRender';
 
 export interface RendererSetupOptions {
 	settings: ForwardedJoplinSettings;
@@ -22,6 +23,7 @@ export interface RenderSettings {
 	initialScroll: number;
 	// If [null], plugin assets are not added to the document
 	pluginAssetContainerSelector: string|null;
+	removeUnusedPluginAssets: boolean;
 
 	splitted?: boolean; // Move CSS into a separate output
 	mapsToLine?: boolean; // Sourcemaps
@@ -44,9 +46,10 @@ export default class Renderer {
 	private lastBodyRenderSettings_: RenderSettings|null = null;
 	private extraContentScripts_: ExtraContentScript[] = [];
 	private lastBodyMarkup_: MarkupRecord|null = null;
+	private lastPluginSettingsCacheKey_: string|null = null;
 	private resourcePathOverrides_: Record<string, string> = Object.create(null);
 
-	public constructor(private output_: RendererOutput, private setupOptions_: RendererSetupOptions) {
+	public constructor(private setupOptions_: RendererSetupOptions) {
 		this.recreateMarkupToHtml_();
 	}
 
@@ -134,6 +137,12 @@ export default class Renderer {
 			whiteBackgroundNoteRendering: markup.language === MarkupLanguage.Html,
 		};
 
+		const pluginSettingsCacheKey = JSON.stringify(settings.pluginSettings);
+		if (pluginSettingsCacheKey !== this.lastPluginSettingsCacheKey_) {
+			this.lastPluginSettingsCacheKey_ = pluginSettingsCacheKey;
+			this.markupToHtml_.clearCache(markup.language);
+		}
+
 		const result = await this.markupToHtml_.render(
 			markup.language,
 			markup.markup,
@@ -148,6 +157,7 @@ export default class Renderer {
 					inlineAssets: this.setupOptions_.useTransferredFiles,
 					readAssetBlob: settings.readAssetBlob,
 					container: document.querySelector(settings.pluginAssetContainerSelector),
+					removeUnusedPluginAssets: settings.removeUnusedPluginAssets,
 				});
 
 				// Some plugins require this event to be dispatched just after being added.
@@ -162,7 +172,7 @@ export default class Renderer {
 		this.lastBodyMarkup_ = markup;
 		this.lastBodyRenderSettings_ = settings;
 
-		const contentContainer = this.output_.getOutputElement();
+		const contentContainer = document.getElementById('joplin-container-content') ?? document.body;
 
 		let html = '';
 		try {
@@ -185,7 +195,7 @@ export default class Renderer {
 			contentContainer.innerHTML = html;
 		}
 
-		this.output_.afterRender(this.setupOptions_, settings);
+		afterFullPageRender(this.setupOptions_, settings);
 	}
 
 	public clearCache(markupLanguage: MarkupLanguage) {

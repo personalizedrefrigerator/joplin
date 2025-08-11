@@ -187,6 +187,7 @@ fuzzer
 Freespinny
 BestEtf
 Etf
+currentcolor
 prosemirror
 gapcursor
 dropcursor
@@ -196,3 +197,4 @@ labelledby
 tiptap
 isTextblock
 deflt
+LOCALAPPDATA
