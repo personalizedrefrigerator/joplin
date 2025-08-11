@@ -2,8 +2,10 @@ import { rsa } from './ppk';
 import { PublicKeyAlgorithm } from '../types';
 import shim from '../../../shim';
 import Logger from '@joplin/utils/Logger';
+import PerformanceLogger from '../../../PerformanceLogger';
 
 const logger = Logger.create('ppkTestUtils');
+const perfLogger = PerformanceLogger.create();
 
 interface TestData {
 	algorithm: PublicKeyAlgorithm;
@@ -40,15 +42,16 @@ export async function printTestData() {
 interface CheckTestDataOptions {
 	throwOnError?: boolean;
 	silent?: boolean;
-	testLabel?: string;
+	testLabel: string;
 }
 
-export async function checkTestData(data: TestData, options: CheckTestDataOptions = null) {
+export async function checkTestData(data: TestData, options: CheckTestDataOptions) {
 	options = {
 		throwOnError: false,
 		silent: false,
 		...options,
 	};
+	const testLabel = `${options.testLabel}--${data.algorithm}`;
 
 	if (shim.mobilePlatform() === 'web' && data.algorithm === PublicKeyAlgorithm.RsaLegacy) {
 		logger.info('RSA Tests: Skipping test case -- RsaLegacy is not supported on web.');
@@ -60,9 +63,9 @@ export async function checkTestData(data: TestData, options: CheckTestDataOption
 	let hasError = false;
 
 	const algorithm = rsa().from(data.algorithm);
-	const keyPair = await algorithm.loadKeys(data.publicKey, data.privateKey, data.keySize);
+	const keyPair = await perfLogger.track(`ppkTestUtils/loadKeys/${testLabel}`, () => algorithm.loadKeys(data.publicKey, data.privateKey, data.keySize));
 	try {
-		const decrypted = await algorithm.decrypt(data.ciphertext, keyPair);
+		const decrypted = await perfLogger.track(`ppkTestUtils/decrypt.0/${testLabel}`, () => algorithm.decrypt(data.ciphertext, keyPair));
 		if (decrypted !== data.plaintext) {
 			messages.push('RSA Tests: Data could not be decrypted');
 			messages.push('RSA Tests: Expected:', data.plaintext);
@@ -80,8 +83,12 @@ export async function checkTestData(data: TestData, options: CheckTestDataOption
 	// decrypt it with the private key.
 
 	try {
-		const encrypted = await algorithm.encrypt('something else', keyPair);
-		const decrypted = await algorithm.decrypt(encrypted, keyPair);
+		const encrypted = await perfLogger.track(`ppkTestUtils/encrypt/${testLabel}`, () => {
+			return algorithm.encrypt('something else', keyPair);
+		});
+		const decrypted = await perfLogger.track(`ppkTestUtils/decrypt.1/${testLabel}`, () => {
+			return algorithm.decrypt(encrypted, keyPair);
+		});
 		if (decrypted !== 'something else') {
 			messages.push('RSA Tests: Data could not be encrypted, then decrypted');
 			messages.push('RSA Tests: Expected:', 'something else');
@@ -207,5 +214,5 @@ export const runIntegrationTests = async (silent = false) => {
 
 	log('RSA Tests: Decrypting and encrypting using local data...');
 	const newData = await createTestData();
-	await checkTestData(newData, { silent, throwOnError: true });
+	await checkTestData(newData, { silent, testLabel: 'local data', throwOnError: true });
 };
