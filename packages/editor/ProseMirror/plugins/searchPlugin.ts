@@ -33,14 +33,14 @@ const searchExtension = (onEditorEvent: (event: EditorEvent)=> void) => {
 
 	let lastState: SearchState|null = null;
 	const checkSearchStateChange = (state: EditorState) => {
-		const currentQuery = getSearchState(state).query;
+		const currentQuery = getSearchState(state)?.query;
 		const currentVisible = getSearchVisible(state);
 
 		const currentState: SearchState = {
-			useRegex: currentQuery.regexp,
-			caseSensitive: currentQuery.caseSensitive,
-			searchText: currentQuery.search,
-			replaceText: currentQuery.replace,
+			useRegex: currentQuery?.regexp,
+			caseSensitive: currentQuery?.caseSensitive,
+			searchText: currentQuery?.search,
+			replaceText: currentQuery?.replace,
 			dialogVisible: currentVisible,
 		};
 

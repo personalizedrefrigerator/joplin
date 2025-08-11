@@ -93,9 +93,12 @@ const createEditor = async (
 
 	const editor = new Editor({
 		element: parentElement,
-		extensions: wrapProseMirrorPlugins([
+		extensions: [
 			keymapPlugin,
 			joplinEditablePlugin,
+			wrapProseMirrorPlugins([
+				searchExtension,
+			]),
 			StarterKit,
 			TaskList,
 			TaskItem,
@@ -104,11 +107,12 @@ const createEditor = async (
 			HardBreak,
 			Link,
 			markupTracker,
-			searchExtension,
-			resourcePlaceholderPlugin,
-			linkTooltipPlugin,
-			joplinEditorApiPlugin,
-		].flat()),
+			wrapProseMirrorPlugins([
+				resourcePlaceholderPlugin,
+				linkTooltipPlugin,
+				joplinEditorApiPlugin,
+			]),
+		].flat(),
 		content: await renderInitialHtml(props.initialText),
 	});
 	editor.view.dispatch(

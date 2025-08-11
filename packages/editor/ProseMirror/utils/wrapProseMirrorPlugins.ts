@@ -1,39 +1,17 @@
 import { Extension } from '@tiptap/core';
-import { Plugin } from '@tiptap/pm/state';
+import { Plugin } from 'prosemirror-state';
 
-type PluginOrExtension = Plugin|Extension;
+type PluginOrPlugins = Plugin|Plugin[];
 
-
-const wrapProseMirrorPlugin = (plugin: Plugin) => (
-	Extension.create({
+const wrapProseMirrorPlugins = (plugins: PluginOrPlugins|PluginOrPlugins[]) => {
+	return Extension.create({
 		addProseMirrorPlugins: () => {
-			if (!(plugin instanceof Plugin)) {
-				throw new Error(`Not a plugin: ${plugin}`);
+			if (Array.isArray(plugins)) {
+				return plugins.flat();
 			}
-
-			if (Array.isArray(plugin)) {
-				return plugin;
-			}
-			return [plugin];
+			return [plugins];
 		},
-	})
-);
-
-const wrapProseMirrorPlugins = (plugins: Plugin|PluginOrExtension[]) => {
-	const result: Extension[] = [];
-	if (!Array.isArray(plugins)) {
-		return [wrapProseMirrorPlugin(plugins)];
-	}
-
-	for (const plugin of plugins) {
-		if (plugin instanceof Plugin) {
-			result.push(wrapProseMirrorPlugin(plugin));
-		} else {
-			result.push(plugin);
-		}
-	}
-
-	return result;
+	});
 };
 
 export default wrapProseMirrorPlugins;

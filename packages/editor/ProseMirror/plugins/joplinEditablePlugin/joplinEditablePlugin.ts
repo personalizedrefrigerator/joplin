@@ -8,6 +8,7 @@ import { msleep } from '@joplin/utils/time';
 import createTextNode from '../../utils/dom/createTextNode';
 import postProcessRenderedHtml from './postProcessRenderedHtml';
 import { NodeConfig, Node as TipTapNode } from '@tiptap/core';
+import wrapProseMirrorPlugins from '../../utils/wrapProseMirrorPlugins';
 
 // See the fold example for more information about
 // writing similar ProseMirror plugins:
@@ -177,14 +178,16 @@ class EditableSourceBlockView implements NodeView {
 }
 
 const joplinEditablePlugin = [
-	new Plugin({
-		props: {
-			nodeViews: {
-				joplinEditableInline: (node, view, getPos) => new EditableSourceBlockView(node, true, view, getPos),
-				joplinEditableBlock: (node, view, getPos) => new EditableSourceBlockView(node, false, view, getPos),
+	wrapProseMirrorPlugins(
+		new Plugin({
+			props: {
+				nodeViews: {
+					joplinEditableInline: (node, view, getPos) => new EditableSourceBlockView(node, true, view, getPos),
+					joplinEditableBlock: (node, view, getPos) => new EditableSourceBlockView(node, false, view, getPos),
+				},
 			},
-		},
-	}),
+		}),
+	),
 	TipTapNode.create({
 		...makeJoplinEditableSpec(true),
 	}),
