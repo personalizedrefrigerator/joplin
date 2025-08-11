@@ -1,5 +1,7 @@
 import { Editor } from '@tiptap/core';
-import StarterKit from '@tiptap/starter-kit';
+import DocumentNode from '@tiptap/extension-document';
+import TextNode from '@tiptap/extension-text';
+import { Focus, UndoRedo, Dropcursor, Gapcursor } from '@tiptap/extensions';
 import ImageKit from '@tiptap/extension-image';
 import { TableKit } from '@tiptap/extension-table';
 import { ContentScriptData, EditorCommandType, EditorControl, EditorProps, EditorSettings, SearchState, UpdateBodyOptions, UserEventSource } from '../types';
@@ -11,7 +13,7 @@ import computeSelectionFormatting from './utils/computeSelectionFormatting';
 import { defaultSelectionFormatting, selectionFormattingEqual } from '../SelectionFormatting';
 import originalMarkupPlugin from './plugins/originalMarkupPlugin';
 import preprocessEditorInput from './utils/preprocessEditorInput';
-import { TaskItem, TaskList } from '@tiptap/extension-list';
+import { BulletList, ListItem, OrderedList, TaskItem, TaskList } from '@tiptap/extension-list';
 import { TextSelection, Transaction } from '@tiptap/pm/state';
 import wrapProseMirrorPlugins from './utils/wrapProseMirrorPlugins';
 import joplinEditablePlugin from './plugins/joplinEditablePlugin/joplinEditablePlugin';
@@ -24,6 +26,16 @@ import resourcePlaceholderPlugin, { onResourceDownloaded } from './plugins/resou
 import HardBreak from '@tiptap/extension-hard-break';
 import keymapPlugin from './plugins/keymapPlugin';
 import searchPlugin from './plugins/searchPlugin';
+import getFileFromPasteEvent from '../utils/getFileFromPasteEvent';
+import Code from '@tiptap/extension-code';
+import Bold from '@tiptap/extension-bold';
+import Italic from '@tiptap/extension-italic';
+import SubScript from '@tiptap/extension-subscript';
+import SuperScript from '@tiptap/extension-superscript';
+import BlockQuote from '@tiptap/extension-blockquote';
+import Heading from '@tiptap/extension-heading';
+import Highlight from '@tiptap/extension-highlight';
+import Paragraph from '@tiptap/extension-paragraph';
 
 const createEditor = async (
 	parentElement: HTMLElement,
@@ -99,13 +111,32 @@ const createEditor = async (
 			wrapProseMirrorPlugins([
 				searchExtension,
 			]),
-			StarterKit,
+			DocumentNode,
+			TextNode,
+			Paragraph,
+			Focus,
+			UndoRedo,
+			Gapcursor,
+			Dropcursor,
+			Code.configure({
+				HTMLAttributes: { class: 'inline-code' },
+			}),
 			TaskList,
 			TaskItem,
+			BulletList,
+			OrderedList,
+			ListItem,
 			ImageKit.configure(),
 			TableKit,
 			HardBreak,
-			Link,
+			Bold,
+			Italic,
+			BlockQuote,
+			SubScript,
+			SuperScript,
+			Heading,
+			Highlight,
+			Link.configure({ openOnClick: false }),
 			markupTracker,
 			wrapProseMirrorPlugins([
 				resourcePlaceholderPlugin,
@@ -113,6 +144,23 @@ const createEditor = async (
 				joplinEditorApiPlugin,
 			]),
 		].flat(),
+		editorProps: {
+			attributes: {
+				'aria-label': settings.editorLabel,
+				class: 'prosemirror-editor',
+			},
+			handleDOMEvents: {
+				paste: (_view, event) => {
+					const fileToPaste = getFileFromPasteEvent(event);
+					if (fileToPaste) {
+						event.preventDefault();
+						void props.onPasteFile(fileToPaste);
+						return true;
+					}
+					return false;
+				},
+			},
+		},
 		content: await renderInitialHtml(props.initialText),
 	});
 	editor.view.dispatch(

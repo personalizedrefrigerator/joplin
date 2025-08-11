@@ -41,7 +41,7 @@ const extractSelectedLinesTo = (schema: Schema, extractTo: ExtractToOptions, tra
 	let toBreak: Node|null = null;
 
 	transaction.doc.nodesBetween(firstParagraphFrom, lastParagraphTo, (node, pos) => {
-		if (node.type === schema.nodes.hard_break) {
+		if (node.type === schema.nodes.hardBreak) {
 			if (pos + node.nodeSize <= selection.from && fromBreakPosition <= pos) {
 				fromBreakPosition = Math.max(fromBreakPosition, pos);
 				fromBreak = node;

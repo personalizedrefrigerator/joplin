@@ -11,17 +11,24 @@ import jumpToHash from './utils/jumpToHash';
 import canReplaceSelectionWith from './utils/canReplaceSelectionWith';
 import { getEditorApi } from './plugins/joplinEditorApiPlugin';
 
-
 type TipTapCommand = (editor: Editor, args?: string[])=> boolean;
+
+const extractCurrentLineToParagraph: TipTapCommand = editor => {
+	const extractResult = extractSelectedLinesTo(editor.schema, {
+		type: editor.schema.nodes.paragraph,
+		attrs: {},
+	}, editor.state.tr, editor.state.selection);
+	if (!extractResult) {
+		return false;
+	}
+
+	editor.view.dispatch(extractResult.transaction);
+	return true;
+};
 
 const toggleHeading = (level: 1|2|3|4|5|6): TipTapCommand => {
 	return (editor) => {
-		const { transaction } = extractSelectedLinesTo(editor.schema, {
-			type: editor.schema.nodes.paragraph,
-			attrs: {},
-		}, editor.state.tr, editor.state.selection);
-		editor.view.dispatch(transaction);
-
+		extractCurrentLineToParagraph(editor);
 		return editor.commands.toggleHeading({ level });
 	};
 };
@@ -68,9 +75,18 @@ const commands: Record<EditorCommandType, TipTapCommand|null> = {
 	[EditorCommandType.ToggleComment]: null,
 	[EditorCommandType.DuplicateLine]: null,
 	[EditorCommandType.SortSelectedLines]: null,
-	[EditorCommandType.ToggleNumberedList]: editor => editor.commands.toggleOrderedList(),
-	[EditorCommandType.ToggleBulletedList]: editor => editor.commands.toggleBulletList(),
-	[EditorCommandType.ToggleCheckList]: editor => editor.commands.toggleTaskList(),
+	[EditorCommandType.ToggleNumberedList]: editor => {
+		extractCurrentLineToParagraph(editor);
+		return editor.commands.toggleOrderedList();
+	},
+	[EditorCommandType.ToggleBulletedList]: editor => {
+		extractCurrentLineToParagraph(editor);
+		return editor.commands.toggleBulletList();
+	},
+	[EditorCommandType.ToggleCheckList]: editor => {
+		extractCurrentLineToParagraph(editor);
+		return editor.commands.toggleTaskList();
+	},
 	[EditorCommandType.ToggleHeading]: toggleHeading(2),
 	[EditorCommandType.ToggleHeading1]: toggleHeading(1),
 	[EditorCommandType.ToggleHeading2]: toggleHeading(2),

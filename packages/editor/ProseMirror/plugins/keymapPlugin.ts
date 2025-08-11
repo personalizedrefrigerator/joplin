@@ -19,7 +19,7 @@ const keymapExtension = Extension.create({
 			let foundHardBreak = false;
 			let hardBreakFrom = -1;
 			state.doc.nodesBetween(from - 1, to, (node, pos) => {
-				if (node.type === schema.nodes.hard_break) {
+				if (node.type === schema.nodes.hardBreak) {
 					foundHardBreak = true;
 					hardBreakFrom = pos;
 				}
@@ -69,10 +69,10 @@ const keymapExtension = Extension.create({
 			// starts with a hard break, it may incorrectly appear to the user that the cursor is at the
 			// start of a paragraph, leading to unexpected behavior related to input rules.
 			if (isInEmptyParagraph(state)) return false;
-			if (!canReplaceSelectionWith(state.selection, schema.nodes.hard_break)) return false;
+			if (!canReplaceSelectionWith(state.selection, schema.nodes.hardBreak)) return false;
 
 			if (dispatch) {
-				const hardBreak = schema.nodes.hard_break.create();
+				const hardBreak = schema.nodes.hardBreak.create();
 
 				// Default to inserting a hard break. See https://github.com/ProseMirror/prosemirror-example-setup/blob/8c11be6850604081dceda8f36e08d2426875e19a/src/keymap.ts#L77C26-L77C39
 				dispatch(

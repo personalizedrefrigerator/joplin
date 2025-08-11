@@ -9391,11 +9391,22 @@ __metadata:
     "@replit/codemirror-vim": "npm:6.2.1"
     "@testing-library/react-hooks": "npm:8.0.1"
     "@tiptap/core": "npm:3.1.0"
+    "@tiptap/extension-blockquote": "npm:3.1.0"
+    "@tiptap/extension-bold": "npm:3.1.0"
+    "@tiptap/extension-code": "npm:3.1.0"
+    "@tiptap/extension-document": "npm:3.1.0"
     "@tiptap/extension-hard-break": "npm:3.1.0"
+    "@tiptap/extension-heading": "npm:3.1.0"
+    "@tiptap/extension-highlight": "npm:3.1.0"
     "@tiptap/extension-image": "npm:3.1.0"
+    "@tiptap/extension-italic": "npm:3.1.0"
     "@tiptap/extension-link": "npm:3.1.0"
     "@tiptap/extension-list": "npm:3.1.0"
+    "@tiptap/extension-subscript": "npm:3.1.0"
+    "@tiptap/extension-superscript": "npm:3.1.0"
     "@tiptap/extension-table": "npm:3.1.0"
+    "@tiptap/extension-text": "npm:3.1.0"
+    "@tiptap/extensions": "npm:3.1.0"
     "@tiptap/pm": "npm:3.1.0"
     "@tiptap/starter-kit": "npm:3.1.0"
     "@types/jest": "npm:29.5.14"
@@ -13509,7 +13520,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tiptap/extension-blockquote@npm:^3.1.0":
+"@tiptap/extension-blockquote@npm:3.1.0, @tiptap/extension-blockquote@npm:^3.1.0":
   version: 3.1.0
   resolution: "@tiptap/extension-blockquote@npm:3.1.0"
   peerDependencies:
@@ -13518,7 +13529,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tiptap/extension-bold@npm:^3.1.0":
+"@tiptap/extension-bold@npm:3.1.0, @tiptap/extension-bold@npm:^3.1.0":
   version: 3.1.0
   resolution: "@tiptap/extension-bold@npm:3.1.0"
   peerDependencies:
@@ -13546,7 +13557,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tiptap/extension-code@npm:^3.1.0":
+"@tiptap/extension-code@npm:3.1.0, @tiptap/extension-code@npm:^3.1.0":
   version: 3.1.0
   resolution: "@tiptap/extension-code@npm:3.1.0"
   peerDependencies:
@@ -13555,7 +13566,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tiptap/extension-document@npm:^3.1.0":
+"@tiptap/extension-document@npm:3.1.0, @tiptap/extension-document@npm:^3.1.0":
   version: 3.1.0
   resolution: "@tiptap/extension-document@npm:3.1.0"
   peerDependencies:
@@ -13591,12 +13602,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tiptap/extension-heading@npm:^3.1.0":
+"@tiptap/extension-heading@npm:3.1.0, @tiptap/extension-heading@npm:^3.1.0":
   version: 3.1.0
   resolution: "@tiptap/extension-heading@npm:3.1.0"
   peerDependencies:
     "@tiptap/core": ^3.1.0
   checksum: 10/4966753ade2ecbf2bd6c5211226b553f5880830eee0f984cae9eb0c9fc211c36a224db77ea4f186d99b668c4ad6128832e09eb68f1e49f2ea497114ced074b3e
+  languageName: node
+  linkType: hard
+
+"@tiptap/extension-highlight@npm:3.1.0":
+  version: 3.1.0
+  resolution: "@tiptap/extension-highlight@npm:3.1.0"
+  peerDependencies:
+    "@tiptap/core": ^3.1.0
+  checksum: 10/9b442cb38df98b144bf86e7a660dc9586d4dc84fe5167ed1751777dee3ac16a1862d91407f7f4b5d98966d18ec396c2be24c79a616721eddec23179e159953c3
   languageName: node
   linkType: hard
 
@@ -13619,7 +13639,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tiptap/extension-italic@npm:^3.1.0":
+"@tiptap/extension-italic@npm:3.1.0, @tiptap/extension-italic@npm:^3.1.0":
   version: 3.1.0
   resolution: "@tiptap/extension-italic@npm:3.1.0"
   peerDependencies:
@@ -13695,6 +13715,26 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@tiptap/extension-subscript@npm:3.1.0":
+  version: 3.1.0
+  resolution: "@tiptap/extension-subscript@npm:3.1.0"
+  peerDependencies:
+    "@tiptap/core": ^3.1.0
+    "@tiptap/pm": ^3.1.0
+  checksum: 10/2225a22947a84dc9178e6e097f6767ec5455c9442cf4f39718c3435f26b5df7fbb4e9ae81d279d1ad8d7da8ef6a8ce8cdfb38db3d2875dd8140d203723434316
+  languageName: node
+  linkType: hard
+
+"@tiptap/extension-superscript@npm:3.1.0":
+  version: 3.1.0
+  resolution: "@tiptap/extension-superscript@npm:3.1.0"
+  peerDependencies:
+    "@tiptap/core": ^3.1.0
+    "@tiptap/pm": ^3.1.0
+  checksum: 10/c97a262a37ce5a0e108562ab1bc22d679fa5f2ce914d7f9dc413e6633b8626452194028710dedc750de9e47e7600d26cba5d4f49bd1416697e4fbab1bbace866
+  languageName: node
+  linkType: hard
+
 "@tiptap/extension-table@npm:3.1.0":
   version: 3.1.0
   resolution: "@tiptap/extension-table@npm:3.1.0"
@@ -13705,7 +13745,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tiptap/extension-text@npm:^3.1.0":
+"@tiptap/extension-text@npm:3.1.0, @tiptap/extension-text@npm:^3.1.0":
   version: 3.1.0
   resolution: "@tiptap/extension-text@npm:3.1.0"
   peerDependencies:
@@ -13723,7 +13763,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tiptap/extensions@npm:^3.1.0":
+"@tiptap/extensions@npm:3.1.0, @tiptap/extensions@npm:^3.1.0":
   version: 3.1.0
   resolution: "@tiptap/extensions@npm:3.1.0"
   peerDependencies:
