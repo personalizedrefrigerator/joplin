@@ -1095,7 +1095,6 @@ packages/editor/ProseMirror/plugins/listPlugin.js
 packages/editor/ProseMirror/plugins/originalMarkupPlugin.js
 packages/editor/ProseMirror/plugins/resourcePlaceholderPlugin.js
 packages/editor/ProseMirror/plugins/searchPlugin.js
-packages/editor/ProseMirror/plugins/tableOfContentsPlugin.js
 packages/editor/ProseMirror/schema.js
 packages/editor/ProseMirror/styles.js
 packages/editor/ProseMirror/testing/createTestEditor.js
