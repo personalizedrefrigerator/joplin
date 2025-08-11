@@ -68,6 +68,9 @@ export const createEditorWithParent = ({
 				allEditors = allEditors.filter(other => other !== control);
 			}
 		},
+		resolveImageSrc: (src) => {
+			return messenger.remoteApi.onResolveImageSrc(src);
+		},
 	});
 
 	allEditors.push(control);
@@ -81,9 +84,6 @@ export const createMainEditor = (props: EditorProps) => {
 		...props,
 		onEvent: (event) => {
 			void messenger.remoteApi.onEditorEvent(event);
-		},
-		resolveImageSrc: (src) => {
-			return messenger.remoteApi.onResolveImageSrc(src);
 		},
 	});
 
