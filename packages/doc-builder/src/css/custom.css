@@ -76,4 +76,8 @@ pre code {
 	.donate-links {
 		display: none;
 	}
+
+	.theme-edit-this-page {
+		display: none;
+	}
 }
