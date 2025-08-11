@@ -11,10 +11,6 @@ export interface PluginOptions {
 	[id: string]: { enabled: boolean };
 }
 
-export interface PluginOptions {
-	[id: string]: { enabled: boolean };
-}
-
 export interface Options {
 	isSafeMode?: boolean;
 	ResourceModel?: OptionsResourceModel;

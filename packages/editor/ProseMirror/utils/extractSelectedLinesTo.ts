@@ -1,6 +1,5 @@
-import { Attrs, NodeType, Node } from 'prosemirror-model';
+import { Attrs, NodeType, Node, Schema } from 'prosemirror-model';
 import { TextSelection, Transaction, Selection } from 'prosemirror-state';
-import schema from '../schema';
 import { canSplit } from 'prosemirror-transform';
 
 interface ExtractToOptions {
@@ -12,7 +11,7 @@ interface ExtractToOptions {
 // paragraphs that contain the selection.
 // This is useful, for example, to convert just the line that contains the cursor to a
 // block of some type, rather than the entire paragraph.
-const extractSelectedLinesTo = (extractTo: ExtractToOptions, transaction: Transaction, selection: Selection) => {
+const extractSelectedLinesTo = (schema: Schema, extractTo: ExtractToOptions, transaction: Transaction, selection: Selection) => {
 	let firstParagraphPos = -1;
 	let lastParagraphPos = -1;
 	let foundParagraph = false;

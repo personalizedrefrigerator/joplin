@@ -1,7 +1,6 @@
 
 import { EditorState, Plugin } from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';
-import schema from '../schema';
 import { getEditorApi } from './joplinEditorApiPlugin';
 import { EditorEventType } from '../../events';
 import { OnEventCallback } from '../../types';
@@ -51,7 +50,7 @@ class LinkTooltip {
 			return marks;
 		};
 
-		const linkMark = getMarksNearSelection().find(mark => mark.type === schema.marks.link);
+		const linkMark = getMarksNearSelection().find(mark => mark.type.name === 'link');
 		const show = state.selection.empty && linkMark;
 
 		if (!show) {
@@ -62,7 +61,7 @@ class LinkTooltip {
 			this.tooltipContent_.onclick = () => {
 				const href = linkMark.attrs.href;
 				if (href.startsWith('#')) {
-					const command = jumpToHash(href.substring(1), schema.nodes.heading);
+					const command = jumpToHash(href.substring(1));
 					command(view.state, view.dispatch, view);
 				} else {
 					this.onEditorEvent_({

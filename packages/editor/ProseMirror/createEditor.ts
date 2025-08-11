@@ -11,10 +11,9 @@ import computeSelectionFormatting from './utils/computeSelectionFormatting';
 import { defaultSelectionFormatting, selectionFormattingEqual } from '../SelectionFormatting';
 import originalMarkupPlugin from './plugins/originalMarkupPlugin';
 import preprocessEditorInput from './utils/preprocessEditorInput';
-import searchExtension from './plugins/searchExtension';
 import { TaskItem, TaskList } from '@tiptap/extension-list';
 import { TextSelection, Transaction } from '@tiptap/pm/state';
-import wrapProseMirrorPlugin from './utils/wrapProseMirrorPlugin';
+import wrapProseMirrorPlugins from './utils/wrapProseMirrorPlugins';
 import joplinEditablePlugin from './plugins/joplinEditablePlugin/joplinEditablePlugin';
 import Link from '@tiptap/extension-link';
 import { RendererControl } from './types';
@@ -22,6 +21,9 @@ import { RendererControl } from './types';
 import joplinEditorApiPlugin, { setEditorApi } from './plugins/joplinEditorApiPlugin';
 import linkTooltipPlugin from './plugins/linkTooltipPlugin';
 import resourcePlaceholderPlugin, { onResourceDownloaded } from './plugins/resourcePlaceholderPlugin';
+import HardBreak from '@tiptap/extension-hard-break';
+import keymapPlugin from './plugins/keymapPlugin';
+import searchPlugin from './plugins/searchPlugin';
 
 const createEditor = async (
 	parentElement: HTMLElement,
@@ -36,7 +38,7 @@ const createEditor = async (
 	parentElement.appendChild(cssContainer);
 
 	const { plugin: markupTracker, stateToMarkup } = originalMarkupPlugin(renderNodeToMarkup);
-	const { plugin: searchPlugin, updateState: updateSearchState } = searchExtension(props.onEvent);
+	const { plugin: searchExtension, updateState: updateSearchState } = searchPlugin(props.onEvent);
 
 	let settings = props.settings;
 	const renderAndPostprocessHtml = async (markup: string) => {
@@ -53,7 +55,7 @@ const createEditor = async (
 			dom,
 			getHtmlString: () => {
 				return new XMLSerializer().serializeToString(dom.body);
-			}
+			},
 		};
 	};
 	const updateGlobalCss = (renderResult: RenderResult) => {
@@ -91,20 +93,22 @@ const createEditor = async (
 
 	const editor = new Editor({
 		element: parentElement,
-		extensions: [
+		extensions: wrapProseMirrorPlugins([
+			keymapPlugin,
+			joplinEditablePlugin,
 			StarterKit,
 			TaskList,
 			TaskItem,
 			ImageKit.configure(),
 			TableKit,
+			HardBreak,
 			Link,
-			wrapProseMirrorPlugin(joplinEditablePlugin),
-			wrapProseMirrorPlugin(markupTracker),
-			wrapProseMirrorPlugin(searchPlugin),
-			wrapProseMirrorPlugin(resourcePlaceholderPlugin),
-			wrapProseMirrorPlugin(linkTooltipPlugin),
-			wrapProseMirrorPlugin(joplinEditorApiPlugin),
-		],
+			markupTracker,
+			searchExtension,
+			resourcePlaceholderPlugin,
+			linkTooltipPlugin,
+			joplinEditorApiPlugin,
+		].flat()),
 		content: await renderInitialHtml(props.initialText),
 	});
 	editor.view.dispatch(

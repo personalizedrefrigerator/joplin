@@ -1,5 +1,5 @@
 import { Plugin } from 'prosemirror-state';
-import { Node, NodeSpec } from 'prosemirror-model';
+import { Node } from 'prosemirror-model';
 import { EditorView, NodeView } from 'prosemirror-view';
 import sanitizeHtml from '../../utils/sanitizeHtml';
 import createEditorDialog from './createEditorDialog';
@@ -7,24 +7,26 @@ import { getEditorApi } from '../joplinEditorApiPlugin';
 import { msleep } from '@joplin/utils/time';
 import createTextNode from '../../utils/dom/createTextNode';
 import postProcessRenderedHtml from './postProcessRenderedHtml';
+import { NodeConfig, Node as TipTapNode } from '@tiptap/core';
 
 // See the fold example for more information about
 // writing similar ProseMirror plugins:
 // https://prosemirror.net/examples/fold/
 
 
-const makeJoplinEditableSpec = (inline: boolean): NodeSpec => ({
+const makeJoplinEditableSpec = (inline: boolean): NodeConfig => ({
+	name: `joplinEditable${inline ? 'Inline' : 'Block'}`,
 	group: inline ? 'inline' : 'block',
 	inline: inline,
 	draggable: true,
-	attrs: {
+	addAttributes: () => ({
 		contentHtml: { default: '', validate: 'string' },
 		source: { default: '', validate: 'string' },
 		language: { default: '', validate: 'string' },
 		openCharacters: { default: '', validate: 'string' },
 		closeCharacters: { default: '', validate: 'string' },
-	},
-	parseDOM: [
+	}),
+	parseHTML: () => [
 		{
 			tag: `${inline ? 'span' : 'div'}.joplin-editable`,
 			getAttrs: node => {
@@ -39,7 +41,7 @@ const makeJoplinEditableSpec = (inline: boolean): NodeSpec => ({
 			},
 		},
 	],
-	toDOM: node => {
+	renderHTML: ({ node, HTMLAttributes }) => {
 		const content = document.createElement(inline ? 'span' : 'div');
 		content.classList.add('joplin-editable');
 		content.innerHTML = sanitizeHtml(node.attrs.contentHtml);
@@ -49,6 +51,10 @@ const makeJoplinEditableSpec = (inline: boolean): NodeSpec => ({
 			sourceNode.textContent = node.attrs.source;
 			sourceNode.setAttribute('data-joplin-source-open', node.attrs.openCharacters);
 			sourceNode.setAttribute('data-joplin-source-close', node.attrs.closeCharacters);
+		}
+
+		for (const [key, value] of Object.entries(HTMLAttributes)) {
+			content.setAttribute(key, value);
 		}
 
 		return content;
@@ -170,13 +176,21 @@ class EditableSourceBlockView implements NodeView {
 	}
 }
 
-const joplinEditablePlugin = new Plugin({
-	props: {
-		nodeViews: {
-			joplinEditableInline: (node, view, getPos) => new EditableSourceBlockView(node, true, view, getPos),
-			joplinEditableBlock: (node, view, getPos) => new EditableSourceBlockView(node, false, view, getPos),
+const joplinEditablePlugin = [
+	new Plugin({
+		props: {
+			nodeViews: {
+				joplinEditableInline: (node, view, getPos) => new EditableSourceBlockView(node, true, view, getPos),
+				joplinEditableBlock: (node, view, getPos) => new EditableSourceBlockView(node, false, view, getPos),
+			},
 		},
-	},
-});
+	}),
+	TipTapNode.create({
+		...makeJoplinEditableSpec(true),
+	}),
+	TipTapNode.create({
+		...makeJoplinEditableSpec(false),
+	}),
+];
 
 export default joplinEditablePlugin;

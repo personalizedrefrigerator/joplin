@@ -5,7 +5,7 @@ import shim from '@joplin/lib/shim';
 import UndoRedoService from '@joplin/lib/services/UndoRedoService';
 import NoteBodyViewer from '../../NoteBodyViewer/NoteBodyViewer';
 import checkPermissions from '../../../utils/checkPermissions';
-import NoteEditor, { EditorType as EditorType } from '../../NoteEditor/NoteEditor';
+import NoteEditor from '../../NoteEditor/NoteEditor';
 import * as React from 'react';
 import { Keyboard, View, TextInput, StyleSheet, Linking, Share, NativeSyntheticEvent } from 'react-native';
 import { Platform, PermissionsAndroid } from 'react-native';

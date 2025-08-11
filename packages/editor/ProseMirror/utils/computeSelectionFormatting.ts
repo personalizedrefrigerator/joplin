@@ -1,12 +1,9 @@
-import { MarkType } from 'prosemirror-model';
-import { EditorState } from 'prosemirror-state';
+import { EditorState, Selection } from '@tiptap/pm/state';
+import { MarkType, Schema, Node } from '@tiptap/pm/model';
 import SelectionFormatting, { MutableSelectionFormatting, defaultSelectionFormatting } from '../../SelectionFormatting';
-import schema from '../schema';
 import { EditorSettings } from '../../types';
 
-const computeSelectionFormatting = (state: EditorState, settings: EditorSettings): SelectionFormatting => {
-	const doc = state.doc;
-	const selection = state.selection;
+const computeSelectionFormatting = (doc: Node, selection: Selection, state: EditorState, schema: Schema, settings: EditorSettings): SelectionFormatting => {
 	const formatting: MutableSelectionFormatting = {
 		...defaultSelectionFormatting,
 		selectedText: doc.textBetween(selection.from, selection.to),
@@ -63,8 +60,8 @@ const computeSelectionFormatting = (state: EditorState, settings: EditorSettings
 	if (formatting.inCode) {
 		formatting.unspellCheckableRegion = true;
 	}
-	formatting.italicized = hasMark(schema.marks.emphasis);
-	formatting.bolded = hasMark(schema.marks.strong);
+	formatting.italicized = hasMark(schema.marks.italic);
+	formatting.bolded = hasMark(schema.marks.bold);
 
 	if (formatting.unspellCheckableRegion) {
 		formatting.spellChecking = false;

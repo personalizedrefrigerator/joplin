@@ -9391,6 +9391,7 @@ __metadata:
     "@replit/codemirror-vim": "npm:6.2.1"
     "@testing-library/react-hooks": "npm:8.0.1"
     "@tiptap/core": "npm:3.1.0"
+    "@tiptap/extension-hard-break": "npm:3.1.0"
     "@tiptap/extension-image": "npm:3.1.0"
     "@tiptap/extension-link": "npm:3.1.0"
     "@tiptap/extension-list": "npm:3.1.0"
@@ -13581,7 +13582,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tiptap/extension-hard-break@npm:^3.1.0":
+"@tiptap/extension-hard-break@npm:3.1.0, @tiptap/extension-hard-break@npm:^3.1.0":
   version: 3.1.0
   resolution: "@tiptap/extension-hard-break@npm:3.1.0"
   peerDependencies:

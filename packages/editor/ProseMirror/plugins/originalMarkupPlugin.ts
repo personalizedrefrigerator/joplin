@@ -1,14 +1,14 @@
 import { EditorState, Plugin } from 'prosemirror-state';
-import { Node as ProseMirrorNode, DOMSerializer } from 'prosemirror-model';
+import { Node as ProseMirrorNode, DOMSerializer, Schema } from 'prosemirror-model';
 import { Decoration, DecorationSet } from 'prosemirror-view';
-import schema from '../schema';
 import changedDescendants from '../vendor/changedDescendants';
+import { Extension } from '@tiptap/core';
 
 const nonbreakingSpace = '\u00A0';
 
 // Creates a custom serializer that can preserve empty paragraphs.
 // See https://discuss.prosemirror.net/t/how-to-preserve-br-tags-in-empty-paragraphs/2051/8.
-const createSerializer = () => {
+const createSerializer = (schema: Schema) => {
 	const baseSerializer = DOMSerializer.fromSchema(schema);
 	return new DOMSerializer({
 		...baseSerializer.nodes,
@@ -58,7 +58,12 @@ const createSerializer = () => {
 };
 
 const originalMarkupPlugin = (htmlToMarkup: (html: Node)=> string) => {
-	const proseMirrorSerializer = createSerializer();
+	let schema: Schema;
+	let serializer_: DOMSerializer;
+	const proseMirrorSerializer = () => {
+		serializer_ ??= createSerializer(schema);
+		return serializer_;
+	};
 
 	const makeDecoration = (position: number, node: ProseMirrorNode, markup: string) => {
 		return Decoration.node(
@@ -79,8 +84,7 @@ const originalMarkupPlugin = (htmlToMarkup: (html: Node)=> string) => {
 			});
 
 			if (matchingDecorations.length === 0) {
-				const serialized = proseMirrorSerializer.serializeNode(node);
-				const markup = htmlToMarkup(serialized);
+				const markup = htmlToMarkup(proseMirrorSerializer().serializeNode(node));
 				decorations = decorations.add(doc, [makeDecoration(position, node, markup)]);
 			}
 
@@ -125,7 +129,12 @@ const originalMarkupPlugin = (htmlToMarkup: (html: Node)=> string) => {
 	});
 
 	return {
-		plugin,
+		plugin: Extension.create({
+			addProseMirrorPlugins() {
+				schema = this.editor.schema;
+				return [plugin];
+			},
+		}),
 		stateToMarkup: (state: EditorState) => {
 			const decorations = plugin.getState(state).find();
 			// Sort the decorations in increasing order -- the documentation does not guarantee

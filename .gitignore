@@ -1055,6 +1055,7 @@ packages/editor/ProseMirror/commands.test.js
 packages/editor/ProseMirror/commands.js
 packages/editor/ProseMirror/createEditor.js
 packages/editor/ProseMirror/index.js
+packages/editor/ProseMirror/plugins/editorEventStatePlugin.js
 packages/editor/ProseMirror/plugins/inputRulesPlugin.js
 packages/editor/ProseMirror/plugins/joplinEditablePlugin/createEditorDialog.js
 packages/editor/ProseMirror/plugins/joplinEditablePlugin/joplinEditablePlugin.test.js
@@ -1068,7 +1069,6 @@ packages/editor/ProseMirror/plugins/listPlugin.js
 packages/editor/ProseMirror/plugins/originalMarkupPlugin.js
 packages/editor/ProseMirror/plugins/resourcePlaceholderPlugin.js
 packages/editor/ProseMirror/plugins/searchPlugin.js
-packages/editor/ProseMirror/schema.js
 packages/editor/ProseMirror/styles.js
 packages/editor/ProseMirror/testing/createTestEditor.js
 packages/editor/ProseMirror/types.js
@@ -1085,6 +1085,7 @@ packages/editor/ProseMirror/utils/preprocessEditorInput.test.js
 packages/editor/ProseMirror/utils/preprocessEditorInput.js
 packages/editor/ProseMirror/utils/sanitizeHtml.js
 packages/editor/ProseMirror/utils/trimEmptyParagraphs.js
+packages/editor/ProseMirror/utils/wrapProseMirrorPlugins.js
 packages/editor/ProseMirror/vendor/changedDescendants.js
 packages/editor/ProseMirror/vendor/splitBlockAs.js
 packages/editor/SelectionFormatting.js

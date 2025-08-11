@@ -1,12 +1,11 @@
 import { Command, TextSelection } from 'prosemirror-state';
 import uslug from '@joplin/fork-uslug/lib/uslug';
-import { NodeType } from 'prosemirror-model';
 import { focus } from '@joplin/lib/utils/focusHandler';
 
-const jumpToHash = (targetHash: string, headingType: NodeType): Command => (state, dispatch, view) => {
+const jumpToHash = (targetHash: string): Command => (state, dispatch, view) => {
 	let targetHeaderPos: number|null = null;
 	state.doc.descendants((node, pos) => {
-		if (node.type === headingType) {
+		if (node.type.name === 'heading') {
 			const hash = uslug(node.textContent);
 			if (hash === targetHash) {
 				// Subtract one to move the selection to the end of

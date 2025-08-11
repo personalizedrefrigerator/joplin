@@ -1,20 +1,22 @@
 import { Command as ProseMirrorCommand, TextSelection } from '@tiptap/pm/state';
 import { EditorCommandType } from '../types';
 import { focus } from '@joplin/lib/utils/focusHandler';
-import { getSearchVisible, setSearchVisible } from './plugins/searchExtension';
+import { getSearchVisible, setSearchVisible } from './plugins/searchPlugin';
 import { getEditorEventHandler } from './plugins/editorEventStatePlugin';
 import { EditorEventType } from '../events';
 import { Editor } from '@tiptap/core';
 import { findNext, findPrev, replaceAll, replaceNext } from 'prosemirror-search';
 import extractSelectedLinesTo from './utils/extractSelectedLinesTo';
 import jumpToHash from './utils/jumpToHash';
+import canReplaceSelectionWith from './utils/canReplaceSelectionWith';
+import { getEditorApi } from './plugins/joplinEditorApiPlugin';
 
 
-type TipTapCommand = (editor: Editor, args: string[])=> void;
+type TipTapCommand = (editor: Editor, args?: string[])=> boolean;
 
 const toggleHeading = (level: 1|2|3|4|5|6): TipTapCommand => {
 	return (editor) => {
-		const { transaction } = extractSelectedLinesTo({
+		const { transaction } = extractSelectedLinesTo(editor.schema, {
 			type: editor.schema.nodes.paragraph,
 			attrs: {},
 		}, editor.state.tr, editor.state.selection);
@@ -36,11 +38,33 @@ const commands: Record<EditorCommandType, TipTapCommand|null> = {
 	[EditorCommandType.SelectAll]: editor => editor.commands.selectAll(),
 	[EditorCommandType.Focus]: (editor) => {
 		focus('commands::focus', editor.commands);
+		return true;
 	},
 	[EditorCommandType.ToggleBolded]: editor => editor.commands.toggleBold(),
 	[EditorCommandType.ToggleItalicized]: editor => editor.commands.toggleItalic(),
 	[EditorCommandType.ToggleCode]: editor => editor.commands.toggleCode(),
-	[EditorCommandType.ToggleMath]: null,
+	[EditorCommandType.ToggleMath]: editor => {
+		const state = editor.state;
+		const renderer = getEditorApi(state).renderer;
+		const selectedText = state.doc.textBetween(state.selection.from, state.selection.to);
+
+		const block = selectedText.includes('\n');
+		const nodeType = block ? editor.schema.nodes.joplinEditableBlock : editor.schema.nodes.joplinEditableInline;
+		if (canReplaceSelectionWith(state.selection, nodeType)) {
+			void (async () => {
+				const separator = block ? '$$' : '$';
+				const rendered = await renderer.renderMarkupToHtml(`${separator}${selectedText}${separator}`, {
+					forceMarkdown: true,
+					isFullPageRender: false,
+				});
+
+				editor.view.pasteHTML(rendered.html);
+			})();
+
+			return true;
+		}
+		return false;
+	},
 	[EditorCommandType.ToggleComment]: null,
 	[EditorCommandType.DuplicateLine]: null,
 	[EditorCommandType.SortSelectedLines]: null,
@@ -88,6 +112,7 @@ const commands: Record<EditorCommandType, TipTapCommand|null> = {
 		onEvent({
 			kind: EditorEventType.EditLink,
 		});
+		return true;
 	},
 	[EditorCommandType.ScrollSelectionIntoView]: null,
 	[EditorCommandType.DeleteLine]: null,
@@ -114,11 +139,12 @@ const commands: Record<EditorCommandType, TipTapCommand|null> = {
 	[EditorCommandType.SelectedText]: null,
 	[EditorCommandType.InsertText]: (editor, [text]) => {
 		editor.state.tr.insertText(text);
+		return true;
 	},
 	[EditorCommandType.ReplaceSelection]: null,
 	[EditorCommandType.SetText]: null,
 	[EditorCommandType.JumpToHash]: (editor, [targetHash]) => {
-		return jumpToHash(targetHash, editor.schema.nodes.heading)(editor.state, editor.view.dispatch, editor.view);
+		return jumpToHash(targetHash)(editor.state, editor.view.dispatch, editor.view);
 	},
 };
 
