@@ -8,6 +8,7 @@ import { EditorCommandType } from '../../types';
 import { Command, EditorState, TextSelection } from 'prosemirror-state';
 import splitBlockAs from '../vendor/splitBlockAs';
 import canReplaceSelectionWith from '../utils/canReplaceSelectionWith';
+import { Node } from 'prosemirror-model';
 
 const splitBlockAsDefault = splitBlockAs();
 const splitBlockAsParagraph = splitBlockAs(() => ({ type: schema.nodes.paragraph }));
@@ -45,19 +46,41 @@ const listItemTypes = [
 	schema.nodes.list_item, schema.nodes.task_list_item,
 ];
 
+const isEmpty = (node: Node) => {
+	if (node.content.size === 0) return true;
+	if (node.isBlock && node.children.length === 1 && node.children[0].type.name === 'text') {
+		return node.textContent === '';
+	}
+	return false;
+};
+
 const isInEmptyListItem = (state: EditorState) => {
 	const anchor = state.selection.$anchor;
 	const selectionGrandparent = anchor.node(Math.max(0, anchor.depth - 1));
 	const inList = listItemTypes.includes(selectionGrandparent?.type);
 
-	return inList && anchor.parent.content.size === 0;
+	return inList && isEmpty(anchor.parent);
 };
 
 const isInEmptyParagraph = (state: EditorState) => {
 	const selectionParent = state.selection.$anchor.parent;
 	return state.selection.empty &&
 		state.selection.$anchor.parent.type === schema.nodes.paragraph &&
-		selectionParent.content.size === 0;
+		isEmpty(selectionParent);
+};
+
+const addNewParagraphAfterEmptyParagraph: Command = (state, dispatch) => {
+	if (isInEmptyParagraph(state)) {
+		const transaction = splitBlockAsParagraph(state.selection, state.tr);
+		if (transaction) {
+			if (dispatch) {
+				dispatch(transaction);
+			}
+
+			return true;
+		}
+	}
+	return false;
 };
 
 const insertHardBreak: Command = (state, dispatch) => {
@@ -94,6 +117,7 @@ const keymapExtension = [
 			exitCode,
 			liftEmptyBlock,
 			convertDoubleHardBreakToNewParagraph,
+			addNewParagraphAfterEmptyParagraph,
 			insertHardBreak,
 		),
 	}),
