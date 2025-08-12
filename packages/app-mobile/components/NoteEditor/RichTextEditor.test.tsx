@@ -369,4 +369,20 @@ describe('RichTextEditor', () => {
 			expect(body.trim()).toBe('Test:\n\n$$\n3^2 + 4^2 = \\sqrt{625}\n$$\n\nTest. testing');
 		});
 	});
+
+	it('should save lists as single-spaced', async () => {
+		let body = 'Test:\n\n- this\n- is\n- a\n- test.';
+
+		render(<WrappedEditor
+			noteBody={body}
+			onBodyChange={newBody => { body = newBody; }}
+		/>);
+
+		const window = await getEditorWindow();
+		mockTyping(window, ' Testing');
+
+		await waitFor(async () => {
+			expect(body.trim()).toBe('Test:\n\n- this\n- is\n- a\n- test. Testing');
+		});
+	});
 });

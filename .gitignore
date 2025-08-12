@@ -1081,6 +1081,8 @@ packages/editor/ProseMirror/utils/dom/createUniqueId.js
 packages/editor/ProseMirror/utils/extractSelectedLinesTo.test.js
 packages/editor/ProseMirror/utils/extractSelectedLinesTo.js
 packages/editor/ProseMirror/utils/jumpToHash.js
+packages/editor/ProseMirror/utils/postprocessEditorOutput.test.js
+packages/editor/ProseMirror/utils/postprocessEditorOutput.js
 packages/editor/ProseMirror/utils/preprocessEditorInput.test.js
 packages/editor/ProseMirror/utils/preprocessEditorInput.js
 packages/editor/ProseMirror/utils/sanitizeHtml.js

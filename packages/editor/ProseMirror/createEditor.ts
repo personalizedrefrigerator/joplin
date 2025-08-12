@@ -25,6 +25,7 @@ import { RendererControl } from './types';
 import resourcePlaceholderPlugin, { onResourceDownloaded } from './plugins/resourcePlaceholderPlugin';
 import getFileFromPasteEvent from '../utils/getFileFromPasteEvent';
 import { RenderResult } from '../../renderer/types';
+import postprocessEditorOutput from './utils/postprocessEditorOutput';
 
 const createEditor = async (
 	parentElement: HTMLElement,
@@ -32,7 +33,9 @@ const createEditor = async (
 	renderer: RendererControl,
 ): Promise<EditorControl> => {
 	const renderNodeToMarkup = (node: Node|DocumentFragment) => {
-		return renderer.renderHtmlToMarkup(node);
+		return renderer.renderHtmlToMarkup(
+			postprocessEditorOutput(node),
+		);
 	};
 
 	const proseMirrorParser = ProseMirrorDomParser.fromSchema(schema);
