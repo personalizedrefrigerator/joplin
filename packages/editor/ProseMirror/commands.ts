@@ -153,8 +153,12 @@ const commands: Record<EditorCommandType, TipTapCommand|null> = {
 	}),
 	[EditorCommandType.DeleteToLineEnd]: null,
 	[EditorCommandType.DeleteToLineStart]: null,
-	[EditorCommandType.IndentMore]: editor => editor.commands.sinkListItem('listItem'),
-	[EditorCommandType.IndentLess]: editor => editor.commands.liftListItem('listItem'),
+	[EditorCommandType.IndentMore]: editor => {
+		return editor.commands.sinkListItem('listItem') || editor.commands.sinkListItem('taskItem');
+	},
+	[EditorCommandType.IndentLess]: editor => {
+		return editor.commands.liftListItem('listItem') || editor.commands.sinkListItem('taskItem');
+	},
 	[EditorCommandType.IndentAuto]: null,
 	[EditorCommandType.InsertNewlineAndIndent]: null,
 	[EditorCommandType.SwapLineUp]: null,

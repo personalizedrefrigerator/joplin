@@ -1,9 +1,8 @@
-import { buildInputRules } from 'prosemirror-example-setup';
-import schema from '../schema';
-import { MarkType, ResolvedPos } from 'prosemirror-model';
+import { MarkType, ResolvedPos, Schema } from 'prosemirror-model';
 import { EditorState, Plugin, Transaction } from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';
 import { closeHistory } from 'prosemirror-history';
+import { Extension } from '@tiptap/core';
 
 
 interface InlineInputRule {
@@ -110,7 +109,7 @@ const inlineInputRules = (rules: InlineInputRule[], commitCharacterExpression: R
 };
 
 const makeMarkInputRule = (
-	regExpString: string, matchEndCharacter: string, replacement: (matches: RegExpMatchArray)=> string, mark: MarkType,
+	schema: Schema, regExpString: string, matchEndCharacter: string, replacement: (matches: RegExpMatchArray)=> string, mark: MarkType,
 ): InlineInputRule => {
 	const commitCharacterExp = '[.?!,:;¡¿() \\n]';
 	const regex = new RegExp(`(^|${commitCharacterExp})${regExpString}$`);
@@ -147,30 +146,32 @@ const makeMarkInputRule = (
 	};
 };
 
-const baseInputRules = buildInputRules(schema);
 const inlineContentExp = '\\S[^\\n]*\\S|\\S';
-const inputRulesExtension = [
-	baseInputRules,
+const inputRulesPlugins = (schema: Schema) => [
 	inlineInputRules([
 		makeMarkInputRule(
+			schema,
 			`\\*\\*(${inlineContentExp})\\*\\*`,
 			'*',
 			(match) => match[1],
 			schema.marks.strong,
 		),
 		makeMarkInputRule(
+			schema,
 			`\\*(${inlineContentExp})\\*`,
 			'*',
 			(match) => match[1],
 			schema.marks.emphasis,
 		),
 		makeMarkInputRule(
+			schema,
 			`_(${inlineContentExp})_`,
 			'_',
 			(match) => match[1],
 			schema.marks.emphasis,
 		),
 		makeMarkInputRule(
+			schema,
 			`[\`](${inlineContentExp})[\`]`,
 			'`',
 			(match) => match[1],
@@ -178,4 +179,10 @@ const inputRulesExtension = [
 		),
 	], /[ .,?)!;]/),
 ];
-export default inputRulesExtension;
+export default Extension.create({
+	name: 'inputRules',
+	addProseMirrorPlugins() {
+		return inputRulesPlugins(this.editor.schema);
+	},
+});
+

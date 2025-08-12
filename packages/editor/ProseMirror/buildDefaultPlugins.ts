@@ -21,10 +21,12 @@ import Highlight from '@tiptap/extension-highlight';
 import Paragraph from '@tiptap/extension-paragraph';
 import listPlugin from './plugins/listPlugin';
 import { Node } from '@tiptap/core';
+import inputRulesPlugin from './plugins/inputRulesPlugin';
 
 const buildDefaultPlugins = () => {
 	const plugins = [
 		keymapPlugin,
+		inputRulesPlugin,
 		joplinEditablePlugin,
 		DocumentNode,
 		TextNode,
@@ -39,8 +41,13 @@ const buildDefaultPlugins = () => {
 		listPlugin,
 		Image.configure({
 			inline: true,
+			allowBase64: true,
 		}).extend({
 			addAttributes: () => ({
+				'src': {
+					default: null as string|null,
+					validate: 'string|null',
+				},
 				'title': {
 					default: null as string|null,
 					validate: 'string|null',
@@ -74,7 +81,13 @@ const buildDefaultPlugins = () => {
 		SuperScript,
 		Heading,
 		Highlight,
-		Link.configure({ openOnClick: false }),
+		Link.configure({
+			openOnClick: false,
+			protocols: ['joplin', 'http', 'https'],
+			isAllowedUri(url, ctx) {
+				return ctx.defaultValidate(url) || !!url.match(/^:\/[a-zA-Z]{32}$/);
+			},
+		}),
 		resourcePlaceholderPlugin,
 		linkTooltipPlugin,
 		joplinEditorApiPlugin,

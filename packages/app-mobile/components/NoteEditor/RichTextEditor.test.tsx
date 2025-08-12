@@ -313,7 +313,7 @@ describe('RichTextEditor', () => {
 			const editorContent = body.trim();
 			if (markupLanguage === MarkupLanguage.Html) {
 				expect(editorContent).toMatch(
-					new RegExp(`^<p><img [^>]*alt="${pregQuote(renderedImage.alt)}" [^>]*src=":/${pregQuote(resource.id)}"> test</p>$`),
+					new RegExp(`^<p><img src=":/${pregQuote(resource.id)}"[^>]*alt="${pregQuote(renderedImage.alt)}"[^>]*> test</p>$`),
 				);
 			} else {
 				expect(editorContent).toBe(`![${renderedImage.alt}](:/${resource.id}) test`);
