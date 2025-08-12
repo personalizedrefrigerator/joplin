@@ -2,7 +2,6 @@ import { Command as ProseMirrorCommand, TextSelection } from '@tiptap/pm/state';
 import { EditorCommandType } from '../types';
 import { focus } from '@joplin/lib/utils/focusHandler';
 import { getSearchVisible, setSearchVisible } from './plugins/searchPlugin';
-import { getEditorEventHandler } from './plugins/editorEventStatePlugin';
 import { EditorEventType } from '../events';
 import { Editor } from '@tiptap/core';
 import { findNext, findPrev, replaceAll, replaceNext } from 'prosemirror-search';
@@ -124,14 +123,34 @@ const commands: Record<EditorCommandType, TipTapCommand|null> = {
 			editor.view.dispatch(state.tr.setSelection(TextSelection.create(state.doc, linkFrom, linkTo)));
 		}
 
-		const onEvent = getEditorEventHandler(state);
+		const onEvent = getEditorApi(state).onEvent;
 		onEvent({
 			kind: EditorEventType.EditLink,
 		});
 		return true;
 	},
-	[EditorCommandType.ScrollSelectionIntoView]: null,
-	[EditorCommandType.DeleteLine]: null,
+	[EditorCommandType.ScrollSelectionIntoView]: toEditorCommand((state, dispatch) => {
+		if (dispatch) {
+			dispatch(state.tr.scrollIntoView());
+		}
+		return true;
+	}),
+	[EditorCommandType.DeleteLine]: toEditorCommand((state, dispatch) => {
+		const anchor = state.selection.$anchor;
+		const transaction = state.tr;
+		for (let i = anchor.depth; i > 0; i--) {
+			if (anchor.node(i).isBlock) {
+				const deleteFrom = anchor.before(i);
+				const deleteTo = anchor.after(i);
+				if (dispatch) {
+					dispatch(transaction.deleteRange(deleteFrom, deleteTo));
+				}
+				return true;
+			}
+		}
+
+		return false;
+	}),
 	[EditorCommandType.DeleteToLineEnd]: null,
 	[EditorCommandType.DeleteToLineStart]: null,
 	[EditorCommandType.IndentMore]: editor => editor.commands.sinkListItem('listItem'),

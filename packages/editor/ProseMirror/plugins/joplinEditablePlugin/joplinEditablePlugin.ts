@@ -8,7 +8,7 @@ import { msleep } from '@joplin/utils/time';
 import createTextNode from '../../utils/dom/createTextNode';
 import postProcessRenderedHtml from './postProcessRenderedHtml';
 import { NodeConfig, Node as TipTapNode } from '@tiptap/core';
-import wrapProseMirrorPlugins from '../../utils/wrapProseMirrorPlugins';
+import wrapProseMirrorPlugins from '../../utils/wrapProseMirrorPlugin';
 
 // See the fold example for more information about
 // writing similar ProseMirror plugins:

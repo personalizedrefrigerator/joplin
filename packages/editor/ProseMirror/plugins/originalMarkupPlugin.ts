@@ -57,7 +57,9 @@ const createSerializer = (schema: Schema) => {
 	}, baseSerializer.marks);
 };
 
-const originalMarkupPlugin = (htmlToMarkup: (html: Node)=> string) => {
+type HtmlToMarkup = (html: Node)=> string;
+
+const originalMarkupPlugin = (htmlToMarkup: HtmlToMarkup, nodeTypes: string[]) => {
 	let schema: Schema;
 	let serializer_: DOMSerializer;
 	const proseMirrorSerializer = () => {
@@ -130,9 +132,23 @@ const originalMarkupPlugin = (htmlToMarkup: (html: Node)=> string) => {
 
 	return {
 		plugin: Extension.create({
+			name: 'originalMarkupPlugin',
 			addProseMirrorPlugins() {
 				schema = this.editor.schema;
 				return [plugin];
+			},
+			addGlobalAttributes() {
+				return [{
+					types: nodeTypes,
+					attributes: {
+						originalMarkup: {
+							validate: 'string|null',
+							default: '',
+							parseHTML: element => element.getAttribute('data-original-markup'),
+							renderHTML: _attrs => ({}),
+						},
+					},
+				}];
 			},
 		}),
 		stateToMarkup: (state: EditorState) => {

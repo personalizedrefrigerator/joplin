@@ -5,6 +5,7 @@ import { getEditorApi } from './joplinEditorApiPlugin';
 import { EditorEventType } from '../../events';
 import { OnEventCallback } from '../../types';
 import jumpToHash from '../utils/jumpToHash';
+import wrapProseMirrorPlugin from '../utils/wrapProseMirrorPlugin';
 
 // This plugin is similar to https://prosemirror.net/examples/tooltip/
 
@@ -90,4 +91,4 @@ const linkTooltipPlugin = new Plugin({
 	view: view => new LinkTooltip(view),
 });
 
-export default linkTooltipPlugin;
+export default wrapProseMirrorPlugin(linkTooltipPlugin);

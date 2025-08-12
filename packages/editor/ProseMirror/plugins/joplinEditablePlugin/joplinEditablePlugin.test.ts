@@ -7,7 +7,10 @@ import { Second } from '@joplin/utils/time';
 
 const createEditor = (html: string) => {
 	return createTestEditor({
-		plugins: [joplinEditablePlugin, joplinEditorApiPlugin],
+		plugins: [
+			joplinEditablePlugin,
+			joplinEditorApiPlugin,
+		],
 		html,
 	});
 };
@@ -47,13 +50,13 @@ describe('joplinEditablePlugin', () => {
 		'<p>Test: <mark><span class="joplin-editable"><pre class="joplin-source">test</pre>rendered</span></mark></p>',
 	])('should show an edit button on source blocks (case %#)', (htmlSource) => {
 		const editor = createEditor(htmlSource);
-		const editButton = findEditButton(editor.dom);
+		const editButton = findEditButton(editor.view.dom);
 		expect(editButton.textContent).toBe('Edit');
 	});
 
 	test('clicking the edit button should show an editor dialog', () => {
 		const editor = createEditor('<span class="joplin-editable"><pre class="joplin-source">test source</pre>rendered</span>');
-		const editButton = findEditButton(editor.dom);
+		const editButton = findEditButton(editor.view.dom);
 		editButton.click();
 
 		// Should show the dialog
@@ -66,7 +69,7 @@ describe('joplinEditablePlugin', () => {
 		const editor = createEditor('<div class="joplin-editable"><pre class="joplin-source">test source</pre>rendered</div>');
 
 		// Mock render functions:
-		editor.dispatch(setEditorApi(editor.state.tr, {
+		editor.view.dispatch(setEditorApi(editor.state.tr, {
 			...getEditorApi(editor.state),
 			renderer: {
 				renderMarkupToHtml: jest.fn(async source => ({
@@ -76,7 +79,7 @@ describe('joplinEditablePlugin', () => {
 			},
 		}));
 
-		const editButton = findEditButton(editor.dom);
+		const editButton = findEditButton(editor.view.dom);
 		editButton.click();
 
 		const dialog = findEditorDialog();
@@ -95,7 +98,7 @@ describe('joplinEditablePlugin', () => {
 
 		// Should render and update the display within a short amount of time
 		await jest.advanceTimersByTimeAsync(Second);
-		const renderedEditable = editor.dom.querySelector('.joplin-editable');
+		const renderedEditable = editor.view.dom.querySelector('.joplin-editable');
 		// Should render the updated content
 		expect(renderedEditable.querySelector('.test-content').innerHTML).toBe('Mocked!');
 	});

@@ -204,7 +204,7 @@ describe('RichTextEditor', () => {
 		};
 
 		// Should have the correct labels
-		expect(firstCheckbox.getAttribute('aria-labelledby')).toBeTruthy();
+		expect(firstCheckbox.getAttribute('aria-label')).toBeTruthy();
 		expect(getCheckboxLabel(firstCheckbox).textContent).toBe('Test');
 
 		// Should be correctly checked/unchecked
@@ -313,7 +313,7 @@ describe('RichTextEditor', () => {
 			const editorContent = body.trim();
 			if (markupLanguage === MarkupLanguage.Html) {
 				expect(editorContent).toMatch(
-					new RegExp(`^<p><img src=":/${pregQuote(resource.id)}" alt="${pregQuote(renderedImage.alt)}"[^>]*> test</p>$`),
+					new RegExp(`^<p><img [^>]*alt="${pregQuote(renderedImage.alt)}" [^>]*src=":/${pregQuote(resource.id)}"> test</p>$`),
 				);
 			} else {
 				expect(editorContent).toBe(`![${renderedImage.alt}](:/${resource.id}) test`);

@@ -1,7 +1,9 @@
 import { Plugin } from 'prosemirror-state';
-import { AttributeSpec, Node, NodeSpec } from 'prosemirror-model';
+import { AttributeSpec, Node } from 'prosemirror-model';
 import { Decoration, DecorationSet, EditorView, NodeView } from 'prosemirror-view';
 import changedDescendants from '../vendor/changedDescendants';
+import wrapProseMirrorPlugin from '../utils/wrapProseMirrorPlugin';
+import { NodeConfig, Node as TipTapNode } from '@tiptap/core';
 
 // See the fold example for more information about
 // writing similar ProseMirror plugins:
@@ -28,11 +30,12 @@ const attrsSpec = {
 	notDownloaded: { validate: 'boolean' },
 } satisfies Record<keyof NodeAttrs, AttributeSpec>;
 
-const placeholderSpec: NodeSpec = {
+const placeholderSpec: NodeConfig = {
+	name: 'resourcePlaceholder',
 	group: 'inline',
 	inline: true,
-	attrs: attrsSpec,
-	parseDOM: [
+	addAttributes: () => attrsSpec,
+	parseHTML: () => [
 		{
 			tag: 'span[data-resource-id].not-loaded-resource',
 			getAttrs: (node): NodeAttrs => {
@@ -48,7 +51,7 @@ const placeholderSpec: NodeSpec = {
 			},
 		},
 	],
-	toDOM: (node) => [
+	renderHTML: ({ node }) => [
 		'span',
 		{
 			'data-resource-id': node.attrs.itemId,
@@ -135,7 +138,7 @@ export const onResourceDownloaded = (view: EditorView, resourceId: string, newSr
 		newSrc,
 	};
 	view.dispatch(
-		view.state.tr.setMeta(resourcePlaceholderPlugin, meta),
+		view.state.tr.setMeta(resourcePlaceholderProseMirrorPlugin, meta),
 	);
 };
 
@@ -144,7 +147,7 @@ interface PluginState {
 	idToSrc: Record<string, string>;
 }
 
-const resourcePlaceholderPlugin: Plugin<PluginState> = new Plugin({
+const resourcePlaceholderProseMirrorPlugin: Plugin<PluginState> = new Plugin({
 	state: {
 		init: (): PluginState => ({
 			decorations: DecorationSet.empty,
@@ -155,7 +158,7 @@ const resourcePlaceholderPlugin: Plugin<PluginState> = new Plugin({
 			let idToSrc = oldValue.idToSrc;
 
 			const tryAddDecoration = (node: Node, pos: number) => {
-				if (node.type.spec === placeholderSpec && decorations.find(pos, pos + node.nodeSize).length === 0) {
+				if (node.type.name === placeholderSpec.name && decorations.find(pos, pos + node.nodeSize).length === 0) {
 					const attrs = node.attrs as NodeAttrs;
 					const itemId = attrs.itemId;
 
@@ -172,7 +175,7 @@ const resourcePlaceholderPlugin: Plugin<PluginState> = new Plugin({
 				}
 			};
 
-			const meta: PluginMeta|undefined = tr.getMeta(resourcePlaceholderPlugin);
+			const meta: PluginMeta|undefined = tr.getMeta(resourcePlaceholderProseMirrorPlugin);
 			if (meta) {
 				const { resourceId, newSrc } = meta;
 				if (!resourceId || !newSrc) {
@@ -207,5 +210,13 @@ const resourcePlaceholderPlugin: Plugin<PluginState> = new Plugin({
 		},
 	},
 });
+
+const resourcePlaceholderPlugin = [
+	wrapProseMirrorPlugin(resourcePlaceholderProseMirrorPlugin),
+
+	TipTapNode.create({
+		...placeholderSpec,
+	}),
+];
 
 export default resourcePlaceholderPlugin;

@@ -1,9 +1,4 @@
 import { Editor } from '@tiptap/core';
-import DocumentNode from '@tiptap/extension-document';
-import TextNode from '@tiptap/extension-text';
-import { Focus, UndoRedo, Dropcursor, Gapcursor } from '@tiptap/extensions';
-import ImageKit from '@tiptap/extension-image';
-import { TableKit } from '@tiptap/extension-table';
 import { ContentScriptData, EditorCommandType, EditorControl, EditorProps, EditorSettings, SearchState, UpdateBodyOptions, UserEventSource } from '../types';
 import commands from './commands';
 import { EditorEventType } from '../events';
@@ -13,29 +8,15 @@ import computeSelectionFormatting from './utils/computeSelectionFormatting';
 import { defaultSelectionFormatting, selectionFormattingEqual } from '../SelectionFormatting';
 import originalMarkupPlugin from './plugins/originalMarkupPlugin';
 import preprocessEditorInput from './utils/preprocessEditorInput';
-import { BulletList, ListItem, OrderedList, TaskItem, TaskList } from '@tiptap/extension-list';
 import { TextSelection, Transaction } from '@tiptap/pm/state';
-import wrapProseMirrorPlugins from './utils/wrapProseMirrorPlugins';
-import joplinEditablePlugin from './plugins/joplinEditablePlugin/joplinEditablePlugin';
-import Link from '@tiptap/extension-link';
+import wrapProseMirrorPlugins from './utils/wrapProseMirrorPlugin';
 import { RendererControl } from './types';
 
-import joplinEditorApiPlugin, { setEditorApi } from './plugins/joplinEditorApiPlugin';
-import linkTooltipPlugin from './plugins/linkTooltipPlugin';
-import resourcePlaceholderPlugin, { onResourceDownloaded } from './plugins/resourcePlaceholderPlugin';
-import HardBreak from '@tiptap/extension-hard-break';
-import keymapPlugin from './plugins/keymapPlugin';
+import { setEditorApi } from './plugins/joplinEditorApiPlugin';
+import { onResourceDownloaded } from './plugins/resourcePlaceholderPlugin';
 import searchPlugin from './plugins/searchPlugin';
 import getFileFromPasteEvent from '../utils/getFileFromPasteEvent';
-import Code from '@tiptap/extension-code';
-import Bold from '@tiptap/extension-bold';
-import Italic from '@tiptap/extension-italic';
-import SubScript from '@tiptap/extension-subscript';
-import SuperScript from '@tiptap/extension-superscript';
-import BlockQuote from '@tiptap/extension-blockquote';
-import Heading from '@tiptap/extension-heading';
-import Highlight from '@tiptap/extension-highlight';
-import Paragraph from '@tiptap/extension-paragraph';
+import buildDefaultPlugins from './buildDefaultPlugins';
 
 const createEditor = async (
 	parentElement: HTMLElement,
@@ -49,7 +30,8 @@ const createEditor = async (
 	const cssContainer = document.createElement('style');
 	parentElement.appendChild(cssContainer);
 
-	const { plugin: markupTracker, stateToMarkup } = originalMarkupPlugin(renderNodeToMarkup);
+	const defaultPlugins = buildDefaultPlugins();
+	const { plugin: markupTracker, stateToMarkup } = originalMarkupPlugin(renderNodeToMarkup, defaultPlugins.nodeTypes);
 	const { plugin: searchExtension, updateState: updateSearchState } = searchPlugin(props.onEvent);
 
 	let settings = props.settings;
@@ -106,43 +88,11 @@ const createEditor = async (
 	const editor = new Editor({
 		element: parentElement,
 		extensions: [
-			keymapPlugin,
-			joplinEditablePlugin,
 			wrapProseMirrorPlugins([
 				searchExtension,
 			]),
-			DocumentNode,
-			TextNode,
-			Paragraph,
-			Focus,
-			UndoRedo,
-			Gapcursor,
-			Dropcursor,
-			Code.configure({
-				HTMLAttributes: { class: 'inline-code' },
-			}),
-			TaskList,
-			TaskItem,
-			BulletList,
-			OrderedList,
-			ListItem,
-			ImageKit.configure(),
-			TableKit,
-			HardBreak,
-			Bold,
-			Italic,
-			BlockQuote,
-			SubScript,
-			SuperScript,
-			Heading,
-			Highlight,
-			Link.configure({ openOnClick: false }),
 			markupTracker,
-			wrapProseMirrorPlugins([
-				resourcePlaceholderPlugin,
-				linkTooltipPlugin,
-				joplinEditorApiPlugin,
-			]),
+			...defaultPlugins.plugins,
 		].flat(),
 		editorProps: {
 			attributes: {
@@ -201,8 +151,9 @@ const createEditor = async (
 			// TODO: Handle this in a better way?
 			document.scrollingElement.scrollTop = fraction * document.scrollingElement.scrollHeight;
 		},
-		insertText: (text: string, _source?: UserEventSource) => {
-			editor.commands.insertContent(text);
+		insertText: async (text: string, _source?: UserEventSource) => {
+			const { dom } = await renderAndPostprocessHtml(text);
+			editor.view.pasteHTML(new XMLSerializer().serializeToString(dom));
 		},
 		updateBody: async (newBody: string, _updateBodyOptions?: UpdateBodyOptions) => {
 			editor.commands.selectAll();

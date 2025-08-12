@@ -1,6 +1,7 @@
 import { EditorState, Plugin, Transaction } from 'prosemirror-state';
 import { OnEventCallback, OnLocalize } from '../../types';
 import { RendererControl } from '../types';
+import wrapProseMirrorPlugin from '../utils/wrapProseMirrorPlugin';
 
 export interface EditorApi {
 	renderer: RendererControl;
@@ -43,4 +44,4 @@ const joplinEditorApiPlugin = new Plugin<EditorApi>({
 	},
 });
 
-export default joplinEditorApiPlugin;
+export default wrapProseMirrorPlugin(joplinEditorApiPlugin);

@@ -1078,11 +1078,11 @@ packages/editor/CodeMirror/utils/markdown/renumberSelectedLists.test.js
 packages/editor/CodeMirror/utils/markdown/renumberSelectedLists.js
 packages/editor/CodeMirror/utils/markdown/stripBlockquote.js
 packages/editor/CodeMirror/utils/setupVim.js
+packages/editor/ProseMirror/buildDefaultPlugins.js
 packages/editor/ProseMirror/commands.test.js
 packages/editor/ProseMirror/commands.js
 packages/editor/ProseMirror/createEditor.js
 packages/editor/ProseMirror/index.js
-packages/editor/ProseMirror/plugins/editorEventStatePlugin.js
 packages/editor/ProseMirror/plugins/inputRulesPlugin.js
 packages/editor/ProseMirror/plugins/joplinEditablePlugin/createEditorDialog.js
 packages/editor/ProseMirror/plugins/joplinEditablePlugin/joplinEditablePlugin.test.js
@@ -1112,7 +1112,7 @@ packages/editor/ProseMirror/utils/preprocessEditorInput.test.js
 packages/editor/ProseMirror/utils/preprocessEditorInput.js
 packages/editor/ProseMirror/utils/sanitizeHtml.js
 packages/editor/ProseMirror/utils/trimEmptyParagraphs.js
-packages/editor/ProseMirror/utils/wrapProseMirrorPlugins.js
+packages/editor/ProseMirror/utils/wrapProseMirrorPlugin.js
 packages/editor/ProseMirror/vendor/changedDescendants.js
 packages/editor/ProseMirror/vendor/splitBlockAs.js
 packages/editor/SelectionFormatting.js

@@ -1,10 +1,10 @@
-import { EditorView } from 'prosemirror-view';
 import { EditorCommandType } from '../types';
 import commands from './commands';
 import createTestEditor from './testing/createTestEditor';
+import { Editor } from '@tiptap/core';
 
-const selectAll = (editor: EditorView) => {
-	commands[EditorCommandType.SelectAll](editor.state, editor.dispatch, editor);
+const selectAll = (editor: Editor) => {
+	commands[EditorCommandType.SelectAll](editor, []);
 };
 
 describe('ProseMirror/commands', () => {
@@ -12,14 +12,14 @@ describe('ProseMirror/commands', () => {
 		const editor = createTestEditor({ html: '<p>Test</p>' });
 
 		selectAll(editor);
-		commands[EditorCommandType.ToggleBolded](editor.state, editor.dispatch, editor);
+		commands[EditorCommandType.ToggleBolded](editor);
 
 		expect(editor.state.doc.toJSON()).toMatchObject({
 			content: [{
 				type: 'paragraph',
 				content: [{
 					marks: [
-						{ type: 'strong' },
+						{ type: 'bold' },
 					],
 					text: 'Test',
 				}],
@@ -31,7 +31,7 @@ describe('ProseMirror/commands', () => {
 		const editor = createTestEditor({ html: '<p>Test</p><p>Test 2</p>' });
 
 		selectAll(editor);
-		commands[EditorCommandType.ToggleHeading](editor.state, editor.dispatch, editor);
+		commands[EditorCommandType.ToggleHeading](editor);
 
 		expect(editor.state.doc.toJSON()).toMatchObject({
 			content: [{
@@ -47,7 +47,7 @@ describe('ProseMirror/commands', () => {
 			}],
 		});
 
-		commands[EditorCommandType.ToggleHeading](editor.state, editor.dispatch, editor);
+		commands[EditorCommandType.ToggleHeading](editor);
 
 		expect(editor.state.doc.toJSON()).toMatchObject({
 			content: [{
@@ -68,7 +68,7 @@ describe('ProseMirror/commands', () => {
 		const editor = createTestEditor({ html: '<h1>Test heading 1</h1><p>Test 2</p><h2>Test heading 2</h2><p>Test 3</p>' });
 
 		const jumpToHash = (hash: string) => {
-			return commands[EditorCommandType.JumpToHash](editor.state, editor.dispatch, editor, [hash]);
+			return commands[EditorCommandType.JumpToHash](editor, [hash]);
 		};
 
 		expect(jumpToHash('test-heading-1')).toBe(true);

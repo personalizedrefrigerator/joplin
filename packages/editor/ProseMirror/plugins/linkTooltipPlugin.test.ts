@@ -1,15 +1,14 @@
-import { TextSelection } from 'prosemirror-state';
 import createTestEditor from '../testing/createTestEditor';
 import joplinEditorApiPlugin from './joplinEditorApiPlugin';
 import linkTooltipPlugin from './linkTooltipPlugin';
-import { EditorView } from 'prosemirror-view';
+import { Editor } from '@tiptap/core';
 
 const getTooltip = () => {
 	return document.querySelector('.link-tooltip:not(.-hidden)');
 };
 
 
-let editor: EditorView;
+let editor: Editor;
 
 describe('linkTooltipPlugin', () => {
 	beforeEach(() => {
@@ -28,22 +27,16 @@ describe('linkTooltipPlugin', () => {
 	});
 
 	test('should show a link tooltip when the cursor is in a link', () => {
+		editor.commands.setTextSelection(editor.state.doc.nodeSize);
 		expect(getTooltip()).toBeFalsy();
 
-		editor.dispatch(
-			editor.state.tr.setSelection(TextSelection.create(editor.state.tr.doc, 3)),
-		);
+		editor.commands.setTextSelection(3);
 
 		expect(getTooltip()).toBeTruthy();
 	});
 
 	test('clicking on a hash link should move the cursor to the corresponding header', () => {
-		editor.dispatch(
-			editor.state.tr.setSelection(
-				TextSelection.create(editor.state.tr.doc, 3),
-			),
-		);
-
+		editor.commands.setTextSelection(3);
 		getTooltip().querySelector('button').click();
 
 		expect(editor.state.selection.$to.parent.textContent).toBe('Test heading');
