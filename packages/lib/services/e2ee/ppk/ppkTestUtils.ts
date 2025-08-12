@@ -18,16 +18,19 @@ interface TestData {
 
 // This is convenient to quickly generate some data to verify for example that
 // react-native-rsa can decrypt data from node-rsa and vice-versa.
-export async function createTestData() {
+export async function createTestData(ppkAlgorithm: PublicKeyAlgorithm) {
 	const plaintext = 'ff00aa31bcf009a7cc';
-	const algorithm = rsa().from(PublicKeyAlgorithm.RsaV2);
-	const { keyPair, keySize } = await algorithm.generateKeyPair();
-	const ciphertext = await algorithm.encrypt(plaintext, keyPair);
+	const implementation = rsa().from(ppkAlgorithm);
+	const { keyPair, keySize } = await perfLogger.track(
+		`ppkTestUtils/generateKeyPair--${ppkAlgorithm}`,
+		() => implementation.generateKeyPair(),
+	);
+	const ciphertext = await implementation.encrypt(plaintext, keyPair);
 
 	return {
-		publicKey: await algorithm.publicKey(keyPair),
-		privateKey: await algorithm.privateKey(keyPair),
-		algorithm: PublicKeyAlgorithm.RsaV2,
+		publicKey: await implementation.publicKey(keyPair),
+		privateKey: await implementation.privateKey(keyPair),
+		algorithm: ppkAlgorithm,
 		keySize,
 		plaintext,
 		ciphertext,
@@ -36,8 +39,12 @@ export async function createTestData() {
 
 export async function printTestData() {
 	// eslint-disable-next-line no-console
-	console.info(JSON.stringify(await createTestData(), null, '\t'));
+	console.info(JSON.stringify(await createTestData(PublicKeyAlgorithm.RsaV2), null, '\t'));
 }
+
+const shouldSkipTest = (testAlgorithm: PublicKeyAlgorithm) => {
+	return shim.mobilePlatform() === 'web' && testAlgorithm === PublicKeyAlgorithm.RsaLegacy;
+};
 
 interface CheckTestDataOptions {
 	throwOnError?: boolean;
@@ -53,7 +60,7 @@ export async function checkTestData(data: TestData, options: CheckTestDataOption
 	};
 	const testLabel = `${options.testLabel}--${data.algorithm}`;
 
-	if (shim.mobilePlatform() === 'web' && data.algorithm === PublicKeyAlgorithm.RsaLegacy) {
+	if (shouldSkipTest(data.algorithm)) {
 		logger.info('RSA Tests: Skipping test case -- RsaLegacy is not supported on web.');
 		return;
 	}
@@ -63,9 +70,15 @@ export async function checkTestData(data: TestData, options: CheckTestDataOption
 	let hasError = false;
 
 	const algorithm = rsa().from(data.algorithm);
-	const keyPair = await perfLogger.track(`ppkTestUtils/loadKeys/${testLabel}`, () => algorithm.loadKeys(data.publicKey, data.privateKey, data.keySize));
+	const keyPair = await perfLogger.track(
+		`ppkTestUtils/loadKeys/${testLabel}`,
+		() => algorithm.loadKeys(data.publicKey, data.privateKey, data.keySize),
+	);
 	try {
-		const decrypted = await perfLogger.track(`ppkTestUtils/decrypt.0/${testLabel}`, () => algorithm.decrypt(data.ciphertext, keyPair));
+		const decrypted = await perfLogger.track(
+			`ppkTestUtils/decrypt.0/${testLabel}`,
+			() => algorithm.decrypt(data.ciphertext, keyPair),
+		);
 		if (decrypted !== data.plaintext) {
 			messages.push('RSA Tests: Data could not be decrypted');
 			messages.push('RSA Tests: Expected:', data.plaintext);
@@ -213,6 +226,10 @@ export const runIntegrationTests = async (silent = false) => {
 	}
 
 	log('RSA Tests: Decrypting and encrypting using local data...');
-	const newData = await createTestData();
-	await checkTestData(newData, { silent, testLabel: 'local data', throwOnError: true });
+	for (const algorithm of [PublicKeyAlgorithm.RsaLegacy, PublicKeyAlgorithm.RsaV2]) {
+		if (shouldSkipTest(algorithm)) continue;
+
+		const newData = await createTestData(algorithm);
+		await checkTestData(newData, { silent, testLabel: 'local data', throwOnError: true });
+	}
 };
