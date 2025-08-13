@@ -126,7 +126,10 @@ class EditableSourceBlockView implements NodeView {
 		this.dom = document.createElement(inline ? 'span' : 'div');
 		this.dom.classList.add('joplin-editable');
 
+		// The link tooltip used for other in-editor links won't be shown for links within a
+		// rendered source block -- these links need custom logic to be clickable:
 		makeLinksClickableInElement(this.dom, view);
+
 		this.updateContent_();
 	}
 
