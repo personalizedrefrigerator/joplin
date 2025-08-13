@@ -44,16 +44,16 @@ describe('e2ee/utils', () => {
 	});
 
 	it('should do ppk migration', async () => {
-		const { reset } = testing__setPpkMigrations_([PublicKeyAlgorithm.RsaLegacy, PublicKeyAlgorithm.RsaV2]);
+		const { reset } = testing__setPpkMigrations_([PublicKeyAlgorithm.RsaV1, PublicKeyAlgorithm.RsaV2]);
 
 		try {
 			const syncInfo = localSyncInfo();
 			const testPassword = 'test--TEST';
 			Setting.setValue('encryption.masterPassword', testPassword);
-			syncInfo.ppk = await generateKeyPairWithAlgorithm(PublicKeyAlgorithm.RsaLegacy, encryptionService(), testPassword);
+			syncInfo.ppk = await generateKeyPairWithAlgorithm(PublicKeyAlgorithm.RsaV1, encryptionService(), testPassword);
 			saveLocalSyncInfo(syncInfo);
 
-			expect(getPpkAlgorithm(localSyncInfo().ppk)).toBe(PublicKeyAlgorithm.RsaLegacy);
+			expect(getPpkAlgorithm(localSyncInfo().ppk)).toBe(PublicKeyAlgorithm.RsaV1);
 			await migratePpk();
 			expect(getPpkAlgorithm(localSyncInfo().ppk)).toBe(PublicKeyAlgorithm.RsaV2);
 		} finally {

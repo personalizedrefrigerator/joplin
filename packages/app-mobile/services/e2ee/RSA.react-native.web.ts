@@ -5,8 +5,8 @@ const webCryptoRsa = new WebCryptoRsa(crypto);
 
 const rsa: PublicKeyCryptoProvider = {
 	from: (algorithm: PublicKeyAlgorithm): PublicKeyCrypto => {
-		if (algorithm === PublicKeyAlgorithm.RsaLegacy) {
-			throw new Error('RsaLegacy is not supported on web.');
+		if (algorithm === PublicKeyAlgorithm.RsaV1) {
+			throw new Error('RsaV1 is not supported on web.');
 		} else if (algorithm === PublicKeyAlgorithm.RsaV2) {
 			return webCryptoRsa;
 		} else if (algorithm === PublicKeyAlgorithm.Unknown) {

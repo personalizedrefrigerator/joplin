@@ -15,7 +15,7 @@ export type KeyPairAndSize<KeyPair> = { keyPair: KeyPair; keySize: number };
 
 export enum PublicKeyAlgorithm {
 	Unknown = 'unknown',
-	RsaLegacy = 'legacy', // 'rsa-pkcs1-v1.5',
+	RsaV1 = 'rsa-v1', // 'rsa-pkcs1-v1.5',
 	RsaV2 = 'rsa-v2', // 'rsa-pkcs1-oaep',
 }
 

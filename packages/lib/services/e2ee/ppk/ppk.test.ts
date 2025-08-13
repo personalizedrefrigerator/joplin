@@ -15,7 +15,7 @@ describe('e2ee/ppk', () => {
 	});
 
 	describe.each([
-		PublicKeyAlgorithm.RsaLegacy,
+		PublicKeyAlgorithm.RsaV1,
 		PublicKeyAlgorithm.RsaV2,
 	])('(algorithm %j)', (algorithm) => {
 		it('should create a public private key pair', async () => {
@@ -28,7 +28,7 @@ describe('e2ee/ppk', () => {
 			expect(privateKey.length).toBeGreaterThan(350);
 			expect(publicKey.length).toBeGreaterThan(350);
 
-			if (algorithm === PublicKeyAlgorithm.RsaLegacy) {
+			if (algorithm === PublicKeyAlgorithm.RsaV1) {
 				expect(privateKey).toContain('BEGIN RSA PRIVATE KEY');
 				expect(privateKey).toContain('END RSA PRIVATE KEY');
 

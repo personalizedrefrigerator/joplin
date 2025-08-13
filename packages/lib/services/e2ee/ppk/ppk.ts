@@ -2,6 +2,9 @@ import { VirtualOpaqueType } from '@joplin/utils/types';
 import uuid from '../../../uuid';
 import EncryptionService, { EncryptionCustomHandler, EncryptionMethod } from '../EncryptionService';
 import { MasterKeyEntity, PublicKeyAlgorithm, PublicKeyCryptoProvider } from '../types';
+import PerformanceLogger from '../../../PerformanceLogger';
+
+const perfLogger = PerformanceLogger.create();
 
 interface PrivateKey {
 	encryptionMethod: EncryptionMethod;
@@ -22,11 +25,14 @@ export interface PublicPrivateKeyPair {
 // To indicate that clients should migrate to a new PublicKeyAlgorithm, add it to the end of
 // "ppkMigrations".
 let ppkMigrations = [
-	PublicKeyAlgorithm.RsaLegacy,
-	// Uncomment to migrate to RSA v2
+	PublicKeyAlgorithm.RsaV1,
+	// Uncomment to migrate to RsaV2, which uses different encryption libraries, padding type,
+	// and a larger key size. Before migrating:
+	// - Check whether generating keys with this method still blocks the UI on Android/iOS
+	//   (it might not after migrating to React Native's New Architecture).
 	// PublicKeyAlgorithm.RsaV2,
 ];
-const getDefaultPpkAlgorithm = () => ppkMigrations[ppkMigrations.length - 1];
+export const getDefaultPpkAlgorithm = () => ppkMigrations[ppkMigrations.length - 1];
 
 // Exported for testing purposes
 export const testing__setPpkMigrations_ = (migrations: PublicKeyAlgorithm[]) => {
@@ -58,7 +64,7 @@ export const rsa = (): PublicKeyCryptoProvider => {
 const splitPpkPublicKey = (publicKey: PublicKey) => {
 	const algorithmMatch = publicKey.match(/^([^; ]+;)/);
 
-	let algorithm = PublicKeyAlgorithm.RsaLegacy;
+	let algorithm = PublicKeyAlgorithm.RsaV1;
 	if (algorithmMatch) {
 		const algorithmNameAndSeparator = algorithmMatch[0];
 		const algorithmName = algorithmNameAndSeparator.replace(/[;]$/, '');
@@ -77,7 +83,7 @@ const splitPpkPublicKey = (publicKey: PublicKey) => {
 
 const attachPpkAlgorithm = (publicKey: PublicKey, algorithm: PublicKeyAlgorithm): PublicKey => {
 	// Legacy PPK format didn't include the algorithm in the public key:
-	if (algorithm === PublicKeyAlgorithm.RsaLegacy) {
+	if (algorithm === PublicKeyAlgorithm.RsaV1) {
 		return publicKey;
 	}
 
@@ -105,7 +111,9 @@ export async function decryptPrivateKey(encryptionService: EncryptionService, en
 }
 
 export const generateKeyPairWithAlgorithm = async (algorithm: PublicKeyAlgorithm, encryptionService: EncryptionService, password: string): Promise<PublicPrivateKeyPair> => {
-	const { keyPair, keySize } = await rsa().from(algorithm).generateKeyPair();
+	const { keyPair, keySize } = await perfLogger.track('ppk/generateKeyPair', () => (
+		rsa().from(algorithm).generateKeyPair()
+	));
 
 	return {
 		id: uuid.createNano(),

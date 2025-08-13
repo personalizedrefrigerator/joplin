@@ -91,7 +91,7 @@ const webCryptoRsa = new WebCryptoRsa({
 
 const rsa: PublicKeyCryptoProvider = {
 	from: (algorithm: PublicKeyAlgorithm): PublicKeyCrypto => {
-		if (algorithm === PublicKeyAlgorithm.RsaLegacy) {
+		if (algorithm === PublicKeyAlgorithm.RsaV1) {
 			return legacyRsa;
 		} else if (algorithm === PublicKeyAlgorithm.RsaV2) {
 			return webCryptoRsa;
@@ -103,7 +103,7 @@ const rsa: PublicKeyCryptoProvider = {
 		}
 	},
 	supportsAlgorithm: (algorithm) => {
-		return algorithm === PublicKeyAlgorithm.RsaLegacy || algorithm === PublicKeyAlgorithm.RsaV2;
+		return algorithm === PublicKeyAlgorithm.RsaV1 || algorithm === PublicKeyAlgorithm.RsaV2;
 	},
 };
 
