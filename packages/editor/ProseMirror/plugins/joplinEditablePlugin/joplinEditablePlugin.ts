@@ -57,14 +57,15 @@ const makeJoplinEditableSpec = (
 		...additionalParseRules,
 	],
 	toDOM: node => {
+		const attrs = node.attrs as JoplinEditableAttributes;
 		const content = document.createElement(inline ? 'span' : 'div');
 		content.classList.add('joplin-editable');
-		content.innerHTML = sanitizeHtml(node.attrs.contentHtml);
+		content.innerHTML = sanitizeHtml(attrs.contentHtml);
 
 		const getSourceNode = () => {
 			let sourceNode = content.querySelector('.joplin-source');
 			// If the node has a "source" attribute, its content still needs to be saved
-			if (!sourceNode && node.attrs.source) {
+			if (!sourceNode && attrs.source) {
 				sourceNode = document.createElement(inline ? 'span' : 'div');
 				sourceNode.classList.add('joplin-source');
 				content.appendChild(sourceNode);
@@ -74,12 +75,12 @@ const makeJoplinEditableSpec = (
 
 		const sourceNode = getSourceNode();
 		if (sourceNode) {
-			sourceNode.textContent = node.attrs.source;
-			sourceNode.setAttribute('data-joplin-source-open', node.attrs.openCharacters);
-			sourceNode.setAttribute('data-joplin-source-close', node.attrs.closeCharacters);
+			sourceNode.textContent = attrs.source;
+			sourceNode.setAttribute('data-joplin-source-open', attrs.openCharacters);
+			sourceNode.setAttribute('data-joplin-source-close', attrs.closeCharacters);
 		}
 
-		if (node.attrs.readOnly) {
+		if (attrs.readOnly) {
 			content.setAttribute('data-joplin-readonly', 'true');
 		}
 
@@ -173,6 +174,7 @@ class EditableSourceBlockView implements NodeView {
 			this.dom.innerHTML = sanitizeHtml(html);
 		};
 
+		const attrs = this.node.attrs as JoplinEditableAttributes;
 		const addEditButton = () => {
 			const editButton = document.createElement('button');
 			editButton.classList.add('edit');
@@ -185,12 +187,12 @@ class EditableSourceBlockView implements NodeView {
 				event.preventDefault();
 			};
 
-			if (this.node.attrs.canEdit) {
+			if (!attrs.readOnly) {
 				this.dom.appendChild(editButton);
 			}
 		};
 
-		setDomContentSafe(this.node.attrs.contentHtml);
+		setDomContentSafe(attrs.contentHtml);
 		postProcessRenderedHtml(this.dom, this.node.isInline);
 		addEditButton();
 	}
