@@ -7,6 +7,7 @@ import { getEditorApi } from '../joplinEditorApiPlugin';
 import { msleep } from '@joplin/utils/time';
 import createTextNode from '../../utils/dom/createTextNode';
 import postProcessRenderedHtml from './postProcessRenderedHtml';
+import makeLinksClickableInElement from '../../utils/makeLinksClickableInElement';
 
 // See the fold example for more information about
 // writing similar ProseMirror plugins:
@@ -96,7 +97,7 @@ export const nodeSpecs = {
 			tag: 'nav.table-of-contents',
 			getAttrs: (node): false|Partial<JoplinEditableAttributes> => {
 				// Additional validation to check that this is indeed a [toc].
-				if (node.children.length !== 0 || node.children[0].tagName !== 'UL') {
+				if (node.children.length !== 1 || node.children[0]?.tagName !== 'UL') {
 					return false; // The rule doesn't match
 				}
 
@@ -124,6 +125,8 @@ class EditableSourceBlockView implements NodeView {
 
 		this.dom = document.createElement(inline ? 'span' : 'div');
 		this.dom.classList.add('joplin-editable');
+
+		makeLinksClickableInElement(this.dom, view);
 		this.updateContent_();
 	}
 
