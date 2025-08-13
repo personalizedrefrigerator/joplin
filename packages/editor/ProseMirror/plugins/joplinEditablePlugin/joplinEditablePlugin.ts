@@ -94,7 +94,12 @@ export const nodeSpecs = {
 		// Table of contents regions are also handled as block editable regions
 		{
 			tag: 'nav.table-of-contents',
-			getAttrs: (node): Partial<JoplinEditableAttributes> => {
+			getAttrs: (node): false|Partial<JoplinEditableAttributes> => {
+				// Additional validation to check that this is indeed a [toc].
+				if (node.children.length !== 0 || node.children[0].tagName !== 'UL') {
+					return false; // The rule doesn't match
+				}
+
 				return {
 					contentHtml: node.innerHTML,
 					source: '[toc]',
