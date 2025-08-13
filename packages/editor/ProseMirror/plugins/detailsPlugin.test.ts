@@ -29,4 +29,36 @@ describe('detailsPlugin', () => {
 			markupToHtml.stateToMarkup(view.state).trim(),
 		).toBe(expectedState);
 	});
+
+	it.each([
+		{ initialOpen: false },
+		{ initialOpen: true },
+	])('toggling the details element should update its state (%j)', ({ initialOpen }) => {
+		const view = createTestEditor({
+			html: `
+				<details${initialOpen ? ' open' : ''}><summary>Test summary</summary>
+					<p>Test content.</p>
+				</details>
+			`,
+			plugins: [detailsPlugin],
+		});
+
+		const details = view.dom.querySelector('details');
+		details.open = !initialOpen;
+		details.dispatchEvent(new Event('toggle'));
+
+		// The changes to the DOM should be reflected in the editor state
+		expect(view.state.doc.toJSON()).toMatchObject({
+			content: [
+				{
+					type: 'details',
+					attrs: { open: !initialOpen },
+					content: [
+						{ type: 'details_summary' },
+						{ type: 'paragraph' },
+					],
+				},
+			],
+		});
+	});
 });
