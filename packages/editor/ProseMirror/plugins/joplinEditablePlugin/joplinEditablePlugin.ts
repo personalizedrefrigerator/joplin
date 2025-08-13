@@ -1,5 +1,5 @@
 import { Plugin } from 'prosemirror-state';
-import { Node, NodeSpec } from 'prosemirror-model';
+import { Node, NodeSpec, TagParseRule } from 'prosemirror-model';
 import { EditorView, NodeView } from 'prosemirror-view';
 import sanitizeHtml from '../../utils/sanitizeHtml';
 import createEditorDialog from './createEditorDialog';
@@ -12,22 +12,37 @@ import postProcessRenderedHtml from './postProcessRenderedHtml';
 // writing similar ProseMirror plugins:
 // https://prosemirror.net/examples/fold/
 
+interface JoplinEditableAttributes {
+	contentHtml: string;
+	source: string;
+	language: string;
+	openCharacters: string;
+	closeCharacters: string;
+	readOnly: boolean;
+}
 
-const makeJoplinEditableSpec = (inline: boolean): NodeSpec => ({
+const joplinEditableAttributes = {
+	contentHtml: { default: '', validate: 'string' },
+	source: { default: '', validate: 'string' },
+	language: { default: '', validate: 'string' },
+	openCharacters: { default: '', validate: 'string' },
+	closeCharacters: { default: '', validate: 'string' },
+	readOnly: { default: false, validate: 'boolean' },
+} satisfies Record<keyof JoplinEditableAttributes, unknown>;
+
+const makeJoplinEditableSpec = (
+	inline: boolean,
+	// Additional tags that should be interpreted as joplinEditable-like blocks.
+	additionalParseRules: TagParseRule[],
+): NodeSpec => ({
 	group: inline ? 'inline' : 'block',
 	inline: inline,
 	draggable: true,
-	attrs: {
-		contentHtml: { default: '', validate: 'string' },
-		source: { default: '', validate: 'string' },
-		language: { default: '', validate: 'string' },
-		openCharacters: { default: '', validate: 'string' },
-		closeCharacters: { default: '', validate: 'string' },
-	},
+	attrs: joplinEditableAttributes,
 	parseDOM: [
 		{
 			tag: `${inline ? 'span' : 'div'}.joplin-editable`,
-			getAttrs: node => {
+			getAttrs: (node): Partial<JoplinEditableAttributes> => {
 				const sourceNode = node.querySelector('.joplin-source');
 				return {
 					contentHtml: node.innerHTML,
@@ -35,20 +50,37 @@ const makeJoplinEditableSpec = (inline: boolean): NodeSpec => ({
 					openCharacters: sourceNode?.getAttribute('data-joplin-source-open'),
 					closeCharacters: sourceNode?.getAttribute('data-joplin-source-close'),
 					language: sourceNode?.getAttribute('data-joplin-language'),
+					readOnly: !!node.hasAttribute('data-joplin-readonly'),
 				};
 			},
 		},
+		...additionalParseRules,
 	],
 	toDOM: node => {
 		const content = document.createElement(inline ? 'span' : 'div');
 		content.classList.add('joplin-editable');
 		content.innerHTML = sanitizeHtml(node.attrs.contentHtml);
 
-		const sourceNode = content.querySelector('.joplin-source');
+		const getSourceNode = () => {
+			let sourceNode = content.querySelector('.joplin-source');
+			// If the node has a "source" attribute, its content still needs to be saved
+			if (!sourceNode && node.attrs.source) {
+				sourceNode = document.createElement(inline ? 'span' : 'div');
+				sourceNode.classList.add('joplin-source');
+				content.appendChild(sourceNode);
+			}
+			return sourceNode;
+		};
+
+		const sourceNode = getSourceNode();
 		if (sourceNode) {
 			sourceNode.textContent = node.attrs.source;
 			sourceNode.setAttribute('data-joplin-source-open', node.attrs.openCharacters);
 			sourceNode.setAttribute('data-joplin-source-close', node.attrs.closeCharacters);
+		}
+
+		if (node.attrs.readOnly) {
+			content.setAttribute('data-joplin-readonly', 'true');
 		}
 
 		return content;
@@ -56,8 +88,23 @@ const makeJoplinEditableSpec = (inline: boolean): NodeSpec => ({
 });
 
 export const nodeSpecs = {
-	joplinEditableInline: makeJoplinEditableSpec(true),
-	joplinEditableBlock: makeJoplinEditableSpec(false),
+	joplinEditableInline: makeJoplinEditableSpec(true, []),
+	joplinEditableBlock: makeJoplinEditableSpec(false, [
+		// Table of contents regions are also handled as block editable regions
+		{
+			tag: 'nav.table-of-contents',
+			getAttrs: (node): Partial<JoplinEditableAttributes> => {
+				return {
+					contentHtml: node.innerHTML,
+					source: '[toc]',
+					// Disable the [toc]'s default rerendering behavior -- table of contents rendering
+					// requires the document's full content and won't work if "[toc]" is rendered on its
+					// own.
+					readOnly: true,
+				};
+			},
+		},
+	]),
 };
 
 type GetPosition = ()=> number;
@@ -137,7 +184,10 @@ class EditableSourceBlockView implements NodeView {
 				this.showEditDialog_();
 				event.preventDefault();
 			};
-			this.dom.appendChild(editButton);
+
+			if (this.node.attrs.canEdit) {
+				this.dom.appendChild(editButton);
+			}
 		};
 
 		setDomContentSafe(this.node.attrs.contentHtml);
