@@ -16,6 +16,12 @@ const postprocessHtml = (html: HTMLElement) => {
 		resource.src = `:/${resourceId}`;
 	}
 
+	// Restore HREFs
+	const links = html.querySelectorAll<HTMLAnchorElement>('a[href="#"][data-href]');
+	for (const link of links) {
+		link.href = link.getAttribute('data-href');
+	}
+
 	return html;
 };
 
