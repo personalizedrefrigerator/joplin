@@ -17,9 +17,10 @@ const postprocessHtml = (html: HTMLElement) => {
 	}
 
 	// Restore HREFs
-	const links = html.querySelectorAll<HTMLAnchorElement>('a[href="#"][data-href]');
+	const links = html.querySelectorAll<HTMLAnchorElement>('a[href="#"][data-original-href]');
 	for (const link of links) {
-		link.href = link.getAttribute('data-href');
+		link.href = link.getAttribute('data-original-href');
+		link.removeAttribute('data-original-href');
 	}
 
 	return html;

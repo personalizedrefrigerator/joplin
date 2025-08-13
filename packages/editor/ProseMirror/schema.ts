@@ -250,8 +250,8 @@ const marks = {
 					href = `:/${resourceId}`;
 				}
 
-				if (href === '#' && node.hasAttribute('data-href')) {
-					href = node.getAttribute('data-href');
+				if (href === '#' && node.hasAttribute('data-original-href')) {
+					href = node.getAttribute('data-original-href');
 				}
 
 				return {
@@ -276,7 +276,7 @@ const marks = {
 				{
 					href: safeHref,
 					...(safeHref !== node.attrs.href ? {
-						'data-href': node.attrs.href,
+						'data-original-href': node.attrs.href,
 					} : {}),
 
 					title: node.attrs.title,

@@ -378,9 +378,9 @@ describe('RichTextEditor', () => {
 			onBodyChange={newBody => { body = newBody; }}
 		/>);
 
-		const renderedLink = await findElement<HTMLAnchorElement>('a[href][data-href]');
+		const renderedLink = await findElement<HTMLAnchorElement>('a[href][data-original-href]');
 		expect(renderedLink.getAttribute('href')).toBe('#');
-		expect(renderedLink.getAttribute('data-href')).toBe('unknown://test');
+		expect(renderedLink.getAttribute('data-original-href')).toBe('unknown://test');
 
 		const window = await getEditorWindow();
 		mockTyping(window, ' testing');
