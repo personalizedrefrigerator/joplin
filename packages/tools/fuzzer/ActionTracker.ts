@@ -276,7 +276,6 @@ class ActionTracker {
 			},
 			shareFolder: (id: ItemId, shareWith: Client) => {
 				const itemToShare = this.idToItem_.get(id);
-				assert.ok(itemToShare, `Sharing: folder with ${id} should exist`);
 				assertIsFolder(itemToShare);
 
 				const alreadyShared = itemToShare.sharedWith.includes(shareWith.email);
@@ -295,6 +294,26 @@ class ActionTracker {
 				this.idToItem_.set(id, {
 					...itemToShare,
 					sharedWith: [...itemToShare.sharedWith, shareWith.email],
+				});
+
+				this.checkRep_();
+				return Promise.resolve();
+			},
+			removeFromShare: (id: ItemId, shareWith: Client) => {
+				const targetItem = this.idToItem_.get(id);
+				assertIsFolder(targetItem);
+
+				assert.ok(targetItem.sharedWith.includes(shareWith.email), `Folder ${id} should be shared with ${shareWith.label}`);
+
+				const otherSubTree = this.tree_.get(shareWith.email);
+				this.tree_.set(shareWith.email, {
+					...otherSubTree,
+					childIds: otherSubTree.childIds.filter(childId => childId !== id),
+				});
+
+				this.idToItem_.set(id, {
+					...targetItem,
+					sharedWith: targetItem.sharedWith.filter(shareeEmail => shareeEmail !== shareWith.email),
 				});
 
 				this.checkRep_();

@@ -31,6 +31,10 @@ export const isFolder = (item: TreeItem): item is FolderData => {
 // Typescript type assertions require type definitions on the left for arrow functions.
 // See https://github.com/microsoft/TypeScript/issues/53450.
 export const assertIsFolder: (item: TreeItem)=> asserts item is FolderData = item => {
+	if (!item) {
+		throw new Error(`Item ${item} is not a folder`);
+	}
+
 	if (!isFolder(item)) {
 		throw new Error(`Expected item with ID ${item?.id} to be a folder.`);
 	}
@@ -50,6 +54,7 @@ export interface RandomFolderOptions {
 export interface ActionableClient {
 	createFolder(data: FolderMetadata): Promise<void>;
 	shareFolder(id: ItemId, shareWith: Client): Promise<void>;
+	removeFromShare(id: string, shareWith: Client): Promise<void>;
 	deleteFolder(id: ItemId): Promise<void>;
 	createNote(data: NoteData): Promise<void>;
 	updateNote(data: NoteData): Promise<void>;
@@ -59,7 +64,7 @@ export interface ActionableClient {
 	listNotes(): Promise<NoteData[]>;
 	listFolders(): Promise<FolderMetadata[]>;
 	allFolderDescendants(parentId: ItemId): Promise<ItemId[]>;
-	randomFolder(options: RandomFolderOptions): Promise<FolderMetadata>;
+	randomFolder(options: RandomFolderOptions): Promise<FolderData>;
 	randomNote(): Promise<NoteData>;
 }
 

@@ -493,6 +493,14 @@ class Client implements ActionableClient {
 		await shareWith.sync();
 	}
 
+	public async removeFromShare(id: string, other: Client) {
+		await this.tracker_.removeFromShare(id, other);
+
+		logger.info('Remove', other.label, 'from share', id);
+		await this.execCliCommand_('share', 'remove', id, other.email);
+		await other.sync();
+	}
+
 	public async moveItem(itemId: ItemId, newParentId: ItemId) {
 		logger.info('Move', itemId, 'to', newParentId);
 		await this.tracker_.moveItem(itemId, newParentId);

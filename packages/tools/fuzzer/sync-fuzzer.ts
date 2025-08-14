@@ -159,6 +159,21 @@ const doRandomAction = async (context: FuzzContext, client: Client, clientPool: 
 			await client.shareFolder(target.id, other);
 			return true;
 		},
+		unshareFolder: async () => {
+			const target = await client.randomFolder({
+				filter: candidate => {
+					return candidate.sharedWith.length > 0 && candidate.ownedByEmail === client.email;
+				},
+			});
+			if (!target) return false;
+
+			const recipientIndex = context.randInt(0, target.sharedWith.length);
+			const recipientEmail = target.sharedWith[recipientIndex];
+			const recipient = clientPool.clientsByEmail(recipientEmail)[0];
+			assert.ok(recipient, `invalid state -- recipient ${recipientEmail} should exist`);
+			await client.removeFromShare(target.id, recipient);
+			return true;
+		},
 		deleteFolder: async () => {
 			const target = await client.randomFolder({});
 			if (!target) return false;
