@@ -955,6 +955,8 @@ export default class Folder extends BaseItem {
 			// When a shared subfolder is converted to a toplevel folder, clear its share_id
 			// as soon as possible. Without this, modifiedFolder would be incorrectly treated
 			// as a root shared folder by some logic.
+			// Since the folder's children aren't toplevel, they won't be considered root
+			// shared folders and are updated later.
 			modifiedFolder.share_id = '';
 		}
 
