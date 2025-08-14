@@ -143,14 +143,19 @@ const doRandomAction = async (context: FuzzContext, client: Client, clientPool: 
 			return true;
 		},
 		shareFolder: async () => {
+			const other = clientPool.randomClient(c => c !== client);
+			if (!other) return false;
+
 			const target = await client.randomFolder({
-				filter: candidate => (
-					!candidate.parentId && !candidate.isShareRoot
-				),
+				filter: candidate => {
+					const isToplevel = !candidate.parentId;
+					const ownedByCurrent = candidate.ownedByEmail === client.email;
+					const alreadyShared = candidate.sharedWith.includes(other.email);
+					return isToplevel && ownedByCurrent && !alreadyShared;
+				},
 			});
 			if (!target) return false;
 
-			const other = clientPool.randomClient(c => c !== client);
 			await client.shareFolder(target.id, other);
 			return true;
 		},
@@ -174,7 +179,7 @@ const doRandomAction = async (context: FuzzContext, client: Client, clientPool: 
 		moveFolderTo: async () => {
 			const target = await client.randomFolder({
 				// Don't move shared folders (should not be allowed by the GUI in the main apps).
-				filter: item => !item.isShareRoot,
+				filter: item => item.sharedWith.length === 0,
 			});
 			if (!target) return false;
 

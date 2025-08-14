@@ -18,12 +18,22 @@ export type FolderMetadata = {
 };
 export type FolderData = FolderMetadata & {
 	childIds: ItemId[];
-	isShareRoot: boolean;
+	sharedWith: string[];
+	// Email of the Joplin Server account that controls the item
+	ownedByEmail: string;
 };
 export type TreeItem = NoteData|FolderData;
 
 export const isFolder = (item: TreeItem): item is FolderData => {
 	return 'childIds' in item;
+};
+
+// Typescript type assertions require type definitions on the left for arrow functions.
+// See https://github.com/microsoft/TypeScript/issues/53450.
+export const assertIsFolder: (item: TreeItem)=> asserts item is FolderData = item => {
+	if (!isFolder(item)) {
+		throw new Error(`Expected item with ID ${item?.id} to be a folder.`);
+	}
 };
 
 export interface FuzzContext {
