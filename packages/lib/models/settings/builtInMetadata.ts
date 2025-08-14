@@ -1475,6 +1475,16 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 			section: 'note',
 			storage: SettingStorage.File,
 		},
+		'editor.highlightActiveLine': {
+			value: false,
+			type: SettingItemType.Bool,
+			public: true,
+			section: 'note',
+			appTypes: [AppType.Desktop, AppType.Mobile],
+			label: () => _('Markdown editor: Highlight active line'),
+			storage: SettingStorage.File,
+			isGlobal: true,
+		},
 
 		'imageeditor.jsdrawToolbar': {
 			value: '',
