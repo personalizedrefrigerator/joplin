@@ -940,12 +940,23 @@ export default class Folder extends BaseItem {
 
 		// When moving a note to a different folder, the user timestamp is not updated.
 		// However updated_time is updated so that the note can be synced later on.
+		const original = await this.load(folderId);
 
-		const modifiedFolder = {
+		const modifiedFolder: FolderEntity = {
 			id: folderId,
 			parent_id: targetFolderId,
 			updated_time: time.unixMs(),
+			share_id: original.share_id,
 		};
+
+		const wasShared = !!modifiedFolder.share_id;
+		const movedToTopLevel = original.parent_id !== '' && targetFolderId === '';
+		if (wasShared && movedToTopLevel) {
+			// When a shared subfolder is converted to a toplevel folder, clear its share_id
+			// as soon as possible (prevent it from being recognised as a toplevel shared
+			// folder).
+			modifiedFolder.share_id = '';
+		}
 
 		return Folder.save(modifiedFolder, { autoTimestamp: false });
 	}
