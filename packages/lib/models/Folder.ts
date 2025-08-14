@@ -953,8 +953,8 @@ export default class Folder extends BaseItem {
 		const movedToTopLevel = original.parent_id !== '' && targetFolderId === '';
 		if (wasShared && movedToTopLevel) {
 			// When a shared subfolder is converted to a toplevel folder, clear its share_id
-			// as soon as possible (prevent it from being recognised as a toplevel shared
-			// folder).
+			// as soon as possible. Without this, modifiedFolder would be incorrectly treated
+			// as a root shared folder by some logic.
 			modifiedFolder.share_id = '';
 		}
 
