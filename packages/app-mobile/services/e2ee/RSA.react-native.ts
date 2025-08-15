@@ -1,6 +1,6 @@
-import { WebCryptoSlice } from '@joplin/lib/services/e2ee/ppk/WebCryptoRsa';
 import buildRsaCryptoProvider from '@joplin/lib/services/e2ee/ppk/webCrypto/buildRsaCryptoProvider';
-import { PublicKeyAlgorithm, PublicKeyCrypto, PublicKeyCryptoProvider } from '@joplin/lib/services/e2ee/types';
+import { WebCryptoSlice } from '@joplin/lib/services/e2ee/ppk/webCrypto/WebCryptoRsa';
+import { CiphertextBuffer, PublicKeyAlgorithm, PublicKeyCrypto, PublicKeyCryptoProvider } from '@joplin/lib/services/e2ee/types';
 import QuickCrypto from 'react-native-quick-crypto';
 const RnRSA = require('react-native-rsa-native').RSA;
 
@@ -32,13 +32,12 @@ const legacyRsa: PublicKeyCrypto = {
 		return { public: publicKey, private: privateKey, keySizeBits };
 	},
 
-	encrypt: async (plaintextUtf8: string, rsaKeyPair: LegacyRsaKeyPair): Promise<string> => {
+	encrypt: async (plaintextUtf8: string, rsaKeyPair: LegacyRsaKeyPair) => {
 		// TODO: Support long-data encryption in a way compatible with node-rsa.
-		return RnRSA.encrypt(plaintextUtf8, rsaKeyPair.public);
+		return Buffer.from(RnRSA.encrypt(plaintextUtf8, rsaKeyPair.public), 'base64');
 	},
 
-	decrypt: async (ciphertextBase64: string, rsaKeyPair: LegacyRsaKeyPair): Promise<string> => {
-		const ciphertextBuffer = Buffer.from(ciphertextBase64, 'base64');
+	decrypt: async (ciphertextBuffer: CiphertextBuffer, rsaKeyPair: LegacyRsaKeyPair): Promise<string> => {
 		const maximumEncryptedSize = Math.floor(rsaKeyPair.keySizeBits / 8); // Usually 256
 
 		// On iOS, .decrypt fails without throwing or rejecting.
@@ -73,7 +72,7 @@ const legacyRsa: PublicKeyCrypto = {
 			}
 			return result.join('');
 		} else {
-			const plainText = await RnRSA.decrypt(ciphertextBase64, rsaKeyPair.private);
+			const plainText = await RnRSA.decrypt(ciphertextBuffer.toString('base64'), rsaKeyPair.private);
 			handleError(plainText);
 			return plainText;
 		}
@@ -88,14 +87,17 @@ const legacyRsa: PublicKeyCrypto = {
 	},
 };
 
-const webCryptoRsa = buildRsaCryptoProvider(PublicKeyAlgorithm.RsaV2, QuickCrypto as WebCryptoSlice);
+const webCryptoRsa2 = buildRsaCryptoProvider(PublicKeyAlgorithm.RsaV2, QuickCrypto as WebCryptoSlice);
+const webCryptoRsa3 = buildRsaCryptoProvider(PublicKeyAlgorithm.RsaV3, QuickCrypto as WebCryptoSlice);
 
 const rsa: PublicKeyCryptoProvider = {
 	from: (algorithm: PublicKeyAlgorithm): PublicKeyCrypto => {
 		if (algorithm === PublicKeyAlgorithm.RsaV1) {
 			return legacyRsa;
 		} else if (algorithm === PublicKeyAlgorithm.RsaV2) {
-			return webCryptoRsa;
+			return webCryptoRsa2;
+		} else if (algorithm === PublicKeyAlgorithm.RsaV3) {
+			return webCryptoRsa3;
 		} else if (algorithm === PublicKeyAlgorithm.Unknown) {
 			throw new Error('Unsupported algorithm');
 		} else {

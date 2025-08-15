@@ -16,18 +16,21 @@ export type KeyPairAndSize<KeyPair> = { keyPair: KeyPair; keySize: number };
 export enum PublicKeyAlgorithm {
 	Unknown = 'unknown',
 	RsaV1 = 'rsa-v1', // 'rsa-pkcs1-v1.5',
-	RsaV2 = 'rsa-v2', // 'rsa-pkcs1-oaep',
+	RsaV2 = 'rsa-v2', // 'rsa-pkcs1-oaep-2048',
+	RsaV3 = 'rsa-v3', // 'rsa-pkcs1-oaep-4096',
 }
+
+export type CiphertextBuffer = Buffer<ArrayBuffer>;
 
 export interface PublicKeyCrypto<
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Partial refactor of old code before rule was applied
 	KeyPair = any, // Depends on implementation
-	InputDataType = string,
+	InputDataType = string, // Usually hexadecimal data
 > {
 	generateKeyPair(): Promise<KeyPairAndSize<KeyPair>>;
 	loadKeys(publicKey: string, privateKey: string, keySizeBits: number): Promise<KeyPair>;
-	encrypt(plaintextUtf8: InputDataType, rsaKeyPair: KeyPair): Promise<string>; // Returns Base64 encoded data
-	decrypt(ciphertextBase64: string, rsaKeyPair: KeyPair): Promise<InputDataType>; // Returns hexadecimal data
+	encrypt(plaintextUtf8: InputDataType, rsaKeyPair: KeyPair): Promise<CiphertextBuffer>;
+	decrypt(ciphertext: CiphertextBuffer, rsaKeyPair: KeyPair): Promise<InputDataType>;
 	publicKey(rsaKeyPair: KeyPair): Promise<string>;
 	privateKey(rsaKeyPair: KeyPair): Promise<string>;
 	// Maximum input size, output size may be greater. Use "null" to specify an arbitrary size.

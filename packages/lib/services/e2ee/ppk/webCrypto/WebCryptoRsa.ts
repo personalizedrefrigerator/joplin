@@ -1,4 +1,4 @@
-import { PublicKeyCrypto } from '../../types';
+import { CiphertextBuffer, PublicKeyCrypto } from '../../types';
 
 // The web crypto API is available in both NodeJS and browsers
 export type WebCryptoSlice = {
@@ -78,16 +78,16 @@ export default class WebCryptoRsa implements PublicKeyCrypto<KeyPair, Buffer<Arr
 		const ciphertext = await this.webCrypto_.subtle.encrypt(
 			{ name: 'RSA-OAEP' }, rsaKeyPair.publicKey, plaintextBuffer,
 		);
-		return Buffer.from(ciphertext).toString('base64');
+		return Buffer.from(ciphertext);
 	}
 
-	public async decrypt(ciphertextBase64: string, rsaKeyPair: KeyPair) {
+	public async decrypt(ciphertext: CiphertextBuffer, rsaKeyPair: KeyPair) {
 		if (!rsaKeyPair.privateKey) {
 			throw new Error('Missing private key');
 		}
 
 		const plaintextBuffer = Buffer.from(await this.webCrypto_.subtle.decrypt(
-			{ name: 'RSA-OAEP' }, rsaKeyPair.privateKey, Buffer.from(ciphertextBase64, 'base64'),
+			{ name: 'RSA-OAEP' }, rsaKeyPair.privateKey, ciphertext,
 		));
 		return plaintextBuffer;
 	}

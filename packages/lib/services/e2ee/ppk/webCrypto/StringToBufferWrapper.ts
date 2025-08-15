@@ -5,7 +5,7 @@ const isLowercaseHexadecimalString = (text: string) => {
 	return text.match(/^[a-f0-9]+$/) && text.length % 2 === 0;
 };
 
-export default class StringToBufferAdapter<KeyPair> implements PublicKeyCrypto<KeyPair> {
+export default class StringToBufferDecorator<KeyPair> implements PublicKeyCrypto<KeyPair> {
 	public constructor(private publicKeyCrypto_: PublicKeyCrypto<KeyPair, Buffer<ArrayBuffer>>) {}
 
 	public async generateKeyPair() {
@@ -37,7 +37,7 @@ export default class StringToBufferAdapter<KeyPair> implements PublicKeyCrypto<K
 
 	private bufferToText_(buffer: Buffer) {
 		let encoding: BufferEncoding;
-		const isHex = buffer.readUInt8(buffer.byteLength - 1) === 1;
+		const isHex = buffer.byteLength > 0 && buffer.readUInt8(buffer.byteLength - 1) === 1;
 		if (isHex) {
 			encoding = 'hex';
 		} else {
@@ -59,16 +59,17 @@ export default class StringToBufferAdapter<KeyPair> implements PublicKeyCrypto<K
 
 	public async encrypt(plaintextUtf8: string, rsaKeyPair: KeyPair) {
 		const plaintextBuffer = this.textToBuffer_(plaintextUtf8);
-		if (plaintextBuffer.byteLength > this.maximumPlaintextLengthBytes) {
-			throw new Error('Data too long');
+		const internalMaximumLength = this.publicKeyCrypto_.maximumPlaintextLengthBytes;
+		if (plaintextBuffer.byteLength > internalMaximumLength) {
+			throw new Error(`Data too long (longer than ${internalMaximumLength})`);
 		}
 
 		const ciphertext = await this.publicKeyCrypto_.encrypt(plaintextBuffer, rsaKeyPair);
-		return Buffer.from(ciphertext).toString('base64');
+		return Buffer.from(ciphertext);
 	}
 
-	public async decrypt(ciphertextBase64: string, rsaKeyPair: KeyPair) {
-		const plaintextBuffer = await this.publicKeyCrypto_.decrypt(ciphertextBase64, rsaKeyPair);
+	public async decrypt(ciphertext: Buffer<ArrayBuffer>, rsaKeyPair: KeyPair) {
+		const plaintextBuffer = await this.publicKeyCrypto_.decrypt(ciphertext, rsaKeyPair);
 		return this.bufferToText_(plaintextBuffer);
 	}
 

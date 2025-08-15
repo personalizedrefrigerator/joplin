@@ -3,23 +3,28 @@ import buildRsaCryptoProvider from './buildRsaCryptoProvider';
 import { PublicKeyAlgorithm } from '../../types';
 
 
-describe('WebCryptoRsa', () => {
+describe.each([
+	{ algorithm: PublicKeyAlgorithm.RsaV2 },
+	{ algorithm: PublicKeyAlgorithm.RsaV3 },
+])('buildRsaCryptoProvider (%j)', ({ algorithm }) => {
+	const rsaProvider = buildRsaCryptoProvider(algorithm, webcrypto);
+
 	// The default error message when a message is larger than the maximum length
 	// can be confusing. Verifies that a better message is provided:
 	test('should encrypt data up to the maximum length, then throw', async () => {
-		const rsaProvider = buildRsaCryptoProvider(PublicKeyAlgorithm.RsaV2, webcrypto);
 		const { keyPair, keySize: keySizeBits } = await rsaProvider.generateKeyPair();
 
 		// Should handle the case where given empty input
-		const expectedOutputLength = Buffer.alloc(keySizeBits / 8).toString('base64').length;
-		expect(await rsaProvider.encrypt('', keyPair)).toHaveLength(expectedOutputLength);
+		const keyLengthBytes = keySizeBits / 8;
+		expect(await rsaProvider.encrypt('', keyPair)).toHaveLength(keyLengthBytes);
 
-		const maximumLength = 444;
+		const maximumLength = rsaProvider.maximumPlaintextLengthBytes;
+		expect(maximumLength).toBeGreaterThanOrEqual(190);
 		for (let length = 1; length <= maximumLength; length++) {
-			// WebCryptoRsa adds 1 byte of metadata:
 			const hexData = Buffer.alloc(length).toString('hex');
 			// Verify that it encrypts without throwing
-			await expect(rsaProvider.encrypt(hexData, keyPair)).resolves.toHaveLength(expectedOutputLength);
+			const encrypted = await rsaProvider.encrypt(hexData, keyPair);
+			expect(encrypted.length).toBeGreaterThanOrEqual(keyLengthBytes);
 		}
 
 		for (let length = maximumLength + 1; length <= maximumLength * 2; length++) {
@@ -29,7 +34,6 @@ describe('WebCryptoRsa', () => {
 	});
 
 	test('output should not contain the input (medium-length input)', async () => {
-		const rsaProvider = buildRsaCryptoProvider(PublicKeyAlgorithm.RsaV2, webcrypto);
 		const { keyPair } = await rsaProvider.generateKeyPair();
 
 		for (const hexInput of ['123456789aa', '111aaaabbbbccccddddaa', '567890aaa']) {

@@ -44,11 +44,11 @@ const legacyRsa: PublicKeyCrypto<NodeRSA> = {
 
 	encrypt: async (plaintextUtf8: string, rsaKeyPair: NodeRSA) => {
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Workaround for incorrect types after improving type safety
-		return rsaKeyPair.encrypt(plaintextUtf8 as any, 'base64', 'utf8');
+		return rsaKeyPair.encrypt(plaintextUtf8 as any, 'buffer', 'utf8') as Buffer<ArrayBuffer>;
 	},
 
-	decrypt: async (ciphertextBase64: string, rsaKeyPair: NodeRSA) => {
-		return rsaKeyPair.decrypt(ciphertextBase64, 'utf8');
+	decrypt: async (ciphertext: Buffer, rsaKeyPair: NodeRSA) => {
+		return rsaKeyPair.decrypt(ciphertext, 'utf8');
 	},
 
 	publicKey: async (rsaKeyPair: NodeRSA) => {
@@ -61,14 +61,17 @@ const legacyRsa: PublicKeyCrypto<NodeRSA> = {
 
 };
 
-const webCryptoRsa = buildRsaCryptoProvider(PublicKeyAlgorithm.RsaV2, webcrypto);
+const webCryptoRsa2 = buildRsaCryptoProvider(PublicKeyAlgorithm.RsaV2, webcrypto);
+const webCryptoRsa3 = buildRsaCryptoProvider(PublicKeyAlgorithm.RsaV3, webcrypto);
 
 const rsa: PublicKeyCryptoProvider = {
 	from: (algorithm) => {
 		if (algorithm === PublicKeyAlgorithm.RsaV1) {
 			return legacyRsa;
 		} else if (algorithm === PublicKeyAlgorithm.RsaV2) {
-			return webCryptoRsa;
+			return webCryptoRsa2;
+		} else if (algorithm === PublicKeyAlgorithm.RsaV3) {
+			return webCryptoRsa3;
 		} else if (algorithm === PublicKeyAlgorithm.Unknown) {
 			throw new Error('Unknown PPK algorithm.');
 		} else {

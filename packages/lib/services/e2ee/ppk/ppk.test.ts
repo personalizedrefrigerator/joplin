@@ -17,6 +17,7 @@ describe('e2ee/ppk', () => {
 	describe.each([
 		PublicKeyAlgorithm.RsaV1,
 		PublicKeyAlgorithm.RsaV2,
+		PublicKeyAlgorithm.RsaV3,
 	])('(algorithm %j)', (algorithm) => {
 		it('should create a public private key pair', async () => {
 			const ppk = await generateKeyPairWithAlgorithm(algorithm, encryptionService(), '111111');
@@ -45,7 +46,8 @@ describe('e2ee/ppk', () => {
 					key_ops: ['encrypt'],
 					// ...other properties...
 				});
-				expect(publicKey.startsWith('rsa-v2;')).toBe(true);
+				expect(publicKey).toMatch(/^rsa-v\d+;/);
+				expect(publicKey.startsWith(`${algorithm};`)).toBe(true);
 			}
 		});
 

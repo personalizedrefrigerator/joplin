@@ -26,11 +26,14 @@ export interface PublicPrivateKeyPair {
 // "ppkMigrations".
 let ppkMigrations = [
 	PublicKeyAlgorithm.RsaV1,
-	// Uncomment to migrate to RsaV2, which uses different encryption libraries, padding type,
+	// Uncomment to migrate to RsaV2, which uses a different padding type from RsaV1
+	// PublicKeyAlgorithm.RsaV2,
+
+	// Uncomment to migrate to RsaV3, which uses different encryption libraries, padding type,
 	// and a larger key size. Before migrating:
 	// - Check whether generating keys with this method still blocks the UI on Android/iOS
 	//   (it might not after migrating to React Native's New Architecture).
-	// PublicKeyAlgorithm.RsaV2,
+	// PublicKeyAlgorithm.RsaV3,
 ];
 export const getDefaultPpkAlgorithm = () => ppkMigrations[ppkMigrations.length - 1];
 
@@ -189,15 +192,17 @@ function ppkEncryptionHandler(ppk: PublicPrivateKeyPair, rsaKeyPair: KeyPair): E
 			algorithm: getPpkAlgorithm(ppk),
 		},
 		encrypt: async (context: Context, hexaBytes: string, _password: string): Promise<string> => {
+			const ciphertextBuffer = await rsa().from(context.algorithm).encrypt(hexaBytes, context.rsaKeyPair);
 			return JSON.stringify({
 				ppkId: context.ppkId,
-				ciphertext: await rsa().from(context.algorithm).encrypt(hexaBytes, context.rsaKeyPair),
+				ciphertext: ciphertextBuffer.toString('base64'),
 			});
 		},
 		decrypt: async (context: Context, ciphertext: string, _password: string): Promise<string> => {
 			const parsed = JSON.parse(ciphertext);
 			if (parsed.ppkId !== context.ppkId) throw new Error(`Needs private key ${parsed.ppkId} to decrypt, but using ${context.ppkId}`);
-			return rsa().from(context.algorithm).decrypt(parsed.ciphertext, context.rsaKeyPair);
+			const cipherTextBuffer = Buffer.from(parsed.ciphertext, 'base64');
+			return rsa().from(context.algorithm).decrypt(cipherTextBuffer, context.rsaKeyPair);
 		},
 	};
 }

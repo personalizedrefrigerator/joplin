@@ -1367,13 +1367,13 @@ packages/lib/services/e2ee/crypto.js
 packages/lib/services/e2ee/cryptoShared.js
 packages/lib/services/e2ee/cryptoTestUtils.js
 packages/lib/services/e2ee/ppk/RSA.node.js
-packages/lib/services/e2ee/ppk/WebCryptoRsa.js
 packages/lib/services/e2ee/ppk/ppk.test.js
 packages/lib/services/e2ee/ppk/ppk.js
 packages/lib/services/e2ee/ppk/ppkTestUtils.js
-packages/lib/services/e2ee/ppk/webCrypto/StringToBufferAdapter.js
-packages/lib/services/e2ee/ppk/webCrypto/WebCryptoRsa.test.js
+packages/lib/services/e2ee/ppk/webCrypto/LongDataWrapper.js
+packages/lib/services/e2ee/ppk/webCrypto/StringToBufferWrapper.js
 packages/lib/services/e2ee/ppk/webCrypto/WebCryptoRsa.js
+packages/lib/services/e2ee/ppk/webCrypto/buildRsaCryptoProvider.test.js
 packages/lib/services/e2ee/ppk/webCrypto/buildRsaCryptoProvider.js
 packages/lib/services/e2ee/types.js
 packages/lib/services/e2ee/utils.test.js
