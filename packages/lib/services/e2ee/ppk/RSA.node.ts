@@ -1,7 +1,7 @@
 import { PublicKeyAlgorithm, PublicKeyCrypto, PublicKeyCryptoProvider } from '../types';
 import * as NodeRSA from 'node-rsa';
-import WebCryptoRsa from './WebCryptoRsa';
 import { webcrypto } from 'crypto';
+import buildRsaCryptoProvider from './webCrypto/buildRsaCryptoProvider';
 
 const legacyRSAOptions: NodeRSA.Options = {
 	// Must use pkcs1 otherwise any data encrypted with NodeRSA will crash the
@@ -38,6 +38,10 @@ const legacyRsa: PublicKeyCrypto<NodeRSA> = {
 		return keys;
 	},
 
+	// Unlimited, but probably not a good idea to encrypt a large amount of data (>=1 KiB).
+	// Breaking input into blocks is handled by NodeRSA, but seems to use ECB mode.
+	maximumPlaintextLengthBytes: null,
+
 	encrypt: async (plaintextUtf8: string, rsaKeyPair: NodeRSA) => {
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Workaround for incorrect types after improving type safety
 		return rsaKeyPair.encrypt(plaintextUtf8 as any, 'base64', 'utf8');
@@ -57,7 +61,7 @@ const legacyRsa: PublicKeyCrypto<NodeRSA> = {
 
 };
 
-const webCryptoRsa = WebCryptoRsa.fromNodeCrypto(webcrypto);
+const webCryptoRsa = buildRsaCryptoProvider(PublicKeyAlgorithm.RsaV2, webcrypto);
 
 const rsa: PublicKeyCryptoProvider = {
 	from: (algorithm) => {

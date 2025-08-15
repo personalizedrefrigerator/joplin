@@ -1,7 +1,7 @@
-import WebCryptoRsa from '@joplin/lib/services/e2ee/ppk/WebCryptoRsa';
+import buildRsaCryptoProvider from '@joplin/lib/services/e2ee/ppk/webCrypto/buildRsaCryptoProvider';
 import { PublicKeyAlgorithm, PublicKeyCrypto, PublicKeyCryptoProvider } from '@joplin/lib/services/e2ee/types';
 
-const webCryptoRsa = new WebCryptoRsa(crypto);
+const webCryptoRsa = buildRsaCryptoProvider(PublicKeyAlgorithm.RsaV2, crypto);
 
 const rsa: PublicKeyCryptoProvider = {
 	from: (algorithm: PublicKeyAlgorithm): PublicKeyCrypto => {

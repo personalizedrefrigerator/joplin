@@ -1,4 +1,5 @@
-import WebCryptoRsa, { WebCryptoSlice } from '@joplin/lib/services/e2ee/ppk/WebCryptoRsa';
+import { WebCryptoSlice } from '@joplin/lib/services/e2ee/ppk/WebCryptoRsa';
+import buildRsaCryptoProvider from '@joplin/lib/services/e2ee/ppk/webCrypto/buildRsaCryptoProvider';
 import { PublicKeyAlgorithm, PublicKeyCrypto, PublicKeyCryptoProvider } from '@joplin/lib/services/e2ee/types';
 import QuickCrypto from 'react-native-quick-crypto';
 const RnRSA = require('react-native-rsa-native').RSA;
@@ -24,6 +25,8 @@ const legacyRsa: PublicKeyCrypto = {
 			keySize,
 		};
 	},
+
+	maximumPlaintextLengthBytes: 190,
 
 	loadKeys: async (publicKey: string, privateKey: string, keySizeBits: number): Promise<LegacyRsaKeyPair> => {
 		return { public: publicKey, private: privateKey, keySizeBits };
@@ -85,9 +88,7 @@ const legacyRsa: PublicKeyCrypto = {
 	},
 };
 
-const webCryptoRsa = new WebCryptoRsa({
-	subtle: QuickCrypto.subtle,
-} as WebCryptoSlice);
+const webCryptoRsa = buildRsaCryptoProvider(PublicKeyAlgorithm.RsaV2, QuickCrypto as WebCryptoSlice);
 
 const rsa: PublicKeyCryptoProvider = {
 	from: (algorithm: PublicKeyAlgorithm): PublicKeyCrypto => {

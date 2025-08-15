@@ -22,13 +22,16 @@ export enum PublicKeyAlgorithm {
 export interface PublicKeyCrypto<
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Partial refactor of old code before rule was applied
 	KeyPair = any, // Depends on implementation
+	InputDataType = string,
 > {
 	generateKeyPair(): Promise<KeyPairAndSize<KeyPair>>;
 	loadKeys(publicKey: string, privateKey: string, keySizeBits: number): Promise<KeyPair>;
-	encrypt(plaintextUtf8: string, rsaKeyPair: KeyPair): Promise<string>; // Returns Base64 encoded data
-	decrypt(ciphertextBase64: string, rsaKeyPair: KeyPair): Promise<string>; // Returns hexadecimal data
+	encrypt(plaintextUtf8: InputDataType, rsaKeyPair: KeyPair): Promise<string>; // Returns Base64 encoded data
+	decrypt(ciphertextBase64: string, rsaKeyPair: KeyPair): Promise<InputDataType>; // Returns hexadecimal data
 	publicKey(rsaKeyPair: KeyPair): Promise<string>;
 	privateKey(rsaKeyPair: KeyPair): Promise<string>;
+	// Maximum input size, output size may be greater. Use "null" to specify an arbitrary size.
+	maximumPlaintextLengthBytes: number|null;
 }
 
 // This is the interface that each platform must implement. Data is passed as

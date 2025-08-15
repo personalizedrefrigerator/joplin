@@ -1,12 +1,13 @@
 import { webcrypto } from 'node:crypto';
-import WebCryptoRsa from './WebCryptoRsa';
+import buildRsaCryptoProvider from './buildRsaCryptoProvider';
+import { PublicKeyAlgorithm } from '../../types';
 
-const rsaProvider = WebCryptoRsa.fromNodeCrypto(webcrypto);
 
 describe('WebCryptoRsa', () => {
 	// The default error message when a message is larger than the maximum length
 	// can be confusing. Verifies that a better message is provided:
 	test('should encrypt data up to the maximum length, then throw', async () => {
+		const rsaProvider = buildRsaCryptoProvider(PublicKeyAlgorithm.RsaV2, webcrypto);
 		const { keyPair, keySize: keySizeBits } = await rsaProvider.generateKeyPair();
 
 		// Should handle the case where given empty input
@@ -28,6 +29,7 @@ describe('WebCryptoRsa', () => {
 	});
 
 	test('output should not contain the input (medium-length input)', async () => {
+		const rsaProvider = buildRsaCryptoProvider(PublicKeyAlgorithm.RsaV2, webcrypto);
 		const { keyPair } = await rsaProvider.generateKeyPair();
 
 		for (const hexInput of ['123456789aa', '111aaaabbbbccccddddaa', '567890aaa']) {
