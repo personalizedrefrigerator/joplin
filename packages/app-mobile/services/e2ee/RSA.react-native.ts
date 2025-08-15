@@ -34,7 +34,7 @@ const legacyRsa: PublicKeyCrypto = {
 
 	encrypt: async (plaintextUtf8: string, rsaKeyPair: LegacyRsaKeyPair) => {
 		// TODO: Support long-data encryption in a way compatible with node-rsa.
-		return Buffer.from(RnRSA.encrypt(plaintextUtf8, rsaKeyPair.public), 'base64');
+		return Buffer.from(await RnRSA.encrypt(plaintextUtf8, rsaKeyPair.public), 'base64');
 	},
 
 	decrypt: async (ciphertextBuffer: CiphertextBuffer, rsaKeyPair: LegacyRsaKeyPair): Promise<string> => {
