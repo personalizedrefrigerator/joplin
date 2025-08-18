@@ -1,6 +1,6 @@
 import { afterAllCleanUp, encryptionService, expectNotThrow, expectThrow, setupDatabaseAndSynchronizer, switchClient } from '../../../testing/test-utils';
 import { PublicKeyAlgorithm } from '../types';
-import { decryptPrivateKey, ppkDecryptMasterKeyContent, ppkGenerateMasterKey, ppkPasswordIsValid, mkReencryptFromPasswordToPublicKey, mkReencryptFromPublicKeyToPassword, generateKeyPairWithAlgorithm } from './ppk';
+import { decryptPrivateKey, ppkDecryptMasterKeyContent, ppkGenerateMasterKey, ppkPasswordIsValid, mkReencryptFromPasswordToPublicKey, mkReencryptFromPublicKeyToPassword, generateKeyPairWithAlgorithm, supportsPpkAlgorithm } from './ppk';
 import { runIntegrationTests } from './ppkTestUtils';
 
 describe('e2ee/ppk', () => {
@@ -49,6 +49,9 @@ describe('e2ee/ppk', () => {
 				expect(publicKey).toMatch(/^rsa-v\d+;/);
 				expect(publicKey.startsWith(`${algorithm};`)).toBe(true);
 			}
+
+			// Should support the just-created key
+			expect(supportsPpkAlgorithm(ppk)).toBe(true);
 		});
 
 		it('should create different key pairs every time', async () => {
