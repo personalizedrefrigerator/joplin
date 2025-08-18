@@ -8,6 +8,10 @@ interface Options {
 	appName: string;
 }
 
+const shouldUseElectronNotifications = () => {
+	return (shim.isMac() || shim.isLinux()) && shim.isElectron();
+};
+
 export default class AlarmServiceDriverNode {
 
 	private appName_: string;
@@ -67,8 +71,8 @@ export default class AlarmServiceDriverNode {
 		});
 	}
 
-	private displayMacNotification(notification: Notification) {
-		// On macOS, node-notifier is broken:
+	private displayElectronNotification(notification: Notification) {
+		// On macOS and Linux, node-notifier is broken:
 		//
 		// https://github.com/mikaelbr/node-notifier/issues/352
 		//
@@ -97,7 +101,7 @@ export default class AlarmServiceDriverNode {
 	}
 
 	private async checkPermission() {
-		if (shim.isMac() && shim.isElectron()) {
+		if (shouldUseElectronNotifications()) {
 			this.logger().info(`AlarmServiceDriverNode::checkPermission: Permission in settings is "${Setting.value('notificationPermission')}"`);
 
 			if (Setting.value('notificationPermission') !== '') return Setting.value('notificationPermission');
@@ -172,8 +176,8 @@ export default class AlarmServiceDriverNode {
 			}, maxInterval);
 		} else {
 			timeoutId = shim.setTimeout(() => {
-				if (shim.isMac() && shim.isElectron()) {
-					this.displayMacNotification(notification);
+				if (shouldUseElectronNotifications()) {
+					this.displayElectronNotification(notification);
 				} else {
 					this.displayDefaultNotification(notification);
 				}
