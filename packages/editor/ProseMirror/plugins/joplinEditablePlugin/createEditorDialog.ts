@@ -15,14 +15,16 @@ interface Options {
 	block: SourceBlockData;
 	editorApi: EditorApi;
 	onSave: (newContent: SourceBlockData)=> void;
+	onDismiss: ()=> void;
 }
 
-const createEditorDialog = ({ editorApi, doneLabel, block, onSave }: Options) => {
+const createEditorDialog = ({ editorApi, doneLabel, block, onSave, onDismiss }: Options) => {
 	const dialog = document.createElement('dialog');
 	dialog.classList.add('editor-dialog', '-visible');
 	document.body.appendChild(dialog);
 
 	dialog.onclose = () => {
+		onDismiss();
 		dialog.remove();
 		editor.remove();
 	};

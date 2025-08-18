@@ -26,6 +26,7 @@ import { OnCreateCodeEditor as OnCreateCodeEditor, RendererControl } from './typ
 import resourcePlaceholderPlugin, { onResourceDownloaded } from './plugins/resourcePlaceholderPlugin';
 import getFileFromPasteEvent from '../utils/getFileFromPasteEvent';
 import { RenderResult } from '../../renderer/types';
+import detailsPlugin from './plugins/detailsPlugin';
 
 interface ProseMirrorControl extends EditorControl {
 	getSettings(): EditorSettings;
@@ -80,6 +81,7 @@ const createEditor = async (
 				gapCursor(),
 				dropCursor(),
 				history(),
+				detailsPlugin,
 				searchPlugin,
 				joplinEditablePlugin,
 				markupTracker,
