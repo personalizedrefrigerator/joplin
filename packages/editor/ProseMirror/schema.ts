@@ -5,6 +5,7 @@ import { nodeSpecs as listNodes } from './plugins/listPlugin';
 import { nodeSpecs as resourcePlaceholderNodes } from './plugins/resourcePlaceholderPlugin';
 import { hasProtocol } from '@joplin/utils/url';
 import { isResourceUrl } from '@joplin/lib/models/utils/resourceUtils';
+import { nodeSpecs as detailsNodes } from './plugins/detailsPlugin';
 
 // For reference, see:
 // - https://prosemirror.net/docs/guide/#schema
@@ -131,6 +132,7 @@ const nodes = addDefaultToplevelAttributes({
 			return result;
 		},
 	},
+	...detailsNodes,
 	...resourcePlaceholderNodes,
 	...listNodes,
 	...joplinEditableNodes,
