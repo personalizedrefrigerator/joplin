@@ -389,7 +389,7 @@ describe('RichTextEditor', () => {
 			expect(body.trim()).toBe('[link](unknown://test) testing');
 		});
 	});
-        
+
 	it('should preserve table of contents blocks on edit', async () => {
 		let body = '# Heading\n\n# Heading 2\n\n[toc]\n\nTest.';
 
