@@ -377,7 +377,7 @@ describe('RichTextEditor', () => {
 			noteBody={body}
 			onBodyChange={newBody => { body = newBody; }}
 		/>);
-	
+
 		const window = await getEditorWindow();
 		mockTyping(window, ' Testing');
 
@@ -385,7 +385,7 @@ describe('RichTextEditor', () => {
 			expect(body.trim()).toBe('Test:\n\n- this\n- is\n- a\n- test. Testing');
 		});
 	});
-		
+
 	it('should preserve table of contents blocks on edit', async () => {
 		let body = '# Heading\n\n# Heading 2\n\n[toc]\n\nTest.';
 
