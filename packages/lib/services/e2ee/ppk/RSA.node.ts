@@ -61,27 +61,11 @@ const legacyRsa: PublicKeyCrypto<NodeRSA> = {
 
 };
 
-const webCryptoRsa2 = buildRsaCryptoProvider(PublicKeyAlgorithm.RsaV2, webcrypto);
-const webCryptoRsa3 = buildRsaCryptoProvider(PublicKeyAlgorithm.RsaV3, webcrypto);
-
 const rsa: PublicKeyCryptoProvider = {
-	from: (algorithm) => {
-		if (algorithm === PublicKeyAlgorithm.RsaV1) {
-			return legacyRsa;
-		} else if (algorithm === PublicKeyAlgorithm.RsaV2) {
-			return webCryptoRsa2;
-		} else if (algorithm === PublicKeyAlgorithm.RsaV3) {
-			return webCryptoRsa3;
-		} else if (algorithm === PublicKeyAlgorithm.Unknown) {
-			throw new Error('Unknown PPK algorithm.');
-		} else {
-			const exhaustivenessCheck: never = algorithm;
-			throw new Error(`Unknown algorithm: ${exhaustivenessCheck}`);
-		}
-	},
-	supportsAlgorithm: (algorithm) => {
-		return algorithm === PublicKeyAlgorithm.RsaV1 || algorithm === PublicKeyAlgorithm.RsaV2;
-	},
+	[PublicKeyAlgorithm.Unknown]: null,
+	[PublicKeyAlgorithm.RsaV1]: legacyRsa,
+	[PublicKeyAlgorithm.RsaV2]: buildRsaCryptoProvider(PublicKeyAlgorithm.RsaV2, webcrypto),
+	[PublicKeyAlgorithm.RsaV3]: buildRsaCryptoProvider(PublicKeyAlgorithm.RsaV3, webcrypto),
 };
 
 export default rsa;

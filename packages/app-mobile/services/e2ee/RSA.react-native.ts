@@ -87,27 +87,11 @@ const legacyRsa: PublicKeyCrypto = {
 	},
 };
 
-const webCryptoRsa2 = buildRsaCryptoProvider(PublicKeyAlgorithm.RsaV2, QuickCrypto as WebCryptoSlice);
-const webCryptoRsa3 = buildRsaCryptoProvider(PublicKeyAlgorithm.RsaV3, QuickCrypto as WebCryptoSlice);
-
 const rsa: PublicKeyCryptoProvider = {
-	from: (algorithm: PublicKeyAlgorithm): PublicKeyCrypto => {
-		if (algorithm === PublicKeyAlgorithm.RsaV1) {
-			return legacyRsa;
-		} else if (algorithm === PublicKeyAlgorithm.RsaV2) {
-			return webCryptoRsa2;
-		} else if (algorithm === PublicKeyAlgorithm.RsaV3) {
-			return webCryptoRsa3;
-		} else if (algorithm === PublicKeyAlgorithm.Unknown) {
-			throw new Error('Unsupported algorithm');
-		} else {
-			const exhaustivenessCheck: never = algorithm;
-			throw new Error(`Unsupported public key algorithm: ${exhaustivenessCheck}`);
-		}
-	},
-	supportsAlgorithm: (algorithm) => {
-		return algorithm === PublicKeyAlgorithm.RsaV1 || algorithm === PublicKeyAlgorithm.RsaV2;
-	},
+	[PublicKeyAlgorithm.Unknown]: null,
+	[PublicKeyAlgorithm.RsaV1]: legacyRsa,
+	[PublicKeyAlgorithm.RsaV2]: buildRsaCryptoProvider(PublicKeyAlgorithm.RsaV2, QuickCrypto as WebCryptoSlice),
+	[PublicKeyAlgorithm.RsaV3]: buildRsaCryptoProvider(PublicKeyAlgorithm.RsaV3, QuickCrypto as WebCryptoSlice),
 };
 
 export default rsa;

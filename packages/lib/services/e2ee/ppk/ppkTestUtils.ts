@@ -20,7 +20,7 @@ interface TestData {
 // react-native-rsa can decrypt data from node-rsa and vice-versa.
 export async function createTestData(ppkAlgorithm: PublicKeyAlgorithm) {
 	const plaintext = 'ff00aa31bcf009a7cc';
-	const implementation = rsa().from(ppkAlgorithm);
+	const implementation = rsa(ppkAlgorithm);
 	const { keyPair, keySize } = await perfLogger.track(
 		`ppkTestUtils/generateKeyPair--${ppkAlgorithm}`,
 		() => implementation.generateKeyPair(),
@@ -69,7 +69,7 @@ export async function checkTestData(data: TestData, options: CheckTestDataOption
 	const messages: string[] = [];
 	let hasError = false;
 
-	const algorithm = rsa().from(data.algorithm);
+	const algorithm = rsa(data.algorithm);
 	const keyPair = await algorithm.loadKeys(data.publicKey, data.privateKey, data.keySize);
 	try {
 		const decrypted = await algorithm.decrypt(Buffer.from(data.ciphertext, 'base64'), keyPair);

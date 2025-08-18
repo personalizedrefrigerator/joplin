@@ -40,10 +40,7 @@ export interface PublicKeyCrypto<
 // This is the interface that each platform must implement. Data is passed as
 // Base64 encoded because that's what both NodeRSA and react-native-rsa support.
 
-export interface PublicKeyCryptoProvider {
-	from(algorithm: PublicKeyAlgorithm): PublicKeyCrypto;
-	supportsAlgorithm(algorithm: PublicKeyAlgorithm): boolean;
-}
+export type PublicKeyCryptoProvider = Record<PublicKeyAlgorithm, PublicKeyCrypto>;
 
 export interface Crypto {
 	randomBytes(size: number): Promise<CryptoBuffer>;
