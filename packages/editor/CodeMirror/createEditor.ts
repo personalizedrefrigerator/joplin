@@ -50,7 +50,7 @@ import { RenderedContentContext } from './extensions/rendering/types';
 type ExtendedEditorView = typeof EditorView & { EDIT_CONTEXT: boolean };
 (EditorView as ExtendedEditorView).EDIT_CONTEXT = false;
 
-export type ResolveImageCallback = (imageSrc: string)=> Promise<string>;
+export type ResolveImageCallback = (imageSrc: string, reloadCounter: number)=> Promise<string>;
 
 interface CodeMirrorProps {
 	resolveImageSrc: ResolveImageCallback;
@@ -65,8 +65,8 @@ const createEditor = (
 	props.onLogMessage('Initializing CodeMirror...');
 
 	const context: RenderedContentContext = {
-		resolveImageSrc: (src) => {
-			return props.resolveImageSrc(src);
+		resolveImageSrc: (src, counter) => {
+			return props.resolveImageSrc(src, counter);
 		},
 	};
 

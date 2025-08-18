@@ -229,8 +229,8 @@ const useEditorControl = (
 				setSearchState: setSearchStateCallback,
 			},
 
-			onResourceDownloaded: (id: string) => {
-				editorRef.current.onResourceDownloaded(id);
+			onResourceChanged: (id: string) => {
+				editorRef.current.onResourceChanged(id);
 			},
 		};
 
@@ -329,7 +329,7 @@ function NoteEditor(props: Props) {
 		for (const key in props.noteResources) {
 			const wasDownloaded = isDownloaded(lastNoteResources.current, key);
 			if (!wasDownloaded && isDownloaded(props.noteResources, key)) {
-				editorControl.onResourceDownloaded(key);
+				editorControl.onResourceChanged(key);
 			}
 		}
 	}, [props.noteResources, editorControl]);
