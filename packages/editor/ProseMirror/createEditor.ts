@@ -26,6 +26,7 @@ import resourcePlaceholderPlugin, { onResourceDownloaded } from './plugins/resou
 import getFileFromPasteEvent from '../utils/getFileFromPasteEvent';
 import { RenderResult } from '../../renderer/types';
 import postprocessEditorOutput from './utils/postprocessEditorOutput';
+import detailsPlugin from './plugins/detailsPlugin';
 
 const createEditor = async (
 	parentElement: HTMLElement,
@@ -76,6 +77,7 @@ const createEditor = async (
 				gapCursor(),
 				dropCursor(),
 				history(),
+				detailsPlugin,
 				searchPlugin,
 				joplinEditablePlugin,
 				markupTracker,
