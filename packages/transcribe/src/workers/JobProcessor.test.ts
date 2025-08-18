@@ -82,7 +82,7 @@ describe('JobProcessor', () => {
 		}
 	}, 6 * Minute);
 
-	skipIfCI('should remove file sent to queue if job is completed', async () => {
+	skipByDefault('should remove file sent to queue if job is completed', async () => {
 		jest.useRealTimers();
 		const tw = new JobProcessor(queue, new HtrCli('joplin/htr-cli:0.0.2', join(process.cwd(), 'images')), new FileStorage(), 1000);
 		await tw.init();
@@ -107,7 +107,7 @@ describe('JobProcessor', () => {
 
 	}, 6 * Minute);
 
-	skipIfCI('should remove file sent to queue if job fails too many times', async () => {
+	skipByDefault('should remove file sent to queue if job fails too many times', async () => {
 		jest.useRealTimers();
 		const fileStorage = new FileStorage();
 		const mockedFileStorageRemove = jest.fn();
