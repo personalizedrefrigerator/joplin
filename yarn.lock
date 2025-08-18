@@ -28042,7 +28042,6 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "generate-plugin-doc@workspace:packages/generate-plugin-doc"
   dependencies:
-    "@types/node": "npm:18.19.100"
     typedoc: "npm:0.17.8"
     typescript: "npm:4.7.4"
   languageName: unknown
