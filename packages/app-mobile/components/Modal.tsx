@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { RefObject, useCallback, useMemo, useRef, useState } from 'react';
-import { GestureResponderEvent, Modal, ModalProps, Platform, Pressable, ScrollView, ScrollViewProps, StyleSheet, View, ViewStyle } from 'react-native';
+import { GestureResponderEvent, KeyboardAvoidingView, Modal, ModalProps, Platform, Pressable, ScrollView, ScrollViewProps, StyleSheet, View, ViewStyle } from 'react-native';
 import FocusControl from './accessibility/FocusControl/FocusControl';
 import { msleep, Second } from '@joplin/utils/time';
 import useAsyncEffect from '@joplin/lib/hooks/useAsyncEffect';
@@ -159,11 +159,13 @@ const ModalElement: React.FC<ModalElementProps> = ({
 				{...modalProps}
 			>
 				{scrollOverflow ? (
-					<ScrollView
-						{...extraScrollViewProps}
-						style={[styles.modalScrollView, extraScrollViewProps.style]}
-						contentContainerStyle={[styles.modalScrollViewContent, extraScrollViewProps.contentContainerStyle]}
-					>{contentAndBackdrop}</ScrollView>
+					<KeyboardAvoidingView behavior='padding'>
+						<ScrollView
+							{...extraScrollViewProps}
+							style={[styles.modalScrollView, extraScrollViewProps.style]}
+							contentContainerStyle={[styles.modalScrollViewContent, extraScrollViewProps.contentContainerStyle]}
+						>{contentAndBackdrop}</ScrollView>
+					</KeyboardAvoidingView>
 				) : contentAndBackdrop}
 			</Modal>
 		</FocusControl.ModalWrapper>

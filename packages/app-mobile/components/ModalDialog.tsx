@@ -27,9 +27,7 @@ const useStyles = (themeId: number) => {
 				borderRadius: 4,
 				backgroundColor: theme.backgroundColor,
 				maxWidth: 600,
-				maxHeight: 500,
 				width: '100%',
-				height: '100%',
 				alignSelf: 'center',
 				marginVertical: 'auto',
 				flexGrow: 1,
@@ -39,7 +37,6 @@ const useStyles = (themeId: number) => {
 			title: theme.headerStyle,
 			contentWrapper: {
 				flexGrow: 1,
-				flexShrink: 1,
 			},
 			buttonRow: {
 				flexDirection: 'row',
@@ -66,6 +63,7 @@ const ModalDialog: React.FC<Props> = props => {
 			onRequestClose={null}
 			containerStyle={styles.container}
 			backgroundColor={theme.backgroundColorTransparent2}
+			scrollOverflow={true}
 		>
 			<View style={styles.contentWrapper}>{props.children}</View>
 			<View style={styles.buttonRow}>
