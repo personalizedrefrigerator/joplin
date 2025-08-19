@@ -1,6 +1,7 @@
 import BaseModel, { DeleteOptions, ModelType } from '../BaseModel';
 import BaseItem from './BaseItem';
-import FolderClass from './Folder';
+import type FolderClass from './Folder';
+import type ResourceClass from './Resource';
 import ItemChange from './ItemChange';
 import Setting from './Setting';
 import shim from '../shim';
@@ -9,7 +10,6 @@ import markdownUtils from '../markdownUtils';
 import { FolderEntity, NoteEntity } from '../services/database/types';
 import Tag from './Tag';
 const { sprintf } = require('sprintf-js');
-import ResourceClass from './Resource';
 import syncDebugLog from '../services/synchronizer/syncDebugLog';
 import { toFileProtocolPath, toForwardSlashes } from '../path-utils';
 const { pregQuote, substrWithEllipsis } = require('../string-utils.js');
