@@ -30,7 +30,6 @@ const useStyles = (themeId: number) => {
 				width: '100%',
 				alignSelf: 'center',
 				marginVertical: 'auto',
-				flexGrow: 1,
 				flexShrink: 1,
 				padding: theme.margin,
 			},
