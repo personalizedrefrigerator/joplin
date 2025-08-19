@@ -747,15 +747,13 @@ export default class Folder extends BaseItem {
 			report[tableName] = rows.length;
 
 			for (const row of rows) {
-				// Already unshared? If so, don't update the item.
-				// This prevents conflicts in the case where the item was unshared remotely.
-				// See https://github.com/laurent22/joplin/issues/12648.
-				if (row.share_id === '') continue;
-
 				const toSave: BaseItemEntity = {
 					id: row.id,
 					share_id: '',
-					updated_time: Date.now(),
+					// Don't change the updated_time.
+					// This prevents conflicts in the case where the item was unshared remotely.
+					// See https://github.com/laurent22/joplin/issues/12648
+					// updated_time: Date.now(),
 				};
 
 				if (hasParentId) {
