@@ -1,4 +1,4 @@
-import { defaultFolderIcon, FolderEntity, FolderIcon, NoteEntity, ResourceEntity } from '../services/database/types';
+import { BaseItemEntity, defaultFolderIcon, FolderEntity, FolderIcon, NoteEntity, ResourceEntity } from '../services/database/types';
 import BaseModel, { DeleteOptions } from '../BaseModel';
 import { FolderLoadOptions } from './utils/types';
 import time from '../time';
@@ -500,6 +500,7 @@ export default class Folder extends BaseItem {
 
 			for (const child of children) {
 				if (child.share_id !== rootFolder.share_id) {
+					logger.info('Update share_id in', child.id, 'since it doesn\'t match ', rootFolder.share_id);
 					await this.save({
 						id: child.id,
 						share_id: rootFolder.share_id,
@@ -527,6 +528,8 @@ export default class Folder extends BaseItem {
 		report.unshareUpdateCount += foldersToUnshare.length;
 
 		for (const item of foldersToUnshare) {
+			logger.info('Unshare', item.id);
+
 			await this.save({
 				id: item.id,
 				share_id: '',
@@ -747,14 +750,20 @@ export default class Folder extends BaseItem {
 			report[tableName] = rows.length;
 
 			for (const row of rows) {
-				// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-				const toSave: any = {
+				// Already unshared? If so, don't update the item.
+				// This prevents conflicts in the case where the item was unshared remotely.
+				// See https://github.com/laurent22/joplin/issues/12648.
+				if (row.share_id === '') continue;
+
+				const toSave: BaseItemEntity = {
 					id: row.id,
 					share_id: '',
 					updated_time: Date.now(),
 				};
 
-				if (hasParentId) toSave.parent_id = row.parent_id;
+				if (hasParentId) {
+					(toSave as FolderEntity|NoteEntity).parent_id = row.parent_id;
+				}
 
 				await ItemClass.save(toSave, { autoTimestamp: false });
 			}
