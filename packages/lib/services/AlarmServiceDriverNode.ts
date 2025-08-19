@@ -9,7 +9,7 @@ interface Options {
 }
 
 const shouldUseElectronNotifications = () => {
-	return (shim.isMac() || shim.isLinux()) && shim.isElectron();
+	return shim.isElectron();
 };
 
 export default class AlarmServiceDriverNode {
@@ -127,9 +127,12 @@ export default class AlarmServiceDriverNode {
 			// if a user doesn't want notifications, they can simply not set
 			// alarms.
 
-			new Notification('Checking permissions...', {
-				body: 'Permission has been granted',
-			});
+			// Notification permissions are only needed on MacOS:
+			if (shim.isMac()) {
+				new Notification('Checking permissions...', {
+					body: 'Permission has been granted',
+				});
+			}
 
 			Setting.setValue('notificationPermission', 'granted');
 		}
