@@ -702,7 +702,7 @@ export default class BaseItem extends BaseModel {
 		for (let i = 0; i < classNames.length; i++) {
 			const className = classNames[i];
 			const ItemClass = this.getClass(className);
-			const fieldNames = ItemClass.fieldNames(true);
+			const fieldNames = ItemClass.fieldNames('items');
 
 			// // NEVER SYNCED:
 			// 'SELECT * FROM [ITEMS] WHERE id NOT INT (SELECT item_id FROM sync_items WHERE sync_target = ?)'
