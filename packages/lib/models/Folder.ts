@@ -500,7 +500,6 @@ export default class Folder extends BaseItem {
 
 			for (const child of children) {
 				if (child.share_id !== rootFolder.share_id) {
-					logger.info('Update share_id in', child.id, 'since it doesn\'t match ', rootFolder.share_id);
 					await this.save({
 						id: child.id,
 						share_id: rootFolder.share_id,
@@ -528,8 +527,6 @@ export default class Folder extends BaseItem {
 		report.unshareUpdateCount += foldersToUnshare.length;
 
 		for (const item of foldersToUnshare) {
-			logger.info('Unshare', item.id);
-
 			await this.save({
 				id: item.id,
 				share_id: '',
