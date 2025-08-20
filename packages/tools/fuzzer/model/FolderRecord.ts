@@ -1,12 +1,12 @@
 import { strict as assert } from 'node:assert';
-import type { FolderMetadata, ItemId } from '../types';
+import type { FolderData, ItemId } from '../types';
 
 export type ShareRecord = {
 	email: string;
 	readOnly: boolean;
 };
 
-interface InitializationOptions extends FolderMetadata {
+interface InitializationOptions extends FolderData {
 	childIds: ItemId[];
 	sharedWith: ShareRecord[];
 	// Email of the Joplin Server account that controls the item
@@ -17,7 +17,7 @@ const validateId = (id: string) => {
 	return !!id.match(/^[a-zA-Z0-9]{32}$/);
 };
 
-export default class FolderRecord implements FolderMetadata {
+export default class FolderRecord implements FolderData {
 	public readonly parentId: string;
 	public readonly id: string;
 	public readonly title: string;

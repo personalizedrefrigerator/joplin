@@ -1,5 +1,5 @@
 import { strict as assert } from 'assert';
-import { ActionableClient, FolderMetadata, FuzzContext, ItemId, NoteData, ShareOptions, TreeItem, assertIsFolder, isFolder } from './types';
+import { ActionableClient, FolderData, FuzzContext, ItemId, NoteData, ShareOptions, TreeItem, assertIsFolder, isFolder } from './types';
 import type Client from './Client';
 import FolderRecord from './model/FolderRecord';
 
@@ -301,7 +301,7 @@ class ActionTracker {
 				this.checkRep_();
 				return Promise.resolve();
 			},
-			createFolder: (data: FolderMetadata) => {
+			createFolder: (data: FolderData) => {
 				const parentId = data.parentId ?? '';
 				assertWriteable(parentId);
 
@@ -407,7 +407,10 @@ class ActionTracker {
 			listNotes: () => {
 				const notes = mapItems(item => {
 					return isFolder(item) ? null : item;
-				}).filter(item => !!item);
+				}).filter(item => !!item).map(item => ({
+					...item,
+					isShared: isShared(item),
+				}));
 
 				this.checkRep_();
 				return Promise.resolve(notes);

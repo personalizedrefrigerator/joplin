@@ -1,5 +1,5 @@
 import uuid, { createSecureRandom } from '@joplin/lib/uuid';
-import { ActionableClient, FolderMetadata, FuzzContext, HttpMethod, ItemId, Json, NoteData, RandomFolderOptions, RandomNoteOptions, ShareOptions } from './types';
+import { ActionableClient, FolderData, FuzzContext, HttpMethod, ItemId, Json, NoteData, RandomFolderOptions, RandomNoteOptions, ShareOptions } from './types';
 import { join } from 'path';
 import { mkdir, remove } from 'fs-extra';
 import getStringProperty from './utils/getStringProperty';
@@ -449,7 +449,7 @@ class Client implements ActionableClient {
 		});
 	}
 
-	public async createFolder(folder: FolderMetadata) {
+	public async createFolder(folder: FolderData) {
 		logger.info('Create folder', folder.id, 'in', `${folder.parentId ?? 'root'}/${this.label}`);
 		await this.tracker_.createFolder(folder);
 
@@ -575,7 +575,7 @@ class Client implements ActionableClient {
 
 	public async listNotes() {
 		const params = {
-			fields: 'id,parent_id,body,title,is_conflict,conflict_original_id',
+			fields: 'id,parent_id,body,title,is_conflict,conflict_original_id,share_id',
 			include_deleted: '1',
 			include_conflicts: '1',
 		};
@@ -590,6 +590,7 @@ class Client implements ActionableClient {
 				) : getStringProperty(item, 'parent_id'),
 				title: getStringProperty(item, 'title'),
 				body: getStringProperty(item, 'body'),
+				isShared: getStringProperty(item, 'share_id') !== '',
 			}),
 		);
 	}

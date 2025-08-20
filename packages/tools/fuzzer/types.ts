@@ -12,12 +12,15 @@ export interface NoteData {
 	title: string;
 	body: string;
 }
-export interface FolderMetadata {
+export interface DetailedNoteData extends NoteData {
+	isShared: boolean;
+}
+export interface FolderData {
 	parentId: ItemId;
 	id: ItemId;
 	title: string;
 }
-export interface DetailedFolderMetadata extends FolderMetadata {
+export interface DetailedFolderData extends FolderData {
 	isShared: boolean;
 }
 
@@ -61,7 +64,7 @@ export interface ShareOptions {
 }
 
 export interface ActionableClient {
-	createFolder(data: FolderMetadata): Promise<void>;
+	createFolder(data: FolderData): Promise<void>;
 	shareFolder(id: ItemId, shareWith: Client, options: ShareOptions): Promise<void>;
 	removeFromShare(id: string, shareWith: Client): Promise<void>;
 	deleteFolder(id: ItemId): Promise<void>;
@@ -71,7 +74,7 @@ export interface ActionableClient {
 	sync(): Promise<void>;
 
 	listNotes(): Promise<NoteData[]>;
-	listFolders(): Promise<DetailedFolderMetadata[]>;
+	listFolders(): Promise<DetailedFolderData[]>;
 	allFolderDescendants(parentId: ItemId): Promise<ItemId[]>;
 	randomFolder(options: RandomFolderOptions): Promise<FolderRecord>;
 	randomNote(options: RandomNoteOptions): Promise<NoteData>;
