@@ -406,4 +406,32 @@ describe('RichTextEditor', () => {
 			expect(body.trim()).toBe('# Heading\n\n# Heading 2\n\n[toc]\n\nTest. testing');
 		});
 	});
+
+	it.each([
+		'**bold**',
+		'*italic*',
+		'$\\text{math}$',
+		'<span style="color: red;">test</span>',
+		'`code`',
+		'==highlight==ed',
+		'<sup>Super</sup>script',
+		'<sub>Sub</sub>script',
+	])('should preserve inline markup on edit (case %#)', async (initialBody) => {
+		initialBody += 'test'; // Ensure that typing will add new content outside the formatting
+		let body = initialBody;
+
+		render(<WrappedEditor
+			noteBody={body}
+			onBodyChange={newBody => { body = newBody; }}
+		/>);
+
+		await findElement<HTMLElement>('div.prosemirror-editor');
+
+		const window = await getEditorWindow();
+		mockTyping(window, ' testing');
+
+		await waitFor(async () => {
+			expect(body.trim()).toBe(`${initialBody} testing`);
+		});
+	});
 });
