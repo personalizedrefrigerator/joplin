@@ -540,6 +540,7 @@ class Client implements ActionableClient {
 					accepted: false,
 					waiting: true,
 					rejected: false,
+					canWrite: !options.readOnly,
 					folderId: id,
 					fromUser: {
 						email: this.email,
