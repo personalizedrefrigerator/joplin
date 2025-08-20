@@ -370,6 +370,21 @@ describe('RichTextEditor', () => {
 		});
 	});
 
+	it('should be possible show an editor for math blocks', async () => {
+		let body = 'Test:\n\n$$3^2 + 4^2 = 5^2$$';
+		render(<WrappedEditor
+			noteBody={body}
+			onBodyChange={newBody => { body = newBody; }}
+		/>);
+
+		const editButton = await findElement<HTMLButtonElement>('button.edit');
+		editButton.click();
+
+		const editor = await findElement('dialog .cm-editor');
+		expect(editor).toBeTruthy();
+		expect(editor.textContent).toContain('3^2 + 4^2 = 5^2');
+	});
+
 	it('should preserve table of contents blocks on edit', async () => {
 		let body = '# Heading\n\n# Heading 2\n\n[toc]\n\nTest.';
 

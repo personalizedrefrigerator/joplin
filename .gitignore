@@ -671,7 +671,6 @@ packages/app-mobile/components/NoteEditor/RichTextEditor.js
 packages/app-mobile/components/NoteEditor/SearchPanel.js
 packages/app-mobile/components/NoteEditor/WarningBanner.js
 packages/app-mobile/components/NoteEditor/commandDeclarations.js
-packages/app-mobile/components/NoteEditor/hooks/useCodeMirrorPlugins.js
 packages/app-mobile/components/NoteEditor/hooks/useEditorCommandHandler.test.js
 packages/app-mobile/components/NoteEditor/hooks/useEditorCommandHandler.js
 packages/app-mobile/components/NoteEditor/testing/createTestEditorProps.js
@@ -841,6 +840,7 @@ packages/app-mobile/contentScripts/imageEditorBundle/utils/useEditorMessenger.js
 packages/app-mobile/contentScripts/markdownEditorBundle/contentScript.js
 packages/app-mobile/contentScripts/markdownEditorBundle/types.js
 packages/app-mobile/contentScripts/markdownEditorBundle/useWebViewSetup.js
+packages/app-mobile/contentScripts/markdownEditorBundle/utils/useCodeMirrorPlugins.js
 packages/app-mobile/contentScripts/rendererBundle/contentScript/Renderer.test.js
 packages/app-mobile/contentScripts/rendererBundle/contentScript/Renderer.js
 packages/app-mobile/contentScripts/rendererBundle/contentScript/index.js
