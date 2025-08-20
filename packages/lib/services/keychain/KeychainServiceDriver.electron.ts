@@ -31,12 +31,14 @@ export default class KeychainServiceDriver extends KeychainServiceDriverBase {
 		if (canUseSafeStorage()) {
 			logger.debug('Saving password with electron safe storage. ID: ', name);
 
+			let encrypted;
 			try {
-				const encrypted = await shim.electronBridge().safeStorage.encryptString(password);
-				await KvStore.instance().setValue(`${kvStorePrefix}${name}`, encrypted);
+				encrypted = await shim.electronBridge().safeStorage.encryptString(password);
 			} catch (error) {
 				logger.warn('Encrypting a setting failed. Missing keychain permission?', error);
+				return false;
 			}
+			await KvStore.instance().setValue(`${kvStorePrefix}${name}`, encrypted);
 		} else {
 			// Unsupported.
 			return false;
