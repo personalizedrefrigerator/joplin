@@ -152,7 +152,7 @@ const doRandomAction = async (context: FuzzContext, client: Client, clientPool: 
 				filter: candidate => {
 					const isToplevel = !candidate.parentId;
 					const ownedByCurrent = candidate.ownedByEmail === client.email;
-					const alreadyShared = candidate.isSharedWith(other.email);
+					const alreadyShared = isToplevel && candidate.isSharedWith(other.email);
 					return isToplevel && ownedByCurrent && !alreadyShared;
 				},
 				includeReadOnly: true,
@@ -166,7 +166,7 @@ const doRandomAction = async (context: FuzzContext, client: Client, clientPool: 
 		unshareFolder: async () => {
 			const target = await client.randomFolder({
 				filter: candidate => {
-					return candidate.isShared() && candidate.ownedByEmail === client.email;
+					return candidate.isRootSharedItem && candidate.ownedByEmail === client.email;
 				},
 				includeReadOnly: true,
 			});
@@ -200,7 +200,7 @@ const doRandomAction = async (context: FuzzContext, client: Client, clientPool: 
 		moveFolderTo: async () => {
 			const target = await client.randomFolder({
 				// Don't move shared folders (should not be allowed by the GUI in the main apps).
-				filter: item => !item.isShared(),
+				filter: item => !item.isRootSharedItem,
 				includeReadOnly: false,
 			});
 			if (!target) return false;

@@ -596,7 +596,7 @@ class Client implements ActionableClient {
 
 	public async listFolders() {
 		const params = {
-			fields: 'id,parent_id,title',
+			fields: 'id,parent_id,title,share_id',
 			include_deleted: '1',
 		};
 		return await this.execPagedApiCommand_(
@@ -607,6 +607,7 @@ class Client implements ActionableClient {
 				id: getStringProperty(item, 'id'),
 				parentId: getStringProperty(item, 'parent_id'),
 				title: getStringProperty(item, 'title'),
+				isShared: getStringProperty(item, 'share_id') !== '',
 			}),
 		);
 	}

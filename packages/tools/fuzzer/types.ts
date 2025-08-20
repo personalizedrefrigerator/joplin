@@ -17,6 +17,10 @@ export interface FolderMetadata {
 	id: ItemId;
 	title: string;
 }
+export interface DetailedFolderMetadata extends FolderMetadata {
+	isShared: boolean;
+}
+
 export type TreeItem = NoteData|FolderRecord;
 
 export const isFolder = (item: TreeItem): item is FolderRecord => {
@@ -67,7 +71,7 @@ export interface ActionableClient {
 	sync(): Promise<void>;
 
 	listNotes(): Promise<NoteData[]>;
-	listFolders(): Promise<FolderMetadata[]>;
+	listFolders(): Promise<DetailedFolderMetadata[]>;
 	allFolderDescendants(parentId: ItemId): Promise<ItemId[]>;
 	randomFolder(options: RandomFolderOptions): Promise<FolderRecord>;
 	randomNote(options: RandomNoteOptions): Promise<NoteData>;

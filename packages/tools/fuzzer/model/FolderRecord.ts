@@ -1,3 +1,4 @@
+import { strict as assert } from 'node:assert';
 import type { FolderMetadata, ItemId } from '../types';
 
 export type ShareRecord = {
@@ -56,16 +57,17 @@ export default class FolderRecord implements FolderMetadata {
 		};
 	}
 
-	// Only valid for top-level folders
-	public isShared() {
+	public get isRootSharedItem() {
 		return this.sharedWith_.length > 0;
 	}
 
 	public isSharedWith(email: string) {
+		assert.equal(this.parentId, '', 'only supported for toplevel folders');
 		return this.sharedWith_.some(record => record.email === email);
 	}
 
 	public isReadOnlySharedWith(email: string) {
+		assert.equal(this.parentId, '', 'only supported for toplevel folders');
 		return this.sharedWith_.some(record => record.email === email && record.readOnly);
 	}
 

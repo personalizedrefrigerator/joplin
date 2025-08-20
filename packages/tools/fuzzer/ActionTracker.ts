@@ -12,6 +12,26 @@ class ActionTracker {
 	private tree_: Map<string, ClientData> = new Map();
 	public constructor(private readonly context_: FuzzContext) {}
 
+	private getToplevelParent_(item: ItemId|TreeItem) {
+		let itemId = typeof item === 'string' ? item : item.id;
+		const originalItemId = itemId;
+		const seenIds = new Set<ItemId>();
+		while (this.idToItem_.get(itemId)?.parentId) {
+			seenIds.add(itemId);
+
+			itemId = this.idToItem_.get(itemId).parentId;
+			if (seenIds.has(itemId)) {
+				throw new Error('Assertion failure: Item hierarchy is not a tree.');
+			}
+		}
+
+		const toplevelItem = this.idToItem_.get(itemId);
+		assert.ok(toplevelItem, `Parent not found for item, top:${itemId} (started at ${originalItemId})`);
+		assert.equal(toplevelItem.parentId, '', 'Should be a toplevel item');
+
+		return toplevelItem;
+	}
+
 	private checkRep_() {
 		const checkItem = (itemId: ItemId) => {
 			assert.match(itemId, /^[a-zA-Z0-9]{32}$/, 'item IDs should be 32 character alphanumeric strings');
@@ -34,12 +54,15 @@ class ActionTracker {
 
 				// Shared folders
 				assert.ok(item.ownedByEmail, 'all folders should have a "shareOwner" property (even if not shared)');
-				assert.ok(!item.isSharedWith(item.ownedByEmail), 'the share owner should not be in an item\'s sharedWith list');
-				if (item.isShared()) {
+				if (item.isRootSharedItem) {
 					assert.equal(item.parentId, '', 'only toplevel folders should be shared');
 				}
 				for (const sharedWith of item.shareRecipients) {
 					assert.ok(this.tree_.has(sharedWith), 'all sharee users should exist');
+				}
+				// isSharedWith is only valid for toplevel folders
+				if (item.parentId === '') {
+					assert.ok(!item.isSharedWith(item.ownedByEmail), 'the share owner should not be in an item\'s sharedWith list');
 				}
 
 				// Uniqueness
@@ -218,32 +241,24 @@ class ActionTracker {
 			return result;
 		};
 
-		const listFoldersDetailed = () => {
+		const getAllFolders = () => {
 			return mapItems((item): FolderRecord => {
 				return isFolder(item) ? item : null;
 			}).filter(item => !!item);
 		};
 
-		const isReadOnly = (itemId: ItemId) => {
-			const originalItemId = itemId;
-			if (itemId === '') return false;
+		const isReadOnly = (item: ItemId|TreeItem) => {
+			if (item === '') return false;
 
-			const seenIds = new Set<ItemId>();
-			while (this.idToItem_.get(itemId)?.parentId) {
-				seenIds.add(itemId);
-
-				itemId = this.idToItem_.get(itemId).parentId;
-				if (seenIds.has(itemId)) {
-					throw new Error('Assertion failure: Item hierarchy is not a tree.');
-				}
-			}
-
-			const toplevelItem = this.idToItem_.get(itemId);
-			assert.ok(toplevelItem, `Parent not found for item, top:${itemId} (started at ${originalItemId})`);
-			assert.equal(toplevelItem.parentId, '', 'Should actually be a toplevel item');
-
+			const toplevelItem = this.getToplevelParent_(item);
 			assertIsFolder(toplevelItem);
 			return toplevelItem.isReadOnlySharedWith(clientId);
+		};
+
+		const isShared = (item: TreeItem) => {
+			const toplevelItem = this.getToplevelParent_(item);
+			assertIsFolder(toplevelItem);
+			return toplevelItem.isRootSharedItem;
 		};
 
 		const assertWriteable = (item: ItemId|TreeItem) => {
@@ -370,7 +385,7 @@ class ActionTracker {
 					}
 
 					if (isFolder(item)) {
-						assert.equal(item.isShared(), false, 'cannot move toplevel shared folders without first unsharing');
+						assert.equal(item.isRootSharedItem, false, 'cannot move toplevel shared folders without first unsharing');
 					}
 
 					assertWriteable(itemId);
@@ -399,10 +414,11 @@ class ActionTracker {
 			},
 			listFolders: () => {
 				this.checkRep_();
-				const folderData = listFoldersDetailed().map(item => ({
+				const folderData = getAllFolders().map(item => ({
 					id: item.id,
 					title: item.title,
 					parentId: item.parentId,
+					isShared: isShared(item),
 				}));
 
 				return Promise.resolve(folderData);
@@ -431,7 +447,7 @@ class ActionTracker {
 				return Promise.resolve(descendants);
 			},
 			randomFolder: async (options) => {
-				let folders = listFoldersDetailed();
+				let folders = getAllFolders();
 				if (options.filter) {
 					folders = folders.filter(options.filter);
 				}
