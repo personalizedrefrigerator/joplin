@@ -23,6 +23,9 @@ const domOutputSpecs = {
 	listItem: ['li', 0],
 	blockQuote: ['blockquote', 0],
 	hr: ['hr'],
+	sub: ['sub', 0],
+	sup: ['sup', 0],
+	mark: ['mark', 0],
 } satisfies Record<string, DOMOutputSpec>;
 
 type AttributeSpecs = Record<string, AttributeSpec>;
@@ -217,6 +220,18 @@ const marks = {
 		code: true,
 		toDOM: () => domOutputSpecs.code,
 		excludes: '_',
+	},
+	sub: {
+		parseDOM: [{ tag: 'sub' }],
+		toDOM: () => domOutputSpecs.sub,
+	},
+	sup: {
+		parseDOM: [{ tag: 'sup' }],
+		toDOM: () => domOutputSpecs.sup,
+	},
+	mark: {
+		parseDOM: [{ tag: 'mark' }],
+		toDOM: () => domOutputSpecs.mark,
 	},
 	color: {
 		inclusive: false,
