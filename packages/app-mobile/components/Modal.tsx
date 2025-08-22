@@ -39,6 +39,9 @@ const useStyles = (hasScrollView: boolean, backgroundColor: string|undefined) =>
 				// instead:
 				backgroundColor: hasScrollView ? null : backgroundColor,
 			},
+			keyboardAvoidingView: {
+				flex: 1,
+			},
 			modalScrollView: {
 				backgroundColor,
 				flexGrow: 1,
@@ -159,7 +162,7 @@ const ModalElement: React.FC<ModalElementProps> = ({
 				{...modalProps}
 			>
 				{scrollOverflow ? (
-					<KeyboardAvoidingView behavior='padding' style={{ flex: 1 }}>
+					<KeyboardAvoidingView behavior='padding' style={styles.keyboardAvoidingView}>
 						<ScrollView
 							{...extraScrollViewProps}
 							style={[styles.modalScrollView, extraScrollViewProps.style]}
