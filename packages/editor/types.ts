@@ -127,8 +127,11 @@ export interface EditorControl {
 	setContentScripts(plugins: ContentScriptData[]): Promise<void>;
 
 	// Called when a resource associated with the current note finishes downloading
-	// or has otherwise changed.
+	// or has been updated in an external editor.
 	onResourceChanged(id: string): void;
+
+	remove(): void;
+	focus(): void;
 }
 
 export enum EditorLanguageType {
