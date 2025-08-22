@@ -164,12 +164,12 @@ export default class OcrService {
 
 		try {
 			const language = toIso639Alpha3(Setting.value('locale'));
+			const processedResourceIds: string[] = [];
 
 			// Queue all resources for processing
-			const processedResourceIds: string[] = [];
-			let processedThisRound;
-			do {
-				processedThisRound = 0;
+			let lastProcessedCount = -1;
+			while (processedResourceIds.length > lastProcessedCount) {
+				lastProcessedCount = processedResourceIds.length;
 
 				const resources = await Resource.needOcr(supportedMimeTypes, skippedResourceIds.concat(processedResourceIds), 100, {
 					fields: [
@@ -196,12 +196,11 @@ export default class OcrService {
 
 					if (processed) {
 						processedResourceIds.push(resource.id);
-						processedThisRound++;
 					} else {
 						skippedResourceIds.push(resource.id);
 					}
 				}
-			} while (processedThisRound > 0);
+			}
 
 			// Wait for processing to finish
 			await this.printedTextQueue_.waitForAll();
