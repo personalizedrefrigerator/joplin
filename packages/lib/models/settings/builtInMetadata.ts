@@ -1456,7 +1456,7 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 		},
 
 		'editor.inlineRendering': {
-			value: true,
+			value: false,
 			type: SettingItemType.Bool,
 			public: true,
 			appTypes: [AppType.Desktop, AppType.Mobile],
@@ -1466,7 +1466,7 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 			storage: SettingStorage.File,
 		},
 		'editor.imageRendering': {
-			value: true,
+			value: false,
 			type: SettingItemType.Bool,
 			public: true,
 			appTypes: [AppType.Desktop, AppType.Mobile],
