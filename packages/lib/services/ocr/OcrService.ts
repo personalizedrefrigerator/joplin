@@ -165,14 +165,12 @@ export default class OcrService {
 		try {
 			const language = toIso639Alpha3(Setting.value('locale'));
 
-			let totalProcessed = 0;
-
-			const recentlyProcessedIds: string[] = [];
+			const processedResourceIds: string[] = [];
 			let processedThisRound;
 			do {
 				processedThisRound = 0;
 
-				const resources = await Resource.needOcr(supportedMimeTypes, skippedResourceIds.concat(recentlyProcessedIds), 100, {
+				const resources = await Resource.needOcr(supportedMimeTypes, skippedResourceIds.concat(processedResourceIds), 100, {
 					fields: [
 						'id',
 						'mime',
@@ -183,24 +181,31 @@ export default class OcrService {
 				});
 
 				for (const resource of resources) {
-					recentlyProcessedIds.push(resource.id);
+					const makeCurrentQueueAction = () => makeQueueAction(processedResourceIds.length, language, resource);
 
+					let processed = true;
 					if (resource.ocr_driver_id === ResourceOcrDriverId.PrintedText) {
-						processedThisRound++;
-						await this.printedTextQueue_.pushAsync(resource.id, makeQueueAction(totalProcessed++, language, resource));
+						await this.printedTextQueue_.pushAsync(resource.id, makeCurrentQueueAction());
 					} else if (resource.ocr_driver_id === ResourceOcrDriverId.HandwrittenText) {
-						processedThisRound++;
-						await this.handwrittenTextQueue_.pushAsync(resource.id, makeQueueAction(totalProcessed++, language, resource));
+						await this.handwrittenTextQueue_.pushAsync(resource.id, makeCurrentQueueAction());
 					} else {
 						logger.info('Skipped processing', resource.id, 'with OCR: Unsupported ocr_driver_id', resource.ocr_driver_id);
+						processed = false;
+					}
+
+					if (processed) {
+						processedResourceIds.push(resource.id);
+						processedThisRound++;
+					} else {
+						skippedResourceIds.push(resource.id);
 					}
 				}
 
 				await this.printedTextQueue_.waitForAll();
 				await this.handwrittenTextQueue_.waitForAll();
-				totalProcessed += processedThisRound;
 			} while (processedThisRound > 0);
 
+			const totalProcessed = processedResourceIds.length;
 			if (totalProcessed) {
 				eventManager.emit(EventName.OcrServiceResourcesProcessed);
 			}
