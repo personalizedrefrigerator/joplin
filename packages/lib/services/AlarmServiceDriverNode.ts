@@ -72,7 +72,7 @@ export default class AlarmServiceDriverNode {
 	}
 
 	private displayElectronNotification(notification: Notification) {
-		// On macOS and Linux, node-notifier is broken:
+		// On Electron, node-notifier is broken:
 		//
 		// https://github.com/mikaelbr/node-notifier/issues/352
 		//
@@ -81,7 +81,6 @@ export default class AlarmServiceDriverNode {
 		//
 		// https://www.electronjs.org/docs/tutorial/notifications
 		//
-		// In fact it's likely that we could use this on other platforms too
 		try {
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 			const options: any = {
@@ -92,7 +91,7 @@ export default class AlarmServiceDriverNode {
 				},
 			};
 
-			this.logger().info('AlarmServiceDriverNode::displayMacNotification: Triggering notification (macOS):', notification.title, options);
+			this.logger().info('AlarmServiceDriverNode::displayMacNotification: Triggering notification (electron):', notification.title, options);
 
 			new Notification(notification.title, options);
 		} catch (error) {
