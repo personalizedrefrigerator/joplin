@@ -1,6 +1,14 @@
 # Joplin Desktop Changelog
 
-## [v3.4.6](https://github.com/laurent22/joplin/releases/tag/v3.4.6) - 2025-08-20T20:30:35Z
+## [v3.4.7](https://github.com/laurent22/joplin/releases/tag/v3.4.7) (Pre-release) - 2025-08-23T10:49:54Z
+
+- Improved: Downgrade to Electron 35.7.5 ([#13013](https://github.com/laurent22/joplin/issues/13013) by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Fix custom root CA support ([#13018](https://github.com/laurent22/joplin/issues/13018)) ([#13009](https://github.com/laurent22/joplin/issues/13009) by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Fix error logged when rendering a non-existent resource ([#13004](https://github.com/laurent22/joplin/issues/13004)) ([#12998](https://github.com/laurent22/joplin/issues/12998) by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Fix startup failure when unable to access the keychain ([#13006](https://github.com/laurent22/joplin/issues/13006) by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Fix unshare action requires two syncs to be reflected locally ([#12999](https://github.com/laurent22/joplin/issues/12999)) ([#12648](https://github.com/laurent22/joplin/issues/12648) by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+
+## [v3.4.6](https://github.com/laurent22/joplin/releases/tag/v3.4.6) (Pre-release) - 2025-08-20T20:30:35Z
 
 - Improved: Markdown editor: Toggle checkboxes on ctrl-click ([#12927](https://github.com/laurent22/joplin/issues/12927) by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
 - Improved: Updated packages @adobe/css-tools (v4.4.3), @playwright/test (v1.52.0), jsdom (v26.1.0), sass (v1.87.0), sharp (v0.34.2)
