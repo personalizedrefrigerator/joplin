@@ -53,7 +53,7 @@ class Command extends BaseCommand {
 
 		const userId = ShareService.instance().userId;
 		const shareUrl = ShareService.instance().shareUrl(userId, share);
-		this.stdout(_('Share URL:', shareUrl));
+		this.stdout(_('Published at URL:', shareUrl));
 	}
 }
 

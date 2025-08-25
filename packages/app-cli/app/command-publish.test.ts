@@ -49,9 +49,9 @@ describe('command-publish', () => {
 			});
 		});
 
-		// Should have logged a share URL
+		// Should have logged the publication URL
 		expect(onStdout).toHaveBeenCalled();
-		expect(onStdout.mock.lastCall[0]).toMatch(/Share URL:/);
+		expect(onStdout.mock.lastCall[0]).toMatch(/Published at URL:/);
 	});
 
 	test('should be enabled for Joplin Server and Cloud sync targets', () => {
