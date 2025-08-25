@@ -567,6 +567,27 @@ class Client implements ActionableClient {
 		await other.sync();
 	}
 
+	public async publishNote(id: ItemId) {
+		await this.tracker_.publishNote(id);
+
+		logger.info('Publish note', id, 'in', this.label);
+		const publishOutput = await this.execCliCommand_('publish', '-f', id);
+		const publishUrl = publishOutput.stdout.match(/http[s]?:\/\/\S+/);
+
+		assert.notEqual(publishUrl, null, 'should log the publication URL');
+
+		logger.info('Testing publication URL: ', publishUrl[0]);
+		const fetchResult = await fetch(publishUrl[0]);
+		assert.ok(fetchResult.ok, 'should be able to fetch the published note.');
+	}
+
+	public async unpublishNote(id: ItemId) {
+		await this.tracker_.publishNote(id);
+
+		logger.info('Unpublish note', id, 'in', this.label);
+		await this.execCliCommand_('unpublish', id);
+	}
+
 	public async moveItem(itemId: ItemId, newParentId: ItemId) {
 		logger.info('Move', itemId, 'to', newParentId);
 		await this.tracker_.moveItem(itemId, newParentId);
@@ -576,7 +597,7 @@ class Client implements ActionableClient {
 
 	public async listNotes() {
 		const params = {
-			fields: 'id,parent_id,body,title,is_conflict,conflict_original_id,share_id',
+			fields: 'id,parent_id,body,title,is_conflict,conflict_original_id,share_id,is_shared',
 			include_deleted: '1',
 			include_conflicts: '1',
 		};
@@ -592,6 +613,7 @@ class Client implements ActionableClient {
 				title: getStringProperty(item, 'title'),
 				body: getStringProperty(item, 'body'),
 				isShared: getStringProperty(item, 'share_id') !== '',
+				published: getNumberProperty(item, 'is_shared') === 1,
 			}),
 		);
 	}
