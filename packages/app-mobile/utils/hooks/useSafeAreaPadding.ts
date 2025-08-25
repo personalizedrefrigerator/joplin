@@ -10,7 +10,7 @@ const useSafeAreaPadding = () => {
 		return isLandscape ? {
 			paddingRight: safeAreaInsets.right,
 			paddingLeft: safeAreaInsets.left,
-			paddingTop: 0,
+			paddingTop: safeAreaInsets.top,
 			paddingBottom: 0,
 		} : {
 			paddingTop: safeAreaInsets.top,
