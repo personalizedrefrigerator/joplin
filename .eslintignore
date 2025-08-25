@@ -117,6 +117,8 @@ packages/app-cli/app/command-ls.js
 packages/app-cli/app/command-mkbook.test.js
 packages/app-cli/app/command-mkbook.js
 packages/app-cli/app/command-mv.js
+packages/app-cli/app/command-publish.test.js
+packages/app-cli/app/command-publish.js
 packages/app-cli/app/command-ren.js
 packages/app-cli/app/command-restore.js
 packages/app-cli/app/command-rmbook.test.js
@@ -129,6 +131,8 @@ packages/app-cli/app/command-share.test.js
 packages/app-cli/app/command-share.js
 packages/app-cli/app/command-sync.js
 packages/app-cli/app/command-testing.js
+packages/app-cli/app/command-unpublish.test.js
+packages/app-cli/app/command-unpublish.js
 packages/app-cli/app/command-use.js
 packages/app-cli/app/command-version.js
 packages/app-cli/app/gui/FolderListWidget.js
