@@ -8,7 +8,7 @@ import { ModalState } from './accessibility/FocusControl/types';
 import useSafeAreaPadding from '../utils/hooks/useSafeAreaPadding';
 import { _ } from '@joplin/lib/locale';
 
-interface ModalElementProps extends ModalProps {
+export interface ModalElementProps extends ModalProps {
 	children: React.ReactNode;
 	containerStyle?: ViewStyle;
 	backgroundColor?: string;
