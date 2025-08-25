@@ -5,6 +5,7 @@ import { EditorProcessApi, EditorProps, EditorWithParentProps, ExportedWebViewGl
 import readFileToBase64 from '../utils/readFileToBase64';
 import { EditorControl } from '@joplin/editor/types';
 import { EditorEventType } from '@joplin/editor/events';
+import InMemoryCache from '@joplin/utils/InMemoryCache';
 
 export { default as setUpLogger } from '../utils/setUpLogger';
 
@@ -47,6 +48,8 @@ export const createEditorWithParent = ({
 		throw new Error(`Unable to find parent element for editor (class name: ${JSON.stringify(parentElementOrClassName)})`);
 	}
 
+	const resolvedImageSrcCache = new InMemoryCache<Promise<string>>();
+
 	const control = createEditor(parentElement, {
 		initialText,
 		initialNoteId,
@@ -68,8 +71,16 @@ export const createEditorWithParent = ({
 				allEditors = allEditors.filter(other => other !== control);
 			}
 		},
-		resolveImageSrc: (src) => {
-			return messenger.remoteApi.onResolveImageSrc(src);
+		resolveImageSrc: async (src) => {
+			const cacheKey = `cachedImage.${src}`;
+			const cachedValue = resolvedImageSrcCache.value(cacheKey);
+			if (cachedValue) {
+				return cachedValue;
+			}
+
+			const result = messenger.remoteApi.onResolveImageSrc(src);
+			resolvedImageSrcCache.setValue(cacheKey, result);
+			return result;
 		},
 	});
 

@@ -1,4 +1,4 @@
-import InMemoryCache from './InMemoryCache';
+import InMemoryCache from '@joplin/utils/InMemoryCache';
 import noteStyle from './noteStyle';
 import { fileExtension } from '@joplin/utils/path';
 import setupLinkify from './MdToHtml/setupLinkify';

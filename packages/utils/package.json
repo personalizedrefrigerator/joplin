@@ -12,6 +12,7 @@
     "./fs": "./dist/fs.js",
     "./html": "./dist/html.js",
     "./Logger": "./dist/Logger.js",
+    "./InMemoryCache": "./dist/InMemoryCache.js",
     "./markdown": "./dist/markdown.js",
     "./net": "./dist/net.js",
     "./time": "./dist/time.js",

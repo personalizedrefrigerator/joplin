@@ -9,24 +9,23 @@
 // should be fine in most cases, as long as the class is not used at a massive
 // scale.
 
-interface Record {
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	value: any;
+interface CacheRecord<RecordType> {
+	value: RecordType;
 	expiredTime: number;
 }
 
-interface Records {
-	[key: string]: Record;
+interface Records<RecordType> {
+	[key: string]: CacheRecord<RecordType>;
 }
 
 interface ExpirableKeys {
 	[key: string]: boolean;
 }
 
-export default class Cache {
+export default class Cache<RecordType> {
 
 	private maxRecords_: number;
-	private records_: Records = {};
+	private records_: Records<RecordType> = Object.create(null);
 	private expirableKeys_: ExpirableKeys = {};
 	private recordKeyHistory_: string[] = [];
 
@@ -56,16 +55,14 @@ export default class Cache {
 		}
 	}
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	public value(key: string, defaultValue: any = undefined): any {
+	public value(key: string, defaultValue: RecordType|undefined = undefined): RecordType|undefined {
 		this.checkExpiredRecords();
 		if (key in this.records_) return this.records_[key].value;
 
 		return defaultValue;
 	}
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	public setValue(key: string, value: any, ttl = 0) {
+	public setValue(key: string, value: RecordType, ttl = 0) {
 		this.checkExpiredRecords();
 
 		this.records_[key] = {
