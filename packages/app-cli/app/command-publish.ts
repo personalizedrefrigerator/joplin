@@ -41,7 +41,8 @@ class Command extends BaseCommand {
 		const parent = await app().loadItem(ModelType.Folder, targetNote.parent_id);
 
 		const force = args.options.force;
-		const ok = force ? true : await this.prompt(
+		const alreadyShared = !!targetNote.is_shared;
+		const ok = force || alreadyShared ? true : await this.prompt(
 			_('Publish note "%s" (in notebook "%s")?', targetNote.title, parent.title ?? '<root>'),
 			{ booleanAnswerDefault: 'n' },
 		);
