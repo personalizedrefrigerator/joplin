@@ -64,6 +64,7 @@ const NoteTagsDialogComponent: React.FC<Props> = props => {
 			allTags={props.tags}
 			onTagsChange={setNoteTags}
 			mode={TagEditorMode.Large}
+			searchResultProps={{ nestedScrollEnabled: true }}
 			style={{ flex: 1 }}
 		/>
 	</ModalDialog>;
