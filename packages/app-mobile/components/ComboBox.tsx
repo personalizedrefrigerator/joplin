@@ -587,7 +587,6 @@ const ComboBox: React.FC<Props> = ({
 			placeholder={placeholder}
 			aria-activedescendant={showSearchResults ? activeId : undefined}
 			aria-controls={`menuBox-${baseId}`}
-			disableFullscreenUI={true}
 
 			// Certain accessibility properties only work well on web:
 			{...(Platform.OS === 'web' ? {
