@@ -25,14 +25,12 @@ class ImageWidget extends WidgetType {
 		return this.src_ === other.src_ && this.alt_ === other.alt_ && this.reloadCounter_ === other.reloadCounter_;
 	}
 
-	public toDOM() {
-		const container = document.createElement('div');
-		container.classList.add(imageClassName);
+	public updateDOM(dom: HTMLElement): boolean {
+		const image = dom.querySelector<HTMLDivElement>('div.image');
+		if (!image) return false;
 
-		const image = document.createElement('div');
-		image.role = 'image';
 		image.ariaLabel = this.alt_;
-		image.classList.add('image');
+		image.role = 'image';
 
 		const updateImageUrl = () => {
 			if (this.resolvedSrc_) {
@@ -51,7 +49,19 @@ class ImageWidget extends WidgetType {
 			updateImageUrl();
 		}
 
+		return true;
+	}
+
+	public toDOM() {
+		const container = document.createElement('div');
+		container.classList.add(imageClassName);
+
+		const image = document.createElement('div');
+		image.classList.add('image');
+
 		container.appendChild(image);
+		this.updateDOM(container);
+
 		return container;
 	}
 
@@ -83,8 +93,15 @@ const getImageAlt = (node: SyntaxNodeRef, state: EditorState) => {
 	}
 };
 
+// In Electron: To work around browser caching, these counters should continue to increase even if an old
+// editor is destroyed and a new one is created in the same window.
 const imageToRefreshCounters = new Map<string, number>();
 export const resetImageResourceEffect = StateEffect.define<{ id: string }>();
+
+// Intended only for automated tests.
+export const testing__resetImageRefreshCounterCache = () => {
+	imageToRefreshCounters.clear();
+};
 
 const renderBlockImages = (context: RenderedContentContext) => [
 	EditorView.theme({
@@ -134,14 +151,15 @@ const renderBlockImages = (context: RenderedContentContext) => [
 		hideWhenContainsSelection: false,
 
 		shouldFullReRender: (transaction: Transaction) => {
+			let hadRefreshEffect = false;
 			for (const effect of transaction.effects) {
 				if (effect.is(resetImageResourceEffect)) {
 					const key = `:/${effect.value.id}`;
 					imageToRefreshCounters.set(key, (imageToRefreshCounters.get(key) ?? 0) + 1);
-					return true;
+					hadRefreshEffect = true;
 				}
 			}
-			return false;
+			return hadRefreshEffect;
 		},
 	}),
 ];
