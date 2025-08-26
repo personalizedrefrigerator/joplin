@@ -268,7 +268,7 @@ const createEditor = async (
 		setContentScripts: (_plugins: ContentScriptData[]) => {
 			throw new Error('setContentScripts not implemented.');
 		},
-		onResourceDownloaded: async (resourceId: string) => {
+		onResourceChanged: async (resourceId: string) => {
 			const rendered = await renderAndPostprocessHtml(`<img src=":/${resourceId}"/>`);
 			const renderedImage = rendered.dom.querySelector('img');
 
@@ -282,6 +282,7 @@ const createEditor = async (
 			}
 
 			const resourceSrc = renderedImage?.src;
+			// TODO: Handle the more general case where the resource changed externally
 			onResourceDownloaded(view, resourceId, resourceSrc);
 		},
 		remove: () => {
