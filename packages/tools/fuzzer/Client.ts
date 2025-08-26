@@ -578,7 +578,11 @@ class Client implements ActionableClient {
 
 		logger.info('Testing publication URL: ', publishUrl[0]);
 		const fetchResult = await fetch(publishUrl[0]);
-		assert.ok(fetchResult.ok, 'should be able to fetch the published note.');
+
+		if (!fetchResult.ok) {
+			logger.warn('Fetch failed', fetchResult.statusText);
+		}
+		assert.equal(fetchResult.status, 200, `should be able to fetch the published note (status: ${fetchResult.statusText}).`);
 	}
 
 	public async unpublishNote(id: ItemId) {
