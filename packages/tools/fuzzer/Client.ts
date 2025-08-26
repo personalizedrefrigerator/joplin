@@ -567,6 +567,12 @@ class Client implements ActionableClient {
 		await other.sync();
 	}
 
+	public async deleteAssociatedShare(id: string) {
+		await this.tracker_.deleteAssociatedShare(id);
+		logger.info('Unshare', id, '(from', this.label, ')');
+		await this.execCliCommand_('share', 'delete', '-f', id);
+	}
+
 	public async moveItem(itemId: ItemId, newParentId: ItemId) {
 		logger.info('Move', itemId, 'to', newParentId);
 		await this.tracker_.moveItem(itemId, newParentId);
