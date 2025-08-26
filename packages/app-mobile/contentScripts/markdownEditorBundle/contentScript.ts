@@ -71,8 +71,8 @@ export const createEditorWithParent = ({
 				allEditors = allEditors.filter(other => other !== control);
 			}
 		},
-		resolveImageSrc: async (src) => {
-			const cacheKey = `cachedImage.${src}`;
+		resolveImageSrc: async (src, reloadCounter) => {
+			const cacheKey = `cachedImage.${reloadCounter}.${src}`;
 			const cachedValue = resolvedImageSrcCache.value(cacheKey);
 			if (cachedValue) {
 				return cachedValue;
