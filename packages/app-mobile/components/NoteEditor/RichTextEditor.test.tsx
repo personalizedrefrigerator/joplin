@@ -288,6 +288,26 @@ describe('RichTextEditor', () => {
 		});
 	});
 
+	it('should avoid rendering URLs with unknown protocols', async () => {
+		let body = '[link](unknown://test)';
+
+		render(<WrappedEditor
+			noteBody={body}
+			onBodyChange={newBody => { body = newBody; }}
+		/>);
+
+		const renderedLink = await findElement<HTMLAnchorElement>('a[href][data-original-href]');
+		expect(renderedLink.getAttribute('href')).toBe('#');
+		expect(renderedLink.getAttribute('data-original-href')).toBe('unknown://test');
+
+		const window = await getEditorWindow();
+		mockTyping(window, ' testing');
+
+		await waitFor(async () => {
+			expect(body.trim()).toBe('[link](unknown://test) testing');
+		});
+	});
+
 	it.each([
 		MarkupLanguage.Markdown, MarkupLanguage.Html,
 	])('should preserve image attachments on edit (case %#)', async (markupLanguage) => {
