@@ -80,7 +80,7 @@ export const createEditorWithParent = ({
 				return cachedValue;
 			}
 
-			const result = messenger.remoteApi.onResolveImageSrc(src);
+			const result = messenger.remoteApi.onResolveImageSrc(src, reloadCounter);
 			resolvedImageSrcCache.setValue(cacheKey, result);
 			return result;
 		},
