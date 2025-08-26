@@ -6,6 +6,7 @@ import ShareService from '@joplin/lib/services/share/ShareService';
 import { ModelType } from '@joplin/lib/BaseModel';
 import SyncTargetRegistry from '@joplin/lib/SyncTargetRegistry';
 import Setting from '@joplin/lib/models/Setting';
+import { reg } from '@joplin/lib/registry';
 
 const logger = Logger.create('command-publish');
 
@@ -50,6 +51,9 @@ class Command extends BaseCommand {
 
 		logger.info('Share note: ', targetNote.id);
 		const share = await ShareService.instance().shareNote(targetNote.id, false);
+
+		this.stdout(_('Syncing...'));
+		await reg.waitForSyncFinishedThenSync();
 
 		const userId = ShareService.instance().userId;
 		const shareUrl = ShareService.instance().shareUrl(userId, share);
