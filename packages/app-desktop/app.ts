@@ -689,6 +689,7 @@ class Application extends BaseApplication {
 					Note,
 					Folder,
 					Resource,
+					Setting,
 					ocrService: () => this.ocrService_,
 				};
 			});
