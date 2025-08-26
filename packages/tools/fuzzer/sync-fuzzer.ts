@@ -178,11 +178,15 @@ const doRandomAction = async (context: FuzzContext, client: Client, clientPool: 
 			});
 			if (!target) return false;
 
-			const recipientIndex = context.randInt(0, target.shareRecipients.length);
-			const recipientEmail = target.shareRecipients[recipientIndex];
-			const recipient = clientPool.clientsByEmail(recipientEmail)[0];
-			assert.ok(recipient, `invalid state -- recipient ${recipientEmail} should exist`);
-			await client.removeFromShare(target.id, recipient);
+			const recipientIndex = context.randInt(-1, target.shareRecipients.length);
+			if (recipientIndex === -1) { // Completely remove the share
+				await client.deleteAssociatedShare(target.id);
+			} else {
+				const recipientEmail = target.shareRecipients[recipientIndex];
+				const recipient = clientPool.clientsByEmail(recipientEmail)[0];
+				assert.ok(recipient, `invalid state -- recipient ${recipientEmail} should exist`);
+				await client.removeFromShare(target.id, recipient);
+			}
 			return true;
 		},
 		deleteFolder: async () => {
