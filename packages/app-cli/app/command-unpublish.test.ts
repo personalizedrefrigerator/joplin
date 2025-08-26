@@ -4,7 +4,7 @@ import { setupDatabaseAndSynchronizer, switchClient, waitFor } from '@joplin/lib
 import { setupApplication, setupCommandForTesting } from './utils/testUtils';
 import Note from '@joplin/lib/models/Note';
 import Folder from '@joplin/lib/models/Folder';
-const Command = require('./command-publish');
+const Command = require('./command-unpublish');
 
 
 describe('command-unpublish', () => {
