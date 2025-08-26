@@ -1,5 +1,5 @@
 import InMemoryCache from './InMemoryCache';
-import time from './time';
+import { msleep } from './time';
 
 describe('InMemoryCache', () => {
 
@@ -24,7 +24,7 @@ describe('InMemoryCache', () => {
 		// Check that the value is undefined once the cache has expired
 		cache.setValue('test', 'something', 500);
 		expect(cache.value('test')).toBe('something');
-		await time.msleep(510);
+		await msleep(510);
 		expect(cache.value('test')).toBe(undefined);
 
 		// This test can sometimes fail in some cases, probably because it

@@ -1141,8 +1141,6 @@ packages/lib/CssUtils.js
 packages/lib/EventDispatcher.test.js
 packages/lib/EventDispatcher.js
 packages/lib/HtmlToMd.js
-packages/lib/InMemoryCache.test.js
-packages/lib/InMemoryCache.js
 packages/lib/JoplinDatabase.js
 packages/lib/JoplinError.js
 packages/lib/JoplinServerApi.js
