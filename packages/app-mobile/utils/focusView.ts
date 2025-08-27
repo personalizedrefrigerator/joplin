@@ -26,13 +26,6 @@ const focusView = (source: string, view: View|HTMLElement) => {
 			} else {
 				logger.warn('Couldn\'t find a view to focus.');
 			}
-
-			// Also set keyboard focus if called, for example, with a TextInput.
-			// eslint-disable-next-line no-restricted-properties
-			if ('focus' in view && typeof view.focus === 'function') {
-				// eslint-disable-next-line no-restricted-properties -- Already within a call to focus()
-				view.focus();
-			}
 		}
 	};
 

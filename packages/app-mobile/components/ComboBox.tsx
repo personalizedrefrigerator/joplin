@@ -12,7 +12,6 @@ import focusView from '../utils/focusView';
 import AsyncActionQueue from '@joplin/lib/AsyncActionQueue';
 import NestableFlatList, { NestableFlatListControl } from './NestableFlatList';
 import useKeyboardState from '../utils/hooks/useKeyboardState';
-import { msleep } from '@joplin/utils/time';
 const naturalCompare = require('string-natural-compare');
 
 
@@ -397,7 +396,6 @@ const useSelectionAutoScroll = (
 interface UseInputEventHandlersProps {
 	selectedIndexControl: SelectedIndexControl;
 	onItemSelected: OnItemSelected;
-	searchInputRef: RefObject<TextInput>;
 
 	selectedIndex: number;
 	selectedResult: Option|null;
@@ -409,7 +407,6 @@ interface UseInputEventHandlersProps {
 
 const useInputEventHandlers = ({
 	selectedIndexControl,
-	searchInputRef,
 	onItemSelected: propsOnItemSelected, setShowSearchResults, alwaysExpand,
 	setSearch, selectedResult, selectedIndex, showSearchResults,
 }: UseInputEventHandlersProps) => {
@@ -433,18 +430,12 @@ const useInputEventHandlers = ({
 		return result;
 	}, [setShowSearchResults, alwaysExpand, setSearch]);
 
-	const onSubmit = useCallback(async () => {
+	const onSubmit = useCallback(() => {
 		if (selectedResult) {
 			onItemSelected(selectedResult, selectedIndex);
 			setSearch('');
-
-			// On Android, selecting an item by pressing "enter" causes keyboard focus to leave the search input
-			// and jump to the top of the dialog. Refocusing the search input immediately doesn't work and instead
-			// the input must be refocused after a brief delay.
-			await msleep(100);
-			focusView('ComboBox::onSubmit', searchInputRef.current);
 		}
-	}, [onItemSelected, selectedResult, selectedIndex, setSearch, searchInputRef]);
+	}, [onItemSelected, selectedResult, selectedIndex, setSearch]);
 
 	// For now, onKeyPress only works on web.
 	// See https://github.com/react-native-community/discussions-and-proposals/issues/249
@@ -472,7 +463,7 @@ const useInputEventHandlers = ({
 			// search input from becoming defocused after
 			// pressing "enter".
 			event.preventDefault();
-			void onSubmit();
+			onSubmit();
 			setSearch('');
 		} else if (key === 'Escape' && !alwaysExpand) {
 			setShowSearchResults(false);
@@ -525,7 +516,6 @@ const ComboBox: React.FC<Props> = ({
 	const { onItemSelected, onKeyPress, onSubmit } = useInputEventHandlers({
 		selectedIndexControl,
 		onItemSelected: propsOnItemSelected,
-		searchInputRef,
 
 		selectedIndex,
 		selectedResult: results[selectedIndex],
@@ -594,6 +584,7 @@ const ComboBox: React.FC<Props> = ({
 			onChangeText={setSearch}
 			onKeyPress={onKeyPress}
 			onSubmitEditing={onSubmit}
+			submitBehavior='submit'
 			placeholder={placeholder}
 			aria-activedescendant={showSearchResults ? activeId : undefined}
 			aria-controls={`menuBox-${baseId}`}
