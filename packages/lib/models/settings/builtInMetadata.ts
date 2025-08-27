@@ -562,7 +562,7 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 			public: true,
 			appTypes: [AppType.Desktop],
 			label: () => _('Enable handwritten transcription'),
-			description: () => 'Allows selecting specific attachments for higher-quality on-server OCR. When enabled, the right-click menu for an attachment includes an option to send an attachment for off-device processing.\n\nExperimental! It may not work at all. Requires Joplin Server or Cloud.',
+			description: () => 'Allows selecting specific attachments for higher-quality on-server OCR. When enabled, the right-click menu for an attachment includes an option to send an attachment to Joplin Cloud/Server for off-device processing.\n\nExperimental! It may not work at all. Requires Joplin Server or Cloud.',
 			storage: SettingStorage.File,
 			isGlobal: true,
 			advanced: true,
