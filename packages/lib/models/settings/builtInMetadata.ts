@@ -562,8 +562,10 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 			public: true,
 			appTypes: [AppType.Desktop],
 			label: () => _('Enable handwritten transcription'),
+			description: () => 'Experimental - may not work',
 			storage: SettingStorage.File,
 			isGlobal: true,
+			advanced: true,
 		},
 
 		'ocr.languageDataPath': {
