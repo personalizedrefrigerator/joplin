@@ -60,8 +60,10 @@ const isInEmptyParagraph = (state: EditorState) => {
 		selectionParent.content.size === 0;
 };
 
-// Handling "Enter" key events directly with a Plugin prevents the cursor from getting stuck
-// on Android. As such, double hard-breaks are replaced separately from the main keymap() plugins.
+// Handle double-hard-break -> paragraph conversion with a Plugin to work around
+// a bug on Android. If convertDoubleHardBreakToNewParagraph is handled with the
+// main keymap logic (with a keymap() extension), then it's possible for the cursor
+// to get stuck in some cases.
 // See https://github.com/laurent22/joplin/issues/12960.
 const replaceDoubleHardBreaksOnEnter = new Plugin({
 	props: {
