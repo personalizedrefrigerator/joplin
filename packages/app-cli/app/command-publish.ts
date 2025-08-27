@@ -52,7 +52,7 @@ class Command extends BaseCommand {
 		logger.info('Share note: ', targetNote.id);
 		const share = await ShareService.instance().shareNote(targetNote.id, false);
 
-		this.stdout(_('Syncing...'));
+		this.stdout(_('Synchronising...'));
 		await reg.waitForSyncFinishedThenSync();
 
 		const userId = ShareService.instance().userId;

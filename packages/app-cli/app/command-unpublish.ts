@@ -7,6 +7,7 @@ import { ModelType } from '@joplin/lib/BaseModel';
 import Note from '@joplin/lib/models/Note';
 import SyncTargetRegistry from '@joplin/lib/SyncTargetRegistry';
 import Setting from '@joplin/lib/models/Setting';
+import { reg } from '@joplin/lib/registry';
 
 const logger = Logger.create('command-unpublish');
 
@@ -47,6 +48,9 @@ class Command extends BaseCommand {
 		if (note.is_shared) {
 			throw new Error('Assertion failure: The note is still shared.');
 		}
+
+		this.stdout(_('Synchronising...'));
+		await reg.waitForSyncFinishedThenSync();
 	}
 }
 

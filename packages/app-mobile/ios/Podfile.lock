@@ -1458,7 +1458,7 @@ PODS:
     - Yoga
   - react-native-get-random-values (1.11.0):
     - React-Core
-  - react-native-image-picker (7.2.3):
+  - react-native-image-picker (8.0.0):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -1516,7 +1516,7 @@ PODS:
     - React
   - react-native-saf-x (3.4.0):
     - React-Core
-  - react-native-safe-area-context (5.4.0):
+  - react-native-safe-area-context (5.4.1):
     - React-Core
   - react-native-sqlite-storage (6.0.1):
     - React-Core
@@ -2338,13 +2338,13 @@ SPEC CHECKSUMS:
   react-native-document-picker: da39c5e4f279d39c0356dca157b98f9dc349e5bb
   react-native-geolocation: ec15ffebc53790314885eb9e5f2132132fbc2600
   react-native-get-random-values: d16467cf726c618e9c7a8c3c39c31faa2244bbba
-  react-native-image-picker: 99fbcec11cf4679170a7cfba4e4d9f598297448c
+  react-native-image-picker: 922b9ba90f144b5866d07d04b0fb2b4e9ab0ed75
   react-native-image-resizer: 24c5d06fae2176dc0caed4b6396e02befb44064a
   react-native-netinfo: cec9c4e86083cb5b6aba0e0711f563e2fbbff187
   react-native-quick-crypto: 988d8d57cd720dbe218272b60775a8e0210d0b80
   react-native-rsa-native: a7931cdda1f73a8576a46d7f431378c5550f0c38
   react-native-saf-x: 24ebe9aa153f82ec6726de459ae77508d68d5599
-  react-native-safe-area-context: 9d72abf6d8473da73033b597090a80b709c0b2f1
+  react-native-safe-area-context: dde2052b903c11d677c320b599c3244021c34ce8
   react-native-sqlite-storage: 0c84826214baaa498796c7e46a5ccc9a82e114ed
   react-native-version-info: f0b04e16111c4016749235ff6d9a757039189141
   react-native-webview: 1b5778b306d4ed09d13829a6e7a6550e3c1a644a
