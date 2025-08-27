@@ -562,7 +562,7 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 			public: true,
 			appTypes: [AppType.Desktop],
 			label: () => _('Enable handwritten transcription'),
-			description: () => 'Experimental - may not work',
+			description: () => 'Experimental! It may not work at all. Note that the resource to be transcribed will be sent unencrypted to Joplin Cloud/Server.',
 			storage: SettingStorage.File,
 			isGlobal: true,
 			advanced: true,
