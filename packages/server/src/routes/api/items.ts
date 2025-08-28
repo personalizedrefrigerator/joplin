@@ -117,7 +117,7 @@ router.del('api/items/:id', async (path: SubPath, ctx: AppContext) => {
 		if (error instanceof ErrorNotFound) {
 			// That's ok - a no-op
 		} else if (error instanceof ErrorNotDeleted) {
-			// Can happen when two clients attempt to delete the same resource at the same time
+			// Also a no-op. This can happen when two clients attempt to delete the same resource at the same time
 			logger.info('Skipped item deletion -- deleted by two clients at the same time?');
 		} else {
 			throw error;
