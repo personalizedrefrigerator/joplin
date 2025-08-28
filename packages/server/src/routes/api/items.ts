@@ -5,13 +5,16 @@ import Router from '../../utils/Router';
 import { RouteType } from '../../utils/types';
 import { AppContext } from '../../utils/types';
 import * as fs from 'fs-extra';
-import { ErrorForbidden, ErrorMethodNotAllowed, ErrorNotFound, ErrorPayloadTooLarge, errorToPlainObject } from '../../utils/errors';
+import { ErrorForbidden, ErrorMethodNotAllowed, ErrorNotDeleted, ErrorNotFound, ErrorPayloadTooLarge, errorToPlainObject } from '../../utils/errors';
 import ItemModel, { ItemSaveOption, SaveFromRawContentItem } from '../../models/ItemModel';
 import { requestPagination } from '../../models/utils/pagination';
 import { AclAction } from '../../models/BaseModel';
 import { safeRemove } from '../../utils/fileUtils';
 import { formatBytes, MB } from '../../utils/bytes';
 import { requestDeltaPagination } from '../../models/ChangeModel';
+import Logger from '@joplin/utils/Logger';
+
+const logger = Logger.create('api/items');
 
 const router = new Router(RouteType.Api);
 
@@ -113,6 +116,9 @@ router.del('api/items/:id', async (path: SubPath, ctx: AppContext) => {
 	} catch (error) {
 		if (error instanceof ErrorNotFound) {
 			// That's ok - a no-op
+		} else if (error instanceof ErrorNotDeleted) {
+			// Can happen when two clients attempt to delete the same resource at the same time
+			logger.info('Skipped item deletion -- deleted by two clients at the same time?');
 		} else {
 			throw error;
 		}

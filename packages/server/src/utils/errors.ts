@@ -57,6 +57,15 @@ export class ErrorMethodNotAllowed extends ApiError {
 	}
 }
 
+export class ErrorNotDeleted extends ApiError {
+	public static httpCode = 500;
+
+	public constructor(message = 'Not deleted', code: ErrorCode = undefined) {
+		super(message, ErrorNotFound.httpCode, code);
+		Object.setPrototypeOf(this, ErrorNotFound.prototype);
+	}
+}
+
 export class ErrorNotFound extends ApiError {
 	public static httpCode = 404;
 
