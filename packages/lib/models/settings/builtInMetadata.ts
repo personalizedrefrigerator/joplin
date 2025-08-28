@@ -557,7 +557,7 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 		},
 
 		'ocr.handwrittenTextDriverEnabled': {
-			value: true,
+			value: false,
 			type: SettingItemType.Bool,
 			public: true,
 			appTypes: [AppType.Desktop],
