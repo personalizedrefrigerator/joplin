@@ -585,6 +585,7 @@ const ComboBox: React.FC<Props> = ({
 			onChangeText={setSearch}
 			onKeyPress={onKeyPress}
 			onSubmitEditing={onSubmit}
+			submitBehavior='submit'
 			placeholder={placeholder}
 			aria-activedescendant={showSearchResults ? activeId : undefined}
 			aria-controls={`menuBox-${baseId}`}
