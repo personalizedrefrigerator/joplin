@@ -144,6 +144,13 @@ const doRandomAction = async (context: FuzzContext, client: Client, clientPool: 
 
 			return true;
 		},
+		deleteNote: async () => {
+			const target = await client.randomNote({ includeReadOnly: false });
+			if (!target) return false;
+
+			await client.deleteNote(target.id);
+			return true;
+		},
 		shareFolder: async () => {
 			const other = clientPool.randomClient(c => !c.hasSameAccount(client));
 			if (!other) return false;
