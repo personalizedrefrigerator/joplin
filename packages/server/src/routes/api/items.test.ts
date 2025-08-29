@@ -126,7 +126,7 @@ describe('api/items', () => {
 		expect(ids.sort()).toEqual(['000000000000000000000000000000F2', '00000000000000000000000000000002'].sort());
 	});
 
-	test('should not error if an item does not exist', async () => {
+	test('delete should not error if an item does not exist', async () => {
 		const { user, session } = await createUserAndSession(1, true);
 
 		const tree = {
