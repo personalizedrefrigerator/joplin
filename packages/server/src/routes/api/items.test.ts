@@ -1,4 +1,4 @@
-import { beforeAllDb, afterAllTests, beforeEachDb, createUserAndSession, models, createItem, makeTempFileWithContent, makeNoteSerializedBody, createItemTree, expectHttpError, createNote, expectNoHttpError, getItem } from '../../utils/testing/testUtils';
+import { beforeAllDb, afterAllTests, beforeEachDb, createUserAndSession, models, createItem, makeTempFileWithContent, makeNoteSerializedBody, createItemTree, expectHttpError, createNote, expectNoHttpError, getItem, deleteItem } from '../../utils/testing/testUtils';
 import { NoteEntity } from '@joplin/lib/services/database/types';
 import { ModelType } from '@joplin/lib/BaseModel';
 import { deleteApi, getApi, putApi } from '../../utils/testing/apiUtils';
@@ -414,4 +414,29 @@ describe('api/items', () => {
 		);
 	});
 
+	test('should support multiple delete requests for the same item at the same time', async () => {
+		const { user: user1, session: session1 } = await createUserAndSession(1);
+
+		await createItemTree(user1.id, '', {
+			'000000000000000000000000000000F1': {
+				'00000000000000000000000000000001': null,
+				'00000000000000000000000000000002': null,
+				'00000000000000000000000000000003': null,
+			},
+		});
+
+		// Should not fail
+		await Promise.all([
+			deleteItem(session1.id, '00000000000000000000000000000001'),
+			deleteItem(session1.id, '00000000000000000000000000000001'),
+			deleteItem(session1.id, '00000000000000000000000000000002'),
+			deleteItem(session1.id, '00000000000000000000000000000002'),
+		]);
+
+		// Should have deleted the items
+		expect(await models().item().loadByJopId(user1.id, '00000000000000000000000000000001')).toBeNull();
+		expect(await models().item().loadByJopId(user1.id, '00000000000000000000000000000002')).toBeNull();
+		// Should not have deleted the other item
+		expect(await models().item().loadByJopId(user1.id, '00000000000000000000000000000003')).toBeTruthy();
+	});
 });
