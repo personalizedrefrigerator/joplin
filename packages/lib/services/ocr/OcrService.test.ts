@@ -316,6 +316,7 @@ describe('OcrService', () => {
 		await Resource.save({
 			...resource,
 			ocr_driver_id: ResourceOcrDriverId.HandwrittenText,
+			title: 'Test',
 		});
 
 		const service = newOcrService();
@@ -323,9 +324,12 @@ describe('OcrService', () => {
 
 		// Should not process HandwrittenText results
 		const processedResource: ResourceEntity = await Resource.load(resource.id);
-		expect(processedResource.ocr_text).toBe('');
-		expect(processedResource.ocr_status).toBe(ResourceOcrStatus.Todo);
-		expect(processedResource.ocr_error).toBe('');
+		expect(processedResource).toMatchObject({
+			ocr_text: '',
+			title: 'Test',
+			ocr_status: ResourceOcrStatus.Todo,
+			ocr_error: '',
+		});
 
 		await service.dispose();
 	});
