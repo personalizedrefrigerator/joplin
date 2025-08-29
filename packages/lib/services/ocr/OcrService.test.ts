@@ -1,9 +1,10 @@
 import { createNoteAndResource, newOcrService, ocrSampleDir, resourceFetcher, setupDatabaseAndSynchronizer, supportDir, switchClient, synchronizerStart } from '../../testing/test-utils';
 import { supportedMimeTypes } from './OcrService';
 import Resource from '../../models/Resource';
-import { ResourceEntity, ResourceOcrStatus } from '../database/types';
+import { ResourceEntity, ResourceOcrDriverId, ResourceOcrStatus } from '../database/types';
 import { msleep } from '@joplin/utils/time';
 import Logger from '@joplin/utils/Logger';
+import Setting from '../../models/Setting';
 
 describe('OcrService', () => {
 
@@ -303,6 +304,27 @@ describe('OcrService', () => {
 		const processedResource: ResourceEntity = await Resource.load(resource.id);
 		expect(processedResource.ocr_text).toBe('This is a test.\nTesting...\nThis PDF has 3 pages.\nThis is page 3.');
 		expect(processedResource.ocr_status).toBe(ResourceOcrStatus.Done);
+		expect(processedResource.ocr_error).toBe('');
+
+		await service.dispose();
+	});
+
+	it('should skip HTR processing when the relevant setting is disabled', async () => {
+		const { resource } = await createNoteAndResource({ path: `${ocrSampleDir}/multi_page__embedded_text.pdf` });
+		Setting.setValue('ocr.handwrittenTextDriverEnabled', false);
+
+		await Resource.save({
+			...resource,
+			ocr_driver_id: ResourceOcrDriverId.HandwrittenText,
+		});
+
+		const service = newOcrService();
+		await service.processResources();
+
+		// Should not process HandwrittenText results
+		const processedResource: ResourceEntity = await Resource.load(resource.id);
+		expect(processedResource.ocr_text).toBe('');
+		expect(processedResource.ocr_status).toBe(ResourceOcrStatus.Todo);
 		expect(processedResource.ocr_error).toBe('');
 
 		await service.dispose();
