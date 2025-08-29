@@ -890,10 +890,6 @@ export default class BaseApplication {
 		if (!currentFolder) currentFolder = await Folder.defaultFolder();
 		Setting.setValue('activeFolderId', currentFolder ? currentFolder.id : '');
 
-		if (currentFolder && !this.hasGui()) {
-			this.currentFolder_ = currentFolder;
-		}
-
 		await setupAutoDeletion();
 
 		await MigrationService.instance().run();
