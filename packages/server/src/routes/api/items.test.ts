@@ -126,6 +126,23 @@ describe('api/items', () => {
 		expect(ids.sort()).toEqual(['000000000000000000000000000000F2', '00000000000000000000000000000002'].sort());
 	});
 
+	test('should not error if an item does not exist', async () => {
+		const { user, session } = await createUserAndSession(1, true);
+
+		const tree = {
+			'000000000000000000000000000000F1': { },
+		};
+
+		const itemModel = models().item();
+
+		await createItemTree(user.id, '', tree);
+		await deleteApi(session.id, 'items/root:/12345600000000000000000000000000.md:');
+
+		// Should not have deleted the folder
+		expect((await itemModel.all()).length).toBe(1);
+		expect((await itemModel.all())[0].jop_id).toBe('000000000000000000000000000000F1');
+	});
+
 	test('should get back the serialized note', async () => {
 		const { session } = await createUserAndSession(1, true);
 
