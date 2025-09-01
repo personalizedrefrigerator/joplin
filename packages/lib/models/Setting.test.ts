@@ -521,7 +521,7 @@ describe('models/Setting', () => {
 		Setting.setValue('revisionService.ttlDays', 0);
 		expect(Setting.value('revisionService.ttlDays')).toBe(1);
 	});
-	
+
 	test('should not fail to save settings that can conflict with uninstalled plugin settings', async () => {
 		Setting.setValue('editor.imageRendering', true);
 		expect(Setting.value('editor.imageRendering')).toBe(true);
