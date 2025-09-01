@@ -521,6 +521,13 @@ describe('models/Setting', () => {
 		Setting.setValue('revisionService.ttlDays', 0);
 		expect(Setting.value('revisionService.ttlDays')).toBe(1);
 	});
+	
+	test('should not fail to save settings that can conflict with uninstalled plugin settings', async () => {
+		Setting.setValue('editor.imageRendering', true);
+		expect(Setting.value('editor.imageRendering')).toBe(true);
+		Setting.setValue('editor.imageRendering', false);
+		expect(Setting.value('editor.imageRendering')).toBe(false);
+	});
 
 	test('should adjust settings to avoid conflicts', async () => {
 		const testSettingId = 'plugin-plugin.calebjohn.rich-markdown.inlineImages';
