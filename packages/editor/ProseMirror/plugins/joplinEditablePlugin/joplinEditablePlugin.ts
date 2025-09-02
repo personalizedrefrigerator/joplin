@@ -1,13 +1,13 @@
 import { Command, EditorState, Plugin } from 'prosemirror-state';
 import { Node, NodeSpec, TagParseRule } from 'prosemirror-model';
-import { EditorView, NodeView } from 'prosemirror-view';
+import { EditorView } from 'prosemirror-view';
 import sanitizeHtml from '../../utils/sanitizeHtml';
 import createEditorDialog from './createEditorDialog';
 import { getEditorApi } from '../joplinEditorApiPlugin';
 import { msleep } from '@joplin/utils/time';
 import postProcessRenderedHtml from './postProcessRenderedHtml';
-import createButton from '../../utils/dom/createButton';
 import makeLinksClickableInElement from '../../utils/makeLinksClickableInElement';
+import SelectableNodeView from '../../utils/SelectableNodeView';
 
 // See the fold example for more information about
 // writing similar ProseMirror plugins:
@@ -226,14 +226,14 @@ export const nodeSpecs = {
 
 type GetPosition = ()=> number;
 
-class EditableSourceBlockView implements NodeView {
-	public readonly dom: HTMLElement;
+class EditableSourceBlockView extends SelectableNodeView {
 	public constructor(private node: Node, inline: boolean, private view: EditorView, private getPosition: GetPosition) {
 		if ((node.attrs.contentHtml ?? undefined) === undefined) {
 			throw new Error(`Unable to create a SourceBlockView for a node lacking contentHtml. Node: ${node}.`);
 		}
 
-		this.dom = document.createElement(inline ? 'span' : 'div');
+		super(inline);
+
 		this.dom.classList.add('joplin-editable');
 
 		// The link tooltip used for other in-editor links won't be shown for links within a
@@ -256,30 +256,14 @@ class EditableSourceBlockView implements NodeView {
 		const addEditButton = () => {
 			const { localize: _ } = getEditorApi(this.view.state);
 
-			const editButton = createButton(_('Edit'), () => this.showEditDialog_());
-			editButton.classList.add('edit');
-
 			if (!attrs.readOnly) {
-				this.dom.appendChild(editButton);
+				this.addActionButton(_('Edit'), () => this.showEditDialog_());
 			}
 		};
 
 		setDomContentSafe(attrs.contentHtml);
 		postProcessRenderedHtml(this.dom, this.node.isInline);
 		addEditButton();
-	}
-
-	public selectNode() {
-		this.dom.classList.add('-selected');
-	}
-
-	public deselectNode() {
-		this.dom.classList.remove('-selected');
-	}
-
-	public stopEvent(event: Event) {
-		// Allow using the keyboard to activate the "edit" button:
-		return event.target === this.dom.querySelector('button.edit');
 	}
 
 	public update(node: Node) {
