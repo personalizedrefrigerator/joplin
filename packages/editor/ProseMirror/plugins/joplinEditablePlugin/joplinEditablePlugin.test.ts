@@ -13,11 +13,11 @@ const createEditor = (html: string) => {
 };
 
 const findEditButton = (ancestor: Element): HTMLButtonElement => {
-	return ancestor.querySelector('.joplin-editable > button.edit');
+	return ancestor.querySelector('.joplin-editable > .actions > button.edit');
 };
 
 const findEditorDialog = () => {
-	const dialog = document.querySelector('dialog.editor-dialog');
+	const dialog = document.querySelector('dialog.joplin-dialog');
 	if (!dialog) {
 		return null;
 	}

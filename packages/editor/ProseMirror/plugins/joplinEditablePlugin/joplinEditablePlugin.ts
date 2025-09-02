@@ -257,7 +257,8 @@ class EditableSourceBlockView extends SelectableNodeView {
 			const { localize: _ } = getEditorApi(this.view.state);
 
 			if (!attrs.readOnly) {
-				this.addActionButton(_('Edit'), () => this.showEditDialog_());
+				const button = this.addActionButton(_('Edit'), () => this.showEditDialog_());
+				button.classList.add('edit');
 			}
 		};
 

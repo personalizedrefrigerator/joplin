@@ -25,6 +25,7 @@ export default class SelectableNodeView implements NodeView {
 
 		const button = createButton(label, onClick);
 		actions.appendChild(button);
+		return button;
 	}
 
 	public selectNode() {

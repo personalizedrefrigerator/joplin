@@ -19,6 +19,7 @@ interface Options {
 
 const createEditorDialog = ({ editorApi, doneLabel, block, onSave, onDismiss }: Options) => {
 	const content = document.createElement('div');
+	content.classList.add('editor-dialog-content');
 	document.body.appendChild(content);
 
 	const editor = editorApi.createCodeEditor(
