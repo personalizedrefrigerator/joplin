@@ -15,9 +15,9 @@ import Setting from '@joplin/lib/models/Setting';
 import { OnItemClickHander } from '../NoteListHeader/types';
 import { NoteListColumns } from '@joplin/lib/services/plugins/api/noteListType';
 import depNameToNoteProp from '@joplin/lib/services/noteList/depNameToNoteProp';
-import { getTrashFolderId } from '@joplin/lib/services/trash';
 import usePrevious from '../hooks/usePrevious';
 import { WindowIdContext } from '../NewWindowOrIFrame';
+import Folder from '@joplin/lib/models/Folder';
 
 const logger = Logger.create('NoteListWrapper');
 
@@ -60,7 +60,7 @@ const useNoteListControlsBreakpoints = (width: number, newNoteButtonElement: Ele
 	const [dynamicBreakpoints, setDynamicBreakpoints] = useState<Breakpoints>({ Sm: BaseBreakpoint.Sm, Md: BaseBreakpoint.Md, Lg: BaseBreakpoint.Lg, Xl: BaseBreakpoint.Xl });
 	const previousWidth = usePrevious(width);
 	const widthHasChanged = width !== previousWidth;
-	const showNewNoteButton = selectedFolderId !== getTrashFolderId();
+	const showNewNoteButton = !Folder.isVirtualFolder(selectedFolderId);
 
 	// Initialize language-specific breakpoints
 	useEffect(() => {

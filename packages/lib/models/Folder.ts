@@ -95,6 +95,7 @@ export default class Folder extends BaseItem {
 
 	public static byId(items: FolderEntity[], id: string) {
 		if (id === getTrashFolderId()) return getTrashFolder();
+		if (id === this.misplacedFolderId()) return this.misplacedFolder();
 		return super.byId(items, id);
 	}
 
@@ -121,6 +122,7 @@ export default class Folder extends BaseItem {
 		};
 
 		if (folderId === getTrashFolderId()) throw new Error('The trash folder cannot be deleted');
+		if (folderId === this.misplacedFolderId()) throw new Error('The misplaced folder (a virtual folder) cannot be deleted');
 
 		const toTrash = !!options.toTrash;
 
@@ -185,6 +187,28 @@ export default class Folder extends BaseItem {
 			is_shared: 0,
 			deleted_time: 0,
 		};
+	}
+
+	public static misplacedFolderId() {
+		return 'misplaced0misplaced0misplaced000';
+	}
+
+	public static misplacedFolder(): FolderEntity {
+		return {
+			type_: this.TYPE_FOLDER,
+			id: this.misplacedFolderId(),
+			parent_id: '',
+			title: _('Misplaced'),
+			updated_time: Date.now(),
+			user_updated_time: Date.now(),
+			share_id: '',
+			is_shared: 0,
+			deleted_time: 0,
+		};
+	}
+
+	public static isVirtualFolder(id: string) {
+		return id === getTrashFolderId() || id === this.conflictFolderId() || id === this.misplacedFolderId();
 	}
 
 	// Checks for invalid state -- whether startId or its parents is part of a cycle
@@ -907,6 +931,7 @@ export default class Folder extends BaseItem {
 	public static load(id: string, options: LoadOptions = null): Promise<FolderEntity> {
 		if (id === this.conflictFolderId()) return Promise.resolve(this.conflictFolder());
 		if (id === getTrashFolderId()) return Promise.resolve(getTrashFolder());
+		if (id === this.misplacedFolderId()) return Promise.resolve(this.misplacedFolder());
 		return super.load(id, options);
 	}
 
@@ -927,7 +952,7 @@ export default class Folder extends BaseItem {
 
 		while (true) {
 			const folder = await Folder.load(targetFolderId);
-			if (!folder.parent_id) break;
+			if (!folder?.parent_id) break;
 			if (folder.parent_id === folderId) return false;
 			targetFolderId = folder.parent_id;
 		}

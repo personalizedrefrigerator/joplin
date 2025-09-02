@@ -1,3 +1,4 @@
+import Folder from '../../models/Folder';
 import { FolderEntity } from '../../services/database/types';
 import { getTrashFolder, getTrashFolderId } from '../../services/trash';
 import { buildFolderTree, renderFolders } from './side-menu-shared';
@@ -125,6 +126,35 @@ describe('side-menu-shared', () => {
 					[getTrashFolderId(), false, 0],
 				],
 				order: ['1', '2', getTrashFolderId()],
+			},
+		],
+
+		// Should render folders with missing parent IDs
+		[
+			{
+				collapsedFolderIds: [],
+				folders: [
+					{
+						id: '1',
+						parent_id: '1234',
+						deleted_time: 0,
+					},
+					{
+						id: '2',
+						parent_id: '',
+						deleted_time: 0,
+					},
+					getTrashFolder(),
+				],
+			},
+			{
+				items: [
+					['2', false, 0],
+					[getTrashFolderId(), false, 0],
+					[Folder.misplacedFolderId(), true, 0],
+					['1', false, 1],
+				],
+				order: ['2', getTrashFolderId(), Folder.misplacedFolderId(), '1'],
 			},
 		],
 	])('should render folders (case %#)', (props, expected) => {

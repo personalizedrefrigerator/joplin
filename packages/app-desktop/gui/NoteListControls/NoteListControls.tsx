@@ -11,10 +11,10 @@ import { _ } from '@joplin/lib/locale';
 import { connect } from 'react-redux';
 import styled from 'styled-components';
 import stateToWhenClauseContext from '../../services/commands/stateToWhenClauseContext';
-import { getTrashFolderId } from '@joplin/lib/services/trash';
 import { Breakpoints } from '../NoteList/utils/types';
 import { stateUtils } from '@joplin/lib/reducer';
 import { WindowIdContext } from '../NewWindowOrIFrame';
+import Folder from '@joplin/lib/models/Folder';
 
 interface Props {
 	showNewNoteButtons: boolean;
@@ -286,7 +286,7 @@ const mapStateToProps = (state: AppState, ownProps: ConnectProps) => {
 	const windowState = stateUtils.windowStateById(state, ownProps.windowId);
 
 	return {
-		showNewNoteButtons: windowState.selectedFolderId !== getTrashFolderId(),
+		showNewNoteButtons: !Folder.isVirtualFolder(windowState.selectedFolderId),
 		newNoteButtonEnabled: CommandService.instance().isEnabled('newNote', whenClauseContext),
 		newTodoButtonEnabled: CommandService.instance().isEnabled('newTodo', whenClauseContext),
 		sortOrderButtonsVisible: state.settings['notes.sortOrder.buttonsVisible'],

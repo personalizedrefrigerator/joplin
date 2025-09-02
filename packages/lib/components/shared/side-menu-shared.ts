@@ -1,6 +1,7 @@
 import { FolderEntity, TagEntity, TagsWithNoteCountEntity } from '../../services/database/types';
 import { getDisplayParentId } from '../../services/trash';
 import { getCollator } from '../../models/utils/getCollator';
+import Folder from '../../models/Folder';
 
 export type RenderFolderItem<T> = (folder: FolderEntity, hasChildren: boolean, depth: number)=> T;
 export type RenderTagItem<T> = (tag: TagsWithNoteCountEntity)=> T;
@@ -22,6 +23,7 @@ type ItemsWithOrder<ItemType> = {
 interface FolderTree {
 	folders: FolderEntity[];
 	parentIdToChildren: Map<string, FolderEntity[]>;
+	misplacedItems: FolderEntity[]; // Folders with missing parents
 	idToItem: Map<string, FolderEntity>;
 }
 
@@ -30,41 +32,50 @@ interface RenderFoldersProps {
 	collapsedFolderIds: string[];
 }
 
-function folderIsCollapsed(context: RenderFoldersProps, folderId: string) {
-	if (!context.collapsedFolderIds || !context.collapsedFolderIds.length) return false;
-
-	while (true) {
-		const folder = context.folderTree.idToItem.get(folderId);
-		const folderParentId = getDisplayParentId(folder, context.folderTree.idToItem.get(folder.parent_id));
-		if (!folderParentId) return false;
-		if (context.collapsedFolderIds.includes(folderParentId)) return true;
-		folderId = folderParentId;
-	}
-}
-
-function renderFoldersRecursive_<T>(props: RenderFoldersProps, renderItem: RenderFolderItem<T>, items: T[], parentId: string, depth: number, order: string[]): ItemsWithOrder<T> {
-	const folders = props.folderTree.parentIdToChildren.get(parentId ?? '') ?? [];
+export const renderFolders = <T> (props: RenderFoldersProps, renderItem: RenderFolderItem<T>): ItemsWithOrder<T> => {
+	const renderedIds = new Set<string>();
+	const items: T[] = [];
+	const order: string[] = [];
 	const parentIdToChildren = props.folderTree.parentIdToChildren;
-	for (const folder of folders) {
-		if (folderIsCollapsed(props, folder.id)) continue;
+	const collapsedFolderIds = props.collapsedFolderIds ?? [];
+
+	const renderFolder_ = (folder: FolderEntity, depth: number) => {
+		// Handle invalid state: Cyclic parent_ids.
+		if (renderedIds.has(folder.id)) return;
 
 		const hasChildren = parentIdToChildren.has(folder.id);
 		order.push(folder.id);
+		renderedIds.add(folder.id);
 		items.push(renderItem(folder, hasChildren, depth));
-		if (hasChildren) {
-			const result = renderFoldersRecursive_(props, renderItem, items, folder.id, depth + 1, order);
-			items = result.items;
-			order = result.order;
+		if (hasChildren && !collapsedFolderIds.includes(folder.id)) {
+			renderFoldersRecursive_(folder.id, depth + 1);
 		}
-	}
-	return {
-		items: items,
-		order: order,
 	};
-}
 
-export const renderFolders = <T> (props: RenderFoldersProps, renderItem: RenderFolderItem<T>): ItemsWithOrder<T> => {
-	return renderFoldersRecursive_(props, renderItem, [], '', 0, []);
+	const renderFoldersRecursive_ = (parentId: string, depth: number) => {
+		const folders = props.folderTree.parentIdToChildren.get(parentId ?? '') ?? [];
+		for (const folder of folders) {
+			renderFolder_(folder, depth);
+		}
+	};
+	renderFoldersRecursive_('', 0);
+
+	const renderMisplacedFolders = () => {
+		if (props.folderTree.misplacedItems.length === 0) return;
+
+		const misplacedItem = Folder.misplacedFolder();
+		items.push(renderItem(misplacedItem, true, 0));
+		order.push(misplacedItem.id);
+
+		if (!collapsedFolderIds.includes(misplacedItem.id)) {
+			for (const folder of props.folderTree.misplacedItems) {
+				renderFolder_(folder, 1);
+			}
+		}
+	};
+	renderMisplacedFolders();
+
+	return { items, order };
 };
 
 export const buildFolderTree = (folders: FolderEntity[]): FolderTree => {
@@ -73,6 +84,7 @@ export const buildFolderTree = (folders: FolderEntity[]): FolderTree => {
 		idToItem.set(folder.id, folder);
 	}
 
+	const misplacedItems = [];
 	const parentIdToChildren = new Map<string, FolderEntity[]>();
 	for (const folder of folders) {
 		const displayParentId = getDisplayParentId(folder, idToItem.get(folder.parent_id)) ?? '';
@@ -80,9 +92,13 @@ export const buildFolderTree = (folders: FolderEntity[]): FolderTree => {
 			parentIdToChildren.set(displayParentId, []);
 		}
 		parentIdToChildren.get(displayParentId).push(folder);
+
+		if (folder.parent_id && !idToItem.has(folder.parent_id) && !Folder.isVirtualFolder(folder.parent_id)) {
+			misplacedItems.push(folder);
+		}
 	}
 
-	return { folders, parentIdToChildren, idToItem };
+	return { folders, parentIdToChildren, misplacedItems, idToItem };
 };
 
 const sortTags = (tags: TagEntity[]) => {

@@ -125,12 +125,12 @@ const useOnRenderItem = (props: Props) => {
 
 		let item = null;
 		if (itemType === BaseModel.TYPE_FOLDER) {
-			item = BaseModel.byId(foldersRef.current, itemId);
+			item = Folder.byId(foldersRef.current, itemId);
 		}
 
 		const isDeleted = item ? !!item.deleted_time : false;
 
-		if (!isDeleted) {
+		if (!isDeleted && !Folder.isVirtualFolder(itemId)) {
 			if (itemType === BaseModel.TYPE_FOLDER && !item.encryption_applied) {
 				menu.append(
 					new MenuItem(menuUtils.commandToStatefulMenuItem('newFolder', itemId)),
@@ -261,7 +261,7 @@ const useOnRenderItem = (props: Props) => {
 					);
 				}
 			}
-		} else {
+		} else if (isDeleted) {
 			if (itemType === BaseModel.TYPE_FOLDER) {
 				menu.append(
 					new MenuItem(menuUtils.commandToStatefulMenuItem('restoreFolder', itemId)),
