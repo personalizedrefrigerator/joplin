@@ -202,13 +202,13 @@ describe('ShareModel', () => {
 			},
 		});
 
-		expect((await models().userItem().byUserId(user3.id)).length).toBe(0);
+		expect(await models().userItem().byUserId(user3.id)).toHaveLength(0);
 		await Promise.all([
 			models().share().createSharedFolderUserItems(share.id, user3.id),
 			models().share().createSharedFolderUserItems(share.id, user3.id),
 			models().share().createSharedFolderUserItems(share.id, user3.id),
 		]);
-		expect((await models().userItem().byUserId(user3.id)).length).toBe(4);
+		expect(await models().userItem().byUserId(user3.id)).toHaveLength(4);
 	});
 
 });
