@@ -1092,6 +1092,7 @@ packages/editor/ProseMirror/utils/dom/createButton.js
 packages/editor/ProseMirror/utils/dom/createTextArea.js
 packages/editor/ProseMirror/utils/dom/createTextNode.js
 packages/editor/ProseMirror/utils/dom/createUniqueId.js
+packages/editor/ProseMirror/utils/dom/showModal.js
 packages/editor/ProseMirror/utils/extractSelectedLinesTo.test.js
 packages/editor/ProseMirror/utils/extractSelectedLinesTo.js
 packages/editor/ProseMirror/utils/forEachHeading.js

@@ -1,7 +1,10 @@
 import { Plugin } from 'prosemirror-state';
 import { AttributeSpec, Node, NodeSpec } from 'prosemirror-model';
 import { EditorView } from 'prosemirror-view';
-import SelectableNodeView from '../utils/SelectableNodeView';
+import SelectableNodeView, { GetPosition } from '../utils/SelectableNodeView';
+import { getEditorApi } from './joplinEditorApiPlugin';
+import showModal from '../utils/dom/showModal';
+import createTextArea from '../utils/dom/createTextArea';
 
 // See the fold example for more information about
 // writing similar ProseMirror plugins:
@@ -116,11 +119,39 @@ export const nodeSpecs = {
 };
 
 class ImageView extends SelectableNodeView {
-	public constructor(node: Node) {
+	public constructor(node: Node, view: EditorView, getPosition: GetPosition) {
 		super(true);
 		this.dom.classList.add('joplin-image-view');
 
 		this.dom.appendChild(this.createDom_(node));
+		const { localize: _ } = getEditorApi(view.state);
+
+		this.addActionButton(_('ALT'), () => {
+			const position = getPosition();
+			const node = view.state.doc.nodeAt(position);
+			const attrs = node.attrs as NodeAttrs;
+
+			const content = document.createElement('div');
+			content.classList.add('alt-text-editor');
+			const input = createTextArea({
+				label: _('A brief description of the image:'),
+				initialContent: attrs.alt,
+				onChange: (newContent) => {
+					view.dispatch(
+						// TODO: Handle the case where the node moves during editing.
+						view.state.tr.setNodeAttribute(position, 'alt', newContent.replace(/[\n]+/g, '\n')),
+					);
+				},
+			});
+			content.appendChild(input.label);
+			content.appendChild(input.textArea);
+
+			showModal({
+				content,
+				doneLabel: _('Done'),
+				onDismiss: ()=>{},
+			});
+		});
 	}
 
 	private createDom_(node: Node) {
@@ -180,8 +211,8 @@ export const onResourceDownloaded = (view: EditorView, resourceId: string, newSr
 const imagePlugin = new Plugin({
 	props: {
 		nodeViews: {
-			image: (node, _view, _getPos) => {
-				return new ImageView(node);
+			image: (node, view, getPosition) => {
+				return new ImageView(node, view, getPosition);
 			},
 		},
 	},
