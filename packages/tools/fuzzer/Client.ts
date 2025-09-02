@@ -504,6 +504,13 @@ class Client implements ActionableClient {
 		await this.assertNoteMatchesState_(note);
 	}
 
+	public async deleteNote(id: ItemId) {
+		logger.info('Delete note', id, 'in', this.label);
+		await this.tracker_.deleteNote(id);
+
+		await this.execCliCommand_('rmnote', '--permanent', '--force', id);
+	}
+
 	public async deleteFolder(id: string) {
 		logger.info('Delete folder', id, 'in', this.label);
 		await this.tracker_.deleteFolder(id);

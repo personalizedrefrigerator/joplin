@@ -351,6 +351,19 @@ class ActionTracker {
 				this.checkRep_();
 				return Promise.resolve();
 			},
+			deleteNote: (id: ItemId) => {
+				this.checkRep_();
+
+				const item = this.idToItem_.get(id);
+				if (!item) throw new Error(`Not found ${id}`);
+				assert.ok(!isFolder(item), 'should be a note');
+				assertWriteable(item);
+
+				removeItemRecursive(id);
+
+				this.checkRep_();
+				return Promise.resolve();
+			},
 			shareFolder: (id: ItemId, shareWith: ClientInfo, options: ShareOptions) => {
 				const itemToShare = this.idToItem_.get(id);
 				assertIsFolder(itemToShare);
