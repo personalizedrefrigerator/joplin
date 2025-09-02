@@ -139,12 +139,12 @@ export default class UserItemModel extends BaseModel<UserItem> {
 		const items: Item[] = Array.isArray(itemsQuery) ? itemsQuery : await itemsQuery.whereNotIn('id', this.db('user_items').select('item_id').where('user_id', '=', userId));
 		if (!items.length) return;
 
-		await this.withTransaction(async () => {
-			perfTimer.push(`Processing ${items.length} items`);
+		perfTimer.push(`Processing ${items.length} items`);
 
-			for (const item of items) {
-				if (!('name' in item) || !('id' in item)) throw new Error('item.id and item.name must be set');
+		for (const item of items) {
+			if (!('name' in item) || !('id' in item)) throw new Error('item.id and item.name must be set');
 
+			await this.withTransaction(async () => {
 				try {
 					await super.save({
 						user_id: userId,
@@ -166,10 +166,10 @@ export default class UserItemModel extends BaseModel<UserItem> {
 						throw error;
 					}
 				}
-			}
+			}, 'UserItemModel::addMulti');
+		}
 
-			perfTimer.pop();
-		}, 'UserItemModel::addMulti');
+		perfTimer.pop();
 
 		perfTimer.pop();
 	}
