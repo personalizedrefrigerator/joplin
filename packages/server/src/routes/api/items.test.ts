@@ -1,4 +1,4 @@
-import { beforeAllDb, afterAllTests, beforeEachDb, createUserAndSession, models, createItem, makeTempFileWithContent, makeNoteSerializedBody, createItemTree, expectHttpError, createNote, expectNoHttpError, getItem, deleteItem } from '../../utils/testing/testUtils';
+import { beforeAllDb, afterAllTests, beforeEachDb, createUserAndSession, models, createItem, makeTempFileWithContent, makeNoteSerializedBody, createItemTree, expectHttpError, createNote, expectNoHttpError, getItem, deleteItem, createBaseAppContext } from '../../utils/testing/testUtils';
 import { NoteEntity } from '@joplin/lib/services/database/types';
 import { ModelType } from '@joplin/lib/BaseModel';
 import { deleteApi, getApi, putApi } from '../../utils/testing/apiUtils';
@@ -425,12 +425,14 @@ describe('api/items', () => {
 			},
 		});
 
+		const baseAppContext = await createBaseAppContext();
+
 		// Should not fail
 		await Promise.all([
-			deleteItem(session1.id, '00000000000000000000000000000001'),
-			deleteItem(session1.id, '00000000000000000000000000000001'),
-			deleteItem(session1.id, '00000000000000000000000000000002'),
-			deleteItem(session1.id, '00000000000000000000000000000002'),
+			deleteItem(session1.id, '00000000000000000000000000000001', baseAppContext),
+			deleteItem(session1.id, '00000000000000000000000000000001', baseAppContext),
+			deleteItem(session1.id, '00000000000000000000000000000002', baseAppContext),
+			deleteItem(session1.id, '00000000000000000000000000000002', baseAppContext),
 		]);
 
 		// Should have deleted the items
