@@ -5,6 +5,7 @@ import SelectableNodeView, { GetPosition } from '../utils/SelectableNodeView';
 import { getEditorApi } from './joplinEditorApiPlugin';
 import showModal from '../utils/dom/showModal';
 import createTextArea from '../utils/dom/createTextArea';
+import createExternalEditorPlugin, { OnHide } from './utils/createExternalEditorPlugin';
 
 // See the fold example for more information about
 // writing similar ProseMirror plugins:
@@ -118,6 +119,53 @@ export const nodeSpecs = {
 	image: imageSpec,
 };
 
+
+const createAltTextDialog = (nodePosition: number, view: EditorView, onHide: ()=> void) => {
+	const node = view.state.doc.nodeAt(nodePosition);
+	const attrs = node.attrs as NodeAttrs;
+
+	const { localize: _ } = getEditorApi(view.state);
+
+	const content = document.createElement('div');
+	content.classList.add('alt-text-editor');
+	const input = createTextArea({
+		label: _('A brief description of the image:'),
+		initialContent: attrs.alt,
+		onChange: (newContent) => {
+			view.dispatch(
+				// TODO: Handle the case where the node moves during editing.
+				view.state.tr.setNodeAttribute(nodePosition, 'alt', newContent.replace(/[\n]+/g, '\n')),
+			);
+		},
+	});
+	content.appendChild(input.label);
+	content.appendChild(input.textArea);
+
+	const modal = showModal({
+		content,
+		doneLabel: _('Done'),
+		onDismiss: ()=>{
+			onHide();
+		},
+	});
+
+	return {
+		onPositionChange: (newPosition: number) => {
+			nodePosition = newPosition;
+		},
+		dismiss: () => modal.dismiss(),
+	};
+};
+
+const { plugin: altTextEditorPlugin, editAt: editAltTextAt } = createExternalEditorPlugin({
+	canEdit: (node: Node) => {
+		return node.type.name === 'image';
+	},
+	showEditor: (pos: number, view: EditorView, onHide: OnHide) => {
+		return createAltTextDialog(pos, view, onHide);
+	},
+});
+
 class ImageView extends SelectableNodeView {
 	public constructor(node: Node, view: EditorView, getPosition: GetPosition) {
 		super(true);
@@ -127,30 +175,7 @@ class ImageView extends SelectableNodeView {
 		const { localize: _ } = getEditorApi(view.state);
 
 		this.addActionButton(_('ALT'), () => {
-			const position = getPosition();
-			const node = view.state.doc.nodeAt(position);
-			const attrs = node.attrs as NodeAttrs;
-
-			const content = document.createElement('div');
-			content.classList.add('alt-text-editor');
-			const input = createTextArea({
-				label: _('A brief description of the image:'),
-				initialContent: attrs.alt,
-				onChange: (newContent) => {
-					view.dispatch(
-						// TODO: Handle the case where the node moves during editing.
-						view.state.tr.setNodeAttribute(position, 'alt', newContent.replace(/[\n]+/g, '\n')),
-					);
-				},
-			});
-			content.appendChild(input.label);
-			content.appendChild(input.textArea);
-
-			showModal({
-				content,
-				doneLabel: _('Done'),
-				onDismiss: ()=>{},
-			});
+			editAltTextAt(getPosition())(view.state, view.dispatch, view);
 		});
 	}
 
@@ -208,14 +233,18 @@ export const onResourceDownloaded = (view: EditorView, resourceId: string, newSr
 	view.dispatch(tr);
 };
 
-const imagePlugin = new Plugin({
-	props: {
-		nodeViews: {
-			image: (node, view, getPosition) => {
-				return new ImageView(node, view, getPosition);
+
+const imagePlugin = [
+	altTextEditorPlugin,
+	new Plugin({
+		props: {
+			nodeViews: {
+				image: (node, view, getPosition) => {
+					return new ImageView(node, view, getPosition);
+				},
 			},
 		},
-	},
-});
+	}),
+];
 
 export default imagePlugin;
