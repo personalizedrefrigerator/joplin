@@ -254,6 +254,8 @@ const SearchResult: React.FC<SearchResultProps> = ({
 		<View style={[styles.optionContent, selected && styles.optionContentSelected]}>
 			{icon}
 			<Text
+				ellipsizeMode='tail'
+				numberOfLines={1}
 				style={styles.optionLabel}
 			>{text}</Text>
 		</View>
