@@ -37,9 +37,12 @@ add_library(${CMAKE_PROJECT_NAME} SHARED
 
 set(WHISPER_LIB_DIR ${CMAKE_SOURCE_DIR}/../../../../vendor/whisper.cpp)
 
+# Support 16 KB pages (see https://developer.android.com/guide/practices/page-sizes#cmake)
+set(SHARED_FLAGS "-O3 -Wl,-z,max-page-size=16384")
+
 # Based on the Whisper.cpp Android example:
-set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}   -O3 ")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -fvisibility=hidden -fvisibility-inlines-hidden -ffunction-sections -fdata-sections")
+set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}   ${SHARED_FLAGS} ")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${SHARED_FLAGS} -fvisibility=hidden -fvisibility-inlines-hidden -ffunction-sections -fdata-sections")
 
 # Whisper: See https://stackoverflow.com/a/76290722
 add_subdirectory(${WHISPER_LIB_DIR} ./whisper)
