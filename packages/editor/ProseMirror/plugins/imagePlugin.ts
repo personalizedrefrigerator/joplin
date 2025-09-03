@@ -133,11 +133,11 @@ const createAltTextDialog = (nodePosition: number, view: EditorView, onHide: ()=
 		initialContent: attrs.alt,
 		onChange: (newContent) => {
 			view.dispatch(
-				// TODO: Handle the case where the node moves during editing.
 				view.state.tr.setNodeAttribute(nodePosition, 'alt', newContent.replace(/[\n]+/g, '\n')),
 			);
 		},
 	});
+	input.textArea.setAttribute('autofocus', 'true');
 	content.appendChild(input.label);
 	content.appendChild(input.textArea);
 
@@ -174,7 +174,7 @@ class ImageView extends SelectableNodeView {
 		this.dom.appendChild(this.createDom_(node));
 		const { localize: _ } = getEditorApi(view.state);
 
-		this.addActionButton(_('ALT'), () => {
+		this.addActionButton(_('Label'), () => {
 			editAltTextAt(getPosition())(view.state, view.dispatch, view);
 		});
 	}

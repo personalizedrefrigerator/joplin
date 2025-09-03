@@ -3,7 +3,7 @@ import { EditorView } from 'prosemirror-view';
 import schema from '../schema';
 import { EditorState, Plugin } from 'prosemirror-state';
 
-type PluginList = Plugin[]|(Plugin|Plugin[])[];
+export type PluginList = Plugin[]|(Plugin|Plugin[])[];
 
 interface Options {
 	parent?: HTMLElement;

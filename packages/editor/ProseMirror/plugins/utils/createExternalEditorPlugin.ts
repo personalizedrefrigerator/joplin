@@ -1,4 +1,4 @@
-import { Command, EditorState, Plugin } from 'prosemirror-state';
+import { Command, EditorState, Plugin, TextSelection } from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';
 import { Node } from 'prosemirror-model';
 
@@ -63,6 +63,15 @@ const createExternalEditorPlugin = (options: Options) => {
 
 					if (newState.editingNodeAt !== null) {
 						if (oldState.editingNodeAt === null) {
+							// iOS/accessibility: Put the selection just before the node to be edited
+							// but **do not select the node**. Selecting the node seems to cause issues
+							// with focus placement when opening the dialog.
+							view.dispatch(
+								view.state.tr.setSelection(
+									TextSelection.create(view.state.doc, newState.editingNodeAt),
+								),
+							);
+
 							const onHide = () => {
 								hideEditor(view.state, view.dispatch, view);
 							};
