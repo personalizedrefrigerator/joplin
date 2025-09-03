@@ -44,6 +44,7 @@ const useStyles = (themeId: number, headerStyle: TextStyle|undefined) => {
 			tagText: {
 				color: theme.color3,
 				fontSize: theme.fontSize,
+				flexShrink: 1,
 			},
 			removeTagButton: {
 				color: theme.color3,
