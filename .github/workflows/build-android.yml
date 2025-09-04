@@ -44,6 +44,14 @@ jobs:
       - name: Verify alignment
         run: |
           cd packages/app-mobile/android/app
+          $APK_FILE=$(find . -type f -name '*.apk' | head -n1)
+          if test ! -f "$APK_FILE" ; then
+            echo "APK file not found."
+            exit 1
+          else
+            echo "APK file found at: $APK_FILE"
+          fi
+
           if test ! -d ./release ; then
             echo "Missing release folder."
             exit 1
@@ -61,4 +69,4 @@ jobs:
             echo "zipalign not found (searching in $BUILD_TOOLS_PATH, candidate: $ZIPALIGN_PATH)"
             exit 1
           fi
-          $BUILD_TOOLS_PATH/zipalign -c -P 16 -v 4 ./app-release.apk
+          $BUILD_TOOLS_PATH/zipalign -c -P 16 -v 4 "$APK_FILE"
