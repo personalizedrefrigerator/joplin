@@ -119,7 +119,9 @@ const FeedbackBanner: React.FC<Props> = props => {
 		logger.debug('sending response to', fetchUrl);
 		const showError = (message: string) => {
 			logger.error('Error', message);
-			void shim.showErrorDialog(_('Error: %s', message));
+			void shim.showErrorDialog(
+				_('An error occurred while sending the response. This can happen if the app is offline or cannot connect to the server.\nError: %s', message),
+			);
 		};
 
 		try {
@@ -134,7 +136,7 @@ const FeedbackBanner: React.FC<Props> = props => {
 				showError(`Server error: ${response.status} ${body}`);
 			}
 		} catch (error) {
-			showError(`Error: ${error}`);
+			showError(error);
 		}
 	}, [surveyUrl]);
 
@@ -167,7 +169,7 @@ const FeedbackBanner: React.FC<Props> = props => {
 	if (shim.mobilePlatform() !== 'web' || props.progress === SurveyProgress.Dismissed) return null;
 
 	return <Portal>
-		<View style={styles.container}>
+		<View style={styles.container} role='complementary'>
 			<View>
 				<Text
 					accessibilityRole='header'
