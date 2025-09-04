@@ -43,7 +43,7 @@ jobs:
       
       - name: Verify alignment
         run: |
-          cd packages/app-mobile/android/app/release
+          cd app/release
           BUILD_TOOLS_PATH=$ANDROID_HOME/build-tools/
           if test ! -d "$BUILD_TOOLS_PATH" ; then
             echo "Build tools not found at $BUILD_TOOLS_PATH ($ANDROID_HOME, $BUILD_TOOLS_VERSION)"
