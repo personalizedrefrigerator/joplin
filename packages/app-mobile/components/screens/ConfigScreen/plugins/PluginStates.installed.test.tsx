@@ -1,11 +1,9 @@
 import * as React from 'react';
 import { createTempDir, mockMobilePlatform, setupDatabaseAndSynchronizer, switchClient } from '@joplin/lib/testing/test-utils';
 
-import { act, fireEvent, render, screen, userEvent, waitFor } from '@testing-library/react-native';
-import '@testing-library/react-native/extend-expect';
+import { act, fireEvent, render, screen, userEvent, waitFor } from '../../../../utils/testing/testingLibrary';
 
 import PluginService, { PluginSettings, defaultPluginSetting } from '@joplin/lib/services/plugins/PluginService';
-import pluginServiceSetup from './testUtils/pluginServiceSetup';
 import { writeFile } from 'fs-extra';
 import { join } from 'path';
 import shim from '@joplin/lib/shim';
@@ -16,6 +14,7 @@ import createMockReduxStore from '../../../../utils/testing/createMockReduxStore
 import WrappedPluginStates from './testUtils/WrappedPluginStates';
 import mockRepositoryApiConstructor from './testUtils/mockRepositoryApiConstructor';
 import Setting from '@joplin/lib/models/Setting';
+import mockPluginServiceSetup from '../../../../utils/testing/mockPluginServiceSetup';
 
 
 let reduxStore: Store<AppState> = null;
@@ -57,7 +56,7 @@ describe('PluginStates.installed', () => {
 		await setupDatabaseAndSynchronizer(0);
 		await switchClient(0);
 		reduxStore = createMockReduxStore();
-		pluginServiceSetup(reduxStore);
+		mockPluginServiceSetup(reduxStore);
 		resetRepoApi();
 
 		await mockMobilePlatform('android');

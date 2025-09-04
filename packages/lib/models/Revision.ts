@@ -4,6 +4,7 @@ import BaseItem from './BaseItem';
 const DiffMatchPatch = require('diff-match-patch');
 import * as ArrayUtils from '../ArrayUtils';
 import JoplinError from '../JoplinError';
+import time from '../time';
 const { sprintf } = require('sprintf-js');
 
 const dmp = new DiffMatchPatch();
@@ -343,8 +344,8 @@ export default class Revision extends BaseItem {
 				const bodyDiff = this.createTextPatch('', merged.body);
 				const metadataDiff = this.createObjectPatch({}, merged.metadata);
 				queries.push({
-					sql: 'UPDATE revisions SET title_diff = ?, body_diff = ?, metadata_diff = ? WHERE id = ?',
-					params: [titleDiff, bodyDiff, metadataDiff, keptRev.id],
+					sql: 'UPDATE revisions SET title_diff = ?, body_diff = ?, metadata_diff = ?, updated_time = ? WHERE id = ?',
+					params: [titleDiff, bodyDiff, metadataDiff, time.unixMs(), keptRev.id],
 				});
 			}
 
@@ -371,6 +372,15 @@ export default class Revision extends BaseItem {
 				}
 			}
 		}
+	}
+
+	public static async deleteHistoryForNote(noteId: string) {
+		const revisions: RevisionEntity[] = await this.modelSelectAll(
+			'SELECT id FROM revisions WHERE item_type = ? AND item_id = ? ORDER BY item_updated_time DESC',
+			[ModelType.Note, noteId],
+		);
+
+		await this.batchDelete(revisions.map(item => item.id), { sourceDescription: 'Revision.deleteHistoryForNote' });
 	}
 
 	public static async revisionExists(itemType: ModelType, itemId: string, updatedTime: number) {

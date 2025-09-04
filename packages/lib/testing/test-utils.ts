@@ -48,7 +48,7 @@ import RevisionService from '../services/RevisionService';
 import ResourceFetcher from '../services/ResourceFetcher';
 const WebDavApi = require('../WebDavApi');
 const DropboxApi = require('../DropboxApi');
-import JoplinServerApi from '../JoplinServerApi';
+import JoplinServerApi, { Session } from '../JoplinServerApi';
 import { FolderEntity, ResourceEntity } from '../services/database/types';
 import { credentialFile, readCredentialFile } from '../utils/credentialFiles';
 import SyncTargetJoplinCloud from '../SyncTargetJoplinCloud';
@@ -68,6 +68,9 @@ import OcrService from '../services/ocr/OcrService';
 import { createWorker } from 'tesseract.js';
 import { reg } from '../registry';
 import { Store } from 'redux';
+import { dirname } from '@joplin/utils/path';
+import SyncTargetJoplinServerSAML from '../SyncTargetJoplinServerSAML';
+import { MarkupLanguage } from '@joplin/renderer';
 
 // Each suite has its own separate data and temp directory so that multiple
 // suites can be run at the same time. suiteName is what is used to
@@ -129,6 +132,7 @@ SyncTargetRegistry.addClass(SyncTargetDropbox);
 SyncTargetRegistry.addClass(SyncTargetAmazonS3);
 SyncTargetRegistry.addClass(SyncTargetWebDAV);
 SyncTargetRegistry.addClass(SyncTargetJoplinServer);
+SyncTargetRegistry.addClass(SyncTargetJoplinServerSAML);
 SyncTargetRegistry.addClass(SyncTargetJoplinCloud);
 
 let syncTargetName_ = '';
@@ -146,7 +150,7 @@ function setSyncTargetName(name: string) {
 	syncTargetName_ = name;
 	syncTargetId_ = SyncTargetRegistry.nameToId(syncTargetName_);
 	sleepTime = syncTargetId_ === SyncTargetRegistry.nameToId('filesystem') ? 1001 : 100;// 400;
-	isNetworkSyncTarget_ = ['nextcloud', 'dropbox', 'onedrive', 'amazon_s3', 'joplinServer', 'joplinCloud'].includes(syncTargetName_);
+	isNetworkSyncTarget_ = ['nextcloud', 'dropbox', 'onedrive', 'amazon_s3', 'joplinServer', 'joplinServerSaml', 'joplinCloud'].includes(syncTargetName_);
 	synchronizers_ = [];
 	return previousName;
 }
@@ -196,6 +200,7 @@ Setting.setConstant('tempDir', baseTempDir);
 Setting.setConstant('cacheDir', baseTempDir);
 Setting.setConstant('resourceDir', baseTempDir);
 Setting.setConstant('pluginDataDir', `${profileDir}/profile/plugin-data`);
+Setting.setConstant('pluginAssetDir', `${dirname(require.resolve('@joplin/renderer'))}/assets`);
 Setting.setConstant('profileDir', profileDir);
 Setting.setConstant('rootProfileDir', rootProfileDir);
 Setting.setConstant('env', Env.Dev);
@@ -439,15 +444,17 @@ function pluginDir(id: number = null) {
 
 export interface CreateNoteAndResourceOptions {
 	path?: string;
+	markupLanguage?: MarkupLanguage;
 }
 
 const createNoteAndResource = async (options: CreateNoteAndResourceOptions = null) => {
 	options = {
 		path: `${supportDir}/photo.jpg`,
+		markupLanguage: MarkupLanguage.Markdown,
 		...options,
 	};
 
-	let note = await Note.save({});
+	let note = await Note.save({ markup_language: options.markupLanguage });
 	note = await shim.attachFileToNote(note, options.path);
 	const resourceIds = await Note.linkedItemIds(note.body);
 	const resource: ResourceEntity = await Resource.load(resourceIds[0]);
@@ -697,6 +704,7 @@ async function initFileApi() {
 			userContentBaseUrl: () => joplinServerAuth.userContentBaseUrl,
 			username: () => joplinServerAuth.email,
 			password: () => joplinServerAuth.password,
+			session: (): Session => null,
 		});
 
 		fileApi = new FileApi('', new FileApiDriverJoplinServer(api));
@@ -1108,7 +1116,7 @@ const simulateReadOnlyShareEnv = (shareIds: string[]|string, store?: Store) => {
 
 export const newOcrService = () => {
 	const driver = new OcrDriverTesseract({ createWorker }, { workerPath: null, corePath: null, languageDataPath: null });
-	return new OcrService(driver);
+	return new OcrService([driver]);
 };
 
 export const mockMobilePlatform = (platform: string) => {
@@ -1188,7 +1196,7 @@ export const runWithFakeTimers = async (callback: ()=> Promise<void>) => {
 // null => Use default
 type MockFetchRequestHandler = (request: Request)=> Response|null;
 
-// Mocks shim.fetch, may not mock other fetch-related methods
+// Mocks shim.fetch, but may not mock other fetch-related methods
 export const mockFetch = (requestHandler: MockFetchRequestHandler) => {
 	const originalFetch = shim.fetch;
 
@@ -1207,6 +1215,24 @@ export const mockFetch = (requestHandler: MockFetchRequestHandler) => {
 			shim.fetch = originalFetch;
 		},
 	};
+};
+
+export const withWarningSilenced = async <T> (warningRegex: RegExp, task: ()=> Promise<T>): Promise<T> => {
+	// See https://jestjs.io/docs/jest-object#spied-methods-and-the-using-keyword, which
+	// shows how to use .spyOn to hide warnings
+	let warningMock;
+	try {
+		warningMock = jest.spyOn(console, 'warn');
+		warningMock.mockImplementation((message, ...args) => {
+			const fullMessage = [message, ...args].join(' ');
+			if (!fullMessage.match(warningRegex)) {
+				console.error(`Unexpected warning: ${message}`, ...args);
+			}
+		});
+		return await task();
+	} finally {
+		warningMock.mockRestore();
+	}
 };
 
 export { supportDir, createNoteAndResource, createTempFile, createTestShareData, simulateReadOnlyShareEnv, waitForFolderCount, afterAllCleanUp, exportDir, synchronizerStart, afterEachCleanUp, syncTargetName, setSyncTargetName, syncDir, createTempDir, isNetworkSyncTarget, kvStore, expectThrow, logger, expectNotThrow, resourceService, resourceFetcher, tempFilePath, allSyncTargetItemsEncrypted, msleep, setupDatabase, revisionService, setupDatabaseAndSynchronizer, db, synchronizer, fileApi, sleep, clearDatabase, switchClient, syncTargetId, objectsEqual, checkThrowAsync, checkThrow, encryptionService, loadEncryptionMasterKey, fileContentEqual, decryptionWorker, currentClientId, id, ids, sortedIds, at, createNTestNotes, createNTestFolders, createNTestTags, TestApp };

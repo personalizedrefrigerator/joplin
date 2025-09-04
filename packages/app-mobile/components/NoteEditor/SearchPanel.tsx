@@ -5,11 +5,12 @@ import { useMemo, useState, useEffect } from 'react';
 
 import { EditorSettings } from './types';
 import { _ } from '@joplin/lib/locale';
-import { BackHandler, TextInput, View, Text, StyleSheet, ViewStyle } from 'react-native';
+import { TextInput, View, Text, StyleSheet, ViewStyle } from 'react-native';
 import { Theme } from '@joplin/lib/themes/type';
 import IconButton from '../IconButton';
 import { SearchState } from '@joplin/editor/types';
 import { SearchControl } from './types';
+import BackButtonService from '../../services/BackButtonService';
 
 const buttonSize = 48;
 
@@ -115,6 +116,7 @@ const useStyles = (theme: Theme) => {
 				backgroundColor: theme.backgroundColor3,
 			},
 			input: {
+				flexBasis: 0,
 				flexGrow: 1,
 				height: buttonSize,
 				backgroundColor: theme.backgroundColor4,
@@ -134,6 +136,13 @@ const useStyles = (theme: Theme) => {
 				alignItems: 'center',
 				justifyContent: 'center',
 				marginLeft: 10,
+			},
+			panelContainer: {
+				// Workaround for the editor disappearing when dismissing search on Android.
+				// See https://github.com/laurent22/joplin/issues/12781
+				//
+				// It may be possible to remove this line after upgrading to React Native's New Architecture.
+				borderColor: 'transparent',
 			},
 		});
 	}, [theme]);
@@ -170,6 +179,7 @@ export const SearchPanel = (props: SearchPanelProps) => {
 				returnKeyType='search'
 				blurOnSubmit={false}
 				onSubmitEditing={control.findNext}
+				selectTextOnFocus={true}
 			/>
 		);
 	};
@@ -181,17 +191,17 @@ export const SearchPanel = (props: SearchPanelProps) => {
 			return () => {};
 		}
 
-		const backListener = BackHandler.addEventListener('hardwareBackPress', () => {
+		const handler = () => {
 			control.hideSearch();
 			return true;
-		});
+		};
 
-		return () => backListener.remove();
-		// eslint-disable-next-line @seiyab/react-hooks/exhaustive-deps -- Old code before rule was applied
-	}, [state.dialogVisible]);
+		BackButtonService.addHandler(handler);
+		return () => BackButtonService.removeHandler(handler);
+	}, [state.dialogVisible, control]);
 
 
-	const themeId = props.editorSettings.themeId;
+	const themeId = props.editorSettings.themeData.themeId;
 	const closeButton = (
 		<ActionButton
 			themeId={themeId}
@@ -365,7 +375,9 @@ export const SearchPanel = (props: SearchPanelProps) => {
 		return null;
 	}
 
-	return showingAdvanced ? advancedLayout : simpleLayout;
+	return <View style={styles.panelContainer}>
+		{showingAdvanced ? advancedLayout : simpleLayout}
+	</View>;
 };
 
 export default SearchPanel;

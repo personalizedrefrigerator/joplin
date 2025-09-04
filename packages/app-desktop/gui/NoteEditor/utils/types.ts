@@ -57,16 +57,17 @@ export interface NoteEditorProps {
 	setTagsToolbarButtonInfo: ToolbarButtonInfo;
 	contentMaxWidth: number;
 	scrollbarSize: ScrollbarSize;
+	viewerFontFamily: string;
 	isSafeMode: boolean;
 	useCustomPdfViewer: boolean;
 	shareCacheSetting: string;
 	syncUserId: string;
 	searchResults: ProcessResultsRow[];
 	pluginHtmlContents: PluginHtmlContents;
-	'plugins.shownEditorViewIds': string[];
 	onTitleChange?: (title: string)=> void;
 	bodyEditor: string;
 	startupPluginsLoaded: boolean;
+	enableHtmlToMarkdownBanner: boolean;
 }
 
 export interface NoteBodyEditorRef {
@@ -85,8 +86,6 @@ export type HtmlToMarkdownHandler = (markupLanguage: number, html: string, origi
 export interface NoteBodyEditorProps {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	style: any;
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	ref: any;
 	themeId: number;
 
 	// When this is true it means the note must always be rendered using a white
@@ -134,11 +133,17 @@ export interface NoteBodyEditorProps {
 	plugins: PluginStates;
 	mathEnabled: boolean;
 	fontSize: number;
+	baseFontFamily: string;
 	contentMaxWidth: number;
 	isSafeMode: boolean;
 	noteId: string;
 	useCustomPdfViewer: boolean;
 	watchedNoteFiles: string[];
+	enableHtmlToMarkdownBanner: boolean;
+}
+
+export interface NoteBodyEditorPropsAndRef extends NoteBodyEditorProps {
+	ref: RefObject<NoteBodyEditorRef>;
 }
 
 export interface FormNote {

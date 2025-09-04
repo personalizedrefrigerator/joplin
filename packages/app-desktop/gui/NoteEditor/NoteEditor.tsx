@@ -14,7 +14,7 @@ import useFormNote, { OnLoadEvent, OnSetFormNote } from './utils/useFormNote';
 import useEffectiveNoteId from './utils/useEffectiveNoteId';
 import useFolder from './utils/useFolder';
 import styles_ from './styles';
-import { NoteEditorProps, FormNote, OnChangeEvent, NoteBodyEditorProps, AllAssetsOptions, NoteBodyEditorRef } from './utils/types';
+import { NoteEditorProps, FormNote, OnChangeEvent, AllAssetsOptions, NoteBodyEditorRef, NoteBodyEditorPropsAndRef } from './utils/types';
 import CommandService from '@joplin/lib/services/CommandService';
 import Button, { ButtonLevel } from '../Button/Button';
 import eventManager, { EventName } from '@joplin/lib/eventManager';
@@ -52,10 +52,11 @@ import Logger from '@joplin/utils/Logger';
 import usePluginEditorView from './utils/usePluginEditorView';
 import { stateUtils } from '@joplin/lib/reducer';
 import { WindowIdContext } from '../NewWindowOrIFrame';
-import PluginService from '@joplin/lib/services/plugins/PluginService';
-import EditorPluginHandler from '@joplin/lib/services/plugins/EditorPluginHandler';
 import useResourceUnwatcher from './utils/useResourceUnwatcher';
 import StatusBar from './StatusBar';
+import useVisiblePluginEditorViewIds from '@joplin/lib/hooks/plugins/useVisiblePluginEditorViewIds';
+import useConnectToEditorPlugin from './utils/useConnectToEditorPlugin';
+import getResourceBaseUrl from './utils/getResourceBaseUrl';
 
 const debounce = require('debounce');
 
@@ -75,23 +76,17 @@ function NoteEditorContent(props: NoteEditorProps) {
 	const [titleHasBeenManuallyChanged, setTitleHasBeenManuallyChanged] = useState(false);
 	const [isReadOnly, setIsReadOnly] = useState<boolean>(false);
 
-	const editorRef = useRef<NoteBodyEditorRef>();
-	const titleInputRef = useRef<HTMLInputElement>();
+	const editorRef = useRef<NoteBodyEditorRef|null>(null);
+	const titleInputRef = useRef<HTMLInputElement|null>(null);
 	const isMountedRef = useRef(true);
 	const noteSearchBarRef = useRef(null);
-
-	const editorPluginHandler = useMemo(() => {
-		return new EditorPluginHandler(PluginService.instance());
-	}, []);
-
-	const shownEditorViewIds = props['plugins.shownEditorViewIds'];
 
 	// Should be constant and unique to this instance of the editor.
 	const editorId = useMemo(() => {
 		return `editor-${editorIdCounter++}`;
 	}, []);
 
-	const setFormNoteRef = useRef<OnSetFormNote>();
+	const setFormNoteRef = useRef<OnSetFormNote>(null);
 	const { saveNoteIfWillChange, scheduleSaveNote } = useScheduleSaveCallbacks({
 		setFormNote: setFormNoteRef, dispatch: props.dispatch, editorRef, editorId,
 	});
@@ -105,18 +100,7 @@ function NoteEditorContent(props: NoteEditorProps) {
 	}, []);
 
 	const effectiveNoteId = useEffectiveNoteId(props);
-
-	useAsyncEffect(async (_event) => {
-		if (!props.startupPluginsLoaded) return;
-		await editorPluginHandler.emitActivationCheck();
-	}, [effectiveNoteId, editorPluginHandler, props.startupPluginsLoaded]);
-
-	useEffect(() => {
-		if (!props.startupPluginsLoaded) return;
-		editorPluginHandler.emitUpdate(shownEditorViewIds);
-	}, [effectiveNoteId, editorPluginHandler, shownEditorViewIds, props.startupPluginsLoaded]);
-
-	const { editorPlugin, editorView } = usePluginEditorView(props.plugins, shownEditorViewIds);
+	const { editorPlugin, editorView } = usePluginEditorView(props.plugins);
 	const builtInEditorVisible = !editorPlugin;
 
 	const { formNote, setFormNote, isNewNote, resourceInfos } = useFormNote({
@@ -130,10 +114,23 @@ function NoteEditorContent(props: NoteEditorProps) {
 		editorId,
 	});
 	setFormNoteRef.current = setFormNote;
-	const formNoteRef = useRef<FormNote>();
+	const formNoteRef = useRef<FormNote>(formNote);
 	formNoteRef.current = { ...formNote };
 
 	const formNoteFolder = useFolder({ folderId: formNote.parent_id });
+
+	const windowId = useContext(WindowIdContext);
+	const shownEditorViewIds = useVisiblePluginEditorViewIds(props.plugins, windowId);
+	useConnectToEditorPlugin({
+		startupPluginsLoaded: props.startupPluginsLoaded,
+		setFormNote,
+		scheduleSaveNote,
+		formNote,
+		effectiveNoteId,
+		shownEditorViewIds,
+		activeEditorView: editorView,
+		plugins: props.plugins,
+	});
 
 	const {
 		localSearch,
@@ -161,6 +158,7 @@ function NoteEditorContent(props: NoteEditorProps) {
 		customCss: props.customCss,
 		plugins: props.plugins,
 		scrollbarSize: props.scrollbarSize,
+		baseFontFamily: props.viewerFontFamily,
 	});
 
 	const allAssets = useCallback(async (markupLanguage: number, options: AllAssetsOptions = null) => {
@@ -172,7 +170,7 @@ function NoteEditorContent(props: NoteEditorProps) {
 		const theme = themeStyle(options.themeId ? options.themeId : props.themeId);
 
 		const markupToHtml = markupLanguageUtils.newMarkupToHtml(props.plugins, {
-			resourceBaseUrl: `joplin-content://note-viewer/${Setting.value('resourceDir')}/`,
+			resourceBaseUrl: getResourceBaseUrl(),
 			customCss: props.customCss,
 		});
 
@@ -180,9 +178,10 @@ function NoteEditorContent(props: NoteEditorProps) {
 			contentMaxWidth: props.contentMaxWidth,
 			contentMaxWidthTarget: options.contentMaxWidthTarget,
 			scrollbarSize: props.scrollbarSize,
+			baseFontFamily: props.viewerFontFamily,
 			whiteBackgroundNoteRendering: options.whiteBackgroundNoteRendering,
 		});
-	}, [props.plugins, props.themeId, props.scrollbarSize, props.customCss, props.contentMaxWidth]);
+	}, [props.plugins, props.themeId, props.scrollbarSize, props.viewerFontFamily, props.customCss, props.contentMaxWidth]);
 
 	const handleProvisionalFlag = useCallback(() => {
 		if (props.isProvisional) {
@@ -336,7 +335,6 @@ function NoteEditorContent(props: NoteEditorProps) {
 		lastEditorScrollPercents: props.lastEditorScrollPercents,
 		editorRef,
 	});
-	const windowId = useContext(WindowIdContext);
 	const onMessage = useMessageHandler(scrollWhenReady, clearScrollWhenReady, windowId, editorRef, setLocalSearchResultCount, props.dispatch, formNote, htmlToMarkdown, markupToHtml);
 
 	useResourceUnwatcher({ noteId: formNote.id, windowId });
@@ -423,7 +421,7 @@ function NoteEditorContent(props: NoteEditorProps) {
 	const searchMarkers = useSearchMarkers(showLocalSearch, localSearchMarkerOptions, props.searches, props.selectedSearchId, props.highlightedWords);
 
 	const markupLanguage = formNote.markup_language;
-	const editorProps: NoteBodyEditorProps = {
+	const editorProps: NoteBodyEditorPropsAndRef = {
 		ref: editorRef,
 		contentKey: formNote.id,
 		style: styles.tinyMCE,
@@ -462,12 +460,14 @@ function NoteEditorContent(props: NoteEditorProps) {
 		fontSize: Setting.value('style.editor.fontSize'),
 		contentMaxWidth: props.contentMaxWidth,
 		scrollbarSize: props.scrollbarSize,
+		baseFontFamily: props.viewerFontFamily,
 		isSafeMode: props.isSafeMode,
 		useCustomPdfViewer: props.useCustomPdfViewer,
 		// We need it to identify the context for which media is rendered.
 		// It is currently used to remember pdf scroll position for each attachments of each note uniquely.
 		noteId: props.noteId,
 		watchedNoteFiles: props.watchedNoteFiles,
+		enableHtmlToMarkdownBanner: props.enableHtmlToMarkdownBanner,
 	};
 
 	let editor = null;
@@ -489,6 +489,17 @@ function NoteEditorContent(props: NoteEditorProps) {
 	const noteRevisionViewer_onBack = useCallback(() => {
 		setShowRevisions(false);
 	}, []);
+
+	const onBannerConvertItToMarkdown = useCallback(async (event: React.MouseEvent<HTMLAnchorElement>) => {
+		event.preventDefault();
+		if (!props.selectedNoteIds || props.selectedNoteIds.length === 0) return;
+		await CommandService.instance().execute('convertNoteToMarkdown', props.selectedNoteIds[0]);
+	}, [props.selectedNoteIds]);
+
+	const onHideBannerConvertItToMarkdown = async (event: React.MouseEvent<HTMLAnchorElement>) => {
+		event.preventDefault();
+		Setting.setValue('editor.enableHtmlToMarkdownBanner', false);
+	};
 
 	const onBannerResourceClick = useCallback(async (event: React.MouseEvent<HTMLAnchorElement>) => {
 		event.preventDefault();
@@ -634,9 +645,30 @@ function NoteEditorContent(props: NoteEditorProps) {
 
 	const theme = themeStyle(props.themeId);
 
+	function renderConvertHtmlToMarkdown(): React.ReactNode {
+		if (!props.enableHtmlToMarkdownBanner) return null;
+
+		const note = props.notes.find(n => n.id === props.selectedNoteIds[0]);
+		if (!note) return null;
+		if (note.markup_language !== MarkupLanguage.Html) return null;
+
+		return (
+			<div style={styles.resourceWatchBanner}>
+				<p style={styles.resourceWatchBannerLine}>
+					{_('This note is in HTML format. Convert it to Markdown to edit it more easily.')}
+					&nbsp;
+					<a href="#" style={styles.resourceWatchBannerAction} onClick={onBannerConvertItToMarkdown}>{`${_('Convert it')}`}</a>
+					{' / '}
+					<a href="#" style={styles.resourceWatchBannerAction} onClick={onHideBannerConvertItToMarkdown}>{_('Don\'t show this message again')}</a>
+				</p>
+			</div>
+		);
+	}
+
 	return (
 		<div style={styles.root} onDragOver={onDragOver} onDrop={onDrop} ref={containerRef}>
 			<div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+				{renderConvertHtmlToMarkdown()}
 				{renderResourceWatchingNotification()}
 				{renderResourceInSearchResultsNotification()}
 				<NoteTitleBar
@@ -706,7 +738,6 @@ const mapStateToProps = (state: AppState, ownProps: ConnectProps) => {
 		highlightedWords: state.highlightedWords,
 		plugins: state.pluginService.plugins,
 		pluginHtmlContents: state.pluginService.pluginHtmlContents,
-		'plugins.shownEditorViewIds': state.settings['plugins.shownEditorViewIds'] || [],
 		toolbarButtonInfos: toolbarButtonUtils.commandsToToolbarButtons([
 			'historyBackward',
 			'historyForward',
@@ -718,12 +749,14 @@ const mapStateToProps = (state: AppState, ownProps: ConnectProps) => {
 		], whenClauseContext)[0] as ToolbarButtonInfo,
 		contentMaxWidth: state.settings['style.editor.contentMaxWidth'],
 		scrollbarSize: state.settings['style.scrollbarSize'],
+		viewerFontFamily: state.settings['style.viewer.fontFamily'],
 		tabMovesFocus: state.settings['editor.tabMovesFocus'],
 		isSafeMode: state.settings.isSafeMode,
 		useCustomPdfViewer: false,
 		syncUserId: state.settings['sync.userId'],
 		shareCacheSetting: state.settings['sync.shareCache'],
 		searchResults: state.searchResults,
+		enableHtmlToMarkdownBanner: state.settings['editor.enableHtmlToMarkdownBanner'],
 	};
 };
 

@@ -34,7 +34,6 @@ import { themeStyle, editorFont } from '../../global-style';
 import shared, { BaseNoteScreenComponent, Props as BaseProps } from '@joplin/lib/components/shared/note-screen-shared';
 import SelectDateTimeDialog from '../../SelectDateTimeDialog';
 import ShareExtension from '../../../utils/ShareExtension.js';
-import CameraView from '../../CameraView/CameraView';
 import { FolderEntity, NoteEntity, ResourceEntity } from '@joplin/lib/services/database/types';
 import Logger from '@joplin/utils/Logger';
 import ImageEditor from '../../NoteEditor/ImageEditor/ImageEditor';
@@ -44,7 +43,6 @@ import { ChangeEvent as EditorChangeEvent, SelectionRangeChangeEvent, UndoRedoDe
 import { join } from 'path';
 import { Dispatch } from 'redux';
 import { RefObject, useContext } from 'react';
-import { SelectionRange } from '../../NoteEditor/types';
 import { getNoteCallbackUrl } from '@joplin/lib/callbackUrlUtils';
 import { AppState } from '../../../utils/types';
 import restoreItems from '@joplin/lib/services/trash/restoreItems';
@@ -58,7 +56,7 @@ import getImageDimensions from '../../../utils/image/getImageDimensions';
 import resizeImage from '../../../utils/image/resizeImage';
 import { CameraResult } from '../../CameraView/types';
 import { DialogContext, DialogControl } from '../../DialogManager';
-import { CommandRuntimeProps, EditorMode, PickerResponse } from './types';
+import { CommandRuntimeProps, NoteViewerMode, PickerResponse } from './types';
 import commands from './commands';
 import { AttachFileAction, AttachFileOptions } from './commands/attachFile';
 import PluginService from '@joplin/lib/services/plugins/PluginService';
@@ -68,6 +66,13 @@ import getActivePluginEditorView from '@joplin/lib/services/plugins/utils/getAct
 import EditorPluginHandler from '@joplin/lib/services/plugins/EditorPluginHandler';
 import AudioRecordingBanner from '../../voiceTyping/AudioRecordingBanner';
 import SpeechToTextBanner from '../../voiceTyping/SpeechToTextBanner';
+import CameraView from '../../CameraView/CameraView';
+import ShareNoteDialog from '../ShareNoteDialog';
+import stateToWhenClauseContext from '../../../services/commands/stateToWhenClauseContext';
+import { defaultWindowId } from '@joplin/lib/reducer';
+import useVisiblePluginEditorViewIds from '@joplin/lib/hooks/plugins/useVisiblePluginEditorViewIds';
+import { SelectionRange } from '../../../contentScripts/markdownEditorBundle/types';
+import { EditorType } from '../../NoteEditor/types';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 const emptyArray: any[] = [];
@@ -86,10 +91,12 @@ interface NoteNavigation {
 }
 
 interface Props extends BaseProps {
+	windowId: string;
 	provisionalNoteIds: string[];
 	navigation: NoteNavigation;
 	dispatch: Dispatch;
 	noteId: string;
+	editorType: EditorType;
 	useEditorBeta: boolean;
 	plugins: PluginStates;
 	themeId: number;
@@ -102,18 +109,19 @@ interface Props extends BaseProps {
 	highlightedWords: string[];
 	noteHash: string;
 	toolbarEnabled: boolean;
-	'plugins.shownEditorViewIds': string[];
 	pluginHtmlContents: PluginHtmlContents;
 	editorNoteReloadTimeRequest: number;
+	canPublish: boolean;
 }
 
 interface ComponentProps extends Props {
 	dialogs: DialogControl;
+	visibleEditorPluginIds: string[];
 }
 
 interface State {
 	note: NoteEntity;
-	mode: EditorMode;
+	mode: NoteViewerMode;
 	readOnly: boolean;
 	folder: FolderEntity|null;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
@@ -123,6 +131,7 @@ interface State {
 	alarmDialogShown: boolean;
 	heightBumpView: number;
 	noteTagDialogShown: boolean;
+	publishDialogShown: boolean;
 	fromShare: boolean;
 	showCamera: boolean;
 	showImageEditor: boolean;
@@ -141,7 +150,7 @@ interface State {
 	showSpeechToTextDialog: boolean;
 }
 
-class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> implements BaseNoteScreenComponent {
+class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> implements BaseNoteScreenComponent<State> {
 	// This isn't in this.state because we don't want changing scroll to trigger
 	// a re-render.
 	private lastBodyScroll: number|undefined = undefined;
@@ -159,8 +168,6 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	private noteTagDialog_closeRequested: any;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	private onJoplinLinkClick_: any;
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	private refreshResource: (resource: any, noteBody?: string)=> Promise<void>;
 	private selection: SelectionRange;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
@@ -172,7 +179,9 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	public dialogbox: any;
 	private commandRegistration_: RegisteredRuntime|null = null;
-	private editorPluginHandler_ = new EditorPluginHandler(PluginService.instance());
+	private editorPluginHandler_ = new EditorPluginHandler(PluginService.instance(), saveEvent => {
+		return shared.noteComponent_change(this, 'body', saveEvent.body);
+	});
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	public static navigationOptions(): any {
@@ -193,6 +202,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 			alarmDialogShown: false,
 			heightBumpView: 0,
 			noteTagDialogShown: false,
+			publishDialogShown: false,
 			fromShare: false,
 			showCamera: false,
 			showImageEditor: false,
@@ -285,14 +295,6 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 
 		this.noteTagDialog_closeRequested = () => {
 			this.setState({ noteTagDialogShown: false });
-		};
-
-		this.onJoplinLinkClick_ = async (msg: string) => {
-			try {
-				await CommandService.instance().execute('openItem', msg);
-			} catch (error) {
-				await this.props.dialogs.error(error.message);
-			}
 		};
 
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
@@ -426,6 +428,18 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 			body: noteBody === null ? this.state.note.body : noteBody,
 		};
 	}
+
+	private onPublishDialogClose_ = () => {
+		this.setState({
+			publishDialogShown: false,
+		});
+	};
+
+	private onPublishDialogShow_ = () => {
+		this.setState({
+			publishDialogShown: true,
+		});
+	};
 
 	public styles() {
 		const themeId = this.props.themeId;
@@ -571,10 +585,13 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 			}, 100);
 		}
 
-		await this.editorPluginHandler_.emitActivationCheck();
+		await this.editorPluginHandler_.emitActivationCheck({
+			noteId: this.props.noteId,
+			parentWindowId: defaultWindowId,
+		});
 
 		setTimeout(() => {
-			this.editorPluginHandler_.emitUpdate(this.props['plugins.shownEditorViewIds']);
+			this.emitEditorPluginUpdate_();
 		}, 300);
 	}
 
@@ -588,7 +605,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 		await ResourceFetcher.instance().markForDownload(resourceIds);
 	}
 
-	public componentDidUpdate(prevProps: Props, prevState: State) {
+	public componentDidUpdate(prevProps: ComponentProps, prevState: State) {
 		if (this.doFocusUpdate_) {
 			this.doFocusUpdate_ = false;
 			this.scheduleFocusUpdate();
@@ -622,6 +639,13 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 			});
 		}
 
+		if (prevState.mode !== this.state.mode) {
+			this.props.dispatch({
+				type: 'NOTE_EDITOR_VISIBLE_CHANGE',
+				visible: this.state.mode === 'edit' && !this.state.showCamera && !this.state.showImageEditor,
+			});
+		}
+
 		if (prevProps.noteId && this.props.noteId && prevProps.noteId !== this.props.noteId) {
 			// Easier to just go back, then go to the note since
 			// the Note screen doesn't handle reloading a different note
@@ -636,15 +660,22 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 			});
 		}
 
-		if (this.props['plugins.shownEditorViewIds'] !== prevProps['plugins.shownEditorViewIds']) {
-			const { editorPlugin } = getShownPluginEditorView(this.props.plugins, this.props['plugins.shownEditorViewIds']);
+		if (this.props.visibleEditorPluginIds !== prevProps.visibleEditorPluginIds) {
+			const { editorPlugin } = getShownPluginEditorView(this.props.plugins, this.props.windowId);
 			if (!editorPlugin && this.props.editorNoteReloadTimeRequest > this.state.noteLastLoadTime) {
 				void shared.reloadNote(this);
 			}
 		}
 
 		if (prevProps.noteId && this.props.noteId && prevProps.noteId !== this.props.noteId) {
-			void this.editorPluginHandler_.emitActivationCheck();
+			void this.editorPluginHandler_.emitActivationCheck({
+				noteId: this.props.noteId,
+				parentWindowId: defaultWindowId,
+			});
+		}
+
+		if (prevState.note.body !== this.state.note.body) {
+			this.emitEditorPluginUpdate_();
 		}
 	}
 
@@ -662,11 +693,23 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 
 		this.commandRegistration_?.deregister();
 		this.commandRegistration_ = null;
+
+		this.props.dispatch({
+			type: 'SET_NOTE_EDITOR_VISIBLE',
+			visible: false,
+		});
 	}
 
 	private title_changeText(text: string) {
 		shared.noteComponent_change(this, 'title', text);
 		this.setState({ newAndNoTitleChangeNoteId: null });
+	}
+
+	private emitEditorPluginUpdate_() {
+		this.editorPluginHandler_.emitUpdate({
+			noteId: this.props.noteId,
+			newBody: this.state.note.body,
+		}, this.props.visibleEditorPluginIds);
 	}
 
 	private onPlainEditorTextChange = (text: string) => {
@@ -696,9 +739,9 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 		this.selection = { start: event.from, end: event.to };
 	};
 
-	public makeSaveAction() {
+	public makeSaveAction(state: State) {
 		return async () => {
-			return shared.saveNoteButton_press(this, null, null);
+			return shared.saveNoteButton_press(this, state, null, null);
 		};
 	}
 
@@ -709,12 +752,12 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 		return this.saveActionQueues_[noteId];
 	}
 
-	public scheduleSave() {
-		this.saveActionQueue(this.state.note.id).push(this.makeSaveAction());
+	public scheduleSave(state: State) {
+		this.saveActionQueue(state.note.id).push(this.makeSaveAction(state));
 	}
 
 	private async saveNoteButton_press(folderId: string = null) {
-		await shared.saveNoteButton_press(this, folderId, null);
+		await shared.saveNoteButton_press(this, this.state, folderId, null);
 
 		Keyboard.dismiss();
 	}
@@ -808,6 +851,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 		pickerResponse: PickerResponse,
 		fileType: string,
 	): Promise<ResourceEntity|null> {
+		logger.debug('Attaching file:', pickerResponse?.uri);
 		if (!pickerResponse) {
 			// User has cancelled
 			return null;
@@ -879,21 +923,27 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 
 		resource = await Resource.save(resource, { isNew: true });
 
-		const resourceTag = Resource.markupTag(resource);
+		const resourceTag = Resource.markupTag(resource, this.state.note.markup_language);
 		const newNote = await this.insertText(resourceTag, { newLine: true });
 
 		void this.refreshResource(resource, newNote.body);
 
-		this.scheduleSave();
+		this.scheduleSave({ ...this.state, note: newNote });
 
 		return resource;
 	}
 
-	private cameraView_onPhoto(data: CameraResult) {
-		void this.attachFile(
-			data,
-			'image',
-		);
+	private async cameraView_onPhoto(data: CameraResult|CameraResult[]) {
+		if (!Array.isArray(data)) {
+			data = [data];
+		}
+
+		for (const item of data) {
+			await this.attachFile(
+				item,
+				'image',
+			);
+		}
 
 		this.setState({ showCamera: false });
 	}
@@ -993,9 +1043,9 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 	};
 
 	private toggleIsTodo_onPress() {
-		shared.toggleIsTodo_onPress(this);
+		const newNote = shared.toggleIsTodo_onPress(this);
 
-		this.scheduleSave();
+		this.scheduleSave({ ...this.state, note: newNote });
 	}
 
 	private async share_onPress() {
@@ -1091,12 +1141,27 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 				void this.showOnMap_onPress();
 			},
 		});
+		output.push({
+			title: _('Previous versions'),
+			onPress: () => {
+				this.props.dispatch({ type: 'SIDE_MENU_CLOSE' });
+				void NavService.go('NoteRevisionViewer', {
+					noteId: this.props.noteId,
+				});
+			},
+		});
 		if (note.source_url) {
 			output.push({
 				title: _('Go to source URL'),
 				onPress: () => {
 					void this.showSource_onPress();
 				},
+			});
+		}
+		if (this.props.canPublish) {
+			output.push({
+				title: _('Publish/unpublish'),
+				onPress: this.onPublishDialogShow_,
 			});
 		}
 
@@ -1176,10 +1241,11 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 		const isSaved = note && note.id;
 		const readOnly = this.state.readOnly;
 		const isDeleted = !!this.state.note.deleted_time;
+		const isCodeView = this.props.editorType === EditorType.Markdown;
 
 		const pluginCommands = pluginUtils.commandNamesFromViews(this.props.plugins, 'noteToolbar');
 
-		const cacheKey = md5([isTodo, isSaved, pluginCommands.join(','), readOnly].join('_'));
+		const cacheKey = md5([isTodo, isSaved, pluginCommands.join(','), readOnly, this.state.mode, isCodeView].join('_'));
 		if (!this.menuOptionsCache_) this.menuOptionsCache_ = {};
 
 		if (this.menuOptionsCache_[cacheKey]) return this.menuOptionsCache_[cacheKey];
@@ -1295,6 +1361,16 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 				this.properties_onPress();
 			},
 		});
+
+		if (this.state.mode === 'edit') {
+			const newCodeView = !isCodeView;
+			output.push({
+				title: newCodeView ? _('Edit as Markdown') : _('Edit as Rich Text'),
+				onPress: () => {
+					Setting.setValue('editor.codeView', newCodeView);
+				},
+			});
+		}
 
 		if (isDeleted) {
 			output.push({
@@ -1429,7 +1505,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 			const newNote: NoteEntity = { ...this.state.note };
 			newNote.body = `${newNote.body} ${text}`;
 			this.setState({ note: newNote });
-			this.scheduleSave();
+			this.scheduleSave(this.state);
 		} else {
 			if (this.useEditorBeta()) {
 				// We add a space so that if the feature is used twice in a row,
@@ -1464,7 +1540,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 		// multiple times.
 		this.registerCommands();
 
-		const { editorPlugin, editorView } = getShownPluginEditorView(this.props.plugins, this.props['plugins.shownEditorViewIds']);
+		const { editorPlugin, editorView } = getShownPluginEditorView(this.props.plugins, this.props.windowId);
 
 		if (this.state.isLoading) {
 			return (
@@ -1480,10 +1556,10 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 
 		if (this.state.showCamera) {
 			return <CameraView
-				style={{ flex: 1 }}
 				onPhoto={this.cameraView_onPhoto}
 				onInsertBarcode={this.cameraView_onInsertBarcode}
 				onCancel={this.cameraView_onCancel}
+				style={{ flex: 1 }}
 			/>;
 		} else if (this.state.showImageEditor) {
 			return <ImageEditor
@@ -1495,6 +1571,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 		}
 
 		const renderPluginEditor = () => {
+			this.editorPluginHandler_.onEditorPluginShown(editorView.id);
 			return <PluginUserWebView
 				viewInfo={{ plugin: editorPlugin, view: editorView }}
 				themeId={this.props.themeId}
@@ -1519,7 +1596,6 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 				bodyComponent =
 					!note || !note.body.trim() ? null : (
 						<NoteBodyViewer
-							onJoplinLinkClick={this.onJoplinLinkClick_}
 							style={this.styles().noteBodyViewer}
 							// Extra bottom padding to make it possible to scroll past the
 							// action button (so that it doesn't overlap the text)
@@ -1528,15 +1604,12 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 							noteMarkupLanguage={note.markup_language}
 							noteResources={this.state.noteResources}
 							highlightedKeywords={keywords}
-							themeId={this.props.themeId}
-							fontSize={this.props.viewerFontSize}
 							noteHash={this.props.noteHash}
 							onCheckboxChange={this.onBodyViewerCheckboxChange}
 							onMarkForDownload={this.onMarkForDownload}
 							onRequestEditResource={this.onEditResource}
 							onScroll={this.onBodyViewerScroll}
 							initialScroll={this.lastBodyScroll}
-							pluginStates={this.props.plugins}
 						/>
 					);
 			} else {
@@ -1587,10 +1660,13 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 						noteHash={this.props.noteHash}
 						initialText={note.body}
 						initialSelection={this.selection}
+						markupLanguage={this.state.note.markup_language}
+						globalSearch={this.props.searchQuery}
 						onChange={this.onMarkdownEditorTextChange}
 						onSelectionChange={this.onMarkdownEditorSelectionChange}
 						onUndoRedoDepthChange={this.onUndoRedoDepthChange}
 						onAttach={this.onAttach}
+						noteResources={this.state.noteResources}
 						readOnly={this.state.readOnly}
 						plugins={this.props.plugins}
 						style={{
@@ -1600,6 +1676,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 							paddingLeft: 0,
 							paddingRight: 0,
 						}}
+						mode={this.props.editorType}
 					/>;
 				}
 			}
@@ -1608,6 +1685,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 		const voiceTypingDialogShown = this.state.showSpeechToTextDialog || this.state.showAudioRecorder;
 		const renderActionButton = () => {
 			if (voiceTypingDialogShown) return null;
+			if (editorView) return null;
 			if (!this.state.note || !!this.state.note.deleted_time) return null;
 
 			const editButton = {
@@ -1674,7 +1752,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 			return result;
 		};
 
-		const { editorPlugin: activeEditorPlugin } = getActivePluginEditorView(this.props.plugins);
+		const { editorPlugin: activeEditorPlugin } = getActivePluginEditorView(this.props.plugins, this.props.windowId);
 
 		return (
 			<View style={this.rootStyle(this.props.themeId).root}>
@@ -1702,6 +1780,11 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 				<SelectDateTimeDialog themeId={this.props.themeId} shown={this.state.alarmDialogShown} date={dueDate} onAccept={this.onAlarmDialogAccept} onReject={this.onAlarmDialogReject} />
 
 				{noteTagDialog}
+				<ShareNoteDialog
+					noteId={this.props.noteId}
+					visible={this.state.publishDialogShown}
+					onClose={this.onPublishDialogClose_}
+				/>
 			</View>
 		);
 	}
@@ -1713,13 +1796,17 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 // how the new note should be rendered
 const NoteScreenWrapper = (props: Props) => {
 	const dialogs = useContext(DialogContext);
+	const visibleEditorPluginIds = useVisiblePluginEditorViewIds(props.plugins, props.windowId);
+
 	return (
-		<NoteScreenComponent key={props.noteId} dialogs={dialogs} {...props} />
+		<NoteScreenComponent key={props.noteId} dialogs={dialogs} visibleEditorPluginIds={visibleEditorPluginIds} {...props} />
 	);
 };
 
 const NoteScreen = connect((state: AppState) => {
+	const whenClause = stateToWhenClauseContext(state);
 	return {
+		windowId: state.windowId,
 		noteId: state.selectedNoteIds.length ? state.selectedNoteIds[0] : null,
 		noteHash: state.selectedNoteHash,
 		itemType: state.selectedItemType,
@@ -1736,14 +1823,16 @@ const NoteScreen = connect((state: AppState) => {
 		provisionalNoteIds: state.provisionalNoteIds,
 		highlightedWords: state.highlightedWords,
 		plugins: state.pluginService.plugins,
-		'plugins.shownEditorViewIds': state.settings['plugins.shownEditorViewIds'] || [],
 		pluginHtmlContents: state.pluginService.pluginHtmlContents,
 		editorNoteReloadTimeRequest: state.editorNoteReloadTimeRequest,
+
+		editorType: state.settings['editor.codeView'] ? EditorType.Markdown : EditorType.RichText,
 
 		// What we call "beta editor" in this component is actually the (now
 		// default) CodeMirror editor. That should be refactored to make it less
 		// confusing.
 		useEditorBeta: !state.settings['editor.usePlainText'],
+		canPublish: whenClause.joplinServerConnected && !whenClause.inTrash,
 	};
 })(NoteScreenWrapper);
 

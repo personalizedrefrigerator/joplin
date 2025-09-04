@@ -28,6 +28,7 @@ import { setLocale } from '@joplin/lib/locale';
 import initLib from '@joplin/lib/initLib';
 import checkAdminHandler from './middleware/checkAdminHandler';
 import ActionLogger from '@joplin/lib/utils/ActionLogger';
+import { setupSamlAuthentication } from './utils/saml';
 
 interface Argv {
 	env?: Env;
@@ -145,6 +146,9 @@ async function main() {
 	}
 
 	function acceptOrigin(origin: string): boolean {
+		// Origin can be string "null"
+		if (origin === 'null') return false;
+
 		const hostname = (new URL(origin)).hostname;
 		const userContentDomain = envVariables.USER_CONTENT_BASE_URL ? (new URL(envVariables.USER_CONTENT_BASE_URL)).hostname : '';
 
@@ -258,6 +262,10 @@ async function main() {
 		appLogger().info(`Writing PID to ${pidFile}...`);
 		fs.removeSync(pidFile as string);
 		fs.writeFileSync(pidFile, `${process.pid}`);
+	}
+
+	if (config().saml.enabled) {
+		setupSamlAuthentication();
 	}
 
 	let runCommandAndExitApp = true;

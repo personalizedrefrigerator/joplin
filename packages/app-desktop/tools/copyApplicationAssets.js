@@ -82,7 +82,7 @@ async function main() {
 	const files = [
 		'@fortawesome/fontawesome-free/css/all.min.css',
 		'@joeattardi/emoji-button/dist/index.js',
-		'codemirror/addon/dialog/dialog.css',
+		'codemirror/addon/',
 		'codemirror/lib/codemirror.css',
 		'mark.js/dist/mark.min.js',
 		'roboto-fontface/css/roboto/roboto-fontface.css',
@@ -90,6 +90,7 @@ async function main() {
 		'smalltalk/dist/smalltalk.min.js',
 		'smalltalk/img/IDR_CLOSE_DIALOG_H.png',
 		'smalltalk/img/IDR_CLOSE_DIALOG.png',
+		'tesseract.js/dist/tesseract.min.js',
 		{
 			src: resolve(__dirname, '../../lib/services/plugins/sandboxProxy.js'),
 			dest: `${buildLibDir}/@joplin/lib/services/plugins/sandboxProxy.js`,

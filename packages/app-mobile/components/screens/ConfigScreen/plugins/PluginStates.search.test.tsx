@@ -1,16 +1,15 @@
 import * as React from 'react';
 import { mockMobilePlatform, setupDatabaseAndSynchronizer, switchClient } from '@joplin/lib/testing/test-utils';
 
-import { render, screen, userEvent, waitFor } from '@testing-library/react-native';
-import '@testing-library/react-native/extend-expect';
+import { render, screen, userEvent, waitFor } from '../../../../utils/testing/testingLibrary';
 
-import pluginServiceSetup from './testUtils/pluginServiceSetup';
 import createMockReduxStore from '../../../../utils/testing/createMockReduxStore';
 import WrappedPluginStates from './testUtils/WrappedPluginStates';
 import { AppState } from '../../../../utils/types';
 import { Store } from 'redux';
 import mockRepositoryApiConstructor from './testUtils/mockRepositoryApiConstructor';
 import { resetRepoApi } from './utils/useRepoApi';
+import mockPluginServiceSetup from '../../../../utils/testing/mockPluginServiceSetup';
 
 const expectSearchResultCountToBe = async (count: number) => {
 	await waitFor(() => {
@@ -38,7 +37,7 @@ describe('PluginStates.search', () => {
 		await setupDatabaseAndSynchronizer(0);
 		await switchClient(0);
 		reduxStore = createMockReduxStore();
-		pluginServiceSetup(reduxStore);
+		mockPluginServiceSetup(reduxStore);
 		mockMobilePlatform('android');
 		resetRepoApi();
 

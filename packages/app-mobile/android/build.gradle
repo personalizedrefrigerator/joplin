@@ -2,14 +2,14 @@
 
 buildscript {
     ext {
-        buildToolsVersion = "34.0.0"
-        minSdkVersion = 23
+        buildToolsVersion = "35.0.0"
+        minSdkVersion = 24
 
-        compileSdkVersion = 34
-        targetSdkVersion = 34
+        compileSdkVersion = 35
+        targetSdkVersion = 35
 
-        ndkVersion = "26.1.10909125"
-        kotlinVersion = "1.9.22"
+        ndkVersion = "27.1.12297006"
+        kotlinVersion = "2.0.21"
     }
     repositories {
         google()
@@ -39,12 +39,6 @@ allprojects {
         //
         // https://search.maven.org/artifact/com.alphacephei/vosk-android/0.3.46/aar
         maven { url "https://maven.apache.org" }
-
-        maven {
-            // Required by react-native-fingerprint-scanner
-            // https://github.com/hieuvp/react-native-fingerprint-scanner/issues/192
-            url "https://maven.aliyun.com/repository/jcenter"
-        }
 
         // Also required for react-native-vosk?
         maven { url "https://maven.google.com" }

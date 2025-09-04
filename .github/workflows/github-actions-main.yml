@@ -9,7 +9,7 @@ jobs:
       matrix:
         # Do not use unbuntu-latest because it causes `The operation was canceled` failures:
         # https://github.com/actions/runner-images/issues/6709
-        os: [macos-13, ubuntu-22.04, windows-2019, ubuntu-22.04-arm]
+        os: [macos-13, ubuntu-22.04, windows-2025, ubuntu-22.04-arm]
     steps:
       - uses: actions/checkout@v4
 
@@ -17,7 +17,6 @@ jobs:
         uses: ./.github/workflows/shared/setup-build-environment
 
       - name: Install Docker Engine
-        # if: runner.os == 'Linux' && startsWith(github.ref, 'refs/tags/server-v')
         if: runner.os == 'Linux'
         run: |
           sudo apt-get install -y apt-transport-https
@@ -36,7 +35,7 @@ jobs:
       # a pull request it will fail because the PR doesn't have access to
       # secrets
       - uses: docker/login-action@v3
-        if: runner.os == 'Linux' && startsWith(github.ref, 'refs/tags/server-v')
+        if: runner.os == 'Linux' && (startsWith(github.ref, 'refs/tags/server-v') || startsWith(github.ref, 'refs/tags/transcribe-v'))
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
@@ -122,7 +121,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '18'
-          cache: 'yarn'
 
       - name: Install Yarn
         run: |
@@ -141,13 +139,8 @@ jobs:
           echo "RUNNER_ARCH=$RUNNER_ARCH"
           echo "DOCKER_IMAGE_PLATFORM=$DOCKER_IMAGE_PLATFORM"
 
-          # Canvas is only needed for tests and it doesn't build in ARM64 so remove it
-          cd packages/lib
-          yarn remove canvas
-          cd ../..
-          
           yarn install
-          yarn buildServerDocker --platform $DOCKER_IMAGE_PLATFORM --tag-name server-v0.0.0 --repository joplin/server
+          yarn buildServerDocker --docker-file Dockerfile.server --platform $DOCKER_IMAGE_PLATFORM --tag-name server-v0.0.0 --repository joplin/server
 
           # Basic test to ensure that the created build is valid. It should exit with
           # code 0 if it works.
@@ -159,7 +152,7 @@ jobs:
           docker run -p 22300:22300 joplin/server:$(dpkg --print-architecture)-0.0.0 node dist/app.js --env dev &
 
           # Wait for server to start
-          sleep 30
+          sleep 120
 
           # Check if status code is correct
           # if the actual_status DOES NOT include the expected_status

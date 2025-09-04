@@ -6,10 +6,8 @@ import Note from './models/Note';
 import Resource from './models/Resource';
 import { basename, fileExtension, safeFileExtension } from './path-utils';
 import * as fs from 'fs-extra';
-import * as pdfJsNamespace from 'pdfjs-dist';
 import { writeFile } from 'fs/promises';
 import { ResourceEntity } from './services/database/types';
-import { TextItem } from 'pdfjs-dist/types/src/display/api';
 import replaceUnsupportedCharacters from './utils/replaceUnsupportedCharacters';
 import { FetchBlobOptions } from './types';
 import { fromFile as fileTypeFromFile } from 'file-type';
@@ -20,6 +18,7 @@ import * as mimeUtils from './mime-utils';
 import BaseItem from './models/BaseItem';
 import { Size } from '@joplin/utils/types';
 import { cpus } from 'os';
+import type PdfJs from './utils/types/pdfJs';
 const { _ } = require('./locale');
 const http = require('http');
 const https = require('https');
@@ -99,7 +98,7 @@ function setupProxySettings(options: any) {
 	proxySettings.proxyUrl = options.proxyUrl;
 }
 
-interface ShimInitOptions {
+export interface ShimInitOptions {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	sharp: any;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
@@ -111,7 +110,7 @@ interface ShimInitOptions {
 	electronBridge: any;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	nodeSqlite: any;
-	pdfJs: typeof pdfJsNamespace;
+	pdfJs: PdfJs;
 	isAppleSilicon?: ()=> boolean;
 }
 
@@ -823,7 +822,7 @@ function shimInit(options: ShimInitOptions = null) {
 				const textContent = await page.getTextContent();
 
 				const strings = textContent.items.map(item => {
-					const text = (item as TextItem).str ?? '';
+					const text = item.str ?? '';
 					return text;
 				}).join('\n');
 
@@ -839,32 +838,24 @@ function shimInit(options: ShimInitOptions = null) {
 	};
 
 	shim.pdfToImages = async (pdfPath: string, outputDirectoryPath: string, options?: CreatePdfFromImagesOptions): Promise<string[]> => {
-		// We handle both the Electron app and testing framework. Potentially
-		// the same code could be use to support the CLI app.
-		const isTesting = !shim.isElectron();
+		if (typeof HTMLCanvasElement === 'undefined') {
+			throw new Error('Unsupported -- the Canvas element is required.');
+		}
 
 		const createCanvas = () => {
-			if (isTesting) {
-				return require('canvas').createCanvas();
-			}
 			return document.createElement('canvas');
 		};
 
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-		const canvasToBuffer = async (canvas: any): Promise<Buffer> => {
+		const canvasToBuffer = async (canvas: HTMLCanvasElement): Promise<Buffer> => {
 			const quality = 0.8;
-			if (isTesting) {
-				return canvas.toBuffer('image/jpeg', { quality });
-			} else {
-				const canvasToBlob = async (canvas: HTMLCanvasElement): Promise<Blob> => {
-					return new Promise(resolve => {
-						canvas.toBlob(blob => resolve(blob), 'image/jpg', quality);
-					});
-				};
+			const canvasToBlob = async (canvas: HTMLCanvasElement): Promise<Blob> => {
+				return new Promise(resolve => {
+					canvas.toBlob(blob => resolve(blob), 'image/jpg', quality);
+				});
+			};
 
-				const blob = await canvasToBlob(canvas);
-				return Buffer.from(await blob.arrayBuffer());
-			}
+			const blob = await canvasToBlob(canvas);
+			return Buffer.from(await blob.arrayBuffer());
 		};
 
 		const filePrefix = `page_${Date.now()}`;
@@ -879,6 +870,9 @@ function shimInit(options: ShimInitOptions = null) {
 				const viewport = page.getViewport({ scale: options?.scaleFactor ?? 2 });
 				const canvas = createCanvas();
 				const ctx = canvas.getContext('2d');
+				if (!ctx) {
+					throw new Error('Unable to get 2D rendering context from canvas.');
+				}
 
 				canvas.height = viewport.height;
 				canvas.width = viewport.width;

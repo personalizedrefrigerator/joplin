@@ -14,6 +14,11 @@ const customCssFilePath = (Setting: typeof SettingType, filename: string): strin
 	return `${Setting.value('rootProfileDir')}/${filename}`;
 };
 
+const showVoiceTypingSettings = () => (
+	// For now, iOS and web don't support voice typing.
+	shim.mobilePlatform() === 'android'
+);
+
 export enum CameraDirection {
 	Back,
 	Front,
@@ -82,7 +87,7 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 			value: true,
 			type: SettingItemType.Bool,
 			public: false,
-			appTypes: [AppType.Desktop],
+			appTypes: [AppType.Desktop, AppType.Mobile],
 			storage: SettingStorage.File,
 			isGlobal: true,
 		},
@@ -355,6 +360,37 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 			label: () => _('Joplin Server password'),
 			secure: true,
 		},
+		'sync.11.path': {
+			value: '',
+			type: SettingItemType.String,
+			section: 'sync',
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
+			show: (settings: any) => {
+				return settings['sync.target'] === SyncTargetRegistry.nameToId('joplinServerSaml');
+			},
+			public: true,
+			label: () => _('Joplin Server URL'),
+			description: () => emptyDirWarning,
+			storage: SettingStorage.File,
+		},
+		'sync.11.userContentPath': {
+			value: '',
+			type: SettingItemType.String,
+			public: false,
+			storage: SettingStorage.Database,
+		},
+		'sync.11.id': {
+			value: '',
+			type: SettingItemType.String,
+			public: false,
+			storage: SettingStorage.Database,
+		},
+		'sync.11.userId': {
+			value: '',
+			type: SettingItemType.String,
+			public: false,
+			storage: SettingStorage.Database,
+		},
 
 		// Although sync.10.path is essentially a constant, we still define
 		// it here so that both Joplin Server and Joplin Cloud can be
@@ -439,6 +475,7 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 		'sync.8.context': { value: '', type: SettingItemType.String, public: false },
 		'sync.9.context': { value: '', type: SettingItemType.String, public: false },
 		'sync.10.context': { value: '', type: SettingItemType.String, public: false },
+		'sync.11.context': { value: '', type: SettingItemType.String, public: false },
 
 		'sync.maxConcurrentConnections': { value: 5, type: SettingItemType.Int, storage: SettingStorage.File, isGlobal: true, public: true, advanced: true, section: 'sync', label: () => _('Max concurrent connections'), minimum: 1, maximum: 20, step: 1 },
 
@@ -525,6 +562,18 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 			isGlobal: true,
 		},
 
+		'ocr.handwrittenTextDriverEnabled': {
+			value: false,
+			type: SettingItemType.Bool,
+			public: true,
+			appTypes: [AppType.Desktop],
+			label: () => _('Enable handwritten transcription'),
+			description: () => 'Allows selecting specific attachments for higher-quality on-server OCR. When enabled, the right-click menu for an attachment includes an option to send an attachment to Joplin Cloud/Server for off-device processing.\n\nExperimental! It may not work at all. Requires Joplin Server or Cloud.',
+			storage: SettingStorage.File,
+			isGlobal: true,
+			advanced: true,
+		},
+
 		'ocr.languageDataPath': {
 			value: '',
 			type: SettingItemType.String,
@@ -551,6 +600,16 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 			public: true,
 			appTypes: [AppType.Desktop],
 			label: () => _('OCR: Clear cache and re-download language data files'),
+		},
+
+		'ocr.searchInExtractedContent': {
+			value: true,
+			type: SettingItemType.Bool,
+			advanced: true,
+			public: true,
+			appTypes: [AppType.Desktop],
+			storage: SettingStorage.Database,
+			label: () => _('OCR: Search in extracted content'),
 		},
 
 		theme: {
@@ -656,7 +715,7 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 				return options;
 			},
 			storage: SettingStorage.File,
-			isGlobal: true,
+			isGlobal: false,
 		},
 		'editor.autoMatchingBraces': {
 			value: true,
@@ -677,6 +736,17 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 			appTypes: [AppType.Desktop, AppType.Mobile],
 			label: () => _('Autocomplete Markdown and HTML'),
 			description: () => _('Enables Markdown list continuation, auto-closing HTML tags, and other markup autocompletions.'),
+			storage: SettingStorage.File,
+			isGlobal: true,
+		},
+		'editor.enableHtmlToMarkdownBanner': {
+			value: true,
+			advanced: true,
+			type: SettingItemType.Bool,
+			public: true,
+			section: 'note',
+			appTypes: [AppType.Desktop],
+			label: () => _('Enable HTML-to-Markdown conversion banner'),
 			storage: SettingStorage.File,
 			isGlobal: true,
 		},
@@ -728,7 +798,16 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 			isGlobal: false,
 		},
 
-		'notes.sortOrder.reverse': { value: true, type: SettingItemType.Bool, storage: SettingStorage.File, isGlobal: true, section: 'note', public: true, label: () => _('Reverse sort order'), appTypes: [AppType.Cli] },
+		'notes.sortOrder.reverse': {
+			value: true,
+			type: SettingItemType.Bool,
+			storage: SettingStorage.File,
+			isGlobal: false,
+			section: 'note',
+			public: true,
+			label: () => _('Reverse sort order'),
+			appTypes: [AppType.Cli],
+		},
 		// NOTE: A setting whose name starts with 'notes.sortOrder' is special,
 		// which implies changing the setting automatically triggers the refresh of notes.
 		// See lib/BaseApplication.ts/generalMiddleware() for details.
@@ -905,7 +984,7 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 			public: false,
 			appTypes: [AppType.Desktop],
 			storage: SettingStorage.File,
-			isGlobal: true,
+			isGlobal: false,
 		},
 
 		'plugins.states': {
@@ -1158,6 +1237,17 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 			isGlobal: true,
 			subType: SettingItemSubType.MonospaceFontFamily,
 		},
+		'style.viewer.fontFamily': {
+			value: '',
+			type: SettingItemType.String,
+			public: true,
+			appTypes: [AppType.Desktop],
+			section: 'appearance',
+			label: () => _('Viewer and Rich Text Editor font family'),
+			storage: SettingStorage.File,
+			isGlobal: true,
+			subType: SettingItemSubType.FontFamily,
+		},
 
 		'style.editor.contentMaxWidth': { value: 0, type: SettingItemType.Int, public: true, storage: SettingStorage.File, isGlobal: true, appTypes: [AppType.Desktop], section: 'appearance', label: () => _('Editor maximum width'), description: () => _('Set it to 0 to make it take the complete available space. Recommended width is 600.') },
 
@@ -1181,7 +1271,14 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 			isGlobal: true,
 		},
 
-		'ui.layout': { value: {}, type: SettingItemType.Object, storage: SettingStorage.File, isGlobal: true, public: false, appTypes: [AppType.Desktop] },
+		'ui.layout': {
+			value: {},
+			type: SettingItemType.Object,
+			storage: SettingStorage.File,
+			isGlobal: false,
+			public: false,
+			appTypes: [AppType.Desktop],
+		},
 
 		'ui.lastSelectedPluginPanel': {
 			value: '',
@@ -1366,6 +1463,37 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 			isGlobal: true,
 		},
 
+		'editor.inlineRendering': {
+			value: false,
+			type: SettingItemType.Bool,
+			public: true,
+			appTypes: [AppType.Desktop, AppType.Mobile],
+			label: () => _('Markdown editor: Render markup in editor'),
+			description: () => _('Renders markup on all lines that don\'t include the cursor.'),
+			section: 'note',
+			storage: SettingStorage.File,
+		},
+		'editor.imageRendering': {
+			value: false,
+			type: SettingItemType.Bool,
+			public: true,
+			appTypes: [AppType.Desktop, AppType.Mobile],
+			label: () => _('Markdown editor: Render images'),
+			description: () => _('If an image attachment is on its own line and followed by a blank line, it will be rendered just below its Markdown source.'),
+			section: 'note',
+			storage: SettingStorage.File,
+		},
+		'editor.highlightActiveLine': {
+			value: false,
+			type: SettingItemType.Bool,
+			public: true,
+			section: 'note',
+			appTypes: [AppType.Desktop, AppType.Mobile],
+			label: () => _('Markdown editor: Highlight active line'),
+			storage: SettingStorage.File,
+			isGlobal: true,
+		},
+
 		'imageeditor.jsdrawToolbar': {
 			value: '',
 			type: SettingItemType.String,
@@ -1453,6 +1581,7 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 						SyncTargetRegistry.nameToId('nextcloud'),
 						SyncTargetRegistry.nameToId('webdav'),
 						SyncTargetRegistry.nameToId('joplinServer'),
+						SyncTargetRegistry.nameToId('joplinServerSaml'),
 						// Needs to be enabled for Joplin Cloud too because
 						// some companies filter all traffic and swap TLS
 						// certificates, which result in error
@@ -1538,7 +1667,7 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 			type: SettingItemType.Int,
 			public: true,
 			minimum: 1,
-			maximum: 365 * 2,
+			maximum: 99999,
 			step: 1,
 			unitLabel: (value: number = null) => {
 				return value === null ? _('days') : _n('%d day', '%d days', value, value);
@@ -1637,6 +1766,12 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 			public: false,
 		},
 
+		lastSettingGlobalMigration: {
+			value: -1,
+			type: SettingItemType.Int,
+			public: false,
+		},
+
 		wasClosedSuccessfully: {
 			value: true,
 			type: SettingItemType.Bool,
@@ -1722,17 +1857,6 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 		// 	storage: SettingStorage.File,
 		// },
 
-		'featureFlag.useBetaEncryptionMethod': {
-			value: false,
-			type: SettingItemType.Bool,
-			public: true,
-			storage: SettingStorage.File,
-			label: () => 'Use beta encryption',
-			description: () => 'Set beta encryption methods as the default methods. This applies to all clients and takes effect after restarting the app.',
-			section: 'sync',
-			isGlobal: true,
-		},
-
 		'featureFlag.richText.useStrictContentSecurityPolicy': {
 			value: true,
 			type: SettingItemType.Bool,
@@ -1791,8 +1915,7 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 			appTypes: [AppType.Mobile],
 			description: () => _('Leave it blank to download the language files from the default website'),
 			label: () => _('Voice typing language files (URL)'),
-			// For now, iOS and web don't support voice typing.
-			show: () => shim.mobilePlatform() === 'android',
+			show: showVoiceTypingSettings,
 			section: 'note',
 		},
 
@@ -1803,8 +1926,7 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 			appTypes: [AppType.Mobile],
 			label: () => _('Preferred voice typing provider'),
 			isEnum: true,
-			// For now, iOS and web don't support voice typing.
-			show: () => shim.mobilePlatform() === 'android',
+			show: showVoiceTypingSettings,
 			section: 'note',
 
 			options: () => {
@@ -1813,6 +1935,27 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 					'whisper-tiny': _('Whisper'),
 				};
 			},
+		},
+
+		'voiceTyping.glossary': {
+			value: '',
+			type: SettingItemType.String,
+			public: true,
+			appTypes: [AppType.Mobile],
+			label: () => _('Voice typing: Glossary'),
+			description: () => _('A comma-separated list of words. May be used for uncommon words, to help voice typing spell them correctly.'),
+			show: (settings) => showVoiceTypingSettings() && settings['voiceTyping.preferredProvider'].startsWith('whisper'),
+			section: 'note',
+		},
+
+		'scanner.titleTemplate': {
+			value: 'Scan: {date} ({count})',
+			type: SettingItemType.String,
+			public: true,
+			appTypes: [AppType.Mobile],
+			label: () => _('Document scanner: Title template'),
+			description: () => _('Default title to use for documents created by the scanner.'),
+			section: 'note',
 		},
 
 		'trash.autoDeletionEnabled': {
