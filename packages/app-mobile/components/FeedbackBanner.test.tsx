@@ -6,7 +6,6 @@ import { switchClient, setupDatabase, mockMobilePlatform, mockFetch, waitFor } f
 import createMockReduxStore from '../utils/testing/createMockReduxStore';
 import setupGlobalStore from '../utils/testing/setupGlobalStore';
 import { act, fireEvent, render, screen } from '@testing-library/react-native';
-import '@testing-library/jest-native/extend-expect';
 import FeedbackBanner from './FeedbackBanner';
 
 interface WrapperProps { }
