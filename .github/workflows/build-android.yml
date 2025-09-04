@@ -44,7 +44,7 @@ jobs:
       - name: Verify alignment
         run: |
           cd packages/app-mobile/android/app
-          $APK_FILE="./build/outputs/apk/release/app-release.apk"
+          APK_FILE="./build/outputs/apk/release/app-release.apk"
           if test ! -f "$APK_FILE" ; then
             echo "APK file not found."
             exit 1
