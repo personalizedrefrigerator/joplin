@@ -45,6 +45,41 @@ test.describe('pluginApi', () => {
 		}));
 	});
 
+	test('should report the correct visibility state for dialogs', async ({ startAppWithPlugins }) => {
+		const { app, mainWindow } = await startAppWithPlugins(['resources/test-plugins/dialogs.js']);
+		const mainScreen = await new MainScreen(mainWindow).setup();
+		await mainScreen.createNewNote('Dialog test note');
+
+		const editor = mainScreen.noteEditor;
+		const expectVisible = async (visible: boolean) => {
+			// Check UI visibility
+			if (visible) {
+				await expect(mainScreen.dialog).toBeVisible();
+			} else {
+				await expect(mainScreen.dialog).not.toBeVisible();
+			}
+
+			// Check visibility reported through the plugin API
+			await expect.poll(async () => {
+				await mainScreen.goToAnything.runCommand(app, 'getTestDialogVisibility');
+
+				const editorContent = await editor.contentLocator();
+				return editorContent.textContent();
+			}).toBe(JSON.stringify({
+				visible: visible,
+				active: visible,
+			}));
+		};
+		await expectVisible(false);
+
+		await mainScreen.goToAnything.runCommand(app, 'showTestDialog');
+		await expectVisible(true);
+
+		// Submitting the dialog should include form data in the output
+		await mainScreen.dialog.getByRole('button', { name: 'Okay' }).click();
+		await expectVisible(false);
+	});
+
 	test('should be possible to create multiple toasts with the same text from a plugin', async ({ startAppWithPlugins }) => {
 		const { app, mainWindow } = await startAppWithPlugins(['resources/test-plugins/showToast.js']);
 		const mainScreen = await new MainScreen(mainWindow).setup();
