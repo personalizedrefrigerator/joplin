@@ -20,6 +20,7 @@ const defaultRendererSettings: RenderSettings = {
 	splitted: false,
 
 	pluginSettings: {},
+	requestPluginSetting: () => { },
 };
 
 const makeRenderer = (options: Partial<RendererSetupOptions>) => {
@@ -109,19 +110,20 @@ describe('Renderer', () => {
 		expect(getRenderedContent().querySelectorAll('pre.joplin-source')).toHaveLength(1);
 	});
 
-	test('should request settings when a setting is missing', async () => {
+	test('should call .requestPluginSetting when a setting is missing', async () => {
 		const renderer = makeRenderer({});
 
+		const requestPluginSetting = jest.fn();
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 		const rerenderToBody = (pluginSettings: Record<string, any>) => {
 			return renderer.rerenderToBody(
 				{ language: MarkupLanguage.Markdown, markup: '```\ntest\n```' },
-				{ ...defaultRendererSettings, pluginSettings },
+				{ ...defaultRendererSettings, pluginSettings, requestPluginSetting },
 			);
 		};
 
-		let output = await rerenderToBody({});
-		expect(output.missingPluginSettings).toHaveLength(0);
+		await rerenderToBody({});
+		expect(requestPluginSetting).toHaveBeenCalledTimes(0);
 
 		const pluginId = 'com.example.test-plugin';
 		await renderer.setExtraContentScriptsAndRerender([
@@ -145,21 +147,21 @@ describe('Renderer', () => {
 		]);
 
 		// Should call .requestPluginSetting for missing settings
-		expect(output.missingPluginSettings).toHaveLength(1);
-		output = await rerenderToBody({ someOtherSetting: 1 });
-		expect(output.missingPluginSettings).toHaveLength(2);
-		expect(output.missingPluginSettings[1]).toMatchObject({ pluginId: 'com.example.test-plugin', settingName: 'setting' });
+		expect(requestPluginSetting).toHaveBeenCalledTimes(1);
+		await rerenderToBody({ someOtherSetting: 1 });
+		expect(requestPluginSetting).toHaveBeenCalledTimes(2);
+		expect(requestPluginSetting).toHaveBeenLastCalledWith('com.example.test-plugin', 'setting');
 
 		// Should still render
 		expect(getRenderedContent().querySelector('#setting-value').innerHTML).toBe('Setting value: undefined');
 
 		// Should expect only namespaced plugin settings
-		output = await rerenderToBody({ 'setting': 'test' });
-		expect(output.missingPluginSettings).toHaveLength(3);
+		await rerenderToBody({ 'setting': 'test' });
+		expect(requestPluginSetting).toHaveBeenCalledTimes(3);
 
 		// Should not request plugin settings when all settings are present.
-		output = await rerenderToBody({ [`${pluginId}.setting`]: 'test' });
-		expect(output.missingPluginSettings).toHaveLength(0);
+		await rerenderToBody({ [`${pluginId}.setting`]: 'test' });
+		expect(requestPluginSetting).toHaveBeenCalledTimes(3);
 		expect(getRenderedContent().querySelector('#setting-value').innerHTML).toBe('Setting value: test');
 	});
 });

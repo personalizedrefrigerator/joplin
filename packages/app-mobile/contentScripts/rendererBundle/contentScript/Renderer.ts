@@ -1,5 +1,5 @@
 import { MarkupLanguage, MarkupToHtml } from '@joplin/renderer';
-import type { MarkupToHtmlConverter, RenderOptions, RenderResult, FsDriver as RendererFsDriver, ResourceInfos } from '@joplin/renderer/types';
+import type { MarkupToHtmlConverter, RenderOptions, FsDriver as RendererFsDriver, ResourceInfos } from '@joplin/renderer/types';
 import makeResourceModel from './utils/makeResourceModel';
 import addPluginAssets from './utils/addPluginAssets';
 import { ExtraContentScriptSource, ForwardedJoplinSettings, MarkupRecord } from '../types';
@@ -32,17 +32,14 @@ export interface RenderSettings {
 	destroyEditPopupSyntax: string;
 
 	pluginSettings: Record<string, unknown>;
+	requestPluginSetting: (pluginId: string, settingKey: string)=> void;
 	readAssetBlob: (assetPath: string)=> Promise<Blob>;
 }
 
-export interface RendererPluginSetting {
-	pluginId: string;
-	settingName: string;
+export interface RendererOutput {
+	getOutputElement: ()=> HTMLElement;
+	afterRender: (setupOptions: RendererSetupOptions, renderSettings: RenderSettings)=> void;
 }
-
-export type RenderOutput = RenderResult & {
-	missingPluginSettings: RendererPluginSetting[];
-};
 
 export default class Renderer {
 	private markupToHtml_: MarkupToHtmlConverter;
@@ -110,8 +107,7 @@ export default class Renderer {
 		}
 	}
 
-	public async render(markup: MarkupRecord, settings: RenderSettings): Promise<RenderOutput> {
-		const missingSettings: RendererPluginSetting[] = [];
+	public async render(markup: MarkupRecord, settings: RenderSettings) {
 		const options: RenderOptions = {
 			highlightedKeywords: settings.highlightedKeywords,
 			resources: settings.resources,
@@ -130,7 +126,7 @@ export default class Renderer {
 
 				if (!(settingKey in settings.pluginSettings)) {
 					// This should make the setting available on future renders.
-					missingSettings.push({ settingName, pluginId });
+					settings.requestPluginSetting(pluginId, settingName);
 					return undefined;
 				}
 
@@ -169,7 +165,7 @@ export default class Renderer {
 			})();
 		}
 
-		return { ...result, missingPluginSettings: missingSettings };
+		return result;
 	}
 
 	public async rerenderToBody(markup: MarkupRecord, settings: RenderSettings) {
@@ -179,9 +175,8 @@ export default class Renderer {
 		const contentContainer = document.getElementById('joplin-container-content') ?? document.body;
 
 		let html = '';
-		let result: RenderOutput|null = null;
 		try {
-			result = await this.render(markup, settings);
+			const result = await this.render(markup, settings);
 			html = result.html;
 		} catch (error) {
 			if (!contentContainer) {
@@ -201,7 +196,6 @@ export default class Renderer {
 		}
 
 		afterFullPageRender(this.setupOptions_, settings);
-		return result;
 	}
 
 	public clearCache(markupLanguage: MarkupLanguage) {
