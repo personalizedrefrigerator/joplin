@@ -93,8 +93,10 @@ const useStyles = (themeId: number, sentFeedback: boolean) => {
 const useSurveyUrl = (surveyKey: string) => {
 	return useMemo(() => {
 		let baseUrl = 'https://objects.joplinusercontent.com/';
-		// the app is in dev mode.
-		if (Setting.value('env') === 'dev') {
+
+		// For testing with a locally-hosted server:
+		const useLocalServer = false;
+		if (Setting.value('env') === 'dev' && useLocalServer) {
 			baseUrl = 'http://localhost:3430/';
 		}
 
