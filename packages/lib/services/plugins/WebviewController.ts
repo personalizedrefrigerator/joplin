@@ -285,9 +285,14 @@ export default class WebviewController extends ViewController {
 	}
 
 	public closeWithResponse(result: DialogResult) {
-		this.close();
-		this.closeResponse_.resolve(result);
+		const responseCallback = this.closeResponse_;
+		// Clear the closeResponse_ to prevent the default behavior
+		// (which sends a response of null).
 		this.closeResponse_ = null;
+
+		this.close();
+
+		responseCallback?.resolve(result);
 	}
 
 	public get buttons(): ButtonSpec[] {
