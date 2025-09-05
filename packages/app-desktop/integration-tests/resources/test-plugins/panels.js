@@ -39,7 +39,7 @@ joplin.plugins.register({
 	onStart: async function() {
 		const panels = joplin.views.panels;
 		const view = await panels.create('panelTestView');
-		await panels.setHtml(view, '<h1>Test</h1><p>Test</p>');
+		await panels.setHtml(view, '<h1>Panel content</h1><p>Test</p>');
 		await panels.hide(view);
 
 

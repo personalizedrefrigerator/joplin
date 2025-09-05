@@ -128,12 +128,24 @@ test.describe('pluginApi', () => {
 		const mainScreen = await new MainScreen(mainWindow).setup();
 		await mainScreen.createNewNote('Test note (panels)');
 
+		const panelLocator = await mainScreen.pluginPanelLocator('org.joplinapp.plugins.example.panels');
+
 		const noteEditor = mainScreen.noteEditor;
 		await mainScreen.goToAnything.runCommand(app, 'testShowPanel');
 		await expect(noteEditor.codeMirrorEditor).toHaveText('visible');
 
+		// Panel should be visible
+		await expect(panelLocator).toBeVisible();
+		// The panel should have the expected content
+		const panelContent = panelLocator.contentFrame();
+		await expect(
+			panelContent.getByRole('heading', { name: 'Panel content' }),
+		).toBeAttached();
+
 		await mainScreen.goToAnything.runCommand(app, 'testHidePanel');
 		await expect(noteEditor.codeMirrorEditor).toHaveText('hidden');
+
+		await expect(panelLocator).not.toBeVisible();
 	});
 });
 
