@@ -6,12 +6,12 @@ import { SetUpResult } from '../types';
 import { themeStyle } from '../../components/global-style';
 import Logger from '@joplin/utils/Logger';
 import { WebViewControl } from '../../components/ExtendedWebView/types';
-import { MainProcessApi, OnScrollCallback, RendererControl, RendererProcessApi, RendererWebViewOptions, RenderOptions } from './types';
+import { CancelEvent, MainProcessApi, OnScrollCallback, RendererControl, RendererProcessApi, RendererWebViewOptions, RenderOptions } from './types';
 import PluginService from '@joplin/lib/services/plugins/PluginService';
 import RNToWebViewMessenger from '../../utils/ipc/RNToWebViewMessenger';
 import useEditPopup from './utils/useEditPopup';
 import { PluginStates } from '@joplin/lib/services/plugins/reducer';
-import { RenderSettings } from './contentScript/Renderer';
+import type { RendererPluginSetting, RenderOutput, RenderSettings } from './contentScript/Renderer';
 import resolvePathWithinDir from '@joplin/lib/utils/resolvePathWithinDir';
 import Resource from '@joplin/lib/models/Resource';
 import { ResourceInfos } from '@joplin/renderer/types';
@@ -184,7 +184,6 @@ const useWebViewSetup = (props: Props): SetUpResult<RendererControl> => {
 				return output;
 			};
 
-			let settingsChanged = false;
 			const getSettings = (): RenderSettings => ({
 				...options,
 				codeTheme: theme.codeThemeCss,
@@ -197,13 +196,6 @@ const useWebViewSetup = (props: Props): SetUpResult<RendererControl> => {
 				createEditPopupSyntax,
 				destroyEditPopupSyntax,
 				pluginSettings: loadPluginSettings(),
-				requestPluginSetting: (pluginId: string, settingKey: string) => {
-					const key = `${pluginId}.${settingKey}`;
-					if (!pluginSettingKeysRef.current.has(key)) {
-						pluginSettingKeysRef.current.add(key);
-						settingsChanged = true;
-					}
-				},
 				readAssetBlob: (assetPath: string): Promise<Blob> => {
 					// Built-in assets are in resourceDir, external plugin assets are in cacheDir.
 					const assetsDirs = [Setting.value('resourceDir'), Setting.value('cacheDir')];
@@ -226,33 +218,42 @@ const useWebViewSetup = (props: Props): SetUpResult<RendererControl> => {
 
 			return {
 				getSettings,
-				getSettingsChanged() {
-					return settingsChanged;
+				addPluginSettings: (settings: RendererPluginSetting[]) => {
+					for (const { pluginId, settingName } of settings) {
+						const key = `${pluginId}.${settingName}`;
+						if (!pluginSettingKeysRef.current.has(key)) {
+							pluginSettingKeysRef.current.add(key);
+						}
+					}
 				},
 			};
 		};
 
+		type RenderFunction = (settings: RenderSettings)=> Promise<RenderOutput|null>;
+		const renderWithRetry = async (render: RenderFunction, options: RenderOptions, cancelEvent?: CancelEvent) => {
+			const { getSettings, addPluginSettings } = await prepareRenderer(options);
+			if (cancelEvent?.cancelled) return null;
+
+			const output = await render(getSettings());
+			if (cancelEvent?.cancelled) return null;
+
+			if (output.missingPluginSettings.length) {
+				addPluginSettings(output.missingPluginSettings);
+				return await render(getSettings());
+			}
+			return output;
+		};
+
 		return {
 			rerenderToBody: async (markup, options, cancelEvent) => {
-				const { getSettings, getSettingsChanged } = await prepareRenderer(options);
-				if (cancelEvent?.cancelled) return null;
-
-				const output = await renderer.rerenderToBody(markup, getSettings());
-				if (cancelEvent?.cancelled) return null;
-
-				if (getSettingsChanged()) {
-					return await renderer.rerenderToBody(markup, getSettings());
-				}
-				return output;
+				return renderWithRetry((settings) => {
+					return renderer.rerenderToBody(markup, settings);
+				}, options, cancelEvent);
 			},
 			render: async (markup, options) => {
-				const { getSettings, getSettingsChanged } = await prepareRenderer(options);
-				const output = await renderer.render(markup, getSettings());
-
-				if (getSettingsChanged()) {
-					return await renderer.render(markup, getSettings());
-				}
-				return output;
+				return renderWithRetry((settings) => {
+					return renderer.render(markup, settings);
+				}, options);
 			},
 			clearCache: async markupLanguage => {
 				await renderer.clearCache(markupLanguage);

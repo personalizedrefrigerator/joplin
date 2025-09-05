@@ -1,6 +1,7 @@
 import type { MarkupLanguage, FsDriver as RendererFsDriver, RenderResult, ResourceInfos } from '@joplin/renderer/types';
 import type Renderer from './contentScript/Renderer';
 import { PluginOptions } from '@joplin/renderer/MarkupToHtml';
+import type { RenderOutput } from './contentScript/Renderer';
 
 // Joplin settings (as from Setting.value(...)) that should
 // remain constant during editing.
@@ -69,10 +70,10 @@ export interface RenderOptions {
 	mapsToLine?: boolean;
 }
 
-type CancelEvent = { cancelled: boolean };
+export type CancelEvent = { cancelled: boolean };
 
 export interface RendererControl {
-	rerenderToBody(markup: MarkupRecord, options: RenderOptions, cancelEvent?: CancelEvent): Promise<string|void>;
+	rerenderToBody(markup: MarkupRecord, options: RenderOptions, cancelEvent?: CancelEvent): Promise<RenderOutput|null>;
 	render(markup: MarkupRecord, options: RenderOptions): Promise<RenderResult>;
 	clearCache(markupLanguage: MarkupLanguage): void;
 }
