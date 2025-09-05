@@ -15,7 +15,6 @@ export interface ResourceInfo {
 
 interface Props {
 	renderer: RendererControl;
-	rerenderCounter: number;
 
 	noteBody: string;
 	noteMarkupLanguage: MarkupLanguage;
@@ -101,7 +100,7 @@ const useRerenderHandler = (props: Props) => {
 	const effectDependencies = [
 		props.noteBody, props.noteMarkupLanguage, props.renderer, props.highlightedKeywords,
 		props.noteHash, props.noteResources, props.themeId, props.paddingBottom, resourceDownloadRerenderCounter,
-		props.fontSize, props.rerenderCounter,
+		props.fontSize,
 	];
 	const previousDeps = usePrevious(effectDependencies, []);
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied

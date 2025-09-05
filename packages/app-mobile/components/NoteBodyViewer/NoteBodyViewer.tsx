@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import useOnMessage, { HandleMessageCallback, OnMarkForDownloadCallback } from './hooks/useOnMessage';
-import { useRef, useCallback, useState } from 'react';
+import { useRef, useCallback } from 'react';
 import { View, ViewStyle } from 'react-native';
 import ExtendedWebView from '../ExtendedWebView';
 import { WebViewControl } from '../ExtendedWebView/types';
@@ -65,14 +65,10 @@ function NoteBodyViewer(props: Props) {
 		onResourceLongPress,
 	});
 
-	const [rerenderCounter, setRerenderCounter] = useState(0);
 	const { api: renderer, pageSetup, webViewEventHandlers } = useWebViewSetup({
 		webviewRef,
 		onBodyScroll: onScroll,
 		onPostMessage,
-		onRerenderRequested: () => {
-			setRerenderCounter(rerenderCounter => rerenderCounter + 1);
-		},
 		pluginStates: props.pluginStates,
 		themeId: props.themeId,
 	});
@@ -87,7 +83,6 @@ function NoteBodyViewer(props: Props) {
 		noteResources: props.noteResources,
 		noteHash: props.noteHash,
 		initialScroll: props.initialScroll,
-		rerenderCounter,
 
 		paddingBottom: props.paddingBottom,
 	});
