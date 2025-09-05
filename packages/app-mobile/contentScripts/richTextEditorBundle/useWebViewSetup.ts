@@ -156,6 +156,7 @@ const useWebViewSetup = (props: Props): SetUpResult<EditorControl> => {
 		webviewRef: props.webviewRef,
 		onBodyScroll: null,
 		onPostMessage: props.onPostMessage,
+		onRerenderRequested: ()=>{}, // For now, ignore rerender requests
 		pluginStates: props.pluginStates,
 		themeId: props.themeId,
 	});

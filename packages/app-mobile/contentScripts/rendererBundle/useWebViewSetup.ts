@@ -24,6 +24,7 @@ interface Props {
 	webviewRef: RefObject<WebViewControl>;
 	onBodyScroll: OnScrollCallback|null;
 	onPostMessage: (message: string)=> void;
+	onRerenderRequested: ()=> void;
 	pluginStates: PluginStates;
 
 	themeId: number;
@@ -149,6 +150,9 @@ const useWebViewSetup = (props: Props): SetUpResult<RendererControl> => {
 		void messenger.remoteApi.renderer.setExtraContentScriptsAndRerender(contentScripts);
 	}, [messenger, contentScripts]);
 
+	const onRerenderRequestRef = useRef(props.onRerenderRequested);
+	onRerenderRequestRef.current = props.onRerenderRequested;
+
 	const rendererControl = useMemo((): RendererControl => {
 		const renderer = messenger.remoteApi.renderer;
 
@@ -184,7 +188,7 @@ const useWebViewSetup = (props: Props): SetUpResult<RendererControl> => {
 				return output;
 			};
 
-			let settingsChanged = false;
+			const settingsChanged = false;
 			const getSettings = (): RenderSettings => ({
 				...options,
 				codeTheme: theme.codeThemeCss,
@@ -201,7 +205,7 @@ const useWebViewSetup = (props: Props): SetUpResult<RendererControl> => {
 					const key = `${pluginId}.${settingKey}`;
 					if (!pluginSettingKeysRef.current.has(key)) {
 						pluginSettingKeysRef.current.add(key);
-						settingsChanged = true;
+						onRerenderRequestRef.current();
 					}
 				},
 				readAssetBlob: (assetPath: string): Promise<Blob> => {
