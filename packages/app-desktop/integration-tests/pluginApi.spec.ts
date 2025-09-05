@@ -122,5 +122,18 @@ test.describe('pluginApi', () => {
 		await msleep(Second);
 		await expect(noteEditor.codeMirrorEditor).toHaveText(expectedUpdatedText);
 	});
+
+	test('should support hiding and showing panels', async ({ startAppWithPlugins }) => {
+		const { mainWindow, app } = await startAppWithPlugins(['resources/test-plugins/panels.js']);
+		const mainScreen = await new MainScreen(mainWindow).setup();
+		await mainScreen.createNewNote('Test note (panels)');
+
+		const noteEditor = mainScreen.noteEditor;
+		await mainScreen.goToAnything.runCommand(app, 'testShowPanel');
+		await expect(noteEditor.codeMirrorEditor).toHaveText('visible');
+
+		await mainScreen.goToAnything.runCommand(app, 'testHidePanel');
+		await expect(noteEditor.codeMirrorEditor).toHaveText('hidden');
+	});
 });
 
