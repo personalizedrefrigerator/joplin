@@ -242,6 +242,8 @@ const useWebViewSetup = (props: Props): SetUpResult<RendererControl> => {
 				if (cancelEvent?.cancelled) return null;
 
 				const render = async () => {
+					if (cancelEvent?.cancelled) return;
+
 					await renderer.rerenderToBody(markup, getSettings());
 				};
 
