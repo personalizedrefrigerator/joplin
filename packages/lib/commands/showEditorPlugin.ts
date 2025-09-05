@@ -68,7 +68,7 @@ export const runtime = (): CommandRuntime => {
 			};
 			Setting.setValue('plugins.shownEditorViewIds', getUpdatedShownViewIds());
 
-			void controller.setOpen(show);
+			await controller.setOpen(show);
 		},
 	};
 };
