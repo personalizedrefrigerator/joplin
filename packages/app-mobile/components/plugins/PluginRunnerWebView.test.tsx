@@ -6,7 +6,7 @@ import createMockReduxStore from '../../utils/testing/createMockReduxStore';
 import setupGlobalStore from '../../utils/testing/setupGlobalStore';
 import PluginRunnerWebView from './PluginRunnerWebView';
 import TestProviderStack from '../testing/TestProviderStack';
-import { render, waitFor } from '../../utils/testing/testingLibrary';
+import { act, render, waitFor } from '../../utils/testing/testingLibrary';
 import createTestPlugin from '@joplin/lib/testing/plugins/createTestPlugin';
 import getWebViewDomById from '../../utils/testing/getWebViewDomById';
 import Setting from '@joplin/lib/models/Setting';
@@ -29,6 +29,15 @@ const defaultManifestProperties = {
 	platforms: ['desktop', 'mobile'],
 	name: 'Some plugin name',
 };
+
+type PluginSlice = { manifest: { id: string } };
+const waitForPluginToLoad = (plugin: PluginSlice) => {
+	return waitFor(async () => {
+		expect(PluginService.instance().pluginById(plugin.manifest.id)).toBeTruthy();
+	});
+};
+
+const getUserWebViewDom = () => getWebViewDomById('joplin__PluginDialogWebView');
 
 describe('PluginRunnerWebView', () => {
 	beforeEach(async () => {
@@ -56,16 +65,40 @@ describe('PluginRunnerWebView', () => {
 			`,
 		});
 		render(<WrappedPluginRunnerWebView/>);
-
-		// Should load the plugin
-		await waitFor(async () => {
-			expect(PluginService.instance().pluginById(testPlugin.manifest.id)).toBeTruthy();
-		});
+		await waitForPluginToLoad(testPlugin);
 
 		// Should show the dialog
 		await waitFor(async () => {
-			const dom = await getWebViewDomById('joplin__PluginDialogWebView');
+			const dom = await getUserWebViewDom();
 			expect(dom.querySelector('h1').textContent).toBe('Test!');
+		});
+	});
+
+	test('should load a plugin that adds a panel', async () => {
+		const testPlugin = await createTestPlugin({
+			...defaultManifestProperties,
+			id: 'org.joplinapp.panel-test',
+		}, {
+			onStart: `
+				const panels = joplin.views.panels;
+				const handle = await panels.create('test-panel');
+				await panels.setHtml(
+					handle,
+					'<h1>Panel content</h1><p>Test</p>',
+				);
+			`,
+		});
+		render(<WrappedPluginRunnerWebView/>);
+		await waitForPluginToLoad(testPlugin);
+
+		act(() => {
+			store.dispatch({ type: 'SET_PLUGIN_PANELS_DIALOG_VISIBLE', visible: true });
+		});
+
+		// Should show the panel
+		const dom = await getUserWebViewDom();
+		await waitFor(async () => {
+			expect(dom.querySelector('h1').textContent).toBe('Panel content');
 		});
 	});
 });
