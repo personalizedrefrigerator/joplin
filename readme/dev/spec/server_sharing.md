@@ -35,7 +35,7 @@ However, there are some maintenance tasks that clear `share_id` locally when a u
 3. `User1` unshares `Folder A`.
 4. `User2` locally clears the `share_id` property on the local `Folder A`.
 
-At this point, `User2` no longer has access to `Folder A` on the server. `User2` cannot sync the change to the `share_id` because `User2` no longer has access to the share.
+At this point, `User2` no longer has access to `Folder A` on the server. They cannot sync the change to `share_id` because they no longer have access to the share.
 
 ## Publishing a note via a public URL 
 
