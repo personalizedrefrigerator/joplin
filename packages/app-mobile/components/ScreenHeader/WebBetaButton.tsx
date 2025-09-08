@@ -51,7 +51,7 @@ const WebBetaButton: React.FC<Props> = props => {
 				<Text>Welcome to the beta version of the Joplin Web App!</Text>
 				<Text>Thank you for participating in the beta version of the Joplin Web App.</Text>
 				<Text>The Joplin Web App is available for a limited time in open beta and may later join the Joplin Cloud plans.</Text>
-				<Text>Feel free to use it and let us know if have any question or notice any issue!</Text>
+				<Text>Feel free to use it and let us know if have any questions or notice any issues!</Text>
 				<View style={feedbackContainerStyles}>
 					<LinkButton onPress={onLeaveFeedback}>{'Give feedback'}</LinkButton>
 				</View>
