@@ -6,11 +6,12 @@ import createMockReduxStore from '../../utils/testing/createMockReduxStore';
 import setupGlobalStore from '../../utils/testing/setupGlobalStore';
 import PluginRunnerWebView from './PluginRunnerWebView';
 import TestProviderStack from '../testing/TestProviderStack';
-import { act, render, waitFor } from '../../utils/testing/testingLibrary';
+import { act, render, screen, waitFor } from '../../utils/testing/testingLibrary';
 import createTestPlugin from '@joplin/lib/testing/plugins/createTestPlugin';
 import getWebViewDomById from '../../utils/testing/getWebViewDomById';
 import Setting from '@joplin/lib/models/Setting';
 import PluginService from '@joplin/lib/services/plugins/PluginService';
+import CommandService from '@joplin/lib/services/CommandService';
 
 let store: Store<AppState>;
 
@@ -37,7 +38,8 @@ const waitForPluginToLoad = (plugin: PluginSlice) => {
 	});
 };
 
-const getUserWebViewDom = () => getWebViewDomById('joplin__PluginDialogWebView');
+const webViewId = 'joplin__PluginDialogWebView';
+const getUserWebViewDom = () => getWebViewDomById(webViewId);
 
 describe('PluginRunnerWebView', () => {
 	beforeEach(async () => {
@@ -86,6 +88,22 @@ describe('PluginRunnerWebView', () => {
 					handle,
 					'<h1>Panel content</h1><p>Test</p>',
 				);
+
+				const commands = joplin.commands;
+				await commands.register({
+					name: 'hideTestPanel',
+					label: 'Hide the test plugin panel',
+					execute: async () => {
+						await panels.hide(handle);
+					},
+				});
+
+				await commands.register({
+					name: 'showTestPanel',
+					execute: async () => {
+						await panels.show(handle);
+					},
+				});
 			`,
 		});
 		render(<WrappedPluginRunnerWebView/>);
@@ -95,10 +113,22 @@ describe('PluginRunnerWebView', () => {
 			store.dispatch({ type: 'SET_PLUGIN_PANELS_DIALOG_VISIBLE', visible: true });
 		});
 
-		// Should show the panel
-		const dom = await getUserWebViewDom();
-		await waitFor(async () => {
-			expect(dom.querySelector('h1').textContent).toBe('Panel content');
+		const expectPanelVisible = async () => {
+			const dom = await getUserWebViewDom();
+			await waitFor(async () => {
+				expect(dom.querySelector('h1').textContent).toBe('Panel content');
+			});
+		};
+		await expectPanelVisible();
+
+		// Should hide the panel
+		await act(() => CommandService.instance().execute('hideTestPanel'));
+		await waitFor(() => {
+			expect(screen.queryByTestId('webViewId')).toBeNull();
 		});
+
+		// Should show the panel again
+		await act(() => CommandService.instance().execute('showTestPanel'));
+		await expectPanelVisible();
 	});
 });
