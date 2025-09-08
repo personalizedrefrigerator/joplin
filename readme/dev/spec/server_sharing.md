@@ -27,7 +27,7 @@ On the other hand, all that information is present on the client. Whenever a not
 
 ### When are changes to `share_id` synced?
 
-In general, changes to `share_id` should be synced only if a Joplin client still has access to the remote item. For example, if `User1` adds an item to a folder shared with `User2`, then `User1` should update the `share_id` for that item.
+In general, changes to `share_id` should be synced only if a Joplin client still has access to the remote item. For example, if `User1` adds an item to a folder shared with `User2`, then `User1` should update and sync the `share_id` for that item.
 
 However, there are some maintenance tasks that clear `share_id` locally when a user no longer has access to a share. These changes should not be synced to the server because the user no longer has access to the relevant remote items. For example, if,
 1. `User1` shares `Folder A` with `User2`.
