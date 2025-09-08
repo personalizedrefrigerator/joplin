@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Linking, TextStyle, View, ViewStyle } from 'react-native';
+import { Linking, StyleSheet, TextStyle, View, ViewStyle } from 'react-native';
 import { Text } from 'react-native-paper';
 import IconButton from '../IconButton';
 import { _ } from '@joplin/lib/locale';
@@ -17,7 +17,15 @@ const onLeaveFeedback = () => {
 	void Linking.openURL('https://forms.gle/B5YGDNzsUYBnoPx19');
 };
 
-const feedbackContainerStyles: ViewStyle = { flexGrow: 1, justifyContent: 'flex-end' };
+const styles = StyleSheet.create({
+	feedbackContainer: {
+		flexGrow: 1,
+		justifyContent: 'flex-end',
+	},
+	paragraph: {
+		paddingBottom: 7,
+	},
+});
 
 const WebBetaButton: React.FC<Props> = props => {
 	const [dialogVisible, setDialogVisible] = useState(false);
@@ -29,6 +37,10 @@ const WebBetaButton: React.FC<Props> = props => {
 	const onHideDialog = useCallback(() => {
 		setDialogVisible(false);
 	}, []);
+
+	const renderParagraph = (content: string) => {
+		return <Text variant='bodyLarge' style={styles.paragraph}>{content}</Text>;
+	};
 
 	return (
 		<>
@@ -48,11 +60,11 @@ const WebBetaButton: React.FC<Props> = props => {
 				visible={dialogVisible}
 				onDismiss={onHideDialog}
 			>
-				<Text>Welcome to the beta version of the Joplin Web App!</Text>
-				<Text>Thank you for participating in the beta version of the Joplin Web App.</Text>
-				<Text>The Joplin Web App is available for a limited time in open beta and may later join the Joplin Cloud plans.</Text>
-				<Text>Feel free to use it and let us know if have any questions or notice any issues!</Text>
-				<View style={feedbackContainerStyles}>
+				{renderParagraph('Welcome to the beta version of the Joplin Web App!')}
+				{renderParagraph('Thank you for participating in the beta version of the Joplin Web App.')}
+				{renderParagraph('The Joplin Web App is available for a limited time in open beta and may later join the Joplin Cloud plans.')}
+				{renderParagraph('Feel free to use it and let us know if have any questions or notice any issues!')}
+				<View style={styles.feedbackContainer}>
 					<LinkButton onPress={onLeaveFeedback}>{'Give feedback'}</LinkButton>
 				</View>
 			</DismissibleDialog>
