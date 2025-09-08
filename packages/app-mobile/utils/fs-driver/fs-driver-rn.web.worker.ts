@@ -236,20 +236,15 @@ export class WorkerApi {
 		const folderName = removeReservedWords(basename(path));
 
 		let handle: FileSystemDirectoryHandle;
-		if (!parent) {
-			logger.debug('Parent not found for path', path);
-			handle = null;
-		} else {
-			try {
-				handle = await parent.getDirectoryHandle(folderName, { create });
-				this.directoryHandleCache_.set(path, handle);
-			} catch (error) {
-				if (!isNotFoundError(error)) {
-					throw error;
-				}
-
-				handle = null;
+		try {
+			handle = await parent.getDirectoryHandle(folderName, { create });
+			this.directoryHandleCache_.set(path, handle);
+		} catch (error) {
+			if (!isNotFoundError(error)) {
+				throw error;
 			}
+
+			handle = null;
 		}
 
 		return handle;
