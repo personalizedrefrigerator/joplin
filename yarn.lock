@@ -14631,6 +14631,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/node@npm:18.19.101":
+  version: 18.19.101
+  resolution: "@types/node@npm:18.19.101"
+  dependencies:
+    undici-types: "npm:~5.26.4"
+  checksum: 10/fc56ee1895afe249e2a2b6712df65477345f1ccd0d1f9a13cb0c4079a2513fdf14e1dcbc4180de746caae14fcd5d03840959a29b4779b1155fd787648af319c5
+  languageName: node
+  linkType: hard
+
 "@types/node@npm:18.19.103":
   version: 18.19.103
   resolution: "@types/node@npm:18.19.103"
@@ -14814,6 +14823,16 @@ __metadata:
     "@types/scheduler": "npm:*"
     csstype: "npm:^3.0.2"
   checksum: 10/37619ee474504f98a5cf78ee2c716f8e88c0e489fa3222df5b90792e942cd3734a07d1501c9f386d2f93557f1faa4356f2e3f24f71ec47013a2f658f917b5c7b
+  languageName: node
+  linkType: hard
+
+"@types/react@npm:18.3.22":
+  version: 18.3.22
+  resolution: "@types/react@npm:18.3.22"
+  dependencies:
+    "@types/prop-types": "npm:*"
+    csstype: "npm:^3.0.2"
+  checksum: 10/580496f2768db339206c215aba4347ca07cf5d87a825311355760c9018bf4e2020810a85e8c525681ab78aa53be1ccc3751c9f4ec9cbc0d1b8217c7aeaa62e32
   languageName: node
   linkType: hard
 
