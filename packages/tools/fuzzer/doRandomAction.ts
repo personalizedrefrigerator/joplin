@@ -302,7 +302,7 @@ const doRandomAction = async (context: FuzzContext, client: Client, clientPool: 
 			logger.info('End server issue simulation');
 		};
 
-		setTimeout(() => restoreEnvironment(), context.randInt(0, Second * 2));
+		setTimeout(() => restoreEnvironment(), context.randInt(0, Second * 3));
 	}
 
 	await action();
