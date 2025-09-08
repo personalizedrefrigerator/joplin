@@ -6,7 +6,6 @@ import { _ } from '@joplin/lib/locale';
 import { useCallback, useState } from 'react';
 import DismissibleDialog, { DialogSize } from '../DismissibleDialog';
 import { LinkButton } from '../buttons';
-import NavService from '@joplin/lib/services/NavService';
 
 interface Props {
 	wrapperStyle: ViewStyle;
@@ -15,7 +14,7 @@ interface Props {
 }
 
 const onLeaveFeedback = () => {
-	void Linking.openURL('https://discourse.joplinapp.org/t/web-client-running-joplin-mobile-in-a-web-browser-with-react-native-web/38749');
+	void Linking.openURL('https://forms.gle/B5YGDNzsUYBnoPx19');
 };
 
 const feedbackContainerStyles: ViewStyle = { flexGrow: 1, justifyContent: 'flex-end' };
@@ -49,10 +48,12 @@ const WebBetaButton: React.FC<Props> = props => {
 				visible={dialogVisible}
 				onDismiss={onHideDialog}
 			>
-				<Text>{'At present, the web client is in beta. In the future, it may change significantly, or be removed.'}</Text>
+				<Text>Welcome to the beta version of the Joplin Web App!</Text>
+				<Text>Thank you for participating in the beta version of the Joplin Web App.</Text>
+				<Text>The Joplin Web App is available for a limited time in open beta and may later join the Joplin Cloud plans.</Text>
+				<Text>Feel free to use it and let us know if have any question or notice any issue!</Text>
 				<View style={feedbackContainerStyles}>
 					<LinkButton onPress={onLeaveFeedback}>{'Give feedback'}</LinkButton>
-					<LinkButton onPress={() => NavService.go('DocumentScanner')}>{'Test work-in-progress feature: Document scanner'}</LinkButton>
 				</View>
 			</DismissibleDialog>
 		</>
