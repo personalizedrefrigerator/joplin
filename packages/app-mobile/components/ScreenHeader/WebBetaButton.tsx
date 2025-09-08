@@ -6,6 +6,10 @@ import { _ } from '@joplin/lib/locale';
 import { useCallback, useState } from 'react';
 import DismissibleDialog, { DialogSize } from '../DismissibleDialog';
 import { LinkButton } from '../buttons';
+import makeDiscourseDebugUrl from '@joplin/lib/makeDiscourseDebugUrl';
+import getPackageInfo from '../../utils/getPackageInfo';
+import PluginService from '@joplin/lib/services/plugins/PluginService';
+import Setting from '@joplin/lib/models/Setting';
 
 interface Props {
 	wrapperStyle: ViewStyle;
@@ -15,6 +19,12 @@ interface Props {
 
 const onLeaveFeedback = () => {
 	void Linking.openURL('https://forms.gle/B5YGDNzsUYBnoPx19');
+};
+
+const onReportBug = () => {
+	void Linking.openURL(
+		makeDiscourseDebugUrl('', '', [], getPackageInfo(), PluginService.instance(), Setting.value('plugins.states')),
+	);
 };
 
 const styles = StyleSheet.create({
@@ -65,6 +75,7 @@ const WebBetaButton: React.FC<Props> = props => {
 				{renderParagraph('The Joplin Web App is available for a limited time in open beta and may later join the Joplin Cloud plans.')}
 				{renderParagraph('Feel free to use it and let us know if have any questions or notice any issues!')}
 				<View style={styles.feedbackContainer}>
+					<LinkButton onPress={onReportBug}>{'Report bug'}</LinkButton>
 					<LinkButton onPress={onLeaveFeedback}>{'Give feedback'}</LinkButton>
 				</View>
 			</DismissibleDialog>
