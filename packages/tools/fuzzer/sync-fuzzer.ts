@@ -136,7 +136,7 @@ const main = async (options: Options) => {
 				await clientPool.checkState();
 			}, {
 				count: 4,
-				delayOnFailure: count => count * Second * 2,
+				delayOnFailure: count => count * Second * 3,
 				onFail: async () => {
 					logger.info('.checkState failed. Syncing all clients...');
 					await clientPool.syncAll();
