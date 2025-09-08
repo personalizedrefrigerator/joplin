@@ -29,6 +29,7 @@ import initLib from '@joplin/lib/initLib';
 import checkAdminHandler from './middleware/checkAdminHandler';
 import ActionLogger from '@joplin/lib/utils/ActionLogger';
 import { setupSamlAuthentication } from './utils/saml';
+import debugHandler from './middleware/debugHandler';
 
 interface Argv {
 	env?: Env;
@@ -230,6 +231,7 @@ async function main() {
 	app.use(checkAdminHandler);
 	app.use(notificationHandler);
 	app.use(clickJackingHandler);
+	app.use(debugHandler);
 	app.use(routeHandler);
 
 	await initConfig(env, envVariables);

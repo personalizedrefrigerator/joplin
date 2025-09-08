@@ -9,6 +9,12 @@ import Logger from '@joplin/utils/Logger';
 
 const logger = Logger.create('doRandomAction');
 
+type Action = ()=> Promise<void>;
+type ResolveActionResult = false|Action;
+type ActionMap = {
+	[key: string]: ()=> ResolveActionResult|Promise<ResolveActionResult>;
+};
+
 const buildActions = (context: FuzzContext, client: Client, clientPool: ClientPool) => {
 	const selectOrCreateParentFolder = async () => {
 		let parentId = (await client.randomFolder({ includeReadOnly: false }))?.id;
@@ -46,8 +52,8 @@ const buildActions = (context: FuzzContext, client: Client, clientPool: ClientPo
 		return note;
 	};
 
-	const localActions = {
-		newSubfolder: async () => {
+	const localActions: ActionMap = {
+		newSubfolder: () => async () => {
 			const folderId = uuid.create();
 			const parentId = await selectOrCreateParentFolder();
 
@@ -56,20 +62,16 @@ const buildActions = (context: FuzzContext, client: Client, clientPool: ClientPo
 				id: folderId,
 				title: 'Subfolder',
 			});
-
-			return true;
 		},
-		newToplevelFolder: async () => {
+		newToplevelFolder: () => async () => {
 			const folderId = uuid.create();
 			await client.createFolder({
 				parentId: null,
 				id: folderId,
 				title: `Folder ${context.randInt(0, 1000)}`,
 			});
-
-			return true;
 		},
-		newNote: async () => {
+		newNote: () => async () => {
 			const parentId = await selectOrCreateParentFolder();
 			await client.createNote({
 				parentId: parentId,
@@ -77,55 +79,53 @@ const buildActions = (context: FuzzContext, client: Client, clientPool: ClientPo
 				body: 'Testing...',
 				id: uuid.create(),
 			});
-
-			return true;
 		},
-		renameNote: async () => {
+		renameNote: () => async () => {
 			const note = await selectOrCreateWriteableNote();
 
 			await client.updateNote({
 				...note,
 				title: `Renamed (${context.randInt(0, 1000)})`,
 			});
-
-			return true;
 		},
-		updateNoteBody: async () => {
+		updateNoteBody: () => async () => {
 			const note = await selectOrCreateWriteableNote();
 
 			await client.updateNote({
 				...note,
 				body: `${note.body}\n\nUpdated.\n`,
 			});
-
-			return true;
 		},
 		moveNote: async () => {
-			const note = await selectOrCreateWriteableNote();
+			const note = await client.randomNote({ includeReadOnly: false });
+			if (!note) return false;
+
 			const targetParent = await client.randomFolder({
 				filter: folder => folder.id !== note.parentId,
 				includeReadOnly: false,
 			});
 			if (!targetParent) return false;
 
-			await client.moveItem(note.id, targetParent.id);
-
-			return true;
+			return async () => {
+				await client.moveItem(note.id, targetParent.id);
+			};
 		},
 		deleteNote: async () => {
 			const target = await client.randomNote({ includeReadOnly: false });
 			if (!target) return false;
 
-			await client.deleteNote(target.id);
-			return true;
+			return async () => {
+				await client.deleteNote(target.id);
+			};
 		},
 
 		deleteFolder: async () => {
 			const target = await client.randomFolder({ includeReadOnly: false });
 			if (!target) return false;
 
-			await client.deleteFolder(target.id);
-			return true;
+			return async () => {
+				await client.deleteFolder(target.id);
+			};
 		},
 		moveFolderToToplevel: async () => {
 			const target = await client.randomFolder({
@@ -135,8 +135,9 @@ const buildActions = (context: FuzzContext, client: Client, clientPool: ClientPo
 			});
 			if (!target) return false;
 
-			await client.moveItem(target.id, '');
-			return true;
+			return async () => {
+				await client.moveItem(target.id, '');
+			};
 		},
 		moveFolderTo: async () => {
 			const target = await client.randomFolder({
@@ -157,12 +158,13 @@ const buildActions = (context: FuzzContext, client: Client, clientPool: ClientPo
 			});
 			if (!newParent) return false;
 
-			await client.moveItem(target.id, newParent.id);
-			return true;
+			return async () => {
+				await client.moveItem(target.id, newParent.id);
+			};
 		},
 	};
 
-	const remoteActions = {
+	const remoteActions: ActionMap = {
 		shareFolder: async () => {
 			const other = clientPool.randomClient(c => !c.hasSameAccount(client));
 			if (!other) return false;
@@ -178,9 +180,10 @@ const buildActions = (context: FuzzContext, client: Client, clientPool: ClientPo
 			});
 			if (!target) return false;
 
-			const readOnly = context.randInt(0, 2) === 1 && context.isJoplinCloud;
-			await client.shareFolder(target.id, other, { readOnly });
-			return true;
+			return async () => {
+				const readOnly = context.randInt(0, 2) === 1 && context.isJoplinCloud;
+				await client.shareFolder(target.id, other, { readOnly });
+			};
 		},
 		unshareFolder: async () => {
 			const target = await client.randomFolder({
@@ -191,18 +194,19 @@ const buildActions = (context: FuzzContext, client: Client, clientPool: ClientPo
 			});
 			if (!target) return false;
 
-			const recipientIndex = context.randInt(-1, target.shareRecipients.length);
-			if (recipientIndex === -1) { // Completely remove the share
-				await client.deleteAssociatedShare(target.id);
-			} else {
-				const recipientEmail = target.shareRecipients[recipientIndex];
-				const recipient = clientPool.clientsByEmail(recipientEmail)[0];
-				assert.ok(recipient, `invalid state -- recipient ${recipientEmail} should exist`);
-				await client.removeFromShare(target.id, recipient);
-			}
-			return true;
+			return async () => {
+				const recipientIndex = context.randInt(-1, target.shareRecipients.length);
+				if (recipientIndex === -1) { // Completely remove the share
+					await client.deleteAssociatedShare(target.id);
+				} else {
+					const recipientEmail = target.shareRecipients[recipientIndex];
+					const recipient = clientPool.clientsByEmail(recipientEmail)[0];
+					assert.ok(recipient, `invalid state -- recipient ${recipientEmail} should exist`);
+					await client.removeFromShare(target.id, recipient);
+				}
+			};
 		},
-		newClientOnSameAccount: async () => {
+		newClientOnSameAccount: () => async () => {
 			const welcomeNoteCount = context.randInt(0, 30);
 			logger.info(`Syncing a new client on the same account ${welcomeNoteCount > 0 ? `(with ${welcomeNoteCount} initial notes)` : ''}`);
 			const createClientInitialNotes = async (client: Client) => {
@@ -247,17 +251,17 @@ const buildActions = (context: FuzzContext, client: Client, clientPool: ClientPo
 			});
 
 			await client.sync();
-			return true;
 		},
 		removeClientsOnSameAccount: async () => {
 			const others = clientPool.othersWithSameAccount(client);
 			if (others.length === 0) return false;
 
-			for (const otherClient of others) {
-				assert.notEqual(otherClient, client);
-				await otherClient.close();
-			}
-			return true;
+			return async () => {
+				for (const otherClient of others) {
+					assert.notEqual(otherClient, client);
+					await otherClient.close();
+				}
+			};
 		},
 	};
 	return { localActions, remoteActions };
@@ -265,27 +269,44 @@ const buildActions = (context: FuzzContext, client: Client, clientPool: ClientPo
 
 const doRandomAction = async (context: FuzzContext, client: Client, clientPool: ClientPool) => {
 	const { localActions, remoteActions } = buildActions(context, client, clientPool);
-	const allActions = {...localActions, ...remoteActions};
+	const allActions = { ...localActions, ...remoteActions };
+	const actionKeys = Object.keys(allActions);
 
-	const keys = <T extends Record<string, any>> (data: T) => [...Object.keys(data)] as (keyof T)[];
-	const allActionKeys = keys(allActions);
-	const localActionKeys = keys(localActions);
-	const remoteActionKeys = keys(localActions);
+	const getRandomAction = async () => {
+		let action: false|(()=> Promise<void>) = false;
+		let key;
+		while (!action) {
+			const randomAction = actionKeys[context.randInt(0, actionKeys.length)];
+			key = randomAction;
+			action = await allActions[randomAction]();
 
-
-	let result = false;
-	while (!result) { // Loop until an action was done
-		const randomAction = allActionKeys[context.randInt(0, allActionKeys.length)];
-		logger.info(`Action: ${randomAction} in ${client.email}`);
-
-		if ((remoteActionKeys as string[]).includes(randomAction)) {
-			// TODO: Select another random remote action to race with.
+			if (!action) {
+				logger.debug('Skipped', action);
+			}
 		}
-		result = await allActions[randomAction]();
-		if (!result) {
-			logger.info(`  ${randomAction} was skipped (preconditions not met).`);
-		}
+		return { key, action };
+	};
+
+	const { key, action } = await getRandomAction();
+	logger.info(`Action: ${key} in ${client.email}`);
+
+	let restoreEnvironment = () => Promise.resolve();
+	const addServerInterference = key in remoteActions && context.randInt(0, 4) === 1;
+	if (addServerInterference) {
+		logger.info('Simulating server issues');
+
+		await context.execApi('POST', 'api/debug', { action: 'simulateServerDown', enabled: 1 });
+		restoreEnvironment = async () => {
+			restoreEnvironment = () => Promise.resolve();
+			await context.execApi('POST', 'api/debug', { action: 'simulateServerDown', enabled: 0 });
+			logger.info('End server issue simulation');
+		};
+
+		setTimeout(() => restoreEnvironment(), context.randInt(0, Second * 2));
 	}
+
+	await action();
+	await restoreEnvironment();
 };
 
 

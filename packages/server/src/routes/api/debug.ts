@@ -8,6 +8,7 @@ import { Env, RouteType } from '../../utils/types';
 import { SubPath } from '../../utils/routeUtils';
 import { AppContext } from '../../utils/types';
 import { ErrorForbidden } from '../../utils/errors';
+import { setSimulateUnavailable } from '../../middleware/debugHandler';
 
 const router = new Router(RouteType.Api);
 
@@ -17,6 +18,7 @@ interface Query {
 	action: string;
 	count?: number;
 	fromNum?: number;
+	enabled?: boolean;
 }
 
 router.post('api/debug', async (_path: SubPath, ctx: AppContext) => {
@@ -46,6 +48,10 @@ router.post('api/debug', async (_path: SubPath, ctx: AppContext) => {
 
 	if (query.action === 'clearKeyValues') {
 		await models.keyValue().deleteAll();
+	}
+
+	if (query.action === 'simulateServerDown') {
+		setSimulateUnavailable(!!query.enabled);
 	}
 });
 
