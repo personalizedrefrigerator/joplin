@@ -104,6 +104,7 @@ export interface DeltaOptions {
 	allItemIdsHandler(): Promise<string[]>;
 	logger?: LoggerWrapper;
 	wipeOutFailSafe: boolean;
+	context?: unknown;
 }
 
 export enum GetOptionsTarget {
@@ -122,6 +123,7 @@ export interface GetOptions {
 export interface PutOptions {
 	path?: string;
 	source?: string;
+	shareId?: string;
 }
 
 export interface ItemStat {

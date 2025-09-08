@@ -32,6 +32,7 @@ import syncDeleteStep from './services/synchronizer/utils/syncDeleteStep';
 import { ErrorCode } from './errors';
 import { SyncAction } from './services/synchronizer/utils/types';
 import checkDisabledSyncItemsNotification from './services/synchronizer/utils/checkDisabledSyncItemsNotification';
+import { FunctionPropertiesOf, AsyncReturnTypeOf } from '@joplin/utils/types';
 const { sprintf } = require('sprintf-js');
 const { Dirnames } = require('./services/synchronizer/utils/types');
 
@@ -52,6 +53,18 @@ function isCannotSyncError(error: any): boolean {
 	if (error.type === 'request-timeout' || error.message.includes('network timeout')) return true;
 
 	return false;
+}
+
+type ApiKey = keyof FunctionPropertiesOf<FileApi>;
+
+interface SyncOptions {
+	onProgress?: ()=> void;
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Partially refactored old code before rule was applied
+	context?: any;
+	syncSteps?: string[];
+	throwOnError?: boolean;
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Partially refactored old code before rule was applied
+	saveContextHandler?: (context: any)=> void;
 }
 
 export default class Synchronizer {
@@ -155,8 +168,7 @@ export default class Synchronizer {
 		this.shareService_ = v;
 	}
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	public setEncryptionService(v: any) {
+	public setEncryptionService(v: EncryptionService) {
 		this.encryptionService_ = v;
 	}
 
@@ -360,13 +372,15 @@ export default class Synchronizer {
 		return localInfo;
 	}
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	private async apiCall(fnName: string, ...args: any[]) {
+	private async apiCall<FnName extends ApiKey>(
+		fnName: FnName,
+		...args: Parameters<FileApi[FnName]>
+	): AsyncReturnTypeOf<FileApi[FnName]> {
 		if (this.syncTargetIsLocked_) throw new JoplinError('Sync target is locked - aborting API call', 'lockError');
 
 		try {
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-			const output = await (this.api() as any)[fnName](...args);
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Partial refactor of old code before rule was applied
+			const output = await (this.api()[fnName] as any)(...args);
 			return output;
 		} catch (error) {
 			const lockStatus = await this.lockErrorStatus_();
@@ -387,13 +401,14 @@ export default class Synchronizer {
 	// 2. DELETE_REMOTE: Delete on the sync target, the items that have been deleted locally.
 	// 3. DELTA: Find on the sync target the items that have been modified or deleted and apply the changes locally.
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	public async start(options: any = null) {
+	public async start(options: SyncOptions = null) {
 		if (!options) options = {};
 
 		if (this.state() !== 'idle') {
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-			const error: any = new Error(sprintf('Synchronisation is already in progress. State: %s', this.state()));
-			error.code = 'alreadyStarted';
+			const error = new JoplinError(
+				sprintf('Synchronisation is already in progress. State: %s', this.state()),
+				'alreadyStarted',
+			);
 			throw error;
 		}
 
@@ -618,7 +633,8 @@ export default class Synchronizer {
 						//   (by setting an updated_time less than current time).
 						if (donePaths.indexOf(path) >= 0) throw new JoplinError(sprintf('Processing a path that has already been done: %s. sync_time was not updated? Remote item has an updated_time in the future?', path), 'processingPathTwice');
 
-						const remote: RemoteItem = result.neverSyncedItemIds.includes(local.id) ? null : await this.apiCall('stat', path);
+						// eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: One of these types (the return type of 'stat' or RemoteItem) is incorrect.
+						const remote: RemoteItem = result.neverSyncedItemIds.includes(local.id) ? null : await this.apiCall('stat', path) as any;
 						let action: SyncAction = null;
 						let itemIsReadOnly = false;
 						let reason = '';
