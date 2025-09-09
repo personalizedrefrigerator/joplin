@@ -40,7 +40,7 @@ export const renderFolders = <T> (props: RenderFoldersProps, renderItem: RenderF
 	const collapsedFolderIds = props.collapsedFolderIds ?? [];
 
 	const renderFolder_ = (folder: FolderEntity, depth: number) => {
-		// Handle invalid state: Cyclic parent_ids.
+		// Prevent infinite loop if there are cyclic parent_ids.
 		if (renderedIds.has(folder.id)) return;
 
 		const hasChildren = parentIdToChildren.has(folder.id);
@@ -58,7 +58,6 @@ export const renderFolders = <T> (props: RenderFoldersProps, renderItem: RenderF
 			renderFolder_(folder, depth);
 		}
 	};
-	renderFoldersRecursive_('', 0);
 
 	const renderMisplacedFolders = () => {
 		if (props.folderTree.misplacedItems.length === 0) return;
@@ -73,7 +72,9 @@ export const renderFolders = <T> (props: RenderFoldersProps, renderItem: RenderF
 			}
 		}
 	};
+
 	renderMisplacedFolders();
+	renderFoldersRecursive_('', 0);
 
 	return { items, order };
 };
