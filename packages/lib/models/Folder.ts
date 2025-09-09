@@ -190,7 +190,7 @@ export default class Folder extends BaseItem {
 	}
 
 	public static misplacedFolderId() {
-		return 'misplaced0misplaced0misplaced000';
+		return 'a97eac80247b4c5d8f49feaea47721b8';
 	}
 
 	public static misplacedFolder(): FolderEntity {
@@ -947,6 +947,8 @@ export default class Folder extends BaseItem {
 
 		const conflictFolderId = Folder.conflictFolderId();
 		if (folderId === conflictFolderId || targetFolderId === conflictFolderId) return false;
+		const misplacedFolderId = Folder.misplacedFolderId();
+		if (folderId === misplacedFolderId || targetFolderId === misplacedFolderId) return false;
 
 		if (!targetFolderId) return true;
 
