@@ -541,6 +541,18 @@ describe('models/Note', () => {
 		}
 	});
 
+	it('should return notes with an invalid or missing parent_id', async () => {
+		const folder = await Folder.save({});
+		const note1 = await Note.save({ title: 'note1', parent_id: '' });
+		const note2 = await Note.save({ title: 'note2', parent_id: '12345678901234567890123456789012' });
+		await Note.save({ title: 'note3', parent_id: folder.id });
+
+		const misplacedNotes = await Note.previews(Folder.misplacedFolderId());
+		expect(
+			misplacedNotes.map(note => note.id).sort(),
+		).toEqual([note1.id, note2.id].sort());
+	});
+
 	it('should return the notes from the trash', async () => {
 		const folder = await Folder.save({});
 		const note1 = await Note.save({ title: 'note1', parent_id: folder.id });

@@ -149,12 +149,12 @@ describe('side-menu-shared', () => {
 			},
 			{
 				items: [
-					['2', false, 0],
-					[getTrashFolderId(), false, 0],
 					[Folder.misplacedFolderId(), true, 0],
 					['1', false, 1],
+					['2', false, 0],
+					[getTrashFolderId(), false, 0],
 				],
-				order: ['2', getTrashFolderId(), Folder.misplacedFolderId(), '1'],
+				order: [Folder.misplacedFolderId(), '1', '2', getTrashFolderId()],
 			},
 		],
 	])('should render folders (case %#)', (props, expected) => {
