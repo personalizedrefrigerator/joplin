@@ -351,6 +351,19 @@ class ActionTracker {
 				this.checkRep_();
 				return Promise.resolve();
 			},
+			deleteNote: (id: ItemId) => {
+				this.checkRep_();
+
+				const item = this.idToItem_.get(id);
+				if (!item) throw new Error(`Not found ${id}`);
+				assert.ok(!isFolder(item), 'should be a note');
+				assertWriteable(item);
+
+				removeItemRecursive(id);
+
+				this.checkRep_();
+				return Promise.resolve();
+			},
 			shareFolder: (id: ItemId, shareWith: ClientInfo, options: ShareOptions) => {
 				const itemToShare = this.idToItem_.get(id);
 				assertIsFolder(itemToShare);
@@ -417,6 +430,35 @@ class ActionTracker {
 					itemId,
 					isFolder(item) ? item.withParent(newParentId) : { ...item, parentId: newParentId },
 				);
+
+				this.checkRep_();
+				return Promise.resolve();
+			},
+			publishNote: (id) => {
+				const oldItem = this.idToItem_.get(id);
+				assert.ok(oldItem, 'should exist');
+				assert.ok(!isFolder(oldItem), 'folders cannot be published');
+				assert.ok(!oldItem.published, 'should not be published');
+
+
+				this.idToItem_.set(id, {
+					...oldItem,
+					published: true,
+				});
+
+				this.checkRep_();
+				return Promise.resolve();
+			},
+			unpublishNote: (id) => {
+				const oldItem = this.idToItem_.get(id);
+				assert.ok(oldItem, 'should exist');
+				assert.ok(!isFolder(oldItem), 'folders cannot be unpublished');
+				assert.ok(oldItem.published, 'should be published');
+
+				this.idToItem_.set(id, {
+					...oldItem,
+					published: false,
+				});
 
 				this.checkRep_();
 				return Promise.resolve();
