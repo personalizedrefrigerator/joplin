@@ -1,7 +1,6 @@
-import { focus } from '@joplin/lib/utils/focusHandler';
-import createTextNode from '../../utils/dom/createTextNode';
 import { EditorApi } from '../joplinEditorApiPlugin';
 import { EditorLanguageType } from '../../../types';
+import showModal from '../../utils/dom/showModal';
 
 interface SourceBlockData {
 	start: string;
@@ -15,20 +14,16 @@ interface Options {
 	block: SourceBlockData;
 	editorApi: EditorApi;
 	onSave: (newContent: SourceBlockData)=> void;
+	onDismiss: ()=> void;
 }
 
-const createEditorDialog = ({ editorApi, doneLabel, block, onSave }: Options) => {
-	const dialog = document.createElement('dialog');
-	dialog.classList.add('editor-dialog', '-visible');
-	document.body.appendChild(dialog);
-
-	dialog.onclose = () => {
-		dialog.remove();
-		editor.remove();
-	};
+const createEditorDialog = ({ editorApi, doneLabel, block, onSave, onDismiss }: Options) => {
+	const content = document.createElement('div');
+	content.classList.add('editor-dialog-content');
+	document.body.appendChild(content);
 
 	const editor = editorApi.createCodeEditor(
-		dialog,
+		content,
 		EditorLanguageType.Markdown,
 		(newContent) => {
 			block = {
@@ -46,31 +41,14 @@ const createEditorDialog = ({ editorApi, doneLabel, block, onSave }: Options) =>
 		block.end,
 	].join(''));
 
-	const submitButton = document.createElement('button');
-	submitButton.appendChild(createTextNode(doneLabel));
-	submitButton.classList.add('submit');
-	submitButton.onclick = () => {
-		if (dialog.close) {
-			dialog.close();
-		} else {
-			// Handle the case where the dialog element is not supported by the
-			// browser/testing environment.
-			dialog.onclose(new Event('close'));
-		}
-	};
-
-	dialog.appendChild(submitButton);
-
-
-	// .showModal is not defined in JSDOM and some older (pre-2022) browsers
-	if (dialog.showModal) {
-		dialog.showModal();
-	} else {
-		dialog.classList.add('-fake-modal');
-		focus('createEditorDialog/legacy', editor);
-	}
-
-	return {};
+	return showModal({
+		content,
+		doneLabel,
+		onDismiss: () => {
+			onDismiss();
+			editor.remove();
+		},
+	});
 };
 
 export default createEditorDialog;

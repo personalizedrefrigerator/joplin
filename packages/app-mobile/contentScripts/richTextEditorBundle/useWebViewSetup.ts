@@ -140,7 +140,7 @@ const useSource = (props: UseSourceProps) => {
 					richTextEditorBundle.setUpLogger();
 					richTextEditorBundle.initialize(
 						${JSON.stringify(editorOptions)},
-						window.createSecondaryEditor,
+						window,
 					).then(function(editor) {
 						/* For testing */
 						window.joplinRichTextEditor_ = editor;

@@ -7,6 +7,9 @@ import { OnMessageEvent, WebViewControl } from '../../components/ExtendedWebView
 import { EditorEvent } from '@joplin/editor/events';
 import Logger from '@joplin/utils/Logger';
 import RNToWebViewMessenger from '../../utils/ipc/RNToWebViewMessenger';
+import { _ } from '@joplin/lib/locale';
+import { PluginStates } from '@joplin/lib/services/plugins/reducer';
+import useCodeMirrorPlugins from './utils/useCodeMirrorPlugins';
 import Resource from '@joplin/lib/models/Resource';
 import { parseResourceUrl } from '@joplin/lib/urlUtils';
 const { isImageMimeType } = require('@joplin/lib/resourceUtils');
@@ -62,13 +65,6 @@ const useWebViewSetup = ({
 			window.markdownEditorBundle = markdownEditorBundle;
 			markdownEditorBundle.setUpLogger();
 		}
-		function getMarkdownEditorBundle() {
-			return markdownEditorBundle;
-		}
-
-		window.createSecondaryEditor = function(options) {
-			return getMarkdownEditorBundle().createEditorWithParent(options);
-		};
 
 		if (!window.cm) {
 			const parentClassName = ${JSON.stringify(editorOptions?.parentElementOrClassName)};
@@ -78,7 +74,7 @@ const useWebViewSetup = ({
 			// document has loaded. To avoid logging an error each time the editor starts, don't throw
 			// if the parent element can't be found:
 			if (foundParent) {
-				window.cm = getMarkdownEditorBundle().createMainEditor(${JSON.stringify(editorOptions)});
+				window.cm = markdownEditorBundle.createMainEditor(${JSON.stringify(editorOptions)});
 
 				${jumpToHashJs}
 				// Set the initial selection after jumping to the header -- the initial selection,
@@ -89,7 +85,7 @@ const useWebViewSetup = ({
 				window.onresize = () => {
 					cm.execCommand('scrollSelectionIntoView');
 				};
-			} else {
+			} else if (parentClassName) {
 				console.log('No parent element found with class name ', parentClassName);
 			}
 		}
@@ -129,6 +125,13 @@ const useWebViewSetup = ({
 			},
 			async onPasteFile(type, data) {
 				onAttachRef.current(type, data);
+			},
+			async onLocalize(text) {
+				const localizationFunction = _;
+				return localizationFunction(text);
+			},
+			async onEditorAdded() {
+				messenger.remoteApi.updatePlugins(codeMirrorPluginsRef.current);
 			},
 			async onResolveImageSrc(src) {
 				const url = parseResourceUrl(src);

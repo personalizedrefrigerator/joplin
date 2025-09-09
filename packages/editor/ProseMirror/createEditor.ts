@@ -23,9 +23,16 @@ import searchExtension from './plugins/searchPlugin';
 import joplinEditorApiPlugin, { setEditorApi } from './plugins/joplinEditorApiPlugin';
 import linkTooltipPlugin from './plugins/linkTooltipPlugin';
 import { OnCreateCodeEditor as OnCreateCodeEditor, RendererControl } from './types';
-import resourcePlaceholderPlugin, { onResourceDownloaded } from './plugins/resourcePlaceholderPlugin';
+import imagePlugin, { onResourceDownloaded } from './plugins/imagePlugin';
 import getFileFromPasteEvent from '../utils/getFileFromPasteEvent';
 import { RenderResult } from '../../renderer/types';
+import postprocessEditorOutput from './utils/postprocessEditorOutput';
+import detailsPlugin from './plugins/detailsPlugin';
+
+interface ProseMirrorControl extends EditorControl {
+	getSettings(): EditorSettings;
+}
+
 
 interface ProseMirrorControl extends EditorControl {
 	getSettings(): EditorSettings;
@@ -39,7 +46,9 @@ const createEditor = async (
 	createCodeEditor: OnCreateCodeEditor,
 ): Promise<ProseMirrorControl> => {
 	const renderNodeToMarkup = (node: Node|DocumentFragment) => {
-		return renderer.renderHtmlToMarkup(node);
+		return renderer.renderHtmlToMarkup(
+			postprocessEditorOutput(node),
+		);
 	};
 
 	const proseMirrorParser = ProseMirrorDomParser.fromSchema(schema);
@@ -80,6 +89,7 @@ const createEditor = async (
 				gapCursor(),
 				dropCursor(),
 				history(),
+				detailsPlugin,
 				searchPlugin,
 				joplinEditablePlugin,
 				markupTracker,
@@ -87,7 +97,7 @@ const createEditor = async (
 				linkTooltipPlugin,
 				tableEditing({ allowTableNodeSelection: true }),
 				joplinEditorApiPlugin,
-				resourcePlaceholderPlugin,
+				imagePlugin,
 			].flat(),
 		});
 

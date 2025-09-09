@@ -2,7 +2,10 @@ import { AttributeSpec, DOMOutputSpec, MarkSpec, NodeSpec, Schema } from 'prosem
 import { nodeSpecs as joplinEditableNodes } from './plugins/joplinEditablePlugin/joplinEditablePlugin';
 import { tableNodes } from 'prosemirror-tables';
 import { nodeSpecs as listNodes } from './plugins/listPlugin';
-import { nodeSpecs as resourcePlaceholderNodes } from './plugins/resourcePlaceholderPlugin';
+import { nodeSpecs as imageNodes } from './plugins/imagePlugin';
+import { hasProtocol } from '@joplin/utils/url';
+import { isResourceUrl } from '@joplin/lib/models/utils/resourceUtils';
+import { nodeSpecs as detailsNodes } from './plugins/detailsPlugin';
 
 // For reference, see:
 // - https://prosemirror.net/docs/guide/#schema
@@ -20,6 +23,9 @@ const domOutputSpecs = {
 	listItem: ['li', 0],
 	blockQuote: ['blockquote', 0],
 	hr: ['hr'],
+	sub: ['sub', 0],
+	sup: ['sup', 0],
+	mark: ['mark', 0],
 } satisfies Record<string, DOMOutputSpec>;
 
 type AttributeSpecs = Record<string, AttributeSpec>;
@@ -129,7 +135,8 @@ const nodes = addDefaultToplevelAttributes({
 			return result;
 		},
 	},
-	...resourcePlaceholderNodes,
+	...detailsNodes,
+	...imageNodes,
 	...listNodes,
 	...joplinEditableNodes,
 	...tableNodes({
@@ -149,46 +156,6 @@ const nodes = addDefaultToplevelAttributes({
 
 	text: {
 		group: 'inline',
-	},
-	image: {
-		group: 'inline',
-		inline: true,
-		draggable: true,
-		attrs: {
-			src: { default: '', validate: 'string' },
-			alt: { default: '', validate: 'string' },
-			title: { default: '', validate: 'string' },
-			fromMd: { default: false, validate: 'boolean' },
-			resourceId: { default: null as string|null, validate: 'string|null' },
-		},
-		parseDOM: [
-			{
-				tag: 'img[src]',
-				getAttrs: node => ({
-					src: node.getAttribute('src'),
-					alt: node.getAttribute('alt'),
-					title: node.getAttribute('title'),
-					fromMd: node.hasAttribute('data-from-md'),
-					resourceId: node.getAttribute('data-resource-id') || null,
-				}),
-			},
-		],
-		toDOM: node => {
-			const { src, alt, title, fromMd, resourceId } = node.attrs;
-			const outputAttrs: Record<string, unknown> = { src, alt, title };
-
-			if (fromMd) {
-				outputAttrs['data-from-md'] = true;
-			}
-			if (resourceId) {
-				outputAttrs['data-resource-id'] = resourceId;
-			}
-
-			return [
-				'img',
-				outputAttrs,
-			];
-		},
 	},
 	hard_break: {
 		inline: true,
@@ -213,6 +180,18 @@ const marks = {
 		code: true,
 		toDOM: () => domOutputSpecs.code,
 		excludes: '_',
+	},
+	sub: {
+		parseDOM: [{ tag: 'sub' }],
+		toDOM: () => domOutputSpecs.sub,
+	},
+	sup: {
+		parseDOM: [{ tag: 'sup' }],
+		toDOM: () => domOutputSpecs.sup,
+	},
+	mark: {
+		parseDOM: [{ tag: 'mark' }],
+		toDOM: () => domOutputSpecs.mark,
 	},
 	color: {
 		inclusive: false,
@@ -242,8 +221,15 @@ const marks = {
 			tag: 'a[href]',
 			getAttrs: node => {
 				const resourceId = node.getAttribute('data-resource-id');
-				const href = node.getAttribute('href');
+				let href = node.getAttribute('href');
 				const isResourceLink = resourceId && href === '#';
+				if (isResourceLink) {
+					href = `:/${resourceId}`;
+				}
+
+				if (href === '#' && node.hasAttribute('data-original-href')) {
+					href = node.getAttribute('data-original-href');
+				}
 
 				return {
 					href: isResourceLink ? `:/${resourceId}` : href,
@@ -252,10 +238,29 @@ const marks = {
 				};
 			},
 		}],
-		toDOM: node => [
-			'a',
-			{ href: node.attrs.href, title: node.attrs.title, 'data-resource-id': node.attrs.dataResourceId },
-		],
+		toDOM: node => {
+			const isSafeForRendering = (href: string) => {
+				return hasProtocol(href, ['http', 'https', 'joplin']) || isResourceUrl(href);
+			};
+
+			// Avoid rendering URLs with unknown protocols (avoid rendering or pasting unsafe HREFs).
+			// Note that URL click handling is handled elsewhere and does not use the HTML "href" attribute.
+			// However "href" may be used by the right-click menu on web:
+			const safeHref = isSafeForRendering(node.attrs.href) ? node.attrs.href : '#';
+
+			return [
+				'a',
+				{
+					href: safeHref,
+					...(safeHref !== node.attrs.href ? {
+						'data-original-href': node.attrs.href,
+					} : {}),
+
+					title: node.attrs.title,
+					'data-resource-id': node.attrs.dataResourceId,
+				},
+			];
+		},
 	},
 } satisfies Record<string, MarkSpec>;
 

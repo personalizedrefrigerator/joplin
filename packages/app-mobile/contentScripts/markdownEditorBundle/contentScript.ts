@@ -1,12 +1,15 @@
 import { createEditor } from '@joplin/editor/CodeMirror';
 import { focus } from '@joplin/lib/utils/focusHandler';
 import WebViewToRNMessenger from '../../utils/ipc/WebViewToRNMessenger';
-import { EditorProcessApi, EditorProps, EditorWithParentProps, MainProcessApi } from './types';
+import { EditorProcessApi, EditorProps, EditorWithParentProps, ExportedWebViewGlobals, MainProcessApi } from './types';
 import readFileToBase64 from '../utils/readFileToBase64';
 import { EditorControl } from '@joplin/editor/types';
 import { EditorEventType } from '@joplin/editor/events';
 
 export { default as setUpLogger } from '../utils/setUpLogger';
+
+interface ExtendedWindow extends ExportedWebViewGlobals, Window { }
+declare const window: ExtendedWindow;
 
 let mainEditor: EditorControl|null = null;
 let allEditors: EditorControl[] = [];
@@ -110,3 +113,6 @@ export const createMainEditor = (props: EditorProps) => {
 	mainEditor = control;
 	return control;
 };
+
+window.createEditorWithParent = createEditorWithParent;
+window.createMainEditor = createMainEditor;
