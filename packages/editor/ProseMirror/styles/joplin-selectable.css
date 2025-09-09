@@ -20,7 +20,7 @@
 	outline: 4px solid var(--joplin-text-selection-color);
 }
 
-.joplin-selectable.-selected > .actions {
+.joplin-selectable.-selected > .actions, .joplin-selectable:focus-within > .actions {
 	display: block;
 	opacity: 0.9;
 }
