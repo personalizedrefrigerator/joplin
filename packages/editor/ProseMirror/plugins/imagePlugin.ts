@@ -25,6 +25,8 @@ type NodeAttrs = Readonly<{
 	fromMd: boolean;
 	alt: string;
 	title: string;
+	width: string;
+	height: string;
 }>;
 
 const attrsSpec = {
@@ -33,6 +35,8 @@ const attrsSpec = {
 	placeholderAlt: { default: '', validate: 'string' },
 	notDownloaded: { validate: 'boolean' },
 	isImage: { validate: 'boolean' },
+	width: { validate: 'string', default: '' },
+	height: { validate: 'string', default: '' },
 
 	resourceId: { default: null as string|null, validate: 'string|null' },
 	src: { default: '', validate: 'string' },
@@ -54,6 +58,8 @@ const imageSpec: NodeSpec = {
 				src: node.getAttribute('src'),
 				alt: node.getAttribute('alt'),
 				title: node.getAttribute('title'),
+				width: node.getAttribute('width') ?? '',
+				height: node.getAttribute('height') ?? '',
 				fromMd: node.hasAttribute('data-from-md'),
 				resourceId: node.getAttribute('data-resource-id') || null,
 
@@ -73,6 +79,8 @@ const imageSpec: NodeSpec = {
 					resourceId: node.getAttribute('data-resource-id'),
 					placeholderSrc: node.querySelector('img')?.src,
 					src: '',
+					width: null,
+					height: null,
 					placeholderAlt: node.querySelector('img')?.alt,
 					fromMd: false,
 					alt: node.getAttribute('data-original-alt'),
@@ -106,6 +114,12 @@ const imageSpec: NodeSpec = {
 				} : {}),
 				...(attrs.resourceId ? {
 					'data-resource-id': attrs.resourceId,
+				} : {}),
+				...(attrs.width ? {
+					width: attrs.width,
+				} : {}),
+				...(attrs.height ? {
+					height: attrs.height,
 				} : {}),
 				src: attrs.src,
 				alt: attrs.alt,
@@ -186,6 +200,9 @@ class ImageView extends SelectableNodeView {
 			const image = document.createElement('img');
 			image.src = imageSrc;
 			image.alt = imageAlt;
+
+			image.setAttribute('width', attrs.width);
+			image.setAttribute('height', attrs.height);
 
 			let dom;
 			if (!loaded) {
