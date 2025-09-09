@@ -848,6 +848,12 @@ rules.joplinSourceBlock = {
   }
 }
 
+rules.joplinKeyboard = {
+  filter: 'kbd',
+  replacement: (content) => {
+    return `<kbd>${content}</kbd>`;
+  }
+}
 
 // ===============================================================================
 // Checkboxes

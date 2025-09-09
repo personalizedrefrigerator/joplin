@@ -26,6 +26,7 @@ const domOutputSpecs = {
 	sub: ['sub', 0],
 	sup: ['sup', 0],
 	mark: ['mark', 0],
+	keyboard: ['kbd', 0],
 } satisfies Record<string, DOMOutputSpec>;
 
 type AttributeSpecs = Record<string, AttributeSpec>;
@@ -249,6 +250,11 @@ const marks = {
 			result.style.color = node.attrs.color;
 			return result;
 		},
+	},
+	keyboard: {
+		inclusive: false,
+		parseDOM: [{ tag: 'kbd' }],
+		toDOM: () => domOutputSpecs.keyboard,
 	},
 	link: {
 		attrs: {
