@@ -48,7 +48,9 @@ const useMessenger = (props: UseMessengerProps) => {
 		themeId: props.themeId,
 		highlightedKeywords: [],
 		resources: props.noteResources,
-		themeOverrides: {},
+		themeOverrides: {
+			noteViewerFontSize: `${props.settings.themeData.fontSize}${props.settings.themeData.fontSizeUnits}`,
+		},
 		noteHash: '',
 		initialScroll: 0,
 		pluginAssetContainerSelector: null,
@@ -128,10 +130,6 @@ const useSource = (props: UseSourceProps) => {
 				.prosemirror-editor {
 					/* Increase the size of the editor to make it easier to focus the editor. */
 					min-height: 75vh;
-
-					/* -apple-system-body allows for correct font scaling on iOS devices */
-					font: -apple-system-body;
-					font-family: var(--joplin-font-family, sans-serif);
 				}
 			`,
 			js: `
