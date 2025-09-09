@@ -6,6 +6,7 @@ import { Second } from '@joplin/utils/time';
 import { FuzzContext } from './types';
 import ClientPool from './ClientPool';
 import Logger from '@joplin/utils/Logger';
+import Server from './Server';
 
 const logger = Logger.create('doRandomAction');
 
@@ -267,7 +268,7 @@ const buildActions = (context: FuzzContext, client: Client, clientPool: ClientPo
 	return { localActions, remoteActions };
 };
 
-const doRandomAction = async (context: FuzzContext, client: Client, clientPool: ClientPool) => {
+const doRandomAction = async (context: FuzzContext, server: Server, client: Client, clientPool: ClientPool) => {
 	const { localActions, remoteActions } = buildActions(context, client, clientPool);
 	const allActions = { ...localActions, ...remoteActions };
 	const actionKeys = Object.keys(allActions);
@@ -293,16 +294,31 @@ const doRandomAction = async (context: FuzzContext, client: Client, clientPool: 
 	let restoreEnvironment = () => Promise.resolve();
 	const addServerInterference = key in remoteActions && context.randInt(0, 4) === 1;
 	if (addServerInterference) {
-		logger.info('Simulating server issues');
+		const serverInterferenceType = context.randInt(0, 2);
+		if (serverInterferenceType === 0) {
+			const serverIssueDelay = context.randInt(0, 20);
+			const startDelay = context.randInt(0, Second);
+			logger.info('Restarting the server in ', serverIssueDelay, 'ms');
 
-		await context.execApi('POST', 'api/debug', { action: 'simulateServerDown', enabled: 1 });
-		restoreEnvironment = async () => {
-			restoreEnvironment = () => Promise.resolve();
-			await context.execApi('POST', 'api/debug', { action: 'simulateServerDown', enabled: 0 });
-			logger.info('End server issue simulation');
-		};
+			if (serverIssueDelay > 0) {
+				setTimeout(() => {
+					server.restart(startDelay);
+				}, serverIssueDelay);
+			} else {
+				server.restart(startDelay);
+			}
+		} else {
+			logger.info('Simulating server issues');
 
-		setTimeout(() => restoreEnvironment(), context.randInt(0, Second * 3));
+			await context.execApi('POST', 'api/debug', { action: 'simulateServerDown', enabled: 1 });
+			restoreEnvironment = async () => {
+				restoreEnvironment = () => Promise.resolve();
+				await context.execApi('POST', 'api/debug', { action: 'simulateServerDown', enabled: 0 });
+				logger.info('End server issue simulation');
+			};
+
+			setTimeout(() => restoreEnvironment(), context.randInt(0, Second * 3));
+		}
 	}
 
 	await action();

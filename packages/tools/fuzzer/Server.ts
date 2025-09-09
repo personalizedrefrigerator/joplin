@@ -5,6 +5,7 @@ import { Env } from '@joplin/lib/models/Setting';
 import execa = require('execa');
 import { msleep } from '@joplin/utils/time';
 import Logger from '@joplin/utils/Logger';
+import { strict as assert } from 'assert';
 
 const logger = Logger.create('Server');
 
@@ -23,15 +24,21 @@ const createApi = async (serverUrl: string, adminAuth: UserData) => {
 
 export default class Server {
 	private api_: JoplinServerApi|null = null;
-	private server_: execa.ExecaChildProcess<string>;
+	private server_: execa.ExecaChildProcess<string>|null = null;
 
 	public constructor(
-		serverBaseDirectory: string,
+		private readonly serverBaseDirectory_: string,
 		private readonly serverUrl_: string,
 		private readonly adminAuth_: UserData,
 	) {
-		const serverDir = resolve(serverBaseDirectory);
+		this.startServer_();
+	}
+
+	private startServer_() {
+		logger.info('Starting the server...');
+		const serverDir = resolve(this.serverBaseDirectory_);
 		const mainEntrypoint = join(serverDir, 'dist', 'app.js');
+
 		this.server_ = execa.node(mainEntrypoint, [
 			'--env', 'dev',
 		], {
@@ -73,6 +80,17 @@ export default class Server {
 	public async close() {
 		this.server_.cancel();
 		logger.info('Closed the server.');
+	}
+
+	public restart(restartDelay = 0) {
+		assert.ok(this.server_.kill(), 'should close the server');
+		if (restartDelay > 0) {
+			setTimeout(() => {
+				this.startServer_();
+			}, restartDelay);
+		} else {
+			this.startServer_();
+		}
 	}
 }
 

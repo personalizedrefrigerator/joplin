@@ -125,7 +125,7 @@ const main = async (options: Options) => {
 				if (actionsBeforeFullSync > 1) {
 					logger.info('Sub-step', subStepIndex, '/', actionsBeforeFullSync, '(in step', stepIndex, ')');
 				}
-				await doRandomAction(fuzzContext, client, clientPool);
+				await doRandomAction(fuzzContext, server, client, clientPool);
 			}
 			await client.sync();
 
