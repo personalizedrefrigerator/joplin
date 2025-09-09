@@ -642,7 +642,13 @@ export default class Note extends BaseItem {
 
 	public static async moveToFolder(noteId: string, folderId: string, saveOptions: SaveOptions|null = null) {
 		const Folder = this.getClass<typeof FolderClass>('Folder');
-		if (folderId === Folder.conflictFolderId()) throw new Error(_('Cannot move note to "%s" notebook', Folder.conflictFolderTitle()));
+
+		const movingToConflicts = folderId === Folder.conflictFolderId();
+		const movingToMisplaced = folderId === Folder.misplacedFolderId();
+		if (movingToConflicts || movingToMisplaced) {
+			const title = movingToConflicts ? Folder.conflictFolderTitle() : Folder.misplacedFolder().title;
+			throw new Error(_('Cannot move note to "%s" notebook', title));
+		}
 
 		// When moving a note to a different folder, the user timestamp is not
 		// updated. However updated_time is updated so that the note can be
