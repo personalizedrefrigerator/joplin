@@ -7,6 +7,8 @@ import type SettingType from '../Setting';
 import { AppType, SettingItemSubType, SettingItemType, SettingStorage, SyncStartupOperation, SettingItem } from './types';
 import { defaultListColumns } from '../../services/plugins/api/noteListType';
 import type { PluginSettings } from '../../services/plugins/PluginService';
+import type { PublicPrivateKeyPair } from '../../services/e2ee/ppk/ppk';
+import { EmptyObject } from '@joplin/utils/types';
 const ObjectUtils = require('../../ObjectUtils');
 const { toTitleCase } = require('../../string-utils.js');
 
@@ -28,6 +30,17 @@ export enum ScrollbarSize {
 	Small = 7,
 	Medium = 12,
 	Large = 24,
+}
+
+type CachedPpk = EmptyObject|{
+	timestamp: number;
+	ppk: PublicPrivateKeyPair;
+};
+
+export enum SurveyProgress {
+	NotStarted,
+	Started,
+	Dismissed,
 }
 
 const builtInMetadata = (Setting: typeof SettingType) => {
@@ -1141,6 +1154,13 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 			type: SettingItemType.Int,
 			public: false,
 		},
+		// Holds the no-longer-published PPK from before a migration. This allows accepting
+		// shares that target the old PPK.
+		'encryption.cachedPpk': {
+			value: {} as CachedPpk,
+			type: SettingItemType.Object,
+			public: false,
+		},
 
 		'sync.userId': {
 			value: '',
@@ -1872,6 +1892,21 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 			label: () => 'Security: Improve plugin panel, editor, and dialog security',
 			description: () => 'Improves the security of plugin WebViews. This may break some plugins.',
 			section: 'note',
+			isGlobal: true,
+		},
+
+		'survey.webClientEval2025.progress': {
+			value: SurveyProgress.NotStarted,
+			type: SettingItemType.Int,
+			public: false,
+			isEnum: true,
+			storage: SettingStorage.File,
+			options: () => ({
+				[SurveyProgress.NotStarted]: 'Not started',
+				[SurveyProgress.Started]: 'Started',
+				[SurveyProgress.Dismissed]: 'Done',
+			}),
+			label: () => 'Show web client evaluation survey',
 			isGlobal: true,
 		},
 
