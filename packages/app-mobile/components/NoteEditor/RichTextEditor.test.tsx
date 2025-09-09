@@ -23,6 +23,7 @@ import { MarkupLanguage } from '@joplin/renderer';
 import { NoteEntity } from '@joplin/lib/services/database/types';
 import { EditorSettings } from './types';
 import { pregQuote } from '@joplin/lib/string-utils';
+import { join } from 'path';
 
 
 interface WrapperProps {
@@ -338,6 +339,29 @@ describe('RichTextEditor', () => {
 			} else {
 				expect(editorContent).toBe(`![${renderedImage.alt}](:/${resource.id}) test`);
 			}
+		});
+	});
+
+	it('should preserve non-image attachments on edit', async () => {
+		const { note, resource } = await createNoteAndResource({ path: join(supportDir, 'sample.txt') });
+		let body = note.body;
+
+		const resources = await attachedResources(body);
+		render(<WrappedEditor
+			noteBody={note.body}
+			note={note}
+			onBodyChange={newBody => { body = newBody; }}
+			noteResources={resources}
+		/>);
+
+		const window = await getEditorWindow();
+		mockTyping(window, ' test');
+
+		await waitFor(async () => {
+			const editorContent = body.trim();
+			// TODO: At present, the resource title may be included in the final Markdown
+			// (e.g. as [sample.txt](:/id-here "sample.txt")).
+			expect(editorContent).toMatch(new RegExp(`^\\[sample\\.txt\\]\\(:/${pregQuote(resource.id)}.*\\) test$`));
 		});
 	});
 

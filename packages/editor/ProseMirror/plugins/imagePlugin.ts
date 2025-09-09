@@ -93,7 +93,8 @@ const imageSpec: NodeSpec = {
 	],
 	toDOM: (node) => {
 		const attrs = node.attrs as NodeAttrs;
-		return attrs.isPlaceholder ? [
+		// Continue to render non-images as placeholders for now, even after downloading:
+		return (attrs.isPlaceholder || !attrs.isImage) ? [
 			'span',
 			{
 				'data-resource-id': attrs.resourceId,
