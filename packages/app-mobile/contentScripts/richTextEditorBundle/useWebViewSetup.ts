@@ -125,9 +125,13 @@ const useSource = (props: UseSourceProps) => {
 				${rendererCss}
 				${markdownEditorCss}
 
-				/* Increase the size of the editor to make it easier to focus the editor. */
 				.prosemirror-editor {
+					/* Increase the size of the editor to make it easier to focus the editor. */
 					min-height: 75vh;
+
+					/* -apple-system-body allows for correct font scaling on iOS devices */
+					font: -apple-system-body;
+					font-family: var(--joplin-font-family, sans-serif);
 				}
 			`,
 			js: `
