@@ -13,9 +13,6 @@ import useCodeMirrorPlugins from './utils/useCodeMirrorPlugins';
 import Resource from '@joplin/lib/models/Resource';
 import { parseResourceUrl } from '@joplin/lib/urlUtils';
 const { isImageMimeType } = require('@joplin/lib/resourceUtils');
-import { _ } from '@joplin/lib/locale';
-import { PluginStates } from '@joplin/lib/services/plugins/reducer';
-import useCodeMirrorPlugins from './utils/useCodeMirrorPlugins';
 
 const logger = Logger.create('markdownEditor');
 
@@ -149,13 +146,6 @@ const useWebViewSetup = ({
 				} else {
 					return Resource.fullPath(item);
 				}
-			},
-			async onLocalize(text) {
-				const localizationFunction = _;
-				return localizationFunction(text);
-			},
-			async onEditorAdded() {
-				messenger.remoteApi.updatePlugins(codeMirrorPluginsRef.current);
 			},
 		};
 		const messenger = new RNToWebViewMessenger<MainProcessApi, EditorProcessApi>(
