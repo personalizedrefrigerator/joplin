@@ -133,7 +133,7 @@ export default class Folder extends BaseItem {
 					throw new Error('Invalid state: misplacedFolderId is virtual and should not be a misplaced folder');
 				}
 
-				await this.delete(id, options);
+				await this.delete(id, { ...options, toTrashParentId: '' });
 			}
 
 			return;
