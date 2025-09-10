@@ -130,8 +130,8 @@ const useOnRenderItem = (props: Props) => {
 
 		const isDeleted = item ? !!item.deleted_time : false;
 
-		if (!isDeleted && !Folder.isVirtualFolder(itemId)) {
-			if (itemType === BaseModel.TYPE_FOLDER && !item.encryption_applied) {
+		if (!isDeleted) {
+			if (itemType === BaseModel.TYPE_FOLDER && !item.encryption_applied && !Folder.isVirtualFolder(item.id)) {
 				menu.append(
 					new MenuItem(menuUtils.commandToStatefulMenuItem('newFolder', itemId)),
 				);
@@ -165,7 +165,7 @@ const useOnRenderItem = (props: Props) => {
 				);
 			}
 
-			if (itemType === BaseModel.TYPE_FOLDER && !item.encryption_applied) {
+			if (itemType === BaseModel.TYPE_FOLDER && !item.encryption_applied && !Folder.isVirtualFolder(item.id)) {
 				menu.append(new MenuItem({
 					...menuUtils.commandToStatefulMenuItem('moveToFolder', [itemId]),
 					// By default, enabled is based on the selected folder. However, the right-click
@@ -261,7 +261,7 @@ const useOnRenderItem = (props: Props) => {
 					);
 				}
 			}
-		} else if (isDeleted) {
+		} else {
 			if (itemType === BaseModel.TYPE_FOLDER) {
 				menu.append(
 					new MenuItem(menuUtils.commandToStatefulMenuItem('restoreFolder', itemId)),
