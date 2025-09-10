@@ -302,7 +302,10 @@ class Client implements ActionableClient {
 			this.bufferedChildProcessStderr_ = [];
 			process.stdout.write('CLI debug session. Enter a blank line or "exit" to exit.\n');
 			process.stdout.write('To review a transcript of all interactions with this client,\n');
-			process.stdout.write('enter "[transcript]".\n\n');
+			process.stdout.write('enter "[transcript]".\n');
+			process.stdout.write('To view logs, open\n');
+			process.stdout.write(`  ${join(this.profileDirectory, 'log.txt')}`);
+			process.stdout.write('\n\n');
 			process.stdout.write(cliProcessPromptString);
 
 			const isExitRequest = (input: string) => {
