@@ -19,6 +19,7 @@ import { spawn } from 'child_process';
 import AsyncActionQueue from '@joplin/lib/AsyncActionQueue';
 import { createInterface } from 'readline/promises';
 import Stream = require('stream');
+import time from '@joplin/lib/time';
 
 const logger = Logger.create('Client');
 
@@ -354,6 +355,8 @@ class Client implements ActionableClient {
 				this.bufferedChildProcessStderr_ = [];
 				const command = `${[commandName, ...args.map(arg => JSON.stringify(arg))].join(' ')}\n`;
 				logger.debug('exec', command);
+
+				this.transcript_.push(` (${time.formatDateToLocal(new Date(), 'HH:mm:ss')}) `);
 				this.childProcess_.writeStdin(command);
 			});
 		});
