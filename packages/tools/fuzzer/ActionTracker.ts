@@ -492,8 +492,12 @@ class ActionTracker {
 				const folderIndex = this.context_.randInt(0, folders.length);
 				return folders.length ? folders[folderIndex] : null;
 			},
-			randomNote: async () => {
-				const notes = await tracker.listNotes();
+			randomNote: async (options) => {
+				let notes = await tracker.listNotes();
+				if (!options.includeReadOnly) {
+					notes = notes.filter(note => !isReadOnly(note));
+				}
+
 				const noteIndex = this.context_.randInt(0, notes.length);
 				return notes.length ? notes[noteIndex] : null;
 			},
