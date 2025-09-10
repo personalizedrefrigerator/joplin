@@ -390,6 +390,21 @@ describe('models/Folder', () => {
 		expect((await Note.load(note3.id)).deleted_time).toBe(0);
 	});
 
+	it('should allow deleting all misplaced folders', async () => {
+		const invalidParent = 'aaaaaaaaaaaaaaaa0000000000000000';
+		const folder1 = await Folder.save({ title: 'Misplaced 1', parent_id: invalidParent });
+		const folder2 = await Folder.save({ title: 'Misplaced 2', parent_id: invalidParent });
+		const folder3 = await Folder.save({ title: 'Valid 1', parent_id: '' });
+		const folder4 = await Folder.save({ title: 'Valid 2', parent_id: folder3.id });
+
+		await Folder.delete(Folder.misplacedFolderId(), { toTrash: true, deleteChildren: true });
+
+		expect((await Folder.load(folder1.id)).deleted_time).toBeGreaterThan(0);
+		expect((await Folder.load(folder2.id)).deleted_time).toBeGreaterThan(0);
+		expect((await Folder.load(folder3.id)).deleted_time).toBe(0);
+		expect((await Folder.load(folder4.id)).deleted_time).toBe(0);
+	});
+
 	it('should delete and set the parent ID', async () => {
 		const folder1 = await Folder.save({});
 		const folder2 = await Folder.save({});

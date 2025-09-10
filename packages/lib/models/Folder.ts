@@ -122,7 +122,22 @@ export default class Folder extends BaseItem {
 		};
 
 		if (folderId === getTrashFolderId()) throw new Error('The trash folder cannot be deleted');
-		if (folderId === this.misplacedFolderId()) throw new Error('The misplaced folder (a virtual folder) cannot be deleted');
+		if (folderId === this.misplacedFolderId()) {
+			if (!options.deleteChildren) {
+				throw new Error('The misplaced folder (a virtual folder) cannot be deleted directly');
+			}
+
+			const misplacedFolderIds = await this.allMisplacedIds_();
+			for (const id of misplacedFolderIds) {
+				if (id === this.misplacedFolderId()) {
+					throw new Error('Invalid state: misplacedFolderId is virtual and should not be a misplaced folder');
+				}
+
+				await this.delete(id, options);
+			}
+
+			return;
+		}
 
 		const toTrash = !!options.toTrash;
 
@@ -439,6 +454,24 @@ export default class Folder extends BaseItem {
 		`;
 
 		return this.db().selectAll(sql, [folderId]);
+	}
+
+	private static async allMissingParent_() {
+		const sql = `
+			WITH folder_ids_as_parent_ids(parent_id) AS (
+				SELECT id as parent_id FROM folders
+			)
+			SELECT id, parent_id, deleted_time FROM folders
+			WHERE parent_id NOT IN folder_ids_as_parent_ids
+		`;
+
+		return await this.db().selectAll(sql);
+	}
+
+	private static async allMisplacedIds_() {
+		return (await this.allMissingParent_()).filter(
+			folder => folder.parent_id && folder.parent_id !== getTrashFolderId() && folder.parent_id !== this.conflictFolderId(),
+		).map(folder => folder.id);
 	}
 
 	public static async rootSharedFolders(activeShares: StateShare[]): Promise<FolderEntity[]> {
