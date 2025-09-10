@@ -247,7 +247,12 @@ class Command extends BaseCommand {
 			if (!ok) return;
 
 			logger.info('Unsharing folder', folder.id);
-			await ShareService.instance().unshareFolder(folder.id);
+			try {
+				await ShareService.instance().unshareFolder(folder.id);
+			} catch (error) {
+				this.stdout(`Unshare failed: ${error}`);
+				throw error;
+			}
 			await reg.scheduleSync();
 		};
 

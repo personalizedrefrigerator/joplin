@@ -583,7 +583,20 @@ class Client implements ActionableClient {
 	public async deleteAssociatedShare(id: string) {
 		await this.tracker_.deleteAssociatedShare(id);
 		logger.info('Unshare', id, '(from', this.label, ')');
-		await this.execCliCommand_('share', 'delete', '-f', id);
+
+		await retryWithCount(async () => {
+			const result = await this.execCliCommand_('share', 'delete', '-f', id);
+
+			if (result.stdout.trim().startsWith('Unshare failed')) {
+				throw new Error(`Failed with output: ${result.stdout}`);
+			}
+		}, {
+			count: 3,
+			delayOnFailure: (retryCount) => retryCount * Second,
+			onFail: ()=>{
+				logger.info('Retrying share deletion...');
+			},
+		});
 	}
 
 	public async moveItem(itemId: ItemId, newParentId: ItemId) {
