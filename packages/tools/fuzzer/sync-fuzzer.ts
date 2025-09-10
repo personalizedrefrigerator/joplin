@@ -75,10 +75,11 @@ const main = async (options: Options) => {
 	});
 
 	let clientPool: ClientPool|null = null;
+	let server: Server|null = null;
 
 	try {
 		const joplinServerUrl = 'http://localhost:22300/';
-		const server = new Server(options.serverPath, joplinServerUrl, {
+		server = new Server(options.serverPath, joplinServerUrl, {
 			email: 'admin@localhost',
 			password: env['FUZZER_SERVER_ADMIN_PASSWORD'] ?? 'admin',
 		});
@@ -145,6 +146,12 @@ const main = async (options: Options) => {
 		}
 	} catch (error) {
 		logger.error('ERROR', error);
+		if (server) {
+			const serverLogFilePath = join(__dirname, 'server-log.txt');
+			await server.saveLogToFile(serverLogFilePath);
+			logger.info('Saved server log to file:', serverLogFilePath);
+		}
+
 		if (clientPool) {
 			logger.info('Client information:\n', clientPool.helpText());
 			await openDebugSession(clientPool);

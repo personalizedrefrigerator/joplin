@@ -6,6 +6,7 @@ import execa = require('execa');
 import { msleep } from '@joplin/utils/time';
 import Logger from '@joplin/utils/Logger';
 import { strict as assert } from 'assert';
+import { writeFile } from 'fs/promises';
 
 const logger = Logger.create('Server');
 
@@ -25,6 +26,7 @@ const createApi = async (serverUrl: string, adminAuth: UserData) => {
 export default class Server {
 	private api_: JoplinServerApi|null = null;
 	private server_: execa.ExecaChildProcess<string>|null = null;
+	private log_: string[] = [];
 
 	public constructor(
 		private readonly serverBaseDirectory_: string,
@@ -48,6 +50,12 @@ export default class Server {
 			// For debugging:
 			// stderr: process.stderr,
 			// stdout: process.stdout,
+		});
+		this.server_.stdout.on('data', (chunk: Buffer) => {
+			this.log_.push(chunk.toString());
+		});
+		this.server_.stderr.on('data', (chunk: Buffer) => {
+			this.log_.push(chunk.toString());
 		});
 	}
 
@@ -91,6 +99,10 @@ export default class Server {
 		} else {
 			this.startServer_();
 		}
+	}
+
+	public saveLogToFile(path: string) {
+		return writeFile(path, this.log_.join(''));
 	}
 }
 
