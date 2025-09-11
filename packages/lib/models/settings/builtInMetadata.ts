@@ -1933,7 +1933,7 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 			section: 'note',
 		},
 
-		// Currently unused. For now, the mobile app only supports the Whisper voice typing provider.
+		// Deprecated and currently unused. For now, the mobile app only supports the Whisper voice typing provider.
 		'voiceTyping.preferredProvider': {
 			value: 'whisper-tiny',
 			type: SettingItemType.String,
@@ -1946,7 +1946,7 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 
 			options: () => {
 				return {
-					'vosk': 'Vosk',
+					'vosk': 'Vosk', // No longer supported
 					'whisper-tiny': 'Whisper',
 				};
 			},
