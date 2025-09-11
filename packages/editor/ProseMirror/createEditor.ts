@@ -33,12 +33,6 @@ interface ProseMirrorControl extends EditorControl {
 	getSettings(): EditorSettings;
 }
 
-
-interface ProseMirrorControl extends EditorControl {
-	getSettings(): EditorSettings;
-}
-
-
 const createEditor = async (
 	parentElement: HTMLElement,
 	props: EditorProps,
