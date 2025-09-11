@@ -1933,20 +1933,21 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 			section: 'note',
 		},
 
+		// Currently unused. For now, the mobile app only supports the Whisper voice typing provider.
 		'voiceTyping.preferredProvider': {
 			value: 'whisper-tiny',
 			type: SettingItemType.String,
-			public: true,
+			public: false,
 			appTypes: [AppType.Mobile],
-			label: () => _('Preferred voice typing provider'),
+			label: () => 'Preferred voice typing provider',
 			isEnum: true,
 			show: showVoiceTypingSettings,
 			section: 'note',
 
 			options: () => {
 				return {
-					'vosk': _('Vosk'),
-					'whisper-tiny': _('Whisper'),
+					'vosk': 'Vosk',
+					'whisper-tiny': 'Whisper',
 				};
 			},
 		},
