@@ -40,7 +40,7 @@ const SyncWizard: React.FC<Props> = ({ themeId, visible, dispatch }) => {
 		size={DialogSize.Small}
 		heading={_('Sync')}
 	>
-		<Text variant='headlineMedium'>{_('Select a synchronization option:')}</Text>
+		<Text variant='headlineMedium'>{_('Select a synchronisation provider:')}</Text>
 		<List.Item
 			title={_('Joplin Cloud')}
 			description={_('A synchronisation service built for Joplin.')}
