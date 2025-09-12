@@ -697,6 +697,8 @@ packages/app-mobile/components/SearchInput.js
 packages/app-mobile/components/SelectDateTimeDialog.js
 packages/app-mobile/components/SideMenu.js
 packages/app-mobile/components/SideMenuContentNote.js
+packages/app-mobile/components/SyncWizard/JoplinCloudIcon.js
+packages/app-mobile/components/SyncWizard/SyncWizard.js
 packages/app-mobile/components/TagEditor.test.js
 packages/app-mobile/components/TagEditor.js
 packages/app-mobile/components/TextInput.js
