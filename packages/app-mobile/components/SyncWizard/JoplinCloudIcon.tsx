@@ -3,8 +3,7 @@ import Svg, { SvgProps, G, Path, Defs, LinearGradient, Stop, ClipPath, Rect } fr
 
 const JoplinCloudIcon: React.FC<SvgProps> = props => {
 	return <Svg
-		width={84}
-		height={84}
+		viewBox='0 0 84 84'
 		fill='none'
 		{...props}
 	>

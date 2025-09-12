@@ -4,11 +4,10 @@ import { AppState } from '../../utils/types';
 import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
 import { useCallback } from 'react';
-import { Text, TouchableRipple } from 'react-native-paper';
+import { Icon, List, Text } from 'react-native-paper';
 import { _ } from '@joplin/lib/locale';
-import shim from '@joplin/lib/shim';
 import JoplinCloudIcon from './JoplinCloudIcon';
-import { View } from 'react-native';
+import NavService from '@joplin/lib/services/NavService';
 
 interface Props {
 	dispatch: Dispatch;
@@ -25,8 +24,14 @@ const SyncWizard: React.FC<Props> = ({ themeId, visible, dispatch }) => {
 	}, [dispatch]);
 
 	const onSelectSuggestedTarget = useCallback(async () => {
-		await shim.showErrorDialog('Not implemented');
-	}, []);
+		onDismiss();
+		await NavService.go('JoplinCloudLogin');
+	}, [onDismiss]);
+
+	const onSelectOtherTarget = useCallback(async () => {
+		onDismiss();
+		await NavService.go('Config', { sectionName: 'sync' });
+	}, [onDismiss]);
 
 	return <DismissibleDialog
 		themeId={themeId}
@@ -36,15 +41,18 @@ const SyncWizard: React.FC<Props> = ({ themeId, visible, dispatch }) => {
 		heading={_('Sync')}
 	>
 		<Text variant='headlineMedium'>{_('Select a synchronization option:')}</Text>
-		<TouchableRipple
+		<List.Item
+			title={_('Joplin Cloud')}
+			description={_('A synchronisation service built for Joplin.')}
+			left={_props => <JoplinCloudIcon style={{ width: 84 }}/>}
 			onPress={onSelectSuggestedTarget}
-			role='button'
-		>
-			<View style={{ display: 'flex', flexDirection: 'row' }}>
-				<JoplinCloudIcon/>
-				<Text>Joplin Cloud</Text>
-			</View>
-		</TouchableRipple>
+		/>
+		<List.Item
+			title={_('Other')}
+			description={_('View all synchronization options.')}
+			left={props => <Icon {...props} size={84} source='dots-horizontal-circle'/>}
+			onPress={onSelectOtherTarget}
+		/>
 	</DismissibleDialog>;
 };
 
