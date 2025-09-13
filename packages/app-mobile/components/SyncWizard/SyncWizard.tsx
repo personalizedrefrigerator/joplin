@@ -4,16 +4,88 @@ import { AppState } from '../../utils/types';
 import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
 import { useCallback } from 'react';
-import { Icon, List, Text } from 'react-native-paper';
+import { Icon, List, Text, TouchableRipple } from 'react-native-paper';
 import { _ } from '@joplin/lib/locale';
 import JoplinCloudIcon from './JoplinCloudIcon';
 import NavService from '@joplin/lib/services/NavService';
+import { Platform, StyleSheet, View } from 'react-native';
+import Setting, { Env } from '@joplin/lib/models/Setting';
 
 interface Props {
 	dispatch: Dispatch;
 	visible: boolean;
 	themeId: number;
 }
+
+const iconSize = 24;
+const styles = StyleSheet.create({
+	icon: {
+		width: iconSize,
+	},
+	titleContainer: {
+		flexDirection: 'row',
+		gap: 8,
+		paddingBottom: 6,
+		alignItems: 'center',
+	},
+	cardContent: {
+		padding: 12,
+	},
+	cardContentDisabled: {
+		opacity: 0.75,
+	},
+	disabledText: {
+		textAlign: 'right',
+	},
+	heading: {
+		marginBottom: 8,
+	},
+});
+
+interface SyncProviderProps {
+	title: string;
+	icon: ()=> React.ReactNode;
+	description: string;
+	onPress: ()=> void;
+	featuresList: string[];
+	disabled: boolean;
+}
+
+const SyncProvider: React.FC<SyncProviderProps> = props => {
+	return <TouchableRipple
+		role='button'
+		aria-disabled={props.disabled}
+		onPress={props.onPress}
+		disabled={props.disabled}
+	>
+		<View style={[styles.cardContent, props.disabled && styles.cardContentDisabled]}>
+			<View style={styles.titleContainer}>
+				{props.icon()}
+				<Text variant='titleMedium'>{props.title}{props.disabled ? ' (Not supported)' : ''}</Text>
+			</View>
+			{props.description && <Text variant='titleSmall'>{props.description}</Text>}
+			{props.featuresList.map((feature, index) => (
+				<List.Item
+					key={`feature-${index}`}
+					left={props => <Icon size={14} source='check' {...props}/>}
+					title={feature}
+				/>
+			))}
+		</View>
+	</TouchableRipple>;
+};
+
+const isJoplinCloudSupported = () => {
+	if (Platform.OS !== 'web') return true;
+
+	// At present, Joplin Cloud sync is not supported with self-hosted web apps. This may change
+	// in the future:
+	const supportedDomains = ['app.joplincloud.com'];
+	if (Setting.value('env') === Env.Dev) {
+		supportedDomains.push('localhost');
+	}
+	return supportedDomains.includes(location.hostname);
+};
 
 const SyncWizard: React.FC<Props> = ({ themeId, visible, dispatch }) => {
 	const onDismiss = useCallback(() => {
@@ -23,7 +95,7 @@ const SyncWizard: React.FC<Props> = ({ themeId, visible, dispatch }) => {
 		});
 	}, [dispatch]);
 
-	const onSelectSuggestedTarget = useCallback(async () => {
+	const onSelectJoplinCloud = useCallback(async () => {
 		onDismiss();
 		await NavService.go('JoplinCloudLogin');
 	}, [onDismiss]);
@@ -40,18 +112,28 @@ const SyncWizard: React.FC<Props> = ({ themeId, visible, dispatch }) => {
 		size={DialogSize.Small}
 		heading={_('Sync')}
 	>
-		<Text variant='headlineMedium'>{_('Select a synchronisation provider:')}</Text>
-		<List.Item
+		<Text variant='titleMedium' role='heading' style={styles.heading}>{
+			_('Joplin can synchronise your notes using various providers. Select one from the list below.')
+		}</Text>
+		<SyncProvider
 			title={_('Joplin Cloud')}
-			description={_('A synchronisation service built for Joplin.')}
-			left={_props => <JoplinCloudIcon style={{ width: 84 }}/>}
-			onPress={onSelectSuggestedTarget}
+			description={_('Joplin\'s own sync service. Also gives access to Joplin-specific features such as publishing notes or collaborating on notebooks with others.')}
+			featuresList={[
+				_('Sync your notes'),
+				_('Publish notes to the internet'),
+				_('Collaborate on notebooks with others'),
+			]}
+			icon={() => <JoplinCloudIcon style={styles.icon}/>}
+			onPress={onSelectJoplinCloud}
+			disabled={!isJoplinCloudSupported()}
 		/>
-		<List.Item
+		<SyncProvider
 			title={_('Other')}
-			description={_('View all synchronization options.')}
-			left={props => <Icon {...props} size={84} source='dots-horizontal-circle'/>}
+			description={_('Select one of the other supported sync targets.')}
+			icon={() => <Icon size={iconSize} source='dots-horizontal-circle'/>}
+			featuresList={[]}
 			onPress={onSelectOtherTarget}
+			disabled={false}
 		/>
 	</DismissibleDialog>;
 };
