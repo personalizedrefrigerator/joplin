@@ -141,7 +141,7 @@ const nodes = addDefaultToplevelAttributes({
 	...joplinEditableNodes,
 	...tableNodes({
 		tableGroup: 'block',
-		cellContent: 'inline*',
+		cellContent: 'block+',
 		cellAttributes: {},
 	}),
 	// Override the default `table` node to include the default toplevel attributes
