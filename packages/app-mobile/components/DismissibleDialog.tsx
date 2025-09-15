@@ -39,6 +39,9 @@ const useStyles = (themeId: number, containerStyle: ViewStyle, size: DialogSize)
 				justifyContent: 'space-between',
 				alignContent: 'center',
 			},
+			closeButton: {
+				margin: 0,
+			},
 			heading: {
 				alignSelf: 'center',
 			},
@@ -82,6 +85,7 @@ const DismissibleDialog: React.FC<Props> = props => {
 				icon='close'
 				accessibilityLabel={_('Close')}
 				onPress={props.onDismiss}
+				style={styles.closeButton}
 			/>
 		</View>
 	);
