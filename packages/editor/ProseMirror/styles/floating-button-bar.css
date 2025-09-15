@@ -1,0 +1,9 @@
+
+.floating-button-bar {
+	position: absolute;
+	z-index: 1;
+}
+
+.floating-button-bar.-hidden {
+	display: none;
+}
