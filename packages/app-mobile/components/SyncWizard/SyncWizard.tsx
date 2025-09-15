@@ -4,12 +4,13 @@ import { AppState } from '../../utils/types';
 import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
 import { useCallback } from 'react';
-import { Icon, List, Text, TouchableRipple } from 'react-native-paper';
+import { Icon, Text } from 'react-native-paper';
 import { _ } from '@joplin/lib/locale';
 import JoplinCloudIcon from './JoplinCloudIcon';
 import NavService from '@joplin/lib/services/NavService';
 import { Platform, StyleSheet, View } from 'react-native';
 import Setting, { Env } from '@joplin/lib/models/Setting';
+import CardButton from '../buttons/CardButton';
 
 interface Props {
 	dispatch: Dispatch;
@@ -30,15 +31,22 @@ const styles = StyleSheet.create({
 	},
 	cardContent: {
 		padding: 12,
-	},
-	cardContentDisabled: {
-		opacity: 0.75,
+		borderRadius: 14,
 	},
 	disabledText: {
 		textAlign: 'right',
 	},
 	heading: {
 		marginBottom: 8,
+	},
+	syncProviderCard: {
+		marginBottom: 8,
+	},
+	listItem: {
+		flexDirection: 'row',
+		gap: 8,
+		marginVertical: 6,
+		verticalAlign: 'middle',
 	},
 });
 
@@ -52,27 +60,24 @@ interface SyncProviderProps {
 }
 
 const SyncProvider: React.FC<SyncProviderProps> = props => {
-	return <TouchableRipple
-		role='button'
-		aria-disabled={props.disabled}
-		onPress={props.onPress}
+	return <CardButton
 		disabled={props.disabled}
+		style={styles.syncProviderCard}
+		onPress={props.onPress}
 	>
-		<View style={[styles.cardContent, props.disabled && styles.cardContentDisabled]}>
+		<View style={styles.cardContent}>
 			<View style={styles.titleContainer}>
 				{props.icon()}
 				<Text variant='titleMedium'>{props.title}{props.disabled ? ' (Not supported)' : ''}</Text>
 			</View>
 			{props.description && <Text variant='titleSmall'>{props.description}</Text>}
 			{props.featuresList.map((feature, index) => (
-				<List.Item
-					key={`feature-${index}`}
-					left={props => <Icon size={14} source='check' {...props}/>}
-					title={feature}
-				/>
+				<View key={`feature-${index}`} style={styles.listItem}>
+					<Icon size={14} source='check'/><Text>{feature}</Text>
+				</View>
 			))}
 		</View>
-	</TouchableRipple>;
+	</CardButton>;
 };
 
 const isJoplinCloudSupported = () => {
