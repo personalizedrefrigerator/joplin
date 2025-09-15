@@ -33,14 +33,8 @@ const styles = StyleSheet.create({
 		padding: 12,
 		borderRadius: 14,
 	},
-	disabledText: {
-		textAlign: 'right',
-	},
-	heading: {
-		marginBottom: 8,
-	},
 	syncProviderCard: {
-		marginBottom: 8,
+		marginBottom: 2,
 	},
 	listItem: {
 		flexDirection: 'row',
@@ -117,7 +111,7 @@ const SyncWizard: React.FC<Props> = ({ themeId, visible, dispatch }) => {
 		size={DialogSize.Small}
 		heading={_('Sync')}
 	>
-		<Text variant='titleMedium' role='heading' style={styles.heading}>{
+		<Text variant='titleMedium' role='heading'>{
 			_('Joplin can synchronise your notes using various providers. Select one from the list below.')
 		}</Text>
 		<SyncProvider
