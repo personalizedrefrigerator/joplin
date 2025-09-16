@@ -17,7 +17,7 @@ describe('detailsPlugin', () => {
 			'<details class="jop-noMdConv"><summary class="jop-noMdConv">Test</summary>',
 			'<p>Test...</p>',
 			'</details>',
-		].join('\n')));
+		].join('')));
 	});
 
 	it.each([
