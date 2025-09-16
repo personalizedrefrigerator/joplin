@@ -7,6 +7,9 @@ import Modal from './Modal';
 import { _ } from '@joplin/lib/locale';
 
 export enum DialogSize {
+	// Small width, auto-determined height
+	SmallResize = 'small-resize',
+
 	Small = 'small',
 
 	// Ideal for panels and dialogs that should be fullscreen even on large devices
@@ -58,6 +61,7 @@ const useStyles = (themeId: number, containerStyle: ViewStyle, size: DialogSize)
 				marginRight: 'auto',
 				paddingLeft: 6,
 				paddingRight: 6,
+				justifyContent: 'center',
 
 				...containerStyle,
 			},
@@ -66,7 +70,10 @@ const useStyles = (themeId: number, containerStyle: ViewStyle, size: DialogSize)
 				backgroundColor: theme.backgroundColor,
 				padding: 10,
 				width: '100%',
-				height: '100%',
+
+				...(size !== DialogSize.SmallResize ? {
+					height: '100%',
+				} : { }),
 			},
 		});
 	}, [themeId, windowSize.width, windowSize.height, containerStyle, size]);

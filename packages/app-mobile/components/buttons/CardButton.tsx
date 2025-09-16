@@ -26,7 +26,8 @@ const useStyles = (disabled: boolean) => {
 				margin: 0,
 				marginTop: 8,
 				padding: 0,
-				borderRadius: 14,
+				borderRadius: 12,
+				overflow: 'hidden',
 			},
 			card: disabled ? {
 				...baseCard,
