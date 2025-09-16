@@ -42,6 +42,12 @@ const styles = StyleSheet.create({
 		marginVertical: 6,
 		verticalAlign: 'middle',
 	},
+	syncWizardContainer: {
+		justifyContent: 'center',
+	},
+	syncWizardSurface: {
+		height: 'auto',
+	},
 });
 
 interface SyncProviderProps {
@@ -108,6 +114,8 @@ const SyncWizard: React.FC<Props> = ({ themeId, visible, dispatch }) => {
 		themeId={themeId}
 		visible={visible}
 		onDismiss={onDismiss}
+		containerStyle={styles.syncWizardContainer}
+		surfaceStyle={styles.syncWizardSurface}
 		size={DialogSize.Small}
 		heading={_('Sync')}
 	>

@@ -18,6 +18,7 @@ interface Props {
 	visible: boolean;
 	onDismiss: ()=> void;
 	containerStyle?: ViewStyle;
+	surfaceStyle?: ViewStyle;
 	children: React.ReactNode;
 	heading?: string;
 
@@ -100,7 +101,11 @@ const DismissibleDialog: React.FC<Props> = props => {
 			backgroundColor={theme.backgroundColorTransparent2}
 			transparent={true}
 		>
-			<Surface style={styles.dialogSurface} elevation={1}>
+			<Surface
+				style={[styles.dialogSurface, props.surfaceStyle]}
+				elevation={1}
+				testID='dialog-surface'
+			>
 				{closeButtonRow}
 				{props.children}
 			</Surface>
