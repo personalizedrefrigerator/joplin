@@ -205,8 +205,6 @@ const TagsBox: React.FC<TagsBoxProps> = props => {
 	</View>;
 };
 
-const normalizeTag = (tagText: string) => tagText?.trim()?.toLowerCase();
-
 const TagEditor: React.FC<Props> = props => {
 	const styles = useStyles(props.themeId, props.headerStyle);
 
@@ -238,9 +236,8 @@ const TagEditor: React.FC<Props> = props => {
 
 	const onRemoveTag = useCallback(async (title: string) => {
 		if (!title) return;
-
-		const normalizedTitle = normalizeTag(title);
-		const previousTagIndex = props.tags.findIndex(item => normalizeTag(item) === normalizedTitle);
+		const lowercaseTitle = title.toLowerCase();
+		const previousTagIndex = props.tags.findIndex(item => item.toLowerCase() === lowercaseTitle);
 		const targetTag = props.tags[previousTagIndex + 1] ?? props.tags[previousTagIndex - 1];
 		setAutofocusTag(targetTag);
 
@@ -248,7 +245,7 @@ const TagEditor: React.FC<Props> = props => {
 		// prevent focus from occasionally jumping away from the tag box.
 		await msleep(100);
 		AccessibilityInfo.announceForAccessibility(_('Removed tag: %s', title));
-		props.onTagsChange(props.tags.filter(tag => normalizeTag(tag) !== normalizedTitle));
+		props.onTagsChange(props.tags.filter(tag => tag.toLowerCase() !== lowercaseTitle));
 	}, [props.tags, props.onTagsChange]);
 
 	const onComboBoxSelect = useCallback((item: { title: string }) => {
@@ -256,16 +253,16 @@ const TagEditor: React.FC<Props> = props => {
 		return { willRemove: true };
 	}, [onAddTag]);
 
-	const allTagsNormalized = useMemo(() => {
+	const allTagsSetNormalized = useMemo(() => {
 		return new Set([
-			...props.allTags.map(tag => normalizeTag(tag.title)),
-			...props.tags.map(tag => normalizeTag(tag)),
+			...props.allTags.map(tag => tag.title?.trim()?.toLowerCase()),
+			...props.tags.map(tag => tag.trim().toLowerCase()),
 		]);
 	}, [props.allTags, props.tags]);
 
 	const onCanAddTag = useCallback((tag: string) => {
-		return !allTagsNormalized.has(normalizeTag(tag));
-	}, [allTagsNormalized]);
+		return !allTagsSetNormalized.has(tag.trim().toLowerCase());
+	}, [allTagsSetNormalized]);
 
 	const showAssociatedTags = props.mode === TagEditorMode.Large || props.tags.length > 0;
 

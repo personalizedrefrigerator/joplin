@@ -7,6 +7,9 @@ import Modal from './Modal';
 import { _ } from '@joplin/lib/locale';
 
 export enum DialogSize {
+	// Small width, auto-determined height
+	SmallResize = 'small-resize',
+
 	Small = 'small',
 
 	// Ideal for panels and dialogs that should be fullscreen even on large devices
@@ -20,6 +23,7 @@ interface Props {
 	containerStyle?: ViewStyle;
 	children: React.ReactNode;
 	heading?: string;
+	scrollOverflow?: boolean;
 
 	size: DialogSize;
 }
@@ -45,12 +49,13 @@ const useStyles = (themeId: number, containerStyle: ViewStyle, size: DialogSize)
 			heading: {
 				alignSelf: 'center',
 			},
+			modalBackground: {
+				justifyContent: 'center',
+			},
 			dialogContainer: {
 				maxHeight,
 				maxWidth,
 				width: '100%',
-				height: '100%',
-				flexShrink: 1,
 
 				// Center
 				marginLeft: 'auto',
@@ -65,7 +70,10 @@ const useStyles = (themeId: number, containerStyle: ViewStyle, size: DialogSize)
 				backgroundColor: theme.backgroundColor,
 				padding: 10,
 				width: '100%',
-				height: '100%',
+
+				...(size !== DialogSize.SmallResize ? {
+					height: '100%',
+				} : { }),
 			},
 		});
 	}, [themeId, windowSize.width, windowSize.height, containerStyle, size]);
@@ -96,9 +104,11 @@ const DismissibleDialog: React.FC<Props> = props => {
 			onDismiss={props.onDismiss}
 			onRequestClose={props.onDismiss}
 			containerStyle={styles.dialogContainer}
+			modalBackgroundStyle={styles.modalBackground}
 			animationType='fade'
 			backgroundColor={theme.backgroundColorTransparent2}
 			transparent={true}
+			scrollOverflow={props.scrollOverflow}
 		>
 			<Surface style={styles.dialogSurface} elevation={1}>
 				{closeButtonRow}

@@ -1458,7 +1458,7 @@ PODS:
     - Yoga
   - react-native-get-random-values (1.11.0):
     - React-Core
-  - react-native-image-picker (8.0.0):
+  - react-native-image-picker (8.2.1):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -1486,7 +1486,7 @@ PODS:
     - React-Core
   - react-native-netinfo (11.4.1):
     - React-Core
-  - react-native-quick-crypto (0.7.13):
+  - react-native-quick-crypto (0.7.17):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -1914,6 +1914,8 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
+  - RNSVG (15.13.0):
+    - React-Core
   - RNVectorIcons (10.2.0):
     - DoubleConversion
     - glog
@@ -2055,6 +2057,7 @@ DEPENDENCIES:
   - RNQuickAction (from `../node_modules/react-native-quick-actions`)
   - RNSecureRandom (from `../node_modules/react-native-securerandom`)
   - RNShare (from `../node_modules/react-native-share`)
+  - RNSVG (from `../node_modules/react-native-svg`)
   - RNVectorIcons (from `../node_modules/react-native-vector-icons`)
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
 
@@ -2278,6 +2281,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-securerandom"
   RNShare:
     :path: "../node_modules/react-native-share"
+  RNSVG:
+    :path: "../node_modules/react-native-svg"
   RNVectorIcons:
     :path: "../node_modules/react-native-vector-icons"
   Yoga:
@@ -2338,10 +2343,10 @@ SPEC CHECKSUMS:
   react-native-document-picker: da39c5e4f279d39c0356dca157b98f9dc349e5bb
   react-native-geolocation: ec15ffebc53790314885eb9e5f2132132fbc2600
   react-native-get-random-values: d16467cf726c618e9c7a8c3c39c31faa2244bbba
-  react-native-image-picker: 922b9ba90f144b5866d07d04b0fb2b4e9ab0ed75
+  react-native-image-picker: 7babe45e727db306b3f00d08c72eda3586d6e9c1
   react-native-image-resizer: 24c5d06fae2176dc0caed4b6396e02befb44064a
   react-native-netinfo: cec9c4e86083cb5b6aba0e0711f563e2fbbff187
-  react-native-quick-crypto: 988d8d57cd720dbe218272b60775a8e0210d0b80
+  react-native-quick-crypto: b475b71e7fa4dbf3446be55e8ad4ef2c58ac4f7f
   react-native-rsa-native: a7931cdda1f73a8576a46d7f431378c5550f0c38
   react-native-saf-x: 3f8b52fb8160d7322161dec02a564271cc8f4138
   react-native-safe-area-context: dde2052b903c11d677c320b599c3244021c34ce8
@@ -2391,6 +2396,7 @@ SPEC CHECKSUMS:
   RNQuickAction: c2c8f379e614428be0babe4d53a575739667744d
   RNSecureRandom: b64d263529492a6897e236a22a2c4249aa1b53dc
   RNShare: 675e8e4a84f0137baf33057cac8f7334b0bb4b98
+  RNSVG: 295a96bc43f2baa5958d64aeec9847a1d8ca7a3d
   RNVectorIcons: d53917643fddb261b22bd6d889776f336893622b
   SocketRocket: d4aabe649be1e368d1318fdf28a022d714d65748
   Yoga: c758bfb934100bb4bf9cbaccb52557cee35e8bdf
