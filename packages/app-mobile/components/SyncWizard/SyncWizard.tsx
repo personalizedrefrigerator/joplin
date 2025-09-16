@@ -106,6 +106,7 @@ const SyncWizard: React.FC<Props> = ({ themeId, visible, dispatch }) => {
 		visible={visible}
 		onDismiss={onDismiss}
 		size={DialogSize.SmallResize}
+		scrollOverflow={true}
 		heading={_('Sync')}
 	>
 		<Text variant='titleMedium' role='heading'>{

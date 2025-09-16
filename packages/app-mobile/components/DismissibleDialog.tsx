@@ -24,6 +24,7 @@ interface Props {
 	surfaceStyle?: ViewStyle;
 	children: React.ReactNode;
 	heading?: string;
+	scrollOverflow?: boolean;
 
 	size: DialogSize;
 }
@@ -107,6 +108,7 @@ const DismissibleDialog: React.FC<Props> = props => {
 			animationType='fade'
 			backgroundColor={theme.backgroundColorTransparent2}
 			transparent={true}
+			scrollOverflow={props.scrollOverflow}
 		>
 			<Surface
 				style={[styles.dialogSurface, props.surfaceStyle]}
