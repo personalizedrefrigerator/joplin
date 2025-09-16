@@ -21,7 +21,6 @@ interface Props {
 	visible: boolean;
 	onDismiss: ()=> void;
 	containerStyle?: ViewStyle;
-	surfaceStyle?: ViewStyle;
 	children: React.ReactNode;
 	heading?: string;
 	scrollOverflow?: boolean;
@@ -50,19 +49,19 @@ const useStyles = (themeId: number, containerStyle: ViewStyle, size: DialogSize)
 			heading: {
 				alignSelf: 'center',
 			},
+			modalBackground: {
+				justifyContent: 'center',
+			},
 			dialogContainer: {
 				maxHeight,
 				maxWidth,
 				width: '100%',
-				height: '100%',
-				flexShrink: 1,
 
 				// Center
 				marginLeft: 'auto',
 				marginRight: 'auto',
 				paddingLeft: 6,
 				paddingRight: 6,
-				justifyContent: 'center',
 
 				...containerStyle,
 			},
@@ -105,16 +104,13 @@ const DismissibleDialog: React.FC<Props> = props => {
 			onDismiss={props.onDismiss}
 			onRequestClose={props.onDismiss}
 			containerStyle={styles.dialogContainer}
+			modalBackgroundStyle={styles.modalBackground}
 			animationType='fade'
 			backgroundColor={theme.backgroundColorTransparent2}
 			transparent={true}
 			scrollOverflow={props.scrollOverflow}
 		>
-			<Surface
-				style={[styles.dialogSurface, props.surfaceStyle]}
-				elevation={1}
-				testID='dialog-surface'
-			>
+			<Surface style={styles.dialogSurface} elevation={1}>
 				{closeButtonRow}
 				{props.children}
 			</Surface>
