@@ -20,9 +20,6 @@ interface Props {
 
 const iconSize = 24;
 const styles = StyleSheet.create({
-	icon: {
-		width: iconSize,
-	},
 	titleContainer: {
 		flexDirection: 'row',
 		gap: 8,
@@ -122,7 +119,7 @@ const SyncWizard: React.FC<Props> = ({ themeId, visible, dispatch }) => {
 				_('Publish notes to the internet'),
 				_('Collaborate on notebooks with others'),
 			]}
-			icon={() => <JoplinCloudIcon style={styles.icon}/>}
+			icon={() => <JoplinCloudIcon width={iconSize} height={iconSize}/>}
 			onPress={onSelectJoplinCloud}
 			disabled={!isJoplinCloudSupported()}
 		/>
