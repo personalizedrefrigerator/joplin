@@ -22,12 +22,15 @@ const useStyles = (disabled: boolean) => {
 		// For the TouchableRipple to work on Android, the card needs a transparent background.
 		const baseCard = { backgroundColor: 'transparent' };
 		return StyleSheet.create({
-			cardContainer: {
+			cardOuterWrapper: {
 				margin: 0,
 				marginTop: 8,
 				padding: 0,
 				borderRadius: 12,
 				overflow: 'hidden',
+			},
+			cardInnerWrapper: {
+				width: '100%',
 			},
 			card: disabled ? {
 				...baseCard,
@@ -47,21 +50,23 @@ const CardButton: React.FC<Props> = props => {
 
 	const CardWrapper = containerIsButton ? TouchableRipple : View;
 	return (
-		<CardWrapper
-			accessibilityRole={containerIsButton ? 'button' : null}
-			accessible={containerIsButton}
-			onPress={props.onPress}
-			disabled={props.disabled}
-			style={[props.style, styles.cardContainer]}
-			testID={props.testID}
-		>
-			<Card
-				mode='outlined'
-				style={styles.card}
+		<View style={[styles.cardOuterWrapper, props.style]}>
+			<CardWrapper
+				accessibilityRole={containerIsButton ? 'button' : null}
+				accessible={containerIsButton}
+				onPress={props.onPress}
+				disabled={props.disabled}
+				style={styles.cardInnerWrapper}
+				testID={props.testID}
 			>
-				{props.children}
-			</Card>
-		</CardWrapper>
+				<Card
+					mode='outlined'
+					style={styles.card}
+				>
+					{props.children}
+				</Card>
+			</CardWrapper>
+		</View>
 	);
 };
 
