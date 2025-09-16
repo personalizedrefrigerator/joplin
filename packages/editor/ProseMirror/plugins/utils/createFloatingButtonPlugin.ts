@@ -3,18 +3,26 @@ import { LocalizationResult, OnLocalize } from '../../../types';
 import { EditorView } from 'prosemirror-view';
 import createButton from '../../utils/dom/createButton';
 import { getEditorApi } from '../joplinEditorApiPlugin';
+import { Node } from 'prosemirror-model';
 
 type LocalizeFunction = (_: OnLocalize)=> LocalizationResult;
 
 interface ButtonSpec {
 	label: LocalizeFunction;
-	command: Command;
+	command: (node: Node, offset: number)=> Command;
+}
+
+export enum ToolbarPosition {
+	TopLeftOutside,
+	TopRightInside,
 }
 
 class FloatingButtonBar {
 	private container_: HTMLElement;
 
-	public constructor(view: EditorView, private targetNode_: string, private buttons_: ButtonSpec[]) {
+	public constructor(
+		view: EditorView, private targetNode_: string, private buttons_: ButtonSpec[], private position_: ToolbarPosition,
+	) {
 		this.container_ = document.createElement('div');
 		this.container_.classList.add('floating-button-bar');
 
@@ -31,14 +39,17 @@ class FloatingButtonBar {
 		}
 
 		const findTargetNode = () => {
-			const anchor = view.state.selection.$anchor;
-			for (let i = 0; i <= anchor.depth; i++) {
-				const node = anchor.node(i);
-				if (node?.type?.name === this.targetNode_) {
-					return { node, offset: anchor.posAtIndex(0, i) };
+			type TargetNode = { offset: number; node: Node };
+			let target: TargetNode = null;
+			state.doc.nodesBetween(state.selection.from, state.selection.to, (node, offset) => {
+				if (node.type.name === this.targetNode_) {
+					target = { node, offset };
+					return false;
 				}
-			}
-			return null;
+				return true;
+			});
+
+			return target;
 		};
 
 		const target = findTargetNode();
@@ -47,7 +58,8 @@ class FloatingButtonBar {
 		} else {
 			this.container_.classList.remove('-hidden');
 
-			if (this.container_.children.length !== this.buttons_.length) {
+			const hasCreatedButtons = this.container_.children.length === this.buttons_.length;
+			if (!hasCreatedButtons) {
 				const { localize } = getEditorApi(view.state);
 				this.container_.replaceChildren(...this.buttons_.map(button => {
 					return createButton(
@@ -61,24 +73,33 @@ class FloatingButtonBar {
 				const button = this.container_.children[i] as HTMLButtonElement;
 				const buttonSpec = this.buttons_[i];
 				button.onclick = () => {
-					buttonSpec.command(view.state, view.dispatch);
+					buttonSpec.command(target.node, target.offset)(view.state, view.dispatch, view);
 				};
 			}
 
 			const position = view.coordsAtPos(target.offset);
-			// TODO: Reduce code duplication with linkTooltipPlugin.
 			// Fall back to document.body to support testing environments:
 			const parentBox = (this.container_.offsetParent ?? document.body).getBoundingClientRect();
 			const tooltipBox = this.container_.getBoundingClientRect();
-			this.container_.style.top = `${position.top - parentBox.top - tooltipBox.height}px`;
-			this.container_.style.left = `${Math.max(position.left, 0)}px`;
+
+			this.container_.style.left = '';
+			this.container_.style.right = '';
+
+			let top = position.top - parentBox.top;
+			if (this.position_ === ToolbarPosition.TopLeftOutside) {
+				top -= tooltipBox.height;
+				this.container_.style.left = `${Math.max(position.left - parentBox.left, 0)}px`;
+			} else if (this.position_ === ToolbarPosition.TopRightInside) {
+				this.container_.style.right = `${position.right}px`;
+			}
+			this.container_.style.top = `${top}px`;
 		}
 	}
 }
 
-const createFloatingButtonPlugin = (nodeName: string, actions: ButtonSpec[]) => {
+const createFloatingButtonPlugin = (nodeName: string, actions: ButtonSpec[], position: ToolbarPosition) => {
 	return new Plugin({
-		view: (view) => new FloatingButtonBar(view, nodeName, actions),
+		view: (view) => new FloatingButtonBar(view, nodeName, actions, position),
 	});
 };
 
