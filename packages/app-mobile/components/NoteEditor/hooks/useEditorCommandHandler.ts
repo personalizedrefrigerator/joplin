@@ -3,10 +3,11 @@ import { EditorControl } from '@joplin/editor/types';
 import useNowEffect from '@joplin/lib/hooks/useNowEffect';
 import commandDeclarations, { enabledCondition } from '../commandDeclarations';
 import Logger from '@joplin/utils/Logger';
+import { RefObject, useRef } from 'react';
 
 const logger = Logger.create('useEditorCommandHandler');
 
-const commandRuntime = (declaration: CommandDeclaration, editor: EditorControl) => {
+const commandRuntime = (declaration: CommandDeclaration, editor: RefObject<EditorControl>) => {
 	return {
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 		execute: async (_context: CommandContext, ...args: any[]) => {
@@ -22,24 +23,27 @@ const commandRuntime = (declaration: CommandDeclaration, editor: EditorControl) 
 				}
 			}
 
-			if (!(await editor.supportsCommand(commandName))) {
+			if (!(await editor.current.supportsCommand(commandName))) {
 				logger.warn('Command not supported by editor: ', commandName);
 				return;
 			}
 
-			return await editor.execCommand(commandName, ...args);
+			return await editor.current.execCommand(commandName, ...args);
 		},
 		enabledCondition: enabledCondition(declaration.name),
 	};
 };
 
 const useEditorCommandHandler = (editorControl: EditorControl) => {
+	const editorControlRef = useRef(editorControl);
+	editorControlRef.current = editorControl;
+
 	// useNowEffect: The command runtimes need to be registered before child components
 	// can render.
 	useNowEffect(() => {
 		const commandService = CommandService.instance();
 		for (const declaration of commandDeclarations) {
-			commandService.registerRuntime(declaration.name, commandRuntime(declaration, editorControl));
+			commandService.registerRuntime(declaration.name, commandRuntime(declaration, editorControlRef));
 		}
 
 		return () => {
