@@ -8,8 +8,7 @@ import { Icon, Text } from 'react-native-paper';
 import { _ } from '@joplin/lib/locale';
 import JoplinCloudIcon from './JoplinCloudIcon';
 import NavService from '@joplin/lib/services/NavService';
-import { Platform, StyleSheet, View } from 'react-native';
-import Setting, { Env } from '@joplin/lib/models/Setting';
+import { StyleSheet, View } from 'react-native';
 import CardButton from '../buttons/CardButton';
 
 interface Props {
@@ -71,18 +70,6 @@ const SyncProvider: React.FC<SyncProviderProps> = props => {
 	</CardButton>;
 };
 
-const isJoplinCloudSupported = () => {
-	if (Platform.OS !== 'web') return true;
-
-	// At present, Joplin Cloud sync is not supported with self-hosted web apps. This may change
-	// in the future:
-	const supportedDomains = ['app.joplincloud.com'];
-	if (Setting.value('env') === Env.Dev) {
-		supportedDomains.push('localhost');
-	}
-	return supportedDomains.includes(location.hostname);
-};
-
 const SyncWizard: React.FC<Props> = ({ themeId, visible, dispatch }) => {
 	const onDismiss = useCallback(() => {
 		dispatch({
@@ -122,7 +109,7 @@ const SyncWizard: React.FC<Props> = ({ themeId, visible, dispatch }) => {
 			]}
 			icon={() => <JoplinCloudIcon width={iconSize} height={iconSize}/>}
 			onPress={onSelectJoplinCloud}
-			disabled={!isJoplinCloudSupported()}
+			disabled={false}
 		/>
 		<SyncProvider
 			title={_('Other')}
