@@ -85,12 +85,19 @@ class FloatingButtonBar {
 			this.container_.style.left = '';
 			this.container_.style.right = '';
 
-			let top = position.top - parentBox.top;
+			const nodeElement = view.nodeDOM(target.offset);
+			const nodeBbox = nodeElement instanceof HTMLElement ? nodeElement.getBoundingClientRect() : {
+				...position,
+				width: 0,
+				height: 0,
+			};
+
+			let top = nodeBbox.top - parentBox.top;
 			if (this.position_ === ToolbarPosition.TopLeftOutside) {
 				top -= tooltipBox.height;
-				this.container_.style.left = `${Math.max(position.left - parentBox.left, 0)}px`;
+				this.container_.style.left = `${Math.max(nodeBbox.left - parentBox.left, 0)}px`;
 			} else if (this.position_ === ToolbarPosition.TopRightInside) {
-				this.container_.style.right = `${position.right}px`;
+				this.container_.style.right = `${parentBox.width - nodeBbox.width - nodeBbox.left}px`;
 			}
 			this.container_.style.top = `${top}px`;
 		}
