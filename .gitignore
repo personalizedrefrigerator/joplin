@@ -1085,7 +1085,9 @@ packages/editor/ProseMirror/plugins/linkTooltipPlugin.js
 packages/editor/ProseMirror/plugins/listPlugin.js
 packages/editor/ProseMirror/plugins/originalMarkupPlugin.js
 packages/editor/ProseMirror/plugins/searchPlugin.js
+packages/editor/ProseMirror/plugins/tablePlugin.js
 packages/editor/ProseMirror/plugins/utils/createExternalEditorPlugin.js
+packages/editor/ProseMirror/plugins/utils/createFloatingButtonPlugin.js
 packages/editor/ProseMirror/schema.js
 packages/editor/ProseMirror/styles.js
 packages/editor/ProseMirror/testing/createTestEditor.js
