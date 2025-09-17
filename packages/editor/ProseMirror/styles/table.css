@@ -2,7 +2,3 @@
 table .selectedCell {
 	outline: 2px solid var(--joplin-text-selection-color);
 }
-
-th > p:only-child, td > p:only-child {
-	margin: unset;
-}
