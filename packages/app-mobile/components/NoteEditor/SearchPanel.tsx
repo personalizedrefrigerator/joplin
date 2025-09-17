@@ -96,7 +96,6 @@ const useStyles = (theme: Theme) => {
 		const buttonStyle: ViewStyle = {
 			width: buttonSize,
 			height: buttonSize,
-			backgroundColor: theme.backgroundColor4,
 			alignItems: 'center',
 			justifyContent: 'center',
 			flexShrink: 1,
@@ -120,7 +119,6 @@ const useStyles = (theme: Theme) => {
 				flexShrink: 1,
 				minWidth: 0,
 				height: buttonSize,
-				backgroundColor: theme.backgroundColor4,
 				color: theme.color4,
 			},
 			buttonText: buttonTextStyle,
