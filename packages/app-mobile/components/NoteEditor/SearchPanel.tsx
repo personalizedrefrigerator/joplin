@@ -116,8 +116,9 @@ const useStyles = (theme: Theme) => {
 				backgroundColor: theme.backgroundColor3,
 			},
 			input: {
-				flexBasis: 0,
 				flexGrow: 1,
+				flexShrink: 1,
+				minWidth: 0,
 				height: buttonSize,
 				backgroundColor: theme.backgroundColor4,
 				color: theme.color4,
@@ -132,10 +133,11 @@ const useStyles = (theme: Theme) => {
 			},
 			labeledInput: {
 				flexGrow: 1,
+				flexShrink: 1,
 				flexDirection: 'row',
 				alignItems: 'center',
-				justifyContent: 'center',
 				marginLeft: 10,
+				justifyContent: 'flex-end',
 			},
 			panelContainer: {
 				// Workaround for the editor disappearing when dismissing search on Android.
@@ -143,6 +145,9 @@ const useStyles = (theme: Theme) => {
 				//
 				// It may be possible to remove this line after upgrading to React Native's New Architecture.
 				borderColor: 'transparent',
+			},
+			row: {
+				flexDirection: 'row',
 			},
 		});
 	}, [theme]);
@@ -343,7 +348,7 @@ export const SearchPanel = (props: SearchPanelProps) => {
 	);
 
 	const simpleLayout = (
-		<View style={{ flexDirection: 'row' }}>
+		<View style={styles.row}>
 			{ closeButton }
 			{ searchTextInput }
 			{ showDetailsButton }
@@ -353,15 +358,15 @@ export const SearchPanel = (props: SearchPanelProps) => {
 	);
 
 	const advancedLayout = (
-		<View style={{ flexDirection: 'column', alignItems: 'center' }}>
-			<View style={{ flexDirection: 'row' }}>
+		<View>
+			<View style={styles.row}>
 				{ closeButton }
 				{ labeledSearchInput }
 				{ hideDetailsButton }
 				{ toPrevButton }
 				{ toNextButton }
 			</View>
-			<View style={{ flexDirection: 'row' }}>
+			<View style={styles.row}>
 				{ regexpButton }
 				{ caseSensitiveButton }
 				{ labeledReplaceInput }
