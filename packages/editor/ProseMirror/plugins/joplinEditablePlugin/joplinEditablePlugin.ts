@@ -242,6 +242,7 @@ export default [
 		createFloatingButtonPlugin(nodeName, [
 			{
 				label: _ => _('Edit'),
+				className: 'edit-button',
 				command: (_node, offset) => editAt(offset),
 				showForNode: (node) => !node.attrs.readOnly,
 			},

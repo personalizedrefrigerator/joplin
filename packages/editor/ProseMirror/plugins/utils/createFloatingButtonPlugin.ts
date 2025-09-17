@@ -11,6 +11,7 @@ interface ButtonSpec {
 	label: LocalizeFunction;
 	command: (node: Node, offset: number)=> Command;
 	showForNode?: (node: Node)=> boolean;
+	className?: string;
 }
 
 export enum ToolbarPosition {
@@ -67,7 +68,12 @@ class FloatingButtonBar {
 						buttonSpec.label(localize),
 						() => { },
 					);
+
 					button.classList.add('action');
+					if (buttonSpec.className) {
+						button.classList.add(buttonSpec.className);
+					}
+
 					return button;
 				}));
 			}
@@ -75,17 +81,13 @@ class FloatingButtonBar {
 			for (let i = 0; i < this.buttons_.length; i++) {
 				const button = this.container_.children[i] as HTMLButtonElement;
 				const buttonSpec = this.buttons_[i];
+
+				const command = buttonSpec.command(target.node, target.offset);
 				button.onclick = () => {
-					buttonSpec.command(target.node, target.offset)(view.state, view.dispatch, view);
+					command(view.state, view.dispatch, view);
 				};
 
-				if (buttonSpec.showForNode && !buttonSpec.showForNode(target.node)) {
-					button.classList.add('-hidden');
-					button.disabled = true;
-				} else {
-					button.classList.remove('-hidden');
-					button.disabled = false;
-				}
+				button.disabled = !command(view.state);
 			}
 
 			const position = view.coordsAtPos(target.offset);
