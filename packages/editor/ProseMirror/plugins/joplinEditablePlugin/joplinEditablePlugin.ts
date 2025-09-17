@@ -221,7 +221,7 @@ class EditableSourceBlockView extends SelectableNodeView {
 
 const { plugin: externalEditorPlugin, hideEditor, editAt } = createExternalEditorPlugin({
 	canEdit: (node: Node) => {
-		return node.type.name === 'joplinEditableInline' || node.type.name === 'joplinEditableBlock';
+		return (node.type.name === 'joplinEditableInline' || node.type.name === 'joplinEditableBlock') && !node.attrs.readOnly;
 	},
 	showEditor: createEditorDialogForNode,
 });
@@ -244,7 +244,6 @@ export default [
 				label: _ => _('Edit'),
 				className: 'edit-button',
 				command: (_node, offset) => editAt(offset),
-				showForNode: (node) => !node.attrs.readOnly,
 			},
 		], ToolbarPosition.TopRightInside)
 	)),
