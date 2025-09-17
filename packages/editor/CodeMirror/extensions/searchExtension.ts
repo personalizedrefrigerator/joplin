@@ -38,8 +38,8 @@ const searchExtension = (onEvent: OnEventCallback, settings: EditorSettings): Ex
 			const matchFrom = firstMatchAfterSelection.value?.from;
 
 			if (matchFrom !== mainSelection.from) {
-				const targetMatch = firstMatchAfterSelection ?? getFirstMatchAfter(0);
-				if (targetMatch) {
+				const targetMatch = matchFrom ?? getFirstMatchAfter(0);
+				if (targetMatch && targetMatch.from >= 0 && targetMatch.to >= 0) {
 					return [
 						tr,
 						{
