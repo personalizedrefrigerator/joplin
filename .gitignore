@@ -1089,6 +1089,7 @@ packages/editor/ProseMirror/plugins/listPlugin.js
 packages/editor/ProseMirror/plugins/originalMarkupPlugin.js
 packages/editor/ProseMirror/plugins/searchPlugin.js
 packages/editor/ProseMirror/plugins/utils/createExternalEditorPlugin.js
+packages/editor/ProseMirror/plugins/utils/createFloatingButtonPlugin.js
 packages/editor/ProseMirror/schema.js
 packages/editor/ProseMirror/styles.js
 packages/editor/ProseMirror/testing/createTestEditor.js
@@ -1113,6 +1114,7 @@ packages/editor/ProseMirror/utils/postprocessEditorOutput.js
 packages/editor/ProseMirror/utils/preprocessEditorInput.test.js
 packages/editor/ProseMirror/utils/preprocessEditorInput.js
 packages/editor/ProseMirror/utils/sanitizeHtml.js
+packages/editor/ProseMirror/utils/selectFirstInstanceOfNode.js
 packages/editor/ProseMirror/utils/trimEmptyParagraphs.js
 packages/editor/ProseMirror/vendor/changedDescendants.js
 packages/editor/ProseMirror/vendor/splitBlockAs.js
