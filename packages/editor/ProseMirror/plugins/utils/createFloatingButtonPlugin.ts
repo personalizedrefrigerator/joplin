@@ -28,7 +28,11 @@ class FloatingButtonBar {
 		this.container_ = document.createElement('div');
 		this.container_.classList.add('floating-button-bar');
 
-		view.dom.parentElement.appendChild(this.container_);
+		// Prevent other elements (e.g. checkboxes, links) from being between the toolbar button and the
+		// target element. If the toolbar is instead included **after** the Rich Text Editor's main content,
+		// then all items included directly within the Rich Text Editor come before the toolbar in the focus
+		// order.
+		view.dom.parentElement.prepend(this.container_);
 		this.update(view, null);
 	}
 
