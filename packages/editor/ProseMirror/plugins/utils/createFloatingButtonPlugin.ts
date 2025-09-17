@@ -10,6 +10,7 @@ type LocalizeFunction = (_: OnLocalize)=> LocalizationResult;
 interface ButtonSpec {
 	label: LocalizeFunction;
 	command: (node: Node, offset: number)=> Command;
+	showForNode?: (node: Node)=> boolean;
 }
 
 export enum ToolbarPosition {
@@ -26,7 +27,7 @@ class FloatingButtonBar {
 		this.container_ = document.createElement('div');
 		this.container_.classList.add('floating-button-bar');
 
-		view.dom.parentElement.prepend(this.container_);
+		view.dom.parentElement.appendChild(this.container_);
 		this.update(view, null);
 	}
 
@@ -61,11 +62,13 @@ class FloatingButtonBar {
 			const hasCreatedButtons = this.container_.children.length === this.buttons_.length;
 			if (!hasCreatedButtons) {
 				const { localize } = getEditorApi(view.state);
-				this.container_.replaceChildren(...this.buttons_.map(button => {
-					return createButton(
-						button.label(localize),
+				this.container_.replaceChildren(...this.buttons_.map(buttonSpec => {
+					const button = createButton(
+						buttonSpec.label(localize),
 						() => { },
 					);
+					button.classList.add('action');
+					return button;
 				}));
 			}
 
@@ -75,6 +78,14 @@ class FloatingButtonBar {
 				button.onclick = () => {
 					buttonSpec.command(target.node, target.offset)(view.state, view.dispatch, view);
 				};
+
+				if (buttonSpec.showForNode && !buttonSpec.showForNode(target.node)) {
+					button.classList.add('-hidden');
+					button.disabled = true;
+				} else {
+					button.classList.remove('-hidden');
+					button.disabled = false;
+				}
 			}
 
 			const position = view.coordsAtPos(target.offset);
@@ -97,7 +108,7 @@ class FloatingButtonBar {
 				top -= tooltipBox.height;
 				this.container_.style.left = `${Math.max(nodeBbox.left - parentBox.left, 0)}px`;
 			} else if (this.position_ === ToolbarPosition.TopRightInside) {
-				this.container_.style.right = `${parentBox.width - nodeBbox.width - nodeBbox.left}px`;
+				this.container_.style.right = `${parentBox.width - nodeBbox.width - (nodeBbox.left - parentBox.left)}px`;
 			}
 			this.container_.style.top = `${top}px`;
 		}

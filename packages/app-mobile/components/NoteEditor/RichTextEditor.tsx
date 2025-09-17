@@ -44,6 +44,10 @@ function useCss(themeId: number, editorCss: string): string {
 				font-size: 13pt;
 				font-family: ${JSON.stringify(theme.fontFamily)}, sans-serif;
 			}
+
+			.RichTextEditor {
+				position: relative;
+			}
 		`;
 	}, [themeId, editorCss]);
 }

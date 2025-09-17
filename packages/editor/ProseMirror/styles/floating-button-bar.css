@@ -7,3 +7,7 @@
 .floating-button-bar.-hidden {
 	display: none;
 }
+
+.floating-button-bar > .action {
+	opacity: 0.9;
+}
