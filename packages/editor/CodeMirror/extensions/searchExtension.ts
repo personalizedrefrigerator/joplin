@@ -30,28 +30,26 @@ const searchExtension = (onEvent: OnEventCallback, settings: EditorSettings): Ex
 
 			const getFirstMatchAfter = (pos: number) => {
 				const iterator = query.getCursor(state, pos);
-				return iterator.next().value;
+				const result = iterator.next();
+				return !result.done ? result.value : null;
 			};
 
 			const mainSelection = state.selection.main;
 			const firstMatchAfterSelection = getFirstMatchAfter(mainSelection.from);
-			const matchFrom = firstMatchAfterSelection.value?.from;
+			const targetMatch = firstMatchAfterSelection ?? getFirstMatchAfter(0);
 
-			if (matchFrom !== mainSelection.from) {
-				const targetMatch = matchFrom ?? getFirstMatchAfter(0);
-				if (targetMatch && targetMatch.from >= 0 && targetMatch.to >= 0) {
-					return [
-						tr,
-						{
-							selection: EditorSelection.single(targetMatch.from, targetMatch.to),
-							effects: [
-								EditorView.scrollIntoView(targetMatch.from),
-								announceSearchMatch(tr.state, targetMatch),
-							],
-							userEvent: 'select.search',
-						},
-					];
-				}
+			if (targetMatch && targetMatch.from >= 0) {
+				return [
+					tr,
+					{
+						selection: EditorSelection.single(targetMatch.from, targetMatch.to),
+						effects: [
+							EditorView.scrollIntoView(targetMatch.from),
+							announceSearchMatch(tr.state, targetMatch),
+						],
+						userEvent: 'select.search',
+					},
+				];
 			}
 		}
 		return tr;
