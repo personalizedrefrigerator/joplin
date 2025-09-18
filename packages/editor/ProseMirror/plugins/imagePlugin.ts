@@ -6,6 +6,7 @@ import { getEditorApi } from './joplinEditorApiPlugin';
 import showModal from '../utils/dom/showModal';
 import createTextArea from '../utils/dom/createTextArea';
 import createExternalEditorPlugin, { OnHide } from './utils/createExternalEditorPlugin';
+import createFloatingButtonPlugin, { ToolbarPosition } from './utils/createFloatingButtonPlugin';
 
 // See the fold example for more information about
 // writing similar ProseMirror plugins:
@@ -93,7 +94,8 @@ const imageSpec: NodeSpec = {
 	],
 	toDOM: (node) => {
 		const attrs = node.attrs as NodeAttrs;
-		return attrs.isPlaceholder ? [
+		// Continue to render non-images as placeholders for now, even after downloading:
+		return (attrs.isPlaceholder || !attrs.isImage) ? [
 			'span',
 			{
 				'data-resource-id': attrs.resourceId,
@@ -186,11 +188,9 @@ class ImageView extends SelectableNodeView {
 		this.dom.classList.add('joplin-image-view');
 
 		this.dom.appendChild(this.createDom_(node));
-		const { localize: _ } = getEditorApi(view.state);
-
-		this.addActionButton(_('Label'), () => {
+		this.dom.ondblclick = () => {
 			editAltTextAt(getPosition())(view.state, view.dispatch, view);
-		});
+		};
 	}
 
 	private createDom_(node: Node) {
@@ -250,7 +250,6 @@ export const onResourceDownloaded = (view: EditorView, resourceId: string, newSr
 	view.dispatch(tr);
 };
 
-
 const imagePlugin = [
 	altTextEditorPlugin,
 	new Plugin({
@@ -262,6 +261,9 @@ const imagePlugin = [
 			},
 		},
 	}),
+	createFloatingButtonPlugin('image', [
+		{ label: _ => _('Label'), command: (_node, offset) => editAltTextAt(offset) },
+	], ToolbarPosition.TopRightInside),
 ];
 
 export default imagePlugin;
