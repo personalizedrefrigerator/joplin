@@ -6,7 +6,7 @@ import { themeStyle } from './global-style';
 import Modal from './Modal';
 import { _ } from '@joplin/lib/locale';
 
-export enum DialogSize {
+export enum DialogVariant {
 	// Small width, auto-determined height
 	SmallResize = 'small-resize',
 
@@ -25,29 +25,48 @@ interface Props {
 	heading?: string;
 	scrollOverflow?: boolean;
 
-	size: DialogSize;
+	size: DialogVariant;
 }
 
-const useStyles = (themeId: number, containerStyle: ViewStyle, size: DialogSize) => {
+const useStyles = (themeId: number, containerStyle: ViewStyle, size: DialogVariant) => {
 	const windowSize = useWindowDimensions();
 
 	return useMemo(() => {
 		const theme = themeStyle(themeId);
 
-		const maxWidth = size === DialogSize.Large ? windowSize.width : 500;
-		const maxHeight = size === DialogSize.Large ? windowSize.height : 700;
+		const maxWidth = size === DialogVariant.Large ? windowSize.width : 500;
+		const maxHeight = size === DialogVariant.Large ? windowSize.height : 700;
+
+		const dialogSizing: ViewStyle = {
+			width: '100%',
+
+			...(size !== DialogVariant.SmallResize ? {
+				height: '100%',
+			} : { }),
+		};
 
 		return StyleSheet.create({
-			closeButtonContainer: {
+			closeButtonRow: {
 				flexDirection: 'row',
 				justifyContent: 'space-between',
 				alignContent: 'center',
+				marginBottom: 8,
+			},
+			closeButtonRowWithHeading: {
+				marginBottom: 16,
 			},
 			closeButton: {
 				margin: 0,
 			},
-			heading: {
+			// Ensure that the close button is aligned with the center of the header:
+			// Make its container smaller and center it.
+			closeButtonWrapper: {
+				height: 18,
+				flexDirection: 'column',
+				justifyContent: 'center',
 				alignSelf: 'center',
+			},
+			heading: {
 			},
 			modalBackground: {
 				justifyContent: 'center',
@@ -55,7 +74,7 @@ const useStyles = (themeId: number, containerStyle: ViewStyle, size: DialogSize)
 			dialogContainer: {
 				maxHeight,
 				maxWidth,
-				width: '100%',
+				...dialogSizing,
 
 				// Center
 				marginLeft: 'auto',
@@ -66,14 +85,11 @@ const useStyles = (themeId: number, containerStyle: ViewStyle, size: DialogSize)
 				...containerStyle,
 			},
 			dialogSurface: {
-				borderRadius: 12,
+				borderRadius: 24,
 				backgroundColor: theme.backgroundColor,
-				padding: 10,
-				width: '100%',
-
-				...(size !== DialogSize.SmallResize ? {
-					height: '100%',
-				} : { }),
+				paddingHorizontal: 16,
+				paddingVertical: 24,
+				...dialogSizing,
 			},
 		});
 	}, [themeId, windowSize.width, windowSize.height, containerStyle, size]);
@@ -87,14 +103,16 @@ const DismissibleDialog: React.FC<Props> = props => {
 		<Text variant='headlineSmall' role='heading' style={styles.heading}>{props.heading}</Text>
 	) : null;
 	const closeButtonRow = (
-		<View style={styles.closeButtonContainer}>
+		<View style={[styles.closeButtonRow, !!props.heading && styles.closeButtonRowWithHeading]}>
 			{heading ?? <View/>}
-			<IconButton
-				icon='close'
-				accessibilityLabel={_('Close')}
-				onPress={props.onDismiss}
-				style={styles.closeButton}
-			/>
+			<View style={styles.closeButtonWrapper}>
+				<IconButton
+					icon='close'
+					accessibilityLabel={_('Close')}
+					onPress={props.onDismiss}
+					style={styles.closeButton}
+				/>
+			</View>
 		</View>
 	);
 
