@@ -543,10 +543,6 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 		if (Platform.OS === 'web') return;
 
 		const response = await checkPermissions(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION, {
-			rationale: {
-				message: _('In order to associate a geo-location with the note, the app needs your permission to access your location.\n\nYou may turn off this option at any time in the Configuration screen.'),
-				title: _('Permission needed'),
-			},
 			onRequestConfirmation: async () => {
 				const yesIndex = 0;
 				const result = await shim.showMessageBox(

@@ -1,4 +1,3 @@
-import { _ } from '@joplin/lib/locale';
 import Logger from '@joplin/utils/Logger';
 
 import { Platform, PermissionsAndroid, Permission } from 'react-native';
@@ -7,7 +6,7 @@ const logger = Logger.create('checkPermissions');
 type Rationale = {
 	title: string;
 	message: string;
-	buttonPositive?: string;
+	buttonPositive: string;
 	buttonNegative?: string;
 	buttonNeutral?: string;
 };
@@ -30,10 +29,7 @@ export default async (permissions: Permission, { rationale, onRequestConfirmatio
 			return PermissionsAndroid.RESULTS.NEVER_ASK_AGAIN;
 		}
 
-		const result = await PermissionsAndroid.request(permissions, {
-			buttonPositive: _('Ok'),
-			...rationale,
-		});
+		const result = await PermissionsAndroid.request(permissions, rationale);
 		logger.info('Requested permission:', result);
 		return result;
 	}
