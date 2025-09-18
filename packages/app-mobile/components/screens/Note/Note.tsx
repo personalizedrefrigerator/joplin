@@ -550,7 +550,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 			onRequestConfirmation: async () => {
 				const yesIndex = 0;
 				const result = await shim.showMessageBox(
-					_('Joplin supports saving the location at which notes were saved or created. Do you want to enable it? This can be changed at any time in settings.'),
+					_('Joplin supports saving the location at which notes are saved or created. Do you want to enable it? This can be changed at any time in settings.'),
 					{
 						buttons: [_('Yes'), _('No')],
 						title: _('Save geolocation?'),
