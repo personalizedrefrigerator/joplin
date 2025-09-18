@@ -1095,6 +1095,7 @@ packages/editor/CodeMirror/utils/markdown/renumberSelectedLists.js
 packages/editor/CodeMirror/utils/markdown/stripBlockquote.js
 packages/editor/CodeMirror/utils/markdown/toggleCheckboxAt.js
 packages/editor/CodeMirror/utils/setupVim.js
+packages/editor/CodeMirror/vendor/announceSearchMatch.js
 packages/editor/ProseMirror/commands.test.js
 packages/editor/ProseMirror/commands.js
 packages/editor/ProseMirror/createEditor.js
