@@ -447,8 +447,8 @@ const shim = {
 		await shim.showMessageBox(message, { type: MessageBoxType.Error });
 	},
 
-	showConfirmationDialog: async (message: string, options: ShowMessageBoxOptions = {}): Promise<boolean> => {
-		return await shim.showMessageBox(message, { type: MessageBoxType.Confirm, ...options }) === 0;
+	showConfirmationDialog: async (message: string): Promise<boolean> => {
+		return await shim.showMessageBox(message, { type: MessageBoxType.Confirm }) === 0;
 	},
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
