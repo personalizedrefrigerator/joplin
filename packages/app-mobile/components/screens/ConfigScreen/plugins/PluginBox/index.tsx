@@ -43,6 +43,9 @@ const styles = StyleSheet.create({
 	content: {
 		gap: 5,
 	},
+	cardContainer: {
+		marginTop: 8,
+	},
 });
 
 const PluginBox: React.FC<Props> = props => {
@@ -64,6 +67,7 @@ const PluginBox: React.FC<Props> = props => {
 
 	return (
 		<CardButton
+			style={styles.cardContainer}
 			onPress={props.onShowPluginInfo ? onPress : null}
 			testID='plugin-card'
 			disabled={!props.isCompatible}

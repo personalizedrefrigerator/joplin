@@ -24,7 +24,6 @@ const useStyles = (disabled: boolean) => {
 		return StyleSheet.create({
 			cardOuterWrapper: {
 				margin: 0,
-				marginTop: 8,
 				padding: 0,
 				borderRadius: 12,
 				overflow: 'hidden',

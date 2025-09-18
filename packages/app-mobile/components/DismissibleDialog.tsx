@@ -37,17 +37,36 @@ const useStyles = (themeId: number, containerStyle: ViewStyle, size: DialogVaria
 		const maxWidth = size === DialogVariant.Large ? windowSize.width : 500;
 		const maxHeight = size === DialogVariant.Large ? windowSize.height : 700;
 
+		const dialogSizing: ViewStyle = {
+			width: '100%',
+
+			...(size !== DialogVariant.SmallResize ? {
+				height: '100%',
+			} : { }),
+		};
+
 		return StyleSheet.create({
-			closeButtonContainer: {
+			closeButtonRow: {
 				flexDirection: 'row',
 				justifyContent: 'space-between',
 				alignContent: 'center',
+				marginBottom: 8,
+			},
+			closeButtonRowWithHeading: {
+				marginBottom: 16,
 			},
 			closeButton: {
 				margin: 0,
 			},
-			heading: {
+			// Ensure that the close button is aligned with the center of the header:
+			// Make its container smaller and center it.
+			closeButtonWrapper: {
+				height: 18,
+				flexDirection: 'column',
+				justifyContent: 'center',
 				alignSelf: 'center',
+			},
+			heading: {
 			},
 			modalBackground: {
 				justifyContent: 'center',
@@ -55,11 +74,7 @@ const useStyles = (themeId: number, containerStyle: ViewStyle, size: DialogVaria
 			dialogContainer: {
 				maxHeight,
 				maxWidth,
-				width: '100%',
-
-				...(size !== DialogVariant.SmallResize ? {
-					height: '100%',
-				} : { }),
+				...dialogSizing,
 
 				// Center
 				marginLeft: 'auto',
@@ -70,14 +85,11 @@ const useStyles = (themeId: number, containerStyle: ViewStyle, size: DialogVaria
 				...containerStyle,
 			},
 			dialogSurface: {
-				borderRadius: 12,
+				borderRadius: 24,
 				backgroundColor: theme.backgroundColor,
-				padding: 10,
-				width: '100%',
-
-				...(size !== DialogVariant.SmallResize ? {
-					height: '100%',
-				} : { }),
+				paddingHorizontal: 16,
+				paddingVertical: 24,
+				...dialogSizing,
 			},
 		});
 	}, [themeId, windowSize.width, windowSize.height, containerStyle, size]);
@@ -91,14 +103,16 @@ const DismissibleDialog: React.FC<Props> = props => {
 		<Text variant='headlineSmall' role='heading' style={styles.heading}>{props.heading}</Text>
 	) : null;
 	const closeButtonRow = (
-		<View style={styles.closeButtonContainer}>
+		<View style={[styles.closeButtonRow, !!props.heading && styles.closeButtonRowWithHeading]}>
 			{heading ?? <View/>}
-			<IconButton
-				icon='close'
-				accessibilityLabel={_('Close')}
-				onPress={props.onDismiss}
-				style={styles.closeButton}
-			/>
+			<View style={styles.closeButtonWrapper}>
+				<IconButton
+					icon='close'
+					accessibilityLabel={_('Close')}
+					onPress={props.onDismiss}
+					style={styles.closeButton}
+				/>
+			</View>
 		</View>
 	);
 

@@ -25,12 +25,18 @@ const styles = StyleSheet.create({
 		paddingBottom: 6,
 		alignItems: 'center',
 	},
+	subheading: {
+		marginBottom: 24,
+	},
 	cardContent: {
 		padding: 12,
 		borderRadius: 14,
 	},
-	syncProviderCard: {
-		marginBottom: 2,
+	syncProviderList: {
+		gap: 8,
+	},
+	featuresList: {
+		marginTop: 4,
 	},
 	listItem: {
 		flexDirection: 'row',
@@ -52,20 +58,22 @@ interface SyncProviderProps {
 const SyncProvider: React.FC<SyncProviderProps> = props => {
 	return <CardButton
 		disabled={props.disabled}
-		style={styles.syncProviderCard}
 		onPress={props.onPress}
+		testID='sync-provider-card'
 	>
 		<View style={styles.cardContent}>
 			<View style={styles.titleContainer}>
 				{props.icon()}
 				<Text variant='titleMedium'>{props.title}{props.disabled ? ' (Not supported)' : ''}</Text>
 			</View>
-			{props.description && <Text variant='titleSmall'>{props.description}</Text>}
-			{props.featuresList.map((feature, index) => (
-				<View key={`feature-${index}`} style={styles.listItem}>
-					<Icon size={14} source='check'/><Text>{feature}</Text>
-				</View>
-			))}
+			{props.description && <Text variant='bodyMedium'>{props.description}</Text>}
+			<View style={styles.featuresList}>
+				{props.featuresList.map((feature, index) => (
+					<View key={`feature-${index}`} style={styles.listItem}>
+						<Icon size={14} source='check'/><Text>{feature}</Text>
+					</View>
+				))}
+			</View>
 		</View>
 	</CardButton>;
 };
@@ -96,29 +104,31 @@ const SyncWizard: React.FC<Props> = ({ themeId, visible, dispatch }) => {
 		scrollOverflow={true}
 		heading={_('Sync')}
 	>
-		<Text variant='titleMedium' role='heading'>{
+		<Text variant='bodyLarge' role='heading' style={styles.subheading}>{
 			_('Joplin can synchronise your notes using various providers. Select one from the list below.')
 		}</Text>
-		<SyncProvider
-			title={_('Joplin Cloud')}
-			description={_('Joplin\'s own sync service. Also gives access to Joplin-specific features such as publishing notes or collaborating on notebooks with others.')}
-			featuresList={[
-				_('Sync your notes'),
-				_('Publish notes to the internet'),
-				_('Collaborate on notebooks with others'),
-			]}
-			icon={() => <JoplinCloudIcon width={iconSize} height={iconSize}/>}
-			onPress={onSelectJoplinCloud}
-			disabled={false}
-		/>
-		<SyncProvider
-			title={_('Other')}
-			description={_('Select one of the other supported sync targets.')}
-			icon={() => <Icon size={iconSize} source='dots-horizontal-circle'/>}
-			featuresList={[]}
-			onPress={onSelectOtherTarget}
-			disabled={false}
-		/>
+		<View style={styles.syncProviderList}>
+			<SyncProvider
+				title={_('Joplin Cloud')}
+				description={_('Joplin\'s own sync service. Also gives access to Joplin-specific features such as publishing notes or collaborating on notebooks with others.')}
+				featuresList={[
+					_('Sync your notes'),
+					_('Publish notes to the internet'),
+					_('Collaborate on notebooks with others'),
+				]}
+				icon={() => <JoplinCloudIcon width={iconSize} height={iconSize}/>}
+				onPress={onSelectJoplinCloud}
+				disabled={false}
+			/>
+			<SyncProvider
+				title={_('Other')}
+				description={_('Select one of the other supported sync targets.')}
+				icon={() => <Icon size={iconSize} source='dots-horizontal-circle'/>}
+				featuresList={[]}
+				onPress={onSelectOtherTarget}
+				disabled={false}
+			/>
+		</View>
 	</DismissibleDialog>;
 };
 
