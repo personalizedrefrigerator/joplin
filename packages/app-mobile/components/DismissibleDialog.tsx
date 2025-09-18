@@ -6,7 +6,7 @@ import { themeStyle } from './global-style';
 import Modal from './Modal';
 import { _ } from '@joplin/lib/locale';
 
-export enum DialogSize {
+export enum DialogVariant {
 	// Small width, auto-determined height
 	SmallResize = 'small-resize',
 
@@ -25,17 +25,17 @@ interface Props {
 	heading?: string;
 	scrollOverflow?: boolean;
 
-	size: DialogSize;
+	size: DialogVariant;
 }
 
-const useStyles = (themeId: number, containerStyle: ViewStyle, size: DialogSize) => {
+const useStyles = (themeId: number, containerStyle: ViewStyle, size: DialogVariant) => {
 	const windowSize = useWindowDimensions();
 
 	return useMemo(() => {
 		const theme = themeStyle(themeId);
 
-		const maxWidth = size === DialogSize.Large ? windowSize.width : 500;
-		const maxHeight = size === DialogSize.Large ? windowSize.height : 700;
+		const maxWidth = size === DialogVariant.Large ? windowSize.width : 500;
+		const maxHeight = size === DialogVariant.Large ? windowSize.height : 700;
 
 		return StyleSheet.create({
 			closeButtonContainer: {
@@ -71,7 +71,7 @@ const useStyles = (themeId: number, containerStyle: ViewStyle, size: DialogSize)
 				padding: 10,
 				width: '100%',
 
-				...(size !== DialogSize.SmallResize ? {
+				...(size !== DialogVariant.SmallResize ? {
 					height: '100%',
 				} : { }),
 			},

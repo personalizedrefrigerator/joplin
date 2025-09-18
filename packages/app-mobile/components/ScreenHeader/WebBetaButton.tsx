@@ -4,7 +4,7 @@ import { Text } from 'react-native-paper';
 import IconButton from '../IconButton';
 import { _ } from '@joplin/lib/locale';
 import { useCallback, useState } from 'react';
-import DismissibleDialog, { DialogSize } from '../DismissibleDialog';
+import DismissibleDialog, { DialogVariant } from '../DismissibleDialog';
 import { LinkButton } from '../buttons';
 import makeDiscourseDebugUrl from '@joplin/lib/makeDiscourseDebugUrl';
 import getPackageInfo from '../../utils/getPackageInfo';
@@ -65,7 +65,7 @@ const WebBetaButton: React.FC<Props> = props => {
 			/>
 			<DismissibleDialog
 				heading={_('Beta')}
-				size={DialogSize.Small}
+				size={DialogVariant.Small}
 				themeId={props.themeId}
 				visible={dialogVisible}
 				onDismiss={onHideDialog}

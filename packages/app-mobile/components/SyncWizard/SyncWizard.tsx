@@ -1,5 +1,5 @@
 import * as React from 'react';
-import DismissibleDialog, { DialogSize } from '../DismissibleDialog';
+import DismissibleDialog, { DialogVariant } from '../DismissibleDialog';
 import { AppState } from '../../utils/types';
 import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
@@ -92,7 +92,7 @@ const SyncWizard: React.FC<Props> = ({ themeId, visible, dispatch }) => {
 		themeId={themeId}
 		visible={visible}
 		onDismiss={onDismiss}
-		size={DialogSize.SmallResize}
+		size={DialogVariant.SmallResize}
 		scrollOverflow={true}
 		heading={_('Sync')}
 	>
