@@ -543,8 +543,14 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 		if (Platform.OS === 'web') return;
 
 		const response = await checkPermissions(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION, {
-			message: _('In order to associate a geo-location with the note, the app needs your permission to access your location.\n\nYou may turn off this option at any time in the Configuration screen.'),
-			title: _('Permission needed'),
+			rationale: {
+				message: _('In order to associate a geo-location with the note, the app needs your permission to access your location.\n\nYou may turn off this option at any time in the Configuration screen.'),
+				title: _('Permission needed'),
+			},
+			confirmMessage: {
+				title: _('Save geolocation?'),
+				message: _('Joplin supports saving the location at which notes were saved or created. Do you want to enable it? This can be changed at any time in settings.'),
+			},
 		});
 
 		// If the user simply pressed "Deny", we don't automatically switch it off because they might accept
