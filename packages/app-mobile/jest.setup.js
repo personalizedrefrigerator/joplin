@@ -106,7 +106,7 @@ jest.mock('react-native-zip-archive', () => {
 jest.mock('@react-native-documents/picker', () => ({ default: { } }));
 
 // Used by the renderer
-jest.doMock('react-native-vector-icons/Ionicons', () => {
+jest.doMock('@react-native-vector-icons/ionicons', () => {
 	return {
 		default: class extends require('react-native').View {
 			static getImageSourceSync = () => ({ uri: '' });
