@@ -57,6 +57,10 @@ const useStyles = (themeId: number, containerStyle: ViewStyle, size: DialogVaria
 				maxWidth,
 				width: '100%',
 
+				...(size !== DialogVariant.SmallResize ? {
+					height: '100%',
+				} : { }),
+
 				// Center
 				marginLeft: 'auto',
 				marginRight: 'auto',
