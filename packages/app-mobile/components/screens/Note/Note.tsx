@@ -547,9 +547,16 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 				message: _('In order to associate a geo-location with the note, the app needs your permission to access your location.\n\nYou may turn off this option at any time in the Configuration screen.'),
 				title: _('Permission needed'),
 			},
-			confirmMessage: {
-				title: _('Save geolocation?'),
-				message: _('Joplin supports saving the location at which notes were saved or created. Do you want to enable it? This can be changed at any time in settings.'),
+			onRequestConfirmation: async () => {
+				const yesIndex = 0;
+				const result = await shim.showMessageBox(
+					_('Joplin supports saving the location at which notes were saved or created. Do you want to enable it? This can be changed at any time in settings.'),
+					{
+						buttons: [_('Yes'), _('No')],
+						title: _('Save geolocation?'),
+					},
+				);
+				return result === yesIndex;
 			},
 		});
 

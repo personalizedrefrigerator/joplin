@@ -1,5 +1,4 @@
 import { _ } from '@joplin/lib/locale';
-import shim from '@joplin/lib/shim';
 import Logger from '@joplin/utils/Logger';
 
 import { Platform, PermissionsAndroid, Permission } from 'react-native';
@@ -13,17 +12,12 @@ type Rationale = {
 	buttonNeutral?: string;
 };
 
-interface ConfirmMessage {
-	title: string;
-	message: string;
-}
-
 interface Options {
 	rationale?: Rationale;
-	confirmMessage?: ConfirmMessage;
+	onRequestConfirmation?: ()=> Promise<boolean>;
 }
 
-export default async (permissions: Permission, { rationale, confirmMessage }: Options = {}) => {
+export default async (permissions: Permission, { rationale, onRequestConfirmation }: Options = {}) => {
 	// On iOS, permissions are prompted for by the system, so here we assume it's granted.
 	if (Platform.OS !== 'android') return PermissionsAndroid.RESULTS.GRANTED;
 
@@ -32,7 +26,7 @@ export default async (permissions: Permission, { rationale, confirmMessage }: Op
 	if (granted) {
 		return PermissionsAndroid.RESULTS.GRANTED;
 	} else {
-		if (confirmMessage && !await shim.showConfirmationDialog(confirmMessage.message, { title: confirmMessage.title })) {
+		if (onRequestConfirmation && !await onRequestConfirmation()) {
 			return PermissionsAndroid.RESULTS.NEVER_ASK_AGAIN;
 		}
 
