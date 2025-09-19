@@ -133,6 +133,13 @@ android {
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
         }
     }
+    packagingOptions {
+        excludes += [
+            // Avoids a conflict with expo-sqlite.
+            // See https://github.com/expo/expo/issues/34891
+            "**/react-native-quick-crypto/**/libcrypto.so",
+        ]
+    }
 }
 
 dependencies {

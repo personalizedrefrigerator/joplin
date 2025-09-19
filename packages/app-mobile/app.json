@@ -1,4 +1,19 @@
 {
   "name": "Joplin",
-  "displayName": "Joplin"
+  "displayName": "Joplin",
+  "plugins": [
+    [
+      "expo-sqlite",
+      {
+        "enableFTS": true,
+        "useSQLCipher": true
+      }
+    ]
+  ],
+  "android": {
+    "package": "com.personalizedrefrigerator.joplin"
+  },
+  "ios": {
+    "bundleIdentifier": "com.personalizedrefrigerator.joplin"
+  }
 }

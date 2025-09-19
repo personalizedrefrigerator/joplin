@@ -9260,6 +9260,7 @@ __metadata:
     expo-av: "npm:15.1.7"
     expo-camera: "npm:16.1.10"
     expo-local-authentication: "npm:16.0.5"
+    expo-sqlite: "npm:15.2.14"
     fast-deep-equal: "npm:3.1.3"
     fs-extra: "npm:11.2.0"
     gulp: "npm:4.0.2"
@@ -17678,6 +17679,13 @@ __metadata:
   dependencies:
     possible-typed-array-names: "npm:^1.0.0"
   checksum: 10/6c9da3a66caddd83c875010a1ca8ef11eac02ba15fb592dc9418b2b5e7b77b645fa7729380a92d9835c2f05f2ca1b6251f39b993e0feb3f1517c74fa1af02cab
+  languageName: node
+  linkType: hard
+
+"await-lock@npm:^2.2.2":
+  version: 2.2.2
+  resolution: "await-lock@npm:2.2.2"
+  checksum: 10/feb11f36768a8545879ed2d214b46aae484e6564ffa466af9212d5782897203770795cae01f813de04a46f66c0b8ee6bc690a0c435b04e00cad5a18ef0842e25
   languageName: node
   linkType: hard
 
@@ -26313,6 +26321,19 @@ __metadata:
   dependencies:
     invariant: "npm:^2.2.4"
   checksum: 10/c8992dcd7e9a3124c245beb65333add2c1955200724ac5b0a3fc5214f8da2b7779f6f88474b284be5dc9bc4030369c2189ea14200b97854758e086c0ee10c6bf
+  languageName: node
+  linkType: hard
+
+"expo-sqlite@npm:15.2.14":
+  version: 15.2.14
+  resolution: "expo-sqlite@npm:15.2.14"
+  dependencies:
+    await-lock: "npm:^2.2.2"
+  peerDependencies:
+    expo: "*"
+    react: "*"
+    react-native: "*"
+  checksum: 10/1b5e2ca65a7fa236f870722033f81090f83743ca013eda5478886e6ffa36ac209bb32a09759bcc3e6db91d231b369f59969362383bf103a47a49ae4cb2ec1b9b
   languageName: node
   linkType: hard
 

@@ -83,7 +83,7 @@ import PluginService from '@joplin/lib/services/plugins/PluginService';
 import initializeCommandService from '../utils/initializeCommandService';
 import PlatformImplementation from '../services/plugins/PlatformImplementation';
 import { DEFAULT_ROUTE } from '../utils/appDefaultState';
-import DatabaseDriverReactNative from '../utils/database-driver-react-native';
+import DatabaseDriverReactNative from './database/DatabaseDriverReactNative';
 import lockToSingleInstance from '../utils/lockToSingleInstance';
 import { AppState } from '../utils/types';
 import PerformanceLogger from '@joplin/lib/PerformanceLogger';
