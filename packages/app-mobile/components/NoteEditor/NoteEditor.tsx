@@ -313,12 +313,6 @@ function NoteEditor(props: Props) {
 			void CommandService.instance().execute('openItem', event.link);
 			break;
 		case EditorEventType.UpdateSearchDialog: {
-			if (event.searchState.dialogVisible) {
-				editorControl.searchControl.showSearch();
-			} else {
-				editorControl.searchControl.hideSearch();
-			}
-
 			const hasExternalChange = (
 				event.changeSources.length !== 1
 				|| event.changeSources[0] !== noteEditorSearchChangeSource
@@ -329,6 +323,12 @@ function NoteEditor(props: Props) {
 			// search state with an older value.
 			if (hasExternalChange) {
 				setSearchState(event.searchState);
+
+				if (event.searchState.dialogVisible) {
+					editorControl.searchControl.showSearch();
+				} else {
+					editorControl.searchControl.hideSearch();
+				}
 			}
 			break;
 		}
