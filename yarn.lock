@@ -9286,7 +9286,7 @@ __metadata:
     react-native-image-picker: "npm:8.2.1"
     react-native-localize: "npm:3.4.1"
     react-native-modal-datetime-picker: "npm:18.0.0"
-    react-native-paper: "npm:5.13.5"
+    react-native-paper: "npm:5.14.5"
     react-native-popup-menu: "npm:0.17.0"
     react-native-quick-actions: "npm:0.3.13"
     react-native-quick-crypto: "npm:0.7.17"
@@ -9747,7 +9747,7 @@ __metadata:
     node-os-utils: "npm:1.3.7"
     nodemailer: "npm:6.10.1"
     nodemon: "npm:3.1.10"
-    pg: "npm:8.16.0"
+    pg: "npm:8.16.2"
     pretty-bytes: "npm:5.6.0"
     prettycron: "npm:0.10.0"
     query-string: "npm:7.1.3"
@@ -9802,7 +9802,7 @@ __metadata:
     relative: "npm:3.0.2"
     request: "npm:2.88.2"
     rss: "npm:1.2.2"
-    sass: "npm:1.89.0"
+    sass: "npm:1.89.2"
     sharp: "npm:0.34.2"
     source-map-support: "npm:0.5.21"
     sqlite3: "npm:5.1.6"
@@ -39425,7 +39425,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"pg-cloudflare@npm:^1.2.5, pg-cloudflare@npm:^1.2.7":
+"pg-cloudflare@npm:^1.2.6, pg-cloudflare@npm:^1.2.7":
   version: 1.2.7
   resolution: "pg-cloudflare@npm:1.2.7"
   checksum: 10/3d171407cbce36436c461200666ba6bd884bfe98016972760a797cec850199b8024a40055d80322c5fc02909e1533a144e9b108a99f7d7e21d0c42612f9821fb
@@ -39446,7 +39446,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"pg-connection-string@npm:^2.9.0, pg-connection-string@npm:^2.9.1":
+"pg-connection-string@npm:^2.9.1":
   version: 2.9.1
   resolution: "pg-connection-string@npm:2.9.1"
   checksum: 10/40e9e9cd752121e72bff18d83e6c7ecda9056426815a84294de018569a319293c924704c8b7f0604fdc588835c7927647dea4f3c87a014e715bcbb17d794e9f0
@@ -39460,7 +39460,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"pg-pool@npm:^3.10.0, pg-pool@npm:^3.10.1":
+"pg-pool@npm:^3.10.1":
   version: 3.10.1
   resolution: "pg-pool@npm:3.10.1"
   peerDependencies:
@@ -39469,7 +39469,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"pg-protocol@npm:^1.10.0, pg-protocol@npm:^1.10.3":
+"pg-protocol@npm:^1.10.2, pg-protocol@npm:^1.10.3":
   version: 1.10.3
   resolution: "pg-protocol@npm:1.10.3"
   checksum: 10/31da85319084c03f403efee7accce9786964df82a7feb60e6bd77b71f1e622c74a2a644a2bc434389d0ab92e5abdeedea69ebdb53b1897d9f01d2a1f51a8a2fe
@@ -39489,14 +39489,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"pg@npm:8.16.0":
-  version: 8.16.0
-  resolution: "pg@npm:8.16.0"
+"pg@npm:8.16.2":
+  version: 8.16.2
+  resolution: "pg@npm:8.16.2"
   dependencies:
-    pg-cloudflare: "npm:^1.2.5"
-    pg-connection-string: "npm:^2.9.0"
-    pg-pool: "npm:^3.10.0"
-    pg-protocol: "npm:^1.10.0"
+    pg-cloudflare: "npm:^1.2.6"
+    pg-connection-string: "npm:^2.9.1"
+    pg-pool: "npm:^3.10.1"
+    pg-protocol: "npm:^1.10.2"
     pg-types: "npm:2.2.0"
     pgpass: "npm:1.0.5"
   peerDependencies:
@@ -39507,7 +39507,7 @@ __metadata:
   peerDependenciesMeta:
     pg-native:
       optional: true
-  checksum: 10/706ba6bbc79c397ae32ab144db2cc4e962a2dbad759ba539be0269731298efca8e0dbcd4de4ad14fb6e8b54c830b82f5da7d94ae4c32d853dea7e541b3a05f60
+  checksum: 10/e34056b3758e996cf24635412e62c4d44ac2fd41f1e389a0dc0346b9965d0dc763e4f72d30d4de497d2b3495ee0ec44c39e930ec464aa4622db257895955e184
   languageName: node
   linkType: hard
 
@@ -41789,9 +41789,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-paper@npm:5.13.5":
-  version: 5.13.5
-  resolution: "react-native-paper@npm:5.13.5"
+"react-native-paper@npm:5.14.5":
+  version: 5.14.5
+  resolution: "react-native-paper@npm:5.14.5"
   dependencies:
     "@callstack/react-theme-provider": "npm:^3.0.9"
     color: "npm:^3.1.2"
@@ -41800,8 +41800,7 @@ __metadata:
     react: "*"
     react-native: "*"
     react-native-safe-area-context: "*"
-    react-native-vector-icons: "*"
-  checksum: 10/a4e7a051d1ec9ccaa49249d439f650f137aba8f909dd2d0cf2f7526857b37069bab8eeab70d7f1f86b9f724c41fa38948d2f408d9c0d88c91fe5abf51c289b1e
+  checksum: 10/8e098974296ee272f2a81a71077c7b0f581407910064582203ed5b06b86fbcfbfa903675b44b902810aaa5ad65eb19f9ddf13909664b2310ac189d62525bcff4
   languageName: node
   linkType: hard
 
@@ -44187,9 +44186,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"sass@npm:1.89.0":
-  version: 1.89.0
-  resolution: "sass@npm:1.89.0"
+"sass@npm:1.89.2":
+  version: 1.89.2
+  resolution: "sass@npm:1.89.2"
   dependencies:
     "@parcel/watcher": "npm:^2.4.1"
     chokidar: "npm:^4.0.0"
@@ -44200,7 +44199,7 @@ __metadata:
       optional: true
   bin:
     sass: sass.js
-  checksum: 10/e8a5ce1a011fbbb20b454bd7db9d28527baae157c2a583c3ff68ca52f4fe97cec9a4ec18811e6509ef4199349286dce3c24c02a3536000d6e6107778f870435f
+  checksum: 10/7e9044f3c88b23580731de321cdf4c53fe6139395e2241fce7ff353c60a7cc8fe36b5eedc9701e092d2975f2c124e886379bb9ceab27b5ed053548f202b992b3
   languageName: node
   linkType: hard
 
