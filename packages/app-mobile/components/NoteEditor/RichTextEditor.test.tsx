@@ -422,6 +422,7 @@ describe('RichTextEditor', () => {
 		/>);
 
 		const window = await getEditorWindow();
+		// Select the math block to show the "edit" button.
 		mockSelectionMovement(window, '<Test:>'.length, '<Test:>$'.length);
 
 		const editButton = await findElement<HTMLButtonElement>('button.edit-button');
