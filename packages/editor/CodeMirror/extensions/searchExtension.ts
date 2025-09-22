@@ -19,7 +19,7 @@ const scanForFirstMatch = async (
 ) => {
 	if (cancelEvent.cancelled) return null;
 
-	const pageSizeChars = 100_000;
+	const pageSizeChars = 40_000;
 	let nextStartPosition = startPosition;
 
 	const nextCursor = () => {
