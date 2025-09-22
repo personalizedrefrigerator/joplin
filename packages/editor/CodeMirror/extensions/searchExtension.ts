@@ -33,9 +33,13 @@ const scanForFirstMatch = async (
 		return cursor;
 	};
 
-	for (let cursor = nextCursor(); !!cursor && !cancelEvent.cancelled; cursor = nextCursor()) {
+	const nextCursorAndWait = async () => {
+		const result = nextCursor();
 		await delayFunction();
+		return result;
+	};
 
+	for (let cursor = nextCursor(); !!cursor && !cancelEvent.cancelled; cursor = await nextCursorAndWait()) {
 		const match = cursor.next();
 		if (match?.value && match.value.to && match.value.from !== match.value.to) {
 			return match.value;
@@ -43,6 +47,81 @@ const scanForFirstMatch = async (
 	}
 	return null;
 };
+
+const autoScrollToMatchPlugin = ViewPlugin.fromClass(class {
+	private _lastCancelEvent: CancelEvent = { cancelled: false };
+	public constructor(private _view: EditorView) { }
+
+	private async handleScrollOnQueryChange_(
+		query: SearchQuery,
+		state: EditorState,
+		startState: EditorState,
+		cancelEvent: CancelEvent,
+	) {
+		const isOpenSearchPanelEvent = () => searchPanelOpen(startState) && !searchPanelOpen(state);
+		if (
+			!query || query.search.length === 0
+			// Avoid auto-scrolling to the search result when first opening the search panel
+			|| isOpenSearchPanelEvent()
+		) {
+			return;
+		}
+		const getFirstMatchAfter = async (pos: number) => {
+			const delayFunction = () => {
+				return new Promise<void>(resolve => {
+					requestAnimationFrame(() => resolve());
+				});
+			};
+			return await scanForFirstMatch(
+				state, query, pos, delayFunction, cancelEvent,
+			);
+		};
+
+		const mainSelection = state.selection.main;
+		const firstMatchAfterSelection = await getFirstMatchAfter(mainSelection.from);
+		const targetMatch = firstMatchAfterSelection ?? await getFirstMatchAfter(0);
+
+		if (targetMatch && targetMatch.from >= 0 && !cancelEvent.cancelled) {
+			this._view.dispatch({
+				selection: EditorSelection.single(targetMatch.from, targetMatch.to),
+				effects: [
+					EditorView.scrollIntoView(targetMatch.from),
+					announceSearchMatch(state, targetMatch),
+				],
+				userEvent: 'select.search',
+			});
+		}
+	}
+
+	public async update(update: ViewUpdate) {
+		let lastQueryUpdate: StateEffect<SearchQuery>|null = null;
+		for (const tr of update.transactions) {
+			const queryUpdate = tr.effects.find(e => e.is(setSearchQuery));
+			if (queryUpdate) {
+				lastQueryUpdate = queryUpdate;
+			}
+		}
+
+		const cancelOngoingSearch = () => {
+			this._lastCancelEvent.cancelled = true;
+		};
+
+		const newCancelEvent = () => {
+			cancelOngoingSearch();
+			const cancelEvent = { cancelled: false };
+			this._lastCancelEvent = cancelEvent;
+			return cancelEvent;
+		};
+
+		if (!searchPanelOpen(update.state)) {
+			cancelOngoingSearch();
+		} else if (lastQueryUpdate) {
+			void this.handleScrollOnQueryChange_(
+				lastQueryUpdate.value, update.state, update.startState, newCancelEvent(),
+			);
+		}
+	}
+});
 
 const searchExtension = (onEvent: OnEventCallback, settings: EditorSettings): Extension => {
 	const onSearchDialogUpdate = (state: EditorState) => {
@@ -67,81 +146,7 @@ const searchExtension = (onEvent: OnEventCallback, settings: EditorSettings): Ex
 			},
 		} : undefined),
 
-		ViewPlugin.fromClass(class {
-			private _lastCancelEvent: CancelEvent = { cancelled: false };
-			public constructor(private _view: EditorView) {
-			}
-
-			private async handleScrollOnQueryChange_(
-				query: SearchQuery,
-				state: EditorState,
-				startState: EditorState,
-				cancelEvent: CancelEvent,
-			) {
-				const wasSearchPanelOpen = searchPanelOpen(startState);
-				if (
-					!query || query.search.length === 0
-					// Avoid auto-scrolling to the search result when first opening the search panel
-					|| !wasSearchPanelOpen || !searchPanelOpen(state)
-				) {
-					return;
-				}
-				const getFirstMatchAfter = async (pos: number) => {
-					const delayFunction = () => {
-						return new Promise<void>(resolve => {
-							requestAnimationFrame(() => resolve());
-						});
-					};
-					return await scanForFirstMatch(
-						state, query, pos, delayFunction, cancelEvent,
-					);
-				};
-
-				const mainSelection = state.selection.main;
-				const firstMatchAfterSelection = await getFirstMatchAfter(mainSelection.from);
-				const targetMatch = firstMatchAfterSelection ?? await getFirstMatchAfter(0);
-
-				if (targetMatch && targetMatch.from >= 0 && !cancelEvent.cancelled) {
-					this._view.dispatch({
-						selection: EditorSelection.single(targetMatch.from, targetMatch.to),
-						effects: [
-							EditorView.scrollIntoView(targetMatch.from),
-							announceSearchMatch(state, targetMatch),
-						],
-						userEvent: 'select.search',
-					});
-				}
-			}
-
-			public async update(update: ViewUpdate) {
-				let lastQueryUpdate: StateEffect<SearchQuery>|null = null;
-				for (const tr of update.transactions) {
-					const queryUpdate = tr.effects.find(e => e.is(setSearchQuery));
-					if (queryUpdate) {
-						lastQueryUpdate = queryUpdate;
-					}
-				}
-
-				const cancelOngoingSearch = () => {
-					this._lastCancelEvent.cancelled = true;
-				};
-
-				const newCancelEvent = () => {
-					cancelOngoingSearch();
-					const cancelEvent = { cancelled: false };
-					this._lastCancelEvent = cancelEvent;
-					return cancelEvent;
-				};
-
-				if (!searchPanelOpen(update.state)) {
-					cancelOngoingSearch();
-				} else if (lastQueryUpdate) {
-					void this.handleScrollOnQueryChange_(
-						lastQueryUpdate.value, update.state, update.startState, newCancelEvent(),
-					);
-				}
-			}
-		}),
+		autoScrollToMatchPlugin,
 
 		EditorState.transactionExtender.of((tr) => {
 			if (tr.effects.some(e => e.is(setSearchQuery)) || searchPanelOpen(tr.state) !== searchPanelOpen(tr.startState)) {
