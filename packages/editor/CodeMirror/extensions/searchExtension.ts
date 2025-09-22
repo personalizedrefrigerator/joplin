@@ -23,7 +23,11 @@ const scanForFirstMatch = async (
 	let nextStartPosition = startPosition;
 
 	const nextCursor = () => {
-		let endPosition = Math.min(nextStartPosition + pageSizeChars, state.doc.length - 1);
+		if (nextStartPosition >= state.doc.length) {
+			return null;
+		}
+
+		let endPosition = Math.min(nextStartPosition + pageSizeChars, state.doc.length);
 		const endPositionLine = state.doc.lineAt(endPosition);
 		// Always search up to the end of the current line to avoid getting partial matches.
 		endPosition = endPositionLine.to;
