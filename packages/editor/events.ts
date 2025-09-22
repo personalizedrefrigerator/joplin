@@ -52,7 +52,6 @@ export interface EditorScrolledEvent {
 export interface UpdateSearchDialogEvent {
 	kind: EditorEventType.UpdateSearchDialog;
 	searchState: SearchState;
-	changeSources: string[];
 }
 
 export interface RequestEditLinkEvent {

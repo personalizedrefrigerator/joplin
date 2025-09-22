@@ -103,8 +103,8 @@ const useEditorControl = (
 			void editorRef.current.execCommand(command);
 		};
 
-		const setSearchStateCallback = (state: SearchState, changeSource: string) => {
-			editorRef.current.setSearchState(state, changeSource);
+		const setSearchStateCallback = (state: SearchState) => {
+			editorRef.current.setSearchState(state);
 			setSearchState(state);
 		};
 
@@ -311,14 +311,12 @@ function NoteEditor(props: Props) {
 			void CommandService.instance().execute('openItem', event.link);
 			break;
 		case EditorEventType.UpdateSearchDialog:
-			if (event.changeSources.length !== 1 || event.changeSources[0] !== 'mobileSearchPanel') {
-				setSearchState(event.searchState);
+			setSearchState(event.searchState);
 
-				if (event.searchState.dialogVisible) {
-					editorControl.searchControl.showSearch();
-				} else {
-					editorControl.searchControl.hideSearch();
-				}
+			if (event.searchState.dialogVisible) {
+				editorControl.searchControl.showSearch();
+			} else {
+				editorControl.searchControl.hideSearch();
 			}
 			break;
 		case EditorEventType.Remove:
