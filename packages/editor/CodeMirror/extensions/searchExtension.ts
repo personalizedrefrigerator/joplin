@@ -8,8 +8,6 @@ import announceSearchMatch from '../vendor/announceSearchMatch';
 
 type CancelEvent = { cancelled: boolean };
 
-export const searchChangeSourceEffect = StateEffect.define<string>({});
-
 const scanForFirstMatch = async (
 	state: EditorState,
 	query: SearchQuery,
