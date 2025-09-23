@@ -50,16 +50,17 @@ const scanForFirstMatch = async (
 	return null;
 };
 
+// Included in a transaction if it was caused by the auto-scroll-to-next-match logic
 const autoMatchAnnotation = StateEffect.define<boolean>();
 
-const autoMatchStartField = StateField.define<number>({
+const autoMatchSearchStartField = StateField.define<number>({
 	create: (state) => state.selection.main.from,
 	update: (lastValue, viewUpdate) => {
-		const wasAutoMatch = viewUpdate.effects.some(effect => effect.is(autoMatchAnnotation));
+		const changedByAutoMatch = viewUpdate.effects.some(effect => effect.is(autoMatchAnnotation));
 		const sameSelection = viewUpdate.startState.selection.eq(viewUpdate.newSelection);
+		const noSignificantChanges = sameSelection && !viewUpdate.docChanged;
 
-		if (wasAutoMatch || (sameSelection && !viewUpdate.docChanged)) {
-			// Keep the match start the same if the selection change came from automatch.
+		if (changedByAutoMatch || noSignificantChanges) {
 			return lastValue;
 		}
 		return viewUpdate.newSelection.main.from;
@@ -95,7 +96,7 @@ const autoScrollToMatchPlugin = ViewPlugin.fromClass(class {
 			);
 		};
 
-		const searchStart = state.field(autoMatchStartField);
+		const searchStart = state.field(autoMatchSearchStartField);
 		const firstMatchAfterSelection = await getFirstMatchAfter(searchStart);
 		const targetMatch = firstMatchAfterSelection ?? await getFirstMatchAfter(0);
 
@@ -144,7 +145,7 @@ const autoScrollToMatchPlugin = ViewPlugin.fromClass(class {
 		}
 	}
 }, {
-	provide: () => autoMatchStartField,
+	provide: () => autoMatchSearchStartField,
 });
 
 const searchExtension = (onEvent: OnEventCallback, settings: EditorSettings): Extension => {
