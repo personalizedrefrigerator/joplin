@@ -158,9 +158,10 @@ export const SearchPanel = (props: SearchPanelProps) => {
 	const state = props.searchState;
 	const control = props.searchControl;
 
-	const updateSearchState = (changedData: Partial<SearchState>) => {
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
+	const updateSearchState = (changedData: any) => {
 		const newState = { ...state, ...changedData };
-		control.setSearchState(newState, 'mobileSearchPanel');
+		control.setSearchState(newState);
 	};
 
 	// Creates a TextInput with the given parameters

@@ -15,7 +15,7 @@ export interface SearchControl {
 	replaceAll(): void;
 	showSearch(): void;
 	hideSearch(): void;
-	setSearchState(state: SearchState, changeSource: string): void;
+	setSearchState(state: SearchState): void;
 }
 
 // Controls for the entire editor (including dialogs)

@@ -98,7 +98,7 @@ export const initialize = async (
 			},
 		});
 	});
-	editor.setSearchState(initialSearch, 'initialSearch');
+	editor.setSearchState(initialSearch);
 
 	messenger.setLocalInterface({
 		editor,

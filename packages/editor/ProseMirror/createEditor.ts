@@ -264,8 +264,8 @@ const createEditor = async (
 
 			view.dispatch(transaction);
 		},
-		setSearchState: (newState: SearchState, changeSource = 'setSearchState') => {
-			view.dispatch(updateSearchState(view.state, newState, changeSource));
+		setSearchState: (newState: SearchState) => {
+			view.dispatch(updateSearchState(view.state, newState));
 		},
 		setContentScripts: (_plugins: ContentScriptData[]) => {
 			throw new Error('setContentScripts not implemented.');
