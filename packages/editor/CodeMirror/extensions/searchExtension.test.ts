@@ -65,7 +65,28 @@ describe('searchExtension', () => {
 		await setSearchTextAndWait('Match2', view);
 		expect(getSelectionFrom(view)).toBe(docText.indexOf('Match2'));
 
+		await setSearchTextAndWait('Match23', view);
+		expect(getSelectionFrom(view)).toBe(docText.indexOf('Match23'));
+	});
+
+	test('should preserve auto-match start position until selection is manually changed', async () => {
+		const view = await createEditor('Match1\nMatch2\nMatch23', 0);
+		const docText = view.state.doc.toString();
+
+		await setSearchTextAndWait('Match2', view);
+		expect(getSelectionFrom(view)).toBe(docText.indexOf('Match2'));
+
 		await setSearchTextAndWait('Match', view);
+		expect(getSelectionFrom(view)).toBe(docText.indexOf('Match'));
+
+		await setSearchTextAndWait('Match23', view);
+		expect(getSelectionFrom(view)).toBe(docText.indexOf('Match23'));
+
+		// Manually setting the selection should change the match start location
+		view.dispatch({
+			selection: EditorSelection.single('Match1\n'.length),
+		});
+		await setSearchTextAndWait('Match2', view);
 		expect(getSelectionFrom(view)).toBe(docText.indexOf('Match2'));
 	});
 

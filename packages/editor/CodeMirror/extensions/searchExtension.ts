@@ -1,4 +1,4 @@
-import { EditorSelection, EditorState, Extension, StateEffect } from '@codemirror/state';
+import { EditorSelection, EditorState, Extension, StateEffect, StateField } from '@codemirror/state';
 import { EditorView, ViewPlugin, ViewUpdate } from '@codemirror/view';
 import { EditorSettings, OnEventCallback } from '../../types';
 import getSearchState from '../utils/getSearchState';
@@ -52,6 +52,22 @@ const scanForFirstMatch = async (
 	return null;
 };
 
+const autoMatchAnnotation = StateEffect.define<boolean>();
+
+const autoMatchStartField = StateField.define<number>({
+	create: (state) => state.selection.main.from,
+	update: (lastValue, viewUpdate) => {
+		const wasAutoMatch = viewUpdate.effects.some(effect => effect.is(autoMatchAnnotation));
+		const sameSelection = viewUpdate.startState.selection.eq(viewUpdate.newSelection);
+
+		if (wasAutoMatch || (sameSelection && !viewUpdate.docChanged)) {
+			// Keep the match start the same if the selection change came from automatch.
+			return lastValue;
+		}
+		return viewUpdate.newSelection.main.from;
+	},
+});
+
 const autoScrollToMatchPlugin = ViewPlugin.fromClass(class {
 	private _lastCancelEvent: CancelEvent = { cancelled: false };
 	public constructor(private _view: EditorView) { }
@@ -81,14 +97,18 @@ const autoScrollToMatchPlugin = ViewPlugin.fromClass(class {
 			);
 		};
 
-		const mainSelection = state.selection.main;
-		const firstMatchAfterSelection = await getFirstMatchAfter(mainSelection.from);
+		const searchStart = state.field(autoMatchStartField);
+		const firstMatchAfterSelection = await getFirstMatchAfter(searchStart);
 		const targetMatch = firstMatchAfterSelection ?? await getFirstMatchAfter(0);
 
 		if (targetMatch && targetMatch.from >= 0 && !cancelEvent.cancelled) {
 			this._view.dispatch({
 				selection: EditorSelection.single(targetMatch.from, targetMatch.to),
 				effects: [
+					// Mark this transaction as an auto-match. This allows listeners to
+					// process the transaction differently.
+					autoMatchAnnotation.of(true),
+
 					EditorView.scrollIntoView(targetMatch.from),
 					announceSearchMatch(state, targetMatch),
 				],
@@ -125,6 +145,8 @@ const autoScrollToMatchPlugin = ViewPlugin.fromClass(class {
 			);
 		}
 	}
+}, {
+	provide: () => autoMatchStartField,
 });
 
 const searchExtension = (onEvent: OnEventCallback, settings: EditorSettings): Extension => {
