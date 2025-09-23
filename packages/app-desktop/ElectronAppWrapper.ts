@@ -238,10 +238,10 @@ export default class ElectronAppWrapper {
 			// this needs to be a non-transparent color:
 			backgroundColor: nativeTheme.shouldUseDarkColors ? '#333' : '#fff',
 			webPreferences: {
-				nodeIntegration: true,
+				nodeIntegration: false,
 				contextIsolation: false,
 				spellcheck: true,
-				enableRemoteModule: true,
+				enableRemoteModule: false,
 			},
 			// We start with a hidden window, which is then made visible depending on the showTrayIcon setting
 			// https://github.com/laurent22/joplin/issues/2031
@@ -407,6 +407,9 @@ export default class ElectronAppWrapper {
 					isGoingToExit = true;
 				} else {
 					event.preventDefault();
+					if (this.win_.isFullScreen()) {
+						this.win_.setFullScreen(false);
+					}
 					this.hide();
 				}
 			} else {
