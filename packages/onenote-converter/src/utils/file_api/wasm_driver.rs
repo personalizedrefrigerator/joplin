@@ -2,8 +2,8 @@
 use wasm_bindgen::prelude::wasm_bindgen;
 use wasm_bindgen::JsValue;
 use web_sys::js_sys::Uint8Array;
+use web_sys::js_sys;
 use super::FileApiDriver;
-use color_eyre::Result;
 use super::ApiResult;
 
 #[wasm_bindgen(module = "/node_functions.js")]
@@ -64,11 +64,26 @@ extern "C" {
     unsafe fn join_path(path_1: &str, path_2: &str) -> std::result::Result<JsValue, JsValue>;
 }
 
+fn handle_error(error: JsValue, source: &str) -> std::io::Error {
+	use std::io::ErrorKind;
+	use std::io::Error;
+
+	let error = js_sys::Error::from(error);
+	match error.name().to_string() {
+		_ => Error::new(ErrorKind::Other, String::from(format!("Err({}): {:?}", source, error)))
+	}
+}
+
 pub struct FileApiDriverImpl { }
 
 impl FileApiDriver for FileApiDriverImpl {
 	fn is_directory(&self, path: &str) -> ApiResult<bool> {
-		unsafe { is_directory(path.as_str()) }
+		match unsafe { is_directory(path) } {
+			Ok(is_dir) => Ok(is_dir),
+			Err(e) => Err(
+				handle_error(e, "checking is_directory")
+			),
+		}
 	}
 
 	fn read_dir(&self, path: &str) -> ApiResult<Vec<String>> {
@@ -78,29 +93,38 @@ impl FileApiDriver for FileApiDriverImpl {
 			Some(x) => x,
 			_ => String::new(),
 		};
-		Ok(result_str.split('\n').map(|s| s.to_string()).collect_vec())
+		Ok(result_str.split('\n').map(|s| s.to_string()).collect())
 	}
 
 	fn read_file(&self, path: &str) -> ApiResult<Vec<u8>> {
-		let Ok(file) = (unsafe { read_file(path) }) else {
-			return Err("Failed to read file.");
-		};
-		Uint8Array::new(&file).to_vec()
+		match unsafe { read_file(path) } {
+			Ok(file) => Ok(Uint8Array::new(&file).to_vec()),
+			Err(e) => Err(
+				handle_error(e, &format!("reading file {}", path))
+			),
+		}
 	}
 
 	fn write_file(&self, path: &str, data: &[u8]) -> ApiResult<()> {
-		unsafe { write_file(path, data) }?;
-		Ok()
+		if let Err(error) = unsafe { write_file(path, data) } {
+			Err(handle_error(error, &format!("writing file {}", path)))
+		} else {
+			Ok(())
+		}
 	}
 
-	fn exists(&self, path: &str) -> bool {
-		unsafe { exists(path) }
+	fn exists(&self, path: &str) -> ApiResult<bool> {
+		match unsafe { exists(path) } {
+			Ok(exists) => Ok(exists),
+			Err(e) => Err(handle_error(e, &format!("checking exists {}", path))),
+		}
 	}
 
 	fn make_dir(&self, path: &str) -> ApiResult<()> {
-		match unsafe { make_dir() } {
-			Ok() => Ok(),
-			Err(e) => std::io::Error::new(std::io::ErrorKind::Other, e.into()),
+		if let Err(error) = unsafe { make_dir(path) } {
+			Err(handle_error(error, &format!("mkdir {}", path)))
+		} else {
+			Ok(())
 		}
 	}
 
@@ -109,7 +133,7 @@ impl FileApiDriver for FileApiDriverImpl {
 		if file_name == "" {
 			None
 		} else {
-			file_name
+			Some(file_name)
 		}
 	}
     fn get_file_extension(&self, path: &str) -> String {
