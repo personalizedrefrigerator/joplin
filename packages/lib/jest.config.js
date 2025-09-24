@@ -5,7 +5,7 @@ const testPathIgnorePatterns = [
 	'<rootDir>/vendor/',
 ];
 
-if (!process.env.IS_CONTINUOUS_INTEGRATION) {
+if (!process.env.IS_CONTINUOUS_INTEGRATION && !process.env.DO_ONENOTE_CONVERTER_BUILD) {
 	// We don't require all developers to have Rust to run the project, so we skip this test if not running in CI
 	testPathIgnorePatterns.push('<rootDir>/services/interop/InteropService_Importer_OneNote.*');
 }

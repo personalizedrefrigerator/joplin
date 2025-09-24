@@ -4,11 +4,9 @@ use crate::parser::onenote::notebook::Notebook;
 use crate::parser::onenote::section::{Section, SectionEntry, SectionGroup};
 use crate::parser::onestore::parse_store;
 use crate::parser::reader::Reader;
-use crate::parser::utils::{exists, is_directory, read_dir, read_file};
 use crate::utils::utils::log;
-use crate::utils::{get_dir_name, get_file_extension, get_file_name, join_path};
+use crate::utils::get_fs_driver;
 use std::panic;
-use web_sys::js_sys::Uint8Array;
 
 pub(crate) mod content;
 pub(crate) mod embedded_file;
@@ -46,9 +44,7 @@ impl Parser {
     /// sections from the folder that the table of contents file is in.
     pub fn parse_notebook(&mut self, path: String) -> Result<Notebook> {
         log!("Parsing notebook: {:?}", path);
-        let file_content = unsafe { read_file(path.as_str()) }.unwrap();
-        let array = Uint8Array::new(&file_content);
-        let data = array.to_vec();
+        let data = get_fs_driver().read_file(&path)?;
         let packaging = OneStorePackaging::parse(&mut Reader::new(&data))?;
         let store = parse_store(&packaging)?;
 
@@ -56,29 +52,22 @@ impl Parser {
             return Err(ErrorKind::NotATocFile { file: path }.into());
         }
 
-        let base_dir = unsafe { get_dir_name(path.as_str()) }
-            .expect("base dir not found")
-            .as_string()
-            .unwrap();
+        let base_dir = get_fs_driver().get_dir_name(&path);
         let sections = notebook::parse_toc(store.data_root())?
             .iter()
             .map(|name| {
-                let result = unsafe { join_path(base_dir.as_str(), name) }
-                    .unwrap()
-                    .as_string()
-                    .unwrap();
-                return result;
+                get_fs_driver().join(&base_dir, name)
             })
             .filter(|p| !p.contains("OneNote_RecycleBin"))
             .filter(|p| {
-                let is_file = match unsafe { exists(p.as_str()) } {
+                let is_file = match get_fs_driver().exists(p) {
                     Ok(is_file) => is_file,
                     Err(_err) => false,
                 };
                 return is_file;
             })
             .map(|p| {
-                let is_dir = unsafe { is_directory(p.as_str()) }.unwrap();
+                let is_dir = get_fs_driver().is_directory(&p)?;
                 if !is_dir {
                     self.parse_section(p).map(SectionEntry::Section)
                 } else {
@@ -96,9 +85,7 @@ impl Parser {
     /// OneNote section.
     pub fn parse_section(&mut self, path: String) -> Result<Section> {
         log!("Parsing section: {:?}", path);
-        let file_content = unsafe { read_file(path.as_str()) }.unwrap();
-        let array = Uint8Array::new(&file_content);
-        let data = array.to_vec();
+        let data = get_fs_driver().read_file(path.as_str())?;
         let packaging = OneStorePackaging::parse(&mut Reader::new(&data))?;
         let store = parse_store(&packaging)?;
 
@@ -106,25 +93,18 @@ impl Parser {
             return Err(ErrorKind::NotASectionFile { file: path }.into());
         }
 
-        let filename = unsafe { get_file_name(path.as_str()) }
-            .expect("file without file name")
-            .as_string()
-            .unwrap();
+        let filename = get_fs_driver().get_file_name(&path)
+            .expect("file without file name");
         section::parse_section(store, filename)
     }
 
     fn parse_section_group(&mut self, path: String) -> Result<SectionGroup> {
-        let display_name = unsafe { get_file_name(path.as_str()) }
-            .expect("file without file name")
-            .as_string()
-            .unwrap();
+        let display_name = get_fs_driver().get_file_name(path.as_str())
+            .expect("file without file name");
 
-        if let Some(entries) = unsafe { read_dir(path.as_str()) } {
+        if let Ok(entries) = get_fs_driver().read_dir(&path) {
             for entry in entries {
-                let ext = unsafe { get_file_extension(entry.as_str()) }
-                    .unwrap()
-                    .as_string()
-                    .unwrap();
+                let ext = get_fs_driver().get_file_extension(&entry);
                 if ext == ".onetoc2" {
                     return self.parse_notebook(entry).map(|group| SectionGroup {
                         display_name,
