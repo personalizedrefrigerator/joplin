@@ -8,15 +8,10 @@ import { getImpersonatorAdminSessionId } from '../routes/admin/utils/users/imper
 import { onRequestComplete, onRequestStart } from '../utils/metrics';
 import { uuidgen } from '@joplin/lib/uuid';
 import { ApiError, ErrorTooManyRequests } from '../utils/errors';
-import { formatBytes } from '../utils/bytes';
+import { formatBytesSimple } from '../utils/bytes';
 
-export default async function(ctx: AppContext) {
-	const requestStartTime = Date.now();
-	const requestId = uuidgen();
-
-	onRequestStart(requestId);
-
-	const logRequestInfo = (error: Error | string | null) => {
+const logRequestInfo = (ctx: AppContext, requestStartTime: number, error: Error | string | null) => {
+	try {
 		const owner = ctx.joplin.owner;
 		// Technically this is not the total request duration because there are
 		// other middlewares but that should give a good approximation
@@ -26,7 +21,7 @@ export default async function(ctx: AppContext) {
 			const prefix: string[] = [];
 			if (owner) prefix.push(owner.id);
 			prefix.push(userIp(ctx));
-			if (typeof ctx.request?.length === 'number') prefix.push(formatBytes(ctx.request.length));
+			if (typeof ctx.request?.length === 'number') prefix.push(formatBytesSimple(ctx.request.length));
 			return prefix;
 		};
 
@@ -42,7 +37,17 @@ export default async function(ctx: AppContext) {
 			const line = getLinePrefix();
 			ctx.joplin.appLogger().error(`${line.join(': ')}:`, error);
 		}
-	};
+	} catch (logFunctionError) {
+		// eslint-disable-next-line no-console
+		console.error('[ERROR] Error in logging function!!', logFunctionError);
+	}
+};
+
+export default async function(ctx: AppContext) {
+	const requestStartTime = Date.now();
+	const requestId = uuidgen();
+
+	onRequestStart(requestId);
 
 	try {
 		const { response: responseObject, path } = await execRequest(ctx.joplin.routes, ctx);
@@ -68,7 +73,7 @@ export default async function(ctx: AppContext) {
 			ctx.response.body = [undefined, null].includes(responseObject) ? '' : responseObject;
 		}
 
-		logRequestInfo(null);
+		logRequestInfo(ctx, requestStartTime, null);
 	} catch (e) {
 		const error = e as ApiError;
 
@@ -78,9 +83,9 @@ export default async function(ctx: AppContext) {
 		ctx.response.status = error.httpCode ? error.httpCode : 500;
 
 		if (error.httpCode >= 400 && error.httpCode < 500) {
-			logRequestInfo(error.message);
+			logRequestInfo(ctx, requestStartTime, error.message);
 		} else {
-			logRequestInfo(error);
+			logRequestInfo(ctx, requestStartTime, error);
 		}
 
 		const responseFormat = routeResponseFormat(ctx);
