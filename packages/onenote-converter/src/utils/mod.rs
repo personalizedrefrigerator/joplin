@@ -90,7 +90,7 @@ pub mod utils {
         ( $( $t:tt )* ) => {
             use crate::utils::get_current_page;
 
-            web_sys::console::warn_1(&format!("OneNoteConverter: Warning around the following page: {}", get_current_page().unwrap()).into());
+            web_sys::console::warn_1(&format!("OneNoteConverter: Warning around the following page: {}", get_current_page()).into());
             web_sys::console::warn_2(&format!("OneNoteConverter: ").into(), &format!( $( $t )* ).into());
         }
     }
@@ -108,9 +108,7 @@ pub mod utils {
     macro_rules! log_warn {
         ( $( $t:tt )* ) => {
             use crate::utils::get_current_page;
-
-            println!("OneNoteConverter: Warning around the following page: {}", get_current_page().unwrap());
-            println!("OneNoteConverter: {}", &format!( $( $t )* ));
+            println!("Warning: {}, near {}", &format!( $( $t )* ), get_current_page());
         }
     }
 
@@ -144,8 +142,8 @@ pub fn set_current_page(page_name: String) {
     *current_page = Some(page_name.to_string());
 }
 
-pub fn get_current_page() -> Option<String> {
+pub fn get_current_page() -> String {
     let current_page = CURRENT_PAGE.lock().unwrap();
-    current_page.clone()
+    current_page.clone().unwrap_or_else(|| { String::from("[None]") })
 }
 
