@@ -6,7 +6,6 @@ use crate::parser::onestore::parse_store;
 use crate::parser::reader::Reader;
 use crate::utils::fs_driver;
 use crate::utils::utils::log;
-use std::panic;
 
 pub(crate) mod content;
 pub(crate) mod embedded_file;
@@ -24,7 +23,6 @@ pub(crate) mod rich_text;
 pub(crate) mod section;
 pub(crate) mod table;
 
-extern crate console_error_panic_hook;
 extern crate lazy_static;
 
 /// The OneNote file parser.
@@ -33,7 +31,6 @@ pub struct Parser;
 impl Parser {
     /// Create a new OneNote file parser.
     pub fn new() -> Parser {
-        panic::set_hook(Box::new(console_error_panic_hook::hook));
         Parser {}
     }
 
