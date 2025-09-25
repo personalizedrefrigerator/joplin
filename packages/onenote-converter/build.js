@@ -2,7 +2,7 @@ const { execCommand } = require('@joplin/utils');
 const yargs = require('yargs');
 
 async function main() {
-	if (!process.env.IS_CONTINUOUS_INTEGRATION && !process.env.DO_ONENOTE_CONVERTER_BUILD) {
+	if (!process.env.IS_CONTINUOUS_INTEGRATION) {
 		// eslint-disable-next-line no-console
 		console.info(
 			'----------------------------------------------------------------\n' +
