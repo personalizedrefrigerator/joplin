@@ -35,9 +35,6 @@ extern "C" {
 
 #[wasm_bindgen(module = "fs")]
 extern "C" {
-    // #[wasm_bindgen(js_name = writeFileSync, catch)]
-    // pub fn write_file(path: &str, data: &[u8]) -> std::result::Result<JsValue, JsValue>;
-
     #[wasm_bindgen(js_name = readFileSync, catch)]
     fn read_file(path: &str) -> std::result::Result<JsValue, JsValue>;
 
