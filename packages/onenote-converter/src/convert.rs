@@ -52,13 +52,22 @@ pub fn convert(path: &str, output_dir: &str, base_path: &str) -> Result<()> {
 #[cfg(test)]
 mod test {
 	use super::*;
+    use std::fs;
+
+    fn setup() {
+        if fs::exists("./test-output").unwrap() {
+            fs::remove_dir_all("./test-output").unwrap();
+        }
+        fs::create_dir("./test-output").unwrap();
+    }
 
     #[test]
     fn convert_simple() {
+        setup();
 		convert(
-			"./test-data/manual-export/Untitled Section.one",
+			"./assets/test-data/single-page/Untitled Section.one",
 			"./test-output/",
-			"./test-data/manual-export/"
+			"./assets/test-data/single-page/"
 		).unwrap()
     }
 }
