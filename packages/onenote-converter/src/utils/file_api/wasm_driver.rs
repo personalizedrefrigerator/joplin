@@ -1,10 +1,9 @@
-
+use super::ApiResult;
+use super::FileApiDriver;
 use wasm_bindgen::prelude::wasm_bindgen;
 use wasm_bindgen::JsValue;
-use web_sys::js_sys::Uint8Array;
 use web_sys::js_sys;
-use super::FileApiDriver;
-use super::ApiResult;
+use web_sys::js_sys::Uint8Array;
 
 #[wasm_bindgen(module = "/node_functions.js")]
 extern "C" {
@@ -65,84 +64,89 @@ extern "C" {
 }
 
 fn handle_error(error: JsValue, source: &str) -> std::io::Error {
-	use std::io::ErrorKind;
-	use std::io::Error;
+    use std::io::Error;
+    use std::io::ErrorKind;
 
-	let error = js_sys::Error::from(error);
-	match error.name().to_string() {
-		_ => Error::new(ErrorKind::Other, String::from(format!("Err({}): {:?}", source, error)))
-	}
+    let error = js_sys::Error::from(error);
+    match error.name().to_string() {
+        _ => Error::new(
+            ErrorKind::Other,
+            String::from(format!("Err({}): {:?}", source, error)),
+        ),
+    }
 }
 
-pub struct FileApiDriverImpl { }
+pub struct FileApiDriverImpl {}
 
 impl FileApiDriver for FileApiDriverImpl {
-	fn is_directory(&self, path: &str) -> ApiResult<bool> {
-		match unsafe { is_directory(path) } {
-			Ok(is_dir) => Ok(is_dir),
-			Err(e) => Err(
-				handle_error(e, "checking is_directory")
-			),
-		}
-	}
+    fn is_directory(&self, path: &str) -> ApiResult<bool> {
+        match unsafe { is_directory(path) } {
+            Ok(is_dir) => Ok(is_dir),
+            Err(e) => Err(handle_error(e, "checking is_directory")),
+        }
+    }
 
-	fn read_dir(&self, path: &str) -> ApiResult<Vec<String>> {
-		let result_ptr = unsafe { read_dir_js(path) }.unwrap();
+    fn read_dir(&self, path: &str) -> ApiResult<Vec<String>> {
+        let result_ptr = unsafe { read_dir_js(path) }.unwrap();
 
-		let result_str: String = match result_ptr.as_string() {
-			Some(x) => x,
-			_ => String::new(),
-		};
-		Ok(result_str.split('\n').map(|s| s.to_string()).collect())
-	}
+        let result_str: String = match result_ptr.as_string() {
+            Some(x) => x,
+            _ => String::new(),
+        };
+        Ok(result_str.split('\n').map(|s| s.to_string()).collect())
+    }
 
-	fn read_file(&self, path: &str) -> ApiResult<Vec<u8>> {
-		match unsafe { read_file(path) } {
-			Ok(file) => Ok(Uint8Array::new(&file).to_vec()),
-			Err(e) => Err(
-				handle_error(e, &format!("reading file {}", path))
-			),
-		}
-	}
+    fn read_file(&self, path: &str) -> ApiResult<Vec<u8>> {
+        match unsafe { read_file(path) } {
+            Ok(file) => Ok(Uint8Array::new(&file).to_vec()),
+            Err(e) => Err(handle_error(e, &format!("reading file {}", path))),
+        }
+    }
 
-	fn write_file(&self, path: &str, data: &[u8]) -> ApiResult<()> {
-		if let Err(error) = unsafe { write_file(path, data) } {
-			Err(handle_error(error, &format!("writing file {}", path)))
-		} else {
-			Ok(())
-		}
-	}
+    fn write_file(&self, path: &str, data: &[u8]) -> ApiResult<()> {
+        if let Err(error) = unsafe { write_file(path, data) } {
+            Err(handle_error(error, &format!("writing file {}", path)))
+        } else {
+            Ok(())
+        }
+    }
 
-	fn exists(&self, path: &str) -> ApiResult<bool> {
-		match unsafe { exists(path) } {
-			Ok(exists) => Ok(exists),
-			Err(e) => Err(handle_error(e, &format!("checking exists {}", path))),
-		}
-	}
+    fn exists(&self, path: &str) -> ApiResult<bool> {
+        match unsafe { exists(path) } {
+            Ok(exists) => Ok(exists),
+            Err(e) => Err(handle_error(e, &format!("checking exists {}", path))),
+        }
+    }
 
-	fn make_dir(&self, path: &str) -> ApiResult<()> {
-		if let Err(error) = unsafe { make_dir(path) } {
-			Err(handle_error(error, &format!("mkdir {}", path)))
-		} else {
-			Ok(())
-		}
-	}
+    fn make_dir(&self, path: &str) -> ApiResult<()> {
+        if let Err(error) = unsafe { make_dir(path) } {
+            Err(handle_error(error, &format!("mkdir {}", path)))
+        } else {
+            Ok(())
+        }
+    }
 
     fn get_file_name(&self, path: &str) -> Option<String> {
-		let file_name = unsafe { get_file_name(path) }.unwrap().as_string().unwrap();
-		if file_name == "" {
-			None
-		} else {
-			Some(file_name)
-		}
-	}
+        let file_name = unsafe { get_file_name(path) }.unwrap().as_string().unwrap();
+        if file_name == "" {
+            None
+        } else {
+            Some(file_name)
+        }
+    }
     fn get_file_extension(&self, path: &str) -> String {
-		unsafe { get_file_extension(path) }.unwrap().as_string().unwrap()
-	}
+        unsafe { get_file_extension(path) }
+            .unwrap()
+            .as_string()
+            .unwrap()
+    }
     fn get_dir_name(&self, path: &str) -> String {
-		unsafe { get_dir_name(path) }.unwrap().as_string().unwrap()
-	}
+        unsafe { get_dir_name(path) }.unwrap().as_string().unwrap()
+    }
     fn join(&self, path_1: &str, path_2: &str) -> String {
-		unsafe { join_path(path_1, path_2) }.unwrap().as_string().unwrap()
-	}
+        unsafe { join_path(path_1, path_2) }
+            .unwrap()
+            .as_string()
+            .unwrap()
+    }
 }

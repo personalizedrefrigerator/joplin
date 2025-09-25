@@ -3,8 +3,8 @@ use color_eyre::eyre::Result;
 use std::panic;
 use wasm_bindgen::prelude::wasm_bindgen;
 
-use crate::utils::{utils::log_warn, utils::log};
 use crate::convert::convert;
+use crate::utils::{utils::log, utils::log_warn};
 
 mod convert;
 mod notebook;

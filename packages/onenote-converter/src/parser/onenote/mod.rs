@@ -4,8 +4,8 @@ use crate::parser::onenote::notebook::Notebook;
 use crate::parser::onenote::section::{Section, SectionEntry, SectionGroup};
 use crate::parser::onestore::parse_store;
 use crate::parser::reader::Reader;
-use crate::utils::utils::log;
 use crate::utils::get_fs_driver;
+use crate::utils::utils::log;
 use std::panic;
 
 pub(crate) mod content;
@@ -55,9 +55,7 @@ impl Parser {
         let base_dir = get_fs_driver().get_dir_name(&path);
         let sections = notebook::parse_toc(store.data_root())?
             .iter()
-            .map(|name| {
-                get_fs_driver().join(&base_dir, name)
-            })
+            .map(|name| get_fs_driver().join(&base_dir, name))
             .filter(|p| !p.contains("OneNote_RecycleBin"))
             .filter(|p| {
                 let is_file = match get_fs_driver().exists(p) {
@@ -93,13 +91,15 @@ impl Parser {
             return Err(ErrorKind::NotASectionFile { file: path }.into());
         }
 
-        let filename = get_fs_driver().get_file_name(&path)
+        let filename = get_fs_driver()
+            .get_file_name(&path)
             .expect("file without file name");
         section::parse_section(store, filename)
     }
 
     fn parse_section_group(&mut self, path: String) -> Result<SectionGroup> {
-        let display_name = get_fs_driver().get_file_name(path.as_str())
+        let display_name = get_fs_driver()
+            .get_file_name(path.as_str())
             .expect("file without file name");
 
         if let Ok(entries) = get_fs_driver().read_dir(&path) {

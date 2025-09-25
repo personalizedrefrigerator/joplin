@@ -1,10 +1,8 @@
-
 pub mod api;
-pub use api::FileApiDriver;
 pub use api::ApiResult;
+pub use api::FileApiDriver;
 use lazy_static::lazy_static;
 use std::sync::Arc;
-
 
 #[cfg(target_arch = "wasm32")]
 mod wasm_driver;
@@ -17,9 +15,8 @@ mod native_driver;
 use native_driver::FileApiDriverImpl;
 
 lazy_static! {
-	static ref FS_DRIVER: Arc<dyn FileApiDriver> = Arc::new(FileApiDriverImpl {});
+    static ref FS_DRIVER: Arc<dyn FileApiDriver> = Arc::new(FileApiDriverImpl {});
 }
-
 
 pub fn get_fs_driver() -> Arc<dyn FileApiDriver> {
     FS_DRIVER.clone()

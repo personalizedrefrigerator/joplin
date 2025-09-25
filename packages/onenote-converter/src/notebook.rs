@@ -2,8 +2,8 @@ use crate::parser::notebook::Notebook;
 use crate::parser::property::common::Color;
 use crate::parser::section::{Section, SectionEntry};
 use crate::templates::notebook::Toc;
-use crate::utils::utils::log;
 use crate::utils::get_fs_driver;
+use crate::utils::utils::log;
 use crate::{section, templates};
 use color_eyre::eyre::Result;
 use palette::rgb::Rgb;
@@ -40,7 +40,8 @@ impl Renderer {
                 }
                 SectionEntry::SectionGroup(group) => {
                     let dir_name = sanitize_filename::sanitize(group.display_name());
-                    let section_group_dir = get_fs_driver().join(notebook_dir.as_str(), dir_name.as_str());
+                    let section_group_dir =
+                        get_fs_driver().join(notebook_dir.as_str(), dir_name.as_str());
 
                     log!("Section group directory: {:?}", section_group_dir);
                     get_fs_driver().make_dir(section_group_dir.as_str())?;
@@ -80,9 +81,8 @@ impl Renderer {
         let section_path = renderer.render(section, notebook_dir)?;
         log!("section_path: {:?}", section_path);
 
-        let path_from_base_dir = String::from(
-            get_fs_driver().remove_prefix(&section_path, &base_dir)
-        );
+        let path_from_base_dir =
+            String::from(get_fs_driver().remove_prefix(&section_path, &base_dir));
         log!("path_from_base_dir: {:?}", path_from_base_dir);
         Ok(templates::notebook::Section {
             name: section.display_name().to_string(),

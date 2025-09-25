@@ -1,8 +1,8 @@
 use crate::page::Renderer;
 use crate::parser::contents::EmbeddedFile;
 use crate::parser::property::embedded_file::FileType;
-use crate::utils::utils::log;
 use crate::utils::get_fs_driver;
+use crate::utils::utils::log;
 use color_eyre::eyre::ContextCompat;
 use color_eyre::Result;
 use std::path::PathBuf;

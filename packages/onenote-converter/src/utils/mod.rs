@@ -8,8 +8,8 @@ use std::sync::Mutex;
 use widestring::U16CString;
 
 mod file_api;
-pub use file_api::FileApiDriver;
 pub use file_api::get_fs_driver;
+pub use file_api::FileApiDriver;
 
 pub(crate) fn px(inches: f32) -> String {
     format!("{}px", (inches * 48.0).round())
@@ -95,7 +95,6 @@ pub mod utils {
         }
     }
 
-
     #[cfg(not(target_arch = "wasm32"))]
     macro_rules! log {
         ( $( $t:tt )* ) => {
@@ -144,6 +143,7 @@ pub fn set_current_page(page_name: String) {
 
 pub fn get_current_page() -> String {
     let current_page = CURRENT_PAGE.lock().unwrap();
-    current_page.clone().unwrap_or_else(|| { String::from("[None]") })
+    current_page
+        .clone()
+        .unwrap_or_else(|| String::from("[None]"))
 }
-
