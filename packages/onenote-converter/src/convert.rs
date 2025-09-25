@@ -49,27 +49,3 @@ pub fn convert(path: &str, output_dir: &str, base_path: &str) -> Result<()> {
 
     Ok(())
 }
-
-#[cfg(test)]
-mod test {
-    use super::*;
-    use std::fs;
-
-    fn setup() {
-        if fs::exists("./test-output").unwrap() {
-            fs::remove_dir_all("./test-output").unwrap();
-        }
-        fs::create_dir("./test-output").unwrap();
-    }
-
-    #[test]
-    fn convert_simple() {
-        setup();
-        convert(
-            "./assets/test-data/single-page/Untitled Section.one",
-            "./test-output/",
-            "./assets/test-data/single-page/",
-        )
-        .unwrap()
-    }
-}

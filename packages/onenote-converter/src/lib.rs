@@ -6,7 +6,7 @@ use wasm_bindgen::prelude::wasm_bindgen;
 use crate::convert::convert;
 use crate::utils::{utils::log, utils::log_warn};
 
-mod convert;
+pub mod convert;
 mod notebook;
 mod page;
 mod parser;

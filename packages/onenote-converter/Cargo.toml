@@ -1,5 +1,5 @@
 [package]
-name = "onenote-converter"
+name = "onenote_converter"
 version = "0.0.1"
 authors = ["Pedro Luiz <pedrlz.frn@gmail.com>"]
 edition = "2018"
@@ -39,4 +39,4 @@ features = [
 ]
 
 [lib]
-crate-type = ["cdylib"]
+crate-type = ["cdylib", "lib"]
