@@ -119,7 +119,7 @@ impl Parser {
             .as_string()
             .unwrap();
 
-        if let Some(entries) = unsafe { read_dir(path.as_str()) } {
+        if let Some(entries) = read_dir(path.as_str()) {
             for entry in entries {
                 let ext = unsafe { get_file_extension(entry.as_str()) }
                     .unwrap()

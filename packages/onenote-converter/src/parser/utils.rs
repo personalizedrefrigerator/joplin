@@ -78,8 +78,8 @@ extern "C" {
     unsafe fn read_dir_js(path: &str) -> std::result::Result<JsValue, JsValue>;
 }
 
-pub unsafe fn read_dir(path: &str) -> Option<Vec<String>> {
-    let result_ptr = read_dir_js(path).unwrap();
+pub fn read_dir(path: &str) -> Option<Vec<String>> {
+    let result_ptr = unsafe { read_dir_js(path) }.unwrap();
 
     let result_str: String = match result_ptr.as_string() {
         Some(x) => x,
