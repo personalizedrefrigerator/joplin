@@ -8,7 +8,7 @@ use std::sync::Mutex;
 use widestring::U16CString;
 
 mod file_api;
-pub use file_api::get_fs_driver;
+pub use file_api::fs_driver;
 pub use file_api::FileApiDriver;
 
 pub(crate) fn px(inches: f32) -> String {

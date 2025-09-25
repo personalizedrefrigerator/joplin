@@ -1,7 +1,7 @@
 use crate::page::Renderer;
 use crate::parser::contents::EmbeddedFile;
 use crate::parser::property::embedded_file::FileType;
-use crate::utils::get_fs_driver;
+use crate::utils::fs_driver;
 use crate::utils::utils::log;
 use color_eyre::eyre::ContextCompat;
 use color_eyre::Result;
@@ -12,9 +12,9 @@ impl<'a> Renderer<'a> {
         let content;
 
         let filename = self.determine_filename(file.filename())?;
-        let path = get_fs_driver().join(self.output.as_str(), filename.as_str());
+        let path = fs_driver().join(self.output.as_str(), filename.as_str());
         log!("Rendering embedded file: {:?}", path);
-        get_fs_driver().write_file(&path, file.data())?;
+        fs_driver().write_file(&path, file.data())?;
 
         let file_type = Self::guess_type(file);
 

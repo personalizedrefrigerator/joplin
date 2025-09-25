@@ -18,6 +18,6 @@ lazy_static! {
     static ref FS_DRIVER: Arc<dyn FileApiDriver> = Arc::new(FileApiDriverImpl {});
 }
 
-pub fn get_fs_driver() -> Arc<dyn FileApiDriver> {
+pub fn fs_driver() -> Arc<dyn FileApiDriver> {
     FS_DRIVER.clone()
 }
