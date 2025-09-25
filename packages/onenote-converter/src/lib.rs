@@ -39,8 +39,8 @@ pub fn convert(path: &str, output_dir: &str, base_path: &str) -> Result<()> {
 
     match extension.as_str() {
         ".one" => {
-            let name: String = fs_driver().get_file_name(path).expect("Missing file name");
-            log!("Parsing .one file: {}", name);
+            let _name: String = fs_driver().get_file_name(path).expect("Missing file name");
+            log!("Parsing .one file: {}", _name);
 
             if path.contains("OneNote_RecycleBin") {
                 return Ok(());
@@ -52,8 +52,8 @@ pub fn convert(path: &str, output_dir: &str, base_path: &str) -> Result<()> {
             section::Renderer::new().render(&section, section_output_dir.to_owned())?;
         }
         ".onetoc2" => {
-            let name: String = fs_driver().get_file_name(path).expect("Missing file name");
-            log!("Parsing .onetoc2 file: {}", name);
+            let _name: String = fs_driver().get_file_name(path).expect("Missing file name");
+            log!("Parsing .onetoc2 file: {}", _name);
 
             let notebook = parser.parse_notebook(path.to_owned())?;
 
