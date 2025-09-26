@@ -213,7 +213,7 @@ export default class Folder extends BaseItem {
 			type_: this.TYPE_FOLDER,
 			id: this.misplacedFolderId(),
 			parent_id: '',
-			title: _('Misplaced'),
+			title: '...',
 			updated_time: Date.now(),
 			user_updated_time: Date.now(),
 			share_id: '',
