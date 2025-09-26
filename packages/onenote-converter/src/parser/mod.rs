@@ -9,6 +9,7 @@ mod macros;
 mod one;
 mod onenote;
 mod onestore;
+mod local_onestore;
 mod reader;
 mod shared;
 mod utils;

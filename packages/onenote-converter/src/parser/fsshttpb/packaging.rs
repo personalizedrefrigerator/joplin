@@ -1,10 +1,11 @@
 use crate::parser::errors::{ErrorKind, Result};
-use crate::parser::fsshttpb::data::exguid::ExGuid;
-use crate::parser::fsshttpb::data::object_types::ObjectType;
-use crate::parser::fsshttpb::data::stream_object::ObjectHeader;
-use crate::parser::fsshttpb::data_element::DataElementPackage;
+use super::data::exguid::ExGuid;
+use super::data::object_types::ObjectType;
+use super::data::stream_object::ObjectHeader;
+use super::data_element::DataElementPackage;
 use crate::parser::shared::guid::Guid;
 use crate::parser::Reader;
+use crate::utils::utils::log;
 
 /// A OneNote file packaged in FSSHTTPB format.
 ///
@@ -30,9 +31,19 @@ impl OneStorePackaging {
         let legacy_file_version = Guid::parse(reader)?;
         let file_format = Guid::parse(reader)?;
 
-        if file != legacy_file_version {
+        if file_format == Guid::from_str("109ADD3F-911B-49F5-A5D0-1791EDC8AED8").unwrap() {
+            // Matches the file format specified in MS-ONESTORE section 2.3
             return Err(
-                ErrorKind::MalformedOneStoreData("not a legacy OneStore file".into()).into(),
+                ErrorKind::NotFssHttpBData(
+                    "This parser only supports notebooks that have been shared then downloaded from OneDrive.".into()
+                ).into(),
+            );
+        } else if file == legacy_file_version {
+            // Matches the file format specified in MS-ONESTORE section 2.8
+            log!("File matches the alternative packaging format");
+        } else {
+            return Err(
+                ErrorKind::MalformedOneStoreData("not a valid OneStore file".into()).into(),
             );
         }
 

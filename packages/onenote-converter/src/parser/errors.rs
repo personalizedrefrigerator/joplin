@@ -93,6 +93,10 @@ pub enum ErrorKind {
     #[error("Malformed FSSHTTPB data: {0}")]
     MalformedFssHttpBData(Cow<'static, str>),
 
+    /// The file was expected to be FSSHTTPB data, but was not.
+    #[error("Not FSSHTTPB data: {0}")]
+    NotFssHttpBData(Cow<'static, str>),
+
     /// A malformed UUID was encountered
     #[error("Invalid UUID: {err}")]
     InvalidUuid {
