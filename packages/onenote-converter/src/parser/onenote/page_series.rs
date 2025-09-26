@@ -3,6 +3,7 @@ use crate::parser::fsshttpb::data::exguid::ExGuid;
 use crate::parser::one::property_set::page_series_node;
 use crate::parser::onenote::page::{parse_page, Page};
 use crate::parser::onestore::OneStore;
+use crate::utils::utils::log_warn;
 
 /// A series of page.
 ///
@@ -33,11 +34,17 @@ pub(crate) fn parse_page_series(id: ExGuid, store: &OneStore) -> Result<PageSeri
         .page_spaces
         .into_iter()
         .map(|page_space_id| {
-            store
-                .object_space(page_space_id)
-                .ok_or_else(|| ErrorKind::MalformedOneNoteData("page space is missing".into()))
+            let space = store.object_space(page_space_id);
+            if space.is_none() {
+                log_warn!(
+                    "Missing page: {:?}. The page will be skipped.",
+                    page_space_id
+                );
+            }
+            space
         })
-        .map(|page_space| parse_page(page_space?))
+        .filter_map(|page_space| page_space)
+        .map(|page_space| parse_page(page_space))
         .collect::<Result<_>>()?;
 
     Ok(PageSeries { pages })
