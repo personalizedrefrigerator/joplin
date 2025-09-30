@@ -148,13 +148,16 @@ const autoScrollToMatchPlugin = ViewPlugin.fromClass(class {
 	provide: () => autoMatchSearchStartField,
 });
 
+export const searchChangeSourceEffect = StateEffect.define<string>();
+
 const searchExtension = (onEvent: OnEventCallback, settings: EditorSettings): Extension => {
-	const onSearchDialogUpdate = (state: EditorState) => {
+	const onSearchDialogUpdate = (state: EditorState, changeSources: string[]) => {
 		const newSearchState = getSearchState(state);
 
 		onEvent({
 			kind: EditorEventType.UpdateSearchDialog,
 			searchState: newSearchState,
+			changeSources,
 		});
 	};
 
@@ -175,7 +178,10 @@ const searchExtension = (onEvent: OnEventCallback, settings: EditorSettings): Ex
 
 		EditorState.transactionExtender.of((tr) => {
 			if (tr.effects.some(e => e.is(setSearchQuery)) || searchPanelOpen(tr.state) !== searchPanelOpen(tr.startState)) {
-				onSearchDialogUpdate(tr.state);
+				const changeSourceEffects = tr.effects.filter(effect => effect.is(searchChangeSourceEffect));
+				const changeSources = changeSourceEffects.map(effect => effect.value);
+
+				onSearchDialogUpdate(tr.state, changeSources);
 			}
 			return null;
 		}),
