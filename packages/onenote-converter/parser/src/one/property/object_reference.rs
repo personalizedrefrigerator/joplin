@@ -1,9 +1,9 @@
 use crate::one::property::references::References;
 use crate::one::property::PropertyType;
 use crate::onestore::object::Object;
-use crate::onestore::types::compact_id::CompactId;
-use crate::onestore::types::property::PropertyValue;
+use crate::shared::compact_id::CompactId;
 use crate::shared::exguid::ExGuid;
+use crate::shared::property::PropertyValue;
 use parser_utils::errors::{ErrorKind, Result};
 
 /// A generic object reference.

@@ -1,12 +1,14 @@
+use super::{
+    object_stream_header::ObjectStreamHeader, prop_set::PropertySet, property::PropertyId,
+    property::PropertyValue,
+};
 use crate::one::property::PropertyType;
-use crate::onestore::types::compact_id::CompactId;
-use crate::onestore::types::object_stream_header::ObjectStreamHeader;
-use crate::onestore::types::prop_set::PropertySet;
-use crate::onestore::types::property::{PropertyId, PropertyValue};
+use crate::shared::compact_id::CompactId;
 use parser_utils::errors::Result;
+use parser_utils::parse::Parse;
 use parser_utils::Reader;
 
-/// An object's properties.
+/// An object's properties. "ObjectSpaceObjectPropSet"
 ///
 /// See [\[MS-ONESTORE\] 2.1.1].
 ///
@@ -37,8 +39,8 @@ impl ObjectPropSet {
     }
 }
 
-impl ObjectPropSet {
-    pub(crate) fn parse(reader: Reader) -> Result<ObjectPropSet> {
+impl Parse for ObjectPropSet {
+    fn parse(reader: Reader) -> Result<ObjectPropSet> {
         let header = ObjectStreamHeader::parse(reader)?;
         let object_ids = (0..header.count)
             .map(|_| CompactId::parse(reader))
@@ -71,7 +73,9 @@ impl ObjectPropSet {
             properties,
         })
     }
+}
 
+impl ObjectPropSet {
     pub(crate) fn get(&self, prop_type: PropertyType) -> Option<&PropertyValue> {
         self.properties.get(PropertyId::new(prop_type as u32))
     }

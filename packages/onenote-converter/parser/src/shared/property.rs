@@ -1,4 +1,4 @@
-use crate::onestore::types::prop_set::PropertySet;
+use crate::shared::prop_set::PropertySet;
 use parser_utils::errors::{ErrorKind, Result};
 use parser_utils::Reader;
 use std::convert::TryFrom;
@@ -233,7 +233,7 @@ impl fmt::Debug for PropertyId {
 
 #[cfg(test)]
 mod test {
-    use crate::onestore::types::property::PropertyId;
+    use crate::shared::property::PropertyId;
 
     #[test]
     fn test_property_bool() {

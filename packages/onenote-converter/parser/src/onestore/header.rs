@@ -1,8 +1,8 @@
 use crate::fsshttpb::data_element::object_group::{ObjectGroup, ObjectGroupData};
 use crate::one::property::PropertyType;
-use crate::onestore::types::object_prop_set::ObjectPropSet;
-use crate::onestore::types::property::PropertyValue;
 use crate::shared::guid::Guid;
+use crate::shared::object_prop_set::ObjectPropSet;
+use crate::shared::property::PropertyValue;
 use parser_utils::errors::{ErrorKind, Result};
 use parser_utils::parse::Parse;
 use parser_utils::reader::Reader;

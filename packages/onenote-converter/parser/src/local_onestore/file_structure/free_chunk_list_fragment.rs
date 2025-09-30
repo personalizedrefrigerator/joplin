@@ -11,7 +11,7 @@ pub struct FreeChunkListFragment {
 }
 
 impl FreeChunkListFragment {
-    fn parse(size: u64, reader: Reader) -> Result<Self> {
+    fn parse(reader: Reader, size: u64) -> Result<Self> {
         let crc = reader.get_u32()?;
         let fcr_next_chunk = FileChunkReference64x32::parse(reader)?;
 

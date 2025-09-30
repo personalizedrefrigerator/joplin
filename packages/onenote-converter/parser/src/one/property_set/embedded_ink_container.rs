@@ -2,11 +2,11 @@ use crate::one::property::object_reference::ObjectReference;
 use crate::one::property::object_space_reference::ObjectSpaceReference;
 use crate::one::property::{simple, PropertyType};
 use crate::onestore::object::Object;
-use crate::onestore::types::compact_id::CompactId;
-use crate::onestore::types::jcid::JcId;
-use crate::onestore::types::object_prop_set::ObjectPropSet;
-use crate::onestore::types::prop_set::PropertySet;
-use crate::onestore::types::property::PropertyId;
+use crate::shared::compact_id::CompactId;
+use crate::shared::jcid::JcId;
+use crate::shared::object_prop_set::ObjectPropSet;
+use crate::shared::prop_set::PropertySet;
+use crate::shared::property::PropertyId;
 use parser_utils::errors::{ErrorKind, Result};
 
 /// An embedded ink handwriting container.

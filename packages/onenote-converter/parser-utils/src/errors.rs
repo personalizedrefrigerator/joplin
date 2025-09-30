@@ -100,6 +100,9 @@ pub enum ErrorKind {
     #[error("Post-parse validation failed: {0}")]
     ParseValidationFailed(Cow<'static, str>),
 
+    #[error("Failed to resolve: {0}")]
+    ResolutionFailed(Cow<'static, str>),
+
     /// A malformed UUID was encountered
     #[error("Invalid UUID: {err}")]
     InvalidUuid {

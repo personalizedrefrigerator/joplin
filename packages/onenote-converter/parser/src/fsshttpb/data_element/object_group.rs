@@ -6,6 +6,7 @@ use crate::fsshttpb::data_element::DataElement;
 use crate::shared::compact_u64::CompactU64;
 use crate::shared::exguid::ExGuid;
 use parser_utils::errors::{ErrorKind, Result};
+use parser_utils::parse::Parse;
 use parser_utils::Reader;
 use std::fmt;
 

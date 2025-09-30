@@ -40,7 +40,25 @@ impl ExGuid {
         ExGuid { guid, value }
     }
 
-    pub(crate) fn parse(reader: Reader) -> Result<ExGuid> {
+    /// Parse an array of `ExGuid` values.
+    ///
+    /// See [\[MS-FSSHTTPB\] 2.2.1.8]
+    ///
+    /// [\[MS-FSSHTTPB\] 2.2.1.8]: https://docs.microsoft.com/en-us/openspecs/sharepoint_protocols/ms-fsshttpb/10d6fb35-d630-4ae3-b530-b9e877fc27d3
+    pub(crate) fn parse_array(reader: Reader) -> Result<Vec<ExGuid>> {
+        let mut values = vec![];
+
+        let count = CompactU64::parse(reader)?.value();
+        for _ in 0..count {
+            values.push(ExGuid::parse(reader)?);
+        }
+
+        Ok(values)
+    }
+}
+
+impl Parse for ExGuid {
+    fn parse(reader: Reader) -> Result<ExGuid> {
         let data = reader.get_u8()?;
 
         // A null ExGuid ([FSSHTTPB] 2.2.1.7.1)
@@ -93,22 +111,6 @@ impl ExGuid {
             ErrorKind::MalformedData(format!("unexpected ExGuid first byte: {:b}", data).into())
                 .into(),
         )
-    }
-
-    /// Parse an array of `ExGuid` values.
-    ///
-    /// See [\[MS-FSSHTTPB\] 2.2.1.8]
-    ///
-    /// [\[MS-FSSHTTPB\] 2.2.1.8]: https://docs.microsoft.com/en-us/openspecs/sharepoint_protocols/ms-fsshttpb/10d6fb35-d630-4ae3-b530-b9e877fc27d3
-    pub(crate) fn parse_array(reader: Reader) -> Result<Vec<ExGuid>> {
-        let mut values = vec![];
-
-        let count = CompactU64::parse(reader)?.value();
-        for _ in 0..count {
-            values.push(ExGuid::parse(reader)?);
-        }
-
-        Ok(values)
     }
 }
 

@@ -15,7 +15,6 @@ pub(crate) mod object;
 pub(crate) mod object_space;
 pub(crate) mod revision;
 mod revision_role;
-pub(crate) mod types;
 
 #[derive(Debug)]
 #[allow(dead_code)]

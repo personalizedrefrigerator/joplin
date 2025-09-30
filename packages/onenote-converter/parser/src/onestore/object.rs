@@ -1,12 +1,13 @@
-use super::types::prop_set::PropertySet;
 use crate::fsshttpb::data_element::object_group::ObjectGroupData;
 use crate::fsshttpb::packaging::OneStorePackaging;
 use crate::onestore::mapping_table::MappingTable;
 use crate::onestore::object_space::GroupData;
-use crate::onestore::types::jcid::JcId;
-use crate::onestore::types::object_prop_set::ObjectPropSet;
 use crate::shared::exguid::ExGuid;
+use crate::shared::jcid::JcId;
+use crate::shared::object_prop_set::ObjectPropSet;
+use crate::shared::prop_set::PropertySet;
 use parser_utils::errors::{ErrorKind, Result};
+use parser_utils::parse::Parse;
 use parser_utils::reader::Reader;
 
 /// A OneNote data object.

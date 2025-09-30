@@ -1,6 +1,6 @@
 use crate::one::property::PropertyType;
 use crate::onestore::object::Object;
-use crate::onestore::types::property::{PropertyId, PropertyValue};
+use crate::shared::property::{PropertyId, PropertyValue};
 use parser_utils::errors::{ErrorKind, Result};
 
 pub(crate) struct References;

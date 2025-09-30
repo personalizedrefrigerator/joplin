@@ -5,27 +5,33 @@ use std::mem;
 
 macro_rules! try_get {
     ($this:ident, $typ:tt) => {{
-        if $this.0.remaining() < mem::size_of::<$typ>() {
+        if $this.buff.remaining() < mem::size_of::<$typ>() {
             Err(ErrorKind::UnexpectedEof.into())
         } else {
-            Ok(paste! {$this.0. [< get_ $typ >]()})
+            Ok(paste! {$this.buff. [< get_ $typ >]()})
         }
     }};
 
     ($this:ident, $typ:tt::$endian:tt) => {{
-        if $this.0.remaining() < mem::size_of::<$typ>() {
+        if $this.buff.remaining() < mem::size_of::<$typ>() {
             Err(ErrorKind::UnexpectedEof.into())
         } else {
-            Ok(paste! {$this.0. [< get_ $typ _ $endian >]()})
+            Ok(paste! {$this.buff. [< get_ $typ _ $endian >]()})
         }
     }};
 }
 
-pub struct Reader<'a>(&'a [u8]);
+pub struct Reader<'a> {
+    buff: &'a [u8],
+    original: &'a [u8],
+}
 
 impl<'a> Reader<'a> {
     pub fn new(data: &'a [u8]) -> Reader<'a> {
-        Reader(data)
+        Reader {
+            buff: data,
+            original: data,
+        }
     }
 
     pub fn read(&mut self, cnt: usize) -> Result<&[u8]> {
@@ -33,18 +39,18 @@ impl<'a> Reader<'a> {
             return Err(ErrorKind::UnexpectedEof.into());
         }
 
-        let data = &self.0[0..cnt];
-        self.0.advance(cnt);
+        let data = &self.buff[0..cnt];
+        self.buff.advance(cnt);
 
         Ok(data)
     }
 
     pub fn bytes(&self) -> &[u8] {
-        self.0.chunk()
+        self.buff.chunk()
     }
 
     pub fn remaining(&self) -> usize {
-        self.0.remaining()
+        self.buff.remaining()
     }
 
     pub fn advance(&mut self, cnt: usize) -> Result<()> {
@@ -52,9 +58,17 @@ impl<'a> Reader<'a> {
             return Err(ErrorKind::UnexpectedEof.into());
         }
 
-        self.0.advance(cnt);
+        self.buff.advance(cnt);
 
         Ok(())
+    }
+
+    pub fn with_start_index(&self, position: usize) -> Result<Reader<'a>> {
+        if position >= self.original.len() {
+            return Err(ErrorKind::UnexpectedEof.into());
+        }
+
+        Ok(Reader::new(&self.original[position..]))
     }
 
     pub fn get_u8(&mut self) -> Result<u8> {

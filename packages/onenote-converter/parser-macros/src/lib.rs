@@ -5,14 +5,18 @@ use syn::{DeriveInput, Expr, parse_macro_input, spanned::Spanned};
 
 // See the syn example: https://github.com/dtolnay/syn/blob/master/examples/heapsize/heapsize_derive/src/lib.rs
 
-#[proc_macro_derive(Parse, attributes(pad_to_alignment, parse_additional_args, validate))]
+#[proc_macro_derive(
+    Parse,
+    attributes(pad_to_alignment, parse_additional_args, validate, count)
+)]
 pub fn parseable_derive(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let ast = parse_macro_input!(input as DeriveInput);
     let name = &ast.ident;
+    let (impl_generics, ty_generics, where_clause) = &ast.generics.split_for_impl();
     let parse_impl = process_fields(&ast.data, &ast.attrs);
 
     let generated = quote! {
-        impl parser_utils::parse::Parse for #name {
+        impl #impl_generics parser_utils::parse::Parse for #name #ty_generics #where_clause {
             fn parse(reader: parser_utils::Reader) -> parser_utils::errors::Result<Self> {
                 #parse_impl
             }
@@ -43,6 +47,12 @@ fn process_fields(data: &syn::Data, attrs: &Vec<syn::Attribute>) -> TokenStream 
         })
         .filter_map(|field| field);
 
+    for attr in attrs {
+        if attr.path().is_ident("pad_to_alignment") {
+            panic!("#[pad_to_alignment(...)] is only permitted on fields");
+        }
+    }
+
     match *data {
         syn::Data::Struct(ref data) => {
             match data.fields {
@@ -51,6 +61,13 @@ fn process_fields(data: &syn::Data, attrs: &Vec<syn::Attribute>) -> TokenStream 
                         let name = &f.ident;
                         let type_name = &f.ty;
                         let attrs = &f.attrs;
+
+                        // Validate attrs
+                        for attr in attrs {
+                            if attr.path().is_ident("validate") {
+                                panic!("The #[validate(...)] attr is only permitted on toplevel blocks");
+                            }
+                        }
 
                         let pad_to_alignment = attrs.iter().find_map(|a| {
                             if a.path().is_ident("pad_to_alignment") {

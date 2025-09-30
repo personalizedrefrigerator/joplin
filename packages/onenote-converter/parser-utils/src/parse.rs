@@ -8,6 +8,12 @@ where
 {
     fn parse(reader: Reader) -> Result<Self>;
 }
+pub trait ParseWithCount
+where
+    Self: Sized,
+{
+    fn parse(reader: Reader, count: usize) -> Result<Self>;
+}
 
 impl Parse for u8 {
     fn parse(reader: Reader) -> Result<Self> {
@@ -33,6 +39,12 @@ impl Parse for u64 {
     }
 }
 
+impl Parse for u128 {
+    fn parse(reader: Reader) -> Result<Self> {
+        reader.get_u128()
+    }
+}
+
 impl Parse for f32 {
     fn parse(reader: Reader) -> Result<Self> {
         reader.get_f32()
@@ -42,5 +54,15 @@ impl Parse for f32 {
 impl Parse for () {
     fn parse(_reader: Reader) -> Result<Self> {
         Ok(())
+    }
+}
+
+impl<T: Parse> ParseWithCount for Vec<T> {
+    fn parse(reader: Reader, size: usize) -> Result<Self> {
+        let mut result = Vec::new();
+        for _i in 0..size {
+            result.push(T::parse(reader)?);
+        }
+        Ok(result)
     }
 }

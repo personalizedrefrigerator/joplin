@@ -1,5 +1,5 @@
 use crate::fsshttpb::data::cell_id::CellId;
-use crate::onestore::types::compact_id::CompactId;
+use crate::shared::compact_id::CompactId;
 use crate::shared::exguid::ExGuid;
 use std::collections::HashMap;
 

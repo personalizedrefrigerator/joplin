@@ -8,8 +8,8 @@ pub struct FileNodeChunkReference {
     cb_format: u32,
     stp: Vec<u8>,
     cb: Vec<u8>,
-    cb_value: u64,
-    stp_value: u64,
+    pub cb_value: u64,
+    pub stp_value: u64,
 }
 
 impl FileNodeChunkReference {
@@ -77,6 +77,20 @@ impl FileNodeChunkReference {
             cb_value,
             stp_value,
         })
+    }
+
+    pub fn resolve_to_reader<'a>(
+        &self,
+        original_reader: &parser_utils::reader::Reader<'a>,
+    ) -> Result<parser_utils::reader::Reader<'a>> {
+        if self.is_fcr_nil() {
+            return Err(ErrorKind::ResolutionFailed(
+                "Failed to resolve node reference -- is nil".into(),
+            )
+            .into());
+        }
+
+        original_reader.with_start_index(self.stp_value as usize)
     }
 }
 

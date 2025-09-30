@@ -4,7 +4,7 @@
 //!
 //! [\[MS-ONE\] 2.1.13]: https://docs.microsoft.com/en-us/openspecs/office_file_formats/ms-one/73d98105-f194-4c05-a795-09840a6d24bf
 
-use crate::onestore::types::jcid::JcId;
+use crate::shared::jcid::JcId;
 use enum_primitive_derive::Primitive;
 use num_traits::FromPrimitive;
 
