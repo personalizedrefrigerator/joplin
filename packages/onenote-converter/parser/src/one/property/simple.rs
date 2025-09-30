@@ -1,11 +1,11 @@
-use parser_utils::errors::{ErrorKind, Result};
-use parser_utils::parse::Parse;
-use parser_utils::Utf16ToString;
 use crate::one::property::PropertyType;
 use crate::onestore::object::Object;
-use parser_utils::reader::Reader;
 use crate::shared::guid::Guid;
 use encoding_rs::mem::decode_latin1;
+use parser_utils::errors::{ErrorKind, Result};
+use parser_utils::parse::Parse;
+use parser_utils::reader::Reader;
+use parser_utils::Utf16ToString;
 
 pub(crate) fn parse_bool(prop_type: PropertyType, object: &Object) -> Result<Option<bool>> {
     let value = match object.props().get(prop_type) {

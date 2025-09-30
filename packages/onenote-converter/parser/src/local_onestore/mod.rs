@@ -1,18 +1,18 @@
+use file_structure::{FreeChunkListFragment, OneStoreHeader, TransactionLogFragment};
 use parser_utils::errors::Result;
-use parser_utils::Reader;
 use parser_utils::parse::Parse;
-use file_structure::{OneStoreHeader, FreeChunkListFragment, TransactionLogFragment};
+use parser_utils::Reader;
 
 mod common;
-mod file_structure;
 mod file_node;
+mod file_structure;
 
 /// A OneNote file packaged in the standard OneNote 2016 format.
 ///
 /// See [\[MS-ONESTORE\] 2.8.1]
 ///
 /// [\[MS-ONESTORE\] 2.8.1]: https://docs.microsoft.com/en-us/openspecs/office_file_formats/ms-onestore/a2f046ea-109a-49c4-912d-dc2888cf0565
-/// 
+///
 #[derive(Debug)]
 pub struct OneStorePackaging {
     pub header: OneStoreHeader,

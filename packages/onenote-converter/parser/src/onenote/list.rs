@@ -1,8 +1,8 @@
-use parser_utils::errors::{ErrorKind, Result};
-use crate::shared::exguid::ExGuid;
 use crate::one::property::color_ref::ColorRef;
 use crate::one::property_set::number_list_node;
 use crate::onestore::object_space::ObjectSpace;
+use crate::shared::exguid::ExGuid;
+use parser_utils::errors::{ErrorKind, Result};
 
 /// A list definition.
 ///

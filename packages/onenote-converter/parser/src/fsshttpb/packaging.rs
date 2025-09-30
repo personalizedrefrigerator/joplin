@@ -1,12 +1,12 @@
-use parser_utils::errors::{ErrorKind, Result};
-use parser_utils::parse::Parse;
 use super::data::object_types::ObjectType;
 use super::data::stream_object::ObjectHeader;
 use super::data_element::DataElementPackage;
 use crate::shared::exguid::ExGuid;
 use crate::shared::guid::Guid;
-use parser_utils::Reader;
+use parser_utils::errors::{ErrorKind, Result};
 use parser_utils::log;
+use parser_utils::parse::Parse;
+use parser_utils::Reader;
 
 /// A OneNote file packaged in FSSHTTPB format.
 ///

@@ -1,18 +1,16 @@
-use parser_utils::errors::{ErrorKind, Result};
-use crate::shared::exguid::ExGuid;
 use crate::one::property::charset::Charset;
 use crate::one::property::color_ref::ColorRef;
 use crate::one::property::layout_alignment::LayoutAlignment;
 use crate::one::property::paragraph_alignment::ParagraphAlignment;
-use crate::one::property_set::{
-    embedded_ink_container, paragraph_style_object, rich_text_node,
-};
+use crate::one::property_set::{embedded_ink_container, paragraph_style_object, rich_text_node};
 use crate::onenote::ink::{parse_ink_data, Ink, InkBoundingBox};
 use crate::onenote::note_tag::{parse_note_tags, NoteTag};
 use crate::onestore::object::Object;
 use crate::onestore::object_space::ObjectSpace;
-use parser_utils::log_warn;
+use crate::shared::exguid::ExGuid;
 use itertools::Itertools;
+use parser_utils::errors::{ErrorKind, Result};
+use parser_utils::log_warn;
 
 /// A rich text paragraph.
 ///

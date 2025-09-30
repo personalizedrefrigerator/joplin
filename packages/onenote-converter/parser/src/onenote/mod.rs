@@ -1,9 +1,9 @@
-use parser_utils::errors::{ErrorKind, Result};
 use crate::fsshttpb::packaging::OneStorePackaging;
 use crate::onenote::notebook::Notebook;
 use crate::onenote::section::{Section, SectionEntry, SectionGroup};
 use crate::onestore::parse_store;
-use parser_utils::{ reader::Reader, log, fs_driver };
+use parser_utils::errors::{ErrorKind, Result};
+use parser_utils::{fs_driver, log, reader::Reader};
 
 pub(crate) mod content;
 pub(crate) mod embedded_file;

@@ -1,11 +1,11 @@
-use parser_utils::errors::{ErrorKind, Result};
 use crate::fsshttpb::data::cell_id::CellId;
-use crate::shared::exguid::ExGuid;
 use crate::fsshttpb::data_element::storage_index::StorageIndex;
 use crate::fsshttpb::packaging::OneStorePackaging;
 use crate::onestore::object::Object;
 use crate::onestore::object_space::GroupData;
 use crate::onestore::revision_role::RevisionRole;
+use crate::shared::exguid::ExGuid;
+use parser_utils::errors::{ErrorKind, Result};
 use std::collections::HashMap;
 
 /// A OneNote file revision.

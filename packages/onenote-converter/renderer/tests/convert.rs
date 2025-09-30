@@ -30,8 +30,10 @@ fn convert_simple() {
     // Should create a table of contents file
     assert!(output_dir.join("Untitled Section.html").exists());
     // Should convert the input page to an HTML file
-    assert!(output_dir
-        .join("Untitled Section")
-        .join("test.html")
-        .exists());
+    assert!(
+        output_dir
+            .join("Untitled Section")
+            .join("test.html")
+            .exists()
+    );
 }

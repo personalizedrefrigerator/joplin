@@ -1,4 +1,3 @@
-use parser_utils::errors::{ErrorKind, Result};
 use crate::fsshttpb::data::object_types::ObjectType;
 use crate::fsshttpb::data::serial_number::SerialNumber;
 use crate::fsshttpb::data::stream_object::ObjectHeader;
@@ -10,6 +9,7 @@ use crate::fsshttpb::data_element::storage_index::StorageIndex;
 use crate::fsshttpb::data_element::storage_manifest::StorageManifest;
 use crate::shared::compact_u64::CompactU64;
 use crate::shared::exguid::ExGuid;
+use parser_utils::errors::{ErrorKind, Result};
 use parser_utils::Reader;
 use std::collections::HashMap;
 use std::fmt::Debug;

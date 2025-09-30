@@ -1,6 +1,6 @@
-use parser_utils::errors::Result;
 use crate::one::property::{simple, PropertyType};
 use crate::onestore::object::Object;
+use parser_utils::errors::Result;
 
 /// The author of an object.
 ///

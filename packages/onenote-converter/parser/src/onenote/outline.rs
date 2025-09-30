@@ -1,12 +1,10 @@
-use parser_utils::errors::{ErrorKind, Result};
-use crate::shared::exguid::ExGuid;
 use crate::one::property::layout_alignment::LayoutAlignment;
-use crate::one::property_set::{
-    outline_element_node, outline_group, outline_node, PropertySetId,
-};
+use crate::one::property_set::{outline_element_node, outline_group, outline_node, PropertySetId};
 use crate::onenote::content::{parse_content, Content};
 use crate::onenote::list::{parse_list, List};
 use crate::onestore::object_space::ObjectSpace;
+use crate::shared::exguid::ExGuid;
+use parser_utils::errors::{ErrorKind, Result};
 
 /// A content outline.
 ///

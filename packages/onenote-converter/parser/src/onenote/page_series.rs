@@ -1,8 +1,8 @@
-use parser_utils::errors::{ErrorKind, Result};
-use crate::shared::exguid::ExGuid;
 use crate::one::property_set::page_series_node;
 use crate::onenote::page::{parse_page, Page};
 use crate::onestore::OneStore;
+use crate::shared::exguid::ExGuid;
+use parser_utils::errors::{ErrorKind, Result};
 
 /// A series of page.
 ///

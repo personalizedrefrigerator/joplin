@@ -1,11 +1,11 @@
-use parser_utils::errors::{ErrorKind, Result};
-use parser_utils::parse::Parse;
 use crate::fsshttpb::data_element::object_group::{ObjectGroup, ObjectGroupData};
 use crate::one::property::PropertyType;
 use crate::onestore::types::object_prop_set::ObjectPropSet;
 use crate::onestore::types::property::PropertyValue;
-use parser_utils::reader::Reader;
 use crate::shared::guid::Guid;
+use parser_utils::errors::{ErrorKind, Result};
+use parser_utils::parse::Parse;
+use parser_utils::reader::Reader;
 
 /// A OneStore file's header data.
 ///

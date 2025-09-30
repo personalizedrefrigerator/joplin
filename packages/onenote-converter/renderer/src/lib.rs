@@ -1,5 +1,5 @@
+use color_eyre::eyre::{Result, eyre};
 pub use parser::Parser;
-use color_eyre::eyre::{eyre, Result};
 use std::panic;
 use wasm_bindgen::prelude::wasm_bindgen;
 
@@ -74,4 +74,3 @@ pub fn convert(path: &str, output_dir: &str, base_path: &str) -> Result<()> {
 
     Ok(())
 }
-

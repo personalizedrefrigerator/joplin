@@ -1,5 +1,3 @@
-use parser_utils::errors::{ErrorKind, Result};
-use crate::shared::exguid::ExGuid;
 use crate::one::property::layout_alignment::LayoutAlignment;
 use crate::one::property::object_reference::ObjectReference;
 use crate::one::property::paragraph_alignment::ParagraphAlignment;
@@ -8,6 +6,8 @@ use crate::one::property::{simple, PropertyType};
 use crate::one::property_set::note_tag_container::Data as NoteTagData;
 use crate::one::property_set::PropertySetId;
 use crate::onestore::object::Object;
+use crate::shared::exguid::ExGuid;
+use parser_utils::errors::{ErrorKind, Result};
 use parser_utils::log_warn;
 
 /// A rich text paragraph.

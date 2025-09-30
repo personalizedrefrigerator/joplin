@@ -1,5 +1,5 @@
-use parser_utils::errors::Result;
 use itertools::Itertools;
+use parser_utils::errors::Result;
 use std::collections::HashMap;
 use std::fmt;
 use std::fmt::Display;
@@ -86,4 +86,3 @@ impl Utf16ToString for &[u8] {
         Ok(value.to_string().unwrap())
     }
 }
-

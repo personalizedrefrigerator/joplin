@@ -1,9 +1,9 @@
-use parser_utils::errors::{ErrorKind, Result};
-use crate::shared::exguid::ExGuid;
 use crate::one::property_set::toc_container;
 use crate::onenote::section::SectionEntry;
 use crate::onestore::object_space::ObjectSpace;
+use crate::shared::exguid::ExGuid;
 use itertools::Itertools;
+use parser_utils::errors::{ErrorKind, Result};
 
 /// A OneNote notebook.
 #[derive(Clone, Debug)]

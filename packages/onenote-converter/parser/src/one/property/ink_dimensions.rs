@@ -1,9 +1,9 @@
-use parser_utils::errors::{ErrorKind, Result};
-use parser_utils::parse::Parse;
 use crate::one::property::PropertyType;
 use crate::onestore::object::Object;
-use parser_utils::reader::Reader;
 use crate::shared::guid::Guid;
+use parser_utils::errors::{ErrorKind, Result};
+use parser_utils::parse::Parse;
+use parser_utils::reader::Reader;
 
 /// The dimensions (X or Y) for an ink stoke with lower and upper limits.
 #[allow(dead_code)]

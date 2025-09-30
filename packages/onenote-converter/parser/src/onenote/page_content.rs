@@ -1,11 +1,11 @@
-use parser_utils::errors::{ErrorKind, Result};
-use crate::shared::exguid::ExGuid;
 use crate::one::property_set::PropertySetId;
 use crate::onenote::embedded_file::{parse_embedded_file, EmbeddedFile};
 use crate::onenote::image::{parse_image, Image};
 use crate::onenote::ink::{parse_ink, Ink};
 use crate::onenote::outline::{parse_outline, Outline};
 use crate::onestore::object_space::ObjectSpace;
+use crate::shared::exguid::ExGuid;
+use parser_utils::errors::{ErrorKind, Result};
 
 /// The contents of a page.
 #[allow(missing_docs)]

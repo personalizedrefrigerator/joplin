@@ -1,4 +1,3 @@
-use parser_utils::errors::{ErrorKind, Result};
 use crate::one::property::color_ref::ColorRef;
 use crate::one::property::note_tag::ActionItemType;
 use crate::one::property::note_tag_property_status::NoteTagPropertyStatus;
@@ -6,6 +5,7 @@ use crate::one::property::note_tag_shape::NoteTagShape;
 use crate::one::property::{simple, PropertyType};
 use crate::one::property_set::PropertySetId;
 use crate::onestore::object::Object;
+use parser_utils::errors::{ErrorKind, Result};
 
 /// An note tag shared definition container.
 ///

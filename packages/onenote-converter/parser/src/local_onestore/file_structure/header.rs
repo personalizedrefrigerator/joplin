@@ -1,9 +1,9 @@
-use parser_utils::{errors::{ErrorKind, Result}, parse::Parse};
+use super::super::common::{FileChunkReference32, FileChunkReference64x32};
 use crate::shared::guid::Guid;
 use parser_utils::Reader;
-use super::super::common::{
-    FileChunkReference64x32,
-    FileChunkReference32
+use parser_utils::{
+    errors::{ErrorKind, Result},
+    parse::Parse,
 };
 
 /// A OneNote file header in the standard OneNote 2016 format.
@@ -11,7 +11,7 @@ use super::super::common::{
 /// See [\[MS-ONESTORE\] 2.8.1]
 ///
 /// [\[MS-ONESTORE\] 2.8.1]: https://docs.microsoft.com/en-us/openspecs/office_file_formats/ms-onestore/a2f046ea-109a-49c4-912d-dc2888cf0565
-/// 
+///
 #[derive(Debug, Parse)]
 pub struct OneStoreHeader {
     pub file_type: Guid,
@@ -64,11 +64,10 @@ impl Parse for OneStoreFormatGuid {
         let file_format = Guid::parse(reader)?;
         if file_format != Guid::from_str("109ADD3F-911B-49F5-A5D0-1791EDC8AED8").unwrap() {
             // Matches the file format specified in MS-ONESTORE section 2.3
-            return Err(
-                ErrorKind::NotFssHttpBData(
-                    "This parser only supports OneNote^(r) 2016-style Notebooks.".into()
-                ).into(),
-            );
+            return Err(ErrorKind::NotFssHttpBData(
+                "This parser only supports OneNote^(r) 2016-style Notebooks.".into(),
+            )
+            .into());
         }
 
         Ok(Self { value: file_format })
@@ -79,7 +78,7 @@ impl Parse for OneStoreFormatGuid {
 struct RgbReserved {}
 
 impl Parse for RgbReserved {
-    fn parse(reader: Reader)-> Result<Self> {
+    fn parse(reader: Reader) -> Result<Self> {
         // Skip
         reader.advance(728)?;
 

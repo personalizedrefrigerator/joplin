@@ -1,6 +1,6 @@
-use parser_utils::errors::{ErrorKind, Result};
 use crate::one::property::PropertyType;
 use crate::onestore::object::Object;
+use parser_utils::errors::{ErrorKind, Result};
 use parser_utils::reader::Reader;
 
 #[derive(Debug, Clone)]

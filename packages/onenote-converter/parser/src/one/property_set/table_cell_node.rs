@@ -1,5 +1,3 @@
-use parser_utils::errors::{ErrorKind, Result};
-use crate::shared::exguid::ExGuid;
 use crate::one::property::color::Color;
 use crate::one::property::object_reference::ObjectReference;
 use crate::one::property::outline_indent_distance::OutlineIndentDistance;
@@ -7,6 +5,8 @@ use crate::one::property::time::Time;
 use crate::one::property::{simple, PropertyType};
 use crate::one::property_set::PropertySetId;
 use crate::onestore::object::Object;
+use crate::shared::exguid::ExGuid;
+use parser_utils::errors::{ErrorKind, Result};
 
 /// A table cell.
 ///

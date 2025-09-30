@@ -1,7 +1,7 @@
-use parser_utils::errors::{ErrorKind, Result};
 use crate::{fsshttpb::data::object_types::ObjectType, shared::compact_u64::CompactU64};
-use parser_utils::Reader;
 use num_traits::{FromPrimitive, ToPrimitive};
+use parser_utils::errors::{ErrorKind, Result};
+use parser_utils::Reader;
 
 /// A FSSHTTPB stream object header.
 ///

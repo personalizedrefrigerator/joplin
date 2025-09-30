@@ -5,13 +5,12 @@
 mod fsshttpb;
 #[macro_use]
 mod macros;
+mod local_onestore;
 mod one;
 mod onenote;
 mod onestore;
-mod local_onestore;
 mod shared;
 mod utils;
-
 
 pub use onenote::Parser;
 

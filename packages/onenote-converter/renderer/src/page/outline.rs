@@ -1,7 +1,7 @@
 use crate::page::Renderer;
-use parser::contents::{Outline, OutlineElement, OutlineItem};
-use crate::utils::{px, AttributeSet, StyleSet};
+use crate::utils::{AttributeSet, StyleSet, px};
 use color_eyre::Result;
+use parser::contents::{Outline, OutlineElement, OutlineItem};
 
 impl<'a> Renderer<'a> {
     pub(crate) fn render_outline(&mut self, outline: &Outline) -> Result<String> {

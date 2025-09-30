@@ -1,13 +1,13 @@
 use widestring::U16CString;
 
-pub mod reader;
 pub mod errors;
-pub mod parse;
-pub mod log;
 mod file_api;
+pub mod log;
+pub mod parse;
+pub mod reader;
 
-pub use file_api::fs_driver;
 pub use errors::Result;
+pub use file_api::fs_driver;
 
 pub type Reader<'a, 'b> = &'b mut crate::reader::Reader<'a>;
 

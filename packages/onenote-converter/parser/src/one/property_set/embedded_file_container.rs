@@ -1,6 +1,6 @@
-use parser_utils::errors::{ErrorKind, Result};
 use crate::one::property_set::PropertySetId;
 use crate::onestore::object::Object;
+use parser_utils::errors::{ErrorKind, Result};
 
 /// An embedded file data container.
 ///

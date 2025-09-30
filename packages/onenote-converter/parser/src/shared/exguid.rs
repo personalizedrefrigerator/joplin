@@ -1,7 +1,7 @@
-use parser_utils::errors::{ErrorKind, Result};
-use parser_utils::parse::Parse;
 use super::compact_u64::CompactU64;
 use crate::shared::guid::Guid;
+use parser_utils::errors::{ErrorKind, Result};
+use parser_utils::parse::Parse;
 use parser_utils::Reader;
 use std::fmt;
 

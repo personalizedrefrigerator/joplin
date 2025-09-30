@@ -1,12 +1,12 @@
 use crate::page::Renderer;
+use crate::utils::{AttributeSet, StyleSet, px};
+use color_eyre::Result;
+use color_eyre::eyre::ContextCompat;
+use itertools::Itertools;
+use once_cell::sync::Lazy;
 use parser::contents::{EmbeddedObject, RichText};
 use parser::property::common::ColorRef;
 use parser::property::rich_text::{ParagraphAlignment, ParagraphStyling};
-use crate::utils::{px, AttributeSet, StyleSet};
-use color_eyre::eyre::ContextCompat;
-use color_eyre::Result;
-use itertools::Itertools;
-use once_cell::sync::Lazy;
 use regex::{Captures, Regex};
 
 impl<'a> Renderer<'a> {

@@ -1,4 +1,3 @@
-use parser_utils::errors::{ErrorKind, Result};
 use crate::one::property::file_type::FileType;
 use crate::one::property::layout_alignment::LayoutAlignment;
 use crate::one::property::object_reference::ObjectReference;
@@ -8,6 +7,7 @@ use crate::one::property_set::note_tag_container::Data as NoteTagData;
 use crate::one::property_set::PropertySetId;
 use crate::onestore::object::Object;
 use crate::shared::exguid::ExGuid;
+use parser_utils::errors::{ErrorKind, Result};
 use parser_utils::log;
 
 /// An embedded file.

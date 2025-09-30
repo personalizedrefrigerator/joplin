@@ -1,6 +1,6 @@
-use parser_utils::{errors::Result, parse::Parse};
 use crate::shared::guid::Guid;
 use parser_utils::Reader;
+use parser_utils::{errors::Result, parse::Parse};
 
 /// A variable-width serial number.
 ///

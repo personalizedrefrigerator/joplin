@@ -1,6 +1,6 @@
-use parser_utils::errors::{ErrorKind, Result};
 use crate::one::property::PropertyType;
 use crate::onestore::object::Object;
+use parser_utils::errors::{ErrorKind, Result};
 
 /// A page size declaration.
 ///

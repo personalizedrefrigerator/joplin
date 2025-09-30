@@ -1,5 +1,5 @@
-use parser_utils::errors::Result;
 use crate::onestore::types::property::{PropertyId, PropertyValue};
+use parser_utils::errors::Result;
 use parser_utils::Reader;
 use std::collections::HashMap;
 

@@ -1,6 +1,6 @@
-use parser_utils::errors::{ErrorKind, Result};
 use crate::one::property::PropertyType;
 use crate::onestore::object::Object;
+use parser_utils::errors::{ErrorKind, Result};
 
 /// A 32 bit date/time timestamp.
 ///

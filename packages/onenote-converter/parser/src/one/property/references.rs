@@ -1,7 +1,7 @@
-use parser_utils::errors::{ErrorKind, Result};
 use crate::one::property::PropertyType;
 use crate::onestore::object::Object;
 use crate::onestore::types::property::{PropertyId, PropertyValue};
+use parser_utils::errors::{ErrorKind, Result};
 
 pub(crate) struct References;
 

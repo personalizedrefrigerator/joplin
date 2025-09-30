@@ -1,6 +1,6 @@
 use crate::fsshttpb::data::cell_id::CellId;
-use crate::shared::exguid::ExGuid;
 use crate::onestore::types::compact_id::CompactId;
+use crate::shared::exguid::ExGuid;
 use std::collections::HashMap;
 
 /// The ID mapping table for an object.

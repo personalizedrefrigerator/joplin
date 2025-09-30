@@ -1,5 +1,3 @@
-use parser_utils::errors::{ErrorKind, Result};
-use crate::shared::exguid::ExGuid;
 use crate::one::property::color_ref::ColorRef;
 use crate::one::property::note_tag::{ActionItemStatus, ActionItemType};
 use crate::one::property::note_tag_property_status::NoteTagPropertyStatus;
@@ -8,6 +6,8 @@ use crate::one::property::time::Time;
 use crate::one::property_set::note_tag_container::Data;
 use crate::one::property_set::note_tag_shared_definition_container;
 use crate::onestore::object_space::ObjectSpace;
+use crate::shared::exguid::ExGuid;
+use parser_utils::errors::{ErrorKind, Result};
 
 /// A note tag.
 ///

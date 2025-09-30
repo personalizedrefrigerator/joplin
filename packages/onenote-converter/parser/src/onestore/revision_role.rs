@@ -1,5 +1,5 @@
-use parser_utils::errors::{ErrorKind, Result};
 use crate::shared::exguid::ExGuid;
+use parser_utils::errors::{ErrorKind, Result};
 
 /// A revision's role.
 ///

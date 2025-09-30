@@ -1,5 +1,5 @@
-use parser_utils::errors::{ErrorKind, Result};
 use crate::onestore::types::prop_set::PropertySet;
+use parser_utils::errors::{ErrorKind, Result};
 use parser_utils::Reader;
 use std::convert::TryFrom;
 use std::fmt;

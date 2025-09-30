@@ -1,9 +1,9 @@
-use parser_utils::errors::{ErrorKind, Result};
-use crate::shared::exguid::ExGuid;
 use crate::one::property_set::{
     ink_container, ink_data_node, ink_stroke_node, stroke_properties_node,
 };
 use crate::onestore::object_space::ObjectSpace;
+use crate::shared::exguid::ExGuid;
+use parser_utils::errors::{ErrorKind, Result};
 
 /// An ink object.
 #[derive(Clone, Debug)]

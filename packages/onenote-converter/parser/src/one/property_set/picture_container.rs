@@ -1,7 +1,7 @@
-use parser_utils::errors::{ErrorKind, Result};
 use crate::one::property::{simple, PropertyType};
 use crate::one::property_set::PropertySetId;
 use crate::onestore::object::Object;
+use parser_utils::errors::{ErrorKind, Result};
 
 /// A picture container.
 ///

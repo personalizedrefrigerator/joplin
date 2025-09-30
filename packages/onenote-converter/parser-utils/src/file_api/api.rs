@@ -33,11 +33,7 @@ pub trait FileApiDriver: Send + Sync {
         let result = self.get_file_name(&dir_name);
 
         if let Some(value) = result {
-            if value == "" {
-                None
-            } else {
-                Some(value)
-            }
+            if value == "" { None } else { Some(value) }
         } else {
             None
         }

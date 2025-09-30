@@ -1,8 +1,8 @@
-use parser_utils::errors::Result;
 use crate::fsshttpb::data::binary_item::BinaryItem;
 use crate::fsshttpb::data::object_types::ObjectType;
 use crate::fsshttpb::data::stream_object::ObjectHeader;
 use crate::fsshttpb::data_element::DataElement;
+use parser_utils::errors::Result;
 use parser_utils::Reader;
 use std::fmt;
 

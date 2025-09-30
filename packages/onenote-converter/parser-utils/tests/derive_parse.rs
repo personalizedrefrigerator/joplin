@@ -9,7 +9,7 @@ struct Test {
 
 #[test]
 fn test_parse() {
-    let data: [u8; 5] = [ 1, 2, 3, 4, 5 ];
+    let data: [u8; 5] = [1, 2, 3, 4, 5];
     let mut reader = Reader::new(&data);
     let parsed = Test::parse(&mut reader).unwrap();
     assert_eq!(parsed.a, 1);

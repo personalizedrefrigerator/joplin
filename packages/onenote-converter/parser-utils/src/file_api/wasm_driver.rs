@@ -1,7 +1,7 @@
 use super::ApiResult;
 use super::FileApiDriver;
-use wasm_bindgen::prelude::wasm_bindgen;
 use wasm_bindgen::JsValue;
+use wasm_bindgen::prelude::wasm_bindgen;
 use web_sys::js_sys;
 use web_sys::js_sys::Uint8Array;
 

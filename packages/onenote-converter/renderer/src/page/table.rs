@@ -1,7 +1,7 @@
 use crate::page::Renderer;
-use parser::contents::{OutlineElement, Table, TableCell};
-use crate::utils::{px, AttributeSet, StyleSet};
+use crate::utils::{AttributeSet, StyleSet, px};
 use color_eyre::Result;
+use parser::contents::{OutlineElement, Table, TableCell};
 
 impl<'a> Renderer<'a> {
     pub(crate) fn render_table(&mut self, table: &Table) -> Result<String> {
@@ -102,11 +102,7 @@ impl<'a> Renderer<'a> {
             .iter()
             .any(|element| self.is_list(element) || self.has_note_tag(element));
 
-        if needs_nesting {
-            2
-        } else {
-            1
-        }
+        if needs_nesting { 2 } else { 1 }
     }
 }
 

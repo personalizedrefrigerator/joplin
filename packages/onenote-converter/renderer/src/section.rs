@@ -1,8 +1,8 @@
+use crate::{page, templates};
+use color_eyre::eyre::Result;
 use parser::section::Section;
 use parser_utils::fs_driver;
 use parser_utils::log;
-use crate::{page, templates};
-use color_eyre::eyre::Result;
 use std::collections::HashSet;
 
 pub(crate) struct Renderer {

@@ -1,8 +1,8 @@
-use parser_utils::errors::{ErrorKind, Result};
 use crate::one::property::ink_dimensions::InkDimension;
 use crate::one::property::{simple, PropertyType};
 use crate::one::property_set::PropertySetId;
 use crate::onestore::object::Object;
+use parser_utils::errors::{ErrorKind, Result};
 
 /// An ink stroke's properties.
 #[allow(dead_code)]

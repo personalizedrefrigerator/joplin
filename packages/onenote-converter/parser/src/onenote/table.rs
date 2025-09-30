@@ -1,5 +1,3 @@
-use parser_utils::errors::{ErrorKind, Result};
-use crate::shared::exguid::ExGuid;
 use crate::one::property::color::Color;
 use crate::one::property::layout_alignment::LayoutAlignment;
 use crate::one::property::outline_indent_distance::OutlineIndentDistance;
@@ -7,6 +5,8 @@ use crate::one::property_set::{table_cell_node, table_node, table_row_node};
 use crate::onenote::note_tag::{parse_note_tags, NoteTag};
 use crate::onenote::outline::{parse_outline_element, OutlineElement};
 use crate::onestore::object_space::ObjectSpace;
+use crate::shared::exguid::ExGuid;
+use parser_utils::errors::{ErrorKind, Result};
 
 /// A table.
 ///

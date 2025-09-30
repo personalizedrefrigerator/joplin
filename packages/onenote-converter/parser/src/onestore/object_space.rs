@@ -1,12 +1,12 @@
-use parser_utils::errors::{ErrorKind, Result};
 use crate::fsshttpb::data::cell_id::CellId;
-use crate::shared::exguid::ExGuid;
 use crate::fsshttpb::data_element::object_group::ObjectGroupData;
 use crate::fsshttpb::data_element::storage_index::{StorageIndex, StorageIndexCellMapping};
 use crate::fsshttpb::packaging::OneStorePackaging;
 use crate::onestore::object::Object;
 use crate::onestore::revision::Revision;
 use crate::onestore::revision_role::RevisionRole;
+use crate::shared::exguid::ExGuid;
+use parser_utils::errors::{ErrorKind, Result};
 use std::collections::HashMap;
 
 pub(crate) type GroupData<'a> = HashMap<(ExGuid, u64), &'a ObjectGroupData>;

@@ -1,6 +1,6 @@
 use askama::Template;
-use color_eyre::eyre::WrapErr;
 use color_eyre::Result;
+use color_eyre::eyre::WrapErr;
 
 #[derive(Template)]
 #[template(path = "section.html")]
@@ -32,4 +32,3 @@ pub(crate) fn render(name: &str, pages: Vec<(String, String, i32)>) -> Result<St
         .render()
         .wrap_err("Failed to render section template")
 }
-

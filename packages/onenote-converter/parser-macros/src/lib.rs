@@ -1,13 +1,13 @@
 use proc_macro2::TokenStream;
 
 use quote::{quote, quote_spanned};
-use syn::{parse_macro_input, spanned::Spanned, DeriveInput, Expr};
+use syn::{DeriveInput, Expr, parse_macro_input, spanned::Spanned};
 
 // See the syn example: https://github.com/dtolnay/syn/blob/master/examples/heapsize/heapsize_derive/src/lib.rs
 
 #[proc_macro_derive(Parse, attributes(pad_to_alignment, parse_additional_args, validate))]
 pub fn parseable_derive(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
-	let ast = parse_macro_input!(input as DeriveInput);
+    let ast = parse_macro_input!(input as DeriveInput);
     let name = &ast.ident;
     let parse_impl = process_fields(&ast.data, &ast.attrs);
 
@@ -21,23 +21,27 @@ pub fn parseable_derive(input: proc_macro::TokenStream) -> proc_macro::TokenStre
     proc_macro::TokenStream::from(generated)
 }
 
-
-fn process_fields(data: &syn::Data, attrs: &Vec<syn::Attribute>)->TokenStream {
-    let validation = attrs.iter().map(|a| {
-        if a.path().is_ident("validate") {
-            let validation: Expr = a.parse_args().expect("validate must have a single validation argument");
-            let validation_str = format!("Failed to validate: {:?}", validation);
-            Some(quote_spanned! {validation.span() =>
-                if ! (#validation) {
-                    return Err(parser_utils::errors::ErrorKind::ParseValidationFailed(
-                        ( #validation_str ).into()
-                    ).into());
-                }
-            })
-        } else {
-            None
-        }
-    }).filter_map(|field| field);
+fn process_fields(data: &syn::Data, attrs: &Vec<syn::Attribute>) -> TokenStream {
+    let validation = attrs
+        .iter()
+        .map(|a| {
+            if a.path().is_ident("validate") {
+                let validation: Expr = a
+                    .parse_args()
+                    .expect("validate must have a single validation argument");
+                let validation_str = format!("Failed to validate: {:?}", validation);
+                Some(quote_spanned! {validation.span() =>
+                    if ! (#validation) {
+                        return Err(parser_utils::errors::ErrorKind::ParseValidationFailed(
+                            ( #validation_str ).into()
+                        ).into());
+                    }
+                })
+            } else {
+                None
+            }
+        })
+        .filter_map(|field| field);
 
     match *data {
         syn::Data::Struct(ref data) => {
@@ -101,11 +105,11 @@ fn process_fields(data: &syn::Data, attrs: &Vec<syn::Attribute>)->TokenStream {
                             #(#names),*
                         })
                     }
-                },
+                }
                 syn::Fields::Unnamed(ref _fields) => unimplemented!(),
                 syn::Fields::Unit => unimplemented!(),
             }
-        },
+        }
         syn::Data::Enum(ref _data) => unimplemented!(),
         syn::Data::Union(ref _data) => unimplemented!(),
     }
