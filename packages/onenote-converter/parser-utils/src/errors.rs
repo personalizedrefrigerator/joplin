@@ -97,6 +97,9 @@ pub enum ErrorKind {
     #[error("Not FSSHTTPB data: {0}")]
     NotFssHttpBData(Cow<'static, str>),
 
+    #[error("Post-parse validation failed: {0}")]
+    ParseValidationFailed(Cow<'static, str>),
+
     /// A malformed UUID was encountered
     #[error("Invalid UUID: {err}")]
     InvalidUuid {

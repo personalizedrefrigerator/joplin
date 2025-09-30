@@ -42,7 +42,7 @@ impl Parse for FileNodeData {
 			0x025 => FileNode::GlobalIdTableEntry2FNDX(GlobalIdTableEntry2FNDX::parse(reader)?),
 			0x026 => FileNode::GlobalIdTableEntry3FNDX(GlobalIdTableEntry3FNDX::parse(reader)?),
 			// 0x028 => GlobalIdTableEndFNDX // Unused
-			// 0x02D => Self::ObjectDeclarationWithRefCountFNDX(ObjectDeclarationWithRefCountFNDX::parse(reader)?),
+			0x02D => FileNode::ObjectDeclarationWithRefCountFNDX(ObjectDeclarationWithRefCountFNDX::parse(reader, stp_format, cb_format)?),
 			// 0x02E => Self::ObjectDeclarationWithRefCount2FNDX(ObjectDeclarationWithRefCount2FNDX::parse(reader)?),
 			// 0x041 => Self::ObjectRevisionWithRefCountFNDX(ObjectRevisionWithRefCountFNDX::parse(reader)?),
 			// 0x042 => Self::ObjectRevisionWithRefCount2FNDX(ObjectRevisionWithRefCount2FNDX::parse(reader)?),
