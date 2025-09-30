@@ -1,6 +1,6 @@
 use crate::page::Renderer;
-use crate::parser::contents::{List, OutlineElement};
-use crate::parser::property::common::ColorRef;
+use parser::contents::{List, OutlineElement};
+use parser::property::common::ColorRef;
 use crate::utils::{px, AttributeSet, StyleSet};
 use color_eyre::Result;
 

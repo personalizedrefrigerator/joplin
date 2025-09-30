@@ -1,9 +1,8 @@
-use crate::parser::notebook::Notebook;
-use crate::parser::property::common::Color;
-use crate::parser::section::{Section, SectionEntry};
+use parser::notebook::Notebook;
+use parser::property::common::Color;
+use parser::section::{Section, SectionEntry};
 use crate::templates::notebook::Toc;
-use crate::utils::fs_driver;
-use crate::utils::utils::log;
+use parser_utils::{fs_driver, log};
 use crate::{section, templates};
 use color_eyre::eyre::Result;
 use palette::rgb::Rgb;

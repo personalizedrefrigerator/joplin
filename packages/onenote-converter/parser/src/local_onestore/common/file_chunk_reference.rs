@@ -67,7 +67,7 @@ mod test {
 
     #[test]
     fn parse_file_chunk_32() {
-        let data: [u8; 8] = [ 1, 0, 0, 0, 0, 0, 0, 0 ];
+        let data: [u8; 8] = [ 8, 0, 0, 0, 0, 0, 0, 0 ];
         let mut reader = Reader::new(&data);
         let parsed = FileChunkReference32::parse(&mut reader).unwrap();
         assert_eq!(parsed.stp, 8);

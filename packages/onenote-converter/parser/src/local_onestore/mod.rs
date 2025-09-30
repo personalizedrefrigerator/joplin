@@ -1,9 +1,9 @@
 use parser_utils::errors::Result;
 use parser_utils::Reader;
+use parser_utils::parse::Parse;
 use file_structure::{OneStoreHeader, FreeChunkListFragment, TransactionLogFragment};
 
 mod common;
-mod file_node_list;
 mod file_structure;
 mod file_node;
 
@@ -18,8 +18,8 @@ pub struct OneStorePackaging {
     pub header: OneStoreHeader,
     pub free_chunk_list: Vec<FreeChunkListFragment>,
     pub transaction_log: Vec<TransactionLogFragment>,
-    pub hashed_chunk_list: Vec<FileNodeListFragment>,
-    pub root_file_node_list: Vec<RootFileNodeList>,
+    // pub hashed_chunk_list: Vec<FileNodeListFragment>,
+    // pub root_file_node_list: Vec<RootFileNodeList>,
 }
 
 impl OneStorePackaging {
@@ -28,6 +28,8 @@ impl OneStorePackaging {
 
         Ok(Self {
             header,
+            free_chunk_list: todo!(),
+            transaction_log: todo!(),
         })
     }
 }

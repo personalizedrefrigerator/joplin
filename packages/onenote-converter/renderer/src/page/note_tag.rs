@@ -1,7 +1,7 @@
 use crate::page::Renderer;
-use crate::parser::contents::{NoteTag, OutlineElement};
-use crate::parser::property::common::ColorRef;
-use crate::parser::property::note_tag::{ActionItemStatus, NoteTagShape};
+use parser::contents::{NoteTag, OutlineElement};
+use parser::property::common::ColorRef;
+use parser::property::note_tag::{ActionItemStatus, NoteTagShape};
 use crate::utils::StyleSet;
 use std::borrow::Cow;
 

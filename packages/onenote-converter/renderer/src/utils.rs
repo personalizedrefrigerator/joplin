@@ -1,10 +1,8 @@
-use crate::parser::errors::Result;
+use parser_utils::errors::Result;
 use itertools::Itertools;
-use lazy_static::lazy_static;
 use std::collections::HashMap;
 use std::fmt;
 use std::fmt::Display;
-use std::sync::Mutex;
 use widestring::U16CString;
 
 pub(crate) fn px(inches: f32) -> String {

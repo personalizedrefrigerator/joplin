@@ -1,7 +1,7 @@
 use crate::page::Renderer;
-use crate::parser::contents::{EmbeddedObject, RichText};
-use crate::parser::property::common::ColorRef;
-use crate::parser::property::rich_text::{ParagraphAlignment, ParagraphStyling};
+use parser::contents::{EmbeddedObject, RichText};
+use parser::property::common::ColorRef;
+use parser::property::rich_text::{ParagraphAlignment, ParagraphStyling};
 use crate::utils::{px, AttributeSet, StyleSet};
 use color_eyre::eyre::ContextCompat;
 use color_eyre::Result;

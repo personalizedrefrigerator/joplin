@@ -1,4 +1,4 @@
-use crate::parser::page::{Page, PageContent};
+use parser::page::{Page, PageContent};
 use crate::section;
 use crate::utils::StyleSet;
 use color_eyre::Result;

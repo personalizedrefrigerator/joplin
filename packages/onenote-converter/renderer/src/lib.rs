@@ -3,7 +3,7 @@ use color_eyre::eyre::{eyre, Result};
 use std::panic;
 use wasm_bindgen::prelude::wasm_bindgen;
 
-use crate::utils::{fs_driver, utils::{log, log_warn}};
+use parser_utils::{fs_driver, log, log_warn};
 
 mod notebook;
 mod page;

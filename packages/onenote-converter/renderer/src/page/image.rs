@@ -1,7 +1,7 @@
 use crate::page::Renderer;
-use crate::parser::contents::Image;
-use crate::utils::utils::log;
-use crate::utils::{fs_driver, px, AttributeSet, StyleSet};
+use parser::contents::Image;
+use parser_utils::{fs_driver, log};
+use crate::utils::{px, AttributeSet, StyleSet};
 use color_eyre::Result;
 
 impl<'a> Renderer<'a> {

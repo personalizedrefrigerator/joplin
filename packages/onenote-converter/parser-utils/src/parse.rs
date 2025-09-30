@@ -35,3 +35,10 @@ impl Parse for f32 {
 		reader.get_f32()
 	}
 }
+
+impl Parse for () {
+	fn parse(_reader: Reader) -> Result<Self> {
+		Ok(())
+	}
+}
+

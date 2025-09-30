@@ -1,7 +1,7 @@
 use parser_utils::parse::Parse;
 use parser_utils::Result;
 use super::file_node_chunk_reference::FileNodeChunkReference;
-use super::super::common::ObjectDeclarationWithRefCountBody;
+use super::super::common::{ ObjectDeclarationWithRefCountBody, ObjectSpaceObjectPropSet };
 use crate::shared::exguid::ExGuid;
 
 use crate::shared::guid::Guid;

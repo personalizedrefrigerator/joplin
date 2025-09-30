@@ -1,5 +1,5 @@
 use crate::page::Renderer;
-use crate::parser::contents::{Ink, InkBoundingBox, InkPoint, InkStroke};
+use parser::contents::{Ink, InkBoundingBox, InkPoint, InkStroke};
 use crate::utils::{px, AttributeSet, StyleSet};
 use itertools::Itertools;
 

@@ -1,5 +1,5 @@
 use crate::page::Renderer;
-use crate::parser::contents::{Outline, OutlineElement, OutlineItem};
+use parser::contents::{Outline, OutlineElement, OutlineItem};
 use crate::utils::{px, AttributeSet, StyleSet};
 use color_eyre::Result;
 

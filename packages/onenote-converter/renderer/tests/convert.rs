@@ -1,4 +1,4 @@
-use onenote_converter::convert;
+use renderer::convert;
 use std::fs;
 use std::path::PathBuf;
 

@@ -1,5 +1,5 @@
 use parser_utils::errors::Result;
-use crate::fsshttpb::data::compact_u64::CompactU64;
+use crate::shared::compact_u64::CompactU64;
 use parser_utils::Reader;
 
 /// A byte array with the length determined by a `CompactU64`.

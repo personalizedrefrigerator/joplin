@@ -1,6 +1,6 @@
-use crate::parser::section::Section;
-use crate::utils::fs_driver;
-use crate::utils::utils::log;
+use parser::section::Section;
+use parser_utils::fs_driver;
+use parser_utils::log;
 use crate::{page, templates};
 use color_eyre::eyre::Result;
 use std::collections::HashSet;
