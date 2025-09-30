@@ -6,12 +6,12 @@ use parser_utils::{errors::Result, parse::Parse, Reader};
 pub struct FreeChunkListFragment {
     size: u64,
     crc: u32,
-    fcr_next_chunk: FileChunkReference64x32,
+    pub fcr_next_chunk: FileChunkReference64x32,
     fcr_free_chunk: Vec<FileChunkReference64>,
 }
 
 impl FreeChunkListFragment {
-    fn parse(reader: Reader, size: u64) -> Result<Self> {
+    pub fn parse(reader: Reader, size: u64) -> Result<Self> {
         let crc = reader.get_u32()?;
         let fcr_next_chunk = FileChunkReference64x32::parse(reader)?;
 

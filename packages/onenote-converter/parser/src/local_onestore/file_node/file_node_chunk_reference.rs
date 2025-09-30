@@ -2,7 +2,7 @@ use super::super::common::FileChunkReference;
 use parser_utils::errors::{ErrorKind, Result};
 use parser_utils::Reader;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct FileNodeChunkReference {
     stp_format: u32,
     cb_format: u32,

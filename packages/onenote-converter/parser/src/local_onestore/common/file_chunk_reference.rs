@@ -7,7 +7,7 @@ pub trait FileChunkReference {
 }
 
 /// See [\[MS-ONESTORE\] 2.2.4.1](https://learn.microsoft.com/en-us/openspecs/office_file_formats/ms-onestore/f77f021e-57b1-4dff-9254-985f514a0d89)
-#[derive(Debug, Parse)]
+#[derive(Debug, Clone, Parse)]
 pub struct FileChunkReference32 {
     /// Data location
     stp: u32,
@@ -26,10 +26,10 @@ impl FileChunkReference for FileChunkReference32 {
 }
 
 /// See [\[MS-ONESTORE\] 2.2.4.4]: https://learn.microsoft.com/en-us/openspecs/office_file_formats/ms-onestore/e2815e73-bd04-42fc-838e-6e86ab192e54
-#[derive(Debug, Parse)]
+#[derive(Debug, Clone, Parse)]
 pub struct FileChunkReference64x32 {
-    stp: u64,
-    cb: u32,
+    pub stp: u64,
+    pub cb: u32,
 }
 
 impl FileChunkReference for FileChunkReference64x32 {
@@ -43,7 +43,7 @@ impl FileChunkReference for FileChunkReference64x32 {
 }
 
 /// See [\[MS-ONESTORE\] 2.2.4.4]: https://learn.microsoft.com/en-us/openspecs/office_file_formats/ms-onestore/e2815e73-bd04-42fc-838e-6e86ab192e54
-#[derive(Debug, Parse)]
+#[derive(Debug, Clone, Parse)]
 pub struct FileChunkReference64 {
     stp: u64,
     cb: u64,

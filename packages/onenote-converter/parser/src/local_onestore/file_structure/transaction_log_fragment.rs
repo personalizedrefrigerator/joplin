@@ -7,7 +7,7 @@ use parser_utils::Reader;
 #[derive(Debug, Parse)]
 pub struct TransactionLogFragment {
     size_table: SizeTable,
-    next_fragment: FileChunkReference64x32,
+    pub next_fragment: FileChunkReference64x32,
 }
 
 #[derive(Debug)]

@@ -1,0 +1,52 @@
+use crate::local_onestore::{common::FileChunkReference64x32, file_node::FileNodeData};
+use parser_utils::parse::Parse;
+
+#[derive(Debug)]
+pub struct FileNodeListFragment {
+    pub header: FileNodeListHeader,
+    pub file_nodes: Vec<FileNodeData>,
+    pub next_fragment: FileChunkReference64x32,
+    pub footer: u64,
+}
+
+impl FileNodeListFragment {
+    pub fn parse(reader: parser_utils::Reader, size: usize) -> parser_utils::Result<Self> {
+        let header = FileNodeListHeader::parse(reader)?;
+        let mut file_nodes: Vec<FileNodeData> = Vec::new();
+        let mut file_node_size: usize = 0;
+
+        loop {
+            let file_node = FileNodeData::parse(reader)?;
+            file_node_size += file_node.size as usize;
+            if file_node.node_id != 0 {
+                file_nodes.push(file_node);
+            }
+
+            if size - 36 - file_node_size <= 4 {
+                break;
+            }
+        }
+
+        let padding_length = size - 36 - file_node_size;
+        reader.advance(padding_length)?;
+
+        let next_fragment = FileChunkReference64x32::parse(reader)?;
+        let footer = reader.get_u64()?;
+
+        Ok(Self {
+            header,
+            file_nodes,
+            next_fragment,
+            footer,
+        })
+    }
+}
+
+#[derive(Debug, Parse)]
+#[validate(magic == 0xA4567AB1F5F7F4C4)]
+#[validate(file_node_list_id >= 0x0010)]
+struct FileNodeListHeader {
+    magic: u64,
+    file_node_list_id: u32,
+    n_fragment_sequence: u32,
+}

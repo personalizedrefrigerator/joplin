@@ -5,6 +5,7 @@ use crate::shared::compact_id::CompactId;
 use crate::shared::exguid::ExGuid;
 use crate::shared::jcid::JcId;
 use crate::shared::object_prop_set::ObjectPropSet;
+use parser_utils::errors::ErrorKind;
 use parser_utils::parse::{Parse, ParseWithCount};
 use parser_utils::Utf16ToString;
 use parser_utils::{Reader, Result};
@@ -12,18 +13,22 @@ use parser_utils::{Reader, Result};
 use crate::shared::guid::Guid;
 
 /// See [\[MS-ONESTORE\] 2.4.3](https://learn.microsoft.com/en-us/openspecs/office_file_formats/ms-onestore/25a9b048-f91a-48d1-b803-137b7194e69e)
-
+#[derive(Debug, Clone)]
 pub struct FileNodeData {
-    node_id: u32,
+    /// Specifies the type of the structure
+    pub node_id: u32,
+
     stp_format: u32,
     cb_format: u32,
     base_type: u32,
-    size: u32,
-    fnd: FileNode,
+    pub size: u32,
+    pub fnd: FileNode,
 }
 
 impl Parse for FileNodeData {
     fn parse(reader: parser_utils::Reader) -> Result<Self> {
+        let remaining_0 = reader.remaining();
+
         let first_line = reader.get_u32()?;
         let node_id = first_line & 0x3FF; // First 10 bits
         let size = (first_line >> 10) & 0x1FFF; // Next 13 bits
@@ -123,19 +128,32 @@ impl Parse for FileNodeData {
             _ => FileNode::Null,
         };
 
-        Ok(Self {
-            node_id,
-            stp_format,
-            cb_format,
-            base_type,
-            size,
-            fnd,
-        })
+        let remaining_1 = reader.remaining();
+        let actual_size = (remaining_0 - remaining_1) as u32;
+        if actual_size != size {
+            Err(ErrorKind::MalformedOneNoteFileData(
+                format!(
+                    "The size specified for this structure is incorrect. Was {}, expected {}",
+                    size, actual_size
+                )
+                .into(),
+            )
+            .into())
+        } else {
+            Ok(Self {
+                node_id,
+                stp_format,
+                cb_format,
+                base_type,
+                size,
+                fnd,
+            })
+        }
     }
 }
 
 /// See [\[MS-ONESTORE\] 2.4.3](https://learn.microsoft.com/en-us/openspecs/office_file_formats/ms-onestore/25a9b048-f91a-48d1-b803-137b7194e69e)
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum FileNode {
     ObjectSpaceManifestRootFND(ObjectSpaceManifestRootFND),
     ObjectSpaceManifestListReferenceFND(ObjectSpaceManifestListReferenceFND),
@@ -186,19 +204,19 @@ where
     fn parse(reader: parser_utils::Reader, stp_format: u32, cb_format: u32) -> Result<Self>;
 }
 
-#[derive(Debug, Parse)]
+#[derive(Debug, Clone, Parse)]
 struct ObjectSpaceManifestRootFND {
     gosid_root: Guid,
 }
 
 type ObjectSpaceManifestListReferenceFND = ObjectRefAndId<ExGuid>;
 
-#[derive(Debug, Parse)]
+#[derive(Debug, Clone, Parse)]
 struct ObjectSpaceManifestListStartFND {
     gsoid: ExGuid,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct RevisionManifestListReferenceFND {
     list_ref: FileNodeChunkReference,
 }
@@ -211,7 +229,7 @@ impl ParseWithFormat for RevisionManifestListReferenceFND {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct RevisionManifestListStartFND {
     gsoid: ExGuid,
     n_instance: u32,
@@ -226,7 +244,7 @@ impl Parse for RevisionManifestListStartFND {
     }
 }
 
-#[derive(Debug, Parse)]
+#[derive(Debug, Clone, Parse)]
 struct RevisionManifestStart4FND {
     rid: ExGuid,
     rid_dependent: ExGuid,
@@ -235,7 +253,7 @@ struct RevisionManifestStart4FND {
     odcs_default: u16,
 }
 
-#[derive(Debug, Parse)]
+#[derive(Debug, Clone, Parse)]
 struct RevisionManifestStart6FND {
     rid: ExGuid,
     rid_dependent: ExGuid,
@@ -243,37 +261,37 @@ struct RevisionManifestStart6FND {
     odcs_default: u16,
 }
 
-#[derive(Debug, Parse)]
+#[derive(Debug, Clone, Parse)]
 struct RevisionManifestStart7FND {
     base: RevisionManifestStart6FND,
     gctxid: ExGuid,
 }
 
-#[derive(Debug, Parse)]
+#[derive(Debug, Clone, Parse)]
 struct GlobalIdTableStartFNDX {
     reserved: u8,
 }
 
-#[derive(Debug, Parse)]
+#[derive(Debug, Clone, Parse)]
 struct GlobalIdTableEntryFNDX {
     index: u32,
     guid: Guid,
 }
 
-#[derive(Debug, Parse)]
+#[derive(Debug, Clone, Parse)]
 struct GlobalIdTableEntry2FNDX {
     i_index_map_from: u32,
     i_index_map_to: u32,
 }
 
-#[derive(Debug, Parse)]
+#[derive(Debug, Clone, Parse)]
 struct GlobalIdTableEntry3FNDX {
     i_index_copy_from_start: u32,
     c_entries_to_copy: u32,
     i_index_copy_to_start: u32,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct ObjectDeclarationWithSizedRefCount<RefSize: Parse> {
     object_ref: FileNodeChunkReference,
     body: ObjectDeclarationWithRefCountBody,
@@ -307,7 +325,7 @@ impl<RefSize: Parse> ParseWithFormat for ObjectDeclarationWithSizedRefCount<RefS
 type ObjectDeclarationWithRefCountFNDX = ObjectDeclarationWithSizedRefCount<u8>;
 type ObjectDeclarationWithRefCount2FNDX = ObjectDeclarationWithSizedRefCount<u32>;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct ObjectRevisionWithRefCountFNDX {
     object_ref: FileNodeChunkReference,
     oid: CompactId,
@@ -333,7 +351,7 @@ impl ParseWithFormat for ObjectRevisionWithRefCountFNDX {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct ObjectRevisionWithRefCount2FNDX {
     object_ref: FileNodeChunkReference,
     oid: CompactId,
@@ -359,32 +377,32 @@ impl ParseWithFormat for ObjectRevisionWithRefCount2FNDX {
     }
 }
 
-#[derive(Debug, Parse)]
+#[derive(Debug, Clone, Parse)]
 struct RootObjectReference2FNDX {
     oid_root: CompactId,
     root_role: u32,
 }
 
-#[derive(Debug, Parse)]
+#[derive(Debug, Clone, Parse)]
 struct RootObjectReference3FND {
     oid_root: ExGuid,
     root_role: u32,
 }
 
-#[derive(Debug, Parse)]
+#[derive(Debug, Clone, Parse)]
 struct RevisionRoleDeclarationFND {
     rid: ExGuid,
     revision_role: u32,
 }
 
-#[derive(Debug, Parse)]
+#[derive(Debug, Clone, Parse)]
 struct RevisionRoleAndContextDeclarationFND {
     base: RevisionRoleDeclarationFND,
     gctxid: ExGuid,
 }
 
 /// See [\[MS-ONESTORE\] 2.2.3](https://learn.microsoft.com/en-us/openspecs/office_file_formats/ms-onestore/af15f3eb-f2a8-4333-8d04-e05e55c2af07)
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct StringInStorageBuffer {
     cch: u32,
     data: String,
@@ -400,7 +418,7 @@ impl Parse for StringInStorageBuffer {
 }
 
 /// See [\[MS-ONESTORE\] 2.5.27](https://learn.microsoft.com/en-us/openspecs/office_file_formats/ms-onestore/da2bbc7d-0529-4bf4-a843-6f3f55c87e8f)
-#[derive(Debug, Parse)]
+#[derive(Debug, Clone, Parse)]
 #[validate({
     let data = &file_data_ref.data;
     data.starts_with("<file>") || data.starts_with("<ifndf>") || data.starts_with("<invfdo>")
@@ -416,7 +434,7 @@ struct ObjectDeclarationFileDataRefCount<RefSize: Parse> {
 type ObjectDeclarationFileData3RefCountFND = ObjectDeclarationFileDataRefCount<u8>;
 type ObjectDeclarationFileData3LargeRefCountFND = ObjectDeclarationFileDataRefCount<u32>;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct ObjectRefOnly {
     data_ref: FileNodeChunkReference,
 }
@@ -429,7 +447,7 @@ impl ParseWithFormat for ObjectRefOnly {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct ObjectRefAndId<Id: Parse> {
     data_ref: FileNodeChunkReference,
     id: Id,
@@ -444,7 +462,7 @@ impl<Id: Parse> ParseWithFormat for ObjectRefAndId<Id> {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct ObjectRefAndHash<Hash: Parse> {
     data_ref: FileNodeChunkReference,
     hash: Hash,
@@ -462,14 +480,14 @@ impl<Hash: Parse> ObjectRefAndHash<Hash> {
 /// Points to encrypted data. See [\[MS-ONESTORE\] 2.5.19](https://learn.microsoft.com/en-us/openspecs/office_file_formats/ms-onestore/542f09eb-9db8-4b6a-86e5-2d9a930b41c0).
 type ObjectDataEncryptionKeyV2FNDX = ObjectRefOnly;
 
-#[derive(Debug, Parse)]
+#[derive(Debug, Clone, Parse)]
 struct ObjectInfoDependencyOverride<RefSize: Parse> {
     oid: CompactId,
     c_ref: RefSize,
 }
 
 /// See [\[MS-ONESTORE\] 2.6.10](https://learn.microsoft.com/en-us/openspecs/office_file_formats/ms-onestore/af821117-689f-42cf-8136-c72c1e238f1e)
-#[derive(Debug, Parse)]
+#[derive(Debug, Clone, Parse)]
 struct ObjectInfoDependencyOverrideData {
     c8_override_count: u32,
     c32_override_count: u32,
@@ -481,7 +499,7 @@ struct ObjectInfoDependencyOverrideData {
 }
 
 /// See [\[MS-ONESTORE\] 2.5.20](https://learn.microsoft.com/en-us/openspecs/office_file_formats/ms-onestore/80125c83-199e-43b9-9a13-4085752eddac)
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct ObjectInfoDependencyOverridesFND {
     obj_ref: FileNodeChunkReference,
     data: ObjectInfoDependencyOverrideData,
@@ -506,7 +524,7 @@ impl ParseWithFormat for ObjectInfoDependencyOverridesFND {
 
 /// Terminates ObjectGroupEndFND, DataSignatureGroupDefinitionFND, and RevisionManifestEndFND.
 /// See [\[MS-ONESTORE\] 2.5.33](https://learn.microsoft.com/en-us/openspecs/office_file_formats/ms-onestore/0fa4c886-011a-4c19-9651-9a69e43a19c6)
-#[derive(Debug, Parse)]
+#[derive(Debug, Clone, Parse)]
 struct DataSignatureGroupDefinitionFND {
     data_signature_group: ExGuid,
 }
@@ -517,7 +535,7 @@ type FileDataStoreListReferenceFND = ObjectRefOnly;
 /// See [\[MS-ONESTORE\] 2.5.22](https://learn.microsoft.com/en-us/openspecs/office_file_formats/ms-onestore/6f6d5729-ad03-420f-b8fa-7683751218b3)
 type FileDataStoreObjectReferenceFND = ObjectRefAndId<Guid>;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct ObjectDeclaration2Body {
     oid: CompactId,
     jcid: JcId,
@@ -540,7 +558,7 @@ impl Parse for ObjectDeclaration2Body {
 }
 
 /// See [\[MS-ONESTORE\] 2.5.25](https://learn.microsoft.com/en-us/openspecs/office_file_formats/ms-onestore/a6ea1707-b205-4cd8-be40-d4c3462b226b)
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct ObjectDeclaration2RefCount<RefSize: Parse> {
     blob_ref: FileNodeChunkReference,
     body: ObjectDeclaration2Body,
@@ -562,14 +580,14 @@ type ObjectDeclaration2LargeRefCountFND = ObjectDeclaration2RefCount<u32>;
 
 type ObjectGroupListReferenceFND = ObjectRefAndId<ExGuid>;
 
-#[derive(Debug, Parse)]
+#[derive(Debug, Clone, Parse)]
 struct ObjectGroupStartFND {
     oid: ExGuid,
 }
 
 type HashedChunkDescriptor2FND = ObjectRefAndHash<u128>;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct ReadOnlyObjectDeclaration2RefCount<Base: ParseWithFormat> {
     base: Base,
     md5_hash: u128,
