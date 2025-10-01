@@ -8,8 +8,8 @@ use parser_utils::Reader;
 /// [\[MS-ONESTORE\] 2.2.2]: https://docs.microsoft.com/en-us/openspecs/office_file_formats/ms-onestore/8de02f24-9b9c-48a9-bd26-5c0230814bf4
 #[derive(Debug, Hash, Eq, PartialEq, Copy, Clone)]
 pub(crate) struct CompactId {
-    n: u8,
-    guid_index: u32,
+    pub n: u8,
+    pub guid_index: u32,
 }
 
 impl CompactId {

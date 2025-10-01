@@ -10,6 +10,7 @@ use parser_utils::errors::ErrorKind;
 use parser_utils::parse::{Parse, ParseWithCount};
 use parser_utils::{log_warn, Utf16ToString};
 use parser_utils::{Reader, Result};
+use super::NodeId;
 
 use crate::shared::guid::Guid;
 
@@ -17,8 +18,11 @@ use crate::shared::guid::Guid;
 #[derive(Debug, Clone)]
 #[allow(dead_code)]
 pub struct FileNodeData {
+    /// A unique ID for the node. Not guaranteed to be the same if the file is re-parsed.
+    pub node_unique_id: NodeId,
+
     /// Specifies the type of the structure
-    pub node_id: u32,
+    node_type_id: u32,
 
     stp_format: u32,
     cb_format: u32,
@@ -34,6 +38,16 @@ enum FileNodeDataRef {
     ElementList(RootFileNodeList),
     NoData,
     InvalidData,
+}
+
+impl FileNodeData {
+    pub fn get_children(&self) -> Option<&RootFileNodeList> {
+        if let FileNodeDataRef::ElementList(list) = &self.data_ref {
+            Some(list)
+        } else {
+            None
+        }
+    }
 }
 
 impl Parse for FileNodeData {
@@ -157,7 +171,8 @@ impl Parse for FileNodeData {
         let actual_size = remaining_0 - remaining_2;
 
         let node = Self {
-            node_id,
+            node_unique_id: NodeId(reader.absolute_offset()),
+            node_type_id: node_id,
             stp_format,
             cb_format,
             base_type,

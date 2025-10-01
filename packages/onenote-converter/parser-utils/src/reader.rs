@@ -66,6 +66,18 @@ impl<'a> Reader<'a> {
         Ok(())
     }
 
+    pub fn absolute_offset(&self) -> usize {
+        // Use pointer arithmetic (in a way similar to the [subslice offset](https://docs.rs/crate/subslice-offset/latest/source/src/lib.rs)
+        // crate and [this StackOverflow post](https://stackoverflow.com/questions/50781561/how-to-find-the-starting-offset-of-a-string-slice-of-another-string/50781657))
+        // to calculate the offset.
+        let offset = (self.buff.as_ptr() as usize) - (self.original.as_ptr() as usize);
+        if offset > self.original.len() {
+            panic!("self.buff must be a subslice of self.original!");
+        }
+
+        offset
+    }
+
     pub fn with_updated_bounds(&self, start: usize, end: usize) -> Result<Reader<'a>> {
         if start > self.original.len() {
             return Err(ErrorKind::UnexpectedEof(

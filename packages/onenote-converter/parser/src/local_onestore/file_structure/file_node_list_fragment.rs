@@ -1,4 +1,4 @@
-use crate::local_onestore::{common::FileChunkReference64x32, file_node::FileNodeData};
+use crate::local_onestore::{common::FileChunkReference64x32, file_node::{FileNode, FileNodeData}};
 use parser_utils::{errors::ErrorKind, parse::Parse};
 
 #[derive(Debug, Clone)]
@@ -18,18 +18,13 @@ impl FileNodeListFragment {
 
         let remaining_0 = reader.remaining();
 
-        println!("Frag: Size: {}", size);
+        println!("Fragment: Size: {}", size);
 
         loop {
             let file_node = FileNodeData::parse(reader)?;
             file_node_size += file_node.size as usize;
-            println!(
-                "Node {:#0x}, remaining {}",
-                file_node.node_id,
-                size - 36 - file_node_size
-            );
 
-            if file_node.node_id != 0 {
+            if !matches!(file_node.fnd, FileNode::Null) {
                 file_nodes.push(file_node);
             }
 

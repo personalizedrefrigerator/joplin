@@ -28,8 +28,8 @@ impl fmt::Debug for OneStoreFile {
 	}
 }
 
-impl OneStoreFile {
-    pub fn parse(reader: Reader) -> Result<Self> {
+impl Parse for OneStoreFile {
+    fn parse(reader: Reader) -> Result<Self> {
         let header = OneStoreHeader::parse(reader)?;
 
         let mut free_chunk_list = Vec::new();
@@ -90,6 +90,7 @@ impl OneStoreFile {
 #[cfg(test)]
 mod test {
     use parser_utils::fs_driver;
+    use parser_utils::parse::Parse;
     use parser_utils::reader::Reader;
 
     use super::OneStoreFile;
