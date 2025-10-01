@@ -100,7 +100,7 @@ mod test {
             .unwrap();
         let mut reader = Reader::new(&test_data);
         let packaging = OneStorePackaging::parse(&mut reader).unwrap();
-        // println!("Packaging {:#?}", packaging);
+        println!("Packaging {:#?}", packaging);
         assert!(packaging.root_file_node_list.is_some());
     }
 }

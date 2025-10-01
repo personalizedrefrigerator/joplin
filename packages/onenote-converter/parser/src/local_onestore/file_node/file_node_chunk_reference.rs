@@ -7,8 +7,6 @@ use parser_utils::Reader;
 #[derive(Debug, Clone)]
 #[allow(dead_code)]
 pub struct FileNodeChunkReference {
-    stp_format: u32,
-    cb_format: u32,
     stp: Vec<u8>,
     cb: Vec<u8>,
     /// The size of the data
@@ -75,8 +73,6 @@ impl FileNodeChunkReference {
         };
 
         Ok(Self {
-            stp_format,
-            cb_format,
             stp,
             cb,
             cb_value,
