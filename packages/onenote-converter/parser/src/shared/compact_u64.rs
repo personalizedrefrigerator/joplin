@@ -23,7 +23,9 @@ impl CompactU64 {
     pub(crate) fn parse(reader: Reader) -> Result<CompactU64> {
         let bytes = reader.bytes();
 
-        let first_byte = bytes.first().copied().ok_or(ErrorKind::UnexpectedEof("Reading CompactU64 (first byte)".into()))?;
+        let first_byte = bytes.first().copied().ok_or(ErrorKind::UnexpectedEof(
+            "Reading CompactU64 (first byte)".into(),
+        ))?;
 
         if first_byte == 0 {
             reader.advance(1)?;

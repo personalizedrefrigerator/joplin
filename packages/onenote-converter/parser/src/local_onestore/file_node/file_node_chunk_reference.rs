@@ -93,11 +93,11 @@ impl FileChunkReference for FileNodeChunkReference {
     fn is_fcr_zero(&self) -> bool {
         self.stp.iter().all(|v| *v == u8::MIN) && self.cb.iter().all(|v| *v == u8::MIN)
     }
-    
+
     fn data_location(&self) -> usize {
         self.stp_value as usize
     }
-    
+
     fn data_size(&self) -> usize {
         self.cb_value as usize
     }

@@ -49,7 +49,9 @@ impl Parse for FileNodeData {
 
         let data_ref = match base_type {
             0 => FileNodeDataRef::NoData, // Does not reference other data
-            1 => FileNodeDataRef::SingleElement(FileNodeChunkReference::parse(reader, stp_format, cb_format)?),
+            1 => FileNodeDataRef::SingleElement(FileNodeChunkReference::parse(
+                reader, stp_format, cb_format,
+            )?),
             2 => FileNodeDataRef::ElementList({
                 let list_ref = FileNodeChunkReference::parse(reader, stp_format, cb_format)?;
                 let mut resolved_reader = list_ref.resolve_to_reader(reader)?;
@@ -112,7 +114,7 @@ impl Parse for FileNodeData {
                 ObjectDeclarationFileData3LargeRefCountFND::parse(reader)?,
             ),
             0x07C => FileNode::ObjectDataEncryptionKeyV2FNDX(ObjectDataEncryptionKeyV2FNDX::parse(
-                reader
+                reader,
             )?),
             0x084 => FileNode::ObjectInfoDependencyOverridesFND(
                 ObjectInfoDependencyOverridesFND::parse(reader, &data_ref)?,
@@ -121,24 +123,24 @@ impl Parse for FileNodeData {
                 DataSignatureGroupDefinitionFND::parse(reader)?,
             ),
             0x090 => FileNode::FileDataStoreListReferenceFND(FileDataStoreListReferenceFND::parse(
-                reader
+                reader,
             )?),
             0x094 => FileNode::FileDataStoreObjectReferenceFND(
                 FileDataStoreObjectReferenceFND::parse(reader)?,
             ),
             0x0A4 => FileNode::ObjectDeclaration2RefCountFND(ObjectDeclaration2RefCountFND::parse(
-                reader, &data_ref
+                reader, &data_ref,
             )?),
             0x0A5 => FileNode::ObjectDeclaration2LargeRefCountFND(
                 ObjectDeclaration2LargeRefCountFND::parse(reader, &data_ref)?,
             ),
-            0x0B0 => FileNode::ObjectGroupListReferenceFND(ObjectGroupListReferenceFND::parse(
-                reader
-            )?),
+            0x0B0 => {
+                FileNode::ObjectGroupListReferenceFND(ObjectGroupListReferenceFND::parse(reader)?)
+            }
             0x0B4 => FileNode::ObjectGroupStartFND(ObjectGroupStartFND::parse(reader)?),
             0x0B8 => FileNode::ObjectGroupEndFND,
             0x0C2 => FileNode::HashedChunkDescriptor2FND(HashedChunkDescriptor2FND::parse(
-                reader, &data_ref
+                reader, &data_ref,
             )?),
             0x0C4 => FileNode::ReadOnlyObjectDeclaration2RefCountFND(
                 ReadOnlyObjectDeclaration2RefCountFND::parse(reader, &data_ref)?,
@@ -154,7 +156,7 @@ impl Parse for FileNodeData {
                 assert!(size_used <= size);
                 let remaining_size = size - size_used;
                 FileNode::UnknownNode(UnknownNode::parse(reader, remaining_size as usize)?)
-            },
+            }
         };
 
         let remaining_2 = reader.remaining();
@@ -172,7 +174,10 @@ impl Parse for FileNodeData {
 
         // The stored size can be incorrect when node_id is zero
         if actual_size != size && node_id != 0 {
-            println!("Incorrect structure size: {:#?} (expected size {}, but was {})", node, size, actual_size);
+            println!(
+                "Incorrect structure size: {:#?} (expected size {}, but was {})",
+                node, size, actual_size
+            );
             Err(ErrorKind::MalformedOneNoteFileData(
                 format!(
                     "The size specified for this structure is incorrect. Was {}, expected {}. Id: {:#0x}",
@@ -268,14 +273,15 @@ pub struct RevisionManifestListReferenceFND {
 impl ParseWithRef for RevisionManifestListReferenceFND {
     fn parse(_reader: parser_utils::Reader, data_ref: &FileNodeDataRef) -> Result<Self> {
         match data_ref {
-            FileNodeDataRef::ElementList(list) => {
-                Ok(Self { list: list.clone() })
-            },
-            other => Err(
-                ErrorKind::MalformedOneStoreData(
-                    format!("Expected a list (parsing RevisionManifestListReferenceFND), got {:?}", other).into()
-                ).into()
-            ),
+            FileNodeDataRef::ElementList(list) => Ok(Self { list: list.clone() }),
+            other => Err(ErrorKind::MalformedOneStoreData(
+                format!(
+                    "Expected a list (parsing RevisionManifestListReferenceFND), got {:?}",
+                    other
+                )
+                .into(),
+            )
+            .into()),
         }
     }
 }
@@ -358,20 +364,21 @@ pub struct ObjectDeclarationWithSizedRefCount<RefSize: Parse> {
     property_set: ObjectPropSet,
 }
 
-fn read_property_set(
-    reader: Reader,
-    property_set_ref: &FileNodeDataRef,
-) -> Result<ObjectPropSet> {
+fn read_property_set(reader: Reader, property_set_ref: &FileNodeDataRef) -> Result<ObjectPropSet> {
     match property_set_ref {
         FileNodeDataRef::SingleElement(data_ref) => {
             let mut prop_set_reader = data_ref.resolve_to_reader(reader)?;
             let prop_set = ObjectPropSet::parse(&mut prop_set_reader)?;
             Ok(prop_set)
-        },
-        FileNodeDataRef::ElementList(_) => Err(
-            ErrorKind::MalformedOneStoreData("Expected a single element (reading PropertySet)".into()).into()
+        }
+        FileNodeDataRef::ElementList(_) => Err(ErrorKind::MalformedOneStoreData(
+            "Expected a single element (reading PropertySet)".into(),
+        )
+        .into()),
+        _ => Err(
+            ErrorKind::MalformedOneStoreData("Expected a reference to a property set".into())
+                .into(),
         ),
-        _ => Err(ErrorKind::MalformedOneStoreData("Expected a reference to a property set".into()).into()),
     }
 }
 
@@ -482,7 +489,10 @@ impl Parse for StringInStorageBuffer {
         let data = reader.read(string_size)?;
         let data = data.utf16_to_string()?;
         println!("Read string (StringInStorageBuffer): {}", data);
-        Ok(Self { cch: characer_count, data })
+        Ok(Self {
+            cch: characer_count,
+            data,
+        })
     }
 }
 
@@ -513,7 +523,7 @@ pub struct ObjectRefAndId<Id: Parse> {
 
 /// Points to encrypted data. See [\[MS-ONESTORE\] 2.5.19](https://learn.microsoft.com/en-us/openspecs/office_file_formats/ms-onestore/542f09eb-9db8-4b6a-86e5-2d9a930b41c0).
 #[derive(Debug, Clone, Parse)]
-struct ObjectDataEncryptionKeyV2FNDX { }
+struct ObjectDataEncryptionKeyV2FNDX {}
 
 #[derive(Debug, Clone, Parse)]
 #[allow(dead_code)]
@@ -546,8 +556,9 @@ impl ParseWithRef for ObjectInfoDependencyOverridesFND {
     fn parse(reader: parser_utils::Reader, obj_ref: &FileNodeDataRef) -> Result<Self> {
         if let FileNodeDataRef::SingleElement(obj_ref) = obj_ref {
             if !obj_ref.is_fcr_nil() {
-                let data =
-                    ObjectInfoDependencyOverrideData::parse(&mut obj_ref.resolve_to_reader(reader)?)?;
+                let data = ObjectInfoDependencyOverrideData::parse(
+                    &mut obj_ref.resolve_to_reader(reader)?,
+                )?;
                 Ok(Self { data })
             } else {
                 Ok(Self {
@@ -555,11 +566,10 @@ impl ParseWithRef for ObjectInfoDependencyOverridesFND {
                 })
             }
         } else {
-            Err(
-                ErrorKind::MalformedOneStoreData(
-                    "Missing ref to data (parsing ObjectInfoDependencyOverridesFND)".into()
-                ).into()
+            Err(ErrorKind::MalformedOneStoreData(
+                "Missing ref to data (parsing ObjectInfoDependencyOverridesFND)".into(),
             )
+            .into())
         }
     }
 }
@@ -673,11 +683,11 @@ type ReadOnlyObjectDeclaration2LargeRefCountFND =
     ReadOnlyObjectDeclaration2RefCount<ObjectDeclaration2LargeRefCountFND>;
 
 #[derive(Debug, Clone)]
-pub struct UnknownNode { }
+pub struct UnknownNode {}
 
 impl ParseWithCount for UnknownNode {
     fn parse(reader: Reader, size: usize) -> Result<Self> {
         reader.advance(size)?;
-        Ok(UnknownNode {  })
+        Ok(UnknownNode {})
     }
 }

@@ -54,7 +54,7 @@ impl OneStorePackaging {
 
         ObjectHeader::try_parse_32(reader, ObjectType::OneNotePackaging)?;
 
-        let storage_index = < ExGuid as ParseHttpb >::parse(reader)?;
+        let storage_index = <ExGuid as ParseHttpb>::parse(reader)?;
         let cell_schema = Guid::parse(reader)?;
 
         let data_element_package = DataElementPackage::parse(reader)?;

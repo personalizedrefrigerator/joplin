@@ -6,9 +6,7 @@ use std::mem;
 macro_rules! try_get {
     ($this:ident, $typ:tt) => {{
         if $this.buff.remaining() < mem::size_of::<$typ>() {
-            Err(ErrorKind::UnexpectedEof(
-                format!("Getting {:}", stringify!($typ)).into()
-            ).into())
+            Err(ErrorKind::UnexpectedEof(format!("Getting {:}", stringify!($typ)).into()).into())
         } else {
             Ok(paste! {$this.buff. [< get_ $typ >]()})
         }
@@ -17,8 +15,9 @@ macro_rules! try_get {
     ($this:ident, $typ:tt::$endian:tt) => {{
         if $this.buff.remaining() < mem::size_of::<$typ>() {
             Err(ErrorKind::UnexpectedEof(
-                format!("Getting {:} ({:})", stringify!($typ), stringify!($endian)).into()
-            ).into())
+                format!("Getting {:} ({:})", stringify!($typ), stringify!($endian)).into(),
+            )
+            .into())
         } else {
             Ok(paste! {$this.buff. [< get_ $typ _ $endian >]()})
         }
@@ -69,13 +68,22 @@ impl<'a> Reader<'a> {
 
     pub fn with_updated_bounds(&self, start: usize, end: usize) -> Result<Reader<'a>> {
         if start > self.original.len() {
-            return Err(ErrorKind::UnexpectedEof("Reader.with_updated_bounds: start is out of bounds".into()).into());
+            return Err(ErrorKind::UnexpectedEof(
+                "Reader.with_updated_bounds: start is out of bounds".into(),
+            )
+            .into());
         }
         if end > self.original.len() {
-            return Err(ErrorKind::UnexpectedEof("Reader.with_updated_bounds: end is out of bounds".into()).into());
+            return Err(ErrorKind::UnexpectedEof(
+                "Reader.with_updated_bounds: end is out of bounds".into(),
+            )
+            .into());
         }
 
-        Ok(Reader { buff: &self.original[start..end], original: self.original })
+        Ok(Reader {
+            buff: &self.original[start..end],
+            original: self.original,
+        })
     }
 
     pub fn get_u8(&mut self) -> Result<u8> {

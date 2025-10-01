@@ -23,7 +23,11 @@ impl FileNodeListFragment {
         loop {
             let file_node = FileNodeData::parse(reader)?;
             file_node_size += file_node.size as usize;
-            println!("Node {:#0x}, remaining {}", file_node.node_id, size - 36 - file_node_size);
+            println!(
+                "Node {:#0x}, remaining {}",
+                file_node.node_id,
+                size - 36 - file_node_size
+            );
 
             if file_node.node_id != 0 {
                 file_nodes.push(file_node);
@@ -43,11 +47,10 @@ impl FileNodeListFragment {
 
         let footer = reader.get_u64()?;
         if footer != 0x8BC215C38233BA4B {
-            return Err(
-                ErrorKind::MalformedOneStoreData(
-                    format!("Invalid footer: {:#0x}", footer).into()
-                ).into()
-            );
+            return Err(ErrorKind::MalformedOneStoreData(
+                format!("Invalid footer: {:#0x}", footer).into(),
+            )
+            .into());
         }
 
         Ok(Self {

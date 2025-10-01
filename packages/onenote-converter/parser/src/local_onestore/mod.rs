@@ -1,7 +1,7 @@
 use file_structure::FileNodeListFragment;
 use file_structure::{FreeChunkListFragment, OneStoreHeader, TransactionLogFragment};
 use parser_utils::errors::Result;
-use parser_utils::parse::Parse;
+use parser_utils::parse::{Parse, ParseWithCount};
 use parser_utils::Reader;
 
 use crate::local_onestore::{common::FileChunkReference, file_structure::RootFileNodeList};
@@ -44,7 +44,8 @@ impl OneStorePackaging {
         loop {
             let mut reader = transaction_log_ref.resolve_to_reader(reader)?;
 
-            let fragment = TransactionLogFragment::parse(&mut reader, transaction_log_ref.cb as usize)?;
+            let fragment =
+                TransactionLogFragment::parse(&mut reader, transaction_log_ref.cb as usize)?;
             transaction_log_ref = fragment.next_fragment.clone();
             transaction_log.push(fragment);
 
@@ -94,7 +95,9 @@ mod test {
     #[test]
     fn should_parse_onenote_2016_file() {
         // TODO: Update path:
-        let test_data = fs_driver().read_file("/home/self/Documents/test/test2.one").unwrap();
+        let test_data = fs_driver()
+            .read_file("/home/self/Documents/test/test2.one")
+            .unwrap();
         let mut reader = Reader::new(&test_data);
         let packaging = OneStorePackaging::parse(&mut reader).unwrap();
         // println!("Packaging {:#?}", packaging);

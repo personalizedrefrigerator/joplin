@@ -18,7 +18,10 @@ pub trait FileChunkReference {
             .into());
         }
 
-        original_reader.with_updated_bounds(self.data_location(), self.data_location() + self.data_size())
+        original_reader.with_updated_bounds(
+            self.data_location(),
+            self.data_location() + self.data_size(),
+        )
     }
 }
 

@@ -9,7 +9,6 @@ where
     fn parse(reader: Reader) -> Result<Self>;
 }
 
-
 pub trait ParseHttpb
 where
     Self: Sized,

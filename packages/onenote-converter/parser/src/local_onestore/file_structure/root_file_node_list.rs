@@ -35,11 +35,14 @@ impl RootFileNodeList {
     fn add_fragment(&mut self, fragment: FileNodeListFragment) -> Result<FileChunkReference64x32> {
         let fragment_sequence = fragment.header.n_fragment_sequence;
         if fragment_sequence != self.next_fragment_id {
-            return Err(
-                ErrorKind::MalformedOneStoreData(
-                    format!("Invalid n_fragment_sequence. Was {}, expected {}", fragment_sequence, self.next_fragment_id).into()
-                ).into()
-            );
+            return Err(ErrorKind::MalformedOneStoreData(
+                format!(
+                    "Invalid n_fragment_sequence. Was {}, expected {}",
+                    fragment_sequence, self.next_fragment_id
+                )
+                .into(),
+            )
+            .into());
         }
         self.next_fragment_id = fragment_sequence + 1;
 
