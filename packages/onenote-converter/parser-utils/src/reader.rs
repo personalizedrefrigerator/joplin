@@ -29,8 +29,8 @@ pub struct Reader<'a> {
 impl<'a> Reader<'a> {
     pub fn new(data: &'a [u8]) -> Reader<'a> {
         Reader {
-            buff: data,
-            original: data,
+            buff: &data[..],
+            original: &data[..],
         }
     }
 
@@ -93,5 +93,30 @@ impl<'a> Reader<'a> {
 
     pub fn get_f32(&mut self) -> Result<f32> {
         try_get!(self, f32::le)
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn with_start_index_should_seek() {
+        let data: [u8; 8] = [1, 2, 3, 4, 5, 6, 7, 8];
+        let mut reader = Reader::new(&data);
+        assert_eq!(reader.get_u8().unwrap(), 1);
+        assert_eq!(reader.get_u8().unwrap(), 2);
+        assert_eq!(reader.get_u8().unwrap(), 3);
+        {
+            let mut reader = reader.with_start_index(0).unwrap();
+            assert_eq!(reader.get_u8().unwrap(), 1);
+            assert_eq!(reader.get_u8().unwrap(), 2);
+            assert_eq!(reader.get_u8().unwrap(), 3);
+            assert_eq!(reader.get_u8().unwrap(), 4);
+            let mut reader = reader.with_start_index(1).unwrap();
+            assert_eq!(reader.get_u8().unwrap(), 2);
+            assert_eq!(reader.get_u8().unwrap(), 3);
+        }
+        assert_eq!(reader.get_u8().unwrap(), 4);
     }
 }
