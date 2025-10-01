@@ -13,6 +13,7 @@ import { readdirSync, writeFileSync } from 'fs';
 import { readFile } from 'fs/promises';
 import { copy, mkdirpSync, remove } from 'fs-extra';
 import { GettextExtractor, JsExtractors } from 'gettext-extractor';
+import parsePluralLocalizationForm from './utils/parsePluralLocalizationForm';
 
 const rootDir = `${__dirname}/../..`;
 const localesDir = `${__dirname}/locales`;
@@ -405,7 +406,7 @@ async function main() {
 		const { headers } = await buildLocale(poFilePäth, jsonFilePath);
 
 		const stat = await translationStatus(defaultLocale === locale, poFilePäth);
-		stat.pluralForms = headers['Plural-Forms'];
+		stat.pluralForms = `function(n) { ${parsePluralLocalizationForm(headers['Plural-Forms'])} }`;
 		stat.locale = locale;
 		stat.languageName = countryDisplayName(locale);
 		stats.push(stat);
