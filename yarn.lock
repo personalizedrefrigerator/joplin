@@ -9615,6 +9615,7 @@ __metadata:
     react-native-securerandom: "npm:1.0.1"
     react-native-share: "npm:12.0.11"
     react-native-sqlite-storage: "npm:6.0.1"
+    react-native-svg: "npm:15.13.0"
     react-native-url-polyfill: "npm:2.0.0"
     react-native-vector-icons: "npm:10.2.0"
     react-native-version-info: "npm:1.1.1"
@@ -42100,6 +42101,20 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-native-svg@npm:15.13.0":
+  version: 15.13.0
+  resolution: "react-native-svg@npm:15.13.0"
+  dependencies:
+    css-select: "npm:^5.1.0"
+    css-tree: "npm:^1.1.3"
+    warn-once: "npm:0.1.1"
+  peerDependencies:
+    react: "*"
+    react-native: "*"
+  checksum: 10/03db4516aec2dfcdf406283bf6b0e18ea3f56cdf228c97f92d282128b1e39c3336424d46a1afec894ebc1c3681b16d2c35c03b08a8a5ee2314c124bdea7ae6e3
+  languageName: node
+  linkType: hard
+
 "react-native-url-polyfill@npm:2.0.0":
   version: 2.0.0
   resolution: "react-native-url-polyfill@npm:2.0.0"
@@ -50729,6 +50744,13 @@ __metadata:
   dependencies:
     makeerror: "npm:1.0.12"
   checksum: 10/ad7a257ea1e662e57ef2e018f97b3c02a7240ad5093c392186ce0bcf1f1a60bbadd520d073b9beb921ed99f64f065efb63dfc8eec689a80e569f93c1c5d5e16c
+  languageName: node
+  linkType: hard
+
+"warn-once@npm:0.1.1":
+  version: 0.1.1
+  resolution: "warn-once@npm:0.1.1"
+  checksum: 10/e6a5a1f5a8dba7744399743d3cfb571db4c3947897875d4962a7c5b1bf2195ab4518c838cb4cea652e71729f21bba2e98dc75686f5fccde0fabbd894e2ed0c0d
   languageName: node
   linkType: hard
 
