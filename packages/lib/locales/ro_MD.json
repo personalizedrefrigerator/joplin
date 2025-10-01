@@ -173,9 +173,6 @@
 	"[None]": [
 		"[niciuna]"
 	],
-	"A brief description of the image:": [
-		""
-	],
 	"A comma-separated list of words. May be used for uncommon words, to help voice typing spell them correctly.": [
 		"O listă de cuvinte separate de virgule. Poate fi folosită pentru cuvinte mai puțin comune, pentru a ajuta transcrierea prin dictare să le scrie corect."
 	],
@@ -343,9 +340,6 @@
 	],
 	"An autosaved drawing was found. Attach a copy of it to the note?": [
 		"A fost găsit un desen salvat automat. Atașezi o copie a acestuia la notiță?"
-	],
-	"An error occurred while sending the response. This can happen if the app is offline or cannot connect to the server.\nError: %s": [
-		""
 	],
 	"An error occurred: %s": [
 		"S-a produs o eroare: %s"
@@ -1185,9 +1179,6 @@
 	"Do not lose the password as, for security purposes, this will be the *only* way to decrypt the data! To enable encryption, please enter your password below.": [
 		"Nu pierde parola, deoarece din motive de securitate, aceasta este *unica* modalitate de decriptare a datelor! Pentru a activa criptarea, te rog să întroduci parola mai jos."
 	],
-	"Do you find the Joplin web app useful?": [
-		""
-	],
 	"Document scanner: Title template": [
 		"Scanner documente: Șablon titlu"
 	],
@@ -1608,9 +1599,6 @@
 	"Feature flags": [
 		"Feature Flags"
 	],
-	"Feedback": [
-		""
-	],
 	"Fetched items: %d/%d.": [
 		"Elemente preluate: %d/%d."
 	],
@@ -1871,6 +1859,9 @@
 	"In any command, a note or notebook can be referred to by title or ID, or using the shortcuts `$n` or `$b` for, respectively, the currently selected note or notebook. `$c` can be used to refer to the currently selected item.": [
 		"În orice comandă, se poate face referire la o notă sau la un caiet de notițe prin titlu sau ID, sau folosind comenzile rapide `$n` sau `$b` pentru nota sau caietul selectat în acel moment. Se poate utiliza `$c` pentru a se referi la elementul selectat în mod curent."
 	],
+	"In order to associate a geo-location with the note, the app needs your permission to access your location.\n\nYou may turn off this option at any time in the Configuration screen.": [
+		"Pentru a asocia o geolocație cu notița, aplicația are nevoie de permisiunea de a îți accesa locația.\n\nPoți dezactiva această opțiune în orice moment din ecranul de configurare."
+	],
 	"In order to do so, your entire data set will have to be encrypted and synchronised, so it is best to run it overnight.\n\nTo start, please follow these instructions:\n\n1. Synchronise all your devices.\n2. Click \"%s\".\n3. Let it run to completion. While it runs, avoid changing any note on your other devices, to avoid conflicts.\n4. Once sync is done on this device, sync all your other devices and let it run to completion.\n\nImportant: you only need to run this ONCE on one device.": [
 		"Pentru a face acest lucru, întregul set de date va trebui să fie criptat și sincronizat, așa că cel mai bine este să îl execuți peste noapte.\n\nPentru a începe, te rog să urmezi aceste instrucțiuni:\n\n1. Sincronizează-ți toate dispozitivele.\n2. Fă clic pe „%s”.\n3. Lasă-l să se execute pînă la finalizare. În timp ce se execută, evită să modifici orice notiță pe celelalte dispozitive, pentru a evita conflictele.\n4. Odată ce sincronizarea este finalizată pe acest dispozitiv, sincronizează toate celelalte dispozitive și las-o să se execute pînă la finalizare.\n\nImportant: nu trebuie să execuți acest lucru decît O SINGURĂ dată pe un singur dispozitiv."
 	],
@@ -2042,9 +2033,6 @@
 	"Joplin SSO Authentication": [
 		"Autentificare SSO Joplin"
 	],
-	"Joplin supports saving the location at which notes are saved or created. Do you want to enable it? This can be changed at any time in settings.": [
-		""
-	],
 	"Joplin Web Clipper allows saving web pages and screenshots from your browser to Joplin.": [
 		"Joplin Web Clipper permite salvarea paginilor web și a capturilor de ecran din navigatorul tău web în Joplin."
 	],
@@ -2074,9 +2062,6 @@
 	],
 	"Keys that need upgrading": [
 		"Chei care trebuie actualizate"
-	],
-	"Label": [
-		""
 	],
 	"Landscape": [
 		"Peisaj"
@@ -2495,9 +2480,6 @@
 	"Not now": [
 		"Nu acum"
 	],
-	"Not useful": [
-		""
-	],
 	"note": [
 		"notiță"
 	],
@@ -2705,9 +2687,6 @@
 	"Ordered list": [
 		"Listă ordonată"
 	],
-	"Other": [
-		""
-	],
 	"Other applications...": [
 		"Alte aplicații…"
 	],
@@ -2769,6 +2748,9 @@
 	],
 	"Permanently deletes the notebook, skipping the trash.": [
 		"Șterge permanent caietul, omițînd coșul."
+	],
+	"Permission needed": [
+		"Permisiune necesară"
 	],
 	"Photo %d": [
 		"Fotografia %d"
@@ -2872,6 +2854,9 @@
 	"Preferred light theme": [
 		"Tema luminoasă preferată"
 	],
+	"Preferred voice typing provider": [
+		"Furnizorul preferat de transcriere vocală"
+	],
 	"Preserve colours when pasting text in Rich Text Editor": [
 		"Păstrează culorile la lipirea textului în editorul de text îmbogățit"
 	],
@@ -2970,9 +2955,6 @@
 	],
 	"Publish/unpublish": [
 		"Publică/Retrage"
-	],
-	"Publishes a note to Joplin Server or Joplin Cloud": [
-		""
 	],
 	"QR Code": [
 		"Cod QR"
@@ -3316,9 +3298,6 @@
 	"Select notebook": [
 		"Selectează caiet"
 	],
-	"Select one of the other supported sync targets.": [
-		""
-	],
 	"Select parent notebook": [
 		"Selectează caietul părinte"
 	],
@@ -3655,9 +3634,6 @@
 	"Switches to [notebook] - all further operations will happen within this notebook.": [
 		"Comută la [notebook] - toate operațiunile ulterioare vor avea loc în acest caiet."
 	],
-	"Sync": [
-		""
-	],
 	"Sync as many devices as you want": [
 		"Sincronizează cît de multe dispozitive dorești"
 	],
@@ -3753,9 +3729,6 @@
 	],
 	"Text editor command": [
 		"Comandă editor de text"
-	],
-	"Thank you for the feedback!\nDo you have time to complete a short survey?": [
-		""
 	],
 	"The active profile cannot be deleted. Switch to a different profile and try again.": [
 		"Profilul activ nu poate fi șters. Comută la un alt profil și încearcă din nou."
@@ -4304,9 +4277,6 @@
 	"Used where a fixed width font is needed to lay out text legibly (e.g. tables, checkboxes, code). If not found, a generic monospace (fixed width) font is used.": [
 		"Se utilizează atunci cînd este necesar un font cu lățime fixă pentru a prezenta textul în mod lizibil (de exemplu, tabele, căsuțe de selectare, coduri). Dacă nu se găsește, se utilizează un font generic monospace (lățime fixă)."
 	],
-	"Useful": [
-		""
-	],
 	"User deletions": [
 		"Ștergeri de utilizatori"
 	],
@@ -4354,6 +4324,9 @@
 	],
 	"Voice typing: Glossary": [
 		"Transcriere vocală: Glosar"
+	],
+	"Vosk": [
+		"Vosk"
 	],
 	"Waiting for authorisation...": [
 		"Se așteaptă autorizarea..."
@@ -4414,6 +4387,9 @@
 	],
 	"When enabled, the application will scan your attachments and extract the text from it. This will allow you to search for text in these attachments.": [
 		"Atunci cînd este activată, aplicația va scana atașamentele și va extrage textul din ele. Acest lucru îți va permite să cauți text în atașamente."
+	],
+	"Whisper": [
+		"Whisper"
 	],
 	"Window unresponsive.": [
 		"Fereastra nu răspunde."

@@ -167,9 +167,6 @@
 	"[None]": [
 		"[Semmi]"
 	],
-	"A brief description of the image:": [
-		""
-	],
 	"A comma-separated list of words. May be used for uncommon words, to help voice typing spell them correctly.": [
 		"Szavak vesszővel elválasztott listája. Használható a nem túl gyakori szavak esetében, hogy segítse a hangalapú gépelést a helyesírásban."
 	],
@@ -337,9 +334,6 @@
 	],
 	"An autosaved drawing was found. Attach a copy of it to the note?": [
 		"Automatikusan mentett rajz megtalálva. Mellékeli a másolatát a jegyzethez?"
-	],
-	"An error occurred while sending the response. This can happen if the app is offline or cannot connect to the server.\nError: %s": [
-		""
 	],
 	"An error occurred: %s": [
 		"Hiba történt: %s"
@@ -1177,9 +1171,6 @@
 	"Do not lose the password as, for security purposes, this will be the *only* way to decrypt the data! To enable encryption, please enter your password below.": [
 		"Ne veszítse el a jelszót, mert biztonsági okokból ez lesz az *egyetlen* módja az adatok visszafejtésének! A titkosítás engedélyezéséhez adja meg a jelszavát alább."
 	],
-	"Do you find the Joplin web app useful?": [
-		""
-	],
 	"Document scanner: Title template": [
 		"Dokumentumbeolvasó: Címsablon"
 	],
@@ -1600,9 +1591,6 @@
 	"Feature flags": [
 		"Funkciójelölők"
 	],
-	"Feedback": [
-		""
-	],
 	"Fetched items: %d/%d.": [
 		"Lekérdezett elemek: %d/%d."
 	],
@@ -1806,7 +1794,7 @@
 		"Tétlen"
 	],
 	"If an image attachment is on its own line and followed by a blank line, it will be rendered just below its Markdown source.": [
-		"Ha egy képmelléklet a saját sorában található, és utána egy üres sor következik, akkor a Markdown forrása alá renderelődik."
+		"Ha egy képmelléklet a saját sorában található, és utána egy üres sor következik, akkor a Markdown forrása alatt jelenik meg."
 	],
 	"If you have already authorised, please wait for the application to sync to Joplin Cloud.": [
 		"Ha már engedélyezte, várja meg, amíg az alkalmazás szinkronizálódik a Joplin Clouddal."
@@ -1861,6 +1849,9 @@
 	],
 	"In any command, a note or notebook can be referred to by title or ID, or using the shortcuts `$n` or `$b` for, respectively, the currently selected note or notebook. `$c` can be used to refer to the currently selected item.": [
 		"Bármely parancsban egy jegyzet vagy jegyzetfüzet hivatkozható cím vagy azonosító alapján, illetve a jelenleg kijelölt jegyzet vagy jegyzetfüzet esetén a `$n` vagy `$b` parancs használatával. A jelenlegi kijelölt elemre a `$c` paranccsal hivatkozhat."
+	],
+	"In order to associate a geo-location with the note, the app needs your permission to access your location.\n\nYou may turn off this option at any time in the Configuration screen.": [
+		"Ahhoz, hogy a jegyzethez földrajzi helyet társíthasson, engedélyt kell adnia az alkalmazásnak a helyadatokhoz való hozzáféréshez.\n\nEzt az engedélyt bármikor kikapcsolhatja a „Beállítások” menüben."
 	],
 	"In order to do so, your entire data set will have to be encrypted and synchronised, so it is best to run it overnight.\n\nTo start, please follow these instructions:\n\n1. Synchronise all your devices.\n2. Click \"%s\".\n3. Let it run to completion. While it runs, avoid changing any note on your other devices, to avoid conflicts.\n4. Once sync is done on this device, sync all your other devices and let it run to completion.\n\nImportant: you only need to run this ONCE on one device.": [
 		"Ehhez az összes adatának titkosítása és szinkronizálása szükséges, ezért a folyamatot érdemes éjszakára időzíteni.\n\nA kezdéshez kövesse az alábbi lépéseket:\n\n1. Szinkronizálja az összes eszközét.  \n2. Kattintson a(z) „%s” gombra.  \n3. Várja meg, amíg a folyamat befejeződik. Amíg fut, kerülje a jegyzetek módosítását más eszközein, hogy elkerülje az ütközéseket.  \n4. Miután a szinkronizálás ezen az eszközön befejeződött, szinkronizálja a többi eszközt, és várja meg, amíg ott is befejeződik.  \n\nFontos: ezt a folyamatot ELÉG egyszer lefuttatni egyetlen eszközön."
@@ -1917,7 +1908,7 @@
 		"Hiperhivatkozás beszúrása"
 	],
 	"Insert time": [
-		"Időpont beszúrása"
+		"Idő beszúrása"
 	],
 	"Install": [
 		"Telepítés"
@@ -2033,9 +2024,6 @@
 	"Joplin SSO Authentication": [
 		"Joplin SSO-hitelesítés"
 	],
-	"Joplin supports saving the location at which notes are saved or created. Do you want to enable it? This can be changed at any time in settings.": [
-		""
-	],
 	"Joplin Web Clipper allows saving web pages and screenshots from your browser to Joplin.": [
 		"A Joplin Web Clipper lehetővé teszi weboldalak és képernyőképek mentését a böngészőből a Joplin alkalmazásba."
 	],
@@ -2065,9 +2053,6 @@
 	],
 	"Keys that need upgrading": [
 		"Frissítésre szoruló kulcsok"
-	],
-	"Label": [
-		""
 	],
 	"Landscape": [
 		"Fekvő"
@@ -2483,9 +2468,6 @@
 	"Not now": [
 		"Most nem"
 	],
-	"Not useful": [
-		""
-	],
 	"note": [
 		"jegyzet"
 	],
@@ -2693,9 +2675,6 @@
 	"Ordered list": [
 		"Számozott lista"
 	],
-	"Other": [
-		""
-	],
 	"Other applications...": [
 		"További alkalmazások…"
 	],
@@ -2756,6 +2735,9 @@
 	],
 	"Permanently deletes the notebook, skipping the trash.": [
 		"A jegyzetfüzet véglegesen törlődik, a kuka kihagyásával."
+	],
+	"Permission needed": [
+		"Engedély szükséges"
 	],
 	"Photo %d": [
 		"Kép: %d"
@@ -2859,6 +2841,9 @@
 	"Preferred light theme": [
 		"Előnyben részesített világos téma"
 	],
+	"Preferred voice typing provider": [
+		"Előnyben részesített hangalapú beviteli szolgáltató"
+	],
 	"Preserve colours when pasting text in Rich Text Editor": [
 		"Színek megőrzése a szöveg beillesztésekor a formázott szöveges szerkesztőben"
 	],
@@ -2957,9 +2942,6 @@
 	],
 	"Publish/unpublish": [
 		"Közzététel / Közzététel megszüntetése"
-	],
-	"Publishes a note to Joplin Server or Joplin Cloud": [
-		""
 	],
 	"QR Code": [
 		"QR-kód"
@@ -3303,9 +3285,6 @@
 	"Select notebook": [
 		"Jegyzetfüzet kiválasztása"
 	],
-	"Select one of the other supported sync targets.": [
-		""
-	],
 	"Select parent notebook": [
 		"Szülő jegyzetfüzet kijelölése"
 	],
@@ -3526,7 +3505,7 @@
 		"Osztott nézet"
 	],
 	"Start application minimised in the tray icon": [
-		"Alkalmazás kicsinyítése a tálcára indításkor"
+		"Indításkor kicsinyítse az alkalmazást a tálcára"
 	],
 	"Start recording": [
 		"Rögzítés indítása"
@@ -3642,9 +3621,6 @@
 	"Switches to [notebook] - all further operations will happen within this notebook.": [
 		"Váltás a(z) [notebook] jegyzetfüzetre – minden további művelet ebben a jegyzetfüzetben történik."
 	],
-	"Sync": [
-		""
-	],
 	"Sync as many devices as you want": [
 		"Szinkronizáljon annyi eszközt, amennyit csak akar"
 	],
@@ -3740,9 +3716,6 @@
 	],
 	"Text editor command": [
 		"Szövegszerkesztő-parancs"
-	],
-	"Thank you for the feedback!\nDo you have time to complete a short survey?": [
-		""
 	],
 	"The active profile cannot be deleted. Switch to a different profile and try again.": [
 		"Az aktív profil nem törölhető. Váltson másik profilra, és próbálja újra."
@@ -4286,9 +4259,6 @@
 	"Used where a fixed width font is needed to lay out text legibly (e.g. tables, checkboxes, code). If not found, a generic monospace (fixed width) font is used.": [
 		"Ott használatos, ahol a szöveg olvasható elrendezéséhez fix szélességű betűtípusra van szükség (például: táblázatok, jelölőnégyzetek, kódok). Ha nem található, akkor egy általános monospace (fix szélességű) betűtípus lesz használva."
 	],
-	"Useful": [
-		""
-	],
 	"User deletions": [
 		"Felhasználói törlések"
 	],
@@ -4317,7 +4287,7 @@
 		"Megjelenítő"
 	],
 	"Viewer and Rich Text Editor font family": [
-		"A megjelenítő és a szövegszerkesztő betűcsaládja"
+		"A megtekintő és a szövegszerkesztő betűcsaládja"
 	],
 	"Viewer font size": [
 		"Megjelenítő betűmérete"
@@ -4336,6 +4306,9 @@
 	],
 	"Voice typing: Glossary": [
 		"Hanggépelés: Szójegyzék"
+	],
+	"Vosk": [
+		"Vosk"
 	],
 	"Waiting for authorisation...": [
 		"Várakozás a hitelesítésre…"
@@ -4396,6 +4369,9 @@
 	],
 	"When enabled, the application will scan your attachments and extract the text from it. This will allow you to search for text in these attachments.": [
 		"Amikor engedélyezve van, az alkalmazás beolvassa a mellékleteket, és kivonatolja belőlük a szöveget. Ez lehetővé teszi a szöveg keresését ezekben a mellékletekben."
+	],
+	"Whisper": [
+		"Whisper"
 	],
 	"Window unresponsive.": [
 		"Az ablak nem válaszol."
