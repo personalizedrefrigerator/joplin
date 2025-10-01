@@ -5,7 +5,7 @@ use crate::shared::exguid::ExGuid;
 use crate::shared::guid::Guid;
 use parser_utils::errors::{ErrorKind, Result};
 use parser_utils::log;
-use parser_utils::parse::Parse;
+use parser_utils::parse::ParseHttpb;
 use parser_utils::Reader;
 
 /// A OneNote file packaged in FSSHTTPB format.
@@ -54,7 +54,7 @@ impl OneStorePackaging {
 
         ObjectHeader::try_parse_32(reader, ObjectType::OneNotePackaging)?;
 
-        let storage_index = ExGuid::parse(reader)?;
+        let storage_index = < ExGuid as ParseHttpb >::parse(reader)?;
         let cell_schema = Guid::parse(reader)?;
 
         let data_element_package = DataElementPackage::parse(reader)?;

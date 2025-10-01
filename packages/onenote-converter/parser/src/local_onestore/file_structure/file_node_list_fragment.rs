@@ -15,12 +15,16 @@ impl FileNodeListFragment {
         let mut file_nodes: Vec<FileNodeData> = Vec::new();
         let mut file_node_size: usize = 0;
 
+        let remaining_0 = reader.remaining();
+
         loop {
             let file_node = FileNodeData::parse(reader)?;
             file_node_size += file_node.size as usize;
             if file_node.node_id != 0 {
                 file_nodes.push(file_node);
             }
+
+            assert_eq!(remaining_0 - reader.remaining(), file_node_size);
 
             if size - 36 - file_node_size <= 4 {
                 break;

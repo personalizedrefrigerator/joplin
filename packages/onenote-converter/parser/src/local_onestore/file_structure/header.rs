@@ -8,9 +8,9 @@ use parser_utils::{
 
 /// A OneNote file header in the standard OneNote 2016 format.
 ///
-/// See [\[MS-ONESTORE\] 2.8.1]
+/// See [\[MS-ONESTORE\] 2.3.1]
 ///
-/// [\[MS-ONESTORE\] 2.8.1]: https://docs.microsoft.com/en-us/openspecs/office_file_formats/ms-onestore/a2f046ea-109a-49c4-912d-dc2888cf0565
+/// [\[MS-ONESTORE\] 2.3.1]: https://learn.microsoft.com/en-us/openspecs/office_file_formats/ms-onestore/2b394c6b-8788-441f-b631-da1583d772fd
 ///
 #[derive(Debug, Parse)]
 pub struct OneStoreHeader {
@@ -26,6 +26,7 @@ pub struct OneStoreHeader {
     pub fcr_legacy_transaction_log: FileChunkReference32,
     pub c_transactions_in_log: u32,
     pub cb_legacy_expected_file_length: u32,
+    #[assert_offset(104)]
     pub rgb_placeholder: u64,
     pub fcr_legacy_file_node_list_root: FileChunkReference32,
     pub cb_legacy_free_space_in_free_chunk_list: u32,
@@ -34,6 +35,7 @@ pub struct OneStoreHeader {
     pub f_needs_garbage_collect: u8,
     pub f_has_no_embedded_file_objects: u8,
     pub guid_ancestor: Guid,
+    #[assert_offset(144)]
     pub crc_name: u32,
     pub fcr_hashed_chunk_list: FileChunkReference64x32,
     pub fcr_transaction_log: FileChunkReference64x32,
@@ -42,6 +44,7 @@ pub struct OneStoreHeader {
     pub cb_expected_file_length: u64,
     pub cb_free_space_in_free_chunk_list: u64,
     pub guid_file_version: Guid,
+    #[assert_offset(228)]
     pub n_file_version_generation: u64,
     pub guid_deny_read_file_version: Guid,
     pub grf_debug_log_flags: u32,
@@ -51,6 +54,7 @@ pub struct OneStoreHeader {
     pub bn_last_wrote_to_this_file: u32,
     pub bn_oldest_written: u32,
     pub bn_newest_written: u32,
+    #[assert_offset(296)]
     pub rgb_reserved: RgbReserved,
 }
 

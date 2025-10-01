@@ -1,5 +1,5 @@
 use parser_utils::errors::Result;
-use parser_utils::parse::Parse;
+use parser_utils::parse::{Parse, ParseHttpb};
 use parser_utils::Reader;
 use std::fmt;
 use uuid::Uuid;
@@ -59,6 +59,12 @@ impl Parse for Guid {
         ]));
 
         Ok(guid)
+    }
+}
+
+impl ParseHttpb for Guid {
+    fn parse(reader: Reader) -> Result<Self> {
+        <Guid as Parse>::parse(reader)
     }
 }
 

@@ -35,8 +35,7 @@ macro_rules! log {
 #[cfg(not(target_arch = "wasm32"))]
 macro_rules! log_warn {
 	( $( $t:tt )* ) => {
-		use parser_utils::log::get_current_page;
-		println!("Warning: {}, near {}", &format!( $( $t )* ), get_current_page());
+		println!("Warning: {}, near {}", &format!( $( $t )* ), parser_utils::log::get_current_page());
 	}
 }
 

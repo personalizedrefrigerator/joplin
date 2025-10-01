@@ -28,7 +28,6 @@ pub struct FileNodeData {
 impl Parse for FileNodeData {
     fn parse(reader: parser_utils::Reader) -> Result<Self> {
         let remaining_0 = reader.remaining();
-
         let first_line = reader.get_u32()?;
         let node_id = first_line & 0x3FF; // First 10 bits
         let size = (first_line >> 10) & 0x1FFF; // Next 13 bits
@@ -130,24 +129,28 @@ impl Parse for FileNodeData {
 
         let remaining_1 = reader.remaining();
         let actual_size = (remaining_0 - remaining_1) as u32;
-        if actual_size != size {
+
+        let node = Self {
+            node_id,
+            stp_format,
+            cb_format,
+            base_type,
+            size: actual_size,
+            fnd,
+        };
+
+        // The stored size can be incorrect when node_id is zero
+        if actual_size != size && node_id != 0 {
             Err(ErrorKind::MalformedOneNoteFileData(
                 format!(
-                    "The size specified for this structure is incorrect. Was {}, expected {}",
-                    size, actual_size
+                    "The size specified for this structure is incorrect. Was {}, expected {}. Id: {}, data {:?}",
+                    actual_size, size, node_id, node
                 )
                 .into(),
             )
             .into())
         } else {
-            Ok(Self {
-                node_id,
-                stp_format,
-                cb_format,
-                base_type,
-                size,
-                fnd,
-            })
+            Ok(node)
         }
     }
 }
@@ -206,7 +209,7 @@ where
 
 #[derive(Debug, Clone, Parse)]
 struct ObjectSpaceManifestRootFND {
-    gosid_root: Guid,
+    gosid_root: ExGuid,
 }
 
 type ObjectSpaceManifestListReferenceFND = ObjectRefAndId<ExGuid>;

@@ -1,7 +1,7 @@
 use super::compact_u64::CompactU64;
 use crate::shared::guid::Guid;
 use parser_utils::errors::{ErrorKind, Result};
-use parser_utils::parse::Parse;
+use parser_utils::parse;
 use parser_utils::Reader;
 use std::fmt;
 
@@ -10,7 +10,7 @@ use std::fmt;
 /// See [\[MS-FSSHTTPB\] 2.2.1.7].
 ///
 /// [\[MS-FSSHTTPB\] 2.2.1.7]: https://docs.microsoft.com/en-us/openspecs/sharepoint_protocols/ms-fsshttpb/bff58e9f-8222-4fbb-b112-5826d5febedd
-#[derive(Clone, Copy, PartialEq, Hash, Eq)]
+#[derive(Clone, Copy, PartialEq, Hash, Eq, parse::Parse)]
 pub struct ExGuid {
     pub guid: Guid,
     pub value: u32,
@@ -45,19 +45,19 @@ impl ExGuid {
     /// See [\[MS-FSSHTTPB\] 2.2.1.8]
     ///
     /// [\[MS-FSSHTTPB\] 2.2.1.8]: https://docs.microsoft.com/en-us/openspecs/sharepoint_protocols/ms-fsshttpb/10d6fb35-d630-4ae3-b530-b9e877fc27d3
-    pub(crate) fn parse_array(reader: Reader) -> Result<Vec<ExGuid>> {
+    pub(crate) fn parse_array_httpb(reader: Reader) -> Result<Vec<ExGuid>> {
         let mut values = vec![];
 
         let count = CompactU64::parse(reader)?.value();
         for _ in 0..count {
-            values.push(ExGuid::parse(reader)?);
+            values.push(<ExGuid as parse::ParseHttpb>::parse(reader)?);
         }
 
         Ok(values)
     }
 }
 
-impl Parse for ExGuid {
+impl parse::ParseHttpb for ExGuid {
     fn parse(reader: Reader) -> Result<ExGuid> {
         let data = reader.get_u8()?;
 
@@ -72,7 +72,7 @@ impl Parse for ExGuid {
         // A ExGuid with a 5 bit value ([FSSHTTPB] 2.2.1.7.2)
         if data & 0b111 == 4 {
             return Ok(ExGuid {
-                guid: Guid::parse(reader)?,
+                guid: <Guid as parse::ParseHttpb>::parse(reader)?,
                 value: (data >> 3) as u32,
             });
         }
@@ -82,7 +82,7 @@ impl Parse for ExGuid {
             let value = (reader.get_u8()? as u16) << 2 | (data >> 6) as u16;
 
             return Ok(ExGuid {
-                guid: Guid::parse(reader)?,
+                guid: <Guid as parse::ParseHttpb>::parse(reader)?,
                 value: value as u32,
             });
         }
@@ -92,7 +92,7 @@ impl Parse for ExGuid {
             let value = (reader.get_u16()? as u32) << 1 | (data >> 7) as u32;
 
             return Ok(ExGuid {
-                guid: Guid::parse(reader)?,
+                guid: <Guid as parse::ParseHttpb>::parse(reader)?,
                 value,
             });
         }
@@ -102,7 +102,7 @@ impl Parse for ExGuid {
             let value = reader.get_u32()?;
 
             return Ok(ExGuid {
-                guid: Guid::parse(reader)?,
+                guid: <Guid as parse::ParseHttpb>::parse(reader)?,
                 value,
             });
         }

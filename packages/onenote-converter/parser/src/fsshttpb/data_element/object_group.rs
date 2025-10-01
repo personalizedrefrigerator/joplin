@@ -6,7 +6,7 @@ use crate::fsshttpb::data_element::DataElement;
 use crate::shared::compact_u64::CompactU64;
 use crate::shared::exguid::ExGuid;
 use parser_utils::errors::{ErrorKind, Result};
-use parser_utils::parse::Parse;
+use parser_utils::parse::ParseHttpb;
 use parser_utils::Reader;
 use std::fmt;
 
@@ -297,21 +297,21 @@ impl DataElement {
             let object_header = ObjectHeader::parse(reader)?;
             match object_header.object_type {
                 ObjectType::ObjectGroupDataExcluded => {
-                    let group = ExGuid::parse_array(reader)?;
+                    let group = ExGuid::parse_array_httpb(reader)?;
                     let cells = CellId::parse_array(reader)?;
                     let size = CompactU64::parse(reader)?.value();
 
                     objects.push(ObjectGroupData::ObjectExcluded { group, cells, size })
                 }
                 ObjectType::ObjectGroupDataObject => {
-                    let group = ExGuid::parse_array(reader)?;
+                    let group = ExGuid::parse_array_httpb(reader)?;
                     let cells = CellId::parse_array(reader)?;
                     let data = BinaryItem::parse(reader)?.value();
 
                     objects.push(ObjectGroupData::Object { group, cells, data })
                 }
                 ObjectType::ObjectGroupBlobReference => {
-                    let references = ExGuid::parse_array(reader)?;
+                    let references = ExGuid::parse_array_httpb(reader)?;
                     let cells = CellId::parse_array(reader)?;
                     let blob = ExGuid::parse(reader)?;
 

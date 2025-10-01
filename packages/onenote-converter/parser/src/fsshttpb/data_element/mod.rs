@@ -10,7 +10,7 @@ use crate::fsshttpb::data_element::storage_manifest::StorageManifest;
 use crate::shared::compact_u64::CompactU64;
 use crate::shared::exguid::ExGuid;
 use parser_utils::errors::{ErrorKind, Result};
-use parser_utils::parse::Parse;
+use parser_utils::parse::ParseHttpb;
 use parser_utils::Reader;
 use std::collections::HashMap;
 use std::fmt::Debug;

@@ -7,7 +7,7 @@ use syn::{DeriveInput, Expr, parse_macro_input, spanned::Spanned};
 
 #[proc_macro_derive(
     Parse,
-    attributes(pad_to_alignment, parse_additional_args, validate, count)
+    attributes(pad_to_alignment, parse_additional_args, validate, assert_offset)
 )]
 pub fn parseable_derive(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let ast = parse_macro_input!(input as DeriveInput);
@@ -51,6 +51,9 @@ fn process_fields(data: &syn::Data, attrs: &Vec<syn::Attribute>) -> TokenStream 
         if attr.path().is_ident("pad_to_alignment") {
             panic!("#[pad_to_alignment(...)] is only permitted on fields");
         }
+        if attr.path().is_ident("assert_offset") {
+            panic!("#[assert_offset(...)] is only permitted on fields");
+        }
     }
 
     match *data {
@@ -89,6 +92,22 @@ fn process_fields(data: &syn::Data, attrs: &Vec<syn::Attribute>) -> TokenStream 
                             }
                         });
 
+                        let assert_offset = attrs.iter().find_map(|a| {
+                            if a.path().is_ident("assert_offset") {
+                                let offset: Expr = a.parse_args().expect("assert_offset must have a single numeric argument.");
+                                Some(quote_spanned! {offset.span() =>
+                                    {
+                                        let remaining_1 = reader.remaining();
+                                        let actual_offset = _parse_remaining_0 - remaining_1;
+                                        let expected_offset = #offset;
+                                        assert_eq!(actual_offset, expected_offset);
+                                    }
+                                })
+                            } else {
+                                None
+                            }
+                        });
+
                         let parse_args = attrs.iter().find_map(|a| {
                             if a.path().is_ident("parse_additional_args") {
                                 let args: Expr = a.parse_args().expect("parse_additional_args must have a single argument");
@@ -101,6 +120,7 @@ fn process_fields(data: &syn::Data, attrs: &Vec<syn::Attribute>) -> TokenStream 
                         }).unwrap_or(quote! { reader });
 
                         quote_spanned! {f.span() =>
+                            #assert_offset
                             let #name = < #type_name >::parse( #parse_args )?;
                             #pad_to_alignment
                         }

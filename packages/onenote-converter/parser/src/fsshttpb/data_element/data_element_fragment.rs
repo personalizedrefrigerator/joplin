@@ -4,7 +4,7 @@ use crate::fsshttpb::data_element::DataElement;
 use crate::shared::compact_u64::CompactU64;
 use crate::shared::exguid::ExGuid;
 use parser_utils::errors::Result;
-use parser_utils::parse::Parse;
+use parser_utils::parse::ParseHttpb;
 use parser_utils::Reader;
 
 /// A data element fragment.

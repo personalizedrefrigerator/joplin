@@ -5,7 +5,7 @@ use crate::fsshttpb::data_element::DataElement;
 use crate::shared::exguid::ExGuid;
 use crate::shared::guid::Guid;
 use parser_utils::errors::Result;
-use parser_utils::parse::Parse;
+use parser_utils::parse::ParseHttpb;
 use parser_utils::Reader;
 use std::collections::HashMap;
 
@@ -35,7 +35,7 @@ impl DataElement {
 
             ObjectHeader::try_parse_16(reader, ObjectType::StorageManifestRoot)?;
 
-            let root_manifest = ExGuid::parse(reader)?;
+            let root_manifest = <ExGuid as ParseHttpb>::parse(reader)?;
             let cell = CellId::parse(reader)?;
 
             roots.insert(root_manifest, cell);

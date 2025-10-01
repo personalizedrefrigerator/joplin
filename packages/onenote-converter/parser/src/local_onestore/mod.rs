@@ -42,7 +42,14 @@ impl OneStorePackaging {
         let mut transaction_log_ref = header.fcr_transaction_log.clone();
         loop {
             let mut reader = reader.with_start_index(transaction_log_ref.stp as usize)?;
-            let fragment = TransactionLogFragment::parse(&mut reader)?;
+
+            // let remaining_0 = reader.remaining();
+            let fragment = TransactionLogFragment::parse(&mut reader, transaction_log_ref.cb as usize)?;
+            // let remaining_1 = reader.remaining();
+
+            println!("Debug: {:?}-> {:?}", transaction_log_ref, fragment);
+            // assert_eq!(remaining_0 - remaining_1, transaction_log_ref.cb as usize);
+
             transaction_log_ref = fragment.next_fragment.clone();
             transaction_log.push(fragment);
 
@@ -79,5 +86,22 @@ impl OneStorePackaging {
             hashed_chunk_list,
             root_file_node_list,
         })
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use parser_utils::fs_driver;
+    use parser_utils::reader::Reader;
+
+    use super::OneStorePackaging;
+
+    #[test]
+    fn should_parse_onenote_2016_file() {
+        // TODO: Update path:
+        let test_data = fs_driver().read_file("/home/self/Documents/test/cab/Nouvelle section 1.one").unwrap();
+        let mut reader = Reader::new(&test_data);
+        let packaging = OneStorePackaging::parse(&mut reader).unwrap();
+        assert!(packaging.root_file_node_list.is_some());
     }
 }

@@ -3,7 +3,7 @@ use crate::fsshttpb::data::stream_object::ObjectHeader;
 use crate::fsshttpb::data_element::DataElement;
 use crate::shared::exguid::ExGuid;
 use parser_utils::errors::{ErrorKind, Result};
-use parser_utils::parse::Parse;
+use parser_utils::parse::ParseHttpb;
 use parser_utils::Reader;
 
 /// A revision manifest.
