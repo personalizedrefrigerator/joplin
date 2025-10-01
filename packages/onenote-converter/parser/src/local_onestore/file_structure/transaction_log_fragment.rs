@@ -5,6 +5,7 @@ use parser_utils::{log_warn, Reader};
 
 /// See [\[MS-ONESTORE\] 2.3.3.1](https://learn.microsoft.com/en-us/openspecs/office_file_formats/ms-onestore/158030a2-dbf0-4b92-bf6e-1a91a403aebd)
 #[derive(Debug)]
+#[allow(dead_code)]
 pub struct TransactionLogFragment {
     size_table: Vec<TransactionEntry>,
     pub next_fragment: FileChunkReference64x32,
@@ -52,13 +53,14 @@ impl TransactionLogFragment {
 
 /// See [\[MS-ONESTORE\] 2.3.3.2](https://learn.microsoft.com/en-us/openspecs/office_file_formats/ms-onestore/c00897d9-d90a-4707-b9fb-58c93e490322)
 #[derive(Debug, Parse)]
+#[allow(dead_code)]
 struct TransactionEntry {
     src_id: u32,
     transaction_entry_switch: u32,
 }
 
 impl TransactionEntry {
-    pub fn is_sentinel(&self) -> bool {
+    fn is_sentinel(&self) -> bool {
         self.src_id == 0x00000001
     }
 }

@@ -13,6 +13,7 @@ use parser_utils::{
 /// [\[MS-ONESTORE\] 2.3.1]: https://learn.microsoft.com/en-us/openspecs/office_file_formats/ms-onestore/2b394c6b-8788-441f-b631-da1583d772fd
 ///
 #[derive(Debug, Parse)]
+#[allow(dead_code)]
 pub struct OneStoreHeader {
     pub file_type: Guid,
     pub guid_file: Guid,
@@ -59,7 +60,8 @@ pub struct OneStoreHeader {
 }
 
 #[derive(Debug)]
-struct OneStoreFormatGuid {
+#[allow(dead_code)]
+pub struct OneStoreFormatGuid {
     value: Guid,
 }
 
@@ -79,7 +81,7 @@ impl Parse for OneStoreFormatGuid {
 }
 
 #[derive(Debug)]
-struct RgbReserved {}
+pub struct RgbReserved {}
 
 impl Parse for RgbReserved {
     fn parse(reader: Reader) -> Result<Self> {

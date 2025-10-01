@@ -15,6 +15,7 @@ use crate::shared::guid::Guid;
 
 /// See [\[MS-ONESTORE\] 2.4.3](https://learn.microsoft.com/en-us/openspecs/office_file_formats/ms-onestore/25a9b048-f91a-48d1-b803-137b7194e69e)
 #[derive(Debug, Clone)]
+#[allow(dead_code)]
 pub struct FileNodeData {
     /// Specifies the type of the structure
     pub node_id: u32,
@@ -188,6 +189,7 @@ impl Parse for FileNodeData {
 
 /// See [\[MS-ONESTORE\] 2.4.3](https://learn.microsoft.com/en-us/openspecs/office_file_formats/ms-onestore/25a9b048-f91a-48d1-b803-137b7194e69e)
 #[derive(Debug, Clone)]
+#[allow(dead_code)]
 pub enum FileNode {
     ObjectSpaceManifestRootFND(ObjectSpaceManifestRootFND),
     ObjectSpaceManifestListReferenceFND(ObjectSpaceManifestListReferenceFND),
@@ -240,19 +242,26 @@ where
 }
 
 #[derive(Debug, Clone, Parse)]
-struct ObjectSpaceManifestRootFND {
+#[allow(dead_code)]
+pub struct ObjectSpaceManifestRootFND {
     gosid_root: ExGuid,
 }
 
-type ObjectSpaceManifestListReferenceFND = ObjectRefAndId<ExGuid>;
+#[derive(Debug, Clone, Parse)]
+#[allow(dead_code)]
+pub struct ObjectSpaceManifestListReferenceFND {
+    gosid: ExGuid,
+}
 
 #[derive(Debug, Clone, Parse)]
-struct ObjectSpaceManifestListStartFND {
+#[allow(dead_code)]
+pub struct ObjectSpaceManifestListStartFND {
     gsoid: ExGuid,
 }
 
 #[derive(Debug, Clone)]
-struct RevisionManifestListReferenceFND {
+#[allow(dead_code)]
+pub struct RevisionManifestListReferenceFND {
     list: RootFileNodeList,
 }
 
@@ -272,6 +281,7 @@ impl ParseWithRef for RevisionManifestListReferenceFND {
 }
 
 #[derive(Debug, Clone)]
+#[allow(dead_code)]
 struct RevisionManifestListStartFND {
     gsoid: ExGuid,
     n_instance: u32,
@@ -287,6 +297,7 @@ impl Parse for RevisionManifestListStartFND {
 }
 
 #[derive(Debug, Clone, Parse)]
+#[allow(dead_code)]
 struct RevisionManifestStart4FND {
     rid: ExGuid,
     rid_dependent: ExGuid,
@@ -296,6 +307,7 @@ struct RevisionManifestStart4FND {
 }
 
 #[derive(Debug, Clone, Parse)]
+#[allow(dead_code)]
 struct RevisionManifestStart6FND {
     rid: ExGuid,
     rid_dependent: ExGuid,
@@ -304,37 +316,43 @@ struct RevisionManifestStart6FND {
 }
 
 #[derive(Debug, Clone, Parse)]
+#[allow(dead_code)]
 struct RevisionManifestStart7FND {
     base: RevisionManifestStart6FND,
     gctxid: ExGuid,
 }
 
 #[derive(Debug, Clone, Parse)]
+#[allow(dead_code)]
 struct GlobalIdTableStartFNDX {
     reserved: u8,
 }
 
 #[derive(Debug, Clone, Parse)]
+#[allow(dead_code)]
 struct GlobalIdTableEntryFNDX {
     index: u32,
     guid: Guid,
 }
 
 #[derive(Debug, Clone, Parse)]
+#[allow(dead_code)]
 struct GlobalIdTableEntry2FNDX {
     i_index_map_from: u32,
     i_index_map_to: u32,
 }
 
 #[derive(Debug, Clone, Parse)]
-struct GlobalIdTableEntry3FNDX {
+#[allow(dead_code)]
+pub struct GlobalIdTableEntry3FNDX {
     i_index_copy_from_start: u32,
     c_entries_to_copy: u32,
     i_index_copy_to_start: u32,
 }
 
 #[derive(Debug, Clone)]
-struct ObjectDeclarationWithSizedRefCount<RefSize: Parse> {
+#[allow(dead_code)]
+pub struct ObjectDeclarationWithSizedRefCount<RefSize: Parse> {
     body: ObjectDeclarationWithRefCountBody,
     c_ref: RefSize,
     property_set: ObjectPropSet,
@@ -368,10 +386,11 @@ impl<RefSize: Parse> ParseWithRef for ObjectDeclarationWithSizedRefCount<RefSize
     }
 }
 
-type ObjectDeclarationWithRefCountFNDX = ObjectDeclarationWithSizedRefCount<u8>;
-type ObjectDeclarationWithRefCount2FNDX = ObjectDeclarationWithSizedRefCount<u32>;
+pub type ObjectDeclarationWithRefCountFNDX = ObjectDeclarationWithSizedRefCount<u8>;
+pub type ObjectDeclarationWithRefCount2FNDX = ObjectDeclarationWithSizedRefCount<u32>;
 
 #[derive(Debug, Clone)]
+#[allow(dead_code)]
 struct ObjectRevisionWithRefCountFNDX {
     oid: CompactId,
     f_has_oid_references: bool,
@@ -396,6 +415,7 @@ impl ParseWithRef for ObjectRevisionWithRefCountFNDX {
 }
 
 #[derive(Debug, Clone)]
+#[allow(dead_code)]
 struct ObjectRevisionWithRefCount2FNDX {
     oid: CompactId,
     f_has_oid_references: bool,
@@ -420,24 +440,28 @@ impl ParseWithRef for ObjectRevisionWithRefCount2FNDX {
 }
 
 #[derive(Debug, Clone, Parse)]
-struct RootObjectReference2FNDX {
+#[allow(dead_code)]
+pub struct RootObjectReference2FNDX {
     oid_root: CompactId,
     root_role: u32,
 }
 
 #[derive(Debug, Clone, Parse)]
-struct RootObjectReference3FND {
+#[allow(dead_code)]
+pub struct RootObjectReference3FND {
     oid_root: ExGuid,
     root_role: u32,
 }
 
 #[derive(Debug, Clone, Parse)]
-struct RevisionRoleDeclarationFND {
+#[allow(dead_code)]
+pub struct RevisionRoleDeclarationFND {
     rid: ExGuid,
     revision_role: u32,
 }
 
 #[derive(Debug, Clone, Parse)]
+#[allow(dead_code)]
 struct RevisionRoleAndContextDeclarationFND {
     base: RevisionRoleDeclarationFND,
     gctxid: ExGuid,
@@ -445,7 +469,8 @@ struct RevisionRoleAndContextDeclarationFND {
 
 /// See [\[MS-ONESTORE\] 2.2.3](https://learn.microsoft.com/en-us/openspecs/office_file_formats/ms-onestore/af15f3eb-f2a8-4333-8d04-e05e55c2af07)
 #[derive(Debug, Clone)]
-struct StringInStorageBuffer {
+#[allow(dead_code)]
+pub struct StringInStorageBuffer {
     cch: usize,
     data: String,
 }
@@ -467,6 +492,7 @@ impl Parse for StringInStorageBuffer {
     let data = &file_data_ref.data;
     data.starts_with("<file>") || data.starts_with("<ifndf>") || data.starts_with("<invfdo>")
 })]
+#[allow(dead_code)]
 struct ObjectDeclarationFileDataRefCount<RefSize: Parse> {
     oid: CompactId,
     jcid: JcId,
@@ -480,7 +506,8 @@ type ObjectDeclarationFileData3RefCountFND = ObjectDeclarationFileDataRefCount<u
 type ObjectDeclarationFileData3LargeRefCountFND = ObjectDeclarationFileDataRefCount<u32>;
 
 #[derive(Debug, Clone, Parse)]
-struct ObjectRefAndId<Id: Parse> {
+#[allow(dead_code)]
+pub struct ObjectRefAndId<Id: Parse> {
     id: Id,
 }
 
@@ -489,6 +516,7 @@ struct ObjectRefAndId<Id: Parse> {
 struct ObjectDataEncryptionKeyV2FNDX { }
 
 #[derive(Debug, Clone, Parse)]
+#[allow(dead_code)]
 struct ObjectInfoDependencyOverride<RefSize: Parse> {
     oid: CompactId,
     c_ref: RefSize,
@@ -496,6 +524,7 @@ struct ObjectInfoDependencyOverride<RefSize: Parse> {
 
 /// See [\[MS-ONESTORE\] 2.6.10](https://learn.microsoft.com/en-us/openspecs/office_file_formats/ms-onestore/af821117-689f-42cf-8136-c72c1e238f1e)
 #[derive(Debug, Clone, Parse)]
+#[allow(dead_code)]
 struct ObjectInfoDependencyOverrideData {
     c8_override_count: u32,
     c32_override_count: u32,
@@ -508,6 +537,7 @@ struct ObjectInfoDependencyOverrideData {
 
 /// See [\[MS-ONESTORE\] 2.5.20](https://learn.microsoft.com/en-us/openspecs/office_file_formats/ms-onestore/80125c83-199e-43b9-9a13-4085752eddac)
 #[derive(Debug, Clone)]
+#[allow(dead_code)]
 struct ObjectInfoDependencyOverridesFND {
     data: ObjectInfoDependencyOverrideData,
 }
@@ -537,6 +567,7 @@ impl ParseWithRef for ObjectInfoDependencyOverridesFND {
 /// Terminates ObjectGroupEndFND, DataSignatureGroupDefinitionFND, and RevisionManifestEndFND.
 /// See [\[MS-ONESTORE\] 2.5.33](https://learn.microsoft.com/en-us/openspecs/office_file_formats/ms-onestore/0fa4c886-011a-4c19-9651-9a69e43a19c6)
 #[derive(Debug, Clone, Parse)]
+#[allow(dead_code)]
 struct DataSignatureGroupDefinitionFND {
     data_signature_group: ExGuid,
 }
@@ -546,9 +577,10 @@ struct DataSignatureGroupDefinitionFND {
 struct FileDataStoreListReferenceFND {}
 
 /// See [\[MS-ONESTORE\] 2.5.22](https://learn.microsoft.com/en-us/openspecs/office_file_formats/ms-onestore/6f6d5729-ad03-420f-b8fa-7683751218b3)
-type FileDataStoreObjectReferenceFND = ObjectRefAndId<Guid>;
+pub type FileDataStoreObjectReferenceFND = ObjectRefAndId<Guid>;
 
 #[derive(Debug, Clone)]
+#[allow(dead_code)]
 struct ObjectDeclaration2Body {
     oid: CompactId,
     jcid: JcId,
@@ -572,6 +604,7 @@ impl Parse for ObjectDeclaration2Body {
 
 /// See [\[MS-ONESTORE\] 2.5.25](https://learn.microsoft.com/en-us/openspecs/office_file_formats/ms-onestore/a6ea1707-b205-4cd8-be40-d4c3462b226b)
 #[derive(Debug, Clone)]
+#[allow(dead_code)]
 struct ObjectDeclaration2RefCount<RefSize: Parse> {
     props: ObjectPropSet,
     body: ObjectDeclaration2Body,
@@ -594,12 +627,14 @@ type ObjectDeclaration2LargeRefCountFND = ObjectDeclaration2RefCount<u32>;
 type ObjectGroupListReferenceFND = ObjectRefAndId<ExGuid>;
 
 #[derive(Debug, Clone, Parse)]
-struct ObjectGroupStartFND {
+#[allow(dead_code)]
+pub struct ObjectGroupStartFND {
     oid: ExGuid,
 }
 
 #[derive(Debug, Clone)]
-struct HashedChunkDescriptor<Hash: Parse> {
+#[allow(dead_code)]
+pub struct HashedChunkDescriptor<Hash: Parse> {
     prop_set: ObjectPropSet,
     hash: Hash,
 }
@@ -617,6 +652,7 @@ impl<Hash: Parse> ParseWithRef for HashedChunkDescriptor<Hash> {
 type HashedChunkDescriptor2FND = HashedChunkDescriptor<u128>;
 
 #[derive(Debug, Clone)]
+#[allow(dead_code)]
 struct ReadOnlyObjectDeclaration2RefCount<Base: ParseWithRef> {
     base: Base,
     md5_hash: u128,
@@ -637,7 +673,7 @@ type ReadOnlyObjectDeclaration2LargeRefCountFND =
     ReadOnlyObjectDeclaration2RefCount<ObjectDeclaration2LargeRefCountFND>;
 
 #[derive(Debug, Clone)]
-struct UnknownNode { }
+pub struct UnknownNode { }
 
 impl ParseWithCount for UnknownNode {
     fn parse(reader: Reader, size: usize) -> Result<Self> {

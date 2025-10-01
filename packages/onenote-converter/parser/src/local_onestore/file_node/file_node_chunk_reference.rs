@@ -5,6 +5,7 @@ use parser_utils::Reader;
 /// Points to data referenced by a FileNode
 /// See [\[MS-ONESTORE\] 2.2.4.2](https://learn.microsoft.com/en-us/openspecs/office_file_formats/ms-onestore/150b6726-e605-441b-8233-8776ce4cdd2d)
 #[derive(Debug, Clone)]
+#[allow(dead_code)]
 pub struct FileNodeChunkReference {
     stp_format: u32,
     cb_format: u32,
