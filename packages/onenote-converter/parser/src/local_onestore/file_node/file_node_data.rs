@@ -1,6 +1,7 @@
 use super::super::common::ObjectDeclarationWithRefCountBody;
 use super::file_node_chunk_reference::FileNodeChunkReference;
 use crate::local_onestore::common::FileChunkReference;
+use crate::local_onestore::file_structure::RootFileNodeList;
 use crate::shared::compact_id::CompactId;
 use crate::shared::exguid::ExGuid;
 use crate::shared::jcid::JcId;
@@ -22,7 +23,16 @@ pub struct FileNodeData {
     cb_format: u32,
     base_type: u32,
     pub size: u32,
+    data_ref: FileNodeDataRef,
     pub fnd: FileNode,
+}
+
+#[derive(Debug, Clone)]
+enum FileNodeDataRef {
+    SingleElement(FileNodeChunkReference),
+    ElementList(RootFileNodeList),
+    NoData,
+    InvalidData,
 }
 
 impl Parse for FileNodeData {
@@ -36,18 +46,31 @@ impl Parse for FileNodeData {
         let base_type = (first_line >> 27) & 0xF;
         // Last bit is reserved
 
+        let data_ref = match base_type {
+            0 => FileNodeDataRef::NoData, // Does not reference other data
+            1 => FileNodeDataRef::SingleElement(FileNodeChunkReference::parse(reader, stp_format, cb_format)?),
+            2 => FileNodeDataRef::ElementList({
+                let list_ref = FileNodeChunkReference::parse(reader, stp_format, cb_format)?;
+                let mut resolved_reader = list_ref.resolve_to_reader(reader)?;
+                RootFileNodeList::parse(&mut resolved_reader, list_ref.data_size())
+            }?),
+            _ => FileNodeDataRef::InvalidData,
+        };
+
+        println!("Read data_ref: {:?}, id: {:#0x?}", data_ref, node_id);
+
         let fnd = match node_id {
             0x004 => {
                 FileNode::ObjectSpaceManifestRootFND(ObjectSpaceManifestRootFND::parse(reader)?)
             }
             0x008 => FileNode::ObjectSpaceManifestListReferenceFND(
-                ObjectSpaceManifestListReferenceFND::parse(reader, stp_format, cb_format)?,
+                ObjectSpaceManifestListReferenceFND::parse(reader)?,
             ),
             0x00C => FileNode::ObjectSpaceManifestListStartFND(
                 ObjectSpaceManifestListStartFND::parse(reader)?,
             ),
             0x010 => FileNode::RevisionManifestListReferenceFND(
-                RevisionManifestListReferenceFND::parse(reader, stp_format, cb_format)?,
+                RevisionManifestListReferenceFND::parse(reader, &data_ref)?,
             ),
             0x014 => {
                 FileNode::RevisionManifestListStartFND(RevisionManifestListStartFND::parse(reader)?)
@@ -63,16 +86,16 @@ impl Parse for FileNodeData {
             0x026 => FileNode::GlobalIdTableEntry3FNDX(GlobalIdTableEntry3FNDX::parse(reader)?),
             0x028 => FileNode::GlobalIdTableEndFNDX,
             0x02D => FileNode::ObjectDeclarationWithRefCountFNDX(
-                ObjectDeclarationWithRefCountFNDX::parse(reader, stp_format, cb_format)?,
+                ObjectDeclarationWithRefCountFNDX::parse(reader, &data_ref)?,
             ),
             0x02E => FileNode::ObjectDeclarationWithRefCount2FNDX(
-                ObjectDeclarationWithRefCount2FNDX::parse(reader, stp_format, cb_format)?,
+                ObjectDeclarationWithRefCount2FNDX::parse(reader, &data_ref)?,
             ),
             0x041 => FileNode::ObjectRevisionWithRefCountFNDX(
-                ObjectRevisionWithRefCountFNDX::parse(reader, stp_format, cb_format)?,
+                ObjectRevisionWithRefCountFNDX::parse(reader, &data_ref)?,
             ),
             0x042 => FileNode::ObjectRevisionWithRefCount2FNDX(
-                ObjectRevisionWithRefCount2FNDX::parse(reader, stp_format, cb_format)?,
+                ObjectRevisionWithRefCount2FNDX::parse(reader, &data_ref)?,
             ),
             0x059 => FileNode::RootObjectReference2FNDX(RootObjectReference2FNDX::parse(reader)?),
             0x05A => FileNode::RootObjectReference3FND(RootObjectReference3FND::parse(reader)?),
@@ -89,39 +112,39 @@ impl Parse for FileNodeData {
                 ObjectDeclarationFileData3LargeRefCountFND::parse(reader)?,
             ),
             0x07C => FileNode::ObjectDataEncryptionKeyV2FNDX(ObjectDataEncryptionKeyV2FNDX::parse(
-                reader, stp_format, cb_format,
+                reader
             )?),
             0x084 => FileNode::ObjectInfoDependencyOverridesFND(
-                ObjectInfoDependencyOverridesFND::parse(reader, stp_format, cb_format)?,
+                ObjectInfoDependencyOverridesFND::parse(reader, &data_ref)?,
             ),
             0x08C => FileNode::DataSignatureGroupDefinitionFND(
                 DataSignatureGroupDefinitionFND::parse(reader)?,
             ),
             0x090 => FileNode::FileDataStoreListReferenceFND(FileDataStoreListReferenceFND::parse(
-                reader, stp_format, cb_format,
+                reader
             )?),
             0x094 => FileNode::FileDataStoreObjectReferenceFND(
-                FileDataStoreObjectReferenceFND::parse(reader, stp_format, cb_format)?,
+                FileDataStoreObjectReferenceFND::parse(reader)?,
             ),
             0x0A4 => FileNode::ObjectDeclaration2RefCountFND(ObjectDeclaration2RefCountFND::parse(
-                reader, stp_format, cb_format,
+                reader, &data_ref
             )?),
             0x0A5 => FileNode::ObjectDeclaration2LargeRefCountFND(
-                ObjectDeclaration2LargeRefCountFND::parse(reader, stp_format, cb_format)?,
+                ObjectDeclaration2LargeRefCountFND::parse(reader, &data_ref)?,
             ),
             0x0B0 => FileNode::ObjectGroupListReferenceFND(ObjectGroupListReferenceFND::parse(
-                reader, stp_format, cb_format,
+                reader
             )?),
             0x0B4 => FileNode::ObjectGroupStartFND(ObjectGroupStartFND::parse(reader)?),
             0x0B8 => FileNode::ObjectGroupEndFND,
             0x0C2 => FileNode::HashedChunkDescriptor2FND(HashedChunkDescriptor2FND::parse(
-                reader, stp_format, cb_format,
+                reader, &data_ref
             )?),
             0x0C4 => FileNode::ReadOnlyObjectDeclaration2RefCountFND(
-                ReadOnlyObjectDeclaration2RefCountFND::parse(reader, stp_format, cb_format)?,
+                ReadOnlyObjectDeclaration2RefCountFND::parse(reader, &data_ref)?,
             ),
             0x0C5 => FileNode::ReadOnlyObjectDeclaration2LargeRefCountFND(
-                ReadOnlyObjectDeclaration2LargeRefCountFND::parse(reader, stp_format, cb_format)?,
+                ReadOnlyObjectDeclaration2LargeRefCountFND::parse(reader, &data_ref)?,
             ),
             0x0FF => FileNode::ChunkTerminatorFND,
             _ => FileNode::Null,
@@ -136,6 +159,7 @@ impl Parse for FileNodeData {
             cb_format,
             base_type,
             size: actual_size,
+            data_ref,
             fnd,
         };
 
@@ -200,11 +224,11 @@ pub enum FileNode {
     Null,
 }
 
-trait ParseWithFormat
+trait ParseWithRef
 where
     Self: Sized,
 {
-    fn parse(reader: parser_utils::Reader, stp_format: u32, cb_format: u32) -> Result<Self>;
+    fn parse(reader: parser_utils::Reader, data_ref: &FileNodeDataRef) -> Result<Self>;
 }
 
 #[derive(Debug, Clone, Parse)]
@@ -221,14 +245,21 @@ struct ObjectSpaceManifestListStartFND {
 
 #[derive(Debug, Clone)]
 struct RevisionManifestListReferenceFND {
-    list_ref: FileNodeChunkReference,
+    list: RootFileNodeList,
 }
 
-impl ParseWithFormat for RevisionManifestListReferenceFND {
-    fn parse(reader: parser_utils::Reader, stp_format: u32, cb_format: u32) -> Result<Self> {
-        Ok(Self {
-            list_ref: FileNodeChunkReference::parse(reader, stp_format, cb_format)?,
-        })
+impl ParseWithRef for RevisionManifestListReferenceFND {
+    fn parse(_reader: parser_utils::Reader, data_ref: &FileNodeDataRef) -> Result<Self> {
+        match data_ref {
+            FileNodeDataRef::ElementList(list) => {
+                Ok(Self { list: list.clone() })
+            },
+            other => Err(
+                ErrorKind::MalformedOneStoreData(
+                    format!("Expected a list (parsing RevisionManifestListReferenceFND), got {:?}", other).into()
+                ).into()
+            ),
+        }
     }
 }
 
@@ -296,28 +327,33 @@ struct GlobalIdTableEntry3FNDX {
 
 #[derive(Debug, Clone)]
 struct ObjectDeclarationWithSizedRefCount<RefSize: Parse> {
-    object_ref: FileNodeChunkReference,
     body: ObjectDeclarationWithRefCountBody,
     c_ref: RefSize,
     property_set: ObjectPropSet,
 }
 
-fn read_property_set_and_ref(
+fn read_property_set(
     reader: Reader,
-    stp_format: u32,
-    cb_format: u32,
-) -> Result<(ObjectPropSet, FileNodeChunkReference)> {
-    let object_ref = FileNodeChunkReference::parse(reader, stp_format, cb_format)?;
-    let mut prop_set_reader = object_ref.resolve_to_reader(reader)?;
-    let prop_set = ObjectPropSet::parse(&mut prop_set_reader)?;
-    Ok((prop_set, object_ref))
+    property_set_ref: &FileNodeDataRef,
+) -> Result<ObjectPropSet> {
+    println!("Reading property_set...");
+    match property_set_ref {
+        FileNodeDataRef::SingleElement(data_ref) => {
+            let mut prop_set_reader = data_ref.resolve_to_reader(reader)?;
+            let prop_set = ObjectPropSet::parse(&mut prop_set_reader)?;
+            Ok(prop_set)
+        },
+        FileNodeDataRef::ElementList(_) => Err(
+            ErrorKind::MalformedOneStoreData("Expected a single element (reading PropertySet)".into()).into()
+        ),
+        _ => Err(ErrorKind::MalformedOneStoreData("Expected a reference to a property set".into()).into()),
+    }
 }
 
-impl<RefSize: Parse> ParseWithFormat for ObjectDeclarationWithSizedRefCount<RefSize> {
-    fn parse(reader: Reader, stp_format: u32, cb_format: u32) -> Result<Self> {
-        let (property_set, object_ref) = read_property_set_and_ref(reader, stp_format, cb_format)?;
+impl<RefSize: Parse> ParseWithRef for ObjectDeclarationWithSizedRefCount<RefSize> {
+    fn parse(reader: Reader, data_ref: &FileNodeDataRef) -> Result<Self> {
+        let property_set = read_property_set(reader, data_ref)?;
         Ok(Self {
-            object_ref,
             body: ObjectDeclarationWithRefCountBody::parse(reader)?,
             c_ref: RefSize::parse(reader)?,
             property_set,
@@ -330,7 +366,6 @@ type ObjectDeclarationWithRefCount2FNDX = ObjectDeclarationWithSizedRefCount<u32
 
 #[derive(Debug, Clone)]
 struct ObjectRevisionWithRefCountFNDX {
-    object_ref: FileNodeChunkReference,
     oid: CompactId,
     f_has_oid_references: bool,
     f_has_osid_references: bool,
@@ -338,13 +373,12 @@ struct ObjectRevisionWithRefCountFNDX {
     c_ref: u8,
 }
 
-impl ParseWithFormat for ObjectRevisionWithRefCountFNDX {
-    fn parse(reader: parser_utils::Reader, stp_format: u32, cb_format: u32) -> Result<Self> {
-        let (property_set, object_ref) = read_property_set_and_ref(reader, stp_format, cb_format)?;
+impl ParseWithRef for ObjectRevisionWithRefCountFNDX {
+    fn parse(reader: parser_utils::Reader, data_ref: &FileNodeDataRef) -> Result<Self> {
+        let property_set = read_property_set(reader, data_ref)?;
         let oid = CompactId::parse(reader)?;
         let metadata = reader.get_u8()?;
         Ok(Self {
-            object_ref,
             oid,
             f_has_oid_references: metadata & 0x1 > 0,
             f_has_osid_references: metadata & 0x2 > 0,
@@ -356,7 +390,6 @@ impl ParseWithFormat for ObjectRevisionWithRefCountFNDX {
 
 #[derive(Debug, Clone)]
 struct ObjectRevisionWithRefCount2FNDX {
-    object_ref: FileNodeChunkReference,
     oid: CompactId,
     f_has_oid_references: bool,
     f_has_osid_references: bool,
@@ -364,13 +397,12 @@ struct ObjectRevisionWithRefCount2FNDX {
     c_ref: u32,
 }
 
-impl ParseWithFormat for ObjectRevisionWithRefCount2FNDX {
-    fn parse(reader: parser_utils::Reader, stp_format: u32, cb_format: u32) -> Result<Self> {
-        let (property_set, object_ref) = read_property_set_and_ref(reader, stp_format, cb_format)?;
+impl ParseWithRef for ObjectRevisionWithRefCount2FNDX {
+    fn parse(reader: parser_utils::Reader, data_ref: &FileNodeDataRef) -> Result<Self> {
+        let property_set = read_property_set(reader, data_ref)?;
         let oid = CompactId::parse(reader)?;
         let metadata = reader.get_u32()?;
         Ok(Self {
-            object_ref,
             oid,
             f_has_oid_references: metadata & 0x1 > 0,
             f_has_osid_references: metadata & 0x2 > 0,
@@ -407,16 +439,18 @@ struct RevisionRoleAndContextDeclarationFND {
 /// See [\[MS-ONESTORE\] 2.2.3](https://learn.microsoft.com/en-us/openspecs/office_file_formats/ms-onestore/af15f3eb-f2a8-4333-8d04-e05e55c2af07)
 #[derive(Debug, Clone)]
 struct StringInStorageBuffer {
-    cch: u32,
+    cch: usize,
     data: String,
 }
 
 impl Parse for StringInStorageBuffer {
     fn parse(reader: Reader) -> Result<Self> {
-        let cch = reader.get_u32()?;
-        let data = reader.read(cch as usize)?;
+        let characer_count = reader.get_u32()? as usize;
+        let string_size = characer_count * 2; // 2 bytes per character
+        let data = reader.read(string_size)?;
         let data = data.utf16_to_string()?;
-        Ok(Self { cch, data })
+        println!("Read string (StringInStorageBuffer): {}", data);
+        Ok(Self { cch: characer_count, data })
     }
 }
 
@@ -429,6 +463,7 @@ impl Parse for StringInStorageBuffer {
 struct ObjectDeclarationFileDataRefCount<RefSize: Parse> {
     oid: CompactId,
     jcid: JcId,
+    #[assert_offset(8)]
     c_ref: RefSize,
     file_data_ref: StringInStorageBuffer,
     file_ext: StringInStorageBuffer,
@@ -437,36 +472,14 @@ struct ObjectDeclarationFileDataRefCount<RefSize: Parse> {
 type ObjectDeclarationFileData3RefCountFND = ObjectDeclarationFileDataRefCount<u8>;
 type ObjectDeclarationFileData3LargeRefCountFND = ObjectDeclarationFileDataRefCount<u32>;
 
-#[derive(Debug, Clone)]
-struct ObjectRefOnly {
-    data_ref: FileNodeChunkReference,
-}
-
-impl ParseWithFormat for ObjectRefOnly {
-    fn parse(reader: Reader, stp_format: u32, cb_format: u32) -> Result<Self> {
-        Ok(Self {
-            data_ref: FileNodeChunkReference::parse(reader, stp_format, cb_format)?,
-        })
-    }
-}
-
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Parse)]
 struct ObjectRefAndId<Id: Parse> {
-    data_ref: FileNodeChunkReference,
     id: Id,
 }
 
-impl<Id: Parse> ParseWithFormat for ObjectRefAndId<Id> {
-    fn parse(reader: Reader, stp_format: u32, cb_format: u32) -> Result<Self> {
-        Ok(Self {
-            data_ref: FileNodeChunkReference::parse(reader, stp_format, cb_format)?,
-            id: Id::parse(reader)?,
-        })
-    }
-}
-
 /// Points to encrypted data. See [\[MS-ONESTORE\] 2.5.19](https://learn.microsoft.com/en-us/openspecs/office_file_formats/ms-onestore/542f09eb-9db8-4b6a-86e5-2d9a930b41c0).
-type ObjectDataEncryptionKeyV2FNDX = ObjectRefOnly;
+#[derive(Debug, Clone, Parse)]
+struct ObjectDataEncryptionKeyV2FNDX { }
 
 #[derive(Debug, Clone, Parse)]
 struct ObjectInfoDependencyOverride<RefSize: Parse> {
@@ -489,23 +502,27 @@ struct ObjectInfoDependencyOverrideData {
 /// See [\[MS-ONESTORE\] 2.5.20](https://learn.microsoft.com/en-us/openspecs/office_file_formats/ms-onestore/80125c83-199e-43b9-9a13-4085752eddac)
 #[derive(Debug, Clone)]
 struct ObjectInfoDependencyOverridesFND {
-    obj_ref: FileNodeChunkReference,
     data: ObjectInfoDependencyOverrideData,
 }
 
-impl ParseWithFormat for ObjectInfoDependencyOverridesFND {
-    fn parse(reader: parser_utils::Reader, stp_format: u32, cb_format: u32) -> Result<Self> {
-        let obj_ref = FileNodeChunkReference::parse(reader, stp_format, cb_format)?;
-
-        if obj_ref.is_fcr_nil() {
-            let data =
-                ObjectInfoDependencyOverrideData::parse(&mut obj_ref.resolve_to_reader(reader)?)?;
-            Ok(Self { obj_ref, data })
+impl ParseWithRef for ObjectInfoDependencyOverridesFND {
+    fn parse(reader: parser_utils::Reader, obj_ref: &FileNodeDataRef) -> Result<Self> {
+        if let FileNodeDataRef::SingleElement(obj_ref) = obj_ref {
+            if !obj_ref.is_fcr_nil() {
+                let data =
+                    ObjectInfoDependencyOverrideData::parse(&mut obj_ref.resolve_to_reader(reader)?)?;
+                Ok(Self { data })
+            } else {
+                Ok(Self {
+                    data: ObjectInfoDependencyOverrideData::parse(reader)?,
+                })
+            }
         } else {
-            Ok(Self {
-                obj_ref,
-                data: ObjectInfoDependencyOverrideData::parse(reader)?,
-            })
+            Err(
+                ErrorKind::MalformedOneStoreData(
+                    "Missing ref to data (parsing ObjectInfoDependencyOverridesFND)".into()
+                ).into()
+            )
         }
     }
 }
@@ -518,7 +535,8 @@ struct DataSignatureGroupDefinitionFND {
 }
 
 /// See [\[MS-ONESTORE\] 2.5.21](https://learn.microsoft.com/en-us/openspecs/office_file_formats/ms-onestore/2701cc42-3601-49f9-a3ba-7c40cd8a2be9)
-type FileDataStoreListReferenceFND = ObjectRefOnly;
+#[derive(Debug, Clone, Parse)]
+struct FileDataStoreListReferenceFND {}
 
 /// See [\[MS-ONESTORE\] 2.5.22](https://learn.microsoft.com/en-us/openspecs/office_file_formats/ms-onestore/6f6d5729-ad03-420f-b8fa-7683751218b3)
 type FileDataStoreObjectReferenceFND = ObjectRefAndId<Guid>;
@@ -548,15 +566,15 @@ impl Parse for ObjectDeclaration2Body {
 /// See [\[MS-ONESTORE\] 2.5.25](https://learn.microsoft.com/en-us/openspecs/office_file_formats/ms-onestore/a6ea1707-b205-4cd8-be40-d4c3462b226b)
 #[derive(Debug, Clone)]
 struct ObjectDeclaration2RefCount<RefSize: Parse> {
-    blob_ref: FileNodeChunkReference,
+    props: ObjectPropSet,
     body: ObjectDeclaration2Body,
     c_ref: RefSize,
 }
 
-impl<RefSize: Parse> ParseWithFormat for ObjectDeclaration2RefCount<RefSize> {
-    fn parse(reader: parser_utils::Reader, stp_format: u32, cb_format: u32) -> Result<Self> {
+impl<RefSize: Parse> ParseWithRef for ObjectDeclaration2RefCount<RefSize> {
+    fn parse(reader: parser_utils::Reader, property_set_ref: &FileNodeDataRef) -> Result<Self> {
         Ok(Self {
-            blob_ref: FileNodeChunkReference::parse(reader, stp_format, cb_format)?,
+            props: read_property_set(reader, property_set_ref)?,
             body: ObjectDeclaration2Body::parse(reader)?,
             c_ref: RefSize::parse(reader)?,
         })
@@ -575,16 +593,14 @@ struct ObjectGroupStartFND {
 
 #[derive(Debug, Clone)]
 struct HashedChunkDescriptor<Hash: Parse> {
-    data_ref: FileNodeChunkReference,
     prop_set: ObjectPropSet,
     hash: Hash,
 }
 
-impl<Hash: Parse> HashedChunkDescriptor<Hash> {
-    pub fn parse(reader: Reader, stp_format: u32, cb_format: u32) -> Result<Self> {
-        let (prop_set, data_ref) = read_property_set_and_ref(reader, stp_format, cb_format)?;
+impl<Hash: Parse> ParseWithRef for HashedChunkDescriptor<Hash> {
+    fn parse(reader: Reader, prop_ref: &FileNodeDataRef) -> Result<Self> {
+        let prop_set = read_property_set(reader, &prop_ref)?;
         Ok(Self {
-            data_ref,
             prop_set,
             hash: Hash::parse(reader)?,
         })
@@ -594,15 +610,15 @@ impl<Hash: Parse> HashedChunkDescriptor<Hash> {
 type HashedChunkDescriptor2FND = HashedChunkDescriptor<u128>;
 
 #[derive(Debug, Clone)]
-struct ReadOnlyObjectDeclaration2RefCount<Base: ParseWithFormat> {
+struct ReadOnlyObjectDeclaration2RefCount<Base: ParseWithRef> {
     base: Base,
     md5_hash: u128,
 }
 
-impl<Base: ParseWithFormat> ReadOnlyObjectDeclaration2RefCount<Base> {
-    pub fn parse(reader: parser_utils::Reader, stp_format: u32, cb_format: u32) -> Result<Self> {
+impl<Base: ParseWithRef> ParseWithRef for ReadOnlyObjectDeclaration2RefCount<Base> {
+    fn parse(reader: parser_utils::Reader, prop_ref: &FileNodeDataRef) -> Result<Self> {
         Ok(Self {
-            base: Base::parse(reader, stp_format, cb_format)?,
+            base: Base::parse(reader, prop_ref)?,
             md5_hash: u128::parse(reader)?,
         })
     }

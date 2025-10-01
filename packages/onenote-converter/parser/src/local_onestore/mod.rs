@@ -32,7 +32,7 @@ impl OneStorePackaging {
         let mut free_chunk_list = Vec::new();
         let mut free_chunk_ref = header.fcr_free_chunk_list.clone();
         while !free_chunk_ref.is_fcr_nil() && !free_chunk_ref.is_fcr_zero() {
-            let mut reader = reader.with_start_index(free_chunk_ref.stp as usize)?;
+            let mut reader = free_chunk_ref.resolve_to_reader(reader)?;
             let fragment = FreeChunkListFragment::parse(&mut reader, free_chunk_ref.cb.into())?;
             free_chunk_ref = fragment.fcr_next_chunk.clone();
             free_chunk_list.push(fragment);
@@ -41,7 +41,7 @@ impl OneStorePackaging {
         let mut transaction_log = Vec::new();
         let mut transaction_log_ref = header.fcr_transaction_log.clone();
         loop {
-            let mut reader = reader.with_start_index(transaction_log_ref.stp as usize)?;
+            let mut reader = transaction_log_ref.resolve_to_reader(reader)?;
 
             let fragment = TransactionLogFragment::parse(&mut reader, transaction_log_ref.cb as usize)?;
             transaction_log_ref = fragment.next_fragment.clone();
@@ -55,7 +55,7 @@ impl OneStorePackaging {
         let mut hashed_chunk_list = Vec::new();
         let mut hash_chunk_ref = header.fcr_hashed_chunk_list.clone();
         while !hash_chunk_ref.is_fcr_nil() && !hash_chunk_ref.is_fcr_zero() {
-            let mut reader = reader.with_start_index(hash_chunk_ref.stp as usize)?;
+            let mut reader = hash_chunk_ref.resolve_to_reader(reader)?;
             let fragment = FileNodeListFragment::parse(&mut reader, hash_chunk_ref.cb as usize)?;
             hash_chunk_ref = fragment.next_fragment.clone();
             hashed_chunk_list.push(fragment);
@@ -64,7 +64,7 @@ impl OneStorePackaging {
         let file_node_list_root = &header.fcr_file_node_list_root;
         let root_file_node_list =
             if !file_node_list_root.is_fcr_nil() && !file_node_list_root.is_fcr_zero() {
-                let mut reader = reader.with_start_index(file_node_list_root.stp as usize)?;
+                let mut reader = file_node_list_root.resolve_to_reader(reader)?;
                 Some(RootFileNodeList::parse(
                     &mut reader,
                     file_node_list_root.cb as usize,
@@ -96,7 +96,7 @@ mod test {
         let test_data = fs_driver().read_file("/home/self/Documents/test/test.one").unwrap();
         let mut reader = Reader::new(&test_data);
         let packaging = OneStorePackaging::parse(&mut reader).unwrap();
-        println!("Packaging {:#?}", packaging);
+        // println!("Packaging {:#?}", packaging);
         assert!(packaging.root_file_node_list.is_some());
     }
 }

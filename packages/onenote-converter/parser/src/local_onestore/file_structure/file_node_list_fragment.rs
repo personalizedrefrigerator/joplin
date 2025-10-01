@@ -1,7 +1,7 @@
 use crate::local_onestore::{common::FileChunkReference64x32, file_node::FileNodeData};
 use parser_utils::parse::Parse;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct FileNodeListFragment {
     pub header: FileNodeListHeader,
     pub file_nodes: Vec<FileNodeData>,
@@ -46,7 +46,7 @@ impl FileNodeListFragment {
     }
 }
 
-#[derive(Debug, Parse)]
+#[derive(Debug, Parse, Clone)]
 #[validate(magic == 0xA4567AB1F5F7F4C4)]
 #[validate(file_node_list_id >= 0x0010)]
 struct FileNodeListHeader {

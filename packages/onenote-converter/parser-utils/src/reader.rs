@@ -6,7 +6,9 @@ use std::mem;
 macro_rules! try_get {
     ($this:ident, $typ:tt) => {{
         if $this.buff.remaining() < mem::size_of::<$typ>() {
-            Err(ErrorKind::UnexpectedEof.into())
+            Err(ErrorKind::UnexpectedEof(
+                format!("Getting {:}", stringify!($typ)).into()
+            ).into())
         } else {
             Ok(paste! {$this.buff. [< get_ $typ >]()})
         }
@@ -14,7 +16,9 @@ macro_rules! try_get {
 
     ($this:ident, $typ:tt::$endian:tt) => {{
         if $this.buff.remaining() < mem::size_of::<$typ>() {
-            Err(ErrorKind::UnexpectedEof.into())
+            Err(ErrorKind::UnexpectedEof(
+                format!("Getting {:} ({:})", stringify!($typ), stringify!($endian)).into()
+            ).into())
         } else {
             Ok(paste! {$this.buff. [< get_ $typ _ $endian >]()})
         }
@@ -36,7 +40,7 @@ impl<'a> Reader<'a> {
 
     pub fn read(&mut self, cnt: usize) -> Result<&[u8]> {
         if self.remaining() < cnt {
-            return Err(ErrorKind::UnexpectedEof.into());
+            return Err(ErrorKind::UnexpectedEof("Unexpected EOF (Reader.read)".into()).into());
         }
 
         let data = &self.buff[0..cnt];
@@ -55,7 +59,7 @@ impl<'a> Reader<'a> {
 
     pub fn advance(&mut self, cnt: usize) -> Result<()> {
         if self.remaining() < cnt {
-            return Err(ErrorKind::UnexpectedEof.into());
+            return Err(ErrorKind::UnexpectedEof("Reader.advance".into()).into());
         }
 
         self.buff.advance(cnt);
@@ -63,12 +67,15 @@ impl<'a> Reader<'a> {
         Ok(())
     }
 
-    pub fn with_start_index(&self, position: usize) -> Result<Reader<'a>> {
-        if position >= self.original.len() {
-            return Err(ErrorKind::UnexpectedEof.into());
+    pub fn with_updated_bounds(&self, start: usize, end: usize) -> Result<Reader<'a>> {
+        if start > self.original.len() {
+            return Err(ErrorKind::UnexpectedEof("Reader.with_updated_bounds: start is out of bounds".into()).into());
+        }
+        if end > self.original.len() {
+            return Err(ErrorKind::UnexpectedEof("Reader.with_updated_bounds: end is out of bounds".into()).into());
         }
 
-        Ok(Reader::new(&self.original[position..]))
+        Ok(Reader { buff: &self.original[start..end], original: self.original })
     }
 
     pub fn get_u8(&mut self) -> Result<u8> {
@@ -108,14 +115,21 @@ mod test {
         assert_eq!(reader.get_u8().unwrap(), 2);
         assert_eq!(reader.get_u8().unwrap(), 3);
         {
-            let mut reader = reader.with_start_index(0).unwrap();
+            let mut reader = reader.with_updated_bounds(0, 8).unwrap();
             assert_eq!(reader.get_u8().unwrap(), 1);
             assert_eq!(reader.get_u8().unwrap(), 2);
             assert_eq!(reader.get_u8().unwrap(), 3);
             assert_eq!(reader.get_u8().unwrap(), 4);
-            let mut reader = reader.with_start_index(1).unwrap();
+            let mut reader = reader.with_updated_bounds(1, 7).unwrap();
             assert_eq!(reader.get_u8().unwrap(), 2);
             assert_eq!(reader.get_u8().unwrap(), 3);
+            let mut reader = reader.with_updated_bounds(1, 7).unwrap();
+            assert_eq!(reader.get_u8().unwrap(), 2);
+            assert_eq!(reader.get_u8().unwrap(), 3);
+            let reader = reader.with_updated_bounds(5, 7).unwrap();
+            assert_eq!(reader.remaining(), 2);
+            let reader = reader.with_updated_bounds(6, 6).unwrap();
+            assert_eq!(reader.remaining(), 0);
         }
         assert_eq!(reader.get_u8().unwrap(), 4);
     }

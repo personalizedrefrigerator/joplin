@@ -2,14 +2,18 @@ use super::super::common::FileChunkReference;
 use parser_utils::errors::{ErrorKind, Result};
 use parser_utils::Reader;
 
+/// Points to data referenced by a FileNode
+/// See [\[MS-ONESTORE\] 2.2.4.2](https://learn.microsoft.com/en-us/openspecs/office_file_formats/ms-onestore/150b6726-e605-441b-8233-8776ce4cdd2d)
 #[derive(Debug, Clone)]
 pub struct FileNodeChunkReference {
     stp_format: u32,
     cb_format: u32,
     stp: Vec<u8>,
     cb: Vec<u8>,
-    pub cb_value: u64,
-    pub stp_value: u64,
+    /// The size of the data
+    cb_value: u64,
+    /// The pointer
+    stp_value: u64,
 }
 
 impl FileNodeChunkReference {
@@ -78,21 +82,6 @@ impl FileNodeChunkReference {
             stp_value,
         })
     }
-
-    pub fn resolve_to_reader<'a>(
-        &self,
-        original_reader: &parser_utils::reader::Reader<'a>,
-    ) -> Result<parser_utils::reader::Reader<'a>> {
-        if self.is_fcr_nil() {
-            return Err(ErrorKind::ResolutionFailed(
-                "Failed to resolve node reference -- is nil".into(),
-            )
-            .into());
-        }
-
-        println!("resolve to reader at: {} -> {}", self.stp_value, self.stp_value as usize);
-        original_reader.with_start_index(self.stp_value as usize)
-    }
 }
 
 impl FileChunkReference for FileNodeChunkReference {
@@ -102,5 +91,13 @@ impl FileChunkReference for FileNodeChunkReference {
 
     fn is_fcr_zero(&self) -> bool {
         self.stp.iter().all(|v| *v == u8::MIN) && self.cb.iter().all(|v| *v == u8::MIN)
+    }
+    
+    fn data_location(&self) -> usize {
+        self.stp_value as usize
+    }
+    
+    fn data_size(&self) -> usize {
+        self.cb_value as usize
     }
 }

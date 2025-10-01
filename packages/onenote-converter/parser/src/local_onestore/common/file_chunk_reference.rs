@@ -1,9 +1,25 @@
-use parser_utils::parse::Parse;
+use parser_utils::{errors::ErrorKind, errors::Result, parse::Parse};
 
 /// See [\[MS-ONESTORE\] 2.2.4](https://learn.microsoft.com/en-us/openspecs/office_file_formats/ms-onestore/0d86b13d-d58c-44e8-b931-4728b9d39a4b)
 pub trait FileChunkReference {
     fn is_fcr_nil(&self) -> bool;
     fn is_fcr_zero(&self) -> bool;
+    fn data_location(&self) -> usize;
+    fn data_size(&self) -> usize;
+
+    fn resolve_to_reader<'a>(
+        &self,
+        original_reader: &parser_utils::reader::Reader<'a>,
+    ) -> Result<parser_utils::reader::Reader<'a>> {
+        if self.is_fcr_nil() {
+            return Err(ErrorKind::ResolutionFailed(
+                "Failed to resolve node reference -- is nil".into(),
+            )
+            .into());
+        }
+
+        original_reader.with_updated_bounds(self.data_location(), self.data_location() + self.data_size())
+    }
 }
 
 /// See [\[MS-ONESTORE\] 2.2.4.1](https://learn.microsoft.com/en-us/openspecs/office_file_formats/ms-onestore/f77f021e-57b1-4dff-9254-985f514a0d89)
@@ -23,6 +39,14 @@ impl FileChunkReference for FileChunkReference32 {
     fn is_fcr_zero(&self) -> bool {
         self.stp == u32::MIN && self.cb == u32::MIN
     }
+
+    fn data_location(&self) -> usize {
+        self.stp as usize
+    }
+
+    fn data_size(&self) -> usize {
+        self.cb as usize
+    }
 }
 
 /// See [\[MS-ONESTORE\] 2.2.4.4]: https://learn.microsoft.com/en-us/openspecs/office_file_formats/ms-onestore/e2815e73-bd04-42fc-838e-6e86ab192e54
@@ -40,6 +64,14 @@ impl FileChunkReference for FileChunkReference64x32 {
     fn is_fcr_zero(&self) -> bool {
         self.stp == u64::MIN && self.cb == u32::MIN
     }
+
+    fn data_location(&self) -> usize {
+        self.stp as usize
+    }
+
+    fn data_size(&self) -> usize {
+        self.cb as usize
+    }
 }
 
 /// See [\[MS-ONESTORE\] 2.2.4.4]: https://learn.microsoft.com/en-us/openspecs/office_file_formats/ms-onestore/e2815e73-bd04-42fc-838e-6e86ab192e54
@@ -56,6 +88,14 @@ impl FileChunkReference for FileChunkReference64 {
 
     fn is_fcr_zero(&self) -> bool {
         self.stp == u64::MIN && self.cb == u64::MIN
+    }
+
+    fn data_location(&self) -> usize {
+        self.stp as usize
+    }
+
+    fn data_size(&self) -> usize {
+        self.cb as usize
     }
 }
 

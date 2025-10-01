@@ -54,8 +54,8 @@ impl From<uuid::Error> for Error {
 #[derive(Error, Debug)]
 pub enum ErrorKind {
     /// Hit the end of the OneNote file before it was expected.
-    #[error("Unexpected end of file")]
-    UnexpectedEof,
+    #[error("Unexpected end of file: {0}")]
+    UnexpectedEof(Cow<'static, str>),
 
     /// The parser was asked to process a table-of-contents file that turned out not to be one.
     #[error("Not a table of contents file: {file}")]

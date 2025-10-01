@@ -5,7 +5,7 @@ use crate::local_onestore::common::{FileChunkReference, FileChunkReference64x32}
 use crate::local_onestore::file_node::{FileNode, FileNodeData};
 use crate::local_onestore::file_structure::FileNodeListFragment;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct RootFileNodeList {
     pub file_node_list_fragments: Vec<FileNodeListFragment>,
     pub file_node_sequence: Vec<FileNodeData>,
@@ -21,7 +21,7 @@ impl RootFileNodeList {
         let mut next_fragment_ref =
             builder.add_fragment(FileNodeListFragment::parse(reader, size)?);
         while !next_fragment_ref.is_fcr_nil() && !next_fragment_ref.is_fcr_zero() {
-            let mut reader = reader.with_start_index(next_fragment_ref.stp as usize)?;
+            let mut reader = next_fragment_ref.resolve_to_reader(reader)?;
             let fragment = FileNodeListFragment::parse(&mut reader, next_fragment_ref.cb as usize)?;
             next_fragment_ref = builder.add_fragment(fragment);
         }
