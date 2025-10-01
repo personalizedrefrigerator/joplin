@@ -43,13 +43,7 @@ impl OneStorePackaging {
         loop {
             let mut reader = reader.with_start_index(transaction_log_ref.stp as usize)?;
 
-            // let remaining_0 = reader.remaining();
             let fragment = TransactionLogFragment::parse(&mut reader, transaction_log_ref.cb as usize)?;
-            // let remaining_1 = reader.remaining();
-
-            println!("Debug: {:?}-> {:?}", transaction_log_ref, fragment);
-            // assert_eq!(remaining_0 - remaining_1, transaction_log_ref.cb as usize);
-
             transaction_log_ref = fragment.next_fragment.clone();
             transaction_log.push(fragment);
 

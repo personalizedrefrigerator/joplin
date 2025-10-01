@@ -27,7 +27,6 @@ impl TransactionLogFragment {
             }
 
             if !encountered_sentinel {
-                println!("Entry data {:?}", entry);
                 size_table.push(entry);
             }
         }
