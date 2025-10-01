@@ -18,7 +18,6 @@ impl ObjectStreamHeader {
         let data = reader.get_u32()?;
 
         let count = data & 0xFFFFFF;
-        println!("Read ObjectStreamHeader: {:#010x} = {:#010b}; count: {}", data, data, count);
         // assert_eq!(data & 0x3F000000, 0); // Reserved: Must be 0 and ignored
         let extended_streams_present = (data >> 30) & 0x1 != 0;
         let osid_stream_not_present = (data >> 31) != 0;

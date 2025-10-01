@@ -7,4 +7,5 @@ use crate::shared::compact_id::CompactId;
 pub struct ObjectDeclarationWithRefCountBody {
     pub oid: CompactId,
     _ignored: u32,
+    _ignored2: u16,
 }

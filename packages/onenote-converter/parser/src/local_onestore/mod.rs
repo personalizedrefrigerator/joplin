@@ -93,7 +93,7 @@ mod test {
     #[test]
     fn should_parse_onenote_2016_file() {
         // TODO: Update path:
-        let test_data = fs_driver().read_file("/home/self/Documents/test/test.one").unwrap();
+        let test_data = fs_driver().read_file("/home/self/Documents/test/test2.one").unwrap();
         let mut reader = Reader::new(&test_data);
         let packaging = OneStorePackaging::parse(&mut reader).unwrap();
         // println!("Packaging {:#?}", packaging);

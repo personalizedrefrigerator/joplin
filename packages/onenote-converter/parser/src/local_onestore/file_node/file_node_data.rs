@@ -8,7 +8,7 @@ use crate::shared::jcid::JcId;
 use crate::shared::object_prop_set::ObjectPropSet;
 use parser_utils::errors::ErrorKind;
 use parser_utils::parse::{Parse, ParseWithCount};
-use parser_utils::Utf16ToString;
+use parser_utils::{log_warn, Utf16ToString};
 use parser_utils::{Reader, Result};
 
 use crate::shared::guid::Guid;
@@ -22,7 +22,7 @@ pub struct FileNodeData {
     stp_format: u32,
     cb_format: u32,
     base_type: u32,
-    pub size: u32,
+    pub size: usize,
     data_ref: FileNodeDataRef,
     pub fnd: FileNode,
 }
@@ -40,7 +40,7 @@ impl Parse for FileNodeData {
         let remaining_0 = reader.remaining();
         let first_line = reader.get_u32()?;
         let node_id = first_line & 0x3FF; // First 10 bits
-        let size = (first_line >> 10) & 0x1FFF; // Next 13 bits
+        let size = ((first_line >> 10) & 0x1FFF) as usize; // Next 13 bits
         let stp_format = (first_line >> 23) & 0x3; // Next 2 bits
         let cb_format = (first_line >> 25) & 0x3; // Next 2 bits
         let base_type = (first_line >> 27) & 0xF;
@@ -56,8 +56,7 @@ impl Parse for FileNodeData {
             }?),
             _ => FileNodeDataRef::InvalidData,
         };
-
-        println!("Read data_ref: {:?}, id: {:#0x?}", data_ref, node_id);
+        let remaining_1 = reader.remaining();
 
         let fnd = match node_id {
             0x004 => {
@@ -147,11 +146,18 @@ impl Parse for FileNodeData {
                 ReadOnlyObjectDeclaration2LargeRefCountFND::parse(reader, &data_ref)?,
             ),
             0x0FF => FileNode::ChunkTerminatorFND,
-            _ => FileNode::Null,
+            0 => FileNode::Null,
+            other => {
+                log_warn!("Unknown node type: {:#0x}, size {}", other, size);
+                let size_used = remaining_0 - remaining_1;
+                assert!(size_used <= size);
+                let remaining_size = size - size_used;
+                FileNode::UnknownNode(UnknownNode::parse(reader, remaining_size as usize)?)
+            },
         };
 
-        let remaining_1 = reader.remaining();
-        let actual_size = (remaining_0 - remaining_1) as u32;
+        let remaining_2 = reader.remaining();
+        let actual_size = remaining_0 - remaining_2;
 
         let node = Self {
             node_id,
@@ -165,10 +171,11 @@ impl Parse for FileNodeData {
 
         // The stored size can be incorrect when node_id is zero
         if actual_size != size && node_id != 0 {
+            println!("Incorrect structure size: {:#?} (expected size {}, but was {})", node, size, actual_size);
             Err(ErrorKind::MalformedOneNoteFileData(
                 format!(
-                    "The size specified for this structure is incorrect. Was {}, expected {}. Id: {}, data {:?}",
-                    actual_size, size, node_id, node
+                    "The size specified for this structure is incorrect. Was {}, expected {}. Id: {:#0x}",
+                    actual_size, size, node_id
                 )
                 .into(),
             )
@@ -221,6 +228,7 @@ pub enum FileNode {
     ReadOnlyObjectDeclaration2RefCountFND(ReadOnlyObjectDeclaration2RefCountFND),
     ReadOnlyObjectDeclaration2LargeRefCountFND(ReadOnlyObjectDeclaration2LargeRefCountFND),
     ChunkTerminatorFND,
+    UnknownNode(UnknownNode),
     Null,
 }
 
@@ -336,7 +344,6 @@ fn read_property_set(
     reader: Reader,
     property_set_ref: &FileNodeDataRef,
 ) -> Result<ObjectPropSet> {
-    println!("Reading property_set...");
     match property_set_ref {
         FileNodeDataRef::SingleElement(data_ref) => {
             let mut prop_set_reader = data_ref.resolve_to_reader(reader)?;
@@ -628,3 +635,13 @@ type ReadOnlyObjectDeclaration2RefCountFND =
     ReadOnlyObjectDeclaration2RefCount<ObjectDeclaration2RefCountFND>;
 type ReadOnlyObjectDeclaration2LargeRefCountFND =
     ReadOnlyObjectDeclaration2RefCount<ObjectDeclaration2LargeRefCountFND>;
+
+#[derive(Debug, Clone)]
+struct UnknownNode { }
+
+impl ParseWithCount for UnknownNode {
+    fn parse(reader: Reader, size: usize) -> Result<Self> {
+        reader.advance(size)?;
+        Ok(UnknownNode {  })
+    }
+}
