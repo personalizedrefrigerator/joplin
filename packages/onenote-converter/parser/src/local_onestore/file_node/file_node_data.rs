@@ -465,21 +465,6 @@ impl<Id: Parse> ParseWithFormat for ObjectRefAndId<Id> {
     }
 }
 
-#[derive(Debug, Clone)]
-struct ObjectRefAndHash<Hash: Parse> {
-    data_ref: FileNodeChunkReference,
-    hash: Hash,
-}
-
-impl<Hash: Parse> ObjectRefAndHash<Hash> {
-    pub fn parse(reader: Reader, stp_format: u32, cb_format: u32) -> Result<Self> {
-        Ok(Self {
-            data_ref: FileNodeChunkReference::parse(reader, stp_format, cb_format)?,
-            hash: Hash::parse(reader)?,
-        })
-    }
-}
-
 /// Points to encrypted data. See [\[MS-ONESTORE\] 2.5.19](https://learn.microsoft.com/en-us/openspecs/office_file_formats/ms-onestore/542f09eb-9db8-4b6a-86e5-2d9a930b41c0).
 type ObjectDataEncryptionKeyV2FNDX = ObjectRefOnly;
 
@@ -588,7 +573,25 @@ struct ObjectGroupStartFND {
     oid: ExGuid,
 }
 
-type HashedChunkDescriptor2FND = ObjectRefAndHash<u128>;
+#[derive(Debug, Clone)]
+struct HashedChunkDescriptor<Hash: Parse> {
+    data_ref: FileNodeChunkReference,
+    prop_set: ObjectPropSet,
+    hash: Hash,
+}
+
+impl<Hash: Parse> HashedChunkDescriptor<Hash> {
+    pub fn parse(reader: Reader, stp_format: u32, cb_format: u32) -> Result<Self> {
+        let (prop_set, data_ref) = read_property_set_and_ref(reader, stp_format, cb_format)?;
+        Ok(Self {
+            data_ref,
+            prop_set,
+            hash: Hash::parse(reader)?,
+        })
+    }
+}
+
+type HashedChunkDescriptor2FND = HashedChunkDescriptor<u128>;
 
 #[derive(Debug, Clone)]
 struct ReadOnlyObjectDeclaration2RefCount<Base: ParseWithFormat> {

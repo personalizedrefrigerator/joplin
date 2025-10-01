@@ -1,6 +1,6 @@
 use proc_macro2::TokenStream;
 
-use quote::{quote, quote_spanned};
+use quote::{quote, quote_spanned, ToTokens};
 use syn::{DeriveInput, Expr, parse_macro_input, spanned::Spanned};
 
 // See the syn example: https://github.com/dtolnay/syn/blob/master/examples/heapsize/heapsize_derive/src/lib.rs
@@ -33,7 +33,9 @@ fn process_fields(data: &syn::Data, attrs: &Vec<syn::Attribute>) -> TokenStream 
                 let validation: Expr = a
                     .parse_args()
                     .expect("validate must have a single validation argument");
-                let validation_str = format!("Failed to validate: {:?}", validation);
+                let validation_str = format!(
+                    "Failed to validate: {:}", validation.clone().into_token_stream().to_string()
+                );
                 Some(quote_spanned! {validation.span() =>
                     if ! (#validation) {
                         return Err(parser_utils::errors::ErrorKind::ParseValidationFailed(

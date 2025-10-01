@@ -90,6 +90,7 @@ impl FileNodeChunkReference {
             .into());
         }
 
+        println!("resolve to reader at: {} -> {}", self.stp_value, self.stp_value as usize);
         original_reader.with_start_index(self.stp_value as usize)
     }
 }
