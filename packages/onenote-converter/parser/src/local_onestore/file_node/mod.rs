@@ -1,5 +1,5 @@
 mod file_node_chunk_reference;
-mod file_node_data;
+mod file_node;
 
-pub use file_node_data::FileNode;
-pub use file_node_data::FileNodeData;
+pub use file_node::FileNode;
+pub use file_node::FileNodeData;

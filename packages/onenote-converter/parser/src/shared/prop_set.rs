@@ -10,6 +10,14 @@ use std::collections::HashMap;
 /// [\[MS-ONESTORE\] 2.6.7]: https://docs.microsoft.com/en-us/openspecs/office_file_formats/ms-onestore/88a64c18-f815-4ebc-8590-ddd432024ab9
 #[derive(Debug, Clone)]
 pub(crate) struct PropertySet {
+    /// Maps from PropertyId values to (index, PropertyValue).
+    /// Values for PropertyId can be found in [\[MS-ONESTORE\] 2.1.12](https://learn.microsoft.com/en-us/openspecs/office_file_formats/ms-one/e9bf7da8-7aab-4668-be5e-e0c421175e3c).
+    /// 
+    /// For example, to get the value of the "bold" property, use
+    /// ```skip
+    /// let propset = PropertySet::fallback();
+    /// assert_eq!(propset.get(PropertyType::Bold), None);
+    /// ```
     values: HashMap<u32, (usize, PropertyValue)>,
 }
 

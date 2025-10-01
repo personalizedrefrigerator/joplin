@@ -237,6 +237,7 @@ mod test {
 
     #[test]
     fn test_property_bool() {
+        // 0x08001C04 = "bold"
         assert_eq!(PropertyId::new(0x08001C04).bool(), false);
         assert_eq!(PropertyId::new(0x88001C04).bool(), true);
         assert_eq!(PropertyId::new(0x88001C04).id(), 0x1C04);

@@ -62,9 +62,7 @@ impl Parse for FileNodeData {
         let remaining_1 = reader.remaining();
 
         let fnd = match node_id {
-            0x004 => {
-                FileNode::ObjectSpaceManifestRootFND(ObjectSpaceManifestRootFND::parse(reader)?)
-            }
+            0x004 => FileNode::ObjectSpaceManifestRootFND(ObjectSpaceManifestRootFND::parse(reader)?),
             0x008 => FileNode::ObjectSpaceManifestListReferenceFND(
                 ObjectSpaceManifestListReferenceFND::parse(reader, &data_ref)?,
             ),
@@ -74,9 +72,7 @@ impl Parse for FileNodeData {
             0x010 => FileNode::RevisionManifestListReferenceFND(
                 RevisionManifestListReferenceFND::parse(reader, &data_ref)?,
             ),
-            0x014 => {
-                FileNode::RevisionManifestListStartFND(RevisionManifestListStartFND::parse(reader)?)
-            }
+            0x014 => FileNode::RevisionManifestListStartFND(RevisionManifestListStartFND::parse(reader)?),
             0x01B => FileNode::RevisionManifestStart4FND(RevisionManifestStart4FND::parse(reader)?),
             0x01C => FileNode::RevisionManifestEndFND,
             0x01E => FileNode::RevisionManifestStart6FND(RevisionManifestStart6FND::parse(reader)?),
@@ -101,9 +97,7 @@ impl Parse for FileNodeData {
             ),
             0x059 => FileNode::RootObjectReference2FNDX(RootObjectReference2FNDX::parse(reader)?),
             0x05A => FileNode::RootObjectReference3FND(RootObjectReference3FND::parse(reader)?),
-            0x05C => {
-                FileNode::RevisionRoleDeclarationFND(RevisionRoleDeclarationFND::parse(reader)?)
-            }
+            0x05C => FileNode::RevisionRoleDeclarationFND(RevisionRoleDeclarationFND::parse(reader)?),
             0x05D => FileNode::RevisionRoleAndContextDeclarationFND(
                 RevisionRoleAndContextDeclarationFND::parse(reader)?,
             ),
