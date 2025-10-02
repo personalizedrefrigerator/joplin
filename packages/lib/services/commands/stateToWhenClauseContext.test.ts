@@ -82,7 +82,11 @@ describe('stateToWhenClauseContext', () => {
 		expect(resultingState.inTrash).toBe(false);
 	});
 
-	it('should set joplinServerConnected when a Joplin Server/Cloud sync target is selected', () => {
+	it.each(SyncTargetRegistry.allIds().map(id => ({
+		id,
+		name: SyncTargetRegistry.idToName(id),
+		expected: SyncTargetRegistry.isJoplinServerOrCloud(id),
+	})))('should set joplinServerConnected to $expected when the sync target is $name', ({ id, expected }) => {
 		const getWhenClauseContext = (syncTarget: number) => {
 			const applicationState = {
 				...defaultState,
@@ -93,9 +97,7 @@ describe('stateToWhenClauseContext', () => {
 			return stateToWhenClauseContext(applicationState);
 		};
 
-		for (const id of SyncTargetRegistry.allIds()) {
-			const whenClauseContext = getWhenClauseContext(id);
-			expect(whenClauseContext.joplinServerConnected).toBe(SyncTargetRegistry.isJoplinServerOrCloud(id));
-		}
+		const whenClauseContext = getWhenClauseContext(id);
+		expect(whenClauseContext.joplinServerConnected).toBe(expected);
 	});
 });
