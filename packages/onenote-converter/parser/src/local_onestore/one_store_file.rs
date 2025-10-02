@@ -5,7 +5,7 @@ use parser_utils::errors::Result;
 use parser_utils::parse::{Parse, ParseWithCount};
 use parser_utils::Reader;
 
-use crate::local_onestore::{common::FileChunkReference, file_structure::RootFileNodeList};
+use crate::local_onestore::{common::FileChunkReference, file_structure::FileNodeList};
 
 /// A OneNote file packaged in the standard OneNote 2016 format.
 ///
@@ -19,7 +19,7 @@ pub struct OneStoreFile {
     pub free_chunk_list: Vec<FreeChunkListFragment>,
     pub transaction_log: Vec<TransactionLogFragment>,
     pub hashed_chunk_list: Vec<FileNodeListFragment>,
-    pub root_file_node_list: Option<RootFileNodeList>,
+    pub root_file_node_list: Option<FileNodeList>,
 }
 
 impl fmt::Debug for OneStoreFile {
@@ -69,7 +69,7 @@ impl Parse for OneStoreFile {
         let root_file_node_list =
             if !file_node_list_root.is_fcr_nil() && !file_node_list_root.is_fcr_zero() {
                 let mut reader = file_node_list_root.resolve_to_reader(reader)?;
-                Some(RootFileNodeList::parse(
+                Some(FileNodeList::parse(
                     &mut reader,
                     file_node_list_root.cb as usize,
                 )?)

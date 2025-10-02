@@ -1,11 +1,11 @@
-use crate::local_onestore::{common::FileChunkReference64x32, file_node::{FileNode, FileNodeData}};
+use crate::local_onestore::{common::FileChunkReference64x32, file_node::{FileNodeData, FileNode}};
 use parser_utils::{errors::ErrorKind, parse::Parse};
 
 #[derive(Debug, Clone)]
 #[allow(dead_code)]
 pub struct FileNodeListFragment {
     pub header: FileNodeListHeader,
-    pub file_nodes: Vec<FileNodeData>,
+    pub file_nodes: Vec<FileNode>,
     pub next_fragment: FileChunkReference64x32,
     pub footer: u64,
 }
@@ -13,7 +13,7 @@ pub struct FileNodeListFragment {
 impl FileNodeListFragment {
     pub fn parse(reader: parser_utils::Reader, size: usize) -> parser_utils::Result<Self> {
         let header = FileNodeListHeader::parse(reader)?;
-        let mut file_nodes: Vec<FileNodeData> = Vec::new();
+        let mut file_nodes: Vec<FileNode> = Vec::new();
         let mut file_node_size: usize = 0;
 
         let remaining_0 = reader.remaining();
@@ -21,10 +21,10 @@ impl FileNodeListFragment {
         println!("Fragment: Size: {}", size);
 
         loop {
-            let file_node = FileNodeData::parse(reader)?;
+            let file_node = FileNode::parse(reader)?;
             file_node_size += file_node.size as usize;
 
-            if !matches!(file_node.fnd, FileNode::Null) {
+            if !matches!(file_node.fnd, FileNodeData::Null) {
                 file_nodes.push(file_node);
             }
 

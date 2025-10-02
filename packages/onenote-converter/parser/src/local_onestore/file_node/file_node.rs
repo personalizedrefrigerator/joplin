@@ -1,7 +1,7 @@
 use super::super::common::ObjectDeclarationWithRefCountBody;
 use super::file_node_chunk_reference::FileNodeChunkReference;
 use crate::local_onestore::common::FileChunkReference;
-use crate::local_onestore::file_structure::RootFileNodeList;
+use crate::local_onestore::file_structure::FileNodeList;
 use crate::shared::compact_id::CompactId;
 use crate::shared::exguid::ExGuid;
 use crate::shared::jcid::JcId;
@@ -17,7 +17,7 @@ use crate::shared::guid::Guid;
 /// See [\[MS-ONESTORE\] 2.4.3](https://learn.microsoft.com/en-us/openspecs/office_file_formats/ms-onestore/25a9b048-f91a-48d1-b803-137b7194e69e)
 #[derive(Debug, Clone)]
 #[allow(dead_code)]
-pub struct FileNodeData {
+pub struct FileNode {
     /// A unique ID for the node. Not guaranteed to be the same if the file is re-parsed.
     pub node_unique_id: NodeId,
 
@@ -29,19 +29,19 @@ pub struct FileNodeData {
     base_type: u32,
     pub size: usize,
     data_ref: FileNodeDataRef,
-    pub fnd: FileNode,
+    pub fnd: FileNodeData,
 }
 
 #[derive(Debug, Clone)]
 enum FileNodeDataRef {
     SingleElement(FileNodeChunkReference),
-    ElementList(RootFileNodeList),
+    ElementList(FileNodeList),
     NoData,
     InvalidData,
 }
 
-impl FileNodeData {
-    pub fn get_children(&self) -> Option<&RootFileNodeList> {
+impl FileNode {
+    pub fn get_children(&self) -> Option<&FileNodeList> {
         if let FileNodeDataRef::ElementList(list) = &self.data_ref {
             Some(list)
         } else {
@@ -50,7 +50,7 @@ impl FileNodeData {
     }
 }
 
-impl Parse for FileNodeData {
+impl Parse for FileNode {
     fn parse(reader: parser_utils::Reader) -> Result<Self> {
         let remaining_0 = reader.remaining();
         let first_line = reader.get_u32()?;
@@ -69,101 +69,101 @@ impl Parse for FileNodeData {
             2 => FileNodeDataRef::ElementList({
                 let list_ref = FileNodeChunkReference::parse(reader, stp_format, cb_format)?;
                 let mut resolved_reader = list_ref.resolve_to_reader(reader)?;
-                RootFileNodeList::parse(&mut resolved_reader, list_ref.data_size())
+                FileNodeList::parse(&mut resolved_reader, list_ref.data_size())
             }?),
             _ => FileNodeDataRef::InvalidData,
         };
         let remaining_1 = reader.remaining();
 
         let fnd = match node_id {
-            0x004 => FileNode::ObjectSpaceManifestRootFND(ObjectSpaceManifestRootFND::parse(reader)?),
-            0x008 => FileNode::ObjectSpaceManifestListReferenceFND(
+            0x004 => FileNodeData::ObjectSpaceManifestRootFND(ObjectSpaceManifestRootFND::parse(reader)?),
+            0x008 => FileNodeData::ObjectSpaceManifestListReferenceFND(
                 ObjectSpaceManifestListReferenceFND::parse(reader, &data_ref)?,
             ),
-            0x00C => FileNode::ObjectSpaceManifestListStartFND(
+            0x00C => FileNodeData::ObjectSpaceManifestListStartFND(
                 ObjectSpaceManifestListStartFND::parse(reader)?,
             ),
-            0x010 => FileNode::RevisionManifestListReferenceFND(
+            0x010 => FileNodeData::RevisionManifestListReferenceFND(
                 RevisionManifestListReferenceFND::parse(reader, &data_ref)?,
             ),
-            0x014 => FileNode::RevisionManifestListStartFND(RevisionManifestListStartFND::parse(reader)?),
-            0x01B => FileNode::RevisionManifestStart4FND(RevisionManifestStart4FND::parse(reader)?),
-            0x01C => FileNode::RevisionManifestEndFND,
-            0x01E => FileNode::RevisionManifestStart6FND(RevisionManifestStart6FND::parse(reader)?),
-            0x01F => FileNode::RevisionManifestStart7FND(RevisionManifestStart7FND::parse(reader)?),
-            0x021 => FileNode::GlobalIdTableStartFNDX(GlobalIdTableStartFNDX::parse(reader)?),
-            0x022 => FileNode::GlobalIdTableStart2FND,
-            0x024 => FileNode::GlobalIdTableEntryFNDX(GlobalIdTableEntryFNDX::parse(reader)?),
-            0x025 => FileNode::GlobalIdTableEntry2FNDX(GlobalIdTableEntry2FNDX::parse(reader)?),
-            0x026 => FileNode::GlobalIdTableEntry3FNDX(GlobalIdTableEntry3FNDX::parse(reader)?),
-            0x028 => FileNode::GlobalIdTableEndFNDX,
-            0x02D => FileNode::ObjectDeclarationWithRefCountFNDX(
+            0x014 => FileNodeData::RevisionManifestListStartFND(RevisionManifestListStartFND::parse(reader)?),
+            0x01B => FileNodeData::RevisionManifestStart4FND(RevisionManifestStart4FND::parse(reader)?),
+            0x01C => FileNodeData::RevisionManifestEndFND,
+            0x01E => FileNodeData::RevisionManifestStart6FND(RevisionManifestStart6FND::parse(reader)?),
+            0x01F => FileNodeData::RevisionManifestStart7FND(RevisionManifestStart7FND::parse(reader)?),
+            0x021 => FileNodeData::GlobalIdTableStartFNDX(GlobalIdTableStartFNDX::parse(reader)?),
+            0x022 => FileNodeData::GlobalIdTableStart2FND,
+            0x024 => FileNodeData::GlobalIdTableEntryFNDX(GlobalIdTableEntryFNDX::parse(reader)?),
+            0x025 => FileNodeData::GlobalIdTableEntry2FNDX(GlobalIdTableEntry2FNDX::parse(reader)?),
+            0x026 => FileNodeData::GlobalIdTableEntry3FNDX(GlobalIdTableEntry3FNDX::parse(reader)?),
+            0x028 => FileNodeData::GlobalIdTableEndFNDX,
+            0x02D => FileNodeData::ObjectDeclarationWithRefCountFNDX(
                 ObjectDeclarationWithRefCountFNDX::parse(reader, &data_ref)?,
             ),
-            0x02E => FileNode::ObjectDeclarationWithRefCount2FNDX(
+            0x02E => FileNodeData::ObjectDeclarationWithRefCount2FNDX(
                 ObjectDeclarationWithRefCount2FNDX::parse(reader, &data_ref)?,
             ),
-            0x041 => FileNode::ObjectRevisionWithRefCountFNDX(
+            0x041 => FileNodeData::ObjectRevisionWithRefCountFNDX(
                 ObjectRevisionWithRefCountFNDX::parse(reader, &data_ref)?,
             ),
-            0x042 => FileNode::ObjectRevisionWithRefCount2FNDX(
+            0x042 => FileNodeData::ObjectRevisionWithRefCount2FNDX(
                 ObjectRevisionWithRefCount2FNDX::parse(reader, &data_ref)?,
             ),
-            0x059 => FileNode::RootObjectReference2FNDX(RootObjectReference2FNDX::parse(reader)?),
-            0x05A => FileNode::RootObjectReference3FND(RootObjectReference3FND::parse(reader)?),
-            0x05C => FileNode::RevisionRoleDeclarationFND(RevisionRoleDeclarationFND::parse(reader)?),
-            0x05D => FileNode::RevisionRoleAndContextDeclarationFND(
+            0x059 => FileNodeData::RootObjectReference2FNDX(RootObjectReference2FNDX::parse(reader)?),
+            0x05A => FileNodeData::RootObjectReference3FND(RootObjectReference3FND::parse(reader)?),
+            0x05C => FileNodeData::RevisionRoleDeclarationFND(RevisionRoleDeclarationFND::parse(reader)?),
+            0x05D => FileNodeData::RevisionRoleAndContextDeclarationFND(
                 RevisionRoleAndContextDeclarationFND::parse(reader)?,
             ),
-            0x072 => FileNode::ObjectDeclarationFileData3RefCountFND(
+            0x072 => FileNodeData::ObjectDeclarationFileData3RefCountFND(
                 ObjectDeclarationFileData3RefCountFND::parse(reader)?,
             ),
-            0x073 => FileNode::ObjectDeclarationFileData3LargeRefCountFND(
+            0x073 => FileNodeData::ObjectDeclarationFileData3LargeRefCountFND(
                 ObjectDeclarationFileData3LargeRefCountFND::parse(reader)?,
             ),
-            0x07C => FileNode::ObjectDataEncryptionKeyV2FNDX(ObjectDataEncryptionKeyV2FNDX::parse(
+            0x07C => FileNodeData::ObjectDataEncryptionKeyV2FNDX(ObjectDataEncryptionKeyV2FNDX::parse(
                 reader,
             )?),
-            0x084 => FileNode::ObjectInfoDependencyOverridesFND(
+            0x084 => FileNodeData::ObjectInfoDependencyOverridesFND(
                 ObjectInfoDependencyOverridesFND::parse(reader, &data_ref)?,
             ),
-            0x08C => FileNode::DataSignatureGroupDefinitionFND(
+            0x08C => FileNodeData::DataSignatureGroupDefinitionFND(
                 DataSignatureGroupDefinitionFND::parse(reader)?,
             ),
-            0x090 => FileNode::FileDataStoreListReferenceFND(FileDataStoreListReferenceFND::parse(
+            0x090 => FileNodeData::FileDataStoreListReferenceFND(FileDataStoreListReferenceFND::parse(
                 reader,
             )?),
-            0x094 => FileNode::FileDataStoreObjectReferenceFND(
+            0x094 => FileNodeData::FileDataStoreObjectReferenceFND(
                 FileDataStoreObjectReferenceFND::parse(reader)?,
             ),
-            0x0A4 => FileNode::ObjectDeclaration2RefCountFND(ObjectDeclaration2RefCountFND::parse(
+            0x0A4 => FileNodeData::ObjectDeclaration2RefCountFND(ObjectDeclaration2RefCountFND::parse(
                 reader, &data_ref,
             )?),
-            0x0A5 => FileNode::ObjectDeclaration2LargeRefCountFND(
+            0x0A5 => FileNodeData::ObjectDeclaration2LargeRefCountFND(
                 ObjectDeclaration2LargeRefCountFND::parse(reader, &data_ref)?,
             ),
             0x0B0 => {
-                FileNode::ObjectGroupListReferenceFND(ObjectGroupListReferenceFND::parse(reader)?)
+                FileNodeData::ObjectGroupListReferenceFND(ObjectGroupListReferenceFND::parse(reader)?)
             }
-            0x0B4 => FileNode::ObjectGroupStartFND(ObjectGroupStartFND::parse(reader)?),
-            0x0B8 => FileNode::ObjectGroupEndFND,
-            0x0C2 => FileNode::HashedChunkDescriptor2FND(HashedChunkDescriptor2FND::parse(
+            0x0B4 => FileNodeData::ObjectGroupStartFND(ObjectGroupStartFND::parse(reader)?),
+            0x0B8 => FileNodeData::ObjectGroupEndFND,
+            0x0C2 => FileNodeData::HashedChunkDescriptor2FND(HashedChunkDescriptor2FND::parse(
                 reader, &data_ref,
             )?),
-            0x0C4 => FileNode::ReadOnlyObjectDeclaration2RefCountFND(
+            0x0C4 => FileNodeData::ReadOnlyObjectDeclaration2RefCountFND(
                 ReadOnlyObjectDeclaration2RefCountFND::parse(reader, &data_ref)?,
             ),
-            0x0C5 => FileNode::ReadOnlyObjectDeclaration2LargeRefCountFND(
+            0x0C5 => FileNodeData::ReadOnlyObjectDeclaration2LargeRefCountFND(
                 ReadOnlyObjectDeclaration2LargeRefCountFND::parse(reader, &data_ref)?,
             ),
-            0x0FF => FileNode::ChunkTerminatorFND,
-            0 => FileNode::Null,
+            0x0FF => FileNodeData::ChunkTerminatorFND,
+            0 => FileNodeData::Null,
             other => {
                 log_warn!("Unknown node type: {:#0x}, size {}", other, size);
                 let size_used = remaining_0 - remaining_1;
                 assert!(size_used <= size);
                 let remaining_size = size - size_used;
-                FileNode::UnknownNode(UnknownNode::parse(reader, remaining_size as usize)?)
+                FileNodeData::UnknownNode(UnknownNode::parse(reader, remaining_size as usize)?)
             }
         };
 
@@ -204,7 +204,7 @@ impl Parse for FileNodeData {
 /// See [\[MS-ONESTORE\] 2.4.3](https://learn.microsoft.com/en-us/openspecs/office_file_formats/ms-onestore/25a9b048-f91a-48d1-b803-137b7194e69e)
 #[derive(Debug, Clone)]
 #[allow(dead_code)]
-pub enum FileNode {
+pub enum FileNodeData {
     ObjectSpaceManifestRootFND(ObjectSpaceManifestRootFND),
     ObjectSpaceManifestListReferenceFND(ObjectSpaceManifestListReferenceFND),
     ObjectSpaceManifestListStartFND(ObjectSpaceManifestListStartFND),
@@ -264,7 +264,7 @@ pub struct ObjectSpaceManifestRootFND {
 #[derive(Debug, Clone)]
 #[allow(dead_code)]
 pub struct ObjectSpaceManifestListReferenceFND {
-    gosid: ExGuid,
+    pub gosid: ExGuid,
     // Per [section 2.1.6](https://learn.microsoft.com/en-us/openspecs/office_file_formats/ms-onestore/480f3f4d-1c13-4b58-9ee5-63919b17fb11),
     // - There is at least one revision in the list.
     // - All but the last revision must be ignored.
@@ -279,7 +279,7 @@ impl ParseWithRef for ObjectSpaceManifestListReferenceFND {
                 let mut index = 0;
                 for item in &data_ref.file_node_sequence {
                     if index == 0 {
-                        if !matches!(item.fnd, FileNode::ObjectSpaceManifestListStartFND(_)) {
+                        if !matches!(item.fnd, FileNodeData::ObjectSpaceManifestListStartFND(_)) {
                             return Err(
                                 ErrorKind::MalformedOneStoreData(
                                     "ObjectSpaceManifestListReferenceFND's list must start with a ObjectSpaceManifestListStartFND.".into()
@@ -287,7 +287,7 @@ impl ParseWithRef for ObjectSpaceManifestListReferenceFND {
                             )
                         }
                     } else {
-                        if !matches!(item.fnd, FileNode::RevisionManifestListReferenceFND(_)) {
+                        if !matches!(item.fnd, FileNodeData::RevisionManifestListReferenceFND(_)) {
                             return Err(
                                 ErrorKind::MalformedOneStoreData(
                                     "All items following the first in an ObjectSpaceManifestListReferenceFND must be RevisionManifestListReferenceFNDs.".into()
@@ -301,7 +301,7 @@ impl ParseWithRef for ObjectSpaceManifestListReferenceFND {
 
             let last_revision = data_ref.file_node_sequence.iter().rev().find_map(|node| {
                 match &node.fnd {
-                    FileNode::RevisionManifestListReferenceFND(revision) => Some(revision),
+                    FileNodeData::RevisionManifestListReferenceFND(revision) => Some(revision),
                     _ => None,
                 }
             });
@@ -337,7 +337,7 @@ pub struct ObjectSpaceManifestListStartFND {
 #[derive(Debug, Clone)]
 #[allow(dead_code)]
 pub struct RevisionManifestListReferenceFND {
-    list: RootFileNodeList,
+    pub list: FileNodeList,
 }
 
 impl ParseWithRef for RevisionManifestListReferenceFND {
@@ -407,15 +407,15 @@ pub struct GlobalIdTableStartFNDX {
 #[derive(Debug, Clone, Parse)]
 #[allow(dead_code)]
 pub struct GlobalIdTableEntryFNDX {
-    index: u32,
-    guid: Guid,
+    pub index: u32,
+    pub guid: Guid,
 }
 
 #[derive(Debug, Clone, Parse)]
 #[allow(dead_code)]
 pub struct GlobalIdTableEntry2FNDX {
-    i_index_map_from: u32,
-    i_index_map_to: u32,
+    pub i_index_map_from: u32,
+    pub i_index_map_to: u32,
 }
 
 #[derive(Debug, Clone, Parse)]

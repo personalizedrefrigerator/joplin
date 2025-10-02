@@ -3,6 +3,7 @@ mod file_node;
 mod file_structure;
 mod one_store_file;
 mod global_id_table;
+mod object;
 
 use std::collections::HashMap;
 
@@ -21,22 +22,8 @@ pub struct OneStore {
 
 impl OneStore {
 	fn new(raw: OneStoreFile) -> Self {
-		let node_to_id_table = raw.root_file_node_list.iter().flat_map(
-			|list| {
-				let mut id_table = None;
-				let mut node_to_id_table = Vec::new();
-				let mut global_id_table_builder 
-				for node in list.iter_recursive() {
-					if let 
-				}
-			}
-		).collect();
-
-		if let Some(node_list) = raw.root_file_node_list {
-			for node in node_list.iter_recursive() {
-				node_to_id_table.node.node_unique_id
-			}
-		}
+		// Do higher-level parsing: Convert the low-level objects to high-level ones
+		
 
 
 		OneStore {

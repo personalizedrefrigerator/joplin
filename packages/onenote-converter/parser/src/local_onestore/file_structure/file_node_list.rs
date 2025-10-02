@@ -3,18 +3,18 @@ use parser_utils::parse::ParseWithCount;
 use parser_utils::Reader;
 
 use crate::local_onestore::common::{FileChunkReference, FileChunkReference64x32};
-use crate::local_onestore::file_node::{FileNode, FileNodeData};
+use crate::local_onestore::file_node::{FileNodeData, FileNode};
 use crate::local_onestore::file_structure::FileNodeListFragment;
 
 #[derive(Debug, Clone)]
-pub struct RootFileNodeList {
+pub struct FileNodeList {
     file_node_list_fragments: Vec<FileNodeListFragment>,
-    pub file_node_sequence: Vec<FileNodeData>,
+    pub file_node_sequence: Vec<FileNode>,
 }
 
-impl ParseWithCount for RootFileNodeList {
+impl ParseWithCount for FileNodeList {
     fn parse(reader: Reader, size: usize) -> Result<Self> {
-        let mut builder = RootFileNodeListBuilder {
+        let mut builder = FileNodeListBuilder {
             next_fragment_id: 0,
             file_node_list_fragments: Vec::new(),
             file_node_sequence: Vec::new(),
@@ -34,15 +34,15 @@ impl ParseWithCount for RootFileNodeList {
     }
 }
 
-struct RootFileNodeListBuilder {
+struct FileNodeListBuilder {
     pub file_node_list_fragments: Vec<FileNodeListFragment>,
-    pub file_node_sequence: Vec<FileNodeData>,
+    pub file_node_sequence: Vec<FileNode>,
 
     // Used for validation during construction
     next_fragment_id: u32,
 }
 
-impl RootFileNodeListBuilder {
+impl FileNodeListBuilder {
     fn add_fragment(&mut self, fragment: FileNodeListFragment) -> Result<FileChunkReference64x32> {
         let fragment_sequence = fragment.header.n_fragment_sequence;
         if fragment_sequence != self.next_fragment_id {
@@ -60,7 +60,7 @@ impl RootFileNodeListBuilder {
         for item in fragment
             .file_nodes
             .iter()
-            .filter(|f| !matches!(f.fnd, FileNode::ChunkTerminatorFND))
+            .filter(|f| !matches!(f.fnd, FileNodeData::ChunkTerminatorFND))
         {
             self.file_node_sequence.push(item.clone());
         }
@@ -70,53 +70,47 @@ impl RootFileNodeListBuilder {
     }
 }
 
-impl RootFileNodeList {
-    /// Iterate over all nodes.
-    /// TODO: Currently, this uses depth-first search. It may need to be changed to breadth-first.
-    pub fn iter_recursive<'a>(&'a self) -> RootFileNodeListIterator<'a> {
-        RootFileNodeListIterator::new(self)
+impl FileNodeList {
+    /// Iterate over the .fnd fields for all toplevel nodes
+    pub fn iter_data<'a>(&'a self) -> FileNodeDataIterator<'a> {
+        FileNodeDataIterator::new(self)
     }
 }
 
-pub struct RootFileNodeListIterator<'a> {
-    data: &'a RootFileNodeList,
-    sub_iterator: Option<Box<RootFileNodeListIterator<'a>>>,
+pub struct FileNodeDataIterator<'a> {
+    data: &'a FileNodeList,
     index: usize,
 }
 
-impl<'a> RootFileNodeListIterator<'a> {
-    fn new(node_list: &'a RootFileNodeList) -> Self {
-        RootFileNodeListIterator {
+impl<'a> FileNodeDataIterator<'a> {
+    fn new(node_list: &'a FileNodeList) -> Self {
+        FileNodeDataIterator {
             data: node_list,
-            sub_iterator: None,
             index: 0,
         }
     }
-}
 
-impl <'a> Iterator for RootFileNodeListIterator<'a> {
-    type Item = &'a FileNodeData;
-    fn next(&mut self) -> Option<Self::Item> {
-        if self.index >= self.data.file_node_sequence.len() {
-            return None;
+    pub fn peek(&self) -> Option<&'a FileNodeData> {
+        let index = self.index;
+        if index >= self.data.file_node_sequence.len() {
+            None
+        } else {
+            Some(&self.data.file_node_sequence[index].fnd)
         }
-
-        // Continue iterating through a child node
-        if let Some(sub_iterator) = &mut self.sub_iterator {
-            let next = sub_iterator.next();
-            if let None = next {
-                self.sub_iterator = None;
-            } else {
-                return next;
-            }
-        }
-
-        let result = &self.data.file_node_sequence[self.index];
-        self.index += 1;
-        self.sub_iterator = result.get_children().map(
-            |children| Box::new(children.iter_recursive())
-        );
-
-        Some(result)
     }
 }
+
+impl <'a> Iterator for FileNodeDataIterator<'a> {
+    type Item = &'a FileNodeData;
+    fn next(&mut self) -> Option<Self::Item> {
+        let new_index = self.index + 1;
+        if new_index >= self.data.file_node_sequence.len() {
+            return None;
+        }
+        self.index = new_index;
+
+        let result = &self.data.file_node_sequence[new_index];
+        Some(&result.fnd)
+    }
+}
+
