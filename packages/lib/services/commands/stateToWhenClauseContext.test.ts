@@ -1,10 +1,10 @@
-import { State } from '../../reducer';
+import { defaultState, State } from '../../reducer';
+import SyncTargetRegistry from '../../SyncTargetRegistry';
 import { getTrashFolderId } from '../trash';
 import stateToWhenClauseContext from './stateToWhenClauseContext';
 
 
 describe('stateToWhenClauseContext', () => {
-
 	it('should be in trash if selected note has been deleted and selected folder is trash', async () => {
 		const applicationState = {
 			selectedNoteIds: ['1'],
@@ -82,4 +82,20 @@ describe('stateToWhenClauseContext', () => {
 		expect(resultingState.inTrash).toBe(false);
 	});
 
+	it('should set joplinServerConnected when a Joplin Server/Cloud sync target is selected', () => {
+		const getWhenClauseContext = (syncTarget: number) => {
+			const applicationState = {
+				...defaultState,
+				settings: {
+					'sync.target': syncTarget,
+				},
+			};
+			return stateToWhenClauseContext(applicationState);
+		};
+
+		for (const id of SyncTargetRegistry.allIds()) {
+			const whenClauseContext = getWhenClauseContext(id);
+			expect(whenClauseContext.joplinServerConnected).toBe(SyncTargetRegistry.isJoplinServerOrCloud(id));
+		}
+	});
 });
