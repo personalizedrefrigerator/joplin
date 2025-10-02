@@ -143,7 +143,7 @@ impl Parse for FileNode {
                 ObjectDeclaration2LargeRefCountFND::parse(reader, &data_ref)?,
             ),
             0x0B0 => {
-                FileNodeData::ObjectGroupListReferenceFND(ObjectGroupListReferenceFND::parse(reader)?)
+                FileNodeData::ObjectGroupListReferenceFND(ObjectGroupListReferenceFND::parse(reader, &data_ref)?)
             }
             0x0B4 => FileNodeData::ObjectGroupStartFND(ObjectGroupStartFND::parse(reader)?),
             0x0B8 => FileNodeData::ObjectGroupEndFND,
@@ -344,14 +344,12 @@ impl ParseWithRef for RevisionManifestListReferenceFND {
     fn parse(_reader: parser_utils::Reader, data_ref: &FileNodeDataRef) -> Result<Self> {
         match data_ref {
             FileNodeDataRef::ElementList(list) => Ok(Self { list: list.clone() }),
-            other => Err(ErrorKind::MalformedOneStoreData(
-                format!(
+            other =>
+                Err(parser_error!(
+                    MalformedOneStoreData,
                     "Expected a list (parsing RevisionManifestListReferenceFND), got {:?}",
                     other
-                )
-                .into(),
-            )
-            .into()),
+                ).into()),
         }
     }
 }
@@ -359,7 +357,7 @@ impl ParseWithRef for RevisionManifestListReferenceFND {
 #[derive(Debug, Clone)]
 #[allow(dead_code)]
 pub struct RevisionManifestListStartFND {
-    gsoid: ExGuid,
+    pub gsoid: ExGuid,
     n_instance: u32,
 }
 
@@ -375,8 +373,8 @@ impl Parse for RevisionManifestListStartFND {
 #[derive(Debug, Clone, Parse)]
 #[allow(dead_code)]
 pub struct RevisionManifestStart4FND {
-    rid: ExGuid,
-    rid_dependent: ExGuid,
+    pub rid: ExGuid,
+    pub rid_dependent: ExGuid,
     reserved_time_creation: u64,
     revision_role: u32,
     odcs_default: u16,
@@ -385,8 +383,9 @@ pub struct RevisionManifestStart4FND {
 #[derive(Debug, Clone, Parse)]
 #[allow(dead_code)]
 pub struct RevisionManifestStart6FND {
-    rid: ExGuid,
-    rid_dependent: ExGuid,
+    pub rid: ExGuid,
+    /// ID of a dependency revision
+    pub rid_dependent: ExGuid,
     revision_role: u32,
     odcs_default: u16,
 }
@@ -394,7 +393,7 @@ pub struct RevisionManifestStart6FND {
 #[derive(Debug, Clone, Parse)]
 #[allow(dead_code)]
 pub struct RevisionManifestStart7FND {
-    base: RevisionManifestStart6FND,
+    pub base: RevisionManifestStart6FND,
     gctxid: ExGuid,
 }
 
@@ -526,22 +525,25 @@ pub struct RootObjectReference2FNDX {
 #[derive(Debug, Clone, Parse)]
 #[allow(dead_code)]
 pub struct RootObjectReference3FND {
-    oid_root: ExGuid,
-    root_role: u32,
+    pub oid_root: ExGuid,
+    pub root_role: u32,
 }
 
 #[derive(Debug, Clone, Parse)]
 #[allow(dead_code)]
 pub struct RevisionRoleDeclarationFND {
-    rid: ExGuid,
+    pub rid: ExGuid,
+    /// "should be 0x01"
     revision_role: u32,
 }
 
 #[derive(Debug, Clone, Parse)]
 #[allow(dead_code)]
 pub struct RevisionRoleAndContextDeclarationFND {
-    base: RevisionRoleDeclarationFND,
-    gctxid: ExGuid,
+    /// Revision role & pointer to the revision
+    pub base: RevisionRoleDeclarationFND,
+    /// The revision context
+    pub gctxid: ExGuid,
 }
 
 /// See [\[MS-ONESTORE\] 2.2.3](https://learn.microsoft.com/en-us/openspecs/office_file_formats/ms-onestore/af15f3eb-f2a8-4333-8d04-e05e55c2af07)
@@ -582,6 +584,20 @@ pub struct ObjectDeclarationFileDataRefCount<RefSize: Parse> {
     file_ext: StringInStorageBuffer,
 }
 
+impl <RefSize : Parse> ObjectDeclarationNode for ObjectDeclarationFileDataRefCount<RefSize> {
+    fn get_jcid(&self) -> JcId {
+        self.jcid
+    }
+
+    fn get_compact_id(&self) -> CompactId {
+        self.oid
+    }
+
+    fn get_props<'a>(&'a self) -> Option<&'a ObjectPropSet> {
+        None
+    }
+}
+
 pub type ObjectDeclarationFileData3RefCountFND = ObjectDeclarationFileDataRefCount<u8>;
 pub type ObjectDeclarationFileData3LargeRefCountFND = ObjectDeclarationFileDataRefCount<u32>;
 
@@ -616,6 +632,7 @@ struct ObjectInfoDependencyOverrideData {
 }
 
 /// See [\[MS-ONESTORE\] 2.5.20](https://learn.microsoft.com/en-us/openspecs/office_file_formats/ms-onestore/80125c83-199e-43b9-9a13-4085752eddac)
+/// Specifies reference counts for objects.
 #[derive(Debug, Clone)]
 #[allow(dead_code)]
 pub struct ObjectInfoDependencyOverridesFND {
@@ -659,10 +676,19 @@ pub struct FileDataStoreListReferenceFND {}
 /// See [\[MS-ONESTORE\] 2.5.22](https://learn.microsoft.com/en-us/openspecs/office_file_formats/ms-onestore/6f6d5729-ad03-420f-b8fa-7683751218b3)
 pub type FileDataStoreObjectReferenceFND = ObjectRefAndId<Guid>;
 
+/// Common functionality available for most nodes that declare objects
+pub trait ObjectDeclarationNode {
+    fn get_jcid(&self) -> JcId;
+    fn get_compact_id(&self) -> CompactId;
+    fn get_props<'a>(&'a self) -> Option<&'a ObjectPropSet>;
+}
+
 #[derive(Debug, Clone)]
 #[allow(dead_code)]
 struct ObjectDeclaration2Body {
+    /// The object ID
     oid: CompactId,
+    /// Specifies the object type
     jcid: JcId,
     f_has_oid_references: bool,
     f_has_osid_references: bool,
@@ -691,6 +717,18 @@ pub struct ObjectDeclaration2RefCount<RefSize: Parse> {
     c_ref: RefSize,
 }
 
+impl <RefSize: Parse> ObjectDeclarationNode for ObjectDeclaration2RefCount<RefSize> {
+    fn get_jcid(&self) -> JcId {
+        self.body.jcid
+    }
+    fn get_props<'a>(&'a self) -> Option<&'a ObjectPropSet> {
+        Some(&self.props)
+    }
+    fn get_compact_id(&self) -> CompactId {
+        self.body.oid
+    }
+}
+
 impl<RefSize: Parse> ParseWithRef for ObjectDeclaration2RefCount<RefSize> {
     fn parse(reader: parser_utils::Reader, property_set_ref: &FileNodeDataRef) -> Result<Self> {
         Ok(Self {
@@ -704,12 +742,35 @@ impl<RefSize: Parse> ParseWithRef for ObjectDeclaration2RefCount<RefSize> {
 pub type ObjectDeclaration2RefCountFND = ObjectDeclaration2RefCount<u8>;
 pub type ObjectDeclaration2LargeRefCountFND = ObjectDeclaration2RefCount<u32>;
 
-pub type ObjectGroupListReferenceFND = ObjectRefAndId<ExGuid>;
+#[derive(Debug, Clone)]
+pub struct ObjectGroupListReferenceFND {
+    pub list: FileNodeList,
+    pub id: ExGuid,
+}
 
+impl ParseWithRef for ObjectGroupListReferenceFND {
+    fn parse(reader: parser_utils::Reader, data_ref: &FileNodeDataRef) -> Result<Self> {
+        match data_ref {
+            FileNodeDataRef::ElementList(list) => Ok(Self {
+                list: list.clone(),
+                id: ExGuid::parse(reader)?,
+            }),
+            other => 
+                Err(parser_error!(
+                    MalformedOneStoreData,
+                    "Expected a list (parsing ObjectGroupListReferenceFND), got {:?}",
+                    other
+                ).into()),
+        }
+    }
+}
+
+/// See [MS-ONESTORE 2.5.32](https://learn.microsoft.com/en-us/openspecs/office_file_formats/ms-onestore/2b639cb8-1185-4f63-82cb-0f3e4106611e)
 #[derive(Debug, Clone, Parse)]
 #[allow(dead_code)]
 pub struct ObjectGroupStartFND {
-    oid: ExGuid,
+    /// The ID of the object group
+    pub oid: ExGuid,
 }
 
 #[derive(Debug, Clone)]
@@ -734,7 +795,7 @@ type HashedChunkDescriptor2FND = HashedChunkDescriptor<u128>;
 #[derive(Debug, Clone)]
 #[allow(dead_code)]
 pub struct ReadOnlyObjectDeclaration2RefCount<Base> {
-    base: Base,
+    pub base: Base,
     md5_hash: u128,
 }
 
@@ -744,6 +805,18 @@ impl<Base: ParseWithRef> ParseWithRef for ReadOnlyObjectDeclaration2RefCount<Bas
             base: Base::parse(reader, prop_ref)?,
             md5_hash: u128::parse(reader)?,
         })
+    }
+}
+
+impl <Base : ObjectDeclarationNode> ObjectDeclarationNode for ReadOnlyObjectDeclaration2RefCount<Base> {
+    fn get_jcid(&self) -> JcId {
+        self.base.get_jcid()
+    }
+    fn get_props<'a>(&'a self) -> Option<&'a ObjectPropSet> {
+        self.base.get_props()
+    }
+    fn get_compact_id(&self) -> CompactId {
+        self.base.get_compact_id()
     }
 }
 

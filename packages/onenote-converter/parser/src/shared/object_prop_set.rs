@@ -13,7 +13,7 @@ use parser_utils::Reader;
 /// See [\[MS-ONESTORE\] 2.1.1].
 ///
 /// [\[MS-ONESTORE\] 2.1.1]: https://docs.microsoft.com/en-us/openspecs/office_file_formats/ms-onestore/e9fb4b61-5128-45dd-9a96-6bad6f11dc18
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 pub(crate) struct ObjectPropSet {
     pub(crate) object_ids: Vec<CompactId>,
     pub(crate) object_space_ids: Vec<CompactId>,

@@ -1,6 +1,6 @@
 use std::{collections::HashMap};
 
-use crate::{local_onestore::{file_node::{FileNodeData}, file_structure::{FileNodeDataIterator}, object::id_mapping::IdMapping}, shared::{compact_id::CompactId, exguid::ExGuid}};
+use crate::{local_onestore::{file_node::{FileNodeData}, file_structure::{FileNodeDataIterator}, objects::id_mapping::IdMapping}, shared::{compact_id::CompactId, exguid::ExGuid}};
 use parser_utils::{errors::{ErrorKind, Result}, log_warn};
 
 pub struct GlobalIdTable {

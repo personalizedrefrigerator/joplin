@@ -21,6 +21,14 @@ macro_rules! exguid {
     };
 }
 
+macro_rules! parser_error {
+    ($kind:tt , $( $message:tt )* ) => {
+        parser_utils::errors::ErrorKind::$kind(
+            format!($( $message )*).into()
+        )
+    };
+}
+
 #[cfg(test)]
 mod test {
     use crate::shared::exguid::ExGuid;

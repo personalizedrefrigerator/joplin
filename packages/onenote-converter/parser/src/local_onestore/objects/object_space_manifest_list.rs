@@ -1,16 +1,15 @@
-use std::{collections::HashMap};
-
-use crate::{local_onestore::{file_node::{file_node::ObjectSpaceManifestListReferenceFND, FileNodeData}, file_structure::FileNodeDataIterator, object::id_mapping::IdMapping}, shared::{compact_id::CompactId, exguid::ExGuid}};
-use parser_utils::{errors::{ErrorKind, Result}, log_warn};
+use crate::{local_onestore::{file_node::{file_node::ObjectSpaceManifestListReferenceFND, FileNodeData}, file_structure::FileNodeDataIterator, objects::{revision_manifest_list::RevisionManifestList}}, shared::{exguid::ExGuid}};
+use parser_utils::{errors::{Result}};
 
 /// A collection of objects, referenced from the root file node list.
 ///
 /// See [\[MS-ONESTORE\] 2.1.4](https://learn.microsoft.com/en-us/openspecs/office_file_formats/ms-onestore/1329433f-02a5-4e83-ab41-80d57ade38d9)
-pub struct ObjectSpace {
+pub struct ObjectSpaceManifestList {
     id: ExGuid,
+    revision_list: RevisionManifestList,
 }
 
-impl ObjectSpace {
+impl ObjectSpaceManifestList {
 	pub fn try_parse(iterator: &mut FileNodeDataIterator)->Result<Option<Self>> {
 		let next = iterator.peek();
 
@@ -27,8 +26,14 @@ impl ObjectSpace {
 
 	fn parse(_iterator: &mut FileNodeDataIterator, list_reference: &ObjectSpaceManifestListReferenceFND) -> Result<Self> {
 		let id = list_reference.gosid;
-
-        Ok(Self { id })
+        let mut list_iterator = list_reference.last_revision.list.iter_data();
+        let revision_list = RevisionManifestList::try_parse(&mut list_iterator)?.ok_or_else(
+            || parser_error!(MalformedOneStoreData, "ObjectSpaceManifestList should include a RevisionManifestList.")
+        )?;
+        Ok(Self {
+            id,
+            revision_list: revision_list,
+        })
 	}
 }
 

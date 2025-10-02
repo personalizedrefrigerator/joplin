@@ -3,7 +3,7 @@ mod file_node;
 mod file_structure;
 mod one_store_file;
 mod global_id_table;
-mod object;
+mod objects;
 
 use std::collections::HashMap;
 
