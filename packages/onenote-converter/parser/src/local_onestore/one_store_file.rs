@@ -28,7 +28,11 @@ pub struct OneStoreFile {
 
 impl fmt::Debug for OneStoreFile {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "OneStoreFile({:?})", self.root_file_node_list)
+        if f.alternate() {
+            write!(f, "OneStoreFile({:#?})", self.root_file_node_list)
+        } else {
+            write!(f, "OneStoreFile({:?})", self.root_file_node_list)
+        }
     }
 }
 
@@ -107,7 +111,7 @@ mod test {
     fn should_parse_onenote_2016_file() {
         // TODO: Update path:
         let test_data = fs_driver()
-            .read_file("/home/self/Documents/test/test.one")
+            .read_file("/home/self/Documents/test/DRaftPunK.one")
             .unwrap();
         let mut reader = Reader::new(&test_data);
         let packaging = OneStoreFile::parse(&mut reader).unwrap();

@@ -611,6 +611,13 @@ impl<RefSize: Parse> ObjectDeclarationNode for ObjectDeclarationFileDataRefCount
     fn get_props<'a>(&'a self) -> Option<&'a ObjectPropSet> {
         None
     }
+
+    fn get_attachment_info(&self) -> Option<AttachmentInfo> {
+        Some(AttachmentInfo {
+            data_ref: self.file_data_ref.data.clone(),
+            extension: self.file_ext.data.clone(),
+        })
+    }
 }
 
 pub type ObjectDeclarationFileData3RefCountFND = ObjectDeclarationFileDataRefCount<u8>;
@@ -689,8 +696,10 @@ pub type FileDataStoreListReferenceFND = PointerToListFND;
 
 /// See [\[MS-ONESTORE\] 2.6.13](https://learn.microsoft.com/en-us/openspecs/office_file_formats/ms-onestore/8806fd18-6735-4874-b111-227b83eaac26)
 #[derive(Debug, Parse, Clone)]
+#[validate(guid_header == Guid::from_str("{BDE316E7-2665-4511-A4C4-8D4D0B7A9EAC}").unwrap())]
+#[validate(guid_footer == Guid::from_str("{71FBA722-0F79-4A0B-BB13-899256426B24}").unwrap())]
 pub struct FileDataStoreObject {
-    pub guid_header: Guid,
+    guid_header: Guid,
     /// Length of the file data (without padding)
     cb_length: u64,
     _unused: u32,
@@ -698,6 +707,7 @@ pub struct FileDataStoreObject {
     #[parse_additional_args(cb_length as usize)]
     #[pad_to_alignment(8)]
     pub file_data: FileData,
+    guid_footer: Guid,
 }
 
 #[derive(Clone)]
@@ -723,7 +733,7 @@ impl ParseWithCount for FileData {
 #[derive(Debug, Clone)]
 pub struct FileDataStoreObjectReferenceFND {
     pub target: FileDataStoreObject,
-    guid: Guid,
+    pub guid: Guid,
 }
 
 impl ParseWithRef for FileDataStoreObjectReferenceFND {
@@ -744,11 +754,20 @@ impl ParseWithRef for FileDataStoreObjectReferenceFND {
     }
 }
 
+#[derive(Debug)]
+pub struct AttachmentInfo {
+    extension: String,
+    data_ref: String,
+}
+
 /// Common functionality available for most nodes that declare objects
 pub trait ObjectDeclarationNode {
     fn get_jcid(&self) -> JcId;
     fn get_compact_id(&self) -> CompactId;
     fn get_props<'a>(&'a self) -> Option<&'a ObjectPropSet>;
+    fn get_attachment_info(&self) -> Option<AttachmentInfo> {
+        None
+    }
 }
 
 #[derive(Debug, Clone)]

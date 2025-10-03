@@ -38,7 +38,7 @@ impl FileDataStore {
         for item in iterator {
             if let FileNodeData::FileDataStoreObjectReferenceFND(item) = item {
                 files.push(File {
-                    id: item.target.guid_header,
+                    id: item.guid,
                     file_data: item.target.file_data.clone(),
                 })
             } else {

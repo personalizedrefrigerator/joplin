@@ -2,7 +2,7 @@ use std::fmt::Debug;
 
 use crate::{
     local_onestore::{
-        file_node::{file_node::ObjectDeclarationNode, FileNodeData},
+        file_node::{file_node::{AttachmentInfo, ObjectDeclarationNode}, FileNodeData},
         file_structure::FileNodeDataIterator,
     },
     shared::{compact_id::CompactId, jcid::JcId, object_prop_set::ObjectPropSet},
@@ -14,11 +14,17 @@ pub struct Object {
     pub compact_id: CompactId,
     pub jc_id: JcId,
     pub props: ObjectPropSet,
+    attachment_info: Option<AttachmentInfo>,
 }
 
 impl Debug for Object {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "Object(jc_id={:?}, props=...)", self.jc_id)
+        let attachment_info = if let Some(info) = &self.attachment_info {
+            format!(", attachment={:?}", info)
+        } else {
+            "".into()
+        };
+        write!(f, "Object(jc_id={:?}, props=...{})", self.jc_id, attachment_info)
     }
 }
 
@@ -61,6 +67,7 @@ impl Object {
             jc_id: declaration.get_jcid(),
             // TODO: Change to a reference?
             props: properties.unwrap_or_default(),
+            attachment_info: declaration.get_attachment_info(),
         })
     }
 }
