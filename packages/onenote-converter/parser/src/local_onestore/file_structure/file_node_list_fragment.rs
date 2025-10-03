@@ -1,4 +1,7 @@
-use crate::local_onestore::{common::FileChunkReference64x32, file_node::{FileNodeData, FileNode}};
+use crate::local_onestore::{
+    common::FileChunkReference64x32,
+    file_node::{FileNode, FileNodeData},
+};
 use parser_utils::{errors::ErrorKind, parse::Parse};
 
 #[derive(Debug, Clone)]

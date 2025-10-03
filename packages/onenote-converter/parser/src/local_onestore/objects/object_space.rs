@@ -1,5 +1,12 @@
-use crate::{local_onestore::{file_node::{file_node::ObjectSpaceManifestListReferenceFND, FileNodeData}, file_structure::FileNodeDataIterator, objects::{revision_manifest_list::RevisionManifestList}}, shared::exguid::ExGuid};
-use parser_utils::{errors::{ErrorKind, Result}};
+use crate::{
+    local_onestore::{
+        file_node::{file_node::ObjectSpaceManifestListReferenceFND, FileNodeData},
+        file_structure::FileNodeDataIterator,
+        objects::revision_manifest_list::RevisionManifestList,
+    },
+    shared::exguid::ExGuid,
+};
+use parser_utils::errors::{ErrorKind, Result};
 
 /// A collection of objects, referenced from the root file node list.
 ///
@@ -11,30 +18,32 @@ pub struct ObjectSpace {
 }
 
 impl ObjectSpace {
-	pub fn try_parse(iterator: &mut FileNodeDataIterator)->Result<Option<Self>> {
-		let next = iterator.peek();
+    pub fn try_parse(iterator: &mut FileNodeDataIterator) -> Result<Option<Self>> {
+        let next = iterator.peek();
 
-		match next {
+        match next {
             Some(FileNodeData::ObjectSpaceManifestListReferenceFND(list_reference)) => {
                 iterator.next();
                 Ok(Some(Self::parse(iterator, list_reference)?))
-            },
-            _ => {
-                Ok(None)
-            },
+            }
+            _ => Ok(None),
         }
-	}
+    }
 
-	fn parse(_iterator: &mut FileNodeDataIterator, list_reference: &ObjectSpaceManifestListReferenceFND) -> Result<Self> {
-		let id = list_reference.gosid;
+    fn parse(
+        _iterator: &mut FileNodeDataIterator,
+        list_reference: &ObjectSpaceManifestListReferenceFND,
+    ) -> Result<Self> {
+        let id = list_reference.gosid;
         let mut list_iterator = list_reference.last_revision.list.iter_data();
         let revision_list = RevisionManifestList::try_parse(&mut list_iterator)?;
         Ok(Self {
             id,
-            revision_list: revision_list.ok_or_else(
-                || ErrorKind::MalformedOneStoreData("ObjectSpace should point to a RevisionManifestList".into())
-            )?
+            revision_list: revision_list.ok_or_else(|| {
+                ErrorKind::MalformedOneStoreData(
+                    "ObjectSpace should point to a RevisionManifestList".into(),
+                )
+            })?,
         })
-	}
+    }
 }
-

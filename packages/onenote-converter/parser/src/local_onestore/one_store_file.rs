@@ -1,11 +1,13 @@
 use core::fmt;
 
-use super::file_structure::{FileNodeListFragment, FreeChunkListFragment, OneStoreHeader, TransactionLogFragment};
+use super::file_structure::{
+    FileNodeListFragment, FreeChunkListFragment, OneStoreHeader, TransactionLogFragment,
+};
 use parser_utils::errors::Result;
 use parser_utils::parse::{Parse, ParseWithCount};
 use parser_utils::Reader;
 
-use crate::local_onestore::objects::root_file_node_list::{RootFileNodeList};
+use crate::local_onestore::objects::root_file_node_list::RootFileNodeList;
 use crate::local_onestore::{common::FileChunkReference, file_structure::FileNodeList};
 
 /// A OneNote file packaged in the standard OneNote 2016 format.
@@ -24,9 +26,9 @@ pub struct OneStoreFile {
 }
 
 impl fmt::Debug for OneStoreFile {
-	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-		write!(f, "OneStoreFile({:?})", self.root_file_node_list)
-	}
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "OneStoreFile({:?})", self.root_file_node_list)
+    }
 }
 
 impl Parse for OneStoreFile {
@@ -70,10 +72,7 @@ impl Parse for OneStoreFile {
         let raw_file_node_list =
             if !file_node_list_root.is_fcr_nil() && !file_node_list_root.is_fcr_zero() {
                 let mut reader = file_node_list_root.resolve_to_reader(reader)?;
-                FileNodeList::parse(
-                    &mut reader,
-                    file_node_list_root.cb as usize,
-                )?
+                FileNodeList::parse(&mut reader, file_node_list_root.cb as usize)?
             } else {
                 FileNodeList::default()
             };

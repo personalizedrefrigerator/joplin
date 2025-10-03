@@ -1,5 +1,11 @@
-use crate::{local_onestore::{file_node::FileNodeData, file_structure::FileNodeDataIterator, objects::{object_space::ObjectSpace}}, shared::exguid::ExGuid};
 use super::file_data_store::FileDataStore;
+use crate::{
+    local_onestore::{
+        file_node::FileNodeData, file_structure::FileNodeDataIterator,
+        objects::object_space::ObjectSpace,
+    },
+    shared::exguid::ExGuid,
+};
 use parser_utils::errors::Result;
 
 // TODO: See
@@ -24,32 +30,38 @@ impl RootFileNodeList {
                 object_spaces.push(object_space);
             } else if let Some(data_store) = FileDataStore::try_parse(iterator)? {
                 if file_data_store.is_some() {
-                    return Err(
-                        onestore_parse_error!("Only one file_data_store can exist in the root node list").into()
-                    );
+                    return Err(onestore_parse_error!(
+                        "Only one file_data_store can exist in the root node list"
+                    )
+                    .into());
                 }
                 file_data_store = Some(data_store);
             } else if let FileNodeData::ObjectSpaceManifestRootFND(data) = current {
                 iterator.next();
                 root_object_space_id = Some(data.gosid_root);
             } else {
-                return Err(
-                    onestore_parse_error!("Unexpected entry in the root file node list: {:?}", current).into()
-                );
+                return Err(onestore_parse_error!(
+                    "Unexpected entry in the root file node list: {:?}",
+                    current
+                )
+                .into());
             }
 
             let index = iterator.get_index();
             if index == last_index {
-                println!("Indexes equal: {} = {}. Parsing: {:?}", index, index, current)
+                println!(
+                    "Indexes equal: {} = {}. Parsing: {:?}",
+                    index, index, current
+                )
             }
             assert_ne!(index, last_index);
             last_index = index;
         }
 
         Ok(Self {
-            root_object_space_id: root_object_space_id.ok_or_else(
-                || onestore_parse_error!("Root file node list did not contain a node with the root ID")
-            )?,
+            root_object_space_id: root_object_space_id.ok_or_else(|| {
+                onestore_parse_error!("Root file node list did not contain a node with the root ID")
+            })?,
             file_data_store,
             object_spaces,
         })

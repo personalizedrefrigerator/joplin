@@ -3,7 +3,7 @@ use parser_utils::parse::ParseWithCount;
 use parser_utils::Reader;
 
 use crate::local_onestore::common::{FileChunkReference, FileChunkReference64x32};
-use crate::local_onestore::file_node::{FileNodeData, FileNode};
+use crate::local_onestore::file_node::{FileNode, FileNodeData};
 use crate::local_onestore::file_structure::FileNodeListFragment;
 
 #[derive(Debug, Clone, Default)]
@@ -104,7 +104,7 @@ impl<'a> FileNodeDataIterator<'a> {
     }
 }
 
-impl <'a> Iterator for FileNodeDataIterator<'a> {
+impl<'a> Iterator for FileNodeDataIterator<'a> {
     type Item = &'a FileNodeData;
     fn next(&mut self) -> Option<Self::Item> {
         let target_index = self.index;
@@ -117,4 +117,3 @@ impl <'a> Iterator for FileNodeDataIterator<'a> {
         Some(&result.fnd)
     }
 }
-

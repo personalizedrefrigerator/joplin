@@ -1,6 +1,12 @@
 use std::fmt::Debug;
 
-use crate::{local_onestore::{file_node::{file_node::ObjectDeclarationNode, FileNodeData}, file_structure::FileNodeDataIterator}, shared::{compact_id::CompactId, jcid::JcId, object_prop_set::ObjectPropSet}};
+use crate::{
+    local_onestore::{
+        file_node::{file_node::ObjectDeclarationNode, FileNodeData},
+        file_structure::FileNodeDataIterator,
+    },
+    shared::{compact_id::CompactId, jcid::JcId, object_prop_set::ObjectPropSet},
+};
 use parser_utils::errors::Result;
 
 // TODO: Merge with src/onestore/object.rs
@@ -22,22 +28,22 @@ impl Object {
         let result = match current {
             Some(FileNodeData::ObjectDeclaration2RefCountFND(data)) => {
                 Some(Self::parse_from_declaration(data)?)
-            },
+            }
             Some(FileNodeData::ObjectDeclaration2LargeRefCountFND(data)) => {
                 Some(Self::parse_from_declaration(data)?)
-            },
+            }
             Some(FileNodeData::ReadOnlyObjectDeclaration2RefCountFND(data)) => {
                 Some(Self::parse_from_declaration(data)?)
-            },
+            }
             Some(FileNodeData::ReadOnlyObjectDeclaration2LargeRefCountFND(data)) => {
                 Some(Self::parse_from_declaration(data)?)
-            },
+            }
             Some(FileNodeData::ObjectDeclarationFileData3RefCountFND(data)) => {
                 Some(Self::parse_from_declaration(data)?)
-            },
+            }
             Some(FileNodeData::ObjectDeclarationFileData3LargeRefCountFND(data)) => {
                 Some(Self::parse_from_declaration(data)?)
-            },
+            }
             Some(_) => None,
             None => None,
         };

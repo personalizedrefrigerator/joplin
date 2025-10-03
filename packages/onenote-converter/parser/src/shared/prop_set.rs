@@ -12,7 +12,7 @@ use std::collections::HashMap;
 pub(crate) struct PropertySet {
     /// Maps from PropertyId values to (index, PropertyValue).
     /// Values for PropertyId can be found in [\[MS-ONESTORE\] 2.1.12](https://learn.microsoft.com/en-us/openspecs/office_file_formats/ms-one/e9bf7da8-7aab-4668-be5e-e0c421175e3c).
-    /// 
+    ///
     /// For example, to get the value of the "bold" property, use
     /// ```skip
     /// let propset = PropertySet::fallback();

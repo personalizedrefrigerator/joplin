@@ -29,7 +29,6 @@ macro_rules! parser_error {
     };
 }
 
-
 macro_rules! onestore_parse_error {
     ($( $message:tt )* ) => {
         parser_utils::errors::ErrorKind::MalformedOneStoreData(
@@ -37,7 +36,6 @@ macro_rules! onestore_parse_error {
         )
     };
 }
-
 
 #[cfg(test)]
 mod test {

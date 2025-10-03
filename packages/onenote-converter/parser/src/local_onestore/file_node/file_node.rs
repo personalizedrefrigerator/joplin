@@ -4,6 +4,7 @@ use std::rc::Rc;
 
 use super::super::common::ObjectDeclarationWithRefCountBody;
 use super::file_node_chunk_reference::FileNodeChunkReference;
+use super::NodeId;
 use crate::local_onestore::common::FileChunkReference;
 use crate::local_onestore::file_structure::FileNodeList;
 use crate::shared::compact_id::CompactId;
@@ -14,7 +15,6 @@ use parser_utils::errors::ErrorKind;
 use parser_utils::parse::{Parse, ParseWithCount};
 use parser_utils::{log_warn, Utf16ToString};
 use parser_utils::{Reader, Result};
-use super::NodeId;
 
 use crate::shared::guid::Guid;
 
@@ -80,7 +80,9 @@ impl Parse for FileNode {
         let remaining_1 = reader.remaining();
 
         let fnd = match node_id {
-            0x004 => FileNodeData::ObjectSpaceManifestRootFND(ObjectSpaceManifestRootFND::parse(reader)?),
+            0x004 => {
+                FileNodeData::ObjectSpaceManifestRootFND(ObjectSpaceManifestRootFND::parse(reader)?)
+            }
             0x008 => FileNodeData::ObjectSpaceManifestListReferenceFND(
                 ObjectSpaceManifestListReferenceFND::parse(reader, &data_ref)?,
             ),
@@ -90,11 +92,19 @@ impl Parse for FileNode {
             0x010 => FileNodeData::RevisionManifestListReferenceFND(
                 RevisionManifestListReferenceFND::parse(reader, &data_ref)?,
             ),
-            0x014 => FileNodeData::RevisionManifestListStartFND(RevisionManifestListStartFND::parse(reader)?),
-            0x01B => FileNodeData::RevisionManifestStart4FND(RevisionManifestStart4FND::parse(reader)?),
+            0x014 => FileNodeData::RevisionManifestListStartFND(
+                RevisionManifestListStartFND::parse(reader)?,
+            ),
+            0x01B => {
+                FileNodeData::RevisionManifestStart4FND(RevisionManifestStart4FND::parse(reader)?)
+            }
             0x01C => FileNodeData::RevisionManifestEndFND,
-            0x01E => FileNodeData::RevisionManifestStart6FND(RevisionManifestStart6FND::parse(reader)?),
-            0x01F => FileNodeData::RevisionManifestStart7FND(RevisionManifestStart7FND::parse(reader)?),
+            0x01E => {
+                FileNodeData::RevisionManifestStart6FND(RevisionManifestStart6FND::parse(reader)?)
+            }
+            0x01F => {
+                FileNodeData::RevisionManifestStart7FND(RevisionManifestStart7FND::parse(reader)?)
+            }
             0x021 => FileNodeData::GlobalIdTableStartFNDX(GlobalIdTableStartFNDX::parse(reader)?),
             0x022 => FileNodeData::GlobalIdTableStart2FND,
             0x024 => FileNodeData::GlobalIdTableEntryFNDX(GlobalIdTableEntryFNDX::parse(reader)?),
@@ -113,9 +123,13 @@ impl Parse for FileNode {
             0x042 => FileNodeData::ObjectRevisionWithRefCount2FNDX(
                 ObjectRevisionWithRefCount2FNDX::parse(reader, &data_ref)?,
             ),
-            0x059 => FileNodeData::RootObjectReference2FNDX(RootObjectReference2FNDX::parse(reader)?),
+            0x059 => {
+                FileNodeData::RootObjectReference2FNDX(RootObjectReference2FNDX::parse(reader)?)
+            }
             0x05A => FileNodeData::RootObjectReference3FND(RootObjectReference3FND::parse(reader)?),
-            0x05C => FileNodeData::RevisionRoleDeclarationFND(RevisionRoleDeclarationFND::parse(reader)?),
+            0x05C => {
+                FileNodeData::RevisionRoleDeclarationFND(RevisionRoleDeclarationFND::parse(reader)?)
+            }
             0x05D => FileNodeData::RevisionRoleAndContextDeclarationFND(
                 RevisionRoleAndContextDeclarationFND::parse(reader)?,
             ),
@@ -125,30 +139,30 @@ impl Parse for FileNode {
             0x073 => FileNodeData::ObjectDeclarationFileData3LargeRefCountFND(
                 ObjectDeclarationFileData3LargeRefCountFND::parse(reader)?,
             ),
-            0x07C => FileNodeData::ObjectDataEncryptionKeyV2FNDX(ObjectDataEncryptionKeyV2FNDX::parse(
-                reader,
-            )?),
+            0x07C => FileNodeData::ObjectDataEncryptionKeyV2FNDX(
+                ObjectDataEncryptionKeyV2FNDX::parse(reader)?,
+            ),
             0x084 => FileNodeData::ObjectInfoDependencyOverridesFND(
                 ObjectInfoDependencyOverridesFND::parse(reader, &data_ref)?,
             ),
             0x08C => FileNodeData::DataSignatureGroupDefinitionFND(
                 DataSignatureGroupDefinitionFND::parse(reader)?,
             ),
-            0x090 => FileNodeData::FileDataStoreListReferenceFND(FileDataStoreListReferenceFND::parse(
-                reader, &data_ref,
-            )?),
+            0x090 => FileNodeData::FileDataStoreListReferenceFND(
+                FileDataStoreListReferenceFND::parse(reader, &data_ref)?,
+            ),
             0x094 => FileNodeData::FileDataStoreObjectReferenceFND(
                 FileDataStoreObjectReferenceFND::parse(reader, &data_ref)?,
             ),
-            0x0A4 => FileNodeData::ObjectDeclaration2RefCountFND(ObjectDeclaration2RefCountFND::parse(
-                reader, &data_ref,
-            )?),
+            0x0A4 => FileNodeData::ObjectDeclaration2RefCountFND(
+                ObjectDeclaration2RefCountFND::parse(reader, &data_ref)?,
+            ),
             0x0A5 => FileNodeData::ObjectDeclaration2LargeRefCountFND(
                 ObjectDeclaration2LargeRefCountFND::parse(reader, &data_ref)?,
             ),
-            0x0B0 => {
-                FileNodeData::ObjectGroupListReferenceFND(ObjectGroupListReferenceFND::parse(reader, &data_ref)?)
-            }
+            0x0B0 => FileNodeData::ObjectGroupListReferenceFND(ObjectGroupListReferenceFND::parse(
+                reader, &data_ref,
+            )?),
             0x0B4 => FileNodeData::ObjectGroupStartFND(ObjectGroupStartFND::parse(reader)?),
             0x0B8 => FileNodeData::ObjectGroupEndFND,
             0x0C2 => FileNodeData::HashedChunkDescriptor2FND(HashedChunkDescriptor2FND::parse(
@@ -288,7 +302,7 @@ impl ParseWithRef for ObjectSpaceManifestListReferenceFND {
                                 ErrorKind::MalformedOneStoreData(
                                     "ObjectSpaceManifestListReferenceFND's list must start with a ObjectSpaceManifestListStartFND.".into()
                                 ).into()
-                            )
+                            );
                         }
                     } else {
                         if !matches!(item.fnd, FileNodeData::RevisionManifestListReferenceFND(_)) {
@@ -296,19 +310,22 @@ impl ParseWithRef for ObjectSpaceManifestListReferenceFND {
                                 ErrorKind::MalformedOneStoreData(
                                     "All items following the first in an ObjectSpaceManifestListReferenceFND must be RevisionManifestListReferenceFNDs.".into()
                                 ).into()
-                            )
+                            );
                         }
                     }
                     index += 1;
                 }
             }
 
-            let last_revision = data_ref.file_node_sequence.iter().rev().find_map(|node| {
-                match &node.fnd {
-                    FileNodeData::RevisionManifestListReferenceFND(revision) => Some(revision),
-                    _ => None,
-                }
-            });
+            let last_revision =
+                data_ref
+                    .file_node_sequence
+                    .iter()
+                    .rev()
+                    .find_map(|node| match &node.fnd {
+                        FileNodeData::RevisionManifestListReferenceFND(revision) => Some(revision),
+                        _ => None,
+                    });
             if let Some(last_revision) = last_revision {
                 Ok(Self {
                     gosid: ExGuid::parse(reader)?,
@@ -322,11 +339,10 @@ impl ParseWithRef for ObjectSpaceManifestListReferenceFND {
                 )
             }
         } else {
-            Err(
-                ErrorKind::MalformedOneStoreData(
-                    "ObjectSpaceManifestListReferenceFND must point to a list of elements".into()
-                ).into()
+            Err(ErrorKind::MalformedOneStoreData(
+                "ObjectSpaceManifestListReferenceFND must point to a list of elements".into(),
             )
+            .into())
         }
     }
 }
@@ -347,11 +363,7 @@ impl ParseWithRef for PointerToListFND {
     fn parse(_reader: parser_utils::Reader, data_ref: &FileNodeDataRef) -> Result<Self> {
         match data_ref {
             FileNodeDataRef::ElementList(list) => Ok(Self { list: list.clone() }),
-            other =>
-                Err(onestore_parse_error!(
-                    "Expected a list, got {:?}",
-                    other
-                ).into()),
+            other => Err(onestore_parse_error!("Expected a list, got {:?}", other).into()),
         }
     }
 }
@@ -589,7 +601,7 @@ pub struct ObjectDeclarationFileDataRefCount<RefSize: Parse> {
     file_ext: StringInStorageBuffer,
 }
 
-impl <RefSize : Parse> ObjectDeclarationNode for ObjectDeclarationFileDataRefCount<RefSize> {
+impl<RefSize: Parse> ObjectDeclarationNode for ObjectDeclarationFileDataRefCount<RefSize> {
     fn get_jcid(&self) -> JcId {
         self.jcid
     }
@@ -726,9 +738,10 @@ impl ParseWithRef for FileDataStoreObjectReferenceFND {
                 guid,
             })
         } else {
-            Err(
-                onestore_parse_error!("FileDataStoreObjectReferenceFND should point to a single file node object").into()
+            Err(onestore_parse_error!(
+                "FileDataStoreObjectReferenceFND should point to a single file node object"
             )
+            .into())
         }
     }
 }
@@ -774,7 +787,7 @@ pub struct ObjectDeclaration2RefCount<RefSize: Parse> {
     c_ref: RefSize,
 }
 
-impl <RefSize: Parse> ObjectDeclarationNode for ObjectDeclaration2RefCount<RefSize> {
+impl<RefSize: Parse> ObjectDeclarationNode for ObjectDeclaration2RefCount<RefSize> {
     fn get_jcid(&self) -> JcId {
         self.body.jcid
     }
@@ -812,12 +825,12 @@ impl ParseWithRef for ObjectGroupListReferenceFND {
                 list: list.clone(),
                 id: ExGuid::parse(reader)?,
             }),
-            other => 
-                Err(parser_error!(
-                    MalformedOneStoreData,
-                    "Expected a list (parsing ObjectGroupListReferenceFND), got {:?}",
-                    other
-                ).into()),
+            other => Err(parser_error!(
+                MalformedOneStoreData,
+                "Expected a list (parsing ObjectGroupListReferenceFND), got {:?}",
+                other
+            )
+            .into()),
         }
     }
 }
@@ -865,7 +878,9 @@ impl<Base: ParseWithRef> ParseWithRef for ReadOnlyObjectDeclaration2RefCount<Bas
     }
 }
 
-impl <Base : ObjectDeclarationNode> ObjectDeclarationNode for ReadOnlyObjectDeclaration2RefCount<Base> {
+impl<Base: ObjectDeclarationNode> ObjectDeclarationNode
+    for ReadOnlyObjectDeclaration2RefCount<Base>
+{
     fn get_jcid(&self) -> JcId {
         self.base.get_jcid()
     }

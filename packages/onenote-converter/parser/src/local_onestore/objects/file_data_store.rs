@@ -1,4 +1,13 @@
-use crate::{local_onestore::{file_node::{file_node::{FileData, FileDataStoreListReferenceFND}, FileNodeData}, file_structure::FileNodeDataIterator}, shared::guid::Guid};
+use crate::{
+    local_onestore::{
+        file_node::{
+            file_node::{FileData, FileDataStoreListReferenceFND},
+            FileNodeData,
+        },
+        file_structure::FileNodeDataIterator,
+    },
+    shared::guid::Guid,
+};
 use parser_utils::errors::Result;
 
 /// See [MS-ONESTORE 2.5.21](https://learn.microsoft.com/en-us/openspecs/office_file_formats/ms-onestore/2701cc42-3601-49f9-a3ba-7c40cd8a2be9)
@@ -15,9 +24,7 @@ pub struct File {
 
 impl FileDataStore {
     pub fn try_parse(iterator: &mut FileNodeDataIterator) -> Result<Option<Self>> {
-        if let Some(
-            FileNodeData::FileDataStoreListReferenceFND(data)
-         ) = iterator.peek() {
+        if let Some(FileNodeData::FileDataStoreListReferenceFND(data)) = iterator.peek() {
             iterator.next();
             Ok(Some(Self::from_reference(data)?))
         } else {
@@ -35,9 +42,11 @@ impl FileDataStore {
                     file_data: item.target.file_data.clone(),
                 })
             } else {
-                return Err(
-                    onestore_parse_error!("Unexpected item in file list: {:?}. Expected FileDataStoreObjectReferenceFND", item).into()
+                return Err(onestore_parse_error!(
+                    "Unexpected item in file list: {:?}. Expected FileDataStoreObjectReferenceFND",
+                    item
                 )
+                .into());
             }
         }
 
