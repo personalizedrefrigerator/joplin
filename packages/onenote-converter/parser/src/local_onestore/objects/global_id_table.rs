@@ -14,9 +14,9 @@ use parser_utils::{
 
 #[derive(Debug)]
 pub struct GlobalIdTable {
-    id_map: IdMapping,
+    pub id_map: IdMapping,
     /// Only used in .onetoc2 files
-    reference_map: IdReferenceMapping,
+    _reference_map: IdReferenceMapping,
 }
 
 impl GlobalIdTable {
@@ -71,7 +71,7 @@ impl GlobalIdTable {
 
         Ok(Self {
             id_map,
-            reference_map,
+            _reference_map: reference_map,
         })
     }
 

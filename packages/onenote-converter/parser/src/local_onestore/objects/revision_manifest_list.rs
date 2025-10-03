@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, rc::Rc};
 
 use crate::{
     local_onestore::{
@@ -12,7 +12,7 @@ use parser_utils::errors::{ErrorKind, Result};
 
 #[derive(Debug)]
 pub struct RevisionManifestList {
-    revisions: HashMap<ExGuid, Revision>,
+    pub revisions: HashMap<ExGuid, Rc<Revision>>,
 }
 
 impl RevisionManifestList {
@@ -65,7 +65,7 @@ impl RevisionManifestList {
                             node
                         )
                     })?;
-                    revisions.insert(revision.id, revision);
+                    revisions.insert(revision.id, Rc::new(revision));
                 }
             }
 

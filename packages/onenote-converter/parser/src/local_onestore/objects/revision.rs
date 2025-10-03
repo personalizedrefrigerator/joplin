@@ -8,15 +8,15 @@ use crate::{
     },
     shared::exguid::ExGuid,
 };
-use parser_utils::errors::{ErrorKind, Result};
+use parser_utils::errors::{Result};
 
 /// See [MS-ONESTORE 2.1.9](https://learn.microsoft.com/en-us/openspecs/office_file_formats/ms-onestore/90101e91-2f7f-4753-9332-31bed5b5c49d)
 #[derive(Debug)]
 pub struct Revision {
     pub id: ExGuid,
     parent_id: ExGuid,
-    object_groups: Vec<ObjectGroupList>,
-    global_id_tables: Vec<GlobalIdTable>,
+    pub object_groups: Vec<ObjectGroupList>,
+    pub global_id_tables: Vec<GlobalIdTable>,
     root_objects: HashMap<u32, ExGuid>,
 }
 

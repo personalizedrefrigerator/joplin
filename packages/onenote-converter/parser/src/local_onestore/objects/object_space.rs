@@ -14,7 +14,7 @@ use parser_utils::errors::{ErrorKind, Result};
 #[derive(Debug)]
 pub struct ObjectSpace {
     id: ExGuid,
-    revision_list: RevisionManifestList,
+    pub revision_list: RevisionManifestList,
 }
 
 impl ObjectSpace {

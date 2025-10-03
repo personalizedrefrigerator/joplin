@@ -1,3 +1,5 @@
+use std::rc::Rc;
+
 use crate::{
     local_onestore::{
         file_node::{file_node::ObjectGroupListReferenceFND, FileNodeData},
@@ -12,8 +14,8 @@ use parser_utils::{errors::Result, log_warn};
 #[derive(Debug)]
 pub struct ObjectGroupList {
     id: ExGuid,
-    id_table: GlobalIdTable,
-    objects: Vec<Object>,
+    pub id_table: GlobalIdTable,
+    pub objects: Vec<Rc<Object>>,
 }
 
 impl ObjectGroupList {
@@ -59,7 +61,7 @@ impl ObjectGroupList {
                 iterator.next();
                 log_warn!("Ignoring DataSignatureGroupDefinitionFND"); // TODO
             } else if let Some(object) = Object::try_parse(iterator)? {
-                objects.push(object);
+                objects.push(Rc::new(object));
             } else {
                 return Err(onestore_parse_error!(
                     "Unexpected node in ObjectGroupList: {:?}",
