@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use crate::{local_onestore::{file_node::{file_node::RevisionManifestListStartFND, FileNodeData}, file_structure::FileNodeDataIterator, objects::revision::{Revision}}, shared::exguid::ExGuid};
 use parser_utils::errors::{ErrorKind, Result};
 
-
+#[derive(Debug)]
 pub struct RevisionManifestList {
     revisions: HashMap<ExGuid, Revision>,
 }
@@ -26,8 +26,12 @@ impl RevisionManifestList {
     fn parse(iterator: &mut FileNodeDataIterator, _list_reference: &RevisionManifestListStartFND) -> Result<Self> {
         let mut revisions: HashMap<ExGuid, _> = HashMap::new();
 
+        let mut last_index = iterator.get_index();
         while let Some(current) = iterator.peek() {
             match current {
+                FileNodeData::RevisionManifestEndFND => {
+                    break;
+                },
                 FileNodeData::RevisionRoleDeclarationFND(_data) => {
                     // Ignore. If present, should always have revision_role = 0x1?
                     iterator.next();
@@ -46,13 +50,17 @@ impl RevisionManifestList {
                         );
                     }
                 },
-                _ => {
+                node => {
                     let revision = Revision::try_parse(iterator)?.ok_or_else(
-                        || ErrorKind::MalformedOneStoreData("Unexpected node encountered in RevisionManifestList".into())
+                        || onestore_parse_error!("Unexpected node encountered in RevisionManifestList: {:?}", node)
                     )?;
                     revisions.insert(revision.id, revision);
                 },
             }
+
+            let index = iterator.get_index();
+            assert_ne!(index, last_index);
+            last_index = index;
         }
         Ok(RevisionManifestList { revisions })
     }

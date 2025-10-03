@@ -6,7 +6,7 @@ use crate::local_onestore::common::{FileChunkReference, FileChunkReference64x32}
 use crate::local_onestore::file_node::{FileNodeData, FileNode};
 use crate::local_onestore::file_structure::FileNodeListFragment;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 pub struct FileNodeList {
     file_node_list_fragments: Vec<FileNodeListFragment>,
     pub file_node_sequence: Vec<FileNode>,
@@ -98,18 +98,22 @@ impl<'a> FileNodeDataIterator<'a> {
             Some(&self.data.file_node_sequence[index].fnd)
         }
     }
+
+    pub fn get_index(&self) -> usize {
+        self.index
+    }
 }
 
 impl <'a> Iterator for FileNodeDataIterator<'a> {
     type Item = &'a FileNodeData;
     fn next(&mut self) -> Option<Self::Item> {
-        let new_index = self.index + 1;
-        if new_index >= self.data.file_node_sequence.len() {
+        let target_index = self.index;
+        self.index += 1;
+        if target_index >= self.data.file_node_sequence.len() {
             return None;
         }
-        self.index = new_index;
 
-        let result = &self.data.file_node_sequence[new_index];
+        let result = &self.data.file_node_sequence[target_index];
         Some(&result.fnd)
     }
 }

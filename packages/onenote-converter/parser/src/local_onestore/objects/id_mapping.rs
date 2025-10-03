@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, fmt::Debug};
 use parser_utils::errors::{ Result, ErrorKind };
 use crate::shared::{compact_id::CompactId, exguid::ExGuid, guid::Guid};
 
@@ -7,6 +7,12 @@ use crate::shared::{compact_id::CompactId, exguid::ExGuid, guid::Guid};
 /// Maps from GUID index -> GUID. The other part of the full ID is stored directly
 /// in each CompactId.
 pub struct IdMapping(HashMap<u32, Guid>);
+
+impl Debug for IdMapping {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "IdMapping(entry count: {:})", self.0.len())
+    }
+}
 
 impl IdMapping {
     pub fn new() -> Self {

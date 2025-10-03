@@ -1,3 +1,7 @@
+use std::fmt::Debug;
+use std::iter::FromIterator;
+use std::rc::Rc;
+
 use super::super::common::ObjectDeclarationWithRefCountBody;
 use super::file_node_chunk_reference::FileNodeChunkReference;
 use crate::local_onestore::common::FileChunkReference;
@@ -131,10 +135,10 @@ impl Parse for FileNode {
                 DataSignatureGroupDefinitionFND::parse(reader)?,
             ),
             0x090 => FileNodeData::FileDataStoreListReferenceFND(FileDataStoreListReferenceFND::parse(
-                reader,
+                reader, &data_ref,
             )?),
             0x094 => FileNodeData::FileDataStoreObjectReferenceFND(
-                FileDataStoreObjectReferenceFND::parse(reader)?,
+                FileDataStoreObjectReferenceFND::parse(reader, &data_ref)?,
             ),
             0x0A4 => FileNodeData::ObjectDeclaration2RefCountFND(ObjectDeclaration2RefCountFND::parse(
                 reader, &data_ref,
@@ -258,7 +262,7 @@ where
 #[derive(Debug, Clone, Parse)]
 #[allow(dead_code)]
 pub struct ObjectSpaceManifestRootFND {
-    gosid_root: ExGuid,
+    pub gosid_root: ExGuid,
 }
 
 #[derive(Debug, Clone)]
@@ -333,26 +337,27 @@ pub struct ObjectSpaceManifestListStartFND {
     gsoid: ExGuid,
 }
 
-/// See [MS-ONESTORE 2.1.10](https://learn.microsoft.com/en-us/openspecs/office_file_formats/ms-onestore/14af4d81-c2d6-43e6-8bd4-508d4123fb22)
 #[derive(Debug, Clone)]
 #[allow(dead_code)]
-pub struct RevisionManifestListReferenceFND {
+pub struct PointerToListFND {
     pub list: FileNodeList,
 }
 
-impl ParseWithRef for RevisionManifestListReferenceFND {
+impl ParseWithRef for PointerToListFND {
     fn parse(_reader: parser_utils::Reader, data_ref: &FileNodeDataRef) -> Result<Self> {
         match data_ref {
             FileNodeDataRef::ElementList(list) => Ok(Self { list: list.clone() }),
             other =>
-                Err(parser_error!(
-                    MalformedOneStoreData,
-                    "Expected a list (parsing RevisionManifestListReferenceFND), got {:?}",
+                Err(onestore_parse_error!(
+                    "Expected a list, got {:?}",
                     other
                 ).into()),
         }
     }
 }
+
+/// See [MS-ONESTORE 2.1.10](https://learn.microsoft.com/en-us/openspecs/office_file_formats/ms-onestore/14af4d81-c2d6-43e6-8bd4-508d4123fb22)
+pub type RevisionManifestListReferenceFND = PointerToListFND;
 
 #[derive(Debug, Clone)]
 #[allow(dead_code)]
@@ -670,11 +675,63 @@ pub struct DataSignatureGroupDefinitionFND {
 }
 
 /// See [\[MS-ONESTORE\] 2.5.21](https://learn.microsoft.com/en-us/openspecs/office_file_formats/ms-onestore/2701cc42-3601-49f9-a3ba-7c40cd8a2be9)
-#[derive(Debug, Clone, Parse)]
-pub struct FileDataStoreListReferenceFND {}
+pub type FileDataStoreListReferenceFND = PointerToListFND;
+
+/// See [\[MS-ONESTORE\] 2.6.13](https://learn.microsoft.com/en-us/openspecs/office_file_formats/ms-onestore/8806fd18-6735-4874-b111-227b83eaac26)
+#[derive(Debug, Parse, Clone)]
+pub struct FileDataStoreObject {
+    pub guid_header: Guid,
+    /// Length of the file data (without padding)
+    cb_length: u64,
+    _unused: u32,
+    _reserved: u64,
+    #[parse_additional_args(cb_length as usize)]
+    #[pad_to_alignment(8)]
+    pub file_data: FileData,
+}
+
+#[derive(Clone)]
+pub struct FileData(Rc<[u8]>);
+
+impl Debug for FileData {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "FileData(size={:} KiB)", self.0.len() / 1024)
+    }
+}
+
+impl ParseWithCount for FileData {
+    fn parse(reader: parser_utils::Reader, size: usize) -> Result<Self> {
+        let data = reader.read(size)?.clone();
+        // TODO: Performance: Avoid making a copy here and instead point to the original
+        // file data.
+        let data_ref = Rc::from_iter(data.iter().map(|item| *item));
+        Ok(FileData(data_ref))
+    }
+}
 
 /// See [\[MS-ONESTORE\] 2.5.22](https://learn.microsoft.com/en-us/openspecs/office_file_formats/ms-onestore/6f6d5729-ad03-420f-b8fa-7683751218b3)
-pub type FileDataStoreObjectReferenceFND = ObjectRefAndId<Guid>;
+#[derive(Debug, Clone)]
+pub struct FileDataStoreObjectReferenceFND {
+    pub target: FileDataStoreObject,
+    guid: Guid,
+}
+
+impl ParseWithRef for FileDataStoreObjectReferenceFND {
+    fn parse(reader: parser_utils::Reader, data_ref: &FileNodeDataRef) -> Result<Self> {
+        let guid = Guid::parse(reader)?;
+        if let FileNodeDataRef::SingleElement(data_ref) = data_ref {
+            let mut reader = data_ref.resolve_to_reader(reader)?;
+            Ok(Self {
+                target: FileDataStoreObject::parse(&mut reader)?,
+                guid,
+            })
+        } else {
+            Err(
+                onestore_parse_error!("FileDataStoreObjectReferenceFND should point to a single file node object").into()
+            )
+        }
+    }
+}
 
 /// Common functionality available for most nodes that declare objects
 pub trait ObjectDeclarationNode {

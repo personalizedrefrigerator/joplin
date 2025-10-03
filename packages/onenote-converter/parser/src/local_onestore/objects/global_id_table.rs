@@ -3,6 +3,7 @@ use std::{collections::HashMap};
 use crate::{local_onestore::{file_node::{FileNodeData}, file_structure::{FileNodeDataIterator}, objects::id_mapping::IdMapping}, shared::{compact_id::CompactId, exguid::ExGuid}};
 use parser_utils::{errors::{ErrorKind, Result}, log_warn};
 
+#[derive(Debug)]
 pub struct GlobalIdTable {
 	id_map: IdMapping,
 	/// Only used in .onetoc2 files
@@ -68,6 +69,12 @@ impl GlobalIdTable {
 struct IdReferenceMapping {
     /// Maps from indexes in dependency revisions to indexes in the current revision.
     parent_references: HashMap<u32, u32>,
+}
+
+impl std::fmt::Debug for IdReferenceMapping {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+		write!(f, "[IdReferenceMapping]")
+	}
 }
 
 impl IdReferenceMapping {

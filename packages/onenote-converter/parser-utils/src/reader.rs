@@ -37,7 +37,7 @@ impl<'a> Reader<'a> {
         }
     }
 
-    pub fn read(&mut self, cnt: usize) -> Result<&[u8]> {
+    pub fn read(&mut self, cnt: usize) -> Result<&'a [u8]> {
         if self.remaining() < cnt {
             return Err(ErrorKind::UnexpectedEof("Unexpected EOF (Reader.read)".into()).into());
         }

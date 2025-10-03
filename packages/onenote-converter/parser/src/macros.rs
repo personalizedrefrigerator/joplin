@@ -29,6 +29,16 @@ macro_rules! parser_error {
     };
 }
 
+
+macro_rules! onestore_parse_error {
+    ($( $message:tt )* ) => {
+        parser_utils::errors::ErrorKind::MalformedOneStoreData(
+            format!($( $message )*).into()
+        )
+    };
+}
+
+
 #[cfg(test)]
 mod test {
     use crate::shared::exguid::ExGuid;

@@ -5,6 +5,7 @@ use crate::{local_onestore::{file_node::FileNodeData, file_structure::FileNodeDa
 use super::object_group_list::ObjectGroupList;
 
 /// See [MS-ONESTORE 2.1.9](https://learn.microsoft.com/en-us/openspecs/office_file_formats/ms-onestore/90101e91-2f7f-4753-9332-31bed5b5c49d)
+#[derive(Debug)]
 pub struct Revision {
     pub id: ExGuid,
     parent_id: ExGuid,
@@ -42,7 +43,7 @@ impl Revision {
             },
             _ => {
                 return Err(
-                    parser_error!(MalformedOneStoreData, "Invalid start node for revision: {:?}", start).into(),
+                    onestore_parse_error!("Invalid start node for revision: {:?}", start).into(),
                 );
             },
         };
@@ -52,12 +53,16 @@ impl Revision {
         let mut root_objects = HashMap::new();
 
         while let Some(current) = iterator.peek() {
-            if let Some(object_group_list) = ObjectGroupList::try_parse(iterator)? {
+            if let FileNodeData::RevisionManifestEndFND = current {
+                break;
+            } else if let Some(object_group_list) = ObjectGroupList::try_parse(iterator)? {
                 // Ignore the "info dependency overrides" section
                 // TODO: Move this into the "ObjectGroupList" parsing logic.
                 let dependency_overrides = iterator.next();
                 if !matches!(dependency_overrides, Some(FileNodeData::ObjectInfoDependencyOverridesFND(_))) {
-                    return Err(ErrorKind::MalformedOneStoreData("Object group lists must always be followed by ObjectInfoDependencyOverridesFND nodes.".into()).into());
+                    return Err(
+                        onestore_parse_error!("Object group lists must always be followed by ObjectInfoDependencyOverridesFND nodes. Was: {:?}", dependency_overrides).into()
+                    );
                 }
                 object_groups.push(object_group_list);
             } else if let Some(global_id_table) = GlobalIdTable::try_parse(iterator)? {
@@ -67,7 +72,7 @@ impl Revision {
                 root_objects.insert(object_reference.root_role, object_reference.oid_root);
             } else {
                 return Err(
-                    parser_error!(MalformedOneStoreData, "Unexpected node: {:?}", current).into()
+                    parser_error!(MalformedOneStoreData, "Unexpected node (parsing Revision): {:?}", current).into()
                 );
             }
         }

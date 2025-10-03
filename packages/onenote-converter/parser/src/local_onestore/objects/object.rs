@@ -1,3 +1,5 @@
+use std::fmt::Debug;
+
 use crate::{local_onestore::{file_node::{file_node::ObjectDeclarationNode, FileNodeData}, file_structure::FileNodeDataIterator}, shared::{compact_id::CompactId, jcid::JcId, object_prop_set::ObjectPropSet}};
 use parser_utils::errors::Result;
 
@@ -8,10 +10,16 @@ pub struct Object {
     pub props: ObjectPropSet,
 }
 
+impl Debug for Object {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Object(jc_id={:?}, props=...)", self.jc_id)
+    }
+}
+
 impl Object {
     pub fn try_parse(iterator: &mut FileNodeDataIterator) -> Result<Option<Self>> {
         let current = iterator.peek();
-        Ok(match current {
+        let result = match current {
             Some(FileNodeData::ObjectDeclaration2RefCountFND(data)) => {
                 Some(Self::parse_from_declaration(data)?)
             },
@@ -32,7 +40,12 @@ impl Object {
             },
             Some(_) => None,
             None => None,
-        })
+        };
+        // Ensure that the iterator always advances when parsing
+        if result.is_some() {
+            iterator.next();
+        }
+        Ok(result)
     }
 
     fn parse_from_declaration(declaration: &dyn ObjectDeclarationNode) -> Result<Self> {

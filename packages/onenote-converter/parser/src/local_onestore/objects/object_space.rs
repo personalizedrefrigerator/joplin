@@ -1,9 +1,10 @@
-use crate::{local_onestore::{file_node::{file_node::ObjectSpaceManifestListReferenceFND, FileNodeData}, file_structure::FileNodeDataIterator, objects::{revision_manifest_list::RevisionManifestList}}, shared::{compact_id::CompactId, exguid::ExGuid}};
+use crate::{local_onestore::{file_node::{file_node::ObjectSpaceManifestListReferenceFND, FileNodeData}, file_structure::FileNodeDataIterator, objects::{revision_manifest_list::RevisionManifestList}}, shared::exguid::ExGuid};
 use parser_utils::{errors::{ErrorKind, Result}};
 
 /// A collection of objects, referenced from the root file node list.
 ///
 /// See [\[MS-ONESTORE\] 2.1.4](https://learn.microsoft.com/en-us/openspecs/office_file_formats/ms-onestore/1329433f-02a5-4e83-ab41-80d57ade38d9)
+#[derive(Debug)]
 pub struct ObjectSpace {
     id: ExGuid,
     revision_list: RevisionManifestList,
