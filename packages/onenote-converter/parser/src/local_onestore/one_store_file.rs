@@ -7,6 +7,7 @@ use parser_utils::errors::Result;
 use parser_utils::parse::{Parse, ParseWithCount};
 use parser_utils::Reader;
 
+use crate::local_onestore::file_structure::ParseContext;
 use crate::local_onestore::objects::root_file_node_list::RootFileNodeList;
 use crate::local_onestore::{common::FileChunkReference, file_structure::FileNodeList};
 
@@ -59,11 +60,14 @@ impl Parse for OneStoreFile {
             }
         }
 
+        let mut parse_context = ParseContext::new();
+        parse_context.update_from_transaction_log(&transaction_log);
+
         let mut hashed_chunk_list = Vec::new();
         let mut hash_chunk_ref = header.fcr_hashed_chunk_list.clone();
         while !hash_chunk_ref.is_fcr_nil() && !hash_chunk_ref.is_fcr_zero() {
             let mut reader = hash_chunk_ref.resolve_to_reader(reader)?;
-            let fragment = FileNodeListFragment::parse(&mut reader, hash_chunk_ref.cb as usize)?;
+            let fragment = FileNodeListFragment::parse(&mut reader, &mut parse_context, hash_chunk_ref.cb as usize)?;
             hash_chunk_ref = fragment.next_fragment.clone();
             hashed_chunk_list.push(fragment);
         }
@@ -72,7 +76,7 @@ impl Parse for OneStoreFile {
         let raw_file_node_list =
             if !file_node_list_root.is_fcr_nil() && !file_node_list_root.is_fcr_zero() {
                 let mut reader = file_node_list_root.resolve_to_reader(reader)?;
-                FileNodeList::parse(&mut reader, file_node_list_root.cb as usize)?
+                FileNodeList::parse(&mut reader, &mut parse_context, file_node_list_root.cb as usize)?
             } else {
                 FileNodeList::default()
             };

@@ -1,10 +1,9 @@
 use parser_utils::errors::{ErrorKind, Result};
-use parser_utils::parse::ParseWithCount;
 use parser_utils::Reader;
 
 use crate::local_onestore::common::{FileChunkReference, FileChunkReference64x32};
 use crate::local_onestore::file_node::{FileNode, FileNodeData};
-use crate::local_onestore::file_structure::FileNodeListFragment;
+use crate::local_onestore::file_structure::{FileNodeListFragment, ParseContext};
 
 #[derive(Debug, Clone, Default)]
 pub struct FileNodeList {
@@ -12,8 +11,8 @@ pub struct FileNodeList {
     pub file_node_sequence: Vec<FileNode>,
 }
 
-impl ParseWithCount for FileNodeList {
-    fn parse(reader: Reader, size: usize) -> Result<Self> {
+impl FileNodeList {
+    pub fn parse(reader: Reader, context: &mut ParseContext, size: usize) -> Result<Self> {
         let mut builder = FileNodeListBuilder {
             next_fragment_id: 0,
             file_node_list_fragments: Vec::new(),
@@ -21,16 +20,21 @@ impl ParseWithCount for FileNodeList {
         };
 
         let mut next_fragment_ref =
-            builder.add_fragment(FileNodeListFragment::parse(reader, size)?)?;
+            builder.add_fragment(FileNodeListFragment::parse(reader, context, size)?)?;
         while !next_fragment_ref.is_fcr_nil() && !next_fragment_ref.is_fcr_zero() {
             let mut reader = next_fragment_ref.resolve_to_reader(reader)?;
-            let fragment = FileNodeListFragment::parse(&mut reader, next_fragment_ref.cb as usize)?;
+            let fragment = FileNodeListFragment::parse(&mut reader, context, next_fragment_ref.cb as usize)?;
             next_fragment_ref = builder.add_fragment(fragment)?;
         }
         Ok(Self {
             file_node_list_fragments: builder.file_node_list_fragments,
             file_node_sequence: builder.file_node_sequence,
         })
+    }
+
+    /// Iterate over the .fnd fields for all toplevel nodes
+    pub fn iter_data<'a>(&'a self) -> FileNodeDataIterator<'a> {
+        FileNodeDataIterator::new(self)
     }
 }
 
@@ -67,13 +71,6 @@ impl FileNodeListBuilder {
         let next_fragment_ref = fragment.next_fragment.clone();
         self.file_node_list_fragments.push(fragment);
         Ok(next_fragment_ref)
-    }
-}
-
-impl FileNodeList {
-    /// Iterate over the .fnd fields for all toplevel nodes
-    pub fn iter_data<'a>(&'a self) -> FileNodeDataIterator<'a> {
-        FileNodeDataIterator::new(self)
     }
 }
 

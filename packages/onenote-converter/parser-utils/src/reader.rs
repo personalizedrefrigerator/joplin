@@ -56,12 +56,20 @@ impl<'a> Reader<'a> {
         self.buff.remaining()
     }
 
-    pub fn advance(&mut self, cnt: usize) -> Result<()> {
-        if self.remaining() < cnt {
-            return Err(ErrorKind::UnexpectedEof("Reader.advance".into()).into());
+    pub fn advance(&mut self, count: usize) -> Result<()> {
+        if self.remaining() < count {
+            return Err(
+                ErrorKind::UnexpectedEof(
+                    format!(
+                        "Reader.advance was unable to advance {} bytes. Only {} bytes are available",
+                        count,
+                        self.remaining(),
+                    ).into()
+                ).into()
+            );
         }
 
-        self.buff.advance(cnt);
+        self.buff.advance(count);
 
         Ok(())
     }

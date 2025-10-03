@@ -28,11 +28,11 @@ pub(crate) struct ObjectSpace<'a> {
 }
 
 impl<'a, 'b> ObjectSpace<'a> {
-    pub(crate) fn get_object(&self, id: ExGuid) -> Option<&Object> {
+    pub(crate) fn get_object(&'_ self, id: ExGuid) -> Option<&'a Object<'_>> {
         self.objects.get(&id)
     }
 
-    pub(crate) fn get_object_or_fallback<F>(&self, id: ExGuid, fallback_fn: F) -> Object
+    pub(crate) fn get_object_or_fallback<F>(&'_ self, id: ExGuid, fallback_fn: F) -> Object<'_>
     where
         F: FnOnce() -> Object<'a>,
     {

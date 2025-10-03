@@ -6,7 +6,7 @@ use super::super::common::ObjectDeclarationWithRefCountBody;
 use super::file_node_chunk_reference::FileNodeChunkReference;
 use super::NodeId;
 use crate::local_onestore::common::FileChunkReference;
-use crate::local_onestore::file_structure::FileNodeList;
+use crate::local_onestore::file_structure::{FileNodeList, ParseContext};
 use crate::shared::compact_id::CompactId;
 use crate::shared::exguid::ExGuid;
 use crate::shared::jcid::JcId;
@@ -52,10 +52,8 @@ impl FileNode {
             None
         }
     }
-}
-
-impl Parse for FileNode {
-    fn parse(reader: parser_utils::Reader) -> Result<Self> {
+    
+    pub fn parse(reader: parser_utils::Reader, context: &mut ParseContext) -> Result<Self> {
         let remaining_0 = reader.remaining();
         let first_line = reader.get_u32()?;
         let node_id = first_line & 0x3FF; // First 10 bits
@@ -73,7 +71,7 @@ impl Parse for FileNode {
             2 => FileNodeDataRef::ElementList({
                 let list_ref = FileNodeChunkReference::parse(reader, stp_format, cb_format)?;
                 let mut resolved_reader = list_ref.resolve_to_reader(reader)?;
-                FileNodeList::parse(&mut resolved_reader, list_ref.data_size())
+                FileNodeList::parse(&mut resolved_reader, context, list_ref.data_size())
             }?),
             _ => FileNodeDataRef::InvalidData,
         };

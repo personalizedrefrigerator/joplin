@@ -2,7 +2,8 @@ use crate::local_onestore::{
     common::FileChunkReference64x32,
     file_node::{FileNode, FileNodeData},
 };
-use parser_utils::{errors::ErrorKind, parse::Parse};
+use parser_utils::{errors::ErrorKind, log_warn, parse::Parse};
+use super::parse_context::ParseContext;
 
 #[derive(Debug, Clone)]
 #[allow(dead_code)]
@@ -14,7 +15,7 @@ pub struct FileNodeListFragment {
 }
 
 impl FileNodeListFragment {
-    pub fn parse(reader: parser_utils::Reader, size: usize) -> parser_utils::Result<Self> {
+    pub fn parse(reader: parser_utils::Reader, context: &mut ParseContext, size: usize) -> parser_utils::Result<Self> {
         let header = FileNodeListHeader::parse(reader)?;
         let mut file_nodes: Vec<FileNode> = Vec::new();
         let mut file_node_size: usize = 0;
@@ -23,20 +24,34 @@ impl FileNodeListFragment {
 
         println!("Fragment: Size: {}", size);
 
-        loop {
-            let file_node = FileNode::parse(reader)?;
+        // Sometimes, the node count is specified externally
+        let mut maximum_node_count = match context.get_file_node_count(&header) {
+            Some(count) => {
+                println!("Node count set to {}", count);
+                count
+            },
+            None => {
+                log_warn!("No node count found.");
+                usize::MAX
+            }
+        };
+
+        while size - 36 - file_node_size >= 4 && maximum_node_count > 0 {
+            let file_node = FileNode::parse(reader, context)?;
             file_node_size += file_node.size as usize;
 
+            if !matches!(file_node.fnd, FileNodeData::ChunkTerminatorFND|FileNodeData::Null) {
+                maximum_node_count -= 1;
+            }
             if !matches!(file_node.fnd, FileNodeData::Null) {
                 file_nodes.push(file_node);
             }
 
             assert_eq!(remaining_0 - reader.remaining(), file_node_size);
-
-            if size - 36 - file_node_size <= 4 {
-                break;
-            }
         }
+
+        println!("Node count: {}/{}", file_nodes.len(), maximum_node_count);
+        context.update_remaining_nodes_in_fragment(&header, maximum_node_count);
 
         let padding_length = size - 36 - file_node_size;
         reader.advance(padding_length)?;
@@ -66,6 +81,6 @@ impl FileNodeListFragment {
 #[allow(dead_code)]
 pub struct FileNodeListHeader {
     magic: u64,
-    file_node_list_id: u32,
+    pub file_node_list_id: u32,
     pub n_fragment_sequence: u32,
 }

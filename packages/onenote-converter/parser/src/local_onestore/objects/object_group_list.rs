@@ -21,7 +21,7 @@ impl ObjectGroupList {
         let current = iterator.peek();
         if let Some(FileNodeData::ObjectGroupListReferenceFND(data)) = current {
             iterator.next();
-            Ok(Some(Self::from_reference(iterator, data)?))
+            Ok(Some(Self::from_reference(data)?))
         } else if let Some(FileNodeData::ObjectGroupStartFND(_)) = current {
             Ok(Some(Self::parse(iterator)?))
         } else {
@@ -30,7 +30,6 @@ impl ObjectGroupList {
     }
 
     fn from_reference(
-        iterator: &mut FileNodeDataIterator,
         reference: &ObjectGroupListReferenceFND,
     ) -> Result<Self> {
         let mut iterator = reference.list.iter_data();
