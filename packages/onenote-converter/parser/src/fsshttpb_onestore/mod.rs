@@ -30,10 +30,6 @@ pub(crate) struct FssHttpbOneStore {
 }
 
 impl FssHttpbOneStore {
-    pub fn schema_guid(&self) -> Guid {
-        self.schema
-    }
-
     pub fn is_onetoc2(&self) -> bool {
         self.schema == guid!({ E4DBFD38 - E5C7 - 408B - A8A1 - 0E7B421E1F5F })
     }
@@ -137,12 +133,17 @@ pub(crate) fn parse_store(package: &OneStorePackaging) -> Result<FssHttpbOneStor
         object_spaces.insert(id, Rc::new(group));
     }
 
-    Ok(FssHttpbOneStore {
+    let result = FssHttpbOneStore {
         schema: storage_manifest.id,
         header,
         data_root: Rc::new(data_root),
         object_spaces,
-    })
+    };
+    if !result.is_onestore() && !result.is_onetoc2() {
+        Err(parser_error!(MalformedOneNoteData, "File's GUID matches the expected type for neither onetoc2 nor onestore").into())
+    } else {
+        Ok(result)
+    }
 }
 
 fn parse_object_space<'a, 'b>(

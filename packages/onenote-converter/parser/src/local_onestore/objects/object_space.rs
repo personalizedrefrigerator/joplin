@@ -9,7 +9,6 @@ use crate::{
             revision_manifest_list::RevisionManifestList,
         },
     },
-    onestore,
     shared::exguid::ExGuid,
 };
 use parser_utils::errors::{ErrorKind, Result};
@@ -71,7 +70,7 @@ impl ObjectSpace {
         for revision in &self.revision_list.revisions {
             // TODO: Use global_id_tables if present. This may be required for parsing
             //      .onetoc2 files, which allow references from one ID table to another.
-            let global_id_tables = &revision.global_id_tables;
+            let _global_id_tables = &revision.global_id_tables;
 
             for object_group in &revision.object_groups {
                 let id_table = &object_group.id_table;
@@ -87,7 +86,7 @@ impl ObjectSpace {
 }
 
 impl crate::onestore::object_space::ObjectSpace for ObjectSpace {
-    fn get_object(&self, id: ExGuid) -> Option<Rc<onestore::object::Object>> {
+    fn get_object(&self, id: ExGuid) -> Option<Rc<ExportedObject>> {
         if let Some(result) = self.id_to_object.get(&id) {
             Some(result.data.clone())
         } else {

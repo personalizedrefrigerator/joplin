@@ -44,14 +44,6 @@ enum FileNodeDataRef {
 }
 
 impl FileNode {
-    pub fn get_children(&self) -> Option<&FileNodeList> {
-        if let FileNodeDataRef::ElementList(list) = &self.data_ref {
-            Some(list)
-        } else {
-            None
-        }
-    }
-
     pub fn parse(reader: parser_utils::Reader, context: &mut ParseContext) -> Result<Self> {
         let remaining_0 = reader.remaining();
         let first_line = reader.get_u32()?;
@@ -697,6 +689,7 @@ pub type FileDataStoreListReferenceFND = PointerToListFND;
 #[derive(Debug, Parse, Clone)]
 #[validate(guid_header == Guid::from_str("{BDE316E7-2665-4511-A4C4-8D4D0B7A9EAC}").unwrap())]
 #[validate(guid_footer == Guid::from_str("{71FBA722-0F79-4A0B-BB13-899256426B24}").unwrap())]
+#[allow(unused)]
 pub struct FileDataStoreObject {
     guid_header: Guid,
     /// Length of the file data (without padding)
@@ -858,6 +851,7 @@ impl<RefSize: Parse> ParseWithRef for ObjectDeclaration2RefCount<RefSize> {
 pub type ObjectDeclaration2RefCountFND = ObjectDeclaration2RefCount<u8>;
 pub type ObjectDeclaration2LargeRefCountFND = ObjectDeclaration2RefCount<u32>;
 
+#[allow(unused)]
 #[derive(Debug, Clone)]
 pub struct ObjectGroupListReferenceFND {
     pub list: FileNodeList,

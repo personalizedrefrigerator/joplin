@@ -101,7 +101,7 @@ impl ParseContextIdMapping {
 }
 
 impl MappingTable for ParseContextIdMapping {
-    fn get_object_space(&self, index: usize, cid: &CompactId) -> Option<CellId> {
+    fn get_object_space(&self, _index: usize, cid: &CompactId) -> Option<CellId> {
         if let Ok(result) = self.id_table.resolve_id(cid) {
             Some(CellId(result, ExGuid::fallback()))
         } else {
@@ -109,7 +109,7 @@ impl MappingTable for ParseContextIdMapping {
         }
     }
 
-    fn resolve_id(&self, index: usize, cid: &CompactId) -> Option<ExGuid> {
+    fn resolve_id(&self, _index: usize, cid: &CompactId) -> Option<ExGuid> {
         if let Ok(result) = self.id_table.resolve_id(cid) {
             Some(result)
         } else {

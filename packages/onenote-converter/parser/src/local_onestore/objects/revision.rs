@@ -18,7 +18,7 @@ use parser_utils::errors::{Error, Result};
 #[derive(Debug)]
 pub struct Revision {
     pub id: ExGuid,
-    parent_id: ExGuid,
+    _parent_id: ExGuid,
     pub object_groups: Vec<ObjectGroupList>,
     pub global_id_tables: Vec<GlobalIdTable>,
     root_objects: HashMap<RootRole, ExGuid>,
@@ -127,7 +127,7 @@ impl Revision {
 
         Ok(Revision {
             id,
-            parent_id,
+            _parent_id: parent_id,
             object_groups,
             global_id_tables,
             root_objects,

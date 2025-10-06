@@ -34,12 +34,6 @@ enum Partition {
 }
 
 impl Object {
-    pub fn fallback() -> Object {
-        return Object {
-            data: Rc::new(SharedObject::fallback()),
-        };
-    }
-
     pub(crate) fn parse(
         object_id: ExGuid,
         context_id: ExGuid,

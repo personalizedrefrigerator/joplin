@@ -7,7 +7,6 @@ use crate::local_onestore::file_structure::{FileNodeListFragment, ParseContext};
 
 #[derive(Debug, Clone, Default)]
 pub struct FileNodeList {
-    file_node_list_fragments: Vec<FileNodeListFragment>,
     pub file_node_sequence: Vec<FileNode>,
 }
 
@@ -15,7 +14,6 @@ impl FileNodeList {
     pub fn parse(reader: Reader, context: &mut ParseContext, size: usize) -> Result<Self> {
         let mut builder = FileNodeListBuilder {
             next_fragment_id: 0,
-            file_node_list_fragments: Vec::new(),
             file_node_sequence: Vec::new(),
         };
 
@@ -28,7 +26,6 @@ impl FileNodeList {
             next_fragment_ref = builder.add_fragment(fragment)?;
         }
         Ok(Self {
-            file_node_list_fragments: builder.file_node_list_fragments,
             file_node_sequence: builder.file_node_sequence,
         })
     }
@@ -40,7 +37,6 @@ impl FileNodeList {
 }
 
 struct FileNodeListBuilder {
-    pub file_node_list_fragments: Vec<FileNodeListFragment>,
     pub file_node_sequence: Vec<FileNode>,
 
     // Used for validation during construction
@@ -70,7 +66,6 @@ impl FileNodeListBuilder {
             self.file_node_sequence.push(item.clone());
         }
         let next_fragment_ref = fragment.next_fragment.clone();
-        self.file_node_list_fragments.push(fragment);
         Ok(next_fragment_ref)
     }
 }

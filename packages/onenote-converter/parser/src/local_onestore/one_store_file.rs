@@ -7,8 +7,7 @@ use parser_utils::errors::Result;
 use parser_utils::parse::{Parse, ParseWithCount};
 use parser_utils::Reader;
 
-use crate::local_onestore::file_structure::{self, ParseContext};
-use crate::local_onestore::global_id_map::IdLookupTable;
+use crate::local_onestore::file_structure;
 use crate::local_onestore::objects;
 use crate::local_onestore::objects::root_file_node_list::RootFileNodeList;
 use crate::local_onestore::{common::FileChunkReference, file_structure::FileNodeList};
@@ -22,13 +21,13 @@ use crate::shared::cell_id::CellId;
 ///
 /// [\[MS-ONESTORE\] 2.8.1]: https://docs.microsoft.com/en-us/openspecs/office_file_formats/ms-onestore/a2f046ea-109a-49c4-912d-dc2888cf0565
 ///
+#[allow(dead_code)]
 pub struct OneStoreFile {
     pub header: OneStoreHeader,
     pub free_chunk_list: Vec<FreeChunkListFragment>,
     pub transaction_log: Vec<TransactionLogFragment>,
     pub hashed_chunk_list: Vec<FileNodeListFragment>,
     pub root_file_node_list: RootFileNodeList,
-    pub global_id_map: IdLookupTable,
 }
 
 impl fmt::Debug for OneStoreFile {
@@ -134,7 +133,6 @@ impl Parse for OneStoreFile {
             RootFileNodeList::parse(&mut iterator, &parse_context)
         }?;
 
-        let global_id_map = IdLookupTable::build(&root_file_node_list)?;
         if let Some(file_data_store) = root_file_node_list.file_data_store.clone() {
             parse_context.update_file_data(file_data_store);
         }
@@ -145,7 +143,6 @@ impl Parse for OneStoreFile {
             transaction_log,
             hashed_chunk_list,
             root_file_node_list,
-            global_id_map,
         })
     }
 }

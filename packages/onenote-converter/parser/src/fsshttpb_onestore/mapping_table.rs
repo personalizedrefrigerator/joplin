@@ -31,13 +31,6 @@ impl crate::onestore::mapping_table::MappingTable for MappingTable {
 }
 
 impl MappingTable {
-    pub fn fallback() -> MappingTable {
-        return MappingTable {
-            objects: HashMap::from([]),
-            object_spaces: HashMap::from([]),
-        };
-    }
-
     pub(crate) fn from_entries<
         I: Iterator<Item = (CompactId, ExGuid)>,
         J: Iterator<Item = (CompactId, CellId)>,
@@ -59,14 +52,6 @@ impl MappingTable {
             objects: objects_map,
             object_spaces: object_spaces_map,
         }
-    }
-
-    pub(crate) fn get_object(&self, index: usize, cid: CompactId) -> Option<ExGuid> {
-        self.get(index, cid, &self.objects)
-    }
-
-    pub(crate) fn get_object_space(&self, index: usize, cid: CompactId) -> Option<CellId> {
-        self.get(index, cid, &self.object_spaces)
     }
 
     fn get<T: Copy>(

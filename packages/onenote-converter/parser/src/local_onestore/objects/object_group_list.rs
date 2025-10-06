@@ -1,5 +1,5 @@
 use std::rc::Rc;
-
+use std::fmt::Debug;
 use crate::{
     local_onestore::{
         file_node::{file_node::ObjectGroupListReferenceFND, FileNodeData},
@@ -11,11 +11,20 @@ use crate::{
 use parser_utils::{errors::Result, log_warn};
 
 /// See [MS-ONESTORE 2.1.13](https://learn.microsoft.com/en-us/openspecs/office_file_formats/ms-onestore/607a84d4-5762-4a3e-9244-c91acddcf647)
-#[derive(Debug)]
 pub struct ObjectGroupList {
     id: ExGuid,
     pub id_table: GlobalIdTable,
     pub objects: Vec<Rc<Object>>,
+}
+
+impl Debug for ObjectGroupList {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        // Don't include all fields -- avoid duplicate data in output
+        f.debug_struct("ObjectGroupList")
+            .field("id", &self.id)
+            .field("objects", &self.objects)
+            .finish()
+    }
 }
 
 impl ObjectGroupList {

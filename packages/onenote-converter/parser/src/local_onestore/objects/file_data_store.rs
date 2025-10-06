@@ -8,7 +8,7 @@ use crate::{
     },
     shared::{file_data_ref::FileBlob, guid::Guid},
 };
-use parser_utils::errors::{self, Result};
+use parser_utils::errors::Result;
 
 /// See [MS-ONESTORE 2.5.21](https://learn.microsoft.com/en-us/openspecs/office_file_formats/ms-onestore/2701cc42-3601-49f9-a3ba-7c40cd8a2be9)
 #[derive(Debug)]
