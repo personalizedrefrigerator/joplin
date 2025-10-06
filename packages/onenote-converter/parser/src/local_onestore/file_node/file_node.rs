@@ -11,8 +11,8 @@ use crate::shared::jcid::JcId;
 use crate::shared::object_prop_set::ObjectPropSet;
 use parser_utils::errors::ErrorKind;
 use parser_utils::parse::{Parse, ParseWithCount};
+use parser_utils::{log_warn, Utf16ToString};
 use parser_utils::{Reader, Result};
-use parser_utils::{Utf16ToString, log_warn};
 
 use crate::shared::guid::Guid;
 

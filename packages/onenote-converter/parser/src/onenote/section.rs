@@ -2,9 +2,9 @@ use std::rc::Rc;
 
 use crate::one::property::color::Color;
 use crate::one::property_set::{section_metadata_node, section_node};
-use crate::onenote::page_series::{PageSeries, parse_page_series};
-use crate::onestore::OneStore;
+use crate::onenote::page_series::{parse_page_series, PageSeries};
 use crate::onestore::object_space::ObjectSpaceRef;
+use crate::onestore::OneStore;
 use parser_utils::errors::{ErrorKind, Result};
 
 /// An entry in a section list.

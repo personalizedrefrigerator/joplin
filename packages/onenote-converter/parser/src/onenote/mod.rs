@@ -1,6 +1,6 @@
 use crate::onenote::notebook::Notebook;
 use crate::onenote::section::{Section, SectionEntry, SectionGroup};
-use crate::onestore::{OneStoreType, parse_onestore};
+use crate::onestore::{parse_onestore, OneStoreType};
 use parser_utils::errors::{ErrorKind, Result};
 use parser_utils::{fs_driver, log, reader::Reader};
 

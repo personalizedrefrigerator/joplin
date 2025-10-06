@@ -4,9 +4,9 @@ use super::{
 };
 use crate::one::property::PropertyType;
 use crate::shared::compact_id::CompactId;
-use parser_utils::Reader;
 use parser_utils::errors::Result;
 use parser_utils::parse::Parse;
+use parser_utils::Reader;
 
 /// An object's properties. "ObjectSpaceObjectPropSet"
 ///

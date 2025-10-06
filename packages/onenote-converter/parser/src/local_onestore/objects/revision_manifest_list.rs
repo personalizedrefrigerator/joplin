@@ -2,7 +2,7 @@ use std::{collections::HashMap, rc::Rc};
 
 use crate::{
     local_onestore::{
-        file_node::{FileNodeData, file_node::RevisionManifestListStartFND},
+        file_node::{file_node::RevisionManifestListStartFND, FileNodeData},
         file_structure::FileNodeDataIterator,
         objects::{parse_context::ParseContext, revision::Revision},
     },

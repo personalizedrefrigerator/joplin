@@ -1,6 +1,6 @@
 use crate::{
     local_onestore::{
-        file_node::{FileNodeData, file_node::ObjectGroupListReferenceFND},
+        file_node::{file_node::ObjectGroupListReferenceFND, FileNodeData},
         file_structure::FileNodeDataIterator,
         objects::{global_id_table::GlobalIdTable, object::Object, parse_context::ParseContext},
     },

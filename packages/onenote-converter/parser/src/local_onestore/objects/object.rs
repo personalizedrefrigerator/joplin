@@ -3,8 +3,8 @@ use std::{fmt::Debug, rc::Rc};
 use crate::{
     local_onestore::{
         file_node::{
-            FileNodeData,
             file_node::{AttachmentInfo, ObjectDeclarationNode},
+            FileNodeData,
         },
         file_structure::FileNodeDataIterator,
         objects::parse_context::ParseContext,

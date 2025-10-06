@@ -1,6 +1,6 @@
-use parser_utils::Reader;
 use parser_utils::errors::Result;
 use parser_utils::parse::{Parse, ParseHttpb};
+use parser_utils::Reader;
 use std::fmt;
 use uuid::Uuid;
 

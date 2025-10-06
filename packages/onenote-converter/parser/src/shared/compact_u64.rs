@@ -1,5 +1,5 @@
-use parser_utils::Reader;
 use parser_utils::errors::{ErrorKind, Result};
+use parser_utils::Reader;
 
 /// A compact unsigned 64-bit integer.
 ///

@@ -1,6 +1,6 @@
 use crate::one::property::file_type::FileType;
 use crate::one::property_set::{embedded_file_container, embedded_file_node};
-use crate::onenote::note_tag::{NoteTag, parse_note_tags};
+use crate::onenote::note_tag::{parse_note_tags, NoteTag};
 use crate::onestore::object_space::ObjectSpaceRef;
 use crate::shared::exguid::ExGuid;
 use crate::shared::file_data_ref::FileBlob;
