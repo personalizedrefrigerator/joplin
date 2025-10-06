@@ -62,7 +62,7 @@ pub fn convert(path: &str, output_dir: &str, base_path: &str) -> Result<()> {
             log!("notebook name: {:?}", notebook_name);
 
             let notebook_output_dir = fs_driver().get_output_path(base_path, output_dir, path);
-            log!("Notebok directory: {:?}", notebook_output_dir);
+            log!("Notebook directory: {:?}", notebook_output_dir);
 
             notebook::Renderer::new().render(&notebook, &notebook_name, &notebook_output_dir)?;
         }
