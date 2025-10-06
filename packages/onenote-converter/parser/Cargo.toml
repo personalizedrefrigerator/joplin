@@ -2,7 +2,7 @@
 name = "parser"
 version = "0.0.1"
 authors = ["Pedro Luiz <pedrlz.frn@gmail.com>"]
-edition = "2018"
+edition = "2024"
 description = "Parse Microsoft OneNote® notebooks"
 license = "MPL-2.0-no-copyleft-exception"
 repository = "https://github.com/laurent22/joplin"
