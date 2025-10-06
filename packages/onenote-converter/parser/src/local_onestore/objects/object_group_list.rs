@@ -6,7 +6,7 @@ use crate::{
     },
     shared::exguid::ExGuid,
 };
-use parser_utils::{errors::Result, log_warn};
+use parser_utils::{errors::Result, log};
 use std::fmt::Debug;
 use std::rc::Rc;
 
@@ -74,7 +74,7 @@ impl ObjectGroupList {
                 break;
             } else if let FileNodeData::DataSignatureGroupDefinitionFND(_) = item {
                 iterator.next();
-                log_warn!("Ignoring DataSignatureGroupDefinitionFND"); // TODO
+                log!("Ignoring DataSignatureGroupDefinitionFND");
             } else if let Some(object) = Object::try_parse(iterator, &parse_context)? {
                 objects.push(Rc::new(object));
             } else {
