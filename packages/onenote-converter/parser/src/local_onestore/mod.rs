@@ -1,3 +1,5 @@
+//! Parsing specific to OneNote 2016 format `.one` and `.onetoc2` files.
+
 mod common;
 mod file_node;
 mod file_structure;

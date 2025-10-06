@@ -1,3 +1,5 @@
+//! Utilities shared between the parser and renderer.
+
 use widestring::U16CString;
 
 pub mod errors;

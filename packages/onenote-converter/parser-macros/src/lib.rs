@@ -1,10 +1,19 @@
+//! Adds support for #[derive(Parse)]
+ 
+// Development ref: See the relevant syn example: https://github.com/dtolnay/syn/blob/master/examples/heapsize/heapsize_derive/src/lib.rs
+
 use proc_macro2::TokenStream;
 
 use quote::{ToTokens, quote, quote_spanned};
 use syn::{DeriveInput, Expr, parse_macro_input, spanned::Spanned};
 
-// See the syn example: https://github.com/dtolnay/syn/blob/master/examples/heapsize/heapsize_derive/src/lib.rs
 
+/// Auto-implements the `Parse` trait. Can be applied using `#[derive(Parse)]`.
+/// Attributes:
+/// - #[validate(callback)]: Extra validation logic. This should go at the beginning of the struct declaration.
+/// - #[assert_offset(n)]: For debugging. Assert that some struct field has offset `n` from the beginning of the struct.
+/// - #[pad_to_alignment(n)]: Attaches to a struct field to add up to n bytes of padding.
+/// - #[parse_additional_args(arg1, arg2)]: Attaches to a struct field. Includes additional arguments to be provided to that field's `::parse` method.
 #[proc_macro_derive(
     Parse,
     attributes(pad_to_alignment, parse_additional_args, validate, assert_offset)
@@ -13,8 +22,8 @@ pub fn parseable_derive(input: proc_macro::TokenStream) -> proc_macro::TokenStre
     let ast = parse_macro_input!(input as DeriveInput);
     let name = &ast.ident;
     let (impl_generics, ty_generics, where_clause) = &ast.generics.split_for_impl();
-    let parse_impl = process_fields(&ast.data, &ast.attrs);
 
+    let parse_impl = process_fields(&ast.data, &ast.attrs);
     let generated = quote! {
         impl #impl_generics parser_utils::parse::Parse for #name #ty_generics #where_clause {
             fn parse(reader: parser_utils::Reader) -> parser_utils::errors::Result<Self> {

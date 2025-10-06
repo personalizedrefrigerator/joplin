@@ -1,3 +1,7 @@
+//! Parsing specific to on-server .one and .onetoc2 files. This is usually the format of OneNote files
+//! when downloaded from OneDrive or SharePoint.
+//! See [\[MS-ONESTORE\] 2.8](https://learn.microsoft.com/en-us/openspecs/office_file_formats/ms-onestore/c65f7aa8-4f0e-45dc-aabd-96db97cedbd4).
+
 use self::packaging::OneStorePackaging;
 use crate::fsshttpb::data_element::storage_index::StorageIndex;
 use crate::fsshttpb::data_element::storage_manifest::StorageManifest;
