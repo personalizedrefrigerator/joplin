@@ -5,9 +5,9 @@
   },
   "description": "Used to import a OneNote archive into Joplin",
   "version": "3.5.0",
-  "license": "AGPL-3.0-or-later",
+  "license": "MPL-2.0-no-copyleft-exception",
   "repository": "https://github.com/laurent22/joplin/tree/dev/packages/onenote-converter",
-  "main": "./pkg/onenote_converter.js",
+  "main": "./renderer/pkg/renderer.js",
   "scripts": {
     "build": "node ./build.js --profile=release",
     "buildDev": "node ./build.js --profile=dev"

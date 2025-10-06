@@ -24,7 +24,7 @@ async function main() {
 	if (!argv.profile) throw new Error('OneNote build: profile value is missing');
 	if (!['release', 'dev'].includes(argv.profile)) throw new Error('OneNote build: profile value is invalid');
 
-	const buildCommand = `wasm-pack build --target nodejs --${argv.profile}`;
+	const buildCommand = `wasm-pack build --target nodejs --${argv.profile} ./renderer`;
 
 	await execCommand(buildCommand);
 
