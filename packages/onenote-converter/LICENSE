@@ -393,7 +393,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ---
 
-The OneNote converter is based on code ported from https://github.com/OfficeDev/Interop-TestSuites/blob/master/FileSyncandWOPI/, which has the following license:
+Parts of the OneNote converter are based on C# code (ported to Rust) from https://github.com/OfficeDev/Interop-TestSuites/blob/master/FileSyncandWOPI/. The original C# code has the following license:
 
 The MIT License (MIT)
 
