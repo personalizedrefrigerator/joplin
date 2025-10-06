@@ -27,7 +27,7 @@ impl IdMapping {
                 "Missing mapping for ID.".into(),
             ))?;
 
-        Ok(ExGuid::from_guid(guid.clone(), id.n.into()))
+        Ok(ExGuid::from_guid(*guid, id.n.into()))
     }
 
     pub fn add_mapping(&mut self, guid_index: u32, guid: Guid) {

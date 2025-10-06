@@ -81,7 +81,7 @@ impl Object {
     ) -> Result<Self> {
         let props = declaration
             .get_props()
-            .map(|props| props.clone())
+            .cloned()
             .unwrap_or_default();
         let data = ExportedObject {
             jc_id: declaration.get_jcid(),

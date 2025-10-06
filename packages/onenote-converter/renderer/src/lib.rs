@@ -23,7 +23,7 @@ pub fn oneNoteConverter(input: &str, output: &str, base_path: &str) {
 
 fn _main(input_path: &str, output_dir: &str, base_path: &str) -> Result<()> {
     log!("Starting parsing of the file: {:?}", input_path);
-    convert(&input_path, &output_dir, base_path)?;
+    convert(input_path, output_dir, base_path)?;
 
     Ok(())
 }
@@ -56,7 +56,7 @@ pub fn convert(path: &str, output_dir: &str, base_path: &str) -> Result<()> {
             let notebook_name = fs_driver()
                 .get_parent_dir(path)
                 .expect("Input file has no parent folder");
-            if notebook_name == "" {
+            if notebook_name.is_empty() {
                 panic!("Parent directory has no name");
             }
             log!("notebook name: {:?}", notebook_name);

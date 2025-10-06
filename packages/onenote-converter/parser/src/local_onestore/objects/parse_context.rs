@@ -110,10 +110,6 @@ impl MappingTable for ParseContextIdMapping {
     }
 
     fn resolve_id(&self, _index: usize, cid: &CompactId) -> Option<ExGuid> {
-        if let Ok(result) = self.id_table.resolve_id(cid) {
-            Some(result)
-        } else {
-            None
-        }
+        self.id_table.resolve_id(cid).ok()
     }
 }

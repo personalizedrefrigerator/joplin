@@ -47,6 +47,7 @@ fn process_fields(data: &syn::Data, attrs: &Vec<syn::Attribute>) -> TokenStream 
                     validation.clone().into_token_stream().to_string()
                 );
                 Some(quote_spanned! {validation.span() =>
+                    #[allow(clippy::nonminimal_bool)]
                     if ! (#validation) {
                         return Err(parser_utils::errors::ErrorKind::ParseValidationFailed(
                             ( #validation_str ).into()

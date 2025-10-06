@@ -87,11 +87,7 @@ impl ObjectSpace {
 
 impl crate::onestore::object_space::ObjectSpace for ObjectSpace {
     fn get_object(&self, id: ExGuid) -> Option<Rc<ExportedObject>> {
-        if let Some(result) = self.id_to_object.get(&id) {
-            Some(result.data.clone())
-        } else {
-            None
-        }
+        self.id_to_object.get(&id).map(|result| result.data.clone())
     }
 
     fn content_root(&self) -> Option<ExGuid> {

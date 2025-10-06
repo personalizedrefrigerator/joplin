@@ -2,7 +2,6 @@ use std::fmt::Debug;
 
 use super::super::common::ObjectDeclarationWithRefCountBody;
 use super::file_node_chunk_reference::FileNodeChunkReference;
-use super::NodeId;
 use crate::local_onestore::common::FileChunkReference;
 use crate::local_onestore::file_structure::{FileNodeList, ParseContext};
 use crate::shared::compact_id::CompactId;
@@ -21,9 +20,6 @@ use crate::shared::guid::Guid;
 #[derive(Debug, Clone)]
 #[allow(dead_code)]
 pub struct FileNode {
-    /// A unique ID for the node. Not guaranteed to be the same if the file is re-parsed.
-    pub node_unique_id: NodeId,
-
     /// Specifies the type of the structure
     node_type_id: u32,
 
@@ -170,7 +166,7 @@ impl FileNode {
                 let size_used = remaining_0 - remaining_1;
                 assert!(size_used <= size);
                 let remaining_size = size - size_used;
-                FileNodeData::UnknownNode(UnknownNode::parse(reader, remaining_size as usize)?)
+                FileNodeData::UnknownNode(UnknownNode::parse(reader, remaining_size)?)
             }
         };
 
@@ -178,7 +174,6 @@ impl FileNode {
         let actual_size = remaining_0 - remaining_2;
 
         let node = Self {
-            node_unique_id: NodeId(reader.absolute_offset()),
             node_type_id: node_id,
             stp_format,
             cb_format,
@@ -282,27 +277,21 @@ impl ParseWithRef for ObjectSpaceManifestListReferenceFND {
     fn parse(reader: parser_utils::Reader, data_ref: &FileNodeDataRef) -> Result<Self> {
         if let FileNodeDataRef::ElementList(data_ref) = data_ref {
             // Validation
-            {
-                let mut index = 0;
-                for item in &data_ref.file_node_sequence {
-                    if index == 0 {
-                        if !matches!(item.fnd, FileNodeData::ObjectSpaceManifestListStartFND(_)) {
-                            return Err(
-                                ErrorKind::MalformedOneStoreData(
-                                    "ObjectSpaceManifestListReferenceFND's list must start with a ObjectSpaceManifestListStartFND.".into()
-                                ).into()
-                            );
-                        }
-                    } else {
-                        if !matches!(item.fnd, FileNodeData::RevisionManifestListReferenceFND(_)) {
-                            return Err(
-                                ErrorKind::MalformedOneStoreData(
-                                    "All items following the first in an ObjectSpaceManifestListReferenceFND must be RevisionManifestListReferenceFNDs.".into()
-                                ).into()
-                            );
-                        }
+            for (index, item) in data_ref.file_node_sequence.iter().enumerate() {
+                if index == 0 {
+                    if !matches!(item.fnd, FileNodeData::ObjectSpaceManifestListStartFND(_)) {
+                        return Err(
+                            ErrorKind::MalformedOneStoreData(
+                                "ObjectSpaceManifestListReferenceFND's list must start with a ObjectSpaceManifestListStartFND.".into()
+                            ).into()
+                        );
                     }
-                    index += 1;
+                } else if !matches!(item.fnd, FileNodeData::RevisionManifestListReferenceFND(_)) {
+                    return Err(
+                        ErrorKind::MalformedOneStoreData(
+                            "All items following the first in an ObjectSpaceManifestListReferenceFND must be RevisionManifestListReferenceFNDs.".into()
+                        ).into()
+                    );
                 }
             }
 
@@ -448,7 +437,7 @@ impl<RefSize: Parse> ObjectDeclarationNode for ObjectDeclarationWithSizedRefCoun
         self.body.oid
     }
 
-    fn get_props<'a>(&'a self) -> Option<&'a ObjectPropSet> {
+    fn get_props(&self) -> Option<&ObjectPropSet> {
         Some(&self.property_set)
     }
 }
@@ -800,7 +789,7 @@ impl AttachmentInfo {
 pub trait ObjectDeclarationNode {
     fn get_jcid(&self) -> JcId;
     fn get_compact_id(&self) -> CompactId;
-    fn get_props<'a>(&'a self) -> Option<&'a ObjectPropSet>;
+    fn get_props(&self) -> Option<&ObjectPropSet>;
     fn get_attachment_info(&self) -> Option<AttachmentInfo> {
         None
     }
@@ -844,7 +833,7 @@ impl<RefSize: Parse> ObjectDeclarationNode for ObjectDeclaration2RefCount<RefSiz
     fn get_jcid(&self) -> JcId {
         self.body.jcid
     }
-    fn get_props<'a>(&'a self) -> Option<&'a ObjectPropSet> {
+    fn get_props(&self) -> Option<&ObjectPropSet> {
         Some(&self.props)
     }
     fn get_compact_id(&self) -> CompactId {
@@ -906,7 +895,7 @@ pub struct HashedChunkDescriptor<Hash: Parse> {
 
 impl<Hash: Parse> ParseWithRef for HashedChunkDescriptor<Hash> {
     fn parse(reader: Reader, prop_ref: &FileNodeDataRef) -> Result<Self> {
-        let prop_set = read_property_set(reader, &prop_ref)?;
+        let prop_set = read_property_set(reader, prop_ref)?;
         Ok(Self {
             prop_set,
             hash: Hash::parse(reader)?,
@@ -938,7 +927,7 @@ impl<Base: ObjectDeclarationNode> ObjectDeclarationNode
     fn get_jcid(&self) -> JcId {
         self.base.get_jcid()
     }
-    fn get_props<'a>(&'a self) -> Option<&'a ObjectPropSet> {
+    fn get_props(&self) -> Option<&ObjectPropSet> {
         self.base.get_props()
     }
     fn get_compact_id(&self) -> CompactId {

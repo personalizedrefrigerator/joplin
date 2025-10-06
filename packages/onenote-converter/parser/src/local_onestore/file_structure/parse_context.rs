@@ -20,7 +20,7 @@ impl ParseContext {
     pub fn get_file_node_count(&self, header: &FileNodeListHeader) -> Option<usize> {
         self.file_node_count_mapping
             .get(&header.file_node_list_id)
-            .map(|size| *size)
+            .cloned()
     }
 
     pub fn update_remaining_nodes_in_fragment(

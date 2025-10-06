@@ -42,7 +42,7 @@ impl FileNodeListFragment {
 
         while size - 36 - file_node_size >= 4 && maximum_node_count > 0 {
             let file_node = FileNode::parse(reader, context)?;
-            file_node_size += file_node.size as usize;
+            file_node_size += file_node.size;
 
             if !matches!(
                 file_node.fnd,
