@@ -3,6 +3,7 @@ use crate::utils::StyleSet;
 use parser::contents::{NoteTag, OutlineElement};
 use parser::property::common::ColorRef;
 use parser::property::note_tag::{ActionItemStatus, NoteTagShape};
+use parser_utils::log_warn;
 use std::borrow::Cow;
 
 const COLOR_BLUE: &str = "#4673b7";
@@ -121,7 +122,6 @@ impl<'a> Renderer<'a> {
         let mut style = StyleSet::new();
 
         match shape {
-            NoteTagShape::NoIcon => unimplemented!(),
             NoteTagShape::GreenCheckBox => self.icon_checkbox(status, style, COLOR_GREEN),
             NoteTagShape::YellowCheckBox => self.icon_checkbox(status, style, COLOR_YELLOW),
             NoteTagShape::BlueCheckBox => self.icon_checkbox(status, style, COLOR_BLUE),
@@ -160,12 +160,12 @@ impl<'a> Renderer<'a> {
                     self.icon_style(IconSize::Normal, style),
                 )
             }
-            NoteTagShape::BlueFollowUpFlag => unimplemented!(),
+
             NoteTagShape::QuestionMark => (
                 Cow::from(ICON_QUESTION_MARK),
                 self.icon_style(IconSize::Normal, style),
             ),
-            NoteTagShape::BlueRightArrow => unimplemented!(),
+
             NoteTagShape::HighPriority => (
                 Cow::from(ICON_ERROR),
                 self.icon_style(IconSize::Normal, style),
@@ -174,13 +174,12 @@ impl<'a> Renderer<'a> {
                 Cow::from(ICON_PHONE),
                 self.icon_style(IconSize::Normal, style),
             ),
-            NoteTagShape::Meeting => unimplemented!(),
-            NoteTagShape::TimeSensitive => unimplemented!(),
+
             NoteTagShape::LightBulb => (
                 Cow::from(ICON_LIGHT_BULB),
                 self.icon_style(IconSize::Normal, style),
             ),
-            NoteTagShape::Pushpin => unimplemented!(),
+
             NoteTagShape::Home => (
                 Cow::from(ICON_HOME),
                 self.icon_style(IconSize::Normal, style),
@@ -189,78 +188,39 @@ impl<'a> Renderer<'a> {
                 Cow::from(ICON_BUBBLE),
                 self.icon_style(IconSize::Normal, style),
             ),
-            NoteTagShape::SmilingFace => unimplemented!(),
+
             NoteTagShape::AwardRibbon => (
                 Cow::from(ICON_AWARD),
                 self.icon_style(IconSize::Normal, style),
             ),
-            NoteTagShape::YellowKey => unimplemented!(),
+
             NoteTagShape::BlueCheckBox1 => self.icon_checkbox_with_1(status, style, COLOR_BLUE),
-            NoteTagShape::BlueCircle1 => unimplemented!(),
+
             NoteTagShape::BlueCheckBox2 => self.icon_checkbox_with_2(status, style, COLOR_BLUE),
-            NoteTagShape::BlueCircle2 => unimplemented!(),
+
             NoteTagShape::BlueCheckBox3 => self.icon_checkbox_with_3(status, style, COLOR_BLUE),
-            NoteTagShape::BlueCircle3 => unimplemented!(),
-            NoteTagShape::BlueEightPointStar => unimplemented!(),
+
             NoteTagShape::BlueCheckMark => self.icon_checkmark(style, COLOR_BLUE),
             NoteTagShape::BlueCircle => self.icon_circle(style, COLOR_BLUE),
-            NoteTagShape::BlueDownArrow => unimplemented!(),
-            NoteTagShape::BlueLeftArrow => unimplemented!(),
-            NoteTagShape::BlueSolidTarget => unimplemented!(),
-            NoteTagShape::BlueStar => unimplemented!(),
-            NoteTagShape::BlueSun => unimplemented!(),
-            NoteTagShape::BlueTarget => unimplemented!(),
-            NoteTagShape::BlueTriangle => unimplemented!(),
-            NoteTagShape::BlueUmbrella => unimplemented!(),
-            NoteTagShape::BlueUpArrow => unimplemented!(),
-            NoteTagShape::BlueXWithDots => unimplemented!(),
-            NoteTagShape::BlueX => unimplemented!(),
+
             NoteTagShape::GreenCheckBox1 => self.icon_checkbox_with_1(status, style, COLOR_GREEN),
-            NoteTagShape::GreenCircle1 => unimplemented!(),
+
             NoteTagShape::GreenCheckBox2 => self.icon_checkbox_with_2(status, style, COLOR_GREEN),
-            NoteTagShape::GreenCircle2 => unimplemented!(),
+
             NoteTagShape::GreenCheckBox3 => self.icon_checkbox_with_3(status, style, COLOR_GREEN),
-            NoteTagShape::GreenCircle3 => unimplemented!(),
-            NoteTagShape::GreenEightPointStar => unimplemented!(),
+
             NoteTagShape::GreenCheckMark => self.icon_checkmark(style, COLOR_GREEN),
             NoteTagShape::GreenCircle => self.icon_circle(style, COLOR_GREEN),
-            NoteTagShape::GreenDownArrow => unimplemented!(),
-            NoteTagShape::GreenLeftArrow => unimplemented!(),
-            NoteTagShape::GreenRightArrow => unimplemented!(),
-            NoteTagShape::GreenSolidArrow => unimplemented!(),
-            NoteTagShape::GreenStar => unimplemented!(),
-            NoteTagShape::GreenSun => unimplemented!(),
-            NoteTagShape::GreenTarget => unimplemented!(),
-            NoteTagShape::GreenTriangle => unimplemented!(),
-            NoteTagShape::GreenUmbrella => unimplemented!(),
-            NoteTagShape::GreenUpArrow => unimplemented!(),
-            NoteTagShape::GreenXWithDots => unimplemented!(),
-            NoteTagShape::GreenX => unimplemented!(),
+
             NoteTagShape::YellowCheckBox1 => self.icon_checkbox_with_1(status, style, COLOR_YELLOW),
-            NoteTagShape::YellowCircle1 => unimplemented!(),
+
             NoteTagShape::YellowCheckBox2 => self.icon_checkbox_with_2(status, style, COLOR_YELLOW),
-            NoteTagShape::YellowCircle2 => unimplemented!(),
+
             NoteTagShape::YellowCheckBox3 => self.icon_checkbox_with_3(status, style, COLOR_YELLOW),
-            NoteTagShape::YellowCircle3 => unimplemented!(),
-            NoteTagShape::YellowEightPointStar => unimplemented!(),
+
             NoteTagShape::YellowCheckMark => self.icon_checkmark(style, COLOR_YELLOW),
             NoteTagShape::YellowCircle => self.icon_circle(style, COLOR_YELLOW),
-            NoteTagShape::YellowDownArrow => unimplemented!(),
-            NoteTagShape::YellowLeftArrow => unimplemented!(),
-            NoteTagShape::YellowRightArrow => unimplemented!(),
-            NoteTagShape::YellowSolidTarget => unimplemented!(),
-            NoteTagShape::YellowSun => unimplemented!(),
-            NoteTagShape::YellowTarget => unimplemented!(),
-            NoteTagShape::YellowTriangle => unimplemented!(),
-            NoteTagShape::YellowUmbrella => unimplemented!(),
-            NoteTagShape::YellowUpArrow => unimplemented!(),
-            NoteTagShape::YellowXWithDots => unimplemented!(),
-            NoteTagShape::YellowX => unimplemented!(),
-            NoteTagShape::FollowUpTodayFlag => unimplemented!(),
-            NoteTagShape::FollowUpTomorrowFlag => unimplemented!(),
-            NoteTagShape::FollowUpThisWeekFlag => unimplemented!(),
-            NoteTagShape::FollowUpNextWeekFlag => unimplemented!(),
-            NoteTagShape::NoFollowUpDateFlag => unimplemented!(),
+
             NoteTagShape::BluePersonCheckBox => {
                 self.icon_checkbox_with_person(status, style, COLOR_BLUE)
             }
@@ -287,23 +247,12 @@ impl<'a> Renderer<'a> {
                 Cow::from(ICON_EMAIL),
                 self.icon_style(IconSize::Normal, style),
             ),
-            NoteTagShape::ClosedEnvelope => unimplemented!(),
-            NoteTagShape::OpenEnvelope => unimplemented!(),
-            NoteTagShape::MobilePhone => unimplemented!(),
-            NoteTagShape::TelephoneWithClock => unimplemented!(),
-            NoteTagShape::QuestionBalloon => unimplemented!(),
-            NoteTagShape::PaperClip => unimplemented!(),
-            NoteTagShape::FrowningFace => unimplemented!(),
-            NoteTagShape::InstantMessagingContactPerson => unimplemented!(),
-            NoteTagShape::PersonWithExclamationMark => unimplemented!(),
-            NoteTagShape::TwoPeople => unimplemented!(),
-            NoteTagShape::ReminderBell => unimplemented!(),
+
             NoteTagShape::Contact => (
                 Cow::from(ICON_CONTACT),
                 self.icon_style(IconSize::Normal, style),
             ),
-            NoteTagShape::RoseOnAStem => unimplemented!(),
-            NoteTagShape::CalendarDateWithClock => unimplemented!(),
+
             NoteTagShape::MusicalNote => (
                 Cow::from(ICON_MUSIC),
                 self.icon_style(IconSize::Normal, style),
@@ -312,17 +261,12 @@ impl<'a> Renderer<'a> {
                 Cow::from(ICON_FILM),
                 self.icon_style(IconSize::Normal, style),
             ),
-            NoteTagShape::QuotationMark => unimplemented!(),
-            NoteTagShape::Globe => unimplemented!(),
+
             NoteTagShape::HyperlinkGlobe => (
                 Cow::from(ICON_LINK),
                 self.icon_style(IconSize::Normal, style),
             ),
-            NoteTagShape::Laptop => unimplemented!(),
-            NoteTagShape::Plane => unimplemented!(),
-            NoteTagShape::Car => unimplemented!(),
-            NoteTagShape::Binoculars => unimplemented!(),
-            NoteTagShape::PresentationSlide => unimplemented!(),
+
             NoteTagShape::Padlock => (
                 Cow::from(ICON_LOCK),
                 self.icon_style(IconSize::Normal, style),
@@ -331,24 +275,28 @@ impl<'a> Renderer<'a> {
                 Cow::from(ICON_BOOK),
                 self.icon_style(IconSize::Normal, style),
             ),
-            NoteTagShape::NotebookWithClock => unimplemented!(),
+
             NoteTagShape::BlankPaperWithLines => (
                 Cow::from(ICON_PAPER),
                 self.icon_style(IconSize::Normal, style),
             ),
-            NoteTagShape::Research => unimplemented!(),
+
             NoteTagShape::Pen => (
                 Cow::from(ICON_PEN),
                 self.icon_style(IconSize::Normal, style),
             ),
-            NoteTagShape::DollarSign => unimplemented!(),
-            NoteTagShape::CoinsWithAWindowBackdrop => unimplemented!(),
-            NoteTagShape::ScheduledTask => unimplemented!(),
-            NoteTagShape::LightningBolt => unimplemented!(),
-            NoteTagShape::Cloud => unimplemented!(),
-            NoteTagShape::Heart => unimplemented!(),
-            NoteTagShape::Sunflower => unimplemented!(),
+
+            shape => self.icon_fallback(style, shape),
         }
+    }
+
+    fn icon_fallback(&self, style: StyleSet, shape: NoteTagShape) -> (Cow<'static, str>, StyleSet) {
+        log_warn!("Unsupported icon type: {:?}", shape);
+
+        (
+            Cow::from(ICON_QUESTION_MARK),
+            self.icon_style(IconSize::Normal, style),
+        )
     }
 
     fn icon_checkbox(
