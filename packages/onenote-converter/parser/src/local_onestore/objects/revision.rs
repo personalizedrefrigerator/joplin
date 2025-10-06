@@ -63,15 +63,11 @@ impl Revision {
     }
 
     pub fn content_root(&self) -> Option<ExGuid> {
-        self.root_objects
-            .get(&RootRole::DefaultContent)
-            .copied()
+        self.root_objects.get(&RootRole::DefaultContent).copied()
     }
 
     pub fn metadata_root(&self) -> Option<ExGuid> {
-        self.root_objects
-            .get(&RootRole::MetadataRoot)
-            .copied()
+        self.root_objects.get(&RootRole::MetadataRoot).copied()
     }
 
     fn parse(iterator: &mut FileNodeDataIterator, context: &ParseContext) -> Result<Self> {

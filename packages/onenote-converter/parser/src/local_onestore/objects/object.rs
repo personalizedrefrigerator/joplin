@@ -79,10 +79,7 @@ impl Object {
         declaration: &dyn ObjectDeclarationNode,
         context: &ParseContext,
     ) -> Result<Self> {
-        let props = declaration
-            .get_props()
-            .cloned()
-            .unwrap_or_default();
+        let props = declaration.get_props().cloned().unwrap_or_default();
         let data = ExportedObject {
             jc_id: declaration.get_jcid(),
             props,

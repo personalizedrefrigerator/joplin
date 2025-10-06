@@ -1,12 +1,11 @@
 //! Adds support for #[derive(Parse)]
- 
+
 // Development ref: See the relevant syn example: https://github.com/dtolnay/syn/blob/master/examples/heapsize/heapsize_derive/src/lib.rs
 
 use proc_macro2::TokenStream;
 
 use quote::{ToTokens, quote, quote_spanned};
 use syn::{DeriveInput, Expr, parse_macro_input, spanned::Spanned};
-
 
 /// Auto-implements the `Parse` trait. Can be applied using `#[derive(Parse)]`.
 /// Attributes:
