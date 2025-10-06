@@ -34,7 +34,9 @@ impl FileApiDriver for FileApiDriverImpl {
     }
 
     fn make_dir(&self, path: &str) -> ApiResult<()> {
-        Ok(fs::create_dir(path)?)
+        let result = fs::create_dir(path);
+        // Don't fail if it already existed
+        if self.exists(path)? { Ok(()) } else { result }
     }
 
     fn get_file_name(&self, path: &str) -> Option<String> {

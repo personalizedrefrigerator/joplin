@@ -40,6 +40,14 @@ macro_rules! onestore_parse_error {
     };
 }
 
+macro_rules! iterator_skip_if_matching {
+    ($iterator:expr, $match_condition:pat) => {
+        if matches!($iterator.peek(), $match_condition) {
+            $iterator.next();
+        }
+    };
+}
+
 #[cfg(test)]
 mod test {
     use crate::shared::exguid::ExGuid;

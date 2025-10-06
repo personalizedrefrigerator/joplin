@@ -439,6 +439,31 @@ pub struct ObjectDeclarationWithSizedRefCount<RefSize: Parse> {
     property_set: ObjectPropSet,
 }
 
+impl<RefSize: Parse> ObjectDeclarationNode for ObjectDeclarationWithSizedRefCount<RefSize> {
+    fn get_jcid(&self) -> JcId {
+        self.body.jcid(true)
+    }
+
+    fn get_compact_id(&self) -> CompactId {
+        self.body.oid
+    }
+
+    fn get_props<'a>(&'a self) -> Option<&'a ObjectPropSet> {
+        Some(&self.property_set)
+    }
+}
+
+impl<RefSize: Parse> ParseWithRef for ObjectDeclarationWithSizedRefCount<RefSize> {
+    fn parse(reader: Reader, data_ref: &FileNodeDataRef) -> Result<Self> {
+        let property_set = read_property_set(reader, data_ref)?;
+        Ok(Self {
+            body: ObjectDeclarationWithRefCountBody::parse(reader)?,
+            c_ref: RefSize::parse(reader)?,
+            property_set,
+        })
+    }
+}
+
 fn read_property_set(reader: Reader, property_set_ref: &FileNodeDataRef) -> Result<ObjectPropSet> {
     match property_set_ref {
         FileNodeDataRef::SingleElement(data_ref) => {
@@ -454,17 +479,6 @@ fn read_property_set(reader: Reader, property_set_ref: &FileNodeDataRef) -> Resu
             ErrorKind::MalformedOneStoreData("Expected a reference to a property set".into())
                 .into(),
         ),
-    }
-}
-
-impl<RefSize: Parse> ParseWithRef for ObjectDeclarationWithSizedRefCount<RefSize> {
-    fn parse(reader: Reader, data_ref: &FileNodeDataRef) -> Result<Self> {
-        let property_set = read_property_set(reader, data_ref)?;
-        Ok(Self {
-            body: ObjectDeclarationWithRefCountBody::parse(reader)?,
-            c_ref: RefSize::parse(reader)?,
-            property_set,
-        })
     }
 }
 
@@ -524,8 +538,8 @@ impl ParseWithRef for ObjectRevisionWithRefCount2FNDX {
 #[derive(Debug, Clone, Parse)]
 #[allow(dead_code)]
 pub struct RootObjectReference2FNDX {
-    oid_root: CompactId,
-    root_role: u32,
+    pub oid_root: CompactId,
+    pub root_role: u32,
 }
 
 #[derive(Debug, Clone, Parse)]

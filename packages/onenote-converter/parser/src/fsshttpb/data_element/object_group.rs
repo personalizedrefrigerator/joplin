@@ -185,7 +185,11 @@ impl DataElement {
                 let object_header = ObjectHeader::parse(reader)?;
                 if object_header.object_type != ObjectType::ObjectGroupData {
                     return Err(ErrorKind::MalformedFssHttpBData(
-                        format!("unexpected object type: {:x}", object_header.object_type).into(),
+                        format!(
+                            "unexpected object type (in object_group): {:x}",
+                            object_header.object_type
+                        )
+                        .into(),
                     )
                     .into());
                 }
@@ -193,7 +197,11 @@ impl DataElement {
             ObjectType::ObjectGroupData => {} // Skip, will be parsed below
             _ => {
                 return Err(ErrorKind::MalformedFssHttpBData(
-                    format!("unexpected object type: {:x}", object_header.object_type).into(),
+                    format!(
+                        "unexpected object type (in object_group): {:x}",
+                        object_header.object_type
+                    )
+                    .into(),
                 )
                 .into())
             }

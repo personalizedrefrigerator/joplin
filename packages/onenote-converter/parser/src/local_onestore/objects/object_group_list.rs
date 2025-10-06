@@ -96,4 +96,12 @@ impl ObjectGroupList {
             objects,
         })
     }
+
+    pub fn from_objects(objects: Vec<Rc<Object>>, id_table: GlobalIdTable) -> Self {
+        Self {
+            id: ExGuid::fallback(),
+            id_table,
+            objects: objects,
+        }
+    }
 }

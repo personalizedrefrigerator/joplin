@@ -214,7 +214,11 @@ impl ObjectHeader {
         match parse(reader) {
             Ok(header) if header.object_type == object_type => Ok(()),
             Ok(header) => Err(ErrorKind::MalformedFssHttpBData(
-                format!("unexpected object type: {:x}", header.object_type).into(),
+                format!(
+                    "unexpected object type (in stream_object): {:x}",
+                    header.object_type
+                )
+                .into(),
             )
             .into()),
             Err(e) => Err(e),
@@ -229,7 +233,7 @@ impl ObjectHeader {
         match parse(reader) {
             Ok(header) if header == object_type => Ok(()),
             Ok(header) => Err(ErrorKind::MalformedFssHttpBData(
-                format!("unexpected object type: {:x}", header).into(),
+                format!("unexpected object type (in stream_object): {:x}", header).into(),
             )
             .into()),
             Err(e) => Err(e),

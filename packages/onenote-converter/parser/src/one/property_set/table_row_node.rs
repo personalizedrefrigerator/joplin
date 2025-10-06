@@ -21,7 +21,11 @@ pub(crate) struct Data {
 pub(crate) fn parse(object: &Object) -> Result<Data> {
     if object.id() != PropertySetId::TableRowNode.as_jcid() {
         return Err(ErrorKind::MalformedOneNoteFileData(
-            format!("unexpected object type: 0x{:X}", object.id().0).into(),
+            format!(
+                "unexpected object type (table_row_node): 0x{:X}",
+                object.id().0
+            )
+            .into(),
         )
         .into());
     }

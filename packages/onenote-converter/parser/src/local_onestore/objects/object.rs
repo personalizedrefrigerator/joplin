@@ -62,6 +62,9 @@ impl Object {
             Some(FileNodeData::ObjectDeclarationFileData3LargeRefCountFND(data)) => {
                 Some(Self::parse_from_declaration(data, context)?)
             }
+            Some(FileNodeData::ObjectDeclarationWithRefCountFNDX(data)) => {
+                Some(Self::parse_from_declaration(data, context)?)
+            }
             Some(_) => None,
             None => None,
         };
