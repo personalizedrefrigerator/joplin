@@ -1,5 +1,5 @@
-use parser_utils::errors::Result;
 use parser_utils::Reader;
+use parser_utils::errors::Result;
 
 /// A compact reference to an ID in the mapping table.
 ///

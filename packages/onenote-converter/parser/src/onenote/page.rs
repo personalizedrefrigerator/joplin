@@ -1,7 +1,7 @@
 use crate::one::property::layout_alignment::LayoutAlignment;
 use crate::one::property_set::{page_manifest_node, page_metadata, page_node, title_node};
-use crate::onenote::outline::{parse_outline, Outline};
-use crate::onenote::page_content::{parse_page_content, PageContent};
+use crate::onenote::outline::{Outline, parse_outline};
+use crate::onenote::page_content::{PageContent, parse_page_content};
 use crate::onestore::object_space::ObjectSpaceRef;
 use crate::shared::exguid::ExGuid;
 use parser_utils::errors::{ErrorKind, Result};

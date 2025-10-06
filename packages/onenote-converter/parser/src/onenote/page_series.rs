@@ -1,7 +1,7 @@
 use std::rc::Rc;
 
 use crate::one::property_set::page_series_node;
-use crate::onenote::page::{parse_page, Page};
+use crate::onenote::page::{Page, parse_page};
 use crate::onestore::OneStore;
 use crate::shared::exguid::ExGuid;
 use parser_utils::errors::{ErrorKind, Result};

@@ -1,4 +1,4 @@
-use parser_utils::{parse::Parse, Reader, Result};
+use parser_utils::{Reader, Result, parse::Parse};
 
 use crate::shared::{compact_id::CompactId, jcid::JcId};
 

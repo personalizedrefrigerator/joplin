@@ -1,7 +1,7 @@
 use crate::one::property::object_reference::ObjectReference;
 use crate::one::property::object_space_reference::ObjectSpaceReference;
 use crate::one::property::time::Timestamp;
-use crate::one::property::{simple, PropertyType};
+use crate::one::property::{PropertyType, simple};
 use crate::one::property_set::PropertySetId;
 use crate::onestore::object::Object;
 use crate::shared::cell_id::CellId;

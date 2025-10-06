@@ -1,6 +1,6 @@
 use super::super::common::FileChunkReference;
-use parser_utils::errors::{ErrorKind, Result};
 use parser_utils::Reader;
+use parser_utils::errors::{ErrorKind, Result};
 
 /// Points to data referenced by a FileNode
 /// See [\[MS-ONESTORE\] 2.2.4.2](https://learn.microsoft.com/en-us/openspecs/office_file_formats/ms-onestore/150b6726-e605-441b-8233-8776ce4cdd2d)

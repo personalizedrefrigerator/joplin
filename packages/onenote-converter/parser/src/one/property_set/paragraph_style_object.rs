@@ -1,7 +1,7 @@
 use crate::one::property::charset::Charset;
 use crate::one::property::color_ref::ColorRef;
 use crate::one::property::paragraph_alignment::ParagraphAlignment;
-use crate::one::property::{simple, PropertyType};
+use crate::one::property::{PropertyType, simple};
 use crate::one::property_set::PropertySetId;
 use crate::onestore::object::Object;
 use parser_utils::errors::Result;

@@ -1,5 +1,5 @@
-use parser_utils::errors::Result;
 use parser_utils::Reader;
+use parser_utils::errors::Result;
 
 /// An object stream header.
 ///
