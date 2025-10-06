@@ -6,18 +6,18 @@ fn get_output_dir() -> PathBuf {
     PathBuf::from("./test-output")
 }
 
-fn setup() {
-    let output_dir = get_output_dir();
+fn setup(test_id: &str) {
+    let output_dir = get_output_dir().join(test_id);
 
     if output_dir.exists() {
         fs::remove_dir_all(&output_dir).unwrap();
     }
-    fs::create_dir(&output_dir).unwrap();
+    fs::create_dir_all(&output_dir).unwrap();
 }
 
 #[test]
 fn convert_web_export() {
-    setup();
+    setup("web_export");
 
     let output_dir = get_output_dir();
     convert(
