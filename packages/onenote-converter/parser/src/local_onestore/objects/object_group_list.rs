@@ -1,5 +1,3 @@
-use std::rc::Rc;
-use std::fmt::Debug;
 use crate::{
     local_onestore::{
         file_node::{file_node::ObjectGroupListReferenceFND, FileNodeData},
@@ -9,6 +7,8 @@ use crate::{
     shared::exguid::ExGuid,
 };
 use parser_utils::{errors::Result, log_warn};
+use std::fmt::Debug;
+use std::rc::Rc;
 
 /// See [MS-ONESTORE 2.1.13](https://learn.microsoft.com/en-us/openspecs/office_file_formats/ms-onestore/607a84d4-5762-4a3e-9244-c91acddcf647)
 pub struct ObjectGroupList {

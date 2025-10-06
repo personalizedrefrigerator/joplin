@@ -71,4 +71,3 @@ pub fn convert(path: &str, output_dir: &str, base_path: &str) -> Result<()> {
 
     Ok(())
 }
-

@@ -140,7 +140,11 @@ pub(crate) fn parse_store(package: &OneStorePackaging) -> Result<FssHttpbOneStor
         object_spaces,
     };
     if !result.is_onestore() && !result.is_onetoc2() {
-        Err(parser_error!(MalformedOneNoteData, "File's GUID matches the expected type for neither onetoc2 nor onestore").into())
+        Err(parser_error!(
+            MalformedOneNoteData,
+            "File's GUID matches the expected type for neither onetoc2 nor onestore"
+        )
+        .into())
     } else {
         Ok(result)
     }
