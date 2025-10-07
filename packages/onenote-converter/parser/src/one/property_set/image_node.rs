@@ -5,7 +5,7 @@ use crate::one::property_set::note_tag_container::Data as NoteTagData;
 use crate::one::property_set::PropertySetId;
 use crate::onestore::object::Object;
 use crate::shared::exguid::ExGuid;
-use parser_utils::errors::{ErrorKind, Result};
+use parser_utils::errors::Result;
 
 /// An embedded image.
 ///
@@ -40,10 +40,9 @@ pub(crate) struct Data {
 
 pub(crate) fn parse(object: &Object) -> Result<Data> {
     if object.id() != PropertySetId::ImageNode.as_jcid() {
-        return Err(ErrorKind::MalformedOneNoteFileData(
-            format!("unexpected object type (in image_node): 0x{:X}", object.id().0).into(),
-        )
-        .into());
+        return Err(
+            unexpected_object_type_error!(object.id().0).into()
+        );
     }
 
     // TODO: add support for last_modified

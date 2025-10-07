@@ -30,14 +30,9 @@ pub(crate) struct Data {
 
 pub(crate) fn parse(object: &Object) -> Result<Data> {
     if object.id() != PropertySetId::TableNode.as_jcid() {
-        return Err(ErrorKind::MalformedOneNoteFileData(
-            format!(
-                "unexpected object type (in table_node): 0x{:X}",
-                object.id().0
-            )
-            .into(),
-        )
-        .into());
+        return Err(
+            unexpected_object_type_error!(object.id().0).into()
+        );
     }
 
     let last_modified = Time::parse(PropertyType::LastModifiedTime, object)?.ok_or_else(|| {

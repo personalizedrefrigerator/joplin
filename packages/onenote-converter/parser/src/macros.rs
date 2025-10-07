@@ -27,15 +27,26 @@ macro_rules! exguid {
 macro_rules! parser_error {
     ($kind:tt , $( $message:tt )* ) => {
         parser_utils::errors::ErrorKind::$kind(
-            format!($( $message )*).into()
+            format!("{} (in {}:{})", format!($( $message )*), file!(), line!()).into()
         )
     };
 }
 
 macro_rules! onestore_parse_error {
     ($( $message:tt )* ) => {
-        parser_utils::errors::ErrorKind::MalformedOneStoreData(
-            format!($( $message )*).into()
+        parser_error!(
+            MalformedOneStoreData,
+            $( $message )*
+        )
+    };
+}
+
+macro_rules! unexpected_object_type_error {
+    ( $object_type:expr ) => {
+        parser_error!(
+            MalformedOneNoteFileData,
+            "unexpected object type: 0x{:X}",
+            $object_type,
         )
     };
 }

@@ -2,7 +2,7 @@ use crate::one::property::{simple, PropertyType};
 use crate::one::property_set::PropertySetId;
 use crate::onestore::object::Object;
 use crate::shared::file_data_ref::FileBlob;
-use parser_utils::errors::{ErrorKind, Result};
+use parser_utils::errors::Result;
 
 /// A picture container.
 ///
@@ -19,10 +19,9 @@ pub(crate) fn parse(object: &Object) -> Result<Data> {
     if object.id() != PropertySetId::PictureContainer.as_jcid()
         && object.id() != PropertySetId::XpsContainer.as_jcid()
     {
-        return Err(ErrorKind::MalformedOneNoteFileData(
-            format!("unexpected object type: 0x{:X}", object.id().0).into(),
-        )
-        .into());
+        return Err(
+            unexpected_object_type_error!(object.id().0).into()
+        );
     }
 
     let data = object
