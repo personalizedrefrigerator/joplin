@@ -13,7 +13,7 @@ use crate::{
     },
     shared::exguid::ExGuid,
 };
-use parser_utils::errors::{Error, Result};
+use parser_utils::{errors::{Error, Result}, log_warn};
 use parser_utils::log;
 
 /// See [MS-ONESTORE 2.1.9](https://learn.microsoft.com/en-us/openspecs/office_file_formats/ms-onestore/90101e91-2f7f-4753-9332-31bed5b5c49d)
@@ -128,8 +128,14 @@ impl Revision {
                 global_id_tables.push(global_id_table);
             } else if let FileNodeData::RootObjectReference3FND(object_reference) = current {
                 iterator.next(); // Consume the reference
+
+                let root_role: RootRole = object_reference.root_role.try_into()?;
+                if root_objects.contains_key(&root_role) {
+                    log_warn!("An item with role {:?} is already present", root_role);
+                }
+
                 root_objects.insert(
-                    object_reference.root_role.try_into()?,
+                    root_role,
                     object_reference.oid_root,
                 );
             } else if let FileNodeData::RootObjectReference2FNDX(object_reference) = current {
