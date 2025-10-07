@@ -54,7 +54,6 @@ impl FileNodeListFragment {
             assert_eq!(remaining_0 - reader.remaining(), file_node_size);
         }
 
-        println!("Node count: {}/{}", file_nodes.len(), maximum_node_count);
         context.update_remaining_nodes_in_fragment(&header, maximum_node_count);
 
         let padding_length = size - 36 - file_node_size;
