@@ -2,25 +2,36 @@ use renderer::convert;
 use std::fs;
 use std::path::PathBuf;
 
-fn setup(test_id: &str) -> PathBuf {
-    let output_dir = PathBuf::from("./test-output").join(test_id);
+struct TestResources {
+    output_dir: PathBuf,
+    test_data_dir: PathBuf,
+}
+
+fn setup(test_id: &str) -> TestResources {
+    let output_dir = fs::canonicalize(
+        PathBuf::from("./test-output").join(test_id)
+    ).unwrap();
 
     if output_dir.exists() {
         fs::remove_dir_all(&output_dir).unwrap();
     }
     fs::create_dir_all(&output_dir).unwrap();
 
-    output_dir
+    let test_data_dir = fs::canonicalize(PathBuf::from("../test-data/")).unwrap();
+    assert!(test_data_dir.exists());
+
+    TestResources { output_dir, test_data_dir }
 }
 
 #[test]
 fn convert_web_export() {
-    let output_dir = setup("web_export");
+    let TestResources { output_dir, test_data_dir } = setup("web_export");
+    let test_data_dir = test_data_dir.join("single-page");
 
     convert(
-        "./assets/test-data/single-page/Untitled Section.one",
+        &test_data_dir.join("Untitled Section.one").to_string_lossy(),
         &output_dir.to_string_lossy(),
-        "./assets/test-data/single-page/",
+        &test_data_dir.to_string_lossy(),
     )
     .unwrap();
 

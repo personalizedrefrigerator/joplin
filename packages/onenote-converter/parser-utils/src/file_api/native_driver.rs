@@ -61,6 +61,13 @@ impl FileApiDriver for FileApiDriverImpl {
         }
     }
     fn join(&self, path_1: &str, path_2: &str) -> String {
+        // Remove the / prefix prior to joining: Match the behavior of the
+        // WASM/NodeJS file API.
+        let path_2 = if path_2.starts_with("/") {
+            path_2.strip_prefix("/").unwrap()
+        } else {
+            path_2
+        };
         Path::new(path_1).join(path_2).to_string_lossy().into()
     }
 }

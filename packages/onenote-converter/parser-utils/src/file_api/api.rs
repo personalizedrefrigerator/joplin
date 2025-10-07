@@ -9,10 +9,13 @@ pub trait FileApiDriver: Send + Sync {
     fn exists(&self, path: &str) -> ApiResult<bool>;
 
     // These functions correspond to the similarly-named
-    // path functions.
+    // NodeJS path functions and should behave like the NodeJS
+    // functions (rather than the corresponding Rust functions).
     fn get_file_name(&self, path: &str) -> Option<String>;
     fn get_file_extension(&self, path: &str) -> String;
     fn get_dir_name(&self, path: &str) -> String;
+    /// Unlike Rust's `Path::join`, if `path_2` starts with "/",
+    /// `path_2` is still appended to `path_1`.
     fn join(&self, path_1: &str, path_2: &str) -> String;
 
     fn remove_prefix<'a>(&self, full_path: &'a str, prefix: &str) -> &'a str {
