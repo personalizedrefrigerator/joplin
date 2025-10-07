@@ -11,3 +11,12 @@ The mobile app supports a "scan notebook" workflow that allows quickly creating 
 
 The photos taken in step 2 are added to a new note.
 
+## Search optimization
+
+Requirements:
+- A Joplin Cloud account or Joplin Server with the transcription service enabled.
+- A version of the desktop app connected to the same account via sync.
+- The "Handwriting transcription" setting enabled on desktop.
+- Joplin >= 3.5.
+
+When connected to Joplin Cloud/Server, the "Queue for transcription" option will be visible on the "Note preview" screen. Setting this to "enabled" will cause a connected copy of the desktop app to send the images to a server for higher-quality handwriting transcription. The transcribed handwriting is used to optimize searching for the note that contains the images.
