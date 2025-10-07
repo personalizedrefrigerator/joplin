@@ -8,9 +8,9 @@ use crate::local_onestore::{
 };
 use parser_utils::errors::Result;
 
-// TODO: See
-// - https://learn.microsoft.com/en-us/openspecs/office_file_formats/ms-onestore/28e21c1f-94b6-4f98-9d81-2e1278ebefc6
-// - https://learn.microsoft.com/en-us/openspecs/office_file_formats/ms-onestore/e3f4f871-f674-4198-9cb8-d67e1eeac2f3
+// See
+// - [MS-ONESTORE 2.1.14](https://learn.microsoft.com/en-us/openspecs/office_file_formats/ms-onestore/28e21c1f-94b6-4f98-9d81-2e1278ebefc6)
+// - [MS-ONESTORE 1.3.2](https://learn.microsoft.com/en-us/openspecs/office_file_formats/ms-onestore/e3f4f871-f674-4198-9cb8-d67e1eeac2f3)
 #[derive(Debug)]
 pub struct RootFileNodeList {
     pub root_object_space: Rc<ObjectSpace>,
