@@ -8,7 +8,7 @@ use crate::{
     },
     shared::exguid::ExGuid,
 };
-use parser_utils::errors::{ErrorKind, Result};
+use parser_utils::{errors::{ErrorKind, Result}, log_warn};
 
 #[derive(Debug)]
 pub struct RevisionManifestList {
@@ -57,7 +57,8 @@ impl RevisionManifestList {
                     let revision = revisions_map.get(&data.base.rid);
                     if let Some(_revision) = revision {
                         iterator.next();
-                        todo!("apply the new role and context to the revision");
+                        // TODO: Find a test .one file that uses this and implement:
+                        log_warn!("TO-DO: Apply the new role and context to the revision");
                     } else {
                         return Err(
                             ErrorKind::MalformedOneStoreData("RevisionRoleAndContextDeclarationFND points to a non-existent revision".into()).into()

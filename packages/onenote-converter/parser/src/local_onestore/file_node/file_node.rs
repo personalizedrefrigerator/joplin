@@ -761,7 +761,14 @@ impl AttachmentInfo {
             file_blob_by_id(&self.data_ref["<ifndf>".len()..])
         } else if self.data_ref.starts_with("<file>") {
             // An external file reference
-            todo!("Not implemented: Loading files from the onefiles folder");
+            // TODO: Find a test .one file that uses this and implement it.
+            Err(parser_error!(
+                ResolutionFailed,
+                "Not supported: Loading an attachment from a file: {} (ext: {})",
+                self.data_ref,
+                self.extension,
+            )
+            .into())
         } else if self.data_ref.starts_with("<invfdo>") {
             // "invalid"
             log_warn!("Attempted to load an invalid {} file", self.extension);
