@@ -157,9 +157,8 @@ mod test {
 
     #[test]
     fn should_parse_onenote_2016_file() {
-        // TODO: Update path:
         let test_data = fs_driver()
-            .read_file("/home/self/Documents/test/test.one")
+            .read_file("../test-data/onenote-2016/OneWithFileData.one")
             .unwrap();
         let mut reader = Reader::new(&test_data);
         let packaging = OneStoreFile::parse(&mut reader).unwrap();
