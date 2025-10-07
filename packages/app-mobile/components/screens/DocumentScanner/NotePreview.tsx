@@ -35,6 +35,7 @@ interface Props {
 	allFolders: FolderEntity[];
 	selectedFolderId: string;
 	isJoplinServer: boolean;
+	queueForTranscriptionDefault: boolean;
 
 	onCreateNote: null|OnCreateNote;
 }
@@ -86,7 +87,7 @@ const useStyles = (themeId: number) => {
 				display: 'flex',
 				flexDirection: 'column',
 				marginHorizontal: theme.margin,
-				marginTop: theme.margin,
+				marginTop: theme.margin * 2,
 				marginBottom: theme.margin * 2,
 				gap: 6,
 			},
@@ -110,13 +111,13 @@ const tagSearchResultsProps = {
 };
 
 const NotePreview: React.FC<Props> = ({
-	themeId, lastImage, imageCount, allTags, onCreateNote, allFolders, selectedFolderId: propsSelectedFolderId, isJoplinServer,
+	themeId, lastImage, imageCount, allTags, onCreateNote, allFolders, selectedFolderId: propsSelectedFolderId, isJoplinServer, queueForTranscriptionDefault,
 }) => {
 	const styles = useStyles(themeId);
 	const [title, setTitle] = useState('');
 	const [tags, setTags] = useState([]);
 	const [selectedFolderId, setSelectedFolderId] = useState(propsSelectedFolderId);
-	const [queueForTranscription, setQueueForTranscription] = useState(false);
+	const [queueForTranscription, setQueueForTranscription] = useState(queueForTranscriptionDefault);
 
 	const realFolders = useMemo(() => {
 		return Folder.getRealFolders(allFolders);
@@ -140,6 +141,8 @@ const NotePreview: React.FC<Props> = ({
 
 	const onNewNote = useCallback(() => {
 		if (!onCreateNote) return;
+
+		Setting.setValue('scanner.requestTranscription', queueForTranscription);
 
 		onCreateNote({
 			tags,
@@ -216,4 +219,5 @@ export default connect((state: AppState) => ({
 	selectedFolderId: state.selectedFolderId,
 	isJoplinServer: SyncTargetRegistry.isJoplinServerOrCloud(state.settings['sync.target']),
 	themeId: state.settings.theme,
+	queueForTranscriptionDefault: state.settings['scanner.requestTranscription'],
 }))(NotePreview);
