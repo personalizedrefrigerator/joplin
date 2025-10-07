@@ -19,7 +19,7 @@ impl Data {
 pub(crate) fn parse(object: &Object) -> Result<Data> {
     if object.id() != PropertySetId::EmbeddedFileContainer.as_jcid() {
         return Err(ErrorKind::MalformedOneNoteFileData(
-            format!("unexpected object type: 0x{:X}", object.id().0).into(),
+            format!("unexpected object type (in embedded_file_container): 0x{:X}", object.id().0).into(),
         )
         .into());
     }

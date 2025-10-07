@@ -261,7 +261,7 @@ impl DataElement {
                 }
                 _ => {
                     return Err(ErrorKind::MalformedFssHttpBData(
-                        format!("unexpected object type: {:x}", object_header.object_type).into(),
+                        format!("unexpected object type (in object_group): {:x}", object_header.object_type).into(),
                     )
                     .into())
                 }
@@ -331,7 +331,7 @@ impl DataElement {
                 }
                 _ => {
                     return Err(ErrorKind::MalformedFssHttpBData(
-                        format!("unexpected object type: {:x}", object_header.object_type).into(),
+                        format!("unexpected object type (in object_group): {:x}", object_header.object_type).into(),
                     )
                     .into())
                 }
