@@ -26,12 +26,9 @@ impl FileNodeListFragment {
 
         let remaining_0 = reader.remaining();
 
-        println!("Fragment: Size: {}", size);
-
         // Sometimes, the node count is specified externally
         let mut maximum_node_count = match context.get_file_node_count(&header) {
             Some(count) => {
-                println!("Node count set to {}", count);
                 count
             }
             None => {
