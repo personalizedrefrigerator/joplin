@@ -78,7 +78,7 @@ const DocumentScanner: React.FC<Props> = ({ themeId, dispatch }) => {
 	const onCreateNote = useCallback(async (event: CreateNoteEvent) => {
 		setSnackbarMessage(_('Creating note "%s"...', event.title));
 		setCreatingNote(true);
-		logger.info('Creating note', event.queueForTranscription ? '(queue for transcription)' : '');
+		logger.info('Creating note', event.queueForTranscription ? '(with transcription)' : '');
 
 		try {
 			const resources = [];

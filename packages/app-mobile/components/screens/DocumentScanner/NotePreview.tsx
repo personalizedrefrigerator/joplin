@@ -159,7 +159,7 @@ const NotePreview: React.FC<Props> = ({
 
 	const transcriptionCheckbox = <View style={styles.transcriptionCheckboxContainer}>
 		<View style={styles.transcriptionCheckbox}>
-			<Text nativeID='transcriptionLabel' style={styles.transcriptionLabel}>{_('Queue for transcription:')}</Text>
+			<Text nativeID='transcriptionLabel' style={styles.transcriptionLabel}>{_('Recognise text:')}</Text>
 			<Switch accessibilityLabelledBy='transcriptionLabel' value={queueForTranscription} onValueChange={setQueueForTranscription} />
 		</View>
 		<View>
