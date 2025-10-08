@@ -3,7 +3,7 @@ use color_eyre::eyre::{eyre, Result};
 use std::panic;
 use wasm_bindgen::{prelude::wasm_bindgen, JsError};
 
-use crate::utils::{fs_driver, get_current_page, utils::log};
+use crate::utils::{fs_driver, get_current_page, set_current_page, utils::log};
 
 mod notebook;
 mod page;
@@ -19,6 +19,7 @@ extern crate web_sys;
 #[allow(non_snake_case)]
 pub fn oneNoteConverter(input: &str, output: &str, base_path: &str) -> Result<(), JsError> {
     panic::set_hook(Box::new(console_error_panic_hook::hook));
+    set_current_page("[None]".into());
 
     if let Err(e) = _main(input, output, base_path) {
         let message = format!("Error: {:?} (near page {})", e, get_current_page());
