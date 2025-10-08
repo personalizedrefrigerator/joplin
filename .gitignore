@@ -1090,6 +1090,7 @@ packages/editor/ProseMirror/plugins/linkTooltipPlugin.js
 packages/editor/ProseMirror/plugins/listPlugin.js
 packages/editor/ProseMirror/plugins/originalMarkupPlugin.js
 packages/editor/ProseMirror/plugins/searchPlugin.js
+packages/editor/ProseMirror/plugins/tablePlugin.js
 packages/editor/ProseMirror/plugins/utils/createExternalEditorPlugin.js
 packages/editor/ProseMirror/plugins/utils/createFloatingButtonPlugin.js
 packages/editor/ProseMirror/schema.js
@@ -1510,6 +1511,7 @@ packages/lib/services/plugins/utils/createViewHandle.js
 packages/lib/services/plugins/utils/executeSandboxCall.js
 packages/lib/services/plugins/utils/getActivePluginEditorView.js
 packages/lib/services/plugins/utils/getActivePluginEditorViews.js
+packages/lib/services/plugins/utils/getPluginHelpUrl.js
 packages/lib/services/plugins/utils/getPluginIssueReportUrl.test.js
 packages/lib/services/plugins/utils/getPluginIssueReportUrl.js
 packages/lib/services/plugins/utils/getPluginNamespacedSettingKey.js
@@ -1829,6 +1831,8 @@ packages/tools/updateMarkdownDoc.js
 packages/tools/utils/discourse.test.js
 packages/tools/utils/discourse.js
 packages/tools/utils/loadSponsors.js
+packages/tools/utils/parsePluralLocalizationForm.js
+packages/tools/utils/parsePlurallLocalizationForm.test.js
 packages/tools/utils/translation.js
 packages/tools/validateFilenames.js
 packages/tools/website/build.js

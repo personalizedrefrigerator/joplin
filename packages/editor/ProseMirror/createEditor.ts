@@ -16,7 +16,6 @@ import joplinEditablePlugin from './plugins/joplinEditablePlugin/joplinEditableP
 import keymapExtension from './plugins/keymapPlugin';
 import inputRulesExtension from './plugins/inputRulesPlugin';
 import originalMarkupPlugin from './plugins/originalMarkupPlugin';
-import { tableEditing } from 'prosemirror-tables';
 import preprocessEditorInput from './utils/preprocessEditorInput';
 import listPlugin from './plugins/listPlugin';
 import searchExtension from './plugins/searchPlugin';
@@ -28,6 +27,7 @@ import getFileFromPasteEvent from '../utils/getFileFromPasteEvent';
 import { RenderResult } from '../../renderer/types';
 import postprocessEditorOutput from './utils/postprocessEditorOutput';
 import detailsPlugin from './plugins/detailsPlugin';
+import tablePlugin from './plugins/tablePlugin';
 
 interface ProseMirrorControl extends EditorControl {
 	getSettings(): EditorSettings;
@@ -89,7 +89,7 @@ const createEditor = async (
 				markupTracker,
 				listPlugin,
 				linkTooltipPlugin,
-				tableEditing({ allowTableNodeSelection: true }),
+				tablePlugin,
 				joplinEditorApiPlugin,
 				imagePlugin,
 			].flat(),

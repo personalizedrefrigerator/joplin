@@ -104,8 +104,8 @@ const mockTyping = (window: EditorWindow, text: string) => {
 	}
 };
 
-const mockSelectionMovement = (window: EditorWindow, position: number) => {
-	getEditorControl(window).select(position, position);
+const mockSelectionMovement = (window: EditorWindow, from: number, to?: number) => {
+	getEditorControl(window).select(from, to ?? from);
 };
 
 const findElement = async function<ElementType extends Element = Element>(selector: string) {
@@ -414,14 +414,18 @@ describe('RichTextEditor', () => {
 		});
 	});
 
-	it('should be possible show an editor for math blocks', async () => {
+	it('should be possible to show an editor for math blocks', async () => {
 		let body = 'Test:\n\n$$3^2 + 4^2 = 5^2$$';
 		render(<WrappedEditor
 			noteBody={body}
 			onBodyChange={newBody => { body = newBody; }}
 		/>);
 
-		const editButton = await findElement<HTMLButtonElement>('button.edit');
+		const window = await getEditorWindow();
+		// Select the math block to show the "edit" button.
+		mockSelectionMovement(window, '<Test:>'.length, '<Test:>$'.length);
+
+		const editButton = await findElement<HTMLButtonElement>('button.edit-button');
 		editButton.click();
 
 		const editor = await findElement('dialog .cm-editor');
