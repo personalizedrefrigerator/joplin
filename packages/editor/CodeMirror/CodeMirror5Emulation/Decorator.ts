@@ -187,6 +187,14 @@ export default class Decorator {
 					// Line decorations are specified to have a size-zero range.
 					const to = isLineDecoration ? from : value.to;
 
+					// Prevent duplicate decorations (remove equivalent decorations)
+					decorations = decorations.update({
+						filter: (otherFrom, otherTo, value) => {
+							return otherFrom === from && otherTo === to && value.eq(decoration);
+						},
+						filterFrom: from,
+						filterTo: to,
+					});
 					decorations = decorations.update({
 						add: [decoration.range(from, to)],
 					});
