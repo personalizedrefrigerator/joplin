@@ -1,5 +1,7 @@
 /* global mermaid */
 
+(() => {
+
 function mermaidReady() {
 	// The Mermaid initialization code renders the Mermaid code within any element with class "mermaid" or
 	// ID "mermaid". However in some cases some elements might have this ID but not be Mermaid code.
@@ -87,3 +89,5 @@ document.addEventListener('DOMContentLoaded', () => {
 		clearInterval(initIID_);
 	}
 });
+
+})()
