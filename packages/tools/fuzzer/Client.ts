@@ -504,6 +504,13 @@ class Client implements ActionableClient {
 		await this.assertNoteMatchesState_(note);
 	}
 
+	public async deleteNote(id: ItemId) {
+		logger.info('Delete note', id, 'in', this.label);
+		await this.tracker_.deleteNote(id);
+
+		await this.execCliCommand_('rmnote', '--permanent', '--force', id);
+	}
+
 	public async deleteFolder(id: string) {
 		logger.info('Delete folder', id, 'in', this.label);
 		await this.tracker_.deleteFolder(id);
@@ -567,6 +574,39 @@ class Client implements ActionableClient {
 		await other.sync();
 	}
 
+	public async deleteAssociatedShare(id: string) {
+		await this.tracker_.deleteAssociatedShare(id);
+		logger.info('Unshare', id, '(from', this.label, ')');
+		await this.execCliCommand_('share', 'delete', '-f', id);
+	}
+
+	public async publishNote(id: ItemId) {
+		await this.tracker_.publishNote(id);
+
+		await this.sync();
+
+		logger.info('Publish note', id, 'in', this.label);
+		const publishOutput = await this.execCliCommand_('publish', '-f', id);
+		const publishUrl = publishOutput.stdout.match(/http[s]?:\/\/\S+/);
+
+		assert.notEqual(publishUrl, null, 'should log the publication URL');
+
+		logger.info('Testing publication URL: ', publishUrl[0]);
+		const fetchResult = await fetch(publishUrl[0]);
+
+		if (!fetchResult.ok) {
+			logger.warn('Fetch failed', fetchResult.statusText);
+		}
+		assert.equal(fetchResult.status, 200, `should be able to fetch the published note (status: ${fetchResult.statusText}).`);
+	}
+
+	public async unpublishNote(id: ItemId) {
+		await this.tracker_.unpublishNote(id);
+
+		logger.info('Unpublish note', id, 'in', this.label);
+		await this.execCliCommand_('unpublish', id);
+	}
+
 	public async moveItem(itemId: ItemId, newParentId: ItemId) {
 		logger.info('Move', itemId, 'to', newParentId);
 		await this.tracker_.moveItem(itemId, newParentId);
@@ -576,7 +616,7 @@ class Client implements ActionableClient {
 
 	public async listNotes() {
 		const params = {
-			fields: 'id,parent_id,body,title,is_conflict,conflict_original_id,share_id',
+			fields: 'id,parent_id,body,title,is_conflict,conflict_original_id,share_id,is_shared',
 			include_deleted: '1',
 			include_conflicts: '1',
 		};
@@ -592,6 +632,7 @@ class Client implements ActionableClient {
 				title: getStringProperty(item, 'title'),
 				body: getStringProperty(item, 'body'),
 				isShared: getStringProperty(item, 'share_id') !== '',
+				published: getNumberProperty(item, 'is_shared') === 1,
 			}),
 		);
 	}

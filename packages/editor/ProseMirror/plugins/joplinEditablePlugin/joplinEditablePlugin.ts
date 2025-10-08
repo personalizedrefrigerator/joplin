@@ -1,17 +1,83 @@
 import { Plugin } from 'prosemirror-state';
 import { Node, NodeSpec, TagParseRule } from 'prosemirror-model';
-import { EditorView, NodeView } from 'prosemirror-view';
+import { EditorView } from 'prosemirror-view';
 import sanitizeHtml from '../../utils/sanitizeHtml';
 import createEditorDialog from './createEditorDialog';
 import { getEditorApi } from '../joplinEditorApiPlugin';
 import { msleep } from '@joplin/utils/time';
 import postProcessRenderedHtml from './postProcessRenderedHtml';
-import createButton from '../../utils/dom/createButton';
 import makeLinksClickableInElement from '../../utils/makeLinksClickableInElement';
+import SelectableNodeView from '../../utils/SelectableNodeView';
+import createExternalEditorPlugin, { OnHide } from '../utils/createExternalEditorPlugin';
+import createFloatingButtonPlugin, { ToolbarPosition } from '../utils/createFloatingButtonPlugin';
 
 // See the fold example for more information about
 // writing similar ProseMirror plugins:
 // https://prosemirror.net/examples/fold/
+
+
+const createEditorDialogForNode = (nodePosition: number, view: EditorView, onHide: OnHide) => {
+	let saveCounter = 0;
+
+	const getNode = () => (
+		view.state.doc.nodeAt(nodePosition)
+	);
+
+	const { localize: _ } = getEditorApi(view.state);
+	const { dismiss } = createEditorDialog({
+		doneLabel: _('Done'),
+		editorLabel: _('Code:'),
+		editorApi: getEditorApi(view.state),
+		block: {
+			content: getNode().attrs.source,
+			start: getNode().attrs.openCharacters,
+			end: getNode().attrs.closeCharacters,
+		},
+		onSave: async (block) => {
+			view.dispatch(
+				view.state.tr.setNodeAttribute(
+					nodePosition, 'source', block.content,
+				).setNodeAttribute(
+					nodePosition, 'openCharacters', block.start,
+				).setNodeAttribute(
+					nodePosition, 'closeCharacters', block.end,
+				),
+			);
+
+			saveCounter ++;
+			const initialSaveCounter = saveCounter;
+			const cancelled = () => saveCounter !== initialSaveCounter;
+
+			// Debounce rendering
+			await msleep(400);
+			if (cancelled()) return;
+
+			const rendered = await getEditorApi(view.state).renderer.renderMarkupToHtml(
+				`${block.start}${block.content}${block.end}`,
+				{ forceMarkdown: true, isFullPageRender: false },
+			);
+			if (cancelled()) return;
+
+			const html = postProcessRenderedHtml(rendered.html, getNode().isInline);
+			view.dispatch(
+				view.state.tr.setNodeAttribute(
+					nodePosition, 'contentHtml', html,
+				),
+			);
+		},
+		onDismiss: () => {
+			onHide();
+		},
+	});
+
+	return {
+		onPositionChange: (newPosition: number) => {
+			nodePosition = newPosition;
+		},
+		dismiss,
+	};
+};
+
 
 interface JoplinEditableAttributes {
 	contentHtml: string;
@@ -114,17 +180,14 @@ export const nodeSpecs = {
 	]),
 };
 
-type GetPosition = ()=> number;
-
-class EditableSourceBlockView implements NodeView {
-	private editDialogVisible_ = false;
-	public readonly dom: HTMLElement;
-	public constructor(private node: Node, inline: boolean, private view: EditorView, private getPosition: GetPosition) {
+class EditableSourceBlockView extends SelectableNodeView {
+	public constructor(private node: Node, inline: boolean, view: EditorView) {
 		if ((node.attrs.contentHtml ?? undefined) === undefined) {
 			throw new Error(`Unable to create a SourceBlockView for a node lacking contentHtml. Node: ${node}.`);
 		}
 
-		this.dom = document.createElement(inline ? 'span' : 'div');
+		super(inline);
+
 		this.dom.classList.add('joplin-editable');
 
 		// The link tooltip used for other in-editor links won't be shown for links within a
@@ -134,94 +197,14 @@ class EditableSourceBlockView implements NodeView {
 		this.updateContent_();
 	}
 
-	private showEditDialog_() {
-		if (this.editDialogVisible_) {
-			return;
-		}
-
-		const { localize: _ } = getEditorApi(this.view.state);
-
-		let saveCounter = 0;
-		createEditorDialog({
-			doneLabel: _('Done'),
-			editorLabel: _('Code:'),
-			editorApi: getEditorApi(this.view.state),
-			block: {
-				content: this.node.attrs.source,
-				start: this.node.attrs.openCharacters,
-				end: this.node.attrs.closeCharacters,
-			},
-			onSave: async (block) => {
-				this.view.dispatch(
-					this.view.state.tr.setNodeAttribute(
-						this.getPosition(), 'source', block.content,
-					).setNodeAttribute(
-						this.getPosition(), 'openCharacters', block.start,
-					).setNodeAttribute(
-						this.getPosition(), 'closeCharacters', block.end,
-					),
-				);
-
-				saveCounter ++;
-				const initialSaveCounter = saveCounter;
-				const cancelled = () => saveCounter !== initialSaveCounter;
-
-				// Debounce rendering
-				await msleep(400);
-				if (cancelled()) return;
-
-				const rendered = await getEditorApi(this.view.state).renderer.renderMarkupToHtml(
-					`${block.start}${block.content}${block.end}`,
-					{ forceMarkdown: true, isFullPageRender: false },
-				);
-				if (cancelled()) return;
-
-				const html = postProcessRenderedHtml(rendered.html, this.node.isInline);
-				this.view.dispatch(
-					this.view.state.tr.setNodeAttribute(
-						this.getPosition(), 'contentHtml', html,
-					),
-				);
-			},
-			onDismiss: () => {
-				this.editDialogVisible_ = false;
-			},
-		});
-	}
-
 	private updateContent_() {
 		const setDomContentSafe = (html: string) => {
 			this.dom.innerHTML = sanitizeHtml(html);
 		};
 
 		const attrs = this.node.attrs as JoplinEditableAttributes;
-		const addEditButton = () => {
-			const { localize: _ } = getEditorApi(this.view.state);
-
-			const editButton = createButton(_('Edit'), () => this.showEditDialog_());
-			editButton.classList.add('edit');
-
-			if (!attrs.readOnly) {
-				this.dom.appendChild(editButton);
-			}
-		};
-
 		setDomContentSafe(attrs.contentHtml);
 		postProcessRenderedHtml(this.dom, this.node.isInline);
-		addEditButton();
-	}
-
-	public selectNode() {
-		this.dom.classList.add('-selected');
-	}
-
-	public deselectNode() {
-		this.dom.classList.remove('-selected');
-	}
-
-	public stopEvent(event: Event) {
-		// Allow using the keyboard to activate the "edit" button:
-		return event.target === this.dom.querySelector('button.edit');
 	}
 
 	public update(node: Node) {
@@ -236,13 +219,32 @@ class EditableSourceBlockView implements NodeView {
 	}
 }
 
-const joplinEditablePlugin = new Plugin({
-	props: {
-		nodeViews: {
-			joplinEditableInline: (node, view, getPos) => new EditableSourceBlockView(node, true, view, getPos),
-			joplinEditableBlock: (node, view, getPos) => new EditableSourceBlockView(node, false, view, getPos),
-		},
+const { plugin: externalEditorPlugin, hideEditor, editAt } = createExternalEditorPlugin({
+	canEdit: (node: Node) => {
+		return (node.type.name === 'joplinEditableInline' || node.type.name === 'joplinEditableBlock') && !node.attrs.readOnly;
 	},
+	showEditor: createEditorDialogForNode,
 });
 
-export default joplinEditablePlugin;
+export { hideEditor as hideSourceBlockEditor, editAt as editSourceBlockAt };
+
+export default [
+	externalEditorPlugin,
+	new Plugin({
+		props: {
+			nodeViews: {
+				joplinEditableInline: (node, view) => new EditableSourceBlockView(node, true, view),
+				joplinEditableBlock: (node, view) => new EditableSourceBlockView(node, false, view),
+			},
+		},
+	}),
+	...['joplinEditableInline', 'joplinEditableBlock'].map(nodeName => (
+		createFloatingButtonPlugin(nodeName, [
+			{
+				label: _ => _('Edit'),
+				className: 'edit-button',
+				command: (_node, offset) => editAt(offset),
+			},
+		], ToolbarPosition.TopRightInside)
+	)),
+];

@@ -12,7 +12,7 @@ import focusView from '../utils/focusView';
 import AsyncActionQueue from '@joplin/lib/AsyncActionQueue';
 import NestableFlatList, { NestableFlatListControl } from './NestableFlatList';
 import useKeyboardState from '../utils/hooks/useKeyboardState';
-const naturalCompare = require('string-natural-compare');
+import { getCollator, getCollatorLocale } from '@joplin/lib/models/utils/getCollator';
 
 
 export interface Option {
@@ -64,17 +64,20 @@ interface UseSearchResultsOptions {
 const useSearchResults = ({
 	search, setSearch, options, onAddItem, canAddItem,
 }: UseSearchResultsOptions) => {
+	const collatorLocale = getCollatorLocale();
 	const results = useMemo(() => {
+		const collator = getCollator(collatorLocale);
+		const lowerSearch = search?.toLowerCase();
 		return options
-			.filter(option => option.title.startsWith(search))
+			.filter(option => option.title.toLowerCase().includes(lowerSearch))
 			.sort((a, b) => {
 				if (a.title === b.title) return 0;
 				// Full matches should go first
-				if (a.title === search) return -1;
-				if (b.title === search) return 1;
-				return naturalCompare(a.title, b.title);
+				if (a.title.toLowerCase() === lowerSearch) return -1;
+				if (b.title.toLowerCase() === lowerSearch) return 1;
+				return collator.compare(a.title, b.title);
 			});
-	}, [search, options]);
+	}, [search, options, collatorLocale]);
 
 	const canAdd = (
 		!!onAddItem
@@ -254,6 +257,8 @@ const SearchResult: React.FC<SearchResultProps> = ({
 		<View style={[styles.optionContent, selected && styles.optionContentSelected]}>
 			{icon}
 			<Text
+				ellipsizeMode='tail'
+				numberOfLines={1}
 				style={styles.optionLabel}
 			>{text}</Text>
 		</View>
@@ -458,10 +463,11 @@ const useInputEventHandlers = ({
 		} else if (key === 'ArrowUp') {
 			selectedIndexControl.onPreviousResult();
 			event.preventDefault();
-		} else if (key === 'Enter') {
+		} else if (key === 'Enter' && Platform.OS === 'web') {
 			// This case is necessary on web to prevent the
 			// search input from becoming defocused after
-			// pressing "enter".
+			// pressing "enter". Enter key behavior is handled
+			// elsewhere for other platforms.
 			event.preventDefault();
 			onSubmit();
 			setSearch('');
@@ -584,6 +590,7 @@ const ComboBox: React.FC<Props> = ({
 			onChangeText={setSearch}
 			onKeyPress={onKeyPress}
 			onSubmitEditing={onSubmit}
+			submitBehavior='submit'
 			placeholder={placeholder}
 			aria-activedescendant={showSearchResults ? activeId : undefined}
 			aria-controls={`menuBox-${baseId}`}
