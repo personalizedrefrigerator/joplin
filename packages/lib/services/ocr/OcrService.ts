@@ -72,6 +72,7 @@ export default class OcrService {
 		if (resource.encryption_applied) throw new Error(`Cannot OCR encrypted resource: ${resource.id}`);
 
 		if (getOcrDriverId(resource) === ResourceOcrDriverId.HandwrittenText && !Setting.value('ocr.handwrittenTextDriverEnabled')) {
+			logger.debug('Skipping OCR of', resource.id, 'with the HandwrittenText driver. The HTR driver has been disabled by the user.');
 			return null;
 		}
 
