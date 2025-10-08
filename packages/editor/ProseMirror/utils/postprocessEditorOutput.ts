@@ -34,6 +34,8 @@ const restoreOriginalLinks = (container: HTMLElement) => {
 const removeTableItemExtraPadding = (container: HTMLElement) => {
 	const cells = container.querySelectorAll<HTMLTableCellElement>('th, td');
 	for (const cell of cells) {
+		// Table cells can exist in Markdown without the need for invisible
+		// content.
 		// Remove single nonbreaking space padding:
 		if (cell.textContent === '\u00A0') {
 			cell.textContent = '';
