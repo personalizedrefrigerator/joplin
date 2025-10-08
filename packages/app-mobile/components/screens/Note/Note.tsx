@@ -74,6 +74,8 @@ import useVisiblePluginEditorViewIds from '@joplin/lib/hooks/plugins/useVisibleP
 import { SelectionRange } from '../../../contentScripts/markdownEditorBundle/types';
 import { EditorType } from '../../NoteEditor/types';
 import { IconButton } from 'react-native-paper';
+import { writeTextToCacheFile } from '../../../utils/ShareUtils';
+import shareFile from '../../../utils/shareFile';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 const emptyArray: any[] = [];
@@ -543,8 +545,17 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 		if (Platform.OS === 'web') return;
 
 		const response = await checkPermissions(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION, {
-			message: _('In order to associate a geo-location with the note, the app needs your permission to access your location.\n\nYou may turn off this option at any time in the Configuration screen.'),
-			title: _('Permission needed'),
+			onRequestConfirmation: async () => {
+				const yesIndex = 0;
+				const result = await shim.showMessageBox(
+					_('Joplin supports saving the location at which notes are saved or created. Do you want to enable it? This can be changed at any time in settings.'),
+					{
+						buttons: [_('Yes'), _('No')],
+						title: _('Save geolocation?'),
+					},
+				);
+				return result === yesIndex;
+			},
 		});
 
 		// If the user simply pressed "Deny", we don't automatically switch it off because they might accept
@@ -1057,10 +1068,33 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 	}
 
 	private async share_onPress() {
-		await Share.share({
-			message: `${this.state.note.title}\n\n${this.state.note.body}`,
-			title: this.state.note.title,
-		});
+		const shareText = `${this.state.note.title}\n\n${this.state.note.body}`;
+		const filename = this.state.note.id ?? uuid.create();
+
+		if (shareText.length > 100000) {
+			let fileToShare;
+			try {
+				// Using a .txt file extension causes a "No valid provider found from URL" error
+				// and blank share sheet on iOS for larger log files (around 200 KiB).
+				fileToShare = await writeTextToCacheFile(shareText, `${filename}.md`);
+				await shareFile(fileToShare, 'text/plain');
+			} catch (e) {
+				logger.error('Unable to share note data:', e);
+
+				// Display a message to the user (e.g. in the case where the user is out of disk space).
+				void shim.showErrorDialog(_('Unable to share note data. Reason: %s', e.toString()));
+			} finally {
+				if (fileToShare) {
+					await shim.fsDriver().remove(fileToShare);
+				}
+			}
+		} else {
+			// A txt extension is automatically appended to the title when shared to a file via this route
+			await Share.share({
+				message: shareText,
+				title: filename,
+			});
+		}
 	}
 
 	private properties_onPress() {
