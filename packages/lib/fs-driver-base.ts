@@ -21,14 +21,23 @@ export interface RemoveOptions {
 	recursive?: boolean;
 }
 
+export interface ZipCreateOptions {
+	inputDirectory: string;
+	output: string;
+}
+
 export interface ZipExtractOptions {
 	source: string;
 	extractTo: string;
 }
 
 export interface ZipEntry {
-	entryName: string;
-	name: string;
+	path: string;
+}
+
+export interface GzipOptions {
+	sourceFile: string;
+	destination: string;
 }
 
 
@@ -272,4 +281,7 @@ export default class FsDriverBase {
 		throw new Error('Not implemented: zipExtract');
 	}
 
+	public async zipCreate(_options: ZipCreateOptions): Promise<void> {
+		throw new Error('Not implemented: zipCreate');
+	}
 }

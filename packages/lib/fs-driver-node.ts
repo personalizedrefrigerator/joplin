@@ -1,8 +1,10 @@
-import AdmZip = require('adm-zip');
-import FsDriverBase, { Stat, ZipEntry, ZipExtractOptions } from './fs-driver-base';
+import { ZipReader, ZipWriter } from '@zip.js/zip.js';
+import FsDriverBase, { Stat, ZipCreateOptions, ZipEntry, ZipExtractOptions } from './fs-driver-base';
 import time from './time';
 const md5File = require('md5-file');
-const fs = require('fs-extra');
+import fs = require('fs-extra');
+import { Readable, Writable } from 'stream';
+import { relative } from 'path';
 
 export default class FsDriverNode extends FsDriverBase {
 
@@ -22,7 +24,8 @@ export default class FsDriverNode extends FsDriverBase {
 
 	public async appendFile(path: string, string: string, encoding = 'base64') {
 		try {
-			return await fs.appendFile(path, string, { encoding: encoding });
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Partial refactor of old code before rule was applied
+			return await fs.appendFile(path, string, { encoding: encoding as any });
 		} catch (error) {
 			throw this.fsErrorToJsError_(error, path);
 		}
@@ -33,7 +36,8 @@ export default class FsDriverNode extends FsDriverBase {
 			if (encoding === 'buffer') {
 				return await fs.writeFile(path, string);
 			} else {
-				return await fs.writeFile(path, string, { encoding: encoding });
+				// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Partial refactor of old code before rule was applied
+				return await fs.writeFile(path, string, { encoding: encoding as any });
 			}
 		} catch (error) {
 			throw this.fsErrorToJsError_(error, path);
@@ -153,7 +157,8 @@ export default class FsDriverNode extends FsDriverBase {
 	public async readFile(path: string, encoding = 'utf8') {
 		try {
 			if (encoding === 'Buffer') return await fs.readFile(path); // Returns the raw buffer
-			return await fs.readFile(path, encoding);
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Partial refactor of old code from before rule was applied
+			return await fs.readFile(path, encoding as any);
 		} catch (error) {
 			throw this.fsErrorToJsError_(error, path);
 		}
@@ -212,8 +217,69 @@ export default class FsDriverNode extends FsDriverBase {
 	}
 
 	public async zipExtract(options: ZipExtractOptions): Promise<ZipEntry[]> {
-		const zip = new AdmZip(options.source);
-		zip.extractAllTo(options.extractTo, false);
-		return zip.getEntries();
+		let readStream, reader;
+		const result = [];
+		try {
+			readStream = fs.createReadStream(options.source);
+			// Cast to ReadableStream -- TypeScript identifies the global ReadableStream and
+			// the NodeJS streams/web ReadableStream as different types:
+			reader = new ZipReader(Readable.toWeb(readStream) as ReadableStream);
+
+			for await (const entry of reader.getEntriesGenerator()) {
+				const outputPath = this.resolveRelativePathWithinDir(options.extractTo, entry.filename);
+				if (await fs.exists(outputPath)) {
+					throw new Error(`Refusing to overwrite existing file: ${JSON.stringify(outputPath)}`);
+				}
+
+				// The "=== true" is necessary for type narrowing
+				if (entry.directory === true) {
+					await fs.mkdir(outputPath);
+				} else {
+					const writeStream = fs.createWriteStream(outputPath);
+					try {
+						await entry.getData(Writable.toWeb(writeStream));
+					} finally {
+						writeStream.close();
+					}
+				}
+
+				result.push({
+					path: entry.filename,
+				});
+			}
+		} finally {
+			await reader?.close();
+			readStream?.close();
+		}
+
+		return result;
+	}
+
+	public async zipCreate(options: ZipCreateOptions): Promise<void> {
+		let writer, writeStream;
+		try {
+			writeStream = fs.createWriteStream(options.output);
+			writer = new ZipWriter(Writable.toWeb(writeStream));
+
+			const basePath = this.resolve(options.inputDirectory);
+			for (const stat of await this.readDirStats(basePath, { recursive: true })) {
+				const fullPath = this.resolveRelativePathWithinDir(basePath, stat.path);
+				const relativePath = relative(basePath, fullPath);
+
+				if (stat.isDirectory()) {
+					await writer.add(relativePath, undefined, { directory: true });
+				} else {
+					const readStream = fs.createReadStream(fullPath);
+					try {
+						await writer.add(relativePath, Readable.toWeb(readStream) as ReadableStream);
+					} finally {
+						readStream.close();
+					}
+				}
+			}
+		} finally {
+			await writer?.close();
+			writeStream?.close();
+		}
 	}
 }

@@ -9507,7 +9507,6 @@ __metadata:
     "@joplin/turndown-plugin-gfm": "npm:^1.0.63"
     "@joplin/utils": "npm:~3.5"
     "@testing-library/react-hooks": "npm:8.0.1"
-    "@types/adm-zip": "npm:0.5.7"
     "@types/fs-extra": "npm:11.0.4"
     "@types/jest": "npm:29.5.14"
     "@types/jest-expect-message": "npm:1.1.0"
@@ -9520,7 +9519,7 @@ __metadata:
     "@types/node-rsa": "npm:1.1.4"
     "@types/react": "npm:18.3.23"
     "@types/uuid": "npm:10.0.0"
-    adm-zip: "npm:0.5.16"
+    "@zip.js/zip.js": "npm:2.8.7"
     async-mutex: "npm:0.5.0"
     base-64: "npm:1.0.0"
     base64-stream: "npm:1.0.0"
@@ -13514,15 +13513,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/adm-zip@npm:0.5.7":
-  version: 0.5.7
-  resolution: "@types/adm-zip@npm:0.5.7"
-  dependencies:
-    "@types/node": "npm:*"
-  checksum: 10/24e9842bd6838879c60fe833af267489d8bc6b582d5feac6179543bf7a0b01a749931a9c6f21a20b8454e83925937a63bae0190493fa269d33a35c6daf4df209
-  languageName: node
-  linkType: hard
-
 "@types/asn1@npm:>=0.2.4":
   version: 0.2.4
   resolution: "@types/asn1@npm:0.2.4"
@@ -16054,6 +16044,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@zip.js/zip.js@npm:2.8.7":
+  version: 2.8.7
+  resolution: "@zip.js/zip.js@npm:2.8.7"
+  checksum: 10/6adb3b11ffb452d0e7f26df2518fc0416ced9d1a3bb2a02736ff8de25e1faaae80b1e9483cc77f7f103e63142f4c608df0723c93de5ef3d40cf751d5d1a1900f
+  languageName: node
+  linkType: hard
+
 "@zkochan/cmd-shim@npm:^3.1.0":
   version: 3.1.0
   resolution: "@zkochan/cmd-shim@npm:3.1.0"
@@ -16296,13 +16293,6 @@ __metadata:
   version: 1.2.2
   resolution: "address@npm:1.2.2"
   checksum: 10/57d80a0c6ccadc8769ad3aeb130c1599e8aee86a8d25f671216c40df9b8489d6c3ef879bc2752b40d1458aa768f947c2d91e5b2fedfe63cf702c40afdfda9ba9
-  languageName: node
-  linkType: hard
-
-"adm-zip@npm:0.5.16":
-  version: 0.5.16
-  resolution: "adm-zip@npm:0.5.16"
-  checksum: 10/e167d1b9e60cde37334efda828fa514680af9facbd4183952f36526390e5c7da9a90ca1e6880dfd3aba7b3517f1506c6178e0dc29cd630b26b98c795f97fc599
   languageName: node
   linkType: hard
 

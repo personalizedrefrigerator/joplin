@@ -1,7 +1,8 @@
-
-import shim from '@joplin/lib/shim';
+import shim from '../../shim';
 import { join, dirname } from 'path';
 
+// This is used during startup tests on mobile, so must avoid using native NodeJS
+// functionality.
 const createFilesFromPathRecord = async (baseDir: string, fileContents: Record<string, string>) => {
 	for (const relativePath in fileContents) {
 		const targetPath = join(baseDir, relativePath);

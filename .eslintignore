@@ -943,8 +943,6 @@ packages/app-mobile/utils/fs-driver/runOnDeviceTests.js
 packages/app-mobile/utils/fs-driver/tarCreate.js
 packages/app-mobile/utils/fs-driver/tarExtract.test.js
 packages/app-mobile/utils/fs-driver/tarExtract.js
-packages/app-mobile/utils/fs-driver/testUtil/createFilesFromPathRecord.js
-packages/app-mobile/utils/fs-driver/testUtil/verifyDirectoryMatches.js
 packages/app-mobile/utils/getPackageInfo.js
 packages/app-mobile/utils/getVersionInfoText.js
 packages/app-mobile/utils/hooks/useBackHandler.js
@@ -1657,6 +1655,8 @@ packages/lib/shim-init-node.js
 packages/lib/shim.js
 packages/lib/string-utils.test.js
 packages/lib/string-utils.js
+packages/lib/testing/fs/createFilesFromPathRecord.js
+packages/lib/testing/fs/verifyDirectoryMatches.js
 packages/lib/testing/plugins/createTestPlugin.js
 packages/lib/testing/share/makeMockShareInvitation.js
 packages/lib/testing/share/mockShareService.js

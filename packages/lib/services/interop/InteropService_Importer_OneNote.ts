@@ -4,7 +4,7 @@ import InteropService_Importer_Base from './InteropService_Importer_Base';
 import { NoteEntity } from '../database/types';
 import { rtrimSlashes } from '../../path-utils';
 import InteropService_Importer_Md from './InteropService_Importer_Md';
-import { join, resolve, normalize, sep, dirname } from 'path';
+import { join, resolve, normalize, sep, dirname, basename } from 'path';
 import Logger from '@joplin/utils/Logger';
 import { uuidgen } from '../../uuid';
 import shim from '../../shim';
@@ -53,16 +53,18 @@ export default class InteropService_Importer_OneNote extends InteropService_Impo
 		}
 
 		const tempOutputDirectory = await this.temporaryDirectory_(true);
-		const baseFolder = this.getEntryDirectory(unzipTempDirectory, files[0].entryName);
+		const baseFolder = this.getEntryDirectory(unzipTempDirectory, files[0].path);
 		const notebookBaseDir = join(unzipTempDirectory, baseFolder, sep);
 		const outputDirectory2 = join(tempOutputDirectory, baseFolder);
 
-		const notebookFiles = files.filter(e => e.name !== '.onetoc2' && e.name !== 'OneNote_RecycleBin.onetoc2');
+		const notebookFiles = files.filter(e => (
+			basename(e.path) !== '.onetoc2' && basename(e.path) !== 'OneNote_RecycleBin.onetoc2'
+		));
 		const { oneNoteConverter } = shim.requireDynamic('@joplin/onenote-converter');
 
 		logger.info('Extracting OneNote to HTML');
 		for (const notebookFile of notebookFiles) {
-			const notebookFilePath = join(unzipTempDirectory, notebookFile.entryName);
+			const notebookFilePath = join(unzipTempDirectory, notebookFile.path);
 			try {
 				await oneNoteConverter(notebookFilePath, resolve(outputDirectory2), notebookBaseDir);
 			} catch (error) {

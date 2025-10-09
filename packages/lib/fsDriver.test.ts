@@ -1,7 +1,9 @@
 import { join } from 'path';
 import FsDriverNode from './fs-driver-node';
 import shim from './shim';
-import { expectThrow, supportDir } from './testing/test-utils';
+import { createTempDir, expectThrow, supportDir } from './testing/test-utils';
+import createFilesFromPathRecord from './testing/fs/createFilesFromPathRecord';
+import verifyDirectoryMatches from './testing/fs/verifyDirectoryMatches';
 
 const windowsPartitionLetter = __filename[0];
 
@@ -41,5 +43,35 @@ describe('fsDriver', () => {
 		expect(
 			await shim.fsDriver().findUniqueFilename(join(supportDir, 'this-file-does-not-exist.txt'), [join(supportDir, 'some-other-file.txt')]),
 		).toBe(join(supportDir, 'this-file-does-not-exist.txt'));
+	});
+
+	it('should support creating zip files with zipCreate and extracting them with zipExtract', async () => {
+		const tempDir = await createTempDir();
+		const sourceDir = join(tempDir, 'source');
+		await shim.fsDriver().mkdir(sourceDir);
+		const destDir = join(tempDir, 'dest');
+		await shim.fsDriver().mkdir(destDir);
+
+		const fileContents = {
+			'a/test.txt': 'ASCII',
+			'test ✏️.txt': 'This ✏️ test file contains unicode characters. (Á,Ä,É,Ë,Í,Ï,Ó,Ö,Ú,Ü)',
+			'📂 folder 📂/a.txt': 'Test!\nTesting...',
+		};
+		await createFilesFromPathRecord(sourceDir, fileContents);
+
+		const zipPath = join(destDir, 'out.zip');
+		await shim.fsDriver().zipCreate({
+			inputDirectory: sourceDir,
+			output: zipPath,
+		});
+
+		const extractDir = join(tempDir, 'extract');
+		await shim.fsDriver().mkdir(extractDir);
+		await shim.fsDriver().zipExtract({
+			source: zipPath,
+			extractTo: extractDir,
+		});
+
+		await verifyDirectoryMatches(extractDir, fileContents);
 	});
 });

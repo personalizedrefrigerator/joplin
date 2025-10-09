@@ -1,7 +1,9 @@
-
-import shim from '@joplin/lib/shim';
+import shim from '../../shim';
 import { join } from 'path';
 
+// Checks that a directory matches a path record.
+// This is used during startup tests on mobile, so must avoid using native NodeJS
+// functionality.
 const verifyDirectoryMatches = async (baseDir: string, fileContents: Record<string, string>) => {
 	for (const path in fileContents) {
 		const fileContent = await shim.fsDriver().readFile(join(baseDir, path), 'utf8');
