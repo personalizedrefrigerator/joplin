@@ -1,9 +1,9 @@
 use color_eyre::eyre::{Result, eyre};
 pub use parser::Parser;
 use std::panic;
-use wasm_bindgen::prelude::wasm_bindgen;
+use wasm_bindgen::{prelude::wasm_bindgen, JsError};
 
-use parser_utils::{fs_driver, log, log_warn};
+use parser_utils::{fs_driver, log};
 
 mod notebook;
 mod page;
@@ -13,11 +13,15 @@ mod utils;
 
 #[wasm_bindgen]
 #[allow(non_snake_case)]
-pub fn oneNoteConverter(input: &str, output: &str, base_path: &str) {
+pub fn oneNoteConverter(input: &str, output: &str, base_path: &str) -> Result<(), JsError> {
     panic::set_hook(Box::new(console_error_panic_hook::hook));
+    log::set_current_page("[None]".into());
 
     if let Err(e) = _main(input, output, base_path) {
-        log_warn!("{:?}", e);
+        let message = format!("Error: {:?} (near page {})", e, log::get_current_page());
+        Err(JsError::new(&message))
+    } else {
+        Ok(())
     }
 }
 
