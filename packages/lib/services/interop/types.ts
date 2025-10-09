@@ -30,6 +30,7 @@ export enum ExportModuleOutputFormat {
 	Enex = 'enex',
 	Html = 'html',
 	Jex = 'jex',
+	JexCompressed = 'jex-compressed',
 	Markdown = 'md',
 	MarkdownFrontMatter = 'md_frontmatter',
 	Memory = 'memory',
@@ -51,6 +52,7 @@ export interface ImportOptions {
 	onProgress?: (progressState: any, progress?: any)=> void;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	onError?: (error: any)=> void;
+	onRequestPassword?: ()=> Promise<string>;
 	document?: Document;
 	xmlSerializer?: XMLSerializer;
 
@@ -76,6 +78,8 @@ export interface ExportOptions {
 	plugins?: PluginStates;
 	customCss?: string;
 	packIntoSingleFile?: boolean;
+	// Not supported by all exporters
+	password?: string;
 
 	onProgress?: OnExportProgressCallback;
 }

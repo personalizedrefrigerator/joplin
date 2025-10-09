@@ -8,6 +8,11 @@ interface Smalltalk {
 	prompt(title: string, message: string, defaultValue: string, options: unknown): Promise<string>;
 }
 
+interface PromptOptions {
+	cancel?: boolean;
+	type?: 'password';
+}
+
 class Dialogs {
 	private activeWindow: Window|null;
 	public setActiveWindow(win: Window) {
@@ -45,7 +50,7 @@ class Dialogs {
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	public async prompt(message: string, title = '', defaultValue = '', options: any = null) {
+	public async prompt(message: string, title = '', defaultValue = '', options: PromptOptions = null) {
 		options = { cancel: true, ...options };
 
 		try {

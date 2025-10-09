@@ -23,6 +23,7 @@ import InteropService_Exporter_Html from './InteropService_Exporter_Html';
 import InteropService_Importer_EnexToHtml from './InteropService_Importer_EnexToHtml';
 import InteropService_Importer_EnexToMd from './InteropService_Importer_EnexToMd';
 import InteropService_Importer_OneNote from './InteropService_Importer_OneNote';
+import InteropService_Exporter_JexCompressed from './InteropService_Exporter_JexCompressed';
 const { sprintf } = require('sprintf-js');
 const { fileExtension } = require('../../path-utils');
 const EventEmitter = require('events');
@@ -61,7 +62,7 @@ export default class InteropService {
 			const importModules = [
 				makeImportModule({
 					format: 'jex',
-					fileExtensions: ['jex'],
+					fileExtensions: ['jex', 'jexz'],
 					sources: [FileSystemItem.File],
 					description: _('Joplin Export File'),
 				}, () => new InteropService_Importer_Jex()),
@@ -156,6 +157,15 @@ export default class InteropService {
 					target: FileSystemItem.File,
 					description: _('Joplin Export File'),
 				}, () => new InteropService_Exporter_Jex()),
+
+				makeExportModule({
+					format: ExportModuleOutputFormat.JexCompressed,
+					fileExtensions: ['jexz'],
+					target: FileSystemItem.File,
+					description: _('Joplin Export File (Compressed)'),
+					supportsMobile: false,
+					supportsPassword: true,
+				}, () => new InteropService_Exporter_JexCompressed()),
 
 				makeExportModule({
 					format: ExportModuleOutputFormat.Raw,

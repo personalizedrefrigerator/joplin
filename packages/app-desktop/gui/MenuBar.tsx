@@ -29,6 +29,8 @@ import { EventName } from '@joplin/lib/eventManager';
 import { ipcRenderer } from 'electron';
 import NavService from '@joplin/lib/services/NavService';
 import Logger from '@joplin/utils/Logger';
+import { ImportOptions } from '@joplin/lib/services/interop/types';
+import dialogs from './dialogs';
 
 const logger = Logger.create('MenuBar');
 
@@ -328,7 +330,7 @@ function useMenu(props: Props) {
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 		const errors: any[] = [];
 
-		const importOptions = {
+		const importOptions: ImportOptions = {
 			path,
 			format: module.format,
 			outputFormat: module.outputFormat,
@@ -344,6 +346,9 @@ function useMenu(props: Props) {
 			onError: (error: any) => {
 				errors.push(error);
 				console.warn(error);
+			},
+			onRequestPassword: () => {
+				return dialogs.prompt(_('Password:'), undefined, undefined, { type: 'password' });
 			},
 			destinationFolderId: !module.isNoteArchive && moduleSource === 'file' ? props.selectedFolderId : null,
 		};

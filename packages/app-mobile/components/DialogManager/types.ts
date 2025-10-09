@@ -16,6 +16,10 @@ export interface PromptOptions {
 	cancelable?: boolean;
 }
 
+export interface TextPromptOptions {
+	secure?: boolean;
+}
+
 export interface MenuChoice<IdType> extends BaseButtonSpec {
 	id: IdType;
 }
@@ -24,7 +28,7 @@ export interface DialogControl {
 	info(message: string): Promise<void>;
 	error(message: string): Promise<void>;
 	prompt(title: string, message: string, buttons?: PromptButtonSpec[], options?: PromptOptions): void;
-	promptForText(message: string): Promise<string>;
+	promptForText(message: string, options?: TextPromptOptions): Promise<string>;
 	showMenu<IdType>(title: string, choices: MenuChoice<IdType>[]): Promise<IdType>;
 }
 
@@ -47,6 +51,7 @@ export interface TextInputDialogData {
 	type: DialogType.TextInput;
 	key: string;
 	message: string;
+	secure: boolean;
 	onSubmit: (text: string)=> void;
 	onDismiss: ()=> void;
 }

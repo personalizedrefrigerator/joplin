@@ -224,11 +224,20 @@ export default class FsDriverNode extends FsDriverBase {
 			// Cast to ReadableStream -- TypeScript identifies the global ReadableStream and
 			// the NodeJS streams/web ReadableStream as different types:
 			reader = new ZipReader(Readable.toWeb(readStream) as ReadableStream);
+			let password = undefined;
 
 			for await (const entry of reader.getEntriesGenerator()) {
 				const outputPath = this.resolveRelativePathWithinDir(options.extractTo, entry.filename);
 				if (await fs.exists(outputPath)) {
 					throw new Error(`Refusing to overwrite existing file: ${JSON.stringify(outputPath)}`);
+				}
+
+				if (entry.encrypted) {
+					if (options.onRequestPassword) {
+						password ??= await options.onRequestPassword();
+					} else {
+						throw new Error('Unable to decrypt ZIP file entry -- no password given.');
+					}
 				}
 
 				// The "=== true" is necessary for type narrowing
@@ -237,7 +246,7 @@ export default class FsDriverNode extends FsDriverBase {
 				} else {
 					const writeStream = fs.createWriteStream(outputPath);
 					try {
-						await entry.getData(Writable.toWeb(writeStream));
+						await entry.getData(Writable.toWeb(writeStream), { password });
 					} finally {
 						writeStream.close();
 					}
@@ -259,7 +268,7 @@ export default class FsDriverNode extends FsDriverBase {
 		let writer, writeStream;
 		try {
 			writeStream = fs.createWriteStream(options.output);
-			writer = new ZipWriter(Writable.toWeb(writeStream));
+			writer = new ZipWriter(Writable.toWeb(writeStream), { password: options.password });
 
 			const basePath = this.resolve(options.inputDirectory);
 			for (const stat of await this.readDirStats(basePath, { recursive: true })) {

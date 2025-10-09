@@ -8,7 +8,7 @@ import InteropService from '@joplin/lib/services/interop/InteropService';
 import pickDocument from '../../../../utils/pickDocument';
 import makeImportExportCacheDirectory from './utils/makeImportExportCacheDirectory';
 import shim from '@joplin/lib/shim';
-import TaskButton, { OnProgressCallback, SetAfterCompleteListenerCallback, TaskStatus } from './TaskButton';
+import TaskButton, { OnRunTask, TaskStatus } from './TaskButton';
 import { Platform } from 'react-native';
 
 const logger = Logger.create('NoteImportButton');
@@ -29,10 +29,7 @@ const getTitle = (taskStatus: TaskStatus) => {
 	}
 };
 
-const runImportTask = async (
-	_onProgress: OnProgressCallback,
-	setAfterCompleteListener: SetAfterCompleteListenerCallback,
-) => {
+const runImportTask: OnRunTask = async (_onProgress, setAfterCompleteListener, dialogs) => {
 	const importTargetPath = join(await makeImportExportCacheDirectory(), 'to-import.jex');
 	logger.info('Importing...');
 
@@ -57,6 +54,9 @@ const runImportTask = async (
 		const status = await InteropService.instance().import({
 			path: importTargetPath,
 			format: 'jex',
+			onRequestPassword: () => {
+				return dialogs.promptForText('Password', { secure: true });
+			},
 		});
 
 		logger.info('Imported successfully');

@@ -24,11 +24,16 @@ export interface RemoveOptions {
 export interface ZipCreateOptions {
 	inputDirectory: string;
 	output: string;
+	// When not undefined, the fs-driver implementation must either create an encrypted
+	// ZIP file or fail. The encrypted ZIP file should use the AES 256 encryption method
+	// and must not use the original (broken) PkZip encryption method.
+	password: string|undefined;
 }
 
 export interface ZipExtractOptions {
 	source: string;
 	extractTo: string;
+	onRequestPassword?: ()=> Promise<string>;
 }
 
 export interface ZipEntry {

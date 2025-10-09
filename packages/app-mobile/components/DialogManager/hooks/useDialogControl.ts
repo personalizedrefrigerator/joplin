@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Alert, Platform } from 'react-native';
-import { DialogControl, DialogType, MenuChoice, PromptButtonSpec, DialogData, PromptOptions } from '../types';
+import { DialogControl, DialogType, MenuChoice, PromptButtonSpec, DialogData, PromptOptions, TextPromptOptions } from '../types';
 import { _ } from '@joplin/lib/locale';
 import { useMemo, useRef } from 'react';
 
@@ -91,7 +91,7 @@ const useDialogControl = (setPromptDialogs: SetPromptDialogs) => {
 					});
 				});
 			},
-			promptForText: (message: string) => {
+			promptForText: (message: string, { secure }: TextPromptOptions = {}) => {
 				return new Promise<string|null>((resolve) => {
 					const dismiss = () => {
 						onDismiss(dialog);
@@ -100,6 +100,7 @@ const useDialogControl = (setPromptDialogs: SetPromptDialogs) => {
 					const dialog: DialogData = {
 						type: DialogType.TextInput,
 						key: `prompt-dialog-${nextDialogIdRef.current++}`,
+						secure,
 						message,
 						onSubmit: (text) => {
 							resolve(text);

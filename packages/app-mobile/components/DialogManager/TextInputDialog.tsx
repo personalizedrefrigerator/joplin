@@ -48,6 +48,7 @@ const TextInputDialog: React.FC<Props> = ({ dialog, containerStyle, themeId }) =
 					aria-labelledby={labelId}
 					themeId={themeId}
 					value={text}
+					secureTextEntry={dialog.secure}
 					onChangeText={setText}
 				/>
 			</Dialog.Content>

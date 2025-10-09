@@ -37,6 +37,7 @@ export interface ImportModule extends ImportMetadata {
 export interface ExportMetadata extends BaseMetadata {
 	type: ModuleType.Exporter;
 	format: ExportModuleOutputFormat;
+	supportsPassword: boolean;
 
 	target: FileSystemItem;
 }
@@ -103,6 +104,7 @@ export const makeExportModule = (
 		format: '' as any,
 		type: ModuleType.Exporter,
 		target: FileSystemItem.File,
+		supportsPassword: false,
 
 		fullLabel: (moduleSource?: FileSystemItem) => {
 			return moduleFullLabel(fullMetadata, moduleSource);
@@ -117,6 +119,10 @@ export const makeExportModule = (
 	return {
 		...fullMetadata,
 		factory: (options: ExportOptions = {}) => {
+			if (options.password && !fullMetadata.supportsPassword) {
+				throw new Error(`Invalid options: The ${fullMetadata.format} exporter does not support exporting with a password.`);
+			}
+
 			const result = factory();
 			result.setMetadata({ ...fullMetadata, ...(options ?? {}) });
 

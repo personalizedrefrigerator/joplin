@@ -2,6 +2,7 @@
 
 import Setting from '../../models/Setting';
 import shim from '../../shim';
+import { ResourceEntity } from '../database/types';
 import { type ExportMetadata } from './Module';
 import { ExportOptions } from './types';
 
@@ -15,8 +16,7 @@ export default class InteropService_Exporter_Base {
 	public async prepareForProcessingItemType(_itemType: number, _itemsToExport: any[]) {}
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	public async processItem(_itemType: number, _item: any) {}
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	public async processResource(_resource: any, _filePath: string) {}
+	public async processResource(_resource: ResourceEntity, _filePath: string) {}
 	public async close() {}
 
 	public setMetadata(md: ExportMetadata) {

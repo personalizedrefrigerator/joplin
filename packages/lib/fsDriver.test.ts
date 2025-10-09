@@ -45,7 +45,10 @@ describe('fsDriver', () => {
 		).toBe(join(supportDir, 'this-file-does-not-exist.txt'));
 	});
 
-	it('should support creating zip files with zipCreate and extracting them with zipExtract', async () => {
+	it.each([
+		{ encrypted: false },
+		{ encrypted: true },
+	])('should support creating zip files with zipCreate and extracting them with zipExtract (encrypted:$encrypted)', async ({ encrypted }) => {
 		const tempDir = await createTempDir();
 		const sourceDir = join(tempDir, 'source');
 		await shim.fsDriver().mkdir(sourceDir);
@@ -60,9 +63,11 @@ describe('fsDriver', () => {
 		await createFilesFromPathRecord(sourceDir, fileContents);
 
 		const zipPath = join(destDir, 'out.zip');
+		const testPassword = encrypted ? '🔑 test 🗝️' : undefined;
 		await shim.fsDriver().zipCreate({
 			inputDirectory: sourceDir,
 			output: zipPath,
+			password: testPassword,
 		});
 
 		const extractDir = join(tempDir, 'extract');
@@ -70,6 +75,7 @@ describe('fsDriver', () => {
 		await shim.fsDriver().zipExtract({
 			source: zipPath,
 			extractTo: extractDir,
+			onRequestPassword: testPassword ? () => Promise.resolve(testPassword) : undefined,
 		});
 
 		await verifyDirectoryMatches(extractDir, fileContents);

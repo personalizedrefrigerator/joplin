@@ -2,11 +2,12 @@ import * as React from 'react';
 import { Text } from 'react-native';
 import { _ } from '@joplin/lib/locale';
 import { ProgressBar } from 'react-native-paper';
-import { FunctionComponent, useCallback, useState } from 'react';
+import { FunctionComponent, useCallback, useContext, useState } from 'react';
 import { ConfigScreenStyles } from '../configScreenStyles';
 import SettingsButton from '../SettingsButton';
 import Logger from '@joplin/utils/Logger';
 import shim from '@joplin/lib/shim';
+import { DialogContext, DialogControl } from '../../../DialogManager';
 
 // Undefined = indeterminate progress
 export type OnProgressCallback = (progressFraction: number|undefined)=> void;
@@ -26,22 +27,27 @@ export enum TaskStatus {
 	Done,
 }
 
+export type OnRunTask = (
+	setProgress: OnProgressCallback,
+	setAfterCompleteListener: SetAfterCompleteListenerCallback,
+	dialogs: DialogControl,
+)=> Promise<TaskResult>;
+
 interface Props {
 	taskName: string;
 	buttonLabel: (status: TaskStatus)=> string;
 	finishedLabel: string;
 	description?: string;
 	styles: ConfigScreenStyles;
-	onRunTask: (
-		setProgress: OnProgressCallback,
-		setAfterCompleteListener: SetAfterCompleteListenerCallback,
-	)=> Promise<TaskResult>;
+	onRunTask: OnRunTask;
 }
 
 const TaskButton: FunctionComponent<Props> = props => {
 	const [taskStatus, setTaskStatus] = useState<TaskStatus>(TaskStatus.NotStarted);
 	const [progress, setProgress] = useState<number|undefined>(0);
 	const [warnings, setWarnings] = useState<string>('');
+
+	const dialogs = useContext(DialogContext);
 
 	const startTask = useCallback(async () => {
 		// Don't run multiple task instances at the same time.
@@ -61,7 +67,7 @@ const TaskButton: FunctionComponent<Props> = props => {
 
 			const status = await props.onRunTask(setProgress, (afterComplete: AfterCompleteListener) => {
 				afterCompleteListener = afterComplete;
-			});
+			}, dialogs);
 
 			setWarnings(status.warnings.join('\n'));
 			if (status.success) {
@@ -81,7 +87,7 @@ const TaskButton: FunctionComponent<Props> = props => {
 
 			await afterCompleteListener(completedSuccessfully);
 		}
-	}, [props.onRunTask, props.taskName, taskStatus]);
+	}, [props.onRunTask, props.taskName, taskStatus, dialogs]);
 
 	let statusComponent = (
 		<ProgressBar

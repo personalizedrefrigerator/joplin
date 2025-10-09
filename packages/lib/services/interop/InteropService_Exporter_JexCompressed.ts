@@ -1,10 +1,9 @@
-import { _ } from '../../locale';
 import InteropService_Exporter_Base from './InteropService_Exporter_Base';
 import InteropService_Exporter_Raw from './InteropService_Exporter_Raw';
 import shim from '../../shim';
 import { BaseItemEntity, ResourceEntity } from '../database/types';
 
-export default class InteropService_Exporter_Jex extends InteropService_Exporter_Base {
+export default class InteropService_Exporter_JexCompressed extends InteropService_Exporter_Base {
 
 	private tempDir_: string;
 	private destPath_: string;
@@ -13,7 +12,7 @@ export default class InteropService_Exporter_Jex extends InteropService_Exporter
 	public async init(destPath: string) {
 		if (await shim.fsDriver().isDirectory(destPath)) throw new Error(`Path is a directory: ${destPath}`);
 
-		this.tempDir_ = await this.temporaryDirectory_(false);
+		this.tempDir_ = await this.temporaryDirectory_(true);
 		this.destPath_ = destPath;
 		this.rawExporter_ = new InteropService_Exporter_Raw();
 		await this.rawExporter_.init(this.tempDir_);
@@ -28,17 +27,13 @@ export default class InteropService_Exporter_Jex extends InteropService_Exporter
 	}
 
 	public async close() {
-		const stats = await shim.fsDriver().readDirStats(this.tempDir_, { recursive: true });
-		const filePaths = stats.filter((a) => !a.isDirectory()).map((a) => a.path);
+		await this.rawExporter_.close();
 
-		if (!filePaths.length) throw new Error(_('There is no data to export.'));
-
-		await shim.fsDriver().tarCreate({
-			strict: true,
-			portable: true,
-			file: this.destPath_,
-			cwd: this.tempDir_,
-		}, filePaths);
+		await shim.fsDriver().zipCreate({
+			inputDirectory: this.tempDir_,
+			output: this.destPath_,
+			password: undefined,
+		});
 
 		await shim.fsDriver().remove(this.tempDir_);
 	}

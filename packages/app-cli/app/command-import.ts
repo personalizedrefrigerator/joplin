@@ -65,6 +65,10 @@ class Command extends BaseCommand {
 			this.stdout(s);
 		};
 
+		importOptions.onRequestPassword = async () => {
+			return this.prompt(_('Password:'), { type: 'string', secure: true });
+		};
+
 		if (args.options.outputFormat) importOptions.outputFormat = args.options.outputFormat;
 
 		app().gui().showConsole();
