@@ -72,6 +72,44 @@ export default class SyncTargetJoplinServerSAML extends SyncTargetJoplinServer {
 		return false;
 	}
 
+	public static override async checkConfig(fileApi: FileApiOptions) {
+		try {
+			// Simulate a login request
+			const result = await fetch(`${fileApi.path()}/api/saml`);
+
+			if (result.status === 200) { // The server successfully responded, SAML is enabled
+				return {
+					ok: true,
+					errorMessage: '',
+				};
+			} else { // SAML is disabled or an error occurred
+				const text = await result.text();
+				let message = text; // Use the textual body as the default message
+
+				// Check if we got an error message
+				if (result.headers.get('Content-Type').includes('application/json')) {
+					try {
+						const json = JSON.parse(text);
+
+						if (json.error) {
+							message = json.error;
+						}
+					} catch (_e) {} // eslint-disable-line no-empty -- Keep the plain text response as the error message, ignore the parsing exception
+				}
+
+				return {
+					ok: false,
+					errorMessage: `Could not connect to server: Error ${result.status}: ${message}`,
+				};
+			}
+		} catch (e) {
+			return {
+				ok: false,
+				errorMessage: e.message,
+			};
+		}
+	}
+
 	protected override async initFileApi() {
 		return initFileApi(SyncTargetJoplinServerSAML.id(), this.logger(), {
 			path: () => Setting.value('sync.11.path'),
