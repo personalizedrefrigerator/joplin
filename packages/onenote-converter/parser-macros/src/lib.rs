@@ -1,4 +1,6 @@
-//! Adds support for #[derive(Parse)]
+//! Adds support for #[derive(Parse)]. In many cases, this allows the `Parse`
+//! trait for binary->struct parsing to be auto-implemented based on a struct
+//! definition.
 
 // Development ref: See the relevant syn example: https://github.com/dtolnay/syn/blob/master/examples/heapsize/heapsize_derive/src/lib.rs
 

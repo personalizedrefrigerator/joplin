@@ -1,4 +1,5 @@
-//! Parsing specific to OneNote 2016 format `.one` and `.onetoc2` files.
+//! A OneStore parsing implementation for the OneNote 2016 format.
+//! Parses `.one` files and has partial support for `.onetoc2` files.
 
 mod common;
 mod file_node;

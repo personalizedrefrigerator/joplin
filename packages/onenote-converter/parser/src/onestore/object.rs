@@ -19,6 +19,7 @@ impl ObjectFileData for FileBlob {
     }
 }
 
+/// See [\[MS-ONESTORE\] 2.1.5](https://learn.microsoft.com/en-us/openspecs/office_file_formats/ms-onestore/ce60b62f-82e5-401a-bf2c-3255457732ad)
 #[derive(Clone)]
 pub(crate) struct Object {
     pub(crate) context_id: ExGuid,

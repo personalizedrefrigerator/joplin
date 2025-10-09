@@ -1,5 +1,7 @@
 //! A compatibility layer for unifying data stored in FSSHTTPB/SOAP files and
 //! standard OneNote 2016 archives.
+//! 
+//! Provides interfaces that are implemented by the different OneStore parsers.
 
 use std::rc::Rc;
 

@@ -14,7 +14,8 @@ pub trait FileApiDriver: Send + Sync {
     fn get_file_name(&self, path: &str) -> Option<String>;
     fn get_file_extension(&self, path: &str) -> String;
     fn get_dir_name(&self, path: &str) -> String;
-    /// Unlike Rust's `Path::join`, if `path_2` starts with "/",
+    /// This function should behave like NodeJS's `path.join` function.
+    /// As a result, unlike Rust's `Path::join`, if `path_2` starts with "/",
     /// `path_2` is still appended to `path_1`.
     fn join(&self, path_1: &str, path_2: &str) -> String;
 

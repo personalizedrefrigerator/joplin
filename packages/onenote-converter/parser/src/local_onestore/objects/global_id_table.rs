@@ -8,10 +8,16 @@ use crate::{
     shared::{compact_id::CompactId, exguid::ExGuid},
 };
 use parser_utils::{
-    errors::{ErrorKind, Result},
+    errors::Result,
     log_warn,
 };
 
+/// Lower-level structure for mapping local `CompactId`s to global `ExGuid`s. Applies to a
+/// particular region of a OneStore file.
+/// 
+/// In `.onetoc2` files, `GlobalIdTable`s may depend on other `GlobalIdTable`s.
+/// 
+/// See [\[MS-ONESTORE\] 2.1.3](https://learn.microsoft.com/en-us/openspecs/office_file_formats/ms-onestore/a243bd78-6cfd-4e18-96c7-e8c2095ce6b0)
 #[derive(Debug, Clone)]
 pub struct GlobalIdTable {
     pub id_map: IdMapping,
@@ -61,8 +67,8 @@ impl GlobalIdTable {
                     );
                 }
                 _ => {
-                    return Err(ErrorKind::MalformedOneNoteData(
-                        "Unexpected node encountered while parsing global ID table".into(),
+                    return Err(onestore_parse_error!(
+                        "Unexpected node ({:?}) encountered while parsing global ID table", node
                     )
                     .into());
                 }

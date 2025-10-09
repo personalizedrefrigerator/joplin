@@ -12,16 +12,19 @@ use crate::{
 
 type GlobalFileData = Option<Rc<FileDataStore>>;
 
+/// Provides an interface to access shared data to mid-level parsing logic.
+/// Use this, for example, to resolve IDs.
 pub struct ParseContext {
     pub id_map: Rc<dyn MappingTable>,
+
+    /// The ID of the ObjectSpace that contains the current node
+    pub context_id: ExGuid,
+
     // TODO: Redesign to avoid using a RefCell. RefCells allow changing the value of the
     // shared pointer, but make the code more difficult to understand. Ideally, the file data
     // reference would be passed as an argument to `UnresolvedFileData.load()`, which would make
     // the dependency clear.
-    pub file_data: Rc<RefCell<GlobalFileData>>,
-
-    /// The ID of the ObjectSpace that contains the current node
-    pub context_id: ExGuid,
+    file_data: Rc<RefCell<GlobalFileData>>,
 }
 
 impl ParseContext {

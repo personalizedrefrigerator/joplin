@@ -27,7 +27,6 @@ pub struct FileNode {
     cb_format: u32,
     base_type: u32,
     pub size: usize,
-    data_ref: FileNodeDataRef,
     pub fnd: FileNodeData,
 }
 
@@ -179,7 +178,6 @@ impl FileNode {
             cb_format,
             base_type,
             size: actual_size,
-            data_ref,
             fnd,
         };
 
@@ -258,13 +256,11 @@ where
 }
 
 #[derive(Debug, Clone, Parse)]
-#[allow(dead_code)]
 pub struct ObjectSpaceManifestRootFND {
     pub gosid_root: ExGuid,
 }
 
 #[derive(Debug, Clone)]
-#[allow(dead_code)]
 pub struct ObjectSpaceManifestListReferenceFND {
     pub gosid: ExGuid,
     // Per [section 2.1.6](https://learn.microsoft.com/en-us/openspecs/office_file_formats/ms-onestore/480f3f4d-1c13-4b58-9ee5-63919b17fb11),
