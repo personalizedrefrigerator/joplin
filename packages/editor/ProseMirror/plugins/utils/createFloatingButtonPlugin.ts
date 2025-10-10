@@ -70,16 +70,17 @@ class FloatingButtonBar {
 			if (!hasCreatedButtons) {
 				const { localize } = getEditorApi(view.state);
 				this.container_.replaceChildren(...this.buttons_.map(buttonSpec => {
+					const label = buttonSpec.label(localize);
 					const button = createButton(
-						buttonSpec.label(localize),
+						buttonSpec.icon ? { label, icon: buttonSpec.icon() } : label,
 						() => { },
 					);
 
+					button.classList.add('action', 'action-button');
 					if (buttonSpec.icon) {
-						button.prepend(buttonSpec.icon());
+						button.classList.add('-icon');
 					}
 
-					button.classList.add('action');
 					if (buttonSpec.className) {
 						button.classList.add(buttonSpec.className);
 					}
