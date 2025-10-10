@@ -92,28 +92,29 @@ const makeBuildContext = (entryPoint: string, renderer: boolean, addDebugStats: 
 			{
 				name: 'joplin--smaller-source-map-size',
 				setup: build => {
-					if (addDebugStats) return;
-
-					// Exclude dependencies from node_modules. This significantly reduces the size of the
+					// Unless bundling with additional debug information, exclude 3rd-party
+					// dependencies from source maps. This significantly reduces the size of the
 					// source map, improving startup performance.
 					//
 					// See https://github.com/evanw/esbuild/issues/1685#issuecomment-944916409
 					// and https://github.com/evanw/esbuild/issues/4130
-					const emptyMapData = Buffer.from(
-						JSON.stringify({ version: 3, sources: [null], mappings: 'AAAA' }),
-						'utf-8',
-					).toString('base64');
-					const emptyMapUrl = `data:application/json;base64,${emptyMapData}`;
+					if (!addDebugStats) {
+						const emptyMapData = Buffer.from(
+							JSON.stringify({ version: 3, sources: [null], mappings: 'AAAA' }),
+							'utf-8',
+						).toString('base64');
+						const emptyMapUrl = `data:application/json;base64,${emptyMapData}`;
 
-					build.onLoad({ filter: /node_modules.*js$/ }, args => {
-						return {
-							contents: [
-								readFileSync(args.path, 'utf8'),
-								`//# sourceMappingURL=${emptyMapUrl}`,
-							].join('\n'),
-							loader: 'default',
-						};
-					});
+						build.onLoad({ filter: /node_modules.*js$/ }, args => {
+							return {
+								contents: [
+									readFileSync(args.path, 'utf8'),
+									`//# sourceMappingURL=${emptyMapUrl}`,
+								].join('\n'),
+								loader: 'default',
+							};
+						});
+					}
 				},
 			},
 		],
