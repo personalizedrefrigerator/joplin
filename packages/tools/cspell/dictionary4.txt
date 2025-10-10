@@ -205,3 +205,8 @@ Pokiesman
 Gamstop
 ESIGNER
 TOTP
+SPSSO
+IDPSSO
+nameid
+attrname
+dpkg
