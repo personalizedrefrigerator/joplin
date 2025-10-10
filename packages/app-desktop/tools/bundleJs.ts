@@ -9,7 +9,7 @@ const baseNodeModules = join(baseDir, 'node_modules');
 
 // Note: Roughly based on js-draw's use of esbuild:
 // https://github.com/personalizedrefrigerator/js-draw/blob/6fe6d6821402a08a8d17f15a8f48d95e5d7b084f/packages/build-tool/src/BundledFile.ts#L64
-const makeBuildContext = (entryPoint: string, renderer: boolean, computeFileSizeStats: boolean) => {
+const makeBuildContext = (entryPoint: string, renderer: boolean, addDebugStats: boolean) => {
 	return esbuild.context({
 		entryPoints: [entryPoint],
 		outfile: `${filename(entryPoint)}.bundle.js`,
@@ -19,7 +19,7 @@ const makeBuildContext = (entryPoint: string, renderer: boolean, computeFileSize
 		format: 'iife', // Immediately invoked function expression
 		sourcemap: true,
 		sourcesContent: false, // Do not embed full source file content in the .map file
-		metafile: computeFileSizeStats,
+		metafile: addDebugStats,
 		platform: 'node',
 		target: ['node20.0'],
 		mainFields: renderer ? ['browser', 'main'] : ['main'],
@@ -92,6 +92,8 @@ const makeBuildContext = (entryPoint: string, renderer: boolean, computeFileSize
 			{
 				name: 'joplin--smaller-source-map-size',
 				setup: build => {
+					if (addDebugStats) return;
+
 					// Exclude dependencies from node_modules. This significantly reduces the size of the
 					// source map, improving startup performance.
 					//
