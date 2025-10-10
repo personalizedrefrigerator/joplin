@@ -5,6 +5,10 @@ const { wrapCallSite } = require('source-map-support');
 
 /* eslint-disable no-console */
 
+console.log('Use this tool to resolve (line:column) pairs from error messages.');
+console.log('To ensure that errors are resolved accurately, be sure to build');
+console.log('Joplin from the same version/commit that produced the error.');
+
 let gitHash: string|null = null;
 const getCurrentGitHash = async () => {
 	gitHash ??= await execCommand(['git', 'log', '-1', '--pretty="%H"']);
@@ -13,8 +17,9 @@ const getCurrentGitHash = async () => {
 	return gitHash;
 };
 
-// TODO: This is using an internal function of source-map-support.
 const resolveLine = (lineNumber: number, columnNumber: number, fileName = 'main-html.bundle.js') => {
+	// Note: This is an undocumented function provided by source-map-support. It
+	// may change in the future:
 	const frame = wrapCallSite({
 		getFileName: () => fileName,
 		isNative: ()=>false,
