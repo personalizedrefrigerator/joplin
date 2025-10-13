@@ -1,6 +1,6 @@
 use crate::shared::prop_set::PropertySet;
-use parser_utils::errors::{ErrorKind, Result};
 use parser_utils::Reader;
+use parser_utils::errors::{ErrorKind, Result};
 use std::convert::TryFrom;
 use std::fmt;
 
@@ -160,7 +160,7 @@ impl PropertyValue {
                 return Err(ErrorKind::MalformedOneStoreData(
                     format!("unexpected property type: 0x{:x}", v).into(),
                 )
-                .into())
+                .into());
             }
         };
 

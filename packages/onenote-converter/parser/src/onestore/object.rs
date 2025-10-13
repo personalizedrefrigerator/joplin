@@ -1,9 +1,11 @@
 use super::mapping_table::MappingTable;
 use crate::{
-    one::property_set::PropertySetId, onestore::mapping_table::mapping_table_fallback, shared::{
+    one::property_set::PropertySetId,
+    onestore::mapping_table::mapping_table_fallback,
+    shared::{
         exguid::ExGuid, file_data_ref::FileBlob, jcid::JcId, object_prop_set::ObjectPropSet,
         prop_set::PropertySet,
-    }
+    },
 };
 use parser_utils::Result;
 use std::rc::Rc;

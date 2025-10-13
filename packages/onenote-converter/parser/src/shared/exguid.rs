@@ -1,8 +1,8 @@
 use super::compact_u64::CompactU64;
 use crate::shared::guid::Guid;
+use parser_utils::Reader;
 use parser_utils::errors::{ErrorKind, Result};
 use parser_utils::parse;
-use parser_utils::Reader;
 use std::fmt;
 use std::ops::BitXor;
 
@@ -30,11 +30,7 @@ impl ExGuid {
     }
 
     pub(crate) fn as_option(&self) -> Option<ExGuid> {
-        if self.is_nil() {
-            None
-        } else {
-            Some(*self)
-        }
+        if self.is_nil() { None } else { Some(*self) }
     }
 
     pub(crate) fn from_guid(guid: Guid, value: u32) -> ExGuid {

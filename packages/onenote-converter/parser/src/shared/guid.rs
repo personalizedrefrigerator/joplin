@@ -1,6 +1,6 @@
+use parser_utils::Reader;
 use parser_utils::errors::Result;
 use parser_utils::parse::{Parse, ParseHttpb};
-use parser_utils::Reader;
 use std::fmt;
 use std::ops::BitXor;
 use uuid::Uuid;
@@ -100,9 +100,6 @@ mod test {
     fn should_support_xor() {
         let zeros = Guid::from_str("{00000000-0000-0000-0000-000000000000}").unwrap();
         let nonzero = Guid::from_str("{10100300-0400-0500-0600-008000900A00}").unwrap();
-        assert_eq!(
-            zeros ^ nonzero,
-            nonzero,
-        );
+        assert_eq!(zeros ^ nonzero, nonzero,);
     }
 }

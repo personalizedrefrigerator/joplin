@@ -1,5 +1,5 @@
-use parser_utils::errors::{ErrorKind, Result};
 use parser_utils::Reader;
+use parser_utils::errors::{ErrorKind, Result};
 
 use crate::local_onestore::common::{FileChunkReference, FileChunkReference64x32};
 use crate::local_onestore::file_node::{FileNode, FileNodeData};

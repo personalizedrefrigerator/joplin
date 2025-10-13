@@ -2,13 +2,16 @@ use std::{collections::HashMap, rc::Rc};
 
 use crate::{
     local_onestore::{
-        file_node::{file_node::RevisionManifestListStartFND, FileNodeData},
+        file_node::{FileNodeData, file_node::RevisionManifestListStartFND},
         file_structure::FileNodeDataIterator,
         objects::{parse_context::ParseContext, revision::Revision},
     },
     shared::exguid::ExGuid,
 };
-use parser_utils::{errors::{ErrorKind, Result}, log_warn};
+use parser_utils::{
+    errors::{ErrorKind, Result},
+    log_warn,
+};
 
 #[derive(Debug)]
 pub struct RevisionManifestList {

@@ -1,7 +1,7 @@
 use color_eyre::eyre::{Result, eyre};
 pub use parser::Parser;
 use std::panic;
-use wasm_bindgen::{prelude::wasm_bindgen, JsError};
+use wasm_bindgen::{JsError, prelude::wasm_bindgen};
 
 use parser_utils::{fs_driver, log};
 

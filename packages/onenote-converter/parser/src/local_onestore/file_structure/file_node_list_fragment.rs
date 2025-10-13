@@ -28,9 +28,7 @@ impl FileNodeListFragment {
 
         // Sometimes, the node count is specified externally
         let mut maximum_node_count = match context.get_file_node_count(&header) {
-            Some(count) => {
-                count
-            }
+            Some(count) => count,
             None => {
                 log_warn!("No node count found.");
                 usize::MAX

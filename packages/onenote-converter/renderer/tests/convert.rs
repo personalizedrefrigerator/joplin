@@ -26,7 +26,10 @@ fn setup(test_id: &str) -> TestResources {
 
 #[test]
 fn convert_web_export() {
-    let TestResources { output_dir, test_data_dir } = setup("web_export");
+    let TestResources {
+        output_dir,
+        test_data_dir,
+    } = setup("web_export");
     let test_data_dir = test_data_dir.join("single-page");
 
     convert(
@@ -49,7 +52,10 @@ fn convert_web_export() {
 
 #[test]
 fn convert_desktop_export() {
-    let TestResources { output_dir, test_data_dir } = setup("desktop_export");
+    let TestResources {
+        output_dir,
+        test_data_dir,
+    } = setup("desktop_export");
     let test_data_dir = test_data_dir.join("onenote-2016");
 
     convert(

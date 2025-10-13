@@ -7,7 +7,7 @@ pub use parser_macros::Parse;
 /// In many cases, it is possible to auto-derive implementations for this trait. For example,
 /// ```
 /// use parser_utils::parse::Parse;
-/// 
+///
 /// #[derive(Parse)]
 /// #[validate(a > 3)]
 /// struct Example {

@@ -20,10 +20,11 @@ impl IdMapping {
     }
 
     pub fn resolve_id(&self, id: &CompactId) -> Result<ExGuid> {
-        let guid = self
-            .0
-            .get(&id.guid_index)
-            .ok_or(parser_error!(ResolutionFailed, "Missing mapping for ID (index: {})", id.guid_index))?;
+        let guid = self.0.get(&id.guid_index).ok_or(parser_error!(
+            ResolutionFailed,
+            "Missing mapping for ID (index: {})",
+            id.guid_index
+        ))?;
 
         Ok(ExGuid::from_guid(*guid, id.n.into()))
     }

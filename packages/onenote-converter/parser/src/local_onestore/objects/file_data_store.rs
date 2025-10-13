@@ -1,8 +1,8 @@
 use crate::{
     local_onestore::{
         file_node::{
-            file_node::{AttachmentInfo, FileData, FileDataStoreListReferenceFND},
             FileNodeData,
+            file_node::{AttachmentInfo, FileData, FileDataStoreListReferenceFND},
         },
         file_structure::FileNodeDataIterator,
     },

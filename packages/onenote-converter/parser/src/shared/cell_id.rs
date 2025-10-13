@@ -1,8 +1,8 @@
 use crate::shared::compact_u64::CompactU64;
 use crate::shared::exguid::ExGuid;
+use parser_utils::Reader;
 use parser_utils::errors::Result;
 use parser_utils::parse::ParseHttpb;
-use parser_utils::Reader;
 
 /// A FSSHTTP cell identifier.
 ///

@@ -1,5 +1,5 @@
-use std::rc::Rc;
 use std::fmt::Debug;
+use std::rc::Rc;
 
 #[derive(Clone, Default, Eq, PartialEq, PartialOrd)]
 pub struct FileBlob(pub Rc<Vec<u8>>);

@@ -13,8 +13,11 @@ use crate::{
     },
     shared::exguid::ExGuid,
 };
-use parser_utils::{errors::{Error, Result}, log_warn};
 use parser_utils::log;
+use parser_utils::{
+    errors::{Error, Result},
+    log_warn,
+};
 
 /// See [MS-ONESTORE 2.1.9](https://learn.microsoft.com/en-us/openspecs/office_file_formats/ms-onestore/90101e91-2f7f-4753-9332-31bed5b5c49d)
 #[derive(Debug)]
@@ -134,10 +137,7 @@ impl Revision {
                     log_warn!("An item with role {:?} is already present", root_role);
                 }
 
-                root_objects.insert(
-                    root_role,
-                    object_reference.oid_root,
-                );
+                root_objects.insert(root_role, object_reference.oid_root);
             } else if let FileNodeData::RootObjectReference2FNDX(object_reference) = current {
                 // .onetoc2
                 iterator.next();
