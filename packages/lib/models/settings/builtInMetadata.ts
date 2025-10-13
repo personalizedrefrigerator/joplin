@@ -1973,6 +1973,14 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 			section: 'note',
 		},
 
+		'scanner.requestTranscription': {
+			value: false,
+			type: SettingItemType.Bool,
+			label: () => 'Default value for the "queue for transcription" checkbox',
+			public: false,
+			appTypes: [AppType.Mobile],
+		},
+
 		'trash.autoDeletionEnabled': {
 			value: true,
 			type: SettingItemType.Bool,

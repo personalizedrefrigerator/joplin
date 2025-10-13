@@ -4,10 +4,12 @@ import { EditorView } from 'prosemirror-view';
 import createButton from '../../utils/dom/createButton';
 import { getEditorApi } from '../joplinEditorApiPlugin';
 import { Node } from 'prosemirror-model';
+import { Icon } from '../../vendor/icons/types';
 
 type LocalizeFunction = (_: OnLocalize)=> LocalizationResult;
 
 interface ButtonSpec {
+	icon?: Icon;
 	label: LocalizeFunction;
 	command: (node: Node, offset: number)=> Command;
 	showForNode?: (node: Node)=> boolean;
@@ -68,12 +70,17 @@ class FloatingButtonBar {
 			if (!hasCreatedButtons) {
 				const { localize } = getEditorApi(view.state);
 				this.container_.replaceChildren(...this.buttons_.map(buttonSpec => {
+					const label = buttonSpec.label(localize);
 					const button = createButton(
-						buttonSpec.label(localize),
+						buttonSpec.icon ? { label, icon: buttonSpec.icon() } : label,
 						() => { },
 					);
 
-					button.classList.add('action');
+					button.classList.add('action', 'action-button');
+					if (buttonSpec.icon) {
+						button.classList.add('-icon');
+					}
+
 					if (buttonSpec.className) {
 						button.classList.add(buttonSpec.className);
 					}

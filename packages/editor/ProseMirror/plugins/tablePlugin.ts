@@ -1,14 +1,17 @@
-import { addColumnAfter, addRowAfter, deleteColumn, deleteRow, deleteTable, tableEditing } from 'prosemirror-tables';
+import { addColumnAfter, addRowAfter, deleteColumn, deleteRow, tableEditing } from 'prosemirror-tables';
 import createFloatingButtonPlugin, { ToolbarPosition } from './utils/createFloatingButtonPlugin';
+import addColumnRightIcon from '../vendor/icons/addColumnRight';
+import addRowBelowIcon from '../vendor/icons/addRowBelow';
+import removeRowIcon from '../vendor/icons/removeRow';
+import removeColumnIcon from '../vendor/icons/removeColumn';
 
 const tablePlugin = [
 	tableEditing({ allowTableNodeSelection: true }),
 	createFloatingButtonPlugin('table', [
-		{ label: (_) => _('Add row'), command: () => addRowAfter },
-		{ label: (_) => _('Add column'), command: () => addColumnAfter },
-		{ label: (_) => _('Delete row'), command: () => deleteRow },
-		{ label: (_) => _('Delete column'), command: () => deleteColumn },
-		{ label: (_) => _('Delete table'), command: () => deleteTable },
+		{ icon: addRowBelowIcon, label: (_) => _('Add row'), command: () => addRowAfter },
+		{ icon: addColumnRightIcon, label: (_) => _('Add column'), command: () => addColumnAfter },
+		{ icon: removeRowIcon, label: (_) => _('Delete row'), command: () => deleteRow },
+		{ icon: removeColumnIcon, label: (_) => _('Delete column'), command: () => deleteColumn },
 	], ToolbarPosition.TopLeftOutside),
 ];
 
