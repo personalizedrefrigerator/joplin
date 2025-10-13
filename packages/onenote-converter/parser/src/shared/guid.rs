@@ -2,6 +2,7 @@ use parser_utils::errors::Result;
 use parser_utils::parse::{Parse, ParseHttpb};
 use parser_utils::Reader;
 use std::fmt;
+use std::ops::BitXor;
 use uuid::Uuid;
 
 /// A global UUID.
@@ -77,5 +78,31 @@ impl fmt::Display for Guid {
 impl fmt::Debug for Guid {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "Guid {}", self)
+    }
+}
+
+impl BitXor for Guid {
+    type Output = Self;
+    fn bitxor(self, rhs: Self) -> Self::Output {
+        let (high_bits_1, low_bits_1) = self.0.as_u64_pair();
+        let (high_bits_2, low_bits_2) = rhs.0.as_u64_pair();
+        let high_bits = high_bits_1 ^ high_bits_2;
+        let low_bits = low_bits_1 ^ low_bits_2;
+        Self(Uuid::from_u64_pair(high_bits, low_bits))
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::Guid;
+
+    #[test]
+    fn should_support_xor() {
+        let zeros = Guid::from_str("{00000000-0000-0000-0000-000000000000}").unwrap();
+        let nonzero = Guid::from_str("{10100300-0400-0500-0600-008000900A00}").unwrap();
+        assert_eq!(
+            zeros ^ nonzero,
+            nonzero,
+        );
     }
 }

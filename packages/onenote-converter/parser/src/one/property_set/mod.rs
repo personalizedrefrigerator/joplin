@@ -64,6 +64,8 @@ pub(crate) enum PropertySetId {
     TableRowNode = 0x00060023,
     TitleNode = 0x0006002C,
     TocContainer = 0x00020001,
+    VersionHistoryMetadata = 0x00020046,
+    VersionHistoryContent = 0x0006003C,
 
     // Undocumented:
     XpsContainer = 0x0008003A,

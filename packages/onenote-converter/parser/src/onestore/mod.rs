@@ -24,6 +24,8 @@ pub mod object_space;
 pub trait OneStore {
     fn get_type(&self) -> OneStoreType;
     fn data_root(&self) -> ObjectSpaceRef;
+    /// Fetches the object space that is parent to the object identified by the
+    /// given `id` (if any).
     fn object_space(&self, id: CellId) -> Option<ObjectSpaceRef>;
 }
 

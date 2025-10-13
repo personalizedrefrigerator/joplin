@@ -4,6 +4,7 @@ use parser_utils::errors::{ErrorKind, Result};
 use parser_utils::parse;
 use parser_utils::Reader;
 use std::fmt;
+use std::ops::BitXor;
 
 /// A variable-width encoding of an extended GUID (GUID + 32 bit value)
 ///
@@ -117,5 +118,16 @@ impl parse::ParseHttpb for ExGuid {
 impl fmt::Debug for ExGuid {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "ExGuid {{{}, {}}}", self.guid, self.value)
+    }
+}
+
+impl BitXor for ExGuid {
+    type Output = Self;
+
+    fn bitxor(self, rhs: Self) -> Self::Output {
+        Self {
+            guid: self.guid ^ rhs.guid,
+            value: self.value ^ rhs.value,
+        }
     }
 }

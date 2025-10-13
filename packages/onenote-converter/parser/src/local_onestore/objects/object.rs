@@ -9,7 +9,7 @@ use crate::{
         file_structure::FileNodeDataIterator,
         objects::parse_context::ParseContext,
     },
-    shared::compact_id::CompactId,
+    shared::{compact_id::CompactId, property::PropertyValue},
 };
 use parser_utils::errors::Result;
 
@@ -24,16 +24,16 @@ pub struct Object {
 
 impl Debug for Object {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let attachment_info = if let Some(info) = &self.attachment_info {
-            format!(", attachment={:?}", info)
-        } else {
-            "".into()
-        };
-        write!(
-            f,
-            "Object(jc_id={:?}, props=...{})",
-            self.data.jc_id, attachment_info
-        )
+        let mut debug = f.debug_struct("Object");
+        debug.field("id", &self.data.jc_id);
+
+        if let Some(info) = &self.attachment_info {
+            debug.field("attachment", info);
+        }
+
+        let props: Vec<&PropertyValue> = self.data.props.properties().values().collect();
+        debug.field("props", &props);
+        debug.finish()
     }
 }
 

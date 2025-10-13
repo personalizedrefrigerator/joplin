@@ -41,7 +41,14 @@ pub(crate) fn parse(object: &Object) -> Result<Data> {
             .unwrap_or_default();
     let page_metadata =
         ObjectReference::parse_vec(PropertyType::MetaDataObjectsAboveGraphSpace, object)?
-            .unwrap_or_default();
+            .unwrap_or_default()
+            .into_iter()
+            // This must be xored with a seed value:
+            //  { 0x22a8c031, 0x3600, 0x42ee, { 0xb7, 0x14, 0xd7, 0xac, 0xda, 0x24, 0x35, 0xe8 } }
+            // As per [\[MS-ONE\] 2.2.18] and an analysis of the spec in comments in https://github.com/alegrigoriev/onenote2xml/,
+            // this corresponds to "{22a8c031-3600-42ee-b714-d7acda2435e8}".
+            .map(|item| item ^ exguid!({"{22a8c031-3600-42ee-b714-d7acda2435e8}", 0}))
+            .collect();
     let created_at = Timestamp::parse(PropertyType::TopologyCreationTimeStamp, object)?;
 
     let data = Data {

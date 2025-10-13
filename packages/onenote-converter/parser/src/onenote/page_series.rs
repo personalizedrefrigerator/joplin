@@ -2,9 +2,11 @@ use std::rc::Rc;
 
 use crate::one::property_set::page_series_node;
 use crate::onenote::page::{parse_page, Page};
+use crate::onenote::version_history::is_version_history;
 use crate::onestore::OneStore;
 use crate::shared::exguid::ExGuid;
 use parser_utils::errors::{ErrorKind, Result};
+use parser_utils::log_warn;
 
 /// A series of page.
 ///
@@ -31,15 +33,28 @@ pub(crate) fn parse_page_series(id: ExGuid, store: Rc<dyn OneStore>) -> Result<P
         .ok_or_else(|| ErrorKind::MalformedOneNoteData("page series object is missing".into()))?;
     let data = page_series_node::parse(object.as_ref())?;
 
-    let pages = data
-        .page_spaces
+    let pages = data.page_spaces
         .into_iter()
         .map(|page_space_id| {
-            store
+            let space = store
                 .object_space(page_space_id)
-                .ok_or_else(|| ErrorKind::MalformedOneNoteData("page space is missing".into()))
+                .ok_or_else(|| ErrorKind::MalformedOneNoteData("page space is missing".into()))?;
+            Ok(space)
         })
-        .map(|page_space| parse_page(page_space?))
+        .filter_map(|page_space| {
+            match page_space {
+                Ok(page_space) => {
+                    // Some versions of OneNote include version histories as the children of a page series.
+                    if is_version_history(page_space.clone()) {
+                        log_warn!("Skipping version-history-only page: {:?}", page_space);
+                        None
+                    } else {
+                        Some(parse_page(page_space))
+                    }
+                },
+                Err(error) => Some(Err(error)),
+            }
+        })
         .collect::<Result<_>>()?;
 
     Ok(PageSeries { pages })
