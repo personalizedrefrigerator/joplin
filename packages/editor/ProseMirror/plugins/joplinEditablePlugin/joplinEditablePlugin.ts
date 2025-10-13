@@ -245,6 +245,6 @@ export default [
 				className: 'edit-button',
 				command: (_node, offset) => editAt(offset),
 			},
-		], ToolbarPosition.TopRightInside)
+		], ToolbarPosition.AnchorTopRight)
 	)),
 ];

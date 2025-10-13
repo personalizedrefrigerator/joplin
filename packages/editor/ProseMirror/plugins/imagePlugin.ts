@@ -263,7 +263,7 @@ const imagePlugin = [
 	}),
 	createFloatingButtonPlugin('image', [
 		{ label: _ => _('Label'), command: (_node, offset) => editAltTextAt(offset) },
-	], ToolbarPosition.TopRightInside),
+	], ToolbarPosition.AnchorTopRight),
 ];
 
 export default imagePlugin;

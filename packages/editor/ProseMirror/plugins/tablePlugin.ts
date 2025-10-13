@@ -8,11 +8,27 @@ import removeColumnIcon from '../vendor/icons/removeColumn';
 const tablePlugin = [
 	tableEditing({ allowTableNodeSelection: true }),
 	createFloatingButtonPlugin('table', [
-		{ icon: addRowBelowIcon, label: (_) => _('Add row'), command: () => addRowAfter },
-		{ icon: addColumnRightIcon, label: (_) => _('Add column'), command: () => addColumnAfter },
-		{ icon: removeRowIcon, label: (_) => _('Delete row'), command: () => deleteRow },
-		{ icon: removeColumnIcon, label: (_) => _('Delete column'), command: () => deleteColumn },
-	], ToolbarPosition.TopLeftOutside),
+		{
+			icon: addRowBelowIcon,
+			label: (_) => _('Add row'),
+			command: () => addRowAfter,
+		},
+		{
+			icon: addColumnRightIcon,
+			label: (_) => _('Add column'),
+			command: () => addColumnAfter,
+		},
+		{
+			icon: removeRowIcon,
+			label: (_) => _('Delete row'),
+			command: () => deleteRow,
+		},
+		{
+			icon: removeColumnIcon,
+			label: (_) => _('Delete column'),
+			command: () => deleteColumn,
+		},
+	], ToolbarPosition.FloatAboveBelow),
 ];
 
 export default tablePlugin;
