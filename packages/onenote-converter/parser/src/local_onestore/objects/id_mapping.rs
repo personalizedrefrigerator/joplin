@@ -1,5 +1,5 @@
 use crate::shared::{compact_id::CompactId, exguid::ExGuid, guid::Guid};
-use parser_utils::errors::{ErrorKind, Result};
+use parser_utils::errors::Result;
 use std::{collections::HashMap, fmt::Debug};
 
 /// A subset of the global ID table that applies to a particular range of nodes.
@@ -23,9 +23,7 @@ impl IdMapping {
         let guid = self
             .0
             .get(&id.guid_index)
-            .ok_or(ErrorKind::ResolutionFailed(
-                "Missing mapping for ID.".into(),
-            ))?;
+            .ok_or(parser_error!(ResolutionFailed, "Missing mapping for ID (index: {})", id.guid_index))?;
 
         Ok(ExGuid::from_guid(*guid, id.n.into()))
     }
