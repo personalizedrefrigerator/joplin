@@ -20,8 +20,8 @@ pub trait FileApiDriver: Send + Sync {
     fn join(&self, path_1: &str, path_2: &str) -> String;
 
     fn remove_prefix<'a>(&self, full_path: &'a str, prefix: &str) -> &'a str {
-        if full_path.starts_with(prefix) {
-            &full_path[prefix.len()..]
+        if let Some(without_prefix) = full_path.strip_prefix(prefix) {
+            without_prefix
         } else {
             full_path
         }
@@ -36,10 +36,6 @@ pub trait FileApiDriver: Send + Sync {
         let dir_name = self.get_dir_name(path);
         let result = self.get_file_name(&dir_name);
 
-        if let Some(value) = result {
-            if value == "" { None } else { Some(value) }
-        } else {
-            None
-        }
+        result.filter(|value| !value.is_empty())
     }
 }

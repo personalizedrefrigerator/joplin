@@ -22,15 +22,15 @@ impl FileApiDriver for FileApiDriverImpl {
     }
 
     fn read_file(&self, path: &str) -> ApiResult<Vec<u8>> {
-        Ok(fs::read(path)?)
+        fs::read(path)
     }
 
     fn write_file(&self, path: &str, data: &[u8]) -> ApiResult<()> {
-        Ok(fs::write(path, data)?)
+        fs::write(path, data)
     }
 
     fn exists(&self, path: &str) -> ApiResult<bool> {
-        Ok(fs::exists(path)?)
+        fs::exists(path)
     }
 
     fn make_dir(&self, path: &str) -> ApiResult<()> {
@@ -40,10 +40,9 @@ impl FileApiDriver for FileApiDriverImpl {
     }
 
     fn get_file_name(&self, path: &str) -> Option<String> {
-        match Path::new(path).file_name() {
-            Some(name) => Some(name.to_string_lossy().into()),
-            None => None,
-        }
+        Path::new(path)
+            .file_name()
+            .map(|name| name.to_string_lossy().into())
     }
     fn get_file_extension(&self, path: &str) -> String {
         match Path::new(path).extension() {

@@ -597,7 +597,7 @@ impl<RefSize: Parse> ObjectDeclarationNode for ObjectDeclarationFileDataRefCount
         self.oid
     }
 
-    fn get_props<'a>(&'a self) -> Option<&'a ObjectPropSet> {
+    fn get_props(&self) -> Option<&ObjectPropSet> {
         None
     }
 

@@ -38,14 +38,14 @@ pub fn parseable_derive(input: proc_macro::TokenStream) -> proc_macro::TokenStre
 fn process_fields(data: &syn::Data, attrs: &Vec<syn::Attribute>) -> TokenStream {
     let validation = attrs
         .iter()
-        .map(|a| {
+        .filter_map(|a| {
             if a.path().is_ident("validate") {
                 let validation: Expr = a
                     .parse_args()
                     .expect("validate must have a single validation argument");
                 let validation_str = format!(
                     "Failed to validate: {:}",
-                    validation.clone().into_token_stream().to_string()
+                    validation.clone().into_token_stream()
                 );
                 Some(quote_spanned! {validation.span() =>
                     #[allow(clippy::nonminimal_bool)]
@@ -58,8 +58,7 @@ fn process_fields(data: &syn::Data, attrs: &Vec<syn::Attribute>) -> TokenStream 
             } else {
                 None
             }
-        })
-        .filter_map(|field| field);
+        });
 
     for attr in attrs {
         if attr.path().is_ident("pad_to_alignment") {

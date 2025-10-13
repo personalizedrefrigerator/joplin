@@ -118,7 +118,7 @@ impl Revision {
                     );
                 }
 
-                if objects.len() > 0 {
+                if !objects.is_empty() {
                     // .onetoc2 only
                     object_groups.push(ObjectGroupList::from_objects(
                         objects,

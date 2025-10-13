@@ -48,7 +48,7 @@ impl ParseContext {
         Self {
             id_map: self.id_map.clone(),
             file_data: self.file_data.clone(),
-            context_id: context_id,
+            context_id,
         }
     }
 

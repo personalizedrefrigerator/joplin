@@ -61,8 +61,7 @@ impl OneStore for OneStoreFile {
             .root_file_node_list
             .object_spaces
             .iter()
-            .find(|space| space.id == id.0)
-            .map(|space| space);
+            .find(|space| space.id == id.0);
         if let Some(result) = result {
             Some(result.clone())
         } else {

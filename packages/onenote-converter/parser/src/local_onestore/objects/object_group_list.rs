@@ -101,7 +101,7 @@ impl ObjectGroupList {
         Self {
             id: ExGuid::fallback(),
             id_table,
-            objects: objects,
+            objects,
         }
     }
 }

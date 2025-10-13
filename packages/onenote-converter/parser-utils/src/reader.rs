@@ -42,8 +42,8 @@ impl<'a> Clone for Reader<'a> {
 impl<'a> Reader<'a> {
     pub fn new(data: &'a [u8]) -> Reader<'a> {
         Reader {
-            buff: &data[..],
-            original: &data[..],
+            buff: data,
+            original: data,
         }
     }
 
