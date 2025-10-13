@@ -2,14 +2,11 @@ use std::{fmt::Debug, rc::Rc};
 
 use crate::{
     local_onestore::{
-        file_node::{
-            file_node::{AttachmentInfo, ObjectDeclarationNode},
-            FileNodeData,
-        },
+        file_node::{ file_node::ObjectDeclarationNode, FileNodeData },
         file_structure::FileNodeDataIterator,
         objects::parse_context::ParseContext,
     },
-    shared::{compact_id::CompactId, property::PropertyValue},
+    shared::compact_id::CompactId,
 };
 use parser_utils::errors::Result;
 
@@ -18,22 +15,12 @@ type ExportedObject = crate::onestore::object::Object;
 #[derive(Clone)]
 pub struct Object {
     pub data: Rc<ExportedObject>,
-    attachment_info: Option<AttachmentInfo>,
     pub compact_id: CompactId,
 }
 
 impl Debug for Object {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let mut debug = f.debug_struct("Object");
-        debug.field("id", &self.data.jc_id);
-
-        if let Some(info) = &self.attachment_info {
-            debug.field("attachment", info);
-        }
-
-        let props: Vec<&PropertyValue> = self.data.props.properties().values().collect();
-        debug.field("props", &props);
-        debug.finish()
+        self.data.fmt(f)
     }
 }
 
@@ -91,7 +78,6 @@ impl Object {
         };
         Ok(Self {
             data: Rc::new(data),
-            attachment_info: declaration.get_attachment_info(),
             compact_id: declaration.get_compact_id(),
         })
     }

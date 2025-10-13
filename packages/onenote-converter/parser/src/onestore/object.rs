@@ -1,10 +1,9 @@
 use super::mapping_table::MappingTable;
 use crate::{
-    onestore::mapping_table::mapping_table_fallback,
-    shared::{
+    one::property_set::PropertySetId, onestore::mapping_table::mapping_table_fallback, shared::{
         exguid::ExGuid, file_data_ref::FileBlob, jcid::JcId, object_prop_set::ObjectPropSet,
         prop_set::PropertySet,
-    },
+    }
 };
 use parser_utils::Result;
 use std::rc::Rc;
@@ -32,7 +31,20 @@ pub(crate) struct Object {
 
 impl std::fmt::Debug for Object {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "Object(type:{:?})", self.jc_id)
+        let mut debug = f.debug_struct("Object");
+        if let Some(id) = &PropertySetId::from_jcid(self.jc_id) {
+            debug.field("id", id);
+        } else {
+            // Unknown object type
+            debug.field("id", &self.jc_id);
+        }
+
+        if let Some(info) = &self.file_data {
+            debug.field("file_data", &info.load());
+        }
+
+        debug.field("props", self.props.properties());
+        debug.finish()
     }
 }
 

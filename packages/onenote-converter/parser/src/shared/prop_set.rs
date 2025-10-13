@@ -2,13 +2,14 @@ use crate::shared::property::{PropertyId, PropertyValue};
 use parser_utils::errors::Result;
 use parser_utils::Reader;
 use std::collections::HashMap;
+use std::fmt::Debug;
 
 /// A property set.
 ///
 /// See [\[MS-ONESTORE\] 2.6.7].
 ///
 /// [\[MS-ONESTORE\] 2.6.7]: https://docs.microsoft.com/en-us/openspecs/office_file_formats/ms-onestore/88a64c18-f815-4ebc-8590-ddd432024ab9
-#[derive(Debug, Clone, Default)]
+#[derive(Clone, Default)]
 pub(crate) struct PropertySet {
     /// Maps from PropertyId values to (index, PropertyValue).
     /// Values for PropertyId can be found in [\[MS-ONESTORE\] 2.1.12](https://learn.microsoft.com/en-us/openspecs/office_file_formats/ms-one/e9bf7da8-7aab-4668-be5e-e0c421175e3c).
@@ -19,6 +20,19 @@ pub(crate) struct PropertySet {
     /// assert_eq!(propset.get(PropertyType::Bold), None);
     /// ```
     values: HashMap<u32, (usize, PropertyValue)>,
+}
+
+impl Debug for PropertySet {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut debug_map = f.debug_map();
+        for (key, (_, value)) in &self.values {
+            let formatted_key = format!("{:#0x}", key);
+            // Use the default compact representation of the value
+            let formatted_value = format!("{:?}", value);
+            debug_map.entry(&formatted_key, &formatted_value);
+        }
+        debug_map.finish()
+    }
 }
 
 impl PropertySet {

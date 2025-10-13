@@ -1,7 +1,15 @@
 use std::rc::Rc;
+use std::fmt::Debug;
 
-#[derive(Clone, Debug, Default, Eq, PartialEq, PartialOrd)]
+#[derive(Clone, Default, Eq, PartialEq, PartialOrd)]
 pub struct FileBlob(pub Rc<Vec<u8>>);
+
+impl Debug for FileBlob {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let len = self.0.len();
+        write!(f, "FileBlob [ {:?} KiB ]", len / 1024)
+    }
+}
 
 impl FileBlob {
     pub fn as_ref(&self) -> &[u8] {
