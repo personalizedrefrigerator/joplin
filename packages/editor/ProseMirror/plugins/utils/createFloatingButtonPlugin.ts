@@ -104,8 +104,11 @@ class FloatingButtonBar implements PluginView {
 			const validCandidates = positionCandidates.filter(position => {
 				return position >= viewportTop && position + tooltipBox.height <= viewportBottom && Math.abs(position - cursorTop) > 50;
 			});
-			overlay.style.left = `${Math.max(nodeBbox.left - parentBox.left, 0)}px`;
 			overlay.style.top = `${validCandidates[0] ?? positionCandidates[0]}px`;
+
+			const targetCenter = nodeBbox.left + nodeBbox.width / 2;
+			const currentCenter = parentBox.left + tooltipBox.width / 2;
+			overlay.style.left = `${Math.max(targetCenter - currentCenter, 0)}px`;
 		} else if (this.position_ === ToolbarPosition.AnchorTopRight) {
 			overlay.style.right = `${parentBox.width - nodeBbox.width - (nodeBbox.left - parentBox.left)}px`;
 			overlay.style.top = `${nodeBbox.top - parentBox.top}px`;
@@ -167,9 +170,9 @@ class FloatingButtonBar implements PluginView {
 						() => { },
 					);
 
-					button.classList.add('action', 'action-button');
+					button.classList.add('action');
 					if (buttonSpec.icon) {
-						button.classList.add('-icon');
+						button.classList.add('action-button', '-icon');
 					}
 
 					if (buttonSpec.className) {

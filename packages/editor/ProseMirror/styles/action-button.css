@@ -1,12 +1,20 @@
 
 .action-button {
-	background-color: var(--joplin-background-color3);
-	color: var(--joplin-color);
-	border: 1px solid var(--joplin-code-border-color);
-	padding: 6px;
+	background-color: transparent;
+	color: currentColor;
+	border-radius: 48px;
 	transition: background-color 0.2s ease, opacity 0.2s ease;
 }
 
 .action-button:hover {
 	background-color: var(--joplin-background-color-hover3);
+}
+
+.action-button.-icon {
+	width: 48px;
+	height: 48px;
+}
+
+.action-button > .icon {
+	vertical-align: middle;
 }
