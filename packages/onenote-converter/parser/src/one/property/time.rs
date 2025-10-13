@@ -50,8 +50,4 @@ impl Timestamp {
 
         Ok(timestamp)
     }
-
-    pub(crate) fn fallback() -> Self {
-        Self(0)
-    }
 }
