@@ -3,8 +3,8 @@ use crate::fsshttpb::data::object_types::ObjectType;
 use crate::fsshttpb::data::stream_object::ObjectHeader;
 use crate::fsshttpb::data_element::DataElement;
 use crate::shared::file_data_ref::FileBlob;
-use parser_utils::errors::Result;
 use parser_utils::Reader;
+use parser_utils::errors::Result;
 use std::fmt;
 
 /// An object data blob.

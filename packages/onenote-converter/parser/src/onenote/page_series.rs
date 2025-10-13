@@ -1,9 +1,9 @@
 use std::rc::Rc;
 
 use crate::one::property_set::page_series_node;
-use crate::onenote::page::{parse_page, Page};
-use crate::onestore::object_space::ObjectSpaceRef;
+use crate::onenote::page::{Page, parse_page};
 use crate::onestore::OneStore;
+use crate::onestore::object_space::ObjectSpaceRef;
 use crate::shared::exguid::ExGuid;
 use parser_utils::errors::{ErrorKind, Result};
 
@@ -32,7 +32,8 @@ pub(crate) fn parse_page_series(id: ExGuid, store: Rc<dyn OneStore>) -> Result<P
         .ok_or_else(|| ErrorKind::MalformedOneNoteData("page series object is missing".into()))?;
     let data = page_series_node::parse(object.as_ref())?;
 
-    let pages = data.page_spaces
+    let pages = data
+        .page_spaces
         .into_iter()
         .map(|page_space_id| {
             let space = store
@@ -40,9 +41,7 @@ pub(crate) fn parse_page_series(id: ExGuid, store: Rc<dyn OneStore>) -> Result<P
                 .ok_or_else(|| ErrorKind::MalformedOneNoteData("page space is missing".into()))?;
             Ok(space)
         })
-        .map(|page_space: Result<ObjectSpaceRef>| {
-            parse_page(page_space?)
-        })
+        .map(|page_space: Result<ObjectSpaceRef>| parse_page(page_space?))
         .collect::<Result<_>>()?;
 
     Ok(PageSeries { pages })

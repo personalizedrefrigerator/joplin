@@ -1,6 +1,6 @@
 use crate::one::property::object_reference::ObjectReference;
 use crate::one::property::object_space_reference::ObjectSpaceReference;
-use crate::one::property::{simple, PropertyType};
+use crate::one::property::{PropertyType, simple};
 use crate::onestore::object::Object;
 use crate::shared::compact_id::CompactId;
 use crate::shared::jcid::JcId;

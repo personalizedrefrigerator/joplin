@@ -4,9 +4,9 @@ use crate::fsshttpb::data_element::DataElement;
 use crate::shared::cell_id::CellId;
 use crate::shared::exguid::ExGuid;
 use crate::shared::guid::Guid;
+use parser_utils::Reader;
 use parser_utils::errors::Result;
 use parser_utils::parse::ParseHttpb;
-use parser_utils::Reader;
 use std::collections::HashMap;
 
 /// A storage manifest.

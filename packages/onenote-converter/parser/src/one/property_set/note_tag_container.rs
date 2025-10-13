@@ -1,7 +1,7 @@
+use crate::one::property::PropertyType;
 use crate::one::property::object_reference::ObjectReference;
 use crate::one::property::object_space_reference::ObjectSpaceReference;
 use crate::one::property::time::Time;
-use crate::one::property::PropertyType;
 use crate::shared::compact_id::CompactId;
 use crate::shared::exguid::ExGuid;
 use crate::shared::jcid::JcId;

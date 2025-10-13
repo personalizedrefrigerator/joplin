@@ -2,9 +2,9 @@ use crate::fsshttpb::data::object_types::ObjectType;
 use crate::fsshttpb::data::stream_object::ObjectHeader;
 use crate::fsshttpb::data_element::DataElement;
 use crate::shared::exguid::ExGuid;
+use parser_utils::Reader;
 use parser_utils::errors::{ErrorKind, Result};
 use parser_utils::parse::ParseHttpb;
-use parser_utils::Reader;
 
 /// A revision manifest.
 ///
@@ -61,9 +61,13 @@ impl DataElement {
                 }
                 _ => {
                     return Err(ErrorKind::MalformedFssHttpBData(
-                        format!("unexpected object type (in revision_manifest): {:x}", object_header.object_type).into(),
+                        format!(
+                            "unexpected object type (in revision_manifest): {:x}",
+                            object_header.object_type
+                        )
+                        .into(),
                     )
-                    .into())
+                    .into());
                 }
             }
         }

@@ -5,9 +5,9 @@ use crate::fsshttpb::data_element::DataElement;
 use crate::shared::cell_id::CellId;
 use crate::shared::compact_u64::CompactU64;
 use crate::shared::exguid::ExGuid;
+use parser_utils::Reader;
 use parser_utils::errors::{ErrorKind, Result};
 use parser_utils::parse::ParseHttpb;
-use parser_utils::Reader;
 use std::fmt;
 
 /// An object group.
@@ -203,7 +203,7 @@ impl DataElement {
                     )
                     .into(),
                 )
-                .into())
+                .into());
             }
         }
         let objects = DataElement::parse_object_group_data(reader)?;
@@ -261,9 +261,13 @@ impl DataElement {
                 }
                 _ => {
                     return Err(ErrorKind::MalformedFssHttpBData(
-                        format!("unexpected object type (in object_group): {:x}", object_header.object_type).into(),
+                        format!(
+                            "unexpected object type (in object_group): {:x}",
+                            object_header.object_type
+                        )
+                        .into(),
                     )
-                    .into())
+                    .into());
                 }
             }
         }
@@ -331,9 +335,13 @@ impl DataElement {
                 }
                 _ => {
                     return Err(ErrorKind::MalformedFssHttpBData(
-                        format!("unexpected object type (in object_group): {:x}", object_header.object_type).into(),
+                        format!(
+                            "unexpected object type (in object_group): {:x}",
+                            object_header.object_type
+                        )
+                        .into(),
                     )
-                    .into())
+                    .into());
                 }
             }
         }

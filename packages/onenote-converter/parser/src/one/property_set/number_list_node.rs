@@ -1,10 +1,10 @@
 use crate::one::property::color_ref::ColorRef;
 use crate::one::property::time::Time;
-use crate::one::property::{simple, PropertyType};
+use crate::one::property::{PropertyType, simple};
 use crate::one::property_set::PropertySetId;
 use crate::onestore::object::Object;
 use parser_utils::errors::{ErrorKind, Result};
-use std::char::{decode_utf16, REPLACEMENT_CHARACTER};
+use std::char::{REPLACEMENT_CHARACTER, decode_utf16};
 
 /// A number list definition.
 ///
@@ -28,9 +28,7 @@ pub(crate) struct Data {
 
 pub(crate) fn parse(object: &Object) -> Result<Data> {
     if object.id() != PropertySetId::NumberListNode.as_jcid() {
-        return Err(
-            unexpected_object_type_error!(object.id().0).into()
-        );
+        return Err(unexpected_object_type_error!(object.id().0).into());
     }
 
     let last_modified = Time::parse(PropertyType::LastModifiedTime, object)?.ok_or_else(|| {

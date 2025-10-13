@@ -1,5 +1,5 @@
 use crate::one::property::object_reference::ObjectReference;
-use crate::one::property::{simple, PropertyType};
+use crate::one::property::{PropertyType, simple};
 use crate::one::property_set::PropertySetId;
 use crate::onestore::object::Object;
 use crate::shared::exguid::ExGuid;
@@ -13,9 +13,7 @@ pub(crate) struct Data {
 
 pub(crate) fn parse(object: &Object) -> Result<Data> {
     if object.id() != PropertySetId::InkDataNode.as_jcid() {
-        return Err(
-            unexpected_object_type_error!(object.id().0).into()
-        );
+        return Err(unexpected_object_type_error!(object.id().0).into());
     }
 
     let strokes =
