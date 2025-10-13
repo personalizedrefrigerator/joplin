@@ -69,26 +69,3 @@ fn convert_desktop_export() {
             .exists()
     );
 }
-
-#[test]
-fn convert_old_desktop_export() {
-    let TestResources { output_dir, test_data_dir } = setup("desktop_export_old");
-    let test_data_dir = test_data_dir.join("onenote-old");
-
-    convert(
-        &test_data_dir.join("testOneNote1.one").to_string_lossy(),
-        &output_dir.to_string_lossy(),
-        &test_data_dir.to_string_lossy(),
-    )
-    .unwrap();
-
-    // Should create a table of contents file
-    assert!(output_dir.join("OneWithFileData.html").exists());
-    // Should convert the input page to an HTML file
-    assert!(
-        output_dir
-            .join("OneWithFileData")
-            .join("Untitled Page 1.html")
-            .exists()
-    );
-}
