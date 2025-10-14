@@ -71,65 +71,75 @@ class FloatingButtonBar implements PluginView {
 		const view = this.view_;
 		const target = this.lastTarget_;
 		const position = this.view_.coordsAtPos(target.offset);
+		const targetElement = view.nodeDOM(target.offset);
+
 		// Fall back to document.body to support testing environments:
 		const parentBox = (this.container_.offsetParent ?? document.body).getBoundingClientRect();
 		const tooltipBox = this.container_.getBoundingClientRect();
-
-		this.container_.style.left = '';
-		this.container_.style.right = '';
-
-		const nodeElement = view.nodeDOM(target.offset);
-		const nodeBbox = nodeElement instanceof HTMLElement ? nodeElement.getBoundingClientRect() : {
+		const targetBox = targetElement instanceof HTMLElement ? targetElement.getBoundingClientRect() : {
 			...position,
 			width: 0,
 			height: 0,
 		};
 
+		this.container_.style.left = '';
+		this.container_.style.right = '';
+
 		if (this.position_ === ToolbarPosition.FloatAboveBelow) {
-			const top = nodeBbox.top - parentBox.top - tooltipBox.height;
-			const bottom = nodeBbox.top + nodeBbox.height - parentBox.top;
-			const viewportTop = window.visualViewport.pageTop;
-			const viewportBottom = viewportTop + window.visualViewport.height;
+			const above = targetBox.top - tooltipBox.height - parentBox.top;
+			const below = targetBox.top + targetBox.height - parentBox.top;
+			const viewportTop = window.visualViewport?.pageTop;
+			const viewportBottom = viewportTop + window.visualViewport?.height;
 			const cursorTop = viewportTop + view.coordsAtPos(view.state.selection.head).top;
-			const padding = 10;
 
-			// Always prefer showing the toolbar outside the element
-			const outsideCandidates = [
-				top, bottom,
-			];
+			const getOffsetTop = () => {
+				const padding = 10;
 
-			// If the toolbar must be displayed within the element to be visible, prefer
-			// less movement:
-			const previousTop = tooltipBox.top + viewportTop;
-			const insideCandidates = [
-				Math.max(viewportTop, top + padding),
-				Math.min(viewportBottom - padding - tooltipBox.height, bottom),
-			].sort((a, b) => {
-				const distanceA = Math.abs(a - previousTop);
-				const distanceB = Math.abs(b - previousTop);
-				return distanceA - distanceB;
-			}).filter(position => {
-				return position >= top && position <= bottom;
-			});
+				// If the toolbar must be displayed within the element to be visible, prefer
+				// less movement:
+				const previousTop = tooltipBox.top + viewportTop;
+				const insideCandidates = [
+					Math.max(viewportTop + padding, above),
+					Math.min(viewportBottom - padding - tooltipBox.height, below),
+				].sort((a, b) => {
+					const distanceA = Math.abs(a - previousTop);
+					const distanceB = Math.abs(b - previousTop);
+					return distanceA - distanceB;
+				}).filter(position => {
+					return position >= above && position <= below;
+				});
 
-			const positionCandidates = [...outsideCandidates, ...insideCandidates];
+				const positionCandidates = [
+					// Always prefer showing the toolbar outside the element
+					above, below,
+					// Fall back to showing the toolbar inside
+					...insideCandidates,
+				];
 
-			const validCandidates = positionCandidates.filter((position) => {
-				const candidateTop = position;
-				const candidateCenter = position + tooltipBox.height / 2;
-				const candidateBottom = position + tooltipBox.height;
-				return candidateTop >= viewportTop
-					&& candidateBottom <= viewportBottom
-					&& Math.abs(candidateCenter - cursorTop) > tooltipBox.height / 2 + padding;
-			});
-			overlay.style.top = `${validCandidates[0] ?? positionCandidates[0]}px`;
+				const validCandidates = positionCandidates.filter((position) => {
+					const candidateTop = position;
+					const candidateBottom = position + tooltipBox.height;
+					const candidateCenter = position + tooltipBox.height / 2;
+					const distanceFromCursor = Math.abs(candidateCenter - cursorTop);
 
-			const targetCenter = nodeBbox.left + nodeBbox.width / 2;
+					return candidateTop >= viewportTop
+						// Avoid showing the toolbar off the bottom edge of the screen
+						&& candidateBottom <= viewportBottom
+						// Avoid showing the toolbar on the same line as the cursor
+						&& distanceFromCursor > tooltipBox.height / 2 + padding;
+				});
+				return validCandidates[0] ?? positionCandidates[0];
+			};
+
+			const targetCenter = targetBox.left + targetBox.width / 2;
 			const currentCenter = parentBox.left + tooltipBox.width / 2;
+			// Subtract (parentBox.left, parentBox.top): style.left and style.top
+			// are relative to the parent, but the computed position is not.
 			overlay.style.left = `${Math.max(targetCenter - currentCenter, 0)}px`;
+			overlay.style.top = `${getOffsetTop()}px`;
 		} else if (this.position_ === ToolbarPosition.AnchorTopRight) {
-			overlay.style.right = `${parentBox.width - nodeBbox.width - (nodeBbox.left - parentBox.left)}px`;
-			overlay.style.top = `${nodeBbox.top - parentBox.top}px`;
+			overlay.style.right = `${parentBox.width - targetBox.width - (targetBox.left - parentBox.left)}px`;
+			overlay.style.top = `${targetBox.top - parentBox.top}px`;
 		}
 	}
 
