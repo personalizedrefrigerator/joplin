@@ -1,5 +1,5 @@
 import { addColumnAfter, addRowAfter, deleteColumn, deleteRow, tableEditing } from 'prosemirror-tables';
-import createFloatingButtonPlugin, { ToolbarPosition } from './utils/createFloatingButtonPlugin';
+import createFloatingButtonPlugin, { ToolbarType } from './utils/createFloatingButtonPlugin';
 import addColumnRightIcon from '../vendor/icons/addColumnRight';
 import addRowBelowIcon from '../vendor/icons/addRowBelow';
 import removeRowIcon from '../vendor/icons/removeRow';
@@ -28,7 +28,7 @@ const tablePlugin = [
 			label: (_) => _('Delete column'),
 			command: () => deleteColumn,
 		},
-	], ToolbarPosition.FloatAboveBelow),
+	], ToolbarType.FloatAboveBelow),
 ];
 
 export default tablePlugin;

@@ -16,7 +16,7 @@ interface ButtonSpec {
 	className?: string;
 }
 
-export enum ToolbarPosition {
+export enum ToolbarType {
 	// Attempts to keep the toolbar visible when the node
 	// is visible. While showing the toolbar outside the node
 	// is preferred, the toolbar will be shown inside the node
@@ -35,14 +35,26 @@ interface TargetNode {
 
 class FloatingButtonBar implements PluginView {
 	private container_: HTMLElement;
-	private lastTarget_: TargetNode|null = null;
-	private intersectionObserver_: IntersectionObserver|null;
+	private buttonRow_: ButtonRow;
+
+	private currentTarget_: TargetNode|null = null;
+	private observer_: ElementObserver;
 
 	public constructor(
-		private view_: EditorView, private targetNode_: string, private buttons_: ButtonSpec[], private position_: ToolbarPosition,
+		private view_: EditorView,
+		private targetNodeName_: string,
+		buttons: ButtonSpec[],
+		private type_: ToolbarType,
 	) {
 		this.container_ = document.createElement('div');
 		this.container_.classList.add('floating-button-bar');
+
+		this.buttonRow_ = new ButtonRow(this.container_, buttons);
+
+		this.observer_ = new ElementObserver(
+			this.type_ === ToolbarType.FloatAboveBelow,
+			() => this.repositionOverlay_(),
+		);
 
 		// Prevent other elements (e.g. checkboxes, links) from being between the toolbar button and the
 		// target element. If the toolbar is instead included **after** the Rich Text Editor's main content,
@@ -51,25 +63,22 @@ class FloatingButtonBar implements PluginView {
 		view_.dom.parentElement.prepend(this.container_);
 		this.update(view_, null);
 
-		if (this.position_ === ToolbarPosition.FloatAboveBelow) {
-			if (typeof IntersectionObserver !== 'undefined') {
-				this.intersectionObserver_ = new IntersectionObserver(() => {
-					this.repositionOverlay_();
-				});
-			}
-			document.addEventListener('scroll', this.onViewportUpdate_);
-			document.addEventListener('resize', this.onViewportUpdate_);
+		if (this.type_ === ToolbarType.AnchorTopRight) {
+			this.container_.classList.add('-anchored');
+		} else if (this.type_ === ToolbarType.FloatAboveBelow) {
+			this.container_.classList.add('-floating');
+		} else {
+			const unreachable_: never = this.type_;
+			throw new Error(`Unknown toolbar type: ${unreachable_}`);
 		}
 	}
 
-	private onViewportUpdate_ = () => this.repositionOverlay_();
-
 	private repositionOverlay_() {
-		if (!this.lastTarget_) return;
+		if (!this.currentTarget_) return;
 
 		const overlay = this.container_;
 		const view = this.view_;
-		const target = this.lastTarget_;
+		const target = this.currentTarget_;
 		const position = this.view_.coordsAtPos(target.offset);
 		const targetElement = view.nodeDOM(target.offset);
 
@@ -85,7 +94,7 @@ class FloatingButtonBar implements PluginView {
 		this.container_.style.left = '';
 		this.container_.style.right = '';
 
-		if (this.position_ === ToolbarPosition.FloatAboveBelow) {
+		if (this.type_ === ToolbarType.FloatAboveBelow) {
 			const above = targetBox.top - tooltipBox.height - parentBox.top;
 			const below = targetBox.top + targetBox.height - parentBox.top;
 			const viewportTop = window.visualViewport?.pageTop;
@@ -137,7 +146,7 @@ class FloatingButtonBar implements PluginView {
 			// are relative to the parent, but the computed position is not.
 			overlay.style.left = `${Math.max(targetCenter - currentCenter, 0)}px`;
 			overlay.style.top = `${getOffsetTop()}px`;
-		} else if (this.position_ === ToolbarPosition.AnchorTopRight) {
+		} else if (this.type_ === ToolbarType.AnchorTopRight) {
 			overlay.style.right = `${parentBox.width - targetBox.width - (targetBox.left - parentBox.left)}px`;
 			overlay.style.top = `${targetBox.top - parentBox.top}px`;
 		}
@@ -154,9 +163,9 @@ class FloatingButtonBar implements PluginView {
 		}
 
 		const findTargetNode = () => {
-			let target: TargetNode = null;
+			let target: TargetNode|null = null;
 			state.doc.nodesBetween(state.selection.from, state.selection.to, (node, offset) => {
-				if (node.type.name === this.targetNode_) {
+				if (node.type.name === this.targetNodeName_) {
 					const dom = view.nodeDOM(offset);
 					const domElement = dom instanceof HTMLElement ? dom : dom.parentElement;
 					target = { node, offset, element: domElement };
@@ -169,74 +178,113 @@ class FloatingButtonBar implements PluginView {
 		};
 
 		const target = findTargetNode();
-
-		// Only observe one element at a time
-		if (target?.element !== this.lastTarget_?.element) {
-			if (this.lastTarget_?.element) {
-				this.intersectionObserver_?.unobserve(this.lastTarget_.element);
-			}
-
-			if (target?.element) {
-				this.intersectionObserver_?.observe(target.element);
-			}
-		}
-
-		this.lastTarget_ = target;
+		this.observer_.setElement(target?.element);
+		this.currentTarget_ = target;
 
 		if (!target) {
 			this.container_.classList.add('-hidden');
 		} else {
 			this.container_.classList.remove('-hidden');
 
-			const hasCreatedButtons = this.container_.children.length === this.buttons_.length;
-			if (!hasCreatedButtons) {
-				const { localize } = getEditorApi(view.state);
-				this.container_.replaceChildren(...this.buttons_.map(buttonSpec => {
-					const label = buttonSpec.label(localize);
-					const button = createButton(
-						buttonSpec.icon ? { label, icon: buttonSpec.icon() } : label,
-						() => { },
-					);
-
-					button.classList.add('action');
-					if (buttonSpec.icon) {
-						button.classList.add('action-button', '-icon');
-					}
-
-					if (buttonSpec.className) {
-						button.classList.add(buttonSpec.className);
-					}
-
-					return button;
-				}));
-			}
-
-			for (let i = 0; i < this.buttons_.length; i++) {
-				const button = this.container_.children[i] as HTMLButtonElement;
-				const buttonSpec = this.buttons_[i];
-
-				const command = buttonSpec.command(target.node, target.offset);
-				button.onclick = () => {
-					command(view.state, view.dispatch, view);
-				};
-
-				button.disabled = !command(view.state);
-			}
-
+			this.buttonRow_.updateButtons(view, target);
 			this.repositionOverlay_();
 		}
 	}
 
 	public destroy() {
-		this.intersectionObserver_?.disconnect();
-		this.intersectionObserver_ = null;
-
-		document.removeEventListener('scroll', this.onViewportUpdate_);
-		document.removeEventListener('resize', this.onViewportUpdate_);
+		this.observer_.destroy();
 	}
 }
 
-const createFloatingButtonPlugin = (nodeName: string, actions: ButtonSpec[], position: ToolbarPosition) => {
+// Emits changes when the element's position changes.
+class ElementObserver {
+	private intersectionObserver_: IntersectionObserver|null;
+	private lastElement_: Element|null = null;
+
+	public constructor(private enabled_: boolean, private onNodeUpdate_: ()=> void) {
+		if (enabled_) {
+			if (typeof IntersectionObserver !== 'undefined') {
+				this.intersectionObserver_ = new IntersectionObserver(() => {
+					this.onNodeUpdate_();
+				});
+			}
+			document.addEventListener('scroll', this.onNodeUpdate_);
+			document.addEventListener('resize', this.onNodeUpdate_);
+		}
+	}
+
+	public setElement(element: Element|null) {
+		if (!this.enabled_ || element === this.lastElement_) return;
+
+		if (this.lastElement_) {
+			this.intersectionObserver_?.unobserve(this.lastElement_);
+		}
+
+		if (element) {
+			this.intersectionObserver_?.observe(element);
+		}
+
+		this.lastElement_ = element;
+	}
+
+	public destroy() {
+		if (!this.enabled_) return;
+
+		this.intersectionObserver_?.disconnect();
+		this.intersectionObserver_ = null;
+
+		document.removeEventListener('scroll', this.onNodeUpdate_);
+		document.removeEventListener('resize', this.onNodeUpdate_);
+	}
+}
+
+class ButtonRow {
+	private created_ = false;
+	public constructor(private container_: HTMLElement, private buttons_: ButtonSpec[]) { }
+
+	public updateButtons(view: EditorView, targetNode: TargetNode) {
+		// Late-init the buttons to allow accessing `view`:
+		if (!this.created_) {
+			this.created_ = true;
+
+			const { localize } = getEditorApi(view.state);
+			this.container_.replaceChildren(...this.buttons_.map(buttonSpec => {
+				const label = buttonSpec.label(localize);
+				const button = createButton(
+					buttonSpec.icon ? { label, icon: buttonSpec.icon() } : label,
+					() => { },
+				);
+
+				button.classList.add('action');
+				if (buttonSpec.icon) {
+					button.classList.add('action-button', '-icon');
+				}
+
+				if (buttonSpec.className) {
+					button.classList.add(buttonSpec.className);
+				}
+
+				return button;
+			}));
+		}
+
+		// Update the button listeners and states based on the current view and
+		// target node
+		for (let i = 0; i < this.buttons_.length; i++) {
+			const button = this.container_.children[i] as HTMLButtonElement;
+			const buttonSpec = this.buttons_[i];
+
+			const command = buttonSpec.command(targetNode.node, targetNode.offset);
+			button.onclick = () => {
+				command(view.state, view.dispatch, view);
+			};
+
+			button.disabled = !command(view.state);
+		}
+	}
+}
+
+const createFloatingButtonPlugin = (nodeName: string, actions: ButtonSpec[], position: ToolbarType) => {
 	return new Plugin({
 		view: (view) => new FloatingButtonBar(view, nodeName, actions, position),
 	});
