@@ -180,8 +180,8 @@ test.describe('markdownEditor', () => {
 		await expect(matches).toHaveCount(1);
 
 		// Should continue searching after switching to view-only mode
-		await noteEditor.toggleEditorLayoutButton.click();
-		await noteEditor.toggleEditorLayoutButton.click();
+		await noteEditor.toggleEditorLayout();
+		await noteEditor.toggleEditorLayout();
 		await expect(noteEditor.codeMirrorEditor).not.toBeVisible();
 		await expect(noteEditor.editorSearchInput).not.toBeVisible();
 		await expect(noteEditor.viewerSearchInput).toBeVisible();
@@ -194,7 +194,7 @@ test.describe('markdownEditor', () => {
 		await expect(matches).toHaveCount(0);
 
 		// After showing the viewer again, search should still be hidden
-		await noteEditor.toggleEditorLayoutButton.click();
+		await noteEditor.toggleEditorLayout();
 		await expect(noteEditor.codeMirrorEditor).toBeVisible();
 		await expect(noteEditor.editorSearchInput).not.toBeVisible();
 	});
@@ -273,6 +273,59 @@ test.describe('markdownEditor', () => {
 		const imageSize = await getImageSourceSize(renderedImage);
 		expect(imageSize[0]).toBeGreaterThan(0);
 		expect(imageSize[1]).toBeGreaterThan(0);
+	});
+
+	test('ctrl-clicking on note links should open the linked note (when the viewer is hidden)', async ({ mainWindow }) => {
+		const mainScreen = await new MainScreen(mainWindow).setup();
+		await mainScreen.createNewNote('Test note links 1');
+		const noteEditor = mainScreen.noteEditor;
+		await noteEditor.hideViewer();
+
+		await noteEditor.focusCodeMirrorEditor();
+		await mainWindow.keyboard.type('# Test');
+		await mainWindow.keyboard.press('Enter');
+		await mainWindow.keyboard.type('## Test 2');
+		await mainWindow.keyboard.press('Enter');
+		await mainWindow.keyboard.type('### Test 3');
+
+		// Create an intermediary note as a way of getting the note ID for the 1st note
+		await mainScreen.createNewNote('Test note links 2');
+		const editorContent = await noteEditor.contentLocator();
+		const note1Locator = mainScreen.noteList.getNoteItemByTitle('Test note links 1');
+		await note1Locator.dragTo(editorContent);
+
+		// Extract the note ID
+		const linkExpression = /\[[^\]]*\]\(:\/([a-z0-9]{32})\)/;
+		await noteEditor.expectToHaveText(linkExpression);
+		const targetNoteId = (await editorContent.textContent()).match(linkExpression)[1];
+
+		// Create a new note that links to the "test-2" header in note 1
+		await mainScreen.createNewNote('Test note links 3');
+		await noteEditor.focusCodeMirrorEditor();
+		await mainWindow.keyboard.type('[link](:/');
+		await mainWindow.keyboard.type(targetNoteId);
+		await mainWindow.keyboard.type('#test-2');
+		await mainWindow.keyboard.type(')');
+
+		// Clicking the link should navigate to note1
+		const link = editorContent.getByText('link');
+		await link.click({ modifiers: ['ControlOrMeta'] });
+		await expect(noteEditor.noteTitleInput).toHaveValue('Test note links 1');
+		await noteEditor.expectToHaveText([
+			'# Test',
+			'## Test 2',
+			'### Test 3',
+		].join('\n'));
+		// eslint-disable-next-line no-restricted-properties -- focusHandler requires a logger
+		await editorContent.focus();
+
+		// The cursor should be positioned on the linked-to header
+		await mainWindow.keyboard.type('[[cursor]]');
+		await noteEditor.expectToHaveText([
+			'# Test',
+			'## Test 2[[cursor]]',
+			'### Test 3',
+		].join('\n'));
 	});
 });
 
