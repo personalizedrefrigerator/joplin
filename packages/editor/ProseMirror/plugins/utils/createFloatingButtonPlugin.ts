@@ -95,15 +95,14 @@ class FloatingButtonBar implements PluginView {
 		this.container_.style.right = '';
 
 		if (this.type_ === ToolbarType.FloatAboveBelow) {
-			const above = targetBox.top - tooltipBox.height - parentBox.top;
-			const below = targetBox.top + targetBox.height - parentBox.top;
+			const padding = 10;
+			const above = targetBox.top - tooltipBox.height - parentBox.top - padding;
+			const below = targetBox.top + targetBox.height - parentBox.top + padding;
 			const viewportTop = window.visualViewport?.pageTop;
 			const viewportBottom = viewportTop + window.visualViewport?.height;
 			const cursorTop = viewportTop + view.coordsAtPos(view.state.selection.head).top;
 
 			const getOffsetTop = () => {
-				const padding = 10;
-
 				// If the toolbar must be displayed within the element to be visible, prefer
 				// less movement:
 				const previousTop = tooltipBox.top + viewportTop;
@@ -255,9 +254,9 @@ class ButtonRow {
 					() => { },
 				);
 
-				button.classList.add('action');
+				button.classList.add('action', 'action-button');
 				if (buttonSpec.icon) {
-					button.classList.add('action-button', '-icon');
+					button.classList.add('-icon');
 				}
 
 				if (buttonSpec.className) {
