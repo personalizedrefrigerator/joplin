@@ -4,7 +4,7 @@ import { EditorState, TextSelection, Transaction } from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';
 import { DOMParser as ProseMirrorDomParser } from 'prosemirror-model';
 import { history } from 'prosemirror-history';
-import commands from './commands';
+import commands from './commands/commands';
 import schema from './schema';
 import { gapCursor } from 'prosemirror-gapcursor';
 import { dropCursor } from 'prosemirror-dropcursor';

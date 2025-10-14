@@ -1,19 +1,19 @@
 import { Command, EditorState, Transaction } from 'prosemirror-state';
-import { EditorCommandType } from '../types';
+import { EditorCommandType } from '../../types';
 import { redo, undo } from 'prosemirror-history';
 import { autoJoin, selectAll, setBlockType, toggleMark } from 'prosemirror-commands';
-import { focus } from '@joplin/lib/utils/focusHandler';
-import schema from './schema';
+import schema from '../schema';
 import { liftListItem, sinkListItem, wrapRangeInList } from 'prosemirror-schema-list';
 import { NodeType } from 'prosemirror-model';
-import { getSearchVisible, setSearchVisible } from './plugins/searchPlugin';
+import { getSearchVisible, setSearchVisible } from '../plugins/searchPlugin';
 import { findNext, findPrev, replaceAll, replaceNext } from 'prosemirror-search';
-import { getEditorApi } from './plugins/joplinEditorApiPlugin';
-import { EditorEventType } from '../events';
-import extractSelectedLinesTo from './utils/extractSelectedLinesTo';
+import { getEditorApi } from '../plugins/joplinEditorApiPlugin';
+import { EditorEventType } from '../../events';
+import extractSelectedLinesTo from '../utils/extractSelectedLinesTo';
 import { EditorView } from 'prosemirror-view';
-import jumpToHash from './utils/jumpToHash';
-import canReplaceSelectionWith from './utils/canReplaceSelectionWith';
+import jumpToHash from '../utils/jumpToHash';
+import canReplaceSelectionWith from '../utils/canReplaceSelectionWith';
+import focusEditor from './focusEditor';
 
 type Dispatch = (tr: Transaction)=> void;
 type ExtendedCommand = (state: EditorState, dispatch: Dispatch, view?: EditorView, options?: string[])=> boolean;
@@ -81,12 +81,7 @@ const commands: Record<EditorCommandType, ExtendedCommand|null> = {
 	[EditorCommandType.Undo]: undo,
 	[EditorCommandType.Redo]: redo,
 	[EditorCommandType.SelectAll]: selectAll,
-	[EditorCommandType.Focus]: (_state, _dispatch?, view?) => {
-		if (view) {
-			focus('commands::focus', view);
-		}
-		return true;
-	},
+	[EditorCommandType.Focus]: focusEditor,
 	[EditorCommandType.ToggleBolded]: toggleMark(schema.marks.strong),
 	[EditorCommandType.ToggleItalicized]: toggleMark(schema.marks.emphasis),
 	[EditorCommandType.ToggleCode]: toggleCode,
