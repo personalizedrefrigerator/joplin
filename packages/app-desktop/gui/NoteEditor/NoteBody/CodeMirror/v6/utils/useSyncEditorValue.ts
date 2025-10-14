@@ -28,11 +28,7 @@ const useSyncEditorValue = ({ content, visiblePanes, onMessage, editorRef, noteI
 			// If the viewer isn't visible, the content should be considered rendered
 			// after the editor has finished updating:
 			if (!visiblePanesRef.current.includes('viewer')) {
-				// TODO: This needs to be in a setTimeout so that it runs after all useEffects have
-				// finished. This should be refactored to remove the need for a setTimeout.
-				setTimeout(() => {
-					onMessageRef.current({ channel: 'noteRenderComplete' });
-				}, 10);
+				onMessageRef.current({ channel: 'noteRenderComplete' });
 			}
 		}
 	}, [content, noteId, editorRef]);
