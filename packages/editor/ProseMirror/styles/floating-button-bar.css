@@ -18,7 +18,7 @@
 	color: var(--joplin-color);
 	gap: 4px;
 
-	box-shadow: 0px 0px 2px var(--joplin-background-color-transparent2);
+	box-shadow: 0px 0px 3px var(--joplin-background-color-transparent2);
 }
 
 .floating-button-bar.-hidden {
