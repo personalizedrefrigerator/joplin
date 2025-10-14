@@ -1,6 +1,7 @@
 import * as React from 'react';
+import { useMemo } from 'react';
 
-import { FlatList, View } from 'react-native';
+import { FlatList, View, Text, StyleSheet, TextStyle, ViewStyle } from 'react-native';
 import NoteItem from '../../NoteItem';
 import { useEffect, useRef, useState } from 'react';
 import useQueuedAsyncEffect from '@joplin/lib/hooks/useQueuedAsyncEffect';
@@ -10,13 +11,55 @@ import Note from '@joplin/lib/models/Note';
 import SearchEngine, { ComplexTerm } from '@joplin/lib/services/search/SearchEngine';
 import { ProgressBar } from 'react-native-paper';
 import shim from '@joplin/lib/shim';
+import { _ } from '@joplin/lib/locale';
+import { themeStyle } from '@joplin/lib/theme';
+import { connect } from 'react-redux';
+import { AppState } from '../../../utils/types';
 
 interface Props {
+	themeId: number;
 	query: string;
 	onHighlightedWordsChange: (highlightedWords: (ComplexTerm | string)[])=> void;
 
 	ftsEnabled: number;
+	initialNumToRender?: number;
 }
+
+export const limit = 100;
+
+const useStyles = (themeId: number) => {
+	return useMemo(() => {
+		const theme = themeStyle(themeId);
+
+		const limitMessageContainer: ViewStyle = {
+			marginLeft: theme.marginLeft,
+		};
+
+		const limitMessage: TextStyle = {
+			color: theme.colorFaded,
+			fontSize: theme.fontSize * 0.8,
+			marginRight: theme.marginRight,
+		};
+
+		return StyleSheet.create({
+			limitMessageContainer,
+			limitMessage,
+		});
+	}, [themeId]);
+};
+
+type LimitMessageProps = {
+	themeId: number;
+};
+
+const LimitMessage = (props: LimitMessageProps) => {
+	const styles = useStyles(props.themeId);
+
+	return <View style={styles.limitMessageContainer}>
+		<Text style={styles.limitMessage}>{_('Only the first %s results are being shown', limit)}</Text>
+	</View>;
+
+};
 
 const useResults = (props: Props) => {
 	const [notes, setNotes] = useState<NoteEntity[]>([]);
@@ -30,7 +73,7 @@ const useResults = (props: Props) => {
 		try {
 			if (query) {
 				if (ftsEnabled) {
-					const r = await SearchEngineUtils.notesForQuery(query, true, { appendWildCards: true });
+					const r = await SearchEngineUtils.notesForQuery(query, true, { appendWildCards: true, limit });
 					notes = r.notes;
 				} else {
 					const p = query.split(' ');
@@ -113,10 +156,23 @@ const SearchResults: React.FC<Props> = props => {
 			<FlatList
 				data={notes}
 				keyExtractor={(item) => item.id}
-				renderItem={event => <NoteItem note={event.item} />}
+				initialNumToRender={props.initialNumToRender}
+				renderItem={event => {
+					if (event.index === 0 && notes.length === limit) {
+						return <React.Fragment>
+							<LimitMessage themeId={props.themeId} />
+							<NoteItem note={event.item} />
+						</React.Fragment>;
+					}
+					return <NoteItem note={event.item} />;
+				}}
 			/>
 		</View>
 	);
 };
 
-export default SearchResults;
+export default connect((state: AppState) => {
+	return {
+		themeId: state.settings.theme,
+	};
+})(SearchResults);

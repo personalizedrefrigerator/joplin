@@ -39,6 +39,8 @@ interface SearchOptions {
 
 	// Include resources that are not associated with any notes.
 	includeOrphanedResources?: boolean;
+
+	limit?: number;
 }
 
 export interface ProcessResultsRow {
@@ -803,7 +805,7 @@ export default class SearchEngine {
 
 			const useFts = searchType === SearchEngine.SEARCH_TYPE_FTS;
 			try {
-				const { query, params } = queryBuilder(parsedQuery.allTerms, useFts);
+				const { query, params } = queryBuilder(parsedQuery.allTerms, useFts, { limit: options.limit });
 
 				rows = await this.db().selectAll<ProcessResultsRow>(query, params);
 				const queryHasFilters = !!parsedQuery.allTerms.find(t => t.name !== 'text');

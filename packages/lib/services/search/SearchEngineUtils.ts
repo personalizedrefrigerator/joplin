@@ -5,6 +5,7 @@ import Setting from '../../models/Setting';
 export interface NotesForQueryOptions {
 	fields?: string[];
 	appendWildCards?: boolean;
+	limit?: number;
 }
 
 export default class SearchEngineUtils {
@@ -27,6 +28,7 @@ export default class SearchEngineUtils {
 		const results = await searchEngine.search(query, {
 			searchType,
 			appendWildCards: options.appendWildCards,
+			limit: options.limit,
 		});
 
 		const noteIds = results.map(n => n.id);

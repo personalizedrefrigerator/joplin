@@ -844,6 +844,7 @@ packages/app-mobile/components/screens/NoteTagsDialog.js
 packages/app-mobile/components/screens/Notes/NewNoteButton.test.js
 packages/app-mobile/components/screens/Notes/NewNoteButton.js
 packages/app-mobile/components/screens/Notes/Notes.js
+packages/app-mobile/components/screens/SearchScreen/SearchResults.test.js
 packages/app-mobile/components/screens/SearchScreen/SearchResults.js
 packages/app-mobile/components/screens/SearchScreen/index.js
 packages/app-mobile/components/screens/ShareManager/AcceptedShareItem.js
@@ -1582,6 +1583,7 @@ packages/lib/services/rest/routes/notes.js
 packages/lib/services/rest/routes/ping.js
 packages/lib/services/rest/routes/resources.js
 packages/lib/services/rest/routes/revisions.js
+packages/lib/services/rest/routes/search.test.js
 packages/lib/services/rest/routes/search.js
 packages/lib/services/rest/routes/tags.js
 packages/lib/services/rest/utils/collectionToPaginatedResults.js
