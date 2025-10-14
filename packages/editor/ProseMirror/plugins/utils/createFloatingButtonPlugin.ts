@@ -90,19 +90,37 @@ class FloatingButtonBar implements PluginView {
 			const bottom = nodeBbox.top + nodeBbox.height - parentBox.top;
 			const viewportTop = window.visualViewport.pageTop;
 			const viewportBottom = viewportTop + window.visualViewport.height;
-			const cursorTop = view.coordsAtPos(view.state.selection.head).top;
-			const positionCandidates = [
-				top,
-				bottom,
-				Math.max(viewportTop, top + 10),
-				Math.min(viewportBottom - 10, bottom) - tooltipBox.height,
-			].map(candidate => {
-				const clampedToEnd = Math.min(candidate, bottom);
-				const clampedToStart = Math.max(clampedToEnd, top);
-				return clampedToStart;
+			const cursorTop = viewportTop + view.coordsAtPos(view.state.selection.head).top;
+			const padding = 10;
+
+			// Always prefer showing the toolbar outside the element
+			const outsideCandidates = [
+				top, bottom,
+			];
+
+			// If the toolbar must be displayed within the element to be visible, prefer
+			// less movement:
+			const previousTop = tooltipBox.top + viewportTop;
+			const insideCandidates = [
+				Math.max(viewportTop, top + padding),
+				Math.min(viewportBottom - padding - tooltipBox.height, bottom),
+			].sort((a, b) => {
+				const distanceA = Math.abs(a - previousTop);
+				const distanceB = Math.abs(b - previousTop);
+				return distanceA - distanceB;
+			}).filter(position => {
+				return position >= top && position <= bottom;
 			});
-			const validCandidates = positionCandidates.filter(position => {
-				return position >= viewportTop && position + tooltipBox.height <= viewportBottom && Math.abs(position - cursorTop) > 50;
+
+			const positionCandidates = [...outsideCandidates, ...insideCandidates];
+
+			const validCandidates = positionCandidates.filter((position) => {
+				const candidateTop = position;
+				const candidateCenter = position + tooltipBox.height / 2;
+				const candidateBottom = position + tooltipBox.height;
+				return candidateTop >= viewportTop
+					&& candidateBottom <= viewportBottom
+					&& Math.abs(candidateCenter - cursorTop) > tooltipBox.height / 2 + padding;
 			});
 			overlay.style.top = `${validCandidates[0] ?? positionCandidates[0]}px`;
 
