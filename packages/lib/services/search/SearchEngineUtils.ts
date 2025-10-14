@@ -6,6 +6,7 @@ export interface NotesForQueryOptions {
 	fields?: string[];
 	appendWildCards?: boolean;
 	limit?: number;
+	offset?: number;
 }
 
 export default class SearchEngineUtils {
@@ -29,6 +30,7 @@ export default class SearchEngineUtils {
 			searchType,
 			appendWildCards: options.appendWildCards,
 			limit: options.limit,
+			offset: options.offset,
 		});
 
 		const noteIds = results.map(n => n.id);
@@ -60,7 +62,8 @@ export default class SearchEngineUtils {
 		const previewOptions: PreviewsOptions = { order: [],
 			fields: fields,
 			conditions: [`id IN (${Note.escapeIdsForSql(noteIds)})`],
-			...options };
+			...options,
+			offset: 0 };
 
 		const notes = await Note.previews(null, previewOptions);
 

@@ -317,6 +317,7 @@ class BaseModel {
 		}
 
 		if (options.limit) sql += ` LIMIT ${options.limit}`;
+		if (options.offset) sql += ` OFFSET ${Number(options.limit)}`;
 
 		return { sql: sql, params: params };
 	}

@@ -446,6 +446,7 @@ const getConnective = (terms: Term[], relation: Relation): string => {
 
 type QueryBuilderOptions = {
 	limit?: number;
+	offset?: number;
 };
 
 export default function queryBuilder(terms: Term[], useFts: boolean, options: QueryBuilderOptions) {
@@ -497,7 +498,12 @@ export default function queryBuilder(terms: Term[], useFts: boolean, options: Qu
 
 	if (options.limit) {
 		queryParts.push('LIMIT ?');
-		params.push(options.limit.toString());
+		params.push(String(options.limit));
+	}
+
+	if (options.offset) {
+		queryParts.push('OFFSET ?');
+		params.push(String(options.offset));
 	}
 
 	let query;

@@ -36,7 +36,7 @@ describe('SearchResult', () => {
 		await createNotes();
 		await SearchEngine.instance().syncTables();
 		render(<TestProviderStack store={store}>
-			<SearchResults query='abcd' onHighlightedWordsChange={() => { }} ftsEnabled={1} />
+			<SearchResults query='abcd' onHighlightedWordsChange={() => { }} />
 		</TestProviderStack>);
 
 		const notShowingEverythingAlert = await screen.findByText(`Only the first ${limit} results are being shown`);
@@ -47,7 +47,7 @@ describe('SearchResult', () => {
 		await createNotes();
 		await SearchEngine.instance().syncTables();
 		render(<TestProviderStack store={store}>
-			<SearchResults query='abcd' onHighlightedWordsChange={() => { }} ftsEnabled={1} initialNumToRender={limit} />
+			<SearchResults query='abcd' onHighlightedWordsChange={() => { }} initialNumToRender={limit} />
 		</TestProviderStack>);
 
 		const items = await screen.findAllByText(/abcd \d\d?\d?/);

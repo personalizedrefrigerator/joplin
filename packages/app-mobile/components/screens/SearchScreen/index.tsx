@@ -20,7 +20,6 @@ interface Props {
 	dispatch: Dispatch;
 
 	noteSelectionEnabled: boolean;
-	ftsEnabled: number;
 }
 
 const useStyles = (theme: ThemeStyle, visible: boolean) => {
@@ -114,7 +113,6 @@ const SearchScreenComponent: React.FC<Props> = props => {
 
 				<SearchResults
 					query={query}
-					ftsEnabled={props.ftsEnabled}
 					onHighlightedWordsChange={onHighlightedWordsChange}
 				/>
 			</View>
@@ -128,7 +126,6 @@ const SearchScreen = connect((state: AppState) => {
 		themeId: state.settings.theme,
 		settings: state.settings,
 		noteSelectionEnabled: state.noteSelectionEnabled,
-		ftsEnabled: state.settings['db.ftsEnabled'],
 	};
 })(SearchScreenComponent);
 

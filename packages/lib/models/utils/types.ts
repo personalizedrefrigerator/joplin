@@ -30,6 +30,7 @@ export interface LoadOptions {
 		caseInsensitive?: boolean;
 	}[];
 	limit?: number;
+	offset?: number;
 	includeConflicts?: boolean;
 	includeDeleted?: boolean;
 }

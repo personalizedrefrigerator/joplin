@@ -1,7 +1,7 @@
 import Logger from '@joplin/utils/Logger';
 import ItemChange from '../../models/ItemChange';
 import Setting from '../../models/Setting';
-import Note from '../../models/Note';
+import Note, { PreviewsOptions } from '../../models/Note';
 import BaseModel, { ModelType } from '../../BaseModel';
 import ItemChangeUtils from '../ItemChangeUtils';
 import shim from '../../shim';
@@ -41,6 +41,12 @@ interface SearchOptions {
 	includeOrphanedResources?: boolean;
 
 	limit?: number;
+	offset?: number;
+}
+
+interface BasicSearchOptions {
+	limit?: number;
+	offset?: number;
 }
 
 export interface ProcessResultsRow {
@@ -672,11 +678,13 @@ export default class SearchEngine {
 		return n;
 	}
 
-	public async basicSearch(query: string) {
+	public async basicSearch(query: string, options: BasicSearchOptions) {
 		query = query.replace(/\*/, '');
 		const parsedQuery = await this.parseQuery(query);
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-		const searchOptions: any = {};
+		const searchOptions: PreviewsOptions = {
+			limit: options.limit,
+			offset: options.offset,
+		};
 
 		for (const key of parsedQuery.keys) {
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
@@ -780,7 +788,7 @@ export default class SearchEngine {
 		if (searchType === SearchEngine.SEARCH_TYPE_BASIC) {
 			searchString = this.normalizeText_(searchString);
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-			rows = (await this.basicSearch(searchString)) as any[];
+			rows = (await this.basicSearch(searchString, { limit: options.limit, offset: options.offset })) as any[];
 			this.processResults_(rows, parsedQuery, true);
 		} else {
 			// SEARCH_TYPE_FTS
@@ -805,7 +813,11 @@ export default class SearchEngine {
 
 			const useFts = searchType === SearchEngine.SEARCH_TYPE_FTS;
 			try {
-				const { query, params } = queryBuilder(parsedQuery.allTerms, useFts, { limit: options.limit });
+				const { query, params } = queryBuilder(
+					parsedQuery.allTerms,
+					useFts,
+					{ limit: options.limit, offset: options.offset },
+				);
 
 				rows = await this.db().selectAll<ProcessResultsRow>(query, params);
 				const queryHasFilters = !!parsedQuery.allTerms.find(t => t.name !== 'text');

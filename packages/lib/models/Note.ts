@@ -41,7 +41,9 @@ export interface PreviewsOptions {
 	anywherePattern?: string;
 	itemTypes?: string[];
 	limit?: number;
+	offset?: number;
 	titlePattern?: string;
+	bodyPattern?: string;
 }
 
 export default class Note extends BaseItem {

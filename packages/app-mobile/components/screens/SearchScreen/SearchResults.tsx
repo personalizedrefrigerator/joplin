@@ -1,7 +1,7 @@
 import * as React from 'react';
-import { useMemo } from 'react';
+import { useCallback } from 'react';
 
-import { FlatList, View, Text, StyleSheet, TextStyle, ViewStyle } from 'react-native';
+import { FlatList, View } from 'react-native';
 import NoteItem from '../../NoteItem';
 import { useEffect, useRef, useState } from 'react';
 import useQueuedAsyncEffect from '@joplin/lib/hooks/useQueuedAsyncEffect';
@@ -12,95 +12,82 @@ import SearchEngine, { ComplexTerm } from '@joplin/lib/services/search/SearchEng
 import { ProgressBar } from 'react-native-paper';
 import shim from '@joplin/lib/shim';
 import { _ } from '@joplin/lib/locale';
-import { themeStyle } from '@joplin/lib/theme';
 import { connect } from 'react-redux';
 import { AppState } from '../../../utils/types';
+import Setting from '@joplin/lib/models/Setting';
+import { msleep } from '@joplin/utils/time';
 
 interface Props {
 	themeId: number;
 	query: string;
 	onHighlightedWordsChange: (highlightedWords: (ComplexTerm | string)[])=> void;
 
-	ftsEnabled: number;
 	initialNumToRender?: number;
 }
 
-export const limit = 100;
+export const limit = 4;
 
-const useStyles = (themeId: number) => {
-	return useMemo(() => {
-		const theme = themeStyle(themeId);
+const selectResults = async (query: string, limit: number, offset: number) => {
+	if (!query) return [];
 
-		const limitMessageContainer: ViewStyle = {
-			marginLeft: theme.marginLeft,
-		};
+	if (Setting.value('db.ftsEnabled')) {
+		const r = await SearchEngineUtils.notesForQuery(query, true, { appendWildCards: true, limit, offset });
+		return r.notes;
+	} else {
+		const p = query.split(' ');
+		const temp = [];
+		for (let i = 0; i < p.length; i++) {
+			const t = p[i].trim();
+			if (!t) continue;
+			temp.push(t);
+		}
 
-		const limitMessage: TextStyle = {
-			color: theme.colorFaded,
-			fontSize: theme.fontSize * 0.8,
-			marginRight: theme.marginRight,
-		};
-
-		return StyleSheet.create({
-			limitMessageContainer,
-			limitMessage,
+		return await Note.previews(null, {
+			anywherePattern: `*${temp.join('*')}*`,
+			limit,
+			offset,
 		});
-	}, [themeId]);
-};
-
-type LimitMessageProps = {
-	themeId: number;
-};
-
-const LimitMessage = (props: LimitMessageProps) => {
-	const styles = useStyles(props.themeId);
-
-	return <View style={styles.limitMessageContainer}>
-		<Text style={styles.limitMessage}>{_('Only the first %s results are being shown', limit)}</Text>
-	</View>;
-
+	}
 };
 
 const useResults = (props: Props) => {
 	const [notes, setNotes] = useState<NoteEntity[]>([]);
 	const [isProcessing, setIsProcessing] = useState(false);
 	const query = props.query;
-	const ftsEnabled = props.ftsEnabled;
+
+	const onUpdateHighlightedWords = useCallback(async (query: string) => {
+		const parsedQuery = await SearchEngine.instance().parseQuery(query);
+		const highlightedWords = SearchEngine.instance().allParsedQueryTerms(parsedQuery);
+
+		props.onHighlightedWordsChange(highlightedWords);
+	}, [props.onHighlightedWordsChange]);
 
 	useQueuedAsyncEffect(async (event) => {
-		let notes: NoteEntity[] = [];
 		setIsProcessing(true);
+
 		try {
-			if (query) {
-				if (ftsEnabled) {
-					const r = await SearchEngineUtils.notesForQuery(query, true, { appendWildCards: true, limit });
-					notes = r.notes;
-				} else {
-					const p = query.split(' ');
-					const temp = [];
-					for (let i = 0; i < p.length; i++) {
-						const t = p[i].trim();
-						if (!t) continue;
-						temp.push(t);
-					}
+			await onUpdateHighlightedWords(query);
 
-					notes = await Note.previews(null, {
-						anywherePattern: `*${temp.join('*')}*`,
-					});
+			let newNotes: NoteEntity[] = [];
+			let offset = 0;
+			while ((offset === 0 || newNotes.length === limit) && !event.cancelled) {
+				newNotes = await selectResults(query, limit, offset);
+				offset += limit;
+
+				for (const note of newNotes) {
+					notes.push(note);
 				}
+				// Avoid making any changes to the state when cancelled
+				if (!event.cancelled) {
+					setNotes(notes => notes.concat(newNotes));
+				}
+
+				await msleep(500);
 			}
-
-			if (event.cancelled) return;
-
-			const parsedQuery = await SearchEngine.instance().parseQuery(query);
-			const highlightedWords = SearchEngine.instance().allParsedQueryTerms(parsedQuery);
-
-			props.onHighlightedWordsChange(highlightedWords);
-			setNotes(notes);
 		} finally {
 			setIsProcessing(false);
 		}
-	}, [query, ftsEnabled], { interval: 200 });
+	}, [query], { interval: 200 });
 
 	return {
 		notes,
@@ -157,15 +144,7 @@ const SearchResults: React.FC<Props> = props => {
 				data={notes}
 				keyExtractor={(item) => item.id}
 				initialNumToRender={props.initialNumToRender}
-				renderItem={event => {
-					if (event.index === 0 && notes.length === limit) {
-						return <React.Fragment>
-							<LimitMessage themeId={props.themeId} />
-							<NoteItem note={event.item} />
-						</React.Fragment>;
-					}
-					return <NoteItem note={event.item} />;
-				}}
+				renderItem={event => <NoteItem note={event.item} />}
 			/>
 		</View>
 	);
