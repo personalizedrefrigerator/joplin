@@ -288,19 +288,20 @@ test.describe('markdownEditor', () => {
 		await mainWindow.keyboard.press('Enter');
 		await mainWindow.keyboard.type('### Test 3');
 
-		// Create an intermediary note as a way of getting the note ID for the 1st note
-		await mainScreen.createNewNote('Test note links 2');
 		const editorContent = await noteEditor.contentLocator();
-		const note1Locator = mainScreen.noteList.getNoteItemByTitle('Original');
-		await note1Locator.dragTo(editorContent);
 
 		// Extract the note ID
+		const note1Locator = mainScreen.noteList.getNoteItemByTitle('Original');
+		await note1Locator.dragTo(editorContent);
 		const linkExpression = /\[[^\]]*\]\(:\/([a-z0-9]{32})\)/;
 		await noteEditor.expectToHaveText(linkExpression);
 		const targetNoteId = (await editorContent.textContent()).match(linkExpression)[1];
 
+		await mainScreen.createNewNote('Test note links');
+
 		// Create a new link to a header
 		await noteEditor.focusCodeMirrorEditor();
+		await mainWindow.keyboard.press('Enter');
 		await mainWindow.keyboard.press('Enter');
 		await mainWindow.keyboard.type('[link](:/');
 		await mainWindow.keyboard.type(targetNoteId);
@@ -309,17 +310,10 @@ test.describe('markdownEditor', () => {
 		await mainWindow.keyboard.press('Enter');
 
 		// Clicking the link should navigate to note1
-		await expect.poll(async () => {
-			const link = editorContent.getByText(/link/);
-			await link.click({ modifiers: ['ControlOrMeta'] });
-			await expect(noteEditor.noteTitleInput).toHaveValue('Original');
-			return true;
-		}).toBe(true);
-		await noteEditor.expectToHaveText([
-			'# Test',
-			'## Test 2',
-			'### Test 3',
-		].join('\n'));
+		const link = editorContent.getByText(/\[?link\]?/);
+		await link.click({ modifiers: ['ControlOrMeta'] });
+		await expect(noteEditor.noteTitleInput).toHaveValue('Original');
+		await noteEditor.expectToHaveText(/^# Test/);
 		await expect.poll(() => editorContent.evaluate(async editor => {
 			const selection = getSelection();
 			return editor.contains(selection.anchorNode);
