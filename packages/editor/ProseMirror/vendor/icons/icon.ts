@@ -7,6 +7,7 @@ const icon = (importedIcon: ImportedIcon): Icon => {
 		const icon = importedIcon.default();
 		icon.removeAttribute('fill');
 		icon.style.fill = 'currentColor';
+		icon.classList.add('icon');
 		return icon;
 	};
 };
