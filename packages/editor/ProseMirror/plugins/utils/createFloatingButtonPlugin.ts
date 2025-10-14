@@ -52,7 +52,6 @@ class FloatingButtonBar implements PluginView {
 		this.buttonRow_ = new ButtonRow(this.container_, buttons);
 
 		this.observer_ = new ElementObserver(
-			this.type_ === ToolbarType.FloatAboveBelow,
 			() => this.repositionOverlay_(),
 		);
 
@@ -200,20 +199,18 @@ class ElementObserver {
 	private intersectionObserver_: IntersectionObserver|null;
 	private lastElement_: Element|null = null;
 
-	public constructor(private enabled_: boolean, private onNodeUpdate_: ()=> void) {
-		if (enabled_) {
-			if (typeof IntersectionObserver !== 'undefined') {
-				this.intersectionObserver_ = new IntersectionObserver(() => {
-					this.onNodeUpdate_();
-				});
-			}
-			document.addEventListener('scroll', this.onNodeUpdate_);
-			document.addEventListener('resize', this.onNodeUpdate_);
+	public constructor(private onNodeUpdate_: ()=> void) {
+		if (typeof IntersectionObserver !== 'undefined') {
+			this.intersectionObserver_ = new IntersectionObserver(() => {
+				this.onNodeUpdate_();
+			});
 		}
+		document.addEventListener('scroll', this.onNodeUpdate_);
+		window.addEventListener('resize', this.onNodeUpdate_);
 	}
 
 	public setElement(element: Element|null) {
-		if (!this.enabled_ || element === this.lastElement_) return;
+		if (element === this.lastElement_) return;
 
 		if (this.lastElement_) {
 			this.intersectionObserver_?.unobserve(this.lastElement_);
@@ -227,13 +224,11 @@ class ElementObserver {
 	}
 
 	public destroy() {
-		if (!this.enabled_) return;
-
 		this.intersectionObserver_?.disconnect();
 		this.intersectionObserver_ = null;
 
 		document.removeEventListener('scroll', this.onNodeUpdate_);
-		document.removeEventListener('resize', this.onNodeUpdate_);
+		window.removeEventListener('resize', this.onNodeUpdate_);
 	}
 }
 
