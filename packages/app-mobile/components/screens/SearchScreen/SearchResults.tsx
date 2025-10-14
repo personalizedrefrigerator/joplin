@@ -15,23 +15,25 @@ import { _ } from '@joplin/lib/locale';
 import { connect } from 'react-redux';
 import { AppState } from '../../../utils/types';
 import Setting from '@joplin/lib/models/Setting';
-import { msleep } from '@joplin/utils/time';
+import { PrimaryButton } from '../../buttons';
+
+type OnHighlightedWordsChange = (highlightedWords: (ComplexTerm | string)[])=> void;
 
 interface Props {
 	themeId: number;
 	query: string;
-	onHighlightedWordsChange: (highlightedWords: (ComplexTerm | string)[])=> void;
+	onHighlightedWordsChange: OnHighlightedWordsChange;
 
 	initialNumToRender?: number;
 }
 
-export const limit = 4;
+export const baseLimit = 4;
 
-const selectResults = async (query: string, limit: number, offset: number) => {
+const selectResults = async (query: string, limit: number) => {
 	if (!query) return [];
 
 	if (Setting.value('db.ftsEnabled')) {
-		const r = await SearchEngineUtils.notesForQuery(query, true, { appendWildCards: true, limit, offset });
+		const r = await SearchEngineUtils.notesForQuery(query, true, { appendWildCards: true, limit });
 		return r.notes;
 	} else {
 		const p = query.split(' ');
@@ -45,53 +47,73 @@ const selectResults = async (query: string, limit: number, offset: number) => {
 		return await Note.previews(null, {
 			anywherePattern: `*${temp.join('*')}*`,
 			limit,
-			offset,
 		});
 	}
 };
 
-const useResults = (props: Props) => {
+const useLimit = (query: string) => {
+	const [limit, setLimit] = useState(baseLimit);
+	const [hasMore, setHasMore] = useState(false);
+
+	useEffect(() => {
+		setLimit(baseLimit);
+		setHasMore(false);
+	}, [query]);
+
+	const onIncreaseLimit = useCallback(() => {
+		setLimit(limit => limit * 2);
+		setHasMore(false);
+	}, []);
+
+	const onResultsLoaded = useCallback((resultCount: number) => {
+		setHasMore(resultCount === limit);
+	}, [limit]);
+
+	return {
+		onIncreaseLimit,
+		onResultsLoaded,
+		limit,
+		hasMore,
+	};
+};
+
+interface UseResultsProps {
+	onHighlightedWordsChange: OnHighlightedWordsChange;
+	query: string;
+}
+
+const useResults = ({ onHighlightedWordsChange, query }: UseResultsProps) => {
 	const [notes, setNotes] = useState<NoteEntity[]>([]);
 	const [isProcessing, setIsProcessing] = useState(false);
-	const query = props.query;
+	const { limit, hasMore, onResultsLoaded, onIncreaseLimit } = useLimit(query);
 
 	const onUpdateHighlightedWords = useCallback(async (query: string) => {
 		const parsedQuery = await SearchEngine.instance().parseQuery(query);
 		const highlightedWords = SearchEngine.instance().allParsedQueryTerms(parsedQuery);
 
-		props.onHighlightedWordsChange(highlightedWords);
-	}, [props.onHighlightedWordsChange]);
+		onHighlightedWordsChange(highlightedWords);
+	}, [onHighlightedWordsChange]);
 
 	useQueuedAsyncEffect(async (event) => {
 		setIsProcessing(true);
 
 		try {
+			const newNotes = await selectResults(query, limit);
+			if (event.cancelled) return;
+			setNotes(newNotes);
+			onResultsLoaded(newNotes.length);
 			await onUpdateHighlightedWords(query);
-
-			let newNotes: NoteEntity[] = [];
-			let offset = 0;
-			while ((offset === 0 || newNotes.length === limit) && !event.cancelled) {
-				newNotes = await selectResults(query, limit, offset);
-				offset += limit;
-
-				for (const note of newNotes) {
-					notes.push(note);
-				}
-				// Avoid making any changes to the state when cancelled
-				if (!event.cancelled) {
-					setNotes(notes => notes.concat(newNotes));
-				}
-
-				await msleep(500);
-			}
 		} finally {
 			setIsProcessing(false);
 		}
-	}, [query], { interval: 200 });
+	}, [query, limit], { interval: 200 });
 
 	return {
 		notes,
 		isPending: isProcessing,
+		hasMore,
+		onIncreaseLimit,
+		limit,
 	};
 };
 
@@ -126,7 +148,10 @@ const useIsLongRunning = (isPending: boolean) => {
 const containerStyle = { flex: 1 };
 
 const SearchResults: React.FC<Props> = props => {
-	const { notes, isPending } = useResults(props);
+	const { notes, isPending, hasMore, onIncreaseLimit } = useResults({
+		onHighlightedWordsChange: props.onHighlightedWordsChange,
+		query: props.query,
+	});
 	// Don't show the progress bar immediately, only show if the search
 	// is taking some time.
 	const longRunning = useIsLongRunning(isPending);
@@ -136,6 +161,7 @@ const SearchResults: React.FC<Props> = props => {
 	const progressBar = <View aria-hidden={!progressVisible}>
 		<ProgressBar indeterminate={true} visible={progressVisible}/>
 	</View>;
+	const footer = <PrimaryButton onPress={onIncreaseLimit}>{_('Load more')}</PrimaryButton>;
 
 	return (
 		<View style={containerStyle}>
@@ -143,6 +169,7 @@ const SearchResults: React.FC<Props> = props => {
 			<FlatList
 				data={notes}
 				keyExtractor={(item) => item.id}
+				ListFooterComponent={hasMore && footer}
 				initialNumToRender={props.initialNumToRender}
 				renderItem={event => <NoteItem note={event.item} />}
 			/>

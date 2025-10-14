@@ -41,12 +41,10 @@ interface SearchOptions {
 	includeOrphanedResources?: boolean;
 
 	limit?: number;
-	offset?: number;
 }
 
 interface BasicSearchOptions {
 	limit?: number;
-	offset?: number;
 }
 
 export interface ProcessResultsRow {
@@ -683,7 +681,6 @@ export default class SearchEngine {
 		const parsedQuery = await this.parseQuery(query);
 		const searchOptions: PreviewsOptions = {
 			limit: options.limit,
-			offset: options.offset,
 		};
 
 		for (const key of parsedQuery.keys) {
@@ -788,7 +785,7 @@ export default class SearchEngine {
 		if (searchType === SearchEngine.SEARCH_TYPE_BASIC) {
 			searchString = this.normalizeText_(searchString);
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-			rows = (await this.basicSearch(searchString, { limit: options.limit, offset: options.offset })) as any[];
+			rows = (await this.basicSearch(searchString, { limit: options.limit })) as any[];
 			this.processResults_(rows, parsedQuery, true);
 		} else {
 			// SEARCH_TYPE_FTS
@@ -816,7 +813,7 @@ export default class SearchEngine {
 				const { query, params } = queryBuilder(
 					parsedQuery.allTerms,
 					useFts,
-					{ limit: options.limit, offset: options.offset },
+					{ limit: options.limit },
 				);
 
 				rows = await this.db().selectAll<ProcessResultsRow>(query, params);

@@ -6,7 +6,7 @@ import createMockReduxStore from '../../../utils/testing/createMockReduxStore';
 import setupGlobalStore from '../../../utils/testing/setupGlobalStore';
 import Note from '@joplin/lib/models/Note';
 import { render, screen } from '../../../utils/testing/testingLibrary';
-import SearchResults, { limit } from './SearchResults';
+import SearchResults, { baseLimit } from './SearchResults';
 import SearchEngine from '@joplin/lib/services/search/SearchEngine';
 import Folder from '@joplin/lib/models/Folder';
 import TestProviderStack from '../../testing/TestProviderStack';
@@ -14,7 +14,7 @@ import TestProviderStack from '../../testing/TestProviderStack';
 const createNotes = async () => {
 	const promises = [];
 	const folder = await Folder.save({ title: 'Test Note' });
-	for (let i = 0; i < limit + 1; i++) {
+	for (let i = 0; i < baseLimit + 1; i++) {
 		promises.push(Note.save({ title: `abcd ${i}`, body: 'body', parent_id: folder.id }));
 	}
 	await Promise.all(promises);
@@ -39,7 +39,7 @@ describe('SearchResult', () => {
 			<SearchResults query='abcd' onHighlightedWordsChange={() => { }} />
 		</TestProviderStack>);
 
-		const notShowingEverythingAlert = await screen.findByText(`Only the first ${limit} results are being shown`);
+		const notShowingEverythingAlert = await screen.findByText(`Only the first ${baseLimit} results are being shown`);
 		expect(notShowingEverythingAlert).toBeVisible();
 	});
 
@@ -47,10 +47,10 @@ describe('SearchResult', () => {
 		await createNotes();
 		await SearchEngine.instance().syncTables();
 		render(<TestProviderStack store={store}>
-			<SearchResults query='abcd' onHighlightedWordsChange={() => { }} initialNumToRender={limit} />
+			<SearchResults query='abcd' onHighlightedWordsChange={() => { }} initialNumToRender={baseLimit} />
 		</TestProviderStack>);
 
 		const items = await screen.findAllByText(/abcd \d\d?\d?/);
-		expect(items.length).toBe(limit);
+		expect(items.length).toBe(baseLimit);
 	});
 });
