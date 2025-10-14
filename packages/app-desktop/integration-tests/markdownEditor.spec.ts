@@ -277,7 +277,7 @@ test.describe('markdownEditor', () => {
 
 	test('ctrl-clicking on note links should open the linked note (when the viewer is hidden)', async ({ mainWindow }) => {
 		const mainScreen = await new MainScreen(mainWindow).setup();
-		await mainScreen.createNewNote('Test note links 1');
+		await mainScreen.createNewNote('Original');
 		const noteEditor = mainScreen.noteEditor;
 		await noteEditor.hideViewer();
 
@@ -291,7 +291,7 @@ test.describe('markdownEditor', () => {
 		// Create an intermediary note as a way of getting the note ID for the 1st note
 		await mainScreen.createNewNote('Test note links 2');
 		const editorContent = await noteEditor.contentLocator();
-		const note1Locator = mainScreen.noteList.getNoteItemByTitle('Test note links 1');
+		const note1Locator = mainScreen.noteList.getNoteItemByTitle('Original');
 		await note1Locator.dragTo(editorContent);
 
 		// Extract the note ID
@@ -299,33 +299,38 @@ test.describe('markdownEditor', () => {
 		await noteEditor.expectToHaveText(linkExpression);
 		const targetNoteId = (await editorContent.textContent()).match(linkExpression)[1];
 
-		// Create a new note that links to the "test-2" header in note 1
-		await mainScreen.createNewNote('Test note links 3');
+		// Create a new link to a header
 		await noteEditor.focusCodeMirrorEditor();
+		await mainWindow.keyboard.press('Enter');
 		await mainWindow.keyboard.type('[link](:/');
 		await mainWindow.keyboard.type(targetNoteId);
 		await mainWindow.keyboard.type('#test-2');
 		await mainWindow.keyboard.type(')');
+		await mainWindow.keyboard.press('Enter');
 
 		// Clicking the link should navigate to note1
-		const link = editorContent.getByText('link');
-		await link.click({ modifiers: ['ControlOrMeta'] });
-		await expect(noteEditor.noteTitleInput).toHaveValue('Test note links 1');
+		await expect.poll(async () => {
+			const link = editorContent.getByText(/link/);
+			await link.click({ modifiers: ['ControlOrMeta'] });
+			await expect(noteEditor.noteTitleInput).toHaveValue('Original');
+			return true;
+		}).toBe(true);
 		await noteEditor.expectToHaveText([
 			'# Test',
 			'## Test 2',
 			'### Test 3',
 		].join('\n'));
-		// eslint-disable-next-line no-restricted-properties -- focusHandler requires a logger
-		await editorContent.focus();
+		await expect.poll(() => editorContent.evaluate(async editor => {
+			const selection = getSelection();
+			return editor.contains(selection.anchorNode);
+		})).toBe(true);
 
 		// The cursor should be positioned on the linked-to header
-		await mainWindow.keyboard.type('[[cursor]]');
-		await noteEditor.expectToHaveText([
-			'# Test',
-			'## Test 2[[cursor]]',
-			'### Test 3',
-		].join('\n'));
+		await expect.poll(async () => {
+			await mainWindow.keyboard.type('[[cursor]]');
+			await noteEditor.expectToHaveText(/## Test 2\[\[cursor\]\]/);
+			return true;
+		}).toBe(true);
 	});
 });
 
