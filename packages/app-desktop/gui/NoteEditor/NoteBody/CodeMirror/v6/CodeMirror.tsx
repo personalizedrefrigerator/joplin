@@ -405,14 +405,23 @@ const CodeMirror = (props: NoteBodyEditorProps, ref: ForwardedRef<NoteBodyEditor
 	initialCursorLocationRef.current = props.initialCursorLocation.markdown ?? 0;
 
 	// Update the editor's value
+	const lastNoteIdRef = useRef(props.noteId);
 	useEffect(() => {
 		// Include the noteId in the update props to give plugins access
 		// to the current note ID.
 		const updateProps = { noteId: props.noteId };
 		if (editorRef.current?.updateBody(props.content, updateProps)) {
 			editorRef.current?.clearHistory();
-			const cursorLocation = initialCursorLocationRef.current;
-			editorRef.current?.select(cursorLocation, cursorLocation);
+
+			// Only reset the cursor location when switching notes. If, for example,
+			// the note is updated from a secondary window, the cursor location shouldn't
+			// reset.
+			const noteChanged = lastNoteIdRef.current !== props.noteId;
+			if (noteChanged) {
+				const cursorLocation = initialCursorLocationRef.current;
+				editorRef.current?.select(cursorLocation, cursorLocation);
+			}
+			lastNoteIdRef.current = props.noteId;
 		}
 	}, [props.content, props.noteId]);
 
