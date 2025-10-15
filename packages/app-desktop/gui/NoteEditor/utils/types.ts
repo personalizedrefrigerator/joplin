@@ -84,6 +84,7 @@ export interface NoteBodyEditorRef {
 export { MarkupToHtmlOptions };
 export type MarkupToHtmlHandler = (markupLanguage: MarkupLanguage, markup: string, options: MarkupToHtmlOptions)=> Promise<RenderResult>;
 export type HtmlToMarkdownHandler = (markupLanguage: number, html: string, originalCss: string, parseOptions?: ParseOptions)=> Promise<string>;
+export type OnCursorMotion = (event: EditorCursorLocations)=> void;
 
 export interface NoteBodyEditorProps {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
@@ -110,7 +111,7 @@ export interface NoteBodyEditorProps {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	onMessage(event: any): void;
 	onScroll(event: { percent: number }): void;
-	onCursorMotion(event: EditorCursorLocations): void;
+	onCursorMotion: OnCursorMotion;
 	markupToHtml: MarkupToHtmlHandler;
 	htmlToMarkdown: HtmlToMarkdownHandler;
 	allAssets: (markupLanguage: MarkupLanguage, options: AllAssetsOptions)=> Promise<RenderResultPluginAsset[]>;

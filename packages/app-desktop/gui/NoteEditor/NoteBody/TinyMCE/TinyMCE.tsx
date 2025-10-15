@@ -47,6 +47,7 @@ import Setting from '@joplin/lib/models/Setting';
 import useTextPatternsLookup, { TextPatternContext } from './utils/useTextPatternsLookup';
 import { toFileProtocolPath } from '@joplin/utils/path';
 import { RenderResultPluginAsset } from '@joplin/renderer/types';
+import useCursorPositioning from './utils/useCursorPositioning';
 
 const logger = Logger.create('TinyMCE');
 
@@ -354,9 +355,6 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: Ref<NoteBodyEditorRef>) => {
 	// 		document.getElementsByTagName('head')[0].appendChild(element);
 	// 	});
 	// };
-
-	const initialCursorLocationRef = useRef(props.initialCursorLocation);
-	initialCursorLocationRef.current = props.initialCursorLocation;
 
 	useEffect(() => {
 		if (!editorContainerDom) return () => {};
@@ -907,12 +905,6 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: Ref<NoteBodyEditorRef>) => {
 						}
 					});
 
-					editor.on('SelectionChange', () => {
-						props.onCursorMotion({
-							richText: editor.selection.getBookmark(2, true),
-						});
-					});
-
 					editor.on('init', () => {
 						setEditorReady(true);
 					});
@@ -925,14 +917,8 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: Ref<NoteBodyEditorRef>) => {
 						}
 					};
 
-					const setInitialCursorLocation = () => {
-						const location = initialCursorLocationRef.current.richText as Bookmark;
-						editor.selection.moveToBookmark(location);
-					};
-
 					editor.on('SetContent', () => {
 						preprocessContent();
-						setInitialCursorLocation();
 
 						props_onMessage.current({ channel: 'noteRenderComplete' });
 					});
@@ -1061,6 +1047,12 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: Ref<NoteBodyEditorRef>) => {
 		return true;
 	}
 
+	const { onInitialContentSet } = useCursorPositioning({
+		initialCursorLocation: props.initialCursorLocation.richText as Bookmark,
+		onCursorUpdate: props.onCursorMotion,
+		editor,
+	});
+
 	const lastNoteIdRef = useRef(props.noteId);
 	useEffect(() => {
 		if (!editor) return () => {};
@@ -1151,6 +1143,7 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: Ref<NoteBodyEditorRef>) => {
 			await loadDocumentAssets(props.themeId, editor, allAssets);
 
 			dispatchDidUpdate(editor);
+			onInitialContentSet();
 		};
 
 		void loadContent();
