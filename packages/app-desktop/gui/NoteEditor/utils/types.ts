@@ -14,6 +14,7 @@ import { ScrollbarSize } from '@joplin/lib/models/settings/builtInMetadata';
 import { RefObject, SetStateAction } from 'react';
 import * as React from 'react';
 import { ResourceEntity, ResourceLocalStateEntity } from '@joplin/lib/services/database/types';
+import { EditorCursorLocations, NoteToEditorCursorLocations, EditorScrollPercents } from '../../../app.reducer';
 
 export interface AllAssetsOptions {
 	contentMaxWidthTarget?: string;
@@ -40,8 +41,8 @@ export interface NoteEditorProps {
 	notesParentType: string;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	selectedNoteTags: any[];
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	lastEditorScrollPercents: any;
+	lastEditorScrollPercents: EditorScrollPercents;
+	lastEditorCursorLocations: NoteToEditorCursorLocations;
 	selectedNoteHash: string;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	searches: any[];
@@ -102,12 +103,14 @@ export interface NoteBodyEditorProps {
 	contentKey: string;
 	contentMarkupLanguage: number;
 	contentOriginalCss: string;
+	initialCursorLocation: EditorCursorLocations;
 	onChange(event: OnChangeEvent): void;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	onWillChange(event: any): void;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	onMessage(event: any): void;
 	onScroll(event: { percent: number }): void;
+	onCursorMotion(event: EditorCursorLocations): void;
 	markupToHtml: MarkupToHtmlHandler;
 	htmlToMarkdown: HtmlToMarkdownHandler;
 	allAssets: (markupLanguage: MarkupLanguage, options: AllAssetsOptions)=> Promise<RenderResultPluginAsset[]>;

@@ -342,6 +342,7 @@ const CodeMirror = (props: NoteBodyEditorProps, ref: ForwardedRef<NoteBodyEditor
 		} else if (event.kind === EditorEventType.Change) {
 			codeMirror_change(event.value);
 		} else if (event.kind === EditorEventType.SelectionRangeChange) {
+			props.onCursorMotion({ markdown: event.from });
 			setSelectionRange({ from: event.from, to: event.to });
 		} else if (event.kind === EditorEventType.UpdateSearchDialog) {
 			if (lastSearchState.current?.searchText !== event.searchState.searchText) {
@@ -355,7 +356,7 @@ const CodeMirror = (props: NoteBodyEditorProps, ref: ForwardedRef<NoteBodyEditor
 		} else if (event.kind === EditorEventType.FollowLink) {
 			void CommandService.instance().execute('openItem', event.link);
 		}
-	}, [editor_scroll, codeMirror_change, props.setLocalSearch, props.setShowLocalSearch]);
+	}, [editor_scroll, codeMirror_change, props.setLocalSearch, props.setShowLocalSearch, props.onCursorMotion]);
 
 	const onSelectPastBeginning = useCallback(() => {
 		void CommandService.instance().execute('focusElement', 'noteTitle');
@@ -400,6 +401,8 @@ const CodeMirror = (props: NoteBodyEditorProps, ref: ForwardedRef<NoteBodyEditor
 		props.tabMovesFocus,
 	]);
 
+	const initialCursorLocationRef = useRef(props.initialCursorLocation);
+	initialCursorLocationRef.current = props.initialCursorLocation;
 	// Update the editor's value
 	useEffect(() => {
 		// Include the noteId in the update props to give plugins access
@@ -407,6 +410,8 @@ const CodeMirror = (props: NoteBodyEditorProps, ref: ForwardedRef<NoteBodyEditor
 		const updateProps = { noteId: props.noteId };
 		if (editorRef.current?.updateBody(props.content, updateProps)) {
 			editorRef.current?.clearHistory();
+			const cursorLocation = initialCursorLocationRef.current?.markdown ?? 0;
+			editorRef.current?.select(cursorLocation, cursorLocation);
 		}
 	}, [props.content, props.noteId]);
 

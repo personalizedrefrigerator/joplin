@@ -30,6 +30,17 @@ export interface EditorScrollPercents {
 	[noteId: string]: number;
 }
 
+type RichTextEditorSelectionBookmark = unknown;
+
+export interface EditorCursorLocations {
+	readonly richText?: RichTextEditorSelectionBookmark;
+	readonly markdown?: number;
+}
+
+export interface NoteToEditorCursorLocations {
+	[noteId: string]: EditorCursorLocations;
+}
+
 export interface VisibleDialogs {
 	[dialogKey: string]: boolean;
 }
@@ -42,6 +53,9 @@ export interface AppWindowState extends WindowState {
 	devToolsVisible: boolean;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	watchedResources: any;
+
+	lastEditorScrollPercents: EditorScrollPercents;
+	lastEditorCursorLocations: NoteToEditorCursorLocations;
 }
 
 interface BackgroundWindowStates {
@@ -55,7 +69,6 @@ export interface AppState extends State, AppWindowState {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	navHistory: any[];
 	watchedNoteFiles: string[];
-	lastEditorScrollPercents: EditorScrollPercents;
 	focusedField: string;
 	layoutMoveMode: boolean;
 	startupPluginsLoaded: boolean;
@@ -75,6 +88,8 @@ export const createAppDefaultWindowState = (): AppWindowState => {
 		editorCodeView: true,
 		devToolsVisible: false,
 		watchedResources: {},
+		lastEditorCursorLocations: {},
+		lastEditorScrollPercents: {},
 	};
 };
 
@@ -90,7 +105,6 @@ export function createAppDefaultState(resourceEditWatcherDefaultState: any): App
 		},
 		navHistory: [],
 		watchedNoteFiles: [],
-		lastEditorScrollPercents: {},
 		visibleDialogs: {}, // empty object if no dialog is visible. Otherwise contains the list of visible dialogs.
 		focusedField: null,
 		layoutMoveMode: false,
@@ -296,6 +310,18 @@ export default function(state: AppState, action: any) {
 				const newPercents = { ...newState.lastEditorScrollPercents };
 				newPercents[action.noteId] = action.percent;
 				newState.lastEditorScrollPercents = newPercents;
+			}
+			break;
+
+		case 'EDITOR_CURSOR_POSITION_SET':
+			{
+				newState = { ...state };
+				const newCursorLocations = { ...newState.lastEditorCursorLocations };
+				newCursorLocations[action.noteId] = {
+					...(newCursorLocations[action.noteId] ?? {}),
+					...action.location,
+				};
+				newState.lastEditorCursorLocations = newCursorLocations;
 			}
 			break;
 

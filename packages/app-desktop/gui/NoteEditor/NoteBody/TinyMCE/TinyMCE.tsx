@@ -23,7 +23,7 @@ import { themeStyle } from '@joplin/lib/theme';
 import { loadScript } from '../../../utils/loadScript';
 import bridge from '../../../../services/bridge';
 import { TinyMceEditorEvents } from './utils/types';
-import type { Editor, EditorEvent } from 'tinymce';
+import type { Bookmark, Editor, EditorEvent } from 'tinymce';
 import { joplinCommandToTinyMceCommands, TinyMceCommand } from './utils/joplinCommandToTinyMceCommands';
 import shouldPasteResources from './utils/shouldPasteResources';
 import lightTheme from '@joplin/lib/themes/light';
@@ -354,6 +354,9 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: Ref<NoteBodyEditorRef>) => {
 	// 		document.getElementsByTagName('head')[0].appendChild(element);
 	// 	});
 	// };
+
+	const initialCursorLocationRef = useRef(props.initialCursorLocation);
+	initialCursorLocationRef.current = props.initialCursorLocation;
 
 	useEffect(() => {
 		if (!editorContainerDom) return () => {};
@@ -904,6 +907,12 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: Ref<NoteBodyEditorRef>) => {
 						}
 					});
 
+					editor.on('SelectionChange', () => {
+						props.onCursorMotion({
+							richText: editor.selection.getBookmark(2, true),
+						});
+					});
+
 					editor.on('init', () => {
 						setEditorReady(true);
 					});
@@ -916,8 +925,14 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: Ref<NoteBodyEditorRef>) => {
 						}
 					};
 
+					const setInitialCursorLocation = () => {
+						const location = initialCursorLocationRef.current.richText as Bookmark;
+						editor.selection.moveToBookmark(location);
+					};
+
 					editor.on('SetContent', () => {
 						preprocessContent();
+						setInitialCursorLocation();
 
 						props_onMessage.current({ channel: 'noteRenderComplete' });
 					});
