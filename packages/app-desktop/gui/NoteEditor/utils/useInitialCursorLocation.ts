@@ -1,8 +1,8 @@
 import { useMemo } from 'react';
-import { EditorCursorLocations, NoteToEditorCursorLocations } from '../../../app.reducer';
+import { EditorCursorLocations, NoteIdToEditorCursorLocations } from '../../../app.reducer';
 
 interface Props {
-	lastEditorCursorLocations: NoteToEditorCursorLocations;
+	lastEditorCursorLocations: NoteIdToEditorCursorLocations;
 	noteId: string;
 }
 

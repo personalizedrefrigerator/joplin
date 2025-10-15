@@ -14,7 +14,7 @@ import { ScrollbarSize } from '@joplin/lib/models/settings/builtInMetadata';
 import { RefObject, SetStateAction } from 'react';
 import * as React from 'react';
 import { ResourceEntity, ResourceLocalStateEntity } from '@joplin/lib/services/database/types';
-import { EditorCursorLocations, NoteToEditorCursorLocations, EditorScrollPercents } from '../../../app.reducer';
+import { EditorCursorLocations, NoteIdToEditorCursorLocations, NoteIdToScrollPercent } from '../../../app.reducer';
 
 export interface AllAssetsOptions {
 	contentMaxWidthTarget?: string;
@@ -41,8 +41,8 @@ export interface NoteEditorProps {
 	notesParentType: string;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	selectedNoteTags: any[];
-	lastEditorScrollPercents: EditorScrollPercents;
-	lastEditorCursorLocations: NoteToEditorCursorLocations;
+	lastEditorScrollPercents: NoteIdToScrollPercent;
+	lastEditorCursorLocations: NoteIdToEditorCursorLocations;
 	selectedNoteHash: string;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	searches: any[];

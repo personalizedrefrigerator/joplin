@@ -26,7 +26,7 @@ export interface AppStateDialog {
 	props: Record<string, any>;
 }
 
-export interface EditorScrollPercents {
+export interface NoteIdToScrollPercent {
 	[noteId: string]: number;
 }
 
@@ -37,7 +37,7 @@ export interface EditorCursorLocations {
 	readonly markdown?: number;
 }
 
-export interface NoteToEditorCursorLocations {
+export interface NoteIdToEditorCursorLocations {
 	[noteId: string]: EditorCursorLocations;
 }
 
@@ -54,8 +54,8 @@ export interface AppWindowState extends WindowState {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	watchedResources: any;
 
-	lastEditorScrollPercents: EditorScrollPercents;
-	lastEditorCursorLocations: NoteToEditorCursorLocations;
+	lastEditorScrollPercents: NoteIdToScrollPercent;
+	lastEditorCursorLocations: NoteIdToEditorCursorLocations;
 }
 
 interface BackgroundWindowStates {
