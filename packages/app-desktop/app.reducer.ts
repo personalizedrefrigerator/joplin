@@ -79,7 +79,7 @@ export interface AppState extends State, AppWindowState {
 	isResettingLayout: boolean;
 }
 
-export const createAppDefaultWindowState = (): AppWindowState => {
+export const createAppDefaultWindowState = (globalState: AppState|null): AppWindowState => {
 	return {
 		...defaultWindowState,
 		visibleDialogs: {},
@@ -88,8 +88,12 @@ export const createAppDefaultWindowState = (): AppWindowState => {
 		editorCodeView: true,
 		devToolsVisible: false,
 		watchedResources: {},
-		lastEditorCursorLocations: {},
-		lastEditorScrollPercents: {},
+
+		// Maintain the scroll and cursor location for secondary windows separate from the
+		// main window. This prevents scrolling in a secondary window from changing/resetting
+		// the default scroll position in the main window:
+		lastEditorCursorLocations: globalState?.lastEditorCursorLocations ?? {},
+		lastEditorScrollPercents: globalState?.lastEditorScrollPercents ?? {},
 	};
 };
 
@@ -97,7 +101,7 @@ export const createAppDefaultWindowState = (): AppWindowState => {
 export function createAppDefaultState(resourceEditWatcherDefaultState: any): AppState {
 	return {
 		...defaultState,
-		...createAppDefaultWindowState(),
+		...createAppDefaultWindowState(null),
 		route: {
 			type: 'NAV_GO',
 			routeName: 'Main',
