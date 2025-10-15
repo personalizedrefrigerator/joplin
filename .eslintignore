@@ -1743,6 +1743,7 @@ packages/plugin-repo-cli/lib/gitCompareUrl.test.js
 packages/plugin-repo-cli/lib/gitCompareUrl.js
 packages/plugin-repo-cli/lib/overrideUtils.test.js
 packages/plugin-repo-cli/lib/overrideUtils.js
+packages/plugin-repo-cli/lib/searchPlugins.js
 packages/plugin-repo-cli/lib/types.js
 packages/plugin-repo-cli/lib/updateReadme.test.js
 packages/plugin-repo-cli/lib/updateReadme.js
