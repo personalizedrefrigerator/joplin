@@ -35,7 +35,6 @@ function validateResponse(response: unknown): asserts response is SearchResponse
 }
 
 const searchPlugins = async () => {
-	// See https://github.com/npm/registry/blob/main/docs/REGISTRY-API.md#get-v1search
 	const pageSize = 100;
 	const makeRequest = async (start: number): Promise<SearchResponse> => {
 		const urlParams = new URLSearchParams({
@@ -43,6 +42,7 @@ const searchPlugins = async () => {
 			size: String(pageSize),
 			from: String(start),
 		});
+		// API documentation: https://github.com/npm/registry/blob/main/docs/REGISTRY-API.md#get-v1search
 		const query = `https://registry.npmjs.org/-/v1/search?${urlParams.toString()}`;
 		const result = await fetch(query);
 		const json: unknown = await result.json();
@@ -61,11 +61,10 @@ const searchPlugins = async () => {
 	let total = firstResponse.total;
 	addPackageInfos(firstResponse);
 
-	const maximumRequests = 10;
 	for (let page = 1; packageInfos.length < total; page++) {
-		// Cap the maximum number of requests to fail early in the case where the search query breaks
+		// Cap the maximum number of requests: Fail early in the case where the search query breaks
 		// in the future.
-		if (page >= maximumRequests) {
+		if (page >= 100) {
 			throw new Error('More requests sent than expected. Does maximumRequests need to be increased?');
 		}
 
