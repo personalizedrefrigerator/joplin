@@ -31,6 +31,7 @@ import CommandService from '@joplin/lib/services/CommandService';
 import useRefocusOnVisiblePaneChange from './utils/useRefocusOnVisiblePaneChange';
 import { WindowIdContext } from '../../../../NewWindowOrIFrame';
 import eventManager, { EventName, ResourceChangeEvent } from '@joplin/lib/eventManager';
+import useSyncEditorValue from './utils/useSyncEditorValue';
 
 const logger = Logger.create('CodeMirror6');
 const logDebug = (message: string) => logger.debug(message);
@@ -167,9 +168,8 @@ const CodeMirror = (props: NoteBodyEditorProps, ref: ForwardedRef<NoteBodyEditor
 			},
 			scrollTo: (options: ScrollOptions) => {
 				if (options.type === ScrollOptionTypes.Hash) {
-					if (!webviewRef.current) return;
 					const hash: string = options.value;
-					webviewRef.current.send('scrollToHash', hash);
+					webviewRef.current?.send('scrollToHash', hash);
 					editorRef.current.jumpToHash(hash);
 				} else if (options.type === ScrollOptionTypes.Percent) {
 					const percent = options.value as number;
@@ -404,26 +404,14 @@ const CodeMirror = (props: NoteBodyEditorProps, ref: ForwardedRef<NoteBodyEditor
 	const initialCursorLocationRef = useRef(0);
 	initialCursorLocationRef.current = props.initialCursorLocation.markdown ?? 0;
 
-	// Update the editor's value
-	const lastNoteIdRef = useRef(props.noteId);
-	useEffect(() => {
-		// Include the noteId in the update props to give plugins access
-		// to the current note ID.
-		const updateProps = { noteId: props.noteId };
-		if (editorRef.current?.updateBody(props.content, updateProps)) {
-			editorRef.current?.clearHistory();
-
-			// Only reset the cursor location when switching notes. If, for example,
-			// the note is updated from a secondary window, the cursor location shouldn't
-			// reset.
-			const noteChanged = lastNoteIdRef.current !== props.noteId;
-			if (noteChanged) {
-				const cursorLocation = initialCursorLocationRef.current;
-				editorRef.current?.select(cursorLocation, cursorLocation);
-			}
-			lastNoteIdRef.current = props.noteId;
-		}
-	}, [props.content, props.noteId]);
+	useSyncEditorValue({
+		content: props.content,
+		visiblePanes: props.visiblePanes,
+		onMessage: props.onMessage,
+		editorRef,
+		noteId: props.noteId,
+		initialCursorLocationRef,
+	});
 
 	const renderEditor = () => {
 		return (

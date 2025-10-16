@@ -9170,7 +9170,7 @@ __metadata:
     compare-versions: "npm:6.1.1"
     countable: "npm:3.0.1"
     debounce: "npm:1.2.1"
-    electron: "npm:37.4.0"
+    electron: "npm:37.7.0"
     electron-builder: "npm:24.13.3"
     electron-updater: "npm:6.6.2"
     electron-window-state: "npm:5.0.3"
@@ -9311,7 +9311,7 @@ __metadata:
     react-native-rsa-native: "npm:2.0.5"
     react-native-safe-area-context: "npm:5.4.1"
     react-native-securerandom: "npm:1.0.1"
-    react-native-share: "npm:12.0.11"
+    react-native-share: "npm:12.1.0"
     react-native-sqlite-storage: "npm:6.0.1"
     react-native-svg: "npm:15.13.0"
     react-native-url-polyfill: "npm:2.0.0"
@@ -24214,16 +24214,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"electron@npm:37.4.0":
-  version: 37.4.0
-  resolution: "electron@npm:37.4.0"
+"electron@npm:37.7.0":
+  version: 37.7.0
+  resolution: "electron@npm:37.7.0"
   dependencies:
     "@electron/get": "npm:^2.0.0"
     "@types/node": "npm:^22.7.7"
     extract-zip: "npm:^2.0.1"
   bin:
     electron: cli.js
-  checksum: 10/762132aa324d9bec4ab04eba9f655f9e99b3324da9afd55429f6ad9900e5df8422dc2834bed3336fc675a8875df158b8f69923f15348f511b4ac144f82540ec2
+  checksum: 10/90d65ac676770662442f7f473791ed7488c2186f42d516e1cebe1deac64a8259a67cef1126787a729309c25801ee6f53a312127e71696d86a51c056d3b6a6646
   languageName: node
   linkType: hard
 
@@ -41843,10 +41843,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-share@npm:12.0.11":
-  version: 12.0.11
-  resolution: "react-native-share@npm:12.0.11"
-  checksum: 10/df789e2376a24c77c19061c0a17be0c3ff9a461c8c60862f685af5c90f38f21fa73463043daa8187fbc2358677a371af7c793d6da340ee3a4ef3a49728e7c796
+"react-native-share@npm:12.1.0":
+  version: 12.1.0
+  resolution: "react-native-share@npm:12.1.0"
+  checksum: 10/a7b9d4d8bd03b24f637f02e5112317e8050fe4f8d82554b6d16ae5177c8fcb3c8d1a88b0bbc7602dec445ad2399ea22a0b016ccdfa922c5fae3721986a5ef9af
   languageName: node
   linkType: hard
 
