@@ -1071,8 +1071,9 @@ packages/editor/CodeMirror/utils/markdown/stripBlockquote.js
 packages/editor/CodeMirror/utils/markdown/toggleCheckboxAt.js
 packages/editor/CodeMirror/utils/setupVim.js
 packages/editor/CodeMirror/vendor/announceSearchMatch.js
-packages/editor/ProseMirror/commands.test.js
-packages/editor/ProseMirror/commands.js
+packages/editor/ProseMirror/commands/commands.test.js
+packages/editor/ProseMirror/commands/commands.js
+packages/editor/ProseMirror/commands/focusEditor.js
 packages/editor/ProseMirror/createEditor.js
 packages/editor/ProseMirror/index.js
 packages/editor/ProseMirror/plugins/detailsPlugin.test.js
@@ -1091,6 +1092,7 @@ packages/editor/ProseMirror/plugins/linkTooltipPlugin.js
 packages/editor/ProseMirror/plugins/listPlugin.js
 packages/editor/ProseMirror/plugins/originalMarkupPlugin.js
 packages/editor/ProseMirror/plugins/searchPlugin.js
+packages/editor/ProseMirror/plugins/tablePlugin.js
 packages/editor/ProseMirror/plugins/utils/createExternalEditorPlugin.js
 packages/editor/ProseMirror/plugins/utils/createFloatingButtonPlugin.js
 packages/editor/ProseMirror/schema.js
@@ -1120,6 +1122,12 @@ packages/editor/ProseMirror/utils/sanitizeHtml.js
 packages/editor/ProseMirror/utils/selectFirstInstanceOfNode.js
 packages/editor/ProseMirror/utils/trimEmptyParagraphs.js
 packages/editor/ProseMirror/vendor/changedDescendants.js
+packages/editor/ProseMirror/vendor/icons/addColumnRight.js
+packages/editor/ProseMirror/vendor/icons/addRowBelow.js
+packages/editor/ProseMirror/vendor/icons/icon.js
+packages/editor/ProseMirror/vendor/icons/removeColumn.js
+packages/editor/ProseMirror/vendor/icons/removeRow.js
+packages/editor/ProseMirror/vendor/icons/types.js
 packages/editor/ProseMirror/vendor/splitBlockAs.js
 packages/editor/SelectionFormatting.js
 packages/editor/events.js

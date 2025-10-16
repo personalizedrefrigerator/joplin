@@ -1,7 +1,7 @@
 import { EditorView } from 'prosemirror-view';
-import { EditorCommandType } from '../types';
+import { EditorCommandType } from '../../types';
 import commands from './commands';
-import createTestEditor from './testing/createTestEditor';
+import createTestEditor from '../testing/createTestEditor';
 
 const selectAll = (editor: EditorView) => {
 	commands[EditorCommandType.SelectAll](editor.state, editor.dispatch, editor);
