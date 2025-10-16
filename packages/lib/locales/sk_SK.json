@@ -173,6 +173,9 @@
 	"[None]": [
 		"[Žiadny]"
 	],
+	"A brief description of the image:": [
+		""
+	],
 	"A comma-separated list of words. May be used for uncommon words, to help voice typing spell them correctly.": [
 		"Zoznam slov oddelených čiarkami. Môže sa použiť pre nezvyčajné slová, aby sa pomohlo pri ich správnom hlasovom zadávaní."
 	],
@@ -340,6 +343,9 @@
 	],
 	"An autosaved drawing was found. Attach a copy of it to the note?": [
 		"Bol nájdený automaticky uložený náčrt. Pripojiť jeho kópiu k poznámke?"
+	],
+	"An error occurred while sending the response. This can happen if the app is offline or cannot connect to the server.\nError: %s": [
+		""
 	],
 	"An error occurred: %s": [
 		"Vyskytla sa chyba: %s"
@@ -1179,6 +1185,9 @@
 	"Do not lose the password as, for security purposes, this will be the *only* way to decrypt the data! To enable encryption, please enter your password below.": [
 		"Nestraťte heslo, pretože z bezpečnostných dôvodov je to *jediný* spôsob, ako dešifrovať údaje! Ak chcete zapnúť šifrovanie, zadajte heslo nižšie."
 	],
+	"Do you find the Joplin web app useful?": [
+		""
+	],
 	"Document scanner: Title template": [
 		"Skener dokumentov: Šablóna názvu"
 	],
@@ -1599,6 +1608,9 @@
 	"Feature flags": [
 		"Príznaky funkcií"
 	],
+	"Feedback": [
+		""
+	],
 	"Fetched items: %d/%d.": [
 		"Načítané položky: %d/%d."
 	],
@@ -1859,9 +1871,6 @@
 	"In any command, a note or notebook can be referred to by title or ID, or using the shortcuts `$n` or `$b` for, respectively, the currently selected note or notebook. `$c` can be used to refer to the currently selected item.": [
 		"V každom príkaze sa na poznámku alebo zápisník môžete odvolať pomocou názvu alebo ID, alebo pomocou skratiek `$n` alebo `$b` pre aktuálne vybranú poznámku alebo zápisník. Na označenie aktuálne vybranej položky možno použiť `$c`."
 	],
-	"In order to associate a geo-location with the note, the app needs your permission to access your location.\n\nYou may turn off this option at any time in the Configuration screen.": [
-		"Aby mohla aplikácia priradiť geografickú polohu k poznámke, potrebuje vaše povolenie na prístup k vašej polohe.\n\nTúto možnosť môžete kedykoľvek vypnúť na stránke Nastavenie."
-	],
 	"In order to do so, your entire data set will have to be encrypted and synchronised, so it is best to run it overnight.\n\nTo start, please follow these instructions:\n\n1. Synchronise all your devices.\n2. Click \"%s\".\n3. Let it run to completion. While it runs, avoid changing any note on your other devices, to avoid conflicts.\n4. Once sync is done on this device, sync all your other devices and let it run to completion.\n\nImportant: you only need to run this ONCE on one device.": [
 		"Na tento účel bude potrebné zašifrovať a synchronizovať celý súbor údajov, preto je najlepšie spustiť ho cez noc.\n\nAk chcete začať, postupujte podľa týchto pokynov:\n\n1. Synchronizujte všetky svoje zariadenia.\n2. Kliknite na tlačidlo „%s“.\n3. Nechajte funkciu bežať až do konca. Počas jej spustenia sa vyhnite zmene akejkoľvek poznámky na ostatných zariadeniach, aby ste predišli konfliktom.\n4. Po dokončení synchronizácie na tomto zariadení synchronizujte všetky ostatné zariadenia a nechajte ju prebehnúť do konca.\n\nDôležité: je potrebné to spustiť iba JEDENKRÁT na jednom zariadení."
 	],
@@ -2033,6 +2042,9 @@
 	"Joplin SSO Authentication": [
 		"Joplin SSO overenie"
 	],
+	"Joplin supports saving the location at which notes are saved or created. Do you want to enable it? This can be changed at any time in settings.": [
+		""
+	],
 	"Joplin Web Clipper allows saving web pages and screenshots from your browser to Joplin.": [
 		"Joplin Web Clipper umožňuje ukladanie webových stránok a snímok obrazovky z vášho prehliadača do aplikácie Joplin."
 	],
@@ -2062,6 +2074,9 @@
 	],
 	"Keys that need upgrading": [
 		"Kľúče, ktoré si vyžadujú aktualizáciu"
+	],
+	"Label": [
+		""
 	],
 	"Landscape": [
 		"Na šírku"
@@ -2480,6 +2495,9 @@
 	"Not now": [
 		"Teraz nie"
 	],
+	"Not useful": [
+		""
+	],
 	"note": [
 		"pozn"
 	],
@@ -2687,6 +2705,9 @@
 	"Ordered list": [
 		"Usporiadaný zoznam"
 	],
+	"Other": [
+		""
+	],
 	"Other applications...": [
 		"Iné aplikácie..."
 	],
@@ -2748,9 +2769,6 @@
 	],
 	"Permanently deletes the notebook, skipping the trash.": [
 		"Trvalo odstráni zápisník, pričom vynechá kôš."
-	],
-	"Permission needed": [
-		"Vyžaduje sa povolenie"
 	],
 	"Photo %d": [
 		"Fotka %d"
@@ -2854,9 +2872,6 @@
 	"Preferred light theme": [
 		"Uprednostňovaná svetlá téma"
 	],
-	"Preferred voice typing provider": [
-		"Uprednostňovaný poskytovateľ hlasového písania"
-	],
 	"Preserve colours when pasting text in Rich Text Editor": [
 		"Zachovať farby pri vkladaní textu v rozšírenom textovom editore"
 	],
@@ -2955,6 +2970,9 @@
 	],
 	"Publish/unpublish": [
 		"Zverejniť/Zrušiť zverejnenie"
+	],
+	"Publishes a note to Joplin Server or Joplin Cloud": [
+		""
 	],
 	"QR Code": [
 		"QR kód"
@@ -3298,6 +3316,9 @@
 	"Select notebook": [
 		"Vybrať zápisník"
 	],
+	"Select one of the other supported sync targets.": [
+		""
+	],
 	"Select parent notebook": [
 		"Vybrať nadradený zápisník"
 	],
@@ -3634,6 +3655,9 @@
 	"Switches to [notebook] - all further operations will happen within this notebook.": [
 		"Prepne na [zápisník] – všetky ďalšie operácie budú prebiehať v tomto zápisníku."
 	],
+	"Sync": [
+		""
+	],
 	"Sync as many devices as you want": [
 		"Synchronizujte toľko zariadení, koľko len chcete"
 	],
@@ -3729,6 +3753,9 @@
 	],
 	"Text editor command": [
 		"Príkaz textového editora"
+	],
+	"Thank you for the feedback!\nDo you have time to complete a short survey?": [
+		""
 	],
 	"The active profile cannot be deleted. Switch to a different profile and try again.": [
 		"Aktívny profil nie je možné odstrániť. Prepnite na iný profil a skúste to znova."
@@ -4277,6 +4304,9 @@
 	"Used where a fixed width font is needed to lay out text legibly (e.g. tables, checkboxes, code). If not found, a generic monospace (fixed width) font is used.": [
 		"Používa sa v prípadoch, keď je na čitateľné rozvrhnutie textu potrebná pevná šírka písma (napr. tabuľky, označovacie políčka, kód). Ak sa nenájde, použije sa všeobecné monospace písmo (s pevnou šírkou)."
 	],
+	"Useful": [
+		""
+	],
 	"User deletions": [
 		"Vymazania používateľa"
 	],
@@ -4324,9 +4354,6 @@
 	],
 	"Voice typing: Glossary": [
 		"Hlasové zadávanie: Slovník"
-	],
-	"Vosk": [
-		"Vosk"
 	],
 	"Waiting for authorisation...": [
 		"Čaká sa na overenie..."
@@ -4385,11 +4412,11 @@
 	"When creating a new to-do:": [
 		"Pri vytváraní novej úlohy:"
 	],
+	"When enabled, requests that the images in the note be transcribed with a higher-quality on-server transcription service. Requires sync with a copy of the desktop app.": [
+		""
+	],
 	"When enabled, the application will scan your attachments and extract the text from it. This will allow you to search for text in these attachments.": [
 		"Ak je táto funkcia zapnutá, aplikácia bude skenovať prílohy a extrahovať z nich text. To vám umožní vyhľadávať text v týchto prílohách."
-	],
-	"Whisper": [
-		"Whisper"
 	],
 	"Window unresponsive.": [
 		"Okno nereaguje."
