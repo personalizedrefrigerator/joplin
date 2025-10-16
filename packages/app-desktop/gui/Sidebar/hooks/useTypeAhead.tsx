@@ -66,6 +66,8 @@ const useUpdateSelectedIndex = (props: UpdateSelectedIndexProps) => {
 	}, [query]);
 };
 
+// See the ARIA Authoring Practices Guide (APG) for how typeahead should work:
+// https://www.w3.org/WAI/ARIA/apg/patterns/treeview/
 const useTypeAhead = ({ listItems, selectedIndex, updateSelectedIndex, focusSidebar }: Props) => {
 	const [query, setQuery] = useState('');
 	const inputRef = useRef<HTMLInputElement>(null);
