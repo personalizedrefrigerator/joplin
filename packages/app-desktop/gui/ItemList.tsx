@@ -84,6 +84,10 @@ class ItemList<ItemType> extends React.Component<Props<ItemType>, State> {
 		this.updateStateItemIndexes(newProps);
 	}
 
+	public hasFocus() {
+		return !!this.listRef?.current?.matches(':focus-within');
+	}
+
 	public onScroll: UIEventHandler<HTMLDivElement> = event => {
 		this.lastScrollTop_ = (event.target as HTMLElement).scrollTop;
 		this.updateStateItemIndexes();

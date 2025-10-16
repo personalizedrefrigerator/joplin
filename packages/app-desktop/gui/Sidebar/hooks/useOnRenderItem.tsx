@@ -38,13 +38,17 @@ const MenuItem = bridge().MenuItem;
 
 const logger = Logger.create('useOnRenderItem');
 
+interface ItemContainerSlice {
+	hasFocus: ()=> boolean;
+}
+
 interface Props {
 	dispatch: Dispatch;
 	themeId: number;
 	plugins: PluginStates;
 	folders: FolderEntity[];
 	collapsedFolderIds: string[];
-	containerRef: React.RefObject<HTMLDivElement>;
+	containerRef: React.RefObject<ItemContainerSlice>;
 
 	selectedIndex: number;
 	listItems: ListItem[];
@@ -344,7 +348,7 @@ const useOnRenderItem = (props: Props) => {
 	const itemCount = props.listItems.length;
 	return useCallback((item: ListItem, index: number) => {
 		const selected = props.selectedIndex === index;
-		const focusInList = document.hasFocus() && props.containerRef.current?.contains(document.activeElement);
+		const focusInList = document.hasFocus() && props.containerRef.current?.hasFocus();
 		const anchorRef = (focusInList && selected) ? focusListItem : noFocusListItem;
 
 		if (item.kind === ListItemType.Tag) {
@@ -356,6 +360,7 @@ const useOnRenderItem = (props: Props) => {
 				onClick={tagItem_click}
 				onTagDrop={onTagDrop_}
 				onContextMenu={onItemContextMenu}
+				label={item.label}
 				tag={tag}
 				itemCount={itemCount}
 				index={index}
@@ -384,7 +389,7 @@ const useOnRenderItem = (props: Props) => {
 				anchorRef={anchorRef}
 				selected={selected}
 				folderId={folder.id}
-				folderTitle={Folder.displayTitle(folder)}
+				folderTitle={item.label}
 				folderIcon={Folder.unserializeIcon(folder.icon)}
 				depth={item.depth}
 				isExpanded={isExpanded}

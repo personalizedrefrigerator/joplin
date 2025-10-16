@@ -4,12 +4,17 @@ import { KeyboardEventHandler, useCallback } from 'react';
 import CommandService from '@joplin/lib/services/CommandService';
 import toggleHeader from './utils/toggleHeader';
 
+type OnSetTypeAheadQuery = (query: string)=> void;
+
 interface Props {
 	dispatch: Dispatch;
 	listItems: ListItem[];
 	collapsedFolderIds: string[];
 	selectedIndex: number;
 	updateSelectedIndex: SetSelectedIndexCallback;
+
+	setTypeAheadQuery: OnSetTypeAheadQuery;
+	typeAheadEnabled: boolean;
 }
 
 const isToggleShortcut = (keyCode: string, selectedItem: ListItem, collapsedFolderIds: string[]) => {
@@ -50,11 +55,12 @@ const getParentOffset = (childIndex: number, listItems: ListItem[]): number|null
 };
 
 const useOnSidebarKeyDownHandler = (props: Props) => {
-	const { updateSelectedIndex, listItems, selectedIndex, collapsedFolderIds, dispatch } = props;
+	const { updateSelectedIndex, setTypeAheadQuery, typeAheadEnabled, listItems, selectedIndex, collapsedFolderIds, dispatch } = props;
 
 	return useCallback<KeyboardEventHandler<HTMLElement>>((event) => {
 		const selectedItem = listItems[selectedIndex];
 		let indexChange = 0;
+		let disableTypeAhead = true;
 
 		if (selectedItem && isToggleShortcut(event.code, selectedItem, collapsedFolderIds)) {
 			event.preventDefault();
@@ -82,16 +88,36 @@ const useOnSidebarKeyDownHandler = (props: Props) => {
 			indexChange = 1;
 		} else if ((event.ctrlKey || event.metaKey) && event.code === 'KeyA') { // ctrl+a or cmd+a
 			event.preventDefault();
+		} else if (event.code === 'Home') {
+			event.preventDefault();
+			updateSelectedIndex(0);
+			indexChange = 0;
+		} else if (event.code === 'End') {
+			event.preventDefault();
+			updateSelectedIndex(listItems.length - 1);
+			indexChange = 0;
 		} else if (event.code === 'Enter' && !event.shiftKey) {
 			event.preventDefault();
 			void CommandService.instance().execute('focusElement', 'noteList');
+		} else if (selectedIndex && selectedIndex >= 0 && event.key.length === 1) {
+			disableTypeAhead = false;
+			if (!typeAheadEnabled) {
+				setTypeAheadQuery(event.key);
+				event.preventDefault();
+			}
+		} else {
+			disableTypeAhead = false;
 		}
 
 		if (indexChange !== 0) {
 			event.preventDefault();
 			updateSelectedIndex(selectedIndex + indexChange);
 		}
-	}, [selectedIndex, collapsedFolderIds, listItems, updateSelectedIndex, dispatch]);
+
+		if (disableTypeAhead) {
+			setTypeAheadQuery('');
+		}
+	}, [selectedIndex, typeAheadEnabled, collapsedFolderIds, listItems, updateSelectedIndex, dispatch, setTypeAheadQuery]);
 };
 
 export default useOnSidebarKeyDownHandler;
