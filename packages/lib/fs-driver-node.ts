@@ -1,6 +1,8 @@
 import AdmZip = require('adm-zip');
-import FsDriverBase, { Stat, ZipEntry, ZipExtractOptions } from './fs-driver-base';
+import FsDriverBase, { Stat, ZipEntry, ArchiveExtractOptions } from './fs-driver-base';
 import time from './time';
+import { execCommand } from '@joplin/utils';
+import { extname } from 'path';
 const md5File = require('md5-file');
 const fs = require('fs-extra');
 
@@ -211,9 +213,43 @@ export default class FsDriverNode extends FsDriverBase {
 		await require('tar').create(options, filePaths);
 	}
 
-	public async zipExtract(options: ZipExtractOptions): Promise<ZipEntry[]> {
+	public async zipExtract(options: ArchiveExtractOptions): Promise<ZipEntry[]> {
 		const zip = new AdmZip(options.source);
 		zip.extractAllTo(options.extractTo, false);
 		return zip.getEntries();
+	}
+
+	public async cabExtract(options: ArchiveExtractOptions) {
+		if (process.platform !== 'win32') {
+			throw new Error('Extracting CAB archives is only supported on Windows.');
+		}
+
+		// See the PowerShell documentation for Expand-Archive:
+		// https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.archive/expand-archive
+		const command = [
+			'param(',
+			'	[string]$source,',
+			'	[string]$dest',
+			')',
+			'Expand-Archive -LiteralPath $source -DestinationPath $dest',
+		].join(' ');
+
+		const source = this.resolve(options.source);
+		const extractTo = this.resolve(options.extractTo);
+
+		if (extname(source).toLowerCase() !== '.cab') {
+			throw new Error('Invalid file extension. Expected .CAB.');
+		}
+
+		await execCommand([
+			'PowerShell.exe',
+			// Don't load the default startup profile. This avoids potential conflicts
+			// with user-specified PowerShell customizations (see discussion at: https://stackoverflow.com/a/75868879):
+			'-NoProfile',
+			'-Command', command,
+			// Passing parameters: "If the value of Command is a string, Command must be the last parameter [...] all arguments following it are interpreted as part of the command to execute."
+			// https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_powershell_exe?view=powershell-5.1&viewFallbackFrom=powershell-7.5
+			source, extractTo,
+		], { quiet: true });
 	}
 }
