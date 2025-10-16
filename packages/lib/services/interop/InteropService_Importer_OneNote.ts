@@ -41,9 +41,9 @@ export default class InteropService_Importer_OneNote extends InteropService_Impo
 		return normalize(withoutBasePath).split(sep)[0];
 	}
 
-	public async exec(result: ImportExportResult) {
+	private async execImpl_(result: ImportExportResult, unzipTempDirectory: string, tempOutputDirectory: string) {
 		const sourcePath = rtrimSlashes(this.sourcePath_);
-		const unzipTempDirectory = await this.temporaryDirectory_(true);
+
 		logger.info('Unzipping files...');
 		const files = await shim.fsDriver().zipExtract({ source: sourcePath, extractTo: unzipTempDirectory });
 
@@ -52,7 +52,6 @@ export default class InteropService_Importer_OneNote extends InteropService_Impo
 			return result;
 		}
 
-		const tempOutputDirectory = await this.temporaryDirectory_(true);
 		const baseFolder = this.getEntryDirectory(unzipTempDirectory, files[0].entryName);
 		const notebookBaseDir = join(unzipTempDirectory, baseFolder, sep);
 		const outputDirectory2 = join(tempOutputDirectory, baseFolder);
@@ -94,12 +93,21 @@ export default class InteropService_Importer_OneNote extends InteropService_Impo
 			...this.options_,
 			format: 'html',
 			outputFormat: ImportModuleOutputFormat.Html,
-
 		});
 		logger.info('Finished');
 		result = await importer.exec(result);
-
 		return result;
+	}
+
+	public async exec(result: ImportExportResult) {
+		const unzipTempDirectory = await this.temporaryDirectory_(true);
+		const tempOutputDirectory = await this.temporaryDirectory_(true);
+		try {
+			return await this.execImpl_(result, unzipTempDirectory, tempOutputDirectory);
+		} finally {
+			await shim.fsDriver().remove(unzipTempDirectory);
+			await shim.fsDriver().remove(tempOutputDirectory);
+		}
 	}
 
 	private async moveSvgToLocalFile(baseFolder: string) {
