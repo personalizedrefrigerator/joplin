@@ -342,6 +342,7 @@ const CodeMirror = (props: NoteBodyEditorProps, ref: ForwardedRef<NoteBodyEditor
 		} else if (event.kind === EditorEventType.Change) {
 			codeMirror_change(event.value);
 		} else if (event.kind === EditorEventType.SelectionRangeChange) {
+			props.onCursorMotion({ markdown: event.from });
 			setSelectionRange({ from: event.from, to: event.to });
 		} else if (event.kind === EditorEventType.UpdateSearchDialog) {
 			if (lastSearchState.current?.searchText !== event.searchState.searchText) {
@@ -355,7 +356,7 @@ const CodeMirror = (props: NoteBodyEditorProps, ref: ForwardedRef<NoteBodyEditor
 		} else if (event.kind === EditorEventType.FollowLink) {
 			void CommandService.instance().execute('openItem', event.link);
 		}
-	}, [editor_scroll, codeMirror_change, props.setLocalSearch, props.setShowLocalSearch]);
+	}, [editor_scroll, codeMirror_change, props.setLocalSearch, props.setShowLocalSearch, props.onCursorMotion]);
 
 	const onSelectPastBeginning = useCallback(() => {
 		void CommandService.instance().execute('focusElement', 'noteTitle');
@@ -400,12 +401,16 @@ const CodeMirror = (props: NoteBodyEditorProps, ref: ForwardedRef<NoteBodyEditor
 		props.tabMovesFocus,
 	]);
 
+	const initialCursorLocationRef = useRef(0);
+	initialCursorLocationRef.current = props.initialCursorLocation.markdown ?? 0;
+
 	useSyncEditorValue({
 		content: props.content,
 		visiblePanes: props.visiblePanes,
 		onMessage: props.onMessage,
 		editorRef,
 		noteId: props.noteId,
+		initialCursorLocationRef,
 	});
 
 	const renderEditor = () => {
@@ -414,6 +419,7 @@ const CodeMirror = (props: NoteBodyEditorProps, ref: ForwardedRef<NoteBodyEditor
 				<Editor
 					style={styles.editor}
 					initialText={props.content}
+					initialSelectionRef={initialCursorLocationRef}
 					initialNoteId={props.noteId}
 					ref={editorRef}
 					settings={editorSettings}
