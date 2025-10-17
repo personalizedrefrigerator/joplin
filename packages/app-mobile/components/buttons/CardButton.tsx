@@ -19,12 +19,14 @@ interface Props {
 
 const useStyles = (disabled: boolean) => {
 	return useMemo(() => {
-		const borderRadius = 14;
+		const borderRadius = 16;
 		// For the TouchableRipple to work on Android, the card needs a transparent background.
 		const baseCard = { backgroundColor: 'transparent', borderRadius };
 		return StyleSheet.create({
 			cardOuterWrapper: {
-				borderRadius,
+				// Slightly increase the border radius to prevent the touchable
+				// ripple from being observably outside of the container:
+				borderRadius: borderRadius + 4,
 				// Hide overflow to prevent the touchable ripple from
 				// extending outside the button's border.
 				overflow: 'hidden',
