@@ -87,7 +87,6 @@ export default class InteropService_Importer_OneNote extends InteropService_Impo
 		const baseFolder = this.getEntryDirectory(unzipTempDirectory, files[0].path);
 		const notebookBaseDir = join(unzipTempDirectory, baseFolder, sep);
 		const outputDirectory2 = join(tempOutputDirectory, baseFolder);
-		console.warn('all files', files.map(f => f.path));
 
 		const notebookFiles = files.filter(e => {
 			return extname(e.path) !== '.onetoc2' && basename(e.path) !== 'OneNote_RecycleBin.onetoc2';
