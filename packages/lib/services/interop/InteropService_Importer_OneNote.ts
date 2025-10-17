@@ -43,24 +43,32 @@ export default class InteropService_Importer_OneNote extends InteropService_Impo
 
 	private async extractFiles_(sourcePath: string, targetPath: string) {
 		const fileExtension = extname(sourcePath).toLowerCase();
+		const fileNameNoExtension = basename(sourcePath, extname(sourcePath));
 		if (fileExtension === '.zip') {
 			logger.info('Unzipping files...');
 			await shim.fsDriver().zipExtract({ source: sourcePath, extractTo: targetPath });
 		} else if (fileExtension === '.one') {
 			logger.info('Copying file...');
-			const fileName = basename(sourcePath);
-			const outputPath = join(targetPath, fileName);
-			await shim.fsDriver().copy(sourcePath, outputPath);
+
+			const outputDirectory = join(targetPath, fileNameNoExtension);
+			await shim.fsDriver().mkdir(outputDirectory);
+
+			await shim.fsDriver().copy(sourcePath, join(outputDirectory, basename(sourcePath)));
 		} else if (fileExtension === '.onepkg') {
 			// Change the file extension so that the archive can be extracted
-			const fileName = basename(sourcePath, fileExtension);
-			const archivePath = join(targetPath, `${fileName}.cab`);
+			const archivePath = join(targetPath, `${fileNameNoExtension}.cab`);
 			await shim.fsDriver().copy(sourcePath, archivePath);
 
-			const extractPath = join(targetPath, fileName);
+			const extractPath = join(targetPath, fileNameNoExtension);
 			await shim.fsDriver().mkdir(extractPath);
 
-			await shim.fsDriver().cabExtract({ source: sourcePath, extractTo: extractPath });
+			await shim.fsDriver().cabExtract({
+				source: archivePath,
+				extractTo: extractPath,
+				// Only the .one files are used--there's no need to extract
+				// other files.
+				fileNamePattern: '*.one',
+			});
 		} else {
 			throw new Error(`Unknown file extension: ${fileExtension}`);
 		}
@@ -79,6 +87,7 @@ export default class InteropService_Importer_OneNote extends InteropService_Impo
 		const baseFolder = this.getEntryDirectory(unzipTempDirectory, files[0].path);
 		const notebookBaseDir = join(unzipTempDirectory, baseFolder, sep);
 		const outputDirectory2 = join(tempOutputDirectory, baseFolder);
+		console.warn('all files', files.map(f => f.path));
 
 		const notebookFiles = files.filter(e => {
 			return extname(e.path) !== '.onetoc2' && basename(e.path) !== 'OneNote_RecycleBin.onetoc2';
