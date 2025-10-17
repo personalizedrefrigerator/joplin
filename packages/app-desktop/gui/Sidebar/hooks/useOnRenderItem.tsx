@@ -38,17 +38,13 @@ const MenuItem = bridge().MenuItem;
 
 const logger = Logger.create('useOnRenderItem');
 
-interface ItemContainerSlice {
-	hasFocus: ()=> boolean;
-}
-
 interface Props {
 	dispatch: Dispatch;
 	themeId: number;
 	plugins: PluginStates;
 	folders: FolderEntity[];
 	collapsedFolderIds: string[];
-	containerRef: React.RefObject<ItemContainerSlice>;
+	containerRef: React.RefObject<HTMLDivElement>;
 
 	selectedIndex: number;
 	listItems: ListItem[];
@@ -348,7 +344,7 @@ const useOnRenderItem = (props: Props) => {
 	const itemCount = props.listItems.length;
 	return useCallback((item: ListItem, index: number) => {
 		const selected = props.selectedIndex === index;
-		const focusInList = document.hasFocus() && props.containerRef.current?.hasFocus();
+		const focusInList = document.hasFocus() && props.containerRef.current?.contains(document.activeElement);
 		const anchorRef = (focusInList && selected) ? focusListItem : noFocusListItem;
 
 		if (item.kind === ListItemType.Tag) {

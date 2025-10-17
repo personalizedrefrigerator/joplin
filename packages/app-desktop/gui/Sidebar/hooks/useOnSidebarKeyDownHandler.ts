@@ -4,17 +4,12 @@ import { KeyboardEventHandler, useCallback } from 'react';
 import CommandService from '@joplin/lib/services/CommandService';
 import toggleHeader from './utils/toggleHeader';
 
-type OnSetTypeAheadQuery = (query: string)=> void;
-
 interface Props {
 	dispatch: Dispatch;
 	listItems: ListItem[];
 	collapsedFolderIds: string[];
 	selectedIndex: number;
 	updateSelectedIndex: SetSelectedIndexCallback;
-
-	setTypeAheadQuery: OnSetTypeAheadQuery;
-	typeAheadEnabled: boolean;
 }
 
 const isToggleShortcut = (keyCode: string, selectedItem: ListItem, collapsedFolderIds: string[]) => {
@@ -54,13 +49,30 @@ const getParentOffset = (childIndex: number, listItems: ListItem[]): number|null
 	return null;
 };
 
+const findNextTypeAheadMatch = (selectedIndex: number, query: string, listItems: ListItem[]) => {
+	const matches = (item: ListItem) => {
+		return item.label.startsWith(query);
+	};
+	const indexBefore = listItems.slice(0, selectedIndex).findIndex(matches);
+	// Search in all results **after** the current. This prevents the current item from
+	// always being identified as the next match, if the user repeatedly presses the
+	// same key.
+	const startAfter = selectedIndex + 1;
+	let indexAfter = listItems.slice(startAfter).findIndex(matches);
+	if (indexAfter !== -1) {
+		indexAfter += startAfter;
+	}
+	// Prefer jumping to the next match, rather than the previous
+	const matchingIndex = indexAfter !== -1 ? indexAfter : indexBefore;
+	return matchingIndex;
+};
+
 const useOnSidebarKeyDownHandler = (props: Props) => {
-	const { updateSelectedIndex, setTypeAheadQuery, typeAheadEnabled, listItems, selectedIndex, collapsedFolderIds, dispatch } = props;
+	const { updateSelectedIndex, listItems, selectedIndex, collapsedFolderIds, dispatch } = props;
 
 	return useCallback<KeyboardEventHandler<HTMLElement>>((event) => {
 		const selectedItem = listItems[selectedIndex];
 		let indexChange = 0;
-		let disableTypeAhead = true;
 
 		if (selectedItem && isToggleShortcut(event.code, selectedItem, collapsedFolderIds)) {
 			event.preventDefault();
@@ -100,24 +112,17 @@ const useOnSidebarKeyDownHandler = (props: Props) => {
 			event.preventDefault();
 			void CommandService.instance().execute('focusElement', 'noteList');
 		} else if (selectedIndex && selectedIndex >= 0 && event.key.length === 1) {
-			disableTypeAhead = false;
-			if (!typeAheadEnabled) {
-				setTypeAheadQuery(event.key);
-				event.preventDefault();
+			const nextMatch = findNextTypeAheadMatch(selectedIndex, event.key, listItems);
+			if (nextMatch !== -1) {
+				indexChange = nextMatch - selectedIndex;
 			}
-		} else {
-			disableTypeAhead = false;
 		}
 
 		if (indexChange !== 0) {
 			event.preventDefault();
 			updateSelectedIndex(selectedIndex + indexChange);
 		}
-
-		if (disableTypeAhead) {
-			setTypeAheadQuery('');
-		}
-	}, [selectedIndex, typeAheadEnabled, collapsedFolderIds, listItems, updateSelectedIndex, dispatch, setTypeAheadQuery]);
+	}, [selectedIndex, collapsedFolderIds, listItems, updateSelectedIndex, dispatch]);
 };
 
 export default useOnSidebarKeyDownHandler;

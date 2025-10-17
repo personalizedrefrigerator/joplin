@@ -17,7 +17,6 @@ import { ListItem } from './types';
 import useSidebarCommandHandler from './hooks/useSidebarCommandHandler';
 import { stateUtils } from '@joplin/lib/reducer';
 import useOnRenderListWrapper from './hooks/useOnRenderListWrapper';
-import useTypeAhead from './hooks/useTypeAhead';
 
 interface Props {
 	dispatch: Dispatch;
@@ -47,35 +46,29 @@ const FolderAndTagList: React.FC<Props> = props => {
 		return areAllFoldersCollapsed(props.folders, props.collapsedFolderIds);
 	}, [props.collapsedFolderIds, props.folders]);
 
-	const itemListRef = useRef<ItemList<ListItem>|null>(null);
+	const listContainerRef = useRef<HTMLDivElement|null>(null);
 	const onRenderItem = useOnRenderItem({
 		...props,
 		selectedIndex,
 		listItems,
-		containerRef: itemListRef,
+		containerRef: listContainerRef,
 	});
 
-	const { focusSidebar } = useFocusHandler({ itemListRef, selectedIndex, listItems });
-
-	const { setTypeAheadQuery, typeAheadComponent, typeAheadEnabled } = useTypeAhead({
-		listItems,
-		selectedIndex,
-		updateSelectedIndex,
-		focusSidebar,
-	});
 	const onKeyEventHandler = useOnSidebarKeyDownHandler({
 		dispatch: props.dispatch,
 		listItems: listItems,
 		selectedIndex,
 		updateSelectedIndex,
 		collapsedFolderIds: props.collapsedFolderIds,
-		setTypeAheadQuery,
-		typeAheadEnabled,
 	});
+
+	const itemListRef = useRef<ItemList<ListItem>|null>(null);
+	const { focusSidebar } = useFocusHandler({ itemListRef, selectedIndex, listItems });
 
 	useSidebarCommandHandler({ focusSidebar });
 
 	const [itemListContainer, setItemListContainer] = useState<HTMLDivElement|null>(null);
+	listContainerRef.current = itemListContainer;
 	const listHeight = useElementHeight(itemListContainer);
 	const listStyle = useMemo(() => ({ height: listHeight }), [listHeight]);
 
@@ -85,7 +78,6 @@ const FolderAndTagList: React.FC<Props> = props => {
 		<div
 			className='folder-and-tag-list'
 			ref={setItemListContainer}
-			onKeyDown={onKeyEventHandler}
 		>
 			<ItemList
 				className='items'
@@ -103,7 +95,6 @@ const FolderAndTagList: React.FC<Props> = props => {
 
 				itemHeight={30}
 			/>
-			{typeAheadComponent}
 		</div>
 	);
 };

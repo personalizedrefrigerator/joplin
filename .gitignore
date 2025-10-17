@@ -403,7 +403,6 @@ packages/app-desktop/gui/Sidebar/hooks/useOnSidebarKeyDownHandler.js
 packages/app-desktop/gui/Sidebar/hooks/useSelectedSidebarIndex.js
 packages/app-desktop/gui/Sidebar/hooks/useSidebarCommandHandler.js
 packages/app-desktop/gui/Sidebar/hooks/useSidebarListData.js
-packages/app-desktop/gui/Sidebar/hooks/useTypeAhead.js
 packages/app-desktop/gui/Sidebar/hooks/utils/toggleHeader.js
 packages/app-desktop/gui/Sidebar/listItemComponents/AllNotesItem.js
 packages/app-desktop/gui/Sidebar/listItemComponents/EmptyExpandLink.js
