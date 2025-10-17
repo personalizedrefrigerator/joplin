@@ -23,13 +23,19 @@ const useStyles = (disabled: boolean) => {
 		const baseCard = { backgroundColor: 'transparent' };
 		return StyleSheet.create({
 			cardOuterWrapper: {
-				margin: 0,
-				padding: 0,
 				borderRadius: 12,
+				// Hide overflow to prevent the touchable ripple from
+				// extending outside the button's border.
 				overflow: 'hidden',
+
+				// Exclude two pixels of space from the hidden overflow region.
+				// This allows the "focus-visible" indicator to be shown on web.
+				margin: -2,
+				padding: 2,
 			},
 			cardInnerWrapper: {
 				width: '100%',
+				borderRadius: 12,
 			},
 			card: disabled ? {
 				...baseCard,
