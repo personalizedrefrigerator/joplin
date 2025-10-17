@@ -75,3 +75,30 @@ fn convert_desktop_export() {
             .exists()
     );
 }
+
+#[test]
+fn convert_desktop_export_newer() {
+    let TestResources {
+        output_dir,
+        test_data_dir,
+    } = setup("desktop_2025_export");
+    let test_data_dir = test_data_dir.join("onenote-2025");
+
+    // This file was exported from the OneNote desktop app using file > export > onepkg.
+    // Test.one was then extracted from the onepkg file.
+    convert(
+        &test_data_dir.join("Test.one").to_string_lossy(),
+        &output_dir.to_string_lossy(),
+        &test_data_dir.to_string_lossy(),
+    )
+    .unwrap();
+
+    // Should create a table of contents file
+    assert!(output_dir.join("Test.html").exists());
+
+    // Should create all three pages
+    let notebook_dir = output_dir.join("Test");
+    assert!(notebook_dir.join("Page 3.html").exists());
+    assert!(notebook_dir.join("Another page.html").exists());
+    assert!(notebook_dir.join("Test.html").exists());
+}
