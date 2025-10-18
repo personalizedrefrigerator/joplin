@@ -577,7 +577,7 @@ msgid ""
 "Error: %s"
 msgstr ""
 "Hiba történt a válasz elküldésekor. Ez akkor fordulhat elő, ha az alkalmazás "
-"offline állapotban van, vagy nem tud csatlakozni a kiszolgálóhoz.\r\n"
+"offline állapotban van, vagy nem tud csatlakozni a kiszolgálóhoz.\n"
 "Hiba: %s"
 
 #: packages/app-desktop/ElectronAppWrapper.ts:189
@@ -6108,7 +6108,7 @@ msgid ""
 "Thank you for the feedback!\n"
 "Do you have time to complete a short survey?"
 msgstr ""
-"Köszönjük a visszajelzést!\r\n"
+"Köszönjük a visszajelzést!\n"
 "Van ideje kitölteni egy rövid kérdőívet?"
 
 #: packages/lib/services/profileConfig/index.ts:106
