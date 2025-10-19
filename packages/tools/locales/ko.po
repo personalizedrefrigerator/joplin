@@ -111,8 +111,8 @@ msgstr "보기(&V)"
 msgid "&Window"
 msgstr "창(&W)"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1687
-#: packages/lib/models/settings/builtInMetadata.ts:2001
+#: packages/lib/models/settings/builtInMetadata.ts:1696
+#: packages/lib/models/settings/builtInMetadata.ts:2010
 #, fuzzy
 msgid "%d day"
 msgid_plural "%d days"
@@ -130,9 +130,9 @@ msgstr "%d GB"
 msgid "%d GB storage space"
 msgstr "%d GB 저장 공간"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1399
-#: packages/lib/models/settings/builtInMetadata.ts:1400
-#: packages/lib/models/settings/builtInMetadata.ts:1401
+#: packages/lib/models/settings/builtInMetadata.ts:1408
+#: packages/lib/models/settings/builtInMetadata.ts:1409
+#: packages/lib/models/settings/builtInMetadata.ts:1410
 #, fuzzy
 msgid "%d hour"
 msgid_plural "%d hours"
@@ -150,9 +150,9 @@ msgstr "%d MB"
 msgid "%d MB per note or attachment"
 msgstr "노트 또는 첨부 파일당 %d MB"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1396
-#: packages/lib/models/settings/builtInMetadata.ts:1397
-#: packages/lib/models/settings/builtInMetadata.ts:1398
+#: packages/lib/models/settings/builtInMetadata.ts:1405
+#: packages/lib/models/settings/builtInMetadata.ts:1406
+#: packages/lib/models/settings/builtInMetadata.ts:1407
 #, fuzzy
 msgid "%d minute"
 msgid_plural "%d minutes"
@@ -200,13 +200,13 @@ msgstr "%s (%s): %s"
 msgid "%s (pre-release)"
 msgstr "%s (사전 출시)"
 
-#: packages/lib/models/settings/builtInMetadata.ts:697
-#: packages/lib/models/settings/builtInMetadata.ts:698
-#: packages/lib/models/settings/builtInMetadata.ts:699
+#: packages/lib/models/settings/builtInMetadata.ts:706
+#: packages/lib/models/settings/builtInMetadata.ts:707
+#: packages/lib/models/settings/builtInMetadata.ts:708
 msgid "%s / %s"
 msgstr "%s / %s"
 
-#: packages/lib/models/settings/builtInMetadata.ts:696
+#: packages/lib/models/settings/builtInMetadata.ts:705
 msgid "%s / %s / %s"
 msgstr "%s / %s / %s"
 
@@ -307,7 +307,7 @@ msgstr ""
 msgid "A brief description of the image:"
 msgstr ""
 
-#: packages/lib/models/settings/builtInMetadata.ts:1961
+#: packages/lib/models/settings/builtInMetadata.ts:1970
 msgid ""
 "A comma-separated list of words. May be used for uncommon words, to help "
 "voice typing spell them correctly."
@@ -318,15 +318,15 @@ msgstr ""
 msgid "A new update (%s) is available"
 msgstr "프로파일 업데이트"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1425
+#: packages/lib/models/settings/builtInMetadata.ts:1434
 msgid "A3"
 msgstr "A3"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1423
+#: packages/lib/models/settings/builtInMetadata.ts:1432
 msgid "A4"
 msgstr "A4"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1426
+#: packages/lib/models/settings/builtInMetadata.ts:1435
 msgid "A5"
 msgstr "A5"
 
@@ -424,6 +424,10 @@ msgstr "실제 크기"
 msgid "Add body"
 msgstr "내용 추가"
 
+#: packages/editor/ProseMirror/plugins/tablePlugin.ts:24
+msgid "Add column"
+msgstr ""
+
 #: packages/app-mobile/components/buttons/FloatingActionButton.tsx:66
 #: packages/app-mobile/components/ComboBox.tsx:103
 #: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:136
@@ -437,6 +441,11 @@ msgstr "태그 추가 및 제거:"
 #: packages/app-desktop/gui/ShareFolderDialog/ShareFolderDialog.tsx:278
 msgid "Add recipient:"
 msgstr "받는 사람 추가:"
+
+#: packages/editor/ProseMirror/plugins/tablePlugin.ts:19
+#, fuzzy
+msgid "Add row"
+msgstr "새로 추가"
 
 #: packages/app-mobile/components/TagEditor.tsx:281
 #, fuzzy
@@ -505,7 +514,7 @@ msgstr "노트, 노트북, 태그를 포함한 모든 데이터는 영구적으�
 msgid "All item sync failures have been marked as \"ignored\"."
 msgstr ""
 
-#: packages/app-desktop/gui/Sidebar/listItemComponents/AllNotesItem.tsx:73
+#: packages/app-desktop/gui/Sidebar/hooks/useSidebarListData.ts:72
 #: packages/app-mobile/components/screens/Notes/Notes.tsx:208
 #: packages/app-mobile/components/side-menu-content.tsx:684
 msgid "All notes"
@@ -519,7 +528,7 @@ msgstr "모든 포트들이 사용 중입니다 - %s에 문제를 공유해주�
 msgid "All shared folders:"
 msgstr ""
 
-#: packages/lib/models/settings/builtInMetadata.ts:1023
+#: packages/lib/models/settings/builtInMetadata.ts:1032
 msgid "Allows debugging mobile plugins. See %s for details."
 msgstr ""
 
@@ -536,11 +545,11 @@ msgstr "링크된 노트들도 공유하기"
 msgid "Alternative instance ID: %s"
 msgstr "클라이언트 ID: %s"
 
-#: packages/lib/models/settings/builtInMetadata.ts:461
+#: packages/lib/models/settings/builtInMetadata.ts:470
 msgid "Always"
 msgstr "항상"
 
-#: packages/lib/models/settings/builtInMetadata.ts:979
+#: packages/lib/models/settings/builtInMetadata.ts:988
 msgid "Always ask"
 msgstr "항상 묻기"
 
@@ -548,7 +557,7 @@ msgstr "항상 묻기"
 msgid "Always open %s files without asking."
 msgstr ""
 
-#: packages/lib/models/settings/builtInMetadata.ts:980
+#: packages/lib/models/settings/builtInMetadata.ts:989
 msgid "Always resize"
 msgstr "항상 크기 조정"
 
@@ -661,7 +670,7 @@ msgid "Attach"
 msgstr "첨부"
 
 #: packages/app-desktop/gui/NoteEditor/editorCommandDeclarations.ts:75
-#: packages/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/TinyMCE.tsx:803
+#: packages/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/TinyMCE.tsx:804
 #: packages/app-mobile/components/screens/Note/commands/attachFile.ts:26
 #: packages/app-mobile/components/screens/Note/commands/attachFile.ts:90
 msgid "Attach file"
@@ -693,7 +702,7 @@ msgstr "첨부"
 msgid "Attachment conflict: \"%s\""
 msgstr "첨부 충돌: \"%s\""
 
-#: packages/lib/models/settings/builtInMetadata.ts:457
+#: packages/lib/models/settings/builtInMetadata.ts:466
 msgid "Attachment download behaviour"
 msgstr "첨부 내려받기 방식"
 
@@ -730,7 +739,7 @@ msgstr "인증 토큰:"
 msgid "Authorise"
 msgstr "권한 부여"
 
-#: packages/lib/models/settings/builtInMetadata.ts:463
+#: packages/lib/models/settings/builtInMetadata.ts:472
 msgid "Auto"
 msgstr "자동"
 
@@ -738,27 +747,27 @@ msgstr "자동"
 msgid "Auto-add disabled accounts for deletion"
 msgstr "삭제를 위해 비활성화된 계정을 자동으로 추가"
 
-#: packages/lib/models/settings/builtInMetadata.ts:776
+#: packages/lib/models/settings/builtInMetadata.ts:785
 msgid "Auto-format Markdown in the Rich Text Editor"
 msgstr ""
 
-#: packages/lib/models/settings/builtInMetadata.ts:733
+#: packages/lib/models/settings/builtInMetadata.ts:742
 msgid "Auto-pair braces, parentheses, quotations, etc."
 msgstr "괄호, 중괄호, 인용 부호 등의 자동 완성."
 
-#: packages/lib/models/settings/builtInMetadata.ts:744
+#: packages/lib/models/settings/builtInMetadata.ts:753
 msgid "Autocomplete Markdown and HTML"
 msgstr ""
 
-#: packages/lib/models/settings/builtInMetadata.ts:1370
+#: packages/lib/models/settings/builtInMetadata.ts:1379
 msgid "Automatically check for updates"
 msgstr "자동으로 업데이트를 확인"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1988
+#: packages/lib/models/settings/builtInMetadata.ts:1997
 msgid "Automatically delete notes in the trash after a number of days"
 msgstr "다음 기간이 지나면 자동으로 휴지통에 있는 노트 삭제"
 
-#: packages/lib/models/settings/builtInMetadata.ts:644
+#: packages/lib/models/settings/builtInMetadata.ts:653
 msgid "Automatically switch theme to match system theme"
 msgstr "시스템 테마에 적합한 테마로 자동으로 변경"
 
@@ -923,8 +932,8 @@ msgstr "새 노트를 생성할 수 없습니다: %s"
 #: packages/app-cli/app/command-tag.js:87
 #: packages/app-cli/app/command-todo.js:21
 #: packages/app-cli/app/command-use.ts:23
-#: packages/lib/services/interop/InteropService.ts:300
-#: packages/lib/services/interop/InteropService.ts:319
+#: packages/lib/services/interop/InteropService.ts:305
+#: packages/lib/services/interop/InteropService.ts:324
 msgid "Cannot find \"%s\"."
 msgstr "\"%s\"를 찾을 수 없습니다."
 
@@ -936,11 +945,11 @@ msgstr "찾을 수 없습니다: \"%s\""
 msgid "Cannot initialise synchroniser."
 msgstr "동기화를 시작할 수 없습니다."
 
-#: packages/lib/services/interop/InteropService.ts:267
+#: packages/lib/services/interop/InteropService.ts:272
 msgid "Cannot load \"%s\" module for format \"%s\" and output \"%s\""
 msgstr "\"%s\" 모듈(\"%s\" 포맷과 \"%s\" 출력을 위한)을 불러올 수 없습니다"
 
-#: packages/lib/services/interop/InteropService.ts:280
+#: packages/lib/services/interop/InteropService.ts:285
 msgid "Cannot load \"%s\" module for format \"%s\" and target \"%s\""
 msgstr "\"%s\" 모듈(\"%s\" 포맷과 \"%s\" 대상을 위한)을 불러올 수 없습니다"
 
@@ -1157,11 +1166,11 @@ msgstr ""
 msgid "Code"
 msgstr "코드"
 
-#: packages/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/TinyMCE.tsx:813
+#: packages/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/TinyMCE.tsx:814
 msgid "Code Block"
 msgstr "코드 블록"
 
-#: packages/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/TinyMCE.tsx:1558
+#: packages/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/TinyMCE.tsx:1566
 msgid "Code View"
 msgstr "코드 보기"
 
@@ -1175,7 +1184,7 @@ msgid "Collaborate on a notebook with others"
 msgstr "다른 사람과 노트북에서 협업하기"
 
 #: packages/app-desktop/gui/SyncWizard/Dialog.tsx:177
-#: packages/app-mobile/components/SyncWizard/SyncWizard.tsx:117
+#: packages/app-mobile/components/SyncWizard/SyncWizard.tsx:123
 msgid "Collaborate on notebooks with others"
 msgstr "다른 사람과 노트북들에서 협업하기"
 
@@ -1199,12 +1208,12 @@ msgstr "무너지다"
 msgid "Coming alarms"
 msgstr "예정된 알람"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1582
+#: packages/lib/models/settings/builtInMetadata.ts:1591
 msgid ""
 "Comma-separated list of paths to directories to load the certificates from, "
-"or path to individual cert files. For example: /my/cert_dir, /other/"
-"custom.pem. Note that if you make changes to the TLS settings, you must save "
-"your changes before clicking on \"Check synchronisation configuration\"."
+"or path to individual cert files. For example: /my/cert_dir, /other/custom."
+"pem. Note that if you make changes to the TLS settings, you must save your "
+"changes before clicking on \"Check synchronisation configuration\"."
 msgstr ""
 "인증서를 불러올 (쉼표로 구분되어 있는) 경로들의 목록, 또는 개별적인 인증서 파"
 "일들의 경로입니다. 예를 들면 다음과 같은 형식입니다: /my/cert_dir, /other/"
@@ -1279,7 +1288,7 @@ msgstr "오래된 변경을 압축"
 msgid "Configuration"
 msgstr "설정"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1283
+#: packages/lib/models/settings/builtInMetadata.ts:1292
 msgid "Configures the size of scrollbars used in the app."
 msgstr ""
 
@@ -1349,7 +1358,7 @@ msgstr "계속"
 msgid "Control character"
 msgstr "문자"
 
-#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:660
+#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:674
 #, fuzzy
 msgid "Convert it"
 msgstr "노트로 변환"
@@ -1646,15 +1655,15 @@ msgstr "사용자 정의"
 msgid "Custom order"
 msgstr "사용자 정의"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1339
+#: packages/lib/models/settings/builtInMetadata.ts:1348
 msgid "Custom stylesheet for Joplin-wide app styles"
 msgstr "Joplin 앱에 전역적으로 적용되는 사용자 정의 스타일시트"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1322
+#: packages/lib/models/settings/builtInMetadata.ts:1331
 msgid "Custom stylesheet for rendered Markdown"
 msgstr "렌더링된 마크다운에 적용할 사용자 정의 스타일시트"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1581
+#: packages/lib/models/settings/builtInMetadata.ts:1590
 msgid "Custom TLS certificates"
 msgstr "사용자 TLS 인증서"
 
@@ -1680,12 +1689,12 @@ msgstr "대시보드"
 msgid "Date"
 msgstr "날짜"
 
-#: packages/lib/models/settings/builtInMetadata.ts:523
+#: packages/lib/models/settings/builtInMetadata.ts:532
 msgid "Date format"
 msgstr "날짜 형식"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1687
-#: packages/lib/models/settings/builtInMetadata.ts:2001
+#: packages/lib/models/settings/builtInMetadata.ts:1696
+#: packages/lib/models/settings/builtInMetadata.ts:2010
 msgid "days"
 msgstr "일"
 
@@ -1706,13 +1715,13 @@ msgstr "복호화된 항목: %s / %s"
 msgid "Decrypting items: %d/%d"
 msgstr "복호화 항목: %d/%d"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1215
-#: packages/lib/models/settings/builtInMetadata.ts:1222
-#: packages/lib/models/settings/builtInMetadata.ts:1461
+#: packages/lib/models/settings/builtInMetadata.ts:1224
+#: packages/lib/models/settings/builtInMetadata.ts:1231
+#: packages/lib/models/settings/builtInMetadata.ts:1470
 msgid "Default"
 msgstr "기본값"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1972
+#: packages/lib/models/settings/builtInMetadata.ts:1981
 msgid "Default title to use for documents created by the scanner."
 msgstr ""
 
@@ -1738,6 +1747,11 @@ msgstr "삭제"
 msgid "Delete attachment \"%s\"?"
 msgstr "첨부된 \"%s\"를 삭제할까요?"
 
+#: packages/editor/ProseMirror/plugins/tablePlugin.ts:34
+#, fuzzy
+msgid "Delete column"
+msgstr "줄 삭제"
+
 #: packages/server/src/services/TaskService.ts:27
 msgid "Delete expired sessions"
 msgstr "만료된 세션을 제거"
@@ -1757,7 +1771,7 @@ msgstr "노트 변경 이력 활성화"
 msgid "Delete line"
 msgstr "줄 삭제"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1363
+#: packages/lib/models/settings/builtInMetadata.ts:1372
 msgid "Delete local data and re-download from sync target"
 msgstr "로컬 데이터를 지우고 동기화 대상의 데이터를 다시 내려받기"
 
@@ -1776,6 +1790,11 @@ msgstr "\"%s\" 플러그인을 삭제할까요?"
 #: packages/app-mobile/components/ProfileSwitcher/ProfileSwitcher.tsx:111
 msgid "Delete profile \"%s\""
 msgstr "프로필 \"%s\" 삭제"
+
+#: packages/editor/ProseMirror/plugins/tablePlugin.ts:29
+#, fuzzy
+msgid "Delete row"
+msgstr "메모 삭제"
 
 #: packages/app-mobile/components/ScreenHeader/index.tsx:486
 msgid "Delete selected notes"
@@ -1871,7 +1890,7 @@ msgstr ""
 msgid "Directory"
 msgstr "폴더"
 
-#: packages/lib/models/settings/builtInMetadata.ts:160
+#: packages/lib/models/settings/builtInMetadata.ts:169
 msgid "Directory to synchronise with (absolute path)"
 msgstr "동기화를 할 폴더 (절대 경로)"
 
@@ -1902,7 +1921,7 @@ msgstr "웹 수집기 서비스 사용 안함"
 #: packages/app-desktop/gui/KeymapConfig/KeymapConfigScreen.tsx:143
 #: packages/app-mobile/components/screens/ConfigScreen/plugins/PluginBox/PluginChips.tsx:85
 #: packages/app-mobile/components/screens/encryption-config.tsx:353
-#: packages/lib/models/settings/builtInMetadata.ts:1395
+#: packages/lib/models/settings/builtInMetadata.ts:1404
 msgid "Disabled"
 msgstr "사용하지 않음"
 
@@ -2013,7 +2032,7 @@ msgstr ""
 msgid "Do you find the Joplin web app useful?"
 msgstr ""
 
-#: packages/lib/models/settings/builtInMetadata.ts:1971
+#: packages/lib/models/settings/builtInMetadata.ts:1980
 msgid "Document scanner: Title template"
 msgstr ""
 
@@ -2023,7 +2042,7 @@ msgid ""
 "for the `add` subcommand."
 msgstr ""
 
-#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:662
+#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:676
 msgid "Don't show this message again"
 msgstr ""
 
@@ -2090,7 +2109,7 @@ msgstr "그림 그리기"
 msgid "Drawing"
 msgstr "그리는 중"
 
-#: packages/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/TinyMCE.tsx:1558
+#: packages/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/TinyMCE.tsx:1566
 msgid "Drop notes or files here"
 msgstr "노트나 파일을 여기에 끌어놓습니다"
 
@@ -2185,9 +2204,9 @@ msgstr "프로파일 설정 편집..."
 
 #: packages/app-desktop/gui/MainScreen.tsx:132
 #: packages/app-desktop/gui/NoteContentPropertiesDialog.tsx:144
-#: packages/lib/models/settings/builtInMetadata.ts:696
-#: packages/lib/models/settings/builtInMetadata.ts:697
-#: packages/lib/models/settings/builtInMetadata.ts:698
+#: packages/lib/models/settings/builtInMetadata.ts:705
+#: packages/lib/models/settings/builtInMetadata.ts:706
+#: packages/lib/models/settings/builtInMetadata.ts:707
 msgid "Editor"
 msgstr "편집"
 
@@ -2196,23 +2215,23 @@ msgstr "편집"
 msgid "Editor actions"
 msgstr "편집기 글꼴"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1208
+#: packages/lib/models/settings/builtInMetadata.ts:1217
 msgid "Editor font"
 msgstr "편집기 글꼴"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1234
+#: packages/lib/models/settings/builtInMetadata.ts:1243
 msgid "Editor font family"
 msgstr "편집기 글꼴 모음"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1196
+#: packages/lib/models/settings/builtInMetadata.ts:1205
 msgid "Editor font size"
 msgstr "편집기 글꼴 크기"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1266
+#: packages/lib/models/settings/builtInMetadata.ts:1275
 msgid "Editor maximum width"
 msgstr "편집기 최대 너비"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1247
+#: packages/lib/models/settings/builtInMetadata.ts:1256
 msgid "Editor monospace font family"
 msgstr "편집기 모노스페이스 글꼴 모음"
 
@@ -2225,7 +2244,7 @@ msgstr "편집자: %s"
 msgid "Either \"text\" or \"json\""
 msgstr "\"text\" 또는 \"json\""
 
-#: packages/lib/models/settings/builtInMetadata.ts:1462
+#: packages/lib/models/settings/builtInMetadata.ts:1471
 msgid "Emacs"
 msgstr "Emacs"
 
@@ -2271,27 +2290,27 @@ msgstr "휴지통 비우기"
 msgid "Enable"
 msgstr "활성화"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1091
+#: packages/lib/models/settings/builtInMetadata.ts:1100
 msgid "Enable ^sup^ syntax"
 msgstr "^sup^ 구문 활성화"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1095
+#: packages/lib/models/settings/builtInMetadata.ts:1104
 msgid "Enable ++insert++ syntax"
 msgstr "++insert++ 확장 활성화"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1087
+#: packages/lib/models/settings/builtInMetadata.ts:1096
 msgid "Enable ==mark== syntax"
 msgstr "==mark== 구문 활성화"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1090
+#: packages/lib/models/settings/builtInMetadata.ts:1099
 msgid "Enable ~sub~ syntax"
 msgstr "~sub~ 구문 활성화"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1093
+#: packages/lib/models/settings/builtInMetadata.ts:1102
 msgid "Enable abbreviation syntax"
 msgstr "약어 구문 활성화"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1084
+#: packages/lib/models/settings/builtInMetadata.ts:1093
 msgid "Enable audio player"
 msgstr "음성 재생 활성화"
 
@@ -2299,7 +2318,7 @@ msgstr "음성 재생 활성화"
 msgid "Enable biometrics authentication?"
 msgstr "생체 인식 인증을 사용하시겠습니까?"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1092
+#: packages/lib/models/settings/builtInMetadata.ts:1101
 msgid "Enable deflist syntax"
 msgstr "정의 목록 구문 활성화"
 
@@ -2308,53 +2327,53 @@ msgstr "정의 목록 구문 활성화"
 msgid "Enable encryption"
 msgstr "암호화 사용"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1107
+#: packages/lib/models/settings/builtInMetadata.ts:1116
 msgid "Enable file:// URLs for images and videos"
 msgstr ""
 
-#: packages/lib/models/settings/builtInMetadata.ts:1088
+#: packages/lib/models/settings/builtInMetadata.ts:1097
 msgid "Enable footnotes"
 msgstr "각주 활성화"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1081
+#: packages/lib/models/settings/builtInMetadata.ts:1090
 msgid "Enable Fountain syntax support"
 msgstr "Fountain 구문 지원 활성화"
 
-#: packages/lib/models/settings/builtInMetadata.ts:577
+#: packages/lib/models/settings/builtInMetadata.ts:586
 #, fuzzy
 msgid "Enable handwritten transcription"
 msgstr "암호화 사용"
 
-#: packages/lib/models/settings/builtInMetadata.ts:756
+#: packages/lib/models/settings/builtInMetadata.ts:765
 #, fuzzy
 msgid "Enable HTML-to-Markdown conversion banner"
 msgstr "마크다운 툴바 활성화"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1078
+#: packages/lib/models/settings/builtInMetadata.ts:1087
 msgid "Enable Linkify"
 msgstr "링크 자동 감지 활성화"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1094
+#: packages/lib/models/settings/builtInMetadata.ts:1103
 msgid "Enable markdown emoji"
 msgstr "마크다운 이모지 활성화"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1080
+#: packages/lib/models/settings/builtInMetadata.ts:1089
 msgid "Enable math expressions"
 msgstr "수식 표현 활성화"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1082
+#: packages/lib/models/settings/builtInMetadata.ts:1091
 msgid "Enable Mermaid diagrams support"
 msgstr "Mermaid 다이어그램 지원 활성화"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1096
+#: packages/lib/models/settings/builtInMetadata.ts:1105
 msgid "Enable multimarkdown table extension"
 msgstr "MultiMarkdown 테이블 확장 활성화"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1677
+#: packages/lib/models/settings/builtInMetadata.ts:1686
 msgid "Enable note history"
 msgstr "노트 변경 이력 활성화"
 
-#: packages/lib/models/settings/builtInMetadata.ts:566
+#: packages/lib/models/settings/builtInMetadata.ts:575
 msgid "Enable optical character recognition (OCR)"
 msgstr "문자 인식(OCR) 활성화"
 
@@ -2362,42 +2381,42 @@ msgstr "문자 인식(OCR) 활성화"
 msgid "Enable or disable plugins"
 msgstr "플러그인 활성화/비활성화"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1086
+#: packages/lib/models/settings/builtInMetadata.ts:1095
 msgid "Enable PDF viewer"
 msgstr "PDF 보기 활성화"
 
 #: packages/app-mobile/components/screens/ConfigScreen/plugins/EnablePluginSupportPage.tsx:119
-#: packages/lib/models/settings/builtInMetadata.ts:1034
+#: packages/lib/models/settings/builtInMetadata.ts:1043
 #, fuzzy
 msgid "Enable plugin support"
 msgstr "조판 부호 지원 활성화"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1076
+#: packages/lib/models/settings/builtInMetadata.ts:1085
 msgid "Enable soft breaks"
 msgstr "소프트 브레이크 활성화"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1475
+#: packages/lib/models/settings/builtInMetadata.ts:1484
 #, fuzzy
 msgid "Enable spell checking in Markdown editor"
 msgstr "텍스트 편집기에서 맞춤법 검사 활성화하기"
 
-#: packages/lib/models/settings/builtInMetadata.ts:918
+#: packages/lib/models/settings/builtInMetadata.ts:927
 msgid "Enable spellcheck in the text editor"
 msgstr "텍스트 편집기에서 맞춤법 검사 활성화하기"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1089
+#: packages/lib/models/settings/builtInMetadata.ts:1098
 msgid "Enable table of contents extension"
 msgstr "목차 확장 활성화"
 
-#: packages/lib/models/settings/builtInMetadata.ts:929
+#: packages/lib/models/settings/builtInMetadata.ts:938
 msgid "Enable the Markdown toolbar"
 msgstr "마크다운 툴바 활성화"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1077
+#: packages/lib/models/settings/builtInMetadata.ts:1086
 msgid "Enable typographer support"
 msgstr "조판 부호 지원 활성화"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1085
+#: packages/lib/models/settings/builtInMetadata.ts:1094
 msgid "Enable video player"
 msgstr "비디오 재생 활성화"
 
@@ -2413,13 +2432,13 @@ msgstr "웹 수집기 서비스 사용"
 msgid "Enabled"
 msgstr "활성화됨"
 
-#: packages/lib/models/settings/builtInMetadata.ts:745
+#: packages/lib/models/settings/builtInMetadata.ts:754
 msgid ""
 "Enables Markdown list continuation, auto-closing HTML tags, and other markup "
 "autocompletions."
 msgstr ""
 
-#: packages/lib/models/settings/builtInMetadata.ts:777
+#: packages/lib/models/settings/builtInMetadata.ts:786
 msgid ""
 "Enables Markdown pattern replacement in the Rich Text Editor. For example, "
 "when enabled, typing **bold** creates bold text."
@@ -2433,11 +2452,11 @@ msgstr ""
 "암호화를 활성화하면 *모든* 노트와 첨부들이 다시 동기화되고 동기화 대상으로 암"
 "호화되어 전송됩니다."
 
-#: packages/lib/models/BaseItem.ts:921
+#: packages/lib/models/BaseItem.ts:943
 msgid "Encrypted"
 msgstr "암호화됨"
 
-#: packages/lib/models/BaseItem.ts:983
+#: packages/lib/models/BaseItem.ts:1005
 msgid "Encrypted items cannot be modified"
 msgstr "암호화된 항목은 변경될 수 없습니다"
 
@@ -2657,11 +2676,11 @@ msgstr "특정 노트를 내보냅니다."
 msgid "Exports only the given notebook."
 msgstr "특정 노트북을 내보냅니다."
 
-#: packages/lib/models/settings/builtInMetadata.ts:1648
+#: packages/lib/models/settings/builtInMetadata.ts:1657
 msgid "Fail-safe"
 msgstr "안전 장치"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1649
+#: packages/lib/models/settings/builtInMetadata.ts:1658
 msgid ""
 "Fail-safe: Do not wipe out local data when sync target is empty (often the "
 "result of a misconfiguration or bug)"
@@ -2751,13 +2770,13 @@ msgstr "검색 색인을 수정하는 중..."
 msgid "Focus"
 msgstr "강조"
 
-#: packages/lib/models/settings/builtInMetadata.ts:945
-#: packages/lib/models/settings/builtInMetadata.ts:962
+#: packages/lib/models/settings/builtInMetadata.ts:954
+#: packages/lib/models/settings/builtInMetadata.ts:971
 msgid "Focus body"
 msgstr "내용에 포커스"
 
-#: packages/lib/models/settings/builtInMetadata.ts:944
-#: packages/lib/models/settings/builtInMetadata.ts:961
+#: packages/lib/models/settings/builtInMetadata.ts:953
+#: packages/lib/models/settings/builtInMetadata.ts:970
 msgid "Focus title"
 msgstr "제목에 포커스"
 
@@ -2773,7 +2792,7 @@ msgstr ""
 msgid "For debugging purpose only: export your profile to an external SD card."
 msgstr "디버깅 목적으로만 사용: 프로파일을 외장 SD 카드에 내보냅니다."
 
-#: packages/lib/models/settings/builtInMetadata.ts:1628
+#: packages/lib/models/settings/builtInMetadata.ts:1637
 msgid "For example \"%s\""
 msgstr "예: \"%s\""
 
@@ -2793,7 +2812,7 @@ msgid ""
 "For the list of keyboard shortcuts and config options, type `help keymap`"
 msgstr "키보드 단축키 및 설정 옵션을 변경하려면 `help keymap`을 입력해주세요"
 
-#: packages/lib/models/settings/builtInMetadata.ts:324
+#: packages/lib/models/settings/builtInMetadata.ts:333
 msgid "Force path style"
 msgstr "경로 스타일을 강제"
 
@@ -2844,7 +2863,7 @@ msgstr ""
 msgid "Get it now:"
 msgstr "설치하기:"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1371
+#: packages/lib/models/settings/builtInMetadata.ts:1380
 msgid "Get pre-releases when checking for updates"
 msgstr "사전-출시 버전일 경우에도 업데이트"
 
@@ -2969,7 +2988,7 @@ msgstr "홈"
 msgid "Horizontal Rule"
 msgstr "수평줄"
 
-#: packages/lib/services/interop/InteropService.ts:190
+#: packages/lib/services/interop/InteropService.ts:195
 msgid "HTML Directory"
 msgstr "HTML 디렉터리"
 
@@ -2977,7 +2996,7 @@ msgstr "HTML 디렉터리"
 msgid "HTML document"
 msgstr "HTML 문서"
 
-#: packages/lib/services/interop/InteropService.ts:183
+#: packages/lib/services/interop/InteropService.ts:188
 msgid "HTML File"
 msgstr "HTML 파일"
 
@@ -3001,7 +3020,7 @@ msgstr "식별자"
 msgid "Idle"
 msgstr "대기"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1496
+#: packages/lib/models/settings/builtInMetadata.ts:1505
 msgid ""
 "If an image attachment is on its own line and followed by a blank line, it "
 "will be rendered just below its Markdown source."
@@ -3022,7 +3041,7 @@ msgstr ""
 msgid "Ignore"
 msgstr "무시하기"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1607
+#: packages/lib/models/settings/builtInMetadata.ts:1616
 msgid "Ignore TLS certificate errors"
 msgstr "TLS 인증서 오류 무시"
 
@@ -3088,7 +3107,7 @@ msgstr "내보내는 중..."
 msgid "Imports data into Joplin."
 msgstr "데이터를 Joplin으로 가져옵니다."
 
-#: packages/lib/models/settings/builtInMetadata.ts:458
+#: packages/lib/models/settings/builtInMetadata.ts:467
 msgid ""
 "In \"Manual\" mode, attachments are downloaded only when you click on them. "
 "In \"Auto\", they are downloaded when you open the note. In \"Always\", all "
@@ -3156,7 +3175,7 @@ msgstr "웹 수집기를 사용하려면 다음 절차를 따라주세요:"
 msgid "In progress"
 msgstr "진행 중"
 
-#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:608
+#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:622
 msgid "In: %s"
 msgstr "내부: %s"
 
@@ -3200,7 +3219,7 @@ msgstr ""
 msgid "Information"
 msgstr "정보"
 
-#: packages/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/TinyMCE.tsx:821
+#: packages/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/TinyMCE.tsx:822
 msgid "Inline Code"
 msgstr "인라인 코드"
 
@@ -3214,7 +3233,7 @@ msgid "Insert Hyperlink"
 msgstr "하이퍼링크 삽입"
 
 #: packages/app-desktop/gui/NoteEditor/editorCommandDeclarations.ts:105
-#: packages/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/TinyMCE.tsx:854
+#: packages/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/TinyMCE.tsx:855
 #: packages/app-mobile/components/screens/Note/commands/insertDateTime.ts:8
 msgid "Insert time"
 msgstr "시간 삽입하기"
@@ -3313,7 +3332,7 @@ msgid "Join us on %s"
 msgstr "트위터에 참여하기"
 
 #: packages/app-desktop/gui/SyncWizard/Dialog.tsx:310
-#: packages/app-mobile/components/SyncWizard/SyncWizard.tsx:108
+#: packages/app-mobile/components/SyncWizard/SyncWizard.tsx:114
 msgid ""
 "Joplin can synchronise your notes using various providers. Select one from "
 "the list below."
@@ -3321,7 +3340,7 @@ msgstr ""
 "Joplin은 다양한 서비스 제공자들을 통해 노트를 동기화할 수 있습니다. 아래의 목"
 "록에서 하나를 선택하세요."
 
-#: packages/app-mobile/components/SyncWizard/SyncWizard.tsx:112
+#: packages/app-mobile/components/SyncWizard/SyncWizard.tsx:118
 #: packages/lib/models/Setting.ts:1304 packages/lib/SyncTargetJoplinCloud.ts:30
 msgid "Joplin Cloud"
 msgstr "Joplin 클라우드"
@@ -3342,12 +3361,12 @@ msgid ""
 "dangerous. What would you like to do?"
 msgstr ""
 
-#: packages/lib/services/interop/InteropService.ts:163
+#: packages/lib/services/interop/InteropService.ts:168
 #: packages/lib/services/interop/InteropService.ts:72
 msgid "Joplin Export Directory"
 msgstr "Joplin 내보내기 폴더"
 
-#: packages/lib/services/interop/InteropService.ts:157
+#: packages/lib/services/interop/InteropService.ts:162
 #: packages/lib/services/interop/InteropService.ts:66
 msgid "Joplin Export File"
 msgstr "Joplin 내보내기 파일"
@@ -3390,7 +3409,7 @@ msgstr "Joplin 서버 URL"
 msgid "Joplin Server Business"
 msgstr "Joplin 서버 사용자 이름"
 
-#: packages/lib/models/settings/builtInMetadata.ts:355
+#: packages/lib/models/settings/builtInMetadata.ts:364
 msgid "Joplin Server email"
 msgstr "Joplin 서버 전자우편"
 
@@ -3400,12 +3419,12 @@ msgstr "Joplin 서버 전자우편"
 msgid "Joplin Server Login"
 msgstr "Joplin 서버 URL"
 
-#: packages/lib/models/settings/builtInMetadata.ts:367
+#: packages/lib/models/settings/builtInMetadata.ts:376
 msgid "Joplin Server password"
 msgstr "Joplin 서버 암호"
 
-#: packages/lib/models/settings/builtInMetadata.ts:336
-#: packages/lib/models/settings/builtInMetadata.ts:379
+#: packages/lib/models/settings/builtInMetadata.ts:345
+#: packages/lib/models/settings/builtInMetadata.ts:388
 msgid "Joplin Server URL"
 msgstr "Joplin 서버 URL"
 
@@ -3431,7 +3450,7 @@ msgstr ""
 msgid "Joplin website"
 msgstr "Joplin 웹사이트"
 
-#: packages/app-mobile/components/SyncWizard/SyncWizard.tsx:113
+#: packages/app-mobile/components/SyncWizard/SyncWizard.tsx:119
 #: packages/lib/SyncTargetJoplinCloud.ts:34
 msgid ""
 "Joplin's own sync service. Also gives access to Joplin-specific features "
@@ -3440,15 +3459,15 @@ msgstr ""
 "Joplin의 자체 동기화 서비스. 노트 발행이나 노트북 협업과 같은 Joplin에서만 지"
 "원하는 기능들을 제공합니다."
 
-#: packages/lib/models/settings/builtInMetadata.ts:1689
+#: packages/lib/models/settings/builtInMetadata.ts:1698
 msgid "Keep note history for"
 msgstr "다음 기간 동안 노트 변경 이력을 유지"
 
-#: packages/lib/models/settings/builtInMetadata.ts:2005
+#: packages/lib/models/settings/builtInMetadata.ts:2014
 msgid "Keep notes in the trash for"
 msgstr "다음 기간 동안 노트를 휴지통에 보관"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1457
+#: packages/lib/models/settings/builtInMetadata.ts:1466
 msgid "Keyboard Mode"
 msgstr "키보드 모드"
 
@@ -3472,11 +3491,11 @@ msgstr "키 업그레이드가 필요합니다"
 msgid "Label"
 msgstr ""
 
-#: packages/lib/models/settings/builtInMetadata.ts:1434
+#: packages/lib/models/settings/builtInMetadata.ts:1443
 msgid "Landscape"
 msgstr "가로 방향"
 
-#: packages/lib/models/settings/builtInMetadata.ts:511
+#: packages/lib/models/settings/builtInMetadata.ts:520
 msgid "Language"
 msgstr "언어"
 
@@ -3484,7 +3503,7 @@ msgstr "언어"
 msgid "Language, date format"
 msgstr "언어, 날짜 형식"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1279
+#: packages/lib/models/settings/builtInMetadata.ts:1288
 msgid "Large"
 msgstr ""
 
@@ -3516,7 +3535,7 @@ msgstr "레이아웃 버튼 순서"
 msgid "Learn more"
 msgstr "들여쓰기 추가"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1930
+#: packages/lib/models/settings/builtInMetadata.ts:1939
 msgid "Leave it blank to download the language files from the default website"
 msgstr "기본 웹사이트에서 언어 파일을 다운로드하려면 비워 두세요"
 
@@ -3529,11 +3548,11 @@ msgstr "노트북 떠나기..."
 msgid "Leave notebook..."
 msgstr "노트북 떠나기..."
 
-#: packages/lib/models/settings/builtInMetadata.ts:1428
+#: packages/lib/models/settings/builtInMetadata.ts:1437
 msgid "Legal"
 msgstr "Legal"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1424
+#: packages/lib/models/settings/builtInMetadata.ts:1433
 msgid "Letter"
 msgstr "Letter"
 
@@ -3696,39 +3715,39 @@ msgstr ""
 "E2EE(종단간 암호화) 설정을 관리합니다. `enable`, `disable`, `decrypt`, "
 "`status`, `decrypt-file`, `target-status`와 같은 명령들이 있습니다."
 
-#: packages/lib/models/settings/builtInMetadata.ts:462
+#: packages/lib/models/settings/builtInMetadata.ts:471
 msgid "Manual"
 msgstr "수동"
 
 #: packages/app-desktop/gui/ToggleEditorsButton/ToggleEditorsButton.tsx:28
 #: packages/lib/models/Setting.ts:1297
 #: packages/lib/services/interop/InteropService.ts:124
-#: packages/lib/services/interop/InteropService.ts:169
+#: packages/lib/services/interop/InteropService.ts:174
 msgid "Markdown"
 msgstr "마크다운"
 
 #: packages/lib/services/interop/InteropService.ts:132
-#: packages/lib/services/interop/InteropService.ts:175
+#: packages/lib/services/interop/InteropService.ts:180
 msgid "Markdown + Front Matter"
 msgstr "마크다운 + Front Matter"
 
-#: packages/app-desktop/gui/NoteEditor/NoteBody/CodeMirror/v6/CodeMirror.tsx:396
+#: packages/app-desktop/gui/NoteEditor/NoteBody/CodeMirror/v6/CodeMirror.tsx:397
 #: packages/app-mobile/components/NoteEditor/NoteEditor.tsx:286
 #, fuzzy
 msgid "Markdown editor"
 msgstr "마크다운"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1506
+#: packages/lib/models/settings/builtInMetadata.ts:1515
 #, fuzzy
 msgid "Markdown editor: Highlight active line"
 msgstr "마크다운"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1495
+#: packages/lib/models/settings/builtInMetadata.ts:1504
 #, fuzzy
 msgid "Markdown editor: Render images"
 msgstr "마크다운"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1485
+#: packages/lib/models/settings/builtInMetadata.ts:1494
 msgid "Markdown editor: Render markup in editor"
 msgstr ""
 
@@ -3767,7 +3786,7 @@ msgstr ""
 msgid "Math"
 msgstr ""
 
-#: packages/lib/models/settings/builtInMetadata.ts:487
+#: packages/lib/models/settings/builtInMetadata.ts:496
 msgid "Max concurrent connections"
 msgstr "최대 동시 연결수"
 
@@ -3787,7 +3806,7 @@ msgstr "최대 총 크기"
 msgid "Media player, math, diagrams, table of contents"
 msgstr "미디어 플레이어, 수학, 도표, 목차"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1278
+#: packages/lib/models/settings/builtInMetadata.ts:1287
 msgid "Medium"
 msgstr ""
 
@@ -3905,7 +3924,7 @@ msgstr "아니오"
 msgid "N"
 msgstr "아니오"
 
-#: packages/lib/models/settings/builtInMetadata.ts:981
+#: packages/lib/models/settings/builtInMetadata.ts:990
 msgid "Never resize"
 msgstr "크기 조정 안 함"
 
@@ -4003,15 +4022,15 @@ msgstr "다음 매치"
 msgid "Nextcloud"
 msgstr "Nextcloud"
 
-#: packages/lib/models/settings/builtInMetadata.ts:199
+#: packages/lib/models/settings/builtInMetadata.ts:208
 msgid "Nextcloud password"
 msgstr "Nextcloud 암호"
 
-#: packages/lib/models/settings/builtInMetadata.ts:187
+#: packages/lib/models/settings/builtInMetadata.ts:196
 msgid "Nextcloud username"
 msgstr "Nextcloud 사용자 이름"
 
-#: packages/lib/models/settings/builtInMetadata.ts:174
+#: packages/lib/models/settings/builtInMetadata.ts:183
 msgid "Nextcloud WebDAV URL"
 msgstr "Nextcloud WebDAV URL"
 
@@ -4143,7 +4162,7 @@ msgstr "노트"
 msgid "Note"
 msgstr "노트"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1753
+#: packages/lib/models/settings/builtInMetadata.ts:1762
 msgid "Note area growth factor"
 msgstr "노트 영역 증가 인수"
 
@@ -4198,7 +4217,7 @@ msgstr "노트는 목록 항목이 아닙니다: \"%s\""
 msgid "Note list"
 msgstr "노트 리스트"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1738
+#: packages/lib/models/settings/builtInMetadata.ts:1747
 msgid "Note list growth factor"
 msgstr "노트 리스트 증가 인수"
 
@@ -4232,7 +4251,7 @@ msgstr "노트 제목"
 msgid "Note viewer"
 msgstr "노트 제목"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1122
+#: packages/lib/models/settings/builtInMetadata.ts:1131
 msgid "Note: Does not work in all desktop environments."
 msgstr "참고: 모든 데스크탑 환경에서 작동하는 것은 아닙니다."
 
@@ -4250,7 +4269,7 @@ msgstr "노트북(&b)"
 msgid "Notebook"
 msgstr "노트북"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1723
+#: packages/lib/models/settings/builtInMetadata.ts:1732
 msgid "Notebook list growth factor"
 msgstr "노트북 목록 증가 인수"
 
@@ -4264,7 +4283,7 @@ msgstr "노트북: %s"
 msgid "Notebook: %s (%s)"
 msgstr "노트북: %s"
 
-#: packages/app-desktop/gui/Sidebar/hooks/useSidebarListData.ts:54
+#: packages/app-desktop/gui/Sidebar/hooks/useSidebarListData.ts:58
 #: packages/app-mobile/components/side-menu-content.tsx:691
 #: packages/lib/services/ReportService.ts:369
 msgid "Notebooks"
@@ -4298,16 +4317,16 @@ msgstr "위치"
 msgid "Numbered List"
 msgstr "번호 매기기 목록"
 
-#: packages/lib/models/settings/builtInMetadata.ts:609
+#: packages/lib/models/settings/builtInMetadata.ts:618
 msgid "OCR: Clear cache and re-download language data files"
 msgstr ""
 
-#: packages/lib/models/settings/builtInMetadata.ts:590
+#: packages/lib/models/settings/builtInMetadata.ts:599
 #, fuzzy
 msgid "OCR: Language data URL or path"
 msgstr "언어, 날짜 형식"
 
-#: packages/lib/models/settings/builtInMetadata.ts:619
+#: packages/lib/models/settings/builtInMetadata.ts:628
 #, fuzzy
 msgid "OCR: Search in extracted content"
 msgstr "모든 노트에서 검색"
@@ -4379,7 +4398,7 @@ msgstr "OneDrive"
 msgid "OneDrive Login"
 msgstr "OneDrive 로그인"
 
-#: packages/lib/services/interop/InteropService.ts:148
+#: packages/lib/services/interop/InteropService.ts:153
 #, fuzzy
 msgid "OneNote Notebook"
 msgstr "새 노트북"
@@ -4485,7 +4504,7 @@ msgstr "옵션"
 msgid "Ordered list"
 msgstr "정렬 목록"
 
-#: packages/app-mobile/components/SyncWizard/SyncWizard.tsx:124
+#: packages/app-mobile/components/SyncWizard/SyncWizard.tsx:130
 msgid "Other"
 msgstr ""
 
@@ -4497,11 +4516,11 @@ msgstr "다른 애플리케이션..."
 msgid "Output format: %s"
 msgstr "출력 포맷: %s"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1431
+#: packages/lib/models/settings/builtInMetadata.ts:1440
 msgid "Page orientation for PDF export"
 msgstr "PDF를 내보낼 때의 페이지 방향"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1421
+#: packages/lib/models/settings/builtInMetadata.ts:1430
 msgid "Page size for PDF export"
 msgstr "PDF로 내보낼때 페이지 크기"
 
@@ -4649,7 +4668,7 @@ msgstr "삭제할 노트나 노트북을 먼저 선택해주세요."
 msgid "Please select where the sync status should be exported to"
 msgstr "동기화 상태를 내보낼 대상을 선택하세요"
 
-#: packages/lib/services/interop/InteropService.ts:313
+#: packages/lib/services/interop/InteropService.ts:318
 msgid "Please specify import format for %s"
 msgstr "%s 항목에 사용할 가져오기 형식을 지정하세요"
 
@@ -4662,7 +4681,7 @@ msgstr "노트를 가져와서 저장할 노트북을 지정해주세요."
 msgid "Please upgrade Joplin to version %s or later to use this plugin."
 msgstr "이 플러그인을 사용하기 위해서는 Joplin을 업그레이드해야 합니다"
 
-#: packages/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/TinyMCE.tsx:1558
+#: packages/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/TinyMCE.tsx:1566
 msgid ""
 "Please wait for all attachments to be downloaded and decrypted. You may also "
 "switch to %s to edit the note."
@@ -4705,7 +4724,7 @@ msgstr "플러그인 검색"
 msgid "Plugin tools"
 msgstr "플러그인 도구"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1022
+#: packages/lib/models/settings/builtInMetadata.ts:1031
 msgid "Plugin WebView debugging"
 msgstr ""
 
@@ -4722,7 +4741,7 @@ msgid ""
 "can extend Joplin's editor, viewer, and more."
 msgstr ""
 
-#: packages/lib/models/settings/builtInMetadata.ts:1433
+#: packages/lib/models/settings/builtInMetadata.ts:1442
 msgid "Portrait"
 msgstr "세로 방향"
 
@@ -4746,15 +4765,15 @@ msgstr "설정"
 msgid "Preferences..."
 msgstr "설정..."
 
-#: packages/lib/models/settings/builtInMetadata.ts:674
+#: packages/lib/models/settings/builtInMetadata.ts:683
 msgid "Preferred dark theme"
 msgstr "선호하는 어두운 테마"
 
-#: packages/lib/models/settings/builtInMetadata.ts:658
+#: packages/lib/models/settings/builtInMetadata.ts:667
 msgid "Preferred light theme"
 msgstr "선호하는 밝은 테마"
 
-#: packages/lib/models/settings/builtInMetadata.ts:766
+#: packages/lib/models/settings/builtInMetadata.ts:775
 msgid "Preserve colours when pasting text in Rich Text Editor"
 msgstr ""
 
@@ -4857,15 +4876,15 @@ msgstr "프로파일"
 msgid "Properties"
 msgstr "속성"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1617
+#: packages/lib/models/settings/builtInMetadata.ts:1626
 msgid "Proxy enabled"
 msgstr "프록시 사용"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1639
+#: packages/lib/models/settings/builtInMetadata.ts:1648
 msgid "Proxy timeout (seconds)"
 msgstr "프록시 시간 초과(초)"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1627
+#: packages/lib/models/settings/builtInMetadata.ts:1636
 msgid "Proxy URL"
 msgstr "프록시 URL"
 
@@ -4892,7 +4911,7 @@ msgid "Publish Notes"
 msgstr "노트 발행"
 
 #: packages/app-desktop/gui/SyncWizard/Dialog.tsx:176
-#: packages/app-mobile/components/SyncWizard/SyncWizard.tsx:116
+#: packages/app-mobile/components/SyncWizard/SyncWizard.tsx:122
 #: packages/lib/utils/joplinCloud/index.ts:162
 msgid "Publish notes to the internet"
 msgstr "인터넷에 노트를 발행합니다"
@@ -4940,7 +4959,7 @@ msgstr "다시 암호화"
 msgid "Re-enter password"
 msgstr "비밀번호 입력"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1352
+#: packages/lib/models/settings/builtInMetadata.ts:1361
 msgid "Re-upload local data to sync target"
 msgstr "로컬 데이터를 동기화 대상에 다시 업로드"
 
@@ -5088,7 +5107,7 @@ msgstr "태그 이름 바꾸기:"
 msgid "Renames the given <item> (note or notebook) to <name>."
 msgstr "해당 <item> (노트 또는 노트북)의 이름을 <name>로 바꿉니다."
 
-#: packages/lib/models/settings/builtInMetadata.ts:1486
+#: packages/lib/models/settings/builtInMetadata.ts:1495
 msgid "Renders markup on all lines that don't include the cursor."
 msgstr ""
 
@@ -5162,7 +5181,7 @@ msgstr "애플리케이션 레이아웃 재설정"
 msgid "Reset master password"
 msgstr "마스터 비밀번호 재설정"
 
-#: packages/lib/models/settings/builtInMetadata.ts:975
+#: packages/lib/models/settings/builtInMetadata.ts:984
 msgid "Resize large images:"
 msgstr "큰 이미지 크기 조정하기:"
 
@@ -5240,8 +5259,8 @@ msgid "Reveal file in folder"
 msgstr "폴더에 있는 파일 표시"
 
 #: packages/app-desktop/gui/WindowCommandsAndDialogs/commands/toggleNotesSortOrderReverse.ts:8
-#: packages/lib/models/settings/builtInMetadata.ts:815
-#: packages/lib/models/settings/builtInMetadata.ts:896
+#: packages/lib/models/settings/builtInMetadata.ts:824
+#: packages/lib/models/settings/builtInMetadata.ts:905
 msgid "Reverse sort order"
 msgstr "정렬 순서 반전"
 
@@ -5262,7 +5281,7 @@ msgstr "개정판: %s (%s)"
 msgid "Rich Text"
 msgstr ""
 
-#: packages/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/TinyMCE.tsx:715
+#: packages/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/TinyMCE.tsx:716
 msgid "Rich Text editor. Press Escape then Tab to escape focus."
 msgstr ""
 
@@ -5277,23 +5296,23 @@ msgstr ""
 msgid "S3"
 msgstr "S3"
 
-#: packages/lib/models/settings/builtInMetadata.ts:300
+#: packages/lib/models/settings/builtInMetadata.ts:309
 msgid "S3 access key"
 msgstr "S3 접근 키"
 
-#: packages/lib/models/settings/builtInMetadata.ts:257
+#: packages/lib/models/settings/builtInMetadata.ts:266
 msgid "S3 bucket"
 msgstr "S3 버킷"
 
-#: packages/lib/models/settings/builtInMetadata.ts:288
+#: packages/lib/models/settings/builtInMetadata.ts:297
 msgid "S3 region"
 msgstr "S3 리전"
 
-#: packages/lib/models/settings/builtInMetadata.ts:312
+#: packages/lib/models/settings/builtInMetadata.ts:321
 msgid "S3 secret key"
 msgstr "S3 보안 키"
 
-#: packages/lib/models/settings/builtInMetadata.ts:273
+#: packages/lib/models/settings/builtInMetadata.ts:282
 msgid "S3 URL"
 msgstr "S3 URL"
 
@@ -5339,7 +5358,7 @@ msgstr "변경 사항 저장"
 msgid "Save changes?"
 msgstr "변경 사항을 저장하시겠습니까?"
 
-#: packages/lib/models/settings/builtInMetadata.ts:897
+#: packages/lib/models/settings/builtInMetadata.ts:906
 msgid "Save geo-location with notes"
 msgstr "노트에 지리적 위치 정보 포함시키기"
 
@@ -5357,7 +5376,7 @@ msgstr "상위 노트북 선택"
 msgid "Scanned code"
 msgstr ""
 
-#: packages/lib/models/settings/builtInMetadata.ts:1282
+#: packages/lib/models/settings/builtInMetadata.ts:1291
 msgid "Scrollbar size"
 msgstr ""
 
@@ -5426,7 +5445,7 @@ msgstr "주어진 <pattern>을 모든 노트에서 검색합니다."
 msgid "See changelog"
 msgstr "바뀐 내용을 모두 보기"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1371
+#: packages/lib/models/settings/builtInMetadata.ts:1380
 msgid "See the pre-release page for more details: %s"
 msgstr "자세한 내용은 사전-출시 페이지를 참조해주세요: %s"
 
@@ -5458,7 +5477,7 @@ msgstr "파일 선택..."
 msgid "Select notebook"
 msgstr "상위 노트북 선택"
 
-#: packages/app-mobile/components/SyncWizard/SyncWizard.tsx:125
+#: packages/app-mobile/components/SyncWizard/SyncWizard.tsx:131
 msgid "Select one of the other supported sync targets."
 msgstr ""
 
@@ -5512,7 +5531,7 @@ msgstr "알람 설정"
 msgid "Set alarm:"
 msgstr "알람 설정:"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1266
+#: packages/lib/models/settings/builtInMetadata.ts:1275
 msgid ""
 "Set it to 0 to make it take the complete available space. Recommended width "
 "is 600."
@@ -5611,7 +5630,7 @@ msgstr "고급 옵션"
 msgid "Show all"
 msgstr "모두 표시"
 
-#: packages/lib/models/settings/builtInMetadata.ts:705
+#: packages/lib/models/settings/builtInMetadata.ts:714
 msgid "Show completed to-dos"
 msgstr "완료된 목록을 표시"
 
@@ -5628,7 +5647,7 @@ msgstr "비활성화된 키 보기"
 msgid "Show monospace fonts only."
 msgstr "편집기 모노스페이스 글꼴 모음"
 
-#: packages/lib/models/settings/builtInMetadata.ts:687
+#: packages/lib/models/settings/builtInMetadata.ts:696
 msgid "Show note counts"
 msgstr "노트 수 보이기"
 
@@ -5642,11 +5661,11 @@ msgstr "노트 수 보이기"
 msgid "Show password"
 msgstr "암호 설정"
 
-#: packages/lib/models/settings/builtInMetadata.ts:827
+#: packages/lib/models/settings/builtInMetadata.ts:836
 msgid "Show sort order buttons"
 msgstr "정렬 순서 버튼 보기"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1120
+#: packages/lib/models/settings/builtInMetadata.ts:1129
 msgid "Show tray icon"
 msgstr "트레이 아이콘 표시"
 
@@ -5659,7 +5678,7 @@ msgstr "사이드바 보이기/숨기기"
 msgid "Shows notes for tag"
 msgstr "노트 수 보이기"
 
-#: packages/lib/models/settings/builtInMetadata.ts:976
+#: packages/lib/models/settings/builtInMetadata.ts:985
 msgid "Shrink large images before adding them to notes."
 msgstr "큰 이미지를 노트에 추가하기 전에 축소하세요."
 
@@ -5701,7 +5720,7 @@ msgstr "건너뛴 항목: %d (복호화를 다시 시도하려면 --retry-failed
 msgid "Skipped: %d."
 msgstr "넘겨짐: %d."
 
-#: packages/lib/models/settings/builtInMetadata.ts:1277
+#: packages/lib/models/settings/builtInMetadata.ts:1286
 msgid "Small"
 msgstr ""
 
@@ -5752,13 +5771,13 @@ msgstr ""
 msgid "Sort \"%s\" in descending order"
 msgstr ""
 
-#: packages/lib/models/settings/builtInMetadata.ts:883
+#: packages/lib/models/settings/builtInMetadata.ts:892
 msgid "Sort notebooks by"
 msgstr "노트북을 다음 기준으로 정렬"
 
 #: packages/app-desktop/gui/NoteList/utils/canManuallySortNotes.ts:10
 #: packages/app-mobile/components/ScreenHeader/index.tsx:542
-#: packages/lib/models/settings/builtInMetadata.ts:713
+#: packages/lib/models/settings/builtInMetadata.ts:722
 msgid "Sort notes by"
 msgstr "노트를 다음 기준으로 정렬"
 
@@ -5789,11 +5808,11 @@ msgstr "원본 포맷: %s"
 msgid "Source: "
 msgstr "원본: "
 
-#: packages/app-desktop/gui/Sidebar/hooks/useOnRenderItem.tsx:436
+#: packages/app-desktop/gui/Sidebar/hooks/useOnRenderItem.tsx:437
 msgid "Spacer"
 msgstr ""
 
-#: packages/lib/models/settings/builtInMetadata.ts:1667
+#: packages/lib/models/settings/builtInMetadata.ts:1676
 msgid ""
 "Specify the port that should be used by the API server. If not set, a "
 "default will be used."
@@ -5806,13 +5825,13 @@ msgstr ""
 msgid "Spell checker"
 msgstr "맞춤법 검사기"
 
-#: packages/lib/models/settings/builtInMetadata.ts:696
-#: packages/lib/models/settings/builtInMetadata.ts:698
-#: packages/lib/models/settings/builtInMetadata.ts:699
+#: packages/lib/models/settings/builtInMetadata.ts:705
+#: packages/lib/models/settings/builtInMetadata.ts:707
+#: packages/lib/models/settings/builtInMetadata.ts:708
 msgid "Split View"
 msgstr "화면 나누기"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1135
+#: packages/lib/models/settings/builtInMetadata.ts:1144
 msgid "Start application minimised in the tray icon"
 msgstr "Joplin을 최소화된 상태로 트레이 아이콘에서 시작"
 
@@ -5996,7 +6015,7 @@ msgid ""
 msgstr ""
 "[notebook]으로 전환 - 앞으로의 모든 작업은 이 노트북 안에서만 해당됩니다."
 
-#: packages/app-mobile/components/SyncWizard/SyncWizard.tsx:105
+#: packages/app-mobile/components/SyncWizard/SyncWizard.tsx:111
 msgid "Sync"
 msgstr ""
 
@@ -6029,7 +6048,7 @@ msgid "Sync Version: %s"
 msgstr "동기화 버전: %s"
 
 #: packages/app-desktop/gui/SyncWizard/Dialog.tsx:175
-#: packages/app-mobile/components/SyncWizard/SyncWizard.tsx:115
+#: packages/app-mobile/components/SyncWizard/SyncWizard.tsx:121
 msgid "Sync your notes"
 msgstr "노트 동기화"
 
@@ -6041,7 +6060,7 @@ msgstr "동기화, 암호화, 프록시"
 msgid "Synchronisation"
 msgstr "동기화"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1392
+#: packages/lib/models/settings/builtInMetadata.ts:1401
 msgid "Synchronisation interval"
 msgstr "동기화 간격"
 
@@ -6054,7 +6073,7 @@ msgstr "이미 동기화가 진행중입니다."
 msgid "Synchronisation Status"
 msgstr "동기화 상태"
 
-#: packages/lib/models/settings/builtInMetadata.ts:118
+#: packages/lib/models/settings/builtInMetadata.ts:127
 msgid "Synchronisation target"
 msgstr "동기화 대상"
 
@@ -6068,7 +6087,7 @@ msgstr "동기화 대상: %s (%s)"
 msgid "Synchronise"
 msgstr "동기화"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1412
+#: packages/lib/models/settings/builtInMetadata.ts:1421
 msgid "Synchronise only over WiFi connection"
 msgstr "WiFi 상에서만 동기화"
 
@@ -6091,11 +6110,11 @@ msgid "Tab indents"
 msgstr ""
 
 #: packages/app-desktop/gui/NoteEditor/StatusBar.tsx:72
-#: packages/lib/models/settings/builtInMetadata.ts:796
+#: packages/lib/models/settings/builtInMetadata.ts:805
 msgid "Tab moves focus"
 msgstr ""
 
-#: packages/lib/models/settings/builtInMetadata.ts:1427
+#: packages/lib/models/settings/builtInMetadata.ts:1436
 msgid "Tabloid"
 msgstr "Tabloid"
 
@@ -6105,7 +6124,7 @@ msgid "Tagged: %d."
 msgstr "태그됨: %d."
 
 #: packages/app-desktop/gui/NoteListHeader/utils/getColumnTitle.ts:10
-#: packages/app-desktop/gui/Sidebar/hooks/useSidebarListData.ts:75
+#: packages/app-desktop/gui/Sidebar/hooks/useSidebarListData.ts:79
 #: packages/app-desktop/gui/WindowCommandsAndDialogs/commands/setTags.ts:7
 #: packages/app-mobile/components/screens/Note/commands/setTags.ts:7
 #: packages/app-mobile/components/screens/tags.tsx:92
@@ -6144,7 +6163,7 @@ msgstr "팀"
 msgid "Text document"
 msgstr "텍스트 문서"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1420
+#: packages/lib/models/settings/builtInMetadata.ts:1429
 msgid "Text editor command"
 msgstr "텍스트 편집기 명령어"
 
@@ -6183,7 +6202,7 @@ msgstr "애플리케이션이 성공적으로 허가되었습니다."
 msgid "The application must be restarted for these changes to take effect."
 msgstr "변경 사항이 적용되려면 애플리케이션이 반드시 재시작되어야 합니다."
 
-#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:577
+#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:591
 msgid ""
 "The attachments will no longer be watched when you switch to a different "
 "note."
@@ -6217,7 +6236,7 @@ msgstr "기본 암호 방법이 변경되었습니다. 데이터를 다시 암�
 msgid "The default profile cannot be deleted"
 msgstr "기본 프로필은 삭제할 수 없습니다"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1420
+#: packages/lib/models/settings/builtInMetadata.ts:1429
 msgid ""
 "The editor command (may include arguments) that will be used to open a note. "
 "If none is provided it will try to auto-detect the default editor."
@@ -6225,9 +6244,9 @@ msgstr ""
 "노트를 여는데 사용할 텍스트 편집기 명령어(인자를 포함할 수 있습니다)를 지정합"
 "니다. 주어진 명령어가 없을 시 기본 편집기를 자동으로 찾을 것입니다."
 
-#: packages/lib/models/settings/builtInMetadata.ts:1725
-#: packages/lib/models/settings/builtInMetadata.ts:1740
-#: packages/lib/models/settings/builtInMetadata.ts:1755
+#: packages/lib/models/settings/builtInMetadata.ts:1734
+#: packages/lib/models/settings/builtInMetadata.ts:1749
+#: packages/lib/models/settings/builtInMetadata.ts:1764
 msgid ""
 "The factor property sets how the item will grow or shrink to fit the "
 "available space in its container with respect to the other items. Thus an "
@@ -6239,12 +6258,12 @@ msgstr ""
 "많은 공간을 차지하게 될 것입니다. 변경은 애플리케이션을 재시작한 후에 적용됩"
 "니다."
 
-#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:592
+#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:606
 msgid "The following attachment matches your search query:"
 msgid_plural "The following attachments match your search query:"
 msgstr[0] "다음 첨부 파일은 검색어와 일치합니다:"
 
-#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:576
+#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:590
 msgid "The following attachments are being watched for changes:"
 msgstr "다음 첨부 파일들이 변경되었는지 감시하고 있습니다:"
 
@@ -6381,7 +6400,7 @@ msgstr "동기화 비밀번호가 누락되었습니다."
 msgid "The tag \"%s\" already exists. Please choose a different name."
 msgstr "태그 \"%s\"(이)가 이미 존재합니다. 다른 이름을 선택해 주세요."
 
-#: packages/lib/models/settings/builtInMetadata.ts:120
+#: packages/lib/models/settings/builtInMetadata.ts:129
 msgid ""
 "The target to synchronise to. Each sync target may have additional "
 "parameters which are named as `sync.NUM.NAME` (all documented below)."
@@ -6422,7 +6441,7 @@ msgstr ""
 "%s의 WebDAV 구현은 Joplin과 호환되지 않으므로 더 이상 지원되지 않습니다. 다"
 "른 동기화 방법을 사용해 보세요."
 
-#: packages/lib/models/settings/builtInMetadata.ts:631
+#: packages/lib/models/settings/builtInMetadata.ts:640
 msgid "Theme"
 msgstr "테마"
 
@@ -6584,7 +6603,7 @@ msgstr ""
 msgid "This note has no history"
 msgstr "이 노트의 변경 내역이 없습니다"
 
-#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:658
+#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:672
 msgid ""
 "This note is in HTML format. Convert it to Markdown to edit it more easily."
 msgstr ""
@@ -6615,7 +6634,7 @@ msgstr ""
 msgid "This subfolder of the trash has no notes."
 msgstr ""
 
-#: packages/lib/models/settings/builtInMetadata.ts:1122
+#: packages/lib/models/settings/builtInMetadata.ts:1131
 msgid ""
 "This will allow Joplin to run in the background. It is recommended to enable "
 "this setting so that your notes are constantly being synchronised, thus "
@@ -6642,7 +6661,7 @@ msgid ""
 msgstr ""
 "컬렉션에서 노트북이 제거되고 더 이상 접근할 수 없습니다. 계속하시겠어요?"
 
-#: packages/lib/models/settings/builtInMetadata.ts:547
+#: packages/lib/models/settings/builtInMetadata.ts:556
 msgid "Time format"
 msgstr "시간 형식"
 
@@ -6906,7 +6925,7 @@ msgstr "로그 데이터를 공유할 수 없습니다. 이유: %s"
 msgid "Unchecked"
 msgstr ""
 
-#: packages/lib/models/settings/builtInMetadata.ts:704
+#: packages/lib/models/settings/builtInMetadata.ts:713
 msgid "Uncompleted to-dos on top"
 msgstr "완료되지 않은 목록을 맨 위에"
 
@@ -6939,7 +6958,7 @@ msgstr "알 수 없는 플래그: %s"
 msgid "Unknown flag: %s"
 msgstr "알 수 없는 플래그: %s"
 
-#: packages/lib/Synchronizer.ts:1163
+#: packages/lib/Synchronizer.ts:1182
 msgid ""
 "Unknown item type downloaded - please upgrade Joplin to the latest version"
 msgstr ""
@@ -7004,7 +7023,7 @@ msgid ""
 msgstr "지원하지 않는 링크 또는 메시지: %s"
 
 #: packages/app-desktop/gui/ResourceScreen.tsx:123
-#: packages/lib/models/BaseItem.ts:922 packages/lib/path-utils.ts:27
+#: packages/lib/models/BaseItem.ts:944 packages/lib/path-utils.ts:27
 #: packages/lib/path-utils.ts:71
 msgid "Untitled"
 msgstr "제목 없음"
@@ -7096,7 +7115,7 @@ msgstr "URL"
 msgid "Usage: %s"
 msgstr "사용량: %s"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1811
+#: packages/lib/models/settings/builtInMetadata.ts:1820
 msgid "Use biometrics to secure access to the app"
 msgstr "생체 인식을 사용하여 앱에 대한 액세스 보호"
 
@@ -7125,7 +7144,7 @@ msgid "Use the arrows to move the layout items. Press \"Escape\" to exit."
 msgstr ""
 "레이아웃 항목을 옮기려면 화살표를 사용하세요. \"ESC\"키를 눌러 종료합니다."
 
-#: packages/lib/models/settings/builtInMetadata.ts:1550
+#: packages/lib/models/settings/builtInMetadata.ts:1559
 #, fuzzy
 msgid "Use the legacy Markdown editor"
 msgstr "마크다운 툴바 활성화"
@@ -7146,7 +7165,7 @@ msgstr ""
 "생체 인식을 사용하여 애플리케이션에 대한 액세스를 보호하세요. 나중에 설정에"
 "서 언제든지 설정할 수 있습니다."
 
-#: packages/lib/models/settings/builtInMetadata.ts:1236
+#: packages/lib/models/settings/builtInMetadata.ts:1245
 msgid ""
 "Used for most text in the markdown editor. If not found, a generic "
 "proportional (variable width) font is used."
@@ -7154,7 +7173,7 @@ msgstr ""
 "마크다운 편집기에서 대부분의 텍스트에 사용할 글꼴입니다. 찾지 못한 경우 일반"
 "적으로 균형잡힌 (가변폭) 글꼴이 사용됩니다."
 
-#: packages/lib/models/settings/builtInMetadata.ts:1249
+#: packages/lib/models/settings/builtInMetadata.ts:1258
 msgid ""
 "Used where a fixed width font is needed to lay out text legibly (e.g. "
 "tables, checkboxes, code). If not found, a generic monospace (fixed width) "
@@ -7206,23 +7225,23 @@ msgid "View them now"
 msgstr "지금 나타내기"
 
 #: packages/app-desktop/gui/NoteContentPropertiesDialog.tsx:145
-#: packages/lib/models/settings/builtInMetadata.ts:696
-#: packages/lib/models/settings/builtInMetadata.ts:697
-#: packages/lib/models/settings/builtInMetadata.ts:699
+#: packages/lib/models/settings/builtInMetadata.ts:705
+#: packages/lib/models/settings/builtInMetadata.ts:706
+#: packages/lib/models/settings/builtInMetadata.ts:708
 msgid "Viewer"
 msgstr "뷰어"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1260
+#: packages/lib/models/settings/builtInMetadata.ts:1269
 #, fuzzy
 msgid "Viewer and Rich Text Editor font family"
 msgstr "편집기 글꼴 모음"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1182
+#: packages/lib/models/settings/builtInMetadata.ts:1191
 #, fuzzy
 msgid "Viewer font size"
 msgstr "편집기 글꼴 크기"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1463
+#: packages/lib/models/settings/builtInMetadata.ts:1472
 msgid "Vim"
 msgstr "Vim"
 
@@ -7230,11 +7249,11 @@ msgstr "Vim"
 msgid "Voice recorder"
 msgstr ""
 
-#: packages/lib/models/settings/builtInMetadata.ts:1931
+#: packages/lib/models/settings/builtInMetadata.ts:1940
 msgid "Voice typing language files (URL)"
 msgstr "음성 입력 언어 파일(URL)"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1960
+#: packages/lib/models/settings/builtInMetadata.ts:1969
 #, fuzzy
 msgid "Voice typing: Glossary"
 msgstr "음성 입력 중..."
@@ -7281,15 +7300,15 @@ msgstr "웹 클리퍼"
 msgid "WebDAV"
 msgstr "WebDAV"
 
-#: packages/lib/models/settings/builtInMetadata.ts:237
+#: packages/lib/models/settings/builtInMetadata.ts:246
 msgid "WebDAV password"
 msgstr "WebDAV 암호"
 
-#: packages/lib/models/settings/builtInMetadata.ts:212
+#: packages/lib/models/settings/builtInMetadata.ts:221
 msgid "WebDAV URL"
 msgstr "WebDAV URL"
 
-#: packages/lib/models/settings/builtInMetadata.ts:225
+#: packages/lib/models/settings/builtInMetadata.ts:234
 msgid "WebDAV username"
 msgstr "WebDAV 사용자 이름"
 
@@ -7333,11 +7352,11 @@ msgstr "환영합니다!"
 msgid "What are plugins?"
 msgstr "\"%s\" 플러그인을 삭제할까요?"
 
-#: packages/lib/models/settings/builtInMetadata.ts:958
+#: packages/lib/models/settings/builtInMetadata.ts:967
 msgid "When creating a new note:"
 msgstr "새 노트를 만들 때:"
 
-#: packages/lib/models/settings/builtInMetadata.ts:941
+#: packages/lib/models/settings/builtInMetadata.ts:950
 msgid "When creating a new to-do:"
 msgstr "새 목록을 만들 때:"
 
@@ -7348,7 +7367,7 @@ msgid ""
 "the desktop app."
 msgstr ""
 
-#: packages/lib/models/settings/builtInMetadata.ts:567
+#: packages/lib/models/settings/builtInMetadata.ts:576
 msgid ""
 "When enabled, the application will scan your attachments and extract the "
 "text from it. This will allow you to search for text in these attachments."

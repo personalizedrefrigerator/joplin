@@ -110,8 +110,8 @@ msgstr "&Vista"
 msgid "&Window"
 msgstr "&Finestra"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1687
-#: packages/lib/models/settings/builtInMetadata.ts:2001
+#: packages/lib/models/settings/builtInMetadata.ts:1696
+#: packages/lib/models/settings/builtInMetadata.ts:2010
 #, fuzzy
 msgid "%d day"
 msgid_plural "%d days"
@@ -130,9 +130,9 @@ msgstr "%d GB"
 msgid "%d GB storage space"
 msgstr "%d GB di spazio di archiviazione"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1399
-#: packages/lib/models/settings/builtInMetadata.ts:1400
-#: packages/lib/models/settings/builtInMetadata.ts:1401
+#: packages/lib/models/settings/builtInMetadata.ts:1408
+#: packages/lib/models/settings/builtInMetadata.ts:1409
+#: packages/lib/models/settings/builtInMetadata.ts:1410
 #, fuzzy
 msgid "%d hour"
 msgid_plural "%d hours"
@@ -151,9 +151,9 @@ msgstr "%d MB"
 msgid "%d MB per note or attachment"
 msgstr "%d MB per nota o allegato"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1396
-#: packages/lib/models/settings/builtInMetadata.ts:1397
-#: packages/lib/models/settings/builtInMetadata.ts:1398
+#: packages/lib/models/settings/builtInMetadata.ts:1405
+#: packages/lib/models/settings/builtInMetadata.ts:1406
+#: packages/lib/models/settings/builtInMetadata.ts:1407
 #, fuzzy
 msgid "%d minute"
 msgid_plural "%d minutes"
@@ -204,13 +204,13 @@ msgstr "%s (%s): %s"
 msgid "%s (pre-release)"
 msgstr "%s (pre-rilascio)"
 
-#: packages/lib/models/settings/builtInMetadata.ts:697
-#: packages/lib/models/settings/builtInMetadata.ts:698
-#: packages/lib/models/settings/builtInMetadata.ts:699
+#: packages/lib/models/settings/builtInMetadata.ts:706
+#: packages/lib/models/settings/builtInMetadata.ts:707
+#: packages/lib/models/settings/builtInMetadata.ts:708
 msgid "%s / %s"
 msgstr "%s / %s"
 
-#: packages/lib/models/settings/builtInMetadata.ts:696
+#: packages/lib/models/settings/builtInMetadata.ts:705
 msgid "%s / %s / %s"
 msgstr "%s / %s / %s"
 
@@ -312,7 +312,7 @@ msgstr ""
 msgid "A brief description of the image:"
 msgstr ""
 
-#: packages/lib/models/settings/builtInMetadata.ts:1961
+#: packages/lib/models/settings/builtInMetadata.ts:1970
 msgid ""
 "A comma-separated list of words. May be used for uncommon words, to help "
 "voice typing spell them correctly."
@@ -323,15 +323,15 @@ msgstr ""
 msgid "A new update (%s) is available"
 msgstr "Aggiornamento disponibile"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1425
+#: packages/lib/models/settings/builtInMetadata.ts:1434
 msgid "A3"
 msgstr "A3"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1423
+#: packages/lib/models/settings/builtInMetadata.ts:1432
 msgid "A4"
 msgstr "A4"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1426
+#: packages/lib/models/settings/builtInMetadata.ts:1435
 msgid "A5"
 msgstr "A5"
 
@@ -433,6 +433,10 @@ msgstr "Dimensione attuale"
 msgid "Add body"
 msgstr "Aggiungi corpo"
 
+#: packages/editor/ProseMirror/plugins/tablePlugin.ts:24
+msgid "Add column"
+msgstr ""
+
 #: packages/app-mobile/components/buttons/FloatingActionButton.tsx:66
 #: packages/app-mobile/components/ComboBox.tsx:103
 #: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:136
@@ -446,6 +450,11 @@ msgstr "Aggiungi o rimuovi etichetta:"
 #: packages/app-desktop/gui/ShareFolderDialog/ShareFolderDialog.tsx:278
 msgid "Add recipient:"
 msgstr "Aggiungi destinatario:"
+
+#: packages/editor/ProseMirror/plugins/tablePlugin.ts:19
+#, fuzzy
+msgid "Add row"
+msgstr "Aggiungi nuova"
 
 #: packages/app-mobile/components/TagEditor.tsx:281
 #, fuzzy
@@ -517,7 +526,7 @@ msgstr ""
 "Tutti gli errori di sincronizzazione degli elementi sono stati "
 "contrassegnati come \"ignorati\"."
 
-#: packages/app-desktop/gui/Sidebar/listItemComponents/AllNotesItem.tsx:73
+#: packages/app-desktop/gui/Sidebar/hooks/useSidebarListData.ts:72
 #: packages/app-mobile/components/screens/Notes/Notes.tsx:208
 #: packages/app-mobile/components/side-menu-content.tsx:684
 msgid "All notes"
@@ -532,7 +541,7 @@ msgstr ""
 msgid "All shared folders:"
 msgstr ""
 
-#: packages/lib/models/settings/builtInMetadata.ts:1023
+#: packages/lib/models/settings/builtInMetadata.ts:1032
 msgid "Allows debugging mobile plugins. See %s for details."
 msgstr "Consenti il debug dei plugin mobili. Vedi %s per dettagli."
 
@@ -549,11 +558,11 @@ msgstr "Pubblica anche le note collegate"
 msgid "Alternative instance ID: %s"
 msgstr "ID del Client: %s"
 
-#: packages/lib/models/settings/builtInMetadata.ts:461
+#: packages/lib/models/settings/builtInMetadata.ts:470
 msgid "Always"
 msgstr "Sempre"
 
-#: packages/lib/models/settings/builtInMetadata.ts:979
+#: packages/lib/models/settings/builtInMetadata.ts:988
 msgid "Always ask"
 msgstr "Chiedi sempre"
 
@@ -561,7 +570,7 @@ msgstr "Chiedi sempre"
 msgid "Always open %s files without asking."
 msgstr "Apri sempre i file %s senza chiedere."
 
-#: packages/lib/models/settings/builtInMetadata.ts:980
+#: packages/lib/models/settings/builtInMetadata.ts:989
 msgid "Always resize"
 msgstr "Ridimensiona sempre"
 
@@ -683,7 +692,7 @@ msgid "Attach"
 msgstr "Allega"
 
 #: packages/app-desktop/gui/NoteEditor/editorCommandDeclarations.ts:75
-#: packages/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/TinyMCE.tsx:803
+#: packages/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/TinyMCE.tsx:804
 #: packages/app-mobile/components/screens/Note/commands/attachFile.ts:26
 #: packages/app-mobile/components/screens/Note/commands/attachFile.ts:90
 msgid "Attach file"
@@ -715,7 +724,7 @@ msgstr "Allegati"
 msgid "Attachment conflict: \"%s\""
 msgstr "Conflitto tra gli allegati: \"%s\""
 
-#: packages/lib/models/settings/builtInMetadata.ts:457
+#: packages/lib/models/settings/builtInMetadata.ts:466
 msgid "Attachment download behaviour"
 msgstr "Comportamento scaricamento allegati"
 
@@ -755,7 +764,7 @@ msgstr "Token di autorizzazione:"
 msgid "Authorise"
 msgstr "Autorizza"
 
-#: packages/lib/models/settings/builtInMetadata.ts:463
+#: packages/lib/models/settings/builtInMetadata.ts:472
 msgid "Auto"
 msgstr "Auto"
 
@@ -763,28 +772,28 @@ msgstr "Auto"
 msgid "Auto-add disabled accounts for deletion"
 msgstr "Aggiungi automaticamente gli account disabilitati per la cancellazione"
 
-#: packages/lib/models/settings/builtInMetadata.ts:776
+#: packages/lib/models/settings/builtInMetadata.ts:785
 msgid "Auto-format Markdown in the Rich Text Editor"
 msgstr ""
 
-#: packages/lib/models/settings/builtInMetadata.ts:733
+#: packages/lib/models/settings/builtInMetadata.ts:742
 msgid "Auto-pair braces, parentheses, quotations, etc."
 msgstr "Auto- accoppia parentesi graffe, parentesi, citazione, ecc."
 
-#: packages/lib/models/settings/builtInMetadata.ts:744
+#: packages/lib/models/settings/builtInMetadata.ts:753
 msgid "Autocomplete Markdown and HTML"
 msgstr ""
 
-#: packages/lib/models/settings/builtInMetadata.ts:1370
+#: packages/lib/models/settings/builtInMetadata.ts:1379
 msgid "Automatically check for updates"
 msgstr "Controlla aggiornamenti automaticamente"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1988
+#: packages/lib/models/settings/builtInMetadata.ts:1997
 msgid "Automatically delete notes in the trash after a number of days"
 msgstr ""
 "Elimina automaticamente le note nel cestino dopo un certo numero di giorni"
 
-#: packages/lib/models/settings/builtInMetadata.ts:644
+#: packages/lib/models/settings/builtInMetadata.ts:653
 msgid "Automatically switch theme to match system theme"
 msgstr "Usa il tema di sistema"
 
@@ -950,8 +959,8 @@ msgstr "Impossibile creare una nuova nota: %s"
 #: packages/app-cli/app/command-tag.js:87
 #: packages/app-cli/app/command-todo.js:21
 #: packages/app-cli/app/command-use.ts:23
-#: packages/lib/services/interop/InteropService.ts:300
-#: packages/lib/services/interop/InteropService.ts:319
+#: packages/lib/services/interop/InteropService.ts:305
+#: packages/lib/services/interop/InteropService.ts:324
 msgid "Cannot find \"%s\"."
 msgstr "Impossibile trovare \"%s\"."
 
@@ -963,14 +972,14 @@ msgstr "Impossibile trovare: \"%s\""
 msgid "Cannot initialise synchroniser."
 msgstr "Non è possibile inizializzare la sincronizzazione."
 
-#: packages/lib/services/interop/InteropService.ts:267
+#: packages/lib/services/interop/InteropService.ts:272
 msgid "Cannot load \"%s\" module for format \"%s\" and output \"%s\""
 msgstr ""
 "Impossibile caricare il modulo \"%s\" per il formato \"%s\" e per l'output "
 "\"%s\""
 
 # Target potrebbe significare destinazione
-#: packages/lib/services/interop/InteropService.ts:280
+#: packages/lib/services/interop/InteropService.ts:285
 msgid "Cannot load \"%s\" module for format \"%s\" and target \"%s\""
 msgstr ""
 "Impossibile caricare il modulo \"%s\" per il formato \"%s\" e per il target "
@@ -1191,11 +1200,11 @@ msgstr "Cmd-clic per aprire: %s"
 msgid "Code"
 msgstr "Codice"
 
-#: packages/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/TinyMCE.tsx:813
+#: packages/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/TinyMCE.tsx:814
 msgid "Code Block"
 msgstr "Blocco di codice"
 
-#: packages/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/TinyMCE.tsx:1558
+#: packages/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/TinyMCE.tsx:1566
 msgid "Code View"
 msgstr "Codice"
 
@@ -1209,7 +1218,7 @@ msgid "Collaborate on a notebook with others"
 msgstr "Collabora su un taccuino con altri"
 
 #: packages/app-desktop/gui/SyncWizard/Dialog.tsx:177
-#: packages/app-mobile/components/SyncWizard/SyncWizard.tsx:117
+#: packages/app-mobile/components/SyncWizard/SyncWizard.tsx:123
 msgid "Collaborate on notebooks with others"
 msgstr "Collabora su un taccuino con altri"
 
@@ -1233,12 +1242,12 @@ msgstr "Collassa"
 msgid "Coming alarms"
 msgstr "Prossimi avvisi"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1582
+#: packages/lib/models/settings/builtInMetadata.ts:1591
 msgid ""
 "Comma-separated list of paths to directories to load the certificates from, "
-"or path to individual cert files. For example: /my/cert_dir, /other/"
-"custom.pem. Note that if you make changes to the TLS settings, you must save "
-"your changes before clicking on \"Check synchronisation configuration\"."
+"or path to individual cert files. For example: /my/cert_dir, /other/custom."
+"pem. Note that if you make changes to the TLS settings, you must save your "
+"changes before clicking on \"Check synchronisation configuration\"."
 msgstr ""
 "Elenco separato da virgole di percorsi alle cartelle per caricare i "
 "certificati o percorso dei singoli file cert. Ad esempio: /my/cert_dir, /"
@@ -1316,7 +1325,7 @@ msgstr "Comprimi le vecchie modifiche"
 msgid "Configuration"
 msgstr "Configurazione"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1283
+#: packages/lib/models/settings/builtInMetadata.ts:1292
 msgid "Configures the size of scrollbars used in the app."
 msgstr ""
 
@@ -1386,7 +1395,7 @@ msgstr "Continua"
 msgid "Control character"
 msgstr "Caratteri"
 
-#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:660
+#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:674
 #, fuzzy
 msgid "Convert it"
 msgstr "Converti in nota"
@@ -1684,15 +1693,15 @@ msgstr "ordine personalizzato"
 msgid "Custom order"
 msgstr "Ordine personalizzato"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1339
+#: packages/lib/models/settings/builtInMetadata.ts:1348
 msgid "Custom stylesheet for Joplin-wide app styles"
 msgstr "CSS per gli stili Joplin-wide app"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1322
+#: packages/lib/models/settings/builtInMetadata.ts:1331
 msgid "Custom stylesheet for rendered Markdown"
 msgstr "Foglio di stile personalizzato per visualizzare il markdown"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1581
+#: packages/lib/models/settings/builtInMetadata.ts:1590
 msgid "Custom TLS certificates"
 msgstr "Certificati TLS personalizzati"
 
@@ -1718,12 +1727,12 @@ msgstr "Pannello di controllo"
 msgid "Date"
 msgstr "Data"
 
-#: packages/lib/models/settings/builtInMetadata.ts:523
+#: packages/lib/models/settings/builtInMetadata.ts:532
 msgid "Date format"
 msgstr "Formato della data"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1687
-#: packages/lib/models/settings/builtInMetadata.ts:2001
+#: packages/lib/models/settings/builtInMetadata.ts:1696
+#: packages/lib/models/settings/builtInMetadata.ts:2010
 msgid "days"
 msgstr "giorni"
 
@@ -1744,13 +1753,13 @@ msgstr "Elementi decriptati: %s / %s"
 msgid "Decrypting items: %d/%d"
 msgstr "Decrittografia elementi: %d/%d"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1215
-#: packages/lib/models/settings/builtInMetadata.ts:1222
-#: packages/lib/models/settings/builtInMetadata.ts:1461
+#: packages/lib/models/settings/builtInMetadata.ts:1224
+#: packages/lib/models/settings/builtInMetadata.ts:1231
+#: packages/lib/models/settings/builtInMetadata.ts:1470
 msgid "Default"
 msgstr "Predefinito"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1972
+#: packages/lib/models/settings/builtInMetadata.ts:1981
 msgid "Default title to use for documents created by the scanner."
 msgstr ""
 
@@ -1776,6 +1785,11 @@ msgstr "Elimina"
 msgid "Delete attachment \"%s\"?"
 msgstr "Eliminare allegato \"%s\"?"
 
+#: packages/editor/ProseMirror/plugins/tablePlugin.ts:34
+#, fuzzy
+msgid "Delete column"
+msgstr "Elimina riga"
+
 #: packages/server/src/services/TaskService.ts:27
 msgid "Delete expired sessions"
 msgstr "Elimina le sessioni scadute"
@@ -1795,7 +1809,7 @@ msgstr "Attiva cronologia della nota"
 msgid "Delete line"
 msgstr "Elimina riga"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1363
+#: packages/lib/models/settings/builtInMetadata.ts:1372
 msgid "Delete local data and re-download from sync target"
 msgstr ""
 "Elimina i dati locali e riscaricali dalla destinazione di sincronizzazione"
@@ -1815,6 +1829,11 @@ msgstr "Eliminare il plugin \"%s\"?"
 #: packages/app-mobile/components/ProfileSwitcher/ProfileSwitcher.tsx:111
 msgid "Delete profile \"%s\""
 msgstr "Eliminare il profilo \"%s\""
+
+#: packages/editor/ProseMirror/plugins/tablePlugin.ts:29
+#, fuzzy
+msgid "Delete row"
+msgstr "Eliminare la nota"
 
 #: packages/app-mobile/components/ScreenHeader/index.tsx:486
 msgid "Delete selected notes"
@@ -1910,7 +1929,7 @@ msgstr ""
 msgid "Directory"
 msgstr "Cartella"
 
-#: packages/lib/models/settings/builtInMetadata.ts:160
+#: packages/lib/models/settings/builtInMetadata.ts:169
 msgid "Directory to synchronise with (absolute path)"
 msgstr "Cartella da sincronizzare con (percorso assoluto)"
 
@@ -1941,7 +1960,7 @@ msgstr "Disattiva servizio Web Clipper"
 #: packages/app-desktop/gui/KeymapConfig/KeymapConfigScreen.tsx:143
 #: packages/app-mobile/components/screens/ConfigScreen/plugins/PluginBox/PluginChips.tsx:85
 #: packages/app-mobile/components/screens/encryption-config.tsx:353
-#: packages/lib/models/settings/builtInMetadata.ts:1395
+#: packages/lib/models/settings/builtInMetadata.ts:1404
 msgid "Disabled"
 msgstr "Disabilitato"
 
@@ -2056,7 +2075,7 @@ msgstr ""
 msgid "Do you find the Joplin web app useful?"
 msgstr ""
 
-#: packages/lib/models/settings/builtInMetadata.ts:1971
+#: packages/lib/models/settings/builtInMetadata.ts:1980
 msgid "Document scanner: Title template"
 msgstr ""
 
@@ -2066,7 +2085,7 @@ msgid ""
 "for the `add` subcommand."
 msgstr ""
 
-#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:662
+#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:676
 msgid "Don't show this message again"
 msgstr ""
 
@@ -2134,7 +2153,7 @@ msgstr "Disegna l'immagine"
 msgid "Drawing"
 msgstr "Disegno"
 
-#: packages/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/TinyMCE.tsx:1558
+#: packages/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/TinyMCE.tsx:1566
 msgid "Drop notes or files here"
 msgstr "Trascina qui note o file"
 
@@ -2228,9 +2247,9 @@ msgstr "Modifica configurazione profilo..."
 
 #: packages/app-desktop/gui/MainScreen.tsx:132
 #: packages/app-desktop/gui/NoteContentPropertiesDialog.tsx:144
-#: packages/lib/models/settings/builtInMetadata.ts:696
-#: packages/lib/models/settings/builtInMetadata.ts:697
-#: packages/lib/models/settings/builtInMetadata.ts:698
+#: packages/lib/models/settings/builtInMetadata.ts:705
+#: packages/lib/models/settings/builtInMetadata.ts:706
+#: packages/lib/models/settings/builtInMetadata.ts:707
 msgid "Editor"
 msgstr "Editor"
 
@@ -2239,23 +2258,23 @@ msgstr "Editor"
 msgid "Editor actions"
 msgstr "Editor caratteri"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1208
+#: packages/lib/models/settings/builtInMetadata.ts:1217
 msgid "Editor font"
 msgstr "Editor caratteri"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1234
+#: packages/lib/models/settings/builtInMetadata.ts:1243
 msgid "Editor font family"
 msgstr "Editor famiglia caratteri"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1196
+#: packages/lib/models/settings/builtInMetadata.ts:1205
 msgid "Editor font size"
 msgstr "Editor dimensione caratteri"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1266
+#: packages/lib/models/settings/builtInMetadata.ts:1275
 msgid "Editor maximum width"
 msgstr "Editor larghezza massima"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1247
+#: packages/lib/models/settings/builtInMetadata.ts:1256
 msgid "Editor monospace font family"
 msgstr "Editor con carattere a larghezza fissa"
 
@@ -2268,7 +2287,7 @@ msgstr "Editor: %s"
 msgid "Either \"text\" or \"json\""
 msgstr "Sia \"testo\" che \"json\""
 
-#: packages/lib/models/settings/builtInMetadata.ts:1462
+#: packages/lib/models/settings/builtInMetadata.ts:1471
 msgid "Emacs"
 msgstr "Emacs"
 
@@ -2314,27 +2333,27 @@ msgstr "Svuota cestino"
 msgid "Enable"
 msgstr "Abilitato"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1091
+#: packages/lib/models/settings/builtInMetadata.ts:1100
 msgid "Enable ^sup^ syntax"
 msgstr "Attiva sintassi ^sup^"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1095
+#: packages/lib/models/settings/builtInMetadata.ts:1104
 msgid "Enable ++insert++ syntax"
 msgstr "Attiva sintassi ++insert++"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1087
+#: packages/lib/models/settings/builtInMetadata.ts:1096
 msgid "Enable ==mark== syntax"
 msgstr "Attiva sintassi ==mark=="
 
-#: packages/lib/models/settings/builtInMetadata.ts:1090
+#: packages/lib/models/settings/builtInMetadata.ts:1099
 msgid "Enable ~sub~ syntax"
 msgstr "Attiva sintassi ~sub~"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1093
+#: packages/lib/models/settings/builtInMetadata.ts:1102
 msgid "Enable abbreviation syntax"
 msgstr "Abilita abbreviazioni"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1084
+#: packages/lib/models/settings/builtInMetadata.ts:1093
 msgid "Enable audio player"
 msgstr "Abilita riproduttore audio"
 
@@ -2342,7 +2361,7 @@ msgstr "Abilita riproduttore audio"
 msgid "Enable biometrics authentication?"
 msgstr "Abilitare l'autenticazione biometrica?"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1092
+#: packages/lib/models/settings/builtInMetadata.ts:1101
 msgid "Enable deflist syntax"
 msgstr "Abilita sintassi deflist"
 
@@ -2351,53 +2370,53 @@ msgstr "Abilita sintassi deflist"
 msgid "Enable encryption"
 msgstr "Attiva Crittografia"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1107
+#: packages/lib/models/settings/builtInMetadata.ts:1116
 msgid "Enable file:// URLs for images and videos"
 msgstr ""
 
-#: packages/lib/models/settings/builtInMetadata.ts:1088
+#: packages/lib/models/settings/builtInMetadata.ts:1097
 msgid "Enable footnotes"
 msgstr "Attiva note a piè pagina"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1081
+#: packages/lib/models/settings/builtInMetadata.ts:1090
 msgid "Enable Fountain syntax support"
 msgstr "Attiva supporto sintassi Fountain"
 
-#: packages/lib/models/settings/builtInMetadata.ts:577
+#: packages/lib/models/settings/builtInMetadata.ts:586
 #, fuzzy
 msgid "Enable handwritten transcription"
 msgstr "Attiva Crittografia"
 
-#: packages/lib/models/settings/builtInMetadata.ts:756
+#: packages/lib/models/settings/builtInMetadata.ts:765
 #, fuzzy
 msgid "Enable HTML-to-Markdown conversion banner"
 msgstr "Abilita la barra degli strumenti Markdown"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1078
+#: packages/lib/models/settings/builtInMetadata.ts:1087
 msgid "Enable Linkify"
 msgstr "Abilita Linkify"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1094
+#: packages/lib/models/settings/builtInMetadata.ts:1103
 msgid "Enable markdown emoji"
 msgstr "Abilita emoji markdown"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1080
+#: packages/lib/models/settings/builtInMetadata.ts:1089
 msgid "Enable math expressions"
 msgstr "Attiva espressioni matematiche"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1082
+#: packages/lib/models/settings/builtInMetadata.ts:1091
 msgid "Enable Mermaid diagrams support"
 msgstr "Attiva supporto diagrammi Mermaid"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1096
+#: packages/lib/models/settings/builtInMetadata.ts:1105
 msgid "Enable multimarkdown table extension"
 msgstr "Abilita estensione tavola dei contenuti"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1677
+#: packages/lib/models/settings/builtInMetadata.ts:1686
 msgid "Enable note history"
 msgstr "Attiva cronologia della nota"
 
-#: packages/lib/models/settings/builtInMetadata.ts:566
+#: packages/lib/models/settings/builtInMetadata.ts:575
 msgid "Enable optical character recognition (OCR)"
 msgstr "Abilita riconoscimento ottico dei caratteri (OCR)"
 
@@ -2405,41 +2424,41 @@ msgstr "Abilita riconoscimento ottico dei caratteri (OCR)"
 msgid "Enable or disable plugins"
 msgstr "Attiva o disattiva plugin"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1086
+#: packages/lib/models/settings/builtInMetadata.ts:1095
 msgid "Enable PDF viewer"
 msgstr "Abilita visualizzatore PDF"
 
 #: packages/app-mobile/components/screens/ConfigScreen/plugins/EnablePluginSupportPage.tsx:119
-#: packages/lib/models/settings/builtInMetadata.ts:1034
+#: packages/lib/models/settings/builtInMetadata.ts:1043
 msgid "Enable plugin support"
 msgstr "Attiva supporto plugin"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1076
+#: packages/lib/models/settings/builtInMetadata.ts:1085
 msgid "Enable soft breaks"
 msgstr "Abilita interruzioni soft"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1475
+#: packages/lib/models/settings/builtInMetadata.ts:1484
 #, fuzzy
 msgid "Enable spell checking in Markdown editor"
 msgstr "Abilita il controllo ortografico nell'editor di testo"
 
-#: packages/lib/models/settings/builtInMetadata.ts:918
+#: packages/lib/models/settings/builtInMetadata.ts:927
 msgid "Enable spellcheck in the text editor"
 msgstr "Abilita il controllo ortografico nell'editor di testo"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1089
+#: packages/lib/models/settings/builtInMetadata.ts:1098
 msgid "Enable table of contents extension"
 msgstr "Abilita l'estensione indice"
 
-#: packages/lib/models/settings/builtInMetadata.ts:929
+#: packages/lib/models/settings/builtInMetadata.ts:938
 msgid "Enable the Markdown toolbar"
 msgstr "Abilita la barra degli strumenti Markdown"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1077
+#: packages/lib/models/settings/builtInMetadata.ts:1086
 msgid "Enable typographer support"
 msgstr "Attiva supporto tipografico"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1085
+#: packages/lib/models/settings/builtInMetadata.ts:1094
 msgid "Enable video player"
 msgstr "Abilita riproduttore video"
 
@@ -2455,13 +2474,13 @@ msgstr "Abilita servizio Web Clipper"
 msgid "Enabled"
 msgstr "Attivato"
 
-#: packages/lib/models/settings/builtInMetadata.ts:745
+#: packages/lib/models/settings/builtInMetadata.ts:754
 msgid ""
 "Enables Markdown list continuation, auto-closing HTML tags, and other markup "
 "autocompletions."
 msgstr ""
 
-#: packages/lib/models/settings/builtInMetadata.ts:777
+#: packages/lib/models/settings/builtInMetadata.ts:786
 msgid ""
 "Enables Markdown pattern replacement in the Rich Text Editor. For example, "
 "when enabled, typing **bold** creates bold text."
@@ -2476,11 +2495,11 @@ msgstr ""
 "allegati verranno ri-sincronizzati e inviati crittografati alla destinazione "
 "di sincronizzazione."
 
-#: packages/lib/models/BaseItem.ts:921
+#: packages/lib/models/BaseItem.ts:943
 msgid "Encrypted"
 msgstr "Crittografato"
 
-#: packages/lib/models/BaseItem.ts:983
+#: packages/lib/models/BaseItem.ts:1005
 msgid "Encrypted items cannot be modified"
 msgstr "Gli elementi crittografati non possono essere modificati"
 
@@ -2700,11 +2719,11 @@ msgstr "Esporta solo la seguente nota."
 msgid "Exports only the given notebook."
 msgstr "Esporta solo il seguente Taccuino."
 
-#: packages/lib/models/settings/builtInMetadata.ts:1648
+#: packages/lib/models/settings/builtInMetadata.ts:1657
 msgid "Fail-safe"
 msgstr "Fail-safe"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1649
+#: packages/lib/models/settings/builtInMetadata.ts:1658
 msgid ""
 "Fail-safe: Do not wipe out local data when sync target is empty (often the "
 "result of a misconfiguration or bug)"
@@ -2794,13 +2813,13 @@ msgstr "Correzione indice di ricerca..."
 msgid "Focus"
 msgstr "Focus"
 
-#: packages/lib/models/settings/builtInMetadata.ts:945
-#: packages/lib/models/settings/builtInMetadata.ts:962
+#: packages/lib/models/settings/builtInMetadata.ts:954
+#: packages/lib/models/settings/builtInMetadata.ts:971
 msgid "Focus body"
 msgstr "Focus sul testo"
 
-#: packages/lib/models/settings/builtInMetadata.ts:944
-#: packages/lib/models/settings/builtInMetadata.ts:961
+#: packages/lib/models/settings/builtInMetadata.ts:953
+#: packages/lib/models/settings/builtInMetadata.ts:970
 msgid "Focus title"
 msgstr "Focus sul titolo"
 
@@ -2817,7 +2836,7 @@ msgid "For debugging purpose only: export your profile to an external SD card."
 msgstr ""
 "Solo per scopo di debugging: esporta il tuo profilo su una scheda SD esterna."
 
-#: packages/lib/models/settings/builtInMetadata.ts:1628
+#: packages/lib/models/settings/builtInMetadata.ts:1637
 msgid "For example \"%s\""
 msgstr "Per esempio \"%s\""
 
@@ -2842,7 +2861,7 @@ msgstr ""
 "Per l'elenco delle scorciatoie da tastiera e delle opzioni di "
 "configurazione, digita `help keymap`"
 
-#: packages/lib/models/settings/builtInMetadata.ts:324
+#: packages/lib/models/settings/builtInMetadata.ts:333
 msgid "Force path style"
 msgstr "Forzare lo stile del percorso"
 
@@ -2896,7 +2915,7 @@ msgstr ""
 msgid "Get it now:"
 msgstr "Scaricalo subito:"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1371
+#: packages/lib/models/settings/builtInMetadata.ts:1380
 msgid "Get pre-releases when checking for updates"
 msgstr "Ottieni pre-rilasci durante controllo aggiornamenti"
 
@@ -3020,7 +3039,7 @@ msgstr "Home"
 msgid "Horizontal Rule"
 msgstr "Riga orizzontale"
 
-#: packages/lib/services/interop/InteropService.ts:190
+#: packages/lib/services/interop/InteropService.ts:195
 msgid "HTML Directory"
 msgstr "Cartella HTML"
 
@@ -3028,7 +3047,7 @@ msgstr "Cartella HTML"
 msgid "HTML document"
 msgstr "Documento HTML"
 
-#: packages/lib/services/interop/InteropService.ts:183
+#: packages/lib/services/interop/InteropService.ts:188
 msgid "HTML File"
 msgstr "File HTML"
 
@@ -3052,7 +3071,7 @@ msgstr "ID"
 msgid "Idle"
 msgstr "Inattivo"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1496
+#: packages/lib/models/settings/builtInMetadata.ts:1505
 msgid ""
 "If an image attachment is on its own line and followed by a blank line, it "
 "will be rendered just below its Markdown source."
@@ -3073,7 +3092,7 @@ msgstr ""
 msgid "Ignore"
 msgstr "Ignora"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1607
+#: packages/lib/models/settings/builtInMetadata.ts:1616
 msgid "Ignore TLS certificate errors"
 msgstr "Ignora gli errori del certificato TLS"
 
@@ -3135,7 +3154,7 @@ msgstr "Importazione..."
 msgid "Imports data into Joplin."
 msgstr "Importa i dati in Joplin."
 
-#: packages/lib/models/settings/builtInMetadata.ts:458
+#: packages/lib/models/settings/builtInMetadata.ts:467
 msgid ""
 "In \"Manual\" mode, attachments are downloaded only when you click on them. "
 "In \"Auto\", they are downloaded when you open the note. In \"Always\", all "
@@ -3207,7 +3226,7 @@ msgstr "Per utilizzare il web clipper, devi fare quanto segue:"
 msgid "In progress"
 msgstr "In corso"
 
-#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:608
+#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:622
 msgid "In: %s"
 msgstr "In: %s"
 
@@ -3251,7 +3270,7 @@ msgstr ""
 msgid "Information"
 msgstr "Informazioni"
 
-#: packages/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/TinyMCE.tsx:821
+#: packages/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/TinyMCE.tsx:822
 msgid "Inline Code"
 msgstr "Codice inline"
 
@@ -3265,7 +3284,7 @@ msgid "Insert Hyperlink"
 msgstr "Inserire collegamento ipertestuale"
 
 #: packages/app-desktop/gui/NoteEditor/editorCommandDeclarations.ts:105
-#: packages/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/TinyMCE.tsx:854
+#: packages/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/TinyMCE.tsx:855
 #: packages/app-mobile/components/screens/Note/commands/insertDateTime.ts:8
 msgid "Insert time"
 msgstr "Inserisci data e ora"
@@ -3362,7 +3381,7 @@ msgid "Join us on %s"
 msgstr "Unisciti a noi su Twitter"
 
 #: packages/app-desktop/gui/SyncWizard/Dialog.tsx:310
-#: packages/app-mobile/components/SyncWizard/SyncWizard.tsx:108
+#: packages/app-mobile/components/SyncWizard/SyncWizard.tsx:114
 msgid ""
 "Joplin can synchronise your notes using various providers. Select one from "
 "the list below."
@@ -3370,7 +3389,7 @@ msgstr ""
 "Joplin può sincronizzare le tue note utilizzando vari provider. Seleziona "
 "uno dalla lista sotto."
 
-#: packages/app-mobile/components/SyncWizard/SyncWizard.tsx:112
+#: packages/app-mobile/components/SyncWizard/SyncWizard.tsx:118
 #: packages/lib/models/Setting.ts:1304 packages/lib/SyncTargetJoplinCloud.ts:30
 msgid "Joplin Cloud"
 msgstr "Joplin Cloud"
@@ -3392,12 +3411,12 @@ msgstr ""
 "Joplin non riconosce l'estensione %s. L'apertura di questo file potrebbe "
 "essere pericolosa. Cosa vorresti fare?"
 
-#: packages/lib/services/interop/InteropService.ts:163
+#: packages/lib/services/interop/InteropService.ts:168
 #: packages/lib/services/interop/InteropService.ts:72
 msgid "Joplin Export Directory"
 msgstr "Cartella di esportazione di Joplin"
 
-#: packages/lib/services/interop/InteropService.ts:157
+#: packages/lib/services/interop/InteropService.ts:162
 #: packages/lib/services/interop/InteropService.ts:66
 msgid "Joplin Export File"
 msgstr "Esporta file di Joplin"
@@ -3439,7 +3458,7 @@ msgstr "URL Joplin Server"
 msgid "Joplin Server Business"
 msgstr "Nome Utente Joplin Server"
 
-#: packages/lib/models/settings/builtInMetadata.ts:355
+#: packages/lib/models/settings/builtInMetadata.ts:364
 msgid "Joplin Server email"
 msgstr "Email Server Joplin"
 
@@ -3449,12 +3468,12 @@ msgstr "Email Server Joplin"
 msgid "Joplin Server Login"
 msgstr "URL Joplin Server"
 
-#: packages/lib/models/settings/builtInMetadata.ts:367
+#: packages/lib/models/settings/builtInMetadata.ts:376
 msgid "Joplin Server password"
 msgstr "Password Joplin Server"
 
-#: packages/lib/models/settings/builtInMetadata.ts:336
-#: packages/lib/models/settings/builtInMetadata.ts:379
+#: packages/lib/models/settings/builtInMetadata.ts:345
+#: packages/lib/models/settings/builtInMetadata.ts:388
 msgid "Joplin Server URL"
 msgstr "URL Joplin Server"
 
@@ -3480,7 +3499,7 @@ msgstr ""
 msgid "Joplin website"
 msgstr "Sito web Joplin"
 
-#: packages/app-mobile/components/SyncWizard/SyncWizard.tsx:113
+#: packages/app-mobile/components/SyncWizard/SyncWizard.tsx:119
 #: packages/lib/SyncTargetJoplinCloud.ts:34
 msgid ""
 "Joplin's own sync service. Also gives access to Joplin-specific features "
@@ -3490,15 +3509,15 @@ msgstr ""
 "specifiche di Joplin come la pubblicazione di note o la collaborazione su "
 "taccuini con altri."
 
-#: packages/lib/models/settings/builtInMetadata.ts:1689
+#: packages/lib/models/settings/builtInMetadata.ts:1698
 msgid "Keep note history for"
 msgstr "Mantieni la cronologia note per"
 
-#: packages/lib/models/settings/builtInMetadata.ts:2005
+#: packages/lib/models/settings/builtInMetadata.ts:2014
 msgid "Keep notes in the trash for"
 msgstr "Mantieni le note nel cestino per"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1457
+#: packages/lib/models/settings/builtInMetadata.ts:1466
 msgid "Keyboard Mode"
 msgstr "Modalità Tastiera"
 
@@ -3522,11 +3541,11 @@ msgstr "Chiavi master che devono essere aggiornate"
 msgid "Label"
 msgstr ""
 
-#: packages/lib/models/settings/builtInMetadata.ts:1434
+#: packages/lib/models/settings/builtInMetadata.ts:1443
 msgid "Landscape"
 msgstr "Orizzontale"
 
-#: packages/lib/models/settings/builtInMetadata.ts:511
+#: packages/lib/models/settings/builtInMetadata.ts:520
 msgid "Language"
 msgstr "Lingua"
 
@@ -3534,7 +3553,7 @@ msgstr "Lingua"
 msgid "Language, date format"
 msgstr "Lingua, formato della data"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1279
+#: packages/lib/models/settings/builtInMetadata.ts:1288
 msgid "Large"
 msgstr ""
 
@@ -3565,7 +3584,7 @@ msgstr "Layout della sequenza tasti"
 msgid "Learn more"
 msgstr "Per saperne di più"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1930
+#: packages/lib/models/settings/builtInMetadata.ts:1939
 msgid "Leave it blank to download the language files from the default website"
 msgstr ""
 "Lasciarlo vuoto per scaricare i file della lingua dal sito Web predefinito"
@@ -3578,11 +3597,11 @@ msgstr "Lascia il taccuino"
 msgid "Leave notebook..."
 msgstr "Lascia il taccuino..."
 
-#: packages/lib/models/settings/builtInMetadata.ts:1428
+#: packages/lib/models/settings/builtInMetadata.ts:1437
 msgid "Legal"
 msgstr "Legale"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1424
+#: packages/lib/models/settings/builtInMetadata.ts:1433
 msgid "Letter"
 msgstr "Lettera"
 
@@ -3748,39 +3767,39 @@ msgstr ""
 "Gestisci la configurazione E2EE. I comandi sono `abilita`, `disabilita`, "
 "`decripta`, `stato`, `decripta-file` e `stato-target`."
 
-#: packages/lib/models/settings/builtInMetadata.ts:462
+#: packages/lib/models/settings/builtInMetadata.ts:471
 msgid "Manual"
 msgstr "Manuale"
 
 #: packages/app-desktop/gui/ToggleEditorsButton/ToggleEditorsButton.tsx:28
 #: packages/lib/models/Setting.ts:1297
 #: packages/lib/services/interop/InteropService.ts:124
-#: packages/lib/services/interop/InteropService.ts:169
+#: packages/lib/services/interop/InteropService.ts:174
 msgid "Markdown"
 msgstr "Markdown"
 
 #: packages/lib/services/interop/InteropService.ts:132
-#: packages/lib/services/interop/InteropService.ts:175
+#: packages/lib/services/interop/InteropService.ts:180
 msgid "Markdown + Front Matter"
 msgstr "Markdown + Front Matter"
 
-#: packages/app-desktop/gui/NoteEditor/NoteBody/CodeMirror/v6/CodeMirror.tsx:396
+#: packages/app-desktop/gui/NoteEditor/NoteBody/CodeMirror/v6/CodeMirror.tsx:397
 #: packages/app-mobile/components/NoteEditor/NoteEditor.tsx:286
 #, fuzzy
 msgid "Markdown editor"
 msgstr "Markdown"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1506
+#: packages/lib/models/settings/builtInMetadata.ts:1515
 #, fuzzy
 msgid "Markdown editor: Highlight active line"
 msgstr "Markdown"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1495
+#: packages/lib/models/settings/builtInMetadata.ts:1504
 #, fuzzy
 msgid "Markdown editor: Render images"
 msgstr "Markdown"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1485
+#: packages/lib/models/settings/builtInMetadata.ts:1494
 msgid "Markdown editor: Render markup in editor"
 msgstr ""
 
@@ -3819,7 +3838,7 @@ msgstr ""
 msgid "Math"
 msgstr ""
 
-#: packages/lib/models/settings/builtInMetadata.ts:487
+#: packages/lib/models/settings/builtInMetadata.ts:496
 msgid "Max concurrent connections"
 msgstr "Massimo numero di connessioni concorrenti"
 
@@ -3839,7 +3858,7 @@ msgstr "Dimensione totale massima"
 msgid "Media player, math, diagrams, table of contents"
 msgstr "Lettore multimediale, matematica, diagrammi, indice"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1278
+#: packages/lib/models/settings/builtInMetadata.ts:1287
 msgid "Medium"
 msgstr ""
 
@@ -3960,7 +3979,7 @@ msgstr "n"
 msgid "N"
 msgstr "N"
 
-#: packages/lib/models/settings/builtInMetadata.ts:981
+#: packages/lib/models/settings/builtInMetadata.ts:990
 msgid "Never resize"
 msgstr "Non ridimensionare mai"
 
@@ -4057,15 +4076,15 @@ msgstr "Prossima occorrenza"
 msgid "Nextcloud"
 msgstr "Nextcloud"
 
-#: packages/lib/models/settings/builtInMetadata.ts:199
+#: packages/lib/models/settings/builtInMetadata.ts:208
 msgid "Nextcloud password"
 msgstr "Password Nextcloud"
 
-#: packages/lib/models/settings/builtInMetadata.ts:187
+#: packages/lib/models/settings/builtInMetadata.ts:196
 msgid "Nextcloud username"
 msgstr "Nome Utente Nextcloud"
 
-#: packages/lib/models/settings/builtInMetadata.ts:174
+#: packages/lib/models/settings/builtInMetadata.ts:183
 msgid "Nextcloud WebDAV URL"
 msgstr "URL Nextcloud WebDAV"
 
@@ -4196,7 +4215,7 @@ msgstr "nota"
 msgid "Note"
 msgstr "Nota"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1753
+#: packages/lib/models/settings/builtInMetadata.ts:1762
 msgid "Note area growth factor"
 msgstr "Fattore di crescita dell'area note"
 
@@ -4251,7 +4270,7 @@ msgstr "La nota non è un \"Cose-da-fare\": \"%s\""
 msgid "Note list"
 msgstr "Lista della nota"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1738
+#: packages/lib/models/settings/builtInMetadata.ts:1747
 msgid "Note list growth factor"
 msgstr "Fattore di crescita della lista note"
 
@@ -4285,7 +4304,7 @@ msgstr "Titolo della nota"
 msgid "Note viewer"
 msgstr "Titolo della nota"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1122
+#: packages/lib/models/settings/builtInMetadata.ts:1131
 msgid "Note: Does not work in all desktop environments."
 msgstr "Nota: non funziona in tutti gli ambienti desktop."
 
@@ -4303,7 +4322,7 @@ msgstr "Taccuino"
 msgid "Notebook"
 msgstr "Taccuini"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1723
+#: packages/lib/models/settings/builtInMetadata.ts:1732
 msgid "Notebook list growth factor"
 msgstr "Fattore di crescita del taccuino"
 
@@ -4316,7 +4335,7 @@ msgstr "Taccuini: %s"
 msgid "Notebook: %s (%s)"
 msgstr "Taccuini: %s (%s)"
 
-#: packages/app-desktop/gui/Sidebar/hooks/useSidebarListData.ts:54
+#: packages/app-desktop/gui/Sidebar/hooks/useSidebarListData.ts:58
 #: packages/app-mobile/components/side-menu-content.tsx:691
 #: packages/lib/services/ReportService.ts:369
 msgid "Notebooks"
@@ -4350,16 +4369,16 @@ msgstr "Posizione"
 msgid "Numbered List"
 msgstr "Elenco numerato"
 
-#: packages/lib/models/settings/builtInMetadata.ts:609
+#: packages/lib/models/settings/builtInMetadata.ts:618
 msgid "OCR: Clear cache and re-download language data files"
 msgstr ""
 
-#: packages/lib/models/settings/builtInMetadata.ts:590
+#: packages/lib/models/settings/builtInMetadata.ts:599
 #, fuzzy
 msgid "OCR: Language data URL or path"
 msgstr "Lingua, formato della data"
 
-#: packages/lib/models/settings/builtInMetadata.ts:619
+#: packages/lib/models/settings/builtInMetadata.ts:628
 #, fuzzy
 msgid "OCR: Search in extracted content"
 msgstr "Cerca in tutte le note"
@@ -4432,7 +4451,7 @@ msgstr "OneDrive"
 msgid "OneDrive Login"
 msgstr "Login OneDrive"
 
-#: packages/lib/services/interop/InteropService.ts:148
+#: packages/lib/services/interop/InteropService.ts:153
 #, fuzzy
 msgid "OneNote Notebook"
 msgstr "Nuovo taccuino"
@@ -4536,7 +4555,7 @@ msgstr "Opzioni"
 msgid "Ordered list"
 msgstr "Lista ordinata"
 
-#: packages/app-mobile/components/SyncWizard/SyncWizard.tsx:124
+#: packages/app-mobile/components/SyncWizard/SyncWizard.tsx:130
 msgid "Other"
 msgstr ""
 
@@ -4548,11 +4567,11 @@ msgstr "Altre applicazioni..."
 msgid "Output format: %s"
 msgstr "Formato di esportazione: %s"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1431
+#: packages/lib/models/settings/builtInMetadata.ts:1440
 msgid "Page orientation for PDF export"
 msgstr "Orientamento pagina per l'esportazione in PDF"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1421
+#: packages/lib/models/settings/builtInMetadata.ts:1430
 msgid "Page size for PDF export"
 msgstr "Dimensione pagina per l'esportazione in PDF"
 
@@ -4709,7 +4728,7 @@ msgstr ""
 "Per favore selezionare dove lo stato della sincronizzazione deve essere "
 "esportato"
 
-#: packages/lib/services/interop/InteropService.ts:313
+#: packages/lib/services/interop/InteropService.ts:318
 msgid "Please specify import format for %s"
 msgstr "Si prega di specificare il formato di importazione per %s"
 
@@ -4721,7 +4740,7 @@ msgstr "Si prega di specificare il Taccuino in cui importare le note."
 msgid "Please upgrade Joplin to version %s or later to use this plugin."
 msgstr "Aggiorna Joplin alla versione %s per utilizzare questo plugin."
 
-#: packages/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/TinyMCE.tsx:1558
+#: packages/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/TinyMCE.tsx:1566
 msgid ""
 "Please wait for all attachments to be downloaded and decrypted. You may also "
 "switch to %s to edit the note."
@@ -4762,7 +4781,7 @@ msgstr "Sicurezza plugin"
 msgid "Plugin tools"
 msgstr "Strumenti plugin"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1022
+#: packages/lib/models/settings/builtInMetadata.ts:1031
 msgid "Plugin WebView debugging"
 msgstr "Degub WebView dei plugin"
 
@@ -4781,7 +4800,7 @@ msgstr ""
 "I plugin estendono Joplin con funzionalità non presenti normalmente. I "
 "plugin possono estendere l'editor, la visualizzazione, e altro."
 
-#: packages/lib/models/settings/builtInMetadata.ts:1433
+#: packages/lib/models/settings/builtInMetadata.ts:1442
 msgid "Portrait"
 msgstr "Verticale"
 
@@ -4805,15 +4824,15 @@ msgstr "Preferenze"
 msgid "Preferences..."
 msgstr "Preferenze..."
 
-#: packages/lib/models/settings/builtInMetadata.ts:674
+#: packages/lib/models/settings/builtInMetadata.ts:683
 msgid "Preferred dark theme"
 msgstr "Preferisci il tema scuro"
 
-#: packages/lib/models/settings/builtInMetadata.ts:658
+#: packages/lib/models/settings/builtInMetadata.ts:667
 msgid "Preferred light theme"
 msgstr "Preferisci il tema chiaro"
 
-#: packages/lib/models/settings/builtInMetadata.ts:766
+#: packages/lib/models/settings/builtInMetadata.ts:775
 msgid "Preserve colours when pasting text in Rich Text Editor"
 msgstr ""
 
@@ -4916,15 +4935,15 @@ msgstr "Profili"
 msgid "Properties"
 msgstr "Proprietà"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1617
+#: packages/lib/models/settings/builtInMetadata.ts:1626
 msgid "Proxy enabled"
 msgstr "Proxy abilitato"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1639
+#: packages/lib/models/settings/builtInMetadata.ts:1648
 msgid "Proxy timeout (seconds)"
 msgstr "Timeout proxy (secondi)"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1627
+#: packages/lib/models/settings/builtInMetadata.ts:1636
 msgid "Proxy URL"
 msgstr "URL proxy"
 
@@ -4951,7 +4970,7 @@ msgid "Publish Notes"
 msgstr "Pubblica note"
 
 #: packages/app-desktop/gui/SyncWizard/Dialog.tsx:176
-#: packages/app-mobile/components/SyncWizard/SyncWizard.tsx:116
+#: packages/app-mobile/components/SyncWizard/SyncWizard.tsx:122
 #: packages/lib/utils/joplinCloud/index.ts:162
 msgid "Publish notes to the internet"
 msgstr "Pubblicare note su Internet"
@@ -4999,7 +5018,7 @@ msgstr "Cripta nuovamente"
 msgid "Re-enter password"
 msgstr "Inserisci password"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1352
+#: packages/lib/models/settings/builtInMetadata.ts:1361
 msgid "Re-upload local data to sync target"
 msgstr "Ricarica i dati locali sulla destinazione di sincronizzazione"
 
@@ -5146,7 +5165,7 @@ msgstr "Rinomina etichetta:"
 msgid "Renames the given <item> (note or notebook) to <name>."
 msgstr "Rinomina <item> (Nota o Taccuino) in <name>."
 
-#: packages/lib/models/settings/builtInMetadata.ts:1486
+#: packages/lib/models/settings/builtInMetadata.ts:1495
 msgid "Renders markup on all lines that don't include the cursor."
 msgstr ""
 
@@ -5218,7 +5237,7 @@ msgstr "Ripristina il layout dell'applicazione"
 msgid "Reset master password"
 msgstr "Reimposta la password principale"
 
-#: packages/lib/models/settings/builtInMetadata.ts:975
+#: packages/lib/models/settings/builtInMetadata.ts:984
 msgid "Resize large images:"
 msgstr "Ridimensionare le immagini di grandi dimensioni:"
 
@@ -5296,8 +5315,8 @@ msgid "Reveal file in folder"
 msgstr "Visualizza file nella cartella"
 
 #: packages/app-desktop/gui/WindowCommandsAndDialogs/commands/toggleNotesSortOrderReverse.ts:8
-#: packages/lib/models/settings/builtInMetadata.ts:815
-#: packages/lib/models/settings/builtInMetadata.ts:896
+#: packages/lib/models/settings/builtInMetadata.ts:824
+#: packages/lib/models/settings/builtInMetadata.ts:905
 msgid "Reverse sort order"
 msgstr "Inverti l'ordine"
 
@@ -5318,7 +5337,7 @@ msgstr "Revisione: %s (%s)"
 msgid "Rich Text"
 msgstr ""
 
-#: packages/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/TinyMCE.tsx:715
+#: packages/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/TinyMCE.tsx:716
 msgid "Rich Text editor. Press Escape then Tab to escape focus."
 msgstr ""
 
@@ -5332,23 +5351,23 @@ msgstr "Esegue comandi contenuti in un file di testo. Un comando per riga."
 msgid "S3"
 msgstr "AWS S3"
 
-#: packages/lib/models/settings/builtInMetadata.ts:300
+#: packages/lib/models/settings/builtInMetadata.ts:309
 msgid "S3 access key"
 msgstr "Chiave AWS S3"
 
-#: packages/lib/models/settings/builtInMetadata.ts:257
+#: packages/lib/models/settings/builtInMetadata.ts:266
 msgid "S3 bucket"
 msgstr "Bucket AWS S3"
 
-#: packages/lib/models/settings/builtInMetadata.ts:288
+#: packages/lib/models/settings/builtInMetadata.ts:297
 msgid "S3 region"
 msgstr "Regione AWS S3"
 
-#: packages/lib/models/settings/builtInMetadata.ts:312
+#: packages/lib/models/settings/builtInMetadata.ts:321
 msgid "S3 secret key"
 msgstr "Secret AWS"
 
-#: packages/lib/models/settings/builtInMetadata.ts:273
+#: packages/lib/models/settings/builtInMetadata.ts:282
 msgid "S3 URL"
 msgstr "URL AWS S3"
 
@@ -5394,7 +5413,7 @@ msgstr "Salva i cambiamenti"
 msgid "Save changes?"
 msgstr "Salva i cambiamenti?"
 
-#: packages/lib/models/settings/builtInMetadata.ts:897
+#: packages/lib/models/settings/builtInMetadata.ts:906
 msgid "Save geo-location with notes"
 msgstr "Salva geolocalizzazione con le note"
 
@@ -5412,7 +5431,7 @@ msgstr "Seleziona il taccuino principale"
 msgid "Scanned code"
 msgstr ""
 
-#: packages/lib/models/settings/builtInMetadata.ts:1282
+#: packages/lib/models/settings/builtInMetadata.ts:1291
 msgid "Scrollbar size"
 msgstr ""
 
@@ -5481,7 +5500,7 @@ msgstr "Cerca <pattern> in tutte le note."
 msgid "See changelog"
 msgstr "Changelog completo"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1371
+#: packages/lib/models/settings/builtInMetadata.ts:1380
 msgid "See the pre-release page for more details: %s"
 msgstr "Vedi la pagina di pre-rilascio per maggiori dettagli: %s"
 
@@ -5513,7 +5532,7 @@ msgstr "Seleziona file..."
 msgid "Select notebook"
 msgstr "Seleziona il taccuino principale"
 
-#: packages/app-mobile/components/SyncWizard/SyncWizard.tsx:125
+#: packages/app-mobile/components/SyncWizard/SyncWizard.tsx:131
 msgid "Select one of the other supported sync targets."
 msgstr ""
 
@@ -5567,7 +5586,7 @@ msgstr "Imposta avviso"
 msgid "Set alarm:"
 msgstr "Imposta avviso:"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1266
+#: packages/lib/models/settings/builtInMetadata.ts:1275
 msgid ""
 "Set it to 0 to make it take the complete available space. Recommended width "
 "is 600."
@@ -5667,7 +5686,7 @@ msgstr "Mostra opzioni avanzate"
 msgid "Show all"
 msgstr "Mostra tutto"
 
-#: packages/lib/models/settings/builtInMetadata.ts:705
+#: packages/lib/models/settings/builtInMetadata.ts:714
 msgid "Show completed to-dos"
 msgstr "Mostra le \"Cose-da-fare\" completate"
 
@@ -5683,7 +5702,7 @@ msgstr "Mostra pulsanti disabilitati"
 msgid "Show monospace fonts only."
 msgstr "Mostra solo carattere a larghezza fissa."
 
-#: packages/lib/models/settings/builtInMetadata.ts:687
+#: packages/lib/models/settings/builtInMetadata.ts:696
 msgid "Show note counts"
 msgstr "Visualizza conteggio note"
 
@@ -5697,11 +5716,11 @@ msgstr "Visualizza conteggio note"
 msgid "Show password"
 msgstr "Imposta la password"
 
-#: packages/lib/models/settings/builtInMetadata.ts:827
+#: packages/lib/models/settings/builtInMetadata.ts:836
 msgid "Show sort order buttons"
 msgstr "Mostra i pulsanti di ordinamento"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1120
+#: packages/lib/models/settings/builtInMetadata.ts:1129
 msgid "Show tray icon"
 msgstr "Visualizza nella barra delle applicazioni"
 
@@ -5714,7 +5733,7 @@ msgstr "Mostra/nascondi la barra laterale"
 msgid "Shows notes for tag"
 msgstr "Visualizza conteggio note"
 
-#: packages/lib/models/settings/builtInMetadata.ts:976
+#: packages/lib/models/settings/builtInMetadata.ts:985
 msgid "Shrink large images before adding them to notes."
 msgstr ""
 "Riduci le immagini di grandi dimensioni prima di aggiungerle alle note."
@@ -5759,7 +5778,7 @@ msgstr ""
 msgid "Skipped: %d."
 msgstr "Saltato: %d."
 
-#: packages/lib/models/settings/builtInMetadata.ts:1277
+#: packages/lib/models/settings/builtInMetadata.ts:1286
 msgid "Small"
 msgstr ""
 
@@ -5814,13 +5833,13 @@ msgstr ""
 msgid "Sort \"%s\" in descending order"
 msgstr ""
 
-#: packages/lib/models/settings/builtInMetadata.ts:883
+#: packages/lib/models/settings/builtInMetadata.ts:892
 msgid "Sort notebooks by"
 msgstr "Ordina i taccuini per"
 
 #: packages/app-desktop/gui/NoteList/utils/canManuallySortNotes.ts:10
 #: packages/app-mobile/components/ScreenHeader/index.tsx:542
-#: packages/lib/models/settings/builtInMetadata.ts:713
+#: packages/lib/models/settings/builtInMetadata.ts:722
 msgid "Sort notes by"
 msgstr "Ordina le note per"
 
@@ -5850,11 +5869,11 @@ msgstr "Formato sorgente: %s"
 msgid "Source: "
 msgstr "Sorgente: "
 
-#: packages/app-desktop/gui/Sidebar/hooks/useOnRenderItem.tsx:436
+#: packages/app-desktop/gui/Sidebar/hooks/useOnRenderItem.tsx:437
 msgid "Spacer"
 msgstr "Separatore"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1667
+#: packages/lib/models/settings/builtInMetadata.ts:1676
 msgid ""
 "Specify the port that should be used by the API server. If not set, a "
 "default will be used."
@@ -5867,13 +5886,13 @@ msgstr ""
 msgid "Spell checker"
 msgstr "Controllo ortografico"
 
-#: packages/lib/models/settings/builtInMetadata.ts:696
-#: packages/lib/models/settings/builtInMetadata.ts:698
-#: packages/lib/models/settings/builtInMetadata.ts:699
+#: packages/lib/models/settings/builtInMetadata.ts:705
+#: packages/lib/models/settings/builtInMetadata.ts:707
+#: packages/lib/models/settings/builtInMetadata.ts:708
 msgid "Split View"
 msgstr "Split View"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1135
+#: packages/lib/models/settings/builtInMetadata.ts:1144
 msgid "Start application minimised in the tray icon"
 msgstr "Avvia applicazione minimizzata nella barra delle applicazioni"
 
@@ -6060,7 +6079,7 @@ msgstr ""
 "Passa tra [notebook] - tutte le ulteriori operazioni interesseranno il "
 "seguente Taccuino."
 
-#: packages/app-mobile/components/SyncWizard/SyncWizard.tsx:105
+#: packages/app-mobile/components/SyncWizard/SyncWizard.tsx:111
 msgid "Sync"
 msgstr ""
 
@@ -6097,7 +6116,7 @@ msgid "Sync Version: %s"
 msgstr "Sinc. versione: %s"
 
 #: packages/app-desktop/gui/SyncWizard/Dialog.tsx:175
-#: packages/app-mobile/components/SyncWizard/SyncWizard.tsx:115
+#: packages/app-mobile/components/SyncWizard/SyncWizard.tsx:121
 msgid "Sync your notes"
 msgstr "Sincronizza le tue note"
 
@@ -6109,7 +6128,7 @@ msgstr "Sincronizzazione, crittografia, proxy"
 msgid "Synchronisation"
 msgstr "Sincronizzazione"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1392
+#: packages/lib/models/settings/builtInMetadata.ts:1401
 msgid "Synchronisation interval"
 msgstr "Intervallo di sincronizzazione"
 
@@ -6122,7 +6141,7 @@ msgstr "La sincronizzazione è già in corso."
 msgid "Synchronisation Status"
 msgstr "Stato della sincronizzazione"
 
-#: packages/lib/models/settings/builtInMetadata.ts:118
+#: packages/lib/models/settings/builtInMetadata.ts:127
 msgid "Synchronisation target"
 msgstr "Destinazione di sincronizzazione"
 
@@ -6136,7 +6155,7 @@ msgstr "Posizione di sincronizzazione: %s (%s)"
 msgid "Synchronise"
 msgstr "Sincronizza"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1412
+#: packages/lib/models/settings/builtInMetadata.ts:1421
 msgid "Synchronise only over WiFi connection"
 msgstr "Sincronizza solo con la connessione WiFi"
 
@@ -6159,11 +6178,11 @@ msgid "Tab indents"
 msgstr ""
 
 #: packages/app-desktop/gui/NoteEditor/StatusBar.tsx:72
-#: packages/lib/models/settings/builtInMetadata.ts:796
+#: packages/lib/models/settings/builtInMetadata.ts:805
 msgid "Tab moves focus"
 msgstr ""
 
-#: packages/lib/models/settings/builtInMetadata.ts:1427
+#: packages/lib/models/settings/builtInMetadata.ts:1436
 msgid "Tabloid"
 msgstr "Tabloid"
 
@@ -6173,7 +6192,7 @@ msgid "Tagged: %d."
 msgstr "Etichettato: %d."
 
 #: packages/app-desktop/gui/NoteListHeader/utils/getColumnTitle.ts:10
-#: packages/app-desktop/gui/Sidebar/hooks/useSidebarListData.ts:75
+#: packages/app-desktop/gui/Sidebar/hooks/useSidebarListData.ts:79
 #: packages/app-desktop/gui/WindowCommandsAndDialogs/commands/setTags.ts:7
 #: packages/app-mobile/components/screens/Note/commands/setTags.ts:7
 #: packages/app-mobile/components/screens/tags.tsx:92
@@ -6212,7 +6231,7 @@ msgstr "Squadre"
 msgid "Text document"
 msgstr "Documento di testo"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1420
+#: packages/lib/models/settings/builtInMetadata.ts:1429
 msgid "Text editor command"
 msgstr "Comando editor di testo"
 
@@ -6256,7 +6275,7 @@ msgid "The application must be restarted for these changes to take effect."
 msgstr ""
 "L'applicazione deve essere riavviata affinché le modifiche siano attive."
 
-#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:577
+#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:591
 msgid ""
 "The attachments will no longer be watched when you switch to a different "
 "note."
@@ -6296,7 +6315,7 @@ msgstr ""
 msgid "The default profile cannot be deleted"
 msgstr "Il profilo predefinito non può essere eliminato"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1420
+#: packages/lib/models/settings/builtInMetadata.ts:1429
 msgid ""
 "The editor command (may include arguments) that will be used to open a note. "
 "If none is provided it will try to auto-detect the default editor."
@@ -6305,9 +6324,9 @@ msgstr ""
 "una nota. Se non ne viene fornita alcuna, cercherà di rilevare "
 "automaticamente l'editor predefinito."
 
-#: packages/lib/models/settings/builtInMetadata.ts:1725
-#: packages/lib/models/settings/builtInMetadata.ts:1740
-#: packages/lib/models/settings/builtInMetadata.ts:1755
+#: packages/lib/models/settings/builtInMetadata.ts:1734
+#: packages/lib/models/settings/builtInMetadata.ts:1749
+#: packages/lib/models/settings/builtInMetadata.ts:1764
 msgid ""
 "The factor property sets how the item will grow or shrink to fit the "
 "available space in its container with respect to the other items. Thus an "
@@ -6320,13 +6339,13 @@ msgstr ""
 "rispetto ad un elemento con un fattore di 1. Riavvia il programma per vedere "
 "le modifiche."
 
-#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:592
+#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:606
 msgid "The following attachment matches your search query:"
 msgid_plural "The following attachments match your search query:"
 msgstr[0] "Il seguente allegato corrisponde alla tua ricerca:"
 msgstr[1] "I seguenti allegati corrispondono alla tua ricerca:"
 
-#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:576
+#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:590
 msgid "The following attachments are being watched for changes:"
 msgstr "I seguenti allegati sono monitorati per eventuali modifiche:"
 
@@ -6470,7 +6489,7 @@ msgstr "Manca la password di sincronizzazione."
 msgid "The tag \"%s\" already exists. Please choose a different name."
 msgstr "L'etichetta \"%s\" esiste già. Scegliere un nome differente."
 
-#: packages/lib/models/settings/builtInMetadata.ts:120
+#: packages/lib/models/settings/builtInMetadata.ts:129
 msgid ""
 "The target to synchronise to. Each sync target may have additional "
 "parameters which are named as `sync.NUM.NAME` (all documented below)."
@@ -6514,7 +6533,7 @@ msgstr ""
 "L'implementazione WebDAV di %s è incompatibile con Joplin e come tale non è "
 "più supportata. Utilizza un metodo di sincronizzazione diverso."
 
-#: packages/lib/models/settings/builtInMetadata.ts:631
+#: packages/lib/models/settings/builtInMetadata.ts:640
 msgid "Theme"
 msgstr "Tema"
 
@@ -6685,7 +6704,7 @@ msgstr ""
 msgid "This note has no history"
 msgstr "Questa nota non ha cronologia"
 
-#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:658
+#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:672
 msgid ""
 "This note is in HTML format. Convert it to Markdown to edit it more easily."
 msgstr ""
@@ -6717,7 +6736,7 @@ msgstr ""
 msgid "This subfolder of the trash has no notes."
 msgstr "Questa sottocartella del cestino non ha note."
 
-#: packages/lib/models/settings/builtInMetadata.ts:1122
+#: packages/lib/models/settings/builtInMetadata.ts:1131
 msgid ""
 "This will allow Joplin to run in the background. It is recommended to enable "
 "this setting so that your notes are constantly being synchronised, thus "
@@ -6746,7 +6765,7 @@ msgstr ""
 "Ciò rimuoverà il taccuino dalla tua raccolta e non avrai più accesso al suo "
 "contenuto. Vuoi continuare?"
 
-#: packages/lib/models/settings/builtInMetadata.ts:547
+#: packages/lib/models/settings/builtInMetadata.ts:556
 msgid "Time format"
 msgstr "Formato dell'orario"
 
@@ -7017,7 +7036,7 @@ msgstr "Impossibile condividere i dati di registro. Motivi: %s"
 msgid "Unchecked"
 msgstr ""
 
-#: packages/lib/models/settings/builtInMetadata.ts:704
+#: packages/lib/models/settings/builtInMetadata.ts:713
 msgid "Uncompleted to-dos on top"
 msgstr "\"Cose-da-fare\" incomplete in cima alla lista"
 
@@ -7049,7 +7068,7 @@ msgstr "Tipo file sconosciuto"
 msgid "Unknown flag: %s"
 msgstr "Flag sconosciuta: %s"
 
-#: packages/lib/Synchronizer.ts:1163
+#: packages/lib/Synchronizer.ts:1182
 msgid ""
 "Unknown item type downloaded - please upgrade Joplin to the latest version"
 msgstr ""
@@ -7114,7 +7133,7 @@ msgid ""
 msgstr "Link o messaggio non supportato: %s"
 
 #: packages/app-desktop/gui/ResourceScreen.tsx:123
-#: packages/lib/models/BaseItem.ts:922 packages/lib/path-utils.ts:27
+#: packages/lib/models/BaseItem.ts:944 packages/lib/path-utils.ts:27
 #: packages/lib/path-utils.ts:71
 msgid "Untitled"
 msgstr "Senza titolo"
@@ -7205,7 +7224,7 @@ msgstr "URL"
 msgid "Usage: %s"
 msgstr "Uso: %s"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1811
+#: packages/lib/models/settings/builtInMetadata.ts:1820
 msgid "Use biometrics to secure access to the app"
 msgstr "Utilizza la biometria per proteggere l'accesso all'app"
 
@@ -7235,7 +7254,7 @@ msgstr ""
 "Utilizza le frecce per muovere gli elementi del layout. Premi \"Esc\" per "
 "uscire."
 
-#: packages/lib/models/settings/builtInMetadata.ts:1550
+#: packages/lib/models/settings/builtInMetadata.ts:1559
 #, fuzzy
 msgid "Use the legacy Markdown editor"
 msgstr "Abilita la barra degli strumenti Markdown"
@@ -7257,7 +7276,7 @@ msgstr ""
 "applicazione. Puoi sempre configurarlo in un secondo momento nelle "
 "Impostazioni."
 
-#: packages/lib/models/settings/builtInMetadata.ts:1236
+#: packages/lib/models/settings/builtInMetadata.ts:1245
 msgid ""
 "Used for most text in the markdown editor. If not found, a generic "
 "proportional (variable width) font is used."
@@ -7266,7 +7285,7 @@ msgstr ""
 "trovato, sarà utilizzato un carattere proporzionale (larghezza variabile) "
 "generico."
 
-#: packages/lib/models/settings/builtInMetadata.ts:1249
+#: packages/lib/models/settings/builtInMetadata.ts:1258
 msgid ""
 "Used where a fixed width font is needed to lay out text legibly (e.g. "
 "tables, checkboxes, code). If not found, a generic monospace (fixed width) "
@@ -7320,23 +7339,23 @@ msgid "View them now"
 msgstr "Mostrali ora"
 
 #: packages/app-desktop/gui/NoteContentPropertiesDialog.tsx:145
-#: packages/lib/models/settings/builtInMetadata.ts:696
-#: packages/lib/models/settings/builtInMetadata.ts:697
-#: packages/lib/models/settings/builtInMetadata.ts:699
+#: packages/lib/models/settings/builtInMetadata.ts:705
+#: packages/lib/models/settings/builtInMetadata.ts:706
+#: packages/lib/models/settings/builtInMetadata.ts:708
 msgid "Viewer"
 msgstr "Visualizzatore"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1260
+#: packages/lib/models/settings/builtInMetadata.ts:1269
 #, fuzzy
 msgid "Viewer and Rich Text Editor font family"
 msgstr "Editor famiglia caratteri"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1182
+#: packages/lib/models/settings/builtInMetadata.ts:1191
 #, fuzzy
 msgid "Viewer font size"
 msgstr "Editor dimensione caratteri"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1463
+#: packages/lib/models/settings/builtInMetadata.ts:1472
 msgid "Vim"
 msgstr "Vim"
 
@@ -7344,11 +7363,11 @@ msgstr "Vim"
 msgid "Voice recorder"
 msgstr ""
 
-#: packages/lib/models/settings/builtInMetadata.ts:1931
+#: packages/lib/models/settings/builtInMetadata.ts:1940
 msgid "Voice typing language files (URL)"
 msgstr "File della lingua di digitazione vocale (URL)"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1960
+#: packages/lib/models/settings/builtInMetadata.ts:1969
 #, fuzzy
 msgid "Voice typing: Glossary"
 msgstr "Digitazione vocale..."
@@ -7399,15 +7418,15 @@ msgstr "Web Clipper"
 msgid "WebDAV"
 msgstr "WebDAV"
 
-#: packages/lib/models/settings/builtInMetadata.ts:237
+#: packages/lib/models/settings/builtInMetadata.ts:246
 msgid "WebDAV password"
 msgstr "Password WebDAV"
 
-#: packages/lib/models/settings/builtInMetadata.ts:212
+#: packages/lib/models/settings/builtInMetadata.ts:221
 msgid "WebDAV URL"
 msgstr "URL WebDAV"
 
-#: packages/lib/models/settings/builtInMetadata.ts:225
+#: packages/lib/models/settings/builtInMetadata.ts:234
 msgid "WebDAV username"
 msgstr "Nome Utente WebDAV"
 
@@ -7449,11 +7468,11 @@ msgstr "Benvenuto!"
 msgid "What are plugins?"
 msgstr "Che cosa sono i plugin?"
 
-#: packages/lib/models/settings/builtInMetadata.ts:958
+#: packages/lib/models/settings/builtInMetadata.ts:967
 msgid "When creating a new note:"
 msgstr "Quando si crea una nuova nota:"
 
-#: packages/lib/models/settings/builtInMetadata.ts:941
+#: packages/lib/models/settings/builtInMetadata.ts:950
 msgid "When creating a new to-do:"
 msgstr "Quando crei un nuovo \"Cose-da-fare\":"
 
@@ -7464,7 +7483,7 @@ msgid ""
 "the desktop app."
 msgstr ""
 
-#: packages/lib/models/settings/builtInMetadata.ts:567
+#: packages/lib/models/settings/builtInMetadata.ts:576
 msgid ""
 "When enabled, the application will scan your attachments and extract the "
 "text from it. This will allow you to search for text in these attachments."

@@ -115,8 +115,8 @@ msgstr "&Zobrazit"
 msgid "&Window"
 msgstr "Zavřít okno"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1687
-#: packages/lib/models/settings/builtInMetadata.ts:2001
+#: packages/lib/models/settings/builtInMetadata.ts:1696
+#: packages/lib/models/settings/builtInMetadata.ts:2010
 #, fuzzy
 msgid "%d day"
 msgid_plural "%d days"
@@ -136,9 +136,9 @@ msgstr "%d GB"
 msgid "%d GB storage space"
 msgstr "%d GB místa v úložišti"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1399
-#: packages/lib/models/settings/builtInMetadata.ts:1400
-#: packages/lib/models/settings/builtInMetadata.ts:1401
+#: packages/lib/models/settings/builtInMetadata.ts:1408
+#: packages/lib/models/settings/builtInMetadata.ts:1409
+#: packages/lib/models/settings/builtInMetadata.ts:1410
 #, fuzzy
 msgid "%d hour"
 msgid_plural "%d hours"
@@ -158,9 +158,9 @@ msgstr "%d MB"
 msgid "%d MB per note or attachment"
 msgstr "%d MB na poznámku nebo přílohu"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1396
-#: packages/lib/models/settings/builtInMetadata.ts:1397
-#: packages/lib/models/settings/builtInMetadata.ts:1398
+#: packages/lib/models/settings/builtInMetadata.ts:1405
+#: packages/lib/models/settings/builtInMetadata.ts:1406
+#: packages/lib/models/settings/builtInMetadata.ts:1407
 #, fuzzy
 msgid "%d minute"
 msgid_plural "%d minutes"
@@ -214,13 +214,13 @@ msgstr "%s (%s): %s"
 msgid "%s (pre-release)"
 msgstr "%s (nefinální vydání)"
 
-#: packages/lib/models/settings/builtInMetadata.ts:697
-#: packages/lib/models/settings/builtInMetadata.ts:698
-#: packages/lib/models/settings/builtInMetadata.ts:699
+#: packages/lib/models/settings/builtInMetadata.ts:706
+#: packages/lib/models/settings/builtInMetadata.ts:707
+#: packages/lib/models/settings/builtInMetadata.ts:708
 msgid "%s / %s"
 msgstr "%s / %s"
 
-#: packages/lib/models/settings/builtInMetadata.ts:696
+#: packages/lib/models/settings/builtInMetadata.ts:705
 msgid "%s / %s / %s"
 msgstr "%s / %s / %s"
 
@@ -323,7 +323,7 @@ msgstr ""
 msgid "A brief description of the image:"
 msgstr ""
 
-#: packages/lib/models/settings/builtInMetadata.ts:1961
+#: packages/lib/models/settings/builtInMetadata.ts:1970
 msgid ""
 "A comma-separated list of words. May be used for uncommon words, to help "
 "voice typing spell them correctly."
@@ -334,15 +334,15 @@ msgstr ""
 msgid "A new update (%s) is available"
 msgstr "Aktualizovat profil"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1425
+#: packages/lib/models/settings/builtInMetadata.ts:1434
 msgid "A3"
 msgstr "A3"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1423
+#: packages/lib/models/settings/builtInMetadata.ts:1432
 msgid "A4"
 msgstr "A4"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1426
+#: packages/lib/models/settings/builtInMetadata.ts:1435
 msgid "A5"
 msgstr "A5"
 
@@ -440,6 +440,10 @@ msgstr "Skutečná velikost"
 msgid "Add body"
 msgstr "Přidat tělo"
 
+#: packages/editor/ProseMirror/plugins/tablePlugin.ts:24
+msgid "Add column"
+msgstr ""
+
 #: packages/app-mobile/components/buttons/FloatingActionButton.tsx:66
 #: packages/app-mobile/components/ComboBox.tsx:103
 #: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:136
@@ -453,6 +457,11 @@ msgstr "Přidat či odebrat štítky:"
 #: packages/app-desktop/gui/ShareFolderDialog/ShareFolderDialog.tsx:278
 msgid "Add recipient:"
 msgstr "Přidat příjemce:"
+
+#: packages/editor/ProseMirror/plugins/tablePlugin.ts:19
+#, fuzzy
+msgid "Add row"
+msgstr "Přidat nový"
 
 #: packages/app-mobile/components/TagEditor.tsx:281
 #, fuzzy
@@ -522,7 +531,7 @@ msgstr ""
 msgid "All item sync failures have been marked as \"ignored\"."
 msgstr ""
 
-#: packages/app-desktop/gui/Sidebar/listItemComponents/AllNotesItem.tsx:73
+#: packages/app-desktop/gui/Sidebar/hooks/useSidebarListData.ts:72
 #: packages/app-mobile/components/screens/Notes/Notes.tsx:208
 #: packages/app-mobile/components/side-menu-content.tsx:684
 msgid "All notes"
@@ -537,7 +546,7 @@ msgstr ""
 msgid "All shared folders:"
 msgstr ""
 
-#: packages/lib/models/settings/builtInMetadata.ts:1023
+#: packages/lib/models/settings/builtInMetadata.ts:1032
 msgid "Allows debugging mobile plugins. See %s for details."
 msgstr ""
 
@@ -554,11 +563,11 @@ msgstr "Zveřejněte také propojené poznámky"
 msgid "Alternative instance ID: %s"
 msgstr "ID klienta: %s"
 
-#: packages/lib/models/settings/builtInMetadata.ts:461
+#: packages/lib/models/settings/builtInMetadata.ts:470
 msgid "Always"
 msgstr "Vždy"
 
-#: packages/lib/models/settings/builtInMetadata.ts:979
+#: packages/lib/models/settings/builtInMetadata.ts:988
 #, fuzzy
 msgid "Always ask"
 msgstr "Vždy"
@@ -567,7 +576,7 @@ msgstr "Vždy"
 msgid "Always open %s files without asking."
 msgstr ""
 
-#: packages/lib/models/settings/builtInMetadata.ts:980
+#: packages/lib/models/settings/builtInMetadata.ts:989
 #, fuzzy
 msgid "Always resize"
 msgstr "Vždy"
@@ -686,7 +695,7 @@ msgid "Attach"
 msgstr "Připojit"
 
 #: packages/app-desktop/gui/NoteEditor/editorCommandDeclarations.ts:75
-#: packages/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/TinyMCE.tsx:803
+#: packages/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/TinyMCE.tsx:804
 #: packages/app-mobile/components/screens/Note/commands/attachFile.ts:26
 #: packages/app-mobile/components/screens/Note/commands/attachFile.ts:90
 msgid "Attach file"
@@ -718,7 +727,7 @@ msgstr "Přílohy"
 msgid "Attachment conflict: \"%s\""
 msgstr "Konflikt přílohy: \"%s\""
 
-#: packages/lib/models/settings/builtInMetadata.ts:457
+#: packages/lib/models/settings/builtInMetadata.ts:466
 msgid "Attachment download behaviour"
 msgstr "Stahovat přílohy"
 
@@ -757,7 +766,7 @@ msgstr "Autorizační token:"
 msgid "Authorise"
 msgstr "Autorizační token:"
 
-#: packages/lib/models/settings/builtInMetadata.ts:463
+#: packages/lib/models/settings/builtInMetadata.ts:472
 msgid "Auto"
 msgstr "Automaticky"
 
@@ -765,27 +774,27 @@ msgstr "Automaticky"
 msgid "Auto-add disabled accounts for deletion"
 msgstr "Automatické přidání zakázaných účtů k odstranění"
 
-#: packages/lib/models/settings/builtInMetadata.ts:776
+#: packages/lib/models/settings/builtInMetadata.ts:785
 msgid "Auto-format Markdown in the Rich Text Editor"
 msgstr ""
 
-#: packages/lib/models/settings/builtInMetadata.ts:733
+#: packages/lib/models/settings/builtInMetadata.ts:742
 msgid "Auto-pair braces, parentheses, quotations, etc."
 msgstr "Automaticky zdvojit uvozovky, závorky, apod."
 
-#: packages/lib/models/settings/builtInMetadata.ts:744
+#: packages/lib/models/settings/builtInMetadata.ts:753
 msgid "Autocomplete Markdown and HTML"
 msgstr ""
 
-#: packages/lib/models/settings/builtInMetadata.ts:1370
+#: packages/lib/models/settings/builtInMetadata.ts:1379
 msgid "Automatically check for updates"
 msgstr "Automatická kontrola aktualizací"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1988
+#: packages/lib/models/settings/builtInMetadata.ts:1997
 msgid "Automatically delete notes in the trash after a number of days"
 msgstr ""
 
-#: packages/lib/models/settings/builtInMetadata.ts:644
+#: packages/lib/models/settings/builtInMetadata.ts:653
 msgid "Automatically switch theme to match system theme"
 msgstr "Automaticky přepnout téma vzhledu podle nastavení systému"
 
@@ -951,8 +960,8 @@ msgstr "Vytvoří novou poznámku."
 #: packages/app-cli/app/command-tag.js:87
 #: packages/app-cli/app/command-todo.js:21
 #: packages/app-cli/app/command-use.ts:23
-#: packages/lib/services/interop/InteropService.ts:300
-#: packages/lib/services/interop/InteropService.ts:319
+#: packages/lib/services/interop/InteropService.ts:305
+#: packages/lib/services/interop/InteropService.ts:324
 msgid "Cannot find \"%s\"."
 msgstr "Výraz \"%s\" nebyl nalezen."
 
@@ -964,11 +973,11 @@ msgstr "Nelze najít: \"%s\""
 msgid "Cannot initialise synchroniser."
 msgstr "Nelze inicializovat synchronizátor."
 
-#: packages/lib/services/interop/InteropService.ts:267
+#: packages/lib/services/interop/InteropService.ts:272
 msgid "Cannot load \"%s\" module for format \"%s\" and output \"%s\""
 msgstr "Nelze načíst modul \"%s\" pro formát \"%s\" a výstup \"%s\""
 
-#: packages/lib/services/interop/InteropService.ts:280
+#: packages/lib/services/interop/InteropService.ts:285
 msgid "Cannot load \"%s\" module for format \"%s\" and target \"%s\""
 msgstr "Nelze načíst modul \"%s\" pro formát \"%s\" a cíl \"%s\""
 
@@ -1182,11 +1191,11 @@ msgstr ""
 msgid "Code"
 msgstr "Kód"
 
-#: packages/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/TinyMCE.tsx:813
+#: packages/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/TinyMCE.tsx:814
 msgid "Code Block"
 msgstr "Blok kódu"
 
-#: packages/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/TinyMCE.tsx:1558
+#: packages/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/TinyMCE.tsx:1566
 msgid "Code View"
 msgstr "Zobrazit kód"
 
@@ -1201,7 +1210,7 @@ msgid "Collaborate on a notebook with others"
 msgstr "Spolupracujte na zápisnících s ostatními"
 
 #: packages/app-desktop/gui/SyncWizard/Dialog.tsx:177
-#: packages/app-mobile/components/SyncWizard/SyncWizard.tsx:117
+#: packages/app-mobile/components/SyncWizard/SyncWizard.tsx:123
 msgid "Collaborate on notebooks with others"
 msgstr "Spolupracujte na zápisnících s ostatními"
 
@@ -1225,12 +1234,12 @@ msgstr "Sbalit"
 msgid "Coming alarms"
 msgstr "Nadcházející alarmy"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1582
+#: packages/lib/models/settings/builtInMetadata.ts:1591
 msgid ""
 "Comma-separated list of paths to directories to load the certificates from, "
-"or path to individual cert files. For example: /my/cert_dir, /other/"
-"custom.pem. Note that if you make changes to the TLS settings, you must save "
-"your changes before clicking on \"Check synchronisation configuration\"."
+"or path to individual cert files. For example: /my/cert_dir, /other/custom."
+"pem. Note that if you make changes to the TLS settings, you must save your "
+"changes before clicking on \"Check synchronisation configuration\"."
 msgstr ""
 "Čárkami oddělený seznam adresářů s certifikáty nebo cestami k jednotlivým "
 "souborům s certifikáty. Například: /my/cert_dir, /other/custom.pem. "
@@ -1306,7 +1315,7 @@ msgstr "Komprese starých změn"
 msgid "Configuration"
 msgstr "Nastavení"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1283
+#: packages/lib/models/settings/builtInMetadata.ts:1292
 msgid "Configures the size of scrollbars used in the app."
 msgstr ""
 
@@ -1379,7 +1388,7 @@ msgstr "Pokračovat"
 msgid "Control character"
 msgstr "Znaky"
 
-#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:660
+#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:674
 #, fuzzy
 msgid "Convert it"
 msgstr "Konvertovat na poznámku"
@@ -1684,15 +1693,15 @@ msgstr "vlastní řazení"
 msgid "Custom order"
 msgstr "Vlastní řazení"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1339
+#: packages/lib/models/settings/builtInMetadata.ts:1348
 msgid "Custom stylesheet for Joplin-wide app styles"
 msgstr "Vlastní styly pro aplikaci Joplin"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1322
+#: packages/lib/models/settings/builtInMetadata.ts:1331
 msgid "Custom stylesheet for rendered Markdown"
 msgstr "Vlastní styly pro vykreslený Markdown"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1581
+#: packages/lib/models/settings/builtInMetadata.ts:1590
 msgid "Custom TLS certificates"
 msgstr "Vlastní TLS certifikát"
 
@@ -1718,12 +1727,12 @@ msgstr "Panel"
 msgid "Date"
 msgstr "Datum"
 
-#: packages/lib/models/settings/builtInMetadata.ts:523
+#: packages/lib/models/settings/builtInMetadata.ts:532
 msgid "Date format"
 msgstr "Formát data"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1687
-#: packages/lib/models/settings/builtInMetadata.ts:2001
+#: packages/lib/models/settings/builtInMetadata.ts:1696
+#: packages/lib/models/settings/builtInMetadata.ts:2010
 msgid "days"
 msgstr "dní"
 
@@ -1744,13 +1753,13 @@ msgstr "Dešifrované položky: %s/%s"
 msgid "Decrypting items: %d/%d"
 msgstr "Dešifrování položek: %d/%d"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1215
-#: packages/lib/models/settings/builtInMetadata.ts:1222
-#: packages/lib/models/settings/builtInMetadata.ts:1461
+#: packages/lib/models/settings/builtInMetadata.ts:1224
+#: packages/lib/models/settings/builtInMetadata.ts:1231
+#: packages/lib/models/settings/builtInMetadata.ts:1470
 msgid "Default"
 msgstr "Výchozí"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1972
+#: packages/lib/models/settings/builtInMetadata.ts:1981
 msgid "Default title to use for documents created by the scanner."
 msgstr ""
 
@@ -1776,6 +1785,11 @@ msgstr "Smazat"
 msgid "Delete attachment \"%s\"?"
 msgstr "Smazat přílohu \"%s\"?"
 
+#: packages/editor/ProseMirror/plugins/tablePlugin.ts:34
+#, fuzzy
+msgid "Delete column"
+msgstr "Smazat řádek"
+
 #: packages/server/src/services/TaskService.ts:27
 msgid "Delete expired sessions"
 msgstr "Odstranění relací, jejichž platnost vypršela"
@@ -1795,7 +1809,7 @@ msgstr "Povolit historii poznámky"
 msgid "Delete line"
 msgstr "Smazat řádek"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1363
+#: packages/lib/models/settings/builtInMetadata.ts:1372
 msgid "Delete local data and re-download from sync target"
 msgstr "Smazat místní data a stáhnout je z cíle synchronizace"
 
@@ -1816,6 +1830,11 @@ msgstr "Smazat rozšíření \"%s\"?"
 #: packages/app-mobile/components/ProfileSwitcher/ProfileSwitcher.tsx:111
 msgid "Delete profile \"%s\""
 msgstr "Odstranění profilu \"%s\""
+
+#: packages/editor/ProseMirror/plugins/tablePlugin.ts:29
+#, fuzzy
+msgid "Delete row"
+msgstr "Smazat poznámku?"
 
 #: packages/app-mobile/components/ScreenHeader/index.tsx:486
 msgid "Delete selected notes"
@@ -1907,7 +1926,7 @@ msgstr ""
 msgid "Directory"
 msgstr "Adresář"
 
-#: packages/lib/models/settings/builtInMetadata.ts:160
+#: packages/lib/models/settings/builtInMetadata.ts:169
 msgid "Directory to synchronise with (absolute path)"
 msgstr "Složka k synchronizaci (absolutní cesta)"
 
@@ -1938,7 +1957,7 @@ msgstr "Služba Web clipper vypnuta"
 #: packages/app-desktop/gui/KeymapConfig/KeymapConfigScreen.tsx:143
 #: packages/app-mobile/components/screens/ConfigScreen/plugins/PluginBox/PluginChips.tsx:85
 #: packages/app-mobile/components/screens/encryption-config.tsx:353
-#: packages/lib/models/settings/builtInMetadata.ts:1395
+#: packages/lib/models/settings/builtInMetadata.ts:1404
 msgid "Disabled"
 msgstr "Vypnuto"
 
@@ -2050,7 +2069,7 @@ msgstr ""
 msgid "Do you find the Joplin web app useful?"
 msgstr ""
 
-#: packages/lib/models/settings/builtInMetadata.ts:1971
+#: packages/lib/models/settings/builtInMetadata.ts:1980
 msgid "Document scanner: Title template"
 msgstr ""
 
@@ -2060,7 +2079,7 @@ msgid ""
 "for the `add` subcommand."
 msgstr ""
 
-#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:662
+#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:676
 msgid "Don't show this message again"
 msgstr ""
 
@@ -2130,7 +2149,7 @@ msgstr ""
 msgid "Drawing"
 msgstr ""
 
-#: packages/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/TinyMCE.tsx:1558
+#: packages/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/TinyMCE.tsx:1566
 msgid "Drop notes or files here"
 msgstr "Sem přetáhněte poznámky nebo soubory"
 
@@ -2225,9 +2244,9 @@ msgstr "Upravit konfiguraci profilu..."
 
 #: packages/app-desktop/gui/MainScreen.tsx:132
 #: packages/app-desktop/gui/NoteContentPropertiesDialog.tsx:144
-#: packages/lib/models/settings/builtInMetadata.ts:696
-#: packages/lib/models/settings/builtInMetadata.ts:697
-#: packages/lib/models/settings/builtInMetadata.ts:698
+#: packages/lib/models/settings/builtInMetadata.ts:705
+#: packages/lib/models/settings/builtInMetadata.ts:706
+#: packages/lib/models/settings/builtInMetadata.ts:707
 msgid "Editor"
 msgstr "Editor"
 
@@ -2236,23 +2255,23 @@ msgstr "Editor"
 msgid "Editor actions"
 msgstr "Písmo editoru"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1208
+#: packages/lib/models/settings/builtInMetadata.ts:1217
 msgid "Editor font"
 msgstr "Písmo editoru"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1234
+#: packages/lib/models/settings/builtInMetadata.ts:1243
 msgid "Editor font family"
 msgstr "Rodina písma v editoru"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1196
+#: packages/lib/models/settings/builtInMetadata.ts:1205
 msgid "Editor font size"
 msgstr "Velikost písma v editoru"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1266
+#: packages/lib/models/settings/builtInMetadata.ts:1275
 msgid "Editor maximum width"
 msgstr "Maximální šířka editoru"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1247
+#: packages/lib/models/settings/builtInMetadata.ts:1256
 msgid "Editor monospace font family"
 msgstr "Neproporcionální písmo editoru"
 
@@ -2265,7 +2284,7 @@ msgstr "Editor: %s"
 msgid "Either \"text\" or \"json\""
 msgstr "Buď \"text\" nebo \"json\""
 
-#: packages/lib/models/settings/builtInMetadata.ts:1462
+#: packages/lib/models/settings/builtInMetadata.ts:1471
 msgid "Emacs"
 msgstr "Emacs"
 
@@ -2313,27 +2332,27 @@ msgstr ""
 msgid "Enable"
 msgstr "Zapnout"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1091
+#: packages/lib/models/settings/builtInMetadata.ts:1100
 msgid "Enable ^sup^ syntax"
 msgstr "Povolit syntaxi ^sup^"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1095
+#: packages/lib/models/settings/builtInMetadata.ts:1104
 msgid "Enable ++insert++ syntax"
 msgstr "Povolit syntaxi ++insert++"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1087
+#: packages/lib/models/settings/builtInMetadata.ts:1096
 msgid "Enable ==mark== syntax"
 msgstr "Povolit syntaxi ==mark=="
 
-#: packages/lib/models/settings/builtInMetadata.ts:1090
+#: packages/lib/models/settings/builtInMetadata.ts:1099
 msgid "Enable ~sub~ syntax"
 msgstr "Povolit syntaxi ~sub~"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1093
+#: packages/lib/models/settings/builtInMetadata.ts:1102
 msgid "Enable abbreviation syntax"
 msgstr "Povolit syntaxi zkratek"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1084
+#: packages/lib/models/settings/builtInMetadata.ts:1093
 msgid "Enable audio player"
 msgstr "Povolit přehrávač zvuků"
 
@@ -2341,7 +2360,7 @@ msgstr "Povolit přehrávač zvuků"
 msgid "Enable biometrics authentication?"
 msgstr "Povolit biometrické ověřování?"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1092
+#: packages/lib/models/settings/builtInMetadata.ts:1101
 msgid "Enable deflist syntax"
 msgstr "Povolit syntaxi deflist"
 
@@ -2350,53 +2369,53 @@ msgstr "Povolit syntaxi deflist"
 msgid "Enable encryption"
 msgstr "Zapnout šifrování"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1107
+#: packages/lib/models/settings/builtInMetadata.ts:1116
 msgid "Enable file:// URLs for images and videos"
 msgstr ""
 
-#: packages/lib/models/settings/builtInMetadata.ts:1088
+#: packages/lib/models/settings/builtInMetadata.ts:1097
 msgid "Enable footnotes"
 msgstr "Povolit poznámky pod čarou"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1081
+#: packages/lib/models/settings/builtInMetadata.ts:1090
 msgid "Enable Fountain syntax support"
 msgstr "Povolit podporu Fountain syntaxe"
 
-#: packages/lib/models/settings/builtInMetadata.ts:577
+#: packages/lib/models/settings/builtInMetadata.ts:586
 #, fuzzy
 msgid "Enable handwritten transcription"
 msgstr "Zapnout šifrování"
 
-#: packages/lib/models/settings/builtInMetadata.ts:756
+#: packages/lib/models/settings/builtInMetadata.ts:765
 #, fuzzy
 msgid "Enable HTML-to-Markdown conversion banner"
 msgstr "Povolit markdown emoji"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1078
+#: packages/lib/models/settings/builtInMetadata.ts:1087
 msgid "Enable Linkify"
 msgstr "Povolit Linkify"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1094
+#: packages/lib/models/settings/builtInMetadata.ts:1103
 msgid "Enable markdown emoji"
 msgstr "Povolit markdown emoji"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1080
+#: packages/lib/models/settings/builtInMetadata.ts:1089
 msgid "Enable math expressions"
 msgstr "Povolit matematické výrazy"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1082
+#: packages/lib/models/settings/builtInMetadata.ts:1091
 msgid "Enable Mermaid diagrams support"
 msgstr "Povolit podporu pro Mermaid diagramy"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1096
+#: packages/lib/models/settings/builtInMetadata.ts:1105
 msgid "Enable multimarkdown table extension"
 msgstr "Povolit rozšíření multimarkdown tabulky"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1677
+#: packages/lib/models/settings/builtInMetadata.ts:1686
 msgid "Enable note history"
 msgstr "Povolit historii poznámky"
 
-#: packages/lib/models/settings/builtInMetadata.ts:566
+#: packages/lib/models/settings/builtInMetadata.ts:575
 msgid "Enable optical character recognition (OCR)"
 msgstr ""
 
@@ -2405,43 +2424,43 @@ msgstr ""
 msgid "Enable or disable plugins"
 msgstr "Správa vašich rozšíření"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1086
+#: packages/lib/models/settings/builtInMetadata.ts:1095
 msgid "Enable PDF viewer"
 msgstr "Povolit zobrazení PDF"
 
 #: packages/app-mobile/components/screens/ConfigScreen/plugins/EnablePluginSupportPage.tsx:119
-#: packages/lib/models/settings/builtInMetadata.ts:1034
+#: packages/lib/models/settings/builtInMetadata.ts:1043
 #, fuzzy
 msgid "Enable plugin support"
 msgstr "Povolit podporu pro typographer"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1076
+#: packages/lib/models/settings/builtInMetadata.ts:1085
 msgid "Enable soft breaks"
 msgstr "Povolit měkké zalomení"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1475
+#: packages/lib/models/settings/builtInMetadata.ts:1484
 #, fuzzy
 msgid "Enable spell checking in Markdown editor"
 msgstr "Povolení kontroly pravopisu v textovém editoru"
 
-#: packages/lib/models/settings/builtInMetadata.ts:918
+#: packages/lib/models/settings/builtInMetadata.ts:927
 msgid "Enable spellcheck in the text editor"
 msgstr "Povolení kontroly pravopisu v textovém editoru"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1089
+#: packages/lib/models/settings/builtInMetadata.ts:1098
 msgid "Enable table of contents extension"
 msgstr "Povolit rozšíření pro generování Obsahu"
 
-#: packages/lib/models/settings/builtInMetadata.ts:929
+#: packages/lib/models/settings/builtInMetadata.ts:938
 #, fuzzy
 msgid "Enable the Markdown toolbar"
 msgstr "Povolit markdown emoji"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1077
+#: packages/lib/models/settings/builtInMetadata.ts:1086
 msgid "Enable typographer support"
 msgstr "Povolit podporu pro typographer"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1085
+#: packages/lib/models/settings/builtInMetadata.ts:1094
 msgid "Enable video player"
 msgstr "Povolit přehrávač videí"
 
@@ -2457,13 +2476,13 @@ msgstr "Povolit službu Web clipper"
 msgid "Enabled"
 msgstr "Zapnuto"
 
-#: packages/lib/models/settings/builtInMetadata.ts:745
+#: packages/lib/models/settings/builtInMetadata.ts:754
 msgid ""
 "Enables Markdown list continuation, auto-closing HTML tags, and other markup "
 "autocompletions."
 msgstr ""
 
-#: packages/lib/models/settings/builtInMetadata.ts:777
+#: packages/lib/models/settings/builtInMetadata.ts:786
 msgid ""
 "Enables Markdown pattern replacement in the Rich Text Editor. For example, "
 "when enabled, typing **bold** creates bold text."
@@ -2478,11 +2497,11 @@ msgstr ""
 "synchronizovány a odeslány do cíle synchronizace šifrovaně. Přejete si "
 "pokračovat?"
 
-#: packages/lib/models/BaseItem.ts:921
+#: packages/lib/models/BaseItem.ts:943
 msgid "Encrypted"
 msgstr "Zašifrováno"
 
-#: packages/lib/models/BaseItem.ts:983
+#: packages/lib/models/BaseItem.ts:1005
 msgid "Encrypted items cannot be modified"
 msgstr "Nelze editovat zašifrovanou položku"
 
@@ -2704,11 +2723,11 @@ msgstr "Exportuje pouze vybranou poznámku."
 msgid "Exports only the given notebook."
 msgstr "Exportuje pouze vybraný zápisník."
 
-#: packages/lib/models/settings/builtInMetadata.ts:1648
+#: packages/lib/models/settings/builtInMetadata.ts:1657
 msgid "Fail-safe"
 msgstr "Ochrana proti ztrátě dat"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1649
+#: packages/lib/models/settings/builtInMetadata.ts:1658
 msgid ""
 "Fail-safe: Do not wipe out local data when sync target is empty (often the "
 "result of a misconfiguration or bug)"
@@ -2799,13 +2818,13 @@ msgstr "Probíhá oprava vyhledávacího indexu..."
 msgid "Focus"
 msgstr "Přejít na"
 
-#: packages/lib/models/settings/builtInMetadata.ts:945
-#: packages/lib/models/settings/builtInMetadata.ts:962
+#: packages/lib/models/settings/builtInMetadata.ts:954
+#: packages/lib/models/settings/builtInMetadata.ts:971
 msgid "Focus body"
 msgstr "Kurzor v obsahu"
 
-#: packages/lib/models/settings/builtInMetadata.ts:944
-#: packages/lib/models/settings/builtInMetadata.ts:961
+#: packages/lib/models/settings/builtInMetadata.ts:953
+#: packages/lib/models/settings/builtInMetadata.ts:970
 msgid "Focus title"
 msgstr "Kurzor v názvu"
 
@@ -2821,7 +2840,7 @@ msgstr ""
 msgid "For debugging purpose only: export your profile to an external SD card."
 msgstr "Pouze pro účely ladění: exportovat profil na externí SD kartu."
 
-#: packages/lib/models/settings/builtInMetadata.ts:1628
+#: packages/lib/models/settings/builtInMetadata.ts:1637
 msgid "For example \"%s\""
 msgstr "Například \"%s\""
 
@@ -2843,7 +2862,7 @@ msgid ""
 msgstr ""
 "Pro seznam klávesových zkratek a konfiguračních voleb zadejte `help keymap`"
 
-#: packages/lib/models/settings/builtInMetadata.ts:324
+#: packages/lib/models/settings/builtInMetadata.ts:333
 msgid "Force path style"
 msgstr "Vynutit styl cesty"
 
@@ -2896,7 +2915,7 @@ msgstr ""
 msgid "Get it now:"
 msgstr "Získat hned:"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1371
+#: packages/lib/models/settings/builtInMetadata.ts:1380
 msgid "Get pre-releases when checking for updates"
 msgstr "Při hledání aktualizací zahrnout beta verze"
 
@@ -3022,7 +3041,7 @@ msgstr "Domů"
 msgid "Horizontal Rule"
 msgstr "Horizontální čára"
 
-#: packages/lib/services/interop/InteropService.ts:190
+#: packages/lib/services/interop/InteropService.ts:195
 msgid "HTML Directory"
 msgstr "HTML adresář"
 
@@ -3030,7 +3049,7 @@ msgstr "HTML adresář"
 msgid "HTML document"
 msgstr ""
 
-#: packages/lib/services/interop/InteropService.ts:183
+#: packages/lib/services/interop/InteropService.ts:188
 msgid "HTML File"
 msgstr "HTML soubor"
 
@@ -3054,7 +3073,7 @@ msgstr "ID"
 msgid "Idle"
 msgstr "Nečinný"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1496
+#: packages/lib/models/settings/builtInMetadata.ts:1505
 msgid ""
 "If an image attachment is on its own line and followed by a blank line, it "
 "will be rendered just below its Markdown source."
@@ -3073,7 +3092,7 @@ msgstr ""
 msgid "Ignore"
 msgstr "Ignorovat"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1607
+#: packages/lib/models/settings/builtInMetadata.ts:1616
 msgid "Ignore TLS certificate errors"
 msgstr "Ignorovat chyby TLS"
 
@@ -3138,7 +3157,7 @@ msgstr "Probíhá export profilu..."
 msgid "Imports data into Joplin."
 msgstr "Importuje data do Joplinu."
 
-#: packages/lib/models/settings/builtInMetadata.ts:458
+#: packages/lib/models/settings/builtInMetadata.ts:467
 msgid ""
 "In \"Manual\" mode, attachments are downloaded only when you click on them. "
 "In \"Auto\", they are downloaded when you open the note. In \"Always\", all "
@@ -3209,7 +3228,7 @@ msgstr "Pro použití web clipper musíte udělat následující:"
 msgid "In progress"
 msgstr "Probíhá"
 
-#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:608
+#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:622
 msgid "In: %s"
 msgstr "V: %s"
 
@@ -3253,7 +3272,7 @@ msgstr ""
 msgid "Information"
 msgstr "Informace"
 
-#: packages/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/TinyMCE.tsx:821
+#: packages/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/TinyMCE.tsx:822
 msgid "Inline Code"
 msgstr "Vložený kód"
 
@@ -3267,7 +3286,7 @@ msgid "Insert Hyperlink"
 msgstr "Vložit odkaz"
 
 #: packages/app-desktop/gui/NoteEditor/editorCommandDeclarations.ts:105
-#: packages/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/TinyMCE.tsx:854
+#: packages/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/TinyMCE.tsx:855
 #: packages/app-mobile/components/screens/Note/commands/insertDateTime.ts:8
 msgid "Insert time"
 msgstr "Vložit datum a čas"
@@ -3366,7 +3385,7 @@ msgid "Join us on %s"
 msgstr "Připojte se k nám na Twitteru"
 
 #: packages/app-desktop/gui/SyncWizard/Dialog.tsx:310
-#: packages/app-mobile/components/SyncWizard/SyncWizard.tsx:108
+#: packages/app-mobile/components/SyncWizard/SyncWizard.tsx:114
 msgid ""
 "Joplin can synchronise your notes using various providers. Select one from "
 "the list below."
@@ -3374,7 +3393,7 @@ msgstr ""
 "Joplin dokáže synchronizovat vaše poznámky pomocí různých poskytovatelů. "
 "Vyberte si některého z nich z níže uvedeného seznamu."
 
-#: packages/app-mobile/components/SyncWizard/SyncWizard.tsx:112
+#: packages/app-mobile/components/SyncWizard/SyncWizard.tsx:118
 #: packages/lib/models/Setting.ts:1304 packages/lib/SyncTargetJoplinCloud.ts:30
 msgid "Joplin Cloud"
 msgstr "Joplin cloud"
@@ -3396,12 +3415,12 @@ msgid ""
 "dangerous. What would you like to do?"
 msgstr ""
 
-#: packages/lib/services/interop/InteropService.ts:163
+#: packages/lib/services/interop/InteropService.ts:168
 #: packages/lib/services/interop/InteropService.ts:72
 msgid "Joplin Export Directory"
 msgstr "Složka pro export"
 
-#: packages/lib/services/interop/InteropService.ts:157
+#: packages/lib/services/interop/InteropService.ts:162
 #: packages/lib/services/interop/InteropService.ts:66
 msgid "Joplin Export File"
 msgstr "Soubor Joplin Export"
@@ -3444,7 +3463,7 @@ msgstr "URL Joplin serveru"
 msgid "Joplin Server Business"
 msgstr "Joplin server"
 
-#: packages/lib/models/settings/builtInMetadata.ts:355
+#: packages/lib/models/settings/builtInMetadata.ts:364
 msgid "Joplin Server email"
 msgstr "E-mailová adresa Joplin serveru"
 
@@ -3454,12 +3473,12 @@ msgstr "E-mailová adresa Joplin serveru"
 msgid "Joplin Server Login"
 msgstr "URL Joplin serveru"
 
-#: packages/lib/models/settings/builtInMetadata.ts:367
+#: packages/lib/models/settings/builtInMetadata.ts:376
 msgid "Joplin Server password"
 msgstr "Heslo Joplin serveru"
 
-#: packages/lib/models/settings/builtInMetadata.ts:336
-#: packages/lib/models/settings/builtInMetadata.ts:379
+#: packages/lib/models/settings/builtInMetadata.ts:345
+#: packages/lib/models/settings/builtInMetadata.ts:388
 msgid "Joplin Server URL"
 msgstr "URL Joplin serveru"
 
@@ -3485,7 +3504,7 @@ msgstr ""
 msgid "Joplin website"
 msgstr "Web Joplinu"
 
-#: packages/app-mobile/components/SyncWizard/SyncWizard.tsx:113
+#: packages/app-mobile/components/SyncWizard/SyncWizard.tsx:119
 #: packages/lib/SyncTargetJoplinCloud.ts:34
 msgid ""
 "Joplin's own sync service. Also gives access to Joplin-specific features "
@@ -3495,16 +3514,16 @@ msgstr ""
 "specifickým pro Joplin, jako je publikování poznámek nebo spolupráce na "
 "zápisnících s ostatními."
 
-#: packages/lib/models/settings/builtInMetadata.ts:1689
+#: packages/lib/models/settings/builtInMetadata.ts:1698
 msgid "Keep note history for"
 msgstr "Uchovat historii poznámky"
 
-#: packages/lib/models/settings/builtInMetadata.ts:2005
+#: packages/lib/models/settings/builtInMetadata.ts:2014
 #, fuzzy
 msgid "Keep notes in the trash for"
 msgstr "Uchovat historii poznámky"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1457
+#: packages/lib/models/settings/builtInMetadata.ts:1466
 msgid "Keyboard Mode"
 msgstr "Režim klávesnice"
 
@@ -3528,11 +3547,11 @@ msgstr "Klíče, které je třeba aktualizovat"
 msgid "Label"
 msgstr ""
 
-#: packages/lib/models/settings/builtInMetadata.ts:1434
+#: packages/lib/models/settings/builtInMetadata.ts:1443
 msgid "Landscape"
 msgstr "Na šířku"
 
-#: packages/lib/models/settings/builtInMetadata.ts:511
+#: packages/lib/models/settings/builtInMetadata.ts:520
 msgid "Language"
 msgstr "Jazyk"
 
@@ -3541,7 +3560,7 @@ msgstr "Jazyk"
 msgid "Language, date format"
 msgstr "Formát data"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1279
+#: packages/lib/models/settings/builtInMetadata.ts:1288
 msgid "Large"
 msgstr ""
 
@@ -3573,7 +3592,7 @@ msgstr "Posloupnost pro tlačítko Rozložení"
 msgid "Learn more"
 msgstr "Zvětšit odsazení"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1930
+#: packages/lib/models/settings/builtInMetadata.ts:1939
 msgid "Leave it blank to download the language files from the default website"
 msgstr ""
 
@@ -3586,11 +3605,11 @@ msgstr "Zanechte zápisník..."
 msgid "Leave notebook..."
 msgstr "Zanechte zápisník..."
 
-#: packages/lib/models/settings/builtInMetadata.ts:1428
+#: packages/lib/models/settings/builtInMetadata.ts:1437
 msgid "Legal"
 msgstr "Legal"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1424
+#: packages/lib/models/settings/builtInMetadata.ts:1433
 msgid "Letter"
 msgstr "Dopis"
 
@@ -3758,39 +3777,39 @@ msgstr ""
 "Spravuje konfiguraci koncového šifrování. Příkazy jsou `zapnout`, `vypnout`, "
 "`dešifrovat`, `stav`, `dešifrovat soubor` a `cílový stav`."
 
-#: packages/lib/models/settings/builtInMetadata.ts:462
+#: packages/lib/models/settings/builtInMetadata.ts:471
 msgid "Manual"
 msgstr "Ručně"
 
 #: packages/app-desktop/gui/ToggleEditorsButton/ToggleEditorsButton.tsx:28
 #: packages/lib/models/Setting.ts:1297
 #: packages/lib/services/interop/InteropService.ts:124
-#: packages/lib/services/interop/InteropService.ts:169
+#: packages/lib/services/interop/InteropService.ts:174
 msgid "Markdown"
 msgstr "Markdown"
 
 #: packages/lib/services/interop/InteropService.ts:132
-#: packages/lib/services/interop/InteropService.ts:175
+#: packages/lib/services/interop/InteropService.ts:180
 msgid "Markdown + Front Matter"
 msgstr "Markdown + Front Matter"
 
-#: packages/app-desktop/gui/NoteEditor/NoteBody/CodeMirror/v6/CodeMirror.tsx:396
+#: packages/app-desktop/gui/NoteEditor/NoteBody/CodeMirror/v6/CodeMirror.tsx:397
 #: packages/app-mobile/components/NoteEditor/NoteEditor.tsx:286
 #, fuzzy
 msgid "Markdown editor"
 msgstr "Markdown"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1506
+#: packages/lib/models/settings/builtInMetadata.ts:1515
 #, fuzzy
 msgid "Markdown editor: Highlight active line"
 msgstr "Markdown"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1495
+#: packages/lib/models/settings/builtInMetadata.ts:1504
 #, fuzzy
 msgid "Markdown editor: Render images"
 msgstr "Markdown"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1485
+#: packages/lib/models/settings/builtInMetadata.ts:1494
 msgid "Markdown editor: Render markup in editor"
 msgstr ""
 
@@ -3829,7 +3848,7 @@ msgstr ""
 msgid "Math"
 msgstr ""
 
-#: packages/lib/models/settings/builtInMetadata.ts:487
+#: packages/lib/models/settings/builtInMetadata.ts:496
 msgid "Max concurrent connections"
 msgstr "Maximální počet souběžných spojení"
 
@@ -3849,7 +3868,7 @@ msgstr "Maximální celková velikost"
 msgid "Media player, math, diagrams, table of contents"
 msgstr ""
 
-#: packages/lib/models/settings/builtInMetadata.ts:1278
+#: packages/lib/models/settings/builtInMetadata.ts:1287
 msgid "Medium"
 msgstr ""
 
@@ -3969,7 +3988,7 @@ msgstr "n"
 msgid "N"
 msgstr "N"
 
-#: packages/lib/models/settings/builtInMetadata.ts:981
+#: packages/lib/models/settings/builtInMetadata.ts:990
 msgid "Never resize"
 msgstr ""
 
@@ -4067,15 +4086,15 @@ msgstr "Další zápas"
 msgid "Nextcloud"
 msgstr "Nextcloud"
 
-#: packages/lib/models/settings/builtInMetadata.ts:199
+#: packages/lib/models/settings/builtInMetadata.ts:208
 msgid "Nextcloud password"
 msgstr "Nextcloud heslo"
 
-#: packages/lib/models/settings/builtInMetadata.ts:187
+#: packages/lib/models/settings/builtInMetadata.ts:196
 msgid "Nextcloud username"
 msgstr "Nextcloud uživatelské jméno"
 
-#: packages/lib/models/settings/builtInMetadata.ts:174
+#: packages/lib/models/settings/builtInMetadata.ts:183
 msgid "Nextcloud WebDAV URL"
 msgstr "Nextcloud WebDAV URL"
 
@@ -4207,7 +4226,7 @@ msgstr "Nová poznámka"
 msgid "Note"
 msgstr "Zápisníky"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1753
+#: packages/lib/models/settings/builtInMetadata.ts:1762
 msgid "Note area growth factor"
 msgstr "Růstový faktor oblasti s poznámkami"
 
@@ -4262,7 +4281,7 @@ msgstr "Poznámka není úkol: \"%s\""
 msgid "Note list"
 msgstr "Seznam poznámek"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1738
+#: packages/lib/models/settings/builtInMetadata.ts:1747
 msgid "Note list growth factor"
 msgstr "Růstový faktor seznamu poznámek"
 
@@ -4297,7 +4316,7 @@ msgstr "Název zápisníku"
 msgid "Note viewer"
 msgstr "Název zápisníku"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1122
+#: packages/lib/models/settings/builtInMetadata.ts:1131
 msgid "Note: Does not work in all desktop environments."
 msgstr "Poznámka: Nefunguje v některých desktopových prostředích."
 
@@ -4315,7 +4334,7 @@ msgstr "&Zápisník"
 msgid "Notebook"
 msgstr "Zápisníky"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1723
+#: packages/lib/models/settings/builtInMetadata.ts:1732
 msgid "Notebook list growth factor"
 msgstr "Růstový faktor seznamu zápisníků"
 
@@ -4329,7 +4348,7 @@ msgstr "Zápisník: %s"
 msgid "Notebook: %s (%s)"
 msgstr "Zápisník: %s"
 
-#: packages/app-desktop/gui/Sidebar/hooks/useSidebarListData.ts:54
+#: packages/app-desktop/gui/Sidebar/hooks/useSidebarListData.ts:58
 #: packages/app-mobile/components/side-menu-content.tsx:691
 #: packages/lib/services/ReportService.ts:369
 msgid "Notebooks"
@@ -4363,16 +4382,16 @@ msgstr "Poloha"
 msgid "Numbered List"
 msgstr "Číslovaný seznam"
 
-#: packages/lib/models/settings/builtInMetadata.ts:609
+#: packages/lib/models/settings/builtInMetadata.ts:618
 msgid "OCR: Clear cache and re-download language data files"
 msgstr ""
 
-#: packages/lib/models/settings/builtInMetadata.ts:590
+#: packages/lib/models/settings/builtInMetadata.ts:599
 #, fuzzy
 msgid "OCR: Language data URL or path"
 msgstr "Formát data"
 
-#: packages/lib/models/settings/builtInMetadata.ts:619
+#: packages/lib/models/settings/builtInMetadata.ts:628
 #, fuzzy
 msgid "OCR: Search in extracted content"
 msgstr "Hledat ve všech poznámkách"
@@ -4444,7 +4463,7 @@ msgstr "OneDrive"
 msgid "OneDrive Login"
 msgstr "Přihlášení s OneDrive"
 
-#: packages/lib/services/interop/InteropService.ts:148
+#: packages/lib/services/interop/InteropService.ts:153
 #, fuzzy
 msgid "OneNote Notebook"
 msgstr "Nový zápisník"
@@ -4550,7 +4569,7 @@ msgstr "Nastavení"
 msgid "Ordered list"
 msgstr "Seznam objednávek"
 
-#: packages/app-mobile/components/SyncWizard/SyncWizard.tsx:124
+#: packages/app-mobile/components/SyncWizard/SyncWizard.tsx:130
 msgid "Other"
 msgstr ""
 
@@ -4562,11 +4581,11 @@ msgstr "Další aplikace..."
 msgid "Output format: %s"
 msgstr "Výstupní formát: %s"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1431
+#: packages/lib/models/settings/builtInMetadata.ts:1440
 msgid "Page orientation for PDF export"
 msgstr "Orientace stránky pro PDF export"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1421
+#: packages/lib/models/settings/builtInMetadata.ts:1430
 msgid "Page size for PDF export"
 msgstr "Velikost stránky pro PDF export"
 
@@ -4720,7 +4739,7 @@ msgstr "Nejprve prosím vyberte poznámku či zápisník ke smazání."
 msgid "Please select where the sync status should be exported to"
 msgstr "Prosím vyberte, kam má být stav synchronizace exportován"
 
-#: packages/lib/services/interop/InteropService.ts:313
+#: packages/lib/services/interop/InteropService.ts:318
 msgid "Please specify import format for %s"
 msgstr "Prosím specifikujte formát pro import %s"
 
@@ -4733,7 +4752,7 @@ msgstr "Prosím specifikujte sešit, do kterého mají být poznámky importová
 msgid "Please upgrade Joplin to version %s or later to use this plugin."
 msgstr "Pro použití tohoto rozšíření prosím aktualizujte Joplin"
 
-#: packages/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/TinyMCE.tsx:1558
+#: packages/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/TinyMCE.tsx:1566
 msgid ""
 "Please wait for all attachments to be downloaded and decrypted. You may also "
 "switch to %s to edit the note."
@@ -4778,7 +4797,7 @@ msgstr "Rozšíření"
 msgid "Plugin tools"
 msgstr "Nástroje rozšíření"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1022
+#: packages/lib/models/settings/builtInMetadata.ts:1031
 msgid "Plugin WebView debugging"
 msgstr ""
 
@@ -4795,7 +4814,7 @@ msgid ""
 "can extend Joplin's editor, viewer, and more."
 msgstr ""
 
-#: packages/lib/models/settings/builtInMetadata.ts:1433
+#: packages/lib/models/settings/builtInMetadata.ts:1442
 msgid "Portrait"
 msgstr "Na výšku"
 
@@ -4819,15 +4838,15 @@ msgstr "Nastavení"
 msgid "Preferences..."
 msgstr "Nastavení..."
 
-#: packages/lib/models/settings/builtInMetadata.ts:674
+#: packages/lib/models/settings/builtInMetadata.ts:683
 msgid "Preferred dark theme"
 msgstr "Preferovaný tmavý vzhled"
 
-#: packages/lib/models/settings/builtInMetadata.ts:658
+#: packages/lib/models/settings/builtInMetadata.ts:667
 msgid "Preferred light theme"
 msgstr "Preferovaný světlý vzhled"
 
-#: packages/lib/models/settings/builtInMetadata.ts:766
+#: packages/lib/models/settings/builtInMetadata.ts:775
 msgid "Preserve colours when pasting text in Rich Text Editor"
 msgstr ""
 
@@ -4930,15 +4949,15 @@ msgstr "Profily"
 msgid "Properties"
 msgstr "Nastavení"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1617
+#: packages/lib/models/settings/builtInMetadata.ts:1626
 msgid "Proxy enabled"
 msgstr "Proxy server povolen"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1639
+#: packages/lib/models/settings/builtInMetadata.ts:1648
 msgid "Proxy timeout (seconds)"
 msgstr "Proxy timeout (sekundy)"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1627
+#: packages/lib/models/settings/builtInMetadata.ts:1636
 msgid "Proxy URL"
 msgstr "Proxy adresa"
 
@@ -4965,7 +4984,7 @@ msgid "Publish Notes"
 msgstr "Zveřejnit poznámky"
 
 #: packages/app-desktop/gui/SyncWizard/Dialog.tsx:176
-#: packages/app-mobile/components/SyncWizard/SyncWizard.tsx:116
+#: packages/app-mobile/components/SyncWizard/SyncWizard.tsx:122
 #: packages/lib/utils/joplinCloud/index.ts:162
 msgid "Publish notes to the internet"
 msgstr "Zveřejnění poznámek na internetu"
@@ -5013,7 +5032,7 @@ msgstr "Opětovné zašifrování"
 msgid "Re-enter password"
 msgstr "Hlavní heslo"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1352
+#: packages/lib/models/settings/builtInMetadata.ts:1361
 msgid "Re-upload local data to sync target"
 msgstr "Odeslat místní data do cíle synchronizace"
 
@@ -5161,7 +5180,7 @@ msgstr "Přejmenovat štítek:"
 msgid "Renames the given <item> (note or notebook) to <name>."
 msgstr "Přejmenuje <položku> (poznámku či zápisník) na <jméno>."
 
-#: packages/lib/models/settings/builtInMetadata.ts:1486
+#: packages/lib/models/settings/builtInMetadata.ts:1495
 msgid "Renders markup on all lines that don't include the cursor."
 msgstr ""
 
@@ -5235,7 +5254,7 @@ msgstr "Obnovit rozložení aplikace"
 msgid "Reset master password"
 msgstr "Obnovit hlavní heslo"
 
-#: packages/lib/models/settings/builtInMetadata.ts:975
+#: packages/lib/models/settings/builtInMetadata.ts:984
 msgid "Resize large images:"
 msgstr ""
 
@@ -5318,8 +5337,8 @@ msgid "Reveal file in folder"
 msgstr "Ukázat soubor ve složce"
 
 #: packages/app-desktop/gui/WindowCommandsAndDialogs/commands/toggleNotesSortOrderReverse.ts:8
-#: packages/lib/models/settings/builtInMetadata.ts:815
-#: packages/lib/models/settings/builtInMetadata.ts:896
+#: packages/lib/models/settings/builtInMetadata.ts:824
+#: packages/lib/models/settings/builtInMetadata.ts:905
 msgid "Reverse sort order"
 msgstr "Řadit od konce"
 
@@ -5340,7 +5359,7 @@ msgstr "Revize: %s (%s)"
 msgid "Rich Text"
 msgstr ""
 
-#: packages/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/TinyMCE.tsx:715
+#: packages/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/TinyMCE.tsx:716
 msgid "Rich Text editor. Press Escape then Tab to escape focus."
 msgstr ""
 
@@ -5356,23 +5375,23 @@ msgstr ""
 msgid "S3"
 msgstr "S3"
 
-#: packages/lib/models/settings/builtInMetadata.ts:300
+#: packages/lib/models/settings/builtInMetadata.ts:309
 msgid "S3 access key"
 msgstr "S3 přístupový klíč"
 
-#: packages/lib/models/settings/builtInMetadata.ts:257
+#: packages/lib/models/settings/builtInMetadata.ts:266
 msgid "S3 bucket"
 msgstr "S3 bucket"
 
-#: packages/lib/models/settings/builtInMetadata.ts:288
+#: packages/lib/models/settings/builtInMetadata.ts:297
 msgid "S3 region"
 msgstr "S3 region"
 
-#: packages/lib/models/settings/builtInMetadata.ts:312
+#: packages/lib/models/settings/builtInMetadata.ts:321
 msgid "S3 secret key"
 msgstr "S3 tajný klíč"
 
-#: packages/lib/models/settings/builtInMetadata.ts:273
+#: packages/lib/models/settings/builtInMetadata.ts:282
 msgid "S3 URL"
 msgstr "S3 Adresa"
 
@@ -5419,7 +5438,7 @@ msgstr "Uložit změny"
 msgid "Save changes?"
 msgstr "Uložit změny"
 
-#: packages/lib/models/settings/builtInMetadata.ts:897
+#: packages/lib/models/settings/builtInMetadata.ts:906
 msgid "Save geo-location with notes"
 msgstr "Ukládat k poznámkám informace o zeměpisné poloze"
 
@@ -5437,7 +5456,7 @@ msgstr "Smazat zápisník"
 msgid "Scanned code"
 msgstr ""
 
-#: packages/lib/models/settings/builtInMetadata.ts:1282
+#: packages/lib/models/settings/builtInMetadata.ts:1291
 msgid "Scrollbar size"
 msgstr ""
 
@@ -5508,7 +5527,7 @@ msgstr "Hledá <zadání> ve všech poznámkách."
 msgid "See changelog"
 msgstr "Úplný seznam změn"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1371
+#: packages/lib/models/settings/builtInMetadata.ts:1380
 msgid "See the pre-release page for more details: %s"
 msgstr "Pro náhled beta verzí navštivte stránku: %s"
 
@@ -5540,7 +5559,7 @@ msgstr "Vybrat soubor..."
 msgid "Select notebook"
 msgstr "Smazat zápisník"
 
-#: packages/app-mobile/components/SyncWizard/SyncWizard.tsx:125
+#: packages/app-mobile/components/SyncWizard/SyncWizard.tsx:131
 msgid "Select one of the other supported sync targets."
 msgstr ""
 
@@ -5596,7 +5615,7 @@ msgstr "Nastavit alarm"
 msgid "Set alarm:"
 msgstr "Nastavit alarm:"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1266
+#: packages/lib/models/settings/builtInMetadata.ts:1275
 msgid ""
 "Set it to 0 to make it take the complete available space. Recommended width "
 "is 600."
@@ -5697,7 +5716,7 @@ msgstr "Pokročilá nastavení"
 msgid "Show all"
 msgstr "Zobrazit vše"
 
-#: packages/lib/models/settings/builtInMetadata.ts:705
+#: packages/lib/models/settings/builtInMetadata.ts:714
 msgid "Show completed to-dos"
 msgstr "Zobrazit dokončené úkoly"
 
@@ -5714,7 +5733,7 @@ msgstr "Zobrazit vypnuté klávesy"
 msgid "Show monospace fonts only."
 msgstr "Neproporcionální písmo editoru"
 
-#: packages/lib/models/settings/builtInMetadata.ts:687
+#: packages/lib/models/settings/builtInMetadata.ts:696
 msgid "Show note counts"
 msgstr "Zobrazit počty poznámek"
 
@@ -5728,11 +5747,11 @@ msgstr "Zobrazit počty poznámek"
 msgid "Show password"
 msgstr "Nastavit heslo"
 
-#: packages/lib/models/settings/builtInMetadata.ts:827
+#: packages/lib/models/settings/builtInMetadata.ts:836
 msgid "Show sort order buttons"
 msgstr "Zobrazit tlačítka řazení"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1120
+#: packages/lib/models/settings/builtInMetadata.ts:1129
 msgid "Show tray icon"
 msgstr "Zobrazovat ikonu v panelu"
 
@@ -5745,7 +5764,7 @@ msgstr "Zobrazit/skrýt boční panel"
 msgid "Shows notes for tag"
 msgstr "Zobrazit počty poznámek"
 
-#: packages/lib/models/settings/builtInMetadata.ts:976
+#: packages/lib/models/settings/builtInMetadata.ts:985
 msgid "Shrink large images before adding them to notes."
 msgstr ""
 
@@ -5790,7 +5809,7 @@ msgstr ""
 msgid "Skipped: %d."
 msgstr "Přeskočeno: %d."
 
-#: packages/lib/models/settings/builtInMetadata.ts:1277
+#: packages/lib/models/settings/builtInMetadata.ts:1286
 msgid "Small"
 msgstr ""
 
@@ -5840,13 +5859,13 @@ msgstr ""
 msgid "Sort \"%s\" in descending order"
 msgstr ""
 
-#: packages/lib/models/settings/builtInMetadata.ts:883
+#: packages/lib/models/settings/builtInMetadata.ts:892
 msgid "Sort notebooks by"
 msgstr "Řadit zápisníky podle"
 
 #: packages/app-desktop/gui/NoteList/utils/canManuallySortNotes.ts:10
 #: packages/app-mobile/components/ScreenHeader/index.tsx:542
-#: packages/lib/models/settings/builtInMetadata.ts:713
+#: packages/lib/models/settings/builtInMetadata.ts:722
 msgid "Sort notes by"
 msgstr "Řadit poznámky podle"
 
@@ -5876,11 +5895,11 @@ msgstr "Zdrojový formát: %s"
 msgid "Source: "
 msgstr "Zdroj: "
 
-#: packages/app-desktop/gui/Sidebar/hooks/useOnRenderItem.tsx:436
+#: packages/app-desktop/gui/Sidebar/hooks/useOnRenderItem.tsx:437
 msgid "Spacer"
 msgstr ""
 
-#: packages/lib/models/settings/builtInMetadata.ts:1667
+#: packages/lib/models/settings/builtInMetadata.ts:1676
 msgid ""
 "Specify the port that should be used by the API server. If not set, a "
 "default will be used."
@@ -5893,13 +5912,13 @@ msgstr ""
 msgid "Spell checker"
 msgstr "Kontrola pravopisu"
 
-#: packages/lib/models/settings/builtInMetadata.ts:696
-#: packages/lib/models/settings/builtInMetadata.ts:698
-#: packages/lib/models/settings/builtInMetadata.ts:699
+#: packages/lib/models/settings/builtInMetadata.ts:705
+#: packages/lib/models/settings/builtInMetadata.ts:707
+#: packages/lib/models/settings/builtInMetadata.ts:708
 msgid "Split View"
 msgstr "Přepnout pohled"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1135
+#: packages/lib/models/settings/builtInMetadata.ts:1144
 msgid "Start application minimised in the tray icon"
 msgstr "Spouštět aplikaci minimalizovanou do lišty ikon"
 
@@ -6086,7 +6105,7 @@ msgstr ""
 "Přepne do zápisníku [zápisník]. Všechny další operace budou prováděny na "
 "tomto zápisníku."
 
-#: packages/app-mobile/components/SyncWizard/SyncWizard.tsx:105
+#: packages/app-mobile/components/SyncWizard/SyncWizard.tsx:111
 msgid "Sync"
 msgstr ""
 
@@ -6122,7 +6141,7 @@ msgid "Sync Version: %s"
 msgstr "Verze synchronizace: %s"
 
 #: packages/app-desktop/gui/SyncWizard/Dialog.tsx:175
-#: packages/app-mobile/components/SyncWizard/SyncWizard.tsx:115
+#: packages/app-mobile/components/SyncWizard/SyncWizard.tsx:121
 msgid "Sync your notes"
 msgstr "Synchronizace poznámek"
 
@@ -6135,7 +6154,7 @@ msgstr "Zapnout šifrování"
 msgid "Synchronisation"
 msgstr "Synchronizace"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1392
+#: packages/lib/models/settings/builtInMetadata.ts:1401
 msgid "Synchronisation interval"
 msgstr "Interval synchronizace"
 
@@ -6148,7 +6167,7 @@ msgstr "Synchronizace již probíhá."
 msgid "Synchronisation Status"
 msgstr "Stav synchronizace"
 
-#: packages/lib/models/settings/builtInMetadata.ts:118
+#: packages/lib/models/settings/builtInMetadata.ts:127
 msgid "Synchronisation target"
 msgstr "Cíl synchronizace"
 
@@ -6162,7 +6181,7 @@ msgstr "Cíl synchronizace: %s (%s)"
 msgid "Synchronise"
 msgstr "Synchronizovat"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1412
+#: packages/lib/models/settings/builtInMetadata.ts:1421
 msgid "Synchronise only over WiFi connection"
 msgstr "Synchronizovat pouze přes WiFi"
 
@@ -6185,11 +6204,11 @@ msgid "Tab indents"
 msgstr ""
 
 #: packages/app-desktop/gui/NoteEditor/StatusBar.tsx:72
-#: packages/lib/models/settings/builtInMetadata.ts:796
+#: packages/lib/models/settings/builtInMetadata.ts:805
 msgid "Tab moves focus"
 msgstr ""
 
-#: packages/lib/models/settings/builtInMetadata.ts:1427
+#: packages/lib/models/settings/builtInMetadata.ts:1436
 msgid "Tabloid"
 msgstr "Tabloid"
 
@@ -6199,7 +6218,7 @@ msgid "Tagged: %d."
 msgstr "Označeno pomocí štítků: %d."
 
 #: packages/app-desktop/gui/NoteListHeader/utils/getColumnTitle.ts:10
-#: packages/app-desktop/gui/Sidebar/hooks/useSidebarListData.ts:75
+#: packages/app-desktop/gui/Sidebar/hooks/useSidebarListData.ts:79
 #: packages/app-desktop/gui/WindowCommandsAndDialogs/commands/setTags.ts:7
 #: packages/app-mobile/components/screens/Note/commands/setTags.ts:7
 #: packages/app-mobile/components/screens/tags.tsx:92
@@ -6239,7 +6258,7 @@ msgstr "Týmy"
 msgid "Text document"
 msgstr "Textový editor"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1420
+#: packages/lib/models/settings/builtInMetadata.ts:1429
 msgid "Text editor command"
 msgstr "Textový editor"
 
@@ -6278,7 +6297,7 @@ msgstr "Aplikace byla úspěšně autorizována."
 msgid "The application must be restarted for these changes to take effect."
 msgstr "Pro provedení těchto změn je potřeba aplikaci restartovat."
 
-#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:577
+#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:591
 msgid ""
 "The attachments will no longer be watched when you switch to a different "
 "note."
@@ -6315,7 +6334,7 @@ msgstr ""
 msgid "The default profile cannot be deleted"
 msgstr "Výchozí profil nelze odstranit"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1420
+#: packages/lib/models/settings/builtInMetadata.ts:1429
 msgid ""
 "The editor command (may include arguments) that will be used to open a note. "
 "If none is provided it will try to auto-detect the default editor."
@@ -6324,9 +6343,9 @@ msgstr ""
 "poznámky. Pokud není určeno, aplikace se pokusí o automatické rozpoznání "
 "výchozího editoru."
 
-#: packages/lib/models/settings/builtInMetadata.ts:1725
-#: packages/lib/models/settings/builtInMetadata.ts:1740
-#: packages/lib/models/settings/builtInMetadata.ts:1755
+#: packages/lib/models/settings/builtInMetadata.ts:1734
+#: packages/lib/models/settings/builtInMetadata.ts:1749
+#: packages/lib/models/settings/builtInMetadata.ts:1764
 msgid ""
 "The factor property sets how the item will grow or shrink to fit the "
 "available space in its container with respect to the other items. Thus an "
@@ -6338,7 +6357,7 @@ msgstr ""
 "faktorem 2 tedy zabere dvakrát tolik místa než položka s faktorem 1. Pro "
 "zobrazení změn restartujte aplikaci."
 
-#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:592
+#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:606
 #, fuzzy
 msgid "The following attachment matches your search query:"
 msgid_plural "The following attachments match your search query:"
@@ -6346,7 +6365,7 @@ msgstr[0] "Následující přílohy jsou sledovány, zda došlo k jejich změně
 msgstr[1] "Následující přílohy jsou sledovány, zda došlo k jejich změně:"
 msgstr[2] "Následující přílohy jsou sledovány, zda došlo k jejich změně:"
 
-#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:576
+#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:590
 msgid "The following attachments are being watched for changes:"
 msgstr "Následující přílohy jsou sledovány, zda došlo k jejich změně:"
 
@@ -6484,13 +6503,13 @@ msgstr "Zkontrolovat nastavení synchronizace"
 msgid "The tag \"%s\" already exists. Please choose a different name."
 msgstr "Štítek \"%s\" už existuje. Zadejte jiný název."
 
-#: packages/lib/models/settings/builtInMetadata.ts:120
+#: packages/lib/models/settings/builtInMetadata.ts:129
 msgid ""
 "The target to synchronise to. Each sync target may have additional "
 "parameters which are named as `sync.NUM.NAME` (all documented below)."
 msgstr ""
-"Cíl synchronizace. Každý cíl může mít další parametry ve formátu "
-"`sync.NUM.NAME` (dokumentace níže)."
+"Cíl synchronizace. Každý cíl může mít další parametry ve formátu `sync.NUM."
+"NAME` (dokumentace níže)."
 
 #: packages/lib/services/share/invitationRespond.ts:22
 msgid ""
@@ -6525,7 +6544,7 @@ msgstr ""
 "Implementace WebDAV %s je nekompatibilní s Joplinem, a proto již není "
 "podporována. Použijte prosím jinou metodu synchronizace."
 
-#: packages/lib/models/settings/builtInMetadata.ts:631
+#: packages/lib/models/settings/builtInMetadata.ts:640
 msgid "Theme"
 msgstr "Vzhled"
 
@@ -6696,7 +6715,7 @@ msgstr "Tato poznámka je prázdná. pro otevření editoru klepněte na \"%s\".
 msgid "This note has no history"
 msgstr "Tato poznámka nemá historii"
 
-#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:658
+#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:672
 msgid ""
 "This note is in HTML format. Convert it to Markdown to edit it more easily."
 msgstr ""
@@ -6728,7 +6747,7 @@ msgstr ""
 msgid "This subfolder of the trash has no notes."
 msgstr ""
 
-#: packages/lib/models/settings/builtInMetadata.ts:1122
+#: packages/lib/models/settings/builtInMetadata.ts:1131
 msgid ""
 "This will allow Joplin to run in the background. It is recommended to enable "
 "this setting so that your notes are constantly being synchronised, thus "
@@ -6755,7 +6774,7 @@ msgstr ""
 "Tím sešit odstraní z vaší sbírky a vy již nebudete mít přístup k jeho "
 "obsahu. Chcete pokračovat?"
 
-#: packages/lib/models/settings/builtInMetadata.ts:547
+#: packages/lib/models/settings/builtInMetadata.ts:556
 msgid "Time format"
 msgstr "Formát času"
 
@@ -7028,7 +7047,7 @@ msgstr ""
 msgid "Unchecked"
 msgstr ""
 
-#: packages/lib/models/settings/builtInMetadata.ts:704
+#: packages/lib/models/settings/builtInMetadata.ts:713
 msgid "Uncompleted to-dos on top"
 msgstr "Nedokončené úkoly nahoře"
 
@@ -7059,7 +7078,7 @@ msgstr "Neznámý flag: %s"
 msgid "Unknown flag: %s"
 msgstr "Neznámý flag: %s"
 
-#: packages/lib/Synchronizer.ts:1163
+#: packages/lib/Synchronizer.ts:1182
 msgid ""
 "Unknown item type downloaded - please upgrade Joplin to the latest version"
 msgstr ""
@@ -7124,7 +7143,7 @@ msgid ""
 msgstr "Nepodporovaný odkaz či zpráva: %s"
 
 #: packages/app-desktop/gui/ResourceScreen.tsx:123
-#: packages/lib/models/BaseItem.ts:922 packages/lib/path-utils.ts:27
+#: packages/lib/models/BaseItem.ts:944 packages/lib/path-utils.ts:27
 #: packages/lib/path-utils.ts:71
 msgid "Untitled"
 msgstr "Bez názvu"
@@ -7216,7 +7235,7 @@ msgstr "URL"
 msgid "Usage: %s"
 msgstr "Použití: %s"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1811
+#: packages/lib/models/settings/builtInMetadata.ts:1820
 msgid "Use biometrics to secure access to the app"
 msgstr "Použití biometrických údajů pro zabezpečení přístupu k aplikaci"
 
@@ -7246,7 +7265,7 @@ msgstr ""
 "Pro přesun položek v rozložení použijte šipky. Pro ukončení změn stiskněte "
 "klávesu \"Escape\"."
 
-#: packages/lib/models/settings/builtInMetadata.ts:1550
+#: packages/lib/models/settings/builtInMetadata.ts:1559
 #, fuzzy
 msgid "Use the legacy Markdown editor"
 msgstr "Povolit markdown emoji"
@@ -7268,7 +7287,7 @@ msgstr ""
 "K zabezpečení přístupu do aplikace použijte své biometrické údaje. Vždy ji "
 "můžete nastavit později v Nastavení."
 
-#: packages/lib/models/settings/builtInMetadata.ts:1236
+#: packages/lib/models/settings/builtInMetadata.ts:1245
 msgid ""
 "Used for most text in the markdown editor. If not found, a generic "
 "proportional (variable width) font is used."
@@ -7276,7 +7295,7 @@ msgstr ""
 "Používá se pro většinu textu v editoru Markdownu. Pokud nebude nalezeno, "
 "bude použito obecné proporcionální písmo s různou šířkou znaků."
 
-#: packages/lib/models/settings/builtInMetadata.ts:1249
+#: packages/lib/models/settings/builtInMetadata.ts:1258
 msgid ""
 "Used where a fixed width font is needed to lay out text legibly (e.g. "
 "tables, checkboxes, code). If not found, a generic monospace (fixed width) "
@@ -7330,23 +7349,23 @@ msgid "View them now"
 msgstr "Zobrazit"
 
 #: packages/app-desktop/gui/NoteContentPropertiesDialog.tsx:145
-#: packages/lib/models/settings/builtInMetadata.ts:696
-#: packages/lib/models/settings/builtInMetadata.ts:697
-#: packages/lib/models/settings/builtInMetadata.ts:699
+#: packages/lib/models/settings/builtInMetadata.ts:705
+#: packages/lib/models/settings/builtInMetadata.ts:706
+#: packages/lib/models/settings/builtInMetadata.ts:708
 msgid "Viewer"
 msgstr "Prohlížeč"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1260
+#: packages/lib/models/settings/builtInMetadata.ts:1269
 #, fuzzy
 msgid "Viewer and Rich Text Editor font family"
 msgstr "Rodina písma v editoru"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1182
+#: packages/lib/models/settings/builtInMetadata.ts:1191
 #, fuzzy
 msgid "Viewer font size"
 msgstr "Velikost písma v editoru"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1463
+#: packages/lib/models/settings/builtInMetadata.ts:1472
 msgid "Vim"
 msgstr "Vim"
 
@@ -7354,11 +7373,11 @@ msgstr "Vim"
 msgid "Voice recorder"
 msgstr ""
 
-#: packages/lib/models/settings/builtInMetadata.ts:1931
+#: packages/lib/models/settings/builtInMetadata.ts:1940
 msgid "Voice typing language files (URL)"
 msgstr ""
 
-#: packages/lib/models/settings/builtInMetadata.ts:1960
+#: packages/lib/models/settings/builtInMetadata.ts:1969
 msgid "Voice typing: Glossary"
 msgstr ""
 
@@ -7406,15 +7425,15 @@ msgstr "Web Clipper"
 msgid "WebDAV"
 msgstr "WebDAV"
 
-#: packages/lib/models/settings/builtInMetadata.ts:237
+#: packages/lib/models/settings/builtInMetadata.ts:246
 msgid "WebDAV password"
 msgstr "WebDAV heslo"
 
-#: packages/lib/models/settings/builtInMetadata.ts:212
+#: packages/lib/models/settings/builtInMetadata.ts:221
 msgid "WebDAV URL"
 msgstr "WebDAV URL"
 
-#: packages/lib/models/settings/builtInMetadata.ts:225
+#: packages/lib/models/settings/builtInMetadata.ts:234
 msgid "WebDAV username"
 msgstr "WebDAV uživatelské jméno"
 
@@ -7458,11 +7477,11 @@ msgstr "Vítejte"
 msgid "What are plugins?"
 msgstr "Smazat rozšíření \"%s\"?"
 
-#: packages/lib/models/settings/builtInMetadata.ts:958
+#: packages/lib/models/settings/builtInMetadata.ts:967
 msgid "When creating a new note:"
 msgstr "Při vytváření nové poznámky:"
 
-#: packages/lib/models/settings/builtInMetadata.ts:941
+#: packages/lib/models/settings/builtInMetadata.ts:950
 msgid "When creating a new to-do:"
 msgstr "Při vytváření nového úkolu:"
 
@@ -7473,7 +7492,7 @@ msgid ""
 "the desktop app."
 msgstr ""
 
-#: packages/lib/models/settings/builtInMetadata.ts:567
+#: packages/lib/models/settings/builtInMetadata.ts:576
 msgid ""
 "When enabled, the application will scan your attachments and extract the "
 "text from it. This will allow you to search for text in these attachments."

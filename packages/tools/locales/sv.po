@@ -108,8 +108,8 @@ msgstr "&Visa"
 msgid "&Window"
 msgstr "&Fönster"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1687
-#: packages/lib/models/settings/builtInMetadata.ts:2001
+#: packages/lib/models/settings/builtInMetadata.ts:1696
+#: packages/lib/models/settings/builtInMetadata.ts:2010
 msgid "%d day"
 msgid_plural "%d days"
 msgstr[0] "%d dag"
@@ -127,9 +127,9 @@ msgstr "%d GB"
 msgid "%d GB storage space"
 msgstr "%d GB lagringsutrymme"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1399
-#: packages/lib/models/settings/builtInMetadata.ts:1400
-#: packages/lib/models/settings/builtInMetadata.ts:1401
+#: packages/lib/models/settings/builtInMetadata.ts:1408
+#: packages/lib/models/settings/builtInMetadata.ts:1409
+#: packages/lib/models/settings/builtInMetadata.ts:1410
 msgid "%d hour"
 msgid_plural "%d hours"
 msgstr[0] "%d timme"
@@ -147,9 +147,9 @@ msgstr "%d MB"
 msgid "%d MB per note or attachment"
 msgstr "%d MB per anteckning eller bilaga"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1396
-#: packages/lib/models/settings/builtInMetadata.ts:1397
-#: packages/lib/models/settings/builtInMetadata.ts:1398
+#: packages/lib/models/settings/builtInMetadata.ts:1405
+#: packages/lib/models/settings/builtInMetadata.ts:1406
+#: packages/lib/models/settings/builtInMetadata.ts:1407
 msgid "%d minute"
 msgid_plural "%d minutes"
 msgstr[0] "%d minut"
@@ -197,13 +197,13 @@ msgstr "%s (%s): %s"
 msgid "%s (pre-release)"
 msgstr "%s (förhandsversion)"
 
-#: packages/lib/models/settings/builtInMetadata.ts:697
-#: packages/lib/models/settings/builtInMetadata.ts:698
-#: packages/lib/models/settings/builtInMetadata.ts:699
+#: packages/lib/models/settings/builtInMetadata.ts:706
+#: packages/lib/models/settings/builtInMetadata.ts:707
+#: packages/lib/models/settings/builtInMetadata.ts:708
 msgid "%s / %s"
 msgstr "%s / %s"
 
-#: packages/lib/models/settings/builtInMetadata.ts:696
+#: packages/lib/models/settings/builtInMetadata.ts:705
 msgid "%s / %s / %s"
 msgstr "%s / %s / %s"
 
@@ -303,7 +303,7 @@ msgstr ""
 msgid "A brief description of the image:"
 msgstr ""
 
-#: packages/lib/models/settings/builtInMetadata.ts:1961
+#: packages/lib/models/settings/builtInMetadata.ts:1970
 msgid ""
 "A comma-separated list of words. May be used for uncommon words, to help "
 "voice typing spell them correctly."
@@ -315,15 +315,15 @@ msgstr ""
 msgid "A new update (%s) is available"
 msgstr "En ny uppdatering (%s) är tillgänglig"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1425
+#: packages/lib/models/settings/builtInMetadata.ts:1434
 msgid "A3"
 msgstr "A3"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1423
+#: packages/lib/models/settings/builtInMetadata.ts:1432
 msgid "A4"
 msgstr "A4"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1426
+#: packages/lib/models/settings/builtInMetadata.ts:1435
 msgid "A5"
 msgstr "A5"
 
@@ -416,6 +416,10 @@ msgstr "Faktisk storlek"
 msgid "Add body"
 msgstr "Lägg till brödtext"
 
+#: packages/editor/ProseMirror/plugins/tablePlugin.ts:24
+msgid "Add column"
+msgstr ""
+
 #: packages/app-mobile/components/buttons/FloatingActionButton.tsx:66
 #: packages/app-mobile/components/ComboBox.tsx:103
 #: packages/app-mobile/components/screens/Notes/NewNoteButton.tsx:136
@@ -429,6 +433,11 @@ msgstr "Lägg till eller ta bort taggar:"
 #: packages/app-desktop/gui/ShareFolderDialog/ShareFolderDialog.tsx:278
 msgid "Add recipient:"
 msgstr "Lägg till mottagare:"
+
+#: packages/editor/ProseMirror/plugins/tablePlugin.ts:19
+#, fuzzy
+msgid "Add row"
+msgstr "Lägg till ny"
 
 #: packages/app-mobile/components/TagEditor.tsx:281
 msgid "Add tags:"
@@ -494,7 +503,7 @@ msgstr ""
 msgid "All item sync failures have been marked as \"ignored\"."
 msgstr "Alla objektsynkroniseringsfel har markerats som \"ignorerade\"."
 
-#: packages/app-desktop/gui/Sidebar/listItemComponents/AllNotesItem.tsx:73
+#: packages/app-desktop/gui/Sidebar/hooks/useSidebarListData.ts:72
 #: packages/app-mobile/components/screens/Notes/Notes.tsx:208
 #: packages/app-mobile/components/side-menu-content.tsx:684
 msgid "All notes"
@@ -508,7 +517,7 @@ msgstr "Alla potentiella portar används - rapportera problemet på %s"
 msgid "All shared folders:"
 msgstr "Alla delade mappar:"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1023
+#: packages/lib/models/settings/builtInMetadata.ts:1032
 msgid "Allows debugging mobile plugins. See %s for details."
 msgstr "Tillåter felsökning av mobila insticksmoduler. Se %s för detaljer."
 
@@ -524,11 +533,11 @@ msgstr "Publicera även länkade anteckningar"
 msgid "Alternative instance ID: %s"
 msgstr "Alternativt instans-ID: %s"
 
-#: packages/lib/models/settings/builtInMetadata.ts:461
+#: packages/lib/models/settings/builtInMetadata.ts:470
 msgid "Always"
 msgstr "Alltid"
 
-#: packages/lib/models/settings/builtInMetadata.ts:979
+#: packages/lib/models/settings/builtInMetadata.ts:988
 msgid "Always ask"
 msgstr "Fråga alltid"
 
@@ -536,7 +545,7 @@ msgstr "Fråga alltid"
 msgid "Always open %s files without asking."
 msgstr "Öppna alltid %s-filer utan att fråga."
 
-#: packages/lib/models/settings/builtInMetadata.ts:980
+#: packages/lib/models/settings/builtInMetadata.ts:989
 msgid "Always resize"
 msgstr "Ändra alltid storlek"
 
@@ -659,7 +668,7 @@ msgid "Attach"
 msgstr "Bifoga"
 
 #: packages/app-desktop/gui/NoteEditor/editorCommandDeclarations.ts:75
-#: packages/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/TinyMCE.tsx:803
+#: packages/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/TinyMCE.tsx:804
 #: packages/app-mobile/components/screens/Note/commands/attachFile.ts:26
 #: packages/app-mobile/components/screens/Note/commands/attachFile.ts:90
 msgid "Attach file"
@@ -690,7 +699,7 @@ msgstr "Bilaga"
 msgid "Attachment conflict: \"%s\""
 msgstr "Bilagskonflikt: \"%s\""
 
-#: packages/lib/models/settings/builtInMetadata.ts:457
+#: packages/lib/models/settings/builtInMetadata.ts:466
 msgid "Attachment download behaviour"
 msgstr "Beteende för hämtning av bilagor"
 
@@ -728,7 +737,7 @@ msgstr "Auktoriseringstoken:"
 msgid "Authorise"
 msgstr "Auktorisera"
 
-#: packages/lib/models/settings/builtInMetadata.ts:463
+#: packages/lib/models/settings/builtInMetadata.ts:472
 msgid "Auto"
 msgstr "Automatiskt"
 
@@ -736,27 +745,27 @@ msgstr "Automatiskt"
 msgid "Auto-add disabled accounts for deletion"
 msgstr "Lägg automatiskt till inaktiverade konton för radering"
 
-#: packages/lib/models/settings/builtInMetadata.ts:776
+#: packages/lib/models/settings/builtInMetadata.ts:785
 msgid "Auto-format Markdown in the Rich Text Editor"
 msgstr "Formatera Markdown automatiskt i Avancerad textredigerare"
 
-#: packages/lib/models/settings/builtInMetadata.ts:733
+#: packages/lib/models/settings/builtInMetadata.ts:742
 msgid "Auto-pair braces, parentheses, quotations, etc."
 msgstr "Para automatiskt hakparenteser, paranteser, situationstecken, etc."
 
-#: packages/lib/models/settings/builtInMetadata.ts:744
+#: packages/lib/models/settings/builtInMetadata.ts:753
 msgid "Autocomplete Markdown and HTML"
 msgstr "Slutför automatiskt Markdown och HTML"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1370
+#: packages/lib/models/settings/builtInMetadata.ts:1379
 msgid "Automatically check for updates"
 msgstr "Sök automatiskt efter uppdateringar"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1988
+#: packages/lib/models/settings/builtInMetadata.ts:1997
 msgid "Automatically delete notes in the trash after a number of days"
 msgstr "Radera anteckningar i papperskorgen automatiskt efter ett antal dagar"
 
-#: packages/lib/models/settings/builtInMetadata.ts:644
+#: packages/lib/models/settings/builtInMetadata.ts:653
 msgid "Automatically switch theme to match system theme"
 msgstr "Växla automatiskt tema för att matcha systemtema"
 
@@ -923,8 +932,8 @@ msgstr "Kan inte skapa en ny anteckning: %s"
 #: packages/app-cli/app/command-tag.js:87
 #: packages/app-cli/app/command-todo.js:21
 #: packages/app-cli/app/command-use.ts:23
-#: packages/lib/services/interop/InteropService.ts:300
-#: packages/lib/services/interop/InteropService.ts:319
+#: packages/lib/services/interop/InteropService.ts:305
+#: packages/lib/services/interop/InteropService.ts:324
 msgid "Cannot find \"%s\"."
 msgstr "Det går inte att hitta \"%s\"."
 
@@ -936,13 +945,13 @@ msgstr "Det går inte att hitta: \"%s\"."
 msgid "Cannot initialise synchroniser."
 msgstr "Det går inte att initiera synkroniseraren."
 
-#: packages/lib/services/interop/InteropService.ts:267
+#: packages/lib/services/interop/InteropService.ts:272
 msgid "Cannot load \"%s\" module for format \"%s\" and output \"%s\""
 msgstr ""
 "Det går inte att läsa in \"%s\"-modulen för formatet \"%s\" och utmatningen "
 "\"%s\""
 
-#: packages/lib/services/interop/InteropService.ts:280
+#: packages/lib/services/interop/InteropService.ts:285
 msgid "Cannot load \"%s\" module for format \"%s\" and target \"%s\""
 msgstr ""
 "Det går inte att läsa in \"%s\"-modulen för formatet \"%s\" och målet \"%s\""
@@ -1159,11 +1168,11 @@ msgstr "Cmd-klicka för att öppna: %s"
 msgid "Code"
 msgstr "Kod"
 
-#: packages/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/TinyMCE.tsx:813
+#: packages/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/TinyMCE.tsx:814
 msgid "Code Block"
 msgstr "Kodblock"
 
-#: packages/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/TinyMCE.tsx:1558
+#: packages/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/TinyMCE.tsx:1566
 msgid "Code View"
 msgstr "Kodvy"
 
@@ -1176,7 +1185,7 @@ msgid "Collaborate on a notebook with others"
 msgstr "Samarbeta på en anteckningsbok med andra"
 
 #: packages/app-desktop/gui/SyncWizard/Dialog.tsx:177
-#: packages/app-mobile/components/SyncWizard/SyncWizard.tsx:117
+#: packages/app-mobile/components/SyncWizard/SyncWizard.tsx:123
 msgid "Collaborate on notebooks with others"
 msgstr "Samarbeta på anteckningsböcker tillsammans med andra"
 
@@ -1198,12 +1207,12 @@ msgstr "Ihopfälld"
 msgid "Coming alarms"
 msgstr "Kommande larm"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1582
+#: packages/lib/models/settings/builtInMetadata.ts:1591
 msgid ""
 "Comma-separated list of paths to directories to load the certificates from, "
-"or path to individual cert files. For example: /my/cert_dir, /other/"
-"custom.pem. Note that if you make changes to the TLS settings, you must save "
-"your changes before clicking on \"Check synchronisation configuration\"."
+"or path to individual cert files. For example: /my/cert_dir, /other/custom."
+"pem. Note that if you make changes to the TLS settings, you must save your "
+"changes before clicking on \"Check synchronisation configuration\"."
 msgstr ""
 "Kommaseparerad lista över sökvägar till kataloger för att läsa certifikaten "
 "från eller sökvägen till enskilda cert-filer. Till exempel: /my/cert_dir,/"
@@ -1281,7 +1290,7 @@ msgstr "Komprimera gamla ändringar"
 msgid "Configuration"
 msgstr "Konfiguration"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1283
+#: packages/lib/models/settings/builtInMetadata.ts:1292
 msgid "Configures the size of scrollbars used in the app."
 msgstr "Konfigurerar storleken på rullningslister som används i appen."
 
@@ -1349,7 +1358,7 @@ msgstr "Fortsätt"
 msgid "Control character"
 msgstr "Kontrolltecken"
 
-#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:660
+#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:674
 msgid "Convert it"
 msgstr "Konvertera den"
 
@@ -1636,15 +1645,15 @@ msgstr "anpassad ordning"
 msgid "Custom order"
 msgstr "Anpassad ordning"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1339
+#: packages/lib/models/settings/builtInMetadata.ts:1348
 msgid "Custom stylesheet for Joplin-wide app styles"
 msgstr "Anpassat formatmall för appformat för hela Joplin"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1322
+#: packages/lib/models/settings/builtInMetadata.ts:1331
 msgid "Custom stylesheet for rendered Markdown"
 msgstr "Anpassat formatmall för renderad Markdown"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1581
+#: packages/lib/models/settings/builtInMetadata.ts:1590
 msgid "Custom TLS certificates"
 msgstr "Anpassade TLS-certifikat"
 
@@ -1670,12 +1679,12 @@ msgstr "Instrumentbräda"
 msgid "Date"
 msgstr "Datum"
 
-#: packages/lib/models/settings/builtInMetadata.ts:523
+#: packages/lib/models/settings/builtInMetadata.ts:532
 msgid "Date format"
 msgstr "Datumformat"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1687
-#: packages/lib/models/settings/builtInMetadata.ts:2001
+#: packages/lib/models/settings/builtInMetadata.ts:1696
+#: packages/lib/models/settings/builtInMetadata.ts:2010
 msgid "days"
 msgstr "dagar"
 
@@ -1696,13 +1705,13 @@ msgstr "Antal dekrypterade objekt: %s / %s"
 msgid "Decrypting items: %d/%d"
 msgstr "Dekrypterar objekt: %d/%d"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1215
-#: packages/lib/models/settings/builtInMetadata.ts:1222
-#: packages/lib/models/settings/builtInMetadata.ts:1461
+#: packages/lib/models/settings/builtInMetadata.ts:1224
+#: packages/lib/models/settings/builtInMetadata.ts:1231
+#: packages/lib/models/settings/builtInMetadata.ts:1470
 msgid "Default"
 msgstr "Standard"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1972
+#: packages/lib/models/settings/builtInMetadata.ts:1981
 msgid "Default title to use for documents created by the scanner."
 msgstr "Standardtitel som ska användas för dokument som skapas av skannern."
 
@@ -1728,6 +1737,11 @@ msgstr "Ta bort"
 msgid "Delete attachment \"%s\"?"
 msgstr "Ta bort bilagan \"%s\"?"
 
+#: packages/editor/ProseMirror/plugins/tablePlugin.ts:34
+#, fuzzy
+msgid "Delete column"
+msgstr "Ta bort rad"
+
 #: packages/server/src/services/TaskService.ts:27
 msgid "Delete expired sessions"
 msgstr "Ta bort utgångna sessioner"
@@ -1746,7 +1760,7 @@ msgstr "Radera historik"
 msgid "Delete line"
 msgstr "Ta bort rad"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1363
+#: packages/lib/models/settings/builtInMetadata.ts:1372
 msgid "Delete local data and re-download from sync target"
 msgstr "Ta bort lokala data och hämta igen från synkroniseringsmålet"
 
@@ -1765,6 +1779,11 @@ msgstr "Ta bort insticksmodulen \"%s\"?"
 #: packages/app-mobile/components/ProfileSwitcher/ProfileSwitcher.tsx:111
 msgid "Delete profile \"%s\""
 msgstr "Ta bort profilen \"%s\""
+
+#: packages/editor/ProseMirror/plugins/tablePlugin.ts:29
+#, fuzzy
+msgid "Delete row"
+msgstr "Ta bort anteckning"
 
 #: packages/app-mobile/components/ScreenHeader/index.tsx:486
 msgid "Delete selected notes"
@@ -1857,7 +1876,7 @@ msgstr "Enhet: %s"
 msgid "Directory"
 msgstr "Katalog"
 
-#: packages/lib/models/settings/builtInMetadata.ts:160
+#: packages/lib/models/settings/builtInMetadata.ts:169
 msgid "Directory to synchronise with (absolute path)"
 msgstr "Katalog för att synkronisera med (absolut sökväg)"
 
@@ -1887,7 +1906,7 @@ msgstr "Inaktivera Web Clipper-tjänsten"
 #: packages/app-desktop/gui/KeymapConfig/KeymapConfigScreen.tsx:143
 #: packages/app-mobile/components/screens/ConfigScreen/plugins/PluginBox/PluginChips.tsx:85
 #: packages/app-mobile/components/screens/encryption-config.tsx:353
-#: packages/lib/models/settings/builtInMetadata.ts:1395
+#: packages/lib/models/settings/builtInMetadata.ts:1404
 msgid "Disabled"
 msgstr "Inaktiverad"
 
@@ -1939,9 +1958,9 @@ msgid ""
 "to-dos, while `-tnt` would display notes and to-dos."
 msgstr ""
 "Visar endast objekt av den specifika typen/typerna. Kan vara `n` för "
-"anteckningar, `t` för att-göra eller `nt` för anteckningar och att-göra "
-"(t.ex. `-tt` skulle bara visa att-göra, medan `-tnt` skulle visa "
-"anteckningar och att-göra."
+"anteckningar, `t` för att-göra eller `nt` för anteckningar och att-göra (t."
+"ex. `-tt` skulle bara visa att-göra, medan `-tnt` skulle visa anteckningar "
+"och att-göra."
 
 #: packages/app-cli/app/command-status.js:13
 msgid "Displays summary about the notes and notebooks."
@@ -2000,7 +2019,7 @@ msgstr ""
 msgid "Do you find the Joplin web app useful?"
 msgstr ""
 
-#: packages/lib/models/settings/builtInMetadata.ts:1971
+#: packages/lib/models/settings/builtInMetadata.ts:1980
 msgid "Document scanner: Title template"
 msgstr "Dokumentskanner: Titelmall"
 
@@ -2012,7 +2031,7 @@ msgstr ""
 "Tillåt inte delningsmottagaren att skriva till den delade anteckningsboken. "
 "Gäller endast för underkommandot `add`."
 
-#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:662
+#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:676
 msgid "Don't show this message again"
 msgstr "Visa inte detta meddelande igen"
 
@@ -2078,7 +2097,7 @@ msgstr "Rita bild"
 msgid "Drawing"
 msgstr "Teckning"
 
-#: packages/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/TinyMCE.tsx:1558
+#: packages/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/TinyMCE.tsx:1566
 msgid "Drop notes or files here"
 msgstr "Släpp anteckningar eller filer här"
 
@@ -2171,9 +2190,9 @@ msgstr "Redigera profilkonfiguration..."
 
 #: packages/app-desktop/gui/MainScreen.tsx:132
 #: packages/app-desktop/gui/NoteContentPropertiesDialog.tsx:144
-#: packages/lib/models/settings/builtInMetadata.ts:696
-#: packages/lib/models/settings/builtInMetadata.ts:697
-#: packages/lib/models/settings/builtInMetadata.ts:698
+#: packages/lib/models/settings/builtInMetadata.ts:705
+#: packages/lib/models/settings/builtInMetadata.ts:706
+#: packages/lib/models/settings/builtInMetadata.ts:707
 msgid "Editor"
 msgstr "Redigerare"
 
@@ -2181,23 +2200,23 @@ msgstr "Redigerare"
 msgid "Editor actions"
 msgstr "Redigeraråtgärder"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1208
+#: packages/lib/models/settings/builtInMetadata.ts:1217
 msgid "Editor font"
 msgstr "Redigerarens teckensnitt"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1234
+#: packages/lib/models/settings/builtInMetadata.ts:1243
 msgid "Editor font family"
 msgstr "Redigerarens teckensnittsfamilj"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1196
+#: packages/lib/models/settings/builtInMetadata.ts:1205
 msgid "Editor font size"
 msgstr "Redigerarens teckenstorlek"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1266
+#: packages/lib/models/settings/builtInMetadata.ts:1275
 msgid "Editor maximum width"
 msgstr "Redigerarens maximala bredd"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1247
+#: packages/lib/models/settings/builtInMetadata.ts:1256
 msgid "Editor monospace font family"
 msgstr "Redigerarens monospace teckensnittsfamilj"
 
@@ -2210,7 +2229,7 @@ msgstr "Redigerare: %s"
 msgid "Either \"text\" or \"json\""
 msgstr "Antingen \"text\" eller \"json\""
 
-#: packages/lib/models/settings/builtInMetadata.ts:1462
+#: packages/lib/models/settings/builtInMetadata.ts:1471
 msgid "Emacs"
 msgstr "Emacs"
 
@@ -2256,27 +2275,27 @@ msgstr "Töm papperskorgen"
 msgid "Enable"
 msgstr "Aktivera"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1091
+#: packages/lib/models/settings/builtInMetadata.ts:1100
 msgid "Enable ^sup^ syntax"
 msgstr "Aktivera ^sup^ syntax"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1095
+#: packages/lib/models/settings/builtInMetadata.ts:1104
 msgid "Enable ++insert++ syntax"
 msgstr "Aktivera ++ insert ++ syntax"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1087
+#: packages/lib/models/settings/builtInMetadata.ts:1096
 msgid "Enable ==mark== syntax"
 msgstr "Aktivera ==mark== syntax"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1090
+#: packages/lib/models/settings/builtInMetadata.ts:1099
 msgid "Enable ~sub~ syntax"
 msgstr "Aktivera ~sub~ syntax"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1093
+#: packages/lib/models/settings/builtInMetadata.ts:1102
 msgid "Enable abbreviation syntax"
 msgstr "Aktivera förkortningssyntax"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1084
+#: packages/lib/models/settings/builtInMetadata.ts:1093
 msgid "Enable audio player"
 msgstr "Aktivera ljudspelare"
 
@@ -2284,7 +2303,7 @@ msgstr "Aktivera ljudspelare"
 msgid "Enable biometrics authentication?"
 msgstr "Aktivera biometrisk autentisering?"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1092
+#: packages/lib/models/settings/builtInMetadata.ts:1101
 msgid "Enable deflist syntax"
 msgstr "Aktivera deflist-syntax"
 
@@ -2293,51 +2312,51 @@ msgstr "Aktivera deflist-syntax"
 msgid "Enable encryption"
 msgstr "Aktivera kryptering"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1107
+#: packages/lib/models/settings/builtInMetadata.ts:1116
 msgid "Enable file:// URLs for images and videos"
 msgstr "Aktivera file:// URL:er för bilder och videor"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1088
+#: packages/lib/models/settings/builtInMetadata.ts:1097
 msgid "Enable footnotes"
 msgstr "Aktivera fotnoter"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1081
+#: packages/lib/models/settings/builtInMetadata.ts:1090
 msgid "Enable Fountain syntax support"
 msgstr "Aktivera stöd för Fountain-syntax"
 
-#: packages/lib/models/settings/builtInMetadata.ts:577
+#: packages/lib/models/settings/builtInMetadata.ts:586
 msgid "Enable handwritten transcription"
 msgstr "Aktivera handskriven transkription"
 
-#: packages/lib/models/settings/builtInMetadata.ts:756
+#: packages/lib/models/settings/builtInMetadata.ts:765
 msgid "Enable HTML-to-Markdown conversion banner"
 msgstr "Aktivera banderoll för HTML till Markdown-konvertering"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1078
+#: packages/lib/models/settings/builtInMetadata.ts:1087
 msgid "Enable Linkify"
 msgstr "Aktivera Linkify"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1094
+#: packages/lib/models/settings/builtInMetadata.ts:1103
 msgid "Enable markdown emoji"
 msgstr "Aktivera markdown-emoji"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1080
+#: packages/lib/models/settings/builtInMetadata.ts:1089
 msgid "Enable math expressions"
 msgstr "Aktivera matematiska uttryck"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1082
+#: packages/lib/models/settings/builtInMetadata.ts:1091
 msgid "Enable Mermaid diagrams support"
 msgstr "Aktivera stöd för Mermaid-diagram"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1096
+#: packages/lib/models/settings/builtInMetadata.ts:1105
 msgid "Enable multimarkdown table extension"
 msgstr "Aktivera tabellförlängning för multimarkdown"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1677
+#: packages/lib/models/settings/builtInMetadata.ts:1686
 msgid "Enable note history"
 msgstr "Aktivera anteckningshistorik"
 
-#: packages/lib/models/settings/builtInMetadata.ts:566
+#: packages/lib/models/settings/builtInMetadata.ts:575
 msgid "Enable optical character recognition (OCR)"
 msgstr "Aktivera optisk teckenigenkänning (OCR)"
 
@@ -2345,40 +2364,40 @@ msgstr "Aktivera optisk teckenigenkänning (OCR)"
 msgid "Enable or disable plugins"
 msgstr "Aktivera eller inaktivera insticksmoduler"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1086
+#: packages/lib/models/settings/builtInMetadata.ts:1095
 msgid "Enable PDF viewer"
 msgstr "Aktivera PDF-visare"
 
 #: packages/app-mobile/components/screens/ConfigScreen/plugins/EnablePluginSupportPage.tsx:119
-#: packages/lib/models/settings/builtInMetadata.ts:1034
+#: packages/lib/models/settings/builtInMetadata.ts:1043
 msgid "Enable plugin support"
 msgstr "Aktivera insticksmodulsstöd"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1076
+#: packages/lib/models/settings/builtInMetadata.ts:1085
 msgid "Enable soft breaks"
 msgstr "Aktivera mjuk radbrytning"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1475
+#: packages/lib/models/settings/builtInMetadata.ts:1484
 msgid "Enable spell checking in Markdown editor"
 msgstr "Aktivera stavningskontroll i Markdown-redigeraren"
 
-#: packages/lib/models/settings/builtInMetadata.ts:918
+#: packages/lib/models/settings/builtInMetadata.ts:927
 msgid "Enable spellcheck in the text editor"
 msgstr "Aktivera stavningskontroll i textredigeraren"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1089
+#: packages/lib/models/settings/builtInMetadata.ts:1098
 msgid "Enable table of contents extension"
 msgstr "Aktivera innehållsförteckningen"
 
-#: packages/lib/models/settings/builtInMetadata.ts:929
+#: packages/lib/models/settings/builtInMetadata.ts:938
 msgid "Enable the Markdown toolbar"
 msgstr "Aktivera Markdown-verktygsfältet"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1077
+#: packages/lib/models/settings/builtInMetadata.ts:1086
 msgid "Enable typographer support"
 msgstr "Aktivera typografiskt stöd"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1085
+#: packages/lib/models/settings/builtInMetadata.ts:1094
 msgid "Enable video player"
 msgstr "Aktivera videospelare"
 
@@ -2394,7 +2413,7 @@ msgstr "Aktivera Web Clipper-tjänsten"
 msgid "Enabled"
 msgstr "Aktiverad"
 
-#: packages/lib/models/settings/builtInMetadata.ts:745
+#: packages/lib/models/settings/builtInMetadata.ts:754
 msgid ""
 "Enables Markdown list continuation, auto-closing HTML tags, and other markup "
 "autocompletions."
@@ -2402,7 +2421,7 @@ msgstr ""
 "Aktiverar Markdown-listfortsättning, automatisk stängning av HTML-taggar och "
 "andra märkspråksautokompletteringar."
 
-#: packages/lib/models/settings/builtInMetadata.ts:777
+#: packages/lib/models/settings/builtInMetadata.ts:786
 msgid ""
 "Enables Markdown pattern replacement in the Rich Text Editor. For example, "
 "when enabled, typing **bold** creates bold text."
@@ -2418,11 +2437,11 @@ msgstr ""
 "Aktivera kryptering betyder att *alla* dina anteckningar och bilagor kommer "
 "att synkroniseras på nytt och skickas krypterade till synkroniseringsmålet."
 
-#: packages/lib/models/BaseItem.ts:921
+#: packages/lib/models/BaseItem.ts:943
 msgid "Encrypted"
 msgstr "Krypterad"
 
-#: packages/lib/models/BaseItem.ts:983
+#: packages/lib/models/BaseItem.ts:1005
 msgid "Encrypted items cannot be modified"
 msgstr "Krypterade objekt kan inte ändras"
 
@@ -2634,11 +2653,11 @@ msgstr "Exporterar endast den angivna anteckningen."
 msgid "Exports only the given notebook."
 msgstr "Exporterar endast den angivna anteckningsboken."
 
-#: packages/lib/models/settings/builtInMetadata.ts:1648
+#: packages/lib/models/settings/builtInMetadata.ts:1657
 msgid "Fail-safe"
 msgstr "Felsäker"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1649
+#: packages/lib/models/settings/builtInMetadata.ts:1658
 msgid ""
 "Fail-safe: Do not wipe out local data when sync target is empty (often the "
 "result of a misconfiguration or bug)"
@@ -2730,13 +2749,13 @@ msgstr "Åtgärdar sökindex..."
 msgid "Focus"
 msgstr "Fokus"
 
-#: packages/lib/models/settings/builtInMetadata.ts:945
-#: packages/lib/models/settings/builtInMetadata.ts:962
+#: packages/lib/models/settings/builtInMetadata.ts:954
+#: packages/lib/models/settings/builtInMetadata.ts:971
 msgid "Focus body"
 msgstr "Fokus på huvuddel"
 
-#: packages/lib/models/settings/builtInMetadata.ts:944
-#: packages/lib/models/settings/builtInMetadata.ts:961
+#: packages/lib/models/settings/builtInMetadata.ts:953
+#: packages/lib/models/settings/builtInMetadata.ts:970
 msgid "Focus title"
 msgstr "Fokus på titel"
 
@@ -2752,7 +2771,7 @@ msgstr "Följ länken"
 msgid "For debugging purpose only: export your profile to an external SD card."
 msgstr "Endast för felsökning: exportera din profil till ett externt SD-kort."
 
-#: packages/lib/models/settings/builtInMetadata.ts:1628
+#: packages/lib/models/settings/builtInMetadata.ts:1637
 msgid "For example \"%s\""
 msgstr "Till exempel \"%s\""
 
@@ -2775,7 +2794,7 @@ msgstr ""
 "För listan över snabbkommandon och konfigurationsinställningar, skriv `help "
 "keymap`"
 
-#: packages/lib/models/settings/builtInMetadata.ts:324
+#: packages/lib/models/settings/builtInMetadata.ts:333
 msgid "Force path style"
 msgstr "Tvinga sökvägsstil"
 
@@ -2829,7 +2848,7 @@ msgstr "Begär en offert"
 msgid "Get it now:"
 msgstr "Hämta det nu:"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1371
+#: packages/lib/models/settings/builtInMetadata.ts:1380
 msgid "Get pre-releases when checking for updates"
 msgstr "Hämta förhandsversioner vid programuppdateringar"
 
@@ -2951,7 +2970,7 @@ msgstr "Hem"
 msgid "Horizontal Rule"
 msgstr "Horisontell linje"
 
-#: packages/lib/services/interop/InteropService.ts:190
+#: packages/lib/services/interop/InteropService.ts:195
 msgid "HTML Directory"
 msgstr "HTML-mapp"
 
@@ -2959,7 +2978,7 @@ msgstr "HTML-mapp"
 msgid "HTML document"
 msgstr "HTML-dokument"
 
-#: packages/lib/services/interop/InteropService.ts:183
+#: packages/lib/services/interop/InteropService.ts:188
 msgid "HTML File"
 msgstr "HTML-fil"
 
@@ -2983,7 +3002,7 @@ msgstr "ID"
 msgid "Idle"
 msgstr "Inaktiv"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1496
+#: packages/lib/models/settings/builtInMetadata.ts:1505
 msgid ""
 "If an image attachment is on its own line and followed by a blank line, it "
 "will be rendered just below its Markdown source."
@@ -3006,7 +3025,7 @@ msgstr ""
 msgid "Ignore"
 msgstr "Ignorera"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1607
+#: packages/lib/models/settings/builtInMetadata.ts:1616
 msgid "Ignore TLS certificate errors"
 msgstr "Ignorera TLS-certifikatfel"
 
@@ -3069,7 +3088,7 @@ msgstr "Importerar..."
 msgid "Imports data into Joplin."
 msgstr "Importerar data till Joplin."
 
-#: packages/lib/models/settings/builtInMetadata.ts:458
+#: packages/lib/models/settings/builtInMetadata.ts:467
 msgid ""
 "In \"Manual\" mode, attachments are downloaded only when you click on them. "
 "In \"Auto\", they are downloaded when you open the note. In \"Always\", all "
@@ -3141,7 +3160,7 @@ msgstr "För att kunna använda Web Clipper måste du göra följande:"
 msgid "In progress"
 msgstr "Pågår"
 
-#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:608
+#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:622
 msgid "In: %s"
 msgstr "I: %s"
 
@@ -3182,7 +3201,7 @@ msgstr "Info"
 msgid "Information"
 msgstr "Information"
 
-#: packages/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/TinyMCE.tsx:821
+#: packages/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/TinyMCE.tsx:822
 msgid "Inline Code"
 msgstr "Kodsnuttar"
 
@@ -3196,7 +3215,7 @@ msgid "Insert Hyperlink"
 msgstr "Infoga hyperlänk"
 
 #: packages/app-desktop/gui/NoteEditor/editorCommandDeclarations.ts:105
-#: packages/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/TinyMCE.tsx:854
+#: packages/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/TinyMCE.tsx:855
 #: packages/app-mobile/components/screens/Note/commands/insertDateTime.ts:8
 msgid "Insert time"
 msgstr "Infoga tid"
@@ -3291,7 +3310,7 @@ msgid "Join us on %s"
 msgstr "Följ oss ​​på %s"
 
 #: packages/app-desktop/gui/SyncWizard/Dialog.tsx:310
-#: packages/app-mobile/components/SyncWizard/SyncWizard.tsx:108
+#: packages/app-mobile/components/SyncWizard/SyncWizard.tsx:114
 msgid ""
 "Joplin can synchronise your notes using various providers. Select one from "
 "the list below."
@@ -3299,7 +3318,7 @@ msgstr ""
 "Joplin kan synkronisera dina anteckningar med olika leverantörer. Välj en "
 "från listan nedan."
 
-#: packages/app-mobile/components/SyncWizard/SyncWizard.tsx:112
+#: packages/app-mobile/components/SyncWizard/SyncWizard.tsx:118
 #: packages/lib/models/Setting.ts:1304 packages/lib/SyncTargetJoplinCloud.ts:30
 msgid "Joplin Cloud"
 msgstr "Joplin Cloud"
@@ -3321,12 +3340,12 @@ msgstr ""
 "Joplin känner inte igen insticksmodulen %s. Det kan vara farligt att öppna "
 "den här filen. Vad skulle du vilja göra?"
 
-#: packages/lib/services/interop/InteropService.ts:163
+#: packages/lib/services/interop/InteropService.ts:168
 #: packages/lib/services/interop/InteropService.ts:72
 msgid "Joplin Export Directory"
 msgstr "Joplin-exporteringskatalog"
 
-#: packages/lib/services/interop/InteropService.ts:157
+#: packages/lib/services/interop/InteropService.ts:162
 #: packages/lib/services/interop/InteropService.ts:66
 msgid "Joplin Export File"
 msgstr "Joplin-exporteringsfil"
@@ -3366,7 +3385,7 @@ msgstr "Joplin-serverwebbadress"
 msgid "Joplin Server Business"
 msgstr "Joplin Server Business"
 
-#: packages/lib/models/settings/builtInMetadata.ts:355
+#: packages/lib/models/settings/builtInMetadata.ts:364
 msgid "Joplin Server email"
 msgstr "Joplin Server-e-post"
 
@@ -3375,12 +3394,12 @@ msgstr "Joplin Server-e-post"
 msgid "Joplin Server Login"
 msgstr "Joplin Server-inloggning"
 
-#: packages/lib/models/settings/builtInMetadata.ts:367
+#: packages/lib/models/settings/builtInMetadata.ts:376
 msgid "Joplin Server password"
 msgstr "Joplin Server-lösenord"
 
-#: packages/lib/models/settings/builtInMetadata.ts:336
-#: packages/lib/models/settings/builtInMetadata.ts:379
+#: packages/lib/models/settings/builtInMetadata.ts:345
+#: packages/lib/models/settings/builtInMetadata.ts:388
 msgid "Joplin Server URL"
 msgstr "Joplin-serverwebbadress"
 
@@ -3406,7 +3425,7 @@ msgstr ""
 msgid "Joplin website"
 msgstr "Joplin-webbplats"
 
-#: packages/app-mobile/components/SyncWizard/SyncWizard.tsx:113
+#: packages/app-mobile/components/SyncWizard/SyncWizard.tsx:119
 #: packages/lib/SyncTargetJoplinCloud.ts:34
 msgid ""
 "Joplin's own sync service. Also gives access to Joplin-specific features "
@@ -3416,15 +3435,15 @@ msgstr ""
 "funktioner som att publicera anteckningar eller samarbeta med "
 "anteckningsböcker."
 
-#: packages/lib/models/settings/builtInMetadata.ts:1689
+#: packages/lib/models/settings/builtInMetadata.ts:1698
 msgid "Keep note history for"
 msgstr "Behåll anteckningshistorik under"
 
-#: packages/lib/models/settings/builtInMetadata.ts:2005
+#: packages/lib/models/settings/builtInMetadata.ts:2014
 msgid "Keep notes in the trash for"
 msgstr "Behåll anteckningar i papperskorgen under"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1457
+#: packages/lib/models/settings/builtInMetadata.ts:1466
 msgid "Keyboard Mode"
 msgstr "Tangentbordsläge"
 
@@ -3448,11 +3467,11 @@ msgstr "Nycklar som behöver uppgradering"
 msgid "Label"
 msgstr ""
 
-#: packages/lib/models/settings/builtInMetadata.ts:1434
+#: packages/lib/models/settings/builtInMetadata.ts:1443
 msgid "Landscape"
 msgstr "Liggande"
 
-#: packages/lib/models/settings/builtInMetadata.ts:511
+#: packages/lib/models/settings/builtInMetadata.ts:520
 msgid "Language"
 msgstr "Språk"
 
@@ -3460,7 +3479,7 @@ msgstr "Språk"
 msgid "Language, date format"
 msgstr "Språk, datumformat"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1279
+#: packages/lib/models/settings/builtInMetadata.ts:1288
 msgid "Large"
 msgstr "Stor"
 
@@ -3491,7 +3510,7 @@ msgstr "Knappordning"
 msgid "Learn more"
 msgstr "Läs mer"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1930
+#: packages/lib/models/settings/builtInMetadata.ts:1939
 msgid "Leave it blank to download the language files from the default website"
 msgstr "Lämna det tomt för att hämta språkfilerna från standardwebbplatsen"
 
@@ -3503,11 +3522,11 @@ msgstr "Lämna anteckningsboken"
 msgid "Leave notebook..."
 msgstr "Lämna anteckningsbok..."
 
-#: packages/lib/models/settings/builtInMetadata.ts:1428
+#: packages/lib/models/settings/builtInMetadata.ts:1437
 msgid "Legal"
 msgstr "Legal"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1424
+#: packages/lib/models/settings/builtInMetadata.ts:1433
 msgid "Letter"
 msgstr "Letter"
 
@@ -3664,40 +3683,40 @@ msgid ""
 "Manages E2EE configuration. Commands are `enable`, `disable`, `decrypt`, "
 "`status`, `decrypt-file`, and `target-status`."
 msgstr ""
-"Hanterar E2EE-konfigurationen. Kommandona är `enable`,` disable`, "
-"`decrypt`,` status`, `decrypt-file` och `target-status`."
+"Hanterar E2EE-konfigurationen. Kommandona är `enable`,` disable`, `decrypt`,"
+"` status`, `decrypt-file` och `target-status`."
 
-#: packages/lib/models/settings/builtInMetadata.ts:462
+#: packages/lib/models/settings/builtInMetadata.ts:471
 msgid "Manual"
 msgstr "Manuellt"
 
 #: packages/app-desktop/gui/ToggleEditorsButton/ToggleEditorsButton.tsx:28
 #: packages/lib/models/Setting.ts:1297
 #: packages/lib/services/interop/InteropService.ts:124
-#: packages/lib/services/interop/InteropService.ts:169
+#: packages/lib/services/interop/InteropService.ts:174
 msgid "Markdown"
 msgstr "Markdown"
 
 #: packages/lib/services/interop/InteropService.ts:132
-#: packages/lib/services/interop/InteropService.ts:175
+#: packages/lib/services/interop/InteropService.ts:180
 msgid "Markdown + Front Matter"
 msgstr "Markdown + Front Matter"
 
-#: packages/app-desktop/gui/NoteEditor/NoteBody/CodeMirror/v6/CodeMirror.tsx:396
+#: packages/app-desktop/gui/NoteEditor/NoteBody/CodeMirror/v6/CodeMirror.tsx:397
 #: packages/app-mobile/components/NoteEditor/NoteEditor.tsx:286
 msgid "Markdown editor"
 msgstr "Markdown-redigerare"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1506
+#: packages/lib/models/settings/builtInMetadata.ts:1515
 #, fuzzy
 msgid "Markdown editor: Highlight active line"
 msgstr "Markdown-redigerare: Rendera bilder"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1495
+#: packages/lib/models/settings/builtInMetadata.ts:1504
 msgid "Markdown editor: Render images"
 msgstr "Markdown-redigerare: Rendera bilder"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1485
+#: packages/lib/models/settings/builtInMetadata.ts:1494
 msgid "Markdown editor: Render markup in editor"
 msgstr "Markdown-redigerare: Rendera märkkod i redigeraren"
 
@@ -3736,7 +3755,7 @@ msgstr "matcha skiftläge"
 msgid "Math"
 msgstr "Matematik"
 
-#: packages/lib/models/settings/builtInMetadata.ts:487
+#: packages/lib/models/settings/builtInMetadata.ts:496
 msgid "Max concurrent connections"
 msgstr "Max antal samtida anslutningar"
 
@@ -3756,7 +3775,7 @@ msgstr "Max total storlek"
 msgid "Media player, math, diagrams, table of contents"
 msgstr "Mediaspelare, matematik, diagram, innehållsförteckning"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1278
+#: packages/lib/models/settings/builtInMetadata.ts:1287
 msgid "Medium"
 msgstr "Medium"
 
@@ -3872,7 +3891,7 @@ msgstr "n"
 msgid "N"
 msgstr "N"
 
-#: packages/lib/models/settings/builtInMetadata.ts:981
+#: packages/lib/models/settings/builtInMetadata.ts:990
 msgid "Never resize"
 msgstr "Ändra aldrig storlek"
 
@@ -3966,15 +3985,15 @@ msgstr "Nästa träff"
 msgid "Nextcloud"
 msgstr "Nextcloud"
 
-#: packages/lib/models/settings/builtInMetadata.ts:199
+#: packages/lib/models/settings/builtInMetadata.ts:208
 msgid "Nextcloud password"
 msgstr "Nextcloud-lösenord"
 
-#: packages/lib/models/settings/builtInMetadata.ts:187
+#: packages/lib/models/settings/builtInMetadata.ts:196
 msgid "Nextcloud username"
 msgstr "Nextcloud-användarnamn"
 
-#: packages/lib/models/settings/builtInMetadata.ts:174
+#: packages/lib/models/settings/builtInMetadata.ts:183
 msgid "Nextcloud WebDAV URL"
 msgstr "Nextcloud WebDAV-URL"
 
@@ -4101,7 +4120,7 @@ msgstr "anteckning"
 msgid "Note"
 msgstr "Anteckning"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1753
+#: packages/lib/models/settings/builtInMetadata.ts:1762
 msgid "Note area growth factor"
 msgstr "Anteckningsområdets tillväxtfaktor"
 
@@ -4154,7 +4173,7 @@ msgstr "Anteckning är inte en att-göra: \"%s\""
 msgid "Note list"
 msgstr "Anteckningslista"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1738
+#: packages/lib/models/settings/builtInMetadata.ts:1747
 msgid "Note list growth factor"
 msgstr "Anteckningslistans tillväxtfaktor"
 
@@ -4186,7 +4205,7 @@ msgstr "Rubriken"
 msgid "Note viewer"
 msgstr "Anteckningsvisare"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1122
+#: packages/lib/models/settings/builtInMetadata.ts:1131
 msgid "Note: Does not work in all desktop environments."
 msgstr "Obs: Fungerar inte i alla skrivbordsmiljöer."
 
@@ -4205,7 +4224,7 @@ msgstr "Antecknings&bok"
 msgid "Notebook"
 msgstr "Anteckningsbok"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1723
+#: packages/lib/models/settings/builtInMetadata.ts:1732
 msgid "Notebook list growth factor"
 msgstr "Anteckningsbokens tillväxtfaktor"
 
@@ -4218,7 +4237,7 @@ msgstr "Anteckningsbok: %s"
 msgid "Notebook: %s (%s)"
 msgstr "Anteckningsbok: %s (%s)"
 
-#: packages/app-desktop/gui/Sidebar/hooks/useSidebarListData.ts:54
+#: packages/app-desktop/gui/Sidebar/hooks/useSidebarListData.ts:58
 #: packages/app-mobile/components/side-menu-content.tsx:691
 #: packages/lib/services/ReportService.ts:369
 msgid "Notebooks"
@@ -4252,15 +4271,15 @@ msgstr "Aviseringar"
 msgid "Numbered List"
 msgstr "Numrerad lista"
 
-#: packages/lib/models/settings/builtInMetadata.ts:609
+#: packages/lib/models/settings/builtInMetadata.ts:618
 msgid "OCR: Clear cache and re-download language data files"
 msgstr "OCR: Rensa cacheminnet och hämta språkdatafiler igen"
 
-#: packages/lib/models/settings/builtInMetadata.ts:590
+#: packages/lib/models/settings/builtInMetadata.ts:599
 msgid "OCR: Language data URL or path"
 msgstr "OCR: Språkdata-URL eller -sökväg"
 
-#: packages/lib/models/settings/builtInMetadata.ts:619
+#: packages/lib/models/settings/builtInMetadata.ts:628
 msgid "OCR: Search in extracted content"
 msgstr "OCR: Sök i extraherat innehåll"
 
@@ -4332,7 +4351,7 @@ msgstr "OneDrive"
 msgid "OneDrive Login"
 msgstr "OneDrive-inloggning"
 
-#: packages/lib/services/interop/InteropService.ts:148
+#: packages/lib/services/interop/InteropService.ts:153
 msgid "OneNote Notebook"
 msgstr "OneNote-anteckningsbok"
 
@@ -4429,7 +4448,7 @@ msgstr "Inställningar"
 msgid "Ordered list"
 msgstr "Numrerad lista"
 
-#: packages/app-mobile/components/SyncWizard/SyncWizard.tsx:124
+#: packages/app-mobile/components/SyncWizard/SyncWizard.tsx:130
 msgid "Other"
 msgstr ""
 
@@ -4441,11 +4460,11 @@ msgstr "Andra program..."
 msgid "Output format: %s"
 msgstr "Utmatningsformat: %s"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1431
+#: packages/lib/models/settings/builtInMetadata.ts:1440
 msgid "Page orientation for PDF export"
 msgstr "Sidorientering för export till PDF"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1421
+#: packages/lib/models/settings/builtInMetadata.ts:1430
 msgid "Page size for PDF export"
 msgstr "Sidstorlek för export till PDF"
 
@@ -4595,7 +4614,7 @@ msgstr "Välj anteckningen eller anteckningsboken som ska tas bort först."
 msgid "Please select where the sync status should be exported to"
 msgstr "Välj vart synkroniseringstillståndet ska exporteras till"
 
-#: packages/lib/services/interop/InteropService.ts:313
+#: packages/lib/services/interop/InteropService.ts:318
 msgid "Please specify import format for %s"
 msgstr "Ange importeringsformat för %s"
 
@@ -4609,7 +4628,7 @@ msgstr ""
 "Uppgradera Joplin till version %s eller senare för att använda denna "
 "insticksmodul."
 
-#: packages/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/TinyMCE.tsx:1558
+#: packages/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/TinyMCE.tsx:1566
 msgid ""
 "Please wait for all attachments to be downloaded and decrypted. You may also "
 "switch to %s to edit the note."
@@ -4650,7 +4669,7 @@ msgstr "Insticksmodulssäkerhet"
 msgid "Plugin tools"
 msgstr "Insticksmodulsverktyg"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1022
+#: packages/lib/models/settings/builtInMetadata.ts:1031
 msgid "Plugin WebView debugging"
 msgstr "Plugin WebView-felsökning"
 
@@ -4669,7 +4688,7 @@ msgstr ""
 "Insticksmoduler utökar Joplin med funktioner som inte finns som standard. "
 "Insticksmoduler kan utöka Joplins redigerare, visare och mer."
 
-#: packages/lib/models/settings/builtInMetadata.ts:1433
+#: packages/lib/models/settings/builtInMetadata.ts:1442
 msgid "Portrait"
 msgstr "Stående"
 
@@ -4693,15 +4712,15 @@ msgstr "Inställningar"
 msgid "Preferences..."
 msgstr "Inställningar..."
 
-#: packages/lib/models/settings/builtInMetadata.ts:674
+#: packages/lib/models/settings/builtInMetadata.ts:683
 msgid "Preferred dark theme"
 msgstr "Föredraget mörkt tema"
 
-#: packages/lib/models/settings/builtInMetadata.ts:658
+#: packages/lib/models/settings/builtInMetadata.ts:667
 msgid "Preferred light theme"
 msgstr "Föredraget ljust tema"
 
-#: packages/lib/models/settings/builtInMetadata.ts:766
+#: packages/lib/models/settings/builtInMetadata.ts:775
 msgid "Preserve colours when pasting text in Rich Text Editor"
 msgstr "Bevara färger när du klistrar in text i Avancerad textredigerare"
 
@@ -4801,15 +4820,15 @@ msgstr "Profiler"
 msgid "Properties"
 msgstr "Egenskaper"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1617
+#: packages/lib/models/settings/builtInMetadata.ts:1626
 msgid "Proxy enabled"
 msgstr "Proxy aktiverad"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1639
+#: packages/lib/models/settings/builtInMetadata.ts:1648
 msgid "Proxy timeout (seconds)"
 msgstr "Proxy tidsgräns (sekunder)"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1627
+#: packages/lib/models/settings/builtInMetadata.ts:1636
 msgid "Proxy URL"
 msgstr "Proxy-URL"
 
@@ -4835,7 +4854,7 @@ msgid "Publish Notes"
 msgstr "Publicera anteckningar"
 
 #: packages/app-desktop/gui/SyncWizard/Dialog.tsx:176
-#: packages/app-mobile/components/SyncWizard/SyncWizard.tsx:116
+#: packages/app-mobile/components/SyncWizard/SyncWizard.tsx:122
 #: packages/lib/utils/joplinCloud/index.ts:162
 msgid "Publish notes to the internet"
 msgstr "Publicera anteckningar till internet"
@@ -4881,7 +4900,7 @@ msgstr "Omkryptering"
 msgid "Re-enter password"
 msgstr "Ange lösenordet igen"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1352
+#: packages/lib/models/settings/builtInMetadata.ts:1361
 msgid "Re-upload local data to sync target"
 msgstr "Ladda upp lokala data igen till synkroniseringsmålet"
 
@@ -5021,7 +5040,7 @@ msgstr ""
 "Byter namn på den angivna <item> (anteckning eller anteckningsbok) till "
 "<name>."
 
-#: packages/lib/models/settings/builtInMetadata.ts:1486
+#: packages/lib/models/settings/builtInMetadata.ts:1495
 msgid "Renders markup on all lines that don't include the cursor."
 msgstr "Renderar märkkod på alla rader som inte innehåller markören."
 
@@ -5091,7 +5110,7 @@ msgstr "Återställ applikationslayout"
 msgid "Reset master password"
 msgstr "Återställ huvudlösenord"
 
-#: packages/lib/models/settings/builtInMetadata.ts:975
+#: packages/lib/models/settings/builtInMetadata.ts:984
 msgid "Resize large images:"
 msgstr "Ändra storlek på stora bilder:"
 
@@ -5168,8 +5187,8 @@ msgid "Reveal file in folder"
 msgstr "Visa filen i mappen"
 
 #: packages/app-desktop/gui/WindowCommandsAndDialogs/commands/toggleNotesSortOrderReverse.ts:8
-#: packages/lib/models/settings/builtInMetadata.ts:815
-#: packages/lib/models/settings/builtInMetadata.ts:896
+#: packages/lib/models/settings/builtInMetadata.ts:824
+#: packages/lib/models/settings/builtInMetadata.ts:905
 msgid "Reverse sort order"
 msgstr "Omvänd sorteringsordning"
 
@@ -5189,7 +5208,7 @@ msgstr "Revision: %s (%s)"
 msgid "Rich Text"
 msgstr "Avancerad text"
 
-#: packages/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/TinyMCE.tsx:715
+#: packages/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/TinyMCE.tsx:716
 msgid "Rich Text editor. Press Escape then Tab to escape focus."
 msgstr ""
 "Avancerad textredigerare. Tryck på ESC och sedan på Tab för att undvika "
@@ -5205,23 +5224,23 @@ msgstr "Kör kommandona i textfilen. Det ska finnas ett kommando per rad."
 msgid "S3"
 msgstr "S3"
 
-#: packages/lib/models/settings/builtInMetadata.ts:300
+#: packages/lib/models/settings/builtInMetadata.ts:309
 msgid "S3 access key"
 msgstr "S3 åtkomstnyckel"
 
-#: packages/lib/models/settings/builtInMetadata.ts:257
+#: packages/lib/models/settings/builtInMetadata.ts:266
 msgid "S3 bucket"
 msgstr "S3 bucket"
 
-#: packages/lib/models/settings/builtInMetadata.ts:288
+#: packages/lib/models/settings/builtInMetadata.ts:297
 msgid "S3 region"
 msgstr "S3 region"
 
-#: packages/lib/models/settings/builtInMetadata.ts:312
+#: packages/lib/models/settings/builtInMetadata.ts:321
 msgid "S3 secret key"
 msgstr "S3 hemlig nyckel"
 
-#: packages/lib/models/settings/builtInMetadata.ts:273
+#: packages/lib/models/settings/builtInMetadata.ts:282
 msgid "S3 URL"
 msgstr "S3 URL"
 
@@ -5267,7 +5286,7 @@ msgstr "Spara ändringar"
 msgid "Save changes?"
 msgstr "Spara ändringar?"
 
-#: packages/lib/models/settings/builtInMetadata.ts:897
+#: packages/lib/models/settings/builtInMetadata.ts:906
 msgid "Save geo-location with notes"
 msgstr "Spara geografisk plats med anteckningar"
 
@@ -5284,7 +5303,7 @@ msgstr "Skanna anteckningsbok"
 msgid "Scanned code"
 msgstr "Skannad kod"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1282
+#: packages/lib/models/settings/builtInMetadata.ts:1291
 msgid "Scrollbar size"
 msgstr "Rullningslistens storlek"
 
@@ -5350,7 +5369,7 @@ msgstr "Söker efter det givna <pattern> i alla anteckningarna."
 msgid "See changelog"
 msgstr "Se ändringslogg"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1371
+#: packages/lib/models/settings/builtInMetadata.ts:1380
 msgid "See the pre-release page for more details: %s"
 msgstr "Se sidan för förhandsversioner för mer information: %s"
 
@@ -5380,7 +5399,7 @@ msgstr "Välj fil..."
 msgid "Select notebook"
 msgstr "Välj anteckningsbok"
 
-#: packages/app-mobile/components/SyncWizard/SyncWizard.tsx:125
+#: packages/app-mobile/components/SyncWizard/SyncWizard.tsx:131
 msgid "Select one of the other supported sync targets."
 msgstr ""
 
@@ -5431,7 +5450,7 @@ msgstr "Ställ in larm"
 msgid "Set alarm:"
 msgstr "Ställ in larm:"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1266
+#: packages/lib/models/settings/builtInMetadata.ts:1275
 msgid ""
 "Set it to 0 to make it take the complete available space. Recommended width "
 "is 600."
@@ -5532,7 +5551,7 @@ msgstr "Visa avancerade inställningar"
 msgid "Show all"
 msgstr "Visa alla"
 
-#: packages/lib/models/settings/builtInMetadata.ts:705
+#: packages/lib/models/settings/builtInMetadata.ts:714
 msgid "Show completed to-dos"
 msgstr "Visa slutförda att-göra"
 
@@ -5548,7 +5567,7 @@ msgstr "Visa inaktiverade nycklar"
 msgid "Show monospace fonts only."
 msgstr "Visa endast monospace-teckensnitt."
 
-#: packages/lib/models/settings/builtInMetadata.ts:687
+#: packages/lib/models/settings/builtInMetadata.ts:696
 msgid "Show note counts"
 msgstr "Visa anteckningsantal"
 
@@ -5560,11 +5579,11 @@ msgstr "Visa alternativ för anteckningsboken"
 msgid "Show password"
 msgstr "Visa lösenord"
 
-#: packages/lib/models/settings/builtInMetadata.ts:827
+#: packages/lib/models/settings/builtInMetadata.ts:836
 msgid "Show sort order buttons"
 msgstr "Visa sorteringsordningsknappar"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1120
+#: packages/lib/models/settings/builtInMetadata.ts:1129
 msgid "Show tray icon"
 msgstr "Visa systemfältsikon"
 
@@ -5576,7 +5595,7 @@ msgstr "Visa/dölj sidofältet"
 msgid "Shows notes for tag"
 msgstr "Visar anteckningar för tagg"
 
-#: packages/lib/models/settings/builtInMetadata.ts:976
+#: packages/lib/models/settings/builtInMetadata.ts:985
 msgid "Shrink large images before adding them to notes."
 msgstr "Förminska stora bilder innan du lägger till dem i anteckningar."
 
@@ -5619,7 +5638,7 @@ msgstr ""
 msgid "Skipped: %d."
 msgstr "Överhoppad: %d."
 
-#: packages/lib/models/settings/builtInMetadata.ts:1277
+#: packages/lib/models/settings/builtInMetadata.ts:1286
 msgid "Small"
 msgstr "Liten"
 
@@ -5672,13 +5691,13 @@ msgstr "Sortera \"%s\" i stigande ordning"
 msgid "Sort \"%s\" in descending order"
 msgstr "Sortera \"%s\" i fallande ordning"
 
-#: packages/lib/models/settings/builtInMetadata.ts:883
+#: packages/lib/models/settings/builtInMetadata.ts:892
 msgid "Sort notebooks by"
 msgstr "Sortera anteckningsböcker efter"
 
 #: packages/app-desktop/gui/NoteList/utils/canManuallySortNotes.ts:10
 #: packages/app-mobile/components/ScreenHeader/index.tsx:542
-#: packages/lib/models/settings/builtInMetadata.ts:713
+#: packages/lib/models/settings/builtInMetadata.ts:722
 msgid "Sort notes by"
 msgstr "Sortera anteckningar efter"
 
@@ -5708,11 +5727,11 @@ msgstr "Källformat: %s"
 msgid "Source: "
 msgstr "Källa: "
 
-#: packages/app-desktop/gui/Sidebar/hooks/useOnRenderItem.tsx:436
+#: packages/app-desktop/gui/Sidebar/hooks/useOnRenderItem.tsx:437
 msgid "Spacer"
 msgstr "Spacer"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1667
+#: packages/lib/models/settings/builtInMetadata.ts:1676
 msgid ""
 "Specify the port that should be used by the API server. If not set, a "
 "default will be used."
@@ -5725,13 +5744,13 @@ msgstr ""
 msgid "Spell checker"
 msgstr "Stavningskontroll"
 
-#: packages/lib/models/settings/builtInMetadata.ts:696
-#: packages/lib/models/settings/builtInMetadata.ts:698
-#: packages/lib/models/settings/builtInMetadata.ts:699
+#: packages/lib/models/settings/builtInMetadata.ts:705
+#: packages/lib/models/settings/builtInMetadata.ts:707
+#: packages/lib/models/settings/builtInMetadata.ts:708
 msgid "Split View"
 msgstr "Dela vy"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1135
+#: packages/lib/models/settings/builtInMetadata.ts:1144
 msgid "Start application minimised in the tray icon"
 msgstr "Starta programmet minimerat i systemfältsikonen"
 
@@ -5914,7 +5933,7 @@ msgstr ""
 "Växlar till [notebook] - alla ytterligare åtgärder sker inom denna "
 "anteckningsbok."
 
-#: packages/app-mobile/components/SyncWizard/SyncWizard.tsx:105
+#: packages/app-mobile/components/SyncWizard/SyncWizard.tsx:111
 msgid "Sync"
 msgstr ""
 
@@ -5949,7 +5968,7 @@ msgid "Sync Version: %s"
 msgstr "Synkroniseringsversion: %s"
 
 #: packages/app-desktop/gui/SyncWizard/Dialog.tsx:175
-#: packages/app-mobile/components/SyncWizard/SyncWizard.tsx:115
+#: packages/app-mobile/components/SyncWizard/SyncWizard.tsx:121
 msgid "Sync your notes"
 msgstr "Synkronisera dina anteckningar"
 
@@ -5961,7 +5980,7 @@ msgstr "Synkronisering, kryptering, proxy"
 msgid "Synchronisation"
 msgstr "Synkronisering"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1392
+#: packages/lib/models/settings/builtInMetadata.ts:1401
 msgid "Synchronisation interval"
 msgstr "Synkroniseringsintervall"
 
@@ -5974,7 +5993,7 @@ msgstr "Synkronisering pågår redan."
 msgid "Synchronisation Status"
 msgstr "Synkroniseringstillstånd"
 
-#: packages/lib/models/settings/builtInMetadata.ts:118
+#: packages/lib/models/settings/builtInMetadata.ts:127
 msgid "Synchronisation target"
 msgstr "Synkroniseringsmål"
 
@@ -5988,7 +6007,7 @@ msgstr "Synkroniseringsmål: %s (%s)"
 msgid "Synchronise"
 msgstr "Synkronisera"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1412
+#: packages/lib/models/settings/builtInMetadata.ts:1421
 msgid "Synchronise only over WiFi connection"
 msgstr "Synkronisera endast via Wi-Fi-anslutning"
 
@@ -6011,11 +6030,11 @@ msgid "Tab indents"
 msgstr "Tabbindrag"
 
 #: packages/app-desktop/gui/NoteEditor/StatusBar.tsx:72
-#: packages/lib/models/settings/builtInMetadata.ts:796
+#: packages/lib/models/settings/builtInMetadata.ts:805
 msgid "Tab moves focus"
 msgstr "Tabb flyttar fokus"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1427
+#: packages/lib/models/settings/builtInMetadata.ts:1436
 msgid "Tabloid"
 msgstr "Tabloid"
 
@@ -6025,7 +6044,7 @@ msgid "Tagged: %d."
 msgstr "Taggad: %d."
 
 #: packages/app-desktop/gui/NoteListHeader/utils/getColumnTitle.ts:10
-#: packages/app-desktop/gui/Sidebar/hooks/useSidebarListData.ts:75
+#: packages/app-desktop/gui/Sidebar/hooks/useSidebarListData.ts:79
 #: packages/app-desktop/gui/WindowCommandsAndDialogs/commands/setTags.ts:7
 #: packages/app-mobile/components/screens/Note/commands/setTags.ts:7
 #: packages/app-mobile/components/screens/tags.tsx:92
@@ -6064,7 +6083,7 @@ msgstr "Team"
 msgid "Text document"
 msgstr "Textdokument"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1420
+#: packages/lib/models/settings/builtInMetadata.ts:1429
 msgid "Text editor command"
 msgstr "Textredigeringskommando"
 
@@ -6104,7 +6123,7 @@ msgstr "Programmet har godkänts."
 msgid "The application must be restarted for these changes to take effect."
 msgstr "Programmet måste startas om för att dessa ändringar ska träda i kraft."
 
-#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:577
+#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:591
 msgid ""
 "The attachments will no longer be watched when you switch to a different "
 "note."
@@ -6142,7 +6161,7 @@ msgstr "Standardkrypteringsmetoden har ändrats, du bör omkryptera dina data."
 msgid "The default profile cannot be deleted"
 msgstr "Standardprofilen kan inte tas bort"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1420
+#: packages/lib/models/settings/builtInMetadata.ts:1429
 msgid ""
 "The editor command (may include arguments) that will be used to open a note. "
 "If none is provided it will try to auto-detect the default editor."
@@ -6151,9 +6170,9 @@ msgstr ""
 "anteckning. Om inget tillhandahålls försöker det automatiskt identifiera "
 "standardredigeraren."
 
-#: packages/lib/models/settings/builtInMetadata.ts:1725
-#: packages/lib/models/settings/builtInMetadata.ts:1740
-#: packages/lib/models/settings/builtInMetadata.ts:1755
+#: packages/lib/models/settings/builtInMetadata.ts:1734
+#: packages/lib/models/settings/builtInMetadata.ts:1749
+#: packages/lib/models/settings/builtInMetadata.ts:1764
 msgid ""
 "The factor property sets how the item will grow or shrink to fit the "
 "available space in its container with respect to the other items. Thus an "
@@ -6165,13 +6184,13 @@ msgstr ""
 "artiklarna. Således tar ett objekt med faktorn 2 dubbelt så mycket utrymme "
 "som ett objekt med faktorn 1. Starta om appen för att se förändringar."
 
-#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:592
+#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:606
 msgid "The following attachment matches your search query:"
 msgid_plural "The following attachments match your search query:"
 msgstr[0] "Följande bilaga matchar din sökfråga:"
 msgstr[1] "Följande bilagor matchar din sökfråga:"
 
-#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:576
+#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:590
 msgid "The following attachments are being watched for changes:"
 msgstr "Följande bilagor bevakas för ändringar:"
 
@@ -6320,7 +6339,7 @@ msgstr "Synkroniseringslösenordet saknas."
 msgid "The tag \"%s\" already exists. Please choose a different name."
 msgstr "Taggen \"%s\" finns redan. Välj ett annat namn."
 
-#: packages/lib/models/settings/builtInMetadata.ts:120
+#: packages/lib/models/settings/builtInMetadata.ts:129
 msgid ""
 "The target to synchronise to. Each sync target may have additional "
 "parameters which are named as `sync.NUM.NAME` (all documented below)."
@@ -6366,7 +6385,7 @@ msgstr ""
 "WebDAV-implementeringen av %s är inkompatibel med Joplin och stöds därför "
 "inte längre. Använd en annan synkroniseringsmetod."
 
-#: packages/lib/models/settings/builtInMetadata.ts:631
+#: packages/lib/models/settings/builtInMetadata.ts:640
 msgid "Theme"
 msgstr "Tema"
 
@@ -6542,7 +6561,7 @@ msgstr ""
 msgid "This note has no history"
 msgstr "Denna anteckning har ingen historik"
 
-#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:658
+#: packages/app-desktop/gui/NoteEditor/NoteEditor.tsx:672
 msgid ""
 "This note is in HTML format. Convert it to Markdown to edit it more easily."
 msgstr ""
@@ -6576,7 +6595,7 @@ msgstr ""
 msgid "This subfolder of the trash has no notes."
 msgstr "Den här undermappen till papperskorgen har inga anteckningar."
 
-#: packages/lib/models/settings/builtInMetadata.ts:1122
+#: packages/lib/models/settings/builtInMetadata.ts:1131
 msgid ""
 "This will allow Joplin to run in the background. It is recommended to enable "
 "this setting so that your notes are constantly being synchronised, thus "
@@ -6605,7 +6624,7 @@ msgstr ""
 "Detta tar bort anteckningsboken från din samling och du kommer inte längre "
 "ha tillgång till innehållet. Vill du fortsätta?"
 
-#: packages/lib/models/settings/builtInMetadata.ts:547
+#: packages/lib/models/settings/builtInMetadata.ts:556
 msgid "Time format"
 msgstr "Tidsformat"
 
@@ -6866,7 +6885,7 @@ msgstr "Det går inte att dela loggdata. Orsak: %s"
 msgid "Unchecked"
 msgstr "Omarkerad"
 
-#: packages/lib/models/settings/builtInMetadata.ts:704
+#: packages/lib/models/settings/builtInMetadata.ts:713
 msgid "Uncompleted to-dos on top"
 msgstr "Inte slutförda att-göra högst upp"
 
@@ -6899,7 +6918,7 @@ msgstr "Okänd filtyp"
 msgid "Unknown flag: %s"
 msgstr "Okänd flagga: %s"
 
-#: packages/lib/Synchronizer.ts:1163
+#: packages/lib/Synchronizer.ts:1182
 msgid ""
 "Unknown item type downloaded - please upgrade Joplin to the latest version"
 msgstr "Okänd objekttyp hämtad - uppgradera Joplin till den senaste versionen"
@@ -6962,7 +6981,7 @@ msgstr ""
 "Fel: %s"
 
 #: packages/app-desktop/gui/ResourceScreen.tsx:123
-#: packages/lib/models/BaseItem.ts:922 packages/lib/path-utils.ts:27
+#: packages/lib/models/BaseItem.ts:944 packages/lib/path-utils.ts:27
 #: packages/lib/path-utils.ts:71
 msgid "Untitled"
 msgstr "Utan titel"
@@ -7051,7 +7070,7 @@ msgstr "URL"
 msgid "Usage: %s"
 msgstr "Användning: %s"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1811
+#: packages/lib/models/settings/builtInMetadata.ts:1820
 msgid "Use biometrics to secure access to the app"
 msgstr "Använd biometri för att säkra åtkomsten till appen"
 
@@ -7081,7 +7100,7 @@ msgstr ""
 "Använd pilarna för att flytta layoutobjekten. Tryck på \"Escape\" för att "
 "avsluta."
 
-#: packages/lib/models/settings/builtInMetadata.ts:1550
+#: packages/lib/models/settings/builtInMetadata.ts:1559
 msgid "Use the legacy Markdown editor"
 msgstr "Använd den äldre Markdown-redigeraren"
 
@@ -7101,7 +7120,7 @@ msgstr ""
 "Använd din biometri för att säkra åtkomsten till din applikation. Du kan "
 "alltid ställa in det senare i Inställningar."
 
-#: packages/lib/models/settings/builtInMetadata.ts:1236
+#: packages/lib/models/settings/builtInMetadata.ts:1245
 msgid ""
 "Used for most text in the markdown editor. If not found, a generic "
 "proportional (variable width) font is used."
@@ -7109,7 +7128,7 @@ msgstr ""
 "Används för mest text i markdown-redigeraren. Om det inte hittas används ett "
 "generiskt proportionellt (variabelt bredd) teckensnitt."
 
-#: packages/lib/models/settings/builtInMetadata.ts:1249
+#: packages/lib/models/settings/builtInMetadata.ts:1258
 msgid ""
 "Used where a fixed width font is needed to lay out text legibly (e.g. "
 "tables, checkboxes, code). If not found, a generic monospace (fixed width) "
@@ -7162,21 +7181,21 @@ msgid "View them now"
 msgstr "Visa dem nu"
 
 #: packages/app-desktop/gui/NoteContentPropertiesDialog.tsx:145
-#: packages/lib/models/settings/builtInMetadata.ts:696
-#: packages/lib/models/settings/builtInMetadata.ts:697
-#: packages/lib/models/settings/builtInMetadata.ts:699
+#: packages/lib/models/settings/builtInMetadata.ts:705
+#: packages/lib/models/settings/builtInMetadata.ts:706
+#: packages/lib/models/settings/builtInMetadata.ts:708
 msgid "Viewer"
 msgstr "Visare"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1260
+#: packages/lib/models/settings/builtInMetadata.ts:1269
 msgid "Viewer and Rich Text Editor font family"
 msgstr "Teckensnitt för Viewer och Avancerad textredigerare"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1182
+#: packages/lib/models/settings/builtInMetadata.ts:1191
 msgid "Viewer font size"
 msgstr "Teckenstorlek för visningsprogram"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1463
+#: packages/lib/models/settings/builtInMetadata.ts:1472
 msgid "Vim"
 msgstr "Vim"
 
@@ -7184,11 +7203,11 @@ msgstr "Vim"
 msgid "Voice recorder"
 msgstr "Röstinspelare"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1931
+#: packages/lib/models/settings/builtInMetadata.ts:1940
 msgid "Voice typing language files (URL)"
 msgstr "Språkfiler för röstinmatning (URL)"
 
-#: packages/lib/models/settings/builtInMetadata.ts:1960
+#: packages/lib/models/settings/builtInMetadata.ts:1969
 msgid "Voice typing: Glossary"
 msgstr "Röstinmatning: Ordlista"
 
@@ -7238,15 +7257,15 @@ msgstr "Web Clipper"
 msgid "WebDAV"
 msgstr "WebDAV"
 
-#: packages/lib/models/settings/builtInMetadata.ts:237
+#: packages/lib/models/settings/builtInMetadata.ts:246
 msgid "WebDAV password"
 msgstr "WebDAV-lösenord"
 
-#: packages/lib/models/settings/builtInMetadata.ts:212
+#: packages/lib/models/settings/builtInMetadata.ts:221
 msgid "WebDAV URL"
 msgstr "WebDAV-webbadress"
 
-#: packages/lib/models/settings/builtInMetadata.ts:225
+#: packages/lib/models/settings/builtInMetadata.ts:234
 msgid "WebDAV username"
 msgstr "WebDAV-användarnamn"
 
@@ -7288,11 +7307,11 @@ msgstr "Välkommen!"
 msgid "What are plugins?"
 msgstr "Vad är insticksmoduler?"
 
-#: packages/lib/models/settings/builtInMetadata.ts:958
+#: packages/lib/models/settings/builtInMetadata.ts:967
 msgid "When creating a new note:"
 msgstr "När du skapar en ny anteckning:"
 
-#: packages/lib/models/settings/builtInMetadata.ts:941
+#: packages/lib/models/settings/builtInMetadata.ts:950
 msgid "When creating a new to-do:"
 msgstr "När du skapar en ny att-göra:"
 
@@ -7303,7 +7322,7 @@ msgid ""
 "the desktop app."
 msgstr ""
 
-#: packages/lib/models/settings/builtInMetadata.ts:567
+#: packages/lib/models/settings/builtInMetadata.ts:576
 msgid ""
 "When enabled, the application will scan your attachments and extract the "
 "text from it. This will allow you to search for text in these attachments."

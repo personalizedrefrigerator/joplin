@@ -239,6 +239,9 @@
 	"Add body": [
 		""
 	],
+	"Add column": [
+		""
+	],
 	"Add new": [
 		""
 	],
@@ -246,6 +249,9 @@
 		""
 	],
 	"Add recipient:": [
+		""
+	],
+	"Add row": [
 		""
 	],
 	"Add tags:": [
@@ -1009,6 +1015,9 @@
 	"Delete attachment \"%s\"?": [
 		""
 	],
+	"Delete column": [
+		""
+	],
 	"Delete expired sessions": [
 		""
 	],
@@ -1034,6 +1043,9 @@
 		""
 	],
 	"Delete profile \"%s\"": [
+		""
+	],
+	"Delete row": [
 		""
 	],
 	"Delete selected notes": [
