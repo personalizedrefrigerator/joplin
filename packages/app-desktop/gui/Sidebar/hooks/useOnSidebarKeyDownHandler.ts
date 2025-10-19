@@ -74,6 +74,8 @@ const useOnSidebarKeyDownHandler = (props: Props) => {
 		const selectedItem = listItems[selectedIndex];
 		let indexChange = 0;
 
+		const ctrlAltOrMeta = event.ctrlKey || event.altKey || event.metaKey;
+
 		if (selectedItem && isToggleShortcut(event.code, selectedItem, collapsedFolderIds)) {
 			event.preventDefault();
 
@@ -111,7 +113,7 @@ const useOnSidebarKeyDownHandler = (props: Props) => {
 		} else if (event.code === 'Enter' && !event.shiftKey) {
 			event.preventDefault();
 			void CommandService.instance().execute('focusElement', 'noteList');
-		} else if (selectedIndex && selectedIndex >= 0 && event.key.length === 1) {
+		} else if (selectedIndex && selectedIndex >= 0 && event.key.length === 1 && !ctrlAltOrMeta) {
 			const nextMatch = findNextTypeAheadMatch(selectedIndex, event.key, listItems);
 			if (nextMatch !== -1) {
 				indexChange = nextMatch - selectedIndex;
