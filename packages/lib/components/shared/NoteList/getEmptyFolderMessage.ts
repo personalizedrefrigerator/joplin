@@ -9,6 +9,8 @@ const getEmptyFolderMessage = (folders: FolderEntity[], selectedFolderId: string
 		return _('There are no notes in the trash folder.');
 	} else if (selectedFolderId && itemIsInTrash(Folder.byId(folders, selectedFolderId))) {
 		return _('This subfolder of the trash has no notes.');
+	} else if (selectedFolderId && Folder.isVirtualFolder(selectedFolderId)) {
+		return _('There are no notes in this notebook.');
 	}
 
 	if (Setting.value('appType') === 'desktop') {
