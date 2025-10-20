@@ -29,7 +29,8 @@ const useStyles = (disabled: boolean) => {
 				borderRadius,
 				overflow: 'hidden',
 				// Accessibility: Prevent the 'overflow: hidden' from hiding the focus indicator
-				// on web:
+				// on web. Only apply to web, as this causes the touchable ripple
+				// from being completely contained within the card on non-web platforms.
 				...(Platform.OS === 'web' ? {
 					margin: -2,
 					padding: 2,
