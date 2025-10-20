@@ -298,8 +298,8 @@ impl<'a> Renderer<'a> {
                 ParagraphAlignment::Right => {
                     "right"
                 },
-                _ => {
-                    log_warn!("Unknown/unsupported text-align value");
+                other => {
+                    log_warn!("Unknown/unsupported text-align value: {:?}", other);
                     ""
                 }
             }.into());
