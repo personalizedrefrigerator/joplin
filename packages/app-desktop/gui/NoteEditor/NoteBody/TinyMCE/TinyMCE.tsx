@@ -23,7 +23,7 @@ import { themeStyle } from '@joplin/lib/theme';
 import { loadScript } from '../../../utils/loadScript';
 import bridge from '../../../../services/bridge';
 import { TinyMceEditorEvents } from './utils/types';
-import type { Editor, EditorEvent } from 'tinymce';
+import type { Bookmark, Editor, EditorEvent } from 'tinymce';
 import { joplinCommandToTinyMceCommands, TinyMceCommand } from './utils/joplinCommandToTinyMceCommands';
 import shouldPasteResources from './utils/shouldPasteResources';
 import lightTheme from '@joplin/lib/themes/light';
@@ -47,6 +47,7 @@ import Setting from '@joplin/lib/models/Setting';
 import useTextPatternsLookup, { TextPatternContext } from './utils/useTextPatternsLookup';
 import { toFileProtocolPath } from '@joplin/utils/path';
 import { RenderResultPluginAsset } from '@joplin/renderer/types';
+import useCursorPositioning from './utils/useCursorPositioning';
 
 const logger = Logger.create('TinyMCE');
 
@@ -1046,6 +1047,12 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: Ref<NoteBodyEditorRef>) => {
 		return true;
 	}
 
+	const { onInitialContentSet } = useCursorPositioning({
+		initialCursorLocation: props.initialCursorLocation.richText as Bookmark,
+		onCursorUpdate: props.onCursorMotion,
+		editor,
+	});
+
 	const lastNoteIdRef = useRef(props.noteId);
 	useEffect(() => {
 		if (!editor) return () => {};
@@ -1136,6 +1143,7 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: Ref<NoteBodyEditorRef>) => {
 			await loadDocumentAssets(props.themeId, editor, allAssets);
 
 			dispatchDidUpdate(editor);
+			onInitialContentSet();
 		};
 
 		void loadContent();
@@ -1387,6 +1395,7 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: Ref<NoteBodyEditorRef>) => {
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 		async function onCopy(event: any) {
 			const copiedContent = editor.selection.getContent();
+			if (!copiedContent) return;
 			copyHtmlToClipboard(copiedContent);
 			event.preventDefault();
 		}
@@ -1395,6 +1404,7 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: Ref<NoteBodyEditorRef>) => {
 		async function onCut(event: any) {
 			event.preventDefault();
 			const selectedContent = editor.selection.getContent();
+			if (!selectedContent) return;
 			copyHtmlToClipboard(selectedContent);
 			editor.insertContent('');
 			onChangeHandler();

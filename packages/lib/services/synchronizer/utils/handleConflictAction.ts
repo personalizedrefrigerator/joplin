@@ -26,13 +26,15 @@ export default async (action: SyncAction, ItemClass: typeof BaseItem, remoteExis
 		if (remoteExists) {
 			local = remoteContent;
 
-			const syncTimeQueries = BaseItem.updateSyncTimeQueries(syncTargetId, local, time.unixMs());
+			const syncTimeQueries = BaseItem.updateSyncTimeQueries(syncTargetId, local, time.unixMs(), remoteContent.updated_time);
 			await ItemClass.save(local, { autoTimestamp: false, changeSource: ItemChange.SOURCE_SYNC, nextQueries: syncTimeQueries });
 		} else {
+			// If the item is a folder, avoid deleting child notes and folders, as this could cause massive data loss where this conflict happens unexpectedly
 			await ItemClass.delete(local.id, {
 				changeSource: ItemChange.SOURCE_SYNC,
 				sourceDescription: 'sync: handleConflictAction: non-note conflict',
 				trackDeleted: false,
+				deleteChildren: false,
 			});
 		}
 	} else if (action === SyncAction.NoteConflict) {
@@ -80,7 +82,7 @@ export default async (action: SyncAction, ItemClass: typeof BaseItem, remoteExis
 
 		if (remoteExists) {
 			local = remoteContent;
-			const syncTimeQueries = BaseItem.updateSyncTimeQueries(syncTargetId, local, time.unixMs());
+			const syncTimeQueries = BaseItem.updateSyncTimeQueries(syncTargetId, local, time.unixMs(), remoteContent.updated_time);
 			await ItemClass.save(local, { autoTimestamp: false, changeSource: ItemChange.SOURCE_SYNC, nextQueries: syncTimeQueries });
 
 			if (local.encryption_applied) dispatch({ type: 'SYNC_GOT_ENCRYPTED_ITEM' });

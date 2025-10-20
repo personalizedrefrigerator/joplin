@@ -6,7 +6,7 @@ import Setting, { AppType, Env } from '../models/Setting';
 import BaseService from '../services/BaseService';
 import FsDriverNode from '../fs-driver-node';
 import time from '../time';
-import shim from '../shim';
+import shim, { MobilePlatform } from '../shim';
 import uuid from '../uuid';
 import ResourceService from '../services/ResourceService';
 import KeymapService from '../services/KeymapService';
@@ -71,6 +71,7 @@ import { Store } from 'redux';
 import { dirname } from '@joplin/utils/path';
 import SyncTargetJoplinServerSAML from '../SyncTargetJoplinServerSAML';
 import { MarkupLanguage } from '@joplin/renderer';
+import SearchEngine from '../services/search/SearchEngine';
 
 // Each suite has its own separate data and temp directory so that multiple
 // suites can be run at the same time. suiteName is what is used to
@@ -287,6 +288,7 @@ async function switchClient(id: number, options: any = null) {
 	currentClient_ = id;
 	BaseModel.setDb(databases_[id]);
 	KvStore.instance().setDb(databases_[id]);
+	SearchEngine.instance().setDb(databases_[id]);
 
 	BaseItem.encryptionService_ = encryptionServices_[id];
 	Resource.encryptionService_ = encryptionServices_[id];
@@ -1119,7 +1121,7 @@ export const newOcrService = () => {
 	return new OcrService([driver]);
 };
 
-export const mockMobilePlatform = (platform: string) => {
+export const mockMobilePlatform = (platform: MobilePlatform) => {
 	const originalMobilePlatform = shim.mobilePlatform;
 	const originalIsNode = shim.isNode;
 

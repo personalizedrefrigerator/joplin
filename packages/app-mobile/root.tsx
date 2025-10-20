@@ -107,6 +107,7 @@ import DocumentScanner from './components/screens/DocumentScanner/DocumentScanne
 import buildStartupTasks from './utils/buildStartupTasks';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import appReducer from './utils/appReducer';
+import SyncWizard from './components/SyncWizard/SyncWizard';
 
 const logger = Logger.create('root');
 const perfLogger = PerformanceLogger.create();
@@ -143,7 +144,7 @@ const generalMiddleware = (store: any) => (next: any) => async (action: any) => 
 	if (action.type === 'NAV_GO') Keyboard.dismiss();
 
 	if (['NOTE_UPDATE_ONE', 'NOTE_DELETE', 'FOLDER_UPDATE_ONE', 'FOLDER_DELETE'].indexOf(action.type) >= 0) {
-		if (!await reg.syncTarget().syncStarted()) void reg.scheduleSync(1000, { syncSteps: ['update_remote', 'delete_remote'] }, true);
+		if (!await reg.syncTarget().syncStarted()) void reg.scheduleSync(reg.syncAsYouTypeInterval(), { syncSteps: ['update_remote', 'delete_remote'] }, true);
 		SearchEngine.instance().scheduleSyncTables();
 	}
 
@@ -762,6 +763,7 @@ class AppComponent extends React.Component<AppComponentProps, AppComponentState>
 							</View>
 							{/* eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied */}
 							<DropdownAlert alert={(func: any) => (this.dropdownAlert_ = func)} />
+							<SyncWizard/>
 						</SafeAreaView>
 					</View>
 				</SideMenu>
