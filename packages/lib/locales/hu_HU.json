@@ -153,7 +153,7 @@
 		"– Kamera: lehetővé teszi a képkészítést és a képek mellékelését a jegyzetekhez."
 	],
 	"- Location: to allow attaching geo-location information to a note.": [
-		"– Helyszín: lehetővé teszi a földrajzi helymeghatározási információk mellékelését a jegyzetekhez."
+		"– Hely: lehetővé teszi a földrajzi helymeghatározási információk mellékelését a jegyzetekhez."
 	],
 	"- Storage: to allow attaching files to notes and to enable filesystem synchronisation.": [
 		"– Tárhely: lehetővé teszi a fájlrendszer szinkronizálását és a fájlok mellékelését a jegyzetekhez."
@@ -168,7 +168,7 @@
 		"[Semmi]"
 	],
 	"A brief description of the image:": [
-		""
+		"A kép rövid leírása:"
 	],
 	"A comma-separated list of words. May be used for uncommon words, to help voice typing spell them correctly.": [
 		"Szavak vesszővel elválasztott listája. Használható a nem túl gyakori szavak esetében, hogy segítse a hangalapú gépelést a helyesírásban."
@@ -241,6 +241,9 @@
 	],
 	"Add body": [
 		"Törzsszöveg hozzáadása"
+	],
+	"Add column": [
+		""
 	],
 	"Add new": [
 		"Új hozzáadása"
@@ -339,7 +342,7 @@
 		"Automatikusan mentett rajz megtalálva. Mellékeli a másolatát a jegyzethez?"
 	],
 	"An error occurred while sending the response. This can happen if the app is offline or cannot connect to the server.\nError: %s": [
-		""
+		"Hiba történt a válasz elküldésekor. Ez akkor fordulhat elő, ha az alkalmazás offline állapotban van, vagy nem tud csatlakozni a kiszolgálóhoz.\nHiba: %s"
 	],
 	"An error occurred: %s": [
 		"Hiba történt: %s"
@@ -558,7 +561,7 @@
 		"A titkosított jegyzetfüzetet nem lehet megosztani a következő címzettel: %s, mert az nem engedélyezte a végpontok közötti titkosítást. Ezt megteheti a Beállítások > Titkosítás menüben."
 	],
 	"Case sensitive": [
-		"Kis-nagybetű érzékeny"
+		"Kis- és nagybetűk megkülönböztetése"
 	],
 	"Change application layout": [
 		"Alkalmazás elrendezésének módosítása"
@@ -679,6 +682,9 @@
 	],
 	"Collapse all notebooks": [
 		"Összes jegyzetfüzet összecsukása"
+	],
+	"Collapse title": [
+		"Cím összecsukása"
 	],
 	"Collapsed": [
 		"Összecsukva"
@@ -836,7 +842,7 @@
 		"Az alkalmazás nem hitelesíthető:\n\n%s\n\nPróbálja újra."
 	],
 	"Could not connect to Joplin Server. Please check the Synchronisation options in the config screen. Full error was:\n\n%s": [
-		"Nem sikerült kapcsolódni a Joplin kiszolgálóhoz. Ellenőrizze a szinkronizálási beállításokat. A teljes hiba a következő volt:\n\n%s"
+		"Nem sikerült kapcsolódni a Joplin Serverhez. Ellenőrizze a szinkronizálási beállításokat. A teljes hiba a következő volt:\n\n%s"
 	],
 	"Could not connect to plugin repository.": [
 		"Nem sikerült kapcsolódni a bővítménytárolóhoz."
@@ -1139,7 +1145,7 @@
 		"Elvetés"
 	],
 	"Displays a geolocation URL for the note.": [
-		"Megjeleníti a jegyzethez tartozó földrajzi helyszín webcímét."
+		"Megjeleníti a jegyzethez tartozó földrajzi hely webcímét."
 	],
 	"Displays only the first top <num> notes.": [
 		"Csak az első <num> leggyakrabban használt jegyzetet jeleníti meg."
@@ -1178,7 +1184,7 @@
 		"Ne veszítse el a jelszót, mert biztonsági okokból ez lesz az *egyetlen* módja az adatok visszafejtésének! A titkosítás engedélyezéséhez adja meg a jelszavát alább."
 	],
 	"Do you find the Joplin web app useful?": [
-		""
+		"Hasznosnak találja a Joplin webalkalmazását?"
 	],
 	"Document scanner: Title template": [
 		"Dokumentumbeolvasó: Címsablon"
@@ -1537,6 +1543,9 @@
 	"Expand all notebooks": [
 		"Összes jegyzetfüzet kibontása"
 	],
+	"Expand title": [
+		"Cím kibontása"
+	],
 	"Expanded": [
 		"Kibontva"
 	],
@@ -1601,7 +1610,7 @@
 		"Funkciójelölők"
 	],
 	"Feedback": [
-		""
+		"Visszajelzés"
 	],
 	"Fetched items: %d/%d.": [
 		"Lekérdezett elemek: %d/%d."
@@ -2013,28 +2022,31 @@
 		"Joplin mobilalkalmazás"
 	],
 	"Joplin Server": [
-		"Joplin kiszolgáló"
+		"Joplin Server"
+	],
+	"Joplin Server (SAML)": [
+		"Joplin Server (SAML)"
 	],
 	"Joplin Server Business": [
-		"Üzleti Joplin kiszolgáló"
+		"Üzleti Joplin Server"
 	],
 	"Joplin Server email": [
-		"Joplin kiszolgáló e-mail-címe"
+		"Joplin Server e-mail-címe"
 	],
 	"Joplin Server Login": [
-		"Bejelentkezés a Joplin kiszolgálóba"
+		"Bejelentkezés a Joplin Serverbe"
 	],
 	"Joplin Server password": [
-		"Joplin kiszolgáló jelszava"
+		"Joplin Server jelszava"
 	],
 	"Joplin Server URL": [
-		"Joplin kiszolgáló webcíme"
+		"Joplin Server webcíme"
 	],
 	"Joplin SSO Authentication": [
 		"Joplin SSO-hitelesítés"
 	],
 	"Joplin supports saving the location at which notes are saved or created. Do you want to enable it? This can be changed at any time in settings.": [
-		""
+		"A Joplin támogatja annak a helynek a mentését, amelybe a jegyzetek el lettek mentve vagy létre lettek hozva. Szeretné engedélyezni? Ez a beállítás bármikor módosítható a beállításokban."
 	],
 	"Joplin Web Clipper allows saving web pages and screenshots from your browser to Joplin.": [
 		"A Joplin Web Clipper lehetővé teszi weboldalak és képernyőképek mentését a böngészőből a Joplin alkalmazásba."
@@ -2067,7 +2079,7 @@
 		"Frissítésre szoruló kulcsok"
 	],
 	"Label": [
-		""
+		"Címke"
 	],
 	"Landscape": [
 		"Fekvő"
@@ -2156,7 +2168,7 @@
 		"Betöltés…"
 	],
 	"Location": [
-		"Helyszín"
+		"Hely"
 	],
 	"Lock file is already being hold. If you know that no synchronisation is taking place, you may delete the lock file at \"%s\" and resume the operation.": [
 		"A zárolási fájl már használatban van. Ha biztos benne, hogy nem történik szinkronizálás, törölheti a zárolási fájlt itt: „%s”, és folytathatja a műveletet."
@@ -2223,6 +2235,9 @@
 	],
 	"Markdown editor": [
 		"Markdown szerkesztő"
+	],
+	"Markdown editor: Highlight active line": [
+		"Markdown szerkesztő: Aktív sor kiemelése"
 	],
 	"Markdown editor: Render images": [
 		"Markdown szerkesztő: képek renderelése"
@@ -2484,7 +2499,7 @@
 		"Most nem"
 	],
 	"Not useful": [
-		""
+		"Nem hasznos"
 	],
 	"note": [
 		"jegyzet"
@@ -2533,6 +2548,9 @@
 	],
 	"Note list style": [
 		"Jegyzetlista stílusa"
+	],
+	"Note not published: %s": [
+		"A jegyzet nem lett közzétéve: %s"
 	],
 	"Note preview": [
 		"Jegyzet előnézete"
@@ -2694,7 +2712,7 @@
 		"Számozott lista"
 	],
 	"Other": [
-		""
+		"Egyéb"
 	],
 	"Other applications...": [
 		"További alkalmazások…"
@@ -2946,6 +2964,9 @@
 	"Publish Note": [
 		"Jegyzet közzététele"
 	],
+	"Publish note \"%s\" (in notebook \"%s\")?": [
+		"Közzéteszi a(z) „%s” jegyzetet (a(z) „%s” jegyzetfüzetből)?"
+	],
 	"Publish note...": [
 		"Jegyzet közzététele…"
 	],
@@ -2958,8 +2979,11 @@
 	"Publish/unpublish": [
 		"Közzététel / Közzététel megszüntetése"
 	],
+	"Published at URL: %s": [
+		"Közzétéve a következő webcímen: %s"
+	],
 	"Publishes a note to Joplin Server or Joplin Cloud": [
-		""
+		"Megjegyzés közzététele a Joplin Serveren vagy a Joplin Cloudon"
 	],
 	"QR Code": [
 		"QR-kód"
@@ -3006,6 +3030,9 @@
 	"Recipients:": [
 		"Címzettek:"
 	],
+	"Recognise text:": [
+		"Szöveg felismerése:"
+	],
 	"Recognize handwritten image": [
 		"Kézzel írt kép felismerése"
 	],
@@ -3031,7 +3058,7 @@
 		"Frissítés"
 	],
 	"Regular expression": [
-		"Reguláris kifejezés"
+		"Reguláris kifejezések"
 	],
 	"Reject": [
 		"Elutasítás"
@@ -3232,7 +3259,10 @@
 		"Módosítások mentése?"
 	],
 	"Save geo-location with notes": [
-		"Földrajzi helyszín mentése a jegyzetekhez"
+		"Földrajzi hely mentése a jegyzetekhez"
+	],
+	"Save geolocation?": [
+		"Menti a földrajzi helyet?"
 	],
 	"Scan notebook": [
 		"Jegyzetfüzet beolvasása"
@@ -3304,7 +3334,7 @@
 		"Jegyzetfüzet kiválasztása"
 	],
 	"Select one of the other supported sync targets.": [
-		""
+		"Válasszon ki egy másik támogatott szinkronizálási célt."
 	],
 	"Select parent notebook": [
 		"Szülő jegyzetfüzet kijelölése"
@@ -3379,7 +3409,7 @@
 		"Megosztások"
 	],
 	"Shares or unshares the specified [notebook] with [user]. Requires Joplin Cloud or Joplin Server.": [
-		"Engedélyezi vagy megszünteti a megadott [jegyzetfüzet] megosztását a [felhasználóval]. Joplin Cloud vagy Joplin kiszolgáló szükséges hozzá."
+		"Engedélyezi vagy megszünteti a megadott [jegyzetfüzet] megosztását a [felhasználóval]. Joplin Cloud vagy Joplin Server szükséges hozzá."
 	],
 	"Sharing notebook...": [
 		"Jegyzetfüzet megosztása…"
@@ -3643,7 +3673,7 @@
 		"Váltás a(z) [notebook] jegyzetfüzetre – minden további művelet ebben a jegyzetfüzetben történik."
 	],
 	"Sync": [
-		""
+		"Szinkronizálás"
 	],
 	"Sync as many devices as you want": [
 		"Szinkronizáljon annyi eszközt, amennyit csak akar"
@@ -3723,6 +3753,9 @@
 	"Take photo": [
 		"Kép készítése"
 	],
+	"Take survey": [
+		"Kérdőív kitöltése"
+	],
 	"Task \"%s\" failed with error: %s": [
 		"A(z) „%s” feladat sikertelen volt a következő hibával: %s"
 	],
@@ -3742,7 +3775,7 @@
 		"Szövegszerkesztő-parancs"
 	],
 	"Thank you for the feedback!\nDo you have time to complete a short survey?": [
-		""
+		"Köszönjük a visszajelzést!\nVan ideje kitölteni egy rövid kérdőívet?"
 	],
 	"The active profile cannot be deleted. Switch to a different profile and try again.": [
 		"Az aktív profil nem törölhető. Váltson másik profilra, és próbálja újra."
@@ -4142,6 +4175,9 @@
 	"Unable to share log data. Reason: %s": [
 		"A naplóadatok megosztása nem lehetséges. Indok: %s"
 	],
+	"Unable to share note data. Reason: %s": [
+		"Nem lehet a jegyzet adatait megosztani. Indok: %s"
+	],
 	"Unchecked": [
 		"Nem ellenőrzött"
 	],
@@ -4287,7 +4323,7 @@
 		"Ott használatos, ahol a szöveg olvasható elrendezéséhez fix szélességű betűtípusra van szükség (például: táblázatok, jelölőnégyzetek, kódok). Ha nem található, akkor egy általános monospace (fix szélességű) betűtípus lesz használva."
 	],
 	"Useful": [
-		""
+		"Hasznos"
 	],
 	"User deletions": [
 		"Felhasználói törlések"
@@ -4395,7 +4431,7 @@
 		"Új teendő létrehozásakor:"
 	],
 	"When enabled, requests that the images in the note be transcribed with a higher-quality on-server transcription service. Requires sync with a copy of the desktop app.": [
-		""
+		"Ha engedélyezve van, akkor a jegyzetben lévő képek átírása egy jobb minőségű, kiszolgálóoldali átírási szolgáltatással történik. Ehhez szinkronizáció szükséges az asztali alkalmazással."
 	],
 	"When enabled, the application will scan your attachments and extract the text from it. This will allow you to search for text in these attachments.": [
 		"Amikor engedélyezve van, az alkalmazás beolvassa a mellékleteket, és kivonatolja belőlük a szöveget. Ez lehetővé teszi a szöveg keresését ezekben a mellékletekben."

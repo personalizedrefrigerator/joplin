@@ -174,7 +174,7 @@
 		"[niciuna]"
 	],
 	"A brief description of the image:": [
-		""
+		"O descriere sumară a imaginii:"
 	],
 	"A comma-separated list of words. May be used for uncommon words, to help voice typing spell them correctly.": [
 		"O listă de cuvinte separate de virgule. Poate fi folosită pentru cuvinte mai puțin comune, pentru a ajuta transcrierea prin dictare să le scrie corect."
@@ -247,6 +247,9 @@
 	],
 	"Add body": [
 		"Adaugă corp"
+	],
+	"Add column": [
+		""
 	],
 	"Add new": [
 		"Adaugă un nou"
@@ -345,7 +348,7 @@
 		"A fost găsit un desen salvat automat. Atașezi o copie a acestuia la notiță?"
 	],
 	"An error occurred while sending the response. This can happen if the app is offline or cannot connect to the server.\nError: %s": [
-		""
+		"A apărut o eroare la trimiterea răspunsului. Acest lucru se poate întîmpla dacă aplicația este offline sau nu se poate conecta la server.\nEroare: %s"
 	],
 	"An error occurred: %s": [
 		"S-a produs o eroare: %s"
@@ -685,6 +688,9 @@
 	],
 	"Collapse all notebooks": [
 		"Restrînge toate caietele"
+	],
+	"Collapse title": [
+		"Restrînge titlul"
 	],
 	"Collapsed": [
 		"Restrîns"
@@ -1186,7 +1192,7 @@
 		"Nu pierde parola, deoarece din motive de securitate, aceasta este *unica* modalitate de decriptare a datelor! Pentru a activa criptarea, te rog să întroduci parola mai jos."
 	],
 	"Do you find the Joplin web app useful?": [
-		""
+		"Consideri că aplicația web Joplin este utilă?"
 	],
 	"Document scanner: Title template": [
 		"Scanner documente: Șablon titlu"
@@ -1545,6 +1551,9 @@
 	"Expand all notebooks": [
 		"Extinde toate caietele"
 	],
+	"Expand title": [
+		"Extinde titlul"
+	],
 	"Expanded": [
 		"Extins"
 	],
@@ -1609,7 +1618,7 @@
 		"Feature Flags"
 	],
 	"Feedback": [
-		""
+		"Feedback"
 	],
 	"Fetched items: %d/%d.": [
 		"Elemente preluate: %d/%d."
@@ -2024,6 +2033,9 @@
 	"Joplin Server": [
 		"Server Joplin"
 	],
+	"Joplin Server (SAML)": [
+		"Server Joplin (SAML)"
+	],
 	"Joplin Server Business": [
 		"Server Joplin Business"
 	],
@@ -2043,7 +2055,7 @@
 		"Autentificare SSO Joplin"
 	],
 	"Joplin supports saving the location at which notes are saved or created. Do you want to enable it? This can be changed at any time in settings.": [
-		""
+		"Joplin suportă salvarea locației în care notițele sînt salvate sau create. Dorești să o activezi? Acest lucru poate fi modificat oricînd din setări."
 	],
 	"Joplin Web Clipper allows saving web pages and screenshots from your browser to Joplin.": [
 		"Joplin Web Clipper permite salvarea paginilor web și a capturilor de ecran din navigatorul tău web în Joplin."
@@ -2076,7 +2088,7 @@
 		"Chei care trebuie actualizate"
 	],
 	"Label": [
-		""
+		"Etichetă"
 	],
 	"Landscape": [
 		"Peisaj"
@@ -2234,6 +2246,9 @@
 	],
 	"Markdown editor": [
 		"Editor Markdown"
+	],
+	"Markdown editor: Highlight active line": [
+		"Editor Markdown: Evidențiază linia activă"
 	],
 	"Markdown editor: Render images": [
 		"Editor Markdown: Redă imaginile"
@@ -2496,7 +2511,7 @@
 		"Nu acum"
 	],
 	"Not useful": [
-		""
+		"Nu este utilă"
 	],
 	"note": [
 		"notiță"
@@ -2545,6 +2560,9 @@
 	],
 	"Note list style": [
 		"Stilul listei de notițe"
+	],
+	"Note not published: %s": [
+		"Notița nu a fost publicată: %s"
 	],
 	"Note preview": [
 		"Previzualizare notiță"
@@ -2706,7 +2724,7 @@
 		"Listă ordonată"
 	],
 	"Other": [
-		""
+		"Alta"
 	],
 	"Other applications...": [
 		"Alte aplicații…"
@@ -2959,6 +2977,9 @@
 	"Publish Note": [
 		"Publică notița"
 	],
+	"Publish note \"%s\" (in notebook \"%s\")?": [
+		"Publici notița „%s” (în caietul „%s”)?"
+	],
 	"Publish note...": [
 		"Publică notița…"
 	],
@@ -2971,8 +2992,11 @@
 	"Publish/unpublish": [
 		"Publică/Retrage"
 	],
+	"Published at URL: %s": [
+		"Publicat la URL: %s"
+	],
 	"Publishes a note to Joplin Server or Joplin Cloud": [
-		""
+		"Publică o notiță pe un server Joplin sau în Cloud-ul Joplin"
 	],
 	"QR Code": [
 		"Cod QR"
@@ -3018,6 +3042,9 @@
 	],
 	"Recipients:": [
 		"Destinatari:"
+	],
+	"Recognise text:": [
+		"Recunoaște textul:"
 	],
 	"Recognize handwritten image": [
 		"Recunoaște imagine cu text scris de mînă"
@@ -3247,6 +3274,9 @@
 	"Save geo-location with notes": [
 		"Salvează geo-locația în notițe"
 	],
+	"Save geolocation?": [
+		"Salvezi geo-locația?"
+	],
 	"Scan notebook": [
 		"Scanează un caiet"
 	],
@@ -3317,7 +3347,7 @@
 		"Selectează caiet"
 	],
 	"Select one of the other supported sync targets.": [
-		""
+		"Selectează una din celelalte destinații de sincronizare suportate."
 	],
 	"Select parent notebook": [
 		"Selectează caietul părinte"
@@ -3656,7 +3686,7 @@
 		"Comută la [notebook] - toate operațiunile ulterioare vor avea loc în acest caiet."
 	],
 	"Sync": [
-		""
+		"Sincronizează"
 	],
 	"Sync as many devices as you want": [
 		"Sincronizează cît de multe dispozitive dorești"
@@ -3736,6 +3766,9 @@
 	"Take photo": [
 		"Fotografiază"
 	],
+	"Take survey": [
+		"Completează chestionarul"
+	],
 	"Task \"%s\" failed with error: %s": [
 		"Sarcina „%s” a eșuat cu eroarea: %s"
 	],
@@ -3755,7 +3788,7 @@
 		"Comandă editor de text"
 	],
 	"Thank you for the feedback!\nDo you have time to complete a short survey?": [
-		""
+		"Mulțumim pentru feedback!\nAi timp să completezi un scurt chestionar?"
 	],
 	"The active profile cannot be deleted. Switch to a different profile and try again.": [
 		"Profilul activ nu poate fi șters. Comută la un alt profil și încearcă din nou."
@@ -4158,7 +4191,10 @@
 		"Nu se poate edita resursa de tip %s"
 	],
 	"Unable to share log data. Reason: %s": [
-		"Imposibilitatea de a partaja datele din jurnal. Motivul: %s"
+		"Imposibil de a partaja datele din jurnal. Motivul: %s"
+	],
+	"Unable to share note data. Reason: %s": [
+		"Imposibil de a partaja datele din notiță. Motivul: %s"
 	],
 	"Unchecked": [
 		"Debifat"
@@ -4305,7 +4341,7 @@
 		"Se utilizează atunci cînd este necesar un font cu lățime fixă pentru a prezenta textul în mod lizibil (de exemplu, tabele, căsuțe de selectare, coduri). Dacă nu se găsește, se utilizează un font generic monospace (lățime fixă)."
 	],
 	"Useful": [
-		""
+		"Utilă"
 	],
 	"User deletions": [
 		"Ștergeri de utilizatori"
@@ -4413,7 +4449,7 @@
 		"Cînd este creată o nouă listă de făcut:"
 	],
 	"When enabled, requests that the images in the note be transcribed with a higher-quality on-server transcription service. Requires sync with a copy of the desktop app.": [
-		""
+		"Cînd este activat, solicită ca imaginile din notiță să fie transcrise cu un serviciu de calitate mai bună de pe server. Necesită sincronizare cu aplicația desktop."
 	],
 	"When enabled, the application will scan your attachments and extract the text from it. This will allow you to search for text in these attachments.": [
 		"Atunci cînd este activată, aplicația va scana atașamentele și va extrage textul din ele. Acest lucru îți va permite să cauți text în atașamente."

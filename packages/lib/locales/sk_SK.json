@@ -174,7 +174,7 @@
 		"[Žiadny]"
 	],
 	"A brief description of the image:": [
-		""
+		"Stručný popis obrázku:"
 	],
 	"A comma-separated list of words. May be used for uncommon words, to help voice typing spell them correctly.": [
 		"Zoznam slov oddelených čiarkami. Môže sa použiť pre nezvyčajné slová, aby sa pomohlo pri ich správnom hlasovom zadávaní."
@@ -247,6 +247,9 @@
 	],
 	"Add body": [
 		"Pridať telo"
+	],
+	"Add column": [
+		""
 	],
 	"Add new": [
 		"Pridať novú"
@@ -345,7 +348,7 @@
 		"Bol nájdený automaticky uložený náčrt. Pripojiť jeho kópiu k poznámke?"
 	],
 	"An error occurred while sending the response. This can happen if the app is offline or cannot connect to the server.\nError: %s": [
-		""
+		"Pri odosielaní odpovede došlo k chybe. K tejto chybe môže dôjsť, ak je aplikácia offline alebo sa nemôže pripojiť k serveru.\nChyba: %s"
 	],
 	"An error occurred: %s": [
 		"Vyskytla sa chyba: %s"
@@ -685,6 +688,9 @@
 	],
 	"Collapse all notebooks": [
 		"Zbaliť všetky zápisníky"
+	],
+	"Collapse title": [
+		"Zbaliť nadpis"
 	],
 	"Collapsed": [
 		"Zbalené"
@@ -1186,7 +1192,7 @@
 		"Nestraťte heslo, pretože z bezpečnostných dôvodov je to *jediný* spôsob, ako dešifrovať údaje! Ak chcete zapnúť šifrovanie, zadajte heslo nižšie."
 	],
 	"Do you find the Joplin web app useful?": [
-		""
+		"Považujete webovú aplikáciu Joplin za užitočnú?"
 	],
 	"Document scanner: Title template": [
 		"Skener dokumentov: Šablóna názvu"
@@ -1545,6 +1551,9 @@
 	"Expand all notebooks": [
 		"Rozbaliť všetky zápisníky"
 	],
+	"Expand title": [
+		"Rozbaliť nadpis"
+	],
 	"Expanded": [
 		"Rozbalené"
 	],
@@ -1609,7 +1618,7 @@
 		"Príznaky funkcií"
 	],
 	"Feedback": [
-		""
+		"Spätná väzba"
 	],
 	"Fetched items: %d/%d.": [
 		"Načítané položky: %d/%d."
@@ -2024,6 +2033,9 @@
 	"Joplin Server": [
 		"Joplin Server"
 	],
+	"Joplin Server (SAML)": [
+		"Joplin Server (SAML)"
+	],
 	"Joplin Server Business": [
 		"Joplin Server Business"
 	],
@@ -2043,7 +2055,7 @@
 		"Joplin SSO overenie"
 	],
 	"Joplin supports saving the location at which notes are saved or created. Do you want to enable it? This can be changed at any time in settings.": [
-		""
+		"Joplin podporuje ukladanie polohy, pri ktorej sa poznámky ukladajú alebo vytvárajú. Chcete túto funkciu povoliť? Túto voľbu môžete kedykoľvek zmeniť v nastaveniach."
 	],
 	"Joplin Web Clipper allows saving web pages and screenshots from your browser to Joplin.": [
 		"Joplin Web Clipper umožňuje ukladanie webových stránok a snímok obrazovky z vášho prehliadača do aplikácie Joplin."
@@ -2076,7 +2088,7 @@
 		"Kľúče, ktoré si vyžadujú aktualizáciu"
 	],
 	"Label": [
-		""
+		"Označenie"
 	],
 	"Landscape": [
 		"Na šírku"
@@ -2234,6 +2246,9 @@
 	],
 	"Markdown editor": [
 		"Editor Markdown"
+	],
+	"Markdown editor: Highlight active line": [
+		"Editor Markdown: Zvýrazniť aktívny riadok"
 	],
 	"Markdown editor: Render images": [
 		"Editor Markdown: Vykresliť obrázky"
@@ -2496,7 +2511,7 @@
 		"Teraz nie"
 	],
 	"Not useful": [
-		""
+		"Nie je užitočné"
 	],
 	"note": [
 		"pozn"
@@ -2545,6 +2560,9 @@
 	],
 	"Note list style": [
 		"Štýl zoznamu poznámok"
+	],
+	"Note not published: %s": [
+		"Poznámka neuverejnená: %s"
 	],
 	"Note preview": [
 		"Náhľad poznámky"
@@ -2706,7 +2724,7 @@
 		"Usporiadaný zoznam"
 	],
 	"Other": [
-		""
+		"Iné"
 	],
 	"Other applications...": [
 		"Iné aplikácie..."
@@ -2959,6 +2977,9 @@
 	"Publish Note": [
 		"Zverejniť poznámku"
 	],
+	"Publish note \"%s\" (in notebook \"%s\")?": [
+		"Zverejniť poznámku „%s“ (v zápisníku „%s“)?"
+	],
 	"Publish note...": [
 		"Zverejniť poznámku..."
 	],
@@ -2971,8 +2992,11 @@
 	"Publish/unpublish": [
 		"Zverejniť/Zrušiť zverejnenie"
 	],
+	"Published at URL: %s": [
+		"Uverejnené na URL adrese: %s"
+	],
 	"Publishes a note to Joplin Server or Joplin Cloud": [
-		""
+		"Uverejní poznámku na serveri Joplin alebo v cloude Joplin"
 	],
 	"QR Code": [
 		"QR kód"
@@ -3018,6 +3042,9 @@
 	],
 	"Recipients:": [
 		"Príjemcovia:"
+	],
+	"Recognise text:": [
+		"Rozpoznať text:"
 	],
 	"Recognize handwritten image": [
 		"Rozpoznať obrázok rukopisu"
@@ -3247,6 +3274,9 @@
 	"Save geo-location with notes": [
 		"Uložiť geografickú polohu s poznámkami"
 	],
+	"Save geolocation?": [
+		"Uložiť geografickú polohu?"
+	],
 	"Scan notebook": [
 		"Skenovať zápisník"
 	],
@@ -3317,7 +3347,7 @@
 		"Vybrať zápisník"
 	],
 	"Select one of the other supported sync targets.": [
-		""
+		"Vyberte jeden z ďalších podporovaných cieľov synchronizácie."
 	],
 	"Select parent notebook": [
 		"Vybrať nadradený zápisník"
@@ -3656,7 +3686,7 @@
 		"Prepne na [zápisník] – všetky ďalšie operácie budú prebiehať v tomto zápisníku."
 	],
 	"Sync": [
-		""
+		"Synchronizovať"
 	],
 	"Sync as many devices as you want": [
 		"Synchronizujte toľko zariadení, koľko len chcete"
@@ -3736,6 +3766,9 @@
 	"Take photo": [
 		"Odfotiť"
 	],
+	"Take survey": [
+		"Zúčastniť sa prieskumu"
+	],
 	"Task \"%s\" failed with error: %s": [
 		"Úloha \"%s\" zlyhala s chybou: %s"
 	],
@@ -3755,7 +3788,7 @@
 		"Príkaz textového editora"
 	],
 	"Thank you for the feedback!\nDo you have time to complete a short survey?": [
-		""
+		"Ďakujeme za spätnú väzbu!\nMáte čas vyplniť krátky dotazník?"
 	],
 	"The active profile cannot be deleted. Switch to a different profile and try again.": [
 		"Aktívny profil nie je možné odstrániť. Prepnite na iný profil a skúste to znova."
@@ -4160,6 +4193,9 @@
 	"Unable to share log data. Reason: %s": [
 		"Nie je možné zdieľať údaje záznamu. Dôvod: %s"
 	],
+	"Unable to share note data. Reason: %s": [
+		"Nie je možné zdieľať údaje poznámky. Dôvod: %s"
+	],
 	"Unchecked": [
 		"Neoznačené"
 	],
@@ -4305,7 +4341,7 @@
 		"Používa sa v prípadoch, keď je na čitateľné rozvrhnutie textu potrebná pevná šírka písma (napr. tabuľky, označovacie políčka, kód). Ak sa nenájde, použije sa všeobecné monospace písmo (s pevnou šírkou)."
 	],
 	"Useful": [
-		""
+		"Užitočné"
 	],
 	"User deletions": [
 		"Vymazania používateľa"
@@ -4413,7 +4449,7 @@
 		"Pri vytváraní novej úlohy:"
 	],
 	"When enabled, requests that the images in the note be transcribed with a higher-quality on-server transcription service. Requires sync with a copy of the desktop app.": [
-		""
+		"Ak je táto funkcia povolená, požiada o prepis obrázkov v poznámke pomocou kvalitnejšej služby prepisovania na serveri. Vyžaduje synchronizáciu s kópiou aplikácie pre počítače."
 	],
 	"When enabled, the application will scan your attachments and extract the text from it. This will allow you to search for text in these attachments.": [
 		"Ak je táto funkcia zapnutá, aplikácia bude skenovať prílohy a extrahovať z nich text. To vám umožní vyhľadávať text v týchto prílohách."
