@@ -70,6 +70,8 @@ const geoipServices: Record<string, GeoipService> = {
 							Altitude = $altitude
 						} | ConvertTo-Json | Write-Output
 					}
+
+					$geo.Stop()
 				`,
 			], { quiet: true });
 			const responseData = JSON.parse(response.replace(/^True/, ''));
