@@ -26,6 +26,13 @@
 		</intent>
 	</queries>
 
+	<!-- Some organizations send secret keys to Joplin Cloud/Server as a required part of auth
+	     or to customize the Joplin Cloud sign-up behavior. -->
+	<permission
+		android:name="net.cozic.joplin.SECRET_KEY_PROVIDER"
+		android:protectionLevel="signature"
+	/>
+
 	<!--
 		android:requestLegacyExternalStorage: Android 10 introduced new "scoped storage" mechanism.
 		Apps targeting Android 10 (sdk 29) can no longer freely access arbitrary paths on the shared storage.
@@ -103,6 +110,13 @@
 				<data android:scheme="joplin" />
 			</intent-filter>
 			<!-- /EXTERNAL LINK -->
+
+			<!-- -->
+			<intent-filter>
+				<action android:name="android.intent.action." />
+				<category android:name="android.intent.category.DEFAULT" />
+				<data android:mimeType="*/*" />
+			</intent-filter>
 		</activity>
 
 	</application>
