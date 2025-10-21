@@ -1,7 +1,9 @@
 package net.cozic.joplin.ipc
 
 import android.content.ComponentName
+import android.content.Context
 import android.content.Intent
+import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.ActivityResultRegistry
 import androidx.appcompat.app.AppCompatActivity
@@ -20,22 +22,26 @@ import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
 // ref: https://developer.android.com/training/basics/intents/result#separate
-class IpcLifecycleObserver(private val registry: ActivityResultRegistry) :
-    DefaultLifecycleObserver {
-    lateinit var getContent : ActivityResultLauncher<String>
+class IpcHandler(private val registry: ActivityResultRegistry, private val context: Context) {
+    var getContent : ActivityResultLauncher<String>? = null
 
-    override fun onCreate(owner: LifecycleOwner) {
-        getContent = registry.register<String, String>(
+    fun onResume(owner: LifecycleOwner) {
+        getContent = getContent ?: registry.register<String, String>(
             "net.cozic.joplin.secret-key-request",
             owner,
             SecretRequestContract()
         ) { result ->
             // TODO: Process result
+            Toast.makeText(context, "Done! ${result}", Toast.LENGTH_SHORT).show()
         }
     }
 
     fun requestKey() {
-        getContent.launch("")
+        if (getContent != null) {
+            getContent!!.launch("")
+        } else {
+            throw Exception("IpcHandler not yet initialized")
+        }
     }
 }
 
@@ -52,7 +58,10 @@ class IpcPackage : ReactPackage {
     class IpcPackage(
         private var context: ReactApplicationContext,
     ) : ReactContextBaseJavaModule(context), LifecycleEventListener {
-        private var observer: IpcLifecycleObserver? = null
+        private var observer: IpcHandler? = null
+        init {
+            context.addLifecycleEventListener(this)
+        }
 
         override fun getName() = "AppIpcModule"
 
@@ -60,9 +69,8 @@ class IpcPackage : ReactPackage {
             val activity = context.currentActivity
             if (activity is AppCompatActivity) {
                 val resultRegistry = activity.activityResultRegistry
-                observer = observer ?: IpcLifecycleObserver(resultRegistry).also { observer ->
-                    activity.lifecycle.addObserver(observer)
-                }
+                observer = observer ?: IpcHandler(resultRegistry, context)
+                observer?.onResume(activity)
             } else {
                 throw Exception("Invalid state: The current activity must exist and must be an AppCompatActivity when the app resumes")
             }
@@ -72,7 +80,10 @@ class IpcPackage : ReactPackage {
 
         @ReactMethod
         fun requestAppSecret(promise: Promise) {
-            val appContext = context.applicationContext
+            if (observer == null) {
+                promise.reject(Exception("No observer registered"))
+                return
+            }
 
             try {
                 observer?.requestKey()
