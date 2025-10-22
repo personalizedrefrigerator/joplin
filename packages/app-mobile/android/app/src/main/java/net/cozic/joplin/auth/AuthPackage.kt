@@ -14,19 +14,18 @@ import androidx.core.net.toUri
 // Handles inter-process communication with other apps.
 class AuthPackage : ReactPackage {
     override fun createNativeModules(reactContext: ReactApplicationContext): List<NativeModule> {
-        return listOf<NativeModule>(IpcPackage(reactContext))
+        return listOf<NativeModule>(AuthModule(reactContext))
     }
 
     override fun createViewManagers(reactContext: ReactApplicationContext): List<ViewManager<*, *>> {
         return emptyList()
     }
 
-    class IpcPackage(
+    class AuthModule(
         private var context: ReactApplicationContext,
     ) : ReactContextBaseJavaModule(context) {
 
         override fun getName() = "AppAuthModule"
-
 
         @ReactMethod
         fun requestAppSecret(promise: Promise) {
