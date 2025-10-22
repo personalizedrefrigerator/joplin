@@ -28,14 +28,14 @@ class AuthPackage : ReactPackage {
         override fun getName() = "AppAuthModule"
 
         @ReactMethod
-        fun requestAppSecret(promise: Promise) {
+        fun requestAppSecret(serverUri: String, promise: Promise) {
             var cursor: Cursor? = null
             try {
                 cursor = context.contentResolver.query(
                     "content://net.cozic.joplin-key.auth-client-secret".toUri(),
                     arrayOf("secret"),
-                    null,
-                    emptyArray<String>(),
+                    "server = ?",
+                    arrayOf(serverUri),
                     ""
                 )
                 if (cursor == null) {

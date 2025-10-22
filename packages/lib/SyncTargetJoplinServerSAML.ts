@@ -30,15 +30,17 @@ export async function initFileApi(syncTargetId: number, logger: Logger, options:
 	return fileApi;
 }
 
+type OnGetClientSecret = (baseUrl: string)=> Promise<string|null>;
 export interface AuthenticationProps {
-	clientSecret: string;
+	getClientSecret: null|OnGetClientSecret;
 }
 
 export const authenticateWithCode = async (code: string, options: AuthenticationProps) => {
 	try {
-		const response = await fetch(`${Setting.value('sync.11.path')}/api/login_with_code/${code}`, {
-			headers: new Headers(options.clientSecret ? {
-				'Client-Secret': options.clientSecret,
+		const fetchUrl = `${Setting.value('sync.11.path')}/api/login_with_code/${code}`;
+		const response = await fetch(fetchUrl, {
+			headers: new Headers(options.getClientSecret ? {
+				'Client-Secret': await options.getClientSecret(fetchUrl),
 			} : {}),
 		});
 		if (response.status !== 200) {

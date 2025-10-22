@@ -1,6 +1,7 @@
 
+type OnGetClientSecret = (baseUrl: string)=> Promise<string|null>;
 export interface AuthenticationProps {
-	clientSecret: string;
+	getClientSecret: null|OnGetClientSecret;
 }
 
 interface SsoScreenShared {

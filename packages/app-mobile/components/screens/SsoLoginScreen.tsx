@@ -47,7 +47,7 @@ const SsoLoginScreenComponent = (props: Props) => {
 
 	const submit = async () => {
 		const options = {
-			clientSecret: await clientSecret.current,
+			getClientSecret: clientSecret.current.getForUri,
 		};
 		if (await props.shared.processLoginCode(code, options)) {
 			await shim.showMessageBox(_('You are now logged into your account.'), {
