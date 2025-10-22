@@ -72,27 +72,24 @@ const useStyle = (themeId: number) => {
 	}, [themeId]);
 };
 
-const { AppIpcModule } = NativeModules;
+const { AppAuthModule } = NativeModules;
 const useClientSecret = () => {
 	const applicationClientSecret = useRef<Promise<string>>(null);
 	applicationClientSecret.current ??= (async () => {
-		if (!AppIpcModule) {
+		if (!AppAuthModule) {
 			logger.info('Skipping client secret check: Not supported on this device');
+			return null;
 		}
 
 		try {
-			const secret = await AppIpcModule.requestAppSecret();
-			logger.info('Client secret found');
+			const secret = await AppAuthModule.requestAppSecret();
+			logger.info('Client secret:', secret ? 'found' : 'not found');
 			return secret;
 		} catch (error) {
-			if (String(error).includes('Not supported on this device')) {
-				logger.debug('Client secret: not found.');
-			} else {
-				void shim.showErrorDialog(`An unexpected error occurred while fetching the device secret: ${error}`);
-				logger.warn('Failed to fetch client secret:', error);
-			}
+			void shim.showErrorDialog(`An error occurred while fetching the device secret: ${error}`);
+			logger.warn('Failed to fetch client secret:', error);
 
-			return '';
+			return null;
 		}
 	})();
 	return applicationClientSecret;

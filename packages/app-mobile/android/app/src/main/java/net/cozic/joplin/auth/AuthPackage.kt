@@ -1,18 +1,7 @@
-package net.cozic.joplin.ipc
+package net.cozic.joplin.auth
 
-import android.content.ComponentName
-import android.content.Context
-import android.content.Intent
 import android.database.Cursor
-import android.net.Uri
-import android.widget.Toast
-import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.ActivityResultRegistry
-import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.DefaultLifecycleObserver
-import androidx.lifecycle.LifecycleOwner
 import com.facebook.react.ReactPackage
-import com.facebook.react.bridge.LifecycleEventListener
 import com.facebook.react.bridge.NativeModule
 import com.facebook.react.bridge.Promise
 import com.facebook.react.bridge.ReactApplicationContext
@@ -23,7 +12,7 @@ import androidx.core.net.toUri
 
 
 // Handles inter-process communication with other apps.
-class IpcPackage : ReactPackage {
+class AuthPackage : ReactPackage {
     override fun createNativeModules(reactContext: ReactApplicationContext): List<NativeModule> {
         return listOf<NativeModule>(IpcPackage(reactContext))
     }
@@ -36,7 +25,7 @@ class IpcPackage : ReactPackage {
         private var context: ReactApplicationContext,
     ) : ReactContextBaseJavaModule(context) {
 
-        override fun getName() = "AppIpcModule"
+        override fun getName() = "AppAuthModule"
 
 
         @ReactMethod
@@ -51,14 +40,17 @@ class IpcPackage : ReactPackage {
                     ""
                 )
                 if (cursor == null) {
-                    promise.reject(Exception("Failed to resolve app secret"))
+                    // This should be the case for most devices: No authentication secret
+                    // provider app was found. Use "null" for the secret.
+                    promise.resolve(null)
                     return
                 }
+
                 if (cursor.moveToFirst()) {
                     val value = cursor.getString(0)
                     promise.resolve(value)
                 } else {
-                    promise.reject(Exception("No data"))
+                    promise.reject(Exception("No client secret was returned"))
                 }
             } catch (exception: Throwable) {
                 promise.reject(exception)

@@ -10,12 +10,11 @@ import com.facebook.react.ReactHost
 import com.facebook.react.ReactNativeHost
 import com.facebook.react.ReactPackage
 import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint.load
-import com.facebook.react.defaults.DefaultReactHost.getDefaultReactHost
 import com.facebook.react.defaults.DefaultReactNativeHost
 import com.facebook.react.soloader.OpenSourceMergedSoMapping
 import com.facebook.soloader.SoLoader
 import net.cozic.joplin.audio.SpeechToTextPackage
-import net.cozic.joplin.ipc.IpcPackage
+import net.cozic.joplin.auth.AuthPackage
 import net.cozic.joplin.versioninfo.SystemVersionInformationPackage
 import net.cozic.joplin.share.SharePackage
 import net.cozic.joplin.ssl.SslPackage
@@ -29,7 +28,7 @@ class MainApplication : Application(), ReactApplication {
                     add(SslPackage())
                     add(SystemVersionInformationPackage())
                     add(SpeechToTextPackage())
-                    add(IpcPackage())
+                    add(AuthPackage())
                 }
 
         override fun getJSMainModuleName(): String = ".expo/.virtual-metro-entry"
