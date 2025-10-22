@@ -107,13 +107,6 @@
 				<data android:scheme="joplin" />
 			</intent-filter>
 			<!-- /EXTERNAL LINK -->
-
-			<!-- -->
-			<intent-filter>
-				<action android:name="android.intent.action." />
-				<category android:name="android.intent.category.DEFAULT" />
-				<data android:mimeType="*/*" />
-			</intent-filter>
 		</activity>
 
 	</application>
