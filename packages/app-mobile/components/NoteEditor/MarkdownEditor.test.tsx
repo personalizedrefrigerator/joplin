@@ -55,12 +55,12 @@ describe('MarkdownEditor', () => {
 	// Regression test for #13193. This verifies that the editor can be reached
 	// over IPC.
 	it('should support the "textBold" command', async () => {
-		let lastBody = 'test';
+		let editorBody = 'test';
 		const editorRef = React.createRef<EditorControl|null>();
 		render(<WrappedEditor
 			ref={editorRef}
-			noteBody={lastBody}
-			onBodyChange={newValue => { lastBody = newValue; }}
+			noteBody={editorBody}
+			onBodyChange={newValue => { editorBody = newValue; }}
 		/>);
 
 		// Should mark the command as supported
@@ -70,7 +70,7 @@ describe('MarkdownEditor', () => {
 		await editorRef.current.execCommand(EditorCommandType.SelectAll);
 		await editorRef.current.execCommand(EditorCommandType.ToggleBolded);
 		await waitFor(() => {
-			expect(lastBody).toBe('**test**');
+			expect(editorBody).toBe('**test**');
 		});
 	});
 });
