@@ -10,6 +10,7 @@ import { _ } from '@joplin/lib/locale';
 import { Button, TextInput } from 'react-native-paper';
 import shim from '@joplin/lib/shim';
 import BackButtonService from '../../services/BackButtonService';
+import useClientSecret from '../../utils/auth/useClientSecret';
 
 interface Props {
 	themeId: number;
@@ -42,9 +43,13 @@ const SsoLoginScreenComponent = (props: Props) => {
 	});
 
 	const [code, setCode] = React.useState('');
+	const clientSecret = useClientSecret();
 
 	const submit = async () => {
-		if (await props.shared.processLoginCode(code)) {
+		const options = {
+			clientSecret: await clientSecret.current,
+		};
+		if (await props.shared.processLoginCode(code, options)) {
 			await shim.showMessageBox(_('You are now logged into your account.'), {
 				buttons: [_('OK')],
 			});

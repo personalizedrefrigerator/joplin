@@ -1,7 +1,6 @@
 import * as React from 'react';
 
-import { useRef } from 'react';
-import { View, Text, StyleSheet, Linking, Animated, Easing, NativeModules } from 'react-native';
+import { View, Text, StyleSheet, Linking, Animated, Easing } from 'react-native';
 const { connect } = require('react-redux');
 const { _ } = require('@joplin/lib/locale');
 const { themeStyle } = require('../global-style.js');
@@ -15,7 +14,7 @@ import Clipboard from '@react-native-clipboard/clipboard';
 const Icon = require('react-native-vector-icons/Ionicons').default;
 import Logger from '@joplin/utils/Logger';
 import { reg } from '@joplin/lib/registry';
-import shim from '@joplin/lib/shim';
+import useClientSecret from '../../utils/auth/useClientSecret';
 
 const logger = Logger.create('JoplinCloudLoginScreen');
 
@@ -70,29 +69,6 @@ const useStyle = (themeId: number) => {
 			},
 		});
 	}, [themeId]);
-};
-
-const { AppAuthModule } = NativeModules;
-const useClientSecret = () => {
-	const applicationClientSecret = useRef<Promise<string>>(null);
-	applicationClientSecret.current ??= (async () => {
-		if (!AppAuthModule) {
-			logger.info('Skipping client secret check: Not supported on this device');
-			return null;
-		}
-
-		try {
-			const secret = await AppAuthModule.requestAppSecret();
-			logger.info('Client secret:', secret ? 'found' : 'not found');
-			return secret;
-		} catch (error) {
-			void shim.showErrorDialog(`An error occurred while fetching the device secret: ${error}`);
-			logger.warn('Failed to fetch client secret:', error);
-
-			return null;
-		}
-	})();
-	return applicationClientSecret;
 };
 
 const JoplinCloudScreenComponent = (props: Props) => {

@@ -1,6 +1,11 @@
+
+export interface AuthenticationProps {
+	clientSecret: string;
+}
+
 interface SsoScreenShared {
 	openLoginPage(): Promise<void>;
-	processLoginCode(code: string): Promise<boolean>;
+	processLoginCode(code: string, props: AuthenticationProps): Promise<boolean>;
 	isLoginCodeValid(code: string): boolean;
 }
 

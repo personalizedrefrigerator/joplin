@@ -30,9 +30,17 @@ export async function initFileApi(syncTargetId: number, logger: Logger, options:
 	return fileApi;
 }
 
-export const authenticateWithCode = async (code: string) => {
+export interface AuthenticationProps {
+	clientSecret: string;
+}
+
+export const authenticateWithCode = async (code: string, options: AuthenticationProps) => {
 	try {
-		const response = await fetch(`${Setting.value('sync.11.path')}/api/login_with_code/${code}`);
+		const response = await fetch(`${Setting.value('sync.11.path')}/api/login_with_code/${code}`, {
+			headers: new Headers(options.clientSecret ? {
+				'Client-Secret': options.clientSecret,
+			} : {}),
+		});
 		if (response.status !== 200) {
 			return false;
 		}

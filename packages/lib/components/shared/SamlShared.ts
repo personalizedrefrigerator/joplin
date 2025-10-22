@@ -2,7 +2,7 @@ import Setting from '../../models/Setting';
 import shim from '../../shim';
 import { authenticateWithCode } from '../../SyncTargetJoplinServerSAML';
 import prefixWithHttps from '../../utils/prefixWithHttps';
-import SsoScreenShared from './SsoScreenShared';
+import SsoScreenShared, { AuthenticationProps } from './SsoScreenShared';
 
 export default class SamlShared implements SsoScreenShared {
 	public openLoginPage() {
@@ -10,9 +10,9 @@ export default class SamlShared implements SsoScreenShared {
 		return Promise.resolve();
 	}
 
-	public processLoginCode(code: string) {
+	public processLoginCode(code: string, props: AuthenticationProps) {
 		if (this.isLoginCodeValid(code)) {
-			return authenticateWithCode(this.cleanCode(code));
+			return authenticateWithCode(this.cleanCode(code), props);
 		} else {
 			return Promise.resolve(false);
 		}
