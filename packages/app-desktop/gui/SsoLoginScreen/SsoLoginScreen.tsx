@@ -20,7 +20,7 @@ const SsoLoginScreen = (props: Props) => {
 	const back = () => props.dispatch({ type: 'NAV_BACK' });
 
 	const submit = async () => {
-		if (await props.shared.processLoginCode(code)) {
+		if (await props.shared.processLoginCode(code, { clientSecret: null })) {
 			await shim.showMessageBox(_('You are now logged into your account.'), {
 				buttons: [_('OK')],
 			});
