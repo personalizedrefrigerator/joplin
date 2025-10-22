@@ -95,13 +95,17 @@ export const generateApplicationConfirmUrl = async (confirmUrl: string) => {
 // after an error occurs. E.g.: if the function would throw an error while isWaitingResponse
 // was set to true the next time we call the function the value would still be true.
 // The closure function prevents that.
-export const checkIfLoginWasSuccessful = async (applicationsUrl: string) => {
+export const checkIfLoginWasSuccessful = async (applicationsUrl: string, clientSecret: string|undefined) => {
 	let isWaitingResponse = false;
 	const performLoginRequest = async () => {
 		if (isWaitingResponse) return undefined;
 		isWaitingResponse = true;
 
-		const response = await fetch(applicationsUrl);
+		const response = await fetch(applicationsUrl, {
+			headers: new Headers(clientSecret ? {
+				'Client-Secret': clientSecret,
+			} : {}),
+		});
 		const jsonBody = await response.json();
 
 		if (!response.ok || jsonBody.status !== 'finished') {

@@ -1,6 +1,7 @@
 import * as React from 'react';
 
-import { View, Text, StyleSheet, Linking, Animated, Easing } from 'react-native';
+import { useRef } from 'react';
+import { View, Text, StyleSheet, Linking, Animated, Easing, NativeModules } from 'react-native';
 const { connect } = require('react-redux');
 const { _ } = require('@joplin/lib/locale');
 const { themeStyle } = require('../global-style.js');
@@ -14,6 +15,7 @@ import Clipboard from '@react-native-clipboard/clipboard';
 const Icon = require('react-native-vector-icons/Ionicons').default;
 import Logger from '@joplin/utils/Logger';
 import { reg } from '@joplin/lib/registry';
+import shim from '@joplin/lib/shim';
 
 const logger = Logger.create('JoplinCloudLoginScreen');
 
@@ -70,6 +72,32 @@ const useStyle = (themeId: number) => {
 	}, [themeId]);
 };
 
+const { AppIpcModule } = NativeModules;
+const useClientSecret = () => {
+	const applicationClientSecret = useRef<Promise<string>>(null);
+	applicationClientSecret.current ??= (async () => {
+		if (!AppIpcModule) {
+			logger.info('Skipping client secret check: Not supported on this device');
+		}
+
+		try {
+			const secret = await AppIpcModule.requestAppSecret();
+			logger.info('Client secret found');
+			return secret;
+		} catch (error) {
+			if (String(error).includes('Not supported on this device')) {
+				logger.debug('Client secret: not found.');
+			} else {
+				void shim.showErrorDialog(`An unexpected error occurred while fetching the device secret: ${error}`);
+				logger.warn('Failed to fetch client secret:', error);
+			}
+
+			return '';
+		}
+	})();
+	return applicationClientSecret;
+};
+
 const JoplinCloudScreenComponent = (props: Props) => {
 
 	const confirmUrl = (applicationAuthId: string) => `${props.joplinCloudWebsite}/applications/${applicationAuthId}/confirm`;
@@ -79,6 +107,7 @@ const JoplinCloudScreenComponent = (props: Props) => {
 	const [state, dispatch] = React.useReducer(reducer, defaultState);
 
 	const applicationAuthId = React.useMemo(() => uuidgen(), []);
+	const appClientSecret = useClientSecret();
 
 	const styles = useStyle(props.themeId);
 
@@ -87,7 +116,7 @@ const JoplinCloudScreenComponent = (props: Props) => {
 
 		const interval = setInterval(async () => {
 			try {
-				const response = await checkIfLoginWasSuccessful(applicationAuthUrl(applicationAuthId));
+				const response = await checkIfLoginWasSuccessful(applicationAuthUrl(applicationAuthId), await appClientSecret.current);
 				if (response && response.success) {
 					dispatch({ type: 'COMPLETED' });
 					clearInterval(interval);

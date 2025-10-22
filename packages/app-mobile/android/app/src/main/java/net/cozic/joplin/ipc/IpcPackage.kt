@@ -3,6 +3,8 @@ package net.cozic.joplin.ipc
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.database.Cursor
+import android.net.Uri
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.ActivityResultRegistry
@@ -17,33 +19,8 @@ import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReactContextBaseJavaModule
 import com.facebook.react.bridge.ReactMethod
 import com.facebook.react.uimanager.ViewManager
-import net.cozic.joplin.audio.SpeechToTextSessionManager
-import java.util.concurrent.ExecutorService
-import java.util.concurrent.Executors
+import androidx.core.net.toUri
 
-// ref: https://developer.android.com/training/basics/intents/result#separate
-class IpcHandler(private val registry: ActivityResultRegistry, private val context: Context) {
-    var getContent : ActivityResultLauncher<String>? = null
-
-    fun onResume(owner: LifecycleOwner) {
-        getContent = getContent ?: registry.register<String, String>(
-            "net.cozic.joplin.secret-key-request",
-            owner,
-            SecretRequestContract()
-        ) { result ->
-            // TODO: Process result
-            Toast.makeText(context, "Done! ${result}", Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    fun requestKey() {
-        if (getContent != null) {
-            getContent!!.launch("")
-        } else {
-            throw Exception("IpcHandler not yet initialized")
-        }
-    }
-}
 
 // Handles inter-process communication with other apps.
 class IpcPackage : ReactPackage {
@@ -57,39 +34,36 @@ class IpcPackage : ReactPackage {
 
     class IpcPackage(
         private var context: ReactApplicationContext,
-    ) : ReactContextBaseJavaModule(context), LifecycleEventListener {
-        private var observer: IpcHandler? = null
-        init {
-            context.addLifecycleEventListener(this)
-        }
+    ) : ReactContextBaseJavaModule(context) {
 
         override fun getName() = "AppIpcModule"
 
-        override fun onHostResume() {
-            val activity = context.currentActivity
-            if (activity is AppCompatActivity) {
-                val resultRegistry = activity.activityResultRegistry
-                observer = observer ?: IpcHandler(resultRegistry, context)
-                observer?.onResume(activity)
-            } else {
-                throw Exception("Invalid state: The current activity must exist and must be an AppCompatActivity when the app resumes")
-            }
-        }
-        override fun onHostPause() { }
-        override fun onHostDestroy() { }
 
         @ReactMethod
         fun requestAppSecret(promise: Promise) {
-            if (observer == null) {
-                promise.reject(Exception("No observer registered"))
-                return
-            }
-
+            var cursor: Cursor? = null
             try {
-                observer?.requestKey()
-                promise.resolve(0)
+                cursor = context.contentResolver.query(
+                    "content://net.cozic.joplin-key.auth-client-secret".toUri(),
+                    arrayOf("secret"),
+                    null,
+                    emptyArray<String>(),
+                    ""
+                )
+                if (cursor == null) {
+                    promise.reject(Exception("Failed to resolve app secret"))
+                    return
+                }
+                if (cursor.moveToFirst()) {
+                    val value = cursor.getString(0)
+                    promise.resolve(value)
+                } else {
+                    promise.reject(Exception("No data"))
+                }
             } catch (exception: Throwable) {
                 promise.reject(exception)
+            } finally {
+                cursor?.close()
             }
         }
 

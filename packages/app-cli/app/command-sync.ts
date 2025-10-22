@@ -97,7 +97,8 @@ class Command extends BaseCommand {
 			const checkForCredentials = async () => {
 				try {
 					const applicationAuthUrl = `${Setting.value('sync.10.path')}/api/application_auth/${applicationAuthId}`;
-					const response = await checkIfLoginWasSuccessful(applicationAuthUrl);
+					const clientSecret: string|undefined = undefined;
+					const response = await checkIfLoginWasSuccessful(applicationAuthUrl, clientSecret);
 					if (response && response.success) {
 						return response;
 					}
