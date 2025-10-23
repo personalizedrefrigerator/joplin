@@ -269,7 +269,7 @@ function ShareFolderDialog(props: Props) {
 	}, []);
 
 	function renderAddRecipient() {
-		const disabled = shareState !== ShareState.Idle;
+		const disabled = shareState !== ShareState.Idle && shareState !== ShareState.Synchronizing;
 
 		const dropdown = !props.canUseSharePermissions ? null : <Dropdown className="permission-dropdown" options={permissionOptions} value={recipientPermissions} onChange={recipientPermissions_change}/>;
 
