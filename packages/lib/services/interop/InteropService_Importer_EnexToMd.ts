@@ -5,54 +5,41 @@ import Folder from '../../models/Folder';
 import { FolderEntity } from '../database/types';
 import { fileExtension, rtrimSlashes } from '../../path-utils';
 import shim from '../../shim';
-import { basename } from 'path';
-import { Stat } from '../../fs-driver-base';
 const { filename } = require('../../path-utils');
+
+const createDestinationFolder = async (importFilepath: string, parentId: string|undefined) => {
+	const title = await Folder.findUniqueItemTitle(filename(importFilepath));
+	return await Folder.save({ title, parent_id: parentId ?? '' });
+};
 
 const doImportEnex = async (destFolder: FolderEntity, sourcePath: string, options: ImportOptions) => {
 	if (!destFolder) {
-		const folderTitle = await Folder.findUniqueItemTitle(filename(sourcePath));
-		destFolder = await Folder.save({ title: folderTitle });
+		destFolder = await createDestinationFolder(sourcePath, undefined);
 	}
 
 	await importEnex(destFolder.id, sourcePath, options);
 };
 
-const importEnexDirectory = async (result: ImportExportResult, rootDestinationFolder: FolderEntity|null, sourcePath: string, fileExtensions: string[], options: ImportOptions) => {
-	const stats = await shim.fsDriver().readDirStats(sourcePath);
+export const enexImporterExec = async (result: ImportExportResult, destinationFolder: FolderEntity, sourcePath: string, fileExtensions: string[], options: ImportOptions) => {
+	sourcePath = rtrimSlashes(sourcePath);
 
-	const destinationFolderFromStat = (stat: Stat) => {
-		if (stat.isDirectory()) {
-			return Folder.save({
-				title: basename(stat.path),
-				parent_id: rootDestinationFolder?.id ?? '',
-			});
-		} else {
-			return rootDestinationFolder;
-		}
-	};
+	if (await shim.fsDriver().isDirectory(sourcePath)) {
+		const stats = await shim.fsDriver().readDirStats(sourcePath);
 
-	for (const stat of stats) {
-		const fullPath = `${sourcePath}/${stat.path}`;
-		const newDestinationFolder = await destinationFolderFromStat(stat);
+		for (const stat of stats) {
+			const fullPath = `${sourcePath}/${stat.path}`;
+			if (!fileExtensions.includes(fileExtension(fullPath).toLowerCase())) continue;
 
-		if (stat.isDirectory()) {
-			await importEnexDirectory(result, newDestinationFolder, fullPath, fileExtensions, options);
-		} else if (fileExtensions.includes(fileExtension(fullPath).toLowerCase())) {
+			// When importing a directory, avoid putting the imported notes directly in the parent
+			// folders (each entry in the directory to import should be given its own Joplin folder).
+			const destinationSubfolder = destinationFolder ? await createDestinationFolder(fullPath, destinationFolder.id) : null;
+
 			try {
-				await doImportEnex(newDestinationFolder, fullPath, options);
+				await doImportEnex(destinationSubfolder, fullPath, options);
 			} catch (error) {
 				result.warnings.push(`When importing "${fullPath}": ${error.message}`);
 			}
 		}
-	}
-};
-
-export const enexImporterExec = async (result: ImportExportResult, destinationFolder: FolderEntity|null, sourcePath: string, fileExtensions: string[], options: ImportOptions) => {
-	sourcePath = rtrimSlashes(sourcePath);
-
-	if (await shim.fsDriver().isDirectory(sourcePath)) {
-		await importEnexDirectory(result, destinationFolder, sourcePath, fileExtensions, options);
 	} else {
 		await doImportEnex(destinationFolder, sourcePath, options);
 	}

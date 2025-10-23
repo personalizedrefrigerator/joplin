@@ -4,6 +4,7 @@ import { setupDatabase, supportDir, switchClient } from '../../testing/test-util
 import { ImportModuleOutputFormat, ImportOptions } from './types';
 import InteropService from './InteropService';
 import Note from '../../models/Note';
+import { NoteEntity } from '../database/types';
 
 describe('InteropService_Importer_EnexToMd', () => {
 	beforeEach(async () => {
@@ -11,10 +12,10 @@ describe('InteropService_Importer_EnexToMd', () => {
 		await switchClient(1);
 	});
 
-	it('should create Joplin folders based on the input folder hierarchy', async () => {
+	it('should support importing to the provided destinationFolderId for directory imports', async () => {
 		const folder = await Folder.save({ title: 'base' });
 		const importOptions: ImportOptions = {
-			path: join(supportDir, 'enex_nested_folders'),
+			path: join(supportDir, 'enex_full', 'root'),
 			format: 'enex',
 			destinationFolderId: folder.id,
 			outputFormat: ImportModuleOutputFormat.Markdown,
@@ -26,22 +27,18 @@ describe('InteropService_Importer_EnexToMd', () => {
 		const allFolders = await Folder.allAsTree();
 		expect(allFolders).toMatchObject([{
 			title: 'base',
-			children: [{
-				title: 'root',
-				children: [
-					{ title: 'Folder A' },
-					{ title: 'Folder B' },
-				],
-			}],
+			children: [{ title: 'item1' }, { title: 'item2' }],
 		}]);
 
-		const folderA = await Folder.loadByTitle('Folder A');
-		const folderB = await Folder.loadByTitle('Folder B');
+		const checkFolderContent = async (folderTitle: string, expected: Partial<NoteEntity>[]) => {
+			const folder = await Folder.loadByTitle(folderTitle);
+			expect(await Note.previews(folder.id)).toMatchObject(expected);
+		};
 
-		expect(await Note.previews(folderA.id)).toMatchObject([
+		await checkFolderContent('item1', [
 			{ title: 'Test 1' },
 		]);
-		expect(await Note.previews(folderB.id)).toMatchObject([
+		await checkFolderContent('item2', [
 			{ title: 'Note 2' },
 		]);
 	});
