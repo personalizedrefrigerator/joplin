@@ -5,6 +5,8 @@ import Folder from '../../models/Folder';
 import { FolderEntity } from '../database/types';
 import { fileExtension, rtrimSlashes } from '../../path-utils';
 import shim from '../../shim';
+import { basename } from 'path';
+import { Stat } from '../../fs-driver-base';
 const { filename } = require('../../path-utils');
 
 const doImportEnex = async (destFolder: FolderEntity, sourcePath: string, options: ImportOptions) => {
@@ -16,22 +18,41 @@ const doImportEnex = async (destFolder: FolderEntity, sourcePath: string, option
 	await importEnex(destFolder.id, sourcePath, options);
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-export const enexImporterExec = async (result: ImportExportResult, destinationFolder: FolderEntity, sourcePath: string, fileExtensions: string[], options: any) => {
-	sourcePath = rtrimSlashes(sourcePath);
+const importEnexDirectory = async (result: ImportExportResult, rootDestinationFolder: FolderEntity|null, sourcePath: string, fileExtensions: string[], options: ImportOptions) => {
+	const stats = await shim.fsDriver().readDirStats(sourcePath);
 
-	if (await shim.fsDriver().isDirectory(sourcePath)) {
-		const stats = await shim.fsDriver().readDirStats(sourcePath);
-		for (const stat of stats) {
-			const fullPath = `${sourcePath}/${stat.path}`;
-			if (!fileExtensions.includes(fileExtension(fullPath).toLowerCase())) continue;
+	const destinationFolderFromStat = (stat: Stat) => {
+		if (stat.isDirectory()) {
+			return Folder.save({
+				title: basename(stat.path),
+				parent_id: rootDestinationFolder?.id ?? '',
+			});
+		} else {
+			return rootDestinationFolder;
+		}
+	};
 
+	for (const stat of stats) {
+		const fullPath = `${sourcePath}/${stat.path}`;
+		const newDestinationFolder = await destinationFolderFromStat(stat);
+
+		if (stat.isDirectory()) {
+			await importEnexDirectory(result, newDestinationFolder, fullPath, fileExtensions, options);
+		} else if (fileExtensions.includes(fileExtension(fullPath).toLowerCase())) {
 			try {
-				await doImportEnex(null, fullPath, options);
+				await doImportEnex(newDestinationFolder, fullPath, options);
 			} catch (error) {
 				result.warnings.push(`When importing "${fullPath}": ${error.message}`);
 			}
 		}
+	}
+};
+
+export const enexImporterExec = async (result: ImportExportResult, destinationFolder: FolderEntity|null, sourcePath: string, fileExtensions: string[], options: ImportOptions) => {
+	sourcePath = rtrimSlashes(sourcePath);
+
+	if (await shim.fsDriver().isDirectory(sourcePath)) {
+		await importEnexDirectory(result, destinationFolder, sourcePath, fileExtensions, options);
 	} else {
 		await doImportEnex(destinationFolder, sourcePath, options);
 	}
@@ -41,6 +62,11 @@ export const enexImporterExec = async (result: ImportExportResult, destinationFo
 
 export default class InteropService_Importer_EnexToMd extends InteropService_Importer_Base {
 	public async exec(result: ImportExportResult) {
+		let destinationFolder = this.options_.destinationFolder;
+		if (!destinationFolder && this.options_.destinationFolderId) {
+			destinationFolder = await Folder.load(this.options_.destinationFolderId);
+		}
+
 		return enexImporterExec(
 			result,
 			this.options_.destinationFolder,
