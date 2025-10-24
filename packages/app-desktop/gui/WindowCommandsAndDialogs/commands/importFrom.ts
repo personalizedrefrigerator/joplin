@@ -81,26 +81,26 @@ export const runtime = (control: WindowControl): CommandRuntime => {
 			const importModule = await findImportModule(options, control);
 			if (!importModule) return null; // E.g. if cancelled
 
-			let sourcePath = options.sourcePath ?? await promptForSourcePath(importModule, options.sourceType);
+			let sourcePath = options?.sourcePath ?? await promptForSourcePath(importModule, options?.sourceType);
 			if (Array.isArray(sourcePath)) {
 				sourcePath = sourcePath[0];
 			}
+
 			if (!options) {
-				const destinationFolderId = 'destinationFolderId' in options ? (
-					options.destinationFolderId
-				) : await showFolderPicker(control, {
+				const destinationFolderId = await showFolderPicker(control, {
 					label: _('Import to notebook:'),
 					allowSelectNone: true,
 					excludeIds: new Set(),
 				});
 				const importFormat = importModule.format;
 				const outputFormat = importModule.outputFormat;
+				const isDirectory = await shim.fsDriver().isDirectory(sourcePath);
 				options = {
 					sourcePath,
 					destinationFolderId,
 					importFormat,
 					outputFormat,
-					sourceType: await shim.fsDriver().isDirectory(sourcePath) ? FileSystemItem.Directory : FileSystemItem.File,
+					sourceType: isDirectory ? FileSystemItem.Directory : FileSystemItem.File,
 				};
 			}
 
