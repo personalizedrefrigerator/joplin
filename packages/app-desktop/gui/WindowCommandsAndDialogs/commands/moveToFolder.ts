@@ -37,7 +37,7 @@ export const runtime = (comp: any): CommandRuntime => {
 				// It's okay for folders (but not notes) to have no parent folder:
 				allowSelectNone: allAreFolders,
 				// Don't allow setting a folder as its own parent
-				excludeIds: itemIdToType,
+				showFolder: (folder) => !itemIdToType.has(folder.id),
 			});
 
 			// It's important to allow the case where targetFolderId is the empty string,

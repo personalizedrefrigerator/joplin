@@ -1,6 +1,7 @@
 import Folder, { FolderEntityWithChildren } from '@joplin/lib/models/Folder';
 import { WindowControl } from './useWindowControl';
 import { _ } from '@joplin/lib/locale';
+import { FolderEntity } from '@joplin/lib/services/database/types';
 
 interface FolderEntry {
 	key: string;
@@ -9,17 +10,13 @@ interface FolderEntry {
 	indentDepth: number;
 }
 
-type SetLike = {
-	has(key: string): boolean;
-};
-
 interface Options {
 	label: string;
 	allowSelectNone: boolean;
-	excludeIds: SetLike;
+	showFolder: (entity: FolderEntity)=> boolean;
 }
 
-const showFolderPicker = async (control: WindowControl, { label, allowSelectNone, excludeIds }: Options) => {
+const showFolderPicker = async (control: WindowControl, { label, allowSelectNone, showFolder }: Options) => {
 	const folders = await Folder.sortFolderTree();
 	const startFolders: FolderEntry[] = [];
 	const maxDepth = 15;
@@ -37,8 +34,7 @@ const showFolderPicker = async (control: WindowControl, { label, allowSelectNone
 		for (let i = 0; i < folders.length; i++) {
 			const folder = folders[i];
 
-			// For example, this can disallow making a folder a subfolder of itself.
-			if (excludeIds.has(folder.id)) {
+			if (!showFolder(folder)) {
 				continue;
 			}
 

@@ -92,7 +92,7 @@ export const runtime = (control: WindowControl): CommandRuntime => {
 				const destinationFolderId = await showFolderPicker(control, {
 					label: _('Import to notebook:'),
 					allowSelectNone: true,
-					excludeIds: new Set(),
+					showFolder: (_folder)=>true,
 				});
 				const importFormat = importModule.format;
 				const outputFormat = importModule.outputFormat;
