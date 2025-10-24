@@ -312,7 +312,7 @@ function useMenu(props: Props) {
 			importFormat: module.format,
 			outputFormat: module.outputFormat,
 		};
-		await CommandService.instance().execute('importTo', options);
+		await CommandService.instance().execute('importFrom', options);
 	}, [props.selectedFolderId]);
 
 	const onMenuItemClickRef = useRef(null);
