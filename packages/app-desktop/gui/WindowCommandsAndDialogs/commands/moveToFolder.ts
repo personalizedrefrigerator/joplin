@@ -33,6 +33,7 @@ export const runtime = (comp: any): CommandRuntime => {
 			}
 
 			const targetFolderId = await showFolderPicker(comp, {
+				label: _('Move to notebook:'),
 				// It's okay for folders (but not notes) to have no parent folder:
 				allowSelectNone: allAreFolders,
 				// Don't allow setting a folder as its own parent

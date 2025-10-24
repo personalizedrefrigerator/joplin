@@ -100,6 +100,7 @@ export const runtime = (control: WindowControl): CommandRuntime => {
 				const destinationFolderId = 'destinationFolderId' in partialOptions ? (
 					partialOptions.destinationFolderId
 				) : await showFolderPicker(control, {
+					label: _('Import to notebook:'),
 					allowSelectNone: true,
 					excludeIds: new Set(),
 				});

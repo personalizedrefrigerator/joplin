@@ -14,11 +14,12 @@ type SetLike = {
 };
 
 interface Options {
+	label: string;
 	allowSelectNone: boolean;
 	excludeIds: SetLike;
 }
 
-const showFolderPicker = async (control: WindowControl, { allowSelectNone, excludeIds }: Options) => {
+const showFolderPicker = async (control: WindowControl, { label, allowSelectNone, excludeIds }: Options) => {
 	const folders = await Folder.sortFolderTree();
 	const startFolders: FolderEntry[] = [];
 	const maxDepth = 15;
@@ -49,7 +50,7 @@ const showFolderPicker = async (control: WindowControl, { allowSelectNone, exclu
 	addOptions(folders, 0);
 
 	const folderId = await control.showPrompt({
-		label: _('Move to notebook:'),
+		label,
 		value: '',
 		suggestions: startFolders,
 	});
