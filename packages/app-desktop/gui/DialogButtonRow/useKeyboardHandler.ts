@@ -2,9 +2,10 @@ import * as React from 'react';
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { isInsideContainer } from '@joplin/lib/dom';
 
+type OnButtonClick = ()=> void;
 interface Props {
-	onOkButtonClick: null|(()=> void);
-	onCancelButtonClick: null|(()=> void);
+	onOkButtonClick: null|OnButtonClick;
+	onCancelButtonClick: null|OnButtonClick;
 }
 
 const globalKeydownHandlers: string[] = [];
