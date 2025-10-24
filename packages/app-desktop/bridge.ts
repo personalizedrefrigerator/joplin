@@ -367,7 +367,7 @@ export class Bridge {
 	public async showOpenDialog(options: OpenDialogOptions = null) {
 		if (!options) options = {};
 		let fileType = 'file';
-		if (options.properties) fileType = 'directory';
+		if (options.properties && options.properties.includes('openDirectory')) fileType = 'directory';
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 		if (!('defaultPath' in options) && (this.lastSelectedPaths_ as any)[fileType]) options.defaultPath = (this.lastSelectedPaths_ as any)[fileType];
 		if (!('createDirectory' in options)) options.createDirectory = true;
