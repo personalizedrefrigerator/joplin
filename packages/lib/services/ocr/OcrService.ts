@@ -186,9 +186,9 @@ export default class OcrService {
 			const processedResourceIds: string[] = [];
 
 			// Queue all resources for processing
-			let lastProcessedResourceIdsLength = -1;
-			while (processedResourceIds.length > lastProcessedResourceIdsLength) {
-				lastProcessedResourceIdsLength = processedResourceIds.length;
+			let lastProcessedCount = -1;
+			while (processedResourceIds.length > lastProcessedCount) {
+				lastProcessedCount = processedResourceIds.length;
 
 				const resources = await Resource.needOcr(supportedMimeTypes, skippedResourceIds.concat(processedResourceIds), 100, {
 					fields: [
