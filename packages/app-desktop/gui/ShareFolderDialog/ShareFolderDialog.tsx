@@ -147,7 +147,7 @@ function ShareFolderDialog(props: Props) {
 
 	useEffect(() => {
 		void ShareService.instance().refreshShares();
-	}, []);
+	}, [props.folderId]);
 
 	useAsyncEffect(async (event: AsyncEffectEvent) => {
 		await synchronize(event);
@@ -176,10 +176,6 @@ function ShareFolderDialog(props: Props) {
 		if (!sus) return;
 		setShareUsers(sus);
 	}, [share, props.shareUsers]);
-
-	useEffect(() => {
-		void ShareService.instance().refreshShares();
-	}, [props.folderId]);
 
 	const permissionsFromString = (p: string): SharePermissions => {
 		return {
