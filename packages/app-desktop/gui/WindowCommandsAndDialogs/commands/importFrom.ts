@@ -9,7 +9,6 @@ import makeDiscourseDebugUrl from '@joplin/lib/makeDiscourseDebugUrl';
 import PluginService from '@joplin/lib/services/plugins/PluginService';
 import Setting from '@joplin/lib/models/Setting';
 import { PackageInfo } from '@joplin/lib/versionInfo';
-import { fileExtension } from '@joplin/utils/path';
 import shim from '@joplin/lib/shim';
 import { ImportModule } from '@joplin/lib/services/interop/Module';
 const packageInfo: PackageInfo = require('../../../packageInfo.js');
@@ -20,29 +19,19 @@ export const declaration: CommandDeclaration = {
 };
 
 export interface ImportCommandOptions {
-	sourcePath?: string;
-	sourceType?: FileSystemItem;
-	destinationFolderId?: string;
-	importFormat?: string;
-	outputFormat?: ImportModuleOutputFormat;
+	sourcePath: string|undefined;
+	sourceType: FileSystemItem;
+	destinationFolderId: string|null;
+	importFormat: string;
+	outputFormat: ImportModuleOutputFormat;
 }
 
-type AllCommandOptions = Required<ImportCommandOptions>;
-
-const findImportModule = async (partialOptions: ImportCommandOptions, control: WindowControl) => {
-	if (partialOptions.importFormat) {
+const findImportModule = async (commandOptions: ImportCommandOptions|null, control: WindowControl) => {
+	if (commandOptions) {
 		const module = InteropService.instance().findModuleByFormat(
-			ModuleType.Importer, partialOptions.importFormat, partialOptions.sourceType, partialOptions.outputFormat);
+			ModuleType.Importer, commandOptions.importFormat, commandOptions.sourceType, commandOptions.outputFormat);
 		if (module) {
 			return module as ImportModule;
-		}
-	}
-
-	if (partialOptions.sourcePath) {
-		const extension = fileExtension(partialOptions.sourcePath);
-		const candidateModule = InteropService.instance().moduleByFileExtension(ModuleType.Importer, extension) as ImportModule;
-		if (candidateModule) {
-			return candidateModule;
 		}
 	}
 
@@ -88,17 +77,17 @@ const promptForSourcePath = async (module: ImportModule, sourceType: FileSystemI
 export const runtime = (control: WindowControl): CommandRuntime => {
 	return {
 		// Since this can be run from "go to anything", partialOptions needs to support being null or empty.
-		execute: async (context: CommandContext, partialOptions: ImportCommandOptions = {}) => {
-			const askUserForOptions = async (): Promise<AllCommandOptions|null> => {
-				const importModule = await findImportModule(partialOptions, control);
-				if (!importModule) return null;
+		execute: async (context: CommandContext, options: ImportCommandOptions|undefined) => {
+			const importModule = await findImportModule(options, control);
+			if (!importModule) return null; // E.g. if cancelled
 
-				let sourcePath = partialOptions.sourcePath ?? await promptForSourcePath(importModule, partialOptions.sourceType);
-				if (Array.isArray(sourcePath)) {
-					sourcePath = sourcePath[0];
-				}
-				const destinationFolderId = 'destinationFolderId' in partialOptions ? (
-					partialOptions.destinationFolderId
+			let sourcePath = options.sourcePath ?? await promptForSourcePath(importModule, options.sourceType);
+			if (Array.isArray(sourcePath)) {
+				sourcePath = sourcePath[0];
+			}
+			if (!options) {
+				const destinationFolderId = 'destinationFolderId' in options ? (
+					options.destinationFolderId
 				) : await showFolderPicker(control, {
 					label: _('Import to notebook:'),
 					allowSelectNone: true,
@@ -106,26 +95,23 @@ export const runtime = (control: WindowControl): CommandRuntime => {
 				});
 				const importFormat = importModule.format;
 				const outputFormat = importModule.outputFormat;
-				return {
+				options = {
 					sourcePath,
 					destinationFolderId,
 					importFormat,
 					outputFormat,
 					sourceType: await shim.fsDriver().isDirectory(sourcePath) ? FileSystemItem.Directory : FileSystemItem.File,
 				};
-			};
+			}
 
-			const options = await askUserForOptions();
-			if (!options) return null; // Cancelled
-
-			const modalMessage = _('Importing from "%s" as "%s" format. Please wait...', options.sourcePath, options.importFormat);
+			const modalMessage = _('Importing from "%s" as "%s" format. Please wait...', sourcePath, options.importFormat);
 			void CommandService.instance().execute('showModalMessage', modalMessage);
 
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 			const errors: any[] = [];
 
 			const importOptions = {
-				path: options.sourcePath,
+				path: sourcePath,
 				format: options.importFormat,
 				outputFormat: options.outputFormat,
 				// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied

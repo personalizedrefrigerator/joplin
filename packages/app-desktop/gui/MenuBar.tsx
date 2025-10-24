@@ -308,6 +308,7 @@ function useMenu(props: Props) {
 	const onImportModuleClick = useCallback(async (module: ImportModule, moduleSource: FileSystemItem) => {
 		const options: ImportCommandOptions = {
 			destinationFolderId: !module.isNoteArchive && moduleSource === 'file' ? props.selectedFolderId : null,
+			sourcePath: undefined, // Show a file picker
 			sourceType: moduleSource,
 			importFormat: module.format,
 			outputFormat: module.outputFormat,

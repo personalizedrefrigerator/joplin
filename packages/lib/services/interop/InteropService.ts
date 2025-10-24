@@ -287,7 +287,7 @@ export default class InteropService {
 		return moduleMetadata.factory(options);
 	}
 
-	public moduleByFileExtension(type: ModuleType, ext: string) {
+	private moduleByFileExtension_(type: ModuleType, ext: string) {
 		ext = ext.toLowerCase();
 
 		const modules = this.modules();
@@ -314,7 +314,7 @@ export default class InteropService {
 		};
 
 		if (options.format === 'auto') {
-			const module = this.moduleByFileExtension(ModuleType.Importer, fileExtension(options.path));
+			const module = this.moduleByFileExtension_(ModuleType.Importer, fileExtension(options.path));
 			if (!module) throw new Error(_('Please specify import format for %s', options.path));
 			options.format = module.format;
 		}
