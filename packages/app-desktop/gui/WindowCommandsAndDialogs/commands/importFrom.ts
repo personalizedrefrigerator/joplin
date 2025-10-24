@@ -155,7 +155,7 @@ export const runtime = (control: WindowControl): CommandRuntime => {
 			void CommandService.instance().execute('hideModalMessage');
 
 			if (errors.length) {
-				const response = bridge().showErrorMessageBox('There was some errors importing the notes - check the console for more details.\n\nPlease consider sending a bug report to the forum!', {
+				const response = bridge().showErrorMessageBox('There were some errors importing the notes - check the console for more details.\n\nPlease consider sending a bug report to the forum!', {
 					buttons: [_('Close'), _('Send bug report')],
 				});
 
