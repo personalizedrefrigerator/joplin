@@ -85,6 +85,8 @@ export const runtime = (control: WindowControl): CommandRuntime => {
 			if (Array.isArray(sourcePath)) {
 				sourcePath = sourcePath[0];
 			}
+			// Handle the case where the directory picker action was cancelled
+			if (!sourcePath) return null;
 
 			if (!options) {
 				const destinationFolderId = await showFolderPicker(control, {
