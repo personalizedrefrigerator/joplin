@@ -172,7 +172,12 @@ export default class OcrService {
 					toSave.ocr_error = errorMessage || 'Unknown error';
 				}
 
-				await Resource.save(toSave);
+				if (await Resource.load(resource.id)) {
+					await Resource.save(toSave);
+				} else {
+					logger.warn(`Processing ${resource.id} was cancelled: Resource no longer exists. (Was the resource deleted?)`);
+					skippedResourceIds.push(resource.id);
+				}
 			};
 		};
 
@@ -181,9 +186,9 @@ export default class OcrService {
 			const processedResourceIds: string[] = [];
 
 			// Queue all resources for processing
-			let lastProcessedCount = -1;
-			while (processedResourceIds.length > lastProcessedCount) {
-				lastProcessedCount = processedResourceIds.length;
+			let lastProcessedResourceIdsLength = -1;
+			while (processedResourceIds.length > lastProcessedResourceIdsLength) {
+				lastProcessedResourceIdsLength = processedResourceIds.length;
 
 				const resources = await Resource.needOcr(supportedMimeTypes, skippedResourceIds.concat(processedResourceIds), 100, {
 					fields: [
