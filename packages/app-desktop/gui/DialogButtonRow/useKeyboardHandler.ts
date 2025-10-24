@@ -3,10 +3,8 @@ import { useEffect, useState, useRef, useCallback } from 'react';
 import { isInsideContainer } from '@joplin/lib/dom';
 
 interface Props {
-	// eslint-disable-next-line @typescript-eslint/ban-types -- Old code before rule was applied
-	onOkButtonClick: Function;
-	// eslint-disable-next-line @typescript-eslint/ban-types -- Old code before rule was applied
-	onCancelButtonClick: Function;
+	onOkButtonClick: null|(()=> void);
+	onCancelButtonClick: null|(()=> void);
 }
 
 const globalKeydownHandlers: string[] = [];
@@ -48,15 +46,17 @@ export default (props: Props) => {
 
 		if (!isTopDialog() || isInSubModal(event.target)) return;
 
-		if (event.keyCode === 13) {
+		if (event.keyCode === 13 && props.onOkButtonClick) {
 			if ('nodeName' in event.target && event.target.nodeName === 'INPUT') {
 				const target = event.target as HTMLInputElement;
 
 				if (target.type !== 'button' && target.type !== 'checkbox') {
+					event.preventDefault();
 					props.onOkButtonClick();
 				}
 			}
-		} else if (event.keyCode === 27) {
+		} else if (event.keyCode === 27 && props.onCancelButtonClick) {
+			event.preventDefault();
 			props.onCancelButtonClick();
 		}
 		// eslint-disable-next-line @seiyab/react-hooks/exhaustive-deps -- Old code before rule was applied
