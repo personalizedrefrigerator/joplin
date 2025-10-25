@@ -89,14 +89,18 @@ export const runtime = (control: WindowControl): CommandRuntime => {
 			if (!sourcePath) return null;
 
 			if (!options) {
+				const isDirectory = await shim.fsDriver().isDirectory(sourcePath);
+				const importsMultipleNotes = importModule.isNoteArchive || isDirectory;
+
 				const destinationFolderId = await showFolderPicker(control, {
 					label: _('Import to notebook:'),
-					allowSelectNone: true,
+					// Allow selecting no parent folder only if a new folder will
+					// be created:
+					allowSelectNone: importsMultipleNotes,
 					showFolder: (_folder)=>true,
 				});
 				const importFormat = importModule.format;
 				const outputFormat = importModule.outputFormat;
-				const isDirectory = await shim.fsDriver().isDirectory(sourcePath);
 				options = {
 					sourcePath,
 					destinationFolderId,
