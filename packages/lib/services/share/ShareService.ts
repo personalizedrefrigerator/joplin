@@ -120,7 +120,7 @@ export default class ShareService {
 			}
 
 			if (folder.master_key_id) {
-				logger.debug(`Folder ${folderId}'s already has a master key. Not creating a new one.`);
+				logger.info(`Folder ${folderId}'s already has a master key. Not creating a new one.`);
 			} else {
 				// TODO: handle "undefinedMasterPassword" error - show master password dialog
 				folderMasterKey = await this.encryptionService_.generateMasterKey(getMasterPassword());
