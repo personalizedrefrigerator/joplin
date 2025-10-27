@@ -394,7 +394,7 @@ function ShareFolderDialog(props: Props) {
 			// Don't allow unsharing the folder during the "create" action. Doing so might
 			// be able to cause issues similar to #13518 (e.g. if the "unshare" action completes while
 			// the "share" action is still in progress).
-			disabled: shareState === ShareState.Creating,
+			disabled: shareState === ShareState.Creating || shareState === ShareState.Synchronizing,
 		}] : [];
 	}, [share, shareState]);
 
