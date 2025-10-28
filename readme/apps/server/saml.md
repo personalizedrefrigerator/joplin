@@ -60,16 +60,31 @@ While and IDP config would look like this:
 
 <!-- cSpell:enable -->
 
-## Required user attributes
+### Required user attributes
 
 Users must have the following attributes configured on your SAML provider:
 
 - `email`: The user email.
 - `displayName`: The user full name.
 
-## API domain
+### API domain
 
 Joplin Server supports using a separate domain for the API calls, using the `API_BASE_URL` env variable. However this setup is **not supported with SAML**. Both API and website must be under the same URL - essentially it means that both `APP_BASE_URL` and `API_BASE_URL` should be set to the same URL.
+
+Your environment file would look like this:
+
+```ini
+APP_BASE_URL=https://myserver.com
+API_BASE_URL=https://myserver.com
+```
+
+### Session expiration
+
+By default Joplin Server automatically clears sessions every 6 hours, forcing clients to login again. This is fine in a context where login can be done via an API, so that the client can automatically login again. However with SAML the user needs to go through the manual login process every time. For this reason it is strongly recommended to disable this task. You can do so by setting `DELETE_EXPIRED_SESSIONS_SCHEDULE` to an empty string, like so:
+
+```ini
+DELETE_EXPIRED_SESSIONS_SCHEDULE=
+```
 
 ## Custom CA certificates
 
