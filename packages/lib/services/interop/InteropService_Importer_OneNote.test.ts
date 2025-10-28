@@ -249,17 +249,15 @@ describe('InteropService_Importer_OneNote', () => {
 	});
 
 	it('should use default value for EntityGuid and InkBias if not found', async () => {
-		let idx = 0;
-		const originalIdGenerator = BaseModel.setIdGenerator(() => String(idx++));
 		const notes = await withWarningSilenced(/OneNoteConverter:/, async () => importNote(`${supportDir}/onenote/ink_bias_and_entity_guid.zip`));
 
 		// InkBias bug
-		expect(notes.find(n => n.title === 'Marketing Funnel & Training').body).toMatchSnapshot();
+		const note1Content = notes.find(n => n.title === 'Marketing Funnel & Training').body;
+		expect(removeItemIds(note1Content)).toMatchSnapshot();
 
 		// EntityGuid
-		expect(notes.find(n => n.title === 'Decrease support costs').body).toMatchSnapshot();
-
-		BaseModel.setIdGenerator(originalIdGenerator);
+		const note2Content = notes.find(n => n.title === 'Decrease support costs').body;
+		expect(removeItemIds(note2Content)).toMatchSnapshot();
 	});
 
 	it('should support directly importing .one files', async () => {
