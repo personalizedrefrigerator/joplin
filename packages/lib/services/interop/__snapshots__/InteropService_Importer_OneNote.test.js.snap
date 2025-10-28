@@ -1506,10 +1506,10 @@ exports[`InteropService_Importer_OneNote should support importing .one files tha
 </div><div class="container-outline"><div class="outline-element" style="margin-left: 0px;"><span style="color: rgb(118,118,118); font-family: Calibri; font-size: 10pt; line-height: 16px;">jeudi 23 octobre 2025</span></div>
 <div class="outline-element" style="margin-left: 0px;"><span style="color: rgb(118,118,118); font-family: Calibri; font-size: 10pt; line-height: 16px;">09:24</span></div>
 </div></div><div class="container-outline" style="left: 48px; position: absolute; top: 115px; width: 720px;"><div class="outline-element" style="margin-left: 0px;"><h2 style="color: rgb(46,117,181); font-family: Calibri; font-size: 14pt; line-height: 22px;">Todo HBA</h2></div>
-<div class="outline-element" style="margin-left: 0px;"><p style="font-family: Calibri; font-size: 11pt; line-height: 17px;"><span class="note-tag-icon icon-0"><img class="checkbox-icon -checked" alt="Checked" src=":/id-here">
+<div class="outline-element" style="margin-left: 0px;"><p style="font-family: Calibri; font-size: 11pt; line-height: 17px;"><span class="note-tag-icon icon-0"><img alt="Checked" src=":/id-here">
 </span>Rédiger carnet MS-OneNote jeu d'essai (case cochée)</p></div>
 <div class="outline-element" style="margin-left: 0px;"><p style="font-family: Calibri; font-size: 11pt; line-height: 17px;"><span class="note-tag-icon icon-1"><img class="checkbox-icon" alt="Unchecked" src=":/id-here">
-</span>Transmettre aux dev Joplin (case non cochée)</p></div><div class="outline-element" style="margin-left: 36px;"><p style="font-family: Calibri; font-size: 11pt; line-height: 17px;"><span class="note-tag-icon icon-2"><img class="checkbox-icon -checked" alt="Checked" src=":/id-here">
+</span>Transmettre aux dev Joplin (case non cochée)</p></div><div class="outline-element" style="margin-left: 36px;"><p style="font-family: Calibri; font-size: 11pt; line-height: 17px;"><span class="note-tag-icon icon-2"><img alt="Checked" src=":/id-here">
 </span>Exporter le carnet en *.packageone (case cochée)</p></div>
 <div class="outline-element" style="margin-left: 36px;"><p style="font-family: Calibri; font-size: 11pt; line-height: 17px;"><span class="note-tag-icon icon-3"><img class="checkbox-icon" alt="Unchecked" src=":/id-here">
 </span>Exporter des page en *.one (case non cochée)</p></div>
@@ -1519,7 +1519,7 @@ exports[`InteropService_Importer_OneNote should support importing .one files tha
 <div class="outline-element" style="margin-left: 0px;"><p style="font-family: Calibri; font-size: 11pt; line-height: 17px;"><span class="note-tag-icon icon-4"><img class="checkbox-icon" alt="Unchecked" src=":/id-here">
 </span>Rédiger compte-rendu réunion de service</p></div>
 <div class="outline-element" style="margin-left: 0px;"><p style="font-family: Calibri; font-size: 11pt; line-height: 17px;"><span class="note-tag-icon icon-5"><img class="checkbox-icon" alt="Unchecked" src=":/id-here">
-</span>Rédiger présentation service Joplin et fonctionnalités complémentaires associée à JBS<br>la doc sur le partage : <a href="file:///\\\\mondomaine.local\\partage\\DSI\\Projets%20Techniques%202025\\Remplacement%20Office\\JOPLIN_Alternatives_OneNote\\formation" style="">\\\\mondomaine.local\\partage\\DSI\\Projets Techniques 2025\\Remplacement Office\\JOPLIN_Alternatives_OneNote\\formation</a> </p></div><div class="outline-element" style="margin-left: 36px;"><p style="font-family: Calibri; font-size: 11pt; line-height: 17px;"><span class="note-tag-icon icon-6"><img class="checkbox-icon -checked" alt="Checked" src=":/id-here">
+</span>Rédiger présentation service Joplin et fonctionnalités complémentaires associée à JBS<br>la doc sur le partage : <a href="file:///\\\\mondomaine.local\\partage\\DSI\\Projets%20Techniques%202025\\Remplacement%20Office\\JOPLIN_Alternatives_OneNote\\formation" style="">\\\\mondomaine.local\\partage\\DSI\\Projets Techniques 2025\\Remplacement Office\\JOPLIN_Alternatives_OneNote\\formation</a> </p></div><div class="outline-element" style="margin-left: 36px;"><p style="font-family: Calibri; font-size: 11pt; line-height: 17px;"><span class="note-tag-icon icon-6"><img alt="Checked" src=":/id-here">
 </span>Documenter configuration synchro JBS saml pour un utilisateur (case cochée)</p></div>
 
 </div>
