@@ -67,6 +67,10 @@ Users must have the following attributes configured on your SAML provider:
 - `email`: The user email.
 - `displayName`: The user full name.
 
+## API domain
+
+Joplin Server supports using a separate domain for the API calls, using the `API_BASE_URL` env variable. However this setup is **not supported with SAML**. Both API and website must be under the same URL - essentially it means that both `APP_BASE_URL` and `API_BASE_URL` should be set to the same URL.
+
 ## Custom CA certificates
 
 By default, the Joplin Server image does not include the `ca-certificates` which may be needed to get custom certificates for your mail server working. You can install those additional packages (and any other package), using the method below:
