@@ -147,7 +147,7 @@ function ShareFolderDialog(props: Props) {
 
 	useEffect(() => {
 		void ShareService.instance().refreshShares();
-	}, [props.folderId]);
+	}, []);
 
 	useAsyncEffect(async (event: AsyncEffectEvent) => {
 		await synchronize(event);
