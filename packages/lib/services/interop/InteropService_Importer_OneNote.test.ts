@@ -39,7 +39,7 @@ describe('InteropService_Importer_OneNote', () => {
 	}
 	beforeAll(() => {
 		const jsdom = new JSDOM('<div></div>');
-		InteropService.instance().document = jsdom.window.document;
+		InteropService.instance().domParser = new jsdom.window.DOMParser();
 		InteropService.instance().xmlSerializer = new jsdom.window.XMLSerializer();
 	});
 	beforeEach(async () => {
@@ -165,12 +165,12 @@ describe('InteropService_Importer_OneNote', () => {
 		const content = await readFile(filepath, 'utf-8');
 
 		const jsdom = new JSDOM('<div></div>');
-		InteropService.instance().document = jsdom.window.document;
+		InteropService.instance().domParser = new jsdom.window.DOMParser();
 		InteropService.instance().xmlSerializer = new jsdom.window.XMLSerializer();
 
 		const importer = new InteropService_Importer_OneNote();
 		await importer.init('asdf', {
-			document: jsdom.window.document,
+			domParser: new jsdom.window.DOMParser(),
 			xmlSerializer: new jsdom.window.XMLSerializer(),
 		});
 
