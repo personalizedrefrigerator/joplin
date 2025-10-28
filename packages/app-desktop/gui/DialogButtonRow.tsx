@@ -7,6 +7,7 @@ import useKeyboardHandler from './DialogButtonRow/useKeyboardHandler';
 export interface ButtonSpec {
 	name: string;
 	label: string;
+	disabled?: boolean;
 }
 
 export interface ClickEvent {
@@ -66,7 +67,7 @@ export default function DialogButtonRow(props: Props) {
 	if (props.customButtons) {
 		for (const b of props.customButtons) {
 			buttonComps.push(
-				<button key={b.name} style={buttonStyle} onClick={() => onCustomButtonClick({ buttonName: b.name })} onKeyDown={onKeyDown}>
+				<button key={b.name} style={buttonStyle} onClick={() => onCustomButtonClick({ buttonName: b.name })} disabled={b.disabled} onKeyDown={onKeyDown}>
 					{b.label}
 				</button>,
 			);
