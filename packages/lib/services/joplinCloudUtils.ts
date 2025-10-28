@@ -69,6 +69,8 @@ export const getApplicationInformation = async () => {
 		return { type: ApplicationType.Mobile, platform: ApplicationPlatform.Ios };
 	case 'android':
 		return { type: ApplicationType.Mobile, platform: ApplicationPlatform.Android };
+	case 'web':
+		return { type: ApplicationType.Mobile, platform: ApplicationPlatform.Web };
 	case 'darwin':
 		return { type: ApplicationType.Desktop, platform: ApplicationPlatform.MacOs };
 	case 'win32':
@@ -86,6 +88,10 @@ export const generateApplicationConfirmUrl = async (confirmUrl: string) => {
 	searchParams.append('platform', applicationInfo.platform.toString());
 	searchParams.append('type', applicationInfo.type.toString());
 	searchParams.append('version', shim.appVersion());
+	const manufacturer = await shim.deviceManufacturer();
+	if (manufacturer) {
+		searchParams.append('manufacturer', manufacturer);
+	}
 
 	return `${confirmUrl}?${searchParams.toString()}`;
 };

@@ -201,6 +201,8 @@ const shim = {
 		return MobilePlatform.None; // Default if we're not on mobile (React Native)
 	},
 
+	deviceManufacturer: (): Promise<string|null> => Promise.resolve(null),
+
 	// https://github.com/cheton/is-electron
 	isElectron: () => {
 		// Renderer process

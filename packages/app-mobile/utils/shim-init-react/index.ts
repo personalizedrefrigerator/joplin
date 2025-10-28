@@ -6,6 +6,7 @@ import RNFetchBlob from 'rn-fetch-blob';
 import { generateSecureRandom } from 'react-native-securerandom';
 import FsDriverRN from '../fs-driver/fs-driver-rn';
 import { Linking, Platform } from 'react-native';
+import { getManufacturer } from 'react-native-device-info';
 import crypto from '../../services/e2ee/crypto';
 const RNExitApp = require('react-native-exit-app').default;
 
@@ -166,6 +167,10 @@ export default function shimInit() {
 
 	shim.mobilePlatform = () => {
 		return Platform.OS as MobilePlatform;
+	};
+
+	shim.deviceManufacturer = () => {
+		return getManufacturer();
 	};
 
 	shim.isAppleSilicon = () => {
