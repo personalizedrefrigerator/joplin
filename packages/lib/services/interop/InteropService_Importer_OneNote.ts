@@ -185,8 +185,6 @@ export default class InteropService_Importer_OneNote extends InteropService_Impo
 
 		for (const svgNode of svgNodeList) {
 			const img = dom.createElement('img');
-			const title = `${titleGenerator()}.svg`;
-			img.setAttribute('src', `./${title}`);
 
 			if (svgNode.hasAttribute('style')) {
 				img.setAttribute('style', svgNode.getAttribute('style'));
@@ -208,6 +206,9 @@ export default class InteropService_Importer_OneNote extends InteropService_Impo
 			if (titleElement) {
 				img.alt = titleElement.textContent;
 			}
+
+			const title = `${titleGenerator()}.svg`;
+			img.setAttribute('src', `./${title}`);
 
 			svgs.push({
 				title,
