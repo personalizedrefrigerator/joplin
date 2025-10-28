@@ -12,7 +12,7 @@ import shim from '../../shim';
 const logger = Logger.create('InteropService_Importer_OneNote');
 
 export type SvgXml = {
-	fileName: string;
+	title: string;
 	content: string;
 };
 
@@ -167,7 +167,7 @@ export default class InteropService_Importer_OneNote extends InteropService_Impo
 
 	private async createSvgFiles(svgs: SvgXml[], svgBaseFolder: string) {
 		for (const svg of svgs) {
-			await shim.fsDriver().writeFile(join(svgBaseFolder, svg.fileName), svg.content, 'utf8');
+			await shim.fsDriver().writeFile(join(svgBaseFolder, svg.title), svg.content, 'utf8');
 		}
 	}
 
@@ -185,8 +185,8 @@ export default class InteropService_Importer_OneNote extends InteropService_Impo
 
 		for (const svgNode of svgNodeList) {
 			const img = dom.createElement('img');
-			const fileName = `${titleGenerator()}.svg`;
-			img.setAttribute('src', `./${fileName}`);
+			const title = `${titleGenerator()}.svg`;
+			img.setAttribute('src', `./${title}`);
 
 			if (svgNode.hasAttribute('style')) {
 				img.setAttribute('style', svgNode.getAttribute('style'));
@@ -210,7 +210,7 @@ export default class InteropService_Importer_OneNote extends InteropService_Impo
 			}
 
 			svgs.push({
-				fileName,
+				title,
 				content: this.xmlSerializer.serializeToString(svgNode),
 			});
 
