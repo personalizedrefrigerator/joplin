@@ -22,6 +22,10 @@ const expectWithInstructions = <T>(value: T) => {
 	return expect(value, instructionMessage);
 };
 
+const removeItemIds = (body: string) => {
+	return body.replace(/:\/[a-z0-9]{32}/g, ':/id-here');
+};
+
 // This file is ignored if not running in CI. Look at onenote-converter/README.md and jest.config.js for more information
 describe('InteropService_Importer_OneNote', () => {
 	let tempDir: string;
@@ -270,5 +274,12 @@ describe('InteropService_Importer_OneNote', () => {
 			// The index page
 			'onenote_desktop',
 		]);
+	});
+
+	it('should support importing .one files that contain checkboxes', async () => {
+		const notes = await importNote(`${supportDir}/onenote/checkboxes_and_unicode.one`);
+		expectWithInstructions(
+			removeItemIds(notes.find(n => n.title.startsWith('Test Todo')).body),
+		).toMatchSnapshot();
 	});
 });
