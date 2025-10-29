@@ -23,6 +23,7 @@ import { defaultWindowId } from '@joplin/lib/reducer';
 import { msleep, Second } from '@joplin/utils/time';
 import determineBaseAppDirs from '@joplin/lib/determineBaseAppDirs';
 import getAppName from '@joplin/lib/getAppName';
+import { execCommand } from '@joplin/utils';
 
 interface RendererProcessQuitReply {
 	canClose: boolean;
@@ -810,6 +811,23 @@ export default class ElectronAppWrapper {
 		return this.customProtocolHandler_;
 	}
 
+	private async fixLinuxAccessibility_() {
+		// Work around https://issues.chromium.org/issues/431257156 by force-enabling accessibility
+		// when Orca is running:
+		if (shim.isLinux() && !this.electronApp().accessibilitySupportEnabled) {
+			try {
+				const isOrcaRunning = await execCommand(['ps', '-C', 'orca']);
+
+				if (isOrcaRunning) {
+					this.electronApp().setAccessibilitySupportEnabled(true);
+				}
+			} catch (error) {
+				// eslint-disable-next-line no-console -- The main logger is not available at this point.
+				console.error('Failed to check for and enable accessibility support', error);
+			}
+		}
+	}
+
 	public async start() {
 		// Since we are doing other async things before creating the window, we might miss
 		// the "ready" event. So we use the function below to make sure that the app is ready.
@@ -817,6 +835,8 @@ export default class ElectronAppWrapper {
 
 		const alreadyRunning = await this.ensureSingleInstance();
 		if (alreadyRunning) return;
+
+		await this.fixLinuxAccessibility_();
 
 		this.customProtocolHandler_ = handleCustomProtocols();
 		this.createWindow();
