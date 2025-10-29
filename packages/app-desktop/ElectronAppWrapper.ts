@@ -812,19 +812,29 @@ export default class ElectronAppWrapper {
 	}
 
 	private async fixLinuxAccessibility_() {
-		// Work around https://issues.chromium.org/issues/431257156 by force-enabling accessibility
-		// when Orca is running:
-		if (shim.isLinux() && !this.electronApp().accessibilitySupportEnabled) {
-			try {
-				const isOrcaRunning = await execCommand(['ps', '-C', 'orca']);
+		if (this.electronApp().accessibilitySupportEnabled) return;
 
-				if (isOrcaRunning) {
-					this.electronApp().setAccessibilitySupportEnabled(true);
-				}
+		const isOrcaRunning = async () => {
+			if (!shim.isLinux()) return false;
+			try {
+				const matchingProcesses = await execCommand(['ps', '--no-headers', '-C', 'orca'], { quiet: true });
+				return matchingProcesses.trim().length > 0;
 			} catch (error) {
-				// eslint-disable-next-line no-console -- The main logger is not available at this point.
-				console.error('Failed to check for and enable accessibility support', error);
+				if (error.stderr || error.exitCode !== 1) {
+					// eslint-disable-next-line no-console -- The main logger is not available at this point.
+					console.error('Failed to check for and enable accessibility support:', error.stderr);
+				}
+
+				return false;
 			}
+		};
+
+		// Work around https://issues.chromium.org/issues/431257156 by force-enabling accessibility
+		// when Orca (a screen reader) is running:
+		if (await isOrcaRunning()) {
+			// eslint-disable-next-line no-console -- The main logger is not available at this point.
+			console.log('Linux accessibility: Enabling full accessibility support.');
+			this.electronApp().setAccessibilitySupportEnabled(true);
 		}
 	}
 
