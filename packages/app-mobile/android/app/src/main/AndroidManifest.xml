@@ -12,9 +12,11 @@
 	<uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
 	<uses-permission android:name="android.permission.RECORD_AUDIO" />
 
-	<!-- Some organizations send secret keys to Joplin Cloud/Server as a required part of auth
-	     or to customize the Joplin Cloud sign-up behavior. -->
-	<uses-permission android:name="net.cozic.joplin-key.READ_PROVIDER" />
+	<!-- Permission to read a device secret key from another app. Some organizations
+	     send secret keys to Joplin Cloud/Server as a required part of auth. -->
+	<uses-permission android:name="net.cozic.joplin-key.auth.READ_PROVIDER" />
+	<!-- Allows organizations to customize Joplin Cloud sign-up behavior. -->
+	<uses-permission android:name="net.cozic.joplin-key.device-type.READ_PROVIDER" />
 
 	<!-- Make these features optional to enable Chromebooks -->
 	<!-- https://github.com/laurent22/joplin/issues/37 -->

@@ -1,6 +1,7 @@
 package net.cozic.joplin.auth
 
 import android.database.Cursor
+import android.net.Uri
 import com.facebook.react.ReactPackage
 import com.facebook.react.bridge.NativeModule
 import com.facebook.react.bridge.Promise
@@ -27,12 +28,13 @@ class AuthPackage : ReactPackage {
 
         override fun getName() = "AppAuthModule"
 
-        @ReactMethod
-        fun requestAppSecret(serverUri: String, promise: Promise) {
+        private fun requestSecret(secretUri: Uri, serverUri: String, promise: Promise) {
             var cursor: Cursor? = null
             try {
+                val client = context.contentResolver.acquireContentProviderClient(secretUri)
+                client?.
                 cursor = context.contentResolver.query(
-                    "content://net.cozic.joplin-key.auth-client-secret".toUri(),
+                    secretUri,
                     arrayOf("secret"),
                     "server = ?",
                     arrayOf(serverUri),
@@ -56,6 +58,16 @@ class AuthPackage : ReactPackage {
             } finally {
                 cursor?.close()
             }
+        }
+
+        @ReactMethod
+        fun requestAppSecret(serverUri: String, promise: Promise) {
+            requestSecret("content://net.cozic.joplin-key.auth-client-secret".toUri(), serverUri, promise)
+        }
+
+        @ReactMethod
+        fun requestDeviceSecret(serverUri: String, promise: Promise) {
+            requestSecret("content://net.cozic.joplin-key.auth-device-secret".toUri(), serverUri, promise)
         }
 
     }
