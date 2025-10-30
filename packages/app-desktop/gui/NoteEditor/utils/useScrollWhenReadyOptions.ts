@@ -1,22 +1,21 @@
-import { RefObject, useCallback, useRef } from 'react';
+import { RefObject, useCallback, useContext, useRef } from 'react';
 import { NoteBodyEditorRef, ScrollOptions, ScrollOptionTypes } from './types';
 import usePrevious from '@joplin/lib/hooks/usePrevious';
-import type { NoteIdToScrollPercent } from '../../../app.reducer';
+import NotePositionService from '@joplin/lib/services/NotePositionService';
 import useNowEffect from '@joplin/lib/hooks/useNowEffect';
+import { WindowIdContext } from '../../NewWindowOrIFrame';
 
 interface Props {
 	noteId: string;
 	selectedNoteHash: string;
-	lastEditorScrollPercents: NoteIdToScrollPercent;
 	editorRef: RefObject<NoteBodyEditorRef>;
 }
 
-const useScrollWhenReadyOptions = ({ noteId, selectedNoteHash, lastEditorScrollPercents, editorRef }: Props) => {
+const useScrollWhenReadyOptions = ({ noteId, selectedNoteHash, editorRef }: Props) => {
 	const scrollWhenReadyRef = useRef<ScrollOptions|null>(null);
 
 	const previousNoteId = usePrevious(noteId);
-	const lastScrollPercentsRef = useRef<NoteIdToScrollPercent>(null);
-	lastScrollPercentsRef.current = lastEditorScrollPercents;
+	const windowId = useContext(WindowIdContext);
 
 	// This needs to be a nowEffect to prevent race conditions
 	useNowEffect(() => {
@@ -26,7 +25,7 @@ const useScrollWhenReadyOptions = ({ noteId, selectedNoteHash, lastEditorScrollP
 			editorRef.current.resetScroll();
 		}
 
-		const lastScrollPercent = lastScrollPercentsRef.current[noteId] || 0;
+		const lastScrollPercent = NotePositionService.instance().getScrollPercent(noteId, windowId) || 0;
 		scrollWhenReadyRef.current = {
 			type: selectedNoteHash ? ScrollOptionTypes.Hash : ScrollOptionTypes.Percent,
 			value: selectedNoteHash ? selectedNoteHash : lastScrollPercent,
