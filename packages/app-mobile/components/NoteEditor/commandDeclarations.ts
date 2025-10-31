@@ -99,6 +99,11 @@ const declarations: CommandDeclaration[] = [
 		iconName: 'material format-list-checks',
 	},
 	{
+		name: `editor.${EditorCommandType.InsertTable}`,
+		label: () => _('Table'),
+		iconName: 'material table',
+	},
+	{
 		name: EditorCommandType.IndentLess,
 		label: () => _('Decrease indent level'),
 		iconName: 'ant indent-left',
