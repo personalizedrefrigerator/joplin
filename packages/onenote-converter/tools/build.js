@@ -1,22 +1,38 @@
 const { execCommand } = require('@joplin/utils');
 const yargs = require('yargs');
 
-async function main() {
-	if (!process.env.IS_CONTINUOUS_INTEGRATION) {
+const canBuild = async () => {
+	if (process.env.SKIP_ONENOTE_CONVERTER_BUILD) return false;
+	// Always build in CI, unless explicitly skipped
+	if (process.env.IS_CONTINUOUS_INTEGRATION) return true;
+
+	try {
+		let toolchains;
+		if (process.platform === 'win32') {
+			toolchains = await execCommand('rustup.exe toolchain list', { quiet: true });
+		} else {
+			toolchains = await execCommand('rustup toolchain list', { quiet: true });
+		}
+
+		// At least on MacOS, a single "stable-x86_64-apple-darwin" toolchain is sufficient to
+		// build the OneNote converter:
+		return toolchains.split('\n').length >= 1;
+	} catch (error) {
 		// eslint-disable-next-line no-console
 		console.info(
 			'----------------------------------------------------------------\n' +
-			'Not building onenote-converter because it is not a continuous integration environment.\n' +
+			'Not building onenote-converter: Rust toolchain not found.\n' +
 			'Use IS_CONTINUOUS_INTEGRATION=1 env var if build is necessary.\n' +
 			'----------------------------------------------------------------',
 		);
-		return;
+		return false;
 	}
+};
 
-	// Sometimes the onenote-converter build needs to be disabled in CI.
-	if (process.env.SKIP_ONENOTE_CONVERTER_BUILD) {
+async function main() {
+	if (!await canBuild()) {
 		// eslint-disable-next-line no-console
-		console.info('SKIP_ONENOTE_CONVERTER_BUILD was set. The onenote-converter package will not be built.');
+		console.info('OneNote converter build skipped');
 		return;
 	}
 
