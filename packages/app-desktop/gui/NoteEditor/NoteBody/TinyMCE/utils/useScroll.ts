@@ -1,9 +1,9 @@
 import { useEffect, useCallback, useRef } from 'react';
 import shim from '@joplin/lib/shim';
+import { Editor } from 'tinymce';
 
 interface HookDependencies {
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	editor: any;
+	editor: Editor;
 	// eslint-disable-next-line @typescript-eslint/ban-types -- Old code before rule was applied
 	onScroll: Function;
 }
