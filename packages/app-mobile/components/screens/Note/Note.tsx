@@ -1586,27 +1586,24 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 			bodyComponent = renderPluginEditor();
 		} else {
 			if (this.state.mode === 'view') {
-				// Note: as of 2018-12-29 it's important not to display the viewer if the note body is empty,
-				// to avoid the HACK_webviewLoadingState related bug.
-				bodyComponent =
-					!note || !note.body.trim() ? null : (
-						<NoteBodyViewer
-							style={this.styles().noteBodyViewer}
-							// Extra bottom padding to make it possible to scroll past the
-							// action button (so that it doesn't overlap the text)
-							paddingBottom={150}
-							noteBody={note.body}
-							noteMarkupLanguage={note.markup_language}
-							noteResources={this.state.noteResources}
-							highlightedKeywords={keywords}
-							noteHash={this.props.noteHash}
-							onCheckboxChange={this.onBodyViewerCheckboxChange}
-							onMarkForDownload={this.onMarkForDownload}
-							onRequestEditResource={this.onEditResource}
-							onScroll={this.onBodyViewerScroll}
-							initialScroll={this.lastBodyScroll}
-						/>
-					);
+				bodyComponent = (
+					<NoteBodyViewer
+						style={this.styles().noteBodyViewer}
+						// Extra bottom padding to make it possible to scroll past the
+						// action button (so that it doesn't overlap the text)
+						paddingBottom={150}
+						noteBody={note.body}
+						noteMarkupLanguage={note.markup_language}
+						noteResources={this.state.noteResources}
+						highlightedKeywords={keywords}
+						noteHash={this.props.noteHash}
+						onCheckboxChange={this.onBodyViewerCheckboxChange}
+						onMarkForDownload={this.onMarkForDownload}
+						onRequestEditResource={this.onEditResource}
+						onScroll={this.onBodyViewerScroll}
+						initialScroll={this.lastBodyScroll}
+					/>
+				);
 			} else {
 				// Note: In theory ScrollView can be used to provide smoother scrolling of the TextInput.
 				// However it causes memory or rendering issues on older Android devices, probably because
