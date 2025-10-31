@@ -9,16 +9,29 @@ const markdownEditorOnlyCommands = [
 	EditorCommandType.SwapLineDown,
 ].map(command => `editor.${command}`);
 
-export const enabledCondition = (commandName: string) => {
-	const output = [
-		'!noteIsReadOnly',
-	];
+
+const richTextEditorOnlyCommands = [
+	EditorCommandType.InsertTable,
+].map(command => `editor.${command}`);
+
+export const visibleCondition = (commandName: string) => {
+	const output = [];
 
 	if (markdownEditorOnlyCommands.includes(commandName)) {
 		output.push('!richTextEditorVisible');
 	}
 
-	return output.filter(c => !!c).join(' && ');
+	if (richTextEditorOnlyCommands.includes(commandName)) {
+		output.push('!markdownEditorPaneVisible');
+	}
+
+	return output.join(' && ');
+};
+
+export const enabledCondition = (commandName: string) => {
+	return [
+		visibleCondition(commandName), '!noteIsReadOnly',
+	].filter(c => !!c).join('&&');
 };
 
 const headerDeclarations = () => {
