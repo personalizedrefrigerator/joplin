@@ -1,4 +1,4 @@
-import { Minute } from '@joplin/utils/time';
+import { Second } from '@joplin/utils/time';
 import { afterAllCleanUp, setupDatabaseAndSynchronizer, switchClient, syncTargetId, synchronizerStart, msleep } from '../testing/test-utils';
 import BaseItem from './BaseItem';
 import Folder from './Folder';
@@ -81,8 +81,8 @@ describe('BaseItem', () => {
 
 		const start = performance.now();
 		await Note.unserialize(serialized);
-		// Locally, this passes in in < 2s, so 2 mins should be a safe upper bound.
-		expect(performance.now() - start).toBeLessThan(2 * Minute);
+		// Locally, this passes in in < 2s, so 30s should be a safe upper bound.
+		expect(performance.now() - start).toBeLessThan(30 * Second);
 	});
 
 	it('should serialize geolocation fields', async () => {
