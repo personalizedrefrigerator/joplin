@@ -13,18 +13,13 @@ const packageInfo = require('./packageInfo.js');
 import { isCallbackUrl } from '@joplin/lib/callbackUrlUtils';
 import determineBaseAppDirs from '@joplin/lib/determineBaseAppDirs';
 import registerCustomProtocols from './utils/customProtocols/registerCustomProtocols';
-import shim from '@joplin/lib/shim';
 
 // Electron takes the application name from package.json `name` and
 // displays this in the tray icon toolip and message box titles, however in
 // our case it's a string like "@joplin/app-desktop". It's also supposed to
 // check the productName key but is not doing it, so here set the
 // application name to the right string.
-//
-// 2025-11-03: On Linux, this needs to be 'Joplin' to match the 'StartupWMClass' used
-// in the AppImage launcher. In the future, it may make sense to adjust the app name
-// for the other platforms as well.
-electronApp.setName(shim.isLinux() ? 'Joplin' : packageInfo.name);
+electronApp.setName(packageInfo.name);
 
 process.on('unhandledRejection', (reason, p) => {
 	console.error('Unhandled promise rejection', p, 'reason:', reason);
