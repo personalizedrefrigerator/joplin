@@ -919,8 +919,6 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: Ref<NoteBodyEditorRef>) => {
 
 					editor.on('SetContent', () => {
 						preprocessContent();
-
-						props_onMessage.current({ channel: 'noteRenderComplete' });
 					});
 				},
 			});
@@ -1130,6 +1128,7 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: Ref<NoteBodyEditorRef>) => {
 					resourceInfos: props.resourceInfos,
 					contentKey: props.contentKey,
 				};
+				props_onMessage.current({ channel: 'noteRenderComplete' });
 			}
 
 			const allAssetsOptions: NoteStyleOptions = {
