@@ -16,27 +16,28 @@ const useScrollWhenReadyOptions = ({ noteId, editorName, selectedNoteHash, edito
 	const scrollWhenReadyRef = useRef<ScrollOptions|null>(null);
 
 	const previousNoteId = usePrevious(noteId);
-	const noteIdChanged = noteId !== previousNoteId;
 	const previousEditor = usePrevious(editorName);
-	const editorChanged = editorName !== previousEditor;
 	const windowId = useContext(WindowIdContext);
 
 
 	// This needs to be a nowEffect to prevent race conditions
 	useNowEffect(() => {
+		const editorChanged = editorName !== previousEditor;
+		const noteIdChanged = noteId !== previousNoteId;
 		if (!editorChanged && !noteIdChanged) return () => {};
-
-		if (editorRef.current) {
-			editorRef.current.resetScroll();
-		}
 
 		const lastScrollPercent = NotePositionService.instance().getScrollPercent(noteId, windowId) || 0;
 		scrollWhenReadyRef.current = {
 			type: selectedNoteHash ? ScrollOptionTypes.Hash : ScrollOptionTypes.Percent,
 			value: selectedNoteHash ? selectedNoteHash : lastScrollPercent,
 		};
+
+		if (editorRef.current) {
+			editorRef.current.resetScroll();
+		}
+
 		return () => {};
-	}, [editorChanged, noteIdChanged, noteId, selectedNoteHash, editorRef, windowId]);
+	}, [editorName, noteId, selectedNoteHash, editorRef, windowId]);
 
 	const clearScrollWhenReady = useCallback(() => {
 		scrollWhenReadyRef.current = null;
