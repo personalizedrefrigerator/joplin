@@ -335,6 +335,7 @@ function NoteEditorContent(props: NoteEditorProps) {
 		noteId: formNote.id,
 		selectedNoteHash: props.selectedNoteHash,
 		editorRef,
+		editorName: props.bodyEditor,
 	});
 	const onMessage = useMessageHandler(scrollWhenReadyRef, clearScrollWhenReady, windowId, editorRef, setLocalSearchResultCount, props.dispatch, formNote, htmlToMarkdown, markupToHtml);
 
