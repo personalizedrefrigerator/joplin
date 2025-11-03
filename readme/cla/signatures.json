@@ -2415,6 +2415,14 @@
       "created_at": "2025-10-31T22:47:35Z",
       "repoId": 79162682,
       "pullRequestNo": 13593
+    },
+    {
+      "name": "horvatkm",
+      "id": 169067207,
+      "comment_id": 3481603064,
+      "created_at": "2025-11-03T17:07:57Z",
+      "repoId": 79162682,
+      "pullRequestNo": 13613
     }
   ]
 }
