@@ -1045,7 +1045,7 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: Ref<NoteBodyEditorRef>) => {
 		return true;
 	}
 
-	const { onInitialContentSet } = useCursorPositioning({
+	const { onRestoreCursorPosition } = useCursorPositioning({
 		initialCursorLocation: props.initialCursorLocation.richText as Bookmark,
 		onCursorUpdate: props.onCursorMotion,
 		editor,
@@ -1118,8 +1118,12 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: Ref<NoteBodyEditorRef>) => {
 					// times would result in an empty note.
 					// https://github.com/laurent22/joplin/issues/3534
 					editor.undoManager.reset();
+
+					// Only restore the cursor position from the global state when switching notes.
+					// See https://github.com/laurent22/joplin/issues/13579
+					onRestoreCursorPosition();
 				} else {
-					// Restore the cursor location
+					// Restore the cursor location from the current note
 					editor.selection.bookmarkManager.moveToBookmark(bookmark);
 				}
 
@@ -1142,7 +1146,6 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: Ref<NoteBodyEditorRef>) => {
 			await loadDocumentAssets(props.themeId, editor, allAssets);
 
 			dispatchDidUpdate(editor);
-			onInitialContentSet();
 		};
 
 		void loadContent();
