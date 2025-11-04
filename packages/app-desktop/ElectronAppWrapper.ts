@@ -218,6 +218,10 @@ export default class ElectronAppWrapper {
 			defaultWidth: Math.round(0.8 * screen.getPrimaryDisplay().workArea.width),
 			defaultHeight: Math.round(0.8 * screen.getPrimaryDisplay().workArea.height),
 			file: `window-state-${this.env_}.json`,
+			// Work around a bug on certain Linux desktops: If the window is initially maximized, there
+			// may be rendering issues.
+			// See https://github.com/laurent22/joplin/issues/13561, https://github.com/laurent22/joplin/issues/13600
+			maximize: !shim.isLinux(),
 		};
 
 		if (this.profilePath_) stateOptions.path = this.profilePath_;
