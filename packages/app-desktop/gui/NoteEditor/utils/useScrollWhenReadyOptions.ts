@@ -37,7 +37,7 @@ const useScrollWhenReadyOptions = ({ noteId, editorName, selectedNoteHash, edito
 		}
 
 		return () => {};
-	}, [editorName, noteId, selectedNoteHash, editorRef, windowId]);
+	}, [editorName, previousEditor, noteId, previousNoteId, selectedNoteHash, editorRef, windowId]);
 
 	const clearScrollWhenReady = useCallback(() => {
 		scrollWhenReadyRef.current = null;
