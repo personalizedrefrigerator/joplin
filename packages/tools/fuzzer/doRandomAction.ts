@@ -187,29 +187,9 @@ const doRandomAction = async (context: FuzzContext, client: Client, clientPool: 
 			return true;
 		},
 		newClientOnSameAccount: async () => {
-			const welcomeNoteCount = context.randInt(0, 30);
-			logger.info(`Syncing a new client on the same account ${welcomeNoteCount > 0 ? `(with ${welcomeNoteCount} initial notes)` : ''}`);
+			logger.info('Syncing a new client on the same account...');
 			const createClientInitialNotes = async (client: Client) => {
-				if (welcomeNoteCount === 0) return;
-
-				// Create a new folder. Usually, new clients have a default set of
-				// welcome notes when first syncing.
-				const testNotesFolderId = uuid.create();
-				await client.createFolder({
-					id: testNotesFolderId,
-					title: 'Test -- from secondary client',
-					parentId: '',
-				});
-
-				for (let i = 0; i < welcomeNoteCount; i++) {
-					await client.createNote({
-						...defaultNoteProperties,
-						parentId: testNotesFolderId,
-						id: uuid.create(),
-						title: `Test note ${i}/${welcomeNoteCount}`,
-						body: `Test note (in account ${client.email}), created ${Date.now()}.`,
-					});
-				}
+				await client.createOrUpdateMany(context.randInt(0, 512));
 			};
 
 			await client.sync();
