@@ -1821,14 +1821,17 @@ packages/tools/fuzzer/Client.js
 packages/tools/fuzzer/ClientPool.js
 packages/tools/fuzzer/Server.js
 packages/tools/fuzzer/constants.js
+packages/tools/fuzzer/doRandomAction.js
 packages/tools/fuzzer/model/FolderRecord.js
 packages/tools/fuzzer/sync-fuzzer.js
 packages/tools/fuzzer/types.js
+packages/tools/fuzzer/utils/ProgressBar.js
 packages/tools/fuzzer/utils/SeededRandom.js
 packages/tools/fuzzer/utils/getNumberProperty.js
 packages/tools/fuzzer/utils/getProperty.js
 packages/tools/fuzzer/utils/getStringProperty.js
 packages/tools/fuzzer/utils/openDebugSession.js
+packages/tools/fuzzer/utils/randomString.js
 packages/tools/fuzzer/utils/retryWithCount.js
 packages/tools/generate-database-types.js
 packages/tools/generate-images.js

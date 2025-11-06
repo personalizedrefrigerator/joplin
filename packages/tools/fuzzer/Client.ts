@@ -13,12 +13,14 @@ import { quotePath } from '@joplin/utils/path';
 import getNumberProperty from './utils/getNumberProperty';
 import retryWithCount from './utils/retryWithCount';
 import resolvePathWithinDir from '@joplin/lib/utils/resolvePathWithinDir';
-import { msleep, Second } from '@joplin/utils/time';
+import { formatMsToDateTimeLocal, msleep, Second } from '@joplin/utils/time';
 import shim from '@joplin/lib/shim';
 import { spawn } from 'child_process';
 import AsyncActionQueue from '@joplin/lib/AsyncActionQueue';
 import { createInterface } from 'readline/promises';
 import Stream = require('stream');
+import randomString from './utils/randomString';
+import ProgressBar from './utils/ProgressBar';
 
 const logger = Logger.create('Client');
 
@@ -36,6 +38,7 @@ const createNewAccount = async (email: string, context: FuzzContext): Promise<Ac
 	const password = createSecureRandom();
 	const apiOutput = await context.execApi('POST', 'api/users', {
 		email,
+		full_name: `Fuzzer user from ${formatMsToDateTimeLocal(Date.now())}`,
 	});
 	const serverId = getStringProperty(apiOutput, 'id');
 
@@ -66,7 +69,7 @@ const createNewAccount = async (email: string, context: FuzzContext): Promise<Ac
 		onClientDisconnected: async () => {
 			referenceCounter --;
 			assert.ok(referenceCounter >= 0, 'reference counter should be non-negative');
-			if (referenceCounter === 0) {
+			if (referenceCounter === 0 && !context.keepAccounts) {
 				await closeAccount();
 			}
 		},
@@ -90,6 +93,10 @@ type ChildProcessWrapper = {
 // Should match the prompt used by the CLI "batch" command.
 const cliProcessPromptString = 'command> ';
 
+interface CreateOrUpdateOptions {
+	quiet?: boolean;
+}
+
 class Client implements ActionableClient {
 	public readonly email: string;
 
@@ -97,7 +104,13 @@ class Client implements ActionableClient {
 		const account = await createNewAccount(`${uuid.create()}@localhost`, context);
 
 		try {
-			return await this.fromAccount(account, actionTracker, context);
+			const client = await this.fromAccount(account, actionTracker, context);
+
+			logger.info('Creating initial data...');
+			const actionCount = context.randomFrom([0, 100, 2000, 4000]);
+			await client.createOrUpdateMany(actionCount);
+
+			return client;
 		} catch (error) {
 			logger.error('Error creating client:', error);
 			await account.onClientDisconnected();
@@ -449,8 +462,69 @@ class Client implements ActionableClient {
 		});
 	}
 
-	public async createFolder(folder: FolderData) {
-		logger.info('Create folder', folder.id, 'in', `${folder.parentId ?? 'root'}/${this.label}`);
+	public async createOrUpdateMany(actionCount: number) {
+		logger.info(`Creating/updating ${actionCount} items...`);
+		const bar = new ProgressBar('Creating/updating');
+
+		for (let i = 0; i < actionCount; i++) {
+			bar.update(i, actionCount);
+
+			const actionId = this.context_.randInt(0, 100);
+
+			const targetNote = await this.randomNote({ includeReadOnly: false });
+			const isCreate = actionId > 60;
+			if (!targetNote || isCreate) {
+				let parentId = (await this.randomFolder({ includeReadOnly: false }))?.id;
+				const createSubfolder = this.context_.randInt(0, 100) < 10;
+				if (!parentId || createSubfolder) {
+					const folder = await this.createRandomFolder(parentId, { quiet: true });
+					parentId = folder.id;
+				}
+
+				await this.createRandomNote(parentId, { quiet: true });
+			} else {
+				const isDelete = actionId < 3;
+				const isUpdate = !isDelete;
+
+				if (isDelete) {
+					await this.deleteNote(targetNote.id, { quiet: true });
+				}
+
+				if (isUpdate) {
+					const keep = targetNote.body.substring(
+						// Problems start to appear when notes get long. This needs to be looked into, but
+						// for now, cap this at 5000 characters.
+						0, Math.max(this.context_.randInt(0, targetNote.body.length), 5000),
+					);
+					const append = randomString(this.context_.randInt, this.context_.randInt(0, 5000));
+					await this.updateNote({
+						...targetNote,
+						body: keep + append,
+					}, { quiet: true });
+				}
+			}
+		}
+		bar.complete();
+	}
+
+	public async createRandomFolder(parentId: ItemId, options: CreateOrUpdateOptions) {
+		const titleLength = this.context_.randInt(1, 128);
+		const folderId = uuid.create();
+		const folder = {
+			parentId: parentId,
+			id: folderId,
+			title: randomString(this.context_.randInt, titleLength).replace(/\n/g, ' '),
+		};
+
+		await this.createFolder(folder, options);
+
+		return folder;
+	}
+
+	public async createFolder(folder: FolderData, { quiet = false }: CreateOrUpdateOptions = {}) {
+		if (!quiet) {
+			logger.info('Create folder', folder.id, 'in', `${folder.parentId ?? 'root'}/${this.label}`);
+		}
 		await this.tracker_.createFolder(folder);
 
 		await this.execApiCommand_('POST', '/folders', {
@@ -461,14 +535,26 @@ class Client implements ActionableClient {
 	}
 
 	private async assertNoteMatchesState_(expected: NoteData) {
+		const normalizeForCompare = (text: string) => {
+			// Handle invalid unicode (replace with placeholder characters)
+			return Buffer.from(new TextEncoder().encode(text))
+				.toString()
+				.trimEnd();
+		};
+
 		await retryWithCount(async () => {
-			const noteContent = (await this.execCliCommand_('cat', expected.id)).stdout;
+			const noteResult = JSON.parse(
+				await this.execApiCommand_('GET', `/notes/${encodeURIComponent(expected.id)}?fields=title,body`),
+			);
 			assert.equal(
-				// Compare without trailing newlines for consistency, the output from "cat"
-				// can sometimes have an extra newline (due to the CLI prompt)
-				noteContent.trimEnd(),
-				`${expected.title}\n\n${expected.body.trimEnd()}`,
-				'note should exist',
+				normalizeForCompare(noteResult.title),
+				normalizeForCompare(expected.title),
+				'note title should match',
+			);
+			assert.equal(
+				normalizeForCompare(noteResult.body),
+				normalizeForCompare(expected.body),
+				'note body should match',
 			);
 		}, {
 			count: 3,
@@ -480,8 +566,22 @@ class Client implements ActionableClient {
 		});
 	}
 
-	public async createNote(note: NoteData) {
-		logger.info('Create note', note.id, 'in', `${note.parentId}/${this.label}`);
+	public async createRandomNote(parentId: string, { quiet = false }: CreateOrUpdateOptions = { }) {
+		const titleLength = this.context_.randInt(0, 512);
+		const bodyLength = this.context_.randInt(0, 4096);
+		await this.createNote({
+			published: false,
+			parentId,
+			title: randomString(this.context_.randInt, titleLength),
+			body: randomString(this.context_.randInt, bodyLength),
+			id: uuid.create(),
+		}, { quiet });
+	}
+
+	public async createNote(note: NoteData, { quiet = false }: CreateOrUpdateOptions = { }) {
+		if (!quiet) {
+			logger.info('Create note', note.id, 'in', `${note.parentId}/${this.label}`);
+		}
 		await this.tracker_.createNote(note);
 
 		await this.execApiCommand_('POST', '/notes', {
@@ -493,8 +593,11 @@ class Client implements ActionableClient {
 		await this.assertNoteMatchesState_(note);
 	}
 
-	public async updateNote(note: NoteData) {
-		logger.info('Update note', note.id, 'in', `${note.parentId}/${this.label}`);
+	public async updateNote(note: NoteData, { quiet = false }: CreateOrUpdateOptions = { }) {
+		if (!quiet) {
+			logger.info('Update note', note.id, 'in', `${note.parentId}/${this.label}`);
+		}
+
 		await this.tracker_.updateNote(note);
 		await this.execApiCommand_('PUT', `/notes/${encodeURIComponent(note.id)}`, {
 			title: note.title,
@@ -504,8 +607,11 @@ class Client implements ActionableClient {
 		await this.assertNoteMatchesState_(note);
 	}
 
-	public async deleteNote(id: ItemId) {
-		logger.info('Delete note', id, 'in', this.label);
+	public async deleteNote(id: ItemId, { quiet }: CreateOrUpdateOptions = {}) {
+		if (!quiet) {
+			logger.info('Delete note', id, 'in', this.label);
+		}
+
 		await this.tracker_.deleteNote(id);
 
 		await this.execCliCommand_('rmnote', '--permanent', '--force', id);
