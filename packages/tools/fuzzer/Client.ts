@@ -28,7 +28,7 @@ type AccountData = Readonly<{
 	email: string;
 	password: string;
 	serverId: string;
-	e2eePassword: string;
+	e2eePassword: string|null;
 	associatedClientCount: number;
 	onClientConnected: ()=> void;
 	onClientDisconnected: ()=> Promise<void>;
@@ -58,7 +58,7 @@ const createNewAccount = async (email: string, context: FuzzContext): Promise<Ac
 	return {
 		email,
 		password,
-		e2eePassword: createSecureRandom().replace(/^-/, '_'),
+		e2eePassword: context.enableE2ee ? createSecureRandom().replace(/^-/, '_') : null,
 		serverId,
 		get associatedClientCount() {
 			return referenceCounter;
@@ -149,7 +149,9 @@ class Client implements ActionableClient {
 		await client.execCliCommand_('config', 'api.token', apiData.token);
 		await client.execCliCommand_('config', 'api.port', String(apiData.port));
 
-		await client.execCliCommand_('e2ee', 'enable', '--password', account.e2eePassword);
+		if (account.e2eePassword) {
+			await client.execCliCommand_('e2ee', 'enable', '--password', account.e2eePassword);
+		}
 		logger.info('Created and configured client');
 
 		await client.startClipperServer_();
@@ -433,6 +435,8 @@ class Client implements ActionableClient {
 	}
 
 	private async decrypt_() {
+		if (!this.context_.enableE2ee) return;
+
 		const result = await this.execCliCommand_('e2ee', 'decrypt', '--force');
 		if (!result.stdout.includes('Completed decryption.')) {
 			throw new Error(`Decryption did not complete: ${result.stdout}`);

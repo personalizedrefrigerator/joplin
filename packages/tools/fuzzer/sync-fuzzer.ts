@@ -43,6 +43,7 @@ interface Options {
 	seed: number;
 	maximumSteps: number;
 	maximumStepsBetweenSyncs: number;
+	enableE2ee: boolean;
 	clientCount: number;
 	keepAccountsOnClose: boolean;
 
@@ -102,7 +103,9 @@ const main = async (options: Options) => {
 		const fuzzContext: FuzzContext = {
 			serverUrl: joplinServerUrl,
 			isJoplinCloud: options.isJoplinCloud,
+			enableE2ee: options.enableE2ee,
 			baseDir: profilesDirectory.path,
+
 			execApi: server.execApi.bind(server),
 			randInt: (a, b) => random.nextInRange(a, b),
 			randomFrom: (data) => data[random.nextInRange(0, data.length)],
@@ -197,6 +200,11 @@ void yargs
 					default: false,
 					defaultDescription: 'Whether to keep the created Joplin Server users after exiting. Default is to try to clean up, removing old accounts when exiting.',
 				},
+				'enable-e2ee': {
+					type: 'boolean',
+					default: true,
+					defaultDescription: 'Whether to enable end-to-end encryption',
+				},
 				'joplin-cloud': {
 					type: 'string',
 					default: '',
@@ -217,6 +225,7 @@ void yargs
 				isJoplinCloud: !!argv.joplinCloud,
 				maximumStepsBetweenSyncs: argv['steps-between-syncs'],
 				keepAccountsOnClose: argv.keepAccounts,
+				enableE2ee: argv.enableE2ee,
 			});
 		},
 	)
