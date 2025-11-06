@@ -52,6 +52,7 @@ export interface FuzzContext {
 
 	execApi: (method: HttpMethod, route: string, debugAction: Json)=> Promise<Json>;
 	randInt: (low: number, high: number)=> number;
+	randomString: (targetLength: number)=> string;
 	randomFrom: <T> (data: T[])=> T;
 }
 

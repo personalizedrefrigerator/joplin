@@ -1,9 +1,9 @@
 type OnRandomInt = (low: number, high: number)=> number;
 
-const randomString = (randInt: OnRandomInt, length: number) => {
+const randomString = (generator: OnRandomInt) => (length: number) => {
 	const charCodes = [];
 	for (let i = 0; i < length; i++) {
-		charCodes.push(randInt(0, 0xFFFF));
+		charCodes.push(generator(0, 0xFFFF));
 	}
 
 	let text = String.fromCharCode(...charCodes);

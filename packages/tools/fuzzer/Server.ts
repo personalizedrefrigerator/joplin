@@ -44,6 +44,10 @@ export default class Server {
 		});
 	}
 
+	public get url() {
+		return this.serverUrl_;
+	}
+
 	public async checkConnection() {
 		let lastError;
 		for (let retry = 0; retry < 30; retry++) {

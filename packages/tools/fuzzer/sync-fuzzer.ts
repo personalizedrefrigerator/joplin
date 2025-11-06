@@ -13,6 +13,7 @@ import openDebugSession from './utils/openDebugSession';
 import { Second } from '@joplin/utils/time';
 import { packagesDir } from './constants';
 import doRandomAction from './doRandomAction';
+import randomString from './utils/randomString';
 const { shimInit } = require('@joplin/lib/shim-init-node');
 
 const globalLogger = new Logger();
@@ -44,12 +45,47 @@ interface Options {
 	maximumSteps: number;
 	maximumStepsBetweenSyncs: number;
 	enableE2ee: boolean;
+	randomStrings: boolean;
 	clientCount: number;
 	keepAccountsOnClose: boolean;
 
 	serverPath: string;
 	isJoplinCloud: boolean;
 }
+
+const createContext = (options: Options, server: Server, profilesDirectory: string) => {
+	const random = new SeededRandom(options.seed);
+	// Use a separate random number generator for strings. This prevents
+	// the random strings setting from affecting the other output.
+	const stringRandom = new SeededRandom(random.next());
+
+	if (options.isJoplinCloud) {
+		logger.info('Sync target: Joplin Cloud');
+	}
+
+	let stringCount = 0;
+	const randomStringGenerator = (() => {
+		if (options.randomStrings) {
+			return randomString((min, max) => stringRandom.nextInRange(min, max));
+		} else {
+			return (_targetLength: number) => `Placeholder (x${stringCount++})`;
+		}
+	})();
+
+	const fuzzContext: FuzzContext = {
+		serverUrl: server.url,
+		isJoplinCloud: options.isJoplinCloud,
+		enableE2ee: options.enableE2ee,
+		baseDir: profilesDirectory,
+
+		execApi: server.execApi.bind(server),
+		randInt: (a, b) => random.nextInRange(a, b),
+		randomFrom: (data) => data[random.nextInRange(0, data.length)],
+		randomString: randomStringGenerator,
+		keepAccounts: options.keepAccountsOnClose,
+	};
+	return fuzzContext;
+};
 
 const main = async (options: Options) => {
 	shimInit();
@@ -94,23 +130,8 @@ const main = async (options: Options) => {
 		cleanupTasks.push(profilesDirectory.remove);
 
 		logger.info('Starting with seed', options.seed);
-		const random = new SeededRandom(options.seed);
 
-		if (options.isJoplinCloud) {
-			logger.info('Sync target: Joplin Cloud');
-		}
-
-		const fuzzContext: FuzzContext = {
-			serverUrl: joplinServerUrl,
-			isJoplinCloud: options.isJoplinCloud,
-			enableE2ee: options.enableE2ee,
-			baseDir: profilesDirectory.path,
-
-			execApi: server.execApi.bind(server),
-			randInt: (a, b) => random.nextInRange(a, b),
-			randomFrom: (data) => data[random.nextInRange(0, data.length)],
-			keepAccounts: options.keepAccountsOnClose,
-		};
+		const fuzzContext = createContext(options, server, profilesDirectory.path);
 		clientPool = await ClientPool.create(
 			fuzzContext,
 			options.clientCount,
@@ -203,7 +224,12 @@ void yargs
 				'enable-e2ee': {
 					type: 'boolean',
 					default: true,
-					defaultDescription: 'Whether to enable end-to-end encryption',
+					description: 'Whether to enable end-to-end encryption',
+				},
+				'random-strings': {
+					type: 'boolean',
+					default: true,
+					description: 'Whether to generate text using pseudorandom Unicode characters. Disabling this can simplify debugging.',
 				},
 				'joplin-cloud': {
 					type: 'string',
@@ -226,6 +252,7 @@ void yargs
 				maximumStepsBetweenSyncs: argv['steps-between-syncs'],
 				keepAccountsOnClose: argv.keepAccounts,
 				enableE2ee: argv.enableE2ee,
+				randomStrings: argv.randomStrings,
 			});
 		},
 	)

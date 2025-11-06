@@ -19,7 +19,6 @@ import { spawn } from 'child_process';
 import AsyncActionQueue from '@joplin/lib/AsyncActionQueue';
 import { createInterface } from 'readline/promises';
 import Stream = require('stream');
-import randomString from './utils/randomString';
 import ProgressBar from './utils/ProgressBar';
 
 const logger = Logger.create('Client');
@@ -500,7 +499,7 @@ class Client implements ActionableClient {
 						// for now, cap this at 5000 characters.
 						0, Math.max(this.context_.randInt(0, targetNote.body.length), 5000),
 					);
-					const append = randomString(this.context_.randInt, this.context_.randInt(0, 5000));
+					const append = this.context_.randomString(this.context_.randInt(0, 5000));
 					await this.updateNote({
 						...targetNote,
 						body: keep + append,
@@ -517,7 +516,7 @@ class Client implements ActionableClient {
 		const folder = {
 			parentId: parentId,
 			id: folderId,
-			title: randomString(this.context_.randInt, titleLength).replace(/\n/g, ' '),
+			title: this.context_.randomString(titleLength).replace(/\n/g, ' '),
 		};
 
 		await this.createFolder(folder, options);
@@ -576,8 +575,8 @@ class Client implements ActionableClient {
 		await this.createNote({
 			published: false,
 			parentId,
-			title: randomString(this.context_.randInt, titleLength),
-			body: randomString(this.context_.randInt, bodyLength),
+			title: this.context_.randomString(titleLength),
+			body: this.context_.randomString(bodyLength),
 			id: uuid.create(),
 		}, { quiet });
 	}
