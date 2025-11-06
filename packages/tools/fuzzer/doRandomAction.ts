@@ -224,6 +224,10 @@ const doRandomAction = async (context: FuzzContext, client: Client, clientPool: 
 			}
 			return true;
 		},
+		createOrUpdateMany: async () => {
+			await client.createOrUpdateMany(context.randInt(1, 512));
+			return true;
+		},
 		publishNote: async () => {
 			const note = await client.randomNote({
 				includeReadOnly: true,
