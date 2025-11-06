@@ -1,4 +1,3 @@
-
 type OnRandomInt = (low: number, high: number)=> number;
 
 const randomString = (randInt: OnRandomInt, length: number) => {
@@ -8,7 +7,8 @@ const randomString = (randInt: OnRandomInt, length: number) => {
 	}
 
 	let text = String.fromCharCode(...charCodes);
-	// Normalize (TODO: Can the note comparison logic be adjusted to remove some of this?)
+	// Normalize to avoid differences when reading/writing content from Joplin clients.
+	// TODO: Can the note comparison logic be adjusted to remove some of this?
 	text = text.normalize();
 	text = text.replace(/[\r\b\f\v\0\u007F]/g, '!');
 	text = text.replace(/\p{C}/ug, '-'); // Other control characters
