@@ -163,6 +163,9 @@ export default class ChangeModel extends BaseModel<Change> {
 		// The "+ 0" was added to prevent Postgres from scanning the `changes` table in `counter`
 		// order, which is an extremely slow query plan. With "+ 0" it went from 2 minutes to 6
 		// seconds for a particular query. https://dba.stackexchange.com/a/338597/37012
+		//
+		// 2025-11-06: Remove the "+ 0" because now it appears to make query slower by preventing
+		// the query planner from using the index. Using Postgres 16.8
 
 		const subQuery2 = `
 			SELECT ${fieldsSql}
@@ -170,7 +173,7 @@ export default class ChangeModel extends BaseModel<Change> {
 			WHERE counter > ?
 			AND type = ?
 			AND item_id IN (SELECT item_id FROM user_items WHERE user_id = ?)
-			ORDER BY "counter" + 0 ASC
+			ORDER BY "counter" ASC
 			${doCountQuery ? '' : 'LIMIT ?'}
 		`;
 
