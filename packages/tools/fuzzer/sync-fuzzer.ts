@@ -137,7 +137,7 @@ const main = async (options: Options) => {
 			options.clientCount,
 			task => { cleanupTasks.push(task); },
 		);
-		await clientPool.syncAll();
+		await clientPool.createInitialItemsAndSync();
 
 		const maxSteps = options.maximumSteps;
 		for (let stepIndex = 1; maxSteps <= 0 || stepIndex <= maxSteps; stepIndex++) {

@@ -104,11 +104,6 @@ class Client implements ActionableClient {
 
 		try {
 			const client = await this.fromAccount(account, actionTracker, context);
-
-			logger.info('Creating initial data...');
-			const actionCount = context.randomFrom([0, 100, 2000, 4000]);
-			await client.createOrUpdateMany(actionCount);
-
 			return client;
 		} catch (error) {
 			logger.error('Error creating client:', error);
