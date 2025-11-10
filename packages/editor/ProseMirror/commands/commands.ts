@@ -114,15 +114,25 @@ const commands: Record<EditorCommandType, ExtendedCommand|null> = {
 	[EditorCommandType.ToggleHeading4]: toggleHeading(4),
 	[EditorCommandType.ToggleHeading5]: toggleHeading(5),
 	[EditorCommandType.InsertHorizontalRule]: null,
-	[EditorCommandType.InsertTable]: (_state, _dispatch, view) => {
+	[EditorCommandType.InsertTable]: (state, dispatch, view) => {
 		if (view) {
-			void insertRenderedMarkdown(view,
-				[
-					'|    |    |    |',
-					'|----|----|----|',
-					'|    |    |    |',
-				].join('\n'),
+			// See https://github.com/ProseMirror/prosemirror-tables/issues/91
+			const tr = state.tr.replaceSelectionWith(
+				schema.nodes.table.create(null, [
+					schema.nodes.table_row.create(null, [
+						schema.nodes.table_header.createAndFill(),
+						schema.nodes.table_header.createAndFill(),
+					]),
+					schema.nodes.table_row.create(null, [
+						schema.nodes.table_cell.createAndFill(),
+						schema.nodes.table_cell.createAndFill(),
+					]),
+				]),
 			);
+
+			if (dispatch) {
+				dispatch(tr);
+			}
 		}
 
 		return true;
