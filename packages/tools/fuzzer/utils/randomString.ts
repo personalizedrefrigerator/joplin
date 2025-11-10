@@ -15,6 +15,14 @@ const randomString = (nextRandomInteger: OnRandomInt) => (length: number) => {
 
 	// Remove invalid UTF-8
 	text = new TextDecoder().decode(new TextEncoder().encode(text));
+
+	// Attempt to work around issues related to unexpected differences in items when reading from
+	// the Joplin client: Remove certain invalid unicode:
+	if ('toWellFormed' in String.prototype && typeof String.prototype.toWellFormed === 'function') {
+		// toWellFormed requires Node >= v20
+		text = String.prototype.toWellFormed.call(text);
+	}
+
 	return text;
 };
 
