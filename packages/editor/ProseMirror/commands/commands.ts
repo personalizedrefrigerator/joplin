@@ -12,9 +12,8 @@ import { EditorEventType } from '../../events';
 import extractSelectedLinesTo from '../utils/extractSelectedLinesTo';
 import { EditorView } from 'prosemirror-view';
 import jumpToHash from '../utils/jumpToHash';
-import focusEditor from './focusEditor';
-import insertRenderedMarkdown from '../utils/insertRenderedMarkdown';
 import canReplaceSelectionWith from '../utils/canReplaceSelectionWith';
+import focusEditor from './focusEditor';
 
 type Dispatch = (tr: Transaction)=> void;
 type ExtendedCommand = (state: EditorState, dispatch: Dispatch, view?: EditorView, options?: string[])=> boolean;
@@ -75,6 +74,7 @@ const toggleCode: Command = (state, dispatch, view) => {
 	return toggleMark(schema.marks.code)(state, dispatch, view) || setBlockType(schema.nodes.paragraph)(state, dispatch, view);
 };
 
+
 const listItemTypes = [schema.nodes.list_item, schema.nodes.task_list_item];
 
 const commands: Record<EditorCommandType, ExtendedCommand|null> = {
@@ -86,17 +86,24 @@ const commands: Record<EditorCommandType, ExtendedCommand|null> = {
 	[EditorCommandType.ToggleItalicized]: toggleMark(schema.marks.emphasis),
 	[EditorCommandType.ToggleCode]: toggleCode,
 	[EditorCommandType.ToggleMath]: (state, _dispatch, view) => {
+		const renderer = getEditorApi(state).renderer;
 		const selectedText = state.doc.textBetween(state.selection.from, state.selection.to);
+
 		const block = selectedText.includes('\n');
 		const nodeType = block ? schema.nodes.joplinEditableBlock : schema.nodes.joplinEditableInline;
-
 		if (canReplaceSelectionWith(state.selection, nodeType)) {
-			if (view) {
+			void (async () => {
 				const separator = block ? '$$' : '$';
-				void insertRenderedMarkdown(view,
-					`${separator}${selectedText}${separator}`,
-				);
-			}
+				const rendered = await renderer.renderMarkupToHtml(`${separator}${selectedText}${separator}`, {
+					forceMarkdown: true,
+					isFullPageRender: false,
+				});
+
+				if (view) {
+					view.pasteHTML(rendered.html);
+				}
+			})();
+
 			return true;
 		}
 		return false;
@@ -114,29 +121,6 @@ const commands: Record<EditorCommandType, ExtendedCommand|null> = {
 	[EditorCommandType.ToggleHeading4]: toggleHeading(4),
 	[EditorCommandType.ToggleHeading5]: toggleHeading(5),
 	[EditorCommandType.InsertHorizontalRule]: null,
-	[EditorCommandType.InsertTable]: (state, dispatch, view) => {
-		if (view) {
-			// See https://github.com/ProseMirror/prosemirror-tables/issues/91
-			const tr = state.tr.replaceSelectionWith(
-				schema.nodes.table.create(null, [
-					schema.nodes.table_row.create(null, [
-						schema.nodes.table_header.createAndFill(),
-						schema.nodes.table_header.createAndFill(),
-					]),
-					schema.nodes.table_row.create(null, [
-						schema.nodes.table_cell.createAndFill(),
-						schema.nodes.table_cell.createAndFill(),
-					]),
-				]),
-			);
-
-			if (dispatch) {
-				dispatch(tr);
-			}
-		}
-
-		return true;
-	},
 	[EditorCommandType.ToggleSearch]: (state, dispatch, view) => {
 		const command = setSearchVisible(!getSearchVisible(state));
 		return command(state, dispatch, view);
