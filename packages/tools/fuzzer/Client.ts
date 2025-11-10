@@ -20,6 +20,8 @@ import AsyncActionQueue from '@joplin/lib/AsyncActionQueue';
 import { createInterface } from 'readline/promises';
 import Stream = require('stream');
 import ProgressBar from './utils/ProgressBar';
+import logDiffDebug from './utils/logDiffDebug';
+import { NoteEntity } from '@joplin/lib/services/database/types';
 
 const logger = Logger.create('Client');
 
@@ -490,8 +492,8 @@ class Client implements ActionableClient {
 
 				if (isUpdate) {
 					const keep = targetNote.body.substring(
-						// Problems start to appear when notes get long. This needs to be looked into, but
-						// for now, cap this at 5000 characters.
+						// Problems start to appear when notes get long.
+						// See https://github.com/laurent22/joplin/issues/13644.
 						0, Math.max(this.context_.randInt(0, targetNote.body.length), 5000),
 					);
 					const append = this.context_.randomString(this.context_.randInt(0, 5000));
@@ -537,31 +539,45 @@ class Client implements ActionableClient {
 			// Handle invalid unicode (replace with placeholder characters)
 			return Buffer.from(new TextEncoder().encode(text))
 				.toString()
+				// Rule out differences caused by control characters:
+				.replace(/\p{C}/ug, '')
 				.trimEnd();
 		};
 
-		await retryWithCount(async () => {
-			const noteResult = JSON.parse(
-				await this.execApiCommand_('GET', `/notes/${encodeURIComponent(expected.id)}?fields=title,body`),
-			);
-			assert.equal(
-				normalizeForCompare(noteResult.title),
-				normalizeForCompare(expected.title),
-				'note title should match',
-			);
-			assert.equal(
-				normalizeForCompare(noteResult.body),
-				normalizeForCompare(expected.body),
-				'note body should match',
-			);
-		}, {
-			count: 3,
-			onFail: async () => {
-				// Send an event to the server and wait for it to be processed -- it's possible that the server
-				// hasn't finished processing the API event for creating the note:
-				await this.execApiCommand_('GET', '/ping');
-			},
-		});
+		let lastActualNote: NoteEntity|null = null;
+		try {
+			await retryWithCount(async () => {
+				const noteResult = JSON.parse(
+					await this.execApiCommand_('GET', `/notes/${encodeURIComponent(expected.id)}?fields=title,body`),
+				);
+				lastActualNote = noteResult;
+
+				assert.equal(
+					normalizeForCompare(noteResult.title),
+					normalizeForCompare(expected.title),
+					'note title should match',
+				);
+				assert.equal(
+					normalizeForCompare(noteResult.body),
+					normalizeForCompare(expected.body),
+					'note body should match',
+				);
+			}, {
+				count: 3,
+				onFail: async () => {
+					// Send an event to the server and wait for it to be processed -- it's possible that the server
+					// hasn't finished processing the API event for creating the note:
+					await this.execApiCommand_('GET', '/ping');
+				},
+			});
+		} catch (error) {
+			// Log additional information to help debug binary differences
+			if (lastActualNote) {
+				logDiffDebug(lastActualNote.title, expected.title);
+				logDiffDebug(lastActualNote.body, expected.body);
+			}
+			throw error;
+		}
 	}
 
 	public async createRandomNote(parentId: string, { quiet = false }: CreateOrUpdateOptions = { }) {

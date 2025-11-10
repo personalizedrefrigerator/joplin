@@ -1830,6 +1830,7 @@ packages/tools/fuzzer/utils/SeededRandom.js
 packages/tools/fuzzer/utils/getNumberProperty.js
 packages/tools/fuzzer/utils/getProperty.js
 packages/tools/fuzzer/utils/getStringProperty.js
+packages/tools/fuzzer/utils/logDiffDebug.js
 packages/tools/fuzzer/utils/openDebugSession.js
 packages/tools/fuzzer/utils/randomString.js
 packages/tools/fuzzer/utils/retryWithCount.js
