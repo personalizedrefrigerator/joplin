@@ -227,12 +227,21 @@ export default class ShareModel extends BaseModel<Share> {
 			perfTimer.pop();
 		};
 
-		const handleUpdated = async (change: Change, item: Item, share: Share) => {
+		const handleUpdated = async (change: Change, item: Item, share: Share, processedUpdates: Set<string>) => {
 			const previousItem = this.models().change().unserializePreviousItem(change.previous_item);
 			const previousShareId = previousItem.jop_share_id;
 			const shareId = share ? share.id : '';
 
-			if (previousShareId === shareId) return;
+			if (previousShareId === shareId) {
+				return;
+			}
+			// Avoid re-processing the same item. Doing so may cause all users to lose access to the share:
+			// https://github.com/laurent22/joplin/issues/13686
+			const updateKey = `${item.id};${previousShareId};${share?.id}`;
+			if (processedUpdates.has(updateKey)) {
+				return;
+			}
+			processedUpdates.add(updateKey);
 
 			perfTimer.push('handleUpdated');
 
@@ -338,6 +347,8 @@ export default class ShareModel extends BaseModel<Share> {
 				const shares = await this.models().share().loadByIds(shareIds);
 				perfTimer.pop();
 
+				const handledUpdates = new Set<string>();
+
 				perfTimer.push('Change processing transaction');
 				await this.withTransaction(async () => {
 					perfTimer.push(`Processing ${changes.length} changes`);
@@ -355,7 +366,7 @@ export default class ShareModel extends BaseModel<Share> {
 							}
 
 							if (change.type === ChangeType.Update) {
-								await handleUpdated(change, item, itemShare);
+								await handleUpdated(change, item, itemShare, handledUpdates);
 							}
 						}
 
