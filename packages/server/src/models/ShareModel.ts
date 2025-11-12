@@ -232,9 +232,7 @@ export default class ShareModel extends BaseModel<Share> {
 			const previousShareId = previousItem.jop_share_id;
 			const shareId = share ? share.id : '';
 
-			if (previousShareId === shareId) {
-				return;
-			}
+			if (previousShareId === shareId) return;
 
 			perfTimer.push('handleUpdated');
 
