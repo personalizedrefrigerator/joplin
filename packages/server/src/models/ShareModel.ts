@@ -324,7 +324,7 @@ export default class ShareModel extends BaseModel<Share> {
 			perfTimer.push('Get paginated changes');
 			const paginatedChanges = await this.models().change().allFromId(latestProcessedChange || '', {
 				// Ignore all updates that don't change the share_id
-				updatesEquivalent: (a, b) => {
+				updatesEqual: (a, b) => {
 					const previousShareId = (change: Change) => {
 						return this.models().change().unserializePreviousItem(change.previous_item).jop_share_id;
 					};

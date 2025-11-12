@@ -35,11 +35,11 @@ export interface ChangePreviousItem {
 	jop_share_id: string;
 }
 
-type OnCompareUpdates = (before: Change, after: Change)=> boolean;
+type UpdatesEqual = (before: Change, after: Change)=> boolean;
 
 interface AllFromIdOptions {
 	limit?: number;
-	updatesEquivalent?: OnCompareUpdates;
+	updatesEqual?: UpdatesEqual;
 }
 
 export function defaultDeltaPagination(): ChangePagination {
@@ -91,7 +91,7 @@ export default class ChangeModel extends BaseModel<Change> {
 
 	public async allFromId(id: string, {
 		limit = SqliteMaxVariableNum,
-		updatesEquivalent = ()=>true,
+		updatesEqual = ()=>true,
 	}: AllFromIdOptions = {}): Promise<PaginatedChanges> {
 		const startChange: Change = id ? await this.load(id) : null;
 		const query = this.db(this.tableName).select(...this.defaultFields);
@@ -101,7 +101,7 @@ export default class ChangeModel extends BaseModel<Change> {
 		const hasMore = !!results.length;
 		const cursor = results.length ? results[results.length - 1].id : id;
 		results = await this.removeDeletedItems(results);
-		results = await this.compressChanges(results, updatesEquivalent);
+		results = await this.compressChanges(results, updatesEqual);
 		return {
 			items: results,
 			has_more: hasMore,
@@ -407,7 +407,8 @@ export default class ChangeModel extends BaseModel<Change> {
 	// such as "jop_parent_id" or "name", which is used by the share mechanism
 	// to know if an item has been moved from one folder to another. In that
 	// case, we need to know about each individual change, so they are not
-	// compressed.
+	// compressed. The share update task specifies whether particular updates can
+	// be omitted or not using `updatesEqual`.
 	//
 	// The latest change, when an item goes from DELETE to CREATE seems odd but
 	// can happen because we are not checking for "item" changes but for
@@ -415,7 +416,7 @@ export default class ChangeModel extends BaseModel<Change> {
 	// (CREATED), then unshared (DELETED), then shared again (CREATED). When it
 	// happens, we want the user to get the item, thus we generate a CREATE
 	// event.
-	private compressChanges(changes: Change[], isUpdateEquivalentTo: OnCompareUpdates): Change[] {
+	private compressChanges(changes: Change[], updatesEqual: UpdatesEqual): Change[] {
 		const itemChanges: Record<Uuid, Change> = {};
 
 		const uniqueUpdateChanges: Record<Uuid, Change[]> = {};
@@ -428,8 +429,8 @@ export default class ChangeModel extends BaseModel<Change> {
 				const uniqueChanges = uniqueUpdateChanges[itemId];
 				if (uniqueChanges) {
 					const lastChange = uniqueChanges[uniqueChanges.length - 1];
-					if (isUpdateEquivalentTo(lastChange, change)) {
-						// Prefer the later change, even if marked as equivalent
+					if (updatesEqual(lastChange, change)) {
+						// Always prefer the later change
 						uniqueChanges[uniqueChanges.length - 1] = change;
 					} else {
 						uniqueChanges.push(change);
