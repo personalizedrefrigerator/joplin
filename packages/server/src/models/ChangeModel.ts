@@ -2,6 +2,7 @@ import { Knex } from 'knex';
 import Logger from '@joplin/utils/Logger';
 import { DbConnection, SqliteMaxVariableNum, isPostgres } from '../db';
 import { Change, ChangeType, Item, Uuid } from '../services/database/types';
+import { md5 } from '../utils/crypto';
 import { ErrorResyncRequired } from '../utils/errors';
 import { Day, formatDateTime } from '../utils/time';
 import BaseModel, { SaveOptions } from './BaseModel';
@@ -415,9 +416,7 @@ export default class ChangeModel extends BaseModel<Change> {
 			const previous = itemChanges[itemId];
 
 			if (change.type === ChangeType.Update) {
-				// HACK: Work around a bug in ShareModel.updateSharedItems3.
-				const prev = change.previous_item ? JSON.parse(change.previous_item).jop_share_id : '';
-				const key = `${itemId}-${prev}`;
+				const key = md5(itemId + change.previous_item);
 				if (!uniqueUpdateChanges[itemId]) uniqueUpdateChanges[itemId] = {};
 				uniqueUpdateChanges[itemId][key] = change;
 			}
