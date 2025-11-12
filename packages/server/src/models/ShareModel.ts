@@ -227,7 +227,7 @@ export default class ShareModel extends BaseModel<Share> {
 			perfTimer.pop();
 		};
 
-		const handleUpdated = async (change: Change, item: Item, share: Share, processedUpdates: Set<string>) => {
+		const handleUpdated = async (change: Change, item: Item, share: Share) => {
 			const previousItem = this.models().change().unserializePreviousItem(change.previous_item);
 			const previousShareId = previousItem.jop_share_id;
 			const shareId = share ? share.id : '';
@@ -235,13 +235,6 @@ export default class ShareModel extends BaseModel<Share> {
 			if (previousShareId === shareId) {
 				return;
 			}
-			// Avoid re-processing the same item. Doing so may cause all users to lose access to the share:
-			// https://github.com/laurent22/joplin/issues/13686
-			const updateKey = `${item.id};${previousShareId};${share?.id}`;
-			if (processedUpdates.has(updateKey)) {
-				return;
-			}
-			processedUpdates.add(updateKey);
 
 			perfTimer.push('handleUpdated');
 
@@ -329,7 +322,15 @@ export default class ShareModel extends BaseModel<Share> {
 			perfTimer.pop();
 
 			perfTimer.push('Get paginated changes');
-			const paginatedChanges = await this.models().change().allFromId(latestProcessedChange || '');
+			const paginatedChanges = await this.models().change().allFromId(latestProcessedChange || '', {
+				// Ignore all updates that don't change the share_id
+				updatesEquivalent: (a, b) => {
+					const previousShareId = (change: Change) => {
+						return this.models().change().unserializePreviousItem(change.previous_item).jop_share_id;
+					};
+					return previousShareId(a) === previousShareId(b);
+				},
+			});
 			perfTimer.pop();
 			const changes = paginatedChanges.items;
 
@@ -346,8 +347,6 @@ export default class ShareModel extends BaseModel<Share> {
 				perfTimer.push(`Load ${shareIds.length} shares`);
 				const shares = await this.models().share().loadByIds(shareIds);
 				perfTimer.pop();
-
-				const handledUpdates = new Set<string>();
 
 				perfTimer.push('Change processing transaction');
 				await this.withTransaction(async () => {
@@ -366,7 +365,7 @@ export default class ShareModel extends BaseModel<Share> {
 							}
 
 							if (change.type === ChangeType.Update) {
-								await handleUpdated(change, item, itemShare, handledUpdates);
+								await handleUpdated(change, item, itemShare);
 							}
 						}
 
