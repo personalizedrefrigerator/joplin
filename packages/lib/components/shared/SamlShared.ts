@@ -6,7 +6,15 @@ import SsoScreenShared from './SsoScreenShared';
 
 export default class SamlShared implements SsoScreenShared {
 	public openLoginPage() {
-		shim.openUrl(`${prefixWithHttps(Setting.value('sync.11.path'))}/login/sso-saml-app`);
+		const samlUrl = Setting.value('sync.11.path');
+		if (!samlUrl) {
+			const message = 'No URL for SAML authentication set.';
+			void shim.showErrorDialog(message);
+
+			throw new Error(message);
+		}
+
+		shim.openUrl(`${prefixWithHttps(samlUrl)}/login/sso-saml-app`);
 		return Promise.resolve();
 	}
 
