@@ -39,7 +39,7 @@ export default class Server {
 			cwd: serverDir,
 			stdin: 'ignore', // No stdin
 			// For debugging:
-			// stderr: process.stderr,
+			stderr: process.stderr,
 			// stdout: process.stdout,
 		});
 	}
