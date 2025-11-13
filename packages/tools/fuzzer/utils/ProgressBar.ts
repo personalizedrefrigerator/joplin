@@ -20,6 +20,7 @@ export default class ProgressBar {
 
 	public complete() {
 		if (!this.isFirst_) {
+			stdout.write(`\r${this.prefix_}: Done`.padEnd(this.lastLength_));
 			stdout.write('\n');
 		}
 	}

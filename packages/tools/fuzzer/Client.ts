@@ -466,14 +466,8 @@ class Client implements ActionableClient {
 		logger.info(`Creating/updating ${actionCount} items...`);
 		const bar = new ProgressBar('Creating/updating');
 
-		for (let i = 0; i < actionCount; i++) {
-			bar.update(i, actionCount);
-
-			const actionId = this.context_.randInt(0, 100);
-
-			const targetNote = await this.randomNote({ includeReadOnly: false });
-			const isCreate = actionId > 60;
-			if (!targetNote || isCreate) {
+		const actions = {
+			create: async () => {
 				let parentId = (await this.randomFolder({ includeReadOnly: false }))?.id;
 				const createSubfolder = this.context_.randInt(0, 100) < 10;
 				if (!parentId || createSubfolder) {
@@ -482,26 +476,38 @@ class Client implements ActionableClient {
 				}
 
 				await this.createRandomNote(parentId, { quiet: true });
+			},
+			update: async (targetNote: NoteData) => {
+				const keep = targetNote.body.substring(
+					// Problems start to appear when notes get long.
+					// See https://github.com/laurent22/joplin/issues/13644.
+					0, Math.min(this.context_.randInt(0, targetNote.body.length), 5000),
+				);
+				const append = this.context_.randomString(this.context_.randInt(0, 5000));
+				await this.updateNote({
+					...targetNote,
+					body: keep + append,
+				}, { quiet: true });
+			},
+			delete: async (targetNote: NoteData) => {
+				await this.deleteNote(targetNote.id, { quiet: true });
+			},
+		};
+
+		for (let i = 0; i < actionCount; i++) {
+			bar.update(i, actionCount);
+
+			const actionId = this.context_.randInt(0, 100);
+
+			const targetNote = await this.randomNote({ includeReadOnly: false });
+			if (!targetNote) {
+				await actions.create();
+			} else if (actionId > 60) {
+				await actions.update(targetNote);
+			} else if (actionId > 50) {
+				await actions.delete(targetNote);
 			} else {
-				const isDelete = actionId < 3;
-				const isUpdate = !isDelete;
-
-				if (isDelete) {
-					await this.deleteNote(targetNote.id, { quiet: true });
-				}
-
-				if (isUpdate) {
-					const keep = targetNote.body.substring(
-						// Problems start to appear when notes get long.
-						// See https://github.com/laurent22/joplin/issues/13644.
-						0, Math.max(this.context_.randInt(0, targetNote.body.length), 5000),
-					);
-					const append = this.context_.randomString(this.context_.randInt(0, 5000));
-					await this.updateNote({
-						...targetNote,
-						body: keep + append,
-					}, { quiet: true });
-				}
+				await actions.create();
 			}
 		}
 		bar.complete();
@@ -581,8 +587,8 @@ class Client implements ActionableClient {
 	}
 
 	public async createRandomNote(parentId: string, { quiet = false }: CreateOrUpdateOptions = { }) {
-		const titleLength = this.context_.randInt(0, 512);
-		const bodyLength = this.context_.randInt(0, 4096);
+		const titleLength = this.context_.randInt(0, 256);
+		const bodyLength = this.context_.randInt(0, 2000);
 		await this.createNote({
 			published: false,
 			parentId,
