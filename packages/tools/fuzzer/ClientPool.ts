@@ -67,9 +67,12 @@ export default class ClientPool {
 	}
 
 	public async syncAll() {
-		for (const client of this.clients_) {
-			await client.sync();
-		}
+		// Sync all clients at roughly the same time. Some sync bugs are only apparent
+		// when multiple clients are syncing simultaneously.
+		await Promise.all(this.clients_.map(c => c.sync()));
+
+		// Note: For more deterministic behavior, sync clients individually instead:
+		//   for (const client of this.clients_) { await client.sync(); }
 	}
 
 	public get clients() {

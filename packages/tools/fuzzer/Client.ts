@@ -422,7 +422,7 @@ class Client implements ActionableClient {
 	private async decrypt_() {
 		const result = await this.execCliCommand_('e2ee', 'decrypt', '--force');
 		if (!result.stdout.includes('Completed decryption.')) {
-			throw new Error(`Decryption did not complete: ${result.stdout}`);
+			throw new Error(`Decryption did not complete (client ${this.label}): ${result.stdout}`);
 		}
 	}
 
@@ -444,7 +444,7 @@ class Client implements ActionableClient {
 			delayOnFailure: retry => retry * Second * 2,
 			onFail: async (error) => {
 				logger.debug('Sync error: ', error);
-				logger.info('Sync failed. Retrying...');
+				logger.info(`Sync failed (${this.label}). Retrying...`);
 			},
 		});
 	}
