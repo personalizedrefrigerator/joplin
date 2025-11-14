@@ -34,6 +34,11 @@ jobs:
         run:  yarn install
         env:
           SKIP_ONENOTE_CONVERTER_BUILD: 1
+      
+      - name: Free disk space
+        run: |
+          sudo rm -rf /usr/share/dotnet || true
+          sudo rm -rf /opt/ghc || true
 
       - name: Assemble Android Release
         run: |
