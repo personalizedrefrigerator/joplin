@@ -1411,6 +1411,7 @@ packages/lib/services/UndoRedoService.js
 packages/lib/services/WhenClause.test.js
 packages/lib/services/WhenClause.js
 packages/lib/services/commands/MenuUtils.js
+packages/lib/services/commands/ToolbarButtonUtils.test.js
 packages/lib/services/commands/ToolbarButtonUtils.js
 packages/lib/services/commands/commandsToMarkdownTable.js
 packages/lib/services/commands/focusEditorIfEditorCommand.js

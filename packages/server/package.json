@@ -23,7 +23,7 @@
   },
   "dependencies": {
     "@authenio/samlify-xmllint-wasm": "1.0.1",
-    "@aws-sdk/client-s3": "3.296.0",
+    "@aws-sdk/client-s3": "3.928.0",
     "@fortawesome/fontawesome-free": "5.15.4",
     "@joplin/lib": "~3.5",
     "@joplin/renderer": "~3.5",
@@ -39,7 +39,7 @@
     "html-entities": "1.4.0",
     "jquery": "3.7.1",
     "knex": "3.1.0",
-    "koa": "2.16.2",
+    "koa": "2.16.3",
     "ldapts": "7.4.0",
     "markdown-it": "13.0.2",
     "mustache": "4.2.0",
