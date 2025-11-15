@@ -27,7 +27,6 @@ import { reg } from './registry';
 import time from './time';
 import BaseSyncTarget from './BaseSyncTarget';
 import reduxSharedMiddleware from './components/shared/reduxSharedMiddleware';
-import dns = require('dns');
 import fs = require('fs-extra');
 const EventEmitter = require('events');
 const syswidecas = require('./vendor/syswide-cas');
@@ -68,6 +67,8 @@ import determineProfileAndBaseDir from './determineBaseAppDirs';
 import NavService from './services/NavService';
 import getAppName from './getAppName';
 import PerformanceLogger from './PerformanceLogger';
+import { Agent, setGlobalDispatcher } from 'undici';
+import { readFileSync } from 'fs';
 
 const appLogger: LoggerWrapper = Logger.create('App');
 const perfLogger = PerformanceLogger.create();
@@ -184,13 +185,6 @@ export default class BaseApplication {
 
 		if (flags.matched.showStackTraces) {
 			this.showStackTraces_ = true;
-		}
-
-		// Work around issues with ipv6 resolution -- default to ipv4first.
-		// (possibly incorrect URL serialization see https://github.com/mswjs/msw/issues/1388#issuecomment-1241180921).
-		// See also https://github.com/node-fetch/node-fetch/issues/1624#issuecomment-1407717012
-		if (flags.matched.allowOverridingDnsResultOrder) {
-			dns.setDefaultResultOrder('ipv4first');
 		}
 
 		return {
@@ -368,7 +362,11 @@ export default class BaseApplication {
 				time.setTimeFormat(Setting.value('timeFormat'));
 			},
 			'net.ignoreTlsErrors': async () => {
-				process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = Setting.value('net.ignoreTlsErrors') ? '0' : '1';
+				const ignoreTlsErrors = Setting.value('net.ignoreTlsErrors');
+				process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = ignoreTlsErrors ? '0' : '1';
+				if (ignoreTlsErrors) {
+					this.logger().warn('Ignore TLS errors is enabled. Consider disabling to improve security.');
+				}
 			},
 			'net.customCertificates': async () => {
 				const caPaths = Setting.value('net.customCertificates').split(',');
@@ -377,6 +375,16 @@ export default class BaseApplication {
 					if (!f) continue;
 					syswidecas.addCAs(f);
 				}
+
+				// TODO: Fix
+				const defaultDispatcher = new Agent({
+					connect: {
+						ca: caPaths.map(path => {
+							return readFileSync(path);
+						}),
+					},
+				});
+				setGlobalDispatcher(defaultDispatcher);
 			},
 			'net.proxyEnabled': async () => {
 				setupProxySettings({

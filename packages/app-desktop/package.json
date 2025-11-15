@@ -211,7 +211,6 @@
     "@joplin/onenote-converter": "~3.5",
     "fs-extra": "11.2.0",
     "keytar": "7.9.0",
-    "node-fetch": "2.6.7",
     "sqlite3": "5.1.6"
   }
 }

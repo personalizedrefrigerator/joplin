@@ -2,7 +2,6 @@ import { pathExists, readFile, writeFile, unlink, stat, createWriteStream } from
 import { hasCredentialFile, readCredentialFile } from '@joplin/lib/utils/credentialFiles';
 import { execCommand as execCommand2, commandToString } from '@joplin/utils';
 
-const fetch = require('node-fetch');
 const execa = require('execa');
 const moment = require('moment');
 

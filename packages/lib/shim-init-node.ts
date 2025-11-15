@@ -513,8 +513,6 @@ function shimInit(options: ShimInitOptions = null) {
 		}
 	};
 
-	const nodeFetch = require('node-fetch');
-
 	// Not used??
 	shim.readLocalFileBase64 = path => {
 		const data = fs.readFileSync(path);
@@ -530,7 +528,7 @@ function shimInit(options: ShimInitOptions = null) {
 		const resolvedProxyUrl = resolveProxyUrl(proxySettings.proxyUrl);
 		options.agent = (resolvedProxyUrl && proxySettings.proxyEnabled) ? shim.proxyAgent(url, resolvedProxyUrl) : null;
 		return shim.fetchWithRetry(() => {
-			return nodeFetch(url, options);
+			return fetch(url, options);
 		}, options);
 	};
 
