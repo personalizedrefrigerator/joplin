@@ -421,15 +421,18 @@ export default class ChangeModel extends BaseModel<Change> {
 			const previous = itemChanges.get(itemId);
 
 			if (change.type === ChangeType.Update) {
-				const updates = itemUniqueUpdates.get(itemId);
 				const shareId = changeToShareId(change);
-				if (updates) {
+
+				const uniqueUpdates = itemUniqueUpdates.get(itemId);
+				if (uniqueUpdates) {
 					const lastShareId = itemToLastUpdateShareIds.get(itemId);
-					if (lastShareId === shareId) {
+					const canCompress = lastShareId === shareId;
+
+					if (canCompress) {
 						// Always keep the last change as up-to-date as possible
-						updates[updates.length - 1] = change;
+						uniqueUpdates[uniqueUpdates.length - 1] = change;
 					} else {
-						updates.push(change);
+						uniqueUpdates.push(change);
 						itemToLastUpdateShareIds.set(itemId, shareId);
 					}
 				} else {
