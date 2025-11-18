@@ -207,7 +207,7 @@ export default class ChangeModel extends BaseModel<Change> {
 					FROM share_users
 					WHERE user_id = ?
 				UNION
-					SELECT owner_id as share_id
+					SELECT id as share_id
 					FROM shares
 					WHERE owner_id = ?
 			)
