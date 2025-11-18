@@ -394,9 +394,8 @@ export default class ChangeModel extends BaseModel<Change> {
 	//
 	// There's one exception for changes that include a "previous_item". This is
 	// used to save specific properties about the previous state of the item,
-	// such as "jop_parent_id" or "name", which is used by the share mechanism
-	// to know if an item has been moved from one folder to another. In that
-	// case, we need to know about each individual change, so they are not
+	// such as "jop_share_id" or "name". The share mechanism needs to know about
+	// each change to "jop_share_id", so updates that change the share ID are not
 	// compressed.
 	//
 	// The latest change, when an item goes from DELETE to CREATE seems odd but
@@ -405,7 +404,9 @@ export default class ChangeModel extends BaseModel<Change> {
 	// (CREATED), then unshared (DELETED), then shared again (CREATED). When it
 	// happens, we want the user to get the item, thus we generate a CREATE
 	// event.
-	private compressChanges_(changes: Change[]): Change[] {
+	//
+	// Public to allow testing.
+	public compressChanges_(changes: Change[]): Change[] {
 		const itemChanges = new Map<Uuid, Change>();
 
 		const itemUniqueUpdates = new Map<Uuid, Change[]>();
