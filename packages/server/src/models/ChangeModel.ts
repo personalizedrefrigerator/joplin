@@ -91,7 +91,7 @@ export default class ChangeModel extends BaseModel<Change> {
 		const hasMore = !!results.length;
 		const cursor = results.length ? results[results.length - 1].id : id;
 		results = await this.removeDeletedItems(results);
-		results = await this.compressChanges(results);
+		results = await this.compressChanges_(results);
 		return {
 			items: results,
 			has_more: hasMore,
@@ -312,7 +312,7 @@ export default class ChangeModel extends BaseModel<Change> {
 
 		let items: Item[] = await this.db('items').select('id', 'jop_updated_time').whereIn('items.id', changes.map(c => c.item_id));
 
-		let processedChanges = this.compressChanges(changes);
+		let processedChanges = this.compressChanges_(changes);
 		processedChanges = await this.removeDeletedItems(processedChanges, items);
 
 		if (this.deltaIncludesItems_) {
@@ -405,10 +405,12 @@ export default class ChangeModel extends BaseModel<Change> {
 	// (CREATED), then unshared (DELETED), then shared again (CREATED). When it
 	// happens, we want the user to get the item, thus we generate a CREATE
 	// event.
-	private compressChanges(changes: Change[]): Change[] {
+	private compressChanges_(changes: Change[]): Change[] {
 		const itemChanges = new Map<Uuid, Change>();
 
-		const uniqueUpdateChanges = new Map<Uuid, Change[]>();
+		const itemUniqueUpdates = new Map<Uuid, Change[]>();
+		const itemToLastUpdateShareIds = new Map<Uuid, Uuid>();
+
 		const changeToShareId = (change: Change) => {
 			return this.unserializePreviousItem(change.previous_item)?.jop_share_id ?? '';
 		};
@@ -418,17 +420,20 @@ export default class ChangeModel extends BaseModel<Change> {
 			const previous = itemChanges.get(itemId);
 
 			if (change.type === ChangeType.Update) {
-				const uniqueChanges = uniqueUpdateChanges.get(itemId);
-				if (uniqueChanges) {
-					const lastChange = uniqueChanges[uniqueChanges.length - 1];
-					if (changeToShareId(lastChange) === changeToShareId(change)) {
+				const updates = itemUniqueUpdates.get(itemId);
+				const shareId = changeToShareId(change);
+				if (updates) {
+					const lastShareId = itemToLastUpdateShareIds.get(itemId);
+					if (lastShareId === shareId) {
 						// Always keep the last change as up-to-date as possible
-						uniqueChanges[uniqueChanges.length - 1] = change;
+						updates[updates.length - 1] = change;
 					} else {
-						uniqueChanges.push(change);
+						updates.push(change);
+						itemToLastUpdateShareIds.set(itemId, shareId);
 					}
 				} else {
-					uniqueUpdateChanges.set(itemId, [change]);
+					itemUniqueUpdates.set(itemId, [change]);
+					itemToLastUpdateShareIds.set(itemId, shareId);
 				}
 			}
 
@@ -461,7 +466,7 @@ export default class ChangeModel extends BaseModel<Change> {
 
 		for (const [itemId, change] of itemChanges) {
 			if (change.type === ChangeType.Update) {
-				for (const otherChange of uniqueUpdateChanges.get(itemId)) {
+				for (const otherChange of itemUniqueUpdates.get(itemId)) {
 					output.push(otherChange);
 				}
 			} else {
