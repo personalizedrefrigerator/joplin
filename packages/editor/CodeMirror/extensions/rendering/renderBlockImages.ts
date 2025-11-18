@@ -106,6 +106,10 @@ const renderBlockImages = (context: RenderedContentContext) => [
 			maxWidth: '100%',
 			minWidth: 0,
 			display: 'block',
+
+			// Center
+			marginLeft: 'auto',
+			marginRight: 'auto',
 		},
 	}),
 	makeBlockReplaceExtension({
