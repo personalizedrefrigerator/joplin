@@ -243,7 +243,7 @@ const reactions: Record<Action, Reaction> = {
 
 const randomActionKey = () => {
 	const r = Math.random();
-	if (r <= .5) {
+	if (r <= .35) {
 		return randomElement(createActions);
 	} else if (r <= .8) {
 		return randomElement(updateActions);
@@ -254,7 +254,7 @@ const randomActionKey = () => {
 
 const populateDatabase = async (models: Models, options: Options) => {
 	logger().info('Populating database...');
-	const createActionCount = Math.ceil(options.actionCount / 4);
+	const createActionCount = Math.ceil(options.actionCount / 16);
 	const postCreateActionCount = options.actionCount - createActionCount;
 
 	const context: Context = {
@@ -352,9 +352,9 @@ const populateDatabase = async (models: Models, options: Options) => {
 					try {
 						const done = await reactions[action](context, user);
 						if (done) updateReport(action);
-						logger().info(`Done action ${i}: ${action}. User: ${user.email}${!done ? ' (Skipped)' : ''}`);
+						logger().info(`Done action ${loopIndex}.${i}: ${action}. User: ${user.email}${!done ? ' (Skipped)' : ''}`);
 					} catch (error) {
-						error.message = `Could not do action ${i}: ${action}. User: ${user.email}: ${error.message}`;
+						error.message = `Could not do action ${loopIndex}.${i}: ${action}. User: ${user.email}: ${error.message}`;
 						logger().warn(error.message);
 					}
 				})());
