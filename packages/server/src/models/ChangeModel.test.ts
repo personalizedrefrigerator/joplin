@@ -86,7 +86,7 @@ describe('ChangeModel', () => {
 			// 2a is compressed down to CREATE 2.
 			const page1 = (await changeModel.delta(user.id, pagination));
 			let changes = page1.items;
-			expect(changes.length).toBe(1);
+			expect(changes).toHaveLength(1);
 			expect(page1.has_more).toBe(true);
 			expect(changes[0].item_id).toBe(item2.id);
 			expect(changes[0].type).toBe(ChangeType.Create);
@@ -95,7 +95,7 @@ describe('ChangeModel', () => {
 			// has been compressed.
 			const page2 = (await changeModel.delta(user.id, { ...pagination, cursor: page1.cursor }));
 			changes = page2.items;
-			expect(changes.length).toBe(3);
+			expect(changes).toHaveLength(3);
 			// Although there are no more changes, it's not possible to know
 			// that without running the next query
 			expect(page2.has_more).toBe(true);

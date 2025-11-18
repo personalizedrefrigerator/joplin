@@ -5,7 +5,6 @@ import { isJoplinItemName, isJoplinResourceBlobPath, linkedResourceIds, serializ
 import { ModelType } from '@joplin/lib/BaseModel';
 import { ApiError, CustomErrorCode, ErrorConflict, ErrorForbidden, ErrorPayloadTooLarge, ErrorUnprocessableEntity, ErrorCode } from '../utils/errors';
 import { Knex } from 'knex';
-import { ChangePreviousItem } from './ChangeModel';
 import { unique } from '../utils/array';
 import StorageDriverBase, { Context } from './items/storage/StorageDriverBase';
 import { DbConnection, isUniqueConstraintError, returningSupported } from '../db';
@@ -992,25 +991,19 @@ export default class ItemModel extends BaseModel<Item> {
 		item = { ... item };
 		const isNew = await this.isNew(item, options);
 
-		let previousItem: ChangePreviousItem = null;
-
 		if (item.content && !item.content_storage_id) {
 			item.content_storage_id = (await this.storageDriver()).storageId;
 		}
 
+		let previousShareId = '';
+		let previousName = '';
 		if (isNew) {
 			if (!item.mime_type) item.mime_type = mimeUtils.fromFilename(item.name) || '';
 			if (!item.owner_id) item.owner_id = userId;
 		} else {
-			const beforeSaveItem = (await this.load(item.id, { fields: ['name', 'jop_type', 'jop_parent_id', 'jop_share_id'] }));
-			const resourceIds = beforeSaveItem.jop_type === ModelType.Note ? await this.models().itemResource().byItemId(item.id) : [];
-
-			previousItem = {
-				jop_parent_id: beforeSaveItem.jop_parent_id,
-				name: beforeSaveItem.name,
-				jop_resource_ids: resourceIds,
-				jop_share_id: beforeSaveItem.jop_share_id,
-			};
+			const beforeSaveItem = (await this.load(item.id, { fields: ['jop_share_id', 'name'] }));
+			previousShareId = beforeSaveItem.jop_share_id;
+			previousName = beforeSaveItem.name;
 		}
 
 		return this.withTransaction(async () => {
@@ -1029,7 +1022,7 @@ export default class ItemModel extends BaseModel<Item> {
 
 			// We only record updates. This because Create and Update events are
 			// per user, whenever a user_item is created or deleted.
-			const changeItemName = item.name || previousItem.name;
+			const changeItemName = item.name || previousName;
 
 			if (!isNew && this.shouldRecordChange(changeItemName)) {
 				await this.models().change().save({
@@ -1037,7 +1030,7 @@ export default class ItemModel extends BaseModel<Item> {
 					item_id: item.id,
 					item_name: changeItemName,
 					type: isNew ? ChangeType.Create : ChangeType.Update,
-					previous_item: previousItem ? this.models().change().serializePreviousItem(previousItem) : '',
+					previous_share_id: previousShareId,
 					user_id: userId,
 				});
 			}

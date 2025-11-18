@@ -145,7 +145,6 @@ export default class ChangeModel extends BaseModel<Change> {
 			SELECT ${fieldsSql}
 			FROM "changes"
 			WHERE counter > ?
-			AND (type = ? OR type = ?)
 			AND user_id = ?
 			ORDER BY "counter" ASC
 			${doCountQuery ? '' : 'LIMIT ?'}
@@ -153,8 +152,6 @@ export default class ChangeModel extends BaseModel<Change> {
 
 		const subParams1 = [
 			fromCounter,
-			ChangeType.Create,
-			ChangeType.Delete,
 			userId,
 		];
 
@@ -194,16 +191,24 @@ export default class ChangeModel extends BaseModel<Change> {
 		// ORDER BY "counter" ASC
 		// ${doCountQuery ? '' : 'LIMIT ?'}
 		// ```
+		//
+		// ## 2025-11-18
+		//
+		// The share-related query now queries using share_id. Work-in-progress.
 
 		const changesFieldsSql = fields
 			.map(f => `"changes"."${f}" AS "${f}"`)
 			.join(', ');
 
 		const subQuery2 = `
-			WITH ui AS MATERIALIZED (
-				SELECT item_id
-				FROM user_items
-				WHERE user_id = ?
+			WITH readable_shares AS MATERIALIZED (
+					SELECT share_id
+					FROM share_users
+					WHERE user_id = ?
+				UNION
+					SELECT owner_id as share_id
+					FROM shares
+					WHERE owner_id = ?
 			)
 			SELECT ${changesFieldsSql}
 			FROM changes
@@ -211,14 +216,15 @@ export default class ChangeModel extends BaseModel<Change> {
 				AND counter > ?
 				AND EXISTS (
 					SELECT 1
-					FROM ui
-					WHERE ui.item_id = changes.item_id
+					FROM readable_shares
+					WHERE changes.previous_share_id = readable_shares.share_id
 				)
 			ORDER BY counter
 			${doCountQuery ? '' : 'LIMIT ?'}
 		`;
 
 		const subParams2 = [
+			userId,
 			userId,
 			ChangeType.Update,
 			fromCounter,
@@ -393,12 +399,8 @@ export default class ChangeModel extends BaseModel<Change> {
 	//     update - delete => delete
 	//     delete - create => create
 	//
-	// There's one exception for changes that include a "previous_item". This is
-	// used to save specific properties about the previous state of the item,
-	// such as "jop_parent_id" or "name", which is used by the share mechanism
-	// to know if an item has been moved from one folder to another. In that
-	// case, we need to know about each individual change, so they are not
-	// compressed.
+	// There's one exception for changes change the share ID, because the share
+	// mechanism needs to handle each share_id update individually.
 	//
 	// The latest change, when an item goes from DELETE to CREATE seems odd but
 	// can happen because we are not checking for "item" changes but for
@@ -416,7 +418,7 @@ export default class ChangeModel extends BaseModel<Change> {
 			const previous = itemChanges[itemId];
 
 			if (change.type === ChangeType.Update) {
-				const key = md5(itemId + change.previous_item);
+				const key = md5(itemId + change.previous_share_id);
 				if (!uniqueUpdateChanges[itemId]) uniqueUpdateChanges[itemId] = {};
 				uniqueUpdateChanges[itemId][key] = change;
 			}

@@ -221,7 +221,7 @@ export interface Change extends WithDates, WithUuid {
 	item_id?: Uuid;
 	item_name?: string;
 	type?: ChangeType;
-	previous_item?: string;
+	previous_share_id?: string; // Only set if type == update
 	user_id?: Uuid;
 }
 
@@ -431,7 +431,7 @@ export const databaseSchema: DatabaseTables = {
 		type: { type: 'number', defaultValue: null },
 		updated_time: { type: 'string', defaultValue: null },
 		created_time: { type: 'string', defaultValue: null },
-		previous_item: { type: 'string', defaultValue: '' },
+		previous_share_id: { type: 'string', defaultValue: '' },
 		user_id: { type: 'string', defaultValue: '' },
 	},
 	tokens: {

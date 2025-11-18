@@ -413,6 +413,16 @@ export async function migrateList(db: DbConnection, asString = true) {
 	return output.map(l => `${l.done ? '✓' : '✗'} ${l.name}`).join('\n');
 }
 
+export const migrateUntil = async (db: DbConnection, migrationName: string) => {
+	const migrations = await migrateList(db, false) as Migration[];
+
+	for (const migration of migrations) {
+		if (migration.done) continue;
+		if (migration.name === migrationName) break;
+		await migrateUp(db);
+	}
+};
+
 export const needsMigration = async (db: DbConnection) => {
 	const list = await migrateList(db, false) as Migration[];
 	return !!list.find(m => !m.done);
