@@ -2,7 +2,6 @@ import { Knex } from 'knex';
 import Logger from '@joplin/utils/Logger';
 import { DbConnection, SqliteMaxVariableNum, isPostgres } from '../db';
 import { Change, ChangeType, Item, Uuid } from '../services/database/types';
-import { md5 } from '../utils/crypto';
 import { ErrorResyncRequired } from '../utils/errors';
 import { Day, formatDateTime } from '../utils/time';
 import BaseModel, { SaveOptions } from './BaseModel';
@@ -407,18 +406,30 @@ export default class ChangeModel extends BaseModel<Change> {
 	// happens, we want the user to get the item, thus we generate a CREATE
 	// event.
 	private compressChanges(changes: Change[]): Change[] {
-		const itemChanges: Record<Uuid, Change> = {};
+		const itemChanges = new Map<Uuid, Change>();
 
-		const uniqueUpdateChanges: Record<Uuid, Record<string, Change>> = {};
+		const uniqueUpdateChanges = new Map<Uuid, Change[]>();
+		const changeToShareId = (change: Change) => {
+			return this.unserializePreviousItem(change.previous_item)?.jop_share_id ?? '';
+		};
 
 		for (const change of changes) {
 			const itemId = change.item_id;
-			const previous = itemChanges[itemId];
+			const previous = itemChanges.get(itemId);
 
 			if (change.type === ChangeType.Update) {
-				const key = md5(itemId + change.previous_item);
-				if (!uniqueUpdateChanges[itemId]) uniqueUpdateChanges[itemId] = {};
-				uniqueUpdateChanges[itemId][key] = change;
+				const uniqueChanges = uniqueUpdateChanges.get(itemId);
+				if (uniqueChanges) {
+					const lastChange = uniqueChanges[uniqueChanges.length - 1];
+					if (changeToShareId(lastChange) === changeToShareId(change)) {
+						// Always keep the last change as up-to-date as possible
+						uniqueChanges[uniqueChanges.length - 1] = change;
+					} else {
+						uniqueChanges.push(change);
+					}
+				} else {
+					uniqueUpdateChanges.set(itemId, [change]);
+				}
 			}
 
 			if (previous) {
@@ -427,32 +438,31 @@ export default class ChangeModel extends BaseModel<Change> {
 				}
 
 				if (previous.type === ChangeType.Create && change.type === ChangeType.Delete) {
-					delete itemChanges[itemId];
+					itemChanges.delete(itemId);
 				}
 
 				if (previous.type === ChangeType.Update && change.type === ChangeType.Update) {
-					itemChanges[itemId] = change;
+					itemChanges.set(itemId, change);
 				}
 
 				if (previous.type === ChangeType.Update && change.type === ChangeType.Delete) {
-					itemChanges[itemId] = change;
+					itemChanges.set(itemId, change);
 				}
 
 				if (previous.type === ChangeType.Delete && change.type === ChangeType.Create) {
-					itemChanges[itemId] = change;
+					itemChanges.set(itemId, change);
 				}
 			} else {
-				itemChanges[itemId] = change;
+				itemChanges.set(itemId, change);
 			}
 		}
 
 		const output: Change[] = [];
 
-		for (const itemId in itemChanges) {
-			const change = itemChanges[itemId];
+		for (const [itemId, change] of itemChanges) {
 			if (change.type === ChangeType.Update) {
-				for (const key of Object.keys(uniqueUpdateChanges[itemId])) {
-					output.push(uniqueUpdateChanges[itemId][key]);
+				for (const otherChange of uniqueUpdateChanges.get(itemId)) {
+					output.push(otherChange);
 				}
 			} else {
 				output.push(change);
