@@ -1,13 +1,16 @@
 /* eslint-disable no-console */
 
 import config from '../../config';
-import { clearDatabase, createTestUsers, CreateTestUsersOptions, createUserDeletions } from '../../tools/debugTools';
 import { bodyFields } from '../../utils/requestUtils';
 import Router from '../../utils/Router';
 import { Env, RouteType } from '../../utils/types';
 import { SubPath } from '../../utils/routeUtils';
 import { AppContext } from '../../utils/types';
 import { ErrorForbidden } from '../../utils/errors';
+import benchmarkDeltaPerformance from '../../tools/debug/benchmarkDeltaPerformance';
+import createTestUsers, { CreateTestUsersOptions } from '../../tools/debug/createTestUsers';
+import createUserDeletions from '../../tools/debug/createUserDeletions';
+import clearDatabase from '../../tools/debug/clearDatabase';
 
 const router = new Router(RouteType.Api);
 
@@ -46,6 +49,10 @@ router.post('api/debug', async (_path: SubPath, ctx: AppContext) => {
 
 	if (query.action === 'clearKeyValues') {
 		await models.keyValue().deleteAll();
+	}
+
+	if (query.action === 'benchmarkDeltaPerformance') {
+		await benchmarkDeltaPerformance(ctx.joplin.models);
 	}
 });
 
