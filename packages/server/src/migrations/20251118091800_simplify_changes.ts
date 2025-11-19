@@ -20,6 +20,10 @@ export const up = async (db: DbConnection) => {
 	await db.schema.alterTable('changes', table => {
 		table.dropColumn('previous_item');
 	});
+
+	await db.schema.alterTable('shares', table => {
+		table.index('owner_id', 'owner_id_index');
+	});
 };
 
 export const down = async (db: DbConnection) => {
@@ -39,5 +43,9 @@ export const down = async (db: DbConnection) => {
 	await db.schema.alterTable('changes', table => {
 		table.dropIndex('previous_share_id', 'share_id_change_index');
 		table.dropColumn('previous_share_id');
+	});
+
+	await db.schema.alterTable('shares', table => {
+		table.dropIndex('owner_id', 'owner_id_index');
 	});
 };
