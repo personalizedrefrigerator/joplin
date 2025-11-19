@@ -27,10 +27,13 @@ export const down = async (db: DbConnection) => {
 		table.text('previous_item').defaultTo('').notNullable();
 	});
 
+	const previousItemUpdate = db.raw(`${
+		isPostgres(db) ? 'json_build_object' : 'json_object'
+	}('jop_share_id', "previous_share_id")`);
 	await db('changes')
 		.whereNot('previous_share_id', '=', '')
 		.update({
-			previous_item: db.raw('json_insert(\'{}\', \'$.jop_share_id\', "previous_share_id")'),
+			previous_item: previousItemUpdate,
 		});
 
 	await db.schema.alterTable('changes', table => {
