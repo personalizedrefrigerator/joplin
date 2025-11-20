@@ -1,5 +1,5 @@
 const { afterEachCleanUp } = require('@joplin/lib/testing/test-utils.js');
-const { default: shimInitCli } = require('./app/utils/shimInitCli');
+const { shimInit } = require('@joplin/lib/shim-init-node.js');
 const shim = require('@joplin/lib/shim').default;
 const sharp = require('sharp');
 const nodeSqlite = require('sqlite3');
@@ -13,7 +13,7 @@ try {
 	keytar = null;
 }
 
-shimInitCli({ sharp, nodeSqlite, appVersion: () => require('./package.json').version, keytar });
+shimInit({ sharp, keytar, nodeSqlite });
 
 global.afterEach(async () => {
 	await afterEachCleanUp();
