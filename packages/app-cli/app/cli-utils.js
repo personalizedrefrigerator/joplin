@@ -1,7 +1,6 @@
 const yargParser = require('yargs-parser');
 const { _ } = require('@joplin/lib/locale');
 const time = require('@joplin/lib/time').default;
-const stringPadding = require('string-padding');
 const Logger = require('@joplin/utils/Logger').default;
 
 const cliUtils = {};
@@ -32,8 +31,7 @@ cliUtils.printArray = function(logFunction, rows) {
 		for (let col = 0; col < colWidths.length; col++) {
 			const item = rows[row][col];
 			const width = colWidths[col];
-			const dir = colAligns[col] === ALIGN_LEFT ? stringPadding.RIGHT : stringPadding.LEFT;
-			line.push(stringPadding(item, width, ' ', dir));
+			line.push(colAligns[col] === ALIGN_LEFT ? item.padEnd(width, ' ') : item.padStart(width, ' '));
 		}
 		logFunction(line.join(' '));
 	}

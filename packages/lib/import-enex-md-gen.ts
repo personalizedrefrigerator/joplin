@@ -1,7 +1,6 @@
 import markdownUtils from './markdownUtils';
 import { ResourceEntity } from './services/database/types';
 import { htmlentities } from '@joplin/utils/html';
-const stringPadding = require('string-padding');
 const stringToStream = require('string-to-stream');
 const resourceUtils = require('./resourceUtils.js');
 const cssParser = require('@adobe/css-tools');
@@ -1324,12 +1323,12 @@ function drawTable(table: Section) {
 				// width of 3 is a bit better. Note that 3 is the minimum width of a cell - below this, it won't be rendered by
 				// markdown parsers.
 				const width = 3;
-				line.push(stringPadding(cellText, width, ' ', stringPadding.RIGHT));
+				line.push(cellText.padEnd(width, ' '));
 
 				if (!headerDone) {
 					if (!isHeader) {
 						if (!emptyHeader) emptyHeader = [];
-						const h = stringPadding(' ', width, ' ', stringPadding.RIGHT);
+						const h = ' '.padEnd(width, ' ');
 						emptyHeader.push(h);
 					}
 					headerLine.push('-'.repeat(width));

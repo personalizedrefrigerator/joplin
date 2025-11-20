@@ -1,5 +1,4 @@
 import { validateLinks } from '@joplin/renderer';
-const stringPadding = require('string-padding');
 const urlUtils = require('./urlUtils');
 import type * as MarkdownItType from 'markdown-it';
 const MarkdownIt = require('markdown-it');
@@ -165,7 +164,7 @@ const markdownUtils = {
 			if (h.labelUrl) {
 				label = `[${h.label}](${h.labelUrl})`;
 			}
-			headersMd.push(stringPadding(label, minCellWidth, ' ', stringPadding.RIGHT));
+			headersMd.push(label.padEnd(minCellWidth, ' '));
 
 			const justify = h.justify ? h.justify : MarkdownTableJustify.Left;
 
@@ -188,7 +187,7 @@ const markdownUtils = {
 				const h = headers[j];
 				const value = (h.filter ? h.filter(row[h.name]) : row[h.name]) || '';
 				const valueMd = h.disableEscape ? value : markdownUtils.escapeTableCell(value, !h.disableHtmlEscape);
-				rowMd.push(stringPadding(valueMd, minCellWidth, ' ', stringPadding.RIGHT));
+				rowMd.push(valueMd.padEnd(minCellWidth, ' '));
 			}
 			output.push(`| ${rowMd.join(' | ')} |`);
 		}
