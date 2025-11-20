@@ -29,16 +29,15 @@ describe('BackupItemModel', () => {
 		jest.advanceTimersByTime(61 * Day);
 		await backupModel.add(BackupItemType.UserAccount, 'key4', 'value');
 
-		const toKeys = (items: BackupItem[]) => items.map(item => item.key);
-		expect(
-			toKeys(await backupModel.all()).sort(),
-		).toEqual(['key1', 'key2', 'key3', 'key4']);
+		const sortedKeys = (items: BackupItem[]) => items.map(item => item.key).sort();
+		expect(sortedKeys(await backupModel.all())).toEqual(['key1', 'key2', 'key3', 'key4']);
 
 		await backupModel.deleteOldAccountBackups();
+		expect(sortedKeys(await backupModel.all())).toEqual(['key3', 'key4']);
 
-		expect(
-			toKeys(await backupModel.all()).sort(),
-		).toEqual(['key3', 'key4']);
+		// Re-running, should not delete items newer than 90 days
+		await backupModel.deleteOldAccountBackups();
+		expect(sortedKeys(await backupModel.all())).toEqual(['key3', 'key4']);
 	});
 
 });
