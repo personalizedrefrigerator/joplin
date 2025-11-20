@@ -1,7 +1,3 @@
-'use strict';
-
-/* eslint-disable no-console */
-
 import * as fs from 'fs-extra';
 import Logger, { TargetType } from '@joplin/utils/Logger';
 import { dirname } from '@joplin/lib/path-utils';
