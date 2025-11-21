@@ -3,7 +3,6 @@ import InteropService from '@joplin/lib/services/interop/InteropService';
 import { FileSystemItem, ImportModuleOutputFormat, ModuleType } from '@joplin/lib/services/interop/types';
 import bridge from '../../../services/bridge';
 import { WindowControl } from '../utils/useWindowControl';
-import showFolderPicker from '../utils/showFolderPicker';
 import { _ } from '@joplin/lib/locale';
 import makeDiscourseDebugUrl from '@joplin/lib/makeDiscourseDebugUrl';
 import PluginService from '@joplin/lib/services/plugins/PluginService';
@@ -92,13 +91,7 @@ export const runtime = (control: WindowControl): CommandRuntime => {
 				const isDirectory = await shim.fsDriver().isDirectory(sourcePath);
 				const importsMultipleNotes = importModule.isNoteArchive || isDirectory;
 
-				const destinationFolderId = await showFolderPicker(control, {
-					label: _('Import to notebook:'),
-					// Allow selecting no parent folder only if a new folder will
-					// be created:
-					allowSelectNone: importsMultipleNotes,
-					showFolder: (_folder)=>true,
-				});
+				const destinationFolderId = importsMultipleNotes ? null : context.state.selectedFolderId;
 				const importFormat = importModule.format;
 				const outputFormat = importModule.outputFormat;
 				options = {
