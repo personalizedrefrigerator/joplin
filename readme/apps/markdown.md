@@ -127,7 +127,7 @@ Joplin can renders [ABC notation](https://abcnotation.com) into sheet music. You
 	!f!(fgag-g2c2)|
 	```
 
-`<!-- cSpell:enable -->
+<!-- cSpell:enable -->
 
 For example:
 
