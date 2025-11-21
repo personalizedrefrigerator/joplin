@@ -10231,7 +10231,6 @@ __metadata:
     codemirror: "npm:5.65.9"
     color: "npm:3.2.1"
     compare-versions: "npm:6.1.1"
-    countable: "npm:3.0.1"
     debounce: "npm:1.2.1"
     electron: "npm:39.0.0"
     electron-builder: "npm:24.13.3"
@@ -23235,13 +23234,6 @@ __metadata:
     typescript:
       optional: true
   checksum: 10/8bdf1dfbb6fdb3755195b6886dc0649a3c742ec75afa4cb8da7b070936aed22a4f4e5b7359faafe03180358f311dbc300d248fd6586c458203d376a40cc77826
-  languageName: node
-  linkType: hard
-
-"countable@npm:3.0.1":
-  version: 3.0.1
-  resolution: "countable@npm:3.0.1"
-  checksum: 10/4ace30b6922e6672116a97c756d80094201f5a57879873bad18e166f7688230d7ccff63af79e974ae636fe5a278914169172b539d45e4c674433d664b416776e
   languageName: node
   linkType: hard
 
