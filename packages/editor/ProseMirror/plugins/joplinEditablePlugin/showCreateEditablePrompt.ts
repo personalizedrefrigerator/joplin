@@ -35,6 +35,9 @@ const showCreateEditablePrompt = (source: string, inline: boolean): Command => (
 				} satisfies JoplinEditableAttributes),
 			);
 			view.dispatch(tr);
+
+			// Required by certain renderer plugins:
+			document.dispatchEvent(new Event('joplin-noteDidUpdate'));
 		},
 	});
 	return true;
