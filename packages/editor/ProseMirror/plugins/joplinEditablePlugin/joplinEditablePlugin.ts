@@ -64,6 +64,10 @@ const createEditorDialogForNode = (nodePosition: number, view: EditorView, onHid
 					nodePosition, 'contentHtml', html,
 				),
 			);
+
+			// Certain rendered blocks (e.g. ABC sheet music) have an external script that listen for "joplin-noteDidUpdate"
+			// to re-render the block content.
+			document.dispatchEvent(new Event('joplin-noteDidUpdate'));
 		},
 		onDismiss: () => {
 			onHide();
