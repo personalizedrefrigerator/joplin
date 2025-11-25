@@ -107,7 +107,7 @@ const CodeMirror = (props: NoteBodyEditorProps, ref: ForwardedRef<NoteBodyEditor
 	const editorPasteText = useCallback(async () => {
 		if (editorRef.current) {
 			const modifiedMd = await Note.replaceResourceExternalToInternalLinks(clipboard.readText(), { useAbsolutePaths: true });
-			editorRef.current.insertText(modifiedMd, UserEventSource.Paste);
+			editorRef.current.pasteText(modifiedMd);
 		}
 	}, []);
 
