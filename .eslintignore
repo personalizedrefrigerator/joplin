@@ -1007,6 +1007,7 @@ packages/editor/CodeMirror/CodeMirrorControl.js
 packages/editor/CodeMirror/configFromSettings.js
 packages/editor/CodeMirror/createEditor.test.js
 packages/editor/CodeMirror/createEditor.js
+packages/editor/CodeMirror/editorCommands/cutOrCopyText.js
 packages/editor/CodeMirror/editorCommands/duplicateLine.test.js
 packages/editor/CodeMirror/editorCommands/duplicateLine.js
 packages/editor/CodeMirror/editorCommands/editorCommands.js
