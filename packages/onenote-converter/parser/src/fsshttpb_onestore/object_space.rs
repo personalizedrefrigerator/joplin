@@ -62,7 +62,12 @@ impl<'b> ObjectSpace {
             .ok_or_else(|| parser_error!(MalformedOneStoreData, "cell manifest id not found"))?;
         let revision_manifest_id = storage_index
             .find_revision_mapping_id(cell_manifest_id)
-            .ok_or_else(|| parser_error!(MalformedOneStoreData, "No revision manifest id found. (Unable to find revision)."))?;
+            .ok_or_else(|| {
+                parser_error!(
+                    MalformedOneStoreData,
+                    "No revision manifest id found. (Unable to find revision)."
+                )
+            })?;
 
         let mut objects = HashMap::new();
         let mut roots = HashMap::new();

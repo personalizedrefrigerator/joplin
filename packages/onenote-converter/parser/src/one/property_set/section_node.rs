@@ -7,7 +7,7 @@ use crate::one::property_set::PropertySetId;
 use crate::onestore::object::Object;
 use crate::shared::exguid::ExGuid;
 use crate::shared::guid::Guid;
-use parser_utils::errors::{Result};
+use parser_utils::errors::Result;
 use parser_utils::log_warn;
 
 /// A section.
@@ -19,7 +19,6 @@ use parser_utils::log_warn;
 #[allow(dead_code)]
 pub(crate) struct Data {
     //pub(crate) context_id: ExGuid, // Removed -- but may be necessary
-
     /// Used for creating links to sections. If not present, defaults to `Guid::nil`.
     pub(crate) entity_guid: Guid,
     pub(crate) page_series: Vec<ExGuid>,
