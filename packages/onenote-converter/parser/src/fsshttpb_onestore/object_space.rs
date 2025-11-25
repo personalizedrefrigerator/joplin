@@ -65,7 +65,7 @@ impl<'b> ObjectSpace {
             .ok_or_else(|| {
                 parser_error!(
                     MalformedOneStoreData,
-                    "No revision manifest id found. (Unable to find revision)."
+                    "No revision manifest id found. (Unable to find revision?)."
                 )
             })?;
 
