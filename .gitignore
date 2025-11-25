@@ -69,7 +69,7 @@ docs/**/*.mustache
 packages/app-cli/app/LinkSelector.js
 packages/app-cli/app/app.js
 packages/app-cli/app/base-command.js
-packages/app-cli/app/cli-integration-tests.js
+packages/app-cli/app/cli-integration-tests.test.js
 packages/app-cli/app/command-apidoc.js
 packages/app-cli/app/command-attach.js
 packages/app-cli/app/command-batch.js
@@ -243,6 +243,7 @@ packages/app-desktop/gui/NoteEditor/NoteBody/CodeMirror/v6/useEditorCommands.js
 packages/app-desktop/gui/NoteEditor/NoteBody/CodeMirror/v6/utils/localisation.js
 packages/app-desktop/gui/NoteEditor/NoteBody/CodeMirror/v6/utils/useKeymap.js
 packages/app-desktop/gui/NoteEditor/NoteBody/CodeMirror/v6/utils/useRefocusOnVisiblePaneChange.js
+packages/app-desktop/gui/NoteEditor/NoteBody/CodeMirror/v6/utils/useSyncEditorValue.js
 packages/app-desktop/gui/NoteEditor/NoteBody/PlainEditor/PlainEditor.js
 packages/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/TinyMCE.js
 packages/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/styles/index.js
@@ -253,6 +254,7 @@ packages/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/utils/shouldPasteResources.
 packages/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/utils/shouldPasteResources.js
 packages/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/utils/types.js
 packages/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/utils/useContextMenu.js
+packages/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/utils/useCursorPositioning.js
 packages/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/utils/useEditDialog.js
 packages/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/utils/useEditDialogEventListeners.js
 packages/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/utils/useKeyboardRefocusHandler.js
@@ -294,6 +296,7 @@ packages/app-desktop/gui/NoteEditor/utils/useEffectiveNoteId.js
 packages/app-desktop/gui/NoteEditor/utils/useFolder.js
 packages/app-desktop/gui/NoteEditor/utils/useFormNote.test.js
 packages/app-desktop/gui/NoteEditor/utils/useFormNote.js
+packages/app-desktop/gui/NoteEditor/utils/useInitialCursorLocation.js
 packages/app-desktop/gui/NoteEditor/utils/useMessageHandler.js
 packages/app-desktop/gui/NoteEditor/utils/useNoteSearchBar.js
 packages/app-desktop/gui/NoteEditor/utils/usePluginEditorView.test.js
@@ -394,10 +397,11 @@ packages/app-desktop/gui/Sidebar/Sidebar.js
 packages/app-desktop/gui/Sidebar/commands/focusElementSideBar.js
 packages/app-desktop/gui/Sidebar/commands/index.js
 packages/app-desktop/gui/Sidebar/hooks/useFocusHandler.js
+packages/app-desktop/gui/Sidebar/hooks/useOnItemClick.js
 packages/app-desktop/gui/Sidebar/hooks/useOnRenderItem.js
 packages/app-desktop/gui/Sidebar/hooks/useOnRenderListWrapper.js
 packages/app-desktop/gui/Sidebar/hooks/useOnSidebarKeyDownHandler.js
-packages/app-desktop/gui/Sidebar/hooks/useSelectedSidebarIndex.js
+packages/app-desktop/gui/Sidebar/hooks/useSelectedSidebarIndexes.js
 packages/app-desktop/gui/Sidebar/hooks/useSidebarCommandHandler.js
 packages/app-desktop/gui/Sidebar/hooks/useSidebarListData.js
 packages/app-desktop/gui/Sidebar/hooks/utils/toggleHeader.js
@@ -577,6 +581,7 @@ packages/app-desktop/tools/generateLatestArm64Yml.js
 packages/app-desktop/tools/githubReleasesUtils.js
 packages/app-desktop/tools/modifyReleaseAssets.js
 packages/app-desktop/tools/notarizeMacApp.js
+packages/app-desktop/tools/resolveSourceMap.js
 packages/app-desktop/utils/7zip/getPathToExecutable7Zip.js
 packages/app-desktop/utils/7zip/pathToBundled7Zip.js
 packages/app-desktop/utils/checkForUpdatesUtils.test.js
@@ -670,6 +675,7 @@ packages/app-mobile/components/NoteEditor/ImageEditor/ImageEditor.js
 packages/app-mobile/components/NoteEditor/ImageEditor/autosave.js
 packages/app-mobile/components/NoteEditor/ImageEditor/isEditableResource.js
 packages/app-mobile/components/NoteEditor/ImageEditor/promptRestoreAutosave.js
+packages/app-mobile/components/NoteEditor/MarkdownEditor.test.js
 packages/app-mobile/components/NoteEditor/MarkdownEditor.js
 packages/app-mobile/components/NoteEditor/NoteEditor.test.js
 packages/app-mobile/components/NoteEditor/NoteEditor.js
@@ -817,6 +823,7 @@ packages/app-mobile/components/screens/NoteTagsDialog.js
 packages/app-mobile/components/screens/Notes/NewNoteButton.test.js
 packages/app-mobile/components/screens/Notes/NewNoteButton.js
 packages/app-mobile/components/screens/Notes/Notes.js
+packages/app-mobile/components/screens/SearchScreen/SearchResults.test.js
 packages/app-mobile/components/screens/SearchScreen/SearchResults.js
 packages/app-mobile/components/screens/SearchScreen/index.js
 packages/app-mobile/components/screens/ShareManager/AcceptedShareItem.js
@@ -1023,6 +1030,7 @@ packages/editor/CodeMirror/extensions/rendering/types.js
 packages/editor/CodeMirror/extensions/rendering/utils/makeBlockReplaceExtension.js
 packages/editor/CodeMirror/extensions/rendering/utils/makeInlineReplaceExtension.js
 packages/editor/CodeMirror/extensions/rendering/utils/nodeIntersectsSelection.js
+packages/editor/CodeMirror/extensions/searchExtension.test.js
 packages/editor/CodeMirror/extensions/searchExtension.js
 packages/editor/CodeMirror/extensions/selectedNoteIdExtension.js
 packages/editor/CodeMirror/getScrollFraction.js
@@ -1069,8 +1077,10 @@ packages/editor/CodeMirror/utils/markdown/renumberSelectedLists.js
 packages/editor/CodeMirror/utils/markdown/stripBlockquote.js
 packages/editor/CodeMirror/utils/markdown/toggleCheckboxAt.js
 packages/editor/CodeMirror/utils/setupVim.js
-packages/editor/ProseMirror/commands.test.js
-packages/editor/ProseMirror/commands.js
+packages/editor/CodeMirror/vendor/announceSearchMatch.js
+packages/editor/ProseMirror/commands/commands.test.js
+packages/editor/ProseMirror/commands/commands.js
+packages/editor/ProseMirror/commands/focusEditor.js
 packages/editor/ProseMirror/createEditor.js
 packages/editor/ProseMirror/index.js
 packages/editor/ProseMirror/plugins/detailsPlugin.test.js
@@ -1089,6 +1099,7 @@ packages/editor/ProseMirror/plugins/linkTooltipPlugin.js
 packages/editor/ProseMirror/plugins/listPlugin.js
 packages/editor/ProseMirror/plugins/originalMarkupPlugin.js
 packages/editor/ProseMirror/plugins/searchPlugin.js
+packages/editor/ProseMirror/plugins/tablePlugin.js
 packages/editor/ProseMirror/plugins/utils/createExternalEditorPlugin.js
 packages/editor/ProseMirror/plugins/utils/createFloatingButtonPlugin.js
 packages/editor/ProseMirror/schema.js
@@ -1108,6 +1119,7 @@ packages/editor/ProseMirror/utils/dom/showModal.js
 packages/editor/ProseMirror/utils/extractSelectedLinesTo.test.js
 packages/editor/ProseMirror/utils/extractSelectedLinesTo.js
 packages/editor/ProseMirror/utils/forEachHeading.js
+packages/editor/ProseMirror/utils/insertRenderedMarkdown.js
 packages/editor/ProseMirror/utils/jumpToHash.js
 packages/editor/ProseMirror/utils/makeLinksClickableInElement.js
 packages/editor/ProseMirror/utils/postprocessEditorOutput.test.js
@@ -1118,6 +1130,12 @@ packages/editor/ProseMirror/utils/sanitizeHtml.js
 packages/editor/ProseMirror/utils/selectFirstInstanceOfNode.js
 packages/editor/ProseMirror/utils/trimEmptyParagraphs.js
 packages/editor/ProseMirror/vendor/changedDescendants.js
+packages/editor/ProseMirror/vendor/icons/addColumnRight.js
+packages/editor/ProseMirror/vendor/icons/addRowBelow.js
+packages/editor/ProseMirror/vendor/icons/icon.js
+packages/editor/ProseMirror/vendor/icons/removeColumn.js
+packages/editor/ProseMirror/vendor/icons/removeRow.js
+packages/editor/ProseMirror/vendor/icons/types.js
 packages/editor/ProseMirror/vendor/splitBlockAs.js
 packages/editor/SelectionFormatting.js
 packages/editor/events.js
@@ -1319,6 +1337,7 @@ packages/lib/models/utils/getCanBeCollapsedFolderIds.js
 packages/lib/models/utils/getCollator.js
 packages/lib/models/utils/getConflictFolderId.js
 packages/lib/models/utils/isItemId.js
+packages/lib/models/utils/isJoplinServerVariant.js
 packages/lib/models/utils/itemCanBeEncrypted.js
 packages/lib/models/utils/onFolderDrop.test.js
 packages/lib/models/utils/onFolderDrop.js
@@ -1354,6 +1373,7 @@ packages/lib/services/KeymapService_keysRegExp.js
 packages/lib/services/KvStore.js
 packages/lib/services/MigrationService.js
 packages/lib/services/NavService.js
+packages/lib/services/NotePositionService.js
 packages/lib/services/PostMessageService.js
 packages/lib/services/ReportService.test.js
 packages/lib/services/ReportService.js
@@ -1369,6 +1389,7 @@ packages/lib/services/UndoRedoService.js
 packages/lib/services/WhenClause.test.js
 packages/lib/services/WhenClause.js
 packages/lib/services/commands/MenuUtils.js
+packages/lib/services/commands/ToolbarButtonUtils.test.js
 packages/lib/services/commands/ToolbarButtonUtils.js
 packages/lib/services/commands/commandsToMarkdownTable.js
 packages/lib/services/commands/focusEditorIfEditorCommand.js
@@ -1386,6 +1407,7 @@ packages/lib/services/database/migrations/45.js
 packages/lib/services/database/migrations/46.js
 packages/lib/services/database/migrations/47.js
 packages/lib/services/database/migrations/48.js
+packages/lib/services/database/migrations/49.js
 packages/lib/services/database/migrations/index.js
 packages/lib/services/database/sqlStringToLines.js
 packages/lib/services/database/types.js
@@ -1601,6 +1623,7 @@ packages/lib/services/synchronizer/Synchronizer.sharing.test.js
 packages/lib/services/synchronizer/Synchronizer.tags.test.js
 packages/lib/services/synchronizer/Synchronizer.tools.test.js
 packages/lib/services/synchronizer/gui/useSyncTargetUpgrade.js
+packages/lib/services/synchronizer/handleConflictAction.test.js
 packages/lib/services/synchronizer/migrations/1.js
 packages/lib/services/synchronizer/migrations/2.js
 packages/lib/services/synchronizer/migrations/3.js
@@ -1714,6 +1737,7 @@ packages/plugin-repo-cli/lib/gitCompareUrl.test.js
 packages/plugin-repo-cli/lib/gitCompareUrl.js
 packages/plugin-repo-cli/lib/overrideUtils.test.js
 packages/plugin-repo-cli/lib/overrideUtils.js
+packages/plugin-repo-cli/lib/searchPlugins.js
 packages/plugin-repo-cli/lib/types.js
 packages/plugin-repo-cli/lib/updateReadme.test.js
 packages/plugin-repo-cli/lib/updateReadme.js
@@ -1734,6 +1758,7 @@ packages/renderer/MdToHtml/createEventHandlingAttrs.js
 packages/renderer/MdToHtml/linkReplacement.test.js
 packages/renderer/MdToHtml/linkReplacement.js
 packages/renderer/MdToHtml/renderMedia.js
+packages/renderer/MdToHtml/rules/abc.js
 packages/renderer/MdToHtml/rules/checkbox.js
 packages/renderer/MdToHtml/rules/code_inline.js
 packages/renderer/MdToHtml/rules/fence.js
@@ -1776,14 +1801,18 @@ packages/tools/fuzzer/Client.js
 packages/tools/fuzzer/ClientPool.js
 packages/tools/fuzzer/Server.js
 packages/tools/fuzzer/constants.js
+packages/tools/fuzzer/doRandomAction.js
 packages/tools/fuzzer/model/FolderRecord.js
 packages/tools/fuzzer/sync-fuzzer.js
 packages/tools/fuzzer/types.js
+packages/tools/fuzzer/utils/ProgressBar.js
 packages/tools/fuzzer/utils/SeededRandom.js
 packages/tools/fuzzer/utils/getNumberProperty.js
 packages/tools/fuzzer/utils/getProperty.js
 packages/tools/fuzzer/utils/getStringProperty.js
+packages/tools/fuzzer/utils/logDiffDebug.js
 packages/tools/fuzzer/utils/openDebugSession.js
+packages/tools/fuzzer/utils/randomString.js
 packages/tools/fuzzer/utils/retryWithCount.js
 packages/tools/generate-database-types.js
 packages/tools/generate-images.js
