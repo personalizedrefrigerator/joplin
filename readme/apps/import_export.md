@@ -41,15 +41,6 @@ Type `import --format md /path/to/file.md` or `import --format md /path/to/direc
 
 Joplin can also import OneNote notebooks:
 
-#### Importing from OneNote Online
-
-1. Visit [OneNote Web](https://www.onenote.com/notebooks). 
-2. Right-click the desired notebook and choose *Export notebook*.
-3. Follow the instructions to download the backup. It should be a ZIP file.
-4. Open the **desktop application** and go to File > Import > ZIP - OneNote Notebook, and select the exported file.
-
-**Note**: As of October 2025, some users are reporting [incomplete exports from OneNote Online](https://learn.microsoft.com/en-us/answers/questions/5585745/onenote-exported-zip-file-is-incomplete). Importing notebooks exported from the Windows desktop application may be more reliable.
-
 #### Importing from the OneNote Windows desktop app
 
 This requires Joplin >=v3.5.5 and the OneNote Windows desktop app. Confusingly, the OneNote desktop app [is *not* the same as "OneNote for Windows 10"](https://support.microsoft.com/en-us/office/what-s-the-difference-between-the-onenote-versions-a624e692-b78b-4c09-b07f-46181958118f#id0ebd=windows).
@@ -61,6 +52,28 @@ This requires Joplin >=v3.5.5 and the OneNote Windows desktop app. Confusingly, 
 4. Open the Joplin desktop application.
 5. From the "File" > "Import" menu, select "ZIP - OneNote Notebook". In the file picker, select the just-exported file.
 
+#### Importing from OneDrive Online
+
+This requires Joplin >= v3.5.1 and a OneNote notebook stored on OneDrive. This approach [may not work for notebooks larger than 2-4 GB](https://learn.microsoft.com/en-us/answers/questions/5437286/why-cant-i-fully-download-my-onenote-files-from-on).
+
+1. Open [OneDrive Online](https://onedrive.live.com/).
+2. Find the OneNote notebook to be exported (in the "My files" tab).
+3. Create a new folder.
+	- Click "Create or upload", then "Folder".
+4. Move the OneNote notebook to the new folder.
+5. Download the new folder as a ZIP file.
+	- Right-click on the folder, then click "download".
+6. Open the Joplin desktop application.
+7. From the "File" > "Import" menu, select "ZIP - OneNote Notebook". In the file picker, select the just-exported file.
+
+#### Importing from OneNote Online
+
+1. Visit [OneNote Web](https://www.onenote.com/notebooks). 
+2. Right-click the desired notebook and choose *Export notebook*.
+3. Follow the instructions to download the backup. It should be a ZIP file.
+4. Open the **desktop application** and go to File > Import > ZIP - OneNote Notebook, and select the exported file.
+
+**Note**: As of October 2025, some users are reporting [incomplete exports from OneNote Online](https://learn.microsoft.com/en-us/answers/questions/5585745/onenote-exported-zip-file-is-incomplete) or [that the export button is missing](https://learn.microsoft.com/en-us/answers/questions/5598974/no-export-option-shown-when-trying-to-export-a-one). Importing notebooks exported from the Windows desktop application may be more reliable. 
 
 ### Importing from other applications
 
