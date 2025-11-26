@@ -351,7 +351,7 @@ test.describe('markdownEditor', () => {
 		const { expectClipboardToMatch } = await mockClipboard(electronApp, 'original');
 
 		await mainScreen.goToAnything.runCommand(electronApp, 'textCopy');
-		await expectClipboardToMatch('Test content.');
+		await expectClipboardToMatch('Test content.\n');
 	});
 
 	test('should support the textCut and textPaste commands', async ({ electronApp, mainWindow }) => {
@@ -374,7 +374,7 @@ test.describe('markdownEditor', () => {
 
 		await goToAnything.runCommand(electronApp, 'textCut');
 		await noteEditor.expectToHaveText('\n');
-		await expectClipboardToMatch('Test (new content!)');
+		await expectClipboardToMatch('Test (new content!)\n');
 
 		// Should paste the content again with textPaste
 		await goToAnything.runCommand(electronApp, 'textPaste');
