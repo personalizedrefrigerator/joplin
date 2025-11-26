@@ -16,7 +16,7 @@ import jumpToHash from './editorCommands/jumpToHash';
 import { resetImageResourceEffect } from './extensions/rendering/renderBlockImages';
 import Logger from '@joplin/utils/Logger';
 import { searchChangeSourceEffect } from './extensions/searchExtension';
-import clipboardCommand, { ClipboardActionType } from './editorCommands/clipboardCommand';
+import cutOrCopyText, { ClipboardAction } from './editorCommands/cutOrCopyText';
 
 const logger = Logger.create('CodeMirrorControl');
 
@@ -261,25 +261,12 @@ export default class CodeMirrorControl extends CodeMirror5Emulation implements E
 		this._callbacks.onRemove();
 	}
 
-	public cutText(onWriteClipboard: (text: string)=> void) {
-		return clipboardCommand({
-			onWriteClipboard,
-			type: ClipboardActionType.Cut,
-		})(this.editor);
+	public cutText(writeClipboard: (text: string)=> void) {
+		return cutOrCopyText(writeClipboard, ClipboardAction.Cut)(this.editor);
 	}
 
-	public copyText(onWriteClipboard: (text: string)=> void) {
-		return clipboardCommand({
-			onWriteClipboard,
-			type: ClipboardActionType.Copy,
-		})(this.editor);
-	}
-
-	public pasteText(text: string) {
-		return clipboardCommand({
-			text,
-			type: ClipboardActionType.Paste,
-		})(this.editor);
+	public copyText(writeClipboard: (text: string)=> void) {
+		return cutOrCopyText(writeClipboard, ClipboardAction.Copy)(this.editor);
 	}
 
 	//
