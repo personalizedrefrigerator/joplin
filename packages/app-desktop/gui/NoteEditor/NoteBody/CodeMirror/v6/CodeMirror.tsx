@@ -13,7 +13,7 @@ import { _ } from '@joplin/lib/locale';
 import bridge from '../../../../../services/bridge';
 import shim from '@joplin/lib/shim';
 import { MarkupToHtml } from '@joplin/renderer';
-const { clipboard } = require('electron');
+import { clipboard } from 'electron';
 import { reg } from '@joplin/lib/registry';
 import ErrorBoundary from '../../../../ErrorBoundary';
 import { EditorKeymap, EditorLanguageType, EditorSettings, SearchState, UserEventSource } from '@joplin/editor/types';
