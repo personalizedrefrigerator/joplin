@@ -32,13 +32,13 @@ export const up = async (db: DbConnection) => {
 
 	const batchSize = 512;
 	let offset = 0;
-	type ChangeRecord = ChangeEntryOriginal & { share_id: Uuid };
+	type ChangeRecord = ChangeEntryOriginal & { jop_share_id: Uuid };
 	let changes: ChangeRecord[] = [];
 
 	const next = async () => {
 		const changeFields = ['id', 'type', 'user_id', 'previous_item', 'created_time', 'updated_time', 'counter'];
 		const records = await db('changes')
-			.select('items.share_id', ...changeFields.map(f => `changes.${f}`))
+			.select('items.jop_share_id', ...changeFields.map(f => `changes.${f}`))
 			.where('changes.counter', '>', offset)
 			.join('items', 'items.id', '=', 'changes.item_id')
 			.limit(batchSize);
@@ -65,7 +65,7 @@ export const up = async (db: DbConnection) => {
 		return participants;
 	};
 
-	while (next()) {
+	while (await next()) {
 		const rows = [];
 		for (const change of changes) {
 			const previousShareId = change.previous_item ? JSON.parse(change.previous_item)?.jop_share_id : '';
@@ -82,9 +82,9 @@ export const up = async (db: DbConnection) => {
 
 			// TODO: This also needs to push ({ type: Update })s when the current update is the last update
 			// **and** the last update changes the share_id. Currently, it doesn't.
-			if (change.share_id && previousShareId === change.share_id) {
+			if (change.jop_share_id && previousShareId === change.jop_share_id) {
 				// Create one update per user
-				for (const participantId of await getShareParticipants(change.share_id)) {
+				for (const participantId of await getShareParticipants(change.jop_share_id)) {
 					if (participantId === change.user_id) continue;
 
 					rows.push({
