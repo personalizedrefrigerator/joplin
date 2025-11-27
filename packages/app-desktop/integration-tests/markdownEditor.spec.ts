@@ -360,6 +360,7 @@ test.describe('markdownEditor', () => {
 
 		await mainScreen.createNewNote('Test paste');
 		const { expectClipboardToMatch } = await mockClipboard(electronApp, 'test!');
+		await expectClipboardToMatch('test!');
 
 		// Should paste text using the textPaste command
 		const goToAnything = mainScreen.goToAnything;
