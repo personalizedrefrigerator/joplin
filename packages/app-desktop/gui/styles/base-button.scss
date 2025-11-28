@@ -1,0 +1,19 @@
+// Corresponds to theme.buttonStyle
+.base-button {
+	// margin-right: 10px;
+	border: 1px solid;
+	min-height: 26px;
+	min-width: 80px;
+	// max-width: 220px;
+	padding-left: 12px;
+	padding-right: 12px;
+	padding-top: 6px;
+	padding-bottom: 6px;
+	// box-shadow: '0px 1px 1px rgba(0,0,0,0.3)';
+	border-radius: 4px;
+
+	color: var(--joplin-color4);
+	background-color: var(--joplin-background-color4);
+	border-color: var(--joplin-border-color4);
+	user-select: none;
+}
