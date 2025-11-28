@@ -59,7 +59,7 @@ export default class ChangeModel extends BaseModel<Change> {
 	}
 
 	public get tableName(): string {
-		return 'changes';
+		return 'changes_2';
 	}
 
 	protected hasUuid(): boolean {
@@ -95,6 +95,7 @@ export default class ChangeModel extends BaseModel<Change> {
 			cursor,
 		};
 	}
+
 
 	public async changesForUserQuery(userId: Uuid, fromCounter: number, limit: number, doCountQuery: boolean): Promise<Change[]> {
 		// When need to get:
@@ -141,91 +142,20 @@ export default class ChangeModel extends BaseModel<Change> {
 			SELECT ${fieldsSql}
 			FROM "changes"
 			WHERE counter > ?
-			AND (type = ? OR type = ?)
 			AND user_id = ?
 			ORDER BY "counter" ASC
 			${doCountQuery ? '' : 'LIMIT ?'}
 		`;
 
-		const subParams1 = [
+		const params = [
 			fromCounter,
-			ChangeType.Create,
-			ChangeType.Delete,
 			userId,
 		];
 
-		if (!doCountQuery) subParams1.push(limit);
-
-		// The "+ 0" was added to prevent Postgres from scanning the `changes` table in `counter`
-		// order, which is an extremely slow query plan. With "+ 0" it went from 2 minutes to 6
-		// seconds for a particular query. https://dba.stackexchange.com/a/338597/37012
-		//
-		// ## 2025-11-06
-		//
-		// Remove the "+ 0" because now it appears to make query slower by preventing the query
-		// planner from using the index. Using Postgres 16.8
-		//
-		// ## 2025-11-08
-		//
-		// This query shape, with `ui AS MATERIALIZED` ensures that Postgres query planner will use
-		// the index `changes_item_id_counter_type2_index`, which was created specifically for that
-		// query. With the join (as previously) the planner uses the `counter` index and ends up
-		// walking through millions of rows in the `changes` table.
-		//
-		// This new query improves this part, however it's still not perfect because it will be
-		// relatively slow for users with hundreds of thousands of items. But at least the
-		// performance won't be bound to the size of the `changes` table anymore, and it will be
-		// fast for users with a normal amount of items.
-		//
-		// Keeping the previous query here because it's more readable and equivalent. It could be a
-		// use as a base for a refactoring:
-		//
-		// ```
-		// SELECT ${changesFieldsSql}
-		// FROM "changes"
-		// JOIN "user_items" ON user_items.item_id = changes.item_id
-		// WHERE counter > ?
-		// AND type = ?
-		// AND user_items.user_id = ?
-		// ORDER BY "counter" ASC
-		// ${doCountQuery ? '' : 'LIMIT ?'}
-		// ```
-
-		const changesFieldsSql = fields
-			.map(f => `"changes"."${f}" AS "${f}"`)
-			.join(', ');
-
-		const subQuery2 = `
-			WITH ui AS MATERIALIZED (
-				SELECT item_id
-				FROM user_items
-				WHERE user_id = ?
-			)
-			SELECT ${changesFieldsSql}
-			FROM changes
-			WHERE type = ?
-				AND counter > ?
-				AND EXISTS (
-					SELECT 1
-					FROM ui
-					WHERE ui.item_id = changes.item_id
-				)
-			ORDER BY counter
-			${doCountQuery ? '' : 'LIMIT ?'}
-		`;
-
-		const subParams2 = [
-			userId,
-			ChangeType.Update,
-			fromCounter,
-		];
-
-		if (!doCountQuery) subParams2.push(limit);
+		if (!doCountQuery) params.push(limit);
 
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 		let query: Knex.Raw<any> = null;
-
-		const finalParams = subParams1.concat(subParams2);
 
 		// For Postgres, we need to use materialized tables because, even
 		// though each independent query is fast, the query planner end up going
@@ -237,40 +167,31 @@ export default class ChangeModel extends BaseModel<Change> {
 		// keep the non-optimised query.
 
 		if (!doCountQuery) {
-			finalParams.push(limit);
+			params.push(limit);
 
 			if (isPostgres(this.dbSlave)) {
 				query = this.dbSlave.raw(`
 					WITH cte1 AS MATERIALIZED (
 						${subQuery1}
 					)
-					, cte2 AS MATERIALIZED (
-						${subQuery2}
-					)
 					TABLE cte1
-					UNION ALL
-					TABLE cte2
 					ORDER BY counter ASC
 					LIMIT ?
-				`, finalParams);
+				`, params);
 			} else {
 				query = this.dbSlave.raw(`
 					SELECT ${fieldsSql} FROM (${subQuery1}) as sub1
-					UNION ALL				
-					SELECT ${fieldsSql} FROM (${subQuery2}) as sub2
 					ORDER BY counter ASC
 					LIMIT ?
-				`, finalParams);
+				`, params);
 			}
 		} else {
 			query = this.dbSlave.raw(`
 				SELECT count(*) as total
 				FROM (
 					(${subQuery1})
-					UNION ALL				
-					(${subQuery2})
 				) AS merged
-			`, finalParams);
+			`, params);
 		}
 
 		const results = await query;
