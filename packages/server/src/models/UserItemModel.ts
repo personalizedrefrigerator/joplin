@@ -1,4 +1,4 @@
-import { ChangeType, Item, ItemType, UserItem, Uuid } from '../services/database/types';
+import { ChangeType, Item, UserItem, Uuid } from '../services/database/types';
 import BaseModel, { DeleteOptions, LoadOptions, SaveOptions } from './BaseModel';
 import { unique } from '../utils/array';
 import { ErrorNotFound } from '../utils/errors';
@@ -211,11 +211,10 @@ export default class UserItemModel extends BaseModel<UserItem> {
 
 				if (options.recordChanges && this.models().item().shouldRecordChange(item.name)) {
 					await this.models().change().save({
-						item_type: ItemType.UserItem,
 						item_id: userItem.item_id,
 						item_name: item.name,
 						type: ChangeType.Delete,
-						previous_item: '',
+						previous_share_id: '',
 						user_id: userItem.user_id,
 					});
 				}

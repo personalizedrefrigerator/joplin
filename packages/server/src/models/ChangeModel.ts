@@ -1,7 +1,7 @@
 import { Knex } from 'knex';
 import Logger from '@joplin/utils/Logger';
 import { DbConnection, SqliteMaxVariableNum, isPostgres } from '../db';
-import { Change, ChangeType, Item, Uuid } from '../services/database/types';
+import { Change, Changes2, ChangeType, Item, Uuid } from '../services/database/types';
 import { ErrorResyncRequired } from '../utils/errors';
 import { Day, formatDateTime } from '../utils/time';
 import BaseModel, { SaveOptions } from './BaseModel';
@@ -49,7 +49,7 @@ export function requestDeltaPagination(query: any): ChangePagination {
 	return output;
 }
 
-export default class ChangeModel extends BaseModel<Change> {
+export default class ChangeModel extends BaseModel<Changes2> {
 
 	public deltaIncludesItems_: boolean;
 
@@ -80,7 +80,7 @@ export default class ChangeModel extends BaseModel<Change> {
 	}
 
 	public async allFromId(id: string, limit: number = SqliteMaxVariableNum): Promise<PaginatedChanges> {
-		const startChange: Change = id ? await this.load(id) : null;
+		const startChange = id ? await this.load(id) : null;
 		const query = this.db(this.tableName).select(...this.defaultFields);
 		if (startChange) void query.where('counter', '>', startChange.counter);
 		void query.limit(limit);
@@ -214,10 +214,10 @@ export default class ChangeModel extends BaseModel<Change> {
 			...pagination,
 		};
 
-		let changeAtCursor: Change = null;
+		let changeAtCursor: Changes2 = null;
 
 		if (pagination.cursor) {
-			changeAtCursor = await this.load(pagination.cursor) as Change;
+			changeAtCursor = await this.load(pagination.cursor);
 			if (!changeAtCursor) throw new ErrorResyncRequired();
 		}
 
@@ -477,7 +477,7 @@ export default class ChangeModel extends BaseModel<Change> {
 		logger.info(`compressOldChanges: Finished processing. Done ${doneItemIds.length} items. Deleted: ${totalDeletedCount} changes.`);
 	}
 
-	public async save(change: Change, options: SaveOptions = {}): Promise<Change> {
+	public async save(change: Changes2, options: SaveOptions = {}): Promise<Changes2> {
 		return super.save(change, options);
 	}
 

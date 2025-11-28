@@ -1032,16 +1032,14 @@ export default class ItemModel extends BaseModel<Item> {
 				// TODO: Potentially slow:
 				const share = item.jop_share_id ? await this.models().share().byUserAndItemId(userId, item.id) : null;
 				const allUserIds = share ? await this.models().share().allShareUserIds(share) : [userId];
-				const previousItemJson = previousItem ? this.models().change().serializePreviousItem(previousItem) : '';
 
 				// Post a change for all users that can access the item
 				for (const userId of allUserIds) {
 					await this.models().change().save({
-						item_type: this.itemType,
 						item_id: item.id,
 						item_name: changeItemName,
 						type: isNew ? ChangeType.Create : ChangeType.Update,
-						previous_item: previousItemJson,
+						previous_share_id: previousItem?.jop_share_id ?? '',
 						user_id: userId,
 					});
 				}

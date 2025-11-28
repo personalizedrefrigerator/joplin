@@ -338,7 +338,7 @@ export interface User extends WithDates, WithUuid {
 	can_receive_folder?: number;
 	is_external?: number;
 	sso_auth_code?: string;
-	sso_auth_code_expire_at?: string;
+	sso_auth_code_expire_at?: number;
 }
 
 export interface Changes2 {
@@ -346,10 +346,11 @@ export interface Changes2 {
 	id?: Uuid;
 	item_id?: Uuid;
 	user_id?: Uuid;
+	item_name?: string;
 	previous_share_id?: Uuid;
 	type?: number;
-	updated_time?: string;
-	created_time?: string;
+	updated_time?: number;
+	created_time?: number;
 }
 
 export const databaseSchema: DatabaseTables = {
@@ -573,6 +574,7 @@ export const databaseSchema: DatabaseTables = {
 		id: { type: 'string', defaultValue: null },
 		item_id: { type: 'string', defaultValue: null },
 		user_id: { type: 'string', defaultValue: '' },
+		item_name: { type: 'string', defaultValue: '' },
 		previous_share_id: { type: 'string', defaultValue: '' },
 		type: { type: 'number', defaultValue: null },
 		updated_time: { type: 'string', defaultValue: null },

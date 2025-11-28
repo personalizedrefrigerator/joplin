@@ -7,6 +7,7 @@ type ChangeEntryOriginal = {
 	item_id: Uuid;
 	share_id: Uuid;
 	user_id: Uuid;
+	item_name: string;
 	type: ChangeType;
 	updated_time: string;
 	created_time: string;
@@ -21,6 +22,7 @@ export const up = async (db: DbConnection) => {
 		table.string('id', 32).unique().notNullable();
 		table.string('item_id', 32).notNullable();
 		table.string('user_id', 32).defaultTo('').notNullable();
+		table.text('item_name').defaultTo('').notNullable();
 		table.string('previous_share_id', 32).defaultTo('').notNullable();
 		table.integer('type').notNullable();
 		table.bigInteger('updated_time').notNullable();
@@ -47,7 +49,7 @@ export const up = async (db: DbConnection) => {
 	let changes: ChangeRecord[] = [];
 
 	const next = async () => {
-		const changeFields = ['id', 'type', 'user_id', 'created_time', 'updated_time', 'counter'];
+		const changeFields = ['id', 'type', 'user_id', 'created_time', 'item_name', 'updated_time', 'counter'];
 		const previousItemAsJsonSelector = isPostgres(db) ? '"previous_item"::json' : '"previous_item"';
 		const records = await db('changes')
 			.select(
