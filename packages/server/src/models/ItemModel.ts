@@ -1028,7 +1028,7 @@ export default class ItemModel extends BaseModel<Item> {
 			// per user, whenever a user_item is created or deleted.
 			const changeItemName = item.name || previousName;
 
-			if (!isNew && this.shouldRecordChange(changeItemName)) {
+			if (this.shouldRecordChange(changeItemName)) {
 				// TODO: Potentially slow:
 				const share = item.jop_share_id ? await this.models().share().byUserAndItemId(userId, item.id) : null;
 				const allUserIds = share ? await this.models().share().allShareUserIds(share) : [userId];
