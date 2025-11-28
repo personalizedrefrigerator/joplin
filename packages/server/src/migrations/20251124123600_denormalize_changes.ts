@@ -1,11 +1,11 @@
-import { DbConnection } from '../db';
+import { DbConnection, isPostgres } from '../db';
 import { ChangeType, Uuid } from '../services/database/types';
 
 type ChangeEntryOriginal = {
 	counter: number;
 	id: Uuid;
 	item_id: Uuid;
-	previous_item: string;
+	share_id: Uuid;
 	user_id: Uuid;
 	type: ChangeType;
 	updated_time: string;
@@ -30,15 +30,31 @@ export const up = async (db: DbConnection) => {
 		table.index('id');
 	});
 
+	// Storing the start offset allows the migration to be resumed after an interruption
+	const startOffset = async () => {
+		const lastItem = await db('changes_2').select('id').orderBy('counter', 'desc').first();
+		const lastId = lastItem?.id;
+		if (!lastId) return 0;
+
+		const originalItem = await db('changes').select('id', 'counter').where('id', '=', lastId).first();
+		const lastCounter = originalItem.counter;
+		return lastCounter;
+	};
+
 	const batchSize = 512;
-	let offset = 0;
+	let offset = await startOffset();
 	type ChangeRecord = ChangeEntryOriginal & { jop_share_id: Uuid };
 	let changes: ChangeRecord[] = [];
 
 	const next = async () => {
-		const changeFields = ['id', 'type', 'user_id', 'previous_item', 'created_time', 'updated_time', 'counter'];
+		const changeFields = ['id', 'type', 'user_id', 'created_time', 'updated_time', 'counter'];
+		const previousItemAsJsonSelector = isPostgres(db) ? '"previous_item"::json' : '"previous_item"';
 		const records = await db('changes')
-			.select('items.jop_share_id', ...changeFields.map(f => `changes.${f}`))
+			.select(
+				'items.jop_share_id',
+				...changeFields.map(f => `changes.${f}`),
+				db.raw(`COALESCE(${previousItemAsJsonSelector} ->> 'jop_share_id', '') as share_id`),
+			)
 			.where('changes.counter', '>', offset)
 			.join('items', 'items.id', '=', 'changes.item_id')
 			.limit(batchSize);
@@ -68,7 +84,7 @@ export const up = async (db: DbConnection) => {
 	while (await next()) {
 		const rows = [];
 		for (const change of changes) {
-			const previousShareId = change.previous_item ? JSON.parse(change.previous_item)?.jop_share_id : '';
+			const previousShareId = change.share_id;
 			const updatedChange = {
 				previous_share_id: previousShareId,
 				id: change.id,
