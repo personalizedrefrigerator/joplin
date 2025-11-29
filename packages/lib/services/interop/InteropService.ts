@@ -141,7 +141,7 @@ export default class InteropService {
 				}, () => new InteropService_Importer_Md()),
 
 				makeImportModule({
-					format: 'zip',
+					format: 'one',
 					fileExtensions: [
 						'zip',
 						'one',
