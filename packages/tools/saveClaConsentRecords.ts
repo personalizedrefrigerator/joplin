@@ -83,8 +83,22 @@ const validateComments = (comments: IssueComment[], expectedClaAuthorId: number)
 	return false;
 };
 
+const findDuplicates = (array: (string|number|symbol)[])=> {
+	const counts: Record<string|number|symbol, number> = {};
+	const dupes = [];
+
+	for (const item of array) {
+		counts[item] = (counts[item] || 0) + 1;
+		if (counts[item] === 2) {
+			dupes.push(item);
+		}
+	}
+
+	return dupes;
+};
+
 const main = async () => {
-	console.info('To generate an accurate record, remember to merge the cla_signatures branch into dev first.');
+	console.info('⚠️ To generate an accurate record, remember to merge the cla_signatures branch into dev first ⚠️');
 
 	const consentRecordsDir = `${await getRootDir()}/readme/cla/consent_records`;
 	await mkdirp(consentRecordsDir);
@@ -120,6 +134,35 @@ const main = async () => {
 	const contributorCount = signedContributors.length - excludedIssueIds.length;
 
 	if (files.length !== contributorCount) {
+		const notOk = [];
+
+		for (const contributor of signedContributors) {
+			let found = false;
+			for (const file of files) {
+				if (file.startsWith(contributor.name)) {
+					found = true;
+					break;
+				}
+			}
+
+			if (!found) {
+				if (!excludedIssueIds.includes(contributor.pullRequestNo)) {
+					notOk.push(contributor);
+				}
+			}
+		}
+
+		if (notOk.length) {
+			console.info('In signatures.json but not in archived issues:', notOk);
+		}
+
+		const userIds = signedContributors.map(s => s.id);
+		const duplicates = findDuplicates(userIds);
+
+		if (duplicates.length) {
+			console.info('Duplicate user Ids in signatures.json:', duplicates);
+		}
+
 		throw new Error(`‼️ Found ${contributorCount} contributors in signatures.json but ${files.length} archived issues.`);
 	} else {
 		console.info(`👍 Found ${contributorCount} contributors in signatures.json and ${files.length} archived issues.`);
