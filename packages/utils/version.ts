@@ -9,5 +9,5 @@ export const yarnVersionPatch = async () => {
 	const content = JSON.parse(await readFile('package.json', 'utf-8'));
 	const newVersion = content.version;
 	if (!newVersion) throw new Error('Version field could not be updated');
-	return newVersion;
+	return `v${newVersion}`;
 };
