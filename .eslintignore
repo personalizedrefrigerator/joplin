@@ -1117,10 +1117,12 @@ packages/editor/ProseMirror/plugins/detailsPlugin.js
 packages/editor/ProseMirror/plugins/imagePlugin.test.js
 packages/editor/ProseMirror/plugins/imagePlugin.js
 packages/editor/ProseMirror/plugins/inputRulesPlugin.js
-packages/editor/ProseMirror/plugins/joplinEditablePlugin/createEditorDialog.js
 packages/editor/ProseMirror/plugins/joplinEditablePlugin/joplinEditablePlugin.test.js
 packages/editor/ProseMirror/plugins/joplinEditablePlugin/joplinEditablePlugin.js
-packages/editor/ProseMirror/plugins/joplinEditablePlugin/postProcessRenderedHtml.js
+packages/editor/ProseMirror/plugins/joplinEditablePlugin/showCreateEditablePrompt.test.js
+packages/editor/ProseMirror/plugins/joplinEditablePlugin/showCreateEditablePrompt.js
+packages/editor/ProseMirror/plugins/joplinEditablePlugin/utils/createEditorDialog.js
+packages/editor/ProseMirror/plugins/joplinEditablePlugin/utils/postProcessRenderedHtml.js
 packages/editor/ProseMirror/plugins/joplinEditorApiPlugin.js
 packages/editor/ProseMirror/plugins/keymapPlugin.js
 packages/editor/ProseMirror/plugins/linkTooltipPlugin.test.js
@@ -1135,6 +1137,7 @@ packages/editor/ProseMirror/schema.js
 packages/editor/ProseMirror/styles.js
 packages/editor/ProseMirror/testing/createTestEditor.js
 packages/editor/ProseMirror/testing/createTestEditorWithSerializer.js
+packages/editor/ProseMirror/testing/mockEditorApi.js
 packages/editor/ProseMirror/types.js
 packages/editor/ProseMirror/utils/SelectableNodeView.js
 packages/editor/ProseMirror/utils/UndoStackSynchronizer.js
