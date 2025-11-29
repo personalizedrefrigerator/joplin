@@ -19,7 +19,8 @@
     "./url": "./dist/url.js",
     "./ipc": "./dist/ipc.js",
     "./path": "./dist/path.js",
-    "./cli": "./dist/cli.js"
+    "./cli": "./dist/cli.js",
+    "./version": "./dist/version.js"
   },
   "publishConfig": {
     "access": "public"
