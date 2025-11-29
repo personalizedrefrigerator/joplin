@@ -144,6 +144,10 @@ a {
 	animation-duration: 1.2s;
 	animation-iteration-count: infinite;
 	animation-timing-function: linear;
+
+	@media (prefers-reduced-motion: reduce) {
+		animation-name: none;
+	}
 }
 
 @keyframes rotate {
