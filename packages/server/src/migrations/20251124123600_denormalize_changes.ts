@@ -1,35 +1,45 @@
+import Logger from '@joplin/utils/Logger';
 import { DbConnection, isPostgres } from '../db';
 import { ChangeType, Uuid } from '../services/database/types';
+import { uuidgen } from '@joplin/lib/uuid';
+
+const logger = Logger.create('denormalize_changes');
 
 type ChangeEntryOriginal = {
 	counter: number;
 	id: Uuid;
 	item_id: Uuid;
-	share_id: Uuid;
+	jop_share_id: Uuid;
+	previous_item_share_id: Uuid;
 	user_id: Uuid;
-	item_name: string;
 	type: ChangeType;
 	updated_time: string;
 	created_time: string;
 };
 
-export const up = async (db: DbConnection) => {
-	await db.schema.createTable('changes_2', (table) => {
-		// Note that in this table, the counter is the primary key, since
-		// we want it to be automatically incremented. There's also a
-		// column ID to publicly identify a change.
-		table.increments('counter').unique().primary().notNullable();
-		table.string('id', 32).unique().notNullable();
-		table.string('item_id', 32).notNullable();
-		table.string('user_id', 32).defaultTo('').notNullable();
-		table.text('item_name').defaultTo('').notNullable();
-		table.string('previous_share_id', 32).defaultTo('').notNullable();
-		table.integer('type').notNullable();
-		table.bigInteger('updated_time').notNullable();
-		table.bigInteger('created_time').notNullable();
+// It should be possible to pause and resume the migration in the background
+export const config = { transaction: false };
 
-		table.unique(['counter', 'user_id']);
-		table.index('id');
+export const up = async (db: DbConnection) => {
+	await db.transaction(async transaction => {
+		if (await transaction.schema.hasTable('changes_2')) return;
+
+		await transaction.schema.createTable('changes_2', (table) => {
+			// Note that in this table, the counter is the primary key, since
+			// we want it to be automatically incremented. There's also a
+			// column ID to publicly identify a change.
+			table.increments('counter').unique().primary().notNullable();
+			table.string('id', 32).unique().notNullable();
+			table.string('item_id', 32).notNullable();
+			table.string('user_id', 32).defaultTo('').notNullable();
+			table.text('item_name').defaultTo('').notNullable();
+			table.string('previous_share_id', 32).defaultTo('').notNullable();
+			table.integer('type').notNullable();
+			table.bigInteger('updated_time').notNullable();
+			table.bigInteger('created_time').notNullable();
+
+			table.unique(['counter', 'user_id']);
+		});
 	});
 
 	// Storing the start offset allows the migration to be resumed after an interruption
@@ -43,19 +53,26 @@ export const up = async (db: DbConnection) => {
 		return lastCounter;
 	};
 
-	const batchSize = 512;
 	let offset = await startOffset();
+	const total = Object.values(await db('changes').count().where('counter', '>', offset).first())[0];
+	logger.info('Migrating', total, 'changes...');
+
+	const batchSize = 512;
 	type ChangeRecord = ChangeEntryOriginal & { jop_share_id: Uuid };
 	let changes: ChangeRecord[] = [];
 
 	const next = async () => {
-		const changeFields = ['id', 'type', 'user_id', 'created_time', 'item_name', 'updated_time', 'counter'];
+		const changeFields = ['id', 'type', 'user_id', 'item_id', 'created_time', 'updated_time', 'counter'];
 		const previousItemAsJsonSelector = isPostgres(db) ? '"previous_item"::json' : '"previous_item"';
 		const records = await db('changes')
 			.select(
 				'items.jop_share_id',
 				...changeFields.map(f => `changes.${f}`),
-				db.raw(`COALESCE(${previousItemAsJsonSelector} ->> 'jop_share_id', '') as share_id`),
+				db.raw(`(
+					CASE WHEN previous_item="" THEN ""
+            			ELSE COALESCE(${previousItemAsJsonSelector} ->> 'jop_share_id', '')
+					END
+				) as previous_item_share_id`),
 			)
 			.where('changes.counter', '>', offset)
 			.join('items', 'items.id', '=', 'changes.item_id')
@@ -75,6 +92,7 @@ export const up = async (db: DbConnection) => {
 		const matchingShares = await db('shares').select('owner_id').where('id', '=', shareId);
 		if (!matchingShares.length) {
 			shareToParticipants.set(shareId, []);
+			return [];
 		}
 
 		const recipients = await db('share_users').select('user_id').where('share_id', '=', shareId);
@@ -83,10 +101,10 @@ export const up = async (db: DbConnection) => {
 		return participants;
 	};
 
+	let processedCount = 0;
 	while (await next()) {
-		const rows = [];
 		for (const change of changes) {
-			const previousShareId = change.share_id;
+			const previousShareId = change.previous_item_share_id;
 			const updatedChange = {
 				previous_share_id: previousShareId,
 				id: change.id,
@@ -96,23 +114,28 @@ export const up = async (db: DbConnection) => {
 				updated_time: change.updated_time,
 				created_time: change.created_time,
 			};
-			rows.push(updatedChange);
 
-			// TODO: This also needs to push ({ type: Update })s when the current update is the last update
-			// **and** the last update changes the share_id. Currently, it doesn't.
-			if (change.jop_share_id && previousShareId === change.jop_share_id) {
-				// Create one update per user
-				for (const participantId of await getShareParticipants(change.jop_share_id)) {
-					if (participantId === change.user_id) continue;
+			const shareParticipants = await getShareParticipants(change.jop_share_id);
+			await db.transaction(async transaction => {
+				await transaction('changes_2').insert(updatedChange);
 
-					rows.push({
-						...updatedChange,
-						user_id: participantId,
-					});
+				if (change.jop_share_id && previousShareId === change.jop_share_id) {
+					// Create one update per user
+					for (const participantId of shareParticipants) {
+						if (participantId === change.user_id) continue;
+
+						await transaction('changes_2').insert({
+							...updatedChange,
+							id: uuidgen(),
+							user_id: participantId,
+						});
+					}
 				}
-			}
+			});
 		}
-		await db('changes_2').insert(rows);
+
+		processedCount += changes.length;
+		logger.info('Processed', processedCount, '/', total);
 	}
 };
 
