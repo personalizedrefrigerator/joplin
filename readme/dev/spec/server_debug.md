@@ -1,4 +1,6 @@
-# Debugging Server project with vscode
+# Debugging Server project
+
+## Debugging with vscode
 
 Using a debugger sometimes is much easier than trying to just print things to understand a bug, 
 for the server project we have a configuration that makes it easy for everyone to run in debug mode inside vscode.
@@ -42,3 +44,10 @@ the configuration into two files, one for the `launch.json` and other for the `t
 ![image](https://github.com/laurent22/joplin/assets/5051088/b3a12b9f-704c-4dc8-b2bd-14ba7a1c4759)
 ![image](https://github.com/laurent22/joplin/assets/5051088/c45becc4-44b7-4f95-9d49-421517e29592)
 
+## Running debug commands
+
+When running in development mode, several debug commands can be run by POSTing data to `/api/debug`. These include:
+- The `populateDatabase` command adds content to the database, creating test users with initial data.
+	- Example: `curl --data '{"action": "populateDatabase", "size": 2}' -H 'Content-Type: application/json' http://api.joplincloud.local:22300/api/`.
+- The `benchmarkDeltaPerformance` command tests the performance of `models().delta` by calling `delta` multiple times for each user account. Data is saved in the `packages/server/delta-perf.csv`.
+	- Example: `curl --data '{"action":"benchmarkDeltaPerformance"}' -H 'Content-Type: application/json' http://localhost:22300/api/debug`.
