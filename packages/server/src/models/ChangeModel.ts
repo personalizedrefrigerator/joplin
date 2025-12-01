@@ -147,7 +147,7 @@ export default class ChangeModel extends BaseModel<Change> {
 			FROM "changes"
 			WHERE counter > ${argSql('fromCounter', 'int')}
 			AND (type = ${ChangeType.Create} OR type = ${ChangeType.Delete})
-			AND user_id = ${argSql('userId', 'char[32]')}
+			AND user_id = ${argSql('userId', 'char(32)')}
 			ORDER BY "counter" ASC
 			${doCountQuery ? '' : `LIMIT ${argSql('limit', 'int')}`}
 		`;
@@ -195,7 +195,7 @@ export default class ChangeModel extends BaseModel<Change> {
 			WITH ui AS MATERIALIZED (
 				SELECT item_id
 				FROM user_items
-				WHERE user_id = ${argSql('userId', 'char[32]')}
+				WHERE user_id = ${argSql('userId', 'char(32)')}
 			)
 			SELECT ${changesFieldsSql}
 			FROM changes

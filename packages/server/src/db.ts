@@ -119,14 +119,30 @@ export function makeKnexConfig(dbConfig: DatabaseConfig): KnexDatabaseConfig {
 			// Set up per-connection state.
 			// See https://knexjs.org/guide/#aftercreate
 			afterCreate: (connection, done) => {
-				const prepareStatements = BaseModel.buildPrepareStatementSql(true);
-				connection.query(prepareStatements, (error) => {
-					if (error) {
-						logger.error(`Error connecting to database: ${error}`);
-					}
+				const queryAsync = (query: string) => {
+					return new Promise<void>((resolve, reject) => {
+						connection.query(query, (error) => {
+							if (error) {
+								reject(error);
+							} else {
+								resolve();
+							}
+						});
+					});
+				};
 
-					done(error, connection);
-				});
+				const prepareStatements = BaseModel.buildPrepareStatementSql(true);
+				void (async () => {
+					try {
+						for (const statement of prepareStatements) {
+							await queryAsync(statement);
+						}
+						done(undefined, connection);
+					} catch (error) {
+						logger.error(error);
+						done(error, connection);
+					}
+				})();
 			},
 		};
 	}

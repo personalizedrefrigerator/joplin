@@ -439,7 +439,7 @@ export default abstract class BaseModel<T> {
 		for (const statement of this.prepareStatements_) {
 			sql.push(statement({ isPostgres }));
 		}
-		return sql.join(';');
+		return sql;
 	}
 
 	protected static async prepare<QueryParameterTypes extends object>(builder: PreparedStatementBuilder<QueryParameterTypes>) {
@@ -473,8 +473,26 @@ export default abstract class BaseModel<T> {
 			return { buildArgumentSql, argumentNames, argumentTypesSql };
 		};
 
-		let executeSql = '';
-		let executeSqlArgs: (keyof QueryParameterTypes)[] = null;
+		const validateAndEscapeArguments = (args: QueryParameterTypes, argumentNames: (keyof QueryParameterTypes)[]) => {
+			return argumentNames.map((name) => {
+				if (typeof args[name] === 'number') {
+					return args[name];
+				}
+
+				if (typeof args[name] !== 'string') {
+					throw new Error(`Unsupported argument type: ${typeof args[name]} (for argument ${String(name)})`);
+				}
+
+				// TODO: Support all values (improve escaping to handle more characters)
+				if (!args[name]?.match(/^[a-zA-Z0-9]+$/)) {
+					throw new Error(`Argument for ${String(name)} has unsupported characters (arg: ${args[name]}`);
+				}
+
+				return `'${args[name]}'`;
+			}).join(',');
+		};
+
+		let executeSql = (_args: QueryParameterTypes) => '';
 		this.prepareStatements_.push(({ isPostgres }: PrepareStatementOptions) => {
 			if (!isPostgres) throw new Error('Can only prepare statements for PostgreSQL');
 
@@ -483,25 +501,26 @@ export default abstract class BaseModel<T> {
 				argSql: buildArgumentSql,
 				isPostgres,
 			});
-			executeSql = `
-				EXECUTE ${statementName}(${argumentNames.map(() => '?').join(',')})
+			// Work around what seems to be a Knex issue: ?s are replaced with $ patterns
+			// when substituting variable bindings, breaking the EXECUTE call.
+			executeSql = (args: QueryParameterTypes) => `
+				EXECUTE ${statementName}(${validateAndEscapeArguments(args, argumentNames)})
 			`;
-			executeSqlArgs = argumentNames;
-			return `PREPARE ${statementName}(${argumentTypesSql.join(', ')}) AS ${sql}`;
+			return `PREPARE ${statementName} (${argumentTypesSql.join(', ')}) AS (${sql})`;
 		});
 
 		return {
-			execute: (db: DbConnection, options: QueryParameterTypes) => {
+			execute: async (db: DbConnection, options: QueryParameterTypes) => {
 				if (isPostgres(db)) {
-					return db.raw(executeSql, executeSqlArgs.map(name => {
-						return options[name];
-					}));
+					return db.raw(executeSql(options));
 				} else {
 					const { buildArgumentSql, argumentNames } = createArgumentBuilder(false);
 					const sql = builder.callback({
 						argSql: buildArgumentSql,
 						isPostgres: false,
 					});
+
+					validateAndEscapeArguments(options, argumentNames);
 					return db.raw(sql, argumentNames.map(name => {
 						return options[name];
 					}));
