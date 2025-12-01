@@ -7,10 +7,12 @@ import { Env, RouteType } from '../../utils/types';
 import { SubPath } from '../../utils/routeUtils';
 import { AppContext } from '../../utils/types';
 import { ErrorForbidden } from '../../utils/errors';
-import benchmarkDeltaPerformance from '../../tools/debug/benchmarkDeltaPerformance';
 import createTestUsers, { CreateTestUsersOptions } from '../../tools/debug/createTestUsers';
+import benchmarkDeltaPerformance from '../../tools/debug/benchmarkDeltaPerformance';
 import createUserDeletions from '../../tools/debug/createUserDeletions';
 import clearDatabase from '../../tools/debug/clearDatabase';
+import populateDatabase from '../../tools/debug/populateDatabase';
+import uuid from '@joplin/lib/uuid';
 
 const router = new Router(RouteType.Api);
 
@@ -53,6 +55,21 @@ router.post('api/debug', async (_path: SubPath, ctx: AppContext) => {
 
 	if (query.action === 'benchmarkDeltaPerformance') {
 		await benchmarkDeltaPerformance(ctx.joplin.models);
+	}
+
+	if (query.action === 'populateDatabase') {
+		const size = 'size' in query ? Number(query.size) : 1;
+		const actionCount = (() => {
+			if (size === 1) return 1024;
+			if (size === 2) return 4096;
+			return 1024 * 1024;
+		})();
+
+		await populateDatabase(ctx.joplin.models, {
+			actionCount,
+			userCount: 10,
+			userPrefix: uuid.create(),
+		});
 	}
 });
 
