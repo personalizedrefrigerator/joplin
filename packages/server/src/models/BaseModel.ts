@@ -1,5 +1,5 @@
 import { WithDates, WithUuid, databaseSchema, ItemType, Uuid, User } from '../services/database/types';
-import { DbConnection, QueryContext } from '../db';
+import { DbConnection, isPostgres, QueryContext } from '../db';
 import TransactionHandler from '../utils/TransactionHandler';
 import { uuidgen } from '@joplin/lib/uuid';
 import { ErrorUnprocessableEntity, ErrorBadRequest } from '../utils/errors';
@@ -59,6 +59,20 @@ export enum AclAction {
 	Delete = 4,
 	List = 5,
 }
+
+export interface PreparedStatementBuilderOptions<QueryParams> {
+	argSql: (key: keyof QueryParams, type: string)=> string;
+	isPostgres: boolean;
+}
+
+interface PrepareStatementOptions {
+	isPostgres: boolean;
+}
+
+type PreparedStatementBuilder<QueryParams> = {
+	statementName: string;
+	callback: (options: PreparedStatementBuilderOptions<QueryParams>)=> string;
+};
 
 export default abstract class BaseModel<T> {
 
@@ -419,4 +433,80 @@ export default abstract class BaseModel<T> {
 		}, 'BaseModel::delete');
 	}
 
+	private static prepareStatements_: ((prepareStatementsOptions: PrepareStatementOptions)=> string)[] = [];
+	public static buildPrepareStatementSql(isPostgres: boolean) {
+		const sql = [];
+		for (const statement of this.prepareStatements_) {
+			sql.push(statement({ isPostgres }));
+		}
+		return sql.join(';');
+	}
+
+	protected static async prepare<QueryParameterTypes extends object>(builder: PreparedStatementBuilder<QueryParameterTypes>) {
+		const statementName = builder.statementName;
+		if (!statementName.match(/^[a-zA-Z0-9]+$/)) {
+			throw new Error(`Invalid statement name ${statementName}`);
+		}
+
+		const createArgumentBuilder = (isPostgres: boolean) => {
+			const argumentTypesSql: string[] = [];
+			const argumentNames: (keyof QueryParameterTypes)[] = [];
+			const buildArgumentSql = (name: keyof QueryParameterTypes, typeSql: string) => {
+				if (isPostgres) {
+					const index = argumentNames.indexOf(name);
+					if (index > -1) {
+						if (typeSql !== argumentTypesSql[index]) {
+							throw new Error(`Wrong type ${typeSql} (was previously ${argumentTypesSql[index]})`);
+						}
+						return `$${index + 1}`; // Convert from 0-indexed to 1-indexed
+					}
+
+					argumentNames.push(name);
+					argumentTypesSql.push(typeSql);
+					return `$${argumentNames.length}`;
+				} else {
+					argumentNames.push(name);
+					argumentTypesSql.push(typeSql);
+					return '?';
+				}
+			};
+			return { buildArgumentSql, argumentNames, argumentTypesSql };
+		};
+
+		let executeSql = '';
+		let executeSqlArgs: (keyof QueryParameterTypes)[] = null;
+		this.prepareStatements_.push(({ isPostgres }: PrepareStatementOptions) => {
+			if (!isPostgres) throw new Error('Can only prepare statements for PostgreSQL');
+
+			const { buildArgumentSql, argumentNames, argumentTypesSql } = createArgumentBuilder(isPostgres);
+			const sql = builder.callback({
+				argSql: buildArgumentSql,
+				isPostgres,
+			});
+			executeSql = `
+				EXECUTE ${statementName}(${argumentNames.map(() => '?').join(',')})
+			`;
+			executeSqlArgs = argumentNames;
+			return `PREPARE ${statementName}(${argumentTypesSql.join(', ')}) AS ${sql}`;
+		});
+
+		return {
+			execute: (db: DbConnection, options: QueryParameterTypes) => {
+				if (isPostgres(db)) {
+					return db.raw(executeSql, executeSqlArgs.map(name => {
+						return options[name];
+					}));
+				} else {
+					const { buildArgumentSql, argumentNames } = createArgumentBuilder(false);
+					const sql = builder.callback({
+						argSql: buildArgumentSql,
+						isPostgres: false,
+					});
+					return db.raw(sql, argumentNames.map(name => {
+						return options[name];
+					}));
+				}
+			},
+		};
+	}
 }

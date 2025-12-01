@@ -6,6 +6,7 @@ import Logger from '@joplin/utils/Logger';
 import { databaseSchema } from './services/database/types';
 import { compareVersions } from 'compare-versions';
 import { copyFile } from 'fs-extra';
+import BaseModel from './models/BaseModel';
 
 // Make sure bigInteger values are numbers and not strings
 //
@@ -56,10 +57,16 @@ export interface QueryContext {
 	noSuchTableErrorLoggingDisabled?: boolean;
 }
 
+type RawDatabaseContext = {
+	query: (sql: string, callback: (error: unknown)=> void)=> void;
+};
+
 // See https://knexjs.org/guide/#pool
 interface KnexPoolConfig {
 	min: number;
 	max: number;
+
+	afterCreate: (connection: RawDatabaseContext, done: (error: unknown, connection: RawDatabaseContext)=> void)=> void;
 }
 
 export interface KnexDatabaseConfig {
@@ -105,7 +112,23 @@ export function makeKnexConfig(dbConfig: DatabaseConfig): KnexDatabaseConfig {
 		// Knex has a different default configuration for SQLite3 that seems to be
 		// a workaround for a connection-related issue.
 		// See https://knexjs.org/guide/#pool
-		pool = { min: 0, max: dbConfig.maxConnections };
+		pool = {
+			min: 0,
+			max: dbConfig.maxConnections,
+
+			// Set up per-connection state.
+			// See https://knexjs.org/guide/#aftercreate
+			afterCreate: (connection, done) => {
+				const prepareStatements = BaseModel.buildPrepareStatementSql(true);
+				connection.query(prepareStatements, (error) => {
+					if (error) {
+						logger.error(`Error connecting to database: ${error}`);
+					}
+
+					done(error, connection);
+				});
+			},
+		};
 	}
 
 	return {

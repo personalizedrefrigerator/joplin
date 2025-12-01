@@ -1,10 +1,9 @@
-import { Knex } from 'knex';
 import Logger from '@joplin/utils/Logger';
-import { DbConnection, SqliteMaxVariableNum, isPostgres } from '../db';
+import { DbConnection, SqliteMaxVariableNum } from '../db';
 import { Change, ChangeType, Item, Uuid } from '../services/database/types';
 import { ErrorResyncRequired } from '../utils/errors';
 import { Day, formatDateTime } from '../utils/time';
-import BaseModel, { SaveOptions } from './BaseModel';
+import BaseModel, { PreparedStatementBuilderOptions, SaveOptions } from './BaseModel';
 import { PaginatedResults } from './utils/pagination';
 import { NewModelFactoryHandler } from './factory';
 import { Config } from '../utils/types';
@@ -47,6 +46,12 @@ export function requestDeltaPagination(query: any): ChangePagination {
 	if ('limit' in query) output.limit = query.limit;
 	if ('cursor' in query) output.cursor = query.cursor;
 	return output;
+}
+
+interface DeltaQueryParameters {
+	fromCounter: number;
+	userId: string;
+	limit: number;
 }
 
 export default class ChangeModel extends BaseModel<Change> {
@@ -96,7 +101,7 @@ export default class ChangeModel extends BaseModel<Change> {
 		};
 	}
 
-	public async changesForUserQuery(userId: Uuid, fromCounter: number, limit: number, doCountQuery: boolean): Promise<Change[]> {
+	private static prepareDeltaQuery = (doCountQuery: boolean, { isPostgres, argSql }: PreparedStatementBuilderOptions<DeltaQueryParameters>) => {
 		// When need to get:
 		//
 		// - All the CREATE and DELETE changes associated with the user
@@ -140,21 +145,12 @@ export default class ChangeModel extends BaseModel<Change> {
 		const subQuery1 = `
 			SELECT ${fieldsSql}
 			FROM "changes"
-			WHERE counter > ?
-			AND (type = ? OR type = ?)
-			AND user_id = ?
+			WHERE counter > ${argSql('fromCounter', 'int')}
+			AND (type = ${ChangeType.Create} OR type = ${ChangeType.Delete})
+			AND user_id = ${argSql('userId', 'char[32]')}
 			ORDER BY "counter" ASC
-			${doCountQuery ? '' : 'LIMIT ?'}
+			${doCountQuery ? '' : `LIMIT ${argSql('limit', 'int')}`}
 		`;
-
-		const subParams1 = [
-			fromCounter,
-			ChangeType.Create,
-			ChangeType.Delete,
-			userId,
-		];
-
-		if (!doCountQuery) subParams1.push(limit);
 
 		// The "+ 0" was added to prevent Postgres from scanning the `changes` table in `counter`
 		// order, which is an extremely slow query plan. With "+ 0" it went from 2 minutes to 6
@@ -199,33 +195,20 @@ export default class ChangeModel extends BaseModel<Change> {
 			WITH ui AS MATERIALIZED (
 				SELECT item_id
 				FROM user_items
-				WHERE user_id = ?
+				WHERE user_id = ${argSql('userId', 'char[32]')}
 			)
 			SELECT ${changesFieldsSql}
 			FROM changes
-			WHERE type = ?
-				AND counter > ?
+			WHERE type = ${ChangeType.Update}
+				AND counter > ${argSql('fromCounter', 'int')}
 				AND EXISTS (
 					SELECT 1
 					FROM ui
 					WHERE ui.item_id = changes.item_id
 				)
 			ORDER BY counter
-			${doCountQuery ? '' : 'LIMIT ?'}
+			${doCountQuery ? '' : `LIMIT ${argSql('limit', 'int')}`}
 		`;
-
-		const subParams2 = [
-			userId,
-			ChangeType.Update,
-			fromCounter,
-		];
-
-		if (!doCountQuery) subParams2.push(limit);
-
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-		let query: Knex.Raw<any> = null;
-
-		const finalParams = subParams1.concat(subParams2);
 
 		// For Postgres, we need to use materialized tables because, even
 		// though each independent query is fast, the query planner end up going
@@ -236,11 +219,8 @@ export default class ChangeModel extends BaseModel<Change> {
 		// materialized views too, but it doesn't work for some reason so we
 		// keep the non-optimised query.
 
-		if (!doCountQuery) {
-			finalParams.push(limit);
-
-			if (isPostgres(this.dbSlave)) {
-				query = this.dbSlave.raw(`
+		if (isPostgres) {
+			return `
 					WITH cte1 AS MATERIALIZED (
 						${subQuery1}
 					)
@@ -251,29 +231,41 @@ export default class ChangeModel extends BaseModel<Change> {
 					UNION ALL
 					TABLE cte2
 					ORDER BY counter ASC
-					LIMIT ?
-				`, finalParams);
-			} else {
-				query = this.dbSlave.raw(`
-					SELECT ${fieldsSql} FROM (${subQuery1}) as sub1
-					UNION ALL				
-					SELECT ${fieldsSql} FROM (${subQuery2}) as sub2
-					ORDER BY counter ASC
-					LIMIT ?
-				`, finalParams);
-			}
+					${doCountQuery ? '' : `LIMIT ${argSql('limit', 'int')}`}
+			`;
 		} else {
-			query = this.dbSlave.raw(`
-				SELECT count(*) as total
-				FROM (
-					(${subQuery1})
-					UNION ALL				
-					(${subQuery2})
-				) AS merged
-			`, finalParams);
+			return `
+				SELECT ${fieldsSql} FROM (${subQuery1}) as sub1
+				UNION ALL				
+				SELECT ${fieldsSql} FROM (${subQuery2}) as sub2
+				ORDER BY counter ASC
+				${doCountQuery ? '' : `LIMIT ${argSql('limit', 'int')}`}
+			`;
 		}
+	};
+	private static deltaCountQuery = this.prepare<DeltaQueryParameters>({
+		statementName: 'changesDeltaCounted',
+		callback: (options) => {
+			return this.prepareDeltaQuery(true, options);
+		},
+	});
+	private static deltaUncountedQuery = this.prepare<DeltaQueryParameters>({
+		statementName: 'changesDeltaUncounted',
+		callback: (options) => {
+			return this.prepareDeltaQuery(false, options);
+		},
+	});
 
-		const results = await query;
+	public async changesForUserQuery(userId: Uuid, fromCounter: number, limit: number, doCountQuery: boolean): Promise<Change[]> {
+
+		const queryParameters: DeltaQueryParameters = {
+			fromCounter,
+			userId,
+			limit,
+		};
+		const results = await (doCountQuery ? await ChangeModel.deltaCountQuery : await ChangeModel.deltaUncountedQuery).execute(
+			this.dbSlave, queryParameters,
+		);
 
 		// Because it's a raw query, we need to handle the results manually:
 		// Postgres returns an object with a "rows" property, while SQLite
