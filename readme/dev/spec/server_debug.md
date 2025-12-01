@@ -49,5 +49,5 @@ the configuration into two files, one for the `launch.json` and other for the `t
 When running in development mode, several debug commands can be run by POSTing data to `/api/debug`. These include:
 - The `populateDatabase` command adds content to the database, creating test users with initial data.
 	- Example: `curl --data '{"action": "populateDatabase", "size": 2}' -H 'Content-Type: application/json' http://api.joplincloud.local:22300/api/`.
-- The `benchmarkDeltaPerformance` command tests the performance of `models().delta` by calling `delta` multiple times for each user account. Data is saved in the `packages/server/delta-perf.csv`.
+- The `benchmarkDeltaPerformance` command tests the performance of `models().delta` by calling `delta` multiple times for each user account. Data is saved in `packages/server/delta-perf.csv`.
 	- Example: `curl --data '{"action":"benchmarkDeltaPerformance"}' -H 'Content-Type: application/json' http://localhost:22300/api/debug`.
