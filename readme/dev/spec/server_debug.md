@@ -49,7 +49,7 @@ the configuration into two files, one for the `launch.json` and other for the `t
 When running in development mode, several debug commands can be run by sending requests to `/api/debug`. These include:
 - The `populateDatabase` command adds content to the database, creating test users with initial data.
 	- Among other things, this allows testing how Joplin Server handles a large number of users, items, and changes. A larger `size` parameter creates more items. `size` can be either 1, 2, or 3.
-	- Example: `curl --data '{"action": "populateDatabase", "size": 2}' -H 'Content-Type: application/json' http://api.joplincloud.local:22300/api/`.
+	- Example: `curl --data '{"action": "populateDatabase", "size": 2}' -H 'Content-Type: application/json' http://localhost:22300/api/debug`.
 - The `benchmarkDeltaPerformance` command tests the performance of `models.change().delta` by calling `delta` multiple times for each user account. Data is saved in `packages/server/delta-perf.csv`.
 	- `ChangeModel.delta` is called during sync and has historically been a performance bottleneck.
 	- Example: `curl --data '{"action":"benchmarkDeltaPerformance"}' -H 'Content-Type: application/json' http://localhost:22300/api/debug`.
