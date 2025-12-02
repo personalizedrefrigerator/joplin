@@ -44,9 +44,12 @@ enum Action {
 	DeleteFolder = 'deleteFolder',
 }
 
-const createActions = [Action.CreateNote, Action.CreateFolder, Action.CreateAndShareFolder, Action.CreateNoteAndResource];
+const createActions = [Action.CreateNote, Action.CreateFolder, Action.CreateNoteAndResource, Action.CreateAndShareFolder];
+const createActionWeights = [0.55, 0.3, 0.1, 0.05];
 const updateActions = [Action.UpdateNote, Action.UpdateFolder];
+const updateActionWeights = [0.7, 0.3];
 const deleteActions = [Action.DeleteNote, Action.DeleteFolder];
+const deleteActionWeights = [0.7, 0.3];
 
 const isCreateAction = (action: Action) => {
 	return createActions.includes(action);
@@ -64,6 +67,42 @@ type Reaction = (context: Context, user: User)=> Promise<boolean>;
 
 const randomInt = (min: number, max: number) => {
 	return Math.floor(Math.random() * (max - min + 1)) + min;
+};
+
+const randomWeightedElement = <T> (items: T[], weights: number[]): T => {
+	if (items.length !== weights.length) {
+		throw new Error('Items and weights must have the same length');
+	}
+	// Normalize the weights so that they add up to one.
+	const weightsSum = weights.reduce((a, b) => a + b, 0);
+	const normalizedWeights = weights.map(w => w / weightsSum);
+
+	// Pair items and weights
+	const weightedItems = items.map((item, index) => ({ item, weight: normalizedWeights[index] }));
+
+	let weightSum = 0;
+	const value = Math.random();
+	// Find the last item with `value` in its range
+	for (const item of weightedItems) {
+		weightSum += item.weight;
+		if (weightSum > value) {
+			return item.item;
+		}
+	}
+
+	return null;
+};
+
+const shuffled = <T> (items: T[]) => {
+	const result = [...items];
+	// See: https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle
+	for (let i = 0; i < result.length - 1; i++) {
+		const targetIndex = randomInt(i + 1, result.length - 1);
+		const tmp = result[targetIndex];
+		result[targetIndex] = result[i];
+		result[i] = tmp;
+	}
+	return result;
 };
 
 const joplinIdToItem = (context: Context, user: User, parentId: string) => {
@@ -137,8 +176,10 @@ const reactions: Record<Action, Reaction> = {
 		const item = await createRandomFolder(context, user);
 		const share = await context.models.share().shareFolder(user, item.jop_id, '');
 
-		const recipientEmail = randomElement(context.userEmails.filter(email => email !== user.email));
-		await context.models.shareUser().addByEmail(share.id, recipientEmail, '');
+		for (const email of shuffled(context.userEmails)) {
+			await context.models.shareUser().addByEmail(share.id, email, '');
+			if (Math.random() < 0.1) break;
+		}
 
 		return true;
 	},
@@ -244,11 +285,11 @@ const reactions: Record<Action, Reaction> = {
 const randomActionKey = () => {
 	const r = Math.random();
 	if (r <= .35) {
-		return randomElement(createActions);
+		return randomWeightedElement(createActions, createActionWeights);
 	} else if (r <= .8) {
-		return randomElement(updateActions);
+		return randomWeightedElement(updateActions, updateActionWeights);
 	} else {
-		return randomElement(deleteActions);
+		return randomWeightedElement(deleteActions, deleteActionWeights);
 	}
 };
 
@@ -323,7 +364,7 @@ const populateDatabase = async (models: Models, options: Options) => {
 			for (let j = 0; j < batchSize; j++) {
 				promises.push((async () => {
 					const user = randomElement(users);
-					const action = randomElement(createActions);
+					const action = randomWeightedElement(createActions, createActionWeights);
 					await reactions[action](context, user);
 					updateReport(action);
 					logger().info(`Done action ${i}: ${action}. User: ${user.email}`);
