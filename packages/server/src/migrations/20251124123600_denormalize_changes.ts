@@ -1,7 +1,6 @@
 import Logger from '@joplin/utils/Logger';
 import { DbConnection, isPostgres } from '../db';
 import { ChangeType, Uuid } from '../services/database/types';
-import { uuidgen } from '@joplin/lib/uuid';
 
 const logger = Logger.create('denormalize_changes');
 
@@ -21,6 +20,7 @@ type ChangeEntryOriginal = {
 export const config = { transaction: false };
 
 export const up = async (db: DbConnection) => {
+
 	await db.transaction(async transaction => {
 		if (await transaction.schema.hasTable('changes_2')) return;
 
@@ -69,90 +69,66 @@ export const up = async (db: DbConnection) => {
 
 	let offset = await startOffset();
 	const total = Object.values(await db('changes').count().where('counter', '>=', offset).first())[0];
-	logger.info('Migrating', total, 'changes...');
+	logger.info('Migrating', total, 'changes... start', offset);
 
-	const batchSize = 512;
-	type ChangeRecord = ChangeEntryOriginal & { jop_share_id: Uuid };
-	let changes: ChangeRecord[] = [];
-
+	const batchSize = 4000;
+	let counterRange: [number, number] = [offset, offset];
 	const next = async () => {
-		const changeFields = ['id', 'type', 'user_id', 'item_id', 'created_time', 'updated_time', 'counter'];
-		const previousItemAsJsonSelector = isPostgres(db) ? '"previous_item"::json' : '"previous_item"';
-		const records = await db('changes')
-			.select(
-				'items.jop_share_id',
-				...changeFields.map(f => `changes.${f}`),
-				db.raw(`(
-					CASE WHEN previous_item='' THEN ''
-            			ELSE COALESCE(${previousItemAsJsonSelector} ->> 'jop_share_id', '')
-					END
-				) as previous_item_share_id`),
-			)
-			.where('changes.counter', '>=', offset)
-			.leftJoin('items', 'items.id', '=', 'changes.item_id')
+		const nextCounters = await db('changes')
+			.select('counter')
+			.where('counter', '>', offset)
 			.orderBy('counter', 'asc')
 			.limit(batchSize);
-		if (!records.length) {
-			changes = [];
+		if (!nextCounters.length) {
 			return false;
 		}
 
-		offset = records[records.length - 1].counter + 1;
-		changes = records;
+		const oldOffset = offset;
+		const newOffset = nextCounters[nextCounters.length - 1].counter;
+		counterRange = [oldOffset, newOffset];
+		offset = newOffset;
+
 		return true;
-	};
-	const shareToParticipants = new Map<Uuid, Uuid[]>();
-	const getShareParticipants = async (shareId: Uuid) => {
-		if (shareToParticipants.has(shareId)) {
-			return shareToParticipants.get(shareId);
-		}
-
-		const matchingShares = await db('shares').select('owner_id').where('id', '=', shareId);
-		if (!matchingShares.length) {
-			shareToParticipants.set(shareId, []);
-			return [];
-		}
-
-		const recipients = await db('share_users').select('user_id').where('share_id', '=', shareId);
-		const participants = [...recipients.map(r => r.user_id), matchingShares[0].owner_id];
-		shareToParticipants.set(shareId, participants);
-		return participants;
 	};
 
 	let processedCount = 0;
 	while (await next()) {
-		for (const change of changes) {
-			const previousShareId = change.previous_item_share_id;
-			const updatedChange = {
-				previous_share_id: previousShareId,
-				id: change.id,
-				type: change.type,
-				item_id: change.item_id,
-				user_id: change.user_id,
-				updated_time: change.updated_time,
-				created_time: change.created_time,
-			};
+		const previousItemAsJsonSelector = isPostgres(db) ? '"changes"."previous_item"::json' : 'changes.previous_item';
+		await db.transaction(async transaction => {
+			const result = await transaction.raw(`
+				WITH share_participants AS (
+						SELECT user_id, share_id FROM share_users
+					UNION ALL
+						SELECT owner_id AS user_id, id as share_id FROM shares
+				)
+				INSERT INTO changes_2 (previous_share_id, id, type, item_id, user_id, updated_time, created_time)
+					SELECT
+						COALESCE(share_participants.share_id, '') as previous_share_id,
+						changes.id,
+						changes.type,
+						changes.item_id,
+						(
+							CASE WHEN share_participants.share_id IS NULL
+								THEN changes.user_id
+								ELSE share_participants.user_id
+							END
+						) as user_id,
+						changes.updated_time,
+						changes.created_time
+					FROM changes
+					LEFT JOIN share_participants ON share_participants.share_id = (
+						CASE WHEN changes.previous_item=''
+							THEN ''
+							ELSE COALESCE(${previousItemAsJsonSelector} ->> 'jop_share_id', '')
+						END
+					)
+					WHERE changes.counter >= ?
+					AND changes.counter < ?
+					ORDER BY changes.counter ASC
+			`, [counterRange[0], counterRange[1]]);
+			processedCount += result.rowCount;
+		});
 
-			const shareParticipants = await getShareParticipants(change.jop_share_id);
-			await db.transaction(async transaction => {
-				await transaction('changes_2').insert(updatedChange);
-
-				if (change.jop_share_id && previousShareId === change.jop_share_id) {
-					// Create one update per user
-					for (const participantId of shareParticipants) {
-						if (participantId === change.user_id) continue;
-
-						await transaction('changes_2').insert({
-							...updatedChange,
-							id: uuidgen(),
-							user_id: participantId,
-						});
-					}
-				}
-			});
-		}
-
-		processedCount += changes.length;
 		logger.info('Processed', processedCount, '/', total);
 	}
 };
