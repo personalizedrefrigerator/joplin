@@ -97,7 +97,7 @@ const shuffled = <T> (items: T[]) => {
 	const result = [...items];
 	// See: https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle
 	for (let i = 0; i < result.length - 1; i++) {
-		const targetIndex = randomInt(i + 1, result.length - 1);
+		const targetIndex = randomInt(i, result.length - 1);
 		const tmp = result[targetIndex];
 		result[targetIndex] = result[i];
 		result[i] = tmp;
@@ -223,6 +223,7 @@ const reactions: Record<Action, Reaction> = {
 
 		try {
 			const noteItem = await context.models.item().loadByJopId(user.id, noteId);
+			if (!noteItem) return false;
 			const note = await context.models.item().loadAsJoplinItem(noteItem.id);
 			const serialized = makeNoteSerializedBody({
 				title: randomWords(10),
@@ -269,6 +270,7 @@ const reactions: Record<Action, Reaction> = {
 		const noteId = randomElement(context.createdNoteIds[user.id]);
 		if (!noteId) return false;
 		const item = await context.models.item().loadByJopId(user.id, noteId, { fields: ['id'] });
+		if (!item) return false;
 		await context.models.item().delete(item.id, { allowNoOp: true });
 		return true;
 	},
