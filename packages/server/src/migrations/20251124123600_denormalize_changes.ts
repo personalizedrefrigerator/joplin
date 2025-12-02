@@ -94,6 +94,8 @@ export const up = async (db: DbConnection) => {
 	let processedCount = 0;
 	while (await next()) {
 		const previousItemAsJsonSelector = isPostgres(db) ? '"changes"."previous_item"::json' : 'changes.previous_item';
+		// TODO: This won't work in SQLite:
+		const uuidSelector = isPostgres(db) ? 'regexp_replace(gen_random_uuid()::text, \'-\', \'\', \'g\')' : 'regexp_replace(gen_random_uuid(), \'-\', \'\', \'g\')';
 		await db.transaction(async transaction => {
 			const result = await transaction.raw(`
 				WITH share_participants AS (
@@ -104,7 +106,12 @@ export const up = async (db: DbConnection) => {
 				INSERT INTO changes_2 (previous_share_id, id, type, item_id, user_id, updated_time, created_time)
 					SELECT
 						COALESCE(share_participants.share_id, '') as previous_share_id,
-						changes.id,
+						(
+							CASE WHEN share_participants.share_id IS NULL
+								THEN changes.id
+								ELSE ${uuidSelector}
+							END
+						) as id,
 						changes.type,
 						changes.item_id,
 						(
