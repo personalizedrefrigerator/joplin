@@ -181,6 +181,18 @@ const reactions: Record<Action, Reaction> = {
 			if (Math.random() < 0.1) break;
 		}
 
+		// Tag the folder with the share ID so that items created within
+		// the folder can be part of the share:
+		const folder = await context.models.item().loadAsJoplinItem(item.id);
+		const serialized = makeFolderSerializedBody({
+			...folder,
+			share_id: share.id,
+		});
+		await context.models.item().saveFromRawContent(user, {
+			name: `${folder.id}.md`,
+			body: Buffer.from(serialized),
+		});
+
 		return true;
 	},
 
