@@ -69,15 +69,19 @@ export const up = async (db: DbConnection) => {
 				'items.jop_share_id',
 				...changeFields.map(f => `changes.${f}`),
 				db.raw(`(
-					CASE WHEN previous_item="" THEN ""
+					CASE WHEN previous_item='' THEN ''
             			ELSE COALESCE(${previousItemAsJsonSelector} ->> 'jop_share_id', '')
 					END
 				) as previous_item_share_id`),
 			)
 			.where('changes.counter', '>', offset)
-			.join('items', 'items.id', '=', 'changes.item_id')
+			.leftJoin('items', 'items.id', '=', 'changes.item_id')
+			.orderBy('counter', 'asc')
 			.limit(batchSize);
-		if (!records.length) return false;
+		if (!records.length) {
+			changes = [];
+			return false;
+		}
 
 		offset = records[records.length - 1].counter;
 		changes = records;
