@@ -44,17 +44,31 @@ export const up = async (db: DbConnection) => {
 
 	// Storing the start offset allows the migration to be resumed after an interruption
 	const startOffset = async () => {
-		const lastItem = await db('changes_2').select('id').orderBy('counter', 'desc').first();
-		const lastId = lastItem?.id;
-		if (!lastId) return 0;
+		let processedItem: ChangeEntryOriginal|undefined = undefined;
+		const nextProcessedItemFromEnd = async () => {
+			let lastItemQuery = db('changes_2')
+				.select('id', 'counter');
+			if (processedItem) {
+				lastItemQuery = lastItemQuery.where('counter', '<', processedItem.counter);
+			}
+			processedItem = await lastItemQuery.orderBy('counter', 'desc').first();
+		};
 
-		const originalItem = await db('changes').select('id', 'counter').where('id', '=', lastId).first();
+		let originalItem;
+		do {
+			await nextProcessedItemFromEnd();
+			if (!processedItem) return 0;
+
+			originalItem = await db('changes').select('id', 'counter').where('id', '=', processedItem.id).first();
+		} while (!originalItem);
+
 		const lastCounter = originalItem.counter;
-		return lastCounter;
+		const nextCounter = lastCounter + 1;
+		return nextCounter;
 	};
 
 	let offset = await startOffset();
-	const total = Object.values(await db('changes').count().where('counter', '>', offset).first())[0];
+	const total = Object.values(await db('changes').count().where('counter', '>=', offset).first())[0];
 	logger.info('Migrating', total, 'changes...');
 
 	const batchSize = 512;
@@ -74,7 +88,7 @@ export const up = async (db: DbConnection) => {
 					END
 				) as previous_item_share_id`),
 			)
-			.where('changes.counter', '>', offset)
+			.where('changes.counter', '>=', offset)
 			.leftJoin('items', 'items.id', '=', 'changes.item_id')
 			.orderBy('counter', 'asc')
 			.limit(batchSize);
@@ -83,7 +97,7 @@ export const up = async (db: DbConnection) => {
 			return false;
 		}
 
-		offset = records[records.length - 1].counter;
+		offset = records[records.length - 1].counter + 1;
 		changes = records;
 		return true;
 	};
