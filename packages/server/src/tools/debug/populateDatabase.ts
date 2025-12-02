@@ -45,7 +45,7 @@ enum Action {
 }
 
 const createActions = [Action.CreateNote, Action.CreateFolder, Action.CreateNoteAndResource, Action.CreateAndShareFolder];
-const createActionWeights = [0.55, 0.3, 0.1, 0.05];
+const createActionWeights = [0.5, 0.3, 0.1, 0.1];
 const updateActions = [Action.UpdateNote, Action.UpdateFolder];
 const updateActionWeights = [0.7, 0.3];
 const deleteActions = [Action.DeleteNote, Action.DeleteFolder];
