@@ -1,6 +1,6 @@
 import { _, _n } from '../locale';
 import Note from '../models/Note';
-import { CommandRuntime, CommandDeclaration, CommandContext } from '../services/CommandService';
+import CommandService, { CommandRuntime, CommandDeclaration, CommandContext } from '../services/CommandService';
 import { MarkupLanguage } from '@joplin/renderer';
 import { runtime as convertHtmlToMarkdown } from './convertHtmlToMarkdown';
 import shim, { ToastType } from '../shim';
@@ -16,6 +16,17 @@ const logger = Logger.create('convertNoteToMarkdown');
 export const declaration: CommandDeclaration = {
 	name: 'convertNoteToMarkdown',
 	label: () => _('Convert to Markdown'),
+};
+
+const selectNote = async (context: CommandContext, id: string) => {
+	if (shim.mobilePlatform()) {
+		await CommandService.instance().execute('openNote', id);
+	} else {
+		context.dispatch({
+			type: 'NOTE_SELECT',
+			id,
+		});
+	}
 };
 
 export const runtime = (): CommandRuntime => {
@@ -49,16 +60,16 @@ export const runtime = (): CommandRuntime => {
 					newNote.markup_language = MarkupLanguage.Markdown;
 
 					await Note.save(newNote);
-					await Note.delete(note.id, { toTrash: true });
-					processedCount ++;
 
 					if (isFirst) {
-						context.dispatch({
-							type: 'NOTE_SELECT',
-							id: newNote.id,
-						});
+						await selectNote(context, newNote.id);
 						isFirst = false;
 					}
+
+					// Delete after selecting the new note. Otherwise, the mobile app selects the new
+					// note's parent folder.
+					await Note.delete(note.id, { toTrash: true });
+					processedCount ++;
 				}
 
 				void shim.showToast(_n(

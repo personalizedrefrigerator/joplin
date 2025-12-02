@@ -450,7 +450,12 @@ function NoteEditor(props: Props) {
 				/>
 			</View>
 
-			<WarningBanner editorType={props.mode}/>
+			<WarningBanner
+				editorType={props.mode}
+				noteId={props.noteId}
+				markupLanguage={props.markupLanguage}
+				readOnly={props.readOnly}
+			/>
 
 			<SearchPanel
 				editorSettings={editorSettings}

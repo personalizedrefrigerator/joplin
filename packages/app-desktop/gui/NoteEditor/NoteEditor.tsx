@@ -59,6 +59,7 @@ import useConnectToEditorPlugin from './utils/useConnectToEditorPlugin';
 import getResourceBaseUrl from './utils/getResourceBaseUrl';
 import useInitialCursorLocation from './utils/useInitialCursorLocation';
 import NotePositionService, { EditorCursorLocations } from '@joplin/lib/services/NotePositionService';
+import useConvertToMarkdownBanner from '@joplin/lib/components/shared/NoteEditor/WarningBanner/useConvertToMarkdownBanner';
 
 const debounce = require('debounce');
 
@@ -496,16 +497,12 @@ function NoteEditorContent(props: NoteEditorProps) {
 		setShowRevisions(false);
 	}, []);
 
-	const onBannerConvertItToMarkdown = useCallback(async (event: React.MouseEvent<HTMLAnchorElement>) => {
-		event.preventDefault();
-		if (!props.selectedNoteIds || props.selectedNoteIds.length === 0) return;
-		await CommandService.instance().execute('convertNoteToMarkdown', props.selectedNoteIds[0]);
-	}, [props.selectedNoteIds]);
 
-	const onHideBannerConvertItToMarkdown = async (event: React.MouseEvent<HTMLAnchorElement>) => {
-		event.preventDefault();
-		Setting.setValue('editor.enableHtmlToMarkdownBanner', false);
-	};
+	const convertToMarkdownBannerData = useConvertToMarkdownBanner({
+		note: formNote,
+		readOnly: isReadOnly,
+		dismissed: !props.enableHtmlToMarkdownBanner,
+	});
 
 	const onBannerResourceClick = useCallback(async (event: React.MouseEvent<HTMLAnchorElement>) => {
 		event.preventDefault();
@@ -652,20 +649,16 @@ function NoteEditorContent(props: NoteEditorProps) {
 	const theme = themeStyle(props.themeId);
 
 	function renderConvertHtmlToMarkdown(): React.ReactNode {
-		if (!props.enableHtmlToMarkdownBanner) return null;
-
-		const note = props.notes.find(n => n.id === props.selectedNoteIds[0]);
-		if (!note) return null;
-		if (note.markup_language !== MarkupLanguage.Html) return null;
+		if (!convertToMarkdownBannerData.enabled) return null;
 
 		return (
 			<div style={styles.resourceWatchBanner}>
 				<p style={styles.resourceWatchBannerLine}>
 					{_('This note is in HTML format. Convert it to Markdown to edit it more easily.')}
 					&nbsp;
-					<a href="#" style={styles.resourceWatchBannerAction} onClick={onBannerConvertItToMarkdown}>{`${_('Convert it')}`}</a>
+					<button className='link-button' style={styles.resourceWatchBannerAction} onClick={convertToMarkdownBannerData.convert.onPress}>{convertToMarkdownBannerData.convert.label}</button>
 					{' / '}
-					<a href="#" style={styles.resourceWatchBannerAction} onClick={onHideBannerConvertItToMarkdown}>{_('Don\'t show this message again')}</a>
+					<button className='link-button' style={styles.resourceWatchBannerAction} onClick={convertToMarkdownBannerData.dismiss.onPress}>{convertToMarkdownBannerData.dismiss.label}</button>
 				</p>
 			</div>
 		);
