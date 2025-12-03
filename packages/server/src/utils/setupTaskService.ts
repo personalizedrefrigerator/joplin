@@ -87,7 +87,7 @@ export default async function(env: Env, models: Models, config: Config, services
 		{
 			id: TaskId.DeleteArchivedBackups,
 			description: taskIdToLabel(TaskId.DeleteArchivedBackups),
-			schedule: '0 0 */2 * *',
+			schedule: '0 0 * * *',
 			run: (models: Models) => models.backupItem().deleteOldAccountBackups(),
 		},
 	];
