@@ -169,12 +169,7 @@ export default class ChangeModel extends BaseModel<Changes2> {
 		// keep the non-optimised query.
 
 		if (!doCountQuery) {
-			params.push(limit);
-			query = this.dbSlave.raw(`
-				${rawQuerySql}
-				ORDER BY counter ASC
-				LIMIT ?
-			`, params);
+			query = this.dbSlave.raw(rawQuerySql, params);
 		} else {
 			query = this.dbSlave.raw(`
 				SELECT count(*) as total
