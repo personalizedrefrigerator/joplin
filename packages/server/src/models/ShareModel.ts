@@ -1,5 +1,5 @@
 import { resourceBlobPath } from '../utils/joplinUtils';
-import { Change, ChangeType, Item, Share, ShareType, ShareUserStatus, User, Uuid } from '../services/database/types';
+import { Changes2, ChangeType, Item, Share, ShareType, ShareUserStatus, User, Uuid } from '../services/database/types';
 import { unique } from '../utils/array';
 import { ErrorBadRequest, ErrorForbidden, ErrorNotFound } from '../utils/errors';
 import { setQueryParameters } from '../utils/urlUtils';
@@ -199,7 +199,7 @@ export default class ShareModel extends BaseModel<Share> {
 			await this.models().userItem().remove(shareUserId, itemId);
 		};
 
-		const handleCreated = async (change: Change, item: Item, share: Share) => {
+		const handleCreated = async (change: Changes2, item: Item, share: Share) => {
 			if (!item.jop_share_id) return;
 
 			// When a folder is unshared, the share object is deleted, then all
@@ -227,11 +227,11 @@ export default class ShareModel extends BaseModel<Share> {
 			perfTimer.pop();
 		};
 
-		const getPreviousShareId = (change: Change) => {
-			return this.models().change().unserializePreviousItem(change.previous_item)?.jop_share_id;
+		const getPreviousShareId = (change: Changes2) => {
+			return change.previous_share_id;
 		};
 
-		const handleUpdated = async (change: Change, item: Item, share: Share, nextShareId: Uuid) => {
+		const handleUpdated = async (change: Changes2, item: Item, share: Share, nextShareId: Uuid) => {
 			const previousShareId = getPreviousShareId(change);
 			const shareId = share ? share.id : '';
 
@@ -348,7 +348,7 @@ export default class ShareModel extends BaseModel<Share> {
 				await this.withTransaction(async () => {
 					perfTimer.push(`Processing ${changes.length} changes`);
 
-					const itemToUpdates = new Map<Uuid, Change[]>();
+					const itemToUpdates = new Map<Uuid, Changes2[]>();
 					for (const change of changes) {
 						if (change.type === ChangeType.Update) {
 							const updates = itemToUpdates.get(change.item_id);

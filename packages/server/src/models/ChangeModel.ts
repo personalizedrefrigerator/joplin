@@ -1,19 +1,20 @@
 import { Knex } from 'knex';
 import Logger from '@joplin/utils/Logger';
 import { DbConnection, SqliteMaxVariableNum, isPostgres } from '../db';
-import { Change, Changes2, ChangeType, Item, Uuid } from '../services/database/types';
+import { Changes2, ChangeType, Item, Uuid } from '../services/database/types';
 import { ErrorResyncRequired } from '../utils/errors';
 import { Day, formatDateTime } from '../utils/time';
 import BaseModel, { SaveOptions } from './BaseModel';
 import { PaginatedResults } from './utils/pagination';
 import { NewModelFactoryHandler } from './factory';
 import { Config } from '../utils/types';
+import { BaseItemEntity } from '@joplin/lib/services/database/types';
 
 const logger = Logger.create('ChangeModel');
 
 export const defaultChangeTtl = 180 * Day;
 
-export interface DeltaChange extends Change {
+export interface DeltaChange extends Changes2 {
 	jop_updated_time?: number;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	jopItem?: any;
@@ -21,7 +22,7 @@ export interface DeltaChange extends Change {
 
 export type PaginatedDeltaChanges = PaginatedResults<DeltaChange>;
 
-export type PaginatedChanges = PaginatedResults<Change>;
+export type PaginatedChanges = PaginatedResults<Changes2>;
 
 export interface ChangePagination {
 	limit?: number;
@@ -84,7 +85,7 @@ export default class ChangeModel extends BaseModel<Changes2> {
 		const query = this.db(this.tableName).select(...this.defaultFields);
 		if (startChange) void query.where('counter', '>', startChange.counter);
 		void query.limit(limit);
-		let results: Change[] = await query;
+		let results: Changes2[] = await query;
 		const hasMore = !!results.length;
 		const cursor = results.length ? results[results.length - 1].id : id;
 		results = await this.removeDeletedItems(results);
@@ -97,7 +98,7 @@ export default class ChangeModel extends BaseModel<Changes2> {
 	}
 
 
-	public async changesForUserQuery(userId: Uuid, fromCounter: number, limit: number, doCountQuery: boolean): Promise<Change[]> {
+	public async changesForUserQuery(userId: Uuid, fromCounter: number, limit: number, doCountQuery: boolean): Promise<Changes2[]> {
 		// When need to get:
 		//
 		// - All the CREATE and DELETE changes associated with the user
@@ -131,6 +132,7 @@ export default class ChangeModel extends BaseModel<Changes2> {
 			'id',
 			'item_id',
 			'item_name',
+			'previous_share_id',
 			'type',
 			'updated_time',
 			'counter',
@@ -140,7 +142,7 @@ export default class ChangeModel extends BaseModel<Changes2> {
 
 		const subQuery1 = `
 			SELECT ${fieldsSql}
-			FROM "changes"
+			FROM "changes_2"
 			WHERE counter > ?
 			AND user_id = ?
 			ORDER BY "counter" ASC
@@ -199,7 +201,7 @@ export default class ChangeModel extends BaseModel<Changes2> {
 		// Because it's a raw query, we need to handle the results manually:
 		// Postgres returns an object with a "rows" property, while SQLite
 		// returns the rows directly;
-		const output: Change[] = results.rows ? results.rows : results;
+		const output: Changes2[] = results.rows ? results.rows : results;
 
 		// This property is present only for the purpose of ordering the results
 		// and can be removed afterwards.
@@ -250,7 +252,12 @@ export default class ChangeModel extends BaseModel<Changes2> {
 
 		const finalChanges = processedChanges.map(change => {
 			const item = items.find(item => item.id === change.item_id);
-			if (!item) return this.deltaIncludesItems_ ? { ...change, jopItem: null } : { ...change };
+			if (!item) {
+				return this.deltaIncludesItems_ ? {
+					...change,
+					jopItem: null as BaseItemEntity,
+				} : { ...change };
+			}
 			const deltaChange: DeltaChange = {
 				...change,
 				jop_updated_time: item.jop_updated_time,
@@ -270,7 +277,7 @@ export default class ChangeModel extends BaseModel<Changes2> {
 		};
 	}
 
-	private async removeDeletedItems(changes: Change[], items: Item[] = null): Promise<Change[]> {
+	private async removeDeletedItems(changes: Changes2[], items: Item[] = null): Promise<Changes2[]> {
 		const itemIds = changes.map(c => c.item_id);
 
 		// We skip permission check here because, when an item is shared, we need
@@ -279,7 +286,7 @@ export default class ChangeModel extends BaseModel<Changes2> {
 		// a context where permissions have already been checked.
 		items = items === null ? await this.db('items').select('id').whereIn('items.id', itemIds) : items;
 
-		const output: Change[] = [];
+		const output: Changes2[] = [];
 
 		for (const change of changes) {
 			const item = items.find(f => f.id === change.item_id);
@@ -324,14 +331,14 @@ export default class ChangeModel extends BaseModel<Changes2> {
 	// event.
 	//
 	// Public to allow testing.
-	public compressChanges_(changes: Change[]): Change[] {
-		const itemChanges = new Map<Uuid, Change>();
+	public compressChanges_(changes: Changes2[]): Changes2[] {
+		const itemChanges = new Map<Uuid, Changes2>();
 
-		const itemUniqueUpdates = new Map<Uuid, Change[]>();
+		const itemUniqueUpdates = new Map<Uuid, Changes2[]>();
 		const itemToLastUpdateShareIds = new Map<Uuid, Uuid>();
 
-		const changeToShareId = (change: Change) => {
-			return this.unserializePreviousItem(change.previous_item)?.jop_share_id ?? '';
+		const changeToShareId = (change: Changes2) => {
+			return change.previous_share_id ?? '';
 		};
 
 		for (const change of changes) {
@@ -384,7 +391,7 @@ export default class ChangeModel extends BaseModel<Changes2> {
 			}
 		}
 
-		const output: Change[] = [];
+		const output: Changes2[] = [];
 
 		for (const [itemId, change] of itemChanges) {
 			if (change.type === ChangeType.Update) {
@@ -396,7 +403,7 @@ export default class ChangeModel extends BaseModel<Changes2> {
 			}
 		}
 
-		output.sort((a: Change, b: Change) => a.counter < b.counter ? -1 : +1);
+		output.sort((a: Changes2, b: Changes2) => a.counter < b.counter ? -1 : +1);
 
 		return output;
 	}
