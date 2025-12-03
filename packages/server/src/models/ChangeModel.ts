@@ -1,6 +1,6 @@
 import { Knex } from 'knex';
 import Logger from '@joplin/utils/Logger';
-import { DbConnection, SqliteMaxVariableNum, isPostgres } from '../db';
+import { DbConnection, SqliteMaxVariableNum } from '../db';
 import { Changes2, ChangeType, Item, Uuid } from '../services/database/types';
 import { ErrorResyncRequired } from '../utils/errors';
 import { Day, formatDateTime } from '../utils/time';
@@ -140,7 +140,7 @@ export default class ChangeModel extends BaseModel<Changes2> {
 
 		const fieldsSql = `"${fields.join('", "')}"`;
 
-		const subQuery1 = `
+		const rawQuerySql = `
 			SELECT ${fieldsSql}
 			FROM "changes_2"
 			WHERE counter > ?
@@ -170,28 +170,16 @@ export default class ChangeModel extends BaseModel<Changes2> {
 
 		if (!doCountQuery) {
 			params.push(limit);
-
-			if (isPostgres(this.dbSlave)) {
-				query = this.dbSlave.raw(`
-					WITH cte1 AS MATERIALIZED (
-						${subQuery1}
-					)
-					TABLE cte1
-					ORDER BY counter ASC
-					LIMIT ?
-				`, params);
-			} else {
-				query = this.dbSlave.raw(`
-					SELECT ${fieldsSql} FROM (${subQuery1}) as sub1
-					ORDER BY counter ASC
-					LIMIT ?
-				`, params);
-			}
+			query = this.dbSlave.raw(`
+				${rawQuerySql}
+				ORDER BY counter ASC
+				LIMIT ?
+			`, params);
 		} else {
 			query = this.dbSlave.raw(`
 				SELECT count(*) as total
 				FROM (
-					(${subQuery1})
+					(${rawQuerySql})
 				) AS merged
 			`, params);
 		}
