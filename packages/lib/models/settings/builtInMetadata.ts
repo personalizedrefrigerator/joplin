@@ -1491,7 +1491,7 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 		},
 
 		'editor.inlineRendering': {
-			value: false,
+			value: true,
 			type: SettingItemType.Bool,
 			public: true,
 			appTypes: [AppType.Desktop, AppType.Mobile],
@@ -1501,7 +1501,7 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 			storage: SettingStorage.File,
 		},
 		'editor.imageRendering': {
-			value: false,
+			value: true,
 			type: SettingItemType.Bool,
 			public: true,
 			appTypes: [AppType.Desktop, AppType.Mobile],
@@ -1564,6 +1564,13 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 			description: () => 'Enable the the legacy Markdown editor. Some plugins require this editor to function. However, it has accessibility issues and other plugins will not work.',
 			storage: SettingStorage.File,
 			isGlobal: true,
+		},
+
+		// Used to keep track of migrations that require prompting the user.
+		'editor.migration': {
+			public: false,
+			value: 0,
+			type: SettingItemType.Int,
 		},
 
 		'linking.extraAllowedExtensions': {

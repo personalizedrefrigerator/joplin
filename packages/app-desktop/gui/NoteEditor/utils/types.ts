@@ -26,6 +26,8 @@ export interface ToolbarButtonInfos {
 	[key: string]: ToolbarButtonInfo;
 }
 
+export type NoteBodyEditorType = 'CodeMirror6'|'CodeMirror5'|'TinyMCE'|'PlainText';
+
 export interface NoteEditorProps {
 	noteId: string;
 	themeId: number;
@@ -65,7 +67,7 @@ export interface NoteEditorProps {
 	searchResults: ProcessResultsRow[];
 	pluginHtmlContents: PluginHtmlContents;
 	onTitleChange?: (title: string)=> void;
-	bodyEditor: string;
+	bodyEditor: NoteBodyEditorType;
 	startupPluginsLoaded: boolean;
 	enableHtmlToMarkdownBanner: boolean;
 }

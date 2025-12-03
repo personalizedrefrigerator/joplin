@@ -14,7 +14,7 @@ import useFormNote, { OnLoadEvent, OnSetFormNote } from './utils/useFormNote';
 import useEffectiveNoteId from './utils/useEffectiveNoteId';
 import useFolder from './utils/useFolder';
 import styles_ from './styles';
-import { NoteEditorProps, FormNote, OnChangeEvent, AllAssetsOptions, NoteBodyEditorRef, NoteBodyEditorPropsAndRef } from './utils/types';
+import { NoteEditorProps, FormNote, OnChangeEvent, AllAssetsOptions, NoteBodyEditorRef, NoteBodyEditorPropsAndRef, NoteBodyEditorType } from './utils/types';
 import CommandService from '@joplin/lib/services/CommandService';
 import Button, { ButtonLevel } from '../Button/Button';
 import eventManager, { EventName } from '@joplin/lib/eventManager';
@@ -708,7 +708,7 @@ const mapStateToProps = (state: AppState, ownProps: ConnectProps) => {
 	const windowState = stateUtils.windowStateById(state, ownProps.windowId);
 	const noteId = stateUtils.selectedNoteId(windowState);
 
-	let bodyEditor = windowState.editorCodeView ? 'CodeMirror6' : 'TinyMCE';
+	let bodyEditor: NoteBodyEditorType = windowState.editorCodeView ? 'CodeMirror6' : 'TinyMCE';
 	if (state.settings.isSafeMode) {
 		bodyEditor = 'PlainText';
 	} else if (windowState.editorCodeView && state.settings['editor.legacyMarkdown']) {
