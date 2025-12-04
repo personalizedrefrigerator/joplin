@@ -114,8 +114,9 @@ export const up = async (db: DbConnection) => {
 	};
 
 	const batchSize = 4000;
-	// The number of items in each batch to validate
-	const validationCount = batchSize;
+	// The number of items in each batch to validate. Larger values reduce performance,
+	// but improve confidence in the results.
+	const validationCount = Math.floor(batchSize / 10);
 
 	if (offset > 0) {
 		logger.info('Resuming... Validating last migrated changes...');
@@ -164,6 +165,7 @@ export const up = async (db: DbConnection) => {
 					UNION ALL
 						SELECT owner_id AS user_id, id as share_id FROM shares
 					UNION ALL
+						-- Placeholder for "the user that authored the change"
 						SELECT NULL AS user_id, '{placeholder}' AS share_id
 				)
 				INSERT INTO changes_2 (previous_share_id, id, type, item_id, user_id, updated_time, created_time)
