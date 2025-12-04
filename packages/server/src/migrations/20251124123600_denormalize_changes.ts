@@ -1,8 +1,15 @@
 import Logger from '@joplin/utils/Logger';
 import { DbConnection, isPostgres } from '../db';
-import { ChangeType, Uuid } from '../services/database/types';
+import { Uuid } from '../services/database/types';
 
 const logger = Logger.create('denormalize_changes');
+
+// A snapshot of ChangeType at the time of this migration
+enum ChangeType {
+	Create = 1,
+	Update = 2,
+	Delete = 3,
+}
 
 type ChangeEntryOriginal = {
 	counter: number;
@@ -72,6 +79,50 @@ export const up = async (db: DbConnection) => {
 	let offset = await startOffset();
 	const total = Object.values(await db('changes').count().where('counter', '>=', offset).first())[0];
 	logger.info('Migrating', total, 'changes... start', offset);
+
+	const validateChangeMigration = async (maximumCounter: number, limit: number) => {
+		const originalChanges = await db('changes').select('id', 'counter', 'type', 'previous_item')
+			.where('counter', '<', maximumCounter)
+			.orderBy('counter', 'desc')
+			.limit(limit);
+
+
+		for (const change of originalChanges) {
+			const migratedChanges = await db('changes_2')
+				.select('id', 'counter', 'type', 'previous_share_id')
+				.where('id', '=', change.id);
+
+			const validationError = (message: string) =>
+				new Error(`Validation failed: Change failed to migrate (${JSON.stringify(change)}->${JSON.stringify(migratedChanges)}): ${message}`);
+
+			if (migratedChanges.length !== 1) {
+				throw validationError('Migrated change not found.');
+			} else {
+				const migrated = migratedChanges[0];
+				if (migrated.type !== change.type) {
+					throw validationError(`Migrated change has wrong type. Was: ${migrated.type}, expected: ${change.type}`);
+				} else if (migrated.type === ChangeType.Update) {
+					const previousShareId = JSON.parse(change.previous_item || '{}').jop_share_id;
+					if (migrated.previous_share_id !== previousShareId) {
+						throw validationError(
+							`Wrong previous_share_id. Was: ${migrated.previous_share_id}, expected: ${previousShareId}.`,
+						);
+					}
+				}
+			}
+		}
+	};
+
+	if (offset > 0) {
+		logger.info('Resuming... Validating last migrated changes...');
+		try {
+			await validateChangeMigration(offset, 100);
+		} catch (error) {
+			logger.warn('Validation failed. The in-progress migration table will be deleted and the migration will need to be re-run. Error:', error);
+			await db.schema.dropTable('changes_2');
+			throw error;
+		}
+	}
 
 	const batchSize = 4000;
 	let counterRange: [number, number] = [offset, offset];
@@ -144,6 +195,9 @@ export const up = async (db: DbConnection) => {
 		});
 
 		logger.info('Processed', processedCount, '/', total);
+
+		// Validate: Select some of the original changes and verify that they were migrated
+		await validateChangeMigration(counterRange[1], batchSize);// Math.min(40, Math.ceil(batchSize / 10)));
 	}
 };
 
