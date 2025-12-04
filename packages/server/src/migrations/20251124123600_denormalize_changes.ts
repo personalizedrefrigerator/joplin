@@ -168,7 +168,7 @@ export const up = async (db: DbConnection) => {
 						-- Placeholder for "the user that authored the change"
 						SELECT NULL AS user_id, '{placeholder}' AS share_id
 				)
-				INSERT INTO changes_2 (previous_share_id, id, type, item_id, user_id, updated_time, created_time)
+				INSERT INTO changes_2 (previous_share_id, id, type, item_id, item_name, user_id, updated_time, created_time)
 					SELECT
 						(${previousShareIdSql}) as previous_share_id,
 						(
@@ -183,6 +183,7 @@ export const up = async (db: DbConnection) => {
 						) as id,
 						changes.type,
 						changes.item_id,
+						changes.item_name,
 						COALESCE(share_participants.user_id, changes.user_id) as user_id,
 						changes.updated_time,
 						changes.created_time
