@@ -49,6 +49,11 @@ export function requestDeltaPagination(query: any): ChangePagination {
 	return output;
 }
 
+type ItemsById = Map<Uuid, Item>;
+const indexItems = (items: Item[]): ItemsById => {
+	return new Map(items.map(item => [item.id, item]));
+};
+
 export default class ChangeModel extends BaseModel<Change> {
 
 	public deltaIncludesItems_: boolean;
@@ -87,7 +92,7 @@ export default class ChangeModel extends BaseModel<Change> {
 		let results: Change[] = await query;
 		const hasMore = !!results.length;
 		const cursor = results.length ? results[results.length - 1].id : id;
-		results = await this.removeDeletedItems(results);
+		results = await this.removeDeletedItems(results, indexItems(results));
 		results = await this.compressChanges_(results);
 		return {
 			items: results,
@@ -307,10 +312,13 @@ export default class ChangeModel extends BaseModel<Change> {
 			false,
 		);
 
-		let items: Item[] = await this.db('items').select('id', 'jop_updated_time').whereIn('items.id', changes.map(c => c.item_id));
+		let items: Item[] = await this.db('items')
+			.select('id', 'jop_updated_time')
+			.whereIn('items.id', changes.map(c => c.item_id));
+		let idToItem = indexItems(items);
 
 		let processedChanges = this.compressChanges_(changes);
-		processedChanges = await this.removeDeletedItems(processedChanges, items);
+		processedChanges = await this.removeDeletedItems(processedChanges, idToItem);
 
 		if (this.deltaIncludesItems_) {
 			items = await this.models().item().loadWithContentMulti(processedChanges.map(c => c.item_id), {
@@ -325,10 +333,11 @@ export default class ChangeModel extends BaseModel<Change> {
 					'jop_updated_time',
 				],
 			});
+			idToItem = indexItems(items);
 		}
 
 		const finalChanges = processedChanges.map(change => {
-			const item = items.find(item => item.id === change.item_id);
+			const item = idToItem.get(change.item_id);
 			if (!item) return this.deltaIncludesItems_ ? { ...change, jopItem: null } : { ...change };
 			const deltaChange: DeltaChange = {
 				...change,
@@ -349,19 +358,11 @@ export default class ChangeModel extends BaseModel<Change> {
 		};
 	}
 
-	private async removeDeletedItems(changes: Change[], items: Item[] = null): Promise<Change[]> {
-		const itemIds = changes.map(c => c.item_id);
-
-		// We skip permission check here because, when an item is shared, we need
-		// to fetch files that don't belong to the current user. This check
-		// would not be needed anyway because the change items are generated in
-		// a context where permissions have already been checked.
-		items = items === null ? await this.db('items').select('id').whereIn('items.id', itemIds) : items;
-
+	private async removeDeletedItems(changes: Change[], items: ItemsById): Promise<Change[]> {
 		const output: Change[] = [];
 
 		for (const change of changes) {
-			const item = items.find(f => f.id === change.item_id);
+			const item = items.get(change.item_id);
 
 			// If the item associated with this change has been deleted, we have
 			// two cases:
