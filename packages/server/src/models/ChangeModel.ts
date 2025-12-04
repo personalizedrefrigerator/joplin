@@ -307,9 +307,11 @@ export default class ChangeModel extends BaseModel<Change> {
 			false,
 		);
 
-		let items: Item[] = await this.db('items').select('id', 'jop_updated_time').whereIn('items.id', changes.map(c => c.item_id));
-
 		let processedChanges = this.compressChanges_(changes);
+
+		let items: Item[] = await this.db('items')
+			.select('id', 'jop_updated_time')
+			.whereIn('items.id', processedChanges.map(c => c.item_id));
 		processedChanges = await this.removeDeletedItems(processedChanges, items);
 
 		if (this.deltaIncludesItems_) {
