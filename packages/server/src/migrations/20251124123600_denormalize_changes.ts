@@ -109,7 +109,7 @@ export const up = async (db: DbConnection) => {
 					SELECT
 						COALESCE(share_participants.share_id, '') as previous_share_id,
 						(
-							CASE WHEN share_participants.share_id IS NULL
+							CASE WHEN (share_participants.share_id IS NULL) OR (changes.user_id = share_participants.user_id)
 								THEN changes.id
 								ELSE ${uuidSelector}
 							END
@@ -134,6 +134,11 @@ export const up = async (db: DbConnection) => {
 					WHERE changes.counter >= ?
 					AND changes.counter < ?
 					ORDER BY changes.counter ASC
+				${
+	// This "ON CONFLICT DO NOTHING" is necessary to handle the case where the same user ID is present multiple
+	// times for the same share (e.g. if a user is both in share_users and is the share owner).
+	'ON CONFLICT DO NOTHING'
+}
 			`, [counterRange[0], counterRange[1]]);
 			processedCount += result.rowCount;
 		});
