@@ -156,8 +156,14 @@ export const up = async (db: DbConnection) => {
 				ELSE COALESCE(${isPostgres(db) ? '"changes"."previous_item"::json' : 'changes.previous_item'} ->> 'jop_share_id', '')
 			END
 		`;
-		// TODO: This won't work in SQLite:
-		const uuidSelector = isPostgres(db) ? 'regexp_replace(gen_random_uuid()::text, \'-\', \'\', \'g\')' : 'regexp_replace(gen_random_uuid(), \'-\', \'\', \'g\')';
+		const uuidSelector = isPostgres(db) ? `
+			regexp_replace(gen_random_uuid()::text, '-', '', 'g')
+		` : `
+			-- TODO: Check for a better way to generate IDs in SQLite.
+			-- This hex(randomblob) approach is mentioned in the SQLite documentation:
+			-- https://sqlite.org/lang_corefunc.html#randomblob
+			lower(hex(randomblob(16)))
+		`;
 		await db.transaction(async transaction => {
 			const result = await transaction.raw(`
 				WITH share_participants AS (
