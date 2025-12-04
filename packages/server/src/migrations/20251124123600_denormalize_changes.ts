@@ -131,20 +131,20 @@ export const up = async (db: DbConnection) => {
 
 	let counterRange: [number, number] = [offset, offset];
 	const next = async () => {
-		const nextCounters = await db('changes')
+		const nextBatch = await db('changes')
 			.select('counter')
-			.where('counter', '>', offset)
+			.where('counter', '>=', offset)
 			.orderBy('counter', 'asc')
 			.limit(batchSize);
-		if (!nextCounters.length) {
+		if (!nextBatch.length) {
 			return false;
 		}
 
-		const oldOffset = offset;
-		const newOffset = nextCounters[nextCounters.length - 1].counter;
-		counterRange = [oldOffset, newOffset];
-		offset = newOffset;
+		const processFrom = offset;
+		const processTo = nextBatch[nextBatch.length - 1].counter;
+		counterRange = [processFrom, processTo];
 
+		offset = processTo + 1; // The start of the next unprocessed block
 		return true;
 	};
 
@@ -191,7 +191,7 @@ export const up = async (db: DbConnection) => {
 					LEFT JOIN share_participants ON
 						share_participants.share_id IN ((${previousShareIdSql}), '{placeholder}')
 					WHERE changes.counter >= ?
-					AND changes.counter < ?
+					AND changes.counter <= ?
 					ORDER BY changes.counter ASC
 					-- This ON CONFLICT handles the case where two changes were created with the same ID. This is sometimes
 					-- done intentionally (see the "as id" block above) as a way to prevent a particular change from being
