@@ -113,10 +113,14 @@ export const up = async (db: DbConnection) => {
 		}
 	};
 
+	const batchSize = 4000;
+	// The number of items in each batch to validate
+	const validationCount = batchSize;
+
 	if (offset > 0) {
 		logger.info('Resuming... Validating last migrated changes...');
 		try {
-			await validateChangeMigration(offset, 100);
+			await validateChangeMigration(offset, validationCount);
 		} catch (error) {
 			logger.warn('Validation failed. The in-progress migration table will be deleted and the migration will need to be re-run. Error:', error);
 			await db.schema.dropTable('changes_2');
@@ -124,7 +128,6 @@ export const up = async (db: DbConnection) => {
 		}
 	}
 
-	const batchSize = 4000;
 	let counterRange: [number, number] = [offset, offset];
 	const next = async () => {
 		const nextCounters = await db('changes')
@@ -146,7 +149,12 @@ export const up = async (db: DbConnection) => {
 
 	let processedCount = 0;
 	while (await next()) {
-		const previousItemAsJsonSelector = isPostgres(db) ? '"changes"."previous_item"::json' : 'changes.previous_item';
+		const previousShareIdSql = `
+			CASE WHEN changes.previous_item=''
+				THEN ''
+				ELSE COALESCE(${isPostgres(db) ? '"changes"."previous_item"::json' : 'changes.previous_item'} ->> 'jop_share_id', '')
+			END
+		`;
 		// TODO: This won't work in SQLite:
 		const uuidSelector = isPostgres(db) ? 'regexp_replace(gen_random_uuid()::text, \'-\', \'\', \'g\')' : 'regexp_replace(gen_random_uuid(), \'-\', \'\', \'g\')';
 		await db.transaction(async transaction => {
@@ -155,49 +163,45 @@ export const up = async (db: DbConnection) => {
 						SELECT user_id, share_id FROM share_users
 					UNION ALL
 						SELECT owner_id AS user_id, id as share_id FROM shares
+					UNION ALL
+						SELECT NULL AS user_id, '{placeholder}' AS share_id
 				)
 				INSERT INTO changes_2 (previous_share_id, id, type, item_id, user_id, updated_time, created_time)
 					SELECT
-						COALESCE(share_participants.share_id, '') as previous_share_id,
+						(${previousShareIdSql}) as previous_share_id,
 						(
-							CASE WHEN (share_participants.share_id IS NULL) OR (changes.user_id = share_participants.user_id)
+							CASE WHEN share_participants.user_id IS NULL
+									-- This query runs for share_participants.user_id in (null, ...), where ...
+									-- sometimes includes changes.user_id. If it does, we need this check to prevent
+									-- the migrated change from being added twice for the current user.
+									OR share_participants.user_id = changes.user_id 
 								THEN changes.id
 								ELSE ${uuidSelector}
 							END
 						) as id,
 						changes.type,
 						changes.item_id,
-						(
-							CASE WHEN share_participants.share_id IS NULL
-								THEN changes.user_id
-								ELSE share_participants.user_id
-							END
-						) as user_id,
+						COALESCE(share_participants.user_id, changes.user_id) as user_id,
 						changes.updated_time,
 						changes.created_time
 					FROM changes
-					LEFT JOIN share_participants ON share_participants.share_id = (
-						CASE WHEN changes.previous_item=''
-							THEN ''
-							ELSE COALESCE(${previousItemAsJsonSelector} ->> 'jop_share_id', '')
-						END
-					)
+					LEFT JOIN share_participants ON
+						share_participants.share_id IN ((${previousShareIdSql}), '{placeholder}')
 					WHERE changes.counter >= ?
 					AND changes.counter < ?
 					ORDER BY changes.counter ASC
-				${
-	// This "ON CONFLICT DO NOTHING" is necessary to handle the case where the same user ID is present multiple
-	// times for the same share (e.g. if a user is both in share_users and is the share owner).
-	'ON CONFLICT DO NOTHING'
-}
+					-- This ON CONFLICT handles the case where two changes were created with the same ID. This is sometimes
+					-- done intentionally (see the "as id" block above) as a way to prevent a particular change from being
+					-- added twice for the same user.
+					ON CONFLICT DO NOTHING
 			`, [counterRange[0], counterRange[1]]);
 			processedCount += result.rowCount;
 		});
 
-		logger.info('Processed', processedCount, '/', total);
+		logger.info('Processed', processedCount, '/', total, `(start=${counterRange[0]}, end=${counterRange[1]})`);
 
 		// Validate: Select some of the original changes and verify that they were migrated
-		await validateChangeMigration(counterRange[1], batchSize);// Math.min(40, Math.ceil(batchSize / 10)));
+		await validateChangeMigration(counterRange[1], validationCount);
 	}
 };
 
