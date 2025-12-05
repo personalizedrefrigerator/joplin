@@ -113,10 +113,10 @@ export const up = async (db: DbConnection) => {
 		}
 	};
 
-	const batchSize = 4000;
+	const batchSize = 10_000;
 	// The number of items in each batch to validate. Larger values reduce performance,
 	// but improve confidence in the results.
-	const validationCount = Math.floor(batchSize / 10);
+	const validationCount = 100;
 
 	if (offset > 0) {
 		logger.info('Resuming... Validating last migrated changes...');
