@@ -155,6 +155,16 @@ export default class UserItemModel extends BaseModel<UserItem> {
 						user_id: userId,
 						item_id: item.id,
 					}, options);
+
+					if (this.models().item().shouldRecordChange(item.name)) {
+						await this.models().change().save({
+							item_id: item.id,
+							item_name: item.name,
+							type: ChangeType.Create,
+							previous_share_id: '',
+							user_id: userId,
+						});
+					}
 				} catch (error) {
 					if (!options.ignoreAlreadyExists || !isUniqueConstraintError(error)) {
 						throw error;

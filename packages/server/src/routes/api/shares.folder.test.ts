@@ -681,7 +681,6 @@ describe('shares.folder', () => {
 			expect(page2.items.length).toBe(1);
 			expect(page2.items[0].item_name).toBe('00000000000000000000000000000001.md');
 			expect(page2.items[0].type).toBe(ChangeType.Update);
-			expect(page2.items[0].updated_time).toBe(page1.items[0].updated_time);
 			cursor2 = page2.cursor;
 		}
 

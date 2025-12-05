@@ -1024,13 +1024,12 @@ export default class ItemModel extends BaseModel<Item> {
 
 			if (isNew) await this.models().userItem().add(userId, item.id);
 
-			// We only record updates. This because Create and Update events are
-			// per user, whenever a user_item is created or deleted.
+			// We only record updates. Create and Delete events are recorded elsewhere.
 			const changeItemName = item.name || previousName;
 
-			if (this.shouldRecordChange(changeItemName)) {
+			if (!isNew && this.shouldRecordChange(changeItemName)) {
 				// TODO: Potentially slow:
-				const share = item.jop_share_id ? await this.models().share().byUserAndItemId(userId, item.id) : null;
+				const share = item.jop_share_id ? await this.models().share().load(item.jop_share_id) : null;
 				const allUserIds = share ? await this.models().share().allShareUserIds(share) : [userId];
 
 				// Post a change for all users that can access the item
@@ -1038,7 +1037,7 @@ export default class ItemModel extends BaseModel<Item> {
 					await this.models().change().save({
 						item_id: item.id,
 						item_name: changeItemName,
-						type: isNew ? ChangeType.Create : ChangeType.Update,
+						type: ChangeType.Update,
 						previous_share_id: previousItem?.jop_share_id ?? '',
 						user_id: userId,
 					});
