@@ -64,23 +64,18 @@ describe('ChangeModel', () => {
 		}
 
 		{
-			const pagination: ChangePagination = { limit: 3 };
+			const pagination: ChangePagination = { limit: 5 };
 
 			// Internally, when we request the first three changes, we get back:
 			//
 			// - CREATE 1
+			// - UPDATE 1
+			// - UPDATE 1
 			// - CREATE 2
 			// - UPDATE 2a
 			//
 			// We don't get back UPDATE 1a and 1b because the associated item
 			// has been deleted.
-			//
-			// Unlike CREATE events, which come from "user_items" and are
-			// associated with a user, UPDATE events comes from "items" and are
-			// not associated with any specific user. Only if the user has a
-			// corresponding user_item do they get UPDATE events. But in this
-			// case, since the item has been deleted, there's no longer
-			// "user_items" objects.
 			//
 			// Then CREATE 1 is removed since item 1 has been deleted and UPDATE
 			// 2a is compressed down to CREATE 2.
@@ -93,11 +88,12 @@ describe('ChangeModel', () => {
 
 			// In the second page, we get all the expected events since nothing
 			// has been compressed.
-			const page2 = (await changeModel.delta(user.id, { ...pagination, cursor: page1.cursor }));
+			const page2 = (await changeModel.delta(user.id, { ...pagination, cursor: page1.cursor, limit: 3 }));
 			changes = page2.items;
 			expect(changes.length).toBe(3);
 			// Although there are no more changes, it's not possible to know
-			// that without running the next query
+			// that without running the next query, since the same number of changes
+			// were returned as the requested limit.
 			expect(page2.has_more).toBe(true);
 			expect(changes[0].item_id).toBe(item1.id);
 			expect(changes[0].type).toBe(ChangeType.Delete);
@@ -385,27 +381,27 @@ describe('ChangeModel', () => {
 		{
 			label: 'should not compress updates that change the share ID',
 			changes: [
-				{ type: ChangeType.Update, previous_item: '{ "jop_share_id": "a" }' },
-				{ type: ChangeType.Update, previous_item: '{ "jop_share_id": "b" }' },
+				{ type: ChangeType.Update, previous_share_id: 'a' },
+				{ type: ChangeType.Update, previous_share_id: 'b' },
 			],
 			expected: [
-				{ type: ChangeType.Update, previous_item: '{ "jop_share_id": "a" }' },
-				{ type: ChangeType.Update, previous_item: '{ "jop_share_id": "b" }' },
+				{ type: ChangeType.Update, previous_share_id: 'a' },
+				{ type: ChangeType.Update, previous_share_id: 'b' },
 			],
 		},
 		{
 			label: 'should keep the latest change when compressing updates',
 			changes: [
-				{ type: ChangeType.Update, item_id: '1', previous_item: '{ "jop_share_id": "a" }', counter: 1 },
-				{ type: ChangeType.Update, item_id: '1', previous_item: '{ "jop_share_id": "b" }', counter: 2 },
-				{ type: ChangeType.Update, item_id: '1', previous_item: '{ "jop_share_id": "b" }', counter: 3 },
-				{ type: ChangeType.Update, item_id: '2', previous_item: '{ "jop_share_id": "a" }', counter: 4 },
-				{ type: ChangeType.Update, item_id: '2', previous_item: '{ "jop_share_id": "a" }', counter: 5 },
+				{ type: ChangeType.Update, item_id: '1', previous_share_id: 'a', counter: 1 },
+				{ type: ChangeType.Update, item_id: '1', previous_share_id: 'b', counter: 2 },
+				{ type: ChangeType.Update, item_id: '1', previous_share_id: 'b', counter: 3 },
+				{ type: ChangeType.Update, item_id: '2', previous_share_id: 'a', counter: 4 },
+				{ type: ChangeType.Update, item_id: '2', previous_share_id: 'a', counter: 5 },
 			],
 			expected: [
-				{ type: ChangeType.Update, item_id: '1', previous_item: '{ "jop_share_id": "a" }', counter: 1 },
-				{ type: ChangeType.Update, item_id: '1', previous_item: '{ "jop_share_id": "b" }', counter: 3 },
-				{ type: ChangeType.Update, item_id: '2', previous_item: '{ "jop_share_id": "a" }', counter: 5 },
+				{ type: ChangeType.Update, item_id: '1', previous_share_id: 'a', counter: 1 },
+				{ type: ChangeType.Update, item_id: '1', previous_share_id: 'b', counter: 3 },
+				{ type: ChangeType.Update, item_id: '2', previous_share_id: 'a', counter: 5 },
 			],
 		},
 		{
