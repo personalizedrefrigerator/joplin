@@ -3,12 +3,13 @@ import { ShareType, Uuid } from '../../services/database/types';
 import recordBenchmark from './recordBenchmark';
 
 const benchmarkDeltaPerformance = async (models: Models) => {
-	const userIterator = async function*() {
+	const iterateUsers = async function*() {
 		let page = 1;
-		let done = false;
-		while (!done) {
-			const items = await models.user().allPaginated({ page: page++, limit: 500 });
-			done = !items.has_more;
+		let hasMore = true;
+		while (hasMore) {
+			const batchSize = 50;
+			const items = await models.user().allPaginated({ page: page++, limit: batchSize });
+			hasMore = items.has_more;
 
 			const users = items.items;
 			yield await Promise.all(users.map(async user => {
@@ -30,17 +31,16 @@ const benchmarkDeltaPerformance = async (models: Models) => {
 
 	await recordBenchmark<Uuid>({
 		taskLabel: 'full delta',
-		batchIterator: userIterator(),
+		batchIterator: iterateUsers(),
 		trialCount: 10,
 		outputFile: 'delta-perf-full.csv',
 		runTask: async (userId) => {
-			const cursor = '';
-			await models.change().delta(userId, { cursor, limit: 200 });
+			await models.change().delta(userId, { cursor: '', limit: 200 });
 		},
 	});
 	await recordBenchmark<Uuid>({
 		taskLabel: 'changes query',
-		batchIterator: userIterator(),
+		batchIterator: iterateUsers(),
 		trialCount: 10,
 		outputFile: 'delta-perf-query-only.csv',
 		runTask: async (userId) => {
