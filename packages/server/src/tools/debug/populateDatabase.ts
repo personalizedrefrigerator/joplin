@@ -1,6 +1,6 @@
 import { FolderEntity, NoteEntity } from '@joplin/lib/services/database/types';
 import Logger, { LogLevel, TargetType } from '@joplin/utils/Logger';
-import { User } from '../../services/database/types';
+import { Share, ShareUserStatus, User } from '../../services/database/types';
 import { Models } from '../../models/factory';
 import { randomWords } from '../../utils/testing/randomWords';
 import { makeFolderSerializedBody, makeNoteSerializedBody, makeResourceSerializedBody } from '../../utils/testing/serializedItems';
@@ -157,6 +157,15 @@ const createRandomFolder = async (context: Context, user: User, folder: FolderEn
 	return item;
 };
 
+const addUserToShareWithStatus = async (context: Context, share: Share, email: string, status: ShareUserStatus) => {
+	const shareUser = await context.models.shareUser().addByEmail(share.id, email, '');
+
+	const defaultStatus = ShareUserStatus.Waiting;
+	if (status !== defaultStatus) {
+		await context.models.shareUser().setStatus(share.id, shareUser.user_id, status);
+	}
+};
+
 const reactions: Record<Action, Reaction> = {
 	[Action.CreateNote]: async (context, user) => {
 		const item = await createRandomNote(context, user);
@@ -176,11 +185,6 @@ const reactions: Record<Action, Reaction> = {
 		const item = await createRandomFolder(context, user);
 		const share = await context.models.share().shareFolder(user, item.jop_id, '');
 
-		for (const email of shuffled(context.userEmails)) {
-			await context.models.shareUser().addByEmail(share.id, email, '');
-			if (Math.random() < 0.1) break;
-		}
-
 		// Tag the folder with the share ID so that items created within
 		// the folder can be part of the share:
 		const folder = await context.models.item().loadAsJoplinItem(item.id);
@@ -192,6 +196,18 @@ const reactions: Record<Action, Reaction> = {
 			name: `${folder.id}.md`,
 			body: Buffer.from(serialized),
 		});
+
+		// Add users to the share
+		for (const email of shuffled(context.userEmails)) {
+			const status = randomWeightedElement([
+				ShareUserStatus.Accepted,
+				ShareUserStatus.Waiting,
+				ShareUserStatus.Rejected,
+			], [0.8, 0.1, 0.1]);
+			await addUserToShareWithStatus(context, share, email, status);
+
+			if (Math.random() < 0.1) break;
+		}
 
 		return true;
 	},
