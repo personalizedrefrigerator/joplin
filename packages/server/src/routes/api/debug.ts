@@ -8,7 +8,7 @@ import { SubPath } from '../../utils/routeUtils';
 import { AppContext } from '../../utils/types';
 import { ErrorForbidden } from '../../utils/errors';
 import createTestUsers, { CreateTestUsersOptions } from '../../tools/debug/createTestUsers';
-import benchmarkDeltaPerformance from '../../tools/debug/benchmarkDeltaPerformance';
+import benchmarkDeltaPerformance from '../../tools/benchmark/benchmarkDeltaPerformance';
 import createUserDeletions from '../../tools/debug/createUserDeletions';
 import clearDatabase from '../../tools/debug/clearDatabase';
 import populateDatabase from '../../tools/debug/populateDatabase';
