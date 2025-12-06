@@ -168,6 +168,7 @@ export const up = async (db: DbConnection) => {
 			const result = await transaction.raw(`
 				WITH share_participants AS (
 						SELECT user_id, share_id FROM share_users
+							WHERE status = 1 -- Only users that accepted the share
 					UNION ALL
 						SELECT owner_id AS user_id, id as share_id FROM shares
 					UNION ALL
