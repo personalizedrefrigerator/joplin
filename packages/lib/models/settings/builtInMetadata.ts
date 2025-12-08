@@ -1566,7 +1566,7 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 			isGlobal: true,
 		},
 
-		// Used to keep track of migrations that require prompting the user.
+		// Used to keep track of editor setting migrations that require prompting the user.
 		'editor.migration': {
 			public: false,
 			value: 0,
