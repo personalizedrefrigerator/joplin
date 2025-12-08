@@ -1650,7 +1650,6 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 					bodyComponent = <NoteEditor
 						ref={this.editorRef}
 						toolbarEnabled={this.props.toolbarEnabled}
-						themeId={this.props.themeId}
 						noteId={this.props.noteId}
 						noteHash={this.props.noteHash}
 						initialText={note.body}

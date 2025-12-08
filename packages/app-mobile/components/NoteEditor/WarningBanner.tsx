@@ -8,29 +8,44 @@ import { EditorType } from './types';
 import { Banner } from 'react-native-paper';
 import { useMemo } from 'react';
 import useConvertToMarkdownBanner from '@joplin/lib/components/shared/NoteEditor/WarningBanner/useConvertToMarkdownBanner';
+import useEditorTypeMigrationBanner from '@joplin/lib/components/shared/NoteEditor/WarningBanner/useEditorTypeMigrationBanner';
 import { MarkupLanguage } from '@joplin/renderer/types';
 
 interface Props {
 	editorType: EditorType;
 	richTextBannerDismissed: boolean;
 	convertToMarkdownBannerDismissed: boolean;
+	editorMigrationVersion: number;
 
 	markupLanguage: MarkupLanguage;
 	noteId: string;
 	readOnly: boolean;
 }
 
-const useBanner = ({ editorType, readOnly, richTextBannerDismissed, convertToMarkdownBannerDismissed, noteId, markupLanguage }: Props) => {
+const useBanner = ({
+	editorType,
+	readOnly,
+	richTextBannerDismissed,
+	convertToMarkdownBannerDismissed,
+	editorMigrationVersion,
+	noteId,
+	markupLanguage,
+}: Props) => {
 	const convertToMarkdownBanner = useConvertToMarkdownBanner({
 		note: { markup_language: markupLanguage, id: noteId },
 		dismissed: convertToMarkdownBannerDismissed,
 		readOnly,
+	});
+	const editorMigrationBanner = useEditorTypeMigrationBanner({
+		markdownEditorEnabled: editorType === EditorType.Markdown,
+		editorMigrationVersion: editorMigrationVersion,
 	});
 
 	return useMemo(() => {
 		if (editorType === EditorType.RichText && !richTextBannerDismissed) {
 			return {
 				label: _('This Rich Text editor has a number of limitations and it is recommended to be aware of them before using it.'),
+				warning: true,
 				actions: [
 					{
 						label: _('Read more'),
@@ -55,8 +70,18 @@ const useBanner = ({ editorType, readOnly, richTextBannerDismissed, convertToMar
 			};
 		}
 
+		if (editorMigrationBanner.enabled) {
+			return {
+				label: editorMigrationBanner.label,
+				actions: [
+					editorMigrationBanner.disable,
+					editorMigrationBanner.keepEnabled,
+				],
+			};
+		}
+
 		return null;
-	}, [editorType, richTextBannerDismissed, convertToMarkdownBanner]);
+	}, [editorType, richTextBannerDismissed, convertToMarkdownBanner, editorMigrationBanner]);
 };
 
 const WarningBanner: React.FC<Props> = props => {
@@ -65,7 +90,7 @@ const WarningBanner: React.FC<Props> = props => {
 	if (!banner) return null;
 	return (
 		<Banner
-			icon='alert-outline'
+			icon={banner.warning ? 'alert-outline' : 'information-outline'}
 			actions={banner.actions}
 			// Avoid hiding with react-native-paper's "visible" prop to avoid potential accessibility issues
 			// related to how react-native-paper hides the banner.
@@ -80,6 +105,7 @@ export default connect((state: AppState) => {
 	return {
 		richTextBannerDismissed: state.settings.richTextBannerDismissed,
 		convertToMarkdownBannerDismissed: !state.settings['editor.enableHtmlToMarkdownBanner'],
+		editorMigrationVersion: state.settings['editor.migration'],
 		selectedNoteIds: state.selectedNoteIds,
 	};
 })(WarningBanner);

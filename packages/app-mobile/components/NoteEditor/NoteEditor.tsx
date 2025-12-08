@@ -34,6 +34,8 @@ import { MarkupLanguage } from '@joplin/renderer';
 import WarningBanner from './WarningBanner';
 import useIsScreenReaderEnabled from '../../utils/hooks/useIsScreenReaderEnabled';
 import Logger from '@joplin/utils/Logger';
+import { AppState } from '../../utils/types';
+import { connect } from 'react-redux';
 
 const logger = Logger.create('NoteEditor');
 
@@ -57,6 +59,8 @@ interface Props {
 	readOnly: boolean;
 	plugins: PluginStates;
 	noteResources: ResourceInfos;
+	editorImageRendering: boolean;
+	editorInlineRendering: boolean;
 
 	onChange: ChangeEventHandler;
 	onSelectionChange: SelectionChangeEventHandler;
@@ -266,8 +270,8 @@ function NoteEditor(props: Props) {
 		markdownMarkEnabled: Setting.value('markdown.plugin.mark'),
 		katexEnabled: Setting.value('markdown.plugin.katex'),
 		spellcheckEnabled: Setting.value('editor.mobile.spellcheckEnabled'),
-		inlineRenderingEnabled: Setting.value('editor.inlineRendering'),
-		imageRenderingEnabled: Setting.value('editor.imageRendering'),
+		inlineRenderingEnabled: props.editorInlineRendering,
+		imageRenderingEnabled: props.editorImageRendering,
 		language: props.markupLanguage === MarkupLanguage.Html ? EditorLanguageType.Html : EditorLanguageType.Markdown,
 		useExternalSearch: true,
 		readOnly: props.readOnly,
@@ -284,7 +288,7 @@ function NoteEditor(props: Props) {
 		indentWithTabs: true,
 
 		editorLabel: _('Markdown editor'),
-	}), [props.themeId, props.readOnly, props.markupLanguage, highlightActiveLine]);
+	}), [props.themeId, props.readOnly, props.markupLanguage, highlightActiveLine, props.editorInlineRendering, props.editorImageRendering]);
 
 	const [selectionState, setSelectionState] = useState<SelectionFormatting>(defaultSelectionFormatting);
 	const [linkDialogVisible, setLinkDialogVisible] = useState(false);
@@ -468,4 +472,10 @@ function NoteEditor(props: Props) {
 	);
 }
 
-export default NoteEditor;
+export default connect((state: AppState) => {
+	return {
+		themeId: state.settings.theme,
+		editorInlineRendering: state.settings['editor.inlineRendering'],
+		editorImageRendering: state.settings['editor.imageRendering'],
+	};
+})(NoteEditor);
