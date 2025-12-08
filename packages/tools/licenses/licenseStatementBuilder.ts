@@ -45,7 +45,6 @@ const buildFullReport = async (packageNames: string[]): Promise<string> => {
 		output.push('', `## ${mode} dependencies`, '');
 		output.push(`Dependencies in this section are listed as "${mode}" dependencies in one of the \`package.json\` files of a Joplin package, or a dependency of a Joplin package.`);
 
-
 		for (const entry of entries) {
 			let licenseShortText = '';
 			if (entry.license.type === EntryLicenseType.Mit) {
@@ -60,15 +59,13 @@ const buildFullReport = async (packageNames: string[]): Promise<string> => {
 				licenseShortText = toCodeBlock(entry.license.fullText);
 			}
 
-			output.push(
+			output.push(...[
 				`### ${entry.packageNames.join(', ')}`,
 				entry.packageSource ? `From ${entry.packageSource}.` : '',
 				`**${entry.licenseId}**:`,
-				'',
 				licenseShortText,
-				'',
 				entry.license.notice ? `**NOTICE**:\n${toCodeBlock(entry.license.notice)}` : '',
-			);
+			].filter(line => !!line.trim()));
 		}
 
 	}

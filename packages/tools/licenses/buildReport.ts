@@ -88,7 +88,7 @@ const getNotice = async (pkg: PackageInfo) => {
 };
 
 const trimBeforeLicenseHeader = (text: string) => {
-	const header = text.match(/#+ License[\n]/i);
+	const header = text.match(/#+ License[\n]/i) ?? text.match(/[\n]License[\n]--+[\n]/i);
 	if (header) {
 		return text.substring(header.index);
 	} else {
@@ -162,7 +162,7 @@ const buildReport = async (packageNames: string[]): Promise<Report> => {
 		}
 	}
 
-	const report: Report = { [DependencyType.Development]: [], [DependencyType.Production]: [] };
+	const report: Report = { [DependencyType.Production]: [], [DependencyType.Development]: [] };
 	for (const mode of [DependencyType.Production, DependencyType.Development]) {
 		const output: ReportEntry[] = [];
 		report[mode] = output;
