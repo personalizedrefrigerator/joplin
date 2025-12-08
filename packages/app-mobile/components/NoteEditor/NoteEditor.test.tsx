@@ -17,8 +17,6 @@ import { Store } from 'redux';
 import { AppState } from '../../utils/types';
 import { MarkupLanguage } from '@joplin/renderer';
 import { EditorType } from './types';
-import Note from '@joplin/lib/models/Note';
-import Folder from '@joplin/lib/models/Folder';
 import shim from '@joplin/lib/shim';
 
 let store: Store<AppState>;
@@ -133,68 +131,6 @@ describe('NoteEditor', () => {
 		const dismissButton = screen.getByHintText('Hides warning');
 		fireEvent.press(dismissButton);
 		expect(screen.queryByText(warningBannerQuery)).toBeNull();
-
-		wrappedNoteEditor.unmount();
-	});
-
-	it.each([
-		{ readOnly: false, label: 'should show a warning banner when opening an HTML-format note' },
-		{ readOnly: true, label: 'should not show a warning banner when opening a read-only HTML note' },
-	])('$label', async ({ readOnly }) => {
-		const note = await Note.save({
-			parent_id: '', title: 'Test', body: '<p>Test</p>', markup_language: MarkupLanguage.Html,
-		});
-		const wrappedNoteEditor = render(
-			<TestProviderStack store={store}>
-				<NoteEditor
-					ref={undefined}
-					{...defaultEditorProps}
-					noteId={note.id}
-					markupLanguage={note.markup_language}
-					readOnly={readOnly}
-					mode={EditorType.Markdown}
-				/>
-			</TestProviderStack>,
-		);
-
-		const warningBannerQuery = /This note is in HTML format. Convert it to Markdown to edit it more easily.*/;
-		const warning = screen.queryByText(warningBannerQuery);
-		if (readOnly) {
-			expect(warning).toBeNull();
-		} else {
-			expect(warning).toBeVisible();
-		}
-
-		wrappedNoteEditor.unmount();
-	});
-
-	it('should convert an HTML-format note to Markdown from the conversion banner', async () => {
-		const parent = await Folder.save({ title: 'Test' });
-		const note = await Note.save({
-			parent_id: parent.id, title: 'Test', body: '<p><strong>Test</strong></p>', markup_language: MarkupLanguage.Html,
-		});
-		const wrappedNoteEditor = render(
-			<TestProviderStack store={store}>
-				<NoteEditor
-					ref={undefined}
-					{...defaultEditorProps}
-					noteId={note.id}
-					markupLanguage={note.markup_language}
-					mode={EditorType.Markdown}
-				/>
-			</TestProviderStack>,
-		);
-
-		const convertButton = screen.getByRole('button', { name: 'Convert it' });
-		fireEvent.press(convertButton);
-
-		// Should be converted to Markdown
-		await waitFor(async () => {
-			const newNotes = await Note.previews(parent.id, { fields: ['title', 'body', 'id'] });
-			expect(newNotes).toMatchObject([
-				{ title: 'Test', body: '**Test**' },
-			]);
-		});
 
 		wrappedNoteEditor.unmount();
 	});

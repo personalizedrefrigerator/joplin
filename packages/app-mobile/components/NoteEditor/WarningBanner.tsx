@@ -7,7 +7,6 @@ import { AppState } from '../../utils/types';
 import { EditorType } from './types';
 import { Banner } from 'react-native-paper';
 import { useMemo } from 'react';
-import useConvertToMarkdownBanner from '@joplin/lib/components/shared/NoteEditor/WarningBanner/useConvertToMarkdownBanner';
 import useEditorTypeMigrationBanner from '@joplin/lib/components/shared/NoteEditor/WarningBanner/useEditorTypeMigrationBanner';
 import { MarkupLanguage } from '@joplin/renderer/types';
 
@@ -24,18 +23,9 @@ interface Props {
 
 const useBanner = ({
 	editorType,
-	readOnly,
 	richTextBannerDismissed,
-	convertToMarkdownBannerDismissed,
 	editorMigrationVersion,
-	noteId,
-	markupLanguage,
 }: Props) => {
-	const convertToMarkdownBanner = useConvertToMarkdownBanner({
-		note: { markup_language: markupLanguage, id: noteId },
-		dismissed: convertToMarkdownBannerDismissed,
-		readOnly,
-	});
 	const editorMigrationBanner = useEditorTypeMigrationBanner({
 		markdownEditorEnabled: editorType === EditorType.Markdown,
 		editorMigrationVersion: editorMigrationVersion,
@@ -60,16 +50,6 @@ const useBanner = ({
 			};
 		}
 
-		if (convertToMarkdownBanner.enabled) {
-			return {
-				label: convertToMarkdownBanner.label,
-				actions: [
-					convertToMarkdownBanner.dismiss,
-					convertToMarkdownBanner.convert,
-				],
-			};
-		}
-
 		if (editorMigrationBanner.enabled) {
 			return {
 				label: editorMigrationBanner.label,
@@ -81,7 +61,7 @@ const useBanner = ({
 		}
 
 		return null;
-	}, [editorType, richTextBannerDismissed, convertToMarkdownBanner, editorMigrationBanner]);
+	}, [editorType, richTextBannerDismissed, editorMigrationBanner]);
 };
 
 const WarningBanner: React.FC<Props> = props => {
