@@ -127,7 +127,7 @@ export enum EntryLicenseType {
 	Other = '',
 }
 
-type EntryLicenseData = {
+type LicenseDetails = {
 	type: EntryLicenseType.Apache2;
 	notice: string;
 	appendix: string;
@@ -144,7 +144,7 @@ type EntryLicenseData = {
 interface ReportEntry {
 	packageNames: string[];
 
-	license: EntryLicenseData;
+	license: LicenseDetails;
 	licenseId: string;
 	packageSource: string;
 }
@@ -198,9 +198,8 @@ const buildReport = async (packageNames: string[]): Promise<Report> => {
 			let repositoryOutput: string[] = [];
 			let relevantPackages: string[] = [];
 
-
 			let previousLicenseId: string|null = null;
-			let lastLicenseData: EntryLicenseData|null = null;
+			let lastLicenseData: LicenseDetails|null = null;
 			const flushOutput = () => {
 				if (relevantPackages.length > 0 || repositoryOutput.length > 0) {
 					if (!lastLicenseData) {
@@ -237,7 +236,9 @@ const buildReport = async (packageNames: string[]): Promise<Report> => {
 					}
 				};
 
-				let licenseData: EntryLicenseData;
+				// Determine the license data and additional information based on the full license text.
+				// This allows extracting copyright and other information from the full license.
+				let licenseData: LicenseDetails;
 				const apache2Match = matchApache2(licenseText);
 				if (apache2Match) {
 					licenseData = {
@@ -264,10 +265,11 @@ const buildReport = async (packageNames: string[]): Promise<Report> => {
 					}
 				}
 
+				const noticeChanged = lastLicenseData?.notice !== licenseData.notice;
 				const copyrightChanged = lastLicenseData?.type === EntryLicenseType.Mit
 					&& licenseData.type === EntryLicenseType.Mit
 					&& lastLicenseData.copyright !== lastLicenseData.copyright;
-				if (previousLicenseId !== currentLicenses || lastLicenseData?.notice !== licenseData.notice || copyrightChanged) {
+				if (previousLicenseId !== currentLicenses || noticeChanged || copyrightChanged) {
 					flushOutput();
 
 					previousLicenseId = currentLicenses;
