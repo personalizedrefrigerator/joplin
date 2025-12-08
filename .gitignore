@@ -1023,6 +1023,7 @@ packages/editor/CodeMirror/extensions/modifierKeyCssExtension.js
 packages/editor/CodeMirror/extensions/overwriteModeExtension.test.js
 packages/editor/CodeMirror/extensions/overwriteModeExtension.js
 packages/editor/CodeMirror/extensions/rendering/addFormattingClasses.js
+packages/editor/CodeMirror/extensions/rendering/indentLists.js
 packages/editor/CodeMirror/extensions/rendering/renderBlockImages.test.js
 packages/editor/CodeMirror/extensions/rendering/renderBlockImages.js
 packages/editor/CodeMirror/extensions/rendering/renderingExtension.js
@@ -1034,6 +1035,7 @@ packages/editor/CodeMirror/extensions/rendering/replaceFormatCharacters.js
 packages/editor/CodeMirror/extensions/rendering/types.js
 packages/editor/CodeMirror/extensions/rendering/utils/makeBlockReplaceExtension.js
 packages/editor/CodeMirror/extensions/rendering/utils/makeInlineReplaceExtension.js
+packages/editor/CodeMirror/extensions/rendering/utils/measureText.js
 packages/editor/CodeMirror/extensions/rendering/utils/nodeIntersectsSelection.js
 packages/editor/CodeMirror/extensions/searchExtension.test.js
 packages/editor/CodeMirror/extensions/searchExtension.js

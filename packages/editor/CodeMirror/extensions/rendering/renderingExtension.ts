@@ -1,4 +1,5 @@
 import addFormattingClasses from './addFormattingClasses';
+import indentLists from './indentLists';
 import replaceBackslashEscapes from './replaceBackslashEscapes';
 import replaceBulletLists from './replaceBulletLists';
 import replaceCheckboxes from './replaceCheckboxes';
@@ -13,5 +14,6 @@ export default () => {
 		replaceBackslashEscapes,
 		replaceDividers,
 		addFormattingClasses,
+		indentLists,
 	];
 };
