@@ -89,6 +89,7 @@ const csvQuote = (column: string) => {
 void yargs()
 	.scriptName(basename(__filename))
 	.strict()
+	.demandCommand()
 	.usage('$0 <cmd>')
 	.command(
 		'update-report',
