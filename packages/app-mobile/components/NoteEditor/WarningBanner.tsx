@@ -54,8 +54,8 @@ const useBanner = ({
 			return {
 				label: editorMigrationBanner.label,
 				actions: [
-					editorMigrationBanner.disable,
 					editorMigrationBanner.keepEnabled,
+					editorMigrationBanner.disable,
 				],
 			};
 		}
