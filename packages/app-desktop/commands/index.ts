@@ -13,6 +13,7 @@ import * as openProfileDirectory from './openProfileDirectory';
 import * as openSecondaryAppInstance from './openSecondaryAppInstance';
 import * as replaceMisspelling from './replaceMisspelling';
 import * as restoreNoteRevision from './restoreNoteRevision';
+import * as showProfileEditor from './showProfileEditor';
 import * as startExternalEditing from './startExternalEditing';
 import * as stopExternalEditing from './stopExternalEditing';
 import * as switchProfile from './switchProfile';
@@ -38,6 +39,7 @@ const index: any[] = [
 	openSecondaryAppInstance,
 	replaceMisspelling,
 	restoreNoteRevision,
+	showProfileEditor,
 	startExternalEditing,
 	stopExternalEditing,
 	switchProfile,
