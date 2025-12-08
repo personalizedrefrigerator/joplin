@@ -715,11 +715,11 @@ const mapStateToProps = (state: AppState, ownProps: ConnectProps) => {
 	const windowState = stateUtils.windowStateById(state, ownProps.windowId);
 	const noteId = stateUtils.selectedNoteId(windowState);
 
-	let bodyEditor: NoteBodyEditorType = windowState.editorCodeView ? 'CodeMirror6' : 'TinyMCE';
+	let bodyEditor = windowState.editorCodeView ? NoteBodyEditorType.CodeMirror6 : NoteBodyEditorType.TinyMce;
 	if (state.settings.isSafeMode) {
-		bodyEditor = 'PlainText';
+		bodyEditor = NoteBodyEditorType.PlainText;
 	} else if (windowState.editorCodeView && state.settings['editor.legacyMarkdown']) {
-		bodyEditor = 'CodeMirror5';
+		bodyEditor = NoteBodyEditorType.CodeMirror5;
 	}
 
 	return {

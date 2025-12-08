@@ -26,7 +26,12 @@ export interface ToolbarButtonInfos {
 	[key: string]: ToolbarButtonInfo;
 }
 
-export type NoteBodyEditorType = 'CodeMirror6'|'CodeMirror5'|'TinyMCE'|'PlainText';
+export enum NoteBodyEditorType {
+	CodeMirror6 = 'CodeMirror6',
+	CodeMirror5 = 'CodeMirror5',
+	TinyMce = 'TinyMCE',
+	PlainText = 'PlainText',
+}
 
 export interface NoteEditorProps {
 	noteId: string;
