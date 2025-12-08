@@ -40,6 +40,7 @@ import ctrlKeyStateClassExtension from './extensions/modifierKeyCssExtension';
 import ctrlClickLinksExtension from './extensions/links/ctrlClickLinksExtension';
 import { RenderedContentContext } from './extensions/rendering/types';
 import ctrlClickCheckboxExtension from './extensions/ctrlClickCheckboxExtension';
+import editorSettingsExtension, { setEditorSettingsEffect } from './extensions/editorSettingsExtension';
 
 // Newer versions of CodeMirror by default use Chrome's EditContext API.
 // While this might be stable enough for desktop use, it causes significant
@@ -300,6 +301,7 @@ const createEditor = (
 				biDirectionalTextExtension,
 				overwriteModeExtension,
 				ctrlKeyStateClassExtension,
+				editorSettingsExtension(settings),
 
 				selectedNoteIdExtension,
 
@@ -345,9 +347,12 @@ const createEditor = (
 		onSettingsChange: (newSettings: EditorSettings) => {
 			settings = newSettings;
 			editor.dispatch({
-				effects: dynamicConfig.reconfigure(
-					configFromSettings(newSettings, context),
-				),
+				effects: [
+					dynamicConfig.reconfigure(
+						configFromSettings(newSettings, context),
+					),
+					setEditorSettingsEffect.of(newSettings),
+				],
 			});
 		},
 		onUndoRedo: () => {
