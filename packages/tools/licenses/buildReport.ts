@@ -155,10 +155,6 @@ const buildReport = async (packageNames: string[]): Promise<Report> => {
 	const monorepoRootDir = dirname(dirname(dirname(__dirname)));
 	const packagesRootDir = join(monorepoRootDir, 'packages');
 
-
-	// Identifiers for licenses that can be excluded.
-	const excludeLicenses: string[] = [];
-
 	const packageOverrides: LicenseOverride[] = [];
 	for (const packageToCheck of packageNames) {
 		if (licenseOverrides[packageToCheck]) {
@@ -174,7 +170,7 @@ const buildReport = async (packageNames: string[]): Promise<Report> => {
 		const dependencyLicenses: Map<string, LicenseInfo> = new Map();
 		for (const packageName of packageNames) {
 			const packageDir = join(packagesRootDir, packageName);
-			const packageLicenses = await getLicenses(packageDir, mode, excludeLicenses, packageOverrides);
+			const packageLicenses = await getLicenses(packageDir, mode, [], packageOverrides);
 			for (const packageName in packageLicenses) {
 				dependencyLicenses.set(packageName, packageLicenses[packageName]);
 			}
