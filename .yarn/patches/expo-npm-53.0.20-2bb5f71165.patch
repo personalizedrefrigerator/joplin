@@ -1,0 +1,20 @@
+diff --git a/package.json b/package.json
+index 6f209dab5f846fb6970422d5fb3fc55bb017cbbd..9c8f9d2fcf9fe49a7db14d855058ef57a093ef4d 100644
+--- a/package.json
++++ b/package.json
+@@ -73,7 +73,6 @@
+   "homepage": "https://github.com/expo/expo/tree/main/packages/expo",
+   "dependencies": {
+     "@babel/runtime": "^7.20.0",
+-    "@expo/cli": "0.24.20",
+     "@expo/config": "~11.0.13",
+     "@expo/config-plugins": "~10.1.2",
+     "@expo/fingerprint": "0.13.4",
+@@ -99,6 +98,7 @@
+     "react-dom": "19.0.0",
+     "react-native": "0.79.5",
+     "web-streams-polyfill": "^3.3.2",
++    "@expo/cli": "0.24.20",
+     "ws": "^8.18.0"
+   },
+   "peerDependencies": {

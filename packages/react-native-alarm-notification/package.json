@@ -15,6 +15,6 @@
   "readmeFilename": "README.md",
   "devDependencies": {
     "react": "18.3.1",
-    "react-native": "0.70.6"
+    "react-native": "patch:react-native@npm%3A0.79.2#~/.yarn/patches/react-native-npm-0.79.2-9db13eddfe.patch"
   }
 }
