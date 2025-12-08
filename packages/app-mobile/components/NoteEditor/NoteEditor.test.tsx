@@ -17,7 +17,6 @@ import { Store } from 'redux';
 import { AppState } from '../../utils/types';
 import { MarkupLanguage } from '@joplin/renderer';
 import { EditorType } from './types';
-import shim from '@joplin/lib/shim';
 
 let store: Store<AppState>;
 let registeredRuntime: RegisteredRuntime;
@@ -57,7 +56,6 @@ describe('NoteEditor', () => {
 		store = createMockReduxStore();
 		setupGlobalStore(store);
 		registeredRuntime = mockCommandRuntimes(store);
-		shim.showMessageBox = jest.fn();
 	});
 
 	afterEach(() => {
