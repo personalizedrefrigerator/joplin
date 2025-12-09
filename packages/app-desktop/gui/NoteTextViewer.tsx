@@ -233,13 +233,13 @@ const NoteTextViewer = forwardRef((props: Props, ref: ForwardedRef<NoteViewerCon
 		return { border: 'none', ...props.viewerStyle };
 	}, [props.viewerStyle]);
 
-	// allow=fullscreen: Required to allow the user to fullscreen videos.
 	return (
 		<iframe
 			className="noteTextViewer"
 			ref={setWebview}
 			style={viewerStyle}
-			allow='clipboard-write=(self) fullscreen=(self) autoplay=(self) local-fonts=(self) encrypted-media=(self)'
+			allow=''
+			// allow=fullscreen: Required to allow the user to fullscreen videos.
 			allowFullScreen={true}
 			aria-label={_('Note viewer')}
 			src={`joplin-content://note-viewer/${toForwardSlashes(getAssetPath('gui/note-viewer/index.html'))}`}
