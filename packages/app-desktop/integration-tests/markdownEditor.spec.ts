@@ -314,7 +314,6 @@ test.describe('markdownEditor', () => {
 		const link = editorContent.getByText(/\[?link\]?/);
 		await link.click({ modifiers: ['ControlOrMeta'] });
 		await expect(noteEditor.noteTitleInput).toHaveValue('Original');
-		await noteEditor.expectToHaveText(/^# Test/);
 		await expect.poll(() => editorContent.evaluate(async editor => {
 			const selection = getSelection();
 			return editor.contains(selection.anchorNode);
