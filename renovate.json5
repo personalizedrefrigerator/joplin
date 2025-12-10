@@ -145,6 +145,8 @@
 		"react-native",
 		"activesupport",
 		"cocoapods",
+		"@react-native/metro-config",
+		"@react-native/babel-preset",
 
 		// We currently don't have automated tests that verify that the
 		// sidemenus work correctly in the mobile app. Because an update to
