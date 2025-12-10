@@ -276,11 +276,14 @@ test.describe('markdownEditor', () => {
 		expect(imageSize[1]).toBeGreaterThan(0);
 	});
 
-	test('ctrl-clicking on note links should open the linked note (when the viewer is hidden)', async ({ mainWindow }) => {
+	test('ctrl-clicking on note links should open the linked note (when the viewer is hidden)', async ({ mainWindow, electronApp }) => {
 		const mainScreen = await new MainScreen(mainWindow).setup();
 		await mainScreen.createNewNote('Original');
 		const noteEditor = mainScreen.noteEditor;
 		await noteEditor.hideViewer();
+
+		// Workaround: Required for extracting content accurately from the Markdown editor
+		await noteEditor.disableInlineRendering(electronApp);
 
 		await noteEditor.focusCodeMirrorEditor();
 		await mainWindow.keyboard.type('# Test');
@@ -314,6 +317,7 @@ test.describe('markdownEditor', () => {
 		const link = editorContent.getByText(/\[?link\]?/);
 		await link.click({ modifiers: ['ControlOrMeta'] });
 		await expect(noteEditor.noteTitleInput).toHaveValue('Original');
+		await noteEditor.expectToHaveText(/^# Test/);
 		await expect.poll(() => editorContent.evaluate(async editor => {
 			const selection = getSelection();
 			return editor.contains(selection.anchorNode);
