@@ -278,6 +278,7 @@ function NoteEditor(props: Props) {
 		highlightActiveLine,
 
 		keymap: EditorKeymap.Default,
+		preferMacShortcuts: shim.mobilePlatform() === 'ios',
 
 		automatchBraces: false,
 		ignoreModifiers: false,
