@@ -1,5 +1,5 @@
 import { remove, mkdir, writeFile, exists } from 'fs-extra';
-import { createNewProfile, deleteProfileDirectoryById, getProfileFullPath, loadProfileConfig, migrateProfileConfig, saveProfileConfig } from '.';
+import { createNewProfile, deleteProfileConfigEntryById, deleteProfileDirectoryById, getProfileFullPath, loadProfileConfig, migrateProfileConfig, saveProfileConfig } from '.';
 import { createTempDir, tempFilePath } from '../../testing/test-utils';
 import { CurrentProfileVersion, defaultProfile, defaultProfileConfig, DefaultProfileId, Profile, ProfileConfig } from './types';
 
@@ -115,6 +115,22 @@ describe('profileConfig/index', () => {
 				},
 			],
 		});
+	});
+
+	it('should not allow deleting the default profile', async () => {
+		expect(() => {
+			deleteProfileConfigEntryById({
+				version: 2,
+				currentProfileId: 'a',
+				profiles: [{
+					id: 'default',
+					name: 'Default',
+				}, {
+					id: 'a',
+					name: 'A',
+				}],
+			}, 'default');
+		}).toThrow(/The default profile cannot be deleted/);
 	});
 
 	it('should delete a profile directory', async () => {

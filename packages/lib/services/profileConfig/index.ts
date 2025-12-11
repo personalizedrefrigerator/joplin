@@ -104,9 +104,13 @@ export const createNewProfile = (config: ProfileConfig, profileName: string) => 
 	};
 };
 
-export const deleteProfileConfigEntryById = (config: ProfileConfig, profileId: string): ProfileConfig => {
+const assertCanDeleteProfile = (config: ProfileConfig, profileId: string) => {
 	if (profileId === DefaultProfileId) throw new Error(_('The default profile cannot be deleted'));
 	if (profileId === config.currentProfileId) throw new Error(_('The active profile cannot be deleted. Switch to a different profile and try again.'));
+};
+
+export const deleteProfileConfigEntryById = (config: ProfileConfig, profileId: string): ProfileConfig => {
+	assertCanDeleteProfile(config, profileId);
 
 	const newProfiles = config.profiles.filter(p => p.id !== profileId);
 	return {
@@ -116,7 +120,8 @@ export const deleteProfileConfigEntryById = (config: ProfileConfig, profileId: s
 };
 
 export const deleteProfileDirectoryById = async (config: ProfileConfig, profileId: string, rootProfileDir: string) => {
-	if (profileId === config.currentProfileId) throw new Error('Cannot delete the active profile.');
+	assertCanDeleteProfile(config, profileId);
+
 	const profile = config.profiles.find(p => p.id === profileId);
 	if (!profile) throw new Error(`No profile found with ID: ${profileId}`);
 

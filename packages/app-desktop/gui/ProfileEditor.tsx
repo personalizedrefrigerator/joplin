@@ -151,12 +151,12 @@ const ProfileEditorComponent: React.FC<Props> = props => {
 
 		try {
 			await deleteProfileDirectoryById(profileConfig, profile.id, Setting.value('rootProfileDir'));
+
+			await saveNewProfileConfig(() => deleteProfileConfigEntryById(profileConfig, profile.id));
 		} catch (error) {
 			logger.error('Error deleting profile directory: ', error);
 			bridge().showErrorMessageBox(error.message);
 		}
-
-		await saveNewProfileConfig(() => deleteProfileConfigEntryById(profileConfig, profile.id));
 	};
 
 	return (
