@@ -1975,6 +1975,25 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 			section: 'note',
 		},
 
+		'voiceTyping.locale': {
+			value: '',
+			type: SettingItemType.String,
+			public: true,
+			advanced: true,
+			isEnum: true,
+			appTypes: [AppType.Mobile],
+			options: () => {
+				return {
+					'': _('Match app'),
+					...supportedLocalesToLanguages(),
+				};
+			},
+
+			label: () => _('Voice typing: Locale'),
+			show: () => showVoiceTypingSettings(),
+			section: 'note',
+		},
+
 		'scanner.titleTemplate': {
 			value: 'Scan: {date} ({count})',
 			type: SettingItemType.String,

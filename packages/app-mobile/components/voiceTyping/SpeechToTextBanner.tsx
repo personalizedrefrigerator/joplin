@@ -10,6 +10,8 @@ import RecordingControls from './RecordingControls';
 import { PrimaryButton } from '../buttons';
 import useQueuedAsyncEffect from '@joplin/lib/hooks/useQueuedAsyncEffect';
 import shim from '@joplin/lib/shim';
+import { AppState } from '../../utils/types';
+import { connect } from 'react-redux';
 
 interface Props {
 	locale: string;
@@ -203,4 +205,6 @@ const SpeechToTextComponent: React.FC<Props> = props => {
 	/>;
 };
 
-export default SpeechToTextComponent;
+export default connect((state: AppState) => ({
+	locale: state.settings['voiceTyping.locale'] || state.settings.locale,
+}))(SpeechToTextComponent);

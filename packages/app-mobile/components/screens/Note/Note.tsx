@@ -26,7 +26,7 @@ import ScreenHeader, { MenuOptionType } from '../../ScreenHeader';
 import NoteTagsDialog from '../NoteTagsDialog';
 import time from '@joplin/lib/time';
 import Checkbox from '../../Checkbox';
-import { _, currentLocale } from '@joplin/lib/locale';
+import { _ } from '@joplin/lib/locale';
 import { reg } from '@joplin/lib/registry';
 import ResourceFetcher from '@joplin/lib/services/ResourceFetcher';
 import { BaseScreenComponent } from '../../base-screen';
@@ -1752,7 +1752,6 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 			if (this.state.showSpeechToTextDialog) {
 				result.push(<SpeechToTextBanner
 					key='speech-to-text'
-					locale={currentLocale()}
 					onText={this.speechToTextDialog_onText}
 					onDismiss={this.speechToTextDialog_onDismiss}
 				/>);
