@@ -1,6 +1,6 @@
-import { writeFile } from 'fs-extra';
-import { createNewProfile, getProfileFullPath, loadProfileConfig, migrateProfileConfig, saveProfileConfig } from '.';
-import { tempFilePath } from '../../testing/test-utils';
+import { remove, mkdir, writeFile, exists } from 'fs-extra';
+import { createNewProfile, deleteProfileDirectoryById, getProfileFullPath, loadProfileConfig, migrateProfileConfig, saveProfileConfig } from '.';
+import { createTempDir, tempFilePath } from '../../testing/test-utils';
 import { CurrentProfileVersion, defaultProfile, defaultProfileConfig, DefaultProfileId, Profile, ProfileConfig } from './types';
 
 describe('profileConfig/index', () => {
@@ -115,6 +115,29 @@ describe('profileConfig/index', () => {
 				},
 			],
 		});
+	});
+
+	it('should delete a profile directory', async () => {
+		const tempDir = await createTempDir();
+		const profileB = {
+			id: 'b',
+			name: 'B',
+		};
+		const profileBPath = getProfileFullPath(profileB, tempDir);
+		await mkdir(profileBPath);
+
+		await deleteProfileDirectoryById({
+			version: 2,
+			currentProfileId: 'a',
+			profiles: [{
+				id: 'a',
+				name: 'A',
+			}, profileB],
+		}, profileB.id, tempDir);
+
+		expect(await exists(profileBPath)).toBe(false);
+
+		await remove(tempDir);
 	});
 
 });

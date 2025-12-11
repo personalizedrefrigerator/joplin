@@ -6,7 +6,7 @@ import ScreenHeader from '../ScreenHeader';
 import { Profile, ProfileConfig } from '@joplin/lib/services/profileConfig/types';
 import useProfileConfig from './useProfileConfig';
 import { _ } from '@joplin/lib/locale';
-import { deleteProfileById } from '@joplin/lib/services/profileConfig';
+import { deleteProfileConfigEntryById, deleteProfileDirectoryById } from '@joplin/lib/services/profileConfig';
 import { saveProfileConfig, switchProfile } from '../../services/profiles';
 import { themeStyle } from '../global-style';
 import shim from '@joplin/lib/shim';
@@ -16,6 +16,7 @@ import { TextStyle } from 'react-native';
 import useOnLongPressProps from '../../utils/hooks/useOnLongPressProps';
 import { Dispatch } from 'redux';
 import NavService from '@joplin/lib/services/NavService';
+import Setting from '@joplin/lib/models/Setting';
 
 interface Props {
 	themeId: number;
@@ -95,7 +96,9 @@ const ProfileListItem: React.FC<ProfileItemProps> = ({ profile, profileConfig, s
 	const onDeleteProfile = useCallback(async (profile: Profile) => {
 		const doIt = async () => {
 			try {
-				const newConfig = deleteProfileById(profileConfig, profile.id);
+				await deleteProfileDirectoryById(profileConfig, profile.id, Setting.value('rootProfileDir'));
+
+				const newConfig = deleteProfileConfigEntryById(profileConfig, profile.id);
 				await saveProfileConfig(newConfig);
 				setProfileConfigTime(Date.now());
 			} catch (error) {

@@ -3,6 +3,9 @@ import shim from '../../shim';
 import { CurrentProfileVersion, defaultProfile, defaultProfileConfig, DefaultProfileId, Profile, ProfileConfig } from './types';
 import { customAlphabet } from 'nanoid/non-secure';
 import { _ } from '../../locale';
+import Logger from '@joplin/utils/Logger';
+
+const logger = Logger.create('profileConfig/index');
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 export const migrateProfileConfig = (profileConfig: any, toVersion: number): ProfileConfig => {
@@ -101,7 +104,7 @@ export const createNewProfile = (config: ProfileConfig, profileName: string) => 
 	};
 };
 
-export const deleteProfileById = (config: ProfileConfig, profileId: string): ProfileConfig => {
+export const deleteProfileConfigEntryById = (config: ProfileConfig, profileId: string): ProfileConfig => {
 	if (profileId === DefaultProfileId) throw new Error(_('The default profile cannot be deleted'));
 	if (profileId === config.currentProfileId) throw new Error(_('The active profile cannot be deleted. Switch to a different profile and try again.'));
 
@@ -110,6 +113,21 @@ export const deleteProfileById = (config: ProfileConfig, profileId: string): Pro
 		...config,
 		profiles: newProfiles,
 	};
+};
+
+export const deleteProfileDirectoryById = async (config: ProfileConfig, profileId: string, rootProfileDir: string) => {
+	if (profileId === config.currentProfileId) throw new Error('Cannot delete the active profile.');
+	const profile = config.profiles.find(p => p.id === profileId);
+	if (!profile) throw new Error(`No profile found with ID: ${profileId}`);
+
+	const profilePath = getProfileFullPath(profile, rootProfileDir);
+	if (await shim.fsDriver().exists(profilePath)) {
+		await shim.fsDriver().remove(profilePath);
+		logger.info('Removed profile directory at path', profilePath);
+	} else {
+		// This might happen, for example, if a profile directory was manually deleted
+		logger.warn('Cannot remove profile directory: No profile exists at path', profilePath);
+	}
 };
 
 export const profileIdByIndex = (config: ProfileConfig, index: number): string => {

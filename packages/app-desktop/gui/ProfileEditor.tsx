@@ -7,9 +7,8 @@ import { themeStyle } from '@joplin/lib/theme';
 import bridge from '../services/bridge';
 import dialogs from './dialogs';
 import { Profile, ProfileConfig } from '@joplin/lib/services/profileConfig/types';
-import { deleteProfileById, saveProfileConfig } from '@joplin/lib/services/profileConfig';
+import { deleteProfileConfigEntryById, deleteProfileDirectoryById, saveProfileConfig } from '@joplin/lib/services/profileConfig';
 import Setting from '@joplin/lib/models/Setting';
-import shim from '@joplin/lib/shim';
 import Logger from '@joplin/utils/Logger';
 import { AppState } from '../app.reducer';
 import { Dispatch } from 'redux';
@@ -150,18 +149,14 @@ const ProfileEditorComponent: React.FC<Props> = props => {
 		});
 		if (!ok) return;
 
-		const rootDir = Setting.value('rootProfileDir');
-		const profileDir = `${rootDir}/profile-${profile.id}`;
-
 		try {
-			await shim.fsDriver().remove(profileDir);
-			logger.info('Deleted profile directory: ', profileDir);
+			await deleteProfileDirectoryById(profileConfig, profile.id, Setting.value('rootProfileDir'));
 		} catch (error) {
 			logger.error('Error deleting profile directory: ', error);
 			bridge().showErrorMessageBox(error.message);
 		}
 
-		await saveNewProfileConfig(() => deleteProfileById(profileConfig, profile.id));
+		await saveNewProfileConfig(() => deleteProfileConfigEntryById(profileConfig, profile.id));
 	};
 
 	return (
