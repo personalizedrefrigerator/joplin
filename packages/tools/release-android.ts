@@ -1,6 +1,7 @@
 import { execCommand } from '@joplin/utils';
 import { copy, mkdirp, move, readFile, readFileSync, remove, stat, writeFile, writeFileSync } from 'fs-extra';
 import { execCommandVerbose, execCommandWithPipes, githubRelease, githubOauthToken, fileExists, gitPullTry, completeReleaseWithChangelog } from './tool-utils';
+import { homedir } from 'os';
 const path = require('path');
 const uriTemplate = require('uri-template');
 
@@ -12,6 +13,7 @@ interface Release {
 	downloadUrl: string;
 	apkFilename: string;
 	apkFilePath: string;
+	publish: boolean;
 }
 
 type PatcherCallback = (content: string)=> Promise<string>;
@@ -59,6 +61,7 @@ interface ReleaseConfig {
 	name: string;
 	patch?: (patcher: Patcher, rnDir: string)=> Promise<void>;
 	disabled?: boolean;
+	publish: boolean;
 }
 
 function increaseGradleVersionCode(content: string) {
@@ -99,7 +102,7 @@ function gradleVersionName(content: string) {
 	return matches[1];
 }
 
-async function createRelease(projectName: string, releaseConfig: ReleaseConfig, tagName: string, version: string): Promise<Release> {
+async function createRelease(projectName: string, releaseConfig: ReleaseConfig, tagName: string, version: string, publish: boolean): Promise<Release> {
 	const name = releaseConfig.name;
 	const suffix = version + (name === 'main' ? '' : `-${name}`);
 
@@ -107,15 +110,15 @@ async function createRelease(projectName: string, releaseConfig: ReleaseConfig, 
 
 	console.info(`Creating release: ${suffix}`);
 
+	process.chdir(rootDir);
+
+	console.info(`Running from: ${process.cwd()}`);
+
 	if (releaseConfig.patch) await releaseConfig.patch(patcher, rnDir);
 
 	const apkFilename = `joplin-v${suffix}.apk`;
 	const apkFilePath = `${releaseDir}/${apkFilename}`;
 	const downloadUrl = `https://github.com/laurent22/${projectName}/releases/download/${tagName}/${apkFilename}`;
-
-	process.chdir(rootDir);
-
-	console.info(`Running from: ${process.cwd()}`);
 
 	await execCommand('yarn install', { showStdout: false });
 	await execCommand('yarn tsc', { showStdout: false });
@@ -129,7 +132,7 @@ async function createRelease(projectName: string, releaseConfig: ReleaseConfig, 
 	// A problem occurred evaluating project ':app'
 	// > /Users/laurent/src/joplin-new/packages/app-mobile/android/build-main/generated/autolinking/autolinking.json
 	// > (No such file or directory)
-	const buildDirName = name === 'main' ? 'build' : `build-${name}`;
+	const buildDirName = 'build'; // name === 'main' ? 'build' : `build-${name}`;
 	const buildDirBasePath = `${rnDir}/android/app/${buildDirName}`;
 	await remove(buildDirBasePath);
 
@@ -177,6 +180,7 @@ async function createRelease(projectName: string, releaseConfig: ReleaseConfig, 
 		downloadUrl: downloadUrl,
 		apkFilename: apkFilename,
 		apkFilePath: apkFilePath,
+		publish,
 	};
 }
 
@@ -233,11 +237,20 @@ async function main() {
 	const releaseConfigs: ReleaseConfig[] = [
 		{
 			name: 'main',
+			publish: true,
+		},
+
+		{
+			name: 'custom',
+			publish: false,
+			patch: require(`${homedir()}/joplin-credentials/android-black-icon.js`),
+			disabled: false,
 		},
 
 		{
 			name: 'armeabi-v7a',
 			disabled: true,
+			publish: true,
 			patch: async (patcher, rnDir) => {
 				await patcher.updateFileContent(`${rnDir}/android/app/build.gradle`, async (content: string) => {
 					content = content.replace(/abiFilters "armeabi-v7a", "x86", "arm64-v8a", "x86_64"/, 'abiFilters "armeabi-v7a"');
@@ -249,6 +262,7 @@ async function main() {
 		{
 			name: 'x86',
 			disabled: true,
+			publish: true,
 			patch: async (patcher, rnDir) => {
 				await patcher.updateFileContent(`${rnDir}/android/app/build.gradle`, async (content: string) => {
 					content = content.replace(/abiFilters "armeabi-v7a", "x86", "arm64-v8a", "x86_64"/, 'abiFilters "x86"');
@@ -260,6 +274,7 @@ async function main() {
 		{
 			name: 'arm64-v8a',
 			disabled: true,
+			publish: true,
 			patch: async (patcher, rnDir) => {
 				await patcher.updateFileContent(`${rnDir}/android/app/build.gradle`, async (content: string) => {
 					content = content.replace(/abiFilters "armeabi-v7a", "x86", "arm64-v8a", "x86_64"/, 'abiFilters "arm64-v8a"');
@@ -271,6 +286,7 @@ async function main() {
 		{
 			name: 'x86_64',
 			disabled: true,
+			publish: true,
 			patch: async (patcher, rnDir) => {
 				await patcher.updateFileContent(`${rnDir}/android/app/build.gradle`, async (content: string) => {
 					content = content.replace(/abiFilters "armeabi-v7a", "x86", "arm64-v8a", "x86_64"/, 'abiFilters "x86_64"');
@@ -288,7 +304,7 @@ async function main() {
 		if (releaseNameOnly && releaseConfig.name !== releaseNameOnly) continue;
 		if (releaseConfig.disabled) continue;
 		const projectName = releaseConfig.name === 'vosk' ? modProjectName : mainProjectName;
-		releaseFiles[releaseConfig.name] = await createRelease(projectName, releaseConfig, tagName, version);
+		releaseFiles[releaseConfig.name] = await createRelease(projectName, releaseConfig, tagName, version, releaseConfig.publish);
 	}
 
 	console.info('Created releases:');
