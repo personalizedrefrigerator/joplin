@@ -29,7 +29,6 @@ import BaseSyncTarget from './BaseSyncTarget';
 import reduxSharedMiddleware from './components/shared/reduxSharedMiddleware';
 import fs = require('fs-extra');
 const EventEmitter = require('events');
-const syswidecas = require('./vendor/syswide-cas');
 import SyncTargetRegistry from './SyncTargetRegistry';
 import SyncTargetFilesystem from './SyncTargetFilesystem';
 const SyncTargetNextcloud = require('./SyncTargetNextcloud.js');
@@ -68,7 +67,7 @@ import NavService from './services/NavService';
 import getAppName from './getAppName';
 import PerformanceLogger from './PerformanceLogger';
 import { Agent, setGlobalDispatcher } from 'undici';
-import { readFileSync } from 'fs';
+import { getCACertificates, setDefaultCACertificates } from 'node:tls';
 
 const appLogger: LoggerWrapper = Logger.create('App');
 const perfLogger = PerformanceLogger.create();
@@ -370,21 +369,25 @@ export default class BaseApplication {
 			},
 			'net.customCertificates': async () => {
 				const caPaths = Setting.value('net.customCertificates').split(',');
-				for (let i = 0; i < caPaths.length; i++) {
-					const f = caPaths[i].trim();
-					if (!f) continue;
-					syswidecas.addCAs(f);
+				const cas = [...getCACertificates('system')];
+				let addedCa = false;
+				for (const caPath of caPaths) {
+					const path = caPath.trim();
+					if (!path) continue;
+					cas.push(await shim.fsDriver().readFile(path));
+					addedCa = true;
 				}
-
-				// TODO: Fix
-				const defaultDispatcher = new Agent({
-					connect: {
-						ca: caPaths.map(path => {
-							return readFileSync(path);
-						}),
-					},
-				});
-				setGlobalDispatcher(defaultDispatcher);
+				if (addedCa) {
+					setDefaultCACertificates(cas);
+					// TODO: Test this! May require Electron >= 39.2.4. See
+					// https://github.com/electron/electron/pull/49042
+					const defaultDispatcher = new Agent({
+						connect: {
+							ca: cas,
+						},
+					});
+					setGlobalDispatcher(defaultDispatcher);
+				}
 			},
 			'net.proxyEnabled': async () => {
 				setupProxySettings({
