@@ -2,7 +2,7 @@ import InteropService_Importer_Md from '../../services/interop/InteropService_Im
 import Note from '../../models/Note';
 import Folder from '../../models/Folder';
 import * as fs from 'fs-extra';
-import { createTempDir, setupDatabaseAndSynchronizer, supportDir, switchClient } from '../../testing/test-utils';
+import { createTempDir, setupDatabaseAndSynchronizer, supportDir, switchClient, withWarningSilenced } from '../../testing/test-utils';
 import { MarkupToHtml } from '@joplin/renderer';
 import { FolderEntity, NoteEntity, ResourceEntity } from '../database/types';
 import Resource from '../../models/Resource';
@@ -117,6 +117,16 @@ describe('InteropService_Importer_Md', () => {
 		expect(noteBIds.length).toBe(1);
 		expect(noteAIds[0]).toEqual(noteB.id);
 		expect(noteBIds[0]).toEqual(noteA.id);
+	});
+	it('should gracefully handle links longer than the OS maximum length', async () => {
+		let note: NoteEntity;
+		await withWarningSilenced(/Failed to get stats for path/, async () => {
+			note = await importNote(`${supportDir}/test_notes/md/invalid-long-link.md`);
+		});
+
+		const items = await Note.linkedItems(note.body);
+		expect(items.length).toBe(0);
+		expect(note.body).toContain('[test](./this-link-is-longer-than-the-maximum-length-allowed-by-some-platforms-this-link-is-longer-than-the');
 	});
 	it('should not import resources from file:// links', async () => {
 		const note = await importNote(`${supportDir}/test_notes/md/sample-file-links.md`);

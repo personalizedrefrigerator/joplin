@@ -14,6 +14,9 @@ const { pregQuote } = require('../../string-utils-common');
 import { MarkupToHtml } from '@joplin/renderer';
 import { isDataUrl } from '@joplin/utils/url';
 import { stripBom } from '../../string-utils';
+import Logger from '@joplin/utils/Logger';
+
+const logger = Logger.create('InteropService_Importer_Md');
 
 export default class InteropService_Importer_Md extends InteropService_Importer_Base {
 	protected importedNotes: Record<string, NoteEntity> = {};
@@ -127,7 +130,17 @@ export default class InteropService_Importer_Md extends InteropService_Importer_
 				const linkPosix = toForwardSlashes(link);
 				const trimmedLink = this.trimAnchorLink(linkPosix);
 				const pathWithExtension = shim.fsDriver().resolve(`${dirname(filePath)}/${trimmedLink}`);
-				const stat = await shim.fsDriver().stat(pathWithExtension);
+
+				let stat;
+				try {
+					stat = await shim.fsDriver().stat(pathWithExtension);
+				} catch (error) {
+					// Log a warning. This can happen, for example, if the link is longer than the maximum
+					// length allowed by the platform (e.g. if text was incorrectly recognised as a link):
+					stat = null;
+					logger.warn('Failed to get stats for path', pathWithExtension, error);
+				}
+
 				const isDir = stat ? stat.isDirectory() : false;
 				if (stat && !isDir) {
 					const supportedFileExtension = this.metadata().fileExtensions;
