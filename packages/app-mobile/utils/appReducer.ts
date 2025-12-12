@@ -67,6 +67,11 @@ const appReducer = (state = appDefaultState, action: any) => {
 
 				newState.selectedNoteHash = '';
 
+				if (currentRoute.routeName === 'Search' && action.routeName === 'Notes') {
+					// Force a reload of the note list
+					newState.notesSource = '';
+				}
+
 				if (action.routeName === 'Search') {
 					newState.notesParentType = 'Search';
 				}
@@ -77,11 +82,13 @@ const appReducer = (state = appDefaultState, action: any) => {
 
 				if ('folderId' in action) {
 					newState.selectedFolderId = action.folderId;
+					newState.selectedFolderIds = [action.folderId];
 					newState.notesParentType = 'Folder';
 				}
 
 				if ('tagId' in action) {
 					newState.selectedTagId = action.tagId;
+					newState.selectedTagIds = [action.tagId];
 					newState.notesParentType = 'Tag';
 				}
 
@@ -194,6 +201,10 @@ const appReducer = (state = appDefaultState, action: any) => {
 
 		case 'NOTE_EDITOR_VISIBLE_CHANGE':
 			newState = { ...state, noteEditorVisible: action.visible };
+			break;
+
+		case 'SYNC_WIZARD_VISIBLE_CHANGE':
+			newState = { ...state, syncWizardVisible: action.visible };
 			break;
 		}
 	} catch (error) {

@@ -30,6 +30,8 @@ export enum EditorCommandType {
 	ToggleHeading5 = 'textHeading5',
 
 	InsertHorizontalRule = 'textHorizontalRule',
+	InsertTable = 'textTable',
+	InsertCodeBlock = 'textCodeBlock',
 
 	// Find commands
 	ToggleSearch = 'textSearch',
@@ -122,7 +124,7 @@ export interface EditorControl {
 	// the given [label] and [url].
 	updateLink(label: string, url: string): void;
 
-	setSearchState(state: SearchState): void;
+	setSearchState(state: SearchState, changeSource: string): void;
 
 	setContentScripts(plugins: ContentScriptData[]): Promise<void>;
 
@@ -178,6 +180,7 @@ export interface EditorSettings {
 	language: EditorLanguageType;
 
 	keymap: EditorKeymap;
+	preferMacShortcuts: boolean;
 	tabMovesFocus: boolean;
 
 	markdownMarkEnabled: boolean;

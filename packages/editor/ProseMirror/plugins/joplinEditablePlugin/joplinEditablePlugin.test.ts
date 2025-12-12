@@ -1,23 +1,26 @@
-import { htmlentities } from '@joplin/utils/html';
-import { RenderResult } from '../../../../renderer/types';
 import createTestEditor from '../../testing/createTestEditor';
-import joplinEditorApiPlugin, { getEditorApi, setEditorApi } from '../joplinEditorApiPlugin';
 import joplinEditablePlugin, { editSourceBlockAt, hideSourceBlockEditor } from './joplinEditablePlugin';
 import { Second } from '@joplin/utils/time';
+import { EditorView } from 'prosemirror-view';
+import selectFirstInstanceOfNode from '../../utils/selectFirstInstanceOfNode';
+import mockEditorApi from '../../testing/mockEditorApi';
 
 const createEditor = (html: string) => {
-	return createTestEditor({
-		plugins: [joplinEditablePlugin, joplinEditorApiPlugin],
+	const editorApi = mockEditorApi();
+	const editor = createTestEditor({
+		plugins: [joplinEditablePlugin, editorApi.plugin],
 		html,
 	});
+	editorApi.setup(editor);
+	return editor;
 };
 
-const findEditButton = (ancestor: Element): HTMLButtonElement => {
-	return ancestor.querySelector('.joplin-editable > button.edit');
+const findEditButton = (editor: EditorView): HTMLButtonElement => {
+	return editor.dom.parentElement.querySelector('.floating-button-bar:not(.-hidden) > .edit-button');
 };
 
 const findEditorDialog = () => {
-	const dialog = document.querySelector('dialog.editor-dialog');
+	const dialog = document.querySelector('dialog.joplin-dialog');
 	if (!dialog) {
 		return null;
 	}
@@ -47,13 +50,19 @@ describe('joplinEditablePlugin', () => {
 		'<p>Test: <mark><span class="joplin-editable"><pre class="joplin-source">test</pre>rendered</span></mark></p>',
 	])('should show an edit button on source blocks (case %#)', (htmlSource) => {
 		const editor = createEditor(htmlSource);
-		const editButton = findEditButton(editor.dom);
+
+		selectFirstInstanceOfNode(editor, 'joplinEditableInline');
+		selectFirstInstanceOfNode(editor, 'joplinEditableBlock');
+
+		const editButton = findEditButton(editor);
 		expect(editButton.textContent).toBe('Edit');
 	});
 
 	test('clicking the edit button should show an editor dialog', () => {
 		const editor = createEditor('<span class="joplin-editable"><pre class="joplin-source">test source</pre>rendered</span>');
-		const editButton = findEditButton(editor.dom);
+		selectFirstInstanceOfNode(editor, 'joplinEditableInline');
+
+		const editButton = findEditButton(editor);
 		editButton.click();
 
 		// Should show the dialog
@@ -65,18 +74,7 @@ describe('joplinEditablePlugin', () => {
 	test('editing the content of an editor dialog should update the source block', async () => {
 		const editor = createEditor('<div class="joplin-editable"><pre class="joplin-source">test source</pre>rendered</div>');
 
-		// Mock render functions:
-		editor.dispatch(setEditorApi(editor.state.tr, {
-			...getEditorApi(editor.state),
-			renderer: {
-				renderMarkupToHtml: jest.fn(async source => ({
-					html: `<pre class="joplin-source">${htmlentities(source)}</pre><p class="test-content">Mocked!</p></div>`,
-				} as RenderResult)),
-				renderHtmlToMarkup: jest.fn(),
-			},
-		}));
-
-		const editButton = findEditButton(editor.dom);
+		const editButton = findEditButton(editor);
 		editButton.click();
 
 		const dialog = findEditorDialog();

@@ -25,6 +25,7 @@ import { StateDecryptionWorker, StateResourceFetcher } from '@joplin/lib/reducer
 import useOnLongPressProps from '../utils/hooks/useOnLongPressProps';
 import { TouchableRipple } from 'react-native-paper';
 import shim from '@joplin/lib/shim';
+import getConflictFolderId from '@joplin/lib/models/utils/getConflictFolderId';
 const { substrWithEllipsis } = require('@joplin/lib/string-utils');
 
 interface Props {
@@ -42,8 +43,7 @@ interface Props {
 	folders: FolderEntity[];
 	profileConfig: ProfileConfig;
 	inboxJopId: string;
-	selectedFolderId: string;
-	selectedTagId: string;
+	selectedFolderIds: string[];
 }
 
 const syncIconRotationValue = new Animated.Value(0);
@@ -95,6 +95,10 @@ const useStyles = (themeId: number) => {
 			...buttonStyle,
 			flex: 0,
 		};
+		const folderButtonTextStyle: ViewStyle = {
+			...buttonTextStyle,
+			paddingLeft: 0,
+		};
 
 		const styles = StyleSheet.create({
 			menu: {
@@ -112,9 +116,10 @@ const useStyles = (themeId: number) => {
 			},
 			sidebarIcon: sidebarIconStyle,
 			folderButton: folderButtonStyle,
-			folderButtonText: {
-				...buttonTextStyle,
-				paddingLeft: 0,
+			folderButtonText: folderButtonTextStyle,
+			conflictFolderButtonText: {
+				...folderButtonTextStyle,
+				color: theme.colorError,
 			},
 			folderButtonSelected: {
 				...folderButtonStyle,
@@ -263,6 +268,7 @@ const FolderItem: React.FC<FolderItemProps> = props => {
 	// depth is specified with an accessibilityLabel:
 	const folderDepthDescription = props.depth > 0 ? _('(level %d)', props.depth) : '';
 	const accessibilityLabel = `${folderTitle}  ${folderDepthDescription}`.trim();
+	const folderButtonTextStyle = props.folder.id === Folder.conflictFolderId() ? baseStyles.conflictFolderButtonText : baseStyles.folderButtonText;
 	return (
 		<View key={props.folder.id} style={styles.buttonWrapper}>
 			<TouchableRipple
@@ -278,7 +284,7 @@ const FolderItem: React.FC<FolderItemProps> = props => {
 					{renderFolderIcon(props.folder.id, folderIcon)}
 					<Text
 						numberOfLines={1}
-						style={baseStyles.folderButtonText}
+						style={folderButtonTextStyle}
 						accessibilityLabel={accessibilityLabel}
 					>
 						{folderTitle}
@@ -331,6 +337,8 @@ const SideMenuContentComponent = (props: Props) => {
 
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 		const menuItems: any[] = [];
+
+		if (folder && folder.id === getConflictFolderId()) return;
 
 		if (folder && folder.id === getTrashFolderId()) {
 			menuItems.push({
@@ -501,9 +509,8 @@ const SideMenuContentComponent = (props: Props) => {
 			});
 
 			props.dispatch({
-				type: 'NAV_GO',
-				routeName: 'Config',
-				sectionName: 'sync',
+				type: 'SYNC_WIZARD_VISIBLE_CHANGE',
+				visible: true,
 			});
 
 			return 'init';
@@ -558,7 +565,7 @@ const SideMenuContentComponent = (props: Props) => {
 			hasChildren={hasChildren}
 			depth={depth}
 			collapsed={props.collapsedFolderIds.includes(folder.id)}
-			selected={isFolderSelected(folder, { selectedFolderId: props.selectedFolderId, notesParentType: props.notesParentType })}
+			selected={isFolderSelected(folder, { selectedFolderIds: props.selectedFolderIds, notesParentType: props.notesParentType })}
 			styles={styles_}
 			folder={folder}
 			alwaysShowFolderIcons={alwaysShowFolderIcons}
@@ -724,8 +731,7 @@ export default connect((state: AppState) => {
 		folders: state.folders,
 		syncStarted: state.syncStarted,
 		syncReport: state.syncReport,
-		selectedFolderId: state.selectedFolderId,
-		selectedTagId: state.selectedTagId,
+		selectedFolderIds: state.selectedFolderIds,
 		notesParentType: state.notesParentType,
 		locale: state.settings.locale,
 		themeId: state.settings.theme,

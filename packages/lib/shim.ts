@@ -54,6 +54,23 @@ export interface ShowMessageBoxOptions {
 	cancelId?: number;
 }
 
+export enum ToastType {
+	Info = 'info',
+	Error = 'error',
+	Success = 'success',
+}
+
+export interface ShowToastOptions {
+	type: ToastType;
+}
+
+export enum MobilePlatform {
+	None = '',
+	Android = 'android',
+	Ios = 'ios',
+	Web = 'web',
+}
+
 let isTestingEnv_ = false;
 
 // We need to ensure that there's only one instance of React being used by all
@@ -190,8 +207,8 @@ const shim = {
 	},
 
 	// "ios" or "android", or "" if not on mobile
-	mobilePlatform: () => {
-		return ''; // Default if we're not on mobile (React Native)
+	mobilePlatform: (): MobilePlatform => {
+		return MobilePlatform.None; // Default if we're not on mobile (React Native)
 	},
 
 	// https://github.com/cheton/is-electron
@@ -449,6 +466,11 @@ const shim = {
 
 	showConfirmationDialog: async (message: string): Promise<boolean> => {
 		return await shim.showMessageBox(message, { type: MessageBoxType.Confirm }) === 0;
+	},
+
+	showToast: async (message: string, { type = ToastType.Info }: ShowToastOptions = null): Promise<void> => {
+		// Should usually be overridden by implementers
+		await shim.showMessageBox(message, { type: type === ToastType.Error ? MessageBoxType.Error : MessageBoxType.Info });
 	},
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied

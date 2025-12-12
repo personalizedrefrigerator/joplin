@@ -109,6 +109,15 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 			section: 'sync',
 		},
 
+		'sync.wizard.autoShowOnStartup': {
+			value: mobilePlatform === 'web',
+			type: SettingItemType.Bool,
+			public: false,
+			appTypes: [AppType.Mobile],
+			label: () => 'Show the sync wizard on startup if no sync target is selected',
+			section: 'sync',
+		},
+
 		'sync.target': {
 			value: 0,
 			type: SettingItemType.Int,
@@ -1080,6 +1089,7 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 		'markdown.plugin.katex': { storage: SettingStorage.File, isGlobal: true, value: true, type: SettingItemType.Bool, section: 'markdownPlugins', public: true, appTypes: [AppType.Mobile, AppType.Desktop], label: () => `${_('Enable math expressions')}${wysiwygYes}` },
 		'markdown.plugin.fountain': { storage: SettingStorage.File, isGlobal: true, value: false, type: SettingItemType.Bool, section: 'markdownPlugins', public: true, appTypes: [AppType.Mobile, AppType.Desktop], label: () => `${_('Enable Fountain syntax support')}${wysiwygYes}` },
 		'markdown.plugin.mermaid': { storage: SettingStorage.File, isGlobal: true, value: true, type: SettingItemType.Bool, section: 'markdownPlugins', public: true, appTypes: [AppType.Mobile, AppType.Desktop], label: () => `${_('Enable Mermaid diagrams support')}${wysiwygYes}` },
+		'markdown.plugin.abc': { storage: SettingStorage.File, isGlobal: true, value: true, type: SettingItemType.Bool, section: 'markdownPlugins', public: true, appTypes: [AppType.Mobile, AppType.Desktop], label: () => `${_('Enable ABC musical notation support')}${wysiwygYes}` },
 
 		'markdown.plugin.audioPlayer': { storage: SettingStorage.File, isGlobal: true, value: true, type: SettingItemType.Bool, section: 'markdownPlugins', public: true, appTypes: [AppType.Mobile, AppType.Desktop], label: () => `${_('Enable audio player')}${wysiwygNo}` },
 		'markdown.plugin.videoPlayer': { storage: SettingStorage.File, isGlobal: true, value: true, type: SettingItemType.Bool, section: 'markdownPlugins', public: true, appTypes: [AppType.Mobile, AppType.Desktop], label: () => `${_('Enable video player')}${wysiwygNo}` },
@@ -1107,6 +1117,8 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 			label: () => `${_('Enable file:// URLs for images and videos')}${wysiwygYes}`,
 		},
 
+		'markdown.plugin.abc.options': { storage: SettingStorage.File, isGlobal: true, value: '', type: SettingItemType.String, section: 'markdownPlugins', public: true, appTypes: [AppType.Mobile, AppType.Desktop], label: () => `${_('ABC musical notation: Options')}${wysiwygNo}`, description: () => _('Options that should be used whenever rendering ABC code. It must be a JSON5 object. The full list of options is available at: %1', 'https://paulrosen.github.io/abcjs/visual/render-abc-options.html') },
+
 		// Tray icon (called AppIndicator) doesn't work in Ubuntu
 		// http://www.webupd8.org/2017/04/fix-appindicator-not-working-for.html
 		// Might be fixed in Electron 18.x but no non-beta release yet. So for now
@@ -1132,7 +1144,7 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 			appTypes: [AppType.Desktop],
 		},
 
-		startMinimized: { value: false, type: SettingItemType.Bool, storage: SettingStorage.File, isGlobal: true, section: 'application', public: true, appTypes: [AppType.Desktop], label: () => _('Start application minimised in the tray icon') },
+		startMinimized: { value: false, type: SettingItemType.Bool, storage: SettingStorage.File, isGlobal: true, section: 'application', public: true, appTypes: [AppType.Desktop], label: () => _('Start application minimised in the tray icon'), show: settings => !!settings['showTrayIcon'] },
 
 		collapsedFolderIds: { value: [] as string[], type: SettingItemType.Array, public: false },
 
@@ -1971,6 +1983,14 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 			label: () => _('Document scanner: Title template'),
 			description: () => _('Default title to use for documents created by the scanner.'),
 			section: 'note',
+		},
+
+		'scanner.requestTranscription': {
+			value: false,
+			type: SettingItemType.Bool,
+			label: () => 'Default value for the "queue for transcription" checkbox',
+			public: false,
+			appTypes: [AppType.Mobile],
 		},
 
 		'trash.autoDeletionEnabled': {

@@ -23,6 +23,7 @@ import { defaultWindowId } from '@joplin/lib/reducer';
 import { msleep, Second } from '@joplin/utils/time';
 import determineBaseAppDirs from '@joplin/lib/determineBaseAppDirs';
 import getAppName from '@joplin/lib/getAppName';
+import { execCommand } from '@joplin/utils';
 
 interface RendererProcessQuitReply {
 	canClose: boolean;
@@ -407,7 +408,17 @@ export default class ElectronAppWrapper {
 					isGoingToExit = true;
 				} else {
 					event.preventDefault();
-					this.hide();
+
+					const w = this.win_;
+					if (!w) return;
+
+					if (w.isFullScreen()) {
+						// leave fullscreen, then hide
+						w.once('leave-full-screen', () => w.hide());
+						w.setFullScreen(false);
+					} else {
+						w.hide();
+					}
 				}
 			} else {
 				const hasBackgroundWindows = this.secondaryWindows_.size > 0;
@@ -612,7 +623,11 @@ export default class ElectronAppWrapper {
 					console.warn('The window object was not available during the click event from tray icon');
 					return;
 				}
-				this.mainWindow().show();
+				if (!this.mainWindow().isVisible()) {
+					this.mainWindow().show();
+				} else {
+					this.mainWindow().hide();
+				}
 			});
 		} catch (error) {
 			console.error('Cannot create tray', error);
@@ -796,6 +811,33 @@ export default class ElectronAppWrapper {
 		return this.customProtocolHandler_;
 	}
 
+	private async fixLinuxAccessibility_() {
+		if (this.electronApp().accessibilitySupportEnabled) return;
+
+		const isOrcaRunning = async () => {
+			if (!shim.isLinux()) return false;
+			try {
+				const matchingProcesses = await execCommand(['ps', '--no-headers', '-C', 'orca'], { quiet: true });
+				return matchingProcesses.trim().length > 0;
+			} catch (error) {
+				if (error.stderr || error.exitCode !== 1) {
+					// eslint-disable-next-line no-console -- The main logger is not available at this point.
+					console.error('Failed to check for and enable accessibility support:', error.stderr);
+				}
+
+				return false;
+			}
+		};
+
+		// Work around https://issues.chromium.org/issues/431257156 by force-enabling accessibility
+		// when Orca (a screen reader) is running:
+		if (await isOrcaRunning()) {
+			// eslint-disable-next-line no-console -- The main logger is not available at this point.
+			console.log('Linux accessibility: Enabling full accessibility support.');
+			this.electronApp().setAccessibilitySupportEnabled(true);
+		}
+	}
+
 	public async start() {
 		// Since we are doing other async things before creating the window, we might miss
 		// the "ready" event. So we use the function below to make sure that the app is ready.
@@ -803,6 +845,8 @@ export default class ElectronAppWrapper {
 
 		const alreadyRunning = await this.ensureSingleInstance();
 		if (alreadyRunning) return;
+
+		await this.fixLinuxAccessibility_();
 
 		this.customProtocolHandler_ = handleCustomProtocols();
 		this.createWindow();

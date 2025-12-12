@@ -463,4 +463,62 @@ describe('UserModel', () => {
 
 		expect(await models().user().login(user.email, '123456')).toBe(null);
 	});
+
+	test('should not change user properties managed by SAML', async () => {
+		const user1 = await createUser(1);
+
+		config().SAML_ENABLED = true;
+
+		try {
+			await models().user().save({
+				id: user1.id,
+				is_external: 1,
+				full_name: 'testing',
+			}, { skipValidation: true });
+
+			const previousUser = await models().user().load(user1.id);
+
+			await models().user().save({
+				id: user1.id,
+				full_name: 'testing mod',
+				email: 'testingmod@example.com',
+				password: 'mod',
+				max_item_size: 12345,
+			});
+
+			const modUser = await models().user().load(user1.id);
+
+			expect(modUser.full_name).toBe(previousUser.full_name);
+			expect(modUser.email).toBe(previousUser.email);
+			expect(modUser.password).toBe(previousUser.password);
+			expect(modUser.max_item_size).toBe(12345);
+		} finally {
+			config().SAML_ENABLED = false;
+		}
+	});
+
+	test('should generate a unique SSO code', async () => {
+		const createExternalUser = async (index: number) => {
+			const user = await createUser(index);
+			return await models().user().save({
+				id: user.id,
+				is_external: 1,
+			}, { skipValidation: true });
+		};
+		const user1 = await createExternalUser(1);
+		const user2 = await createExternalUser(2);
+		config().SAML_ENABLED = true;
+
+		try {
+			await models().user().generateSsoCode(user1);
+			await models().user().generateSsoCode(user2);
+
+			const code1 = (await models().user().load(user1.id)).sso_auth_code;
+			const code2 = (await models().user().load(user2.id)).sso_auth_code;
+			expect(code1).not.toBe(code2);
+		} finally {
+			config().SAML_ENABLED = false;
+		}
+	});
+
 });

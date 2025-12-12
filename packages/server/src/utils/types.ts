@@ -70,6 +70,7 @@ export interface DatabaseConfig {
 	asyncStackTraces?: boolean;
 	slowQueryLogEnabled?: boolean;
 	slowQueryLogMinDuration?: number;
+	maxConnections?: number;
 	autoMigration?: boolean;
 }
 
@@ -183,6 +184,7 @@ export interface Config extends EnvVariables {
 	businessEmail: string;
 	isJoplinCloud: boolean;
 	cookieSecure: boolean;
+	cookieSameSite: 'strict' | 'lax' | 'none' | boolean;
 	storageDriver: StorageDriverConfig;
 	storageDriverFallback: StorageDriverConfig;
 	itemSizeHardLimit: number;
