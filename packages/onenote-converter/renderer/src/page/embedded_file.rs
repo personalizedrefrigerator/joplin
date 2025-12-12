@@ -33,7 +33,7 @@ impl<'a> Renderer<'a> {
                 styles.set("line-height", "17px".into());
                 let style_attr = styles.to_html_attr();
 
-                content = format!("<p {style_attr}\"><a href=\"{filename}\">{filename}</a></p>")
+                content = format!("<p {style_attr}><a href=\"{filename}\">{filename}</a></p>")
             }
         };
 
