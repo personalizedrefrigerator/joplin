@@ -15,16 +15,15 @@ impl<'a> Renderer<'a> {
         log!("Rendering embedded file: {:?}", path);
         fs_driver().write_file(&path, file.data())?;
 
-        let file_type = Self::guess_type(file);
-
         let mut styles = StyleSet::new();
         if let Some(offset_x_half_inches) = file.offset_horizontal() {
-            styles.set("margin-left", format!("{}in", offset_x_half_inches * 2.));
+            styles.set("margin-left", format!("{}in", offset_x_half_inches / 2.));
         }
         if let Some(offset_y_half_inches) = file.offset_vertical() {
-            styles.set("margin-top", format!("{}in", offset_y_half_inches * 2.));
+            styles.set("margin-top", format!("{}in", offset_y_half_inches / 2.));
         }
 
+        let file_type = Self::guess_type(file);
         match file_type {
             // TODO: we still don't have support for the audio tag on html notes https://github.com/laurent22/joplin/issues/11939
             // FileType::Audio => content = format!("<audio class=\"media-player media-audio\"controls><source src=\"{}\" type=\"audio/x-wav\"></source></audio>", filename),
