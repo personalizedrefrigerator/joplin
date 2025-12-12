@@ -14,7 +14,6 @@ const { pregQuote } = require('../../string-utils-common');
 import { MarkupToHtml } from '@joplin/renderer';
 import { isDataUrl } from '@joplin/utils/url';
 import { stripBom } from '../../string-utils';
-import { pathExists } from 'fs-extra';
 
 export default class InteropService_Importer_Md extends InteropService_Importer_Base {
 	protected importedNotes: Record<string, NoteEntity> = {};
@@ -131,7 +130,7 @@ export default class InteropService_Importer_Md extends InteropService_Importer_
 
 				// This check also means that non-files, such as web URLs, will not be processed by
 				// the code below and simply inserted as links.
-				if (!(await pathExists(pathWithExtension))) continue;
+				if (!(await shim.fsDriver().exists(pathWithExtension))) continue;
 
 				const stat = await shim.fsDriver().stat(pathWithExtension);
 				const isDir = stat ? stat.isDirectory() : false;
