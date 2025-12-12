@@ -6,6 +6,7 @@ const { escapeHtml } = require('./string-utils.js');
 // [\s\S] instead of . for multiline matching
 // https://stackoverflow.com/a/16119722/561309
 const imageRegex = /<img([\s\S]*?)src=["']([\s\S]*?)["']([\s\S]*?)>/gi;
+const videoRegex = /<video([\s\S]*?)src=["']([\s\S]*?)["']([\s\S]*?)>/gi;
 const anchorRegex = /<a([\s\S]*?)href=["']([\s\S]*?)["']([\s\S]*?)>/gi;
 const embedRegex = /<embed([\s\S]*?)src=["']([\s\S]*?)["']([\s\S]*?)>/gi;
 const objectRegex = /<object([\s\S]*?)data=["']([\s\S]*?)["']([\s\S]*?)>/gi;
@@ -76,8 +77,13 @@ class HtmlUtils {
 	}
 
 	// Returns the **encoded** URLs, so to be useful they should be decoded again before use.
+	public extractVideoUrls(html: string) {
+		return this.extractUrls(videoRegex, html);
+	}
+
+	// Returns the **encoded** URLs, so to be useful they should be decoded again before use.
 	public extractFileUrls(html: string) {
-		return this.extractImageUrls(html).concat(this.extractAnchorUrls(html));
+		return this.extractImageUrls(html).concat(this.extractAnchorUrls(html)).concat(this.extractVideoUrls(html));
 	}
 
 	public replaceResourceUrl(html: string, urlToReplace: string, id: string) {
