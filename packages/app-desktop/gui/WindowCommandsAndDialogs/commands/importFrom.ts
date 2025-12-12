@@ -10,7 +10,10 @@ import Setting from '@joplin/lib/models/Setting';
 import { PackageInfo } from '@joplin/lib/versionInfo';
 import shim from '@joplin/lib/shim';
 import { ImportModule } from '@joplin/lib/services/interop/Module';
+import Logger from '@joplin/utils/Logger';
 const packageInfo: PackageInfo = require('../../../packageInfo.js');
+
+const logger = Logger.create('importFrom');
 
 export const declaration: CommandDeclaration = {
 	name: 'importFrom',
@@ -135,6 +138,7 @@ export const runtime = (control: WindowControl): CommandRuntime => {
 				// eslint-disable-next-line no-console
 				console.info('Import result: ', result);
 			} catch (error) {
+				logger.error(error);
 				bridge().showErrorMessageBox(error.message);
 			}
 
