@@ -26,7 +26,7 @@ const importTestFile = async (name: string): Promise<NoteEntity> => {
 	return importNote(`${supportDir}/test_notes/yaml/${name}`);
 };
 
-describe('InteropService_Importer_Md_frontmatter: importMetadata', () => {
+describe('InteropService_Importer_Md_frontmatter', () => {
 	beforeEach(async () => {
 		await setupDatabaseAndSynchronizer(1);
 		await switchClient(1);
@@ -203,6 +203,10 @@ describe('InteropService_Importer_Md_frontmatter: importMetadata', () => {
 			is_todo: 0,
 			todo_completed: 0,
 		});
+	});
+
+	it('should not fail if the keywords field is empty', async () => {
+		await expect(importTestFile('bad_keywords.md')).resolves.not.toThrow();
 	});
 
 	it('should use the filename in cases where the frontmatter has no title', async () => {

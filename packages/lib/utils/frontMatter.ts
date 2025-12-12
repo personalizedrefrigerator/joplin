@@ -240,8 +240,10 @@ export const parse = (note: string): ParsedMeta => {
 	if ('tags' in md) {
 		// Only create unique tags
 		tags = md['tags'];
-	} else if ('keywords' in md) {
-		// Adding support for r-markdown/pandoc
+	} else if ('keywords' in md && Array.isArray(md.keywords)) {
+		// Support for r-markdown/pandoc. Note that "keywords" may be an empty field in the input
+		// document, which would be parsed as just "null", so this is why we need to check that it
+		// is an array. Fixes: https://github.com/laurent22/joplin/issues/13008
 		tags = tags.concat(md['keywords']);
 	}
 
