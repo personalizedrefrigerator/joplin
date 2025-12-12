@@ -1,5 +1,36 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`InteropService_Importer_OneNote should apply position data for embedded files: EmbeddedFiles 1`] = `
+"<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Embedded doc sheet</title>
+    <style>
+    
+/* (For testing: Removed default CSS) */
+
+
+    
+    </style>
+</head>
+<body>
+
+<div class="title" style="left: 48px; position: absolute; top: 24px;"><div class="container-outline"><div class="outline-element" style="margin-left: 0px;"><span style="font-family: Calibri Light; font-size: 20pt; line-height: 32px;">Embedded doc sheet</span></div>
+</div><div class="container-outline"><div class="outline-element" style="margin-left: 0px;"><span style="color: rgb(118,118,118); font-family: Calibri; font-size: 10pt; line-height: 16px;">Wednesday, December 11, 2019</span></div>
+<div class="outline-element" style="margin-left: 0px;"><span style="color: rgb(118,118,118); font-family: Calibri; font-size: 10pt; line-height: 16px;">5:35 PM</span></div>
+</div></div><p style="font-size: 11pt; line-height: 17px; margin-left: 2in; margin-top: 1.7in;"><a href=":/id-here">Dude this is a super cool embedded doc.docx</a></p><div class="container-outline" style="left: 192px; position: absolute; top: 259px; width: 624px;"><div class="outline-element" style="margin-left: 0px;"><p style="font-family: Calibri; font-size: 11pt; line-height: 17px;">&nbsp;</p></div>
+</div>
+
+<script>
+    if (window.parent !== null) {
+        window.parent.postMessage(window.location.href, '*');
+    }
+</script>
+</body>
+</html>"
+`;
+
 exports[`InteropService_Importer_OneNote should be able to create notes from corrupted attachment: new_section 1`] = `
 "<!DOCTYPE html>
 <html lang="en">
