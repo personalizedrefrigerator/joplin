@@ -6,6 +6,18 @@ import { ImportModuleOutputFormat, ImportOptions } from './types';
 import InteropService from './InteropService';
 import Folder from '../../models/Folder';
 import { NoteEntity } from '../database/types';
+const moment = require('moment');
+
+// Suppress warning:
+//
+// Deprecation warning: value provided is not in a recognized RFC2822 or ISO format. moment
+// construction falls back to js Date(), which is not reliable across all browsers and versions. Non
+// RFC2822/ISO date formats are discouraged. Please refer to
+// http://momentjs.com/guides/#/warnings/js-date/ for more info.
+//
+// But what moment.js does it correct when you don't know the format of the date, which is what we
+// simulate here with imported files.
+moment.suppressDeprecationWarnings = true;
 
 async function importNote(path: string) {
 	const folder = await Folder.save({});
@@ -144,8 +156,12 @@ describe('InteropService_Importer_Md_frontmatter', () => {
 		const note = await importTestFile('notesnook_updated_created.md');
 
 		expect(note.title).toBe('Frontmatter test');
+
+		// Notesnook seems to export data with an ambiguous date format such as "02-01-2024" (Is
+		// that 1 February or 2 January?) and we can't support something like this, so there's a
+		// chance imported Notesnook will have the wrong dates but it's for them to fix their app.
 		expect(note.user_created_time).toBe(Date.parse('2024-01-01T01:23:00.000'));
-		expect(note.user_updated_time).toBe(Date.parse('2024-01-02T04:56:00.000'));
+		expect(note.user_updated_time).toBe(Date.parse('2024-01-01T04:56:00.000'));
 	});
 	it('should handle date formats with timezone information', async () => {
 		const note = await importTestFile('utc.md');
