@@ -1,3 +1,4 @@
+import htmlUtils from './htmlUtils';
 import { plainTextToHtml } from './htmlUtils';
 
 describe('htmlUtils', () => {
@@ -71,6 +72,23 @@ describe('htmlUtils', () => {
 			const actual = plainTextToHtml(input);
 			expect(actual).toBe(expected);
 		}
+	});
+
+	test.each([
+		{
+			html: '',
+			extract: [],
+		},
+		{
+			html: '<video src="./test.mp4"/>',
+			extract: ['./test.mp4'],
+		},
+		{
+			html: '<a href="./test.html">test</a><a href="test.png">...</a>',
+			extract: ['./test.html', 'test.png'],
+		},
+	])('should extract file URLs', ({ html, extract }) => {
+		expect(htmlUtils.extractFileUrls(html)).toEqual(extract);
 	});
 
 });
