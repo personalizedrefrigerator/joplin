@@ -3,7 +3,6 @@ import * as React from 'react';
 import { TextStyle, Text, StyleProp } from 'react-native';
 
 import { FontAwesome5 } from '@react-native-vector-icons/fontawesome5';
-import { AntDesign } from '@react-native-vector-icons/ant-design';
 import { MaterialDesignIcons } from '@react-native-vector-icons/material-design-icons';
 import { Ionicons } from '@react-native-vector-icons/ionicons';
 
@@ -57,8 +56,6 @@ const Icon: React.FC<Props> = props => {
 				{...sharedProps}
 			/>
 		);
-	} else if (namePrefix === 'ant') {
-		return <AntDesign name={nameSuffix} {...sharedProps}/>;
 	} else if (namePrefix === 'material') {
 		return <MaterialDesignIcons name={nameSuffix} {...sharedProps}/>;
 	} else if (namePrefix === 'ionicon') {

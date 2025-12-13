@@ -10312,7 +10312,6 @@ __metadata:
     "@react-native-community/netinfo": "npm:11.4.1"
     "@react-native-community/push-notification-ios": "npm:1.11.0"
     "@react-native-documents/picker": "npm:10.1.5"
-    "@react-native-vector-icons/ant-design": "npm:12.4.0"
     "@react-native-vector-icons/fontawesome5": "npm:12.3.0"
     "@react-native-vector-icons/fontisto": "npm:12.4.0"
     "@react-native-vector-icons/get-image": "npm:12.3.0"
@@ -13377,18 +13376,6 @@ __metadata:
     react: "*"
     react-native: "*"
   checksum: 10/22ec4d3aa64ecfcc7afecf0ef77c936bd0cb10a62c4887baf19404f47d5eb4b91f093e2f5a694e537ffe7a212222a08731aa903664b6c02029ff4fa2fec5af07
-  languageName: node
-  linkType: hard
-
-"@react-native-vector-icons/ant-design@npm:12.4.0":
-  version: 12.4.0
-  resolution: "@react-native-vector-icons/ant-design@npm:12.4.0"
-  dependencies:
-    "@react-native-vector-icons/common": "npm:^12.4.0"
-  peerDependencies:
-    react: "*"
-    react-native: "*"
-  checksum: 10/92d2256b92958ae15150f1785993f322186cf770b2dc285e022e826122ac8881378616269f99acaab94647f06b5d7badb410f2e363e5f0d88ee40fbaf66131ed
   languageName: node
   linkType: hard
 
