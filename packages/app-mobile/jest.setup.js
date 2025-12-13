@@ -119,6 +119,7 @@ const mockIconLibrary = (libraryName, exportName) => {
 			static getImageSourceSync = () => ({ uri: '' });
 		};
 		return {
+			default: MockIconComponent,
 			[exportName]: MockIconComponent,
 		};
 	});
