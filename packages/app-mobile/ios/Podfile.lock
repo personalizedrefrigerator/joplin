@@ -1520,7 +1520,7 @@ PODS:
     - React-Core
   - react-native-sqlite-storage (6.0.1):
     - React-Core
-  - react-native-vector-icons (12.2.0):
+  - react-native-vector-icons (12.3.0):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -1544,12 +1544,11 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - react-native-vector-icons-ant-design (12.3.0)
-  - react-native-vector-icons-fontawesome5 (12.2.0)
-  - react-native-vector-icons-fontisto (12.3.0)
+  - react-native-vector-icons-fontawesome5 (12.3.0)
+  - react-native-vector-icons-fontisto (12.4.0)
   - react-native-vector-icons-ionicons (12.3.0)
-  - react-native-vector-icons-material-design-icons (12.3.0)
-  - react-native-vector-icons-material-icons (12.3.0)
+  - react-native-vector-icons-material-design-icons (12.4.0)
+  - react-native-vector-icons-material-icons (12.4.0)
   - react-native-version-info (1.1.1):
     - React-Core
   - react-native-webview (13.15.0):
@@ -2019,7 +2018,6 @@ DEPENDENCIES:
   - react-native-safe-area-context (from `../node_modules/react-native-safe-area-context`)
   - react-native-sqlite-storage (from `../node_modules/react-native-sqlite-storage`)
   - "react-native-vector-icons (from `../node_modules/@react-native-vector-icons/get-image`)"
-  - "react-native-vector-icons-ant-design (from `../node_modules/@react-native-vector-icons/ant-design`)"
   - "react-native-vector-icons-fontawesome5 (from `../node_modules/@react-native-vector-icons/fontawesome5`)"
   - "react-native-vector-icons-fontisto (from `../node_modules/@react-native-vector-icons/fontisto`)"
   - "react-native-vector-icons-ionicons (from `../node_modules/@react-native-vector-icons/ionicons`)"
@@ -2205,8 +2203,6 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-sqlite-storage"
   react-native-vector-icons:
     :path: "../node_modules/@react-native-vector-icons/get-image"
-  react-native-vector-icons-ant-design:
-    :path: "../node_modules/@react-native-vector-icons/ant-design"
   react-native-vector-icons-fontawesome5:
     :path: "../node_modules/@react-native-vector-icons/fontawesome5"
   react-native-vector-icons-fontisto:
@@ -2375,13 +2371,12 @@ SPEC CHECKSUMS:
   react-native-saf-x: 404f0f9a29cc6bf21d88582e054c45a11b28c22b
   react-native-safe-area-context: 2243039f43d10cb1ea30ec5ac57fc6d1448413f4
   react-native-sqlite-storage: 0c84826214baaa498796c7e46a5ccc9a82e114ed
-  react-native-vector-icons: e7ebf5146d187bbfeb01b7626a896dc3ae9963f8
-  react-native-vector-icons-ant-design: 3764a6096f8d760e0bb6766ea762a5545f6dba1c
-  react-native-vector-icons-fontawesome5: 1199fa2cf3323fac0b9b52b2aecb1329aa3602a5
-  react-native-vector-icons-fontisto: e4bd066699d05136908cefa3c98526c32c02cfad
+  react-native-vector-icons: a45ecc326ec090450f152dfc7076ce1173331ce5
+  react-native-vector-icons-fontawesome5: 271d813e27a86d30bb8cf1fc2f12dae74b74b69b
+  react-native-vector-icons-fontisto: f2a88c77dee7b31477514c26fa612d84cbbca44b
   react-native-vector-icons-ionicons: ad07e944a092a5cf71b8b569d8f5ce2bf674c415
-  react-native-vector-icons-material-design-icons: c502df5b988ce85d6c7d2b7ee909818315760b82
-  react-native-vector-icons-material-icons: eff7417eb1ac6c740ab802837ad34b8233fded34
+  react-native-vector-icons-material-design-icons: 76cd460b3540b80527b4a80fb7f867f7deedb498
+  react-native-vector-icons-material-icons: d67e485a05560416ff6b5977d5fa7e0eb6af6870
   react-native-version-info: f0b04e16111c4016749235ff6d9a757039189141
   react-native-webview: 0dceb35a9d050f5fa55f7fe2d8c4d1903651eb7d
   React-NativeModulesApple: 2c4377e139522c3d73f5df582e4f051a838ff25e
