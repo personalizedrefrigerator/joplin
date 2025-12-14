@@ -178,7 +178,7 @@ async function createRelease(projectName: string, releaseConfig: ReleaseConfig, 
 	await patcher.restore();
 
 	return {
-		downloadUrl: downloadUrl,
+		downloadUrl: publish ? downloadUrl : '',
 		apkFilename: apkFilename,
 		apkFilePath: apkFilePath,
 		publish,
