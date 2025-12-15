@@ -86,6 +86,8 @@ const createTheme = (theme: EditorTheme): Extension[] => {
 	const baseHeadingStyle = {
 		fontWeight: 'bold',
 		fontFamily: theme.fontFamily,
+		paddingBottom: '0.2em',
+		marginBottom: '0.1em',
 	};
 
 	const codeMirrorTheme = EditorView.theme({
@@ -210,7 +212,11 @@ const createTheme = (theme: EditorTheme): Extension[] => {
 		// small.
 		'& .cm-h1': {
 			...baseHeadingStyle,
-			fontSize: '1.6em',
+			fontSize: '1.5em',
+
+			borderBottom: '1px solid var(--joplin-divider-color)',
+			// Leave some space between the border and the right edge of the editor:
+			marginInlineEnd: '0.3em',
 		},
 		'& .cm-h2': {
 			...baseHeadingStyle,
