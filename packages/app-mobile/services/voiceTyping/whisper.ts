@@ -6,6 +6,7 @@ import { dirname, join } from 'path';
 import { NativeModules } from 'react-native';
 import { SpeechToTextCallbacks, VoiceTypingProvider, VoiceTypingSession } from './VoiceTyping';
 import { languageCodeOnly, stringByLocale } from '@joplin/lib/locale';
+import { getMaxMemory } from 'react-native-device-info';
 
 const logger = Logger.create('voiceTyping/whisper');
 
@@ -212,10 +213,18 @@ const modelLocalFilepath = () => {
 	return `${modelLocalDirectory()}/model/`;
 };
 
+let isLowRamDevice_: boolean|undefined = undefined;
+const isLowRamDevice = async () => {
+	const megabyte = 1024 * 1024;
+	const gigabyte = megabyte * 1024;
+	isLowRamDevice_ ??= await getMaxMemory() <= 1.5 * gigabyte;
+	return isLowRamDevice_;
+};
+
 const whisper: VoiceTypingProvider = {
 	supported: () => !!SpeechToTextModule,
 	modelLocalFilepath: modelLocalFilepath,
-	getDownloadUrl: (locale) => {
+	getDownloadUrl: async (locale) => {
 		const lang = languageCodeOnly(locale).toLowerCase();
 		let urlTemplate = rtrimSlashes(Setting.value('voiceTypingBaseUrl').trim());
 
@@ -223,8 +232,10 @@ const whisper: VoiceTypingProvider = {
 			urlTemplate = 'https://github.com/joplin/voice-typing-models/releases/download/v0.2.0/{task}.zip';
 		}
 
+		const modelSize = await isLowRamDevice() ? 'whisper-base-q8_0' : 'whisper-small-q8_0';
+
 		return urlTemplate
-			.replace(/\{task\}/g, 'whisper-small-q8_0')
+			.replace(/\{task\}/g, modelSize)
 			.replace(/\{lang\}/g, lang);
 	},
 	deleteCachedModels: async (locale) => {

@@ -32,7 +32,7 @@ export interface VoiceTypingProvider {
 	supported(): boolean;
 	modelLocalFilepath(locale: string): string;
 	deleteCachedModels(locale: string): Promise<void>;
-	getDownloadUrl(locale: string): string;
+	getDownloadUrl(locale: string): Promise<string>;
 	getUuidPath(locale: string): string;
 	build(options: BuildProviderOptions): Promise<VoiceTypingSession>;
 }
@@ -76,7 +76,7 @@ export default class VoiceTyping {
 			return false;
 		}
 
-		const modelUrl = this.provider.getDownloadUrl(this.locale);
+		const modelUrl = await this.provider.getDownloadUrl(this.locale);
 		const urlHash = await shim.fsDriver().readFile(uuidPath);
 		return urlHash.trim() !== md5(modelUrl);
 	}
@@ -91,7 +91,7 @@ export default class VoiceTyping {
 
 	public async download() {
 		const modelPath = this.getModelPath();
-		const modelUrl = this.provider.getDownloadUrl(this.locale);
+		const modelUrl = await this.provider.getDownloadUrl(this.locale);
 
 		await shim.fsDriver().remove(modelPath);
 		logger.info(`Downloading model from: ${modelUrl}`);
