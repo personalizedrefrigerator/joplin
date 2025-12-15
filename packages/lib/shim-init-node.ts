@@ -20,6 +20,7 @@ import { Size } from '@joplin/utils/types';
 import { cpus } from 'os';
 import { pathToFileURL } from 'url';
 import type PdfJs from './utils/types/pdfJs';
+import * as sqlite from 'node:sqlite';
 const { _ } = require('./locale');
 const http = require('http');
 const https = require('https');
@@ -109,8 +110,6 @@ export interface ShimInitOptions {
 	appVersion: ()=> string;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	electronBridge: any;
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	nodeSqlite: any;
 	pdfJs: PdfJs;
 	isAppleSilicon?: ()=> boolean;
 }
@@ -122,7 +121,6 @@ function shimInit(options: ShimInitOptions = null) {
 		React: null,
 		appVersion: null,
 		electronBridge: null,
-		nodeSqlite: null,
 		pdfJs: null,
 		isAppleSilicon: () => false,
 		...options,
@@ -133,7 +131,7 @@ function shimInit(options: ShimInitOptions = null) {
 	const appVersion = options.appVersion;
 	const pdfJs = options.pdfJs;
 
-	shim.setNodeSqlite(options.nodeSqlite);
+	shim.setNodeSqlite(sqlite);
 
 	shim.fsDriver = () => {
 		throw new Error('Not implemented');
