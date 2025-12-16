@@ -16,11 +16,6 @@ export type SvgXml = {
 	content: string;
 };
 
-type ExtractSvgsReturn = {
-	svgs: SvgXml[];
-	html: string;
-};
-
 // See onenote-converter README.md for more information
 export default class InteropService_Importer_OneNote extends InteropService_Importer_Base {
 	protected importedNotes: Record<string, NoteEntity> = {};
@@ -117,8 +112,8 @@ export default class InteropService_Importer_OneNote extends InteropService_Impo
 			this.options_.onError?.(new Error(`None of the files appear to be from OneNote. Skipped files include: ${JSON.stringify(skippedFiles)}`));
 		}
 
-		logger.info('Extracting SVGs into files');
-		await this.moveSvgToLocalFile(tempOutputDirectory);
+		logger.info('Postprocessing imported content...');
+		await this.postprocessGeneratedHtml_(tempOutputDirectory);
 
 		logger.info('Importing HTML into Joplin');
 		const importer = new InteropService_Importer_Md();
@@ -144,22 +139,45 @@ export default class InteropService_Importer_OneNote extends InteropService_Impo
 		}
 	}
 
-	private async moveSvgToLocalFile(baseFolder: string) {
-		const htmlFiles = await this.getValidHtmlFiles(resolve(baseFolder));
+	private async postprocessGeneratedHtml_(baseFolder: string) {
+		const htmlFiles = await this.getValidHtmlFiles_(resolve(baseFolder));
+
+		const pipeline = [
+			async (dom: Document, currentFolder: string) => {
+				const { svgs, changed } = this.extractSvgs(dom);
+
+				if (changed) {
+					await this.createSvgFiles(svgs, currentFolder);
+				}
+
+				return changed;
+			},
+
+			async (_dom: Document) => {
+				return false;
+			},
+		];
 
 		for (const file of htmlFiles) {
 			const fileLocation = join(baseFolder, file.path);
 			const originalHtml = await shim.fsDriver().readFile(fileLocation);
-			const { svgs, html: updatedHtml } = this.extractSvgs(originalHtml, () => uuidgen(10));
+			const dom = this.domParser.parseFromString(originalHtml, 'text/html');
 
-			if (!svgs || !svgs.length) continue;
+			let changed = false;
+			for (const task of pipeline) {
+				const result = await task(dom, dirname(fileLocation));
+				changed ||= result;
+			}
 
-			await shim.fsDriver().writeFile(fileLocation, updatedHtml, 'utf8');
-			await this.createSvgFiles(svgs, join(baseFolder, dirname(file.path)));
+			if (changed) {
+				// Don't use xmlSerializer here: It breaks <style> blocks.
+				const updatedHtml = `<!DOCTYPE HTML>\n${dom.documentElement.outerHTML}`;
+				await shim.fsDriver().writeFile(fileLocation, updatedHtml, 'utf-8');
+			}
 		}
 	}
 
-	private async getValidHtmlFiles(baseFolder: string) {
+	private async getValidHtmlFiles_(baseFolder: string) {
 		const files = await shim.fsDriver().readDirStats(baseFolder, { recursive: true });
 		const htmlFiles = files.filter(f => !f.isDirectory() && f.path.endsWith('.html'));
 		return htmlFiles;
@@ -171,14 +189,12 @@ export default class InteropService_Importer_OneNote extends InteropService_Impo
 		}
 	}
 
-	public extractSvgs(html: string, titleGenerator: ()=> string): ExtractSvgsReturn {
-		const dom = this.domParser.parseFromString(html, 'text/html');
-
+	public extractSvgs(dom: Document, titleGenerator: ()=> string = () => uuidgen(10)) {
 		// get all "top-level" SVGS (ignore nested)
 		const svgNodeList = dom.querySelectorAll('svg');
 
 		if (!svgNodeList || !svgNodeList.length) {
-			return { svgs: [], html };
+			return { svgs: [], changed: false };
 		}
 
 		const svgs: SvgXml[] = [];
@@ -220,8 +236,7 @@ export default class InteropService_Importer_OneNote extends InteropService_Impo
 
 		return {
 			svgs,
-			// Don't use xmlSerializer here: It breaks <style> blocks.
-			html: `<!DOCTYPE HTML>\n${dom.documentElement.outerHTML}`,
+			changed: true,
 		};
 	}
 }
