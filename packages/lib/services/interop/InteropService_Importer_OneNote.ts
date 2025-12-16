@@ -8,12 +8,18 @@ import { join, resolve, normalize, sep, dirname, extname, basename, relative } f
 import Logger from '@joplin/utils/Logger';
 import { uuidgen } from '../../uuid';
 import shim from '../../shim';
+import { htmlentities } from '@joplin/utils/html';
 
 const logger = Logger.create('InteropService_Importer_OneNote');
 
 export type SvgXml = {
 	title: string;
 	content: string;
+};
+
+type PageResolutionResult = { path: string };
+type PageIdMap = {
+	get: (pageId: string, pageTitle: string)=> PageResolutionResult|null;
 };
 
 // See onenote-converter README.md for more information
@@ -139,21 +145,38 @@ export default class InteropService_Importer_OneNote extends InteropService_Impo
 		}
 	}
 
-	private async buildIdMap_(baseFolder: string) {
+	private async buildIdMap_(baseFolder: string): Promise<PageIdMap> {
 		const htmlFiles = await this.getValidHtmlFiles_(resolve(baseFolder));
-		const pageIdToPathMap = new Map<string, string>();
+		const pageIdToPath = new Map<string, string>();
+		const pageTitleToPath = new Map<string, string>();
 
 		for (const file of htmlFiles) {
 			const fullPath = join(baseFolder, file.path);
 			const html: string = await shim.fsDriver().readFile(fullPath);
-			const metaTagMatch = html.match(/<meta name="X-Original-Page-Id" content="([^"]+)"/i);
-			if (!metaTagMatch) continue;
 
-			const pageId = metaTagMatch[1];
-			pageIdToPathMap.set(pageId.toUpperCase(), fullPath);
+			const metaTagMatch = html.match(/<meta name="X-Original-Page-Id" content="([^"]+)"/i);
+			if (metaTagMatch) {
+				const pageId = metaTagMatch[1];
+				pageIdToPath.set(pageId.toUpperCase(), fullPath);
+			}
+
+			const titleMatch = html.match(/<title>([^<]+)<\/title>/i);
+			if (titleMatch) {
+				pageTitleToPath.set(titleMatch[1], fullPath);
+			}
 		}
 
-		return pageIdToPathMap;
+		return {
+			get: (id: string, pageTitle: string)=>{
+				const path = pageIdToPath.get(id.toUpperCase())
+					?? pageTitleToPath.get(htmlentities(pageTitle));
+
+				if (path) {
+					return { path };
+				}
+				return null;
+			},
+		};
 	}
 
 	private async postprocessGeneratedHtml_(baseFolder: string) {
@@ -161,7 +184,7 @@ export default class InteropService_Importer_OneNote extends InteropService_Impo
 
 		const pipeline = [
 			(dom: Document, currentFolder: string) => this.extractSvgsToFiles_(dom, currentFolder),
-			(dom: Document, currentFolder: string) => this.externalLinksToInternalLinks_(dom, currentFolder),
+			(dom: Document, currentFolder: string) => this.convertExternalLinksToInternalLinks_(dom, currentFolder),
 		];
 
 		for (const file of htmlFiles) {
@@ -189,8 +212,8 @@ export default class InteropService_Importer_OneNote extends InteropService_Impo
 		return htmlFiles;
 	}
 
-	private async externalLinksToInternalLinks_(dom: Document, baseFolder: string) {
-		let idMap_: Map<string, string>|null = null;
+	private async convertExternalLinksToInternalLinks_(dom: Document, baseFolder: string) {
+		let idMap_: PageIdMap|null = null;
 		const idMap = async () => {
 			idMap_ ??= await this.buildIdMap_(baseFolder);
 			return idMap_;
@@ -202,17 +225,19 @@ export default class InteropService_Importer_OneNote extends InteropService_Impo
 			if (!link.href.startsWith('onenote:')) continue;
 
 			// Remove everything before the first query parameter (e.g. &section-id=).
-			const prefixRemoved = link.href.replace(/^[^&]+&/, '');
+			const separatorIndex = link.href.indexOf('&');
+			const title = decodeURIComponent(link.href.substring('onenote:#'.length, separatorIndex));
+			const prefixRemoved = link.href.substring(separatorIndex);
 			const params = new URLSearchParams(prefixRemoved);
 			const pageId = params.get('page-id');
-			const targetPage = (await idMap()).get(pageId.toUpperCase());
+			const targetPage = (await idMap()).get(pageId, title);
 
 			// The target page might be in a different notebook (imported separately)
 			if (!targetPage) {
 				logger.warn('Page not found for internal link. Page ID: ', pageId);
 			} else {
 				changed = true;
-				link.href = relative(baseFolder, targetPage);
+				link.href = relative(baseFolder, targetPage.path);
 			}
 		}
 		return changed;
