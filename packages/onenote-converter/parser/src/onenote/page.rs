@@ -4,6 +4,7 @@ use crate::onenote::outline::{Outline, parse_outline};
 use crate::onenote::page_content::{PageContent, parse_page_content};
 use crate::onestore::object_space::ObjectSpaceRef;
 use crate::shared::exguid::ExGuid;
+use crate::shared::guid::Guid;
 use parser_utils::errors::{ErrorKind, Result};
 use parser_utils::log::set_current_page;
 
@@ -15,7 +16,7 @@ use parser_utils::log::set_current_page;
 /// [\[MS-ONE\] 2.2.19]: https://docs.microsoft.com/en-us/openspecs/office_file_formats/ms-one/e381b7c7-b434-43a2-ba23-0d08bafd281a
 #[derive(Clone, Debug)]
 pub struct Page {
-    id: ExGuid,
+    entity_id: Guid,
     title: Option<Title>,
     level: i32,
     author: Option<String>,
@@ -86,8 +87,9 @@ impl Page {
     }
 
     /// The page's GUID. May be referenced by internal links.
-    pub fn id_string(&self) -> String {
-        format!("{}", self.id.guid)
+    /// Ref: [ONESTORE 2.2.58](https://learn.microsoft.com/en-us/openspecs/office_file_formats/ms-one/34ea5601-f060-4a69-b5f9-5843a1f14098)
+    pub fn link_target_id(&self) -> String {
+        format!("{}", self.entity_id)
     }
 
     fn outline_text(outline: &Outline) -> Option<&str> {
@@ -189,7 +191,6 @@ impl Title {
 pub(crate) fn parse_page(page_space: ObjectSpaceRef) -> Result<Page> {
     let metadata = parse_metadata(page_space.clone())?;
     let manifest = parse_manifest(page_space.clone())?;
-    let page_id = manifest.page;
 
     let data = parse_data(manifest, page_space.clone())?;
 
@@ -210,7 +211,7 @@ pub(crate) fn parse_page(page_space: ObjectSpaceRef) -> Result<Page> {
         .collect::<Result<_>>()?;
 
     Ok(Page {
-        id: page_id,
+        entity_id: metadata.entity_guid,
         title,
         level,
         author: data.author.map(|author| author.into_value()),

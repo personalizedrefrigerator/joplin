@@ -4,7 +4,7 @@ import InteropService_Importer_Base from './InteropService_Importer_Base';
 import { NoteEntity } from '../database/types';
 import { rtrimSlashes } from '../../path-utils';
 import InteropService_Importer_Md from './InteropService_Importer_Md';
-import { join, resolve, normalize, sep, dirname, extname, basename } from 'path';
+import { join, resolve, normalize, sep, dirname, extname, basename, relative } from 'path';
 import Logger from '@joplin/utils/Logger';
 import { uuidgen } from '../../uuid';
 import shim from '../../shim';
@@ -139,23 +139,29 @@ export default class InteropService_Importer_OneNote extends InteropService_Impo
 		}
 	}
 
+	private async buildIdMap_(baseFolder: string) {
+		const htmlFiles = await this.getValidHtmlFiles_(resolve(baseFolder));
+		const pageIdToPathMap = new Map<string, string>();
+
+		for (const file of htmlFiles) {
+			const fullPath = join(baseFolder, file.path);
+			const html: string = await shim.fsDriver().readFile(fullPath);
+			const metaTagMatch = html.match(/<meta name="X-Original-Page-Id" content="([^"]+)"/i);
+			if (!metaTagMatch) continue;
+
+			const pageId = metaTagMatch[1];
+			pageIdToPathMap.set(pageId.toUpperCase(), fullPath);
+		}
+
+		return pageIdToPathMap;
+	}
+
 	private async postprocessGeneratedHtml_(baseFolder: string) {
 		const htmlFiles = await this.getValidHtmlFiles_(resolve(baseFolder));
 
 		const pipeline = [
-			async (dom: Document, currentFolder: string) => {
-				const { svgs, changed } = this.extractSvgs(dom);
-
-				if (changed) {
-					await this.createSvgFiles(svgs, currentFolder);
-				}
-
-				return changed;
-			},
-
-			async (_dom: Document) => {
-				return false;
-			},
+			(dom: Document, currentFolder: string) => this.extractSvgsToFiles_(dom, currentFolder),
+			(dom: Document, currentFolder: string) => this.externalLinksToInternalLinks_(dom, currentFolder),
 		];
 
 		for (const file of htmlFiles) {
@@ -183,12 +189,46 @@ export default class InteropService_Importer_OneNote extends InteropService_Impo
 		return htmlFiles;
 	}
 
-	private async createSvgFiles(svgs: SvgXml[], svgBaseFolder: string) {
+	private async externalLinksToInternalLinks_(dom: Document, baseFolder: string) {
+		let idMap_: Map<string, string>|null = null;
+		const idMap = async () => {
+			idMap_ ??= await this.buildIdMap_(baseFolder);
+			return idMap_;
+		};
+
+		const links = dom.querySelectorAll<HTMLAnchorElement>('a[href^="onenote"]');
+		let changed = false;
+		for (const link of links) {
+			if (!link.href.startsWith('onenote:')) continue;
+
+			// Remove everything before the first query parameter (e.g. &section-id=).
+			const prefixRemoved = link.href.replace(/^[^&]+&/, '');
+			const params = new URLSearchParams(prefixRemoved);
+			const pageId = params.get('page-id');
+			const targetPage = (await idMap()).get(pageId.toUpperCase());
+
+			// The target page might be in a different notebook (imported separately)
+			if (!targetPage) {
+				logger.warn('Page not found for internal link. Page ID: ', pageId);
+			} else {
+				changed = true;
+				link.href = relative(baseFolder, targetPage);
+			}
+		}
+		return changed;
+	}
+
+	private async extractSvgsToFiles_(dom: Document, svgBaseFolder: string) {
+		const { svgs, changed } = this.extractSvgs(dom);
+
 		for (const svg of svgs) {
 			await shim.fsDriver().writeFile(join(svgBaseFolder, svg.title), svg.content, 'utf8');
 		}
+
+		return changed;
 	}
 
+	// Public to allow testing:
 	public extractSvgs(dom: Document, titleGenerator: ()=> string = () => uuidgen(10)) {
 		// get all "top-level" SVGS (ignore nested)
 		const svgNodeList = dom.querySelectorAll('svg');

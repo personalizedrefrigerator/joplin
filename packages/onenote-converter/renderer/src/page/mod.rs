@@ -72,7 +72,7 @@ impl<'a> Renderer<'a> {
         content.push_str(&page_content);
 
         crate::templates::page::render(
-            &page.id_string(),
+            &page.link_target_id(),
             &title_text,
             &content,
             &self.global_styles
