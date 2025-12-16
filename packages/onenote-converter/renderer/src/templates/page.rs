@@ -9,7 +9,7 @@ use std::collections::HashMap;
 #[template(path = "page.html", escape = "none")]
 struct PageTemplate<'a> {
     page_id_attr: &'a str,
-    name_html: &'a str,
+    name: &'a str,
     content: &'a str,
     global_styles: Vec<(&'a String, &'a StyleSet)>,
 }
@@ -21,8 +21,8 @@ pub(crate) fn render(
     global_styles: &HashMap<String, StyleSet>,
 ) -> Result<String> {
     PageTemplate {
-        name_html: &html_entities(name),
         content,
+        name: &html_entities(name),
         page_id_attr: &html_entities(page_id),
         global_styles: global_styles
             .iter()

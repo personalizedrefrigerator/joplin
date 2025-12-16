@@ -8,7 +8,6 @@ import { join, resolve, normalize, sep, dirname, extname, basename, relative } f
 import Logger from '@joplin/utils/Logger';
 import { uuidgen } from '../../uuid';
 import shim from '../../shim';
-import { htmlentities } from '@joplin/utils/html';
 
 const logger = Logger.create('InteropService_Importer_OneNote');
 
@@ -19,7 +18,7 @@ export type SvgXml = {
 
 type PageResolutionResult = { path: string };
 type PageIdMap = {
-	get: (pageId: string, pageTitle: string)=> PageResolutionResult|null;
+	get: (pageId: string)=> PageResolutionResult|null;
 };
 
 // See onenote-converter README.md for more information
@@ -148,7 +147,6 @@ export default class InteropService_Importer_OneNote extends InteropService_Impo
 	private async buildIdMap_(baseFolder: string): Promise<PageIdMap> {
 		const htmlFiles = await this.getValidHtmlFiles_(resolve(baseFolder));
 		const pageIdToPath = new Map<string, string>();
-		const pageTitleToPath = new Map<string, string>();
 
 		for (const file of htmlFiles) {
 			const fullPath = join(baseFolder, file.path);
@@ -159,17 +157,11 @@ export default class InteropService_Importer_OneNote extends InteropService_Impo
 				const pageId = metaTagMatch[1];
 				pageIdToPath.set(pageId.toUpperCase(), fullPath);
 			}
-
-			const titleMatch = html.match(/<title>([^<]+)<\/title>/i);
-			if (titleMatch) {
-				pageTitleToPath.set(titleMatch[1], fullPath);
-			}
 		}
 
 		return {
-			get: (id: string, pageTitle: string)=>{
-				const path = pageIdToPath.get(id.toUpperCase())
-					?? pageTitleToPath.get(htmlentities(pageTitle));
+			get: (id: string)=>{
+				const path = pageIdToPath.get(id.toUpperCase());
 
 				if (path) {
 					return { path };
@@ -226,15 +218,14 @@ export default class InteropService_Importer_OneNote extends InteropService_Impo
 
 			// Remove everything before the first query parameter (e.g. &section-id=).
 			const separatorIndex = link.href.indexOf('&');
-			const title = decodeURIComponent(link.href.substring('onenote:#'.length, separatorIndex));
 			const prefixRemoved = link.href.substring(separatorIndex);
 			const params = new URLSearchParams(prefixRemoved);
 			const pageId = params.get('page-id');
-			const targetPage = (await idMap()).get(pageId, title);
+			const targetPage = (await idMap()).get(pageId);
 
 			// The target page might be in a different notebook (imported separately)
 			if (!targetPage) {
-				logger.warn('Page not found for internal link. Page ID: ', pageId);
+				logger.info('Page not found for internal link. Page ID: ', pageId);
 			} else {
 				changed = true;
 				link.href = relative(baseFolder, targetPage.path);
