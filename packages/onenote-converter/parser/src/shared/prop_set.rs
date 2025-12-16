@@ -1,7 +1,9 @@
 use crate::one::property::PropertyType;
+use crate::shared::guid::Guid;
 use crate::shared::property::{PropertyId, PropertyValue};
-use parser_utils::Reader;
+use parser_utils::reader::Reader;
 use parser_utils::errors::Result;
+use parser_utils::parse::ParseHttpb;
 use std::collections::HashMap;
 use std::fmt::Debug;
 
@@ -28,8 +30,21 @@ impl Debug for PropertySet {
         let mut debug_map = f.debug_map();
         for (key, (_, value)) in &self.values {
             let formatted_key = format!("{:#0x}", key);
-            // Use the default compact representation of the value
-            let formatted_value = format!("{:?}", value);
+
+            let formatted_value = match value {
+                // It's often useful to have a string representation of `Vec`s. Convert
+                // to a string, if possible.
+                PropertyValue::Vec(data) => {
+                    if data.len() == 16 { // Length-16 Vecs are often GUIDs.
+                        Guid::parse(&mut Reader::new(data))
+                            .map(|guid| format!("{} ({:?})", guid, data)).ok()
+                    } else {
+                        None
+                    }
+                },
+                _ => None,
+            }.unwrap_or(format!("{:?}", value));
+
             debug_map.entry(&formatted_key, &formatted_value);
         }
         debug_map.finish()
@@ -43,7 +58,7 @@ impl PropertySet {
         };
     }
 
-    pub(crate) fn parse(reader: Reader) -> Result<PropertySet> {
+    pub(crate) fn parse(reader: &mut Reader) -> Result<PropertySet> {
         let count = reader.get_u16()?;
 
         let property_ids: Vec<_> = (0..count)
