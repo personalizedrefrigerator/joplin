@@ -96,7 +96,7 @@
     "tar": "6.2.1",
     "tcp-port-used": "1.0.2",
     "uglifycss": "0.0.29",
-    "undici": "7.16.0",
+    "undici": "patch:undici@npm%3A7.16.0#~/.yarn/patches/undici-npm-7.16.0-f6b1c9157f.patch",
     "url-parse": "1.5.10",
     "uuid": "11.1.0",
     "word-wrap": "1.2.5",

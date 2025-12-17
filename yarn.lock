@@ -10850,7 +10850,7 @@ __metadata:
     tesseract.js: "npm:6.0.1"
     typescript: "npm:5.8.3"
     uglifycss: "npm:0.0.29"
-    undici: "npm:7.16.0"
+    undici: "patch:undici@npm%3A7.16.0#~/.yarn/patches/undici-npm-7.16.0-f6b1c9157f.patch"
     url-parse: "npm:1.5.10"
     uuid: "npm:11.1.0"
     word-wrap: "npm:1.2.5"
@@ -51289,10 +51289,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"undici@npm:^6.18.2":
-  version: 6.21.2
-  resolution: "undici@npm:6.21.2"
-  checksum: 10/9cd9ead22599c23aa2a7dfa5b80fa1491bebb294bf1dc64c9c0f90ea4ec8e272a4db2810e2565d65b952249f105523d2929d7cc951f88cf0a1f082143bae8d75
+"undici@patch:undici@npm%3A7.16.0#~/.yarn/patches/undici-npm-7.16.0-f6b1c9157f.patch":
+  version: 7.16.0
+  resolution: "undici@patch:undici@npm%3A7.16.0#~/.yarn/patches/undici-npm-7.16.0-f6b1c9157f.patch::version=7.16.0&hash=26f548"
+  checksum: 10/39798bca08591e5afc30a3201db9617c1c07388d317f9e193d6e196bd54ccf7959a186a12fc82a0ae00911d0f012437d9cd181fd9b69eb3aca6e2667fc0f26f4
   languageName: node
   linkType: hard
 

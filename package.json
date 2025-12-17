@@ -123,6 +123,7 @@
     "depd@npm:~1.1.2": "patch:depd@npm%3A2.0.0#~/.yarn/patches/depd-npm-2.0.0-b6c51a4b43.patch",
     "depd@npm:2.0.0": "patch:depd@npm%3A2.0.0#~/.yarn/patches/depd-npm-2.0.0-b6c51a4b43.patch",
     "depd@npm:^1.1.2": "patch:depd@npm%3A2.0.0#~/.yarn/patches/depd-npm-2.0.0-b6c51a4b43.patch",
-    "depd@npm:^1.1.0": "patch:depd@npm%3A2.0.0#~/.yarn/patches/depd-npm-2.0.0-b6c51a4b43.patch"
+    "depd@npm:^1.1.0": "patch:depd@npm%3A2.0.0#~/.yarn/patches/depd-npm-2.0.0-b6c51a4b43.patch",
+    "undici@npm:^6.18.2": "patch:undici@npm%3A7.16.0#~/.yarn/patches/undici-npm-7.16.0-f6b1c9157f.patch"
   }
 }

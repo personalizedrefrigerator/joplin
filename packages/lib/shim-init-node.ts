@@ -19,6 +19,9 @@ import BaseItem from './models/BaseItem';
 import { Size } from '@joplin/utils/types';
 import { cpus } from 'os';
 import { pathToFileURL } from 'url';
+// Use fetch from undici rather than the built-in fetch: Undici's fetch provides
+// more information when fetch fails.
+import { fetch } from 'undici';
 import type PdfJs from './utils/types/pdfJs';
 const { _ } = require('./locale');
 const http = require('http');
@@ -527,8 +530,18 @@ function shimInit(options: ShimInitOptions = null) {
 		}
 		const resolvedProxyUrl = resolveProxyUrl(proxySettings.proxyUrl);
 		options.agent = (resolvedProxyUrl && proxySettings.proxyEnabled) ? shim.proxyAgent(url, resolvedProxyUrl) : null;
-		return shim.fetchWithRetry(() => {
-			return fetch(url, options);
+		return shim.fetchWithRetry(async () => {
+			try {
+				return await fetch(url, options);
+			} catch (error) {
+				// When error is a TypeError, information about the error failure is in
+				// error.cause:
+				const cause = error.cause;
+				if (error instanceof TypeError && cause instanceof Error) {
+					throw cause;
+				}
+				throw error;
+			}
 		}, options);
 	};
 
