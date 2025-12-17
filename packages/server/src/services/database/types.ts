@@ -342,6 +342,18 @@ export interface TaskState extends WithDates {
 	enabled?: number;
 }
 
+export interface Changes2 {
+	counter?: number;
+	id?: Uuid;
+	item_id?: Uuid;
+	user_id?: Uuid;
+	item_name?: string;
+	previous_share_id?: Uuid;
+	type?: number;
+	updated_time?: string;
+	created_time?: string;
+}
+
 export const databaseSchema: DatabaseTables = {
 	sessions: {
 		id: { type: 'string', defaultValue: null },
@@ -555,6 +567,17 @@ export const databaseSchema: DatabaseTables = {
 		task_id: { type: 'number', defaultValue: null },
 		running: { type: 'number', defaultValue: 0 },
 		enabled: { type: 'number', defaultValue: 1 },
+		updated_time: { type: 'string', defaultValue: null },
+		created_time: { type: 'string', defaultValue: null },
+	},
+	changes_2: {
+		counter: { type: 'number', defaultValue: null },
+		id: { type: 'string', defaultValue: null },
+		item_id: { type: 'string', defaultValue: null },
+		user_id: { type: 'string', defaultValue: '' },
+		item_name: { type: 'string', defaultValue: '' },
+		previous_share_id: { type: 'string', defaultValue: '' },
+		type: { type: 'number', defaultValue: null },
 		updated_time: { type: 'string', defaultValue: null },
 		created_time: { type: 'string', defaultValue: null },
 	},
