@@ -66,8 +66,7 @@ import determineProfileAndBaseDir from './determineBaseAppDirs';
 import NavService from './services/NavService';
 import getAppName from './getAppName';
 import PerformanceLogger from './PerformanceLogger';
-import { Agent, setGlobalDispatcher } from 'undici';
-import { getCACertificates, setDefaultCACertificates } from 'node:tls';
+import setExtraRootCertificates from './utils/setExtraRootCertificates';
 
 const appLogger: LoggerWrapper = Logger.create('App');
 const perfLogger = PerformanceLogger.create();
@@ -361,33 +360,11 @@ export default class BaseApplication {
 				time.setTimeFormat(Setting.value('timeFormat'));
 			},
 			'net.ignoreTlsErrors': async () => {
-				const ignoreTlsErrors = Setting.value('net.ignoreTlsErrors');
-				process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = ignoreTlsErrors ? '0' : '1';
-				if (ignoreTlsErrors) {
-					this.logger().warn('Ignore TLS errors is enabled. Consider disabling to improve security.');
-				}
+				process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = Setting.value('net.ignoreTlsErrors') ? '0' : '1';
 			},
 			'net.customCertificates': async () => {
 				const caPaths = Setting.value('net.customCertificates').split(',');
-				const cas = [...getCACertificates('system')];
-				let addedCa = false;
-				for (const caPath of caPaths) {
-					const path = caPath.trim();
-					if (!path) continue;
-					cas.push(await shim.fsDriver().readFile(path));
-					addedCa = true;
-				}
-				if (addedCa) {
-					setDefaultCACertificates(cas);
-					// TODO: Test this! May require Electron >= 39.2.4. See
-					// https://github.com/electron/electron/pull/49042
-					const defaultDispatcher = new Agent({
-						connect: {
-							ca: cas,
-						},
-					});
-					setGlobalDispatcher(defaultDispatcher);
-				}
+				await setExtraRootCertificates(caPaths);
 			},
 			'net.proxyEnabled': async () => {
 				setupProxySettings({
