@@ -14,13 +14,6 @@ enum ChangeType {
 type ChangeEntryOriginal = {
 	counter: number;
 	id: Uuid;
-	item_id: Uuid;
-	jop_share_id: Uuid;
-	previous_item_share_id: Uuid;
-	user_id: Uuid;
-	type: ChangeType;
-	updated_time: string;
-	created_time: string;
 };
 
 // It should be possible to pause and resume the migration in the background
