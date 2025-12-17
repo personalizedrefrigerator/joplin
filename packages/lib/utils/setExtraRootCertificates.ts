@@ -1,5 +1,4 @@
 import shim from '../shim';
-import { Agent, setGlobalDispatcher } from 'undici';
 
 let cacheKey = '[]';
 const setExtraRootCertificates = async (paths: string[]) => {
@@ -21,12 +20,6 @@ const setExtraRootCertificates = async (paths: string[]) => {
 	}
 
 	setDefaultCACertificates(cas);
-	const defaultDispatcher = new Agent({
-		connect: {
-			ca: cas,
-		},
-	});
-	setGlobalDispatcher(defaultDispatcher);
 };
 
 export default setExtraRootCertificates;
