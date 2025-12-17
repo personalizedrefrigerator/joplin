@@ -775,6 +775,55 @@ rules.mathjaxScriptBlock = {
 // ===============================================================================
 
 // ===============================================================================
+// MathML support (Wikipedia & KaTeX math)
+// ===============================================================================
+
+// Returns the contents of a <semantics><annotation>...</annotation></semantics> within
+// a math block.
+const getSourceText = (mathNode) => {
+  const semantics = findFirstDescendant(mathNode, 'nodeName', 'semantics');
+  if (!semantics) return '';
+
+  const annotation = findFirstDescendant(semantics, 'nodeName', 'annotation');
+  if (!annotation) return '';
+  return annotation.textContent;
+};
+
+rules.mathMlScriptBlock = {
+  filter: function (node) {
+    return node.nodeName === 'math' && !!getSourceText(node);
+  },
+
+  escapeContent: function() {
+    return false;
+  },
+
+  replacement: function (_content, node, _options) {
+    return '$' + getSourceText(node) + '$';
+  }
+};
+
+// Math renderers often include:
+// - MathML
+// - Stylized display HTML for browsers that don't suppport MathML.
+//
+// Joplin usually can't properly import the display HTML (and the MathML can usually
+// be imported separately). Skip it:
+rules.ignoreMathDisplay = {
+  filter: function (node) {
+    const hidden = node.getAttribute('aria-hidden') === 'true';
+    const hasClass = (className) => node.classList.contains(className);
+
+    const isWikipediaMathFallback = node.nodeName === 'IMG' && hasClass('mwe-math-fallback-image-display') && hidden;
+    const isKatexDisplay = node.nodeName === 'SPAN' && hasClass('katex-html') && hidden;
+    return isWikipediaMathFallback || isKatexDisplay;
+  },
+
+  replacement: () => '',
+};
+
+
+// ===============================================================================
 // Joplin "noMdConv" support
 // 
 // Tags that have the class "jop-noMdConv" are not converted to Markdown
