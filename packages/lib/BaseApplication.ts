@@ -364,7 +364,11 @@ export default class BaseApplication {
 			},
 			'net.customCertificates': async () => {
 				const caPaths = Setting.value('net.customCertificates').split(',');
-				await setExtraRootCertificates(caPaths);
+				try {
+					await setExtraRootCertificates(caPaths);
+				} catch (error) {
+					this.logger().error('Failed to add extra CA certificates:', error);
+				}
 			},
 			'net.proxyEnabled': async () => {
 				setupProxySettings({
