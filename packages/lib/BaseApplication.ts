@@ -3,7 +3,7 @@ import Logger, { TargetType, LoggerWrapper } from '@joplin/utils/Logger';
 import shim from './shim';
 const { setupProxySettings } = require('./shim-init-node');
 import BaseService from './services/BaseService';
-import reducer, { defaultWindowId, getNotesParent, serializeNotesParent, setStore, State } from './reducer';
+import reducer, { getNotesParent, serializeNotesParent, setStore, State } from './reducer';
 import KeychainServiceDriverNode from './services/keychain/KeychainServiceDriver.node';
 import KeychainServiceDriverElectron from './services/keychain/KeychainServiceDriver.electron';
 import { setLocale } from './locale';
@@ -263,16 +263,10 @@ export default class BaseApplication {
 			}
 		}
 
-		// Currently, the parent type is per-window, while the set of highlighted search terms
-		// is global. To avoid clearing the global set of highlighted terms when switching to a
-		// secondary window (where parentType != search), only update which terms are highlighted
-		// when the main window has focus.
-		if (state.windowId === defaultWindowId) {
-			this.store().dispatch({
-				type: 'SET_HIGHLIGHTED',
-				words: highlightedWords,
-			});
-		}
+		this.store().dispatch({
+			type: 'SET_HIGHLIGHTED',
+			words: highlightedWords,
+		});
 
 		this.store().dispatch({
 			type: 'SEARCH_RESULTS_SET',
