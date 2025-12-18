@@ -159,11 +159,18 @@ export const up = async (db: DbConnection) => {
 		`;
 		await db.transaction(async transaction => {
 			const result = await transaction.raw(`
-				WITH share_participants AS (
+				WITH all_share_ids AS (
+					SELECT (${previousShareIdSql}) as included_share_id FROM changes
+					WHERE changes.counter >= ?
+					AND changes.counter <= ?
+				), share_participants AS (
 						SELECT user_id, share_id FROM share_users
+							-- Performance: Filter out all share_ids that aren't used in the batch:
+							JOIN all_share_ids ON share_users.share_id = all_share_ids.included_share_id
 							WHERE status = 1 -- Only users that accepted the share
 					UNION ALL
 						SELECT owner_id AS user_id, id as share_id FROM shares
+							JOIN all_share_ids ON shares.id = all_share_ids.included_share_id
 					UNION ALL
 						-- Placeholder for "the user that authored the change"
 						SELECT NULL AS user_id, '{placeholder}' AS share_id
@@ -197,7 +204,7 @@ export const up = async (db: DbConnection) => {
 					-- done intentionally (see the "as id" block above) as a way to prevent a particular change from being
 					-- added twice for the same user.
 					ON CONFLICT DO NOTHING
-			`, [counterRange[0], counterRange[1]]);
+			`, [counterRange[0], counterRange[1], counterRange[0], counterRange[1]]);
 			processedCount += result.rowCount;
 		});
 
