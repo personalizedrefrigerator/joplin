@@ -19,6 +19,40 @@ type ChangeEntryOriginal = {
 // It should be possible to pause and resume the migration in the background
 export const config = { transaction: false };
 
+
+const validateChangeMigration = async (db: DbConnection, maximumCounter: number, limit: number) => {
+	const originalChanges = await db('changes').select('id', 'counter', 'type', 'previous_item')
+		.where('counter', '<', maximumCounter)
+		.orderBy('counter', 'desc')
+		.limit(limit);
+
+
+	for (const change of originalChanges) {
+		const migratedChanges = await db('changes_2')
+			.select('id', 'counter', 'type', 'previous_share_id')
+			.where('id', '=', change.id);
+
+		const validationError = (message: string) =>
+			new Error(`Validation failed: Change failed to migrate (${JSON.stringify(change)}->${JSON.stringify(migratedChanges)}): ${message}`);
+
+		if (migratedChanges.length !== 1) {
+			throw validationError('Migrated change not found.');
+		} else {
+			const migrated = migratedChanges[0];
+			if (migrated.type !== change.type) {
+				throw validationError(`Migrated change has wrong type. Was: ${migrated.type}, expected: ${change.type}`);
+			} else if (migrated.type === ChangeType.Update) {
+				const previousShareId = JSON.parse(change.previous_item || '{}').jop_share_id;
+				if (migrated.previous_share_id !== previousShareId) {
+					throw validationError(
+						`Wrong previous_share_id. Was: ${migrated.previous_share_id}, expected: ${previousShareId}.`,
+					);
+				}
+			}
+		}
+	}
+};
+
 export const up = async (db: DbConnection) => {
 
 	await db.transaction(async transaction => {
@@ -73,38 +107,6 @@ export const up = async (db: DbConnection) => {
 	const total = Object.values(await db('changes').count().where('counter', '>=', offset).first())[0];
 	logger.info('Migrating', total, 'changes... start', offset);
 
-	const validateChangeMigration = async (maximumCounter: number, limit: number) => {
-		const originalChanges = await db('changes').select('id', 'counter', 'type', 'previous_item')
-			.where('counter', '<', maximumCounter)
-			.orderBy('counter', 'desc')
-			.limit(limit);
-
-
-		for (const change of originalChanges) {
-			const migratedChanges = await db('changes_2')
-				.select('id', 'counter', 'type', 'previous_share_id')
-				.where('id', '=', change.id);
-
-			const validationError = (message: string) =>
-				new Error(`Validation failed: Change failed to migrate (${JSON.stringify(change)}->${JSON.stringify(migratedChanges)}): ${message}`);
-
-			if (migratedChanges.length !== 1) {
-				throw validationError('Migrated change not found.');
-			} else {
-				const migrated = migratedChanges[0];
-				if (migrated.type !== change.type) {
-					throw validationError(`Migrated change has wrong type. Was: ${migrated.type}, expected: ${change.type}`);
-				} else if (migrated.type === ChangeType.Update) {
-					const previousShareId = JSON.parse(change.previous_item || '{}').jop_share_id;
-					if (migrated.previous_share_id !== previousShareId) {
-						throw validationError(
-							`Wrong previous_share_id. Was: ${migrated.previous_share_id}, expected: ${previousShareId}.`,
-						);
-					}
-				}
-			}
-		}
-	};
 
 	const batchSize = 10_000;
 	// The number of items in each batch to validate. Larger values reduce performance,
@@ -114,7 +116,7 @@ export const up = async (db: DbConnection) => {
 	if (offset > 0) {
 		logger.info('Resuming... Validating last migrated changes...');
 		try {
-			await validateChangeMigration(offset, validationCount);
+			await validateChangeMigration(db, offset, validationCount);
 		} catch (error) {
 			logger.warn('Validation failed. The in-progress migration table will be deleted and the migration will need to be re-run. Error:', error);
 			await db.schema.dropTable('changes_2');
@@ -211,7 +213,7 @@ export const up = async (db: DbConnection) => {
 		logger.info('Processed', processedCount, '/', total, `(start=${counterRange[0]}, end=${counterRange[1]})`);
 
 		// Validate: Select some of the original changes and verify that they were migrated
-		await validateChangeMigration(counterRange[1], validationCount);
+		await validateChangeMigration(db, counterRange[1], validationCount);
 	}
 };
 
