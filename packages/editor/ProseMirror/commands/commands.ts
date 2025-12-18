@@ -87,12 +87,16 @@ const commands: Record<EditorCommandType, ExtendedCommand|null> = {
 	[EditorCommandType.ToggleItalicized]: toggleMark(schema.marks.emphasis),
 	[EditorCommandType.ToggleCode]: toggleCode,
 	[EditorCommandType.ToggleMath]: (state, dispatch, view) => {
-		const selectedText = getTextBetween(state.doc, state.selection.from, state.selection.to);
-		const block = selectedText.includes('\n');
-		const nodeType = block ? schema.nodes.joplinEditableBlock : schema.nodes.joplinEditableInline;
+		const inlineNodeType = schema.nodes.joplinEditableInline;
+		const blockNodeType = schema.nodes.joplinEditableBlock;
+		// If multiple paragraphs are selected, it usually isn't possible to replace them
+		// to inline math. Fall back to block math:
+		const block = !canReplaceSelectionWith(state.selection, inlineNodeType);
+		const nodeType = block ? blockNodeType : inlineNodeType;
 
 		if (canReplaceSelectionWith(state.selection, nodeType)) {
 			if (view) {
+				const selectedText = getTextBetween(state.doc, state.selection.from, state.selection.to);
 				const content = selectedText || '...';
 				return showCreateEditablePrompt(
 					block ? `$$\n\t${content}\n$$` : `$${content}$`, !block,
