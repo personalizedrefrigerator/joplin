@@ -162,9 +162,10 @@ export const up = async (db: DbConnection) => {
 		await db.transaction(async transaction => {
 			const result = await transaction.raw(`
 				WITH all_share_ids AS (
-					SELECT (${previousShareIdSql}) as included_share_id FROM changes
+					SELECT DISTINCT (${previousShareIdSql}) as included_share_id FROM changes
 					WHERE changes.counter >= ?
 					AND changes.counter <= ?
+					AND ${previousShareIdSql} != ''
 				), share_participants AS (
 						SELECT user_id, share_id FROM share_users
 							-- Performance: Filter out all share_ids that aren't used in the batch:
