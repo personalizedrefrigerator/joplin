@@ -92,7 +92,10 @@ const commands: Record<EditorCommandType, ExtendedCommand|null> = {
 
 		if (canReplaceSelectionWith(state.selection, nodeType)) {
 			if (view) {
-				return showCreateEditablePrompt(block ? '$$\n\t...\n$$' : '$...$', !block)(state, dispatch, view);
+				const content = selectedText || '...';
+				return showCreateEditablePrompt(
+					block ? `$$\n\t${content}\n$$` : `$${content}$`, !block,
+				)(state, dispatch, view);
 			}
 			return true;
 		}
@@ -135,7 +138,10 @@ const commands: Record<EditorCommandType, ExtendedCommand|null> = {
 		return true;
 	},
 	[EditorCommandType.InsertCodeBlock]: (state, dispatch, view) => {
-		return showCreateEditablePrompt('```\n\n```', false)(state, dispatch, view);
+		const selectedText = state.doc.textBetween(state.selection.from, state.selection.to);
+		return showCreateEditablePrompt(
+			`\`\`\`\n${selectedText}\n\`\`\``, false,
+		)(state, dispatch, view);
 	},
 	[EditorCommandType.ToggleSearch]: (state, dispatch, view) => {
 		const command = setSearchVisible(!getSearchVisible(state));
