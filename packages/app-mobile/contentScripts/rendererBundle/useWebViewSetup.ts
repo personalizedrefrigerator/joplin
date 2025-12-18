@@ -217,21 +217,19 @@ const useWebViewSetup = (props: Props): Result => {
 					if (assetPath.startsWith('pluginAssets/')) { // Built-in plugin asset
 						assetPath = assetPath.replace(/^pluginAssets\//, '');
 
-						// Ensures that the assetPath actually points to a file within the assets
-						// directory:
 						const fullPath = shim.fsDriver().resolveRelativePathWithinDir(
 							Setting.value('pluginAssetDir'), assetPath,
 						);
 						return shim.fsDriver().fileAtPath(fullPath);
-					} else { // Asset from an installed plugin
-						// User-installed plugins
-						const possibleBasePaths = [Setting.value('cacheDir')];
-						// Development plugins
+					} else { // Asset from an installed/development plugin
+						// User-installed plugins are stored in cacheDir
+						const allowedBasePaths = [Setting.value('cacheDir')];
+						// Development plugins are stored in other locations. Add them separately:
 						if (Setting.value('plugins.devPluginPaths')) {
-							possibleBasePaths.push(...Setting.value('plugins.devPluginPaths').split(','));
+							allowedBasePaths.push(...Setting.value('plugins.devPluginPaths').split(','));
 						}
 
-						for (const basePath of possibleBasePaths) {
+						for (const basePath of allowedBasePaths) {
 							const resolved = resolvePathWithinDir(basePath, assetPath);
 							if (resolved) {
 								return shim.fsDriver().fileAtPath(resolved);
