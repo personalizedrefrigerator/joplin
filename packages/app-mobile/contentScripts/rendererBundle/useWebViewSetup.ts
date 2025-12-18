@@ -17,6 +17,7 @@ import { ResourceInfos } from '@joplin/renderer/types';
 import useContentScripts from './utils/useContentScripts';
 import uuid from '@joplin/lib/uuid';
 import AsyncActionQueue from '@joplin/lib/AsyncActionQueue';
+import resolvePathWithinDir from '@joplin/lib/utils/resolvePathWithinDir';
 
 const logger = Logger.create('renderer/useWebViewSetup');
 
@@ -222,9 +223,22 @@ const useWebViewSetup = (props: Props): Result => {
 							Setting.value('pluginAssetDir'), assetPath,
 						);
 						return shim.fsDriver().fileAtPath(fullPath);
-					} else { // Plugin asset
-						const fullPath = shim.fsDriver().resolveRelativePathWithinDir(Setting.value('cacheDir'), assetPath);
-						return shim.fsDriver().fileAtPath(fullPath);
+					} else { // Asset from an installed plugin
+						// User-installed plugins
+						const possibleBasePaths = [Setting.value('cacheDir')];
+						// Development plugins
+						if (Setting.value('plugins.devPluginPaths')) {
+							possibleBasePaths.push(...Setting.value('plugins.devPluginPaths').split(','));
+						}
+
+						for (const basePath of possibleBasePaths) {
+							const resolved = resolvePathWithinDir(basePath, assetPath);
+							if (resolved) {
+								return shim.fsDriver().fileAtPath(resolved);
+							}
+						}
+
+						throw new Error(`Unable to resolve plugin asset: ${assetPath}`);
 					}
 				},
 				removeUnusedPluginAssets: options.removeUnusedPluginAssets,
