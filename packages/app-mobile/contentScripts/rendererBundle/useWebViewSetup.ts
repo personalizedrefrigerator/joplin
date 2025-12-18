@@ -12,7 +12,6 @@ import RNToWebViewMessenger from '../../utils/ipc/RNToWebViewMessenger';
 import useEditPopup from './utils/useEditPopup';
 import { PluginStates } from '@joplin/lib/services/plugins/reducer';
 import { RenderSettings } from './contentScript/Renderer';
-import resolvePathWithinDir from '@joplin/lib/utils/resolvePathWithinDir';
 import Resource from '@joplin/lib/models/Resource';
 import { ResourceInfos } from '@joplin/renderer/types';
 import useContentScripts from './utils/useContentScripts';
@@ -212,20 +211,21 @@ const useWebViewSetup = (props: Props): Result => {
 						settingsChanged = true;
 					}
 				},
-				readAssetBlob: (assetPath: string): Promise<Blob> => {
-					// Built-in assets are in resourceDir, external plugin assets are in cacheDir.
-					const assetsDirs = [Setting.value('resourceDir'), Setting.value('cacheDir')];
+				// Handles plugin asset loading on web (where the WebView can't load assets directly).
+				readAssetBlob: async (assetPath: string): Promise<Blob> => {
+					if (assetPath.startsWith('pluginAssets/')) { // Built-in plugin asset
+						assetPath = assetPath.replace(/^pluginAssets\//, '');
 
-					let resolvedPath = null;
-					for (const assetDir of assetsDirs) {
-						resolvedPath ??= resolvePathWithinDir(assetDir, assetPath);
-						if (resolvedPath) break;
+						// Ensures that the assetPath actually points to a file within the assets
+						// directory:
+						const fullPath = shim.fsDriver().resolveRelativePathWithinDir(
+							Setting.value('pluginAssetDir'), assetPath,
+						);
+						return shim.fsDriver().fileAtPath(fullPath);
+					} else { // Plugin asset
+						const fullPath = shim.fsDriver().resolveRelativePathWithinDir(Setting.value('cacheDir'), assetPath);
+						return shim.fsDriver().fileAtPath(fullPath);
 					}
-
-					if (!resolvedPath) {
-						throw new Error(`Failed to load asset at ${assetPath} -- not in any of the allowed asset directories: ${assetsDirs.join(',')}.`);
-					}
-					return shim.fsDriver().fileAtPath(resolvedPath);
 				},
 				removeUnusedPluginAssets: options.removeUnusedPluginAssets,
 				globalSettings: {
