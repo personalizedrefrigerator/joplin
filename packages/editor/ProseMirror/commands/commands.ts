@@ -15,6 +15,7 @@ import jumpToHash from '../utils/jumpToHash';
 import focusEditor from './focusEditor';
 import canReplaceSelectionWith from '../utils/canReplaceSelectionWith';
 import showCreateEditablePrompt from '../plugins/joplinEditablePlugin/showCreateEditablePrompt';
+import getTextBetween from '../utils/getTextBetween';
 
 type Dispatch = (tr: Transaction)=> void;
 type ExtendedCommand = (state: EditorState, dispatch: Dispatch, view?: EditorView, options?: string[])=> boolean;
@@ -86,7 +87,7 @@ const commands: Record<EditorCommandType, ExtendedCommand|null> = {
 	[EditorCommandType.ToggleItalicized]: toggleMark(schema.marks.emphasis),
 	[EditorCommandType.ToggleCode]: toggleCode,
 	[EditorCommandType.ToggleMath]: (state, dispatch, view) => {
-		const selectedText = state.doc.textBetween(state.selection.from, state.selection.to);
+		const selectedText = getTextBetween(state.doc, state.selection.from, state.selection.to);
 		const block = selectedText.includes('\n');
 		const nodeType = block ? schema.nodes.joplinEditableBlock : schema.nodes.joplinEditableInline;
 
@@ -138,7 +139,7 @@ const commands: Record<EditorCommandType, ExtendedCommand|null> = {
 		return true;
 	},
 	[EditorCommandType.InsertCodeBlock]: (state, dispatch, view) => {
-		const selectedText = state.doc.textBetween(state.selection.from, state.selection.to);
+		const selectedText = getTextBetween(state.doc, state.selection.from, state.selection.to);
 		return showCreateEditablePrompt(
 			`\`\`\`\n${selectedText}\n\`\`\``, false,
 		)(state, dispatch, view);
