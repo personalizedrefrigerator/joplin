@@ -322,4 +322,11 @@ describe('InteropService_Importer_OneNote', () => {
 
 		expect(markdown).toMatchSnapshot('Math');
 	});
+
+	it('should apply position data for embedded files', async () => {
+		const notes = await importNote(`${supportDir}/onenote/testOneNoteEmbeddedWordDoc.one`);
+		const importedNote = notes.find(n => n.title.startsWith('Embedded doc sheet'));
+
+		expect(normalizeNoteForSnapshot(importedNote.body)).toMatchSnapshot('EmbeddedFiles');
+	});
 });
