@@ -187,6 +187,9 @@ const createEditor = async (
 		redo: () => {
 			void editorControl.execCommand(EditorCommandType.Redo);
 		},
+		getSelection: () => {
+			return view.state.doc.textBetween(view.state.selection.from, view.state.selection.to, '\n\n');
+		},
 		select: function(anchor: number, head: number): void {
 			const transaction = view.state.tr;
 			transaction.setSelection(

@@ -132,12 +132,14 @@ const NewWindowOrIFrame: React.FC<Props> = props => {
 	}, [doc, props.title]);
 
 	useEffect(() => {
+		if (props.mode !== WindowMode.NewWindow) return;
+
 		const win = doc?.defaultView;
 		if (win && 'electronWindow' in win && typeof win.electronWindow === 'object') {
 			const electronWindow = win.electronWindow as SecondaryWindowApi;
 			electronWindow.onSetWindowId(props.windowId);
 		}
-	}, [doc, props.windowId]);
+	}, [doc, props.windowId, props.mode]);
 
 	const parentNode = loaded ? doc?.body : null;
 	const wrappedChildren = <WindowIdContext.Provider value={props.windowId}>{props.children}</WindowIdContext.Provider>;

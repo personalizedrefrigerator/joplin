@@ -25,7 +25,7 @@ const convertHtmlToMarkdown = (html: string|HTMLElement) => {
 	turndown.use(turndownPluginGfm);
 	turndown.remove('script');
 	turndown.remove('style');
-	const md = turndown.turndown(html);
+	const md: string = turndown.turndown(html);
 	return md;
 };
 

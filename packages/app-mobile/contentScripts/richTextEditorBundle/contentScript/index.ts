@@ -6,7 +6,7 @@ import { MarkupLanguage } from '@joplin/renderer/types';
 import '@joplin/editor/ProseMirror/styles';
 import readFileToBase64 from '../../utils/readFileToBase64';
 import { EditorLanguageType } from '@joplin/editor/types';
-import convertHtmlToMarkdown from './convertHtmlToMarkdown';
+import convertHtmlToMarkdown from '@joplin/lib/utils/convertHtmlToMarkdown';
 import { ExportedWebViewGlobals as MarkdownEditorWebViewGlobals } from '../../markdownEditorBundle/types';
 import { EditorEventType } from '@joplin/editor/events';
 

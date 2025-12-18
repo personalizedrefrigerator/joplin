@@ -1540,14 +1540,15 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 
 		// 2023-09-07: This setting is now used to track the desktop beta editor. It
 		// was used to track the mobile beta editor previously.
+		// 2025-12-18: This setting is now used to track the desktop beta Rich Text Editor.
 		'editor.beta': {
 			value: false,
 			type: SettingItemType.Bool,
 			section: 'general',
-			public: false,
+			public: true,
 			appTypes: [AppType.Desktop],
 			label: () => 'Opt-in to the editor beta',
-			description: () => 'Currently unused',
+			description: () => 'Enable the beta Rich Text Editor.',
 			storage: SettingStorage.File,
 			isGlobal: true,
 		},

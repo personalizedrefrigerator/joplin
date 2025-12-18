@@ -3,6 +3,7 @@ import * as esbuild from 'esbuild';
 import { existsSync, readFileSync } from 'fs';
 import { writeFile } from 'fs/promises';
 import { dirname, join, relative } from 'path';
+import pluginBundleSvgs from '@joplin/editor/tools/esbuild/pluginBundleSvgs';
 
 const baseDir = dirname(__dirname);
 const baseNodeModules = join(baseDir, 'node_modules');
@@ -63,6 +64,7 @@ const makeBuildContext = (entryPoint: string, renderer: boolean, addDebugStats: 
 					});
 				},
 			},
+			pluginBundleSvgs,
 			{
 				// Rewrite imports to prefer .js files to .ts. Otherwise, certain files are duplicated in the final bundle
 				name: 'joplin--prefer-js-imports',

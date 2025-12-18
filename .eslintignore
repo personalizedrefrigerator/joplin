@@ -271,6 +271,10 @@ packages/app-desktop/gui/NoteEditor/NoteBody/CodeMirror/v6/utils/useKeymap.js
 packages/app-desktop/gui/NoteEditor/NoteBody/CodeMirror/v6/utils/useRefocusOnVisiblePaneChange.js
 packages/app-desktop/gui/NoteEditor/NoteBody/CodeMirror/v6/utils/useSyncEditorValue.js
 packages/app-desktop/gui/NoteEditor/NoteBody/PlainEditor/PlainEditor.js
+packages/app-desktop/gui/NoteEditor/NoteBody/ProseMirror/Editor.js
+packages/app-desktop/gui/NoteEditor/NoteBody/ProseMirror/ProseMirror.js
+packages/app-desktop/gui/NoteEditor/NoteBody/ProseMirror/useEditorCommands.js
+packages/app-desktop/gui/NoteEditor/NoteBody/ProseMirror/utils/useSyncEditorValue.js
 packages/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/TinyMCE.js
 packages/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/styles/index.js
 packages/app-desktop/gui/NoteEditor/NoteBody/TinyMCE/utils/enableTextAreaTab.js
@@ -900,7 +904,6 @@ packages/app-mobile/contentScripts/rendererBundle/useWebViewSetup.js
 packages/app-mobile/contentScripts/rendererBundle/utils/useContentScripts.js
 packages/app-mobile/contentScripts/rendererBundle/utils/useEditPopup.test.js
 packages/app-mobile/contentScripts/rendererBundle/utils/useEditPopup.js
-packages/app-mobile/contentScripts/richTextEditorBundle/contentScript/convertHtmlToMarkdown.js
 packages/app-mobile/contentScripts/richTextEditorBundle/contentScript/index.js
 packages/app-mobile/contentScripts/richTextEditorBundle/types.js
 packages/app-mobile/contentScripts/richTextEditorBundle/useWebViewSetup.js
@@ -1179,6 +1182,7 @@ packages/editor/events.js
 packages/editor/polyfills.js
 packages/editor/testing/createEditorSettings.js
 packages/editor/testing/setUpLogger.js
+packages/editor/tools/esbuild/pluginBundleSvgs.js
 packages/editor/types.js
 packages/editor/utils/getFileFromPasteEvent.js
 packages/fork-htmlparser2/src/CollectingHandler.js
@@ -1715,6 +1719,7 @@ packages/lib/urlUtils.js
 packages/lib/utils/ActionLogger.test.js
 packages/lib/utils/ActionLogger.js
 packages/lib/utils/attachedResources.js
+packages/lib/utils/convertHtmlToMarkdown.js
 packages/lib/utils/credentialFiles.js
 packages/lib/utils/dom/makeSandboxedIframe.js
 packages/lib/utils/focusHandler.js

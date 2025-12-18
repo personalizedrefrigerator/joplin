@@ -59,6 +59,7 @@ import useConnectToEditorPlugin from './utils/useConnectToEditorPlugin';
 import getResourceBaseUrl from './utils/getResourceBaseUrl';
 import useInitialCursorLocation from './utils/useInitialCursorLocation';
 import NotePositionService, { EditorCursorLocations } from '@joplin/lib/services/NotePositionService';
+import ProseMirror from './NoteBody/ProseMirror/ProseMirror';
 
 const debounce = require('debounce');
 
@@ -487,6 +488,8 @@ function NoteEditorContent(props: NoteEditorProps) {
 			editor = <CodeMirror5 {...editorProps}/>;
 		} else if (props.bodyEditor === 'CodeMirror6') {
 			editor = <CodeMirror6 {...editorProps}/>;
+		} else if (props.bodyEditor === 'ProseMirror') {
+			editor = <ProseMirror {...editorProps}/>;
 		} else {
 			throw new Error(`Invalid editor: ${props.bodyEditor}`);
 		}
@@ -720,6 +723,8 @@ const mapStateToProps = (state: AppState, ownProps: ConnectProps) => {
 		bodyEditor = 'PlainText';
 	} else if (windowState.editorCodeView && state.settings['editor.legacyMarkdown']) {
 		bodyEditor = 'CodeMirror5';
+	} else if (state.settings['editor.beta']) {
+		bodyEditor = 'ProseMirror';
 	}
 
 	const mainWindowState = stateUtils.windowStateById(state, defaultWindowId);

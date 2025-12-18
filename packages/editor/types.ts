@@ -115,7 +115,9 @@ export interface EditorControl {
 	// 0 corresponds to the top, 1 corresponds to the bottom.
 	setScrollPercent(fraction: number): void;
 
+	getSelection(): string;
 	insertText(text: string, source?: UserEventSource): void;
+	// Returns true if the body changed
 	updateBody(newBody: string, UpdateBodyOptions?: UpdateBodyOptions): void;
 
 	updateSettings(newSettings: EditorSettings): void;
