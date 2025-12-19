@@ -1114,6 +1114,7 @@ packages/editor/CodeMirror/vendor/announceSearchMatch.js
 packages/editor/ProseMirror/commands/commands.test.js
 packages/editor/ProseMirror/commands/commands.js
 packages/editor/ProseMirror/commands/focusEditor.js
+packages/editor/ProseMirror/commands/selectDocumentEnd.js
 packages/editor/ProseMirror/createEditor.js
 packages/editor/ProseMirror/index.js
 packages/editor/ProseMirror/plugins/detailsPlugin.test.js

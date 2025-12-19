@@ -78,7 +78,10 @@ const toggleCode: Command = (state, dispatch, view) => {
 
 const getSelectedBlock = (state: EditorState) => {
 	const blockRange = state.selection.$from.blockRange(state.selection.$to);
-	const contentStart = blockRange.start + 1;
+
+	// blockRange can be null in an empty document, or when the selection is after the last
+	// block (e.g. the very end of the document). Handle this:
+	const contentStart = blockRange ? blockRange.start + 1 : state.selection.from;
 	return { blockRange, contentStart };
 };
 
@@ -94,7 +97,6 @@ const addTextAtLineStart = (text: string): Command => (state, dispatch) => {
 
 const removeTextAtLineStart = (pattern: RegExp): Command => (state, dispatch) => {
 	const { contentStart, blockRange } = getSelectedBlock(state);
-
 	const text = state.doc.textBetween(contentStart, blockRange.end);
 	const match = text.match(pattern);
 	if (!match || match.index !== 0) return false;
