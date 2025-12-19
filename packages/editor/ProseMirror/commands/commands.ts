@@ -76,9 +76,14 @@ const toggleCode: Command = (state, dispatch, view) => {
 	return toggleMark(schema.marks.code)(state, dispatch, view) || setBlockType(schema.nodes.paragraph)(state, dispatch, view);
 };
 
-const addTextAtLineStart = (text: string): Command => (state, dispatch) => {
+const getSelectedBlock = (state: EditorState) => {
 	const blockRange = state.selection.$from.blockRange(state.selection.$to);
 	const contentStart = blockRange.start + 1;
+	return { blockRange, contentStart };
+};
+
+const addTextAtLineStart = (text: string): Command => (state, dispatch) => {
+	const { contentStart } = getSelectedBlock(state);
 	let transaction = state.tr;
 	transaction = transaction.insertText(text, contentStart);
 
@@ -88,8 +93,8 @@ const addTextAtLineStart = (text: string): Command => (state, dispatch) => {
 };
 
 const removeTextAtLineStart = (pattern: RegExp): Command => (state, dispatch) => {
-	const blockRange = state.selection.$from.blockRange(state.selection.$to);
-	const contentStart = blockRange.start + 1;
+	const { contentStart, blockRange } = getSelectedBlock(state);
+
 	const text = state.doc.textBetween(contentStart, blockRange.end);
 	const match = text.match(pattern);
 	if (!match || match.index !== 0) return false;
