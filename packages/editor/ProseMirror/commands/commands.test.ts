@@ -93,4 +93,36 @@ describe('ProseMirror/commands', () => {
 			}],
 		});
 	});
+
+	test('indentMore should add spaces to the beginning of the line', () => {
+		const editor = createTestEditor({ html: '<p>Test</p>' });
+		selectAll(editor);
+
+		commands[EditorCommandType.IndentMore](editor.state, editor.dispatch, editor);
+
+		expect(editor.state.doc.toJSON()).toMatchObject({
+			content: [{
+				content: [
+					{ type: 'text', text: '    Test' },
+				],
+				type: 'paragraph',
+			}],
+		});
+	});
+
+	test('indentLess should remove spaces from the beginning of the line', () => {
+		const editor = createTestEditor({ html: '<p>    test</p>' });
+		selectAll(editor);
+
+		commands[EditorCommandType.IndentLess](editor.state, editor.dispatch, editor);
+
+		expect(editor.state.doc.toJSON()).toMatchObject({
+			content: [{
+				content: [
+					{ type: 'text', text: 'test' },
+				],
+				type: 'paragraph',
+			}],
+		});
+	});
 });
