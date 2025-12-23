@@ -1920,6 +1920,16 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 			advanced: true,
 		},
 
+		'featureFlag.ui.disableSmallScreenIncompatibleFeatures': {
+			value: false,
+			type: SettingItemType.Bool,
+			public: false,
+			appTypes: [AppType.Mobile],
+			label: () => 'UI: Disable features known to be incompatible with small screens',
+			section: 'note',
+			advanced: true,
+		},
+
 		'survey.webClientEval2025.progress': {
 			value: SurveyProgress.NotStarted,
 			type: SettingItemType.Int,
