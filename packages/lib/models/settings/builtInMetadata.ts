@@ -1920,7 +1920,7 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 			advanced: true,
 		},
 
-		'featureFlag.ui.disableSmallScreenIncompatibleFeatures': {
+		'buildFlag.ui.disableSmallScreenIncompatibleFeatures': {
 			value: false,
 			type: SettingItemType.Bool,
 			public: false,

@@ -81,7 +81,7 @@ const useCss = (editorTheme: Theme) => {
 				display: none;
 			}
 
-			${Setting.value('featureFlag.ui.disableSmallScreenIncompatibleFeatures') ? `
+			${Setting.value('buildFlag.ui.disableSmallScreenIncompatibleFeatures') ? `
 				/* As of December 2025, the help overlay is difficult to use on small screens
 				   (slow to load, help text overlapping content in some cases). */
 				.js-draw .toolbar-help-overlay-button {
