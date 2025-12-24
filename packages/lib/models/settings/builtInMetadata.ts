@@ -1926,8 +1926,6 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 			public: false,
 			appTypes: [AppType.Mobile],
 			label: () => 'UI: Disable features known to be incompatible with small screens',
-			section: 'note',
-			advanced: true,
 		},
 
 		'survey.webClientEval2025.progress': {
