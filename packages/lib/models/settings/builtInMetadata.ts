@@ -1919,6 +1919,14 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 			label: () => 'Voice typing: Enable the voice typing feature',
 		},
 
+		'buildFlag.ui.disableSmallScreenIncompatibleFeatures': {
+			value: false,
+			type: SettingItemType.Bool,
+			public: false,
+			appTypes: [AppType.Mobile],
+			label: () => 'UI: Disable features known to be incompatible with small screens',
+		},
+
 		'survey.webClientEval2025.progress': {
 			value: SurveyProgress.NotStarted,
 			type: SettingItemType.Int,
