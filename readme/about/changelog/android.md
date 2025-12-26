@@ -1,5 +1,12 @@
 # Joplin Android Changelog
 
+## [android-v3.5.5](https://github.com/laurent22/joplin/releases/tag/android-v3.5.5) (Pre-release) - 2025-12-26T10:53:20Z
+
+- Improved: Update js-draw to v1.33.0 (#13990 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Improved: Updated packages react-native-webview (v13.16.0)
+- Fixed: Editor: Fix search/replace UI is partially off-screen on small-screen devices (#13978 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Feature flags: Fix "voice typing" feature flag (#13981 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+
 ## [android-v3.5.4](https://github.com/laurent22/joplin/releases/tag/android-v3.5.4) (Pre-release) - 2025-12-23T20:00:18Z
 
 - Improved: Accessibility: Dark mode: Improve contrast of conflicts notebook title, error messages in "Logs" (#13925 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
