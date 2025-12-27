@@ -1,5 +1,9 @@
 # Joplin Android Changelog
 
+## [android-v3.5.6](https://github.com/laurent22/joplin/releases/tag/android-v3.5.6) (Pre-release) - 2025-12-27T20:34:44Z
+
+- Revert "All: Apache Tomcat WebDAV compatibility for sync (#13614)"
+
 ## [android-v3.5.5](https://github.com/laurent22/joplin/releases/tag/android-v3.5.5) (Pre-release) - 2025-12-26T10:53:20Z
 
 - Improved: Update js-draw to v1.33.0 (#13990 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
