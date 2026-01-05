@@ -17,6 +17,8 @@ class CheckboxWidget extends WidgetType {
 
 	private applyContainerClasses(container: HTMLElement) {
 		container.classList.add(checkboxClassName);
+		// For sizing: Should have the same font/styles as non-rendered checkboxes:
+		container.classList.add('cm-taskMarker');
 
 		for (const className of [...container.classList]) {
 			if (className.startsWith('-depth-')) {
@@ -30,11 +32,17 @@ class CheckboxWidget extends WidgetType {
 	public toDOM(view: EditorView) {
 		const container = document.createElement('span');
 
+		const sizingNode = document.createElement('span');
+		sizingNode.classList.add('sizing');
+		sizingNode.textContent = `[${this.checked ? 'x' : ' '}]`;
+		container.appendChild(sizingNode);
+
 		const checkbox = document.createElement('input');
 		checkbox.type = 'checkbox';
 		checkbox.checked = this.checked;
 		checkbox.ariaLabel = this.label;
 		checkbox.title = this.label;
+		checkbox.classList.add('content');
 		container.appendChild(checkbox);
 
 		checkbox.oninput = () => {
@@ -67,14 +75,27 @@ const completedListItemDecoration = Decoration.line({ class: completedTaskClassN
 const replaceCheckboxes = [
 	EditorView.theme({
 		[`& .${checkboxClassName}`]: {
+			position: 'relative',
+
 			'& > input': {
 				width: '1.1em',
 				height: '1.1em',
-				margin: '4px',
+				marginTop: '4px',
+				marginBottom: '4px',
+
+				marginLeft: 'auto',
+				marginRight: 'auto',
 				verticalAlign: 'middle',
 			},
-			'&:not(.-depth-1) > input': {
-				marginInlineStart: 0,
+
+			'& > .sizing': {
+				color: 'transparent',
+			},
+
+			'& > .content': {
+				position: 'absolute',
+				left: '0',
+				right: '0',
 			},
 		},
 		[`& .${completedTaskClassName}`]: {
