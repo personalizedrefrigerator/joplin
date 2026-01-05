@@ -64,8 +64,8 @@ export default class InteropServiceHelper {
 
 			const windowOptions: BrowserWindowConstructorOptions = {
 				// Work around a printing issue: As of Electron 39, if the window is initially hidden, printing crashes the app.
-				// This only seems to be necessary on Linux.
-				show: shim.isLinux(),
+				// This seems to be necessary on Linux. It may also be necessary on Windows when a note contains resource attachments.
+				show: true,
 			};
 
 			win = bridge().newBrowserWindow(windowOptions);
