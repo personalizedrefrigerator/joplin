@@ -49,8 +49,10 @@ pub fn convert(path: &str, output_dir: &str, base_path: &str) -> Result<()> {
 
             let section = parser.parse_section(path.to_owned())?;
 
-            let section_output_dir = fs_driver().get_output_path(base_path, output_dir, path);
-            section::Renderer::new().render(&section, section_output_dir.to_owned())?;
+            // Workaround: Section .one file names sometimes don't include properly-encoded UTF-8 characters.
+            let output_dir_name = sanitize_filename::sanitize(section.display_name());
+            let section_output_dir = fs_driver().join(output_dir, &output_dir_name);
+            section::Renderer::new().render(&section, section_output_dir)?;
         }
         ".onetoc2" => {
             let _name: String = fs_driver().get_file_name(path).expect("Missing file name");
