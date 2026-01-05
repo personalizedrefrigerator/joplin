@@ -119,7 +119,7 @@ const replaceCheckboxes = [
 					return null;
 				}
 
-				return [listMarker.from, node.to];
+				return [node.from, node.to];
 			} else if (node.name === 'Task') {
 				const taskLine = state.doc.lineAt(node.from);
 				return [taskLine.from];
