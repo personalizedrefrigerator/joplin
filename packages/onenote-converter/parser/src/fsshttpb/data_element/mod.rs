@@ -84,7 +84,9 @@ impl DataElementPackage {
                     .cell_mappings
                     .values()
                     .find(|mapping| mapping.id == cell)
-                    .and_then(|mapping| storage_index.find_revision_mapping_by_serial(&mapping.serial))
+                    .and_then(|mapping| {
+                        storage_index.find_revision_mapping_by_serial(&mapping.serial)
+                    })
             })
             .ok_or_else(|| {
                 ErrorKind::MalformedFssHttpBData("revision manifest id not found".into())
@@ -148,7 +150,8 @@ impl DataElementPackage {
         storage_index: &StorageIndex,
         cell_manifest_id: ExGuid,
     ) -> Option<ExGuid> {
-        let resolved = self.find_cell_revision_id(cell_manifest_id)
+        let resolved = self
+            .find_cell_revision_id(cell_manifest_id)
             .and_then(|revision_id| self.resolve_revision_manifest_id(storage_index, revision_id))
             .or_else(|| self.resolve_revision_manifest_id(storage_index, cell_manifest_id));
 
@@ -222,7 +225,7 @@ impl DataElement {
                 return Err(ErrorKind::MalformedFssHttpBData(
                     format!("invalid element type: 0x{:X}", x).into(),
                 )
-                .into())
+                .into());
             }
         }
 
