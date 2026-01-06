@@ -313,9 +313,8 @@ export default class InteropService_Importer_OneNote extends InteropService_Impo
 
 			let fixedFileName = Buffer.from(fileName, 'latin1').toString('utf8');
 			if (fixedFileName !== fileName) {
-				// In general, the path shouldn't start with "."s or contain path separators.
-				// However, if it does, these characters might cause import errors, so remove them:
-				fixedFileName = fixedFileName.replace(/^\.+/, '');
+				// In general, the path shouldn't contain path separators.
+				// However, if it does, these characters will cause import errors, so remove them:
 				fixedFileName = fixedFileName.replace(/[/\\]/g, ' ');
 
 				// Avoid path traversal: Ensure that the file path is contained within the base directory
