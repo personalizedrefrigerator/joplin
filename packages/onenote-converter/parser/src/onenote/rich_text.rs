@@ -6,6 +6,7 @@ use crate::one::property::layout_alignment::LayoutAlignment;
 use crate::one::property::paragraph_alignment::ParagraphAlignment;
 use crate::one::property_set::{embedded_ink_container, paragraph_style_object, rich_text_node};
 use crate::onenote::ink::{Ink, InkBoundingBox, parse_ink_data};
+use crate::onenote::language_code::{LanguageCode, parse_language_code};
 use crate::onenote::note_tag::{NoteTag, parse_note_tags};
 use crate::onenote::text_region::TextRegion;
 use crate::onestore::object::Object;
@@ -226,7 +227,7 @@ pub struct ParagraphStyling {
     pub(crate) paragraph_space_before: Option<f32>,
     pub(crate) paragraph_space_after: Option<f32>,
     pub(crate) paragraph_line_spacing_exact: Option<f32>,
-    pub(crate) language_code: Option<u32>,
+    pub(crate) language_code: Option<LanguageCode>,
     pub(crate) math_formatting: bool,
     pub(crate) hyperlink: bool,
 }
@@ -349,13 +350,11 @@ impl ParagraphStyling {
         self.paragraph_line_spacing_exact
     }
 
-    /// The LCID language code for the text.
-    ///
-    /// See [\[MS-ONE\] 2.3.26].
-    ///
-    /// [\[MS-ONE\] 2.3.26]: https://docs.microsoft.com/en-us/openspecs/office_file_formats/ms-one/f82cdbc0-d4e9-4cd0-bd0b-8c7734853d7f
-    pub fn language_code(&self) -> Option<u32> {
-        self.language_code
+    /// The language code of the text.
+    /// 
+    /// See [\[MS-LCID\] 2.2](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-lcid/63d3d639-7fd2-4afb-abbe-0d5b5551eef8), [\[MS-ONE\] 2.3.26](https://docs.microsoft.com/en-us/openspecs/office_file_formats/ms-one/f82cdbc0-d4e9-4cd0-bd0b-8c7734853d7f).
+    pub fn language_code(&self) -> Option<&LanguageCode> {
+        self.language_code.as_ref()
     }
 
     /// Whether the text is formatted as a math expression
@@ -555,7 +554,7 @@ fn parse_style(data: paragraph_style_object::Data) -> ParagraphStyling {
         paragraph_space_before: data.paragraph_space_before,
         paragraph_space_after: data.paragraph_space_after,
         paragraph_line_spacing_exact: data.paragraph_line_spacing_exact,
-        language_code: data.language_code,
+        language_code: data.language_code.map(parse_language_code),
         math_formatting: data.math_formatting,
         hyperlink: data.hyperlink,
     }

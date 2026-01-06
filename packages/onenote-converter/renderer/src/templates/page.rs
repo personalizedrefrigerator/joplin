@@ -8,6 +8,7 @@ use std::collections::HashMap;
 #[derive(Template)]
 #[template(path = "page.html", escape = "none")]
 struct PageTemplate<'a> {
+    language: &'a str,
     page_id_attr: &'a str,
     name: &'a str,
     content: &'a str,
@@ -18,12 +19,14 @@ pub(crate) fn render(
     page_id: &str,
     name: &str,
     content: &str,
+    language: &str,
     global_styles: &HashMap<String, StyleSet>,
 ) -> Result<String> {
     PageTemplate {
         content,
         name: &html_entities(name),
         page_id_attr: &html_entities(page_id),
+        language: &html_entities(language),
         global_styles: global_styles
             .iter()
             .sorted_by(|(a, _), (b, _)| Ord::cmp(a, b))

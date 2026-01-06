@@ -4,6 +4,7 @@ use crate::onenote::content::{Content, parse_content};
 use crate::onenote::list::{List, parse_list};
 use crate::onestore::object_space::ObjectSpaceRef;
 use crate::shared::exguid::ExGuid;
+use itertools::Itertools;
 use parser_utils::errors::{ErrorKind, Result};
 
 /// A content outline.
@@ -164,6 +165,27 @@ impl OutlineItem {
         } else {
             None
         }
+    }
+
+    fn group(&self) -> Option<&OutlineGroup> {
+        if let OutlineItem::Group(group) = self {
+            Some(group)
+        } else {
+            None
+        }
+    }
+
+    /// Convenience method to iterate over all outline element leaf nodes
+    pub fn elements(&self) -> Vec<&OutlineElement> {
+        let element = self.element();
+        let single_child_iter = element.into_iter();
+
+        let group = self.group();
+        let multi_child_iter = group.into_iter()
+            .flat_map(|item| item.outlines())
+            .flat_map(|outline| outline.elements());
+
+        single_child_iter.interleave(multi_child_iter).collect()
     }
 }
 

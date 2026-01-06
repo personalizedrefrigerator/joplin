@@ -1,7 +1,7 @@
 use crate::section;
 use crate::utils::StyleSet;
 use color_eyre::Result;
-use parser::page::{Page, PageContent};
+use parser::{page::{Page, PageContent}};
 use std::collections::{HashMap, HashSet};
 
 pub(crate) mod content;
@@ -75,6 +75,7 @@ impl<'a> Renderer<'a> {
             &page.link_target_id(),
             &title_text,
             &content,
+            &guess_language(page),
             &self.global_styles
         )
     }
@@ -102,5 +103,29 @@ impl<'a> Renderer<'a> {
             PageContent::Ink(ink) => Ok(self.render_ink(ink, None, false)),
             PageContent::Unknown => Ok(String::new()),
         }
+    }
+}
+
+fn guess_language(page: &Page) -> &str {
+    let first_language_code = page.contents()
+        .iter()
+        .filter_map(|content| content.outline())
+        .flat_map(|outline| outline.items())
+        .flat_map(|item| item.elements())
+        .flat_map(|element| element.contents())
+        .flat_map(|content| content.rich_text())
+        .map(|rich_text| rich_text.paragraph_style())
+        .flat_map(|style| style.language_code())
+        .map(|item| {
+            println!("Debug: Language code item: {:?}", item);
+            item
+        })
+        .flat_map(|code| code.code())
+        .next();
+
+    if let Some(code) = first_language_code {
+        code
+    } else {
+        "en"
     }
 }

@@ -30,6 +30,12 @@ impl<'a> Renderer<'a> {
             attrs.set("style", style.to_string());
         }
 
+        if let Some(language) = text.paragraph_style().language_code() {
+            if let Some(code) = language.code() {
+                attrs.set("lang", code.into());
+            }
+        }
+
         match text.paragraph_style().style_id() {
             Some(t) if !self.in_list && is_tag(t) => {
                 Ok(format!("<{} {}>{}</{}>", t, attrs, content_html, t))
