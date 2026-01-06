@@ -85,18 +85,6 @@ const replaceCheckboxes = [
 		[`& .${checkboxClassName}`]: {
 			position: 'relative',
 
-			'& > input': {
-				width: '1.1em',
-				height: '1.1em',
-				marginTop: '4px',
-				marginBottom: '4px',
-
-				// Center it:
-				marginLeft: 'auto',
-				marginRight: 'auto',
-				verticalAlign: 'middle',
-			},
-
 			'& > .sizing': {
 				visibility: 'hidden',
 			},
@@ -105,6 +93,18 @@ const replaceCheckboxes = [
 				position: 'absolute',
 				left: '0',
 				right: '0',
+				top: '0',
+				bottom: '0',
+
+				// Center it:
+				marginLeft: 'auto',
+				marginRight: 'auto',
+
+				// A small margin seems to be necessary to align the checkbox
+				// with the list item marker. Use percents so that the relative
+				// size adjusts with the font size/line height.
+				marginTop: '15%',
+				marginBottom: '10%',
 			},
 		},
 		[`& .${completedTaskClassName}`]: {
