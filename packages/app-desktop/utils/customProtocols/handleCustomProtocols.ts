@@ -223,8 +223,13 @@ const handleCustomProtocols = (): CustomProtocolHandler => {
 				response = await handleRangeRequest(request, pathname);
 			}
 		} catch (error) {
-			// Electron "not found" errors don't have a specific code or type. For now, use the error.message.
-			if (error.code === 'ENOENT' || error.message === 'net::ERR_FILE_NOT_FOUND') {
+			if (
+				// Errors from NodeJS fs methods (e.g. fs.stat()
+				error.code === 'ENOENT'
+				// Errors from Electron's net.fetch(). Use error.message since these errors don't
+				// seem to have a specific .code or .name.
+				|| error.message === 'net::ERR_FILE_NOT_FOUND'
+			) {
 				response = makeNotFoundResponse();
 			} else {
 				throw error;
