@@ -40,8 +40,8 @@ pub fn convert(path: &str, output_dir: &str, base_path: &str) -> Result<()> {
 
     match extension.as_str() {
         ".one" => {
-            let file_name: String = fs_driver().get_file_name(path).expect("Missing file name");
-            log!("Parsing .one file: {}", file_name);
+            let _name: String = fs_driver().get_file_name(path).expect("Missing file name");
+            log!("Parsing .one file: {}", _name);
 
             if path.contains("OneNote_RecycleBin") {
                 return Ok(());
@@ -49,24 +49,8 @@ pub fn convert(path: &str, output_dir: &str, base_path: &str) -> Result<()> {
 
             let section = parser.parse_section(path.to_owned())?;
 
-            let section_output_path = fs_driver().get_output_path(base_path, output_dir, path);
-
-            let display_name = section.display_name();
-            let section_display_name_safe = sanitize_filename::sanitize(if display_name.len() > 0 {
-                display_name
-            } else {
-                &file_name
-            });
-            // Workaround: Change the name of the output directory to avoid encoding issues.
-            // Joplin's extraction logic (which uses EXPAND.EXE) seems to result in UTF-8-encoded
-            // filenames being decoded as latin1.
-            // Joplin uses the name of the output folder name as the imported folder title. As
-            // such, it's important that the folder name be correctly encoded.
-            let section_output_dir = fs_driver().join(
-                &fs_driver().get_dir_name(&section_output_path),
-                &section_display_name_safe
-            );
-            section::Renderer::new().render(&section, section_output_dir)?;
+            let section_output_dir = fs_driver().get_output_path(base_path, output_dir, path);
+            section::Renderer::new().render(&section, section_output_dir.to_owned())?;
         }
         ".onetoc2" => {
             let _name: String = fs_driver().get_file_name(path).expect("Missing file name");
