@@ -7,12 +7,20 @@ const checkboxClassName = 'cm-ext-checkbox-toggle';
 
 
 class CheckboxWidget extends WidgetType {
-	public constructor(private checked: boolean, private depth: number, private label: string) {
+	public constructor(
+		private checked: boolean,
+		private depth: number,
+		private label: string,
+		private markup: string,
+	) {
 		super();
 	}
 
 	public eq(other: CheckboxWidget) {
-		return other.checked === this.checked && other.depth === this.depth && other.label === this.label;
+		return other.checked === this.checked
+			&& other.depth === this.depth
+			&& other.label === this.label
+			&& other.markup === this.markup;
 	}
 
 	private applyContainerClasses(container: HTMLElement) {
@@ -34,7 +42,7 @@ class CheckboxWidget extends WidgetType {
 
 		const sizingNode = document.createElement('span');
 		sizingNode.classList.add('sizing');
-		sizingNode.textContent = `[${this.checked ? 'x' : ' '}]`;
+		sizingNode.textContent = this.markup;
 		container.appendChild(sizingNode);
 
 		const checkbox = document.createElement('input');
@@ -83,13 +91,14 @@ const replaceCheckboxes = [
 				marginTop: '4px',
 				marginBottom: '4px',
 
+				// Center it:
 				marginLeft: 'auto',
 				marginRight: 'auto',
 				verticalAlign: 'middle',
 			},
 
 			'& > .sizing': {
-				color: 'transparent',
+				visibility: 'hidden',
 			},
 
 			'& > .content': {
@@ -122,8 +131,14 @@ const replaceCheckboxes = [
 			if (node.name === 'TaskMarker') {
 				const containerLine = state.doc.lineAt(node.from);
 				const labelText = state.doc.sliceString(node.to, containerLine.to);
+				const markerText = state.doc.sliceString(node.from, node.to);
 
-				return new CheckboxWidget(markerIsChecked(node), parentTags.get('ListItem') ?? 0, labelText);
+				return new CheckboxWidget(
+					markerIsChecked(node),
+					parentTags.get('ListItem') ?? 0,
+					labelText,
+					markerText,
+				);
 			} else if (node.name === 'Task') {
 				const marker = node.node.getChild('TaskMarker');
 				if (marker && markerIsChecked(marker)) {
