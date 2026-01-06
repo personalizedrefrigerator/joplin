@@ -177,6 +177,7 @@ export default class InteropService_Importer_OneNote extends InteropService_Impo
 		const pipeline = [
 			(dom: Document, currentFolder: string) => this.extractSvgsToFiles_(dom, currentFolder),
 			(dom: Document, currentFolder: string) => this.convertExternalLinksToInternalLinks_(dom, currentFolder),
+			(dom: Document, _currentFolder: string) => Promise.resolve(this.simplifyHtml_(dom)),
 		];
 
 		for (const file of htmlFiles) {
@@ -231,6 +232,28 @@ export default class InteropService_Importer_OneNote extends InteropService_Impo
 				link.href = relative(baseFolder, targetPage.path);
 			}
 		}
+		return changed;
+	}
+
+	private simplifyHtml_(dom: Document) {
+		const selectors = [
+			// <script> blocks that aren't marked with a specific type (e.g. application/tex).
+			'script:not([type])',
+			// ID mappings (unused at this stage of the import process)
+			'meta[name="X-Original-Page-Id"]',
+
+			// Empty iframes
+			'iframe[src=""]',
+		];
+
+		let changed = false;
+		for (const selector of selectors) {
+			for (const element of dom.querySelectorAll(selector)) {
+				element.remove();
+				changed = true;
+			}
+		}
+
 		return changed;
 	}
 
