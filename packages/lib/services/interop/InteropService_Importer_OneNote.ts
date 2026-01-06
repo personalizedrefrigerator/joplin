@@ -298,8 +298,13 @@ export default class InteropService_Importer_OneNote extends InteropService_Impo
 		};
 	}
 
+	// Works around a decoding issue in which file names are extracted as latin1 strings,
+	// rather than UTF-8 strings. For example, OneNote seems to encode filenames as UTF-8 in .onepkg files.
+	// However, EXPAND.EXE reads the filenames as latin1. As a result, "é.one" becomes
+	// "Ã©.one" when extracted from the archive.
+	// This workaround re-encodes filenames as UTF-8.
 	private async fixIncorrectLatin1Decoding_(parentDir: string) {
-		// Only seems to be necessary on Windows
+		// Only seems to be necessary on Windows.
 		if (!shim.isWindows()) return;
 
 		const fixEncoding = async (basePath: string, fileName: string) => {
