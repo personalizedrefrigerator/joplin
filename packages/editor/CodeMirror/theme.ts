@@ -213,10 +213,9 @@ const createTheme = (theme: EditorTheme): Extension[] => {
 			...baseHeadingStyle,
 			fontSize: '1.5em',
 		},
-		// Only underline level 1 headings not in block quotes. The block quote and non-block quote styles
-		// conflict.
+		// Only underline level 1 headings not in block quotes. The underline overlaps with the blockquote border.
 		'& .cm-h1:not(.cm-blockQuote)': {
-			borderBottom: '1px solid var(--joplin-divider-color)',
+			borderBottom: `1px solid ${theme.dividerColor}`,
 			marginBottom: '0.1em',
 		},
 		'& .cm-h2': {
