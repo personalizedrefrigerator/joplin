@@ -87,7 +87,30 @@ const createTheme = (theme: EditorTheme): Extension[] => {
 		fontWeight: 'bold',
 		fontFamily: theme.fontFamily,
 		paddingBottom: '0.2em',
-		marginBottom: '0.1em',
+	};
+
+	// An underlined block region, where the underline has padding.
+	// This is useful, for example, when underlining headings, where the CodeMirror line has
+	// a small amount of horizontal padding.
+	const underlinedBlockStyle = {
+		borderBottomWidth: '1px',
+		borderBottomStyle: 'solid',
+
+		// border-start and border-end should match the "padding" values for each CodeMirror line
+		'--border-start': 'var(--joplin-cm-line-padding-left, 6px)',
+		'--border-end': 'calc(100% - 4px)',
+		'--border-color': 'var(--joplin-divider-color)',
+
+		// Use a linear gradient to visually add horizontal padding to the border. As of early 2026,
+		// there doesn't seem to be a way to create a padded border using the other border-* properties,
+		// without adjusting the padding/margins of the container element.
+		borderImage: `
+			linear-gradient(
+				to right,
+				transparent var(--border-start), var(--border-color) var(--border-start),
+				var(--border-color) var(--border-end), transparent var(--border-end)
+			) 1
+		`,
 	};
 
 	const codeMirrorTheme = EditorView.theme({
@@ -137,6 +160,7 @@ const createTheme = (theme: EditorTheme): Extension[] => {
 			borderLeft: `4px solid ${theme.colorFaded}`,
 			opacity: theme.blockQuoteOpacity,
 			paddingLeft: '4px',
+			'--joplin-cm-line-padding-left': '4px',
 		},
 
 		'& .cm-codeBlock': {
@@ -196,6 +220,7 @@ const createTheme = (theme: EditorTheme): Extension[] => {
 		[`${editorNoGuttersSelector} .cm-line`]: theme.isDesktop ? {
 			// Note: This cannot be zero:
 			paddingLeft: '1px',
+			'--joplin-cm-line-padding-left': '1px',
 		} : undefined,
 
 		// Override the default URL style when the URL is within a link
@@ -213,10 +238,12 @@ const createTheme = (theme: EditorTheme): Extension[] => {
 		'& .cm-h1': {
 			...baseHeadingStyle,
 			fontSize: '1.5em',
-
-			borderBottom: '1px solid var(--joplin-divider-color)',
-			// Leave some space between the border and the right edge of the editor:
-			marginInlineEnd: '0.3em',
+		},
+		// Only underline level 1 headings not in block quotes. The block quote and non-block quote styles
+		// conflict.
+		'& .cm-h1:not(.cm-blockQuote)': {
+			...underlinedBlockStyle,
+			marginBottom: '0.1em',
 		},
 		'& .cm-h2': {
 			...baseHeadingStyle,
