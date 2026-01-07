@@ -89,30 +89,6 @@ const createTheme = (theme: EditorTheme): Extension[] => {
 		paddingBottom: '0.2em',
 	};
 
-	// An underlined block region, where the underline has padding.
-	// This is useful, for example, when underlining headings, where the CodeMirror line has
-	// a small amount of horizontal padding.
-	const underlinedBlockStyle = {
-		borderBottomWidth: '1px',
-		borderBottomStyle: 'solid',
-
-		// border-start and border-end should match the "padding" values for each CodeMirror line
-		'--border-start': 'var(--joplin-cm-line-padding-left, 6px)',
-		'--border-end': 'calc(100% - 4px)',
-		'--border-color': 'var(--joplin-divider-color)',
-
-		// Use a linear gradient to visually add horizontal padding to the border. As of early 2026,
-		// there doesn't seem to be a way to create a padded border using the other border-* properties,
-		// without adjusting the padding/margins of the container element.
-		borderImage: `
-			linear-gradient(
-				to right,
-				transparent var(--border-start), var(--border-color) var(--border-start),
-				var(--border-color) var(--border-end), transparent var(--border-end)
-			) 1
-		`,
-	};
-
 	const codeMirrorTheme = EditorView.theme({
 		// Include &.CodeMirror to handle the case where additional CodeMirror 5 styles
 		// need to be overridden.
@@ -242,7 +218,7 @@ const createTheme = (theme: EditorTheme): Extension[] => {
 		// Only underline level 1 headings not in block quotes. The block quote and non-block quote styles
 		// conflict.
 		'& .cm-h1:not(.cm-blockQuote)': {
-			...underlinedBlockStyle,
+			borderBottom: '1px solid var(--joplin-divider-color)',
 			marginBottom: '0.1em',
 		},
 		'& .cm-h2': {
