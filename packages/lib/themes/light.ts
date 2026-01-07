@@ -15,6 +15,7 @@ const theme: Theme = {
 	colorWarn: 'rgb(228,86,0)',
 	colorWarnUrl: '#155BDA',
 	colorFaded: '#627184', // For less important text
+	colorInfo: '#1070B0',
 	dividerColor: '#dddddd',
 	selectedColor: '#e5e5e5',
 	urlColor: '#155BDA',

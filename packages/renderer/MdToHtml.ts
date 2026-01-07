@@ -57,6 +57,7 @@ const rules: RendererRules = {
 	mermaid: require('./MdToHtml/rules/mermaid').default,
 	source_map: require('./MdToHtml/rules/source_map').default,
 	tableHorizontallyScrollable: require('./MdToHtml/rules/tableHorizontallyScrollable').default,
+	alerts: require('./MdToHtml/rules/alerts').default,
 };
 
 const uslug = require('@joplin/fork-uslug');

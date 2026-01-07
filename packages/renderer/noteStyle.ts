@@ -402,6 +402,14 @@ export default function(theme: any, options: Options = null) {
 			color: ${theme.searchMarkerColor};
 		}
 
+		.markdown-alert {
+			--alert-color-info: ${theme.colorInfo};
+			--alert-color-error: ${theme.colorError};
+			--alert-color-important: ${theme.colorError2};
+			--alert-color-warning: ${theme.colorWarn};
+			--alert-color-tip: ${theme.colorCorrect};
+		}
+
 		/* =============================================== */
 		/* For TinyMCE */
 		/* =============================================== */

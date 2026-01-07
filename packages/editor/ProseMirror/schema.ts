@@ -135,6 +135,38 @@ const nodes = addDefaultToplevelAttributes({
 			return result;
 		},
 	},
+	alert: {
+		content: 'alert_title block+',
+		group: 'block',
+		attrs: {
+			type: { default: 'note', validate: 'string' },
+		},
+		parseDOM: [
+			{
+				tag: 'div.markdown-alert',
+				getAttrs: node => ({
+					...getDefaultToplevelAttrs(node),
+					type: [ 'note', 'tip', 'important', 'warning', 'caution' ].find((key) => {
+						return node.classList.contains(`markdown-alert-${key}`);
+					}) ?? 'note',
+				}),
+			}
+		],
+		toDOM: (node) => [
+			'div',
+			{ class: `markdown-alert markdown-alert-${node.attrs.type}` },
+			0,
+		],
+	},
+	alert_title: {
+		content: 'inline+',
+		parseDOM: [{ tag: 'div.markdown-alert-title' }],
+		toDOM: () => [
+			'div',
+			{ class: 'markdown-alert-title' },
+			0,
+		],
+	},
 	...detailsNodes,
 	...imageNodes,
 	...listNodes,

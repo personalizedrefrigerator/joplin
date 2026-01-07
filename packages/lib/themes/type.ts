@@ -17,6 +17,7 @@ export interface Theme {
 	colorWarn: string;
 	colorWarnUrl: string; // For URL displayed over a warningBackgroundColor
 	colorFaded: string; // For less important text
+	colorInfo: string;
 	dividerColor: string;
 	selectedColor: string;
 	urlColor: string;

@@ -17,6 +17,7 @@ const input: Theme = {
 	colorFaded: '#7C8B9E', // For less important text
 	dividerColor: '#dddddd',
 	selectedColor: '#e5e5e5',
+	colorInfo: '#1070B0',
 	urlColor: '#155BDA',
 
 	// Color scheme "2" is used for the sidebar. It's white text over
@@ -106,6 +107,7 @@ const expected = `
 	--joplin-text-selection-color: #a0a0ff;
 	--joplin-url-color: #155BDA;
 	--joplin-warning-background-color: #FFD08D;
+	--joplin-color-info: #1070B0;
 }`;
 
 describe('themeToCss', () => {

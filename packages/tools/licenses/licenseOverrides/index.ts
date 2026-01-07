@@ -42,6 +42,16 @@ const allPackageOverrides: LicenseOverride[] = [
 	// license field was not changed).
 	excludeDevelopment(/^fb-watchman/),
 	excludeDevelopment(/^bser/),
+	mitLicenseOverride(
+		'markdown-it-github-alerts',
+		'https://github.com/antfu/markdown-it-github-alerts/blob/main/LICENSE',
+		'Copyright (c) 2022 Anthony Fu <https://github.com/antfu>',
+	),
+	mitLicenseOverride(
+		'octicons',
+		'https://github.com/primer/octicons/blob/main/LICENSE',
+		'Copyright (c) 2025 GitHub Inc.',
+	),
 ];
 
 const licenseOverrides: LicenseOverrides = {
