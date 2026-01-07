@@ -136,7 +136,6 @@ const createTheme = (theme: EditorTheme): Extension[] => {
 			borderLeft: `4px solid ${theme.colorFaded}`,
 			opacity: theme.blockQuoteOpacity,
 			paddingLeft: '4px',
-			'--joplin-cm-line-padding-left': '4px',
 		},
 
 		'& .cm-codeBlock': {
@@ -196,7 +195,6 @@ const createTheme = (theme: EditorTheme): Extension[] => {
 		[`${editorNoGuttersSelector} .cm-line`]: theme.isDesktop ? {
 			// Note: This cannot be zero:
 			paddingLeft: '1px',
-			'--joplin-cm-line-padding-left': '1px',
 		} : undefined,
 
 		// Override the default URL style when the URL is within a link
