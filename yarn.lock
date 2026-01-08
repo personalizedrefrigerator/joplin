@@ -10552,7 +10552,7 @@ __metadata:
     "@types/node": "npm:18.19.130"
     "@types/react": "npm:19.0.14"
     "@types/react-redux": "npm:7.1.33"
-    "@types/serviceworker": "npm:0.0.154"
+    "@types/serviceworker": "npm:0.0.157"
     "@types/tar-stream": "npm:3.1.4"
     assert-browserify: "npm:2.0.0"
     babel-jest: "npm:29.7.0"
@@ -10643,6 +10643,7 @@ __metadata:
     "@joplin/utils": "npm:~3.5"
     "@types/yargs": "npm:17.0.33"
     fs-extra: "npm:11.3.2"
+    joplin-plugin-freehand-drawing: "npm:4.2.0"
     ts-node: "npm:10.9.2"
     typescript: "npm:5.8.3"
     yargs: "npm:17.7.2"
@@ -10986,7 +10987,7 @@ __metadata:
     jest-environment-jsdom: "npm:29.7.0"
     json-stringify-safe: "npm:5.0.1"
     json5: "npm:2.2.3"
-    katex: "npm:0.16.22"
+    katex: "npm:0.16.23"
     markdown-it: "npm:13.0.2"
     markdown-it-abbr: "npm:1.0.4"
     markdown-it-anchor: "npm:5.3.0"
@@ -11171,7 +11172,7 @@ __metadata:
   dependencies:
     "@adobe/css-tools": "npm:4.4.4"
     "@rollup/plugin-commonjs": "npm:28.0.6"
-    "@rollup/plugin-node-resolve": "npm:16.0.1"
+    "@rollup/plugin-node-resolve": "npm:16.0.2"
     "@rollup/plugin-replace": "npm:6.0.2"
     browserify: "npm:14.5.0"
     html-entities: "npm:1.4.0"
@@ -14205,9 +14206,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@rollup/plugin-node-resolve@npm:16.0.1":
-  version: 16.0.1
-  resolution: "@rollup/plugin-node-resolve@npm:16.0.1"
+"@rollup/plugin-node-resolve@npm:16.0.2":
+  version: 16.0.2
+  resolution: "@rollup/plugin-node-resolve@npm:16.0.2"
   dependencies:
     "@rollup/pluginutils": "npm:^5.0.1"
     "@types/resolve": "npm:1.20.2"
@@ -14219,7 +14220,7 @@ __metadata:
   peerDependenciesMeta:
     rollup:
       optional: true
-  checksum: 10/88fee8c003a5730cca2c06edd200ec6a46c7ab28bed3a99aea6d3070f34f980f575fcbea906946579e41b0be6fd7a2fbc24cdf0ca24f172a555f130726915d8b
+  checksum: 10/79ea6cd8fe474161914bc9bf1618787a75378f9e52fb70ffe698322140e8100a0b706198ba5cc615eabf774e78979542df2ad6bc1fe0ad5e820e20f2537de48c
   languageName: node
   linkType: hard
 
@@ -17094,10 +17095,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/serviceworker@npm:0.0.154":
-  version: 0.0.154
-  resolution: "@types/serviceworker@npm:0.0.154"
-  checksum: 10/462ee7a32c6496aa953434219f4680a12d8f777021fd10c4dbcfd456ea7f3ca0a8170361367f596ac717a83fe72f1ec232e7b1656365d32f3bfeb38f67e937cd
+"@types/serviceworker@npm:0.0.157":
+  version: 0.0.157
+  resolution: "@types/serviceworker@npm:0.0.157"
+  checksum: 10/47fd9ff27c075c1d93077de5a771e690da45e30f2f89a0b0f53628f6e7b34ba4f48fdb64ab52b4bef27ed75788d8161175cef16244f3df14e6aa7c863a1913b2
   languageName: node
   linkType: hard
 
@@ -34928,6 +34929,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"joplin-plugin-freehand-drawing@npm:4.2.0":
+  version: 4.2.0
+  resolution: "joplin-plugin-freehand-drawing@npm:4.2.0"
+  dependencies:
+    "@js-draw/material-icons": "npm:1.33.0"
+    js-draw: "npm:1.33.0"
+  checksum: 10/457c23b7fbd6f1e3a48568395c1e456d570a3c68e25b40fba97973fd848de1b513be2f1ece6eb9babae862e19ba140aca871eee0e3a8a9cb5a033e0c0fd78934
+  languageName: node
+  linkType: hard
+
 "joplin@workspace:packages/app-cli":
   version: 0.0.0-use.local
   resolution: "joplin@workspace:packages/app-cli"
@@ -35501,14 +35512,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"katex@npm:0.16.22":
-  version: 0.16.22
-  resolution: "katex@npm:0.16.22"
+"katex@npm:0.16.23":
+  version: 0.16.23
+  resolution: "katex@npm:0.16.23"
   dependencies:
     commander: "npm:^8.3.0"
   bin:
     katex: cli.js
-  checksum: 10/fdb8667d9aa971154502b120ba340766754d202e3d3e322aca0a96de27032ad2dbb8a7295d798d310cd7ce4ddd21ed1f3318895541b61c9b4fdf611166589e02
+  checksum: 10/aee350216b80117f65609e933ae1347b0ffd111cda85756de463983a0d874895d2a7c25864e7f7327976e38d96a2c6c3ca07432cabc8b0cdbfecafbe7e155d70
   languageName: node
   linkType: hard
 
