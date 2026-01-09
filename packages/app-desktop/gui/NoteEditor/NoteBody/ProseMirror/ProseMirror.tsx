@@ -22,15 +22,26 @@ import eventManager, { EventName, ResourceChangeEvent } from '@joplin/lib/eventM
 import useSyncEditorValue from './utils/useSyncEditorValue';
 import { themeStyle } from '@joplin/lib/theme';
 import NewWindowOrIFrame, { WindowMode } from '../../../NewWindowOrIFrame';
+import bridge from '../../../../services/bridge';
+import { join } from 'path';
+import { toForwardSlashes } from '@joplin/utils/path';
 
 const logger = Logger.create('ProseMirror');
 const logDebug = (message: string) => logger.debug(message);
 
+let stylesUrl_: string|undefined = undefined;
+const useStylesUrl = () => {
+	return useMemo(() => {
+		stylesUrl_ ??= `file://${
+			toForwardSlashes(join(bridge().vendorDir(), 'ProseMirror', 'styles.bundle.css'))
+		}`;
+		return stylesUrl_ ?? '';
+	}, []);
+};
 
 const CodeMirror = (props: NoteBodyEditorProps, ref: ForwardedRef<NoteBodyEditorRef>) => {
 
 	const editorRef = useRef<EditorControl>(null);
-	const rootRef = useRef(null);
 
 	type OnChangeCallback = (event: OnChangeEvent)=> void;
 	const props_onChangeRef = useRef<OnChangeCallback>(null);
@@ -241,19 +252,26 @@ const CodeMirror = (props: NoteBodyEditorProps, ref: ForwardedRef<NoteBodyEditor
 		);
 	};
 
+	const stylesUrl = useStylesUrl();
 
 	return (
 		<ErrorBoundary message="The text editor encountered a fatal error and could not continue. The error might be due to a plugin, so please try to disable some of them and try again.">
-			<div style={{}} ref={rootRef}>
-				<NewWindowOrIFrame
-					mode={WindowMode.Iframe}
-					title='Rich Text Editor'
-					windowId=''
-					onClose={()=>{}}
-				>
-					{renderEditor()}
-				</NewWindowOrIFrame>
-			</div>
+			<NewWindowOrIFrame
+				mode={WindowMode.Iframe}
+				title='Rich Text Editor'
+				windowId=''
+				contentSecurityPolicy={`
+					default-src 'self' ;
+					style-src 'unsafe-inline' 'self' ;
+					script-src 'self' ;
+					media-src 'self' blob: data: https://* http://* ;
+					img-src 'self' blob: data: http://* https://* ;
+					font-src 'self' https://* blob: data: ;`}
+				onClose={()=>{}}
+			>
+				<link rel='stylesheet' href={stylesUrl}/>
+				{renderEditor()}
+			</NewWindowOrIFrame>
 		</ErrorBoundary>
 	);
 };

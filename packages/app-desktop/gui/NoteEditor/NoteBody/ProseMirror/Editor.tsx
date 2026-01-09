@@ -117,6 +117,7 @@ const Editor = (props: Props, ref: ForwardedRef<EditorControl>) => {
 
 	return (
 		<div
+			className='ProseMirror'
 			style={props.style}
 			ref={editorContainerRef}
 		></div>

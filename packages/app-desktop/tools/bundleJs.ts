@@ -2,7 +2,7 @@ import { filename, toForwardSlashes } from '@joplin/utils/path';
 import * as esbuild from 'esbuild';
 import { existsSync, readFileSync } from 'fs';
 import { writeFile } from 'fs/promises';
-import { dirname, join, relative } from 'path';
+import { dirname, join, relative, resolve } from 'path';
 import pluginBundleSvgs from '@joplin/editor/tools/esbuild/pluginBundleSvgs';
 
 const baseDir = dirname(__dirname);
@@ -10,10 +10,12 @@ const baseNodeModules = join(baseDir, 'node_modules');
 
 // Note: Roughly based on js-draw's use of esbuild:
 // https://github.com/personalizedrefrigerator/js-draw/blob/6fe6d6821402a08a8d17f15a8f48d95e5d7b084f/packages/build-tool/src/BundledFile.ts#L64
-const makeBuildContext = (entryPoint: string, renderer: boolean, addDebugStats: boolean) => {
+const makeBuildContext = (entryPoint: string, outputDir: string|undefined, renderer: boolean, addDebugStats: boolean) => {
+	const outputFileName = `${filename(entryPoint)}.bundle${entryPoint.endsWith('.css') ? '.css' : '.js'}`;
+	const outputPath = outputDir ? join(outputDir, outputFileName) : outputFileName;
 	return esbuild.context({
 		entryPoints: [entryPoint],
-		outfile: `${filename(entryPoint)}.bundle.js`,
+		outfile: outputPath,
 		bundle: true,
 		minify: true,
 		keepNames: true, // Preserve original function names -- useful for debugging
@@ -127,12 +129,17 @@ const bundleJs = async (writeStats: boolean) => {
 	const entryPoints = [
 		{ fileName: 'main.ts', renderer: false },
 		{ fileName: 'main-html.ts', renderer: true },
+		{
+			fileName: require.resolve('@joplin/editor/ProseMirror/styles.css'),
+			outputDir: 'vendor/ProseMirror',
+			renderer: true
+		},
 	];
-	for (const { fileName, renderer } of entryPoints) {
-		const compiler = await makeBuildContext(fileName, renderer, writeStats);
+	for (const { fileName, outputDir, renderer } of entryPoints) {
+		const compiler = await makeBuildContext(fileName, outputDir, renderer, writeStats);
 		const result = await compiler.rebuild();
 		if (writeStats) {
-			const outPath = `${dirname(__dirname)}/${fileName}.meta.json`;
+			const outPath = `${resolve(fileName)}.meta.json`;
 			console.log('Writing bundle stats to ', outPath);
 			await writeFile(outPath, JSON.stringify(result.metafile, undefined, '\t'));
 		}

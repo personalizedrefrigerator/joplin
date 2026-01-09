@@ -4,6 +4,7 @@ import * as React from 'react';
 import { useState, useEffect, useRef, createContext } from 'react';
 import { createPortal } from 'react-dom';
 import { SecondaryWindowApi } from '../utils/window/types';
+import { htmlentities } from '@joplin/utils/html';
 
 // This component uses react-dom's Portals to render its children in a different HTML
 // document. As children are rendered in a different Window/Document, they should avoid
@@ -22,6 +23,7 @@ interface Props {
 	// Note: children will be rendered in a different DOM from this node. Avoid using document.* methods
 	// in child components.
 	children: React.ReactNode[]|React.ReactNode;
+	contentSecurityPolicy?: string;
 	title: string;
 	mode: WindowMode;
 	windowId: string;
@@ -84,12 +86,17 @@ const useDocument = (
 };
 
 type OnSetLoaded = (loaded: boolean)=> void;
-const useDocumentSetup = (doc: Document|null, setLoaded: OnSetLoaded) => {
+const useDocumentSetup = (doc: Document|null, setLoaded: OnSetLoaded, contentSecurityPolicy: string) => {
 	useEffect(() => {
 		if (!doc) return;
 
 		doc.open();
-		doc.write('<!DOCTYPE html><html><head></head><body></body></html>');
+		doc.write(`<!DOCTYPE html>
+			<html>
+			<head><meta name="Content-Security-Policy" content="${htmlentities(contentSecurityPolicy)}"/></head>
+			<body></body>
+			</html>
+		`);
 		doc.close();
 
 		const cssUrls = [
@@ -116,7 +123,7 @@ const useDocumentSetup = (doc: Document|null, setLoaded: OnSetLoaded) => {
 		doc.body.style.height = '100vh';
 
 		setLoaded(true);
-	}, [doc, setLoaded]);
+	}, [doc, setLoaded, contentSecurityPolicy]);
 };
 
 const NewWindowOrIFrame: React.FC<Props> = props => {
@@ -124,7 +131,7 @@ const NewWindowOrIFrame: React.FC<Props> = props => {
 	const [loaded, setLoaded] = useState(false);
 
 	const doc = useDocument(props.mode, iframeRef, props.onClose);
-	useDocumentSetup(doc, setLoaded);
+	useDocumentSetup(doc, setLoaded, props.contentSecurityPolicy);
 
 	useEffect(() => {
 		if (!doc) return;

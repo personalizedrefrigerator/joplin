@@ -203,6 +203,9 @@ const useEditorControl = (
 			scrollSelectionIntoView() {
 				execEditorCommand(EditorCommandType.ScrollSelectionIntoView);
 			},
+			getSelection() {
+				return editorRef.current.getSelection();
+			},
 			showLinkDialog() {
 				setLinkDialogVisible(true);
 			},

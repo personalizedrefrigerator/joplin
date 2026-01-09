@@ -1144,7 +1144,6 @@ packages/editor/ProseMirror/plugins/tablePlugin.js
 packages/editor/ProseMirror/plugins/utils/createExternalEditorPlugin.js
 packages/editor/ProseMirror/plugins/utils/createFloatingButtonPlugin.js
 packages/editor/ProseMirror/schema.js
-packages/editor/ProseMirror/styles.js
 packages/editor/ProseMirror/testing/createTestEditor.js
 packages/editor/ProseMirror/testing/createTestEditorWithSerializer.js
 packages/editor/ProseMirror/testing/mockEditorApi.js
