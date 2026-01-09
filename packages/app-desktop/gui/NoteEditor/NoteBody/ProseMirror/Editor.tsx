@@ -16,6 +16,7 @@ import getResourceBaseUrl from '../../utils/getResourceBaseUrl';
 import { resourceFilename } from '@joplin/lib/models/utils/resourceUtils';
 import Resource from '@joplin/lib/models/Resource';
 import { EditorEventType } from '@joplin/editor/events';
+import addPluginAssets from './utils/addPluginAssets';
 
 interface Props extends EditorProps {
 	style: React.CSSProperties;
@@ -68,11 +69,22 @@ const Editor = (props: Props, ref: ForwardedRef<EditorControl>) => {
 					language = MarkupLanguage.Html;
 				}
 
-				const result = await markupToHtmlRef.current(language, markup, {
+				let result = await markupToHtmlRef.current(language, markup, {
 					mapsToLine: true,
 					externalAssetsOnly: false,
+					replaceResourceInternalToExternalLinks: true,
 				});
-				console.log('rendered', result);
+				result = { cssStrings: [], ...result };
+
+				const addedPluginCount = addPluginAssets(result.pluginAssets, {
+					container: editorContainerRef.current,
+					removeUnusedPluginAssets: options.isFullPageRender,
+				});
+				if (addedPluginCount) {
+					const editorDocument = editorContainerRef.current.getRootNode();
+					editorDocument.dispatchEvent(new Event('joplin-noteDidUpdate'));
+				}
+
 				return result;
 			},
 		}, (parent, language, onChange) => {
