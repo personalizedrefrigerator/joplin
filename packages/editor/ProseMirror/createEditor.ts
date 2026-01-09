@@ -28,6 +28,7 @@ import { RenderResult } from '../../renderer/types';
 import postprocessEditorOutput from './utils/postprocessEditorOutput';
 import detailsPlugin from './plugins/detailsPlugin';
 import tablePlugin from './plugins/tablePlugin';
+import clampPointToDocument from './utils/clampPointToDocument';
 
 interface ProseMirrorControl extends EditorControl {
 	getSettings(): EditorSettings;
@@ -134,6 +135,14 @@ const createEditor = async (
 				formatting: selectionFormatting,
 			});
 		}
+
+		props.onEvent({
+			kind: EditorEventType.SelectionRangeChange,
+			anchor: newState.selection.anchor,
+			head: newState.selection.head,
+			from: newState.selection.from,
+			to: newState.selection.to,
+		});
 	};
 
 	const view = new EditorView(parentElement, {
@@ -190,10 +199,14 @@ const createEditor = async (
 		getSelection: () => {
 			return view.state.doc.textBetween(view.state.selection.from, view.state.selection.to, '\n\n');
 		},
-		select: function(anchor: number, head: number): void {
+		select: (anchor: number, head: number) => {
 			const transaction = view.state.tr;
 			transaction.setSelection(
-				TextSelection.create(transaction.doc, anchor, head),
+				TextSelection.create(
+					transaction.doc,
+					clampPointToDocument(view.state, anchor),
+					clampPointToDocument(view.state, head),
+				),
 			);
 			view.dispatch(transaction);
 		},
