@@ -1,5 +1,10 @@
 # Joplin iOS Changelog
 
+## [ios-v13.5.3](https://github.com/laurent22/joplin/releases/tag/ios-v13.5.3) - 2026-01-10T10:09:33Z
+
+- Fixed: Fix icon rendering (#14071) (#14063 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Fixed keyboard input issue in note title (#14070) (#13544 by [@mrjo118](https://github.com/mrjo118))
+
 ## [ios-v13.5.2](https://github.com/laurent22/joplin/releases/tag/ios-v13.5.2) - 2026-01-08T19:42:53Z
 
 - New: Add a link to the list of open-source licenses (5caec16)
