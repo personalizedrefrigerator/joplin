@@ -90,6 +90,8 @@ import PerformanceLogger from '@joplin/lib/PerformanceLogger';
 import { Profile } from '@joplin/lib/services/profileConfig/types';
 import shim from '@joplin/lib/shim';
 import { Platform } from 'react-native';
+import VoiceTyping from '../services/voiceTyping/VoiceTyping';
+import whisper from '../services/voiceTyping/whisper';
 
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
@@ -178,6 +180,9 @@ const buildStartupTasks = (
 		Setting.setConstant('pluginAssetDir', `${Setting.value('resourceDir')}/pluginAssets`);
 		Setting.setConstant('pluginDir', `${getProfilesRootDir()}/plugins`);
 		Setting.setConstant('pluginDataDir', getPluginDataDir(currentProfile, isSubProfile));
+		Setting.setConstant('sync.9.apiKey', '');
+		Setting.setConstant('sync.10.apiKey', '');
+		Setting.setConstant('sync.11.apiKey', '');
 	});
 	addTask('buildStartupTasks/make resource directory', async () => {
 		await shim.fsDriver().mkdir(Setting.value('resourceDir'));
@@ -358,6 +363,9 @@ const buildStartupTasks = (
 	});
 	addTask('buildStartupTasks/migrate PPK', async () => {
 		await migratePpk();
+	});
+	addTask('buildStartupTasks/set up voice typing', async () => {
+		VoiceTyping.initialize([whisper]);
 	});
 	addTask('buildStartupTasks/load folders', async () => {
 		await refreshFolders(dispatch, '');
