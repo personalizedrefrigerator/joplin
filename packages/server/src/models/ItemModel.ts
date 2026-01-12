@@ -1028,20 +1028,15 @@ export default class ItemModel extends BaseModel<Item> {
 			const changeItemName = item.name || previousName;
 
 			if (!isNew && this.shouldRecordChange(changeItemName)) {
-				// TODO: Potentially slow:
-				const share = item.jop_share_id ? await this.models().share().load(item.jop_share_id) : null;
-				const allUserIds = share ? await this.models().share().allShareUserIds(share) : [userId];
-
-				// Post a change for all users that can access the item
-				for (const userId of allUserIds) {
-					await this.models().change().save({
-						item_id: item.id,
-						item_name: changeItemName,
-						type: ChangeType.Update,
-						previous_share_id: previousItem?.jop_share_id ?? '',
-						user_id: userId,
-					});
-				}
+				await this.models().change().recordChange({
+					itemId: item.id,
+					sourceUserId: userId,
+					shareId: item.jop_share_id ?? '',
+					previousItem,
+					itemName: changeItemName,
+					type: ChangeType.Update,
+					itemType: this.itemType,
+				});
 			}
 
 			return item;

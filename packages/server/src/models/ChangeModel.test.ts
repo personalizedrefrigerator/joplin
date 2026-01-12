@@ -1,8 +1,20 @@
-import { createUserAndSession, beforeAllDb, afterAllTests, beforeEachDb, models, expectThrow, createFolder, createItemTree3, expectNotThrow, createNote, updateNote, deleteNote } from '../utils/testing/testUtils';
+import { createUserAndSession, beforeAllDb, afterAllTests, beforeEachDb, models, db, dbSlave, expectThrow, createFolder, createItemTree3, expectNotThrow, createNote, updateNote, deleteNote } from '../utils/testing/testUtils';
+import config from '../config';
+import { Config } from '../utils/types';
+import modelFactory from './factory';
 import { ChangeType } from '../services/database/types';
 import { Day, msleep } from '../utils/time';
 import { ChangePagination } from './ChangeModel';
 import { SqliteMaxVariableNum } from '../db';
+import { defaultDeltaPagination } from './ChangeModel';
+import ChangeModel from './ChangeModel.new';
+
+const newChangeModel = (config: Config) => {
+	return new ChangeModel(
+		db(), dbSlave(), db => modelFactory(db, dbSlave(), config), config,
+	);
+};
+
 
 describe('ChangeModel', () => {
 
@@ -20,12 +32,11 @@ describe('ChangeModel', () => {
 
 	test('should track changes - create only', async () => {
 		const { session, user } = await createUserAndSession(1, true);
-		const changeModel = models().change();
 
 		const item1 = await createFolder(session.id, { title: 'folder' });
 
 		{
-			const changes = (await changeModel.delta(user.id)).items;
+			const changes = (await models().change().delta(user.id)).items;
 			expect(changes.length).toBe(1);
 			expect(changes[0].item_id).toBe(item1.id);
 			expect(changes[0].type).toBe(ChangeType.Create);
@@ -35,7 +46,6 @@ describe('ChangeModel', () => {
 	test('should track changes - create, then update', async () => {
 		const { user } = await createUserAndSession(1, true);
 		const itemModel = models().item();
-		const changeModel = models().change();
 
 		await msleep(1); const item1 = await models().item().makeTestItem(user.id, 1); // [1] CREATE 1
 		await msleep(1); await itemModel.saveForUser(user.id, { id: item1.id, name: '0000000000000000000000000000001A.md', content: Buffer.from('') }); // [2] UPDATE 1a
@@ -47,7 +57,7 @@ describe('ChangeModel', () => {
 		await msleep(1); const item3 = await models().item().makeTestItem(user.id, 3); // [8] CREATE 3
 
 		// Check that the 8 changes were created
-		const allUncompressedChanges = await changeModel.all();
+		const allUncompressedChanges = await models().change().all();
 		expect(allUncompressedChanges.length).toBe(8);
 
 		{
@@ -55,7 +65,7 @@ describe('ChangeModel', () => {
 			// We don't get CREATE 1 because item 1 has been deleted. And we
 			// also don't get any UPDATE event since they've been compressed
 			// down to the CREATE events.
-			const changes = (await changeModel.delta(user.id)).items;
+			const changes = (await models().change().delta(user.id)).items;
 			expect(changes.length).toBe(2);
 			expect(changes[0].item_id).toBe(item2.id);
 			expect(changes[0].type).toBe(ChangeType.Create);
@@ -64,7 +74,7 @@ describe('ChangeModel', () => {
 		}
 
 		{
-			const pagination: ChangePagination = { limit: 5 };
+			const pagination: ChangePagination = { limit: 3 };
 
 			// Internally, when we request the first three changes, we get back:
 			//
@@ -79,7 +89,7 @@ describe('ChangeModel', () => {
 			//
 			// Then CREATE 1 is removed since item 1 has been deleted and UPDATE
 			// 2a is compressed down to CREATE 2.
-			const page1 = (await changeModel.delta(user.id, pagination));
+			const page1 = (await models().change().delta(user.id, pagination));
 			let changes = page1.items;
 			expect(changes.length).toBe(1);
 			expect(page1.has_more).toBe(true);
@@ -88,7 +98,7 @@ describe('ChangeModel', () => {
 
 			// In the second page, we get all the expected events since nothing
 			// has been compressed.
-			const page2 = (await changeModel.delta(user.id, { ...pagination, cursor: page1.cursor, limit: 3 }));
+			const page2 = (await models().change().delta(user.id, { ...pagination, cursor: page1.cursor }));
 			changes = page2.items;
 			expect(changes.length).toBe(3);
 			// Although there are no more changes, it's not possible to know
@@ -103,7 +113,7 @@ describe('ChangeModel', () => {
 			expect(changes[2].type).toBe(ChangeType.Create);
 
 			// Check that we indeed reached the end of the feed.
-			const page3 = (await changeModel.delta(user.id, { ...pagination, cursor: page2.cursor }));
+			const page3 = (await models().change().delta(user.id, { ...pagination, cursor: page2.cursor }));
 			expect(page3.items.length).toBe(0);
 			expect(page3.has_more).toBe(false);
 		}
@@ -112,13 +122,12 @@ describe('ChangeModel', () => {
 	test('should throw an error if cursor is invalid', async () => {
 		const { user } = await createUserAndSession(1, true);
 		const itemModel = models().item();
-		const changeModel = models().change();
 
 		let i = 1;
 		await msleep(1); const item1 = await models().item().makeTestItem(user.id, 1); // CREATE 1
 		await msleep(1); await itemModel.saveForUser(user.id, { id: item1.id, name: `test_mod${i++}`, content: Buffer.from('') }); // UPDATE 1
 
-		await expectThrow(async () => changeModel.delta(user.id, { limit: 1, cursor: 'invalid' }), 'resyncRequired');
+		await expectThrow(async () => models().change().delta(user.id, { limit: 1, cursor: 'invalid' }), 'resyncRequired');
 	});
 
 	test('should tell that there are more changes even when current page is empty', async () => {
@@ -325,8 +334,10 @@ describe('ChangeModel', () => {
 	test('should not return the whole item if the option is disabled', async () => {
 		const { user } = await createUserAndSession(1, true);
 
-		const changeModel = await models().change();
-		changeModel.deltaIncludesItems_ = false;
+		const changeModel_ = newChangeModel({
+			...config(),
+			DELTA_INCLUDES_ITEMS: false,
+		});
 
 		await createItemTree3(user.id, '', '', [
 			{
@@ -335,7 +346,7 @@ describe('ChangeModel', () => {
 			},
 		]);
 
-		const result = await changeModel.delta(user.id);
+		const result = await changeModel_.delta(user.id, defaultDeltaPagination());
 		expect('jopItem' in result.items[0]).toBe(false);
 	});
 
@@ -423,8 +434,7 @@ describe('ChangeModel', () => {
 			...change,
 		}));
 
-		const changeModel = models().change();
-		expect(changeModel.compressChanges_(changes)).toMatchObject(expected);
+		expect(newChangeModel(config()).compressChanges_(changes)).toMatchObject(expected);
 	});
 
 });
