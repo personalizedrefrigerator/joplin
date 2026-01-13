@@ -142,7 +142,7 @@ export default class AutoUpdaterService implements AutoUpdaterServiceInterface {
 				autoUpdater.setFeedURL({ provider: 'generic', url: assetUrl });
 				const result = await autoUpdater.checkForUpdates();
 
-				// Wait for the installation to finish. By default, .checkForUpdates runs in the background. 
+				// Wait for the installation to finish. By default, .checkForUpdates runs in the background
 				await result.downloadPromise;
 			} catch (error) {
 				this.logger_.error(`Update download url failed: ${error.message}`);
