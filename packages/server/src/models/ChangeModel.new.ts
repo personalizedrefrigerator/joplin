@@ -446,22 +446,14 @@ export default class ChangeModel extends BaseModel<Changes2> {
 	public async recordChange({
 		shareId, sourceUserId, itemId, itemName, type, previousItem, changeId,
 	}: RecordChangeOptions) {
-		let firstChangeId = changeId;
-		const saveChangeForUser = async (userId: Uuid) => {
-			// If provided, ensure that **at least one** of the changes saved matches the
-			// given ID. For now, is used to ensure that every ID in the old changes table
-			// is also in the new changes table. This logic will need to be removed when
-			// removing ChangeModel.old.
-			const id = firstChangeId;
-			firstChangeId = null;
-
+		const saveChangeForUser = async (userId: Uuid, changeId: Uuid|undefined) => {
 			await this.save({
 				item_id: itemId,
 				item_name: itemName,
 				type,
 				previous_share_id: previousItem.jop_share_id ?? '',
 				user_id: userId,
-				...(id ? { id } : {}),
+				...(changeId ? { id: changeId } : {}),
 			}, { isNew: true });
 		};
 
@@ -470,13 +462,22 @@ export default class ChangeModel extends BaseModel<Changes2> {
 			const allUserIds = share ? await this.models().share().allShareUserIds(share) : [sourceUserId];
 
 			// Post a change for all users that can access the item
-			for (const userId of allUserIds) {
-				await saveChangeForUser(userId);
+			for (let i = 0; i < allUserIds.length; i++) {
+				const isLast = i === allUserIds.length - 1;
+				const userId = allUserIds[i];
+				// Ensure that the last change matches the provided ID. This is important
+				// because the change ID is used as a cursor in the delta table.
+				// Since the same cursor is used in the old and new changes tables,
+				// an up-to-date cursor in one table should correspond to an up-to-date
+				// cursor in the other.
+				const newChangeId = isLast ? changeId : undefined;
+
+				await saveChangeForUser(userId, newChangeId);
 			}
 		} else {
 			// Sharing for create/delete actions is currently handled in a maintenance
 			// task that runs periodically.
-			await saveChangeForUser(sourceUserId);
+			await saveChangeForUser(sourceUserId, changeId);
 		}
 	}
 
