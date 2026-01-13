@@ -28,6 +28,7 @@ describe('20251124123600_denormalize_changes', () => {
 		});
 
 		await db()('changes').truncate();
+		await db()('changes_2').truncate();
 
 		// Use db() directly, rather than models().changes.
 		// It should be possible to update models().changes
