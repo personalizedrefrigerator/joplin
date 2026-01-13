@@ -99,7 +99,7 @@ export default class ApplicationModel extends BaseModel<Application> {
 		return client as Client;
 	}
 
-	// Joplin Cloud now has 2 methods of login, the one where the user uses
+	// Joplin now has 2 methods of login, the one where the user uses
 	// his email as the identifier and other where the client application
 	// will use a generate id as the identifier
 	//

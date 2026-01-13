@@ -2,9 +2,9 @@
 
 ## Account management
 
-### How can I change my details?
+### How can I change my account details?
 
-Most of your details can be found in your [Profile](/users/me) page. To open it, click on the Profile button - this is the button in the top right corner, with your name or email on it.
+Most of your account details can be found in your [Profile](/users/me) page. To open it, click on the Profile button - this is the button in the top right corner, with your name or email on it.
 
 ### How can I get more space?
 
