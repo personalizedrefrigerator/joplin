@@ -14,17 +14,44 @@ enum ChangeType {
 type ChangeEntryOriginal = {
 	counter: number;
 	id: Uuid;
-	item_id: Uuid;
-	jop_share_id: Uuid;
-	previous_item_share_id: Uuid;
-	user_id: Uuid;
-	type: ChangeType;
-	updated_time: string;
-	created_time: string;
 };
 
 // It should be possible to pause and resume the migration in the background
 export const config = { transaction: false };
+
+
+const validateChangeMigration = async (db: DbConnection, maximumCounter: number, limit: number) => {
+	const originalChanges = await db('changes').select('id', 'counter', 'type', 'previous_item')
+		.where('counter', '<', maximumCounter)
+		.orderBy('counter', 'desc')
+		.limit(limit);
+
+
+	for (const change of originalChanges) {
+		const migratedChanges = await db('changes_2')
+			.select('id', 'counter', 'type', 'previous_share_id')
+			.where('id', '=', change.id);
+
+		const validationError = (message: string) =>
+			new Error(`Validation failed: Change failed to migrate (${JSON.stringify(change)}->${JSON.stringify(migratedChanges)}): ${message}`);
+
+		if (migratedChanges.length !== 1) {
+			throw validationError('Migrated change not found.');
+		} else {
+			const migrated = migratedChanges[0];
+			if (migrated.type !== change.type) {
+				throw validationError(`Migrated change has wrong type. Was: ${migrated.type}, expected: ${change.type}`);
+			} else if (migrated.type === ChangeType.Update) {
+				const previousShareId = JSON.parse(change.previous_item || '{}').jop_share_id;
+				if (migrated.previous_share_id !== previousShareId) {
+					throw validationError(
+						`Wrong previous_share_id. Was: ${migrated.previous_share_id}, expected: ${previousShareId}.`,
+					);
+				}
+			}
+		}
+	}
+};
 
 export const up = async (db: DbConnection) => {
 
@@ -80,38 +107,6 @@ export const up = async (db: DbConnection) => {
 	const total = Object.values(await db('changes').count().where('counter', '>=', offset).first())[0];
 	logger.info('Migrating', total, 'changes... start', offset);
 
-	const validateChangeMigration = async (maximumCounter: number, limit: number) => {
-		const originalChanges = await db('changes').select('id', 'counter', 'type', 'previous_item')
-			.where('counter', '<', maximumCounter)
-			.orderBy('counter', 'desc')
-			.limit(limit);
-
-
-		for (const change of originalChanges) {
-			const migratedChanges = await db('changes_2')
-				.select('id', 'counter', 'type', 'previous_share_id')
-				.where('id', '=', change.id);
-
-			const validationError = (message: string) =>
-				new Error(`Validation failed: Change failed to migrate (${JSON.stringify(change)}->${JSON.stringify(migratedChanges)}): ${message}`);
-
-			if (migratedChanges.length !== 1) {
-				throw validationError('Migrated change not found.');
-			} else {
-				const migrated = migratedChanges[0];
-				if (migrated.type !== change.type) {
-					throw validationError(`Migrated change has wrong type. Was: ${migrated.type}, expected: ${change.type}`);
-				} else if (migrated.type === ChangeType.Update) {
-					const previousShareId = JSON.parse(change.previous_item || '{}').jop_share_id;
-					if (migrated.previous_share_id !== previousShareId) {
-						throw validationError(
-							`Wrong previous_share_id. Was: ${migrated.previous_share_id}, expected: ${previousShareId}.`,
-						);
-					}
-				}
-			}
-		}
-	};
 
 	const batchSize = 10_000;
 	// The number of items in each batch to validate. Larger values reduce performance,
@@ -121,7 +116,7 @@ export const up = async (db: DbConnection) => {
 	if (offset > 0) {
 		logger.info('Resuming... Validating last migrated changes...');
 		try {
-			await validateChangeMigration(offset, validationCount);
+			await validateChangeMigration(db, offset, validationCount);
 		} catch (error) {
 			logger.warn('Validation failed. The in-progress migration table will be deleted and the migration will need to be re-run. Error:', error);
 			await db.schema.dropTable('changes_2');
@@ -166,11 +161,19 @@ export const up = async (db: DbConnection) => {
 		`;
 		await db.transaction(async transaction => {
 			const result = await transaction.raw(`
-				WITH share_participants AS (
+				WITH all_share_ids AS (
+					SELECT DISTINCT (${previousShareIdSql}) as included_share_id FROM changes
+					WHERE changes.counter >= ?
+					AND changes.counter <= ?
+					AND ${previousShareIdSql} != ''
+				), share_participants AS (
 						SELECT user_id, share_id FROM share_users
+							-- Performance: Filter out all share_ids that aren't used in the batch:
+							JOIN all_share_ids ON share_users.share_id = all_share_ids.included_share_id
 							WHERE status = 1 -- Only users that accepted the share
 					UNION ALL
 						SELECT owner_id AS user_id, id as share_id FROM shares
+							JOIN all_share_ids ON shares.id = all_share_ids.included_share_id
 					UNION ALL
 						-- Placeholder for "the user that authored the change"
 						SELECT NULL AS user_id, '{placeholder}' AS share_id
@@ -204,14 +207,14 @@ export const up = async (db: DbConnection) => {
 					-- done intentionally (see the "as id" block above) as a way to prevent a particular change from being
 					-- added twice for the same user.
 					ON CONFLICT DO NOTHING
-			`, [counterRange[0], counterRange[1]]);
+			`, [counterRange[0], counterRange[1], counterRange[0], counterRange[1]]);
 			processedCount += result.rowCount;
 		});
 
 		logger.info('Processed', processedCount, '/', total, `(start=${counterRange[0]}, end=${counterRange[1]})`);
 
 		// Validate: Select some of the original changes and verify that they were migrated
-		await validateChangeMigration(counterRange[1], validationCount);
+		await validateChangeMigration(db, counterRange[1], validationCount);
 	}
 };
 
