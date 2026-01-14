@@ -1,6 +1,6 @@
-import diffStringArrays from './diffStringArrays';
+import diffSortedStringArrays from './diffSortedStringArrays';
 
-describe('diffStringArrays', () => {
+describe('diffSortedStringArrays', () => {
 	test.each([
 		[
 			['a'],
@@ -28,7 +28,7 @@ describe('diffStringArrays', () => {
 			{ unexpected: ['b', 'c', 'd', 'f'], missing: [] },
 		],
 	])('should diff string arrays: %j, %j', (actual, expected, diff) => {
-		expect(diffStringArrays(actual, expected)).toEqual(diff);
+		expect(diffSortedStringArrays(actual, expected)).toEqual(diff);
 	});
 });
 

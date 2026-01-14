@@ -22,7 +22,7 @@ import Stream = require('stream');
 import ProgressBar from './utils/ProgressBar';
 import logDiffDebug from './utils/logDiffDebug';
 import { NoteEntity } from '@joplin/lib/services/database/types';
-import diffStringArrays from './utils/diffStringArrays';
+import diffSortedStringArrays from './utils/diffSortedStringArrays';
 
 const logger = Logger.create('Client');
 
@@ -824,10 +824,10 @@ class Client implements ActionableClient {
 			}
 		};
 
-		const assertSameIds = (actual: ItemSlice[], expected: ItemSlice[], testLabel: string) => {
-			const actualIds = actual.map(i => i.id);
-			const expectedIds = expected.map(i => i.id);
-			const { missing, unexpected } = diffStringArrays(actualIds, expectedIds);
+		const assertSameIds = (actualSorted: ItemSlice[], expectedSorted: ItemSlice[], testLabel: string) => {
+			const actualIds = actualSorted.map(i => i.id);
+			const expectedIds = expectedSorted.map(i => i.id);
+			const { missing, unexpected } = diffSortedStringArrays(actualIds, expectedIds);
 
 
 			if (missing.length || unexpected.length) {

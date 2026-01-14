@@ -1,6 +1,6 @@
 
 // Input arrays must be sorted
-const diffStringArrays = (actual: string[], expected: string[]) => {
+const diffSortedStringArrays = (actual: string[], expected: string[]) => {
 	const missing = [];
 	const unexpected = [];
 
@@ -54,5 +54,5 @@ const diffStringArrays = (actual: string[], expected: string[]) => {
 	};
 };
 
-export default diffStringArrays;
+export default diffSortedStringArrays;
 
