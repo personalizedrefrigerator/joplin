@@ -22,6 +22,7 @@ import Stream = require('stream');
 import ProgressBar from './utils/ProgressBar';
 import logDiffDebug from './utils/logDiffDebug';
 import { NoteEntity } from '@joplin/lib/services/database/types';
+import diffStringArrays from './utils/diffStringArrays';
 
 const logger = Logger.create('Client');
 
@@ -186,6 +187,7 @@ class Client implements ActionableClient {
 				'-',
 			], {
 				cwd: cliDirectory,
+				detached: true,
 			});
 			rawChildProcess.stdout.on('data', (chunk: Buffer) => {
 				const chunkString = chunk.toString('utf-8');
@@ -251,6 +253,7 @@ class Client implements ActionableClient {
 
 		this.childProcess_.close();
 		this.closed_ = true;
+		logger.info('Closed client ', this.email);
 	}
 
 	public onClose(listener: OnCloseListener) {
@@ -313,7 +316,8 @@ class Client implements ActionableClient {
 			this.bufferedChildProcessStderr_ = [];
 			process.stdout.write('CLI debug session. Enter a blank line or "exit" to exit.\n');
 			process.stdout.write('To review a transcript of all interactions with this client,\n');
-			process.stdout.write('enter "[transcript]".\n\n');
+			process.stdout.write('enter "[transcript]". To log information about a particular item\n');
+			process.stdout.write('enter "[item:...id here...]".\n\n');
 			process.stdout.write(cliProcessPromptString);
 
 			const isExitRequest = (input: string) => {
@@ -328,6 +332,10 @@ class Client implements ActionableClient {
 				lastInput = await readline.question('');
 				if (lastInput === '[transcript]') {
 					process.stdout.write(`\n\n# Transcript\n\n${this.getTranscript()}\n\n# End transcript\n\n`);
+				} else if (lastInput.startsWith('[item:') && lastInput.endsWith(']')) {
+					let id = lastInput.substring('[item:'.length);
+					id = id.substring(0, id.length - 1);
+					this.globalActionTracker_.printActionLog(id);
 				} else if (!isExitRequest(lastInput)) {
 					this.childProcess_.writeStdin(`${lastInput}\n`);
 				}
@@ -582,6 +590,9 @@ class Client implements ActionableClient {
 				logDiffDebug(lastActualNote.title, expected.title);
 				logDiffDebug(lastActualNote.body, expected.body);
 			}
+			// Log all transactions associated with the item
+			this.globalActionTracker_.printActionLog(expected.id);
+
 			throw error;
 		}
 	}
@@ -814,6 +825,35 @@ class Client implements ActionableClient {
 			}
 		};
 
+		const assertSameIds = (actual: ItemSlice[], expected: ItemSlice[], testLabel: string) => {
+			const actualIds = actual.map(i => i.id);
+			const expectedIds = expected.map(i => i.id);
+			const { missing, unexpected } = diffStringArrays(actualIds, expectedIds);
+
+
+			if (missing.length || unexpected.length) {
+				const idLogs = (ids: string[]) => {
+					const output = [];
+					for (const id of ids) {
+						const log = this.globalActionTracker_.getActionLog(id);
+						output.push(`\nid:${id}`);
+						output.push(log.map(item => `\t${item.source}: ${item.action}`).join('\n'));
+					}
+					return output.join('\n');
+				};
+
+				throw new Error([
+					`IDs were different (${testLabel}):`,
+					missing.length && `- Expected ${JSON.stringify(missing)} to be present, but were missing.`,
+					unexpected.length && `- Present but should not have been: ${JSON.stringify(unexpected)}`,
+					'\n',
+					'Logs:',
+					idLogs(missing),
+					idLogs(unexpected),
+				].filter(line => !!line).join('\n'));
+			}
+		};
+
 		const checkNoteState = async () => {
 			const notes = [...await this.listNotes()];
 			const expectedNotes = [...await this.tracker_.listNotes()];
@@ -823,6 +863,7 @@ class Client implements ActionableClient {
 
 			assertNoAdjacentEqualIds(notes, 'notes');
 			assertNoAdjacentEqualIds(expectedNotes, 'expectedNotes');
+			assertSameIds(notes, expectedNotes, 'should have the same note IDs');
 			assert.deepEqual(notes, expectedNotes, 'should have the same notes as the expected state');
 		};
 
@@ -835,6 +876,7 @@ class Client implements ActionableClient {
 
 			assertNoAdjacentEqualIds(folders, 'folders');
 			assertNoAdjacentEqualIds(expectedFolders, 'expectedFolders');
+			assertSameIds(folders, expectedFolders, 'should have the same folder IDs');
 			assert.deepEqual(folders, expectedFolders, 'should have the same folders as the expected state');
 		};
 
