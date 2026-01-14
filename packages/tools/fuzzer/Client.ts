@@ -187,7 +187,6 @@ class Client implements ActionableClient {
 				'-',
 			], {
 				cwd: cliDirectory,
-				detached: true,
 			});
 			rawChildProcess.stdout.on('data', (chunk: Buffer) => {
 				const chunkString = chunk.toString('utf-8');
