@@ -108,7 +108,7 @@ export default class ChangeModel {
 		const hasDifferentIds = newIds.size !== oldIds.size || !newIds.isSubsetOf(oldIds);
 		if (hasDifferentIds) {
 			const differentIds = [...newIds.difference(oldIds)];
-			logger.warn('Differing delta results:', differentIds);
+			logger.warn('Differing delta results:', differentIds, 'before:', JSON.stringify(resultsOld, undefined, ' '), 'after:', JSON.stringify(resultsNew, undefined, ' '));
 			throw new Error(`Different delta results: ${differentIds} (size from new: ${newIds.size}, size from old: ${oldIds.size}, pagination: ${JSON.stringify(pagination)})`);
 		}
 

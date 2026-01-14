@@ -11,7 +11,7 @@ import { Config } from '../utils/types';
 import { BaseItemEntity } from '@joplin/lib/services/database/types';
 import type { RecordChangeOptions as RecordChangeOptionsBase } from './ChangeModel';
 
-const logger = Logger.create('ChangeModel');
+const logger = Logger.create('ChangeModel.new');
 
 
 export const defaultChangeTtl = 180 * Day;
@@ -459,18 +459,20 @@ export default class ChangeModel extends BaseModel<Changes2> {
 
 		if (type === ChangeType.Update) {
 			const share = shareId ? await this.models().share().load(shareId) : null;
-			const allUserIds = share ? await this.models().share().allShareUserIds(share) : [sourceUserId];
+			let allUserIds = share ? await this.models().share().allShareUserIds(share) : [sourceUserId];
+			if (!allUserIds.includes(sourceUserId)) {
+				logger.warn('Adding sourceUserId to allUserIds because it was missing');
+				allUserIds = [...allUserIds, sourceUserId];
+			}
 
 			// Post a change for all users that can access the item
 			for (let i = 0; i < allUserIds.length; i++) {
-				const isLast = i === allUserIds.length - 1;
 				const userId = allUserIds[i];
-				// Ensure that the last change matches the provided ID. This is important
+
+				const isFirst = i === 0;
+				// Ensure that the first change matches the provided ID. This is important
 				// because the change ID is used as a cursor in the delta table.
-				// Since the same cursor is used in the old and new changes tables,
-				// an up-to-date cursor in one table should correspond to an up-to-date
-				// cursor in the other.
-				const newChangeId = isLast ? changeId : undefined;
+				const newChangeId = isFirst ? changeId : undefined;
 
 				await saveChangeForUser(userId, newChangeId);
 			}
