@@ -123,7 +123,11 @@ export default class ItemModel extends BaseModel<Item> {
 			const share = await this.models().share().load(resource.jop_share_id, { fields: ['id', 'owner_id'] });
 
 			if (!share) {
-				modelLogger.warn('cannot find the share associated with this item. Action:', action, 'User:', user, 'Resource:', resource);
+				// If the share owner has just deleted the share, the share won't exist. In this case, it's still okay to
+				// change the item:
+				if (resource.owner_id !== user.id) {
+					modelLogger.warn('cannot find the share associated with this item. Action:', action, 'User:', user.email, 'Resource:', resource);
+				}
 			} else {
 				if (share.owner_id !== user.id) {
 					const shareUser = await this.models().shareUser().byShareAndUserId(share.id, user.id);
