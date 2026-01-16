@@ -136,7 +136,7 @@ const createActionFunction = <Defaults extends ActionDefaults> (
 			builtOptions[key] = options[key] ?? defaultValue;
 		}
 
-		logger.info('Run action:', JSON.stringify([key, options]));
+		logger.info('Run action:', JSON.stringify([key, builtOptions]));
 		return action(builtOptions as ActionOptions<Defaults>);
 	};
 };
