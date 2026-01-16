@@ -14,7 +14,6 @@ import ActionRunner, { ActionSpec } from './ActionRunner';
 import randomString from './utils/randomString';
 import { readFile } from 'fs/promises';
 const { shimInit } = require('@joplin/lib/shim-init-node');
-const JSON5 = require('json5');
 
 const globalLogger = new Logger();
 globalLogger.addTarget(TargetType.Console);
@@ -140,12 +139,10 @@ const main = async (options: Options) => {
 		);
 
 		const actionRunner = new ActionRunner(fuzzContext, clientPool, clientPool.randomClient());
-		if (options.setupActions.length) {
-			await actionRunner.doActions(options.setupActions);
-		} else {
-			await clientPool.createRandomInitialItemsAndSync();
-		}
+		logger.info('Starting setup:');
+		await actionRunner.doActions(options.setupActions);
 
+		logger.info('Starting randomized actions:');
 		const maxSteps = options.maximumSteps;
 		for (let stepIndex = 1; maxSteps <= 0 || stepIndex <= maxSteps; stepIndex++) {
 			const client = clientPool.randomClient();
@@ -182,18 +179,20 @@ const main = async (options: Options) => {
 
 const readSetupFile = async (path: string) => {
 	const setupActionFile = await readFile(path, 'utf-8');
-	const setupData = JSON5.parse(setupActionFile);
+	const setupData = JSON.parse(setupActionFile);
+
+	const errorLabel = `Reading ${path}.`;
 
 	const readNumber = <T extends object> (key: keyof T, parent: T) => {
 		if (typeof parent[key] !== 'number') {
-			throw new Error(`Reading ${path}. Expected key ${String(key)} to be a number. Was ${typeof parent[key]}.`);
+			throw new Error(`${errorLabel} Expected key ${String(key)} to be a number. Was ${typeof parent[key]}.`);
 		}
 
 		return parent[key];
 	};
 	const readArray = <T extends object> (key: keyof T, parent: T) => {
 		if (!Array.isArray(parent[key])) {
-			throw new Error(`Reading ${path}. Expected key ${String(key)} to be an array. Was ${typeof parent[key]}.`);
+			throw new Error(`${errorLabel} Expected key ${String(key)} to be an array. Was ${typeof parent[key]}.`);
 		}
 
 		return parent[key];
@@ -201,18 +200,39 @@ const readSetupFile = async (path: string) => {
 
 	const clientCount = readNumber('clientCount', setupData);
 
-	const initialActions: Array<unknown> = readArray('actions', setupData);
-	const actions = initialActions.map((action: unknown, index: number) => {
-		if (!Array.isArray(action) || action.length < 1 || action.length > 2) {
-			throw new Error(`Reading ${path}. Each item in "actions" must be an array of length 1 or 2. (Reading item ${JSON.stringify(action)} at index: ${index})`);
-		}
+	const initialActions: unknown[] = readArray('actions', setupData);
+	const actions: ActionSpec[] = initialActions
+		.map((action: unknown, index: number) => {
+			if (typeof action === 'string') {
+				const isComment = action.startsWith('//');
+				if (isComment) {
+					return { key: 'comment', options: { message: action.substring(2).trimStart() } };
+				}
+				return { key: action, options: {} };
+			}
 
-		const key = action[0];
-		const options = action[1] ?? {};
-		return { key, options } as ActionSpec;
-	});
+			if (!Array.isArray(action) || action.length < 1 || action.length > 2) {
+				throw new Error(`${errorLabel} In 'actions'. Expected an array of length 1 or 2. (Reading item ${JSON.stringify(action)} at index: ${index})`);
+			}
+
+			const key = action[0];
+			const options = action[1] ?? {};
+			return { key, options } as ActionSpec;
+		});
 
 	return { clientCount, setupActions: actions };
+};
+
+const defaultSetupActions = (clientCount: number) => {
+	const actions = [];
+	for (let i = 0; i < clientCount; i++) {
+		actions.push(
+			{ key: 'switchClient', options: { id: i } },
+			{ key: 'createOrUpdateMany', options: {} },
+			{ key: 'sync', options: {} },
+		);
+	}
+	return actions;
 };
 
 
@@ -274,7 +294,7 @@ void yargs
 					default: '',
 					defaultDescription: [
 						'A path: If provided, this should point to a JSON file containing actions to run during startup. ',
-						'The JSON file should contain an array of { key: "actionName", options: {} } objects.',
+						'The JSON file should contain an object similar to { "actions": [ ["newNote", {}] ], "clientCount": 1 }.',
 					].join(''),
 				},
 			});
@@ -287,19 +307,21 @@ void yargs
 				setupData = await readSetupFile(argv.setup);
 			}
 
+			const clientCount = setupData?.clientCount ?? argv.clients;
 			await main({
 				seed: argv.seed,
 				maximumSteps: argv.steps,
-				clientCount: setupData.clientCount ?? argv.clients,
+				clientCount,
 				serverPath: serverPath,
 				isJoplinCloud: !!argv.joplinCloud,
 				maximumStepsBetweenSyncs: argv['steps-between-syncs'],
 				keepAccountsOnClose: argv.keepAccounts,
 				enableE2ee: argv.enableE2ee,
 				randomStrings: argv.randomStrings,
-				setupActions: setupData.setupActions ?? [],
+				setupActions: setupData?.setupActions ?? defaultSetupActions(clientCount),
 			});
 		},
 	)
+	.demandCommand()
 	.help()
 	.argv;

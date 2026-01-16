@@ -36,32 +36,50 @@ export default class ActionRunner {
 				logger.info('.checkState failed. Syncing all clients...');
 				await this.clientPool_.syncAll();
 			},
-		});	
+		});
 	}
 
 	private buildActions_() {
-		const { actions, schema } = getActions(this.context_, this.clientPool_, this.activeClient_);
-		actions.set('switchClient', async (options) => {
-			const clientId = options.id ?? this.clientPool_.getClientId(this.clientPool_.randomClient());
-			if (typeof clientId !== 'number') throw new Error(`clientId must be a number. Was ${clientId}`);
-			this.switchClient(this.clientPool_.clientById(clientId));
-			return true;
-		});
-		schema.set('switchClient', ['id']);
+		const { actions, schema, addAction } = getActions(this.context_, this.clientPool_, this.activeClient_);
 
-		actions.set('syncAndCheckState', async () => {
+		addAction('switchClient', async ({ id }) => {
+			if (typeof id !== 'number') throw new Error(`clientId must be a number. Was ${id}`);
+			this.switchClient(this.clientPool_.clientById(id));
+			return true;
+		}, { id: () => this.clientPool_.getClientId(this.clientPool_.randomClient()) });
+
+		addAction('syncAndCheckState', async () => {
 			await this.syncAndCheckState();
 			return true;
-		});
-		schema.set('syncAndCheckState', []);
+		}, {});
 
-		return {actions, schema};
+		return { actions, schema };
 	}
 
 	private validateActions_(specs: ActionSpec[]) {
 		const { schema } = this.buildActions_();
+		const errors = [];
 		for (const spec of specs) {
-			if (!schema.has(spec.key)) throw new Error(`Unknown action: ${spec.key}`)
+			const currentActionLabel = JSON.stringify([spec.key, spec.options]);
+
+			const supportedOptions = schema.get(spec.key);
+			if (!supportedOptions) {
+				errors.push(
+					`In ${currentActionLabel}: Unknown action: ${spec.key}. Available action keys: ${JSON.stringify([...schema.keys()])}`,
+				);
+				continue;
+			}
+
+			const providedOptions = Object.keys(spec.options);
+			for (const option of providedOptions) {
+				if (!supportedOptions.includes(option)) {
+					errors.push(`In ${currentActionLabel}: Unknown option: ${option}. Supported options: ${JSON.stringify(supportedOptions)}`);
+				}
+			}
+		}
+
+		if (errors.length) {
+			throw new Error(`Validation failed:\n- ${errors.join('\n- ')}`);
 		}
 	}
 
@@ -71,7 +89,6 @@ export default class ActionRunner {
 		for (const spec of specs) {
 			const { actions } = this.buildActions_();
 
-			logger.info('Run action:', spec);
 			const action = actions.get(spec.key);
 			if (!action) throw new Error(`Not found: ${spec.key}`);
 
@@ -80,11 +97,12 @@ export default class ActionRunner {
 	}
 
 	public async doRandomAction() {
+		// Avoid running special actions (e.g. "comment")
 		const { actions } = this.buildActions_();
 
 		const actionKeys = [...actions.keys()].filter(key => {
 			// Avoid choosing certain actions:
-			return key !== 'syncAndCheckState' && key !== 'switchClient';
+			return key !== 'syncAndCheckState' && key !== 'switchClient' && key !== 'comment';
 		});
 
 		let result = false;
@@ -98,6 +116,30 @@ export default class ActionRunner {
 		}
 	}
 }
+
+type ActionDefaults = { [key: string]: ()=> unknown|Promise<unknown> };
+type ActionOptions<Defaults extends ActionDefaults> = {
+	[t in keyof Defaults]: Awaited<ReturnType<Defaults[t]>>
+};
+type UnknownActionOptions = Record<string, unknown>;
+type ActionFunction<Options extends UnknownActionOptions>
+	= (options: Options)=> Promise<boolean>;
+
+// Creates an action function, with defaults applied and logging
+const createActionFunction = <Defaults extends ActionDefaults> (
+	key: string, action: ActionFunction<ActionOptions<Defaults>>, defaults: Defaults,
+): ActionFunction<Partial<ActionOptions<Defaults>>> => {
+	return async (options) => {
+		const builtOptions: Record<string, unknown> = {};
+		for (const key in defaults) {
+			const defaultValue = await defaults[key]();
+			builtOptions[key] = options[key] ?? defaultValue;
+		}
+
+		logger.info('Run action:', JSON.stringify([key, options]));
+		return action(builtOptions as ActionOptions<Defaults>);
+	};
+};
 
 const getActions = (context: FuzzContext, clientPool: ClientPool, client: Client) => {
 	const selectOrCreateWriteableFolder = async () => {
@@ -161,26 +203,10 @@ const getActions = (context: FuzzContext, clientPool: ClientPool, client: Client
 		}
 	};
 
-	type ActionDefaults = { [key : string]: ()=>unknown|Promise<unknown> };
-	type ActionValues<Defaults extends ActionDefaults> = {
-		[t in keyof Defaults]: Awaited<ReturnType<Defaults[t]>>
-	};
-	type UnknownActionDefaults = Record<string, ()=>unknown>;
-	type ActionFunction<Defaults extends ActionDefaults>
-		= (options: ActionValues<Defaults>) => Promise<boolean>;
-
 	const schema = new Map<string, string[]>; // Maps from keys to supported options
-	const actions = new Map<string, ActionFunction<UnknownActionDefaults>>();
-	const addAction = <T extends ActionDefaults> (key: string, action: ActionFunction<T>, defaults: T) => {
-		actions.set(key, async (options) => {
-			const builtOptions: Partial<ActionValues<T>> = {};
-			for (const key in defaults) {
-				const defaultValue = await defaults[key]();
-				builtOptions[key] = options[key] ?? defaultValue as any;
-			}
-
-			return action(builtOptions as ActionValues<T>);
-		});
+	const actions = new Map<string, ActionFunction<UnknownActionOptions>>();
+	const addAction = <T extends ActionDefaults> (key: string, action: ActionFunction<ActionOptions<T>>, defaults: T) => {
+		actions.set(key, createActionFunction(key, action, defaults) as ActionFunction<UnknownActionOptions>);
 		schema.set(key, Object.keys(defaults));
 	};
 
@@ -204,7 +230,7 @@ const getActions = (context: FuzzContext, clientPool: ClientPool, client: Client
 		return true;
 	}, {
 		parentId: selectOrCreateWriteableFolder,
-		id: undefinedId
+		id: undefinedId,
 	});
 
 	addAction('renameNote', async ({ id }) => {
@@ -254,7 +280,7 @@ const getActions = (context: FuzzContext, clientPool: ClientPool, client: Client
 		return clientPool.getClientId(other);
 	};
 
-	addAction('shareFolder', async ({ otherClientId, folderId }) => {
+	addAction('shareFolder', async ({ otherClientId, folderId, readOnly }) => {
 		// No suitable client?
 		if (otherClientId === undefined) return false;
 
@@ -270,12 +296,12 @@ const getActions = (context: FuzzContext, clientPool: ClientPool, client: Client
 		});
 		if (!target) return false;
 
-		const readOnly = context.randInt(0, 2) === 1 && context.isJoplinCloud;
 		await client.shareFolder(target.id, other, { readOnly });
 		return true;
 	}, {
 		otherClientId: randomClientOnDifferentAccount,
 		folderId: undefinedId,
+		readOnly: () => context.randInt(0, 2) === 1 && context.isJoplinCloud,
 	});
 
 	addAction('unshareFolder', async ({ folderId }) => {
@@ -397,10 +423,12 @@ const getActions = (context: FuzzContext, clientPool: ClientPool, client: Client
 		return true;
 	}, {});
 
-	addAction('createOrUpdateMany', async () => {
-		await client.createOrUpdateMany(context.randInt(1, 512));
+	addAction('createOrUpdateMany', async ({ count }) => {
+		await client.createOrUpdateMany(count);
 		return true;
-	}, {});
+	}, {
+		count: () => context.randInt(1, 512),
+	});
 
 	addAction('publishNote', async ({ id }) => {
 		const note = id ? noteById(id) : await client.randomNote({
@@ -427,6 +455,11 @@ const getActions = (context: FuzzContext, clientPool: ClientPool, client: Client
 		return true;
 	}, {});
 
-	return { actions, schema };
+	addAction('comment', async ({ message }) => {
+		logger.info(`Action: Comment: ${JSON.stringify(message)}`);
+		return true;
+	}, { message: () => '' });
+
+	return { actions, schema, addAction };
 };
 
