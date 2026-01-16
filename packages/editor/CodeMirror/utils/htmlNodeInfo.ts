@@ -1,12 +1,15 @@
 import { EditorState } from '@codemirror/state';
 import { SyntaxNodeRef } from '@lezer/common';
 
-type HtmlNodeInfo = {
+export interface HtmlNodeInfo {
 	node: SyntaxNodeRef;
+	opening: boolean;
+	closing: boolean;
 	from: number;
 	to: number;
+	tagName: ()=> string;
 	getAttr: (attributeName: string)=> string;
-};
+}
 
 type OnGetNodeContent = (node: SyntaxNodeRef)=> string;
 
@@ -37,13 +40,24 @@ const getHtmlNodeAttr = (node: SyntaxNodeRef, attrName: string, getText: OnGetNo
 // the corresponding Markdown node.
 const htmlNodeInfo = (node: SyntaxNodeRef, state: EditorState, offset = 0): HtmlNodeInfo|null => {
 	// Already an HTML node?
-	if (node.name === 'OpenTag' || node.name === 'CloseTag') {
+	if (node.name === 'OpenTag' || node.name === 'CloseTag' || node.name === 'SelfClosingTag') {
 		const getNodeText = (childNode: SyntaxNodeRef) => state.sliceDoc(childNode.from + offset, childNode.to + offset);
+		const selfClosing = node.name === 'SelfClosingTag';
 
 		return {
 			node,
+			opening: node.name === 'OpenTag' || selfClosing,
+			closing: node.name === 'CloseTag' || selfClosing,
 			from: node.from + offset,
 			to: node.to + offset,
+			tagName: () => {
+				const nodeText = getNodeText(node).trim();
+				const tagNameMatch = nodeText.match(/^<\/?([^>\s]+)/);
+				if (tagNameMatch) {
+					return tagNameMatch[1];
+				}
+				return null;
+			},
 			getAttr: (name: string) => {
 				return getHtmlNodeAttr(node, name, getNodeText);
 			},

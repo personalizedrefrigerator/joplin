@@ -1035,7 +1035,8 @@ packages/editor/CodeMirror/extensions/rendering/replaceBulletLists.js
 packages/editor/CodeMirror/extensions/rendering/replaceCheckboxes.js
 packages/editor/CodeMirror/extensions/rendering/replaceDividers.js
 packages/editor/CodeMirror/extensions/rendering/replaceFormatCharacters.js
-packages/editor/CodeMirror/extensions/rendering/replaceStyledSpans.js
+packages/editor/CodeMirror/extensions/rendering/replaceInlineHtml.test.js
+packages/editor/CodeMirror/extensions/rendering/replaceInlineHtml.js
 packages/editor/CodeMirror/extensions/rendering/types.js
 packages/editor/CodeMirror/extensions/rendering/utils/makeBlockReplaceExtension.js
 packages/editor/CodeMirror/extensions/rendering/utils/makeInlineReplaceExtension.js
