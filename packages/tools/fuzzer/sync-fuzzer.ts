@@ -5,16 +5,16 @@ import Logger, { TargetType } from '@joplin/utils/Logger';
 import Server from './Server';
 import { CleanupTask, FuzzContext } from './types';
 import ClientPool from './ClientPool';
-import retryWithCount from './utils/retryWithCount';
 import SeededRandom from './utils/SeededRandom';
 import { env } from 'process';
 import yargs = require('yargs');
 import openDebugSession from './utils/openDebugSession';
-import { Second } from '@joplin/utils/time';
 import { packagesDir } from './constants';
-import doRandomAction from './doRandomAction';
+import ActionRunner, { ActionSpec } from './ActionRunner';
 import randomString from './utils/randomString';
+import { readFile } from 'fs/promises';
 const { shimInit } = require('@joplin/lib/shim-init-node');
+const JSON5 = require('json5');
 
 const globalLogger = new Logger();
 globalLogger.addTarget(TargetType.Console);
@@ -48,6 +48,7 @@ interface Options {
 	randomStrings: boolean;
 	clientCount: number;
 	keepAccountsOnClose: boolean;
+	setupActions: ActionSpec[];
 
 	serverPath: string;
 	isJoplinCloud: boolean;
@@ -137,11 +138,18 @@ const main = async (options: Options) => {
 			options.clientCount,
 			task => { cleanupTasks.push(task); },
 		);
-		await clientPool.createInitialItemsAndSync();
+
+		const actionRunner = new ActionRunner(fuzzContext, clientPool, clientPool.randomClient());
+		if (options.setupActions.length) {
+			await actionRunner.doActions(options.setupActions);
+		} else {
+			await clientPool.createRandomInitialItemsAndSync();
+		}
 
 		const maxSteps = options.maximumSteps;
 		for (let stepIndex = 1; maxSteps <= 0 || stepIndex <= maxSteps; stepIndex++) {
 			const client = clientPool.randomClient();
+			actionRunner.switchClient(client);
 
 			// Ensure that the client starts up-to-date with the other synced clients.
 			await client.sync();
@@ -152,23 +160,10 @@ const main = async (options: Options) => {
 				if (actionsBeforeFullSync > 1) {
 					logger.info('Sub-step', subStepIndex, '/', actionsBeforeFullSync, '(in step', stepIndex, ')');
 				}
-				await doRandomAction(fuzzContext, client, clientPool);
+				await actionRunner.doRandomAction();
 			}
-			await client.sync();
 
-			// .checkState can fail occasionally due to incomplete
-			// syncs (perhaps because the server is still processing
-			// share-related changes?). Allow this to be retried:
-			await retryWithCount(async () => {
-				await clientPool.checkState();
-			}, {
-				count: 4,
-				delayOnFailure: count => count * Second * 2,
-				onFail: async () => {
-					logger.info('.checkState failed. Syncing all clients...');
-					await clientPool.syncAll();
-				},
-			});
+			await actionRunner.syncAndCheckState();
 		}
 	} catch (error) {
 		logger.error('ERROR', error);
@@ -183,6 +178,41 @@ const main = async (options: Options) => {
 		logger.info('Cleanup complete');
 		process.exit();
 	}
+};
+
+const readSetupFile = async (path: string) => {
+	const setupActionFile = await readFile(path, 'utf-8');
+	const setupData = JSON5.parse(setupActionFile);
+
+	const readNumber = <T extends object> (key: keyof T, parent: T) => {
+		if (typeof parent[key] !== 'number') {
+			throw new Error(`Reading ${path}. Expected key ${String(key)} to be a number. Was ${typeof parent[key]}.`);
+		}
+
+		return parent[key];
+	};
+	const readArray = <T extends object> (key: keyof T, parent: T) => {
+		if (!Array.isArray(parent[key])) {
+			throw new Error(`Reading ${path}. Expected key ${String(key)} to be an array. Was ${typeof parent[key]}.`);
+		}
+
+		return parent[key];
+	};
+
+	const clientCount = readNumber('clientCount', setupData);
+
+	const initialActions: Array<unknown> = readArray('actions', setupData);
+	const actions = initialActions.map((action: unknown, index: number) => {
+		if (!Array.isArray(action) || action.length < 1 || action.length > 2) {
+			throw new Error(`Reading ${path}. Each item in "actions" must be an array of length 1 or 2. (Reading item ${JSON.stringify(action)} at index: ${index})`);
+		}
+
+		const key = action[0];
+		const options = action[1] ?? {};
+		return { key, options } as ActionSpec;
+	});
+
+	return { clientCount, setupActions: actions };
 };
 
 
@@ -239,20 +269,35 @@ void yargs
 						'This also enables testing for some Joplin Cloud-specific features (e.g. read-only shares).',
 					].join(''),
 				},
+				'setup': {
+					type: 'string',
+					default: '',
+					defaultDescription: [
+						'A path: If provided, this should point to a JSON file containing actions to run during startup. ',
+						'The JSON file should contain an array of { key: "actionName", options: {} } objects.',
+					].join(''),
+				},
 			});
 		},
 		async (argv) => {
 			const serverPath = argv.joplinCloud ? argv.joplinCloud : join(packagesDir, 'server');
+
+			let setupData = undefined;
+			if (argv.setup) {
+				setupData = await readSetupFile(argv.setup);
+			}
+
 			await main({
 				seed: argv.seed,
 				maximumSteps: argv.steps,
-				clientCount: argv.clients,
+				clientCount: setupData.clientCount ?? argv.clients,
 				serverPath: serverPath,
 				isJoplinCloud: !!argv.joplinCloud,
 				maximumStepsBetweenSyncs: argv['steps-between-syncs'],
 				keepAccountsOnClose: argv.keepAccounts,
 				enableE2ee: argv.enableE2ee,
 				randomStrings: argv.randomStrings,
+				setupActions: setupData.setupActions ?? [],
 			});
 		},
 	)

@@ -1016,27 +1016,28 @@ export default class ItemModel extends BaseModel<Item> {
 	// can't be replicated so far. On Joplin Cloud it happens on only 0.0008% of
 	// items, so a simple processing task like this one is sufficient for now
 	// but it would be nice to get to the bottom of this bug.
+	//*
 	public processOrphanedItems = async () => {
-		await this.withTransaction(async () => {
-			const orphanedItems: Item[] = await this.db(this.tableName)
-				.select(['items.id', 'items.owner_id'])
-				.leftJoin('user_items', 'user_items.item_id', 'items.id')
-				.whereNull('user_items.user_id');
+		// await this.withTransaction(async () => {
+		// 	const orphanedItems: Item[] = await this.db(this.tableName)
+		// 		.select(['items.id', 'items.owner_id'])
+		// 		.leftJoin('user_items', 'user_items.item_id', 'items.id')
+		// 		.whereNull('user_items.user_id');
 
-			const userIds: string[] = orphanedItems.map(i => i.owner_id);
-			const users = await this.models().user().loadByIds(userIds, { fields: ['id'] });
+		// 	const userIds: string[] = orphanedItems.map(i => i.owner_id);
+		// 	const users = await this.models().user().loadByIds(userIds, { fields: ['id'] });
 
-			for (const orphanedItem of orphanedItems) {
-				if (!users.find(u => u.id)) {
-					// The user may have been deleted since then. In that case, we
-					// simply delete the orphaned item.
-					await this.delete(orphanedItem.id);
-				} else {
-					// Otherwise we add it back to the user's collection
-					await this.models().userItem().add(orphanedItem.owner_id, orphanedItem.id);
-				}
-			}
-		}, 'ItemModel::processOrphanedItems');
+		// 	for (const orphanedItem of orphanedItems) {
+		// 		if (!users.find(u => u.id)) {
+		// 			// The user may have been deleted since then. In that case, we
+		// 			// simply delete the orphaned item.
+		// 			await this.delete(orphanedItem.id);
+		// 		} else {
+		// 			// Otherwise we add it back to the user's collection
+		// 			await this.models().userItem().add(orphanedItem.owner_id, orphanedItem.id);
+		// 		}
+		// 	}
+		// }, 'ItemModel::processOrphanedItems');
 	};
 
 	// This method should be private because items should only be saved using
@@ -1064,6 +1065,16 @@ export default class ItemModel extends BaseModel<Item> {
 			previousItem = {
 				jop_share_id: beforeSaveItem.jop_share_id,
 			};
+
+			// When moving an item between shares, the owner_id needs to be updated. This handles
+			// the case where the original owner is removed from the share.
+			// if (item.jop_share_id !== beforeSaveItem.jop_share_id) {
+			// 	const share = await this.models().share().load(item.jop_share_id, { fields: ['owner_id'] });
+			// 	if (share && share.owner_id) {
+			// 		console.warn('Debug: Changing owner ID to', share.owner_id)
+			// 		// item.owner_id = share.owner_id;
+			// 	}
+			// }
 		}
 
 		return this.withTransaction(async () => {

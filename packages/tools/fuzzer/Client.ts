@@ -99,6 +99,12 @@ interface CreateOrUpdateOptions {
 	quiet?: boolean;
 }
 
+interface CreateRandomItemOptions extends CreateOrUpdateOptions {
+	parentId: ItemId;
+	id?: ItemId;
+	quiet?: boolean;
+}
+
 class Client implements ActionableClient {
 	public readonly email: string;
 
@@ -478,11 +484,11 @@ class Client implements ActionableClient {
 				let parentId = (await this.randomFolder({ includeReadOnly: false }))?.id;
 				const createSubfolder = this.context_.randInt(0, 100) < 10;
 				if (!parentId || createSubfolder) {
-					const folder = await this.createRandomFolder(parentId, { quiet: true });
+					const folder = await this.createRandomFolder({ parentId, quiet: true });
 					parentId = folder.id;
 				}
 
-				await this.createRandomNote(parentId, { quiet: true });
+				await this.createRandomNote({ parentId, quiet: true });
 			},
 			update: async (targetNote: NoteData) => {
 				const keep = targetNote.body.substring(
@@ -520,16 +526,15 @@ class Client implements ActionableClient {
 		bar.complete();
 	}
 
-	public async createRandomFolder(parentId: ItemId, options: CreateOrUpdateOptions) {
+	public async createRandomFolder({ quiet, parentId, id }: CreateRandomItemOptions) {
 		const titleLength = this.context_.randInt(1, 128);
-		const folderId = uuid.create();
 		const folder = {
 			parentId: parentId,
-			id: folderId,
+			id: id ?? uuid.create(),
 			title: this.context_.randomString(titleLength).replace(/\n/g, ' '),
 		};
 
-		await this.createFolder(folder, options);
+		await this.createFolder(folder, { quiet });
 
 		return folder;
 	}
@@ -596,7 +601,7 @@ class Client implements ActionableClient {
 		}
 	}
 
-	public async createRandomNote(parentId: string, { quiet = false }: CreateOrUpdateOptions = { }) {
+	public async createRandomNote({ parentId, id, quiet = false }: CreateRandomItemOptions) {
 		const titleLength = this.context_.randInt(0, 256);
 		const bodyLength = this.context_.randInt(0, 2000);
 		await this.createNote({
@@ -604,7 +609,7 @@ class Client implements ActionableClient {
 			parentId,
 			title: this.context_.randomString(titleLength),
 			body: this.context_.randomString(bodyLength),
-			id: uuid.create(),
+			id: id ?? uuid.create(),
 		}, { quiet });
 	}
 
@@ -801,6 +806,10 @@ class Client implements ActionableClient {
 
 	public async randomNote(options: RandomNoteOptions) {
 		return this.tracker_.randomNote(options);
+	}
+
+	public itemById(itemId: ItemId) {
+		return this.tracker_.itemById(itemId);
 	}
 
 	public async checkState() {

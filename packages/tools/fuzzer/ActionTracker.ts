@@ -600,6 +600,13 @@ class ActionTracker {
 				const noteIndex = this.context_.randInt(0, notes.length);
 				return notes.length ? notes[noteIndex] : null;
 			},
+			// Note: Does not verify that the current client has access to the item
+			itemById: (id: ItemId) => {
+				const item = this.idToItem_.get(id);
+
+				if (!item) throw new Error(`No item found with ID ${id}`);
+				return item;
+			},
 		};
 		return tracker;
 	}
