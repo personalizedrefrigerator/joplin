@@ -17,6 +17,7 @@ describe('replaceInlineHtml', () => {
 		{ markdown: '<sup>Test</sup>', expectedTagsQuery: 'sup' },
 		{ markdown: '<strike>Test</strike>', expectedTagsQuery: 'strike' },
 		{ markdown: 'Test: <span style="color: red;">Test</span>', expectedTagsQuery: 'span[style]' },
+		{ markdown: 'Test: <span style="color: rgb(123, 0, 0);">Test</span>', expectedTagsQuery: 'span[style]' },
 	])('should render inline HTML (case %#)', async ({ markdown, expectedTagsQuery }) => {
 		// Add additional newlines: Ensure that the cursor isn't initially on the same line as the content to be rendered:
 		const editor = await createEditor(`\n\n${markdown}\n\n`);

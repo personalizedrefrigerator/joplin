@@ -79,7 +79,7 @@ export default [
 	createHtmlReplacementExtension('strike', () => Decoration.mark({ tagName: 'strike' })),
 	createHtmlReplacementExtension('span', (info) => {
 		const styles = info.getAttr('style') ?? '';
-		const colorMatch = styles.match(/color:\s*(#?[a-z0-9A-Z]+)(;|$)/);
+		const colorMatch = styles.match(/color:\s*(#?[a-z0-9A-Z]+|rgba?\([0-9, ]+\))(;|$)/);
 
 		return Decoration.mark({
 			attributes: {
