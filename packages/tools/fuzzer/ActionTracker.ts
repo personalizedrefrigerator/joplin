@@ -428,6 +428,8 @@ class ActionTracker {
 				return Promise.resolve();
 			},
 			shareFolder: (id: ItemId, shareWith: ClientInfo, options: ShareOptions) => {
+				assert.notEqual(client.email, shareWith.email, 'Cannot share a folder with the same client');
+
 				const itemToShare = this.idToItem_.get(id);
 				assertIsFolder(itemToShare);
 

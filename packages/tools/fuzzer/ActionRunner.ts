@@ -304,7 +304,7 @@ const getActions = (context: FuzzContext, clientPool: ClientPool, client: Client
 		readOnly: () => context.randInt(0, 2) === 1 && context.isJoplinCloud,
 	});
 
-	addAction('unshareFolder', async ({ folderId }) => {
+	addAction('unshareFolder', async ({ folderId, clientId }) => {
 		const target = await folderByIdOrRandom(folderId, {
 			filter: candidate => {
 				return candidate.isRootSharedItem && candidate.ownedByEmail === client.email;
@@ -313,18 +313,37 @@ const getActions = (context: FuzzContext, clientPool: ClientPool, client: Client
 		});
 		if (!target) return false;
 
-		const recipientIndex = context.randInt(-1, target.shareRecipients.length);
-		if (recipientIndex === -1) { // Completely remove the share
+		const recipientEmail = () => {
+			if (clientId !== undefined) {
+				if (clientId === 'all') {
+					return 'all';
+				}
+
+				const email = clientPool.clientById(clientId).email;
+				assert.ok(target.shareRecipients.includes(email), `Not shared with ${email}.`);
+				return email;
+			}
+
+			const recipientIndex = context.randInt(-1, target.shareRecipients.length);
+			if (recipientIndex === -1) return 'all';
+
+			const recipientEmail = target.shareRecipients[recipientIndex];
+			return recipientEmail;
+		};
+
+
+		const email = recipientEmail();
+		if (email === 'all') { // Completely remove the share
 			await client.deleteAssociatedShare(target.id);
 		} else {
-			const recipientEmail = target.shareRecipients[recipientIndex];
-			const recipient = clientPool.clientsByEmail(recipientEmail)[0];
+			const recipient = clientPool.clientsByEmail(email)[0];
 			assert.ok(recipient, `invalid state -- recipient ${recipientEmail} should exist`);
 			await client.removeFromShare(target.id, recipient);
 		}
 		return true;
 	}, {
 		folderId: undefinedId,
+		clientId: (): number|'all'|undefined => undefined,
 	});
 
 	addAction('deleteFolder', async ({ folderId }) => {
