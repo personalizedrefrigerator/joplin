@@ -314,7 +314,11 @@ export default class JoplinDatabase extends Database {
 			throw new Error(`\`notes_fts\` (${countFieldsNotesFts} fields) must have the same number of fields as \`items_fts\` (${countFieldsItemsFts} fields) for the search engine BM25 algorithm to work`);
 		}
 
-		const tableRows = await this.selectAll('SELECT name FROM sqlite_master WHERE type=\'table\'');
+		interface TableRow {
+			name: string;
+		}
+
+		const tableRows: TableRow[] = await this.selectAll('SELECT name FROM sqlite_master WHERE type=\'table\'');
 
 		for (let i = 0; i < tableRows.length; i++) {
 			let pragmas: Row[] = [];
@@ -322,7 +326,7 @@ export default class JoplinDatabase extends Database {
 			try {
 				if (tableName === 'android_metadata') continue;
 				if (tableName === 'table_fields') continue;
-				if (tableName === 'sqlite_sequence') continue;
+				if (tableName.startsWith('sqlite_')) continue;
 				if (tableName.indexOf('notes_fts') === 0) continue;
 				if (tableName.indexOf('items_fts') === 0) continue;
 				if (tableName === 'notes_spellfix') continue;
