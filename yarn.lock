@@ -13638,13 +13638,13 @@ __metadata:
 
 "@react-native-vector-icons/fontawesome5@patch:@react-native-vector-icons/fontawesome5@npm%3A12.3.0#~/.yarn/patches/@react-native-vector-icons-fontawesome5-npm-12.3.0-a1ca46610f.patch":
   version: 12.3.0
-  resolution: "@react-native-vector-icons/fontawesome5@patch:@react-native-vector-icons/fontawesome5@npm%3A12.3.0#~/.yarn/patches/@react-native-vector-icons-fontawesome5-npm-12.3.0-a1ca46610f.patch::version=12.3.0&hash=830d9c"
+  resolution: "@react-native-vector-icons/fontawesome5@patch:@react-native-vector-icons/fontawesome5@npm%3A12.3.0#~/.yarn/patches/@react-native-vector-icons-fontawesome5-npm-12.3.0-a1ca46610f.patch::version=12.3.0&hash=8ed269"
   dependencies:
     "@react-native-vector-icons/common": "npm:^12.4.0"
   peerDependencies:
     react: "*"
     react-native: "*"
-  checksum: 10/db963e57b9ff34ec97299578b164946f380b7497857eb7d7d52d31ba948e2712fadae117ac1f2d6603862a9105409abc125cf23313a25f9379b0a62a488a66c2
+  checksum: 10/1bfe068fdf6b9edf4608d02acf2c329fe186bbee70e7949a781f56024f386d192ac00967463afc099bc43cca162e3711a884cf7dad01e40a50cea0b612f72f5e
   languageName: node
   linkType: hard
 
