@@ -1,5 +1,9 @@
 # Joplin Android Changelog
 
+## [android-v3.5.9](https://github.com/laurent22/joplin/releases/tag/android-v3.5.9) (Pre-release) - 2026-01-19T16:24:19Z
+
+- Improved: Remove unnecessary READ_PHONE_STATE permission (#14157 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+
 ## [android-v3.5.8](https://github.com/laurent22/joplin/releases/tag/android-v3.5.8) (Pre-release) - 2026-01-10T10:08:46Z
 
 - Fixed: Fixed keyboard input issue in note title (#14070) (#13544 by [@mrjo118](https://github.com/mrjo118))
