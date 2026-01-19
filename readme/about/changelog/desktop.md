@@ -1,5 +1,13 @@
 # Joplin Desktop Changelog
 
+## [v3.6.2](https://github.com/laurent22/joplin/releases/tag/v3.6.2) (Pre-release) - 2026-01-18T20:10:43Z
+
+- Improved: Accessibility: Include accessibility information in exported PDFs ([#14111](https://github.com/laurent22/joplin/issues/14111)) ([#14086](https://github.com/laurent22/joplin/issues/14086) by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Improved: Editor: Inline rendering: Render inline HTML (colorized text, superscript, subscript, strikethrough) ([#14133](https://github.com/laurent22/joplin/issues/14133) by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: .onepkg import: Fix Unicode issues, support Linux and MacOS ([#14094](https://github.com/laurent22/joplin/issues/14094)) ([#14084](https://github.com/laurent22/joplin/issues/14084) by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Application crashes when profile database has been analyzed ([#14144](https://github.com/laurent22/joplin/issues/14144))
+- Fixed: Built-in plugins: Upgrade Freehand Drawing to v4.3.0 ([#14123](https://github.com/laurent22/joplin/issues/14123)) ([#14092](https://github.com/laurent22/joplin/issues/14092) by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+
 ## [v3.6.1](https://github.com/laurent22/joplin/releases/tag/v3.6.1) (Pre-release) - 2026-01-17T14:17:29Z
 
 - New: Add more error information when the profile is corrupted ([f075b56](https://github.com/laurent22/joplin/commit/f075b56))
