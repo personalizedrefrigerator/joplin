@@ -81,16 +81,11 @@ describe('ShareManager', () => {
 		let shares = [makeMockShareInvitation('UserNameHere', 'usernamehere@example.com', ShareUserStatus.Waiting)];
 		const onUpdateShareItems = jest.fn();
 		mockShareService({
-			async onExec(method, path, _query, body: Record<string, unknown>) {
-				if (method === 'GET' && path === 'api/share_users') {
-					return { items: shares };
-				}
-				if (method === 'PATCH' && path.startsWith('api/share_users/')) {
-					onUpdateShareItems(body.status as ShareUserStatus);
-					return null;
-				}
-				return null;
+			patchShareInvitations: (_shareUserId, body) => {
+				onUpdateShareItems(body.status as ShareUserStatus);
+				return Promise.resolve();
 			},
+			getShareInvitations: ()=> Promise.resolve({ items: shares }),
 		}, ShareService.instance(), store);
 
 		render(<ShareManagerWrapper shareInvitations={shares} store={store}/>);

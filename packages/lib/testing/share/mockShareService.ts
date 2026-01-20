@@ -4,6 +4,7 @@ import ShareService from '../../services/share/ShareService';
 import { encryptionService } from '../test-utils';
 import JoplinServerApi, { ExecOptions } from '../../JoplinServerApi';
 import { ShareInvitation, StateShare, StateShareUser } from '../../services/share/reducer';
+import { PublicPrivateKeyPair } from '../../services/e2ee/ppk/ppk';
 
 const testReducer = (state = defaultState, action: unknown) => {
 	return reducer(state, action);
@@ -20,11 +21,7 @@ interface ShareUsersResponse {
 }
 
 type Json = Record<string, unknown>;
-type OnShareGetListener = (query: Json)=> Promise<ShareStateResponse>;
-type OnSharePostListener = (query: Json)=> Promise<{ id: string }>;
-type OnInvitationGetListener = (query: Json)=> Promise<ShareInvitationResponse>;
-type OnShareUsersGetListener = (shareId: string)=> Promise<ShareUsersResponse>;
-type OnShareUsersPostListener = (shareId: string, body: Json)=> Promise<void>;
+type ShareRecord = { id: string };
 
 type OnApiExecListener = (
 	method: string,
@@ -37,56 +34,73 @@ type OnApiExecListener = (
 )=> Promise<unknown>;
 
 export type ApiMock = {
-	getShares: OnShareGetListener;
-	postShares: OnSharePostListener;
-	getShareInvitations: OnInvitationGetListener;
-	getShareUsers?: OnShareUsersGetListener;
-	postShareUsers?: OnShareUsersPostListener;
+	getShares?: (query: Json)=> Promise<ShareStateResponse>;
+	postShares?: (body: Json)=> Promise<ShareRecord>;
+	getShareInvitations?: (query: Json)=> Promise<ShareInvitationResponse>;
+	patchShareInvitations?: (shareUserId: string, body: Json)=> Promise<void>;
+	getShareUsers?: (shareId: string)=> Promise<ShareUsersResponse>;
+	postShareUsers?: (shareId: string, body: Json)=> Promise<void>;
+	deleteShare?: (shareId: string)=> Promise<void>;
+	patchShare?: (shareId: string, body: Json)=> Promise<void>;
+	getUserPublicKey?: (userId: string)=> Promise<PublicPrivateKeyPair>;
 	onUnhandled?: OnApiExecListener;
 
-	onExec?: undefined;
-}|{
-	onExec: OnApiExecListener;
-
-	onUnhandled?: undefined;
-	getShareInvitations?: undefined;
-	getShares?: undefined;
-	postShares?: undefined;
-	getShareUsers?: undefined;
-	postShareUsers?: undefined;
+	onRawRequest?: (route: string, query: Json, body: Json)=> void;
 };
 
 // Initializes a share service with mocks
-const mockShareService = (apiCallHandler: ApiMock, service?: ShareService, store?: Store<State>) => {
+const mockShareService = (api: ApiMock, service?: ShareService, store?: Store<State>) => {
 	service ??= new ShareService();
-	const api: Partial<JoplinServerApi> = {
+
+	const serverApi: Partial<JoplinServerApi> = {
 		exec: (method, path = '', query = null, body = null, headers = null, options = null) => {
-			if (apiCallHandler.onExec) {
-				return apiCallHandler.onExec(method, path, query, body, headers, options);
+			const route = `${method} ${path}`;
+			api.onRawRequest?.(route, query, body);
+
+			if (route === 'GET api/shares') {
+				return api.getShares(query);
+			} else if (route === 'POST api/shares') {
+				return api.postShares(body);
+			} else if (route === 'GET api/share_users') {
+				return api.getShareInvitations(query);
+			} else if (route.startsWith('PATCH api/share_users/')) {
+				const shareUserId = route.substring('PATCH api/share_users/'.length);
+				return api.patchShareInvitations(shareUserId, body);
 			}
-			if (path === 'api/shares') {
-				if (method === 'GET') {
-					return apiCallHandler.getShares(query);
-				} else if (method === 'POST') {
-					return apiCallHandler.postShares(query);
+
+			if (path.startsWith('api/shares/')) {
+				const id = path.replace(/^api\/shares\//, '');
+
+				if (method === 'DELETE') {
+					return api.deleteShare(id);
 				}
-			} else if (method === 'GET' && path === 'api/share_users') {
-				return apiCallHandler.getShareInvitations(query);
+
+				if (method === 'PATCH') {
+					return api.patchShare(id, body);
+				}
 			}
 
 			const shareUsersMatch = path.match(/^api\/shares\/([^/]+)\/users$/);
-			const shareId = shareUsersMatch?.[1];
-			if (shareId) {
-				if (method === 'GET' && apiCallHandler.getShareUsers) {
-					return apiCallHandler.getShareUsers(shareId);
+			if (shareUsersMatch) {
+				const shareId = shareUsersMatch[1];
+				if (method === 'GET') {
+					return api.getShareUsers(shareId);
 				}
-				if (method === 'POST' && apiCallHandler.postShareUsers) {
-					return apiCallHandler.postShareUsers(shareId, body);
+				if (method === 'POST') {
+					return api.postShareUsers(shareId, body);
 				}
 			}
 
-			if (apiCallHandler.onUnhandled) {
-				return apiCallHandler.onUnhandled(method, path, query, body, headers, options);
+			const userPublicKeyMatch = path.match(/^api\/users\/([^/]+)\/public_key$/);
+			if (userPublicKeyMatch) {
+				const email = decodeURIComponent(userPublicKeyMatch[1]);
+				if (method === 'GET') {
+					return api.getUserPublicKey(email);
+				}
+			}
+
+			if (api.onUnhandled) {
+				return api.onUnhandled(method, path, query, body, headers, options);
 			}
 			return null;
 		},
@@ -95,7 +109,7 @@ const mockShareService = (apiCallHandler: ApiMock, service?: ShareService, store
 		},
 	};
 	store ??= createStore(testReducer);
-	service.initialize(store, encryptionService(), api as JoplinServerApi);
+	service.initialize(store, encryptionService(), serverApi as JoplinServerApi);
 	return service;
 };
 export default mockShareService;

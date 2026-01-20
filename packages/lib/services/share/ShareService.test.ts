@@ -1,6 +1,6 @@
 import Note from '../../models/Note';
 import { createFolderTree, encryptionService, loadEncryptionMasterKey, msleep, resourceService, setupDatabaseAndSynchronizer, simulateReadOnlyShareEnv, supportDir, switchClient, synchronizerStart } from '../../testing/test-utils';
-import ShareService, { ApiShare } from './ShareService';
+import ShareService from './ShareService';
 import { NoteEntity, ResourceEntity } from '../database/types';
 import Folder from '../../models/Folder';
 import { localSyncInfo, setEncryptionEnabled, setPpk } from '../synchronizer/syncInfoUtils';
@@ -18,6 +18,7 @@ import Setting from '../../models/Setting';
 import { ModelType } from '../../BaseModel';
 import { remoteNotesFoldersResources } from '../../testing/test-utils-synchronizer';
 import mockShareService from '../../testing/share/mockShareService';
+import mockShareServiceForFolderSharing from '../../testing/share/mockShareServiceForFolderSharing';
 
 const testImagePath = `${supportDir}/photo.jpg`;
 
@@ -35,8 +36,8 @@ const mockServiceForNoteSharing = () => {
 describe('ShareService', () => {
 
 	beforeEach(async () => {
-		await setupDatabaseAndSynchronizer(1);
-		await switchClient(1);
+		await setupDatabaseAndSynchronizer(0);
+		await switchClient(0);
 	});
 
 	it('should not change the note user timestamps when sharing or unsharing', async () => {
@@ -110,56 +111,6 @@ describe('ShareService', () => {
 		}
 	});
 
-	// eslint-disable-next-line @typescript-eslint/ban-types -- Old code before rule was applied
-	function testShareFolderService(extraExecHandlers: Record<string, Function> = {}) {
-		let nextShareId = 1;
-		let shares: ApiShare[] = [];
-		const shareByFolderId = (folderId: string) => {
-			return shares.find(share => share.folder_id === folderId);
-		};
-
-		return mockShareService({
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-			onExec: async (method: string, path: string, query: Record<string, any>, body: any) => {
-				if (extraExecHandlers[`${method} ${path}`]) return extraExecHandlers[`${method} ${path}`](query, body);
-
-				if (method === 'GET' && path === 'api/shares') {
-					return {
-						items: [...shares],
-					};
-				}
-
-				if (method === 'POST' && path === 'api/shares') {
-					// Return the existing share, if it exists. This is to match the behavior
-					// of Joplin Server.
-					const existingShare = shareByFolderId(body.folder_id);
-					if (existingShare) {
-						return existingShare;
-					}
-
-					// Use a predictable ID:
-					const id = `share_${nextShareId++}`;
-
-					const share = {
-						id,
-						master_key_id: body.master_key_id,
-						folder_id: body.folder_id,
-					};
-					shares.push(share);
-					return share;
-				}
-
-				if (method === 'DELETE' && path.startsWith('api/shares/')) {
-					const id = path.replace(/^api\/shares\//, '');
-					shares = shares.filter(share => share.id !== id);
-					return;
-				}
-
-				throw new Error(`Unhandled: ${method} ${path}`);
-			},
-		});
-	}
-
 	const prepareNoteFolderResource = async () => {
 		const folder = await Folder.save({});
 		let note = await Note.save({ parent_id: folder.id });
@@ -184,7 +135,11 @@ describe('ShareService', () => {
 	}
 
 	it('should share a folder', async () => {
-		await testShareFolder(testShareFolderService());
+		await testShareFolder(mockShareServiceForFolderSharing({
+			clientInfo: [
+				{ email: 'test@localhost' },
+			],
+		}).service);
 	});
 
 	it('should share a folder - E2EE', async () => {
@@ -193,7 +148,9 @@ describe('ShareService', () => {
 		const ppk = await generateKeyPair(encryptionService(), '111111');
 		setPpk(ppk);
 
-		const shareService = testShareFolderService();
+		const { service: shareService } = mockShareServiceForFolderSharing({
+			clientInfo: [{ email: 'test@localhost' }],
+		});
 
 		expect(await MasterKey.count()).toBe(1);
 
@@ -256,15 +213,16 @@ describe('ShareService', () => {
 		let uploadedEmail = '';
 		let uploadedMasterKey: MasterKeyEntity = null;
 
-		const service = testShareFolderService({
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-			'GET api/users/toto%40example.com/public_key': async (_query: Record<string, any>, _body: any) => {
-				return recipientPpk;
-			},
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-			'POST api/shares/share_1/users': async (_query: Record<string, any>, body: any) => {
-				uploadedEmail = body.email;
-				uploadedMasterKey = JSON.parse(body.master_key);
+		const { service } = mockShareServiceForFolderSharing({
+			clientInfo: [
+				{ email: 'test@localhost', ppk },
+				{ email: 'toto@example.com', ppk: recipientPpk },
+			],
+			onRawRequest: (path, _query, body) => {
+				if (path === 'POST api/shares/share_1/users') {
+					uploadedEmail = body.email as string;
+					uploadedMasterKey = JSON.parse(body.master_key as string);
+				}
 			},
 		});
 
@@ -286,7 +244,9 @@ describe('ShareService', () => {
 		expect(localSyncInfo().e2ee).toBe(true);
 		expect(localSyncInfo().masterKeys).toHaveLength(1);
 
-		const service = testShareFolderService();
+		const { service } = mockShareServiceForFolderSharing({
+			clientInfo: [],
+		});
 		const { share, folder } = await testShareFolder(service);
 		// Should have created a new master key for the share
 		expect(localSyncInfo().masterKeys).toHaveLength(2);
@@ -307,7 +267,9 @@ describe('ShareService', () => {
 		const ppk = await generateKeyPair(encryptionService(), '111111');
 		setPpk(ppk);
 
-		const service = testShareFolderService();
+		const { service } = mockShareServiceForFolderSharing({
+			clientInfo: [],
+		});
 		const { share, folder } = await testShareFolder(service);
 		await service.refreshShares();
 		await service.unshareFolder(folder.id);
@@ -323,14 +285,8 @@ describe('ShareService', () => {
 		// in tests.
 		const previousLogLevel = Logger.globalLogger.setLevel(LogLevel.Error);
 
-		const service = testShareFolderService({
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-			'GET api/shares': async (_query: Record<string, any>, _body: any): Promise<any> => {
-				return {
-					items: [],
-					has_more: false,
-				};
-			},
+		const { service } = mockShareServiceForFolderSharing({
+			clientInfo: [],
 		});
 
 		const folder = await Folder.save({ share_id: 'nolongershared' });
@@ -361,8 +317,10 @@ describe('ShareService', () => {
 
 		const cleanup = simulateReadOnlyShareEnv('123456789');
 
-		const shareService = testShareFolderService();
-		await shareService.leaveSharedFolder(folder1.id, 'somethingrandom');
+		const { service } = mockShareServiceForFolderSharing({
+			clientInfo: [],
+		});
+		await service.leaveSharedFolder(folder1.id, 'somethingrandom');
 
 		expect(await Folder.count()).toBe(0);
 		expect(await Note.count()).toBe(0);

@@ -1678,6 +1678,7 @@ packages/lib/string-utils.js
 packages/lib/testing/plugins/createTestPlugin.js
 packages/lib/testing/share/makeMockShareInvitation.js
 packages/lib/testing/share/mockShareService.js
+packages/lib/testing/share/mockShareServiceForFolderSharing.js
 packages/lib/testing/syncTargetUtils.js
 packages/lib/testing/test-utils-synchronizer.js
 packages/lib/testing/test-utils.js
