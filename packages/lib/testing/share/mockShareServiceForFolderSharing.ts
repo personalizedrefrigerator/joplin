@@ -1,6 +1,7 @@
 import { PublicPrivateKeyPair } from '../../services/e2ee/ppk/ppk';
-import { ShareUserStatus } from '../../services/share/reducer';
+import { ShareInvitation, ShareUserStatus } from '../../services/share/reducer';
 import { ApiShare } from '../../services/share/ShareService';
+import uuid from '../../uuid';
 import { currentClientId } from '../test-utils';
 import mockShareService, { ApiMock } from './mockShareService';
 import { strict as assert } from 'node:assert';
@@ -8,11 +9,34 @@ import { strict as assert } from 'node:assert';
 class ShareRecord {
 	private participants_: number[] = [];
 	public constructor(public readonly state: ApiShare) {}
-	public addUser(userId: number) {
-		this.participants_.push(userId);
+
+	public withParticipant(userId: number) {
+		const result = new ShareRecord(this.state);
+		result.participants_ = [...this.participants_, userId];
+		return result;
 	}
+
 	public get participants() {
 		return this.participants_;
+	}
+
+	public get owner() {
+		return this.participants_[0];
+	}
+}
+
+class InvitationRecord {
+	public constructor(
+		public readonly state: ShareInvitation,
+		public readonly fromEmail: string,
+		public readonly toEmail: string,
+	) {}
+
+	public withStatus(status: ShareUserStatus) {
+		return new InvitationRecord({
+			...this.state,
+			status,
+		}, this.fromEmail, this.toEmail);
 	}
 }
 
@@ -49,6 +73,7 @@ const mockShareServiceForFolderSharing = (options: Options) => {
 
 	let nextShareId = 1;
 	let shares: ShareRecord[] = [];
+	let shareInvitations: InvitationRecord[] = [];
 
 	const service = mockShareService({
 		getShares(_query) {
@@ -77,8 +102,7 @@ const mockShareServiceForFolderSharing = (options: Options) => {
 				id,
 				master_key_id: masterKeyId,
 				folder_id: folderId,
-			});
-			share.addUser(currentClientId());
+			}).withParticipant(currentClientId());
 			shares.push(share);
 
 			return Promise.resolve(share.state);
@@ -90,18 +114,49 @@ const mockShareServiceForFolderSharing = (options: Options) => {
 		postShareUsers(shareId, body) {
 			const share = shares.find(share => share.state.id === shareId);
 			assert.ok(typeof body.email === 'string');
-			share.addUser(emailToClientId(body.email));
-			return Promise.resolve();
+
+			const clientId = emailToClientId(body.email);
+			shares = shares.map(share => {
+				if (share.state.id === shareId) {
+					return share.withParticipant(clientId);
+				} else {
+					return share;
+				}
+			});
+
+			const invitation = new InvitationRecord({
+				can_read: 1,
+				can_write: 1,
+				id: uuid.create(),
+				master_key: body.master_key,
+				share: {
+					type: 3, // Folder
+					note_id: null,
+					...share.state,
+				},
+				status: ShareUserStatus.Waiting,
+			}, clientIdToEmail(share.owner), body.email);
+			shareInvitations.push(invitation);
+
+			return Promise.resolve({
+				id: 'mock',
+				share_id: share.state.id,
+				user_id: `id-${clientId}`,
+				status: ShareUserStatus.Waiting,
+				masterKey: '',
+			});
 		},
 		getShareUsers(shareId) {
 			const share = shares.find(share => share.state.id === shareId);
 			const participants = share.participants.map(clientId => {
+				const email = clientIdToEmail(clientId);
+				const invitation = shareInvitations.find(invitation => invitation.toEmail === email);
 				return {
 					id: `user-${clientId}`,
-					status: ShareUserStatus.Accepted,
+					status: invitation?.state?.status,
 					user: {
 						id: `user-${clientId}`,
-						email: clientIdToEmail(clientId),
+						email,
 					},
 					can_read: 1,
 					can_write: 1,
@@ -117,10 +172,23 @@ const mockShareServiceForFolderSharing = (options: Options) => {
 			return Promise.resolve(client.ppk);
 		},
 		getShareInvitations(_query) {
-			return Promise.resolve({ items: [] });
+			const clientEmail = clientIdToEmail(currentClientId());
+			const items = shareInvitations
+				.filter(invitation => invitation.toEmail === clientEmail)
+				.map(item => item.state);
+
+			return Promise.resolve({ items });
 		},
-		patchShareInvitations(_query) {
-			throw new Error('Not implemented: Patch share invitations');
+		patchShareInvitations(invitationId, body) {
+			const status = body.status as ShareUserStatus;
+			shareInvitations = shareInvitations.map(invitation => {
+				if (invitation.state.id === invitationId) {
+					return invitation.withStatus(status);
+				} else {
+					return invitation;
+				}
+			});
+			return Promise.resolve();
 		},
 		onRawRequest: options.onRawRequest,
 	});

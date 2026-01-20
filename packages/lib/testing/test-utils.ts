@@ -49,7 +49,7 @@ import ResourceFetcher from '../services/ResourceFetcher';
 const WebDavApi = require('../WebDavApi');
 const DropboxApi = require('../DropboxApi');
 import JoplinServerApi, { Session } from '../JoplinServerApi';
-import { FolderEntity, ResourceEntity } from '../services/database/types';
+import { FolderEntity, NoteEntity, ResourceEntity } from '../services/database/types';
 import { credentialFile, readCredentialFile } from '../utils/credentialFiles';
 import SyncTargetJoplinCloud from '../SyncTargetJoplinCloud';
 import KeychainService from '../services/keychain/KeychainService';
@@ -400,19 +400,26 @@ async function clearSettingFile(id: number) {
 	await fs.remove(Setting.settingFilePath);
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-export async function createFolderTree(parentId: string, tree: any[], num = 0): Promise<FolderEntity> {
+
+interface FolderTreeFolder extends FolderEntity {
+	children: FolderTreeItem[];
+}
+type FolderTreeItem = (NoteEntity & { children?: undefined })|FolderTreeFolder;
+
+export async function createFolderTree(parentId: string, tree: FolderTreeItem[], num = 0): Promise<FolderEntity> {
 	let rootFolder: FolderEntity = null;
 
-	for (const item of tree) {
-		const isFolder = !!item.children;
+	const isFolder = (item: FolderTreeItem): item is FolderTreeFolder => {
+		return !!item.children;
+	};
 
+	for (const item of tree) {
 		num++;
 
 		const data = { ...item };
 		delete data.children;
 
-		if (isFolder) {
+		if (isFolder(item)) {
 			const folder = await Folder.save({ title: `Folder ${num}`, parent_id: parentId, ...data });
 			if (!rootFolder) rootFolder = folder;
 			if (item.children.length) await createFolderTree(folder.id, item.children, num);

@@ -33,13 +33,19 @@ type OnApiExecListener = (
 	options: ExecOptions
 )=> Promise<unknown>;
 
+interface PostShareUserResponse {
+	id: string;
+	share_id: string;
+	user_id: string;
+}
+
 export type ApiMock = {
 	getShares?: (query: Json)=> Promise<ShareStateResponse>;
 	postShares?: (body: Json)=> Promise<ShareRecord>;
 	getShareInvitations?: (query: Json)=> Promise<ShareInvitationResponse>;
 	patchShareInvitations?: (shareUserId: string, body: Json)=> Promise<void>;
 	getShareUsers?: (shareId: string)=> Promise<ShareUsersResponse>;
-	postShareUsers?: (shareId: string, body: Json)=> Promise<void>;
+	postShareUsers?: (shareId: string, body: Json)=> Promise<PostShareUserResponse>;
 	deleteShare?: (shareId: string)=> Promise<void>;
 	patchShare?: (shareId: string, body: Json)=> Promise<void>;
 	getUserPublicKey?: (userId: string)=> Promise<PublicPrivateKeyPair>;
