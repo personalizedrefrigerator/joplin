@@ -1670,7 +1670,6 @@ packages/lib/services/synchronizer/Synchronizer.sharing.test.js
 packages/lib/services/synchronizer/Synchronizer.tags.test.js
 packages/lib/services/synchronizer/Synchronizer.tools.test.js
 packages/lib/services/synchronizer/gui/useSyncTargetUpgrade.js
-packages/lib/services/synchronizer/handleConflictAction.test.js
 packages/lib/services/synchronizer/migrations/1.js
 packages/lib/services/synchronizer/migrations/2.js
 packages/lib/services/synchronizer/migrations/3.js
@@ -1681,6 +1680,7 @@ packages/lib/services/synchronizer/synchronizer_LockHandler.test.js
 packages/lib/services/synchronizer/synchronizer_MigrationHandler.test.js
 packages/lib/services/synchronizer/tools.js
 packages/lib/services/synchronizer/utils/checkDisabledSyncItemsNotification.js
+packages/lib/services/synchronizer/utils/handleConflictAction.test.js
 packages/lib/services/synchronizer/utils/handleConflictAction.js
 packages/lib/services/synchronizer/utils/handleSyncStartupOperation.js
 packages/lib/services/synchronizer/utils/resourceRemotePath.js
@@ -1851,6 +1851,7 @@ packages/tools/fuzzer/ClientPool.js
 packages/tools/fuzzer/Server.js
 packages/tools/fuzzer/constants.js
 packages/tools/fuzzer/model/FolderRecord.js
+packages/tools/fuzzer/model/ResourceRecord.js
 packages/tools/fuzzer/sync-fuzzer.js
 packages/tools/fuzzer/types.js
 packages/tools/fuzzer/utils/ProgressBar.js

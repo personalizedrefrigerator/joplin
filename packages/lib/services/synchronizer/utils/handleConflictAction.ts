@@ -6,11 +6,21 @@ import Note from '../../../models/Note';
 import Resource from '../../../models/Resource';
 import time from '../../../time';
 import { SyncAction, conflictActions } from './types';
+import NoteResource from '../../../models/NoteResource';
+import { BaseItemEntity, ResourceEntity } from '../../database/types';
 
 const logger = Logger.create('handleConflictAction');
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-export default async (action: SyncAction, ItemClass: typeof BaseItem, remoteExists: boolean, remoteContent: any, local: any, syncTargetId: number, itemIsReadOnly: boolean, dispatch: Dispatch) => {
+const handleConflictAction = async (
+	action: SyncAction,
+	ItemClass: typeof BaseItem,
+	remoteExists: boolean,
+	remoteContent: BaseItemEntity|null,
+	local: BaseItemEntity|null,
+	syncTargetId: number,
+	itemIsReadOnly: boolean,
+	dispatch: Dispatch,
+) => {
 	if (!conflictActions.includes(action)) return;
 
 	logger.debug(`Handling conflict: ${action}`);
@@ -60,8 +70,57 @@ export default async (action: SyncAction, ItemClass: typeof BaseItem, remoteExis
 		if (mustHandleConflict) {
 			await Note.createConflictNote(local, ItemChange.SOURCE_SYNC);
 		}
+
+		// ------------------------------------------------------------------------------
+		// Remote no longer exists (note deleted) so delete local one too
+		// ------------------------------------------------------------------------------
+
+		if (!remoteExists) {
+			await ItemClass.delete(
+				local.id,
+				{
+					changeSource: ItemChange.SOURCE_SYNC,
+					trackDeleted: false,
+					sourceDescription: 'sync: handleConflictAction: note conflict',
+				},
+			);
+		}
 	} else if (action === SyncAction.ResourceConflict) {
-		if (!remoteContent || Resource.mustHandleConflict(local, remoteContent)) {
+		const localEntity: ResourceEntity = local;
+		if (!remoteExists) {
+			const associatedNotes = await NoteResource.associatedNoteIds(local.id);
+			// Keep the resource if:
+			// - The remote no longer exists, but the resource is still linked to notes.
+			// - The resource exists locally (downloaded+decrypted).
+			//    - TODO: Remove the "decrypted" condition?
+			//
+			// Otherwise, delete it locally, too.
+			// TODO: What if the NoteResource state is out-of-date and the resource is
+			// associated with notes but not marked as such? (Can it be?)
+			// TODO: What if the linked notes will be deleted later in the sync process?
+			if (associatedNotes.length && await Resource.isReady(localEntity)) {
+				// The remote item no longer exists: Reset its sync time to 0.
+				const remoteSyncTime = 0;
+				const syncTimeQueries = BaseItem.updateSyncTimeQueries(syncTargetId, local, time.unixMs(), remoteSyncTime);
+				await ItemClass.save(
+					local,
+					{
+						autoTimestamp: false,
+						changeSource: ItemChange.SOURCE_SYNC,
+						nextQueries: syncTimeQueries,
+					},
+				);
+			} else {
+				await ItemClass.delete(
+					local.id,
+					{
+						changeSource: ItemChange.SOURCE_SYNC,
+						trackDeleted: false,
+						sourceDescription: 'sync: handleConflictAction: resource conflict',
+					},
+				);
+			}
+		} else if (!remoteContent || Resource.mustHandleConflict(local, remoteContent)) {
 			await Resource.createConflictResourceNote(local);
 
 			if (remoteExists) {
@@ -79,8 +138,7 @@ export default async (action: SyncAction, ItemClass: typeof BaseItem, remoteExis
 		// ------------------------------------------------------------------------------
 		// For note and resource conflicts, the creation of the conflict item is done
 		// differently. However the way the local content is handled is the same.
-		// Either copy the remote content to local or, if the remote content has
-		// been deleted, delete the local content.
+		// Copy the remote content to local or if the remote still exists.
 		// ------------------------------------------------------------------------------
 
 		if (remoteExists) {
@@ -89,16 +147,8 @@ export default async (action: SyncAction, ItemClass: typeof BaseItem, remoteExis
 			await ItemClass.save(local, { autoTimestamp: false, changeSource: ItemChange.SOURCE_SYNC, nextQueries: syncTimeQueries });
 
 			if (local.encryption_applied) dispatch({ type: 'SYNC_GOT_ENCRYPTED_ITEM' });
-		} else {
-			// Remote no longer exists (note deleted) so delete local one too
-			await ItemClass.delete(
-				local.id,
-				{
-					changeSource: ItemChange.SOURCE_SYNC,
-					trackDeleted: false,
-					sourceDescription: 'sync: handleConflictAction: note/resource conflict',
-				},
-			);
 		}
 	}
 };
+
+export default handleConflictAction;
