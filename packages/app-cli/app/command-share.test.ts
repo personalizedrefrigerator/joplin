@@ -1,12 +1,11 @@
-import { setupDatabaseAndSynchronizer, switchClient } from '@joplin/lib/testing/test-utils';
-import mockShareService, { ApiMock } from '@joplin/lib/testing/share/mockShareService';
+import { setupDatabaseAndSynchronizer, switchClient, synchronizer, synchronizerStart } from '@joplin/lib/testing/test-utils';
+import mockShareServiceForFolderSharing from '@joplin/lib/testing/share/mockShareServiceForFolderSharing';
 import { setupCommandForTesting, setupApplication } from './utils/testUtils';
 import Folder from '@joplin/lib/models/Folder';
 import ShareService from '@joplin/lib/services/share/ShareService';
 import BaseItem from '@joplin/lib/models/BaseItem';
+import { ShareUserStatus, StateShare } from '@joplin/lib/services/share/reducer';
 import { ModelType } from '@joplin/lib/BaseModel';
-import { ShareInvitation, ShareUserStatus, StateShare } from '@joplin/lib/services/share/reducer';
-import app from './app';
 const Command = require('./command-share');
 
 const setUpCommand = () => {
@@ -33,80 +32,55 @@ const defaultFolderShare: StateShare = {
 	},
 };
 
-const mockShareServiceForFolderSharing = (eventHandlerOverrides: Partial<ApiMock>&{ onExec?: undefined }) => {
-	const invitations: ShareInvitation[] = [];
-
-	mockShareService({
-		getShareInvitations: async () => ({
-			items: invitations,
-		}),
-		getShares: async () => ({ items: [defaultFolderShare] }),
-		getShareUsers: async (_id: string) => ({ items: [] }),
-		postShareUsers: async (_id, _body) => { },
-		postShares: async () => ({ id: shareId }),
-		...eventHandlerOverrides,
-	}, ShareService.instance(), app().store());
-
-	return {
-		addInvitation: (invitation: Partial<ShareInvitation>) => {
-			const defaultInvitation: ShareInvitation = {
-				share: defaultFolderShare,
-				id: 'some-invitation-id',
-				master_key: undefined,
-				status: ShareUserStatus.Waiting,
-				can_read: 1,
-				can_write: 1,
-			};
-
-			invitations.push({ ...defaultInvitation, ...invitation });
-		},
-	};
-};
-
-
 describe('command-share', () => {
 	beforeEach(async () => {
+		await setupDatabaseAndSynchronizer(0);
+		await switchClient(0);
 		await setupDatabaseAndSynchronizer(1);
 		await switchClient(1);
 		await setupApplication();
 		BaseItem.shareService_ = ShareService.instance();
+		synchronizer(0).setShareService(ShareService.instance());
+		synchronizer(1).setShareService(ShareService.instance());
 	});
 
 	test('should allow adding a user to a share', async () => {
-		const folder = await Folder.save({ title: 'folder1' });
-
-		let lastShareUserUpdate: unknown|null = null;
 		mockShareServiceForFolderSharing({
-			getShares: async () => {
-				const isShared = !!lastShareUserUpdate;
-				if (isShared) {
-					return {
-						items: [{ ...defaultFolderShare, folder_id: folder.id }],
-					};
-				} else {
-					return { items: [] };
-				}
-			},
-			// Called when a new user is added to a share
-			postShareUsers: async (_id, body) => {
-				lastShareUserUpdate = body;
-			},
+			clientInfo: [
+				{ email: 'test@localhost' },
+				{ email: 'test2@localhost' },
+			],
+			service: ShareService.instance(),
 		});
 
+		await switchClient(0);
+
+		const { id: folderId } = await Folder.save({ title: 'folder1' });
 		const { command } = setUpCommand();
 
 		// Should share read-write by default
 		await command.action({
 			'command': 'add',
 			'notebook': 'folder1',
-			'user': 'test@localhost',
+			'user': 'test2@localhost',
 			options: {},
 		});
-		expect(lastShareUserUpdate).toMatchObject({
+
+		await synchronizerStart();
+
+		expect(await Folder.load(folderId)).toMatchObject({ is_shared: 1 });
+
+		await switchClient(1);
+
+		const service = ShareService.instance();
+		await service.refreshShareInvitations();
+		expect(service.shareInvitations).toMatchObject([{
 			email: 'test@localhost',
 			can_write: 1,
 			can_read: 1,
-		});
+		}]);
+
+		await switchClient(0);
 
 		// Should also support sharing as read only
 		await command.action({
@@ -117,11 +91,13 @@ describe('command-share', () => {
 				'read-only': true,
 			},
 		});
-		expect(lastShareUserUpdate).toMatchObject({
+
+		await service.refreshShareInvitations();
+		expect(service.shareInvitations).toMatchObject([{
 			email: 'test2@localhost',
 			can_write: 0,
 			can_read: 1,
-		});
+		}]);
 	});
 
 	test.each([
@@ -160,9 +136,21 @@ describe('command-share', () => {
 			].join('\n'),
 		},
 	])('share invitations: $label', async ({ invitations, expectedOutput }) => {
-		const mock = mockShareServiceForFolderSharing({});
+		const mock = mockShareServiceForFolderSharing({
+			clientInfo: [
+				{ email: 'test@localhost' },
+				{ email: 'test2@localhost' },
+			],
+			service: ShareService.instance(),
+		});
 		for (const invitation of invitations) {
-			mock.addInvitation(invitation);
+			mock.addShareInvitation({
+				share: defaultFolderShare,
+				master_key: null,
+				can_read: 1,
+				can_write: 1,
+				...invitation,
+			}, 'test2@localhost', 'test@localhost');
 		}
 
 		await ShareService.instance().refreshShareInvitations();

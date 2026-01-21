@@ -1,6 +1,9 @@
+import BaseItem from '../../models/BaseItem';
+import Resource from '../../models/Resource';
 import { PublicPrivateKeyPair } from '../../services/e2ee/ppk/ppk';
 import { ShareInvitation, ShareUserStatus } from '../../services/share/reducer';
-import { ApiShare } from '../../services/share/ShareService';
+import ShareService, { ApiShare } from '../../services/share/ShareService';
+import Synchronizer from '../../Synchronizer';
 import uuid from '../../uuid';
 import { currentClientId } from '../test-utils';
 import mockShareService, { ApiMock } from './mockShareService';
@@ -48,6 +51,7 @@ interface ClientInfo {
 interface Options {
 	clientInfo: ClientInfo[];
 	onRawRequest?: ApiMock['onRawRequest'];
+	service?: ShareService;
 }
 
 const mockShareServiceForFolderSharing = (options: Options) => {
@@ -114,6 +118,8 @@ const mockShareServiceForFolderSharing = (options: Options) => {
 		postShareUsers(shareId, body) {
 			const share = shares.find(share => share.state.id === shareId);
 			assert.ok(typeof body.email === 'string');
+			const ownerEmail = clientIdToEmail(share.owner);
+			assert.notEqual(body.email, ownerEmail, 'cannot create a share invitation for the same user');
 
 			const clientId = emailToClientId(body.email);
 			shares = shares.map(share => {
@@ -135,7 +141,7 @@ const mockShareServiceForFolderSharing = (options: Options) => {
 					...share.state,
 				},
 				status: ShareUserStatus.Waiting,
-			}, clientIdToEmail(share.owner), body.email);
+			}, ownerEmail, body.email);
 			shareInvitations.push(invitation);
 
 			return Promise.resolve({
@@ -191,9 +197,19 @@ const mockShareServiceForFolderSharing = (options: Options) => {
 			return Promise.resolve();
 		},
 		onRawRequest: options.onRawRequest,
-	});
+	}, options.service);
 
-	return { service };
+	return {
+		service,
+		install: (synchronizer: Synchronizer) => {
+			BaseItem.shareService_ = service;
+			Resource.shareService_ = service;
+			synchronizer.setShareService(service);
+		},
+		addShareInvitation: (invitation: ShareInvitation, from: string, to: string) => {
+			shareInvitations.push(new InvitationRecord(invitation, from, to));
+		},
+	};
 };
 
 export default mockShareServiceForFolderSharing;
