@@ -18,12 +18,12 @@ const createSharedFolderWithResource = async () => {
 	note = await shim.attachFileToNote(note, join(supportDir, 'photo.jpg'));
 
 	const share = await shareService.shareFolder(folder.id);
-	const shareUser = await shareService.addShareRecipient(share.id, '', 'test2@localhost', { can_read: 1, can_write: 1 });
+	const invitation = await shareService.addShareRecipient(share.id, '', 'test2@localhost', { can_read: 1, can_write: 1 });
 
 	await synchronizerStart();
 	await switchClient(1);
 
-	await shareService.respondInvitation(shareUser.id, null, true);
+	await shareService.respondInvitation(invitation.id, null, true);
 
 	await synchronizerStart();
 
@@ -36,6 +36,16 @@ const createSharedFolderWithResource = async () => {
 	expect(resource).toMatchObject({ title: 'photo.jpg' });
 
 	return { folder, note, resource };
+};
+
+const firstLinkedResourceId = async (noteId: string) => {
+	const note = await Note.load(noteId);
+	const linkedResources = await Note.linkedItemIdsByType(ModelType.Resource, note.body);
+	return linkedResources[0];
+};
+
+const firstLinkedResource = async (noteId: string) => {
+	return await Resource.load(await firstLinkedResourceId(noteId));
 };
 
 describe('Synchronizer.sharing', () => {
@@ -62,51 +72,21 @@ describe('Synchronizer.sharing', () => {
 		await afterAllCleanUp();
 	});
 
-	it('resource duplication should not create conflicts', async () => {
-		const { note } = await createSharedFolderWithResource();
+	it('should duplicate resources that are present in multiple shares on sync', async () => {
+		const { note: note1, resource } = await createSharedFolderWithResource();
+		const { folder: folder2 } = await createSharedFolderWithResource();
 
-		const createNotSharedFolderWithNote = async (body: string) => {
-			const folder = await Folder.save({ title: 'Not shared' });
-			return await Note.save({ parent_id: folder.id, body });
-		};
+		// Use the same resource in two shares:
+		const note2 = await Note.save({ parent_id: folder2.id, body: `![test](:/${resource.id})` });
 
-		const firstLinkedResourceId = async (noteId: string) => {
-			const note = await Note.load(noteId);
-			const linkedResources = await Note.linkedItemIdsByType(ModelType.Resource, note.body);
-			return linkedResources[0];
-		};
+		await synchronizerStart();
 
-		const firstLinkedResource = async (noteId: string) => {
-			return await Resource.load(await firstLinkedResourceId(noteId));
-		};
+		const resourceInstance1 = await firstLinkedResource(note1.id);
+		const resourceInstance2 = await firstLinkedResource(note2.id);
+		expect(resourceInstance1.id).not.toBe(resourceInstance2.id);
 
-
-		// Create one note on each client that independently references the resource:
-		await switchClient(0);
-		const { id: note1Id } = await createNotSharedFolderWithNote(note.body.repeat(10));
-		expect(await firstLinkedResource(note1Id)).toBeTruthy();
-
-		await switchClient(1);
-		const { id: note2Id } = await createNotSharedFolderWithNote(note.body.repeat(10));
-		expect(await firstLinkedResource(note2Id)).toBeTruthy();
-
-		await synchronizerStart(0);
-		await synchronizerStart(1);
-		await synchronizerStart(0);
-
-		// Should not have created conflicts
-		const getConflicts = () => Note.previews(Folder.conflictFolderId(), { });
-		expect(await getConflicts()).toHaveLength(0);
-		await switchClient(0);
-		expect(await getConflicts()).toHaveLength(0);
-
-		// Notes should still be associated with resources that exist for unshared folders
-		expect(await firstLinkedResource(note1Id)).toBeTruthy();
-		await switchClient(1);
-		expect(await firstLinkedResource(note2Id)).toBeTruthy();
-
-		// The same should be true for shared folders
-		expect(await firstLinkedResource(note.id)).toBeTruthy();
+		// At least one of the two should use the original ID
+		expect(resourceInstance1.id === resource.id || resourceInstance2.id === resource.id).toBe(true);
 	});
 
 });
