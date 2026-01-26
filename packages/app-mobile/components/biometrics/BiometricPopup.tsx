@@ -6,6 +6,7 @@ import { SensorInfo } from './sensorInfo';
 import { _ } from '@joplin/lib/locale';
 import Logger from '@joplin/utils/Logger';
 import biometricAuthenticate from './biometricAuthenticate';
+import SafeAreaView from '../SafeAreaView';
 
 const logger = Logger.create('BiometricPopup');
 
@@ -125,7 +126,9 @@ export default (props: Props) => {
 
 	return (
 		<View style={{ display: display ? 'flex' : 'none', position: 'absolute', zIndex: 99999, backgroundColor: '#000000', width: windowSize.width, height: windowSize.height }}>
-			{renderTryAgainButton()}
+			<SafeAreaView>
+				{renderTryAgainButton()}
+			</SafeAreaView>
 		</View>
 	);
 };
