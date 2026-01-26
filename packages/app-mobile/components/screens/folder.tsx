@@ -1,30 +1,43 @@
-const React = require('react');
+import * as React from 'react';
 
-const { View, StyleSheet } = require('react-native');
-const { connect } = require('react-redux');
-const Folder = require('@joplin/lib/models/Folder').default;
-const BaseModel = require('@joplin/lib/BaseModel').default;
-const { ScreenHeader } = require('../ScreenHeader');
-const { BaseScreenComponent } = require('../base-screen');
-const shim = require('@joplin/lib/shim').default;
-const { _ } = require('@joplin/lib/locale');
-const { default: FolderPicker } = require('../FolderPicker');
-const TextInput = require('../TextInput').default;
+import { View, StyleSheet } from 'react-native';
+import { connect } from 'react-redux';
+import Folder from '@joplin/lib/models/Folder';
+import BaseModel from '@joplin/lib/BaseModel';
+import { ScreenHeader } from '../ScreenHeader';
+import { BaseScreenComponent } from '../base-screen';
+import shim from '@joplin/lib/shim';
+import { _ } from '@joplin/lib/locale';
+import FolderPicker from '../FolderPicker';
+import TextInput from '../TextInput';
+import { FolderEntity } from '@joplin/lib/services/database/types';
+import { AppState } from '../../utils/types';
+import { Dispatch } from 'redux';
 
-class FolderScreenComponent extends BaseScreenComponent {
-	static navigationOptions() {
-		return { header: null };
-	}
+interface Props {
+	folderId: string;
+	selectedFolderId: string;
+	themeId: number;
+	folders: FolderEntity[];
+	dispatch: Dispatch;
+}
 
-	constructor() {
-		super();
+interface State {
+	folder: FolderEntity;
+	lastSavedFolder: FolderEntity|null;
+}
+
+class FolderScreenComponent extends BaseScreenComponent<Props, State> {
+
+	public constructor(props: Props) {
+		super(props);
 		this.state = {
 			folder: Folder.new(),
 			lastSavedFolder: null,
 		};
 	}
 
-	UNSAFE_componentWillMount() {
+	public override UNSAFE_componentWillMount() {
 		if (!this.props.folderId) {
 			const folder = Folder.new();
 			this.setState({
@@ -33,7 +46,7 @@ class FolderScreenComponent extends BaseScreenComponent {
 			});
 		} else {
 			// eslint-disable-next-line promise/prefer-await-to-then -- Old code before rule was applied
-			Folder.load(this.props.folderId).then(folder => {
+			void Folder.load(this.props.folderId).then(folder => {
 				this.setState({
 					folder: folder,
 					lastSavedFolder: { ...folder },
@@ -42,38 +55,40 @@ class FolderScreenComponent extends BaseScreenComponent {
 		}
 	}
 
-	isModified() {
+	private isModified() {
 		if (!this.state.folder || !this.state.lastSavedFolder) return false;
 		const diff = BaseModel.diffObjects(this.state.folder, this.state.lastSavedFolder);
 		delete diff.type_;
 		return !!Object.getOwnPropertyNames(diff).length;
 	}
 
-	folderComponent_change(propName, propValue) {
+	private folderComponent_change(propName: keyof FolderEntity, propValue: string) {
 		this.setState((prevState) => {
-			const folder = { ...prevState.folder };
-			folder[propName] = propValue;
+			const folder = {
+				...prevState.folder,
+				[propName]: propValue,
+			};
 			return { folder: folder };
 		});
 	}
 
-	title_changeText(text) {
+	private title_changeText(text: string) {
 		this.folderComponent_change('title', text);
 	}
 
-	parent_changeValue(parent) {
+	private parent_changeValue(parent: string) {
 		this.folderComponent_change('parent_id', parent);
 	}
 
 
-	async saveFolderButton_press() {
+	private async saveFolderButton_press() {
 		let folder = { ...this.state.folder };
 
 		try {
 			if (folder.id && !(await Folder.canNestUnder(folder.id, folder.parent_id))) throw new Error(_('Cannot move notebook to this location'));
 			folder = await Folder.save(folder, { userSideValidation: true });
 		} catch (error) {
-			shim.showErrorDialog(_('The notebook could not be saved: %s', error.message));
+			void shim.showErrorDialog(_('The notebook could not be saved: %s', error.message));
 			return;
 		}
 
@@ -89,7 +104,7 @@ class FolderScreenComponent extends BaseScreenComponent {
 		});
 	}
 
-	render() {
+	public override render() {
 		const saveButtonDisabled = !this.isModified() || !this.state.folder.title;
 
 		return (
@@ -101,7 +116,7 @@ class FolderScreenComponent extends BaseScreenComponent {
 					autoFocus={true}
 					value={this.state.folder.title}
 					onChangeText={text => this.title_changeText(text)}
-					disabled={this.state.folder.encryption_applied}
+					editable={!this.state.folder.encryption_applied}
 				/>
 				<View style={styles.folderPickerContainer}>
 					<FolderPicker
@@ -120,7 +135,7 @@ class FolderScreenComponent extends BaseScreenComponent {
 	}
 }
 
-const FolderScreen = connect(state => {
+export default connect((state: AppState) => {
 	return {
 		folderId: state.selectedFolderId,
 		themeId: state.settings.theme,
@@ -138,4 +153,3 @@ const styles = StyleSheet.create({
 	},
 });
 
-module.exports = { FolderScreen };

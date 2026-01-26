@@ -38,7 +38,7 @@ import Folder from '@joplin/lib/models/Folder';
 import NotesScreen from './components/screens/Notes/Notes';
 import TagsScreen from './components/screens/tags';
 import ConfigScreen from './components/screens/ConfigScreen/ConfigScreen';
-const { FolderScreen } = require('./components/screens/folder.js');
+import FolderScreen from './components/screens/folder';
 import LogScreen from './components/screens/LogScreen';
 import StatusScreen from './components/screens/status';
 import SearchScreen from './components/screens/SearchScreen';
