@@ -112,14 +112,19 @@ jest.doMock('@expo/vector-icons/MaterialCommunityIcons', () => {
 	throw new Error('Not supported in testing environments.');
 });
 
-// Used by the renderer
-jest.doMock('react-native-vector-icons/Ionicons', () => {
-	return {
-		default: class extends require('react-native').View {
-			static getImageSourceSync = () => ({ uri: '' });
-		},
-	};
-});
+const mockIconLibrary = (libraryName, exportName) => {
+	jest.doMock(libraryName, () => {
+		const MockIconComponent = require('react-native').View;
+		return {
+			default: MockIconComponent,
+			[exportName]: MockIconComponent,
+		};
+	});
+};
+
+mockIconLibrary('@react-native-vector-icons/ionicons', 'Ionicons');
+mockIconLibrary('@react-native-vector-icons/material-design-icons', 'MaterialDesignIcons');
+mockIconLibrary('@react-native-vector-icons/fontawesome5', 'FontAwesome5');
 
 // react-native-fs's CachesDirectoryPath export doesn't work in a testing environment.
 // Use a temporary folder instead.
