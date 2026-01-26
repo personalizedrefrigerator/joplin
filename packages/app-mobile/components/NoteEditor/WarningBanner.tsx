@@ -13,7 +13,6 @@ import { MarkupLanguage } from '@joplin/renderer/types';
 interface Props {
 	editorType: EditorType;
 	richTextBannerDismissed: boolean;
-	convertToMarkdownBannerDismissed: boolean;
 	editorMigrationVersion: number;
 
 	markupLanguage: MarkupLanguage;
@@ -84,7 +83,6 @@ const WarningBanner: React.FC<Props> = props => {
 export default connect((state: AppState) => {
 	return {
 		richTextBannerDismissed: state.settings.richTextBannerDismissed,
-		convertToMarkdownBannerDismissed: !state.settings['editor.enableHtmlToMarkdownBanner'],
 		editorMigrationVersion: state.settings['editor.migration'],
 		selectedNoteIds: state.selectedNoteIds,
 	};
