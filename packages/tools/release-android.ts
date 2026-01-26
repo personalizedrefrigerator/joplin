@@ -329,7 +329,7 @@ async function main() {
 
 	await uploadToGitHubRelease(mainProjectName, tagName, isPreRelease, releaseFiles);
 
-	console.info(`Main download URL: ${releaseFiles['main'].downloadUrl}`);
+	if (releaseFiles['main']) console.info(`Main download URL: ${releaseFiles['main'].downloadUrl}`);
 
 	const changelogPath = `${rootDir}/readme/about/changelog/android.md`;
 
