@@ -132,6 +132,17 @@ android {
             minifyEnabled enableProguardInReleaseBuilds
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
         }
+        profileable {
+            // Release-like build that allows profiling with Android Studio Profiler
+            initWith release
+            signingConfig signingConfigs.debug
+            // Required for Android Studio Profiler to attach
+            debuggable false
+            // Keeps symbols for better stack traces in profiler
+            minifyEnabled false
+            // Use release variants of dependencies that don't have profileable
+            matchingFallbacks = ['release']
+        }
     }
 }
 
