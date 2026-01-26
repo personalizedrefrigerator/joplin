@@ -186,6 +186,12 @@ async function createRelease(projectName: string, releaseConfig: ReleaseConfig, 
 }
 
 const uploadToGitHubRelease = async (projectName: string, tagName: string, isPreRelease: boolean, releaseFiles: Record<string, Release>) => {
+	const allPublishDisabled = Object.values(releaseFiles).every(r => !r.publish);
+	if (allPublishDisabled) {
+		console.info('All release files have publishing disabled - skipping GitHub release creation');
+		return;
+	}
+
 	console.info(`Creating GitHub release ${tagName}...`);
 
 	const releaseOptions = { isPreRelease: isPreRelease };
