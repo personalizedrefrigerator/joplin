@@ -14,6 +14,7 @@ interface Props {
 	editorType: EditorType;
 	richTextBannerDismissed: boolean;
 	editorMigrationVersion: number;
+	inlineRenderingEnabled: boolean;
 
 	markupLanguage: MarkupLanguage;
 	noteId: string;
@@ -24,10 +25,12 @@ const useBanner = ({
 	editorType,
 	richTextBannerDismissed,
 	editorMigrationVersion,
+	inlineRenderingEnabled: inEditorRendering,
 }: Props) => {
 	const editorMigrationBanner = useEditorTypeMigrationBanner({
 		markdownEditorEnabled: editorType === EditorType.Markdown,
 		editorMigrationVersion: editorMigrationVersion,
+		inEditorRenderingEnabled: inEditorRendering,
 	});
 
 	return useMemo(() => {

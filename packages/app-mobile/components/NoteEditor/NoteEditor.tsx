@@ -260,37 +260,24 @@ const useEditorControl = (
 	}, [webviewRef, editorRef, setLinkDialogVisible, setSearchState]);
 };
 
-const useHighlightActiveLine = () => {
+const useEditorSettings = (props: Props) => {
 	const screenReaderEnabled = useIsScreenReaderEnabled();
 	// Guess whether highlighting the active line can be enabled without triggering
 	// https://github.com/codemirror/dev/issues/1559.
 	const canHighlight = Platform.OS !== 'ios' || !screenReaderEnabled;
-	return canHighlight && Setting.value('editor.highlightActiveLine');
-};
+	const highlightActiveLine = canHighlight && Setting.value('editor.highlightActiveLine');
 
-const useHasSpaceForToolbar = () => {
-	const [hasSpaceForToolbar, setHasSpaceForToolbar] = useState(true);
+	// Also disable inline rendering. As of January 2026, inline rendering
+	// seems to cause screen readers to behave strangely (e.g. sometimes not announce full
+	// line content, reading "image" when not in an image, etc.)
+	const inlineRenderingEnabled = props.editorInlineRendering && !screenReaderEnabled;
 
-	const onContainerLayout = useCallback((event: LayoutChangeEvent) => {
-		const containerHeight = event.nativeEvent.layout.height;
-
-		setHasSpaceForToolbar(containerHeight >= 140);
-	}, []);
-
-	const debouncedHasSpaceForToolbar = useDebounced(hasSpaceForToolbar, Second / 4);
-	return { hasSpaceForToolbar: debouncedHasSpaceForToolbar, onContainerLayout };
-};
-
-function NoteEditor(props: Props) {
-	const webviewRef = useRef<WebViewControl>(null);
-
-	const highlightActiveLine = useHighlightActiveLine();
 	const editorSettings: EditorSettings = useMemo(() => ({
 		themeData: editorTheme(props.themeId),
 		markdownMarkEnabled: Setting.value('markdown.plugin.mark'),
 		katexEnabled: Setting.value('markdown.plugin.katex'),
 		spellcheckEnabled: Setting.value('editor.mobile.spellcheckEnabled'),
-		inlineRenderingEnabled: props.editorInlineRendering,
+		inlineRenderingEnabled,
 		imageRenderingEnabled: props.editorImageRendering,
 		language: props.markupLanguage === MarkupLanguage.Html ? EditorLanguageType.Html : EditorLanguageType.Markdown,
 		useExternalSearch: true,
@@ -309,7 +296,28 @@ function NoteEditor(props: Props) {
 		indentWithTabs: true,
 
 		editorLabel: _('Markdown editor'),
-	}), [props.themeId, props.readOnly, props.markupLanguage, highlightActiveLine, props.editorInlineRendering, props.editorImageRendering]);
+	}), [props.themeId, props.readOnly, props.markupLanguage, highlightActiveLine, inlineRenderingEnabled, props.editorImageRendering]);
+
+	return editorSettings;
+};
+
+const useHasSpaceForToolbar = () => {
+	const [hasSpaceForToolbar, setHasSpaceForToolbar] = useState(true);
+
+	const onContainerLayout = useCallback((event: LayoutChangeEvent) => {
+		const containerHeight = event.nativeEvent.layout.height;
+
+		setHasSpaceForToolbar(containerHeight >= 140);
+	}, []);
+
+	const debouncedHasSpaceForToolbar = useDebounced(hasSpaceForToolbar, Second / 4);
+	return { hasSpaceForToolbar: debouncedHasSpaceForToolbar, onContainerLayout };
+};
+
+function NoteEditor(props: Props) {
+	const webviewRef = useRef<WebViewControl>(null);
+
+	const editorSettings = useEditorSettings(props);
 
 	const [selectionState, setSelectionState] = useState<SelectionFormatting>(defaultSelectionFormatting);
 	const [linkDialogVisible, setLinkDialogVisible] = useState(false);
@@ -481,6 +489,7 @@ function NoteEditor(props: Props) {
 				editorType={props.mode}
 				noteId={props.noteId}
 				markupLanguage={props.markupLanguage}
+				inlineRenderingEnabled={editorSettings.inlineRenderingEnabled}
 				readOnly={props.readOnly}
 			/>
 

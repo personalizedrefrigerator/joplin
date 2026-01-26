@@ -5,11 +5,12 @@ import shim from '../../../../shim';
 interface Props {
 	editorMigrationVersion: number;
 	markdownEditorEnabled: boolean;
+	inEditorRenderingEnabled: boolean;
 }
 
-const useEditorTypeMigrationBanner = ({ markdownEditorEnabled, editorMigrationVersion }: Props) => {
+const useEditorTypeMigrationBanner = ({ markdownEditorEnabled, inEditorRenderingEnabled, editorMigrationVersion }: Props) => {
 	const React = shim.react();
-	const enabled = markdownEditorEnabled && editorMigrationVersion < 1;
+	const enabled = markdownEditorEnabled && editorMigrationVersion < 1 && inEditorRenderingEnabled;
 
 	return React.useMemo(() => {
 		const onMigrationComplete = () => {
