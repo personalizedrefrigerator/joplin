@@ -5,6 +5,7 @@ use crate::one::property_set::PropertySetId;
 use crate::onestore::object::Object;
 use crate::shared::exguid::ExGuid;
 use parser_utils::errors::{ErrorKind, Result};
+use parser_utils::log_warn;
 
 /// An outline group.
 ///
@@ -24,9 +25,10 @@ pub(crate) fn parse(object: &Object) -> Result<Data> {
         return Err(unexpected_object_type_error!(object.id().0).into());
     }
 
-    let last_modified = Time::parse(PropertyType::LastModifiedTime, object)?.ok_or_else(|| {
-        ErrorKind::MalformedOneNoteFileData("outline group has no last modified time".into())
-    })?;
+    let last_modified = Time::parse(PropertyType::LastModifiedTime, object)?.unwrap_or_else(|| {
+        log_warn!("outline group has no last modified time");
+        Time::default()
+    });
     let children =
         ObjectReference::parse_vec(PropertyType::ElementChildNodes, object)?.unwrap_or_default();
     let child_level = simple::parse_u8(PropertyType::OutlineElementChildLevel, object)?

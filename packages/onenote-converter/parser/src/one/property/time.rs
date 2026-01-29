@@ -6,7 +6,7 @@ use parser_utils::errors::{ErrorKind, Result};
 /// See [\[MS-ONE\] 2.3.1]
 ///
 /// [\[MS-ONE\] 2.3.1]: https://docs.microsoft.com/en-us/openspecs/office_file_formats/ms-one/82336580-f956-40ea-94ab-d9ab15048395
-#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
 pub struct Time(u32);
 
 impl Time {
