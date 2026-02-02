@@ -7,6 +7,34 @@ import NavService from '@joplin/lib/services/NavService';
 import { ToastAndroid } from 'react-native';
 import { PermissionsAndroid } from 'react-native';
 import { Platform } from 'react-native';
+import { isHttpOrHttpsUrl } from '@joplin/utils/url';
+import HtmlToMd from '@joplin/lib/HtmlToMd';
+import { _ } from '@joplin/lib/locale';
+
+const webClip = async (url: string) => {
+	if (!await shim.showConfirmationDialog(_('Save %s as a full-page archive?', JSON.stringify(url)))) {
+		return url;
+	}
+
+	try {
+		const html = await shim.fetch(url);
+		const service = new HtmlToMd();
+		return service.parse(await html.text());
+	} catch (error) {
+		await shim.showErrorDialog(_('Failed to save page: %s', error));
+		return url;
+	}
+};
+
+const postprocessShareData = async (data: SharedData) => {
+	if (isHttpOrHttpsUrl(data.text) && !data.text.match(/\s/)) {
+		return {
+			...data,
+			text: await webClip(data.text),
+		};
+	}
+	return data;
+};
 
 // eslint-disable-next-line @typescript-eslint/ban-types -- Old code before rule was applied
 export default async (sharedData: SharedData, folderId: string, dispatch: Function) => {
@@ -27,6 +55,8 @@ export default async (sharedData: SharedData, folderId: string, dispatch: Functi
 			}
 		}
 	}
+
+	sharedData = await postprocessShareData(sharedData);
 
 	const newNote = await Note.save({
 		parent_id: folderId,
