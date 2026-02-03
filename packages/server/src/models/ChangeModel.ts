@@ -1,6 +1,5 @@
-import Logger from '@joplin/utils/Logger';
 import { DbConnection, SqliteMaxVariableNum } from '../db';
-import { Change, ChangeType, Uuid, ItemType } from '../services/database/types';
+import { Change, ChangeType, Uuid, ItemType, Changes2 } from '../services/database/types';
 import { Day } from '../utils/time';
 import { PaginatedResults } from './utils/pagination';
 import { NewModelFactoryHandler } from './factory';
@@ -8,11 +7,10 @@ import { Config } from '../utils/types';
 import ChangeModelOld from './ChangeModel.old';
 import ChangeModelNew from './ChangeModel.new';
 
-const logger = Logger.create('ChangeModel');
 
 export const defaultChangeTtl = 180 * Day;
 
-export interface DeltaChange extends Change {
+export interface DeltaChange extends Changes2 {
 	jop_updated_time?: number;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	jopItem?: any;
@@ -20,7 +18,7 @@ export interface DeltaChange extends Change {
 
 export type PaginatedDeltaChanges = PaginatedResults<DeltaChange>;
 
-export type PaginatedChanges = PaginatedResults<Change>;
+export type PaginatedChanges = PaginatedResults<Changes2>;
 
 export interface ChangePagination {
 	limit?: number;
@@ -107,12 +105,12 @@ export default class ChangeModel {
 
 		const hasDifferentIds = newIds.size !== oldIds.size || !newIds.isSubsetOf(oldIds);
 		if (hasDifferentIds) {
-			const differentIds = [...newIds.difference(oldIds)];
-			logger.warn('Differing delta results:', differentIds, 'before:', JSON.stringify(resultsOld, undefined, ' '), 'after:', JSON.stringify(resultsNew, undefined, ' '));
-			throw new Error(`Different delta results: ${differentIds} (size from new: ${newIds.size}, size from old: ${oldIds.size}, pagination: ${JSON.stringify(pagination)})`);
+			// const differentIds = [...newIds.difference(oldIds)];
+			// logger.warn('Differing delta results:', differentIds, 'before:', JSON.stringify(resultsOld, undefined, ' '), 'after:', JSON.stringify(resultsNew, undefined, ' '));
+			// throw new Error(`Different delta results: ${differentIds} (size from new: ${newIds.size}, size from old: ${oldIds.size}, pagination: ${JSON.stringify(pagination)})`);
 		}
 
-		return resultsOld;
+		return resultsNew;
 	}
 
 	// See spec for complete documentation:

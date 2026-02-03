@@ -1,5 +1,5 @@
 import { resourceBlobPath } from '../utils/joplinUtils';
-import { Change, ChangeType, Item, Share, ShareType, ShareUserStatus, User, Uuid } from '../services/database/types';
+import { Changes2 as Change, ChangeType, Item, Share, ShareType, ShareUserStatus, User, Uuid } from '../services/database/types';
 import { unique } from '../utils/array';
 import { ErrorBadRequest, ErrorForbidden, ErrorNotFound } from '../utils/errors';
 import { setQueryParameters } from '../utils/urlUtils';
@@ -229,7 +229,7 @@ export default class ShareModel extends BaseModel<Share> {
 		};
 
 		const getPreviousShareId = (change: Change) => {
-			return change.previous_item ? JSON.parse(change.previous_item).jop_share_id : '';
+			return change.previous_share_id;
 		};
 
 		const handleUpdated = async (change: Change, item: Item, share: Share, nextShareId: Uuid) => {
