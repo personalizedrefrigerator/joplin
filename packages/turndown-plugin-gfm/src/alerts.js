@@ -14,8 +14,8 @@ export default function alerts (turndownService) {
       }
 
       content = content.replace(/^\n+|\n+$/g, '');
-      content = content.replace(/^/gm, '> ');
-      return `> [!${marker}]\n${content}`;
+      content = content.replace(/\n/g, `\n> `);
+      return `> [!${marker}]${content}`;
     }
   });
   turndownService.addRule('alerts-title', {
@@ -25,8 +25,13 @@ export default function alerts (turndownService) {
             && node.parentElement && node.parentElement.classList
             && node.parentElement.classList.contains('markdown-alert');
     },
-    replacement: function() {
-        return '';
+    replacement: function(content) {
+        content = content.trim();
+        if (content) {
+          return ` ${content}`;
+        }
+
+        return '\n';
     },
   });
 }
