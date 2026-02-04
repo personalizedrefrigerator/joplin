@@ -248,3 +248,4 @@ nocookie
 fgag
 mrjo
 codegen
+analyzed
