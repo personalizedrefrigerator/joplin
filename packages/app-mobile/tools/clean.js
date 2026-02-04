@@ -1,5 +1,6 @@
-// We don't make that a gulp task because we might want to run it before
-// gulp has been installed.
+// We don't make that a gulp task because we might want to run it before gulp has been installed.
+// For now this script is specifically for Android, as it's the build that causes the most problems.
+// We also don't want to clear the iOS data whenever we build the Android app.
 
 const fs = require('fs');
 
@@ -27,7 +28,7 @@ function deleteMatchingDirs(rootDir, predicate) {
 function main() {
 	const mobileDir = `${__dirname}/..`;
 
-	// Standard Android / iOS build artefacts
+	// Standard Android build artefacts
 	fs.rmSync(`${mobileDir}/android/.gradle`, { recursive: true, force: true });
 	fs.rmSync(`${mobileDir}/android/build`, { recursive: true, force: true });
 	fs.rmSync(`${mobileDir}/android/app/build`, { recursive: true, force: true });
@@ -39,7 +40,7 @@ function main() {
 	fs.rmSync(`${mobileDir}/android/app/build/generated/source/codegen`, { recursive: true, force: true });
 
 	// iOS
-	fs.rmSync(`${mobileDir}/ios/Pods`, { recursive: true, force: true });
+	// fs.rmSync(`${mobileDir}/ios/Pods`, { recursive: true, force: true });
 
 	// Delete all native module Android build artefacts
 	// Equivalent to:
