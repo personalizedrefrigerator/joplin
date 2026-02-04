@@ -1685,6 +1685,7 @@ packages/lib/testing/share/mockShareService.js
 packages/lib/testing/syncTargetUtils.js
 packages/lib/testing/test-utils-synchronizer.js
 packages/lib/testing/test-utils.js
+packages/lib/testing/waitFor.js
 packages/lib/theme.js
 packages/lib/themes/aritimDark.js
 packages/lib/themes/dark.js
