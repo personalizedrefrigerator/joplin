@@ -249,3 +249,5 @@ fgag
 mrjo
 codegen
 analyzed
+Perfetto
+appmodules
