@@ -1,8 +1,9 @@
 
 import * as React from 'react';
 import { FunctionComponent, ReactNode } from 'react';
-import { View, Text, Button } from 'react-native';
+import { View, Text } from 'react-native';
 import { ConfigScreenStyles } from './configScreenStyles';
+import { PrimaryButton } from '../../buttons';
 
 interface Props {
 	title: string;
@@ -29,14 +30,10 @@ const SettingsButton: FunctionComponent<Props> = props => {
 		<View style={styles.settingContainer}>
 			<View style={{ flex: 1, flexDirection: 'column' }}>
 				<View style={{ flex: 1 }}>
-					<Button
-						title={props.title}
+					<PrimaryButton
 						onPress={props.clickHandler}
 						disabled={!!props.disabled}
-						// Workaround for https://github.com/facebook/react-native/issues/54293:
-						// Force the button to reload when the enabled state changes.
-						key={`button-${!!props.disabled}`}
-					/>
+					>{props.title}</PrimaryButton>
 				</View>
 				{props.statusComponent}
 				{descriptionComp}
