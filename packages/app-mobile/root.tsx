@@ -442,6 +442,10 @@ class AppComponent extends React.Component<AppComponentProps, AppComponentState>
 				state: 'ready',
 			});
 
+			setTimeout(() => {
+				perfLogger.mark('Application is ready');
+			}, 50);
+
 			// setTimeout(() => {
 			// 	this.props.dispatch({
 			// 		type: 'NAV_GO',
