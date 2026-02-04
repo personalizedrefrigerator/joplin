@@ -92,6 +92,7 @@ readme/
 packages/react-native-vosk/lib/
 packages/lib/countable/Countable.js
 packages/onenote-converter/renderer/pkg/*
+packages/whisper-voice-typing/lib/
 
 # AUTO-GENERATED - EXCLUDED TYPESCRIPT BUILD
 packages/app-cli/app/LinkSelector.js
@@ -691,6 +692,7 @@ packages/app-mobile/components/FeedbackBanner.js
 packages/app-mobile/components/FolderPicker.js
 packages/app-mobile/components/Icon.js
 packages/app-mobile/components/IconButton.js
+packages/app-mobile/components/KeyboardAvoidingView.js
 packages/app-mobile/components/Modal.js
 packages/app-mobile/components/ModalDialog.js
 packages/app-mobile/components/NestableFlatList.js
@@ -969,6 +971,7 @@ packages/app-mobile/utils/hooks/useSafeAreaPadding.js
 packages/app-mobile/utils/image/fileToImage.web.js
 packages/app-mobile/utils/image/getImageDimensions.js
 packages/app-mobile/utils/image/resizeImage.js
+packages/app-mobile/utils/initReact.js
 packages/app-mobile/utils/initializeCommandService.js
 packages/app-mobile/utils/ipc/RNToWebViewMessenger.js
 packages/app-mobile/utils/ipc/WebViewToRNMessenger.js
@@ -1942,4 +1945,6 @@ packages/tools/website/utils/pressCarousel.js
 packages/tools/website/utils/processTranslations.js
 packages/tools/website/utils/render.js
 packages/tools/website/utils/types.js
+packages/whisper-voice-typing/src/index.js
+packages/whisper-voice-typing/src/specs/Whisper.nitro.js
 # AUTO-GENERATED - EXCLUDED TYPESCRIPT BUILD
