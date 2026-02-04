@@ -1,0 +1,16 @@
+# Backport of https://github.com/facebook/react-native/commit/fef5b8499667f980c7ad7fe7400c3316722b90ba
+# Fixes the back button after minimizing, then re-opening the app.
+diff --git a/ReactAndroid/src/main/java/com/facebook/react/ReactActivity.java b/ReactAndroid/src/main/java/com/facebook/react/ReactActivity.java
+index 031f534afec3d32f1cb7dd087f567ac6923404f0..356bc32c0c18cb6fdb00703b5a9aa18cb1d18a6e 100644
+--- a/ReactAndroid/src/main/java/com/facebook/react/ReactActivity.java
++++ b/ReactAndroid/src/main/java/com/facebook/react/ReactActivity.java
+@@ -124,6 +124,9 @@ public abstract class ReactActivity extends AppCompatActivity
+     // as super.onBackPressed() will call all enabled callbacks in the dispatcher.
+     mBackPressedCallback.setEnabled(false);
+     super.onBackPressed();
++    // Re-enable callback to ensure custom back handling works after activity resume
++    // Without this, the callback remains disabled when the app returns from background
++    mBackPressedCallback.setEnabled(true);
+   }
+ 
+   @Override
