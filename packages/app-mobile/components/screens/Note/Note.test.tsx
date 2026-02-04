@@ -364,4 +364,17 @@ describe('screens/Note', () => {
 
 		unmount();
 	});
+
+	it('should set the initial editor cursor location to the specified hash', async () => {
+		await openNewNote({ title: 'To be edited', body: 'a test\n\n# Test\n\n# Test 2\n\n# Test 3' });
+		store.dispatch({ type: 'NAV_GO', noteHash: 'test-2' });
+		const { unmount } = render(<WrappedNoteScreen />);
+
+		await openEditor();
+		const editor = await getMarkdownEditorControl();
+
+		expect(editor.getCursor().line).toBe(4);
+
+		unmount();
+	});
 });
