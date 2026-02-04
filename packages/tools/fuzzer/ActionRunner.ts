@@ -389,7 +389,7 @@ const getActions = (context: FuzzContext, clientPool: ClientPool, client: Client
 	addAction('moveFolderToToplevel', async ({ folderId }) => {
 		if (!folderId) return false;
 
-		await client.deleteFolder(folderId);
+		await client.moveItem(folderId, '');
 		return true;
 	}, {
 		folderId: async () => (await client.randomFolder({
