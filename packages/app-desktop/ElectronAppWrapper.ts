@@ -115,7 +115,12 @@ export default class ElectronAppWrapper {
 	}
 
 	public activeWindow() {
-		return BrowserWindow.getFocusedWindow() ?? this.win_;
+		for (const window of this.allAppWindows()) {
+			if (window.isFocused()) {
+				return window;
+			}
+		}
+		return this.win_;
 	}
 
 	public ipcServerStarted() {
