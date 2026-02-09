@@ -490,7 +490,6 @@ function NoteEditor(props: Props) {
 
 			<WarningBanner
 				editorType={props.mode}
-				noteId={props.noteId}
 				markupLanguage={props.markupLanguage}
 				inEditorRendering={editorSettings.inlineRenderingEnabled}
 			/>

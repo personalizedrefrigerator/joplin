@@ -17,7 +17,6 @@ interface Props {
 	inEditorRendering: boolean;
 
 	markupLanguage: MarkupLanguage;
-	noteId: string;
 }
 
 const useBanner = ({
@@ -86,6 +85,5 @@ export default connect((state: AppState) => {
 	return {
 		richTextBannerDismissed: state.settings.richTextBannerDismissed,
 		editorMigrationVersion: state.settings['editor.migration'],
-		selectedNoteIds: state.selectedNoteIds,
 	};
 })(WarningBanner);
