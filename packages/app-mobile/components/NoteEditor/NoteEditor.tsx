@@ -270,7 +270,10 @@ const useEditorSettings = (props: Props) => {
 	// Also disable inline rendering. As of January 2026, inline rendering
 	// seems to cause screen readers to behave strangely (e.g. sometimes not announce full
 	// line content, reading "image" when not in an image, etc.)
-	const inlineRenderingEnabled = props.editorInlineRendering && !screenReaderEnabled;
+	// However, `screenReaderEnabled` is always `true` on web (likely due to the lack of an API
+	// to reliably detect whether the user is using a screen reader), so also allow inline rendering
+	// to be enabled on web:
+	const inlineRenderingEnabled = props.editorInlineRendering && (!screenReaderEnabled || Platform.OS === 'web');
 
 	const editorSettings: EditorSettings = useMemo(() => ({
 		themeData: editorTheme(props.themeId),
@@ -489,7 +492,7 @@ function NoteEditor(props: Props) {
 				editorType={props.mode}
 				noteId={props.noteId}
 				markupLanguage={props.markupLanguage}
-				inlineRenderingEnabled={editorSettings.inlineRenderingEnabled}
+				inEditorRendering={editorSettings.inlineRenderingEnabled}
 				readOnly={props.readOnly}
 			/>
 
