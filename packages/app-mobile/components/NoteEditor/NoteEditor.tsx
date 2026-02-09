@@ -513,4 +513,4 @@ export default connect((state: AppState) => {
 		editorInlineRendering: state.settings['editor.inlineRendering'],
 		editorImageRendering: state.settings['editor.imageRendering'],
 	};
-})(NoteEditor);
+}, null, null, { forwardRef: true })(NoteEditor);
