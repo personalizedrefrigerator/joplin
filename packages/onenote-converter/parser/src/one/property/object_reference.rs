@@ -1,9 +1,10 @@
+use crate::errors::{ErrorKind, Result};
+use crate::fsshttpb::data::exguid::ExGuid;
 use crate::one::property::PropertyType;
-use crate::shared::compact_id::CompactId;
-use crate::shared::exguid::ExGuid;
-use crate::shared::property::PropertyValue;
-use crate::{one::property::references::References, onestore::object::Object};
-use parser_utils::errors::{ErrorKind, Result};
+use crate::one::property::references::References;
+use crate::onestore::Object;
+use crate::onestore::shared::compact_id::CompactId;
+use crate::onestore::shared::property::PropertyValue;
 
 /// A generic object reference.
 ///
@@ -14,7 +15,7 @@ pub(crate) struct ObjectReference;
 impl ObjectReference {
     pub(crate) fn parse(prop_type: PropertyType, object: &Object) -> Result<Option<ExGuid>> {
         // Validate the value of the property
-        match object.props().get(prop_type) {
+        match object.props.get(prop_type) {
             Some(property) => property.to_object_id().ok_or_else(|| {
                 ErrorKind::MalformedOneNoteFileData("object reference is not a object id".into())
             })?,
@@ -24,12 +25,10 @@ impl ObjectReference {
         // Find the correct object reference
         let index = Self::get_offset(prop_type, object)?;
 
-        let id = object
-            .props()
-            .object_ids()
-            .iter()
-            .nth(index)
-            .ok_or_else(|| ErrorKind::MalformedOneNoteFileData("object id index corrupt".into()))?;
+        let id =
+            object.props.object_ids().get(index).ok_or_else(|| {
+                ErrorKind::MalformedOneNoteFileData("object id index corrupt".into())
+            })?;
 
         Ok(Self::resolve_id(index, id, object))
     }
@@ -39,7 +38,7 @@ impl ObjectReference {
         object: &Object,
     ) -> Result<Option<Vec<ExGuid>>> {
         // Determine the number of object references
-        let count = match object.props().get(prop_type) {
+        let count = match object.props.get(prop_type) {
             Some(prop) => prop.to_object_ids().ok_or_else(|| {
                 ErrorKind::MalformedOneNoteFileData(
                     "object reference array is not a object id array".into(),
@@ -51,7 +50,7 @@ impl ObjectReference {
         // Determine offset for the property for which we want to look up the object reference
         let offset = Self::get_offset(prop_type, object)?;
 
-        let references = object.props().object_ids();
+        let references = object.props.object_ids();
 
         // Look up the object references by offset/count and resolve them
         let object_ids = references

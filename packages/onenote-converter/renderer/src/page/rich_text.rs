@@ -3,9 +3,9 @@ use crate::utils::{AttributeSet, StyleSet, html_entities, px, url_encode};
 use color_eyre::Result;
 use itertools::Itertools;
 use once_cell::sync::Lazy;
-use parser::contents::{EmbeddedObject, RichText};
-use parser::property::common::ColorRef;
-use parser::property::rich_text::{MathExpression, ParagraphAlignment, ParagraphStyling};
+use onenote_parser::contents::{EmbeddedObject, RichText};
+use onenote_parser::property::common::ColorRef;
+use onenote_parser::property::rich_text::{MathExpression, ParagraphAlignment, ParagraphStyling};
 use parser_utils::log_warn;
 use regex::{Captures, Regex};
 

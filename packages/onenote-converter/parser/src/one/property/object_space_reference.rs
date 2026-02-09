@@ -1,9 +1,10 @@
+use crate::errors::{ErrorKind, Result};
+use crate::fsshttpb::data::cell_id::CellId;
 use crate::one::property::PropertyType;
 use crate::one::property::references::References;
-use crate::shared::compact_id::CompactId;
-use crate::shared::property::PropertyValue;
-use crate::{onestore::object::Object, shared::cell_id::CellId};
-use parser_utils::errors::{ErrorKind, Result};
+use crate::onestore::Object;
+use crate::onestore::shared::compact_id::CompactId;
+use crate::onestore::shared::property::PropertyValue;
 
 /// A generic object space reference.
 ///
@@ -17,7 +18,7 @@ impl ObjectSpaceReference {
         object: &Object,
     ) -> Result<Option<Vec<CellId>>> {
         // Determine the number of object space references
-        let count = match object.props().get(prop_type) {
+        let count = match object.props.get(prop_type) {
             Some(prop) => prop.to_object_space_ids().ok_or_else(|| {
                 ErrorKind::MalformedOneNoteFileData(
                     "object space reference array is not a object id array".into(),
@@ -30,7 +31,7 @@ impl ObjectSpaceReference {
         // reference
         let offset = Self::get_offset(prop_type, object)?;
 
-        let references = object.props().object_space_ids();
+        let references = object.props.object_space_ids();
 
         // Look up the object space references by offset/count and resolve them
         let object_space_ids = references

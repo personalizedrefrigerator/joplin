@@ -1,5 +1,5 @@
 [package]
-name = "parser"
+name = "onenote_parser"
 version = "0.0.1"
 authors = ["Pedro Luiz <pedrlz.frn@gmail.com>"]
 edition = "2024"
@@ -8,22 +8,29 @@ license = "MPL-2.0-no-copyleft-exception"
 repository = "https://github.com/laurent22/joplin"
 keywords = ["onenote"]
 
+[features]
+backtrace = []
+
 [dependencies]
-color-eyre = "0.5"
-log = "0.4.11"
-mime_guess = "2.0.3"
-palette = "0.5.0"
-regex = "1"
-sanitize-filename = "0.3.0"
-console_error_panic_hook = "0.1.7"
-encoding_rs = "0.8.31"
-enum-primitive-derive = "0.2.2"
-itertools = "0.10.3"
+bytes = "1.11"
+encoding_rs = "0.8"
+enum-primitive-derive = "0.3"
+itertools = "0.14"
+log = "0.4"
 num-traits = "0.2"
-uuid = "1.1.2"
-lazy_static = "1.4"
+sanitise-file-name = "1.0"
+thiserror = "2.0"
+uuid = "1.19"
+widestring = "1.2"
+
+onenote_parser_macros = { path = "../onenote_parser_macros" }
 parser-utils = { path = "../parser-utils" }
-parser-macros = { path = "../parser-macros" }
+
+[dev-dependencies]
+insta = "1.45"
+tempfile = "3.15"
+yare = "3.0.0"
+
 
 [dependencies.web-sys]
 version = "0.3"

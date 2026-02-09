@@ -1,10 +1,9 @@
+use crate::Reader;
+use crate::errors::Result;
+use crate::fsshttpb::data::exguid::ExGuid;
 use crate::fsshttpb::data::object_types::ObjectType;
 use crate::fsshttpb::data::stream_object::ObjectHeader;
 use crate::fsshttpb::data_element::DataElement;
-use crate::shared::exguid::ExGuid;
-use parser_utils::Reader;
-use parser_utils::errors::Result;
-use parser_utils::parse::ParseHttpb;
 
 impl DataElement {
     /// Parse a cell manifest.

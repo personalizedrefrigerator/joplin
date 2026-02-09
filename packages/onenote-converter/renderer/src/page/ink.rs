@@ -1,7 +1,7 @@
 use crate::page::Renderer;
 use crate::utils::{AttributeSet, StyleSet, px};
 use itertools::Itertools;
-use parser::contents::{Ink, InkBoundingBox, InkPoint, InkStroke};
+use onenote_parser::contents::{Ink, InkBoundingBox, InkPoint, InkStroke};
 
 impl<'a> Renderer<'a> {
     const SVG_SCALING_FACTOR: f32 = 2540.0 / 96.0;

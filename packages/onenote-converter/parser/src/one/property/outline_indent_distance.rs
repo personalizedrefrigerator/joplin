@@ -1,7 +1,7 @@
+use crate::errors::{ErrorKind, Result};
 use crate::one::property::PropertyType;
-use crate::onestore::object::Object;
-use parser_utils::errors::{ErrorKind, Result};
-use parser_utils::reader::Reader;
+use crate::onestore::Object;
+use crate::reader::Reader;
 
 #[derive(Debug, Clone)]
 pub struct OutlineIndentDistance(Vec<f32>);
@@ -16,7 +16,7 @@ impl OutlineIndentDistance {
     }
 
     pub(crate) fn parse(object: &Object) -> Result<Option<OutlineIndentDistance>> {
-        let value = match object.props().get(PropertyType::RgOutlineIndentDistance) {
+        let value = match object.props.get(PropertyType::RgOutlineIndentDistance) {
             Some(value) => value.to_vec().ok_or_else(|| {
                 ErrorKind::MalformedOneNoteFileData("outline indent distance is not a vec".into())
             })?,

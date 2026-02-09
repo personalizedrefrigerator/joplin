@@ -1,7 +1,7 @@
-use crate::shared::compact_u64::CompactU64;
-use crate::shared::file_data_ref::FileBlob;
-use parser_utils::Reader;
-use parser_utils::errors::Result;
+use crate::Reader;
+use crate::errors::Result;
+use crate::fsshttpb::data::compact_u64::CompactU64;
+use crate::onestore::shared::file_blob::FileBlob;
 
 /// A byte array with the length determined by a `CompactU64`.
 ///

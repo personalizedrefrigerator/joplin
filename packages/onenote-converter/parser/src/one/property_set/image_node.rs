@@ -1,11 +1,12 @@
+use crate::errors::Result;
+use crate::fsshttpb::data::exguid::ExGuid;
 use crate::one::property::layout_alignment::LayoutAlignment;
 use crate::one::property::object_reference::ObjectReference;
+use crate::one::property::time::Time;
 use crate::one::property::{PropertyType, simple};
-use crate::one::property_set::PropertySetId;
 use crate::one::property_set::note_tag_container::Data as NoteTagData;
-use crate::onestore::object::Object;
-use crate::shared::exguid::ExGuid;
-use parser_utils::errors::Result;
+use crate::one::property_set::{PropertySetId, assert_property_set};
+use crate::onestore::Object;
 
 /// An embedded image.
 ///
@@ -15,7 +16,7 @@ use parser_utils::errors::Result;
 #[derive(Debug)]
 #[allow(dead_code)]
 pub(crate) struct Data {
-    // pub(crate) last_modified: Time,
+    pub(crate) last_modified: Option<Time>,
     pub(crate) picture_container: Option<ExGuid>,
     pub(crate) layout_max_width: Option<f32>,
     pub(crate) layout_max_height: Option<f32>,
@@ -39,17 +40,9 @@ pub(crate) struct Data {
 }
 
 pub(crate) fn parse(object: &Object) -> Result<Data> {
-    if object.id() != PropertySetId::ImageNode.as_jcid() {
-        return Err(unexpected_object_type_error!(object.id().0).into());
-    }
+    assert_property_set(object, PropertySetId::ImageNode)?;
 
-    // TODO: add support for last_modified
-    // let last_modified = Time::parse(PropertyType::LastModifiedTime, object)?.ok_or_else(|| now )?;
-    // let last_modified = match Time::parse(PropertyType::LastModifiedTime, object) {
-    //     Ok(time) => Ok(time.unwrap()),
-    //     Ok(None) => Ok(now),
-    //     Err(time_err) => Ok(now),
-    // }?;
+    let last_modified = Time::parse(PropertyType::LastModifiedTime, object)?;
     let picture_container = ObjectReference::parse(PropertyType::PictureContainer, object)?;
     let layout_max_width = simple::parse_f32(PropertyType::LayoutMaxWidth, object)?;
     let layout_max_height = simple::parse_f32(PropertyType::LayoutMaxHeight, object)?;
@@ -78,7 +71,7 @@ pub(crate) fn parse(object: &Object) -> Result<Data> {
         ObjectReference::parse_vec(PropertyType::ContentChildNodes, object)?.unwrap_or_default();
 
     let data = Data {
-        // last_modified,
+        last_modified,
         picture_container,
         layout_max_width,
         layout_max_height,

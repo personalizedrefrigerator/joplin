@@ -1,12 +1,11 @@
+use crate::Reader;
+use crate::errors::{ErrorKind, Result};
+use crate::fsshttpb::data::cell_id::CellId;
+use crate::fsshttpb::data::exguid::ExGuid;
 use crate::fsshttpb::data::object_types::ObjectType;
 use crate::fsshttpb::data::serial_number::SerialNumber;
 use crate::fsshttpb::data::stream_object::ObjectHeader;
 use crate::fsshttpb::data_element::DataElement;
-use crate::shared::cell_id::CellId;
-use crate::shared::exguid::ExGuid;
-use parser_utils::Reader;
-use parser_utils::errors::{ErrorKind, Result};
-use parser_utils::parse::ParseHttpb;
 use std::collections::HashMap;
 
 /// A storage index.
@@ -96,11 +95,7 @@ impl DataElement {
                 }
                 _ => {
                     return Err(ErrorKind::MalformedFssHttpBData(
-                        format!(
-                            "unexpected object type (in storage_index): {:x}",
-                            object_header.object_type
-                        )
-                        .into(),
+                        format!("unexpected object type: {:x}", object_header.object_type).into(),
                     )
                     .into());
                 }

@@ -1,6 +1,5 @@
-use parser_utils::Reader;
-use parser_utils::errors::Result;
-use parser_utils::parse::{Parse, ParseHttpb};
+use crate::Reader;
+use crate::errors::Result;
 use std::fmt;
 use std::ops::BitXor;
 use uuid::Uuid;
@@ -22,17 +21,7 @@ impl Guid {
         Uuid::parse_str(value).map(Guid).map_err(|e| e.into())
     }
 
-    pub(crate) fn nil() -> Guid {
-        Guid(Uuid::nil())
-    }
-
-    pub(crate) fn is_nil(&self) -> bool {
-        self.0.is_nil()
-    }
-}
-
-impl Parse for Guid {
-    fn parse(reader: Reader) -> Result<Guid> {
+    pub(crate) fn parse(reader: Reader) -> Result<Guid> {
         // Read as little endian
         let v = reader.get_u128()?;
 
@@ -61,11 +50,27 @@ impl Parse for Guid {
 
         Ok(guid)
     }
+
+    pub(crate) fn nil() -> Guid {
+        Guid(Uuid::nil())
+    }
+
+    pub(crate) fn is_nil(&self) -> bool {
+        self.0.is_nil()
+    }
 }
 
-impl ParseHttpb for Guid {
-    fn parse(reader: Reader) -> Result<Self> {
-        <Guid as Parse>::parse(reader)
+impl BitXor for Guid {
+    type Output = Self;
+
+    fn bitxor(self, rhs: Self) -> Self::Output {
+        let (high_bits_1, low_bits_1) = self.0.as_u64_pair();
+        let (high_bits_2, low_bits_2) = rhs.0.as_u64_pair();
+
+        let high_bits = high_bits_1 ^ high_bits_2;
+        let low_bits = low_bits_1 ^ low_bits_2;
+
+        Self(Uuid::from_u64_pair(high_bits, low_bits))
     }
 }
 
@@ -81,25 +86,33 @@ impl fmt::Debug for Guid {
     }
 }
 
-impl BitXor for Guid {
-    type Output = Self;
-    fn bitxor(self, rhs: Self) -> Self::Output {
-        let (high_bits_1, low_bits_1) = self.0.as_u64_pair();
-        let (high_bits_2, low_bits_2) = rhs.0.as_u64_pair();
-        let high_bits = high_bits_1 ^ high_bits_2;
-        let low_bits = low_bits_1 ^ low_bits_2;
-        Self(Uuid::from_u64_pair(high_bits, low_bits))
-    }
-}
-
 #[cfg(test)]
-mod test {
+mod tests {
     use super::Guid;
+    use crate::reader::Reader;
+    use uuid::Uuid;
 
     #[test]
-    fn should_support_xor() {
-        let zeros = Guid::from_str("{00000000-0000-0000-0000-000000000000}").unwrap();
-        let nonzero = Guid::from_str("{10100300-0400-0500-0600-008000900A00}").unwrap();
-        assert_eq!(zeros ^ nonzero, nonzero,);
+    fn test_parse_mixed_endian() {
+        let bytes = [
+            0x33, 0x22, 0x11, 0x00, 0x55, 0x44, 0x77, 0x66, 0x88, 0x99, 0xAA, 0xBB, 0xCC, 0xDD,
+            0xEE, 0xFF,
+        ];
+
+        let guid = Guid::parse(&mut Reader::new(&bytes)).unwrap();
+        let expected = Uuid::parse_str("00112233-4455-6677-8899-aabbccddeeff").unwrap();
+
+        assert_eq!(guid.0, expected);
+        assert_eq!(
+            format!("{}", guid),
+            "{00112233-4455-6677-8899-AABBCCDDEEFF}"
+        );
+    }
+
+    #[test]
+    fn test_nil_guid() {
+        let guid = Guid::nil();
+        assert!(guid.is_nil());
+        assert_eq!(guid.0, Uuid::nil());
     }
 }

@@ -1,3 +1,5 @@
+use crate::errors::{ErrorKind, Result};
+use crate::fsshttpb::data::exguid::ExGuid;
 use crate::one::property::color_ref::ColorRef;
 use crate::one::property::note_tag::{ActionItemStatus, ActionItemType};
 use crate::one::property::note_tag_property_status::NoteTagPropertyStatus;
@@ -5,9 +7,7 @@ use crate::one::property::note_tag_shape::NoteTagShape;
 use crate::one::property::time::Time;
 use crate::one::property_set::note_tag_container::Data;
 use crate::one::property_set::note_tag_shared_definition_container;
-use crate::onestore::object_space::ObjectSpaceRef;
-use crate::shared::exguid::ExGuid;
-use parser_utils::errors::{ErrorKind, Result};
+use crate::onestore::ObjectSpace;
 
 /// A note tag.
 ///
@@ -91,7 +91,10 @@ impl NoteTagDefinition {
     }
 }
 
-pub(crate) fn parse_note_tags(note_tags: Vec<Data>, space: ObjectSpaceRef) -> Result<Vec<NoteTag>> {
+pub(crate) fn parse_note_tags(
+    note_tags: &[Data],
+    space: &(impl ObjectSpace + ?Sized),
+) -> Result<Vec<NoteTag>> {
     note_tags
         .into_iter()
         .map(|data| {
@@ -100,7 +103,7 @@ pub(crate) fn parse_note_tags(note_tags: Vec<Data>, space: ObjectSpaceRef) -> Re
                 item_status: data.item_status,
                 definition: data
                     .definition
-                    .map(|definition_id| parse_note_tag_definition(definition_id, space.clone()))
+                    .map(|definition_id| parse_note_tag_definition(definition_id, space))
                     .transpose()?,
             })
         })
@@ -109,13 +112,13 @@ pub(crate) fn parse_note_tags(note_tags: Vec<Data>, space: ObjectSpaceRef) -> Re
 
 pub(crate) fn parse_note_tag_definition(
     definition_id: ExGuid,
-    space: ObjectSpaceRef,
+    space: &(impl ObjectSpace + ?Sized),
 ) -> Result<NoteTagDefinition> {
     let object = space
         .get_object(definition_id)
         .ok_or_else(|| ErrorKind::MalformedOneNoteData("note tag definition is missing".into()))?;
 
-    let data = note_tag_shared_definition_container::parse(&object)?;
+    let data = note_tag_shared_definition_container::parse(object)?;
 
     let definition = NoteTagDefinition {
         label: data.label,

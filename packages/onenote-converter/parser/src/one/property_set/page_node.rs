@@ -1,12 +1,12 @@
+use crate::errors::Result;
+use crate::fsshttpb::data::exguid::ExGuid;
 use crate::one::property::author::Author;
 use crate::one::property::object_reference::ObjectReference;
 use crate::one::property::page_size::PageSize;
 use crate::one::property::time::Time;
 use crate::one::property::{PropertyType, simple};
-use crate::one::property_set::PropertySetId;
-use crate::onestore::object::Object;
-use crate::shared::exguid::ExGuid;
-use parser_utils::errors::Result;
+use crate::one::property_set::{PropertySetId, assert_property_set};
+use crate::onestore::Object;
 
 /// A page.
 ///
@@ -18,26 +18,24 @@ use parser_utils::errors::Result;
 pub(crate) struct Data {
     pub(crate) last_modified: Option<Time>,
     pub(crate) cached_title: Option<String>,
-    pub(crate) author: Option<Author>, // FIXME: Force this?
+    pub(crate) author: Option<Author>,
     pub(crate) content: Vec<ExGuid>,
     pub(crate) title: Option<ExGuid>,
     pub(crate) orientation_portrait: bool,
-    pub(crate) page_width: Option<f32>,  // FIXME: Force this?
-    pub(crate) page_height: Option<f32>, // FIXME: Force this?
+    pub(crate) page_width: Option<f32>,
+    pub(crate) page_height: Option<f32>,
     pub(crate) page_margin_origin_x: Option<f32>,
     pub(crate) page_margin_origin_y: Option<f32>,
-    pub(crate) page_margin_left: Option<f32>, // FIXME: Force this?
-    pub(crate) page_margin_right: Option<f32>, // FIXME: Force this?
-    pub(crate) page_margin_top: Option<f32>,  // FIXME: Force this?
-    pub(crate) page_margin_bottom: Option<f32>, // FIXME: Force this?
+    pub(crate) page_margin_left: Option<f32>,
+    pub(crate) page_margin_right: Option<f32>,
+    pub(crate) page_margin_top: Option<f32>,
+    pub(crate) page_margin_bottom: Option<f32>,
     pub(crate) page_size: PageSize,
     pub(crate) rtl: bool,
 }
 
 pub(crate) fn parse(object: &Object) -> Result<Data> {
-    if object.id() != PropertySetId::PageNode.as_jcid() {
-        return Err(unexpected_object_type_error!(object.id().0).into());
-    }
+    assert_property_set(object, PropertySetId::PageNode)?;
 
     let last_modified = Time::parse(PropertyType::LastModifiedTime, object)?;
     let cached_title = simple::parse_string(PropertyType::CachedTitleStringFromPage, object)?;

@@ -1,8 +1,8 @@
 use crate::page::Renderer;
 use crate::utils::{AttributeSet, StyleSet};
-use parser::contents::{NoteTag, OutlineElement};
-use parser::property::common::ColorRef;
-use parser::property::note_tag::{ActionItemStatus, NoteTagShape};
+use onenote_parser::contents::{NoteTag, OutlineElement};
+use onenote_parser::property::common::ColorRef;
+use onenote_parser::property::note_tag::{ActionItemStatus, NoteTagShape};
 use parser_utils::log_warn;
 use std::borrow::Cow;
 

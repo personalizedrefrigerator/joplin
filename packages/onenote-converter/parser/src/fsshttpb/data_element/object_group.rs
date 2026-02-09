@@ -1,13 +1,12 @@
+use crate::Reader;
+use crate::errors::{ErrorKind, Result};
 use crate::fsshttpb::data::binary_item::BinaryItem;
+use crate::fsshttpb::data::cell_id::CellId;
+use crate::fsshttpb::data::compact_u64::CompactU64;
+use crate::fsshttpb::data::exguid::ExGuid;
 use crate::fsshttpb::data::object_types::ObjectType;
 use crate::fsshttpb::data::stream_object::ObjectHeader;
 use crate::fsshttpb::data_element::DataElement;
-use crate::shared::cell_id::CellId;
-use crate::shared::compact_u64::CompactU64;
-use crate::shared::exguid::ExGuid;
-use parser_utils::Reader;
-use parser_utils::errors::{ErrorKind, Result};
-use parser_utils::parse::ParseHttpb;
 use std::fmt;
 
 /// An object group.
@@ -85,8 +84,8 @@ pub(crate) enum ObjectChangeFrequency {
 }
 
 impl ObjectChangeFrequency {
-    fn parse(value: u64) -> ObjectChangeFrequency {
-        match value {
+    fn parse(value: u64) -> Result<ObjectChangeFrequency> {
+        let frequency = match value {
             x if x == ObjectChangeFrequency::Unknown as u64 => ObjectChangeFrequency::Unknown,
             x if x == ObjectChangeFrequency::Frequent as u64 => ObjectChangeFrequency::Frequent,
             x if x == ObjectChangeFrequency::Infrequent as u64 => ObjectChangeFrequency::Infrequent,
@@ -94,8 +93,15 @@ impl ObjectChangeFrequency {
                 ObjectChangeFrequency::Independent
             }
             x if x == ObjectChangeFrequency::Custom as u64 => ObjectChangeFrequency::Custom,
-            x => panic!("unexpected change frequency: {}", x),
-        }
+            x => {
+                return Err(ErrorKind::MalformedFssHttpBData(
+                    format!("unexpected change frequency: {x}").into(),
+                )
+                .into());
+            }
+        };
+
+        Ok(frequency)
     }
 }
 
@@ -185,11 +191,7 @@ impl DataElement {
                 let object_header = ObjectHeader::parse(reader)?;
                 if object_header.object_type != ObjectType::ObjectGroupData {
                     return Err(ErrorKind::MalformedFssHttpBData(
-                        format!(
-                            "unexpected object type (in object_group): {:x}",
-                            object_header.object_type
-                        )
-                        .into(),
+                        format!("unexpected object type: {:x}", object_header.object_type).into(),
                     )
                     .into());
                 }
@@ -197,11 +199,7 @@ impl DataElement {
             ObjectType::ObjectGroupData => {} // Skip, will be parsed below
             _ => {
                 return Err(ErrorKind::MalformedFssHttpBData(
-                    format!(
-                        "unexpected object type (in object_group): {:x}",
-                        object_header.object_type
-                    )
-                    .into(),
+                    format!("unexpected object type: {:x}", object_header.object_type).into(),
                 )
                 .into());
             }
@@ -261,11 +259,7 @@ impl DataElement {
                 }
                 _ => {
                     return Err(ErrorKind::MalformedFssHttpBData(
-                        format!(
-                            "unexpected object type (in object_group): {:x}",
-                            object_header.object_type
-                        )
-                        .into(),
+                        format!("unexpected object type: {:x}", object_header.object_type).into(),
                     )
                     .into());
                 }
@@ -289,7 +283,7 @@ impl DataElement {
 
             let frequency = CompactU64::parse(reader)?;
             declarations.push(ObjectGroupMetadata {
-                change_frequency: ObjectChangeFrequency::parse(frequency.value()),
+                change_frequency: ObjectChangeFrequency::parse(frequency.value())?,
             })
         }
 
@@ -309,21 +303,21 @@ impl DataElement {
             let object_header = ObjectHeader::parse(reader)?;
             match object_header.object_type {
                 ObjectType::ObjectGroupDataExcluded => {
-                    let group = ExGuid::parse_array_httpb(reader)?;
+                    let group = ExGuid::parse_array(reader)?;
                     let cells = CellId::parse_array(reader)?;
                     let size = CompactU64::parse(reader)?.value();
 
                     objects.push(ObjectGroupData::ObjectExcluded { group, cells, size })
                 }
                 ObjectType::ObjectGroupDataObject => {
-                    let group = ExGuid::parse_array_httpb(reader)?;
+                    let group = ExGuid::parse_array(reader)?;
                     let cells = CellId::parse_array(reader)?;
                     let data = BinaryItem::parse(reader)?.value();
 
                     objects.push(ObjectGroupData::Object { group, cells, data })
                 }
                 ObjectType::ObjectGroupBlobReference => {
-                    let references = ExGuid::parse_array_httpb(reader)?;
+                    let references = ExGuid::parse_array(reader)?;
                     let cells = CellId::parse_array(reader)?;
                     let blob = ExGuid::parse(reader)?;
 
@@ -335,11 +329,7 @@ impl DataElement {
                 }
                 _ => {
                     return Err(ErrorKind::MalformedFssHttpBData(
-                        format!(
-                            "unexpected object type (in object_group): {:x}",
-                            object_header.object_type
-                        )
-                        .into(),
+                        format!("unexpected object type: {:x}", object_header.object_type).into(),
                     )
                     .into());
                 }

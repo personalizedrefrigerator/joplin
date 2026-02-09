@@ -1,5 +1,5 @@
 use color_eyre::eyre::{Result, eyre};
-pub use parser::Parser;
+pub use onenote_parser::Parser;
 use sanitize_filename::sanitize;
 use std::{io::Read, panic};
 use wasm_bindgen::{JsError, prelude::wasm_bindgen};
@@ -41,36 +41,21 @@ pub fn convert(path: &str, output_dir: &str, base_path: &str) -> Result<()> {
 
     match extension.as_str() {
         ".one" => {
-            let _name: String = fs_driver().get_file_name(path).expect("Missing file name");
-            log!("Parsing .one file: {}", _name);
+            let name: String = fs_driver().get_file_name(path).expect("Missing file name");
+            log!("Parsing .one file: {}", name);
 
             if path.contains("OneNote_RecycleBin") {
                 return Ok(());
             }
 
-            let section = Parser::new().parse_section(path.to_owned())?;
+            let data = fs_driver().read_file(path)?;
+            let section = Parser::new().parse_section_buffer(&data, &name)?;
 
             let section_output_dir = fs_driver().get_output_path(base_path, output_dir, path);
             section::Renderer::new().render(&section, section_output_dir.to_owned())?;
         }
         ".onetoc2" => {
-            let _name: String = fs_driver().get_file_name(path).expect("Missing file name");
-            log!("Parsing .onetoc2 file: {}", _name);
-
-            let notebook = Parser::new().parse_notebook(path.to_owned())?;
-
-            let notebook_name = fs_driver()
-                .get_parent_dir(path)
-                .expect("Input file has no parent folder");
-            if notebook_name.is_empty() {
-                panic!("Parent directory has no name");
-            }
-            log!("notebook name: {:?}", notebook_name);
-
-            let notebook_output_dir = fs_driver().get_output_path(base_path, output_dir, path);
-            log!("Notebook directory: {:?}", notebook_output_dir);
-
-            notebook::Renderer::new().render(&notebook, &notebook_name, &notebook_output_dir)?;
+            todo!("Not supported for now: .onetoc2");
         }
         ".onepkg" => {
             let file_data = fs_driver().open_file(path)?;
@@ -133,7 +118,7 @@ fn convert_onepkg(file_data: Box<dyn FileHandle>, output_dir: &str) -> Result<()
             };
 
             let (output_path, file_name) = build_output_dir(&file_path)?;
-            let section = parser.parse_section_from_data(&data, &file_name)?;
+            let section = parser.parse_section_buffer(&data, &file_name)?;
             section::Renderer::new().render(&section, output_path)?;
             Ok(())
         })

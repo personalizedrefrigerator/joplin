@@ -1,12 +1,11 @@
+use crate::Reader;
+use crate::errors::Result;
+use crate::fsshttpb::data::cell_id::CellId;
+use crate::fsshttpb::data::exguid::ExGuid;
 use crate::fsshttpb::data::object_types::ObjectType;
 use crate::fsshttpb::data::stream_object::ObjectHeader;
 use crate::fsshttpb::data_element::DataElement;
-use crate::shared::cell_id::CellId;
-use crate::shared::exguid::ExGuid;
 use crate::shared::guid::Guid;
-use parser_utils::Reader;
-use parser_utils::errors::Result;
-use parser_utils::parse::ParseHttpb;
 use std::collections::HashMap;
 
 /// A storage manifest.
@@ -35,7 +34,7 @@ impl DataElement {
 
             ObjectHeader::try_parse_16(reader, ObjectType::StorageManifestRoot)?;
 
-            let root_manifest = <ExGuid as ParseHttpb>::parse(reader)?;
+            let root_manifest = ExGuid::parse(reader)?;
             let cell = CellId::parse(reader)?;
 
             roots.insert(root_manifest, cell);

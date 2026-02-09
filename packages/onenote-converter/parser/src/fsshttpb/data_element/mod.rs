@@ -1,3 +1,7 @@
+use crate::Reader;
+use crate::errors::{ErrorKind, Result};
+use crate::fsshttpb::data::compact_u64::CompactU64;
+use crate::fsshttpb::data::exguid::ExGuid;
 use crate::fsshttpb::data::object_types::ObjectType;
 use crate::fsshttpb::data::serial_number::SerialNumber;
 use crate::fsshttpb::data::stream_object::ObjectHeader;
@@ -7,12 +11,7 @@ use crate::fsshttpb::data_element::object_group::ObjectGroup;
 use crate::fsshttpb::data_element::revision_manifest::RevisionManifest;
 use crate::fsshttpb::data_element::storage_index::StorageIndex;
 use crate::fsshttpb::data_element::storage_manifest::StorageManifest;
-use crate::shared::compact_u64::CompactU64;
-use crate::shared::exguid::ExGuid;
-use crate::shared::file_data_ref::FileBlob;
-use parser_utils::Reader;
-use parser_utils::errors::{ErrorKind, Result};
-use parser_utils::parse::ParseHttpb;
+use crate::onestore::shared::file_blob::FileBlob;
 use std::collections::HashMap;
 use std::fmt::Debug;
 
@@ -150,12 +149,9 @@ impl DataElementPackage {
         storage_index: &StorageIndex,
         cell_manifest_id: ExGuid,
     ) -> Option<ExGuid> {
-        let resolved = self
-            .find_cell_revision_id(cell_manifest_id)
+        self.find_cell_revision_id(cell_manifest_id)
             .and_then(|revision_id| self.resolve_revision_manifest_id(storage_index, revision_id))
-            .or_else(|| self.resolve_revision_manifest_id(storage_index, cell_manifest_id));
-
-        resolved
+            .or_else(|| self.resolve_revision_manifest_id(storage_index, cell_manifest_id))
     }
 
     /// Look up a revision manifest by its ID.

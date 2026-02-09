@@ -1,7 +1,7 @@
 use crate::{page::Renderer, utils::StyleSet};
 use color_eyre::Result;
-use parser::contents::EmbeddedFile;
-use parser::property::embedded_file::FileType;
+use onenote_parser::contents::EmbeddedFile;
+use onenote_parser::property::embedded_file::FileType;
 use parser_utils::{fs_driver, log};
 
 impl<'a> Renderer<'a> {

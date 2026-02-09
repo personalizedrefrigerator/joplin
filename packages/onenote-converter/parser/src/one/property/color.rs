@@ -1,6 +1,6 @@
+use crate::errors::{ErrorKind, Result};
 use crate::one::property::PropertyType;
-use crate::onestore::object::Object;
-use parser_utils::errors::{ErrorKind, Result};
+use crate::onestore::Object;
 
 /// A RGBA color value.
 ///
@@ -39,7 +39,7 @@ impl Color {
 
 impl Color {
     pub(crate) fn parse(prop_type: PropertyType, object: &Object) -> Result<Option<Color>> {
-        let value = match object.props().get(prop_type) {
+        let value = match object.props.get(prop_type) {
             Some(value) => value
                 .to_u32()
                 .ok_or_else(|| ErrorKind::MalformedOneNoteFileData("color is not a u32".into()))?,

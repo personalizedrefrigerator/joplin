@@ -1,5 +1,6 @@
-use crate::{one::property::PropertyType, onestore::object::Object};
-use parser_utils::errors::{ErrorKind, Result};
+use crate::errors::{ErrorKind, Result};
+use crate::one::property::PropertyType;
+use crate::onestore::Object;
 
 /// An embedded file's file type.
 ///
@@ -20,7 +21,7 @@ pub enum FileType {
 
 impl FileType {
     pub(crate) fn parse(object: &Object) -> Result<FileType> {
-        let value = match object.props().get(PropertyType::IRecordMedia) {
+        let value = match object.props.get(PropertyType::IRecordMedia) {
             Some(value) => value.to_u32().ok_or_else(|| {
                 ErrorKind::MalformedOneNoteFileData("file type status is not a u32".into())
             })?,
@@ -34,7 +35,7 @@ impl FileType {
                 return Err(ErrorKind::MalformedOneNoteFileData(
                     format!("invalid file type: {}", value).into(),
                 )
-                .into())
+                .into());
             }
         };
 

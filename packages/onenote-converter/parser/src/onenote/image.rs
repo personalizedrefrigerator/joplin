@@ -1,13 +1,11 @@
-use std::rc::Rc;
-
+use crate::errors::{ErrorKind, Result};
+use crate::fsshttpb::data::exguid::ExGuid;
 use crate::one::property::layout_alignment::LayoutAlignment;
 use crate::one::property_set::{image_node, picture_container};
 use crate::onenote::iframe::{IFrame, parse_iframe};
 use crate::onenote::note_tag::{NoteTag, parse_note_tags};
-use crate::onestore::object_space::ObjectSpaceRef;
-use crate::shared::exguid::ExGuid;
-use crate::shared::file_data_ref::FileBlob;
-use parser_utils::errors::{ErrorKind, Result};
+use crate::onestore::ObjectSpace;
+use crate::onestore::shared::file_blob::FileBlob;
 
 /// An embedded image.
 ///
@@ -54,8 +52,8 @@ impl Image {
     /// The image's binary data.
     ///
     /// If `None` this means that the image data hasn't been uploaded yet.
-    pub fn data(&self) -> Option<Rc<Vec<u8>>> {
-        self.data.as_ref().map(|data| data.0.clone())
+    pub fn data(&self) -> Option<&[u8]> {
+        self.data.as_ref().map(|blob| blob.as_ref())
     }
 
     /// The image's file extension.
@@ -199,11 +197,11 @@ impl Image {
     }
 }
 
-pub(crate) fn parse_image(image_id: ExGuid, space: ObjectSpaceRef) -> Result<Image> {
+pub(crate) fn parse_image(image_id: ExGuid, space: &(impl ObjectSpace + ?Sized)) -> Result<Image> {
     let node_object = space
         .get_object(image_id)
         .ok_or_else(|| ErrorKind::MalformedOneNoteData("image is missing".into()))?;
-    let node = image_node::parse(&node_object)?;
+    let node = image_node::parse(node_object)?;
 
     let container_data = node
         .picture_container
@@ -213,7 +211,7 @@ pub(crate) fn parse_image(image_id: ExGuid, space: ObjectSpaceRef) -> Result<Ima
                 .ok_or_else(|| ErrorKind::MalformedOneNoteData("image container is missing".into()))
         })
         .transpose()?
-        .map(|container_object| picture_container::parse(&container_object))
+        .map(picture_container::parse)
         .transpose()?;
 
     let (data, extension) = if let Some(data) = container_data {
@@ -225,30 +223,28 @@ pub(crate) fn parse_image(image_id: ExGuid, space: ObjectSpaceRef) -> Result<Ima
     let embed = node
         .iframe
         .into_iter()
-        .map(|iframe_id| parse_iframe(iframe_id, space.clone()))
+        .map(|iframe_id| parse_iframe(iframe_id, space))
         .collect::<Result<_>>()?;
-
-    // TODO: Parse language code
 
     let image = Image {
         data,
         extension,
         layout_max_width: node.layout_max_width,
         layout_max_height: node.layout_max_height,
-        alt_text: node.alt_text.map(String::from),
+        alt_text: node.alt_text,
         layout_alignment_in_parent: node.layout_alignment_in_parent,
         layout_alignment_self: node.layout_alignment_self,
         image_filename: node.image_filename,
         displayed_page_number: node.displayed_page_number,
-        text: node.text.map(String::from),
+        text: node.text,
         text_language_code: node.text_language_code,
         picture_width: node.picture_width,
         picture_height: node.picture_height,
-        hyperlink_url: node.hyperlink_url.map(String::from),
+        hyperlink_url: node.hyperlink_url,
         offset_horizontal: node.offset_from_parent_horiz,
         offset_vertical: node.offset_from_parent_vert,
         is_background: node.is_background,
-        note_tags: parse_note_tags(node.note_tags, space)?,
+        note_tags: parse_note_tags(&*node.note_tags, space)?,
         embeds: embed,
     };
 

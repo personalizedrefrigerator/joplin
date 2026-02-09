@@ -1,6 +1,5 @@
 use crate::{
-    one::property::PropertyType, onenote::rich_text::ParagraphStyling,
-    shared::prop_set::PropertySet,
+    one::property::PropertyType, onenote::rich_text::ParagraphStyling, onestore::shared::prop_set::PropertySet,
 };
 use parser_utils::{Utf16ToString, errors::Result};
 
@@ -306,12 +305,12 @@ impl TextRegionParser {
 
 fn text_region_to_latex(text: &str, additional_data: &PropertySet) -> Result<String> {
     let op_type = match additional_data
-        .get_from_type(PropertyType::MathOperator)
+        .get_from_type(PropertyType::MathInlineObjectChar)
         .and_then(|operator_value| operator_value.to_u32())
     {
         Some(21) => {
             let variant = additional_data
-                .get_from_type(PropertyType::MathUnknown1)
+                .get_from_type(PropertyType::MathInlineObjectType)
                 .and_then(|variant| variant.to_u16())
                 .unwrap_or_default();
             if variant == 8721 {

@@ -1,15 +1,14 @@
+use crate::errors::{ErrorKind, Result};
 use crate::one::property::PropertyType;
-use crate::onestore::object::Object;
+use crate::onestore::Object;
+use crate::onestore::shared::prop_set::PropertySet;
+use crate::reader::Reader;
 use crate::shared::guid::Guid;
-use crate::shared::prop_set::PropertySet;
+use crate::utils::Utf16ToString;
 use encoding_rs::mem::decode_latin1;
-use parser_utils::Utf16ToString;
-use parser_utils::errors::{ErrorKind, Result};
-use parser_utils::parse::Parse;
-use parser_utils::reader::Reader;
 
 pub(crate) fn parse_bool(prop_type: PropertyType, object: &Object) -> Result<Option<bool>> {
-    let value = match object.props().get(prop_type) {
+    let value = match object.props.get(prop_type) {
         Some(value) => value.to_bool().ok_or_else(|| {
             ErrorKind::MalformedOneNoteFileData("bool value is not a bool".into())
         })?,
@@ -20,7 +19,7 @@ pub(crate) fn parse_bool(prop_type: PropertyType, object: &Object) -> Result<Opt
 }
 
 pub(crate) fn parse_u8(prop_type: PropertyType, object: &Object) -> Result<Option<u8>> {
-    let value = match object.props().get(prop_type) {
+    let value = match object.props.get(prop_type) {
         Some(value) => value
             .to_u8()
             .ok_or_else(|| ErrorKind::MalformedOneNoteFileData("u8 value is not a u8".into()))?,
@@ -31,7 +30,7 @@ pub(crate) fn parse_u8(prop_type: PropertyType, object: &Object) -> Result<Optio
 }
 
 pub(crate) fn parse_u16(prop_type: PropertyType, object: &Object) -> Result<Option<u16>> {
-    let value = match object.props().get(prop_type) {
+    let value = match object.props.get(prop_type) {
         Some(value) => value
             .to_u16()
             .ok_or_else(|| ErrorKind::MalformedOneNoteFileData("u16 value is not a u16".into()))?,
@@ -42,7 +41,7 @@ pub(crate) fn parse_u16(prop_type: PropertyType, object: &Object) -> Result<Opti
 }
 
 pub(crate) fn parse_u32(prop_type: PropertyType, object: &Object) -> Result<Option<u32>> {
-    let value = match object.props().get(prop_type) {
+    let value = match object.props.get(prop_type) {
         Some(value) => value
             .to_u32()
             .ok_or_else(|| ErrorKind::MalformedOneNoteFileData("u32 value is not a u32".into()))?,
@@ -68,7 +67,7 @@ pub(crate) fn parse_u32(prop_type: PropertyType, object: &Object) -> Result<Opti
 // }
 
 pub(crate) fn parse_f32(prop_type: PropertyType, object: &Object) -> Result<Option<f32>> {
-    let value = match object.props().get(prop_type) {
+    let value = match object.props.get(prop_type) {
         Some(value) => value.to_u32().ok_or_else(|| {
             ErrorKind::MalformedOneNoteFileData("float value is not a u32".into())
         })?,
@@ -79,7 +78,7 @@ pub(crate) fn parse_f32(prop_type: PropertyType, object: &Object) -> Result<Opti
 }
 
 pub(crate) fn parse_vec(prop_type: PropertyType, object: &Object) -> Result<Option<Vec<u8>>> {
-    let data = match object.props().get(prop_type) {
+    let data = match object.props.get(prop_type) {
         Some(value) => value
             .to_vec()
             .ok_or_else(|| ErrorKind::MalformedOneNoteFileData("vec value is not a vec".into()))?,
@@ -90,7 +89,7 @@ pub(crate) fn parse_vec(prop_type: PropertyType, object: &Object) -> Result<Opti
 }
 
 pub(crate) fn parse_vec_u16(prop_type: PropertyType, object: &Object) -> Result<Option<Vec<u16>>> {
-    let data = match object.props().get(prop_type) {
+    let data = match object.props.get(prop_type) {
         Some(value) => value.to_vec().ok_or_else(|| {
             ErrorKind::MalformedOneNoteFileData("vec u16 value is not a vec".into())
         })?,
@@ -106,7 +105,7 @@ pub(crate) fn parse_vec_u16(prop_type: PropertyType, object: &Object) -> Result<
 }
 
 pub(crate) fn parse_vec_u32(prop_type: PropertyType, object: &Object) -> Result<Option<Vec<u32>>> {
-    let data = match object.props().get(prop_type) {
+    let data = match object.props.get(prop_type) {
         Some(value) => value
             .to_vec()
             .ok_or_else(|| ErrorKind::MalformedOneNoteFileData("vec value is not a vec".into()))?,
@@ -122,7 +121,7 @@ pub(crate) fn parse_vec_u32(prop_type: PropertyType, object: &Object) -> Result<
 }
 
 pub(crate) fn parse_ascii(prop_type: PropertyType, object: &Object) -> Result<Option<String>> {
-    let data = match object.props().get(prop_type) {
+    let data = match object.props.get(prop_type) {
         Some(value) => value.to_vec().ok_or_else(|| {
             ErrorKind::MalformedOneNoteFileData("ascii value is not a vec".into())
         })?,
@@ -135,7 +134,7 @@ pub(crate) fn parse_ascii(prop_type: PropertyType, object: &Object) -> Result<Op
 }
 
 pub(crate) fn parse_string(prop_type: PropertyType, object: &Object) -> Result<Option<String>> {
-    let data = match object.props().get(prop_type) {
+    let data = match object.props.get(prop_type) {
         Some(value) => value
             .to_vec()
             .ok_or_else(|| ErrorKind::MalformedOneNoteFileData("vec value is not a vec".into()))?,
@@ -150,7 +149,7 @@ pub(crate) fn parse_string(prop_type: PropertyType, object: &Object) -> Result<O
 }
 
 pub(crate) fn parse_guid(prop_type: PropertyType, object: &Object) -> Result<Option<Guid>> {
-    let data = match object.props().get(prop_type) {
+    let data = match object.props.get(prop_type) {
         Some(value) => value
             .to_vec()
             .ok_or_else(|| ErrorKind::MalformedOneNoteFileData("guid value is not a vec".into()))?,
@@ -164,7 +163,7 @@ pub(crate) fn parse_property_values(
     prop_type: PropertyType,
     object: &Object,
 ) -> Result<Option<&[PropertySet]>> {
-    let value = match object.props().get(prop_type) {
+    let value = match object.props.get(prop_type) {
         Some(value) => Some(
             value
                 .to_property_values()

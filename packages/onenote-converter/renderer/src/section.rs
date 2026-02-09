@@ -1,8 +1,8 @@
 use crate::errors::{ErrorKind, Result};
 use crate::templates::section::TocEntry;
 use crate::{page, templates};
-use parser::page::Page;
-use parser::section::Section;
+use onenote_parser::page::Page;
+use onenote_parser::section::Section;
 use parser_utils::fs_driver;
 use parser_utils::log;
 use parser_utils::log_warn;

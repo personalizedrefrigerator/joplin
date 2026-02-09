@@ -1,7 +1,7 @@
 use crate::section;
 use crate::utils::StyleSet;
 use color_eyre::Result;
-use parser::page::{Page, PageContent};
+use onenote_parser::page::{Page, PageContent};
 use std::collections::{HashMap, HashSet};
 
 pub(crate) mod content;
@@ -36,7 +36,7 @@ impl<'a> Renderer<'a> {
     }
 
     pub(crate) fn render_page(&mut self, page: &Page) -> Result<String> {
-        let title_text = page.title_text().unwrap_or("Untitled Page".to_string());
+        let title_text = page.title_text().unwrap_or("Untitled Page");
 
         let mut content = String::new();
 

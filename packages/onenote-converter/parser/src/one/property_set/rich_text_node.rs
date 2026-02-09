@@ -1,15 +1,17 @@
+use parser_utils::log_warn;
+
+use crate::errors::{ErrorKind, Result};
+use crate::fsshttpb::data::exguid::ExGuid;
 use crate::one::property::layout_alignment::LayoutAlignment;
 use crate::one::property::object_reference::ObjectReference;
 use crate::one::property::paragraph_alignment::ParagraphAlignment;
 use crate::one::property::time::Time;
 use crate::one::property::{PropertyType, simple};
-use crate::one::property_set::PropertySetId;
 use crate::one::property_set::note_tag_container::Data as NoteTagData;
-use crate::onestore::object::Object;
-use crate::shared::exguid::ExGuid;
-use crate::shared::prop_set::PropertySet;
-use parser_utils::errors::{ErrorKind, Result};
-use parser_utils::{Utf16ToString, log_warn};
+use crate::one::property_set::{PropertySetId, assert_property_set};
+use crate::onestore::Object;
+use crate::onestore::shared::prop_set::PropertySet;
+use crate::utils::Utf16ToString;
 
 /// A rich text paragraph.
 ///
@@ -44,9 +46,7 @@ pub(crate) struct Data {
 }
 
 pub(crate) fn parse(object: &Object) -> Result<Data> {
-    if object.id() != PropertySetId::RichTextNode.as_jcid() {
-        return Err(unexpected_object_type_error!(object.id().0).into());
-    }
+    assert_property_set(object, PropertySetId::RichTextNode)?;
 
     let last_modified_time =
         Time::parse(PropertyType::LastModifiedTime, object)?.ok_or_else(|| {
@@ -68,11 +68,11 @@ pub(crate) fn parse(object: &Object) -> Result<Data> {
         Ok(Some(style)) => style,
         Ok(None) => {
             log_warn!("rich text has no paragraph style");
-            ExGuid::fallback()
+            ExGuid::default()
         }
         Err(e) => {
             log_warn!("error parsing paragraph style: {:?}", e);
-            ExGuid::fallback()
+            ExGuid::default()
         }
     };
     let paragraph_space_before =

@@ -1,6 +1,6 @@
+use crate::errors::{ErrorKind, Result};
 use crate::one::property::PropertyType;
-use crate::onestore::object::Object;
-use parser_utils::errors::{ErrorKind, Result};
+use crate::onestore::Object;
 
 /// The action status of a note tag.
 ///
@@ -33,7 +33,7 @@ impl ActionItemStatus {
 
 impl ActionItemStatus {
     pub(crate) fn parse(object: &Object) -> Result<Option<ActionItemStatus>> {
-        let value = match object.props().get(PropertyType::ActionItemStatus) {
+        let value = match object.props.get(PropertyType::ActionItemStatus) {
             Some(value) => value.to_u16().ok_or_else(|| {
                 ErrorKind::MalformedOneNoteFileData("action item status is not a u16".into())
             })?,
@@ -72,7 +72,7 @@ pub enum ActionItemType {
 
 impl ActionItemType {
     pub(crate) fn parse(object: &Object) -> Result<Option<ActionItemType>> {
-        let value = match object.props().get(PropertyType::ActionItemType) {
+        let value = match object.props.get(PropertyType::ActionItemType) {
             Some(value) => value.to_u16().ok_or_else(|| {
                 ErrorKind::MalformedOneNoteFileData("action item type is not a u16".into())
             })?,

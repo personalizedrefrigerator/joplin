@@ -1,8 +1,18 @@
+use crate::errors::{ErrorKind, Result};
+use crate::fsshttpb::packaging::{OneStorePackaging, embedded_packaging_offset};
 use crate::onenote::notebook::Notebook;
 use crate::onenote::section::{Section, SectionEntry, SectionGroup};
-use crate::onestore::{OneStoreType, parse_onestore};
-use parser_utils::errors::{ErrorKind, Result};
-use parser_utils::{fs_driver, log, reader::Reader};
+use crate::onestore::desktop::one_store_file::RevisionStore;
+use crate::onestore::desktop::parse::Parse;
+use crate::onestore::fsshttpb::parse_store;
+use crate::onestore::{ObjectSpace, OneStore, OneStoreType};
+use crate::reader::Reader;
+use crate::shared::guid::Guid;
+use sanitise_file_name::sanitise;
+use std::ffi::OsStr;
+use std::fs::File;
+use std::io::{BufReader, Read};
+use std::path::{Component, Path, PathBuf};
 
 pub(crate) mod content;
 pub(crate) mod embedded_file;
@@ -10,6 +20,8 @@ pub(crate) mod iframe;
 pub(crate) mod image;
 pub(crate) mod ink;
 pub(crate) mod list;
+pub(crate) mod math_inline_object;
+pub(crate) mod text_region;
 pub(crate) mod note_tag;
 pub(crate) mod notebook;
 pub(crate) mod outline;
@@ -19,13 +31,24 @@ pub(crate) mod page_series;
 pub(crate) mod rich_text;
 pub(crate) mod section;
 pub(crate) mod table;
-pub(crate) mod text_region;
 
 /// The OneNote file parser.
+///
+/// Use [`Parser::parse_notebook`] to load a notebook from a `.onetoc2` file or
+/// [`Parser::parse_section`] to load a single `.one` section. These methods
+/// auto-detect OneNote 2016 (desktop) and OneDrive (FSSHTTP) formats and will
+/// return an error if the input is not the expected file type.
+///
+/// # Thread safety
+///
+/// The parser is stateless and can be shared across threads.
 pub struct Parser;
 
 impl Parser {
     /// Create a new OneNote file parser.
+    ///
+    /// The parser holds no state; reuse a single instance across multiple
+    /// parses if desired.
     pub fn new() -> Parser {
         Parser {}
     }
@@ -35,89 +58,365 @@ impl Parser {
     /// The `path` argument must point to a `.onetoc2` file. This will parse the
     /// table of contents of the notebook as well as all contained
     /// sections from the folder that the table of contents file is in.
-    pub fn parse_notebook(&mut self, path: String) -> Result<Notebook> {
-        log!("Parsing notebook: {:?}", path);
-        let data = fs_driver().read_file(&path)?;
-        let store = parse_onestore(&mut Reader::new(&data))?;
+    ///
+    /// Returns [`ErrorKind::NotATocFile`] if the file is not a notebook table of
+    /// contents.
+    pub fn parse_notebook(&self, path: &Path) -> Result<Notebook> {
+        let file = File::open(path)?;
+        let data = Parser::read(file)?;
+        let store = parse_store_auto(&data)?;
 
-        if store.get_type() != OneStoreType::TableOfContents {
-            return Err(ErrorKind::NotATocFile { file: path }.into());
+        if store.get_type()? != OneStoreType::TableOfContents {
+            return Err(ErrorKind::NotATocFile {
+                file: path.to_string_lossy().to_string(),
+            }
+            .into());
         }
 
-        let base_dir = fs_driver().get_dir_name(&path);
-        let sections = notebook::parse_toc(store.data_root())?
+        let base_dir = path.parent().ok_or_else(|| ErrorKind::InvalidPath {
+            message: "path has no parent directory".into(),
+        })?;
+        let (entries, color) = notebook::parse_toc(store.data_root())?;
+        let entries = entries
             .iter()
-            .map(|name| fs_driver().join(&base_dir, name))
-            .filter(|p| !p.contains("OneNote_RecycleBin"))
-            .filter(|p| {
-                let is_file = match fs_driver().exists(p) {
-                    Ok(is_file) => is_file,
-                    Err(_err) => false,
-                };
-                return is_file;
-            })
-            .map(|p| {
-                let is_dir = fs_driver().is_directory(&p)?;
-                if !is_dir {
-                    self.parse_section(p).map(SectionEntry::Section)
+            .map(|name| resolve_entry_path(base_dir, name))
+            .collect::<Result<Vec<_>>>()?;
+        let sections = entries
+            .into_iter()
+            .filter(|p| p.exists())
+            .filter(|p| !p.ends_with("OneNote_RecycleBin"))
+            .map(|path| {
+                if path.is_file() {
+                    self.parse_section(&path).map(SectionEntry::Section)
                 } else {
-                    self.parse_section_group(p).map(SectionEntry::SectionGroup)
+                    self.parse_section_group(&path)
+                        .map(SectionEntry::SectionGroup)
                 }
             })
             .collect::<Result<_>>()?;
 
-        Ok(Notebook { entries: sections })
+        Ok(Notebook {
+            entries: sections,
+            color,
+        })
+    }
+
+    /// Parse a OneNote section buffer.
+    ///
+    /// The `data` argument must contain a OneNote section.
+    /// The `file_name` is used to populate section metadata and error messages.
+    ///
+    /// Returns [`ErrorKind::NotASectionFile`] if the buffer does not contain a
+    /// section file.
+    pub fn parse_section_buffer(&self, data: &[u8], file_name: &str) -> Result<Section> {
+        let store = parse_store_auto(data)?;
+
+        if store.get_type()? != OneStoreType::Section {
+            return Err(ErrorKind::NotASectionFile {
+                file: file_name.into(),
+            }
+            .into());
+        }
+
+        section::parse_section(
+            store.as_onestore(),
+            file_name.into(),
+        )
     }
 
     /// Parse a OneNote section file.
     ///
     /// The `path` argument must point to a `.one` file that contains a
     /// OneNote section.
-    pub fn parse_section(&mut self, path: String) -> Result<Section> {
-        log!("Parsing section: {:?}", path);
-        let data = fs_driver().read_file(path.as_str())?;
-        self.parse_section_from_data(&data, &path)
-    }
+    ///
+    /// Returns [`ErrorKind::NotASectionFile`] if the file does not contain a
+    /// section.
+    pub fn parse_section(&self, path: &Path) -> Result<Section> {
+        let file = File::open(path)?;
+        let data = Parser::read(file)?;
+        let store = parse_store_auto(&data)?;
 
-    /// Parse a OneNote section file from a byte array.
-    /// The [path] is used to provide debugging information and determine
-    /// the name of the section file.
-    pub fn parse_section_from_data(&mut self, data: &[u8], path: &str) -> Result<Section> {
-        let store = parse_onestore(&mut Reader::new(&data))?;
-
-        if store.get_type() != OneStoreType::Section {
-            return Err(ErrorKind::NotASectionFile { file: String::from(path) }.into());
+        if store.get_type()? != OneStoreType::Section {
+            return Err(ErrorKind::NotASectionFile {
+                file: path.to_string_lossy().to_string(),
+            }
+            .into());
         }
 
-        let filename = fs_driver()
-            .get_file_name(&path)
-            .expect("file without file name");
-        section::parse_section(store, filename)
+        section::parse_section(
+            store.as_onestore(),
+            path.file_name()
+                .ok_or_else(|| ErrorKind::InvalidPath {
+                    message: "path has no file name".into(),
+                })?
+                .to_string_lossy()
+                .to_string(),
+        )
     }
 
-    fn parse_section_group(&mut self, path: String) -> Result<SectionGroup> {
-        let display_name = fs_driver()
-            .get_file_name(path.as_str())
-            .expect("file without file name");
+    fn parse_section_group(&self, path: &Path) -> Result<SectionGroup> {
+        let display_name = path
+            .file_name()
+            .ok_or_else(|| ErrorKind::InvalidPath {
+                message: "path has no file name".into(),
+            })?
+            .to_string_lossy()
+            .to_string();
 
-        if let Ok(entries) = fs_driver().read_dir(&path) {
-            for entry in entries {
-                let ext = fs_driver().get_file_extension(&entry);
-                if ext == ".onetoc2" {
-                    return self.parse_notebook(entry).map(|group| SectionGroup {
+        for entry in path.read_dir()? {
+            let entry = entry?;
+            let is_toc = entry
+                .path()
+                .extension()
+                .map(|ext| ext == OsStr::new("onetoc2"))
+                .unwrap_or_default();
+
+            if is_toc {
+                return self
+                    .parse_notebook(&entry.path())
+                    .map(|group| SectionGroup {
                         display_name,
                         entries: group.entries,
                     });
-                }
             }
         }
 
-        Err(ErrorKind::TocFileMissing { dir: path }.into())
+        Err(ErrorKind::TocFileMissing {
+            dir: path.as_os_str().to_string_lossy().into_owned(),
+        }
+        .into())
     }
+
+    fn read(file: File) -> Result<Vec<u8>> {
+        let size = file.metadata()?.len();
+        let mut data = Vec::with_capacity(size as usize);
+
+        let mut buf = BufReader::new(file);
+        buf.read_to_end(&mut data)?;
+
+        Ok(data)
+    }
+}
+
+enum ParsedStore {
+    Desktop(RevisionStore),
+    FssHttpB(crate::onestore::fsshttpb::PackagingStore),
+}
+
+impl ParsedStore {
+    fn get_type(&self) -> Result<OneStoreType> {
+        match self {
+            ParsedStore::Desktop(store) => store.get_type(),
+            ParsedStore::FssHttpB(store) => store.get_type(),
+        }
+    }
+
+    fn data_root(&self) -> &dyn ObjectSpace {
+        match self {
+            ParsedStore::Desktop(store) => store.data_root(),
+            ParsedStore::FssHttpB(store) => store.data_root(),
+        }
+    }
+
+    fn as_onestore(&self) -> &dyn OneStore {
+        match self {
+            ParsedStore::Desktop(store) => store,
+            ParsedStore::FssHttpB(store) => store,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum StoreFormat {
+    Desktop,
+    FssHttpB { packaging_offset: usize },
+}
+
+fn parse_store_auto(data: &[u8]) -> Result<ParsedStore> {
+    match sniff_store_format(data) {
+        Some(StoreFormat::FssHttpB { packaging_offset }) => {
+            let mut reader = Reader::new(data);
+            reader.advance(packaging_offset)?;
+
+            let packaging = OneStorePackaging::parse(&mut reader)?;
+            let store = parse_store(&packaging)?;
+
+            Ok(ParsedStore::FssHttpB(store))
+        }
+        Some(StoreFormat::Desktop) => {
+            let mut reader = Reader::new(data);
+            let store = RevisionStore::parse(&mut reader)?;
+            Ok(ParsedStore::Desktop(store))
+        }
+        None => {
+            let fss_err = match OneStorePackaging::parse(&mut Reader::new(data))
+                .and_then(|packaging| parse_store(&packaging))
+            {
+                Ok(store) => return Ok(ParsedStore::FssHttpB(store)),
+                Err(err) => err,
+            };
+
+            let mut reader = Reader::new(data);
+            match RevisionStore::parse(&mut reader) {
+                Ok(store) => Ok(ParsedStore::Desktop(store)),
+                Err(_) => Err(fss_err),
+            }
+        }
+    }
+}
+
+fn sniff_store_format(data: &[u8]) -> Option<StoreFormat> {
+    // TODO: Read header directly?
+
+    let mut reader = Reader::new(data);
+    let file_type = Guid::parse(&mut reader).ok()?;
+    let file = Guid::parse(&mut reader).ok()?;
+    let legacy_file_version = Guid::parse(&mut reader).ok()?;
+    let file_format = Guid::parse(&mut reader).ok()?;
+
+    let revision_store_format = guid!("109ADD3F-911B-49F5-A5D0-1791EDC8AED8");
+    let package_store_format = guid!("638DE92F-A6D4-4BC1-9A36-B3FC2511A5B7");
+
+    log::debug!(
+        "sniff_store_format header: file_type={:?} file={:?} legacy_file_version={:?} file_format={:?}",
+        file_type,
+        file,
+        legacy_file_version,
+        file_format
+    );
+
+    if file_format == package_store_format {
+        return Some(StoreFormat::FssHttpB {
+            packaging_offset: 0,
+        });
+    }
+
+    if file_format == revision_store_format {
+        if legacy_file_version.is_nil() {
+            if let Some(packaging_offset) = embedded_packaging_offset(data) {
+                return Some(StoreFormat::FssHttpB { packaging_offset });
+            }
+
+            return Some(StoreFormat::Desktop);
+        }
+
+        return Some(StoreFormat::FssHttpB {
+            packaging_offset: 0,
+        });
+    }
+
+    None
+}
+
+fn resolve_entry_path(base_dir: &Path, entry: &str) -> Result<PathBuf> {
+    let entry_path = Path::new(entry);
+    if entry_path.is_absolute() {
+        return Err(ErrorKind::InvalidPath {
+            message: "section entry must be a relative path".into(),
+        }
+        .into());
+    }
+
+    let mut sanitized = PathBuf::new();
+    for component in entry_path.components() {
+        match component {
+            Component::Normal(name) => {
+                let name = name.to_str().ok_or_else(|| ErrorKind::InvalidPath {
+                    message: "section entry contains non-utf8 characters".into(),
+                })?;
+                let clean = sanitise(name);
+                if clean != name {
+                    return Err(ErrorKind::InvalidPath {
+                        message: format!("section entry contains invalid characters: {name}")
+                            .into(),
+                    }
+                    .into());
+                }
+                sanitized.push(name);
+            }
+            Component::CurDir => {}
+            Component::ParentDir | Component::RootDir | Component::Prefix(_) => {
+                return Err(ErrorKind::InvalidPath {
+                    message: "section entry contains invalid path components".into(),
+                }
+                .into());
+            }
+        }
+    }
+
+    if sanitized.as_os_str().is_empty() {
+        return Err(ErrorKind::InvalidPath {
+            message: "section entry is empty".into(),
+        }
+        .into());
+    }
+
+    let candidate = base_dir.join(&sanitized);
+    if candidate.exists() {
+        let base_canon = base_dir
+            .canonicalize()
+            .map_err(|err| ErrorKind::InvalidPath {
+                message: format!("failed to resolve base directory: {err}").into(),
+            })?;
+        let candidate_canon = candidate
+            .canonicalize()
+            .map_err(|err| ErrorKind::InvalidPath {
+                message: format!("failed to resolve entry path: {err}").into(),
+            })?;
+        if !candidate_canon.starts_with(&base_canon) {
+            return Err(ErrorKind::InvalidPath {
+                message: "section entry escapes base directory".into(),
+            }
+            .into());
+        }
+    }
+
+    Ok(candidate)
 }
 
 impl Default for Parser {
     fn default() -> Self {
         Self::new()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::resolve_entry_path;
+    use std::path::Path;
+    use tempfile::tempdir;
+
+    #[test]
+    fn test_resolve_entry_path_rejects_traversal() {
+        let dir = tempdir().unwrap();
+        let base = dir.path();
+
+        let err = resolve_entry_path(base, "../secret.one").unwrap_err();
+        let err = format!("{err}");
+        assert!(err.contains("invalid path components"));
+    }
+
+    #[test]
+    fn test_resolve_entry_path_rejects_absolute() {
+        let dir = tempdir().unwrap();
+        let base = dir.path();
+
+        let candidate = if cfg!(windows) {
+            r"C:\secret.one"
+        } else {
+            "/etc/passwd"
+        };
+        let err = resolve_entry_path(base, candidate).unwrap_err();
+        let err = format!("{err}");
+        assert!(err.contains("relative path"));
+    }
+
+    #[test]
+    fn test_resolve_entry_path_accepts_relative() {
+        let dir = tempdir().unwrap();
+        let base = dir.path();
+
+        let resolved = resolve_entry_path(base, "Section 1.one").unwrap();
+        assert_eq!(resolved, Path::new(base).join("Section 1.one"));
     }
 }

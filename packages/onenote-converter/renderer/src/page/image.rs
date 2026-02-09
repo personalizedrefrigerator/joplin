@@ -1,7 +1,7 @@
 use crate::page::Renderer;
 use crate::utils::{AttributeSet, StyleSet, px};
 use color_eyre::Result;
-use parser::contents::Image;
+use onenote_parser::contents::Image;
 use parser_utils::{fs_driver, log, log_warn};
 
 impl<'a> Renderer<'a> {

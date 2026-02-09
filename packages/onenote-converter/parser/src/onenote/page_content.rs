@@ -1,20 +1,24 @@
+use crate::errors::{ErrorKind, Result};
+use crate::fsshttpb::data::exguid::ExGuid;
 use crate::one::property_set::PropertySetId;
 use crate::onenote::embedded_file::{EmbeddedFile, parse_embedded_file};
 use crate::onenote::image::{Image, parse_image};
 use crate::onenote::ink::{Ink, parse_ink};
 use crate::onenote::outline::{Outline, parse_outline};
-use crate::onestore::object_space::ObjectSpaceRef;
-use crate::shared::exguid::ExGuid;
-use parser_utils::errors::{ErrorKind, Result};
+use crate::onestore::ObjectSpace;
 
 /// The contents of a page.
-#[allow(missing_docs)]
 #[derive(Clone, Debug)]
 pub enum PageContent {
+    /// An outline block.
     Outline(Outline),
+    /// An embedded image.
     Image(Image),
+    /// An embedded file.
     EmbeddedFile(EmbeddedFile),
+    /// An ink drawing.
     Ink(Ink),
+    /// Content of unknown type.
     Unknown,
 }
 
@@ -56,7 +60,10 @@ impl PageContent {
     }
 }
 
-pub(crate) fn parse_page_content(content_id: ExGuid, space: ObjectSpaceRef) -> Result<PageContent> {
+pub(crate) fn parse_page_content(
+    content_id: ExGuid,
+    space: &(impl ObjectSpace + ?Sized),
+) -> Result<PageContent> {
     let content_type = space
         .get_object(content_id)
         .ok_or_else(|| ErrorKind::MalformedOneNoteData("page content is missing".into()))?

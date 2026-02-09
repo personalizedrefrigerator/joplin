@@ -1,12 +1,12 @@
 use std::rc::Rc;
 
+use itertools::{Either, Itertools};
+
+use crate::errors::{ErrorKind, Result};
+use crate::fsshttpb::data::exguid::ExGuid;
 use crate::one::property_set::page_series_node;
 use crate::onenote::page::{Page, parse_page};
-use crate::onestore::OneStore;
-use crate::onestore::object_space::ObjectSpaceRef;
-use crate::shared::exguid::ExGuid;
-use itertools::{Either, Itertools};
-use parser_utils::errors::{ErrorKind, Result};
+use crate::onestore::{ObjectSpace, OneStore};
 
 /// A series of page.
 ///
@@ -20,7 +20,7 @@ pub struct PageSeries {
     errors: Rc<Vec<String>>,
 }
 
-impl<'a> PageSeries {
+impl PageSeries {
     /// The pages contained in this page series.
     pub fn pages(&self) -> &[Page] {
         &self.pages
@@ -37,12 +37,15 @@ impl<'a> PageSeries {
     }
 }
 
-pub(crate) fn parse_page_series(id: ExGuid, store: Rc<dyn OneStore>) -> Result<PageSeries> {
+pub(crate) fn parse_page_series(
+    id: ExGuid,
+    store: &(impl OneStore + ?Sized),
+) -> Result<PageSeries> {
     let object = store
         .data_root()
         .get_object(id)
         .ok_or_else(|| ErrorKind::MalformedOneNoteData("page series object is missing".into()))?;
-    let data = page_series_node::parse(object.as_ref())?;
+    let data = page_series_node::parse(object)?;
 
     let pages_and_errors = data
         .page_spaces
@@ -53,15 +56,12 @@ pub(crate) fn parse_page_series(id: ExGuid, store: Rc<dyn OneStore>) -> Result<P
                 .ok_or_else(|| ErrorKind::MalformedOneNoteData("page space is missing".into()))?;
             Ok(space)
         })
-        .map(|page_space: Result<ObjectSpaceRef>| parse_page(page_space?));
+        .map(|page_space: Result<&dyn ObjectSpace>| parse_page(page_space?));
 
     let (pages, errors) = pages_and_errors.partition_map(|result| match result {
         Ok(page) => Either::Left(page),
         Err(error) => Either::Right(format!("Failed to parse page: {:?}", error)),
     });
 
-    Ok(PageSeries {
-        pages,
-        errors: Rc::new(errors),
-    })
+    Ok(PageSeries { pages, errors: Rc::new(errors) })
 }

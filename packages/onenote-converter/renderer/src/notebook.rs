@@ -3,9 +3,9 @@ use crate::{section, templates};
 use color_eyre::eyre::Result;
 use palette::rgb::Rgb;
 use palette::{Alpha, ConvertFrom, Hsl, Saturate, Shade, Srgb};
-use parser::notebook::Notebook;
-use parser::property::common::Color;
-use parser::section::{Section, SectionEntry};
+use onenote_parser::notebook::Notebook;
+use onenote_parser::property::common::Color;
+use onenote_parser::section::{Section, SectionEntry};
 use parser_utils::{fs_driver, log};
 
 pub(crate) type RgbColor = Alpha<Rgb<palette::encoding::Srgb, u8>, f32>;

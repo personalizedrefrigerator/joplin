@@ -4,7 +4,16 @@
 //!
 //! [\[MS-ONE\] 2.1.13]: https://docs.microsoft.com/en-us/openspecs/office_file_formats/ms-one/73d98105-f194-4c05-a795-09840a6d24bf
 
-use crate::shared::jcid::JcId;
+use crate::errors::{ErrorKind, Result};
+use crate::one::property::PropertyType;
+use crate::one::property::object_reference::ObjectReference;
+use crate::one::property::object_space_reference::ObjectSpaceReference;
+use crate::onestore::Object;
+use crate::onestore::shared::compact_id::CompactId;
+use crate::onestore::shared::jcid::JcId;
+use crate::onestore::shared::object_prop_set::ObjectPropSet;
+use crate::onestore::shared::prop_set::PropertySet;
+use crate::onestore::shared::property::PropertyId;
 use enum_primitive_derive::Primitive;
 use num_traits::FromPrimitive;
 
@@ -16,6 +25,7 @@ pub(crate) mod image_node;
 pub(crate) mod ink_container;
 pub(crate) mod ink_data_node;
 pub(crate) mod ink_stroke_node;
+pub(crate) mod math_inline_object;
 pub(crate) mod note_tag_container;
 pub(crate) mod note_tag_shared_definition_container;
 pub(crate) mod number_list_node;
@@ -35,6 +45,7 @@ pub(crate) mod stroke_properties_node;
 pub(crate) mod table_cell_node;
 pub(crate) mod table_node;
 pub(crate) mod table_row_node;
+pub(crate) mod text_run_data;
 pub(crate) mod title_node;
 pub(crate) mod toc_container;
 
@@ -84,4 +95,65 @@ impl PropertySetId {
     pub(crate) fn from_jcid(id: JcId) -> Option<PropertySetId> {
         PropertySetId::from_u32(id.0)
     }
+}
+
+pub(crate) fn assert_property_set(object: &Object, expected: PropertySetId) -> Result<()> {
+    if object.id() == expected.as_jcid() {
+        return Ok(());
+    }
+
+    Err(ErrorKind::MalformedOneNoteFileData(
+        format!("unexpected object type: 0x{:X}", object.id().0).into(),
+    )
+    .into())
+}
+
+pub(crate) fn parse_object(
+    object: &Object,
+    id: PropertyId,
+    prop_type: PropertyType,
+    props: &PropertySet,
+) -> Result<Object> {
+    Ok(Object {
+        context_id: object.context_id,
+        jc_id: JcId(id.value()),
+        props: ObjectPropSet {
+            object_ids: get_object_ids(prop_type, props, object)?,
+            object_space_ids: get_object_space_ids(prop_type, props, object)?,
+            context_ids: vec![],
+            properties: props.clone(),
+        },
+        file_data: None,
+        mapping: object.mapping.clone(),
+    })
+}
+
+fn get_object_ids(
+    prop_type: PropertyType,
+    props: &PropertySet,
+    object: &Object,
+) -> Result<Vec<CompactId>> {
+    Ok(object
+        .props
+        .object_ids
+        .iter()
+        .skip(ObjectReference::get_offset(prop_type, object)?)
+        .take(ObjectReference::count_references(props.values()))
+        .copied()
+        .collect())
+}
+
+fn get_object_space_ids(
+    prop_type: PropertyType,
+    props: &PropertySet,
+    object: &Object,
+) -> Result<Vec<CompactId>> {
+    Ok(object
+        .props
+        .object_ids
+        .iter()
+        .skip(ObjectSpaceReference::get_offset(prop_type, object)?)
+        .take(ObjectSpaceReference::count_references(props.values()))
+        .copied()
+        .collect())
 }

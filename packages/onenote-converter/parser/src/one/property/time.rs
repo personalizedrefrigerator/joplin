@@ -1,5 +1,6 @@
-use crate::{one::property::PropertyType, onestore::object::Object};
-use parser_utils::errors::{ErrorKind, Result};
+use crate::errors::{ErrorKind, Result};
+use crate::one::property::PropertyType;
+use crate::onestore::Object;
 
 /// A 32 bit date/time timestamp.
 ///
@@ -12,7 +13,7 @@ pub struct Time(u32);
 impl Time {
     pub(crate) fn parse(prop_type: PropertyType, object: &Object) -> Result<Option<Time>> {
         let time = object
-            .props()
+            .props
             .get(prop_type)
             .map(|value| {
                 value.to_u32().ok_or_else(|| {
@@ -31,14 +32,14 @@ impl Time {
 /// See [\[MS-DTYP\] 2.3.3]
 ///
 /// [\[MS-DTYP\] 2.3.3]: https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-dtyp/2c57429b-fdd4-488f-b5fc-9e4cf020fcdf
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 #[allow(dead_code)]
 pub(crate) struct Timestamp(u64);
 
 impl Timestamp {
     pub(crate) fn parse(prop_type: PropertyType, object: &Object) -> Result<Option<Timestamp>> {
         let timestamp = object
-            .props()
+            .props
             .get(prop_type)
             .map(|value| {
                 value.to_u64().ok_or_else(|| {

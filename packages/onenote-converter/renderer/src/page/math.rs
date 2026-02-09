@@ -2,7 +2,7 @@ use crate::page::Renderer;
 use crate::utils::{StyleSet, html_entities};
 use color_eyre::Result;
 use itertools::Itertools;
-use parser::property::rich_text::MathExpression;
+use onenote_parser::property::rich_text::MathExpression;
 
 impl<'a> Renderer<'a> {
     pub(crate) fn render_math(

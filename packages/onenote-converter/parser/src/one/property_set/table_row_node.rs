@@ -1,10 +1,10 @@
+use crate::errors::{ErrorKind, Result};
+use crate::fsshttpb::data::exguid::ExGuid;
 use crate::one::property::PropertyType;
 use crate::one::property::object_reference::ObjectReference;
 use crate::one::property::time::Time;
-use crate::one::property_set::PropertySetId;
-use crate::onestore::object::Object;
-use crate::shared::exguid::ExGuid;
-use parser_utils::errors::{ErrorKind, Result};
+use crate::one::property_set::{PropertySetId, assert_property_set};
+use crate::onestore::Object;
 
 /// A table row.
 ///
@@ -19,9 +19,7 @@ pub(crate) struct Data {
 }
 
 pub(crate) fn parse(object: &Object) -> Result<Data> {
-    if object.id() != PropertySetId::TableRowNode.as_jcid() {
-        return Err(unexpected_object_type_error!(object.id().0).into());
-    }
+    assert_property_set(object, PropertySetId::TableRowNode)?;
 
     let last_modified = Time::parse(PropertyType::LastModifiedTime, object)?;
     let cells = ObjectReference::parse_vec(PropertyType::ElementChildNodes, object)?

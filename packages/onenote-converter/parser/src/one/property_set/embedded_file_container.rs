@@ -1,6 +1,7 @@
-use crate::onestore::object::Object;
-use crate::{one::property_set::PropertySetId, shared::file_data_ref::FileBlob};
-use parser_utils::errors::{ErrorKind, Result};
+use crate::errors::{ErrorKind, Result};
+use crate::one::property_set::{PropertySetId, assert_property_set};
+use crate::onestore::Object;
+use crate::onestore::shared::file_blob::FileBlob;
 
 /// An embedded file data container.
 ///
@@ -17,17 +18,11 @@ impl Data {
 }
 
 pub(crate) fn parse(object: &Object) -> Result<Data> {
-    if object.id() != PropertySetId::EmbeddedFileContainer.as_jcid() {
-        return Err(unexpected_object_type_error!(object.id().0).into());
-    }
+    assert_property_set(object, PropertySetId::EmbeddedFileContainer)?;
 
-    let data = object
-        .file_data
-        .clone()
-        .ok_or_else(|| {
-            ErrorKind::MalformedOneNoteFileData("embedded file container has no data".into())
-        })?
-        .load()?;
+    let data = object.file_data.clone().ok_or_else(|| {
+        ErrorKind::MalformedOneNoteFileData("embedded file container has no data".into())
+    })?;
 
     Ok(Data(data))
 }

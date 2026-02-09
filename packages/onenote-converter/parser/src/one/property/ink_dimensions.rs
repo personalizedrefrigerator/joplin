@@ -1,11 +1,10 @@
+use crate::errors::{ErrorKind, Result};
 use crate::one::property::PropertyType;
-use crate::onestore::object::Object;
+use crate::onestore::Object;
+use crate::reader::Reader;
 use crate::shared::guid::Guid;
-use parser_utils::errors::{ErrorKind, Result};
-use parser_utils::parse::Parse;
-use parser_utils::reader::Reader;
 
-/// The dimensions (X or Y) for an ink stoke with lower and upper limits.
+/// The dimensions (X or Y) for an ink stroke with lower and upper limits.
 #[allow(dead_code)]
 pub(crate) struct InkDimension {
     pub(crate) id: Guid,
@@ -15,7 +14,7 @@ pub(crate) struct InkDimension {
 
 impl InkDimension {
     pub(crate) fn parse(prop_type: PropertyType, object: &Object) -> Result<Vec<InkDimension>> {
-        let data = match object.props().get(prop_type) {
+        let data = match object.props.get(prop_type) {
             Some(value) => value.to_vec().ok_or_else(|| {
                 ErrorKind::MalformedOneNoteFileData("ink dimensions is not a vec".into())
             })?,

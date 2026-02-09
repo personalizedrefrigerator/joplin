@@ -1,12 +1,10 @@
+use crate::errors::{ErrorKind, Result};
+use crate::fsshttpb::data::exguid::ExGuid;
 use crate::one::property::layout_alignment::LayoutAlignment;
 use crate::one::property_set::{page_manifest_node, page_metadata, page_node, title_node};
 use crate::onenote::outline::{Outline, parse_outline};
 use crate::onenote::page_content::{PageContent, parse_page_content};
-use crate::onestore::object_space::ObjectSpaceRef;
-use crate::shared::exguid::ExGuid;
-use crate::shared::guid::Guid;
-use parser_utils::errors::{ErrorKind, Result};
-use parser_utils::log::set_current_page;
+use crate::onestore::ObjectSpace;
 
 /// A page.
 ///
@@ -16,8 +14,9 @@ use parser_utils::log::set_current_page;
 /// [\[MS-ONE\] 2.2.19]: https://docs.microsoft.com/en-us/openspecs/office_file_formats/ms-one/e381b7c7-b434-43a2-ba23-0d08bafd281a
 #[derive(Clone, Debug)]
 pub struct Page {
-    entity_id: Guid,
+    link_target_id: String,
     title: Option<Title>,
+    title_text: Option<String>,
     level: i32,
     author: Option<String>,
     height: Option<f32>,
@@ -25,6 +24,12 @@ pub struct Page {
 }
 
 impl Page {
+    /// The page's GUID. May be referenced by internal links.
+    /// Ref: [ONESTORE 2.2.58](https://learn.microsoft.com/en-us/openspecs/office_file_formats/ms-one/34ea5601-f060-4a69-b5f9-5843a1f14098)
+    pub fn link_target_id(&self) -> &str {
+        &self.link_target_id
+    }
+
     /// The page's title element.
     ///
     /// See [\[MS-ONE\] 2.2.64].
@@ -65,68 +70,8 @@ impl Page {
     /// The page's title text.
     ///
     /// This is calculated using a heuristic similar to the one OneNote uses.
-    pub fn title_text(&self) -> Option<String> {
-        self.title
-            .as_ref()
-            .and_then(|title| title.contents.first())
-            .and_then(Self::outline_text)
-            .and_then(|t| Some(Self::remove_hyperlink(t.to_owned())))
-            .or_else(|| {
-                self.contents
-                    .iter()
-                    .filter_map(|page_content| page_content.outline())
-                    .filter_map(|t| {
-                        let v = Self::outline_text(t);
-                        if v.is_none() {
-                            return None;
-                        }
-                        return Some(Self::remove_hyperlink(v.unwrap().to_owned()));
-                    })
-                    .next()
-            })
-    }
-
-    /// The page's GUID. May be referenced by internal links.
-    /// Ref: [ONESTORE 2.2.58](https://learn.microsoft.com/en-us/openspecs/office_file_formats/ms-one/34ea5601-f060-4a69-b5f9-5843a1f14098)
-    pub fn link_target_id(&self) -> String {
-        format!("{}", self.entity_id)
-    }
-
-    fn outline_text(outline: &Outline) -> Option<&str> {
-        outline
-            .items
-            .first()
-            .and_then(|outline_item| outline_item.element())
-            .and_then(|outline_element| outline_element.contents.first())
-            .and_then(|content| content.rich_text())
-            .and_then(|text| Some(&*text.text).filter(|s| !s.is_empty()))
-    }
-
-    fn remove_hyperlink(title: String) -> String {
-        const HYPERLINK_MARKER: &str = "\u{fddf}HYPERLINK \"";
-
-        let mut title_copy = title.clone();
-
-        loop {
-            // Find the first hyperlink mark
-            if let Some(marker_start) = title_copy.find(HYPERLINK_MARKER) {
-                let hyperlink_part = &title_copy[marker_start + HYPERLINK_MARKER.len()..];
-
-                // Find the closing double quote of the hyperlink
-                if let Some(quote_end) = hyperlink_part.find('"') {
-                    let before_hyperlink = &title_copy[..marker_start];
-                    let after_hyperlink = &hyperlink_part[quote_end + 1..];
-                    title_copy = format!("{}{}", before_hyperlink, after_hyperlink);
-                } else {
-                    // Sometimes links are broken, in these cases we only consider what is before the mark
-                    title_copy = title[..marker_start].to_string();
-                }
-            } else {
-                break;
-            }
-        }
-
-        title_copy
+    pub fn title_text(&self) -> Option<&str> {
+        self.title_text.as_deref()
     }
 }
 
@@ -188,31 +133,45 @@ impl Title {
     }
 }
 
-pub(crate) fn parse_page(page_space: ObjectSpaceRef) -> Result<Page> {
-    let metadata = parse_metadata(page_space.clone())?;
-    let manifest = parse_manifest(page_space.clone())?;
+pub(crate) fn parse_page(page_space: &(impl ObjectSpace + ?Sized)) -> Result<Page> {
+    let metadata = parse_metadata(page_space)?;
+    let manifest = parse_manifest(page_space)?;
 
-    let data = parse_data(manifest, page_space.clone())?;
+    let data = parse_data(manifest, page_space)?;
 
     let title = data
         .title
-        .map(|id| parse_title(id, page_space.clone()))
+        .map(|id| parse_title(id, page_space))
         .transpose()?;
-
-    let page_title = extract_text_from_title(&title);
-    set_current_page(page_title);
 
     let level = metadata.page_level;
 
-    let contents = data
+    let contents: Vec<PageContent> = data
         .content
         .into_iter()
-        .map(|content_id| parse_page_content(content_id, page_space.clone()))
+        .map(|content_id| parse_page_content(content_id, page_space))
         .collect::<Result<_>>()?;
 
+    let title_text = title
+        .as_ref()
+        .and_then(|title| title.contents.first())
+        .and_then(outline_text)
+        .map(remove_hyperlink)
+        .or_else(|| {
+            (&contents)
+                .iter()
+                .filter_map(|page_content| page_content.outline())
+                .filter_map(outline_text)
+                .next()
+                .map(str::to_owned)
+        });
+
+    let link_target_id = format!("{}", metadata.entity_guid);
+
     Ok(Page {
-        entity_id: metadata.entity_guid,
+        link_target_id,
         title,
+        title_text,
         level,
         author: data.author.map(|author| author.into_value()),
         height: data.page_height,
@@ -220,15 +179,15 @@ pub(crate) fn parse_page(page_space: ObjectSpaceRef) -> Result<Page> {
     })
 }
 
-fn parse_title(title_id: ExGuid, space: ObjectSpaceRef) -> Result<Title> {
+fn parse_title(title_id: ExGuid, space: &(impl ObjectSpace + ?Sized)) -> Result<Title> {
     let title_object = space
         .get_object(title_id)
         .ok_or_else(|| ErrorKind::MalformedOneNoteData("title object is missing".into()))?;
-    let title = title_node::parse(&title_object)?;
+    let title = title_node::parse(title_object)?;
     let contents = title
         .children
         .into_iter()
-        .map(|outline_id| parse_outline(outline_id, space.clone()))
+        .map(|outline_id| parse_outline(outline_id, space))
         .collect::<Result<_>>()?;
 
     Ok(Title {
@@ -242,17 +201,17 @@ fn parse_title(title_id: ExGuid, space: ObjectSpaceRef) -> Result<Title> {
 
 fn parse_data(
     manifest: page_manifest_node::Data,
-    space: ObjectSpaceRef,
+    space: &(impl ObjectSpace + ?Sized),
 ) -> Result<page_node::Data> {
     let page_id = manifest.page;
     let page_object = space
         .get_object(page_id)
         .ok_or_else(|| ErrorKind::MalformedOneNoteData("page object is missing".into()))?;
 
-    page_node::parse(&page_object)
+    page_node::parse(page_object)
 }
 
-fn parse_manifest(space: ObjectSpaceRef) -> Result<page_manifest_node::Data> {
+fn parse_manifest(space: &(impl ObjectSpace + ?Sized)) -> Result<page_manifest_node::Data> {
     let page_manifest_id = space
         .content_root()
         .ok_or_else(|| ErrorKind::MalformedOneNoteData("page content id is missing".into()))?;
@@ -260,10 +219,10 @@ fn parse_manifest(space: ObjectSpaceRef) -> Result<page_manifest_node::Data> {
         .get_object(page_manifest_id)
         .ok_or_else(|| ErrorKind::MalformedOneNoteData("page object is missing".into()))?;
 
-    page_manifest_node::parse(&page_manifest_object)
+    page_manifest_node::parse(page_manifest_object)
 }
 
-fn parse_metadata(space: ObjectSpaceRef) -> Result<page_metadata::Data> {
+fn parse_metadata(space: &(impl ObjectSpace + ?Sized)) -> Result<page_metadata::Data> {
     let metadata_id = space
         .metadata_root()
         .ok_or_else(|| ErrorKind::MalformedOneNoteData("page metadata id is missing".into()))?;
@@ -271,23 +230,42 @@ fn parse_metadata(space: ObjectSpaceRef) -> Result<page_metadata::Data> {
         .get_object(metadata_id)
         .ok_or_else(|| ErrorKind::MalformedOneNoteData("page metadata object is missing".into()))?;
 
-    page_metadata::parse(&metadata_object)
+    page_metadata::parse(metadata_object)
 }
 
-fn extract_text_from_title(title: &Option<Title>) -> String {
-    let mut result = String::new();
-    if let Some(title_content) = title {
-        for outline in &title_content.contents {
-            for item in &outline.items {
-                if let Some(element) = item.element() {
-                    for content in &element.contents {
-                        if let Some(rich_text) = content.rich_text() {
-                            result.push_str(&rich_text.text);
-                        }
-                    }
-                }
+fn outline_text(outline: &Outline) -> Option<&str> {
+    outline
+        .items
+        .first()
+        .and_then(|outline_item| outline_item.element())
+        .and_then(|outline_element| outline_element.contents.first())
+        .and_then(|content| content.rich_text())
+        .and_then(|text| Some(&*text.text).filter(|s| !s.is_empty()))
+}
+
+fn remove_hyperlink(title: &str) -> String {
+    const HYPERLINK_MARKER: &str = "\u{fddf}HYPERLINK \"";
+
+    let mut clean_title = title.to_string();
+
+    loop {
+        // Find the first hyperlink mark
+        if let Some(marker_start) = clean_title.find(HYPERLINK_MARKER) {
+            let hyperlink_part = &clean_title[marker_start + HYPERLINK_MARKER.len()..];
+
+            // Find the closing double quote of the hyperlink
+            if let Some(quote_end) = hyperlink_part.find('"') {
+                let before_hyperlink = &clean_title[..marker_start];
+                let after_hyperlink = &hyperlink_part[quote_end + 1..];
+                clean_title = format!("{}{}", before_hyperlink, after_hyperlink);
+            } else {
+                // Sometimes links are broken, in these cases we only consider what is before the mark
+                clean_title = title[..marker_start].to_string();
             }
+        } else {
+            break;
         }
     }
-    result
+
+    clean_title
 }

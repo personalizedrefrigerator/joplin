@@ -1,5 +1,6 @@
-use crate::{one::property::PropertyType, onestore::object::Object};
-use parser_utils::errors::{ErrorKind, Result};
+use crate::errors::{ErrorKind, Result};
+use crate::one::property::PropertyType;
+use crate::onestore::Object;
 
 /// A layout alignment specification.
 ///
@@ -37,7 +38,7 @@ impl LayoutAlignment {
         prop_type: PropertyType,
         object: &Object,
     ) -> Result<Option<LayoutAlignment>> {
-        let value = match object.props().get(prop_type) {
+        let value = match object.props.get(prop_type) {
             Some(value) => value.to_u32().ok_or_else(|| {
                 ErrorKind::MalformedOneNoteFileData("layout alignment is not a u32".into())
             })?,

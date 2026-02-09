@@ -1,14 +1,14 @@
+use crate::errors::{ErrorKind, Result};
 use crate::one::property::ink_dimensions::InkDimension;
 use crate::one::property::{PropertyType, simple};
-use crate::one::property_set::PropertySetId;
-use crate::onestore::object::Object;
-use parser_utils::errors::{ErrorKind, Result};
+use crate::one::property_set::{PropertySetId, assert_property_set};
+use crate::onestore::Object;
 
 /// An ink stroke's properties.
 #[allow(dead_code)]
 pub(crate) struct Data {
-    // pub(crate) aliased: bool,
-    // pub(crate) fit_to_curve: bool,
+    pub(crate) aliased: bool,
+    pub(crate) fit_to_curve: bool,
     pub(crate) ignore_pressure: bool,
     pub(crate) pen_tip: Option<u8>,
     pub(crate) raster_operation: Option<u8>,
@@ -20,13 +20,10 @@ pub(crate) struct Data {
 }
 
 pub(crate) fn parse(object: &Object) -> Result<Data> {
-    if object.id() != PropertySetId::StrokePropertiesNode.as_jcid() {
-        return Err(unexpected_object_type_error!(object.id().0).into());
-    }
+    assert_property_set(object, PropertySetId::StrokePropertiesNode)?;
 
-    // TODO: add support for aliased
-    // let aliased = simple::parse_bool(PropertyType::InkAntialised, object)?.unwrap_or_default();
-    // let fit_to_curve = simple::parse_bool(PropertyType::InkFitToCurve, object)?.unwrap_or_default();
+    let aliased = simple::parse_bool(PropertyType::InkAntialised, object)?.unwrap_or_default();
+    let fit_to_curve = simple::parse_bool(PropertyType::InkFitToCurve, object)?.unwrap_or_default();
     let ignore_pressure =
         simple::parse_bool(PropertyType::InkIgnorePressure, object)?.unwrap_or_default();
     let pen_tip = simple::parse_u8(PropertyType::InkPenTip, object)?;
@@ -42,8 +39,8 @@ pub(crate) fn parse(object: &Object) -> Result<Data> {
     let dimensions = InkDimension::parse(PropertyType::InkDimensions, object)?;
 
     Ok(Data {
-        // aliased,
-        // fit_to_curve,
+        aliased,
+        fit_to_curve,
         ignore_pressure,
         pen_tip,
         raster_operation,

@@ -1,7 +1,7 @@
+use crate::errors::{ErrorKind, Result};
+use crate::fsshttpb::data::exguid::ExGuid;
 use crate::one::property_set::iframe_node;
-use crate::onestore::object_space::ObjectSpaceRef;
-use crate::shared::exguid::ExGuid;
-use parser_utils::errors::{ErrorKind, Result};
+use crate::onestore::ObjectSpace;
 
 /// An embedded iframe.
 #[derive(Clone, PartialEq, PartialOrd, Debug)]
@@ -11,19 +11,25 @@ pub struct IFrame {
 }
 
 impl IFrame {
+    /// The iframe's embed type, if provided.
     pub fn embed_type(&self) -> Option<u32> {
         self.embed_type
     }
+
+    /// The iframe's source URL.
     pub fn source_url(&self) -> &str {
         &self.source_url
     }
 }
 
-pub(crate) fn parse_iframe(iframe_id: ExGuid, space: ObjectSpaceRef) -> Result<IFrame> {
+pub(crate) fn parse_iframe(
+    iframe_id: ExGuid,
+    space: &(impl ObjectSpace + ?Sized),
+) -> Result<IFrame> {
     let object = space
         .get_object(iframe_id)
         .ok_or_else(|| ErrorKind::MalformedOneNoteData("image is missing".into()))?;
-    let data = iframe_node::parse(&object)?;
+    let data = iframe_node::parse(object)?;
 
     Ok(IFrame {
         embed_type: data.embed_type,

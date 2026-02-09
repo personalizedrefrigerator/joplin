@@ -1,6 +1,6 @@
+use crate::errors::{ErrorKind, Result};
 use crate::one::property::PropertyType;
-use crate::onestore::object::Object;
-use parser_utils::errors::{ErrorKind, Result};
+use crate::onestore::Object;
 
 /// A charset representation.
 ///
@@ -33,7 +33,7 @@ pub enum Charset {
 
 impl Charset {
     pub(crate) fn parse(prop_type: PropertyType, object: &Object) -> Result<Option<Charset>> {
-        let value = match object.props().get(prop_type) {
+        let value = match object.props.get(prop_type) {
             Some(value) => value
                 .to_u8()
                 .ok_or_else(|| ErrorKind::MalformedOneNoteFileData("charset is not a u8".into()))?,

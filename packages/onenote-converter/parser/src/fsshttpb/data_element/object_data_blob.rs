@@ -1,10 +1,10 @@
+use crate::Reader;
+use crate::errors::Result;
 use crate::fsshttpb::data::binary_item::BinaryItem;
 use crate::fsshttpb::data::object_types::ObjectType;
 use crate::fsshttpb::data::stream_object::ObjectHeader;
 use crate::fsshttpb::data_element::DataElement;
-use crate::shared::file_data_ref::FileBlob;
-use parser_utils::Reader;
-use parser_utils::errors::Result;
+use crate::onestore::shared::file_blob::FileBlob;
 use std::fmt;
 
 /// An object data blob.

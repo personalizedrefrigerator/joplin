@@ -1,10 +1,10 @@
+use crate::errors::{ErrorKind, Result};
+use crate::fsshttpb::data::exguid::ExGuid;
 use crate::one::property::file_type::FileType;
 use crate::one::property_set::{embedded_file_container, embedded_file_node};
 use crate::onenote::note_tag::{NoteTag, parse_note_tags};
-use crate::onestore::object_space::ObjectSpaceRef;
-use crate::shared::exguid::ExGuid;
-use crate::shared::file_data_ref::FileBlob;
-use parser_utils::errors::{ErrorKind, Result};
+use crate::onestore::ObjectSpace;
+use crate::onestore::shared::file_blob::FileBlob;
 
 /// An embedded file.
 ///
@@ -92,61 +92,54 @@ impl EmbeddedFile {
     }
 }
 
-pub(crate) fn parse_embedded_file(file_id: ExGuid, space: ObjectSpaceRef) -> Result<EmbeddedFile> {
+pub(crate) fn parse_embedded_file(
+    file_id: ExGuid,
+    space: &(impl ObjectSpace + ?Sized),
+) -> Result<EmbeddedFile> {
     let node_object = space
         .get_object(file_id)
         .ok_or_else(|| ErrorKind::MalformedOneNoteData("embedded file is missing".into()))?;
-    let node = embedded_file_node::parse(&node_object)?;
-    let fallback_value = ExGuid::fallback();
+    let node = embedded_file_node::parse(node_object)?;
 
-    if node.embedded_file_name.is_none() {
-        return Err(ErrorKind::MalformedOneNoteData(
-            "embedded file name didn't return any value".into(),
-        )
-        .into());
-    }
+    // Helper function to create a fallback for corrupted files
+    let create_fallback = |filename: String| -> Result<EmbeddedFile> {
+        Ok(EmbeddedFile {
+            filename,
+            file_type: node.file_type,
+            data: FileBlob::default(),
+            layout_max_width: node.layout_max_width,
+            layout_max_height: node.layout_max_height,
+            offset_horizontal: node.offset_from_parent_horiz,
+            offset_vertical: node.offset_from_parent_vert,
+            note_tags: parse_note_tags(&*node.note_tags, space)?,
+        })
+    };
 
-    if node.embedded_file_container.is_none() {
-        return Err(ErrorKind::MalformedOneNoteData(
-            "embedded file container didn't return any value".into(),
-        )
-        .into());
-    }
+    // Check if we have the required fields to parse a valid embedded file
+    let embedded_filename = match node.embedded_file_name {
+        Some(name) => name,
+        None => return create_fallback(String::new()),
+    };
 
-    if node.embedded_file_container.unwrap() == fallback_value {
-        return Ok({
-            EmbeddedFile {
-                filename: node.embedded_file_name.unwrap(),
-                file_type: node.file_type,
-                data: FileBlob::default(),
-                layout_max_width: node.layout_max_width,
-                layout_max_height: node.layout_max_height,
-                offset_horizontal: node.offset_from_parent_horiz,
-                offset_vertical: node.offset_from_parent_vert,
-                note_tags: parse_note_tags(node.note_tags, space)?,
-            }
-        });
-    }
+    let container_object_id = match node.embedded_file_container {
+        Some(id) => id,
+        None => return create_fallback(embedded_filename),
+    };
 
-    let container_object_id = node.embedded_file_container;
-    let container_object = space
-        .get_object(container_object_id.unwrap())
-        .ok_or_else(|| {
-            ErrorKind::MalformedOneNoteData("embedded file container is missing".into())
-        })?;
+    let container_object = space.get_object(container_object_id).ok_or_else(|| {
+        ErrorKind::MalformedOneNoteData("embedded file container is missing".into())
+    })?;
     let container = embedded_file_container::parse(&container_object)?;
 
-    // TODO: Resolve picture container
-
     let file = EmbeddedFile {
-        filename: node.embedded_file_name.unwrap(),
+        filename: embedded_filename,
         file_type: node.file_type,
         data: container.into_value(),
         layout_max_width: node.layout_max_width,
         layout_max_height: node.layout_max_height,
         offset_horizontal: node.offset_from_parent_horiz,
         offset_vertical: node.offset_from_parent_vert,
-        note_tags: parse_note_tags(node.note_tags, space)?,
+        note_tags: parse_note_tags(&*node.note_tags, space)?,
     };
 
     Ok(file)

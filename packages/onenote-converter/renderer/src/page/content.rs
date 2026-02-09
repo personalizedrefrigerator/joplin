@@ -2,7 +2,7 @@ use crate::page::Renderer;
 use color_eyre::Result;
 use log::warn;
 // use crate::something_else::contents::Content;
-use parser::contents::Content;
+use onenote_parser::contents::Content;
 
 impl<'a> Renderer<'a> {
     pub(crate) fn render_content(&mut self, content: &Content) -> Result<String> {

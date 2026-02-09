@@ -1,6 +1,6 @@
 //! The OneNote file format.
 //!
-//! This module implements parsing OneNote objects from a OneNote revision store (see `onestore/`).
+//! This module implements parsing OneNote objects from a OneNote revision store.
 //! It defines the types of objects we can parse along with their properties.
 //!
 //! See [\[MS-ONE\]]

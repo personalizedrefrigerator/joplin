@@ -1,6 +1,6 @@
+use crate::errors::{ErrorKind, Result};
 use crate::one::property::PropertyType;
-use crate::onestore::object::Object;
-use parser_utils::errors::{ErrorKind, Result};
+use crate::onestore::Object;
 
 /// An RGB color value.
 ///
@@ -25,7 +25,7 @@ pub enum ColorRef {
 
 impl ColorRef {
     pub(crate) fn parse(prop_type: PropertyType, object: &Object) -> Result<Option<ColorRef>> {
-        let value = match object.props().get(prop_type) {
+        let value = match object.props.get(prop_type) {
             Some(value) => value.to_u32().ok_or_else(|| {
                 ErrorKind::MalformedOneNoteFileData("color ref is not a u32".into())
             })?,
@@ -45,7 +45,7 @@ impl ColorRef {
                 return Err(ErrorKind::MalformedOneNoteFileData(
                     format!("invalid color ref: 0x{:08X}", value).into(),
                 )
-                .into())
+                .into());
             }
         };
 
