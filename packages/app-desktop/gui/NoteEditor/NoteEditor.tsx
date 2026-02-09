@@ -766,6 +766,7 @@ const mapStateToProps = (state: AppState, ownProps: ConnectProps) => {
 		shareCacheSetting: state.settings['sync.shareCache'],
 		searchResults: state.searchResults,
 		enableHtmlToMarkdownBanner: state.settings['editor.enableHtmlToMarkdownBanner'],
+		enableInEditorRendering: state.settings['editor.inlineRendering'],
 	};
 };
 

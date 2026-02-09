@@ -493,7 +493,6 @@ function NoteEditor(props: Props) {
 				noteId={props.noteId}
 				markupLanguage={props.markupLanguage}
 				inEditorRendering={editorSettings.inlineRenderingEnabled}
-				readOnly={props.readOnly}
 			/>
 
 			<SearchPanel

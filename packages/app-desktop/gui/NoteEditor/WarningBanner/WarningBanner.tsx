@@ -16,6 +16,7 @@ interface Props {
 	bodyEditor: NoteBodyEditorType;
 	editorMigrationVersion: number;
 	richTextBannerDismissed: boolean;
+	inEditorRenderingEnabled: boolean;
 	pluginCompatibilityBannerDismissedFor: string[];
 	plugins: PluginStates;
 }
@@ -42,6 +43,7 @@ const WarningBanner: React.FC<Props> = props => {
 	const editorMigrationMessage = useEditorTypeMigrationBanner({
 		markdownEditorEnabled: props.bodyEditor === 'CodeMirror6',
 		editorMigrationVersion: props.editorMigrationVersion,
+		inEditorRenderingEnabled: props.inEditorRenderingEnabled,
 	});
 	const editorMigrationBanner = (
 		<BannerContent
@@ -111,5 +113,6 @@ export default connect((state: AppState) => {
 		pluginCompatibilityBannerDismissedFor: state.settings['editor.pluginCompatibilityBannerDismissedFor'],
 		plugins: state.pluginService.plugins,
 		editorMigrationVersion: state.settings['editor.migration'],
+		inEditorRenderingEnabled: state.settings['editor.inlineRendering'],
 	};
 })(WarningBanner);

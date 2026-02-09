@@ -18,7 +18,6 @@ interface Props {
 
 	markupLanguage: MarkupLanguage;
 	noteId: string;
-	readOnly: boolean;
 }
 
 const useBanner = ({
