@@ -1,4 +1,4 @@
-import { ItemId, ResourceData } from '../types';
+import { ItemId, ResourceData } from './types';
 
 interface InitializationOptions extends ResourceData {
 	referencedBy: ItemId[];

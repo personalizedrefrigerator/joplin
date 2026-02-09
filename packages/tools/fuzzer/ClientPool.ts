@@ -1,5 +1,5 @@
 import Logger from '@joplin/utils/Logger';
-import ActionTracker from './ActionTracker';
+import ActionTracker from './model/ActionTracker';
 import Client from './Client';
 import { CleanupTask, FuzzContext } from './types';
 

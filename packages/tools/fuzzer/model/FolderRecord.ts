@@ -1,5 +1,5 @@
 import { strict as assert } from 'node:assert';
-import type { FolderData, ItemId } from '../types';
+import type { FolderData, ItemId } from './types';
 
 export type ShareRecord = {
 	email: string;

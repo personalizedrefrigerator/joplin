@@ -1,11 +1,12 @@
 import uuid, { createSecureRandom } from '@joplin/lib/uuid';
-import { ActionableClient, assertIsNote, FolderData, FuzzContext, HttpMethod, ItemId, Json, NoteData, RandomFolderOptions, RandomNoteOptions, ResourceData, ShareOptions } from './types';
+import { ActionableClient, FuzzContext, HttpMethod, Json, RandomFolderOptions, RandomNoteOptions, ShareOptions } from './types';
+import { assertIsNote, FolderData, ItemId, NoteData, ResourceData } from './model/types';
 import { join } from 'path';
 import { mkdir, remove } from 'fs-extra';
 import getStringProperty from './utils/getStringProperty';
 import { strict as assert } from 'assert';
 import ClipperServer from '@joplin/lib/ClipperServer';
-import ActionTracker from './ActionTracker';
+import ActionTracker from './model/ActionTracker';
 import Logger from '@joplin/utils/Logger';
 import { cliDirectory } from './constants';
 import { commandToString } from '@joplin/utils';
