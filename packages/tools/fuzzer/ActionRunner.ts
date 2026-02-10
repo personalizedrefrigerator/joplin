@@ -1,5 +1,5 @@
-import Client from './Client';
-import ClientPool from './ClientPool';
+import Client from './ipc/Client';
+import ClientPool from './ipc/ClientPool';
 import { FuzzContext, RandomFolderOptions } from './types';
 import { assertIsFolder, assertIsNote, ItemId, ResourceData } from './model/types';
 import { strict as assert } from 'assert';

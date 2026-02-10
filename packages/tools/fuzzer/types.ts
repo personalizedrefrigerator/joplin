@@ -1,4 +1,4 @@
-import type Client from './Client';
+import type Client from './ipc/Client';
 import type FolderRecord from './model/FolderRecord';
 import { NoteData, FolderData, ItemId, ResourceData, DetailedFolderData, TreeItem } from './model/types';
 

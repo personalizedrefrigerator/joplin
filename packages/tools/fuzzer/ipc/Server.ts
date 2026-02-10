@@ -1,5 +1,5 @@
 import { join, resolve } from 'path';
-import { HttpMethod, Json, UserData } from './types';
+import { HttpMethod, Json, UserData } from '../types';
 import JoplinServerApi from '@joplin/lib/JoplinServerApi';
 import { Env } from '@joplin/lib/models/Setting';
 import execa = require('execa');

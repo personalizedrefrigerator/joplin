@@ -42,6 +42,10 @@ class ActionTracker {
 		process.stdout.write(`${log}\n`);
 	}
 
+	public getAccountEmails(): readonly string[] {
+		return [...this.tree_.keys()];
+	}
+
 	private logAction_(item: ItemId|TreeItem, action: string, source: string) {
 		const itemId = typeof item === 'string' ? item : item.id;
 

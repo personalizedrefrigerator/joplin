@@ -31,6 +31,12 @@ export default class SeededRandom {
 		this.value_ = typeof seed === 'number' ? BigInt(seed) : seed;
 	}
 
+	// Returns the last value output by the generator's "next"
+	// Can be used to seed a new random number generator.
+	public get current() {
+		return this.value_;
+	}
+
 	public next() {
 		this.value_ = this.value_ * this.value_ + this.nextStep_;
 

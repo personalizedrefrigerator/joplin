@@ -1,7 +1,7 @@
 import Logger from '@joplin/utils/Logger';
-import ActionTracker from './model/ActionTracker';
+import ActionTracker from '../model/ActionTracker';
 import Client from './Client';
-import { CleanupTask, FuzzContext } from './types';
+import { CleanupTask, FuzzContext } from '../types';
 
 type AddCleanupTask = (task: CleanupTask)=> void;
 type ClientFilter = (client: Client)=> boolean;
@@ -11,34 +11,32 @@ const logger = Logger.create('ClientPool');
 export default class ClientPool {
 	public static async create(
 		context: FuzzContext,
-		clientCount: number,
 		addCleanupTask: AddCleanupTask,
 	) {
-		if (clientCount <= 0) throw new Error('There must be at least 1 client');
 
-		const actionTracker = new ActionTracker(context);
-		const clientPool: Client[] = [];
-		for (let i = 0; i < clientCount; i++) {
-			const client = await Client.create(actionTracker, context);
-			addCleanupTask(() => client.close());
-			clientPool.push(client);
-		}
-
-		return new ClientPool(context, clientPool);
+		return new ClientPool(context, addCleanupTask);
 	}
+
+	private clients_: Client[] = [];
+
 	private constructor(
 		private readonly context_: FuzzContext,
-		private clients_: Client[],
+		private addCleanupTask_: AddCleanupTask,
 	) {
-		for (const client of clients_) {
-			this.listenForClientClose_(client);
-		}
 	}
 
 	private listenForClientClose_(client: Client) {
 		client.onClose(() => {
 			this.clients_ = this.clients_.filter(other => other !== client);
 		});
+	}
+
+	public async newClient(model: ActionTracker) {
+		const client = await Client.create(model, this.context_);
+		this.addCleanupTask_(() => client.close());
+
+		this.listenForClientClose_(client);
+		this.clients_.push(client);
 	}
 
 	public async createRandomInitialItemsAndSync() {
