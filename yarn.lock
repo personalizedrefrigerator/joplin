@@ -10664,7 +10664,7 @@ __metadata:
     prop-types: "npm:15.8.1"
     punycode: "npm:2.3.1"
     react: "npm:19.1.4"
-    react-dom: "npm:19.1.0"
+    react-dom: "npm:19.1.4"
     react-native: "npm:0.81.6"
     react-native-device-info: "npm:14.1.1"
     react-native-dropdownalert: "npm:5.2.0"
@@ -43993,14 +43993,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-dom@npm:19.1.0":
-  version: 19.1.0
-  resolution: "react-dom@npm:19.1.0"
+"react-dom@npm:19.1.4":
+  version: 19.1.4
+  resolution: "react-dom@npm:19.1.4"
   dependencies:
     scheduler: "npm:^0.26.0"
   peerDependencies:
-    react: ^19.1.0
-  checksum: 10/c5b58605862c7b0bb044416b01c73647bb8e89717fb5d7a2c279b11815fb7b49b619fe685c404e59f55eb52c66831236cc565c25ee1c2d042739f4a2cc538aa2
+    react: ^19.1.4
+  checksum: 10/977507ad270e3feac19fccbf8a9a0301e978ca7ceef1812c499899085cdd58207834483fdc9d3ca0bce2c67f48d3406e7da6b234b55e9fbc502c1bb04d141e43
   languageName: node
   linkType: hard
 
