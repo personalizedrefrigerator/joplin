@@ -1,3 +1,7 @@
+---
+forum_url: https://discourse.joplinapp.org/t/48601
+---
+
 # Joplin will come preloaded on the HMD Terra M
 
 <div style="overflow: auto;">
