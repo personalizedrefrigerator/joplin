@@ -13,11 +13,12 @@ export interface FuzzContext {
 	enableE2ee: boolean;
 	baseDir: string;
 
-	execApi: (method: HttpMethod, route: string, debugAction: Json)=> Promise<Json>;
 	randInt: (low: number, high: number)=> number;
 	randomString: (targetLength: number)=> string;
 	randomId: ()=> string;
 	randomFrom: <T> (data: T[])=> T;
+
+	execApi(method: HttpMethod, route: string, body: Json|undefined): Promise<Json>;
 }
 
 export interface RandomFolderOptions {

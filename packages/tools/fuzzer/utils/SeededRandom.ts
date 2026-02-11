@@ -27,8 +27,8 @@ export default class SeededRandom {
 	private nextStep_: bigint = step;
 	private halfSize_ = BigInt(32);
 
-	public constructor(seed: number|bigint) {
-		this.value_ = typeof seed === 'number' ? BigInt(seed) : seed;
+	public constructor(seed: number|bigint|string) {
+		this.value_ = typeof seed !== 'bigint' ? BigInt(seed) : seed;
 	}
 
 	// Returns the last value output by the generator's "next"

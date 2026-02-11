@@ -14,7 +14,7 @@ globalLogger.addTarget(TargetType.Console);
 Logger.initializeGlobalLogger(globalLogger);
 const logger = Logger.create('fuzzer');
 
-const main = async (config: FuzzerConfig) => {
+const main = async (config: FuzzerConfig, restoreFromSnapshot: boolean) => {
 	shimInit();
 	Setting.setConstant('env', Env.Dev);
 
@@ -39,13 +39,18 @@ const main = async (config: FuzzerConfig) => {
 		process.exit(1);
 	});
 
-	logger.info('Starting:', config.isJoplinCloud ? '(cloud)' : '', 'random config:', config.randomConfig);
 
 	let fuzzer: Fuzzer|null = null;
 	try {
-		fuzzer = await Fuzzer.fromConfig(
-			config, (task) => cleanupTasks.push(task),
-		);
+		if (restoreFromSnapshot) {
+			logger.info('Loading from snapshot. (Provided config options will be ignored)');
+			fuzzer = await Fuzzer.fromSnapshot((task) => cleanupTasks.push(task));
+		} else {
+			logger.info('Starting:', config.isJoplinCloud ? '(cloud)' : '', 'random config:', config.randomConfig);
+			fuzzer = await Fuzzer.fromConfig(
+				config, (task) => cleanupTasks.push(task),
+			);
+		}
 		cleanupTasks.push(async () => {
 			fuzzer.stop();
 		});
@@ -190,6 +195,10 @@ void yargs
 					default: -1,
 					description: 'Save a snapshot of the fuzzer state after a certain number of steps.',
 				},
+				'restore-from-snapshot': {
+					type: 'boolean',
+					default: false,
+				},
 			});
 		},
 		async (argv) => {
@@ -217,7 +226,7 @@ void yargs
 				keepAccountsOnClose: argv.keepAccounts,
 				enableE2ee: argv.enableE2ee,
 				setupActions: setupData?.setupActions ?? defaultSetupActions(clientCount),
-			});
+			}, argv.restoreFromSnapshot);
 		},
 	)
 	.demandCommand()

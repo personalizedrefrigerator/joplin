@@ -26,6 +26,8 @@ import diffSortedStringArrays from '../utils/diffSortedStringArrays';
 import extractResourceIds from '../utils/extractResourceIds';
 import { substrWithEllipsis } from '@joplin/lib/string-utils';
 import hangingIndent from '../utils/hangingIndent';
+import { readFile, writeFile } from 'fs/promises';
+import { hasOwnProperty } from '@joplin/utils/object';
 
 const logger = Logger.create('Client');
 
@@ -39,16 +41,25 @@ type AccountData = Readonly<{
 	onClientDisconnected: ()=> Promise<void>;
 }>;
 
-const createNewAccount = async (email: string, context: FuzzContext): Promise<AccountData> => {
-	const password = createSecureRandom();
-	const apiOutput = await context.execApi('POST', 'api/users', {
-		email,
-		full_name: `Fuzzer user from ${formatMsToDateTimeLocal(Date.now())}`,
-	});
-	const serverId = getStringProperty(apiOutput, 'id');
+const emailPrefix = 'fuzzer-user-';
+
+const wrapAccountAndResetPassword = async (userId: string, context: FuzzContext): Promise<AccountData> => {
+	const userRoute = `api/users/${encodeURIComponent(userId)}`;
+	const response = await context.execApi('GET', userRoute, undefined);
+
+	if (typeof response !== 'object' || !hasOwnProperty(response, 'email')) {
+		throw new Error(`Failed to look up the email for user ${userId}`);
+	}
+	// The fuzzer can do things like delete accounts.
+	// Do an extra check to make sure that we're working with an account created by the fuzzer:
+	if (typeof response.email !== 'string' || !response.email.startsWith(emailPrefix)) {
+		throw new Error(`Invalid email: ${JSON.stringify(response.email)} (should start with "${emailPrefix}")`);
+	}
+
+	const email = response.email;
 
 	// The password needs to be set *after* creating the user.
-	const userRoute = `api/users/${encodeURIComponent(serverId)}`;
+	const password = createSecureRandom();
 	await context.execApi('PATCH', userRoute, {
 		email,
 		password,
@@ -64,7 +75,7 @@ const createNewAccount = async (email: string, context: FuzzContext): Promise<Ac
 		email,
 		password,
 		e2eePassword: context.enableE2ee ? createSecureRandom().replace(/^-/, '_') : null,
-		serverId,
+		serverId: userId,
 		get associatedClientCount() {
 			return referenceCounter;
 		},
@@ -79,6 +90,16 @@ const createNewAccount = async (email: string, context: FuzzContext): Promise<Ac
 			}
 		},
 	};
+};
+
+const createNewAccount = async (email: string, context: FuzzContext): Promise<AccountData> => {
+	const apiOutput = await context.execApi('POST', 'api/users', {
+		email,
+		full_name: `Fuzzer user from ${formatMsToDateTimeLocal(Date.now())}`,
+	});
+	const serverId = getStringProperty(apiOutput, 'id');
+
+	return wrapAccountAndResetPassword(serverId, context);
 };
 
 type ApiData = Readonly<{
@@ -118,7 +139,7 @@ class Client implements ActionableClient {
 	public readonly email: string;
 
 	public static async create(actionTracker: ActionTracker, context: FuzzContext) {
-		const account = await createNewAccount(`${uuid.create()}@localhost`, context);
+		const account = await createNewAccount(`${emailPrefix}${uuid.createNano()}@localhost`, context);
 
 		try {
 			const client = await this.fromAccount(account, actionTracker, context);
@@ -164,6 +185,42 @@ class Client implements ActionableClient {
 		if (account.e2eePassword) {
 			await client.execCliCommand_('e2ee', 'enable', '--password', account.e2eePassword);
 		}
+		logger.info('Created and configured client');
+
+		await client.startClipperServer_();
+		return client;
+	}
+
+	public static async fromSnapshotDirectory(path: string, actionTracker: ActionTracker, context: FuzzContext) {
+		const { serverId: accountId } = JSON.parse(await readFile(join(path, 'account.json'), 'utf-8'));
+		const account = await wrapAccountAndResetPassword(accountId, context);
+
+		const profileDirectory = join(context.baseDir, uuid.createNano());
+		await copy(path, profileDirectory);
+
+		const apiData: ApiData = {
+			token: createSecureRandom().replace(/[-]/g, '_'),
+			port: await ClipperServer.instance().findAvailablePort(),
+		};
+
+		const client = new Client(
+			context,
+			actionTracker,
+			actionTracker.track({ email: account.email }),
+			account,
+			profileDirectory,
+			apiData,
+			`${account.email}${account.associatedClientCount ? ` (${account.associatedClientCount})` : ''}`,
+		);
+
+		account.onClientConnected();
+
+		const targetId = context.isJoplinCloud ? '10' : '9';
+		// Update the client with the new password(s)
+		await client.execCliCommand_('config', `sync.${targetId}.password`, account.password);
+		await client.execCliCommand_('config', 'api.token', apiData.token);
+		await client.execCliCommand_('config', 'api.port', String(apiData.port));
+
 		logger.info('Created and configured client');
 
 		await client.startClipperServer_();
@@ -238,6 +295,15 @@ class Client implements ActionableClient {
 	public async saveSnapshot(outputDirectory: string) {
 		assert.ok(await exists(outputDirectory));
 		await copy(this.profileDirectory, outputDirectory);
+
+		await writeFile(
+			join(outputDirectory, 'account.json'),
+			JSON.stringify({
+				serverId: this.account_.serverId,
+				email: this.account_.email,
+			}),
+			'utf-8',
+		);
 	}
 
 	private async startClipperServer_() {

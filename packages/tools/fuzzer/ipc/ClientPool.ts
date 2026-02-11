@@ -4,6 +4,7 @@ import Client from './Client';
 import { FuzzContext } from '../types';
 import { join } from 'path';
 import { mkdir } from 'fs-extra';
+import { readdir } from 'fs/promises';
 
 type ClientFilter = (client: Client)=> boolean;
 
@@ -12,6 +13,22 @@ const logger = Logger.create('ClientPool');
 export default class ClientPool {
 	public static async create(context: FuzzContext) {
 		return new ClientPool(context);
+	}
+
+	public static async fromSnapshot(snapshotDirectory: string, actionTracker: ActionTracker, context: FuzzContext) {
+		const pool = await ClientPool.create(context);
+
+		const matchingDirectories = (await readdir(snapshotDirectory))
+			.filter(child => child.startsWith('client-'))
+			.map(child => join(snapshotDirectory, child));
+
+		for (const clientDirectory of matchingDirectories) {
+			const client = await Client.fromSnapshotDirectory(clientDirectory, actionTracker, context);
+			pool.clients_.push(client);
+			pool.listenForClientClose_(client);
+		}
+
+		return pool;
 	}
 
 	private clients_: Client[] = [];

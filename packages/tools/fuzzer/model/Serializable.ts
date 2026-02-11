@@ -46,16 +46,31 @@ const deserializeFromSchema = <Schema extends BaseSchema|StringType> (schema: Sc
 			if (typeof data !== 'string') {
 				throw new Error(`IDs must be strings. ${errorContext()}`);
 			}
-			if (!/^[a-z0-9]{32}$/i.exec(data)) {
-				throw new Error(`IDs must be 32 character alphanumeric strings. ${errorContext()}`);
+			if (data !== '' && !/^[a-z0-9]{32}$/i.exec(data)) {
+				throw new Error(`IDs must be 32 character alphanumeric strings or empty. ${errorContext()}`);
 			}
+
+			result = data;
 		} else if (schema === 'unknown') {
 			// No check required
+			result = data;
+		} else if (schema.endsWith('[]')) {
+			if (!Array.isArray(data)) {
+				throw new Error(`Invalid type ${typeof data}, expected array. ${errorContext()}`);
+			}
+
+			const subSchema = schema.substring(0, schema.length - 2) as StringType;
+
+			const resultArray = [];
+			for (const item of data) {
+				resultArray.push(deserializeFromSchema(subSchema, item));
+			}
+			result = resultArray;
 		} else if (typeof data !== schema) {
 			throw new Error(`Invalid type: ${typeof data}. Expected ${schema} ${errorContext()}`);
+		} else {
+			result = data;
 		}
-
-		result = data;
 	} else if (Array.isArray(schema)) {
 		if (!Array.isArray(data)) {
 			throw new Error(`Invalid type: ${typeof data}. Expected array. ${errorContext()}`);

@@ -69,6 +69,8 @@ class ActionTracker extends Serializable<typeof schema> {
 		for (const [key, value] of state.tree) {
 			tracker.tree_.set(key, value);
 		}
+
+		return tracker;
 	}
 
 	public serialize() {

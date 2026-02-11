@@ -1,4 +1,4 @@
-import { exists, mkdir, pathExists, readdir, remove, writeFile } from 'fs-extra';
+import { copy, exists, mkdir, pathExists, readdir, remove, writeFile } from 'fs-extra';
 import ActionRunner, { ActionSpec } from './ActionRunner';
 import ClientPool from './ipc/ClientPool';
 import Server from './ipc/Server';
@@ -11,6 +11,7 @@ import randomString from './utils/randomString';
 import randomId from './utils/randomId';
 import { ItemId } from './model/types';
 import openDebugSession from './utils/openDebugSession';
+import { readFile } from 'fs/promises';
 
 const logger = Logger.create('Fuzzer');
 
@@ -81,13 +82,19 @@ const createProfilesDirectory = async () => {
 	};
 };
 
-const getSnapshotsDirectory = async () => {
-	const path = join(__dirname, 'snapshots');
-	if (!await exists(path)) {
-		await mkdir(path);
+const snapshotsPath = join(__dirname, 'snapshots');
+const makeSnapshotsDirectory = async () => {
+	if (!await exists(snapshotsPath)) {
+		await mkdir(snapshotsPath);
 	}
 
-	return path;
+	return snapshotsPath;
+};
+
+const clearSnapshotsDirectory = async () => {
+	if (await exists(snapshotsPath)) {
+		await remove(snapshotsPath);
+	}
 };
 
 type RandomNumberGenerators = {
@@ -159,7 +166,10 @@ export default class Fuzzer {
 	) {
 	}
 
-	public static async fromConfig(config: FuzzerConfig, onCleanup: (task: CleanupTask)=> void) {
+	private static async setupServerAndContext(
+		config: FuzzerConfig,
+		onCleanup: (task: CleanupTask)=> void,
+	) {
 		const joplinServerUrl = 'http://localhost:22300/';
 		const server = new Server(config.serverPath, joplinServerUrl, {
 			email: 'admin@localhost',
@@ -177,10 +187,20 @@ export default class Fuzzer {
 		const random = createRandomNumberGenerators(config.randomConfig);
 		const context = createContext(config, random, server, profilesDirectory.path);
 
+		return { server, context, random };
+	}
+
+	public static async fromConfig(
+		config: FuzzerConfig,
+		onCleanup: (task: CleanupTask)=> void,
+	) {
+		const { server, context, random } = await this.setupServerAndContext(config, onCleanup);
+
+		const model = new ActionTracker(context);
+
 		const clientPool = await ClientPool.create(context);
 		onCleanup(() => clientPool.close());
 
-		const model = new ActionTracker(context);
 		for (let i = 0; i < config.clientCount; i++) {
 			await clientPool.newClient(model);
 		}
@@ -204,11 +224,48 @@ export default class Fuzzer {
 		);
 	}
 
-	public static fromSnapshot(snapshotPath: string) {
-		throw new Error(`Not implemented: Restore from snapshot at ${snapshotPath}`);
+	public static async fromSnapshot(onCleanup: (task: CleanupTask)=> void) {
+		const snapshotDirectory = await makeSnapshotsDirectory();
+		const stateJson = JSON.parse(
+			await readFile(join(snapshotDirectory, 'state.json'), 'utf-8'),
+		);
+
+		const config: FuzzerConfig = stateJson.config;
+
+		// TODO: Refactor
+		const serverDatabaseFile = join(config.serverPath, 'db-dev.sqlite');
+		logger.info('Overwriting', serverDatabaseFile, '...');
+		await copy(join(snapshotDirectory, 'server', 'db-dev.sqlite'), serverDatabaseFile);
+
+		const { server, context, random } = await this.setupServerAndContext(config, onCleanup);
+
+		const model = ActionTracker.fromSnapshot(stateJson.model, context);
+
+		const clientPool = await ClientPool.fromSnapshot(join(snapshotDirectory, 'clients'), model, context);
+		onCleanup(() => clientPool.close());
+
+		const actionRunner = new ActionRunner(
+			context, clientPool, clientPool.clients[0],
+		);
+		const state: FuzzerState = {
+			currentStep: stateJson.currentStep,
+			generalRandom: random.generalRandom,
+			idRandom: random.idRandom,
+			stringRandom: random.stringRandom,
+			model,
+		};
+
+		return new Fuzzer(
+			state,
+			config,
+			clientPool,
+			server,
+			actionRunner,
+			context,
+		);
 	}
 
-	public async saveSnapshot(outputDirectory: string) {
+	private async saveSnapshot_(outputDirectory: string) {
 		logger.info('Saving a snapshot to', outputDirectory);
 		if (!await pathExists(outputDirectory)) {
 			throw new Error('Output directory does not exist');
@@ -227,6 +284,8 @@ export default class Fuzzer {
 				config: {
 					...this.config_,
 					randomConfig: {
+						...this.config_.randomConfig,
+
 						randomStrings: this.config_.randomConfig.randomStrings,
 						seed: undefined,
 						idSeed: String(this.state_.idRandom.current),
@@ -248,13 +307,17 @@ export default class Fuzzer {
 	}
 
 	public async start() {
-		logger.info('Starting setup:');
-		await this.actionRunner_.doActions(this.config_.setupActions);
+		if (this.state_.currentStep <= 0) {
+			logger.info('Starting setup:');
+			await this.actionRunner_.doActions(this.config_.setupActions);
+		} else {
+			logger.info('Skipping setup...');
+		}
 
 		logger.info('Starting randomized actions:');
 		const maxSteps = this.config_.stepConfig.stopAfter;
 		for (
-			let stepIndex = this.state_.currentStep;
+			let stepIndex = this.state_.currentStep + 1;
 			(maxSteps <= 0 || stepIndex <= maxSteps) && !this.closed_;
 			stepIndex++
 		) {
@@ -279,7 +342,8 @@ export default class Fuzzer {
 			await this.actionRunner_.syncAndCheckState();
 
 			if (stepIndex === this.config_.stepConfig.snapshotAfter) {
-				await this.saveSnapshot(await getSnapshotsDirectory());
+				await clearSnapshotsDirectory();
+				await this.saveSnapshot_(await makeSnapshotsDirectory());
 			}
 		}
 	}

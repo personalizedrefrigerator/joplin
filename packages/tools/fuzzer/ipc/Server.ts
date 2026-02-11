@@ -79,7 +79,7 @@ export default class Server {
 		return false;
 	}
 
-	public async execApi(method: HttpMethod, route: string, action: Json) {
+	public async execApi(method: HttpMethod, route: string, action: Json|undefined): Promise<Json> {
 		this.api_ ??= await createApi(this.serverUrl_, this.adminAuth_);
 		logger.debug('API EXEC', method, route, action);
 		const result = await this.api_.exec(method, route, {}, action);
