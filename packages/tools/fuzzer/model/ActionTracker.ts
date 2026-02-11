@@ -4,8 +4,8 @@ import { FolderData, ItemId, NoteData, TreeItem, assertIsFolder, isFolder, isNot
 import FolderRecord from './FolderRecord';
 import { extractResourceUrls } from '@joplin/lib/urlUtils';
 import ResourceRecord from './ResourceRecord';
-import { assertHasOwnPropertyOfType } from '@joplin/utils/object';
 import Serializable, { BaseSchema, SchemaToType } from './Serializable';
+import NoteRecord from './NoteRecord';
 
 interface ClientData {
 	email: string;
@@ -21,11 +21,20 @@ interface ActionLogEntry {
 	source: string;
 }
 
-const schema: BaseSchema = {
-	idToActionLog: ['string', { action: 'string', source: 'string'}],
-	idToItem: [ItemId, unknown][],
-	tree: [string, ClientData][],
-}
+const schema = {
+	idToActionLog: [
+		[
+			'string',
+			[{ action: 'string', source: 'string' }, '...'],
+		],
+		'...',
+	],
+	idToItem: [['string', 'unknown'], '...'],
+	tree: [
+		['string', { email: 'string', childIds: 'string[]' }],
+		'...',
+	],
+} satisfies BaseSchema;
 
 class ActionTracker extends Serializable<typeof schema> {
 	private idToActionLog_: Map<ItemId, ActionLogEntry[]> = new Map();
@@ -37,38 +46,28 @@ class ActionTracker extends Serializable<typeof schema> {
 	}
 
 	public static fromSnapshot(snapshot: unknown, context: FuzzContext) {
-		assertHasOwnPropertyOfType(snapshot, 'idToActionLog', 'unknown[][]');
-		assertHasOwnPropertyOfType(snapshot, 'idToItem', 'unknown[][]');
-		assertHasOwnPropertyOfType(snapshot, 'tree', 'unknown[][]');
+		const tracker = new ActionTracker(context);
+		const state = tracker.deserialize(snapshot);
 
-		const result = new ActionTracker(context);
-
-		for (const [id, log] of snapshot.idToActionLog) {
-			assert.ok(typeof id === 'string');
-			assert.ok(Array.isArray(log));
-			// TODO: Additional validation for log?
-			result.idToActionLog_.set(id, log);
+		for (const [key, value] of state.idToActionLog) {
+			tracker.idToActionLog_.set(key, value);
 		}
-		for (const [id, item] of snapshot.idToItem) {
-			assert.ok(typeof id === 'string');
-			assertHasOwnPropertyOfType(item, 'isNote', 'boolean');
-			assertHasOwnPropertyOfType(item, 'isResource', 'boolean');
-			assertHasOwnPropertyOfType(item, 'isFolder', 'boolean');
 
-			let deserialized;
-			if (item.isNote) {
-				assertHasOwnPropertyOfType(item, 'parentId', 'string');
-				assertHasOwnPropertyOfType(item, 'id', 'string');
-				assertHasOwnPropertyOfType(item, 'title', 'string');
-				assertHasOwnPropertyOfType(item, 'body', 'string');
-				assertHasOwnPropertyOfType(item, 'body', 'string');
-				assertHasOwnPropertyOfType(item, 'published', 'boolean');
-				deserialized = item as NoteData;
-			} else if (item.isFolder) {
-
+		for (const [key, value] of state.idToItem) {
+			if (typeof value !== 'object') throw new Error(`Items must be objects (evaluating ${value})`);
+			let item;
+			if ('isFolder' in value && value.isFolder) {
+				item = FolderRecord.fromSerialized(value);
+			} else if ('isResource' in value && value.isResource) {
+				item = ResourceRecord.fromSerialized(value);
+			} else {
+				item = NoteRecord.fromSerialized(value);
 			}
-			// TODO: Additional validation for entry[1]?
-			result.idToItem_.set(entry[0], entry[1]);
+			tracker.idToItem_.set(key, item);
+		}
+
+		for (const [key, value] of state.tree) {
+			tracker.tree_.set(key, value);
 		}
 	}
 
@@ -199,7 +198,7 @@ class ActionTracker extends Serializable<typeof schema> {
 				'child IDs should be unique',
 			);
 		};
-		const checkNote = (note: NoteData) => {
+		const checkNote = (note: NoteRecord) => {
 			assert.ok(!isFolder(note));
 			assert.ok(!isResource(note));
 		};
@@ -396,7 +395,7 @@ class ActionTracker extends Serializable<typeof schema> {
 					removeItemRecursive(childId);
 				}
 			} else if (isNote(item)) {
-				updateResourceReferences(item, { ...item, body: '' });
+				updateResourceReferences(item, item.withBody(''));
 			}
 		};
 		const mapItems = <T> (map: (item: TreeItem)=> T, startFolder?: FolderRecord) => {
@@ -536,9 +535,7 @@ class ActionTracker extends Serializable<typeof schema> {
 
 				assert.ok(!!data.parentId, `note ${data.id} should have a parentId`);
 				assert.ok(!this.idToItem_.has(data.id), `note ${data.id} should not yet exist`);
-				updateItem(data.id, {
-					...data,
-				}, `created in ${data.parentId}`);
+				updateItem(data.id, new NoteRecord(data), `created in ${data.parentId}`);
 				addChild(data.parentId, data.id);
 				updateResourceReferences(null, data);
 
@@ -565,9 +562,7 @@ class ActionTracker extends Serializable<typeof schema> {
 					});
 
 				removeChild(oldItem.parentId, data.id);
-				updateItem(data.id, {
-					...data,
-				}, `updated (changed fields: ${JSON.stringify(changedFields)})`);
+				updateItem(data.id, new NoteRecord(data), `updated (changed fields: ${JSON.stringify(changedFields)})`);
 				addChild(data.parentId, data.id);
 				updateResourceReferences(oldItem, data);
 
@@ -721,7 +716,7 @@ class ActionTracker extends Serializable<typeof schema> {
 				addChild(newParentId, itemId);
 				item = updateItem(
 					itemId,
-					isFolder(item) ? item.withParent(newParentId) : { ...item, parentId: newParentId },
+					item.withParent(newParentId),
 					`moved to id:${newParentId}`,
 				);
 
@@ -743,10 +738,7 @@ class ActionTracker extends Serializable<typeof schema> {
 				assert.ok(isNote(oldItem), 'only notes can be published');
 				assert.ok(!oldItem.published, 'should not be published');
 
-				updateItem(id, {
-					...oldItem,
-					published: true,
-				}, 'published');
+				updateItem(id, oldItem.withPublished(true), 'published');
 
 				this.checkRep_();
 				return Promise.resolve();
@@ -757,10 +749,7 @@ class ActionTracker extends Serializable<typeof schema> {
 				assert.ok(isNote(oldItem), 'only notes can be unpublished');
 				assert.ok(oldItem.published, 'should be published');
 
-				updateItem(id, {
-					...oldItem,
-					published: false,
-				}, 'unpublished');
+				updateItem(id, oldItem.withPublished(false), 'unpublished');
 
 				this.checkRep_();
 				return Promise.resolve();

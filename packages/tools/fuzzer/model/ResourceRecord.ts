@@ -1,11 +1,20 @@
 import { assertHasOwnPropertyOfType } from '@joplin/utils/object';
 import { ItemId, ResourceData } from './types';
+import Serializable, { BaseSchema } from './Serializable';
 
 interface InitializationOptions extends ResourceData {
 	referencedBy: ItemId[];
 }
 
-export default class ResourceRecord implements ResourceData {
+const schema = {
+	isResource: 'boolean',
+	id: 'id',
+	title: 'string',
+	mimeType: 'string',
+	referencedBy: 'id[]',
+} satisfies BaseSchema;
+
+export default class ResourceRecord extends Serializable<typeof schema> implements ResourceData {
 	public readonly parentId: undefined;
 	public readonly id: ItemId;
 	public readonly title: string;
@@ -13,6 +22,8 @@ export default class ResourceRecord implements ResourceData {
 	public readonly referencedBy: readonly ItemId[] = [];
 
 	public constructor(options: InitializationOptions) {
+		super(schema);
+
 		this.id = options.id;
 		this.title = options.title;
 		this.mimeType = options.mimeType;
@@ -30,9 +41,10 @@ export default class ResourceRecord implements ResourceData {
 
 	public serialize() {
 		return {
+			isResource: true,
 			id: this.id,
 			title: this.title,
-			referencedBy: this.referencedBy,
+			referencedBy: [...this.referencedBy],
 			mimeType: this.mimeType,
 		};
 	}

@@ -1,6 +1,6 @@
 import { strict as assert } from 'node:assert';
 import type { FolderData, ItemId } from './types';
-import { assertHasOwnPropertyOfType } from '@joplin/utils/object';
+import Serializable, { BaseSchema } from './Serializable';
 
 export type ShareRecord = {
 	email: string;
@@ -19,7 +19,21 @@ const validateId = (id: string) => {
 	return !!id.match(/^[a-zA-Z0-9]{32}$/);
 };
 
-export default class FolderRecord implements FolderData {
+const schema = {
+	isFolder: 'boolean',
+	parentId: 'id',
+	id: 'id',
+	title: 'string',
+	ownedByEmail: 'string',
+	childIds: 'id[]',
+	isShared: 'boolean',
+	sharedWith: [
+		{ email: 'string', readOnly: 'boolean' },
+		'...',
+	],
+} satisfies BaseSchema;
+
+export default class FolderRecord extends Serializable<typeof schema> implements FolderData {
 	public readonly parentId: ItemId;
 	public readonly id: ItemId;
 	public readonly title: string;
@@ -30,6 +44,8 @@ export default class FolderRecord implements FolderData {
 	private readonly sharedWith_: readonly ShareRecord[];
 
 	public constructor(options: InitializationOptions) {
+		super(schema);
+
 		this.parentId = options.parentId;
 		this.id = options.id;
 		this.title = options.title;
@@ -47,35 +63,20 @@ export default class FolderRecord implements FolderData {
 		}
 	}
 
-	public static fromSerialized(data: unknown) {
-		assertHasOwnPropertyOfType(data, 'parentId', 'string');
-		assertHasOwnPropertyOfType(data, 'id', 'string');
-		assertHasOwnPropertyOfType(data, 'title', 'string');
-		assertHasOwnPropertyOfType(data, 'ownedByEmail', 'string');
-		assertHasOwnPropertyOfType(data, 'childIds', 'string[]');
-		assertHasOwnPropertyOfType(data, 'sharedWith', 'unknown[]');
-		assertHasOwnPropertyOfType(data, 'isShared', 'boolean');
-
-		return new FolderRecord({
-			...data,
-
-			sharedWith: data.sharedWith.map(item => {
-				assertHasOwnPropertyOfType(item, 'email', 'string');
-				assertHasOwnPropertyOfType(item, 'readOnly', 'boolean');
-
-				return item;
-			}),
-		});
+	public static fromSerialized(serialized: unknown) {
+		const data = this.deserialize(schema, serialized);
+		return new FolderRecord(data);
 	}
 
 	public serialize() {
 		return {
+			isFolder: true,
 			parentId: this.parentId,
 			id: this.id,
 			title: this.title,
 			ownedByEmail: this.ownedByEmail,
-			childIds: this.childIds,
-			sharedWith: this.sharedWith_,
+			childIds: [...this.childIds],
+			sharedWith: [...this.sharedWith_],
 			isShared: this.isShared_,
 		};
 	}

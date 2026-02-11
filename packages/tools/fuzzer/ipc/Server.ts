@@ -6,7 +6,8 @@ import execa = require('execa');
 import { msleep } from '@joplin/utils/time';
 import Logger from '@joplin/utils/Logger';
 import { strict as assert } from 'assert';
-import { copy, exists } from 'fs-extra';
+import { exists } from 'fs-extra';
+import { copyFile } from 'fs/promises';
 
 const logger = Logger.create('Server');
 
@@ -51,7 +52,8 @@ export default class Server {
 
 	public async saveSnapshot(outputDirectory: string) {
 		assert.ok(await exists(outputDirectory));
-		await copy(join(this.baseDirectory_, 'db-dev.sqlite'), outputDirectory);
+		const destination = join(outputDirectory, 'db-dev.sqlite');
+		await copyFile(join(this.baseDirectory_, 'db-dev.sqlite'), destination);
 	}
 
 	public get url() {

@@ -1,29 +1,23 @@
 import Logger from '@joplin/utils/Logger';
 import ActionTracker from '../model/ActionTracker';
 import Client from './Client';
-import { CleanupTask, FuzzContext } from '../types';
+import { FuzzContext } from '../types';
 import { join } from 'path';
 import { mkdir } from 'fs-extra';
 
-type AddCleanupTask = (task: CleanupTask)=> void;
 type ClientFilter = (client: Client)=> boolean;
 
 const logger = Logger.create('ClientPool');
 
 export default class ClientPool {
-	public static async create(
-		context: FuzzContext,
-		addCleanupTask: AddCleanupTask,
-	) {
-
-		return new ClientPool(context, addCleanupTask);
+	public static async create(context: FuzzContext) {
+		return new ClientPool(context);
 	}
 
 	private clients_: Client[] = [];
 
 	private constructor(
 		private readonly context_: FuzzContext,
-		private addCleanupTask_: AddCleanupTask,
 	) {
 	}
 
@@ -44,10 +38,9 @@ export default class ClientPool {
 
 	public async newClient(model: ActionTracker) {
 		const client = await Client.create(model, this.context_);
-		this.addCleanupTask_(() => client.close());
 
-		this.listenForClientClose_(client);
 		this.clients_.push(client);
+		this.listenForClientClose_(client);
 	}
 
 	public async createRandomInitialItemsAndSync() {
@@ -115,6 +108,16 @@ export default class ClientPool {
 
 	public helpText() {
 		return this.clients_.map(client => client.getHelpText()).join('\n\n');
+	}
+
+	public async close() {
+		for (const client of this.clients) {
+			try {
+				await client.close();
+			} catch (error) {
+				logger.warn('Failed to close client', error);
+			}
+		}
 	}
 }
 

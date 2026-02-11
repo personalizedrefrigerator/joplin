@@ -1,6 +1,6 @@
 import uuid, { createSecureRandom } from '@joplin/lib/uuid';
 import { ActionableClient, FuzzContext, HttpMethod, Json, RandomFolderOptions, RandomNoteOptions, ShareOptions } from '../types';
-import { assertIsNote, FolderData, ItemId, NoteData, ResourceData } from '../model/types';
+import { assertIsNote, assertIsNoteData, FolderData, ItemId, NoteData, ResourceData } from '../model/types';
 import { join } from 'path';
 import { copy, exists, mkdir, remove } from 'fs-extra';
 import getStringProperty from '../utils/getStringProperty';
@@ -584,7 +584,7 @@ class Client implements ActionableClient {
 				const expected = this.tracker_.itemById(id);
 				assertIsNote(expected);
 				const actual = noteActualStates.get(id);
-				assertIsNote(actual);
+				assertIsNoteData(actual);
 
 				if (textsMatchIgnoringResources(actual.body, expected.body)) {
 					const firstMatchIndex = actual.body.indexOf(resourceId);
