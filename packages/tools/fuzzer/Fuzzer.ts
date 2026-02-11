@@ -1,4 +1,4 @@
-import { exists, pathExists, readdir, writeFile } from "fs-extra";
+import { copyFile, exists, mkdir, pathExists, readdir, writeFile } from "fs-extra";
 import { ActionSpec } from "./ActionRunner";
 import ClientPool from "./ipc/ClientPool";
 import Server from "./ipc/Server";
@@ -15,10 +15,12 @@ interface FuzzerState {
 	currentStep: number;
 }
 
-interface RandomSeeds {
-	actions: number;
-	ids: number;
-	strings: number;
+interface RandomConfig {
+	actionSeed: number;
+	idSeed: number;
+	stringSeed: number;
+
+	enableStringRandom: boolean;
 }
 
 interface StepConfig {
@@ -28,13 +30,14 @@ interface StepConfig {
 }
 
 interface FuzzerConfig {
-	seeds: RandomSeeds;
+	seeds: RandomConfig;
+	randomStrings: boolean;
 
-	stopAfterSteps
+	stopAfterSteps: number;
 	maximumSteps: number;
 	maximumStepsBetweenSyncs: number;
+
 	enableE2ee: boolean;
-	randomStrings: boolean;
 	clientCount: number;
 	keepAccountsOnClose: boolean;
 	setupActions: ActionSpec[];
@@ -58,10 +61,11 @@ export default class Fuzzer {
 	}
 
 	private constructor(
-		private state_: FuzzerState
+		private state_: FuzzerState,
+		private config_: FuzzerConfig,
 	) {}
 
-	public async snapshot(outputDirectory: string) {
+	public async saveSnapshot(outputDirectory: string) {
 		if (!await pathExists(outputDirectory)) {
 			throw new Error('Output directory does not exist');
 		}
@@ -79,8 +83,19 @@ export default class Fuzzer {
 				stringRandom: this.state_.stringRandom.current,
 				idRandom: this.state_.idRandom.current,
 
-				accountEmails
+				accountEmails: this.state_.model.getAccountEmails(),
+
+				config: this.config_,
+				model: this.model_.snapshot(),
 			}),
 		);
+
+		const serverDir = join(outputDirectory, 'server');
+		await mkdir(serverDir);
+		await this.server_.saveSnapshot(serverDir);
+
+		const clientsDir = join(outputDirectory, 'clients');
+		await mkdir(clientsDir);
+		await this.clients_.saveSnapshot(clientsDir);
 	}
 }

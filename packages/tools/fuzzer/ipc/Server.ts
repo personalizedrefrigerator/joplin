@@ -5,6 +5,8 @@ import { Env } from '@joplin/lib/models/Setting';
 import execa = require('execa');
 import { msleep } from '@joplin/utils/time';
 import Logger from '@joplin/utils/Logger';
+import { strict as assert } from 'assert';
+import { copy, exists } from 'fs-extra';
 
 const logger = Logger.create('Server');
 
@@ -25,6 +27,7 @@ const createApi = async (serverUrl: string, adminAuth: UserData) => {
 export default class Server {
 	private api_: JoplinServerApi|null = null;
 	private server_: execa.ExecaChildProcess<string>;
+	private baseDirectory_: string;
 
 	public constructor(
 		serverBaseDirectory: string,
@@ -32,6 +35,7 @@ export default class Server {
 		private readonly adminAuth_: UserData,
 	) {
 		const serverDir = resolve(serverBaseDirectory);
+		this.baseDirectory_ = serverDir;
 		const mainEntrypoint = join(serverDir, 'dist', 'app.js');
 		this.server_ = execa.node(mainEntrypoint, [
 			'--env', 'dev',
@@ -43,6 +47,11 @@ export default class Server {
 			stderr: process.stderr,
 			// stdout: process.stdout,
 		});
+	}
+
+	public async saveSnapshot(outputDirectory: string) {
+		assert.ok(await exists(outputDirectory));
+		await copy(join(this.baseDirectory_, 'db-dev.sqlite'), outputDirectory);
 	}
 
 	public get url() {

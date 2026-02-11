@@ -2,6 +2,8 @@ import Logger from '@joplin/utils/Logger';
 import ActionTracker from '../model/ActionTracker';
 import Client from './Client';
 import { CleanupTask, FuzzContext } from '../types';
+import { join } from 'path';
+import { mkdir } from 'fs-extra';
 
 type AddCleanupTask = (task: CleanupTask)=> void;
 type ClientFilter = (client: Client)=> boolean;
@@ -29,6 +31,15 @@ export default class ClientPool {
 		client.onClose(() => {
 			this.clients_ = this.clients_.filter(other => other !== client);
 		});
+	}
+
+	public async saveSnapshot(outputDirectory: string) {
+		let i = 0;
+		for (const client of this.clients) {
+			const outputChildDirectory = join(outputDirectory, `client-${i++}`);
+			await mkdir(outputChildDirectory);
+			await client.saveSnapshot(outputChildDirectory);
+		}
 	}
 
 	public async newClient(model: ActionTracker) {

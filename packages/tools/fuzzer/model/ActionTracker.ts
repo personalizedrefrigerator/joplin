@@ -4,6 +4,8 @@ import { FolderData, ItemId, NoteData, TreeItem, assertIsFolder, isFolder, isNot
 import FolderRecord from './FolderRecord';
 import { extractResourceUrls } from '@joplin/lib/urlUtils';
 import ResourceRecord from './ResourceRecord';
+import { assertHasOwnPropertyOfType } from '@joplin/utils/object';
+import Serializable, { BaseSchema, SchemaToType } from './Serializable';
 
 interface ClientData {
 	email: string;
@@ -19,11 +21,92 @@ interface ActionLogEntry {
 	source: string;
 }
 
-class ActionTracker {
+const schema: BaseSchema = {
+	idToActionLog: ['string', { action: 'string', source: 'string'}],
+	idToItem: [ItemId, unknown][],
+	tree: [string, ClientData][],
+}
+
+class ActionTracker extends Serializable<typeof schema> {
 	private idToActionLog_: Map<ItemId, ActionLogEntry[]> = new Map();
 	private idToItem_: Map<ItemId, TreeItem> = new Map();
 	private tree_: Map<string, ClientData> = new Map();
-	public constructor(private readonly context_: FuzzContext) {}
+
+	public constructor(private readonly context_: FuzzContext) {
+		super(schema);
+	}
+
+	public static fromSnapshot(snapshot: unknown, context: FuzzContext) {
+		assertHasOwnPropertyOfType(snapshot, 'idToActionLog', 'unknown[][]');
+		assertHasOwnPropertyOfType(snapshot, 'idToItem', 'unknown[][]');
+		assertHasOwnPropertyOfType(snapshot, 'tree', 'unknown[][]');
+
+		const result = new ActionTracker(context);
+
+		for (const [id, log] of snapshot.idToActionLog) {
+			assert.ok(typeof id === 'string');
+			assert.ok(Array.isArray(log));
+			// TODO: Additional validation for log?
+			result.idToActionLog_.set(id, log);
+		}
+		for (const [id, item] of snapshot.idToItem) {
+			assert.ok(typeof id === 'string');
+			assertHasOwnPropertyOfType(item, 'isNote', 'boolean');
+			assertHasOwnPropertyOfType(item, 'isResource', 'boolean');
+			assertHasOwnPropertyOfType(item, 'isFolder', 'boolean');
+
+			let deserialized;
+			if (item.isNote) {
+				assertHasOwnPropertyOfType(item, 'parentId', 'string');
+				assertHasOwnPropertyOfType(item, 'id', 'string');
+				assertHasOwnPropertyOfType(item, 'title', 'string');
+				assertHasOwnPropertyOfType(item, 'body', 'string');
+				assertHasOwnPropertyOfType(item, 'body', 'string');
+				assertHasOwnPropertyOfType(item, 'published', 'boolean');
+				deserialized = item as NoteData;
+			} else if (item.isFolder) {
+
+			}
+			// TODO: Additional validation for entry[1]?
+			result.idToItem_.set(entry[0], entry[1]);
+		}
+	}
+
+	public serialize() {
+		const result: SchemaToType<typeof schema> = {
+			idToActionLog: [],
+			idToItem: [],
+			tree: [],
+		};
+
+		for (const [id, log] of this.idToActionLog_.entries()) {
+			result.idToActionLog.push([id, log]);
+		}
+		for (const [id, item] of this.idToItem_.entries()) {
+			let serialized;
+			if (isResource(item) || isFolder(item)) {
+				serialized = {
+					isResource: isResource(item),
+					isFolder: isFolder(item),
+					isNote: false,
+					...item.serialize(),
+				};
+			} else {
+				serialized = {
+					isNote: true,
+					isResource: false,
+					isFolder: false,
+					...item,
+				};
+			}
+			result.idToItem.push([id, serialized]);
+		}
+		for (const [email, client] of this.tree_.entries()) {
+			result.tree.push([email, client]);
+		}
+
+		return result;
+	}
 
 	public getActionLog(id: ItemId) {
 		return [...(this.idToActionLog_.get(id) ?? [])];

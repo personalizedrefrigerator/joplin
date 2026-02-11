@@ -2,7 +2,7 @@ import uuid, { createSecureRandom } from '@joplin/lib/uuid';
 import { ActionableClient, FuzzContext, HttpMethod, Json, RandomFolderOptions, RandomNoteOptions, ShareOptions } from '../types';
 import { assertIsNote, FolderData, ItemId, NoteData, ResourceData } from '../model/types';
 import { join } from 'path';
-import { mkdir, remove } from 'fs-extra';
+import { copy, exists, mkdir, remove } from 'fs-extra';
 import getStringProperty from '../utils/getStringProperty';
 import { strict as assert } from 'assert';
 import ClipperServer from '@joplin/lib/ClipperServer';
@@ -233,6 +233,11 @@ class Client implements ActionableClient {
 			};
 		};
 		initializeChildProcess();
+	}
+
+	public async saveSnapshot(outputDirectory: string) {
+		assert.ok(await exists(outputDirectory));
+		await copy(this.profileDirectory, outputDirectory);
 	}
 
 	private async startClipperServer_() {

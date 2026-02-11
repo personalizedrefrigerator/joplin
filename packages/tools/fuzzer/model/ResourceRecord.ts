@@ -1,3 +1,4 @@
+import { assertHasOwnPropertyOfType } from '@joplin/utils/object';
 import { ItemId, ResourceData } from './types';
 
 interface InitializationOptions extends ResourceData {
@@ -16,6 +17,24 @@ export default class ResourceRecord implements ResourceData {
 		this.title = options.title;
 		this.mimeType = options.mimeType;
 		this.referencedBy = [...options.referencedBy];
+	}
+
+	public static fromSerialized(data: unknown) {
+		assertHasOwnPropertyOfType(data, 'id', 'string');
+		assertHasOwnPropertyOfType(data, 'title', 'string');
+		assertHasOwnPropertyOfType(data, 'mimeType', 'string');
+		assertHasOwnPropertyOfType(data, 'referencedBy', 'string[]');
+
+		return new ResourceRecord(data);
+	}
+
+	public serialize() {
+		return {
+			id: this.id,
+			title: this.title,
+			referencedBy: this.referencedBy,
+			mimeType: this.mimeType,
+		};
 	}
 
 	public get referenceCount() {

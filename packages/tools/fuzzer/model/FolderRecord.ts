@@ -1,5 +1,6 @@
 import { strict as assert } from 'node:assert';
 import type { FolderData, ItemId } from './types';
+import { assertHasOwnPropertyOfType } from '@joplin/utils/object';
 
 export type ShareRecord = {
 	email: string;
@@ -44,6 +45,39 @@ export default class FolderRecord implements FolderData {
 		if (!validateId(this.id)) {
 			throw new Error(`Invalid ID: ${this.id}`);
 		}
+	}
+
+	public static fromSerialized(data: unknown) {
+		assertHasOwnPropertyOfType(data, 'parentId', 'string');
+		assertHasOwnPropertyOfType(data, 'id', 'string');
+		assertHasOwnPropertyOfType(data, 'title', 'string');
+		assertHasOwnPropertyOfType(data, 'ownedByEmail', 'string');
+		assertHasOwnPropertyOfType(data, 'childIds', 'string[]');
+		assertHasOwnPropertyOfType(data, 'sharedWith', 'unknown[]');
+		assertHasOwnPropertyOfType(data, 'isShared', 'boolean');
+
+		return new FolderRecord({
+			...data,
+
+			sharedWith: data.sharedWith.map(item => {
+				assertHasOwnPropertyOfType(item, 'email', 'string');
+				assertHasOwnPropertyOfType(item, 'readOnly', 'boolean');
+
+				return item;
+			}),
+		});
+	}
+
+	public serialize() {
+		return {
+			parentId: this.parentId,
+			id: this.id,
+			title: this.title,
+			ownedByEmail: this.ownedByEmail,
+			childIds: this.childIds,
+			sharedWith: this.sharedWith_,
+			isShared: this.isShared_,
+		};
 	}
 
 	public get shareRecipients() {
