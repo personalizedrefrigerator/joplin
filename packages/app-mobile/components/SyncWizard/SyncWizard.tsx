@@ -10,6 +10,7 @@ import JoplinCloudIcon from './JoplinCloudIcon';
 import NavService from '@joplin/lib/services/NavService';
 import { StyleSheet, View } from 'react-native';
 import CardButton from '../buttons/CardButton';
+import Setting from '@joplin/lib/models/Setting';
 
 interface Props {
 	dispatch: Dispatch;
@@ -86,6 +87,11 @@ const SyncWizard: React.FC<Props> = ({ themeId, visible, dispatch }) => {
 		});
 	}, [dispatch]);
 
+	const onManualDismiss = useCallback(() => {
+		Setting.setValue('sync.wizard.autoShowOnStartup', false);
+		onDismiss();
+	}, [onDismiss]);
+
 	const onSelectJoplinCloud = useCallback(async () => {
 		onDismiss();
 		await NavService.go('JoplinCloudLogin');
@@ -99,10 +105,10 @@ const SyncWizard: React.FC<Props> = ({ themeId, visible, dispatch }) => {
 	return <DismissibleDialog
 		themeId={themeId}
 		visible={visible}
-		onDismiss={onDismiss}
+		onDismiss={onManualDismiss}
 		size={DialogVariant.SmallResize}
 		scrollOverflow={true}
-		heading={_('Sync')}
+		heading={_('Synchronisation')}
 	>
 		<Text variant='bodyLarge' role='heading' style={styles.subheading}>{
 			_('Joplin can synchronise your notes using various providers. Select one from the list below.')

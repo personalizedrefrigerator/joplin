@@ -16,13 +16,14 @@ const fs = require('fs-extra');
 import { dialog, ipcMain } from 'electron';
 import { _ } from '@joplin/lib/locale';
 import restartInSafeModeFromMain from './utils/restartInSafeModeFromMain';
-import handleCustomProtocols, { CustomProtocolHandler } from './utils/customProtocols/handleCustomProtocols';
+import handleCustomProtocols, { CustomProtocolHandlers } from './utils/customProtocols/handleCustomProtocols';
 import { clearTimeout, setTimeout } from 'timers';
 import { resolve } from 'path';
 import { defaultWindowId } from '@joplin/lib/reducer';
 import { msleep, Second } from '@joplin/utils/time';
 import determineBaseAppDirs from '@joplin/lib/determineBaseAppDirs';
 import getAppName from '@joplin/lib/getAppName';
+import { execCommand } from '@joplin/utils';
 
 interface RendererProcessQuitReply {
 	canClose: boolean;
@@ -67,7 +68,7 @@ export default class ElectronAppWrapper {
 
 	private initialCallbackUrl_: string = null;
 	private updaterService_: AutoUpdaterService = null;
-	private customProtocolHandler_: CustomProtocolHandler = null;
+	private customProtocolHandlers_: CustomProtocolHandlers|null = null;
 	private updatePollInterval_: ReturnType<typeof setTimeout>|null = null;
 
 	private profileLocker_: FileLocker|null = null;
@@ -258,6 +259,15 @@ export default class ElectronAppWrapper {
 		this.win_ = new BrowserWindow(windowOptions);
 
 		require('@electron/remote/main').enable(this.win_.webContents);
+
+		// Add Referer header for YouTube embeds to fix Error 153
+		this.win_.webContents.session.webRequest.onBeforeSendHeaders(
+			{ urls: ['*://*.youtube.com/*', '*://*.youtube-nocookie.com/*'] },
+			(details, callback) => {
+				details.requestHeaders['Referer'] = 'https://joplinapp.org/';
+				callback({ requestHeaders: details.requestHeaders });
+			},
+		);
 
 		if (!screen.getDisplayMatching(this.win_.getBounds())) {
 			const { width: windowWidth, height: windowHeight } = this.win_.getBounds();
@@ -806,8 +816,39 @@ export default class ElectronAppWrapper {
 		}
 	};
 
-	public getCustomProtocolHandler() {
-		return this.customProtocolHandler_;
+	public getContentProtocolHandler() {
+		return this.customProtocolHandlers_.appContent;
+	}
+
+	public getPluginProtocolHandler() {
+		return this.customProtocolHandlers_.pluginContent;
+	}
+
+	private async fixLinuxAccessibility_() {
+		if (this.electronApp().accessibilitySupportEnabled) return;
+
+		const isOrcaRunning = async () => {
+			if (!shim.isLinux()) return false;
+			try {
+				const matchingProcesses = await execCommand(['ps', '--no-headers', '-C', 'orca'], { quiet: true });
+				return matchingProcesses.trim().length > 0;
+			} catch (error) {
+				if (error.stderr || error.exitCode !== 1) {
+					// eslint-disable-next-line no-console -- The main logger is not available at this point.
+					console.error('Failed to check for and enable accessibility support:', error.stderr);
+				}
+
+				return false;
+			}
+		};
+
+		// Work around https://issues.chromium.org/issues/431257156 by force-enabling accessibility
+		// when Orca (a screen reader) is running:
+		if (await isOrcaRunning()) {
+			// eslint-disable-next-line no-console -- The main logger is not available at this point.
+			console.log('Linux accessibility: Enabling full accessibility support.');
+			this.electronApp().setAccessibilitySupportEnabled(true);
+		}
 	}
 
 	public async start() {
@@ -818,7 +859,9 @@ export default class ElectronAppWrapper {
 		const alreadyRunning = await this.ensureSingleInstance();
 		if (alreadyRunning) return;
 
-		this.customProtocolHandler_ = handleCustomProtocols();
+		await this.fixLinuxAccessibility_();
+
+		this.customProtocolHandlers_ = handleCustomProtocols();
 		this.createWindow();
 
 		this.electronApp_.on('before-quit', () => {
