@@ -10890,6 +10890,7 @@ __metadata:
     "@types/node": "npm:18.19.130"
     "@types/node-rsa": "npm:1.1.4"
     "@types/react": "npm:19.1.10"
+    "@types/react-dom": "npm:19.1.7"
     "@types/uuid": "npm:10.0.0"
     adm-zip: "npm:0.5.16"
     async-mutex: "npm:0.5.0"

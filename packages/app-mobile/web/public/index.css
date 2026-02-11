@@ -9,6 +9,28 @@ body, :root {
 	overflow: hidden;
 }
 
+dialog.dialog-modal-layer {
+	width: 100vw;
+	height: 100vh;
+	border: none;
+	background-color: transparent;
+	opacity: 0;
+
+	transition:
+		opacity 0.25s ease,
+		display 0.25s ease allow-discrete;
+}
+
+dialog.dialog-modal-layer:open {
+	opacity: 1;
+}
+
+@starting-style {
+	dialog.dialog-modal-layer:open {
+		opacity: 0;
+	}
+}
+
 
 /* Scrollbar styling */
 

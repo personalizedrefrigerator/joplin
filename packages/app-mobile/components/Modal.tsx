@@ -8,6 +8,7 @@ import { ModalState } from './accessibility/FocusControl/types';
 import useSafeAreaPadding from '../utils/hooks/useSafeAreaPadding';
 import { _ } from '@joplin/lib/locale';
 import KeyboardAvoidingView from './KeyboardAvoidingView';
+import Dialog from '@joplin/lib/components/Dialog';
 
 export interface ModalElementProps extends ModalProps {
 	children: React.ReactNode;
@@ -168,9 +169,9 @@ const ModalElement: React.FC<ModalElementProps> = ({
 	</View>;
 
 	const extraScrollViewProps = (typeof scrollOverflow === 'object' ? scrollOverflow : {});
-	return (
+	const result = (
 		<FocusControl.ModalWrapper state={modalStatus}>
-			<Modal
+			<ModalComponent
 				// supportedOrientations: On iOS, this allows the dialog to be shown in non-portrait orientations.
 				supportedOrientations={['portrait', 'portrait-upside-down', 'landscape', 'landscape-left', 'landscape-right']}
 				{...modalProps}
@@ -184,9 +185,22 @@ const ModalElement: React.FC<ModalElementProps> = ({
 						>{contentAndBackdrop}</ScrollView>
 					</KeyboardAvoidingView>
 				) : contentAndBackdrop}
-			</Modal>
+			</ModalComponent>
 		</FocusControl.ModalWrapper>
 	);
+
+	return result;
 };
+
+// On web, prefer a <Dialog> element for improved behavior when multiple dialogs
+// are open at the same time.
+const ModalComponent = Platform.OS === 'web' ? (props: ModalElementProps) => {
+	return <Dialog
+		open={props.visible}
+		onCancel={() => props.onRequestClose?.(null)}
+	>
+		{props.children}
+	</Dialog>;
+} : Modal;
 
 export default ModalElement;
