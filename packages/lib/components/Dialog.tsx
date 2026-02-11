@@ -5,8 +5,6 @@ import useDocument from '../hooks/dom/useDocument';
 import type { FC, CSSProperties, ReactNode } from 'react';
 const React = shim.react();
 const { useEffect, useRef, useState } = shim.react();
-const { createPortal } = shim.reactDom();
-
 
 type OnCancelListener = ()=> void;
 
@@ -68,7 +66,7 @@ const Dialog: FC<Props> = props => {
 		</div>
 	);
 	return <div ref={setContainerElement} className='dialog-anchor-node'>
-		{dialogElement && createPortal(content, dialogElement) as ReactNode}
+		{dialogElement && shim.reactDom().createPortal(content, dialogElement) as ReactNode}
 	</div>;
 };
 
