@@ -93,14 +93,14 @@ const useStyles = (hasScrollView: boolean, backgroundColor: string|undefined) =>
 	}, [hasScrollView, safeAreaPadding, backgroundColor]);
 };
 
-const useBackgroundTouchListeners = (onRequestClose: (event: GestureResponderEvent)=> void, backdropRef: RefObject<View>) => {
+const useBackgroundTouchListeners = (onRequestClose: ()=> void, backdropRef: RefObject<View>) => {
 	const onShouldBackgroundCaptureTouch = useCallback((event: GestureResponderEvent) => {
 		return event.target === backdropRef.current && event.nativeEvent.touches.length === 1;
 	}, [backdropRef]);
 
 	const onBackgroundTouchFinished = useCallback((event: GestureResponderEvent) => {
 		if (event.target === backdropRef.current) {
-			onRequestClose?.(event);
+			onRequestClose?.();
 		}
 	}, [onRequestClose, backdropRef]);
 
