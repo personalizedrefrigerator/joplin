@@ -87,23 +87,7 @@ class ActionTracker extends Serializable<typeof schema> {
 			result.idToActionLog.push([id, log]);
 		}
 		for (const [id, item] of this.idToItem_.entries()) {
-			let serialized;
-			if (isResource(item) || isFolder(item)) {
-				serialized = {
-					isResource: isResource(item),
-					isFolder: isFolder(item),
-					isNote: false,
-					...item.serialize(),
-				};
-			} else {
-				serialized = {
-					isNote: true,
-					isResource: false,
-					isFolder: false,
-					...item,
-				};
-			}
-			result.idToItem.push([id, serialized]);
+			result.idToItem.push([id, item.serialize()]);
 		}
 		for (const [email, client] of this.tree_.entries()) {
 			result.tree.push([email, client]);
