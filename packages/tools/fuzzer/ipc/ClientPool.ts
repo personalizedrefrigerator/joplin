@@ -20,7 +20,8 @@ export default class ClientPool {
 
 		const matchingDirectories = (await readdir(snapshotDirectory))
 			.filter(child => child.startsWith('client-'))
-			.map(child => join(snapshotDirectory, child));
+			.map(child => join(snapshotDirectory, child))
+			.sort();
 
 		const accounts = new Map();
 		for (const clientDirectory of matchingDirectories) {
