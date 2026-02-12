@@ -68,7 +68,7 @@ export default class Server {
 		if (process.env.SQLITE_DATABASE) {
 			throw new Error(`Unsupported: Creating snapshots of a non-default database (${JSON.stringify(process.env.SQLITE_DATABASE)}) is not supported. Skipping...`);
 		}
-		if (process.env.DB_CLIENT ?? 'sqlite' !== 'sqlite') {
+		if ((process.env.DB_CLIENT ?? 'sqlite') !== 'sqlite') {
 			throw new Error(`Not supported: Creating snapshots of a non-sqlite database is not supported (DB_CLIENT: ${process.env.DB_CLIENT}). Skipping...`);
 		}
 	}
