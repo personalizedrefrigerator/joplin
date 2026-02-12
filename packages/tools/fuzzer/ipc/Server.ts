@@ -43,11 +43,17 @@ export default class Server {
 	private baseDirectory_: string;
 
 	public constructor(config: ServerConfig) {
-		this.serverUrl_ = config.baseUrl;
 		this.adminAuth_ = config.adminAuth;
 
 		const serverDir = resolve(config.baseDirectory);
 		this.baseDirectory_ = serverDir;
+
+		this.serverUrl_ = config.baseUrl;
+
+		// Code in other places (e.g. the JoplinServerApi) assumes that serverUrl_ ends with a "/"
+		if (!this.serverUrl_.endsWith('/')) {
+			this.serverUrl_ = `${this.serverUrl_}/`;
+		}
 
 		const mainEntrypoint = join(serverDir, 'dist', 'app.js');
 		this.server_ = execa.node(mainEntrypoint, [
@@ -114,7 +120,7 @@ export default class Server {
 		let lastError;
 		for (let retry = 0; retry < 30; retry++) {
 			try {
-				const response = await fetch(`${this.serverUrl_}api/ping`);
+				const response = await fetch(`${this.serverUrl_}/api/ping`);
 				if (response.ok) {
 					return true;
 				}
