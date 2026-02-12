@@ -10,7 +10,11 @@ import { _ } from '@joplin/lib/locale';
 import KeyboardAvoidingView from './KeyboardAvoidingView';
 import Dialog from '@joplin/lib/components/Dialog';
 
+type OnClose = ()=> void;
 export interface ModalElementProps extends ModalProps {
+	// If provided, acts similar to the React Native modal's "onRequestClose".
+	onClose: OnClose|null;
+
 	children: React.ReactNode;
 	containerStyle?: ViewStyle;
 	backgroundColor?: string;
@@ -129,6 +133,7 @@ const ModalElement: React.FC<ModalElementProps> = ({
 	scrollOverflow,
 	modalBackgroundStyle: extraModalBackgroundStyles,
 	dismissButtonStyle,
+	onClose,
 	...modalProps
 }) => {
 	const styles = useStyles(!!scrollOverflow, backgroundColor);
@@ -147,13 +152,13 @@ const ModalElement: React.FC<ModalElementProps> = ({
 
 	const containerRef = useRef<View|null>(null);
 	containerRef.current = containerComponent;
-	const { onShouldBackgroundCaptureTouch, onBackgroundTouchFinished } = useBackgroundTouchListeners(modalProps.onRequestClose, containerRef);
+	const { onShouldBackgroundCaptureTouch, onBackgroundTouchFinished } = useBackgroundTouchListeners(onClose, containerRef);
 
 	// A close button for accessibility tools. Since iOS accessibility focus order is based on the position
 	// of the element on the screen, the close button is placed after the modal content, rather than behind.
-	const closeButton = modalProps.onRequestClose ? <Pressable
+	const closeButton = onClose ? <Pressable
 		style={[styles.dismissButton, dismissButtonStyle]}
-		onPress={modalProps.onRequestClose}
+		onPress={onClose}
 		accessibilityLabel={_('Close dialog')}
 		accessibilityRole='button'
 	/> : null;
@@ -174,6 +179,9 @@ const ModalElement: React.FC<ModalElementProps> = ({
 			<ModalComponent
 				// supportedOrientations: On iOS, this allows the dialog to be shown in non-portrait orientations.
 				supportedOrientations={['portrait', 'portrait-upside-down', 'landscape', 'landscape-left', 'landscape-right']}
+
+				onClose={onClose}
+				onRequestClose={onClose}
 				{...modalProps}
 			>
 				{scrollOverflow ? (
@@ -197,7 +205,7 @@ const ModalElement: React.FC<ModalElementProps> = ({
 const ModalComponent = Platform.OS === 'web' ? (props: ModalElementProps) => {
 	return <Dialog
 		open={props.visible}
-		onCancel={() => props.onRequestClose?.(null)}
+		onCancel={props.onClose}
 	>
 		{props.children}
 	</Dialog>;

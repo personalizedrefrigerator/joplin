@@ -82,7 +82,7 @@ const BottomDrawer: React.FC<Props> = props => {
 	return <Modal
 		visible={props.visible}
 		onDismiss={props.onDismiss}
-		onRequestClose={props.onDismiss}
+		onClose={props.onDismiss}
 		onShow={props.onShow}
 		animationType='fade'
 		backgroundColor={theme.backgroundColorTransparent2}
