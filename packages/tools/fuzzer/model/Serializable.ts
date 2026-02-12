@@ -19,7 +19,7 @@ type TypeMap = {
 	'boolean[]': boolean[];
 	'number[]': number[];
 	'id[]': ItemId[];
-	'unknown[]': unknown;
+	'unknown[]': unknown[];
 };
 
 export type SchemaToType<Schema extends BaseSchema|StringType> = (
