@@ -294,6 +294,8 @@ const getActions = (context: FuzzContext, clientPool: ClientPool, client: Client
 		await client.createNote({
 			...note,
 			id: newNoteId,
+			// When duplicated, notes are no longer published:
+			published: false,
 		});
 		return true;
 	}, {
