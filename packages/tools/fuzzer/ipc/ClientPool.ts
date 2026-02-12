@@ -24,10 +24,25 @@ export default class ClientPool {
 			.sort();
 
 		const accounts = new Map();
-		for (const clientDirectory of matchingDirectories) {
-			const client = await Client.fromSnapshotDirectory(clientDirectory, actionTracker, context, accounts);
-			pool.clients_.push(client);
-			pool.listenForClientClose_(client);
+		const clientPromises = matchingDirectories.map(clientDirectory => (
+			Client.fromSnapshotDirectory(clientDirectory, actionTracker, context, accounts)
+		));
+		const clients = await Promise.allSettled(clientPromises);
+
+		const errors = [];
+		for (const result of clients) {
+			if (result.status === 'fulfilled') {
+				const client = result.value;
+				pool.clients_.push(client);
+				pool.listenForClientClose_(client);
+			} else {
+				errors.push(result.reason);
+			}
+		}
+
+		if (errors.length) {
+			await pool.close();
+			throw new Error(`Failed to construct client pool. Errors: ${errors.join('; ')}`);
 		}
 
 		return pool;
