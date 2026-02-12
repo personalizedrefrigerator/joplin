@@ -1,6 +1,10 @@
+// A modal component with different defaults and better support for web.
+// On Android and iOS, this wraps the default <Modal> component. On web,
+// it uses a <dialog>.
+
 import * as React from 'react';
 import { RefObject, useCallback, useMemo, useRef, useState } from 'react';
-import { GestureResponderEvent, Modal, ModalProps, Platform, Pressable, ScrollView, ScrollViewProps, StyleSheet, View, ViewStyle } from 'react-native';
+import { GestureResponderEvent, Modal, Platform, Pressable, ScrollView, ScrollViewProps, StyleSheet, View, ViewStyle } from 'react-native';
 import FocusControl from './accessibility/FocusControl/FocusControl';
 import { msleep, Second } from '@joplin/utils/time';
 import useAsyncEffect from '@joplin/lib/hooks/useAsyncEffect';
@@ -11,9 +15,16 @@ import KeyboardAvoidingView from './KeyboardAvoidingView';
 import Dialog from '@joplin/lib/components/Dialog';
 
 type OnClose = ()=> void;
-export interface ModalElementProps extends ModalProps {
-	// If provided, acts similar to the React Native modal's "onRequestClose".
+type OnShow = ()=> void;
+export interface ModalElementProps {
+	visible: boolean;
+
+	// If provided, acts similar to the React Native modal's "onRequestClose", must be provided
+	// but can be `null` to prevent the default close behavior.
 	onClose: OnClose|null;
+	onShow?: OnShow;
+
+	statusBarTranslucent?: boolean;
 
 	children: React.ReactNode;
 	containerStyle?: ViewStyle;
@@ -134,7 +145,7 @@ const ModalElement: React.FC<ModalElementProps> = ({
 	modalBackgroundStyle: extraModalBackgroundStyles,
 	dismissButtonStyle,
 	onClose,
-	...modalProps
+	...forwardedProps
 }) => {
 	const styles = useStyles(!!scrollOverflow, backgroundColor);
 
@@ -148,7 +159,7 @@ const ModalElement: React.FC<ModalElementProps> = ({
 
 
 	const [containerComponent, setContainerComponent] = useState<View|null>(null);
-	const modalStatus = useModalStatus(containerComponent, modalProps.visible);
+	const modalStatus = useModalStatus(containerComponent, forwardedProps.visible);
 
 	const containerRef = useRef<View|null>(null);
 	containerRef.current = containerComponent;
@@ -179,10 +190,16 @@ const ModalElement: React.FC<ModalElementProps> = ({
 			<ModalComponent
 				// supportedOrientations: On iOS, this allows the dialog to be shown in non-portrait orientations.
 				supportedOrientations={['portrait', 'portrait-upside-down', 'landscape', 'landscape-left', 'landscape-right']}
+				animationType='fade'
+				transparent
 
+				// Web:
 				onClose={onClose}
+				// iOS only: Called after closing
+				onDismiss={onClose}
+				// Called before closing on Android and sometimes called before closing on iOS
 				onRequestClose={onClose}
-				{...modalProps}
+				{...forwardedProps}
 			>
 				{scrollOverflow ? (
 					<KeyboardAvoidingView style={styles.keyboardAvoidingView} enabled={true}>
@@ -201,11 +218,12 @@ const ModalElement: React.FC<ModalElementProps> = ({
 };
 
 // On web, prefer a <Dialog> element for improved behavior when multiple dialogs
-// are open at the same time.
+// are open at the same time. See https://github.com/laurent22/joplin/issues/11799.
 const ModalComponent = Platform.OS === 'web' ? (props: ModalElementProps) => {
 	return <Dialog
 		open={props.visible}
 		onCancel={props.onClose}
+		onShow={props.onShow}
 	>
 		{props.children}
 	</Dialog>;

@@ -128,9 +128,7 @@ const EditLinkDialog = (props: LinkDialogProps) => {
 
 	return (
 		<Modal
-			animationType="fade"
 			containerStyle={styles.modalContent}
-			transparent={true}
 			visible={props.visible}
 			onClose={() => {
 				props.editorControl.hideLinkDialog();

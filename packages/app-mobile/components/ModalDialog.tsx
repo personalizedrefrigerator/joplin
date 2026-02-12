@@ -71,7 +71,6 @@ const ModalDialog: React.FC<Props> = props => {
 
 	return (
 		<Modal
-			transparent={true}
 			visible={true}
 			onClose={null}
 			backgroundColor={theme.backgroundColorTransparent2}

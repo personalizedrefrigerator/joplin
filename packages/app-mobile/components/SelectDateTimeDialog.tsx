@@ -149,7 +149,6 @@ export default class SelectDateTimeDialog extends React.PureComponent<any, any> 
 
 		return (
 			<Modal
-				transparent={true}
 				visible={modalVisible}
 				containerStyle={styles.centeredView}
 				onClose={() => {

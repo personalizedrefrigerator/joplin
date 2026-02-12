@@ -7,10 +7,12 @@ const React = shim.react();
 const { useEffect, useRef, useState } = shim.react();
 
 type OnCancelListener = ()=> void;
+type OnShowListener = ()=> void;
 
 interface Props {
 	className?: string;
 	onCancel?: OnCancelListener;
+	onShow?: OnShowListener;
 	contentStyle?: CSSProperties;
 	open?: boolean;
 	contentFillsScreen?: boolean;
@@ -41,10 +43,11 @@ const Dialog: FC<Props> = props => {
 		const open = props.open ?? true;
 		if (!dialogElement.open && open) {
 			dialogElement.showModal();
+			props.onShow?.();
 		} else if (dialogElement.open && !open) {
 			dialogElement.close();
 		}
-	}, [dialogElement, contentRendered, props.open]);
+	}, [dialogElement, contentRendered, props.open, props.onShow]);
 
 	useEffect(() => {
 		if (!dialogElement) return;
