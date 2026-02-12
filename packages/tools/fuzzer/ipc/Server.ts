@@ -6,7 +6,7 @@ import execa = require('execa');
 import { msleep } from '@joplin/utils/time';
 import Logger from '@joplin/utils/Logger';
 import { strict as assert } from 'assert';
-import { exists } from 'fs-extra';
+import { copy, exists } from 'fs-extra';
 import { copyFile } from 'fs/promises';
 
 const logger = Logger.create('Server');
@@ -25,6 +25,14 @@ const createApi = async (serverUrl: string, adminAuth: UserData) => {
 	return api;
 };
 
+interface FromSnapshotOptions {
+	snapshotDirectory: string;
+
+	serverBaseDirectory: string;
+	serverUrl: string;
+	adminAuth: UserData;
+}
+
 export default class Server {
 	private api_: JoplinServerApi|null = null;
 	private server_: execa.ExecaChildProcess<string>;
@@ -41,7 +49,9 @@ export default class Server {
 		this.server_ = execa.node(mainEntrypoint, [
 			'--env', 'dev',
 		], {
-			env: { JOPLIN_IS_TESTING: '1' },
+			env: {
+				JOPLIN_IS_TESTING: '1',
+			},
 			cwd: serverDir,
 			stdin: 'ignore', // No stdin
 			// For debugging:
@@ -50,10 +60,27 @@ export default class Server {
 		});
 	}
 
+	public static async fromSnapshot({
+		serverBaseDirectory, snapshotDirectory, adminAuth, serverUrl,
+	}: FromSnapshotOptions) {
+		const serverDatabaseFile = join(serverBaseDirectory, 'db-dev.sqlite');
+		// TODO: Use SQLITE_DATABASE instead of resetting the db-dev.sqlite file?
+		logger.info('Overwriting', serverDatabaseFile, '... (restoring to snapshot...)');
+		await copy(join(snapshotDirectory, 'server', 'db-dev.sqlite'), serverDatabaseFile);
+
+		return new Server(
+			serverBaseDirectory, serverUrl, adminAuth,
+		);
+	}
+
 	public async saveSnapshot(outputDirectory: string) {
+		// Note: Assumes that the server is using SQLite!
+		const databasePath = join(this.baseDirectory_, 'db-dev.sqlite');
+		logger.info('Creating snapshot:', databasePath, '...');
+
 		assert.ok(await exists(outputDirectory));
 		const destination = join(outputDirectory, 'db-dev.sqlite');
-		await copyFile(join(this.baseDirectory_, 'db-dev.sqlite'), destination);
+		await copyFile(databasePath, destination);
 	}
 
 	public get url() {

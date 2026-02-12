@@ -34,7 +34,7 @@ const logger = Logger.create('Client');
 type AccountData = Readonly<{
 	email: string;
 	password: string;
-	serverId: string;
+	userId: string;
 	e2eePassword: string|null;
 	associatedClientCount: number;
 	onClientConnected: ()=> void;
@@ -43,7 +43,11 @@ type AccountData = Readonly<{
 
 const emailPrefix = 'fuzzer-user-';
 
-const wrapAccountAndResetPassword = async (userId: string, context: FuzzContext): Promise<AccountData> => {
+const wrapAccountAndResetPassword = async (
+	userId: string,
+	e2eePassword: string,
+	context: FuzzContext,
+): Promise<AccountData> => {
 	const userRoute = `api/users/${encodeURIComponent(userId)}`;
 	const response = await context.execApi('GET', userRoute, undefined);
 
@@ -74,8 +78,8 @@ const wrapAccountAndResetPassword = async (userId: string, context: FuzzContext)
 	return {
 		email,
 		password,
-		e2eePassword: context.enableE2ee ? createSecureRandom().replace(/^-/, '_') : null,
-		serverId: userId,
+		e2eePassword,
+		userId: userId,
 		get associatedClientCount() {
 			return referenceCounter;
 		},
@@ -97,9 +101,10 @@ const createNewAccount = async (email: string, context: FuzzContext): Promise<Ac
 		email,
 		full_name: `Fuzzer user from ${formatMsToDateTimeLocal(Date.now())}`,
 	});
-	const serverId = getStringProperty(apiOutput, 'id');
+	const userId = getStringProperty(apiOutput, 'id');
 
-	return wrapAccountAndResetPassword(serverId, context);
+	const e2eePassword = context.enableE2ee ? createSecureRandom().replace(/^-/, '_') : null;
+	return wrapAccountAndResetPassword(userId, e2eePassword, context);
 };
 
 type ApiData = Readonly<{
@@ -192,8 +197,8 @@ class Client implements ActionableClient {
 	}
 
 	public static async fromSnapshotDirectory(path: string, actionTracker: ActionTracker, context: FuzzContext) {
-		const { serverId: accountId } = JSON.parse(await readFile(join(path, 'account.json'), 'utf-8'));
-		const account = await wrapAccountAndResetPassword(accountId, context);
+		const { userId, e2eePassword } = JSON.parse(await readFile(join(path, 'info.json'), 'utf-8'));
+		const account = await wrapAccountAndResetPassword(userId, e2eePassword, context);
 
 		const profileDirectory = join(context.baseDir, uuid.createNano());
 		await copy(path, profileDirectory);
@@ -297,10 +302,11 @@ class Client implements ActionableClient {
 		await copy(this.profileDirectory, outputDirectory);
 
 		await writeFile(
-			join(outputDirectory, 'account.json'),
+			join(outputDirectory, 'info.json'),
 			JSON.stringify({
-				serverId: this.account_.serverId,
+				userId: this.account_.userId,
 				email: this.account_.email,
+				e2eePassword: this.account_.e2eePassword,
 			}),
 			'utf-8',
 		);
