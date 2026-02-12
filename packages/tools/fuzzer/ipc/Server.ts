@@ -64,11 +64,27 @@ export default class Server {
 		});
 	}
 
+	private static assertCanUseSnapshots_() {
+		if (process.env.SQLITE_DATABASE) {
+			throw new Error(`Unsupported: Creating snapshots of a non-default database (${JSON.stringify(process.env.SQLITE_DATABASE)}) is not supported. Skipping...`);
+		}
+		if (process.env.DB_CLIENT ?? 'sqlite' !== 'sqlite') {
+			throw new Error(`Not supported: Creating snapshots of a non-sqlite database is not supported (DB_CLIENT: ${process.env.DB_CLIENT}). Skipping...`);
+		}
+	}
+
+	public assertCanUseSnapshots() {
+		// For now, alias the static method. In the future, more checks that require
+		// a server instance may be added:
+		Server.assertCanUseSnapshots_();
+	}
+
 	public static async fromSnapshot({
 		baseDirectory: serverBaseDirectory, snapshotDirectory, ...config
 	}: FromSnapshotOptions) {
+		this.assertCanUseSnapshots_();
+
 		const serverDatabaseFile = join(serverBaseDirectory, 'db-dev.sqlite');
-		// TODO: Use SQLITE_DATABASE instead of resetting the db-dev.sqlite file?
 		logger.info('Overwriting', serverDatabaseFile, '... (restoring to snapshot...)');
 		await copy(join(snapshotDirectory, 'server', 'db-dev.sqlite'), serverDatabaseFile);
 
@@ -79,14 +95,7 @@ export default class Server {
 	}
 
 	public async saveSnapshot(outputDirectory: string) {
-		if (process.env.SQLITE_DATABASE) {
-			logger.warn(`Unsupported: Creating snapshots of a non-default database (${JSON.stringify(process.env.SQLITE_DATABASE)}) is not supported. Skipping...`);
-			return;
-		}
-		if (process.env.DB_CLIENT ?? 'sqlite' !== 'sqlite') {
-			logger.warn(`Not supported: Creating snapshots of a non-sqlite database is not supported (DB_CLIENT: ${process.env.DB_CLIENT}). Skipping...`);
-			return;
-		}
+		Server.assertCanUseSnapshots_();
 
 		// Note: Assumes that the server is using SQLite!
 		const databasePath = join(this.baseDirectory_, 'db-dev.sqlite');

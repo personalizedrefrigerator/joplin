@@ -170,7 +170,7 @@ export default class Fuzzer {
 	) {
 	}
 
-	private static async setupContext(
+	private static async setupContextAndRandom_(
 		config: FuzzerConfig,
 		server: Server,
 		onCleanup: (task: CleanupTask)=> void,
@@ -184,7 +184,7 @@ export default class Fuzzer {
 		return { context, random };
 	}
 
-	private static serverConfig(config: FuzzerConfig) {
+	private static serverConfig_(config: FuzzerConfig) {
 		return {
 			baseUrl: 'http://localhost:22300/',
 			baseDirectory: config.serverPath,
@@ -199,14 +199,14 @@ export default class Fuzzer {
 		config: FuzzerConfig,
 		onCleanup: (task: CleanupTask)=> void,
 	) {
-		const server = new Server(this.serverConfig(config));
+		const server = new Server(this.serverConfig_(config));
 		onCleanup(() => server.close());
 
 		if (!await server.checkConnection()) {
 			throw new Error('Could not connect to the server.');
 		}
 
-		const { context, random } = await this.setupContext(config, server, onCleanup);
+		const { context, random } = await this.setupContextAndRandom_(config, server, onCleanup);
 
 		const model = new ActionTracker(context);
 
@@ -245,12 +245,12 @@ export default class Fuzzer {
 		const config: FuzzerConfig = stateJson.config;
 
 		const server = await Server.fromSnapshot({
-			...this.serverConfig(config),
+			...this.serverConfig_(config),
 			snapshotDirectory: snapshotDirectory,
 		});
 		onCleanup(() => server.close());
 
-		const { context, random } = await this.setupContext(config, server, onCleanup);
+		const { context, random } = await this.setupContextAndRandom_(config, server, onCleanup);
 
 		const model = ActionTracker.fromSnapshot(stateJson.model, context);
 
@@ -324,6 +324,10 @@ export default class Fuzzer {
 	}
 
 	public async start() {
+		if (this.config_.stepConfig.snapshotAfter >= 0) {
+			this.server_.assertCanUseSnapshots();
+		}
+
 		if (this.state_.currentStep <= 0) {
 			logger.info('Starting setup:');
 			await this.actionRunner_.doActions(this.config_.setupActions);
