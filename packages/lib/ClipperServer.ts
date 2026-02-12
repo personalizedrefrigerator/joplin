@@ -98,13 +98,15 @@ export default class ClipperServer {
 		});
 	}
 
-	public async findAvailablePort(): Promise<number> {
+	public async findAvailablePort(excludePorts: number[] = []): Promise<number> {
 		const tcpPortUsed = require('tcp-port-used');
 
 		let state = null;
 		for (let i = 0; i < 10000; i++) {
 			state = randomClipperPort(state, Setting.value('env'));
-			const inUse = await tcpPortUsed.check(state.port);
+
+			const reserved = excludePorts.includes(state.port);
+			const inUse = reserved || await tcpPortUsed.check(state.port);
 			if (!inUse) return state.port;
 		}
 
