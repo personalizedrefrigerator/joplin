@@ -12,23 +12,31 @@ body, :root {
 /* Dialog styling */
 
 dialog.dialog-modal-layer {
-	width: 100vw;
-	height: 100vh;
-	max-width: none;
-	max-height: none;
+	width: 100%;
+	height: 100%;
+	max-width: unset;
+	max-height: unset;
 
 	margin: 0;
 	padding: 0;
-	overflow: hidden;
 
 	border: none;
 	background-color: transparent;
-	opacity: 0;
+}
 
-
+/* Dialog animation
+   (see "Animating dialogs" on MDN: https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/dialog#animating_dialogs) */
+dialog.dialog-modal-layer {
 	transition:
 		opacity 0.25s ease,
-		display 0.25s ease allow-discrete;
+		display 0.25s ease allow-discrete,
+		overlay 0.25s ease allow-discrete;
+}
+
+/* To support Safari (which, as of February 2026 doesn't support open/starting-style,
+   avoid relying on :open or starting-style to set a non-zero opacity. */
+dialog.dialog-modal-layer:not(:open) {
+	opacity: 0;
 }
 
 dialog.dialog-modal-layer:open {
