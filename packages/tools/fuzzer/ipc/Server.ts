@@ -85,7 +85,7 @@ export default class Server {
 		this.assertCanUseSnapshots_();
 
 		const serverDatabaseFile = join(serverBaseDirectory, 'db-dev.sqlite');
-		logger.info('Overwriting', serverDatabaseFile, '... (restoring to snapshot...)');
+		logger.info('Restoring', serverDatabaseFile, '... Replacing with version from snapshot...');
 		await copy(join(snapshotDirectory, 'server', 'db-dev.sqlite'), serverDatabaseFile);
 
 		return new Server({

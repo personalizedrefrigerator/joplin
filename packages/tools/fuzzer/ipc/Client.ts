@@ -205,6 +205,8 @@ class Client implements ActionableClient {
 		// only one AccountData reference exists for each account:
 		userIdToAccount: Map<string, AccountData>,
 	) {
+		logger.info('Reading client from snapshot', path, '...');
+
 		const { userId, e2eePassword } = JSON.parse(await readFile(join(path, 'info.json'), 'utf-8'));
 
 		// Reuse the existing account record if possible:
