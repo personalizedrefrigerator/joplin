@@ -54,7 +54,10 @@ class ActionTracker extends Serializable<typeof schema> {
 		}
 
 		for (const [key, value] of state.idToItem) {
-			if (typeof value !== 'object') throw new Error(`Items must be objects (evaluating ${value})`);
+			if (!value || typeof value !== 'object') {
+				throw new Error(`Invalid snapshot: Items must be objects (evaluating ${value})`);
+			}
+
 			let item;
 			if ('isFolder' in value && value.isFolder) {
 				item = FolderRecord.fromSerialized(value);
