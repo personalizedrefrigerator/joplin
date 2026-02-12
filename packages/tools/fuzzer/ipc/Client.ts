@@ -28,7 +28,6 @@ import { substrWithEllipsis } from '@joplin/lib/string-utils';
 import hangingIndent from '../utils/hangingIndent';
 import { readFile, writeFile } from 'fs/promises';
 import { hasOwnProperty } from '@joplin/utils/object';
-const Mutex = require('async-mutex').Mutex;
 
 const logger = Logger.create('Client');
 
@@ -157,33 +156,15 @@ class Client implements ActionableClient {
 		}
 	}
 
-	private static clipperConfigMutex_ = new Mutex();
-	private static reservedClipperPorts_: number[] = [];
-	private static async buildClipperConfig_() {
-		// Lock an async mutex to prevent multiple clients from finding the same clipper
-		// port. This allows creating multiple clients at the same time:
-		const release = await this.clipperConfigMutex_.acquire();
-		let port;
-		try {
-			port = await ClipperServer.instance().findAvailablePort(this.reservedClipperPorts_);
-			this.reservedClipperPorts_.push(port);
-		} finally {
-			release();
-		}
-
-		const config: ApiData = {
-			token: createSecureRandom().replace(/[-]/g, '_'),
-			port,
-		};
-		return config;
-	}
-
 	private static async fromAccount(account: AccountData, actionTracker: ActionTracker, context: FuzzContext) {
 		const id = context.randomId();
 		const profileDirectory = join(context.baseDir, id);
 		await mkdir(profileDirectory);
 
-		const apiData = await this.buildClipperConfig_();
+		const apiData: ApiData = {
+			token: createSecureRandom().replace(/[-]/g, '_'),
+			port: await ClipperServer.instance().findAvailablePort(),
+		};
 
 		const client = new Client(
 			context,
@@ -226,9 +207,6 @@ class Client implements ActionableClient {
 	) {
 		logger.info('Reading client from snapshot', path, '...');
 
-		const profileDirectory = join(context.baseDir, uuid.createNano());
-		await copy(path, profileDirectory);
-
 		const { userId, e2eePassword } = JSON.parse(await readFile(join(path, 'info.json'), 'utf-8'));
 
 		const getAccount = () => {
@@ -246,7 +224,14 @@ class Client implements ActionableClient {
 
 		const account = await getAccount();
 
-		const apiData = await this.buildClipperConfig_();
+		const profileDirectory = join(context.baseDir, uuid.createNano());
+		await copy(path, profileDirectory);
+
+		const apiData: ApiData = {
+			token: createSecureRandom().replace(/[-]/g, '_'),
+			port: await ClipperServer.instance().findAvailablePort(),
+		};
+
 		const client = new Client(
 			context,
 			actionTracker,
@@ -297,7 +282,7 @@ class Client implements ActionableClient {
 
 		const initializeChildProcess = () => {
 			const rawChildProcess = spawn('yarn', [
-				...this.cliCommandArguments(false),
+				...this.cliCommandArguments,
 				'batch',
 				'--continue-on-failure',
 				'-',
@@ -410,9 +395,9 @@ class Client implements ActionableClient {
 		return this.clientLabel_;
 	}
 
-	public cliCommandArguments(build: boolean) {
+	private get cliCommandArguments() {
 		return [
-			build ? 'start' : 'start-no-build',
+			'start',
 			'--profile', this.profileDirectory,
 			'--env', 'dev',
 		];
@@ -421,7 +406,7 @@ class Client implements ActionableClient {
 	public getHelpText() {
 		return [
 			`Client ${this.label}:`,
-			`\tCommand: cd ${quotePath(cliDirectory)} && ${commandToString('yarn', this.cliCommandArguments(true))}`,
+			`\tCommand: cd ${quotePath(cliDirectory)} && ${commandToString('yarn', this.cliCommandArguments)}`,
 		].join('\n');
 	}
 
