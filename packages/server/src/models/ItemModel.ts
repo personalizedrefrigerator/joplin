@@ -67,6 +67,10 @@ export interface ItemLoadOptions extends LoadOptions {
 	withContent?: boolean;
 }
 
+interface CheckIfAllowedOptions {
+	allowNonExistingShare?: boolean;
+}
+
 export default class ItemModel extends BaseModel<Item> {
 
 	private updatingTotalSizes_ = false;
@@ -118,16 +122,18 @@ export default class ItemModel extends BaseModel<Item> {
 		return this.loadStorageDriver(this.storageDriverConfigFallback_);
 	}
 
-	public async checkIfAllowed(user: User, action: AclAction, resource: Item = null): Promise<void> {
+	public async checkIfAllowed(user: User, action: AclAction, resource: Item|null, options?: CheckIfAllowedOptions): Promise<void> {
 		if ([AclAction.Create, AclAction.Update, AclAction.Delete].includes(action) && resource.jop_share_id) {
 			const share = await this.models().share().load(resource.jop_share_id, { fields: ['id', 'owner_id'] });
 
 			if (!share) {
-				// Don't warn in the case where the share doesn't exist. This can happen, for example, when
+				// Don't fail in the case where the share doesn't exist, but the item is owned by the current user. This can happen, for example, when
 				// unsharing a folder.
 				// See https://github.com/laurent22/joplin/issues/14107.
-				if (resource.owner_id !== user.id) {
-					modelLogger.warn('cannot find the share associated with this item. Action:', action, 'User:', user.email, 'Resource:', resource);
+				if (!options.allowNonExistingShare && resource.owner_id !== user.id) {
+					throw new ErrorForbidden('cannot update item associated with non-existing share');
+				} else {
+					modelLogger.debug('cannot find the share associated with this item. Action:', action, 'User:', user.email, 'Resource:', resource);
 				}
 			} else {
 				if (share.owner_id !== user.id) {
@@ -621,7 +627,18 @@ export default class ItemModel extends BaseModel<Item> {
 					// (see below)
 					let previousShareId = '';
 					if (existingItem) {
-						await this.checkIfAllowed(user, AclAction.Update, existingItem);
+						await this.checkIfAllowed(
+							user,
+							AclAction.Update,
+							existingItem,
+							// Don't fail if attempting to update an item associated with a non-existent share.
+							// This allows updates to items just after their containing share was deleted.
+							//
+							// This is permitted because:
+							// 1. After deleting a share, all user_items associated with users other than the owner are deleted.
+							// 2. If `existingItem` exists, then a user_items entry marks the current user as able to access the item.
+							{ allowNonExistingShare: true },
+						);
 						previousShareId = existingItem.jop_share_id;
 					}
 
