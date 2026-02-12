@@ -203,22 +203,17 @@ class Client implements ActionableClient {
 
 		// A map from client IDs to client accounts. Use this to ensure that
 		// only one AccountData reference exists for each account:
-		userIdToAccount: Map<string, Promise<AccountData>>,
+		userIdToAccount: Map<string, AccountData>,
 	) {
 		logger.info('Reading client from snapshot', path, '...');
 
 		const { userId, e2eePassword } = JSON.parse(await readFile(join(path, 'info.json'), 'utf-8'));
 
-		// Reuse the existing account promise if possible this:
-		// 1. Avoids resetting the password multiple times for the same account.
-		// 2. Avoids closing the account multiple times when exiting the fuzzer.
-		// 3. Caching promises avoids race conditions.
-		let accountPromise = userIdToAccount.get(userId);
+		// Reuse the existing account record if possible:
+		let account = userIdToAccount.get(userId);
 		// Reset the account password to simplify re-authentication.
-		accountPromise ??= loadAccountAndResetPassword(userId, e2eePassword, context);
-		userIdToAccount.set(userId, accountPromise);
-
-		const account = await accountPromise;
+		account ??= await loadAccountAndResetPassword(userId, e2eePassword, context);
+		userIdToAccount.set(userId, account);
 
 		const profileDirectory = join(context.baseDir, uuid.createNano());
 		await copy(path, profileDirectory);
