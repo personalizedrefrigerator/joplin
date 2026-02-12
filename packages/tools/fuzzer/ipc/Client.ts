@@ -43,7 +43,7 @@ type AccountData = Readonly<{
 
 const emailPrefix = 'fuzzer-user-';
 
-const wrapAccountAndResetPassword = async (
+const loadAccountAndResetPassword = async (
 	userId: string,
 	e2eePassword: string,
 	context: FuzzContext,
@@ -104,7 +104,7 @@ const createNewAccount = async (email: string, context: FuzzContext): Promise<Ac
 	const userId = getStringProperty(apiOutput, 'id');
 
 	const e2eePassword = context.enableE2ee ? createSecureRandom().replace(/^-/, '_') : null;
-	return wrapAccountAndResetPassword(userId, e2eePassword, context);
+	return loadAccountAndResetPassword(userId, e2eePassword, context);
 };
 
 type ApiData = Readonly<{
@@ -196,9 +196,22 @@ class Client implements ActionableClient {
 		return client;
 	}
 
-	public static async fromSnapshotDirectory(path: string, actionTracker: ActionTracker, context: FuzzContext) {
+	public static async fromSnapshotDirectory(
+		path: string,
+		actionTracker: ActionTracker,
+		context: FuzzContext,
+
+		// A map from client IDs to client accounts. Use this to ensure that
+		// only one AccountData reference exists for each account:
+		userIdToAccount: Map<string, AccountData>,
+	) {
 		const { userId, e2eePassword } = JSON.parse(await readFile(join(path, 'info.json'), 'utf-8'));
-		const account = await wrapAccountAndResetPassword(userId, e2eePassword, context);
+
+		// Reuse the existing account record if possible:
+		let account = userIdToAccount.get(userId);
+		// Reset the account password to simplify re-authentication.
+		account ??= await loadAccountAndResetPassword(userId, e2eePassword, context);
+		userIdToAccount.set(userId, account);
 
 		const profileDirectory = join(context.baseDir, uuid.createNano());
 		await copy(path, profileDirectory);

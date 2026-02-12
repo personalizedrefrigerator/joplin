@@ -22,8 +22,9 @@ export default class ClientPool {
 			.filter(child => child.startsWith('client-'))
 			.map(child => join(snapshotDirectory, child));
 
+		const accounts = new Map();
 		for (const clientDirectory of matchingDirectories) {
-			const client = await Client.fromSnapshotDirectory(clientDirectory, actionTracker, context);
+			const client = await Client.fromSnapshotDirectory(clientDirectory, actionTracker, context, accounts);
 			pool.clients_.push(client);
 			pool.listenForClientClose_(client);
 		}
