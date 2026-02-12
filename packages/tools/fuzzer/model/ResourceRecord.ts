@@ -1,4 +1,3 @@
-import { assertHasOwnPropertyOfType } from '@joplin/utils/object';
 import { ItemId, ResourceData } from './types';
 import Serializable, { BaseSchema } from './Serializable';
 
@@ -30,12 +29,8 @@ export default class ResourceRecord extends Serializable<typeof schema> implemen
 		this.referencedBy = [...options.referencedBy];
 	}
 
-	public static fromSerialized(data: unknown) {
-		assertHasOwnPropertyOfType(data, 'id', 'string');
-		assertHasOwnPropertyOfType(data, 'title', 'string');
-		assertHasOwnPropertyOfType(data, 'mimeType', 'string');
-		assertHasOwnPropertyOfType(data, 'referencedBy', 'string[]');
-
+	public static fromSerialized(serialized: unknown) {
+		const data = ResourceRecord.deserialize(schema, serialized);
 		return new ResourceRecord(data);
 	}
 
