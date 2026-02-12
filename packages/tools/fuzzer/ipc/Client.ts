@@ -203,17 +203,26 @@ class Client implements ActionableClient {
 
 		// A map from client IDs to client accounts. Use this to ensure that
 		// only one AccountData reference exists for each account:
-		userIdToAccount: Map<string, AccountData>,
+		userIdToAccount: Map<string, Promise<AccountData>>,
 	) {
 		logger.info('Reading client from snapshot', path, '...');
 
 		const { userId, e2eePassword } = JSON.parse(await readFile(join(path, 'info.json'), 'utf-8'));
 
-		// Reuse the existing account record if possible:
-		let account = userIdToAccount.get(userId);
-		// Reset the account password to simplify re-authentication.
-		account ??= await loadAccountAndResetPassword(userId, e2eePassword, context);
-		userIdToAccount.set(userId, account);
+		const getAccount = () => {
+			// Reuse the existing account promise if possible this:
+			// 1. Avoids resetting the password multiple times for the same account.
+			// 2. Avoids closing the account multiple times when exiting the fuzzer.
+			// 3. Caching promises, rather than the final account object, helps avoid race conditions.
+			let accountPromise = userIdToAccount.get(userId);
+			// Reset the account password to simplify re-authentication.
+			accountPromise ??= loadAccountAndResetPassword(userId, e2eePassword, context);
+			userIdToAccount.set(userId, accountPromise);
+
+			return accountPromise;
+		};
+
+		const account = await getAccount();
 
 		const profileDirectory = join(context.baseDir, uuid.createNano());
 		await copy(path, profileDirectory);
@@ -241,7 +250,7 @@ class Client implements ActionableClient {
 		await client.execCliCommand_('config', 'api.token', apiData.token);
 		await client.execCliCommand_('config', 'api.port', String(apiData.port));
 
-		logger.info('Created and configured client');
+		logger.info('Created and configured client in', profileDirectory);
 
 		await client.startClipperServer_();
 		return client;
