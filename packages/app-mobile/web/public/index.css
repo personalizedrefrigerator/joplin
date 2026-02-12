@@ -28,23 +28,21 @@ dialog.dialog-modal-layer {
    (see "Animating dialogs" on MDN: https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/dialog#animating_dialogs) */
 dialog.dialog-modal-layer {
 	transition:
-		opacity 0.25s ease,
-		display 0.25s ease allow-discrete,
-		overlay 0.25s ease allow-discrete;
+		opacity 0.2s ease-out,
+		display 0.22s ease allow-discrete,
+		overlay 0.22s ease allow-discrete;
 }
 
-/* To support Safari (which, as of February 2026 doesn't support open/starting-style,
-   avoid relying on :open or starting-style to set a non-zero opacity. */
-dialog.dialog-modal-layer:not(:open) {
+dialog.dialog-modal-layer:not([open]) {
 	opacity: 0;
 }
 
-dialog.dialog-modal-layer:open {
+dialog.dialog-modal-layer[open] {
 	opacity: 1;
 }
 
 @starting-style {
-	dialog.dialog-modal-layer:open {
+	dialog.dialog-modal-layer[open] {
 		opacity: 0;
 	}
 }
