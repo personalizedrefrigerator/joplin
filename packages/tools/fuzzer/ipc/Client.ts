@@ -45,7 +45,7 @@ const emailPrefix = 'fuzzer-user-';
 
 const loadAccountAndResetPassword = async (
 	userId: string,
-	e2eePassword: string,
+	e2eePassword: string|null,
 	context: FuzzContext,
 ): Promise<AccountData> => {
 	const userRoute = `api/users/${encodeURIComponent(userId)}`;
