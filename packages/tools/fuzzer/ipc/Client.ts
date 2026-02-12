@@ -169,10 +169,7 @@ class Client implements ActionableClient {
 		const profileDirectory = join(context.baseDir, id);
 		await mkdir(profileDirectory);
 
-		const apiData: ApiData = {
-			token: createSecureRandom().replace(/[-]/g, '_'),
-			port: await ClipperServer.instance().findAvailablePort(),
-		};
+		const apiData = await this.buildClipperConfig_();
 
 		const client = new Client(
 			context,
