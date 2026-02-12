@@ -198,6 +198,7 @@ void yargs
 				'restore-from-snapshot': {
 					type: 'boolean',
 					default: false,
+					description: 'Restore the fuzzer state from the last snapshot (if any). To work, the server must be configured to use an SQLite development database. **Caution**: This will overwrite the server\'s development SQLite database.',
 				},
 			});
 		},

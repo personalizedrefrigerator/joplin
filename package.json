@@ -38,7 +38,7 @@
     "linter-precommit": "eslint --resolve-plugins-relative-to . --fix --ext .js --ext .jsx --ext .ts --ext .tsx",
     "linter": "eslint --resolve-plugins-relative-to . --fix --quiet --ext .js --ext .jsx --ext .ts --ext .tsx",
     "packageJsonLint": "node ./packages/tools/packageJsonLint.js",
-    "syncFuzzer": "node ./packages/tools/fuzzer/sync-fuzzer.js",
+    "syncFuzzer": "node ./packages/tools/fuzzer/cli.js",
     "postinstall": "husky && gulp build",
     "postPreReleasesToForum": "node ./packages/tools/postPreReleasesToForum",
     "publishAll": "git pull && yarn buildParallel && lerna version --yes --no-private --no-git-tag-version && gulp completePublishAll",

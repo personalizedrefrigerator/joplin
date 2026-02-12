@@ -1832,6 +1832,7 @@ packages/tools/checkLibPaths.js
 packages/tools/convertThemesToCss.js
 packages/tools/fuzzer/ActionRunner.js
 packages/tools/fuzzer/Fuzzer.js
+packages/tools/fuzzer/cli.js
 packages/tools/fuzzer/constants.js
 packages/tools/fuzzer/ipc/Client.js
 packages/tools/fuzzer/ipc/ClientPool.js
@@ -1842,7 +1843,6 @@ packages/tools/fuzzer/model/NoteRecord.js
 packages/tools/fuzzer/model/ResourceRecord.js
 packages/tools/fuzzer/model/Serializable.js
 packages/tools/fuzzer/model/types.js
-packages/tools/fuzzer/sync-fuzzer.js
 packages/tools/fuzzer/types.js
 packages/tools/fuzzer/utils/ProgressBar.js
 packages/tools/fuzzer/utils/SeededRandom.js
