@@ -1,10 +1,10 @@
-import { copy, exists, mkdir, pathExists, readdir, remove, writeFile } from 'fs-extra';
+import { exists, mkdir, pathExists, readdir, remove, writeFile } from 'fs-extra';
 import ActionRunner, { ActionSpec } from './ActionRunner';
 import ClientPool from './ipc/ClientPool';
 import Server from './ipc/Server';
 import ActionTracker from './model/ActionTracker';
 import { CleanupTask, FuzzContext } from './types';
-import SeededRandom from './utils/SeededRandom';
+import SeededRandom, { RandomState } from './utils/SeededRandom';
 import { join } from 'path';
 import Logger from '@joplin/utils/Logger';
 import randomString from './utils/randomString';
@@ -24,19 +24,19 @@ interface FuzzerState {
 }
 
 // It's possible to seed the random number generator either
-// 1) with a single seed or 2) provide a seed for each sub-generator.
+// 1) with a single seed or 2) provide the last full state of each generator.
 type SeedConfig = {
 	seed: number;
 
-	actionSeed?: undefined;
-	stringSeed?: undefined;
-	idSeed?: undefined;
+	generalRandomState?: undefined;
+	stringRandomState?: undefined;
+	idRandomState?: undefined;
 } | {
 	seed?: undefined;
 
-	actionSeed: bigint;
-	idSeed: bigint;
-	stringSeed: bigint;
+	generalRandomState: RandomState;
+	stringRandomState: RandomState;
+	idRandomState: RandomState;
 };
 
 type RandomConfig = SeedConfig & {
@@ -107,11 +107,15 @@ type RandomNumberGenerators = {
 };
 
 const createRandomNumberGenerators = (config: RandomConfig): RandomNumberGenerators => {
-	const random = new SeededRandom(config.seed ?? config.actionSeed);
+	const createRandom = (initialState: RandomState|undefined, fallbackSeed: ()=> bigint|number) => {
+		return initialState ? SeededRandom.fromState(initialState) : new SeededRandom(fallbackSeed());
+	};
+
+	const random = createRandom(config.generalRandomState, () => config.seed ?? 0);
 	// Use a separate random number generator for strings and IDs. This prevents
 	// the random strings setting from affecting the other output.
-	const stringRandom = new SeededRandom(config.stringSeed ?? random.next());
-	const idRandom = new SeededRandom(config.idSeed ?? random.next());
+	const stringRandom = createRandom(config.stringRandomState, () => random.next());
+	const idRandom = createRandom(config.idRandomState, () => random.next());
 
 	// Wrap the low-level random number generators in higher-level APIs:
 	let stringCount = 0;
@@ -166,35 +170,43 @@ export default class Fuzzer {
 	) {
 	}
 
-	private static async setupServerAndContext(
+	private static async setupContext(
 		config: FuzzerConfig,
+		server: Server,
 		onCleanup: (task: CleanupTask)=> void,
 	) {
-		const joplinServerUrl = 'http://localhost:22300/';
-		const server = new Server(config.serverPath, joplinServerUrl, {
-			email: 'admin@localhost',
-			password: process.env['FUZZER_SERVER_ADMIN_PASSWORD'] ?? 'admin',
-		});
-		onCleanup(() => server.close());
-
-		if (!await server.checkConnection()) {
-			throw new Error('Could not connect to the server.');
-		}
-
 		const profilesDirectory = await createProfilesDirectory();
 		onCleanup(profilesDirectory.remove);
 
 		const random = createRandomNumberGenerators(config.randomConfig);
 		const context = createContext(config, random, server, profilesDirectory.path);
 
-		return { server, context, random };
+		return { context, random };
+	}
+
+	private static serverConfig(config: FuzzerConfig) {
+		return {
+			baseUrl: 'http://localhost:22300/',
+			baseDirectory: config.serverPath,
+			adminAuth: {
+				email: 'admin@localhost',
+				password: process.env['FUZZER_SERVER_ADMIN_PASSWORD'] ?? 'admin',
+			},
+		};
 	}
 
 	public static async fromConfig(
 		config: FuzzerConfig,
 		onCleanup: (task: CleanupTask)=> void,
 	) {
-		const { server, context, random } = await this.setupServerAndContext(config, onCleanup);
+		const server = new Server(this.serverConfig(config));
+		onCleanup(() => server.close());
+
+		if (!await server.checkConnection()) {
+			throw new Error('Could not connect to the server.');
+		}
+
+		const { context, random } = await this.setupContext(config, server, onCleanup);
 
 		const model = new ActionTracker(context);
 
@@ -232,12 +244,13 @@ export default class Fuzzer {
 
 		const config: FuzzerConfig = stateJson.config;
 
-		// TODO: Refactor
-		const serverDatabaseFile = join(config.serverPath, 'db-dev.sqlite');
-		logger.info('Overwriting', serverDatabaseFile, '...');
-		await copy(join(snapshotDirectory, 'server', 'db-dev.sqlite'), serverDatabaseFile);
+		const server = await Server.fromSnapshot({
+			...this.serverConfig(config),
+			snapshotDirectory: snapshotDirectory,
+		});
+		onCleanup(() => server.close());
 
-		const { server, context, random } = await this.setupServerAndContext(config, onCleanup);
+		const { context, random } = await this.setupContext(config, server, onCleanup);
 
 		const model = ActionTracker.fromSnapshot(stateJson.model, context);
 
@@ -275,6 +288,11 @@ export default class Fuzzer {
 			throw new Error(`Output directory must be empty (Try removing ${outputDirectory})`);
 		}
 
+		// Converts RandomState to a value that can be serialized
+		const serializeRandomState = (state: RandomState) => {
+			return { value: String(state.value), step: String(state.step) };
+		};
+
 		await writeFile(
 			join(outputDirectory, 'state.json'),
 			JSON.stringify({
@@ -284,14 +302,13 @@ export default class Fuzzer {
 				config: {
 					...this.config_,
 					randomConfig: {
-						...this.config_.randomConfig,
-
 						randomStrings: this.config_.randomConfig.randomStrings,
 						seed: undefined,
-						idSeed: String(this.state_.idRandom.current),
-						stringSeed: String(this.state_.stringRandom.current),
-						actionSeed: String(this.state_.generalRandom.current),
-					},
+
+						generalRandomState: serializeRandomState(this.state_.generalRandom.state),
+						idRandomState: serializeRandomState(this.state_.idRandom.state),
+						stringRandomState: serializeRandomState(this.state_.stringRandom.state),
+					} satisfies RandomConfig,
 				},
 				model: this.state_.model.serialize(),
 			}),
@@ -314,7 +331,7 @@ export default class Fuzzer {
 			logger.info('Skipping setup...');
 		}
 
-		logger.info('Starting randomized actions:');
+		logger.info('Starting randomized actions:', this.state_.generalRandom.state);
 		const maxSteps = this.config_.stepConfig.stopAfter;
 		for (
 			let stepIndex = this.state_.currentStep + 1;

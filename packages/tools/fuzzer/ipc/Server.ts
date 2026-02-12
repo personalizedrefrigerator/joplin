@@ -25,26 +25,30 @@ const createApi = async (serverUrl: string, adminAuth: UserData) => {
 	return api;
 };
 
-interface FromSnapshotOptions {
-	snapshotDirectory: string;
-
-	serverBaseDirectory: string;
-	serverUrl: string;
+interface ServerConfig {
+	baseUrl: string;
+	baseDirectory: string;
 	adminAuth: UserData;
+}
+
+interface FromSnapshotOptions extends ServerConfig {
+	snapshotDirectory: string;
 }
 
 export default class Server {
 	private api_: JoplinServerApi|null = null;
+	private serverUrl_: string;
+	private adminAuth_: UserData;
 	private server_: execa.ExecaChildProcess<string>;
 	private baseDirectory_: string;
 
-	public constructor(
-		serverBaseDirectory: string,
-		private readonly serverUrl_: string,
-		private readonly adminAuth_: UserData,
-	) {
-		const serverDir = resolve(serverBaseDirectory);
+	public constructor(config: ServerConfig) {
+		this.serverUrl_ = config.baseUrl;
+		this.adminAuth_ = config.adminAuth;
+
+		const serverDir = resolve(config.baseDirectory);
 		this.baseDirectory_ = serverDir;
+
 		const mainEntrypoint = join(serverDir, 'dist', 'app.js');
 		this.server_ = execa.node(mainEntrypoint, [
 			'--env', 'dev',
@@ -61,19 +65,29 @@ export default class Server {
 	}
 
 	public static async fromSnapshot({
-		serverBaseDirectory, snapshotDirectory, adminAuth, serverUrl,
+		baseDirectory: serverBaseDirectory, snapshotDirectory, ...config
 	}: FromSnapshotOptions) {
 		const serverDatabaseFile = join(serverBaseDirectory, 'db-dev.sqlite');
 		// TODO: Use SQLITE_DATABASE instead of resetting the db-dev.sqlite file?
 		logger.info('Overwriting', serverDatabaseFile, '... (restoring to snapshot...)');
 		await copy(join(snapshotDirectory, 'server', 'db-dev.sqlite'), serverDatabaseFile);
 
-		return new Server(
-			serverBaseDirectory, serverUrl, adminAuth,
-		);
+		return new Server({
+			baseDirectory: serverBaseDirectory,
+			...config,
+		});
 	}
 
 	public async saveSnapshot(outputDirectory: string) {
+		if (process.env.SQLITE_DATABASE) {
+			logger.warn(`Unsupported: Creating snapshots of a non-default database (${JSON.stringify(process.env.SQLITE_DATABASE)}) is not supported. Skipping...`);
+			return;
+		}
+		if (process.env.DB_CLIENT ?? 'sqlite' !== 'sqlite') {
+			logger.warn(`Not supported: Creating snapshots of a non-sqlite database is not supported (DB_CLIENT: ${process.env.DB_CLIENT}). Skipping...`);
+			return;
+		}
+
 		// Note: Assumes that the server is using SQLite!
 		const databasePath = join(this.baseDirectory_, 'db-dev.sqlite');
 		logger.info('Creating snapshot:', databasePath, '...');
