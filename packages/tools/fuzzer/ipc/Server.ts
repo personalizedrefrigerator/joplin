@@ -99,7 +99,7 @@ export default class Server {
 
 		// Note: Assumes that the server is using SQLite!
 		const databasePath = join(this.baseDirectory_, 'db-dev.sqlite');
-		logger.info('Creating snapshot:', databasePath, '...');
+		logger.info('Creating snapshot of', databasePath, '...');
 
 		assert.ok(await exists(outputDirectory));
 		const destination = join(outputDirectory, 'db-dev.sqlite');
