@@ -311,7 +311,7 @@ export default class Fuzzer {
 					} satisfies RandomConfig,
 				},
 				model: this.state_.model.serialize(),
-			}),
+			}, undefined, '\t'),
 		);
 
 		const serverDir = join(outputDirectory, 'server');
