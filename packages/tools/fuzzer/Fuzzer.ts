@@ -250,6 +250,10 @@ export default class Fuzzer {
 		});
 		onCleanup(() => server.close());
 
+		if (!await server.checkConnection()) {
+			throw new Error('Could not connect to the server.');
+		}
+
 		const { context, random } = await this.setupContextAndRandom_(config, server, onCleanup);
 
 		const model = ActionTracker.fromSnapshot(stateJson.model, context);
