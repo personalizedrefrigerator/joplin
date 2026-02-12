@@ -270,6 +270,7 @@ class Client implements ActionableClient {
 	private onChildProcessOutput_: ()=> void = ()=>{};
 
 	private transcript_: string[] = [];
+	private static isFirstClient_ = true;
 
 	private constructor(
 		private readonly context_: FuzzContext,
@@ -285,9 +286,13 @@ class Client implements ActionableClient {
 		// Don't skip child process-related tasks.
 		this.childProcessQueue_.setCanSkipTaskHandler(() => false);
 
+		// For faster startup, don't rebuild the CLI app for every new client:
+		const rebuildCliApp = Client.isFirstClient_;
+		Client.isFirstClient_ = false;
+
 		const initializeChildProcess = () => {
 			const rawChildProcess = spawn('yarn', [
-				...this.cliCommandArguments,
+				...this.cliCommandArguments(rebuildCliApp),
 				'batch',
 				'--continue-on-failure',
 				'-',
@@ -400,9 +405,9 @@ class Client implements ActionableClient {
 		return this.clientLabel_;
 	}
 
-	private get cliCommandArguments() {
+	private cliCommandArguments(build: boolean) {
 		return [
-			'start',
+			build ? 'start' : 'start-no-build',
 			'--profile', this.profileDirectory,
 			'--env', 'dev',
 		];
@@ -411,7 +416,7 @@ class Client implements ActionableClient {
 	public getHelpText() {
 		return [
 			`Client ${this.label}:`,
-			`\tCommand: cd ${quotePath(cliDirectory)} && ${commandToString('yarn', this.cliCommandArguments)}`,
+			`\tCommand: cd ${quotePath(cliDirectory)} && ${commandToString('yarn', this.cliCommandArguments(true))}`,
 		].join('\n');
 	}
 
