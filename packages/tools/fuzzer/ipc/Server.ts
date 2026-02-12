@@ -120,7 +120,7 @@ export default class Server {
 		let lastError;
 		for (let retry = 0; retry < 30; retry++) {
 			try {
-				const response = await fetch(`${this.serverUrl_}/api/ping`);
+				const response = await fetch(`${this.serverUrl_}api/ping`);
 				if (response.ok) {
 					return true;
 				}
