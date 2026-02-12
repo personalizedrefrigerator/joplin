@@ -156,6 +156,14 @@ class Client implements ActionableClient {
 		}
 	}
 
+	private static async buildClipperConfig_() {
+		const apiData: ApiData = {
+			token: createSecureRandom().replace(/[-]/g, '_'),
+			port: await ClipperServer.instance().findAvailablePort(),
+		};
+		return apiData;
+	}
+
 	private static async fromAccount(account: AccountData, actionTracker: ActionTracker, context: FuzzContext) {
 		const id = context.randomId();
 		const profileDirectory = join(context.baseDir, id);
@@ -227,10 +235,7 @@ class Client implements ActionableClient {
 		const profileDirectory = join(context.baseDir, uuid.createNano());
 		await copy(path, profileDirectory);
 
-		const apiData: ApiData = {
-			token: createSecureRandom().replace(/[-]/g, '_'),
-			port: await ClipperServer.instance().findAvailablePort(),
-		};
+		const apiData = await this.buildClipperConfig_();
 
 		const client = new Client(
 			context,
