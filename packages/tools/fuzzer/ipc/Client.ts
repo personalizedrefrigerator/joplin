@@ -183,14 +183,7 @@ class Client implements ActionableClient {
 
 		account.onClientConnected();
 
-		// Joplin Server sync
-		const targetId = context.isJoplinCloud ? '10' : '9';
-		await client.execCliCommand_('config', 'sync.target', targetId);
-		await client.execCliCommand_('config', `sync.${targetId}.path`, context.serverUrl);
-		await client.execCliCommand_('config', `sync.${targetId}.username`, account.email);
-		await client.execCliCommand_('config', `sync.${targetId}.password`, account.password);
-		await client.execCliCommand_('config', 'api.token', apiData.token);
-		await client.execCliCommand_('config', 'api.port', String(apiData.port));
+		await client.setInitialSettings_();
 
 		if (account.e2eePassword) {
 			await client.execCliCommand_('e2ee', 'enable', '--password', account.e2eePassword);
@@ -246,11 +239,7 @@ class Client implements ActionableClient {
 
 		account.onClientConnected();
 
-		const targetId = context.isJoplinCloud ? '10' : '9';
-		// Update the client with the new password(s)
-		await client.execCliCommand_('config', `sync.${targetId}.password`, account.password);
-		await client.execCliCommand_('config', 'api.token', apiData.token);
-		await client.execCliCommand_('config', 'api.port', String(apiData.port));
+		await client.setInitialSettings_();
 
 		logger.info('Created and configured client in', profileDirectory);
 
@@ -341,6 +330,20 @@ class Client implements ActionableClient {
 			}),
 			'utf-8',
 		);
+	}
+
+	private async setInitialSettings_() {
+		// Joplin Server sync
+		const targetId = this.context_.isJoplinCloud ? '10' : '9';
+		await this.execCliCommand_('config', 'sync.target', targetId);
+		await this.execCliCommand_('config', `sync.${targetId}.path`, this.context_.serverUrl);
+		await this.execCliCommand_('config', `sync.${targetId}.username`, this.account_.email);
+		await this.execCliCommand_('config', `sync.${targetId}.password`, this.account_.password);
+		// userContentPath only applies to Joplin Cloud:
+		await this.execCliCommand_('config', 'sync.10.userContentPath', this.context_.serverUrl);
+
+		await this.execCliCommand_('config', 'api.token', this.apiData_.token);
+		await this.execCliCommand_('config', 'api.port', String(this.apiData_.port));
 	}
 
 	private async startClipperServer_() {
