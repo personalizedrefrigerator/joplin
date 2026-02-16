@@ -229,7 +229,7 @@ export default class ShareModel extends BaseModel<Share> {
 		};
 
 		const getPreviousShareId = (change: Change) => {
-			return change.previous_item ? JSON.parse(change.previous_item).jop_share_id : '';
+			return this.models().change().unserializePreviousItem(change.previous_item)?.jop_share_id;
 		};
 
 		const handleUpdated = async (change: Change, item: Item, share: Share, nextShareId: Uuid) => {

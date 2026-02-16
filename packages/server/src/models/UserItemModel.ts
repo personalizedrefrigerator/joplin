@@ -1,4 +1,4 @@
-import { ChangeType, Item, UserItem, Uuid, ItemType } from '../services/database/types';
+import { ChangeType, Item, ItemType, UserItem, Uuid } from '../services/database/types';
 import BaseModel, { DeleteOptions, LoadOptions, SaveOptions } from './BaseModel';
 import { unique } from '../utils/array';
 import { ErrorNotFound } from '../utils/errors';
@@ -157,14 +157,13 @@ export default class UserItemModel extends BaseModel<UserItem> {
 					}, options);
 
 					if (this.models().item().shouldRecordChange(item.name)) {
-						await this.models().change().recordChange({
-							itemName: item.name,
-							itemId: item.id,
-							sourceUserId: userId,
-							shareId: item.jop_share_id ?? '',
-							previousItem: { jop_share_id: '' },
+						await this.models().change().save({
+							item_type: ItemType.UserItem,
+							item_id: item.id,
+							item_name: item.name,
 							type: ChangeType.Create,
-							itemType: ItemType.UserItem,
+							previous_item: '',
+							user_id: userId,
 						});
 					}
 				} catch (error) {
@@ -227,15 +226,13 @@ export default class UserItemModel extends BaseModel<UserItem> {
 				if (!item) continue;
 
 				if (options.recordChanges && this.models().item().shouldRecordChange(item.name)) {
-					const shareId = item.jop_share_id;
-					await this.models().change().recordChange({
-						itemName: item.name,
-						itemId: userItem.item_id,
-						sourceUserId: userItem.user_id,
-						shareId,
-						previousItem: { jop_share_id: shareId },
+					await this.models().change().save({
+						item_type: ItemType.UserItem,
+						item_id: userItem.item_id,
+						item_name: item.name,
 						type: ChangeType.Delete,
-						itemType: ItemType.UserItem,
+						previous_item: '',
+						user_id: userItem.user_id,
 					});
 				}
 			}

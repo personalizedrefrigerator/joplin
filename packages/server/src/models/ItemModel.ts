@@ -1085,18 +1085,18 @@ export default class ItemModel extends BaseModel<Item> {
 
 			if (isNew) await this.models().userItem().add(userId, item.id);
 
-			// We only record updates. Create and Delete events are recorded elsewhere.
+			// We only record updates. This because Create and Update events are
+			// per user, whenever a user_item is created or deleted.
 			const changeItemName = item.name || previousName;
 
 			if (!isNew && this.shouldRecordChange(changeItemName)) {
-				await this.models().change().recordChange({
-					itemId: item.id,
-					sourceUserId: userId,
-					shareId: item.jop_share_id ?? '',
-					previousItem,
-					itemName: changeItemName,
-					type: ChangeType.Update,
-					itemType: this.itemType,
+				await this.models().change().save({
+					item_type: this.itemType,
+					item_id: item.id,
+					item_name: changeItemName,
+					type: isNew ? ChangeType.Create : ChangeType.Update,
+					previous_item: previousItem ? this.models().change().serializePreviousItem(previousItem) : '',
+					user_id: userId,
 				});
 			}
 
