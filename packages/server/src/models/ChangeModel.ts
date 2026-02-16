@@ -138,13 +138,13 @@ export default class ChangeModel extends BaseModel<Change> {
 
 		const fieldsSql = `"${fields.join('", "')}"`;
 
-		// All items without a share_id
+		// Query per-user changes: Changes for items not in shares and deletions:
 		const subQuery1 = `
 			SELECT ${fieldsSql}
 			FROM "changes"
 			WHERE counter > ?
 				AND user_id = ?
-				AND share_id = ''
+				AND (share_id = '' OR type = ?)
 			ORDER BY "counter" ASC
 			${doCountQuery ? '' : 'LIMIT ?'}
 		`;
@@ -152,6 +152,9 @@ export default class ChangeModel extends BaseModel<Change> {
 		const subParams1 = [
 			fromCounter,
 			userId,
+			// Users need to process "Delete" changes after being removed from a share. As such,
+			// deletions (unlike create/update changes) are per-user, rather than per-share.
+			ChangeType.Delete,
 		];
 
 		if (!doCountQuery) subParams1.push(limit);
@@ -199,6 +202,7 @@ export default class ChangeModel extends BaseModel<Change> {
 			.map(f => `"changes"."${f}" AS "${f}"`)
 			.join(', ');
 
+		// Per-share changes:
 		const subQuery2 = `
 			WITH relevant_shares AS (SELECT share_id FROM (
 					SELECT user_id, share_id FROM share_users
@@ -210,6 +214,7 @@ export default class ChangeModel extends BaseModel<Change> {
 			SELECT ${changesFieldsSql}
 			FROM "changes"
 			WHERE counter > ?
+				AND type != ?
 				AND share_id IN relevant_shares
 			ORDER BY counter
 			${doCountQuery ? '' : 'LIMIT ?'}
@@ -219,6 +224,7 @@ export default class ChangeModel extends BaseModel<Change> {
 			userId,
 			userId,
 			fromCounter,
+			ChangeType.Delete,
 		];
 
 		if (!doCountQuery) subParams2.push(limit);
