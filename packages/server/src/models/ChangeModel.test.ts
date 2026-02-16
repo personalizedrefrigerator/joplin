@@ -403,27 +403,27 @@ describe('ChangeModel', () => {
 		{
 			label: 'should not compress updates that change the share ID',
 			changes: [
-				{ type: ChangeType.Update, previous_item: '{ "jop_share_id": "a" }' },
-				{ type: ChangeType.Update, previous_item: '{ "jop_share_id": "b" }' },
+				{ type: ChangeType.Update, share_id: 'a' },
+				{ type: ChangeType.Update, share_id: 'b' },
 			],
 			expected: [
-				{ type: ChangeType.Update, previous_item: '{ "jop_share_id": "a" }' },
-				{ type: ChangeType.Update, previous_item: '{ "jop_share_id": "b" }' },
+				{ type: ChangeType.Update, share_id: 'a' },
+				{ type: ChangeType.Update, share_id: 'b' },
 			],
 		},
 		{
 			label: 'should keep the latest change when compressing updates',
 			changes: [
-				{ type: ChangeType.Update, item_id: '1', previous_item: '{ "jop_share_id": "a" }', counter: 1 },
-				{ type: ChangeType.Update, item_id: '1', previous_item: '{ "jop_share_id": "b" }', counter: 2 },
-				{ type: ChangeType.Update, item_id: '1', previous_item: '{ "jop_share_id": "b" }', counter: 3 },
-				{ type: ChangeType.Update, item_id: '2', previous_item: '{ "jop_share_id": "a" }', counter: 4 },
-				{ type: ChangeType.Update, item_id: '2', previous_item: '{ "jop_share_id": "a" }', counter: 5 },
+				{ type: ChangeType.Update, item_id: '1', share_id: 'a', counter: 1 },
+				{ type: ChangeType.Update, item_id: '1', share_id: 'b', counter: 2 },
+				{ type: ChangeType.Update, item_id: '1', share_id: 'b', counter: 3 },
+				{ type: ChangeType.Update, item_id: '2', share_id: 'a', counter: 4 },
+				{ type: ChangeType.Update, item_id: '2', share_id: 'a', counter: 5 },
 			],
 			expected: [
-				{ type: ChangeType.Update, item_id: '1', previous_item: '{ "jop_share_id": "a" }', counter: 1 },
-				{ type: ChangeType.Update, item_id: '1', previous_item: '{ "jop_share_id": "b" }', counter: 3 },
-				{ type: ChangeType.Update, item_id: '2', previous_item: '{ "jop_share_id": "a" }', counter: 5 },
+				{ type: ChangeType.Update, item_id: '1', share_id: 'a', counter: 1 },
+				{ type: ChangeType.Update, item_id: '1', share_id: 'b', counter: 3 },
+				{ type: ChangeType.Update, item_id: '2', share_id: 'a', counter: 5 },
 			],
 		},
 		{
