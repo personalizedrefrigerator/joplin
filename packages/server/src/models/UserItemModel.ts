@@ -142,8 +142,15 @@ export default class UserItemModel extends BaseModel<UserItem> {
 		perfTimer.push('Main');
 
 		// TODO: Modify to load item.jop_share_id?
-		const items: Item[] = Array.isArray(itemsQuery) ? itemsQuery : await itemsQuery.whereNotIn('id', this.db('user_items').select('item_id').where('user_id', '=', userId));
+		let items: Item[] = Array.isArray(itemsQuery) ? itemsQuery : await itemsQuery.whereNotIn('id', this.db('user_items').select('item_id').where('user_id', '=', userId));
 		if (!items.length) return;
+
+		// Load required properties
+		const missingProperties = items.some(item => (!('jop_share_id' in item) || !('name' in item) || !('id' in item)));
+		if (missingProperties) {
+			items = await this.models().item().loadByIds(items.map(item => item.id), { fields: ['id', 'name', 'jop_share_id'] });
+		}
+
 
 		perfTimer.push(`Processing ${items.length} items`);
 

@@ -2,7 +2,7 @@ import { DbConnection, isPostgres } from '../db';
 
 export const up = async (db: DbConnection) => {
 	await db.schema.alterTable('changes', (table) => {
-		table.string('share_id', 32).defaultTo('');
+		table.string('share_id', 32).notNullable().defaultTo('');
 		table.unique(['share_id', 'counter']);
 	});
 

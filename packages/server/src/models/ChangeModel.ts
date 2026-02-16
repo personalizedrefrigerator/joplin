@@ -132,25 +132,25 @@ export default class ChangeModel extends BaseModel<Change> {
 			'item_name',
 			'type',
 			'updated_time',
+			'share_id',
 			'counter',
 		];
 
 		const fieldsSql = `"${fields.join('", "')}"`;
 
+		// All items without a share_id
 		const subQuery1 = `
 			SELECT ${fieldsSql}
 			FROM "changes"
 			WHERE counter > ?
-			AND (type = ? OR type = ?)
-			AND user_id = ?
+				AND user_id = ?
+				AND share_id = ''
 			ORDER BY "counter" ASC
 			${doCountQuery ? '' : 'LIMIT ?'}
 		`;
 
 		const subParams1 = [
 			fromCounter,
-			ChangeType.Create,
-			ChangeType.Delete,
 			userId,
 		];
 
@@ -190,33 +190,34 @@ export default class ChangeModel extends BaseModel<Change> {
 		// ORDER BY "counter" ASC
 		// ${doCountQuery ? '' : 'LIMIT ?'}
 		// ```
+		//
+		// ### 02/16/2026
+		//
+		// Changes are now queried by the share they belong to.
 
 		const changesFieldsSql = fields
 			.map(f => `"changes"."${f}" AS "${f}"`)
 			.join(', ');
 
 		const subQuery2 = `
-			WITH ui AS MATERIALIZED (
-				SELECT item_id
-				FROM user_items
-				WHERE user_id = ?
-			)
+			WITH relevant_shares AS (SELECT share_id FROM (
+					SELECT user_id, share_id FROM share_users
+						WHERE user_id = ?
+				UNION ALL
+					SELECT owner_id as user_id, id as share_id FROM shares
+						WHERE user_id = ?
+			))
 			SELECT ${changesFieldsSql}
-			FROM changes
-			WHERE type = ?
-				AND counter > ?
-				AND EXISTS (
-					SELECT 1
-					FROM ui
-					WHERE ui.item_id = changes.item_id
-				)
+			FROM "changes"
+			WHERE counter > ?
+				AND share_id IN relevant_shares
 			ORDER BY counter
 			${doCountQuery ? '' : 'LIMIT ?'}
 		`;
 
 		const subParams2 = [
 			userId,
-			ChangeType.Update,
+			userId,
 			fromCounter,
 		];
 
