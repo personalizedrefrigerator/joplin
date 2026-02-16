@@ -446,41 +446,13 @@ export default class ChangeModel extends BaseModel<Changes2> {
 	public async recordChange({
 		shareId, sourceUserId, itemId, itemName, type, previousItem, changeId,
 	}: RecordChangeOptions) {
-		const saveChangeForUser = async (userId: Uuid, changeId: Uuid|undefined) => {
-			await this.save({
-				item_id: itemId,
-				item_name: itemName,
-				type,
-				previous_share_id: previousItem.jop_share_id ?? '',
-				user_id: userId,
-				...(changeId ? { id: changeId } : {}),
-			}, { isNew: true });
-		};
-
-		if (type === ChangeType.Update) {
-			const share = shareId ? await this.models().share().load(shareId) : null;
-			let allUserIds = share ? await this.models().share().allShareUserIds(share) : [sourceUserId];
-			if (!allUserIds.includes(sourceUserId)) {
-				logger.warn('Adding sourceUserId to allUserIds because it was missing');
-				allUserIds = [...allUserIds, sourceUserId];
-			}
-
-			// Post a change for all users that can access the item
-			for (let i = 0; i < allUserIds.length; i++) {
-				const userId = allUserIds[i];
-
-				const isFirst = i === 0;
-				// Ensure that the first change matches the provided ID. This is important
-				// because the change ID is used as a cursor in the delta table.
-				const newChangeId = isFirst ? changeId : undefined;
-
-				await saveChangeForUser(userId, newChangeId);
-			}
-		} else {
-			// Sharing for create/delete actions is currently handled in a maintenance
-			// task that runs periodically.
-			await saveChangeForUser(sourceUserId, changeId);
-		}
+		await this.save({
+			item_id: itemId,
+			item_name: itemName,
+			type,
+			share_id: shareId,
+			user_id: sourceUserId,
+		});
 	}
 
 }
