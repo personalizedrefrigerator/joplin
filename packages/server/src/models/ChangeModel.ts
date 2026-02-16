@@ -138,13 +138,13 @@ export default class ChangeModel extends BaseModel<Change> {
 
 		const fieldsSql = `"${fields.join('", "')}"`;
 
-		// Query per-user changes: Changes for items not in shares and deletions:
+		// Query per-user updates and creations/deletions:
 		const subQuery1 = `
 			SELECT ${fieldsSql}
 			FROM "changes"
 			WHERE counter > ?
 				AND user_id = ?
-				AND (share_id = '' OR type = ?)
+				AND (share_id = '' OR type != ?)
 			ORDER BY "counter" ASC
 			${doCountQuery ? '' : 'LIMIT ?'}
 		`;
@@ -152,9 +152,15 @@ export default class ChangeModel extends BaseModel<Change> {
 		const subParams1 = [
 			fromCounter,
 			userId,
-			// Users need to process "Delete" changes after being removed from a share. As such,
-			// deletions (unlike create/update changes) are per-user, rather than per-share.
-			ChangeType.Delete,
+			// - Users need to process "Delete" changes after being removed from a share. As such,
+			//   deletions (unlike create/update changes) are per-user, rather than per-share.
+			// - Creations must also be queried per-user. This helps prevent race conditions involving
+			//   the maintenance task that creates per-user deletions. For example, if an item is added
+			//   to a share, then very quickly removed, a "Create" change is added to the share, but
+			//   if user_items don't yet exist for all users, not all users will have a "Delete"
+			//   corresponding to the "Create".
+			//   The item will still exist, however, so won't be filtered out by removeDeletedItems.
+			ChangeType.Update,
 		];
 
 		if (!doCountQuery) subParams1.push(limit);
@@ -196,13 +202,12 @@ export default class ChangeModel extends BaseModel<Change> {
 		//
 		// ### 02/16/2026
 		//
-		// Changes are now queried by the share they belong to.
+		// Updates are now queried by the share they belong to.
 
 		const changesFieldsSql = fields
 			.map(f => `"changes"."${f}" AS "${f}"`)
 			.join(', ');
 
-		// Per-share changes:
 		const subQuery2 = `
 			WITH relevant_shares AS (SELECT share_id FROM (
 					SELECT user_id, share_id FROM share_users
@@ -214,8 +219,8 @@ export default class ChangeModel extends BaseModel<Change> {
 			SELECT ${changesFieldsSql}
 			FROM "changes"
 			WHERE counter > ?
-				AND type != ?
 				AND share_id IN relevant_shares
+				AND type = ?
 			ORDER BY counter
 			${doCountQuery ? '' : 'LIMIT ?'}
 		`;
@@ -224,7 +229,7 @@ export default class ChangeModel extends BaseModel<Change> {
 			userId,
 			userId,
 			fromCounter,
-			ChangeType.Delete,
+			ChangeType.Update,
 		];
 
 		if (!doCountQuery) subParams2.push(limit);

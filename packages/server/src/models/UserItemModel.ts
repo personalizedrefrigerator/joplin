@@ -171,6 +171,7 @@ export default class UserItemModel extends BaseModel<UserItem> {
 							item_name: item.name,
 							type: ChangeType.Create,
 							share_id: item.jop_share_id,
+							previous_share_id: '',
 							user_id: userId,
 						});
 					}
@@ -239,7 +240,8 @@ export default class UserItemModel extends BaseModel<UserItem> {
 						item_id: userItem.item_id,
 						item_name: item.name,
 						type: ChangeType.Delete,
-						share_id: item.jop_share_id,
+						share_id: '',
+						previous_share_id: item.jop_share_id,
 						user_id: userItem.user_id,
 					});
 				}

@@ -229,7 +229,7 @@ export default class ShareModel extends BaseModel<Share> {
 		};
 
 		const handleUpdated = async (change: Change, item: Item, share: Share, nextShareId: Uuid) => {
-			const previousShareId = change.share_id;
+			const previousShareId = change.previous_share_id;
 			const shareId = share ? share.id : '';
 
 			const changesShareId = previousShareId !== nextShareId;
@@ -376,7 +376,10 @@ export default class ShareModel extends BaseModel<Share> {
 
 								let nextShareId;
 								if (nextChange) {
-									nextShareId = nextChange.share_id;
+									// Don't use change.share_id here. For old change entries, change.share_id can incorrectly
+									// equal change.previous_share_id. While accurate enough for .delta calls, this isn't accurate
+									// enough for determining whether an item was moved between shares:
+									nextShareId = nextChange.previous_share_id;
 								} else {
 									nextShareId = item.jop_share_id;
 								}

@@ -3,6 +3,7 @@ import { DbConnection, isPostgres } from '../db';
 export const up = async (db: DbConnection) => {
 	await db.schema.alterTable('changes', (table) => {
 		table.string('share_id', 32).notNullable().defaultTo('');
+		table.string('previous_share_id', 32).notNullable().defaultTo('');
 		table.unique(['share_id', 'counter']);
 	});
 
@@ -19,9 +20,10 @@ export const up = async (db: DbConnection) => {
 		//   between shares. If an Update change doesn't appear in a particular user's delta
 		//   results due to an outdated share_id, the Create/Delete changes should ensure that
 		//   the item will be updated locally.
-		// - After this migration, the share maintenance task will only process changes from
-		//   **prior** to the migration (TO-DO!). Newer changes don't require maintenance task.
+		// - The share maintenance task can continue to use previous_share_id to determine whether
+		//   an item was moved between shares (ignoring the potentially-inaccurate share_id).
 		share_id: db.raw(previousShareIdSql),
+		previous_share_id: db.raw(previousShareIdSql),
 	});
 
 	await db.schema.alterTable('changes', (table) => {
@@ -44,5 +46,6 @@ export const down = async (db: DbConnection) => {
 	await db.schema.alterTable('changes', (table) => {
 		table.dropUnique(['share_id', 'counter']);
 		table.dropColumn('share_id');
+		table.dropColumn('previous_share_id');
 	});
 };

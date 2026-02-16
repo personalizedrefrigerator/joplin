@@ -1097,6 +1097,7 @@ export default class ItemModel extends BaseModel<Item> {
 					type: isNew ? ChangeType.Create : ChangeType.Update,
 					// Fall back to the previous share_id if not already present in `item`.
 					share_id: item.jop_share_id ?? previousItem.jop_share_id,
+					previous_share_id: previousItem.jop_share_id ?? '',
 					user_id: userId,
 				});
 			}

@@ -364,6 +364,7 @@ export interface Change extends WithDates, WithUuid {
 	type?: ChangeType;
 	user_id?: Uuid;
 	share_id?: Uuid;
+	previous_share_id?: Uuid;
 }
 
 export const databaseSchema: DatabaseTables = {
@@ -603,6 +604,7 @@ export const databaseSchema: DatabaseTables = {
 		created_time: { type: 'string', defaultValue: null },
 		user_id: { type: 'string', defaultValue: '' },
 		share_id: { type: 'string', defaultValue: '' },
+		previous_share_id: { type: 'string', defaultValue: '' },
 	},
 };
 // AUTO-GENERATED-TYPES
