@@ -141,6 +141,7 @@ export default class UserItemModel extends BaseModel<UserItem> {
 
 		perfTimer.push('Main');
 
+		// TODO: Modify to load item.jop_share_id?
 		const items: Item[] = Array.isArray(itemsQuery) ? itemsQuery : await itemsQuery.whereNotIn('id', this.db('user_items').select('item_id').where('user_id', '=', userId));
 		if (!items.length) return;
 
@@ -162,7 +163,7 @@ export default class UserItemModel extends BaseModel<UserItem> {
 							item_id: item.id,
 							item_name: item.name,
 							type: ChangeType.Create,
-							previous_item: '',
+							share_id: item.jop_share_id,
 							user_id: userId,
 						});
 					}
@@ -216,7 +217,7 @@ export default class UserItemModel extends BaseModel<UserItem> {
 		}
 
 		const itemIds = unique(userItems.map(ui => ui.item_id));
-		const items = await this.models().item().loadByIds(itemIds, { fields: ['id', 'name'] });
+		const items = await this.models().item().loadByIds(itemIds, { fields: ['id', 'name', 'jop_share_id'] });
 
 		await this.withTransaction(async () => {
 			for (const userItem of userItems) {
@@ -231,7 +232,7 @@ export default class UserItemModel extends BaseModel<UserItem> {
 						item_id: userItem.item_id,
 						item_name: item.name,
 						type: ChangeType.Delete,
-						previous_item: '',
+						share_id: item.jop_share_id,
 						user_id: userItem.user_id,
 					});
 				}

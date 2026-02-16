@@ -228,12 +228,8 @@ export default class ShareModel extends BaseModel<Share> {
 			perfTimer.pop();
 		};
 
-		const getPreviousShareId = (change: Change) => {
-			return this.models().change().unserializePreviousItem(change.previous_item)?.jop_share_id;
-		};
-
 		const handleUpdated = async (change: Change, item: Item, share: Share, nextShareId: Uuid) => {
-			const previousShareId = getPreviousShareId(change);
+			const previousShareId = change.share_id;
 			const shareId = share ? share.id : '';
 
 			const changesShareId = previousShareId !== nextShareId;
@@ -380,7 +376,7 @@ export default class ShareModel extends BaseModel<Share> {
 
 								let nextShareId;
 								if (nextChange) {
-									nextShareId = getPreviousShareId(nextChange);
+									nextShareId = nextChange.share_id;
 								} else {
 									nextShareId = item.jop_share_id;
 								}

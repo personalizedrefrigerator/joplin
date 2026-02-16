@@ -410,7 +410,7 @@ export default class ChangeModel extends BaseModel<Change> {
 		const itemToLastUpdateShareIds = new Map<Uuid, Uuid>();
 
 		const changeToShareId = (change: Change) => {
-			return this.unserializePreviousItem(change.previous_item)?.jop_share_id ?? '';
+			return change.share_id;
 		};
 
 		for (const change of changes) {

@@ -37,9 +37,12 @@ export const down = async (db: DbConnection) => {
 		table.text('previous_item').defaultTo('').notNullable();
 	});
 	await db('changes').update({
-		previous_item: db.raw(`json_object('share_id' VALUE share_id)`),
+		previous_item: db.raw(
+			`json_object('share_id' ${isPostgres(db) ? 'VALUE' : ','} share_id)`,
+		),
 	});
 	await db.schema.alterTable('changes', (table) => {
+		table.dropUnique(['share_id', 'counter']);
 		table.dropColumn('share_id');
 	});
 };

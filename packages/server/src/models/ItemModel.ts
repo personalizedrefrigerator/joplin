@@ -1095,7 +1095,8 @@ export default class ItemModel extends BaseModel<Item> {
 					item_id: item.id,
 					item_name: changeItemName,
 					type: isNew ? ChangeType.Create : ChangeType.Update,
-					previous_item: previousItem ? this.models().change().serializePreviousItem(previousItem) : '',
+					// Fall back to the previous share_id if not already present in `item`.
+					share_id: item.jop_share_id ?? previousItem.jop_share_id,
 					user_id: userId,
 				});
 			}

@@ -217,16 +217,6 @@ export interface Share extends WithDates, WithUuid {
 	recursive?: number;
 }
 
-export interface Change extends WithDates, WithUuid {
-	counter?: number;
-	item_type?: ItemType;
-	item_id?: Uuid;
-	item_name?: string;
-	type?: ChangeType;
-	previous_item?: string;
-	user_id?: Uuid;
-}
-
 export interface Token extends WithDates {
 	id?: number;
 	value?: string;
@@ -366,16 +356,14 @@ export interface User extends WithDates, WithUuid {
 	sso_auth_code_expire_at?: number;
 }
 
-export interface Changes2 {
+export interface Change extends WithDates, WithUuid {
 	counter?: number;
-	id?: Uuid;
+	item_type?: ItemType;
 	item_id?: Uuid;
-	user_id?: Uuid;
 	item_name?: string;
-	previous_share_id?: Uuid;
-	type?: number;
-	updated_time?: number;
-	created_time?: number;
+	type?: ChangeType;
+	user_id?: Uuid;
+	share_id?: Uuid;
 }
 
 export const databaseSchema: DatabaseTables = {
@@ -459,18 +447,6 @@ export const databaseSchema: DatabaseTables = {
 		note_id: { type: 'string', defaultValue: '' },
 		master_key_id: { type: 'string', defaultValue: '' },
 		recursive: { type: 'number', defaultValue: 0 },
-	},
-	changes: {
-		counter: { type: 'number', defaultValue: null },
-		id: { type: 'string', defaultValue: null },
-		item_type: { type: 'number', defaultValue: null },
-		item_id: { type: 'string', defaultValue: null },
-		item_name: { type: 'string', defaultValue: '' },
-		type: { type: 'number', defaultValue: null },
-		updated_time: { type: 'string', defaultValue: null },
-		created_time: { type: 'string', defaultValue: null },
-		previous_item: { type: 'string', defaultValue: '' },
-		user_id: { type: 'string', defaultValue: '' },
 	},
 	tokens: {
 		id: { type: 'number', defaultValue: null },
@@ -616,16 +592,17 @@ export const databaseSchema: DatabaseTables = {
 		sso_auth_code: { type: 'string', defaultValue: '' },
 		sso_auth_code_expire_at: { type: 'string', defaultValue: 0 },
 	},
-	changes_2: {
+	changes: {
 		counter: { type: 'number', defaultValue: null },
 		id: { type: 'string', defaultValue: null },
+		item_type: { type: 'number', defaultValue: null },
 		item_id: { type: 'string', defaultValue: null },
-		user_id: { type: 'string', defaultValue: '' },
 		item_name: { type: 'string', defaultValue: '' },
-		previous_share_id: { type: 'string', defaultValue: '' },
 		type: { type: 'number', defaultValue: null },
 		updated_time: { type: 'string', defaultValue: null },
 		created_time: { type: 'string', defaultValue: null },
+		user_id: { type: 'string', defaultValue: '' },
+		share_id: { type: 'string', defaultValue: '' },
 	},
 };
 // AUTO-GENERATED-TYPES
