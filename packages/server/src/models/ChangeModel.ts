@@ -141,8 +141,10 @@ export default class ChangeModel extends BaseModel<Change> {
 			FROM "changes"
 			WHERE counter > ?
 				AND user_id = ?
-				AND share_id = ''
-				AND type IN (?, ?)
+				AND (
+					share_id = ''
+					OR type IN (?, ?)
+				)
 			ORDER BY "counter" ASC
 			${doCountQuery ? '' : 'LIMIT ?'}
 		`;
