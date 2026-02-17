@@ -6,7 +6,6 @@ reviews:
   nitpick_comments: false
   request_changes_workflow: false
   high_level_summary: true
-  high_level_summary_placeholder: "@coderabbitai summary"
   walkthrough: false
   estimate_code_review_effort: false
   poem: false
