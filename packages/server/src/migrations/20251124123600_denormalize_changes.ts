@@ -29,9 +29,6 @@ export const up = async (db: DbConnection) => {
 	await db.schema.alterTable('changes', (table) => {
 		table.dropColumn('previous_item');
 	});
-
-	// TODO: Store the migration index, to be used by the share maintenance task (for determining
-	// the last change to be processed by the task).
 };
 
 export const down = async (db: DbConnection) => {
