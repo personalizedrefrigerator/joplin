@@ -72,46 +72,38 @@ describe('ChangeModel', () => {
 			// Internally, when we request the first three changes, we get back:
 			//
 			// - CREATE 1
-			// - CREATE 2
-			// - UPDATE 2a
+			// - UPDATE 1a
+			// - UPDATE 1b
 			//
-			// We don't get back UPDATE 1a and 1b because the associated item
-			// has been deleted.
-			//
-			// Unlike CREATE events, which come from "user_items" and are
-			// associated with a user, UPDATE events comes from "items" and are
-			// not associated with any specific user. Only if the user has a
-			// corresponding user_item do they get UPDATE events. But in this
-			// case, since the item has been deleted, there's no longer
-			// "user_items" objects.
-			//
-			// Then CREATE 1 is removed since item 1 has been deleted and UPDATE
-			// 2a is compressed down to CREATE 2.
+			// Since item 1 has been deleted, the create and update events are removed.
 			const page1 = (await changeModel.delta(user.id, pagination));
 			let changes = page1.items;
-			expect(changes.length).toBe(1);
+			expect(changes).toHaveLength(0);
 			expect(page1.has_more).toBe(true);
-			expect(changes[0].item_id).toBe(item2.id);
-			expect(changes[0].type).toBe(ChangeType.Create);
 
-			// In the second page, we get all the expected events since nothing
-			// has been compressed.
+			// Internally, we get:
+			//
+			// - CREATE 2
+			// - UPDATE 2a
+			// - DELETE 1
+			//
+			// The Create -> Update is compressed to just Create, leaving us with "Create" -> "Delete".
 			const page2 = (await changeModel.delta(user.id, { ...pagination, cursor: page1.cursor }));
 			changes = page2.items;
-			expect(changes.length).toBe(3);
-			// Although there are no more changes, it's not possible to know
-			// that without running the next query
+			expect(changes).toHaveLength(2);
 			expect(page2.has_more).toBe(true);
-			expect(changes[0].item_id).toBe(item1.id);
-			expect(changes[0].type).toBe(ChangeType.Delete);
-			expect(changes[1].item_id).toBe(item2.id);
-			expect(changes[1].type).toBe(ChangeType.Update);
-			expect(changes[2].item_id).toBe(item3.id);
-			expect(changes[2].type).toBe(ChangeType.Create);
+			expect(changes[0].item_id).toBe(item2.id);
+			expect(changes[0].type).toBe(ChangeType.Create);
+			expect(changes[1].item_id).toBe(item1.id);
+			expect(changes[1].type).toBe(ChangeType.Delete);
 
-			// Check that we indeed reached the end of the feed.
+			// The last page should contains an update event for item 2 and the create
+			// event for item 3.
 			const page3 = (await changeModel.delta(user.id, { ...pagination, cursor: page2.cursor }));
-			expect(page3.items.length).toBe(0);
+			expect(page3.items).toMatchObject([
+				{ item_id: item2.id, type: ChangeType.Update },
+				{ item_id: item3.id, type: ChangeType.Create },
+			]);
 			expect(page3.has_more).toBe(false);
 		}
 	});
