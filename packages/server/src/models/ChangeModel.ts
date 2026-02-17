@@ -78,9 +78,9 @@ export default class ChangeModel extends BaseModel<Change> {
 
 	public async allFromId(id: string, limit: number = SqliteMaxVariableNum): Promise<PaginatedChanges> {
 		const startChange: Change = id ? await this.load(id) : null;
-		const query = this.db(this.tableName).select(...this.defaultFields);
-		if (startChange) void query.where('counter', '>', startChange.counter);
-		void query.limit(limit).orderBy('counter', 'asc');
+		let query = this.db(this.tableName).select(...this.defaultFields);
+		if (startChange) query = query.where('counter', '>', startChange.counter);
+		query = query.limit(limit).orderBy('counter', 'asc');
 		let results: Change[] = await query;
 		const hasMore = !!results.length;
 		const cursor = results.length ? results[results.length - 1].id : id;
@@ -130,6 +130,7 @@ export default class ChangeModel extends BaseModel<Change> {
 			'type',
 			'updated_time',
 			'share_id',
+			'previous_share_id',
 			'counter',
 		];
 
@@ -406,32 +407,37 @@ export default class ChangeModel extends BaseModel<Change> {
 		const itemUniqueUpdates = new Map<Uuid, Change[]>();
 		const itemToLastUpdateShareIds = new Map<Uuid, Uuid>();
 
-		const changeToShareId = (change: Change) => {
-			return change.share_id;
-		};
-
 		for (const change of changes) {
 			const itemId = change.item_id;
 			const previous = itemChanges.get(itemId);
 
 			if (change.type === ChangeType.Update) {
-				const shareId = changeToShareId(change);
+				// The share_id for the item **before** the change.
+				const previousShareId = change.previous_share_id;
 
 				const uniqueUpdates = itemUniqueUpdates.get(itemId);
 				if (uniqueUpdates) {
-					const lastShareId = itemToLastUpdateShareIds.get(itemId);
-					const canCompress = lastShareId === shareId;
+					const previousPreviousShareId = itemToLastUpdateShareIds.get(itemId);
+
+					const previousUpdateChangedShareId = previousPreviousShareId !== previousShareId;
+					// Note: "changedShareId" will incorrectly be false for changes prior to a migration.
+					const changedShareId = change.share_id !== change.previous_share_id;
+
+					// Always keep:
+					// - An update just after the share ID change.
+					// - For newer changes: The update that changes the share ID.
+					const canCompress = !previousUpdateChangedShareId && !changedShareId;
 
 					if (canCompress) {
 						// Always keep the last change as up-to-date as possible
 						uniqueUpdates[uniqueUpdates.length - 1] = change;
 					} else {
 						uniqueUpdates.push(change);
-						itemToLastUpdateShareIds.set(itemId, shareId);
+						itemToLastUpdateShareIds.set(itemId, previousShareId);
 					}
 				} else {
 					itemUniqueUpdates.set(itemId, [change]);
-					itemToLastUpdateShareIds.set(itemId, shareId);
+					itemToLastUpdateShareIds.set(itemId, previousShareId);
 				}
 			}
 
