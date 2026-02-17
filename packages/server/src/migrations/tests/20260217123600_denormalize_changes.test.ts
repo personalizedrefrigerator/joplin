@@ -1,9 +1,9 @@
 import { ChangeType, ItemType } from '../../services/database/types';
 import { shareFolderWithUser } from '../../utils/testing/shareApiUtils';
 import { beforeAllDb, afterAllTests, beforeEachDb, db, createUserAndSession } from '../../utils/testing/testUtils';
-import { down, up } from '../20251124123600_denormalize_changes';
+import { down, up } from '../20260217123600_denormalize_changes';
 
-describe('20251124123600_denormalize_changes', () => {
+describe('20260217123600_denormalize_changes', () => {
 
 	beforeAll(async () => {
 		await beforeAllDb('20251124123600_denormalize_changes');
