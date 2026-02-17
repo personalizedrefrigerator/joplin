@@ -1,10 +1,14 @@
 import { strict as assert } from 'assert';
-import { ActionableClient, FolderData, FuzzContext, ItemId, NoteData, ShareOptions, TreeItem, assertIsFolder, isFolder, isNote, isResource } from './types';
-import FolderRecord from './model/FolderRecord';
+import { ActionableClient, FuzzContext, ShareOptions } from '../types';
+import { FolderData, ItemId, NoteData, TreeItem, assertIsFolder, isFolder, isNote, isResource } from './types';
+import FolderRecord from './FolderRecord';
 import { extractResourceUrls } from '@joplin/lib/urlUtils';
-import ResourceRecord from './model/ResourceRecord';
+import ResourceRecord from './ResourceRecord';
+import Serializable, { BaseSchema, SchemaToType } from './Serializable';
+import NoteRecord from './NoteRecord';
 
 interface ClientData {
+	email: string;
 	childIds: ItemId[];
 }
 
@@ -17,11 +21,80 @@ interface ActionLogEntry {
 	source: string;
 }
 
-class ActionTracker {
+const schema = {
+	idToActionLog: [
+		[
+			'string',
+			[{ action: 'string', source: 'string' }, '...'],
+		],
+		'...',
+	],
+	idToItem: [['string', 'unknown'], '...'],
+	tree: [
+		['string', { email: 'string', childIds: 'string[]' }],
+		'...',
+	],
+} satisfies BaseSchema;
+
+class ActionTracker extends Serializable<typeof schema> {
 	private idToActionLog_: Map<ItemId, ActionLogEntry[]> = new Map();
 	private idToItem_: Map<ItemId, TreeItem> = new Map();
 	private tree_: Map<string, ClientData> = new Map();
-	public constructor(private readonly context_: FuzzContext) {}
+
+	public constructor(private readonly context_: FuzzContext) {
+		super(schema);
+	}
+
+	public static fromSnapshot(snapshot: unknown, context: FuzzContext) {
+		const tracker = new ActionTracker(context);
+		const state = tracker.deserialize(snapshot);
+
+		for (const [key, value] of state.idToActionLog) {
+			tracker.idToActionLog_.set(key, value);
+		}
+
+		for (const [key, value] of state.idToItem) {
+			if (!value || typeof value !== 'object') {
+				throw new Error(`Invalid snapshot: Items must be objects (evaluating ${value})`);
+			}
+
+			let item;
+			if ('isFolder' in value && value.isFolder) {
+				item = FolderRecord.fromSerialized(value);
+			} else if ('isResource' in value && value.isResource) {
+				item = ResourceRecord.fromSerialized(value);
+			} else {
+				item = NoteRecord.fromSerialized(value);
+			}
+			tracker.idToItem_.set(key, item);
+		}
+
+		for (const [key, value] of state.tree) {
+			tracker.tree_.set(key, value);
+		}
+
+		return tracker;
+	}
+
+	public serialize() {
+		const result: SchemaToType<typeof schema> = {
+			idToActionLog: [],
+			idToItem: [],
+			tree: [],
+		};
+
+		for (const [id, log] of this.idToActionLog_.entries()) {
+			result.idToActionLog.push([id, log]);
+		}
+		for (const [id, item] of this.idToItem_.entries()) {
+			result.idToItem.push([id, item.serialize()]);
+		}
+		for (const [email, client] of this.tree_.entries()) {
+			result.tree.push([email, client]);
+		}
+
+		return result;
+	}
 
 	public getActionLog(id: ItemId) {
 		return [...(this.idToActionLog_.get(id) ?? [])];
@@ -38,6 +111,10 @@ class ActionTracker {
 			.map(item => `in:${item.source}: ${item.action}`)
 			.join('\n');
 		process.stdout.write(`${log}\n`);
+	}
+
+	public getAccountEmails(): readonly string[] {
+		return [...this.tree_.keys()];
 	}
 
 	private logAction_(item: ItemId|TreeItem, action: string, source: string) {
@@ -82,6 +159,12 @@ class ActionTracker {
 		const checkFolder = (folder: FolderRecord) => {
 			for (const childId of folder.childIds) {
 				checkItem(childId);
+
+				// Verify that parent-child relationships are two-way:
+				const child = this.idToItem_.get(childId);
+				if (!isResource(child)) {
+					assert.equal(child.parentId, folder.id, 'items should only be included in childIds if the item is a child of the parent');
+				}
 			}
 
 			// Shared folders
@@ -104,7 +187,7 @@ class ActionTracker {
 				'child IDs should be unique',
 			);
 		};
-		const checkNote = (note: NoteData) => {
+		const checkNote = (note: NoteRecord) => {
 			assert.ok(!isFolder(note));
 			assert.ok(!isResource(note));
 		};
@@ -146,6 +229,12 @@ class ActionTracker {
 				assert.ok(!!item);
 				assert.equal(item.parentId, '', `${childId} should not have a parent`);
 
+				if (isFolder(item) && item.isRootSharedItem) {
+					const isShareOwner = item.ownedByEmail === clientData.email;
+					const isShareRecipient = item.shareRecipients.includes(clientData.email);
+					assert.ok(isShareOwner || isShareRecipient, `${clientData.email} should have access to item ${childId}.`);
+				}
+
 				checkItem(childId);
 			}
 		}
@@ -156,6 +245,7 @@ class ActionTracker {
 		// If the client's remote account already exists, continue using it:
 		if (!this.tree_.has(clientId)) {
 			this.tree_.set(clientId, {
+				email: clientId,
 				childIds: [],
 			});
 		}
@@ -163,9 +253,10 @@ class ActionTracker {
 		const logAction = (item: ItemId|TreeItem, action: string) => {
 			this.logAction_(item, action, clientId);
 		};
-		const updateItem = (id: ItemId, newValue: TreeItem, changeLabel: string) => {
+		const updateItem = <ItemType extends TreeItem> (id: ItemId, newValue: ItemType, changeLabel: string) => {
 			logAction(id, changeLabel);
 			this.idToItem_.set(id, newValue);
+			return newValue;
 		};
 
 		const getChildIds = (itemId: ItemId) => {
@@ -173,7 +264,7 @@ class ActionTracker {
 			if (!item || !isFolder(item)) return [];
 			return item.childIds;
 		};
-		const updateChildren = (parentId: ItemId, updateFn: (oldChildren: ItemId[])=> ItemId[]) => {
+		const updateChildren = (parentId: ItemId, updateFn: (oldChildren: readonly ItemId[])=> readonly ItemId[]) => {
 			const parent = this.idToItem_.get(parentId);
 			if (!parent) throw new Error(`Parent with ID ${parentId} not found.`);
 			if (!isFolder(parent)) throw new Error(`Item ${parentId} is not a folder`);
@@ -293,7 +384,7 @@ class ActionTracker {
 					removeItemRecursive(childId);
 				}
 			} else if (isNote(item)) {
-				updateResourceReferences(item, { ...item, body: '' });
+				updateResourceReferences(item, item.withBody(''));
 			}
 		};
 		const mapItems = <T> (map: (item: TreeItem)=> T, startFolder?: FolderRecord) => {
@@ -433,9 +524,7 @@ class ActionTracker {
 
 				assert.ok(!!data.parentId, `note ${data.id} should have a parentId`);
 				assert.ok(!this.idToItem_.has(data.id), `note ${data.id} should not yet exist`);
-				updateItem(data.id, {
-					...data,
-				}, `created in ${data.parentId}`);
+				updateItem(data.id, new NoteRecord(data), `created in ${data.parentId}`);
 				addChild(data.parentId, data.id);
 				updateResourceReferences(null, data);
 
@@ -462,9 +551,7 @@ class ActionTracker {
 					});
 
 				removeChild(oldItem.parentId, data.id);
-				updateItem(data.id, {
-					...data,
-				}, `updated (changed fields: ${JSON.stringify(changedFields)})`);
+				updateItem(data.id, new NoteRecord(data), `updated (changed fields: ${JSON.stringify(changedFields)})`);
 				addChild(data.parentId, data.id);
 				updateResourceReferences(oldItem, data);
 
@@ -592,7 +679,7 @@ class ActionTracker {
 				return Promise.resolve();
 			},
 			moveItem: (itemId, newParentId) => {
-				const item = this.idToItem_.get(itemId);
+				let item = this.idToItem_.get(itemId);
 				assert.ok(isFolder(item) || isNote(item), `item with ${itemId} should be a folder or a note`);
 
 				const validateParameters = () => {
@@ -616,11 +703,20 @@ class ActionTracker {
 
 				removeChild(item.parentId, itemId);
 				addChild(newParentId, itemId);
-				updateItem(
+				item = updateItem(
 					itemId,
-					isFolder(item) ? item.withParent(newParentId) : { ...item, parentId: newParentId },
+					item.withParent(newParentId),
 					`moved to id:${newParentId}`,
 				);
+
+				if (isFolder(item) && newParentId === '') {
+					// Ensure that toplevel notebooks have the correct share state.
+					item = updateItem(
+						itemId,
+						item.withUnshared().withShareOwner(client.email),
+						'reset share state',
+					);
+				}
 
 				this.checkRep_();
 				return Promise.resolve();
@@ -631,10 +727,7 @@ class ActionTracker {
 				assert.ok(isNote(oldItem), 'only notes can be published');
 				assert.ok(!oldItem.published, 'should not be published');
 
-				updateItem(id, {
-					...oldItem,
-					published: true,
-				}, 'published');
+				updateItem(id, oldItem.withPublished(true), 'published');
 
 				this.checkRep_();
 				return Promise.resolve();
@@ -645,10 +738,7 @@ class ActionTracker {
 				assert.ok(isNote(oldItem), 'only notes can be unpublished');
 				assert.ok(oldItem.published, 'should be published');
 
-				updateItem(id, {
-					...oldItem,
-					published: false,
-				}, 'unpublished');
+				updateItem(id, oldItem.withPublished(false), 'unpublished');
 
 				this.checkRep_();
 				return Promise.resolve();
@@ -718,9 +808,13 @@ class ActionTracker {
 			},
 			randomNote: async (options) => {
 				let notes = await tracker.listNotes();
+				if (options.filter) {
+					notes = notes.filter(options.filter);
+				}
 				if (!options.includeReadOnly) {
 					notes = notes.filter(note => !isReadOnly(note.id));
 				}
+
 				const noteIndex = this.context_.randInt(0, notes.length);
 				return notes.length ? notes[noteIndex] : null;
 			},
