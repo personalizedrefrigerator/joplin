@@ -134,39 +134,6 @@ export default class ChangeModel extends BaseModel<Change> {
 			'counter',
 		];
 
-		const fieldsSql = `"${fields.join('", "')}"`;
-
-		// Query per-user updates and creations/deletions:
-		const subQuery1 = `
-			SELECT ${fieldsSql}
-			FROM "changes"
-			WHERE counter > ?
-				AND user_id = ?
-				AND (
-					share_id = ''
-					OR type IN (?, ?)
-				)
-			ORDER BY "counter" ASC
-			${doCountQuery ? '' : 'LIMIT ?'}
-		`;
-
-		const subParams1 = [
-			fromCounter,
-			userId,
-			// - Users need to process "Delete" changes after being removed from a share. As such,
-			//   deletions (unlike create/update changes) are per-user, rather than per-share.
-			// - Creations must also be queried per-user. This helps prevent race conditions involving
-			//   the maintenance task that creates per-user deletions. For example, if an item is added
-			//   to a share, then very quickly removed, a "Create" change is added to the share, but
-			//   if user_items don't yet exist for all users, not all users will have a "Delete"
-			//   corresponding to the "Create".
-			//   The item will still exist, however, so won't be filtered out by removeDeletedItems.
-			ChangeType.Create,
-			ChangeType.Delete,
-		];
-
-		if (!doCountQuery) subParams1.push(limit);
-
 		// The "+ 0" was added to prevent Postgres from scanning the `changes` table in `counter`
 		// order, which is an extremely slow query plan. With "+ 0" it went from 2 minutes to 6
 		// seconds for a particular query. https://dba.stackexchange.com/a/338597/37012
@@ -210,7 +177,7 @@ export default class ChangeModel extends BaseModel<Change> {
 			.map(f => `"changes"."${f}" AS "${f}"`)
 			.join(', ');
 
-		const subQuery2 = `
+		const querySql = `
 			WITH relevant_shares AS (
 					SELECT user_id, share_id FROM share_users
 						WHERE user_id = ?
@@ -221,25 +188,28 @@ export default class ChangeModel extends BaseModel<Change> {
 			SELECT ${changesFieldsSql}
 			FROM "changes"
 			WHERE counter > ?
-				AND share_id IN (SELECT share_id FROM relevant_shares)
-				AND type = ?
+				AND (
+					user_id = ?
+					OR
+					share_id IN (SELECT share_id FROM relevant_shares)
+				)
 			ORDER BY counter ASC
 			${doCountQuery ? '' : 'LIMIT ?'}
 		`;
 
-		const subParams2 = [
+		const queryParams = [
 			userId,
 			userId,
 			fromCounter,
-			ChangeType.Update,
+			userId,
 		];
 
-		if (!doCountQuery) subParams2.push(limit);
+		if (!doCountQuery) queryParams.push(limit);
 
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 		let query: Knex.Raw<any> = null;
 
-		const finalParams = [...subParams1, ...subParams2];
+		const finalParams = [...queryParams];
 
 		// Note: Historically, this used materialized tables for Postgres to work around a performance
 		// issue:
@@ -249,19 +219,15 @@ export default class ChangeModel extends BaseModel<Change> {
 			finalParams.push(limit);
 
 			query = this.dbSlave.raw(`
-				SELECT ${fieldsSql} FROM (${subQuery1}) as sub1
-				UNION ALL				
-				SELECT ${fieldsSql} FROM (${subQuery2}) as sub2
+				${querySql}
 				ORDER BY counter ASC
 				LIMIT ?
 			`, finalParams);
 		} else {
 			query = this.dbSlave.raw(`
 				SELECT count(*) as total
-				FROM (
-					(${subQuery1})
-					UNION ALL				
-					(${subQuery2})
+				(
+					(${querySql})
 				) AS merged
 			`, finalParams);
 		}

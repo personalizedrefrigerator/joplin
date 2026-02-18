@@ -170,7 +170,12 @@ export default class UserItemModel extends BaseModel<UserItem> {
 							item_id: item.id,
 							item_name: item.name,
 							type: ChangeType.Create,
-							share_id: item.jop_share_id,
+
+							// Avoid forcing existing users on a share to re-sync all changes
+							// when a new user is added:
+							// Don't update share_id: "Create" changes are per-user, rather
+							// than per-share:
+							share_id: '', // item.jop_share_id,
 							previous_share_id: '',
 							user_id: userId,
 						});
