@@ -1,6 +1,7 @@
 import * as React from 'react';
 
-import { View, Text, FlatList, StyleSheet, AccessibilityRole } from 'react-native';
+import { View, FlatList, StyleSheet, AccessibilityRole } from 'react-native';
+import { Text } from 'react-native-paper';
 import { connect } from 'react-redux';
 import Tag from '@joplin/lib/models/Tag';
 import { themeStyle } from '../global-style';
@@ -47,6 +48,11 @@ const useStyles = (themeId: number) => {
 				color: theme.color,
 				fontSize: theme.fontSize,
 			},
+			noTagsPlaceholder: {
+				paddingTop: theme.itemMarginTop,
+				paddingLeft: theme.marginLeft,
+				paddingRight: theme.marginLeft,
+			},
 			rootStyle: theme.rootStyle,
 		});
 	}, [themeId]);
@@ -87,6 +93,7 @@ const TagItem: React.FC<TagItemProps> = ({ tag, themeId, onPress, onLongPress })
 
 
 const TagsScreenComponent: React.FC<Props> = props => {
+	const [loading, setLoading] = useState(false);
 	const [tags, setTags] = useState<TagEntity[]>([]);
 	const [refreshTrigger, setRefreshTrigger] = useState(0);
 	const [searchQuery, setSearchQuery] = useState('');
@@ -101,6 +108,7 @@ const TagsScreenComponent: React.FC<Props> = props => {
 	type TagItemPressEvent = { id: string };
 
 	useQueuedAsyncEffect(async (event) => {
+		setLoading(true);
 		try {
 			let fetchedTags: TagEntity[];
 
@@ -124,6 +132,10 @@ const TagsScreenComponent: React.FC<Props> = props => {
 			logger.error('Error fetching tags', error);
 			if (!event.cancelled) {
 				setTags([]);
+			}
+		} finally {
+			if (!event.cancelled) {
+				setLoading(false);
 			}
 		}
 	}, [searchQuery, collator, refreshTrigger], { interval: 200 });
@@ -237,6 +249,7 @@ const TagsScreenComponent: React.FC<Props> = props => {
 					onClearButtonPress={clearButton_press}
 				/>
 			)}
+			{tags.length === 0 && !loading && <Text style={styles.noTagsPlaceholder}>{_('No tags found')}</Text>}
 			<FlatList style={{ flex: 1 }} data={tags} renderItem={onRenderItem} keyExtractor={tag => tag.id} />
 		</View>
 	);
