@@ -41,6 +41,7 @@ interface Props {
 	isOnMobileData: boolean;
 	notesParentType: string;
 	folders: FolderEntity[];
+	hasTags: boolean;
 	profileConfig: ProfileConfig;
 	inboxJopId: string;
 	selectedFolderIds: string[];
@@ -625,7 +626,9 @@ const SideMenuContentComponent = (props: Props) => {
 
 		items.push(renderSidebarButton('newFolder_button', _('New Notebook'), 'folder-open', { onPress: newFolderButton_press }));
 
-		items.push(renderSidebarButton('tag_button', _('Tags'), 'pricetag', { onPress: tagButton_press }));
+		if (props.hasTags) {
+			items.push(renderSidebarButton('tag_button', _('Tags'), 'pricetag', { onPress: tagButton_press }));
+		}
 
 		if (props.profileConfig && props.profileConfig.profiles.length > 1) {
 			items.push(renderSidebarButton('switchProfile_button', _('Switch profile'), 'people-circle-outline', { onPress: switchProfileButton_press }));
@@ -729,6 +732,7 @@ const SideMenuContentComponent = (props: Props) => {
 export default connect((state: AppState) => {
 	return {
 		folders: state.folders,
+		hasTags: state.tags.length > 0,
 		syncStarted: state.syncStarted,
 		syncReport: state.syncReport,
 		selectedFolderIds: state.selectedFolderIds,
