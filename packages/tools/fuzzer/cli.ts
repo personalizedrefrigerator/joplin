@@ -58,6 +58,10 @@ const main = async (config: FuzzerConfig, restoreFromSnapshot: boolean) => {
 		await fuzzer.start();
 	} catch (error) {
 		logger.error('ERROR', error);
+		if (error?.code === 403 && !process.env.FUZZER_SERVER_ADMIN_PASSWORD) {
+			logger.error('Hint: Is FUZZER_SERVER_ADMIN_PASSWORD set to the correct value?');
+		}
+
 		if (fuzzer) {
 			await fuzzer.openDebugSession();
 		}
