@@ -1138,6 +1138,7 @@ export default class Synchronizer {
 						const item = localFoldersToDelete[i];
 						const noteIds = await Folder.noteIds(item.id);
 						if (noteIds.length) {
+							logger.warn('Conflict: Folder', item.id, 'deleted without deleting its content');
 							// CONFLICT
 							await Folder.markNotesAsConflict(item.id);
 						}
