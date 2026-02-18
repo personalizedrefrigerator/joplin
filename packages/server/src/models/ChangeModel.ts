@@ -1,6 +1,6 @@
 import { Knex } from 'knex';
 import Logger from '@joplin/utils/Logger';
-import { DbConnection, SqliteMaxVariableNum, isPostgres } from '../db';
+import { DbConnection, SqliteMaxVariableNum } from '../db';
 import { Change, ChangeType, Item, Uuid } from '../services/database/types';
 import { ErrorResyncRequired } from '../utils/errors';
 import { Day, formatDateTime } from '../utils/time';
@@ -211,19 +211,19 @@ export default class ChangeModel extends BaseModel<Change> {
 			.join(', ');
 
 		const subQuery2 = `
-			WITH relevant_shares AS (SELECT share_id FROM (
+			WITH relevant_shares AS (
 					SELECT user_id, share_id FROM share_users
 						WHERE user_id = ?
 				UNION ALL
-					SELECT owner_id as user_id, id as share_id FROM shares
-						WHERE user_id = ?
-			))
+					SELECT owner_id, id as share_id FROM shares
+						WHERE owner_id = ?
+			)
 			SELECT ${changesFieldsSql}
 			FROM "changes"
 			WHERE counter > ?
-				AND share_id IN relevant_shares
+				AND share_id IN (SELECT share_id FROM relevant_shares)
 				AND type = ?
-			ORDER BY counter
+			ORDER BY counter ASC
 			${doCountQuery ? '' : 'LIMIT ?'}
 		`;
 
@@ -239,43 +239,22 @@ export default class ChangeModel extends BaseModel<Change> {
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 		let query: Knex.Raw<any> = null;
 
-		const finalParams = subParams1.concat(subParams2);
+		const finalParams = [...subParams1, ...subParams2];
 
-		// For Postgres, we need to use materialized tables because, even
-		// though each independent query is fast, the query planner end up going
-		// for a very slow plan when they are combined with UNION ALL.
-		// https://dba.stackexchange.com/a/333147/37012
-		//
-		// Normally we could use the same query for SQLite since it supports
-		// materialized views too, but it doesn't work for some reason so we
-		// keep the non-optimised query.
+		// Note: Historically, this used materialized tables for Postgres to work around a performance
+		// issue:
+		// https://dba.stackexchange.com/a/333147/37012.
 
 		if (!doCountQuery) {
 			finalParams.push(limit);
 
-			if (isPostgres(this.dbSlave)) {
-				query = this.dbSlave.raw(`
-					WITH cte1 AS MATERIALIZED (
-						${subQuery1}
-					)
-					, cte2 AS MATERIALIZED (
-						${subQuery2}
-					)
-					TABLE cte1
-					UNION ALL
-					TABLE cte2
-					ORDER BY counter ASC
-					LIMIT ?
-				`, finalParams);
-			} else {
-				query = this.dbSlave.raw(`
-					SELECT ${fieldsSql} FROM (${subQuery1}) as sub1
-					UNION ALL				
-					SELECT ${fieldsSql} FROM (${subQuery2}) as sub2
-					ORDER BY counter ASC
-					LIMIT ?
-				`, finalParams);
-			}
+			query = this.dbSlave.raw(`
+				SELECT ${fieldsSql} FROM (${subQuery1}) as sub1
+				UNION ALL				
+				SELECT ${fieldsSql} FROM (${subQuery2}) as sub2
+				ORDER BY counter ASC
+				LIMIT ?
+			`, finalParams);
 		} else {
 			query = this.dbSlave.raw(`
 				SELECT count(*) as total
