@@ -69,7 +69,7 @@ reviews:
     - label: "plugins"
       instructions: "Apply when the PR contains changes to the plugin system, plugin API, or specific plugins."
     - label: "Regression"
-      instructions: "Apply when the PR fixes a regression (something that used to work but was broken by a recent change)."
+      instructions: "Apply when the linked issue, if any, has the Regression label."
     - label: "renderer"
       instructions: "Apply when the PR contains changes to the note renderer or how notes are displayed."
     - label: "search"
