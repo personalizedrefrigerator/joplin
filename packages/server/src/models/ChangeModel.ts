@@ -178,7 +178,7 @@ export default class ChangeModel extends BaseModel<Change> {
 			.join(', ');
 
 		const querySql = `
-			WITH relevant_shares AS (
+			WITH relevant_shares AS MATERIALIZED (
 					SELECT user_id, share_id FROM share_users
 						WHERE user_id = ?
 				UNION ALL
