@@ -216,13 +216,7 @@ export default class ChangeModel extends BaseModel<Change> {
 		// https://dba.stackexchange.com/a/333147/37012.
 
 		if (!doCountQuery) {
-			finalParams.push(limit);
-
-			query = this.dbSlave.raw(`
-				${querySql}
-				ORDER BY counter ASC
-				LIMIT ?
-			`, finalParams);
+			query = this.dbSlave.raw(querySql, finalParams);
 		} else {
 			query = this.dbSlave.raw(`
 				SELECT count(*) as total
