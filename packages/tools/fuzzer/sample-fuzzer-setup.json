@@ -15,7 +15,7 @@
 		"// Switch to the first client and do a large number of actions",
 		["switchClient", { "id": 0 }],
 		"syncAndCheckState",
-		["createOrUpdateMany", { "deleteProbability": 0, "count": 200 }],
+		["createOrUpdateMany", { "deleteProbability": 0, "count": 400 }],
 		"syncAndCheckState",
 
 		"// Switch back to the second client. Unshare the folder and do a large number of actions",
