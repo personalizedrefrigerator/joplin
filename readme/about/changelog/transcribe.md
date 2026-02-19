@@ -1,6 +1,6 @@
 # Transcribe Changelog
 
-## [transcribe-v3.6.1](https://github.com/laurent22/joplin/releases/tag/transcribe-v3.6.1) - 2026-02-19T13:57:41Z
+## [transcribe-v3.6.2](https://github.com/laurent22/joplin/releases/tag/transcribe-v3.6.2) - 2026-02-19T17:02:49Z
 
 - Improved: #12883: Disable JobProcessor tests by default (#12955) (#12883 by pedr)
 - Improved: Add log statement signalling that the startup has finished (#12876) (#12862 by pedr)
