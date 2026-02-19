@@ -465,6 +465,19 @@ describe('ChangeModel', () => {
 			],
 		},
 		{
+			// In older Joplin versions, **not** compressing Update -> Create results in
+			// "UNIQUE constraint failed" errors:
+			label: 'should compress update -> create to update when in compatibility mode',
+			compatibleWithOldJoplinClients: true,
+			changes: [
+				{ type: ChangeType.Update },
+				{ type: ChangeType.Create },
+			],
+			expected: [
+				{ type: ChangeType.Update },
+			],
+		},
+		{
 			label: 'should not compress updates that change different items',
 			changes: [
 				{ type: ChangeType.Update, item_id: '1' },
@@ -475,7 +488,7 @@ describe('ChangeModel', () => {
 				{ type: ChangeType.Update, item_id: '2' },
 			],
 		},
-	])('should compress changes: $label', ({ changes, expected }) => {
+	])('should compress changes: $label', ({ changes, expected, compatibleWithOldJoplinClients }) => {
 		// Fill default properties
 		changes = changes.map((change, index) => ({
 			counter: index,
@@ -484,7 +497,8 @@ describe('ChangeModel', () => {
 		}));
 
 		const changeModel = models().change();
-		expect(changeModel.compressChanges_(changes)).toMatchObject(expected);
+		expect(changeModel.compressChanges_(changes, { compatibleWithOldJoplinClients })).toMatchObject(expected);
 	});
+
 
 });

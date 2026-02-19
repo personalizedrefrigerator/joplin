@@ -32,6 +32,10 @@ export interface ChangePreviousItem {
 	jop_share_id: string;
 }
 
+interface CompressChangesOptions {
+	compatibleWithOldJoplinClients: boolean;
+}
+
 export function defaultDeltaPagination(): ChangePagination {
 	return {
 		limit: 200,
@@ -88,7 +92,7 @@ export default class ChangeModel extends BaseModel<Change> {
 		const hasMore = !!results.length;
 		const cursor = results.length ? results[results.length - 1].id : id;
 		results = await this.removeDeletedItems(results);
-		results = await this.compressChanges_(results);
+		results = await this.compressChanges_(results, { compatibleWithOldJoplinClients: false });
 		return {
 			items: results,
 			has_more: hasMore,
@@ -309,7 +313,7 @@ export default class ChangeModel extends BaseModel<Change> {
 
 		let items: Item[] = await this.db('items').select('id', 'jop_updated_time').whereIn('items.id', changes.map(c => c.item_id));
 
-		let processedChanges = this.compressChanges_(changes);
+		let processedChanges = this.compressChanges_(changes, { compatibleWithOldJoplinClients: true });
 		processedChanges = await this.removeDeletedItems(processedChanges, items);
 
 		if (this.deltaIncludesItems_) {
@@ -404,7 +408,7 @@ export default class ChangeModel extends BaseModel<Change> {
 	// event.
 	//
 	// Public to allow testing.
-	public compressChanges_(changes: Change[]): Change[] {
+	public compressChanges_(changes: Change[], options: CompressChangesOptions): Change[] {
 		const itemChanges = new Map<Uuid, Change[]>();
 
 		const itemUniqueUpdates = new Map<Uuid, Change[]>();
@@ -466,8 +470,13 @@ export default class ChangeModel extends BaseModel<Change> {
 				}
 
 				if (previous.type === ChangeType.Update && change.type === ChangeType.Create) {
-					// Keep both
-					keptChanges.push(change);
+					if (!options.compatibleWithOldJoplinClients) {
+						// Keep both. This breaks sync in older Joplin clients, but is required
+						// for correctness when updating data within shares:
+						keptChanges.push(change);
+					} else {
+						// Otherwise, keep only the "update" change.
+					}
 				}
 
 				if (previous.type === ChangeType.Delete && change.type === ChangeType.Create) {
