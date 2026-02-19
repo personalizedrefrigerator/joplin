@@ -11,7 +11,7 @@ export const randomWeightedElement = <T> (items: T[], weights: number[], random:
 
 	// Normalize the weights so that they add up to one.
 	const weightsSum = weights.reduce((a, b) => a + b, 0);
-	const normalizedWeights = weights.map(w => w / weightsSum);
+	const normalizedWeights = weights.map(w => w / (weightsSum || 1));
 
 	// Pair items and weights
 	const weightedItems = items.map((item, index) => ({ item, weight: normalizedWeights[index] }));
