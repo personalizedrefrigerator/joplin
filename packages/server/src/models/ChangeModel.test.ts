@@ -401,6 +401,19 @@ describe('ChangeModel', () => {
 			],
 		},
 		{
+			label: 'should not replace update -> create',
+			// Update -> Create can occur in some cases related to shared items.
+			// In this case, preserve both changes
+			changes: [
+				{ type: ChangeType.Update },
+				{ type: ChangeType.Create },
+			],
+			expected: [
+				{ type: ChangeType.Update },
+				{ type: ChangeType.Create },
+			],
+		},
+		{
 			label: 'should not compress updates that change the share ID',
 			changes: [
 				{ type: ChangeType.Update, previous_item: '{ "jop_share_id": "a" }' },
@@ -424,6 +437,31 @@ describe('ChangeModel', () => {
 				{ type: ChangeType.Update, item_id: '1', previous_item: '{ "jop_share_id": "a" }', counter: 1 },
 				{ type: ChangeType.Update, item_id: '1', previous_item: '{ "jop_share_id": "b" }', counter: 3 },
 				{ type: ChangeType.Update, item_id: '2', previous_item: '{ "jop_share_id": "a" }', counter: 5 },
+			],
+		},
+		{
+			label: 'should keep the latest update, but the earliest create, when compressing a mix of creates and updates',
+			changes: [
+				{ type: ChangeType.Update, item_id: '1', previous_item: '{ "jop_share_id": "a" }', counter: 1 },
+				{ type: ChangeType.Update, item_id: '1', previous_item: '{ "jop_share_id": "b" }', counter: 2 },
+
+				{ type: ChangeType.Create, item_id: '1', previous_item: '', counter: 3 },
+				{ type: ChangeType.Update, item_id: '1', previous_item: '{ "jop_share_id": "a" }', counter: 4 },
+				{ type: ChangeType.Update, item_id: '1', previous_item: '{ "jop_share_id": "a" }', counter: 5 },
+
+				{ type: ChangeType.Create, item_id: '1', previous_item: '', counter: 6 },
+				{ type: ChangeType.Update, item_id: '1', previous_item: '{ "jop_share_id": "b" }', counter: 7 },
+			],
+			expected: [
+				{ type: ChangeType.Update, item_id: '1', previous_item: '{ "jop_share_id": "a" }', counter: 1 },
+				{ type: ChangeType.Update, item_id: '1', previous_item: '{ "jop_share_id": "b" }', counter: 2 },
+
+				{ type: ChangeType.Create, item_id: '1', previous_item: '', counter: 3 },
+				// Removed: Redundant update with counter: 4
+				{ type: ChangeType.Update, item_id: '1', previous_item: '{ "jop_share_id": "a" }', counter: 5 },
+
+				// Removed: Redundant create with counter: 6
+				{ type: ChangeType.Update, item_id: '1', previous_item: '{ "jop_share_id": "b" }', counter: 7 },
 			],
 		},
 		{
