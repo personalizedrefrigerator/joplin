@@ -11,6 +11,11 @@ export const randomWeightedElement = <T> (items: T[], weights: number[], random:
 
 	// Normalize the weights so that they add up to one.
 	const weightsSum = weights.reduce((a, b) => a + b, 0);
+
+	if (!isFinite(weightsSum) || weightsSum === 0) {
+		throw new Error(`Weights must sum to a finite, non-zero value. Provided weights: ${JSON.stringify(weights)}`);
+	}
+
 	const normalizedWeights = weights.map(w => w / (weightsSum || 1));
 
 	// Pair items and weights
