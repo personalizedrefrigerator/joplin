@@ -6,6 +6,7 @@
 - Single quotes for strings  
 - Proper TypeScript types (avoid `any`)
 - Comments should be only with `//` and should not contain jsdoc syntax
+- If you duplicate a substantial block of code, add a comment above it noting the duplication and referencing the original location.
 
 ## Full Documentation
 
