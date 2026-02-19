@@ -491,9 +491,9 @@ const getActions = (context: FuzzContext, clientPool: ClientPool, client: Client
 		return true;
 	}, {
 		count: () => context.randInt(1, 512),
-		updateProbability: () => 1,
-		deleteProbability: () => 1,
-		createProbability: () => 1,
+		createProbability: () => 0.3,
+		updateProbability: () => 0.5,
+		deleteProbability: () => 0.2,
 	});
 
 	addAction('publishNote', async ({ id }) => {
