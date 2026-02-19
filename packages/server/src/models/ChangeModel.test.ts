@@ -401,6 +401,19 @@ describe('ChangeModel', () => {
 			],
 		},
 		{
+			label: 'should not replace update -> create',
+			// Update -> Create can occur in some cases related to shared items.
+			// In this case, preserve both changes
+			changes: [
+				{ type: ChangeType.Update },
+				{ type: ChangeType.Create },
+			],
+			expected: [
+				{ type: ChangeType.Update },
+				{ type: ChangeType.Create },
+			],
+		},
+		{
 			label: 'should not compress updates that change the share ID',
 			changes: [
 				{ type: ChangeType.Update, previous_item: '{ "jop_share_id": "a" }' },

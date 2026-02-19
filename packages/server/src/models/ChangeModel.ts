@@ -388,6 +388,7 @@ export default class ChangeModel extends BaseModel<Change> {
 	//     update - update => update
 	//     update - delete => delete
 	//     delete - create => create
+	//     update - create => update - create
 	//
 	// There's one exception for changes that include a "previous_item". This is
 	// used to save specific properties about the previous state of the item,
@@ -404,7 +405,7 @@ export default class ChangeModel extends BaseModel<Change> {
 	//
 	// Public to allow testing.
 	public compressChanges_(changes: Change[]): Change[] {
-		const itemChanges = new Map<Uuid, Change>();
+		const itemChanges = new Map<Uuid, Change[]>();
 
 		const itemUniqueUpdates = new Map<Uuid, Change[]>();
 		const itemToLastUpdateShareIds = new Map<Uuid, Uuid>();
@@ -415,7 +416,8 @@ export default class ChangeModel extends BaseModel<Change> {
 
 		for (const change of changes) {
 			const itemId = change.item_id;
-			const previous = itemChanges.get(itemId);
+			const previousKeptChanges = itemChanges.get(itemId);
+			const previous = previousKeptChanges ? previousKeptChanges[previousKeptChanges.length - 1] : null;
 
 			if (change.type === ChangeType.Update) {
 				const shareId = changeToShareId(change);
@@ -443,35 +445,53 @@ export default class ChangeModel extends BaseModel<Change> {
 					continue;
 				}
 
+				const keptChanges = previousKeptChanges ?? [];
+				itemChanges.set(itemId, keptChanges);
+
+				const replaceLastWithCurrent = () => {
+					keptChanges.pop();
+					keptChanges.push(change);
+				};
+
 				if (previous.type === ChangeType.Create && change.type === ChangeType.Delete) {
-					itemChanges.set(itemId, change);
+					replaceLastWithCurrent();
 				}
 
 				if (previous.type === ChangeType.Update && change.type === ChangeType.Update) {
-					itemChanges.set(itemId, change);
+					replaceLastWithCurrent();
 				}
 
 				if (previous.type === ChangeType.Update && change.type === ChangeType.Delete) {
-					itemChanges.set(itemId, change);
+					replaceLastWithCurrent();
+				}
+
+				if (previous.type === ChangeType.Update && change.type === ChangeType.Create) {
+					// Keep both
+					keptChanges.push(change);
 				}
 
 				if (previous.type === ChangeType.Delete && change.type === ChangeType.Create) {
-					itemChanges.set(itemId, change);
+					replaceLastWithCurrent();
 				}
 			} else {
-				itemChanges.set(itemId, change);
+				itemChanges.set(itemId, [change]);
 			}
 		}
 
 		const output: Change[] = [];
 
-		for (const [itemId, change] of itemChanges) {
-			if (change.type === ChangeType.Update) {
-				for (const otherChange of itemUniqueUpdates.get(itemId)) {
-					output.push(otherChange);
+		for (const [itemId, changes] of itemChanges) {
+			for (const change of changes) {
+				if (change.type === ChangeType.Update) {
+					for (const otherChange of itemUniqueUpdates.get(itemId)) {
+						output.push(otherChange);
+					}
+
+					// Remove the items to ensure that they are added only once
+					itemUniqueUpdates.delete(itemId);
+				} else {
+					output.push(change);
 				}
-			} else {
-				output.push(change);
 			}
 		}
 
