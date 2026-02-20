@@ -134,6 +134,12 @@ interface CreateRandomItemOptions extends CreateOrUpdateOptions {
 	quiet?: boolean;
 }
 
+interface CreateOrUpdateManyOptions {
+	createProbability: number;
+	updateProbability: number;
+	deleteProbability: number;
+}
+
 class ApiResponseError extends Error {
 	public constructor(public readonly code: number, message: string) {
 		super(message);
@@ -708,7 +714,7 @@ class Client implements ActionableClient {
 		}
 	}
 
-	public async createOrUpdateMany(actionCount: number) {
+	public async createOrUpdateMany(actionCount: number, options: CreateOrUpdateManyOptions) {
 		logger.info(`Creating/updating ${actionCount} items...`);
 		const bar = new ProgressBar('Creating/updating');
 
@@ -737,21 +743,21 @@ class Client implements ActionableClient {
 				await this.deleteNote(targetNote.id, { quiet: true });
 			},
 		};
+		const actionKeys: (keyof typeof actions)[] = ['create', 'update', 'delete'];
 
 		for (let i = 0; i < actionCount; i++) {
 			bar.update(i, actionCount);
 
-			const actionId = this.context_.randInt(0, 100);
-
 			const targetNote = await this.randomNote({ includeReadOnly: false });
-			if (!targetNote) {
-				await actions.create();
-			} else if (actionId > 60) {
-				await actions.update(targetNote);
-			} else if (actionId > 50) {
-				await actions.delete(targetNote);
-			} else {
-				await actions.create();
+			const actionWeights = [
+				options.createProbability,
+				targetNote ? options.updateProbability : 0,
+				targetNote ? options.deleteProbability : 0,
+			];
+
+			const actionId = this.context_.randomFrom(actionKeys, actionWeights);
+			if (actionId) {
+				await actions[actionId](targetNote);
 			}
 		}
 		bar.complete();
