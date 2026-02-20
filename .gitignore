@@ -142,6 +142,7 @@ packages/app-desktop/bridge.js
 packages/app-desktop/checkForUpdates.js
 packages/app-desktop/commands/copyDevCommand.js
 packages/app-desktop/commands/copyToClipboard.js
+packages/app-desktop/commands/createAccessibleDocument.js
 packages/app-desktop/commands/editProfileConfig.js
 packages/app-desktop/commands/emptyTrash.js
 packages/app-desktop/commands/exportDeletionLog.test.js
@@ -1525,6 +1526,7 @@ packages/lib/services/ocr/OcrService.js
 packages/lib/services/ocr/drivers/OcrDriverTesseract.js
 packages/lib/services/ocr/drivers/OcrDriverTranscribe.test.js
 packages/lib/services/ocr/drivers/OcrDriverTranscribe.js
+packages/lib/services/ocr/utils/createAccessiblePdf.js
 packages/lib/services/ocr/utils/filterOcrText.test.js
 packages/lib/services/ocr/utils/filterOcrText.js
 packages/lib/services/ocr/utils/types.js
