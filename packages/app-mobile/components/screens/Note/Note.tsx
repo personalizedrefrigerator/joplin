@@ -199,6 +199,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 	private editorPluginHandler_ = new EditorPluginHandler(PluginService.instance(), saveEvent => {
 		return shared.noteComponent_change(this, 'body', saveEvent.body);
 	});
+	private refreshKey: number | undefined;
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	public static navigationOptions(): any {
@@ -711,6 +712,19 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 			const { editorPlugin } = getShownPluginEditorView(this.props.plugins, this.props.windowId);
 			if (!editorPlugin && this.props.editorNoteReloadTimeRequest > this.state.noteLastLoadTime) {
 				void shared.reloadNote(this);
+				this.refreshKey = this.props.editorNoteReloadTimeRequest;
+
+				// Clear the undo / redo state, as undo / redo steps wont be in sync with the current content after the note editor has been refreshed
+				if (!this.useEditorBeta()) {
+					void this.undoRedoService_.reset();
+				}
+
+				this.setState({
+					undoRedoButtonState: {
+						canUndo: false,
+						canRedo: false,
+					},
+				});
 			}
 		}
 
@@ -1740,6 +1754,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 						onScroll={this.props.editorType === EditorType.RichText ? this.onBodyViewerScroll : this.onMarkdownEditorScroll}
 
 						mode={this.props.editorType}
+						refreshKey={this.refreshKey}
 					/>;
 				}
 			}
