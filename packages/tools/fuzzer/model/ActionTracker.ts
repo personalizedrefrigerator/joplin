@@ -19,13 +19,14 @@ interface ClientInfo {
 interface ActionLogEntry {
 	action: string;
 	source: string;
+	step: number;
 }
 
 const schema = {
 	idToActionLog: [
 		[
 			'string',
-			[{ action: 'string', source: 'string' }, '...'],
+			[{ action: 'string', source: 'string', step: 'number' }, '...'],
 		],
 		'...',
 	],
@@ -97,19 +98,22 @@ class ActionTracker extends Serializable<typeof schema> {
 	}
 
 	public getActionLog(id: ItemId) {
-		return [...(this.idToActionLog_.get(id) ?? [])];
+		const logData = this.idToActionLog_.get(id) ?? [];
+		return logData
+			.map(item => {
+				const formattedStep = String(item.step).padStart(2, '0');
+				return `(${formattedStep}) ${item.source}: ${item.action}`;
+			})
+			.join('\n');
 	}
 
 	public printActionLog(id: ItemId) {
-		const logEntries = this.getActionLog(id);
-		if (logEntries.length === 0) {
+		const log = this.getActionLog(id);
+		if (log.length === 0) {
 			process.stdout.write('N/A\n');
 			return;
 		}
 
-		const log = logEntries
-			.map(item => `in:${item.source}: ${item.action}`)
-			.join('\n');
 		process.stdout.write(`${log}\n`);
 	}
 
@@ -123,7 +127,7 @@ class ActionTracker extends Serializable<typeof schema> {
 		const log = this.idToActionLog_.get(itemId) ?? [];
 		this.idToActionLog_.set(itemId, log);
 
-		log.push({ action, source });
+		log.push({ action, source, step: this.context_.currentStep() });
 	}
 
 	private getToplevelParent_(item: ItemId|TreeItem) {
