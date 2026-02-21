@@ -2,7 +2,7 @@ import { readFileSync, readdirSync, writeFileSync } from 'fs-extra';
 import { dirname } from 'path';
 import { fileExtension, basename } from '@joplin/lib/path-utils';
 import markdownUtils from '@joplin/lib/markdownUtils';
-import { AssetContent, ItemMetadata, WelcomeAssetNote, WelcomeAssetResource, WelcomeAssets } from '@joplin/lib/WelcomeUtils';
+import { AssetContent, ItemMetadata, WelcomeAssetNote, WelcomeAssetPlatform, WelcomeAssetResource, WelcomeAssets } from '@joplin/lib/WelcomeUtils';
 
 const rootDir = dirname(dirname(__dirname));
 const enWelcomeDir = `${rootDir}/readme/welcome`;
@@ -24,6 +24,10 @@ const itemMetadata_: ItemMetadata = {
 	},
 	'5_privacy.md': {
 		id: '5ec2e7505ec2e7505ec2e7505ec2e750',
+	},
+	'6_web.md': {
+		id: '4ec2e7505fc2e7505ec2e7505ec2a751',
+		platform: WelcomeAssetPlatform.Web,
 	},
 	'AllClients.png': { id: '5c05172554194f95b60971f6d577cc1a' },
 	'SubNotebooks.png': { id: '3a851ab0c0e849b7bc9e8cd5c4feb34a' },
