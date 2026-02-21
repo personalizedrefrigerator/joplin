@@ -127,7 +127,7 @@ class ActionTracker extends Serializable<typeof schema> {
 		// for two different items:
 		const step = this.context_.currentStep();
 		const stepString = String(step);
-		source = `(${stepString.padStart(2)}) ${source}`;
+		source = `(step ${stepString.padStart(2, '0')}) ${source}`;
 
 		log.push({ action, source });
 	}
