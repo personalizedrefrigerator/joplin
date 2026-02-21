@@ -19,14 +19,13 @@ interface ClientInfo {
 interface ActionLogEntry {
 	action: string;
 	source: string;
-	step: number;
 }
 
 const schema = {
 	idToActionLog: [
 		[
 			'string',
-			[{ action: 'string', source: 'string', step: 'number' }, '...'],
+			[{ action: 'string', source: 'string' }, '...'],
 		],
 		'...',
 	],
@@ -100,10 +99,7 @@ class ActionTracker extends Serializable<typeof schema> {
 	public getActionLog(id: ItemId) {
 		const logData = this.idToActionLog_.get(id) ?? [];
 		return logData
-			.map(item => {
-				const formattedStep = String(item.step).padStart(2, '0');
-				return `(${formattedStep}) ${item.source}: ${item.action}`;
-			})
+			.map(item => `${item.source}: ${item.action}`)
 			.join('\n');
 	}
 
@@ -127,7 +123,13 @@ class ActionTracker extends Serializable<typeof schema> {
 		const log = this.idToActionLog_.get(itemId) ?? [];
 		this.idToActionLog_.set(itemId, log);
 
-		log.push({ action, source, step: this.context_.currentStep() });
+		// Prepend the step at which the action took place. This allows comparing action logs
+		// for two different items:
+		const step = this.context_.currentStep();
+		const stepString = String(step);
+		source = `(${stepString.padStart(2)}) ${source}`;
+
+		log.push({ action, source });
 	}
 
 	private getToplevelParent_(item: ItemId|TreeItem) {
