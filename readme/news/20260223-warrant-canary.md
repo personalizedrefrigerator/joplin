@@ -1,3 +1,7 @@
+---
+forum_url: https://discourse.joplinapp.org/t/48805
+---
+
 # Introducing our Warrant Canary
 
 We have introduced a publicly signed warrant canary for Joplin.
