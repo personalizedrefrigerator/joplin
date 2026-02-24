@@ -92,8 +92,13 @@ const NewNoteButton: React.FC<Props> = props => {
 	};
 
 	const pluginShortcutButtons = props.pluginActions.map(action => {
+		if (action.type === 'separator') return null;
+
 		return renderShortcutButton(
-			`plugin-${action.name}`, action.onClick, action.iconName, action.title || action.tooltip,
+			`plugin-${action.name}`,
+			action.onClick,
+			action.iconName,
+			action.title || action.tooltip,
 		);
 	});
 
