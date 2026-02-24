@@ -11,11 +11,16 @@ import { useCallback, useMemo, useRef } from 'react';
 import Logger from '@joplin/utils/Logger';
 import focusView from '../../../utils/focusView';
 import NavService from '@joplin/lib/services/NavService';
+import { connect } from 'react-redux';
+import { AppState } from '../../../utils/types';
+import { utils as pluginUtils } from '@joplin/lib/services/plugins/reducer';
+import ToolbarButtonUtils, { ToolbarItem } from '@joplin/lib/services/commands/ToolbarButtonUtils';
+import stateToWhenClauseContext from '../../../services/commands/stateToWhenClauseContext';
 
 const logger = Logger.create('NewNoteButton');
 
 interface Props {
-
+	pluginActions: ToolbarItem[];
 }
 
 const makeNewNote = (isTodo: boolean, action?: AttachFileAction) => {
@@ -56,14 +61,21 @@ const styles = StyleSheet.create({
 	},
 });
 
-const NewNoteButton: React.FC<Props> = _props => {
+const toolbarButtonUtils = new ToolbarButtonUtils(CommandService.instance());
+const toolbarButtonsFromState = (state: AppState) => {
+	const pluginCommandNames = pluginUtils.commandNamesFromViews(state.pluginService.plugins, 'newNoteMenu');
+	return toolbarButtonUtils.commandsToToolbarButtons(pluginCommandNames, stateToWhenClauseContext(state));
+};
+
+const NewNoteButton: React.FC<Props> = props => {
 	const newNoteRef = useRef<View|null>(null);
 
 	type ActionType = AttachFileAction|(()=> void);
-	const renderShortcutButton = (action: ActionType, icon: string, title: string) => {
+	const renderShortcutButton = (key: string, action: ActionType, icon: string, title: string) => {
 		const actionSource = typeof action === 'function' ? null : action;
 		action = typeof action === 'function' ? action : () => makeNewNote(false, actionSource);
 		return <LabelledIconButton
+			key={key}
 			onPress={action}
 			style={styles.shortcutButton}
 			title={title}
@@ -72,13 +84,18 @@ const NewNoteButton: React.FC<Props> = _props => {
 		/>;
 	};
 
+	const pluginShortcutButtons = props.pluginActions.map(action => {
+		return renderShortcutButton(action.name, action.onClick, action.iconName, action.title);
+	});
+
 	const menuContent = <View style={styles.menuContent}>
 		<View style={styles.buttonRow}>
-			{renderShortcutButton(AttachFileAction.AttachFile, 'material attachment', _('Attachment'))}
-			{renderShortcutButton(AttachFileAction.RecordAudio, 'material microphone', _('Recording'))}
-			{renderShortcutButton(AttachFileAction.TakePhoto, 'material camera', _('Camera'))}
-			{renderShortcutButton(AttachFileAction.AttachDrawing, 'material draw', _('Drawing'))}
-			{renderShortcutButton(() => NavService.go('DocumentScanner'), 'material data-matrix-scan', _('Scan notebook'))}
+			{renderShortcutButton('attach', AttachFileAction.AttachFile, 'material attachment', _('Attachment'))}
+			{renderShortcutButton('record', AttachFileAction.RecordAudio, 'material microphone', _('Recording'))}
+			{renderShortcutButton('photo', AttachFileAction.TakePhoto, 'material camera', _('Camera'))}
+			{renderShortcutButton('drawing', AttachFileAction.AttachDrawing, 'material draw', _('Drawing'))}
+			{renderShortcutButton('scan', () => NavService.go('DocumentScanner'), 'material data-matrix-scan', _('Scan notebook'))}
+			{pluginShortcutButtons}
 		</View>
 		<Divider/>
 		<View style={[styles.buttonRow, styles.mainButtonRow]}>
@@ -142,4 +159,6 @@ const NewNoteButton: React.FC<Props> = _props => {
 	/>;
 };
 
-export default NewNoteButton;
+export default connect((state: AppState) => ({
+	pluginActions: toolbarButtonsFromState(state),
+}))(NewNoteButton);
