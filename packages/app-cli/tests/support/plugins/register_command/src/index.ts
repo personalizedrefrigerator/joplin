@@ -56,7 +56,7 @@ joplin.plugins.register({
 			label: 'Plugin note',
 			iconName: 'fas fa-plus',
 			execute: async () => {
-				joplin.commands.execute('newNote', 'A new note from a plugin!');
+				await joplin.commands.execute('newNote', 'A new note from a plugin!');
 			},
 		});
 
