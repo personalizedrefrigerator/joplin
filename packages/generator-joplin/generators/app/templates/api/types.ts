@@ -356,6 +356,13 @@ export enum ToolbarButtonLocation {
 	 * This toolbar is right above the text editor. It applies to the note body only.
 	 */
 	EditorToolbar = 'editorToolbar',
+
+	/**
+	 * **Mobile only**: Adds the action to the "new note" menu.
+	 *
+	 * <span class="platform-mobile">mobile</span>
+	 */
+	NewNoteMenu = 'newNoteMenu',
 }
 
 export type ViewHandle = string;
@@ -434,8 +441,29 @@ export interface EditorPluginCallbacks {
 
 export type VisibleHandler = ()=> Promise<void>;
 
+/**
+ * Identifies the type of element that was right-clicked in the editor context menu.
+ */
+export enum ContextMenuItemType {
+	None = '',
+	Image = 'image',
+	Resource = 'resource',
+	Text = 'text',
+	Link = 'link',
+}
+
 export interface EditContextMenuFilterObject {
 	items: MenuItem[];
+	/**
+	 * Context about what was right-clicked. Plugins should use this instead of
+	 * checking the editor cursor position, as the cursor may not reflect the
+	 * actual click location.
+	 */
+	context?: {
+		resourceId?: string;
+		itemType?: ContextMenuItemType;
+		textToCopy?: string;
+	};
 }
 
 export interface EditorActivationCheckFilterObject {
