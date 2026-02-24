@@ -16,6 +16,7 @@ import { AppState } from '../../../utils/types';
 import { utils as pluginUtils } from '@joplin/lib/services/plugins/reducer';
 import ToolbarButtonUtils, { ToolbarItem } from '@joplin/lib/services/commands/ToolbarButtonUtils';
 import stateToWhenClauseContext from '../../../services/commands/stateToWhenClauseContext';
+import { MenuItemLocation } from '@joplin/lib/services/plugins/api/types';
 
 const logger = Logger.create('NewNoteButton');
 
@@ -62,8 +63,12 @@ const styles = StyleSheet.create({
 });
 
 const toolbarButtonUtils = new ToolbarButtonUtils(CommandService.instance());
-const toolbarButtonsFromState = (state: AppState) => {
-	const pluginCommandNames = pluginUtils.commandNamesFromViews(state.pluginService.plugins, 'newNoteMenu');
+const menuButtonsFromState = (state: AppState) => {
+	const views = pluginUtils.viewsByType(state.pluginService.plugins, 'menuItem');
+	const pluginCommandNames = views
+		.filter(view => view.location === MenuItemLocation.NewNoteMenu)
+		.map(view => view.commandName);
+
 	return toolbarButtonUtils.commandsToToolbarButtons(pluginCommandNames, stateToWhenClauseContext(state));
 };
 
@@ -72,20 +77,24 @@ const NewNoteButton: React.FC<Props> = props => {
 
 	type ActionType = AttachFileAction|(()=> void);
 	const renderShortcutButton = (key: string, action: ActionType, icon: string, title: string) => {
-		const actionSource = typeof action === 'function' ? null : action;
-		action = typeof action === 'function' ? action : () => makeNewNote(false, actionSource);
+		const noteAttachmentAction = typeof action === 'function' ? null : action;
+		action = typeof action === 'function' ? action : () => makeNewNote(false, noteAttachmentAction);
+		const hint = noteAttachmentAction ? _('Creates a new note with an attachment of type %s', title) : undefined;
+
 		return <LabelledIconButton
 			key={key}
 			onPress={action}
 			style={styles.shortcutButton}
 			title={title}
-			accessibilityHint={_('Creates a new note with an attachment of type %s', title)}
+			accessibilityHint={hint}
 			icon={icon}
 		/>;
 	};
 
 	const pluginShortcutButtons = props.pluginActions.map(action => {
-		return renderShortcutButton(`plugin-${action.name}`, action.onClick, action.iconName, action.title);
+		return renderShortcutButton(
+			`plugin-${action.name}`, action.onClick, action.iconName, action.title || action.tooltip,
+		);
 	});
 
 	const menuContent = <View style={styles.menuContent}>
@@ -160,5 +169,5 @@ const NewNoteButton: React.FC<Props> = props => {
 };
 
 export default connect((state: AppState) => ({
-	pluginActions: toolbarButtonsFromState(state),
+	pluginActions: menuButtonsFromState(state),
 }))(NewNoteButton);

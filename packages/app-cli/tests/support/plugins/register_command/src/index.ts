@@ -51,6 +51,15 @@ joplin.plugins.register({
 			},
 		});
 
+		await joplin.commands.register({
+			name: 'noteMenuExample',
+			label: 'Plugin note',
+			iconName: 'fas fa-plus',
+			execute: async () => {
+				joplin.commands.execute('newNote', 'A new note from a plugin!');
+			},
+		});
+
 		// Commands that return a result and take argument can only be used
 		// programmatically, so it's not necessary to set a label and icon.
 		await joplin.commands.register({
@@ -74,6 +83,9 @@ joplin.plugins.register({
 
 		await joplin.views.menuItems.create('folderMenuItem1', 'folderContextMenuExample', MenuItemLocation.FolderContextMenu);
 		await joplin.views.menuItems.create('tagMenuItem1', 'tagContextMenuExample', MenuItemLocation.TagContextMenu);
+
+		// Only takes effect on mobile:
+		await joplin.views.menuItems.create('newNoteMenuItem', 'noteMenuExample', MenuItemLocation.NewNoteMenu);
 
 		console.info('Running command with arguments...');
 		const result = await joplin.commands.execute('commandWithResult', 'abcd', 123);

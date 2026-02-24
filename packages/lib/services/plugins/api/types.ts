@@ -285,6 +285,13 @@ export enum MenuItemLocation {
 	 * - `tagId:string`: ID of the tag that was right-clicked on
 	 */
 	TagContextMenu = 'tagContextMenu',
+
+	/**
+	 * **Mobile only**: Adds the action to the new note popup menu.
+	 *
+	 * <span class="platform-mobile">mobile</span>
+	 */
+	NewNoteMenu = 'newNoteMenu',
 }
 
 export function isContextMenuItemLocation(location: MenuItemLocation): boolean {
@@ -356,13 +363,6 @@ export enum ToolbarButtonLocation {
 	 * This toolbar is right above the text editor. It applies to the note body only.
 	 */
 	EditorToolbar = 'editorToolbar',
-
-	/**
-	 * **Mobile only**: Adds the action to the "new note" menu.
-	 *
-	 * <span class="platform-mobile">mobile</span>
-	 */
-	NewNoteMenu = 'newNoteMenu',
 }
 
 export type ViewHandle = string;

@@ -108,10 +108,9 @@ export const utils = {
 		return output;
 	},
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	viewsByType: function(plugins: PluginStates, type: string): any[] {
+	viewsByType: function(plugins: PluginStates, type: string) {
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-		const output: any[] = [];
+		const output: PluginViewState[] = [];
 
 		for (const pluginId in plugins) {
 			const plugin = plugins[pluginId];
