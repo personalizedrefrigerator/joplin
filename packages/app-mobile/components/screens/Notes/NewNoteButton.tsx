@@ -85,7 +85,7 @@ const NewNoteButton: React.FC<Props> = props => {
 	};
 
 	const pluginShortcutButtons = props.pluginActions.map(action => {
-		return renderShortcutButton(action.name, action.onClick, action.iconName, action.title);
+		return renderShortcutButton(`plugin-${action.name}`, action.onClick, action.iconName, action.title);
 	});
 
 	const menuContent = <View style={styles.menuContent}>
