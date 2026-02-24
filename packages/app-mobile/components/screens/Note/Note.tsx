@@ -21,7 +21,7 @@ import NavService, { OnNavigateCallback as OnNavigateCallback } from '@joplin/li
 import { ModelType } from '@joplin/lib/BaseModel';
 import { fileExtension, safeFileExtension } from '@joplin/lib/path-utils';
 import * as mimeUtils from '@joplin/lib/mime-utils';
-import ScreenHeader, { MenuOptionType } from '../../ScreenHeader';
+import ScreenHeader, { MenuOptionType, ViewToggleButtonMode } from '../../ScreenHeader';
 import NoteTagsDialog from '../NoteTagsDialog';
 import time from '@joplin/lib/time';
 import Checkbox from '../../Checkbox';
@@ -1844,6 +1844,11 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 
 		const { editorPlugin: activeEditorPlugin } = getActivePluginEditorView(this.props.plugins, this.props.windowId);
 
+		let viewEditToggleMode = this.state.mode === 'edit' ? ViewToggleButtonMode.ShowViewer : ViewToggleButtonMode.ShowEditor;
+		if (!this.state.note || this.state.note.deleted_time > 0) {
+			viewEditToggleMode = ViewToggleButtonMode.Hidden;
+		}
+
 		const header = <ScreenHeader
 			folderPickerOptions={this.folderPickerOptions()}
 			menuOptions={this.menuOptions()}
@@ -1858,8 +1863,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 			undoButtonDisabled={!this.state.undoRedoButtonState.canUndo && this.state.undoRedoButtonState.canRedo}
 			onUndoButtonPress={this.screenHeader_undoButtonPress}
 			onRedoButtonPress={this.screenHeader_redoButtonPress}
-			showViewToggleButton={!!this.state.note && !this.state.note.deleted_time}
-			viewToggleIconName={this.state.mode === 'edit' ? 'ionicon book' : 'ionicon pencil'}
+			viewToggleButtonMode={viewEditToggleMode}
 			onViewTogglePress={this.toggleVisiblePanes}
 			title={getDisplayParentTitle(this.state.note, this.state.folder)}
 		/>;
