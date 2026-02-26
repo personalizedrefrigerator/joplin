@@ -168,22 +168,18 @@ export async function shareWithUserAndAccept(sharerSessionId: string, shareeSess
 		});
 	}
 
-	const shareUser = await addUserToShare(sharerSessionId, shareeSessionId, share, sharee.email);
-	await models().share().updateSharedItems3();
-
-	return { share, item, shareUser };
-}
-
-export const addUserToShare = async (sharerSessionId: Uuid, shareeSessionId: Uuid, share: Share, recipientEmail: string) => {
 	let shareUser = await postApi(sharerSessionId, `shares/${share.id}/users`, {
-		email: recipientEmail,
+		email: sharee.email,
 	}) as ShareUser;
 
 	shareUser = await models().shareUser().load(shareUser.id);
 
 	await respondInvitation(shareeSessionId, shareUser.id, ShareUserStatus.Accepted);
-	return shareUser;
-};
+
+	await models().share().updateSharedItems3();
+
+	return { share, item, shareUser };
+}
 
 export async function respondInvitation(recipientSessionId: Uuid, shareUserId: Uuid, status: ShareUserStatus) {
 	await patchApi(recipientSessionId, `share_users/${shareUserId}`, { status });

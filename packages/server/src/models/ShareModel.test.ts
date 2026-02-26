@@ -1,13 +1,8 @@
-import { createUserAndSession, beforeAllDb, afterAllTests, beforeEachDb, models, checkThrowAsync, createItem, deleteItem, updateItem, createItemTree, expectNotThrow, createNote, UserAndSession } from '../utils/testing/testUtils';
+import { createUserAndSession, beforeAllDb, afterAllTests, beforeEachDb, models, checkThrowAsync, createItem, createItemTree, expectNotThrow, createNote } from '../utils/testing/testUtils';
 import { ErrorBadRequest, ErrorNotFound } from '../utils/errors';
-import { ShareType, Change, Item, Share } from '../services/database/types';
-import { addUserToShare, inviteUserToShare, shareFolderWithUser, shareWithUserAndAccept, updateItemShareId } from '../utils/testing/shareApiUtils';
-import { makeNoteSerializedBody } from '../utils/testing/serializedItems';
-import { serializeJoplinItem } from '../utils/joplinUtils';
+import { ShareType } from '../services/database/types';
+import { inviteUserToShare, shareFolderWithUser, shareWithUserAndAccept, updateItemShareId } from '../utils/testing/shareApiUtils';
 import { withWarningSilenced } from '@joplin/lib/testing/test-utils';
-import recordBenchmark from '../tools/benchmark/recordBenchmark';
-import uuid from '@joplin/lib/uuid';
-import { NoteEntity } from '@joplin/lib/services/database/types';
 
 // Goes through the process of:
 // 1. Creating two users/sessions
@@ -346,103 +341,4 @@ describe('ShareModel', () => {
 		const updatedNote = await models().item().load(note.id);
 		expect(updatedNote.owner_id).toBe(session2.user_id);
 	});
-
-	test('benchmark updateSharedItems3', async () => {
-		const { session: session1 } = await createUserAndSession(0);
-		const userAndSession2 = await createUserAndSession(1);
-		const { session: session2, user: user2 } = userAndSession2;
-
-		const secondaryUsers: UserAndSession[] = [userAndSession2];
-
-		const createShare = async (recipientCount: number) => {
-			const rootId = uuid.create();
-			await createItemTree(session1.user_id, '', {
-				[rootId]: { },
-			});
-			const shareRoot = await models().item().loadByJopId(session1.user_id, rootId);
-			expect(shareRoot).toBeTruthy();
-
-			const { share } = await shareWithUserAndAccept(
-				session1.id,
-				session2.id,
-				user2,
-				ShareType.Folder,
-				shareRoot,
-			);
-
-			while (secondaryUsers.length < recipientCount) {
-				secondaryUsers.push(await createUserAndSession(secondaryUsers.length + 1));
-			}
-			// Start at 1, since one recipient is already present
-			for (let i = 1; i < recipientCount; i++) {
-				const recipient = secondaryUsers[i];
-				await addUserToShare(session1.id, recipient.session.id, share, recipient.user.email);
-			}
-
-			await updateItemShareId(session1, shareRoot.id, share.id);
-
-			return share;
-		};
-		const createNote = async (share: Share) => {
-			const id = uuid.create();
-			const item = await createItem(session1.id, `root:/${id}.md:`, makeNoteSerializedBody({
-				id,
-				title: 'test',
-				body: '...',
-			}));
-			return await updateItemShareId(session1, item.id, share.id);
-		};
-		let counter = 0;
-		const updateNote = async (item: Item) => {
-			const joplinItem = await models().item().loadAsJoplinItem<NoteEntity>(item.id);
-
-			return await updateItem(session1.id, `root:/${item.name}:`, await serializeJoplinItem({
-				...joplinItem,
-				title: `Updated!!! ${counter++}`,
-			}));
-		};
-		const deleteNote = async (item: Item) => {
-			return await deleteItem(session1.id, item.jop_id);
-		};
-
-		const iterateChangeData = async function*() {
-			let trialStartChange: Change|null = null;
-			const beforeTrial = async (index: number) => {
-				// eslint-disable-next-line no-console
-				console.log('PREPARE TRIAL ', index);
-				trialStartChange = await models().change().last();
-			};
-			const trial = (label: string) => [{
-				labels: { label },
-				data: trialStartChange?.id ?? '',
-			}];
-
-			for (let i = 2; i < 60; i += 10) {
-				await beforeTrial(i);
-				const s = await createShare(i);
-				const item = await createNote(s);
-
-				await updateNote(item);
-				await updateNote(item);
-				await updateNote(item);
-
-				await deleteNote(item);
-				yield trial(`${i} share recipients`);
-			}
-		};
-
-		await recordBenchmark<string>({
-			taskLabel: 'update shared items',
-			batchIterator: iterateChangeData(),
-			trialCount: 100,
-			outputFile: 'updateSharedItems3-perf.csv',
-			runTask: async (startingChange) => {
-				await models().keyValue().setValue(
-					'ShareService::latestProcessedChange',
-					startingChange,
-				);
-				await models().share().updateSharedItems3();
-			},
-		});
-	}, 1_000 * 60 * 10);
 });
