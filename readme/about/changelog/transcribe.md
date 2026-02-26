@@ -1,5 +1,9 @@
 # Transcribe Changelog
 
+## [transcribe-v3.6.4](https://github.com/laurent22/joplin/releases/tag/transcribe-v3.6.4) - 2026-02-26T15:05:51Z
+
+- Fixed: Fixed location of llamacpp library (df10bbd)
+
 ## [transcribe-v3.6.3](https://github.com/laurent22/joplin/releases/tag/transcribe-v3.6.3) - 2026-02-25T21:20:08ZZ
 
 - Improved: #12883: Disable JobProcessor tests by default (#12955) (#12883 by pedr)
