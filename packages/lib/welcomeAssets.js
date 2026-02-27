@@ -52,8 +52,9 @@ module.exports = {
             },
             {
                 "id": "4ec2e7505fc2e7505ec2e7505ec2a751",
+                "platform": "web",
                 "title": "6. About the web app",
-                "body": "# About the web app\n\nThe Joplin web app is Joplin mobile, running in a web browser.\n\n## FAQ\n\n### Where is my data stored?\n\nLike Joplin Mobile, Joplin Web is local-first. Notes and attachments are stored locally on your computer, but can optionally be synced with one of the supported sync targets. As a result, Joplin Web can be used offline.\n\n### What browsers does it support?\n\nThe Joplin web app works best in recent versions of Chrome and Safari. It can also be used in Firefox, but may be slow to start.\n",
+                "body": "# About the web app\n\nThe web app provides access to Joplin from a web browser.\n\nLike the desktop and mobile apps, Joplin Web is local-first. Notes and attachments are stored locally on your computer, but can optionally be synced to the cloud.\n\nThe Joplin web app works best in recent versions of Chrome and Safari. It can also be used in Firefox, but may be slow to start.\n",
                 "resources": {},
                 "parent_id": "9bb5d498aba74cc6a047cfdc841e82a1"
             }

@@ -85,6 +85,10 @@ function itemIdFromPath(metadata: ItemMetadata, path: string) {
 	return md.id;
 }
 
+function itemPlatformFromPath(metadata: ItemMetadata, path: string) {
+	return itemMetadata(metadata, path).platform;
+}
+
 function fileToBase64(filePath: string) {
 	const content = readFileSync(filePath);
 	return Buffer.from(content).toString('base64');
@@ -114,6 +118,7 @@ function parseNoteFile(metadata: ItemMetadata, locale: string, filePath: string)
 
 	return {
 		id: itemIdFromPath(metadata, filePath),
+		platform: itemPlatformFromPath(metadata, filePath),
 		title: title,
 		body: body,
 		resources: resources,
