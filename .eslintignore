@@ -1266,6 +1266,7 @@ packages/lib/SyncTargetRegistry.js
 packages/lib/Synchronizer.js
 packages/lib/TaskQueue.js
 packages/lib/WebDavApi.js
+packages/lib/WelcomeUtils.test.js
 packages/lib/WelcomeUtils.js
 packages/lib/array.js
 packages/lib/callbackUrlUtils.test.js
@@ -1294,6 +1295,7 @@ packages/lib/components/EncryptionConfigScreen/utils.test.js
 packages/lib/components/EncryptionConfigScreen/utils.js
 packages/lib/components/shared/NoteEditor/WarningBanner/onRichTextDismissLinkClick.js
 packages/lib/components/shared/NoteEditor/WarningBanner/onRichTextReadMoreLinkClick.js
+packages/lib/components/shared/NoteEditor/WarningBanner/useEditorTypeMigrationBanner.js
 packages/lib/components/shared/NoteList/getEmptyFolderMessage.js
 packages/lib/components/shared/NoteRevisionViewer/getHelpMessage.js
 packages/lib/components/shared/NoteRevisionViewer/useDeleteHistoryClick.js
