@@ -1967,7 +1967,7 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 		},
 
 		'survey.webClientEval2025.progress': {
-			value: SurveyProgress.NotStarted,
+			value: SurveyProgress.Dismissed,
 			type: SettingItemType.Int,
 			public: false,
 			isEnum: true,

@@ -212,5 +212,5 @@ const FeedbackBanner: React.FC<Props> = props => {
 export default connect((state: AppState) => ({
 	themeId: state.settings.theme,
 	surveyKey: 'web-app-test',
-	progress: state.settings['survey.webClientEval2025.progress'],
+	progress: SurveyProgress.Dismissed,
 }))(FeedbackBanner);
