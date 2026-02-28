@@ -1056,6 +1056,13 @@ class Client implements ActionableClient {
 		);
 	}
 
+	private async getResourceFile_(resourceId: ItemId) {
+		return await this.execApiCommand_(
+			'GET',
+			`/resources/${encodeURIComponent(resourceId)}/file`,
+		);
+	}
+
 	public async listNotes() {
 		const params = {
 			fields: 'id,parent_id,body,title,is_conflict,conflict_original_id,share_id,is_shared',
@@ -1252,6 +1259,16 @@ class Client implements ActionableClient {
 				const log = idLogs(missingResources, expectedResources);
 
 				throw new Error(`Missing resource(s): All expected resources should exist on the client. Resource(s) with ID(s) ${JSON.stringify(missingResources)} were not found (total resource count: ${actualResourceIds.size}).\nResource action history:\n${log}`);
+			}
+
+			for (const resource of expectedResources) {
+				const file = await this.getResourceFile_(resource.id);
+
+				// For now, just verify that the file exists, since all test resources have the same
+				// content:
+				if (!file.length) {
+					throw new Error(`Resource found, but missing file: ${resource.id}`);
+				}
 			}
 		};
 
