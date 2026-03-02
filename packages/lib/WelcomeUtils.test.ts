@@ -32,7 +32,7 @@ describe('WelcomeUtils', () => {
 
 		const notes = await Note.previews(result.defaultFolderId);
 
-		const webAppNoteTitle = '6. About the web app';
+		const webAppNoteTitle = '0. About the web app';
 		const noteTitles = notes.map(note => note.title);
 
 		if (platform === WelcomeAssetPlatform.Web) {

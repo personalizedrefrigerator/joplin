@@ -10,6 +10,10 @@ const enWelcomeDir = `${rootDir}/readme/welcome`;
 const createdDate = new Date('2018-06-22T12:00:00Z');
 
 const itemMetadata_: ItemMetadata = {
+	'0_web.md': {
+		id: '4ec2e7505fc2e7505ec2e7505ec2a751',
+		platform: WelcomeAssetPlatform.Web,
+	},
 	'1_welcome_to_joplin.md': {
 		id: '8a1556e382704160808e9a7bef7135d3',
 	},
@@ -24,10 +28,6 @@ const itemMetadata_: ItemMetadata = {
 	},
 	'5_privacy.md': {
 		id: '5ec2e7505ec2e7505ec2e7505ec2e750',
-	},
-	'6_web.md': {
-		id: '4ec2e7505fc2e7505ec2e7505ec2a751',
-		platform: WelcomeAssetPlatform.Web,
 	},
 	'AllClients.png': { id: '5c05172554194f95b60971f6d577cc1a' },
 	'SubNotebooks.png': { id: '3a851ab0c0e849b7bc9e8cd5c4feb34a' },
