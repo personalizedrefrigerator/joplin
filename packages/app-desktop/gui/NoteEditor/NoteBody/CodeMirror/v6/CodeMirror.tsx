@@ -351,7 +351,7 @@ const CodeMirror = (props: NoteBodyEditorProps, ref: ForwardedRef<NoteBodyEditor
 	});
 
 	const settings = useEditorSettings({
-		baseTheme: styles.baseTHeme,
+		baseTheme: styles.globalTheme,
 		contentMarkupLanguage: props.contentMarkupLanguage,
 		disabled: props.disabled,
 		keyboardMode: props.keyboardMode,
