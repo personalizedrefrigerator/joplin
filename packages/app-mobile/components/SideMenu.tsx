@@ -19,6 +19,7 @@ export type OnChangeCallback = (isOpen: boolean)=> void;
 interface Props {
 	themeId: number;
 	isOpen: boolean;
+	autoShowOnLargeScreens: boolean;
 
 	menu: React.ReactNode;
 	children: React.ReactNode|React.ReactNode[];
@@ -35,11 +36,12 @@ interface Props {
 interface UseStylesProps {
 	themeId: number;
 	isLeftMenu: boolean;
+	sideBySide: boolean;
 	menuWidth: number;
 	menuOpenFraction: Animated.AnimatedInterpolation<number>;
 }
 
-const useStyles = ({ themeId, isLeftMenu, menuWidth, menuOpenFraction }: UseStylesProps) => {
+const useStyles = ({ themeId, isLeftMenu, menuWidth, menuOpenFraction, sideBySide }: UseStylesProps) => {
 	const { height: windowHeight, width: windowWidth } = useWindowDimensions();
 	const safeAreaInsets = useSafeAreaPadding();
 
@@ -52,13 +54,14 @@ const useStyles = ({ themeId, isLeftMenu, menuWidth, menuOpenFraction }: UseStyl
 				height: windowHeight,
 				flexGrow: 1,
 				flexShrink: 1,
+				flexDirection: 'row',
 			},
 			contentOuterWrapper: {
 				flexGrow: 1,
 				flexShrink: 1,
 				width: '100%',
 				height: windowHeight,
-				transform: [{
+				transform: sideBySide ? [] : [{
 					translateX: menuOpenFraction.interpolate({
 						inputRange: [0, 1],
 						outputRange: [0, isLeftMenu ? menuWidth : -menuWidth],
@@ -76,7 +79,7 @@ const useStyles = ({ themeId, isLeftMenu, menuWidth, menuOpenFraction }: UseStyl
 			menuWrapper: {
 				backgroundColor: theme.backgroundColor,
 
-				position: 'absolute',
+				position: sideBySide ? 'relative' : 'absolute',
 				top: 0,
 				bottom: 0,
 				width: menuWidth,
@@ -117,7 +120,7 @@ const useStyles = ({ themeId, isLeftMenu, menuWidth, menuOpenFraction }: UseStyl
 				width: windowWidth,
 			},
 		});
-	}, [themeId, isLeftMenu, windowWidth, windowHeight, menuWidth, menuOpenFraction, safeAreaInsets]);
+	}, [themeId, isLeftMenu, windowWidth, windowHeight, menuWidth, menuOpenFraction, safeAreaInsets, sideBySide]);
 };
 
 interface UseAnimationsProps {
@@ -179,9 +182,11 @@ const useAnimations = ({ menuWidth, isLeftMenu, open }: UseAnimationsProps) => {
 const SideMenuComponent: React.FC<Props> = props => {
 	const [open, setIsOpen] = useState(false);
 
+	const windowSize = useWindowDimensions();
+	const sideBySide = props.autoShowOnLargeScreens && windowSize.width > 700;
 	useEffect(() => {
-		setIsOpen(props.isOpen);
-	}, [props.isOpen]);
+		setIsOpen(props.isOpen || sideBySide);
+	}, [props.isOpen, sideBySide]);
 
 	const [menuWidth, setMenuWidth] = useState(0);
 	const [contentWidth, setContentWidth] = useState(0);
@@ -275,60 +280,77 @@ const SideMenuComponent: React.FC<Props> = props => {
 		setIsAnimating(true);
 	}, [setIsAnimating]);
 
-	const styles = useStyles({ themeId: props.themeId, menuOpenFraction, menuWidth, isLeftMenu });
+	const styles = useStyles({ themeId: props.themeId, menuOpenFraction, menuWidth, isLeftMenu, sideBySide: sideBySide });
 
-	const menuComponent = (
-		<AccessibleView
-			inert={!open}
-			style={styles.menuWrapper}
-			testID='menu-wrapper'
-		>
+
+	let content;
+	if (sideBySide) {
+		content = <>
+			<View style={styles.menuWrapper}>
+				{props.menu}
+			</View>
+			<View style={styles.contentWrapper}>
+				{props.children}
+			</View>
+		</>;
+	} else {
+		const menuComponent = (
 			<AccessibleView
-				// Auto-focuses an empty view at the beginning of the sidemenu -- if we instead
-				// focus the container view, VoiceOver fails to focus to any components within
-				// the sidebar.
-				refocusCounter={!open ? 1 : undefined}
-				testID='sidemenu-menu-focus-region'
-			/>
+				inert={!open}
+				style={styles.menuWrapper}
+				testID='menu-wrapper'
+			>
+				<AccessibleView
+					// Auto-focuses an empty view at the beginning of the sidemenu -- if we instead
+					// focus the container view, VoiceOver fails to focus to any components within
+					// the sidebar.
+					refocusCounter={!open ? 1 : undefined}
+					testID='sidemenu-menu-focus-region'
+				/>
 
-			{props.menu}
-		</AccessibleView>
-	);
+				{props.menu}
+			</AccessibleView>
+		);
 
-	const contentComponent = (
-		<AccessibleView
-			inert={open}
-			style={styles.contentWrapper}
-			testID='content-wrapper'
-		>
-			<AccessibleView refocusCounter={open ? 1 : undefined} testID='sidemenu-content-focus-region' />
-			{props.children}
-		</AccessibleView>
-	);
-	const closeButtonOverlay = (open || animating) ? (
-		<Animated.View
-			style={styles.closeButtonOverlay}
-		>
-			<Pressable
-				aria-label={_('Close side menu')}
-				role='button'
-				onPress={onCloseButtonPress}
-				style={styles.overlayContent}
-			></Pressable>
-		</Animated.View>
-	) : null;
+		const contentComponent = (
+			<AccessibleView
+				inert={open}
+				style={styles.contentWrapper}
+				testID='content-wrapper'
+			>
+				<AccessibleView refocusCounter={open ? 1 : undefined} testID='sidemenu-content-focus-region' />
+				{props.children}
+			</AccessibleView>
+		);
+		const closeButtonOverlay = (open || animating) ? (
+			<Animated.View
+				style={styles.closeButtonOverlay}
+			>
+				<Pressable
+					aria-label={_('Close side menu')}
+					role='button'
+					onPress={onCloseButtonPress}
+					style={styles.overlayContent}
+				></Pressable>
+			</Animated.View>
+		) : null;
+		content = <>
+			{menuComponent}
+			<Animated.View style={styles.contentOuterWrapper}>
+				{closeButtonOverlay}
+				{contentComponent}
+			</Animated.View>
+		</>;
+	}
 
 	return (
 		<View
 			onLayout={onLayoutChange}
 			style={styles.mainContainer}
 			{...panResponder.panHandlers}
+			testID='menu-container'
 		>
-			{menuComponent}
-			<Animated.View style={styles.contentOuterWrapper}>
-				{contentComponent}
-				{closeButtonOverlay}
-			</Animated.View>
+			{content}
 		</View>
 	);
 };

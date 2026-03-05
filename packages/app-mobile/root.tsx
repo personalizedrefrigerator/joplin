@@ -697,6 +697,7 @@ class AppComponent extends React.Component<AppComponentProps, AppComponentState>
 		const theme: Theme = themeStyle(this.props.themeId);
 
 		let sideMenuContent: ReactNode = null;
+		let autoShowSideMenu = false;
 		let menuPosition = SideMenuPosition.Left;
 		let disableSideMenuGestures = this.props.disableSideMenuGestures;
 
@@ -707,6 +708,7 @@ class AppComponent extends React.Component<AppComponentProps, AppComponentState>
 			disableSideMenuGestures = true;
 		} else {
 			sideMenuContent = <SideMenuContent/>;
+			autoShowSideMenu = true;
 		}
 
 		const appNavInit = {
@@ -760,6 +762,7 @@ class AppComponent extends React.Component<AppComponentProps, AppComponentState>
 					menuPosition={menuPosition}
 					onChange={this.sideMenu_change}
 					isOpen={this.props.showSideMenu}
+					autoShowOnLargeScreens={autoShowSideMenu}
 					disableGestures={disableSideMenuGestures}
 				>
 					<View style={{ flexGrow: 1, flexShrink: 1, flexBasis: '100%' }}>
