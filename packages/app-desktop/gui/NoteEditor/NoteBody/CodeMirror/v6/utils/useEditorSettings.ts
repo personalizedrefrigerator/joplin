@@ -5,7 +5,7 @@ import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { AppState } from '../../../../../../app.reducer';
 import { _ } from '@joplin/lib/locale';
-import { isDeepStrictEqual } from 'util';
+import { isDeepStrictEqual } from 'node:util';
 
 interface EditorSettingsProps {
 	contentMarkupLanguage: MarkupLanguage;
