@@ -18,6 +18,7 @@ interface EditorSettingsProps {
 const useEditorSettings = (props: EditorSettingsProps) => {
 	const stateToSettings = (state: AppState) => ({
 		markdownMark: state.settings['markdown.plugin.mark'],
+		markdownInsert: state.settings['markdown.plugin.insert'],
 		katex: state.settings['markdown.plugin.katex'],
 		inlineRendering: state.settings['editor.inlineRendering'],
 		imageRendering: state.settings['editor.imageRendering'],
@@ -44,6 +45,7 @@ const useEditorSettings = (props: EditorSettingsProps) => {
 			language: isHTMLNote ? EditorLanguageType.Html : EditorLanguageType.Markdown,
 			readOnly: props.disabled,
 			markdownMarkEnabled: settings.markdownMark,
+			markdownInsertEnabled: settings.markdownInsert,
 			katexEnabled: settings.katex,
 			inlineRenderingEnabled: settings.inlineRendering,
 			imageRenderingEnabled: settings.imageRendering,
