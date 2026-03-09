@@ -1,20 +1,18 @@
-import { createUserAndSession, beforeAllDb, afterAllTests, beforeEachDb, models, db, dbSlave, expectThrow, createFolder, createItemTree3, expectNotThrow, createNote, updateNote, deleteNote } from '../utils/testing/testUtils';
-import config from '../config';
-import { Config } from '../utils/types';
-import modelFactory from './factory';
+import { createUserAndSession, beforeAllDb, afterAllTests, beforeEachDb, models, expectThrow, createFolder, createItemTree3, expectNotThrow, createNote, updateNote, dbSlave, db } from '../utils/testing/testUtils';
 import { ChangeType } from '../services/database/types';
+import newModelFactory from './factory';
 import { Day, msleep } from '../utils/time';
 import { ChangePagination } from './ChangeModel';
 import { SqliteMaxVariableNum } from '../db';
 import { defaultDeltaPagination } from './ChangeModel';
 import ChangeModel from './ChangeModel.new';
+import config from '../config';
 
-const newChangeModel = (config: Config) => {
+const newChangeModel = () => {
 	return new ChangeModel(
-		db(), dbSlave(), db => modelFactory(db, dbSlave(), config), config,
+		db(), dbSlave(), db => newModelFactory(db, dbSlave(), config()), config(),
 	);
 };
-
 
 describe('ChangeModel', () => {
 
@@ -61,16 +59,19 @@ describe('ChangeModel', () => {
 		expect(allUncompressedChanges.length).toBe(8);
 
 		{
-			// When we get all the changes, we only get CREATE 2 and CREATE 3.
-			// We don't get CREATE 1 because item 1 has been deleted. And we
-			// also don't get any UPDATE event since they've been compressed
-			// down to the CREATE events.
+			// When we get all the changes, we get DELETE 1, CREATE 2, and CREATE 3:
+			// - We don't get CREATE 1 since CREATE 1 -> DELETE 1 was compressed to
+			//   DELETE 1.
+			// - We don't get any UPDATE event since they've been compressed
+			//   down to the CREATE events.
 			const changes = (await models().change().delta(user.id)).items;
-			expect(changes.length).toBe(2);
-			expect(changes[0].item_id).toBe(item2.id);
-			expect(changes[0].type).toBe(ChangeType.Create);
-			expect(changes[1].item_id).toBe(item3.id);
+			expect(changes.length).toBe(3);
+			expect(changes[0].item_id).toBe(item1.id);
+			expect(changes[0].type).toBe(ChangeType.Delete);
+			expect(changes[1].item_id).toBe(item2.id);
 			expect(changes[1].type).toBe(ChangeType.Create);
+			expect(changes[2].item_id).toBe(item3.id);
+			expect(changes[2].type).toBe(ChangeType.Create);
 		}
 
 		{
@@ -277,67 +278,10 @@ describe('ChangeModel', () => {
 		jest.useRealTimers();
 	});
 
-	test('should return whole item when doing a delta call', async () => {
-		const { user, session } = await createUserAndSession(1, true);
-
-		await createItemTree3(user.id, '', '', [
-			{
-				id: '000000000000000000000000000000F1',
-				title: 'Folder 1',
-				children: [
-					{
-						id: '00000000000000000000000000000001',
-						title: 'Note 1',
-					},
-					{
-						id: '00000000000000000000000000000002',
-						title: 'Note 2',
-					},
-				],
-			},
-		]);
-
-		let cursor = '';
-
-		{
-			const result = await models().change().delta(user.id);
-			cursor = result.cursor;
-			const titles = result.items.map(it => it.jopItem.title).sort();
-			expect(titles).toEqual(['Folder 1', 'Note 1', 'Note 2']);
-		}
-
-		await msleep(1);
-
-		await updateNote(session.id, {
-			id: '00000000000000000000000000000001',
-			title: 'new title',
-		});
-
-		{
-			const result = await models().change().delta(user.id, { cursor });
-			cursor = result.cursor;
-			expect(result.items.length).toBe(1);
-			expect(result.items[0].jopItem.title).toBe('new title');
-		}
-
-		await msleep(1);
-
-		await deleteNote(user.id, '00000000000000000000000000000002');
-
-		{
-			const result = await models().change().delta(user.id, { cursor });
-			expect(result.items.length).toBe(1);
-			expect(result.items[0].jopItem).toBe(null);
-		}
-	});
-
-	test('should not return the whole item if the option is disabled', async () => {
+	test('should not return the whole item', async () => {
 		const { user } = await createUserAndSession(1, true);
 
-		const changeModel_ = newChangeModel({
-			...config(),
-			DELTA_INCLUDES_ITEMS: false,
-		});
+		const changeModel = models().change();
 
 		await createItemTree3(user.id, '', '', [
 			{
@@ -346,7 +290,7 @@ describe('ChangeModel', () => {
 			},
 		]);
 
-		const result = await changeModel_.delta(user.id, defaultDeltaPagination());
+		const result = await changeModel.delta(user.id, defaultDeltaPagination());
 		expect('jopItem' in result.items[0]).toBe(false);
 	});
 
@@ -362,12 +306,27 @@ describe('ChangeModel', () => {
 			],
 		},
 		{
-			label: 'should remove create -> delete',
+			label: 'should replace create -> delete with delete',
+			// Create -> Delete can't be filtered out without un-deleting items.
+			// This is because compressChanges is often called on an individual **page**
+			// of results. For example, if the first page of results is,
+			// - Create: Item 1
+			// - ... other changes not involving item 1...
+			//
+			// And the second page of results is,
+			// - Create: Item 1
+			// - Delete Item 1
+			//
+			// Then removing the Create -> Delete would result in Item 1 ultimately being
+			// created, rather than deleted, since there's still a "Create: Item 1" in the
+			// first page.
 			changes: [
 				{ type: ChangeType.Create },
 				{ type: ChangeType.Delete },
 			],
-			expected: [],
+			expected: [
+				{ type: ChangeType.Delete },
+			],
 		},
 		{
 			label: 'should replace update -> delete with delete',
@@ -434,7 +393,8 @@ describe('ChangeModel', () => {
 			...change,
 		}));
 
-		expect(newChangeModel(config()).compressChanges_(changes)).toMatchObject(expected);
+		expect(newChangeModel().compressChanges_(changes)).toMatchObject(expected);
 	});
 
 });
+

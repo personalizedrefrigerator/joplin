@@ -8,7 +8,6 @@ import { themeStyle } from './global-style';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import useKeyboardState from '../utils/hooks/useKeyboardState';
 import usePrevious from '@joplin/lib/hooks/usePrevious';
-import FeedbackBanner from './FeedbackBanner';
 import { Theme } from '@joplin/lib/themes/type';
 import { useMemo } from 'react';
 import KeyboardAvoidingView from './KeyboardAvoidingView';
@@ -63,22 +62,21 @@ const AppNavComponent: React.FC<Props> = (props) => {
 
 	const theme = themeStyle(props.themeId);
 	const styles = useStyles(theme);
-	const autocompletionBarPadding = keyboardState.keyboardVisible ? safeAreaPadding.top : 0;
+	// Workaround: On Android 15 and 16, the main app content seems to auto-resize when the keyboard is shown.
+	// On earlier Android versions (and in modals), this does not seem to be the case.
+	const keyboardAvoidingViewEnabled =
+		(Platform.OS === 'android' && Platform.Version < 35)
+		|| Platform.OS === 'ios';
+	const autocompletionBarPadding = keyboardState.keyboardVisible && keyboardAvoidingViewEnabled ? safeAreaPadding.top : 0;
 
 	return (
 		<KeyboardAvoidingView
 			style={styles.keyboardAvoidingView}
-			enabled={
-				// Workaround: On Android 15 and 16, the main app content seems to auto-resize when the keyboard is shown.
-				// On earlier Android versions (and in modals), this does not seem to be the case.
-				(Platform.OS === 'android' && Platform.Version < 35)
-				|| Platform.OS === 'ios'
-			}
+			enabled={keyboardAvoidingViewEnabled}
 		>
 			<NotesScreen visible={notesScreenVisible} />
 			{searchScreenLoaded && <SearchScreen visible={searchScreenVisible} />}
 			{!notesScreenVisible && !searchScreenVisible && <Screen navigation={{ state: route }} themeId={props.themeId} dispatch={props.dispatch} />}
-			{notesScreenVisible ? <FeedbackBanner/> : null}
 			<View style={{ height: autocompletionBarPadding }} />
 		</KeyboardAvoidingView>
 	);

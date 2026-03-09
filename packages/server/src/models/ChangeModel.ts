@@ -66,10 +66,24 @@ export default class ChangeModel {
 
 	public constructor(db: DbConnection, dbSlave: DbConnection, modelFactory: NewModelFactoryHandler, private config: Config) {
 		this.oldModel_ = new ChangeModelOld(db, dbSlave, modelFactory, config);
-
 		this.newModel_ = new ChangeModelNew(db, dbSlave, modelFactory, config);
-		// performance: Disabled until newModel_ is used for more than testing
-		this.newModel_.deltaIncludesItems_ = false;
+	}
+
+	public get tableName(): string {
+		return 'changes';
+	}
+
+	protected hasUuid(): boolean {
+		return true;
+	}
+
+	public serializePreviousItem(item: ChangePreviousItem): string {
+		return JSON.stringify(item);
+	}
+
+	public unserializePreviousItem(item: string): ChangePreviousItem {
+		if (!item) return null;
+		return JSON.parse(item);
 	}
 
 	public changeUrl(): string {

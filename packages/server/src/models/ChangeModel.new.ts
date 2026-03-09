@@ -8,7 +8,6 @@ import BaseModel, { SaveOptions } from './BaseModel';
 import { PaginatedResults } from './utils/pagination';
 import { NewModelFactoryHandler } from './factory';
 import { Config } from '../utils/types';
-import { BaseItemEntity } from '@joplin/lib/services/database/types';
 import type { RecordChangeOptions as RecordChangeOptionsBase } from './ChangeModel';
 
 const logger = Logger.create('ChangeModel.new');
@@ -61,11 +60,8 @@ export function requestDeltaPagination(query: any): ChangePagination {
 
 export default class ChangeModel extends BaseModel<Changes2> {
 
-	public deltaIncludesItems_: boolean;
-
 	public constructor(db: DbConnection, dbSlave: DbConnection, modelFactory: NewModelFactoryHandler, config: Config) {
 		super(db, dbSlave, modelFactory, config);
-		this.deltaIncludesItems_ = config.DELTA_INCLUDES_ITEMS;
 	}
 
 	public get tableName(): string {
@@ -79,9 +75,8 @@ export default class ChangeModel extends BaseModel<Changes2> {
 	public changeUrl(): string {
 		return `${this.baseUrl}/changes`;
 	}
-
 	public async allFromId(id: string, limit: number = SqliteMaxVariableNum): Promise<PaginatedChanges> {
-		const startChange = id ? await this.load(id) : null;
+		const startChange: Changes2 = id ? await this.load(id) : null;
 		const query = this.db(this.tableName).select(...this.defaultFields);
 		if (startChange) void query.where('counter', '>', startChange.counter);
 		void query.limit(limit).orderBy('counter', 'asc');
@@ -89,7 +84,12 @@ export default class ChangeModel extends BaseModel<Changes2> {
 		const hasMore = !!results.length;
 		const cursor = results.length ? results[results.length - 1].id : id;
 		results = await this.removeDeletedItems(results);
-		results = await this.compressChanges_(results);
+		// We can't compress changes here, since compressChanges_ assumes:
+		// - that all changes are for the same user, which isn't the case here
+		// - create -> delete can be compressed to a no-op, which isn't always true when processing
+		//   all changes.
+		//
+		// results = await this.compressChanges_(results);
 		return {
 			items: results,
 			has_more: hasMore,
@@ -163,6 +163,11 @@ export default class ChangeModel extends BaseModel<Changes2> {
 	}
 
 	public async delta(userId: Uuid, pagination: ChangePagination): Promise<PaginatedDeltaChanges> {
+		pagination = {
+			...defaultDeltaPagination(),
+			...pagination,
+		};
+
 		let changeAtCursor: Changes2 = null;
 
 		if (pagination.cursor) {
@@ -177,41 +182,20 @@ export default class ChangeModel extends BaseModel<Changes2> {
 			false,
 		);
 
-		let items: Item[] = await this.db('items').select('id', 'jop_updated_time').whereIn('items.id', changes.map(c => c.item_id));
+		const items: Item[] = await this.db('items').select('id', 'jop_updated_time').whereIn('items.id', changes.map(c => c.item_id));
 
 		let processedChanges = this.compressChanges_(changes);
 		processedChanges = await this.removeDeletedItems(processedChanges, items);
 
-		if (this.deltaIncludesItems_) {
-			items = await this.models().item().loadWithContentMulti(processedChanges.map(c => c.item_id), {
-				fields: [
-					'content',
-					'id',
-					'jop_encryption_applied',
-					'jop_id',
-					'jop_parent_id',
-					'jop_share_id',
-					'jop_type',
-					'jop_updated_time',
-				],
-			});
-		}
-
 		const finalChanges = processedChanges.map(change => {
 			const item = items.find(item => item.id === change.item_id);
 			if (!item) {
-				return this.deltaIncludesItems_ ? {
-					...change,
-					jopItem: null as BaseItemEntity,
-				} : { ...change };
+				return { ...change };
 			}
 			const deltaChange: DeltaChange = {
 				...change,
 				jop_updated_time: item.jop_updated_time,
 			};
-			if (this.deltaIncludesItems_) {
-				deltaChange.jopItem = item.jop_type ? this.models().item().itemToJoplinItem(item) : null;
-			}
 			return deltaChange;
 		});
 
@@ -259,7 +243,7 @@ export default class ChangeModel extends BaseModel<Changes2> {
 	// know that the item has changed at least once. The reduction is basically:
 	//
 	//     create - update => create
-	//     create - delete => NOOP
+	//     create - delete => delete
 	//     update - update => update
 	//     update - delete => delete
 	//     delete - create => create
@@ -319,7 +303,7 @@ export default class ChangeModel extends BaseModel<Changes2> {
 				}
 
 				if (previous.type === ChangeType.Create && change.type === ChangeType.Delete) {
-					itemChanges.delete(itemId);
+					itemChanges.set(itemId, change);
 				}
 
 				if (previous.type === ChangeType.Update && change.type === ChangeType.Update) {
