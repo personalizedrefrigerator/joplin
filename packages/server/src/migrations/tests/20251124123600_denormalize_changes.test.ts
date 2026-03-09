@@ -55,9 +55,9 @@ describe('20251124123600_denormalize_changes', () => {
 
 		await up(db());
 
-		const updatedChanges = await db()('changes_2').select('*').orderBy('counter');
+		const updatedChanges = () => db()('changes_2').select('*').orderBy('counter');
 		// Should have the correct base properties:
-		expect(updatedChanges).toMatchObject([
+		expect(await updatedChanges()).toMatchObject([
 			{
 				counter: 1,
 				previous_share_id: share.id,
@@ -71,9 +71,27 @@ describe('20251124123600_denormalize_changes', () => {
 		]);
 
 		// Should have the correct user_ids.
-		const finalUserIds = updatedChanges.map(change => change.user_id);
-		finalUserIds.sort();
-		expect(finalUserIds).toEqual([session1.user_id, session2.user_id].sort());
-	});
+		type ChangeUserIdSlice = { user_id: string };
+		const changesToUserIds = (changes: ChangeUserIdSlice[]) => {
+			const userIds = changes.map(change => change.user_id);
+			return userIds.sort();
+		};
+		expect(changesToUserIds(await updatedChanges())).toEqual([session1.user_id, session2.user_id].sort());
 
+		// Should create one update per user, for just new changes, if called again:
+		await db()('changes').insert([
+			{
+				id: '0aaaaaaaaaaaaaaaaaaaa',
+				counter: 2,
+				item_type: ItemType.UserItem,
+				previous_item: JSON.stringify({ 'jop_share_id': share.id }),
+				user_id: session1.user_id,
+
+				...changeBaseProperties,
+			},
+		]);
+		expect(await updatedChanges()).toHaveLength(2);
+		await up(db());
+		expect(await updatedChanges()).toHaveLength(4);
+	});
 });
