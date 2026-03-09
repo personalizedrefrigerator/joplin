@@ -26,7 +26,6 @@ const validateChangeMigration = async (db: DbConnection, maximumCounter: number,
 		.orderBy('counter', 'desc')
 		.limit(limit);
 
-
 	for (const change of originalChanges) {
 		const migratedChanges = await db('changes_2')
 			.select('id', 'counter', 'type', 'previous_share_id')
@@ -53,13 +52,41 @@ const validateChangeMigration = async (db: DbConnection, maximumCounter: number,
 	}
 };
 
+
+// Storing the start offset allows the migration to be resumed after an interruption
+const getStartOffset = async (db: DbConnection) => {
+	let processedItem: ChangeEntryOriginal|undefined = undefined;
+	const nextProcessedItemFromEnd = async () => {
+		let lastItemQuery = db('changes_2')
+			.select('id', 'counter');
+		if (processedItem) {
+			lastItemQuery = lastItemQuery.where('counter', '<', processedItem.counter);
+		}
+		processedItem = await lastItemQuery.orderBy('counter', 'desc').first();
+	};
+
+	let originalItem;
+	do {
+		await nextProcessedItemFromEnd();
+		if (!processedItem) return 0;
+
+		originalItem = await db('changes').select('id', 'counter').where('id', '=', processedItem.id).first();
+	} while (!originalItem);
+
+	const lastCounter = originalItem.counter;
+	const nextCounter = lastCounter + 1;
+	return nextCounter;
+};
+
+// This migration can take a long time. It's written with the goal of being able
+// to run in the background and be paused/resumed.
 export const up = async (db: DbConnection) => {
 
 	await db.transaction(async transaction => {
 		if (await transaction.schema.hasTable('changes_2')) return;
 
 		await transaction.schema.createTable('changes_2', (table) => {
-			// Note that in this table, the counter is the primary key, since
+			// In this table, the counter is the primary key, since
 			// we want it to be automatically incremented. There's also a
 			// column ID to publicly identify a change.
 			table.increments('counter').unique().primary().notNullable();
@@ -78,40 +105,15 @@ export const up = async (db: DbConnection) => {
 		});
 	});
 
-	// Storing the start offset allows the migration to be resumed after an interruption
-	const startOffset = async () => {
-		let processedItem: ChangeEntryOriginal|undefined = undefined;
-		const nextProcessedItemFromEnd = async () => {
-			let lastItemQuery = db('changes_2')
-				.select('id', 'counter');
-			if (processedItem) {
-				lastItemQuery = lastItemQuery.where('counter', '<', processedItem.counter);
-			}
-			processedItem = await lastItemQuery.orderBy('counter', 'desc').first();
-		};
+	let offset = await getStartOffset(db);
 
-		let originalItem;
-		do {
-			await nextProcessedItemFromEnd();
-			if (!processedItem) return 0;
-
-			originalItem = await db('changes').select('id', 'counter').where('id', '=', processedItem.id).first();
-		} while (!originalItem);
-
-		const lastCounter = originalItem.counter;
-		const nextCounter = lastCounter + 1;
-		return nextCounter;
-	};
-
-	let offset = await startOffset();
 	const total = Object.values(await db('changes').count().where('counter', '>=', offset).first())[0];
 	logger.info('Migrating', total, 'changes... start', offset);
-
 
 	const batchSize = 10_000;
 	// The number of items in each batch to validate. Larger values reduce performance,
 	// but improve confidence in the results.
-	const validationCount = 100;
+	const validationCount = 10_000;
 
 	if (offset > 0) {
 		logger.info('Resuming... Validating last migrated changes...');
@@ -145,12 +147,15 @@ export const up = async (db: DbConnection) => {
 
 	let processedCount = 0;
 	while (await next()) {
+		// Extracts jop_share_id from changes.previous_item:
 		const previousShareIdSql = `
 			CASE WHEN changes.previous_item=''
 				THEN ''
 				ELSE COALESCE(${isPostgres(db) ? '"changes"."previous_item"::json' : 'changes.previous_item'} ->> 'jop_share_id', '')
 			END
 		`;
+		// Generates a UUID using SQL functions. As of early 2026, there doesn't seem to be a way to do this that
+		// is compatible with both PostgreSQL and SQLite:
 		const uuidSelector = isPostgres(db) ? `
 			regexp_replace(gen_random_uuid()::text, '-', '', 'g')
 		` : `
@@ -161,17 +166,25 @@ export const up = async (db: DbConnection) => {
 		`;
 		await db.transaction(async transaction => {
 			const result = await transaction.raw(`
+				-- All **previous** share_ids involved in the current page of original changes
+				-- Type: List of Uuid
 				WITH all_share_ids AS (
 					SELECT DISTINCT (${previousShareIdSql}) as included_share_id FROM changes
 					WHERE changes.counter >= ?
 					AND changes.counter <= ?
 					AND ${previousShareIdSql} != ''
-				), share_participants AS (
-						SELECT user_id, share_id FROM share_users
-							-- Performance: Filter out all share_ids that aren't used in the batch:
-							JOIN all_share_ids ON share_users.share_id = all_share_ids.included_share_id
-							WHERE status = 1 -- Only users that accepted the share
+				),
+				-- Which users have access to which shares (only loads the current page). 
+				-- Type: List of (user_id, share_id) pairs.
+				share_participants AS (
+					SELECT user_id, share_id FROM share_users
+						-- Share participants
+						-- For performance, use all_share_ids to filter out all share_ids that
+						-- aren't used in the batch:
+						JOIN all_share_ids ON share_users.share_id = all_share_ids.included_share_id
+						WHERE status = 1 -- Only users that accepted the share
 					UNION ALL
+						-- Share owner
 						SELECT owner_id AS user_id, id as share_id FROM shares
 							JOIN all_share_ids ON shares.id = all_share_ids.included_share_id
 					UNION ALL
@@ -181,7 +194,7 @@ export const up = async (db: DbConnection) => {
 				INSERT INTO changes_2 (previous_share_id, id, type, item_id, item_name, user_id, updated_time, created_time)
 					SELECT
 						(${previousShareIdSql}) as previous_share_id,
-						(
+						( -- Try to match the ID of the change in the original changes table:
 							CASE WHEN share_participants.user_id IS NULL
 									-- This query runs for share_participants.user_id in (null, ...), where ...
 									-- sometimes includes changes.user_id. If it does, we need this check to prevent
