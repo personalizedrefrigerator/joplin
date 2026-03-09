@@ -1,6 +1,5 @@
-import Logger from '@joplin/utils/Logger';
 import { DbConnection, SqliteMaxVariableNum } from '../db';
-import { Change, ChangeType, Uuid, ItemType } from '../services/database/types';
+import { Change, ChangeType, Uuid, ItemType, Changes2 } from '../services/database/types';
 import { Day } from '../utils/time';
 import { PaginatedResults } from './utils/pagination';
 import { NewModelFactoryHandler } from './factory';
@@ -8,11 +7,9 @@ import { Config } from '../utils/types';
 import ChangeModelOld from './ChangeModel.old';
 import ChangeModelNew from './ChangeModel.new';
 
-const logger = Logger.create('ChangeModel');
-
 export const defaultChangeTtl = 180 * Day;
 
-export interface DeltaChange extends Change {
+export interface DeltaChange extends Changes2 {
 	jop_updated_time?: number;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	jopItem?: any;
@@ -20,7 +17,7 @@ export interface DeltaChange extends Change {
 
 export type PaginatedDeltaChanges = PaginatedResults<DeltaChange>;
 
-export type PaginatedChanges = PaginatedResults<Change>;
+export type PaginatedChanges = PaginatedResults<Changes2>;
 
 export interface ChangePagination {
 	limit?: number;
@@ -91,15 +88,15 @@ export default class ChangeModel {
 	}
 
 	public async allFromId(id: string, limit: number = SqliteMaxVariableNum): Promise<PaginatedChanges> {
-		return this.oldModel_.allFromId(id, limit);
+		return this.newModel_.allFromId(id, limit);
 	}
 
 	public async count() {
-		return this.oldModel_.count();
+		return this.newModel_.count();
 	}
 
 	public async all() {
-		return this.oldModel_.all();
+		return this.newModel_.all();
 	}
 
 	// Public for testing
@@ -113,20 +110,29 @@ export default class ChangeModel {
 			...pagination,
 		};
 
-		const resultsOld = await this.oldModel_.delta(userId, pagination);
+		// const resultsOld = await this.oldModel_.delta(userId, pagination);
 		const resultsNew = await this.newModel_.delta(userId, pagination);
 
-		const newIds = new Set(resultsNew.items.map(item => item.item_id));
-		const oldIds = new Set(resultsOld.items.map(item => item.item_id));
+		// const newIds = new Set(resultsNew.items.map(item => item.item_id));
+		// const oldIds = new Set(resultsOld.items.map(item => item.item_id));
 
-		const hasDifferentIds = newIds.size !== oldIds.size || !newIds.isSubsetOf(oldIds);
-		if (hasDifferentIds) {
-			const differentIds = [...newIds.difference(oldIds)];
-			logger.warn('Differing delta results:', differentIds, 'before:', JSON.stringify(resultsOld, undefined, ' '), 'after:', JSON.stringify(resultsNew, undefined, ' '));
-			throw new Error(`Different delta results: ${differentIds} (size from new: ${newIds.size}, size from old: ${oldIds.size}, pagination: ${JSON.stringify(pagination)})`);
-		}
+		// 1. ~~newIds should never be longer than oldIds.~~ UNLESS the difference is due to
+		//    Update ordering, related to the share maintenance task not having run.
+		// assert.ok(newIds.size <= oldIds.size);
+		// 2. If oldIds is longer, the difference should be due to UPDATE changes for items
+		//    that the user did not have access to at the time the change was created.
+		// assert.ok() // ??
+		// 3. If oldIds is longer, fetch more items from the new results so that the total
+		//    changes retrieved match.
 
-		return resultsOld;
+		// const hasDifferentIds = newIds.size !== oldIds.size || !newIds.isSubsetOf(oldIds);
+		// if (hasDifferentIds) {
+		// 	const differentIds = [...newIds.difference(oldIds)];
+		// 	logger.warn('Differing delta results:', differentIds, 'before:', JSON.stringify(resultsOld, undefined, ' '), 'after:', JSON.stringify(resultsNew, undefined, ' '));
+		// 	throw new Error(`Different delta results: ${differentIds} (size from new: ${newIds.size}, size from old: ${oldIds.size}, pagination: ${JSON.stringify(pagination)})`);
+		// }
+
+		return resultsNew;
 	}
 
 	// See spec for complete documentation:

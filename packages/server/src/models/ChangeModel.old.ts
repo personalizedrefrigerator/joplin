@@ -93,7 +93,7 @@ export default class ChangeModel extends BaseModel<Change> {
 		//
 		// results = await this.compressChanges_(results);
 		return {
-			items: results,
+			items: results.map(addPreviousShareId),
 			has_more: hasMore,
 			cursor,
 		};
@@ -287,7 +287,7 @@ export default class ChangeModel extends BaseModel<Change> {
 		// and can be removed afterwards.
 		for (const change of output) delete change.counter;
 
-		return output;
+		return output.map(addPreviousShareId);
 	}
 
 	public async delta(userId: Uuid, pagination: ChangePagination = null): Promise<PaginatedDeltaChanges> {
@@ -566,3 +566,11 @@ export default class ChangeModel extends BaseModel<Change> {
 		});
 	}
 }
+
+// For compatibility with the new changes table output:
+const addPreviousShareId = (change: Change) => {
+	return {
+		...change,
+		previous_share_id: change.previous_item ? JSON.parse(change.previous_item).jop_share_id : '',
+	};
+};

@@ -75,6 +75,7 @@ export default class ChangeModel extends BaseModel<Changes2> {
 	public changeUrl(): string {
 		return `${this.baseUrl}/changes`;
 	}
+
 	public async allFromId(id: string, limit: number = SqliteMaxVariableNum): Promise<PaginatedChanges> {
 		const startChange: Changes2 = id ? await this.load(id) : null;
 		const query = this.db(this.tableName).select(...this.defaultFields);
@@ -116,12 +117,6 @@ export default class ChangeModel extends BaseModel<Changes2> {
 			FROM "changes_2"
 			WHERE counter > ?
 				AND user_id = ?
-				-- Filtering: Remove 'Update' changes for deleted items:
-				AND (type != ? OR EXISTS (
-					SELECT 1
-					FROM user_items
-					WHERE user_items.item_id = changes_2.item_id
-				))
 			ORDER BY "counter" ASC
 			${doCountQuery ? '' : 'LIMIT ?'}
 		`;
@@ -129,7 +124,6 @@ export default class ChangeModel extends BaseModel<Changes2> {
 		const params = [
 			fromCounter,
 			userId,
-			ChangeType.Update,
 		];
 
 		if (!doCountQuery) params.push(limit);
