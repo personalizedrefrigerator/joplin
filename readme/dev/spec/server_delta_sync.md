@@ -33,6 +33,18 @@ Compression works at a page-level so depending on how many items are requested v
 
 Due to this compression, the `limit` query parameter is only advisory. There's no guarantee that exactly `limit` items will be returned as some items might have been removed after compression. There's however a guarantee that no more than `limit` items will be returned.
 
+## Legacy changes
+
+On the server, changes are split between a legacy `changes` table and a newer `changes_2` table:
+- `changes` contains records for old change events.
+	- In this table, `Update` changes may be accessible by multiple different users, depending on which users the change's item is shared with.
+	- Relies on a 4-byte index, limiting the maximum number of entries to just over two billion.
+- `changes_2` contains records for newer change events.
+	- Unlike events in `changes`, `Update` events are per-user. Users can only access changes with a matching `user_id`.
+	- More events can be stored in `changes_2`.
+
+All new change events are written to `changes_2`. However, database queries in `ChangeModel` must usually be able to check both tables.
+
 ## Delete event limitation
 
 There's currently a known limitation regarding delete events. When looking at a particular event page, the server might find that a "create" or "update" event is associated with a non-existing file, which would have been deleted. In that case, the server will send back a "delete" event. When looking at following pages, the server will eventually process the actual "delete" event for that item - and send again a "delete" event for it.
