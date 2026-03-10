@@ -58,15 +58,15 @@ export function requestDeltaPagination(query: any): ChangePagination {
 	return output;
 }
 
-const updateOldChange = (change: Change): Changes2 => {
+const oldToNewChange = (change: Change): Changes2 => {
 	return {
 		...change,
 		previous_share_id: change.previous_item ? JSON.parse(change.previous_item).jop_share_id : '',
 	};
 };
 
-const updateOldChanges = (changes: Change[]) => {
-	return changes.map(updateOldChange);
+const oldToNewChanges = (changes: Change[]) => {
+	return changes.map(oldToNewChange);
 };
 
 export default class ChangeModel extends BaseModel<Changes2> {
@@ -94,9 +94,17 @@ export default class ChangeModel extends BaseModel<Changes2> {
 	}
 
 	public async allFromId(id: string, limit: number = SqliteMaxVariableNum): Promise<PaginatedChanges> {
-		let results = updateOldChanges(
-			await this.oldModel_.allFromId(id, limit),
-		);
+		// Only load old changes if not starting from a point within the new changes list.
+		// If the change is not found by oldModel_ (e.g. because the change is in changes_2),
+		// it will return **all** old changes.
+		const includeOldChanges = !id || !await this.newModel_.load(id, { fields: ['counter'] });
+
+		let results: Changes2[] = [];
+		if (includeOldChanges) {
+			results = oldToNewChanges(
+				await this.oldModel_.allFromId(id, limit),
+			);
+		}
 
 		if (results.length < limit) {
 			const newResults = await this.newModel_.allFromId(id, limit - results.length);
@@ -124,7 +132,7 @@ export default class ChangeModel extends BaseModel<Changes2> {
 	}
 
 	public async all() {
-		return updateOldChanges(await this.oldModel_.all())
+		return oldToNewChanges(await this.oldModel_.all())
 			.concat(await this.newModel_.all());
 	}
 
@@ -134,7 +142,7 @@ export default class ChangeModel extends BaseModel<Changes2> {
 		if (!change) {
 			const oldChange = await this.oldModel_.load(id, options);
 			if (oldChange) {
-				change = updateOldChange(oldChange);
+				change = oldToNewChange(oldChange);
 			}
 		}
 
@@ -146,7 +154,7 @@ export default class ChangeModel extends BaseModel<Changes2> {
 		const firstNewChange = await this.newModel_.first({ fields: ['counter'] });
 		let changes: Changes2[] = [];
 		if (fromCounter < firstNewChange.counter) {
-			changes = updateOldChanges(await this.oldModel_.changesForUserQuery(userId, fromCounter, limit, doCountQuery));
+			changes = oldToNewChanges(await this.oldModel_.changesForUserQuery(userId, fromCounter, limit, doCountQuery));
 		}
 
 		if (changes.length < limit) {

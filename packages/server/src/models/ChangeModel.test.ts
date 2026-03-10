@@ -232,6 +232,8 @@ describe('ChangeModel', () => {
 		// allFromId should query from both tables:
 		changes = await models().change().allFromId('');
 		expect(changes.items).toHaveLength(4);
+		changes = await models().change().allFromId(changes.cursor);
+		expect(changes.items).toHaveLength(0);
 
 		// delta should query from both tables
 		changes = await models().change().delta(user.id);
