@@ -220,16 +220,29 @@ describe('ChangeModel', () => {
 			});
 		};
 
+		// Create changes in the old table
 		await recordOldChange(ChangeType.Create);
 		await recordOldChange(ChangeType.Update);
 		await recordOldChange(ChangeType.Update);
 
-		// Update (new table)
+		// Create changes in the new table
 		await msleep(1);
 		await models().item().saveForUser(user.id, { id: item.id, name: '0000000000000000000000000000001A.md', content: Buffer.from('') });
 
+		// allFromId should query from both tables:
 		changes = await models().change().allFromId('');
 		expect(changes.items).toHaveLength(4);
+
+		// delta should query from both tables
+		changes = await models().change().delta(user.id);
+		// Change compression results in 1 change initially, since the creates and
+		// updates are compressed:
+		expect(changes.items).toHaveLength(1);
+
+		// Adding a new item with a different ID should add a new item to the delta results
+		await models().item().makeTestItem(user.id, 1);
+		changes = await models().change().delta(user.id);
+		expect(changes.items).toHaveLength(2);
 	});
 
 	test('should delete old changes', async () => {

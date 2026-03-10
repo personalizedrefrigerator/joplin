@@ -3,7 +3,7 @@ import Logger from '@joplin/utils/Logger';
 import { DbConnection, SqliteMaxVariableNum } from '../db';
 import { Changes2, ChangeType, Uuid } from '../services/database/types';
 import { Day, formatDateTime } from '../utils/time';
-import BaseModel, { SaveOptions } from './BaseModel';
+import BaseModel, { LoadOptions, SaveOptions } from './BaseModel';
 import { PaginatedResults } from './utils/pagination';
 import { NewModelFactoryHandler } from './factory';
 import { Config } from '../utils/types';
@@ -70,8 +70,11 @@ export default class ChangeModel extends BaseModel<Changes2> {
 		return `${this.baseUrl}/changes`;
 	}
 
-	public async first(): Promise<Changes2> {
-		return await this.db(this.tableName).orderBy('counter', 'asc').first();
+	public async first(options: LoadOptions): Promise<Changes2> {
+		return await this.db(this.tableName)
+			.select(options.fields ?? this.defaultFields)
+			.orderBy('counter', 'asc')
+			.first();
 	}
 
 	public async allFromId(id: string, limit: number = SqliteMaxVariableNum): Promise<Changes2[]> {

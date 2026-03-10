@@ -23,8 +23,6 @@ export const up = async (db: DbConnection) => {
 		table.unique(['user_id', 'counter']);
 	});
 
-	// Create a single starting change to ensure that `counter` starts incrementing in
-	// the new table from where it left of in the old:
 	const lastOldChange = await db('changes').select('counter').orderBy('counter', 'desc').first();
 	let startCounter = 0;
 	if (lastOldChange) {
@@ -32,6 +30,8 @@ export const up = async (db: DbConnection) => {
 		startCounter = lastOldChange.counter + 1;
 	}
 
+	// Create a single starting change to ensure that `counter` starts incrementing in
+	// the new table from where it left of in the old:
 	await db('changes_2').insert({
 		counter: startCounter,
 		id: uuidgen(),

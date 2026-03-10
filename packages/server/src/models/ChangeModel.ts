@@ -124,7 +124,8 @@ export default class ChangeModel extends BaseModel<Changes2> {
 	}
 
 	public async all() {
-		return updateOldChanges(await this.oldModel_.all()).concat(await this.newModel_.all());
+		return updateOldChanges(await this.oldModel_.all())
+			.concat(await this.newModel_.all());
 	}
 
 	public async load(id: string, options?: LoadOptions) {
@@ -142,7 +143,7 @@ export default class ChangeModel extends BaseModel<Changes2> {
 
 	// Public for testing
 	public async changesForUserQuery(userId: Uuid, fromCounter: number, limit: number, doCountQuery: boolean): Promise<Changes2[]> {
-		const firstNewChange = await this.newModel_.first();
+		const firstNewChange = await this.newModel_.first({ fields: ['counter'] });
 		let changes: Changes2[] = [];
 		if (fromCounter < firstNewChange.counter) {
 			changes = updateOldChanges(await this.oldModel_.changesForUserQuery(userId, fromCounter, limit, doCountQuery));
