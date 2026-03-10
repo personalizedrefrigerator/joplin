@@ -341,7 +341,7 @@ export default class ChangeModel extends BaseModel<Changes2> {
 	}
 
 	public async recordChange(options: RecordChangeOptions) {
-		await this.newModel_.recordChange({ ...options });
+		await this.newModel_.recordChange(options);
 	}
 
 }
