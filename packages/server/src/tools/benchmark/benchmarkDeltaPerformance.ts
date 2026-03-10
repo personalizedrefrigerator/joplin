@@ -15,6 +15,9 @@ const benchmarkDeltaPerformance = async (models: Models) => {
 			yield await Promise.all(users.map(async user => {
 				const userItemCount = await models.userItem().countWithUserId(user.id);
 				const shareCount = (await models.share().byUserId(user.id, ShareType.Folder)).length;
+				// nocommit - won't work on dev
+				const changesCount = await models.change().changesForUserQuery(user.id, -1, 200, true) as any;
+
 
 				return {
 					labels: {
@@ -22,6 +25,8 @@ const benchmarkDeltaPerformance = async (models: Models) => {
 						'Share count': shareCount,
 						'user_items count': userItemCount,
 						'Total item size': user.total_item_size,
+						'changes.old': changesCount[0].total,
+						'changes.new': changesCount[1].total,
 					},
 					data: user.id,
 				};
