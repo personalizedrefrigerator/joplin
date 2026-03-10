@@ -43,6 +43,15 @@ export const up = async (db: DbConnection) => {
 		created_time: Date.now(),
 		updated_time: Date.now(),
 	});
+
+	if (isPostgres(db)) {
+		// In PostgreSQL, an initial entry with a specific value isn't enough
+		// and the sequence needs to be altered to start from a specific counter:
+		// https://stackoverflow.com/a/70389309
+		await db.raw(`
+			ALTER SEQUENCE "changes_2_counter_seq" RESTART WITH ${Number(startCounter)}
+		`);
+	}
 };
 
 export const down = async (db: DbConnection) => {
