@@ -4,11 +4,11 @@ import { uuidgen } from '../utils/uuid';
 
 export const up = async (db: DbConnection) => {
 	await db.schema.createTable('changes_2', (table) => {
-		// In this table, the counter is the primary key, since
-		// we want it to be automatically incremented. There's also a
-		// column ID to publicly identify a change.
+		// The counter is the internal change identifier and is used for ordering.
+		// In PostgreSQL, it has a maximum of 2147483647 (see https://www.postgresql.org/docs/current/datatype-numeric.html).
 		table.increments('counter').unique().primary().notNullable();
 		table.string('id', 32).unique().notNullable();
+
 		table.string('item_id', 32).notNullable();
 		table.string('user_id', 32).defaultTo('').notNullable();
 		table.text('item_name').defaultTo('').notNullable();
