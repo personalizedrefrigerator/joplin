@@ -97,7 +97,7 @@ export default class ChangeModel extends BaseModel<Changes2> {
 		// Only load old changes if not starting from a point within the new changes list.
 		// If the change is not found by oldModel_ (e.g. because the change is in changes_2),
 		// it will return **all** old changes.
-		const includeOldChanges = !id || !await this.newModel_.load(id, { fields: ['counter'] });
+		const includeOldChanges = !id || !await this.newModel_.load(id, { fields: ['id'] });
 
 		let results: Changes2[] = [];
 		if (includeOldChanges) {
