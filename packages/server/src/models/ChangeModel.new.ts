@@ -13,43 +13,13 @@ const logger = Logger.create('ChangeModel.new');
 
 export const defaultChangeTtl = 180 * Day;
 
-export interface DeltaChange extends Changes2 {
-	jop_updated_time?: number;
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	jopItem?: any;
-}
-
-export type PaginatedDeltaChanges = PaginatedResults<DeltaChange>;
-
 export type PaginatedChanges = PaginatedResults<Changes2>;
-
-export interface ChangePagination {
-	limit?: number;
-	cursor?: string;
-}
 
 export interface ChangePreviousItem {
 	jop_share_id: string;
 }
 
 type RecordChangeOptions = RecordChangeOptionsBase;
-
-export function defaultDeltaPagination(): ChangePagination {
-	return {
-		limit: 200,
-		cursor: '',
-	};
-}
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-export function requestDeltaPagination(query: any): ChangePagination {
-	if (!query) return defaultDeltaPagination();
-
-	const output: ChangePagination = {};
-	if ('limit' in query) output.limit = query.limit;
-	if ('cursor' in query) output.cursor = query.cursor;
-	return output;
-}
 
 export default class ChangeModel extends BaseModel<Changes2> {
 
