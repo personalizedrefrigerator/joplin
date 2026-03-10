@@ -74,11 +74,12 @@ export default class ChangeModel extends BaseModel<Changes2> {
 		}
 		query = query
 			.where('counter', '>', fromCounter)
-			.andWhere('user_id', '=', userId)
-			.orderBy('counter', 'asc');
+			.andWhere('user_id', '=', userId);
 
 		if (!doCountQuery) {
-			query = query.limit(limit);
+			query = query
+				.orderBy('counter', 'asc')
+				.limit(limit);
 		}
 
 		const results: Changes2[] = await query;
