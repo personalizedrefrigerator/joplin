@@ -5,8 +5,10 @@ import { uuidgen } from '../utils/uuid';
 export const up = async (db: DbConnection) => {
 	await db.schema.createTable('changes_2', (table) => {
 		// The counter is the internal change identifier and is used for ordering.
-		// In PostgreSQL, it has a maximum of 2147483647 (see https://www.postgresql.org/docs/current/datatype-numeric.html).
-		table.increments('counter').unique().primary().notNullable();
+		// In PostgreSQL, .increments has a maximum value a little over 2 billion
+		// (see https://www.postgresql.org/docs/current/datatype-numeric.html) so
+		// we use .bigIncrements
+		table.bigIncrements('counter').unique().primary().notNullable();
 		table.string('id', 32).unique().notNullable();
 
 		table.string('item_id', 32).notNullable();
@@ -49,7 +51,7 @@ export const up = async (db: DbConnection) => {
 		// and the sequence needs to be altered to start from a specific counter:
 		// https://stackoverflow.com/a/70389309
 		await db.raw(`
-			ALTER SEQUENCE "changes_2_counter_seq" RESTART WITH ${Number(startCounter)}
+			ALTER SEQUENCE "changes_2_counter_seq" RESTART WITH ${Number(startCounter + 1)}
 		`);
 	}
 };
