@@ -1,11 +1,13 @@
 import { DbConnection, SqliteMaxVariableNum } from '../db';
-import { Change, ChangeType, Uuid, ItemType, Changes2 } from '../services/database/types';
+import { Change, ChangeType, Uuid, ItemType, Changes2, Item } from '../services/database/types';
 import { Day } from '../utils/time';
 import { PaginatedResults } from './utils/pagination';
 import { NewModelFactoryHandler } from './factory';
 import { Config } from '../utils/types';
 import ChangeModelOld from './ChangeModel.old';
 import ChangeModelNew from './ChangeModel.new';
+import BaseModel, { LoadOptions } from './BaseModel';
+import { ErrorResyncRequired } from '../utils/errors';
 
 export const defaultChangeTtl = 180 * Day;
 
@@ -56,21 +58,31 @@ export function requestDeltaPagination(query: any): ChangePagination {
 	return output;
 }
 
-export default class ChangeModel {
+const updateOldChange = (change: Change): Changes2 => {
+	return {
+		...change,
+		previous_share_id: change.previous_item ? JSON.parse(change.previous_item).jop_share_id : '',
+	};
+};
+
+const updateOldChanges = (changes: Change[]) => {
+	return changes.map(updateOldChange);
+};
+
+export default class ChangeModel extends BaseModel<Changes2> {
 
 	public oldModel_: ChangeModelOld;
 	public newModel_: ChangeModelNew;
-	private deltaResultsSource_: ChangeModelOld|ChangeModelNew;
 
 	public constructor(db: DbConnection, dbSlave: DbConnection, modelFactory: NewModelFactoryHandler, private config: Config) {
+		super(db, dbSlave, modelFactory, config);
+
 		this.oldModel_ = new ChangeModelOld(db, dbSlave, modelFactory, config);
 		this.newModel_ = new ChangeModelNew(db, dbSlave, modelFactory, config);
-
-		this.deltaResultsSource_ = this.newModel_;
 	}
 
 	public get tableName(): string {
-		return 'changes';
+		return this.newModel_.tableName;
 	}
 
 	protected hasUuid(): boolean {
@@ -82,20 +94,65 @@ export default class ChangeModel {
 	}
 
 	public async allFromId(id: string, limit: number = SqliteMaxVariableNum): Promise<PaginatedChanges> {
-		return this.newModel_.allFromId(id, limit);
+		let results = updateOldChanges(
+			await this.oldModel_.allFromId(id, limit),
+		);
+
+		if (results.length < limit) {
+			const newResults = await this.newModel_.allFromId(id, limit - results.length);
+			results = results.concat(newResults);
+		}
+
+		const hasMore = !!results.length;
+		const cursor = results.length ? results[results.length - 1].id : id;
+		results = await this.removeDeletedItems(results);
+		// We can't compress changes here, since compressChanges_ assumes:
+		// - that all changes are for the same user, which isn't the case here
+		// - create -> delete can be compressed to a no-op, which isn't always true when processing
+		//   all changes.
+		//
+		// results = await this.compressChanges_(results);
+		return {
+			items: results,
+			has_more: hasMore,
+			cursor,
+		};
 	}
 
 	public async count() {
-		return this.newModel_.count();
+		return await this.oldModel_.count() + await this.newModel_.count();
 	}
 
 	public async all() {
-		return this.newModel_.all();
+		return updateOldChanges(await this.oldModel_.all()).concat(await this.newModel_.all());
+	}
+
+	public async load(id: string, options?: LoadOptions) {
+		let change = await this.newModel_.load(id, options);
+
+		if (!change) {
+			const oldChange = await this.oldModel_.load(id, options);
+			if (oldChange) {
+				change = updateOldChange(oldChange);
+			}
+		}
+
+		return change;
 	}
 
 	// Public for testing
-	public async changesForUserQuery(userId: Uuid, fromCounter: number, limit: number, doCountQuery: boolean): Promise<Change[]> {
-		return await this.deltaResultsSource_.changesForUserQuery(userId, fromCounter, limit, doCountQuery);
+	public async changesForUserQuery(userId: Uuid, fromCounter: number, limit: number, doCountQuery: boolean): Promise<Changes2[]> {
+		const firstNewChange = await this.newModel_.first();
+		let changes: Changes2[] = [];
+		if (fromCounter < firstNewChange.counter) {
+			changes = updateOldChanges(await this.oldModel_.changesForUserQuery(userId, fromCounter, limit, doCountQuery));
+		}
+
+		if (changes.length < limit) {
+			changes = changes.concat(await this.newModel_.changesForUserQuery(userId, fromCounter, limit - changes.length, doCountQuery));
+		}
+
+		return changes;
 	}
 
 	public async delta(userId: Uuid, pagination: ChangePagination = null): Promise<PaginatedDeltaChanges> {
@@ -104,12 +161,175 @@ export default class ChangeModel {
 			...pagination,
 		};
 
-		const results = await this.deltaResultsSource_.delta(userId, pagination);
-		return results;
+		let changeAtCursor: Change = null;
+
+		if (pagination.cursor) {
+			changeAtCursor = await this.load(pagination.cursor);
+			if (!changeAtCursor) throw new ErrorResyncRequired();
+		}
+
+		const changes = await this.changesForUserQuery(
+			userId,
+			changeAtCursor ? changeAtCursor.counter : -1,
+			pagination.limit,
+			false,
+		);
+
+		const items: Item[] = await this.db('items').select('id', 'jop_updated_time').whereIn('items.id', changes.map(c => c.item_id));
+
+		let processedChanges = this.compressChanges_(changes);
+		processedChanges = await this.removeDeletedItems(processedChanges, items);
+
+		const finalChanges = processedChanges.map(change => {
+			const item = items.find(item => item.id === change.item_id);
+			if (!item) return { ...change };
+			const deltaChange: DeltaChange = {
+				...change,
+				jop_updated_time: item.jop_updated_time,
+			};
+			return deltaChange;
+		});
+
+		return {
+			items: finalChanges,
+			// If we have changes, we return the ID of the latest changes from which delta sync can resume.
+			// If there's no change, we return the previous cursor.
+			cursor: changes.length ? changes[changes.length - 1].id : pagination.cursor,
+			has_more: changes.length >= pagination.limit,
+		};
 	}
 
-	// See spec for complete documentation:
-	// https://joplinapp.org/spec/server_delta_sync/#regarding-the-deletion-of-old-change-events
+	private async removeDeletedItems(changes: Changes2[], items: Item[] = null): Promise<Changes2[]> {
+		const itemIds = changes.map(c => c.item_id);
+
+		// We skip permission check here because, when an item is shared, we need
+		// to fetch files that don't belong to the current user. This check
+		// would not be needed anyway because the change items are generated in
+		// a context where permissions have already been checked.
+		items = items === null ? await this.db('items').select('id').whereIn('items.id', itemIds) : items;
+
+		const output: Changes2[] = [];
+
+		for (const change of changes) {
+			const item = items.find(f => f.id === change.item_id);
+
+			// If the item associated with this change has been deleted, we have
+			// two cases:
+			// - If it's a "delete" change, add it to the list.
+			// - If it's anything else, skip it. The "delete" change will be
+			//   sent on one of the next pages.
+
+			if (!item && change.type !== ChangeType.Delete) {
+				continue;
+			}
+
+			output.push(change);
+		}
+
+		return output;
+	}
+
+	// Compresses the changes so that, for example, multiple updates on the same
+	// item are reduced down to one, because calling code usually only needs to
+	// know that the item has changed at least once. The reduction is basically:
+	//
+	//     create - update => create
+	//     create - delete => delete
+	//     update - update => update
+	//     update - delete => delete
+	//     delete - create => create
+	//
+	// There's one exception for changes that include a "previous_item". This is
+	// used to save specific properties about the previous state of the item,
+	// such as "jop_share_id" or "name". The share mechanism needs to know about
+	// each change to "jop_share_id", so updates that change the share ID are not
+	// compressed.
+	//
+	// The latest change, when an item goes from DELETE to CREATE seems odd but
+	// can happen because we are not checking for "item" changes but for
+	// "user_item" changes. When sharing is involved, an item can be shared
+	// (CREATED), then unshared (DELETED), then shared again (CREATED). When it
+	// happens, we want the user to get the item, thus we generate a CREATE
+	// event.
+	//
+	// Public to allow testing.
+	public compressChanges_(changes: Changes2[]): Changes2[] {
+		const itemChanges = new Map<Uuid, Change>();
+
+		const itemUniqueUpdates = new Map<Uuid, Changes2[]>();
+		const itemToLastUpdateShareIds = new Map<Uuid, Uuid>();
+
+		const changeToShareId = (change: Changes2) => {
+			return change.previous_share_id;
+		};
+
+		for (const change of changes) {
+			const itemId = change.item_id;
+			const previous = itemChanges.get(itemId);
+
+			if (change.type === ChangeType.Update) {
+				const shareId = changeToShareId(change);
+
+				const uniqueUpdates = itemUniqueUpdates.get(itemId);
+				if (uniqueUpdates) {
+					const lastShareId = itemToLastUpdateShareIds.get(itemId);
+					const canCompress = lastShareId === shareId;
+
+					if (canCompress) {
+						// Always keep the last change as up-to-date as possible
+						uniqueUpdates[uniqueUpdates.length - 1] = change;
+					} else {
+						uniqueUpdates.push(change);
+						itemToLastUpdateShareIds.set(itemId, shareId);
+					}
+				} else {
+					itemUniqueUpdates.set(itemId, [change]);
+					itemToLastUpdateShareIds.set(itemId, shareId);
+				}
+			}
+
+			if (previous) {
+				if (previous.type === ChangeType.Create && change.type === ChangeType.Update) {
+					continue;
+				}
+
+				if (previous.type === ChangeType.Create && change.type === ChangeType.Delete) {
+					itemChanges.set(itemId, change);
+				}
+
+				if (previous.type === ChangeType.Update && change.type === ChangeType.Update) {
+					itemChanges.set(itemId, change);
+				}
+
+				if (previous.type === ChangeType.Update && change.type === ChangeType.Delete) {
+					itemChanges.set(itemId, change);
+				}
+
+				if (previous.type === ChangeType.Delete && change.type === ChangeType.Create) {
+					itemChanges.set(itemId, change);
+				}
+			} else {
+				itemChanges.set(itemId, change);
+			}
+		}
+
+		const output: Changes2[] = [];
+
+		for (const [itemId, change] of itemChanges) {
+			if (change.type === ChangeType.Update) {
+				for (const otherChange of itemUniqueUpdates.get(itemId)) {
+					output.push(otherChange);
+				}
+			} else {
+				output.push(change);
+			}
+		}
+
+		output.sort((a: Changes2, b: Changes2) => a.counter < b.counter ? -1 : +1);
+
+		return output;
+	}
+
 	public async compressOldChanges(ttl: number = null) {
 		await this.oldModel_.compressOldChanges(ttl);
 		await this.newModel_.compressOldChanges(ttl);
@@ -121,8 +341,7 @@ export default class ChangeModel {
 	}
 
 	public async recordChange(options: RecordChangeOptions) {
-		const change = await this.oldModel_.recordChange(options);
-		await this.newModel_.recordChange({ ...options, changeId: change.id });
+		await this.newModel_.recordChange({ ...options });
 	}
 
 }

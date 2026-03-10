@@ -1,8 +1,7 @@
 import { Knex } from 'knex';
 import Logger from '@joplin/utils/Logger';
 import { DbConnection, SqliteMaxVariableNum, isPostgres } from '../db';
-import { Change, ChangeType, Item, Uuid } from '../services/database/types';
-import { ErrorResyncRequired } from '../utils/errors';
+import { Change, ChangeType, Uuid } from '../services/database/types';
 import { Day, formatDateTime } from '../utils/time';
 import BaseModel, { SaveOptions } from './BaseModel';
 import { PaginatedResults } from './utils/pagination';
@@ -77,26 +76,13 @@ export default class ChangeModel extends BaseModel<Change> {
 		return `${this.baseUrl}/changes`;
 	}
 
-	public async allFromId(id: string, limit: number = SqliteMaxVariableNum): Promise<PaginatedChanges> {
+	public async allFromId(id: string, limit: number = SqliteMaxVariableNum) {
 		const startChange: Change = id ? await this.load(id) : null;
 		const query = this.db(this.tableName).select(...this.defaultFields);
 		if (startChange) void query.where('counter', '>', startChange.counter);
 		void query.limit(limit).orderBy('counter', 'asc');
-		let results: Change[] = await query;
-		const hasMore = !!results.length;
-		const cursor = results.length ? results[results.length - 1].id : id;
-		results = await this.removeDeletedItems(results);
-		// We can't compress changes here, since compressChanges_ assumes:
-		// - that all changes are for the same user, which isn't the case here
-		// - create -> delete can be compressed to a no-op, which isn't always true when processing
-		//   all changes.
-		//
-		// results = await this.compressChanges_(results);
-		return {
-			items: results.map(addPreviousShareId),
-			has_more: hasMore,
-			cursor,
-		};
+		const results: Change[] = await query;
+		return results;
 	}
 
 	public async changesForUserQuery(userId: Uuid, fromCounter: number, limit: number, doCountQuery: boolean): Promise<Change[]> {
@@ -287,181 +273,6 @@ export default class ChangeModel extends BaseModel<Change> {
 		// and can be removed afterwards.
 		for (const change of output) delete change.counter;
 
-		return output.map(addPreviousShareId);
-	}
-
-	public async delta(userId: Uuid, pagination: ChangePagination = null): Promise<PaginatedDeltaChanges> {
-		pagination = {
-			...defaultDeltaPagination(),
-			...pagination,
-		};
-
-		let changeAtCursor: Change = null;
-
-		if (pagination.cursor) {
-			changeAtCursor = await this.load(pagination.cursor) as Change;
-			if (!changeAtCursor) throw new ErrorResyncRequired();
-		}
-
-		const changes = await this.changesForUserQuery(
-			userId,
-			changeAtCursor ? changeAtCursor.counter : -1,
-			pagination.limit,
-			false,
-		);
-
-		const items: Item[] = await this.db('items').select('id', 'jop_updated_time').whereIn('items.id', changes.map(c => c.item_id));
-
-		let processedChanges = this.compressChanges_(changes);
-		processedChanges = await this.removeDeletedItems(processedChanges, items);
-
-		const finalChanges = processedChanges.map(change => {
-			const item = items.find(item => item.id === change.item_id);
-			if (!item) return { ...change };
-			const deltaChange: DeltaChange = {
-				...change,
-				jop_updated_time: item.jop_updated_time,
-			};
-			return deltaChange;
-		});
-
-		return {
-			items: finalChanges,
-			// If we have changes, we return the ID of the latest changes from which delta sync can resume.
-			// If there's no change, we return the previous cursor.
-			cursor: changes.length ? changes[changes.length - 1].id : pagination.cursor,
-			has_more: changes.length >= pagination.limit,
-		};
-	}
-
-	private async removeDeletedItems(changes: Change[], items: Item[] = null): Promise<Change[]> {
-		const itemIds = changes.map(c => c.item_id);
-
-		// We skip permission check here because, when an item is shared, we need
-		// to fetch files that don't belong to the current user. This check
-		// would not be needed anyway because the change items are generated in
-		// a context where permissions have already been checked.
-		items = items === null ? await this.db('items').select('id').whereIn('items.id', itemIds) : items;
-
-		const output: Change[] = [];
-
-		for (const change of changes) {
-			const item = items.find(f => f.id === change.item_id);
-
-			// If the item associated with this change has been deleted, we have
-			// two cases:
-			// - If it's a "delete" change, add it to the list.
-			// - If it's anything else, skip it. The "delete" change will be
-			//   sent on one of the next pages.
-
-			if (!item && change.type !== ChangeType.Delete) {
-				continue;
-			}
-
-			output.push(change);
-		}
-
-		return output;
-	}
-
-	// Compresses the changes so that, for example, multiple updates on the same
-	// item are reduced down to one, because calling code usually only needs to
-	// know that the item has changed at least once. The reduction is basically:
-	//
-	//     create - update => create
-	//     create - delete => delete
-	//     update - update => update
-	//     update - delete => delete
-	//     delete - create => create
-	//
-	// There's one exception for changes that include a "previous_item". This is
-	// used to save specific properties about the previous state of the item,
-	// such as "jop_share_id" or "name". The share mechanism needs to know about
-	// each change to "jop_share_id", so updates that change the share ID are not
-	// compressed.
-	//
-	// The latest change, when an item goes from DELETE to CREATE seems odd but
-	// can happen because we are not checking for "item" changes but for
-	// "user_item" changes. When sharing is involved, an item can be shared
-	// (CREATED), then unshared (DELETED), then shared again (CREATED). When it
-	// happens, we want the user to get the item, thus we generate a CREATE
-	// event.
-	//
-	// Public to allow testing.
-	public compressChanges_(changes: Change[]): Change[] {
-		const itemChanges = new Map<Uuid, Change>();
-
-		const itemUniqueUpdates = new Map<Uuid, Change[]>();
-		const itemToLastUpdateShareIds = new Map<Uuid, Uuid>();
-
-		const changeToShareId = (change: Change) => {
-			return this.unserializePreviousItem(change.previous_item)?.jop_share_id ?? '';
-		};
-
-		for (const change of changes) {
-			const itemId = change.item_id;
-			const previous = itemChanges.get(itemId);
-
-			if (change.type === ChangeType.Update) {
-				const shareId = changeToShareId(change);
-
-				const uniqueUpdates = itemUniqueUpdates.get(itemId);
-				if (uniqueUpdates) {
-					const lastShareId = itemToLastUpdateShareIds.get(itemId);
-					const canCompress = lastShareId === shareId;
-
-					if (canCompress) {
-						// Always keep the last change as up-to-date as possible
-						uniqueUpdates[uniqueUpdates.length - 1] = change;
-					} else {
-						uniqueUpdates.push(change);
-						itemToLastUpdateShareIds.set(itemId, shareId);
-					}
-				} else {
-					itemUniqueUpdates.set(itemId, [change]);
-					itemToLastUpdateShareIds.set(itemId, shareId);
-				}
-			}
-
-			if (previous) {
-				if (previous.type === ChangeType.Create && change.type === ChangeType.Update) {
-					continue;
-				}
-
-				if (previous.type === ChangeType.Create && change.type === ChangeType.Delete) {
-					itemChanges.set(itemId, change);
-				}
-
-				if (previous.type === ChangeType.Update && change.type === ChangeType.Update) {
-					itemChanges.set(itemId, change);
-				}
-
-				if (previous.type === ChangeType.Update && change.type === ChangeType.Delete) {
-					itemChanges.set(itemId, change);
-				}
-
-				if (previous.type === ChangeType.Delete && change.type === ChangeType.Create) {
-					itemChanges.set(itemId, change);
-				}
-			} else {
-				itemChanges.set(itemId, change);
-			}
-		}
-
-		const output: Change[] = [];
-
-		for (const [itemId, change] of itemChanges) {
-			if (change.type === ChangeType.Update) {
-				for (const otherChange of itemUniqueUpdates.get(itemId)) {
-					output.push(otherChange);
-				}
-			} else {
-				output.push(change);
-			}
-		}
-
-		output.sort((a: Change, b: Change) => a.counter < b.counter ? -1 : +1);
-
 		return output;
 	}
 
@@ -566,11 +377,3 @@ export default class ChangeModel extends BaseModel<Change> {
 		});
 	}
 }
-
-// For compatibility with the new changes table output:
-const addPreviousShareId = (change: Change) => {
-	return {
-		...change,
-		previous_share_id: change.previous_item ? JSON.parse(change.previous_item).jop_share_id : '',
-	};
-};

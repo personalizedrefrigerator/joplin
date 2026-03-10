@@ -29,6 +29,7 @@ const config: Config = {
 		'main.api_clients': 'WithDates, WithUuid',
 		'main.backup_items': 'WithCreatedDate',
 		'main.changes': 'WithDates, WithUuid',
+		'main.changes_2': 'WithDates, WithUuid',
 		'main.emails': 'WithDates',
 		'main.events': 'WithUuid',
 		'main.items': 'WithDates, WithUuid',

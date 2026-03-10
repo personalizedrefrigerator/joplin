@@ -1,18 +1,9 @@
-import { createUserAndSession, beforeAllDb, afterAllTests, beforeEachDb, models, expectThrow, createFolder, createItemTree3, expectNotThrow, createNote, updateNote, dbSlave, db } from '../utils/testing/testUtils';
+import { createUserAndSession, beforeAllDb, afterAllTests, beforeEachDb, models, expectThrow, createFolder, createItemTree3, expectNotThrow, createNote, updateNote } from '../utils/testing/testUtils';
 import { ChangeType } from '../services/database/types';
-import newModelFactory from './factory';
 import { Day, msleep } from '../utils/time';
 import { ChangePagination } from './ChangeModel';
 import { SqliteMaxVariableNum } from '../db';
 import { defaultDeltaPagination } from './ChangeModel';
-import ChangeModel from './ChangeModel.new';
-import config from '../config';
-
-const newChangeModel = () => {
-	return new ChangeModel(
-		db(), dbSlave(), db => newModelFactory(db, dbSlave(), config()), config(),
-	);
-};
 
 describe('ChangeModel', () => {
 
@@ -75,7 +66,7 @@ describe('ChangeModel', () => {
 		}
 
 		{
-			const pagination: ChangePagination = { limit: 3 };
+			const pagination: ChangePagination = { limit: 5 };
 
 			// Internally, when we request the first three changes, we get back:
 			//
@@ -102,16 +93,15 @@ describe('ChangeModel', () => {
 			const page2 = (await models().change().delta(user.id, { ...pagination, cursor: page1.cursor }));
 			changes = page2.items;
 			expect(changes.length).toBe(3);
-			// Although there are no more changes, it's not possible to know
-			// that without running the next query, since the same number of changes
-			// were returned as the requested limit.
-			expect(page2.has_more).toBe(true);
 			expect(changes[0].item_id).toBe(item1.id);
 			expect(changes[0].type).toBe(ChangeType.Delete);
 			expect(changes[1].item_id).toBe(item2.id);
 			expect(changes[1].type).toBe(ChangeType.Update);
 			expect(changes[2].item_id).toBe(item3.id);
 			expect(changes[2].type).toBe(ChangeType.Create);
+
+			// There should be no more changes
+			expect(page2.has_more).toBe(false);
 
 			// Check that we indeed reached the end of the feed.
 			const page3 = (await models().change().delta(user.id, { ...pagination, cursor: page2.cursor }));
@@ -393,7 +383,7 @@ describe('ChangeModel', () => {
 			...change,
 		}));
 
-		expect(newChangeModel().compressChanges_(changes)).toMatchObject(expected);
+		expect(models().change().compressChanges_(changes)).toMatchObject(expected);
 	});
 
 });

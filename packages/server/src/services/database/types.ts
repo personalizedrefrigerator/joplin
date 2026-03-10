@@ -366,16 +366,14 @@ export interface User extends WithDates, WithUuid {
 	sso_auth_code_expire_at?: number;
 }
 
-export interface Changes2 {
+export interface Changes2 extends WithDates, WithUuid {
 	counter?: number;
-	id?: Uuid;
 	item_id?: Uuid;
 	user_id?: Uuid;
 	item_name?: string;
 	previous_share_id?: Uuid;
+	item_type?: ItemType;
 	type?: number;
-	updated_time?: number;
-	created_time?: number;
 }
 
 export const databaseSchema: DatabaseTables = {
@@ -623,6 +621,7 @@ export const databaseSchema: DatabaseTables = {
 		user_id: { type: 'string', defaultValue: '' },
 		item_name: { type: 'string', defaultValue: '' },
 		previous_share_id: { type: 'string', defaultValue: '' },
+		item_type: { type: 'number', defaultValue: null },
 		type: { type: 'number', defaultValue: null },
 		updated_time: { type: 'string', defaultValue: null },
 		created_time: { type: 'string', defaultValue: null },
