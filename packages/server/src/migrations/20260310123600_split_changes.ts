@@ -61,8 +61,8 @@ export const down = async (db: DbConnection) => {
 			FROM changes_2
 			ORDER BY changes_2.counter ASC
 			-- Skip the first (migration marker) change in changes_2.
-			-- Note: A negative limit means "unbounded".
-			LIMIT -1 OFFSET 1
+			-- Note: A negative limit means "unbounded" in SQLite.
+			LIMIT ${isPostgres(db) ? 'ALL' : '-1'} OFFSET 1
 	`);
 	await db.schema.dropTable('changes_2');
 };
