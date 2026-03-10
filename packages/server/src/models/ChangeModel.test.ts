@@ -450,5 +450,13 @@ describe('ChangeModel', () => {
 		expect(models().change().compressChanges_(changes)).toMatchObject(expected);
 	});
 
+	test('changesForUserQuery should split totals across the old/new changes boundary', async () => {
+		const { user } = await createUserAndSession(1, true);
+		await models().item().makeTestItems(user.id, 500);
+
+		const doCountQuery = true;
+		const counts = await models().change().changesForUserQuery(user.id, 0, 999, doCountQuery);
+		expect(counts).toMatchObject([{ total: 0 }, { total: 500 }]);
+	});
 });
 

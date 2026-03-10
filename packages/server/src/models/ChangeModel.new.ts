@@ -1,4 +1,3 @@
-import { Knex } from 'knex';
 import Logger from '@joplin/utils/Logger';
 import { DbConnection, SqliteMaxVariableNum } from '../db';
 import { Changes2, ChangeType, Uuid } from '../services/database/types';
@@ -97,50 +96,28 @@ export default class ChangeModel extends BaseModel<Changes2> {
 			'counter',
 		];
 
-		const fieldsSql = `"${fields.join('", "')}"`;
-
-		const rawQuerySql = `
-			SELECT ${fieldsSql}
-			FROM "changes_2"
-			WHERE counter > ?
-				AND user_id = ?
-			ORDER BY "counter" ASC
-			${doCountQuery ? '' : 'LIMIT ?'}
-		`;
-
-		const params = [
-			fromCounter,
-			userId,
-		];
-
-		if (!doCountQuery) params.push(limit);
-
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-		let query: Knex.Raw<any> = null;
+		let query = this.db(this.tableName);
+		if (doCountQuery) {
+			query = query.count('*', { as: 'total' });
+		} else {
+			query = query.select(fields);
+		}
+		query = query
+			.where('counter', '>', fromCounter)
+			.andWhere('user_id', '=', userId)
+			.orderBy('counter', 'asc');
 
 		if (!doCountQuery) {
-			query = this.dbSlave.raw(rawQuerySql, params);
-		} else {
-			query = this.dbSlave.raw(`
-				SELECT count(*) as total
-				FROM (
-					(${rawQuerySql})
-				) AS merged
-			`, params);
+			query = query.limit(limit);
 		}
 
-		const results = await query;
-
-		// Because it's a raw query, we need to handle the results manually:
-		// Postgres returns an object with a "rows" property, while SQLite
-		// returns the rows directly;
-		const output: Changes2[] = results.rows ? results.rows : results;
+		const results: Changes2[] = await query;
 
 		// This property is present only for the purpose of ordering the results
 		// and can be removed afterwards.
-		for (const change of output) delete change.counter;
+		for (const change of results) delete change.counter;
 
-		return output;
+		return results;
 	}
 
 	// See spec for complete documentation:

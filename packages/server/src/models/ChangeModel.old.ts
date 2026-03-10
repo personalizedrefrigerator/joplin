@@ -255,9 +255,9 @@ export default class ChangeModel extends BaseModel<Change> {
 			query = this.dbSlave.raw(`
 				SELECT count(*) as total
 				FROM (
-					(${subQuery1})
+					SELECT counter FROM (${subQuery1}) as sub1
 					UNION ALL				
-					(${subQuery2})
+					SELECT counter FROM (${subQuery2}) as sub2
 				) AS merged
 			`, finalParams);
 		}
