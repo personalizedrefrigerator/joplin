@@ -236,7 +236,6 @@ REVO
 REVOGB
 Bopomofo
 Linkosed
-randomblob
 mdpi
 xhdpi
 xxhdpi
