@@ -1,9 +1,18 @@
-import { createUserAndSession, beforeAllDb, afterAllTests, beforeEachDb, models, expectThrow, createFolder, createItemTree3, expectNotThrow, createNote, updateNote } from '../utils/testing/testUtils';
+import { createUserAndSession, beforeAllDb, afterAllTests, beforeEachDb, models, expectThrow, createFolder, createItemTree3, expectNotThrow, createNote, updateNote, db, dbSlave } from '../utils/testing/testUtils';
 import { ChangeType } from '../services/database/types';
 import { Day, msleep } from '../utils/time';
 import { ChangePagination } from './ChangeModel';
 import { SqliteMaxVariableNum } from '../db';
 import { defaultDeltaPagination } from './ChangeModel';
+import ChangeModelOld from './ChangeModel.old';
+import config from '../config';
+import newModelFactory from './factory';
+
+const newChangeModelOld = () => {
+	return new ChangeModelOld(
+		db(), dbSlave(), db => newModelFactory(db, dbSlave(), config()), config(),
+	);
+};
 
 describe('ChangeModel', () => {
 
@@ -181,6 +190,46 @@ describe('ChangeModel', () => {
 
 		const result = await models().change().delta(user.id, { limit: 100 });
 		expect(result.has_more).toBe(true);
+	});
+
+	test('should retrieve changes that span the old and new tables', async () => {
+		const { user } = await createUserAndSession(1, true);
+
+		await msleep(1);
+		const { id: itemId } = await models().item().makeTestItem(user.id, 1); // [1] CREATE 1
+		const item = await models().item().load(itemId);
+		await msleep(1);
+		await models().item().saveForUser(user.id, { id: item.id, name: '0000000000000000000000000000001A.md', content: Buffer.from('') });
+
+		// Clear all changes
+		await models().change().delete((await models().change().all()).map(change => change.id));
+
+		let changes = await models().change().allFromId('');
+		expect(changes.items).toHaveLength(0);
+
+		const oldModel = newChangeModelOld();
+		const recordOldChange = async (type: ChangeType) => {
+			await oldModel.recordChange({
+				itemId: item.id,
+				itemName: item.name,
+				itemType: item.jop_type,
+				previousItem: { jop_share_id: '' },
+				shareId: '',
+				sourceUserId: user.id,
+				type,
+			});
+		};
+
+		await recordOldChange(ChangeType.Create);
+		await recordOldChange(ChangeType.Update);
+		await recordOldChange(ChangeType.Update);
+
+		// Update (new table)
+		await msleep(1);
+		await models().item().saveForUser(user.id, { id: item.id, name: '0000000000000000000000000000001A.md', content: Buffer.from('') });
+
+		changes = await models().change().allFromId('');
+		expect(changes.items).toHaveLength(4);
 	});
 
 	test('should delete old changes', async () => {
