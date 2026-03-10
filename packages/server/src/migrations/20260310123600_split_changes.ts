@@ -1,5 +1,5 @@
 import { strict as assert } from 'assert';
-import { DbConnection } from '../db';
+import { DbConnection, isPostgres } from '../db';
 import { uuidgen } from '../utils/uuid';
 
 export const up = async (db: DbConnection) => {
@@ -46,5 +46,23 @@ export const up = async (db: DbConnection) => {
 };
 
 export const down = async (db: DbConnection) => {
+	await db.raw(`
+		INSERT INTO changes (previous_item, id, type, item_id, item_name, item_type, user_id, updated_time, created_time)
+			SELECT
+				json_object('jop_share_id' ${isPostgres(db) ? 'VALUE' : ','} changes_2.previous_share_id),
+				changes_2.id,
+				changes_2.type,
+				changes_2.item_id,
+				changes_2.item_name,
+				changes_2.item_type,
+				changes_2.user_id,
+				changes_2.updated_time,
+				changes_2.created_time
+			FROM changes_2
+			ORDER BY changes_2.counter ASC
+			-- Skip the first (migration marker) change in changes_2.
+			-- Note: A negative limit means "unbounded".
+			LIMIT -1 OFFSET 1
+	`);
 	await db.schema.dropTable('changes_2');
 };
