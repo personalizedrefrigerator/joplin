@@ -20,8 +20,6 @@ export const up = async (db: DbConnection) => {
 		table.bigInteger('updated_time').notNullable();
 		table.bigInteger('created_time').notNullable();
 
-		// TODO: What is the performance change if the "unique" index is removed here?
-		table.index(['user_id', 'counter']);
 		table.unique(['user_id', 'counter']);
 	});
 
