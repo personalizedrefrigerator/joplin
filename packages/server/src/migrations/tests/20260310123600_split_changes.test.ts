@@ -78,18 +78,26 @@ describe('20260310123600_split_changes', () => {
 		expect(updatedChanges).toMatchObject([
 			{
 				counter: 1,
-				previous_item: JSON.stringify({ jop_share_id: share.id }),
 				id: '0aaaaaaaaaaaaaaaaaaa',
 				user_id: session1.user_id,
 				type: ChangeType.Update,
 			},
 			{
 				counter: 2,
-				previous_item: JSON.stringify({ jop_share_id: share.id }),
 				id: '0aaaaaaaaaaaaaaaaaa1',
 				user_id: session1.user_id,
 				type: ChangeType.Delete,
 			},
+		]);
+		// Check the previous_item value separately (by parsing), since the exact formatting
+		// of the JSON isn't guaranteed
+		expect(
+			updatedChanges
+				.map(change => change.previous_item)
+				.map(item => JSON.parse(item)),
+		).toMatchObject([
+			{ jop_share_id: share.id },
+			{ jop_share_id: share.id },
 		]);
 	});
 
