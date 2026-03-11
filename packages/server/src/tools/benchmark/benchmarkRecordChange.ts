@@ -4,7 +4,6 @@ import { ChangeType, ItemType, Share, ShareUserStatus, User } from '../../servic
 import { makeFolderSerializedBody } from '../../utils/testing/serializedItems';
 import recordBenchmark from './recordBenchmark';
 import { FolderEntity } from '@joplin/lib/services/database/types';
-import { strict as assert } from 'node:assert';
 
 const createTestUser = async (models: Models) => {
 	const email = `benchmark-${uuidgen()}@example.com`;
@@ -60,16 +59,15 @@ const benchmarkRecordChange = async (models: Models) => {
 		owner: User;
 	};
 	const iterateShares = async function*() {
-		for (let userCount = 1; userCount <= 200; userCount += 20) {
-			const owner = await createTestUser(models);
-			const { share } = await createAndShareFolder(owner, models);
-
-			for (let i = 1; i < userCount; i++) {
+		const owner = await createTestUser(models);
+		const { share } = await createAndShareFolder(owner, models);
+		for (let userCount = 1; userCount <= 5000; userCount += 100) {
+			const currentUserCount = (await models.share().allShareUserIds(share)).length;
+			for (let i = currentUserCount; i < userCount; i++) {
 				const recipient = await createTestUser(models);
 				const shareUser = await models.shareUser().addByEmail(share.id, recipient.email, '');
 				await models.shareUser().setStatus(share.id, shareUser.user_id, ShareUserStatus.Accepted);
 			}
-			assert.equal((await models.share().allShareUserIds(share)).length, userCount);
 
 			await models.share().updateSharedItems3();
 
