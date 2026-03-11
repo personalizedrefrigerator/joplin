@@ -60,7 +60,7 @@ const benchmarkRecordChange = async (models: Models) => {
 		owner: User;
 	};
 	const iterateShares = async function*() {
-		for (let userCount = 1; userCount <= 400; userCount += 20) {
+		for (let userCount = 1; userCount <= 200; userCount += 20) {
 			const owner = await createTestUser(models);
 			const { share } = await createAndShareFolder(owner, models);
 
@@ -89,7 +89,7 @@ const benchmarkRecordChange = async (models: Models) => {
 	await recordBenchmark<DataPoint>({
 		taskLabel: 'create->update->delete',
 		batchIterator: iterateShares(),
-		trialCount: 5,
+		trialCount: 2,
 		outputFile: 'create-update-delete-item-perf.csv',
 		runTask: async ({ share, owner }) => {
 			const jopId = uuidgen();
