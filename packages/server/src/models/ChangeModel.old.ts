@@ -248,6 +248,13 @@ export default class ChangeModel extends BaseModel<Change> {
 
 	// See spec for complete documentation:
 	// https://joplinapp.org/spec/server_delta_sync/#regarding-the-deletion-of-old-change-events
+	//
+	// Currently, this logic is shared with ChangeModel.new. Since no new changes
+	// will be added to ChangeModel.old and this function only operates on old
+	// changes, this function will eventually do nothing and should be removed
+	// in the future.
+	// TODO: Remove after sufficient time has passed since the changes -> changes_2
+	// migration.
 	public async compressOldChanges(ttl: number = null) {
 		ttl = ttl === null ? defaultChangeTtl : ttl;
 		const cutOffDate = Date.now() - ttl;
