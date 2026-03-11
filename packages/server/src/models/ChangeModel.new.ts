@@ -215,6 +215,8 @@ export default class ChangeModel extends BaseModel<Changes2> {
 			addChangeForUser(sourceUserId);
 		}
 
+		// For performance, apply all of the changes at once. Applying the changes one at a time
+		// can take several seconds to run for large shares.
 		await this.db(this.tableName).insert(changes);
 	}
 
