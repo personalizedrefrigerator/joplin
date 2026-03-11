@@ -80,15 +80,6 @@ export default class UserItemModel extends BaseModel<UserItem> {
 		return count[0].count;
 	}
 
-	public async countWithShareId(shareId: Uuid): Promise<number> {
-		const count = await this
-			.db(this.tableName)
-			.count('*')
-			.leftJoin('items', 'user_items.item_id', 'items.id')
-			.where('items.jop_share_id', '=', shareId);
-		return count[0].count;
-	}
-
 	public async byUserId(userId: Uuid): Promise<UserItem[]> {
 		return this.db(this.tableName).where('user_id', '=', userId);
 	}
