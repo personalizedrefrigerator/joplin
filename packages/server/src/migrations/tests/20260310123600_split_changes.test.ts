@@ -37,9 +37,7 @@ describe('20260310123600_split_changes', () => {
 
 		expect(await db()('changes_2').select('*')).toHaveLength(1);
 
-		// Use db() directly, rather than models().changes.
-		// It should be possible to update models().changes
-		// to use the new changes_2 API without breaking this test.
+		// Since this is testing a migration, use db() directly, rather than models().changes.
 		const changeBaseProperties = {
 			type: ChangeType.Update,
 			item_id: '1234567890',
