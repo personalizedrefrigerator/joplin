@@ -9,7 +9,7 @@ import { NewModelFactoryHandler } from './factory';
 import { Config } from '../utils/types';
 import type { RecordChangeOptions } from './ChangeModel';
 
-const logger = Logger.create('ChangeModel');
+const logger = Logger.create('ChangeModel.old');
 
 export const defaultChangeTtl = 180 * Day;
 

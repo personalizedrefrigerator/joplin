@@ -17,10 +17,6 @@ export const defaultChangeTtl = 180 * Day;
 
 export type PaginatedChanges = PaginatedResults<Changes2>;
 
-export interface ChangePreviousItem {
-	jop_share_id: string;
-}
-
 type RecordChangeOptions = RecordChangeOptionsBase;
 
 export default class ChangeModel extends BaseModel<Changes2> {
