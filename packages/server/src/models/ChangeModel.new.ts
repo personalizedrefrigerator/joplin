@@ -2,11 +2,13 @@ import Logger from '@joplin/utils/Logger';
 import { DbConnection, SqliteMaxVariableNum } from '../db';
 import { Changes2, ChangeType, Uuid } from '../services/database/types';
 import { Day, formatDateTime } from '../utils/time';
-import BaseModel, { LoadOptions, SaveOptions } from './BaseModel';
+import BaseModel, { LoadOptions, SaveOptions, UuidType } from './BaseModel';
 import { PaginatedResults } from './utils/pagination';
 import { NewModelFactoryHandler } from './factory';
 import { Config } from '../utils/types';
 import type { RecordChangeOptions as RecordChangeOptionsBase } from './ChangeModel';
+import { uuidgen } from '../utils/uuid';
+import dbuuid from '../utils/dbuuid';
 
 const logger = Logger.create('ChangeModel.new');
 
@@ -182,15 +184,19 @@ export default class ChangeModel extends BaseModel<Changes2> {
 	public async recordChange({
 		shareId, sourceUserId, itemId, itemName, itemType, type, previousItem,
 	}: RecordChangeOptions) {
-		const saveChangeForUser = async (userId: Uuid) => {
-			await this.save({
+		const changes: Changes2[] = [];
+		const addChangeForUser = (userId: Uuid) => {
+			changes.push({
 				item_id: itemId,
 				item_name: itemName,
 				item_type: itemType,
 				type,
 				previous_share_id: previousItem.jop_share_id ?? '',
 				user_id: userId,
-			}, { isNew: true });
+				id: this.uuidType() === UuidType.NanoId ? uuidgen() : dbuuid(),
+				created_time: Date.now(),
+				updated_time: Date.now(),
+			});
 		};
 
 		if (type === ChangeType.Update) {
@@ -203,11 +209,13 @@ export default class ChangeModel extends BaseModel<Changes2> {
 
 			// Post a change for all users that can access the item
 			for (const userId of allUserIds) {
-				await saveChangeForUser(userId);
+				addChangeForUser(userId);
 			}
 		} else {
-			await saveChangeForUser(sourceUserId);
+			addChangeForUser(sourceUserId);
 		}
+
+		await this.db(this.tableName).insert(changes);
 	}
 
 }
