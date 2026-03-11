@@ -37,11 +37,6 @@ export default class ChangeModel extends BaseModel<Change> {
 		return JSON.stringify(item);
 	}
 
-	public unserializePreviousItem(item: string): ChangePreviousItem {
-		if (!item) return null;
-		return JSON.parse(item);
-	}
-
 	public changeUrl(): string {
 		return `${this.baseUrl}/changes`;
 	}
