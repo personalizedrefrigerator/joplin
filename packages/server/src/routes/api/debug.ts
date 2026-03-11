@@ -13,6 +13,7 @@ import createUserDeletions from '../../tools/debug/createUserDeletions';
 import clearDatabase from '../../tools/debug/clearDatabase';
 import populateDatabase from '../../tools/debug/populateDatabase';
 import uuid from '@joplin/lib/uuid';
+import benchmarkRecordChange from '../../tools/benchmark/benchmarkRecordChange';
 
 const router = new Router(RouteType.Api);
 
@@ -55,6 +56,10 @@ router.post('api/debug', async (_path: SubPath, ctx: AppContext) => {
 
 	if (query.action === 'benchmarkDeltaPerformance') {
 		await benchmarkDeltaPerformance(ctx.joplin.models);
+	}
+
+	if (query.action === 'benchmarkRecordChange') {
+		await benchmarkRecordChange(ctx.joplin.models);
 	}
 
 	if (query.action === 'populateDatabase') {
