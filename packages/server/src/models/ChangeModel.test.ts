@@ -65,11 +65,13 @@ describe('ChangeModel', () => {
 			// - We don't get any UPDATE event since they've been compressed
 			//   down to the CREATE events.
 			const changes = (await models().change().delta(user.id)).items;
-			expect(changes).toMatchObject([
-				{ item_id: item2.id, type: ChangeType.Create },
-				{ item_id: item1.id, type: ChangeType.Delete },
-				{ item_id: item3.id, type: ChangeType.Create },
-			]);
+			expect(changes.length).toBe(3);
+			expect(changes[0].item_id).toBe(item2.id);
+			expect(changes[0].type).toBe(ChangeType.Create);
+			expect(changes[1].item_id).toBe(item1.id);
+			expect(changes[1].type).toBe(ChangeType.Delete);
+			expect(changes[2].item_id).toBe(item3.id);
+			expect(changes[2].type).toBe(ChangeType.Create);
 		}
 
 		{
