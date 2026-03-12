@@ -153,8 +153,10 @@ export default class ChangeModel extends BaseModel<Changes2> {
 	// Public for testing
 	public async changesForUserQuery(userId: Uuid, fromCounter: number, limit: number, doCountQuery: boolean): Promise<Changes2[]> {
 		const firstNewChange = await this.newModel_.first({ fields: ['counter'] });
+
 		let changes: Changes2[] = [];
-		if (fromCounter < firstNewChange.counter) {
+		const startInOldTable = !firstNewChange || fromCounter < firstNewChange.counter;
+		if (startInOldTable) {
 			changes = oldToNewChanges(await this.oldModel_.changesForUserQuery(userId, fromCounter, limit, doCountQuery));
 		}
 

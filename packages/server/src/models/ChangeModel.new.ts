@@ -37,7 +37,7 @@ export default class ChangeModel extends BaseModel<Changes2> {
 		return `${this.baseUrl}/changes`;
 	}
 
-	public async first(options: LoadOptions): Promise<Changes2> {
+	public async first(options: LoadOptions): Promise<Changes2|undefined> {
 		return await this.db(this.tableName)
 			.select(options.fields ?? this.defaultFields)
 			.orderBy('counter', 'asc')
