@@ -94,7 +94,7 @@ export default class ChangeModel extends BaseModel<Changes2> {
 
 		interface ChangeReportItem {
 			total: number;
-			max_counter: number;
+			max_created_time: number;
 			item_id: Uuid;
 		}
 
@@ -110,30 +110,20 @@ export default class ChangeModel extends BaseModel<Changes2> {
 			// as we need this below.
 
 			const query = this
-				.db
-				.select({ item_id: 'item_id' })
-				.fromRaw('changes_2 AS changes_2_outer')
-				.countDistinct('id', { as: 'total' })
-				.max('counter', { as: 'max_counter' })
+				.db(this.tableName)
+				.select('item_id')
+				.count('id', { as: 'total' })
+				.max('created_time', { as: 'max_created_time' })
 
 				.where('type', '=', ChangeType.Update)
 				.where('created_time', '<', cutOffDate)
 
-				// Always keep the latest group of updates. Each user should retain at least one
-				// UPDATE change for an item. Since updates events create one change for each user,
-				// each with the same timestamp, filter out all events that have the latest timestamp:
-				.andWhere(
-					'created_time', '<',
-					this.db.select('max_created_time').from(
-						this.db(this.tableName)
-							.max('created_time', { as: 'max_created_time' })
-							.where('item_id', '=', this.db.raw('changes_2_outer.item_id'))
-							.andWhere('type', '=', ChangeType.Update),
-					),
-				)
-
 				.groupBy('item_id')
 				.orderBy('total', 'desc')
+				// Use created_time to identify events caused by distinct changes. This is important.
+				// In a share, there can be multiple "Update" change entries caused by the same event (one per
+				// user). Each user needs to keep one of these latest updates.
+				.havingRaw('count(DISTINCT created_time) > 1')
 				.limit(limit);
 			const changeReport: ChangeReportItem[] = await query;
 
@@ -156,7 +146,7 @@ export default class ChangeModel extends BaseModel<Changes2> {
 						.db(this.tableName)
 						.where('type', '=', ChangeType.Update)
 						.where('created_time', '<', cutOffDate)
-						.where('counter', '<=', row.max_counter)
+						.where('created_time', '<', row.max_created_time)
 						.where('item_id', '=', row.item_id)
 						.delete();
 
