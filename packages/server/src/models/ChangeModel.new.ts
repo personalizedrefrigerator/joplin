@@ -64,7 +64,7 @@ export default class ChangeModel extends BaseModel<Changes2> {
 			'counter',
 		];
 
-		let query = this.db(this.tableName);
+		let query = this.dbSlave(this.tableName);
 		if (doCountQuery) {
 			query = query.count('*', { as: 'total' });
 		} else {
