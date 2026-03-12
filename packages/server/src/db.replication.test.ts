@@ -113,7 +113,7 @@ describe('db.replication', () => {
 		let result = await changeModel.delta(user.id);
 
 		// We get nothing because the slave has not been synced yet
-		expect(result.items.length).toBe(0);
+		expect(result.items).toHaveLength(0);
 
 		// But we still get the item because it doesn't use the slave database
 		expect((await models().item().loadAsJoplinItem<FolderEntity>(folderItem.id)).title).toBe('title 1');
