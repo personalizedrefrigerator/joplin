@@ -1,14 +1,14 @@
-import { createUserAndSession, beforeAllDb, afterAllTests, beforeEachDb, models, expectThrow, createFolder, createItemTree3, expectNotThrow, createNote, updateNote, db, dbSlave, createItemTree } from '../utils/testing/testUtils';
-import { ChangeType, Session, ShareType } from '../services/database/types';
-import { Day, msleep } from '../utils/time';
-import { ChangePagination } from './ChangeModel';
-import { SqliteMaxVariableNum } from '../db';
-import { defaultDeltaPagination } from './ChangeModel';
+import { createUserAndSession, beforeAllDb, afterAllTests, beforeEachDb, models, expectThrow, createFolder, createItemTree3, expectNotThrow, createNote, updateNote, db, dbSlave, createItemTree } from '../../utils/testing/testUtils';
+import { ChangeType, Session, ShareType } from '../../services/database/types';
+import { Day, msleep } from '../../utils/time';
+import { ChangePagination } from '../ChangeModel';
+import { SqliteMaxVariableNum } from '../../db';
+import { defaultDeltaPagination } from '../ChangeModel';
 import ChangeModelOld from './ChangeModel.old';
-import config from '../config';
-import newModelFactory from './factory';
+import config from '../../config';
+import newModelFactory from '../factory';
 import { runWithFakeTimers } from '@joplin/lib/testing/test-utils';
-import { shareWithUserAndAccept } from '../utils/testing/shareApiUtils';
+import { shareWithUserAndAccept } from '../../utils/testing/shareApiUtils';
 import { NoteEntity } from '@joplin/lib/services/database/types';
 
 const newChangeModelOld = () => {
@@ -17,7 +17,7 @@ const newChangeModelOld = () => {
 	);
 };
 
-describe('ChangeModel', () => {
+describe('ChangeModel/index', () => {
 
 	beforeAll(async () => {
 		await beforeAllDb('ChangeModel');

@@ -1,20 +1,17 @@
-import { DbConnection, SqliteMaxVariableNum } from '../db';
-import { ChangeType, Uuid, ItemType, Changes2, Item, Change } from '../services/database/types';
-import { Day } from '../utils/time';
-import { PaginatedResults } from './utils/pagination';
-import { NewModelFactoryHandler } from './factory';
-import { Config } from '../utils/types';
+import { DbConnection, SqliteMaxVariableNum } from '../../db';
+import { ChangeType, Uuid, ItemType, Changes2, Item, Change } from '../../services/database/types';
+import { PaginatedResults } from '../utils/pagination';
+import { NewModelFactoryHandler } from '../factory';
+import { Config } from '../../utils/types';
 import ChangeModelOld from './ChangeModel.old';
 import ChangeModelNew from './ChangeModel.new';
-import BaseModel, { LoadOptions } from './BaseModel';
-import { ErrorResyncRequired } from '../utils/errors';
+import BaseModel, { LoadOptions } from '../BaseModel';
+import { ErrorResyncRequired } from '../../utils/errors';
 
-export const defaultChangeTtl = 180 * Day;
+export { defaultChangeTtl } from './BaseChangeModel';
 
 export interface DeltaChange extends Changes2 {
 	jop_updated_time?: number;
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	jopItem?: any;
 }
 
 export type PaginatedDeltaChanges = PaginatedResults<DeltaChange>;

@@ -1,17 +1,11 @@
 import { Knex } from 'knex';
-import Logger from '@joplin/utils/Logger';
-import { DbConnection, SqliteMaxVariableNum, isPostgres } from '../db';
-import { Change, ChangeType, Uuid } from '../services/database/types';
-import { Day, formatDateTime } from '../utils/time';
-import BaseModel, { SaveOptions } from './BaseModel';
-import { PaginatedResults } from './utils/pagination';
-import { NewModelFactoryHandler } from './factory';
-import { Config } from '../utils/types';
-import type { RecordChangeOptions } from './ChangeModel';
-
-const logger = Logger.create('ChangeModel.old');
-
-export const defaultChangeTtl = 180 * Day;
+import { DbConnection, isPostgres } from '../../db';
+import { Change, ChangeType, Uuid } from '../../services/database/types';
+import { PaginatedResults } from '../utils/pagination';
+import { NewModelFactoryHandler } from '../factory';
+import { Config } from '../../utils/types';
+import type { RecordChangeOptions } from './index';
+import BaseChangeModel from './BaseChangeModel';
 
 export type PaginatedChanges = PaginatedResults<Change>;
 
@@ -19,38 +13,21 @@ export interface ChangePreviousItem {
 	jop_share_id: string;
 }
 
-export default class ChangeModel extends BaseModel<Change> {
+export default class ChangeModel extends BaseChangeModel<Change> {
 
 	public constructor(db: DbConnection, dbSlave: DbConnection, modelFactory: NewModelFactoryHandler, config: Config) {
 		super(db, dbSlave, modelFactory, config);
 	}
 
-	public get tableName(): string {
+	public override get tableName(): string {
 		return 'changes';
-	}
-
-	protected hasUuid(): boolean {
-		return true;
 	}
 
 	public serializePreviousItem(item: ChangePreviousItem): string {
 		return JSON.stringify(item);
 	}
 
-	public changeUrl(): string {
-		return `${this.baseUrl}/changes`;
-	}
-
-	public async allFromId(id: string, limit: number = SqliteMaxVariableNum) {
-		const startChange: Change = id ? await this.load(id) : null;
-		const query = this.db(this.tableName).select(...this.defaultFields);
-		if (startChange) void query.where('counter', '>', startChange.counter);
-		void query.limit(limit).orderBy('counter', 'asc');
-		const results: Change[] = await query;
-		return results;
-	}
-
-	public async changesForUserQuery(userId: Uuid, fromCounter: number, limit: number, doCountQuery: boolean): Promise<Change[]> {
+	public override async changesForUserQuery(userId: Uuid, fromCounter: number, limit: number, doCountQuery: boolean): Promise<Change[]> {
 		// When need to get:
 		//
 		// - All the CREATE and DELETE changes associated with the user
@@ -236,105 +213,10 @@ export default class ChangeModel extends BaseModel<Change> {
 		return output;
 	}
 
-	// See spec for complete documentation:
-	// https://joplinapp.org/spec/server_delta_sync/#regarding-the-deletion-of-old-change-events
-	//
-	// Currently, this logic is shared with ChangeModel.new. Since no new changes
-	// will be added to ChangeModel.old and this function only operates on old
-	// changes, this function will eventually do nothing and should be removed
-	// in the future.
-	// TODO: Remove after sufficient time has passed since the changes -> changes_2
-	// migration.
-	public async compressOldChanges(ttl: number = null) {
-		ttl = ttl === null ? defaultChangeTtl : ttl;
-		const cutOffDate = Date.now() - ttl;
-		const limit = 1000;
-		const doneItemIds: Uuid[] = [];
-
-		interface ChangeReportItem {
-			total: number;
-			max_created_time: number;
-			item_id: Uuid;
-		}
-
-		let error: Error = null;
-		let totalDeletedCount = 0;
-
-		logger.info(`compressOldChanges: Processing changes older than: ${formatDateTime(cutOffDate)} (${cutOffDate})`);
-
-		while (true) {
-			// First get all the UPDATE changes before the specified date, and
-			// order by the items that had the most changes. Also for each item
-			// get the most recent change date from within that time interval,
-			// as we need this below.
-
-			const changeReport: ChangeReportItem[] = await this
-				.db(this.tableName)
-
-				.select(['item_id'])
-				.countDistinct('id', { as: 'total' })
-				.max('created_time', { as: 'max_created_time' })
-
-				.where('type', '=', ChangeType.Update)
-				.where('created_time', '<', cutOffDate)
-
-				.groupBy('item_id')
-				.havingRaw('count(id) > 1')
-				.orderBy('total', 'desc')
-				.limit(limit);
-
-			if (!changeReport.length) break;
-
-			await this.withTransaction(async () => {
-				for (const row of changeReport) {
-					if (doneItemIds.includes(row.item_id)) {
-						// We don't throw from within the transaction because
-						// that would rollback all other operations even though
-						// they are valid. So we save the error and exit.
-						error = new Error(`Trying to process an item that has already been done. Aborting. Row: ${JSON.stringify(row)}`);
-						return;
-					}
-
-					// Still from within the specified interval, delete all
-					// UPDATE changes, except for the most recent one.
-
-					const deletedCount = await this
-						.db(this.tableName)
-						.where('type', '=', ChangeType.Update)
-						.where('created_time', '<', cutOffDate)
-						.where('created_time', '!=', row.max_created_time)
-						.where('item_id', '=', row.item_id)
-						.delete();
-
-					totalDeletedCount += deletedCount;
-					doneItemIds.push(row.item_id);
-				}
-			}, 'ChangeModel::compressOldChanges');
-
-			logger.info(`compressOldChanges: Processed: ${doneItemIds.length} items. Deleted: ${totalDeletedCount} changes.`);
-
-			if (error) throw error;
-		}
-
-		logger.info(`compressOldChanges: Finished processing. Done ${doneItemIds.length} items. Deleted: ${totalDeletedCount} changes.`);
-	}
-
-	public async save(change: Change, options: SaveOptions = {}): Promise<Change> {
-		return super.save(change, options);
-	}
-
-	public async deleteByItemIds(itemIds: Uuid[]) {
-		if (!itemIds.length) return;
-
-		await this.db(this.tableName)
-			.whereIn('item_id', itemIds)
-			.delete();
-	}
-
-	public async recordChange({
+	public override async recordChange({
 		sourceUserId, itemId, itemName, type, previousItem, itemType,
 	}: RecordChangeOptions) {
-		return await this.save({
+		await this.save({
 			item_type: itemType,
 			item_id: itemId,
 			item_name: itemName,
