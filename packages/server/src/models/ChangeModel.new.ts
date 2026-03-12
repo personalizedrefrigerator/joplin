@@ -124,14 +124,12 @@ export default class ChangeModel extends BaseModel<Changes2> {
 				// each with the same timestamp, filter out all events that have the latest timestamp:
 				.andWhere(
 					'created_time', '<',
-					// For performance, select the most recent update's created time. This assumes that
-					// more recent items have greater created_times:
-					this.db(this.tableName)
-						.select('created_time')
-						.where('item_id', '=', this.db.raw('changes_2_outer.item_id'))
-						.andWhere('type', '=', ChangeType.Update)
-						.orderBy('counter', 'desc')
-						.first(),
+					this.db.select('max_created_time').from(
+						this.db(this.tableName)
+							.max('created_time', { as: 'max_created_time' })
+							.where('item_id', '=', this.db.raw('changes_2_outer.item_id'))
+							.andWhere('type', '=', ChangeType.Update),
+					),
 				)
 
 				.groupBy('item_id')
