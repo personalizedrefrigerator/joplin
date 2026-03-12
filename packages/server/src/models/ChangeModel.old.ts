@@ -233,11 +233,6 @@ export default class ChangeModel extends BaseModel<Change> {
 		// Postgres returns an object with a "rows" property, while SQLite
 		// returns the rows directly;
 		const output: Change[] = results.rows ? results.rows : results;
-
-		// This property is present only for the purpose of ordering the results
-		// and can be removed afterwards.
-		for (const change of output) delete change.counter;
-
 		return output;
 	}
 

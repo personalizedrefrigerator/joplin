@@ -59,9 +59,10 @@ export function requestDeltaPagination(query: any): ChangePagination {
 }
 
 const oldToNewChange = (change: Change): Changes2 => {
+	const previousShareId = change.previous_item ? JSON.parse(change.previous_item)?.jop_share_id : '';
 	return {
 		...change,
-		previous_share_id: change.previous_item ? JSON.parse(change.previous_item).jop_share_id : '',
+		previous_share_id: previousShareId,
 	};
 };
 
@@ -190,8 +191,16 @@ export default class ChangeModel extends BaseModel<Changes2> {
 		processedChanges = await this.removeDeletedItems(processedChanges, items);
 
 		const finalChanges = processedChanges.map(change => {
+			change = { ...change };
+			// change.counter is used only for ordering the results and can be removed
+			// from API output:
+			delete change.counter;
+
+			return change;
+		}).map(change => {
 			const item = items.find(item => item.id === change.item_id);
-			if (!item) return { ...change };
+			if (!item) return change;
+
 			const deltaChange: DeltaChange = {
 				...change,
 				jop_updated_time: item.jop_updated_time,

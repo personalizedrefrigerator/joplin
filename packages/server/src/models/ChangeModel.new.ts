@@ -81,11 +81,6 @@ export default class ChangeModel extends BaseModel<Changes2> {
 		}
 
 		const results: Changes2[] = await query;
-
-		// This property is present only for the purpose of ordering the results
-		// and can be removed afterwards.
-		for (const change of results) delete change.counter;
-
 		return results;
 	}
 
