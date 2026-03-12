@@ -50,6 +50,7 @@ const propertyTypes: Record<string, string> = {
 	'*.item_type': 'ItemType',
 	'backup_items.content': 'Buffer',
 	'changes.type': 'ChangeType',
+	'changes_2.type': 'ChangeType',
 	'emails.sender_id': 'EmailSender',
 	'emails.sent_time': 'number',
 	'events.created_time': 'number',
