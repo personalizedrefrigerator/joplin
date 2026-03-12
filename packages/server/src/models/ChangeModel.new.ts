@@ -95,7 +95,7 @@ export default class ChangeModel extends BaseModel<Changes2> {
 		interface ChangeReportItem {
 			total: number;
 			max_counter: number;
-			itemIdOuter: Uuid;
+			item_id_outer: Uuid;
 		}
 
 		let error: Error = null;
@@ -112,7 +112,7 @@ export default class ChangeModel extends BaseModel<Changes2> {
 			const changeReport: ChangeReportItem[] = await this
 				.db(this.tableName)
 
-				.select({ itemIdOuter: 'item_id' })
+				.select({ item_id_outer: 'item_id' })
 				.countDistinct('id', { as: 'total' })
 				.max('counter', { as: 'max_counter' })
 
@@ -128,7 +128,7 @@ export default class ChangeModel extends BaseModel<Changes2> {
 						this.db(this.tableName)
 							.select('item_id')
 							.max('created_time', { as: 'max_created_time' })
-							.where('item_id', '=', this.db.raw('itemIdOuter'))
+							.where('item_id', '=', this.db.raw('item_id_outer'))
 							.andWhere('type', '=', ChangeType.Update),
 					),
 				)
@@ -141,7 +141,7 @@ export default class ChangeModel extends BaseModel<Changes2> {
 
 			await this.withTransaction(async () => {
 				for (const row of changeReport) {
-					if (doneItemIds.has(row.itemIdOuter)) {
+					if (doneItemIds.has(row.item_id_outer)) {
 						// We don't throw from within the transaction because
 						// that would rollback all other operations even though
 						// they are valid. So we save the error and exit.
@@ -157,11 +157,11 @@ export default class ChangeModel extends BaseModel<Changes2> {
 						.where('type', '=', ChangeType.Update)
 						.where('created_time', '<', cutOffDate)
 						.where('counter', '<=', row.max_counter)
-						.where('item_id', '=', row.itemIdOuter)
+						.where('item_id', '=', row.item_id_outer)
 						.delete();
 
 					totalDeletedCount += deletedCount;
-					doneItemIds.add(row.itemIdOuter);
+					doneItemIds.add(row.item_id_outer);
 				}
 			}, 'ChangeModel::compressOldChanges');
 
