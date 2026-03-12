@@ -176,6 +176,11 @@ export default class ChangeModel extends BaseModel<Changes2> {
 		shareId, sourceUserId, itemId, itemName, itemType, type, previousItem,
 	}: RecordChangeOptions) {
 		const changes: Changes2[] = [];
+
+		// All per-user changes for the same item are given the same created/updated time
+		// to simplify grouping these changes together during change compression:
+		const time = Date.now();
+
 		const addChangeForUser = (userId: Uuid) => {
 			changes.push({
 				item_id: itemId,
@@ -185,8 +190,8 @@ export default class ChangeModel extends BaseModel<Changes2> {
 				previous_share_id: previousItem.jop_share_id ?? '',
 				user_id: userId,
 				id: this.uuidType() === UuidType.NanoId ? uuidgen() : dbuuid(),
-				created_time: Date.now(),
-				updated_time: Date.now(),
+				created_time: time,
+				updated_time: time,
 			});
 		};
 
