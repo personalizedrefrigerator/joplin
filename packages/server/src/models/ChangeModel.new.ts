@@ -90,7 +90,7 @@ export default class ChangeModel extends BaseModel<Changes2> {
 		ttl = ttl === null ? defaultChangeTtl : ttl;
 		const cutOffDate = Date.now() - ttl;
 		const limit = 1000;
-		const doneItemIds: Uuid[] = [];
+		const doneItemIds = new Set<Uuid>();
 
 		interface ChangeReportItem {
 			total: number;
@@ -128,7 +128,7 @@ export default class ChangeModel extends BaseModel<Changes2> {
 
 			await this.withTransaction(async () => {
 				for (const row of changeReport) {
-					if (doneItemIds.includes(row.item_id)) {
+					if (doneItemIds.has(row.item_id)) {
 						// We don't throw from within the transaction because
 						// that would rollback all other operations even though
 						// they are valid. So we save the error and exit.
@@ -148,16 +148,16 @@ export default class ChangeModel extends BaseModel<Changes2> {
 						.delete();
 
 					totalDeletedCount += deletedCount;
-					doneItemIds.push(row.item_id);
+					doneItemIds.add(row.item_id);
 				}
 			}, 'ChangeModel::compressOldChanges');
 
-			logger.info(`compressOldChanges: Processed: ${doneItemIds.length} items. Deleted: ${totalDeletedCount} changes.`);
+			logger.info(`compressOldChanges: Processed: ${doneItemIds.size} items. Deleted: ${totalDeletedCount} changes.`);
 
 			if (error) throw error;
 		}
 
-		logger.info(`compressOldChanges: Finished processing. Done ${doneItemIds.length} items. Deleted: ${totalDeletedCount} changes.`);
+		logger.info(`compressOldChanges: Finished processing. Done ${doneItemIds.size} items. Deleted: ${totalDeletedCount} changes.`);
 	}
 
 	public async save(change: Changes2, options: SaveOptions = {}): Promise<Changes2> {
