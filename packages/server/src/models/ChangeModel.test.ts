@@ -339,8 +339,8 @@ describe('ChangeModel', () => {
 		// Create the following events:
 		//
 		// T1   2025-01-01    U1 Create    U2 Create
-		// T2   2025-02-01    U1 Update
-		// T3   2025-02-02    U2 Update
+		// T2   2025-02-01    U1 Update    U2 Update
+		// T3   2025-02-02    U2 Update    U2 Update
 
 		const t1 = new Date('2025-01-01').getTime();
 		jest.setSystemTime(t1);
@@ -379,6 +379,7 @@ describe('ChangeModel', () => {
 			});
 		};
 
+		// Each updateAtTime should create **two** update events (one per user)
 		await updateAtTime(session1, '2025-02-01');
 		await updateAtTime(session2, '2025-02-02');
 
