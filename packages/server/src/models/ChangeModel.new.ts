@@ -94,8 +94,8 @@ export default class ChangeModel extends BaseModel<Changes2> {
 
 		interface ChangeReportItem {
 			total: number;
-			max_created_time: number;
-			item_id: Uuid;
+			max_counter: number;
+			itemIdOuter: Uuid;
 		}
 
 		let error: Error = null;
@@ -112,15 +112,28 @@ export default class ChangeModel extends BaseModel<Changes2> {
 			const changeReport: ChangeReportItem[] = await this
 				.db(this.tableName)
 
-				.select(['item_id'])
+				.select({ itemIdOuter: 'item_id' })
 				.countDistinct('id', { as: 'total' })
-				.max('created_time', { as: 'max_created_time' })
+				.max('counter', { as: 'max_counter' })
 
 				.where('type', '=', ChangeType.Update)
 				.where('created_time', '<', cutOffDate)
 
+				// Always keep the latest group of updates. Each user should retain at least one
+				// UPDATE change for an item. Since updates events create one change for each user,
+				// each with the same timestamp, filter out all events that have the latest timestamp:
+				.andWhere(
+					'created_time', '<',
+					this.db.select('max_created_time').from(
+						this.db(this.tableName)
+							.select('item_id')
+							.max('created_time', { as: 'max_created_time' })
+							.where('item_id', '=', this.db.raw('itemIdOuter'))
+							.andWhere('type', '=', ChangeType.Update),
+					),
+				)
+
 				.groupBy('item_id')
-				.havingRaw('count(id) > 1')
 				.orderBy('total', 'desc')
 				.limit(limit);
 
@@ -128,7 +141,7 @@ export default class ChangeModel extends BaseModel<Changes2> {
 
 			await this.withTransaction(async () => {
 				for (const row of changeReport) {
-					if (doneItemIds.has(row.item_id)) {
+					if (doneItemIds.has(row.itemIdOuter)) {
 						// We don't throw from within the transaction because
 						// that would rollback all other operations even though
 						// they are valid. So we save the error and exit.
@@ -137,18 +150,18 @@ export default class ChangeModel extends BaseModel<Changes2> {
 					}
 
 					// Still from within the specified interval, delete all
-					// UPDATE changes, except for the most recent one.
+					// UPDATE changes, except for the most recent one (if any).
 
 					const deletedCount = await this
 						.db(this.tableName)
 						.where('type', '=', ChangeType.Update)
 						.where('created_time', '<', cutOffDate)
-						.where('created_time', '!=', row.max_created_time)
-						.where('item_id', '=', row.item_id)
+						.where('counter', '<=', row.max_counter)
+						.where('item_id', '=', row.itemIdOuter)
 						.delete();
 
 					totalDeletedCount += deletedCount;
-					doneItemIds.add(row.item_id);
+					doneItemIds.add(row.itemIdOuter);
 				}
 			}, 'ChangeModel::compressOldChanges');
 

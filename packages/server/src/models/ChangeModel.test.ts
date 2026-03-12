@@ -1,5 +1,5 @@
-import { createUserAndSession, beforeAllDb, afterAllTests, beforeEachDb, models, expectThrow, createFolder, createItemTree3, expectNotThrow, createNote, updateNote, db, dbSlave } from '../utils/testing/testUtils';
-import { ChangeType } from '../services/database/types';
+import { createUserAndSession, beforeAllDb, afterAllTests, beforeEachDb, models, expectThrow, createFolder, createItemTree3, expectNotThrow, createNote, updateNote, db, dbSlave, createItemTree } from '../utils/testing/testUtils';
+import { ChangeType, Session, ShareType } from '../services/database/types';
 import { Day, msleep } from '../utils/time';
 import { ChangePagination } from './ChangeModel';
 import { SqliteMaxVariableNum } from '../db';
@@ -7,6 +7,9 @@ import { defaultDeltaPagination } from './ChangeModel';
 import ChangeModelOld from './ChangeModel.old';
 import config from '../config';
 import newModelFactory from './factory';
+import { runWithFakeTimers } from '@joplin/lib/testing/test-utils';
+import { shareWithUserAndAccept } from '../utils/testing/shareApiUtils';
+import { NoteEntity } from '@joplin/lib/services/database/types';
 
 const newChangeModelOld = () => {
 	return new ChangeModelOld(
@@ -312,10 +315,10 @@ describe('ChangeModel', () => {
 		// been made later
 		expect((await models().change().all()).filter(c => c.item_id === note2.id).length).toBe(3);
 
-		// Between T5 and T6, 90 days later - nothing should happen because
+		// Between T5 and T6, just under 90 days later - nothing should happen because
 		// there's only one note 2 change that is older than 90 days at this
 		// point.
-		jest.setSystemTime(new Date(t5 + changeTtl).getTime());
+		jest.setSystemTime(new Date(t5 + changeTtl - 4 * Day).getTime());
 		await models().change().compressOldChanges();
 		expect(await models().change().count()).toBe(5);
 
@@ -331,6 +334,78 @@ describe('ChangeModel', () => {
 
 		jest.useRealTimers();
 	});
+
+	test('should preserve last updates for shared items when deleting old changes', () => runWithFakeTimers(async () => {
+		// Create the following events:
+		//
+		// T1   2025-01-01    U1 Create    U2 Create
+		// T2   2025-02-01    U1 Update
+		// T3   2025-02-02    U2 Update
+
+		const t1 = new Date('2025-01-01').getTime();
+		jest.setSystemTime(t1);
+
+		const { session: session1 } = await createUserAndSession(1);
+		const { session: session2, user: user2 } = await createUserAndSession(2);
+
+		await createItemTree(session1.user_id, '', {
+			'000000000000000000000000000000F1': { },
+		});
+		const shareRoot = await models().item().loadByJopId(session1.user_id, '000000000000000000000000000000F1');
+		const { share } = await shareWithUserAndAccept(session1.id, session2.id, user2, ShareType.Folder, shareRoot);
+
+		const note = await createNote(session1.id, {
+			title: 'test',
+			share_id: share.id,
+			is_shared: 1,
+		});
+
+		await models().share().updateSharedItems3();
+
+		// One creation event for each item
+		const changesForNote = async () => (await models().change().all()).filter(c => c.item_id === note.id);
+		expect(await changesForNote()).toMatchObject([
+			{ type: ChangeType.Create, user_id: session1.user_id },
+			{ type: ChangeType.Create, user_id: session2.user_id },
+		]);
+
+		let updateCounter = 0;
+		const updateAtTime = async (session: Session, time: string) => {
+			jest.setSystemTime(new Date(time).getTime());
+			const joplinNote = await models().item().loadAsJoplinItem<NoteEntity>(note.id);
+			await updateNote(session.id, {
+				...joplinNote,
+				title: `Updated (x${updateCounter++})`,
+			});
+		};
+
+		await updateAtTime(session1, '2025-02-01');
+		await updateAtTime(session2, '2025-02-02');
+
+		expect(await changesForNote()).toMatchObject([
+			{ type: ChangeType.Create },
+			{ type: ChangeType.Create },
+
+			{ type: ChangeType.Update },
+			{ type: ChangeType.Update },
+
+			{ type: ChangeType.Update },
+			{ type: ChangeType.Update },
+		]);
+
+		const t4 = new Date('2040-08-16').getTime();
+		jest.setSystemTime(t4);
+
+		await models().change().compressOldChanges();
+
+		expect(await changesForNote()).toMatchObject([
+			{ type: ChangeType.Create },
+			{ type: ChangeType.Create },
+			{ type: ChangeType.Update },
+			{ type: ChangeType.Update },
+		]);
+
+	}));
 
 	test('should not return the whole item', async () => {
 		const { user } = await createUserAndSession(1, true);
