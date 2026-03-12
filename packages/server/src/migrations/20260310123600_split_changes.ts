@@ -29,7 +29,11 @@ export const up = async (db: DbConnection) => {
 	let startCounter = 0;
 	if (lastOldChange) {
 		assert.ok(isFinite(lastOldChange.counter));
-		startCounter = lastOldChange.counter + 1;
+		// Start the new counter from well after the last old change.
+		// This allows the migration to run while server instances are still connected to the database,
+		// provided that `changes` doesn't more than double in size before all connected servers
+		// restart.
+		startCounter = lastOldChange.counter * 2;
 	}
 
 	// Create a single starting change to ensure that `counter` starts incrementing in
