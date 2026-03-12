@@ -373,7 +373,7 @@ export interface Changes2 extends WithDates, WithUuid {
 	item_name?: string;
 	previous_share_id?: Uuid;
 	item_type?: ItemType;
-	type?: number;
+	type?: ChangeType;
 }
 
 export const databaseSchema: DatabaseTables = {
