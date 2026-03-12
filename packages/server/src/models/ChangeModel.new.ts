@@ -95,7 +95,7 @@ export default class ChangeModel extends BaseModel<Changes2> {
 		interface ChangeReportItem {
 			total: number;
 			max_counter: number;
-			item_id_outer: Uuid;
+			item_id: Uuid;
 		}
 
 		let error: Error = null;
@@ -109,10 +109,10 @@ export default class ChangeModel extends BaseModel<Changes2> {
 			// get the most recent change date from within that time interval,
 			// as we need this below.
 
-			const changeReport: ChangeReportItem[] = await this
-				.db(this.tableName)
-
-				.select({ item_id_outer: 'item_id' })
+			const query = this
+				.db
+				.select({ item_id: 'item_id' })
+				.fromRaw('changes_2 AS changes_2_outer')
 				.countDistinct('id', { as: 'total' })
 				.max('counter', { as: 'max_counter' })
 
@@ -124,24 +124,26 @@ export default class ChangeModel extends BaseModel<Changes2> {
 				// each with the same timestamp, filter out all events that have the latest timestamp:
 				.andWhere(
 					'created_time', '<',
-					this.db.select('max_created_time').from(
-						this.db(this.tableName)
-							.select('item_id')
-							.max('created_time', { as: 'max_created_time' })
-							.where('item_id', '=', this.db.raw('item_id_outer'))
-							.andWhere('type', '=', ChangeType.Update),
-					),
+					// For performance, select the most recent update's created time. This assumes that
+					// more recent items have greater created_times:
+					this.db(this.tableName)
+						.select('created_time')
+						.where('item_id', '=', this.db.raw('changes_2_outer.item_id'))
+						.andWhere('type', '=', ChangeType.Update)
+						.orderBy('counter', 'desc')
+						.first(),
 				)
 
 				.groupBy('item_id')
 				.orderBy('total', 'desc')
 				.limit(limit);
+			const changeReport: ChangeReportItem[] = await query;
 
 			if (!changeReport.length) break;
 
 			await this.withTransaction(async () => {
 				for (const row of changeReport) {
-					if (doneItemIds.has(row.item_id_outer)) {
+					if (doneItemIds.has(row.item_id)) {
 						// We don't throw from within the transaction because
 						// that would rollback all other operations even though
 						// they are valid. So we save the error and exit.
@@ -157,11 +159,11 @@ export default class ChangeModel extends BaseModel<Changes2> {
 						.where('type', '=', ChangeType.Update)
 						.where('created_time', '<', cutOffDate)
 						.where('counter', '<=', row.max_counter)
-						.where('item_id', '=', row.item_id_outer)
+						.where('item_id', '=', row.item_id)
 						.delete();
 
 					totalDeletedCount += deletedCount;
-					doneItemIds.add(row.item_id_outer);
+					doneItemIds.add(row.item_id);
 				}
 			}, 'ChangeModel::compressOldChanges');
 
