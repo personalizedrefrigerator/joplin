@@ -1,5 +1,5 @@
 import { DbConnection, SqliteMaxVariableNum } from '../db';
-import { Change, ChangeType, Uuid, ItemType, Changes2, Item } from '../services/database/types';
+import { ChangeType, Uuid, ItemType, Changes2, Item, Change } from '../services/database/types';
 import { Day } from '../utils/time';
 import { PaginatedResults } from './utils/pagination';
 import { NewModelFactoryHandler } from './factory';
@@ -66,7 +66,7 @@ const oldToNewChange = (change: Change): Changes2 => {
 	};
 };
 
-const oldToNewChanges = (changes: Change[]) => {
+const oldToNewChanges = (changes: Changes2[]) => {
 	return changes.map(oldToNewChange);
 };
 
@@ -171,7 +171,7 @@ export default class ChangeModel extends BaseModel<Changes2> {
 			...pagination,
 		};
 
-		let changeAtCursor: Change = null;
+		let changeAtCursor: Changes2 = null;
 
 		if (pagination.cursor) {
 			changeAtCursor = await this.load(pagination.cursor);
@@ -272,7 +272,7 @@ export default class ChangeModel extends BaseModel<Changes2> {
 	//
 	// Public to allow testing.
 	public compressChanges_(changes: Changes2[]): Changes2[] {
-		const itemChanges = new Map<Uuid, Change>();
+		const itemChanges = new Map<Uuid, Changes2>();
 
 		const itemUniqueUpdates = new Map<Uuid, Changes2[]>();
 		const itemToLastUpdateShareIds = new Map<Uuid, Uuid>();
