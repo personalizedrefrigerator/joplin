@@ -128,8 +128,6 @@ export default class ChangeModel extends BaseModel<Changes2> {
 			const changeReport: ChangeReportItem[] = await query;
 
 			if (!changeReport.length) break;
-			console.log('temporary: Benchnmarking:');
-			return;
 
 			await this.withTransaction(async () => {
 				for (const row of changeReport) {

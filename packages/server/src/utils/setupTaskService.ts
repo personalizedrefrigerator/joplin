@@ -8,7 +8,6 @@ import { Day } from './time';
 
 export default async function(env: Env, models: Models, config: Config, services: Services): Promise<TaskService> {
 	const taskService = new TaskService(env, models, config, services);
-	console.warn('Compressing old changes and share processing is disabled! (Nocommit)');
 
 	let tasks: Task[] = [
 		{
@@ -25,12 +24,12 @@ export default async function(env: Env, models: Models, config: Config, services
 			run: (models: Models) => models.item().updateTotalSizes(),
 		},
 
-		// {
-		// 	id: TaskId.CompressOldChanges,
-		// 	description: taskIdToLabel(TaskId.CompressOldChanges),
-		// 	schedule: '0 0 */2 * *',
-		// 	run: (models: Models) => models.change().compressOldChanges(),
-		// },
+		{
+			id: TaskId.CompressOldChanges,
+			description: taskIdToLabel(TaskId.CompressOldChanges),
+			schedule: '0 0 */2 * *',
+			run: (models: Models) => models.change().compressOldChanges(),
+		},
 
 		{
 			id: TaskId.ProcessUserDeletions,
@@ -57,12 +56,12 @@ export default async function(env: Env, models: Models, config: Config, services
 			run: (models: Models) => models.item().processOrphanedItems(),
 		},
 
-		// {
-		// 	id: TaskId.ProcessShares,
-		// 	description: taskIdToLabel(TaskId.ProcessShares),
-		// 	schedule: 'PT10S',
-		// 	run: (models: Models) => models.share().updateSharedItems3(),
-		// },
+		{
+			id: TaskId.ProcessShares,
+			description: taskIdToLabel(TaskId.ProcessShares),
+			schedule: 'PT10S',
+			run: (models: Models) => models.share().updateSharedItems3(),
+		},
 
 		{
 			id: TaskId.ProcessEmails,
