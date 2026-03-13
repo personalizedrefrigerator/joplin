@@ -1,8 +1,8 @@
 import { createUserAndSession, beforeAllDb, afterAllTests, beforeEachDb, models, expectThrow, createFolder, createItemTree3, expectNotThrow, createNote, updateNote, db, dbSlave, createItemTree } from '../../utils/testing/testUtils';
-import { ChangeType, Session, ShareType } from '../../services/database/types';
+import { ChangeType, Item, Session, ShareType, User } from '../../services/database/types';
 import { Day, msleep } from '../../utils/time';
 import { ChangePagination } from '../ChangeModel';
-import { SqliteMaxVariableNum } from '../../db';
+import { SqliteMaxVariableNum, truncateTables } from '../../db';
 import { defaultDeltaPagination } from '../ChangeModel';
 import ChangeModelOld from './ChangeModel.old';
 import config from '../../config';
@@ -15,6 +15,22 @@ const newChangeModelOld = () => {
 	return new ChangeModelOld(
 		db(), dbSlave(), db => newModelFactory(db, dbSlave(), config()), config(),
 	);
+};
+
+const recordLegacyChange = (user: User, item: Item, type: ChangeType) => {
+	return newChangeModelOld().recordChange({
+		itemId: item.id,
+		itemName: item.name,
+		itemType: item.jop_type,
+		previousItem: { jop_share_id: item.jop_share_id },
+		sourceUserId: user.id,
+		shareId: item.jop_share_id,
+		type,
+	});
+};
+
+const clearChanges = () => {
+	return truncateTables(db(), ['changes', 'changes_2']);
 };
 
 describe('ChangeModel/index', () => {
@@ -210,23 +226,10 @@ describe('ChangeModel/index', () => {
 		let changes = await models().change().allFromId('');
 		expect(changes.items).toHaveLength(0);
 
-		const oldModel = newChangeModelOld();
-		const recordOldChange = async (type: ChangeType) => {
-			await oldModel.recordChange({
-				itemId: item.id,
-				itemName: item.name,
-				itemType: item.jop_type,
-				previousItem: { jop_share_id: '' },
-				shareId: '',
-				sourceUserId: user.id,
-				type,
-			});
-		};
-
 		// Create changes in the old table
-		await recordOldChange(ChangeType.Create);
-		await recordOldChange(ChangeType.Update);
-		await recordOldChange(ChangeType.Update);
+		await recordLegacyChange(user, item, ChangeType.Create);
+		await recordLegacyChange(user, item, ChangeType.Update);
+		await recordLegacyChange(user, item, ChangeType.Update);
 
 		// Create changes in the new table
 		await msleep(1);
@@ -250,7 +253,38 @@ describe('ChangeModel/index', () => {
 		expect(changes.items).toHaveLength(2);
 	});
 
-	test('should delete old changes', async () => {
+	test('should delete old changes in the legacy changes table', () => runWithFakeTimers(async () => {
+		const { session, user } = await createUserAndSession(1);
+		const note1 = await createNote(session.id, {});
+		await clearChanges();
+
+		const t1 = new Date('2020-01-01').getTime();
+		jest.setSystemTime(t1);
+
+		await recordLegacyChange(user, note1, ChangeType.Create);
+
+		jest.setSystemTime(t1 + Day * 10);
+		await recordLegacyChange(user, note1, ChangeType.Update);
+
+		jest.setSystemTime(t1 + Day * 20);
+		await recordLegacyChange(user, note1, ChangeType.Update);
+
+		jest.setSystemTime(t1 + Day * 300);
+
+		// Compressing old changes should remove the second-to-last update:
+		expect(await models().change().all()).toMatchObject([
+			{ type: ChangeType.Create },
+			{ type: ChangeType.Update },
+			{ type: ChangeType.Update },
+		]);
+		await models().change().compressOldChanges();
+		expect(await models().change().all()).toMatchObject([
+			{ type: ChangeType.Create },
+			{ type: ChangeType.Update },
+		]);
+	}));
+
+	test('should delete old changes in the new changes table', async () => {
 		// Create the following events:
 		//
 		// T1   2020-01-01    U1 Create
@@ -527,12 +561,20 @@ describe('ChangeModel/index', () => {
 	});
 
 	test('changesForUserQuery should split totals across the old/new changes boundary', async () => {
-		const { user } = await createUserAndSession(1, true);
+		const { user, session } = await createUserAndSession(1, true);
+
+		const note = await createNote(session.id, { id: 'A0000000000000000000000000000000' });
+		await clearChanges(); // The first changes should be in the legacy changes table
+
+		await recordLegacyChange(user, note, ChangeType.Create);
+		await recordLegacyChange(user, note, ChangeType.Update);
+		await recordLegacyChange(user, note, ChangeType.Update);
+
 		await models().item().makeTestItems(user.id, 500);
 
 		const doCountQuery = true;
 		const counts = await models().change().changesForUserQuery(user.id, 0, 999, doCountQuery);
-		expect(counts).toMatchObject([{ total: 0 }, { total: 500 }]);
+		expect(counts).toMatchObject([{ total: 3 }, { total: 500 }]);
 	});
 });
 
