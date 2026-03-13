@@ -57,10 +57,14 @@ export function requestDeltaPagination(query: any): ChangePagination {
 
 const oldToNewChange = (change: Change): Changes2 => {
 	const previousShareId = change.previous_item ? JSON.parse(change.previous_item)?.jop_share_id : '';
-	return {
+
+	const result = {
 		...change,
 		previous_share_id: previousShareId,
 	};
+	// previous_item is only a property on legacy changes:
+	delete result.previous_item;
+	return result;
 };
 
 const oldToNewChanges = (changes: Changes2[]) => {
