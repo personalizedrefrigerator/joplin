@@ -26,7 +26,7 @@ export const up = async (db: DbConnection) => {
 	});
 
 	const lastOldChange = await db('changes').select('counter').orderBy('counter', 'desc').first();
-	let startCounter = 0;
+	let startCounter = 1;
 	if (lastOldChange) {
 		assert.ok(isFinite(lastOldChange.counter));
 		// Start the new counter from well after the last old change.
