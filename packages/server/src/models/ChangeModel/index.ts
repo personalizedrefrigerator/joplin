@@ -7,8 +7,11 @@ import ChangeModelOld from './ChangeModel.old';
 import ChangeModelNew from './ChangeModel.new';
 import BaseModel, { LoadOptions } from '../BaseModel';
 import { ErrorResyncRequired } from '../../utils/errors';
+import Logger from '@joplin/utils/Logger';
 
 export { defaultChangeTtl } from './BaseChangeModel';
+
+const logger = Logger.create('ChangeModel/index');
 
 export interface DeltaChange extends Changes2 {
 	jop_updated_time?: number;
@@ -162,7 +165,16 @@ export default class ChangeModel extends BaseModel<Changes2> {
 		}
 
 		if (changes.length < limit) {
-			changes = changes.concat(await this.newModel_.changesForUserQuery(userId, fromCounter, limit - changes.length, doCountQuery));
+			const newChanges = await this.newModel_.changesForUserQuery(userId, fromCounter, limit - changes.length, doCountQuery);
+
+			const firstNewChange = newChanges[0];
+			const lastOldChange = changes[changes.length - 1];
+			if (firstNewChange && lastOldChange && lastOldChange.counter >= firstNewChange.counter) {
+				// Shouldn't happen
+				logger.warn('Bad counter: The last old change has a greater counter than the first new change');
+			}
+
+			changes = changes.concat(newChanges);
 		}
 
 		return changes;
