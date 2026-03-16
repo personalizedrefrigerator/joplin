@@ -33,11 +33,6 @@ enum ChangeType {
 	Delete = 3,
 }
 
-type ChangeEntryOriginal = {
-	counter: number;
-	id: Uuid;
-};
-
 // It should be possible to pause and resume the migration in the background
 export const config = { transaction: false };
 
@@ -147,7 +142,12 @@ export const up = async (db: DbConnection) => {
 
 	// Storing the start offset allows the migration to be resumed after an interruption
 	const startOffset = async () => {
-		let processedItem: ChangeEntryOriginal|undefined = undefined;
+		type ChangeSlice = {
+			counter: number;
+			id: Uuid;
+		};
+		let processedItem: ChangeSlice|undefined = undefined;
+
 		const nextProcessedItemFromEnd = async () => {
 			let lastItemQuery = db('changes_3').select('id', 'counter');
 			if (processedItem) {
