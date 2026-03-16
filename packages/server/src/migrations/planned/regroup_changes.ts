@@ -1,6 +1,6 @@
 import Logger from '@joplin/utils/Logger';
-import { DbConnection, isPostgres } from '../db';
-import { Uuid } from '../services/database/types';
+import { DbConnection, isPostgres } from '../../db';
+import { Uuid } from '../../services/database/types';
 
 const logger = Logger.create('regroup_changes');
 
