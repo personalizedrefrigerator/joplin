@@ -4,7 +4,7 @@ import { Change, ChangeType, Uuid } from '../../services/database/types';
 import { PaginatedResults } from '../utils/pagination';
 import { NewModelFactoryHandler } from '../factory';
 import { Config } from '../../utils/types';
-import type { RecordChangeOptions } from './index';
+import type { RecordChangeOptions } from './ChangeModel';
 import BaseChangeModel from './BaseChangeModel';
 
 export type PaginatedChanges = PaginatedResults<Change>;

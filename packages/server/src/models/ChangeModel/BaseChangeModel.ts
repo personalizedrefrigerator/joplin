@@ -5,7 +5,7 @@ import { Day, formatDateTime } from '../../utils/time';
 import BaseModel, { LoadOptions } from '../BaseModel';
 import { NewModelFactoryHandler } from '../factory';
 import { Config } from '../../utils/types';
-import type { RecordChangeOptions as RecordChangeOptionsBase } from './index';
+import type { RecordChangeOptions as RecordChangeOptionsBase } from './ChangeModel';
 
 const logger = Logger.create('BaseChangeModel');
 

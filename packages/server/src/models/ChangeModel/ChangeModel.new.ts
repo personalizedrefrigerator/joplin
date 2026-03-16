@@ -6,7 +6,7 @@ import { UuidType } from '../BaseModel';
 import { PaginatedResults } from '../utils/pagination';
 import { NewModelFactoryHandler } from '../factory';
 import { Config } from '../../utils/types';
-import type { RecordChangeOptions as RecordChangeOptionsBase } from './index';
+import type { RecordChangeOptions as RecordChangeOptionsBase } from './ChangeModel';
 import { uuidgen } from '../../utils/uuid';
 import dbuuid from '../../utils/dbuuid';
 import BaseChangeModel from './BaseChangeModel';

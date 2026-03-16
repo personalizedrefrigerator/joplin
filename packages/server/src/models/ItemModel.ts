@@ -5,7 +5,7 @@ import { isJoplinItemName, isJoplinResourceBlobPath, linkedResourceIds, serializ
 import { ModelType } from '@joplin/lib/BaseModel';
 import { ApiError, CustomErrorCode, ErrorConflict, ErrorForbidden, ErrorPayloadTooLarge, ErrorUnprocessableEntity, ErrorCode, ErrorBadRequest } from '../utils/errors';
 import { Knex } from 'knex';
-import { ChangePreviousItem } from './ChangeModel';
+import { ChangePreviousItem } from './ChangeModel/ChangeModel';
 import { unique } from '../utils/array';
 import StorageDriverBase, { Context } from './items/storage/StorageDriverBase';
 import { DbConnection, isUniqueConstraintError, returningSupported } from '../db';

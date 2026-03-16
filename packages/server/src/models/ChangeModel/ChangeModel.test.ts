@@ -1,9 +1,9 @@
 import { createUserAndSession, beforeAllDb, afterAllTests, beforeEachDb, models, expectThrow, createFolder, createItemTree3, expectNotThrow, createNote, updateNote, db, dbSlave, createItemTree } from '../../utils/testing/testUtils';
 import { ChangeType, Item, Session, ShareType, User } from '../../services/database/types';
 import { Day, msleep } from '../../utils/time';
-import { ChangePagination } from '../ChangeModel';
+import { ChangePagination } from './ChangeModel';
 import { SqliteMaxVariableNum, truncateTables } from '../../db';
-import { defaultDeltaPagination } from '../ChangeModel';
+import { defaultDeltaPagination } from './ChangeModel';
 import ChangeModelOld from './ChangeModel.old';
 import config from '../../config';
 import newModelFactory from '../factory';
