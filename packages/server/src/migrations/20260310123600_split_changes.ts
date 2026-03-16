@@ -33,7 +33,7 @@ export const up = async (db: DbConnection) => {
 		// This allows the migration to run while server instances are still connected to the database,
 		// provided that `changes` doesn't more than double in size before all connected servers
 		// restart.
-		startCounter = lastOldChange.counter * 2;
+		startCounter = lastOldChange.counter * 2 + 1;
 	}
 
 	// Create a single starting change to ensure that `counter` starts incrementing in
