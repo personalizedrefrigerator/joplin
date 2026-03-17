@@ -108,7 +108,7 @@ const benchmarkRecordChange = async (db: DbConnection, models: Models) => {
 
 		const stepSize = 100;
 		// Start at 1: The folder is already included in the share
-		for (let itemCount = 1; itemCount <= 1_000; itemCount += stepSize) {
+		for (let itemCount = stepSize; itemCount <= 1_000; itemCount += stepSize) {
 			for (let i = 0; i < stepSize; i++) {
 				await createAndUpdateItem(share, owner);
 			}
