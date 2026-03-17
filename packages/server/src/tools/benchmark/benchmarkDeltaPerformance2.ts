@@ -115,7 +115,7 @@ const benchmarkRecordChange = async (db: DbConnection, models: Models) => {
 			await models.share().updateSharedItems3();
 
 			const items = [];
-			for (const limit of [10, 100, 1000]) {
+			for (const limit of [10, 100, 1000, 'all' as const]) {
 				items.push({
 					labels: {
 						'Share ID': share.id,
@@ -140,7 +140,20 @@ const benchmarkRecordChange = async (db: DbConnection, models: Models) => {
 		trialCount: 100,
 		outputFile: 'delta-perf-full-2.csv',
 		runTask: async ({ owner, limit }) => {
-			await models.change().delta(owner.id, { cursor: '', limit });
+			if (limit !== 'all') {
+				await models.change().delta(owner.id, { cursor: '', limit });
+			} else {
+				let cursor = '';
+				const next = async () => {
+					const result = await models.change().delta(owner.id, { cursor, limit: 100 });
+					cursor = result.cursor;
+					return result.has_more;
+				};
+
+				while (await next()) {
+					// no-op
+				}
+			}
 		},
 	});
 };
