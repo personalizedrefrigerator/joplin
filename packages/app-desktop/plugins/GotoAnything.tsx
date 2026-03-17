@@ -740,6 +740,7 @@ class DialogComponent extends React.PureComponent<Props, State> {
 						onChange={this.input_onChange}
 						onKeyDown={this.input_onKeyDown}
 
+						aria-label={_('Search')}
 						aria-describedby={helpTextId}
 						aria-autocomplete='list'
 						aria-controls={itemListId}

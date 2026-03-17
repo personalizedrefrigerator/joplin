@@ -87,5 +87,11 @@ test.describe('wcag', () => {
 		await mainScreen.changeLayoutScreen.open(electronApp);
 		await expectNoViolations(mainWindow);
 	});
+
+	test('should not detect significant issues in go-to-anything', async ({ mainWindow, electronApp }) => {
+		const mainScreen = await new MainScreen(mainWindow).setup();
+		await mainScreen.goToAnything.open(electronApp);
+		await expectNoViolations(mainWindow);
+	});
 });
 
