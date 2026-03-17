@@ -3,11 +3,11 @@ import BaseModel, { DeleteOptions, LoadOptions, SaveOptions } from './BaseModel'
 import { unique } from '../utils/array';
 import { ErrorNotFound } from '../utils/errors';
 import { Knex } from 'knex';
-// import { PerformanceTimer } from '../utils/time';
-// import Logger from '@joplin/utils/Logger';
+import { PerformanceTimer } from '../utils/time';
+import Logger from '@joplin/utils/Logger';
 import { isUniqueConstraintError } from '../db';
 
-// const logger = Logger.create('UserItemModel');
+const logger = Logger.create('UserItemModel');
 
 interface DeleteByShare {
 	id: Uuid;
@@ -80,15 +80,6 @@ export default class UserItemModel extends BaseModel<UserItem> {
 		return count[0].count;
 	}
 
-	public async countWithShareId(shareId: Uuid): Promise<number> {
-		const count = await this
-			.db(this.tableName)
-			.count('*')
-			.leftJoin('items', 'user_items.item_id', 'items.id')
-			.where('items.jop_share_id', '=', shareId);
-		return count[0].count;
-	}
-
 	public async byUserId(userId: Uuid): Promise<UserItem[]> {
 		return this.db(this.tableName).where('user_id', '=', userId);
 	}
@@ -146,14 +137,14 @@ export default class UserItemModel extends BaseModel<UserItem> {
 	}
 
 	public async addMulti(userId: Uuid, itemsQuery: Knex.QueryBuilder | Item[], options: UserItemSaveOptions = {}): Promise<void> {
-		// const perfTimer = new PerformanceTimer(logger, 'addMulti');
+		const perfTimer = new PerformanceTimer(logger, 'addMulti');
 
-		// perfTimer.push('Main');
+		perfTimer.push('Main');
 
 		const items: Item[] = Array.isArray(itemsQuery) ? itemsQuery : await itemsQuery.whereNotIn('id', this.db('user_items').select('item_id').where('user_id', '=', userId));
 		if (!items.length) return;
 
-		// perfTimer.push(`Processing ${items.length} items`);
+		perfTimer.push(`Processing ${items.length} items`);
 
 		for (const item of items) {
 			if (!('name' in item) || !('id' in item)) throw new Error('item.id and item.name must be set');
@@ -184,9 +175,9 @@ export default class UserItemModel extends BaseModel<UserItem> {
 			}, 'UserItemModel::addMulti');
 		}
 
-		// perfTimer.pop();
+		perfTimer.pop();
 
-		// perfTimer.pop();
+		perfTimer.pop();
 	}
 
 	public async save(_userItem: UserItem, _options: SaveOptions = {}): Promise<UserItem> {
