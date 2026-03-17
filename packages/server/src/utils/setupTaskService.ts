@@ -9,6 +9,7 @@ import { Day } from './time';
 export default async function(env: Env, models: Models, config: Config, services: Services): Promise<TaskService> {
 	const taskService = new TaskService(env, models, config, services);
 
+	console.log('share maintenance is DISABLED!!!')
 	let tasks: Task[] = [
 		{
 			id: TaskId.DeleteExpiredTokens,
@@ -56,12 +57,12 @@ export default async function(env: Env, models: Models, config: Config, services
 			run: (models: Models) => models.item().processOrphanedItems(),
 		},
 
-		{
-			id: TaskId.ProcessShares,
-			description: taskIdToLabel(TaskId.ProcessShares),
-			schedule: 'PT10S',
-			run: (models: Models) => models.share().updateSharedItems3(),
-		},
+		// {
+		// 	id: TaskId.ProcessShares,
+		// 	description: taskIdToLabel(TaskId.ProcessShares),
+		// 	schedule: 'PT10S',
+		// 	run: (models: Models) => models.share().updateSharedItems3(),
+		// },
 
 		{
 			id: TaskId.ProcessEmails,
