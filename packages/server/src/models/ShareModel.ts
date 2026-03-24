@@ -208,11 +208,14 @@ export default class ShareModel extends BaseModel<Share> {
 			}
 		};
 
+		const itemFields = ['id', 'jop_share_id', 'owner_id'];
+		type ItemSlice = Pick<Item, 'id'|'jop_share_id'|'owner_id'>;
+
 		// For performance, handleCreated acts on all changes for a particular item at once.
 		//
 		// This function must behave correctly regardless of whether it is called before or after
 		// other events are processed.
-		const handleCreated = async (item: Item, changes: Change[], share: Share) => {
+		const handleCreated = async (item: ItemSlice, changes: Change[], share: Share) => {
 			if (!item.jop_share_id) return;
 
 			// When a folder is unshared, the share object is deleted, then all
@@ -246,7 +249,7 @@ export default class ShareModel extends BaseModel<Share> {
 			return this.models().change().unserializePreviousItem(change.previous_item)?.jop_share_id;
 		};
 
-		const handleUpdated = async (change: Change, item: Item, share: Share, nextShareId: Uuid) => {
+		const handleUpdated = async (change: Change, item: ItemSlice, share: Share, nextShareId: Uuid) => {
 			const previousShareId = getPreviousShareId(change);
 			const shareId = share ? share.id : '';
 
@@ -280,7 +283,7 @@ export default class ShareModel extends BaseModel<Share> {
 			}
 		};
 
-		const handleDeleted = async (change: Change, item: Item|null, share: Share|null) => {
+		const handleDeleted = async (change: Change, item: ItemSlice|null, share: Share|null) => {
 			// On deletion, we check for extra user_items entries and incorrect ownership for
 			// items that still exist:
 			// - Unexpected user_items can be created by race conditions between updateSharedItems3
@@ -455,8 +458,11 @@ export default class ShareModel extends BaseModel<Share> {
 				perfTimer.pop();
 			} else {
 				perfTimer.push(`Load items for ${changes.length} changes`);
-				const items = await this.models().item().loadByIds(changes.map(c => c.item_id));
+				const items: ItemSlice[] = await this.models().item().loadByIds(
+					changes.map(c => c.item_id), { fields: itemFields },
+				);
 				perfTimer.pop();
+
 				const shareIds = unique(items.filter(i => !!i.jop_share_id).map(i => i.jop_share_id));
 
 				perfTimer.push(`Load ${shareIds.length} shares`);
