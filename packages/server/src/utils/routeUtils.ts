@@ -8,7 +8,7 @@ import { csrfCheck } from './csrf';
 import { contextSessionId } from './requestUtils';
 import { shortToLong } from './uuid';
 import { stripOffQueryParameters } from './urlUtils';
-import { hasOwnProperty } from '@joplin/utils/object';
+import { objectHasOwnProperty } from '@joplin/utils/object';
 
 const { ltrimSlashes, rtrimSlashes } = require('@joplin/lib/path-utils');
 
@@ -286,7 +286,7 @@ export function findMatchingRoute(path: string, routes: Routers): MatchedRoute {
 		// Create the base path, eg. "api/files", to match it to one of the
 		// routes.
 		const basePath = `${namespace ? `${namespace}/` : ''}${splittedPath[0]}/${splittedPath[1]}`;
-		if (hasOwnProperty(routes, basePath)) {
+		if (objectHasOwnProperty(routes, basePath)) {
 			// Remove the base path from the array so that parseSubPath() can
 			// extract the ID and link from the URL. So the array will contain
 			// at this point: ['SOME_ID', 'content'].
@@ -302,7 +302,7 @@ export function findMatchingRoute(path: string, routes: Routers): MatchedRoute {
 	// Paths such as "/users/:id" or "/apps/joplin/notes/:id" will get here
 	const basePath = splittedPath[0];
 	const basePathNS = (namespace ? `${namespace}/` : '') + basePath;
-	if (hasOwnProperty(routes, basePathNS)) {
+	if (objectHasOwnProperty(routes, basePathNS)) {
 		splittedPath.splice(0, 1);
 		return {
 			route: routes[basePathNS],

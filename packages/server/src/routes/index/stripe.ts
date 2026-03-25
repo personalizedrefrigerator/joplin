@@ -15,6 +15,9 @@ import { findPrice, PricePeriod } from '@joplin/lib/utils/joplinCloud';
 import { Models } from '../../models/factory';
 import { confirmUrl } from '../../utils/urlUtils';
 import { msleep } from '../../utils/time';
+import { Response } from '../../utils/routeUtils';
+import { IncomingMessage } from 'http';
+import { objectHasOwnProperty } from '@joplin/utils/object';
 
 const logger = Logger.create('index/stripe');
 
@@ -22,8 +25,7 @@ const router: Router = new Router(RouteType.Web);
 
 router.public = true;
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-async function stripeEvent(stripe: Stripe, req: any): Promise<Stripe.Event> {
+async function stripeEvent(stripe: Stripe, req: IncomingMessage): Promise<Stripe.Event> {
 	if (!stripeConfig().webhookSecret) throw new Error('webhookSecret is required');
 
 	const body = await getRawBody(req);
@@ -43,14 +45,12 @@ interface CreateCheckoutSessionFields {
 	source: string;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-type StripeRouteHandler = (stripe: Stripe, path: SubPath, ctx: AppContext)=> Promise<any>;
+type StripeRouteHandler<ResponseType> = (stripe: Stripe, path: SubPath, ctx: AppContext)=> Promise<ResponseType>;
+type StripeGetHandler = StripeRouteHandler<string|Response>;
 
 interface PostHandlers {
-	// eslint-disable-next-line @typescript-eslint/ban-types -- Old code before rule was applied
-	createCheckoutSession: Function;
-	// eslint-disable-next-line @typescript-eslint/ban-types -- Old code before rule was applied
-	webhook: Function;
+	createCheckoutSession: StripeRouteHandler<{ sessionId: string }>;
+	webhook: StripeRouteHandler<void>;
 }
 
 interface SubscriptionInfo {
@@ -377,7 +377,7 @@ export const postHandlers: PostHandlers = {
 
 };
 
-const getHandlers: Record<string, StripeRouteHandler> = {
+const getHandlers: Record<string, StripeGetHandler> = {
 
 	success: async (stripe: Stripe, _path: SubPath, ctx: AppContext) => {
 		try {
@@ -512,14 +512,15 @@ const getHandlers: Record<string, StripeRouteHandler> = {
 };
 
 router.post('stripe/:id', async (path: SubPath, ctx: AppContext) => {
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	if (!(postHandlers as any)[path.id]) throw new ErrorNotFound(`No such action: ${path.id}`);
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	return (postHandlers as any)[path.id](initStripe(), path, ctx);
+	const id = path.id;
+	if (!objectHasOwnProperty(postHandlers, id)) throw new ErrorNotFound(`No such action: ${path.id}`);
+
+	const handler = postHandlers[id] as PostHandlers[keyof PostHandlers];
+	return handler(initStripe(), path, ctx);
 });
 
 router.get('stripe/:id', async (path: SubPath, ctx: AppContext) => {
-	if (!getHandlers[path.id]) throw new ErrorNotFound(`No such action: ${path.id}`);
+	if (!objectHasOwnProperty(getHandlers, path.id)) throw new ErrorNotFound(`No such action: ${path.id}`);
 	return getHandlers[path.id](initStripe(), path, ctx);
 });
 

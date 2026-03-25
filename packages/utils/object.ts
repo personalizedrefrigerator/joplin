@@ -16,7 +16,7 @@ export function checkObjectHasProperties(object: any, properties: string[]) {
 	}
 }
 
-export const hasOwnProperty = <T extends object, Property extends string>(
+export const objectHasOwnProperty = <T extends object, Property extends string>(
 	object: T, property: Property,
 ): object is T & Record<Property, unknown> => {
 	return !!object && Object.prototype.hasOwnProperty.call(object, property);
