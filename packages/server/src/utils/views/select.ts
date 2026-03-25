@@ -27,8 +27,7 @@ export function selectOption(label: string, value: unknown, selected: boolean): 
 	return { label, value, selected };
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-export function yesNoDefaultOptions(object: any, key: string): Option[] {
+export function yesNoDefaultOptions<T>(object: T, key: keyof T): Option[] {
 	return [
 		selectOption('Default', '', object[key] === null),
 		selectOption('Yes', '1', object[key] === 1),
@@ -36,8 +35,7 @@ export function yesNoDefaultOptions(object: any, key: string): Option[] {
 	];
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-export function yesNoOptions(object: any, key: string): Option[] {
+export function yesNoOptions<T>(object: T, key: keyof T): Option[] {
 	return [
 		selectOption('Yes', '1', object[key] === 1),
 		selectOption('No', '0', object[key] === 0),
