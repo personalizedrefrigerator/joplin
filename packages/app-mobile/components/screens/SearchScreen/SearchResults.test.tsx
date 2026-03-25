@@ -5,7 +5,7 @@ import { setupDatabaseAndSynchronizer, switchClient } from '@joplin/lib/testing/
 import createMockReduxStore from '../../../utils/testing/createMockReduxStore';
 import setupGlobalStore from '../../../utils/testing/setupGlobalStore';
 import Note from '@joplin/lib/models/Note';
-import { act, render, screen } from '../../../utils/testing/testingLibrary';
+import { render, screen } from '../../../utils/testing/testingLibrary';
 import SearchResults from './SearchResults';
 import SearchEngine from '@joplin/lib/services/search/SearchEngine';
 import Folder from '@joplin/lib/models/Folder';
@@ -43,10 +43,12 @@ describe('SearchResult', () => {
 		const noteCount = 8;
 		await createNotes(noteCount);
 
-		render(<WrappedSearchResults query='abcd' paused={false}/>);
-		await act(async () => {
-			const items = await screen.findAllByText(/abcd \d\d?\d?/);
-			expect(items.length).toBe(noteCount);
-		});
+		const { unmount } = render(<WrappedSearchResults query='abcd' paused={false}/>);
+
+		const items = await screen.findAllByText(/abcd \d\d?\d?/);
+		expect(items.length).toBe(noteCount);
+
+		// Unmount early to prevent state changes after the test finishes.
+		unmount();
 	});
 });
