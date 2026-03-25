@@ -375,8 +375,8 @@ export default abstract class BaseModel<T> {
 
 	public async loadByIds(ids: string[] | number[], options: LoadOptions = {}): Promise<T[]> {
 		if (!ids.length) return [];
-		ids = unique(ids);
-		return this.db(this.tableName).select(options.fields || this.defaultFields).whereIn('id', ids);
+		const uniqueIds = unique<string|number>(ids);
+		return this.db(this.tableName).select(options.fields || this.defaultFields).whereIn('id', uniqueIds);
 	}
 
 	public async setSavePoint(): Promise<SavePoint> {

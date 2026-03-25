@@ -36,6 +36,11 @@ const fetchSpyOn = (response: FetchResponse) => {
 	);
 };
 
+type ErrorWithHttpCode = Error & { httpCode: number };
+function assertHasHttpCode(error: Error): asserts error is ErrorWithHttpCode {
+	if (!('httpCode' in error)) throw new Error(`Error ${error} missing property 'httpCode'`);
+}
+
 describe('api_transcribe', () => {
 
 	beforeAll(async () => {
@@ -168,6 +173,7 @@ describe('api_transcribe', () => {
 				},
 			));
 
+		assertHasHttpCode(error);
 		expect(error.httpCode).toBe(500);
 		expect(error.message.startsWith('POST /api/transcribe {"status":500,"body":{"error":"Something went wrong"')).toBe(true);
 	});
@@ -191,6 +197,7 @@ describe('api_transcribe', () => {
 					filePath: tempFilePath,
 				},
 			));
+		assertHasHttpCode(error);
 
 		const body = JSON.parse(error.message.split('POST /api/transcribe ')[1]);
 		expect(error.httpCode).toBe(502);
