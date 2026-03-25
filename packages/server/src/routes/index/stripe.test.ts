@@ -6,6 +6,8 @@ import { beforeAllDb, afterAllTests, beforeEachDb, models, koaAppContext, expect
 import { AppContext } from '../../utils/types';
 import { uuidgen } from '@joplin/lib/uuid';
 import { postHandlers } from './stripe';
+import { SubPath } from '../../utils/routeUtils';
+import type Stripe from 'stripe';
 
 interface StripeOptions {
 	userEmail?: string;
@@ -67,13 +69,13 @@ async function simulateWebhook(ctx: AppContext, type: string, object: any, optio
 		...options,
 	};
 
-	await postHandlers.webhook(options.stripe, {}, ctx, {
+	await postHandlers.webhook(options.stripe, { } as SubPath, ctx, {
 		id: options.eventId,
 		type,
 		data: {
 			object,
 		},
-	}, false);
+	} as Stripe.Event, false);
 }
 
 async function createUserViaSubscription(ctx: AppContext, options: WebhookOptions = {}) {

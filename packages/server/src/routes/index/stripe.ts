@@ -45,7 +45,9 @@ interface CreateCheckoutSessionFields {
 	source: string;
 }
 
-type StripeRouteHandler<ResponseType> = (stripe: Stripe, path: SubPath, ctx: AppContext)=> Promise<ResponseType>;
+type StripeRouteHandler<ResponseType> = (
+	stripe: Stripe, path: SubPath, ctx: AppContext,
+)=> Promise<ResponseType>;
 type StripeGetHandler = StripeRouteHandler<string|Response>;
 
 interface PostHandlers {
@@ -141,7 +143,7 @@ const waitForUserCreation = async (models: Models, userEmail: string): Promise<U
 	return null;
 };
 
-export const postHandlers: PostHandlers = {
+export const postHandlers = {
 
 	createCheckoutSession: async (stripe: Stripe, __path: SubPath, ctx: AppContext) => {
 		const fields = await bodyFields<CreateCheckoutSessionFields>(ctx.req);
@@ -375,7 +377,7 @@ export const postHandlers: PostHandlers = {
 		}
 	},
 
-};
+} satisfies PostHandlers;
 
 const getHandlers: Record<string, StripeGetHandler> = {
 
