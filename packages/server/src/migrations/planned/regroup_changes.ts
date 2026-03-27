@@ -36,6 +36,18 @@ enum ChangeType {
 // It should be possible to pause and resume the migration in the background
 export const config = { transaction: false };
 
+const getLastPreMigrationCounter = async (db: DbConnection) => {
+	// This will return a change. The migration that creates changes_2 guarantees
+	// that changes_2 has at least one initial marker entry.
+	//
+	// Assumes that all entries in `changes` have counters less than entries in `changes_2`:
+	const lastChange = await db('changes_2')
+		.select('counter')
+		.orderBy('counter', 'desc')
+		.first();
+	return lastChange.counter;
+};
+
 const migrateLegacyPage = async (db: DbConnection, start: number, end: number) => {
 	const uuidSql = isPostgres(db) ? `
 		regexp_replace(gen_random_uuid()::text, '-', '', 'g')
@@ -66,15 +78,6 @@ const migrateLegacyPage = async (db: DbConnection, start: number, end: number) =
 				ORDER BY changes.counter ASC
 		`, [start, end, ChangeType.Create, ChangeType.Delete]);
 	});
-
-	if (isPostgres(db)) {
-		// In PostgreSQL, we need to manually specify the starting point for the
-		// counter
-		// https://stackoverflow.com/a/70389309
-		await db.raw(`
-			ALTER SEQUENCE "changes_3_counter_seq" RESTART WITH ${end + 1}
-		`);
-	}
 
 	logger.info(`Processing legacy changes (start=${start}, end=${end})`);
 };
@@ -198,20 +201,25 @@ export const up = async (db: DbConnection) => {
 
 	await migrateChanges(db, offset);
 	logger.info('Total migrated:', await getTotal('changes_3'));
+
+	if (isPostgres(db)) {
+		const lastCounter = await getLastPreMigrationCounter(db);
+		// In PostgreSQL, we need to manually specify the starting point for the
+		// counter
+		// https://stackoverflow.com/a/70389309
+		await db.raw(`
+			ALTER SEQUENCE "changes_3_counter_seq" RESTART WITH ${lastCounter + 1}
+		`);
+	}
 };
 
 export const down = async (db: DbConnection) => {
-	// This will return a change. The migration that creates changes_2 guarantees
-	// that changes_2 has at least one initial marker entry:
-	const lastChange = await db('changes_2')
-		.select('counter')
-		.orderBy('counter', 'desc')
-		.first();
+	const lastCounter = await getLastPreMigrationCounter(db);
 
 	await db('changes_2').insert(
 		db('changes_3')
 			.select('*')
-			.where('counter', '>', lastChange.counter)
+			.where('counter', '>', lastCounter)
 			.orderBy('counter', 'asc'),
 	);
 
