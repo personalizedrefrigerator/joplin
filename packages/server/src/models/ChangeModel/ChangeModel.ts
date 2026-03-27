@@ -76,8 +76,8 @@ const oldToNewChanges = (changes: Changes2[]) => {
 
 export default class ChangeModel extends BaseModel<Changes2> {
 
-	public oldModel_: ChangeModelOld;
-	public newModel_: ChangeModelNew;
+	private oldModel_: ChangeModelOld;
+	private newModel_: ChangeModelNew;
 
 	public constructor(db: DbConnection, dbSlave: DbConnection, modelFactory: NewModelFactoryHandler, private config: Config) {
 		super(db, dbSlave, modelFactory, config);
