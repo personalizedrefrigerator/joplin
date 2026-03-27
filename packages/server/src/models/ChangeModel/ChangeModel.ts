@@ -141,7 +141,7 @@ export default class ChangeModel extends BaseModel<Changes2> {
 			.concat(await this.newModel_.all());
 	}
 
-	public async load(id: string, options?: LoadOptions) {
+	public async load(id: Uuid, options?: LoadOptions) {
 		let change = await this.newModel_.load(id, options);
 
 		if (!change) {
