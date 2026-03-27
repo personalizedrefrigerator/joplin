@@ -223,10 +223,6 @@ export default class ChangeModel extends BaseModel<Changes2> {
 			return deltaChange;
 		});
 
-		// This property is present only for the purpose of ordering the results
-		// and can be removed afterwards.
-		for (const change of finalChanges) delete change.counter;
-
 		return {
 			items: finalChanges,
 			// If we have changes, we return the ID of the latest changes from which delta sync can resume.
