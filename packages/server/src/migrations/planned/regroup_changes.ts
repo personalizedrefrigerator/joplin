@@ -67,6 +67,15 @@ const migrateLegacyPage = async (db: DbConnection, start: number, end: number) =
 		`, [start, end, ChangeType.Create, ChangeType.Delete]);
 	});
 
+	if (isPostgres(db)) {
+		// In PostgreSQL, we need to manually specify the starting point for the
+		// counter
+		// https://stackoverflow.com/a/70389309
+		await db.raw(`
+			ALTER SEQUENCE "changes_3_counter_seq" RESTART WITH ${end + 1}
+		`);
+	}
+
 	logger.info(`Processing legacy changes (start=${start}, end=${end})`);
 };
 
@@ -161,7 +170,11 @@ export const up = async (db: DbConnection) => {
 			await nextProcessedItemFromEnd();
 			if (!processedItem) return 0;
 
-			originalItem = await db('changes').select('id', 'counter').where('id', '=', processedItem.id).first();
+			// Select from changes based on `counter` -- the IDs for legacy changes will be different, but the counters
+			// are the same:
+			originalItem = await db('changes').select('id', 'counter').where('counter', '=', processedItem.counter).first();
+
+			// IDs for new changes should match
 			originalItem ??= await db('changes_2').select('id', 'counter').where('id', '=', processedItem.id).first();
 		} while (!originalItem);
 
