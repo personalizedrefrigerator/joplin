@@ -201,10 +201,13 @@ export const up = async (db: DbConnection) => {
 };
 
 export const down = async (db: DbConnection) => {
+	// This will return a change. The migration that creates changes_2 guarantees
+	// that changes_2 has at least one initial marker entry:
 	const lastChange = await db('changes_2')
 		.select('counter')
 		.orderBy('counter', 'desc')
 		.first();
+
 	await db('changes_2').insert(
 		db('changes_3')
 			.select('*')
