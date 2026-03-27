@@ -70,7 +70,7 @@ const oldToNewChange = (change: Change): Changes2 => {
 	return result;
 };
 
-const oldToNewChanges = (changes: Changes2[]) => {
+const oldToNewChanges = (changes: Change[]) => {
 	return changes.map(oldToNewChange);
 };
 
