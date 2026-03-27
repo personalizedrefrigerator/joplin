@@ -6,19 +6,18 @@ import { SqliteMaxVariableNum, truncateTables } from '../../db';
 import { defaultDeltaPagination } from './ChangeModel';
 import ChangeModelOld from './ChangeModel.old';
 import config from '../../config';
-import newModelFactory from '../factory';
 import { runWithFakeTimers } from '@joplin/lib/testing/test-utils';
 import { shareWithUserAndAccept } from '../../utils/testing/shareApiUtils';
 import { NoteEntity } from '@joplin/lib/services/database/types';
 
-const newChangeModelOld = () => {
+const oldChangeModel = () => {
 	return new ChangeModelOld(
-		db(), dbSlave(), db => newModelFactory(db, dbSlave(), config()), config(),
+		db(), dbSlave(), models, config(),
 	);
 };
 
 const recordLegacyChange = (user: User, item: Item, type: ChangeType) => {
-	return newChangeModelOld().recordChange({
+	return oldChangeModel().recordChange({
 		itemId: item.id,
 		itemName: item.name,
 		itemType: item.jop_type,
