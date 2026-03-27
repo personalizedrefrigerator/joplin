@@ -14,7 +14,7 @@ export const defaultChangeTtl = 180 * Day;
 
 type RecordChangeOptions = RecordChangeOptionsBase;
 
-export default abstract class BaseChangeModel<ChangeType extends Changes2|Change> extends BaseModel<ChangeType> {
+export default abstract class BaseChangeModel<ChangeEntity extends Changes2|Change> extends BaseModel<ChangeEntity> {
 
 	public constructor(db: DbConnection, dbSlave: DbConnection, modelFactory: NewModelFactoryHandler, config: Config) {
 		super(db, dbSlave, modelFactory, config);
@@ -28,22 +28,22 @@ export default abstract class BaseChangeModel<ChangeType extends Changes2|Change
 		return `${this.baseUrl}/changes`;
 	}
 
-	public async first(options: LoadOptions): Promise<ChangeType|undefined> {
+	public async first(options: LoadOptions): Promise<ChangeEntity|undefined> {
 		return await this.db(this.tableName)
 			.select(options.fields ?? this.defaultFields)
 			.orderBy('counter', 'asc')
 			.first();
 	}
 
-	public async allFromId(id: string, limit: number = SqliteMaxVariableNum): Promise<ChangeType[]> {
-		const startChange: ChangeType = id ? await this.load(id) : null;
+	public async allFromId(id: string, limit: number = SqliteMaxVariableNum): Promise<ChangeEntity[]> {
+		const startChange: ChangeEntity = id ? await this.load(id) : null;
 		const query = this.db(this.tableName).select(...this.defaultFields);
 		if (startChange) void query.where('counter', '>', startChange.counter);
 		void query.limit(limit).orderBy('counter', 'asc');
 		return await query;
 	}
 
-	public abstract changesForUserQuery(userId: Uuid, fromCounter: number, limit: number, doCountQuery: boolean): Promise<ChangeType[]>;
+	public abstract changesForUserQuery(userId: Uuid, fromCounter: number, limit: number, doCountQuery: boolean): Promise<ChangeEntity[]>;
 
 	// See spec for complete documentation:
 	// https://joplinapp.org/spec/server_delta_sync/#regarding-the-deletion-of-old-change-events
