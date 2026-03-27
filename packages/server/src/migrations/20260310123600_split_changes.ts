@@ -22,7 +22,6 @@ export const up = async (db: DbConnection) => {
 
 		table.unique(['user_id', 'counter']);
 		table.index('item_id');
-		table.index('id');
 	});
 
 	const lastOldChange = await db('changes').select('counter').orderBy('counter', 'desc').first();
