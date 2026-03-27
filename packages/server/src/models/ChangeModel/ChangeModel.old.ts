@@ -213,6 +213,8 @@ export default class ChangeModel extends BaseChangeModel<Change> {
 		return output;
 	}
 
+	// This function implementation is intended for testing only: After creating
+	// changes_2, the changes table should be frozen.
 	public override async recordChange({
 		sourceUserId, itemId, itemName, type, previousItem, itemType,
 	}: RecordChangeOptions) {

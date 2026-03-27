@@ -70,14 +70,14 @@ const oldToNewChange = (change: Change): Changes2 => {
 	return result;
 };
 
-const oldToNewChanges = (changes: Changes2[]) => {
+const oldToNewChanges = (changes: Change[]) => {
 	return changes.map(oldToNewChange);
 };
 
 export default class ChangeModel extends BaseModel<Changes2> {
 
-	public oldModel_: ChangeModelOld;
-	public newModel_: ChangeModelNew;
+	private oldModel_: ChangeModelOld;
+	private newModel_: ChangeModelNew;
 
 	public constructor(db: DbConnection, dbSlave: DbConnection, modelFactory: NewModelFactoryHandler, private config: Config) {
 		super(db, dbSlave, modelFactory, config);
@@ -141,7 +141,7 @@ export default class ChangeModel extends BaseModel<Changes2> {
 			.concat(await this.newModel_.all());
 	}
 
-	public async load(id: string, options?: LoadOptions) {
+	public async load(id: Uuid, options?: LoadOptions) {
 		let change = await this.newModel_.load(id, options);
 
 		if (!change) {
@@ -222,10 +222,6 @@ export default class ChangeModel extends BaseModel<Changes2> {
 			};
 			return deltaChange;
 		});
-
-		// This property is present only for the purpose of ordering the results
-		// and can be removed afterwards.
-		for (const change of finalChanges) delete change.counter;
 
 		return {
 			items: finalChanges,

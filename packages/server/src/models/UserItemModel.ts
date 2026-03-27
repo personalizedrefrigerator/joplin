@@ -226,7 +226,7 @@ export default class UserItemModel extends BaseModel<UserItem> {
 		}
 
 		const itemIds = unique(userItems.map(ui => ui.item_id));
-		const items = await this.models().item().loadByIds(itemIds, { fields: ['id', 'name'] });
+		const items = await this.models().item().loadByIds(itemIds, { fields: ['id', 'name', 'jop_share_id'] });
 
 		await this.withTransaction(async () => {
 			for (const userItem of userItems) {
