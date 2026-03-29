@@ -395,6 +395,20 @@ export default class ElectronAppWrapper {
 		};
 		addWindowEventHandlers(this.win_.webContents);
 
+		// BrowserWindow 'focus' fires when the OS gives focus to the application window
+		// (i.e. coming from another app or from the taskbar), not on intra-app focus switches.
+		// We use a dedicated IPC channel so the renderer can trigger an immediate sync on
+		// OS-level focus gain without conflating it with the 'window-focused' channel that
+		// handles Joplin-internal window routing.
+		this.win_.on('focus', () => {
+			try {
+				this.win_?.webContents.send('main-window-focused');
+			} catch (error) {
+				// Can fail if the render frame is temporarily disposed during window teardown.
+				console.warn('Failed to send main-window-focused:', error);
+			}
+		});
+
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 		this.win_.on('close', (event: any) => {
 			// If it's on macOS, the app is completely closed only if the user chooses to close the app (willQuitApp_ will be true)
@@ -472,27 +486,8 @@ export default class ElectronAppWrapper {
 			// Match the main window's zoom:
 			window.webContents.setZoomFactor(this.mainWindow().webContents.getZoomFactor());
 
-			window.once('close', (event) => {
-				if (this.secondaryWindows_.has(windowId)) {
-					this.secondaryWindows_.delete(windowId);
-
-					// Avoid closing a destroyed window. Closing a destroyed window results in the following error:
-					//   Error: Render frame was disposed before WebFrameMain could be accessed
-					const stillOpen = !window.isDestroyed();
-					if (stillOpen) {
-						event.preventDefault();
-
-						// As of March 2026, Electron crashes with "Assertion failed: (Environment::GetCurrent(isolate)) == (env)" if the native 'close'
-						// event is allowed to close a secondary window. As a workaround, briefly hide the window and .close() it later.
-						// See https://github.com/laurent22/joplin/issues/14628.
-						window.hide();
-						setTimeout(() => {
-							if (!window.isDestroyed()) {
-								window.close();
-							}
-						}, 100);
-					}
-				}
+			window.once('close', () => {
+				this.secondaryWindows_.delete(windowId);
 
 				const allSecondaryWindowsClosed = this.secondaryWindows_.size === 0;
 				const mainWindowVisuallyClosed = this.mainWindowHidden_;
