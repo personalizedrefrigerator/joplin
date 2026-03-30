@@ -39,6 +39,7 @@ import FolderScreen from './components/screens/folder';
 import LogScreen from './components/screens/LogScreen';
 import StatusScreen from './components/screens/status';
 import SearchScreen from './components/screens/SearchScreen';
+import ResourceScreen from './components/screens/ResourceScreen';
 const { OneDriveLoginScreen } = require('./components/screens/onedrive-login.js');
 import EncryptionConfigScreen from './components/screens/encryption-config';
 import DropboxLoginScreen from './components/screens/dropbox-login.js';
@@ -105,6 +106,7 @@ import buildStartupTasks from './utils/buildStartupTasks';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import appReducer from './utils/appReducer';
 import SyncWizard from './components/SyncWizard/SyncWizard';
+import Synchronizer from '@joplin/lib/Synchronizer';
 
 const logger = Logger.create('root');
 const perfLogger = PerformanceLogger.create();
@@ -141,7 +143,7 @@ const generalMiddleware = (store: any) => (next: any) => async (action: any) => 
 	if (action.type === 'NAV_GO') Keyboard.dismiss();
 
 	if (['NOTE_UPDATE_ONE', 'NOTE_DELETE', 'FOLDER_UPDATE_ONE', 'FOLDER_DELETE'].indexOf(action.type) >= 0) {
-		if (!await reg.syncTarget().syncStarted()) void reg.scheduleSync(reg.syncAsYouTypeInterval(), { syncSteps: ['update_remote', 'delete_remote'] }, true);
+		if (!await reg.syncTarget().syncStarted()) void reg.scheduleSync(reg.syncAsYouTypeInterval(), { syncSteps: Synchronizer.partialSyncSteps }, true);
 		SearchEngine.instance().scheduleSyncTables();
 	}
 
@@ -222,6 +224,10 @@ const generalMiddleware = (store: any) => (next: any) => async (action: any) => 
 
 	if (action.type === 'SYNC_CREATED_OR_UPDATED_RESOURCE') {
 		void ResourceFetcher.instance().autoAddResources();
+	}
+
+	if (['NOTE_VISIBLE_PANES_SET'].indexOf(action.type) >= 0) {
+		Setting.setValue('noteVisiblePanes', newState.noteVisiblePanes);
 	}
 
 	if (doRefreshFolders) {
@@ -693,13 +699,15 @@ class AppComponent extends React.Component<AppComponentProps, AppComponentState>
 
 		let sideMenuContent: ReactNode = null;
 		let menuPosition = SideMenuPosition.Left;
-		let disableSideMenuGestures = this.props.disableSideMenuGestures;
+		let disableSideMenuGestures = true;
 
 		if (this.props.routeName === 'Note') {
 			sideMenuContent = <SideMenuContentNote options={this.props.noteSideMenuOptions}/>;
 			menuPosition = SideMenuPosition.Right;
-		} else if (this.props.routeName === 'Config') {
-			disableSideMenuGestures = true;
+			disableSideMenuGestures = this.props.disableSideMenuGestures;
+		} else if (this.props.routeName === 'Notes') {
+			sideMenuContent = <SideMenuContent/>;
+			disableSideMenuGestures = false;
 		} else {
 			sideMenuContent = <SideMenuContent/>;
 		}
@@ -722,6 +730,7 @@ class AppComponent extends React.Component<AppComponentProps, AppComponentState>
 			Log: { screen: LogScreen },
 			Status: { screen: StatusScreen },
 			Search: { screen: SearchScreen },
+			NoteResources: { screen: ResourceScreen },
 			Config: { screen: ConfigScreen },
 			DocumentScanner: { screen: DocumentScanner },
 		};
@@ -822,13 +831,11 @@ class AppComponent extends React.Component<AppComponentProps, AppComponentState>
 							<SafeAreaProvider>
 								<FocusControl.MainAppContent style={{ flex: 1 }}>
 									{shouldShowMainContent ? mainContent : (
-										<SafeAreaView>
-											<BiometricPopup
-												dispatch={this.props.dispatch}
-												themeId={this.props.themeId}
-												sensorInfo={this.state.sensorInfo}
-											/>
-										</SafeAreaView>
+										<BiometricPopup
+											dispatch={this.props.dispatch}
+											themeId={this.props.themeId}
+											sensorInfo={this.state.sensorInfo}
+										/>
 									)}
 								</FocusControl.MainAppContent>
 							</SafeAreaProvider>

@@ -29,6 +29,10 @@ export interface FolderEntityWithChildren extends FolderEntity {
 	children?: FolderEntity[];
 }
 
+export interface SortFolderOptions {
+	includeDeleted?: boolean;
+}
+
 export default class Folder extends BaseItem {
 	public static tableName() {
 		return 'folders';
@@ -544,7 +548,12 @@ export default class Folder extends BaseItem {
 				share_id: '',
 				updated_time: Date.now(),
 				parent_id: item.parent_id,
-			}, { autoTimestamp: false });
+			}, {
+				autoTimestamp: false,
+				// Required, to handle the case where the item's share_id points
+				// to a read-only share:
+				disableReadOnlyCheck: true,
+			});
 		}
 
 		logger.debug('updateFolderShareIds:', report);
@@ -924,11 +933,13 @@ export default class Folder extends BaseItem {
 		return rootFolders;
 	}
 
-	public static async sortFolderTree(folders: FolderEntityWithChildren[] = null) {
-		const output = folders ? folders : await this.allAsTree();
+	public static async sortFolderTree(folders: FolderEntityWithChildren[] = null, options: SortFolderOptions = null) {
+		let output = folders ? folders : await this.allAsTree();
 
 		const sortFoldersAlphabetically = (folders: FolderEntityWithChildren[]) => {
 			const collator = getCollator();
+			if (options && options.includeDeleted === false) folders = folders.filter(folder => !folder.deleted_time);
+
 			folders.sort((a: FolderEntityWithChildren, b: FolderEntityWithChildren) => {
 				if (a.parent_id === b.parent_id) {
 					return collator.compare(a.title, b.title);
@@ -949,7 +960,7 @@ export default class Folder extends BaseItem {
 			return folders;
 		};
 
-		sortFolders(sortFoldersAlphabetically(output));
+		output = sortFolders(sortFoldersAlphabetically(output));
 		return output;
 	}
 
@@ -1131,10 +1142,10 @@ export default class Folder extends BaseItem {
 		if (!folder || !!folder.deleted_time) {
 			const defaultFolder = await Folder.defaultFolder();
 			if (!defaultFolder) return null;
-			return defaultFolder.id;
+			return defaultFolder;
 		}
 
-		return folderId;
+		return folder;
 	}
 
 }

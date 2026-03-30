@@ -251,3 +251,13 @@ codegen
 analyzed
 Perfetto
 appmodules
+mtmd
+gguf
+armor
+clearsign
+ligne
+payant
+llamacpp
+bgcolor
+bordercolor
+togglefullscreen
