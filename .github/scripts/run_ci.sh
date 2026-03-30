@@ -175,6 +175,15 @@ if [ "$RUN_TESTS" == "1" ]; then
 fi
 
 # =============================================================================
+# Test iOS install
+# =============================================================================
+
+if [ "$RUN_TESTS" == "1" ] && [ "$IS_MACOS" == "1" ]; then
+	echo "Step: Running pod install..."
+	cd packages/app-mobile/ios && pod install
+fi
+
+# =============================================================================
 # Validate translations - this is needed as some users manually edit .po files
 # (and often make mistakes) instead of using a proper tool like poedit. Doing it
 # for Linux only is sufficient.
