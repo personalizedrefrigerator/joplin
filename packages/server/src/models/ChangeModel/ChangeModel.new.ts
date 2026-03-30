@@ -1,7 +1,6 @@
 import Logger from '@joplin/utils/Logger';
 import { DbConnection } from '../../db';
 import { Changes2, ChangeType, Uuid } from '../../services/database/types';
-import { Day } from '../../utils/time';
 import { UuidType } from '../BaseModel';
 import { PaginatedResults } from '../utils/pagination';
 import { NewModelFactoryHandler } from '../factory';
@@ -13,8 +12,6 @@ import BaseChangeModel from './BaseChangeModel';
 
 const logger = Logger.create('ChangeModel.new');
 
-
-export const defaultChangeTtl = 180 * Day;
 
 export type PaginatedChanges = PaginatedResults<Changes2>;
 
