@@ -145,13 +145,20 @@ class RootComponent extends React.Component<Props, any> {
 	}
 
 	private renderSecondaryWindows() {
-		return this.props.secondaryWindowStates.map((windowState: WindowState) => {
-			return <EditorWindow
-				key={`new-window-note-${windowState.windowId}`}
-				windowId={windowState.windowId}
-				newWindow={true}
-			/>;
-		});
+		const compareWindowIds = (state1: WindowState, state2: WindowState) => (
+			state1.windowId < state2.windowId ? -1 : (state1.windowId === state2.windowId ? 0 : 1)
+		);
+		return this.props.secondaryWindowStates
+			// Order by window ID to ensure consistent ordering when closing/opening
+			// windows. This is important to prevent unnecessary rerendering:
+			.sort(compareWindowIds)
+			.map((windowState: WindowState) => {
+				return <EditorWindow
+					key={`new-window-note-${windowState.windowId}`}
+					windowId={windowState.windowId}
+					newWindow={true}
+				/>;
+			});
 	}
 
 	public render() {
