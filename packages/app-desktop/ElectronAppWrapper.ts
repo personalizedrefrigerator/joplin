@@ -6,7 +6,7 @@ const shim: typeof ShimType = require('@joplin/lib/shim').default;
 import { isCallbackUrl } from '@joplin/lib/callbackUrlUtils';
 import { FileLocker } from '@joplin/utils/fs';
 import { IpcMessageHandler, IpcServer, Message, newHttpError, sendMessage, SendMessageOptions, startServer, stopServer } from '@joplin/utils/ipc';
-import { BrowserWindow, Tray, WebContents, screen, App, nativeTheme, Menu } from 'electron';
+import { BrowserWindow, Tray, WebContents, screen, App, nativeTheme, Menu, BrowserWindowConstructorOptions } from 'electron';
 import bridge from './bridge';
 import * as url from 'url';
 const path = require('path');
@@ -220,8 +220,7 @@ export default class ElectronAppWrapper {
 		// Load the previous state with fallback to defaults
 		const windowState = windowStateKeeper(stateOptions);
 
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-		const windowOptions: any = {
+		const windowOptions: BrowserWindowConstructorOptions = {
 			x: windowState.x,
 			y: windowState.y,
 			width: windowState.width,
@@ -234,9 +233,9 @@ export default class ElectronAppWrapper {
 			backgroundColor: nativeTheme.shouldUseDarkColors ? '#333' : '#fff',
 			webPreferences: {
 				nodeIntegration: true,
+				nodeIntegrationInSubFrames: false,
 				contextIsolation: false,
 				spellcheck: true,
-				enableRemoteModule: true,
 			},
 			// We start with a hidden window, which is then made visible depending on the showTrayIcon setting
 			// https://github.com/laurent22/joplin/issues/2031
@@ -375,6 +374,7 @@ export default class ElectronAppWrapper {
 						overrideBrowserWindowOptions: {
 							webPreferences: {
 								preload: resolve(__dirname, './utils/window/secondaryWindowPreload.js'),
+								nodeIntegration: false,
 							},
 						},
 					};
