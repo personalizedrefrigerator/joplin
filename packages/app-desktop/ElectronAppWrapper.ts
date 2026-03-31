@@ -494,7 +494,7 @@ export default class ElectronAppWrapper {
 							if (!window.isDestroyed()) {
 								window.close();
 							}
-						}, 100);
+						}, 1000);
 					}
 				}
 
