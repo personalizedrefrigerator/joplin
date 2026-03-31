@@ -75,9 +75,12 @@ const useLinkedCss = (doc: Document|null, cssPaths: string[]) => {
 			elements.push(element);
 		}
 
+		const window = doc.defaultView;
 		return () => {
-			for (const element of elements) {
-				element.remove();
+			if (!window.closed) {
+				for (const element of elements) {
+					element.remove();
+				}
 			}
 		};
 	}, [doc, cssPaths]);
@@ -91,8 +94,12 @@ const useAppliedCss = (doc: Document|null, css: string) => {
 		element.setAttribute('id', 'main-theme-stylesheet-container');
 		doc.head.appendChild(element);
 		element.appendChild(document.createTextNode(css));
+
+		const window = doc.defaultView;
 		return () => {
-			doc.head.removeChild(element);
+			if (!window.closed) {
+				doc.head.removeChild(element);
+			}
 		};
 	}, [css, doc]);
 };
