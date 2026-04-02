@@ -5,7 +5,7 @@ import { createPortal } from 'react-dom';
 import { SecondaryWindowApi } from '../utils/window/types';
 import Logger from '@joplin/utils/Logger';
 
-const logger = Logger.create('NewWindowOrIframe');
+const logger = Logger.create('NewWindowOrIFrame');
 
 // This component uses react-dom's Portals to render its children in a different HTML
 // document. As children are rendered in a different Window/Document, they should avoid
@@ -31,17 +31,16 @@ const useDocument = (
 	mode: WindowMode,
 	iframeElement: HTMLIFrameElement|null,
 ) => {
-	const [doc, setDoc] = useState<Document|null>(null);
+	const [doc, setDoc] = useState<Document>(null);
 
 	useEffect(() => {
 		let openedWindow: Window|null = null;
 		let unmounted = false;
-		let doc;
 		if (iframeElement) {
-			doc = iframeElement?.contentWindow?.document;
+			setDoc(iframeElement?.contentWindow?.document);
 		} else if (mode === WindowMode.NewWindow) {
 			openedWindow = window.open('about:blank');
-			doc = openedWindow.document;
+			setDoc(openedWindow.document);
 
 			// .onbeforeunload and .onclose events don't seem to fire when closed by a user -- rely on polling
 			// instead:
@@ -63,11 +62,6 @@ const useDocument = (
 					}
 				}
 			})();
-		}
-
-		if (doc) {
-			setUpDocument(doc);
-			setDoc(doc);
 		}
 
 		return () => {
@@ -98,40 +92,49 @@ const useDocument = (
 	return doc;
 };
 
-const setUpDocument = (doc: Document) => {
-	doc.open();
-	doc.write('<!DOCTYPE html><html><head></head><body></body></html>');
-	doc.close();
+type OnSetLoaded = (loaded: boolean)=> void;
+const useDocumentSetup = (doc: Document|null, setLoaded: OnSetLoaded) => {
+	useEffect(() => {
+		if (!doc) return;
 
-	const cssUrls = [
-		'style.min.css',
-	];
+		doc.open();
+		doc.write('<!DOCTYPE html><html><head></head><body></body></html>');
+		doc.close();
 
-	for (const url of cssUrls) {
-		const style = doc.createElement('link');
-		style.rel = 'stylesheet';
-		style.href = url;
-		doc.head.appendChild(style);
-	}
+		const cssUrls = [
+			'style.min.css',
+		];
 
-	const jsUrls = [
-		'vendor/lib/smalltalk/dist/smalltalk.min.js',
-		'./utils/window/eventHandlerOverrides.js',
-		'./utils/window/secondaryWindowUtils.js',
-	];
-	for (const url of jsUrls) {
-		const script = doc.createElement('script');
-		script.src = url;
-		doc.head.appendChild(script);
-	}
+		for (const url of cssUrls) {
+			const style = doc.createElement('link');
+			style.rel = 'stylesheet';
+			style.href = url;
+			doc.head.appendChild(style);
+		}
 
-	doc.body.style.height = '100vh';
+		const jsUrls = [
+			'vendor/lib/smalltalk/dist/smalltalk.min.js',
+			'./utils/window/eventHandlerOverrides.js',
+			'./utils/window/secondaryWindowUtils.js',
+		];
+		for (const url of jsUrls) {
+			const script = doc.createElement('script');
+			script.src = url;
+			doc.head.appendChild(script);
+		}
+
+		doc.body.style.height = '100vh';
+
+		setLoaded(true);
+	}, [doc, setLoaded]);
 };
 
 const NewWindowOrIFrame: React.FC<Props> = props => {
 	const [iframeRef, setIframeRef] = useState<HTMLIFrameElement|null>(null);
+	const [loaded, setLoaded] = useState(false);
 
 	const doc = useDocument(props.mode, iframeRef);
+	useDocumentSetup(doc, setLoaded);
 
 	useEffect(() => {
 		if (!doc) return;
@@ -146,7 +149,7 @@ const NewWindowOrIFrame: React.FC<Props> = props => {
 		}
 	}, [doc, props.windowId]);
 
-	const parentNode = doc?.body;
+	const parentNode = loaded ? doc?.body : null;
 	const wrappedChildren = <WindowIdContext.Provider value={props.windowId}>{props.children}</WindowIdContext.Provider>;
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Needed to allow adding the portal to the DOM
