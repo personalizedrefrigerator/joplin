@@ -4,24 +4,78 @@
   "description": "Utilities for Joplin",
   "repository": "https://github.com/laurent22/joplin/tree/dev/packages/utils",
   "exports": {
-    ".": "./dist/index.js",
-    "./bytes": "./dist/bytes.js",
-    "./dom": "./dist/dom.js",
-    "./env": "./dist/env.js",
-    "./object": "./dist/object.js",
-    "./fs": "./dist/fs.js",
-    "./html": "./dist/html.js",
-    "./Logger": "./dist/Logger.js",
-    "./markdown": "./dist/markdown.js",
-    "./net": "./dist/net.js",
-    "./time": "./dist/time.js",
-    "./types": "./dist/types.js",
-    "./url": "./dist/url.js",
-    "./ipc": "./dist/ipc.js",
-    "./path": "./dist/path.js",
-    "./cli": "./dist/cli.js",
-    "./array": "./dist/array.js",
-    "./version": "./dist/version.js"
+    ".": {
+      "default": "./dist/index.js",
+      "types": "./index.ts"
+    },
+    "./bytes": {
+      "default": "./dist/bytes.js",
+      "types": "./bytes.ts"
+    },
+    "./dom": {
+      "default": "./dist/dom.js",
+      "types": "./dom.ts"
+    },
+    "./env": {
+      "default": "./dist/env.js",
+      "types": "./env.ts"
+    },
+    "./object": {
+      "default": "./dist/object.js",
+      "types": "./object.ts"
+    },
+    "./fs": {
+      "default": "./dist/fs.js",
+      "types": "./fs.ts"
+    },
+    "./html": {
+      "default": "./dist/html.js",
+      "types": "./html.ts"
+    },
+    "./Logger": {
+      "default": "./dist/Logger.js",
+      "types": "./Logger.ts"
+    },
+    "./markdown": {
+      "default": "./dist/markdown.js",
+      "types": "./markdown.ts"
+    },
+    "./net": {
+      "default": "./dist/net.js",
+      "types": "./net.ts"
+    },
+    "./time": {
+      "default": "./dist/time.js",
+      "types": "./time.ts"
+    },
+    "./types": {
+      "default": "./dist/types.js",
+      "types": "./types.ts"
+    },
+    "./url": {
+      "default": "./dist/url.js",
+      "types": "./url.ts"
+    },
+    "./ipc": {
+      "default": "./dist/ipc.js",
+      "types": "./ipc.ts"
+    },
+    "./path": {
+      "default": "./dist/path.js",
+      "types": "./path.ts"
+    },
+    "./cli": {
+      "default": "./dist/cli.js",
+      "types": "./cli.ts"
+    },
+    "./array": {
+      "default": "./dist/array.js",
+      "types": "./array.ts"
+    },
+    "./version": {
+      "default": "./dist/version.js",
+      "types": "./version.ts"
+    }
   },
   "publishConfig": {
     "access": "public"
