@@ -19,6 +19,7 @@
 		"jsx": "react",
 		"skipLibCheck": true,
 		"allowUmdGlobalAccess": true,
+		"types": ["node", "jest"]
 	},
 	"exclude": [
 		"**/node_modules",
