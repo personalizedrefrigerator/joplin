@@ -49,7 +49,7 @@ export default class SqliteQueue implements BaseQueue {
 
 	private async createQueue() {
 		const isQueueCreated = await this.sqlite.select('*').from('queue').where({ name: this.name }).first();
-		if (isQueueCreated) return null;
+		if (isQueueCreated) return;
 
 		return this.sqlite.insert({ name: this.name }).table('queue');
 	}
