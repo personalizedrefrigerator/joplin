@@ -1,6 +1,6 @@
 import { defaultWindowId } from '@joplin/lib/reducer';
 import * as React from 'react';
-import { useState, useEffect, useRef, createContext } from 'react';
+import { useState, useEffect, createContext } from 'react';
 import { createPortal } from 'react-dom';
 import { SecondaryWindowApi } from '../utils/window/types';
 
@@ -10,8 +10,6 @@ import { SecondaryWindowApi } from '../utils/window/types';
 // and refs can be used to access the child component's DOM.
 
 export const WindowIdContext = createContext(defaultWindowId);
-
-type OnCloseCallback = ()=> void;
 
 export enum WindowMode {
 	Iframe, NewWindow,
@@ -24,18 +22,13 @@ interface Props {
 	title: string;
 	mode: WindowMode;
 	windowId: string;
-	onClose: OnCloseCallback;
 }
 
 const useDocument = (
 	mode: WindowMode,
 	iframeElement: HTMLIFrameElement|null,
-	onClose: OnCloseCallback,
 ) => {
 	const [doc, setDoc] = useState<Document>(null);
-
-	const onCloseRef = useRef(onClose);
-	onCloseRef.current = onClose;
 
 	useEffect(() => {
 		let openedWindow: Window|null = null;
@@ -72,16 +65,12 @@ const useDocument = (
 			unmounted = true;
 
 			// Delay: Closing immediately causes Electron to crash
-			setTimeout(() => {
-				if (!openedWindow?.closed) {
-					openedWindow?.close();
-					onCloseRef.current?.();
-					openedWindow = null;
-				}
-			}, 200);
+			if (mode === WindowMode.NewWindow && openedWindow) {
+				type SecondaryWindowUtils = Window & {
+					scheduleClose: ()=> void;
+				};
 
-			if (iframeElement && !openedWindow) {
-				onCloseRef.current?.();
+				(openedWindow as SecondaryWindowUtils)?.scheduleClose();
 			}
 		};
 	}, [iframeElement, mode]);
@@ -112,6 +101,7 @@ const useDocumentSetup = (doc: Document|null, setLoaded: OnSetLoaded) => {
 		const jsUrls = [
 			'vendor/lib/smalltalk/dist/smalltalk.min.js',
 			'./utils/window/eventHandlerOverrides.js',
+			'./utils/window/secondaryWindowUtils.js',
 		];
 		for (const url of jsUrls) {
 			const script = doc.createElement('script');
@@ -129,7 +119,7 @@ const NewWindowOrIFrame: React.FC<Props> = props => {
 	const [iframeRef, setIframeRef] = useState<HTMLIFrameElement|null>(null);
 	const [loaded, setLoaded] = useState(false);
 
-	const doc = useDocument(props.mode, iframeRef, props.onClose);
+	const doc = useDocument(props.mode, iframeRef);
 	useDocumentSetup(doc, setLoaded);
 
 	useEffect(() => {
