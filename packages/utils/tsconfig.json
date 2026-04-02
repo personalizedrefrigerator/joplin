@@ -6,7 +6,6 @@
 		"strict": true,
 		"strictNullChecks": true
 	},
-	"rootDir": ".",
 	"include": [
         "**/*.ts",
         "**/*.tsx",
