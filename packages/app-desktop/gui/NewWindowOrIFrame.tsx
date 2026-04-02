@@ -76,15 +76,17 @@ const useDocument = (
 			if (mode === WindowMode.NewWindow && openedWindow) {
 				type SecondaryWindowUtils = Window & {
 					scheduleClose: ()=> void;
+					closeOnLoad?: boolean;
 				};
-				const scheduleClose = (openedWindow as SecondaryWindowUtils).scheduleClose;
+				const window = openedWindow as SecondaryWindowUtils;
 
-				// Edge case: scheduleClose hasn't been registered yet. Warn, rather than
+				// Edge case if scheduleClose hasn't been registered yet. Warn, rather than
 				// throwing to prevent a crash:
-				if (!scheduleClose) {
+				if (!window.scheduleClose) {
 					logger.warn('Attempting to close window before a "scheduleClose" callback has been registered.');
+					window.closeOnLoad = true;
 				} else {
-					scheduleClose();
+					window.scheduleClose();
 				}
 			}
 		};

@@ -6,3 +6,8 @@ window.scheduleClose = () => {
 		window.close();
 	}, 500);
 };
+
+// Handles the case where the window is scheduled to close before this script runs.
+if (window.closeOnLoad) {
+	window.scheduleClose();
+}
