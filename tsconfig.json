@@ -15,7 +15,6 @@
 		"noUnusedParameters": true,
 		"strictBindCallApply": true,
 		"strictFunctionTypes": true,
-		"strictNullChecks": false,
 		"sourceMap": true,
 		"jsx": "react",
 		"skipLibCheck": true,
