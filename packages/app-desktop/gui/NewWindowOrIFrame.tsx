@@ -3,6 +3,9 @@ import * as React from 'react';
 import { useState, useEffect, createContext } from 'react';
 import { createPortal } from 'react-dom';
 import { SecondaryWindowApi } from '../utils/window/types';
+import Logger from '@joplin/utils/Logger';
+
+const logger = Logger.create('NewWindowOrIframe');
 
 // This component uses react-dom's Portals to render its children in a different HTML
 // document. As children are rendered in a different Window/Document, they should avoid
@@ -67,13 +70,22 @@ const useDocument = (
 		return () => {
 			unmounted = true;
 
-			// Delay: Closing immediately causes Electron to crash
+			// Delay and use a helper running within the secondary window:
+			// Closing from the main JS context causes Electron to crash.
+			// See https://github.com/laurent22/joplin/pull/14988
 			if (mode === WindowMode.NewWindow && openedWindow) {
 				type SecondaryWindowUtils = Window & {
 					scheduleClose: ()=> void;
 				};
+				const scheduleClose = (openedWindow as SecondaryWindowUtils).scheduleClose;
 
-				(openedWindow as SecondaryWindowUtils).scheduleClose();
+				// Edge case: scheduleClose hasn't been registered yet. Warn, rather than
+				// throwing to prevent a crash:
+				if (!scheduleClose) {
+					logger.warn('Attempting to close window before a "scheduleClose" callback has been registered.');
+				} else {
+					scheduleClose();
+				}
 			}
 		};
 	}, [iframeElement, mode]);
