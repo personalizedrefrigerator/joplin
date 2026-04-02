@@ -5,76 +5,76 @@
   "repository": "https://github.com/laurent22/joplin/tree/dev/packages/utils",
   "exports": {
     ".": {
-      "default": "./dist/index.js",
-      "types": "./index.ts"
+      "types": "./index.ts",
+      "default": "./dist/index.js"
     },
     "./bytes": {
-      "default": "./dist/bytes.js",
-      "types": "./bytes.ts"
+      "types": "./bytes.ts",
+      "default": "./dist/bytes.js"
     },
     "./dom": {
-      "default": "./dist/dom.js",
-      "types": "./dom.ts"
+      "types": "./dom.ts",
+      "default": "./dist/dom.js"
     },
     "./env": {
-      "default": "./dist/env.js",
-      "types": "./env.ts"
+      "types": "./env.ts",
+      "default": "./dist/env.js"
     },
     "./object": {
-      "default": "./dist/object.js",
-      "types": "./object.ts"
+      "types": "./object.ts",
+      "default": "./dist/object.js"
     },
     "./fs": {
-      "default": "./dist/fs.js",
-      "types": "./fs.ts"
+      "types": "./fs.ts",
+      "default": "./dist/fs.js"
     },
     "./html": {
-      "default": "./dist/html.js",
-      "types": "./html.ts"
+      "types": "./html.ts",
+      "default": "./dist/html.js"
     },
     "./Logger": {
-      "default": "./dist/Logger.js",
-      "types": "./Logger.ts"
+      "types": "./Logger.ts",
+      "default": "./dist/Logger.js"
     },
     "./markdown": {
-      "default": "./dist/markdown.js",
-      "types": "./markdown.ts"
+      "types": "./markdown.ts",
+      "default": "./dist/markdown.js"
     },
     "./net": {
-      "default": "./dist/net.js",
-      "types": "./net.ts"
+      "types": "./net.ts",
+      "default": "./dist/net.js"
     },
     "./time": {
-      "default": "./dist/time.js",
-      "types": "./time.ts"
+      "types": "./time.ts",
+      "default": "./dist/time.js"
     },
     "./types": {
-      "default": "./dist/types.js",
-      "types": "./types.ts"
+      "types": "./types.ts",
+      "default": "./dist/types.js"
     },
     "./url": {
-      "default": "./dist/url.js",
-      "types": "./url.ts"
+      "types": "./url.ts",
+      "default": "./dist/url.js"
     },
     "./ipc": {
-      "default": "./dist/ipc.js",
-      "types": "./ipc.ts"
+      "types": "./ipc.ts",
+      "default": "./dist/ipc.js"
     },
     "./path": {
-      "default": "./dist/path.js",
-      "types": "./path.ts"
+      "types": "./path.ts",
+      "default": "./dist/path.js"
     },
     "./cli": {
-      "default": "./dist/cli.js",
-      "types": "./cli.ts"
+      "types": "./cli.ts",
+      "default": "./dist/cli.js"
     },
     "./array": {
-      "default": "./dist/array.js",
-      "types": "./array.ts"
+      "types": "./array.ts",
+      "default": "./dist/array.js"
     },
     "./version": {
-      "default": "./dist/version.js",
-      "types": "./version.ts"
+      "types": "./version.ts",
+      "default": "./dist/version.js"
     }
   },
   "publishConfig": {
