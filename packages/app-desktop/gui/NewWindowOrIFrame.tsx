@@ -28,16 +28,17 @@ const useDocument = (
 	mode: WindowMode,
 	iframeElement: HTMLIFrameElement|null,
 ) => {
-	const [doc, setDoc] = useState<Document>(null);
+	const [doc, setDoc] = useState<Document|null>(null);
 
 	useEffect(() => {
 		let openedWindow: Window|null = null;
 		let unmounted = false;
+		let doc;
 		if (iframeElement) {
-			setDoc(iframeElement?.contentWindow?.document);
+			doc = iframeElement?.contentWindow?.document;
 		} else if (mode === WindowMode.NewWindow) {
 			openedWindow = window.open('about:blank');
-			setDoc(openedWindow.document);
+			doc = openedWindow.document;
 
 			// .onbeforeunload and .onclose events don't seem to fire when closed by a user -- rely on polling
 			// instead:
@@ -60,6 +61,8 @@ const useDocument = (
 				}
 			})();
 		}
+		setUpDocument(doc);
+		setDoc(doc);
 
 		return () => {
 			unmounted = true;
@@ -70,7 +73,7 @@ const useDocument = (
 					scheduleClose: ()=> void;
 				};
 
-				(openedWindow as SecondaryWindowUtils)?.scheduleClose();
+				(openedWindow as SecondaryWindowUtils).scheduleClose();
 			}
 		};
 	}, [iframeElement, mode]);
@@ -78,49 +81,40 @@ const useDocument = (
 	return doc;
 };
 
-type OnSetLoaded = (loaded: boolean)=> void;
-const useDocumentSetup = (doc: Document|null, setLoaded: OnSetLoaded) => {
-	useEffect(() => {
-		if (!doc) return;
+const setUpDocument = (doc: Document) => {
+	doc.open();
+	doc.write('<!DOCTYPE html><html><head></head><body></body></html>');
+	doc.close();
 
-		doc.open();
-		doc.write('<!DOCTYPE html><html><head></head><body></body></html>');
-		doc.close();
+	const cssUrls = [
+		'style.min.css',
+	];
 
-		const cssUrls = [
-			'style.min.css',
-		];
+	for (const url of cssUrls) {
+		const style = doc.createElement('link');
+		style.rel = 'stylesheet';
+		style.href = url;
+		doc.head.appendChild(style);
+	}
 
-		for (const url of cssUrls) {
-			const style = doc.createElement('link');
-			style.rel = 'stylesheet';
-			style.href = url;
-			doc.head.appendChild(style);
-		}
+	const jsUrls = [
+		'vendor/lib/smalltalk/dist/smalltalk.min.js',
+		'./utils/window/eventHandlerOverrides.js',
+		'./utils/window/secondaryWindowUtils.js',
+	];
+	for (const url of jsUrls) {
+		const script = doc.createElement('script');
+		script.src = url;
+		doc.head.appendChild(script);
+	}
 
-		const jsUrls = [
-			'vendor/lib/smalltalk/dist/smalltalk.min.js',
-			'./utils/window/eventHandlerOverrides.js',
-			'./utils/window/secondaryWindowUtils.js',
-		];
-		for (const url of jsUrls) {
-			const script = doc.createElement('script');
-			script.src = url;
-			doc.head.appendChild(script);
-		}
-
-		doc.body.style.height = '100vh';
-
-		setLoaded(true);
-	}, [doc, setLoaded]);
+	doc.body.style.height = '100vh';
 };
 
 const NewWindowOrIFrame: React.FC<Props> = props => {
 	const [iframeRef, setIframeRef] = useState<HTMLIFrameElement|null>(null);
-	const [loaded, setLoaded] = useState(false);
 
 	const doc = useDocument(props.mode, iframeRef);
-	useDocumentSetup(doc, setLoaded);
 
 	useEffect(() => {
 		if (!doc) return;
@@ -135,7 +129,7 @@ const NewWindowOrIFrame: React.FC<Props> = props => {
 		}
 	}, [doc, props.windowId]);
 
-	const parentNode = loaded ? doc?.body : null;
+	const parentNode = doc?.body;
 	const wrappedChildren = <WindowIdContext.Provider value={props.windowId}>{props.children}</WindowIdContext.Provider>;
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Needed to allow adding the portal to the DOM
