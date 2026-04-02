@@ -5,7 +5,6 @@
 		"rootDir": "./src/",
 		"types": ["node", "jest", "jest-expect-message"]
 	},
-	"rootDir": ".",
 	"include": [
         "**/*.ts",
         "**/*.tsx",
