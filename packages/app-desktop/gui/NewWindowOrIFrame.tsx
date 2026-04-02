@@ -64,8 +64,11 @@ const useDocument = (
 				}
 			})();
 		}
-		setUpDocument(doc);
-		setDoc(doc);
+
+		if (doc) {
+			setUpDocument(doc);
+			setDoc(doc);
+		}
 
 		return () => {
 			unmounted = true;
