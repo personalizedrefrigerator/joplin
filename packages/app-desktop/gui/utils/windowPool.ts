@@ -24,6 +24,10 @@ class WindowPool {
 	}
 
 	public close(w: Window) {
+		if (!this.inUse_.has(w)) {
+			throw new Error('Window is either not in use or not managed by this WindowPool.');
+		}
+
 		this.inUse_.delete(w);
 		w.document.head.replaceChildren();
 		w.document.body.replaceChildren();
