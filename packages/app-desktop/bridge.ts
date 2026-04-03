@@ -311,9 +311,11 @@ export class Bridge {
 
 	public setMenuBarVisibility(windowId: string, showMenuBar: boolean) {
 		const window = this.electronWrapper_.windowById(windowId);
-		if (window && !window.isDestroyed() && !window.webContents.isDestroyed()) {
-			window.setAutoHideMenuBar(!showMenuBar);
-			window.setMenuBarVisibility(showMenuBar);
+		if (window && !window.isDestroyed()) {
+			if (window.menuBarVisible !== showMenuBar) {
+				window.setAutoHideMenuBar(!showMenuBar);
+				window.setMenuBarVisibility(showMenuBar);
+			}
 		}
 	}
 
