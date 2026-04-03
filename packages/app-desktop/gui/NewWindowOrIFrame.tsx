@@ -3,9 +3,7 @@ import * as React from 'react';
 import { useState, useEffect, createContext } from 'react';
 import { createPortal } from 'react-dom';
 import { SecondaryWindowApi } from '../utils/window/types';
-import Logger from '@joplin/utils/Logger';
-
-const logger = Logger.create('NewWindowOrIFrame');
+import windowPool from './utils/windowPool';
 
 // This component uses react-dom's Portals to render its children in a different HTML
 // document. As children are rendered in a different Window/Document, they should avoid
@@ -39,7 +37,7 @@ const useDocument = (
 		if (iframeElement) {
 			setDoc(iframeElement?.contentWindow?.document);
 		} else if (mode === WindowMode.NewWindow) {
-			openedWindow = window.open('about:blank');
+			openedWindow = windowPool.open();
 			setDoc(openedWindow.document);
 
 			// .onbeforeunload and .onclose events don't seem to fire when closed by a user -- rely on polling
@@ -71,20 +69,8 @@ const useDocument = (
 			// Closing from the main JS context causes Electron to crash.
 			// See https://github.com/laurent22/joplin/pull/14988
 			if (mode === WindowMode.NewWindow && openedWindow) {
-				type SecondaryWindowUtils = Window & {
-					scheduleClose: ()=> void;
-					closeOnLoad?: boolean;
-				};
-				const window = openedWindow as SecondaryWindowUtils;
-
-				// Edge case if scheduleClose hasn't been registered yet. Warn, rather than
-				// throwing to prevent a crash:
-				if (!window.scheduleClose) {
-					logger.warn('Attempting to close window before a "scheduleClose" callback has been registered.');
-					window.closeOnLoad = true;
-				} else {
-					window.scheduleClose();
-				}
+				windowPool.close(openedWindow);
+				openedWindow = null;
 			}
 		};
 	}, [iframeElement, mode]);
@@ -115,7 +101,6 @@ const useDocumentSetup = (doc: Document|null, setLoaded: OnSetLoaded) => {
 		const jsUrls = [
 			'vendor/lib/smalltalk/dist/smalltalk.min.js',
 			'./utils/window/eventHandlerOverrides.js',
-			'./utils/window/secondaryWindowUtils.js',
 		];
 		for (const url of jsUrls) {
 			const script = doc.createElement('script');

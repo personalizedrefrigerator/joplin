@@ -605,7 +605,9 @@ function CodeMirror(props: NoteBodyEditorProps, ref: ForwardedRef<NoteBodyEditor
 		`));
 
 		return () => {
-			ownerDoc.head.removeChild(element);
+			if (ownerDoc.head.contains(element)) {
+				ownerDoc.head.removeChild(element);
+			}
 		};
 	}, [props.themeId, props.contentMaxWidth, props.fontSize, editorRoot]);
 

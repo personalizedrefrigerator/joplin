@@ -92,7 +92,9 @@ const useAppliedCss = (doc: Document|null, css: string) => {
 		doc.head.appendChild(element);
 		element.appendChild(document.createTextNode(css));
 		return () => {
-			doc.head.removeChild(element);
+			if (doc.head.contains(element)) {
+				doc.head.removeChild(element);
+			}
 		};
 	}, [css, doc]);
 };
