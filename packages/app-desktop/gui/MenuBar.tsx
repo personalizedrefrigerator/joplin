@@ -203,13 +203,11 @@ function menuItemSetEnabled(id: string, enabled: boolean) {
 	menuItem.enabled = enabled;
 }
 
-const applyMenuBarVisibility = (windowId: string, showMenuBar: boolean) => {
+const applyMenuBarVisibility = (_windowId: string, _showMenuBar: boolean) => {
 	// The menu bar cannot be hidden on macOS
 	if (shim.isMac()) return;
 
-	const window = bridge().windowById(windowId) ?? bridge().mainWindow();
-	window.setAutoHideMenuBar(!showMenuBar);
-	window.setMenuBarVisibility(showMenuBar);
+	// bridge().setMenuBarVisibility(windowId, showMenuBar);
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied

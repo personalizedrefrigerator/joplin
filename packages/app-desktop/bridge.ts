@@ -309,6 +309,14 @@ export class Bridge {
 		return this.electronWrapper_.windowById(id);
 	}
 
+	public setMenuBarVisibility(windowId: string, showMenuBar: boolean) {
+		const window = this.electronWrapper_.windowById(windowId);
+		if (window && !window.isDestroyed() && !window.webContents.isDestroyed()) {
+			window.setAutoHideMenuBar(!showMenuBar);
+			window.setMenuBarVisibility(showMenuBar);
+		}
+	}
+
 	// Switches to the window with the given ID, but only if that window was not the
 	// last focused window
 	public switchToWindow(windowId: string) {
