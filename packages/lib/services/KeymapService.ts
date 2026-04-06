@@ -133,6 +133,7 @@ export interface KeymapItem {
 
 class Keymap {
 	private commandToItem_: Map<string, KeymapItem> = new Map();
+	// Maps from accelerators to **one** of the items with that accelerator
 	private acceleratorToItem_: Map<string, KeymapItem> = new Map();
 
 	public clear() {
@@ -144,13 +145,21 @@ class Keymap {
 		return this.commandToItem_.get(commandName);
 	}
 
-	public byAccelerator(accelerator: string) {
+	public firstWithAccelerator(accelerator: string) {
 		return this.acceleratorToItem_.get(accelerator);
 	}
 
 	public set(item: KeymapItem) {
+		const oldItem = this.commandToItem_.get(item.command);
+		if (oldItem?.accelerator) {
+			this.acceleratorToItem_.delete(oldItem.accelerator);
+		}
+
 		this.commandToItem_.set(item.command, item);
-		this.acceleratorToItem_.set(item.accelerator, item);
+
+		if (item.accelerator) {
+			this.acceleratorToItem_.set(item.accelerator, item);
+		}
 	}
 
 	public hasCommand(commandName: string) {
@@ -401,7 +410,7 @@ export default class KeymapService extends BaseService {
 			if (usedAccelerators.has(itemAccelerator)) {
 				const originalItem = (proposedKeymapItem && proposedKeymapItem.accelerator === itemAccelerator)
 					? proposedKeymapItem
-					: this.keymap.byAccelerator(itemAccelerator);
+					: this.keymap.firstWithAccelerator(itemAccelerator);
 
 				throw new Error(_(
 					'Accelerator "%s" is used for "%s" and "%s" commands. This may lead to unexpected behaviour.',
