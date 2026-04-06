@@ -372,7 +372,7 @@ export default class KeymapService extends BaseService {
 	private validateKeymapItem(item: KeymapItem) {
 		if (!item.hasOwnProperty('command')) {
 			throw new Error(_('"%s" is missing the required "%s" property.', JSON.stringify(item), _('command')));
-		// } else if (!this.keymap.hasOwnProperty(item.command)) {
+		// } else if (!this.keymap.hasCommand(item.command)) {
 		// 	throw new Error(_('Invalid %s: %s.', _('command'), item.command));
 		}
 
