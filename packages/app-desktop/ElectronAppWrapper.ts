@@ -519,17 +519,13 @@ export default class ElectronAppWrapper {
 					//   Error: Render frame was disposed before WebFrameMain could be accessed
 					const stillOpen = !window.isDestroyed();
 					if (stillOpen) {
+						// Don't close the window here. It will be closed by JS after cleanup has finished.
 						event.preventDefault();
 
 						// As of March 2026, Electron crashes with "Assertion failed: (Environment::GetCurrent(isolate)) == (env)" if the native 'close'
 						// event is allowed to close a secondary window. As a workaround, briefly hide the window and .close() it later.
 						// See https://github.com/laurent22/joplin/issues/14628.
 						window.hide();
-						setTimeout(() => {
-							if (!window.isDestroyed()) {
-								window.close();
-							}
-						}, 100);
 					}
 				}
 

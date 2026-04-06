@@ -1,8 +1,9 @@
 import { defaultWindowId } from '@joplin/lib/reducer';
 import * as React from 'react';
-import { useState, useEffect, useRef, createContext } from 'react';
+import { useState, useEffect, createContext } from 'react';
 import { createPortal } from 'react-dom';
 import { SecondaryWindowApi } from '../utils/window/types';
+import windowPool from './utils/windowPool';
 
 // This component uses react-dom's Portals to render its children in a different HTML
 // document. As children are rendered in a different Window/Document, they should avoid
@@ -10,8 +11,6 @@ import { SecondaryWindowApi } from '../utils/window/types';
 // and refs can be used to access the child component's DOM.
 
 export const WindowIdContext = createContext(defaultWindowId);
-
-type OnCloseCallback = ()=> void;
 
 export enum WindowMode {
 	Iframe, NewWindow,
@@ -24,18 +23,13 @@ interface Props {
 	title: string;
 	mode: WindowMode;
 	windowId: string;
-	onClose: OnCloseCallback;
 }
 
 const useDocument = (
 	mode: WindowMode,
 	iframeElement: HTMLIFrameElement|null,
-	onClose: OnCloseCallback,
 ) => {
 	const [doc, setDoc] = useState<Document>(null);
-
-	const onCloseRef = useRef(onClose);
-	onCloseRef.current = onClose;
 
 	useEffect(() => {
 		let openedWindow: Window|null = null;
@@ -43,7 +37,7 @@ const useDocument = (
 		if (iframeElement) {
 			setDoc(iframeElement?.contentWindow?.document);
 		} else if (mode === WindowMode.NewWindow) {
-			openedWindow = window.open('about:blank');
+			openedWindow = windowPool.open();
 			setDoc(openedWindow.document);
 
 			// .onbeforeunload and .onclose events don't seem to fire when closed by a user -- rely on polling
@@ -71,17 +65,12 @@ const useDocument = (
 		return () => {
 			unmounted = true;
 
-			// Delay: Closing immediately causes Electron to crash
-			setTimeout(() => {
-				if (!openedWindow?.closed) {
-					openedWindow?.close();
-					onCloseRef.current?.();
-					openedWindow = null;
-				}
-			}, 200);
-
-			if (iframeElement && !openedWindow) {
-				onCloseRef.current?.();
+			// Delay and use a helper running within the secondary window:
+			// Closing from the main JS context causes Electron to crash.
+			// See https://github.com/laurent22/joplin/pull/14988
+			if (mode === WindowMode.NewWindow && openedWindow) {
+				windowPool.close(openedWindow);
+				openedWindow = null;
 			}
 		};
 	}, [iframeElement, mode]);
@@ -129,7 +118,7 @@ const NewWindowOrIFrame: React.FC<Props> = props => {
 	const [iframeRef, setIframeRef] = useState<HTMLIFrameElement|null>(null);
 	const [loaded, setLoaded] = useState(false);
 
-	const doc = useDocument(props.mode, iframeRef, props.onClose);
+	const doc = useDocument(props.mode, iframeRef);
 	useDocumentSetup(doc, setLoaded);
 
 	useEffect(() => {

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import NoteEditor from './NoteEditor';
 import StyleSheetContainer from '../StyleSheets/StyleSheetContainer';
 import { connect } from 'react-redux';
@@ -50,16 +50,10 @@ const SecondaryWindow: React.FC<Props> = props => {
 	</div>;
 
 	const newWindow = props.newWindow;
-	const onWindowClose = useCallback(() => {
-		if (newWindow) {
-			props.dispatch({ type: 'WINDOW_CLOSE', windowId: props.windowId });
-		}
-	}, [props.dispatch, props.windowId, newWindow]);
 
 	return <NewWindowOrIFrame
 		mode={newWindow ? WindowMode.NewWindow : WindowMode.Iframe}
 		windowId={props.windowId}
-		onClose={onWindowClose}
 		title={windowTitle}
 	>
 		<LibraryStyleRoot>

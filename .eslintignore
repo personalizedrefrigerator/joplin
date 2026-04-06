@@ -556,6 +556,7 @@ packages/app-desktop/gui/utils/announceForAccessibility.js
 packages/app-desktop/gui/utils/convertToScreenCoordinates.js
 packages/app-desktop/gui/utils/dragAndDrop.js
 packages/app-desktop/gui/utils/loadScript.js
+packages/app-desktop/gui/utils/windowPool.js
 packages/app-desktop/gulpfile.js
 packages/app-desktop/integration-tests/goToAnything.spec.js
 packages/app-desktop/integration-tests/main.spec.js
