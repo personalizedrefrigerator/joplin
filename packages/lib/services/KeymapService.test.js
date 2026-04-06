@@ -345,4 +345,11 @@ describe('services_KeymapService', () => {
 		keymapService.registerCommandAccelerator('some-command', null);
 		expect(keymapService.getAriaKeyShortcuts('some-command')).toBe(undefined);
 	});
+
+	it('should return whether an accelerator is unused', () => {
+		const testAccelerator = 'Ctrl+Shift+Alt+P';
+		expect(keymapService.getIfUnused(testAccelerator, 'fallback')).toBe('fallback');
+		keymapService.registerCommandAccelerator('some-command', testAccelerator);
+		expect(keymapService.getIfUnused(testAccelerator, 'fallback')).toBe(testAccelerator);
+	});
 });

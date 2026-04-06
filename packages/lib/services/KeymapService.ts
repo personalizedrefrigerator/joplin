@@ -127,17 +127,52 @@ const defaultKeymapItems = {
 };
 
 export interface KeymapItem {
-	accelerator: string;
-	command: string;
+	readonly accelerator: string;
+	readonly command: string;
 }
 
-interface Keymap {
-	[command: string]: KeymapItem;
+class Keymap {
+	private commandToItem_: Map<string, KeymapItem> = new Map();
+	private acceleratorToItem_: Map<string, KeymapItem> = new Map();
+
+	public clear() {
+		this.commandToItem_.clear();
+		this.acceleratorToItem_.clear();
+	}
+
+	public byCommand(commandName: string) {
+		return this.commandToItem_.get(commandName);
+	}
+
+	public byAccelerator(accelerator: string) {
+		return this.acceleratorToItem_.get(accelerator);
+	}
+
+	public set(item: KeymapItem) {
+		this.commandToItem_.set(item.command, item);
+		this.acceleratorToItem_.set(item.accelerator, item);
+	}
+
+	public hasCommand(commandName: string) {
+		return this.commandToItem_.has(commandName);
+	}
+
+	public hasAccelerator(accelerator: string) {
+		return this.acceleratorToItem_.has(accelerator);
+	}
+
+	public commandNames() {
+		return this.commandToItem_.keys();
+	}
+
+	public items() {
+		return this.commandToItem_.values();
+	}
 }
 
 export default class KeymapService extends BaseService {
 
-	private keymap: Keymap;
+	private keymap = new Keymap();
 	private platform: string;
 	private customKeymapPath: string;
 	private defaultKeymapItems: KeymapItem[];
@@ -185,11 +220,11 @@ export default class KeymapService extends BaseService {
 
 	// Reset keymap back to its default values
 	public resetKeymap() {
-		this.keymap = {};
+		this.keymap.clear();
 		for (let i = 0; i < this.defaultKeymapItems.length; i++) {
 			// Keep the original defaultKeymapItems array untouched
 			// Makes it possible to retrieve the original accelerator later, if needed
-			this.keymap[this.defaultKeymapItems[i].command] = { ...this.defaultKeymapItems[i] };
+			this.keymap.set({ ...this.defaultKeymapItems[i] });
 		}
 	}
 
@@ -226,7 +261,7 @@ export default class KeymapService extends BaseService {
 	}
 
 	public acceleratorExists(command: string) {
-		return !!this.keymap[command];
+		return !!this.keymap.hasCommand(command);
 	}
 
 	private convertToPlatform(accelerator: string) {
@@ -240,25 +275,28 @@ export default class KeymapService extends BaseService {
 		// If the command is already registered, we don't register it again and
 		// we don't update the accelerator. This is because it might have been
 		// modified by the user and we don't want the plugin to overwrite this.
-		if (this.keymap[commandName]) return;
+		if (this.keymap.hasCommand(commandName)) return;
 
 		if (!commandName) throw new Error('Cannot register an accelerator without a command name');
 
 		const validatedAccelerator = accelerator ? this.convertToPlatform(accelerator) : null;
 		if (validatedAccelerator) this.validateAccelerator(validatedAccelerator);
 
-		this.keymap[commandName] = {
+		this.keymap.set({
 			command: commandName,
 			accelerator: validatedAccelerator,
-		};
+		});
 	}
 
 	public setAccelerator(command: string, accelerator: string) {
-		this.keymap[command].accelerator = accelerator;
+		this.keymap.set({
+			...this.keymap.byCommand(command),
+			accelerator,
+		});
 	}
 
 	public getAccelerator(command: string) {
-		const item = this.keymap[command];
+		const item = this.keymap.byCommand(command);
 		if (!item) throw new Error(`KeymapService: "${command}" command does not exist!`);
 
 		return item.accelerator;
@@ -272,11 +310,11 @@ export default class KeymapService extends BaseService {
 	}
 
 	public getCommandNames() {
-		return Object.keys(this.keymap);
+		return [...this.keymap.commandNames()];
 	}
 
 	public getKeymapItems() {
-		return Object.values(this.keymap);
+		return [...this.keymap.items()];
 	}
 
 	public getCustomKeymapItems() {
@@ -292,9 +330,9 @@ export default class KeymapService extends BaseService {
 			}
 		});
 
-		for (const commandName in this.keymap) {
+		for (const commandName of this.keymap.commandNames()) {
 			if (!this.defaultKeymapItems.find((item: KeymapItem) => item.command === commandName)) {
-				customkeymapItems.push(this.keymap[commandName]);
+				customkeymapItems.push(this.keymap.byCommand(commandName));
 			}
 		}
 
@@ -315,7 +353,7 @@ export default class KeymapService extends BaseService {
 
 				// If the command does not exist in the keymap, we are loading a new
 				// command accelerator so we need to register it.
-				if (!this.keymap[item.command]) {
+				if (!this.keymap.hasCommand(item.command)) {
 					this.registerCommandAccelerator(item.command, item.accelerator);
 				} else {
 					this.setAccelerator(item.command, item.accelerator);
@@ -356,14 +394,14 @@ export default class KeymapService extends BaseService {
 		// Helpful for detecting any errors that'll occur, when the proposed change is performed on the keymap
 		if (proposedKeymapItem) usedAccelerators.add(proposedKeymapItem.accelerator);
 
-		for (const item of Object.values(this.keymap)) {
+		for (const item of this.keymap.items()) {
 			const [itemAccelerator, itemCommand] = [item.accelerator, item.command];
 			if (proposedKeymapItem && itemCommand === proposedKeymapItem.command) continue; // Ignore the original accelerator
 
 			if (usedAccelerators.has(itemAccelerator)) {
 				const originalItem = (proposedKeymapItem && proposedKeymapItem.accelerator === itemAccelerator)
 					? proposedKeymapItem
-					: Object.values(this.keymap).find(_item => _item.accelerator === itemAccelerator);
+					: this.keymap.byAccelerator(itemAccelerator);
 
 				throw new Error(_(
 					'Accelerator "%s" is used for "%s" and "%s" commands. This may lead to unexpected behaviour.',
@@ -437,11 +475,9 @@ export default class KeymapService extends BaseService {
 		return electronAccelerator?.replace('Ctrl', 'Control');
 	}
 
-	public getIfUnused(accelerator: string) {
-		for (const item of Object.values(this.keymap)) {
-			if (item.accelerator === accelerator) {
-				return null;
-			}
+	public getIfUnused<T>(accelerator: string, fallback: T) {
+		if (this.keymap.hasAccelerator(accelerator)) {
+			return fallback;
 		}
 		return accelerator;
 	}

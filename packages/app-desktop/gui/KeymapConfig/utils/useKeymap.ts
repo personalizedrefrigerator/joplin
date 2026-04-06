@@ -17,6 +17,20 @@ function allKeymapItems() {
 	return output;
 }
 
+const updateAccelerator = (keymap: KeymapItem[], commandName: string, newAccelerator: string|null) => {
+	return keymap
+		.map(item => {
+			if (item.command === commandName) {
+				return {
+					...item,
+					accelerator: newAccelerator,
+				};
+			} else {
+				return item;
+			}
+		});
+};
+
 const useKeymap = (): [
 	KeymapItem[],
 	Error,
@@ -30,10 +44,7 @@ const useKeymap = (): [
 
 	const setAccelerator = (commandName: string, accelerator: string) => {
 		setKeymapItems(prevKeymap => {
-			const newKeymap = [...prevKeymap];
-
-			newKeymap.find(item => item.command === commandName).accelerator = accelerator || null /* Disabled */;
-			return newKeymap;
+			return updateAccelerator(prevKeymap, commandName, accelerator || null);
 		});
 
 		setMustSave(true);
@@ -42,10 +53,7 @@ const useKeymap = (): [
 	const resetAccelerator = (commandName: string) => {
 		const defaultAccelerator = keymapService.getDefaultAccelerator(commandName);
 		setKeymapItems(prevKeymap => {
-			const newKeymap = [...prevKeymap];
-
-			newKeymap.find(item => item.command === commandName).accelerator = defaultAccelerator;
-			return newKeymap;
+			return updateAccelerator(prevKeymap, commandName, defaultAccelerator);
 		});
 
 		setMustSave(true);
