@@ -699,6 +699,21 @@ function useMenu(props: Props) {
 				});
 			}
 
+			const undoRedoItems = [
+				menuItemDic.globalUndo,
+				{
+					...menuItemDic.globalRedo,
+					visible: false,
+					accelerator: keymapService.getIfUnused('CommandOrControl+Z') ?? undefined,
+				},
+				menuItemDic.globalRedo,
+				{
+					...menuItemDic.globalRedo,
+					visible: false,
+					accelerator: keymapService.getIfUnused('CommandOrControl+Shift+Z') ?? undefined,
+				},
+			];
+
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 			const rootMenus: any = {
 				edit: {
@@ -712,8 +727,7 @@ function useMenu(props: Props) {
 						menuItemDic.pasteAsMarkdown,
 						menuItemDic.textSelectAll,
 						separator(),
-						menuItemDic.globalUndo,
-						menuItemDic.globalRedo,
+						...undoRedoItems,
 						separator(),
 						menuItemDic.textBold,
 						menuItemDic.textItalic,

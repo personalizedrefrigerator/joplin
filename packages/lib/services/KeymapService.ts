@@ -437,6 +437,15 @@ export default class KeymapService extends BaseService {
 		return electronAccelerator?.replace('Ctrl', 'Control');
 	}
 
+	public getIfUnused(accelerator: string) {
+		for (const item of Object.values(this.keymap)) {
+			if (item.accelerator === accelerator) {
+				return null;
+			}
+		}
+		return accelerator;
+	}
+
 	public on<Name extends EventName>(eventName: Name, callback: EventListenerCallback<Name>) {
 		eventManager.on(eventName, callback);
 	}
