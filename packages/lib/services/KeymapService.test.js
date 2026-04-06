@@ -346,7 +346,7 @@ describe('services_KeymapService', () => {
 		expect(keymapService.getAriaKeyShortcuts('some-command')).toBe(undefined);
 	});
 
-	it('should return whether an accelerator is unused', () => {
+	it('getIfUnused should return its argument when an accelerator is unused', () => {
 		const testAccelerator = 'Ctrl+Shift+Alt+P';
 		expect(keymapService.getIfUnused(testAccelerator, 'fallback')).toBe('fallback');
 		keymapService.registerCommandAccelerator('some-command', testAccelerator);
