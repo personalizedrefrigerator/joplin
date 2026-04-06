@@ -699,13 +699,13 @@ function useMenu(props: Props) {
 				});
 			}
 
-			// Undo and redo are a bit complicated and can have two shortcuts in some cases:
+			// Redo is a bit complicated, since it can have two shortcuts in some cases:
 			// - By default, cmd-shift-z and cmd-y should redo in all fields.
-			// - If the user assigns a custom shortcut for cmd-shift-z, that should be used instead.
+			// - If the user assigns a custom shortcut for cmd-shift-z, redo should not use cmd-shift-z as a shortcut.
 			const undoRedoItems = [
 				menuItemDic.globalUndo,
 				{
-					...menuItemDic.globalRedo,
+					...menuItemDic.globalUndo,
 					visible: false,
 					accelerator: keymapService.getIfUnused(`${shim.isMac() ? 'Cmd' : 'Ctrl'}+Z`, undefined),
 				},
