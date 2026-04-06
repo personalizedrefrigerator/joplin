@@ -347,9 +347,11 @@ describe('services_KeymapService', () => {
 	});
 
 	it('getIfUnused should return its argument when an accelerator is unused', () => {
+		keymapService.initialize([]);
+
 		const testAccelerator = 'Ctrl+Shift+Alt+P';
-		expect(keymapService.getIfUnused(testAccelerator, 'fallback')).toBe('fallback');
-		keymapService.registerCommandAccelerator('some-command', testAccelerator);
 		expect(keymapService.getIfUnused(testAccelerator, 'fallback')).toBe(testAccelerator);
+		keymapService.registerCommandAccelerator('some-command', testAccelerator);
+		expect(keymapService.getIfUnused(testAccelerator, 'fallback')).toBe('fallback');
 	});
 });
