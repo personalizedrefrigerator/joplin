@@ -704,11 +704,6 @@ function useMenu(props: Props) {
 			// - If the user assigns a custom shortcut for cmd-shift-z, redo should not use cmd-shift-z as a shortcut.
 			const undoRedoItems = [
 				menuItemDic.globalUndo,
-				{
-					...menuItemDic.globalUndo,
-					visible: false,
-					accelerator: keymapService.getIfUnused(`${shim.isMac() ? 'Cmd' : 'Ctrl'}+Z`, undefined),
-				},
 				menuItemDic.globalRedo,
 				{
 					...menuItemDic.globalRedo,
