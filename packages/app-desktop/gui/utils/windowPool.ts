@@ -22,6 +22,7 @@ class WindowPool {
 		let target;
 		if (this.unused_.length > 0) {
 			target = this.unused_.pop();
+			target.electronWindow.show();
 		} else {
 			target = window.open('about:blank') as SecondaryWindow;
 		}
@@ -38,7 +39,7 @@ class WindowPool {
 		w.electronWindow.hide();
 
 		this.inUse_.delete(w);
-		w.document.head.replaceChildren();
+		this.unused_.push(w);
 		w.document.body.replaceChildren();
 	}
 }

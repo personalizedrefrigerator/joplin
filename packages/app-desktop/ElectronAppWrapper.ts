@@ -499,6 +499,16 @@ export default class ElectronAppWrapper {
 			}
 		});
 
+		ipcMain.on('secondary-window-hide', event => {
+			const window = BrowserWindow.fromWebContents(event.sender);
+			window.hide();
+		});
+
+		ipcMain.on('secondary-window-show', event => {
+			const window = BrowserWindow.fromWebContents(event.sender);
+			window.show();
+		});
+
 		ipcMain.on('secondary-window-added', (event, windowId: string) => {
 			const window = BrowserWindow.fromWebContents(event.sender);
 			const electronWindowId = window?.id;

@@ -54,21 +54,19 @@ const useDocument = (
 type OnSetLoaded = (loaded: boolean)=> void;
 const useDocumentSetup = (doc: Document|null, setLoaded: OnSetLoaded) => {
 	useEffect(() => {
-		if (!doc) return;
+		if (!doc) return () => {};
 
-		doc.open();
-		doc.write('<!DOCTYPE html><html><head></head><body></body></html>');
-		doc.close();
+		const elements: HTMLElement[] = [];
 
 		const cssUrls = [
 			'style.min.css',
 		];
-
 		for (const url of cssUrls) {
 			const style = doc.createElement('link');
 			style.rel = 'stylesheet';
 			style.href = url;
 			doc.head.appendChild(style);
+			elements.push(style);
 		}
 
 		const jsUrls = [
@@ -79,11 +77,18 @@ const useDocumentSetup = (doc: Document|null, setLoaded: OnSetLoaded) => {
 			const script = doc.createElement('script');
 			script.src = url;
 			doc.head.appendChild(script);
+			elements.push(script);
 		}
 
 		doc.body.style.height = '100vh';
 
 		setLoaded(true);
+
+		return () => {
+			for (const element of elements) {
+				element.remove();
+			}
+		};
 	}, [doc, setLoaded]);
 };
 
