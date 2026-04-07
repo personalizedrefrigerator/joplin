@@ -30,6 +30,7 @@ export enum NoteBodyEditorType {
 	CodeMirror6 = 'CodeMirror6',
 	CodeMirror5 = 'CodeMirror5',
 	TinyMce = 'TinyMCE',
+	ProseMirror = 'ProseMirror',
 	PlainText = 'PlainText',
 }
 
