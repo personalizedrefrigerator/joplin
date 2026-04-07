@@ -68,6 +68,7 @@ import determineProfileAndBaseDir from './determineBaseAppDirs';
 import NavService from './services/NavService';
 import getAppName from './getAppName';
 import PerformanceLogger from './PerformanceLogger';
+import Synchronizer from './Synchronizer';
 
 const appLogger: LoggerWrapper = Logger.create('App');
 const perfLogger = PerformanceLogger.create();
@@ -451,7 +452,7 @@ export default class BaseApplication {
 		const newState = store.getState() as State;
 
 		if (this.hasGui() && ['NOTE_UPDATE_ONE', 'NOTE_DELETE', 'FOLDER_UPDATE_ONE', 'FOLDER_DELETE'].indexOf(action.type) >= 0) {
-			if (!(await reg.syncTarget().syncStarted())) void reg.scheduleSync(reg.syncAsYouTypeInterval(), { syncSteps: ['update_remote', 'delete_remote'] });
+			if (!(await reg.syncTarget().syncStarted())) void reg.scheduleSync(reg.syncAsYouTypeInterval(), { syncSteps: Synchronizer.partialSyncSteps });
 			SearchEngine.instance().scheduleSyncTables();
 		}
 
@@ -626,6 +627,17 @@ export default class BaseApplication {
 		DecryptionWorker.instance().dispatch = this.store().dispatch;
 		ResourceFetcher.instance().dispatch = this.store().dispatch;
 		ShareService.instance().initialize(this.store(), EncryptionService.instance());
+
+		const cached = parseShareCache(Setting.value('sync.shareCache'));
+		const hasCachedShareData = cached.shares.length || Object.keys(cached.shareUsers).length || cached.shareInvitations.length;
+		if (hasCachedShareData) {
+			this.store().dispatch({
+				type: 'SHARE_CACHE_RESTORE',
+				shares: cached.shares,
+				shareUsers: cached.shareUsers,
+				shareInvitations: cached.shareInvitations,
+			});
+		}
 	}
 
 	public deinitRedux() {

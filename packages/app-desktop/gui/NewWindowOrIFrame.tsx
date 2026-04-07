@@ -1,5 +1,4 @@
 import { defaultWindowId } from '@joplin/lib/reducer';
-import shim from '@joplin/lib/shim';
 import * as React from 'react';
 import { useState, useEffect, useRef, createContext } from 'react';
 import { createPortal } from 'react-dom';
@@ -42,7 +41,7 @@ const useDocument = (
 
 	useEffect(() => {
 		let openedWindow: Window|null = null;
-		const unmounted = false;
+		let unmounted = false;
 		if (iframeElement) {
 			setDoc(iframeElement?.contentWindow?.document);
 		} else if (mode === WindowMode.NewWindow) {
@@ -54,11 +53,16 @@ const useDocument = (
 			void (async () => {
 				while (!unmounted) {
 					await new Promise<void>(resolve => {
-						shim.setTimeout(() => resolve(), 2000);
+						setTimeout(() => resolve(), 2000);
 					});
 
+					// Re-check after sleep to avoid duplicate WINDOW_CLOSE if IPC already fired.
+					if (unmounted) break;
+
 					if (openedWindow?.closed) {
-						onCloseRef.current?.();
+						// Null out doc first so React stops rendering into the destroyed window
+						// before WINDOW_CLOSE triggers unmounting (prevents renderer crash on Windows).
+						setDoc(null);
 						openedWindow = null;
 						break;
 					}
@@ -67,6 +71,8 @@ const useDocument = (
 		}
 
 		return () => {
+			unmounted = true;
+
 			// Delay: Closing immediately causes Electron to crash
 			setTimeout(() => {
 				if (!openedWindow?.closed) {
