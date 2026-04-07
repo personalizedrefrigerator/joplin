@@ -1,0 +1,76 @@
+# Patch electron-builder's app-builder-lib to add support for node module resolutions.
+# Without this, electron-builder fails to resolve some dependencies (e.g. "depd").
+diff --git a/out/node-module-collector/traversalNodeModulesCollector.js b/out/node-module-collector/traversalNodeModulesCollector.js
+index 851c5427b676c0c8e65b7b63bcf8eadef68904a3..38c6f85195683584b4bf32d784bc521c065f9d69 100644
+--- a/out/node-module-collector/traversalNodeModulesCollector.js
++++ b/out/node-module-collector/traversalNodeModulesCollector.js
+@@ -3,6 +3,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
+ exports.TraversalNodeModulesCollector = void 0;
+ const builder_util_1 = require("builder-util");
+ const path = require("path");
++const fs = require("fs/promises");
++const semverValid = require('semver/functions/valid');
+ const moduleManager_1 = require("./moduleManager");
+ const nodeModulesCollector_1 = require("./nodeModulesCollector");
+ const packageManager_js_1 = require("./packageManager.js");
+@@ -53,6 +55,34 @@ class TraversalNodeModulesCollector extends nodeModulesCollector_1.NodeModulesCo
+         // Track visited packages by their resolved path to prevent infinite loops
+         const visited = new Set();
+         const resolvedBaseDir = await this.cache.realPath[baseDir];
++
++        // JOPLIN CHANGE: Read the toplevel package.json file in the workspace:
++        const rootPackageJson = JSON.parse(await fs.readFile(path.join(resolvedBaseDir, '..', '..', 'package.json')));
++
++        // Checks the "resolutions" field of the toplevel package.json
++        const handleResolutions = (depName, depVersion) => {
++            const resolutionKeys = [ depName, `${depName}@npm:${depVersion}` ];
++            for (const resolutionKey of resolutionKeys) {
++                if (rootPackageJson.resolutions && resolutionKey in rootPackageJson.resolutions) {
++                    const resolvedTo = decodeURIComponent(rootPackageJson.resolutions[resolutionKey].split('#')[0]);
++
++                    const patchMatch = resolvedTo.match(/^patch:[^@]+@npm:(.*)$/);
++                    let resolution = null;
++                    if (patchMatch) {
++                        resolution = patchMatch[1];
++                    } else if (semverValid(resolvedTo)) {
++                        resolution = resolvedTo;
++                    }
++
++                    if (resolution) {
++                        console.log('Resolving', depName, 'to', resolution);
++                        return resolution;
++                    }
++                }
++            }
++            return depVersion;
++        };
++
+         /**
+          * Recursively builds dependency tree starting from a package directory.
+          * @param packageDir - The directory of the package to process
+@@ -82,7 +112,10 @@ class TraversalNodeModulesCollector extends nodeModulesCollector_1.NodeModulesCo
+             visited.add(resolvedPackageDir);
+             const buildPackage = async (dependencies, nullHandler) => {
+                 const builtPackages = {};
+-                for (const [depName, depVersion] of Object.entries(dependencies || {})) {
++                for (let [depName, depVersion] of Object.entries(dependencies || {})) {
++                    depVersion = handleResolutions(depName, depVersion);
++                    
++
+                     const pkg = await this.locatePackageWithVersion({ name: depName, version: depVersion, path: resolvedPackageDir });
+                     const logFields = { parent: moduleName, dependency: depName, version: depVersion };
+                     if (pkg == null) {
+diff --git a/out/util/appFileCopier.js b/out/util/appFileCopier.js
+index f762b47b85539eea2b38f6cf76692624a3b7e307..f169d5a4d42259690b31974b6f0bb6f4336ff879 100644
+--- a/out/util/appFileCopier.js
++++ b/out/util/appFileCopier.js
+@@ -176,7 +176,8 @@ async function collectNodeModulesWithLogging(platformPackager) {
+     const { tempDirManager, appDir, projectDir } = packager;
+     let deps = undefined;
+     const searchDirectories = Array.from(new Set([appDir, projectDir, await packager.getWorkspaceRoot()])).filter((it) => (0, builder_util_1.isEmptyOrSpaces)(it) === false);
+-    const pmApproaches = [await packager.getPackageManager(), node_module_collector_1.PM.TRAVERSAL];
++    // JOPLIN CHANGE: Always use the TRAVERSAL approach: The default yarn approach is unreliable:
++    const pmApproaches = [node_module_collector_1.PM.TRAVERSAL];
+     for (const pm of pmApproaches) {
+         for (const dir of searchDirectories) {
+             builder_util_1.log.info({ pm, searchDir: dir }, "searching for node modules");
