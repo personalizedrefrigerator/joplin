@@ -499,7 +499,6 @@ export default class KeymapService extends BaseService {
 
 	// Returns `accelerator` when not used by the current keymap. This is useful, for example,
 	// if a keyboard shortcut should not conflict with the user-customized keymap.
-	// Note: Does not normalize `accelerator`.
 	public getIfUnused<T>(accelerator: string, fallback: T) {
 		this.validateAccelerator(accelerator);
 
