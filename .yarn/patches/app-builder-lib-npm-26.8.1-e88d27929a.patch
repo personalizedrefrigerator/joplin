@@ -1,5 +1,8 @@
-# Patch electron-builder's app-builder-lib to add support for node module resolutions.
-# Without this, electron-builder fails to resolve some dependencies (e.g. "depd").
+# This patch makes two changes:
+# - Support yarn's "resolution" field while resolving dependencies (see https://github.com/laurent22/joplin/pull/15034#discussion_r3046971785).
+# - On Windows, if an existing uninstaller fails, gives an option to continue with the installation
+#   despite the failure (https://github.com/laurent22/joplin/pull/11541).
+#
 diff --git a/out/node-module-collector/traversalNodeModulesCollector.js b/out/node-module-collector/traversalNodeModulesCollector.js
 index 851c5427b676c0c8e65b7b63bcf8eadef68904a3..38c6f85195683584b4bf32d784bc521c065f9d69 100644
 --- a/out/node-module-collector/traversalNodeModulesCollector.js
@@ -74,3 +77,46 @@ index f762b47b85539eea2b38f6cf76692624a3b7e307..f169d5a4d42259690b31974b6f0bb6f4
      for (const pm of pmApproaches) {
          for (const dir of searchDirectories) {
              builder_util_1.log.info({ pm, searchDir: dir }, "searching for node modules");
+diff --git a/templates/nsis/include/installUtil.nsh b/templates/nsis/include/installUtil.nsh
+index 47367741632726ba0886ac516461dbe98b7aea58..e58d38b7b76276e39dd22864ce9754375e342a87 100644
+--- a/templates/nsis/include/installUtil.nsh
++++ b/templates/nsis/include/installUtil.nsh
+@@ -128,8 +128,9 @@ Function handleUninstallResult
+   ${if} $R0 != 0
+     MessageBox MB_OK|MB_ICONEXCLAMATION "$(uninstallFailed): $R0"
+     DetailPrint `Uninstall was not successful. Uninstaller error code: $R0.`
+-    SetErrorLevel 2
+-    Quit
++    DetailPrint `Continuing anyway. See https://github.com/laurent22/joplin/pull/11612.`
++    # SetErrorLevel 2
++    # Quit
+   ${endif}
+ FunctionEnd
+ 
+@@ -216,11 +217,13 @@ Function uninstallOldVersion
+     IntOp $R5 $R5 + 1
+ 
+     ${if} $R5 > 5
+-      MessageBox MB_RETRYCANCEL|MB_ICONEXCLAMATION "$(appCannotBeClosed)" /SD IDCANCEL IDRETRY OneMoreAttempt
+-      Return
++      MessageBox MB_RETRYCANCEL|MB_ICONEXCLAMATION "$(appCannotBeUninstalled)" /SD IDCANCEL IDRETRY ContinueWithoutUninstall
++        Abort ; Exit early
++      ContinueWithoutUninstall:
++        Return
+     ${endIf}
+ 
+-  OneMoreAttempt:
++#  OneMoreAttempt: ; Commented out because unused
+     ExecWait '"$uninstallerFileNameTemp" /S /KEEP_APP_DATA $0 _?=$installationDir' $R0
+     ifErrors TryInPlace CheckResult
+ 
+diff --git a/templates/nsis/messages.yml b/templates/nsis/messages.yml
+index 982e1b09e424c4f07ce7c1152fe5ce8b703f5f57..56074e4f7ee3bd69459087b380801b7dbbe55f68 100644
+--- a/templates/nsis/messages.yml
++++ b/templates/nsis/messages.yml
+@@ -238,3 +238,5 @@ uninstallFailed:
+ appClosing:
+   en: "Closing running ${PRODUCT_NAME}..."
+   cs: "Ukončuji aplikaci ${PRODUCT_NAME}..."
++appCannotBeUninstalled:
++  en: "The old version of ${PRODUCT_NAME} could not be removed. \nClick Retry to skip this step."
