@@ -3,8 +3,44 @@
 # - On Windows, if an existing uninstaller fails, gives an option to continue with the installation
 #   despite the failure (https://github.com/laurent22/joplin/pull/11541).
 #
+diff --git a/out/node-module-collector/nodeModulesCollector.d.ts b/out/node-module-collector/nodeModulesCollector.d.ts
+index 601ab15e1c0617eb5782372cbcf7d9854ae308b0..d01cd0fd786923112de84f9cbacf31180a6c7980 100644
+--- a/out/node-module-collector/nodeModulesCollector.d.ts
++++ b/out/node-module-collector/nodeModulesCollector.d.ts
+@@ -25,6 +25,7 @@ export declare abstract class NodeModulesCollector<ProdDepType extends Dependenc
+      */
+     getNodeModules({ packageName }: {
+         packageName: string;
++        workspaceDir: string;
+     }): Promise<{
+         nodeModules: NodeModuleInfo[];
+         logSummary: ModuleManager["logSummary"];
+diff --git a/out/node-module-collector/nodeModulesCollector.js b/out/node-module-collector/nodeModulesCollector.js
+index 0956d2657279b06ff210e5008583b9c35b533d5f..62044f0ab215635aeb8a358f6e6c2fbcb8cdc502 100644
+--- a/out/node-module-collector/nodeModulesCollector.js
++++ b/out/node-module-collector/nodeModulesCollector.js
+@@ -45,8 +45,8 @@ class NodeModulesCollector {
+      * 5. Hoisting the dependencies to their final locations
+      * 6. Resolving and returning module information
+      */
+-    async getNodeModules({ packageName }) {
+-        const tree = await this.getDependenciesTree(this.installOptions.manager);
++    async getNodeModules({ packageName, workspaceDir }) {
++        const tree = await this.getDependenciesTree(this.installOptions.manager, workspaceDir);
+         await this.collectAllDependencies(tree, packageName);
+         const realTree = this.getTreeFromWorkspaces(tree, packageName);
+         await this.extractProductionDependencyGraph(realTree, packageName);
+@@ -64,7 +64,7 @@ class NodeModulesCollector {
+      * the output to a temporary file. Includes retry logic to handle transient failures such as
+      * incomplete JSON output or missing files. Will retry up to 1 time with exponential backoff.
+      */
+-    async getDependenciesTree(pm) {
++    async getDependenciesTree(pm, _workspaceDir) {
+         const command = (0, packageManager_1.getPackageManagerCommand)(pm);
+         const args = this.getArgs();
+         const tempOutputFile = await this.tempDirManager.getTempFile({
 diff --git a/out/node-module-collector/traversalNodeModulesCollector.js b/out/node-module-collector/traversalNodeModulesCollector.js
-index 851c5427b676c0c8e65b7b63bcf8eadef68904a3..38c6f85195683584b4bf32d784bc521c065f9d69 100644
+index 851c5427b676c0c8e65b7b63bcf8eadef68904a3..6391c1f3be447cf794ebc7bd5c00b46d34ef4adf 100644
 --- a/out/node-module-collector/traversalNodeModulesCollector.js
 +++ b/out/node-module-collector/traversalNodeModulesCollector.js
 @@ -3,6 +3,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
@@ -16,22 +52,41 @@ index 851c5427b676c0c8e65b7b63bcf8eadef68904a3..38c6f85195683584b4bf32d784bc521c
  const moduleManager_1 = require("./moduleManager");
  const nodeModulesCollector_1 = require("./nodeModulesCollector");
  const packageManager_js_1 = require("./packageManager.js");
-@@ -53,6 +55,34 @@ class TraversalNodeModulesCollector extends nodeModulesCollector_1.NodeModulesCo
+@@ -18,9 +20,9 @@ class TraversalNodeModulesCollector extends nodeModulesCollector_1.NodeModulesCo
+     getArgs() {
+         return [];
+     }
+-    getDependenciesTree(_pm) {
++    getDependenciesTree(_pm, workspaceDir) {
+         builder_util_1.log.info(null, "using manual traversal of node_modules to build dependency tree");
+-        return this.buildNodeModulesTreeManually(this.rootDir, undefined);
++        return this.buildNodeModulesTreeManually(this.rootDir, undefined, workspaceDir);
+     }
+     async collectAllDependencies(tree, appPackageName) {
+         for (const [packageKey, value] of Object.entries({ ...tree.dependencies, ...tree.optionalDependencies })) {
+@@ -49,10 +51,40 @@ class TraversalNodeModulesCollector extends nodeModulesCollector_1.NodeModulesCo
+      * Builds a dependency tree using only package.json dependencies and optionalDependencies.
+      * This skips devDependencies and uses Node.js module resolution (require.resolve).
+      */
+-    async buildNodeModulesTreeManually(baseDir, aliasName) {
++    async buildNodeModulesTreeManually(baseDir, aliasName, workspaceDir) {
          // Track visited packages by their resolved path to prevent infinite loops
          const visited = new Set();
          const resolvedBaseDir = await this.cache.realPath[baseDir];
 +
 +        // JOPLIN CHANGE: Read the toplevel package.json file in the workspace:
-+        const rootPackageJson = JSON.parse(await fs.readFile(path.join(resolvedBaseDir, '..', '..', 'package.json')));
++        const rootPackageJson = JSON.parse(await fs.readFile(path.join(workspaceDir, 'package.json')));
 +
 +        // Checks the "resolutions" field of the toplevel package.json
 +        const handleResolutions = (depName, depVersion) => {
 +            const resolutionKeys = [ depName, `${depName}@npm:${depVersion}` ];
 +            for (const resolutionKey of resolutionKeys) {
 +                if (rootPackageJson.resolutions && resolutionKey in rootPackageJson.resolutions) {
-+                    const resolvedTo = decodeURIComponent(rootPackageJson.resolutions[resolutionKey].split('#')[0]);
++                    // Resolutions can take the form "patch:package@npm%3A1.2.3#./.yarn/patches/package-npm-4.5.6-d92bace04d.patch"
++                    // where the "%3A" is a URL-encoded ":"
++                    const resolvedTo = rootPackageJson.resolutions[resolutionKey].split('#')[0];
++                    const patchMatch = resolvedTo.match(/^patch:[^@]+@npm%3A(.*)$/);
 +
-+                    const patchMatch = resolvedTo.match(/^patch:[^@]+@npm:(.*)$/);
 +                    let resolution = null;
 +                    if (patchMatch) {
 +                        resolution = patchMatch[1];
@@ -40,7 +95,7 @@ index 851c5427b676c0c8e65b7b63bcf8eadef68904a3..38c6f85195683584b4bf32d784bc521c
 +                    }
 +
 +                    if (resolution) {
-+                        console.log('Resolving', depName, 'to', resolution);
++                        builder_util_1.log.info(`Resolving ${depName} to ${resolution}...`);
 +                        return resolution;
 +                    }
 +                }
@@ -51,32 +106,41 @@ index 851c5427b676c0c8e65b7b63bcf8eadef68904a3..38c6f85195683584b4bf32d784bc521c
          /**
           * Recursively builds dependency tree starting from a package directory.
           * @param packageDir - The directory of the package to process
-@@ -82,7 +112,10 @@ class TraversalNodeModulesCollector extends nodeModulesCollector_1.NodeModulesCo
+@@ -82,7 +112,9 @@ class TraversalNodeModulesCollector extends nodeModulesCollector_1.NodeModulesCo
              visited.add(resolvedPackageDir);
              const buildPackage = async (dependencies, nullHandler) => {
                  const builtPackages = {};
 -                for (const [depName, depVersion] of Object.entries(dependencies || {})) {
 +                for (let [depName, depVersion] of Object.entries(dependencies || {})) {
 +                    depVersion = handleResolutions(depName, depVersion);
-+                    
 +
                      const pkg = await this.locatePackageWithVersion({ name: depName, version: depVersion, path: resolvedPackageDir });
                      const logFields = { parent: moduleName, dependency: depName, version: depVersion };
                      if (pkg == null) {
 diff --git a/out/util/appFileCopier.js b/out/util/appFileCopier.js
-index f762b47b85539eea2b38f6cf76692624a3b7e307..f169d5a4d42259690b31974b6f0bb6f4336ff879 100644
+index f762b47b85539eea2b38f6cf76692624a3b7e307..5975683046464777bb296b26f1ed46ae0c87770d 100644
 --- a/out/util/appFileCopier.js
 +++ b/out/util/appFileCopier.js
-@@ -176,7 +176,8 @@ async function collectNodeModulesWithLogging(platformPackager) {
+@@ -175,13 +175,16 @@ async function collectNodeModulesWithLogging(platformPackager) {
+     const packager = platformPackager.info;
      const { tempDirManager, appDir, projectDir } = packager;
      let deps = undefined;
-     const searchDirectories = Array.from(new Set([appDir, projectDir, await packager.getWorkspaceRoot()])).filter((it) => (0, builder_util_1.isEmptyOrSpaces)(it) === false);
+-    const searchDirectories = Array.from(new Set([appDir, projectDir, await packager.getWorkspaceRoot()])).filter((it) => (0, builder_util_1.isEmptyOrSpaces)(it) === false);
 -    const pmApproaches = [await packager.getPackageManager(), node_module_collector_1.PM.TRAVERSAL];
++    const workspaceDir = await packager.getWorkspaceRoot();
++    const searchDirectories = Array.from(new Set([appDir, projectDir, workspaceDir])).filter((it) => (0, builder_util_1.isEmptyOrSpaces)(it) === false);
 +    // JOPLIN CHANGE: Always use the TRAVERSAL approach: The default yarn approach is unreliable:
 +    const pmApproaches = [node_module_collector_1.PM.TRAVERSAL];
      for (const pm of pmApproaches) {
          for (const dir of searchDirectories) {
              builder_util_1.log.info({ pm, searchDir: dir }, "searching for node modules");
+             const collector = (0, node_module_collector_1.getCollectorByPackageManager)(pm, dir, tempDirManager);
+-            deps = await collector.getNodeModules({ packageName: packager.metadata.name });
++            // JOPLIN CHANGE: Always pass "workspaceDir":
++            deps = await collector.getNodeModules({ packageName: packager.metadata.name, workspaceDir });
+             if (deps.nodeModules.length > 0) {
+                 break;
+             }
 diff --git a/templates/nsis/include/installUtil.nsh b/templates/nsis/include/installUtil.nsh
 index 47367741632726ba0886ac516461dbe98b7aea58..e58d38b7b76276e39dd22864ce9754375e342a87 100644
 --- a/templates/nsis/include/installUtil.nsh
