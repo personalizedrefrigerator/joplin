@@ -5,6 +5,7 @@ import keysRegExp from './KeymapService_keysRegExp';
 import keycodeToElectronMap from './KeymapService_keycodeToElectronMap';
 
 import BaseService from './BaseService';
+import { toTitleCase } from '../string-utils';
 
 const modifiersRegExp = {
 	darwin: /^(Ctrl|Option|Shift|Cmd)$/,
@@ -131,6 +132,18 @@ export interface KeymapItem {
 	readonly command: string;
 }
 
+const normalizeAccelerator = (accelerator: string) => {
+	const parts = accelerator.split('+');
+	const modifiers = parts.slice(0, -1);
+
+	return [
+		...modifiers
+			.map(toTitleCase)
+			.sort(),
+		toTitleCase(parts[parts.length - 1]),
+	].join('+');
+};
+
 class Keymap {
 	private commandToItem_: Map<string, KeymapItem> = new Map();
 	// Maps from accelerators to **one** of the items with that accelerator
@@ -152,13 +165,13 @@ class Keymap {
 	public set(item: KeymapItem) {
 		const oldItem = this.commandToItem_.get(item.command);
 		if (oldItem?.accelerator) {
-			this.acceleratorToItem_.delete(oldItem.accelerator);
+			this.acceleratorToItem_.delete(normalizeAccelerator(oldItem.accelerator));
 		}
 
 		this.commandToItem_.set(item.command, item);
 
 		if (item.accelerator) {
-			this.acceleratorToItem_.set(item.accelerator, item);
+			this.acceleratorToItem_.set(normalizeAccelerator(item.accelerator), item);
 		}
 	}
 
@@ -167,7 +180,7 @@ class Keymap {
 	}
 
 	public hasAccelerator(accelerator: string) {
-		return this.acceleratorToItem_.has(accelerator);
+		return this.acceleratorToItem_.has(normalizeAccelerator(accelerator));
 	}
 
 	public commandNames() {
@@ -488,6 +501,8 @@ export default class KeymapService extends BaseService {
 	// if a keyboard shortcut should not conflict with the user-customized keymap.
 	// Note: Does not normalize `accelerator`.
 	public getIfUnused<T>(accelerator: string, fallback: T) {
+		this.validateAccelerator(accelerator);
+
 		if (this.keymap.hasAccelerator(accelerator)) {
 			return fallback;
 		}

@@ -354,4 +354,12 @@ describe('services_KeymapService', () => {
 		keymapService.registerCommandAccelerator('some-command', testAccelerator);
 		expect(keymapService.getIfUnused(testAccelerator, 'fallback')).toBe('fallback');
 	});
+
+	it('getIfUnused should normalize accelerators before comparing', () => {
+		keymapService.initialize([]);
+
+		const testAccelerator = 'Ctrl+Shift+Alt+P';
+		keymapService.registerCommandAccelerator('some-command', 'Alt+Shift+Ctrl+P');
+		expect(keymapService.getIfUnused(testAccelerator, 'fallback')).toBe('fallback');
+	});
 });
