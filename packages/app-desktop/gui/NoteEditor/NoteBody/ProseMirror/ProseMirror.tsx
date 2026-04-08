@@ -23,6 +23,7 @@ import NewWindowOrIFrame, { WindowIdContext, WindowMode } from '../../../NewWind
 import useEditorSettings from '../utils/useEditorSettings';
 import useOnIframeLoad from './utils/useOnIframeLoad';
 import Toolbar from './Toolbar';
+import StyleSheetContainer from '../../../StyleSheets/StyleSheetContainer';
 
 const logger = Logger.create('ProseMirror');
 const logDebug = (message: string) => logger.debug(message);
@@ -239,6 +240,11 @@ const ProseMirror = (props: NoteBodyEditorProps, ref: ForwardedRef<NoteBodyEdito
 				onLoad={onIframeLoad}
 			>
 				{renderEditor()}
+				<StyleSheetContainer
+					// Apply most of the main Joplin styles within the frame, but exclude
+					// custom top-level user CSS:
+					customChromeCssPaths={[]}
+				/>
 			</NewWindowOrIFrame>
 		</ErrorBoundary>
 	</div>;
