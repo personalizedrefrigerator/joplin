@@ -179,6 +179,7 @@ const createEditor = async (
 		},
 	});
 
+	let bodyUpdateCounter = 0;
 	const editorControl: ProseMirrorControl = {
 		supportsCommand: (name: EditorCommandType | string) => {
 			return name in commands && !!commands[name as keyof typeof commands];
@@ -219,7 +220,12 @@ const createEditor = async (
 			view.pasteHTML(new XMLSerializer().serializeToString(dom));
 		},
 		updateBody: async (newBody: string, _updateBodyOptions?: UpdateBodyOptions) => {
-			view.updateState(await createInitialState(newBody));
+			const cancelCounter = ++bodyUpdateCounter;
+			const newState = await createInitialState(newBody);
+
+			if (bodyUpdateCounter === cancelCounter) {
+				view.updateState(newState);
+			}
 		},
 		getSettings: () => {
 			return settings;
