@@ -7,11 +7,13 @@ import { AppState } from '../app.reducer';
 import { connect } from 'react-redux';
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { focus } from '@joplin/lib/utils/focusHandler';
+import { stateUtils } from '@joplin/lib/reducer';
 
 interface Props {
 	themeId: number;
 	scrollable: boolean;
 	style: React.CSSProperties;
+	editorCodeView: boolean;
 	items: ToolbarItem[];
 	disabled: boolean;
 	'aria-label': string;
@@ -133,7 +135,7 @@ const ToolbarBaseComponent: React.FC<Props> = props => {
 			return <ToggleEditorsButton
 				key={o.name}
 				buttonRef={setButtonRefCallback}
-				value={Value.Markdown}
+				value={props.editorCodeView ? Value.Markdown : Value.RichText}
 				themeId={props.themeId}
 				toolbarButtonInfo={o}
 				tabIndex={tabIndex}
@@ -202,8 +204,16 @@ const ToolbarBaseComponent: React.FC<Props> = props => {
 	);
 };
 
-const mapStateToProps = (state: AppState) => {
-	return { themeId: state.settings.theme };
+interface OwnProps {
+	windowId: string;
+}
+
+const mapStateToProps = (state: AppState, ownProps: OwnProps) => {
+	const windowState = stateUtils.windowStateById(state, ownProps.windowId);
+	return {
+		themeId: state.settings.theme,
+		editorCodeView: windowState.editorCodeView,
+	};
 };
 
 export default connect(mapStateToProps)(ToolbarBaseComponent);

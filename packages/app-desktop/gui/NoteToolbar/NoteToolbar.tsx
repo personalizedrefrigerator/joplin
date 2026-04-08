@@ -9,6 +9,8 @@ import { buildStyle } from '@joplin/lib/theme';
 import { _ } from '@joplin/lib/locale';
 import getActivePluginEditorView from '@joplin/lib/services/plugins/utils/getActivePluginEditorView';
 import { AppState } from '../../app.reducer';
+import { WindowIdContext } from '../NewWindowOrIFrame';
+import { useContext } from 'react';
 
 interface NoteToolbarProps {
 	themeId: number;
@@ -31,9 +33,11 @@ function styles_(props: NoteToolbarProps) {
 
 function NoteToolbar(props: NoteToolbarProps) {
 	const styles = styles_(props);
+	const windowId = useContext(WindowIdContext);
 	return (
 		<ToolbarBase
 			style={styles.root}
+			windowId={windowId}
 			scrollable={false}
 			items={props.toolbarButtonInfos}
 			disabled={props.disabled}

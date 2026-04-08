@@ -7,6 +7,8 @@ import { AppState } from '../../../../app.reducer';
 import ToolbarButtonUtils, { ToolbarItem } from '@joplin/lib/services/commands/ToolbarButtonUtils';
 import stateToWhenClauseContext from '../../../../services/commands/stateToWhenClauseContext';
 import { _ } from '@joplin/lib/locale';
+import { WindowIdContext } from '../../../NewWindowOrIFrame';
+import { useContext } from 'react';
 const { buildStyle } = require('@joplin/lib/theme');
 
 interface ToolbarProps {
@@ -30,11 +32,13 @@ const toolbarButtonUtils = new ToolbarButtonUtils(CommandService.instance());
 
 function Toolbar(props: ToolbarProps) {
 	const styles = styles_(props);
+	const windowId = useContext(WindowIdContext);
 	return (
 		<ToolbarBase
 			id="CodeMirrorToolbar"
 			style={styles.root}
 			scrollable={true}
+			windowId={windowId}
 			items={props.toolbarButtonInfos}
 			disabled={!!props.disabled}
 			aria-label={_('Editor actions')}
