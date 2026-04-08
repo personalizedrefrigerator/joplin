@@ -219,7 +219,6 @@ const createEditor = async (
 			view.pasteHTML(new XMLSerializer().serializeToString(dom));
 		},
 		updateBody: async (newBody: string, _updateBodyOptions?: UpdateBodyOptions) => {
-			console.log('Update body!!!!', newBody);
 			view.updateState(await createInitialState(newBody));
 		},
 		getSettings: () => {

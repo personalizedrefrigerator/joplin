@@ -3,7 +3,7 @@ import shim from '@joplin/lib/shim';
 import { MarkupLanguage, MarkupToHtml } from '@joplin/renderer';
 import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
-import { AppState } from '../../../../../../app.reducer';
+import { AppState } from '../../../../app.reducer';
 import { _ } from '@joplin/lib/locale';
 import { isDeepStrictEqual } from 'node:util';
 

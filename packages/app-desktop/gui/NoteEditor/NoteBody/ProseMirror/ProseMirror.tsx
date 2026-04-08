@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useState, useEffect, useRef, forwardRef, useCallback, useImperativeHandle, useMemo, ForwardedRef } from 'react';
+import { useState, useEffect, useRef, forwardRef, useCallback, useImperativeHandle, useMemo, ForwardedRef, useContext } from 'react';
 
 import { EditorCommand, NoteBodyEditorProps, NoteBodyEditorRef, OnChangeEvent } from '../../utils/types';
 import { getResourcesFromPasteEvent } from '../../utils/resourceHandling';
@@ -9,11 +9,9 @@ import usePluginServiceRegistration from '../../utils/usePluginServiceRegistrati
 import Setting from '@joplin/lib/models/Setting';
 import Note from '@joplin/lib/models/Note';
 import { _ } from '@joplin/lib/locale';
-import shim from '@joplin/lib/shim';
-import { MarkupToHtml } from '@joplin/renderer';
 import { clipboard } from 'electron';
 import ErrorBoundary from '../../../ErrorBoundary';
-import { EditorCommandType, EditorControl, EditorKeymap, EditorLanguageType, EditorSettings, SearchState, UserEventSource } from '@joplin/editor/types';
+import { EditorCommandType, EditorControl, SearchState, UserEventSource } from '@joplin/editor/types';
 import { EditorEvent, EditorEventType } from '@joplin/editor/events';
 import Logger from '@joplin/utils/Logger';
 import useEditorCommands from './useEditorCommands';
@@ -21,10 +19,13 @@ import CommandService from '@joplin/lib/services/CommandService';
 import eventManager, { EventName, ResourceChangeEvent } from '@joplin/lib/eventManager';
 import useSyncEditorValue from './utils/useSyncEditorValue';
 import { themeStyle } from '@joplin/lib/theme';
-import NewWindowOrIFrame, { WindowMode } from '../../../NewWindowOrIFrame';
+import NewWindowOrIFrame, { WindowIdContext, WindowMode } from '../../../NewWindowOrIFrame';
 import bridge from '../../../../services/bridge';
 import { join } from 'path';
 import { toForwardSlashes } from '@joplin/utils/path';
+import useEditorSettings from '../utils/useEditorSettings';
+import useOnIframeLoad from './utils/useOnIframeLoad';
+import Toolbar from './Toolbar';
 
 const logger = Logger.create('ProseMirror');
 const logDebug = (message: string) => logger.debug(message);
@@ -103,9 +104,9 @@ const CodeMirror = (props: NoteBodyEditorProps, ref: ForwardedRef<NoteBodyEditor
 			scrollTo: (options: ScrollOptions) => {
 				if (options.type === ScrollOptionTypes.Hash) {
 					const hash: string = options.value;
-					editorRef.current.execCommand(EditorCommandType.JumpToHash, hash);
+					void editorRef.current.execCommand(EditorCommandType.JumpToHash, hash);
 				} else if (options.type === ScrollOptionTypes.Percent) {
-					// TODO
+					void editorRef.current.setScrollPercent(options.value);
 				} else {
 					throw new Error(`Unsupported scroll options: ${options.type}`);
 				}
@@ -174,46 +175,21 @@ const CodeMirror = (props: NoteBodyEditorProps, ref: ForwardedRef<NoteBodyEditor
 		void CommandService.instance().execute('focusElement', 'noteTitle');
 	}, []);
 
-	const editorSettings = useMemo((): EditorSettings => {
-		const isHTMLNote = props.contentMarkupLanguage === MarkupToHtml.MARKUP_LANGUAGE_HTML;
+	const baseTheme = useMemo(() => ({
+		themeId: props.themeId,
+		...themeStyle(props.themeId),
+		marginLeft: 0,
+		marginRight: 0,
+		monospaceFont: Setting.value('style.editor.monospaceFontFamily'),
+	}), [props.themeId]);
 
-		let keyboardMode = EditorKeymap.Default;
-		if (props.keyboardMode === 'vim') {
-			keyboardMode = EditorKeymap.Vim;
-		} else if (props.keyboardMode === 'emacs') {
-			keyboardMode = EditorKeymap.Emacs;
-		}
-
-		return {
-			language: isHTMLNote ? EditorLanguageType.Html : EditorLanguageType.Markdown,
-			readOnly: props.disabled,
-			markdownMarkEnabled: Setting.value('markdown.plugin.mark'),
-			katexEnabled: Setting.value('markdown.plugin.katex'),
-			inlineRenderingEnabled: Setting.value('editor.inlineRendering'),
-			imageRenderingEnabled: Setting.value('editor.imageRendering'),
-			highlightActiveLine: Setting.value('editor.highlightActiveLine'),
-			themeData: {
-				themeId: props.themeId,
-				...themeStyle(props.themeId),
-				marginLeft: 0,
-				marginRight: 0,
-				monospaceFont: Setting.value('style.editor.monospaceFontFamily'),
-			},
-			automatchBraces: Setting.value('editor.autoMatchingBraces'),
-			autocompleteMarkup: Setting.value('editor.autocompleteMarkup'),
-			useExternalSearch: false,
-			ignoreModifiers: true,
-			spellcheckEnabled: Setting.value('editor.spellcheckBeta'),
-			keymap: keyboardMode,
-			preferMacShortcuts: shim.isMac(),
-			indentWithTabs: true,
-			tabMovesFocus: props.tabMovesFocus,
-			editorLabel: _('Markdown editor'),
-		};
-	}, [
-		props.contentMarkupLanguage, props.disabled, props.keyboardMode, props.themeId,
-		props.tabMovesFocus,
-	]);
+	const editorSettings = useEditorSettings({
+		baseTheme,
+		contentMarkupLanguage: props.contentMarkupLanguage,
+		disabled: props.disabled,
+		keyboardMode: props.keyboardMode,
+		tabMovesFocus: props.tabMovesFocus,
+	});
 
 	const initialCursorLocationRef = useRef(0);
 	initialCursorLocationRef.current = props.initialCursorLocation.markdown ?? 0;
@@ -226,6 +202,8 @@ const CodeMirror = (props: NoteBodyEditorProps, ref: ForwardedRef<NoteBodyEditor
 		initialCursorLocationRef,
 		lastChangeEventContentRef,
 	});
+
+	const onIframeLoad = useOnIframeLoad();
 
 	const renderEditor = () => {
 		return (
@@ -253,8 +231,12 @@ const CodeMirror = (props: NoteBodyEditorProps, ref: ForwardedRef<NoteBodyEditor
 	};
 
 	const stylesUrl = useStylesUrl();
+	const windowId = useContext(WindowIdContext);
 
-	return (
+	return <div className='editor-wrapper prosemirror-wrapper'>
+		<div className='toolbar-wrapper'>
+			<Toolbar windowId={windowId}/>
+		</div>
 		<ErrorBoundary message="The text editor encountered a fatal error and could not continue. The error might be due to a plugin, so please try to disable some of them and try again.">
 			<NewWindowOrIFrame
 				mode={WindowMode.Iframe}
@@ -262,18 +244,19 @@ const CodeMirror = (props: NoteBodyEditorProps, ref: ForwardedRef<NoteBodyEditor
 				windowId=''
 				contentSecurityPolicy={`
 					default-src 'self' ;
-					style-src 'unsafe-inline' 'self' ;
+					style-src 'unsafe-inline' 'self' joplin-content://* ;
 					script-src 'self' ;
-					media-src 'self' blob: data: https://* http://* ;
-					img-src 'self' blob: data: http://* https://* ;
-					font-src 'self' https://* blob: data: ;`}
+					media-src 'self' blob: data: https://* http://* joplin-content://* ;
+					img-src 'self' blob: data: http://* https://* joplin-content://* ;
+					font-src 'self' joplin-content://* blob: data: ;`}
 				onClose={()=>{}}
+				onLoad={onIframeLoad}
 			>
 				<link rel='stylesheet' href={stylesUrl}/>
 				{renderEditor()}
 			</NewWindowOrIFrame>
 		</ErrorBoundary>
-	);
+	</div>;
 };
 
 export default forwardRef(CodeMirror);

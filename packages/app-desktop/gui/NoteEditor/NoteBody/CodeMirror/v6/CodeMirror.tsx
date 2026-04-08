@@ -32,7 +32,7 @@ import { WindowIdContext } from '../../../../NewWindowOrIFrame';
 import eventManager, { EventName, ResourceChangeEvent } from '@joplin/lib/eventManager';
 import useSyncEditorValue from './utils/useSyncEditorValue';
 import { getGlobalSettings } from '@joplin/renderer/types';
-import useEditorSettings from './utils/useEditorSettings';
+import useEditorSettings from '../../utils/useEditorSettings';
 
 const logger = Logger.create('CodeMirror6');
 const logDebug = (message: string) => logger.debug(message);

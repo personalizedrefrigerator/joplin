@@ -3,7 +3,6 @@ import * as React from 'react';
 import { useState, useEffect, useRef, createContext } from 'react';
 import { createPortal } from 'react-dom';
 import { SecondaryWindowApi } from '../utils/window/types';
-import { htmlentities } from '@joplin/utils/html';
 
 // This component uses react-dom's Portals to render its children in a different HTML
 // document. As children are rendered in a different Window/Document, they should avoid
@@ -13,21 +12,30 @@ import { htmlentities } from '@joplin/utils/html';
 export const WindowIdContext = createContext(defaultWindowId);
 
 type OnCloseCallback = ()=> void;
+type OnLoadCallback = (doc: Document)=> void;
 
 export enum WindowMode {
 	Iframe, NewWindow,
 }
 
-interface Props {
+interface IframeProps {
+	contentSecurityPolicy?: string;
+	mode: WindowMode.Iframe;
+}
+
+interface NewWindowProps {
+	mode: WindowMode.NewWindow;
+}
+
+type Props = (IframeProps | NewWindowProps) & {
 	// Note: children will be rendered in a different DOM from this node. Avoid using document.* methods
 	// in child components.
 	children: React.ReactNode[]|React.ReactNode;
-	contentSecurityPolicy?: string;
 	title: string;
-	mode: WindowMode;
 	windowId: string;
 	onClose: OnCloseCallback;
-}
+	onLoad?: OnLoadCallback;
+};
 
 const useDocument = (
 	mode: WindowMode,
@@ -91,19 +99,12 @@ const useDocument = (
 	return doc;
 };
 
-type OnSetLoaded = (loaded: boolean)=> void;
-const useDocumentSetup = (doc: Document|null, setLoaded: OnSetLoaded, contentSecurityPolicy: string) => {
+const useDocumentSetup = (doc: Document|null, onLoad: OnLoadCallback) => {
+	const onLoadRef = useRef(onLoad);
+	onLoadRef.current = onLoad;
+
 	useEffect(() => {
 		if (!doc) return;
-
-		doc.open();
-		doc.write(`<!DOCTYPE html>
-			<html>
-			<head><meta name="Content-Security-Policy" content="${htmlentities(contentSecurityPolicy)}"/></head>
-			<body></body>
-			</html>
-		`);
-		doc.close();
 
 		const cssUrls = [
 			'style.min.css',
@@ -128,8 +129,8 @@ const useDocumentSetup = (doc: Document|null, setLoaded: OnSetLoaded, contentSec
 
 		doc.body.style.height = '100vh';
 
-		setLoaded(true);
-	}, [doc, setLoaded, contentSecurityPolicy]);
+		onLoadRef.current(doc);
+	}, [doc]);
 };
 
 const NewWindowOrIFrame: React.FC<Props> = props => {
@@ -137,7 +138,10 @@ const NewWindowOrIFrame: React.FC<Props> = props => {
 	const [loaded, setLoaded] = useState(false);
 
 	const doc = useDocument(props.mode, iframeRef, props.onClose);
-	useDocumentSetup(doc, setLoaded, props.contentSecurityPolicy);
+	useDocumentSetup(doc, (doc) => {
+		props.onLoad?.(doc);
+		setLoaded(true);
+	});
 
 	useEffect(() => {
 		if (!doc) return;
@@ -162,9 +166,15 @@ const NewWindowOrIFrame: React.FC<Props> = props => {
 	if (props.mode === WindowMode.NewWindow) {
 		return <div style={{ display: 'none' }}>{contentPortal}</div>;
 	} else {
+		const additionalProps = {
+			// Note: csp is currently marked as experimental on MDN:
+			// https://developer.mozilla.org/en-US/docs/Web/API/HTMLIFrameElement/csp
+			csp: props.contentSecurityPolicy,
+		};
 		return <iframe
 			ref={setIframeRef}
 			style={{ flexGrow: 1, width: '100%', height: '100%', border: 'none' }}
+			{...additionalProps}
 		>
 			{contentPortal}
 		</iframe>;

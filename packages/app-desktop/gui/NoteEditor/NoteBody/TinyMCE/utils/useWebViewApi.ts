@@ -1,6 +1,6 @@
-import PluginService from '@joplin/lib/services/plugins/PluginService';
 import { useEffect } from 'react';
 import { Editor } from 'tinymce';
+import setUpWebviewApi from '../../utils/setUpWebviewApi';
 
 interface WebViewApi {
 	postMessage: (contentScriptId: string, message: unknown)=> Promise<unknown>;
@@ -16,21 +16,10 @@ const useWebViewApi = (editor: Editor, containerWindow: Window) => {
 		if (!containerWindow) return ()=>{};
 
 		const editorWindow = editor.getWin() as ExtendedWindow;
-		const webviewApi: WebViewApi = {
-			postMessage: async (contentScriptId: string, message: unknown) => {
-				const pluginService = PluginService.instance();
-				const plugin = pluginService.pluginById(
-					pluginService.pluginIdByContentScriptId(contentScriptId),
-				);
-				return await plugin.emitContentScriptMessage(contentScriptId, message);
-			},
-		};
-		editorWindow.webviewApi = webviewApi;
+		const { remove } = setUpWebviewApi(editorWindow);
 
 		return () => {
-			if (editorWindow.webviewApi === webviewApi) {
-				editorWindow.webviewApi = undefined;
-			}
+			remove();
 		};
 	}, [editor, containerWindow]);
 };
