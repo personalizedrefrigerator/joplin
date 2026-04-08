@@ -724,7 +724,7 @@ const mapStateToProps = (state: AppState, ownProps: ConnectProps) => {
 		bodyEditor = NoteBodyEditorType.PlainText;
 	} else if (windowState.editorCodeView && state.settings['editor.legacyMarkdown']) {
 		bodyEditor = NoteBodyEditorType.CodeMirror5;
-	} else if (state.settings['editor.beta']) {
+	} else if (!windowState.editorCodeView && state.settings['editor.beta']) {
 		bodyEditor = NoteBodyEditorType.ProseMirror;
 	}
 
