@@ -21,7 +21,8 @@ const useSyncEditorValue = ({ content, onMessage, editorRef, noteId, initialCurs
 		if (lastChangeEventContentRef.current === content) return;
 
 		editorRef.current?.updateBody(content, { noteId: noteId });
-	}, [content, noteId, editorRef, initialCursorLocationRef]);
+		lastChangeEventContentRef.current = content;
+	}, [content, noteId, editorRef, initialCursorLocationRef, lastChangeEventContentRef]);
 };
 
 export default useSyncEditorValue;
