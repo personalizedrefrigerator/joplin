@@ -191,6 +191,7 @@ class FloatingButtonBar implements PluginView {
 
 	public destroy() {
 		this.observer_.destroy();
+		this.container_.remove();
 	}
 }
 
