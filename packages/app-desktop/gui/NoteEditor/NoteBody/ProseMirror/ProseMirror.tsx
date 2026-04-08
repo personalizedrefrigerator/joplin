@@ -20,9 +20,6 @@ import eventManager, { EventName, ResourceChangeEvent } from '@joplin/lib/eventM
 import useSyncEditorValue from './utils/useSyncEditorValue';
 import { themeStyle } from '@joplin/lib/theme';
 import NewWindowOrIFrame, { WindowIdContext, WindowMode } from '../../../NewWindowOrIFrame';
-import bridge from '../../../../services/bridge';
-import { join } from 'path';
-import { toForwardSlashes } from '@joplin/utils/path';
 import useEditorSettings from '../utils/useEditorSettings';
 import useOnIframeLoad from './utils/useOnIframeLoad';
 import Toolbar from './Toolbar';
@@ -30,17 +27,7 @@ import Toolbar from './Toolbar';
 const logger = Logger.create('ProseMirror');
 const logDebug = (message: string) => logger.debug(message);
 
-let stylesUrl_: string|undefined = undefined;
-const useStylesUrl = () => {
-	return useMemo(() => {
-		stylesUrl_ ??= `file://${
-			toForwardSlashes(join(bridge().vendorDir(), 'ProseMirror', 'styles.bundle.css'))
-		}`;
-		return stylesUrl_ ?? '';
-	}, []);
-};
-
-const CodeMirror = (props: NoteBodyEditorProps, ref: ForwardedRef<NoteBodyEditorRef>) => {
+const ProseMirror = (props: NoteBodyEditorProps, ref: ForwardedRef<NoteBodyEditorRef>) => {
 
 	const editorRef = useRef<EditorControl>(null);
 
@@ -54,8 +41,8 @@ const CodeMirror = (props: NoteBodyEditorProps, ref: ForwardedRef<NoteBodyEditor
 
 	const lastChangeEventContentRef = useRef('');
 	const onContentChange = useCallback((newBody: string) => {
+		lastChangeEventContentRef.current = newBody;
 		if (newBody !== props.content) {
-			lastChangeEventContentRef.current = newBody;
 			props_onChangeRef.current({ changeId: null, content: newBody });
 		}
 	}, [props.content]);
@@ -230,7 +217,6 @@ const CodeMirror = (props: NoteBodyEditorProps, ref: ForwardedRef<NoteBodyEditor
 		);
 	};
 
-	const stylesUrl = useStylesUrl();
 	const windowId = useContext(WindowIdContext);
 
 	return <div className='editor-wrapper prosemirror-wrapper'>
@@ -252,11 +238,10 @@ const CodeMirror = (props: NoteBodyEditorProps, ref: ForwardedRef<NoteBodyEditor
 				onClose={()=>{}}
 				onLoad={onIframeLoad}
 			>
-				<link rel='stylesheet' href={stylesUrl}/>
 				{renderEditor()}
 			</NewWindowOrIFrame>
 		</ErrorBoundary>
 	</div>;
 };
 
-export default forwardRef(CodeMirror);
+export default forwardRef(ProseMirror);
