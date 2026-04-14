@@ -87,7 +87,13 @@ impl FileApiDriver for FileApiDriverImpl {
     }
 }
 
-impl FileHandle for fs::File {}
+impl FileHandle for fs::File {
+    fn byte_length(&self) -> usize {
+        self.metadata()
+            .map(|m| m.len())
+            .unwrap_or(0) as usize
+    }
+}
 
 #[cfg(test)]
 mod test {

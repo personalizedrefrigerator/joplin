@@ -182,6 +182,7 @@ impl FileApiDriver for FileApiDriverImpl {
 struct SeekableFileHandle {
     handle: JsFileHandle,
     offset: usize,
+    byte_length: usize,
 }
 
 impl Read for SeekableFileHandle {
@@ -261,4 +262,8 @@ impl Drop for SeekableFileHandle {
     }
 }
 
-impl FileHandle for BufReader<SeekableFileHandle> {}
+impl FileHandle for BufReader<SeekableFileHandle> {
+    fn byte_length(&self) -> usize {
+        self.handle.size()
+    }
+}

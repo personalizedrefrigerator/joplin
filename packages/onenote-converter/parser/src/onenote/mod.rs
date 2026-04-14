@@ -37,8 +37,8 @@ impl Parser {
     /// sections from the folder that the table of contents file is in.
     pub fn parse_notebook(&mut self, path: String) -> Result<Notebook> {
         log!("Parsing notebook: {:?}", path);
-        let data = fs_driver().read_file(&path)?;
-        let store = parse_onestore(&mut Reader::new(&data))?;
+        let data = fs_driver().open_file(&path)?;
+        let store = parse_onestore(&mut Reader::from(data))?;
 
         if store.get_type() != OneStoreType::TableOfContents {
             return Err(ErrorKind::NotATocFile { file: path }.into());

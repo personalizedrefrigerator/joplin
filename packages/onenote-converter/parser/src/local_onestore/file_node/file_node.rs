@@ -564,7 +564,7 @@ impl Parse for StringInStorageBuffer {
         let characer_count = reader.get_u32()? as usize;
         let string_size = characer_count * 2; // 2 bytes per character
         let data = reader.read(string_size)?;
-        let data = data.utf16_to_string()?;
+        let data = (&data as &[u8]).utf16_to_string()?;
         Ok(Self {
             cch: characer_count,
             data,

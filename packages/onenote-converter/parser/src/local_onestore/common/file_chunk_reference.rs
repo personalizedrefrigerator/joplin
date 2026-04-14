@@ -7,10 +7,10 @@ pub trait FileChunkReference {
     fn data_location(&self) -> usize;
     fn data_size(&self) -> usize;
 
-    fn resolve_to_reader<'a>(
+    fn resolve_to_reader<'a, 'b>(
         &self,
-        original_reader: &parser_utils::reader::Reader<'a>,
-    ) -> Result<parser_utils::reader::Reader<'a>> {
+        original_reader: &'b mut parser_utils::reader::Reader<'a>,
+    ) -> Result<parser_utils::reader::Reader<'b>> {
         if self.is_fcr_nil() {
             return Err(ErrorKind::ResolutionFailed(
                 "Failed to resolve node reference -- is nil".into(),
