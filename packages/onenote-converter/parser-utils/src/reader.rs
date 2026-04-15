@@ -62,7 +62,7 @@ impl<'a> Seek for Reader<'a> {
         if new_offset < 0 || new_offset as usize > self.data_len {
             Err(std::io::Error::new(
                 std::io::ErrorKind::UnexpectedEof,
-                format!("New offset {new_offset} is out-of-bounds."),
+                format!("New offset {} is out-of-bounds (data length ({}).", new_offset, self.data_len),
             ))
         } else {
             self.data_offset = new_offset as usize;
