@@ -33,7 +33,7 @@ impl CompactU64 {
 
         if first_byte & 2 != 0 {
             let second_byte = reader.get_u8()?;
-            let value = u16::from_le_bytes([ first_byte, second_byte ]);
+            let value = u16::from_le_bytes([first_byte, second_byte]);
             return Ok(CompactU64((value >> 2) as u64));
         }
 
