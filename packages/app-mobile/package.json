@@ -7,6 +7,7 @@
   "scripts": {
     "start": "BROWSERSLIST_IGNORE_OLD_DATA=true react-native start --reset-cache",
     "android": "react-native run-android",
+    "android-log": "adb logcat 'ReactNative:V' 'ReactNativeJS:V' 'chromium:V' '*:S'",
     "build": "NO_FLIPPER=1 gulp build",
     "web": "webpack --mode production --config ./web/webpack.config.ts --progress && cp -r ./web/public/* ./web/dist/",
     "serve-web-hot-reload": "yarn serve-web --env HOT_RELOAD",
