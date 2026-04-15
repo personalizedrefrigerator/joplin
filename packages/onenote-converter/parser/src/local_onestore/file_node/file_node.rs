@@ -166,7 +166,7 @@ impl FileNode {
             0 => FileNodeData::Null,
             other => {
                 log_warn!("Unknown node type: {:#0x}, size {}", other, size);
-                let size_used = (remaining_0 - remaining_1) as usize;
+                let size_used = remaining_0 - remaining_1;
                 assert!(size_used <= size);
                 let remaining_size = size - size_used;
                 FileNodeData::UnknownNode(UnknownNode::parse(reader, remaining_size)?)
@@ -174,7 +174,7 @@ impl FileNode {
         };
 
         let remaining_2 = reader.remaining();
-        let actual_size = (remaining_0 - remaining_2) as usize;
+        let actual_size = remaining_0 - remaining_2;
 
         let node = Self {
             node_type_id: node_id,
@@ -956,7 +956,7 @@ pub struct UnknownNode {}
 
 impl ParseWithCount for UnknownNode {
     fn parse(reader: Reader, size: usize) -> Result<Self> {
-        reader.advance(size as u64)?;
+        reader.advance(size)?;
         Ok(UnknownNode {})
     }
 }
