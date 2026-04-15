@@ -945,6 +945,32 @@ exports[`InteropService_Importer_OneNote should import a simple OneNote notebook
 </body></html>"
 `;
 
+exports[`InteropService_Importer_OneNote should import vertically-scaled ink 1`] = `
+"<!DOCTYPE HTML>
+<html><head>
+    <meta charset="UTF-8">
+    <title>Scaled</title>
+    
+    <style>
+    
+/* (For testing: Removed default CSS) */
+
+
+    
+    </style>
+</head>
+<body>
+
+<div class="title" style="left: 48px; position: absolute; top: 24px;"><div class="container-outline" style="width: 624px;"><div class="outline-element" style="margin-left: 0px;"><span style="font-family: Calibri Light; font-size: 20pt; line-height: 32px;">Scaled</span></div>
+</div><div class="container-outline" style="width: 624px;"><div class="outline-element" style="margin-left: 0px;"><span style="color: rgb(118,118,118); font-family: Calibri; font-size: 10pt; line-height: 16px;">Wednesday, April 15, 2026</span></div>
+<div class="outline-element" style="margin-left: 0px;"><span style="color: rgb(118,118,118); font-family: Calibri; font-size: 10pt; line-height: 16px;">12:36 AM</span></div>
+</div></div><img style="height: 492.21px; left: 128.13px; pointer-events: none; position: absolute; top: 144.3px; width: 187.42px;" src=":/id-here">
+
+
+
+</body></html>"
+`;
+
 exports[`InteropService_Importer_OneNote should remove hyperlink from title: Quick Notes 1`] = `
 "<!DOCTYPE HTML>
 <html lang="en"><head>
