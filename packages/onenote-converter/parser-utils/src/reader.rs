@@ -14,7 +14,9 @@ macro_rules! try_get {
         if $this.remaining() < mem::size_of::<$typ>() {
             Err(ErrorKind::UnexpectedEof(format!("Getting {:}", stringify!($typ)).into()).into())
         } else {
-            let mut buff = $this.read(mem::size_of::<$typ>())?;
+            let mut buff = [0; mem::size_of::<$typ>()];
+            $this.read_exact(&mut buff)?;
+
             let mut buff_ref: &[u8] = &mut buff;
             Ok(paste! {buff_ref. [< get_ $typ >]()})
         }
@@ -27,7 +29,9 @@ macro_rules! try_get {
             )
             .into())
         } else {
-            let mut buff = $this.read(mem::size_of::<$typ>())?;
+            let mut buff = [0; mem::size_of::<$typ>()];
+            $this.read_exact(&mut buff)?;
+
             let mut buff_ref: &[u8] = &mut buff;
             Ok(paste! {buff_ref. [< get_ $typ _ $endian >]()})
         }
@@ -84,25 +88,31 @@ impl<'a> Reader<'a> {
     }
 
     pub fn read(&mut self, count: usize) -> Result<Vec<u8>> {
-        if self.remaining() < count {
-            return Err(ErrorKind::UnexpectedEof("Unexpected EOF (Reader.read)".into()).into());
-        }
+        let mut buff = vec![0; count];
+        self.read_exact(&mut buff)?;
+        Ok(buff)
+    }
 
-        let mut read_buffer = |buffer: &[u8]| {
-            let vec = buffer[self.data_offset..self.data_offset + count].into();
-            self.data_offset += count;
-            Ok(vec)
-        };
+    fn read_exact(&mut self, output: &mut [u8]) -> Result<()> {
+        let count = output.len();
+        if self.remaining() < count {
+            return Err(
+                ErrorKind::UnexpectedEof("Unexpected EOF (Reader.read_exact)".into()).into(),
+            );
+        }
 
         match &mut self.data {
-            ReaderData::BufferRef { buffer } => read_buffer(buffer),
-            ReaderData::File(file) => {
-                let mut buff = vec![0; count];
-                file.read_exact(&mut buff)?;
+            ReaderData::BufferRef { buffer } => {
+                (&buffer[self.data_offset..self.data_offset + count]).copy_to_slice(output);
                 self.data_offset += count;
-                Ok(buff)
             }
-        }
+            ReaderData::File(file) => {
+                file.read_exact(output)?;
+                self.data_offset += count;
+            }
+        };
+
+        Ok(())
     }
 
     pub fn peek_u8(&mut self) -> Result<Option<u8>> {

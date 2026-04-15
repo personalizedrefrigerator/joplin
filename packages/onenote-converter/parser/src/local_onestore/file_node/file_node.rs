@@ -721,7 +721,7 @@ impl Debug for FileData {
 
 impl ParseWithCount for FileData {
     fn parse(reader: parser_utils::Reader, size: usize) -> Result<Self> {
-        let data = reader.read(size)?.to_vec();
+        let data = reader.read(size)?;
         Ok(FileData(data.into()))
     }
 }
