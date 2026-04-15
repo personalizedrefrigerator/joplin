@@ -21,7 +21,7 @@ impl CompactU64 {
     }
 
     pub(crate) fn parse(reader: Reader) -> Result<CompactU64> {
-        let first_byte = reader.peek_u8().ok_or(ErrorKind::UnexpectedEof(
+        let first_byte = reader.peek_u8()?.ok_or(ErrorKind::UnexpectedEof(
             "Reading CompactU64 (first byte)".into(),
         ))?;
 
@@ -117,7 +117,9 @@ mod test {
     #[test]
     fn test_zero() {
         assert_eq!(
-            CompactU64::parse(&mut Reader::from(&[0u8] as &[u8])).unwrap().value(),
+            CompactU64::parse(&mut Reader::from(&[0u8] as &[u8]))
+                .unwrap()
+                .value(),
             0
         );
     }

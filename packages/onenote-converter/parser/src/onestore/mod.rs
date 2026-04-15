@@ -3,7 +3,7 @@
 //!
 //! Provides interfaces that are implemented by the different OneStore parsers.
 
-use std::{io::SeekFrom, io::Seek, rc::Rc};
+use std::{io::Seek, io::SeekFrom, rc::Rc};
 
 use crate::{
     fsshttpb_onestore::{self, packaging::OneStorePackaging},

@@ -69,15 +69,19 @@ impl Parser {
     /// OneNote section.
     pub fn parse_section(&mut self, path: String) -> Result<Section> {
         log!("Parsing section: {:?}", path);
-        let data = fs_driver().read_file(path.as_str())?;
-        self.parse_section_from_data(&data, &path)
+        let file = fs_driver().open_file(path.as_str())?;
+        self.parse_section_from_reader(Reader::from(file), &path)
     }
 
     /// Parse a OneNote section file from a byte array.
     /// The [path] is used to provide debugging information and determine
     /// the name of the section file.
     pub fn parse_section_from_data(&mut self, data: &[u8], path: &str) -> Result<Section> {
-        let store = parse_onestore(&mut Reader::new(data))?;
+        self.parse_section_from_reader(Reader::from(data), path)
+    }
+
+    fn parse_section_from_reader(&mut self, mut reader: Reader, path: &str) -> Result<Section> {
+        let store = parse_onestore(&mut reader)?;
 
         if store.get_type() != OneStoreType::Section {
             return Err(ErrorKind::NotASectionFile {

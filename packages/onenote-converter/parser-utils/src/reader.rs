@@ -1,7 +1,13 @@
-use crate::{FileHandle, errors::{ErrorKind, Result}};
+use crate::{
+    FileHandle,
+    errors::{ErrorKind, Result},
+};
 use bytes::Buf;
 use paste::paste;
-use std::{io::{Read, Seek, SeekFrom}, mem};
+use std::{
+    io::{Read, Seek, SeekFrom},
+    mem,
+};
 
 macro_rules! try_get {
     ($this:ident, $typ:tt) => {{
@@ -29,12 +35,7 @@ macro_rules! try_get {
 }
 
 enum ReaderData<'a> {
-    Buffer {
-        buffer: Vec<u8>,
-    },
-    BufferRef {
-        buffer: &'a [u8],
-    },
+    BufferRef { buffer: &'a [u8] },
     File(Box<dyn FileHandle>),
 }
 
@@ -44,27 +45,27 @@ pub struct Reader<'a> {
     data_offset: usize,
 }
 
-impl <'a> Seek for Reader<'a> {
+pub struct ReaderOffset(usize);
+
+impl<'a> Seek for Reader<'a> {
     fn seek(&mut self, pos: SeekFrom) -> std::io::Result<u64> {
         if let ReaderData::File(f) = &mut self.data {
-            self.data_offset = f.seek(pos)? as usize;
-            return Ok(self.data_offset as u64);
+            let offset = f.seek(pos)?;
+            self.data_offset = offset as usize;
+            return Ok(offset);
         }
 
         let new_offset = match pos {
-            SeekFrom::Start(n) => {
-                n as i64
-            },
-            SeekFrom::Current(n) => {
-                self.data_offset as i64 + n
-            },
-            SeekFrom::End(n) => {
-                (self.data_len as i64) + n
-            },
+            SeekFrom::Start(n) => n as i64,
+            SeekFrom::Current(n) => self.data_offset as i64 + n,
+            SeekFrom::End(n) => (self.data_len as i64) + n,
         };
 
-        if new_offset < 0 || new_offset as usize >= self.data_len {
-            Err(std::io::Error::new(std::io::ErrorKind::Unsupported, "out of bounds"))
+        if new_offset < 0 || new_offset as usize > self.data_len {
+            Err(std::io::Error::new(
+                std::io::ErrorKind::UnexpectedEof,
+                "out of bounds",
+            ))
         } else {
             self.data_offset = new_offset as usize;
             Ok(self.data_offset as u64)
@@ -72,7 +73,7 @@ impl <'a> Seek for Reader<'a> {
     }
 }
 
-impl <'a> Reader<'a> {
+impl<'a> Reader<'a> {
     pub fn new(buffer: &'a [u8]) -> Self {
         Reader {
             data_len: buffer.len(),
@@ -93,34 +94,28 @@ impl <'a> Reader<'a> {
         };
 
         match &mut self.data {
-            ReaderData::Buffer { buffer, .. } => read_buffer(buffer),
             ReaderData::BufferRef { buffer } => read_buffer(buffer),
             ReaderData::File(file) => {
                 let mut buff = vec![0; count];
                 file.read_exact(&mut buff)?;
+                self.data_offset += count;
                 Ok(buff)
             }
         }
     }
 
-    pub fn peek_u8(&mut self) -> Option<u8> {
+    pub fn peek_u8(&mut self) -> Result<Option<u8>> {
         match &mut self.data {
-            ReaderData::Buffer { buffer, .. } => {
-                buffer.get(0).copied()
-            },
-            ReaderData::BufferRef { buffer, .. } => {
-                buffer.get(0).copied()
-            },
+            ReaderData::BufferRef { buffer, .. } => Ok(buffer.get(self.data_offset).copied()),
             ReaderData::File(file) => {
                 let mut buf = [0u8];
-                match file.read(&mut buf) {
-                    Ok(size) => if size < 1 {
-                        None
-                    } else {
-                        Some(buf[0])
-                    },
-                    // TODO
-                    Err(_error) => None
+                let read_result = file.read(&mut buf);
+                // Reset the original position
+                file.seek(SeekFrom::Start(self.data_offset as u64))?;
+
+                match read_result {
+                    Ok(size) => Ok(if size < 1 { None } else { Some(buf[0]) }),
+                    Err(error) => Err(error)?,
                 }
             }
         }
@@ -143,50 +138,18 @@ impl <'a> Reader<'a> {
             .into());
         }
 
-        self.data_offset += count;
+        self.data_offset = self.seek(SeekFrom::Current(count as i64))? as usize;
 
         Ok(())
     }
 
-    pub fn with_updated_bounds<'b>(&'b mut self, start: usize, end: usize) -> Result<Reader<'b>> {
-        if start > self.data_len {
-            return Err(ErrorKind::UnexpectedEof(
-                "Reader.with_updated_bounds: start is out of bounds".into(),
-            )
-            .into());
-        }
-        if end > self.data_len {
-            return Err(ErrorKind::UnexpectedEof(
-                "Reader.with_updated_bounds: end is out of bounds".into(),
-            )
-            .into());
-        }
+    pub fn save_position(&self) -> ReaderOffset {
+        ReaderOffset(self.data_offset)
+    }
 
-        fn with_updated_buffer_ref_bounds<'b>(buffer: &'b [u8], start: usize, end: usize) -> Result<Reader<'b>> {
-            Ok(Reader {
-                data: ReaderData::BufferRef {
-                    buffer: &buffer[start..end],
-                },
-                data_len: end - start,
-                data_offset: 0,
-            })
-        }
-
-        match &mut self.data {
-            ReaderData::Buffer { buffer } => with_updated_buffer_ref_bounds(buffer, start, end),
-            ReaderData::BufferRef { buffer } => with_updated_buffer_ref_bounds(buffer, start, end),
-            ReaderData::File(file) => {
-                let mut data = vec![0; end-start];
-                file.read_exact(&mut data)?;
-                file.seek_relative(-(data.len() as i64))?;
-
-                Ok(Reader {
-                    data: ReaderData::Buffer { buffer: data },
-                    data_len: end - start,
-                    data_offset: 0,                    
-                })
-            }
-        }
+    pub fn restore_position(&mut self, offset: ReaderOffset) -> Result<()> {
+        self.seek(SeekFrom::Start(offset.0 as u64))?;
+        Ok(())
     }
 
     pub fn get_u8(&mut self) -> Result<u8> {
@@ -214,7 +177,7 @@ impl <'a> Reader<'a> {
     }
 }
 
-impl <'a> From<Box<dyn FileHandle>> for Reader<'a> {
+impl<'a> From<Box<dyn FileHandle>> for Reader<'a> {
     fn from(value: Box<dyn FileHandle>) -> Self {
         Self {
             data_len: value.byte_length(),
@@ -224,7 +187,7 @@ impl <'a> From<Box<dyn FileHandle>> for Reader<'a> {
     }
 }
 
-impl <'a> From<&'a [u8]> for Reader<'a> {
+impl<'a> From<&'a [u8]> for Reader<'a> {
     fn from(value: &'a [u8]) -> Self {
         Self {
             data_len: value.len(),
@@ -246,21 +209,19 @@ mod test {
         assert_eq!(reader.get_u8().unwrap(), 2);
         assert_eq!(reader.get_u8().unwrap(), 3);
         {
-            let mut reader = reader.with_updated_bounds(0, 8).unwrap();
+            reader.seek(SeekFrom::Start(0)).unwrap();
             assert_eq!(reader.get_u8().unwrap(), 1);
             assert_eq!(reader.get_u8().unwrap(), 2);
             assert_eq!(reader.get_u8().unwrap(), 3);
             assert_eq!(reader.get_u8().unwrap(), 4);
-            let mut reader = reader.with_updated_bounds(1, 7).unwrap();
+
+            reader.seek_relative(-3).unwrap();
             assert_eq!(reader.get_u8().unwrap(), 2);
             assert_eq!(reader.get_u8().unwrap(), 3);
-            let mut reader = reader.with_updated_bounds(1, 7).unwrap();
+
+            reader.seek_relative(-2).unwrap();
             assert_eq!(reader.get_u8().unwrap(), 2);
             assert_eq!(reader.get_u8().unwrap(), 3);
-            let mut reader = reader.with_updated_bounds(5, 7).unwrap();
-            assert_eq!(reader.remaining(), 2);
-            let reader = reader.with_updated_bounds(6, 6).unwrap();
-            assert_eq!(reader.remaining(), 0);
         }
         assert_eq!(reader.get_u8().unwrap(), 4);
     }

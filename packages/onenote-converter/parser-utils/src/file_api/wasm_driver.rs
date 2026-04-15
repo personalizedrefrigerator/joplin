@@ -130,7 +130,12 @@ impl FileApiDriver for FileApiDriverImpl {
     fn open_file(&self, path: &str) -> ApiResult<Box<dyn FileHandle>> {
         match open_file_handle(path) {
             Ok(handle) => {
-                let file = BufReader::new(SeekableFileHandle { handle, offset: 0 });
+                let byte_length = handle.size();
+                let file = BufReader::new(SeekableFileHandle {
+                    handle,
+                    offset: 0,
+                    byte_length,
+                });
                 Ok(Box::new(file))
             }
             Err(e) => Err(handle_error(e, &format!("opening file {}", path))),
@@ -264,6 +269,6 @@ impl Drop for SeekableFileHandle {
 
 impl FileHandle for BufReader<SeekableFileHandle> {
     fn byte_length(&self) -> usize {
-        self.handle.size()
+        self.get_ref().byte_length
     }
 }
