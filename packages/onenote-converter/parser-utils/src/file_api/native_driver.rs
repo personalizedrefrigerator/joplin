@@ -89,8 +89,8 @@ impl FileApiDriver for FileApiDriverImpl {
 }
 
 impl FileHandle for BufReader<fs::File> {
-    fn byte_length(&self) -> usize {
-        self.get_ref().metadata().map(|m| m.len()).unwrap_or(0) as usize
+    fn byte_length(&self) -> u64 {
+        self.get_ref().metadata().map(|m| m.len()).unwrap_or(0)
     }
 }
 
