@@ -1,5 +1,5 @@
 use parser_utils::Reader;
-use parser_utils::errors::{ErrorKind, Result};
+use parser_utils::errors::Result;
 
 /// A compact unsigned 64-bit integer.
 ///
@@ -21,87 +21,63 @@ impl CompactU64 {
     }
 
     pub(crate) fn parse(reader: Reader) -> Result<CompactU64> {
-        let first_byte = reader.peek_u8()?.ok_or(ErrorKind::UnexpectedEof(
-            "Reading CompactU64 (first byte)".into(),
-        ))?;
+        let first_byte = reader.get_u8()?;
 
         if first_byte == 0 {
-            reader.advance(1)?;
-
             return Ok(CompactU64(0));
         }
 
         if first_byte & 1 != 0 {
-            return Ok(CompactU64((reader.get_u8()? >> 1) as u64));
+            return Ok(CompactU64((first_byte >> 1) as u64));
         }
 
         if first_byte & 2 != 0 {
-            return Ok(CompactU64((reader.get_u16()? >> 2) as u64));
+            let second_byte = reader.get_u8()?;
+            let value = u16::from_le_bytes([ first_byte, second_byte ]);
+            return Ok(CompactU64((value >> 2) as u64));
         }
 
         if first_byte & 4 != 0 {
-            if reader.remaining() < 3 {
-                return Err(ErrorKind::UnexpectedEof("Reading CompactU64".into()).into());
-            }
-
-            let bytes = reader.read(3)?;
-            let value = u32::from_le_bytes([bytes[0], bytes[1], bytes[2], 0]);
+            let bytes = reader.read(2)?;
+            let value = u32::from_le_bytes([first_byte, bytes[0], bytes[1], 0]);
 
             return Ok(CompactU64((value >> 3) as u64));
         }
 
         if first_byte & 8 != 0 {
-            if reader.remaining() < 4 {
-                return Err(ErrorKind::UnexpectedEof("CompactU64".into()).into());
-            }
-
-            let bytes = reader.read(4)?;
-            let value = u32::from_le_bytes([bytes[0], bytes[1], bytes[2], bytes[3]]);
+            let bytes = reader.read(3)?;
+            let value = u32::from_le_bytes([first_byte, bytes[0], bytes[1], bytes[2]]);
 
             return Ok(CompactU64((value >> 4) as u64));
         }
 
         if first_byte & 16 != 0 {
-            if reader.remaining() < 5 {
-                return Err(ErrorKind::UnexpectedEof("CompactU64".into()).into());
-            }
-
-            let bytes = reader.read(5)?;
+            let bytes = reader.read(4)?;
             let value =
-                u64::from_le_bytes([bytes[0], bytes[1], bytes[2], bytes[3], bytes[4], 0, 0, 0]);
+                u64::from_le_bytes([first_byte, bytes[0], bytes[1], bytes[2], bytes[3], 0, 0, 0]);
 
             return Ok(CompactU64(value >> 5));
         }
 
         if first_byte & 32 != 0 {
-            if reader.remaining() < 6 {
-                return Err(ErrorKind::UnexpectedEof("CompactU64".into()).into());
-            }
-
-            let bytes = reader.read(6)?;
+            let bytes = reader.read(5)?;
             let value = u64::from_le_bytes([
-                first_byte, bytes[1], bytes[2], bytes[3], bytes[4], bytes[5], 0, 0,
+                first_byte, bytes[0], bytes[1], bytes[2], bytes[3], bytes[4], 0, 0,
             ]);
 
             return Ok(CompactU64(value >> 6));
         }
 
         if first_byte & 64 != 0 {
-            if reader.remaining() < 7 {
-                return Err(ErrorKind::UnexpectedEof("CompactU64".into()).into());
-            }
-
-            let bytes = reader.read(7)?;
+            let bytes = reader.read(6)?;
             let value = u64::from_le_bytes([
-                first_byte, bytes[1], bytes[2], bytes[3], bytes[4], bytes[5], bytes[6], 0,
+                first_byte, bytes[0], bytes[1], bytes[2], bytes[3], bytes[4], bytes[5], 0,
             ]);
 
             return Ok(CompactU64(value >> 7));
         }
 
         if first_byte & 128 != 0 {
-            reader.advance(1)?;
-
             return Ok(CompactU64(reader.get_u64()?));
         }
 
