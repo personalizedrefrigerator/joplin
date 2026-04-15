@@ -3,7 +3,7 @@ use std::io::{Read, Seek};
 
 pub type ApiResult<T> = std::result::Result<T, std::io::Error>;
 pub trait FileHandle: Read + Seek {
-    fn byte_length(&self) -> usize;
+    fn byte_length(&self) -> u64;
 }
 
 pub trait FileApiDriver: Send + Sync {
