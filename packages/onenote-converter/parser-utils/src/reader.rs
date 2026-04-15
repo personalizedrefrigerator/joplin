@@ -49,12 +49,6 @@ pub struct ReaderOffset(usize);
 
 impl<'a> Seek for Reader<'a> {
     fn seek(&mut self, pos: SeekFrom) -> std::io::Result<u64> {
-        if let ReaderData::File(f) = &mut self.data {
-            let offset = f.seek(pos)?;
-            self.data_offset = offset as usize;
-            return Ok(offset);
-        }
-
         let new_offset = match pos {
             SeekFrom::Start(n) => n as i64,
             SeekFrom::Current(n) => self.data_offset as i64 + n,
@@ -64,10 +58,17 @@ impl<'a> Seek for Reader<'a> {
         if new_offset < 0 || new_offset as usize > self.data_len {
             Err(std::io::Error::new(
                 std::io::ErrorKind::UnexpectedEof,
-                "out of bounds",
+                format!("New offset {new_offset} is out-of-bounds."),
             ))
         } else {
             self.data_offset = new_offset as usize;
+
+            // Sync the internal file with the new offset. This is done rather than seek the file
+            // directly to avoid inconsistency if e.g. the file resizes and we're seeking from the end.
+            if let ReaderData::File(f) = &mut self.data {
+                f.seek(SeekFrom::Start(self.data_offset as u64))?;
+            }
+
             Ok(self.data_offset as u64)
         }
     }
@@ -122,6 +123,7 @@ impl<'a> Reader<'a> {
     }
 
     pub fn remaining(&self) -> usize {
+        assert!(self.data_len >= self.data_offset);
         self.data_len - self.data_offset
     }
 
@@ -138,7 +140,7 @@ impl<'a> Reader<'a> {
             .into());
         }
 
-        self.data_offset = self.seek(SeekFrom::Current(count as i64))? as usize;
+        self.seek(SeekFrom::Current(count as i64))? as usize;
 
         Ok(())
     }

@@ -27,7 +27,11 @@ impl From<ErrorKind> for Error {
 
 impl From<std::io::Error> for Error {
     fn from(err: std::io::Error) -> Self {
-        ErrorKind::from(err).into()
+        if err.kind() == std::io::ErrorKind::UnexpectedEof {
+            ErrorKind::UnexpectedEof(err.to_string().into()).into()
+        } else {
+            ErrorKind::from(err).into()
+        }
     }
 }
 
