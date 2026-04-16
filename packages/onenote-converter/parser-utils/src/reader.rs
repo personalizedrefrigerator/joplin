@@ -150,6 +150,12 @@ impl<'a> Reader<'a> {
     }
 
     pub fn as_data_ref(&mut self, size: usize) -> Result<ReaderDataRef> {
+        if self.remaining() < size as u64 {
+            return Err(
+                ErrorKind::UnexpectedEof("Unexpected EOF (Reader.as_data_ref)".into()).into(),
+            );
+        }
+
         match &mut self.data {
             ReaderData::BufferRef { buffer } => {
                 let start = self.data_offset as usize;
