@@ -55,7 +55,7 @@ impl Parser {
             .map(|p| {
                 let is_dir = fs_driver().is_directory(&p)?;
                 if !is_dir {
-                    self.parse_section(p).map(SectionEntry::Section)
+                    self.parse_section(&p).map(SectionEntry::Section)
                 } else {
                     self.parse_section_group(p).map(SectionEntry::SectionGroup)
                 }
@@ -69,15 +69,17 @@ impl Parser {
     ///
     /// The `path` argument must point to a `.one` file that contains a
     /// OneNote section.
-    pub fn parse_section(&mut self, path: String) -> Result<Section> {
+    pub fn parse_section(&mut self, path: &str) -> Result<Section> {
         log!("Parsing section: {:?}", path);
-        let file = fs_driver().open_file(path.as_str())?;
-        self.parse_section_from_reader(Reader::from(file), &path)
+        let file = fs_driver().open_file(path)?;
+        self.parse_section_from_reader(Reader::from(file), path)
     }
 
-    /// Parses low-level OneStore data
-    pub fn parse_onestore_raw(&mut self, data: &[u8]) -> Result<Rc<dyn OneStore>> {
-        parse_onestore(&mut Reader::new(data))
+    /// Parses low-level OneStore data. Exported for debugging purposes.
+    pub fn parse_onestore_raw(&mut self, path: &str) -> Result<Rc<dyn OneStore>> {
+        log!("Parsing OneStore: {:?}", path);
+        let file = fs_driver().open_file(path)?;
+        parse_onestore(&mut Reader::from(file))
     }
 
     /// Parse a OneNote section file from a byte array.

@@ -5,8 +5,10 @@ use crate::{
 use bytes::Buf;
 use paste::paste;
 use std::{
+    cell::RefCell,
     io::{Read, Seek, SeekFrom},
     mem,
+    rc::Rc,
 };
 
 macro_rules! try_get {
@@ -38,9 +40,11 @@ macro_rules! try_get {
     }};
 }
 
+type ReaderFileHandle = Rc<RefCell<Box<dyn FileHandle>>>;
+
 enum ReaderData<'a> {
     BufferRef { buffer: &'a [u8] },
-    File(Box<dyn FileHandle>),
+    File(ReaderFileHandle),
 }
 
 pub struct Reader<'a> {
@@ -62,7 +66,10 @@ impl<'a> Seek for Reader<'a> {
         if new_offset < 0 || new_offset as u64 > self.data_len {
             Err(std::io::Error::new(
                 std::io::ErrorKind::UnexpectedEof,
-                format!("New offset {} is out-of-bounds (data length ({}).", new_offset, self.data_len),
+                format!(
+                    "New offset {} is out-of-bounds (data length ({}).",
+                    new_offset, self.data_len
+                ),
             ))
         } else {
             self.data_offset = new_offset as u64;
@@ -70,7 +77,7 @@ impl<'a> Seek for Reader<'a> {
             // Sync the internal file with the new offset. This is done rather than seek the file
             // directly to avoid inconsistency if e.g. the file resizes and we're seeking from the end.
             if let ReaderData::File(f) = &mut self.data {
-                f.seek(SeekFrom::Start(self.data_offset))?;
+                f.borrow_mut().seek(SeekFrom::Start(self.data_offset))?;
             }
 
             Ok(self.data_offset)
@@ -101,13 +108,17 @@ impl<'a> Reader<'a> {
             );
         }
 
+        if count > 500 * 1024 * 1024 {
+            panic!("Warning: Reading a large amount of data at once ({count} bytes)");
+        }
+
         match &mut self.data {
             ReaderData::BufferRef { buffer } => {
                 let start = self.data_offset as usize;
                 (&buffer[start..start + count]).copy_to_slice(output);
             }
             ReaderData::File(file) => {
-                file.read_exact(output)?;
+                file.borrow_mut().read_exact(output)?;
             }
         };
         self.data_offset += count as u64;
@@ -121,16 +132,31 @@ impl<'a> Reader<'a> {
                 Ok(buffer.get(self.data_offset as usize).copied())
             }
             ReaderData::File(file) => {
+                let mut file = file.borrow_mut();
                 let mut buf = [0u8];
                 let read_result = file.read(&mut buf);
                 // Reset the original position
-                file.seek(SeekFrom::Start(self.data_offset as u64))?;
+                file.seek(SeekFrom::Start(self.data_offset))?;
 
                 match read_result {
                     Ok(size) => Ok(if size < 1 { None } else { Some(buf[0]) }),
                     Err(error) => Err(error)?,
                 }
             }
+        }
+    }
+
+    pub fn as_data_ref(&mut self, size: usize) -> Result<ReaderDataRef> {
+        match &mut self.data {
+            ReaderData::BufferRef { buffer } => {
+                let start = self.data_offset as usize;
+                Ok(ReaderDataRef::Vec(buffer[start..start + size].to_vec()))
+            }
+            ReaderData::File(file) => Ok(ReaderDataRef::FilePointer {
+                file: file.clone(),
+                offset: self.data_offset,
+                size,
+            }),
         }
     }
 
@@ -162,8 +188,12 @@ impl<'a> Reader<'a> {
     }
 
     pub fn restore_position(&mut self, offset: ReaderOffset) -> Result<()> {
-        self.seek(SeekFrom::Start(offset.0 as u64))?;
+        self.seek(SeekFrom::Start(offset.0))?;
         Ok(())
+    }
+
+    pub fn offset(&self) -> u64 {
+        self.data_offset
     }
 
     pub fn get_u8(&mut self) -> Result<u8> {
@@ -196,7 +226,7 @@ impl<'a> From<Box<dyn FileHandle>> for Reader<'a> {
         Self {
             data_len: value.byte_length(),
             data_offset: 0,
-            data: ReaderData::File(value),
+            data: ReaderData::File(Rc::new(RefCell::new(value))),
         }
     }
 }
@@ -207,6 +237,38 @@ impl<'a> From<&'a [u8]> for Reader<'a> {
             data_len: value.len() as u64,
             data_offset: 0,
             data: ReaderData::BufferRef { buffer: value },
+        }
+    }
+}
+
+pub enum ReaderDataRef {
+    Vec(Vec<u8>),
+    FilePointer {
+        file: ReaderFileHandle,
+        offset: u64,
+        size: usize,
+    },
+}
+
+impl ReaderDataRef {
+    pub fn bytes(&self) -> Result<Vec<u8>> {
+        match self {
+            ReaderDataRef::Vec(slice) => Ok(slice.clone()),
+            ReaderDataRef::FilePointer { file, offset, size } => {
+                let mut file = file.borrow_mut();
+                let original_offset = file.seek(SeekFrom::Current(0))?;
+                let read_result = {
+                    file.seek(SeekFrom::Start(*offset))?;
+
+                    let mut result = vec![0; *size];
+                    file.read_exact(&mut result)?;
+
+                    Ok(result)
+                };
+                file.seek(SeekFrom::Start(original_offset))?;
+
+                read_result
+            }
         }
     }
 }

@@ -25,6 +25,9 @@ impl BinaryItem {
 
 impl From<BinaryItem> for FileBlob {
     fn from(value: BinaryItem) -> Self {
-        value.0.into()
+        let size = value.0.len();
+        let data = value.0;
+
+        FileBlob::new(Box::new(data), size)
     }
 }

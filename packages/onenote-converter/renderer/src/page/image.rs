@@ -8,7 +8,7 @@ impl<'a> Renderer<'a> {
     pub(crate) fn render_image(&mut self, image: &Image) -> Result<String> {
         let mut content = String::new();
 
-        if let Some(data) = image.data() {
+        if let Some(data) = image.data()? {
             let filename = self.determine_image_filename(image)?;
             let path = fs_driver().join(&self.output, &filename);
             log!("Rendering image: {:?}", path);

@@ -715,14 +715,15 @@ pub struct FileData(pub FileBlob);
 
 impl Debug for FileData {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "FileData(size={:} KiB)", self.0.as_ref().len() / 1024)
+        write!(f, "FileData(size={:} KiB)", self.0.len() / 1024)
     }
 }
 
 impl ParseWithCount for FileData {
     fn parse(reader: parser_utils::Reader, size: usize) -> Result<Self> {
-        let data = reader.read(size)?;
-        Ok(FileData(data.into()))
+        let data_ref = FileBlob::new(Box::new(reader.as_data_ref(size)?), size);
+        reader.advance(size as u64)?;
+        Ok(FileData(data_ref))
     }
 }
 
