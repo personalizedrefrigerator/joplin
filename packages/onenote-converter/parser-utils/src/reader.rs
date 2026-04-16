@@ -263,14 +263,14 @@ impl ReaderDataRef {
             ReaderDataRef::FilePointer { file, offset, size } => {
                 let mut file = file.borrow_mut();
                 let original_offset = file.seek(SeekFrom::Current(0))?;
-                let read_result = {
+                let read_result = (|| {
                     file.seek(SeekFrom::Start(*offset))?;
 
                     let mut result = vec![0; *size];
                     file.read_exact(&mut result)?;
 
                     Ok(result)
-                };
+                })();
                 file.seek(SeekFrom::Start(original_offset))?;
 
                 read_result
