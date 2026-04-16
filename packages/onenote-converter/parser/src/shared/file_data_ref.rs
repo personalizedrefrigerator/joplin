@@ -19,18 +19,18 @@ impl PartialEq for FileBlob {
 }
 
 pub trait FileDataLoader {
-    fn load<'a>(&'a self) -> Result<Box<dyn Iterator<Item = u8> + 'a>>;
+    fn load(&self) -> Result<Vec<u8>>;
 }
 
 impl FileDataLoader for Vec<u8> {
-    fn load<'a>(&'a self) -> Result<Box<dyn Iterator<Item = u8> + 'a>> {
-        Ok(Box::new(self.iter().copied()))
+    fn load(&self) -> Result<Vec<u8>> {
+        Ok(self.clone())
     }
 }
 
 impl FileDataLoader for ReaderDataRef {
-    fn load<'a>(&'a self) -> Result<Box<dyn Iterator<Item = u8> + 'a>> {
-        Ok(Box::new(self.bytes()?.into_iter()))
+    fn load(&self) -> Result<Vec<u8>> {
+        self.bytes()
     }
 }
 
@@ -62,6 +62,6 @@ impl FileBlob {
     }
 
     pub fn load(&self) -> Result<Vec<u8>> {
-        Ok(self.loader.load()?.collect())
+        self.loader.load()
     }
 }
