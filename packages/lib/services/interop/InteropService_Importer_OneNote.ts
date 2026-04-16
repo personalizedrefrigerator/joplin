@@ -9,6 +9,7 @@ import Logger from '@joplin/utils/Logger';
 import { uuidgen } from '../../uuid';
 import shim from '../../shim';
 import { unique } from '../../ArrayUtils';
+import type NativeOneNoteConverter from '@joplin/onenote-converter';
 
 const logger = Logger.create('InteropService_Importer_OneNote');
 
@@ -22,10 +23,9 @@ type PageIdMap = {
 	get: (pageId: string|null)=> PageResolutionResult|null;
 };
 
-type NativeOneNoteConverter = (notebookPath: string, outputDirectory: string, baseDir: string)=> Promise<void>;
-const getOneNoteConverter = (): NativeOneNoteConverter => {
+const getOneNoteConverter = (): typeof NativeOneNoteConverter => {
 	try {
-		return shim.requireDynamic('@joplin/onenote-converter').oneNoteConverter;
+		return shim.requireDynamic('@joplin/onenote-converter').default;
 	} catch (error) {
 		// Log the original error for debugging:
 		logger.warn('Failed to load the onenote importer:', error);
@@ -119,7 +119,11 @@ export default class InteropService_Importer_OneNote extends InteropService_Impo
 			}
 
 			try {
-				await oneNoteConverter(notebookFilePath, resolve(outputDirectory2), notebookBaseDir);
+				await oneNoteConverter({
+					sourcePath: notebookFilePath,
+					outputDir: resolve(outputDirectory2),
+					baseDir: notebookBaseDir,
+				});
 			} catch (error) {
 				// Forward only the error message. Usually the stack trace points to bytes in the WASM file.
 				// It's very difficult to use and can cause the error report to be longer than the maximum

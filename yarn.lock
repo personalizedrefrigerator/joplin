@@ -13151,6 +13151,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@joplin/onenote-converter@workspace:packages/onenote-converter"
   dependencies:
+    typescript: "npm:5.8.3"
     wasm-pack: "npm:0.13.1"
     yargs: "npm:17.7.2"
   languageName: unknown

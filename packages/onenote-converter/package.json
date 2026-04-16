@@ -7,13 +7,16 @@
   "version": "3.6.0",
   "license": "MPL-2.0-no-copyleft-exception",
   "repository": "https://github.com/laurent22/joplin/tree/dev/packages/onenote-converter",
-  "main": "./renderer/pkg/renderer.js",
+  "main": "./main.js",
+  "types": "./main.ts",
   "scripts": {
     "build": "node ./tools/build.js --profile=release",
     "buildDev": "node ./tools/build.js --profile=dev",
+    "tsc": "tsc",
     "test": "node ./tools/test.js"
   },
   "devDependencies": {
+    "typescript": "5.8.3",
     "wasm-pack": "0.13.1",
     "yargs": "17.7.2"
   },
