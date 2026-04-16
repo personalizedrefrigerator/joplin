@@ -185,7 +185,7 @@ impl<'a> Reader<'a> {
             .into());
         }
 
-        self.seek(SeekFrom::Current(count as i64))? as usize;
+        self.seek(SeekFrom::Current(count as i64))?;
 
         Ok(())
     }
