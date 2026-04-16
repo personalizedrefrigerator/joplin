@@ -91,78 +91,42 @@ mod test {
     use parser_utils::reader::Reader;
 
     #[test]
-    fn test_zero() {
-        assert_eq!(
-            CompactU64::parse(&mut Reader::from(&[0u8] as &[u8]))
-                .unwrap()
-                .value(),
-            0
-        );
-    }
-
-    #[test]
-    fn test_7_bit() {
-        assert_eq!(
-            CompactU64::parse(&mut Reader::new(&[0u8])).unwrap().value(),
-            0
-        );
-    }
-
-    #[test]
-    fn test_14_bit() {
-        assert_eq!(
-            CompactU64::parse(&mut Reader::new(&[0u8])).unwrap().value(),
-            0
-        );
-    }
-
-    #[test]
-    fn test_21_bit() {
-        assert_eq!(
-            CompactU64::parse(&mut Reader::new(&[0xd4u8, 0x8b, 0x10]))
-                .unwrap()
-                .value(),
-            135546
-        );
-    }
-
-    #[test]
-    fn test_28_bit() {
-        assert_eq!(
-            CompactU64::parse(&mut Reader::new(&[0u8])).unwrap().value(),
-            0
-        );
-    }
-
-    #[test]
-    fn test_35_bit() {
-        assert_eq!(
-            CompactU64::parse(&mut Reader::new(&[0u8])).unwrap().value(),
-            0
-        );
-    }
-
-    #[test]
-    fn test_42_bit() {
-        assert_eq!(
-            CompactU64::parse(&mut Reader::new(&[0u8])).unwrap().value(),
-            0
-        );
-    }
-
-    #[test]
-    fn test_49_bit() {
-        assert_eq!(
-            CompactU64::parse(&mut Reader::new(&[0u8])).unwrap().value(),
-            0
-        );
-    }
-
-    #[test]
-    fn test_64_bit() {
-        assert_eq!(
-            CompactU64::parse(&mut Reader::new(&[0u8])).unwrap().value(),
-            0
-        );
+    fn should_parse_from_reader() {
+        for (input, expected) in [
+            // Zero case
+            (vec![0u8], 0),
+            // 7-bit case
+            (vec![0xF], 7),
+            // 14-bit case
+            (vec![0xFE, 0x0], 0x3F),
+            // 21-bit case
+            (vec![0xd4, 0x8b, 0x10], 135546),
+            // 28-bit case
+            (vec![0xd8, 0x8b, 0x10, 0x10], 0x10108bd),
+            // 35-bit case
+            (vec![0x10, 0x8b, 0x10, 0x13, 0x10], 0x1013108b0 >> 1),
+            // 42-bit case
+            (vec![0x20, 0x8b, 0x10, 0x13, 0x10, 0x10], 0x101013108b0 >> 2),
+            // 49-bit case
+            (
+                vec![0x40, 0x8b, 0x10, 0x13, 0x10, 0x10, 0x14],
+                0x14101013108b0 >> 3,
+            ),
+            // 64-bit case
+            (
+                vec![0x80, 0x8b, 0x10, 0x13, 0x10, 0x10, 0x14, 0x10, 0x14],
+                0x141014101013108b,
+            ),
+        ] {
+            let test_label = format!("{input:?} should parse to 0x{expected:0x}");
+            assert_eq!(
+                CompactU64::parse(&mut Reader::from(&input as &[u8]))
+                    .expect(&test_label)
+                    .value(),
+                expected,
+                "{}",
+                test_label,
+            );
+        }
     }
 }
