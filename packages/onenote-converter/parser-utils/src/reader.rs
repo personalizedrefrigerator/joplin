@@ -115,10 +115,6 @@ impl<'a> Reader<'a> {
             );
         }
 
-        if count > 500 * 1024 * 1024 {
-            panic!("Warning: Reading a large amount of data at once ({count} bytes)");
-        }
-
         match &mut self.data {
             ReaderData::BufferRef { buffer } => {
                 let start = self.data_offset as usize;
