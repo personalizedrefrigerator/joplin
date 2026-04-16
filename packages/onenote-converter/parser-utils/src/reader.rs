@@ -43,7 +43,14 @@ macro_rules! try_get {
 type ReaderFileHandle = Rc<RefCell<Box<dyn FileHandle>>>;
 
 enum ReaderData<'a> {
+    /// Wraps a buffer owned by calling logic. This is more efficient for
+    /// small amounts of data.
     BufferRef { buffer: &'a [u8] },
+
+    /// Wraps a handle to a file. This handles large amounts of data
+    /// that won't necessarily fit into memory.
+    /// Invariant: The internal file handle's offset should match the
+    /// `data_offset` of the main reader.
     File(ReaderFileHandle),
 }
 
