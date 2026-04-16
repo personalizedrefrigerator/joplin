@@ -74,7 +74,7 @@ impl<'a> Seek for Reader<'a> {
             Err(std::io::Error::new(
                 std::io::ErrorKind::UnexpectedEof,
                 format!(
-                    "New offset {} is out-of-bounds (data length ({}).",
+                    "New offset {} is out-of-bounds (data length: {}).",
                     new_offset, self.data_len
                 ),
             ))
@@ -153,6 +153,8 @@ impl<'a> Reader<'a> {
         match &mut self.data {
             ReaderData::BufferRef { buffer } => {
                 let start = self.data_offset as usize;
+                // Cloning needs to be done early with BufferRef, since we don't own the original
+                // data. Large data should generally use `ReaderData::File`.
                 Ok(ReaderDataRef::Vec(buffer[start..start + size].to_vec()))
             }
             ReaderData::File(file) => Ok(ReaderDataRef::FilePointer {
@@ -181,6 +183,7 @@ impl<'a> Reader<'a> {
             .into());
         }
 
+        assert!(count < i64::MAX as u64);
         self.seek(SeekFrom::Current(count as i64))?;
 
         Ok(())
@@ -287,21 +290,19 @@ mod test {
         assert_eq!(reader.get_u8().unwrap(), 1);
         assert_eq!(reader.get_u8().unwrap(), 2);
         assert_eq!(reader.get_u8().unwrap(), 3);
-        {
-            reader.seek(SeekFrom::Start(0)).unwrap();
-            assert_eq!(reader.get_u8().unwrap(), 1);
-            assert_eq!(reader.get_u8().unwrap(), 2);
-            assert_eq!(reader.get_u8().unwrap(), 3);
-            assert_eq!(reader.get_u8().unwrap(), 4);
+        reader.seek(SeekFrom::Start(0)).unwrap();
+        assert_eq!(reader.get_u8().unwrap(), 1);
+        assert_eq!(reader.get_u8().unwrap(), 2);
+        assert_eq!(reader.get_u8().unwrap(), 3);
+        assert_eq!(reader.get_u8().unwrap(), 4);
 
-            reader.seek_relative(-3).unwrap();
-            assert_eq!(reader.get_u8().unwrap(), 2);
-            assert_eq!(reader.get_u8().unwrap(), 3);
+        reader.seek_relative(-3).unwrap();
+        assert_eq!(reader.get_u8().unwrap(), 2);
+        assert_eq!(reader.get_u8().unwrap(), 3);
 
-            reader.seek_relative(-2).unwrap();
-            assert_eq!(reader.get_u8().unwrap(), 2);
-            assert_eq!(reader.get_u8().unwrap(), 3);
-        }
+        reader.seek_relative(-2).unwrap();
+        assert_eq!(reader.get_u8().unwrap(), 2);
+        assert_eq!(reader.get_u8().unwrap(), 3);
         assert_eq!(reader.get_u8().unwrap(), 4);
     }
 }

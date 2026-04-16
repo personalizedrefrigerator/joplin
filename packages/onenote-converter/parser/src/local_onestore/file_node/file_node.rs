@@ -56,9 +56,12 @@ impl FileNode {
             )?),
             2 => FileNodeDataRef::ElementList({
                 let list_ref = FileNodeChunkReference::parse(reader, stp_format, cb_format)?;
+
                 let reader_offset = reader.save_position();
-                list_ref.seek_reader_to(reader)?;
-                let result = FileNodeList::parse(reader, context, list_ref.data_size());
+                let result = {
+                    list_ref.seek_reader_to(reader)?;
+                    FileNodeList::parse(reader, context, list_ref.data_size())
+                };
                 reader.restore_position(reader_offset)?;
 
                 result
@@ -456,12 +459,14 @@ impl<RefSize: Parse> ParseWithRef for ObjectDeclarationWithSizedRefCount<RefSize
 fn read_property_set(reader: Reader, property_set_ref: &FileNodeDataRef) -> Result<ObjectPropSet> {
     match property_set_ref {
         FileNodeDataRef::SingleElement(data_ref) => {
-            let offset = reader.save_position();
-            data_ref.seek_reader_to(reader)?;
+            let reader_offset = reader.save_position();
+            let prop_set = {
+                data_ref.seek_reader_to(reader)?;
+                ObjectPropSet::parse(reader)
+            };
+            reader.restore_position(reader_offset)?;
 
-            let prop_set = ObjectPropSet::parse(reader)?;
-            reader.restore_position(offset)?;
-            Ok(prop_set)
+            prop_set
         }
         FileNodeDataRef::ElementList(_) => Err(ErrorKind::MalformedOneStoreData(
             "Expected a single element (reading PropertySet)".into(),
@@ -662,12 +667,13 @@ impl ParseWithRef for ObjectInfoDependencyOverridesFND {
         if let FileNodeDataRef::SingleElement(obj_ref) = obj_ref {
             if !obj_ref.is_fcr_nil() {
                 let reader_offset = reader.save_position();
-
-                obj_ref.seek_reader_to(reader)?;
-                let data = ObjectInfoDependencyOverrideData::parse(reader)?;
-
+                let data = {
+                    obj_ref.seek_reader_to(reader)?;
+                    ObjectInfoDependencyOverrideData::parse(reader)
+                };
                 reader.restore_position(reader_offset)?;
-                Ok(Self { data })
+
+                Ok(Self { data: data? })
             } else {
                 Ok(Self {
                     data: ObjectInfoDependencyOverrideData::parse(reader)?,
@@ -738,12 +744,17 @@ impl ParseWithRef for FileDataStoreObjectReferenceFND {
     fn parse(reader: parser_utils::Reader, data_ref: &FileNodeDataRef) -> Result<Self> {
         let guid = Guid::parse(reader)?;
         if let FileNodeDataRef::SingleElement(data_ref) = data_ref {
-            let offset = reader.save_position();
-            data_ref.seek_reader_to(reader)?;
-            let target = FileDataStoreObject::parse(reader)?;
-            reader.restore_position(offset)?;
+            let reader_offset = reader.save_position();
+            let target = {
+                data_ref.seek_reader_to(reader)?;
+                FileDataStoreObject::parse(reader)
+            };
+            reader.restore_position(reader_offset)?;
 
-            Ok(Self { target, guid })
+            Ok(Self {
+                target: target?,
+                guid,
+            })
         } else {
             Err(onestore_parse_error!(
                 "FileDataStoreObjectReferenceFND should point to a single file node object"

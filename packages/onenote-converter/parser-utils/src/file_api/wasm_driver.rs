@@ -232,7 +232,7 @@ impl Seek for SeekableFileHandle {
             }
             SeekFrom::Current(offset) => {
                 // Disallow seeking to a negative position
-                if offset < 0 && (-offset) as u64 > self.offset {
+                if offset < 0 && offset.unsigned_abs() > self.offset {
                     return Err(std::io::Error::new(
                         std::io::ErrorKind::InvalidInput,
                         "Attempted to seek before the beginning of the file.",
