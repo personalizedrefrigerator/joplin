@@ -233,13 +233,16 @@ impl<'a> Reader<'a> {
     }
 }
 
-impl<'a> From<Box<dyn FileHandle>> for Reader<'a> {
-    fn from(value: Box<dyn FileHandle>) -> Self {
-        Self {
-            data_len: value.byte_length(),
-            data_offset: 0,
-            data: ReaderData::File(Rc::new(RefCell::new(value))),
-        }
+impl<'a> TryFrom<Box<dyn FileHandle>> for Reader<'a> {
+    type Error = crate::errors::Error;
+
+    fn try_from(mut handle: Box<dyn FileHandle>) -> Result<Self> {
+        let initial_offset = handle.seek(SeekFrom::Current(0))?;
+        Ok(Self {
+            data_len: handle.byte_length(),
+            data_offset: initial_offset,
+            data: ReaderData::File(Rc::new(RefCell::new(handle))),
+        })
     }
 }
 

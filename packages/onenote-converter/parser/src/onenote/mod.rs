@@ -40,7 +40,7 @@ impl Parser {
     pub fn parse_notebook(&mut self, path: String) -> Result<Notebook> {
         log!("Parsing notebook: {:?}", path);
         let data = fs_driver().open_file(&path)?;
-        let store = parse_onestore(&mut Reader::from(data))?;
+        let store = parse_onestore(&mut Reader::try_from(data)?)?;
 
         if store.get_type() != OneStoreType::TableOfContents {
             return Err(ErrorKind::NotATocFile { file: path }.into());
@@ -72,14 +72,14 @@ impl Parser {
     pub fn parse_section(&mut self, path: &str) -> Result<Section> {
         log!("Parsing section: {:?}", path);
         let file = fs_driver().open_file(path)?;
-        self.parse_section_from_reader(Reader::from(file), path)
+        self.parse_section_from_reader(Reader::try_from(file)?, path)
     }
 
     /// Parses low-level OneStore data. Exported for debugging purposes.
     pub fn parse_onestore_raw(&mut self, path: &str) -> Result<Rc<dyn OneStore>> {
         log!("Parsing OneStore: {:?}", path);
         let file = fs_driver().open_file(path)?;
-        parse_onestore(&mut Reader::from(file))
+        parse_onestore(&mut Reader::try_from(file)?)
     }
 
     /// Parse a OneNote section file from a byte array.
