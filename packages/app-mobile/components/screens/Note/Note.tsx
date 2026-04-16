@@ -7,7 +7,7 @@ import NoteBodyViewer from '../../NoteBodyViewer/NoteBodyViewer';
 import checkPermissions from '../../../utils/checkPermissions';
 import NoteEditor from '../../NoteEditor/NoteEditor';
 import * as React from 'react';
-import { Keyboard, View, TextInput, StyleSheet, Linking, Share, NativeSyntheticEvent, useWindowDimensions } from 'react-native';
+import { Keyboard, View, TextInput, StyleSheet, Linking, Share, NativeSyntheticEvent, useWindowDimensions, ViewStyle } from 'react-native';
 import { Platform, PermissionsAndroid } from 'react-native';
 import { connect } from 'react-redux';
 import Note from '@joplin/lib/models/Note';
@@ -477,8 +477,9 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 	public styles() {
 		const themeId = this.props.themeId;
 		const theme = themeStyle(themeId);
+		const isTodo = this.state.note.is_todo;
 
-		const cacheKey = [themeId, this.state.titleTextInputHeight].join('_');
+		const cacheKey = [themeId, this.state.titleTextInputHeight, isTodo].join('_');
 
 		if (this.styles_[cacheKey]) return this.styles_[cacheKey];
 		this.styles_ = {};
@@ -540,19 +541,30 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 			flex: 0,
 			flexDirection: 'row',
 			flexBasis: 'auto',
-			paddingLeft: theme.marginLeft,
 			borderBottomColor: theme.dividerColor,
 			borderBottomWidth: 1,
 			maxHeight: '40%',
+			position: 'relative',
 		};
 
 		styles.titleContainerTodo = { ...styles.titleContainer };
 		styles.titleContainerTodo.paddingLeft = 0;
 
+		const checkboxWidth = 32;
+		styles.checkbox = {
+			position: 'absolute',
+			left: 0,
+			top: 0,
+			bottom: 0,
+			width: checkboxWidth,
+
+			zIndex: 2,
+		} satisfies ViewStyle;
+
 		styles.titleTextInput = {
 			flex: 1,
 			marginTop: 0,
-			paddingLeft: 0,
+			paddingLeft: theme.marginLeft + (isTodo ? checkboxWidth : 0),
 			color: theme.color,
 			fontWeight: 'bold',
 			fontSize: theme.fontSize,
