@@ -226,6 +226,7 @@ export default class InteropService_Importer_OneNote extends InteropService_Impo
 			(dom: Document, currentFolder: string) => this.convertExternalLinksToInternalLinks_(dom, currentFolder, idMap),
 			(dom: Document, _currentFolder: string) => Promise.resolve(this.simplifyHtml_(dom)),
 		];
+		html = html.replace(/[\u{00d8}]/ug, 'ø');
 		const dom = this.domParser.parseFromString(html, 'text/html');
 
 		let changed = false;
