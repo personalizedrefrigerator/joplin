@@ -7,7 +7,7 @@ import NoteBodyViewer from '../../NoteBodyViewer/NoteBodyViewer';
 import checkPermissions from '../../../utils/checkPermissions';
 import NoteEditor from '../../NoteEditor/NoteEditor';
 import * as React from 'react';
-import { Keyboard, View, TextInput, StyleSheet, Linking, Share, NativeSyntheticEvent, useWindowDimensions, ViewStyle } from 'react-native';
+import { Keyboard, View, TextInput, StyleSheet, Linking, Share, NativeSyntheticEvent, useWindowDimensions, ViewStyle, TextStyle } from 'react-native';
 import { Platform, PermissionsAndroid } from 'react-native';
 import { connect } from 'react-redux';
 import Note from '@joplin/lib/models/Note';
@@ -564,13 +564,13 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 		styles.titleTextInput = {
 			flex: 1,
 			marginTop: 0,
-			paddingLeft: (isTodo ? checkboxWidth : theme.marginLeft),
+			paddingInlineStart: isTodo ? checkboxWidth : theme.marginLeft,
 			color: theme.color,
 			fontWeight: 'bold',
 			fontSize: theme.fontSize,
 			paddingTop: 10, // Added for iOS (Not needed for Android??)
 			paddingBottom: 10, // Added for iOS (Not needed for Android??)
-		};
+		} satisfies TextStyle;
 
 		this.styles_[cacheKey] = StyleSheet.create(styles);
 		return this.styles_[cacheKey];
