@@ -210,7 +210,7 @@ export default class InteropService_Importer_OneNote extends InteropService_Impo
 
 		for (const file of htmlFiles) {
 			const fileLocation = join(baseFolder, file.path);
-			const originalHtml = await shim.fsDriver().readFile(fileLocation, 'utf-8');
+			const originalHtml = await shim.fsDriver().readFile(fileLocation);
 			const { changed, html } = await this.postprocessGeneratedHtml_(originalHtml, dirname(fileLocation), idMap);
 
 			if (changed) {
