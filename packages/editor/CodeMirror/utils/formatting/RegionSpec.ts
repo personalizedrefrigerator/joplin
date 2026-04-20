@@ -16,6 +16,9 @@ export interface RegionSpec {
 
 	// How to identify the region
 	matcher: RegionMatchSpec;
+
+	// Whether the format should be applied per-line in multiline contexts
+	perLine: boolean;
 }
 
 export namespace RegionSpec { // eslint-disable-line no-redeclare
@@ -23,6 +26,7 @@ export namespace RegionSpec { // eslint-disable-line no-redeclare
 		nodeName?: string;
 		template: string | { start: string; end: string };
 		matcher?: RegionMatchSpec;
+		perLine: boolean;
 	}
 
 	// Creates a new RegionSpec, given a simplified set of options.
@@ -47,6 +51,7 @@ export namespace RegionSpec { // eslint-disable-line no-redeclare
 			nodeName: config.nodeName,
 			template: { start: templateStart, end: templateEnd },
 			matcher,
+			perLine: config.perLine,
 		};
 	};
 

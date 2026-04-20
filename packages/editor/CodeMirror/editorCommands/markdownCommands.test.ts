@@ -56,6 +56,27 @@ describe('markdownCommands', () => {
 		});
 	});
 
+	it.each([
+		{
+			lines: '- This\n- is\n- a\n- test',
+			selection: [0, '- This\n- is\n- a\n- test'.length],
+			expected: '- **This**\n- **is**\n- **a**\n- **test**',
+			command: toggleBolded,
+		},
+	])('should apply inline formatting to each line in a selection (case %j)', async ({ lines, selection, expected, command }) => {
+		const editor = await createTestEditor(
+			lines, EditorSelection.range(selection[0], selection[1]), [],
+		);
+
+		command(editor);
+
+		expect(editor.state.doc.toString()).toBe(expected);
+		expect(editor.state.selection.main).toMatchObject({
+			from: '- '.length,
+			to: expected.length,
+		});
+	});
+
 	it('for a cursor, bolding, then italicizing, should produce a bold-italic region', async () => {
 		const initialDocText = '';
 		const editor = await createTestEditor(

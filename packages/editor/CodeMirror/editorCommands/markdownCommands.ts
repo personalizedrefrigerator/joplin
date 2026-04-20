@@ -17,7 +17,7 @@ import toggleSelectedLinesStartWith from '../utils/formatting/toggleSelectedLine
 
 
 export const toggleBolded: Command = (view: EditorView): boolean => {
-	const spec = RegionSpec.of({ template: '**', nodeName: 'StrongEmphasis' });
+	const spec = RegionSpec.of({ template: '**', nodeName: 'StrongEmphasis', perLine: true });
 	const changes = toggleInlineFormatGlobally(view.state, spec);
 
 	view.dispatch(changes);
@@ -74,6 +74,7 @@ export const toggleItalicized: Command = (view: EditorView): boolean => {
 
 			template: { start: '*', end: '*' },
 			matcher: { start: /[_*]/g, end: /[_*]/g },
+			perLine: true,
 		});
 		view.dispatch(changes);
 	}
@@ -85,11 +86,12 @@ export const toggleItalicized: Command = (view: EditorView): boolean => {
 // a block (fenced) code block.
 export const toggleCode: Command = (view: EditorView): boolean => {
 	const codeFenceRegex = /^```\w*\s*$/;
-	const inlineRegionSpec = RegionSpec.of({ template: '`', nodeName: 'InlineCode' });
+	const inlineRegionSpec = RegionSpec.of({ template: '`', nodeName: 'InlineCode', perLine: true, });
 	const blockRegionSpec: RegionSpec = {
 		nodeName: 'FencedCode',
 		template: { start: '```', end: '```' },
 		matcher: { start: codeFenceRegex, end: codeFenceRegex },
+		perLine: false,
 	};
 
 	const changes = toggleRegionFormatGlobally(view.state, inlineRegionSpec, blockRegionSpec);
@@ -101,7 +103,7 @@ export const toggleCode: Command = (view: EditorView): boolean => {
 export const toggleMath: Command = (view: EditorView): boolean => {
 	const blockStartRegex = /^\$\$/;
 	const blockEndRegex = /\$\$\s*$/;
-	const inlineRegionSpec = RegionSpec.of({ nodeName: 'InlineMath', template: '$' });
+	const inlineRegionSpec = RegionSpec.of({ nodeName: 'InlineMath', template: '$', perLine: true });
 	const blockRegionSpec = RegionSpec.of({
 		nodeName: 'BlockMath',
 		template: '$$',
@@ -109,6 +111,7 @@ export const toggleMath: Command = (view: EditorView): boolean => {
 			start: blockStartRegex,
 			end: blockEndRegex,
 		},
+		perLine: false,
 	});
 
 	const changes = toggleRegionFormatGlobally(view.state, inlineRegionSpec, blockRegionSpec);

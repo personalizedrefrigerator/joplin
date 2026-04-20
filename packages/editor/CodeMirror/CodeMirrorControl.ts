@@ -114,7 +114,7 @@ export default class CodeMirrorControl extends CodeMirror5Emulation implements E
 	}
 
 	public wrapSelections(start: string, end: string) {
-		const regionSpec = RegionSpec.of({ template: { start, end } });
+		const regionSpec = RegionSpec.of({ template: { start, end }, perLine: false });
 
 		this.editor.dispatch(
 			this.editor.state.changeByRange(range => {

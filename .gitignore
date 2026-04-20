@@ -1116,6 +1116,8 @@ packages/editor/CodeMirror/utils/markdown/codeBlockLanguages/allLanguages.js
 packages/editor/CodeMirror/utils/markdown/codeBlockLanguages/defaultLanguage.js
 packages/editor/CodeMirror/utils/markdown/codeBlockLanguages/lookUpLanguage.js
 packages/editor/CodeMirror/utils/markdown/getCheckboxAtPosition.js
+packages/editor/CodeMirror/utils/markdown/moveSelectionWithinBlock.test.js
+packages/editor/CodeMirror/utils/markdown/moveSelectionWithinBlock.js
 packages/editor/CodeMirror/utils/markdown/renumberSelectedLists.test.js
 packages/editor/CodeMirror/utils/markdown/renumberSelectedLists.js
 packages/editor/CodeMirror/utils/markdown/stripBlockquote.js
