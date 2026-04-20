@@ -7,7 +7,7 @@ import NoteBodyViewer from '../../NoteBodyViewer/NoteBodyViewer';
 import checkPermissions from '../../../utils/checkPermissions';
 import NoteEditor from '../../NoteEditor/NoteEditor';
 import * as React from 'react';
-import { Keyboard, View, TextInput, StyleSheet, Linking, Share, NativeSyntheticEvent, useWindowDimensions, ViewStyle, TextStyle } from 'react-native';
+import { Keyboard, View, TextInput, StyleSheet, Linking, Share, NativeSyntheticEvent, useWindowDimensions } from 'react-native';
 import { Platform, PermissionsAndroid } from 'react-native';
 import { connect } from 'react-redux';
 import Note from '@joplin/lib/models/Note';
@@ -477,9 +477,8 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 	public styles() {
 		const themeId = this.props.themeId;
 		const theme = themeStyle(themeId);
-		const isTodo = this.state.note.is_todo;
 
-		const cacheKey = [themeId, this.state.titleTextInputHeight, isTodo].join('_');
+		const cacheKey = [themeId, this.state.titleTextInputHeight].join('_');
 
 		if (this.styles_[cacheKey]) return this.styles_[cacheKey];
 		this.styles_ = {};
@@ -541,36 +540,25 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 			flex: 0,
 			flexDirection: 'row',
 			flexBasis: 'auto',
+			paddingLeft: theme.marginLeft,
 			borderBottomColor: theme.dividerColor,
 			borderBottomWidth: 1,
 			maxHeight: '40%',
-			position: 'relative',
 		};
 
 		styles.titleContainerTodo = { ...styles.titleContainer };
 		styles.titleContainerTodo.paddingLeft = 0;
 
-		const checkboxWidth = 38;
-		styles.checkbox = {
-			position: 'absolute',
-			left: 0,
-			top: 0,
-			bottom: 0,
-			width: checkboxWidth,
-
-			zIndex: 2,
-		} satisfies ViewStyle;
-
 		styles.titleTextInput = {
 			flex: 1,
 			marginTop: 0,
-			paddingInlineStart: isTodo ? checkboxWidth : theme.marginLeft,
+			paddingLeft: 0,
 			color: theme.color,
 			fontWeight: 'bold',
 			fontSize: theme.fontSize,
 			paddingTop: 10, // Added for iOS (Not needed for Android??)
 			paddingBottom: 10, // Added for iOS (Not needed for Android??)
-		} satisfies TextStyle;
+		};
 
 		this.styles_[cacheKey] = StyleSheet.create(styles);
 		return this.styles_[cacheKey];
@@ -1812,6 +1800,12 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 						this.setState({ titleContainerWidth: width });
 					}
 				}}
+
+				// Making this focusable works around a tab ordering bug on Android
+				// See https://github.com/laurent22/joplin/issues/14548
+				focusable
+				// Since the group is focusable, it also needs a label (otherwise TalkBack reads "unlabelled"):
+				aria-label={_('Title')}
 			>
 				<TextWrapCalculator
 					textCompStyle={this.styles().titleTextInput}
