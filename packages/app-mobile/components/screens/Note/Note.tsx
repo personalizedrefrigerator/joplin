@@ -550,7 +550,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 		styles.titleContainerTodo = { ...styles.titleContainer };
 		styles.titleContainerTodo.paddingLeft = 0;
 
-		const checkboxWidth = 32;
+		const checkboxWidth = 38;
 		styles.checkbox = {
 			position: 'absolute',
 			left: 0,
@@ -564,7 +564,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 		styles.titleTextInput = {
 			flex: 1,
 			marginTop: 0,
-			paddingLeft: theme.marginLeft + (isTodo ? checkboxWidth : 0),
+			paddingLeft: (isTodo ? checkboxWidth : theme.marginLeft),
 			color: theme.color,
 			fontWeight: 'bold',
 			fontSize: theme.fontSize,
