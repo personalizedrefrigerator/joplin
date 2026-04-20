@@ -3,6 +3,7 @@ import FsDriverBase, { Stat, ZipEntry, ArchiveExtractOptions } from './fs-driver
 import time from './time';
 const md5File = require('md5-file');
 const fs = require('fs-extra');
+import { readFile } from 'fs/promises';
 
 export default class FsDriverNode extends FsDriverBase {
 
@@ -152,8 +153,11 @@ export default class FsDriverNode extends FsDriverBase {
 
 	public async readFile(path: string, encoding = 'utf8') {
 		try {
-			if (encoding === 'Buffer') return await fs.readFile(path); // Returns the raw buffer
-			return await fs.readFile(path, encoding);
+			// Avoid using fs-extra here. Reading files with `fs-extra` seems to cause hangs
+			// when running the output through certain native methods (e.g. `new Blob`).
+			// See https://github.com/laurent22/joplin/issues/15132
+			if (encoding === 'Buffer') return await readFile(path); // Returns the raw buffer
+			return await readFile(path, { encoding: encoding as BufferEncoding });
 		} catch (error) {
 			throw this.fsErrorToJsError_(error, path);
 		}
