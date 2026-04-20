@@ -226,6 +226,10 @@ export default class InteropService_Importer_OneNote extends InteropService_Impo
 			(dom: Document, currentFolder: string) => this.convertExternalLinksToInternalLinks_(dom, currentFolder, idMap),
 			(dom: Document, _currentFolder: string) => Promise.resolve(this.simplifyHtml_(dom)),
 		];
+		// Workaround: HTML read directly from the filesystem can cause parseFromString to hang.
+		// Force creation of a new string.
+		// See https://github.com/laurent22/joplin/issues/15132
+		html = `${html} `.substring(0, html.length);
 		const dom = this.domParser.parseFromString(html, 'text/html');
 
 		let changed = false;
