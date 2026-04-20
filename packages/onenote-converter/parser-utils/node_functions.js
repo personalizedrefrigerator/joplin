@@ -30,9 +30,17 @@ function normalizeAndWriteFile(filePath, data) {
 
 function fileReader(path) {
 	const fd = fs.openSync(path);
-	const size = fs.fstatSync(fd).size;
+	// TODO: When Node v20 is EOL, replace this with the { bigint: true }
+	// parameter variant.
+	const size = BigInt(fs.fstatSync(fd).size);
+
 	return {
-		read: (position, length) => {
+		read: (bigPosition, bigLength) => {
+			// Rust uses u64 for position/length which is transferred to JS as a BigInt.
+			// Convert:
+			const length = Number(bigLength);
+			const position = Number(bigPosition);
+
 			const data = Buffer.alloc(length);
 			const sizeRead = fs.readSync(fd, data, { length, position });
 
@@ -48,6 +56,10 @@ function fileReader(path) {
 	};
 }
 
+function isWindows() {
+	return process.platform === 'win32';
+}
+
 module.exports = {
 	mkdirSyncRecursive,
 	isDirectory,
@@ -55,4 +67,5 @@ module.exports = {
 	removePrefix,
 	normalizeAndWriteFile,
 	fileReader,
+	isWindows,
 };

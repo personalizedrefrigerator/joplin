@@ -257,3 +257,11 @@ armor
 clearsign
 ligne
 payant
+llamacpp
+bgcolor
+bordercolor
+togglefullscreen
+onestore
+macshot
+pdate
+coderabbitai

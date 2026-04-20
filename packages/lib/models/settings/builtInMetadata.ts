@@ -781,6 +781,7 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 			section: 'editor',
 			appTypes: [AppType.Desktop],
 			label: () => _('Enable HTML-to-Markdown conversion banner'),
+			description: () => _('If enabled, opening an HTML note displays a prompt to convert the note to Markdown.'),
 			storage: SettingStorage.File,
 			isGlobal: true,
 		},
@@ -862,7 +863,7 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 			storage: SettingStorage.File,
 			section: 'note',
 			public: false,
-			appTypes: [AppType.Cli, AppType.Desktop],
+			appTypes: [AppType.Cli, AppType.Desktop, AppType.Mobile],
 		},
 		'notes.perFieldReverse': {
 			value: {
@@ -875,7 +876,7 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 			storage: SettingStorage.File,
 			section: 'note',
 			public: false,
-			appTypes: [AppType.Cli, AppType.Desktop],
+			appTypes: [AppType.Cli, AppType.Desktop, AppType.Mobile],
 		},
 		'notes.perFolderSortOrderEnabled': {
 			value: true,
@@ -883,7 +884,7 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 			storage: SettingStorage.File,
 			section: 'folder',
 			public: false,
-			appTypes: [AppType.Cli, AppType.Desktop],
+			appTypes: [AppType.Cli, AppType.Desktop, AppType.Mobile],
 		},
 		'notes.perFolderSortOrders': {
 			value: {} as Record<string, string | boolean>,
@@ -891,7 +892,7 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 			storage: SettingStorage.File,
 			section: 'folder',
 			public: false,
-			appTypes: [AppType.Cli, AppType.Desktop],
+			appTypes: [AppType.Cli, AppType.Desktop, AppType.Mobile],
 		},
 		'notes.sharedSortOrder': {
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Partially refactored old code from before rule was applied.
@@ -899,7 +900,7 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 			type: SettingItemType.Object,
 			section: 'folder',
 			public: false,
-			appTypes: [AppType.Cli, AppType.Desktop],
+			appTypes: [AppType.Cli, AppType.Desktop, AppType.Mobile],
 		},
 		'folders.sortOrder.field': {
 			value: 'title',
@@ -1175,6 +1176,25 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 		},
 
 		startMinimized: { value: false, type: SettingItemType.Bool, storage: SettingStorage.File, isGlobal: true, section: 'application', public: true, appTypes: [AppType.Desktop], label: () => _('Start application minimised in the tray icon'), show: settings => !!settings['showTrayIcon'] },
+
+		'globalHotkey': {
+			value: '',
+			type: SettingItemType.String,
+			section: 'application',
+			public: true,
+			appTypes: [AppType.Desktop],
+			label: () => _('Global shortcut to show/hide Joplin'),
+			description: () => _('A system-wide keyboard shortcut that toggles the Joplin window. Works even when Joplin is not focused. Example: CommandOrControl+Shift+J. Leave empty to disable.'),
+			storage: SettingStorage.File,
+			isGlobal: true,
+			autoSave: true,
+			// Electron's globalShortcut API does not yet work under Wayland,
+			// so we hide this option when running on a Wayland session.
+			show: () => {
+				if (platform !== 'linux') return true;
+				return process.env.XDG_SESSION_TYPE !== 'wayland' && !process.env.WAYLAND_DISPLAY;
+			},
+		},
 
 		collapsedFolderIds: { value: [] as string[], type: SettingItemType.Array, public: false },
 
@@ -1459,6 +1479,7 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 		noteVisiblePanes: { value: ['editor', 'viewer'], type: SettingItemType.Array, storage: SettingStorage.File, isGlobal: true, public: false, appTypes: [AppType.Desktop] },
 		tagHeaderIsExpanded: { value: true, type: SettingItemType.Bool, public: false, appTypes: [AppType.Desktop] },
 		folderHeaderIsExpanded: { value: true, type: SettingItemType.Bool, public: false, appTypes: [AppType.Desktop] },
+		syncReportIsVisible: { value: false, type: SettingItemType.Bool, public: false, appTypes: [AppType.Desktop] },
 		editor: { value: '', type: SettingItemType.String, subType: 'file_path_and_args', storage: SettingStorage.File, isGlobal: true, public: true, appTypes: [AppType.Cli, AppType.Desktop], label: () => _('Text editor command'), description: () => _('The editor command (may include arguments) that will be used to open a note. If none is provided it will try to auto-detect the default editor.') },
 		'export.pdfPageSize': { value: 'A4', type: SettingItemType.String, advanced: true, storage: SettingStorage.File, isGlobal: true, isEnum: true, public: true, appTypes: [AppType.Desktop], label: () => _('Page size for PDF export'), options: () => {
 			return {
@@ -1522,7 +1543,7 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 		},
 
 		'editor.inlineRendering': {
-			value: false,
+			value: true,
 			type: SettingItemType.Bool,
 			public: true,
 			appTypes: [AppType.Desktop, AppType.Mobile],
@@ -1532,7 +1553,7 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 			storage: SettingStorage.File,
 		},
 		'editor.imageRendering': {
-			value: false,
+			value: true,
 			type: SettingItemType.Bool,
 			public: true,
 			appTypes: [AppType.Desktop, AppType.Mobile],
@@ -1595,6 +1616,13 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 			description: () => 'Enable the the legacy Markdown editor. Some plugins require this editor to function. However, it has accessibility issues and other plugins will not work.',
 			storage: SettingStorage.File,
 			isGlobal: true,
+		},
+
+		// Used to keep track of editor setting migrations that require prompting the user.
+		'editor.migration': {
+			public: false,
+			value: 0,
+			type: SettingItemType.Int,
 		},
 
 		'linking.extraAllowedExtensions': {
@@ -1959,7 +1987,8 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 		},
 
 		'survey.webClientEval2025.progress': {
-			value: SurveyProgress.NotStarted,
+			// Ended in February 2026. See https://github.com/laurent22/joplin/pull/14497.
+			value: SurveyProgress.Dismissed,
 			type: SettingItemType.Int,
 			public: false,
 			isEnum: true,
@@ -2068,6 +2097,17 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 			label: () => _('Keep notes in the trash for'),
 			storage: SettingStorage.File,
 			isGlobal: false,
+		},
+
+		'notes.showNoteLinkIcon': {
+			value: true,
+			type: SettingItemType.Bool,
+			storage: SettingStorage.File,
+			section: 'note',
+			public: true,
+			isGlobal: true,
+			label: () => _('Show Joplin icon for note links'),
+			appTypes: [AppType.Desktop, AppType.Mobile],
 		},
 	} satisfies Record<string, SettingItem>;
 

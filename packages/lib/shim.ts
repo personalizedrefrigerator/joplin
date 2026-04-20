@@ -34,7 +34,7 @@ export interface Keytar {
 	deletePassword(key: string, client: string): Promise<void>;
 }
 
-interface FetchOptions {
+export interface FetchOptions {
 	method?: string;
 	headers?: Record<string, string>;
 	body?: string;
@@ -491,7 +491,7 @@ const shim = {
 	},
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	writeImageToFile: (_image: any, _format: any, _filePath: string): void => {
+	writeImageToFile: (_image: any, _format: any, _filePath: string): Promise<void> => {
 		throw new Error('Not implemented');
 	},
 

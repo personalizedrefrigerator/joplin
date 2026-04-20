@@ -39,6 +39,7 @@ describe('createJob', () => {
 			sendToQueue: (data: JobData) => queue.send(data),
 			imageMaxDimension: 400,
 			randomName: 'test_file_resized-1',
+			imagesFolder: './images',
 		};
 		const result = await createJob(requirements);
 		const job = await queue.fetch();
@@ -58,9 +59,10 @@ describe('createJob', () => {
 			sendToQueue: (data: JobData) => queue.send(data),
 			imageMaxDimension: 400,
 			randomName: 'test_file_resized-2',
+			imagesFolder: './images',
 		};
 
-		expect(async () => createJob(requirements)).rejects.toThrow();
+		await expect(createJob(requirements)).rejects.toThrow();
 
 		const job = await queue.fetch();
 		expect(job).toBeNull();
@@ -78,6 +80,7 @@ describe('createJob', () => {
 			sendToQueue: (data: JobData) => queue.send(data),
 			imageMaxDimension: 400,
 			randomName: 'test_file_resized-3',
+			imagesFolder: './images',
 		};
 
 		await createJob(requirements);

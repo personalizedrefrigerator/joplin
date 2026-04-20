@@ -245,12 +245,16 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 			titleContainerWidth: 0,
 		};
 
-		const initialCursorLocation = NotePositionService.instance().getCursorPosition(props.noteId, defaultWindowId).markdown;
-		if (initialCursorLocation) {
-			this.selection = { start: initialCursorLocation, end: initialCursorLocation };
-		}
 		const initialScroll = NotePositionService.instance().getScrollPercent(props.noteId, defaultWindowId);
-		this.lastBodyScroll = initialScroll;
+		const initialCursorLocation = NotePositionService.instance().getCursorPosition(props.noteId, defaultWindowId).markdown;
+		// Ignore the initial scroll and cursor location when there's a note hash. The editor/viewer should jump to
+		// the hash, rather than the last position.
+		if (!props.noteHash) {
+			if (initialCursorLocation) {
+				this.selection = { start: initialCursorLocation, end: initialCursorLocation };
+			}
+			this.lastBodyScroll = initialScroll;
+		}
 
 		this.titleTextFieldRef = React.createRef();
 
@@ -708,12 +712,16 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 			});
 		}
 
-		if (this.props.visibleEditorPluginIds !== prevProps.visibleEditorPluginIds || this.props.editorNoteReloadTimeRequest !== prevProps.editorNoteReloadTimeRequest) {
+		const editorPluginIdsChanged = this.props.visibleEditorPluginIds !== prevProps.visibleEditorPluginIds;
+		if (editorPluginIdsChanged || this.props.editorNoteReloadTimeRequest !== prevProps.editorNoteReloadTimeRequest) {
 			const { editorPlugin } = getShownPluginEditorView(this.props.plugins, this.props.windowId);
-			if (!editorPlugin && this.props.editorNoteReloadTimeRequest > this.state.noteLastLoadTime) {
-				void shared.reloadNote(this);
-				this.refreshKey = this.props.editorNoteReloadTimeRequest;
+			const explicitReloadRequired = !editorPlugin && this.props.editorNoteReloadTimeRequest > this.state.noteLastLoadTime;
 
+			if (explicitReloadRequired) {
+				void this.reloadNoteAndUpdateRefreshKey();
+			}
+
+			if (explicitReloadRequired || (editorPlugin && editorPluginIdsChanged)) {
 				// Clear the undo / redo state, as undo / redo steps wont be in sync with the current content after the note editor has been refreshed
 				if (!this.useEditorBeta()) {
 					void this.undoRedoService_.reset();
@@ -763,6 +771,11 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 			type: 'SET_NOTE_EDITOR_VISIBLE',
 			visible: false,
 		});
+	}
+
+	private async reloadNoteAndUpdateRefreshKey() {
+		await shared.reloadNote(this);
+		this.refreshKey = this.props.editorNoteReloadTimeRequest;
 	}
 
 	private title_changeText(text: string) {
@@ -929,7 +942,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 		}
 
 		const localFilePath = Platform.select({
-			ios: decodeURI(pickerResponse.uri),
+			ios: decodeURIComponent(pickerResponse.uri),
 			default: pickerResponse.uri,
 		});
 
@@ -1665,9 +1678,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 					!note || !note.body.trim() ? null : (
 						<NoteBodyViewer
 							style={this.styles().noteBodyViewer}
-							// Extra bottom padding to make it possible to scroll past the
-							// action button (so that it doesn't overlap the text)
-							paddingBottom={150}
+							paddingBottom={0}
 							noteBody={note.body}
 							noteMarkupLanguage={note.markup_language}
 							noteResources={this.state.noteResources}
@@ -1723,7 +1734,6 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 					bodyComponent = <NoteEditor
 						ref={this.editorRef}
 						toolbarEnabled={this.props.toolbarEnabled && !increaseSpaceForEditor}
-						themeId={this.props.themeId}
 						noteId={this.props.noteId}
 						noteHash={this.props.noteHash}
 						initialText={note.body}
@@ -1798,6 +1808,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 					multiline={this.state.multiline}
 					text={note.title}
 					updateState={textWrapCalculator_updateState}
+					readOnly={false}
 				/>
 				{isTodo && <Checkbox style={this.styles().checkbox} checked={!!Number(note.todo_completed)} onChange={this.todoCheckbox_change} />}
 				<TextInput
@@ -1845,7 +1856,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 		const { editorPlugin: activeEditorPlugin } = getActivePluginEditorView(this.props.plugins, this.props.windowId);
 
 		let viewEditToggleMode = this.state.mode === 'edit' ? ViewToggleButtonMode.ShowViewer : ViewToggleButtonMode.ShowEditor;
-		if (!this.state.note || this.state.note.deleted_time > 0) {
+		if (!this.state.note || this.state.note.deleted_time > 0 || editorView) {
 			viewEditToggleMode = ViewToggleButtonMode.Hidden;
 		}
 
