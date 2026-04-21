@@ -1,3 +1,5 @@
+use std::fmt::Debug;
+
 use crate::one::property_set::{
     ink_container, ink_data_node, ink_stroke_node, stroke_properties_node,
 };
@@ -66,7 +68,7 @@ impl Ink {
 /// An ink stroke.
 #[derive(Clone, Debug)]
 pub struct InkStroke {
-    pub(crate) path: Vec<InkPoint>,
+    pub(crate) path: InkPoints,
     pub(crate) pen_tip: Option<u8>,
     pub(crate) transparency: Option<u8>,
     pub(crate) height: f32,
@@ -74,10 +76,34 @@ pub struct InkStroke {
     pub(crate) color: Option<u32>,
 }
 
+#[derive(Clone)]
+pub(crate) struct InkPoints(Vec<InkPoint>);
+
+// Implement a custom output format to simplify inspecting .one files with a large amount of ink
+impl Debug for InkPoints {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "[")?;
+
+        let mut is_first = true;
+        for point in &self.0 {
+            if !is_first {
+                write!(f, ", ")?;
+            } else {
+                is_first = false;
+            }
+
+            write!(f, "({}, {})", point.x, point.y)?;
+        }
+
+        write!(f, "]")?;
+        Ok(())
+    }
+}
+
 impl InkStroke {
     /// The ink stroke's path.
     pub fn path(&self) -> &[InkPoint] {
-        &self.path
+        &self.path.0
     }
 
     /// The pen tip used for the ink path.
@@ -330,7 +356,7 @@ fn parse_ink_stroke(
     let path = parse_ink_path(data.path, &props, scale_x, scale_y)?;
 
     Ok(InkStroke {
-        path,
+        path: InkPoints(path),
         pen_tip: props.pen_tip,
         transparency: props.transparency,
         height: props.ink_height,
