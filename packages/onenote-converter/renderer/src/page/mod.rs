@@ -22,6 +22,7 @@ pub(crate) struct Renderer<'a> {
     in_list: bool,
     global_styles: HashMap<String, StyleSet>,
     global_classes: HashSet<String>,
+    pub(crate) positioning_stack: PositioningContext,
 }
 
 impl<'a> Renderer<'a> {
@@ -32,6 +33,7 @@ impl<'a> Renderer<'a> {
             in_list: false,
             global_styles: HashMap::new(),
             global_classes: HashSet::new(),
+            positioning_stack: PositioningContext { offset_x: 0., offset_y: 0. },
         }
     }
 
@@ -91,7 +93,7 @@ impl<'a> Renderer<'a> {
 
     fn render_page_contents(&mut self, contents: &[PageContent]) -> Result<String> {
         let mut result = vec![];
-        let mut ink_builder = InkBuilder::new(false);
+        let mut ink_builder = InkBuilder::new(false, self.positioning_stack.clone());
 
         for content in contents {
             if !matches!(content, PageContent::Ink(_)) {
@@ -109,7 +111,7 @@ impl<'a> Renderer<'a> {
                     result.push(self.render_embedded_file(file)?);
                 }
                 PageContent::Ink(ink) => {
-                    ink_builder.push(ink, None);
+                    ink_builder.push(ink);
                 }
                 PageContent::Unknown => {}
             }
@@ -117,5 +119,30 @@ impl<'a> Renderer<'a> {
         result.push(ink_builder.finish());
 
         Ok(result.join(""))
+    }
+
+    fn with_positioning_context<F, R>(&mut self, f: F, stack: PositioningContext) -> R
+    where F: FnOnce(&mut Self)->R {
+        let old_stack = std::mem::replace(&mut self.positioning_stack, stack);
+
+        let result = f(self);
+
+        self.positioning_stack = old_stack;
+        result
+    }
+}
+
+#[derive(Clone, Debug)]
+pub(crate) struct PositioningContext {
+    pub(crate) offset_x: f32,
+    pub(crate) offset_y: f32,
+}
+
+impl PositioningContext {
+    pub(crate) fn translated(&self, translation_x: f32, translation_y: f32) -> Self {
+        Self {
+            offset_x: self.offset_x + translation_x,
+            offset_y: self.offset_y + translation_y,
+        }
     }
 }

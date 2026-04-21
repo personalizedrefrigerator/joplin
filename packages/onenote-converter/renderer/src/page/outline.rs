@@ -8,8 +8,7 @@ impl<'a> Renderer<'a> {
         let mut attrs = AttributeSet::new();
         let mut styles = StyleSet::new();
         let mut contents = String::new();
-
-        attrs.set("class", "container-outline".to_string());
+        let mut class_names = vec![ "container-outline" ];
 
         if let Some(width) = outline.layout_max_width() {
             let outline_width = if outline.is_layout_size_set_by_user() {
@@ -23,6 +22,7 @@ impl<'a> Renderer<'a> {
 
         if outline.offset_horizontal().is_some() || outline.offset_vertical().is_some() {
             styles.set("position", "absolute".to_string());
+            class_names.push("-positioned");
         }
 
         if let Some(offset) = outline.offset_horizontal() {
@@ -37,13 +37,21 @@ impl<'a> Renderer<'a> {
             attrs.set("style", styles.to_string());
         }
 
+        attrs.set("class", class_names.join(", "));
+
         contents.push_str(&format!("<div {}>", attrs));
-        contents.push_str(&self.render_outline_items(
-            outline.items(),
-            0,
-            outline.child_level(),
-            outline.indents(),
-        )?);
+        self.with_positioning_context(|renderer| -> Result<()> {
+            contents.push_str(&renderer.render_outline_items(
+                outline.items(),
+                0,
+                outline.child_level(),
+                outline.indents(),
+            )?);
+            Ok(())
+        }, self.positioning_stack.translated(
+            outline.offset_horizontal().unwrap_or_default() * 48.,
+            outline.offset_vertical().unwrap_or_default() * 48.,
+        ))?;
         contents.push_str("</div>");
 
         Ok(contents)
@@ -92,7 +100,10 @@ impl<'a> Renderer<'a> {
 
         self.in_list = is_list;
 
-        contents.push_str(&self.render_contents(element.contents())?);
+        self.with_positioning_context(|renderer| -> Result<()> {
+            contents.push_str(&renderer.render_contents(element.contents())?);
+            Ok(())
+        }, self.positioning_stack.translated(indent_width * 48., 0.))?;
 
         self.in_list = false;
 

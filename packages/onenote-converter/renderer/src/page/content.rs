@@ -7,7 +7,7 @@ use parser::contents::Content;
 impl<'a> Renderer<'a> {
     pub(crate) fn render_contents(&mut self, contents: &[Content]) -> Result<String> {
         let mut result = vec![];
-        let mut ink_builder = InkBuilder::new(false);
+        let mut ink_builder = InkBuilder::new(false, self.positioning_stack.clone());
 
         for content in contents {
             if !matches!(content, Content::Ink(_)) {
@@ -28,7 +28,7 @@ impl<'a> Renderer<'a> {
                     result.push(self.render_table(table)?);
                 }
                 Content::Ink(ink) => {
-                    ink_builder.push(ink, None);
+                    ink_builder.push(ink);
                 }
                 Content::Unknown => {
                     warn!("Page with unknown content");

@@ -68,6 +68,7 @@ impl Ink {
 /// An ink stroke.
 #[derive(Clone, Debug)]
 pub struct InkStroke {
+    pub(crate) id: ExGuid,
     pub(crate) path: InkPoints,
     pub(crate) pen_tip: Option<u8>,
     pub(crate) transparency: Option<u8>,
@@ -101,6 +102,11 @@ impl Debug for InkPoints {
 }
 
 impl InkStroke {
+    /// The ID associated with the stroke
+    pub fn id(&self) -> &ExGuid {
+        &self.id
+    }
+
     /// The ink stroke's path.
     pub fn path(&self) -> &[InkPoint] {
         &self.path.0
@@ -207,6 +213,7 @@ impl InkBoundingBox {
         }
     }
 
+    /// Creates a new bounding box by combining this with another
     fn union(&self, other: Option<InkBoundingBox>) -> InkBoundingBox {
         let Some(other) = other else {
             return *self;
@@ -356,6 +363,7 @@ fn parse_ink_stroke(
     let path = parse_ink_path(data.path, &props, scale_x, scale_y)?;
 
     Ok(InkStroke {
+        id: ink_stroke_id,
         path: InkPoints(path),
         pen_tip: props.pen_tip,
         transparency: props.transparency,

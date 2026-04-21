@@ -50,12 +50,12 @@ impl<'a> Renderer<'a> {
     fn parse_content(&mut self, data: &RichText) -> Result<String> {
         if !data.embedded_objects().is_empty() {
             let mut result = vec![];
-            let mut ink_builder = InkBuilder::new(true);
+            let mut ink_builder = InkBuilder::new(true, self.positioning_stack.clone());
 
             for object in data.embedded_objects() {
                 match object {
                     EmbeddedObject::Ink(container) => {
-                        ink_builder.push(container.ink(), container.bounding_box());
+                        ink_builder.push(container.ink());
                     }
                     EmbeddedObject::InkSpace(space) => {
                         result.push(ink_builder.finish());

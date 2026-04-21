@@ -1,8 +1,8 @@
 use core::f32;
 
-use crate::utils::{AttributeSet, StyleSet};
+use crate::{page::PositioningContext, utils::{AttributeSet, StyleSet}};
 use itertools::Itertools;
-use parser::contents::{Ink, InkBoundingBox, InkPoint, InkStroke};
+use parser::contents::{Ink, InkPoint, InkStroke};
 
 type Vec2 = (f32, f32);
 
@@ -16,16 +16,18 @@ struct InkPart {
 
 pub(crate) struct InkBuilder {
     parts: Vec<InkPart>,
+    container_positioning: PositioningContext,
     embedded: bool,
 }
 
 impl InkBuilder {
     const SVG_SCALING_FACTOR: f32 = 2540.0 / 96.0;
 
-    pub(crate) fn new(embedded: bool) -> Self {
+    pub(crate) fn new(embedded: bool, positioning_stack: PositioningContext) -> Self {
         Self {
             parts: vec![],
             embedded,
+            container_positioning: positioning_stack,
         }
     }
 
@@ -33,10 +35,16 @@ impl InkBuilder {
         self.parts.clear();
     }
 
-    pub(crate) fn push(&mut self, ink: &Ink, display_bounding_box: Option<&InkBoundingBox>) {
+    pub(crate) fn push(&mut self, ink: &Ink) {
+        self.push_rec(ink, (0., 0.));
+    }
+
+    pub(crate) fn push_rec(&mut self, ink: &Ink, offset_px: Vec2) {
         let children = ink.child_groups();
         for child in children {
-            self.push(child, ink.bounding_box().as_ref().or(display_bounding_box));
+            let offset_x = self.container_positioning.offset_x + child.offset_horizontal().unwrap_or_default() * 48.;
+            let offset_y = self.container_positioning.offset_y + child.offset_vertical().unwrap_or_default() * 48.;
+            self.push_rec(child, (offset_x, offset_y));
         }
 
         let strokes = ink.ink_strokes();
@@ -55,11 +63,6 @@ impl InkBuilder {
             .filter(|_| !self.embedded)
             .unwrap_or_default();
 
-        let display_bounding_box = ink
-            .bounding_box()
-            .or_else(|| display_bounding_box.map(|bb| bb.scale(Self::SVG_SCALING_FACTOR)))
-            .filter(|_| self.embedded);
-
         let (x_min, width) = get_boundary(strokes, |p| p.x());
         let (y_min, height) = get_boundary(strokes, |p| p.y());
 
@@ -72,20 +75,20 @@ impl InkBuilder {
         let height_px = (height / (Self::SVG_SCALING_FACTOR)).ceil();
         let width_px = (width / (Self::SVG_SCALING_FACTOR)).ceil();
 
-        let display_y_min = display_bounding_box.map(|bb| bb.y()).unwrap_or_default();
-        let display_x_min = display_bounding_box.map(|bb| bb.x()).unwrap_or_default();
+        let left_px = x_min / Self::SVG_SCALING_FACTOR + offset_horizontal * 48.0 + offset_px.0;
+        let top_px = y_min / Self::SVG_SCALING_FACTOR + offset_vertical * 48.0 + offset_px.1;
 
-        let top_px = (y_min - display_y_min) / Self::SVG_SCALING_FACTOR + offset_vertical * 48.0;
-        let left_px = (x_min - display_x_min) / Self::SVG_SCALING_FACTOR + offset_horizontal * 48.0;
-
+        // Transform everything into pixel units:
         let translate = (
             left_px * Self::SVG_SCALING_FACTOR - x_min,
             top_px * Self::SVG_SCALING_FACTOR - y_min,
         );
         let scale = 1. / Self::SVG_SCALING_FACTOR;
         let path = self.render_ink_path(strokes, scale, translate);
+
         self.parts.push(InkPart {
             content: path,
+
             size_px: (width_px, height_px),
             offset_px: (left_px, top_px),
         })
@@ -134,8 +137,10 @@ impl InkBuilder {
 
         let mut styles = StyleSet::new();
         styles.set("position", "absolute".into());
-        styles.set("left", format!("{offset_x}px"));
-        styles.set("top", format!("{offset_y}px"));
+        let left = offset_x - self.container_positioning.offset_x;
+        styles.set("left", format!("{left}px"));
+        let top = offset_y - self.container_positioning.offset_y;
+        styles.set("top", format!("{top}px"));
         styles.set("width", format!("{width}px"));
         styles.set("height", format!("{height}px"));
         // Allow selecting text behind the ink:
@@ -206,6 +211,12 @@ impl InkBuilder {
         );
 
         attrs.set("fill", "none".to_string());
+
+        // For debugging
+        attrs.set(
+            "data-stroke-ids",
+            strokes.iter().map(|s| format!("{:?}", s.id())).join(", ")
+        );
 
         format!("<path {} />", attrs)
     }
