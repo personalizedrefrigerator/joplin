@@ -122,6 +122,27 @@ fn convert_ink() {
 }
 
 #[test]
+fn convert_ink_from_web() {
+    let TestResources {
+        output_dir,
+        test_data_dir,
+    } = setup("web_ink");
+
+    convert(
+        &test_data_dir.join("web_ink.one").to_string_lossy(),
+        &output_dir.to_string_lossy(),
+        &test_data_dir.to_string_lossy(),
+    )
+    .unwrap();
+
+    assert!(output_dir.join("Test section.html").exists());
+    let test_note = output_dir
+        .join("Test section")
+        .join("Test note.html");
+    assert!(test_note.exists());
+}
+
+#[test]
 fn convert_printout() {
     let TestResources {
         output_dir,

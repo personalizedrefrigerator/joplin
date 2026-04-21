@@ -37,7 +37,7 @@ impl<'a> Renderer<'a> {
             attrs.set("style", styles.to_string());
         }
 
-        attrs.set("class", class_names.join(", "));
+        attrs.set("class", class_names.join(" "));
 
         contents.push_str(&format!("<div {}>", attrs));
         self.with_positioning_context(|renderer| -> Result<()> {
