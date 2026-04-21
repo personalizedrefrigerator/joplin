@@ -1800,6 +1800,12 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 						this.setState({ titleContainerWidth: width });
 					}
 				}}
+
+				// Making this focusable works around a tab ordering bug on Android
+				// See https://github.com/laurent22/joplin/issues/14548
+				accessible={Platform.OS === 'android'}
+				// Since the group is focusable, it also needs a label (otherwise TalkBack reads "unlabelled"):
+				aria-label={_('Title')}
 			>
 				<TextWrapCalculator
 					textCompStyle={this.styles().titleTextInput}
