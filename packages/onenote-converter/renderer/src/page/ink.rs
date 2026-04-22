@@ -69,8 +69,16 @@ impl InkBuilder {
         let width = width + stroke_strength + Self::SVG_SCALING_FACTOR;
         let height = height + stroke_strength + Self::SVG_SCALING_FACTOR;
 
-        let height_px = (height / (Self::SVG_SCALING_FACTOR)).ceil();
-        let width_px = (width / (Self::SVG_SCALING_FACTOR)).ceil();
+        let mut height_px = (height / (Self::SVG_SCALING_FACTOR)).ceil();
+        let mut width_px = (width / (Self::SVG_SCALING_FACTOR)).ceil();
+
+        // Use the ink's bounding box for width/height if larger. Inline ink relies on the preceeding
+        // ink having a specific size for correct positioning. Using the width_px/height_px of the actual content
+        // often results in a too-small bounding box and incorrectly-positioned ink.
+        if let Some(ink_bbox) = ink.bounding_box() {
+            width_px = width_px.max(ink_bbox.width() / Self::SVG_SCALING_FACTOR);
+            height_px = height_px.max(ink_bbox.height() / Self::SVG_SCALING_FACTOR);
+        }
 
         let display_y_min = display_bounding_box.map(|bb| bb.y()).unwrap_or_default();
         let display_x_min = display_bounding_box.map(|bb| bb.x()).unwrap_or_default();
