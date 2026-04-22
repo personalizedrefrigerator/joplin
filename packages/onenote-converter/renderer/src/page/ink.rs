@@ -68,7 +68,7 @@ impl InkBuilder {
 
         let width = width + stroke_strength + Self::SVG_SCALING_FACTOR;
         let height = height + stroke_strength + Self::SVG_SCALING_FACTOR;
-
+        
         let height_px = (height / (Self::SVG_SCALING_FACTOR)).ceil();
         let width_px = (width / (Self::SVG_SCALING_FACTOR)).ceil();
 
@@ -77,17 +77,24 @@ impl InkBuilder {
 
         let top_px = (y_min - display_y_min) / Self::SVG_SCALING_FACTOR + offset_vertical * 48.0;
         let left_px = (x_min - display_x_min) / Self::SVG_SCALING_FACTOR + offset_horizontal * 48.0;
+        
+        let view_box_ink = (x_min, y_min, width, height);
+        let view_box_display = if let Some(bounding_box) = display_bounding_box {
+            (left_px, top_px, bounding_box.width() / Self::SVG_SCALING_FACTOR, bounding_box.height() / Self::SVG_SCALING_FACTOR)
+        } else {
+            (left_px, top_px, width_px, height_px)
+        };
 
+        let scale = (view_box_display.2 / view_box_ink.2, view_box_display.3 / view_box_ink.3);
         let translate = (
-            left_px * Self::SVG_SCALING_FACTOR - x_min,
-            top_px * Self::SVG_SCALING_FACTOR - y_min,
+            view_box_display.0 - view_box_ink.0 * scale.0,
+            view_box_display.1 - view_box_ink.1 * scale.1,
         );
-        let scale = 1. / Self::SVG_SCALING_FACTOR;
         let path = self.render_ink_path(strokes, scale, translate);
         self.parts.push(InkPart {
             content: path,
-            size_px: (width_px, height_px),
-            offset_px: (left_px, top_px),
+            size_px: (view_box_display.2, view_box_display.3),
+            offset_px: (view_box_display.0, view_box_display.1),
         })
     }
 
@@ -157,7 +164,7 @@ impl InkBuilder {
         }
     }
 
-    fn render_ink_path(&self, strokes: &[InkStroke], scale: f32, translate: Vec2) -> String {
+    fn render_ink_path(&self, strokes: &[InkStroke], scale: Vec2, translate: Vec2) -> String {
         if strokes.is_empty() {
             return "".into();
         }
@@ -193,7 +200,7 @@ impl InkBuilder {
         };
         attrs.set("stroke", color);
 
-        attrs.set("stroke-width", (stroke.width() * scale).round().to_string());
+        attrs.set("stroke-width", (stroke.width() * (scale.0 + scale.1) / 2.).round().to_string());
 
         let pen_type = stroke.pen_tip().unwrap_or_default();
         attrs.set(
@@ -210,15 +217,15 @@ impl InkBuilder {
         format!("<path {} />", attrs)
     }
 
-    fn render_ink_path_points(&self, stroke: &InkStroke, scale: f32, translate: Vec2) -> String {
+    fn render_ink_path_points(&self, stroke: &InkStroke, scale: Vec2, translate: Vec2) -> String {
         let path = stroke.path();
         if path.is_empty() {
             return "".into();
         }
 
         let display_point = |p: &InkPoint| -> String {
-            let x = p.x() * scale;
-            let y = p.y() * scale;
+            let x = p.x() * scale.0;
+            let y = p.y() * scale.1;
             format!("{} {}", round_svg_value(x), round_svg_value(y))
         };
 
@@ -229,8 +236,8 @@ impl InkBuilder {
             path.push("0 0".to_string());
         }
 
-        let offset_x = ((start.x() + translate.0) * scale).floor();
-        let offset_y = ((start.y() + translate.1) * scale).floor();
+        let offset_x = (start.x() * scale.0 + translate.0).floor();
+        let offset_y = (start.y() * scale.1 + translate.1).floor();
 
         format!("M {} {} l {}", offset_x, offset_y, path.join(" "))
     }
