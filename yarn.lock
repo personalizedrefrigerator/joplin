@@ -12809,7 +12809,7 @@ __metadata:
     "@types/node": "npm:18.19.130"
     "@types/react": "npm:19.1.10"
     "@types/react-redux": "npm:7.1.34"
-    "@types/serviceworker": "npm:0.0.178"
+    "@types/serviceworker": "npm:0.0.179"
     "@types/tar-stream": "npm:3.1.4"
     assert-browserify: "npm:2.0.0"
     babel-jest: "npm:29.7.0"
@@ -12836,7 +12836,7 @@ __metadata:
     jetifier: "npm:2.0.0"
     js-draw: "npm:1.33.0"
     jsdom: "npm:26.1.0"
-    lodash: "npm:4.17.21"
+    lodash: "npm:4.17.23"
     md5: "npm:2.3.0"
     nodemon: "npm:3.1.11"
     path-browserify: "npm:1.0.1"
@@ -13375,7 +13375,7 @@ __metadata:
     relative: "npm:3.0.2"
     request: "npm:2.88.2"
     rss: "npm:1.2.2"
-    sass: "npm:1.97.2"
+    sass: "npm:1.97.3"
     sharp: "npm:0.34.5"
     source-map-support: "npm:0.5.21"
     sqlite3: "npm:5.1.6"
@@ -19768,10 +19768,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/serviceworker@npm:0.0.178":
-  version: 0.0.178
-  resolution: "@types/serviceworker@npm:0.0.178"
-  checksum: 10/0fec55b9919e8dc5fb028cd2dcf88db3ef2a442141fca5ef896a2687e16d0c2e1ad979dad4b337f1e61592900931bb7380bbaf789821b0289eccff3fb1606888
+"@types/serviceworker@npm:0.0.179":
+  version: 0.0.179
+  resolution: "@types/serviceworker@npm:0.0.179"
+  checksum: 10/cc52b6ffe19749f5420711db2a63d8097b0e9f81b70bc788a258817e401e6e11a1aee1dac35bb6874dd11f70c29e3258858ae7e57b1fe8e33cb94c59de302fc3
   languageName: node
   linkType: hard
 
@@ -40556,7 +40556,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lodash@npm:4.17.21, lodash@npm:^4.17.11, lodash@npm:^4.17.12, lodash@npm:^4.17.14, lodash@npm:^4.17.15, lodash@npm:^4.17.19, lodash@npm:^4.17.20, lodash@npm:^4.17.21, lodash@npm:^4.2.1, lodash@npm:^4.7.0":
+"lodash@npm:4.17.23":
+  version: 4.17.23
+  resolution: "lodash@npm:4.17.23"
+  checksum: 10/82504c88250f58da7a5a4289f57a4f759c44946c005dd232821c7688b5fcfbf4a6268f6a6cdde4b792c91edd2f3b5398c1d2a0998274432cff76def48735e233
+  languageName: node
+  linkType: hard
+
+"lodash@npm:^4.17.11, lodash@npm:^4.17.12, lodash@npm:^4.17.14, lodash@npm:^4.17.15, lodash@npm:^4.17.19, lodash@npm:^4.17.20, lodash@npm:^4.17.21, lodash@npm:^4.2.1, lodash@npm:^4.7.0":
   version: 4.17.21
   resolution: "lodash@npm:4.17.21"
   checksum: 10/c08619c038846ea6ac754abd6dd29d2568aa705feb69339e836dfa8d8b09abbb2f859371e86863eda41848221f9af43714491467b5b0299122431e202bb0c532
@@ -52378,9 +52385,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"sass@npm:1.97.2":
-  version: 1.97.2
-  resolution: "sass@npm:1.97.2"
+"sass@npm:1.97.3":
+  version: 1.97.3
+  resolution: "sass@npm:1.97.3"
   dependencies:
     "@parcel/watcher": "npm:^2.4.1"
     chokidar: "npm:^4.0.0"
@@ -52391,7 +52398,7 @@ __metadata:
       optional: true
   bin:
     sass: sass.js
-  checksum: 10/a6b27e6a75bc8eedf0ce941a86e996f4a477640dfd214ecdcee5e8d7dca054bb03070974690b7f988a99ea729983cd8ddcdbb887bd068c73fde2d0010d835064
+  checksum: 10/707ef8e525ed32d375e737346140d4b675f44de208df996c2df3407f5e62f3f38226ea1faf41a9fd4b068201e67b3a7e152b9e9c3b098daa847dd480c735f038
   languageName: node
   linkType: hard
 
