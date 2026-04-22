@@ -72,7 +72,7 @@ impl InkBuilder {
         let mut height_px = (height / (Self::SVG_SCALING_FACTOR)).ceil();
         let mut width_px = (width / (Self::SVG_SCALING_FACTOR)).ceil();
 
-        // Use the ink's bounding box for width/height if larger. Inline ink relies on the preceeding
+        // Use the ink's bounding box for width/height if larger. Inline ink relies on the preceding
         // ink having a specific size for correct positioning. Using the width_px/height_px of the actual content
         // often results in a too-small bounding box and incorrectly-positioned ink.
         if let Some(ink_bbox) = ink.bounding_box() {
