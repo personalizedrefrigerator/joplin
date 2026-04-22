@@ -68,7 +68,7 @@ impl InkBuilder {
 
         let width = width + stroke_strength + Self::SVG_SCALING_FACTOR;
         let height = height + stroke_strength + Self::SVG_SCALING_FACTOR;
-        
+
         let height_px = (height / (Self::SVG_SCALING_FACTOR)).ceil();
         let width_px = (width / (Self::SVG_SCALING_FACTOR)).ceil();
 
@@ -77,15 +77,39 @@ impl InkBuilder {
 
         let top_px = (y_min - display_y_min) / Self::SVG_SCALING_FACTOR + offset_vertical * 48.0;
         let left_px = (x_min - display_x_min) / Self::SVG_SCALING_FACTOR + offset_horizontal * 48.0;
-        
+
         let view_box_ink = (x_min, y_min, width, height);
-        let view_box_display = if let Some(bounding_box) = display_bounding_box {
-            (left_px, top_px, bounding_box.width() / Self::SVG_SCALING_FACTOR, bounding_box.height() / Self::SVG_SCALING_FACTOR)
-        } else {
-            (left_px, top_px, width_px, height_px)
+        let view_box_display = {
+            let bbox = (left_px, top_px, width_px, height_px);
+
+            if let Some(bounding_box) = display_bounding_box
+                && self.embedded
+            {
+                // Adjust view_box_display so that it fits in the bounding_box
+                let width_2 = bounding_box.width() / Self::SVG_SCALING_FACTOR;
+                let height_2 = bounding_box.height() / Self::SVG_SCALING_FACTOR;
+                let scale = (width_2 / bbox.2).min(height_2 / bbox.3);
+                let width_3 = bbox.2 * scale;
+                let height_3 = bbox.3 * scale;
+                let delta_width = width_3 - bbox.2;
+                let delta_height = height_3 - bbox.3;
+
+                // Re-scale around the center
+                (
+                    bbox.0 - delta_width / 2.,
+                    bbox.1 - delta_height / 2.,
+                    width_3,
+                    height_3,
+                )
+            } else {
+                bbox
+            }
         };
 
-        let scale = (view_box_display.2 / view_box_ink.2, view_box_display.3 / view_box_ink.3);
+        let scale = (
+            view_box_display.2 / view_box_ink.2,
+            view_box_display.3 / view_box_ink.3,
+        );
         let translate = (
             view_box_display.0 - view_box_ink.0 * scale.0,
             view_box_display.1 - view_box_ink.1 * scale.1,
@@ -200,7 +224,12 @@ impl InkBuilder {
         };
         attrs.set("stroke", color);
 
-        attrs.set("stroke-width", (stroke.width() * (scale.0 + scale.1) / 2.).round().to_string());
+        attrs.set(
+            "stroke-width",
+            (stroke.width() / Self::SVG_SCALING_FACTOR)
+                .round()
+                .to_string(),
+        );
 
         let pen_type = stroke.pen_tip().unwrap_or_default();
         attrs.set(
