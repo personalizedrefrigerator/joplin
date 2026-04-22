@@ -101,7 +101,7 @@ impl InkBuilder {
         self.parts.push(InkPart {
             content: path,
             content_size_px: (width_px, height_px),
-            display_size_px: display_size_px,
+            display_size_px,
             offset_px: (left_px, top_px),
         })
     }
@@ -159,7 +159,10 @@ impl InkBuilder {
         let mut attrs = AttributeSet::new();
         attrs.set(
             "viewBox",
-            format!("{} {} {} {}", offset_x, offset_y, content_width, content_height),
+            format!(
+                "{} {} {} {}",
+                offset_x, offset_y, content_width, content_height
+            ),
         );
 
         let mut styles = StyleSet::new();
@@ -175,8 +178,8 @@ impl InkBuilder {
 
         if self.embedded {
             let mut span_styles = StyleSet::new();
-            span_styles.set("width", format!("{display_width}px"));
-            span_styles.set("height", format!("{display_height}px"));
+            span_styles.set("width", format!("{}px", round_svg_value(display_width)));
+            span_styles.set("height", format!("{}px", round_svg_value(display_height)));
 
             format!(
                 "<span style=\"{}\" class=\"ink-text\"><svg {}>{}</svg></span>",
