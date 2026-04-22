@@ -9,8 +9,11 @@ type Vec2 = (f32, f32);
 struct InkPart {
     content: String,
 
-    // In DOM coordinates
-    size_px: Vec2,
+    /// Size of the ink
+    content_size_px: Vec2,
+    /// Size of the element containing the ink
+    display_size_px: Vec2,
+    /// x/y position of the element containing the ink
     offset_px: Vec2,
 }
 
@@ -69,16 +72,19 @@ impl InkBuilder {
         let width = width + stroke_strength + Self::SVG_SCALING_FACTOR;
         let height = height + stroke_strength + Self::SVG_SCALING_FACTOR;
 
-        let mut height_px = (height / (Self::SVG_SCALING_FACTOR)).ceil();
-        let mut width_px = (width / (Self::SVG_SCALING_FACTOR)).ceil();
+        let height_px = (height / (Self::SVG_SCALING_FACTOR)).ceil();
+        let width_px = (width / (Self::SVG_SCALING_FACTOR)).ceil();
 
         // Use the ink's bounding box for width/height if larger. Inline ink relies on the preceding
         // ink having a specific size for correct positioning. Using the width_px/height_px of the actual content
-        // often results in a too-small bounding box and incorrectly-positioned ink.
-        if let Some(ink_bbox) = ink.bounding_box() {
-            width_px = width_px.max(ink_bbox.width() / Self::SVG_SCALING_FACTOR);
-            height_px = height_px.max(ink_bbox.height() / Self::SVG_SCALING_FACTOR);
-        }
+        // often results in an incorrect bounding box and incorrectly-positioned ink.
+        let display_size_px = if let Some(ink_bbox) = display_bounding_box {
+            let display_width = ink_bbox.width() / Self::SVG_SCALING_FACTOR;
+            let display_height = ink_bbox.height() / Self::SVG_SCALING_FACTOR;
+            (display_width, display_height)
+        } else {
+            (width_px, height_px)
+        };
 
         let display_y_min = display_bounding_box.map(|bb| bb.y()).unwrap_or_default();
         let display_x_min = display_bounding_box.map(|bb| bb.x()).unwrap_or_default();
@@ -94,7 +100,8 @@ impl InkBuilder {
         let path = self.render_ink_path(strokes, scale, translate);
         self.parts.push(InkPart {
             content: path,
-            size_px: (width_px, height_px),
+            content_size_px: (width_px, height_px),
+            display_size_px: display_size_px,
             offset_px: (left_px, top_px),
         })
     }
@@ -113,39 +120,54 @@ impl InkBuilder {
 
         let path = self.parts.iter().map(|part| &part.content).join("");
 
-        let (offset_x, offset_y, width, height) = {
-            let mut min_x = f32::INFINITY;
-            let mut max_x = f32::NEG_INFINITY;
-            let mut min_y = f32::INFINITY;
-            let mut max_y = f32::NEG_INFINITY;
+        let (offset_x, offset_y, content_width, content_height, display_width, display_height) = {
+            let mut min_content = (f32::INFINITY, f32::INFINITY);
+            let mut max_content = (f32::NEG_INFINITY, f32::NEG_INFINITY);
+            let mut max_display = (f32::NEG_INFINITY, f32::NEG_INFINITY);
 
             for item in self.parts.iter() {
-                min_x = min_x.min(item.offset_px.0);
-                min_y = min_y.min(item.offset_px.1);
-                max_x = max_x.max(item.offset_px.0 + item.size_px.0);
-                max_y = max_y.max(item.offset_px.1 + item.size_px.1);
+                let offset = item.offset_px;
+
+                min_content.0 = min_content.0.min(offset.0);
+                min_content.1 = min_content.1.min(offset.1);
+                max_content.0 = max_content.0.max(offset.0 + item.content_size_px.0);
+                max_content.1 = max_content.1.max(offset.1 + item.content_size_px.1);
+                max_display.0 = max_display.0.max(offset.0 + item.display_size_px.0);
+                max_display.1 = max_display.1.max(offset.1 + item.display_size_px.1);
             }
 
-            (min_x, min_y, max_x - min_x, max_y - min_y)
+            let content_width = max_content.0 - min_content.0;
+            let content_height = max_content.1 - min_content.1;
+            let display_width = max_display.0 - min_content.0;
+            let display_height = max_display.1 - min_content.1;
+
+            (
+                min_content.0,
+                min_content.1,
+                content_width,
+                content_height,
+                display_width,
+                display_height,
+            )
         };
 
         let offset_x = round_svg_value(offset_x);
         let offset_y = round_svg_value(offset_y);
-        let width = round_svg_value(width);
-        let height = round_svg_value(height);
+        let content_width = round_svg_value(content_width);
+        let content_height = round_svg_value(content_height);
 
         let mut attrs = AttributeSet::new();
         attrs.set(
             "viewBox",
-            format!("{} {} {} {}", offset_x, offset_y, width, height),
+            format!("{} {} {} {}", offset_x, offset_y, content_width, content_height),
         );
 
         let mut styles = StyleSet::new();
         styles.set("position", "absolute".into());
         styles.set("left", format!("{offset_x}px"));
         styles.set("top", format!("{offset_y}px"));
-        styles.set("width", format!("{width}px"));
-        styles.set("height", format!("{height}px"));
+        styles.set("width", format!("{content_width}px"));
+        styles.set("height", format!("{content_height}px"));
         // Allow selecting text behind the ink:
         styles.set("pointer-events", "none".into());
 
@@ -153,8 +175,8 @@ impl InkBuilder {
 
         if self.embedded {
             let mut span_styles = StyleSet::new();
-            span_styles.set("width", format!("{width}px"));
-            span_styles.set("height", format!("{height}px"));
+            span_styles.set("width", format!("{display_width}px"));
+            span_styles.set("height", format!("{display_height}px"));
 
             format!(
                 "<span style=\"{}\" class=\"ink-text\"><svg {}>{}</svg></span>",
