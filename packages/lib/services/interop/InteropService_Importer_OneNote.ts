@@ -317,7 +317,9 @@ export default class InteropService_Importer_OneNote extends InteropService_Impo
 			return { svgs: [], changed: false };
 		}
 
-		const svgs: SvgXml[] = [];
+		// OneNote files can include a large number of duplicate SVGs. Avoid creating one resource
+		// per SVG:
+		const svgs = new Map<string, SvgXml>();
 
 		for (const svgNode of svgNodeList) {
 			const img = dom.createElement('img');
@@ -343,19 +345,25 @@ export default class InteropService_Importer_OneNote extends InteropService_Impo
 				img.alt = titleElement.textContent;
 			}
 
-			const title = `${titleGenerator()}.svg`;
-			img.setAttribute('src', `./${title}`);
+			const content = this.xmlSerializer.serializeToString(svgNode);
 
-			svgs.push({
-				title,
-				content: this.xmlSerializer.serializeToString(svgNode),
-			});
+			let title;
+			if (svgs.has(content)) {
+				title = svgs.get(content).title;
+			} else {
+				title = `${titleGenerator()}.svg`;
+				svgs.set(content, {
+					title,
+					content,
+				});
+			}
+			img.setAttribute('src', `./${title}`);
 
 			svgNode.replaceWith(img);
 		}
 
 		return {
-			svgs,
+			svgs: [...svgs.values()],
 			changed: true,
 		};
 	}
