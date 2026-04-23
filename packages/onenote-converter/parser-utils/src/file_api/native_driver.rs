@@ -92,6 +92,18 @@ impl FileHandle for BufReader<fs::File> {
     fn byte_length(&self) -> u64 {
         self.get_ref().metadata().map(|m| m.len()).unwrap_or(0)
     }
+
+    fn peek_u8(&mut self) -> ApiResult<Option<u8>> {
+        // The default peek_u8 implementation can be slow for buffered readers
+        // (it involves seeking, which may clear the buffer). Try to use the buffer,
+        // if possible:
+        let buffered_u8 = self.buffer().get(0);
+        if let Some(buffered_u8) = buffered_u8 {
+            Ok(Some(*buffered_u8))
+        } else {
+            self._peek_u8_default()
+        }
+    }
 }
 
 #[cfg(test)]

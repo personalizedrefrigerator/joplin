@@ -1,9 +1,29 @@
 use sanitize_filename::{Options as SanitizeOptions, sanitize_with_options};
-use std::io::{Read, Seek};
+use std::io::{Read, Seek, SeekFrom};
 
 pub type ApiResult<T> = std::result::Result<T, std::io::Error>;
+
 pub trait FileHandle: Read + Seek {
     fn byte_length(&self) -> u64;
+
+    fn peek_u8(&mut self) -> ApiResult<Option<u8>> {
+        self._peek_u8_default()
+    }
+
+    fn _peek_u8_default(&mut self) -> ApiResult<Option<u8>> {
+        let position = self.seek(SeekFrom::Current(0))?;
+
+        let mut buf = [0u8];
+        let read_result = self.read(&mut buf);
+
+        // Reset the original position
+        self.seek(SeekFrom::Start(position))?;
+
+        match read_result {
+            Ok(size) => Ok(if size < 1 { None } else { Some(buf[0]) }),
+            Err(error) => Err(error)?,
+        }
+    }
 }
 
 pub trait FileApiDriver: Send + Sync {
