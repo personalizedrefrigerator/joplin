@@ -44,12 +44,6 @@ const useDocument = (
 			setDoc(iframeElement?.contentWindow?.document);
 		} else if (mode === WindowMode.NewWindow) {
 			openedWindow = window.open('about:blank');
-
-			// Starting from Electron 41, secondary about:blank windows open in Quirks Mode, which breaks
-			// TinyMCE. As a workaround, use `document.write` to set the doctype (enabling standards mode):
-			openedWindow.document.write('<!DOCTYPE html><html><head></head><body></body></html>');
-			openedWindow.document.close();
-
 			setDoc(openedWindow.document);
 
 			// .onbeforeunload and .onclose events don't seem to fire when closed by a user -- rely on polling
