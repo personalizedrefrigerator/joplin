@@ -217,6 +217,7 @@
 		"ios-v13.6.4": true,
 		"v3.6.8": true,
 		"android-v3.6.16": true,
-		"android-v3.6.17": true
+		"android-v3.6.17": true,
+		"v3.6.10": true
 	}
 }
