@@ -19,6 +19,8 @@ pub(crate) fn parse(object: &Object) -> Result<Data> {
 
     let strokes =
         ObjectReference::parse_vec(PropertyType::InkStrokes, object)?.unwrap_or_else(|| {
+            // It seems to be possible for an InkDataNode to have no associated InkStrokes object.
+            // See https://discourse.joplinapp.org/t/error-importing-notes-from-onenote/49671
             log_warn!("ink data node {:?} has no strokes", object.id());
             vec![]
         });
