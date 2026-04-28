@@ -32,8 +32,8 @@ pub(crate) fn render(
         content,
         name: &html_entities(name),
         page_id_attr: &html_entities(page_id),
-        created_date_attr: &format!("{}", timestamps.created_time),
-        updated_date_attr: &format!("{}", timestamps.updated_time),
+        created_date_attr: &timestamps.created_time.to_string(),
+        updated_date_attr: &timestamps.updated_time.to_string(),
         global_styles: global_styles
             .iter()
             .sorted_by(|(a, _), (b, _)| Ord::cmp(a, b))
