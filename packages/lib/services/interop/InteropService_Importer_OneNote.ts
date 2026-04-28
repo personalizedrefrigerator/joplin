@@ -318,31 +318,31 @@ export default class InteropService_Importer_OneNote extends InteropService_Impo
 	}
 
 	private simplifyHtml_(dom: Document) {
+		const removeLeadingSpace = (element: Element) => {
+			const sibling = element.previousSibling;
+			if (sibling && sibling.nodeName === '#text' && sibling.textContent.trim() === '') {
+				sibling.remove();
+			}
+		};
+
 		const nodesToRemove = [
 			// <script> blocks that aren't marked with a specific type (e.g. application/tex).
 			{ selector: 'script:not([type])' },
-			// ID mappings (unused at this stage of the import process)
-			{ selector: 'meta[name="X-Original-Page-Id"]', trimSpaceBefore: true },
-			// Date mappings
-			{ selector: 'meta[name="X-Created-Time"]', trimSpaceBefore: true },
-			{ selector: 'meta[name="X-Updated-Time"]', trimSpaceBefore: true },
+
+			// ID mappings and other metadata (unused at this stage of the import process)
+			// Remove leading space to avoid unnecessary blank lines in test snapshots
+			{ selector: 'meta[name="X-Original-Page-Id"]', preprocess: removeLeadingSpace },
+			{ selector: 'meta[name="X-Created-Time"]', preprocess: removeLeadingSpace },
+			{ selector: 'meta[name="X-Updated-Time"]', preprocess: removeLeadingSpace },
 
 			// Empty iframes
 			{ selector: 'iframe[src=""]' },
 		];
 
-		const removeIfSpace = (node: ChildNode|undefined) => {
-			if (node && node.nodeName === '#text' && node.textContent.trim() === '') {
-				node.remove();
-			}
-		};
-
 		let changed = false;
-		for (const { selector, trimSpaceBefore } of nodesToRemove) {
+		for (const { selector, preprocess } of nodesToRemove) {
 			for (const element of dom.querySelectorAll(selector)) {
-				if (trimSpaceBefore) {
-					removeIfSpace(element.previousSibling);
-				}
+				preprocess?.(element);
 				element.remove();
 				changed = true;
 			}
