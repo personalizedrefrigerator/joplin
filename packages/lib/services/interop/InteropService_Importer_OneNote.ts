@@ -9,6 +9,7 @@ import Logger from '@joplin/utils/Logger';
 import { uuidgen } from '../../uuid';
 import shim from '../../shim';
 import { unique } from '../../ArrayUtils';
+import Note from '../../models/Note';
 
 const logger = Logger.create('InteropService_Importer_OneNote');
 
@@ -40,6 +41,14 @@ const setEnableUnresponsiveCheck = (enabled: boolean) => {
 		shim.electronBridge().setEnableUnresponsiveCheck(enabled);
 	}
 };
+
+interface NoteMetadata {
+	created: Date;
+	updated: Date;
+	// Saving the title in the metadata allows using special characters not supported by the file
+	// system in imported note titles (e.g. "/")
+	title: string;
+}
 
 // See onenote-converter README.md for more information
 export default class InteropService_Importer_OneNote extends InteropService_Importer_Base {
@@ -147,10 +156,10 @@ export default class InteropService_Importer_OneNote extends InteropService_Impo
 		}
 
 		logger.info('Postprocessing imported content...');
-		await this.postprocessGeneratedHtmlInFolder_(tempOutputDirectory);
+		const fileToMetadata = await this.postprocessGeneratedHtmlInFolder_(tempOutputDirectory);
 
 		logger.info('Importing HTML into Joplin');
-		const importer = new InteropService_Importer_Md();
+		const importer = new OneNoteHtmlImporter(fileToMetadata);
 		importer.setMetadata({ fileExtensions: ['html'] });
 		await importer.init(tempOutputDirectory, {
 			...this.options_,
@@ -207,6 +216,7 @@ export default class InteropService_Importer_OneNote extends InteropService_Impo
 	private async postprocessGeneratedHtmlInFolder_(baseFolder: string) {
 		const htmlFiles = await this.getValidHtmlFiles_(resolve(baseFolder));
 		const idMap = await this.buildIdMap_(baseFolder);
+		const fileToMetadata = new Map<string, NoteMetadata>();
 
 		for (const file of htmlFiles) {
 			const fileLocation = join(baseFolder, file.path);
@@ -217,8 +227,10 @@ export default class InteropService_Importer_OneNote extends InteropService_Impo
 				await shim.fsDriver().writeFile(fileLocation, html, 'utf-8');
 			}
 
-			await shim.fsDriver().setTimestamps(fileLocation, metadata.timestamps);
+			fileToMetadata.set(resolve(fileLocation), metadata);
 		}
+
+		return fileToMetadata;
 	}
 
 	// Public to allow testing
@@ -245,11 +257,11 @@ export default class InteropService_Importer_OneNote extends InteropService_Impo
 				return new Date(timeSeconds * 1000);
 			};
 
-			const timestamps = {
+			return {
 				created: parseTimestampMeta('meta[name="X-Created-Time"]'),
 				updated: parseTimestampMeta('meta[name="X-Updated-Time"]'),
+				title: dom.title,
 			};
-			return { timestamps };
 		};
 
 		// Parse metadata first, since the pipeline can adjust the HTML:
@@ -388,5 +400,39 @@ export default class InteropService_Importer_OneNote extends InteropService_Impo
 			svgs,
 			changed: true,
 		};
+	}
+}
+
+class OneNoteHtmlImporter extends InteropService_Importer_Md {
+	public constructor(private noteMetadata_: Map<string, NoteMetadata>) {
+		super();
+	}
+
+	public override async importFile(filePath: string, parentFolderId: string) {
+		try {
+			const resolvedPath = shim.fsDriver().resolve(filePath);
+			const note = await super.importFile(filePath, parentFolderId);
+
+			const metadata = this.noteMetadata_.get(resolvedPath);
+			if (metadata) {
+				const updatedNote = {
+					...note,
+
+					user_updated_time: metadata.updated.getTime(),
+					user_created_time: metadata.created.getTime(),
+					title: metadata.title,
+				};
+
+				const noteItem = await Note.save(updatedNote, { isNew: false, autoTimestamp: false });
+
+				this.importedNotes[resolvedPath] = noteItem;
+				return noteItem;
+			} else {
+				return note;
+			}
+		} catch (error) {
+			error.message = `On ${filePath}: ${error.message}`;
+			throw error;
+		}
 	}
 }

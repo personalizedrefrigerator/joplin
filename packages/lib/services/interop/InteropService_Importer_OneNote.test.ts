@@ -400,9 +400,11 @@ describe('InteropService_Importer_OneNote', () => {
 		expect(notesToMarkdownString(matchingNotes)).toMatchSnapshot();
 	});
 
-	it('should import updated timestamps', async () => {
+	it('should import updated/created timestamps', async () => {
 		const notes = await importNote(`${supportDir}/onenote/bold_and_italic.one`);
 		const matchingNotes = notes.filter(n => n.title === 'Bold & italic');
 		expect(matchingNotes[0].user_updated_time).toBe(new Date('2026-04-23T16:41:49.000Z').getTime());
+		// The created time can be greater than the updated time (due to rounding?)
+		expect(matchingNotes[0].user_created_time).toBe(new Date('2026-04-23T16:58:00.000Z').getTime());
 	});
 });
