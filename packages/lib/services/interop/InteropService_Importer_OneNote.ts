@@ -316,22 +316,31 @@ export default class InteropService_Importer_OneNote extends InteropService_Impo
 	}
 
 	private simplifyHtml_(dom: Document) {
-		const selectors = [
+		const nodesToRemove = [
 			// <script> blocks that aren't marked with a specific type (e.g. application/tex).
-			'script:not([type])',
+			{ selector: 'script:not([type])' },
 			// ID mappings (unused at this stage of the import process)
-			'meta[name="X-Original-Page-Id"]',
+			{ selector: 'meta[name="X-Original-Page-Id"]', trimSpaceBefore: true },
 			// Date mappings
-			'meta[name="X-Created-Time"]',
-			'meta[name="X-Updated-Time"]',
+			{ selector: 'meta[name="X-Created-Time"]', trimSpaceBefore: true },
+			{ selector: 'meta[name="X-Updated-Time"]', trimSpaceBefore: true },
 
 			// Empty iframes
-			'iframe[src=""]',
+			{ selector: 'iframe[src=""]' },
 		];
 
+		const removeIfSpace = (node: ChildNode|undefined) => {
+			if (node && node.nodeName === '#text' && node.textContent.trim() === '') {
+				node.remove();
+			}
+		};
+
 		let changed = false;
-		for (const selector of selectors) {
+		for (const { selector, trimSpaceBefore } of nodesToRemove) {
 			for (const element of dom.querySelectorAll(selector)) {
+				if (trimSpaceBefore) {
+					removeIfSpace(element.previousSibling);
+				}
 				element.remove();
 				changed = true;
 			}
