@@ -249,6 +249,8 @@ export default class InteropService_Importer_OneNote extends InteropService_Impo
 		const parseMetadata = (dom: Document) => {
 			const parseTimestampMeta = (selector: string) => {
 				const element = dom.querySelector<HTMLMetaElement>(selector);
+				// Not all files processed by the importer have timestamp metadata tags
+				// (e.g. files that contain lists of pages). Fall back:
 				if (!element) return new Date();
 
 				const timeSeconds = Number(element.content);
