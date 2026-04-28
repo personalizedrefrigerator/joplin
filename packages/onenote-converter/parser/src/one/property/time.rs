@@ -61,7 +61,8 @@ impl Timestamp {
 
 impl From<Timestamp> for time::UtcDateTime {
     fn from(value: Timestamp) -> Self {
-        // TODO: This is a lossy conversion, since the original is in nanoseconds
-        utc_datetime!(1601-01-01 0:00) + Duration::milliseconds((value.0 / 10 / 1000) as i64)
+        // TODO: This is a lossy conversion, since the original is in 100-nanosecond intervals
+        let microseconds = value.0 / 10;
+        utc_datetime!(1601-01-01 0:00) + Duration::milliseconds((microseconds / 1000) as i64)
     }
 }
