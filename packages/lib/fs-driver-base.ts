@@ -31,6 +31,7 @@ export interface ZipEntry {
 	name: string;
 }
 
+
 export default class FsDriverBase {
 
 	public async stat(_path: string): Promise<Stat> {
