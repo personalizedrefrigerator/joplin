@@ -211,11 +211,13 @@ export default class InteropService_Importer_OneNote extends InteropService_Impo
 		for (const file of htmlFiles) {
 			const fileLocation = join(baseFolder, file.path);
 			const originalHtml = await shim.fsDriver().readFile(fileLocation);
-			const { changed, html } = await this.postprocessGeneratedHtml_(originalHtml, dirname(fileLocation), idMap);
+			const { changed, html, metadata } = await this.postprocessGeneratedHtml_(originalHtml, dirname(fileLocation), idMap);
 
 			if (changed) {
 				await shim.fsDriver().writeFile(fileLocation, html, 'utf-8');
 			}
+
+			await shim.fsDriver().setTimestamps(fileLocation, metadata.timestamps);
 		}
 	}
 
@@ -232,6 +234,27 @@ export default class InteropService_Importer_OneNote extends InteropService_Impo
 		html = `${html} `.substring(0, html.length);
 		const dom = this.domParser.parseFromString(html, 'text/html');
 
+		const parseMetadata = (dom: Document) => {
+			const parseTimestampMeta = (selector: string) => {
+				const element = dom.querySelector<HTMLMetaElement>(selector);
+				if (!element) return new Date();
+
+				const timeSeconds = Number(element.content);
+				if (!isFinite(timeSeconds) || timeSeconds < 0) return new Date();
+
+				return new Date(timeSeconds * 1000);
+			};
+
+			const timestamps = {
+				created: parseTimestampMeta('meta[name="X-Created-Time"]'),
+				updated: parseTimestampMeta('meta[name="X-Updated-Time"]'),
+			};
+			return { timestamps };
+		};
+
+		// Parse metadata first, since the pipeline can adjust the HTML:
+		const metadata = parseMetadata(dom);
+
 		let changed = false;
 		for (const task of pipeline) {
 			const result = await task(dom, baseFolder);
@@ -243,7 +266,11 @@ export default class InteropService_Importer_OneNote extends InteropService_Impo
 			html = `<!DOCTYPE HTML>\n${dom.documentElement.outerHTML}`;
 		}
 
-		return { changed, html };
+		return {
+			changed,
+			html,
+			metadata,
+		};
 	}
 
 	private async getValidHtmlFiles_(baseFolder: string) {
@@ -282,6 +309,9 @@ export default class InteropService_Importer_OneNote extends InteropService_Impo
 			'script:not([type])',
 			// ID mappings (unused at this stage of the import process)
 			'meta[name="X-Original-Page-Id"]',
+			// Date mappings
+			'meta[name="X-Created-Time"]',
+			'meta[name="X-Updated-Time"]',
 
 			// Empty iframes
 			'iframe[src=""]',

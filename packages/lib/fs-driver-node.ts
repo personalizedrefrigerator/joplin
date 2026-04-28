@@ -1,5 +1,5 @@
 import AdmZip = require('adm-zip');
-import FsDriverBase, { Stat, ZipEntry, ArchiveExtractOptions } from './fs-driver-base';
+import FsDriverBase, { Stat, ZipEntry, ArchiveExtractOptions, FileTimestamps } from './fs-driver-base';
 import time from './time';
 const md5File = require('md5-file');
 const fs = require('fs-extra');
@@ -105,6 +105,10 @@ export default class FsDriverNode extends FsDriverBase {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	public async setTimestamp(path: string, timestampDate: any) {
 		return fs.utimes(path, timestampDate, timestampDate);
+	}
+
+	public async setTimestamps(path: string, timestamps: FileTimestamps) {
+		return fs.utimes(path, timestamps.created, timestamps.updated);
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied

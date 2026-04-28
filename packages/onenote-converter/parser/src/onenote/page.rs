@@ -19,6 +19,8 @@ pub struct Page {
     entity_id: Guid,
     title: Option<Title>,
     level: i32,
+    updated_at: Option<time::UtcDateTime>,
+    created_at: time::UtcDateTime,
     author: Option<String>,
     height: Option<f32>,
     contents: Vec<PageContent>,
@@ -32,6 +34,16 @@ impl Page {
     /// [\[MS-ONE\] 2.2.64]: https://docs.microsoft.com/en-us/openspecs/office_file_formats/ms-one/00f0b68b-db49-4aea-9ad9-7c8e68e5c95d
     pub fn title(&self) -> Option<&Title> {
         self.title.as_ref()
+    }
+
+    /// The time at which the page was created
+    pub fn created_time(&self) -> time::UtcDateTime {
+        self.created_at
+    }
+
+    /// The last updated time for the page, or the created time, if never updated
+    pub fn updated_time(&self) -> time::UtcDateTime {
+        self.updated_at.unwrap_or_else(|| self.created_time())
     }
 
     /// The page's level in the section page tree.
@@ -205,6 +217,8 @@ pub(crate) fn parse_page(page_space: ObjectSpaceRef) -> Result<Page> {
 
     Ok(Page {
         entity_id: metadata.entity_guid,
+        updated_at: data.last_modified.map(|time| time.into()),
+        created_at: metadata.created_at.into(),
         title,
         level,
         author: data.author.map(|author| author.into_value()),

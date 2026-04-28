@@ -6,6 +6,8 @@ exports[`InteropService_Importer_OneNote should apply position data for embedded
     <meta charset="UTF-8">
     <title>Embedded doc sheet</title>
     
+    
+    
     <style>
     
 /* (For testing: Removed default CSS) */
@@ -105,6 +107,8 @@ exports[`InteropService_Importer_OneNote should be able to create notes from cor
 <html><head>
     <meta charset="UTF-8">
     <title>title</title>
+    
+    
     
     <style>
     
@@ -324,6 +328,8 @@ exports[`InteropService_Importer_OneNote should expect notes to be rendered the 
     <meta charset="UTF-8">
     <title>A page can have any width it wants?</title>
     
+    
+    
     <style>
     
 /* (For testing: Removed default CSS) */
@@ -353,6 +359,8 @@ exports[`InteropService_Importer_OneNote should expect notes to be rendered the 
     <meta charset="UTF-8">
     <title>A page with a lot of svgs</title>
     
+    
+    
     <style>
     
 /* (For testing: Removed default CSS) */
@@ -379,6 +387,8 @@ exports[`InteropService_Importer_OneNote should expect notes to be rendered the 
 <html><head>
     <meta charset="UTF-8">
     <title>A page with text and drawing above it</title>
+    
+    
     
     <style>
     
@@ -413,6 +423,8 @@ exports[`InteropService_Importer_OneNote should expect notes to be rendered the 
     <meta charset="UTF-8">
     <title>A simple filename</title>
     
+    
+    
     <style>
     
 /* (For testing: Removed default CSS) */
@@ -439,6 +451,8 @@ exports[`InteropService_Importer_OneNote should expect notes to be rendered the 
 <html><head>
     <meta charset="UTF-8">
     <title>Page with more than one font size</title>
+    
+    
     
     <style>
     
@@ -552,6 +566,8 @@ exports[`InteropService_Importer_OneNote should expect notes to be rendered the 
 <html><head>
     <meta charset="UTF-8">
     <title>text</title>
+    
+    
     
     <style>
     
@@ -865,6 +881,8 @@ exports[`InteropService_Importer_OneNote should ignore broken characters at the 
     <meta charset="UTF-8">
     <title>Action research - Wikipedia</title>
     
+    
+    
     <style>
     
 /* (For testing: Removed default CSS) */
@@ -923,6 +941,8 @@ exports[`InteropService_Importer_OneNote should import a simple OneNote notebook
 <html><head>
     <meta charset="UTF-8">
     <title>Page title</title>
+    
+    
     
     <style>
     
@@ -1007,6 +1027,8 @@ exports[`InteropService_Importer_OneNote should import inline tags 2`] = `
     <meta charset="UTF-8">
     <title>Checklists</title>
     
+    
+    
     <style>
     
 /* (For testing: Removed default CSS) */
@@ -1066,6 +1088,8 @@ exports[`InteropService_Importer_OneNote should import nested ink 1`] = `
     <meta charset="UTF-8">
     <title>Ink Missing - only one example missing part</title>
     
+    
+    
     <style>
     
 /* (For testing: Removed default CSS) */
@@ -1098,6 +1122,8 @@ exports[`InteropService_Importer_OneNote should import vertically-scaled ink 1`]
 <html><head>
     <meta charset="UTF-8">
     <title>Scaled</title>
+    
+    
     
     <style>
     
@@ -1204,6 +1230,8 @@ exports[`InteropService_Importer_OneNote should remove hyperlink from title: Tip
     <meta charset="UTF-8">
     <title>Tips from a Pro: Using Trees for Dramatic Landscape Photography</title>
     
+    
+    
     <style>
     
 /* (For testing: Removed default CSS) */
@@ -1230,6 +1258,8 @@ exports[`InteropService_Importer_OneNote should remove hyperlink from title: wik
 <html><head>
     <meta charset="UTF-8">
     <title>wikipedia link</title>
+    
+    
     
     <style>
     
@@ -1258,6 +1288,8 @@ exports[`InteropService_Importer_OneNote should remove hyperlink from title: 风
     <meta charset="UTF-8">
     <title>风景  (Web view)</title>
     
+    
+    
     <style>
     
 /* (For testing: Removed default CSS) */
@@ -1285,6 +1317,8 @@ exports[`InteropService_Importer_OneNote should remove hyperlink from title: 风
     <meta charset="UTF-8">
     <title>风景</title>
     
+    
+    
     <style>
     
 /* (For testing: Removed default CSS) */
@@ -1310,6 +1344,8 @@ exports[`InteropService_Importer_OneNote should render audio as links to resourc
 <html><head>
     <meta charset="UTF-8">
     <title>My title</title>
+    
+    
     
     <style>
     
@@ -1416,6 +1452,8 @@ exports[`InteropService_Importer_OneNote should render links properly by ignorin
     <meta charset="UTF-8">
     <title>Is Mexico safe for shooting Street Photography?</title>
     
+    
+    
     <style>
     
 /* (For testing: Removed default CSS) */
@@ -1518,6 +1556,8 @@ exports[`InteropService_Importer_OneNote should support importing .one files tha
     <meta charset="UTF-8">
     <title>Test Todo : cases à cocher lien vers doc sur partage</title>
     
+    
+    
     <style>
     
 /* (For testing: Removed default CSS) */
@@ -1561,6 +1601,8 @@ exports[`InteropService_Importer_OneNote should use default value for EntityGuid
     <meta charset="UTF-8">
     <title>Marketing Funnel &amp; Training</title>
     
+    
+    
     <style>
     
 /* (For testing: Removed default CSS) */
@@ -1593,6 +1635,8 @@ exports[`InteropService_Importer_OneNote should use default value for EntityGuid
 <html><head>
     <meta charset="UTF-8">
     <title>Decrease support costs</title>
+    
+    
     
     <style>
     

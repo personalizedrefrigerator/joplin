@@ -31,6 +31,11 @@ export interface ZipEntry {
 	name: string;
 }
 
+export interface FileTimestamps {
+	created: Date;
+	updated: Date;
+}
+
 
 export default class FsDriverBase {
 
@@ -117,6 +122,10 @@ export default class FsDriverBase {
 
 	public async setTimestamp(_path: string, _timestampDate: Date): Promise<void> {
 		throw new Error('Not implemented: setTimestamp');
+	}
+
+	public async setTimestamps(_path: string, _timestamps: FileTimestamps): Promise<void> {
+		throw new Error('Not implemented: setTimestamps');
 	}
 
 	public async isDirectory(path: string) {

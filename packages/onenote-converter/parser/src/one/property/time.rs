@@ -1,5 +1,6 @@
 use crate::{one::property::PropertyType, onestore::object::Object};
 use parser_utils::errors::{ErrorKind, Result};
+use time::{Duration, macros::utc_datetime};
 
 /// A 32 bit date/time timestamp.
 ///
@@ -26,6 +27,12 @@ impl Time {
     }
 }
 
+impl From<Time> for time::UtcDateTime {
+    fn from(value: Time) -> Self {
+        utc_datetime!(1980-01-01 0:00) + Duration::seconds(value.0 as i64)
+    }
+}
+
 /// A 64 bit date/time timestamp.
 ///
 /// See [\[MS-DTYP\] 2.3.3]
@@ -49,5 +56,12 @@ impl Timestamp {
             .map(Timestamp);
 
         Ok(timestamp)
+    }
+}
+
+impl From<Timestamp> for time::UtcDateTime {
+    fn from(value: Timestamp) -> Self {
+        // TODO: This is a lossy conversion
+        utc_datetime!(1601-01-01 0:00) + Duration::milliseconds((value.0 / 10 / 1000) as i64)
     }
 }
