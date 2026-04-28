@@ -268,7 +268,7 @@ Link to page: [Page 2](:/id-here)
 - [A test](:/id-here "A test")
 
 
-# Note: Untitled Page 1
+# Note: Untitled Page
 
  Untitled Page 
 
@@ -320,37 +320,6 @@ Integral identities (see https://en.wikipedia.org/wiki/Lists_of_integrals), belo
 - $\\def\\parens#1{\\left( {#1} \\right)}\\def\\fnCall#1#2{{ \\rm #1 }\\ {#2}}∫\\parens{\\fnCall{sin}{𝑥}}𝑑𝑥=−\\fnCall{cos}{𝑥}+𝐶$
 
 &nbsp;"
-`;
-
-exports[`InteropService_Importer_OneNote should expect notes to be rendered the same: A page can have any width it wants 1`] = `
-"<!DOCTYPE HTML>
-<html><head>
-    <meta charset="UTF-8">
-    <title>A page can have any width it wants?</title>
-    
-    
-    
-    <style>
-    
-/* (For testing: Removed default CSS) */
-
-
-    
-    </style>
-</head>
-<body>
-
-<div class="title" style="left: 48px; position: absolute; top: 24px;"><div class="container-outline" style="width: 624px;"><div class="outline-element" style="margin-left: 0px;"><span style="font-family: &quot;Calibri Light&quot;, sans-serif; font-size: 20pt;">A page can have any width it wants?</span></div>
-</div><div class="container-outline"><div class="outline-element" style="margin-left: 0px;"><span style="color: rgb(102,102,102); font-family: &quot;Calibri&quot;, sans-serif; font-size: 10pt;">quinta-feira, 25 de abril de 2024</span></div>
-<div class="outline-element" style="margin-left: 0px;"><span style="color: rgb(102,102,102); font-family: &quot;Calibri&quot;, sans-serif; font-size: 10pt;">15:01</span></div>
-</div></div><div class="container-outline" style="left: 48px; position: absolute; top: 115px; width: 624px;"><div class="outline-element" style="margin-left: 0px;"><p style="font-family: &quot;Calibri&quot;, sans-serif; font-size: 11pt; padding-bottom: 7px; padding-top: 7px;"><span style="font-family: &quot;Calibri&quot;, sans-serif; font-size: 10.5pt;">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam eget convallis velit. Nullam at luctus libero.</span><span style="font-family: &quot;Calibri&quot;, sans-serif; font-size: 10.5pt;"> Phasellus id pharetra odio. Duis luctus lorem ut tellus imperdiet, a aliquet elit pretium. Donec sit amet urna et mi gravida cursus et id felis. Ut quis congue velit, eget mollis tortor. Vestibulum porttitor lobortis justo, in imperdiet leo porta id. Sed ornare ex nisi, sed laoreet nulla suscipit a. Cras nec lectus porta, fermentum quam ac, sagittis ipsum. Ut massa lacus, ornare in hendrerit sit amet, tempor quis ligula. Nulla facilisi. Maecenas quam dolor, lacinia id magna nec, blandit tincidunt ipsum. Proin placerat dui gravida, lacinia tortor eu, rhoncus ex. Pellentesque accumsan nunc id venenatis condimentum. Aenean sodales tortor id risus varius, id tincidunt libero tincidunt. Curabitur quis interdum metus.</span></p></div>
-<div class="outline-element" style="margin-left: 0px;"><p style="font-family: &quot;Calibri&quot;, sans-serif; font-size: 11pt;">&nbsp;</p></div>
-</div><div class="container-outline" style="left: 944px; position: absolute; top: 361px; width: 624px;"><div class="outline-element" style="margin-left: 0px;"><p style="font-family: &quot;Calibri&quot;, sans-serif; font-size: 11pt;">This is another paragraph by the right side</p></div>
-</div><img style="height: 165.64px; left: 135.42px; pointer-events: none; position: absolute; top: 221.29px; width: 1087.82px;" src=":/10">
-
-
-
-</body></html>"
 `;
 
 exports[`InteropService_Importer_OneNote should expect notes to be rendered the same: A page can have any width it wants? 1`] = `
@@ -1255,35 +1224,6 @@ exports[`InteropService_Importer_OneNote should remove hyperlink from title: Qui
 </body></html>"
 `;
 
-exports[`InteropService_Importer_OneNote should remove hyperlink from title: Tips from a Pro Using Trees for Dramatic Landscape Photography 1`] = `
-"<!DOCTYPE HTML>
-<html><head>
-    <meta charset="UTF-8">
-    <title>Tips from a Pro: Using Trees for Dramatic Landscape Photography</title>
-    
-    
-    
-    <style>
-    
-/* (For testing: Removed default CSS) */
-
-
-    
-    </style>
-</head>
-<body>
-
-<div class="title" style="left: 48px; position: absolute; top: 24px;"><div class="container-outline" style="width: 624px;"><div class="outline-element" style="margin-left: 0px;"><span style="font-family: &quot;Calibri Light&quot;, sans-serif; font-size: 20pt; line-height: 32px;">&nbsp;</span></div>
-</div><div class="container-outline" style="width: 624px;"><div class="outline-element" style="margin-left: 0px;"><span style="color: rgb(118,118,118); font-family: &quot;Calibri&quot;, sans-serif; font-size: 10pt; line-height: 16px;">Saturday, February 11, 2023</span></div>
-<div class="outline-element" style="margin-left: 0px;"><span style="color: rgb(118,118,118); font-family: &quot;Calibri&quot;, sans-serif; font-size: 10pt; line-height: 16px;">12:56 AM</span></div>
-</div></div><div class="container-outline" style="left: 48px; position: absolute; top: 115px; width: 624px;"><div class="outline-element" style="margin-left: 0px;"><p style="font-family: &quot;Calibri&quot;, sans-serif; font-size: 14pt; line-height: 22px;"><a href="onenote:https://d.docs.live.net/c8d3bbab7f1acf3a/Documents/Photography/%E9%A3%8E%E6%99%AF.one#Tips%20from%20a%20Pro%20Using%20Trees%20for%20Dramatic%20Landscape%20Photography&amp;section-id={262ADDFB-A4DC-4453-A239-0024D6769962}&amp;page-id={88D803A5-4F43-48D4-9B16-4C024F5787DC}&amp;end" style="">Tips from a Pro: Using Trees for Dramatic Landscape Photography</a></p></div>
-</div>
-
-
-
-</body></html>"
-`;
-
 exports[`InteropService_Importer_OneNote should remove hyperlink from title: Tips from a Pro: Using Trees for Dramatic Landscape Photography 1`] = `
 "<!DOCTYPE HTML>
 <html><head>
@@ -1335,35 +1275,6 @@ exports[`InteropService_Importer_OneNote should remove hyperlink from title: wik
 </div><div class="container-outline"><div class="outline-element" style="margin-left: 0px;"><span style="color: rgb(102,102,102); font-family: &quot;Calibri&quot;, sans-serif; font-size: 10pt;">Sunday, January 05, 2025</span></div>
 <div class="outline-element" style="margin-left: 0px;"><span style="color: rgb(102,102,102); font-family: &quot;Calibri&quot;, sans-serif; font-size: 10pt;">10:15 PM</span></div>
 </div></div><div class="container-outline" style="left: 48px; position: absolute; top: 115px; width: 624px;"><div class="outline-element" style="margin-left: 0px;"><p style="font-family: &quot;Calibri&quot;, sans-serif; font-size: 11pt;"><a href="https://zh.wikipedia.org/zh-hans/%E9%A3%8E%E6%99%AF" style="">wikipedia link</a></p></div>
-</div>
-
-
-
-</body></html>"
-`;
-
-exports[`InteropService_Importer_OneNote should remove hyperlink from title: 风景  (Web view) 1`] = `
-"<!DOCTYPE HTML>
-<html><head>
-    <meta charset="UTF-8">
-    <title>风景  (Web view)</title>
-    
-    
-    
-    <style>
-    
-/* (For testing: Removed default CSS) */
-
-
-    
-    </style>
-</head>
-<body>
-
-<div class="title" style="left: 48px; position: absolute; top: 24px;"><div class="container-outline" style="width: 624px;"><div class="outline-element" style="margin-left: 0px;"><span style="font-family: &quot;Calibri Light&quot;, sans-serif; font-size: 20pt;">&nbsp;</span></div>
-</div><div class="container-outline" style="width: 624px;"><div class="outline-element" style="margin-left: 0px;"><span style="color: rgb(128,128,128); font-family: &quot;Calibri&quot;, sans-serif; font-size: 10pt;">Sunday, January 5, 2025</span></div>
-<div class="outline-element" style="margin-left: 0px;"><span style="color: rgb(128,128,128); font-family: &quot;Calibri&quot;, sans-serif; font-size: 10pt;">10:13 PM</span></div>
-</div></div><div class="container-outline" style="left: 48px; position: absolute; top: 115px; width: 624px;"><div class="outline-element" style="margin-left: 0px;"><p style="font-family: &quot;Calibri&quot;, sans-serif; font-size: 11pt;"><a href=":/6" style="font-family: &quot;Calibri&quot;, sans-serif; font-size: 11pt;">风景</a><span style="font-family: &quot;Calibri&quot;, sans-serif; font-size: 11pt;">  (</span><a href="https://onedrive.live.com/edit.aspx?resid=193EE54E3252492D!s9b62db4219f740709f444bc0129de4e9&amp;migratedtospo=true&amp;wd=target%28Quick%20Notes.one%7C75256889-9e75-4ec2-82ed-fc799557e1b9%2F%E9%A3%8E%E6%99%AF%7Cd099b6f3-7f5a-4c08-aed7-e8d42c59523f%2F%29&amp;wdorigin=703&amp;wdpreservelink=1" style="font-family: &quot;Calibri&quot;, sans-serif; font-size: 11pt;">Web view</a><span style="font-family: &quot;Calibri&quot;, sans-serif; font-size: 11pt;">)</span></p></div>
 </div>
 
 
@@ -1529,37 +1440,6 @@ exports[`InteropService_Importer_OneNote should render audio as links to resourc
     .l5 { padding: 10px 20px 10px 100px }
     li.-error a { color: #C11; font-weight: bold; }
 </style>
-
-
-
-</body></html>"
-`;
-
-exports[`InteropService_Importer_OneNote should render links properly by ignoring wrongly set indices when the first character is a hyperlink marker: Is Mexico safe for shooting Street Photography 1`] = `
-"<!DOCTYPE HTML>
-<html><head>
-    <meta charset="UTF-8">
-    <title>Is Mexico safe for shooting Street Photography?</title>
-    
-    
-    
-    <style>
-    
-/* (For testing: Removed default CSS) */
-
-
-    
-    </style>
-</head>
-<body>
-
-<div class="title" style="left: 48px; position: absolute; top: 24px;"><div class="container-outline" style="width: 624px;"><div class="outline-element" style="margin-left: 0px;"><span style="font-family: &quot;Calibri&quot;, sans-serif; font-size: 20pt; line-height: 32px;">&nbsp;</span></div>
-</div><div class="container-outline" style="width: 624px;"><div class="outline-element" style="margin-left: 0px;"><span style="color: rgb(118,118,118); font-family: &quot;Calibri&quot;, sans-serif; font-size: 10pt; line-height: 16px;">Monday, August 28, 2023</span></div>
-<div class="outline-element" style="margin-left: 0px;"><span style="color: rgb(118,118,118); font-family: &quot;Calibri&quot;, sans-serif; font-size: 10pt; line-height: 16px;">10:52 AM</span></div>
-</div></div><div class="container-outline" style="left: 48px; position: absolute; top: 115px; width: 624px;"><div class="outline-element" style="margin-left: 0px;"><p style="font-family: &quot;Calibri&quot;, sans-serif; font-size: 12pt; line-height: 19px;"><a href="https://www.youtube.com/watch?v=-U-uj1jaHtk" style="">Is Mexico safe for shooting Street Photography?</a></p></div>
-<div class="outline-element" style="margin-left: 0px;"><p style="font-family: &quot;Calibri&quot;, sans-serif; font-size: 12pt; line-height: 19px;">&nbsp;</p></div>
-<div class="outline-element" style="margin-left: 0px;"><img src=":/5" style="max-height: 200px; max-width: 356px;"></div>
-</div>
 
 
 
