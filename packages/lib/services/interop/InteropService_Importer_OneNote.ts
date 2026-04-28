@@ -420,7 +420,7 @@ class OneNoteHtmlImporter extends InteropService_Importer_Md {
 
 					user_updated_time: metadata.updated.getTime(),
 					user_created_time: metadata.created.getTime(),
-					title: metadata.title,
+					title: metadata.title || note.title,
 				};
 
 				const noteItem = await Note.save(updatedNote, { isNew: false, autoTimestamp: false });
