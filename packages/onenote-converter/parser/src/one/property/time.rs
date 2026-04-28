@@ -59,10 +59,18 @@ impl Timestamp {
     }
 }
 
-impl From<Timestamp> for time::UtcDateTime {
-    fn from(value: Timestamp) -> Self {
-        // TODO: This is a lossy conversion, since the original is in 100-nanosecond intervals
+impl TryFrom<Timestamp> for time::UtcDateTime {
+    type Error = parser_utils::errors::Error;
+
+    fn try_from(value: Timestamp) -> Result<Self> {
+        // Note: This is a lossy conversion, since the original is in 100-nanosecond intervals
         let microseconds = value.0 / 10;
-        utc_datetime!(1601-01-01 0:00) + Duration::milliseconds((microseconds / 1000) as i64)
+        utc_datetime!(1601-01-01 0:00)
+            // UtcDatetime can only represent dates in the (-9999 BCE, 9999 CE). Use checked_add
+            // to avoid a panic in the case of unexpectedly large dates:
+            .checked_add(Duration::milliseconds((microseconds / 1000) as i64))
+            .ok_or_else(|| {
+                parser_error!(MalformedOneStoreData, "Timestamp out of range {}", value.0).into()
+            })
     }
 }

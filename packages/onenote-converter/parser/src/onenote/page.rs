@@ -7,6 +7,8 @@ use crate::shared::exguid::ExGuid;
 use crate::shared::guid::Guid;
 use parser_utils::errors::{ErrorKind, Result};
 use parser_utils::log::set_current_page;
+use parser_utils::log_warn;
+use time::macros::utc_datetime;
 
 /// A page.
 ///
@@ -218,7 +220,12 @@ pub(crate) fn parse_page(page_space: ObjectSpaceRef) -> Result<Page> {
     Ok(Page {
         entity_id: metadata.entity_guid,
         updated_at: data.last_modified.map(|time| time.into()),
-        created_at: metadata.created_at.into(),
+        created_at: metadata.created_at.try_into().unwrap_or_else(|error| {
+            log_warn!("Invalid timestamp: {:?}", error);
+            // Fall back to the UNIX epoch for out-of-range timestamps. Since last_modified is represented
+            // with less precision in .one files, this is necessary for created_at, but not updated_at.
+            utc_datetime!(1970-01-01 0:00)
+        }),
         title,
         level,
         author: data.author.map(|author| author.into_value()),
