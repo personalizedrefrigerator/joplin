@@ -141,7 +141,7 @@
       "artifactName": "Joplin-${version}.${ext}"
     },
     "toolsets": {
-      "appimage": "1.0.2"
+      "appimage": "1.0.3"
     }
   },
   "homepage": "https://github.com/laurent22/joplin#readme",
