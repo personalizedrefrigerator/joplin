@@ -16,7 +16,7 @@ index 601ab15e1c0617eb5782372cbcf7d9854ae308b0..d01cd0fd786923112de84f9cbacf3118
          nodeModules: NodeModuleInfo[];
          logSummary: ModuleManager["logSummary"];
 diff --git a/out/node-module-collector/nodeModulesCollector.js b/out/node-module-collector/nodeModulesCollector.js
-index 0956d2657279b06ff210e5008583b9c35b533d5f..62044f0ab215635aeb8a358f6e6c2fbcb8cdc502 100644
+index 8285e38a27665f612033c84d7c13239c08e72da7..785d95193a31b814afa357820f4dbb5b762f11cd 100644
 --- a/out/node-module-collector/nodeModulesCollector.js
 +++ b/out/node-module-collector/nodeModulesCollector.js
 @@ -45,8 +45,8 @@ class NodeModulesCollector {
@@ -40,7 +40,7 @@ index 0956d2657279b06ff210e5008583b9c35b533d5f..62044f0ab215635aeb8a358f6e6c2fbc
          const args = this.getArgs();
          const tempOutputFile = await this.tempDirManager.getTempFile({
 diff --git a/out/node-module-collector/traversalNodeModulesCollector.js b/out/node-module-collector/traversalNodeModulesCollector.js
-index 851c5427b676c0c8e65b7b63bcf8eadef68904a3..6391c1f3be447cf794ebc7bd5c00b46d34ef4adf 100644
+index 851c5427b676c0c8e65b7b63bcf8eadef68904a3..3cf3ce9d2e61840aa0f713fa1b46f976b3b44347 100644
 --- a/out/node-module-collector/traversalNodeModulesCollector.js
 +++ b/out/node-module-collector/traversalNodeModulesCollector.js
 @@ -3,6 +3,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
@@ -106,7 +106,7 @@ index 851c5427b676c0c8e65b7b63bcf8eadef68904a3..6391c1f3be447cf794ebc7bd5c00b46d
          /**
           * Recursively builds dependency tree starting from a package directory.
           * @param packageDir - The directory of the package to process
-@@ -82,7 +112,9 @@ class TraversalNodeModulesCollector extends nodeModulesCollector_1.NodeModulesCo
+@@ -82,7 +114,9 @@ class TraversalNodeModulesCollector extends nodeModulesCollector_1.NodeModulesCo
              visited.add(resolvedPackageDir);
              const buildPackage = async (dependencies, nullHandler) => {
                  const builtPackages = {};
@@ -118,7 +118,7 @@ index 851c5427b676c0c8e65b7b63bcf8eadef68904a3..6391c1f3be447cf794ebc7bd5c00b46d
                      const logFields = { parent: moduleName, dependency: depName, version: depVersion };
                      if (pkg == null) {
 diff --git a/out/util/appFileCopier.js b/out/util/appFileCopier.js
-index f762b47b85539eea2b38f6cf76692624a3b7e307..5975683046464777bb296b26f1ed46ae0c87770d 100644
+index f762b47b85539eea2b38f6cf76692624a3b7e307..347fa8643e1ed7cbd3ced60f03ff50880d2deb7d 100644
 --- a/out/util/appFileCopier.js
 +++ b/out/util/appFileCopier.js
 @@ -175,13 +175,16 @@ async function collectNodeModulesWithLogging(platformPackager) {
