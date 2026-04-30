@@ -19,6 +19,11 @@ const uslug = require('@joplin/fork-uslug');
 
 const logger = Logger.create('PluginService');
 
+interface PluginExtractionState {
+	size: number;
+	timestamp: number;
+}
+
 // Plugin data is split into two:
 //
 // - First there's the service `plugins` property, which contains the
@@ -105,6 +110,7 @@ export default class PluginService extends BaseService {
 	private startedPlugins_: Record<string, boolean> = {};
 	private isSafeMode_ = false;
 	private pluginsChangeListeners_: LoadedPluginsChangeListener[] = [];
+	private extractionStates_: Record<string, PluginExtractionState> = null;
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	public initialize(appVersion: string, platformImplementation: any, runner: BasePluginRunner, store: any) {
@@ -195,6 +201,31 @@ export default class PluginService extends BaseService {
 
 	private async deletePluginFiles(plugin: Plugin) {
 		await shim.fsDriver().remove(plugin.baseDir);
+	}
+
+	private extractionStatePath(): string {
+		return `${Setting.value('cacheDir')}/plugin-extraction-state.json`;
+	}
+
+	private async loadExtractionStates(): Promise<Record<string, PluginExtractionState>> {
+		if (!this.extractionStates_) {
+			try {
+				const text = await shim.fsDriver().readFile(this.extractionStatePath(), 'utf8');
+				this.extractionStates_ = JSON.parse(text);
+			} catch {
+				this.extractionStates_ = {};
+			}
+		}
+		return this.extractionStates_;
+	}
+
+	private async saveExtractionStates(states: Record<string, PluginExtractionState>): Promise<void> {
+		this.extractionStates_ = states;
+		try {
+			await shim.fsDriver().writeFile(this.extractionStatePath(), JSON.stringify(states), 'utf8');
+		} catch (error) {
+			logger.error('Failed to save extraction states:', error);
+		}
 	}
 
 	public pluginById(id: string): Plugin {
@@ -294,22 +325,31 @@ export default class PluginService extends BaseService {
 		const unpackDir = `${Setting.value('cacheDir')}/${fname}`;
 		const manifestFilePath = `${unpackDir}/manifest.json`;
 
-		if (manifestOnly) {
-			// When loading only the manifest (e.g. for disabled plugins), try
-			// to use an already-extracted manifest from cache to avoid the
-			// expensive MD5 hash and tar extraction.
+		// Use file size + mtime to check if the .jpl has changed, to
+		// avoid computing an MD5 hash of the full file on every startup.
+		const stat = await shim.fsDriver().stat(path);
+		const extractionStates = await this.loadExtractionStates();
+		const extractionState = extractionStates[fname];
+		const scriptFilePath = `${unpackDir}/index.js`;
+		const extractionValid = extractionState
+			&& extractionState.size === stat.size
+			&& extractionState.timestamp === stat.mtime.getTime()
+			&& await shim.fsDriver().exists(manifestFilePath)
+			&& (manifestOnly || await shim.fsDriver().exists(scriptFilePath));
+
+		if (manifestOnly && extractionValid) {
+			// When loading only the manifest (e.g. for disabled plugins), use
+			// the already-extracted manifest from cache to avoid the tar
+			// extraction.
 			const manifest = await this.loadManifestToObject(manifestFilePath);
 			if (manifest) {
 				return this.loadPlugin(unpackDir, JSON.stringify(manifest), '', makePluginId(fname));
 			}
 		}
 
-		const hash = await shim.fsDriver().md5File(path);
+		if (!extractionValid) {
+			logger.info(`Extracting plugin: ${fname}`);
 
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-		let manifest: any = await this.loadManifestToObject(manifestFilePath);
-
-		if (!manifest || manifest._package_hash !== hash) {
 			await shim.fsDriver().remove(unpackDir);
 			await shim.fsDriver().mkdir(unpackDir);
 
@@ -320,12 +360,16 @@ export default class PluginService extends BaseService {
 				cwd: unpackDir,
 			});
 
-			manifest = await this.loadManifestToObject(manifestFilePath);
+			const manifest = await this.loadManifestToObject(manifestFilePath);
 			if (!manifest) throw new Error(`Missing manifest file at: ${manifestFilePath}`);
 
-			manifest._package_hash = hash;
-
-			await shim.fsDriver().writeFile(manifestFilePath, JSON.stringify(manifest, null, '\t'), 'utf8');
+			extractionStates[fname] = {
+				size: stat.size,
+				timestamp: stat.mtime.getTime(),
+			};
+			await this.saveExtractionStates(extractionStates);
+		} else {
+			logger.info(`Using already extracted plugin: ${fname}`);
 		}
 
 		return this.loadPluginFromPath(unpackDir, manifestOnly);
@@ -513,6 +557,7 @@ export default class PluginService extends BaseService {
 				logger.error(`Could not load plugin: ${pluginPath}`, error);
 			}
 		}
+
 	}
 
 	public async loadAndRunDevPlugins(settings: PluginSettings) {
