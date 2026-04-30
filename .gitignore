@@ -54,6 +54,10 @@ docs/**/*.mustache
 .idea
 /readme/i18n
 .watchman-cookie-*
+*_BACKUP_*.js
+*_BASE_*.js
+*_LOCAL_*.js
+*_REMOTE_*.js
 
 # Yarn stuff
 # https://yarnpkg.com/getting-started/qa#which-files-should-be-gitignored
