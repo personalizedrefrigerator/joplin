@@ -40,12 +40,31 @@ interface Props {
 	masterPasswordDialogOpen: boolean;
 }
 
+interface EncryptionDialogOptions{
+	className: string;
+	title: string;
+	content: React.ReactNode;
+	onClose: ()=> void;
+	onDialogButtonRowClick: (event: { buttonName: string })=> void;
+	okButtonDisabled?: boolean;
+}
+
 export const EncryptionConfigScreen = (props: Props) => {
 	const { inputPasswords, onInputPasswordChange } = useInputPasswords(props.passwords);
 	const [pendingEnableEncryption, setPendingEnableEncryption] = useState(false);
 	const [enableEncryptionPromptVisible, setEnableEncryptionPromptVisible] = useState(false);
 	const [enableEncryptionPassword, setEnableEncryptionPassword] = useState('');
+	const [disableEncryptionPromptVisible, setDisableEncryptionPromptVisible] = useState(false);
+	const disablePromptPromiseRef = useRef<(value: boolean)=> void>(null);
 	const promptPromiseRef = useRef<(password: string | null)=> void>(null);
+
+	// Cleanup on unmount to resolve pending promises if the user navigates away
+	useEffect(() => {
+		return () => {
+			if (disablePromptPromiseRef.current) disablePromptPromiseRef.current(false);
+			if (promptPromiseRef.current) promptPromiseRef.current(null);
+		};
+	}, []);
 
 	const wasMasterPasswordDialogOpen = useRef(props.masterPasswordDialogOpen);
 
@@ -246,7 +265,10 @@ export const EncryptionConfigScreen = (props: Props) => {
 		let newPassword: string | null = '';
 
 		if (isEnabled) {
-			const answer = await dialogs.confirm(_('Disabling encryption means *all* your notes and attachments are going to be re-synchronised and sent unencrypted to the sync target. Do you wish to continue?'));
+			setDisableEncryptionPromptVisible(true);
+			const answer = await new Promise<boolean>((resolve) => {
+				disablePromptPromiseRef.current = resolve;
+			});
 			if (!answer) return;
 		} else {
 			if (shouldOpenMasterPasswordDialogForEnable({
@@ -285,6 +307,24 @@ export const EncryptionConfigScreen = (props: Props) => {
 		}
 	}, [props.dispatch, props.masterPassword, props.masterPasswordDialogOpen]);
 
+	const renderEncryptionDialog = (options: EncryptionDialogOptions) => {
+		return (
+			<Dialog onCancel={options.onClose} className={options.className}>
+				<div className='dialog-root'>
+					<DialogTitle title={options.title}/>
+					<div className='dialog-content'>
+						{options.content}
+					</div>
+					<DialogButtonRow
+						themeId={props.themeId}
+						onClick={options.onDialogButtonRowClick}
+						okButtonDisabled={options.okButtonDisabled ?? false}
+					/>
+				</div>
+			</Dialog>
+		);
+	};
+
 	const renderEnableEncryptionDialog = () => {
 		if (!enableEncryptionPromptVisible) return null;
 
@@ -315,31 +355,63 @@ export const EncryptionConfigScreen = (props: Props) => {
 			setEnableEncryptionPassword(event.target.value);
 		};
 
-		return (
-			<Dialog onCancel={onClose} className="enable-encryption-dialog">
-				<div className="dialog-root">
-					<DialogTitle title={_('Enable encryption')}/>
-					<div className="dialog-content">
-						<div style={{ marginBottom: 16 }}>
-							{messageComps}
-						</div>
-						<div style={{ marginBottom: 16 }}>
-							<label style={{ ...theme.textStyle, marginBottom: 5, display: 'block' }} htmlFor="enable-encryption-password">{_('Password:')}</label>
-							<PasswordInput
-								inputId="enable-encryption-password"
-								value={enableEncryptionPassword}
-								onChange={onPasswordInputChange}
-							/>
-						</div>
+		return renderEncryptionDialog({
+			className: 'enable-encryption-dialog',
+			title: _('Enable encryption'),
+			content: (
+				<>
+					<div style={{ marginBottom: 16 }}>
+						{messageComps}
 					</div>
-					<DialogButtonRow
-						themeId={props.themeId}
-						onClick={onDialogButtonRowClick}
-						okButtonDisabled={!enableEncryptionPassword}
-					/>
+					<div style={{ marginBottom: 16 }}>
+						<label style={{ ...theme.textStyle, marginBottom: 5, display: 'block' }} htmlFor="enable-encryption-password">{_('Password:')}</label>
+						<PasswordInput
+							inputId="enable-encryption-password"
+							value={enableEncryptionPassword}
+							onChange={onPasswordInputChange}
+						/>
+					</div>
+				</>
+			),
+			onClose,
+			onDialogButtonRowClick,
+			okButtonDisabled: !enableEncryptionPassword,
+		});
+	};
+
+	const renderDisableEncryptionDialog = () => {
+		if (!disableEncryptionPromptVisible) return null;
+
+		const onClose = () => {
+			setDisableEncryptionPromptVisible(false);
+			if (disablePromptPromiseRef.current) disablePromptPromiseRef.current(false);
+		};
+
+		const onDialogButtonRowClick = (event: { buttonName: string }) => {
+			if (event.buttonName === 'cancel') {
+				onClose();
+				return;
+			}
+
+			if (event.buttonName === 'ok') {
+				setDisableEncryptionPromptVisible(false);
+				if (disablePromptPromiseRef.current) disablePromptPromiseRef.current(true);
+			}
+		};
+
+		return renderEncryptionDialog({
+			className: 'disable-encryption-dialog',
+			title: _('Disable encryption'),
+			content: (
+				<div style={{ marginBottom: 16 }}>
+					<p style={theme.textStyle}>
+						{_('Disabling encryption means *all* your notes and attachments are going to be re-synchronised and sent unencrypted to the sync target. Do you wish to continue?')}
+					</p>
 				</div>
-			</Dialog>
-		);
+			),
+			onClose,
+			onDialogButtonRowClick,
+		});
 	};
 
 	const renderEncryptionSection = () => {
@@ -523,6 +595,7 @@ export const EncryptionConfigScreen = (props: Props) => {
 			{renderNonExistingMasterKeysSection()}
 			{renderAdvancedSection()}
 			{renderEnableEncryptionDialog()}
+			{renderDisableEncryptionDialog()}
 		</div>
 	);
 };
