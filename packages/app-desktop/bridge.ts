@@ -1,7 +1,7 @@
 import ElectronAppWrapper from './ElectronAppWrapper';
 import shim, { MessageBoxType } from '@joplin/lib/shim';
 import { _, setLocale } from '@joplin/lib/locale';
-import { BrowserWindow, nativeTheme, nativeImage, shell, dialog, MessageBoxSyncOptions, safeStorage, Menu, MenuItemConstructorOptions, MenuItem, BrowserWindowConstructorOptions, FileFilter, SaveDialogOptions, globalShortcut } from 'electron';
+import { BrowserWindow, nativeTheme, nativeImage, shell, dialog, MessageBoxSyncOptions, safeStorage, Menu, MenuItemConstructorOptions, MenuItem, BrowserWindowConstructorOptions, FileFilter, SaveDialogOptions, globalShortcut, ipcMain, IpcMainInvokeEvent } from 'electron';
 import { dirname, toSystemSlashes } from '@joplin/lib/path-utils';
 import { fileUriToPath } from '@joplin/utils/url';
 import { urlDecode } from '@joplin/lib/string-utils';
@@ -31,6 +31,13 @@ interface OpenDialogOptions {
 type OnAllowedExtensionsChange = (newExtensions: string[])=> void;
 interface MessageDialogOptions extends Omit<MessageBoxSyncOptions, 'message'> {
 	message?: string;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Using any to match a TypeScript type
+type OnIpcMainMessage = (event: IpcMainInvokeEvent, messageId: string, ...args: any[])=> void;
+type IpcResponseListener = (response: unknown)=> void;
+export interface IpcMainHandle {
+	remove: ()=> void;
 }
 
 export class Bridge {
@@ -493,6 +500,42 @@ export class Bridge {
 
 	public get MenuItem() {
 		return MenuItem;
+	}
+
+	private channelHandlers_ = new Map<string, OnIpcMainMessage>();
+	private channelResponseListeners_ = new Map<string, IpcResponseListener>();
+	private nextResponseListenerId_ = 0;
+	public respondIpcMainMessage(messageId: string, response: unknown) {
+		this.channelResponseListeners_.get(messageId)?.(response);
+		this.channelResponseListeners_.delete(messageId);
+	}
+
+	// Note: The client **must** call respondIpcMainMessage after responding to the event.
+	public setIpcMainHandler(channel: string, handler: OnIpcMainMessage): IpcMainHandle {
+		this.channelHandlers_.set(channel, handler);
+		// For the return value to be correctly sent back to the .invoke call, it seems to be necessary
+		// to await the handler here (perhaps due to @electron/remote?)
+		ipcMain.handle(channel, async (event, ...args) => {
+			// Issue: Electron/remote doesn't send callback responses to the main process...
+			// As a workaround, require that the
+			const messageId = `message-${this.nextResponseListenerId_++}`;
+
+			return new Promise<unknown>((resolve) => {
+				this.channelResponseListeners_.set(messageId, (r) => {
+					resolve(r);
+				});
+				handler(event, messageId, ...args);
+			});
+		});
+
+		return {
+			remove: () => {
+				if (this.channelHandlers_.get(channel) === handler) {
+					this.channelHandlers_.delete(channel);
+					ipcMain.removeHandler(channel);
+				}
+			},
+		};
 	}
 
 	public async openExternal(url: string) {

@@ -12,6 +12,9 @@ import Note from '@joplin/lib/models/Note';
 const { friendlySafeFilename } = require('@joplin/lib/path-utils');
 import time from '@joplin/lib/time';
 import { BrowserWindow, BrowserWindowConstructorOptions } from 'electron';
+import { resolve } from 'path';
+import type { IpcMainHandle } from './bridge';
+import PluginService from '@joplin/lib/services/plugins/PluginService';
 const md5 = require('md5');
 const url = require('url');
 
@@ -25,6 +28,21 @@ interface ExportNoteOptions {
 	includeConflicts?: boolean;
 	plugins?: PluginStates;
 }
+
+const addPluginMessageHandler = () => {
+	return bridge().setIpcMainHandler('export-window--plugin-message', async (_event, messageId, contentScriptId, message) => {
+		let response;
+		try {
+			const pluginService = PluginService.instance();
+			const plugin = pluginService.pluginById(
+				pluginService.pluginIdByContentScriptId(contentScriptId),
+			);
+			response = await plugin.emitContentScriptMessage(contentScriptId, message);
+		} finally {
+			bridge().respondIpcMainMessage(messageId, response);
+		}
+	});
+};
 
 export default class InteropServiceHelper {
 
@@ -48,10 +66,12 @@ export default class InteropServiceHelper {
 	private static async exportNoteTo_(target: string, noteId: string, options: ExportNoteOptions = {}) {
 		let win: BrowserWindow|null = null;
 		let htmlFile: string = null;
+		let ipcMainHandler: IpcMainHandle|null = null;
 
 		const cleanup = () => {
 			if (win) win.destroy();
 			if (htmlFile) void shim.fsDriver().remove(htmlFile);
+			ipcMainHandler?.remove();
 		};
 
 		try {
@@ -66,13 +86,21 @@ export default class InteropServiceHelper {
 				// Work around a printing issue: As of Electron 39, if the window is initially hidden, printing crashes the app.
 				// This only seems to be necessary on Linux.
 				show: shim.isLinux(),
+
+				webPreferences: {
+					preload: resolve(__dirname, './utils/window/noteExportPreload.js'),
+					contextIsolation: true,
+				},
 			};
 
 			win = bridge().newBrowserWindow(windowOptions);
+			ipcMainHandler = addPluginMessageHandler();
 
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 			return new Promise<any>((resolve, reject) => {
 				win.webContents.on('did-finish-load', () => {
+					// Some plugins render only when a noteDidUpdate event is dispatched
+					void win.webContents.executeJavaScript('document.dispatchEvent(new Event("joplin-noteDidUpdate"))');
 
 					// did-finish-load will trigger when most assets are done loading, probably
 					// images, JavaScript and CSS. However it seems it might trigger *before*
