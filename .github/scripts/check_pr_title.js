@@ -11,7 +11,7 @@
 // Required inputs come from `env`: PR_AUTHOR, PR_NUMBER, PR_TITLE.
 
 module.exports = async ({ github, context, core }) => {
-	const softCheckUsers = ['laurent22', 'personalizedrefrigerator', 'mrjo118', 'tessus', 'CalebJohn'];
+	const softCheckUsers = ['laurent22', 'personalizedrefrigerator', 'mrjo118', 'tessus', 'CalebJohn', 'Rygaa'];
 
 	const prefix = '(Desktop|Mobile|All|Cli|Tools|Chore|Clipper|Server|Android|iOS|Plugins|CI|Plugin Repo|Doc)';
 	const prefixList = `${prefix}(,\\s*${prefix})*`;
