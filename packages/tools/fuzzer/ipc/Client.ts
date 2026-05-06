@@ -28,6 +28,7 @@ import { substrWithEllipsis } from '@joplin/lib/string-utils';
 import hangingIndent from '../utils/hangingIndent';
 import { readFile, writeFile } from 'fs/promises';
 import { hasOwnProperty } from '@joplin/utils/object';
+import removeInvalidUtf8 from '../utils/removeInvalidUtf8';
 
 const logger = Logger.create('Client');
 
@@ -737,8 +738,8 @@ class Client implements ActionableClient {
 				const append = this.context_.randomString(this.context_.randInt(0, 5000));
 
 				let body = keep + append;
-				// Only keep unicode that can be represented as UTF-8
-				body = new TextDecoder().decode(new TextEncoder().encode(body));
+				// Only keep unicode that can be represented as UTF-8 to prevent false-positive fuzzer failures
+				body = removeInvalidUtf8(body);
 
 				await this.updateNote({
 					...targetNote,
