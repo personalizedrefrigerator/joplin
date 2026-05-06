@@ -14,7 +14,7 @@ const getDiffDebugMessage = (actual: string, expected: string) => {
 			inExpected.add(expected.charAt(i));
 		}
 
-		const unexpected = new Set<string>();
+		const unexpected = new Set();
 		for (let i = 0; i < actual.length; i++) {
 			const char = actual.charAt(i);
 			if (!inExpected.has(char)) {
@@ -24,10 +24,7 @@ const getDiffDebugMessage = (actual: string, expected: string) => {
 
 		if (unexpected.size) {
 			diffMessage.push('Characters found in actual that were not in the expected state:\n');
-			const unexpectedArray = [...unexpected];
-			diffMessage.push('  ', JSON.stringify(unexpectedArray));
-			const firstIndex = actual.indexOf(unexpectedArray[0]);
-			diffMessage.push('  (first at index ', firstIndex, ')\n\n');
+			diffMessage.push('  ', JSON.stringify([...unexpected]), '\n\n');
 		}
 	}
 
