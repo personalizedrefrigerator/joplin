@@ -45,6 +45,17 @@ On the server, changes are split between a legacy `changes` table and a newer `c
 
 All new change events are written to `changes_2`. However, database queries in `ChangeModel` must usually be able to check both tables.
 
+### Migration
+
+A planned migration to remove the legacy `changes` table exists in `packages/server/src/migrations/planned/regroup_changes`. In November 2026, at least 6 months after the `changes_2` table was created:
+- The `regroup_changes` migration should be enabled. This can be done by moving it to the `packages/server/src/migrations/` folder and giving it a name that matches the other migrations.
+- `ChangeModel.old.ts` should be removed.
+   - `ChangeModel.old` is responsible for interacting with the legacy changes table.
+- `ChangeModel.new.ts` should be updated to interact with `changes_3`.
+- Some time later, a new migration should be created to `drop` the `changes` and `changes_2` tables: The planned `regroup_changes` migration preserves `changes` and `changes_2` to allow reverting the `regroup_changes` migration, if necessary.
+
+The 6-month timeline is important: Any Joplin clients with delta cursors that still point to changes in `changes` will be forced to do a full resync.
+
 ## Delete event limitation
 
 There's currently a known limitation regarding delete events. When looking at a particular event page, the server might find that a "create" or "update" event is associated with a non-existing file, which would have been deleted. In that case, the server will send back a "delete" event. When looking at following pages, the server will eventually process the actual "delete" event for that item - and send again a "delete" event for it.
