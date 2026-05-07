@@ -36,17 +36,13 @@ enum ChangeType {
 // It should be possible to pause and resume the migration in the background
 export const config = { transaction: false };
 
-const getLastPreMigrationCounter = async (db: DbConnection) => {
-	// This will return a change. The migration that creates changes_2 guarantees
-	// that changes_2 has at least one initial marker entry.
-	//
-	// Assumes that all entries in `changes` have counters less than entries in `changes_2`:
-	const lastChange = await db('changes_2')
-		.select('counter')
-		.orderBy('counter', 'desc')
-		.first();
-	return lastChange.counter;
-};
+// Assumes that:
+// 1. all entries in `changes` have counters less than entries in `changes_2`
+// 2. there is at least one entry in `changes_2` (should be guaranteed by the migration
+//    that creates changes_2).
+//
+// This is a raw query to allow use within another raw query:
+const lastPreMigrationCounterSql = 'SELECT counter FROM changes_2 ORDER BY counter DESC LIMIT 1';
 
 const migrateLegacyPage = async (db: DbConnection, start: number, end: number) => {
 	const uuidSql = isPostgres(db) ? `
@@ -203,23 +199,22 @@ export const up = async (db: DbConnection) => {
 	logger.info('Total migrated:', await getTotal('changes_3'));
 
 	if (isPostgres(db)) {
-		const lastCounter = await getLastPreMigrationCounter(db);
 		// In PostgreSQL, we need to manually specify the starting point for the
 		// counter
 		// https://stackoverflow.com/a/70389309
+		// https://stackoverflow.com/a/2022824
+		// https://www.postgresql.org/docs/current/functions-sequence.html
 		await db.raw(`
-			ALTER SEQUENCE "changes_3_counter_seq" RESTART WITH ${lastCounter + 1}
+			SELECT setval('changes_3_counter_seq', (${lastPreMigrationCounterSql}))
 		`);
 	}
 };
 
 export const down = async (db: DbConnection) => {
-	const lastCounter = await getLastPreMigrationCounter(db);
-
 	await db('changes_2').insert(
 		db('changes_3')
 			.select('*')
-			.where('counter', '>', lastCounter)
+			.where('counter', '>', db.raw(`(${lastPreMigrationCounterSql})`))
 			.orderBy('counter', 'asc'),
 	);
 
