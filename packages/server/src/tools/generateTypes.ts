@@ -1,6 +1,7 @@
 /* eslint-disable no-console */
 
 import sqlts, { Config, Table } from '@rmp135/sql-ts';
+import { hasOwnProperty } from '@joplin/utils/object';
 
 require('source-map-support').install();
 
@@ -77,6 +78,10 @@ const propertyTypes: Record<string, string> = {
 	'users.sso_auth_code_expire_at': 'number',
 };
 
+const interfaceNameOverrides: Record<string, string> = {
+	'Change2': 'Change2',
+};
+
 function insertContentIntoFile(filePath: string, markerOpen: string, markerClose: string, contentToInsert: string): void {
 	const fs = require('fs');
 	if (!fs.existsSync(filePath)) throw new Error(`File not found: ${filePath}`);
@@ -121,7 +126,12 @@ function createTypeString(table: Table) {
 	}
 
 	const header = ['export interface'];
-	header.push(table.interfaceName);
+
+	let interfaceName = table.interfaceName;
+	if (hasOwnProperty(interfaceNameOverrides, interfaceName)) {
+		interfaceName = interfaceNameOverrides[interfaceName];
+	}
+	header.push(interfaceName);
 
 	if (table.extends) header.push(`extends ${table.extends}`);
 
