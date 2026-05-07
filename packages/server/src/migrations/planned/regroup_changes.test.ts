@@ -11,6 +11,45 @@ import { up as splitChangesMigrationUp, down as splitChangesMigrationDown } from
 const oldChangeModel = () => new ChangeModelOld(db(), dbSlave(), models, config());
 const newChangeModel = () => new ChangeModelNew(db(), dbSlave(), models, config());
 
+const setUpShareWithItem = async () => {
+	const { session: session1 } = await createUserAndSession(1);
+	const { session: session2 } = await createUserAndSession(2);
+
+	const folderId = '000000000000000000000000000000F1';
+	const { share } = await shareFolderWithUser(session1.id, session2.id, folderId, {
+		[folderId]: {
+			'00000000000000000000000000000001': null,
+		},
+	});
+
+	const recordTestChange = (newChange: boolean, type: ChangeType) => {
+		const changeData = {
+			itemId: folderId,
+			itemName: 'test.md',
+			itemType: ItemType.Item,
+			previousItem: { jop_share_id: share.id },
+			shareId: share.id,
+			sourceUserId: session1.user_id,
+			type,
+		};
+
+		if (newChange) {
+			return models().change().recordChange(changeData);
+		} else {
+			return oldChangeModel().recordChange(changeData);
+		}
+	};
+
+	return { recordTestChange, session1, session2 };
+};
+
+const switchToChanges2 = async () => {
+	// Run the "split changes" migration to ensure that the changes_2 table
+	// table starts counting just after the changes in the legacy changes table:
+	await splitChangesMigrationDown(db());
+	await splitChangesMigrationUp(db());
+};
+
 describe('regroup_changes', () => {
 
 	beforeAll(async () => {
@@ -26,43 +65,15 @@ describe('regroup_changes', () => {
 	});
 
 	it('should combine entries from changes and changes_2', async () => {
-		const { session: session1 } = await createUserAndSession(1);
-		const { session: session2 } = await createUserAndSession(2);
-
-		const folderId = '000000000000000000000000000000F1';
-		const { share } = await shareFolderWithUser(session1.id, session2.id, folderId, {
-			[folderId]: {
-				'00000000000000000000000000000001': null,
-			},
-		});
+		const { recordTestChange } = await setUpShareWithItem();
 
 		await truncateTables(db(), ['changes', 'changes_2']);
 
-		const recordTestChange = (newChange: boolean, type: ChangeType) => {
-			const changeData = {
-				itemId: folderId,
-				itemName: 'test.md',
-				itemType: ItemType.Item,
-				previousItem: { jop_share_id: share.id },
-				shareId: share.id,
-				sourceUserId: session1.user_id,
-				type,
-			};
-
-			if (newChange) {
-				return models().change().recordChange(changeData);
-			} else {
-				return oldChangeModel().recordChange(changeData);
-			}
-		};
 
 		await recordTestChange(false, ChangeType.Create);
 		await recordTestChange(false, ChangeType.Update);
 
-		// Run the "split changes" migration to ensure that the changes_2 table
-		// starts in the correct place:
-		await splitChangesMigrationDown(db());
-		await splitChangesMigrationUp(db());
+		await switchToChanges2();
 
 		// This adds two updates: Calling recordChange for the new model
 		// creates one update per user.
@@ -98,5 +109,26 @@ describe('regroup_changes', () => {
 			// Should migrate all new changes
 			...expectedNewChanges,
 		]);
+	});
+
+	// For the migration to be successful, it's important that changes_3 and changes_2 have the same columns in the same
+	// order.
+	it('should create changes_3 with the same columns as changes_2', async () => {
+		const { recordTestChange } = await setUpShareWithItem();
+
+		await recordTestChange(true, ChangeType.Update);
+		await switchToChanges2();
+		await up(db());
+
+		const lastChangeFrom = async (tableName: string) => {
+			return await db()(tableName)
+				.select('*')
+				.orderBy('counter', 'desc')
+				.first();
+		};
+		const originalUpdate = await lastChangeFrom('changes_2');
+		const migratedUpdate = await lastChangeFrom('changes_3');
+
+		expect(originalUpdate).toEqual(migratedUpdate);
 	});
 });

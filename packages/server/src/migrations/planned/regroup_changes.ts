@@ -131,8 +131,9 @@ const migrateChanges = async (db: DbConnection, offset: number) => {
 export const up = async (db: DbConnection) => {
 	await db.transaction(async transaction => {
 		if (await transaction.schema.hasTable('changes_3')) return;
+		// This table should match changes_2 exactly.
 		// Do not use "createTableLike". It fails to correctly create the bigIncrements
-		// with SQLite:
+		// column with SQLite:
 		await transaction.schema.createTable('changes_3', (table) => {
 			table.bigIncrements('counter').unique().primary().notNullable();
 			table.string('id', 32).unique().notNullable();
