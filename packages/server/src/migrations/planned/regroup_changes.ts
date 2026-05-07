@@ -90,7 +90,7 @@ const migrateNewPage = async (db: DbConnection, start: number, end: number) => {
 };
 
 const migrateChanges = async (db: DbConnection, offset: number) => {
-	let table: 'changes'|'changes_2' = 'changes' as const;
+	let table: 'changes'|'changes_2' = 'changes';
 	let counterRange: [number, number] = [offset, offset];
 	const next = async () => {
 		const batchSize = 100_000;
