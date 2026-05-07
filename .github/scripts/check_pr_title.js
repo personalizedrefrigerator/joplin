@@ -36,7 +36,9 @@ module.exports = async ({ github, context, core }) => {
 		return;
 	}
 
-	const regex = isSoft ? softRegex : strictRegex;
+	// Doc-only PRs do not require an issue number.
+	const isDocOnly = /^Doc(,\s*Doc)*:/.test(title);
+	const regex = isSoft || isDocOnly ? softRegex : strictRegex;
 	if (regex.test(title)) {
 		core.info('Title is valid.');
 		return;
