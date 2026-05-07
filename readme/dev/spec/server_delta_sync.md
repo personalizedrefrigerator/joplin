@@ -48,11 +48,13 @@ All new change events are written to `changes_2`. However, database queries in `
 ### Migration
 
 A planned migration to remove the legacy `changes` table exists in `packages/server/src/migrations/planned/regroup_changes`. In November 2026, at least 6 months after the `changes_2` table was created:
-- The `regroup_changes` migration should be enabled. This can be done by moving it to the `packages/server/src/migrations/` folder and giving it a name that matches the other migrations.
-- `ChangeModel.old.ts` should be removed.
-   - `ChangeModel.old` is responsible for interacting with the legacy changes table.
-- `ChangeModel.new.ts` should be updated to interact with `changes_3`.
-- Some time later, a new migration should be created to `drop` the `changes` and `changes_2` tables: The planned `regroup_changes` migration preserves `changes` and `changes_2` to allow reverting the `regroup_changes` migration, if necessary.
+1. The `regroup_changes` migration should be enabled. This can be done by moving it to the `packages/server/src/migrations/` folder and giving it a name that matches the other migrations.
+	- This migration may take a long time for a large number of changes. It should be safe to run while the server is up.
+2. Prepare a new migration to migrate the remaining changes to `changes_3` and, at the same time, switch the server over to `changes_3`:
+	- Remove `ChangeModel.old.ts`. `ChangeModel.old` is responsible for interacting with the legacy changes table.
+	- Update `ChangeModel.new.ts` to interact with `changes_3` instead of `changes_2`.
+	- Create a migration that reruns `regroup_changes`. This migration will need to run while the server is down to ensure that all changes are migrated.
+3. Remove the old changes tables: Create a new migration to `drop` the `changes` and `changes_2` tables. The planned `regroup_changes` migration preserves `changes` and `changes_2` to allow reverting the `regroup_changes` migration, if necessary.
 
 The 6-month timeline is important: Any Joplin clients with delta cursors that still point to changes in `changes` will be forced to do a full resync.
 
