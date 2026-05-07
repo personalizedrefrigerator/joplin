@@ -79,7 +79,7 @@ const propertyTypes: Record<string, string> = {
 };
 
 const interfaceNameOverrides: Record<string, string> = {
-	'Change2': 'Change2',
+	'Changes2': 'Change2',
 };
 
 function insertContentIntoFile(filePath: string, markerOpen: string, markerClose: string, contentToInsert: string): void {
