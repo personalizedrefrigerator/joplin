@@ -403,18 +403,20 @@ describe('ChangeModel/index', () => {
 		]);
 
 		let updateCounter = 0;
-		const updateAtTime = async (session: Session, time: string) => {
-			jest.setSystemTime(new Date(time).getTime());
+		const updateAtTime = async (session: Session, timeString: string) => {
+			const time = new Date(timeString).getTime();
+			jest.setSystemTime(time);
 			const joplinNote = await models().item().loadAsJoplinItem<NoteEntity>(note.id);
 			await updateNote(session.id, {
 				...joplinNote,
 				title: `Updated (x${updateCounter++})`,
 			});
+			return { time };
 		};
 
 		// Each updateAtTime should create **two** update events (one per user)
 		await updateAtTime(session1, '2025-02-01');
-		await updateAtTime(session2, '2025-02-02');
+		const { time: lastUpdateTime } = await updateAtTime(session2, '2025-02-02');
 
 		expect(await changesForNote()).toMatchObject([
 			{ type: ChangeType.Create },
@@ -432,13 +434,23 @@ describe('ChangeModel/index', () => {
 
 		await models().change().compressOldChanges();
 
-		expect(await changesForNote()).toMatchObject([
+		const compressedChanges = await changesForNote();
+		expect(compressedChanges).toMatchObject([
 			{ type: ChangeType.Create },
 			{ type: ChangeType.Create },
-			{ type: ChangeType.Update },
-			{ type: ChangeType.Update },
+			// One change should remain for each user
+			{ type: ChangeType.Update, user_id: session2.user_id },
+			{ type: ChangeType.Update, user_id: session1.user_id },
 		]);
 
+		// Remaining updates should be those that occurred just
+		// after lastUpdateTime
+		const update1 = compressedChanges[compressedChanges.length - 2];
+		const update2 = compressedChanges[compressedChanges.length - 1];
+		expect(update1.created_time).toBeGreaterThanOrEqual(lastUpdateTime);
+		expect(update1.created_time).toBeLessThan(lastUpdateTime + Day);
+		expect(update2.created_time).toBeGreaterThanOrEqual(lastUpdateTime);
+		expect(update2.created_time).toBeLessThan(lastUpdateTime + Day);
 	}));
 
 	test('should not return the whole item', async () => {
