@@ -1,5 +1,5 @@
 import { DbConnection, SqliteMaxVariableNum } from '../../db';
-import { ChangeType, Uuid, ItemType, Changes2, Item, Change } from '../../services/database/types';
+import { ChangeType, Uuid, ItemType, Change2, Item, Change } from '../../services/database/types';
 import { PaginatedResults } from '../utils/pagination';
 import { NewModelFactoryHandler } from '../factory';
 import { Config } from '../../utils/types';
@@ -13,13 +13,13 @@ export { defaultChangeTtl } from './BaseChangeModel';
 
 const logger = Logger.create('ChangeModel/index');
 
-export interface DeltaChange extends Changes2 {
+export interface DeltaChange extends Change2 {
 	jop_updated_time?: number;
 }
 
 export type PaginatedDeltaChanges = PaginatedResults<DeltaChange>;
 
-export type PaginatedChanges = PaginatedResults<Changes2>;
+export type PaginatedChanges = PaginatedResults<Change2>;
 
 export interface ChangePagination {
 	limit?: number;
@@ -58,7 +58,7 @@ export function requestDeltaPagination(query: any): ChangePagination {
 	return output;
 }
 
-const oldToNewChange = (change: Change): Changes2 => {
+const oldToNewChange = (change: Change): Change2 => {
 	const previousShareId = change.previous_item ? JSON.parse(change.previous_item)?.jop_share_id : '';
 
 	const result = {
@@ -74,7 +74,7 @@ const oldToNewChanges = (changes: Change[]) => {
 	return changes.map(oldToNewChange);
 };
 
-export default class ChangeModel extends BaseModel<Changes2> {
+export default class ChangeModel extends BaseModel<Change2> {
 
 	private oldModel_: ChangeModelOld;
 	private newModel_: ChangeModelNew;
@@ -104,7 +104,7 @@ export default class ChangeModel extends BaseModel<Changes2> {
 		// it will return **all** old changes.
 		const includeOldChanges = !id || !await this.newModel_.load(id, { fields: ['id'] });
 
-		let results: Changes2[] = [];
+		let results: Change2[] = [];
 		if (includeOldChanges) {
 			results = oldToNewChanges(
 				await this.oldModel_.allFromId(id, limit),
@@ -155,10 +155,10 @@ export default class ChangeModel extends BaseModel<Changes2> {
 	}
 
 	// Public for testing
-	public async changesForUserQuery(userId: Uuid, fromCounter: number, limit: number, doCountQuery: boolean): Promise<Changes2[]> {
+	public async changesForUserQuery(userId: Uuid, fromCounter: number, limit: number, doCountQuery: boolean): Promise<Change2[]> {
 		const firstNewChange = await this.newModel_.first({ fields: ['counter'] });
 
-		let changes: Changes2[] = [];
+		let changes: Change2[] = [];
 		const startInOldTable = !firstNewChange || fromCounter < firstNewChange.counter;
 		if (startInOldTable) {
 			changes = oldToNewChanges(await this.oldModel_.changesForUserQuery(userId, fromCounter, limit, doCountQuery));
@@ -186,7 +186,7 @@ export default class ChangeModel extends BaseModel<Changes2> {
 			...pagination,
 		};
 
-		let changeAtCursor: Changes2 = null;
+		let changeAtCursor: Change2 = null;
 
 		if (pagination.cursor) {
 			changeAtCursor = await this.load(pagination.cursor);
@@ -232,7 +232,7 @@ export default class ChangeModel extends BaseModel<Changes2> {
 		};
 	}
 
-	private async removeDeletedItems(changes: Changes2[], items: Item[] = null): Promise<Changes2[]> {
+	private async removeDeletedItems(changes: Change2[], items: Item[] = null): Promise<Change2[]> {
 		const itemIds = changes.map(c => c.item_id);
 
 		// We skip permission check here because, when an item is shared, we need
@@ -241,7 +241,7 @@ export default class ChangeModel extends BaseModel<Changes2> {
 		// a context where permissions have already been checked.
 		items = items === null ? await this.db('items').select('id').whereIn('items.id', itemIds) : items;
 
-		const output: Changes2[] = [];
+		const output: Change2[] = [];
 
 		for (const change of changes) {
 			const item = items.find(f => f.id === change.item_id);
@@ -286,13 +286,13 @@ export default class ChangeModel extends BaseModel<Changes2> {
 	// event.
 	//
 	// Public to allow testing.
-	public compressChanges_(changes: Changes2[]): Changes2[] {
-		const itemChanges = new Map<Uuid, Changes2>();
+	public compressChanges_(changes: Change2[]): Change2[] {
+		const itemChanges = new Map<Uuid, Change2>();
 
-		const itemUniqueUpdates = new Map<Uuid, Changes2[]>();
+		const itemUniqueUpdates = new Map<Uuid, Change2[]>();
 		const itemToLastUpdateShareIds = new Map<Uuid, Uuid>();
 
-		const changeToShareId = (change: Changes2) => {
+		const changeToShareId = (change: Change2) => {
 			return change.previous_share_id;
 		};
 
@@ -346,7 +346,7 @@ export default class ChangeModel extends BaseModel<Changes2> {
 			}
 		}
 
-		const output: Changes2[] = [];
+		const output: Change2[] = [];
 
 		for (const [itemId, change] of itemChanges) {
 			if (change.type === ChangeType.Update) {
@@ -358,7 +358,7 @@ export default class ChangeModel extends BaseModel<Changes2> {
 			}
 		}
 
-		output.sort((a: Changes2, b: Changes2) => a.counter < b.counter ? -1 : +1);
+		output.sort((a: Change2, b: Change2) => a.counter < b.counter ? -1 : +1);
 
 		return output;
 	}

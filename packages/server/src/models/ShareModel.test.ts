@@ -1,6 +1,6 @@
 import { createUserAndSession, beforeAllDb, afterAllTests, beforeEachDb, models, checkThrowAsync, createItem, createItemTree, expectNotThrow, createNote } from '../utils/testing/testUtils';
 import { ErrorBadRequest, ErrorNotFound } from '../utils/errors';
-import { Changes2, ChangeType, ShareType } from '../services/database/types';
+import { Change2, ChangeType, ShareType } from '../services/database/types';
 import { inviteUserToShare, shareFolderWithUser, shareWithUserAndAccept, updateItemShareId } from '../utils/testing/shareApiUtils';
 import { withWarningSilenced } from '@joplin/lib/testing/test-utils';
 
@@ -349,7 +349,7 @@ describe('ShareModel', () => {
 		const greatestCounterBefore = (await models().change().all())
 			.map(c => c.counter)
 			.reduce((a, b) => Math.max(a, b));
-		const isNewChange = (change: Changes2) => change.counter > greatestCounterBefore;
+		const isNewChange = (change: Change2) => change.counter > greatestCounterBefore;
 
 		// Move out of the share
 		await updateItemShareId(session2, note.id, '');

@@ -1,6 +1,6 @@
 import Logger from '@joplin/utils/Logger';
 import { DbConnection, SqliteMaxVariableNum } from '../../db';
-import { Change, Changes2, ChangeType, Uuid } from '../../services/database/types';
+import { Change, Change2, ChangeType, Uuid } from '../../services/database/types';
 import { Day, formatDateTime } from '../../utils/time';
 import BaseModel, { LoadOptions } from '../BaseModel';
 import { NewModelFactoryHandler } from '../factory';
@@ -14,7 +14,7 @@ export const defaultChangeTtl = 180 * Day;
 
 type RecordChangeOptions = RecordChangeOptionsBase;
 
-export default abstract class BaseChangeModel<ChangeEntity extends Changes2|Change> extends BaseModel<ChangeEntity> {
+export default abstract class BaseChangeModel<ChangeEntity extends Change2|Change> extends BaseModel<ChangeEntity> {
 
 	public constructor(db: DbConnection, dbSlave: DbConnection, modelFactory: NewModelFactoryHandler, config: Config) {
 		super(db, dbSlave, modelFactory, config);

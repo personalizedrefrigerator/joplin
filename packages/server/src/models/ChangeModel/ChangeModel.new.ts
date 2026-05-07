@@ -1,6 +1,6 @@
 import Logger from '@joplin/utils/Logger';
 import { DbConnection } from '../../db';
-import { Changes2, ChangeType, Uuid } from '../../services/database/types';
+import { Change2, ChangeType, Uuid } from '../../services/database/types';
 import { UuidType } from '../BaseModel';
 import { PaginatedResults } from '../utils/pagination';
 import { NewModelFactoryHandler } from '../factory';
@@ -13,11 +13,11 @@ import BaseChangeModel from './BaseChangeModel';
 const logger = Logger.create('ChangeModel.new');
 
 
-export type PaginatedChanges = PaginatedResults<Changes2>;
+export type PaginatedChanges = PaginatedResults<Change2>;
 
 type RecordChangeOptions = RecordChangeOptionsBase;
 
-export default class ChangeModel extends BaseChangeModel<Changes2> {
+export default class ChangeModel extends BaseChangeModel<Change2> {
 
 	public constructor(db: DbConnection, dbSlave: DbConnection, modelFactory: NewModelFactoryHandler, config: Config) {
 		super(db, dbSlave, modelFactory, config);
@@ -27,7 +27,7 @@ export default class ChangeModel extends BaseChangeModel<Changes2> {
 		return 'changes_2';
 	}
 
-	public override async changesForUserQuery(userId: Uuid, fromCounter: number, limit: number, doCountQuery: boolean): Promise<Changes2[]> {
+	public override async changesForUserQuery(userId: Uuid, fromCounter: number, limit: number, doCountQuery: boolean): Promise<Change2[]> {
 		const fields = [
 			'id',
 			'item_id',
@@ -54,14 +54,14 @@ export default class ChangeModel extends BaseChangeModel<Changes2> {
 				.limit(limit);
 		}
 
-		const results: Changes2[] = await query;
+		const results: Change2[] = await query;
 		return results;
 	}
 
 	public override async recordChange({
 		shareId, sourceUserId, itemId, itemName, itemType, type, previousItem,
 	}: RecordChangeOptions) {
-		const changes: Changes2[] = [];
+		const changes: Change2[] = [];
 
 		// All per-user changes for the same item are given the same created/updated time
 		// to simplify grouping these changes together during change compression:

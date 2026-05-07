@@ -365,7 +365,7 @@ export interface User extends WithDates, WithUuid {
 	sso_auth_code_expire_at?: number;
 }
 
-export interface Changes2 extends WithDates, WithUuid {
+export interface Change2 extends WithDates, WithUuid {
 	counter?: number;
 	item_id?: Uuid;
 	user_id?: Uuid;

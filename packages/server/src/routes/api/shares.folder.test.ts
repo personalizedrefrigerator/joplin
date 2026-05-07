@@ -744,8 +744,8 @@ describe('shares.folder', () => {
 			'200000000000000000000000000000F2': {},
 		});
 
-		let latestChanges2 = await models().change().delta(user2.id);
-		const cursor2 = latestChanges2.cursor;
+		let latestChange2 = await models().change().delta(user2.id);
+		const cursor2 = latestChange2.cursor;
 
 		await shareFolderWithUser(session1.id, session2.id, '000000000000000000000000000000F1', {
 			'000000000000000000000000000000F1': {
@@ -753,8 +753,8 @@ describe('shares.folder', () => {
 			},
 		});
 
-		latestChanges2 = await models().change().delta(user2.id, { cursor: cursor2 });
-		expect(latestChanges2.items.length).toBe(2);
+		latestChange2 = await models().change().delta(user2.id, { cursor: cursor2 });
+		expect(latestChange2.items.length).toBe(2);
 	});
 
 	test('should get delta changes - user 1 and 2 are in sync, user 2 adds a note to shared folder', async () => {
