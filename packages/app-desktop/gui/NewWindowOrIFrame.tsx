@@ -44,6 +44,12 @@ const useDocument = (
 			setDoc(iframeElement?.contentWindow?.document);
 		} else if (mode === WindowMode.NewWindow) {
 			openedWindow = window.open('about:blank');
+
+			// Required to support TinyMCE:
+			openedWindow.document.open();
+			openedWindow.document.write('<!DOCTYPE html><html><head></head><body></body></html>');
+			openedWindow.document.close();
+
 			setDoc(openedWindow.document);
 
 			// .onbeforeunload and .onclose events don't seem to fire when closed by a user -- rely on polling
@@ -93,10 +99,6 @@ type OnSetLoaded = (loaded: boolean)=> void;
 const useDocumentSetup = (doc: Document|null, setLoaded: OnSetLoaded) => {
 	useEffect(() => {
 		if (!doc) return;
-
-		doc.open();
-		doc.write('<!DOCTYPE html><html><head></head><body></body></html>');
-		doc.close();
 
 		const cssUrls = [
 			'style.min.css',

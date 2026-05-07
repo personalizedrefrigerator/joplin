@@ -23,6 +23,15 @@ import { AppState as RNAppState, EmitterSubscription, View, Text, Linking, Nativ
 import getResponsiveValue from './components/getResponsiveValue';
 import NetInfo, { NetInfoSubscription } from '@react-native-community/netinfo';
 const DropdownAlert = require('react-native-dropdownalert').default;
+
+// Mirrors the DropdownAlertData type from react-native-dropdownalert
+interface DropdownAlertData {
+	type?: string;
+	title?: string;
+	message?: string;
+	interval?: number;
+	resolve?: (_value: DropdownAlertData)=> void;
+}
 import SafeAreaView from './components/SafeAreaView';
 const { connect, Provider } = require('react-redux');
 import { Provider as PaperProvider, MD3DarkTheme, MD3LightTheme } from 'react-native-paper';
@@ -103,13 +112,22 @@ import SamlShared from '@joplin/lib/components/shared/SamlShared';
 import NoteRevisionViewer from './components/screens/NoteRevisionViewer';
 import DocumentScanner from './components/screens/DocumentScanner/DocumentScanner';
 import buildStartupTasks from './utils/buildStartupTasks';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 import appReducer from './utils/appReducer';
 import SyncWizard from './components/SyncWizard/SyncWizard';
 import Synchronizer from '@joplin/lib/Synchronizer';
 
 const logger = Logger.create('root');
 const perfLogger = PerformanceLogger.create();
+
+interface DropdownAlertWrapperProps {
+	alert: (func: (data?: DropdownAlertData)=> Promise<DropdownAlertData>)=> void;
+}
+
+const DropdownAlertWrapper = ({ alert }: DropdownAlertWrapperProps) => {
+	const insets = useSafeAreaInsets();
+	return <DropdownAlert alert={alert} translucent alertViewStyle={{ padding: 8, marginTop: insets.top }} />;
+};
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 let storeDispatch: any = function(_action: any) {};
@@ -135,7 +153,7 @@ const generalMiddleware = (store: any) => (next: any) => async (action: any) => 
 
 	const result = next(action);
 	const newState: AppState = store.getState();
-	let doRefreshFolders = false;
+	let doRefreshFolders: boolean | string = false;
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	await reduxSharedMiddleware(store, next, action, storeDispatch as any);
@@ -230,9 +248,17 @@ const generalMiddleware = (store: any) => (next: any) => async (action: any) => 
 		Setting.setValue('noteVisiblePanes', newState.noteVisiblePanes);
 	}
 
+	if (action.type === 'SETTING_UPDATE_ONE' && action.key.indexOf('folders.sortOrder') === 0) {
+		doRefreshFolders = 'now';
+	}
+
 	if (doRefreshFolders) {
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-		await scheduleRefreshFolders((action: any) => storeDispatch(action), newState.selectedFolderId);
+		if (doRefreshFolders === 'now') {
+			await refreshFolders(storeDispatch, newState.selectedFolderId);
+		} else {
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
+			await scheduleRefreshFolders((action: any) => storeDispatch(action), newState.selectedFolderId);
+		}
 	}
 
 	return result;
@@ -287,8 +313,7 @@ class AppComponent extends React.Component<AppComponentProps, AppComponentState>
 	private themeChangeListener_: NativeEventSubscription|null = null;
 	private keyboardShowListener_: EmitterSubscription|null = null;
 	private keyboardHideListener_: EmitterSubscription|null = null;
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	private dropdownAlert_ = (_data: any) => new Promise<any>(res => res);
+	private dropdownAlert_: (data?: DropdownAlertData)=> Promise<DropdownAlertData> = (_data?: DropdownAlertData) => new Promise<DropdownAlertData>(res => res);
 	private callbackUrl: string|null = null;
 
 	private lastSyncStarted_ = false;
@@ -586,14 +611,18 @@ class AppComponent extends React.Component<AppComponentProps, AppComponentState>
 		if (sharedData) {
 			reg.logger().info('Received shared data');
 
-			// selectedFolderId can be null if no screens other than "All notes"
-			// have been opened.
-			const targetFolder = this.props.selectedFolderId ?? (await Folder.defaultFolder())?.id;
-			if (targetFolder) {
+			const activeFolder = await Folder.getValidActiveFolder();
+			if (activeFolder) {
 				logger.info('Sharing: handleShareData: Processing...');
-				await handleShared(sharedData, targetFolder, this.props.dispatch);
+				await handleShared(sharedData, activeFolder.id, this.props.dispatch);
 			} else {
-				reg.logger().info('Cannot handle share - default folder id is not set');
+				reg.logger().warn('Cannot handle share - no valid active folder found');
+				void this.dropdownAlert_({
+					type: 'error',
+					title: _('Cannot share'),
+					message: _('No valid notebook is available. Please create or select a notebook and try again.'),
+				});
+				ShareExtension.close();
 			}
 		} else {
 			logger.info('Sharing: received empty share data.');
@@ -771,10 +800,9 @@ class AppComponent extends React.Component<AppComponentProps, AppComponentState>
 							<View style={{ flex: 1, backgroundColor: theme.backgroundColor }}>
 								{ shouldShowMainContent && <AppNav screens={appNavInit} dispatch={this.props.dispatch} /> }
 							</View>
-							{/* eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied */}
-							<DropdownAlert alert={(func: any) => (this.dropdownAlert_ = func)} />
 							<SyncWizard/>
 						</SafeAreaView>
+						<DropdownAlertWrapper alert={(func) => { this.dropdownAlert_ = func; }} />
 					</View>
 				</SideMenu>
 				<PluginRunnerWebView />
