@@ -92,6 +92,7 @@ const migrateNewPage = async (db: DbConnection, start: number, end: number) => {
 const migrateChanges = async (db: DbConnection, offset: number) => {
 	let table: 'changes'|'changes_2' = 'changes';
 	let counterRange: [number, number] = [offset, offset];
+	// Advance to avoid re-processing the change
 	offset += 1;
 
 	const next = async () => {
