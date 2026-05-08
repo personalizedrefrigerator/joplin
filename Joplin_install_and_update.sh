@@ -17,12 +17,12 @@ handleError() {
 # Variables
 #-----------------------------------------------------
 # Only set colors, if tput available and TERM is recognized
-if [[ `command -v tput` && `tput setaf 1 2>/dev/null` ]]; then
-  COLOR_RED=`tput setaf 1`
-  COLOR_GREEN=`tput setaf 2`
-  COLOR_YELLOW=`tput setaf 3`
-  COLOR_BLUE=`tput setaf 4`
-  COLOR_RESET=`tput sgr0`
+if command -v tput && tput setaf 1 2>/dev/null ; then
+  COLOR_RED=$(tput setaf 1)
+  COLOR_GREEN=$(tput setaf 2)
+  COLOR_YELLOW=$(tput setaf 3)
+  COLOR_BLUE=$(tput setaf 4)
+  COLOR_RESET=$(tput sgr0)
 fi
 SILENT=false
 ALLOW_ROOT=false
@@ -109,11 +109,11 @@ compareVersions() {
 #-----------------------------------------------------
 # Setup Download Helper: DL
 #-----------------------------------------------------
-if [[ `command -v wget2` ]]; then
+if command -v wget2 ; then
   DL='wget2 -qO'
-elif [[ `command -v wget` ]]; then
+elif command -v wget; then
   DL='wget -qO'
-elif [[ `command -v curl` ]]; then
+elif command -v curl; then
   DL='curl -sLo'
 else
   print "${COLOR_RED}Error: wget2, wget, and curl not found. Please install one of these tools.${COLOR_RESET}"
@@ -128,7 +128,7 @@ while getopts "${optspec}" OPT; do
   [ "${OPT}" = " " ] && continue
   if [ "${OPT}" = "-" ]; then   # long option: reformulate OPT and OPTARG
     OPT="${OPTARG%%=*}"         # extract long option name
-    OPTARG="${OPTARG#$OPT}"     # extract long option argument (may be empty)
+    OPTARG="${OPTARG#"$OPT"}"     # extract long option argument (may be empty)
     OPTARG="${OPTARG#=}"        # if long option argument, remove assigning `=`
   fi
   case "${OPT}" in
@@ -303,7 +303,7 @@ fi
 # The old checks are left in place for historical reasons, but
 # NO MORE DESKTOP ENVIRONMENTS SHOULD BE ADDED
 # If a new environment needs to be supported, then the command check section should be re-thought
-if [[ $DESKTOP =~ .*gnome.*|.*kde.*|.*xfce.*|.*mate.*|.*lxqt.*|.*unity.*|.*x-cinnamon.*|.*deepin.*|.*pantheon.*|.*lxde.*|.*i3.*|.*sway.* ]] || [[ `command -v update-desktop-database` ]]; then
+if [[ $DESKTOP =~ .*gnome.*|.*kde.*|.*xfce.*|.*mate.*|.*lxqt.*|.*unity.*|.*x-cinnamon.*|.*deepin.*|.*pantheon.*|.*lxde.*|.*i3.*|.*sway.* ]] || command -v update-desktop-database ; then
   DATA_HOME=${XDG_DATA_HOME:-~/.local/share}
   DESKTOP_FILE_LOCATION="$DATA_HOME/applications"
 
@@ -341,7 +341,7 @@ SingleMainWindow=true
 EOF
 
   # Update application icons
-  [[ `command -v update-desktop-database` ]] && update-desktop-database "$DESKTOP_FILE_LOCATION" && update-desktop-database "$DATA_HOME/icons"
+  command -v update-desktop-database && update-desktop-database "$DESKTOP_FILE_LOCATION" && update-desktop-database "$DATA_HOME/icons"
   print "${COLOR_GREEN}OK${COLOR_RESET}"
 else
   print "${COLOR_RED}NOT DONE, unknown desktop '${DESKTOP}'${COLOR_RESET}"
