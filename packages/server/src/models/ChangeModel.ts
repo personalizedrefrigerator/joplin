@@ -117,7 +117,7 @@ export default class ChangeModel extends BaseModel<Change> {
 		};
 	}
 
-	private firstChangeCreatedBefore_(timestamp: number): Promise<Change> {
+	private latestChangeCreatedBefore_(timestamp: number): Promise<Change> {
 		return this.db(this.tableName)
 			.select(...this.defaultFields)
 			.where('created_time', '<', timestamp)
@@ -326,7 +326,7 @@ export default class ChangeModel extends BaseModel<Change> {
 			let changeAtCursor = await this.load(fromId);
 			// Fall back to starting just after the created_time that the cursor
 			// points to. This prevents the client from needing to do a full resync:
-			changeAtCursor ??= await this.firstChangeCreatedBefore_(fallbackFromTime);
+			changeAtCursor ??= await this.latestChangeCreatedBefore_(fallbackFromTime);
 			if (!changeAtCursor) throw new ErrorResyncRequired();
 
 			startCounter = changeAtCursor.counter;
