@@ -3,6 +3,7 @@ import { ChangeType } from '../services/database/types';
 import { Day, msleep } from '../utils/time';
 import { ChangePagination } from './ChangeModel';
 import { SqliteMaxVariableNum } from '../db';
+import { runWithFakeTimers } from '@joplin/lib/testing/test-utils';
 
 describe('ChangeModel', () => {
 
@@ -394,4 +395,38 @@ describe('ChangeModel', () => {
 		expect(changeModel.compressChanges_(changes)).toMatchObject(expected);
 	});
 
+	test('should fall back to using timestamps when a cursor is invalid', () => runWithFakeTimers(async () => {
+		const { session } = await createUserAndSession(1);
+
+		const createNoteAt = (date: string, id: string) => {
+			jest.setSystemTime(new Date(date).getTime());
+			return createNote(session.id, { id });
+		};
+
+		const updateNoteAt = (date: string, id: string) => {
+			jest.setSystemTime(new Date(date).getTime());
+			return updateNote(session.id, { id });
+		};
+		await createNoteAt('2026-01-01', '00000000000000000000000000000001');
+
+		const note2 = await createNoteAt('2026-01-02', '00000000000000000000000000000002');
+
+		await createNoteAt('2026-01-03', '00000000000000000000000000000003');
+
+		const delta1 = await models().change().delta(session.user_id);
+		const lastDelta1Item = delta1.items[delta1.items.length - 1];
+		await models().change().delete(lastDelta1Item.id);
+
+		const note4 = await createNoteAt('2026-01-05', '00000000000000000000000000000004');
+
+		await updateNoteAt('2026-01-06', note2.jop_id);
+
+		// Deleting the item that the cursor points to...
+		// ...should cause the delta to start from just before the last cursor
+		const delta2 = await models().change().delta(session.user_id, { cursor: delta1.cursor });
+		expect(delta2.items).toMatchObject([
+			{ type: ChangeType.Create, item_id: note4.id },
+			{ type: ChangeType.Update, item_id: note2.id },
+		]);
+	}));
 });

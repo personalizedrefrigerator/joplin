@@ -49,6 +49,25 @@ export function requestDeltaPagination(query: any): ChangePagination {
 	return output;
 }
 
+const parseCursor = (cursor: string) => {
+	const separatorIndex = cursor.indexOf(';');
+	if (separatorIndex === -1) {
+		// Legacy cursors
+		return { fromId: cursor, fallbackFromTime: -1 };
+	}
+
+	const id = cursor.substring(0, separatorIndex);
+	const timestamp = cursor.substring(separatorIndex + 1).match(/^\d+/);
+	if (timestamp) {
+		return {
+			fromId: id,
+			fallbackFromTime: Number(timestamp[0]),
+		};
+	} else {
+		throw new ErrorResyncRequired('Invalid cursor');
+	}
+};
+
 export default class ChangeModel extends BaseModel<Change> {
 
 	public constructor(db: DbConnection, dbSlave: DbConnection, modelFactory: NewModelFactoryHandler, config: Config) {
@@ -98,6 +117,14 @@ export default class ChangeModel extends BaseModel<Change> {
 		};
 	}
 
+	private firstChangeCreatedBefore_(timestamp: number): Promise<Change> {
+		return this.db(this.tableName)
+			.select(...this.defaultFields)
+			.where('created_time', '<', timestamp)
+			.orderBy('counter', 'desc')
+			.first();
+	}
+
 	public async changesForUserQuery(userId: Uuid, fromCounter: number, limit: number, doCountQuery: boolean): Promise<Change[]> {
 		// When need to get:
 		//
@@ -133,6 +160,7 @@ export default class ChangeModel extends BaseModel<Change> {
 			'item_id',
 			'item_name',
 			'type',
+			'created_time',
 			'updated_time',
 			'counter',
 		];
@@ -291,16 +319,22 @@ export default class ChangeModel extends BaseModel<Change> {
 			...pagination,
 		};
 
-		let changeAtCursor: Change = null;
+		let startCounter = -1;
 
 		if (pagination.cursor) {
-			changeAtCursor = await this.load(pagination.cursor) as Change;
+			const { fromId, fallbackFromTime } = parseCursor(pagination.cursor);
+			let changeAtCursor = await this.load(fromId);
+			// Fall back to starting just after the created_time that the cursor
+			// points to. This prevents the client from needing to do a full resync:
+			changeAtCursor ??= await this.firstChangeCreatedBefore_(fallbackFromTime);
 			if (!changeAtCursor) throw new ErrorResyncRequired();
+
+			startCounter = changeAtCursor.counter;
 		}
 
 		const changes = await this.changesForUserQuery(
 			userId,
-			changeAtCursor ? changeAtCursor.counter : -1,
+			startCounter,
 			pagination.limit,
 			false,
 		);
@@ -320,15 +354,22 @@ export default class ChangeModel extends BaseModel<Change> {
 			return deltaChange;
 		});
 
-		// This property is present only for the purpose of ordering the results
-		// and can be removed afterwards.
-		for (const change of finalChanges) delete change.counter;
+		const lastChange = changes.length ? changes[changes.length - 1] : null;
+		const cursor = lastChange ? `${lastChange.id};${lastChange.created_time}` : pagination.cursor;
+
+		for (const change of finalChanges) {
+			// This property is present only for the purpose of ordering the results
+			// and can be removed afterwards.
+			delete change.counter;
+			// This property is used for creating the cursor and can also be removed
+			delete change['created_time'];
+		}
 
 		return {
 			items: finalChanges,
+			cursor,
 			// If we have changes, we return the ID of the latest changes from which delta sync can resume.
 			// If there's no change, we return the previous cursor.
-			cursor: changes.length ? changes[changes.length - 1].id : pagination.cursor,
 			has_more: changes.length >= pagination.limit,
 		};
 	}
