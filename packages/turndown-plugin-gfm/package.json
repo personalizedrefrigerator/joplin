@@ -4,7 +4,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "version": "1.0.66",
+  "version": "1.0.67",
   "author": "Dom Christie",
   "main": "lib/turndown-plugin-gfm.cjs.js",
   "devDependencies": {
@@ -41,5 +41,5 @@
     "build-test": "browserify test/turndown-plugin-gfm-test.js --outfile test/turndown-plugin-gfm-test.browser.js",
     "prepare": "npm run build"
   },
-  "gitHead": "502da70dd774ad618b3bcefb0ada629203e54f77"
+  "gitHead": "500e4c02809d3ebe463aa590e86f541d1ef0661c"
 }
