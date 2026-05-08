@@ -55,6 +55,8 @@ const switchToChanges2 = async () => {
 	await splitChangesMigrationUp(db());
 };
 
+const getMigratedChanges = () => db()('changes_3').select('*').orderBy('counter', 'asc');
+
 describe('regroup_changes', () => {
 
 	beforeAll(async () => {
@@ -111,7 +113,7 @@ describe('regroup_changes', () => {
 
 		await up(db());
 
-		const migratedChanges = await db()('changes_3').select('*');
+		const migratedChanges = await getMigratedChanges();
 
 		expect(migratedChanges).toMatchObject([
 			// Should migrate all legacy changes except updates
@@ -196,5 +198,30 @@ describe('regroup_changes', () => {
 			{ counter: 2, item_id: 'A0000000000000000000000000000001' },
 			{ counter: 3, item_id: 'A0000000000000000000000000000002' },
 		]);
+	});
+
+	it('should migrate more changes when up is run multiple times', async () => {
+		const { recordTestChange } = await setUpShareWithItem();
+		await truncateTables(db(), ['changes', 'changes_2']);
+
+		await switchToChanges2();
+		await recordTestChange(true, ChangeType.Update);
+		// The migrated changes should contain:
+		// - One change to mark the start of changes_2
+		// - 2 update changes (one per user).
+		await up(db());
+		expect(await getMigratedChanges()).toHaveLength(3);
+
+		await recordTestChange(true, ChangeType.Update);
+		await recordTestChange(true, ChangeType.Update);
+
+		// The four new update changes should migrate
+		await up(db());
+		expect(await getMigratedChanges()).toHaveLength(7);
+
+		// The new delete change should migrate
+		await recordTestChange(true, ChangeType.Delete);
+		await up(db());
+		expect(await getMigratedChanges()).toHaveLength(8);
 	});
 });

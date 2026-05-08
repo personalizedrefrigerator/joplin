@@ -40,11 +40,13 @@ export const config = { transaction: false };
 // 1. all entries in `changes` have counters less than entries in `changes_2`
 // 2. there is at least one entry in `changes_2` (should be guaranteed by the migration
 //    that creates changes_2).
-//
-// This is a raw query to allow use within another raw query:
-const lastPreMigrationCounterSql = 'SELECT counter FROM changes_2 ORDER BY counter DESC LIMIT 1';
+const lastPreMigrationCounterQuery = (db: DbConnection) => (
+	db('changes_2').select({ 'counter': 'counter' }).orderBy('counter', 'desc').limit(1)
+);
 
 const migrateLegacyPage = async (db: DbConnection, start: number, end: number) => {
+	logger.info(`Processing legacy changes (start=${start}, end=${end})`);
+
 	const uuidSql = isPostgres(db) ? `
 		regexp_replace(gen_random_uuid()::text, '-', '', 'g')
 	` : `
@@ -74,24 +76,24 @@ const migrateLegacyPage = async (db: DbConnection, start: number, end: number) =
 				ORDER BY changes.counter ASC
 		`, [start, end, ChangeType.Create, ChangeType.Delete]);
 	});
-
-	logger.info(`Processing legacy changes (start=${start}, end=${end})`);
 };
 
 const migrateNewPage = async (db: DbConnection, start: number, end: number) => {
+	logger.info(`Processing new changes: (start=${start}, end=${end})`);
+
 	const query = db('changes_2')
 		.select('*')
 		.where('counter', '>=', start)
 		.where('counter', '<=', end)
 		.orderBy('counter', 'asc');
 	await db('changes_3').insert(query);
-
-	logger.info(`Processing new changes: (start=${start}, end=${end})`);
 };
 
 const migrateChanges = async (db: DbConnection, offset: number) => {
 	let table: 'changes'|'changes_2' = 'changes';
 	let counterRange: [number, number] = [offset, offset];
+	offset += 1;
+
 	const next = async () => {
 		const batchSize = 100_000;
 		const nextBatch = await db(table)
@@ -204,8 +206,9 @@ export const up = async (db: DbConnection) => {
 		// https://stackoverflow.com/a/70389309
 		// https://stackoverflow.com/a/2022824
 		// https://www.postgresql.org/docs/current/functions-sequence.html
+		const lastChanges3CounterSql = 'SELECT counter FROM changes_3 ORDER BY counter DESC LIMIT 1';
 		await db.raw(`
-			SELECT setval('changes_3_counter_seq', (${lastPreMigrationCounterSql}))
+			SELECT setval('changes_3_counter_seq', (${lastChanges3CounterSql}))
 		`);
 	}
 };
@@ -214,7 +217,7 @@ export const down = async (db: DbConnection) => {
 	await db('changes_2').insert(
 		db('changes_3')
 			.select('*')
-			.where('counter', '>', db.raw(`(${lastPreMigrationCounterSql})`))
+			.where('counter', '>', lastPreMigrationCounterQuery(db))
 			.orderBy('counter', 'asc'),
 	);
 
