@@ -1,7 +1,7 @@
 {
   "name": "@joplin/turndown",
   "description": "A library that converts HTML to Markdown",
-  "version": "4.0.83",
+  "version": "4.0.84",
   "author": "Dom Christie",
   "main": "lib/turndown.cjs.js",
   "publishConfig": {
@@ -47,5 +47,5 @@
     "build": "npm run build-cjs",
     "prepare": "npm run build"
   },
-  "gitHead": "05a29b450962bf05a8642bbd39446a1f679a96ba"
+  "gitHead": "502da70dd774ad618b3bcefb0ada629203e54f77"
 }
