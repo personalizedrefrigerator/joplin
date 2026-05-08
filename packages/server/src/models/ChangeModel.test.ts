@@ -411,15 +411,15 @@ describe('ChangeModel', () => {
 
 		const note2 = await createNoteAt('2026-01-02', '00000000000000000000000000000002');
 
-		await createNoteAt('2026-01-03', '00000000000000000000000000000003');
+		await createNoteAt('2026-02-03', '00000000000000000000000000000003');
 
 		const delta1 = await models().change().delta(session.user_id);
 		const lastDelta1Item = delta1.items[delta1.items.length - 1];
 		await models().change().delete(lastDelta1Item.id);
 
-		const note4 = await createNoteAt('2026-01-05', '00000000000000000000000000000004');
+		const note4 = await createNoteAt('2026-03-05', '00000000000000000000000000000004');
 
-		await updateNoteAt('2026-01-06', note2.jop_id);
+		await updateNoteAt('2026-03-06', note2.jop_id);
 
 		// Deleting the item that the cursor points to...
 		// ...should cause the delta to start from just before the last cursor

@@ -326,7 +326,13 @@ export default class ChangeModel extends BaseModel<Change> {
 			let changeAtCursor = await this.load(fromId);
 			// Fall back to starting just after the created_time that the cursor
 			// points to. This prevents the client from needing to do a full resync:
-			changeAtCursor ??= await this.latestChangeCreatedBefore_(fallbackFromTime);
+			if (!changeAtCursor) {
+				// It's fine for the fallback case to return more changes than necessary.
+				// However, it isn't fine for it to return less. Include a few days worth
+				// of extra changes to allow for possible clock jumps:
+				const time = fallbackFromTime - Day * 5;
+				changeAtCursor = await this.latestChangeCreatedBefore_(time);
+			}
 			if (!changeAtCursor) throw new ErrorResyncRequired();
 
 			startCounter = changeAtCursor.counter;
@@ -362,7 +368,7 @@ export default class ChangeModel extends BaseModel<Change> {
 			// and can be removed afterwards.
 			delete change.counter;
 			// This property is used for creating the cursor and can also be removed
-			delete change['created_time'];
+			delete change.created_time;
 		}
 
 		return {
