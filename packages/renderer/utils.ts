@@ -1,5 +1,5 @@
 import { attributesHtml } from './htmlUtils';
-import { ItemIdToUrlHandler, OptionsResourceModel } from './types';
+import { ItemIdToUrlHandler, OptionsResourceModel, ResourceInfo, ResourceInfos } from './types';
 
 const Entities = require('html-entities').AllHtmlEntities;
 const htmlentities = new Entities().encode;
@@ -98,8 +98,7 @@ export const resourceStatusName = function(index: number) {
 	throw new Error(`Unknown index: ${index}`);
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-export const resourceStatus = function(ResourceModel: OptionsResourceModel, resourceInfo: any) {
+export const resourceStatus = function(ResourceModel: OptionsResourceModel, resourceInfo: ResourceInfo) {
 	if (!ResourceModel) return 'ready';
 
 	let status = 'ready';
@@ -130,8 +129,7 @@ type ImageMarkupData = {
 	title: string;
 }|{ src: string; before: string; after: string };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-export const imageReplacement = function(ResourceModel: OptionsResourceModel, markup: ImageMarkupData, resources: any, resourceBaseUrl: string, itemIdToUrl: ItemIdToUrlHandler = null) {
+export const imageReplacement = function(ResourceModel: OptionsResourceModel, markup: ImageMarkupData, resources: ResourceInfos, resourceBaseUrl: string, itemIdToUrl: ItemIdToUrlHandler = null) {
 	if (!ResourceModel || !resources) return null;
 
 	const src = markup.src;
@@ -160,19 +158,23 @@ export const imageReplacement = function(ResourceModel: OptionsResourceModel, ma
 		}
 
 		// contenteditable="false": Improves support for the Rich Text Editor -- without this,
-		// users can add content within the <div>, which breaks the html-to-md conversion.
+		// users can add content within the <span>, which breaks the html-to-md conversion.
+		//
+		// Use a <span> and not a <div> to allow the placeholder to appear in <p> elements.
 		return (
-			`<div ${attributesHtml(attrs)} contenteditable="false">`
+			`<span ${attributesHtml(attrs)} contenteditable="false">`
 				+ `<img src="data:image/svg+xml;utf8,${htmlentities(icon)}"/>`
-			+ '</div>'
+			+ '</span>'
 		);
 	}
 	const mime = resource.mime ? resource.mime.toLowerCase() : '';
 	if (ResourceModel.isSupportedImageMimeType(mime)) {
 		let newSrc = '';
 
-		if (itemIdToUrl) {
-			newSrc = itemIdToUrl(resource.id);
+		const timestampParameter = `?t=${resource.updated_time}`;
+		const idToUrlResult = itemIdToUrl?.(resource.id, timestampParameter) ?? null;
+		if (idToUrlResult !== null) {
+			newSrc = idToUrlResult;
 		} else {
 			const temp = [];
 
@@ -183,7 +185,7 @@ export const imageReplacement = function(ResourceModel: OptionsResourceModel, ma
 			}
 
 			temp.push(ResourceModel.filename(resource));
-			temp.push(`?t=${resource.updated_time}`);
+			temp.push(timestampParameter);
 
 			newSrc = temp.join('');
 		}

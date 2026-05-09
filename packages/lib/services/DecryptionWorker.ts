@@ -7,16 +7,28 @@ import Logger from '@joplin/utils/Logger';
 import shim from '../shim';
 import KvStore from './KvStore';
 import EncryptionService from './e2ee/EncryptionService';
+import PerformanceLogger from '../PerformanceLogger';
+import AsyncActionQueue from '../AsyncActionQueue';
 
 const EventEmitter = require('events');
+const perfLogger = PerformanceLogger.create();
 
 interface DecryptionResult {
 	skippedItemCount?: number;
-	decryptedItemCounts?: number;
+	decryptedItemCounts?: Record<number, number>;
 	decryptedItemCount?: number;
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	error: any;
+	error: Error | null;
 }
+
+// Key for use with the KvStore.
+const decryptionErrorKeyPrefix = 'decryptErrorLabel:';
+const decryptionErrorKey = (type: number, id: string) => {
+	return `${decryptionErrorKeyPrefix}${type}:${id}`;
+};
+const decryptionCounterKeyPrefix = 'decrypt:';
+const decryptionCounterKey = (type: number, id: string) => {
+	return `${decryptionCounterKeyPrefix}${type}:${id}`;
+};
 
 export default class DecryptionWorker {
 
@@ -26,13 +38,11 @@ export default class DecryptionWorker {
 	private logger_: Logger;
 	// eslint-disable-next-line @typescript-eslint/ban-types -- Old code before rule was applied
 	public dispatch: Function = () => {};
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	private scheduleId_: any = null;
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	private eventEmitter_: any;
+	private scheduleId_: ReturnType<typeof setTimeout> | null = null;
+	private eventEmitter_: InstanceType<typeof EventEmitter>;
 	private kvStore_: KvStore = null;
 	private maxDecryptionAttempts_ = 2;
-	private startCalls_: boolean[] = [];
+	private taskQueue_: AsyncActionQueue = new AsyncActionQueue();
 	private encryptionService_: EncryptionService = null;
 
 	public constructor() {
@@ -65,8 +75,7 @@ export default class DecryptionWorker {
 		return DecryptionWorker.instance_;
 	}
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	public setEncryptionService(v: any) {
+	public setEncryptionService(v: EncryptionService) {
 		this.encryptionService_ = v;
 	}
 
@@ -96,24 +105,30 @@ export default class DecryptionWorker {
 	}
 
 	public async decryptionDisabledItems() {
-		let items = await this.kvStore().searchByPrefix('decrypt:');
+		let items = await this.kvStore().searchByPrefix(decryptionCounterKeyPrefix);
 		items = items.filter(item => item.value > this.maxDecryptionAttempts_);
-		items = items.map(item => {
+		return await Promise.all(items.map(async item => {
 			const s = item.key.split(':');
+			const type_ = Number(s[1]);
+			const id = s[2];
+			const storedError = await this.kvStore().value(decryptionErrorKey(type_, id));
+			const errorDescription = typeof storedError === 'string' ? storedError : null;
 			return {
-				type_: Number(s[1]),
-				id: s[2],
+				type_,
+				id,
+				reason: errorDescription,
 			};
-		});
-		return items;
+		}));
 	}
 
-	public async clearDisabledItem(typeId: string, itemId: string) {
-		await this.kvStore().deleteValue(`decrypt:${typeId}:${itemId}`);
+	public async clearDisabledItem(typeId: number, itemId: string) {
+		await this.kvStore().deleteValue(decryptionCounterKey(typeId, itemId));
+		await this.kvStore().deleteValue(decryptionErrorKey(typeId, itemId));
 	}
 
 	public async clearDisabledItems() {
-		await this.kvStore().deleteByPrefix('decrypt:');
+		await this.kvStore().deleteByPrefix(decryptionCounterKeyPrefix);
+		await this.kvStore().deleteByPrefix(decryptionErrorKeyPrefix);
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
@@ -169,13 +184,13 @@ export default class DecryptionWorker {
 		this.state_ = 'started';
 
 		const excludedIds = [];
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-		const decryptedItemCounts: any = {};
+		const decryptedItemCounts: Record<number, number> = {};
 		let skippedItemCount = 0;
 
 		this.dispatch({ type: 'ENCRYPTION_HAS_DISABLED_ITEMS', value: false });
 		this.dispatchReport({ state: 'started' });
 
+		const decryptItemsTask = perfLogger.taskStart('DecryptionWorker/decryptItems');
 		try {
 			const notLoadedMasterKeyDispatches = [];
 
@@ -193,10 +208,14 @@ export default class DecryptionWorker {
 						itemCount: items.length,
 					});
 
-					const counterKey = `decrypt:${item.type_}:${item.id}`;
+					const counterKey = decryptionCounterKey(item.type_, item.id);
+					const errorKey = decryptionErrorKey(item.type_, item.id);
 
 					const clearDecryptionCounter = async () => {
 						await this.kvStore().deleteValue(counterKey);
+						// The decryption error key stores the reason for the decryption counter's value.
+						// As such, the error should be reset when the decryption counter is reset:
+						await this.kvStore().deleteValue(errorKey);
 					};
 
 					// Don't log in production as it results in many messages when importing many items
@@ -253,8 +272,11 @@ export default class DecryptionWorker {
 							throw error;
 						}
 
+						await this.kvStore().setValue(errorKey, String(error));
+
 						if (options.errorHandler === 'log') {
-							this.logger().warn(`DecryptionWorker: error for: ${item.id} (${ItemClass.tableName()})`, error, item);
+							this.logger().warn(`DecryptionWorker: error for: ${item.id} (${ItemClass.tableName()})`, error);
+							this.logger().debug('Item with error:', item);
 						} else {
 							throw error;
 						}
@@ -268,6 +290,8 @@ export default class DecryptionWorker {
 			this.state_ = 'idle';
 			this.dispatchReport({ state: 'idle' });
 			throw error;
+		} finally {
+			decryptItemsTask.onEnd();
 		}
 
 		// 2019-05-12: Temporary to set the file size of the resources
@@ -301,14 +325,35 @@ export default class DecryptionWorker {
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	public async start(options: any = {}) {
-		this.startCalls_.push(true);
+	public async start(options: any = {}): Promise<DecryptionResult> {
 		let output = null;
-		try {
-			output = await this.start_(options);
-		} finally {
-			this.startCalls_.pop();
+		let lastError: Error;
+
+		// Use taskQueue_ to ensure that only one decryption task is running at a time.
+		this.taskQueue_.push(async () => {
+			const startTask = perfLogger.taskStart('DecryptionWorker/start');
+			try {
+				output = await this.start_(options);
+			} catch (error) {
+				lastError = error;
+			} finally {
+				startTask.onEnd();
+			}
+		});
+		await this.taskQueue_.processAllNow();
+
+		if (lastError) {
+			throw lastError;
 		}
+
+		// If this task was skipped due to a concurrent start() call, return an empty
+		// DecryptionResult instead of null. AsyncActionQueue drops earlier tasks when
+		// multiple are queued, but start() guarantees Promise<DecryptionResult> and
+		// must not resolve null.
+		if (!output) {
+			return { error: null, decryptedItemCount: 0, skippedItemCount: 0 };
+		}
+
 		return output;
 	}
 
@@ -321,13 +366,6 @@ export default class DecryptionWorker {
 		this.eventEmitter_ = null;
 		DecryptionWorker.instance_ = null;
 
-		return new Promise((resolve) => {
-			const iid = shim.setInterval(() => {
-				if (!this.startCalls_.length) {
-					shim.clearInterval(iid);
-					resolve(null);
-				}
-			}, 100);
-		});
+		await this.taskQueue_.waitForAllDone();
 	}
 }

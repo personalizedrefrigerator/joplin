@@ -1,8 +1,8 @@
 import * as React from 'react';
-import { useState, useEffect, useRef, forwardRef, useCallback, useImperativeHandle, useMemo, ForwardedRef } from 'react';
+import { useState, useEffect, useRef, forwardRef, useCallback, useImperativeHandle, ForwardedRef, useContext } from 'react';
 
 // eslint-disable-next-line no-unused-vars
-import { EditorCommand, MarkupToHtmlOptions, NoteBodyEditorProps, NoteBodyEditorRef } from '../../../utils/types';
+import { EditorCommand, NoteBodyEditorProps, NoteBodyEditorRef } from '../../../utils/types';
 import { commandAttachFileToBody, getResourcesFromPasteEvent } from '../../../utils/resourceHandling';
 import { ScrollOptions, ScrollOptionTypes } from '../../../utils/types';
 import { CommandValue } from '../../../utils/types';
@@ -33,6 +33,8 @@ import useContextMenu from '../utils/useContextMenu';
 import useWebviewIpcMessage from '../utils/useWebviewIpcMessage';
 import useEditorSearchHandler from '../utils/useEditorSearchHandler';
 import { focus } from '@joplin/lib/utils/focusHandler';
+import { WindowIdContext } from '../../../../NewWindowOrIFrame';
+import { MarkupToHtmlOptions } from '../../../../hooks/useMarkupToHtml';
 
 function markupRenderOptions(override: MarkupToHtmlOptions = null): MarkupToHtmlOptions {
 	return { ...override };
@@ -47,7 +49,10 @@ function CodeMirror(props: NoteBodyEditorProps, ref: ForwardedRef<NoteBodyEditor
 	const [webviewReady, setWebviewReady] = useState(false);
 
 	const editorRef = useRef(null);
-	const rootRef = useRef(null);
+	const [editorRoot, setEditorRoot] = useState<HTMLDivElement|null>(null);
+	const rootRef = useRef<HTMLDivElement|null>(null);
+	rootRef.current = editorRoot;
+
 	const webviewRef = useRef(null);
 	// eslint-disable-next-line @typescript-eslint/ban-types -- Old code before rule was applied
 	const props_onChangeRef = useRef<Function>(null);
@@ -243,6 +248,27 @@ function CodeMirror(props: NoteBodyEditorProps, ref: ForwardedRef<NoteBodyEditor
 								reg.logger().warn('CodeMirror execCommand: unsupported command: ', value.name);
 							}
 						},
+						'editor.scrollToText': (_text: string) => {
+							reg.logger().warn('"editor.scrollToText" is unsupported in legacy editor - please use the new editor');
+							return false;
+						},
+						// Table editing commands are only supported in the v6 editor
+						'editor.tableAddRow': () => {
+							reg.logger().warn('Table editing commands are not supported in the legacy editor');
+							return false;
+						},
+						'editor.tableAddColumn': () => {
+							reg.logger().warn('Table editing commands are not supported in the legacy editor');
+							return false;
+						},
+						'editor.tableDeleteRow': () => {
+							reg.logger().warn('Table editing commands are not supported in the legacy editor');
+							return false;
+						},
+						'editor.tableDeleteColumn': () => {
+							reg.logger().warn('Table editing commands are not supported in the legacy editor');
+							return false;
+						},
 					};
 
 					if (commands[cmd.name]) {
@@ -329,7 +355,7 @@ function CodeMirror(props: NoteBodyEditorProps, ref: ForwardedRef<NoteBodyEditor
 	}, [editorPasteText, onEditorPaste]);
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	const loadScript = async (script: any) => {
+	const loadScript = async (script: any, document: Document) => {
 		return new Promise((resolve) => {
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 			let element: any = document.createElement('script');
@@ -358,6 +384,7 @@ function CodeMirror(props: NoteBodyEditorProps, ref: ForwardedRef<NoteBodyEditor
 	};
 
 	useEffect(() => {
+		if (!editorRoot) return () => { };
 		let cancelled = false;
 
 		async function loadScripts() {
@@ -384,13 +411,14 @@ function CodeMirror(props: NoteBodyEditorProps, ref: ForwardedRef<NoteBodyEditor
 				});
 			}
 
+			const ownerDoc = editorRoot.ownerDocument;
 			for (const s of scriptsToLoad) {
-				if (document.getElementById(s.id)) {
+				if (ownerDoc.getElementById(s.id)) {
 					s.loaded = true;
 					continue;
 				}
 
-				await loadScript(s);
+				await loadScript(s, ownerDoc);
 				if (cancelled) return;
 
 				s.loaded = true;
@@ -402,9 +430,11 @@ function CodeMirror(props: NoteBodyEditorProps, ref: ForwardedRef<NoteBodyEditor
 		return () => {
 			cancelled = true;
 		};
-	}, [styles.editor.codeMirrorTheme]);
+	}, [styles.editor.codeMirrorTheme, editorRoot]);
 
 	useEffect(() => {
+		if (!editorRoot) return () => {};
+
 		const theme = themeStyle(props.themeId);
 
 		// Selection in dark mode is hard to see so make it brighter.
@@ -426,10 +456,11 @@ function CodeMirror(props: NoteBodyEditorProps, ref: ForwardedRef<NoteBodyEditor
 			max-width: ${props.contentMaxWidth}px !important;
 		` : '';
 
-		const element = document.createElement('style');
+		const ownerDoc = editorRoot.ownerDocument;
+		const element = ownerDoc.createElement('style');
 		element.setAttribute('id', 'codemirrorStyle');
-		document.head.appendChild(element);
-		element.appendChild(document.createTextNode(`
+		ownerDoc.head.appendChild(element);
+		element.appendChild(ownerDoc.createTextNode(`
 			/* These must be important to prevent the codemirror defaults from taking over*/
 			.CodeMirror {
 				font-family: monospace;
@@ -442,6 +473,11 @@ function CodeMirror(props: NoteBodyEditorProps, ref: ForwardedRef<NoteBodyEditor
 				/* Some themes add a box shadow for some reason */
 				-webkit-box-shadow: none !important;
 				line-height: ${theme.lineHeight} !important;
+			}
+
+			.CodeMirror-code:focus-visible {
+				/* Avoid showing additional focus-visible decoration */
+				outline: none;
 			}
 
 			.CodeMirror-lines {
@@ -586,10 +622,9 @@ function CodeMirror(props: NoteBodyEditorProps, ref: ForwardedRef<NoteBodyEditor
 		`));
 
 		return () => {
-			document.head.removeChild(element);
+			ownerDoc.head.removeChild(element);
 		};
-		// eslint-disable-next-line @seiyab/react-hooks/exhaustive-deps -- Old code before rule was applied
-	}, [props.themeId, props.contentMaxWidth]);
+	}, [props.themeId, props.contentMaxWidth, props.fontSize, editorRoot]);
 
 	const webview_domReady = useCallback(() => {
 		setWebviewReady(true);
@@ -630,6 +665,7 @@ function CodeMirror(props: NoteBodyEditorProps, ref: ForwardedRef<NoteBodyEditor
 				useCustomPdfViewer: props.useCustomPdfViewer,
 				noteId: props.noteId,
 				vendorDir: bridge().vendorDir(),
+				showNoteLinkIcon: props.showNoteLinkIcon,
 			}));
 
 			if (cancelled) return;
@@ -650,7 +686,7 @@ function CodeMirror(props: NoteBodyEditorProps, ref: ForwardedRef<NoteBodyEditor
 			shim.clearTimeout(timeoutId);
 		};
 		// eslint-disable-next-line @seiyab/react-hooks/exhaustive-deps -- Old code before rule was applied
-	}, [props.content, props.contentKey, renderedBodyContentKey, props.contentMarkupLanguage, props.visiblePanes, props.resourceInfos, props.markupToHtml]);
+	}, [props.content, props.contentKey, renderedBodyContentKey, props.contentMarkupLanguage, props.visiblePanes, props.resourceInfos, props.markupToHtml, props.showNoteLinkIcon]);
 
 	useEffect(() => {
 		if (!webviewReady) return;
@@ -679,33 +715,15 @@ function CodeMirror(props: NoteBodyEditorProps, ref: ForwardedRef<NoteBodyEditor
 		// eslint-disable-next-line @seiyab/react-hooks/exhaustive-deps -- Old code before rule was applied
 	}, [renderedBody, webviewReady]);
 
-	useEditorSearchHandler({
+	const { onSetInitialMarkersRef } = useEditorSearchHandler({
 		setLocalSearchResultCount: props.setLocalSearchResultCount,
 		searchMarkers: props.searchMarkers,
 		webviewRef,
 		editorRef,
 		noteContent: props.content,
 		renderedBody,
+		showEditorMarkers: true,
 	});
-
-	const cellEditorStyle = useMemo(() => {
-		const output = { ...styles.cellEditor };
-		if (!props.visiblePanes.includes('editor')) {
-			output.display = 'none'; // Seems to work fine since the refactoring
-		}
-
-		return output;
-	}, [styles.cellEditor, props.visiblePanes]);
-
-	const cellViewerStyle = useMemo(() => {
-		const output = { ...styles.cellViewer };
-		if (!props.visiblePanes.includes('viewer')) {
-			output.display = 'none';
-		} else if (!props.visiblePanes.includes('editor')) {
-			output.borderLeftStyle = 'none';
-		}
-		return output;
-	}, [styles.cellViewer, props.visiblePanes]);
 
 	useEffect(() => {
 		if (!editorRef.current) return;
@@ -724,9 +742,11 @@ function CodeMirror(props: NoteBodyEditorProps, ref: ForwardedRef<NoteBodyEditor
 
 	useContextMenu({
 		plugins: props.plugins,
+		dispatch: props.dispatch,
 		editorCutText, editorCopyText, editorPaste,
 		editorRef,
 		editorClassName: 'codeMirrorEditor',
+		containerRef: rootRef,
 	});
 
 	function renderEditor() {
@@ -734,10 +754,11 @@ function CodeMirror(props: NoteBodyEditorProps, ref: ForwardedRef<NoteBodyEditor
 		const matchBracesOptions = Setting.value('editor.autoMatchingBraces') ? { override: true, pairs: '``()[]{}\'\'""‘’“”（）《》「」『』【】〔〕〖〗〘〙〚〛' } : false;
 
 		return (
-			<div style={cellEditorStyle}>
+			<div className='editor'>
 				<Editor
 					value={props.content}
 					searchMarkers={props.searchMarkers}
+					onSetMarkersRef={onSetInitialMarkersRef}
 					ref={editorRef}
 					mode={props.contentMarkupLanguage === MarkupToHtml.MARKUP_LANGUAGE_HTML ? 'xml' : 'joplin-markdown'}
 					codeMirrorTheme={styles.editor.codeMirrorTheme}
@@ -759,7 +780,7 @@ function CodeMirror(props: NoteBodyEditorProps, ref: ForwardedRef<NoteBodyEditor
 
 	function renderViewer() {
 		return (
-			<div style={cellViewerStyle}>
+			<div className='viewer'>
 				<NoteTextViewer
 					ref={webviewRef}
 					themeId={props.themeId}
@@ -772,17 +793,26 @@ function CodeMirror(props: NoteBodyEditorProps, ref: ForwardedRef<NoteBodyEditor
 		);
 	}
 
+	const editorViewerRow = (
+		<div className={[
+			'note-editor-viewer-row',
+			props.visiblePanes.includes('editor') ? '-show-editor' : '',
+			props.visiblePanes.includes('viewer') ? '-show-viewer' : '',
+		].join(' ')}>
+			{renderEditor()}
+			{renderViewer()}
+		</div>
+	);
+
+	const windowId = useContext(WindowIdContext);
 	return (
 		<ErrorBoundary message="The text editor encountered a fatal error and could not continue. The error might be due to a plugin, so please try to disable some of them and try again.">
-			<div style={styles.root} ref={rootRef}>
+			<div style={styles.root} ref={setEditorRoot}>
 				<div style={styles.rowToolbar}>
-					<Toolbar themeId={props.themeId}/>
+					<Toolbar themeId={props.themeId} windowId={windowId}/>
 					{props.noteToolbar}
 				</div>
-				<div style={styles.rowEditorViewer}>
-					{renderEditor()}
-					{renderViewer()}
-				</div>
+				{editorViewerRow}
 			</div>
 		</ErrorBoundary>
 	);

@@ -14,7 +14,7 @@ It's also possible to convert notes to to-dos and to-dos to notes.
 
 **On desktop**, right-click a note, then click "Switch between note and to-do type":
 
-**On mobile**, open a note, open the note action menu (opened by clicking thee "︙" button), and finally click "convert to todo" or "convert to note":
+**On mobile**, open a note, open the note action menu (opened by clicking the "︙" button), and finally click "convert to todo" or "convert to note":
 
 ## Ordering to-dos
 
@@ -29,7 +29,7 @@ It's also possible to hide incomplete to-dos entirely. As before, this can be do
 
 ## Setting alarms
 
-Joplin can be configured to show a notification for an incomplete to-dos. This is done differently on desktop and mobile.
+Joplin can be configured to show a notification for incomplete to-dos. This is done differently on desktop and mobile.
 
 **On desktop:** Click the alarm button in the note toolbar, enter a new date, then click "OK".
 
@@ -38,3 +38,9 @@ Joplin can be configured to show a notification for an incomplete to-dos. This i
 **On mobile:** Open the note actions menu, then click "set alarm".
 
 Also see [the notifications documentation](https://joplinapp.org/help/apps/notifications) for how notifications are displayed.
+
+## Video tutorial
+
+Watch this short video to learn how to create, manage, and organize tasks effectively:
+
+[![Watch the video](https://img.youtube.com/vi/BtXgBYebR_Y/hqdefault.jpg)](https://www.youtube.com/watch?v=BtXgBYebR_Y)

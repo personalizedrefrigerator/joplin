@@ -65,6 +65,14 @@ export default class Database {
 		this.logger().info('Database was open successfully');
 	}
 
+	public async close() {
+		try {
+			await this.driver().close?.();
+		} catch (error) {
+			this.logger().warn('Failed to close database', error);
+		}
+	}
+
 	public escapeField(field: string) {
 		if (field === '*') return '*';
 		const p = field.split('.');
@@ -82,6 +90,13 @@ export default class Database {
 			output.push(this.escapeField(fields[i]));
 		}
 		return output;
+	}
+
+	public escapeValues(values: string[]) {
+		return values.map(value => {
+			// See https://www.sqlite.org/printf.html#percentq
+			return `'${value.replace(/[']/g, '\'\'')}'`;
+		});
 	}
 
 	public escapeFieldsToString(fields: string[] | string): string {

@@ -1,8 +1,9 @@
-import Dialog from '../Dialog';
-import DialogButtonRow, { ClickEvent, ButtonSpec } from '../DialogButtonRow';
+import * as React from 'react';
+import Dialog from '@joplin/lib/components/Dialog';
+import DialogButtonRow, { ClickEvent } from '../DialogButtonRow';
 import DialogTitle from '../DialogTitle';
 import { _ } from '@joplin/lib/locale';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { FolderEntity } from '@joplin/lib/services/database/types';
 import Folder from '@joplin/lib/models/Folder';
 import ShareService, { ApiShare } from '@joplin/lib/services/share/ShareService';
@@ -18,6 +19,8 @@ import { connect } from 'react-redux';
 import { reg } from '@joplin/lib/registry';
 import useAsyncEffect, { AsyncEffectEvent } from '@joplin/lib/hooks/useAsyncEffect';
 import { ChangeEvent, Dropdown, DropdownOptions, DropdownVariant } from '../Dropdown/Dropdown';
+import shim from '@joplin/lib/shim';
+import { SettingsRecord } from '@joplin/lib/models/Setting';
 
 const logger = Logger.create('ShareFolderDialog');
 
@@ -127,7 +130,6 @@ function ShareFolderDialog(props: Props) {
 	const [share, setShare] = useState<StateShare>(null);
 	const [shareUsers, setShareUsers] = useState<StateShareUser[]>([]);
 	const [shareState, setShareState] = useState<ShareState>(ShareState.Idle);
-	const [customButtons, setCustomButtons] = useState<ButtonSpec[]>([]);
 	const [recipientsBeingUpdated, setRecipientsBeingUpdated] = useState<Record<string, boolean>>({});
 
 	async function synchronize(event: AsyncEffectEvent = null) {
@@ -162,22 +164,11 @@ function ShareFolderDialog(props: Props) {
 	}, [share]);
 
 	useEffect(() => {
-		setCustomButtons(share ? [{
-			name: 'unshare',
-			label: _('Unshare'),
-		}] : []);
-	}, [share]);
-
-	useEffect(() => {
 		if (!share) return;
 		const sus = props.shareUsers[share.id];
 		if (!sus) return;
 		setShareUsers(sus);
 	}, [share, props.shareUsers]);
-
-	useEffect(() => {
-		void ShareService.instance().refreshShares();
-	}, [props.folderId]);
 
 	const permissionsFromString = (p: string): SharePermissions => {
 		return {
@@ -242,13 +233,13 @@ function ShareFolderDialog(props: Props) {
 	}
 
 	async function recipient_delete(event: RecipientDeleteEvent) {
-		if (!confirm(_('Delete this invitation? The recipient will no longer have access to this shared notebook.'))) return;
+		if (!await shim.showConfirmationDialog(_('Delete this invitation? The recipient will no longer have access to this shared notebook.'))) return;
 
 		try {
 			await ShareService.instance().deleteShareRecipient(event.shareUserId);
 		} catch (error) {
 			logger.error(error);
-			alert(_('The recipient could not be removed from the list. Please try again.\n\nThe error was: "%s"', error.message));
+			await shim.showErrorDialog(_('The recipient could not be removed from the list. Please try again.\n\nThe error was: "%s"', error.message));
 		}
 
 		await ShareService.instance().refreshShareUsers(share.id);
@@ -267,7 +258,7 @@ function ShareFolderDialog(props: Props) {
 	}, []);
 
 	function renderAddRecipient() {
-		const disabled = shareState !== ShareState.Idle;
+		const disabled = shareState !== ShareState.Idle && shareState !== ShareState.Synchronizing;
 
 		const dropdown = !props.canUseSharePermissions ? null : <Dropdown className="permission-dropdown" options={permissionOptions} value={recipientPermissions} onChange={recipientPermissions_change}/>;
 
@@ -290,7 +281,7 @@ function ShareFolderDialog(props: Props) {
 			});
 			await ShareService.instance().setPermissions(share.id, shareUserId, permissionsFromString(value));
 		} catch (error) {
-			alert(`Could not set permissions: ${error.message}`);
+			void shim.showErrorDialog(`Could not set permissions: ${error.message}`);
 			logger.error(error);
 		} finally {
 			setRecipientsBeingUpdated(prev => {
@@ -321,7 +312,13 @@ function ShareFolderDialog(props: Props) {
 				<StyledRecipientName>{shareUser.user.email}</StyledRecipientName>
 				{dropdown}
 				<StyledRecipientStatusIcon title={statusToMessage[shareUser.status]} className={statusToIcon[shareUser.status]}></StyledRecipientStatusIcon>
-				<Button disabled={!enabled} size={ButtonSize.Small} iconName="far fa-times-circle" onClick={() => recipient_delete({ shareUserId: shareUser.id })}/>
+				<Button
+					disabled={!enabled}
+					size={ButtonSize.Small}
+					iconName="far fa-times-circle"
+					onClick={() => recipient_delete({ shareUserId: shareUser.id })}
+					tooltip={_('Remove %s from share', shareUser.user.email)}
+				/>
 			</StyledRecipient>
 		);
 	}
@@ -377,13 +374,26 @@ function ShareFolderDialog(props: Props) {
 
 	async function buttonRow_click(event: ClickEvent) {
 		if (event.buttonName === 'unshare') {
-			if (!confirm(_('Unshare this notebook? The recipients will no longer have access to its content.'))) return;
+			if (!await shim.showConfirmationDialog(_('Unshare this notebook? The recipients will no longer have access to its content.'))) {
+				return;
+			}
 			await ShareService.instance().unshareFolder(props.folderId);
 			void synchronize();
 		}
 
 		props.onClose();
 	}
+
+	const customButtons = useMemo(() => {
+		return share ? [{
+			name: 'unshare',
+			label: _('Unshare'),
+			// Don't allow unsharing the folder during the "create" action. Doing so might
+			// be able to cause issues similar to #13518 (e.g. if the "unshare" action completes while
+			// the "share" action is still in progress).
+			disabled: shareState === ShareState.Creating || shareState === ShareState.Synchronizing,
+		}] : [];
+	}, [share, shareState]);
 
 	function renderContent() {
 		return (
@@ -412,10 +422,14 @@ function ShareFolderDialog(props: Props) {
 }
 
 const mapStateToProps = (state: State) => {
+	const getCanUseSharePermissions = (settings: Partial<SettingsRecord>) => {
+		return [9, 10, 11].includes(settings['sync.target']) && !!settings['sync.10.canUseSharePermissions'];
+	};
+
 	return {
 		shares: state.shareService.shares,
 		shareUsers: state.shareService.shareUsers,
-		canUseSharePermissions: state.settings['sync.target'] === 10 && state.settings['sync.10.canUseSharePermissions'],
+		canUseSharePermissions: getCanUseSharePermissions(state.settings),
 	};
 };
 

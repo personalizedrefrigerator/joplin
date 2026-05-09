@@ -2,21 +2,20 @@ import ResourceEditWatcher from '@joplin/lib/services/ResourceEditWatcher/index'
 import { _ } from '@joplin/lib/locale';
 import { copyHtmlToClipboard } from './clipboardUtils';
 import bridge from '../../../services/bridge';
-import { ContextMenuItemType, ContextMenuOptions, ContextMenuItems, resourceInfo, textToDataUri, svgUriToPng, svgDimensions } from './contextMenuUtils';
+import { ContextMenuItemType, ContextMenuOptions, ContextMenuItems, resourceInfo, textToDataUri, svgUriToPng, svgDimensions, buildMenuItems, ContextMenuItem } from './contextMenuUtils';
 const Menu = bridge().Menu;
-const MenuItem = bridge().MenuItem;
 import Resource, { resourceOcrStatusToString } from '@joplin/lib/models/Resource';
 import BaseItem from '@joplin/lib/models/BaseItem';
 import BaseModel, { ModelType } from '@joplin/lib/BaseModel';
-import { processPastedHtml } from './resourceHandling';
-import { NoteEntity, ResourceEntity, ResourceOcrStatus } from '@joplin/lib/services/database/types';
+import { NoteEntity, ResourceEntity, ResourceOcrDriverId, ResourceOcrStatus } from '@joplin/lib/services/database/types';
 import { TinyMceEditorEvents } from '../NoteBody/TinyMCE/utils/types';
 import { itemIsReadOnlySync, ItemSlice } from '@joplin/lib/models/utils/readOnly';
 import Setting from '@joplin/lib/models/Setting';
 import ItemChange from '@joplin/lib/models/ItemChange';
-import { HtmlToMarkdownHandler, MarkupToHtmlHandler } from './types';
-import shim from '@joplin/lib/shim';
+import shim, { MessageBoxType } from '@joplin/lib/shim';
 import { openFileWithExternalEditor } from '@joplin/lib/services/ExternalEditWatcher/utils';
+import CommandService from '@joplin/lib/services/CommandService';
+import SyncTargetRegistry from '@joplin/lib/SyncTargetRegistry';
 const fs = require('fs-extra');
 const { writeFile } = require('fs-extra');
 const { clipboard } = require('electron');
@@ -81,14 +80,39 @@ export async function openItemById(itemId: string, dispatch: Function, hash = ''
 }
 
 // eslint-disable-next-line @typescript-eslint/ban-types -- Old code before rule was applied
-export function menuItems(dispatch: Function, htmlToMd: HtmlToMarkdownHandler, mdToHtml: MarkupToHtmlHandler): ContextMenuItems {
+export function menuItems(dispatch: Function): ContextMenuItems {
+	const makeSeparator = (): ContextMenuItem => {
+		return {
+			isActive: () => { return true; },
+			label: '',
+			onAction: () => {},
+			isSeparator: true,
+		};
+	};
+
 	return {
 		open: {
 			label: _('Open...'),
 			onAction: async (options: ContextMenuOptions) => {
-				await openItemById(options.resourceId, dispatch);
+				if (options.resourceId) {
+					await openItemById(options.resourceId, dispatch);
+				} else if (options.linkToOpen) {
+					await CommandService.instance().execute('openItem', options.linkToOpen);
+				} else {
+					await shim.showErrorDialog('No link found');
+				}
 			},
-			isActive: (itemType: ContextMenuItemType, options: ContextMenuOptions) => !options.textToCopy && (itemType === ContextMenuItemType.Image || itemType === ContextMenuItemType.Resource),
+			isActive: (itemType: ContextMenuItemType, options: ContextMenuOptions) => (
+				(!options.textToCopy && (itemType === ContextMenuItemType.Image || itemType === ContextMenuItemType.Resource || itemType === ContextMenuItemType.NoteLink))
+				|| (!!options.linkToOpen && itemType === ContextMenuItemType.Link)
+			),
+		},
+		openNoteInNewWindow: {
+			label: _('Open in new window'),
+			onAction: async (options: ContextMenuOptions) => {
+				await CommandService.instance().execute('openNoteInNewWindow', options.resourceId);
+			},
+			isActive: (itemType: ContextMenuItemType) => itemType === ContextMenuItemType.NoteLink,
 		},
 		saveAs: {
 			label: _('Save as...'),
@@ -129,13 +153,49 @@ export function menuItems(dispatch: Function, htmlToMd: HtmlToMarkdownHandler, m
 			},
 			isActive: (itemType: ContextMenuItemType, options: ContextMenuOptions) => !!options.textToCopy && itemType === ContextMenuItemType.Image && options.mime?.startsWith('image/svg'),
 		},
+		separator1: makeSeparator(),
 		revealInFolder: {
 			label: _('Reveal file in folder'),
 			onAction: async (options: ContextMenuOptions) => {
 				const { resourcePath } = await resourceInfo(options);
 				bridge().showItemInFolder(resourcePath);
 			},
-			isActive: (itemType: ContextMenuItemType, options: ContextMenuOptions) => !options.textToCopy && itemType === ContextMenuItemType.Image || itemType === ContextMenuItemType.Resource,
+			isActive: (itemType: ContextMenuItemType, options: ContextMenuOptions) => !options.textToCopy && (itemType === ContextMenuItemType.Image || itemType === ContextMenuItemType.Resource),
+		},
+		separator2: makeSeparator(),
+		recognizeHandwrittenImage: {
+			label: _('Recognize handwritten image'),
+			onAction: async (options: ContextMenuOptions) => {
+				const syncTargetId = Setting.value('sync.target');
+				if (!SyncTargetRegistry.isJoplinServerOrCloud(syncTargetId)) {
+					await shim.showMessageBox(_('This feature is only available on Joplin Cloud and Joplin Server.'), { type: MessageBoxType.Error });
+					return;
+				}
+
+				if (!Setting.value('ocr.handwrittenTextDriverEnabled')) {
+					await shim.showMessageBox(_('This feature is disabled by default, you need to manually enable it by turning on the option to \'Enable handwritten transcription\'.'), { type: MessageBoxType.Error });
+					return;
+				}
+
+				const { resource } = await resourceInfo(options);
+
+				if (!['image/png', 'image/jpg', 'image/jpeg', 'image/bmp'].includes(resource.mime)) {
+					await shim.showMessageBox(_('This image type is not supported by the recognition system.'), { type: MessageBoxType.Error });
+					return;
+				}
+
+				await Resource.save({
+					id: resource.id,
+					ocr_status: ResourceOcrStatus.Todo,
+					ocr_driver_id: ResourceOcrDriverId.HandwrittenText,
+					ocr_details: '',
+					ocr_error: '',
+					ocr_text: '',
+				});
+			},
+			isActive: (itemType: ContextMenuItemType, options: ContextMenuOptions) => {
+				return itemType === ContextMenuItemType.Resource || (itemType === ContextMenuItemType.Image && options.resourceId);
+			},
 		},
 		copyOcrText: {
 			label: _('View OCR text'),
@@ -150,8 +210,21 @@ export function menuItems(dispatch: Function, htmlToMd: HtmlToMarkdownHandler, m
 					bridge().showInfoMessageBox(_('This attachment does not have OCR data (Status: %s)', resourceOcrStatusToString(resource.ocr_status)));
 				}
 			},
-			isActive: (itemType: ContextMenuItemType, _options: ContextMenuOptions) => itemType === ContextMenuItemType.Resource,
+			isActive: (itemType: ContextMenuItemType, options: ContextMenuOptions) => {
+				return itemType === ContextMenuItemType.Resource || (itemType === ContextMenuItemType.Image && options.resourceId);
+			},
 		},
+		createAccessibleDocument: {
+			label: _('Create accessible document'),
+			onAction: async (options: ContextMenuOptions) => {
+				const { resource } = await resourceInfo(options);
+				await CommandService.instance().execute('createAccessibleDocument', resource.id);
+			},
+			isActive: (itemType: ContextMenuItemType, options: ContextMenuOptions) => {
+				return itemType === ContextMenuItemType.Resource || (itemType === ContextMenuItemType.Image && options.resourceId);
+			},
+		},
+		separator3: makeSeparator(),
 		copyPathToClipboard: {
 			label: _('Copy path to clipboard'),
 			onAction: async (options: ContextMenuOptions) => {
@@ -176,6 +249,14 @@ export function menuItems(dispatch: Function, htmlToMd: HtmlToMarkdownHandler, m
 			},
 			isActive: (itemType: ContextMenuItemType, options: ContextMenuOptions) => !options.textToCopy && itemType === ContextMenuItemType.Image,
 		},
+		copyLinkUrl: {
+			label: _('Copy Link Address'),
+			onAction: async (options: ContextMenuOptions) => {
+				clipboard.writeText(options.linkToCopy !== null ? options.linkToCopy : options.textToCopy);
+			},
+			isActive: (itemType: ContextMenuItemType, options: ContextMenuOptions) => itemType === ContextMenuItemType.Link || !!options.linkToCopy,
+		},
+		separator4: makeSeparator(),
 		cut: {
 			label: _('Cut'),
 			onAction: async (options: ContextMenuOptions) => {
@@ -193,17 +274,10 @@ export function menuItems(dispatch: Function, htmlToMd: HtmlToMarkdownHandler, m
 		},
 		paste: {
 			label: _('Paste'),
-			onAction: async (options: ContextMenuOptions) => {
-				const pastedHtml = clipboard.readHTML();
-				let content = pastedHtml ? pastedHtml : clipboard.readText();
-
-				if (pastedHtml) {
-					content = await processPastedHtml(pastedHtml, htmlToMd, mdToHtml);
-				}
-
-				options.insertContent(content);
+			onAction: async (_options: ContextMenuOptions) => {
+				bridge().activeWindow().webContents.paste();
 			},
-			isActive: (_itemType: ContextMenuItemType, options: ContextMenuOptions) => !options.isReadOnly && (!!clipboard.readText() || !!clipboard.readHTML()),
+			isActive: (_itemType: ContextMenuItemType, options: ContextMenuOptions) => !options.isReadOnly && clipboard.availableFormats().length > 0,
 		},
 		pasteAsText: {
 			label: _('Paste as text'),
@@ -212,13 +286,6 @@ export function menuItems(dispatch: Function, htmlToMd: HtmlToMarkdownHandler, m
 			},
 			isActive: (_itemType: ContextMenuItemType, options: ContextMenuOptions) => !options.isReadOnly && (!!clipboard.readText() || !!clipboard.readHTML()),
 		},
-		copyLinkUrl: {
-			label: _('Copy Link Address'),
-			onAction: async (options: ContextMenuOptions) => {
-				clipboard.writeText(options.linkToCopy !== null ? options.linkToCopy : options.textToCopy);
-			},
-			isActive: (itemType: ContextMenuItemType, options: ContextMenuOptions) => itemType === ContextMenuItemType.Link || !!options.linkToCopy,
-		},
 	};
 }
 
@@ -226,20 +293,12 @@ export function menuItems(dispatch: Function, htmlToMd: HtmlToMarkdownHandler, m
 export default async function contextMenu(options: ContextMenuOptions, dispatch: Function) {
 	const menu = new Menu();
 
-	const items = menuItems(dispatch, options.htmlToMd, options.mdToHtml);
-
 	if (!('readyOnly' in options)) options.isReadOnly = true;
-	for (const itemKey in items) {
-		const item = items[itemKey];
 
-		if (!item.isActive(options.itemType, options)) continue;
+	const items = await buildMenuItems(menuItems(dispatch), options);
 
-		menu.append(new MenuItem({
-			label: item.label,
-			click: () => {
-				item.onAction(options);
-			},
-		}));
+	for (const item of items) {
+		menu.append(item);
 	}
 
 	return menu;

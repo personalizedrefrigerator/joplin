@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import shim from '@joplin/lib/shim';
 import Logger from '@joplin/utils/Logger';
 import CodeMirror5Emulation from '@joplin/editor/CodeMirror/CodeMirror5Emulation/CodeMirror5Emulation';
@@ -8,7 +8,36 @@ const logger = Logger.create('useEditorSearch');
 // Registers a helper CodeMirror extension to be used with
 // useEditorSearchHandler.
 
-export default function useEditorSearchExtension(CodeMirror: CodeMirror5Emulation) {
+interface SetMarkersOptions {
+	selectedIndex: number;
+	searchTimestamp: number;
+	showEditorMarkers?: boolean;
+	withSelection?: boolean;
+}
+type Keyword = { value: string };
+
+export type OnSetMarkers = (cm: CodeMirror5Emulation, keywords: Keyword[], options: SetMarkersOptions)=> number;
+
+
+// Modified from codemirror/addons/search/search.js
+const searchOverlay = (query: RegExp) => {
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
+	return { token: function(stream: any) {
+		query.lastIndex = stream.pos;
+		const match = query.exec(stream.string);
+		if (match && match.index === stream.pos) {
+			stream.pos += match[0].length || 1;
+			return 'search-marker';
+		} else if (match) {
+			stream.pos = match.index;
+		} else {
+			stream.skipToEnd();
+		}
+		return null;
+	} };
+};
+
+export default function useEditorSearchExtension() {
 
 	const [markers, setMarkers] = useState([]);
 	const [overlay, setOverlay] = useState(null);
@@ -20,16 +49,15 @@ export default function useEditorSearchExtension(CodeMirror: CodeMirror5Emulatio
 	const overlayTimeoutRef = useRef(null);
 	overlayTimeoutRef.current = overlayTimeout;
 
-	function clearMarkers() {
+	const clearMarkers = useCallback(() => {
 		for (let i = 0; i < markers.length; i++) {
 			markers[i].clear();
 		}
 
 		setMarkers([]);
-	}
+	}, [markers]);
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	function clearOverlay(cm: any) {
+	const clearOverlay = useCallback((cm: CodeMirror5Emulation) => {
 		if (overlay) cm.removeOverlay(overlay);
 		if (scrollbarMarks) {
 			try {
@@ -47,31 +75,14 @@ export default function useEditorSearchExtension(CodeMirror: CodeMirror5Emulatio
 		setOverlay(null);
 		setScrollbarMarks(null);
 		setOverlayTimeout(null);
-	}
+	}, [scrollbarMarks, overlay, overlayTimeout]);
 
-	// Modified from codemirror/addons/search/search.js
-	function searchOverlay(query: RegExp) {
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-		return { token: function(stream: any) {
-			query.lastIndex = stream.pos;
-			const match = query.exec(stream.string);
-			if (match && match.index === stream.pos) {
-				stream.pos += match[0].length || 1;
-				return 'search-marker';
-			} else if (match) {
-				stream.pos = match.index;
-			} else {
-				stream.skipToEnd();
-			}
-			return null;
-		} };
-	}
 
 	// Highlights the currently active found work
 	// It's possible to get tricky with this functions and just use findNext/findPrev
 	// but this is fast enough and works more naturally with the current search logic
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	function highlightSearch(cm: any, searchTerm: RegExp, index: number, scrollTo: boolean, withSelection: boolean) {
+	function highlightSearch(cm: CodeMirror5Emulation, searchTerm: RegExp, index: number, scrollTo: boolean, withSelection: boolean) {
 		const cursor = cm.getSearchCursor(searchTerm);
 
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
@@ -116,10 +127,17 @@ export default function useEditorSearchExtension(CodeMirror: CodeMirror5Emulatio
 		};
 	}, []);
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	CodeMirror?.defineExtension('setMarkers', function(keywords: any, options: any) {
+	const onSetMarkers: OnSetMarkers = (cm, keywords, options) => {
+		// Pass arguments in via options to allow the extension to work if multiple editors are open simultaneously
+		// See https://github.com/laurent22/joplin/issues/13399.
 		if (!options) {
 			options = { selectedIndex: 0, searchTimestamp: 0 };
+		}
+
+		if (options.showEditorMarkers === false) {
+			clearMarkers();
+			clearOverlay(cm);
+			return 0;
 		}
 
 		clearMarkers();
@@ -140,7 +158,7 @@ export default function useEditorSearchExtension(CodeMirror: CodeMirror5Emulatio
 			const scrollTo = i === 0 && (previousKeywordValue !== keyword.value || previousIndex !== options.selectedIndex || options.searchTimestamp !== previousSearchTimestamp);
 
 			try {
-				const match = highlightSearch(this, searchTerm, options.selectedIndex, scrollTo, !!options.withSelection);
+				const match = highlightSearch(cm, searchTerm, options.selectedIndex, scrollTo, !!options.withSelection);
 				if (match) marks.push(match);
 			} catch (error) {
 				if (error.name !== 'SyntaxError') {
@@ -160,7 +178,7 @@ export default function useEditorSearchExtension(CodeMirror: CodeMirror5Emulatio
 		// SEARCHOVERLAY
 		// We only want to highlight all matches when there is only 1 search term
 		if (keywords.length !== 1 || keywords[0].value === '') {
-			clearOverlay(this);
+			clearOverlay(cm);
 			const prev = keywords.length > 1 ? keywords[0].value : '';
 			setPreviousKeywordValue(prev);
 			return 0;
@@ -170,22 +188,22 @@ export default function useEditorSearchExtension(CodeMirror: CodeMirror5Emulatio
 
 		// Determine the number of matches in the source, this is passed on
 		// to the NoteEditor component
-		const regexMatches = this.getValue().match(searchTerm);
+		const regexMatches = cm.getValue().match(searchTerm);
 		const nMatches = regexMatches ? regexMatches.length : 0;
 
 		// Don't bother clearing and re-calculating the overlay if the search term
 		// hasn't changed
 		if (keywords[0].value === previousKeywordValue) return nMatches;
 
-		clearOverlay(this);
+		clearOverlay(cm);
 		setPreviousKeywordValue(keywords[0].value);
 
 		// These operations are pretty slow, so we won't add use them until the user
 		// has finished typing, 500ms is probably enough time
 		const timeout = shim.setTimeout(() => {
-			const scrollMarks = this.showMatchesOnScrollbar?.(searchTerm, true, 'cm-search-marker-scrollbar');
+			const scrollMarks = cm.showMatchesOnScrollbar?.(searchTerm, true, 'cm-search-marker-scrollbar');
 			const overlay = searchOverlay(searchTerm);
-			this.addOverlay(overlay);
+			cm.addOverlay(overlay);
 			setOverlay(overlay);
 			setScrollbarMarks(scrollMarks);
 		}, 500);
@@ -194,5 +212,9 @@ export default function useEditorSearchExtension(CodeMirror: CodeMirror5Emulatio
 		overlayTimeoutRef.current = timeout;
 
 		return nMatches;
-	});
+	};
+	const onSetMarkersRef = useRef(onSetMarkers);
+	onSetMarkersRef.current = onSetMarkers;
+
+	return { onSetMarkersRef };
 }

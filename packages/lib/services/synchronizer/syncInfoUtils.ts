@@ -2,8 +2,9 @@ import Logger from '@joplin/utils/Logger';
 import { FileApi } from '../../file-api';
 import JoplinDatabase from '../../JoplinDatabase';
 import Setting from '../../models/Setting';
+import BaseItem from '../../models/BaseItem';
 import { State } from '../../reducer';
-import { PublicPrivateKeyPair } from '../e2ee/ppk';
+import { PublicPrivateKeyPair } from '../e2ee/ppk/ppk';
 import { MasterKeyEntity } from '../e2ee/types';
 import { compareVersions } from 'compare-versions';
 import { _ } from '../../locale';
@@ -20,6 +21,11 @@ export interface SyncInfoValueBoolean {
 
 export interface SyncInfoValueString {
 	value: string;
+	updatedTime: number;
+}
+
+export interface SyncInfoValueInt {
+	value: number;
 	updatedTime: number;
 }
 
@@ -42,6 +48,23 @@ let appMinVersion_ = '3.0.0';
 export const setAppMinVersion = (v: string) => {
 	appMinVersion_ = v;
 };
+
+export function onRevisionServiceSettingsChanged(key: string, value: unknown) {
+	if (key !== 'revisionService.enabled' && key !== 'revisionService.ttlDays') return;
+	const s = localSyncInfo();
+	let changed = false;
+	if (key === 'revisionService.enabled' && s.revisionServiceEnabled !== value) {
+		if (typeof value !== 'boolean') return;
+		s.revisionServiceEnabled = value;
+		changed = true;
+	}
+	if (key === 'revisionService.ttlDays' && s.revisionServiceTtlDays !== value) {
+		if (typeof value !== 'number') return;
+		s.revisionServiceTtlDays = value;
+		changed = true;
+	}
+	if (changed) saveLocalSyncInfo(s);
+}
 
 export async function migrateLocalSyncInfo(db: JoplinDatabase) {
 	if (Setting.value('syncInfoCache')) return; // Already initialized
@@ -74,6 +97,10 @@ export async function migrateLocalSyncInfo(db: JoplinDatabase) {
 	//   most likely not what the user wants.
 	syncInfo.setKeyTimestamp('e2ee', 0);
 	syncInfo.setKeyTimestamp('activeMasterKeyId', 0);
+	syncInfo.revisionServiceEnabled = Setting.value('revisionService.enabled');
+	syncInfo.revisionServiceTtlDays = Setting.value('revisionService.ttlDays');
+	syncInfo.setKeyTimestamp('revisionServiceEnabled', 0);
+	syncInfo.setKeyTimestamp('revisionServiceTtlDays', 0);
 
 	await saveLocalSyncInfo(syncInfo);
 }
@@ -96,10 +123,42 @@ export async function fetchSyncInfo(api: FileApi): Promise<SyncInfo> {
 		// If info.json is not present, this might be an old sync target, in
 		// which case we can at least get the version number from version.txt
 		const oldVersion = await api.get('.sync/version.txt');
-		if (oldVersion) output = { version: 1 };
+
+		// Where info.json is missing, but .sync/version.txt is not, the sync target will be set as needing upgrade, and will be upgraded upon restarting the app
+		// If both info.json and .sync/version.txt are missing, it can be assumed that something has gone wrong with the sync target, so do not mark as needing upgrade and raise a failsafe error if not the initial sync
+		// When performing 'Delete local data and re-download from sync target' or 'Re-upload local data to sync target' actions, all sync_items are cleared down as if it were the initial sync
+		if (oldVersion) {
+			output = { version: 1 };
+		} else if (!(await isInitialSync(api.syncTargetId()))) {
+			throwFailsafeError();
+		}
 	}
 
 	return fixSyncInfo(new SyncInfo(JSON.stringify(output)));
+}
+
+export async function checkSyncTargetIsValid(api: FileApi): Promise<void> {
+	const syncTargetInfoText = await api.get('info.json');
+
+	if (!syncTargetInfoText) {
+		throwFailsafeError();
+	}
+}
+
+async function isInitialSync(syncTargetId: number) {
+	const syncedItems = await BaseItem.syncedItemIds(syncTargetId);
+	return syncedItems.length === 0;
+}
+
+// This failsafe validation producing this error will be performed regardless of which sync target is selected
+// Other failsafe validation is performed based on the percentage of items deleted in the "basicDelta" function
+// The basicDelta is not executed for all sync target types, but the validation in this function is superior at protecting against data loss
+// However it is still beneficial to keep the failsafe check which is driven by count of deleted items in place, as it can protect against deliberate deletion of all notes by the user,
+// where they are not aware of the implications of 2 way sync. This is just "nice to have" though, so would not be worth adding complexity to make it work for all sync target types
+function throwFailsafeError() {
+	if (Setting.value('sync.wipeOutFailSafe')) {
+		throw new JoplinError(_('Fail-safe: Sync was interrupted to prevent data loss, because the sync target is empty or damaged. To override this behaviour disable the fail-safe in the sync settings.'), 'failSafe');
+	}
 }
 
 export function saveLocalSyncInfo(syncInfo: SyncInfo) {
@@ -186,6 +245,8 @@ export function mergeSyncInfos(s1: SyncInfo, s2: SyncInfo): SyncInfo {
 
 	output.setWithTimestamp(s1.keyTimestamp('e2ee') > s2.keyTimestamp('e2ee') ? s1 : s2, 'e2ee');
 	output.setWithTimestamp(s1.keyTimestamp('ppk') > s2.keyTimestamp('ppk') ? s1 : s2, 'ppk');
+	output.setWithTimestamp(s1.keyTimestamp('revisionServiceEnabled') > s2.keyTimestamp('revisionServiceEnabled') ? s1 : s2, 'revisionServiceEnabled');
+	output.setWithTimestamp(s1.keyTimestamp('revisionServiceTtlDays') > s2.keyTimestamp('revisionServiceTtlDays') ? s1 : s2, 'revisionServiceTtlDays');
 	output.version = s1.version > s2.version ? s1.version : s2.version;
 
 	mergeActiveMasterKeys(s1, s2, output);
@@ -222,11 +283,15 @@ export class SyncInfo {
 	private masterKeys_: MasterKeyEntity[] = [];
 	private ppk_: SyncInfoValuePublicPrivateKeyPair;
 	private appMinVersion_: string = appMinVersion_;
+	private revisionServiceEnabled_: SyncInfoValueBoolean;
+	private revisionServiceTtlDays_: SyncInfoValueInt;
 
 	public constructor(serialized: string = null) {
 		this.e2ee_ = { value: false, updatedTime: 0 };
 		this.activeMasterKeyId_ = { value: '', updatedTime: 0 };
 		this.ppk_ = { value: null, updatedTime: 0 };
+		this.revisionServiceEnabled_ = { value: true, updatedTime: 0 };
+		this.revisionServiceTtlDays_ = { value: 90, updatedTime: 0 };
 
 		if (serialized) this.load(serialized);
 	}
@@ -240,6 +305,8 @@ export class SyncInfo {
 			masterKeys: this.masterKeys,
 			ppk: this.ppk_,
 			appMinVersion: this.appMinVersion,
+			revisionServiceEnabled: this.revisionServiceEnabled_,
+			revisionServiceTtlDays: this.revisionServiceTtlDays_,
 		};
 	}
 
@@ -282,6 +349,8 @@ export class SyncInfo {
 		this.masterKeys_ = 'masterKeys' in s ? s.masterKeys : [];
 		this.ppk_ = 'ppk' in s ? s.ppk : { value: null, updatedTime: 0 };
 		this.appMinVersion_ = s.appMinVersion ? s.appMinVersion : '0.0.0';
+		this.revisionServiceEnabled_ = 'revisionServiceEnabled' in s ? s.revisionServiceEnabled : { value: true, updatedTime: 0 };
+		this.revisionServiceTtlDays_ = 'revisionServiceTtlDays' in s ? s.revisionServiceTtlDays : { value: 90, updatedTime: 0 };
 
 		// Migration for master keys that didn't have "hasBeenUsed" property -
 		// in that case we assume they've been used at least once.
@@ -347,6 +416,26 @@ export class SyncInfo {
 		if (v === this.activeMasterKeyId) return;
 
 		this.activeMasterKeyId_ = { value: v, updatedTime: Date.now() };
+	}
+
+	public get revisionServiceEnabled(): boolean {
+		return this.revisionServiceEnabled_.value;
+	}
+
+	public set revisionServiceEnabled(v: boolean) {
+		if (v === this.revisionServiceEnabled) return;
+
+		this.revisionServiceEnabled_ = { value: v, updatedTime: Date.now() };
+	}
+
+	public get revisionServiceTtlDays(): number {
+		return this.revisionServiceTtlDays_.value;
+	}
+
+	public set revisionServiceTtlDays(v: number) {
+		if (v === this.revisionServiceTtlDays) return;
+
+		this.revisionServiceTtlDays_ = { value: v, updatedTime: Date.now() };
 	}
 
 	public get masterKeys(): MasterKeyEntity[] {

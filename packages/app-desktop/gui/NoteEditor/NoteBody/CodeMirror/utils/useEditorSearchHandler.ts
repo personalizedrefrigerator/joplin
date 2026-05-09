@@ -1,6 +1,9 @@
-import { RefObject, useEffect } from 'react';
+import { RefObject, useEffect, useMemo, useRef } from 'react';
 import usePrevious from '../../../../hooks/usePrevious';
 import { RenderedBody } from './types';
+import { SearchMarkers } from '../../../utils/useSearchMarkers';
+import CodeMirror5Emulation from '@joplin/editor/CodeMirror/CodeMirror5Emulation/CodeMirror5Emulation';
+import useEditorSearchExtension from './useEditorSearchExtension';
 const debounce = require('debounce');
 
 interface Props {
@@ -9,19 +12,37 @@ interface Props {
 	searchMarkers: any;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	webviewRef: RefObject<any>;
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	editorRef: RefObject<any>;
+	editorRef: RefObject<CodeMirror5Emulation>;
 
 	noteContent: string;
 	renderedBody: RenderedBody;
+	showEditorMarkers: boolean;
 }
 
 const useEditorSearchHandler = (props: Props) => {
-	const { webviewRef, editorRef, renderedBody, noteContent, searchMarkers } = props;
+	const {
+		webviewRef, editorRef, renderedBody, noteContent, searchMarkers, showEditorMarkers,
+	} = props;
+
+	const { onSetMarkersRef } = useEditorSearchExtension();
 
 	const previousContent = usePrevious(noteContent);
 	const previousRenderedBody = usePrevious(renderedBody);
 	const previousSearchMarkers = usePrevious(searchMarkers);
+	const showEditorMarkersRef = useRef(showEditorMarkers);
+	showEditorMarkersRef.current = showEditorMarkers;
+
+	// Fixes https://github.com/laurent22/joplin/issues/7565
+	const debouncedMarkers = useMemo(() => debounce((searchMarkers: SearchMarkers) => {
+		if (!onSetMarkersRef.current) return;
+
+		if (showEditorMarkersRef.current) {
+			const matches = onSetMarkersRef.current(editorRef.current, searchMarkers.keywords, searchMarkers.options);
+			props.setLocalSearchResultCount(matches);
+		} else {
+			onSetMarkersRef.current(editorRef.current, searchMarkers.keywords, { ...searchMarkers.options, showEditorMarkers: false });
+		}
+	}, 50), [editorRef, onSetMarkersRef, props.setLocalSearchResultCount]);
 
 	useEffect(() => {
 		if (!searchMarkers) return () => {};
@@ -37,23 +58,11 @@ const useEditorSearchHandler = (props: Props) => {
 
 		if (webviewRef.current && (searchMarkers !== previousSearchMarkers || textChanged)) {
 			webviewRef.current.send('setMarkers', searchMarkers.keywords, searchMarkers.options);
-
-			if (editorRef.current) {
-				// Fixes https://github.com/laurent22/joplin/issues/7565
-				const debouncedMarkers = debounce(() => {
-					const matches = editorRef.current.setMarkers(searchMarkers.keywords, searchMarkers.options);
-
-					props.setLocalSearchResultCount(matches);
-				}, 50);
-				debouncedMarkers();
-				return () => {
-					debouncedMarkers.clear();
-				};
-			}
+			debouncedMarkers(searchMarkers);
 		}
 		return () => {};
 	}, [
-		editorRef,
+		onSetMarkersRef,
 		webviewRef,
 		searchMarkers,
 		previousSearchMarkers,
@@ -62,8 +71,13 @@ const useEditorSearchHandler = (props: Props) => {
 		previousContent,
 		previousRenderedBody,
 		renderedBody,
+		debouncedMarkers,
 	]);
 
+	return {
+		// Returned to allow quickly setting the initial search markers just after the editor loads.
+		onSetInitialMarkersRef: onSetMarkersRef,
+	};
 };
 
 export default useEditorSearchHandler;

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useState, useEffect, useRef, forwardRef, useCallback, useImperativeHandle, useMemo, ForwardedRef } from 'react';
+import { useState, useEffect, useRef, forwardRef, useCallback, useImperativeHandle, ForwardedRef, useContext } from 'react';
 
 import { EditorCommand, MarkupToHtmlOptions, NoteBodyEditorProps, NoteBodyEditorRef, OnChangeEvent } from '../../../utils/types';
 import { getResourcesFromPasteEvent } from '../../../utils/resourceHandling';
@@ -12,11 +12,10 @@ import Note from '@joplin/lib/models/Note';
 import { _ } from '@joplin/lib/locale';
 import bridge from '../../../../../services/bridge';
 import shim from '@joplin/lib/shim';
-import { MarkupToHtml } from '@joplin/renderer';
-const { clipboard } = require('electron');
+import { clipboard } from 'electron';
 import { reg } from '@joplin/lib/registry';
 import ErrorBoundary from '../../../../ErrorBoundary';
-import { EditorKeymap, EditorLanguageType, EditorSettings, UserEventSource } from '@joplin/editor/types';
+import { SearchState, UserEventSource } from '@joplin/editor/types';
 import useStyles from '../utils/useStyles';
 import { EditorEvent, EditorEventType } from '@joplin/editor/events';
 import useScrollHandler from '../utils/useScrollHandler';
@@ -27,6 +26,13 @@ import useContextMenu from '../utils/useContextMenu';
 import useWebviewIpcMessage from '../utils/useWebviewIpcMessage';
 import Toolbar from '../Toolbar';
 import useEditorSearchHandler from '../utils/useEditorSearchHandler';
+import CommandService from '@joplin/lib/services/CommandService';
+import useRefocusOnVisiblePaneChange from './utils/useRefocusOnVisiblePaneChange';
+import { WindowIdContext } from '../../../../NewWindowOrIFrame';
+import eventManager, { EventName, ResourceChangeEvent } from '@joplin/lib/eventManager';
+import useSyncEditorValue from './utils/useSyncEditorValue';
+import { getGlobalSettings } from '@joplin/renderer/types';
+import useEditorSettings from './utils/useEditorSettings';
 
 const logger = Logger.create('CodeMirror6');
 const logDebug = (message: string) => logger.debug(message);
@@ -88,41 +94,13 @@ const CodeMirror = (props: NoteBodyEditorProps, ref: ForwardedRef<NoteBodyEditor
 
 	const editorCutText = useCallback(() => {
 		if (editorRef.current) {
-			const selections = editorRef.current.getSelections();
-			if (selections.length > 0 && selections[0]) {
-				clipboard.writeText(selections[0]);
-				// Easy way to wipe out just the first selection
-				selections[0] = '';
-				editorRef.current.replaceSelections(selections);
-			} else {
-				const cursor = editorRef.current.getCursor();
-				const line = editorRef.current.getLine(cursor.line);
-				clipboard.writeText(`${line}\n`);
-				const startLine = editorRef.current.getCursor('head');
-				startLine.ch = 0;
-				const endLine = {
-					line: startLine.line + 1,
-					ch: 0,
-				};
-				editorRef.current.replaceRange('', startLine, endLine);
-			}
+			editorRef.current.cutText(text => clipboard.writeText(text));
 		}
 	}, []);
 
 	const editorCopyText = useCallback(() => {
 		if (editorRef.current) {
-			const selections = editorRef.current.getSelections();
-
-			// Handle the case when there is a selection - copy the selection to the clipboard
-			// When there is no selection, the selection array contains an empty string.
-			if (selections.length > 0 && selections[0]) {
-				clipboard.writeText(selections[0]);
-			} else {
-				// This is the case when there is no selection - copy the current line to the clipboard
-				const cursor = editorRef.current.getCursor();
-				const line = editorRef.current.getLine(cursor.line);
-				clipboard.writeText(line);
-			}
+			editorRef.current.copyText(text => clipboard.writeText(text));
 		}
 	}, []);
 
@@ -163,8 +141,9 @@ const CodeMirror = (props: NoteBodyEditorProps, ref: ForwardedRef<NoteBodyEditor
 			},
 			scrollTo: (options: ScrollOptions) => {
 				if (options.type === ScrollOptionTypes.Hash) {
-					if (!webviewRef.current) return;
-					webviewRef.current.send('scrollToHash', options.value as string);
+					const hash: string = options.value;
+					webviewRef.current?.send('scrollToHash', hash);
+					editorRef.current.jumpToHash(hash);
 				} else if (options.type === ScrollOptionTypes.Percent) {
 					const percent = options.value as number;
 					setEditorPercentScroll(percent);
@@ -175,6 +154,9 @@ const CodeMirror = (props: NoteBodyEditorProps, ref: ForwardedRef<NoteBodyEditor
 				}
 			},
 			supportsCommand: (name: string) => {
+				if (name === 'search' && !props.visiblePanes.includes('editor')) {
+					return false;
+				}
 				return name in commands || editorRef.current.supportsCommand(name);
 			},
 			execCommand: async (cmd: EditorCommand) => {
@@ -197,7 +179,7 @@ const CodeMirror = (props: NoteBodyEditorProps, ref: ForwardedRef<NoteBodyEditor
 				return commandOutput;
 			},
 		};
-	}, [props.content, commands, resetScroll, setEditorPercentScroll, setViewerPercentScroll]);
+	}, [props.content, props.visiblePanes, commands, resetScroll, setEditorPercentScroll, setViewerPercentScroll]);
 
 	const webview_domReady = useCallback(() => {
 		setWebviewReady(true);
@@ -239,6 +221,8 @@ const CodeMirror = (props: NoteBodyEditorProps, ref: ForwardedRef<NoteBodyEditor
 				useCustomPdfViewer: props.useCustomPdfViewer,
 				noteId: props.noteId,
 				vendorDir: bridge().vendorDir(),
+				globalSettings: getGlobalSettings(Setting),
+				showNoteLinkIcon: props.showNoteLinkIcon,
 			}));
 
 			if (cancelled) return;
@@ -261,8 +245,19 @@ const CodeMirror = (props: NoteBodyEditorProps, ref: ForwardedRef<NoteBodyEditor
 	}, [
 		props.content, props.contentKey, renderedBodyContentKey, props.contentMarkupLanguage,
 		props.visiblePanes, props.resourceInfos, props.markupToHtml, props.contentMaxWidth,
-		props.noteId, props.useCustomPdfViewer,
+		props.noteId, props.useCustomPdfViewer, props.showNoteLinkIcon,
 	]);
+
+	useEffect(() => {
+		const listener = (event: ResourceChangeEvent) => {
+			editorRef.current?.onResourceChanged(event.id);
+		};
+
+		eventManager.on(EventName.ResourceChange, listener);
+		return () => {
+			eventManager.off(EventName.ResourceChange, listener);
+		};
+	}, [props.resourceInfos]);
 
 	useEffect(() => {
 		if (!webviewReady) return;
@@ -295,24 +290,7 @@ const CodeMirror = (props: NoteBodyEditorProps, ref: ForwardedRef<NoteBodyEditor
 		}
 	}, [renderedBody, webviewReady, getLineScrollPercent, setEditorPercentScroll]);
 
-	const cellEditorStyle = useMemo(() => {
-		const output = { ...styles.cellEditor };
-		if (!props.visiblePanes.includes('editor')) {
-			output.display = 'none'; // Seems to work fine since the refactoring
-		}
-
-		return output;
-	}, [styles.cellEditor, props.visiblePanes]);
-
-	const cellViewerStyle = useMemo(() => {
-		const output = { ...styles.cellViewer };
-		if (!props.visiblePanes.includes('viewer')) {
-			output.display = 'none';
-		} else if (!props.visiblePanes.includes('editor')) {
-			output.borderLeftStyle = 'none';
-		}
-		return output;
-	}, [styles.cellViewer, props.visiblePanes]);
+	useRefocusOnVisiblePaneChange({ editorRef, webviewRef, visiblePanes: props.visiblePanes });
 
 	useEditorSearchHandler({
 		setLocalSearchResultCount: props.setLocalSearchResultCount,
@@ -321,74 +299,84 @@ const CodeMirror = (props: NoteBodyEditorProps, ref: ForwardedRef<NoteBodyEditor
 		editorRef,
 		noteContent: props.content,
 		renderedBody,
+		showEditorMarkers: !props.useLocalSearch,
 	});
 
 	useContextMenu({
 		plugins: props.plugins,
+		dispatch: props.dispatch,
 		editorCutText, editorCopyText, editorPaste,
 		editorRef,
 		editorClassName: 'cm-editor',
+		containerRef: rootRef,
 	});
 
+	const lastSearchState = useRef<SearchState|null>(null);
 	const onEditorEvent = useCallback((event: EditorEvent) => {
 		if (event.kind === EditorEventType.Scroll) {
 			editor_scroll();
 		} else if (event.kind === EditorEventType.Change) {
 			codeMirror_change(event.value);
 		} else if (event.kind === EditorEventType.SelectionRangeChange) {
+			props.onCursorMotion({ markdown: event.from });
 			setSelectionRange({ from: event.from, to: event.to });
+		} else if (event.kind === EditorEventType.UpdateSearchDialog) {
+			if (lastSearchState.current?.searchText !== event.searchState.searchText) {
+				props.setLocalSearch(event.searchState.searchText);
+			}
+
+			if (lastSearchState.current?.dialogVisible !== event.searchState.dialogVisible) {
+				props.setShowLocalSearch(event.searchState.dialogVisible);
+			}
+			lastSearchState.current = event.searchState;
+		} else if (event.kind === EditorEventType.FollowLink) {
+			void CommandService.instance().execute('openItem', event.link);
 		}
-	}, [editor_scroll, codeMirror_change]);
+	}, [editor_scroll, codeMirror_change, props.setLocalSearch, props.setShowLocalSearch, props.onCursorMotion]);
 
-	const editorSettings = useMemo((): EditorSettings => {
-		const isHTMLNote = props.contentMarkupLanguage === MarkupToHtml.MARKUP_LANGUAGE_HTML;
+	const onSelectPastBeginning = useCallback(() => {
+		void CommandService.instance().execute('focusElement', 'noteTitle');
+	}, []);
 
-		let keyboardMode = EditorKeymap.Default;
-		if (props.keyboardMode === 'vim') {
-			keyboardMode = EditorKeymap.Vim;
-		} else if (props.keyboardMode === 'emacs') {
-			keyboardMode = EditorKeymap.Emacs;
-		}
+	const initialCursorLocationRef = useRef(0);
+	initialCursorLocationRef.current = props.initialCursorLocation.markdown ?? 0;
 
-		return {
-			language: isHTMLNote ? EditorLanguageType.Html : EditorLanguageType.Markdown,
-			readOnly: props.disabled,
-			katexEnabled: Setting.value('markdown.plugin.katex'),
-			themeData: {
-				...styles.globalTheme,
-				monospaceFont: Setting.value('style.editor.monospaceFontFamily'),
-			},
-			automatchBraces: Setting.value('editor.autoMatchingBraces'),
-			useExternalSearch: false,
-			ignoreModifiers: true,
-			spellcheckEnabled: Setting.value('editor.spellcheckBeta'),
-			keymap: keyboardMode,
-			indentWithTabs: true,
-		};
-	}, [
-		props.contentMarkupLanguage, props.disabled, props.keyboardMode, styles.globalTheme,
-	]);
+	useSyncEditorValue({
+		content: props.content,
+		visiblePanes: props.visiblePanes,
+		onMessage: props.onMessage,
+		editorRef,
+		noteId: props.noteId,
+		initialCursorLocationRef,
+	});
 
-	// Update the editor's value
-	useEffect(() => {
-		if (editorRef.current?.updateBody(props.content)) {
-			editorRef.current?.clearHistory();
-		}
-	}, [props.content]);
+	const settings = useEditorSettings({
+		baseTheme: styles.globalTheme,
+		contentMarkupLanguage: props.contentMarkupLanguage,
+		disabled: props.disabled,
+		keyboardMode: props.keyboardMode,
+		tabMovesFocus: props.tabMovesFocus,
+	});
 
 	const renderEditor = () => {
 		return (
-			<div style={cellEditorStyle}>
+			<div className='editor'>
 				<Editor
 					style={styles.editor}
 					initialText={props.content}
+					initialSelectionRef={initialCursorLocationRef}
+					initialNoteId={props.noteId}
 					ref={editorRef}
-					settings={editorSettings}
+					settings={settings}
 					pluginStates={props.plugins}
 					onPasteFile={null}
 					onEvent={onEditorEvent}
 					onLogMessage={logDebug}
 					onEditorPaste={onEditorPaste}
+					onSelectPastBeginning={onSelectPastBeginning}
+					externalSearch={props.searchMarkers}
+					useLocalSearch={props.useLocalSearch}
+					onLocalize={_}
 				/>
 			</div>
 		);
@@ -396,7 +384,7 @@ const CodeMirror = (props: NoteBodyEditorProps, ref: ForwardedRef<NoteBodyEditor
 
 	const renderViewer = () => {
 		return (
-			<div style={cellViewerStyle}>
+			<div className='viewer'>
 				<NoteTextViewer
 					ref={webviewRef}
 					themeId={props.themeId}
@@ -409,17 +397,26 @@ const CodeMirror = (props: NoteBodyEditorProps, ref: ForwardedRef<NoteBodyEditor
 		);
 	};
 
+	const editorViewerRow = (
+		<div className={[
+			'note-editor-viewer-row',
+			props.visiblePanes.includes('editor') ? '-show-editor' : '',
+			props.visiblePanes.includes('viewer') ? '-show-viewer' : '',
+		].join(' ')}>
+			{renderEditor()}
+			{renderViewer()}
+		</div>
+	);
+
+	const windowId = useContext(WindowIdContext);
 	return (
 		<ErrorBoundary message="The text editor encountered a fatal error and could not continue. The error might be due to a plugin, so please try to disable some of them and try again.">
 			<div style={styles.root} ref={rootRef}>
 				<div style={styles.rowToolbar}>
-					<Toolbar themeId={props.themeId}/>
+					<Toolbar themeId={props.themeId} windowId={windowId}/>
 					{props.noteToolbar}
 				</div>
-				<div style={styles.rowEditorViewer}>
-					{renderEditor()}
-					{renderViewer()}
-				</div>
+				{editorViewerRow}
 			</div>
 		</ErrorBoundary>
 	);

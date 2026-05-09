@@ -4,12 +4,14 @@ export interface CheckForUpdateOptions {
 	includePreReleases?: boolean;
 }
 
-interface GitHubReleaseAsset {
+export interface GitHubReleaseAsset {
 	name: string;
 	browser_download_url: string;
+	url?: string;
 }
 
 export interface GitHubRelease {
+	id?: string;
 	tag_name: string;
 	prerelease: boolean;
 	body: string;
@@ -136,4 +138,12 @@ export const extractVersionInfo = (releases: GitHubRelease[], platform: Platform
 	};
 
 	return output;
+};
+
+export const handleReleaseResponseError = (status: number, responseText: string): never => {
+	if ((status === 403 || status === 429) && responseText.toLowerCase().includes('rate limit')) {
+		throw new Error('Could not check for updates. The server rate limit has been exceeded — this is a temporary issue, please try again later.');
+	}
+
+	throw new Error(`Could not check for updates. Please try again later (Error ${status}).`);
 };

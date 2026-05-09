@@ -3,18 +3,25 @@ import BaseModel, { ModelType } from '../../BaseModel';
 import Folder from '../../models/Folder';
 import MarkupToHtml from '@joplin/renderer/MarkupToHtml';
 import { isRootSharedFolder, isSharedFolderOwner } from '../share/reducer';
-import { FolderEntity, NoteEntity } from '../database/types';
+import { NoteEntity } from '../database/types';
 import { itemIsReadOnlySync, ItemSlice } from '../../models/utils/readOnly';
 import ItemChange from '../../models/ItemChange';
 import { getTrashFolderId } from '../trash';
+import getActivePluginEditorView from '../plugins/utils/getActivePluginEditorView';
+import { MarkupLanguage } from '@joplin/renderer';
 
 export interface WhenClauseContextOptions {
 	commandFolderId?: string;
+	commandFolderIds?: string[];
 	commandNoteId?: string;
+	windowId?: string;
 }
 
 export interface WhenClauseContext {
 	allSelectedNotesAreDeleted: boolean;
+	selectionIncludesHtmlNotes: boolean;
+	foldersAreDeleted: boolean;
+	foldersIncludeReadOnly: boolean;
 	folderIsDeleted: boolean;
 	folderIsReadOnly: boolean;
 	folderIsShared: boolean;
@@ -40,26 +47,40 @@ export interface WhenClauseContext {
 	noteTodoCompleted: boolean;
 	oneFolderSelected: boolean;
 	oneNoteSelected: boolean;
+	selectedFolderIsValid: boolean;
 	someNotesSelected: boolean;
 	syncStarted: boolean;
+	hasActivePluginEditor: boolean;
 }
 
 export default function stateToWhenClauseContext(state: State, options: WhenClauseContextOptions = null): WhenClauseContext {
 	options = {
-		commandFolderId: '',
-		commandNoteId: '',
+		commandFolderIds: options?.commandFolderId ? [options.commandFolderId] : null,
 		...options,
 	};
+	const windowState = options.windowId ? stateUtils.windowStateById(state, options.windowId) : state;
 
-	const selectedNoteIds = state.selectedNoteIds || [];
+	const selectedNoteIds = windowState.selectedNoteIds || [];
 	const selectedNoteId = selectedNoteIds.length === 1 ? selectedNoteIds[0] : null;
-	const selectedNote: NoteEntity = selectedNoteId ? BaseModel.byId(state.notes, selectedNoteId) : null;
-	const selectedNotes = selectedNoteIds.map(id => state.notes.find(n => n.id === id)).filter(n => !!n);
+	const selectedNote: NoteEntity = selectedNoteId ? BaseModel.byId(windowState.notes, selectedNoteId) : null;
+	const selectedNotes = BaseModel.modelsByIds(windowState.notes ?? [], selectedNoteIds);
 
-	const commandFolderId = options.commandFolderId || state.selectedFolderId;
-	const commandFolder: FolderEntity = commandFolderId ? BaseModel.byId(state.folders, commandFolderId) : null;
+	const selectedFolderIds = windowState.selectedFolderIds || [];
+	const commandFolderIds = state.notesParentType === 'Folder' ? (options.commandFolderIds || selectedFolderIds) : [];
+	const commandFolders = commandFolderIds.length ? BaseModel.modelsByIds(state.folders, commandFolderIds) : [];
+	const commandFolder = commandFolders.length ? commandFolders[0] : null;
+
+	const { editorPlugin } = state.pluginService ? getActivePluginEditorView(state.pluginService.plugins, windowState.windowId) : { editorPlugin: null };
 
 	const settings = state.settings || {};
+
+	// Check whether the window's selected folder actually exists and is not
+	// deleted. This resolves the case where selectedFolderId is stale (e.g.
+	// new profile with no notebooks) or points to a deleted folder.
+	const selectedFolder = windowState.selectedFolderId
+		? BaseModel.byId(state.folders, windowState.selectedFolderId)
+		: null;
+	const selectedFolderIsValid = !!selectedFolder && !selectedFolder.deleted_time;
 
 	return {
 		// Application state
@@ -67,8 +88,8 @@ export default function stateToWhenClauseContext(state: State, options: WhenClau
 		syncStarted: state.syncStarted,
 
 		// Current location
-		inConflictFolder: state.selectedFolderId === Folder.conflictFolderId(),
-		inTrash: !!((state.selectedFolderId === getTrashFolderId() && !!selectedNote?.deleted_time) || commandFolder && !!commandFolder.deleted_time),
+		inConflictFolder: windowState.selectedFolderId === Folder.conflictFolderId(),
+		inTrash: !!((windowState.selectedFolderId === getTrashFolderId() && !!selectedNote?.deleted_time) || commandFolder && !!commandFolder.deleted_time),
 
 		// Note selection
 		oneNoteSelected: !!selectedNote,
@@ -78,13 +99,15 @@ export default function stateToWhenClauseContext(state: State, options: WhenClau
 
 		// Selected notes properties
 		allSelectedNotesAreDeleted: !selectedNotes.find(n => !n.deleted_time),
+		selectionIncludesHtmlNotes: selectedNotes.some(n => n.markup_language === MarkupLanguage.Html),
 
 		// Note history
-		historyhasBackwardNotes: state.backwardHistoryNotes && state.backwardHistoryNotes.length > 0,
-		historyhasForwardNotes: state.forwardHistoryNotes && state.forwardHistoryNotes.length > 0,
+		historyhasBackwardNotes: windowState.backwardHistoryNotes && windowState.backwardHistoryNotes.length > 0,
+		historyhasForwardNotes: windowState.forwardHistoryNotes && windowState.forwardHistoryNotes.length > 0,
 
 		// Folder selection
-		oneFolderSelected: !!state.selectedFolderId,
+		oneFolderSelected: selectedFolderIds.length === 1,
+		selectedFolderIsValid,
 
 		// Current note properties
 		noteIsTodo: selectedNote ? !!selectedNote.is_todo : false,
@@ -94,7 +117,7 @@ export default function stateToWhenClauseContext(state: State, options: WhenClau
 		noteIsReadOnly: selectedNote ? itemIsReadOnlySync(ModelType.Note, ItemChange.SOURCE_UNSPECIFIED, selectedNote as ItemSlice, settings['sync.userId'], state.shareService) : false,
 		noteIsDeleted: selectedNote ? !!selectedNote.deleted_time : false,
 
-		// Current context folder
+		// Current context folder -- if multiple folders are selected, this only applies to one
 		folderIsShareRoot: commandFolder ? isRootSharedFolder(commandFolder) : false,
 		folderIsShareRootAndNotOwnedByUser: commandFolder ? isRootSharedFolder(commandFolder) && !isSharedFolderOwner(state, commandFolder.id) : false,
 		folderIsShareRootAndOwnedByUser: commandFolder ? isRootSharedFolder(commandFolder) && isSharedFolderOwner(state, commandFolder.id) : false,
@@ -103,8 +126,14 @@ export default function stateToWhenClauseContext(state: State, options: WhenClau
 		folderIsTrash: commandFolder ? commandFolder.id === getTrashFolderId() : false,
 		folderIsReadOnly: commandFolder ? itemIsReadOnlySync(ModelType.Folder, ItemChange.SOURCE_UNSPECIFIED, commandFolder as ItemSlice, settings['sync.userId'], state.shareService) : false,
 
-		joplinServerConnected: [9, 10].includes(settings['sync.target']),
+		// All context folders
+		foldersAreDeleted: commandFolders.every(f => !!f.deleted_time),
+		foldersIncludeReadOnly: commandFolders.some(f => itemIsReadOnlySync(ModelType.Folder, ItemChange.SOURCE_UNSPECIFIED, f as ItemSlice, settings['sync.userId'], state.shareService)),
+
+		joplinServerConnected: [9, 10, 11].includes(settings['sync.target']),
 		joplinCloudAccountType: settings['sync.target'] === 10 ? settings['sync.10.accountType'] : 0,
 		hasMultiProfiles: state.profileConfig && state.profileConfig.profiles.length > 1,
+
+		hasActivePluginEditor: !!editorPlugin,
 	};
 }

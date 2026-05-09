@@ -5,19 +5,19 @@ import EmptyExpandLink from './EmptyExpandLink';
 
 interface ExpandLinkProps {
 	folderId: string;
-	folderTitle: string;
 	hasChildren: boolean;
 	isExpanded: boolean;
+	className: string;
 	onClick: MouseEventHandler<HTMLElement>;
 }
 
 const ExpandLink: React.FC<ExpandLinkProps> = props => {
 	return props.hasChildren ? (
-		<a className='sidebar-expand-link' href="#" data-folder-id={props.folderId} onClick={props.onClick}>
-			<ExpandIcon isVisible={true} isExpanded={props.isExpanded} targetTitle={props.folderTitle}/>
+		<a className={`sidebar-expand-link ${props.className}`} data-folder-id={props.folderId} onClick={props.onClick} role='button'>
+			<ExpandIcon isVisible={true} isExpanded={props.isExpanded} />
 		</a>
 	) : (
-		<EmptyExpandLink/>
+		<EmptyExpandLink className={props.className}/>
 	);
 };
 

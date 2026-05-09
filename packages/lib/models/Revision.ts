@@ -1,16 +1,16 @@
-import BaseModel, { ModelType } from '../BaseModel';
-import { RevisionEntity } from '../services/database/types';
+import BaseModel, { DeleteOptions, ModelType } from '../BaseModel';
+import { RevisionEntity, StringOrSqlQuery } from '../services/database/types';
 import BaseItem from './BaseItem';
 const DiffMatchPatch = require('diff-match-patch');
 import * as ArrayUtils from '../ArrayUtils';
 import JoplinError from '../JoplinError';
+import time from '../time';
 const { sprintf } = require('sprintf-js');
 
 const dmp = new DiffMatchPatch();
 
 export interface ObjectPatch {
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	new: Record<string, any>;
+	new: Record<string, unknown>;
 	deleted: string[];
 }
 
@@ -84,8 +84,7 @@ export default class Revision extends BaseItem {
 		return true;
 	}
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	public static createObjectPatch(oldObject: any, newObject: any) {
+	public static createObjectPatch(oldObject: Record<string, unknown>, newObject: Record<string, unknown>) {
 		if (!oldObject) oldObject = {};
 
 		const output: ObjectPatch = {
@@ -113,8 +112,7 @@ export default class Revision extends BaseItem {
 		return patch.replace(/[\n\r]/g, '');
 	}
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	public static applyObjectPatch(object: any, patch: string) {
+	public static applyObjectPatch(object: Record<string, unknown>, patch: string) {
 		const parsedPatch: ObjectPatch = JSON.parse(this.sanitizeObjectPatch(patch));
 		const output = { ...object };
 
@@ -214,7 +212,7 @@ export default class Revision extends BaseItem {
 
 	public static async itemsWithRevisions(itemType: ModelType, itemIds: string[]) {
 		if (!itemIds.length) return [];
-		const rows = await this.db().selectAll(`SELECT distinct item_id FROM revisions WHERE item_type = ? AND item_id IN ('${itemIds.join('\',\'')}')`, [itemType]);
+		const rows = await this.db().selectAll(`SELECT distinct item_id FROM revisions WHERE item_type = ? AND item_id IN (${this.escapeIdsForSql(itemIds)})`, [itemType]);
 
 		return rows.map((r: RevisionEntity) => r.item_id);
 	}
@@ -260,10 +258,14 @@ export default class Revision extends BaseItem {
 			revs = revs.slice();
 		}
 
-		// Handle rare case where two revisions have been created at exactly the same millisecond
-		// Also handle even rarer case where a rev and its parent have been created at the
-		// same milliseconds. All code below expects target revision to be on top.
-		revs = this.moveRevisionToTop(revision, revs);
+		if (revs.find(item => item.id === revision.id) !== undefined) {
+			// Handle rare case where two revisions have been created at exactly the same millisecond
+			// Also handle even rarer case where a rev and its parent have been created at the
+			// same milliseconds. All code below expects target revision to be on top.
+			revs = this.moveRevisionToTop(revision, revs);
+		} else {
+			revs.push(revision);
+		}
 
 		const output = {
 			title: '',
@@ -298,6 +300,23 @@ export default class Revision extends BaseItem {
 		return output;
 	}
 
+	private static async findAllRevisionsToKeep(itemType: ModelType, itemId: string, cutOffDate: number) {
+		return this.modelSelectAll(`
+				SELECT child.*
+				FROM revisions AS child
+				JOIN revisions AS parent
+				ON child.parent_id = parent.id
+				WHERE child.item_type = ?
+				AND child.item_id = ?
+				AND child.item_updated_time >= ?
+				AND parent.item_type = ?
+				AND parent.item_id = ?
+				AND parent.item_updated_time < ?
+				ORDER BY child.item_updated_time ASC`,
+		[itemType, itemId, cutOffDate, itemType, itemId, cutOffDate],
+		);
+	}
+
 	public static async deleteOldRevisions(ttl: number) {
 		// When deleting old revisions, we need to make sure that the oldest surviving revision
 		// is a "merged" one (as opposed to a diff from a now deleted revision). So every time
@@ -305,44 +324,87 @@ export default class Revision extends BaseItem {
 		// and modify that revision into a "merged" one.
 
 		const cutOffDate = Date.now() - ttl;
-		const revisions = await this.modelSelectAll('SELECT * FROM revisions WHERE item_updated_time < ? ORDER BY item_updated_time DESC', [cutOffDate]);
-		const doneItems: Record<string, boolean> = {};
+		const allOldRevisions: RevisionEntity[] = await this.modelSelectAll(
+			'SELECT * FROM revisions WHERE item_updated_time < ? ORDER BY item_updated_time ASC',
+			[cutOffDate],
+		);
 
-		for (const rev of revisions) {
-			const doneKey = `${rev.item_type}_${rev.item_id}`;
-			if (doneItems[doneKey]) continue;
+		const itemIdToOldRevisions = new Map<string, RevisionEntity[]>();
+		for (const rev of allOldRevisions) {
+			const itemId = rev.item_id;
+			if (!itemIdToOldRevisions.has(itemId)) {
+				itemIdToOldRevisions.set(itemId, []);
+			}
+			itemIdToOldRevisions.get(itemId).push(rev);
+		}
 
-			const keptRev = await this.modelSelectOne('SELECT * FROM revisions WHERE item_updated_time >= ? AND item_type = ? AND item_id = ? ORDER BY item_updated_time ASC LIMIT 1', [cutOffDate, rev.item_type, rev.item_id]);
+		const deleteOldRevisionsForItem = async (itemType: ModelType, itemId: string, oldRevisions: RevisionEntity[]) => {
+			const firstKeptRev = await this.modelSelectOne(
+				'SELECT * FROM revisions WHERE item_updated_time >= ? AND item_type = ? AND item_id = ? ORDER BY item_updated_time ASC LIMIT 1',
+				[cutOffDate, itemType, itemId],
+			);
+			const queries: StringOrSqlQuery[] = [];
+			if (!firstKeptRev) {
+				const hasEncrypted = await this.modelSelectOne(
+					'SELECT * FROM revisions WHERE encryption_applied = 1 AND item_updated_time < ? AND item_id = ?',
+					[cutOffDate, itemId],
+				);
+				if (hasEncrypted) {
+					throw new JoplinError('One of the revision to be deleted is encrypted', 'revision_encrypted');
+				}
+			} else {
+				const revsToMerge = await this.findAllRevisionsToKeep(itemType, itemId, cutOffDate);
 
-			try {
-				const deleteQueryCondition = 'item_updated_time < ? AND item_id = ?';
-				const deleteQueryParams = [cutOffDate, rev.item_id];
-				const deleteQuery = { sql: `DELETE FROM revisions WHERE ${deleteQueryCondition}`, params: deleteQueryParams };
-
-				if (!keptRev) {
-					const hasEncrypted = await this.modelSelectOne(`SELECT * FROM revisions WHERE encryption_applied = 1 AND ${deleteQueryCondition}`, deleteQueryParams);
-					if (hasEncrypted) throw new JoplinError('One of the revision to be deleted is encrypted', 'revision_encrypted');
-					await this.db().transactionExecBatch([deleteQuery]);
-				} else {
+				for (const keptRev of revsToMerge) {
 					// Note: we don't need to check for encrypted rev here because
 					// mergeDiff will already throw the revision_encrypted exception
 					// if a rev is encrypted.
-					const merged = await this.mergeDiffs(keptRev);
+					const merged = await this.mergeDiffs(keptRev, oldRevisions);
 
-					const queries = [deleteQuery, { sql: 'UPDATE revisions SET title_diff = ?, body_diff = ?, metadata_diff = ? WHERE id = ?', params: [this.createTextPatch('', merged.title), this.createTextPatch('', merged.body), this.createObjectPatch({}, merged.metadata), keptRev.id] }];
-
-					await this.db().transactionExecBatch(queries);
+					const titleDiff = this.createTextPatch('', merged.title);
+					const bodyDiff = this.createTextPatch('', merged.body);
+					const metadataDiff = this.createObjectPatch({}, merged.metadata);
+					queries.push({
+						sql: 'UPDATE revisions SET title_diff = ?, body_diff = ?, metadata_diff = ?, updated_time = ? WHERE id = ?',
+						params: [titleDiff, bodyDiff, metadataDiff, time.unixMs(), keptRev.id],
+					});
 				}
+			}
+
+			await this.batchDelete(oldRevisions.map(item => item.id), { sourceDescription: 'Revision.deleteOldRevisions' });
+			if (queries.length) {
+				await this.db().transactionExecBatch(queries);
+			}
+		};
+
+		for (const [itemId, oldRevisions] of itemIdToOldRevisions.entries()) {
+			if (!oldRevisions.length) {
+				throw new Error('Invalid state: There must be at least one old revision per item to be processed.');
+			}
+
+			const latestOldRevision = oldRevisions[oldRevisions.length - 1];
+
+			try {
+				await deleteOldRevisionsForItem(latestOldRevision.item_type, itemId, oldRevisions);
 			} catch (error) {
 				if (error.code === 'revision_encrypted') {
-					this.logger().info(`Aborted deletion of old revisions for item "${rev.item_id}" (rev "${rev.id}") because one of the revisions is still encrypted`, error);
+					this.logger().info(`Aborted deletion of old revisions for item "${itemId}" (latest old rev "${latestOldRevision.id}") because one of the revisions is still encrypted`, error);
 				} else {
 					throw error;
 				}
 			}
-
-			doneItems[doneKey] = true;
 		}
+	}
+
+	public static async deleteHistoryForNote(noteIds: string | string[], options: DeleteOptions) {
+		const ids = Array.isArray(noteIds) ? noteIds : [noteIds];
+
+		const revisions: RevisionEntity[] = await this.modelSelectAll(
+			`SELECT id FROM revisions WHERE item_type = ? AND item_id in (${this.escapeIdsForSql(ids)}) ORDER BY item_updated_time DESC`,
+			[ModelType.Note],
+		);
+
+		await this.batchDelete(revisions.map(item => item.id), options);
 	}
 
 	public static async revisionExists(itemType: ModelType, itemId: string, updatedTime: number) {

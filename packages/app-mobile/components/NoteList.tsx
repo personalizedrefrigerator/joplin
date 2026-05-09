@@ -1,4 +1,4 @@
-const React = require('react');
+import * as React from 'react';
 
 import { Component } from 'react';
 
@@ -10,7 +10,7 @@ import getEmptyFolderMessage from '@joplin/lib/components/shared/NoteList/getEmp
 import Folder from '@joplin/lib/models/Folder';
 
 const { _ } = require('@joplin/lib/locale');
-const { NoteItem } = require('./note-item.js');
+import NoteItem from './NoteItem';
 import { themeStyle } from './global-style';
 
 interface NoteListProps {
@@ -88,7 +88,7 @@ class NoteListComponent extends Component<NoteListProps> {
 
 		if (this.props.items.length) {
 			return <FlatList
-				ref={ref => (this.rootRef_ = ref)}
+				ref={ref => { this.rootRef_ = ref; }}
 				data={this.props.items}
 				renderItem={({ item }) => <NoteItem note={item} />}
 				keyExtractor={item => item.id}

@@ -2,11 +2,10 @@ import * as React from 'react';
 import { AppState } from '../app.reducer';
 import CommandService, { SearchResult as CommandSearchResult } from '@joplin/lib/services/CommandService';
 import KeymapService from '@joplin/lib/services/KeymapService';
-import shim from '@joplin/lib/shim';
 const { connect } = require('react-redux');
 import { _ } from '@joplin/lib/locale';
 import { themeStyle } from '@joplin/lib/theme';
-import SearchEngine from '@joplin/lib/services/search/SearchEngine';
+import SearchEngine, { ComplexTerm } from '@joplin/lib/services/search/SearchEngine';
 import gotoAnythingStyleQuery from '@joplin/lib/services/search/gotoAnythingStyleQuery';
 import BaseModel, { ModelType } from '@joplin/lib/BaseModel';
 import Tag from '@joplin/lib/models/Tag';
@@ -14,15 +13,16 @@ import Folder from '@joplin/lib/models/Folder';
 import Note from '@joplin/lib/models/Note';
 import ItemList from '../gui/ItemList';
 import HelpButton from '../gui/HelpButton';
-const { surroundKeywords, nextWhitespaceIndex, removeDiacritics } = require('@joplin/lib/string-utils.js');
+import { surroundKeywords, nextWhitespaceIndex, removeDiacritics, escapeRegExp, KeywordType } from '@joplin/lib/string-utils';
 import { mergeOverlappingIntervals } from '@joplin/lib/ArrayUtils';
-import markupLanguageUtils from '../utils/markupLanguageUtils';
+import markupLanguageUtils from '@joplin/lib/utils/markupLanguageUtils';
 import focusEditorIfEditorCommand from '@joplin/lib/services/commands/focusEditorIfEditorCommand';
 import Logger from '@joplin/utils/Logger';
 import { MarkupLanguage, MarkupToHtml } from '@joplin/renderer';
 import Resource from '@joplin/lib/models/Resource';
 import { NoteEntity, ResourceEntity } from '@joplin/lib/services/database/types';
-import Dialog from '../gui/Dialog';
+import Dialog from '@joplin/lib/components/Dialog';
+import AsyncActionQueue from '@joplin/lib/AsyncActionQueue';
 
 const logger = Logger.create('GotoAnything');
 
@@ -40,6 +40,39 @@ interface GotoAnythingSearchResult {
 	item_type?: ModelType;
 }
 
+// GotoAnything supports several modes:
+//
+// - Default: Search in note title, body. Can search for folders, tags, etc. This is the full
+//   featured GotoAnything.
+//
+// - TitleOnly: Search in note titles only.
+//
+// These different modes can be set from the `gotoAnything` command.
+
+export enum Mode {
+	Default = 0,
+	TitleOnly,
+}
+
+export interface UserDataCallbackEvent {
+	type: ModelType;
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
+	item: any;
+}
+
+export type UserDataCallbackResolve = (event: UserDataCallbackEvent)=> void;
+export type UserDataCallbackReject = (error: Error)=> void;
+export interface UserDataCallback {
+	resolve: UserDataCallbackResolve;
+	reject: UserDataCallbackReject;
+}
+
+export interface GotoAnythingUserData {
+	startString?: string;
+	mode?: Mode;
+	callback?: UserDataCallback;
+}
+
 interface Props {
 	themeId: number;
 	// eslint-disable-next-line @typescript-eslint/ban-types -- Old code before rule was applied
@@ -47,15 +80,14 @@ interface Props {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	folders: any[];
 	showCompletedTodos: boolean;
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	userData: any;
+	userData: GotoAnythingUserData;
 }
 
 interface State {
 	query: string;
 	results: GotoAnythingSearchResult[];
 	selectedItemId: string;
-	keywords: string[];
+	keywords: (string | ComplexTerm)[];
 	listType: number;
 	showHelp: boolean;
 	resultsInBody: boolean;
@@ -129,11 +161,10 @@ class DialogComponent extends React.PureComponent<Props, State> {
 	private inputRef: any;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	private itemListRef: any;
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	private listUpdateIID_: any;
+	private listUpdateQueue_: AsyncActionQueue;
 	private markupToHtml_: MarkupToHtml;
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	private userCallback_: any = null;
+	private userCallback_: UserDataCallback|null = null;
+	private mode_: Mode;
 
 	public constructor(props: Props) {
 		super(props);
@@ -141,6 +172,9 @@ class DialogComponent extends React.PureComponent<Props, State> {
 		const startString = props?.userData?.startString ? props?.userData?.startString : '';
 
 		this.userCallback_ = props?.userData?.callback;
+		this.listUpdateQueue_ = new AsyncActionQueue(100);
+
+		this.mode_ = props?.userData?.mode ? props.userData.mode : Mode.Default;
 
 		this.state = {
 			query: startString,
@@ -235,7 +269,7 @@ class DialogComponent extends React.PureComponent<Props, State> {
 	}
 
 	public componentWillUnmount() {
-		if (this.listUpdateIID_) shim.clearTimeout(this.listUpdateIID_);
+		void this.listUpdateQueue_.reset();
 
 		this.props.dispatch({
 			type: 'VISIBLE_DIALOGS_REMOVE',
@@ -263,12 +297,7 @@ class DialogComponent extends React.PureComponent<Props, State> {
 	}
 
 	public scheduleListUpdate() {
-		if (this.listUpdateIID_) shim.clearTimeout(this.listUpdateIID_);
-
-		this.listUpdateIID_ = shim.setTimeout(async () => {
-			await this.updateList();
-			this.listUpdateIID_ = null;
-		}, 100);
+		this.listUpdateQueue_.push(() => this.updateList());
 	}
 
 	public async keywords(searchQuery: string) {
@@ -316,8 +345,8 @@ class DialogComponent extends React.PureComponent<Props, State> {
 					return {
 						id: result.commandName,
 						title: result.title,
-						parent_id: null,
-						fields: [],
+						parent_id: null as string,
+						fields: [] as string[],
 						type: BaseModel.TYPE_COMMAND,
 					};
 				});
@@ -327,13 +356,18 @@ class DialogComponent extends React.PureComponent<Props, State> {
 				results = await Tag.searchAllWithNotes({ titlePattern: searchQuery });
 			} else if (this.state.query.indexOf('@') === 0) { // FOLDERS
 				listType = BaseModel.TYPE_FOLDER;
-				searchQuery = `*${this.state.query.split(' ')[0].substr(1).trim()}*`;
-				results = await Folder.search({ titlePattern: searchQuery });
+				searchQuery = this.state.query.substr(1).trim();
+				const normalizedSearchQuery = removeDiacritics(searchQuery).toLowerCase();
 
-				for (let i = 0; i < results.length; i++) {
-					const row = results[i];
-					const path = Folder.folderPathString(this.props.folders, row.parent_id);
-					results[i] = { ...row, path: path ? path : '/' };
+				results = [];
+				for (const folder of this.props.folders) {
+					if (folder.deleted_time) continue;
+
+					const normalizedTitle = removeDiacritics(folder.title).toLowerCase();
+					if (normalizedSearchQuery && normalizedTitle.indexOf(normalizedSearchQuery) < 0) continue;
+
+					const path = Folder.folderPathString(this.props.folders, folder.parent_id);
+					results.push({ ...folder, path: path ? path : '/' });
 				}
 			} else { // Note TITLE or BODY
 				listType = BaseModel.TYPE_NOTE;
@@ -345,6 +379,13 @@ class DialogComponent extends React.PureComponent<Props, State> {
 
 				// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 				resultsInBody = !!results.find((row: any) => row.fields.includes('body'));
+
+				if (this.mode_ === Mode.TitleOnly) {
+					resultsInBody = false;
+					results = results.filter(r => {
+						return r.fields.includes('title');
+					});
+				}
 
 				const resourceIds = results.filter(r => r.item_type === ModelType.Resource).map(r => r.item_id);
 				const resources = await Resource.resourceOcrTextsByIds(resourceIds);
@@ -360,7 +401,6 @@ class DialogComponent extends React.PureComponent<Props, State> {
 					}
 				} else {
 					const limit = 20;
-					const searchKeywords = await this.keywords(searchQuery);
 
 					// Note: any filtering must be done **before** fetching the notes, because we're
 					// going to apply a limit to the number of fetched notes.
@@ -381,6 +421,16 @@ class DialogComponent extends React.PureComponent<Props, State> {
 					results = results.filter(r => !!notesById[r.id])
 						.map(r => ({ ...r, title: notesById[r.id].title }));
 
+					const keywordRegexes = (await this.keywords(searchQuery)).map(term => {
+						if (typeof term === 'string') {
+							return new RegExp(escapeRegExp(term), 'ig');
+						} else if (term.valueRegex) {
+							return new RegExp(removeDiacritics(term.valueRegex), 'ig');
+						} else {
+							return new RegExp(escapeRegExp(term.value), 'ig');
+						}
+					});
+
 					for (let i = 0; i < results.length; i++) {
 						const row = results[i];
 						const path = Folder.folderPathString(this.props.folders, row.parent_id);
@@ -388,21 +438,14 @@ class DialogComponent extends React.PureComponent<Props, State> {
 						if (row.fields.includes('body')) {
 							let fragments = '...';
 
-							if (i < limit) { // Display note fragments of search keyword matches
-								const { markupLanguage, content } = getContentMarkupLanguageAndBody(
-									row,
-									notesById,
-									resources,
-								);
-
+							const loadFragments = (markupLanguage: MarkupLanguage, content: string) => {
 								const indices = [];
 								const body = this.markupToHtml().stripMarkup(markupLanguage, content, { collapseWhiteSpaces: true });
+								const normalizedBody = removeDiacritics(body);
 
 								// Iterate over all matches in the body for each search keyword
-								for (let { valueRegex } of searchKeywords) {
-									valueRegex = removeDiacritics(valueRegex);
-
-									for (const match of removeDiacritics(body).matchAll(new RegExp(valueRegex, 'ig'))) {
+								for (const keywordRegex of keywordRegexes) {
+									for (const match of normalizedBody.matchAll(keywordRegex)) {
 										// Populate 'indices' with [begin index, end index] of each note fragment
 										// Begins at the regex matching index, ends at the next whitespace after seeking 15 characters to the right
 										indices.push([match.index, nextWhitespaceIndex(body, match.index + match[0].length + 15)]);
@@ -418,6 +461,19 @@ class DialogComponent extends React.PureComponent<Props, State> {
 								fragments = mergedIndices.map((f: any) => body.slice(f[0], f[1])).join(' ... ');
 								// Add trailing ellipsis if the final fragment doesn't end where the note is ending
 								if (mergedIndices.length && mergedIndices[mergedIndices.length - 1][1] !== body.length) fragments += ' ...';
+							};
+
+							if (i < limit) { // Display note fragments of search keyword matches
+								const { markupLanguage, content } = getContentMarkupLanguageAndBody(
+									row,
+									notesById,
+									resources,
+								);
+
+								// Don't load fragments for long notes -- doing so can lead to UI freezes.
+								if (content.length < 100_000) {
+									loadFragments(markupLanguage, content);
+								}
 							}
 
 							results[i] = { ...row, path, fragments };
@@ -521,16 +577,8 @@ class DialogComponent extends React.PureComponent<Props, State> {
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	private listItem_onClick(event: any) {
-		const itemId = event.currentTarget.getAttribute('data-id');
-		const parentId = event.currentTarget.getAttribute('data-parent-id');
-		const itemType = Number(event.currentTarget.getAttribute('data-type'));
-
-		void this.gotoItem({
-			id: itemId,
-			parent_id: parentId,
-			type: itemType,
-			commandArgs: this.state.commandArgs,
-		});
+		const targetResultId = event.currentTarget.getAttribute('id');
+		void this.gotoItem(this.selectedItem(targetResultId));
 	}
 
 	public renderItem(item: GotoAnythingSearchResult, index: number) {
@@ -539,11 +587,20 @@ class DialogComponent extends React.PureComponent<Props, State> {
 		const resultId = getResultId(item);
 		const isSelected = resultId === this.state.selectedItemId;
 		const rowStyle = isSelected ? style.rowSelected : style.row;
-		const titleHtml = item.fragments
-			? `<span style="font-weight: bold; color: ${theme.color};">${item.title}</span>`
-			: surroundKeywords(this.state.keywords, item.title, `<span style="font-weight: bold; color: ${theme.searchMarkerColor}; background-color: ${theme.searchMarkerBackgroundColor}">`, '</span>', { escapeHtml: true });
 
-		const fragmentsHtml = !item.fragments ? null : surroundKeywords(this.state.keywords, item.fragments, `<span style="color: ${theme.searchMarkerColor}; background-color: ${theme.searchMarkerBackgroundColor}">`, '</span>', { escapeHtml: true });
+		const wrapKeywordMatches = (unescapedContent: string) => {
+			return surroundKeywords(
+				this.state.keywords as KeywordType,
+				unescapedContent,
+				`<span class="match-highlight" style="font-weight: bold; color: ${theme.searchMarkerColor}; background-color: ${theme.searchMarkerBackgroundColor}">`,
+				'</span>',
+				{ escapeHtml: true },
+			);
+		};
+
+		const titleHtml = wrapKeywordMatches(item.title);
+
+		const fragmentsHtml = !item.fragments ? null : wrapKeywordMatches(item.fragments);
 
 		const folderIcon = <i style={{ fontSize: theme.fontSize, marginRight: 2 }} className="fa fa-book" role='img' aria-label={_('Notebook')} />;
 		const pathComp = !item.path ? null : <div style={style.rowPath}>{folderIcon} {item.path}</div>;
@@ -565,8 +622,8 @@ class DialogComponent extends React.PureComponent<Props, State> {
 				aria-posinset={index + 1}
 			>
 				<div style={style.rowTitle} dangerouslySetInnerHTML={{ __html: titleHtml }}></div>
-				{fragmentComp}
-				{pathComp}
+				{this.mode_ === Mode.TitleOnly ? null : fragmentComp}
+				{this.mode_ === Mode.TitleOnly ? null : pathComp}
 			</div>
 		);
 	}
@@ -582,8 +639,8 @@ class DialogComponent extends React.PureComponent<Props, State> {
 		return -1;
 	}
 
-	public selectedItem() {
-		const index = this.selectedItemIndex();
+	public selectedItem(itemId: string = undefined) {
+		const index = this.selectedItemIndex(undefined, itemId);
 		if (index < 0) return null;
 		return { ...this.state.results[index], commandArgs: this.state.commandArgs };
 	}
@@ -621,7 +678,9 @@ class DialogComponent extends React.PureComponent<Props, State> {
 	}
 
 	private calculateMaxHeight(itemHeight: number) {
-		const maxItemCount = Math.floor((0.7 * window.innerHeight) / itemHeight);
+		const listContainer: HTMLElement|null = this.itemListRef.current?.container;
+		const containerWindow = listContainer?.ownerDocument?.defaultView ?? window;
+		const maxItemCount = Math.floor((0.7 * containerWindow.innerHeight) / itemHeight);
 		return maxItemCount * itemHeight;
 	}
 
@@ -647,6 +706,14 @@ class DialogComponent extends React.PureComponent<Props, State> {
 		);
 	}
 
+	private helpText() {
+		if (this.mode_ === Mode.TitleOnly) {
+			return _('Type a note title to search for it.');
+		} else {
+			return _('Type a note title or part of its content to jump to it. Or type # followed by a tag name, or @ followed by a notebook name. Or type : to search for commands.');
+		}
+	}
+
 	public render() {
 		const style = this.style();
 		const helpTextId = 'goto-anything-help-text';
@@ -657,7 +724,7 @@ class DialogComponent extends React.PureComponent<Props, State> {
 				id={helpTextId}
 				style={style.help}
 				hidden={!this.state.showHelp}
-			>{_('Type a note title or part of its content to jump to it. Or type # followed by a tag name, or @ followed by a notebook name. Or type : to search for commands.')}</div>
+			>{this.helpText()}</div>
 		);
 
 		return (

@@ -3,12 +3,14 @@ import { _ } from '../../locale';
 import BaseItem, { EncryptedItemsStats } from '../../models/BaseItem';
 import useAsyncEffect, { AsyncEffectEvent } from '../../hooks/useAsyncEffect';
 import { MasterKeyEntity } from '../../services/e2ee/types';
-import { findMasterKeyPassword, getMasterPasswordStatus, masterPasswordIsValid, MasterPasswordStatus } from '../../services/e2ee/utils';
+import { findMasterKeyPassword, getMasterPasswordStatus, loadMasterKeysFromSettings, masterPasswordIsValid, MasterPasswordStatus } from '../../services/e2ee/utils';
 import EncryptionService from '../../services/e2ee/EncryptionService';
 import { masterKeyEnabled, setMasterKeyEnabled } from '../../services/synchronizer/syncInfoUtils';
 import MasterKey from '../../models/MasterKey';
 import { reg } from '../../registry';
 import Setting from '../../models/Setting';
+import { MessageBoxType } from '../../shim';
+import DecryptionWorker from '../../services/DecryptionWorker';
 const { useCallback, useEffect, useState } = shim.react();
 
 type PasswordChecks = Record<string, boolean>;
@@ -61,13 +63,13 @@ export const enableEncryptionConfirmationMessages = (_masterKey: MasterKeyEntity
 };
 
 export const reencryptData = async () => {
-	const ok = confirm(_('Please confirm that you would like to re-encrypt your complete database.'));
+	const ok = await shim.showConfirmationDialog(_('Please confirm that you would like to re-encrypt your complete database.'));
 	if (!ok) return;
 
 	await BaseItem.forceSyncAll();
 	void reg.waitForSyncFinishedThenSync();
 	Setting.setValue('encryption.shouldReencrypt', Setting.SHOULD_REENCRYPT_NO);
-	alert(_('Your data is going to be re-encrypted and synced again.'));
+	await shim.showMessageBox(_('Your data is going to be re-encrypted and synced again.'), { type: MessageBoxType.Info });
 };
 
 export const dontReencryptData = () => {
@@ -116,9 +118,21 @@ export const useInputMasterPassword = (masterKeys: MasterKeyEntity[], activeMast
 
 		if (!(await masterPasswordIsValid(inputMasterPassword, masterKeys.find(mk => mk.id === activeMasterKeyId)))) {
 			alert('Password is invalid. Please try again.');
+		} else {
+			try {
+				for (const mk of masterKeys) {
+					EncryptionService.instance().unloadMasterKey(mk);
+				}
+				await loadMasterKeysFromSettings(EncryptionService.instance());
+				await DecryptionWorker.instance().clearDisabledItems();
+				void DecryptionWorker.instance().scheduleStart();
+			} catch (error) {
+				reg.logger().error('Failed to reload master keys after password change:', error);
+				await loadMasterKeysFromSettings(EncryptionService.instance());
+			}
 		}
 		// eslint-disable-next-line @seiyab/react-hooks/exhaustive-deps -- Old code before rule was applied
-	}, [inputMasterPassword]);
+	}, [inputMasterPassword, masterKeys, activeMasterKeyId]);
 
 	const onMasterPasswordChange = useCallback((password: string) => {
 		setInputMasterPassword(password);
@@ -160,15 +174,20 @@ export const usePasswordChecker = (masterKeys: MasterKeyEntity[], activeMasterKe
 		const newPasswordChecks: PasswordChecks = {};
 		const newMasterPasswordKeys: PasswordChecks = {};
 
+		const masterPasswordOk = masterPassword ? await masterPasswordIsValid(masterPassword, masterKeys.find(mk => mk.id === activeMasterKeyId)) : true;
+		newPasswordChecks['master'] = masterPasswordOk;
+
 		for (let i = 0; i < masterKeys.length; i++) {
 			const mk = masterKeys[i];
 			const password = await findMasterKeyPassword(EncryptionService.instance(), mk, passwords);
 			const ok = password ? await EncryptionService.instance().checkMasterKeyPassword(mk, password) : false;
 			newPasswordChecks[mk.id] = ok;
-			newMasterPasswordKeys[mk.id] = password === masterPassword;
+
+			// Even if the password matches the master password, it isn't a master password key if the
+			// master password can't decrypt this key.
+			newMasterPasswordKeys[mk.id] = password === masterPassword && (ok || !masterPasswordOk);
 		}
 
-		newPasswordChecks['master'] = masterPassword ? await masterPasswordIsValid(masterPassword, masterKeys.find(mk => mk.id === activeMasterKeyId)) : true;
 
 		if (event.cancelled) return;
 

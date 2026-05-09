@@ -7,9 +7,13 @@
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 ROOT_DIR="$SCRIPT_DIR/../.."
 
+TRANSCRIBE_TAG_PREFIX=transcribe
+TRANSCRIBE_REPOSITORY=joplin/transcribe
+
 IS_PULL_REQUEST=0
 IS_DESKTOP_RELEASE=0
 IS_SERVER_RELEASE=0
+IS_TRANSCRIBE_RELEASE=0
 IS_LINUX=0
 IS_MACOS=0
 
@@ -21,6 +25,10 @@ fi
 
 if [[ $GIT_TAG_NAME = $SERVER_TAG_PREFIX-* ]]; then
 	IS_SERVER_RELEASE=1
+fi
+
+if [[ $GIT_TAG_NAME = $TRANSCRIBE_TAG_PREFIX-* ]]; then
+	IS_TRANSCRIBE_RELEASE=1
 fi
 
 if [[ $GIT_TAG_NAME = v* ]]; then
@@ -35,18 +43,45 @@ else
 	IS_MACOS=1
 fi
 
+DOCKER_IMAGE_PLATFORM="linux/amd64"
+
 # Tests can randomly fail in some cases, so only run them when not publishing
 # a release
 RUN_TESTS=0
 
-if [ "$IS_SERVER_RELEASE" = 0 ] && [ "$IS_DESKTOP_RELEASE" = 0 ]; then
+if [ "$IS_SERVER_RELEASE" = 0 ] && [ "$IS_DESKTOP_RELEASE" = 0 ] && [ "$IS_TRANSCRIBE_RELEASE" = 0 ]; then
 	RUN_TESTS=1
+fi
+
+if [ "$RUNNER_ARCH" == "ARM64" ]; then
+	if [ "$IS_SERVER_RELEASE" == "0" ] && [ "$IS_TRANSCRIBE_RELEASE" == "0" ]; then
+		# We exit now because nothing works properly with the ARM64 architecture.
+		# We only proceed  if building the server image.
+		echo "Running on ARM64 and not trying to build server image - early exit"
+		exit 0
+	fi
+fi
+
+if [ "$RUNNER_ARCH" == "ARM64" ]; then
+	# Canvas is only needed for tests and it doesn't build in ARM64 so remove it
+	RUN_TESTS=0
+	cd "$ROOT_DIR/packages/lib"
+	yarn remove canvas
+	cd "$ROOT_DIR"
+
+	DOCKER_IMAGE_PLATFORM="linux/arm64"
+
+	# Delete certain directories because `yarn install` will fail on ARM64.
+	rm -rf app-desktop
+	rm -rf app-mobile
 fi
 
 # =============================================================================
 # Print environment
 # =============================================================================
 
+echo "RUNNER_OS=$RUNNER_OS"
+echo "RUNNER_ARCH=$RUNNER_ARCH"
 echo "GITHUB_WORKFLOW=$GITHUB_WORKFLOW"
 echo "GITHUB_EVENT_NAME=$GITHUB_EVENT_NAME"
 echo "GITHUB_REF=$GITHUB_REF"
@@ -55,11 +90,14 @@ echo "GIT_TAG_NAME=$GIT_TAG_NAME"
 echo "BUILD_SEQUENCIAL=$BUILD_SEQUENCIAL"
 echo "SERVER_REPOSITORY=$SERVER_REPOSITORY"
 echo "SERVER_TAG_PREFIX=$SERVER_TAG_PREFIX"
+echo "TRANSCRIBE_TAG_PREFIX=$TRANSCRIBE_TAG_PREFIX"
+echo "DOCKER_IMAGE_PLATFORM=$DOCKER_IMAGE_PLATFORM"
 
 echo "IS_CONTINUOUS_INTEGRATION=$IS_CONTINUOUS_INTEGRATION"
 echo "IS_PULL_REQUEST=$IS_PULL_REQUEST"
 echo "IS_DESKTOP_RELEASE=$IS_DESKTOP_RELEASE"
 echo "IS_SERVER_RELEASE=$IS_SERVER_RELEASE"
+echo "IS_TRANSCRIBE_RELEASE=$IS_TRANSCRIBE_RELEASE"
 echo "RUN_TESTS=$RUN_TESTS"
 echo "IS_LINUX=$IS_LINUX"
 echo "IS_MACOS=$IS_MACOS"
@@ -67,6 +105,7 @@ echo "IS_MACOS=$IS_MACOS"
 echo "Node $( node -v )"
 echo "Npm $( npm -v )"
 echo "Yarn $( yarn -v )"
+echo "Rust $( rustc --version )"
 
 # =============================================================================
 # Install packages
@@ -90,7 +129,7 @@ if [ "$RUN_TESTS" == "1" ]; then
 	# On Linux, we run the Joplin Server tests using PostgreSQL
 	if [ "$IS_LINUX" == "1" ]; then
 		echo "Running Joplin Server tests using PostgreSQL..."
-		sudo docker compose --file docker-compose.db-dev.yml up -d
+		sudo docker compose --parallel 1 --file docker-compose.db-dev.yml up -d
 		cmdResult=$?
 		if [ $cmdResult -ne 0 ]; then
 			exit $cmdResult
@@ -179,6 +218,10 @@ fi
 
 if [ "$IS_LINUX" == "1" ]; then
 	echo "Step: Checking for files that should have been ignored..."
+
+	# .gitignore and .eslintignore can be modified during yarn install. Reset them
+	# so that checkIgnoredFiles works.
+	git restore .gitignore .eslintignore
 
 	node packages/tools/checkIgnoredFiles.js 
 	testResult=$?
@@ -270,9 +313,13 @@ if [ "$IS_DESKTOP_RELEASE" == "1" ]; then
 		USE_HARD_LINKS=false yarn dist
 	fi	
 elif [[ $IS_LINUX = 1 ]] && [ "$IS_SERVER_RELEASE" == "1" ]; then
-	echo "Step: Building Docker Image..."
+	echo "Step: Building Joplin Server Docker Image..."
 	cd "$ROOT_DIR"
-	yarn buildServerDocker --tag-name $GIT_TAG_NAME --push-images --repository $SERVER_REPOSITORY
+	yarn buildServerDocker --docker-file Dockerfile.server --platform $DOCKER_IMAGE_PLATFORM --tag-name $GIT_TAG_NAME --push-images --repository $SERVER_REPOSITORY
+elif [[ $IS_LINUX = 1 ]] && [ "$IS_TRANSCRIBE_RELEASE" == "1" ]; then
+	echo "Step: Building Joplin Transcribe Docker Image..."
+	cd "$ROOT_DIR"
+	yarn buildServerDocker --docker-file Dockerfile.transcribe --platform $DOCKER_IMAGE_PLATFORM --tag-name $GIT_TAG_NAME --push-images --repository $TRANSCRIBE_REPOSITORY
 else
 	echo "Step: Building but *not* publishing desktop application..."
 	

@@ -4,9 +4,10 @@ import { fileExtension } from '@joplin/utils/path';
 import setupLinkify from './MdToHtml/setupLinkify';
 import validateLinks from './MdToHtml/validateLinks';
 import { Options as NoteStyleOptions } from './noteStyle';
-import { FsDriver, ItemIdToUrlHandler, MarkupRenderer, OptionsResourceModel, RenderOptions, RenderResult, RenderResultPluginAsset } from './types';
+import { FsDriver, ItemIdToUrlHandler, MarkupRenderer, OptionsResourceModel, RenderOptions, RenderResult, RenderResultPluginAsset, ResourceInfos } from './types';
 import hljs from './highlight';
-import * as MarkdownIt from 'markdown-it';
+// Use a require() to support bundling on mobile:
+import MarkdownIt = require('markdown-it');
 
 const Entities = require('html-entities').AllHtmlEntities;
 const htmlentities = new Entities().encode;
@@ -41,6 +42,7 @@ interface RendererPlugins {
 
 // /!\/!\ Note: the order of rules is important!! /!\/!\
 const rules: RendererRules = {
+	frontmatter: require('./MdToHtml/rules/frontmatter').default,
 	fence: require('./MdToHtml/rules/fence').default,
 	sanitize_html: require('./MdToHtml/rules/sanitize_html').default,
 	image: require('./MdToHtml/rules/image').default,
@@ -52,7 +54,9 @@ const rules: RendererRules = {
 	highlight_keywords: require('./MdToHtml/rules/highlight_keywords').default,
 	code_inline: require('./MdToHtml/rules/code_inline').default,
 	fountain: require('./MdToHtml/rules/fountain').default,
+	abc: require('./MdToHtml/rules/abc').default,
 	mermaid: require('./MdToHtml/rules/mermaid').default,
+	externalEmbed: require('./MdToHtml/rules/externalEmbed').default,
 	source_map: require('./MdToHtml/rules/source_map').default,
 	tableHorizontallyScrollable: require('./MdToHtml/rules/tableHorizontallyScrollable').default,
 };
@@ -143,7 +147,16 @@ interface PluginContext {
 	pluginWasUsed: {
 		mermaid: boolean;
 		katex: boolean;
+		abc: boolean;
 	};
+}
+
+export enum LinkRenderingType {
+	// linkRenderingType = 1 is the regular rendering and clicking on it is handled via embedded JS (in onclick attribute)
+	JavaScriptHandler = 1,
+
+	// linkRenderingType = 2 gives a plain link with no JS. Caller needs to handle clicking on the link.
+	HrefHandler = 2,
 }
 
 export interface RuleOptions {
@@ -153,16 +166,14 @@ export interface RuleOptions {
 	postMessageSyntax: string;
 	ResourceModel: OptionsResourceModel;
 	resourceBaseUrl: string;
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	resources: any; // resourceId: Resource
+	resources: ResourceInfos; // resourceId: Resource
 
 	// Used by checkboxes to specify how it should be rendered
 	checkboxRenderingType?: number;
 	checkboxDisabled?: boolean;
 
 	// Used by the keyword highlighting plugin (mobile only)
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	highlightedKeywords?: any[];
+	highlightedKeywords?: unknown[];
 
 	// Use by resource-rendering logic to signify that it should be rendered
 	// as a plain HTML string without any attached JavaScript. Used for example
@@ -174,9 +185,7 @@ export interface RuleOptions {
 	enableLongPress?: boolean;
 
 	// Use by `link_open` rule.
-	// linkRenderingType = 1 is the regular rendering and clicking on it is handled via embedded JS (in onclick attribute)
-	// linkRenderingType = 2 gives a plain link with no JS. Caller needs to handle clicking on the link.
-	linkRenderingType?: number;
+	linkRenderingType?: LinkRenderingType;
 
 	// A list of MIME types for which an edit button appears on tap/hover.
 	// Used by the image editor in the mobile app.
@@ -200,28 +209,26 @@ export interface RuleOptions {
 	allowedFilePrefixes?: string[];
 
 	platformName?: string;
+
+	showNoteLinkIcon?: boolean;
 }
 
 export default class MdToHtml implements MarkupRenderer {
 
 	private resourceBaseUrl_: string;
 	private ResourceModel_: OptionsResourceModel;
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	private contextCache_: any;
+	private contextCache_: InMemoryCache;
 	private fsDriver_: FsDriver;
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	private cachedOutputs_: any = {};
+	private cachedOutputs_: Record<string, RenderResult> = {};
 	private lastCodeHighlightCacheKey_: string = null;
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	private cachedHighlightedCode_: any = {};
+	private cachedHighlightedCode_: Record<string, string> = {};
 
 	// Markdown-It plugin options (not Joplin plugin options)
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	private pluginOptions_: any = {};
 	private extraRendererRules_: RendererRules = {};
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	private allProcessedAssets_: any = {};
+	private allProcessedAssets_: Record<string, RenderResult> = {};
 	private customCss_ = '';
 
 	public constructor(options: Options = null) {
@@ -394,9 +401,10 @@ export default class MdToHtml implements MarkupRenderer {
 	public async allAssets(theme: any, noteStyleOptions: NoteStyleOptions = null) {
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 		const assets: any = {};
-		for (const key in rules) {
+		const allRules = { ...rules, ...this.extraRendererRules_ };
+		for (const key in allRules) {
 			if (!this.pluginEnabled(key)) continue;
-			const rule = rules[key];
+			const rule = allRules[key];
 
 			if (rule.assets) {
 				assets[key] = rule.assets(theme);
@@ -511,10 +519,11 @@ export default class MdToHtml implements MarkupRenderer {
 			pluginWasUsed: {
 				mermaid: false,
 				katex: false,
+				abc: false,
 			},
 		};
 
-		const markdownIt: MarkdownIt = new MarkdownIt({
+		const markdownIt = new MarkdownIt({
 			breaks: !this.pluginEnabled('softbreaks'),
 			typographer: this.pluginEnabled('typographer'),
 			linkify: this.pluginEnabled('linkify'),
@@ -526,7 +535,7 @@ export default class MdToHtml implements MarkupRenderer {
 				// The strings includes the last \n that is part of the fence,
 				// so we remove it because we need the exact code in the source block
 				const trimmedStr = this.removeLastNewLine(str);
-				const sourceBlockHtml = `<pre class="joplin-source" data-joplin-language="${htmlentities(lang)}" data-joplin-source-open="\`\`\`${htmlentities(lang)}&#10;" data-joplin-source-close="&#10;\`\`\`">${markdownIt.utils.escapeHtml(trimmedStr)}</pre>`;
+				const sourceBlockHtml = `<pre class="joplin-source" hidden data-joplin-language="${htmlentities(lang)}" data-joplin-source-open="\`\`\`${htmlentities(lang)}&#10;" data-joplin-source-close="&#10;\`\`\`">${markdownIt.utils.escapeHtml(trimmedStr)}</pre>`;
 
 				if (this.shouldSkipHighlighting(trimmedStr, lang)) {
 					outputCodeHtml = markdownIt.utils.escapeHtml(trimmedStr);
@@ -637,6 +646,8 @@ export default class MdToHtml implements MarkupRenderer {
 		const renderedBody = markdownIt.render(body, context);
 
 		let cssStrings = noteStyle(options.theme, {
+			scrollbarSize: options.scrollbarSize,
+			baseFontFamily: options.baseFontFamily,
 			contentMaxWidth: options.contentMaxWidth,
 		});
 
@@ -645,6 +656,7 @@ export default class MdToHtml implements MarkupRenderer {
 		output.pluginAssets = output.pluginAssets.filter(pa => {
 			if (!context.pluginWasUsed.mermaid && pa.source === 'mermaid') return false;
 			if (!context.pluginWasUsed.katex && pa.source === 'katex') return false;
+			if (!context.pluginWasUsed.abc && pa.source === 'abc') return false;
 			return true;
 		});
 

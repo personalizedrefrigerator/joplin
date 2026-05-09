@@ -2,6 +2,7 @@ import dayjs = require('dayjs');
 import dayJsUtc = require('dayjs/plugin/utc');
 import dayJsDuration = require('dayjs/plugin/duration');
 import dayJsTimezone = require('dayjs/plugin/timezone');
+import { LoggerWrapper } from '@joplin/utils/Logger';
 
 function defaultTimezone() {
 	return dayjs.tz.guess();
@@ -31,10 +32,22 @@ export function msleep(ms: number) {
 	});
 }
 
+export function formatDateOnServer(ms: number | Date): string {
+	if (!ms) return '-';
+	ms = ms instanceof Date ? ms.getTime() : ms;
+	return `${dayjs(ms).utc().format('D MMM YY HH:mm:ss')} (UTC)`;
+}
+
 export function formatDateTime(ms: number | Date): string {
 	if (!ms) return '-';
 	ms = ms instanceof Date ? ms.getTime() : ms;
 	return `${dayjs(ms).format('D MMM YY HH:mm:ss')} (${defaultTimezone()})`;
+}
+
+export function formatDate(ms: number | Date): string {
+	if (!ms) return '-';
+	ms = ms instanceof Date ? ms.getTime() : ms;
+	return `${dayjs(ms).format('D MMM YYYY')}`;
 }
 
 export const durationToMilliseconds = (durationIso8601: string) => {
@@ -64,4 +77,48 @@ export function timerPop() {
 	const t = perfTimers_.pop();
 	// eslint-disable-next-line no-console
 	console.info(`Time: ${t.name}: ${Date.now() - t.startTime}`);
+}
+
+interface PerformanceTimerInfo {
+	id: number;
+	name: string;
+	startTime: number;
+}
+
+export class PerformanceTimer {
+
+	private logger_: LoggerWrapper|typeof console = null;
+	private prefix_ = '';
+	private timers_: PerformanceTimerInfo[] = [];
+	private enabled_ = true;
+	private id_ = 1;
+
+	public constructor(logger: LoggerWrapper|typeof console, prefix: string) {
+		this.logger_ = logger;
+		this.prefix_ = prefix;
+	}
+
+	public get enabled() {
+		return this.enabled_;
+	}
+
+	public set enabled(v: boolean) {
+		this.enabled_ = v;
+	}
+
+	public push(name: string) {
+		if (!this.enabled) return;
+		const id = this.id_;
+		this.id_++;
+		this.logger_.info(`${this.prefix_}#${id}: Start: ${name}`);
+		this.timers_.push({ name, startTime: Date.now(), id });
+	}
+
+	public pop() {
+		if (!this.enabled) return;
+		const t = this.timers_.pop();
+		if (!t) throw new Error('Trying to pop a timer but no timer in the list');
+		this.logger_.info(`${this.prefix_}#${t.id}: Done: ${t.name}: ${((Date.now() - t.startTime) / 1000).toFixed(2)}s`);
+	}
+
 }

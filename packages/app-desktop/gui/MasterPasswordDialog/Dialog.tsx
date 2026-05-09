@@ -3,14 +3,16 @@ import { useCallback, useState, useEffect, useMemo } from 'react';
 import { _ } from '@joplin/lib/locale';
 import useAsyncEffect, { AsyncEffectEvent } from '@joplin/lib/hooks/useAsyncEffect';
 import DialogButtonRow, { ClickEvent } from '../DialogButtonRow';
-import Dialog from '../Dialog';
+import Dialog from '@joplin/lib/components/Dialog';
 import DialogTitle from '../DialogTitle';
 import { getMasterPasswordStatus, getMasterPasswordStatusMessage, checkHasMasterPasswordEncryptedData, masterPasswordIsValid, MasterPasswordStatus, resetMasterPassword, updateMasterPassword, getMasterPassword } from '@joplin/lib/services/e2ee/utils';
 import { reg } from '@joplin/lib/registry';
 import EncryptionService from '@joplin/lib/services/e2ee/EncryptionService';
 import KvStore from '@joplin/lib/services/KvStore';
 import ShareService from '@joplin/lib/services/share/ShareService';
-import { PasswordInput } from '../PasswordInput/PasswordInput';
+import LabelledPasswordInput from '../PasswordInput/LabelledPasswordInput';
+import shim from '@joplin/lib/shim';
+import time from '@joplin/lib/time';
 
 interface Props {
 	themeId: number;
@@ -22,6 +24,11 @@ enum Mode {
 	Set = 1,
 	Reset = 2,
 }
+
+const syncAfterDefaultInterval = async () => {
+	await time.msleep(reg.defaultScheduleInterval());
+	await reg.waitForSyncFinishedThenSync();
+};
 
 export default function(props: Props) {
 	const [status, setStatus] = useState(MasterPasswordStatus.NotSet);
@@ -40,7 +47,7 @@ export default function(props: Props) {
 		if (mode === Mode.Reset) return false;
 		return true;
 		// eslint-disable-next-line @seiyab/react-hooks/exhaustive-deps -- Old code before rule was applied
-	}, [status]);
+	}, [status, mode]);
 
 	const onClose = useCallback(() => {
 		props.dispatch({
@@ -77,10 +84,11 @@ export default function(props: Props) {
 				} else {
 					throw new Error(`Unknown mode: ${mode}`);
 				}
-				void reg.waitForSyncFinishedThenSync();
+				// We need to defer the sync, as enabling encryption may take a few seconds to complete
+				void syncAfterDefaultInterval();
 				onClose();
 			} catch (error) {
-				alert(error.message);
+				void shim.showErrorDialog(error.message);
 			} finally {
 				setUpdatingPassword(false);
 			}
@@ -89,10 +97,12 @@ export default function(props: Props) {
 		// eslint-disable-next-line @seiyab/react-hooks/exhaustive-deps -- Old code before rule was applied
 	}, [currentPassword, password1, onClose, mode]);
 
+	// Show the "Re-enter password" confirmation field
 	const needToRepeatPassword = useMemo(() => {
 		if (mode === Mode.Reset) return true;
+		if (showCurrentPassword) return true;
 		return !hasMasterPasswordEncryptedData;
-	}, [hasMasterPasswordEncryptedData, mode]);
+	}, [mode, showCurrentPassword, hasMasterPasswordEncryptedData]);
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	const onCurrentPasswordChange = useCallback((event: any) => {
@@ -136,12 +146,8 @@ export default function(props: Props) {
 		setCurrentPasswordIsValid(isValid);
 	}, [currentPassword]);
 
-	function renderCurrentPasswordIcon() {
-		if (!currentPassword || status === MasterPasswordStatus.NotSet) return null;
-		return currentPasswordIsValid ? <i className="fas fa-check password-valid-icon"></i> : <i className="fas fa-times"></i>;
-	}
-
 	function renderPasswordForm() {
+		const passwordsMatch = password1 === password2;
 		const renderCurrentPassword = () => {
 			if (!showCurrentPassword) return null;
 
@@ -151,49 +157,61 @@ export default function(props: Props) {
 			// having to reset the password (and lose access to any data that's
 			// been encrypted with it).
 
+			const showValidIcon = currentPassword && status !== MasterPasswordStatus.NotSet;
 			return (
-				<div className="form-input-group">
-					<label>{'Current password'}</label>
-					<div className="current-password-wrapper">
-						<PasswordInput value={currentPassword} onChange={onCurrentPasswordChange}/>
-						{renderCurrentPasswordIcon()}
-					</div>
-				</div>
+				<LabelledPasswordInput
+					labelText={_('Current password')}
+					value={currentPassword}
+					onChange={onCurrentPasswordChange}
+					valid={showValidIcon ? currentPasswordIsValid : undefined}
+				/>
 			);
 		};
 
 		const renderResetMasterPasswordLink = () => {
 			if (mode === Mode.Reset) return null;
 			if (status === MasterPasswordStatus.Valid) return null;
-			return <p><a href="#" onClick={onToggleMode}>Reset master password</a></p>;
+			return <p><a href="#" onClick={onToggleMode}>{_('Reset master password')}</a></p>;
 		};
 
 		if (showPasswordForm) {
-			const enterPasswordLabel = [MasterPasswordStatus.Loaded, MasterPasswordStatus.Valid].includes(status) ? 'Enter new password' : 'Enter password';
+			const enterPasswordLabel = [MasterPasswordStatus.Loaded, MasterPasswordStatus.Valid].includes(status) ? _('Enter new password') : _('Enter password');
 
 			return (
 				<div>
 					<div className="form">
 						{renderCurrentPassword()}
-						<div className="form-input-group">
-							<label>{enterPasswordLabel}</label>
-							<PasswordInput value={password1} onChange={onPasswordChange1}/>
-						</div>
+						<LabelledPasswordInput
+							labelText={enterPasswordLabel}
+							value={password1}
+							onChange={onPasswordChange1}
+						/>
+
 						{needToRepeatPassword && (
-							<div className="form-input-group">
-								<label>{'Re-enter password'}</label>
-								<PasswordInput value={password2} onChange={onPasswordChange2}/>
-							</div>
+							<>
+								<LabelledPasswordInput
+									labelText={_('Re-enter password')}
+									value={password2}
+									onChange={onPasswordChange2}
+									valid={password2 ? passwordsMatch : undefined}
+								/>
+
+								{password2 && !passwordsMatch && (
+									<p className="error-message">
+										{_('Passwords do not match')}
+									</p>
+								)}
+							</>
 						)}
 					</div>
-					<p className="bold">Please make sure you remember your password. For security reasons, it is not possible to recover it if it is lost.</p>
+					<p className="bold">{_('Please make sure you remember your password. It cannot be recovered if lost, and any data encrypted with it will become inaccessible.')}</p>
 					{renderResetMasterPasswordLink()}
 				</div>
 			);
 		} else {
 			return (
 				<p>
-					<a onClick={onShowPasswordForm} href="#">Change master password</a>
+					<a onClick={onShowPasswordForm} href="#">{_('Change master password')}</a>
 				</p>
 			);
 		}
@@ -203,16 +221,16 @@ export default function(props: Props) {
 		if (mode === Mode.Reset) {
 			return (
 				<div className="dialog-content">
-					<p>Attention: After resetting your password it will no longer be possible to decrypt any data encrypted with your current password. All encrypted shared notebooks will also be unshared, so please ask the notebook owner to share it again with you.</p>
+					<p>{_('Attention: After resetting your password it will no longer be possible to decrypt any data encrypted with your current password. All encrypted shared notebooks will also be unshared, so please ask the notebook owner to share it again with you.')}</p>
 					{renderPasswordForm()}
 				</div>
 			);
 		} else {
 			return (
 				<div className="dialog-content">
-					<p>Your master password is used to protect sensitive information. In particular, it is used to encrypt your notes when end-to-end encryption (E2EE) is enabled, or to share and encrypt notes with someone who has E2EE enabled.</p>
+					<p>{_('Your master password is used to protect sensitive information. In particular, it is used to encrypt your notes when end-to-end encryption (E2EE) is enabled, or to share and encrypt notes with someone who has E2EE enabled.')}</p>
 					<p>
-						<span>{'Master password status:'}</span> <span className="bold">{getMasterPasswordStatusMessage(status)}</span>
+						<span>{_('Master password status:')}</span> <span className="bold">{getMasterPasswordStatusMessage(status)}</span>
 					</p>
 					{renderPasswordForm()}
 				</div>

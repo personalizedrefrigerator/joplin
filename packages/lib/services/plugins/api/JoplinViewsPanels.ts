@@ -1,5 +1,6 @@
 /* eslint-disable multiline-comment-style */
 
+import { defaultWindowId } from '../../../reducer';
 import Plugin from '../Plugin';
 import createViewHandle from '../utils/createViewHandle';
 import WebviewController, { ContainerType } from '../WebviewController';
@@ -45,7 +46,7 @@ export default class JoplinViewsPanels {
 		}
 
 		const handle = createViewHandle(this.plugin, id);
-		const controller = new WebviewController(handle, this.plugin.id, this.store, this.plugin.baseDir, ContainerType.Panel);
+		const controller = new WebviewController(handle, this.plugin.id, this.store, this.plugin.baseDir, ContainerType.Panel, defaultWindowId);
 		this.plugin.addViewController(controller);
 		return handle;
 	}
@@ -113,7 +114,7 @@ export default class JoplinViewsPanels {
 	 * Shows the panel
 	 */
 	public async show(handle: ViewHandle, show = true): Promise<void> {
-		await this.controller(handle).show(show);
+		await this.controller(handle).setOpen(show);
 	}
 
 	/**
@@ -128,6 +129,14 @@ export default class JoplinViewsPanels {
 	 */
 	public async visible(handle: ViewHandle): Promise<boolean> {
 		return this.controller(handle).visible;
+	}
+
+	/**
+	 * Assuming that the current panel is an editor plugin view, returns
+	 * whether the editor plugin view supports editing the current note.
+	 */
+	public async isActive(handle: ViewHandle): Promise<boolean> {
+		return this.controller(handle).active;
 	}
 
 }

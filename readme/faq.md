@@ -53,7 +53,7 @@ notepad.exe         # Opens Notepad in a new window
 notepad++.exe --openSession   # Opens Notepad ++ in new window
 ```
 
-Note that the path to directory with your editor executable must exist in your PATH variable ([Windows](https://www.computerhope.com/issues/ch000549.htm), [Linux/Mac](https://opensource.com/article/17/6/set-path-linux)) If not, the full path to the executable must be provided.
+Note that the path to the directory with your editor executable must exist in your PATH variable ([Windows](https://www.computerhope.com/issues/ch000549.htm), [Linux/Mac](https://opensource.com/article/17/6/set-path-linux)). If not, the full path to the executable must be provided.
 
 ## When I open a note in vim, the cursor is not visible
 
@@ -105,13 +105,7 @@ Unfortunately it is not possible. Joplin synchronises with file systems using an
 
 ## Could there be a password to restrict access to Joplin?
 
-The end to end encryption that Joplin implements is to protect the data during transmission and on the cloud service so that only you can access it.
-
-On the local device it is assumed that the data is safe due to the OS built-in security features. If additional security is needed it's always possible to put the notes on an encrypted VeraCrypt drive for instance.
-
-For these reasons, because the OS or yourself can easily protect the local data, no PIN or password is currently supported to access Joplin.
-
-There is however an issue open about it, so pull requests are welcome: https://github.com/laurent22/joplin/issues/289
+On mobile, you may enable the biometric lock to protect the access to the Joplin application. On desktop we do not currently support this. There is however an issue open about it: https://github.com/laurent22/joplin/issues/289
 
 ## Why is my WebDAV host not working?
 
@@ -148,7 +142,7 @@ In this case, [make sure you enter the correct WebDAV URL](https://github.com/la
 
 ## How can I use self-signed SSL certificates on Android?
 
-If you want to serve using https but can't or don't want to use SSL certificates signed by trusted certificate authorities (like "Let's Encrypt"), it's possible to generate a custom CA and sign your certificates with it. You can generate the CA and certificates using [openssl](https://gist.github.com/fntlnz/cf14feb5a46b2eda428e000157447309), but I like to use a tool called [mkcert](https://github.com/FiloSottile/mkcert) for it's simplicity. Finally, you have to add your CA certificate to Android settings so that Android can recognize the certificates you signed with your CA as valid ([link](https://support.google.com/nexus/answer/2844832?hl=en-GB)).
+If you want to serve using https but can't or don't want to use SSL certificates signed by trusted certificate authorities (like "Let's Encrypt"), it's possible to generate a custom CA and sign your certificates with it. You can generate the CA and certificates using [openssl](https://gist.github.com/fntlnz/cf14feb5a46b2eda428e000157447309), but I like to use a tool called [mkcert](https://github.com/FiloSottile/mkcert) for its simplicity. Finally, you have to add your CA certificate to Android settings so that Android can recognize the certificates you signed with your CA as valid ([link](https://support.google.com/nexus/answer/2844832?hl=en-GB)).
 
 ## How do I restart Joplin on Windows (so that certain changes take effect)?
 
@@ -159,6 +153,10 @@ If `Show tray icon` is enabled, closing the Joplin window does not quit the appl
 
 Additionally the Windows Task Manager can be used to verify whether Joplin is still around.
 
+## Are notebooks and notes backed up during an iOS backup to your Mac?
+
+Notebooks and notes on iOS are not backed up when [backing up to your Mac](https://support.apple.com/guide/mac-help/back-up-and-restore-your-device-mchla3c8ed03/mac).
+
 ## Why is it named Joplin?
 
-The name comes from the composer and pianist [Scott Joplin](https://en.wikipedia.org/wiki/Scott_Joplin), which I often listen to. His name is also easy to remember and type so it felt like a good choice.
+The application is named in honour of composer and pianist [Scott Joplin](https://en.wikipedia.org/wiki/Scott_Joplin), whose music I frequently listen to. His name is also easy to remember and type, making it a fitting choice.

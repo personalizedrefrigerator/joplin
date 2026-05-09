@@ -1,16 +1,28 @@
-import { useCallback } from 'react';
-import { FormNote, HtmlToMarkdownHandler, MarkupToHtmlHandler, ScrollOptions } from './types';
+import { RefObject, useCallback } from 'react';
+import { FormNote, HtmlToMarkdownHandler, MarkupToHtmlHandler, ScrollOptions, MessageEvent } from './types';
 import contextMenu from './contextMenu';
 import CommandService from '@joplin/lib/services/CommandService';
 import PostMessageService from '@joplin/lib/services/PostMessageService';
 import ResourceFetcher from '@joplin/lib/services/ResourceFetcher';
 import { reg } from '@joplin/lib/registry';
-const bridge = require('@electron/remote').require('./bridge').default;
+import bridge from '../../../services/bridge';
+import { resolveContextMenuItemType } from './contextMenuUtils';
 
-// eslint-disable-next-line @typescript-eslint/ban-types, @typescript-eslint/no-explicit-any -- Old code before rule was applied, Old code before rule was applied
-export default function useMessageHandler(scrollWhenReady: ScrollOptions|null, clearScrollWhenReady: ()=> void, editorRef: any, setLocalSearchResultCount: Function, dispatch: Function, formNote: FormNote, htmlToMd: HtmlToMarkdownHandler, mdToHtml: MarkupToHtmlHandler) {
+export default function useMessageHandler(
+	scrollWhenReadyRef: RefObject<ScrollOptions|null>,
+	clearScrollWhenReady: ()=> void,
+	windowId: string,
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	return useCallback(async (event: any) => {
+	editorRef: any,
+	// eslint-disable-next-line @typescript-eslint/ban-types -- Old code before rule was applied
+	setLocalSearchResultCount: Function,
+	// eslint-disable-next-line @typescript-eslint/ban-types -- Old code before rule was applied
+	dispatch: Function,
+	formNote: FormNote,
+	htmlToMd: HtmlToMarkdownHandler,
+	mdToHtml: MarkupToHtmlHandler,
+) {
+	return useCallback(async (event: MessageEvent) => {
 		const msg = event.channel ? event.channel : '';
 		const args = event.args;
 		const arg0 = args && args.length >= 1 ? args[0] : null;
@@ -23,8 +35,8 @@ export default function useMessageHandler(scrollWhenReady: ScrollOptions|null, c
 			s.splice(0, 1);
 			reg.logger().error(s.join(':'));
 		} else if (msg === 'noteRenderComplete') {
-			if (scrollWhenReady) {
-				const options = { ...scrollWhenReady };
+			if (scrollWhenReadyRef.current) {
+				const options = { ...scrollWhenReadyRef.current };
 				clearScrollWhenReady();
 				editorRef.current.scrollTo(options);
 			}
@@ -35,11 +47,14 @@ export default function useMessageHandler(scrollWhenReady: ScrollOptions|null, c
 			if (s.length < 2) throw new Error(`Invalid message: ${msg}`);
 			void ResourceFetcher.instance().markForDownload(s[1]);
 		} else if (msg === 'contextMenu') {
+			const resourceId = arg0.resourceId;
+			const itemType = await resolveContextMenuItemType(arg0 && arg0.type, resourceId);
 			const menu = await contextMenu({
-				itemType: arg0 && arg0.type,
-				resourceId: arg0.resourceId,
+				itemType,
+				resourceId: resourceId,
 				filename: arg0.filename,
 				mime: arg0.mime,
+				linkToOpen: null,
 				textToCopy: arg0.textToCopy,
 				linkToCopy: arg0.linkToCopy || null,
 				htmlToCopy: '',
@@ -49,7 +64,7 @@ export default function useMessageHandler(scrollWhenReady: ScrollOptions|null, c
 				mdToHtml,
 			}, dispatch);
 
-			menu.popup({ window: bridge().window() });
+			menu.popup({ window: bridge().activeWindow() });
 		} else if (msg.indexOf('#') === 0) {
 			// This is an internal anchor, which is handled by the WebView so skip this case
 		} else if (msg === 'contentScriptExecuteCommand') {
@@ -57,7 +72,7 @@ export default function useMessageHandler(scrollWhenReady: ScrollOptions|null, c
 			const commandArgs = arg0.args || [];
 			void CommandService.instance().execute(commandName, ...commandArgs);
 		} else if (msg === 'postMessageService.message') {
-			void PostMessageService.instance().postMessage(arg0);
+			void PostMessageService.instance().postMessage({ ...arg0, windowId });
 		} else if (msg === 'openPdfViewer') {
 			await CommandService.instance().execute('openPdfViewer', arg0.resourceId, arg0.pageNo);
 		} else {
@@ -65,5 +80,5 @@ export default function useMessageHandler(scrollWhenReady: ScrollOptions|null, c
 			// bridge().showErrorMessageBox(_('Unsupported link or message: %s', msg));
 		}
 		// eslint-disable-next-line @seiyab/react-hooks/exhaustive-deps -- Old code before rule was applied
-	}, [dispatch, setLocalSearchResultCount, scrollWhenReady, formNote]);
+	}, [dispatch, setLocalSearchResultCount, scrollWhenReadyRef, formNote]);
 }

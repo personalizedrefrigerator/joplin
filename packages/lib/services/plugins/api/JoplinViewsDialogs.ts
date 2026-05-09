@@ -3,7 +3,7 @@
 import Plugin from '../Plugin';
 import createViewHandle from '../utils/createViewHandle';
 import WebviewController, { ContainerType } from '../WebviewController';
-import { ButtonSpec, ViewHandle, DialogResult } from './types';
+import { ButtonSpec, ViewHandle, DialogResult, Toast } from './types';
 import { _ } from '../../../locale';
 import { JoplinViewsDialogs as JoplinViewsDialogsImplementation } from '../BasePlatformImplementation';
 
@@ -64,7 +64,7 @@ export default class JoplinViewsDialogs {
 		}
 
 		const handle = createViewHandle(this.plugin, id);
-		const controller = new WebviewController(handle, this.plugin.id, this.store, this.plugin.baseDir, ContainerType.Dialog);
+		const controller = new WebviewController(handle, this.plugin.id, this.store, this.plugin.baseDir, ContainerType.Dialog, null);
 		this.plugin.addViewController(controller);
 		return handle;
 	}
@@ -74,6 +74,16 @@ export default class JoplinViewsDialogs {
 	 */
 	public async showMessageBox(message: string): Promise<number> {
 		return this.implementation_.showMessageBox(`${_('(In plugin: %s)', this.plugin.manifest.name)}\n\n${message}`);
+	}
+
+	/**
+	 * Displays a Toast notification in the corner of the application screen.
+	 */
+	public async showToast(toast: Toast) {
+		this.store.dispatch({
+			type: 'TOAST_SHOW',
+			value: toast,
+		});
 	}
 
 	/**
@@ -110,10 +120,12 @@ export default class JoplinViewsDialogs {
 	}
 
 	/**
-	 * Opens the dialog
+	 * Opens the dialog.
+	 *
+	 * On desktop, this closes any copies of the dialog open in different windows.
 	 */
 	public async open(handle: ViewHandle): Promise<DialogResult> {
-		return this.controller(handle).open();
+		return this.controller(handle).setOpen(true);
 	}
 
 	/**

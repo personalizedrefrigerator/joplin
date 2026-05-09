@@ -14,6 +14,10 @@ import JoplinClipboard from './JoplinClipboard';
 import JoplinWindow from './JoplinWindow';
 import BasePlatformImplementation from '../BasePlatformImplementation';
 import JoplinImaging from './JoplinImaging';
+import JoplinFs from './JoplinFs';
+import { themeStyle } from '../../../theme';
+import Setting from '../../../models/Setting';
+import { ThemeAppearance } from '../../../themes/type';
 
 /**
  * This is the main entry point to the Joplin API. You can access various services using the provided accessors.
@@ -32,6 +36,7 @@ export default class Joplin {
 	private data_: JoplinData = null;
 	private plugins_: JoplinPlugins = null;
 	private imaging_: JoplinImaging = null;
+	private fs_: JoplinFs = null;
 	private workspace_: JoplinWorkspace = null;
 	private filters_: JoplinFilters = null;
 	private commands_: JoplinCommands = null;
@@ -49,6 +54,7 @@ export default class Joplin {
 		this.data_ = new JoplinData(plugin);
 		this.plugins_ = new JoplinPlugins(plugin);
 		this.imaging_ = new JoplinImaging(implementation.imaging);
+		this.fs_ = new JoplinFs();
 		this.workspace_ = new JoplinWorkspace(plugin, store);
 		this.filters_ = new JoplinFilters();
 		this.commands_ = new JoplinCommands(plugin);
@@ -57,7 +63,7 @@ export default class Joplin {
 		this.settings_ = new JoplinSettings(plugin);
 		this.contentScripts_ = new JoplinContentScripts(plugin);
 		this.clipboard_ = new JoplinClipboard(implementation.clipboard, implementation.nativeImage);
-		this.window_ = new JoplinWindow(implementation.window, plugin, store);
+		this.window_ = new JoplinWindow(plugin, store);
 	}
 
 	public get data(): JoplinData {
@@ -70,6 +76,10 @@ export default class Joplin {
 
 	public get imaging(): JoplinImaging {
 		return this.imaging_;
+	}
+
+	public get fs(): JoplinFs {
+		return this.fs_;
 	}
 
 	public get window(): JoplinWindow {
@@ -135,6 +145,14 @@ export default class Joplin {
 
 	public async versionInfo() {
 		return this.implementation_.versionInfo;
+	}
+
+	/**
+	 * Tells whether the current theme is a dark one or not.
+	 */
+	public async shouldUseDarkColors() {
+		const theme = themeStyle(Setting.value('theme'));
+		return theme.appearance === ThemeAppearance.Dark;
 	}
 
 }

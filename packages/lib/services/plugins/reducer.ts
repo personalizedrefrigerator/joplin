@@ -2,18 +2,38 @@ import { Draft } from 'immer';
 import { ContainerType } from './WebviewController';
 import { ButtonSpec } from './api/types';
 
-export interface PluginViewState {
+interface PluginViewStateBase {
 	id: string;
 	type: string;
-	opened: boolean;
 	buttons: ButtonSpec[];
 	fitToContent?: boolean;
 	scripts?: string[];
 	html?: string;
 	commandName?: string;
 	location?: string;
-	containerType: ContainerType;
+	opened: boolean;
 }
+
+export interface PluginEditorViewState extends PluginViewStateBase {
+	containerType: ContainerType.Editor;
+
+	parentWindowId: string;
+	active: boolean;
+
+	// A non-unique ID determined by the type of the editor. Unlike the id property,
+	// this is the same for editor views of the same type opened in different windows.
+	editorTypeId: string;
+}
+
+interface PluginDialogViewState extends PluginViewStateBase {
+	containerType: ContainerType.Dialog;
+}
+
+interface PluginPanelViewState extends PluginViewStateBase {
+	containerType: ContainerType.Panel;
+}
+
+export type PluginViewState = PluginEditorViewState|PluginDialogViewState|PluginPanelViewState;
 
 interface PluginViewStates {
 	[key: string]: PluginViewState;
@@ -28,7 +48,7 @@ interface PluginContentScriptStates {
 	[type: string]: PluginContentScriptState[];
 }
 
-interface PluginState {
+export interface PluginState {
 	id: string;
 	contentScripts: PluginContentScriptStates;
 	views: PluginViewStates;
@@ -162,6 +182,10 @@ const reducer = (draftRoot: Draft<any>, action: any) => {
 			draft.plugins[action.pluginId].views[action.view.id] = { ...action.view };
 			break;
 
+		case 'PLUGIN_VIEW_REMOVE':
+			delete draft.plugins[action.pluginId].views[action.viewId];
+			break;
+
 		case 'PLUGIN_VIEW_PROP_SET':
 
 			if (action.name !== 'html') {
@@ -198,6 +222,7 @@ const reducer = (draftRoot: Draft<any>, action: any) => {
 
 		case 'PLUGIN_UNLOAD':
 			delete draft.plugins[action.pluginId];
+			delete draft.pluginHtmlContents[action.pluginId];
 			break;
 
 		}

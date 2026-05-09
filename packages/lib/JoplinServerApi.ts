@@ -1,6 +1,6 @@
 import shim from './shim';
 import { _ } from './locale';
-const { rtrimSlashes } = require('./path-utils.js');
+import { rtrimSlashes } from './path-utils';
 import JoplinError from './JoplinError';
 import { Env } from './models/Setting';
 import Logger from '@joplin/utils/Logger';
@@ -16,6 +16,8 @@ interface Options {
 	userContentBaseUrl(): string;
 	username(): string;
 	password(): string;
+	apiKey(): string;
+	session(): Session | null;
 	env?: Env;
 }
 
@@ -36,13 +38,12 @@ export interface ExecOptions {
 	source?: string;
 }
 
-interface Session {
+export interface Session {
 	id: string;
 	user_id: string;
 }
 
 export default class JoplinServerApi {
-
 	private options_: Options;
 	private session_: Session;
 	private debugRequests_ = false;
@@ -76,6 +77,13 @@ export default class JoplinServerApi {
 	}
 
 	private async session() {
+		const optionSession = this.options_.session();
+
+		if (optionSession) {
+			this.session_ = optionSession;
+			return optionSession;
+		}
+
 		if (this.session_) return this.session_;
 
 		const clientInfo = await this.getClientInfo();
@@ -88,6 +96,7 @@ export default class JoplinServerApi {
 			this.session_ = await this.exec_('POST', 'api/sessions', null, {
 				email: this.options_.username(),
 				password: this.options_.password(),
+				apiKey: this.options_.apiKey(),
 				...clientInfo,
 			});
 

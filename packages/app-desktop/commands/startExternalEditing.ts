@@ -3,11 +3,11 @@ import { _ } from '@joplin/lib/locale';
 import { stateUtils } from '@joplin/lib/reducer';
 import ExternalEditWatcher from '@joplin/lib/services/ExternalEditWatcher';
 import Note from '@joplin/lib/models/Note';
-const bridge = require('@electron/remote').require('./bridge').default;
+import bridge from '../services/bridge';
 
 export const declaration: CommandDeclaration = {
 	name: 'startExternalEditing',
-	label: () => _('Edit in external editor'),
+	label: () => _('Open in external editor'),
 	iconName: 'icon-share',
 };
 

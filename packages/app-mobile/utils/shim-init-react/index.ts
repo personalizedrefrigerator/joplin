@@ -1,12 +1,13 @@
 import shimInitShared from './shimInitShared';
 
-import shim from '@joplin/lib/shim';
+import shim, { MobilePlatform } from '@joplin/lib/shim';
 const { GeolocationReact } = require('../geolocation-react.js');
 import RNFetchBlob from 'rn-fetch-blob';
 import { generateSecureRandom } from 'react-native-securerandom';
 import FsDriverRN from '../fs-driver/fs-driver-rn';
 import { Linking, Platform } from 'react-native';
-const RNExitApp = require('react-native-exit-app').default;
+import crypto from '../../services/e2ee/crypto';
+import { reloadAppAsync } from 'expo';
 
 export default function shimInit() {
 	shim.Geolocation = GeolocationReact;
@@ -17,6 +18,8 @@ export default function shimInit() {
 		}
 		return shim.fsDriver_;
 	};
+
+	shim.crypto = crypto;
 
 	shim.randomBytes = async (count: number) => {
 		const randomBytes = await generateSecureRandom(count);
@@ -162,7 +165,11 @@ export default function shimInit() {
 	};
 
 	shim.mobilePlatform = () => {
-		return Platform.OS;
+		return Platform.OS as MobilePlatform;
+	};
+
+	shim.isAppleSilicon = () => {
+		return false;
 	};
 
 	shim.appVersion = () => {
@@ -171,7 +178,7 @@ export default function shimInit() {
 	};
 
 	shim.restartApp = () => {
-		RNExitApp.exitApp();
+		void reloadAppAsync();
 	};
 
 	shimInitShared();

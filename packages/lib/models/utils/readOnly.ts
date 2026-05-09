@@ -7,6 +7,7 @@ import ItemChange from '../ItemChange';
 import Setting from '../Setting';
 import { checkObjectHasProperties } from '@joplin/utils/object';
 import isTrashableItem from '../../services/trash/isTrashableItem';
+import isJoplinServerVariant from './isJoplinServerVariant';
 
 const logger = Logger.create('models/utils/readOnly');
 
@@ -21,7 +22,7 @@ export interface ItemSlice {
 // synchronising with Joplin Cloud or if not sharing any notebook.
 export const needsShareReadOnlyChecks = (itemType: ModelType, changeSource: number, shareState: ShareState, disableReadOnlyCheck = false) => {
 	if (disableReadOnlyCheck) return false;
-	if (Setting.value('sync.target') !== 10) return false;
+	if (!isJoplinServerVariant(Setting.value('sync.target'))) return false;
 	if (changeSource === ItemChange.SOURCE_SYNC) return false;
 	if (!Setting.value('sync.userId')) return false;
 	if (![ModelType.Note, ModelType.Folder, ModelType.Resource].includes(itemType)) return false;
@@ -92,7 +93,8 @@ export const itemIsReadOnlySync = (itemType: ModelType, changeSource: number, it
 	if (!item.share_id) return false;
 
 	// Item belongs to the user
-	if (shareState.shares.find(s => s.user.id === userId)) return false;
+	const parentShare = shareState.shares.find(s => s.id === item.share_id);
+	if (parentShare && parentShare.user?.id === userId) return false;
 
 	const shareUser = shareState.shareInvitations.find(si => si.share.id === item.share_id);
 

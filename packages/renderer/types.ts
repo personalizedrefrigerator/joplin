@@ -1,15 +1,34 @@
-import { MarkupLanguage } from './MarkupToHtml';
 import { Options as NoteStyleOptions } from './noteStyle';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-export type ItemIdToUrlHandler = (resource: any)=> string;
+export enum MarkupLanguage {
+	Markdown = 1,
+	Html = 2,
+	Any = 3,
+}
+
+export type ItemIdToUrlHandler = (resourceId: string, urlParameters?: string)=> string;
 
 interface ResourceEntity {
-	id: string;
+	id?: string;
 	title?: string;
 	mime?: string;
 	file_extension?: string;
+	updated_time?: number;
+
+	encryption_applied?: number;
+	encryption_blob_encrypted?: number;
 }
+
+interface ResourceLocalState {
+	fetch_status?: number;
+}
+
+export interface ResourceInfo {
+	localState: ResourceLocalState;
+	item: ResourceEntity;
+}
+
+export type ResourceInfos = Record<string, ResourceInfo>;
 
 export interface FsDriver {
 	writeFile: (path: string, content: string, encoding: string)=> Promise<void>;
@@ -18,8 +37,24 @@ export interface FsDriver {
 	cacheCssToFile: (cssStrings: string[])=> Promise<any>;
 }
 
+export interface RenderOptionsGlobalSettings {
+	'markdown.plugin.abc.options': string;
+}
+
+interface SettingModel {
+	value: <T>(key: string)=> T;
+}
+
+export const getGlobalSettings = (settingModel?: SettingModel): RenderOptionsGlobalSettings => {
+	return {
+		'markdown.plugin.abc.options': settingModel ? settingModel.value<string>('markdown.plugin.abc.options') : '',
+	};
+};
+
 export interface RenderOptions {
 	contentMaxWidth?: number;
+	scrollbarSize?: number;
+	baseFontFamily?: string;
 	bodyOnly?: boolean;
 	splitted?: boolean;
 	enableLongPress?: boolean;
@@ -46,13 +81,23 @@ export interface RenderOptions {
 	vendorDir?: string;
 	itemIdToUrl?: ItemIdToUrlHandler;
 	allowedFilePrefixes?: string[];
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	settingValue?: (pluginId: string, key: string)=> any;
+	settingValue?: (pluginId: string, key: string)=> unknown;
 
-	resources?: Record<string, ResourceEntity>;
+	resources?: ResourceInfos;
+
+	editPopupFiletypes?: string[];
+	createEditPopupSyntax?: string;
+	destroyEditPopupSyntax?: string;
+
+	platformName?: string;
+
+	showNoteLinkIcon?: boolean;
 
 	// HtmlToHtml only
 	whiteBackgroundNoteRendering?: boolean;
+
+	// This can be used to give access to global settings to Markdown renderer plugins
+	globalSettings?: RenderOptionsGlobalSettings;
 }
 
 export interface RenderResultPluginAsset {

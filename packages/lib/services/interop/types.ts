@@ -51,6 +51,8 @@ export interface ImportOptions {
 	onProgress?: (progressState: any, progress?: any)=> void;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	onError?: (error: any)=> void;
+	domParser?: DOMParser;
+	xmlSerializer?: XMLSerializer;
 
 	defaultFolderTitle?: string;
 }
@@ -74,6 +76,7 @@ export interface ExportOptions {
 	plugins?: PluginStates;
 	customCss?: string;
 	packIntoSingleFile?: boolean;
+	shouldEmbedOnlyImages?: boolean;
 
 	onProgress?: OnExportProgressCallback;
 }

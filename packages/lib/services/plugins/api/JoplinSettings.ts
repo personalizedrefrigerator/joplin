@@ -147,7 +147,23 @@ export default class JoplinSettings {
 	}
 
 	/**
-	 * Gets a setting value (only applies to setting you registered from your plugin)
+	 * Gets setting values (only applies to setting you registered from your plugin)
+	 */
+	public async values(keys: string[] | string): Promise<Record<string, unknown>> {
+		if (typeof keys === 'string') keys = [keys];
+		const output: Record<string, unknown> = {};
+		for (const key of keys) {
+			output[key] = Setting.value(getPluginNamespacedSettingKey(this.plugin_.id, key));
+		}
+		return output;
+	}
+
+	/**
+	 * Gets a setting value (only applies to setting you registered from your plugin).
+	 *
+	 * Note: If you want to retrieve all your plugin settings, for example when the plugin starts,
+	 * it is recommended to use the `values()` function instead - it will be much faster than
+	 * calling `value()` multiple times.
 	 */
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	public async value(key: string): Promise<any> {
@@ -163,11 +179,23 @@ export default class JoplinSettings {
 	}
 
 	/**
-	 * Gets a global setting value, including app-specific settings and those set by other plugins.
+	 * Gets global setting values, including app-specific settings and those set by other plugins.
 	 *
 	 * The list of available settings is not documented yet, but can be found by looking at the source code:
 	 *
-	 * https://github.com/laurent22/joplin/blob/dev/packages/lib/models/Setting.ts#L142
+	 * https://github.com/laurent22/joplin/blob/dev/packages/lib/models/settings/builtInMetadata.ts
+	 */
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
+	public async globalValues(keys: string[]): Promise<any[]> {
+		const output: (string|number|boolean)[] = [];
+		for (const key of keys) {
+			output.push(Setting.value(key));
+		}
+		return output;
+	}
+
+	/**
+	 * @deprecated Use joplin.settings.globalValues()
 	 */
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	public async globalValue(key: string): Promise<any> {

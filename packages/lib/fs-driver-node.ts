@@ -1,4 +1,5 @@
-import FsDriverBase, { DirectoryWatchEventType, DirectoryWatcher, OnWatchEventListener, Stat } from './fs-driver-base';
+import AdmZip = require('adm-zip');
+import FsDriverBase, { Stat, ZipEntry, ArchiveExtractOptions, DirectoryWatchEventType, DirectoryWatcher, OnWatchEventListener } from './fs-driver-base';
 import time from './time';
 const md5File = require('md5-file');
 import * as chokidar from 'chokidar';
@@ -253,4 +254,9 @@ export default class FsDriverNode extends FsDriverBase {
 		await require('tar').create(options, filePaths);
 	}
 
+	public async zipExtract(options: ArchiveExtractOptions): Promise<ZipEntry[]> {
+		const zip = new AdmZip(options.source);
+		zip.extractAllTo(options.extractTo, false);
+		return zip.getEntries();
+	}
 }

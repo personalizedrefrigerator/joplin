@@ -3,9 +3,10 @@ import shim from '@joplin/lib/shim';
 
 import Note from '@joplin/lib/models/Note';
 import checkPermissions from './checkPermissions.js';
-const { ToastAndroid } = require('react-native');
-const { PermissionsAndroid } = require('react-native');
-const { Platform } = require('react-native');
+import NavService from '@joplin/lib/services/NavService';
+import { ToastAndroid } from 'react-native';
+import { PermissionsAndroid } from 'react-native';
+import { Platform } from 'react-native';
 
 // eslint-disable-next-line @typescript-eslint/ban-types -- Old code before rule was applied
 export default async (sharedData: SharedData, folderId: string, dispatch: Function) => {
@@ -27,27 +28,21 @@ export default async (sharedData: SharedData, folderId: string, dispatch: Functi
 		}
 	}
 
+	const newNote = await Note.save({
+		parent_id: folderId,
+	}, { provisional: true });
+
 	// This is a bit hacky, but the surest way to go to
 	// the needed note. We go back one screen in case there's
 	// already a note open - if we don't do this, the dispatch
 	// below will do nothing (because routeName wouldn't change)
 	// Then we wait a bit for the state to be set correctly, and
 	// finally we go to the new note.
-	dispatch({ type: 'NAV_BACK' });
-
+	await NavService.go('Notes', { folderId, clearHistory: true });
 	dispatch({ type: 'SIDE_MENU_CLOSE' });
 
-	const newNote = await Note.save({
-		parent_id: folderId,
-	}, { provisional: true });
-
-	shim.setTimeout(() => {
-		dispatch({
-			type: 'NAV_GO',
-			routeName: 'Note',
-			noteId: newNote.id,
-			sharedData: sharedData,
-		});
+	shim.setTimeout(async () => {
+		await NavService.go('Note', { noteId: newNote.id, sharedData });
 
 		ShareExtension.close();
 	}, 5);

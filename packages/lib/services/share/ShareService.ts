@@ -8,18 +8,21 @@ import Note from '../../models/Note';
 import Setting from '../../models/Setting';
 import { FolderEntity } from '../database/types';
 import EncryptionService from '../e2ee/EncryptionService';
-import { PublicPrivateKeyPair, mkReencryptFromPasswordToPublicKey, mkReencryptFromPublicKeyToPassword } from '../e2ee/ppk';
+import { PublicPrivateKeyPair, mkReencryptFromPasswordToPublicKey, mkReencryptFromPublicKeyToPassword, supportsPpkAlgorithm } from '../e2ee/ppk/ppk';
 import { MasterKeyEntity } from '../e2ee/types';
 import { getMasterPassword } from '../e2ee/utils';
 import ResourceService from '../ResourceService';
 import { addMasterKey, getEncryptionEnabled, localSyncInfo } from '../synchronizer/syncInfoUtils';
 import { ShareInvitation, SharePermissions, State, stateRootKey, StateShare } from './reducer';
+import PerformanceLogger from '../../PerformanceLogger';
 
 const logger = Logger.create('ShareService');
+const perfLogger = PerformanceLogger.create();
 
 export interface ApiShare {
 	id: string;
 	master_key_id: string;
+	folder_id: string;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
@@ -57,7 +60,7 @@ export default class ShareService {
 
 	public get enabled(): boolean {
 		if (!this.initialized_) return false;
-		return [9, 10].includes(Setting.value('sync.target')); // Joplin Server, Joplin Cloud targets
+		return [9, 10, 11].includes(Setting.value('sync.target')); // Joplin Server, Joplin Cloud targets
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
@@ -83,6 +86,17 @@ export default class ShareService {
 			userContentBaseUrl: () => Setting.value(`sync.${syncTargetId}.userContentPath`),
 			username: () => Setting.value(`sync.${syncTargetId}.username`),
 			password: () => Setting.value(`sync.${syncTargetId}.password`),
+			apiKey: () => Setting.value(`sync.${syncTargetId}.apiKey`),
+			session: () => {
+				if (syncTargetId === 11) {
+					return {
+						id: Setting.value('sync.11.id'),
+						user_id: Setting.value('sync.11.userId'),
+					};
+				} else {
+					return null;
+				}
+			},
 		});
 
 		return this.api_;
@@ -100,11 +114,21 @@ export default class ShareService {
 			// Shouldn't happen
 			if (!syncInfo.ppk) throw new Error('Cannot share notebook because E2EE is enabled and no Public Private Key pair exists.');
 
-			// TODO: handle "undefinedMasterPassword" error - show master password dialog
-			folderMasterKey = await this.encryptionService_.generateMasterKey(getMasterPassword());
-			folderMasterKey = await MasterKey.save(folderMasterKey);
+			// This can happen if using an outdated Joplin client, where the PPK
+			// was generated on a different device with a newer PPK implementation.
+			if (!supportsPpkAlgorithm(syncInfo.ppk)) {
+				throw new Error('The local public private key pair uses an unsupported algorithm. It may be necessary to upgrade Joplin or share from a different device.');
+			}
 
-			addMasterKey(syncInfo, folderMasterKey);
+			if (folder.master_key_id) {
+				logger.info(`Folder ${folderId}'s already has a master key. Not creating a new one.`);
+			} else {
+				// TODO: handle "undefinedMasterPassword" error - show master password dialog
+				folderMasterKey = await this.encryptionService_.generateMasterKey(getMasterPassword());
+				folderMasterKey = await MasterKey.save(folderMasterKey);
+
+				addMasterKey(syncInfo, folderMasterKey);
+			}
 		}
 
 		const newFolderProps: FolderEntity = {};
@@ -127,7 +151,7 @@ export default class ShareService {
 		// Note: race condition if the share is created but the app crashes
 		// before setting share_id on the folder. See unshareFolder() for info.
 		await Folder.save({ id: folder.id, share_id: share.id });
-		await Folder.updateAllShareIds(ResourceService.instance());
+		await Folder.updateAllShareIds(ResourceService.instance(), this.shares);
 
 		return share;
 	}
@@ -144,6 +168,11 @@ export default class ShareService {
 		// First, delete the share - which in turns is going to remove the items
 		// for all users, except the owner.
 		await this.deleteShare(share.id);
+
+		// Clear the master_key_id so that the folder uses a new master key if
+		// shared again.
+		// TODO: Remove the now-unused master key from local sync info.
+		await Folder.save({ id: folderId, master_key_id: '' });
 
 		// Then reset the "share_id" field for the folder and all sub-items.
 		// This could potentially be done server-side, when deleting the share,
@@ -172,7 +201,7 @@ export default class ShareService {
 
 		// It's ok if updateAllShareIds() doesn't run because it's executed on
 		// each sync too.
-		await Folder.updateAllShareIds(ResourceService.instance());
+		await Folder.updateAllShareIds(ResourceService.instance(), this.shares);
 	}
 
 	// This is when a share recipient decides to leave the shared folder.
@@ -206,7 +235,7 @@ export default class ShareService {
 
 		// We call this to make sure all items are correctly linked before we
 		// call deleteAllByShareId()
-		await Folder.updateAllShareIds(ResourceService.instance());
+		await Folder.updateAllShareIds(ResourceService.instance(), this.shares);
 
 		const source = 'ShareService.leaveSharedFolder';
 		await Folder.delete(folderId, { deleteChildren: false, disableReadOnlyCheck: true, sourceDescription: source });
@@ -218,7 +247,13 @@ export default class ShareService {
 	// necessary otherwise sync will try to update items that are not longer
 	// accessible and will throw the error "Could not find share with ID: xxxx")
 	public async checkShareConsistency() {
-		const rootSharedFolders = await Folder.rootSharedFolders();
+		// Sharing is only supported on Joplin Server/Cloud. If the user is
+		// using a different sync target, there is no share API to query and
+		// any share_id values on folders are stale leftovers from a previous
+		// sync target configuration.
+		if (!this.enabled) return;
+
+		const rootSharedFolders = await Folder.rootSharedFolders(this.shares);
 		let hasRefreshedShares = false;
 		let shares = this.shares;
 
@@ -321,19 +356,20 @@ export default class ShareService {
 		return this.state.shareInvitations;
 	}
 
-	private async userPublicKey(userEmail: string): Promise<PublicPrivateKeyPair> {
-		return this.api().exec('GET', `api/users/${encodeURIComponent(userEmail)}/public_key`);
+	private async userPublicKey(userEmail: string): Promise<PublicPrivateKeyPair|''> {
+		return await this.api().exec('GET', `api/users/${encodeURIComponent(userEmail)}/public_key`);
 	}
 
 	public async addShareRecipient(shareId: string, masterKeyId: string, recipientEmail: string, permissions: SharePermissions) {
 		let recipientMasterKey: MasterKeyEntity = null;
 
 		if (getEncryptionEnabled()) {
+			if (!recipientEmail) throw new Error(_('Please provide the recipient email'));
 			const syncInfo = localSyncInfo();
 			const masterKey = syncInfo.masterKeys.find(m => m.id === masterKeyId);
 			if (!masterKey) throw new Error(`Cannot find master key with ID "${masterKeyId}"`);
 
-			const recipientPublicKey: PublicPrivateKeyPair = await this.userPublicKey(recipientEmail);
+			const recipientPublicKey = await this.userPublicKey(recipientEmail);
 			if (!recipientPublicKey) throw new Error(_('Cannot share encrypted notebook with recipient %s because they have not enabled end-to-end encryption. They may do so from the screen Configuration > Encryption.', recipientEmail));
 
 			logger.info('Reencrypting master key with recipient public key', recipientPublicKey);
@@ -404,14 +440,38 @@ export default class ShareService {
 
 		if (accept) {
 			if (masterKey) {
-				const reencryptedMasterKey = await mkReencryptFromPublicKeyToPassword(
-					this.encryptionService_,
-					masterKey,
-					localSyncInfo().ppk,
-					getMasterPassword(),
-					getMasterPassword(),
-				);
+				const getReEncryptedKey = async (ppkCandidates: PublicPrivateKeyPair[]) => {
+					let lastError: Error = null;
+					for (const ppk of ppkCandidates) {
+						lastError = null;
+						try {
+							return await mkReencryptFromPublicKeyToPassword(
+								this.encryptionService_,
+								masterKey,
+								ppk,
+								getMasterPassword(),
+								getMasterPassword(),
+							);
+						} catch (error) {
+							logger.warn('Failed to decrypt master key. Has the public key been migrated since the item was shared? Error:', error);
+							lastError = error;
+						}
+					}
 
+					throw lastError;
+				};
+
+				// The invitation's masterKey may be encrypted with either the current PPK or a PPK from
+				// before a recent migration. Check the old PPK to prevent the sharer from having to
+				// create a new invitation just after the recipient runs a migration.
+				const ppkCandidates = [localSyncInfo().ppk];
+
+				const cachedPpk = Setting.value('encryption.cachedPpk');
+				if ('ppk' in cachedPpk) {
+					ppkCandidates.push(cachedPpk.ppk);
+				}
+
+				const reencryptedMasterKey = await getReEncryptedKey(ppkCandidates);
 				logger.info('respondInvitation: Key has been reencrypted using master password', reencryptedMasterKey);
 
 				await MasterKey.save(reencryptedMasterKey);
@@ -503,6 +563,7 @@ export default class ShareService {
 	}
 
 	public async maintenance() {
+		const task = perfLogger.taskStart('ShareService/maintenance');
 		if (this.enabled) {
 			let hasError = false;
 
@@ -526,6 +587,7 @@ export default class ShareService {
 			// so we can run the clean up function.
 			if (!hasError) await this.updateNoLongerSharedItems();
 		}
+		task.onEnd();
 	}
 
 }

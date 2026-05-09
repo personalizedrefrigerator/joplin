@@ -22,6 +22,10 @@ module.exports = {
 		'ReadableStreamDefaultReader': 'readonly',
 		'FileSystemCreateWritableOptions': 'readonly',
 		'FileSystemHandle': 'readonly',
+		'IDBTransactionMode': 'readonly',
+		'FlatArray': 'readonly',
+		'BigInt': 'readonly',
+		'globalThis': 'readonly',
 
 		// ServiceWorker
 		'ExtendableEvent': 'readonly',
@@ -56,6 +60,8 @@ module.exports = {
 		'tinymce': 'readonly',
 
 		'JSX': 'readonly',
+
+		'NodeJS': 'readonly',
 	},
 	'parserOptions': {
 		'ecmaVersion': 2018,
@@ -86,6 +92,7 @@ module.exports = {
 			allowEmptyReject: true,
 		}],
 		'no-throw-literal': ['error'],
+		'no-unused-expressions': ['error'],
 
 		// This rule should not be enabled since it matters in what order
 		// imports are done, in particular in relation to the shim.setReact
@@ -286,6 +293,14 @@ module.exports = {
 							'match': true,
 						},
 					},
+					{
+						selector: 'enumMember',
+						format: null,
+						'filter': {
+							'regex': '^(sha1|sha256|sha384|sha512|AES_128_GCM|AES_192_GCM|AES_256_GCM)$',
+							'match': true,
+						},
+					},
 
 					// -----------------------------------
 					// INTERFACE
@@ -299,7 +314,7 @@ module.exports = {
 						selector: 'interface',
 						format: null,
 						'filter': {
-							'regex': '^(RSA|RSAKeyPair)$',
+							'regex': '^(RSA|RSAKeyPair|iOS.*)$',
 							'match': true,
 						},
 					},

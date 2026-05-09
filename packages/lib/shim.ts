@@ -1,7 +1,10 @@
-import * as React from 'react';
-import { NoteEntity, ResourceEntity } from './services/database/types';
+import type * as React from 'react';
+import type * as ReactDom from 'react-dom';
+import type { NoteEntity, ResourceEntity } from './services/database/types';
 import type FsDriverBase from './fs-driver-base';
 import type FileApiDriverLocal from './file-api-driver-local';
+import type { Crypto } from './services/e2ee/types';
+import type { MarkupLanguage } from '@joplin/renderer';
 
 export interface CreateResourceFromPathOptions {
 	resizeLargeImages?: 'always' | 'never' | 'ask';
@@ -19,11 +22,60 @@ export interface PdfInfo {
 	pageCount: number;
 }
 
-interface FetchOptions {
+export interface PdfPageImage {
+	path: string;
+	width: number;
+	height: number;
+}
+
+export interface Keytar {
+	setPassword(key: string, client: string, password: string): Promise<void>;
+	getPassword(key: string, client: string): Promise<string|null>;
+	deletePassword(key: string, client: string): Promise<void>;
+}
+
+export interface FetchOptions {
 	method?: string;
 	headers?: Record<string, string>;
 	body?: string;
 	agent?: unknown;
+}
+
+interface AttachFileToNoteOptions {
+	resizeLargeImages?: 'always'|'never';
+	position?: number;
+	markupLanguage?: MarkupLanguage;
+}
+
+export enum MessageBoxType {
+	Confirm = 'question',
+	Error = 'error',
+	Info = 'info',
+}
+
+export interface ShowMessageBoxOptions {
+	title?: string;
+	buttons?: string[];
+	type?: MessageBoxType;
+	defaultId?: number;
+	cancelId?: number;
+}
+
+export enum ToastType {
+	Info = 'info',
+	Error = 'error',
+	Success = 'success',
+}
+
+export interface ShowToastOptions {
+	type: ToastType;
+}
+
+export enum MobilePlatform {
+	None = '',
+	Android = 'android',
+	Ios = 'ios',
+	Web = 'web',
 }
 
 let isTestingEnv_ = false;
@@ -46,6 +98,7 @@ let isTestingEnv_ = false;
 //
 // https://stackoverflow.com/a/42816077/561309
 let react_: typeof React = null;
+let reactDom_: typeof ReactDom = null;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 let nodeSqlite_: any = null;
 
@@ -128,6 +181,12 @@ const shim = {
 		return typeof process !== 'undefined' && process.platform === 'darwin';
 	},
 
+	// Tells whether the computer **CPU** is an Apple Silicon (not whether the running version was
+	// built for ARM64)
+	isAppleSilicon: (): boolean => {
+		throw new Error('Not implemented: isAppleSilicon');
+	},
+
 	platformName: () => {
 		if (shim.isReactNative()) return shim.mobilePlatform();
 		if (shim.isMac()) return 'darwin';
@@ -138,9 +197,26 @@ const shim = {
 		throw new Error('Cannot determine platform');
 	},
 
+	// Tells the computer CPU architecture. Which if different from the architecture the running
+	// version was built for. For example, the laptop CPU may be an ARM64, while the version was
+	// built for x64 architecture. Here we want to know the laptop CPU.
+	platformArch: (): string => {
+		throw new Error('Not implemented: platformArch');
+	},
+
+	deviceString: () => {
+		const output: string[] = [];
+
+		output.push(shim.platformName());
+
+		if (shim.platformArch()) output.push(shim.platformArch());
+
+		return output.join(', ');
+	},
+
 	// "ios" or "android", or "" if not on mobile
-	mobilePlatform: () => {
-		return ''; // Default if we're not on mobile (React Native)
+	mobilePlatform: (): MobilePlatform => {
+		return MobilePlatform.None; // Default if we're not on mobile (React Native)
 	},
 
 	// https://github.com/cheton/is-electron
@@ -271,6 +347,10 @@ const shim = {
 		throw new Error('Not implemented: fsDriver');
 	},
 
+	sharpEnabled: (): boolean => {
+		return true;
+	},
+
 	FileApiDriverLocal: null as typeof FileApiDriverLocal,
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
@@ -286,6 +366,8 @@ const shim = {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	sjclModule: null as any,
 
+	crypto: null as Crypto,
+
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	randomBytes: async (_count: number): Promise<any> => {
 		throw new Error('Not implemented: randomBytes');
@@ -299,8 +381,7 @@ const shim = {
 	// eslint-disable-next-line @typescript-eslint/ban-types -- Old code before rule was applied
 	detectAndSetLocale: null as Function,
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	attachFileToNote: async (_note: any, _filePath: string): Promise<NoteEntity> => {
+	attachFileToNote: async (_note: NoteEntity, _filePath: string, _options?: AttachFileToNoteOptions): Promise<NoteEntity> => {
 		throw new Error('Not implemented: attachFileToNote');
 	},
 
@@ -332,8 +413,17 @@ const shim = {
 		throw new Error('Not implemented: pdfToImages');
 	},
 
+	// Like pdfToImages but also returns the dimensions of each page image
+	pdfToImagesWithDimensions: async (_pdfPath: string, _outputDirectoryPath: string, _options?: CreatePdfFromImagesOptions): Promise<PdfPageImage[]> => {
+		throw new Error('Not implemented: pdfToImagesWithDimensions');
+	},
+
 	pdfInfo: async (_pdfPath: string): Promise<PdfInfo> => {
 		throw new Error('Not implemented: pdfInfo');
+	},
+
+	createAccessiblePdf: async (_originalPdfPath: string, _ocrDetails: string, _outputPath: string, _tempDir: string): Promise<void> => {
+		throw new Error('Not implemented: createAccessiblePdf');
 	},
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
@@ -365,6 +455,7 @@ const shim = {
 	},
 
 	injectedJs: (_name: string) => '',
+	injectedCss: (_name: string) => '',
 
 	isTestingEnv: () => {
 		return isTestingEnv_;
@@ -382,13 +473,21 @@ const shim = {
 	// Returns the index of the button that was clicked. By default,
 	// 0 -> OK
 	// 1 -> Cancel
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	showMessageBox: (_message: string, _options: any = null): Promise<number> => {
+	showMessageBox: (_message: string, _options: ShowMessageBoxOptions = null): Promise<number> => {
 		throw new Error('Not implemented');
 	},
 
+	showErrorDialog: async (message: string): Promise<void> => {
+		await shim.showMessageBox(message, { type: MessageBoxType.Error });
+	},
+
 	showConfirmationDialog: async (message: string): Promise<boolean> => {
-		return await shim.showMessageBox(message) === 0;
+		return await shim.showMessageBox(message, { type: MessageBoxType.Confirm }) === 0;
+	},
+
+	showToast: async (message: string, { type = ToastType.Info }: ShowToastOptions = null): Promise<void> => {
+		// Should usually be overridden by implementers
+		await shim.showMessageBox(message, { type: type === ToastType.Error ? MessageBoxType.Error : MessageBoxType.Info });
 	},
 
 	pickFolder: async (): Promise<string> => {
@@ -396,7 +495,7 @@ const shim = {
 	},
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	writeImageToFile: (_image: any, _format: any, _filePath: string): void => {
+	writeImageToFile: (_image: any, _format: any, _filePath: string): Promise<void> => {
 		throw new Error('Not implemented');
 	},
 
@@ -463,6 +562,16 @@ const shim = {
 		return react_;
 	},
 
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Workaround for different react versions
+	setReactDom: (reactDom: any) => {
+		reactDom_ = reactDom;
+	},
+
+	reactDom: () => {
+		if (!reactDom_) throw new Error('Trying to access react-dom before it has been set!!! Is this a browser environment?');
+		return reactDom_;
+	},
+
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	dgram: (): any => {
 		throw new Error('Not implemented');
@@ -489,8 +598,7 @@ const shim = {
 		return (shim.isWindows() || shim.isMac()) && !shim.isPortable();
 	},
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	keytar: (): any => {
+	keytar: (): Keytar => {
 		throw new Error('Not implemented');
 	},
 

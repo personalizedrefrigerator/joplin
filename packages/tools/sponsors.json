@@ -1,70 +1,31 @@
 {
 	"github": [
 		{
-			"name": "tateisu"
-		},
-		{
-			"name": "matmoly"
-		},
-		{
-			"name": "KentBrockman"
-		},
-		{
-			"name": "CyberXZT"
+			"name": "felixstorm"
 		},
 		{
 			"name": "avanderberg"
 		},
 		{
-			"name": "dbrandonjohnson"
-		},
-		{
 			"name": "chr15m"
-		},
-		{
-			"name": "maxtruxa"
-		},
-		{
-			"name": "konishi-t"
 		},
 		{
 			"name": "marcdw1289"
 		},
 		{
-			"name": "taskcruncher"
+			"name": "andypiper"
 		},
 		{
-			"name": "sif"
+			"name": "ugoertz"
 		},
 		{
-			"name": "saarantras"
-		},
-		{
-			"name": "Hegghammer"
-		},
-		{
-			"name": "jknowles"
-		},
-		{
-			"name": "fats"
-		},
-		{
-			"name": "dchecks"
+			"name": "GPrimola"
 		},
 		{
 			"name": "Galliver7"
 		},
 		{
-			"name": "mu88"
-		},
-		{
-			"name": "andypiper"
-		},
-		{
-			"name": "jamesandariese"
-		},
-		{
-			"name": "Akhil-CM"
+			"name": "Hegghammer"
 		}
 	],
 	"orgs": [
@@ -73,18 +34,6 @@
 			"title": "Serei Network",
 			"imageName": "SeireiNetwork.png",
 			"githubUser": "konishi-t"
-		},
-		{
-			"url": "https://www.hosting.de/nextcloud/?mtm_campaign=managed-nextcloud&mtm_kwd=joplinapp&mtm_source=joplinapp-github&mtm_medium=banner",
-			"urlWebsite": "https://www.hosting.de/nextcloud/?mtm_campaign=managed-nextcloud&mtm_kwd=joplinapp&mtm_source=joplinapp-webseite&mtm_medium=banner",
-			"title": "Hosting.de",
-			"imageName": "HostingDe.png"
-		},
-		{
-			"url": "https://grundstueckspreise.info/",
-			"title": "SP Software GmbH",
-			"imageName": "Grundstueckspreise.png",
-			"githubUser": "PeterSchumacher22"
 		},
 		{
 			"url": "https://citricsheep.com",
@@ -129,27 +78,46 @@
 			"githubUser": "route4me"
 		},
 		{
-			"url": "https://buyyoutubviews.com",
-			"title": "BYTV",
-			"imageName": "BYTV.png",
-			"githubUser": "bytv1"
-		}
-	],
-	"orgsOld": [
-		{
-			"url": "https://usrigging.com/",
-			"title": "U.S. Ringing Supply",
-			"imageName": "RingingSupply.svg"
+			"url": "https://topagency.webflow.io",
+			"title": "WebDesignAgency",
+			"imageName": "WebDesignAgency.png",
+			"alt": "topagency"
 		},
 		{
-			"url": "https://residence-greece.com/",
-			"title": "Greece Golden Visa",
-			"imageName": "ResidenceGreece.jpg"
+			"url": "https://essayshark.com",
+			"title": "EssayShark - essay writers for hire",
+			"imageName": "EssayShark.png",
+			"alt": "EssayShark - essay writers for hire"
 		},
 		{
-			"url": "https://tranio.com/spain/",
-			"title": "Property for sale in Spain",
-			"imageName": "TranioOverseasProperty.jpg"
+			"url": "https://pokieslab1.com/real-money-pokies/",
+			"title": "Australian Real Money Pokies",
+			"imageName": "PokiesLab.png",
+			"alt": "Australian Real Money Pokies"
+		},
+		{
+			"url": "https://pokiesman1.net/real-money-pokies/",
+			"title": "Australian Real Money Pokies",
+			"imageName": "Pokiesman.png",
+			"alt": "Australian Real Money Pokies"
+		},
+		{
+			"url": "https://socialkings.online",
+			"title": "Boost your reach and buy real followers",
+			"imageName": "SocialKings.png",
+			"alt": "Boost your reach and buy real followers"
+		},
+		{
+			"url": "https://essayservice.com/",
+			"title": "For those in need of immediate academic assistance, EssayService offers a fast and reliable service to write my essay for me now, ensuring high-quality results within tight deadlines",
+			"imageName": "EssayService.png",
+			"alt": "For those in need of immediate academic assistance, EssayService offers a fast and reliable service to write my essay for me now, ensuring high-quality results within tight deadlines"
+		},
+		{
+			"url": "https://thenationonlineng.net/casino-en-ligne/casino-en-ligne-payant-au-canada/",
+			"title": "casino en ligne le plus payant",
+			"imageName": "TheNationOnline.jpg",
+			"alt": "casino en ligne le plus payant"
 		}
 	]
 }

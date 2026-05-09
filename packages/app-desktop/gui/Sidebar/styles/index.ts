@@ -28,6 +28,11 @@ export const StyledHeader = styled.div`
 	user-select: none;
 	text-transform: uppercase;
 	//cursor: pointer;
+	cursor: default;
+	transition: background 0.2s;
+	&:hover {
+		background: ${(props: StyleProps) => props.theme.backgroundColorHover2};
+	}
 `;
 
 export const StyledHeaderIcon = styled.i`
@@ -49,22 +54,6 @@ export const StyledHeaderLabel = styled.span`
 	font-weight: bold;
 `;
 
-export const StyledListItem = styled.div`
-	box-sizing: border-box;
-	height: 30px;
-	display: flex;
-	flex-direction: row;
-	align-items: center;
-	padding-left: ${(props: StyleProps) => props.theme.mainPadding + ('depth' in props ? props.depth : 0) * 16}px;
-	background: ${(props: StyleProps) => props.selected ? props.theme.selectedColor2 : 'none'};
-	/*text-transform: ${(props: StyleProps) => props.isSpecialItem ? 'uppercase' : 'none'};*/
-	transition: 0.1s;
-
-	&:hover {
-		background-color: ${(props: StyleProps) => props.theme.backgroundColorHover2};
-	}
-`;
-
 function listItemTextColor(props: StyleProps) {
 	if (props.isConflictFolder) return props.theme.colorError2;
 	if (props.isSpecialItem) return props.theme.colorFaded2;
@@ -77,7 +66,12 @@ export const StyledListItemAnchor = styled.a`
 	text-decoration: none;
 	color: ${(props: StyleProps) => listItemTextColor(props)};
 	cursor: default;
-	opacity: ${(props: StyleProps) => props.selected || props.shareId ? 1 : 0.8};
+	opacity: ${(props: StyleProps) => {
+		// So that the conflicts folder and shared folders have sufficient contrast,
+		// use an opacity of 1 even when unselected.
+		const needsHigherContrast = props.isConflictFolder || props.isSpecialItem;
+		return (props.selected || props.shareId || needsHigherContrast) ? 1 : 0.8;
+	}};
 	white-space: nowrap;
 	display: flex;
 	flex: 1;

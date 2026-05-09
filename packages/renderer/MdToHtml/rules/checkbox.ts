@@ -24,6 +24,8 @@ function pluginAssets(theme: any) {
 				li.md-checkbox input[type=checkbox] {
 					margin-left: -1.71em;
 					margin-right: 0.7em;
+					position: relative;
+					top: 1px;
 				}
 				
 				ul.joplin-checklist {
@@ -202,6 +204,8 @@ function checkboxPlugin(markdownIt: any, options: RuleOptions) {
 						currentListItem.attrSet('class', (`${currentListItem.attrGet('class') || ''} checked`).trim());
 					}
 				}
+
+				currentList.attrSet('data-is-checklist', '1');
 			}
 		}
 	});

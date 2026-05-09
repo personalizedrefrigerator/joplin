@@ -3,11 +3,16 @@ import shim from '../../shim';
 import { ButtonSpec, DialogResult, ViewHandle } from './api/types';
 const { toSystemSlashes } = require('../../path-utils');
 import PostMessageService, { MessageParticipant } from '../PostMessageService';
-import { PluginViewState } from './reducer';
+import { PluginEditorViewState, PluginViewState } from './reducer';
+import { defaultWindowId } from '../../reducer';
+import Logger from '@joplin/utils/Logger';
+
+const logger = Logger.create('WebviewController');
 
 export enum ContainerType {
 	Panel = 'panel',
 	Dialog = 'dialog',
+	Editor = 'editor',
 }
 
 export interface Options {
@@ -43,29 +48,48 @@ function findItemByKey(layout: any, key: string): any {
 	return recurseFind(layout);
 }
 
+interface EditorUpdateEvent {
+	noteId: string;
+	newBody: string;
+}
+type EditorUpdateListener = (event: EditorUpdateEvent)=> void;
+
+interface SaveNoteEvent {
+	noteId: string;
+	body: string;
+}
+type OnSaveNoteCallback = (saveNoteEvent: SaveNoteEvent)=> void;
+
 export default class WebviewController extends ViewController {
 
 	private baseDir_: string;
 	// eslint-disable-next-line @typescript-eslint/ban-types -- Old code before rule was applied
 	private messageListener_: Function = null;
+	private updateListener_: EditorUpdateListener|null = null;
 	private closeResponse_: CloseResponse = null;
+	private containerType_: ContainerType = null;
+	private saveNoteListener_: OnSaveNoteCallback|null = null;
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	public constructor(handle: ViewHandle, pluginId: string, store: any, baseDir: string, containerType: ContainerType) {
+	public constructor(handle: ViewHandle, pluginId: string, store: any, baseDir: string, containerType: ContainerType, parentWindowId: string|null) {
 		super(handle, pluginId, store);
 		this.baseDir_ = toSystemSlashes(baseDir, 'linux');
+		this.containerType_ = containerType;
 
 		const view: PluginViewState = {
 			id: this.handle,
+			editorTypeId: '',
 			type: this.type,
 			containerType: containerType,
 			html: '',
 			scripts: [],
+			buttons: null,
+			fitToContent: true,
 			// Opened is used for dialogs and mobile panels (which are shown
 			// like dialogs):
 			opened: containerType === ContainerType.Panel,
-			buttons: null,
-			fitToContent: true,
+			active: false,
+			parentWindowId,
 		};
 
 		this.store.dispatch({
@@ -75,8 +99,21 @@ export default class WebviewController extends ViewController {
 		});
 	}
 
+	public destroy() {
+		this.store.dispatch({
+			type: 'PLUGIN_VIEW_REMOVE',
+			pluginId: this.pluginId,
+			viewId: this.storeView.id,
+		});
+	}
+
 	public get type(): string {
 		return 'webview';
+	}
+
+	// Returns `null` if the view can be shown in any window.
+	public get parentWindowId(): string {
+		return this.storeView.parentWindowId;
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
@@ -118,12 +155,12 @@ export default class WebviewController extends ViewController {
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	public postMessage(message: any) {
-
 		const messageId = `plugin_${Date.now()}${Math.random()}`;
 
 		void PostMessageService.instance().postMessage({
 			pluginId: this.pluginId,
 			viewId: this.handle,
+			windowId: defaultWindowId,
 			contentScriptId: null,
 			from: MessageParticipant.Plugin,
 			to: MessageParticipant.UserWebview,
@@ -133,16 +170,101 @@ export default class WebviewController extends ViewController {
 
 	}
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	public async emitMessage(event: EmitMessageEvent): Promise<any> {
-
+	public async emitMessage(event: EmitMessageEvent) {
 		if (!this.messageListener_) return;
+
 		return this.messageListener_(event.message);
+	}
+
+	public emitUpdate(event: EditorUpdateEvent) {
+		if (!this.updateListener_) return;
+
+		if (this.containerType_ === ContainerType.Editor && (!this.active || !this.visible)) {
+			logger.info('emitMessage: Not emitting update because editor is disabled or hidden:', this.pluginId, this.handle, this.active, this.visible);
+			return;
+		}
+
+		this.updateListener_(event);
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	public onMessage(callback: any) {
 		this.messageListener_ = callback;
+	}
+
+	public onUpdate(callback: EditorUpdateListener) {
+		this.updateListener_ = callback;
+	}
+
+	public get visible(): boolean {
+		const appState = this.store.getState();
+
+		if (this.containerType_ === ContainerType.Panel) {
+			// Mobile: There is no appState.mainLayout
+			if (!this.showWithAppLayout()) {
+				return this.storeView.opened;
+			}
+
+			const mainLayout = appState.mainLayout;
+			const item = findItemByKey(mainLayout, this.handle);
+			return item ? item.visible : false;
+		} else if (this.containerType_ === ContainerType.Editor) {
+			const state = this.storeView as PluginEditorViewState;
+			return state.active && state.opened;
+		} else if (this.containerType_ === ContainerType.Dialog) {
+			return this.storeView.opened;
+		}
+
+		const exhaustivenessCheck: never = this.containerType_;
+		throw new Error(`Unknown container type: ${exhaustivenessCheck}`);
+	}
+
+	public setOpen(show = true): null|Promise<DialogResult|null> {
+		this.setStoreProp('opened', show);
+
+		if (this.containerType_ === ContainerType.Panel) {
+			if (this.showWithAppLayout()) {
+				this.store.dispatch({
+					type: 'MAIN_LAYOUT_SET_ITEM_PROP',
+					itemKey: this.handle,
+					propName: 'visible',
+					propValue: show,
+				});
+			}
+			return null;
+		} else if (this.containerType_ === ContainerType.Dialog) {
+			if (this.closeResponse_) {
+				this.closeResponse_.resolve(null);
+				this.closeResponse_ = null;
+			}
+
+			if (show) {
+				this.store.dispatch({
+					type: 'VISIBLE_DIALOGS_ADD',
+					name: this.handle,
+				});
+
+				return new Promise<DialogResult>((resolve, reject) => {
+					this.closeResponse_ = { resolve, reject };
+				});
+			} else {
+				this.store.dispatch({
+					type: 'VISIBLE_DIALOGS_REMOVE',
+					name: this.handle,
+				});
+
+				return null;
+			}
+		} else if (this.containerType_ === ContainerType.Editor) {
+			return null;
+		}
+
+		const exhaustivenessCheck: never = this.containerType_;
+		throw new Error(`Unknown container type: ${exhaustivenessCheck}`);
+	}
+
+	public async hide(): Promise<void> {
+		await this.setOpen(false);
 	}
 
 	// ---------------------------------------------
@@ -153,66 +275,24 @@ export default class WebviewController extends ViewController {
 		return this.containerType === ContainerType.Panel && !!this.store.getState().mainLayout;
 	}
 
-	public async show(show = true): Promise<void> {
-		if (this.showWithAppLayout()) {
-			this.store.dispatch({
-				type: 'MAIN_LAYOUT_SET_ITEM_PROP',
-				itemKey: this.handle,
-				propName: 'visible',
-				propValue: show,
-			});
-		} else {
-			this.setStoreProp('opened', show);
-		}
-	}
-
-	public async hide(): Promise<void> {
-		return this.show(false);
-	}
-
-	public get visible(): boolean {
-		const appState = this.store.getState();
-
-		// Mobile: There is no appState.mainLayout
-		if (!this.showWithAppLayout()) {
-			return this.storeView.opened;
-		}
-
-		const mainLayout = appState.mainLayout;
-		const item = findItemByKey(mainLayout, this.handle);
-		return item ? item.visible : false;
-	}
 
 	// ---------------------------------------------
 	// Specific to dialogs
 	// ---------------------------------------------
 
-	public async open(): Promise<DialogResult> {
-		this.store.dispatch({
-			type: 'VISIBLE_DIALOGS_ADD',
-			name: this.handle,
-		});
-
-		this.setStoreProp('opened', true);
-
-		// eslint-disable-next-line @typescript-eslint/ban-types -- Old code before rule was applied
-		return new Promise((resolve: Function, reject: Function) => {
-			this.closeResponse_ = { resolve, reject };
-		});
-	}
-
 	public close() {
-		this.store.dispatch({
-			type: 'VISIBLE_DIALOGS_REMOVE',
-			name: this.handle,
-		});
-
-		this.setStoreProp('opened', false);
+		void this.setOpen(false);
 	}
 
 	public closeWithResponse(result: DialogResult) {
+		const responseCallback = this.closeResponse_;
+		// Clear the closeResponse_ to prevent the default behavior
+		// (which sends a response of null).
+		this.closeResponse_ = null;
+
 		this.close();
-		this.closeResponse_.resolve(result);
+
+		responseCallback?.resolve(result);
 	}
 
 	public get buttons(): ButtonSpec[] {
@@ -229,5 +309,39 @@ export default class WebviewController extends ViewController {
 
 	public set fitToContent(fitToContent: boolean) {
 		this.setStoreProp('fitToContent', fitToContent);
+	}
+
+	// ---------------------------------------------
+	// Specific to editors
+	// ---------------------------------------------
+
+	public setEditorTypeId(id: string) {
+		this.setStoreProp('editorTypeId', id);
+	}
+
+	public setActive(active: boolean) {
+		this.setStoreProp('active', active);
+	}
+
+	public get active(): boolean {
+		// For compatibility with older versions of Joplin
+		if (this.containerType_ !== ContainerType.Editor) {
+			return this.visible;
+		}
+
+		const state = this.storeView as PluginEditorViewState;
+		return state.active;
+	}
+
+	public async requestSaveNote(event: SaveNoteEvent) {
+		if (!this.saveNoteListener_) {
+			logger.warn('Note save requested, but no save handler was registered. View ID: ', this.storeView?.id);
+			return;
+		}
+		this.saveNoteListener_(event);
+	}
+
+	public onNoteSaveRequested(listener: OnSaveNoteCallback) {
+		this.saveNoteListener_ = listener;
 	}
 }

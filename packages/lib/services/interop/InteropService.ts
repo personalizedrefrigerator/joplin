@@ -18,7 +18,11 @@ import InteropService_Exporter_Md from './InteropService_Exporter_Md';
 import InteropService_Exporter_Md_frontmatter from './InteropService_Exporter_Md_frontmatter';
 import InteropService_Importer_Base from './InteropService_Importer_Base';
 import InteropService_Exporter_Base from './InteropService_Exporter_Base';
-import Module, { dynamicRequireModuleFactory, makeExportModule, makeImportModule } from './Module';
+import Module, { makeExportModule, makeImportModule } from './Module';
+import InteropService_Exporter_Html from './InteropService_Exporter_Html';
+import InteropService_Importer_EnexToHtml from './InteropService_Importer_EnexToHtml';
+import InteropService_Importer_EnexToMd from './InteropService_Importer_EnexToMd';
+import InteropService_Importer_OneNote from './InteropService_Importer_OneNote';
 const { sprintf } = require('sprintf-js');
 const { fileExtension } = require('../../path-utils');
 const EventEmitter = require('events');
@@ -30,6 +34,8 @@ export default class InteropService {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	private eventEmitter_: any = null;
 	private static instance_: InteropService;
+	private domParser_: DOMParser;
+	private xmlSerializer_: XMLSerializer;
 
 	public static instance(): InteropService {
 		if (!this.instance_) this.instance_ = new InteropService();
@@ -74,7 +80,7 @@ export default class InteropService {
 					description: _('Evernote Export File (as HTML)'),
 					supportsMobile: false,
 					outputFormat: ImportModuleOutputFormat.Html,
-				}, dynamicRequireModuleFactory('./InteropService_Importer_EnexToHtml')),
+				}, () => new InteropService_Importer_EnexToHtml()),
 
 				makeImportModule({
 					format: 'enex',
@@ -83,7 +89,7 @@ export default class InteropService {
 					description: _('Evernote Export File (as Markdown)'),
 					supportsMobile: false,
 					isDefault: true,
-				}, dynamicRequireModuleFactory('./InteropService_Importer_EnexToMd')),
+				}, () => new InteropService_Importer_EnexToMd()),
 
 				makeImportModule({
 					format: 'enex',
@@ -92,7 +98,7 @@ export default class InteropService {
 					description: _('Evernote Export Files (Directory, as HTML)'),
 					supportsMobile: false,
 					outputFormat: ImportModuleOutputFormat.Html,
-				}, dynamicRequireModuleFactory('./InteropService_Importer_EnexToHtml')),
+				}, () => new InteropService_Importer_EnexToHtml()),
 
 				makeImportModule({
 					format: 'enex',
@@ -100,7 +106,7 @@ export default class InteropService {
 					sources: [FileSystemItem.Directory],
 					description: _('Evernote Export Files (Directory, as Markdown)'),
 					supportsMobile: false,
-				}, dynamicRequireModuleFactory('./InteropService_Importer_EnexToMd')),
+				}, () => new InteropService_Importer_EnexToMd()),
 
 				makeImportModule({
 					format: 'html',
@@ -133,6 +139,18 @@ export default class InteropService {
 					isNoteArchive: false, // Tells whether the file can contain multiple notes (eg. Enex or Jex format)
 					description: _('Text document'),
 				}, () => new InteropService_Importer_Md()),
+
+				makeImportModule({
+					format: 'one',
+					fileExtensions: [
+						'zip',
+						'one',
+						'onepkg',
+					],
+					sources: [FileSystemItem.File],
+					isNoteArchive: false, // Tells whether the file can contain multiple notes (eg. Enex or Jex format)
+					description: _('OneNote Notebook'),
+				}, () => new InteropService_Importer_OneNote()),
 			];
 
 			const exportModules = [
@@ -168,14 +186,14 @@ export default class InteropService {
 					isNoteArchive: false,
 					description: _('HTML File'),
 					supportsMobile: false,
-				}, dynamicRequireModuleFactory('./InteropService_Exporter_Html')),
+				}, () => new InteropService_Exporter_Html()),
 
 				makeExportModule({
 					format: ExportModuleOutputFormat.Html,
 					target: FileSystemItem.Directory,
 					description: _('HTML Directory'),
 					supportsMobile: false,
-				}, dynamicRequireModuleFactory('./InteropService_Exporter_Html')),
+				}, () => new InteropService_Exporter_Html()),
 			];
 
 			this.defaultModules_ = (importModules as Module[]).concat(exportModules);
@@ -189,12 +207,28 @@ export default class InteropService {
 		this.eventEmitter_.emit('modulesChanged');
 	}
 
+	public set xmlSerializer(xmlSerializer: XMLSerializer) {
+		this.xmlSerializer_ = xmlSerializer;
+	}
+
+	public get xmlSerializer() {
+		return this.xmlSerializer_;
+	}
+
+	public set domParser(domParser: DOMParser) {
+		this.domParser_ = domParser;
+	}
+
+	public get domParser() {
+		return this.domParser_;
+	}
+
 	// Find the module that matches the given type ("importer" or "exporter")
 	// and the given format. Some formats can have multiple associated importers
 	// or exporters, such as ENEX. In this case, the one marked as "isDefault"
 	// is returned. This is useful to auto-detect the module based on the format.
 	// For more precise matching, newModuleFromPath_ should be used.
-	private findModuleByFormat_(type: ModuleType, format: string, target: FileSystemItem = null, outputFormat: ImportModuleOutputFormat = null) {
+	public findModuleByFormat(type: ModuleType, format: string, target: FileSystemItem = null, outputFormat: ImportModuleOutputFormat = null) {
 		const modules = this.modules();
 		const matches = [];
 
@@ -233,7 +267,7 @@ export default class InteropService {
 	// https://github.com/laurent22/joplin/pull/1795#discussion_r322379121) but
 	// we can do it if it ever becomes necessary.
 	private newModuleByFormat_(type: ModuleType, format: string, outputFormat: ImportModuleOutputFormat = ImportModuleOutputFormat.Markdown) {
-		const moduleMetadata = this.findModuleByFormat_(type, format, null, outputFormat);
+		const moduleMetadata = this.findModuleByFormat(type, format, null, outputFormat);
 		if (!moduleMetadata) throw new Error(_('Cannot load "%s" module for format "%s" and output "%s"', type, format, outputFormat));
 
 		return moduleMetadata.factory();
@@ -246,7 +280,7 @@ export default class InteropService {
 	//
 	// https://github.com/laurent22/joplin/pull/1795#pullrequestreview-281574417
 	private newModuleFromPath_(type: ModuleType, options: ExportOptions&ImportOptions) {
-		const moduleMetadata = this.findModuleByFormat_(type, options.format, options.target);
+		const moduleMetadata = this.findModuleByFormat(type, options.format, options.target);
 		if (!moduleMetadata) throw new Error(_('Cannot load "%s" module for format "%s" and target "%s"', type, options.format, options.target));
 
 		return moduleMetadata.factory(options);
@@ -273,6 +307,8 @@ export default class InteropService {
 			format: 'auto',
 			destinationFolderId: null,
 			destinationFolder: null,
+			xmlSerializer: this.xmlSerializer,
+			domParser: this.domParser,
 			...options,
 		};
 

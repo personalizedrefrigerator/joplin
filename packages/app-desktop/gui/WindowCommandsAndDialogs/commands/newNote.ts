@@ -1,0 +1,52 @@
+import { utils, CommandRuntime, CommandDeclaration, CommandContext } from '@joplin/lib/services/CommandService';
+import { _ } from '@joplin/lib/locale';
+import Note from '@joplin/lib/models/Note';
+import Folder from '@joplin/lib/models/Folder';
+import Setting from '@joplin/lib/models/Setting';
+
+export const newNoteEnabledConditions = 'oneFolderSelected && selectedFolderIsValid && !inConflictFolder && !folderIsReadOnly && !folderIsTrash';
+
+export const declaration: CommandDeclaration = {
+	name: 'newNote',
+	label: () => _('New note'),
+	iconName: 'fa-file',
+};
+
+export const runtime = (): CommandRuntime => {
+	return {
+		execute: async (_context: CommandContext, body = '', isTodo = false) => {
+			const folder = await Folder.getValidActiveFolder();
+			if (!folder) return;
+
+			const defaultValues = Note.previewFieldsWithDefaultValues({ includeTimestamps: false });
+
+			let order;
+			if (Setting.value('notes.sortOrder.field') === 'order') {
+				order = await Note.getNextOrderValue(folder.id);
+			}
+
+			let newNote = {
+				...defaultValues, parent_id: folder.id,
+				is_todo: isTodo ? 1 : 0,
+				body: body,
+				...(order !== undefined ? { order } : {}),
+			};
+
+			newNote = await Note.save(newNote, { provisional: true });
+
+			void Note.updateGeolocation(newNote.id);
+
+			utils.store.dispatch({
+				type: 'NOTE_SELECT',
+				id: newNote.id,
+			});
+
+			// Immediately sort the note list so that the new note is positioned correctly before
+			// scrolling to it.
+			utils.store.dispatch({
+				type: 'NOTE_SORT',
+			});
+		},
+		enabledCondition: newNoteEnabledConditions,
+	};
+};

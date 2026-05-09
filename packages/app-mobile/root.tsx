@@ -1,80 +1,65 @@
-const React = require('react');
-import shim from '@joplin/lib/shim';
-shim.setReact(React);
+import * as React from 'react';
+import PerformanceLogger from '@joplin/lib/PerformanceLogger';
+PerformanceLogger.onAppStartBegin();
 
 import setupQuickActions from './setupQuickActions';
-import PluginAssetsLoader from './PluginAssetsLoader';
 import AlarmService from '@joplin/lib/services/AlarmService';
 import Alarm from '@joplin/lib/models/Alarm';
 import time from '@joplin/lib/time';
-import Logger, { TargetType } from '@joplin/utils/Logger';
-import BaseModel from '@joplin/lib/BaseModel';
-import BaseService from '@joplin/lib/services/BaseService';
-import ResourceService from '@joplin/lib/services/ResourceService';
-import KvStore from '@joplin/lib/services/KvStore';
-import NoteScreen from './components/screens/Note';
+import Logger from '@joplin/utils/Logger';
+import NoteScreen from './components/screens/Note/Note';
 import UpgradeSyncTargetScreen from './components/screens/UpgradeSyncTargetScreen';
-import Setting, { AppType, Env } from '@joplin/lib/models/Setting';
+import Setting, { } from '@joplin/lib/models/Setting';
 import PoorManIntervals from '@joplin/lib/PoorManIntervals';
-import reducer, { NotesParent, parseNotesParent, serializeNotesParent } from '@joplin/lib/reducer';
-import ShareExtension from './utils/ShareExtension';
+import { NotesParent, serializeNotesParent } from '@joplin/lib/reducer';
+import ShareExtension, { UnsubscribeShareListener } from './utils/ShareExtension';
 import handleShared from './utils/shareHandler';
-import uuid from '@joplin/lib/uuid';
-import { loadKeychainServiceAndSettings } from '@joplin/lib/services/SettingUtils';
-import KeychainServiceDriverMobile from '@joplin/lib/services/keychain/KeychainServiceDriver.mobile';
 import { _, setLocale } from '@joplin/lib/locale';
 import SyncTargetJoplinServer from '@joplin/lib/SyncTargetJoplinServer';
 import SyncTargetJoplinCloud from '@joplin/lib/SyncTargetJoplinCloud';
 import SyncTargetOneDrive from '@joplin/lib/SyncTargetOneDrive';
-import initProfile from '@joplin/lib/services/profileConfig/initProfile';
-const VersionInfo = require('react-native-version-info').default;
-const { Keyboard, BackHandler, Animated, StatusBar, Platform, Dimensions } = require('react-native');
-import { AppState as RNAppState, EmitterSubscription, View, Text, Linking, NativeEventSubscription, Appearance, AccessibilityInfo, ActivityIndicator } from 'react-native';
+import { Keyboard, BackHandler, Animated, StatusBar, Platform, Dimensions } from 'react-native';
+import { AppState as RNAppState, EmitterSubscription, View, Text, Linking, NativeEventSubscription, Appearance, ActivityIndicator } from 'react-native';
 import getResponsiveValue from './components/getResponsiveValue';
-import NetInfo from '@react-native-community/netinfo';
+import NetInfo, { NetInfoSubscription } from '@react-native-community/netinfo';
 const DropdownAlert = require('react-native-dropdownalert').default;
-const AlarmServiceDriver = require('./services/AlarmServiceDriver').default;
-const SafeAreaView = require('./components/SafeAreaView');
+
+// Mirrors the DropdownAlertData type from react-native-dropdownalert
+interface DropdownAlertData {
+	type?: string;
+	title?: string;
+	message?: string;
+	interval?: number;
+	resolve?: (_value: DropdownAlertData)=> void;
+}
+import SafeAreaView from './components/SafeAreaView';
 const { connect, Provider } = require('react-redux');
 import { Provider as PaperProvider, MD3DarkTheme, MD3LightTheme } from 'react-native-paper';
-const { BackButtonService } = require('./services/back-button.js');
+import BackButtonService, { BackButtonHandler } from './services/BackButtonService';
 import NavService from '@joplin/lib/services/NavService';
 import { createStore, applyMiddleware, Dispatch } from 'redux';
 import reduxSharedMiddleware from '@joplin/lib/components/shared/reduxSharedMiddleware';
-import shimInit from './utils/shim-init-react';
 const { AppNav } = require('./components/app-nav.js');
-import Note from '@joplin/lib/models/Note';
 import Folder from '@joplin/lib/models/Folder';
-import BaseSyncTarget from '@joplin/lib/BaseSyncTarget';
-import Resource from '@joplin/lib/models/Resource';
-import Tag from '@joplin/lib/models/Tag';
-import NoteTag from '@joplin/lib/models/NoteTag';
-import BaseItem from '@joplin/lib/models/BaseItem';
-import MasterKey from '@joplin/lib/models/MasterKey';
-import Revision from '@joplin/lib/models/Revision';
-import RevisionService from '@joplin/lib/services/RevisionService';
-import JoplinDatabase from '@joplin/lib/JoplinDatabase';
-import Database from '@joplin/lib/database';
-import NotesScreen from './components/screens/Notes';
-const { TagsScreen } = require('./components/screens/tags.js');
+import NotesScreen from './components/screens/Notes/Notes';
+import TagsScreen from './components/screens/tags';
 import ConfigScreen from './components/screens/ConfigScreen/ConfigScreen';
-const { FolderScreen } = require('./components/screens/folder.js');
+import FolderScreen from './components/screens/folder';
 import LogScreen from './components/screens/LogScreen';
 import StatusScreen from './components/screens/status';
-const { SearchScreen } = require('./components/screens/search.js');
+import SearchScreen from './components/screens/SearchScreen';
+import ResourceScreen from './components/screens/ResourceScreen';
 const { OneDriveLoginScreen } = require('./components/screens/onedrive-login.js');
 import EncryptionConfigScreen from './components/screens/encryption-config';
-const { DropboxLoginScreen } = require('./components/screens/dropbox-login.js');
+import DropboxLoginScreen from './components/screens/dropbox-login.js';
 import { MenuProvider } from 'react-native-popup-menu';
-import SideMenu from './components/SideMenu';
+import SideMenu, { SideMenuPosition } from './components/SideMenu';
 import SideMenuContent from './components/side-menu-content';
-const { SideMenuContentNote } = require('./components/side-menu-content-note.js');
+import SideMenuContentNote, { SideMenuContentOptions } from './components/SideMenuContentNote';
 import { reg } from '@joplin/lib/registry';
-const { defaultState } = require('@joplin/lib/reducer');
-import FileApiDriverLocal from '@joplin/lib/file-api-driver-local';
+import { defaultState } from '@joplin/lib/reducer';
 import ResourceFetcher from '@joplin/lib/services/ResourceFetcher';
 import SearchEngine from '@joplin/lib/services/search/SearchEngine';
-import WelcomeUtils from '@joplin/lib/WelcomeUtils';
 import { themeStyle } from './components/global-style';
 import SyncTargetRegistry from '@joplin/lib/SyncTargetRegistry';
 import SyncTargetFilesystem from '@joplin/lib/SyncTargetFilesystem';
@@ -82,12 +67,14 @@ const SyncTargetNextcloud = require('@joplin/lib/SyncTargetNextcloud.js');
 const SyncTargetWebDAV = require('@joplin/lib/SyncTargetWebDAV.js');
 const SyncTargetDropbox = require('@joplin/lib/SyncTargetDropbox.js');
 const SyncTargetAmazonS3 = require('@joplin/lib/SyncTargetAmazonS3.js');
+import SyncTargetJoplinServerSAML from '@joplin/lib/SyncTargetJoplinServerSAML';
 import BiometricPopup from './components/biometrics/BiometricPopup';
-import initLib from '@joplin/lib/initLib';
 import { isCallbackUrl, parseCallbackUrl, CallbackUrlCommand } from '@joplin/lib/callbackUrlUtils';
 import JoplinCloudLoginScreen from './components/screens/JoplinCloudLoginScreen';
 
 import SyncTargetNone from '@joplin/lib/SyncTargetNone';
+
+
 
 SyncTargetRegistry.addClass(SyncTargetNone);
 SyncTargetRegistry.addClass(SyncTargetOneDrive);
@@ -97,49 +84,50 @@ SyncTargetRegistry.addClass(SyncTargetDropbox);
 SyncTargetRegistry.addClass(SyncTargetFilesystem);
 SyncTargetRegistry.addClass(SyncTargetAmazonS3);
 SyncTargetRegistry.addClass(SyncTargetJoplinServer);
+SyncTargetRegistry.addClass(SyncTargetJoplinServerSAML);
 SyncTargetRegistry.addClass(SyncTargetJoplinCloud);
 
-import FsDriverRN from './utils/fs-driver/fs-driver-rn';
 import DecryptionWorker from '@joplin/lib/services/DecryptionWorker';
 import EncryptionService from '@joplin/lib/services/e2ee/EncryptionService';
-import MigrationService from '@joplin/lib/services/MigrationService';
-import { clearSharedFilesCache } from './utils/ShareUtils';
-import setIgnoreTlsErrors from './utils/TlsUtils';
-import ShareService from '@joplin/lib/services/share/ShareService';
 import setupNotifications from './utils/setupNotifications';
-import { loadMasterKeysFromSettings, migrateMasterPassword } from '@joplin/lib/services/e2ee/utils';
-import { setRSA } from '@joplin/lib/services/e2ee/ppk';
-import RSA from './services/e2ee/RSA.react-native';
-import { runIntegrationTests as runRsaIntegrationTests } from '@joplin/lib/services/e2ee/ppkTestUtils';
+import { loadMasterKeysFromSettings } from '@joplin/lib/services/e2ee/utils';
 import { Theme, ThemeAppearance } from '@joplin/lib/themes/type';
 import ProfileSwitcher from './components/ProfileSwitcher/ProfileSwitcher';
 import ProfileEditor from './components/ProfileSwitcher/ProfileEditor';
 import sensorInfo, { SensorInfo } from './components/biometrics/sensorInfo';
-import { getCurrentProfile } from '@joplin/lib/services/profileConfig';
-import { getDatabaseName, getPluginDataDir, getProfilesRootDir, getResourceDir, setDispatch } from './services/profiles';
-import userFetcher, { initializeUserFetcher } from '@joplin/lib/utils/userFetcher';
+import { setDispatch } from './services/profiles';
 import { ReactNode } from 'react';
-import { parseShareCache } from '@joplin/lib/services/share/reducer';
 import autodetectTheme, { onSystemColorSchemeChange } from './utils/autodetectTheme';
-import runOnDeviceFsDriverTests from './utils/fs-driver/runOnDeviceTests';
 import PluginRunnerWebView from './components/plugins/PluginRunnerWebView';
 import { refreshFolders, scheduleRefreshFolders } from '@joplin/lib/folders-screen-utils';
-import KeymapService from '@joplin/lib/services/KeymapService';
-import PluginService from '@joplin/lib/services/plugins/PluginService';
-import initializeCommandService from './utils/initializeCommandService';
-import PlatformImplementation from './services/plugins/PlatformImplementation';
 import ShareManager from './components/screens/ShareManager';
-import appDefaultState, { DEFAULT_ROUTE } from './utils/appDefaultState';
 import { setDateFormat, setTimeFormat, setTimeLocale } from '@joplin/utils/time';
-import DatabaseDriverReactNative from './utils/database-driver-react-native';
 import DialogManager from './components/DialogManager';
-import lockToSingleInstance from './utils/lockToSingleInstance';
 import { AppState } from './utils/types';
 import { getDisplayParentId } from '@joplin/lib/services/trash';
-
-type SideMenuPosition = 'left' | 'right';
+import PluginNotification from './components/plugins/PluginNotification';
+import FocusControl from './components/accessibility/FocusControl/FocusControl';
+import SsoLoginScreen from './components/screens/SsoLoginScreen';
+import SamlShared from '@joplin/lib/components/shared/SamlShared';
+import NoteRevisionViewer from './components/screens/NoteRevisionViewer';
+import DocumentScanner from './components/screens/DocumentScanner/DocumentScanner';
+import buildStartupTasks from './utils/buildStartupTasks';
+import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
+import appReducer from './utils/appReducer';
+import SyncWizard from './components/SyncWizard/SyncWizard';
+import Synchronizer from '@joplin/lib/Synchronizer';
 
 const logger = Logger.create('root');
+const perfLogger = PerformanceLogger.create();
+
+interface DropdownAlertWrapperProps {
+	alert: (func: (data?: DropdownAlertData)=> Promise<DropdownAlertData>)=> void;
+}
+
+const DropdownAlertWrapper = ({ alert }: DropdownAlertWrapperProps) => {
+	const insets = useSafeAreaInsets();
+	return <DropdownAlert alert={alert} translucent alertViewStyle={{ padding: 8, marginTop: insets.top }} />;
+};
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 let storeDispatch: any = function(_action: any) {};
@@ -165,7 +153,7 @@ const generalMiddleware = (store: any) => (next: any) => async (action: any) => 
 
 	const result = next(action);
 	const newState: AppState = store.getState();
-	let doRefreshFolders = false;
+	let doRefreshFolders: boolean | string = false;
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	await reduxSharedMiddleware(store, next, action, storeDispatch as any);
@@ -173,7 +161,7 @@ const generalMiddleware = (store: any) => (next: any) => async (action: any) => 
 	if (action.type === 'NAV_GO') Keyboard.dismiss();
 
 	if (['NOTE_UPDATE_ONE', 'NOTE_DELETE', 'FOLDER_UPDATE_ONE', 'FOLDER_DELETE'].indexOf(action.type) >= 0) {
-		if (!await reg.syncTarget().syncStarted()) void reg.scheduleSync(1000, { syncSteps: ['update_remote', 'delete_remote'] }, true);
+		if (!await reg.syncTarget().syncStarted()) void reg.scheduleSync(reg.syncAsYouTypeInterval(), { syncSteps: Synchronizer.partialSyncSteps }, true);
 		SearchEngine.instance().scheduleSyncTables();
 	}
 
@@ -207,7 +195,13 @@ const generalMiddleware = (store: any) => (next: any) => async (action: any) => 
 		setTimeLocale(Setting.value('locale'));
 	}
 
-	if ((action.type === 'SETTING_UPDATE_ONE' && (action.key.indexOf('encryption.') === 0)) || (action.type === 'SETTING_UPDATE_ALL')) {
+	// Like the desktop and CLI apps, we run this whenever the sync target properties change.
+	// Previously, this only ran when encryption was enabled/disabled. However, after fetching
+	// a new key, this needs to run and so we run it when the sync target info changes.
+	if (
+		(action.type === 'SETTING_UPDATE_ONE' && (action.key === 'syncInfoCache' || action.key.startsWith('encryption.')))
+		|| action.type === 'SETTING_UPDATE_ALL'
+	) {
 		await loadMasterKeysFromSettings(EncryptionService.instance());
 		void DecryptionWorker.instance().scheduleStart();
 		const loadedMasterKeyIds = EncryptionService.instance().loadedMasterKeyIds();
@@ -250,622 +244,90 @@ const generalMiddleware = (store: any) => (next: any) => async (action: any) => 
 		void ResourceFetcher.instance().autoAddResources();
 	}
 
+	if (['NOTE_VISIBLE_PANES_SET'].indexOf(action.type) >= 0) {
+		Setting.setValue('noteVisiblePanes', newState.noteVisiblePanes);
+	}
+
+	if (action.type === 'SETTING_UPDATE_ONE' && action.key.indexOf('folders.sortOrder') === 0) {
+		doRefreshFolders = 'now';
+	}
+
 	if (doRefreshFolders) {
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-		await scheduleRefreshFolders((action: any) => storeDispatch(action), newState.selectedFolderId);
+		if (doRefreshFolders === 'now') {
+			await refreshFolders(storeDispatch, newState.selectedFolderId);
+		} else {
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
+			await scheduleRefreshFolders((action: any) => storeDispatch(action), newState.selectedFolderId);
+		}
 	}
 
 	return result;
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-const navHistory: any[] = [];
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-function historyCanGoBackTo(route: any) {
-	if (route.routeName === 'Note') return false;
-	if (route.routeName === 'Folder') return false;
-
-	// There's no point going back to these screens in general and, at least in OneDrive case,
-	// it can be buggy to do so, due to incorrectly relying on global state (reg.syncTarget...)
-	if (route.routeName === 'OneDriveLogin') return false;
-	if (route.routeName === 'DropboxLogin') return false;
-
-	return true;
-}
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-const appReducer = (state = appDefaultState, action: any) => {
-	let newState = state;
-	let historyGoingBack = false;
-
-	try {
-		switch (action.type) {
-
-		case 'NAV_BACK':
-		case 'NAV_GO':
-
-			if (action.type === 'NAV_BACK') {
-				if (!navHistory.length) break;
-
-				let newAction = null;
-				while (navHistory.length) {
-					newAction = navHistory.pop();
-					if (newAction.routeName !== state.route.routeName) break;
-				}
-
-				action = newAction ? newAction : navHistory.pop();
-
-				historyGoingBack = true;
-			}
-
-			{
-				const currentRoute = state.route;
-
-				if (!historyGoingBack && historyCanGoBackTo(currentRoute)) {
-				// If the route *name* is the same (even if the other parameters are different), we
-				// overwrite the last route in the history with the current one. If the route name
-				// is different, we push a new history entry.
-					if (currentRoute.routeName === action.routeName) {
-					// nothing
-					} else {
-						navHistory.push(currentRoute);
-					}
-				}
-
-				// HACK: whenever a new screen is loaded, all the previous screens of that type
-				// are overwritten with the new screen parameters. This is because the way notes
-				// are currently loaded is not optimal (doesn't retain history properly) so
-				// this is a simple fix without doing a big refactoring to change the way notes
-				// are loaded. Might be good enough since going back to different folders
-				// is probably not a common workflow.
-				for (let i = 0; i < navHistory.length; i++) {
-					const n = navHistory[i];
-					if (n.routeName === action.routeName) {
-						navHistory[i] = { ...action };
-					}
-				}
-
-				newState = { ...state };
-
-				newState.selectedNoteHash = '';
-
-				if ('noteId' in action) {
-					newState.selectedNoteIds = action.noteId ? [action.noteId] : [];
-				}
-
-				if ('folderId' in action) {
-					newState.selectedFolderId = action.folderId;
-					newState.notesParentType = 'Folder';
-				}
-
-				if ('tagId' in action) {
-					newState.selectedTagId = action.tagId;
-					newState.notesParentType = 'Tag';
-				}
-
-				if ('smartFilterId' in action) {
-					newState.smartFilterId = action.smartFilterId;
-					newState.selectedSmartFilterId = action.smartFilterId;
-					newState.notesParentType = 'SmartFilter';
-				}
-
-				if ('itemType' in action) {
-					newState.selectedItemType = action.itemType;
-				}
-
-				if ('noteHash' in action) {
-					newState.selectedNoteHash = action.noteHash;
-				}
-
-				if ('sharedData' in action) {
-					newState.sharedData = action.sharedData;
-				} else {
-					newState.sharedData = null;
-				}
-
-				newState.route = action;
-				newState.historyCanGoBack = !!navHistory.length;
-			}
-			break;
-
-		case 'SIDE_MENU_TOGGLE':
-
-			newState = { ...state };
-			newState.showSideMenu = !newState.showSideMenu;
-			break;
-
-		case 'SIDE_MENU_OPEN':
-
-			newState = { ...state };
-			newState.showSideMenu = true;
-			break;
-
-		case 'SIDE_MENU_CLOSE':
-
-			newState = { ...state };
-			newState.showSideMenu = false;
-			break;
-
-		case 'SIDE_MENU_OPEN_PERCENT':
-
-			newState = { ...state };
-			newState.sideMenuOpenPercent = action.value;
-			break;
-
-		case 'SET_PLUGIN_PANELS_DIALOG_VISIBLE':
-			newState = { ...state };
-			newState.showPanelsDialog = action.visible;
-			break;
-
-		case 'NOTE_SELECTION_TOGGLE':
-
-			{
-				newState = { ...state };
-
-				const noteId = action.id;
-				const newSelectedNoteIds = state.selectedNoteIds.slice();
-				const existingIndex = state.selectedNoteIds.indexOf(noteId);
-
-				if (existingIndex >= 0) {
-					newSelectedNoteIds.splice(existingIndex, 1);
-				} else {
-					newSelectedNoteIds.push(noteId);
-				}
-
-				newState.selectedNoteIds = newSelectedNoteIds;
-				newState.noteSelectionEnabled = !!newSelectedNoteIds.length;
-			}
-			break;
-
-		case 'NOTE_SELECTION_START':
-
-			if (!state.noteSelectionEnabled) {
-				newState = { ...state };
-				newState.noteSelectionEnabled = true;
-				newState.selectedNoteIds = [action.id];
-			}
-			break;
-
-		case 'NOTE_SELECTION_END':
-
-			newState = { ...state };
-			newState.noteSelectionEnabled = false;
-			newState.selectedNoteIds = [];
-			break;
-
-		case 'NOTE_SIDE_MENU_OPTIONS_SET':
-
-			newState = { ...state };
-			newState.noteSideMenuOptions = action.options;
-			break;
-
-		case 'SET_SIDE_MENU_TOUCH_GESTURES_DISABLED':
-			newState = { ...state };
-			newState.disableSideMenuGestures = action.disableSideMenuGestures;
-			break;
-
-		case 'MOBILE_DATA_WARNING_UPDATE':
-
-			newState = { ...state };
-			newState.isOnMobileData = action.isOnMobileData;
-			break;
-
-		}
-	} catch (error) {
-		error.message = `In reducer: ${error.message} Action: ${JSON.stringify(action)}`;
-		throw error;
-	}
-
-	return reducer(newState, action);
-};
-
 const store = createStore(appReducer, applyMiddleware(generalMiddleware));
 storeDispatch = store.dispatch;
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-function resourceFetcher_downloadComplete(event: any) {
-	if (event.encrypted) {
-		void DecryptionWorker.instance().scheduleStart();
-	}
-}
-
-function decryptionWorker_resourceMetadataButNotBlobDecrypted() {
-	ResourceFetcher.instance().scheduleAutoAddResources();
-}
-
-const initializeTempDir = async () => {
-	const tempDir = `${getProfilesRootDir()}/tmp`;
-
-	// Re-create the temporary directory.
-	try {
-		await shim.fsDriver().remove(tempDir);
-	} catch (_error) {
-		// The logger may not exist yet. Do nothing.
-	}
-
-	await shim.fsDriver().mkdir(tempDir);
-	return tempDir;
-};
-
-const getInitialActiveFolder = async () => {
-	let folderId = Setting.value('activeFolderId');
-
-	// In some cases (e.g. new profile/install), activeFolderId hasn't been set yet.
-	// Because activeFolderId is used to determine the parent for new notes, initialize
-	// it here:
-	if (!folderId) {
-		folderId = (await Folder.defaultFolder())?.id;
-		if (folderId) {
-			Setting.setValue('activeFolderId', folderId);
-		}
-	}
-	return await Folder.load(folderId);
-};
-
-const singleInstanceLock = lockToSingleInstance();
-
-// eslint-disable-next-line @typescript-eslint/ban-types -- Old code before rule was applied
 async function initialize(dispatch: Dispatch) {
-	shimInit();
-
 	setDispatch(dispatch);
-	const { profileConfig, isSubProfile } = await initProfile(getProfilesRootDir());
-	const currentProfile = getCurrentProfile(profileConfig);
 
-	dispatch({
-		type: 'PROFILE_CONFIG_SET',
-		value: profileConfig,
-	});
+	const startupTasks = buildStartupTasks(dispatch, store);
 
-	Setting.setConstant('env', __DEV__ ? Env.Dev : Env.Prod);
-	Setting.setConstant('appId', 'net.cozic.joplin-mobile');
-	Setting.setConstant('appType', AppType.Mobile);
-	Setting.setConstant('tempDir', await initializeTempDir());
-	Setting.setConstant('cacheDir', `${getProfilesRootDir()}/cache`);
-	const resourceDir = getResourceDir(currentProfile, isSubProfile);
-	Setting.setConstant('resourceDir', resourceDir);
-	Setting.setConstant('pluginDir', `${getProfilesRootDir()}/plugins`);
-	Setting.setConstant('pluginDataDir', getPluginDataDir(currentProfile, isSubProfile));
-
-	await shim.fsDriver().mkdir(resourceDir);
-
-	// Do as much setup as possible before checking the lock -- the lock intentionally waits for
-	// messages from other clients for several hundred ms.
-	await singleInstanceLock;
-
-	const logDatabase = new Database(new DatabaseDriverReactNative());
-	await logDatabase.open({ name: 'log.sqlite' });
-	await logDatabase.exec(Logger.databaseCreateTableSql());
-
-	const mainLogger = new Logger();
-	mainLogger.addTarget(TargetType.Database, { database: logDatabase, source: 'm' });
-	mainLogger.setLevel(Logger.LEVEL_INFO);
-
-	if (Setting.value('env') === 'dev') {
-		mainLogger.addTarget(TargetType.Console);
-		mainLogger.setLevel(Logger.LEVEL_DEBUG);
-	}
-
-	Logger.initializeGlobalLogger(mainLogger);
-	initLib(mainLogger);
-
-	reg.setLogger(mainLogger);
-	reg.setShowErrorMessageBoxHandler((message: string) => { alert(message); });
-	reg.setDispatch(dispatch);
-
-	BaseService.logger_ = mainLogger;
-	// require('@joplin/lib/ntpDate').setLogger(reg.logger());
-
-	reg.logger().info('====================================');
-	reg.logger().info(`Starting application ${Setting.value('appId')} v${VersionInfo.appVersion} (${Setting.value('env')})`);
-
-	const dbLogger = new Logger();
-	dbLogger.addTarget(TargetType.Database, { database: logDatabase, source: 'm' });
-	if (Setting.value('env') === 'dev') {
-		dbLogger.addTarget(TargetType.Console);
-		dbLogger.setLevel(Logger.LEVEL_INFO); // Set to LEVEL_DEBUG for full SQL queries
-	} else {
-		dbLogger.setLevel(Logger.LEVEL_INFO);
-	}
-
-	const db = new JoplinDatabase(new DatabaseDriverReactNative());
-	db.setLogger(dbLogger);
-	reg.setDb(db);
-
-	// reg.dispatch = dispatch;
-	BaseModel.dispatch = dispatch;
-	BaseSyncTarget.dispatch = dispatch;
-	NavService.dispatch = dispatch;
-	BaseModel.setDb(db);
-
-	KvStore.instance().setDb(reg.db());
-
-	BaseItem.loadClass('Note', Note);
-	BaseItem.loadClass('Folder', Folder);
-	BaseItem.loadClass('Resource', Resource);
-	BaseItem.loadClass('Tag', Tag);
-	BaseItem.loadClass('NoteTag', NoteTag);
-	BaseItem.loadClass('MasterKey', MasterKey);
-	BaseItem.loadClass('Revision', Revision);
-
-	const fsDriver = new FsDriverRN();
-
-	Resource.fsDriver_ = fsDriver;
-	FileApiDriverLocal.fsDriver_ = fsDriver;
-
-	AlarmService.setDriver(new AlarmServiceDriver(mainLogger));
-	AlarmService.setLogger(mainLogger);
-
-	// Currently CommandService is just used for plugins.
-	initializeCommandService(store);
-
-	// KeymapService is also present for plugin compatibility
-	KeymapService.instance().initialize();
-
-	// Even if there are no plugins, we need to initialize the PluginService so that
-	// plugin search can work.
-	const platformImplementation = PlatformImplementation.instance();
-	PluginService.instance().initialize(
-		platformImplementation.versionInfo.version, platformImplementation, null, store,
-	);
-
-	setRSA(RSA);
-
-	try {
-		if (Setting.value('env') === 'prod') {
-			await db.open({ name: getDatabaseName(currentProfile, isSubProfile) });
-		} else {
-			await db.open({ name: getDatabaseName(currentProfile, isSubProfile, '-20240127-1') });
-
-			// await db.clearForTesting();
-		}
-
-		reg.logger().info('Database is ready.');
-		reg.logger().info('Loading settings...');
-
-		await loadKeychainServiceAndSettings(KeychainServiceDriverMobile);
-		await migrateMasterPassword();
-
-		if (!Setting.value('clientId')) Setting.setValue('clientId', uuid.create());
-		reg.logger().info(`Client ID: ${Setting.value('clientId')}`);
-
-		BaseItem.syncShareCache = parseShareCache(Setting.value('sync.shareCache'));
-
-		if (Setting.value('firstStart')) {
-			const detectedLocale = shim.detectAndSetLocale(Setting);
-			reg.logger().info(`First start: detected locale as ${detectedLocale}`);
-
-			if (shim.mobilePlatform() === 'web') {
-				// Web browsers generally have more limited storage than desktop and mobile apps:
-				Setting.setValue('sync.resourceDownloadMode', 'auto');
-				// For now, geolocation is disabled by default on web until the web permissions workflow
-				// is improved. At present, trackLocation=true causes the "allow location access" prompt
-				// to appear without a clear indicator for why Joplin wants this information.
-				Setting.setValue('trackLocation', false);
-				logger.info('First start on web: Set resource download mode to auto and disabled location tracking.');
+	for (const [name, task] of startupTasks) {
+		await perfLogger.track(name, async () => {
+			try {
+				await task();
+			} catch (error) {
+				logger.error(`Startup failure during task: ${name}`);
+				throw error;
 			}
-
-			Setting.skipDefaultMigrations();
-			Setting.setValue('firstStart', false);
-		} else {
-			Setting.applyDefaultMigrations();
-		}
-
-		if (Setting.value('env') === Env.Dev) {
-			// Setting.setValue('sync.10.path', 'https://api.joplincloud.com');
-			// Setting.setValue('sync.10.userContentPath', 'https://joplinusercontent.com');
-			Setting.setValue('sync.10.path', 'http://api.joplincloud.local:22300');
-			Setting.setValue('sync.10.userContentPath', 'http://joplinusercontent.local:22300');
-			Setting.setValue('sync.10.website', 'http://joplincloud.local:22300');
-
-			// Setting.setValue('sync.target', 10);
-			// Setting.setValue('sync.10.username', 'user1@example.com');
-			// Setting.setValue('sync.10.password', '111111');
-		}
-
-		if (Setting.value('db.ftsEnabled') === -1) {
-			const ftsEnabled = await db.ftsEnabled();
-			Setting.setValue('db.ftsEnabled', ftsEnabled ? 1 : 0);
-			reg.logger().info('db.ftsEnabled = ', Setting.value('db.ftsEnabled'));
-		}
-
-		if (Setting.value('env') === 'dev') {
-			Setting.setValue('welcome.enabled', false);
-		}
-
-		await PluginAssetsLoader.instance().importAssets();
-
-		// eslint-disable-next-line require-atomic-updates
-		BaseItem.revisionService_ = RevisionService.instance();
-
-		// Note: for now we hard-code the folder sort order as we need to
-		// create a UI to allow customisation (started in branch mobile_add_sidebar_buttons)
-		Setting.setValue('folders.sortOrder.field', 'title');
-		Setting.setValue('folders.sortOrder.reverse', false);
-
-		reg.logger().info(`Sync target: ${Setting.value('sync.target')}`);
-
-		setLocale(Setting.value('locale'));
-
-		if (Platform.OS === 'android') {
-			const ignoreTlsErrors = Setting.value('net.ignoreTlsErrors');
-			if (ignoreTlsErrors) {
-				await setIgnoreTlsErrors(ignoreTlsErrors);
-			}
-		}
-
-		// ----------------------------------------------------------------
-		// E2EE SETUP
-		// ----------------------------------------------------------------
-
-		EncryptionService.fsDriver_ = fsDriver;
-		// eslint-disable-next-line require-atomic-updates
-		BaseItem.encryptionService_ = EncryptionService.instance();
-		BaseItem.shareService_ = ShareService.instance();
-		Resource.shareService_ = ShareService.instance();
-		DecryptionWorker.instance().dispatch = dispatch;
-		DecryptionWorker.instance().setLogger(mainLogger);
-		DecryptionWorker.instance().setKvStore(KvStore.instance());
-		DecryptionWorker.instance().setEncryptionService(EncryptionService.instance());
-		await loadMasterKeysFromSettings(EncryptionService.instance());
-		DecryptionWorker.instance().on('resourceMetadataButNotBlobDecrypted', decryptionWorker_resourceMetadataButNotBlobDecrypted);
-
-		// ----------------------------------------------------------------
-		// / E2EE SETUP
-		// ----------------------------------------------------------------
-
-		await ShareService.instance().initialize(store, EncryptionService.instance());
-
-		reg.logger().info('Loading folders...');
-
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-		await refreshFolders((action: any) => dispatch(action), '');
-
-		const tags = await Tag.allWithNotes();
-
-		dispatch({
-			type: 'TAG_UPDATE_ALL',
-			items: tags,
 		});
-
-		// const masterKeys = await MasterKey.all();
-
-		// dispatch({
-		// 	type: 'MASTERKEY_UPDATE_ALL',
-		// 	items: masterKeys,
-		// });
-
-		const folder = await getInitialActiveFolder();
-
-		dispatch({
-			type: 'FOLDER_SET_COLLAPSED_ALL',
-			ids: Setting.value('collapsedFolderIds'),
-		});
-
-		const notesParent = parseNotesParent(Setting.value('notesParent'), Setting.value('activeFolderId'));
-
-		if (notesParent && notesParent.type === 'SmartFilter') {
-			dispatch(DEFAULT_ROUTE);
-		} else if (!folder) {
-			dispatch(DEFAULT_ROUTE);
-		} else {
-			dispatch({
-				type: 'NAV_GO',
-				routeName: 'Notes',
-				folderId: folder.id,
-			});
-		}
-
-		await clearSharedFilesCache();
-	} catch (error) {
-		alert(`Initialization error: ${error.message}`);
-		reg.logger().error('Initialization error:', error);
 	}
 
-	reg.setupRecurrentSync();
-
-	initializeUserFetcher();
-	PoorManIntervals.setInterval(() => { void userFetcher(); }, 1000 * 60 * 60);
-
-	PoorManIntervals.setTimeout(() => {
-		void AlarmService.garbageCollect();
-	}, 1000 * 60 * 60);
-
-	ResourceService.runInBackground();
-
-	ResourceFetcher.instance().setFileApi(() => { return reg.syncTarget().fileApi(); });
-	ResourceFetcher.instance().setLogger(reg.logger());
-	ResourceFetcher.instance().dispatch = dispatch;
-	ResourceFetcher.instance().on('downloadComplete', resourceFetcher_downloadComplete);
-	void ResourceFetcher.instance().start();
-
-	SearchEngine.instance().setDb(reg.db());
-	SearchEngine.instance().setLogger(reg.logger());
-	SearchEngine.instance().scheduleSyncTables();
-
-	await MigrationService.instance().run();
-
-	// When the app starts we want the full sync to
-	// start almost immediately to get the latest data.
-	// doWifiConnectionCheck set to true so initial sync
-	// doesn't happen on mobile data
-	// eslint-disable-next-line promise/prefer-await-to-then -- Old code before rule was applied
-	void reg.scheduleSync(100, null, true).then(() => {
-		// Wait for the first sync before updating the notifications, since synchronisation
-		// might change the notifications.
-		void AlarmService.updateAllNotifications();
-
-		void DecryptionWorker.instance().scheduleStart();
-	});
-
-	await WelcomeUtils.install(Setting.value('locale'), dispatch);
-
-	// Collect revisions more frequently on mobile because it doesn't auto-save
-	// and it cannot collect anything when the app is not active.
-	RevisionService.instance().runInBackground(1000 * 30);
-
-	// ----------------------------------------------------------------------------
-	// Plugin service setup
-	// ----------------------------------------------------------------------------
-
-	// On startup, we can clear plugin update state -- plugins that were updated when the
-	// user last ran the app have been updated and will be reloaded.
-	const pluginService = PluginService.instance();
-	const pluginSettings = pluginService.unserializePluginSettings(Setting.value('plugins.states'));
-
-	const updatedSettings = pluginService.clearUpdateState(pluginSettings);
-	Setting.setValue('plugins.states', updatedSettings);
-
-	// ----------------------------------------------------------------------------
-	// Keep this below to test react-native-rsa-native
-	// ----------------------------------------------------------------------------
-
-	// const testData = await createTestData();
-	// await checkTestData(testData);
-
-	// const testData = {
-	// 	"publicKey": "-----BEGIN RSA PUBLIC KEY-----\nMIIBCgKCAQEAoMx9NBioka8DUjO3bKrWMn8uJ23LH1xySogQFR6yh6qbl6i5LKTw\nPgqvv55FUuQtYTMtUTVLggYQhdCBvwbBrD1OqO4xU6Ew7x5/TQKPV3MSgYaps3FF\nOdipC4FyA00jBe6Z1CIpL+ZaSnvjDbMUf5lW8bmfRuXfdBGAcdSBjqm9ttajOws+\n7BBSQ9nI5dnBnWRIVEUb7e9bulgANzM1LMUOE+gaef7T3uKzc+Cx3BhHgw1JdFbL\nZAndYtP52KI5N3oiFM4II26DxmDrO1tQokNM88l5xT0BXPhYiEl1CeBpo5VHZBY2\nRHr4MM/OyAXSUdulsDzbntpE+Y85zv7gpQIDAQAB\n-----END RSA PUBLIC KEY-----",
-	// 	"privateKey": "-----BEGIN RSA PRIVATE KEY-----\nMIIEpAIBAAKCAQEAoMx9NBioka8DUjO3bKrWMn8uJ23LH1xySogQFR6yh6qbl6i5\nLKTwPgqvv55FUuQtYTMtUTVLggYQhdCBvwbBrD1OqO4xU6Ew7x5/TQKPV3MSgYap\ns3FFOdipC4FyA00jBe6Z1CIpL+ZaSnvjDbMUf5lW8bmfRuXfdBGAcdSBjqm9ttaj\nOws+7BBSQ9nI5dnBnWRIVEUb7e9bulgANzM1LMUOE+gaef7T3uKzc+Cx3BhHgw1J\ndFbLZAndYtP52KI5N3oiFM4II26DxmDrO1tQokNM88l5xT0BXPhYiEl1CeBpo5VH\nZBY2RHr4MM/OyAXSUdulsDzbntpE+Y85zv7gpQIDAQABAoIBAEA0Zmm+ztAcyX6x\nF7RUImLXVV55AHntN9V6rrFAKJjzDl1oCUhCM4sSSUqBr7yBT31YKegbF6M7OK21\nq5jS4dIcSKQ7N4bk/dz8mGfvdby9Pc5qLqhvuex3DkiBzzxyOGHN+64wVbHCkJrd\nDLQTpUOtvoGWVHrCno6Bzn+lEnYbvdr0hqI5H4D0ubk6TYed1/4ZlJf0R/o/4jnl\nou0UG2hpJN4ur506cttkZJSTxLjzdO38JuQIAkCEglrMYVY61lBNPxC11Kr3ZN7o\ncm7gWZVyP26KoU27t/g+2FoiBGsWLqGYiuTaqT6dKZ2vHyJGjJIZZStv5ye2Ez8V\nKQwpjQECgYEA3xtwYu4n/G5UjEMumkXHNd/bDamelo1aQvvjkVvxKeASNBqV8cM0\n6Jb2FCuT9Y3mWbFTM0jpqXehpHUOCCnrPKGKnJ0ZS4/SRIrtw0iM6q17fTAqmuOt\nhX0pJ77Il8lVCtx4ItsW+LUGbm6CwotlYLVUuyluhKe0pGw2yafi2N0CgYEAuIFk\ng4p7x0i1LFAlIP0YQ07bJQ0E6FEWbCfMgrV3VjtbnT99EaqPOHhMasITCuoEFlh8\ncgyZ6oH7GEy4IRWrM+Mlm47S+NTrr6KgnTGf570ZAFuqnJac97oFB7BvlQsQot6F\n0L2JKM7dQKIMlvwA9DoXZdKX/9ykiqqIpawNxmkCgYEAuyJOwAw2ads4+3UWT7wb\nfarIF8ugA3OItAqHNFNEEvWpDx8FigVMCZMl0IFE14AwKCc+PBP6OXTolgLAxEQ0\n1WRB2V9D6kc1/Nvy1guydt0QaU7PTZ+O2hrDPF0f74Cl3jhSZBoUSIO+Yz46W2eE\nnvs5mMsFsirgr9E8myRAd9kCgYAGMCDE4KIiHugkolN8dcCYkU58QaGGgSG1YuhT\nAe8Mr1T1QynYq9W92RsHAZdN6GdWsIUL9iw7VzyqpfgO9AEX7mhWfUXKHqoA6/1j\nCEUKqqbqAikIs2x0SoLcrSgw4XwfWkM2qwSsn7N/9W9iqPUHO+OJALUkWawTEoEe\nvVSA8QKBgQCEYCPnxgeQSZkrv7x5soXzgF1YN5EZRa1mTUqPBubs564ZjIIY66mI\nCTaHl7U1cPAhx7mHkSzP/i5NjjLqPZZNOyawWDEEmOzxX69OIzKImb6mEQNyS3do\nI8jnpN5q9pw5TvuEIYSrGqQVnHeaEjSvcT48W9GuzjNVscGfw76fPg==\n-----END RSA PRIVATE KEY-----",
-	// 	"plaintext": "just testing",
-	// 	"ciphertext": "BfkKLdrmd2UX4sPf0bzhfqrg3rKwH5DS7dPAqdmoQuHlrvEBrYKqheekwpnWQgGggGcm/orlrsQRwlexLv7jfRbb0bMnElkySMu4w6wTxILB66RX9H3vXCz02SwHKFRcuGJxlzTPUC23ki6f/McYJ2n/2L8qYxBO8fncTKutIWV54jY19RS1wQ4IdVDBqzji8D0QsRxUhVlpRk4qxsVnyuoyg9AyDe91LOYKfRc6NdapFij996nKzjxFcKOdBqpis34fN3Cg7avcs2Dm5vi7zlRhyGqJJhORXTU3x6hVwOBkVAisgaB7xS3lHiYp6Fs5tP3hBd0kFwVVx8gALbHsgg=="
-	// };
-	// await checkTestData(testData);
-
-	// await printTestData();
-
-	// ----------------------------------------------------------------------------
-	// On desktop and CLI we run various tests to check that node-rsa is working
-	// as expected. On mobile however we cannot run test units directly on
-	// device, and that's what would be needed to automatically verify
-	// react-native-rsa-native. So instead we run the tests every time the
-	// mobile app is started in dev mode. If there's any regression the below
-	// call will throw an error, alerting us of the issue. Otherwise it will
-	// just print some messages in the console.
-	// ----------------------------------------------------------------------------
-	if (Setting.value('env') === 'dev') {
-		if (Platform.OS !== 'web') {
-			await runRsaIntegrationTests();
-		} else {
-			logger.info('Skipping RSA tests -- not supported on mobile.');
-		}
-		await runOnDeviceFsDriverTests();
-	}
-
-	reg.logger().info('Application initialized');
+	logger.info('Application initialized');
 }
 
-class AppComponent extends React.Component {
+interface AppComponentProps {
+	dispatch: Dispatch;
+	themeId: number;
+	biometricsDone: boolean;
+	routeName: string;
+	selectedFolderId: string;
+	appState: string;
+	noteSideMenuOptions: SideMenuContentOptions;
+	disableSideMenuGestures: boolean;
+	historyCanGoBack: boolean;
+	showSideMenu: boolean;
+	noteSelectionEnabled: boolean;
+}
+
+interface AppComponentState {
+	sideMenuWidth: number;
+	sensorInfo: SensorInfo;
+	sideMenuContentOpacity: Animated.Value;
+}
+
+class AppComponent extends React.Component<AppComponentProps, AppComponentState> {
 
 	private urlOpenListener_: EmitterSubscription|null = null;
 	private appStateChangeListener_: NativeEventSubscription|null = null;
 	private themeChangeListener_: NativeEventSubscription|null = null;
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	private dropdownAlert_ = (_data: any) => new Promise<any>(res => res);
+	private keyboardShowListener_: EmitterSubscription|null = null;
+	private keyboardHideListener_: EmitterSubscription|null = null;
+	private dropdownAlert_: (data?: DropdownAlertData)=> Promise<DropdownAlertData> = (_data?: DropdownAlertData) => new Promise<DropdownAlertData>(res => res);
 	private callbackUrl: string|null = null;
 
-	public constructor() {
-		super();
+	private lastSyncStarted_ = false;
+	private quickActionShortcutListener_: EmitterSubscription|undefined;
+	private unsubscribeScreenWidthChangeHandler_: EmitterSubscription|undefined;
+	private unsubscribeNetInfoHandler_: NetInfoSubscription|undefined;
+	private unsubscribeNewShareListener_: UnsubscribeShareListener|undefined;
+	private onAppStateChange_: ()=> void;
+	private backButtonHandler_: BackButtonHandler;
+	private handleNewShare_: ()=> void;
+	private handleOpenURL_: (event: unknown)=> void;
+
+	public constructor(props: AppComponentProps) {
+		super(props);
 
 		this.state = {
 			sideMenuContentOpacity: new Animated.Value(0),
@@ -965,7 +427,7 @@ class AppComponent extends React.Component {
 			}
 
 			try {
-				await initialize(this.props.dispatch);
+				await perfLogger.track('root/initialize', () => initialize(this.props.dispatch));
 			} catch (error) {
 				alert(`Something went wrong while starting the application: ${error}`);
 				this.props.dispatch({
@@ -973,6 +435,21 @@ class AppComponent extends React.Component {
 					state: 'error',
 				});
 				throw error;
+			}
+
+			// https://reactnative.dev/docs/linking#handling-deep-links
+			//
+			// The handler added with Linking.addEventListener() is only triggered when app is already open.
+			//
+			// When the app is not already open and the deep link triggered app launch,
+			// the URL can be obtained with Linking.getInitialURL().
+			//
+			// We only save the URL here since we want to show the content only
+			// after biometrics check is passed or known disabled.
+			const url = await Linking.getInitialURL();
+			if (url && isCallbackUrl(url)) {
+				logger.info('received initial callback url: ', url);
+				this.callbackUrl = url;
 			}
 
 			const loadedSensorInfo = await sensorInfo();
@@ -995,6 +472,10 @@ class AppComponent extends React.Component {
 				type: 'APP_STATE_SET',
 				state: 'ready',
 			});
+
+			setTimeout(() => {
+				perfLogger.mark('Application is ready');
+			}, 50);
 
 			// setTimeout(() => {
 			// 	this.props.dispatch({
@@ -1026,9 +507,26 @@ class AppComponent extends React.Component {
 		);
 		onSystemColorSchemeChange(Appearance.getColorScheme());
 
-		this.quickActionShortcutListener_ = await setupQuickActions(this.props.dispatch);
+		this.quickActionShortcutListener_ = await perfLogger.track('root/setupQuickActions',
+			() => setupQuickActions(this.props.dispatch),
+		);
 
-		await setupNotifications(this.props.dispatch);
+		await perfLogger.track('root/setupNotifications',
+			() => setupNotifications(this.props.dispatch),
+		);
+
+		this.keyboardShowListener_ = Keyboard.addListener('keyboardDidShow', () => {
+			this.props.dispatch({
+				type: 'KEYBOARD_VISIBLE_CHANGE',
+				visible: true,
+			});
+		});
+		this.keyboardHideListener_ = Keyboard.addListener('keyboardDidHide', () => {
+			this.props.dispatch({
+				type: 'KEYBOARD_VISIBLE_CHANGE',
+				visible: false,
+			});
+		});
 
 		// Setting.setValue('encryption.masterPassword', 'WRONG');
 		// setTimeout(() => NavService.go('EncryptionConfig'), 2000);
@@ -1065,6 +563,15 @@ class AppComponent extends React.Component {
 		if (this.quickActionShortcutListener_) {
 			this.quickActionShortcutListener_.remove();
 			this.quickActionShortcutListener_ = undefined;
+		}
+
+		if (this.keyboardShowListener_) {
+			this.keyboardShowListener_.remove();
+			this.keyboardShowListener_ = undefined;
+		}
+		if (this.keyboardHideListener_) {
+			this.keyboardHideListener_.remove();
+			this.keyboardHideListener_ = undefined;
 		}
 	}
 
@@ -1104,14 +611,18 @@ class AppComponent extends React.Component {
 		if (sharedData) {
 			reg.logger().info('Received shared data');
 
-			// selectedFolderId can be null if no screens other than "All notes"
-			// have been opened.
-			const targetFolder = this.props.selectedFolderId ?? (await Folder.defaultFolder())?.id;
-			if (targetFolder) {
+			const activeFolder = await Folder.getValidActiveFolder();
+			if (activeFolder) {
 				logger.info('Sharing: handleShareData: Processing...');
-				await handleShared(sharedData, targetFolder, this.props.dispatch);
+				await handleShared(sharedData, activeFolder.id, this.props.dispatch);
 			} else {
-				reg.logger().info('Cannot handle share - default folder id is not set');
+				reg.logger().warn('Cannot handle share - no valid active folder found');
+				void this.dropdownAlert_({
+					type: 'error',
+					title: _('Cannot share'),
+					message: _('No valid notebook is available. Please create or select a notebook and try again.'),
+				});
+				ShareExtension.close();
 			}
 		} else {
 			logger.info('Sharing: received empty share data.');
@@ -1159,7 +670,6 @@ class AppComponent extends React.Component {
 				folderId: params.id,
 			});
 			break;
-
 		}
 	}
 
@@ -1176,16 +686,16 @@ class AppComponent extends React.Component {
 		}
 	}
 
-	private sideMenu_change(isOpen: boolean) {
+	private sideMenu_change = (isOpen: boolean) => {
 		// Make sure showSideMenu property of state is updated
 		// when the menu is open/closed.
-		this.props.dispatch({
-			type: isOpen ? 'SIDE_MENU_OPEN' : 'SIDE_MENU_CLOSE',
-		});
-		AccessibilityInfo.announceForAccessibility(
-			isOpen ? _('Side menu opened') : _('Side menu closed'),
-		);
-	}
+		// Avoid dispatching unnecessarily. See https://github.com/laurent22/joplin/issues/12427
+		if (isOpen !== this.props.showSideMenu) {
+			this.props.dispatch({
+				type: isOpen ? 'SIDE_MENU_OPEN' : 'SIDE_MENU_CLOSE',
+			});
+		}
+	};
 
 	private getSideMenuWidth = () => {
 		const sideMenuWidth = getResponsiveValue({
@@ -1217,16 +727,18 @@ class AppComponent extends React.Component {
 		const theme: Theme = themeStyle(this.props.themeId);
 
 		let sideMenuContent: ReactNode = null;
-		let menuPosition: SideMenuPosition = 'left';
-		let disableSideMenuGestures = this.props.disableSideMenuGestures;
+		let menuPosition = SideMenuPosition.Left;
+		let disableSideMenuGestures = true;
 
 		if (this.props.routeName === 'Note') {
-			sideMenuContent = <SafeAreaView style={{ flex: 1, backgroundColor: theme.backgroundColor }}><SideMenuContentNote options={this.props.noteSideMenuOptions}/></SafeAreaView>;
-			menuPosition = 'right';
-		} else if (this.props.routeName === 'Config') {
-			disableSideMenuGestures = true;
+			sideMenuContent = <SideMenuContentNote options={this.props.noteSideMenuOptions}/>;
+			menuPosition = SideMenuPosition.Right;
+			disableSideMenuGestures = this.props.disableSideMenuGestures;
+		} else if (this.props.routeName === 'Notes') {
+			sideMenuContent = <SideMenuContent/>;
+			disableSideMenuGestures = false;
 		} else {
-			sideMenuContent = <SafeAreaView style={{ flex: 1, backgroundColor: theme.backgroundColor }}><SideMenuContent/></SafeAreaView>;
+			sideMenuContent = <SideMenuContent/>;
 		}
 
 		const appNavInit = {
@@ -1237,15 +749,19 @@ class AppComponent extends React.Component {
 			OneDriveLogin: { screen: OneDriveLoginScreen },
 			DropboxLogin: { screen: DropboxLoginScreen },
 			JoplinCloudLogin: { screen: JoplinCloudLoginScreen },
+			JoplinServerSamlLogin: { screen: SsoLoginScreen(new SamlShared()) },
 			EncryptionConfig: { screen: EncryptionConfigScreen },
 			UpgradeSyncTarget: { screen: UpgradeSyncTargetScreen },
 			ShareManager: { screen: ShareManager },
 			ProfileSwitcher: { screen: ProfileSwitcher },
 			ProfileEditor: { screen: ProfileEditor },
+			NoteRevisionViewer: { screen: NoteRevisionViewer },
 			Log: { screen: LogScreen },
 			Status: { screen: StatusScreen },
 			Search: { screen: SearchScreen },
+			NoteResources: { screen: ResourceScreen },
 			Config: { screen: ConfigScreen },
+			DocumentScanner: { screen: DocumentScanner },
 		};
 
 
@@ -1275,33 +791,22 @@ class AppComponent extends React.Component {
 					toleranceY={20}
 					openMenuOffset={this.state.sideMenuWidth}
 					menuPosition={menuPosition}
-					onChange={(isOpen: boolean) => this.sideMenu_change(isOpen)}
+					onChange={this.sideMenu_change}
+					isOpen={this.props.showSideMenu}
 					disableGestures={disableSideMenuGestures}
-					onSliding={(percent: number) => {
-						this.props.dispatch({
-							type: 'SIDE_MENU_OPEN_PERCENT',
-							value: percent,
-						});
-					}}
 				>
-					<StatusBar barStyle={statusBarStyle} />
-					<MenuProvider style={{ flex: 1 }}>
-						<SafeAreaView style={{ flex: 0, backgroundColor: theme.backgroundColor2 }}/>
-						<SafeAreaView style={{ flex: 1 }}>
+					<View style={{ flexGrow: 1, flexShrink: 1, flexBasis: '100%' }}>
+						<SafeAreaView style={{ flex: 1 }} titleBarUnderlayColor={theme.backgroundColor2}>
 							<View style={{ flex: 1, backgroundColor: theme.backgroundColor }}>
 								{ shouldShowMainContent && <AppNav screens={appNavInit} dispatch={this.props.dispatch} /> }
 							</View>
-							{/* eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied */}
-							<DropdownAlert alert={(func: any) => (this.dropdownAlert_ = func)} />
-							{ !shouldShowMainContent && <BiometricPopup
-								dispatch={this.props.dispatch}
-								themeId={this.props.themeId}
-								sensorInfo={this.state.sensorInfo}
-							/> }
+							<SyncWizard/>
 						</SafeAreaView>
-					</MenuProvider>
+						<DropdownAlertWrapper alert={(func) => { this.dropdownAlert_ = func; }} />
+					</View>
 				</SideMenu>
 				<PluginRunnerWebView />
+				<PluginNotification/>
 			</View>
 		);
 
@@ -1310,50 +815,67 @@ class AppComponent extends React.Component {
 
 		// Wrap everything in a PaperProvider -- this allows using components from react-native-paper
 		return (
-			<PaperProvider theme={{
-				...paperTheme,
-				version: 3,
-				colors: {
-					...paperTheme.colors,
-					onPrimaryContainer: theme.color5,
-					primaryContainer: theme.backgroundColor5,
+			<FocusControl.Provider>
+				<MenuProvider
+					style={{ flex: 1 }}
+					closeButtonLabel={_('Dismiss')}
+				>
+					<PaperProvider theme={{
+						...paperTheme,
+						version: 3,
+						colors: {
+							...paperTheme.colors,
+							onPrimaryContainer: theme.color5,
+							primaryContainer: theme.backgroundColor5,
 
-					outline: theme.codeBorderColor,
+							outline: theme.codeBorderColor,
 
-					primary: theme.color4,
-					onPrimary: theme.backgroundColor4,
+							primary: theme.color4,
+							onPrimary: theme.backgroundColor4,
 
-					background: theme.backgroundColor,
+							background: theme.backgroundColor,
 
-					surface: theme.backgroundColor,
-					onSurface: theme.color,
+							surface: theme.backgroundColor,
+							onSurface: theme.color,
 
-					secondaryContainer: theme.raisedBackgroundColor,
-					onSecondaryContainer: theme.raisedColor,
+							secondaryContainer: theme.raisedBackgroundColor,
+							onSecondaryContainer: theme.raisedColor,
 
-					surfaceVariant: theme.backgroundColor3,
-					onSurfaceVariant: theme.color3,
+							surfaceVariant: theme.backgroundColor3,
+							onSurfaceVariant: theme.color3,
 
-					elevation: {
-						level0: 'transparent',
-						level1: theme.oddBackgroundColor,
-						level2: theme.raisedBackgroundColor,
-						level3: theme.raisedBackgroundColor,
-						level4: theme.raisedBackgroundColor,
-						level5: theme.raisedBackgroundColor,
-					},
-				},
-			}}>
-				<DialogManager>
-					{mainContent}
-				</DialogManager>
-			</PaperProvider>
+							elevation: {
+								level0: 'transparent',
+								level1: theme.oddBackgroundColor,
+								level2: theme.raisedBackgroundColor,
+								level3: theme.raisedBackgroundColor,
+								level4: theme.raisedBackgroundColor,
+								level5: theme.raisedBackgroundColor,
+							},
+						},
+					}}>
+						<DialogManager themeId={this.props.themeId}>
+							<StatusBar barStyle={statusBarStyle} />
+							<SafeAreaProvider>
+								<FocusControl.MainAppContent style={{ flex: 1 }}>
+									{shouldShowMainContent ? mainContent : (
+										<BiometricPopup
+											dispatch={this.props.dispatch}
+											themeId={this.props.themeId}
+											sensorInfo={this.state.sensorInfo}
+										/>
+									)}
+								</FocusControl.MainAppContent>
+							</SafeAreaProvider>
+						</DialogManager>
+					</PaperProvider>
+				</MenuProvider>
+			</FocusControl.Provider>
 		);
 	}
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-const mapStateToProps = (state: any) => {
+const mapStateToProps = (state: AppState) => {
 	return {
 		historyCanGoBack: state.historyCanGoBack,
 		showSideMenu: state.showSideMenu,

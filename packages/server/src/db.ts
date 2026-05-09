@@ -56,9 +56,16 @@ export interface QueryContext {
 	noSuchTableErrorLoggingDisabled?: boolean;
 }
 
+// See https://knexjs.org/guide/#pool
+interface KnexPoolConfig {
+	min: number;
+	max: number;
+}
+
 export interface KnexDatabaseConfig {
 	client: string;
 	connection: DbConfigConnection;
+	pool: KnexPoolConfig;
 	useNullAsDefault?: boolean;
 	asyncStackTraces?: boolean;
 }
@@ -79,6 +86,7 @@ export interface Migration {
 
 export function makeKnexConfig(dbConfig: DatabaseConfig): KnexDatabaseConfig {
 	const connection: DbConfigConnection = {};
+	let pool: KnexPoolConfig|undefined = undefined;
 
 	if (dbConfig.client === 'sqlite3') {
 		connection.filename = dbConfig.name;
@@ -92,12 +100,19 @@ export function makeKnexConfig(dbConfig: DatabaseConfig): KnexDatabaseConfig {
 			connection.user = dbConfig.user;
 			connection.password = dbConfig.password;
 		}
+
+		// Only change the pooling setting for non-sqlite3 connections:
+		// Knex has a different default configuration for SQLite3 that seems to be
+		// a workaround for a connection-related issue.
+		// See https://knexjs.org/guide/#pool
+		pool = { min: 0, max: dbConfig.maxConnections };
 	}
 
 	return {
 		client: dbConfig.client,
 		useNullAsDefault: dbConfig.client === 'sqlite3',
 		asyncStackTraces: dbConfig.asyncStackTraces,
+		pool,
 		connection,
 	};
 }
@@ -141,6 +156,12 @@ export const isPostgres = (db: DbConnection) => {
 
 export const isSqlite = (db: DbConnection) => {
 	return clientType(db) === DatabaseConfigClient.SQLite;
+};
+
+export const getEmptyIp = (db: DbConnection): string | null => {
+	// PostgreSQL uses inet type which doesn't accept empty strings, only null or valid IPs
+	// SQLite uses string type with NOT NULL constraint, so we use empty strings
+	return isPostgres(db) ? null : '';
 };
 
 export const setCollateC = async (db: DbConnection, tableName: string, columnName: string): Promise<void> => {
@@ -287,7 +308,26 @@ export const sqliteSyncSlave = async (master: DbConnection, slave: DbConnection)
 	await reconnectDb(slave);
 };
 
+// This can be used to fix migration names, once the migration has already been deployed.
+// Incorrectly named migrations may end up being applied in the wrong order.
+const fixMigrationNames = async (db: DbConnection) => {
+	try {
+		// By default, Knex logs 'no such table' errors, even if caught by the try/catch block.
+		// See https://github.com/laurent22/joplin/pull/14401 for details.
+		const context: QueryContext = { noSuchTableErrorLoggingDisabled: true };
+		await db('knex_migrations')
+			.queryContext(context)
+			.update({ name: '20250404091200_user_auth_code.js' })
+			.where('name', '=', '202504040912000_user_auth_code.js');
+	} catch (error) {
+		if (isNoSuchTableError(error)) return;
+		throw error;
+	}
+};
+
 export async function migrateLatest(db: DbConnection, disableTransactions = false) {
+	await fixMigrationNames(db);
+
 	await db.migrate.latest({
 		directory: migrationDir,
 		disableTransactions,
@@ -295,6 +335,8 @@ export async function migrateLatest(db: DbConnection, disableTransactions = fals
 }
 
 export async function migrateUp(db: DbConnection, disableTransactions = false) {
+	await fixMigrationNames(db);
+
 	await db.migrate.up({
 		directory: migrationDir,
 		disableTransactions,
@@ -302,6 +344,8 @@ export async function migrateUp(db: DbConnection, disableTransactions = false) {
 }
 
 export async function migrateDown(db: DbConnection, disableTransactions = false) {
+	await fixMigrationNames(db);
+
 	await db.migrate.down({
 		directory: migrationDir,
 		disableTransactions,
@@ -309,10 +353,14 @@ export async function migrateDown(db: DbConnection, disableTransactions = false)
 }
 
 export async function migrateUnlock(db: DbConnection) {
+	await fixMigrationNames(db);
+
 	await db.migrate.forceFreeMigrationsLock();
 }
 
 export async function migrateList(db: DbConnection, asString = true) {
+	await fixMigrationNames(db);
+
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	const migrations: any = await db.migrate.list({
 		directory: migrationDir,
@@ -453,7 +501,7 @@ export function isUniqueConstraintError(error: any): boolean {
 
 const parsePostgresVersionString = (versionString: string) => {
 	// PostgreSQL 16.1 (Debian 16.1-1.pgdg120+1) on x86_64-pc-linux-gnu, compiled by gcc (Debian 12.2.0-14) 12.2.0, 64-bit
-	const matches = versionString.match('PostgreSQL (.*?) ');
+	const matches = versionString.match(/PostgreSQL ([0-9.]+)/);
 	if (!matches || matches.length !== 2) throw new Error(`Cannot parse Postgres version string: ${versionString}`);
 	return matches[1];
 };

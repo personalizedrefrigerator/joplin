@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Platform, Linking, View, Switch, ScrollView, Text, TouchableOpacity, Alert, PermissionsAndroid, Dimensions, AccessibilityInfo } from 'react-native';
+import { Platform, Linking, View, ScrollView, Text, TouchableOpacity, Alert, PermissionsAndroid, Dimensions, AccessibilityInfo } from 'react-native';
 import Setting, { AppType, SettingMetadataSection } from '@joplin/lib/models/Setting';
 import NavService from '@joplin/lib/services/NavService';
 import SearchEngine from '@joplin/lib/services/search/SearchEngine';
@@ -7,13 +7,14 @@ import checkPermissions from '../../../utils/checkPermissions';
 import setIgnoreTlsErrors from '../../../utils/TlsUtils';
 import { reg } from '@joplin/lib/registry';
 import { State } from '@joplin/lib/reducer';
-const { BackButtonService } = require('../../../services/back-button.js');
+import BackButtonService from '../../../services/BackButtonService';
 import { connect } from 'react-redux';
+import { Dispatch } from 'redux';
 import ScreenHeader from '../../ScreenHeader';
 import { _ } from '@joplin/lib/locale';
 import BaseScreenComponent from '../../base-screen';
-import { themeStyle } from '../../global-style';
 import * as shared from '@joplin/lib/components/shared/config/config-shared';
+import { shouldShowBySearch, hasNormalizedQuery } from '@joplin/lib/components/shared/config/config-search-text';
 import SyncTargetRegistry from '@joplin/lib/SyncTargetRegistry';
 import biometricAuthenticate from '../../biometrics/biometricAuthenticate';
 import configScreenStyles, { ConfigScreenStyles } from './configScreenStyles';
@@ -30,12 +31,17 @@ import { TextInput, List } from 'react-native-paper';
 import PluginService, { PluginSettings } from '@joplin/lib/services/plugins/PluginService';
 import PluginStates, { getSearchText as getPluginStatesSearchText } from './plugins/PluginStates';
 import PluginUploadButton, { canInstallPluginsFromFile, buttonLabel as pluginUploadButtonSearchText } from './plugins/PluginUploadButton';
-import NoteImportButton, { importButtonDefaultTitle, importButtonDescription } from './NoteExportSection/NoteImportButton';
+import NoteImportButton, { importedFolderTitle } from './NoteExportSection/NoteImportButton';
 import SectionDescription from './SectionDescription';
 import EnablePluginSupportPage from './plugins/EnablePluginSupportPage';
 import getVersionInfoText from '../../../utils/getVersionInfoText';
 import JoplinCloudConfig, { emailToNoteDescription, emailToNoteLabel } from './JoplinCloudConfig';
 import shim from '@joplin/lib/shim';
+import SettingsToggle from './SettingsToggle';
+import { UpdateSettingValueCallback } from './types';
+import Folder from '@joplin/lib/models/Folder';
+import { FolderEntity } from '@joplin/lib/services/database/types';
+import { substrWithEllipsis } from '@joplin/lib/string-utils';
 
 interface ConfigScreenState {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
@@ -43,6 +49,7 @@ interface ConfigScreenState {
 	changedSettingKeys: string[];
 
 	searchQuery: string;
+	searchSectionFilter: string|null;
 	searching: boolean;
 
 	fixingSearchIndex: boolean;
@@ -51,6 +58,7 @@ interface ConfigScreenState {
 
 	selectedSectionName: string|null;
 	sidebarWidth: number;
+	activeFolder: FolderEntity;
 }
 
 interface ConfigScreenProps {
@@ -59,6 +67,7 @@ interface ConfigScreenProps {
 	themeId: number;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	navigation: any;
+	dispatch: Dispatch;
 }
 
 class ConfigScreenComponent extends BaseScreenComponent<ConfigScreenProps, ConfigScreenState> {
@@ -81,6 +90,7 @@ class ConfigScreenComponent extends BaseScreenComponent<ConfigScreenProps, Confi
 			sidebarWidth: 100,
 			searchQuery: '',
 			searching: false,
+			activeFolder: null,
 		};
 
 		this.scrollViewRef_ = React.createRef<ScrollView>();
@@ -90,6 +100,18 @@ class ConfigScreenComponent extends BaseScreenComponent<ConfigScreenProps, Confi
 
 	private goToJoplinCloudLogin_ = async () => {
 		await NavService.go('JoplinCloudLogin');
+	};
+
+	private goToJoplinServerSamlLogin_ = async () => {
+		// Save the settings to allow for sync when the user completes authentication
+		await this.saveButton_press();
+
+		await NavService.go('JoplinServerSamlLogin');
+	};
+
+	private logoutJoplinServerSaml_ = () => {
+		Setting.setValue('sync.11.id', '');
+		Setting.setValue('sync.11.userId', '');
 	};
 
 	private checkSyncConfig_ = async () => {
@@ -111,6 +133,13 @@ class ConfigScreenComponent extends BaseScreenComponent<ConfigScreenProps, Confi
 
 	private e2eeConfig_ = () => {
 		void NavService.go('EncryptionConfig');
+	};
+
+	private onShowSyncWizard_ = () => {
+		this.props.dispatch({
+			type: 'SYNC_WIZARD_VISIBLE_CHANGE',
+			visible: true,
+		});
 	};
 
 	private saveButton_press = async () => {
@@ -145,6 +174,10 @@ class ConfigScreenComponent extends BaseScreenComponent<ConfigScreenProps, Confi
 		void NavService.go('ProfileSwitcher');
 	};
 
+	private noteResourcesButtonPress_ = () => {
+		void NavService.go('NoteResources');
+	};
+
 	private fixSearchEngineIndexButtonPress_ = async () => {
 		this.setState({ fixingSearchIndex: true });
 		await SearchEngine.instance().rebuildIndex();
@@ -153,6 +186,10 @@ class ConfigScreenComponent extends BaseScreenComponent<ConfigScreenProps, Confi
 
 	private logButtonPress_ = () => {
 		void NavService.go('Log');
+	};
+
+	private deletionLogButtonPress_ = () => {
+		void NavService.go('Log', { defaultFilter: 'DeleteAction' });
 	};
 
 	private manageSharesPress_ = () => {
@@ -214,11 +251,11 @@ class ConfigScreenComponent extends BaseScreenComponent<ConfigScreenProps, Confi
 			// Not implemented yet
 			return true;
 		}
-		return await checkPermissions(PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE, {
+		return await checkPermissions(PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE, { rationale: {
 			title: _('Information'),
 			message: _('In order to use file system synchronisation your permission to write to external storage is required.'),
 			buttonPositive: _('OK'),
-		});
+		} });
 	}
 
 	public UNSAFE_componentWillMount() {
@@ -305,7 +342,7 @@ class ConfigScreenComponent extends BaseScreenComponent<ConfigScreenProps, Confi
 		return false;
 	};
 
-	public componentDidMount() {
+	public async componentDidMount() {
 		if (this.props.navigation.state.sectionName) {
 			this.setState({ selectedSectionName: this.props.navigation.state.sectionName });
 			setTimeout(() => {
@@ -321,6 +358,9 @@ class ConfigScreenComponent extends BaseScreenComponent<ConfigScreenProps, Confi
 		NavService.addHandler(this.handleNavigateToNewScreen);
 		Dimensions.addEventListener('change', this.updateSidebarWidth);
 		this.updateSidebarWidth();
+
+		const activeFolder = await Folder.getValidActiveFolder();
+		this.setState({ activeFolder });
 	}
 
 	public componentWillUnmount() {
@@ -360,22 +400,7 @@ class ConfigScreenComponent extends BaseScreenComponent<ConfigScreenProps, Confi
 		}
 
 		const matchesSearchQuery = (relatedText: string|string[]) => {
-			let searchThrough;
-			if (Array.isArray(relatedText)) {
-				searchThrough = relatedText.join('\n');
-			} else {
-				searchThrough = relatedText;
-			}
-			searchThrough = searchThrough.toLocaleLowerCase();
-
-			const searchQuery = this.state.searchQuery.toLocaleLowerCase().trim();
-
-			const hasSearchMatches =
-				headerTitle.toLocaleLowerCase() === searchQuery
-				|| searchThrough.includes(searchQuery);
-
-			// Don't show results when the search input is empty
-			return this.state.searchQuery.length > 0 && hasSearchMatches;
+			return shouldShowBySearch(this.state.searchQuery, headerTitle, relatedText);
 		};
 
 		const addSettingComponent = (
@@ -383,7 +408,7 @@ class ConfigScreenComponent extends BaseScreenComponent<ConfigScreenProps, Confi
 			relatedText: string|string[],
 			settingMetadata?: { advanced?: boolean },
 		) => {
-			const hiddenBySearch = this.state.searching && !matchesSearchQuery(relatedText);
+			const hiddenBySearch = this.state.searching && hasNormalizedQuery(this.state.searchQuery) && !matchesSearchQuery(relatedText);
 			if (component && !hiddenBySearch) {
 				if (settingMetadata?.advanced) {
 					advancedSettingComps.push(component);
@@ -455,6 +480,12 @@ class ConfigScreenComponent extends BaseScreenComponent<ConfigScreenProps, Confi
 
 					if (settings['sync.target'] === SyncTargetRegistry.nameToId('joplinCloud')) {
 						addSettingButton('go_to_joplin_cloud_login_button', _('Connect to Joplin Cloud'), this.goToJoplinCloudLogin_);
+					} else if (settings['sync.target'] === SyncTargetRegistry.nameToId('joplinServerSaml')) {
+						addSettingButton('login_joplin_server_saml_button', _('Connect using your organisation account'), this.goToJoplinServerSamlLogin_);
+
+						if (Setting.value('sync.11.id') !== '' || Setting.value('sync.11.userId') !== '') {
+							addSettingButton('logout_joplin_server_saml_button', _('Logout'), this.logoutJoplinServerSaml_);
+						}
 					}
 
 					addSettingButton('check_sync_config_button', _('Check synchronisation configuration'), this.checkSyncConfig_, { statusComp: statusComp });
@@ -522,6 +553,7 @@ class ConfigScreenComponent extends BaseScreenComponent<ConfigScreenProps, Confi
 		}
 
 		if (section.name === 'sync') {
+			addSettingButton('sync_wizard_button', _('Open Sync Wizard...'), this.onShowSyncWizard_);
 			addSettingButton('e2ee_config_button', _('Encryption Config'), this.e2eeConfig_);
 		}
 
@@ -541,8 +573,10 @@ class ConfigScreenComponent extends BaseScreenComponent<ConfigScreenProps, Confi
 
 		if (section.name === 'tools') {
 			addSettingButton('profiles_buttons', _('Manage profiles'), this.manageProfilesButtonPress_);
+			addSettingButton('note_resources_button', _('Note attachments'), this.noteResourcesButtonPress_);
 			addSettingButton('status_button', _('Sync Status'), this.syncStatusButtonPress_);
 			addSettingButton('log_button', _('Log'), this.logButtonPress_);
+			addSettingButton('deletion_log_button', _('Deletion log'), this.deletionLogButtonPress_);
 			addSettingButton('fix_search_engine_index', this.state.fixingSearchIndex ? _('Fixing search index...') : _('Fix search index'), this.fixSearchEngineIndexButtonPress_, { disabled: this.state.fixingSearchIndex, description: _('Use this to rebuild the search index if there is a problem with search. It may take a long time depending on the number of notes.') });
 			const syncTargetInfo = SyncTargetRegistry.infoById(this.state.settings['sync.target']);
 			if (syncTargetInfo.supportsShare) {
@@ -555,9 +589,21 @@ class ConfigScreenComponent extends BaseScreenComponent<ConfigScreenProps, Confi
 				<NoteExportButton key='export_as_jex_button' styles={this.styles()} />,
 				[exportButtonDefaultTitle(), exportButtonDescription()],
 			);
+			const importJexLabel = () => _('Import from JEX');
+			const importJexDescription = () => _('Import notes from a JEX (Joplin Export) file.');
 			addSettingComponent(
-				<NoteImportButton key='import_as_jex_button' styles={this.styles()} />,
-				[importButtonDefaultTitle(), importButtonDescription()],
+				<NoteImportButton key='import_as_jex_button' styles={this.styles()} defaultTitle={importJexLabel()} description={importJexDescription()} format='jex' />,
+				[importJexLabel(), importJexDescription()],
+			);
+			const importTxtLabel = () => _('Import from TXT');
+			const importTxtDescription = () => {
+				let folderTitle = importedFolderTitle();
+				if (this.state.activeFolder) folderTitle = this.state.activeFolder.title;
+				return _('Import a note from a Text file. The note will be imported into notebook \'%s\'.', substrWithEllipsis(folderTitle, 0, 32));
+			};
+			addSettingComponent(
+				<NoteImportButton key='import_as_txt_button' styles={this.styles()} defaultTitle={importTxtLabel()} description={importTxtDescription()} format='txt' activeFolder={this.state.activeFolder} />,
+				[importTxtLabel(), importTxtDescription()],
 			);
 			addSettingComponent(
 				<ExportDebugReportButton key='export_report_button' styles={this.styles()}/>,
@@ -595,9 +641,10 @@ class ConfigScreenComponent extends BaseScreenComponent<ConfigScreenProps, Confi
 				);
 			}
 
-			addSettingLink('donate_link', _('Make a donation'), 'https://joplinapp.org/donate/');
+			if (Platform.OS !== 'ios') addSettingLink('donate_link', _('Make a donation'), 'https://joplinapp.org/donate/');
 			addSettingLink('website_link', _('Joplin website'), 'https://joplinapp.org/');
 			addSettingLink('privacy_link', _('Privacy Policy'), 'https://joplinapp.org/privacy/');
+			addSettingLink('license_link', _('Open-source licences'), 'https://raw.githubusercontent.com/laurent22/joplin/refs/heads/dev/readme/licenses.md');
 
 			const versionInfoText = getVersionInfoText(settings['plugins.states']);
 
@@ -668,22 +715,16 @@ class ConfigScreenComponent extends BaseScreenComponent<ConfigScreenProps, Confi
 		);
 	}
 
-	// eslint-disable-next-line @typescript-eslint/ban-types, @typescript-eslint/no-explicit-any -- Old code before rule was applied, Old code before rule was applied
-	private renderToggle(key: string, label: string, value: any, updateSettingValue: Function, descriptionComp: any = null) {
-		const theme = themeStyle(this.props.themeId);
-
-		return (
-			<View key={key}>
-				<View style={this.styles().getContainerStyle(false)}>
-					<Text key="label" style={this.styles().styleSheet.switchSettingText}>
-						{label}
-					</Text>
-					{/* eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied */}
-					<Switch key="control" style={this.styles().styleSheet.switchSettingControl} trackColor={{ false: theme.dividerColor }} value={value} onValueChange={(value: any) => void updateSettingValue(key, value)} />
-				</View>
-				{descriptionComp}
-			</View>
-		);
+	private renderToggle(key: string, label: string, value: unknown, updateSettingValue: UpdateSettingValueCallback) {
+		return <SettingsToggle
+			key={key}
+			settingId={key}
+			value={value}
+			label={label}
+			updateSettingValue={updateSettingValue}
+			styles={this.styles()}
+			themeId={this.props.themeId}
+		/>;
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
@@ -785,6 +826,9 @@ class ConfigScreenComponent extends BaseScreenComponent<ConfigScreenProps, Confi
 				placeholder={_('Search...')}
 				onChangeText={this.onSearchUpdate_}
 				autoFocus={true}
+				autoCapitalize='none'
+				autoComplete='off'
+				autoCorrect={false}
 			/>;
 
 			currentSection = (

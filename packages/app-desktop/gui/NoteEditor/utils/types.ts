@@ -1,11 +1,20 @@
 import AsyncActionQueue from '@joplin/lib/AsyncActionQueue';
-import { ToolbarButtonInfo } from '@joplin/lib/services/commands/ToolbarButtonUtils';
-import { PluginStates } from '@joplin/lib/services/plugins/reducer';
+import { ToolbarButtonInfo, ToolbarItem } from '@joplin/lib/services/commands/ToolbarButtonUtils';
+import { PluginHtmlContents, PluginStates } from '@joplin/lib/services/plugins/reducer';
 import { MarkupLanguage } from '@joplin/renderer';
 import { RenderResult, RenderResultPluginAsset } from '@joplin/renderer/types';
 import { Dispatch } from 'redux';
 import { ProcessResultsRow } from '@joplin/lib/services/search/SearchEngine';
 import { DropHandler } from './useDropHandler';
+import { SearchMarkers } from './useSearchMarkers';
+import { ParseOptions } from '@joplin/lib/HtmlToMd';
+import { ScrollStrategy } from '@joplin/editor/CodeMirror/CodeMirrorControl';
+import { MarkupToHtmlOptions } from '../../hooks/useMarkupToHtml';
+import { ScrollbarSize } from '@joplin/lib/models/settings/builtInMetadata';
+import { RefObject, SetStateAction } from 'react';
+import * as React from 'react';
+import { ResourceEntity, ResourceLocalStateEntity } from '@joplin/lib/services/database/types';
+import { EditorCursorLocations } from '@joplin/lib/services/NotePositionService';
 
 export interface AllAssetsOptions {
 	contentMaxWidthTarget?: string;
@@ -15,6 +24,13 @@ export interface AllAssetsOptions {
 
 export interface ToolbarButtonInfos {
 	[key: string]: ToolbarButtonInfo;
+}
+
+export enum NoteBodyEditorType {
+	CodeMirror6 = 'CodeMirror6',
+	CodeMirror5 = 'CodeMirror5',
+	TinyMce = 'TinyMCE',
+	PlainText = 'PlainText',
 }
 
 export interface NoteEditorProps {
@@ -29,14 +45,9 @@ export interface NoteEditorProps {
 	isProvisional: boolean;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	editorNoteStatuses: any;
-	syncStarted: boolean;
-	decryptionStarted: boolean;
-	bodyEditor: string;
 	notesParentType: string;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	selectedNoteTags: any[];
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	lastEditorScrollPercents: any;
 	selectedNoteHash: string;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	searches: any[];
@@ -47,15 +58,24 @@ export interface NoteEditorProps {
 	watchedResources: any;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	highlightedWords: any[];
+	tabMovesFocus: boolean;
 	plugins: PluginStates;
-	toolbarButtonInfos: ToolbarButtonInfo[];
+	toolbarButtonInfos: ToolbarItem[];
 	setTagsToolbarButtonInfo: ToolbarButtonInfo;
 	contentMaxWidth: number;
+	scrollbarSize: ScrollbarSize;
+	viewerFontFamily: string;
 	isSafeMode: boolean;
 	useCustomPdfViewer: boolean;
 	shareCacheSetting: string;
 	syncUserId: string;
 	searchResults: ProcessResultsRow[];
+	pluginHtmlContents: PluginHtmlContents;
+	onTitleChange?: (title: string)=> void;
+	bodyEditor: NoteBodyEditorType;
+	startupPluginsLoaded: boolean;
+	enableHtmlToMarkdownBanner: boolean;
+	showNoteLinkIcon: boolean;
 }
 
 export interface NoteBodyEditorRef {
@@ -67,30 +87,21 @@ export interface NoteBodyEditorRef {
 	execCommand(command: CommandValue): Promise<void>;
 }
 
-export interface MarkupToHtmlOptions {
-	replaceResourceInternalToExternalLinks?: boolean;
-	resourceInfos?: ResourceInfos;
-	contentMaxWidth?: number;
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	plugins?: Record<string, any>;
-	bodyOnly?: boolean;
-	mapsToLine?: boolean;
-	useCustomPdfViewer?: boolean;
-	noteId?: string;
-	vendorDir?: string;
-	platformName?: string;
-	allowedFilePrefixes?: string[];
-	whiteBackgroundNoteRendering?: boolean;
-}
-
+export { MarkupToHtmlOptions };
 export type MarkupToHtmlHandler = (markupLanguage: MarkupLanguage, markup: string, options: MarkupToHtmlOptions)=> Promise<RenderResult>;
-export type HtmlToMarkdownHandler = (markupLanguage: number, html: string, originalCss: string)=> Promise<string>;
+export type HtmlToMarkdownHandler = (markupLanguage: number, html: string, originalCss: string, parseOptions?: ParseOptions)=> Promise<string>;
+export type OnCursorMotion = (event: EditorCursorLocations)=> void;
+
+export interface MessageEvent {
+	channel: string;
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Partially refactored old code before rule was applied
+	args?: any[];
+}
+export type OnMessage = (event: MessageEvent)=> void;
 
 export interface NoteBodyEditorProps {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	style: any;
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	ref: any;
 	themeId: number;
 
 	// When this is true it means the note must always be rendered using a white
@@ -100,42 +111,57 @@ export interface NoteBodyEditorProps {
 	// avoid cases where black text is rendered over a dark background.
 	whiteBackgroundNoteRendering: boolean;
 
+	scrollbarSize: ScrollbarSize;
+
 	content: string;
 	contentKey: string;
 	contentMarkupLanguage: number;
 	contentOriginalCss: string;
+	initialCursorLocation: EditorCursorLocations;
 	onChange(event: OnChangeEvent): void;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	onWillChange(event: any): void;
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	onMessage(event: any): void;
+	onMessage: OnMessage;
 	onScroll(event: { percent: number }): void;
+	onCursorMotion: OnCursorMotion;
 	markupToHtml: MarkupToHtmlHandler;
 	htmlToMarkdown: HtmlToMarkdownHandler;
 	allAssets: (markupLanguage: MarkupLanguage, options: AllAssetsOptions)=> Promise<RenderResultPluginAsset[]>;
 	disabled: boolean;
-	// eslint-disable-next-line @typescript-eslint/ban-types -- Old code before rule was applied
-	dispatch: Function;
+	dispatch: Dispatch;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	noteToolbar: any;
 	setLocalSearchResultCount(count: number): void;
+	setLocalSearch(search: string): void;
+	setShowLocalSearch(show: boolean): void;
+	useLocalSearch: boolean;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	searchMarkers: any;
+	searchMarkers: SearchMarkers;
 	visiblePanes: string[];
 	keyboardMode: string;
+	tabMovesFocus: boolean;
+	enableTextPatterns: boolean;
 	resourceInfos: ResourceInfos;
 	resourceDirectory: string;
 	locale: string;
 	// eslint-disable-next-line @typescript-eslint/ban-types -- Old code before rule was applied
 	onDrop: DropHandler;
-	noteToolbarButtonInfos: ToolbarButtonInfo[];
+	noteToolbarButtonInfos: ToolbarItem[];
 	plugins: PluginStates;
+	mathEnabled: boolean;
 	fontSize: number;
+	baseFontFamily: string;
 	contentMaxWidth: number;
 	isSafeMode: boolean;
 	noteId: string;
 	useCustomPdfViewer: boolean;
 	watchedNoteFiles: string[];
+	enableHtmlToMarkdownBanner: boolean;
+	showNoteLinkIcon: boolean;
+}
+
+export interface NoteBodyEditorPropsAndRef extends NoteBodyEditorProps {
+	ref: RefObject<NoteBodyEditorRef>;
 }
 
 export interface FormNote {
@@ -144,6 +170,7 @@ export interface FormNote {
 	body: string;
 	parent_id: string;
 	is_todo: number;
+	is_conflict?: number;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	bodyEditorContent?: any;
 	markup_language: number;
@@ -205,10 +232,8 @@ export function defaultFormNote(): FormNote {
 }
 
 export interface ResourceInfo {
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	localState: any;
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	item: any;
+	localState: ResourceLocalStateEntity;
+	item: ResourceEntity;
 }
 
 export interface ResourceInfos {
@@ -246,4 +271,37 @@ export interface CommandValue {
 	ui?: boolean; // For TinyMCE only
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	value?: any; // For TinyMCE only
+}
+
+type DropCommandBase = {
+	pos: {
+		clientX: number;
+		clientY: number;
+	}|undefined;
+};
+
+export type DropCommandValue = ({
+	type: 'notes';
+	markdownTags: string[];
+}|{
+	type: 'files';
+	paths: string[];
+	createFileURL: boolean;
+}) & DropCommandBase;
+
+export interface ScrollToTextValue {
+	// Text should be plain text - it should not include Markdown characters as it needs to work
+	// with both TinyMCE and CodeMirror. To specific an element use the `element` property. For
+	// example to scroll to `## Scroll to this`, use `{ text: 'Scroll to this', element: 'h2' }`.
+	text: string;
+	element: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'strong' | 'ul';
+	scrollStrategy?: ScrollStrategy;
+}
+
+export interface WindowCommandDependencies {
+	setShowLocalSearch: React.Dispatch<SetStateAction<boolean>>;
+	noteSearchBarRef: RefObject<HTMLInputElement>;
+	editorRef: RefObject<NoteBodyEditorRef>;
+	titleInputRef: RefObject<HTMLInputElement>;
+	containerRef: RefObject<HTMLDivElement|null>;
 }

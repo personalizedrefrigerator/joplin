@@ -189,9 +189,9 @@ async function fetchAllNotes() {
 
 		lines.push('## Searching');
 		lines.push('');
-		lines.push('Call **GET /search?query=YOUR_QUERY** to search for notes. This end-point supports the `field` parameter which is recommended to use so that you only get the data that you need. The query syntax is as described in the main documentation: https://joplinapp.org/help/#searching');
+		lines.push('Call **GET /search?query=YOUR_QUERY** to search for notes. This end-point supports the `field` parameter which is recommended to use so that you only get the data that you need. The query syntax is as described in the main documentation: https://joplinapp.org/help/apps/search');
 		lines.push('');
-		lines.push('To retrieve non-notes items, such as notebooks or tags, add a `type` parameter and set it to the required [item type name](#item-type-id). In that case, full text search will not be used - instead it will be a simple case-insensitive search. You can also use `*` as a wildcard. This is convenient for example to retrieve notebooks or tags by title.');
+		lines.push('To retrieve non-notes items, such as notebooks or tags, add a `type` parameter and set it to the required [item type name](#item-type-ids). In that case, full text search will not be used - instead it will be a simple case-insensitive search. You can also use `*` as a wildcard. This is convenient for example to retrieve notebooks or tags by title.');
 		lines.push('');
 		lines.push('For example, to retrieve the notebook named `recipes`: **GET /search?query=recipes&type=folder**');
 		lines.push('');
@@ -402,7 +402,17 @@ async function fetchAllNotes() {
 				lines.push('');
 			}
 
-			if (model.type === BaseModel.TYPE_NOTE || model.type === BaseModel.TYPE_FOLDER) {
+			if (model.type === BaseModel.TYPE_NOTE) {
+				lines.push(`By default, the ${singular} will be moved **to the trash**. To permanently delete it, add the query parameter \`permanent=1\``);
+				lines.push('');
+
+				lines.push('### DELETE /notes/:id/revisions');
+				lines.push('');
+				lines.push('Deletes all the revisions attached to this note.');
+				lines.push('');
+			}
+
+			if (model.type === BaseModel.TYPE_FOLDER) {
 				lines.push(`By default, the ${singular} will be moved **to the trash**. To permanently delete it, add the query parameter \`permanent=1\``);
 				lines.push('');
 			}

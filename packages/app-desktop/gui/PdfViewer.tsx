@@ -62,6 +62,7 @@ export default function PdfViewer(props: Props) {
 			mime: 'text/plain',
 			textToCopy: text,
 			linkToCopy: null,
+			linkToOpen: null,
 			htmlToCopy: '',
 			insertContent: () => { console.warn('insertContent() not implemented'); },
 			fireEditorEvent: () => { console.warn('fireEditorEvent() not implemented'); },
@@ -69,7 +70,7 @@ export default function PdfViewer(props: Props) {
 			mdToHtml: async (_a, b, _c) => { return { html: b, pluginAssets: [], cssStrings: [] }; },
 		} as ContextMenuOptions, props.dispatch);
 
-		menu.popup({ window: bridge().window() });
+		menu.popup({ window: bridge().activeWindow() });
 	}, [props.dispatch]);
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied

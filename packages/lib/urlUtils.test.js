@@ -14,6 +14,7 @@ describe('urlUtils', () => {
 		expect(urlUtils.prependBaseUrl('//somewhereelse.com/testing.html', 'http://example.com/something')).toBe('http://somewhereelse.com/testing.html');
 		expect(urlUtils.prependBaseUrl('', 'http://example.com/something')).toBe('http://example.com/something');
 		expect(urlUtils.prependBaseUrl('testing.html', '')).toBe('testing.html');
+		expect(urlUtils.prependBaseUrl('/testing.html', '')).toBe('/testing.html');
 
 		// It shouldn't prepend anything for these:
 		expect(urlUtils.prependBaseUrl('mailto:emailme@example.com', 'http://example.com')).toBe('mailto:emailme@example.com');
@@ -56,20 +57,33 @@ describe('urlUtils', () => {
 		[
 			'file:///home/builder/.config/joplindev-desktop/profile-owmhbsat/resources/4a12670298dd46abbb140ffc8a10b583.md',
 			'/home/builder/.config/joplindev-desktop/profile-owmhbsat/resources',
+			'posix',
 			{ itemId: '4a12670298dd46abbb140ffc8a10b583', hash: '' },
 		],
 		[
 			'file:///home/builder/.config/joplindev-desktop/profile-owmhbsat/resources/4a12670298dd46abbb140ffc8a10b583.md5#foo',
 			'/home/builder/.config/joplindev-desktop/profile-owmhbsat/resources',
+			'posix',
 			{ itemId: '4a12670298dd46abbb140ffc8a10b583', hash: 'foo' },
 		],
 		[
 			'file:///home/builder/.config/joplindev-desktop/profile-owmhbsat/resources/4a12670298dd46abbb140ffc8a10b583.png?t=12345',
 			'/home/builder/.config/joplindev-desktop/profile-owmhbsat/resources',
+			'posix',
 			{ itemId: '4a12670298dd46abbb140ffc8a10b583', hash: '' },
 		],
-	])('should detect resource file URLs', (url, resourceDir, expected) => {
-		expect(urlUtils.parseResourceUrl(urlUtils.fileUrlToResourceUrl(url, resourceDir))).toMatchObject(expected);
+		[
+			'file:///C:/Users/Test/.config/joplin-desktop/profile-owmhbsat/resources/a1234567890123456789012345678901.png?t=12345',
+			'C:\\Users\\Test\\.config\\joplin-desktop\\profile-owmhbsat\\resources',
+			'win32',
+			{ itemId: 'a1234567890123456789012345678901', hash: '' },
+		],
+	])('should detect resource file URLs (case %#)', (url, resourceDir, os, expected) => {
+		expect(
+			urlUtils.parseResourceUrl(
+				urlUtils.fileUrlToResourceUrl(url, resourceDir, os),
+			),
+		).toMatchObject(expected);
 	});
 
 	it('should extract resource URLs', (async () => {
@@ -78,6 +92,7 @@ describe('urlUtils', () => {
 			['Bla [](:/11111111111111111111111111111111 "Some title") bla [](:/22222222222222222222222222222222 "something else") bla', ['11111111111111111111111111111111', '22222222222222222222222222222222']],
 			['Bla <img src=":/fcca2938a96a22570e8eae2565bc6b0b"/> bla [](:/22222222222222222222222222222222) bla', ['fcca2938a96a22570e8eae2565bc6b0b', '22222222222222222222222222222222']],
 			['Bla <img src=":/fcca2938a96a22570e8eae2565bc6b0b"/> bla <a href=":/33333333333333333333333333333333"/>Some note link</a> blu [](:/22222222222222222222222222222222) bla', ['fcca2938a96a22570e8eae2565bc6b0b', '33333333333333333333333333333333', '22222222222222222222222222222222']],
+			['Link to [a test note] and [another] note.\n\n[a test note]: :/fcca2938a96a22570e8eae2565bc6b0b\n[another]: :/f04a2938a26822570e8eae2505bc6b0c', ['fcca2938a96a22570e8eae2565bc6b0b', 'f04a2938a26822570e8eae2505bc6b0c']],
 			['nothing here', []],
 			['', []],
 		];
@@ -91,4 +106,22 @@ describe('urlUtils', () => {
 		}
 	}));
 
+	it('urlProtocol should detect file protocol URLs', () => {
+		expect(urlUtils.urlProtocol('file:/test')).toBe('file:');
+		expect(urlUtils.urlProtocol('file://test')).toBe('file:');
+		expect(urlUtils.urlProtocol('file:///test')).toBe('file:');
+		expect(urlUtils.urlProtocol('file://C:\\Users\\test`')).toBe('file:');
+	});
+
+	it('urlProtocol should return null for non-empty URLs with no protocol', () => {
+		expect(urlUtils.urlProtocol('invalid!protocol:/test')).toBe(null);
+		expect(urlUtils.urlProtocol('!protocol:/test')).toBe(null);
+		expect(urlUtils.urlProtocol('.protocol:/test')).toBe(null);
+	});
+
+	it('urlProtocol should support protocols with uppercase characters, hyphens, and +s', () => {
+		expect(urlUtils.urlProtocol('ValidProtocol:/test')).toBe('validprotocol:');
+		expect(urlUtils.urlProtocol('valid-protocol:/test')).toBe('valid-protocol:');
+		expect(urlUtils.urlProtocol('valid+protocol:/test')).toBe('valid+protocol:');
+	});
 });

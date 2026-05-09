@@ -1,14 +1,14 @@
 import * as React from 'react';
 import ButtonBar from './ConfigScreen/ButtonBar';
 import { _ } from '@joplin/lib/locale';
+import bridge from '../services/bridge';
 
 const { connect } = require('react-redux');
-const bridge = require('@electron/remote').require('./bridge').default;
 const { themeStyle } = require('@joplin/lib/theme');
 const Shared = require('@joplin/lib/components/shared/dropbox-login-shared');
 
 interface Props {
-	themeId: string;
+	themeId: number;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
@@ -63,8 +63,7 @@ class DropboxLoginScreenComponent extends React.Component<any, any> {
 	}
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-const mapStateToProps = (state: any) => {
+const mapStateToProps = (state: { settings: { theme: number } }) => {
 	return {
 		themeId: state.settings.theme,
 	};

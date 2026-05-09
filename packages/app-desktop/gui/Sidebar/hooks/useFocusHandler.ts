@@ -1,29 +1,16 @@
-import { MutableRefObject, RefObject, useCallback, useEffect, useMemo, useRef } from 'react';
+import { RefObject, useCallback, useEffect, useMemo, useRef } from 'react';
 import { ListItem } from '../types';
 import ItemList from '../../ItemList';
 import { focus } from '@joplin/lib/utils/focusHandler';
 
 interface Props {
 	itemListRef: RefObject<ItemList<ListItem>>;
-	selectedListElement: HTMLElement|null;
 	selectedIndex: number;
 	listItems: ListItem[];
 }
 
-const useFocusAfterNextRenderHandler = (
-	shouldFocusAfterNextRender: MutableRefObject<boolean>,
-	selectedListElement: HTMLElement|null,
-) => {
-	useEffect(() => {
-		if (!shouldFocusAfterNextRender.current || !selectedListElement) return;
-		focus('FolderAndTagList/useFocusHandler/afterRender', selectedListElement);
-		shouldFocusAfterNextRender.current = false;
-	}, [selectedListElement, shouldFocusAfterNextRender]);
-};
-
-const useRefocusOnSelectionChangeHandler = (
+const useScrollToSelectionHandler = (
 	itemListRef: RefObject<ItemList<ListItem>>,
-	shouldFocusAfterNextRender: MutableRefObject<boolean>,
 	listItems: ListItem[],
 	selectedIndex: number,
 ) => {
@@ -41,40 +28,48 @@ const useRefocusOnSelectionChangeHandler = (
 			return lastSelectedItemKey.current;
 		}
 	}, [listItems, selectedIndex]);
-	lastSelectedItemKey.current = selectedItemKey;
 
 	const selectedIndexRef = useRef(selectedIndex);
 	selectedIndexRef.current = selectedIndex;
 
 	useEffect(() => {
+		// Skip scrolling if the selected item hasn't actually changed. When a folder is
+		// expanded or collapsed the selected item's index may shift, but its key stays
+		// the same — in that case we don't want to scroll the view.
+		if (selectedItemKey === lastSelectedItemKey.current) {
+			return;
+		}
+		lastSelectedItemKey.current = selectedItemKey;
+
 		if (!itemListRef.current || !selectedItemKey) return;
 
-		const hasFocus = !!itemListRef.current.container.querySelector(':scope :focus');
-		shouldFocusAfterNextRender.current = hasFocus;
+		const hasFocus = !!itemListRef.current.container.contains(document.activeElement);
 
 		if (hasFocus) {
 			itemListRef.current.makeItemIndexVisible(selectedIndexRef.current);
 		}
-	}, [selectedItemKey, itemListRef, shouldFocusAfterNextRender]);
+	}, [selectedItemKey, itemListRef]);
 };
 
 const useFocusHandler = (props: Props) => {
-	const { itemListRef, selectedListElement, selectedIndex, listItems } = props;
+	const { itemListRef, selectedIndex, listItems } = props;
 
-	// When set to true, when selectedListElement next changes, select it.
-	const shouldFocusAfterNextRender = useRef(false);
-
-	useRefocusOnSelectionChangeHandler(itemListRef, shouldFocusAfterNextRender, listItems, selectedIndex);
-	useFocusAfterNextRenderHandler(shouldFocusAfterNextRender, selectedListElement);
+	useScrollToSelectionHandler(itemListRef, listItems, selectedIndex);
 
 	const focusSidebar = useCallback(() => {
-		if (!selectedListElement || !itemListRef.current.isIndexVisible(selectedIndex)) {
+		if (!itemListRef.current.isIndexVisible(selectedIndex)) {
 			itemListRef.current.makeItemIndexVisible(selectedIndex);
-			shouldFocusAfterNextRender.current = true;
-		} else {
-			focus('FolderAndTagList/useFocusHandler/focusSidebar', selectedListElement);
 		}
-	}, [selectedListElement, selectedIndex, itemListRef]);
+
+		const focusableItem = itemListRef.current.container.querySelector('[role="treeitem"][tabindex="0"]');
+		const focusableContainer = itemListRef.current.container.querySelector('[role="tree"][tabindex="0"]');
+		if (focusableItem) {
+			focus('FolderAndTagList/focusSidebarItem', focusableItem);
+		} else if (focusableContainer) {
+			// Handles the case where no items in the tree can be focused.
+			focus('FolderAndTagList/focusSidebarTree', focusableContainer);
+		}
+	}, [selectedIndex, itemListRef]);
 
 	return { focusSidebar };
 };

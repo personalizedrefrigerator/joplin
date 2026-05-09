@@ -29,16 +29,34 @@ export interface Props {
 	noteId: string;
 	folders: FolderEntity[];
 	sharedData: SharedData|undefined;
+	noteVisiblePanes: string[];
 }
 
-export interface BaseNoteScreenComponent {
-	props: Props;
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	state: any;
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	setState: (newState: any)=> void;
+export interface BaseState {
+	note: NoteEntity;
+	lastSavedNote: NoteEntity;
+	newAndNoTitleChangeNoteId: boolean;
+	mode: string;
+	folder: FolderEntity;
+	isLoading: boolean;
+	fromShare: boolean;
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Partial refactor of old code before rule was applied
+	noteResources: any;
+	readOnly: boolean;
+	noteLastLoadTime: number;
+}
 
-	scheduleSave(): void;
+export interface BaseNoteScreenComponent<State extends BaseState = BaseState> {
+	props: Props;
+	state: State;
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
+	setState(state: any): void;
+
+	// To prevent race conditions, scheduleSave takes a snapshot of the
+	// current state. Previously, the delay between calling setState(state) and
+	// this.state getting the new state value could cause the wrong state
+	// to be saved.
+	scheduleSave(currentState: State): void;
 	scheduleFocusUpdate(): void;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	attachFile(asset: any, fileType: any): void;
@@ -49,7 +67,7 @@ interface Shared {
 	noteExists?: (noteId: string)=> Promise<boolean>;
 	handleNoteDeletedWhileEditing_?: (note: NoteEntity)=> Promise<NoteEntity>;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	saveNoteButton_press?: (comp: BaseNoteScreenComponent, folderId: string, options: any)=> Promise<void>;
+	saveNoteButton_press?: (comp: BaseNoteScreenComponent, state: BaseState, folderId: string, options: any)=> Promise<void>;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	saveOneProperty?: (comp: BaseNoteScreenComponent, name: string, value: any)=> void;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
@@ -59,7 +77,7 @@ interface Shared {
 	attachedResources?: (noteBody: string)=> Promise<any>;
 	isModified?: (comp: BaseNoteScreenComponent)=> boolean;
 	initState?: (comp: BaseNoteScreenComponent)=> Promise<void>;
-	toggleIsTodo_onPress?: (comp: BaseNoteScreenComponent)=> void;
+	toggleIsTodo_onPress?: (comp: BaseNoteScreenComponent)=> NoteEntity;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	toggleCheckboxRange?: (ipcMessage: string, noteBody: string)=> any;
 	toggleCheckbox?: (ipcMessage: string, noteBody: string)=> string;
@@ -67,6 +85,8 @@ interface Shared {
 	installResourceHandling?: (refreshResourceHandler: any)=> void;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	uninstallResourceHandling?: (refreshResourceHandler: any)=> void;
+
+	reloadNote?: (comp: BaseNoteScreenComponent)=> Promise<NoteEntity>;
 }
 
 const shared: Shared = {};
@@ -95,12 +115,13 @@ shared.handleNoteDeletedWhileEditing_ = async (note: NoteEntity) => {
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-shared.saveNoteButton_press = async function(comp: BaseNoteScreenComponent, folderId: string = null, options: any = null) {
+shared.saveNoteButton_press = async function(comp: BaseNoteScreenComponent, state: BaseState, folderId: string = null, options: any = null) {
 	options = { autoTitle: true, ...options };
+	state = { ...comp.state, ...state };
 
 	const releaseMutex = await saveNoteMutex_.acquire();
 
-	let note = { ...comp.state.note };
+	let note = { ...state.note };
 
 	const recreatedNote = await shared.handleNoteDeletedWhileEditing_(note);
 	if (recreatedNote) note = recreatedNote;
@@ -119,11 +140,11 @@ shared.saveNoteButton_press = async function(comp: BaseNoteScreenComponent, fold
 
 	const saveOptions = {
 		userSideValidation: true,
-		fields: BaseModel.diffObjectsFields(comp.state.lastSavedNote, note),
+		fields: BaseModel.diffObjectsFields(state.lastSavedNote, note),
 		dispatchOptions: { preserveSelection: true },
 	};
 
-	const hasAutoTitle = comp.state.newAndNoTitleChangeNoteId || (isProvisionalNote && !note.title);
+	const hasAutoTitle = state.newAndNoTitleChangeNoteId || (isProvisionalNote && !note.title);
 	if (hasAutoTitle && options.autoTitle) {
 		note.title = Note.defaultTitle(note.body);
 		if (saveOptions.fields && saveOptions.fields.indexOf('title') < 0) saveOptions.fields.push('title');
@@ -153,7 +174,7 @@ shared.saveNoteButton_press = async function(comp: BaseNoteScreenComponent, fold
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	const newState: any = {
-		lastSavedNote: { ...note },
+		lastSavedNote: { ...note, ...savedNote },
 		note: note,
 	};
 
@@ -167,7 +188,7 @@ shared.saveNoteButton_press = async function(comp: BaseNoteScreenComponent, fold
 		const updateGeoloc = async () => {
 			const geoNote: NoteEntity = await Note.updateGeolocation(note.id);
 
-			const stateNote = comp.state.note;
+			const stateNote = state.note;
 			if (!stateNote || !geoNote) return;
 			if (stateNote.id !== geoNote.id) return; // Another note has been loaded while geoloc was being retrieved
 
@@ -181,7 +202,7 @@ shared.saveNoteButton_press = async function(comp: BaseNoteScreenComponent, fold
 			};
 
 			const modNote = { ...stateNote, ...geoInfo };
-			const modLastSavedNote = { ...comp.state.lastSavedNote, ...geoInfo };
+			const modLastSavedNote = { ...state.lastSavedNote, ...geoInfo };
 
 			comp.setState({ note: modNote, lastSavedNote: modLastSavedNote });
 		};
@@ -204,7 +225,7 @@ shared.saveOneProperty = async function(comp: BaseNoteScreenComponent, name: str
 	let toSave: any = { id: note.id };
 	toSave[name] = value;
 	toSave = await Note.save(toSave);
-	note[name] = toSave[name];
+	(note as Record<string, unknown>)[name] = toSave[name];
 
 	comp.setState({
 		lastSavedNote: { ...note },
@@ -218,11 +239,11 @@ shared.noteComponent_change = function(comp: BaseNoteScreenComponent, propName: 
 	const newState: any = {};
 
 	const note = { ...comp.state.note };
-	note[propName] = propValue;
+	(note as Record<string, unknown>)[propName] = propValue;
 	newState.note = note;
 
 	comp.setState(newState);
-	comp.scheduleSave();
+	comp.scheduleSave(newState);
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
@@ -268,38 +289,75 @@ shared.isModified = function(comp: BaseNoteScreenComponent) {
 	return !!Object.getOwnPropertyNames(diff).length;
 };
 
-shared.initState = async function(comp: BaseNoteScreenComponent) {
+shared.reloadNote = async (comp: BaseNoteScreenComponent) => {
 	const isProvisionalNote = comp.props.provisionalNoteIds.includes(comp.props.noteId);
 
 	const note = await Note.load(comp.props.noteId);
 
-	let mode = 'view';
+	const panes = comp.props.noteVisiblePanes;
+	let mode = panes.includes('editor') ? 'edit' : 'view';
 
 	if (isProvisionalNote && !comp.props.sharedData) {
 		mode = 'edit';
 		comp.scheduleFocusUpdate();
 	}
 
-	const folder = Folder.byId(comp.props.folders, note.parent_id);
+	const fromShare = !!comp.props.sharedData;
+	if (note) {
+		let folder = Folder.byId(comp.props.folders, note.parent_id);
+		if (!folder && note.parent_id) {
+			folder = await Folder.load(note.parent_id);
+		}
+		comp.setState({
+			lastSavedNote: { ...note },
+			note: note,
+			mode: mode,
+			folder: folder,
+			isLoading: false,
+			fromShare: !!comp.props.sharedData,
+			noteResources: await shared.attachedResources(note ? note.body : ''),
+			readOnly: itemIsReadOnlySync(ModelType.Note, ItemChange.SOURCE_UNSPECIFIED, note as ItemSlice, Setting.value('sync.userId'), BaseItem.syncShareCache),
+			noteLastLoadTime: Date.now(),
+		});
+	} else {
+		// Handle the case where a non-existent note is loaded. This can happen briefly after deleting a note.
+		comp.setState({
+			lastSavedNote: {},
+			note: {},
+			mode,
+			folder: null,
+			isLoading: true,
+			fromShare,
+			noteResources: [],
+			readOnly: true,
+			noteLastLoadTime: Date.now(),
+		});
+	}
 
-	comp.setState({
-		lastSavedNote: { ...note },
-		note: note,
-		mode: mode,
-		folder: folder,
-		isLoading: false,
-		fromShare: !!comp.props.sharedData,
-		noteResources: await shared.attachedResources(note ? note.body : ''),
-		readOnly: itemIsReadOnlySync(ModelType.Note, ItemChange.SOURCE_UNSPECIFIED, note as ItemSlice, Setting.value('sync.userId'), BaseItem.syncShareCache),
-	});
+	return note;
+};
 
+shared.initState = async function(comp: BaseNoteScreenComponent) {
+	const note = await shared.reloadNote(comp);
 
-	if (comp.props.sharedData) {
+	if (comp.props.sharedData && note) {
+		// Use the note returned by reloadNote directly to avoid a race condition where
+		// comp.state.note is still the initial empty note (Note.new() with parent_id='')
+		// because React hasn't flushed reloadNote's setState yet. Without this, the
+		// scheduled save would overwrite parent_id with an empty string in the DB.
+		const updatedNote = { ...note };
+		const fieldsToSave: NoteEntity = { id: note.id };
 		if (comp.props.sharedData.title) {
-			this.noteComponent_change(comp, 'title', comp.props.sharedData.title);
+			updatedNote.title = comp.props.sharedData.title;
+			fieldsToSave.title = comp.props.sharedData.title;
 		}
 		if (comp.props.sharedData.text) {
-			this.noteComponent_change(comp, 'body', comp.props.sharedData.text);
+			updatedNote.body = comp.props.sharedData.text;
+			fieldsToSave.body = comp.props.sharedData.text;
+		}
+		if (fieldsToSave.title !== undefined || fieldsToSave.body !== undefined) {
+			await Note.save(fieldsToSave);
+			comp.setState({ note: updatedNote, lastSavedNote: updatedNote });
 		}
 		if (comp.props.sharedData.resources) {
 			for (let i = 0; i < comp.props.sharedData.resources.length; i++) {
@@ -308,20 +366,18 @@ shared.initState = async function(comp: BaseNoteScreenComponent) {
 				await comp.attachFile({
 					uri: resource.uri,
 					type: resource.mimeType,
-					name: resource.name,
+					fileName: resource.name,
 				}, null);
 			}
 		}
 	}
 
 	// eslint-disable-next-line require-atomic-updates
-	comp.lastLoadedNoteId_ = note.id;
+	comp.lastLoadedNoteId_ = note?.id;
 };
 
 shared.toggleIsTodo_onPress = function(comp: BaseNoteScreenComponent) {
-	const newNote = Note.toggleIsTodo(comp.state.note);
-	const newState = { note: newNote };
-	comp.setState(newState);
+	return Note.toggleIsTodo(comp.state.note);
 };
 
 function toggleCheckboxLine(ipcMessage: string, noteBody: string) {

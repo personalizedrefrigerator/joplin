@@ -1,15 +1,16 @@
 import * as React from 'react';
-import { StyledAllNotesIcon, StyledListItem, StyledListItemAnchor } from '../styles';
+import { StyledAllNotesIcon, StyledListItemAnchor } from '../styles';
 import { useCallback } from 'react';
 import { Dispatch } from 'redux';
 import bridge from '../../../services/bridge';
 import Setting from '@joplin/lib/models/Setting';
 import MenuUtils from '@joplin/lib/services/commands/MenuUtils';
 import CommandService from '@joplin/lib/services/CommandService';
-import PerFolderSortOrderService from '../../../services/sortOrder/PerFolderSortOrderService';
-import { _ } from '@joplin/lib/locale';
+import PerFolderSortOrderService from '@joplin/lib/services/sortOrder/PerFolderSortOrderService';
 import { connect } from 'react-redux';
 import EmptyExpandLink from './EmptyExpandLink';
+import ListItemWrapper, { ItemSelectionState, ListItemRef } from './ListItemWrapper';
+import { ListItem } from '../types';
 const { ALL_NOTES_FILTER_ID } = require('@joplin/lib/reserved-ids');
 
 const Menu = bridge().Menu;
@@ -17,8 +18,11 @@ const MenuItem = bridge().MenuItem;
 
 interface Props {
 	dispatch: Dispatch;
-	selected: boolean;
-	anchorRef: React.Ref<HTMLAnchorElement>;
+	anchorRef: ListItemRef;
+	selectionState: ItemSelectionState;
+	item: ListItem;
+	index: number;
+	itemCount: number;
 }
 
 const menuUtils = new MenuUtils(CommandService.instance());
@@ -42,25 +46,32 @@ const AllNotesItem: React.FC<Props> = props => {
 			}));
 		}
 
-		menu.popup({ window: bridge().window() });
+		menu.popup({ window: bridge().activeWindow() });
 	}, []);
 
 	return (
-		<StyledListItem key="allNotesHeader" selected={props.selected} className={'list-item-container list-item-depth-0 all-notes'} isSpecialItem={true}>
+		<ListItemWrapper
+			containerRef={props.anchorRef}
+			key="allNotesHeader"
+			selectionState={props.selectionState}
+			depth={props.item.depth}
+			className={'list-item-container list-item-depth-0 all-notes'}
+			highlightOnHover={true}
+			itemIndex={props.index}
+			itemCount={props.itemCount}
+		>
 			<EmptyExpandLink/>
-			<StyledAllNotesIcon className="icon-notes"/>
+			<StyledAllNotesIcon aria-hidden='true' role='img' className='icon-notes'/>
 			<StyledListItemAnchor
-				ref={props.anchorRef}
 				className="list-item"
 				isSpecialItem={true}
-				href="#"
-				selected={props.selected}
+				selected={props.selectionState.selected}
 				onClick={onAllNotesClick_}
 				onContextMenu={toggleAllNotesContextMenu}
 			>
-				{_('All notes')}
+				{props.item.label}
 			</StyledListItemAnchor>
-		</StyledListItem>
+		</ListItemWrapper>
 	);
 };
 

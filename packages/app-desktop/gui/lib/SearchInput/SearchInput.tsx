@@ -4,36 +4,6 @@ import CommandService from '@joplin/lib/services/CommandService';
 import { _ } from '@joplin/lib/locale';
 
 import StyledInput from '../../style/StyledInput';
-const styled = require('styled-components').default;
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-type StyleProps = any;
-
-export const Root = styled.div`
-	position: relative;
-	display: flex;
-	width: 100%;
-`;
-
-export const SearchButton = styled.button`
-	position: absolute;
-	right: 0;
-	background: none;
-	border: none;
-	height: 100%;
-	opacity: ${(props: StyleProps) => props.disabled ? 0.5 : 1};
-`;
-
-export const SearchButtonIcon = styled.span`
-	font-size: ${(props: StyleProps) => props.theme.toolbarIconSize}px;
-	color: ${(props: StyleProps) => props.theme.color4};
-`;
-
-export const SearchInput = styled(StyledInput)`
-	padding-right: 20px;
-	flex: 1;
-	width: 10px;
-`;
 
 interface Props {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
@@ -47,10 +17,13 @@ interface Props {
 	// eslint-disable-next-line @typescript-eslint/ban-types -- Old code before rule was applied
 	onKeyDown?: Function;
 	// eslint-disable-next-line @typescript-eslint/ban-types -- Old code before rule was applied
-	onSearchButtonClick: Function;
+	onSearchButtonClick: ()=> void;
 	searchStarted: boolean;
 	placeholder?: string;
 	disabled?: boolean;
+	inputClassName?: string;
+	'aria-controls'?: string;
+	iconButtonTabIndex?: number;
 }
 
 export interface OnChangeEvent {
@@ -66,12 +39,16 @@ export default function(props: Props) {
 		props.onChange({ value: event.currentTarget.value });
 	}, [props.onChange]);
 
+	const fieldClassName = ['field'];
+	if (props.inputClassName) fieldClassName.push(props.inputClassName);
+
 	return (
-		<Root>
-			<SearchInput
+		<div className='search-input'>
+			<StyledInput
 				ref={props.inputRef}
+				className={fieldClassName.join(' ')}
 				value={props.value}
-				type="text"
+				type="search"
 				placeholder={props.placeholder || _('Search...')}
 				onChange={onChange}
 				onFocus={props.onFocus}
@@ -79,13 +56,19 @@ export default function(props: Props) {
 				onKeyDown={props.onKeyDown}
 				spellCheck={false}
 				disabled={props.disabled}
+				aria-label={props.placeholder || _('Search...')}
+				aria-controls={props['aria-controls']}
 			/>
-			<SearchButton
+			<button
+				type='button'
+				className='button'
 				aria-label={iconLabel}
+				disabled={props.disabled}
+				tabIndex={props.iconButtonTabIndex}
 				onClick={props.onSearchButtonClick}
 			>
-				<SearchButtonIcon className={iconName}/>
-			</SearchButton>
-		</Root>
+				<span className={`icon ${iconName}`}/>
+			</button>
+		</div>
 	);
 }

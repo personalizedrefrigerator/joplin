@@ -1,15 +1,14 @@
 
 import * as React from 'react';
-import { TextStyle, Text } from 'react-native';
+import { TextStyle, Text, StyleProp } from 'react-native';
 
-const FontAwesomeIcon = require('react-native-vector-icons/FontAwesome5').default;
-const AntIcon = require('react-native-vector-icons/AntDesign').default;
-const MaterialCommunityIcon = require('react-native-vector-icons/MaterialCommunityIcons').default;
-const Ionicon = require('react-native-vector-icons/Ionicons').default;
+import { FontAwesome5 } from '@react-native-vector-icons/fontawesome5';
+import { MaterialDesignIcons } from '@react-native-vector-icons/material-design-icons';
+import { Ionicons } from '@react-native-vector-icons/ionicons';
 
 interface Props {
 	name: string;
-	style: TextStyle;
+	style: StyleProp<TextStyle>;
 
 	// If `null` is given, the content must be labeled elsewhere.
 	accessibilityLabel: string|null;
@@ -34,40 +33,46 @@ const Icon: React.FC<Props> = props => {
 	const importantForAccessibility = accessibilityHidden ? 'no-hide-descendants' : 'yes';
 
 	const sharedProps = {
-		importantForAccessibility,
-		'aria-hidden': accessibilityHidden,
+		importantForAccessibility, // Android
+		accessibilityElementsHidden: accessibilityHidden, // iOS
+		'aria-hidden': accessibilityHidden, // Web
 		accessibilityLabel: props.accessibilityLabel,
 		style: props.style,
 		allowFontScaling: props.allowFontScaling,
 	};
 
 	if (namePrefix.match(/^fa[bsr]?$/)) {
+		let iconStyle = 'solid';
+		if (namePrefix.startsWith('fab')) {
+			iconStyle = 'brand';
+		} else if (namePrefix.startsWith('fas')) {
+			iconStyle = 'solid';
+		}
+
 		return (
-			<FontAwesomeIcon
-				brand={namePrefix.startsWith('fab')}
-				solid={namePrefix.startsWith('fas')}
+			<FontAwesome5
 				name={nameSuffix}
+				iconStyle={iconStyle}
 				{...sharedProps}
 			/>
 		);
-	} else if (namePrefix === 'ant') {
-		return <AntIcon name={nameSuffix} {...sharedProps}/>;
 	} else if (namePrefix === 'material') {
-		return <MaterialCommunityIcon name={nameSuffix} {...sharedProps}/>;
+		return <MaterialDesignIcons name={nameSuffix} {...sharedProps}/>;
 	} else if (namePrefix === 'ionicon') {
-		return <Ionicon name={nameSuffix} {...sharedProps}/>;
+		return <Ionicons name={nameSuffix} {...sharedProps}/>;
 	} else if (namePrefix === 'text') {
 		return (
 			<Text
 				style={props.style}
 				aria-hidden={accessibilityHidden}
 				importantForAccessibility={importantForAccessibility}
+				accessibilityElementsHidden={accessibilityHidden}
 			>
 				{nameSuffix}
 			</Text>
 		);
 	} else {
-		return <FontAwesomeIcon name='cog' {...sharedProps}/>;
+		return <FontAwesome5 name='cog' {...sharedProps}/>;
 	}
 };
 

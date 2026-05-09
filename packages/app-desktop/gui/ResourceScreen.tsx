@@ -60,15 +60,6 @@ interface ActiveSorting {
 const ResourceTableComp = (props: ResourceTable) => {
 	const theme = themeStyle(props.themeId);
 
-	const sortOrderEngagedMarker = (s: SortingOrder) => {
-		return (
-			<a href="#"
-				style={{ color: theme.urlColor }}
-				onClick={() => props.onToggleSorting(s)}>{
-					(props.sorting.order === s && props.sorting.type === 'desc') ? '▾' : '▴'}</a>
-		);
-	};
-
 	const titleCellStyle = {
 		...theme.textStyle,
 		textOverflow: 'ellipsis',
@@ -93,15 +84,37 @@ const ResourceTableComp = (props: ResourceTable) => {
 	};
 
 	const filteredResources = props.resources.filter(
-		(resource: InnerResource) => !props.filter || resource.title?.includes(props.filter) || resource.id.includes(props.filter),
+		(resource: InnerResource) => {
+			if (props.filter) {
+				const filterLowerCase = props.filter.toLowerCase();
+				return resource.title?.toLowerCase().includes(filterLowerCase) || resource.id.toLowerCase().includes(filterLowerCase);
+			}
+			return true;
+		},
 	);
+
+	const renderSortableHeader = (title: string, order: SortingOrder) => {
+		const sortedDescending = props.sorting.order === order && props.sorting.type === 'desc';
+		const sortButtonLabel = sortedDescending ? _('Sort "%s" in ascending order', title) : _('Sort "%s" in descending order', title);
+		const reverseSortButton = (
+			<a
+				href="#"
+				style={{ color: theme.urlColor }}
+				onClick={() => props.onToggleSorting(order)}
+				aria-label={sortButtonLabel}
+				title={sortButtonLabel}
+				role='button'
+			>{sortedDescending ? '▾' : '▴'}</a>
+		);
+		return <th key={`header-${title}`} style={headerStyle}>{title} {reverseSortButton}</th>;
+	};
 
 	return (
 		<table style={{ width: '100%' }}>
 			<thead>
 				<tr>
-					<th style={headerStyle}>{_('Title')} {sortOrderEngagedMarker('name')}</th>
-					<th style={headerStyle}>{_('Size')} {sortOrderEngagedMarker('size')}</th>
+					{renderSortableHeader(_('Title'), 'name')}
+					{renderSortableHeader(_('Size'), 'size')}
 					<th style={headerStyle}>{_('ID')}</th>
 					<th style={headerStyle}>{_('Action')}</th>
 				</tr>
@@ -109,7 +122,7 @@ const ResourceTableComp = (props: ResourceTable) => {
 			<tbody>
 				{filteredResources.map((resource: InnerResource, index: number) =>
 					<tr key={index}>
-						<td style={titleCellStyle} className="titleCell">
+						<td id={`title-${resource.id}`} style={titleCellStyle} className="titleCell">
 							<a
 								style={{ color: theme.urlColor }}
 								href="#"
@@ -119,7 +132,14 @@ const ResourceTableComp = (props: ResourceTable) => {
 						<td style={cellStyle} className="dataCell">{prettyBytes(resource.size)}</td>
 						<td style={cellStyle} className="dataCell">{resource.id}</td>
 						<td style={cellStyle} className="dataCell">
-							<button style={theme.buttonStyle} onClick={() => props.onResourceDelete(resource)}>{_('Delete')}</button>
+							<button
+								id={`delete-${resource.id}`}
+								aria-labelledby={`delete-${resource.id} title-${resource.id}`}
+								style={theme.buttonStyle}
+								onClick={() => props.onResourceDelete(resource)}
+							>
+								{_('Delete')}
+							</button>
 						</td>
 					</tr>,
 				)}
@@ -283,7 +303,7 @@ class ResourceScreenComponent extends React.Component<Props, State> {
 					<div style={{ ...theme.notificationBox, marginBottom: 10 }}>{
 						_('This is an advanced tool to show the attachments that are linked to your notes. Please be careful when deleting one of them as they cannot be restored afterwards.')
 					}</div>
-					<div style={{ float: 'right' }}>
+					<p style={{ float: 'left', paddingRight: 10 }}>
 						<input
 							style={theme.inputStyle}
 							type="search"
@@ -291,7 +311,7 @@ class ResourceScreenComponent extends React.Component<Props, State> {
 							onChange={this.onFilterUpdate}
 							placeholder={_('Search...')}
 						/>
-					</div>
+					</p>
 					{this.state.isLoading && <div>{_('Please wait...')}</div>}
 					{!this.state.isLoading && <div>
 						{!this.state.resources && <div>
@@ -329,4 +349,4 @@ const mapStateToProps = (state: any) => ({
 
 const ResourceScreen = connect(mapStateToProps)(ResourceScreenComponent);
 
-module.exports = { ResourceScreen };
+export default ResourceScreen;

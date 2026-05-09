@@ -5,11 +5,12 @@ import Note from '../../models/Note';
 import { reg } from '../../registry';
 import ResourceFetcher from '../../services/ResourceFetcher';
 import DecryptionWorker from '../../services/DecryptionWorker';
-import eventManager from '../../eventManager';
+import eventManager, { EventName } from '../../eventManager';
 import BaseItem from '../../models/BaseItem';
 import shim from '../../shim';
 import { Dispatch } from 'redux';
 import { State } from '../../reducer';
+import { onRevisionServiceSettingsChanged } from '../../services/synchronizer/syncInfoUtils';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 let sortNoteListTimeout: any = null;
@@ -29,6 +30,10 @@ export default async (store: any, _next: any, action: any, dispatch: Dispatch) =
 
 	if (action.type === 'SETTING_UPDATE_ONE' && !!action.key.match(/^sync\.\d+\.path$/)) {
 		reg.resetSyncTarget();
+	}
+
+	if (action.type === 'SETTING_UPDATE_ONE') {
+		onRevisionServiceSettingsChanged(action.key, action.value);
 	}
 
 	let mustAutoAddResources = false;
@@ -125,7 +130,7 @@ export default async (store: any, _next: any, action: any, dispatch: Dispatch) =
 		}
 	}
 
-	if (action.type.startsWith('SHARE_')) {
+	if (action.type.startsWith('SHARE_') && action.type !== 'SHARE_CACHE_RESTORE') {
 		const serialized = JSON.stringify(newState.shareService);
 		Setting.setValue('sync.shareCache', serialized);
 		BaseItem.syncShareCache = JSON.parse(serialized);
@@ -141,5 +146,15 @@ export default async (store: any, _next: any, action: any, dispatch: Dispatch) =
 				reg.logger().error('Detected empty element in note array', action);
 			}
 		}
+	}
+
+	if (action.type === 'WINDOW_OPEN') {
+		eventManager.emit(EventName.WindowOpen, {
+			windowId: action.windowId,
+		});
+	} else if (action.type === 'WINDOW_CLOSE') {
+		eventManager.emit(EventName.WindowClose, {
+			windowId: action.windowId,
+		});
 	}
 };

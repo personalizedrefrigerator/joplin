@@ -1,18 +1,20 @@
 import { AppState } from '../../app.reducer';
 import * as React from 'react';
-import { useEffect, useRef, useMemo } from 'react';
+import { useEffect, useRef, useMemo, useContext } from 'react';
 import SearchBar from '../SearchBar/SearchBar';
 import Button, { ButtonLevel, ButtonSize, buttonSizePx } from '../Button/Button';
 import CommandService from '@joplin/lib/services/CommandService';
 import { runtime as focusSearchRuntime } from './commands/focusSearch';
 import Note from '@joplin/lib/models/Note';
-import { notesSortOrderNextField } from '../../services/sortOrder/notesSortOrderUtils';
+import { notesSortOrderNextField } from '@joplin/lib/services/sortOrder/notesSortOrderUtils';
 import { _ } from '@joplin/lib/locale';
-const { connect } = require('react-redux');
+import { connect } from 'react-redux';
 import styled from 'styled-components';
 import stateToWhenClauseContext from '../../services/commands/stateToWhenClauseContext';
 import { getTrashFolderId } from '@joplin/lib/services/trash';
 import { Breakpoints } from '../NoteList/utils/types';
+import { stateUtils } from '@joplin/lib/reducer';
+import { WindowIdContext } from '../NewWindowOrIFrame';
 
 interface Props {
 	showNewNoteButtons: boolean;
@@ -244,11 +246,12 @@ function NoteListControls(props: Props) {
 		);
 	}
 
+	const windowId = useContext(WindowIdContext);
 	return (
 		<StyledRoot ref={noteControlsRef} padding={props.padding} buttonVerticalGap={props.buttonVerticalGap}>
 			{renderNewNoteButtons()}
 			<BottomRow ref={searchAndSortRef} className="search-and-sort">
-				<SearchBar inputRef={searchBarRef}/>
+				<SearchBar inputRef={searchBarRef} windowId={windowId}/>
 				{showsSortOrderButtons() &&
 					<SortOrderButtonsContainer>
 						<StyledPairButtonL
@@ -274,17 +277,24 @@ function NoteListControls(props: Props) {
 	);
 }
 
-const mapStateToProps = (state: AppState) => {
-	const whenClauseContext = stateToWhenClauseContext(state);
+interface ConnectProps {
+	windowId: string;
+}
+
+const mapStateToProps = (state: AppState, ownProps: ConnectProps) => {
+	const whenClauseContext = stateToWhenClauseContext(state, { windowId: ownProps.windowId });
+	const windowState = stateUtils.windowStateById(state, ownProps.windowId);
+	const hasFolderForNewNotes = whenClauseContext.selectedFolderIsValid
+		&& windowState.selectedFolderId !== getTrashFolderId();
 
 	return {
-		showNewNoteButtons: state.selectedFolderId !== getTrashFolderId(),
+		showNewNoteButtons: hasFolderForNewNotes,
 		newNoteButtonEnabled: CommandService.instance().isEnabled('newNote', whenClauseContext),
 		newTodoButtonEnabled: CommandService.instance().isEnabled('newTodo', whenClauseContext),
 		sortOrderButtonsVisible: state.settings['notes.sortOrder.buttonsVisible'],
 		sortOrderField: state.settings['notes.sortOrder.field'],
 		sortOrderReverse: state.settings['notes.sortOrder.reverse'],
-		notesParentType: state.notesParentType,
+		notesParentType: windowState.notesParentType,
 	};
 };
 

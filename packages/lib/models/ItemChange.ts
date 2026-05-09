@@ -2,19 +2,30 @@ import BaseModel, { ModelType } from '../BaseModel';
 import shim from '../shim';
 import eventManager, { EventName, ItemChangeEvent } from '../eventManager';
 import { ItemChangeEntity, SqlQuery } from '../services/database/types';
-const Mutex = require('async-mutex').Mutex;
+import { Mutex } from 'async-mutex';
 
 export interface ChangeSinceIdOptions {
 	limit?: number;
 	fields?: string[];
 }
 
+interface BaseAddOptions {
+	changeSource?: number|null;
+	changeId?: string|null;
+}
+
+interface AddOneOptions extends BaseAddOptions {
+	beforeChangeItemJson?: string|null;
+}
+
+interface AddMultiOptions extends BaseAddOptions {
+	beforeChangeItemJsons?: string[]|null;
+}
+
 export default class ItemChange extends BaseModel {
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	private static addChangeMutex_: any = new Mutex();
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	private static saveCalls_: any[] = [];
+	private static addChangeMutex_: Mutex = new Mutex();
+	private static saveCalls_: boolean[] = [];
 
 	public static TYPE_CREATE = 1;
 	public static TYPE_UPDATE = 2;
@@ -33,8 +44,12 @@ export default class ItemChange extends BaseModel {
 		return BaseModel.TYPE_ITEM_CHANGE;
 	}
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	public static async addMulti(itemType: ModelType, itemIds: string[], type: number, changeSource: any = null, beforeChangeItemJsons: string[] = null) {
+	public static async addMulti(
+		itemType: ModelType,
+		itemIds: string[],
+		type: number,
+		{ changeSource = null, changeId = null, beforeChangeItemJsons = null }: AddMultiOptions = {},
+	) {
 		if (!itemIds.length) return;
 
 		if (changeSource === null) changeSource = ItemChange.SOURCE_UNSPECIFIED;
@@ -72,7 +87,8 @@ export default class ItemChange extends BaseModel {
 			for (const itemId of itemIds) {
 				const event: ItemChangeEvent = {
 					itemType: itemType,
-					itemId: itemId,
+					itemId,
+					changeId,
 					eventType: type,
 				};
 				eventManager.emit(EventName.ItemChange, event);
@@ -80,9 +96,11 @@ export default class ItemChange extends BaseModel {
 		}
 	}
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	public static async add(itemType: ModelType, itemId: string, type: number, changeSource: any = null, beforeChangeItemJson: string = null) {
-		await this.addMulti(itemType, [itemId], type, changeSource, beforeChangeItemJson ? [beforeChangeItemJson] : null);
+	public static async add(itemType: ModelType, itemId: string, type: number, options: AddOneOptions = {}) {
+		await this.addMulti(itemType, [itemId], type, {
+			...options,
+			beforeChangeItemJsons: options?.beforeChangeItemJson ? [options.beforeChangeItemJson] : null,
+		});
 	}
 
 	public static async lastChangeId() {
@@ -129,6 +147,30 @@ export default class ItemChange extends BaseModel {
 			ORDER BY id
 			LIMIT ?
 		`, [changeId, options.limit]);
+	}
+
+	public static async itemChange(itemType: ModelType, itemId: string): Promise<ItemChangeEntity> {
+		return await this.db().selectOne(`
+			SELECT item_type, item_id, type, source, created_time, before_change_item
+			FROM item_changes
+			WHERE item_type = ? AND item_id = ?
+			ORDER BY created_time DESC
+			LIMIT 1
+		`, [itemType, itemId]);
+	}
+
+	public static async oldNoteContent(noteId: string): Promise<string> {
+		const itemChange = await this.itemChange(ModelType.Note, noteId);
+		return itemChange && itemChange.before_change_item ? itemChange.before_change_item : null;
+	}
+
+	public static async resetOldNoteContent(noteId: string) {
+		const itemChange = await this.itemChange(ModelType.Note, noteId);
+
+		// Only create a new item change if there is an existing item change and it has the before_change_item populated on it
+		if (itemChange && itemChange.before_change_item) {
+			await this.add(itemChange.item_type, itemChange.item_id, itemChange.type);
+		}
 	}
 
 }

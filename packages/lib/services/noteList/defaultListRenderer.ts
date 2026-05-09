@@ -1,6 +1,14 @@
 import { _ } from '../../locale';
 import CommandService from '../CommandService';
 import { ItemFlow, ListRenderer, OnClickEvent } from '../plugins/api/noteListType';
+import checkboxPieCss from './checkboxPieCss';
+
+interface CheckboxStats {
+	total: number;
+	checked: number;
+	percent: number;
+	isComplete: boolean;
+}
 
 interface Props {
 	note: {
@@ -8,6 +16,7 @@ interface Props {
 		title: string;
 		is_todo: number;
 		todo_completed: number;
+		checkboxes: CheckboxStats | null;
 	};
 	item: {
 		// index: number;
@@ -34,12 +43,14 @@ const renderer: ListRenderer = {
 		// 'item.index',
 		'item.selected',
 		'item.size.height',
+		'note.checkboxes',
 		'note.id',
 		'note.is_shared',
 		'note.is_todo',
 		'note.isWatched',
 		'note.title',
 		'note.todo_completed',
+		'note.todoStatusText',
 	],
 
 	itemCss: // css
@@ -57,7 +68,7 @@ const renderer: ListRenderer = {
 			background-color: var(--joplin-selected-color);
 		}
 
-		&:hover, :focus-visible > & > .content {
+		&:hover, &.-focus-visible > .content {
 			background-color: var(--joplin-background-color-hover3);
 		}
 	
@@ -95,7 +106,16 @@ const renderer: ListRenderer = {
 					color: var(--joplin-color);
 				}
 			}
+
+			> .checkbox-pie {
+				display: flex;
+				align-items: center;
+				padding-right: 12px;
+				padding-left: 8px;
+			}
 		}
+
+		${checkboxPieCss}
 
 		> .content.-shared {
 			> .title {
@@ -133,18 +153,37 @@ const renderer: ListRenderer = {
 		<div class="content {{#item.selected}}-selected{{/item.selected}} {{#note.is_shared}}-shared{{/note.is_shared}} {{#note.todo_completed}}-completed{{/note.todo_completed}} {{#note.isWatched}}-watched{{/note.isWatched}}">
 			{{#note.is_todo}}
 				<div class="checkbox">
-					<input data-id="todo-checkbox" type="checkbox" {{#note.todo_completed}}checked="checked"{{/note.todo_completed}}>
+					<input
+						data-id="todo-checkbox"
+						type="checkbox"
+						aria-label="{{note.todoStatusText}}"
+						tabindex="-1"
+						{{#note.todo_completed}}checked="checked"{{/note.todo_completed}}
+					>
 				</div>
 			{{/note.is_todo}}
 			<div class="title" data-id="{{note.id}}">
 				<i class="watchedicon fa fa-share-square"></i>
 				<span>{{note.title}}</span>
 			</div>
+			{{#checkboxStats}}
+				<div class="checkbox-pie" title="{{checked}}/{{total}}">
+					{{#isComplete}}
+						<div class="pie -complete">✓</div>
+					{{/isComplete}}
+					{{^isComplete}}
+						<div class="pie" style="--percent: {{percent}};"></div>
+					{{/isComplete}}
+				</div>
+			{{/checkboxStats}}
 		</div>
 	`,
 
 	onRenderNote: async (props: Props) => {
-		return props;
+		return {
+			...props,
+			checkboxStats: props.note.checkboxes,
+		};
 	},
 };
 

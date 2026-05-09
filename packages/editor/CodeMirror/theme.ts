@@ -8,7 +8,7 @@ import { tags } from '@lezer/highlight';
 import { EditorView } from '@codemirror/view';
 import { Extension } from '@codemirror/state';
 
-import { inlineMathTag, mathTag } from './markdown/markdownMathParser';
+import { inlineMathTag, mathTag } from './extensions/markdownMathExtension';
 import { EditorTheme } from '../types';
 
 // For an example on how to customize the theme, see:
@@ -79,15 +79,25 @@ const createTheme = (theme: EditorTheme): Extension[] => {
 	// be at least this specific.
 	const selectionBackgroundSelector = '&.cm-focused > .cm-scroller > .cm-selectionLayer .cm-selectionBackground';
 
+	// Matches the editor only when there are no gutters (e.g. line numbers) added by
+	// plugins
+	const editorNoGuttersSelector = '&:not(:has(> .cm-scroller > .cm-gutters))';
+
 	const baseHeadingStyle = {
 		fontWeight: 'bold',
 		fontFamily: theme.fontFamily,
+		paddingBottom: '0.2em',
 	};
 
 	const codeMirrorTheme = EditorView.theme({
 		// Include &.CodeMirror to handle the case where additional CodeMirror 5 styles
 		// need to be overridden.
 		'&, &.CodeMirror': baseGlobalStyle,
+
+		'& .cm-dropCursor': {
+			backgroundColor: isDarkTheme ? 'white' : 'black',
+			width: '1px',
+		},
 
 		// These must be !important or more specific than CodeMirror's built-ins
 		'& .cm-content': {
@@ -97,6 +107,7 @@ const createTheme = (theme: EditorTheme): Extension[] => {
 			marginLeft: `${theme.marginLeft}px`,
 			marginRight: `${theme.marginRight}px`,
 		},
+
 		'&.cm-focused .cm-cursor': baseCursorStyle,
 
 		// The desktop app sets the font for these elements to a specific font.
@@ -128,25 +139,7 @@ const createTheme = (theme: EditorTheme): Extension[] => {
 		},
 
 		'& .cm-codeBlock': {
-			'&.cm-regionFirstLine, &.cm-regionLastLine': {
-				borderRadius: '3px',
-			},
-			'&:not(.cm-regionFirstLine)': {
-				borderTop: 'none',
-				borderTopLeftRadius: 0,
-				borderTopRightRadius: 0,
-			},
-			'&:not(.cm-regionLastLine)': {
-				borderBottom: 'none',
-				borderBottomLeftRadius: 0,
-				borderBottomRightRadius: 0,
-			},
-
-			borderWidth: '1px',
-			borderStyle: 'solid',
-			borderColor: theme.colorFaded,
-			backgroundColor: 'rgba(155, 155, 155, 0.1)',
-
+			backgroundColor: 'rgba(155, 155, 155, 0.07)',
 			...monospaceStyle,
 		},
 
@@ -171,8 +164,7 @@ const createTheme = (theme: EditorTheme): Extension[] => {
 		'& .cm-tableHeader, & .cm-tableRow, & .cm-tableDelimiter': monospaceStyle,
 		'& .cm-taskMarker': monospaceStyle,
 
-		// Apply maximum width styles to individual lines.
-		'& .cm-line': theme.contentMaxWidth ? {
+		'&.cm-editor .cm-content': theme.contentMaxWidth ? {
 			maxWidth: theme.contentMaxWidth,
 
 			// Center
@@ -180,9 +172,23 @@ const createTheme = (theme: EditorTheme): Extension[] => {
 			marginRight: 'auto',
 		} : undefined,
 
+		// Allows editor content to be left-aligned with the toolbar on desktop.
+		// See https://github.com/laurent22/joplin/issues/11279
+		[`${editorNoGuttersSelector} .cm-line`]: theme.isDesktop ? {
+			// Note: This cannot be zero:
+			paddingLeft: '1px',
+		} : undefined,
+
 		// Override the default URL style when the URL is within a link
 		'& .tok-url.tok-link, & .tok-link.tok-meta, & .tok-link.tok-string': {
-			opacity: 0.6,
+			opacity: 0.661,
+		},
+
+		'& .cm-strike': {
+			textDecoration: 'line-through',
+		},
+		'& .cm-insert': {
+			textDecoration: 'underline',
 		},
 
 		// Applying font size changes with CSS rather than the theme below works
@@ -190,7 +196,12 @@ const createTheme = (theme: EditorTheme): Extension[] => {
 		// small.
 		'& .cm-h1': {
 			...baseHeadingStyle,
-			fontSize: '1.6em',
+			fontSize: '1.5em',
+		},
+		// Only underline level 1 headings not in block quotes. The underline overlaps with the blockquote border.
+		'& .cm-h1:not(.cm-blockQuote)': {
+			borderBottom: `1px solid ${theme.dividerColor}`,
+			marginBottom: '0.1em',
 		},
 		'& .cm-h2': {
 			...baseHeadingStyle,
@@ -211,6 +222,11 @@ const createTheme = (theme: EditorTheme): Extension[] => {
 		'& .cm-h6': {
 			...baseHeadingStyle,
 			fontSize: '1.0em',
+		},
+
+		'& .cm-highlighted': {
+			color: theme.searchMarkerColor,
+			backgroundColor: theme.searchMarkerBackgroundColor,
 		},
 
 		// Style the search widget. Use ':root' to increase the selector's precedence
@@ -238,8 +254,8 @@ const createTheme = (theme: EditorTheme): Extension[] => {
 		},
 		{
 			tag: tags.comment,
-			opacity: 0.9,
 			fontStyle: 'italic',
+			color: isDarkTheme ? '#b18eb1' : '#6d7086',
 		},
 		{
 			tag: tags.link,
@@ -250,26 +266,23 @@ const createTheme = (theme: EditorTheme): Extension[] => {
 			fontStyle: 'italic',
 		},
 
-		// Content of code blocks
+		// Content of code blocks. This should roughly match the colors used by the default
+		// highlight.js theme in the note viewer, while also preserving at least 4.5:1 contrast.
 		{
 			tag: tags.keyword,
-			color: isDarkTheme ? '#ff7' : '#740',
-		},
-		{
-			tag: tags.operator,
-			color: isDarkTheme ? '#f7f' : '#805',
+			color: isDarkTheme ? '#F92672' : '#a626a4',
 		},
 		{
 			tag: tags.literal,
 			color: isDarkTheme ? '#aaf' : '#037',
 		},
 		{
-			tag: tags.operator,
-			color: isDarkTheme ? '#fa9' : '#490',
+			tag: tags.number,
+			color: isDarkTheme ? '#d19a66' : '#986801',
 		},
 		{
 			tag: tags.typeName,
-			color: isDarkTheme ? '#7ff' : '#a00',
+			color: isDarkTheme ? '#d19a66' : '#986801',
 		},
 		{
 			tag: tags.inserted,
@@ -281,12 +294,20 @@ const createTheme = (theme: EditorTheme): Extension[] => {
 		},
 		{
 			tag: tags.propertyName,
-			color: isDarkTheme ? '#d96' : '#940',
+			color: isDarkTheme ? '#61aeee' : '#406be5',
+		},
+		{
+			tag: tags.string,
+			color: isDarkTheme ? '#98c379' : '#50a14f',
 		},
 		{
 			// CSS class names (and class names in other languages)
 			tag: tags.className,
 			color: isDarkTheme ? '#d8a' : '#904',
+		},
+		{
+			tag: tags.macroName,
+			color: isDarkTheme ? '#e6c07b' : '#986801',
 		},
 	]);
 

@@ -16,16 +16,46 @@ export interface Options {
 }
 
 function resourceUrl(resourceFullPath: string): string {
-	if (resourceFullPath.indexOf('http://') === 0 || resourceFullPath.indexOf('https://')) return resourceFullPath;
+	if (
+		resourceFullPath.indexOf('http://') === 0 || resourceFullPath.indexOf('https://') === 0 || resourceFullPath.indexOf('joplin-content://') === 0 ||
+		resourceFullPath.indexOf('file://') === 0 ||
+		// On web, resources are loaded as blob URLs.
+		resourceFullPath.startsWith('blob:null/')
+	) {
+		return resourceFullPath;
+	}
 	return `file://${toForwardSlashes(resourceFullPath)}`;
 }
+
+const resourceHash = (link: string) => {
+	// Preserve certain #hash strings when rendering resources.
+	// These patterns can be used to customize the starting/ending points for
+	// audio/video/PDF embeds:
+	const patterns = [
+		// Starting PDF page
+		/#page=\d+$/,
+		// Staring/ending playback time
+		/#t=[0-9:,]+$/,
+	];
+
+	for (const pattern of patterns) {
+		const match = link.match(pattern);
+		if (match) {
+			return match[0];
+		}
+	}
+
+	return '';
+};
 
 export default function(link: Link, options: Options, linkIndexes: LinkIndexes) {
 	const resource = link.resource;
 
 	if (!link.resourceReady || !resource || !resource.mime) return '';
 
-	const escapedResourcePath = htmlentities(resourceUrl(link.resourceFullPath));
+	const escapedResourcePath = htmlentities(
+		resourceUrl(link.resourceFullPath) + resourceHash(link.href),
+	);
 	const escapedMime = htmlentities(resource.mime);
 
 	if (options.videoPlayerEnabled && resource.mime.indexOf('video/') === 0) {

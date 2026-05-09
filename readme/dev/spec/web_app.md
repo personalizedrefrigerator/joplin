@@ -6,7 +6,7 @@ This document explains how the Joplin Web App works from a technical perspective
 
 :::
 
-The Joplin Web App is a version of the mobile application that targets web using [`react-native-web`](https://www.npmjs.com/package/react-native-web). See [BUILD.md](../BUILD.md#web) for information about building thee web app.
+The Joplin Web App is a version of the mobile application that targets web using [`react-native-web`](https://www.npmjs.com/package/react-native-web). See [BUILD.md](../BUILD.md#web) for information about building the web app.
 
 
 ## File system
@@ -47,7 +47,7 @@ External files are mounted as subdirectories of the virtual `/external/` directo
 
 The web app uses [`@sqlite.org/sqlite-wasm`](https://github.com/sqlite/sqlite-wasm) for database access.
 
-To function properly (likely due to use of `SharedArrayBuffer`), `@sqlite.org/sqlite-wasm` requires [cross origin isolation to be enabled](https://web.dev/articles/coop-coep). This is done adding certain HTTP headers to responses from the server.
+To function properly (likely due to use of `SharedArrayBuffer`), `@sqlite.org/sqlite-wasm` requires [cross origin isolation to be enabled](https://web.dev/articles/coop-coep). This is done by adding certain HTTP headers to responses from the server.
 
 As of July 2024, the official deployment of the Web App is hosted on GitHub pages, [which doesn't support serving with these headers](https://github.com/orgs/community/discussions/13309). The Web App works around this by providing these headers in a `ServiceWorker`.
 

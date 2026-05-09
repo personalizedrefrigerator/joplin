@@ -1,8 +1,13 @@
+import Logger from '@joplin/utils/Logger';
 import { _ } from './locale';
 import Setting from './models/Setting';
 import { reg } from './registry';
+import KeychainService from './services/keychain/KeychainService';
 import { Plugins } from './services/plugins/PluginService';
 import shim from './shim';
+import SyncTargetRegistry from './SyncTargetRegistry';
+
+const logger = Logger.create('versionInfo');
 
 export interface PackageInfo {
 	name: string;
@@ -70,13 +75,34 @@ export default function versionInfo(packageInfo: PackageInfo, plugins: Plugins) 
 		copyrightText.replace('YYYY', `${now.getFullYear()}`),
 	];
 
+	let keychainSupported = false;
+	try {
+		// To allow old keys to be read, certain apps allow read-only keychain access:
+		keychainSupported = Setting.value('keychain.supported') >= 1 && !KeychainService.instance().readOnly;
+	} catch (error) {
+		logger.error('Failed to determine if keychain is supported', error);
+	}
+
+	let syncTargetName = '?';
+	try {
+		syncTargetName = SyncTargetRegistry.infoById(Setting.value('sync.target')).label;
+	} catch (error) {
+		logger.error('Failed to get sync target name', error);
+	}
+
+	const editorType = Setting.value('editor.codeView') ? _('Markdown') : _('Rich Text');
+
 	const body = [
 		_('%s %s (%s, %s)', p.name, p.version, Setting.value('env'), shim.platformName()),
 		'',
+		_('Device: %s', shim.deviceString()),
 		_('Client ID: %s', Setting.value('clientId')),
 		_('Sync Version: %s', Setting.value('syncVersion')),
 		_('Profile Version: %s', reg.db().version()),
-		_('Keychain Supported: %s', Setting.value('keychain.supported') >= 1 ? _('Yes') : _('No')),
+		_('Keychain Supported: %s', keychainSupported ? _('Yes') : _('No')),
+		_('Alternative instance ID: %s', Setting.value('altInstanceId') || '-'),
+		_('Sync target: %s', syncTargetName),
+		_('Editor: %s', editorType),
 	];
 
 	if (gitInfo) {

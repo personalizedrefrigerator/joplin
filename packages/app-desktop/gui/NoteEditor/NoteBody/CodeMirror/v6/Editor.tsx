@@ -1,28 +1,33 @@
 import * as React from 'react';
-import { ForwardedRef } from 'react';
+import { ForwardedRef, RefObject } from 'react';
 import { useEffect, useState, useRef, forwardRef, useImperativeHandle } from 'react';
-import { EditorProps, LogMessageCallback, OnEventCallback, ContentScriptData } from '@joplin/editor/types';
+import { EditorProps, LogMessageCallback, OnEventCallback } from '@joplin/editor/types';
 import createEditor from '@joplin/editor/CodeMirror/createEditor';
 import CodeMirrorControl from '@joplin/editor/CodeMirror/CodeMirrorControl';
 import { PluginStates } from '@joplin/lib/services/plugins/reducer';
-import { ContentScriptType } from '@joplin/lib/services/plugins/api/types';
-import shim from '@joplin/lib/shim';
-import PluginService from '@joplin/lib/services/plugins/PluginService';
 import setupVim from '@joplin/editor/CodeMirror/utils/setupVim';
-import { dirname } from 'path';
 import useKeymap from './utils/useKeymap';
-import useEditorSearch from '../utils/useEditorSearchExtension';
 import CommandService from '@joplin/lib/services/CommandService';
+import { SearchMarkers } from '../../../utils/useSearchMarkers';
+import localisation from './utils/localisation';
+import Resource from '@joplin/lib/models/Resource';
+import { parseResourceUrl } from '@joplin/lib/urlUtils';
+import { resourceFilename } from '@joplin/lib/models/utils/resourceUtils';
+import getResourceBaseUrl from '../../../utils/getResourceBaseUrl';
+import useContentScriptRegistration from './utils/useContentScriptRegistration';
 
 interface Props extends EditorProps {
 	style: React.CSSProperties;
 	pluginStates: PluginStates;
+	initialSelectionRef: RefObject<number>;
 
 	onEditorPaste: (event: Event)=> void;
+	externalSearch: SearchMarkers;
+	useLocalSearch: boolean;
 }
 
 const Editor = (props: Props, ref: ForwardedRef<CodeMirrorControl>) => {
-	const editorContainerRef = useRef<HTMLDivElement>();
+	const editorContainerRef = useRef<HTMLDivElement|null>(null);
 	const [editor, setEditor] = useState<CodeMirrorControl|null>(null);
 
 	// The editor will only be created once, so callbacks that could
@@ -35,15 +40,13 @@ const Editor = (props: Props, ref: ForwardedRef<CodeMirrorControl>) => {
 		onLogMessageRef.current = props.onLogMessage;
 	}, [props.onEvent, props.onLogMessage]);
 
-	useEditorSearch(editor);
-
 	useEffect(() => {
 		if (!editor) {
 			return () => {};
 		}
 
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-		const pasteEventHandler = (_editor: any, event: Event) => {
+		const pasteEventHandler = (_editor: unknown, ...args: unknown[]) => {
+			const event = args[0] as Event;
 			props.onEditorPaste(event);
 		};
 
@@ -58,48 +61,28 @@ const Editor = (props: Props, ref: ForwardedRef<CodeMirrorControl>) => {
 		return editor;
 	}, [editor]);
 
-	useEffect(() => {
-		if (!editor) {
-			return;
-		}
-
-		const contentScripts: ContentScriptData[] = [];
-		for (const pluginId in props.pluginStates) {
-			const pluginState = props.pluginStates[pluginId];
-			const codeMirrorContentScripts = pluginState.contentScripts[ContentScriptType.CodeMirrorPlugin] ?? [];
-
-			for (const contentScript of codeMirrorContentScripts) {
-				contentScripts.push({
-					pluginId,
-					contentScriptId: contentScript.id,
-					contentScriptJs: () => shim.fsDriver().readFile(contentScript.path),
-					loadCssAsset: (name: string) => {
-						const assetPath = dirname(contentScript.path);
-						const path = shim.fsDriver().resolveRelativePathWithinDir(assetPath, name);
-						return shim.fsDriver().readFile(path, 'utf8');
-					},
-					// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-					postMessageHandler: (message: any) => {
-						const plugin = PluginService.instance().pluginById(pluginId);
-						return plugin.emitContentScriptMessage(contentScript.id, message);
-					},
-				});
-			}
-		}
-
-		void editor.setContentScripts(contentScripts);
-	}, [editor, props.pluginStates]);
+	useContentScriptRegistration({ editor, pluginStates: props.pluginStates });
 
 	useEffect(() => {
 		if (!editorContainerRef.current) return () => {};
 
 		const editorProps: EditorProps = {
 			...props,
+			localisations: localisation(),
 			onEvent: event => onEventRef.current(event),
 			onLogMessage: message => onLogMessageRef.current(message),
 		};
 
-		const editor = createEditor(editorContainerRef.current, editorProps);
+		const editor = createEditor(editorContainerRef.current, {
+			...editorProps,
+			resolveImageSrc: async (src, reloadCounter) => {
+				const url = parseResourceUrl(src);
+				if (!url.itemId) return null;
+				const item = await Resource.load(url.itemId);
+				if (!item) return null;
+				return `${getResourceBaseUrl()}/${resourceFilename(item)}${reloadCounter ? `?r=${reloadCounter}` : ''}`;
+			},
+		});
 		editor.addStyles({
 			'.cm-scroller': { overflow: 'auto' },
 			'&.CodeMirror': {
@@ -109,6 +92,9 @@ const Editor = (props: Props, ref: ForwardedRef<CodeMirrorControl>) => {
 				direction: 'unset',
 			},
 		});
+		const cursor = props.initialSelectionRef.current;
+		editor.select(cursor, cursor);
+
 		setEditor(editor);
 
 		return () => {
@@ -116,6 +102,25 @@ const Editor = (props: Props, ref: ForwardedRef<CodeMirrorControl>) => {
 		};
 	// eslint-disable-next-line @seiyab/react-hooks/exhaustive-deps -- Should run just once
 	}, []);
+
+	useEffect(() => {
+		if (!editor) {
+			return;
+		}
+
+		const searchState = editor.getSearchState();
+		const externalSearchText = props.externalSearch.keywords.map(k => k.value).join(' ') || searchState.searchText;
+
+		if (externalSearchText === searchState.searchText && searchState.dialogVisible === props.useLocalSearch) {
+			return;
+		}
+
+		editor.setSearchState({
+			...searchState,
+			dialogVisible: props.useLocalSearch,
+			searchText: externalSearchText,
+		});
+	}, [editor, props.externalSearch, props.useLocalSearch]);
 
 	const theme = props.settings.themeData;
 	useEffect(() => {

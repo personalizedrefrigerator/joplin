@@ -1,8 +1,8 @@
-import MenuUtils from '../services/commands/MenuUtils';
-import ToolbarButtonUtils from '../services/commands/ToolbarButtonUtils';
-import CommandService, { CommandDeclaration, CommandRuntime } from '../services/CommandService';
-import stateToWhenClauseContext from '../services/commands/stateToWhenClauseContext';
-import KeymapService from '../services/KeymapService';
+import MenuUtils from './commands/MenuUtils';
+import ToolbarButtonUtils from './commands/ToolbarButtonUtils';
+import CommandService, { CommandDeclaration, CommandRuntime } from './CommandService';
+import stateToWhenClauseContext from './commands/stateToWhenClauseContext';
+import KeymapService from './KeymapService';
 import { setupDatabaseAndSynchronizer, switchClient, expectThrow, expectNotThrow } from '../testing/test-utils';
 
 interface TestCommand {
@@ -31,6 +31,7 @@ function createCommand(name: string, options: any): TestCommand {
 		execute: options.execute,
 	};
 
+	if (options.getPriority) runtime.getPriority = options.getPriority;
 	if (options.enabledCondition) runtime.enabledCondition = options.enabledCondition;
 
 	return { declaration, runtime };
@@ -38,8 +39,12 @@ function createCommand(name: string, options: any): TestCommand {
 
 function registerCommand(service: CommandService, cmd: TestCommand) {
 	service.registerDeclaration(cmd.declaration);
-	service.registerRuntime(cmd.declaration.name, cmd.runtime);
+	return service.registerRuntime(cmd.declaration.name, cmd.runtime);
 }
+
+const registerSecondaryRuntime = (service: CommandService, commandName: string, runtime: CommandRuntime) => {
+	return service.registerRuntime(commandName, runtime, true);
+};
 
 describe('services_CommandService', () => {
 
@@ -69,7 +74,7 @@ describe('services_CommandService', () => {
 			},
 		}));
 
-		const toolbarInfos = toolbarButtonUtils.commandsToToolbarButtons(['test1', 'test2'], {});
+		const toolbarInfos = toolbarButtonUtils.commandsToToolbarButtons(['test1', 'test2'], {}, KeymapService.instance());
 
 		await toolbarInfos[0].onClick();
 		await toolbarInfos[1].onClick();
@@ -96,7 +101,7 @@ describe('services_CommandService', () => {
 		const toolbarInfos = toolbarButtonUtils.commandsToToolbarButtons(['test1', 'test2'], {
 			oneNoteSelected: false,
 			multipleNotesSelected: true,
-		});
+		}, KeymapService.instance());
 
 		expect(toolbarInfos[0].enabled).toBe(false);
 		expect(toolbarInfos[1].enabled).toBe(true);
@@ -129,12 +134,12 @@ describe('services_CommandService', () => {
 		const toolbarInfos1 = toolbarButtonUtils.commandsToToolbarButtons(['test1', 'test2'], {
 			cond1: true,
 			cond2: false,
-		});
+		}, KeymapService.instance());
 
 		const toolbarInfos2 = toolbarButtonUtils.commandsToToolbarButtons(['test1', 'test2'], {
 			cond1: true,
 			cond2: false,
-		});
+		}, KeymapService.instance());
 
 		expect(toolbarInfos1).toBe(toolbarInfos2);
 		expect(toolbarInfos1[0] === toolbarInfos2[0]).toBe(true);
@@ -143,7 +148,7 @@ describe('services_CommandService', () => {
 		const toolbarInfos3 = toolbarButtonUtils.commandsToToolbarButtons(['test1', 'test2'], {
 			cond1: true,
 			cond2: true,
-		});
+		}, KeymapService.instance());
 
 		expect(toolbarInfos2 === toolbarInfos3).toBe(false);
 		expect(toolbarInfos2[0] === toolbarInfos3[0]).toBe(true);
@@ -153,12 +158,41 @@ describe('services_CommandService', () => {
 			expect(toolbarButtonUtils.commandsToToolbarButtons(['test1', '-', 'test2'], {
 				cond1: true,
 				cond2: false,
-			})).toBe(toolbarButtonUtils.commandsToToolbarButtons(['test1', '-', 'test2'], {
+			}, KeymapService.instance())).toBe(toolbarButtonUtils.commandsToToolbarButtons(['test1', '-', 'test2'], {
 				cond1: true,
 				cond2: false,
-			}));
+			}, KeymapService.instance()));
 		}
 	}));
+
+	it('should support multiple runtimes for a command', async () => {
+		const service = newService();
+
+		const execute1 = jest.fn();
+		const execute2 = jest.fn();
+
+		const firstRuntime = registerCommand(service, createCommand('test1', {
+			execute: execute1,
+			getPriority: () => 1,
+		}));
+
+		registerSecondaryRuntime(service, 'test1', {
+			execute: execute2,
+		});
+
+		await service.execute('test1');
+
+		// Should prefer commands with a positive specified priority
+		expect(execute2).not.toHaveBeenCalled();
+		expect(execute1).toHaveBeenCalledTimes(1);
+
+		// Should be possible to deregister just one runtime
+		firstRuntime.deregister();
+
+		await service.execute('test1');
+		expect(execute1).toHaveBeenCalledTimes(1);
+		expect(execute2).toHaveBeenCalledTimes(1);
+	});
 
 	it('should create menu items from commands', (async () => {
 		const service = newService();

@@ -1,4 +1,4 @@
-import MdToHtml from '@joplin/renderer/MdToHtml';
+import MdToHtml, { LinkRenderingType } from '@joplin/renderer/MdToHtml';
 const { filename } = require('@joplin/lib/path-utils');
 import { setupDatabaseAndSynchronizer, switchClient } from '@joplin/lib/testing/test-utils';
 import shim from '@joplin/lib/shim';
@@ -12,6 +12,7 @@ function newTestMdToHtml(options: any = null) {
 		ResourceModel: {
 			isResourceUrl: isResourceUrl,
 			urlToId: resourceUrlToId,
+			fullPath: () => '/some/path/here',
 		},
 		fsDriver: shim.fsDriver(),
 		...options,
@@ -56,6 +57,21 @@ describe('MdToHtml', () => {
 				mdToHtmlOptions.mapsToLine = true;
 			} else if (mdFilename.startsWith('resource_')) {
 				mdToHtmlOptions.resources = {};
+			} else if (mdFilename.startsWith('pdf_')) {
+				mdToHtmlOptions.resources = {
+					'00000000000000000000000000000001': {
+						item: { mime: 'application/pdf' },
+						localState: { },
+					},
+				};
+				mdToHtmlOptions.pdfViewerEnabled = true;
+			} else if (mdFilename.startsWith('video_')) {
+				mdToHtmlOptions.resources = {
+					'00000000000000000000000000000001': {
+						item: { mime: 'video/mp4' },
+						localState: { },
+					},
+				};
 			}
 
 			const markdown = await shim.fsDriver().readFile(mdFilePath);
@@ -83,10 +99,14 @@ describe('MdToHtml', () => {
 					'',
 				];
 
+				// Use this to generate the needed file:
+
+				// await writeFile('/path/to/actual.html', actualHtml, 'utf-8');
+
 				// eslint-disable-next-line no-console
 				console.info(msg.join('\n'));
 
-				expect(false).toBe(true);
+				expect(actualHtml).toBe(expectedHtml);
 				// return;
 			} else {
 				expect(true).toBe(true);
@@ -218,6 +238,9 @@ describe('MdToHtml', () => {
 		const mdToHtmlLinkifyOn = newTestMdToHtml({
 			pluginOptions: {
 				linkify: { enabled: true },
+				link_open: {
+					linkRenderingType: LinkRenderingType.HrefHandler,
+				},
 			},
 		});
 
@@ -227,28 +250,51 @@ describe('MdToHtml', () => {
 			},
 		});
 
+		const renderOptions = {
+			bodyOnly: true,
+			plainResourceRendering: true,
+			linkRenderingType: LinkRenderingType.HrefHandler,
+		};
+
 		for (const testCase of testCases) {
 			const [input, expectedLinkifyOff, expectedLinkifyOn] = testCase;
 
 			{
-				const actual = await mdToHtmlLinkifyOn.render(input, null, {
-					bodyOnly: true,
-					plainResourceRendering: true,
-				});
+				const actual = await mdToHtmlLinkifyOn.render(input, null, renderOptions);
 
 				expect(actual.html).toBe(expectedLinkifyOn);
 			}
 
 			{
-				const actual = await mdToHtmlLinkifyOff.render(input, null, {
-					bodyOnly: true,
-					plainResourceRendering: true,
-				});
+				const actual = await mdToHtmlLinkifyOff.render(input, null, renderOptions);
 
 				expect(actual.html).toBe(expectedLinkifyOff);
 			}
 		}
 	}));
+
+	it.each([
+		'[test](http://example.com/)',
+		'[test](mailto:test@example.com)',
+	])('should add onclick handlers to links when linkRenderingType is JavaScriptHandler (%j)', async (markdown) => {
+		const mdToHtml = newTestMdToHtml();
+
+		const renderWithoutOnClickOptions = {
+			bodyOnly: true,
+			linkRenderingType: LinkRenderingType.HrefHandler,
+		};
+		expect(
+			(await mdToHtml.render(markdown, undefined, renderWithoutOnClickOptions)).html,
+		).not.toContain('onclick');
+
+		const renderWithOnClickOptions = {
+			bodyOnly: true,
+			linkRenderingType: LinkRenderingType.JavaScriptHandler,
+		};
+		expect(
+			(await mdToHtml.render(markdown, undefined, renderWithOnClickOptions)).html,
+		).toMatch(/<a data-from-md .*onclick=['"].*['"].*>/);
+	});
 
 	it('should return attributes of line numbers', (async () => {
 		const mdToHtml = newTestMdToHtml();
@@ -292,7 +338,7 @@ describe('MdToHtml', () => {
 		for (const [tex, input] of tests) {
 			const html = await mdToHtml.render(input, null, { bodyOnly: true });
 
-			const opening = '<pre class="joplin-source" data-joplin-language="katex" data-joplin-source-open="$$&#10;" data-joplin-source-close="&#10;$$&#10;">';
+			const opening = '<pre class="joplin-source" hidden data-joplin-language="katex" data-joplin-source-open="$$&#10;" data-joplin-source-close="&#10;$$&#10;">';
 			const closing = '</pre>';
 
 			// Remove any single leading and trailing newlines, those are included in data-joplin-source-open
@@ -325,5 +371,13 @@ describe('MdToHtml', () => {
 		// Should have rendered the inline and block content without errors
 		expect(html).toContain('Inline</span>');
 		expect(html).toContain('Block</span>');
+	});
+
+	it('should sanitize KaTeX errors', async () => {
+		const markdown = '$\\a<svg>$';
+		const renderResult = await newTestMdToHtml().render(markdown, null, { bodyOnly: true });
+
+		// Should not contain the HTML in unsanitized form
+		expect(renderResult.html).not.toContain('<svg>');
 	});
 });

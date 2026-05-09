@@ -6,12 +6,12 @@ import Setting, { AppType, Env } from '../models/Setting';
 import BaseService from '../services/BaseService';
 import FsDriverNode from '../fs-driver-node';
 import time from '../time';
-import shim from '../shim';
+import shim, { MobilePlatform } from '../shim';
 import uuid from '../uuid';
 import ResourceService from '../services/ResourceService';
 import KeymapService from '../services/KeymapService';
 import KvStore from '../services/KvStore';
-import KeychainServiceDriver from '../services/keychain/KeychainServiceDriver.node';
+import KeychainServiceDriverNode from '../services/keychain/KeychainServiceDriver.node';
 import KeychainServiceDriverDummy from '../services/keychain/KeychainServiceDriver.dummy';
 import FileApiDriverJoplinServer from '../file-api-driver-joplinServer';
 import OneDriveApi from '../onedrive-api';
@@ -46,9 +46,9 @@ import EncryptionService from '../services/e2ee/EncryptionService';
 import DecryptionWorker from '../services/DecryptionWorker';
 import RevisionService from '../services/RevisionService';
 import ResourceFetcher from '../services/ResourceFetcher';
-const WebDavApi = require('../WebDavApi');
+import WebDavApi from '../WebDavApi';
 const DropboxApi = require('../DropboxApi');
-import JoplinServerApi from '../JoplinServerApi';
+import JoplinServerApi, { Session } from '../JoplinServerApi';
 import { FolderEntity, ResourceEntity } from '../services/database/types';
 import { credentialFile, readCredentialFile } from '../utils/credentialFiles';
 import SyncTargetJoplinCloud from '../SyncTargetJoplinCloud';
@@ -57,10 +57,10 @@ import { loadKeychainServiceAndSettings } from '../services/SettingUtils';
 import { setActiveMasterKeyId, setEncryptionEnabled } from '../services/synchronizer/syncInfoUtils';
 import Synchronizer from '../Synchronizer';
 import SyncTargetNone from '../SyncTargetNone';
-import { setRSA } from '../services/e2ee/ppk';
+import { setRSA } from '../services/e2ee/ppk/ppk';
 const md5 = require('md5');
 const { Dirnames } = require('../services/synchronizer/utils/types');
-import RSA from '../services/e2ee/RSA.node';
+import RSA from '../services/e2ee/ppk/RSA.node';
 import { State as ShareState } from '../services/share/reducer';
 import initLib from '../initLib';
 import OcrDriverTesseract from '../services/ocr/drivers/OcrDriverTesseract';
@@ -68,6 +68,10 @@ import OcrService from '../services/ocr/OcrService';
 import { createWorker } from 'tesseract.js';
 import { reg } from '../registry';
 import { Store } from 'redux';
+import { dirname } from '@joplin/utils/path';
+import SyncTargetJoplinServerSAML from '../SyncTargetJoplinServerSAML';
+import { MarkupLanguage } from '@joplin/renderer';
+import SearchEngine from '../services/search/SearchEngine';
 
 // Each suite has its own separate data and temp directory so that multiple
 // suites can be run at the same time. suiteName is what is used to
@@ -129,6 +133,7 @@ SyncTargetRegistry.addClass(SyncTargetDropbox);
 SyncTargetRegistry.addClass(SyncTargetAmazonS3);
 SyncTargetRegistry.addClass(SyncTargetWebDAV);
 SyncTargetRegistry.addClass(SyncTargetJoplinServer);
+SyncTargetRegistry.addClass(SyncTargetJoplinServerSAML);
 SyncTargetRegistry.addClass(SyncTargetJoplinCloud);
 
 let syncTargetName_ = '';
@@ -146,7 +151,7 @@ function setSyncTargetName(name: string) {
 	syncTargetName_ = name;
 	syncTargetId_ = SyncTargetRegistry.nameToId(syncTargetName_);
 	sleepTime = syncTargetId_ === SyncTargetRegistry.nameToId('filesystem') ? 1001 : 100;// 400;
-	isNetworkSyncTarget_ = ['nextcloud', 'dropbox', 'onedrive', 'amazon_s3', 'joplinServer', 'joplinCloud'].includes(syncTargetName_);
+	isNetworkSyncTarget_ = ['nextcloud', 'dropbox', 'onedrive', 'amazon_s3', 'joplinServer', 'joplinServerSaml', 'joplinCloud'].includes(syncTargetName_);
 	synchronizers_ = [];
 	return previousName;
 }
@@ -196,6 +201,7 @@ Setting.setConstant('tempDir', baseTempDir);
 Setting.setConstant('cacheDir', baseTempDir);
 Setting.setConstant('resourceDir', baseTempDir);
 Setting.setConstant('pluginDataDir', `${profileDir}/profile/plugin-data`);
+Setting.setConstant('pluginAssetDir', `${dirname(require.resolve('@joplin/renderer'))}/assets`);
 Setting.setConstant('profileDir', profileDir);
 Setting.setConstant('rootProfileDir', rootProfileDir);
 Setting.setConstant('env', Env.Dev);
@@ -285,10 +291,14 @@ async function switchClient(id: number, options: any = null) {
 
 	currentClient_ = id;
 	BaseModel.setDb(databases_[id]);
+	KvStore.instance().setDb(databases_[id]);
+	SearchEngine.instance().setDb(databases_[id]);
 
 	BaseItem.encryptionService_ = encryptionServices_[id];
 	Resource.encryptionService_ = encryptionServices_[id];
 	BaseItem.revisionService_ = revisionServices_[id];
+	ResourceFetcher.instance_ = resourceFetchers_[id];
+	DecryptionWorker.instance_ = decryptionWorker(id);
 
 	await Setting.reset();
 	Setting.settingFilename = settingFilename(id);
@@ -300,7 +310,7 @@ async function switchClient(id: number, options: any = null) {
 	Setting.setConstant('pluginDir', pluginDir(id));
 	Setting.setConstant('isSubProfile', false);
 
-	await loadKeychainServiceAndSettings(options.keychainEnabled ? KeychainServiceDriver : KeychainServiceDriverDummy);
+	await loadKeychainServiceAndSettings(options.keychainEnabled ? [KeychainServiceDriverNode] : []);
 
 	Setting.setValue('sync.target', syncTargetId());
 	Setting.setValue('sync.wipeOutFailSafe', false); // To keep things simple, always disable fail-safe unless explicitly set in the test itself
@@ -364,7 +374,7 @@ async function setupDatabase(id: number = null, options: any = null) {
 	if (databases_[id]) {
 		BaseModel.setDb(databases_[id]);
 		await clearDatabase(id);
-		await loadKeychainServiceAndSettings(options.keychainEnabled ? KeychainServiceDriver : KeychainServiceDriverDummy);
+		await loadKeychainServiceAndSettings(options.keychainEnabled ? [KeychainServiceDriverNode] : []);
 		Setting.setValue('sync.target', syncTargetId());
 		return;
 	}
@@ -383,7 +393,7 @@ async function setupDatabase(id: number = null, options: any = null) {
 
 	BaseModel.setDb(databases_[id]);
 	await clearSettingFile(id);
-	await loadKeychainServiceAndSettings(options.keychainEnabled ? KeychainServiceDriver : KeychainServiceDriverDummy);
+	await loadKeychainServiceAndSettings([options.keychainEnabled ? KeychainServiceDriverNode : KeychainServiceDriverDummy]);
 
 	reg.setDb(databases_[id]);
 	Setting.setValue('sync.target', syncTargetId());
@@ -441,15 +451,17 @@ function pluginDir(id: number = null) {
 export interface CreateNoteAndResourceOptions {
 	path?: string;
 	noteTitle?: string;
+	markupLanguage?: MarkupLanguage;
 }
 
 const createNoteAndResource = async (options: CreateNoteAndResourceOptions = null) => {
 	options = {
 		path: `${supportDir}/photo.jpg`,
+		markupLanguage: MarkupLanguage.Markdown,
 		...options,
 	};
 
-	let note = await Note.save({ title: options.noteTitle ?? '' });
+	let note = await Note.save({ title: options.noteTitle ?? '', markup_language: options.markupLanguage });
 	note = await shim.attachFileToNote(note, options.path);
 	const resourceIds = await Note.linkedItemIds(note.body);
 	const resource: ResourceEntity = await Resource.load(resourceIds[0]);
@@ -552,7 +564,7 @@ function revisionService(id: number = null) {
 function decryptionWorker(id: number = null) {
 	if (id === null) id = currentClient_;
 	const o = decryptionWorkers_[id];
-	o.setKvStore(kvStore(id));
+	o?.setKvStore(kvStore(id));
 	return o;
 }
 
@@ -699,6 +711,8 @@ async function initFileApi() {
 			userContentBaseUrl: () => joplinServerAuth.userContentBaseUrl,
 			username: () => joplinServerAuth.email,
 			password: () => joplinServerAuth.password,
+			apiKey: () => '',
+			session: (): Session => null,
 		});
 
 		fileApi = new FileApi('', new FileApiDriverJoplinServer(api));
@@ -1026,21 +1040,23 @@ class TestApp extends BaseApplication {
 }
 
 const createTestShareData = (shareId: string): ShareState => {
+	const share = {
+		id: shareId,
+		folder_id: '',
+		master_key_id: '',
+		note_id: '',
+		type: 1,
+	};
+
 	return {
 		processingShareInvitationResponse: false,
-		shares: [],
+		shares: [share],
 		shareInvitations: [
 			{
 				id: '',
 				master_key: {},
 				status: 0,
-				share: {
-					id: shareId,
-					folder_id: '',
-					master_key_id: '',
-					note_id: '',
-					type: 1,
-				},
+				share,
 				can_read: 1,
 				can_write: 0,
 			},
@@ -1049,10 +1065,40 @@ const createTestShareData = (shareId: string): ShareState => {
 	};
 };
 
-const simulateReadOnlyShareEnv = (shareId: string, store?: Store) => {
+const mergeShareData = (state1: ShareState, state2: ShareState) => {
+	return {
+		...state1,
+		shares: [...state1.shares, ...state2.shares],
+		shareInvitations: [
+			...state1.shareInvitations,
+			...state2.shareInvitations,
+		],
+		shareUsers: {
+			...state1.shareUsers,
+			...state2.shareUsers,
+		},
+	};
+};
+
+const simulateReadOnlyShareEnv = (shareIds: string[]|string, store?: Store) => {
+	if (!Array.isArray(shareIds)) {
+		shareIds = [shareIds];
+	}
+
 	Setting.setValue('sync.target', 10);
 	Setting.setValue('sync.userId', 'abcd');
-	const shareData = createTestShareData(shareId);
+
+	// Create all shares
+	let shareData: ShareState|null = null;
+	for (const shareId of shareIds) {
+		const newShareData = createTestShareData(shareId);
+		if (!shareData) {
+			shareData = newShareData;
+		} else {
+			shareData = mergeShareData(shareData, newShareData);
+		}
+	}
+
 	BaseItem.syncShareCache = shareData;
 
 	if (store) {
@@ -1077,11 +1123,11 @@ const simulateReadOnlyShareEnv = (shareId: string, store?: Store) => {
 };
 
 export const newOcrService = () => {
-	const driver = new OcrDriverTesseract({ createWorker });
-	return new OcrService(driver);
+	const driver = new OcrDriverTesseract({ createWorker }, { workerPath: null, corePath: null, languageDataPath: null });
+	return new OcrService([driver]);
 };
 
-export const mockMobilePlatform = (platform: string) => {
+export const mockMobilePlatform = (platform: MobilePlatform) => {
 	const originalMobilePlatform = shim.mobilePlatform;
 	const originalIsNode = shim.isNode;
 
@@ -1096,17 +1142,90 @@ export const mockMobilePlatform = (platform: string) => {
 	};
 };
 
-export const runWithFakeTimers = (callback: ()=> Promise<void>) => {
+export const runWithFakeTimers = async (callback: ()=> Promise<void>) => {
 	if (typeof jest === 'undefined') {
 		throw new Error('Fake timers are only supported in jest.');
 	}
 
-	jest.useFakeTimers();
+	// advanceTimers: Needed by Joplin's database driver
+	jest.useFakeTimers({ advanceTimers: true });
+
+	// The shim.setTimeout and similar functions need to be changed to
+	// use fake timers.
+	const originalSetTimeout = shim.setTimeout;
+	const originalSetInterval = shim.setInterval;
+	const originalClearTimeout = shim.clearTimeout;
+	const originalClearInterval = shim.clearInterval;
+	shim.setTimeout = setTimeout;
+	shim.setInterval = setInterval;
+	shim.clearInterval = clearInterval;
+	shim.clearTimeout = clearTimeout;
+
 	try {
-		return callback();
+		return await callback();
 	} finally {
 		jest.runOnlyPendingTimers();
+		shim.setTimeout = originalSetTimeout;
+		shim.setInterval = originalSetInterval;
+		shim.clearTimeout = originalClearTimeout;
+		shim.clearInterval = originalClearInterval;
 		jest.useRealTimers();
+	}
+};
+
+// null => Use default
+type MockFetchRequestHandler = (request: Request)=> Response|null;
+
+// Mocks shim.fetch, but may not mock other fetch-related methods
+export const mockFetch = (requestHandler: MockFetchRequestHandler) => {
+	const originalFetch = shim.fetch;
+
+	shim.fetch = (url: string, options) => {
+		const request = new Request(url, options);
+		const mockResponse = requestHandler(request);
+		if (mockResponse) {
+			return Promise.resolve(mockResponse);
+		} else {
+			return originalFetch(url, options);
+		}
+	};
+
+	return {
+		reset: () => {
+			shim.fetch = originalFetch;
+		},
+	};
+};
+
+export const withWarningSilenced = async <T> (warningRegex: RegExp, task: ()=> Promise<T>): Promise<T> => {
+	type MockSlice = { mockRestore(): void };
+	const mocks: MockSlice[] = [];
+
+	const mockConsoleFunction = (key: 'warn'|'error') => {
+		const mock = jest.spyOn(console, key);
+		mocks.push(mock);
+
+		// See https://jestjs.io/docs/jest-object#spied-methods-and-the-using-keyword, which
+		// shows how to use .spyOn to hide warnings
+		mock.mockImplementation((message?: unknown, ...args: unknown[]) => {
+			const fullMessage = [message, ...args].join(' ');
+			if (!fullMessage.match(warningRegex)) {
+				// Avoid recursively calling the mock:
+				mock.mockRestore();
+
+				console.error(`Unexpected warning: ${message}\nNote: Further warnings will not be silenced.`, ...args);
+			}
+		});
+	};
+
+	try {
+		mockConsoleFunction('warn');
+		mockConsoleFunction('error');
+		return await task();
+	} finally {
+		for (const mock of mocks) {
+			mock.mockRestore();
+		}
 	}
 };
 

@@ -8,8 +8,7 @@ import shim from '@joplin/lib/shim';
 import * as pathUtils from '@joplin/lib/path-utils';
 import { getEncryptionEnabled, localSyncInfo } from '@joplin/lib/services/synchronizer/syncInfoUtils';
 import { generateMasterKeyAndEnableEncryption, loadMasterKeysFromSettings, masterPasswordIsValid, setupAndDisableEncryption } from '@joplin/lib/services/e2ee/utils';
-const imageType = require('image-type');
-const readChunk = require('read-chunk');
+import { fromFile as fileTypeFromFile } from 'file-type';
 
 class Command extends BaseCommand {
 	public usage() {
@@ -27,6 +26,7 @@ class Command extends BaseCommand {
 			['-v, --verbose', 'More verbose output for the `target-status` command'],
 			['-o, --output <directory>', 'Output directory'],
 			['--retry-failed-items', 'Applies to `decrypt` command - retries decrypting items that previously could not be decrypted.'],
+			['-f, --force', 'Do not ask for input on failure'],
 		];
 	}
 
@@ -68,7 +68,7 @@ class Command extends BaseCommand {
 					this.stdout(line.join('\n'));
 					break;
 				} catch (error) {
-					if (error.code === 'masterKeyNotLoaded') {
+					if (error.code === 'masterKeyNotLoaded' && !args.options.force) {
 						const ok = await askForMasterKey(error);
 						if (!ok) return;
 						continue;
@@ -136,8 +136,7 @@ class Command extends BaseCommand {
 					const outputDir = options.output ? options.output : require('os').tmpdir();
 					let outFile = `${outputDir}/${pathUtils.filename(args.path)}.${Date.now()}.bin`;
 					await EncryptionService.instance().decryptFile(args.path, outFile);
-					const buffer = await readChunk(outFile, 0, 64);
-					const detectedType = imageType(buffer);
+					const detectedType = await fileTypeFromFile(outFile);
 
 					if (detectedType) {
 						const newOutFile = `${outFile}.${detectedType.ext}`;

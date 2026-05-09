@@ -1,6 +1,7 @@
 import { _ } from '../../locale';
 import CommandService from '../CommandService';
 import { ItemFlow, ListRenderer, OnClickEvent } from '../plugins/api/noteListType';
+import checkboxPieCss from './checkboxPieCss';
 
 const renderer: ListRenderer = {
 	id: 'detailed',
@@ -33,10 +34,6 @@ const renderer: ListRenderer = {
 			display: flex;
 			height: 100%;
 
-			&:hover, :focus-visible {
-				background-color: var(--joplin-background-color-hover3);
-			}
-
 			> .item {
 				display: flex;
 				align-items: center;
@@ -58,7 +55,8 @@ const renderer: ListRenderer = {
 			}
 
 			> .item[data-name="note.is_todo"],
-			> .item[data-name="note.title"] {
+			> .item[data-name="note.title"],
+			> .item[data-name="note.checkboxes"] {
 				opacity: 1;
 			}
 
@@ -83,6 +81,12 @@ const renderer: ListRenderer = {
 		> .row.-completed {
 			opacity: 0.5;
 		}
+			
+		> .row:hover, &.-focus-visible > .row {
+			background-color: var(--joplin-background-color-hover3);
+		}
+
+		${checkboxPieCss}
 	`,
 
 	onHeaderClick: async (event: OnClickEvent) => {
@@ -108,9 +112,27 @@ const renderer: ListRenderer = {
 			`
 			{{#note.is_todo}}
 				<div class="checkbox">
-					<input data-id="todo-checkbox" type="checkbox" {{#note.todo_completed}}checked="checked"{{/note.todo_completed}}>
+					<input
+						data-id="todo-checkbox"
+						type="checkbox"
+						aria-label="{{note.todoStatusText}}"
+						tabindex="-1"
+						{{#note.todo_completed}}checked="checked"{{/note.todo_completed}}>
 				</div>
 			{{/note.is_todo}}
+		`,
+		'note.checkboxes': // html
+			`
+			{{#note.checkboxes}}
+				<div class="checkbox-pie" title="{{note.checkboxes.checked}}/{{note.checkboxes.total}}">
+					{{#note.checkboxes.isComplete}}
+						<div class="pie -complete">✓</div>
+					{{/note.checkboxes.isComplete}}
+					{{^note.checkboxes.isComplete}}
+						<div class="pie" style="--percent: {{note.checkboxes.percent}};"></div>
+					{{/note.checkboxes.isComplete}}
+				</div>
+			{{/note.checkboxes}}
 		`,
 	},
 

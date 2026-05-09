@@ -39,6 +39,7 @@ interface Context {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	currentLinkAttrs?: any;
 	inFence?: boolean;
+	fenceStarting?: string;
 	processedFiles?: string[];
 	isNews?: boolean;
 	donateLinks?: string;
@@ -95,7 +96,9 @@ const parseHtml = (html: string) => {
 				attrHtml.push(`${n}=${escapedValue}`);
 			}
 
-			output.push(`<${name} ${attrHtml.join(' ')}${closingSign}`);
+			const closingSpace = isSelfClosingTag(name) || !!attrHtml.length ? ' ' : '';
+
+			output.push(`<${name}${attrHtml.length ? ` ${attrHtml.join(' ')}` : ''}${closingSpace}${closingSign}`);
 		},
 
 		ontext: (decodedText: string) => {
@@ -157,15 +160,16 @@ const processToken = (token: any, output: string[], context: Context): void => {
 		}
 	} else if (type === 'fence') {
 		context.inFence = true;
-		content.push(`\`\`\`${token.info || ''}\n`);
+		context.fenceStarting = token.markup;
+		content.push(`${token.markup}${token.info || ''}\n`);
 	} else if (type === 'html_block') {
-		contentProcessed = true,
+		contentProcessed = true;
 		content.push(parseHtml(token.content.trim()));
 	} else if (type === 'html_inline') {
-		contentProcessed = true,
+		contentProcessed = true;
 		content.push(parseHtml(token.content.trim()));
 	} else if (type === 'code_inline') {
-		contentProcessed = true,
+		contentProcessed = true;
 		content.push(`\`${token.content}\``);
 	} else if (type === 'code_block') {
 		contentProcessed = true;
@@ -250,7 +254,7 @@ const processToken = (token: any, output: string[], context: Context): void => {
 	}
 
 	if (type === 'fence') {
-		content.push('```');
+		content.push(context.fenceStarting);
 		content.push(paragraphBreak);
 		context.inFence = false;
 	}
@@ -448,7 +452,7 @@ const copyFile = async (sourceFile: string, destFile: string) => {
 const getDonateLinks = () => {
 	return `<div className="donate-links">
 
-[![Donate using PayPal](https://raw.githubusercontent.com/laurent22/joplin/dev/Assets/WebsiteAssets/images/badges/Donate-PayPal-green.svg)](https://www.paypal.com/donate/?business=E8JMYD2LQ8MMA&no_recurring=0&item_name=I+rely+on+donations+to+maintain+and+improve+the+Joplin+open+source+project.+Thank+you+for+your+help+-+it+makes+a+difference%21&currency_code=EUR) [![Sponsor on GitHub](https://raw.githubusercontent.com/laurent22/joplin/dev/Assets/WebsiteAssets/images/badges/GitHub-Badge.svg)](https://github.com/sponsors/laurent22/) [![Become a patron](https://raw.githubusercontent.com/laurent22/joplin/dev/Assets/WebsiteAssets/images/badges/Patreon-Badge.svg)](https://www.patreon.com/joplin) [![Donate using IBAN](https://raw.githubusercontent.com/laurent22/joplin/dev/Assets/WebsiteAssets/images/badges/Donate-IBAN.svg)](https://joplinapp.org/donate/#donations)
+[![Donate using PayPal](https://raw.githubusercontent.com/laurent22/joplin/dev/Assets/WebsiteAssets/images/badges/Donate-PayPal-green.svg)](https://www.paypal.com/donate/?hosted_button_id=WQCERTSSLCC7U) [![Sponsor on GitHub](https://raw.githubusercontent.com/laurent22/joplin/dev/Assets/WebsiteAssets/images/badges/GitHub-Badge.svg)](https://github.com/sponsors/laurent22/) [![Become a patron](https://raw.githubusercontent.com/laurent22/joplin/dev/Assets/WebsiteAssets/images/badges/Patreon-Badge.svg)](https://www.patreon.com/joplin) [![Donate using IBAN](https://raw.githubusercontent.com/laurent22/joplin/dev/Assets/WebsiteAssets/images/badges/Donate-IBAN.svg)](https://joplinapp.org/donate/#donations)
 
 </div>`;
 };
@@ -491,6 +495,7 @@ async function main() {
 		`${readmeDir}/privacy.md`,
 		`${readmeDir}/donate.md`,
 		`${readmeDir}/connection_check.md`,
+		`${readmeDir}/licenses.md`,
 		`${readmeDir}/welcome`,
 		`${readmeDir}/news`,
 	], mainContext);

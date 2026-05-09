@@ -1,20 +1,21 @@
 import * as React from 'react';
-import { useRef, useImperativeHandle, forwardRef, useEffect } from 'react';
+import { useRef, useImperativeHandle, forwardRef, useEffect, useMemo, useContext, useCallback } from 'react';
 import useViewIsReady from './hooks/useViewIsReady';
 import useThemeCss from './hooks/useThemeCss';
 import useContentSize from './hooks/useContentSize';
-import useSubmitHandler from './hooks/useSubmitHandler';
 import useHtmlLoader from './hooks/useHtmlLoader';
 import useWebviewToPluginMessages from './hooks/useWebviewToPluginMessages';
 import useScriptLoader from './hooks/useScriptLoader';
 import Logger from '@joplin/utils/Logger';
-import styled from 'styled-components';
 import { focus } from '@joplin/lib/utils/focusHandler';
+import { WindowIdContext } from '../../gui/NewWindowOrIFrame';
+import useSubmitHandler from './hooks/useSubmitHandler';
+import useFormData from './hooks/useFormData';
+import Setting from '@joplin/lib/models/Setting';
+import getAssetPath from '../../utils/getAssetPath';
+import { toForwardSlashes } from '@joplin/utils/path';
 
 const logger = Logger.create('UserWebview');
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-type StyleProps = any;
 
 export interface Props {
 	html: string;
@@ -28,47 +29,9 @@ export interface Props {
 	borderBottom?: boolean;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	theme?: any;
-	// eslint-disable-next-line @typescript-eslint/ban-types -- Old code before rule was applied
-	onSubmit?: Function;
-	// eslint-disable-next-line @typescript-eslint/ban-types -- Old code before rule was applied
-	onDismiss?: Function;
-	// eslint-disable-next-line @typescript-eslint/ban-types -- Old code before rule was applied
-	onReady?: Function;
-}
-
-const StyledFrame = styled.iframe<{ fitToContent: boolean; borderBottom: boolean }>`
-	padding: 0;
-	margin: 0;
-	width: ${(props: StyleProps) => props.fitToContent ? `${props.width}px` : '100%'};
-	height: ${(props: StyleProps) => props.fitToContent ? `${props.height}px` : '100%'};
-	border: none;
-	border-bottom: ${(props: StyleProps) => props.borderBottom ? `1px solid ${props.theme.dividerColor}` : 'none'};
-`;
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-function serializeForm(form: any) {
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	const output: any = {};
-	const formData = new FormData(form);
-	for (const key of formData.keys()) {
-		output[key] = formData.get(key);
-	}
-	return output;
-}
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-function serializeForms(document: any) {
-	const forms = document.getElementsByTagName('form');
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	const output: any = {};
-	let untitledIndex = 0;
-
-	for (const form of forms) {
-		const name = `${form.getAttribute('name')}` || (`form${untitledIndex++}`);
-		output[name] = serializeForm(form);
-	}
-
-	return output;
+	onSubmit?: ()=> void;
+	onDismiss?: ()=> void;
+	onReady?: ()=> void;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
@@ -76,7 +39,7 @@ function UserWebview(props: Props, ref: any) {
 	const minWidth = props.minWidth ? props.minWidth : 200;
 	const minHeight = props.minHeight ? props.minHeight : 20;
 
-	const viewRef = useRef(null);
+	const viewRef = useRef<HTMLIFrameElement>(null);
 	const isReady = useViewIsReady(viewRef);
 	const cssFilePath = useThemeCss({ pluginId: props.pluginId, themeId: props.themeId });
 
@@ -90,21 +53,22 @@ function UserWebview(props: Props, ref: any) {
 		return viewRef.current.contentWindow;
 	}
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	function postMessage(name: string, args: any = null) {
+	const postMessage = useCallback((name: string, args: unknown = null) => {
 		const win = frameWindow();
 		if (!win) return;
 
 		logger.debug('Got message', name, args);
 
 		win.postMessage({ target: 'webview', name, args }, '*');
-	}
+	}, []);
+
+	const { getFormData } = useFormData(viewRef, postMessage);
 
 	useImperativeHandle(ref, () => {
 		return {
 			formData: function() {
 				if (viewRef.current) {
-					return serializeForms(frameWindow().document);
+					return getFormData();
 				} else {
 					return null;
 				}
@@ -113,36 +77,35 @@ function UserWebview(props: Props, ref: any) {
 				if (viewRef.current) focus('UserWebView::focus', viewRef.current);
 			},
 		};
-	});
+	}, [getFormData]);
 
 	const htmlHash = useHtmlLoader(
-		frameWindow(),
+		viewRef,
 		isReady,
 		postMessage,
 		props.html,
 	);
 
 	const contentSize = useContentSize(
-		frameWindow(),
+		viewRef,
 		htmlHash,
 		minWidth,
 		minHeight,
-		props.fitToContent,
-		isReady,
 	);
 
 	useSubmitHandler(
-		frameWindow(),
+		viewRef,
 		props.onSubmit,
 		props.onDismiss,
-		htmlHash,
 	);
 
+	const windowId = useContext(WindowIdContext);
 	useWebviewToPluginMessages(
-		frameWindow(),
+		viewRef,
 		isReady,
 		props.pluginId,
 		props.viewId,
+		windowId,
 		postMessage,
 	);
 
@@ -153,15 +116,36 @@ function UserWebview(props: Props, ref: any) {
 		cssFilePath,
 	);
 
-	return <StyledFrame
+	const style = useMemo(() => ({
+		'--content-width': `${contentSize.width}px`,
+		'--content-height': `${contentSize.height}px`,
+	} as React.CSSProperties), [contentSize.width, contentSize.height]);
+
+	const src = useMemo(() => {
+		let isolate = Setting.value('featureFlag.plugins.isolatePluginWebViews');
+		isolate ||= needsIsolation(props.pluginId);
+
+		const path = toForwardSlashes(getAssetPath('services/plugins/UserWebviewIndex.html'));
+		if (isolate) {
+			return `joplin-content://plugin-webview/${path}`;
+		} else {
+			return `file://${path}`;
+		}
+	}, [props.pluginId]);
+
+	return <iframe
 		id={props.viewId}
-		width={contentSize.width}
-		height={contentSize.height}
-		fitToContent={props.fitToContent}
+		style={style}
+		className={`plugin-user-webview ${props.fitToContent ? '-fit-to-content' : ''} ${props.borderBottom ? '-border-bottom' : ''}`}
 		ref={viewRef}
-		src="services/plugins/UserWebviewIndex.html"
-		borderBottom={props.borderBottom}
-	></StyledFrame>;
+		src={src}
+	></iframe>;
 }
 
 export default forwardRef(UserWebview);
+
+const needsIsolation = (pluginId: string) => {
+	// Some plugins are broken unless isolated from the main application.
+	// Always enable isolation for these plugins, even if disabled in settings:
+	return ['joplin.plugin.note.tabs', 'joplin.plugin.benji.favorites', 'outline'].includes(pluginId);
+};

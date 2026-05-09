@@ -4,9 +4,11 @@ export default function() {
 		'copyDevCommand',
 		'exportPdf',
 		'focusElementNoteBody',
+		'focusElementNoteViewer',
 		'focusElementNoteList',
 		'focusElementNoteTitle',
 		'focusElementSideBar',
+		'focusElementToolbar',
 		'focusSearch',
 		'historyBackward',
 		'historyForward',
@@ -32,6 +34,7 @@ export default function() {
 		'textSelectAll',
 		'textBulletedList',
 		'toggleExternalEditing',
+		'openNoteInNewWindow',
 		'toggleLayoutMoveMode',
 		'resetLayout',
 		'toggleMenuBar',
@@ -41,21 +44,34 @@ export default function() {
 		'togglePerFolderSortOrder',
 		'toggleSideBar',
 		'toggleVisiblePanes',
+		'toggleEditorPlugin',
+		'toggleTabMovesFocus',
 		'editor.deleteLine',
 		'editor.duplicateLine',
-		// We cannot put the undo/redo commands in the menu because they are
-		// editor-specific commands. If we put them there it will break the
-		// undo/redo in regular text fields.
-		// https://github.com/laurent22/joplin/issues/6214
+		'openSecondaryAppInstance',
+		'openPrimaryAppInstance',
 
-		// 'editor.undo',
-		// 'editor.redo',
+		// We cannot put the editor.undo/editor.redo commands in the menu because they are
+		// editor-specific commands. If we put them there it will break the  undo/redo in
+		// regular text fields (https://github.com/laurent22/joplin/issues/6214).
+		// However, the native Electron undo/redo doesn't work well in TinyMCE/CodeMirror.
+		// As a workaround, use these commands that switch between editor.undo and native Electron
+		// undo/redo depending on the type of selected editor:
+		'globalUndo',
+		'globalRedo',
+
 		'editor.indentLess',
 		'editor.indentMore',
 		'editor.toggleComment',
 		'editor.sortSelectedLines',
 		'editor.swapLineUp',
 		'editor.swapLineDown',
+		'editor.tableAddRow',
+		'editor.tableAddColumn',
+		'editor.tableDeleteRow',
+		'editor.tableDeleteColumn',
+		'linkToNote',
+		'exportDeletionLog',
 		'toggleSafeMode',
 		'showShareNoteDialog',
 		'showShareFolderDialog',
@@ -64,11 +80,14 @@ export default function() {
 		'commandPalette',
 		'openMasterPasswordDialog',
 		'addProfile',
-		'editProfileConfig',
+		'showProfileEditor',
 		'switchProfile1',
 		'switchProfile2',
 		'switchProfile3',
 		'pasteAsText',
+		'pasteAsMarkdown',
 		'showNoteProperties',
+		'convertNoteToMarkdown',
+		'toggleEditors',
 	];
 }

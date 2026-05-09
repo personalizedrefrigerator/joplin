@@ -1,7 +1,8 @@
 import { validateLinks } from '@joplin/renderer';
 const stringPadding = require('string-padding');
 const urlUtils = require('./urlUtils');
-import * as MarkdownIt from 'markdown-it';
+import type * as MarkdownItType from 'markdown-it';
+const MarkdownIt = require('markdown-it');
 
 // Taken from codemirror/addon/edit/continuelist.js
 const listRegex = /^(\s*)([*+-] \[[x ]\]\s|[*+-]\s|(\d+)([.)]\s))(\s*)/;
@@ -10,12 +11,13 @@ const emptyListRegex = /^(\s*)([*+-] \[[x ]\]|[*+-]|(\d+)[.)])(\s+)$/;
 export enum MarkdownTableJustify {
 	Left = 'left',
 	Center = 'center',
-	Right = 'right,',
+	Right = 'right',
 }
 
 export interface MarkdownTableHeader {
 	name: string;
 	label: string;
+	labelUrl?: string;
 	filter?: (content: string)=> string;
 	disableEscape?: boolean;
 	disableHtmlEscape?: boolean;
@@ -78,7 +80,7 @@ const markdownUtils = {
 
 	// Returns the **encoded** URLs, so to be useful they should be decoded again before use.
 	extractFileUrls(md: string, onlyType: string = null): string[] {
-		const markdownIt = new MarkdownIt();
+		const markdownIt: MarkdownItType = new MarkdownIt();
 		markdownIt.validateLink = validateLinks; // Necessary to support file:/// links
 
 		const env = {};
@@ -159,7 +161,11 @@ const markdownUtils = {
 		const lineMd = [];
 		for (let i = 0; i < headers.length; i++) {
 			const h = headers[i];
-			headersMd.push(stringPadding(h.label, minCellWidth, ' ', stringPadding.RIGHT));
+			let label = h.label;
+			if (h.labelUrl) {
+				label = `[${h.label}](${h.labelUrl})`;
+			}
+			headersMd.push(stringPadding(label, minCellWidth, ' ', stringPadding.RIGHT));
 
 			const justify = h.justify ? h.justify : MarkdownTableJustify.Left;
 
@@ -216,12 +222,46 @@ const markdownUtils = {
 
 	titleFromBody(body: string) {
 		if (!body) return '';
-		const mdLinkRegex = /!?\[([^\]]+?)\]\(.+?\)/g;
-		const emptyMdLinkRegex = /!?\[\]\((.+?)\)/g;
-		const filterRegex = /^[# \n\t*`-]*/;
-		const lines = body.trim().split('\n');
-		const title = lines[0].trim();
-		return title.replace(filterRegex, '').replace(mdLinkRegex, '$1').replace(emptyMdLinkRegex, '$1').substring(0, 80);
+		const spaceEntities = /&nbsp;/g;
+		body = body.replace(spaceEntities, ' ');
+		const lines = body.split('\n');
+		let title = '';
+
+		for (const line of lines) {
+			const trimmed = line.trim();
+			if (trimmed) {
+				title = trimmed;
+				break;
+			}
+		}
+
+		title = title.replace(/<\/?(ins|del|mark|sub|sup)>/g, '');
+		title = title.replace(/!?\[([^\]]*)\]\(([^()\n]+(?:\([^()\n]*\)[^()\n]*)*)\)/g, (_match, text, url) => {
+			return text || url;
+		});
+		const formattingPatterns = [
+			/(\*\*\*|___)(.*?)\1/g,
+			/(\*\*|__)(.*?)\1/g,
+			/(\*|_)(.*?)\1/g,
+			/(~~)(.*?)\1/g,
+			/(==)(.*?)\1/g,
+			/(\^)(.*?)\1/g,
+		];
+
+		let prev;
+		do {
+			prev = title;
+			for (const pattern of formattingPatterns) {
+				title = title.replace(pattern, '$2');
+			}
+		} while (title !== prev);
+
+		title = title.replace(/^\s*([-*+]|\d+[.)])\s+(\[[ xX]\]\s+)?/, '');
+		title = title.replace(/^(~{2,}|={2,})$/, '');
+		title = title.replace(/^[#>\-*`\s=]+/, '');
+		title = title.replace(/[#>\-*`\s=]+$/, '');
+		title = title.trim();
+		return title.substring(0, 80);
 	},
 };
 
