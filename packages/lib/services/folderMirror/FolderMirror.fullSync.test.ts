@@ -583,7 +583,7 @@ describe('FolderMirror.fullSync', () => {
 		let note = await Note.save({ title: 'test', parent_id: '', body: 'Test' });
 
 		for (let i = 0; i < 3; i++) {
-			note = await shim.attachFileToNote(note, `${supportDir}/sample.txt`);
+			note = await shim.attachFileToNote(note, `${supportDir}/sample.txt`, { position: note.body.length });
 		}
 
 		await mirror.fullSync();
@@ -595,7 +595,7 @@ describe('FolderMirror.fullSync', () => {
 			'resources/sample--1.txt.metadata.yml': /.*/,
 			'resources/sample--2.txt': 'just testing',
 			'resources/sample--2.txt.metadata.yml': /.*/,
-			'test.md': `---\ntitle: test\nid: ${note.id}\n---\n\nTest\n\n[sample.txt](./resources/sample.txt)\n\n\n\n[sample.txt](./resources/sample--1.txt)\n\n\n\n[sample.txt](./resources/sample--2.txt)\n\n`,
+			'test.md': `---\ntitle: test\nid: ${note.id}\n---\n\nTest[sample.txt](./resources/sample.txt)[sample.txt](./resources/sample--1.txt)[sample.txt](./resources/sample--2.txt)`,
 		};
 
 		await verifyDirectoryMatches(tempDir, expected);
@@ -609,7 +609,7 @@ describe('FolderMirror.fullSync', () => {
 			id: note.id,
 			title: 'test',
 		});
-		expect(updatedNote.body).toMatch(/^Test\n\n\[sample\.txt\]\(:\/.{32}\)\n\n\n\n\[sample\.txt\]\(:\/.{32}\)\n\n\n\n\[sample\.txt\]\(:\/.{32}\)/);
+		expect(updatedNote.body).toMatch(/^Test\[sample\.txt\]\(:\/.{32}\)\[sample\.txt\]\(:\/.{32}\)\[sample\.txt\]\(:\/.{32}\)/);
 	});
 
 	test('should not fail if a child of a local folder has been deleted', async () => {

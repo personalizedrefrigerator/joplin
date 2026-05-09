@@ -687,7 +687,7 @@ describe('FolderMirroringService', () => {
 		await mirror.waitForIdle();
 
 		let note = await Note.loadByTitle('note');
-		note = await shim.attachFileToNote(note, `${supportDir}/sample.txt`);
+		note = await shim.attachFileToNote(note, `${supportDir}/sample.txt`, { position: note.body.length });
 		expect(note.id).toBe('e383d2f435dc4eae8f4dc690055c7960');
 		expect(note.parent_id).toBe(baseFolderId);
 
@@ -699,7 +699,7 @@ describe('FolderMirroringService', () => {
 		await verifyDirectoryMatches(tempDir, {
 			'resources/sample.txt': 'just testing',
 			'resources/sample.txt.metadata.yml': `title: ${resource.title}\nid: ${resource.id}\n`,
-			'note.md': '---\ntitle: note\nid: e383d2f435dc4eae8f4dc690055c7960\n---\n\nTest note\n\n[sample.txt](./resources/sample.txt)\n\n',
+			'note.md': '---\ntitle: note\nid: e383d2f435dc4eae8f4dc690055c7960\n---\n\nTest note[sample.txt](./resources/sample.txt)',
 		});
 	});
 
