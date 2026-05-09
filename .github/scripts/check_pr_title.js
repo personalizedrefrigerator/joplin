@@ -64,12 +64,24 @@ module.exports = async ({ github, context, core }) => {
 		// by hand to lock a PR closed regardless of future fixes.
 		const wasAutoClosed = pr.state === 'closed' && pr.labels.some(l => l.name === autoClosedLabel);
 		if (wasAutoClosed) {
-			await github.rest.pulls.update({
-				owner: context.repo.owner,
-				repo: context.repo.repo,
-				pull_number: prNumber,
-				state: 'open',
-			});
+			try {
+				await github.rest.pulls.update({
+					owner: context.repo.owner,
+					repo: context.repo.repo,
+					pull_number: prNumber,
+					state: 'open',
+				});
+			} catch (error) {
+				// GitHub refuses to reopen a PR when another open PR
+				// already exists from the same head→base branch pair.
+				// In that case the contributor has already opened a
+				// replacement, so leave this PR closed.
+				if (error.status === 422) {
+					core.info('Cannot reopen — another PR is already open from the same branch.');
+					return;
+				}
+				throw error;
+			}
 			await github.rest.issues.removeLabel({
 				owner: context.repo.owner,
 				repo: context.repo.repo,
