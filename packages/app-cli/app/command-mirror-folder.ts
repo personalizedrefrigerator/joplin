@@ -1,5 +1,5 @@
 import BaseCommand from './base-command';
-import BaseModel from '@joplin/lib/BaseModel';
+import { ModelType } from '@joplin/lib/BaseModel';
 import app from './app';
 import { _ } from '@joplin/lib/locale';
 import FolderMirroringService from '@joplin/lib/services/folderMirror/FolderMirroringService';
@@ -22,7 +22,7 @@ class Command extends BaseCommand {
 	}
 
 	public override async action(args: CommandArguments) {
-		const folder = args.folder ? await app().loadItem(BaseModel.TYPE_FOLDER, args.folder) : { id: '' };
+		const folder = args.folder ? await app().loadItem(ModelType.Folder, args.folder) : { id: '' };
 		if (args.folder && !folder) throw new Error(_('Cannot find "%s".', args.folder));
 		await FolderMirroringService.instance().mirrorFolder(args.path, folder.id);
 	}

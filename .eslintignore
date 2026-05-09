@@ -1307,8 +1307,8 @@ packages/lib/commands/deleteNote.js
 packages/lib/commands/historyBackward.js
 packages/lib/commands/historyForward.js
 packages/lib/commands/index.js
-packages/lib/commands/mirrorFolder.js
 packages/lib/commands/leaveSharedFolder.js
+packages/lib/commands/mirrorFolder.js
 packages/lib/commands/openMasterPasswordDialog.js
 packages/lib/commands/permanentlyDeleteNote.js
 packages/lib/commands/renderMarkup.test.js
@@ -1832,10 +1832,10 @@ packages/lib/utils/ipc/utils/separateCallbacksFromSerializable.js
 packages/lib/utils/ipc/utils/separateCallbacksFromSerializableArray.js
 packages/lib/utils/joplinCloud/index.js
 packages/lib/utils/joplinCloud/types.js
+packages/lib/utils/markupLanguageUtils.js
 packages/lib/utils/pathRecord/createFilesFromPathRecord.js
 packages/lib/utils/pathRecord/directoryToPathRecord.js
 packages/lib/utils/pathRecord/verifyDirectoryMatches.js
-packages/lib/utils/markupLanguageUtils.js
 packages/lib/utils/prefixWithHttps.js
 packages/lib/utils/processStartFlags.js
 packages/lib/utils/replaceUnsupportedCharacters.test.js

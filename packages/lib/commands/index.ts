@@ -4,8 +4,8 @@ import * as convertNoteToMarkdown from './convertNoteToMarkdown';
 import * as deleteNote from './deleteNote';
 import * as historyBackward from './historyBackward';
 import * as historyForward from './historyForward';
-import * as mirrorFolder from './mirrorFolder';
 import * as leaveSharedFolder from './leaveSharedFolder';
+import * as mirrorFolder from './mirrorFolder';
 import * as openMasterPasswordDialog from './openMasterPasswordDialog';
 import * as permanentlyDeleteNote from './permanentlyDeleteNote';
 import * as renderMarkup from './renderMarkup';
@@ -20,8 +20,8 @@ const index: any[] = [
 	deleteNote,
 	historyBackward,
 	historyForward,
-	mirrorFolder,
 	leaveSharedFolder,
+	mirrorFolder,
 	openMasterPasswordDialog,
 	permanentlyDeleteNote,
 	renderMarkup,
