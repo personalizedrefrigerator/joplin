@@ -260,6 +260,7 @@ payant
 llamacpp
 bgcolor
 bordercolor
+randomblob
 togglefullscreen
 onestore
 macshot
@@ -267,3 +268,4 @@ pdate
 coderabbitai
 cleanup
 Rygaa
+setval
