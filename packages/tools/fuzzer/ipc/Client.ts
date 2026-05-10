@@ -28,6 +28,7 @@ import { substrWithEllipsis } from '@joplin/lib/string-utils';
 import hangingIndent from '../utils/hangingIndent';
 import { readFile, writeFile } from 'fs/promises';
 import { hasOwnProperty } from '@joplin/utils/object';
+import removeInvalidUtf8 from '../utils/removeInvalidUtf8';
 
 const logger = Logger.create('Client');
 
@@ -126,6 +127,7 @@ const cliProcessPromptString = 'command> ';
 
 interface CreateOrUpdateOptions {
 	quiet?: boolean;
+	message?: string;
 }
 
 interface CreateRandomItemOptions extends CreateOrUpdateOptions {
@@ -733,15 +735,23 @@ class Client implements ActionableClient {
 
 				await this.createRandomNote({ parentId, quiet: true });
 			},
-			update: async (targetNote: NoteData) => {
+			update: async (targetNote: NoteData, step: number) => {
 				const keep = targetNote.body.substring(
 					0, this.context_.randInt(0, targetNote.body.length),
 				);
 				const append = this.context_.randomString(this.context_.randInt(0, 5000));
+
+				let body = keep + append;
+				// Only keep unicode that can be represented as UTF-8 to prevent false-positive fuzzer failures
+				body = removeInvalidUtf8(body);
+
 				await this.updateNote({
 					...targetNote,
-					body: keep + append,
-				}, { quiet: true });
+					body,
+				}, {
+					quiet: true,
+					message: `sub-step: ${step}: keep: ${keep.length}, append: ${append.length}`,
+				});
 			},
 			delete: async (targetNote: NoteData) => {
 				await this.deleteNote(targetNote.id, { quiet: true });
@@ -761,7 +771,7 @@ class Client implements ActionableClient {
 
 			const actionId = this.context_.randomFrom(actionKeys, actionWeights);
 			if (actionId) {
-				await actions[actionId](targetNote);
+				await actions[actionId](targetNote, i);
 			}
 		}
 		bar.complete();
@@ -869,12 +879,12 @@ class Client implements ActionableClient {
 		await this.assertNoteMatchesState_(note);
 	}
 
-	public async updateNote(note: NoteData, { quiet = false }: CreateOrUpdateOptions = { }) {
+	public async updateNote(note: NoteData, { message, quiet = false }: CreateOrUpdateOptions = { }) {
 		if (!quiet) {
 			logger.info('Update note', note.id, 'in', `${note.parentId}/${this.label}`);
 		}
 
-		await this.tracker_.updateNote(note);
+		await this.tracker_.updateNote(note, { message });
 		await this.execApiCommand_('PUT', `/notes/${encodeURIComponent(note.id)}`, {
 			title: note.title,
 			body: note.body,
