@@ -286,4 +286,11 @@ connectionline
 precheck
 unparseable
 setval
+cutoff
+typeof
+readline
+vendored
+Errno
+keyof
+readdir
 keybinds
