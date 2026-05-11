@@ -27,7 +27,7 @@
     "jest-environment-jsdom": "29.7.0",
     "mermaid": "11.10.1",
     "ts-jest": "29.4.6",
-    "typescript": "5.9.3"
+    "typescript": "6.0.3"
   },
   "dependencies": {
     "@joplin/fork-htmlparser2": "^4.1.63",
