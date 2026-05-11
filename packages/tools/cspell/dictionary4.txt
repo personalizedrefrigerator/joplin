@@ -267,6 +267,7 @@ macshot
 pdate
 coderabbitai
 cleanup
+Calibri
 Rygaa
 xyflow
 jsoncanvas
