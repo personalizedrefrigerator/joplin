@@ -1,5 +1,9 @@
 # Joplin iOS Changelog
 
+## [ios-v13.6.7](https://github.com/laurent22/joplin/releases/tag/ios-v13.6.7) - 2026-05-12T10:04:26Z
+
+- Fixed: Fix plugins fail to start (#15362) (#15311 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+
 ## [ios-v13.6.6](https://github.com/laurent22/joplin/releases/tag/ios-v13.6.6) - 2026-05-05T15:29:24Z
 
 - New: Add 'Go to start/end of note' toolbar buttons (#15015 by [@Vpatel1093](https://github.com/Vpatel1093))
