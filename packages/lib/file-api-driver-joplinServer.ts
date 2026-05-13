@@ -37,6 +37,10 @@ export default class FileApiDriverJoplinServer {
 		return true;
 	}
 
+	public get supportsMultiDelete() {
+		return true;
+	}
+
 	public get supportsAccurateTimestamp() {
 		return true;
 	}
@@ -234,6 +238,23 @@ export default class FileApiDriverJoplinServer {
 		}
 
 		return output;
+	}
+
+	public async multiDelete(paths: string[]) {
+		const isNotSupportedError = (error: Error) => {
+			return 'code' in error && error.code === 400 && error.message?.startsWith('Not allowed: DELETE');
+		};
+		try {
+			return await this.api().exec(
+				'DELETE', 'api/batch_items', null, { items: paths }, {}, { ignoreError: isNotSupportedError },
+			);
+		} catch (error) {
+			// Old server versions emit "Not allowed:" for multi-delete
+			if (isNotSupportedError(error)) {
+				error.code = 'methodNotSupported';
+			}
+			throw error;
+		}
 	}
 
 	public async delete(path: string) {

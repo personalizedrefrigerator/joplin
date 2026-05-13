@@ -86,6 +86,9 @@ function requestCanBeRepeated(error: any) {
 	// The target is explicitly rejecting the item so repeating wouldn't make a difference.
 	if (errorCode === 'rejectedByTarget' || errorCode === 'isReadOnly') return false;
 
+	// The target doesn't support this route
+	if (errorCode === 'methodNotSupported') return false;
+
 	// We don't repeat failSafe errors because it's an indication of an issue at the
 	// server-level issue which usually cannot be fixed by repeating the request.
 	// Also we print the previous requests and responses to the log in this case,
@@ -185,6 +188,12 @@ class FileApi {
 	// probably only be supported by Joplin Server.
 	public get supportsMultiPut(): boolean {
 		return !!this.driver().supportsMultiPut;
+	}
+
+	// This can be true if the driver implements deleting multiple items at once. Will
+	// probably only be supported by Joplin Server.
+	public get supportsMultiDelete(): boolean {
+		return !!this.driver().supportsMultiDelete;
 	}
 
 	// This can be true when the sync target timestamps (updated_time) provided
@@ -402,6 +411,11 @@ class FileApi {
 	public async multiPut(items: MultiPutItem[], options: any = null) {
 		if (!this.driver().supportsMultiPut) throw new Error('Multi PUT not supported');
 		return tryAndRepeat(() => this.driver_.multiPut(items, options), this.requestRepeatCount());
+	}
+
+	public async multiDelete(paths: string[]) {
+		if (!this.supportsMultiDelete) throw new Error('Multi DELETE not supported');
+		return tryAndRepeat(() => this.driver_.multiDelete(paths), this.requestRepeatCount());
 	}
 
 	public delete(path: string) {
