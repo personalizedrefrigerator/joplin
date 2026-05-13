@@ -238,3 +238,116 @@ Summary: 131 → 33 disable comments (98 removed). The 33 remaining all fall int
 - `NamedStyles<any>` in `NoteList.tsx` (1) — TypeScript pattern limitation.
 - `console[key] = ... as any` in `wrapConsoleLog.ts` (1) — TypeScript pattern limitation (intersection of console method signatures).
 - `output: any[]` in `fs-driver-rn.ts` (1) — `readDirStats` output mixes SAF `DocumentFileDetail` and normalized `Stat`-shaped entries.
+
+## packages/server
+Session date: 2026-05-12
+
+Starting baseline 2026-05-12 matches the progress doc: 227 disable comments across 67 files, all tagged `Old code before rule was applied`.
+
+General observation (different from prior packages): many of the server's `any`s sit at junction points (Koa context, Knex query callbacks, view contents, error payloads) where tightening propagates through many call sites. So this package will have a much lower remove-rate than the front-end packages.
+
+First batch:
+- `utils/strings.ts` — 1 removed, 0 left. `yesOrNo(value: any)` → `unknown`.
+- `utils/array.ts` — 1 removed, 1 left. `removeElement` typed generically as `<T>(array: T[], element: T)`. Left: `unique(array: any[])` — tried generic `<T>`, but `BaseModel.loadByIds` calls it with `string[] | number[]` and TS can't unify `T` across the union, forcing a cast at the call site (a wider blast radius). Reason updated.
+- `utils/cache.ts` — 4 removed, 0 left. `CacheEntry.object: any` → `string` (always JSON-stringified); `setAny/setObject` `o: any` → `unknown`; `getAny` return `Promise<any>` → `Promise<unknown>` (existing `as object` cast at the one public consumer remains valid).
+- `utils/errors.ts` — 3 removed, 0 left. `ErrorOptions.details?: any` → `unknown`; `ApiError.details: any` → `unknown`; `errorToPlainObject(error: any)` → `unknown` with `'httpCode' in error` narrowing followed by `(error as { httpCode?: number }).httpCode` casts on each field read (TS's `in` operator doesn't narrow `unknown` to a typed shape, only to `object`).
+- `services/MustacheService.ts` — 1 removed, 1 left. The local `layoutView: any` in `renderView` → `Record<string, unknown>`. Left: `View.content?: any` — tried tightening to `Record<string, unknown>`, but `routeHandler.ts:61` reads `view.content.error.httpCode` and other dynamic paths; views contribute heterogeneous content shapes per route. Reason updated.
+
+Files attempted but reverted (still `any`):
+- `commands/BaseCommand.ts` — `run(argv: any)`. Tried `yargs.Arguments`, but subclasses (e.g. `CompressOldChangesCommand`, `StorageCommand`) narrow `argv` to a per-command `Argv` interface, and TS function-parameter contravariance forbids that without making the whole class generic — which would propagate through every `BaseCommand[]` consumer. Reason updated.
+- `utils/urlUtils.ts` — `setQueryParameters(query: any)`. Callers pass Koa `ParsedUrlQuery` (`Record<string, string | string[]>`), pagination shapes with numbers, and plain string records. Tightening forces fixes at every call site. Reason updated.
+- `config.ts` — `initConfig(overrides: any)`. Tried `Partial<Config>`, but `Config.resourceDir: string` is required and only set by some test overrides; the existing spread relies on `any` to bypass the missing-field issue. Reason updated.
+
+Verification at checkpoint: package `yarn tsc --noEmit` clean. 227 → 217 disable comments (10 removed).
+
+Second batch:
+- `models/KeyValueModel.ts` — 3 removed, 0 left. The two `as any` casts in `value<T>` use the existing type parameter (`as T`). The local `value: any` in `readThenWrite` becomes `await this.value<Value>(key)` — the explicit type param uses the public `Value = number | string` already defined in the file.
+- `models/BackupItemModel.ts` — 1 removed, 0 left. `add(content: any)` → `string | Buffer` (the only runtime caller passes a JSON string; the storage type is `Buffer`). Inner assignment uses `content as Buffer`.
+- `models/UserItemModel.ts` — 1 removed, 0 left. Dropped `as any` on `loadByIds(options.byUserItemIds as any)` — `byUserItemIds` is already typed `number[]` and `loadByIds` accepts `string[] | number[]`.
+- `models/UserDeletionModel.ts` — 0 removed, 1 left. `end(error: any)`: tried `Error`, but tests pass plain strings. Tried `Error | string`, but `errorToString` requires `Error`; wrapping strings in `new Error()` changes runtime output (adds a `stack` field to the serialized payload). Reason updated.
+- `models/utils/pagination.ts` — 4 removed, 0 left. `requestPaginationOrder(query: any)` → `ParsedUrlQuery | PaginationQueryParams` with `as string` / `as PaginationOrderDir` narrowing on the read fields; `requestPagination(query: any)` → `(Pagination & PaginationQueryParams) | null`; `filterPaginationQueryParams(query: any)` → `PaginationQueryParams | null`; `paginateDbQuery` made generic over `<T = unknown>` for `PaginatedResults<T>` and the local `orderSql: any[]` inferred from `.map`.
+- `utils/views/table.ts` — 2 removed, 0 left. `Table.requestQuery?: any` → `PaginationQueryParams`; `makeTablePagination(query: any)` → `ParsedUrlQuery` (imported from `querystring`).
+- `utils/views/select.ts` — 0 removed, 2 left. Tried `Record<string, unknown>`, but callers pass concrete entity types like `User` (no index signature). Reason updated.
+- `models/ChangeModel/ChangeModel.ts` — 1 removed, 0 left. `requestDeltaPagination(query: any)` → `ChangePagination | null`.
+- `models/ShareModel.ts` — 2 removed, 0 left. `shareUrl(query: any)` → `Record<string, string | number>`; `itemCountByShareIdPerUser`'s `groupBy('user_id') as any` → `as unknown as { item_count: number; user_id: Uuid }[]` (Knex's typed builder doesn't carry the aggregate column shape through `db.raw`).
+- `utils/testing/koa/FakeRequest.ts` — 2 removed, 0 left. Introduced local `FakeNodeRequest { method?: string }` (the only field used).
+- `utils/testing/koa/FakeResponse.ts` — 4 removed, 0 left. `body: any` → `unknown`; `headers_: any` → `Record<string, string>`; `set`/`get` params/return → `string`.
+- `utils/testing/fileApiUtils.ts` — 2 removed, 0 left. `getDelta` return type and inner cast `PaginatedResults<any>` → `PaginatedResults<unknown>`.
+- `models/items/storage/testUtils.ts` — 1 removed, 0 left. `let error: any = null` → `Error & { code?: CustomErrorCode }`.
+
+Verification at checkpoint: package `yarn tsc --noEmit` clean. 227 → 193 disable comments (34 removed).
+
+Third batch:
+- `utils/prettycron.ts` — 17 removed, 0 left. All `numbers: any[]` → `number[]`; `numberToDateName(value: any, type: any)` → `(value: number | string, type: 'dow' | 'mon')` (the function does `value - 1`, so wrapping in `Number()`); `dateList(numbers: any[], type: any)` → `(numbers: number[], type: 'dow' | 'mon')`; introduced local `type LaterSchedule = Record<string, number[]>` and used it for `removeFromSchedule`, `scheduleToSentence`; `removeFromSchedule(schedule, member: any, length: any)` → `(LaterSchedule, string, number)`; the four `cronspec: any`/`numDates: any` handlers typed as `string` / `number`; the final `(window as any).prettyCron` cast tightened to `(window as Window & { prettyCron?: Record<string, unknown> }).prettyCron`.
+- `utils/routeUtils.test.ts` — 4 removed, 0 left. Three `testCases: any[]` typed as tuple arrays (`[string, string, string, ItemAddressingType][]`, `[string, {...}][]`, `[string, string[]][]`). `routes: Record<string, any>` typed `Record<string, number>` with three `as unknown as Parameters<typeof findMatchingRoute>[1]` casts at call sites (the test injects numbers in place of `Router` instances).
+- `routes/api/sessions.test.ts` — 8 removed, 0 left. Eight `(context.response.body as any).id` casts → `as { id: string }`.
+- `routes/api/items.test.ts` — 4 removed, 0 left. `tree: any` → `Record<string, Record<string, null>>`; `PaginatedResults<any>` (×2) → `<unknown>`; `result.items as any` → `as unknown as SaveFromRawContentResult`.
+- `routes/api/shares.test.ts` — 3 removed, 0 left. `tree: any` → `Record<string, Record<string, null>>`; both `PaginatedResults<any>` → `<Share>` and `<{ user: { email: string }; status: ShareUserStatus }>` (the test only reads those fields).
+- `routes/index/users.test.ts` — 3 removed, 0 left. `postUser(props: any)` → `Partial<User>`; `patchUser(user: any)` → `Partial<User> & Record<string, unknown>`; `as any).value` on a `querySelector` → `querySelector<HTMLInputElement>('input[name=email]').value`.
+- `routes/admin/users.test.ts` — 2 removed, 0 left. `postUser(props: any)` / `patchUser(user: any)` typed `Record<string, unknown>` (tests intentionally pass `max_item_size: ''` which `Partial<User>` would reject).
+- `routes/index/stripe.test.ts` — 2 removed, 0 left. `WebhookOptions.stripe?: any` → `ReturnType<typeof mockStripe>`; `simulateWebhook(object: any)` → `Record<string, unknown>`.
+- `routes/index/shares.link.test.ts` — 2 removed, 0 left. `getShareContent(query: any)` → `Record<string, string>`; the inner `as any` return cast → `as string | Buffer`.
+- `routes/api/share_users.ts` — 2 removed, 0 left. `bodyFields<any>` → `bodyFields<{ status?: number }>`; `items: any[]` → `Record<string, unknown>[]`.
+- `routes/api/share_users.test.ts` — 1 removed, 0 left. `PaginatedResults<any>` → `<{ share: { id: string } }>`.
+
+Verification at checkpoint: package `yarn tsc --noEmit` clean; spellcheck clean. 227 → 145 disable comments (82 removed).
+
+Fourth batch:
+- `routes/api/batch.ts` — 3 removed, 0 left. `SubRequest.body: any` / `SubRequestResponse.body: any` → `unknown`; `SubRequestResponse.header: Record<string, any>` → `Record<string, unknown>`.
+- `routes/api/batch_items.ts` — 2 removed, 0 left. `PaginatedResults<any>` → `<unknown>`; the inner `as any` cast → `as unknown as unknown[]`.
+- `models/UserModel.test.ts` — 3 removed, 0 left. The three `syncInfo*: any` test fixtures share a single inline object-shape type with optional `ppk` (the third variant deletes it).
+- `routes/index/login.ts` — 1 removed, 0 left. `makeView(error: any)` → `Error | null`.
+- `routes/index/home.test.ts` — 1 removed, 0 left. `context.response.body as any` → `as string`.
+- `routes/index/items.test.ts` — 1 removed, 0 left. `items: any` → `Record<string, Record<string, never>>`.
+- `models/items/storage/StorageDriverS3.ts` — 2 removed, 0 left. Introduced local `ReadableLike` interface (only the 3 listener overloads used) so `stream2buffer` is typed; the S3 SDK return is an opaque union, so cast at the call site: `stream2buffer(response.Body as ReadableLike)`.
+- `models/items/storage/StorageDriverS3.test.ts` — 1 removed, 0 left. `parse: any` → `StorageDriverConfig & { enabled?: boolean }`.
+- `routes/api/users.ts` — 1 removed, 0 left. `bodyFields<any>` → `bodyFields<Partial<User>>` (`fromApiInput` accepts a partial user).
+- `routes/api/users.test.ts` — 1 removed, 0 left. `results: any` → `getApi<{ items: User[] }>`.
+- `routes/api/ping.test.ts` — 1 removed, 0 left. `body as any` → `as { status: string; message: string }`.
+- `models/LockModel.test.ts` — 2 removed, 0 left. `'wrongtype' as any` → `as unknown as LockType` (and the same for `LockClientType`).
+- `db.migrations.test.ts` — 2 removed, 0 left. `dbSchemaSnapshot` return → `Awaited<ReturnType<typeof sqlts.toTypeScript>>`; the `db as any` cast → `as unknown as Parameters<typeof sqlts.toTypeScript>[1]`.
+- `utils/testing/testUtils.ts` — 4 removed, 3 left. `createItemTree(tree: any)` → `Record<string, unknown>`; `createItemTree3(tree: any[])` → local `ItemTree3Node` interface; `checkContextError`'s `body: any` → cast through `as { code?: ErrorCode }`; `setupAppContext({} as any, ...)` → `as unknown as AppContext`. Left: `AppContextTestOptions.request: any` (`httpMocks.RequestOptions` is too narrow; callers pass `files: { file: { path: string } }` and free-form bodies); `appContext: any` inside `koaAppContext` (intentionally mocks only a subset of `AppContext`, cast at return); the `createBaseAppContext` one was removed. Reasons updated on the two remaining ones.
+- `utils/requestUtils.ts` — 2 removed, 7 left. Two safe removals: the outer `IncomingMessage` cast in `formParse` uses `as unknown as FormParseRequest`; the `bodyFields`/`bodyFiles` `req: any` typed `IncomingMessage`. The other entries (`BodyFields`, `FormParseResult.files`, `FormParseRequest.body`, `convertFieldsToKeyValue` return) were attempted but reverted — `Record<string, unknown>` breaks `Fields`/`Files` compatibility (formidable's `File | File[]` union surfaces `.filepath` access errors), and `BodyFields` widening propagates to every route handler that reads `body.fields.email` etc. without narrowing. Reasons updated on the remaining ones.
+- `utils/routeUtils.ts` — 5 removed, 1 left. `Response.response: any` / `constructor(response: any)` → `unknown`; `internalRedirect(...args: any[])` → `unknown[]`; `ExecRequestResult.response: any` → `unknown`; `respondWithItemContent(koaResponse: any)` → local `KoaResponseLike` interface with just `body` and `set()`. Left: `RouteHandler`'s `...args: any[], Promise<any>` — concrete handlers (login, mfa, users) narrow `args` to per-route field types; tightening propagates through every route. Reason updated. (Plus a downstream cast `responseObject.response as typeof ctx.response` in `routeHandler.ts:56` for the now-`unknown` response.)
+- `models/ChangeModel/ChangeModel.test.ts` — 1 removed, 0 left. `itemsToCreate: any[]` → `{ id: string; children: never[] }[]`.
+- `models/ChangeModel/ChangeModel.old.ts` — 1 removed, 0 left. `Knex.Raw<any>` → `Knex.Raw<unknown>`.
+- `routes/api/items.ts` — 1 removed, 0 left. `bodyFields.items.map((item: any))` → `(item: { name: string; body?: string })`.
+- `tools/generateTypes.ts` — 1 removed, 0 left. `'pascal' as any` → `as Config['tableNameCasing']`.
+- `models/utils/pagination.test.ts` — 2 removed, 0 left. `testCases: any` → `[Record<string, unknown> | null, Pagination][]`; the inline `input: any` removed by inferring from the tuple. Inner literal `dir: 'asc'` switched to `PaginationOrderDir.ASC`.
+
+Verification at checkpoint: package `yarn tsc --noEmit` clean; spellcheck clean. 227 → 102 disable comments (125 removed).
+
+Fifth batch:
+- `utils/joplinUtils.ts` — 11 removed, 1 left. Tightened `FileViewerResponse.body`/`ResourceInfo`/`LinkedItemInfo` to concrete shapes (`Buffer | string`, `NoteEntity` etc.); `unserializeJoplinItem` / `serializeJoplinItem` typed against `NoteEntity`; `getResourceInfos` output uses the named `ResourceInfos` alias; `jopItem` and `itemToRender` use `NoteEntity & { ...optional fields }`; `FileToRender.content` → `Buffer | null` (the `null as any` cast is no longer needed). Left: the `renderOptions: any` for `markupToHtml.render` — `@joplin/renderer`'s `RenderOptions` is loosely typed in that package; tightening would require updating renderer first.
+- `db.ts` — 14 removed, 0 left. `ConnectionCheckResult.error/latestMigration: any` → `Error | null` and `{ name: string } | null`; the slow-query handler `connection: any, bindings: any[]` → `DbConnection` and `unknown[]`; the inner `queryInfos: Record<any, QueryInfo>` and `timeoutId: any` → `Record<string, QueryInfo>` and `ReturnType<typeof setTimeout>`; `filterBindings(bindings: any[]): Record<string, any>` → `unknown[]` / `Record<string, unknown>`; `KnexQueryErrorData.bindings: any[]` → `unknown[]`; `migrateList`'s `migrations: any` typed as the actual `[string | { file } | { name | file }][]` tuple via a `MigrationInfo` alias; `isNoSuchTableError`/`isUniqueConstraintError` `error: any` → `{ code?: string; message?: string } | null | undefined`. The `pg` `setTypeParser` callback's `val: any` → `string`.
+- `utils/testing/apiUtils.ts` — 11 removed, 0 left. All the `body: Record<string, any>` parameters (×9 functions) → `body: object` (entity types like `User`, `FormUser` don't have an index signature, so `Record<string, unknown>` rejects them — `object` accepts both concrete entities and plain records). The `query: Record<string, any>` → `Record<string, unknown>` (callers always pass plain objects).
+
+Verification at checkpoint: package `yarn tsc --noEmit` clean; lint clean. 227 → 67 disable comments (160 removed).
+
+Sixth batch:
+- `models/ItemModel.ts` — 4 removed, 3 left. `SaveFromRawContentResultItem.error` → union of `Error & { httpCode?: number; code?: string }` / `PlainObjectError` / `null` (callers read `.httpCode` on it; `errorToPlainObject` is also assigned to it). `objectToApiOutput` inner `as any[k]` casts → `(output as Record<string, unknown>)[k]`. `allForDebug` typed `(Omit<Item, 'content'> & { content?: string | Buffer })[]` and now spreads instead of mutating. Left: `itemToJoplinItem(): any` (heterogeneous Note/Folder/Resource/Tag return); the matching `joplinItem?: any` field; the inner `joplinItem: any` local. Reasons updated.
+- `models/BaseModel.ts` — 7 removed, 0 left. `SaveOptions.validationRules`/`previousItem`, `DeleteOptions.validationRules`, `ValidateOptions.rules` → `Record<string, unknown>`. `all()` `rows: any[]` cast → `as T[]` only. `fromApiInput` local `output: any` → `Record<string, unknown>` with `as Record<string, unknown>` on the input spread and `as T` on the return. `isNew`'s `'id' in (object as any)` → `typeof object === 'object' && object && 'id' in object` narrowing.
+- `app.ts` — 7 removed, 0 left. `defaultEnvVariables: Record<Env, any>` → `Record<Env, Partial<EnvVariables>>`. `markPasswords(o: Record<string, any>)` → `object` parameter (concrete entity types like `DatabaseConfig` lack index signatures) with an internal cast to `Record<string, unknown>` for iteration. `getEnvFilePath(argv: any)` → `{ envFile?: string }`. `argv: Argv = yargsArgv as any` → `as unknown as Argv`. The `commandArgv._` cast → `as Argv & { _: string[] }`. `main().catch((error: any))` → `(error: Error)`.
+- `utils/testing/testRouters.ts` — 3 removed, 2 left. `exec` callback `error/stdout/stderr: any` → `(Error & { signal?: string }) | null` / `string` / `string`. `serverProcess: any` → `ReturnType<typeof spawn>`. `checkAndPrintResult(result: any)` → `unknown` with `in` narrowing. Left: `curl` return type (it parses heterogeneous JSON responses that callers read without narrowing) and the `response: any` in `main()` (same reason). Reasons updated.
+- `utils/testing/shareApiUtils.ts` — 5 removed, 0 left. Introduced local `LegacyTreeNode` and `ShareTreeNode` interfaces (with `[key: string]: unknown` on `ShareTreeNode` so test fixtures can include arbitrary fields like `title`). `convertTree(tree: any)` / `createItemTree3(tree: any[])` / `shareFolderWithUser(itemTree: any)` use those types.
+- `routes/admin/users.ts` — 5 removed, 0 left. `boolOrDefaultToValue`/`intOrDefaultToValue`/`makeUser` `fields: any` → `Record<string, unknown>`. The field reads in `makeUser` cast via `as string` / `as number` per User shape. `error: any` on `admin/users/:id` route handler → `Error | null`. `accountTypeOptions().map((o: any))` → `(o: { value: number; selected?: boolean })`. The `formParse().fields` is cast `as unknown as Record<string, unknown> & { id?: Uuid }` at the makeUser call.
+
+Verification at checkpoint: package `yarn tsc --noEmit` clean; lint clean. 227 → 36 disable comments (191 removed).
+
+Final batch:
+- `routes/index/stripe.ts` — 4 removed, 0 left. `stripeEvent(req: any)` → `IncomingMessage`; `StripeRouteHandler` return → `Promise<unknown>`; the two `(postHandlers as any)[path.id]` casts collapsed into a single typed lookup.
+- `env.ts` — 4 removed, 0 left. `parseEnv(defaultOverrides: any)` → `Partial<EnvVariables>`. The three `(output as any)[key]` writes go through a single `outputAsRecord = output as unknown as Record<string, unknown>` alias.
+- `routes/index/users.ts` — 3 removed, 0 left. `makeUser(fields: any)` → `Record<string, unknown>` with `as string` narrowing on field reads; `error: any` on `users/:id` GET → `Error | null`; `accountTypeOptions().map((o: any))` → `(o: { value: number; selected?: boolean })`.
+- `models/UserModel.ts` — 2 removed, 1 left. `(resource as any)[key]` / `(previousResource as any)[key]` → `as Record<string, unknown>`. `syncInfo(): Promise<any>` → `Promise<{ ppk?: { value: PublicPrivateKeyPair } }>`. Left: `checkMaxItemSizeLimit(joplinItem: any)` — same heterogeneous itemToJoplinItem return as ItemModel.
+- `middleware/routeHandler.ts` — 1 removed, 0 left. `const r: any = { error }` → typed `{ error: string; stack?: string; code?: string }`.
+
+Verification: package `yarn tsc --noEmit` clean; `yarn linter-ci packages/server/src/` clean; root `yarn tsc --noEmit` (all workspaces) clean.
+
+Summary: 227 → 22 disable comments (205 removed). Zero remaining `Old code before rule was applied` disables — all 22 left have descriptive reasons explaining why they can't be tightened. They fall into these categories:
+- **Heterogeneous redux/Koa shapes** (5): `BaseCommand.run(argv: any)` (per-command Argv narrowing forbids the base type from being typed without making the class generic); `routeUtils.RouteHandler` (per-route argument types); `joplinUtils.renderOptions` (renderer package's RenderOptions is loose); `MustacheService.View.content` (each view contributes different fields); `testUtils.appContext` (Koa mock only provides a subset).
+- **Heterogeneous Joplin item types** (3): `ItemModel.itemToJoplinItem` plus the two `joplinItem: any` locals it feeds; `UserModel.checkMaxItemSizeLimit.joplinItem`.
+- **Heterogeneous error shapes** (1): `UserDeletionModel.end(error: any)` — tests pass strings while runtime callers pass Errors.
+- **Concrete entity types without index signatures** (3): `urlUtils.setQueryParameters(query: any)`; `select.ts` `yesNoOptions`/`yesNoDefaultOptions`; `app.ts` config initConfig overrides.
+- **Loose lib-typed defaults** (1): `config.ts` `initConfig(overrides: any)` — `Partial<Config>` requires `resourceDir`.
+- **Heterogeneous test fixtures / API call results** (3): `testRouters.curl` and `response` in `main` (parsed JSON responses); `array.ts` `unique` (TS can't unify `T` across `string[] | number[]`).
+- **TypeScript pattern limitations** (6): `testUtils.AppContextTestOptions.request`; the 4 in `requestUtils.ts` (`BodyFields`, `FormParseResult.files`, `FormParseRequest.body`, `convertFieldsToKeyValue` — all centered on formidable's `Fields | Files` union not allowing narrowing).

@@ -24,6 +24,7 @@ For each disable comment encountered:
 5. Do not make whitespace-only changes to surrounding code (per `CLAUDE.md`).
 6. **Don't add explanatory comments unless really needed.** A cast or local type usually speaks for itself — don't write a paragraph explaining what a reader can already see from the code. Only add a comment when the *why* is non-obvious and would otherwise mislead a future change (e.g. a cast that exists to avoid a runtime-changing fix). When you do leave a disable comment, the inline `-- reason` is enough; don't pair it with an extra block comment.
 7. After each package, run `yarn tsc --noEmit` and `yarn lint` for that package to verify nothing broke.
+8. Before committing, run `yarn spellcheck --all` (or `yarn spellcheck <path>` for the files you touched, including the progress docs) and ensure it passes. The pre-commit hook runs spellcheck on the staged files, so an unknown word will block the commit. When cSpell flags a real technical word that should be allowed everywhere, add it to the last dictionary in `packages/tools/cspell/dictionary?.txt` per the spec in [readme/dev/spellcheck.md](/help/dev/spellcheck) (each dictionary has a ~400-word cap; create a new one if the last is full). Don't use inline `// cSpell:disable` for individual words — only for blocks of unparseable content.
 
 ## Files to never touch
 
@@ -40,7 +41,7 @@ For each disable comment encountered:
   - For large packages (e.g. `lib`, `app-desktop`, `app-cli`), also update the table row at intermediate checkpoints (e.g. every ~20 files) so a hard cutoff loses at most one checkpoint's worth of detail.
 - Commit the progress file alongside (or as part of) the package's cleanup PR.
 - **After each commit that updates this file, also sync the PR body** so reviewers see the latest progress without opening the file. Run: `gh pr edit <PR-number> --body-file readme/dev/any_cleanup_progress.md`.
-  Find the PR number with `gh pr list --head <branch> --json number`. The current branch for this cleanup is `any_refactor_3` (no PR opened yet — previous PR #15339 on `any_refactor_2` was merged).
+  Find the PR number with `gh pr list --head <branch> --json number`. The current branch for this cleanup is `any_refactor_4` (no PR opened yet — previous PR #15377 on `any_refactor_3` was merged).
 - If a session stops mid-package, the **Per-package detail** section records exactly which files were processed so the next session can resume cleanly.
 - At the start of any new session, re-read this file before resuming — it is the source of truth, not conversational memory.
 
@@ -69,7 +70,7 @@ Counts captured 2026-05-11 before any work.
 | 7 | tools | 23 | 49 | 45 | 4 | done (2026-05-11) |
 | 8 | plugin-repo-cli | 11 | 33 | 33 | 0 | done (2026-05-11) |
 | 9 | app-mobile | 37 | 131 | 98 | 33 | done (2026-05-12) |
-| 10 | server | 67 | 227 | 0 | 227 | not started |
+| 10 | server | 67 | 227 | 205 | 22 | done (2026-05-12) |
 | 11 | app-cli | 90 | 742 | 0 | 742 | not started |
 | 12 | app-desktop | 149 | 477 | 0 | 477 | not started |
 | 13 | lib | 213 | 1140 | 0 | 1140 | not started |
