@@ -55,6 +55,7 @@ const useEditorSettings = (props: EditorSettingsProps) => {
 				marginLeft: 0,
 				marginRight: 0,
 				monospaceFont: settings.monospaceFont,
+				paddingBottom: 400,
 			},
 			automatchBraces: settings.automatchBraces,
 			autocompleteMarkup: settings.autocompleteMarkup,

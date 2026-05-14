@@ -99,6 +99,7 @@ function editorTheme(themeId: number) {
 		fontSizeUnits: 'em',
 		fontSize: estimatedFontSizeInEm,
 		fontFamily: fontFamilyFromSettings(),
+		paddingBottom: 150,
 	};
 }
 
