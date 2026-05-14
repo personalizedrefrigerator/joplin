@@ -351,6 +351,210 @@ Summary: 227 → 22 disable comments (205 removed). Zero remaining `Old code bef
 - **Loose lib-typed defaults** (1): `config.ts` `initConfig(overrides: any)` — `Partial<Config>` requires `resourceDir`.
 - **Heterogeneous test fixtures / API call results** (3): `testRouters.curl` and `response` in `main` (parsed JSON responses); `array.ts` `unique` (TS can't unify `T` across `string[] | number[]`).
 - **TypeScript pattern limitations** (6): `testUtils.AppContextTestOptions.request`; the 4 in `requestUtils.ts` (`BodyFields`, `FormParseResult.files`, `FormParseRequest.body`, `convertFieldsToKeyValue` — all centered on formidable's `Fields | Files` union not allowing narrowing).
+
+## packages/app-desktop
+Session date: 2026-05-13
+Branch: any_refactor_6
+
+Files processed:
+- `commands/exportFolders.ts` — 1 removed, 0 left. `_context: any` → `CommandContext`.
+- `commands/exportNotes.ts` — 1 removed, 0 left. `_context: any` → `CommandContext`.
+- `commands/focusElement.ts` — 1 removed, 0 left. `_context: any` → `CommandContext`.
+- `commands/toggleExternalEditing.ts` — 1 removed, 0 left. `mapStateToTitle(state: any)` → `AppState`.
+- `checkForUpdates.ts` — 0 removed, 1 left. `parentWindow: any` is passed to `bridge().showMessageBox(parentWindow, ...)` but the bridge signature is `showMessageBox(message: string, ...)` — tightening would expose a pre-existing call-site mismatch (logic change). Reason updated.
+- `gui/ConfigScreen/ButtonBar.tsx` — 1 removed, 0 left. `type StyleProps = any` → local interface with theme fields used in template literals.
+- `gui/ConfigScreen/controls/plugins/PluginBox.tsx` — 1 removed, 0 left. `styled.div<{ mb: any }>` → `string | number`.
+- `gui/ConfigScreen/controls/plugins/SearchPlugins.tsx` — 1 removed, 0 left. `onPluginSettingsChange(event: any)` → `OnPluginSettingChangeEvent` (already used by callers).
+- `gui/DialogButtonRow.tsx` — 1 removed, 0 left. `okButtonRef?: any` → `React.Ref<HTMLButtonElement>`.
+- `gui/DialogButtonRow/useKeyboardHandler.ts` — 1 removed, 0 left. `isInSubModal(targetElement: any)` → `EventTarget | null`.
+- `gui/Dropdown/Dropdown.tsx` — 1 removed, 0 left. `onChange(event: any)` → `React.ChangeEvent<HTMLSelectElement>`.
+- `gui/EditFolderDialog/Dialog.tsx` — 1 removed, 0 left. `onFolderTitleChange(event: any)` → `React.ChangeEvent<HTMLInputElement>`.
+- `gui/EditFolderDialog/IconSelector.tsx` — 0 removed, 1 left. `(window as any).EmojiButton` — emoji-button library is dynamically loaded onto window with no published types. Reason updated.
+- `gui/ErrorBoundary.tsx` — 1 removed, 0 left. `componentDidCatch(error: any)` → `Error | string` (matches the `typeof === 'string'` narrowing already in the body); needs `as Error` after the narrowing branch.
+- `gui/NoteEditor/NoteBody/CodeMirror/utils/index.ts` — 1 removed, 0 left. `cursorPos: any` → `{ line: number; ch: number }` (CodeMirror 5 position shape used inside the function).
+- `gui/NoteEditor/NoteBody/CodeMirror/utils/types.ts` — 1 removed, 0 left. `pluginAssets: any[]` → `RenderResultPluginAsset[]` (from `@joplin/renderer/types`).
+- `gui/NoteEditor/NoteBody/CodeMirror/utils/useContextMenu.ts` — 0 removed, 1 left. `(editorRef.current as any).alignSelection` — CodeMirror 5 runtime method not in the type. Reason updated.
+- `gui/NoteEditor/NoteBody/CodeMirror/v5/utils/useExternalPlugins.ts` — 0 removed, 1 left. `CodeMirror: any` — receives dynamically-loaded CM5 namespace used for plugin registration; @types/codemirror's signature is too narrow. Reason updated.
+- `gui/NoteEditor/commands/focusElementNoteBody.ts` — 1 removed, 0 left. `comp: any` → `WindowCommandDependencies`.
+- `gui/NoteEditor/commands/pasteAsMarkdown.ts` — 1 removed, 0 left. Same.
+- `gui/NoteEditor/commands/pasteAsText.ts` — 1 removed, 0 left. Same.
+- `gui/NoteEditor/commands/showLocalSearch.ts` — 1 removed, 0 left. Same.
+- `gui/NoteEditor/commands/showRevisions.ts` — 1 removed, 0 left. Introduced local `ShowRevisionsDependencies` (NoteEditor passes a different shape with `setShowRevisions`/`isInFocusedDocument` for this command only — not registered via `useWindowCommandHandler`).
+- `gui/NoteEditor/NoteBody/CodeMirror/v5/utils/useJoplinCommands.ts` — 0 removed, 1 left. `CodeMirror: any` — same reason as `useExternalPlugins.ts`. Reason updated.
+- `gui/NoteEditor/NoteBody/CodeMirror/v5/utils/useKeymap.ts` — 0 removed, 1 left. Same.
+- `gui/NoteEditor/NoteBody/CodeMirror/v5/utils/useScrollUtils.ts` — 0 removed, 1 left. Same.
+- `gui/NoteEditor/NoteBody/CodeMirror/v6/utils/useContentScriptRegistration.ts` — 1 removed, 0 left. `postMessageHandler(message: any)` → `unknown` (consumed by `emitContentScriptMessage` which already accepts `unknown`).
+- `gui/NoteEditor/NoteBody/PlainEditor/PlainEditor.tsx` — 1 removed, 0 left. `onChange(event: any)` → `React.ChangeEvent<HTMLTextAreaElement>`.
+- `gui/NoteEditor/NoteBody/TinyMCE/utils/joplinCommandToTinyMceCommands.ts` — 1 removed, 0 left. `value?: any` → `string` (every literal in the file uses string values).
+- `gui/NoteEditor/NoteBody/TinyMCE/utils/useEditDialog.ts` — 0 removed, 1 left. `onSubmit(dialogApi: any)` — TinyMCE dialog API not in published types. Reason updated.
+- `gui/NoteEditor/editorCommandDeclarations.test.ts` — 1 removed, 0 left. `Record<string, any>` → `Record<string, boolean>` (every literal in the file is a boolean).
+- `gui/NoteEditor/utils/contextMenu.ts` — 1 removed, 0 left. `saveFileData(data: any)` → `string | NodeJS.ArrayBufferView` (matches `fs.writeFile`'s accepted data types).
+- `gui/WindowCommandsAndDialogs/commands/addProfile.ts` — 1 removed, 0 left. `comp: any` → `WindowControl`; `onClose(answer: string)` → `unknown` with `as string` (matches `PromptOptions.onClose` shape).
+- `gui/WindowCommandsAndDialogs/commands/moveToFolder.ts` — 1 removed, 0 left. Same — `WindowControl`.
+- `gui/WindowCommandsAndDialogs/commands/renameFolder.ts` — 1 removed, 0 left. Same; onClose answer narrowed via cast.
+- `gui/WindowCommandsAndDialogs/commands/renameTag.ts` — 1 removed, 0 left. Same.
+- `gui/OneDriveLoginScreen.tsx` — 0 removed, 1 left. `React.Component<any, any>` — old class component without state/props refactor. Reason updated.
+- `gui/ResizableLayout/ResizableLayout.tsx` — 1 removed, 0 left. `newSize: any` → `{ width?: number; height?: number }`.
+- `gui/ResizableLayout/utils/layoutItemProp.ts` — 1 removed, 0 left. `(item as any)[propName]` → `propName: keyof LayoutItem`; `item[propName]` is typed; caller (MainScreen.tsx) needs `as string` for previously-loose `item.context.pluginId`.
+- `gui/ResizableLayout/utils/persist.test.ts` — 1 removed, 0 left. `layout: any` → `LayoutItem` (the type was already imported).
+- `gui/ResizableLayout/utils/style.ts` — 0 removed, 1 left. styled-components `.attrs` typing collides with the dynamic style attrs (`props.size`). Reason updated; `(props: any)` callback now typed inline.
+- `gui/ResizableLayout/utils/types.ts` — 1 removed, 0 left. `context?: any` → `Record<string, unknown>`.
+- `gui/ResizableLayout/utils/useWindowResizeEvent.ts` — 1 removed, 0 left. `eventEmitter: any` → `{ current: { emit: (name: string) => void } }`.
+- `gui/Root.tsx` — 0 removed, 1 left. `React.Component<Props, any>` — implicit state shape; tightening requires structural refactor. Reason updated.
+- `gui/Sidebar/styles/index.ts` — 1 removed, 0 left. `type StyleProps = any` → local interface with theme + item discriminators.
+- `gui/StatusScreen/StatusScreen.tsx` — 0 removed, 1 left. `style: any` is spread into `theme.containerStyle` (loosely typed). Reason updated.
+- `gui/SyncWizard/Dialog.tsx` — 1 removed, 0 left. `boxes: any[]` → `React.ReactNode[]`.
+- `gui/NoteEditor/utils/useDropHandler.ts` — 1 removed, 0 left. `editorRef: any` → `RefObject<NoteBodyEditorRef>`. Tightening exposed two `execCommand()` floating-Promise calls; fixed with `void` (same `void` pattern as showLocalSearch).
+- `gui/NoteEditor/utils/useMessageHandler.ts` — 1 removed, 0 left. `editorRef: any` → `RefObject<NoteBodyEditorRef>`.
+- `gui/NoteEditor/utils/useNoteSearchBar.ts` — 1 removed, 0 left. `noteSearchBarRef: MutableRefObject<any>` → `MutableRefObject<HTMLInputElement | null>`.
+- `gui/NoteEditor/utils/usePluginServiceRegistration.ts` — 1 removed, 0 left. `ref: any` → `Ref<unknown>` (must use `Ref`, not `RefObject`, to accept `ForwardedRef` callers).
+- `gui/NoteEditor/utils/useSearchMarkers.ts` — 1 removed, 0 left. `keywords: any[]` → `{ value: string; type?: string; accuracy?: string }[]` (matches both `Keyword`-consuming code and the literal from `useNoteSearchBar`).
+- `gui/NoteList/utils/useOnNoteClick.ts` — 1 removed, 0 left. `(event.target as any)` → `HTMLElement`.
+- `gui/NoteList/utils/useScroll.ts` — 1 removed, 0 left. `event: any` → `React.UIEvent<HTMLDivElement>`; switched `event.target` to `event.currentTarget` (target is `EventTarget` without scrollTop).
+- `gui/NoteListControls/commands/focusSearch.ts` — 1 removed, 0 left. `searchBarRef: any` → `{ current: { select: ()=> void } | null }`.
+- `gui/NoteListHeader/useDragAndDrop.test.ts` — 1 removed, 0 left. `as any` → `as InsertAt` (now exported from `useDragAndDrop`).
+- `gui/NoteListHeader/utils/validateColumns.test.ts` — 1 removed, 0 left. `(props: any)` → `Partial<NoteListColumn>[]`.
+- `gui/WindowCommandsAndDialogs/commands/showNoteContentProperties.ts` — 1 removed, 0 left. `comp: any` → `WindowControl`.
+
+Checkpoint 5 (2026-05-13):
+- `gui/WindowCommandsAndDialogs/commands/showNoteProperties.ts` — 1 removed, 0 left. `comp: any` → `WindowControl`.
+- `gui/WindowCommandsAndDialogs/commands/showShareFolderDialog.ts` — 1 removed, 0 left. Same.
+- `gui/WindowCommandsAndDialogs/commands/showShareNoteDialog.ts` — 1 removed, 0 left. Same.
+- `gui/WindowCommandsAndDialogs/commands/showSpellCheckerMenu.ts` — 0 removed, 1 left. `Menu.buildFromTemplate(menuItems as any)` — `spellCheckerConfigMenuItems` returns a heterogeneous menu shape that doesn't satisfy Electron's `MenuItemConstructorOptions` structurally. Reason updated.
+- `gui/WindowCommandsAndDialogs/commands/toggleNotesSortOrderField.ts` — 1 removed, 0 left. `field?: string | any[]` → `string | [string, boolean]`.
+- `gui/WindowCommandsAndDialogs/utils/useWindowControl.ts` — 1 removed, 0 left. `onClose(answer: any)` → `unknown` with `as PromptSuggestion<T>` cast inside.
+- `gui/dialogs.ts` — 1 removed, 0 left. `options: any = null` → `Record<string, unknown>`.
+- `gui/hooks/usePrevious.ts` — 1 removed, 0 left. Dangling disable comment (no `any` in the body) — removed.
+- `gui/style/StyledInput.tsx` — 1 removed, 0 left. `type StyleProps = any` → local interface with theme fields.
+- `gui/utils/convertToScreenCoordinates.ts` — 1 removed, 0 left. `o: any` → `unknown` with internal `Record<string, unknown>` narrowing after `JSON.parse(JSON.stringify(o))`.
+- `integration-tests/util/setMessageBoxResponse.ts` — 0 removed, 1 left. Mock return cast prevents breakage when Electron's `MessageBoxReturnValue` shape evolves. Reason updated; redundant block comment removed.
+- `tools/notarizeMacApp.ts` — 0 removed, 1 left. `appBundleId` is no longer in `@electron/notarize`'s `NotaryToolStartOptions` but still required at runtime. Reason updated.
+- `utils/checkForUpdatesUtilsTestData.ts` — 3 removed, 0 left. `releases1/2/3: any` → `unknown as GitHubRelease[]` cast at the end of each array literal (fixtures include extra GitHub API fields not in `GitHubRelease`).
+- `utils/checkForUpdatesUtils.test.ts` — 1 removed, 0 left. `testCases: [any, …][]` → `[GitHubRelease[], …][]`.
+- `gui/Navigator.tsx` — 0 removed, 1 left. `ScreenProps = any`: heterogeneous per-screen prop shapes; the navigator just spreads them. Reason updated.
+- `gui/NewWindowOrIFrame.tsx` — 1 removed, 0 left. `createPortal(...) as any` cast wasn't needed; `ReactPortal` already assignable to `ReactNode`.
+- `gui/DropboxLoginScreen.tsx` — 0 removed, 2 left. Reasons updated (old class component + JS module without exported type).
+- `gui/Sidebar/Sidebar.tsx` — 0 removed, 2 left. `syncReport: any` matches the lib reducer shape; the inner `syncCompletedWithoutError` already had a descriptive reason. Both reasons now explain why they can't be tightened locally.
+- `gui/Button/Button.tsx` — 2 removed, 0 left. `type StyleProps = any` → local theme interface; `ref: any` → `React.Ref<HTMLButtonElement>`.
+- `gui/ExtensionBadge.tsx` — 2 removed, 0 left. `style?: any` → `React.CSSProperties`; `themeSelector(_state: any, props: any)` → typed by `Props`.
+- `gui/ImportScreen.tsx` — 2 removed, 0 left. Local `ProgressState` interface; `onError(error: any)` → `Error`.
+- `gui/MultiNoteActions.tsx` — 2 removed, 0 left. `notes: any[]` → `NoteEntity[]`; `multiNotesButton_click(item: any)` → `MenuItem` (electron).
+- `gui/NoteRevisionViewer.tsx` — 2 removed, 0 left. Dangling disable on `revisionList_onChange` removed; `webview_ipcMessage(event: any)` → `{ channel?: string; args?: unknown[] }`.
+- `gui/ResizableLayout/utils/setLayoutItemProps.ts` — 2 removed, 0 left. `props: any` → `Partial<LayoutItem>`; `(item as any)[n]` → `(item as unknown as Record<string, unknown>)[n]`.
+- `gui/ResizableLayout/utils/useLayoutItemSizes.ts` — 2 removed, 0 left. `noWidth/HeightChildren: any[]` → `{ item: LayoutItem; parent: LayoutItem }[]`.
+- `gui/ToggleEditorsButton/styles/index.ts` — 2 removed, 0 left. `innerButton/output: any` → `CSSProperties` / `Record<string, CSSProperties>`.
+- `gui/WindowCommandsAndDialogs/commands/gotoAnything.ts` — 2 removed, 0 left. Local `PluginMenuItem` interface for `PluginManager.menuItems().find(...)`.
+- `gui/WindowCommandsAndDialogs/commands/importFrom.ts` — 2 removed, 0 left. `errors: any[]` → `(string|Error)[]`; `onProgress(status: any)` → `Record<string, unknown>`.
+- `gui/hooks/useEffectDebugger.ts` — 2 removed, 0 left. `effectHook/dependencies/dependencyNames` typed as `EffectCallback`/`unknown[]`/`string[]`; reduce accum typed.
+- `gui/hooks/useImperativeHandlerDebugger.ts` — 2 removed, 0 left. Made generic over T; `ref: Ref<T>`, `effectHook: ()=> T`, deps typed.
+- `gui/hooks/usePropsDebugger.ts` — 2 removed, 0 left. `props: any` → `Record<string, unknown>`; `dependencies: any[]` → `unknown[]`.
+- `gui/lib/SearchInput/SearchInput.tsx` — 2 removed, 0 left. `inputRef?: any` → `React.Ref<HTMLInputElement>`; `onChange(event: any)` → `React.ChangeEvent<HTMLInputElement>`.
+- `gui/utils/loadScript.ts` — 2 removed, 0 left. `attrs?: Record<string, any>` → `Record<string, string>`; `element: any` → typed `HTMLLinkElement | HTMLScriptElement | null` with branch-specific locals.
+- `services/plugins/PlatformImplementation.ts` — 2 removed, 0 left. `Components` index → `unknown`; `registerComponent(_, component: any)` → `unknown`.
+- `services/plugins/UserWebview.tsx` — 2 removed, 0 left. `theme?: any` → `Record<string, unknown>`; `ref: any` → `React.Ref<UserWebviewRef>` (new exported interface).
+- `gui/NoteEditor/NoteBody/CodeMirror/utils/useEditorSearchHandler.ts` — 2 removed, 0 left. `searchMarkers: any` → `SearchMarkers`; `webviewRef: RefObject<any>` → `RefObject<NoteViewerControl>`.
+- `gui/NoteEditor/NoteBody/CodeMirror/utils/useWebviewIpcMessage.ts` — 2 removed, 0 left. Local `WebviewIpcEvent { channel?; args? }` used for both `onMessage` parameter and the returned callback; `arg0` cast `as number` at the `percentScroll` call.
+- `gui/NoteEditor/NoteBody/CodeMirror/v5/utils/useLineSorting.ts` — 0 removed, 2 left. Same dynamic CM5 loader / runtime instance reason as the other v5 utils. Reasons updated.
+- `gui/NoteEditor/NoteBody/TinyMCE/utils/setupToolbarButtons.ts` — 0 removed, 2 left. TinyMCE editor + ToggleButton api types not in published types. Reasons updated.
+- `gui/NoteEditor/NoteBody/TinyMCE/utils/useScroll.ts` — 1 removed, 1 left. `scheduleOnScroll(event: any)` → `{ percent: number }`; `editor: any` stays (TinyMCE Editor type narrower than getDoc/getWin usage). Reason updated.
+- `gui/NoteEditor/utils/useFormNote.ts` — 2 removed, 0 left. `editorRef: any` → `RefObject<NoteBodyEditorRef>` (exposed a floating Promise in `handleAutoFocus`; fixed with `void`); `onResourceChange(event: any)` → `{ id: string }`.
+- `gui/NoteEditor/utils/useWindowCommandHandler.ts` — 2 removed, 0 left. `noteSearchBarRef: any` → `MutableRefObject<HTMLInputElement | null>`; `execute(..., ...args: any[])` → `unknown[]`.
+- `gui/NoteList/utils/types.ts` — 2 removed, 1 left. `themeId: any` → `number`; `resizableLayoutEventEmitter: any` → `EventEmitter`; `searches: any[]` left with descriptive reason (matches lib reducer shape).
+- `gui/NoteListWrapper/NoteListWrapper.tsx` — 1 removed, 0 left. `resizableLayoutEventEmitter: any` → `EventEmitter`; `depNameToNoteProp(event.name as any)` → `as ListRendererDependency`.
+- `gui/Sidebar/hooks/useOnRenderItem.tsx` — 2 removed, 0 left. `(folder as any).note_count` → `(folder as FolderEntity & { note_count?: number }).note_count` (dynamic SQL-only field).
+
+Verification at checkpoint: package `yarn tsc --noEmit` clean; lint clean on changed files; spellcheck clean. 431 → 368 disable comments (63 removed; cumulative 109/477).
+
+Checkpoint 6 (2026-05-13):
+- `gui/WindowCommandsAndDialogs/commands/editAlarm.ts` — 3 removed, 0 left. `comp: any` → `WindowControl`; `onClose(answer: any, buttonType: string)` → `(unknown, unknown)` with `as number` for `todo_due`; `mapStateToTitle(state: any)` → `State` (from lib reducer).
+- `gui/NoteListHeader/useDragAndDrop.ts` — 3 removed, 0 left. `setupDataTransfer.data: any` → `unknown`; `onResizerDragOver as any` (×2) → `as unknown as EventListener` for `add/removeEventListener`.
+- `gui/NoteListItem/utils/prepareViewProps.ts` — 3 removed, 0 left. `output: any` → typed local shape `{note?: {folder?}; item?: {size?; selected?; index?}}`; `(note as any)[propName]` / `(itemSize as any)[propName]` → `as unknown as Record<string, unknown>`.
+- `gui/ResizableLayout/utils/movements.ts` — 3 removed, 0 left. `array_move` made generic over T; `produce(layout, (draft: any))` → `LayoutItem`; `newSize: any` → `{ width?: number; height?: number }`.
+- `gui/ToolbarButton/ToolbarButton.tsx` — 3 removed, 0 left. `getProp(props, name, defaultValue: any = null)` → `unknown` default; record-cast accessors; cast `title/tooltip/iconName as string` and `onClick as (()=> void) | undefined` at call sites.
+- `InteropServiceHelper.ts` — 1 removed, 2 left. `Promise<any>` → `Promise<Buffer | null>` (this exposed a downstream `writeFile(string)` mismatch in `usePrintToCallback.ts` — added `as unknown as string` there with the runtime accepting Buffer). The other two (`pageSize as any`, `webContents.print(options as any)`) stay with descriptive reasons (Electron's option types stricter than what we pass).
+- `gui/MasterPasswordDialog/Dialog.tsx` — 0 removed, 3 left. PasswordInput's `ChangeEventHandler` is typed as `(event: {value: string})=> void` but the runtime hands a DOM `React.ChangeEvent` through (StyledInput passes the raw onChange). Updated reason on all three handlers.
+- `gui/EncryptionConfigScreen/EncryptionConfigScreen.tsx` — 2 removed, 1 left. `themeId: any` → `number`; `infoComp: any = null` → `React.ReactNode`. `onPasswordInputChange` left for the same PasswordInput reason above; reason updated.
+- `gui/NoteListControls/NoteListControls.tsx` — 3 removed, 0 left. `StyleProps = any` → local interface; `StyledRoot: any` typed via interface; `iconMap: any` → `Record<string, string>`.
+- `gui/PdfViewer.tsx` — 3 removed, 0 left. `StyleProps = any` → local theme interface; `resource: any` → `ResourceEntity`; `onMessage_(event: any)` → `MessageEvent<{ name; text? }>`.
+- `gui/ConfigScreen/controls/SettingComponent.tsx` — 2 removed, 1 left. `onChange(event: any)` → `{ value: unknown }`; `inputStyle: any` → `CSSProperties`. The `settingKeyToControl` declaration's `React.FC<any>` left — each control's props differ and tightening would require structural changes. Reason updated.
+- `gui/NoteEditor/NoteBody/CodeMirror/v6/CodeMirror.tsx` — 3 removed, 0 left. `pluginAssets: any[]` → `RenderResultPluginAsset[]`; `(commands as any)[cmd.name](cmd.value)` → typed record cast; `options: any` → inline typed object with optional `percent`.
+- `gui/ResizableLayout/utils/persist.ts` — 4 removed, 0 left. `saveLayout(layout): any` → `Partial<LayoutItem>`; `produce(layout, (draft: any))` → `LayoutItem`; `delete (item as any)[k]` → `as unknown as Record<string, unknown>`; `loadLayout(layout: any)` → `Partial<LayoutItem> | null` with `as LayoutItem` on the spread.
+- `gui/NoteEditor/utils/resourceHandling.ts` — 4 removed, 0 left. `commandAttachFileToBody.options` → local `CommandAttachFileToBodyOptions`; `resourcesStatus.resourceInfos: any` → `ResourceInfos` (renderer); `clipboardImageToResource.image: any` → `NativeImage` (electron type import); `getResourcesFromPasteEvent.event: any` → `{ preventDefault } | null`.
+- `gui/SearchBar/SearchBar.tsx` — 4 removed, 0 left. `inputRef?: any` → `MutableRefObject<HTMLInputElement | null>`; `onChange(event: any)` → `{ value: string }`; `onKeyDown(event: any)` → `React.KeyboardEvent`; inner `document.activeElement as any` → `as HTMLElement`.
+- `gui/WindowCommandsAndDialogs/commands/showPrompt.ts` — 4 removed, 0 left. `comp: any` → `WindowControl`; `value?: any` → `string` (matches DialogState shape); `autocomplete?: any[]` → `unknown[]`; `onClose(answer: any, buttonType: string)` → `(unknown, unknown)`.
+- `gui/NoteEditor/NoteBody/CodeMirror/v6/useEditorCommands.ts` — 4 removed, 0 left. `webviewRef: RefObject<any>` → `RefObject<NoteViewerControl>`; `insertText(value: any)` → `string`; `(editorRef.current as any)[value.name]` (×2) → single `editorAsRecord` alias typed `Record<string, (...args: unknown[])=> unknown>`.
+- `bridge.ts` — 3 removed, 1 left. `showOpenDialog` `(this.lastSelectedPaths_ as any)[fileType]` (×2) → typed `keyof LastSelectedPath`; `shouldShowMenu(_event: any, params: any)` → `(unknown, { isEditable: boolean })`. The remaining `as any` on `dialog.showOpenDialog(this.activeWindow(), options as any)` stays — our `OpenDialogOptions.properties` is `string[]` but Electron's is a strict union. Reason updated.
+- `gui/ConfigScreen/controls/plugins/PluginsStates.tsx` — 4 removed, 0 left. `styled.div<any>` / `styled(StyledMessage)<any>` → typed prop interfaces; `value: any` → `SerializedPluginSettings`; `onSearchPluginSettingsChange(event: any)` → `OnPluginSettingChangeEvent`.
+
+Verification at checkpoint: package `yarn tsc --noEmit` clean; lint clean on changed files; spellcheck clean. 368 → 312 disable comments (56 removed; cumulative 165/477).
+
+Checkpoint 7 (2026-05-13):
+- `gui/NoteEditor/NoteBody/CodeMirror/utils/useEditorSearchExtension.ts` — 3 removed, 2 left. `getSearchTerm.keyword: any` → `Keyword`; `match: any` → `{from: {line; ch}; to: {line; ch}}` (CodeMirror 5 DocumentPosition); `marks: any` → `ReturnType<typeof highlightSearch>[]`. The `stream: any` overlay token signature stays — CM5 StringStream isn't typed in this repo.
+- `gui/NoteEditor/NoteBody/CodeMirror/v5/utils/useCursorUtils.ts` — 0 removed, 5 left. All `CodeMirror: any` / `cm: any` / `params: any` reasons updated to mention the CM5 dynamic loader / no @types/codemirror.
+- `gui/ResourceScreen.tsx` — 5 removed, 0 left. `onResourceClick/Delete/ToggleSorting`'s return `any` → `void`; `rootStyle: any` → `CSSProperties & { height?; width? }`; `mapStateToProps(state: any)` → `AppState`.
+- `gui/WindowCommandsAndDialogs/utils/appDialogs.tsx` — 0 removed, 5 left. Reasons consolidated — each dialog requires a different `customProps` shape and the render functions intentionally spread an open shape.
+- `app.reducer.ts` — 5 removed, 1 left. `watchedResources: any` → `Record<string, unknown>`; `navHistory: any[]` → `AppStateRoute[]`; `createAppDefaultState.resourceEditWatcherDefaultState: any` → `Partial<AppState>` (this required spreading `backgroundWindows: {}` to override the lib's looser default); `getNextLayout.currentLayout: any` → `string | string[]`; `(item as any)[propName]` → `as unknown as Record<string, unknown>`. The main reducer `action: any` stays with reason — would need a redux action union.
+- `gui/ShareFolderDialog/ShareFolderDialog.tsx` — 6 removed, 0 left. `styled(StyledMessage)<any>` × 2 → typed prop interfaces (`<{index: number}>` and the bare form); `StyleProps = any` → local interface; `handleError(error: any)` / `defer(error: any)` → `Error` / `Error | null`; `recipientEmail_change(event: any)` → `React.ChangeEvent<HTMLInputElement>`. Needed `type="info"` on `<StyledRecipient>` and `<StyledShareState>` to satisfy the StyledMessage's `type: string` required prop that the original `<any>` cast had hidden (runtime branches on `type === 'error'`, so 'info' = default styling).
+- `gui/NoteEditor/NoteEditor.tsx` — 6 removed, 0 left. `onFieldChange.value: any` → `string`; `onTitleChange(event: any)` → `React.ChangeEvent<HTMLInputElement>`; `onBodyWillChange(event: any)` → `{ changeId: number }`; `externalEditWatcher_noteChange(event: any)` / `onNotePropertyChange(event: any)` → `{ id; note: NoteEntity }` / `{ note: NoteEntity }` (matches the `AlarmChangeEvent` shape lib emits); `(newFormNote as any)[key]` → `as unknown as Record<string, unknown>` via a typed `noteAsRecord` alias.
+- `ElectronAppWrapper.ts` — 7 removed, 0 left. `stateOptions: any` → typed object literal; `windowOptions: any` → `BrowserWindowConstructorOptions` (uncovered that `enableRemoteModule` is no longer in the published `WebPreferences`; cast with comment explaining @electron/remote still relies on it); `(event as any).isMainFrame` → `as Electron.Event & {isMainFrame?: boolean}`; `close/open-url` event handlers → `import('electron').Event`; `ipcMain.on` handlers → `import('electron').IpcMainEvent` with `args` typed `unknown` and cast at the assignment site. (Used `import('electron').*` inline rather than `Electron.*` because the project's lint config doesn't surface the `Electron` global.)
+- `gui/NoteEditor/NoteBody/CodeMirror/v5/CodeMirror.tsx` — 4 removed, 3 left. `commands: any` → `Record<string, (...args: any[])=> unknown>` (kept inner `any` with reason — commands are heterogeneous and dispatched by name); `replaceSelection.value: any` / `insertText.value: any` → `string`; `onEditorPaste.event: any` → `{ preventDefault } | null`; `loadScript.script: any` / `element: any` → `{src; id?; attrs?}` / `HTMLScriptElement | HTMLLinkElement` with branch-specific narrowing; `options: any` → typed object with optional `percent`. Two of the remaining disables collapsed into the new `commands` typing comment.
+- `gui/NoteEditor/NoteBody/CodeMirror/v5/utils/useJoplinMode.ts` — 0 removed, 7 left. All CM5 mode/state/stream `any`s reason-updated (no @types/codemirror in this repo).
+- `gui/NoteListItem/utils/useItemElement.ts` — 7 removed, 0 left. All `as any` event-listener casts → `as unknown as EventListener`; React→DOM event casts → `as unknown as React.MouseEvent<HTMLDivElement>`; `(element.style as any)[n]` → `as unknown as Record<string, unknown>`.
+
+Verification at checkpoint: package `yarn tsc --noEmit` clean; lint clean on changed files; spellcheck clean. 312 → 266 disable comments (46 removed; cumulative 211/477).
+
+Checkpoint 8 (2026-05-13):
+- `gui/WindowCommandsAndDialogs/commands/setTags.ts` — 8 removed, 0 left. `comp: any` → `WindowControl`; introduced local `TagOption { value; label }` for the suggestion arrays; sort/map callbacks typed via `TagEntity`; `onClose(answer: any[])` → `unknown` with internal `as TagOption[]`. The `value: startTags` needed `as unknown as string` because DialogState's value is typed `string`.
+- `gui/NotePropertiesDialog.tsx` — 7 removed, 2 left. `okButton: any` → `RefObject<HTMLButtonElement>`; `styles_: any` → `Record<string, CSSProperties>`; `buttonRow_click(event: any)` → `{ buttonName: string }`; `editPropertyButtonClick.initialValue: any` → `string | number | null`; `(newFormNote as any)[k]` and `(formNote as any)[key]` → `as unknown as Record<string, unknown>` casts; `editedValue: any` → `string | number | null`. Two stay with descriptive reasons: `latLongFromLocation` output spreads into NoteEntity which expects number lat/long while the code keeps them as strings (runtime coercion); `createNoteField.value` is genuinely heterogeneous (timestamps + ids + urls).
+- `gui/utils/NoteListUtils.ts` — 0 removed, 11 left. All `commandToStatefulMenuItem(...) as any` casts get a consolidated reason: lib's MenuItem shape doesn't structurally satisfy Electron's MenuItemConstructorOptions.
+- `app.ts` — 4 removed, 6 left. `shouldShowMenu(_event: any, params: any)` → `(unknown, { isEditable; inputFieldType })`; `ResourceEditWatcher.on('resourceChange', event: any)` → `{ id: string }`; `(window as any).joplin` → `as unknown as Record<string, unknown>`. The reducer/middleware/Tesseract/menu callback/redux dispatch `any`s stay with descriptive reasons (base class signatures, dynamic loader, heterogeneous menu items).
+- `gui/ConfigScreen/ConfigScreen.tsx` — 8 removed, 2 left. Class declaration `<any, any>` stays with reason (legacy class component); `private rowStyle_: any` → `React.CSSProperties`; `sidebar_selectionChange.event: any` / `renderSectionDescription.section: any` / `sectionToComponent.section: any/settings: any` → `SettingMetadataSection` + `Record<string, unknown>`; `sectionWidths: Record<string, any>` → `Record<string, string>`; `sectionStyle: any` → `React.CSSProperties`; `needRestartComp: any` → `React.ReactNode`; `mapStateToProps(state: any)` → `AppState`. Required `settings['sync.target'] as number` casts at call sites. Constructor `props: any` stays (matches the class's open props type).
+- `services/plugins/PluginRunner.ts` — 11 removed, 0 left. `ipcRendererSend.args` / `eventHandler.args` → `unknown`/`unknown[]`; `PluginMessage.args/result/error` → `unknown[]`/`unknown`; introduced local `CallbackPromise` interface and typed `callbackPromises: Record<string, CallbackPromise>`; `mapEventIdsToHandlers.arg: any` → `unknown` with internal `as Record<string, unknown>` for the object-iteration branch; `ipcRenderer.on` handler typed via `IpcRendererEvent`; `result/error` locals → `unknown` / `Error | null` with `as Error` in the catch.
+- `gui/NoteEditor/NoteBody/CodeMirror/utils/useScrollHandler.ts` — 3 removed, 7 left. `scrollTimeoutId_: any` / `restoreEditorPercentScrollTimeoutId_: any` → `ReturnType<typeof setTimeout> | null`; `scheduleOnScroll.event: any` → `{ percent: number }`. The remaining seven CM5 `cm/codeMirror: any` entries reason-updated to mention the dynamic editor/scrollInfo types.
+- `gui/NoteEditor/NoteBody/CodeMirror/v5/utils/useListIdent.ts` — 0 removed, 9 left. All CM5 plugin-loader `any`s reason-updated.
+
+Verification at checkpoint: package `yarn tsc --noEmit` clean; lint clean on changed files; spellcheck clean. 266 → 226 disable comments (40 removed; cumulative 251/477).
+
+Checkpoint 9 (2026-05-13):
+- `gui/MainScreen.tsx` — 12 removed, 4 left. `style: any` → `CSSProperties & { width?; height? }`; `State` fields `promptOptions/notePropertiesDialogOptions/noteContentPropertiesDialogOptions/shareNoteDialogOptions` → `Record<string, unknown>`; `waitForNotesSavedIID_: any` → `ReturnType<typeof setInterval>`; `ipcRenderer.on` handler → `(IpcRendererEvent, string, { url })`; `produce(layout, (draft: any))` → `LayoutItem`; `layoutModeListenerKeyDown.event: any` → `KeyboardEvent`; `urlStyle: any` → `React.CSSProperties`; `renderNotification.styles: any` → `Record<string, CSSProperties>`; `resizableLayout_resize.event: any` → `{ layout: LayoutItem }`; `resizableLayout_renderItem.event: any` → typed shape (`eventEmitter: EventEmitter; visible; size: Size; item: LayoutItem`) — also added missing `return null;` and the explicit `: React.ReactNode` return type; `components: any` → `Record<string, ()=> React.ReactNode>`; `dispatch as any` → `as unknown as Dispatch`. Left: `styles_: any` (heterogeneous — CSSProperties blocks + computed numbers like rowHeight); reducer/middleware-like patterns elsewhere.
+- `gui/NoteEditor/NoteBody/CodeMirror/v5/Editor.tsx` — 0 removed, 17 left. All CM5 dynamic editor/event/options `any`s reason-updated; covers `EditorProps` heterogeneous callbacks (`onChange/onScroll/onEditorPaste/onResize/onUpdate`), the dynamic `cmOptions` record, and ref/wrapper signatures.
+- `gui/NoteEditor/utils/types.ts` — 12 removed, 5 left. `NoteEditorProps`: `notes: any[]` → `NoteEntity[]`; `editorNoteStatuses: any` → `Record<string, string>`; `selectedNoteTags: any[]` → `TagEntity[]`; `watchedResources: any` → `Record<string, unknown>`; `highlightedWords: any[]` → `string[]`. `NoteBodyEditorProps`: `style: any` → `React.CSSProperties`; `onWillChange.event: any` → `{ changeId: number }`; `noteToolbar: any` → `React.ReactNode`; dangling `searchMarkers: any` disable removed (already typed `SearchMarkers`). `MessageEvent.args: any[]` reason updated. `bodyEditorContent: any` reason updated (TinyMCE retains a raw editor object). `ScrollOptions.value` / `OnChangeEvent.content` / `EditorCommand.value` / `CommandValue.args/value` stay with descriptive reasons — each editor dispatches heterogeneous shapes through these fields; tightening would require per-command discriminated unions across all editors. `searches: any[]` stays (matches lib reducer).
+
+Verification at checkpoint: package `yarn tsc --noEmit` clean; lint clean on changed files; spellcheck clean. 226 → 202 disable comments (24 removed; cumulative 275/477).
+
+Checkpoint 10 (2026-05-13):
+- `gui/PromptDialog.tsx` — 11 removed, 9 left. `defaultValue/answer/autocomplete/buttons: any` stay with descriptive reasons (DialogState.promptOptions has heterogeneous values per inputType). `styles_: any` stays (heterogeneous style blocks + react-select factories). `answerInput_: any` stays (HTMLInputElement vs react-select ref depending on inputType). All six react-select style/theme factory callbacks (`control/input/menu/option/multiValueLabel/multiValueRemove`/`selectTheme`) reason-updated. `onSelectChange.newValue: any` → `unknown`; `onKeyDown.event: any` → `React.KeyboardEvent`. `makeAnimated() as any` casts kept inline with reasons.
+- `gui/plugins/GotoAnything.tsx` — 13 removed, 7 left. `UserDataCallbackEvent.item: any` → `NoteEntity | FolderEntity | ResourceEntity | TagEntity`; `folders: any[]` → `FolderEntity[]`; `Dialog: any` → `React.ComponentType<Props>`; `manifest: any` → typed object with menuItem shape; `onTrigger.event: any` → `{ userData }`; `inputRef/itemListRef: any` → `RefObject<HTMLInputElement>` / `RefObject<ItemList<...>>`; `input_onChange/listItem_onClick/input_onKeyDown.event: any` → React event types; `results: any[]` / `row: any` / `result: any` → `GotoAnythingSearchResult[]` and `result.id` accesses; `mergeOverlappingIntervals.f: any` → `[number, number]`; `gotoItem.item: any` → `GotoAnythingSearchResult & { commandArgs? }`; `selectedItemIndex.results: any[]` → `GotoAnythingSearchResult[]`. Notes results from `Tag.searchAllWithNotes`/`SearchEngine.search` and the `folder` spread need `as unknown as GotoAnythingSearchResult[]` casts since lib's signatures are looser. `styles_: any` and the heterogeneous `commandResults` callback signature stay.
+- `gui/MenuBar.tsx` — 0 removed, 23 left. All 23 `any` usages reason-updated: Electron `MenuItemConstructorOptions` has heterogeneous shapes (submenu/role/type/click vary by item kind) and the menu structure is built dynamically.
+
+Verification at checkpoint: package `yarn tsc --noEmit` clean; lint clean on changed files; spellcheck clean. 202 → 179 disable comments (23 removed; cumulative 298/477).
+
+Checkpoint 11 (2026-05-13) — final:
+- `gui/NoteEditor/NoteBody/TinyMCE/TinyMCE.tsx` — 2 removed, 18 left. `stripMarkup.options: any` → `{ collapseWhiteSpaces?: boolean }`; `dispatchDidUpdateIID_: any` → `ReturnType<typeof setTimeout> | null`. All 18 remaining `any`s reason-updated to mention TinyMCE editor instance/event types being looser than @types/tinymce (we use APIs like getDoc/getWin/formatter/ui.registry/undoManager extensions that aren't in the published types).
+- `gui/MenuBar.tsx` — already updated reasons in checkpoint 10.
+- `gui/NoteEditor/NoteBody/CodeMirror/utils/useContextMenu.ts` — 0 removed, 1 left. Combined `github/array-foreach` + `no-explicit-any` disable kept on one line (lint requires consecutive `disable-next-line` directives to be merged); reason updated to mention lib's MenuItem shape vs Electron's MenuItemConstructorOptions.
+- `gui/NoteEditor/NoteBody/CodeMirror/utils/useScrollHandler.ts` — already in checkpoint 8. Inline disable consolidated.
+- `gui/NoteEditor/utils/useSearchMarkers.ts` — 0 removed, 1 left. Combined `ban-types` + `no-explicit-any` disable kept on one line; reason explains `searches: any[]` matches lib reducer and `highlightedWords` is heterogeneous (string[] at call site, keyword shapes inside).
+
+Verification at checkpoint: package `yarn tsc --noEmit` clean; lint clean on changed files; spellcheck clean. 179 → 177 disable comments (2 removed; cumulative 300/477 — 63% reduction).
+
+## Summary
+
+app-desktop final state: **177 disable comments remaining out of 477 (300 removed, 63% reduction)**.
+
+All 177 remaining disables now have **descriptive `-- reason` comments** explaining why they can't be tightened. They fall into these categories:
+
+1. **CodeMirror 5 dynamic loader / dynamic editor / scrollInfo / line-handle types** — no `@types/codemirror` in this monorepo. Files: `useJoplinMode.ts` (7), `useCursorUtils.ts` (5), `useListIdent.ts` (9), `useScrollHandler.ts` (7), `v5/CodeMirror.tsx` (3), `Editor.tsx` (17), and several smaller utils.
+2. **TinyMCE editor / event types** — looser than `@types/tinymce` (we use APIs not in the published types). File: `TinyMCE.tsx` (18).
+3. **Electron MenuItemConstructorOptions** — heterogeneous shapes (submenu/role/type/click vary by item kind). Files: `MenuBar.tsx` (23), `NoteListUtils.ts` (11), `app.ts` (a few).
+4. **react-select style/theme factories** — library's own provided styles, tightening requires importing each StyleConfig generic. File: `PromptDialog.tsx` (9).
+5. **Redux actions / middleware** — heterogeneous action types; tightening would require an action-type union and base class signature change. Files: `app.ts`, `app.reducer.ts`, `MainScreen.tsx`.
+6. **Legacy class components without props/state interfaces** — `Root.tsx`, `OneDriveLoginScreen.tsx`, `DropboxLoginScreen.tsx`, `ConfigScreen.tsx`, `PromptDialog.tsx`.
+7. **Heterogeneous editor commands** — `EditorCommand.value` / `CommandValue.args/value` / `ScrollOptions.value` / `OnChangeEvent.content` — each editor dispatches different shapes by name.
+8. **Library API mismatches** — Electron's `@electron/notarize` types missing `appBundleId`; `WebPreferences.enableRemoteModule` removed; Electron's `OpenDialogOptions.properties` is a strict union but the app uses `string[]`.
+9. **Heterogeneous test fixtures / external library shapes** — `electron-context-menu`'s actions/props, PluginManager dynamic menu items, `tesseract.js` dynamic loader.
+10. **CSS / styling** — `styled-components.attrs` typing conflicts; `styles_` blocks that mix CSSProperties with computed numbers.
+
 ## packages/app-cli
 Session date: 2026-05-13
 
