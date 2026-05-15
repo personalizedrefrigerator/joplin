@@ -1,7 +1,7 @@
 import { NitroModules } from 'react-native-nitro-modules';
 import type { AudioRecorder, SessionOptions, WhisperSession, WhisperVoiceTyping } from './specs/Whisper.nitro';
 
-let WhisperVoiceTypingHybridObject: WhisperVoiceTyping|null = NitroModules.createHybridObject<WhisperVoiceTyping>('WhisperVoiceTyping');
+let WhisperVoiceTypingHybridObject: WhisperVoiceTyping|null = null;
 
 export type { SessionOptions };
 
