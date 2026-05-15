@@ -31,6 +31,13 @@ const shouldFullReplace = (node: SyntaxNodeRef, state: EditorState) => {
 			if (!lastClosingBracketIdx || node.from < lastClosingBracketIdx) {
 				return false;
 			}
+			// Avoid fully hiding links
+			const hasEmptyLabel = state.sliceDoc(
+				Math.max(0, lastClosingBracketIdx - 1), lastClosingBracketIdx,
+			) === '[';
+			if (hasEmptyLabel) {
+				return false;
+			}
 		}
 		return true;
 	}
