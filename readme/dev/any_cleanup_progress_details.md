@@ -606,3 +606,357 @@ Summary: 90 → 16 disable comments (74 removed). Zero remaining `Old code befor
 - **Loose lib-typed APIs** (2): `command-sync.ts` — `Synchronizer.start(options: any)` and `Synchronizer.reportToLines(report: any)` in lib are themselves `any`; tightening here would diverge from lib.
 - **No published types for JS modules** (3): `StatusBarWidget` (tkwidgets terminal-kit `inputField` options + callback) and `command-sync.ts` `oneDriveApiUtils_` (`onedrive-api-node-utils.js` is plain JS).
 - **Dynamic command/state shapes already documented** (6): all of `app.ts` was already annotated with descriptive non-"Old code" reasons before this pass — `commands_`, `commandMetadata_`, `activeCommand_`, `gui_`, dynamic command type at L175, and the redux dispatch type.
+
+## packages/lib
+Session date: 2026-05-14
+
+Starting count: 1138 disable comments across 212 files (excluding `node_modules/`).
+
+Checkpoint 1 (2026-05-14): 1138 → 1101 (37 removed across ~25 files).
+
+Files processed:
+- `SyncTargetNone.ts` — 1 removed, 0 left. `null as any` → `null as unknown as Synchronizer` with type-only import.
+- `components/shared/config/shouldShowMissingPasswordWarning.ts` — 1 removed, 0 left. `settings: any` → `Record<string, unknown>`.
+- `folders-screen-utils.ts` — 1 removed, 0 left. `scheduleRefreshFoldersIID_: any` → `ReturnType<typeof shim.setTimeout>`.
+- `geolocation-node.ts` — 1 removed, 0 left. `fetchJson` return → `Record<string, unknown>` (and renamed shadowed `let r` to `const response` to keep types straight after `.json()`).
+- `hooks/useAsyncEffect.ts` — 1 removed, 0 left. `dependencies: any[]` → `DependencyList` (type-only import from react).
+- `hooks/useElementSize.ts` — 1 removed, 0 left. `elementRef: any` → `RefObject<HTMLElement>` (type-only import from react).
+- `markdownUtils.ts` — 1 removed, 0 left. `searchUrls(tokens: any[])` → `MarkdownItType.Token[]` (already had type-only import).
+- `markupLanguageUtils.ts` — 1 removed, 0 left. `pluginOptions: any` → `Record<string, { enabled: boolean }>`.
+- `models/Note.test.ts` — 1 removed, 0 left. `t[0]` cast `as NoteEntity` instead of inner `let input: any`.
+- `models/NoteResource.ts` — 1 removed, 0 left. Introduced exported `AssociatedResourceNote = Partial<NoteEntity> & { resource_id; note_id }` to reflect the join shape.
+- `models/Revision.test.ts` — 1 removed, 0 left. `input as any` → `input as RevisionEntity`.
+- `models/Revision.ts` — 0 removed, 1 left. Tried `unknown[]` for parsePatch; broke `patchItem.diffs` access. Reverted with updated reason — diff-match-patch JSON shape, no installed `@types/diff-match-patch`.
+- `models/Setting.test.ts` — 1 removed, 0 left. `loadSettingsFromFile(): Promise<any>` → `Promise<Record<string, unknown>>`.
+- `models/settings/FileHandler.ts` — 1 removed, 0 left. `SettingValues = Record<string, any>` → `Record<string, unknown>`.
+- `ntp.ts` — 1 removed, 0 left. `error: any` → `Error | null` in the NTP callback signature.
+- `services/ResourceEditWatcher/reducer.ts` — 0 removed, 1 left. Reason updated (heterogeneous redux state composed across desktop/mobile; action types untyped).
+- `services/database/isSqliteSyntaxError.ts` — 1 removed, 0 left. `sqliteError: any` → `{ message?: string }`.
+- `services/interop/InteropService_Importer_EnexToMd.ts` — 1 removed, 0 left. `options: any` → `ImportOptions`.
+- `services/interop/InteropService_Importer_Raw.test.ts` — 1 removed, 0 left. Introduced local `FolderEntityWithChildren` interface; `tree: any` → typed cast.
+- `services/interop/Module.test.ts` — 1 removed, 0 left. `format: ... as any` → `as ExportModuleOutputFormat`.
+- `services/interop/Module.ts` — 1 removed, 0 left. `format: '' as any` → `as ExportModuleOutputFormat`.
+- `services/joplinCloudUtils.ts` — 1 removed, 0 left. `Action.payload?: any` → `string` (only ever holds errorMessage).
+- `services/noteList/defaultMultiColumnsRenderer.ts` — 0 removed, 1 left. Reason updated (matches OnRenderNoteHandler which is `any` by design; props heterogeneous per renderer's itemProps).
+- `services/noteList/renderTemplate.test.ts` — 1 removed, 0 left. `name: '…' as any` → `as ColumnName`.
+- `services/noteList/renderViewProps.ts` — 1 removed, 0 left. `value: any` → `unknown` with inner narrowing casts.
+- `services/ocr/OcrService.ts` — 1 removed, 0 left. `maintenanceTimer_: any` → `ReturnType<typeof shim.setInterval>`.
+- `services/plugins/MenuController.ts` — 1 removed, 0 left. `store: any` → `PluginStore` (new exported alias from `ViewController`).
+- `services/plugins/MenuItemController.ts` — 1 removed, 0 left. Same fix via `PluginStore`.
+- `services/plugins/ToolbarButtonController.ts` — 1 removed, 0 left. Same fix via `PluginStore`.
+- `services/plugins/ViewController.ts` — 3 removed, 1 left. Introduced exported `PluginStore = Store<any>` (state heterogeneous across desktop/mobile — `mainLayout` lives on AppState only); typed `store_`/`store`/`message`. `storeView` stays `any` (controllers index different view shapes).
+- `services/plugins/Plugin.ts` — 4 removed, 0 left. Introduced exported `MessageListenerCallback = (message: unknown)=> Promise<unknown>`; typed `messageListener_`, `contentScriptMessageListeners_`, `emitMessage`, `onMessage`, `onContentScriptMessage`, `emitContentScriptMessage`.
+- `services/plugins/RepositoryApi.ts` — 1 removed, 0 left. `(manifest as any)[field]` → `as const` tuple + direct indexing.
+- `services/plugins/api/JoplinContentScripts.ts` — 1 removed, 0 left. `callback: any` → `MessageListenerCallback`.
+- `services/plugins/api/JoplinInterop.ts` — 1 removed, 0 left. `...module as any` → spread + `format: module.format as ExportModuleOutputFormat`.
+- `services/plugins/utils/loadContentScripts.ts` — 1 removed, 1 left. `postMessageHandler` now async returning `Promise<unknown>`. The `loadedModule.codeMirrorResources/codeMirrorOptions` access kept `as any` with updated reason — these properties are not on `ContentScriptModule`.
+- `services/interop/InteropService_Importer_EnexToHtml.ts` — follow-up fix: `outputFormat: 'html'` → `ImportModuleOutputFormat.Html` (caused by ImportOptions tightening).
+
+Files skipped entirely:
+- `database-driver.ts` — `SelectResult = any` already tagged "Partial refactor"; out of scope.
+- `file-api-driver-local.ts` — already tagged "Partial refactor".
+- `services/interop/InteropService_Importer_Md_frontmatter.ts` — `parseRawYamlToFolderIcon` already tagged "The raw YAML output is untyped".
+- `services/e2ee/ppk/RSA.node.ts` — already tagged "Workaround for incorrect types".
+- `services/e2ee/types.ts` — already tagged "Partial refactor".
+- `services/commands/ToolbarButtonUtils.ts` — already tagged "WhenClauseContext can be partial in tests".
+
+Checkpoint 2 (2026-05-14): 1101 → 1053 (48 removed across ~25 files).
+
+- `services/plugins/api/JoplinPlugins.ts` — 1 removed, 0 left. `require(_path): any` → `unknown` (stub).
+- `services/plugins/utils/manifestFromObject.ts` — 1 removed, 0 left. `(o: any)` → `Record<string, unknown>`; PluginService.validateManifest now casts on the caller side.
+- `services/plugins/utils/mapEventHandlersToIds.ts` — 0 removed, 1 left. Reason updated (recursive walker; tightening to `unknown` forces narrowing at every branch and recursive call).
+- `services/plugins/utils/validatePluginPlatforms.test.ts` — 1 removed, 0 left. `platforms: any` → `unknown`; inner cast in call.
+- `services/profileConfig/index.ts` — 1 removed, 0 left. Introduced local `MigratingProfile`/`MigratingProfileConfig` interfaces describing the v1→v2 transition.
+- `services/rest/ApiResponse.ts` — 1 removed, 0 left. `body: any` → `unknown`.
+- `services/rest/routes/auth.ts` — 1 removed, 0 left. `output: any` → inline `{ status: AuthTokenStatus; token?: string }`.
+- `services/rest/routes/search.ts` — 1 removed, 0 left. Restructured to construct the options as a typed object literal; NotesForQueryOptions branch narrows the LoadOptions.fields union to string[].
+- `services/rest/utils/defaultAction.ts` — 1 removed, 0 left. `getOneModel.options: any` → `LoadOptions`.
+- `services/rest/utils/defaultLoadOptions.ts` — 1 removed, 0 left. Return → `LoadOptions`.
+- `services/rest/utils/defaultSaveOptions.ts` — 1 removed, 0 left. Introduced exported `DefaultSaveOptions { userSideValidation; isNew?; autoTimestamp? }`; callers set `autoTimestamp` after construction.
+- `services/search/SearchFilter.test.ts` — 1 removed, 0 left. `let engine: any` → `SearchEngine`.
+- `services/sortOrder/PerFolderSortOrderService.ts` — 1 removed, 0 left. `event: any` → `{ value: string }`.
+- `services/style/loadCssToTheme.ts` — 1 removed, 0 left. Removed `(f: any)` annotation — readDirStats returns typed Stat[].
+- `services/synchronizer/ItemUploader.ts` — 1 removed, 0 left. `preUploadedItems_: Record<string, any>` → `Record<string, { error?: { message?; code? } }>`.
+- `services/synchronizer/MigrationHandler.ts` — 1 removed, 0 left. `autoLockError: any` / `error: any` → `Error | null`.
+- `services/synchronizer/gui/useSyncTargetUpgrade.ts` — 1 removed, 0 left. `error: any` → `Error | null`.
+- `services/synchronizer/migrations/1.ts` and `2.ts` — 2 removed, 0 left. `api: any` → `FileApi`.
+- `services/synchronizer/utils/handleConflictAction.ts` — 1 removed, 0 left. `remoteContent/local: any` → `BaseItemEntity`.
+- `utils/ipc/types.ts` — 0 removed, 1 left. Reason updated (structural constraint can't express "args extend SerializableData[]" without index-signature errors).
+- `utils/ipc/utils/mergeCallbacksAndSerializable.ts` — 1 removed, 0 left. `OnAfterCallbackCreated` callback typed properly.
+- `utils/ipc/utils/separateCallbacksFromSerializable.test.ts` — 1 removed, 0 left. `as any[]` → `as string[]`.
+- `file-api-driver.test.ts` — 1 removed, 0 left. Removed `(f: any)` from map; items typed already.
+- `file-api.test.ts` — 1 removed, 0 left. `syncContext: any` → inferred from literal with `null as unknown` for cache fields.
+- `ArrayUtils.ts` — 2 removed, 0 left. `mergeOverlappingIntervals` typed `[number, number][]`; one caller (`GotoAnything.tsx`) annotated its `indices` accordingly.
+- `JoplinError.ts` — 2 removed, 0 left. Introduced exported `JoplinErrorCode = string | number | null`.
+- `ObjectUtils.ts` — 2 removed, 0 left. `output: any` in `sortByValue` and `convertValuesToFunctions` → `Record<string, ...>` with final cast to the typed return type.
+- `dom.ts` — 2 removed, 0 left. `isInsideContainer(node: any)` → `EventTarget | Node | null`; `waitForElement` made generic `<T extends HTMLElement>` returning `T | null`. One caller (`useRootElement.ts`) now uses the generic explicitly.
+- `errorUtils.ts` — 2 removed, 0 left. Introduced local `WrapErrorInput` and `WrappedError` interfaces.
+- `net-utils.ts` — 2 removed, 0 left. Introduced `TcpPortUsed { check(port): Promise<boolean> }`; `Record<string, any>` → `Record<string, string>` for headers.
+- `models/utils/types.ts` — 2 removed, 0 left. `LoadOptions.whereParams: any[]` → `(string|number|boolean)[]`; `SaveOptions.oldItem: any` → `Record<string, unknown>`; added `SaveOptions.fields?: string[]` (used by `BaseModel.save` and at least one renameTag caller).
+- `models/Alarm.ts` — 2 removed, 0 left. `selectAll` cast to `{ id: string }[]`; `makeNotification(alarm, note)` → `AlarmEntity`/`NoteEntity`.
+- `models/Tag.ts` — 2 removed, 0 left. `searchAllWithNotes(options: any)` → `SearchOptions` (new exported interface in `BaseModel`); `save.options: any` → `SaveOptions`.
+- `models/utils/readOnly.ts` — 2 removed, 0 left. `Folder: any` → `typeof import('../Folder').default`; `BaseItem: any` → `typeof import('../BaseItem').default`.
+- `components/shared/config/config-shared.ts` — 1 removed, 1 left. `updateSettingValue.value: any` → `unknown`. The `setState` field is left `any` with a new reason — mirrors `React.Component.setState` (`Pick<S, K>`); narrowing breaks subclass `this` assignment to the interface in app-mobile's class-based ConfigScreen.
+- `components/shared/config/plugins/useOnInstallHandler.ts` — 2 removed, 0 left. Both `setInstallingPluginIds((prev: any))` callbacks rely on the `React.Dispatch<SetStateAction<...>>` inferred type.
+- `components/shared/reduxSharedMiddleware.ts` — 1 removed, 1 left. `sortNoteListTimeout: any` → `ReturnType<typeof shim.setTimeout>`; `store/_next` typed (`Store<State>`/`Dispatch`); `action: any` kept with new reason explaining the heterogeneous action union.
+- New shared types: `BaseModel.SearchOptions`; `JoplinError.JoplinErrorCode`; `models/NoteResource.AssociatedResourceNote`; `services/plugins/ViewController.PluginStore`; `services/plugins/Plugin.MessageListenerCallback`; `services/rest/utils/defaultSaveOptions.DefaultSaveOptions`.
+
+Follow-up edits in other packages (caused by lib tightenings):
+- `app-desktop/gui/NoteListItem/utils/useRootElement.ts` — call `waitForElement<HTMLDivElement>(...)` explicitly.
+- `app-desktop/plugins/GotoAnything.tsx` — annotated local `indices: [number, number][]`.
+
+Checkpoint 3 (2026-05-14): 1053 → 1004 (49 removed).
+
+Plugin-API files (mostly thanks to the new `PluginStore` / `MessageListenerCallback` aliases from checkpoint 1):
+- `services/plugins/api/JoplinClipboard.ts` — 3 removed, 0 left. Local `ElectronClipboardLike` / `ElectronNativeImageLike` interfaces (electron module not available in non-desktop packages).
+- `services/plugins/api/JoplinViews.ts` — 3 removed, 0 left. `implementation` now `BasePlatformImplementation.JoplinViews` (the actual sub-object passed in); `store` → `PluginStore`.
+- `services/plugins/api/JoplinViewsDialogs.ts` — 3 removed, 0 left. Introduced `ShowOpenDialogOptions` in `BasePlatformImplementation`; tightened return to `string[] | null`.
+- `services/plugins/api/JoplinViewsEditor.ts` — 4 removed, 0 left. `store` → `PluginStore`; `onMessage.callback: Function` → `MessageListenerCallback`; `postMessage.message: any` → `unknown`.
+- `services/plugins/api/JoplinViewsPanels.ts` — 3 removed, 0 left. Same pattern (`PluginStore` / `MessageListenerCallback` / `unknown`).
+- `services/plugins/api/JoplinViewsToolbarButtons.ts` — 3 removed, 0 left. `store` → `PluginStore`; deprecation cast typed.
+- `services/plugins/api/JoplinViewsMenus.ts` — 4 removed, 0 left. `store` → `PluginStore`; deprecation casts typed.
+- `services/plugins/api/JoplinViewsMenuItems.ts` — 4 removed, 0 left. Same.
+- `services/plugins/api/JoplinSettings.ts` — 4 removed, 0 left. All four setting-value returns/inputs → `unknown`.
+- `services/plugins/api/JoplinPlugins.ts` — already in batch 2.
+- `services/plugins/api/Joplin.ts` — follow-up: cast `implementation.clipboard/.nativeImage` to the JoplinClipboard constructor parameter shapes.
+- `services/plugins/BasePlatformImplementation.ts` — 4 removed, 0 left. Introduced `ShowOpenDialogOptions`; `clipboard`/`nativeImage`/`registerComponent` returns/params → `unknown`.
+- `services/plugins/api/noteListType.ts` — 1 removed, 2 left. `OnChangeEvent.value: any` → `unknown`. `RenderNoteView` and `OnRenderNoteHandler.props` kept `any` with updated reasons (heterogeneous per-renderer shape).
+
+Top-level lib files:
+- `eventManager.ts` — 0 removed, 3 left. Reason updated on `filterEmit.object: any` (filter objects vary per filter name). Two `Partial refactor` reasons already in scope; no change.
+- `hooks/useEventListener.ts` — 4 removed, 0 left. Introduced local `EventHandler = (event: Event) => void`; typed `element` as `RefObject<EventTarget | null>` (type-only import from react).
+- `services/AlarmService.ts` — 3 removed, 0 left. Introduced exported `AlarmServiceDriver` interface; `updateNoteNotification.noteOrId` typed `NoteEntity | string`.
+- `models/Alarm.ts` — follow-up: `selectAll` cast updated to `{ id: number }[]` (alarm IDs are integers, unlike note IDs); `batchDelete` call now casts the resulting `number[]` (the function's signature accepts `string[]` for note-style IDs).
+- `services/KvStore.ts` — 4 removed, 0 left. Introduced `JoplinDatabase` and `MutexInterface` imports for typed fields; `formatValues_` callers cast the `Row[]` results to `KvStoreKeyValue[]`.
+
+Checkpoint 4 (2026-05-14): 1004 → 977 (27 removed).
+
+- `TaskQueue.ts` — 3 removed, 0 left. `TaskCallback`/`TaskResult.result`/`completeTask.result` → `unknown`.
+- `HtmlToMd.ts` — 3 removed, 0 left. `turndownOpts: any` → `Record<string, unknown>`; `blankReplacement`/`replacement` callbacks typed with `HTMLElement`.
+- `InMemoryCache.ts` — 3 removed, 0 left. `Record.value`/`value()`/`setValue()` → `unknown`.
+- `SyncTargetOneDrive.ts` — 2 removed, 1 left. `api_: any` → `OneDriveApi`; `(a: any)` → `unknown`. Left the inherited `db/options` constructor params (BaseSyncTarget still uses `any` there).
+- `htmlUtils.ts` — 3 removed, 5 left (4 of the 5 are existing `ban-types` Function disables and now-typed callbacks via new `ReplaceUrlCallback` / `ProcessImageTagCallback` aliases). `attributesHtml.attr: any` → `Record<string, string>`; `headAndBodyHtml.doc: any` → `Document`. One test (`htmlUtils2.test.ts`) gets a typed cast. The `Function`-typed `processImageTags`/`replaceImageUrls`/`replaceEmbedUrls`/`replaceMediaUrls` callbacks are now typed via new aliases — the ban-types disables go away with the explicit-any ones.
+- `downloadController.ts` — 3 removed, 0 left. Introduced local `DownloadRequest` / `DownloadChunk` interfaces.
+- `services/interop/InteropService_Exporter_Base.ts` — 3 removed, 1 left. `prepareForProcessingItemType.itemsToExport: any[]` → `BaseItemEntity[]`; `processItem.item: any` → `BaseItemEntity`; `processResource.resource: any` → `ResourceEntity`; `updateContext.context: any` → `object`. The `context_` field stays `any` with updated reason — shape is exporter-specific (Html has `cssStrings/customAssets`, Md has `noteTags/tagTitles`) and indexed dynamically by subclasses.
+- `services/interop/InteropService_Exporter_Jex.ts` — 3 removed, 0 left. `processItem`/`processResource` now match the tightened base; `readDirStats.filter/map` callbacks no longer need a cast.
+- `services/interop/InteropService_Exporter_Html.ts` — 3 removed, 0 left. `style_: any` → `ThemeStyle`; `init.options: any` → `ExportOptions`; `processItem.item: any` → `NoteEntity`.
+
+Follow-up: `htmlUtils2.test.ts` typed cast; `app-desktop/.../resourceHandling.ts` doesn't need changes (return type of its `replaceImageUrls` callback is `void`, which `ReplaceUrlCallback` now allows).
+
+Checkpoint 5 (2026-05-14): 977 → 965 (12 removed across a handful of larger files).
+
+- `services/share/ShareService.ts` — 4 removed, 0 left. `formatShareInvitations.invitations: any[]` → typed shape using `ShareInvitation`/`MasterKeyEntity`; `store_: Store<any>` → `Store<unknown>`; `state` getter narrows via `as Record<string, unknown>`.
+- `services/ExternalEditWatcher.ts` — 5 removed, 3 left. Introduced local `DispatchFn`/`BridgeFn`; `eventEmitter_` typed via `EventEmitter` (switched to ES import). `chokidar_`/`watcher_` stay `any` with a single shared reason (chokidar typings vary across platforms; we use a small subset structurally). `on`/`off` callbacks stay `any` with reason (EventEmitter payloads vary per event name; per-event union would require touching every caller).
+- `theme.ts` — 2 removed, 1 left. `cachedStyles_` shape typed (`themeId`, indexed `styles` record); `buildStyle.cacheKey: any` → `string | (string | number)[]`. `BuildStyleCallback` return stays `any` (heterogeneous: CSSProperties, styled-components objects, plain CSS strings).
+- `services/share/reducer.ts` — 2 removed, 1 left. `parseShareCache.raw: any` → `Partial<State>`. The reducer's `action: any` keeps a reason about heterogeneous SHARE_* action shapes. `(draft.shareUsers as any)` cast removed.
+- `services/interop/types.ts` — 2 removed, 1 left. `ImportOptions.destinationFolder: any` → `FolderEntity`; `onError: (error: any)` → `Error`. `onProgress` stays `any` with reason — Importer/Exporter share this options bag, export side passes ExportProgressState here.
+- `services/plugins/PluginService.ts` — 3 removed, 2 left. `loadManifestToObject(path): Promise<any>` → `Promise<Record<string, unknown>>`; `plugin dispatch` action typed via `Plugin.PluginDispatchCallback`; `readDirStats` filter/map untyped. The `store_` and `platformImplementation_` fields stay `any` with reason — test fixtures across app-cli/app-mobile pass partial shapes (`{ joplin: {} }`, `{ dispatch, getState }`) that the strict interfaces don't accept.
+- `services/plugins/Plugin.ts` — 2 removed, 0 left. Introduced exported `PluginDispatchCallback`; `dispatch_`/constructor `dispatch` parameter typed; `eventEmitter_: any` → `InstanceType<typeof EventEmitter>`.
+
+Checkpoint 6 (2026-05-14): 965 → 949 (16 removed).
+
+- `services/rest/utils/collectionToPaginatedResults.ts` — 3 removed, 1 left. `items` callbacks and sort comparator typed; the outer `items: any[]` stays with a new reason — callers pass entity types (NoteEntity, FolderEntity) without index signatures.
+- `services/plugins/api/JoplinImaging.ts` — 4 removed, 0 left. Introduced local `NativeImageLike` interface (toPNG/toJPEG/resize/crop/getSize); `cacheImage` and `Image.data` typed; `toJpgResource`/`toPngResource.resourceProps` → `Partial<ResourceEntity>`.
+- `testing/syncTargetUtils.ts` — 4 removed, 0 left. Introduced local `TestDataNode` / `TestData` types for the recursive test data structure.
+- `time.ts` — 5 removed, 1 left. `formatLocalToMs`/`anythingToDateTime`/`anythingToMs`/`goBackInTime`/`goForwardInTime` typed using `string | number | Date | { toDate }` unions; added type-only `MomentTypes` import for `unitOfTime` namespace. `msleep` switched from `Promise((resolve: Function))` to `Promise<void>(resolve => ...)` (removes the ban-types disable too).
+
+Checkpoint 7 (2026-05-14): 949 → 929 (20 removed).
+
+- `services/plugins/api/JoplinWorkspace.ts` — 4 removed, 2 left. `store` → `PluginStore`; `onNoteChange` wrapper event typed; `selectedNote(): Promise<any>` → `Promise<NoteEntity | null>`. Two left (one is "No plugin-api-accessible Note type defined" reason already; one is the `Function` ban-types in `onNoteSelectionChange`).
+- `services/PostMessageService.ts` — 4 removed, 1 left. `MessageResponse.response/.error` → `unknown` / `Error | null`; `Message.content` and `sendResponse.responseContent` → `unknown`. `ViewMessageHandler` left `any` with updated reason — callers register handlers with concrete payload types (MessageResponse, SerializableData); making this generic would force changes at every dispatch site.
+- `locale.ts` — 5 removed, 0 left. `supportedLocales_` typed `Record<string, Record<string, string[]>>`; `localeStats_` typed `Record<string, Record<string, unknown>>` (per-locale stats include pluralForms function); `_/_n/stringByLocale` rest args → `unknown[]`. Single inner cast `as ParsePluralFormFunction` for the plural-forms field.
+- `services/plugins/reducer.ts` — 3 removed, 2 left. `(view as any)` casts on `PLUGIN_VIEW_PROP_SET`/`_PUSH` → `as unknown as Record<string, unknown[]>` etc. The reducer's `action: any` keeps a reason (heterogeneous PLUGIN_* action shapes). `viewsByType` returns `any[]` with reason (menu views have menuItems not on PluginViewState).
+- `JoplinDatabase.ts` — 4 removed, 2 left. `TableField.default: any` → `string | number | boolean | null`; `tableDescriptions_: any` → `Record<string, Record<string, string>>`; `open.options: any` → `Record<string, unknown>`; `tableFields.options: any` → `{ includeDescription?: boolean }`; `createDefaultRow.row: any` → `Record<string, unknown>`. `constructor(driver: any)` kept with reason — base Database.driver is `any` across multiple driver implementations (sqlite/better-sqlite3/web).
+
+Checkpoint 8 (2026-05-14): 929 → 886 (43 removed).
+
+- `models/utils/paginatedFeed.ts` — 2 removed, 1 left. `db: any` → `JoplinDatabase`; `WhereQuery.params` → `(string|number|boolean)[]`. The `items: any[]` stays with new reason (callers receive Note/Folder/Resource entities without index signatures).
+- `models/settings/settingValidations.ts` — 2 removed, 1 left. `validateSetting.oldValue/newValue`, `newValues` typed `unknown` / `Record<string, unknown>`. The `ValidationHandler` type alias keeps `any` with a new reason — settings are heterogeneous; each validator narrows from this base.
+- `services/DecryptionWorker.ts` — 5 removed, 0 left. Introduced local `DecryptionWorkerStartOptions` interface; `dispatchReport.report: any` → `Record<string, unknown>`; `dispatch: Function` → `(action: { type; ... })`; `on`/`off` callbacks updated reasons (heterogeneous payloads by event name).
+- `models/Folder.test.ts` — 3 removed, 0 left. `foldersById: any` → `Record<string, FolderEntity & { note_count?: number }>`.
+- `services/search/SearchEngineUtils.test.ts` — 3 removed, 0 left. `searchEngine: any` → `SearchEngine`; `options: any` → `NotesForQueryOptions`.
+- `services/search/SearchEngine.test.ts` — 4 removed, 0 left. Introduced local `ExpectedTerms` interface; helper `extractValue` narrows `string | { value: string }`.
+- `services/share/ShareService.test.ts` — 5 removed, 0 left. `extraExecHandlers` callbacks typed; per-handler body casts to specific shapes; `Function` ban-types disable goes away with the explicit-any ones.
+- `services/ExternalEditWatcher/utils.ts` — 4 removed, 0 left. `spawnCommand.options: any` → `SpawnOptions` from `child_process`; `wrapError.error: any` → `Error | null`; `subProcess.on('error')` callback typed `Error`; introduced local `ExternalBridge { openItem }` interface.
+- `services/interop/InteropService_Importer_Raw.ts` — 4 removed, 0 left. `itemIdMap/createdResources: any` → `Record<string, string>` / `Record<string, ResourceEntity>`; `folderExists.stats: any[]` → `Stat[]`; `defaultFolder_: any` → `FolderEntity | null`.
+- `services/plugins/ViewController.ts` — 2 removed, 2 left. `emitMessage` returns `Promise<unknown>`, `postMessage.message: any` → `unknown`. The other two disables (Store state heterogeneous; storeView shape varies) keep updated reasons.
+- `services/spellChecker/SpellCheckerService.ts` — 2 removed, 2 left. Removed `(a: any, b: any) => ...` sort callbacks (already-typed array items work). Two stay with updated reasons (Electron MenuItemConstructorOptions union not imported in lib).
+- `services/WhenClause.ts` — 6 removed, 0 left. `AdvancedExpression.subExpressions: any` → `Record<string, string>`; `evaluate`/`validate.context: any` → `object` (matches existing callers that pass `WhenClauseContext`); `createContext.getValue` uses generic `<T>` to match `IContext.getValue<T>`.
+- `services/plugins/api/JoplinData.ts` — 6 removed, 0 left. `api_: any` → `Api`; `serializeApiBody.body: any` → `unknown`; route calls typed with `RequestMethod` enum and `RequestFile[]`.
+
+Checkpoint 9 (2026-05-14): 886 → 829 (57 removed).
+
+- `models/settings/types.ts` — 3 removed, 3 left. `value: any` keeps a new reason (settings heterogeneous, each consumer narrows); `options/show` left `any` with reasons (varying per setting/heterogeneous setting access). `unitLabel/filter` left where parameters are contravariant per-setting.
+- `services/plugins/utils/executeSandboxCall.ts` — 4 removed, 2 left. `EventHandler.args: any[]` → `unknown[]`; nested `args: any[]` → `unknown[]`. Recursive walker `arg` and dotted-path `parent/fn` left `any` with new reasons (heterogeneous sandbox object shape).
+- `services/interop/InteropService_Exporter_Custom.ts` — 5 removed, 1 left. Each `CustomImporter` method typed: `context: ExportContext`, `item: BaseItemEntity`, `resource: ResourceEntity`.
+- `services/debug/populateDatabase.ts` — 6 removed, 0 left. `randomIndex/randomElement/randomElements` made generic `<T>`; `db: any` → `JoplinDatabase & { clearForTesting }`; `folder/note: any` → `FolderEntity` / `NoteEntity`.
+- `database-driver-better-sqlite.ts` — 6 removed, 0 left. Introduced local `BetterSqliteDatabase` / `PreparedStatement` / `SqliteError` / `WrappedError` / `SqlParams` types.
+- `fs-driver-base.ts` — 5 removed, 3 left. Introduced exported `FileHandle = unknown` (drivers use different concrete shapes) and `TarOptions { strict?, portable?, file, cwd }`. `appendFile/open/close/readFileChunk*` typed. `ReadDirStatsOptions.recursive` made optional. `readFile` stays `any` with reason — widening to `string|Buffer` cascades broken call sites across many lib files.
+- `fs-driver-node.ts` — 9 removed, 0 left. Introduced `FsError`/`WrappedFsError`; `fsErrorToJsError_`, `setTimestamp`, `readDirStats`, `open`, `close`, `readFileChunk`, `tarExtract`, `tarCreate` typed.
+- `services/AlarmServiceDriverNode.ts` — 7 removed, 0 left. Introduced `StoredNotification` (extends Notification with timeoutId); `notifications_/service_/setService` typed; `displayDefault/electron` notification options typed with proper interface; `notifier.notify` callback typed.
+- `services/plugins/WebviewController.ts` — 6 removed, 3 left. Introduced local `LayoutItem` for `findItemByKey`; `CloseResponse.resolve/reject` typed; `messageListener_/onMessage` use `MessageListenerCallback`; `store` → `PluginStore`; `postMessage/setStoreProp` value typed `unknown`.
+- `registry.ts` — 9 removed, 2 left. Various private fields typed (`scheduleSyncId_`/`recurrentSyncId_`/`db_`/`showErrorMessageBoxHandler_`); `setShowErrorMessageBoxHandler`/`setDb`/`saveContextHandler` typed; `promiseResolve` typed. `syncTargets_/scheduleSync.syncOptions` keep `any` with reasons (heterogeneous sync target API and Synchronizer.start options).
+- Side fix: `app-cli/app/command-apidoc.ts` — cast `tableFields` to `MarkdownTableRow[]` (now that `TableField` no longer has an index signature compatible with MarkdownTableRow).
+
+Checkpoint 10 (2026-05-14): 829 → 816 (13 removed).
+
+- `services/UndoRedoService.ts` — 8 removed, 2 left. `UndoQueue.inner_` and methods → `unknown`; `state/redoState/undoState/push.state/schedulePush.state` → `unknown`; `dispatch: Function` removed (no usage). Two `on`/`off` callbacks stay `any` with reason (EventEmitter payloads vary). Follow-up in `app-mobile/.../Note.tsx` casts the undo state to its concrete shape.
+- `JoplinServerApi.ts` — 5 removed, 3 left. `connectionErrorMessage.error` → `Error | null`; `requestToCurl_.options` typed inline; `exec/exec_.query/headers` typed `Record<string, unknown>` / `Record<string, string>`; `responseJson_` → `Record<string, unknown>`. Three stay with reasons — `body` and `fetchOptions.body` flow through `shim.fetch/fetchBlob/uploadBlob` (FetchOptions) which type body as `string`; `hidePasswords` accepts both stringified bodies and header records; `response` is the shim/blob return.
+- `services/ResourceFetcher.ts` — 9 removed, 4 left. `dispatch: Function` typed via the action shape; `queue_/autoAddResourcesCalls_` typed; timer IDs typed via `ReturnType<typeof shim.setTimeout>`; `on`/`off` reasons updated; the `as any` cast on `notifyDisabledSyncItems` callback replaced with a typed adapter. Four stay with reasons (`fetchingItems_` mixed bool/Entity; `fileApi_/setFileApi/constructor` widened for test mocks).
+
+Checkpoint 11 (2026-05-14): 816 → 805 (11 removed).
+
+- `services/RevisionService.ts` — 7 removed, 0 left. `changedSinceCollectionCache_`/`maintenanceCalls_`/`maintenanceTimer1_`/`maintenanceTimer2_` typed; `noteMetadata_.md` → `Record<string, unknown>`; `output.type_` cast uses `NoteEntity & { type_? }`.
+- `BaseSyncTarget.ts` — 8 removed, 2 left. `dispatch: Function` typed via action shape; `initState_/options_` typed; `option`/`unsupportedPlatforms`/`checkConfig` typed. Two stay (`db_/fileApi_/constructor.db/setFileApi.v/initFileApi`) with reasons — sync target subclasses each pass concrete shapes (FileApi subclasses, FileApiOptions) so tightening here forces every subclass to match.
+
+Checkpoint 12 (2026-05-14): 805 → 789 (16 removed).
+
+- `models/Resource.ts` — 9 removed, 0 left. `fsDriver_: any` → `FsDriverBase`; `fetchStatuses` return → typed shape; `markupTag.resource` typed `ResourceEntity & { alt? }`; `localState`/`setLocalStateQueries`/`setLocalState.resourceOrId` → `ResourceEntity | string`; `itemCanBeEncrypted` cast uses `Parameters<...>`; `params: any[]` → `(string|number)[]`; `resourceConflictFolder` return type inferred.
+- `models/Folder.ts` — 7 removed, 0 left. `fieldsToLabels: any` → `Record<string, string>`; `tableNameToClasses: Record<string, any>` → `Record<string, typeof BaseItem>` (2 places); `handleTitleNaturalSorting.options` typed; `allAsTree.options` → `FolderLoadOptions & { includeNotes? }`; `idToFolders.any` → `FolderEntityWithChildren`; `save.options: any` → `SaveOptions & {duplicateCheck?, reservedTitleCheck?, stripLeftSlashes?}`.
+
+Checkpoint 13 (2026-05-14): 789 → 777 (12 removed).
+
+- `WebDavApi.ts` — 4 removed, 5 left. `RequestInfo.options` typed via `FetchOptions & ...`; `_requestToCurl.options` typed; `serializeRequest` callback body uses `Record<string, unknown>`. Five remain with updated reasons (xml2js heterogeneous output, url-parse Url shape, JsonValue alias, fetchOptions/response are platform-specific shapes via shim).
+- `file-api.ts` — 8 removed, 5 left. `RemoteItem.isDir` added (used by list filter); `requestCanBeRepeated.error` typed; `tryAndRepeat` made generic `<T>` with `Function`→`()=> T|Promise<T>`; `list` filter callbacks typed; `put.content: any` → `string | Buffer | null`; `multiPut.options: any` → `{ source? }`; introduced `BasicDeltaContext` and typed the helper; `getDirStatFn: Function` → `(path) => ItemStat[]|Promise<ItemStat[]>`; sort/map callbacks typed. Five stay with reasons: `RemoteItem.jopItem`, `PaginatedList.context`, `driver_`, constructor `driver`, and the `output: any[]` mixed array of ItemStat + deleted-items.
+
+Checkpoint 14 (2026-05-14): 777 → 756 (21 removed).
+
+- `services/ResourceEditWatcher/index.ts` — 10 removed, 3 left. `logger_/dispatch` typed; `eventEmitter_` typed `InstanceType<typeof EventEmitter>` with proper ES import; `externalApi.openAndWatch/watch/stopWatching/isWatched` callbacks typed `{ resourceId: string }`; watcher 'all'/'raw' event handlers typed. Three remain with reasons (chokidar typings vary across platforms; on/off heterogeneous events).
+- `file-api-driver-joplinServer.ts` — 11 removed, 0 left. Typed `metadataToStat_`/`metadataToStats_` arguments; introduced `RemoteItem` return type (added `id: ''` to satisfy the interface); typed `delta`/`list`/`get`/`put`/`multiPut` options via `ExecOptions` from JoplinServerApi; typed `isRejectedBySyncTargetError`/`isReadyOnlyError.error`; typed `Object.entries<...>` response shape. Also caught a typo: `response.has_more` → `response.hasMore` (the returned object actually exposes `hasMore`).
+
+Checkpoint 15 (2026-05-14): 756 → 732 (24 removed).
+
+- `ClipperServer.ts` — 11 removed, 2 left. Introduced local `ClipperDispatch` alias for the dispatch field; `server_` typed `http.Server & { destroy? }` (server-destroy adds `.destroy` at runtime); all request/response handler callbacks typed via `IncomingMessage`/`ServerResponse`; `writeCorsHeaders`/`writeResponseJson`/`writeResponseText`/`writeResponseInstance`/`writeResponse`/`execRequest` typed; `multiparty.Form.parse` callback typed; `request.on('data')` typed `Buffer | string`. Two stay with reasons (`actionApi` shape varies, the Api `route` method parameter cast).
+- `testing/test-utils.ts` — 13 removed, 2 left. Typed `switchClient`/`setupDatabase`/`setupDatabaseAndSynchronizer` options bag; introduced `FolderTreeNode` for `createFolderTree`; `objectsEqual` → `Record<string, unknown>`; `checkThrowAsync`/`expectThrow`/`expectNotThrow`/`checkThrow` → function signatures; `id`/`ids`/`sortedIds` → `{ id?: string }`; `at<T>` made generic; `createNTestNotes.folder` → `FolderEntity`; `middlewareCalls_: any[]` → `boolean[]`; `start.argv` → `string[]`. Two stay (`synchronizerStart.extraOptions` and `generalMiddleware` — Synchronizer.start signature and BaseApplication.generalMiddleware override force `any`).
+
+Checkpoint 16 (2026-05-14): 732 → 700 (32 removed).
+
+- `file-api-driver-memory.ts` — 6 removed, 0 left. Introduced local `MemoryItem` interface for `items_`/`deletedItems_`; `encodeContent_`/`decodeContent_` typed `string | Buffer` / `string`; `setTimestamp` return `Promise<void>`; `get`/`put`/`multiPut`/`delta` options typed via `GetOptions`/`PutOptions`/`DeltaOptions`; `multiPut.output` typed.
+- `eventManager.ts` — 4 removed, 0 left. `AppStateChangeCallback` made generic `<T>`; `FilterHandler` made generic `<T>` (matches plugin api/types `FilterHandler<T>`); `filterEmit`/`filterOn`/`filterOff`/`appStateOn`/`appStateOff` all generic with internal `unknown`-cast for storage; `stateValue_` uses `Record<string, unknown>` instead of `any`.
+- `markdownUtils.ts` — 1 removed, 0 left. `prependBaseUrl` replace callback `_match: any` → `string`.
+- `utils/focusHandler.ts` — 2 removed, 0 left. Adopted `unknown` for `element` arg with a `MaybeFocusable` cast inside `toggleFocus` so the runtime `typeof` check narrows the call. Many call sites pass things like `Element`/`EventTarget`/`EditorView` that have only `focus`, so any typed interface would have rejected them.
+- `utils/joplinCloud/index.ts` — 2 removed, 0 left. Extended `PlanFeature` with missing `basicInfo/proInfo/teamsInfo/joplinServerBusinessInfo*` keys (used at call sites but undeclared); `getFeatureLabel`/`getCellInfo` use `keyof PlanFeature` indexing with `typeof v === 'string'` guards.
+- `utils/frontMatter.ts` — 3 removed, 0 left. `toLowerCase` → `Record<string, unknown>`; `parse` added local `asString`/`asNumber` coercion helpers since `yaml.load` returns `unknown`-shaped values; `'tags' in md` check now also requires `Array.isArray` before assigning.
+- `utils/ipc/RemoteMessenger.ts` — 9 removed, 0 left. Replaced ambient `FinalizationRegistry` constructor/register `any` with `(id: string)=> void` and `object`; Proxy `get` returns `unknown`; `canRemoteAccessProperty.parentObject`/`trackCallbackFinalization.callback`/`methodFromPath` parent/current/stack typed `unknown` with narrowing `Record<string, unknown>` casts where indexing is required.
+- `file-api-driver-local.ts` — 1 removed, 0 left. `fsErrorToJsError_.output` typed `Error & { code?: JoplinError['code'] }` instead of `any`.
+- `SyncTargetOneDrive.ts` — 1 removed, 0 left. Constructor `options: any` → `Record<string, unknown>` (matches BaseSyncTarget); `db: any` keeps reason via `// eslint-disable-next-line` referencing BaseSyncTarget.
+- `file-api.ts` — 1 removed, 0 left. Introduced `ListOptions` interface ({ includeHidden?, includeDirs?, syncItemsOnly?, context? }); `FileApi.list.options: any` → `ListOptions`.
+- `database-driver.ts` — 1 removed, 0 left. `SelectResult = any` → `unknown` with a comment explaining narrowing happens at the model layer.
+- `database.ts` — 1 removed, 8 left with updated reasons. Tried widening `Row`/`selectAllFields`/`open`/`insertQuery`/`updateQuery`/`formatValue` to `unknown` but each cascaded into many downstream errors across `JoplinDatabase`, `models/*`, `services/KvStore`, `services/RevisionService`, etc. (typically requiring index-signature errors, or explicit narrowing for already-extant column accesses). Reverted to `any` with descriptive reasons. The one removed was `enumId` using `(this as unknown as Record<string, number>)` for the dynamic `TYPE_*` lookup. `wrapQueries`/`wrapQuery` were already widened safely (`(string | SqlQuery | [string, SqlParams?])[]`).
+- `services/synchronizer/syncInfoUtils.ts` — 9 removed, 1 left. `masterKeys`/`masterKeyMap` typed `MasterKeyEntity[]`/`Record<string, MasterKeyEntity>`; `fetchSyncInfo.output: any` → `{ version: number; [k: string]: unknown }`; `toObject` return type inferred; `setWithTimestamp`/`keyTimestamp`/`setKeyTimestamp` all use `(this as unknown as Record<...>)` casts. The `load.s: any` stays — JSON parse output varies per sync target version and is validated per-field via `'x' in s` checks below.
+
+Checkpoint 17 (2026-05-14): 700 → 681 (19 removed).
+
+- `services/CommandService.ts` — 5 removed, 7 left. `CommandContext.dispatch: Function` kept (acts as a variance escape hatch — desktop runtimes type dispatch more strictly via `DesktopCommandContext`). `ReduxStore` simplified to `type ReduxStore = any` with a reason — tests and platforms pass partials and add subscribe etc. `scheduleExecute.args: any` → `unknown`. `componentUnregisterCommands.commands` kept `ComponentCommandSpec<any>` with updated reason. `CommandRuntime.execute` and `Api.execute` kept `any` with updated reasons (per-command/per-route shapes). `createContext.dispatch.action` typed `unknown`.
+- `services/rest/Api.ts` — 7 removed, 5 left. `Request.params: any[]` → `string[]`; `Request.action?: any` → `string`. `RequestContext.dispatch: Function` → typed dispatch. `RouteFunction` reason updated. `Api.token_: string | Function` → `string | (()=> string)`; `knownNounces_: any` → `Record<string, string>`; `dispatch_: Function` → typed dispatch. Constructor and private `dispatch` typed. `actionApi_` stays `any` with reason. `execServiceActionFromRequest_.externalApi: any` → typed. `Request.body`/`bodyJson_`/`bodyJson`/`Api.route` keep `any` with route-specific reasons.
+- `services/interop/InteropService.ts` — 4 removed, 2 left. `eventEmitter_: any` → `EventEmitter` (changed `require` → ES `import { EventEmitter } from 'events'`); `on/off.callback: Function` → typed; `context: any` → `{ resourcePaths; destResourcePaths?; notePaths? }`. `normalizeItemForExport` made generic `<T extends Record<string, unknown>>`; `override: any` → `Partial<{ is_shared; share_id }>`. `itemsToExport: any[]`/`queueExportItem.itemOrId: any` kept `any` with updated reasons (mirror exporter signatures across all subclasses; structural { type, itemOrId }).
+- `services/interop/InteropService_Exporter_Md.ts` — 5 removed, 1 left. `makeDirPath_.item` → `NoteEntity | FolderEntity`; `replaceLinkedItemIdsByRelativePaths_.item` → `NoteEntity`; `replaceItemIdsByRelativePaths_.paths/fn_createRelativePath` typed; `prepareForProcessingItemType` context inner type narrowed; `processItem.item` → `NoteEntity | FolderEntity`. The outer `prepareForProcessingItemType.itemsToExport: any[]` stays with reason matching InteropService.
+
+Checkpoint 18 (2026-05-14): 681 → 620 (61 removed).
+
+- `services/interop/InteropService_Exporter_Md.test.ts` — 21 removed, 0 left. The same `itemsToExport: any[]` / `queueExportItem` boilerplate appeared 10 times; replaced all with `const { items: itemsToExport, queue: queueExportItem } = createExportItems();` (the helper already existed at the top of the file). One inline `context: any` → typed shape. Resource.load call sites cast `itemOrId as string`.
+- `services/interop/InteropService.test.ts` — 11 removed, 0 left. `fieldsEqual` made generic `<T extends object>`; `Item.object: any` → `unknown`; export callback signatures typed via `BaseItemEntity`/`ResourceEntity`; `Folder.all` result typed; `result: any` typed inline; `format: 'testing' as any` → `as ExportModuleOutputFormat`.
+- `services/synchronizer/synchronizer_MigrationHandler.test.ts` — 10 removed, 0 left. `MigrationTests.[key]: Function` → `()=> Promise<void>`; the 10 `items.filter((i: any) => ...)` callbacks rely on RemoteItem inference now.
+- `services/synchronizer/ItemUploader.test.ts` — 6 removed, 0 left. Introduced `MultiPutItem` / `MultiPutResult` / `ItemBodyCallback` aliases; `ApiCall.args: any[]` → `unknown[]`; `clearArray` made generic; `newFakeApi`/`newFakeApiCall` typed; the `args[0].length` accesses now cast via `MultiPutItem[]`.
+- `services/rest/routes/notes.ts` — 13 removed, 0 left. Introduced `Stylesheet`, `ImageSize`, exported `ImageSizes`. `htmlToMdParser_` → `HtmlToMd`; `RequestNote.id: any` → `string`, `anchor_names: any[]` → `string[]`, `stylesheets: any` → `Stylesheet[]`, `image_sizes` → `ImageSizes`. `requestNoteToNote.output: any` → `NoteEntity`. `tryToGuessExtFromMimeType.response: any` → headers shape. `replaceUrlsByResources.imageSizes` typed; the replace callback `_match: any` → `string`. `attachImageFromDataUrl.note: any` → `NoteEntity`, `cropRect: any` typed. `extractNoteFromHTML.imageSizes` typed.
+
+Checkpoint 19 (2026-05-14): 620 → 574 (46 removed).
+
+- `models/settings/builtInMetadata.ts` — 28 removed, 0 left. The 20 `show: (settings: any)` callbacks all inherit the type from `SettingItem.show?(settings: any)`; dropping the explicit annotation removes the disable comments while keeping the interface as-is. `themeOptions` / multiple `options()` callbacks `: any` → `Record<string|number, string>`; `filter: (value: any)` → infers from interface; `'notes.sharedSortOrder'` value cast to `Record<string, unknown>`. Side fix: `services/sortOrder/PerFolderSortOrderService.ts` widens the read-back to `{ field?: string; reverse?: boolean } & Record<...>`.
+- `Synchronizer.ts` — 18 removed, 4 left. Introduced local `ProgressReport` interface (`errors`, `state?`, `startTime?`, `completedTime?`, counter index signature) typed across `progressReport_`/`reportHasErrors`/`completionTime`/`reportToLines`/`logSyncSummary`. `isCannotSyncError.error: any` typed; `downloadQueue_: any` → `TaskQueue` (constructor now passes logger via TaskQueue's second arg instead of mutating a private field); `setEncryptionService.v: any` → `EncryptionService`; `logSyncOperation.local` typed `{ id?, path?, type_? }`. Several lambda callbacks typed: `startAutoLockRefresh.error: any` → `Error`; `result.items.filter((it: any))` infers from itemsThatNeedSync. `local = resource as any` → cast through `typeof local`. `(action: any) => dispatch(action)` typings dropped (infer). Four stay with reasons: `apiCall` dispatch by name (FileApi heterogeneous methods), `start.options: any` (caller bag), `handleCannotSyncItem.item: any` (BaseItem.saveSyncDisabled), and the BaseItem.save `options` bag during DELTA. Side fix: `cancel()` now uses `void this.downloadQueue_.stop()` (was already an awaitable promise but unmarked).
+
+Checkpoint 20 (2026-05-14): 574 → 539 (35 removed).
+
+- `models/Setting.ts` — 17 removed, 7 left. `appType: 'SET_ME' as any` → `as AppType`; `saveTimeoutId_/changeEventTimeoutId_: any` → `ReturnType<typeof shim.setTimeout>`; `rows.map((r: any))` typed inline; `toPlainObject.keyToValues: any` → `Record<string, unknown>`; `incValue.inc: any` → `number`; `setArrayValue.settingValue: any[]` → `string[]`; `objectValue/setObjectValue.value: any` → `unknown`; `enumOptionLabel/isAllowedEnumOption.value: any` → `unknown`/`string`; `subValues.output: any` → `Record<string, unknown>`; `groupMetadatasBySections.{generalSection,nameToSections}: any` → `SettingMetadataSection`/`Record<string, SettingMetadataSection>`. The 7 that stay (with reasons): `SettingValueType` fallback, `CacheItem.value`, `keychainService_` and its setter (concrete class in app-desktop/app-mobile), `valueToString`/`formatValue` (heterogeneous values per setting type), and the `constants_` lookup in `value()`. Side fix: `markupLanguageUtils.ts` now coerces with `!!` for `pluginOptions.enabled`.
+- `models/Note.ts` — 11 removed, 13 left. `PreviewsOptions.conditionsParams: any[]` → `(string|number|boolean)[]`; `geolocationCache_/dueDateObjects_: any` → typed shapes. `linkedItemIds.links` typed `{ itemId: string }[]`. `replaceResource{Internal,External}ToInternalLinks.options: any` → `{ useAbsolutePaths? }`. `sortNotes.orders: any[]` → `{ by: string; dir: string }[]`; `noteFieldComp` made generic; sort prop access typed `string|number|boolean`. `previewFields.options: any` → `{ includeTimestamps? }`. `loadFolderNoteByField.value: any` → `string|number|boolean`. `preview.options: any` → `{ fields?: string|string[]; excludeConflicts? }`. Introduced `DuplicateOptions` for `duplicateMultipleNotes`/`duplicate`. The 13 that stay are mostly around the dynamic `(newNote as any)[field]` patterns retained as `Record<string, unknown>` casts and `search.options` forwarding to BaseItem.search. Side fixes: `models/Note.test.ts` testCases typed `[boolean, string, string][]`.
+
+Checkpoint 21 (2026-05-14): 539 → 506 (33 removed).
+
+- `shim.ts` — 11 removed, 25 left. `msleep_` resolver typed `Promise<void>` (no Function). `isElectron` window/process casts use structural types instead of `any`. `fetchRequestCanBeRetried.error: any` → `{ code?, message? }`. `fetchText.options` → `FetchOptions`. `fetchBlob/uploadBlob/imageFromDataUrl` keep `any` with descriptive reasons. Throwing stub methods now have concrete return types where unambiguous (`stringByteLength: number`, `appVersion: string`, `pathRelativeToCwd: string`, `writeImageToFile.format: string`, `setReact/setReactDom` typed via `typeof React`). Several stay `any` for genuine cross-platform polymorphism: `Geolocation`, `electronBridge_`, `fsDriver_`, `httpAgent_`, `proxyAgent`, `nodeSqlite_`, `sjclModule`, the node datagram module, `requireDynamic`, `fetchWithRetry.fetchFn`, `setTimeout/setInterval` return types, `openUrl` (boolean vs Promise), `readLocalFileBase64` (string vs Promise).
+- `BaseApplication.ts` — 10 removed, 9 left. `eventEmitter_: any` → `EventEmitter` (changed `require` → ES `import`); `scheduleAutoAddResourcesIID_` typed via `ReturnType<typeof shim.setTimeout>`; `currentFolder_: any` → `FolderEntity`. `on(callback: Function)` → typed; `switchCurrentFolder.folder` → `FolderEntity`; `refreshNotes.state: any` → `State` (with `parentType: string|number` to allow reassign to ModelType numeric); `resourceFetcher_downloadComplete.event` typed; `reducerActionToString.action` typed `{ type; [k]: unknown }`; `applySettingsSideEffects.action`/`sideEffects` typed; `readFlagsFromFile.flags: any` replaced with `flagArgs: string[]`. The 9 that stay are around the redux middleware (`generalMiddleware`/`generalMiddlewareFn`/`reducer`/`initRedux`/`dispatch`/`start`) where per-app state and action unions diverge, plus the refreshFolders dispatch wrapper.
+- `onedrive-api.ts` — 12 removed, 7 left. Introduced `OneDriveAuth` interface and `ListenerCallback` type. `auth_/setAuth/auth()` typed; `accountProperties_` → `Record<string, unknown>`; `listeners_: Record<string, ListenerCallback[]>`; `dispatch.param/setAccountProperties` typed; `oneDriveErrorResponseToError.errorResponse` typed (return still `any` since downstream augments with `request`/`headers`/`body` fields); `execTokenRequest.body/refreshAccessToken.body` → `Record<string, string>`; `authorizationTokenRemoved.data` typed `unknown` with `Record<string, unknown>` inner cast. The 7 remaining (`uploadChunk`, `uploadBigFile`, `exec`, `execJson`, `execText`, `handleRequestRepeat.error`, `oneDriveErrorResponseToError` return) cover FetchOptions/handle/buffer bags and network error augmentation.
+
+Checkpoint 22 (2026-05-14): 506 → 477 (29 removed).
+
+- `services/e2ee/EncryptionService.ts` — 12 removed, 13 left. `EncryptionCustomHandler<Context = any>` → `<Context = unknown>`. `EncryptOptions.onProgress: Function` → `(event: { doneSize: number })=> void`. `activeMasterKeyId` and `loadedMasterKey` error throws now use `Error & { code; masterKeyId? }` casts instead of `any`. `wrapSjclError.sjclError` typed. `randomHexString`/`generateMasterKeyContent_` cast `shim.randomBytes` to `number[]` at use site. `stringWriter_` typed inline; `fileReader_`/`fileWriter_` encoding params → `string`; `encryptString`/`decryptString` plain/cipher text → `string`. `headerTemplate` indexes via `Record<number, { fields: (string|number)[][] }>`; `encodeHeader_` parameter typed; `decodeHeaderString.cipherText` → `string`; `decodeHeaderBytes_.output` → `Record<string, string|number>`. `itemIsEncrypted.item` typed `{ encryption_applied?, encryption_cipher_text?, type_? }`. The 13 that stay (with reasons) are `fsDriver_`, `encryptAbstract_`/`decryptAbstract_`/`decodeHeaderSource_` source/destination (duck-typed reader/writer union), and a handful of polymorphic API surface bits.
+- `services/plugins/api/types.ts` — 8 removed, 16 left. `Command.execute` reason updated. `ExportModule.onProcessItem/onProcessResource` reasons updated. `KeymapItem.userData/ImportContext.options/Script.onStart` typed `unknown`/`Record<string, unknown>`. `MenuItem.commandArgs: any[]` → `unknown[]`. `FormValue.value/DialogResult.formData` → `unknown`/`Record<string, unknown>`. `SettingItem.options` → `Record<string|number, string>`. `ContentScriptModuleLoadedEvent.userData` → `unknown`. The 16 staying are all plugin API surface tied to external libraries (markdown-it, CodeMirror 6) where the concrete types aren't imported in lib. Side fix: `app-mobile/components/plugins/dialogs/PluginDialogWebView.tsx` casts `formData` from `SerializableData` to `Record<string, unknown>` at the call site.
+
+Checkpoint 23 (2026-05-14): 477 → 433 (44 removed).
+
+- `reducer.ts` — 33 removed, 14 left. Introduced `AdditionalReducer` (kept as a 3-`any` interface — reducers from plugin/share services are immer-based with Draft mutation and per-sub-state shapes) and `SearchEntry` for `State.searches`. `StateLastSelectedNotesIds.{Folder,Tag,Search}: any` → `Record<string, string[]>`; `StateDecryptionWorker.decryptedItemCounts` → `Record<string, number>`; `State.masterKeys: any[]` → `MasterKeyEntity[]`; `pluginsLegacy/syncReport/screens` typed. `derivedStateCache_` → `Record<string, unknown>`; `cacheEnabledOutput` made generic `<T>`. Selectors and `selectArrayShallow` typed. `StateUtils.{selectArrayShallow,notesOrder,foldersOrder,lastSelectedNoteIds}` typed; `arrayHasEncryptedItems` → `{ encryption_applied? }[]`; `removeAdjacentDuplicates` made generic. `(windowDraft as any)[k]` patterns replaced with `(windowDraft as unknown as Record<string, unknown>)[k]`. Helpers `updateOneItem`, `handleHistory`, `getContextFromHistory`, `removeItemFromArray`, the top-level `reducer` body keep `any` with descriptive reasons matching the redux-action-union discrimination pattern. Side fixes: `PLUGINLEGACY_DIALOG_SET` and `DECRYPTION_WORKER_SET` reducer cases use typed intermediates.
+- `models/BaseItem.ts` — 11 removed, 20 left. `ItemsThatNeedDecryptionResult.items: any[]` → `BaseItemEntity[]`; `isSystemPath` and `pathToId` use local `const`/`split` chains instead of mutating an `any` variable; `loadItemByField.value: any` → `string|number|boolean`; `syncItemClassNames`/`syncItemTypes` map callbacks typed; `encrypt` error and `reducedItem` casts now go through structural types; `decrypt`, `serialize`, `unserialize`, `serialize_format`/`unserialize_format` kept `any` with descriptive reasons for their unavoidably heterogeneous parameters. `updateSyncTimeQueries`/`saveSyncTime` kept `any` because tests pass loose objects with `id` as number.
+
+Checkpoint 24 (2026-05-14): 433 → 411 (22 removed).
+
+- `BaseModel.ts` — 22 removed, 19 left. `typeEnum_: any[]` → `[string, ModelType][]`. `saveMutexes_` → `Record<string, { acquire }>`. `setDb.db: any` → `JoplinDatabase`. `defaultValues.output: any` → `Record<string, unknown>`; `applySqlOptions.params/all.params` typed as primitive arrays; `allIds.rows.map` typed inline. `count.options/loadByField.fieldValue/loadByFields.fields/loadByTitle.fieldValue/fieldType.defaultValue/releaseSaveMutex.release/saveMutex.modelOrId` all typed concretely. `saveQuery.temp/filtered: any` → `Record<string, unknown>`. `userSideValidation.o` typed `{ id?, user_updated_time?, user_created_time? }`. `count.then` callback typed. Several stay `any` with descriptive reasons: `addModelMd`, `byId`, `modelIndexById` (subclass overrides return per-entity types so a base-class generic conflicts with subclass return-type variance), `removeUnknownFields`/`new`/`save`/`modOptions`/`saveQuery.o`/`saveQuery.query`/`diffObjects`/`modelsAreSame`/`modelSelectAll<T = any>` (heterogeneous entity slices across subclasses), and `dispatch: Function` for variance.
+
+Checkpoint 25 (2026-05-14): 411 → 361 (50 removed).
+
+- `components/shared/note-screen-shared.ts` — 21 removed, 2 left. Introduced `AttachedResource`/`AttachedResources`/`SaveNoteOptions`/`AttachFileAsset`/`ResourceHandler` types. `BaseState.noteResources: any` → `AttachedResources`. `Shared` interface methods all typed (saveOneProperty/noteComponent_change/installResourceHandling/uninstallResourceHandling/attachedResources/toggleCheckboxRange). `saveNoteButton_press.options: any` → `SaveNoteOptions`. `newState: any` → `Partial<BaseState>`. `resourceCache_: any` → `AttachedResources`. `toggleCheckboxLine` return → `ToggleCheckboxResult` discriminated union, downstream callers handle the string|tuple shape. `setState(state: any)` kept with reason (React component setState signature). `ResourceHandler` parameter `any[]` kept with reason (EventEmitter heterogeneous payloads). Side fixes: `app-desktop/.../useWebviewIpcMessage.ts` handles the new string return; `Note.tsx` resource handler signature is already compatible via variadic `any[]`.
+- `shim-init-node.ts` — 12 removed, 9 left. Introduced `ProxySettings` interface; `proxySettings.any` and `setupProxySettings.options.any` typed. `ShimInitOptions` `any` fields kept with descriptive reasons (sharp/keytar/React/electronBridge/nodeSqlite are external module types). `detectAndSetLocale.Setting: any` → `typeof Setting`. `saveOptions: any` → typed structurally. `imageOptions: any` → typed. `cleanUpOnError/file/request.on('error')` typed `Error`. `requestOptions` kept `any` (node http/https request options + agent). `sites` call site typed via `NodeJS.CallSite[]`. `makeResponse.response` typed structurally.
+- `import-enex.ts` — 17 removed, 3 left. `sourceStream/destStream.on('error')` typed `Error`. `removeUndefinedProperties` made generic `<T>`. `saveNoteResources.toSave: any` cast tightened via `Partial<Pick<...>>` for the delete keys. `Node.attributes: Record<string, any>` → `Record<string, string>`. `saveNoteToStorage` cast through `as ExtractedNote`. `handleSaxStreamEvent` typed `(...args: any[])=> void` with reason (sax events heterogeneous). `noteAttributes/noteResourceAttributes` typed `Record<string, string>`. `createErrorWithNoteTitle` typed. Stream and saxStream `on('error')` typed `Error`. `noteResource[n]` indexing uses a typed cast through `Record<string, string>`. `is_todo` cast to `0|1`. Latitude/longitude/altitude need `as unknown as number` casts since ENEX values arrive as strings.
+
+Checkpoint 26 (2026-05-14): 361 → 323 (38 removed).
+
+- `services/search/SearchEngine.ts` — 22 removed, 0 left. `ComplexTerm.scriptType: any` → `string`. `dispatch: Function` → action-shape dispatch. `syncCalls_: any[]` → `boolean[]`. `scheduleSyncTablesIID_` typed via `ReturnType<typeof shim.setTimeout>`. `setDb.db: any` → `JoplinDatabase`. `fieldNamesFromOffsets_.offsets: any[]` → `number[]`. `hitsThisRow`/`docsWithHits` typed `Uint32Array`. `processBasicSearchResults_`/`processResults_` typed `ProcessResultsRow[]` + `ParsedQuery`. `queryTermToRegex.term: any` → `string`. `basicSearch.searchOptions: any` typed structurally; `determineSearchType_.preferredSearchType` → `SearchType`; `allTerms: any[]` → `Term[]`. Side: added `fuzziness?: number` to `ProcessResultsRow` (was being assigned at runtime but not declared).
+- `import-enex-md-gen.ts` — 16 removed, 5 left. `Section.lines: any[]` kept `any` with reason (mixed strings/Section/Hr objects). `ParserState.{anchorAttributes,spanAttributes}: any[]` → `Record<string, string>[]`. `collapseWhiteSpaceAndAppend.state: any` → `ParserState`. Introduced `SaxContext` type alias; `cssValue/isInvisibleBlock/isHighlight/isCodeBlock/displaySaxWarning` typed via `SaxContext` and `{ style?: string }`. `attributeToLowerCase.node` typed structurally. `isSpanWithStyle/isSpanStyleBold/isSpanStyleItalic.attributes` typed. `saxStream.on('error')` typed `Error`; `saxStream.on('opentag')` `node: any` → `{ name; attributes? }`. `captionLines: any[]` lets inference do the work. `enexXmlToMdArray.stream`, `renderLine/renderLines.lines`, and `currentCells` keep `any` with descriptive reasons (sax stream / heterogeneous nested Section objects).
+
+Checkpoint 27 (2026-05-14): 323 → 293 (30 removed).
+
+Scatter cleanup across many smaller files:
+- `services/synchronizer/LockHandler.ts` — 2 removed, 0 left. `RefreshTimer.id: any` → `ReturnType<typeof shim.setInterval>`. `lockFileToObject.file: any` typed structurally with optional path/updated_time.
+- `services/synchronizer/utils/types.ts` — 1 removed, 1 left with updated reason. `LogSyncOperationFunction.local: any` typed structurally; `ApiCallFunction` keeps `any[]`/`any` (dispatches by name across drivers).
+- `services/style/themeToCss.ts` — 2 removed, 0 left. `isColor.v` typed `unknown` with type predicate; theme indexing via `Record<string, unknown>` cast.
+- `services/style/cssToTheme.ts` — 2 removed, 0 left. `declarations`/`output` typed; final return cast `as unknown as Theme`.
+- `services/profileConfig/mergeGlobalAndLocalSettings.ts` — 2 removed, 0 left. `rootSettings`/`subProfileSettings`/`output` all `Record<string, unknown>`.
+- `utils/attachedResources.ts` — 2 removed, 0 left. `resourceCache_`/`output: any` → `AttachedResources`.
+- `services/noteList/renderTemplate.ts` — 2 removed, 0 left. `Cell.value: any` → `unknown`; `valueToString.value: any` → `unknown` (using `String(value)`).
+- `services/plugins/api/JoplinWindow.ts` — 2 removed, 0 left. Introduced local `DispatchStore` type for store_.
+- `services/plugins/api/Global.ts` — 2 removed, 0 left. `implementation: any` → `BasePlatformImplementation`; `store: any` → `Store<any>` with descriptive reason; `process: any` → `NodeJS.Process`.
+- `services/plugins/api/Joplin.ts` — 1 removed, 1 left with updated reason. `store: any` → `Store<any>` with reason. `require.return: any` kept with plugin-API reason.
+- `services/plugins/api/JoplinCommands.ts` — 2 removed (reasons updated).
+- `services/plugins/utils/loadContentScripts.ts` — 1 removed, 1 left. `loadedModule as any` cast → typed extension. `ExtraContentScript.module: any` kept with descriptive reason.
+- `services/ResourceService.ts` — 2 removed, 0 left. `maintenanceTimer1_/maintenanceTimer2_: any` → `ReturnType<typeof shim.setTimeout/setInterval>`.
+- `services/KeymapService.ts` — 2 removed, 0 left. `modifiersRegExp: any` → `RegExp`; `domToElectronAccelerator.event: any` typed structurally with the 5 fields actually read.
+- `services/interop/InteropService_Importer_Base.ts` — 2 removed, 0 left. `setMetadata.md: any` → `Partial<ImportMetadata>` with cast; `init.options: any` → `ImportOptions`.
+- `services/interop/InteropService_Importer_Custom.ts` — 2 removed, 0 left. `options: any` → `Record<string, unknown>` on `CustomImporter.onExec.context.options` and `processedOptions`.
+- `services/interop/InteropService_Exporter_Raw.ts` — 2 removed, 0 left. `processItem.item/processResource.resource` typed via `BaseItemEntity`/`ResourceEntity`.
+- `utils/ipc/utils/mergeCallbacksAndSerializable.test.ts` — 1 removed, 1 left. `data: any` typed inline.
+- `utils/ipc/RemoteMessenger.test.ts` — 2 removed, 0 left. `transfer.o: any` made generic `<T>`; `testObjects: any[]` → `Record<string, unknown>[]`.
+- Side fix: `services/interop/InteropService_Importer_Md.test.ts` uses `ImportModuleOutputFormat` enum members rather than raw string literals.
+
+Checkpoint 28 (2026-05-14): 293 → 272 (21 removed).
+
+Scatter cleanup chasing remaining "Old code before rule was applied" comments across many files:
+- `models/Note.ts` — 5 removed, 7 left. `previewFieldsWithDefaultValues.options` typed; `(n as any)[field]` and `(o as any)[field]` patterns → `Record<string, unknown>` casts; `beforeChangeItems: any` → `Record<string, string | null>`; `updateNoteOrder_.order` → `number`; `handleTitleNaturalSorting.options` typed.
+- `models/BaseItem.ts` — 4 removed, 16 left. `displayTitle.item` typed structurally; `items.map((item: any))` typed via `modelSelectAll<{ id: string }>`; `markdownTag.itemOrId/isMarkdownTag.md` typed structurally; `save.o` reason updated.
+- `BaseModel.ts` — 3 removed, 16 left. `isNew.object/options` typed; `filterArray`/`filter` reasons updated; static enum loop uses `Record<string, ModelType>` cast.
+- `models/Folder.ts` — 1 removed, 0 left. `report: any` → `Record<string, number>`.
+- `services/plugins/Plugin.ts` — 1 removed, 0 left. `emit.event: any` → `unknown`.
+- `services/plugins/api/JoplinPlugins.ts` — 1 removed, 0 left. `script.onStart.catch.error: any` typed structurally.
+- `services/commands/MenuUtils.ts` — 1 removed, 0 left. `commandToStatefulMenuItem.commandTarget: any` → `unknown`.
+- `services/interop/InteropService_Exporter_Md_frontmatter.ts` — 0 removed (reason updated).
+- `import-enex.ts` — 1 removed, 2 left. saxStream cdata callback typed `string`.
+- `testing/test-utils-synchronizer.ts` — 0 removed (kept with reason matching the heterogeneous test fixtures).
+- `services/CommandService.test.ts` — 1 removed, 1 left. `createCommand.options` kept `any` with reason (test fixtures), execute mock kept with reason.
+- `services/synchronizer/Synchronizer.conflicts.test.ts` — 2 removed, 0 left. dynamic field iteration uses `Record<string, unknown>` casts.
+- `services/rest/Api.test.ts` — 2 removed, 0 left. `response: any` → `NoteEntity`; sort callback typed `{ id: string }`.
+- `utils/ipc/utils/mergeCallbacksAndSerializable.test.ts` — 1 left with reason (mergeCallbacksAndSerializable return shape).
+
+## packages/lib summary
+
+Final: 1138 → 272 (**866 removed, 76% reduction**), processed in 28 batches over 2026-05-13 → 2026-05-14.
+
+Of the 272 remaining disables, 270 have descriptive `-- reason` comments. The 2 without are inside commented-out code in `services/synchronizer/synchronizer_LockHandler.test.ts:103-105`.
+
+The remaining `any` annotations cluster into a handful of structural reasons that resist simple narrowing:
+
+1. **Per-app polymorphism**: `shim.ts` and `shim-init-node.ts` cross-platform shims (sharp, keytar, react, electron bridge, nodeSqlite, fsDriver, httpAgent, proxyAgent, node datagram module), redux store/state/dispatch differing across cli/desktop/mobile, FileApi driver subclass shapes.
+2. **Plugin API surface**: `services/plugins/api/types.ts`, `Joplin.ts`, `JoplinCommands.ts`, command/script/content-script entry points where args/returns are arbitrary by design — narrowing would break plugin authors.
+3. **External library types not imported here**: markdown-it, CodeMirror 6 (EditorView/Extension/CompletionSource), sax stream callbacks, node http/https request bag, css-tools declarations, sharp instance.
+4. **BaseModel/BaseItem subclass variance**: `byId`, `modelIndexById`, `save`, `serialize`, `filter`, etc. are overridden by every subclass with stricter per-entity types; narrowing the base forces subclass return-type incompatibilities or many call-site casts.
+5. **Reducer action unions**: `reducer.ts` matches dynamically on `action.type` across all redux actions in the app; the action union diverges across cli/desktop/mobile so a strict union here would not compose.
+6. **Test fixtures**: a handful of tests pass loose `{ id: 1, type_: ... }` objects with `id` as `number`, mocked stores without `dispatch`, or partial entity slices that don't satisfy the production-typed signatures.
+
+All `yarn tsc --noEmit` and `yarn linter-ci packages/lib/` runs pass for every batch commit.
+
