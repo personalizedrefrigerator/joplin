@@ -27,12 +27,13 @@ document.createRange = () => {
 };
 
 // By default, jsdom's window.scrollTo throws an unimplemented error
-window.scrollTo = (scroll) => {
-	const target = document.scrollingElement ?? document.body;
-	if (typeof scroll === 'number') {
-		target.scrollTop = scroll;
-	} else {
-		target.scrollTop = scroll.top;
-		target.scrollLeft = scroll.left;
+window.scrollTo = (scrollX, scrollY) => {
+	if (typeof scrollX === 'object') {
+		scrollX = scrollX.left ?? 0;
+		scrollY = scrollX.top ?? 0;
 	}
+
+	const target = document.scrollingElement ?? document.body;
+	target.scrollTop = scrollY;
+	target.scrollLeft = scrollX;
 };
