@@ -34,6 +34,8 @@ const mockServiceForNoteSharing = () => {
 
 describe('ShareService', () => {
 
+	jest.retryTimes(2);
+
 	beforeEach(async () => {
 		await setupDatabaseAndSynchronizer(1);
 		await switchClient(1);
@@ -300,6 +302,10 @@ describe('ShareService', () => {
 		expect(localSyncInfo().masterKeys).toHaveLength(2);
 	});
 
+	// On CI this test can randomly throw "Exceeded timeout of 90000 ms for a
+	// test." because of the multiple RSA key generation and master key
+	// encryption steps. Increase the timeout as a backstop in addition to the
+	// suite-level `jest.retryTimes(2)`.
 	it('should use a different master key when folders are unshared, then shared again', async () => {
 		await generateMasterKeyAndEnableEncryption(encryptionService(), 'testing!');
 		const ppk = await generateKeyPair(encryptionService(), '111111');
@@ -314,7 +320,7 @@ describe('ShareService', () => {
 		expect(share2.master_key_id).toBeTruthy();
 		expect(share2.folder_id).toBe(folder.id);
 		expect(share.master_key_id).not.toBe(share2.master_key_id);
-	});
+	}, 60000 * 5);
 
 	it('should leave folders that are no longer with the user', async () => {
 		// `checkShareConsistency` will emit a warning so we need to silent it
