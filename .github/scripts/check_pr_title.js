@@ -153,7 +153,6 @@ module.exports = async ({ github, context, core }) => {
 			pull_number: prNumber,
 			state: 'closed',
 		});
+		core.setFailed('Pull request title does not match the required format.');
 	}
-
-	core.setFailed('Pull request title does not match the required format.');
 };
