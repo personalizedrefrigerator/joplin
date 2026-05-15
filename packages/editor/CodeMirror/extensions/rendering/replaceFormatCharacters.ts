@@ -15,30 +15,30 @@ const shouldFullReplace = (node: SyntaxNodeRef, state: EditorState) => {
 	if ((node.name === 'URL' || node.name === 'LinkMark') && getParentName() === 'Link') {
 		const parent = node.node.parent!;
 		const parentContent = state.sliceDoc(parent.from, parent.to);
-		if (node.name === 'LinkMark') {
-			if (isReferenceLink(parentContent)) {
-				return !!resolveReferenceFromLink(parentContent, state);
-			}
-		} else if (node.name === 'URL') {
-			// Find all closing link marks
-			const closingBracketNodes = parent.getChildren('LinkMark').filter(mark => {
-				const isClosingBracket = state.sliceDoc(mark.from, mark.to) === ']';
-				return isClosingBracket;
-			});
-
-			// URLs can only be hidden if after the last ].
-			const lastClosingBracketIdx = closingBracketNodes.length > 0 ? closingBracketNodes[closingBracketNodes.length - 1].from : null;
-			if (!lastClosingBracketIdx || node.from < lastClosingBracketIdx) {
-				return false;
-			}
-			// Avoid fully hiding links
-			const hasEmptyLabel = state.sliceDoc(
-				Math.max(0, lastClosingBracketIdx - 1), lastClosingBracketIdx,
-			) === '[';
-			if (hasEmptyLabel) {
-				return false;
-			}
+		if (node.name === 'LinkMark' && isReferenceLink(parentContent)) {
+			return !!resolveReferenceFromLink(parentContent, state);
 		}
+
+		// Find all closing link marks
+		const closingBracketNodes = parent.getChildren('LinkMark').filter(mark => {
+			const isClosingBracket = state.sliceDoc(mark.from, mark.to) === ']';
+			return isClosingBracket;
+		});
+
+		// URLs can only be hidden if after the last ].
+		const isUrl = node.name === 'URL';
+		const lastClosingBracketIdx = closingBracketNodes.length > 0 ? closingBracketNodes[closingBracketNodes.length - 1].from : null;
+		if (!lastClosingBracketIdx || isUrl && node.from < lastClosingBracketIdx) {
+			return false;
+		}
+		// Avoid fully hiding links
+		const hasEmptyLabel = state.sliceDoc(
+			Math.max(0, lastClosingBracketIdx - 1), lastClosingBracketIdx,
+		) === '[';
+		if (hasEmptyLabel) {
+			return false;
+		}
+
 		return true;
 	}
 
