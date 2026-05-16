@@ -26,6 +26,7 @@ import { canvasNodeToFlowNode, canvasToFlow, flowToCanvas, WhiteboardFlowEdge, W
 import TextNode from './nodes/TextNode';
 import FileNode from './nodes/FileNode';
 import LinkNode from './nodes/LinkNode';
+import GroupNode from './nodes/GroupNode';
 import { ActionButton, ActionDivider, ActionInput, ActionPanel } from './ActionPanel';
 
 const makeArrowMarker = () => ({ type: MarkerType.ArrowClosed, width: 27, height: 27, markerUnits: 'userSpaceOnUse' });
@@ -49,29 +50,28 @@ const nodeTypes: NodeTypes = {
 	wbText: TextNode as unknown as NodeTypes[string],
 	wbFile: FileNode as unknown as NodeTypes[string],
 	wbLink: LinkNode as unknown as NodeTypes[string],
+	wbGroup: GroupNode as unknown as NodeTypes[string],
 };
 
 const InnerSurface = ({ canvas, onChange }: Props) => {
 	const initial = useMemo(() => canvasToFlow(canvas), [canvas]);
 	const [flowNodes, setFlowNodes] = useState<WhiteboardFlowNode[]>(initial.nodes);
 	const [flowEdges, setFlowEdges] = useState<WhiteboardFlowEdge[]>(initial.edges);
-	const preservedGroupsRef = useRef<CanvasNode[]>(initial.preservedGroups);
 	const containerRef = useRef<HTMLDivElement | null>(null);
 	const rf = useReactFlow();
 
-	const lastEmittedRef = useRef<string>(JSON.stringify(flowToCanvas(initial.nodes, initial.edges, initial.preservedGroups)));
+	const lastEmittedRef = useRef<string>(JSON.stringify(flowToCanvas(initial.nodes, initial.edges)));
 	useEffect(() => {
 		const incoming = JSON.stringify(canvas);
 		if (incoming === lastEmittedRef.current) return;
 		const next = canvasToFlow(canvas);
 		setFlowNodes(next.nodes);
 		setFlowEdges(next.edges);
-		preservedGroupsRef.current = next.preservedGroups;
-		lastEmittedRef.current = JSON.stringify(flowToCanvas(next.nodes, next.edges, next.preservedGroups));
+		lastEmittedRef.current = JSON.stringify(flowToCanvas(next.nodes, next.edges));
 	}, [canvas]);
 
 	useEffect(() => {
-		const out = flowToCanvas(flowNodes, flowEdges, preservedGroupsRef.current);
+		const out = flowToCanvas(flowNodes, flowEdges);
 		const serialized = JSON.stringify(out);
 		if (serialized === lastEmittedRef.current) return;
 		lastEmittedRef.current = serialized;
@@ -84,6 +84,55 @@ const InnerSurface = ({ canvas, onChange }: Props) => {
 
 	const onEdgesChange: OnEdgesChange = useCallback((changes) => {
 		setFlowEdges(prev => applyEdgeChanges(changes, prev) as WhiteboardFlowEdge[]);
+	}, []);
+
+	// Drag-along for groups: when the user drags a group, all non-selected
+	// nodes whose centre lies inside the group's starting bounds move with it.
+	// The set is captured once at drag-start so adding/removing overlap
+	// mid-drag doesn't change membership. Other groups can be captives too;
+	// their own captives are NOT re-evaluated because we only translate them.
+	type Captive = { id: string; originX: number; originY: number };
+	const dragRef = useRef<{ groupId: string; originX: number; originY: number; captives: Captive[] } | null>(null);
+
+	const onNodeDragStart = useCallback((_e: React.MouseEvent, node: Node) => {
+		const dragged = flowNodes.find(n => n.id === node.id);
+		if (!dragged || dragged.data?.canvasNode?.type !== 'group') return;
+		const gx = dragged.position.x;
+		const gy = dragged.position.y;
+		const gw = (typeof dragged.width === 'number' ? dragged.width : (typeof dragged.style?.width === 'number' ? dragged.style.width : 0)) ?? 0;
+		const gh = (typeof dragged.height === 'number' ? dragged.height : (typeof dragged.style?.height === 'number' ? dragged.style.height : 0)) ?? 0;
+		const captives: Captive[] = [];
+		for (const n of flowNodes) {
+			if (n.id === dragged.id) continue;
+			// Skip nodes the user is already moving via multi-select — React
+			// Flow translates those itself, and our delta would double-move.
+			if (n.selected) continue;
+			const nw = (typeof n.width === 'number' ? n.width : (typeof n.style?.width === 'number' ? n.style.width : 0)) ?? 0;
+			const nh = (typeof n.height === 'number' ? n.height : (typeof n.style?.height === 'number' ? n.style.height : 0)) ?? 0;
+			const cx = n.position.x + nw / 2;
+			const cy = n.position.y + nh / 2;
+			if (cx >= gx && cx <= gx + gw && cy >= gy && cy <= gy + gh) {
+				captives.push({ id: n.id, originX: n.position.x, originY: n.position.y });
+			}
+		}
+		dragRef.current = { groupId: dragged.id, originX: gx, originY: gy, captives };
+	}, [flowNodes]);
+
+	const onNodeDrag = useCallback((_e: React.MouseEvent, node: Node) => {
+		const ctx = dragRef.current;
+		if (!ctx || node.id !== ctx.groupId || !ctx.captives.length) return;
+		const dx = node.position.x - ctx.originX;
+		const dy = node.position.y - ctx.originY;
+		const originById = new Map(ctx.captives.map(c => [c.id, c]));
+		setFlowNodes(prev => prev.map(n => {
+			const origin = originById.get(n.id);
+			if (!origin) return n;
+			return { ...n, position: { x: origin.originX + dx, y: origin.originY + dy } };
+		}));
+	}, []);
+
+	const onNodeDragStop = useCallback(() => {
+		dragRef.current = null;
 	}, []);
 
 	const onConnect: OnConnect = useCallback((connection: Connection) => {
@@ -109,15 +158,21 @@ const InnerSurface = ({ canvas, onChange }: Props) => {
 		markerEnd: makeArrowMarker(),
 	}), []);
 
-	const addCanvasNode = useCallback((n: Exclude<CanvasNode, { type: 'group' }>) => {
-		setFlowNodes(prev => [...prev, canvasNodeToFlowNode(n)]);
+	const addCanvasNode = useCallback((n: CanvasNode) => {
+		const flow = canvasNodeToFlowNode(n);
+		setFlowNodes(prev => n.type === 'group' ? [flow, ...prev] : [...prev, flow]);
 	}, []);
 
-	const onAddText = useCallback(() => {
+	const viewportCentre = useCallback((): { x: number; y: number } => {
 		const view = rf.getViewport();
 		const rect = containerRef.current?.getBoundingClientRect();
 		const cx = rect ? (rect.width / 2 - view.x) / view.zoom : 0;
 		const cy = rect ? (rect.height / 2 - view.y) / view.zoom : 0;
+		return { x: cx, y: cy };
+	}, [rf]);
+
+	const onAddText = useCallback(() => {
+		const { x: cx, y: cy } = viewportCentre();
 		addCanvasNode({
 			id: generateId(),
 			type: 'text',
@@ -127,7 +182,20 @@ const InnerSurface = ({ canvas, onChange }: Props) => {
 			height: 100,
 			text: _('New text card'),
 		});
-	}, [rf, addCanvasNode]);
+	}, [viewportCentre, addCanvasNode]);
+
+	const onAddGroup = useCallback(() => {
+		const { x: cx, y: cy } = viewportCentre();
+		addCanvasNode({
+			id: generateId(),
+			type: 'group',
+			x: cx - 200,
+			y: cy - 140,
+			width: 400,
+			height: 280,
+			label: _('New group'),
+		});
+	}, [viewportCentre, addCanvasNode]);
 
 	const selectedEdges = useMemo(() => flowEdges.filter(e => e.selected), [flowEdges]);
 	const selectedNodes = useMemo(() => flowNodes.filter(n => n.selected), [flowNodes]);
@@ -232,6 +300,9 @@ const InnerSurface = ({ canvas, onChange }: Props) => {
 				onNodesChange={onNodesChange}
 				onEdgesChange={onEdgesChange}
 				onConnect={onConnect}
+				onNodeDragStart={onNodeDragStart}
+				onNodeDrag={onNodeDrag}
+				onNodeDragStop={onNodeDragStop}
 				deleteKeyCode={['Backspace', 'Delete']}
 				multiSelectionKeyCode={['Shift', 'Meta', 'Control']}
 				selectionKeyCode={['Shift']}
@@ -240,6 +311,7 @@ const InnerSurface = ({ canvas, onChange }: Props) => {
 				zoomOnPinch
 				zoomOnScroll={false}
 				fitView={flowNodes.length > 0}
+				elevateNodesOnSelect={false}
 				proOptions={{ hideAttribution: true }}
 			>
 				<Background gap={16} size={1} />
@@ -248,6 +320,7 @@ const InnerSurface = ({ canvas, onChange }: Props) => {
 
 				<ActionPanel position="top-right">
 					<ActionButton onClick={onAddText} title={_('Add a text card')}>{_('+ Text')}</ActionButton>
+					<ActionButton onClick={onAddGroup} title={_('Add a group')}>{_('+ Group')}</ActionButton>
 				</ActionPanel>
 
 				{selectedEdges.length > 0 ? (
