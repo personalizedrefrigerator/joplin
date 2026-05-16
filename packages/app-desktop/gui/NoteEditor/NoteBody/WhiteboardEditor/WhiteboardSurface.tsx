@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { CSSProperties, DragEvent as ReactDragEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { DragEvent as ReactDragEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
 	Background,
 	Connection,
@@ -19,7 +19,7 @@ import {
 	applyNodeChanges,
 	useReactFlow,
 } from '@xyflow/react';
-import ensureReactFlowCss, { applyReactFlowTheme } from './loadReactFlowCss';
+import ensureReactFlowCss from './loadReactFlowCss';
 import generateId from '@joplin/lib/services/whiteboard/generateId';
 import { _, _n } from '@joplin/lib/locale';
 import { Canvas, CanvasEdge, CanvasNode } from '@joplin/lib/services/whiteboard/jsoncanvas';
@@ -30,12 +30,7 @@ import TextNode from './nodes/TextNode';
 import FileNode from './nodes/FileNode';
 import LinkNode from './nodes/LinkNode';
 import { ActionButton, ActionDivider, ActionInput, ActionPanel } from './ActionPanel';
-import { useWhiteboardContext } from './WhiteboardContext';
-import { whiteboardColors } from './theme';
 
-// `markerUnits: 'userSpaceOnUse'` keeps the arrowhead at an absolute size,
-// independent of the edge's stroke width. Without it, selected edges (which
-// have a thicker stroke) would render a proportionally bigger arrow.
 const makeArrowMarker = () => ({ type: MarkerType.ArrowClosed, width: 27, height: 27, markerUnits: 'userSpaceOnUse' });
 
 type ArrowMode = 'none' | 'forward' | 'backward' | 'both' | 'mixed';
@@ -60,39 +55,13 @@ const nodeTypes: NodeTypes = {
 };
 
 const InnerSurface = ({ canvas, onChange }: Props) => {
-	const ctx = useWhiteboardContext();
-	const colors = useMemo(() => whiteboardColors(ctx.themeId), [ctx.themeId]);
-
-	// Re-apply React Flow's CSS custom properties whenever the theme changes
-	// so edges, minimap, controls and dot grid follow the active Joplin theme.
-	useEffect(() => {
-		applyReactFlowTheme(colors);
-	}, [colors]);
-
-	const containerStyle: CSSProperties = useMemo(() => ({
-		position: 'relative',
-		flex: 1,
-		width: '100%',
-		height: '100%',
-		background: colors.surfaceBackground,
-		outline: 'none',
-	}), [colors]);
-
 	const initial = useMemo(() => canvasToFlow(canvas), [canvas]);
 	const [flowNodes, setFlowNodes] = useState<WhiteboardFlowNode[]>(initial.nodes);
 	const [flowEdges, setFlowEdges] = useState<WhiteboardFlowEdge[]>(initial.edges);
-	// JSONCanvas group nodes are not rendered, but we preserve them through
-	// round-trip so importing a canvas from another tool and
-	// re-saving doesn't silently drop them.
 	const preservedGroupsRef = useRef<CanvasNode[]>(initial.preservedGroups);
 	const containerRef = useRef<HTMLDivElement | null>(null);
 	const rf = useReactFlow();
 
-	// When the incoming canvas changes (note loaded externally), reload state
-	// — but skip if it's the same canvas we just emitted (avoid feedback loops).
-	// Seed with the *round-tripped* serialization so optional edge fields
-	// (fromEnd/toEnd) added by flowToCanvas don't make the very first push-back
-	// effect see the canvas as "different" and emit a spurious onChange.
 	const lastEmittedRef = useRef<string>(JSON.stringify(flowToCanvas(initial.nodes, initial.edges, initial.preservedGroups)));
 	useEffect(() => {
 		const incoming = JSON.stringify(canvas);
@@ -101,12 +70,9 @@ const InnerSurface = ({ canvas, onChange }: Props) => {
 		setFlowNodes(next.nodes);
 		setFlowEdges(next.edges);
 		preservedGroupsRef.current = next.preservedGroups;
-		// Stamp with the round-tripped form too, for the same reason as the
-		// initial seed above.
 		lastEmittedRef.current = JSON.stringify(flowToCanvas(next.nodes, next.edges, next.preservedGroups));
 	}, [canvas]);
 
-	// Push changes back to the parent whenever the local flow state changes.
 	useEffect(() => {
 		const out = flowToCanvas(flowNodes, flowEdges, preservedGroupsRef.current);
 		const serialized = JSON.stringify(out);
@@ -146,9 +112,6 @@ const InnerSurface = ({ canvas, onChange }: Props) => {
 		markerEnd: makeArrowMarker(),
 	}), []);
 
-	// Append a freshly-created canvas node to the surface's local flow state.
-	// The render-cycle effect at flowToCanvas → onChange propagates the new
-	// node up to the parent, so we don't need an explicit onAddNode prop.
 	const addCanvasNode = useCallback((n: Exclude<CanvasNode, { type: 'group' }>) => {
 		setFlowNodes(prev => [...prev, canvasNodeToFlowNode(n)]);
 	}, []);
@@ -169,13 +132,9 @@ const InnerSurface = ({ canvas, onChange }: Props) => {
 		});
 	}, [rf, addCanvasNode]);
 
-	// Selection summaries for the action panels.
 	const selectedEdges = useMemo(() => flowEdges.filter(e => e.selected), [flowEdges]);
 	const selectedNodes = useMemo(() => flowNodes.filter(n => n.selected), [flowNodes]);
 
-	// Edges fed to React Flow. For selected edges we override marker colour
-	// to match the selection blue — markers are SVG <marker> defs that don't
-	// inherit stroke colour from the edge path automatically.
 	const SELECTED_EDGE_COLOR = '#4a90e2';
 	const renderedEdges = useMemo<WhiteboardFlowEdge[]>(() => {
 		return flowEdges.map(e => {
@@ -263,7 +222,7 @@ const InnerSurface = ({ canvas, onChange }: Props) => {
 	return (
 		<div
 			ref={containerRef}
-			style={containerStyle}
+			className="whiteboard-surface"
 			onDragOver={onDragOver}
 			onDrop={onDrop}
 		>
@@ -288,7 +247,7 @@ const InnerSurface = ({ canvas, onChange }: Props) => {
 			>
 				<Background gap={16} size={1} />
 				<Controls showInteractive={false} />
-				<MiniMap pannable zoomable style={{ width: 160, height: 100 }} />
+				<MiniMap pannable zoomable />
 
 				<ActionPanel position="top-right">
 					<ActionButton onClick={onAddText} title={_('Add a text card')}>{_('+ Text')}</ActionButton>
@@ -322,9 +281,7 @@ const InnerSurface = ({ canvas, onChange }: Props) => {
 					<ActionPanel
 						position="bottom-center"
 						caption={_n('%d card', '%d cards', selectedNodes.length, selectedNodes.length)}
-					>
-						{/* Per-card actions can be added here later (colour, alignment, etc.). */}
-					</ActionPanel>
+					/>
 				) : null}
 			</ReactFlow>
 		</div>
