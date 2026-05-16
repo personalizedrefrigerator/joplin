@@ -78,6 +78,7 @@ const buttonBase = (colors: WhiteboardThemeColors): CSSProperties => ({
 	alignItems: 'center',
 	gap: 4,
 	whiteSpace: 'nowrap',
+	userSelect: 'none',
 });
 
 interface ActionButtonProps {
