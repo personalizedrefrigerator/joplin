@@ -99,7 +99,9 @@ function editorTheme(themeId: number) {
 		fontSizeUnits: 'em',
 		fontSize: estimatedFontSizeInEm,
 		fontFamily: fontFamilyFromSettings(),
-		paddingBottom: 150,
+
+		// At least when the keyboard is open, iOS adds its own padding to the bottom of the note editor
+		paddingBottom: Platform.OS === 'ios' ? 0 : 150,
 	};
 }
 
