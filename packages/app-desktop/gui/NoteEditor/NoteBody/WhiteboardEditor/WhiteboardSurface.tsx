@@ -106,12 +106,16 @@ const InnerSurface = ({ canvas, onChange }: Props) => {
 		const gy = dragged.position.y;
 		const gw = (typeof dragged.width === 'number' ? dragged.width : (typeof dragged.style?.width === 'number' ? dragged.style.width : 0)) ?? 0;
 		const gh = (typeof dragged.height === 'number' ? dragged.height : (typeof dragged.style?.height === 'number' ? dragged.style.height : 0)) ?? 0;
+		// If the group itself is part of a multi-selection, React Flow drags
+		// every selected node together — in that case we must skip selected
+		// captives or they'd be double-moved by our delta. If the group isn't
+		// in the multi-selection, only the group moves, so all nodes inside
+		// (selected or not) need to come along.
+		const groupInMultiSelect = !!dragged.selected;
 		const captives: Captive[] = [];
 		for (const n of flowNodes) {
 			if (n.id === dragged.id) continue;
-			// Skip nodes the user is already moving via multi-select — React
-			// Flow translates those itself, and our delta would double-move.
-			if (n.selected) continue;
+			if (groupInMultiSelect && n.selected) continue;
 			const nw = (typeof n.width === 'number' ? n.width : (typeof n.style?.width === 'number' ? n.style.width : 0)) ?? 0;
 			const nh = (typeof n.height === 'number' ? n.height : (typeof n.style?.height === 'number' ? n.style.height : 0)) ?? 0;
 			const cx = n.position.x + nw / 2;
