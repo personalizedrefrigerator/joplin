@@ -103,9 +103,6 @@ const FileNode = ({ data, selected }: NodeProps<{ id: string; type: 'wbFile'; da
 		? resourceUrlFor(resolved?.resource ?? null, ctx.resourceDirectory)
 		: (/^(https?:|file:)\/\//i.test(node.file) ? node.file : null);
 	const mime = resolved?.resource?.mime;
-	const isPdf = isInternal
-		? mime === 'application/pdf'
-		: /\.pdf(\?|$|#)/i.test(node.file);
 	const isImage = isInternal
 		? !!mime?.startsWith('image/')
 		: /\.(png|jpe?g|gif|webp|svg|bmp)(\?|$|#)/i.test(node.file);
@@ -175,9 +172,6 @@ const FileNode = ({ data, selected }: NodeProps<{ id: string; type: 'wbFile'; da
 		if (url && isImage && !isInTrash) {
 			return <img className="image" src={url} alt={resolved?.title ?? ''} />;
 		}
-		if (url && isPdf && !isInTrash) {
-			return <embed className="embed" src={url} type="application/pdf" />;
-		}
 
 		if (resolved?.kind === 'note' && !isInTrash) {
 			return (
@@ -191,7 +185,7 @@ const FileNode = ({ data, selected }: NodeProps<{ id: string; type: 'wbFile'; da
 		if (resolved?.kind === 'resource' && !isInTrash) {
 			return (
 				<>
-					<div className="header">{_('Resource')}</div>
+					<div className="header">{_('File')}</div>
 					<div className="body">{resolved.title}</div>
 				</>
 			);

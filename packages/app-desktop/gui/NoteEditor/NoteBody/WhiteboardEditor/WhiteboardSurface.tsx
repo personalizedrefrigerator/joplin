@@ -22,7 +22,12 @@ import {
 import generateId from '@joplin/lib/services/whiteboard/generateId';
 import { _, _n } from '@joplin/lib/locale';
 import { Canvas, CanvasEdge, CanvasNode } from '@joplin/lib/services/whiteboard/jsoncanvas';
+import shim from '@joplin/lib/shim';
+import Logger from '@joplin/utils/Logger';
+import { webUtils } from 'electron';
 import { canvasNodeToFlowNode, canvasToFlow, flowToCanvas, WhiteboardFlowEdge, WhiteboardFlowNode } from './canvasFlow';
+
+const logger = Logger.create('WhiteboardSurface');
 import TextNode from './nodes/TextNode';
 import FileNode from './nodes/FileNode';
 import LinkNode from './nodes/LinkNode';
@@ -250,13 +255,20 @@ const InnerSurface = ({ canvas, onChange }: Props) => {
 		if (types.includes('text/x-jop-note-ids') || types.includes('text/x-jop-resource-ids')) {
 			e.preventDefault();
 			e.dataTransfer.dropEffect = 'link';
+		} else if (types.includes('Files')) {
+			e.preventDefault();
+			e.dataTransfer.dropEffect = 'copy';
 		}
 	}, []);
 
-	const onDrop = useCallback((e: ReactDragEvent<HTMLDivElement>) => {
+	const onDrop = useCallback(async (e: ReactDragEvent<HTMLDivElement>) => {
 		const noteIdsRaw = e.dataTransfer.getData('text/x-jop-note-ids');
 		const resourceIdsRaw = e.dataTransfer.getData('text/x-jop-resource-ids');
-		if (!noteIdsRaw && !resourceIdsRaw) return;
+		// Electron's recommended way to get the on-disk path of a dropped File
+		// (the deprecated `File.path` was removed in recent Electron versions).
+		const droppedFiles = Array.from(e.dataTransfer.files);
+		const filePaths = droppedFiles.map(f => webUtils.getPathForFile(f)).filter((p): p is string => !!p);
+		if (!noteIdsRaw && !resourceIdsRaw && !filePaths.length) return;
 		e.preventDefault();
 		e.stopPropagation();
 
@@ -265,12 +277,9 @@ const InnerSurface = ({ canvas, onChange }: Props) => {
 			if (!raw) return [];
 			try { const v = JSON.parse(raw); return Array.isArray(v) ? v : []; } catch { return []; }
 		};
-		const ids = [
-			...tryParse(noteIdsRaw),
-			...tryParse(resourceIdsRaw),
-		];
-		let offset = 0;
-		for (const id of ids) {
+
+		const placeCardForResource = (resourceId: string, index: number) => {
+			const offset = index * 24;
 			addCanvasNode({
 				id: generateId(),
 				type: 'file',
@@ -278,9 +287,29 @@ const InnerSurface = ({ canvas, onChange }: Props) => {
 				y: drop.y - 60 + offset,
 				width: 240,
 				height: 160,
-				file: `:/${id}`,
+				file: `:/${resourceId}`,
 			});
-			offset += 24;
+		};
+
+		const internalIds = [
+			...tryParse(noteIdsRaw),
+			...tryParse(resourceIdsRaw),
+		];
+		for (let i = 0; i < internalIds.length; i++) placeCardForResource(internalIds[i], i);
+
+		if (filePaths.length) {
+			// Import each file into the resource store, then add a card. Done
+			// in parallel for throughput; the card index (and thus the offset)
+			// follows the original drop order so cards stagger predictably
+			// even if larger files finish importing later.
+			await Promise.all(filePaths.map(async (filePath, i) => {
+				try {
+					const resource = await shim.createResourceFromPath(filePath);
+					placeCardForResource(resource.id, internalIds.length + i);
+				} catch (error) {
+					logger.warn(`Could not import dropped file ${filePath}:`, error);
+				}
+			}));
 		}
 	}, [rf, addCanvasNode]);
 
