@@ -8,6 +8,7 @@ import Note from '@joplin/lib/models/Note';
 import ItemChange from '@joplin/lib/models/ItemChange';
 import { ModelType } from '@joplin/lib/BaseModel';
 import attachedResources from '@joplin/lib/utils/attachedResources';
+import { _ } from '@joplin/lib/locale';
 import Logger from '@joplin/utils/Logger';
 import { resourceFullPath } from '@joplin/lib/models/utils/resourceUtils';
 import { ResourceEntity } from '@joplin/lib/services/database/types';
@@ -52,6 +53,8 @@ interface ResolvedItem {
 	// Note metadata used to gate writes from this card (e.g. checkbox
 	// toggling) and to enable conflict detection on save.
 	userUpdatedTime?: number;
+	// Non-zero when the item is in the trash. Used to render the "deleted"
+	// state for both notes and resources, and to block writes on notes.
 	deletedTime?: number;
 	// The full resource entity for `kind: 'resource'` items, so we can pass
 	// it straight to resourceFullPath / resourceFilename (which know how to
@@ -102,6 +105,7 @@ const useResolvedRef = (file: string): { resolved: ResolvedItem | null; refetch:
 						kind: 'resource',
 						title: item.title || file,
 						resource: item as ResourceEntity,
+						deletedTime: item.deleted_time,
 					});
 				} else {
 					setResolved({ kind: 'unknown', title: file });
@@ -223,18 +227,24 @@ const FileNode = ({ data, selected }: NodeProps<{ id: string; type: 'wbFile'; da
 		onChange: onLinkedNoteBodyChange,
 	});
 
+	// In-trash items have a non-zero `deleted_time`. Treat them as deleted for
+	// rendering purposes — same as fully-missing items — so the card doesn't
+	// keep showing content for a note the user already sent to the trash.
+	const isInTrash = !!resolved?.deletedTime;
+
 	const renderContent = () => {
-		// Image / PDF resource — render directly.
-		if (url && isImage) {
+		// Image / PDF resource — render directly. Skip when in trash so the
+		// card matches the deleted-state UI below.
+		if (url && isImage && !isInTrash) {
 			return <img src={url} style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', alignSelf: 'center', flex: 1 }} alt={resolved?.title ?? ''} />;
 		}
-		if (url && isPdf) {
+		if (url && isPdf && !isInTrash) {
 			return <embed src={url} type="application/pdf" style={{ width: '100%', height: '100%' }} />;
 		}
 
 		// Internal note ref — show the note's title in the header and the body
 		// preview below.
-		if (resolved?.kind === 'note') {
+		if (resolved?.kind === 'note' && !isInTrash) {
 			return (
 				<>
 					<div style={noteHeaderStyle(colors.textColor, colors.dividerColor)} title={resolved.title}>{resolved.title}</div>
@@ -244,11 +254,25 @@ const FileNode = ({ data, selected }: NodeProps<{ id: string; type: 'wbFile'; da
 		}
 
 		// Internal resource (non-image / non-pdf) — show its title.
-		if (resolved?.kind === 'resource') {
+		if (resolved?.kind === 'resource' && !isInTrash) {
 			return (
 				<>
-					<div style={headerStyle(colors)}>Resource</div>
+					<div style={headerStyle(colors)}>{_('Resource')}</div>
 					<div style={bodyStyle(colors)}>{resolved.title}</div>
+				</>
+			);
+		}
+
+		// Internal ref to a deleted item: either the note/resource has been
+		// permanently deleted (`kind: 'unknown'` because loadItemById returned
+		// null) or it's in the trash (`deletedTime > 0`). We can't tell from
+		// the bare `:/<id>` ref which kind it was, so show a generic message
+		// rather than the raw ID, which is meaningless to the user.
+		if (isInternal && (resolved?.kind === 'unknown' || isInTrash)) {
+			return (
+				<>
+					<div style={headerStyle(colors)}>{_('Note / Resource')}</div>
+					<div style={{ ...bodyStyle(colors), color: colors.mutedColor, fontStyle: 'italic' }}>{_('This note or resource has been deleted.')}</div>
 				</>
 			);
 		}
@@ -256,8 +280,8 @@ const FileNode = ({ data, selected }: NodeProps<{ id: string; type: 'wbFile'; da
 		// Loading or external file path.
 		return (
 			<>
-				<div style={headerStyle(colors)}>{node.file.startsWith(':/') ? 'Note / Resource' : 'File'}</div>
-				<div style={bodyStyle(colors)}>{resolved === null && node.file.startsWith(':/') ? 'Loading…' : node.file}</div>
+				<div style={headerStyle(colors)}>{isInternal ? _('Note / Resource') : _('File')}</div>
+				<div style={bodyStyle(colors)}>{resolved === null && isInternal ? _('Loading…') : node.file}</div>
 			</>
 		);
 	};
