@@ -271,8 +271,8 @@ const FileNode = ({ data, selected }: NodeProps<{ id: string; type: 'wbFile'; da
 		if (isInternal && (resolved?.kind === 'unknown' || isInTrash)) {
 			return (
 				<>
-					<div style={headerStyle(colors)}>{_('Note / Resource')}</div>
-					<div style={{ ...bodyStyle(colors), color: colors.mutedColor, fontStyle: 'italic' }}>{_('This note or resource has been deleted.')}</div>
+					<div style={headerStyle(colors)}>{_('Linked item')}</div>
+					<div style={{ ...bodyStyle(colors), color: colors.mutedColor, fontStyle: 'italic' }}>{_('This linked item has been deleted.')}</div>
 				</>
 			);
 		}
@@ -280,7 +280,7 @@ const FileNode = ({ data, selected }: NodeProps<{ id: string; type: 'wbFile'; da
 		// Loading or external file path.
 		return (
 			<>
-				<div style={headerStyle(colors)}>{isInternal ? _('Note / Resource') : _('File')}</div>
+				<div style={headerStyle(colors)}>{isInternal ? _('Linked item') : _('File')}</div>
 				<div style={bodyStyle(colors)}>{resolved === null && isInternal ? _('Loading…') : node.file}</div>
 			</>
 		);
