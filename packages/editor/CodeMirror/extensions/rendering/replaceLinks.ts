@@ -29,11 +29,12 @@ const shouldFullReplace = (node: SyntaxNodeRef, state: EditorState) => {
 		return false;
 	}
 
+	const label = state.sliceDoc(
+		parent.from, lastClosingBracketIdx,
+	).replace(/^\[/, '');
+
 	// Links with an empty label shouldn't be hidden
-	const hasEmptyLabel = state.sliceDoc(
-		Math.max(0, lastClosingBracketIdx - 1), lastClosingBracketIdx,
-	) === '[';
-	if (hasEmptyLabel) {
+	if (label.trim() === '') {
 		return false;
 	}
 

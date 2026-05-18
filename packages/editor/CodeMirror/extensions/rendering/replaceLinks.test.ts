@@ -12,6 +12,13 @@ describe('replaceLinks', () => {
 			expectedSyntaxTags: ['URL', 'LinkMark', 'Link'],
 		},
 		{
+			label: 'should not hide whitespace-only links',
+			markup: 'test: [ ](https://example.com)',
+			expectedText: 'test: [ ](https://example.com)',
+
+			expectedSyntaxTags: ['URL', 'LinkMark', 'Link'],
+		},
+		{
 			label: 'should hide link Markdown when a title is present',
 			markup: 'test: [test](https://example.com)',
 			expectedText: 'test: test',
