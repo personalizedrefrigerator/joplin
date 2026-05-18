@@ -77,4 +77,13 @@ describe('replaceInlineHtml', () => {
 			expect(editor.contentDOM.textContent).toContain('<strike>');
 		});
 	});
+
+	test('should not hide empty inline HTML tags', async () => {
+		const markdown = '<sup></sup>...';
+		const editor = await createEditorWithCursor(markdown, markdown.length);
+
+		await waitFor(() => {
+			expect(editor.contentDOM.textContent).toBe('<sup></sup>...');
+		});
+	});
 });

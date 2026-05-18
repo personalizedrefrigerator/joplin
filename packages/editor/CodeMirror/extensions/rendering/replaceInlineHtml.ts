@@ -45,33 +45,6 @@ const createHtmlReplacementExtension = (tagName: string, onRenderContent: OnRend
 		return cursor;
 	};
 
-	const findOpeningTag = (closingTag: SyntaxNodeRef, state: EditorState) => {
-		const closingTagInfo = htmlNodeInfo(closingTag, state);
-		// Self-closing?
-		if (closingTagInfo.opening) {
-			return closingTag;
-		}
-
-		let cursor = closingTag.node.prevSibling;
-		let nestedTagCounter = 1;
-
-		// Find the matching opening tag
-		for (; !!cursor && nestedTagCounter > 0; cursor = cursor.prevSibling) {
-			const info = htmlNodeInfo(cursor, state);
-			if (info && isMatchingClosingTag(info)) {
-				nestedTagCounter ++;
-			} else if (info && isMatchingOpeningTag(info)) {
-				nestedTagCounter --;
-			}
-
-			if (nestedTagCounter === 0) {
-				break;
-			}
-		}
-
-		return cursor;
-	};
-
 	const selectionIntersectsRange = (selection: EditorSelection, from: number, to: number) => {
 		const rangeContains = (point: number) => point >= from && point <= to;
 		const selectionContains = (point: number) => point >= selection.main.from && point <= selection.main.to;
@@ -90,13 +63,9 @@ const createHtmlReplacementExtension = (tagName: string, onRenderContent: OnRend
 		if (info.opening) {
 			const closingTag = findClosingTag(node, state);
 			if (!closingTag) return null;
+			const content = state.sliceDoc(node.to, closingTag.from);
+			if (!content.trim()) return null;
 			return [node.from, closingTag.to];
-		}
-
-		if (info.closing) {
-			const openingTag = findOpeningTag(node, state);
-			if (!openingTag) return null;
-			return [openingTag.from, node.to];
 		}
 
 		return null;
