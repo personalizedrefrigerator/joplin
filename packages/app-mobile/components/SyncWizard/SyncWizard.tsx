@@ -133,7 +133,7 @@ const SyncWizard: React.FC<Props> = ({ themeId, visible, dispatch }) => {
 	>
 		<Text variant='bodyLarge' role='heading' style={styles.subheading}>{
 			isAppJoplinCloud()
-				? _('Sign in to Joplin Cloud to sync your notes.')
+				? _('Sign in to Joplin Cloud to sync and manage your notes.')
 				: _('Joplin can synchronise your notes using various providers. Select one from the list below.')
 		}</Text>
 		<View style={styles.syncProviderList}>
