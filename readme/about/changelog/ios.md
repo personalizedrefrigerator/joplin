@@ -1,5 +1,13 @@
 # Joplin iOS Changelog
 
+## [ios-v13.6.8](https://github.com/laurent22/joplin/releases/tag/ios-v13.6.8) - 2026-05-19T14:45:16Z
+
+- New: Add padding to the bottom of the viewer and editor  (#15418 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- New: Add setting to choose the default view / edit state (#15423 by [@mrjo118](https://github.com/mrjo118))
+- Improved: Improve view/edit toggle button appearance in note header (#15450)
+- Fixed: Fix JEX import on iOS (#15408) (#15407 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: In-editor rendering: Do not render empty inline HTML (#15470) (#15467 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+
 ## [ios-v13.6.7](https://github.com/laurent22/joplin/releases/tag/ios-v13.6.7) - 2026-05-12T10:04:26Z
 
 - Fixed: Fix plugins fail to start (#15362) (#15311 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
