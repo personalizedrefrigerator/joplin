@@ -128,27 +128,30 @@ export default class FsDriverRN extends FsDriverBase {
 		}
 
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-		let output: any[] = [];
+		type RawStat = any;
+
+		const toRelativePath = (stat: RawStat) => {
+			let relativePath = isScoped ? stat.uri : stat.path;
+
+			// Workaround: Paths returned by RNFS.readDir can include a leading /private/, when this isn't included
+			// in the original path variable:
+			if (relativePath.startsWith('/private/') && !path.startsWith('/private/')) {
+				relativePath = relativePath.replace(/^\/private/, '');
+			}
+
+			if (!relativePath.startsWith(path)) {
+				logger.warn('readDirStats: Relative path does not start with original:', { relativePath, path });
+			}
+
+			relativePath = relativePath.substring(path.length + 1);
+			return relativePath;
+		};
+
+		let output: RawStat[] = [];
 		for (let i = 0; i < stats.length; i++) {
 			const stat = stats[i];
-			let relativePath;
-			if (isScoped) {
-				relativePath = stat.uri;
-			} else {
-				relativePath = stat.path;
 
-				// Workaround: Paths returned by RNFS.readDir can include a leading /private/, when this isn't included
-				// in the original path variable:
-				if (stat.path.startsWith('/private/') && !path.startsWith('/private/')) {
-					relativePath = relativePath.replace(/^\/private/, '');
-				}
-
-				if (!relativePath.startsWith(path)) {
-					logger.warn('readDirStats: Relative path does not start with original:', { relativePath, path });
-				}
-
-				relativePath = relativePath.substring(path.length + 1);
-			}
+			const relativePath = toRelativePath(stat);
 			const standardStat = this.rnfsStatToStd_(stat, relativePath);
 			output.push(standardStat);
 
