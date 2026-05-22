@@ -169,10 +169,10 @@ setSyncTargetName('memory');
 
 const syncDir = `${oldTestDir}/sync/${suiteName_}`;
 
-// 90 seconds now that the tests are running in parallel and have been
-// split into smaller suites might not be necessary but for now leave it
-// anyway.
-let defaultJestTimeout = 90 * 1000;
+// Tests run in parallel across many suites, so individual tests can be
+// starved of CPU/IO on contended CI runners. 180s leaves headroom for
+// that without hiding genuinely hung tests.
+let defaultJestTimeout = 180 * 1000;
 if (isNetworkSyncTarget_) defaultJestTimeout = 60 * 1000 * 10;
 if (typeof jest !== 'undefined') jest.setTimeout(defaultJestTimeout);
 
