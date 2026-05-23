@@ -6,7 +6,8 @@ import BaseModel from '@joplin/lib/BaseModel';
 import Note from '@joplin/lib/models/Note';
 import Resource from '@joplin/lib/models/Resource';
 import Setting from '@joplin/lib/models/Setting';
-import reducer, { defaultState } from '@joplin/lib/reducer';
+import reducer, { defaultState, State } from '@joplin/lib/reducer';
+import { Store } from 'redux';
 import { splitCommandString } from '@joplin/utils';
 import { reg } from '@joplin/lib/registry';
 import { _ } from '@joplin/lib/locale';
@@ -53,8 +54,7 @@ type App = any;
 
 class AppGui {
 	private app_: App;
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Redux store from @joplin/lib/reducer; full state shape isn't strongly typed here
-	private store_: any;
+	private store_: Store<State>;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- TermWrapper from tkwidgets has no type definitions
 	private term_: any;
 	private tkWidgetKeys_: Record<string, string>;
@@ -71,7 +71,7 @@ class AppGui {
 	private linkSelector_: any;
 	private resourceServer_: ResourceServer;
 
-	public constructor(app: App, store: unknown, keymap: KeymapItem[]) {
+	public constructor(app: App, store: Store<State>, keymap: KeymapItem[]) {
 		try {
 			this.app_ = app;
 			this.store_ = store;
@@ -206,8 +206,7 @@ class AppGui {
 				});
 			}
 		});
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- ReduxRootWidget.connect's state-mapper takes the untyped Redux state
-		this.rootWidget_.connect(folderList, (state: any) => {
+		this.rootWidget_.connect(folderList, (state: State) => {
 			return {
 				selectedFolderId: state.selectedFolderId,
 				selectedTagId: state.selectedTagId,
@@ -234,8 +233,7 @@ class AppGui {
 				id: note ? note.id : null,
 			});
 		});
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- state mapper consumes the untyped Redux state
-		this.rootWidget_.connect(noteList, (state: any) => {
+		this.rootWidget_.connect(noteList, (state: State) => {
 			return {
 				selectedNoteId: state.selectedNoteIds.length ? state.selectedNoteIds[0] : null,
 				items: state.notes,
@@ -249,8 +247,7 @@ class AppGui {
 			borderBottomWidth: 1,
 			borderLeftWidth: 1,
 		};
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- state mapper consumes the untyped Redux state
-		this.rootWidget_.connect(noteText, (state: any) => {
+		this.rootWidget_.connect(noteText, (state: State) => {
 			return {
 				noteId: state.selectedNoteIds.length ? state.selectedNoteIds[0] : null,
 				notes: state.notes,
@@ -265,8 +262,7 @@ class AppGui {
 			borderLeftWidth: 1,
 			borderRightWidth: 1,
 		};
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- state mapper consumes the untyped Redux state
-		this.rootWidget_.connect(noteMetadata, (state: any) => {
+		this.rootWidget_.connect(noteMetadata, (state: State) => {
 			return { noteId: state.selectedNoteIds.length ? state.selectedNoteIds[0] : null };
 		});
 		noteMetadata.hide();
