@@ -82,7 +82,7 @@ Same as the [`any` cleanup guide](any_cleanup_progress.md#context-exhaustion-con
 
 ## Status
 
-Counts captured against `upstream/dev` HEAD before any conversion work landed from this plan. Excludes the "Files to never touch" categories above. Numbers are approximate; re-verify at session start with:
+Counts captured against `dev` HEAD before any conversion work landed from this plan. Excludes the "Files to never touch" categories above. Numbers are approximate; re-verify at session start with:
 
 ```
 git ls-files packages/<name>/ | grep -E '\.js$' | grep -v -E '<the excludes>'
