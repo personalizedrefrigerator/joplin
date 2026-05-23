@@ -1,4 +1,3 @@
-<!-- cSpell:ignore SIGKILL -->
 # `.js` → `.ts` Migration Progress
 
 Tracks the effort to convert remaining JavaScript source files in the Joplin repo to TypeScript.
@@ -20,7 +19,7 @@ For each `.js` file to convert:
    - For singleton-class globals (e.g. `app()` returning `Application`), the class may need a one-line `export` added in its source file before it can be imported.
    - For small fixed-variant records, a discriminated union beats `Record<string, any>`.
 
-   Only fall back to `any` when the right type genuinely isn't available — typically callbacks from untyped third-party libraries or truly heterogeneous bags. Add `// eslint-disable-next-line @typescript-eslint/no-explicit-any -- <reason>` only when ESLint actually fires. An implicit `any` from `const X = require('untyped-pkg')` is fine and needs no disable.
+   Only fall back to `any` when the right type genuinely isn't available — typically callbacks from untyped third-party libraries or truly heterogeneous bags. Add `// eslint-disable-next-line @typescript-eslint/no-explicit-any -- <reason>` only when ESLint actually fires. An implicit `any` from `const X = require('untyped-pkg')` is fine and needs no disable — but prefer a typed `import` (`import X from 'pkg'` or `import * as X from 'pkg'`) when the package ships its own `.d.ts`; reach for `require()` only when the dependency is genuinely untyped or when the surrounding code already uses CommonJS for a reason (e.g. the app-cli command dispatcher).
 3. **Treat every `@typescript-eslint/no-explicit-any` disable as a candidate for one more look before committing** — sometimes the right type only becomes obvious after a second pass over the file, or after finishing related files in the same round. If a tightening genuinely doesn't fit in the conversion commit (e.g. it requires exporting a type from another file or coordinating across files), do it as its own small follow-up commit; the [`any` cleanup guide](any_cleanup_progress.md) covers the methodology for that kind of work.
 4. **Match the export style of nearby converted files.**
    - `packages/app-cli/app/command-*.ts` use `module.exports = Command;` (the dispatcher loads them via `require()` and calls `new CommandClass()` without `.default`).
@@ -90,7 +89,7 @@ Same as the [`any` cleanup guide](any_cleanup_progress.md#context-exhaustion-con
 
 ## Status
 
-Counts captured against `upstream/dev` before any conversion work from this plan landed. Excludes the "Files to never touch" categories above. Numbers are approximate; re-verify at session start with:
+Counts captured against the `dev` branch before any conversion work from this plan landed. Excludes the "Files to never touch" categories above. Numbers are approximate; re-verify at session start with:
 
 ```
 git ls-files packages/<name>/ | grep -E '\.js$' | grep -v -E '<the excludes>'

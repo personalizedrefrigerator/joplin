@@ -300,3 +300,4 @@ querystring
 msgbox
 LASTEXITCODE
 segfaults
+SIGKILL
