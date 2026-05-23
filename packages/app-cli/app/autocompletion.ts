@@ -6,10 +6,7 @@ const { cliUtils } = require('./cli-utils.js');
 import yargParser = require('yargs-parser');
 import * as fs from 'fs-extra';
 
-// Joplin's autocompleter returns either the completed line as a string, or an
-// array of candidate completions augmented with a `prefix` property indicating
-// the unchanged leading portion of the line. The augmented-array shape is what
-// the StatusBarWidget's autoComplete callback consumes.
+// Augmented-array shape consumed by StatusBarWidget's autoComplete callback.
 type CompletionList = string[] & { prefix?: string };
 type CompletionResult = string | CompletionList;
 

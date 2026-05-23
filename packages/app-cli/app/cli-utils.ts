@@ -148,10 +148,6 @@ cliUtils.makeCommandArgs = function(cmd: BaseCommand, argv: string[]): CommandAr
 	for (let i = 1; i < parsedUsage['_'].length; i++) {
 		const a = cliUtils.parseCommandArg(parsedUsage['_'][i] as string);
 		if (a.required && !args['_'][i]) throw new Error(_('Missing required argument: %s', a.name));
-		// The original JS had `if (i >= a.length) { output[a.name] = null }` here,
-		// but `a` is `{ required, name }` so `a.length` is undefined and the if
-		// branch was unreachable. Preserving the original behaviour (always take
-		// the else branch); see review-later.md for the likely-intended fix.
 		output[a.name] = args['_'][i];
 	}
 
