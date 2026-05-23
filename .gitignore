@@ -125,6 +125,7 @@ packages/app-cli/app/command-unpublish.test.js
 packages/app-cli/app/command-unpublish.js
 packages/app-cli/app/command-use.js
 packages/app-cli/app/command-version.js
+packages/app-cli/app/gui/ConsoleWidget.js
 packages/app-cli/app/gui/FolderListWidget.js
 packages/app-cli/app/gui/NoteListWidget.js
 packages/app-cli/app/gui/NoteMetadataWidget.js

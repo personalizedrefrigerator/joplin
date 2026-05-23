@@ -34,7 +34,7 @@ const NoteMetadataWidget = require('./gui/NoteMetadataWidget.js').default;
 const FolderListWidget = require('./gui/FolderListWidget').default;
 const NoteListWidget = require('./gui/NoteListWidget.js').default;
 const StatusBarWidget = require('./gui/StatusBarWidget').default;
-const ConsoleWidget = require('./gui/ConsoleWidget.js');
+const ConsoleWidget = require('./gui/ConsoleWidget.js').default;
 const LinkSelector = require('./LinkSelector.js').default;
 
 
