@@ -1359,6 +1359,7 @@ packages/lib/downloadController.js
 packages/lib/envFromArgs.js
 packages/lib/errorUtils.js
 packages/lib/errors.js
+packages/lib/eventManager.test.js
 packages/lib/eventManager.js
 packages/lib/file-api-driver-joplinServer.js
 packages/lib/file-api-driver-local.js
