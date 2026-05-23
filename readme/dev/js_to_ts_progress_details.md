@@ -69,6 +69,8 @@ Follow-up tightening commits (separate from each file's main conversion):
 - `Extract PromptOptions interface from StatusBarWidget.prompt` — same anonymous `{ cursorPosition?: number; secure?: boolean }` shape was duplicated across three places; extracted as `PromptOptions` exported from `StatusBarWidget`.
 - `Final-review cleanup on app-cli conversions` — mirrored the `LoggerWrapper` widening to `app-gui.ts logger_/setLogger`; reordered the `NoteEntity` import to group with `@joplin/lib/*`; trimmed the 5-line closure-cast comment in `NoteWidget`.
 - `Trim cli-utils explanatory comments` — removed the `printArray` empty-rows comment entirely; shortened the `prompt` `_initialText` rationale.
+- `Use typed LinkSelector import in app-cli app-gui` — `LinkSelector` was already a typed `.ts` class; replaced the `require('./LinkSelector.js').default` + `any` field with a typed import and dropped the stale eslint-disable. Caught during a final consistency-check pass over the branch.
+- `Trim block comments in app-cli autocompletion and cli-utils` — same consistency-check pass: shortened the `CompletionList` rationale block to one line and removed the cli-utils `makeCommandArgs` dead-branch post-mortem (the dead branch is already gone; the note lives on in `review-later.md`).
 
 Files skipped:
 
