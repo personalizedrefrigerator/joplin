@@ -25,7 +25,7 @@ describe('eventManager', () => {
 			name: 'john',
 		};
 
-		eventManager.appStateOn<string>('name', nameWatch);
+		eventManager.appStateOn('name', nameWatch);
 		eventManager.appStateEmit(globalState as unknown as AppState);
 
 		expect(localStateName).toBe('john');
@@ -54,8 +54,8 @@ describe('eventManager', () => {
 			name: 'john',
 		};
 
-		eventManager.appStateOn<string>('name', nameWatch);
-		eventManager.appStateOff<string>('name', nameWatch);
+		eventManager.appStateOn('name', nameWatch);
+		eventManager.appStateOff('name', nameWatch);
 		eventManager.appStateEmit(globalState as unknown as AppState);
 
 		expect(localStateName).toBe('');
@@ -74,7 +74,7 @@ describe('eventManager', () => {
 			},
 		};
 
-		eventManager.appStateOn<string>('user.name', nameWatch);
+		eventManager.appStateOn('user.name', nameWatch);
 		eventManager.appStateEmit(globalState as unknown as AppState);
 
 		expect(localStateName).toBe('john');
@@ -103,7 +103,7 @@ describe('eventManager', () => {
 			},
 		};
 
-		eventManager.appStateOn<{ name: string }>('user', userWatch);
+		eventManager.appStateOn('user', userWatch);
 		eventManager.appStateEmit(globalState as unknown as AppState);
 
 		expect(checkThrow(() => localUser.name = 'paul')).toBe(true);
