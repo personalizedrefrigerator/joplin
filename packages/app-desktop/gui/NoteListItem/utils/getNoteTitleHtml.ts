@@ -1,6 +1,7 @@
 import { htmlentities } from '@joplin/utils/html';
 const Mark = require('mark.js/dist/mark.min.js');
-import markJsUtils from '@joplin/lib/markJsUtils';
+const markJsUtils = require('@joplin/lib/markJsUtils');
+const { replaceRegexDiacritics, pregQuote } = require('@joplin/lib/string-utils');
 
 const getNoteTitleHtml = (highlightedWords: string[], displayTitle: string) => {
 	if (highlightedWords.length) {
@@ -15,7 +16,10 @@ const getNoteTitleHtml = (highlightedWords: string[], displayTitle: string) => {
 
 		try {
 			for (const wordToBeHighlighted of highlightedWords) {
-				markJsUtils.markKeyword(mark, wordToBeHighlighted);
+				markJsUtils.markKeyword(mark, wordToBeHighlighted, {
+					pregQuote: pregQuote,
+					replaceRegexDiacritics: replaceRegexDiacritics,
+				});
 			}
 		} catch (error) {
 			if (error.name !== 'SyntaxError') {

@@ -1419,7 +1419,6 @@ packages/lib/locale.test.js
 packages/lib/locale.js
 packages/lib/makeDiscourseDebugUrl.test.js
 packages/lib/makeDiscourseDebugUrl.js
-packages/lib/markJsUtils.js
 packages/lib/markdownUtils.test.js
 packages/lib/markdownUtils.js
 packages/lib/markdownUtils2.test.js
