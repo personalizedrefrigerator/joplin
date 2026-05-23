@@ -44,9 +44,6 @@ interface CliUtils {
 export const cliUtils: CliUtils = {} as CliUtils;
 
 cliUtils.printArray = function(logFunction: (s: string)=> void, rows: unknown[][]) {
-	// (The original JS returned '' for empty rows, but the inner loops skip the
-	// work in that case anyway, so the explicit early return was redundant.)
-
 	const ALIGN_LEFT = 0;
 	const ALIGN_RIGHT = 1;
 
@@ -231,9 +228,8 @@ cliUtils.promptConfirm = function(message: string, answers: string[] | null = nu
 	});
 };
 
-// Note: _initialText is there to have the same signature as statusBar.prompt() so that
-// it can be a drop-in replacement, however it is not used (and cannot be
-// with readline.question?). Underscore-prefixed so tsc's noUnusedParameters allows it.
+// _initialText is there only to match statusBar.prompt's signature for drop-in
+// use; readline.question doesn't expose a way to pre-fill the prompt.
 cliUtils.prompt = function(_initialText = '', promptString = ':', options: PromptOptions | null = null): Promise<string> {
 	if (!options) options = {};
 
