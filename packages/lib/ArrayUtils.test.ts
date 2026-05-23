@@ -1,4 +1,4 @@
-const ArrayUtils = require('./ArrayUtils');
+import * as ArrayUtils from './ArrayUtils';
 
 describe('ArrayUtils', () => {
 
@@ -51,7 +51,7 @@ describe('ArrayUtils', () => {
 	}));
 
 	it('should merge overlapping intervals', (async () => {
-		const testCases = [
+		const testCases: [[number, number][], [number, number][]][] = [
 			[
 				[],
 				[],
@@ -79,12 +79,12 @@ describe('ArrayUtils', () => {
 		];
 
 		// eslint-disable-next-line github/array-foreach -- Old code before rule was applied
-		testCases.forEach((t, i) => {
+		testCases.forEach((t) => {
 			const intervals = t[0];
 			const expected = t[1];
 
 			const actual = ArrayUtils.mergeOverlappingIntervals(intervals, intervals.length);
-			expect(actual).toEqual(expected, `Test case ${i}`);
+			expect(actual).toEqual(expected);
 		});
 	}));
 

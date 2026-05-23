@@ -1255,6 +1255,7 @@ packages/htmlpack/packToString.js
 packages/htmlpack/packToWriter.test.js
 packages/htmlpack/packToWriter.js
 packages/htmlpack/utils/parseHtmlAsync.js
+packages/lib/ArrayUtils.test.js
 packages/lib/ArrayUtils.js
 packages/lib/AsyncActionQueue.test.js
 packages/lib/AsyncActionQueue.js
