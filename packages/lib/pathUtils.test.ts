@@ -1,4 +1,4 @@
-const { friendlySafeFilename } = require('./path-utils');
+import { friendlySafeFilename } from './path-utils';
 
 describe('pathUtils', () => {
 

@@ -1484,6 +1484,7 @@ packages/lib/onedrive-api.test.js
 packages/lib/onedrive-api.js
 packages/lib/parameters.js
 packages/lib/path-utils.js
+packages/lib/pathUtils.test.js
 packages/lib/randomClipperPort.js
 packages/lib/reducer.test.js
 packages/lib/reducer.js
