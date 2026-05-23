@@ -1,3 +1,4 @@
+<!-- cSpell:ignore SIGKILL -->
 # `.js` → `.ts` Migration Progress
 
 Tracks the effort to convert remaining JavaScript source files in the Joplin repo to TypeScript.
@@ -16,14 +17,14 @@ For each `.js` file to convert:
    - A published library type from the package's `.d.ts` in `node_modules/<pkg>/`.
    - A sibling file's existing interface — a parameter named `cmd`, `options`, etc. often has a typed counterpart nearby.
    - For Redux call sites, `State` from `@joplin/lib/reducer` and `Store<State>` from `redux`.
-   - For singleton-class globals (`app()` returning `Application`, etc.), the class may need to be `export`ed once and then importable. A one-line `export class X` change in the source file is a fair part of the conversion.
-   - For small fixed-variant record shapes (e.g. a link that's either `{ type: 'url', url }` or `{ type: 'item', id }`), a discriminated union is usually clearer than `Record<string, any>`.
+   - For singleton-class globals (e.g. `app()` returning `Application`), the class may need a one-line `export` added in its source file before it can be imported.
+   - For small fixed-variant records, a discriminated union beats `Record<string, any>`.
 
-   Only leave `any` — with an inline `// eslint-disable-next-line @typescript-eslint/no-explicit-any -- <reason>` *when ESLint actually fires* — when the right type genuinely isn't available (typically: callbacks from untyped third-party libraries, truly heterogeneous bags). An implicit `any` from `const X = require('untyped-pkg')` is fine and needs no disable.
+   Only fall back to `any` when the right type genuinely isn't available — typically callbacks from untyped third-party libraries or truly heterogeneous bags. Add `// eslint-disable-next-line @typescript-eslint/no-explicit-any -- <reason>` only when ESLint actually fires. An implicit `any` from `const X = require('untyped-pkg')` is fine and needs no disable.
 3. **Treat every `@typescript-eslint/no-explicit-any` disable as a candidate for one more look before committing** — sometimes the right type only becomes obvious after a second pass over the file, or after finishing related files in the same round. If a tightening genuinely doesn't fit in the conversion commit (e.g. it requires exporting a type from another file or coordinating across files), do it as its own small follow-up commit; the [`any` cleanup guide](any_cleanup_progress.md) covers the methodology for that kind of work.
 4. **Match the export style of nearby converted files.**
    - `packages/app-cli/app/command-*.ts` use `module.exports = Command;` (the dispatcher loads them via `require()` and calls `new CommandClass()` without `.default`).
-   - Other `packages/app-cli/app/**/*.ts` (widgets, helpers) use `export default …` and consumers add `.default` to their `require()` — see `FolderListWidget`/`StatusBarWidget`/`SyncTargetOneDrive` as in-tree precedents.
+   - Other `packages/app-cli/app/**/*.ts` (widgets, helpers) use `export default …` and consumers add `.default` to their `require()` — see `gui/FolderListWidget` and `gui/StatusBarWidget` as in-tree precedents.
    - `packages/lib/**/*.ts` files use `export default …` for single-class/function modules and named `export const …` for utilities.
    - **Never** convert `export const X = …` to `export default X` just to silence `import/prefer-default-export` when the file name and symbol name diverge — add a second meaningful export (often a `type`/`interface` the callers benefit from), or use `// eslint-disable-next-line import/prefer-default-export -- <reason>`.
 5. **Behavior-preserving casts where types are too narrow.** Apply a local `as` cast with a one-line comment and log the underlying signature mismatch somewhere for follow-up (the PR description, an issue, or a per-project review-later note) — fixing the upstream type is a correctness improvement out of scope for a mechanical conversion.
@@ -38,7 +39,6 @@ For each `.js` file to convert:
    - `yarn tsc --noEmit` to type-check; then `yarn tsc` to produce the compiled `.js`.
 8. **Update consumers when the export shape changes.** Named-export conversions usually need no caller updates (destructured `require()` continues to work). `module.exports = X` → `export default X` conversions require callers to add `.default`. Do these in the same commit.
 9. **Don't add explanatory comments unless really needed.** A typed parameter or cast usually speaks for itself. Only comment when the *why* would otherwise mislead a future change. Long block comments describing what the code does are unwelcome.
-<!-- cSpell:ignore SIGKILL -->
 10. **Pre-commit hook failures.** `git commit` may fail with `yarn linter-precommit failed to spawn: SIGKILL` — the SIGKILL message hides the real lint/spellcheck error above. Use `git commit ... 2>&1 | tail -40` to see it. Common blockers:
     - cSpell flags a non-word (test data, OAuth secrets, base64): add `// cSpell:ignore word1 word2` at the top of the file or wrap an offending block in `// cSpell:disable` / `// cSpell:enable`. For real technical words, extend `packages/tools/cspell/dictionary*.txt` per [readme/dev/spellcheck.md](spellcheck.md) instead.
     - `.gitignore`/`.eslintignore` out of date: re-run `yarn updateIgnored`.
@@ -77,8 +77,8 @@ For each `.js` file to convert:
 
 ## Workflow
 
-- **One PR per package.** Small packages first, to validate the workflow before tackling the large ones.
-- **One commit per converted file.** Type fixes the conversion surfaces but that aren't strictly part of the conversion (e.g. tightening `BaseCommand.description()` to return `string`) go in their own follow-up commit. Use the message form `Chore: Migrate <area> <Name> to TypeScript`.
+- **One PR per package.** Process small packages first to validate the workflow before tackling the large ones.
+- **One commit per converted file.** Related type fixes the conversion surfaces — e.g. tightening `BaseCommand.description()` to return `string` — go in their own follow-up commit. Use the message form `Chore: Migrate <area> <Name> to TypeScript`.
 - **Update this file as you go, not at the end.** Same rules as the `any` cleanup file — write per-file entries immediately to `./js_to_ts_progress_details.md`, update the **Status** table row after each package, and checkpoint every ~10 files in big packages so a context-loss costs at most one checkpoint.
 - **Commit the progress file alongside (or as part of) the package's PR.** When updating, also sync the PR body: `gh pr edit <PR-number> --body-file readme/dev/js_to_ts_progress.md`.
 - **If a session stops mid-package**, the per-file detail records exactly where to resume.
@@ -90,7 +90,7 @@ Same as the [`any` cleanup guide](any_cleanup_progress.md#context-exhaustion-con
 
 ## Status
 
-Counts captured against `dev` HEAD before any conversion work landed from this plan. Excludes the "Files to never touch" categories above. Numbers are approximate; re-verify at session start with:
+Counts captured against `upstream/dev` before any conversion work from this plan landed. Excludes the "Files to never touch" categories above. Numbers are approximate; re-verify at session start with:
 
 ```
 git ls-files packages/<name>/ | grep -E '\.js$' | grep -v -E '<the excludes>'
