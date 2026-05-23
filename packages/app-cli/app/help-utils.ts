@@ -1,5 +1,6 @@
 import { wrap } from '@joplin/lib/string-utils';
 import Setting, { AppType } from '@joplin/lib/models/Setting';
+import { SettingItem } from '@joplin/lib/models/settings/types';
 import { _ } from '@joplin/lib/locale';
 import BaseCommand from './base-command';
 
@@ -45,8 +46,7 @@ export const renderCommandHelp = (cmd: BaseCommand, width: number = null) => {
 	}
 
 	if (cmd.name() === 'config') {
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Setting metadata records are not strongly typed at the source; the optional fields used here (label, key, type, isEnum, value) are duck-typed at runtime
-		const renderMetadata = (md: any): TwoColumnRow => {
+		const renderMetadata = (md: SettingItem): TwoColumnRow => {
 			const desc: string[] = [];
 
 			if (md.label) {
