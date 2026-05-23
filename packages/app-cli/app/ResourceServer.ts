@@ -8,7 +8,7 @@ type LinkHandler = (resourceId: string, response: http.ServerResponse)=> Promise
 
 class ResourceServer {
 	private server_: http.Server | null;
-	private logger_: Logger | LoggerWrapper;
+	private logger_: LoggerWrapper;
 	private port_: number | null;
 	private linkHandler_: LinkHandler | null;
 	private started_: boolean;
@@ -21,7 +21,7 @@ class ResourceServer {
 		this.started_ = false;
 	}
 
-	public setLogger(logger: Logger | LoggerWrapper) {
+	public setLogger(logger: LoggerWrapper) {
 		this.logger_ = logger;
 	}
 
