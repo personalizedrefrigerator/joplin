@@ -132,6 +132,7 @@ packages/app-cli/app/gui/NoteListWidget.js
 packages/app-cli/app/gui/NoteMetadataWidget.js
 packages/app-cli/app/gui/NoteWidget.js
 packages/app-cli/app/gui/StatusBarWidget.js
+packages/app-cli/app/help-utils.js
 packages/app-cli/app/services/plugins/PluginRunner.js
 packages/app-cli/app/setupCommand.js
 packages/app-cli/app/utils/initializeCommandService.js
