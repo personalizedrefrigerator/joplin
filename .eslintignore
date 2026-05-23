@@ -133,6 +133,7 @@ packages/app-cli/app/command-rmbook.js
 packages/app-cli/app/command-rmnote.test.js
 packages/app-cli/app/command-rmnote.js
 packages/app-cli/app/command-search.js
+packages/app-cli/app/command-server.js
 packages/app-cli/app/command-set.js
 packages/app-cli/app/command-settingschema.js
 packages/app-cli/app/command-share.test.js
