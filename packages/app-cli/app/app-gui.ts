@@ -1,4 +1,4 @@
-import Logger from '@joplin/utils/Logger';
+import Logger, { LoggerWrapper } from '@joplin/utils/Logger';
 import Folder from '@joplin/lib/models/Folder';
 import BaseItem from '@joplin/lib/models/BaseItem';
 import Tag from '@joplin/lib/models/Tag';
@@ -14,8 +14,8 @@ import { _ } from '@joplin/lib/locale';
 import shim from '@joplin/lib/shim';
 import { AllHtmlEntities } from 'html-entities';
 import DecryptionWorker from '@joplin/lib/services/DecryptionWorker';
-import NoteWidget from './gui/NoteWidget';
 import { NoteEntity } from '@joplin/lib/services/database/types';
+import NoteWidget from './gui/NoteWidget';
 import ResourceServer from './ResourceServer';
 import NoteMetadataWidget from './gui/NoteMetadataWidget';
 import FolderListWidget from './gui/FolderListWidget';
@@ -59,7 +59,7 @@ class AppGui {
 	private tkWidgetKeys_: Record<string, string>;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Renderer from tkwidgets has no type definitions
 	private renderer_: any;
-	private logger_: Logger;
+	private logger_: LoggerWrapper;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- ReduxRootWidget from tkwidgets has no type definitions
 	private rootWidget_: any;
 	private keymap_: KeymapItem[];
@@ -429,7 +429,7 @@ class AppGui {
 		return this.app_;
 	}
 
-	public setLogger(l: Logger) {
+	public setLogger(l: LoggerWrapper) {
 		this.logger_ = l;
 	}
 

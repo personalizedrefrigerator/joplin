@@ -48,11 +48,8 @@ class NoteWidget extends TextWidget {
 			this.scrollTop = 0;
 		} else if (this.noteId_) {
 			this.doAsync('loadNote', async () => {
-				// noteId_ is `string | 0` for the initial-sentinel case; the
-				// surrounding `else if (this.noteId_)` proves it's truthy here
-				// but the async closure boundary loses TS's narrowing, so
-				// cast at each use to preserve the original behaviour of
-				// reading the current value at execution time.
+				// The outer `else if (this.noteId_)` proves noteId_ is a string,
+				// but the async-closure boundary loses TS's narrowing.
 				this.note_ = await Note.load(this.noteId_ as string);
 
 				if (this.note_ && this.note_.encryption_applied) {
