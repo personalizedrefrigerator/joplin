@@ -1291,6 +1291,7 @@ packages/lib/SyncTargetOneDrive.js
 packages/lib/SyncTargetRegistry.js
 packages/lib/SyncTargetWebDAV.js
 packages/lib/Synchronizer.js
+packages/lib/TaskQueue.test.js
 packages/lib/TaskQueue.js
 packages/lib/WebDavApi.js
 packages/lib/WelcomeUtils.test.js
