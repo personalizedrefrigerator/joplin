@@ -1,5 +1,5 @@
-
-const urlUtils = require('./urlUtils.js');
+// cSpell:ignore owmhbsat validprotocol
+import * as urlUtils from './urlUtils';
 
 describe('urlUtils', () => {
 
@@ -24,7 +24,7 @@ describe('urlUtils', () => {
 	}));
 
 	it('should detect resource URLs', (async () => {
-		const testCases = [
+		const testCases: [string, { itemId: string; hash: string } | null][] = [
 			[':/1234abcd1234abcd1234abcd1234abcd', { itemId: '1234abcd1234abcd1234abcd1234abcd', hash: '' }],
 			[':/1234abcd1234abcd1234abcd1234abcd "some text"', { itemId: '1234abcd1234abcd1234abcd1234abcd', hash: '' }],
 			[':/1234abcd1234abcd1234abcd1234abcd#hash', { itemId: '1234abcd1234abcd1234abcd1234abcd', hash: 'hash' }],
@@ -87,7 +87,7 @@ describe('urlUtils', () => {
 	});
 
 	it('should extract resource URLs', (async () => {
-		const testCases = [
+		const testCases: [string, string[]][] = [
 			['Bla [](:/11111111111111111111111111111111) bla [](:/22222222222222222222222222222222) bla', ['11111111111111111111111111111111', '22222222222222222222222222222222']],
 			['Bla [](:/11111111111111111111111111111111 "Some title") bla [](:/22222222222222222222222222222222 "something else") bla', ['11111111111111111111111111111111', '22222222222222222222222222222222']],
 			['Bla <img src=":/fcca2938a96a22570e8eae2565bc6b0b"/> bla [](:/22222222222222222222222222222222) bla', ['fcca2938a96a22570e8eae2565bc6b0b', '22222222222222222222222222222222']],
