@@ -1,4 +1,5 @@
-const mimeUtils = require('./mime-utils.js');
+// cSpell:ignore csvg cpath AAAANS
+import * as mimeUtils from './mime-utils';
 
 describe('mimeUtils', () => {
 
