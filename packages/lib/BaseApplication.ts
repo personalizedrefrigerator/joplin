@@ -33,7 +33,7 @@ import { EventEmitter } from 'events';
 const syswidecas = require('./vendor/syswide-cas');
 import SyncTargetRegistry from './SyncTargetRegistry';
 import SyncTargetFilesystem from './SyncTargetFilesystem';
-const SyncTargetNextcloud = require('./SyncTargetNextcloud.js');
+import SyncTargetNextcloud from './SyncTargetNextcloud';
 const SyncTargetWebDAV = require('./SyncTargetWebDAV.js');
 const SyncTargetDropbox = require('./SyncTargetDropbox.js');
 const SyncTargetAmazonS3 = require('./SyncTargetAmazonS3.js');

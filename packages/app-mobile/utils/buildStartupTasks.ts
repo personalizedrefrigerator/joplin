@@ -40,7 +40,7 @@ import SearchEngine from '@joplin/lib/services/search/SearchEngine';
 import WelcomeUtils from '@joplin/lib/WelcomeUtils';
 import SyncTargetRegistry from '@joplin/lib/SyncTargetRegistry';
 import SyncTargetFilesystem from '@joplin/lib/SyncTargetFilesystem';
-const SyncTargetNextcloud = require('@joplin/lib/SyncTargetNextcloud.js');
+import SyncTargetNextcloud from '@joplin/lib/SyncTargetNextcloud';
 const SyncTargetWebDAV = require('@joplin/lib/SyncTargetWebDAV.js');
 const SyncTargetDropbox = require('@joplin/lib/SyncTargetDropbox.js');
 const SyncTargetAmazonS3 = require('@joplin/lib/SyncTargetAmazonS3.js');

@@ -1307,6 +1307,7 @@ packages/lib/SyncTargetJoplinCloud.js
 packages/lib/SyncTargetJoplinServer.js
 packages/lib/SyncTargetJoplinServerSAML.js
 packages/lib/SyncTargetMemory.js
+packages/lib/SyncTargetNextcloud.js
 packages/lib/SyncTargetNone.js
 packages/lib/SyncTargetOneDrive.js
 packages/lib/SyncTargetRegistry.js

@@ -37,7 +37,7 @@ const { FileApiDriverOneDrive } = require('../file-api-driver-onedrive.js');
 import SyncTargetRegistry from '../SyncTargetRegistry';
 import SyncTargetMemory from '../SyncTargetMemory';
 import SyncTargetFilesystem from '../SyncTargetFilesystem';
-const SyncTargetNextcloud = require('../SyncTargetNextcloud.js');
+import SyncTargetNextcloud from '../SyncTargetNextcloud';
 const SyncTargetDropbox = require('../SyncTargetDropbox.js');
 const SyncTargetAmazonS3 = require('../SyncTargetAmazonS3.js');
 const SyncTargetWebDAV = require('../SyncTargetWebDAV.js');
