@@ -29,7 +29,7 @@ const ReduxRootWidget = require('tkwidgets/ReduxRootWidget.js');
 const WindowWidget = require('tkwidgets/WindowWidget.js');
 
 const NoteWidget = require('./gui/NoteWidget.js').default;
-const ResourceServer = require('./ResourceServer.js');
+const ResourceServer = require('./ResourceServer.js').default;
 const NoteMetadataWidget = require('./gui/NoteMetadataWidget.js').default;
 const FolderListWidget = require('./gui/FolderListWidget').default;
 const NoteListWidget = require('./gui/NoteListWidget.js').default;
