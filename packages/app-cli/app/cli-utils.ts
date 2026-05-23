@@ -237,14 +237,14 @@ cliUtils.promptConfirm = function(message: string, answers: string[] | null = nu
 cliUtils.prompt = function(_initialText = '', promptString = ':', options: PromptOptions | null = null): Promise<string> {
 	if (!options) options = {};
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- The Writable subclass we synthesise carries a `muted` flag that the base Writable type doesn't know about
-	const mutableStdout: any = new Writable({
-		write: function(chunk, encoding, callback) {
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any -- `this` is the Writable instance which we've augmented with a `muted` flag at runtime
-			if (!(this as any).muted) process.stdout.write(chunk, encoding);
+	type MutableStdout = Writable & { muted: boolean };
+
+	const mutableStdout = new Writable({
+		write: function(this: MutableStdout, chunk, encoding, callback) {
+			if (!this.muted) process.stdout.write(chunk, encoding);
 			callback();
 		},
-	});
+	}) as MutableStdout;
 
 	const rl = readline.createInterface({
 		input: process.stdin,
