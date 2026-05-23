@@ -439,7 +439,7 @@ class Application extends BaseApplication {
 			// Otherwise open the GUI
 			const keymap = await this.loadKeymaps();
 
-			const AppGui = require('./app-gui.js');
+			const AppGui = require('./app-gui.js').default;
 			this.gui_ = new AppGui(this, this.store(), keymap);
 			this.gui_.setLogger(this.logger());
 			await this.gui_.start();
