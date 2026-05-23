@@ -1801,6 +1801,7 @@ packages/lib/themes/solarizedDark.js
 packages/lib/themes/solarizedLight.js
 packages/lib/themes/type.js
 packages/lib/time.js
+packages/lib/timeUtils.test.js
 packages/lib/types.js
 packages/lib/urlUtils.test.js
 packages/lib/urlUtils.js
