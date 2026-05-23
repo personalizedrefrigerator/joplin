@@ -6,6 +6,13 @@
 function Build-WindowsApp {
 	param([string[]]$DistArgs = @())
 
+	# Force the postinstall build to run sequentially. Setting this here (rather
+	# than only on the workflow step) ensures it reaches every child process
+	# spawned by `yarn install` -> postinstall -> gulp on Windows, where parallel
+	# builds randomly crash with STATUS_STACK_BUFFER_OVERRUN (0xC0000409).
+	$env:BUILD_SEQUENCIAL = '1'
+	$env:IS_CONTINUOUS_INTEGRATION = '1'
+
 	$attempts = 3
 	for ($i = 1; $i -le $attempts; $i++) {
 		yarn install
