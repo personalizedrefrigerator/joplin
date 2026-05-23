@@ -30,7 +30,7 @@ const WindowWidget = require('tkwidgets/WindowWidget.js');
 
 const NoteWidget = require('./gui/NoteWidget.js');
 const ResourceServer = require('./ResourceServer.js');
-const NoteMetadataWidget = require('./gui/NoteMetadataWidget.js');
+const NoteMetadataWidget = require('./gui/NoteMetadataWidget.js').default;
 const FolderListWidget = require('./gui/FolderListWidget').default;
 const NoteListWidget = require('./gui/NoteListWidget.js');
 const StatusBarWidget = require('./gui/StatusBarWidget').default;
