@@ -11,8 +11,16 @@ Convert `.js` files under `packages/*` to `.ts` (or `.tsx` where JSX is present)
 For each `.js` file to convert:
 
 1. **Use `git mv`** to record the rename. Don't `cp`/`rm`.
-2. **Add types only where they're clear from context** — parameters, return types, class fields, `const X: T = …` when the literal gets reassigned to a wider type. Don't invent shapes that aren't already there. Leave `any` (with an inline `// eslint-disable-next-line @typescript-eslint/no-explicit-any -- <reason>` *only* when ESLint actually fires; an implicit `any` from `const X = require('untyped-pkg')` is fine and needs no disable).
-3. **Prefer existing types over hand-rolled ones.** Same rule as the [`any` cleanup guide](any_cleanup_progress.md): check the package's `.d.ts` first, then `@joplin/lib/services/database/types` for entity shapes (`NoteEntity`, `FolderEntity`, `TagEntity`, `ResourceEntity`, …).
+2. **Actively look for the right type before falling back to `any`.** For each parameter / return / field, try in this order:
+   - An entity type from `@joplin/lib/services/database/types` (`NoteEntity`, `FolderEntity`, `TagEntity`, `ResourceEntity`, …).
+   - A published library type from the package's `.d.ts` in `node_modules/<pkg>/`.
+   - A sibling file's existing interface — a parameter named `cmd`, `options`, etc. often has a typed counterpart nearby.
+   - For Redux call sites, `State` from `@joplin/lib/reducer` and `Store<State>` from `redux`.
+   - For singleton-class globals (`app()` returning `Application`, etc.), the class may need to be `export`ed once and then importable. A one-line `export class X` change in the source file is a fair part of the conversion.
+   - For small fixed-variant record shapes (e.g. a link that's either `{ type: 'url', url }` or `{ type: 'item', id }`), a discriminated union is usually clearer than `Record<string, any>`.
+
+   Only leave `any` — with an inline `// eslint-disable-next-line @typescript-eslint/no-explicit-any -- <reason>` *when ESLint actually fires* — when the right type genuinely isn't available (typically: callbacks from untyped third-party libraries, truly heterogeneous bags). An implicit `any` from `const X = require('untyped-pkg')` is fine and needs no disable.
+3. **Treat every `@typescript-eslint/no-explicit-any` disable as a candidate for one more look before committing** — sometimes the right type only becomes obvious after a second pass over the file, or after finishing related files in the same round. If a tightening genuinely doesn't fit in the conversion commit (e.g. it requires exporting a type from another file or coordinating across files), do it as its own small follow-up commit; the [`any` cleanup guide](any_cleanup_progress.md) covers the methodology for that kind of work.
 4. **Match the export style of nearby converted files.**
    - `packages/app-cli/app/command-*.ts` use `module.exports = Command;` (the dispatcher loads them via `require()` and calls `new CommandClass()` without `.default`).
    - Other `packages/app-cli/app/**/*.ts` (widgets, helpers) use `export default …` and consumers add `.default` to their `require()` — see `FolderListWidget`/`StatusBarWidget`/`SyncTargetOneDrive` as in-tree precedents.
