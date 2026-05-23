@@ -121,6 +121,7 @@ packages/app-cli/app/command-keymap.js
 packages/app-cli/app/command-ls.js
 packages/app-cli/app/command-mkbook.test.js
 packages/app-cli/app/command-mkbook.js
+packages/app-cli/app/command-mknote.js
 packages/app-cli/app/command-mv.js
 packages/app-cli/app/command-publish.test.js
 packages/app-cli/app/command-publish.js
