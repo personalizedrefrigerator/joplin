@@ -1440,6 +1440,7 @@ packages/lib/models/ItemChange.js
 packages/lib/models/MasterKey.test.js
 packages/lib/models/MasterKey.js
 packages/lib/models/Migration.js
+packages/lib/models/Note.customSortOrder.test.js
 packages/lib/models/Note.test.js
 packages/lib/models/Note.js
 packages/lib/models/NoteResource.js

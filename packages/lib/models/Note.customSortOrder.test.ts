@@ -1,9 +1,9 @@
-const time = require('../time').default;
-const { setupDatabaseAndSynchronizer, switchClient, msleep } = require('../testing/test-utils.js');
-const Folder = require('../models/Folder').default;
-const Note = require('../models/Note').default;
+import time from '../time';
+import { setupDatabaseAndSynchronizer, switchClient, msleep } from '../testing/test-utils';
+import Folder from '../models/Folder';
+import Note from '../models/Note';
 
-describe('models/Note_CustomSortOrder', () => {
+describe('models/Note.customSortOrder', () => {
 	beforeEach(async () => {
 		await setupDatabaseAndSynchronizer(1);
 		await switchClient(1);
@@ -41,7 +41,7 @@ describe('models/Note_CustomSortOrder', () => {
 		notes2.push(await Note.save({ parent_id: folder2.id })); await time.msleep(2);
 		notes2.push(await Note.save({ parent_id: folder2.id })); await time.msleep(2);
 
-		const originalTimestamps = {};
+		const originalTimestamps: Record<string, { user_created_time: number; user_updated_time: number }> = {};
 		for (const n of notes1) {
 			originalTimestamps[n.id] = {
 				user_created_time: n.user_created_time,
@@ -49,7 +49,7 @@ describe('models/Note_CustomSortOrder', () => {
 			};
 		}
 
-		await Note.insertNotesAt(folder1.id, notes2.map(n => n.id), 2);
+		await Note.insertNotesAt(folder1.id, notes2.map(n => n.id), 2, false, false);
 
 		const newNotes1 = [
 			await Note.load(notes1[0].id),
@@ -97,8 +97,8 @@ describe('models/Note_CustomSortOrder', () => {
 
 		await msleep(10);
 
-		await Note.insertNotesAt(folder1.id, [note2.id], 0);
-		await Note.insertNotesAt(folder1.id, [note1.id], 1);
+		await Note.insertNotesAt(folder1.id, [note2.id], 0, false, false);
+		await Note.insertNotesAt(folder1.id, [note1.id], 1, false, false);
 
 		const sortedNotes2 = await Note.previews(folder1.id, {
 			fields: ['id', 'title', 'updated_time', 'user_updated_time'],
@@ -130,7 +130,7 @@ describe('models/Note_CustomSortOrder', () => {
 		notes.push(await Note.save({ order: 1000, parent_id: folder1.id })); await time.msleep(2);
 		notes.push(await Note.save({ order: 1000, parent_id: folder1.id })); await time.msleep(2);
 
-		await Note.insertNotesAt(folder1.id, [notes[0].id], 1);
+		await Note.insertNotesAt(folder1.id, [notes[0].id], 1, false, false);
 
 		const sortedNotes = await Note.previews(folder1.id, {
 			order: Note.customOrderByColumns(),
@@ -152,7 +152,7 @@ describe('models/Note_CustomSortOrder', () => {
 		notes.push(await Note.save({ order: 1000, parent_id: folder1.id })); await time.msleep(2);
 		notes.push(await Note.save({ order: 1000, parent_id: folder1.id })); await time.msleep(2);
 
-		await Note.insertNotesAt(folder1.id, [notes[1].id], 4);
+		await Note.insertNotesAt(folder1.id, [notes[1].id], 4, false, false);
 
 		const sortedNotes = await Note.previews(folder1.id, {
 			fields: ['id', 'order', 'user_created_time'],
@@ -175,7 +175,7 @@ describe('models/Note_CustomSortOrder', () => {
 		notes.push(await Note.save({ order: 1000, parent_id: folder1.id })); await time.msleep(2);
 		notes.push(await Note.save({ order: 1000, parent_id: folder1.id })); await time.msleep(2);
 
-		await Note.insertNotesAt(folder1.id, [notes[2].id], 0);
+		await Note.insertNotesAt(folder1.id, [notes[2].id], 0, false, false);
 
 		const sortedNotes = await Note.previews(folder1.id, {
 			fields: ['id', 'order', 'user_created_time'],
@@ -198,7 +198,7 @@ describe('models/Note_CustomSortOrder', () => {
 		notes.push(await Note.save({ order: 1000, parent_id: folder1.id })); await time.msleep(2);
 		notes.push(await Note.save({ order: 1000, parent_id: folder1.id })); await time.msleep(2);
 
-		await Note.insertNotesAt(folder1.id, [notes[1].id, notes[3].id], 0);
+		await Note.insertNotesAt(folder1.id, [notes[1].id, notes[3].id], 0, false, false);
 
 		const sortedNotes = await Note.previews(folder1.id, {
 			fields: ['id', 'order', 'user_created_time'],
@@ -216,13 +216,13 @@ describe('models/Note_CustomSortOrder', () => {
 		const folder1 = await Folder.save({});
 
 		const notes = [];
-		notes.push(await Note.save({ order: 1006, parent_id: folder1.id, is_todo: true, todo_completed: time.unixMs() })); await time.msleep(2);
-		notes.push(await Note.save({ order: 1005, parent_id: folder1.id, is_todo: true })); await time.msleep(2);
+		notes.push(await Note.save({ order: 1006, parent_id: folder1.id, is_todo: 1, todo_completed: time.unixMs() })); await time.msleep(2);
+		notes.push(await Note.save({ order: 1005, parent_id: folder1.id, is_todo: 1 })); await time.msleep(2);
 		notes.push(await Note.save({ order: 1004, parent_id: folder1.id })); await time.msleep(2);
 		notes.push(await Note.save({ order: 1003, parent_id: folder1.id })); await time.msleep(2);
 		notes.push(await Note.save({ order: 1002, parent_id: folder1.id })); await time.msleep(2);
-		notes.push(await Note.save({ order: 1001, parent_id: folder1.id, is_todo: true })); await time.msleep(2);
-		notes.push(await Note.save({ order: 1000, parent_id: folder1.id, is_todo: true })); await time.msleep(2);
+		notes.push(await Note.save({ order: 1001, parent_id: folder1.id, is_todo: 1 })); await time.msleep(2);
+		notes.push(await Note.save({ order: 1000, parent_id: folder1.id, is_todo: 1 })); await time.msleep(2);
 
 		const sortNotes = async () => await Note.previews(folder1.id, {
 			fields: ['id', 'order', 'user_created_time', 'is_todo', 'todo_completed'],
