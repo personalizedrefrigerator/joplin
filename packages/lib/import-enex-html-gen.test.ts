@@ -1,11 +1,17 @@
-const { setupDatabaseAndSynchronizer, switchClient, supportDir } = require('./testing/test-utils.js');
-const shim = require('./shim').default;
-const { enexXmlToHtml } = require('./import-enex-html-gen.js');
+import { setupDatabaseAndSynchronizer, switchClient, supportDir } from './testing/test-utils';
+import shim from './shim';
+import { enexXmlToHtml } from './import-enex-html-gen';
+import { ResourceEntity } from './services/database/types';
 
-const fileWithPath = (filename) =>
+interface CompareOutputOptions {
+	testName: string;
+	resources?: ResourceEntity[];
+}
+
+const fileWithPath = (filename: string) =>
 	`${supportDir}/../enex_to_html/${filename}`;
 
-const audioResource = {
+const audioResource: ResourceEntity = {
 	filename: 'audio test',
 	id: '9168ee833d03c5ea7c730ac6673978c1',
 	mime: 'audio/x-m4a',
@@ -22,11 +28,8 @@ const audioResource = {
 // (e.g. `./enex_to_html/code1.enex`) correspond to the contents of a single
 // `<note>...</note>` node in an `.enex` file already extracted from
 // `<content><![CDATA[...]]</content>`.
-const compareOutputToExpected = (options) => {
-	options = {
-		resources: [],
-		...options,
-	};
+const compareOutputToExpected = (options: CompareOutputOptions) => {
+	const resources = options.resources ?? [];
 
 	const inputFile = fileWithPath(`${options.testName}.enex`);
 	const outputFile = fileWithPath(`${options.testName}.html`);
@@ -36,7 +39,7 @@ const compareOutputToExpected = (options) => {
 	it(testTitle, (async () => {
 		const enexInput = await shim.fsDriver().readFile(inputFile);
 		const expectedOutput = await shim.fsDriver().readFile(outputFile);
-		const actualOutput = (await enexXmlToHtml(enexInput, options.resources)).trim();
+		const actualOutput = (await enexXmlToHtml(enexInput, resources)).trim();
 		expect(actualOutput).toEqual(expectedOutput);
 	}));
 };
@@ -91,8 +94,8 @@ describe('EnexToHtml', () => {
 			filename: 'attachment-image',
 			id: 'e2d4887c5a32ab1686276c7c5ae733ef',
 			mime: 'image/jpeg', // Any non-image/non-audio mime type will do
-			width: '1.125in',
-		}],
+			width: '1.125in', // Not part of ResourceEntity; preserved as fixture data
+		} as ResourceEntity],
 	});
 
 	compareOutputToExpected({

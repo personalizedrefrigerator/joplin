@@ -1412,6 +1412,7 @@ packages/lib/hooks/useQueuedAsyncEffect.js
 packages/lib/htmlUtils.test.js
 packages/lib/htmlUtils.js
 packages/lib/htmlUtils2.test.js
+packages/lib/import-enex-html-gen.test.js
 packages/lib/import-enex-html-gen.js
 packages/lib/import-enex-md-gen.test.js
 packages/lib/import-enex-md-gen.js
