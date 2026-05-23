@@ -152,6 +152,7 @@ packages/app-cli/app/gui/ConsoleWidget.js
 packages/app-cli/app/gui/FolderListWidget.js
 packages/app-cli/app/gui/NoteListWidget.js
 packages/app-cli/app/gui/NoteMetadataWidget.js
+packages/app-cli/app/gui/NoteWidget.js
 packages/app-cli/app/gui/StatusBarWidget.js
 packages/app-cli/app/services/plugins/PluginRunner.js
 packages/app-cli/app/setupCommand.js
