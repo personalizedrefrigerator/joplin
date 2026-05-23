@@ -16,6 +16,7 @@ import { AllHtmlEntities } from 'html-entities';
 import DecryptionWorker from '@joplin/lib/services/DecryptionWorker';
 import { NoteEntity } from '@joplin/lib/services/database/types';
 import NoteWidget from './gui/NoteWidget';
+import LinkSelector from './LinkSelector';
 import ResourceServer from './ResourceServer';
 import NoteMetadataWidget from './gui/NoteMetadataWidget';
 import FolderListWidget from './gui/FolderListWidget';
@@ -37,8 +38,6 @@ const HLayoutWidget = require('tkwidgets/HLayoutWidget.js');
 const VLayoutWidget = require('tkwidgets/VLayoutWidget.js');
 const ReduxRootWidget = require('tkwidgets/ReduxRootWidget.js');
 const WindowWidget = require('tkwidgets/WindowWidget.js');
-
-const LinkSelector = require('./LinkSelector.js').default;
 
 // The keymap entries that the CLI dispatcher recognises. The shape is loose
 // because items can have command-type-specific extra fields (e.g. cursorPosition
@@ -66,8 +65,7 @@ class AppGui {
 	private commandCancelCalled_: boolean;
 	private currentShortcutKeys_: string[];
 	private lastShortcutKeyTime_: number;
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- LinkSelector is still .js and untyped
-	private linkSelector_: any;
+	private linkSelector_: LinkSelector;
 	private resourceServer_: ResourceServer;
 
 	public constructor(app: Application, store: Store<State>, keymap: KeymapItem[]) {
