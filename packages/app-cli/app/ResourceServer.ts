@@ -1,4 +1,4 @@
-import Logger from '@joplin/utils/Logger';
+import Logger, { LoggerWrapper } from '@joplin/utils/Logger';
 import { findAvailablePort } from '@joplin/lib/net-utils';
 import * as http from 'http';
 import * as urlParser from 'url';
@@ -8,7 +8,7 @@ type LinkHandler = (resourceId: string, response: http.ServerResponse)=> Promise
 
 class ResourceServer {
 	private server_: http.Server | null;
-	private logger_: Logger;
+	private logger_: Logger | LoggerWrapper;
 	private port_: number | null;
 	private linkHandler_: LinkHandler | null;
 	private started_: boolean;
@@ -21,7 +21,7 @@ class ResourceServer {
 		this.started_ = false;
 	}
 
-	public setLogger(logger: Logger) {
+	public setLogger(logger: Logger | LoggerWrapper) {
 		this.logger_ = logger;
 	}
 

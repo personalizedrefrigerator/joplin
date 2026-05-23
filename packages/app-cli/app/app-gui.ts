@@ -21,6 +21,7 @@ import FolderListWidget from './gui/FolderListWidget';
 import NoteListWidget from './gui/NoteListWidget';
 import StatusBarWidget from './gui/StatusBarWidget';
 import ConsoleWidget from './gui/ConsoleWidget';
+import type { Application } from './app';
 
 const htmlentities = new AllHtmlEntities().encode;
 
@@ -49,11 +50,8 @@ interface KeymapItem {
 	cursorPosition?: number;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- The Application class (app.ts) carries a wide surface (commands, store, gui, logger, sync) that the GUI invokes via duck-typing; tightening would require coordinated typing of the whole CLI entry point
-type App = any;
-
 class AppGui {
-	private app_: App;
+	private app_: Application;
 	private store_: Store<State>;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- TermWrapper from tkwidgets has no type definitions
 	private term_: any;
@@ -71,7 +69,7 @@ class AppGui {
 	private linkSelector_: any;
 	private resourceServer_: ResourceServer;
 
-	public constructor(app: App, store: Store<State>, keymap: KeymapItem[]) {
+	public constructor(app: Application, store: Store<State>, keymap: KeymapItem[]) {
 		try {
 			this.app_ = app;
 			this.store_ = store;
@@ -97,8 +95,8 @@ class AppGui {
 
 			this.renderer_ = new Renderer(this.term(), this.rootWidget_);
 
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any -- modelAction event shape comes from the untyped app
-			this.app_.on('modelAction', async (event: any) => {
+			this.app_.on('modelAction', async (...args: unknown[]) => {
+				const event = args[0] as { action: unknown };
 				await this.handleModelAction(event.action);
 			});
 
@@ -427,7 +425,7 @@ class AppGui {
 		return this.rootWidget_.childByName(name);
 	}
 
-	public app(): App {
+	public app(): Application {
 		return this.app_;
 	}
 

@@ -22,7 +22,7 @@ import initializeCommandService from './utils/initializeCommandService';
 const { cliUtils } = require('./cli-utils.js');
 const Cache = require('@joplin/lib/Cache');
 
-class Application extends BaseApplication {
+export class Application extends BaseApplication {
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Dynamic command loading system
 	private commands_: Record<string, any> = {};
