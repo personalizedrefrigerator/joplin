@@ -1,11 +1,11 @@
 // The Nextcloud sync target is essentially a wrapper over the WebDAV sync target,
 // thus all the calls to SyncTargetWebDAV to avoid duplicate code.
 
-import BaseSyncTarget from './BaseSyncTarget';
+import BaseSyncTarget, { CheckConfigResult } from './BaseSyncTarget';
 import { _ } from './locale';
 import Setting from './models/Setting';
 import Synchronizer from './Synchronizer';
-const SyncTargetWebDAV = require('./SyncTargetWebDAV');
+import SyncTargetWebDAV, { WebDavFileApiOptions } from './SyncTargetWebDAV';
 
 export default class SyncTargetNextcloud extends BaseSyncTarget {
 
@@ -37,8 +37,7 @@ export default class SyncTargetNextcloud extends BaseSyncTarget {
 		return true;
 	}
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	public static async checkConfig(options: any) {
+	public static override async checkConfig(options: WebDavFileApiOptions): Promise<CheckConfigResult> {
 		return SyncTargetWebDAV.checkConfig(options);
 	}
 
