@@ -15,6 +15,7 @@ import shim from '@joplin/lib/shim';
 import { AllHtmlEntities } from 'html-entities';
 import DecryptionWorker from '@joplin/lib/services/DecryptionWorker';
 import NoteWidget from './gui/NoteWidget';
+import { NoteEntity } from '@joplin/lib/services/database/types';
 import ResourceServer from './ResourceServer';
 import NoteMetadataWidget from './gui/NoteMetadataWidget';
 import FolderListWidget from './gui/FolderListWidget';
@@ -606,8 +607,7 @@ class AppGui {
 		this.widget('noteList').items = notes;
 	}
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- note can be a NoteEntity or null
-	public async updateNoteText(note: any) {
+	public async updateNoteText(note: NoteEntity | null) {
 		const text = note ? note.body : '';
 		this.widget('noteText').text = text;
 	}
@@ -671,8 +671,8 @@ class AppGui {
 		const linkStyle = chalk.blue.underline;
 		const noteTextWidget = this.widget('noteText');
 		const resourceIdRegex = /^:\/[a-f0-9]+$/i;
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- link objects are loosely shaped at runtime
-		const noteLinks: Record<string, any> = {};
+		type NoteLink = { type: 'url'; url: string } | { type: 'item'; id: string };
+		const noteLinks: Record<string, NoteLink> = {};
 
 		const hasProtocol = (s: string, protocols: string[]) => {
 			if (!s) return false;
