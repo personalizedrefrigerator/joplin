@@ -35,7 +35,7 @@ import SyncTargetRegistry from './SyncTargetRegistry';
 import SyncTargetFilesystem from './SyncTargetFilesystem';
 import SyncTargetNextcloud from './SyncTargetNextcloud';
 const SyncTargetWebDAV = require('./SyncTargetWebDAV.js');
-const SyncTargetDropbox = require('./SyncTargetDropbox.js');
+import SyncTargetDropbox from './SyncTargetDropbox';
 const SyncTargetAmazonS3 = require('./SyncTargetAmazonS3.js');
 import EncryptionService from './services/e2ee/EncryptionService';
 import ResourceFetcher from './services/ResourceFetcher';

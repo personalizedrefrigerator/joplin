@@ -38,7 +38,7 @@ import SyncTargetRegistry from '../SyncTargetRegistry';
 import SyncTargetMemory from '../SyncTargetMemory';
 import SyncTargetFilesystem from '../SyncTargetFilesystem';
 import SyncTargetNextcloud from '../SyncTargetNextcloud';
-const SyncTargetDropbox = require('../SyncTargetDropbox.js');
+import SyncTargetDropbox from '../SyncTargetDropbox';
 const SyncTargetAmazonS3 = require('../SyncTargetAmazonS3.js');
 const SyncTargetWebDAV = require('../SyncTargetWebDAV.js');
 import SyncTargetJoplinServer from '../SyncTargetJoplinServer';

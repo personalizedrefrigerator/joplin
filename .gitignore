@@ -1279,6 +1279,7 @@ packages/lib/PerformanceLogger.js
 packages/lib/PoorManIntervals.js
 packages/lib/RotatingLogs.test.js
 packages/lib/RotatingLogs.js
+packages/lib/SyncTargetDropbox.js
 packages/lib/SyncTargetFilesystem.js
 packages/lib/SyncTargetJoplinCloud.js
 packages/lib/SyncTargetJoplinServer.js
