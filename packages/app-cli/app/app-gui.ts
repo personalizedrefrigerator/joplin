@@ -20,7 +20,7 @@ import ResourceServer from './ResourceServer';
 import NoteMetadataWidget from './gui/NoteMetadataWidget';
 import FolderListWidget from './gui/FolderListWidget';
 import NoteListWidget from './gui/NoteListWidget';
-import StatusBarWidget from './gui/StatusBarWidget';
+import StatusBarWidget, { PromptOptions } from './gui/StatusBarWidget';
 import ConsoleWidget from './gui/ConsoleWidget';
 import type { Application } from './app';
 
@@ -144,8 +144,7 @@ class AppGui {
 		return this.term().restoreState(state);
 	}
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- StatusBarWidget.prompt accepts arbitrary option shapes
-	public prompt(initialText = '', promptString = ':', options: any = null) {
+	public prompt(initialText = '', promptString = ':', options: PromptOptions = null) {
 		return this.widget('statusBar').prompt(initialText, promptString, options);
 	}
 
@@ -851,8 +850,7 @@ class AppGui {
 					if (keymapItem.type === 'function') {
 						void this.processFunctionCommand(keymapItem.command);
 					} else if (keymapItem.type === 'prompt') {
-						// eslint-disable-next-line @typescript-eslint/no-explicit-any -- StatusBarWidget.prompt accepts arbitrary option shapes
-						const promptOptions: any = {};
+						const promptOptions: PromptOptions = {};
 						if ('cursorPosition' in keymapItem) promptOptions.cursorPosition = keymapItem.cursorPosition;
 						const commandString = await statusBar.prompt(keymapItem.command ? keymapItem.command : '', null, promptOptions);
 						this.addCommandToConsole(commandString);
