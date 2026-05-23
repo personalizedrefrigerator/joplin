@@ -40,7 +40,7 @@ import SyncTargetFilesystem from '../SyncTargetFilesystem';
 import SyncTargetNextcloud from '../SyncTargetNextcloud';
 import SyncTargetDropbox from '../SyncTargetDropbox';
 const SyncTargetAmazonS3 = require('../SyncTargetAmazonS3.js');
-const SyncTargetWebDAV = require('../SyncTargetWebDAV.js');
+import SyncTargetWebDAV from '../SyncTargetWebDAV';
 import SyncTargetJoplinServer from '../SyncTargetJoplinServer';
 import EncryptionService from '../services/e2ee/EncryptionService';
 import DecryptionWorker from '../services/DecryptionWorker';

@@ -34,7 +34,7 @@ const syswidecas = require('./vendor/syswide-cas');
 import SyncTargetRegistry from './SyncTargetRegistry';
 import SyncTargetFilesystem from './SyncTargetFilesystem';
 import SyncTargetNextcloud from './SyncTargetNextcloud';
-const SyncTargetWebDAV = require('./SyncTargetWebDAV.js');
+import SyncTargetWebDAV from './SyncTargetWebDAV';
 import SyncTargetDropbox from './SyncTargetDropbox';
 const SyncTargetAmazonS3 = require('./SyncTargetAmazonS3.js');
 import EncryptionService from './services/e2ee/EncryptionService';

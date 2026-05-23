@@ -41,7 +41,7 @@ import WelcomeUtils from '@joplin/lib/WelcomeUtils';
 import SyncTargetRegistry from '@joplin/lib/SyncTargetRegistry';
 import SyncTargetFilesystem from '@joplin/lib/SyncTargetFilesystem';
 import SyncTargetNextcloud from '@joplin/lib/SyncTargetNextcloud';
-const SyncTargetWebDAV = require('@joplin/lib/SyncTargetWebDAV.js');
+import SyncTargetWebDAV from '@joplin/lib/SyncTargetWebDAV';
 import SyncTargetDropbox from '@joplin/lib/SyncTargetDropbox';
 const SyncTargetAmazonS3 = require('@joplin/lib/SyncTargetAmazonS3.js');
 import SyncTargetJoplinServerSAML from '@joplin/lib/SyncTargetJoplinServerSAML';

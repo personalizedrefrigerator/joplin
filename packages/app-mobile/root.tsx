@@ -64,7 +64,7 @@ import { themeStyle } from './components/global-style';
 import SyncTargetRegistry from '@joplin/lib/SyncTargetRegistry';
 import SyncTargetFilesystem from '@joplin/lib/SyncTargetFilesystem';
 import SyncTargetNextcloud from '@joplin/lib/SyncTargetNextcloud';
-const SyncTargetWebDAV = require('@joplin/lib/SyncTargetWebDAV.js');
+import SyncTargetWebDAV from '@joplin/lib/SyncTargetWebDAV';
 import SyncTargetDropbox from '@joplin/lib/SyncTargetDropbox';
 const SyncTargetAmazonS3 = require('@joplin/lib/SyncTargetAmazonS3.js');
 import SyncTargetJoplinServerSAML from '@joplin/lib/SyncTargetJoplinServerSAML';
