@@ -25,12 +25,17 @@ export interface ApiShare {
 	folder_id: string;
 }
 
+export interface ApiTeamUsers {
+	items: { email: string }[];
+	has_more: boolean;
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-function formatShareInvitations(invitations: any[]): ShareInvitation[] {
+function formatShareInvitations(invitations: (Omit<ShareInvitation, 'master_key'> & { master_key: string | MasterKeyEntity | null })[]): ShareInvitation[] {
 	return invitations.map(inv => {
 		return {
 			...inv,
-			master_key: inv.master_key ? JSON.parse(inv.master_key) : null,
+			master_key: inv.master_key && typeof inv.master_key === 'string' ? JSON.parse(inv.master_key) : inv.master_key,
 		};
 	});
 }
@@ -39,8 +44,7 @@ export default class ShareService {
 
 	private static instance_: ShareService;
 	private api_: JoplinServerApi = null;
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	private store_: Store<any> = null;
+	private store_: Store<unknown> = null;
 	private encryptionService_: EncryptionService = null;
 	private initialized_ = false;
 
@@ -50,8 +54,7 @@ export default class ShareService {
 		return this.instance_;
 	}
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	public initialize(store: Store<any>, encryptionService: EncryptionService, api: JoplinServerApi = null) {
+	public initialize(store: Store<unknown>, encryptionService: EncryptionService, api: JoplinServerApi = null) {
 		this.initialized_ = true;
 		this.store_ = store;
 		this.encryptionService_ = encryptionService;
@@ -63,13 +66,12 @@ export default class ShareService {
 		return [9, 10, 11].includes(Setting.value('sync.target')); // Joplin Server, Joplin Cloud targets
 	}
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	private get store(): Store<any> {
+	private get store(): Store<unknown> {
 		return this.store_;
 	}
 
 	public get state(): State {
-		return this.store.getState()[stateRootKey] as State;
+		return (this.store.getState() as Record<string, unknown>)[stateRootKey] as State;
 	}
 
 	public get userId(): string {
@@ -403,6 +405,13 @@ export default class ShareService {
 
 	private async loadShareUsers(shareId: string) {
 		return this.api().exec('GET', `api/shares/${shareId}/users`);
+	}
+
+	// Team member email autocomplete when sharing a notebook (Joplin Cloud / Teams).
+	public async loadTeamUsers(teamId: string, userEmailSearch: string): Promise<ApiTeamUsers> {
+		return this.api().exec('GET', `api/teams/${encodeURIComponent(teamId)}/users`, {
+			user_email_search: userEmailSearch,
+		});
 	}
 
 	private async loadShareInvitations() {

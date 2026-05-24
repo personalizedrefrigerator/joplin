@@ -255,6 +255,7 @@ mtmd
 gguf
 armor
 clearsign
+CUDA
 ligne
 payant
 llamacpp
@@ -294,3 +295,8 @@ Errno
 keyof
 readdir
 keybinds
+unobserve
+querystring
+msgbox
+LASTEXITCODE
+segfaults
