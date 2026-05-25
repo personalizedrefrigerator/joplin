@@ -65,7 +65,7 @@ Counts captured 2026-05-25, before any work. `const X = require(...)` occurrence
 | 10 | tools | 49 | 29 | 20 | done (2026-05-25) |
 | 11 | app-cli | 49 | 18 | 31 | done (2026-05-25) |
 | 12 | app-mobile | 61 | 18 | 43 | done (2026-05-25) |
-| 13 | app-desktop | 131 |  |  | pending |
+| 13 | app-desktop | 131 | 33 | 98 | done (2026-05-25) |
 | 14 | lib | 195 |  |  | pending |
 | — | generator-joplin | 1 | — | — | excluded (template) |
 
@@ -288,3 +288,50 @@ Files skipped entirely:
 - time.ts — 2 deliberate `const X: typeof X = require(...)` workarounds for React Native bundler compatibility (already typed via paired `import type`).
 - ipc.ts — `tcp-port-used` has no types.
 - cli.ts — `readline/promises` is not in the installed `@types/node` (16.x); migrating would require a node-types upgrade.
+
+## packages/app-desktop
+Session date: 2026-05-25
+
+This package has the highest concentration of cascading type errors when imports are typed: typed `themeStyle` / `buildStyle` from `@joplin/lib/theme` propagates strict `CSSProperties` union types (`WhiteSpace`, `TextAlign`, `OverflowX`, etc.) into inline `style` objects in many screens; typed `connect` from `react-redux` rejects components whose base class is still untyped (similar to the `BaseScreenComponent` case in app-mobile); typed `styled-components` and `reselect.createSelector` produce broad downstream errors. To keep this commit mechanical, those four patterns were intentionally **not converted** here. Many other safe patterns were converted.
+
+Files processed:
+- ElectronAppWrapper.ts — 1 converted (`@joplin/lib/path-utils`); 3 left (`@joplin/lib/shim` typeof-workaround, `fs-extra` redundant with existing import, inline `electron-window-state`).
+- InteropServiceHelper.ts — 1 converted (`@joplin/lib/path-utils`).
+- commands/copyDevCommand.ts — 2 converted (`@electron/remote`, `electron.clipboard`).
+- gui/ClipperConfigScreen.tsx — 1 converted (`electron.clipboard`); `connect`, `themeStyle` left (see note above).
+- gui/ErrorBoundary.tsx — 1 converted (`electron.ipcRenderer`).
+- gui/MainScreen.tsx — 1 converted (`electron.ipcRenderer`).
+- gui/MenuBar.tsx — 1 converted (`electron.clipboard`).
+- gui/NoteEditor/NoteBody/CodeMirror/v5/CodeMirror.tsx — 1 converted (`electron.clipboard`).
+- gui/NoteEditor/NoteBody/TinyMCE/TinyMCE.tsx — 1 converted (`electron.clipboard`).
+- gui/NoteEditor/NoteEditor.tsx — 1 converted (`@joplin/lib/string-utils`); `themeStyle` left.
+- gui/NoteEditor/commands/pasteAsMarkdown.ts — 1 converted (`electron.clipboard`).
+- gui/NoteEditor/utils/clipboardUtils.ts — 1 converted (`electron.clipboard`).
+- gui/NoteEditor/utils/contextMenu.ts — 4 converted (`electron.clipboard`, `@joplin/lib/path-utils`, two `fs-extra`).
+- gui/NoteEditor/utils/index.ts — 1 converted (`@joplin/renderer` MarkupToHtml).
+- gui/NoteEditor/utils/resourceHandling.ts — 1 converted (`electron.clipboard`); `@joplin/renderer.utils` left (the `.utils` namespace access doesn't cleanly map to a named import).
+- gui/NoteEditor/utils/useNoteSearchBar.ts — 1 converted (`@joplin/lib/services/CommandService`, default).
+- gui/NoteListItem/utils/getNoteTitleHtml.ts — 1 converted (`@joplin/lib/string-utils`).
+- gui/NotePropertiesDialog.tsx — 1 converted (`electron.clipboard`).
+- gui/NoteRevisionViewer.tsx — 1 converted (`@joplin/lib/urlUtils`); `react-tooltip` reverted because the typed import isn't usable as a JSX component (typings expose only the module namespace); `connect` left.
+- gui/ResourceScreen.tsx — 1 converted (`pretty-bytes`); `connect`, `themeStyle` left.
+- gui/Root.tsx — 1 converted (`react-dom/client`); `connect, Provider`, `styled-components` `ThemeProvider`/`StyleSheetManager`/`createGlobalStyle` left.
+- gui/Root_UpgradeSyncTarget.tsx — 1 converted (`electron.ipcRenderer`).
+- gui/ShareNoteDialog.tsx — 1 converted (`electron.clipboard`).
+- gui/WindowCommandsAndDialogs/commands/deleteFolder.ts — 1 converted (`@joplin/lib/string-utils`).
+- gui/utils/NoteListUtils.ts — 1 converted (`electron.clipboard`).
+- main-html.ts — 2 converted (`pdfjs-dist`, `is-apple-silicon`); `@joplin/lib/shim-init-node.js` (lib's `module.exports = {}` issue) left.
+- plugins/GotoAnything.tsx — 1 converted (`electron.clipboard`); `connect` left.
+- services/plugins/PlatformImplementation.ts — 1 converted (`electron.clipboard, nativeImage`).
+- services/plugins/PluginRunner.ts — 1 converted (`electron.ipcRenderer`).
+
+Files skipped entirely / important categories left untouched:
+- All `react-redux connect` requires (15) — typed `connect` rejects components whose Props haven't been declared and/or extend untyped base classes. Worth a follow-up that types each component's `Props` interface.
+- All `styled-components` requires (9) — typed `styled` surfaces broad `IntrinsicAttributes` mismatches on existing `<Button type=... mr=... />` usage and breaks downstream files (e.g. SearchInput, Button.tsx). Out of scope.
+- All `@joplin/lib/theme` `themeStyle` / `buildStyle` requires (9) — typed `themeStyle` returns a strict `ThemeStyle` whose CSS-property values are union types; spreading `theme.textStyle` into inline `style={{ ... }}` then fails on `WhiteSpace` / `TextAlign` / `OverflowX`. Need to either narrow each inline style with `as const` / `CSSProperties` casts, or change the lib's types. Out of scope.
+- `reselect.createSelector` (in ExtensionBadge.tsx) — typed selector return propagates `CSSProperties` cascade into inline `style`. Out of scope.
+- `@joplin/lib/services/PluginManager` (3), `@joplin/lib/onedrive-api-node-utils.js` (1), `@joplin/lib/markJsUtils` (1), `@joplin/lib/countable/Countable` (1), `@joplin/lib/envFromArgs` (1), `@joplin/lib/components/shared/dropbox-login-shared` (1), `@joplin/lib/reserved-ids` (2), `./packageInfo.js` (5), `./services/electron-context-menu` (1), `./execCommand` (1), `./supportedLocales` (1) — JS-only sources.
+- `@joplin/lib/shim-init-node.js` (2) — same `module.exports = { ... }` issue described under packages/server.
+- `md5` (4), `debounce` (5), `color` (2), `styled-system` (3), `taboverride` (1), `source-map-support` (1), `react-toggle-button` (1), `formatcoords` (1), `gulp` (1), `@joplin/tools/*` (3) — no types installed.
+- `react` (2) — `const React = require('react')` is used in class components; typing surfaces missing `Props` declarations on the affected `React.Component` subclasses (TagItem, ClipperConfigScreen). Same kind of follow-up as the `connect` cluster.
+- Inline `require()` calls inside functions / arrow callbacks (bridge.ts, mockClipboard.ts, markdownEditor.spec.ts, ElectronAppWrapper.ts `electron-window-state`) — would require moving to top level.
