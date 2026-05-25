@@ -66,7 +66,7 @@ Counts captured 2026-05-25, before any work. `const X = require(...)` occurrence
 | 11 | app-cli | 49 | 18 | 31 | done (2026-05-25) |
 | 12 | app-mobile | 61 | 18 | 43 | done (2026-05-25) |
 | 13 | app-desktop | 131 | 33 | 98 | done (2026-05-25) |
-| 14 | lib | 195 |  |  | pending |
+| 14 | lib | 195 | 55 | 140 | done (2026-05-25) |
 | — | generator-joplin | 1 | — | — | excluded (template) |
 
 Total in-scope `require()` calls at start: **558** (counted across `*.ts`/`*.tsx`, excluding `**/node_modules/**`, `**/build/**` and `**/dist/**`).
@@ -335,3 +335,27 @@ Files skipped entirely / important categories left untouched:
 - `md5` (4), `debounce` (5), `color` (2), `styled-system` (3), `taboverride` (1), `source-map-support` (1), `react-toggle-button` (1), `formatcoords` (1), `gulp` (1), `@joplin/tools/*` (3) — no types installed.
 - `react` (2) — `const React = require('react')` is used in class components; typing surfaces missing `Props` declarations on the affected `React.Component` subclasses (TagItem, ClipperConfigScreen). Same kind of follow-up as the `connect` cluster.
 - Inline `require()` calls inside functions / arrow callbacks (bridge.ts, mockClipboard.ts, markdownEditor.spec.ts, ElectronAppWrapper.ts `electron-window-state`) — would require moving to top level.
+
+## packages/lib
+Session date: 2026-05-25
+
+Many conversions, but several modules surfaced latent type issues that need their own follow-up:
+
+Categories converted (across roughly 40 files):
+- Internal lib paths: `./path-utils`, `./string-utils`, `./urlUtils`, `./markdownUtils`, `./errorUtils`, `./locale` (when paired with a TS source).
+- Node built-ins: `path`, `os`, `url`, `events` (where it doesn't cascade), `https`, `http`, `crypto`, `buffer`, `zlib`, `timers`, `dgram`, `querystring` — namespace or destructured.
+- npm packages: `async-mutex` (incl. the `.Mutex` access pattern), `html-entities` (`.AllHtmlEntities`), `chokidar`, `fast-deep-equal`, `query-string`, `markdown-it`, `md5-file`, `string-to-stream`, `@joplin/renderer` (`MarkupToHtml`), `sqlite3`.
+
+Latent issues surfaced & reverted (worth follow-ups):
+- `moment` (used in `time.ts`, `services/interop/InteropService_Importer_Md_frontmatter.test.ts`): typed `moment()` rejects the `string | number | Date | { toDate(): Date }` union — `anythingToDateTime` / `anythingToMs` rely on narrowing `o` past `{ toDate(): Date }` via `'toDate' in o`, but TS doesn't propagate the narrowing into the `moment(o, format)` call. Worth either restructuring the narrowing or adding a cast.
+- `fs-extra` in `fs-driver-node.ts`: typed `fs.appendFile(path, content, { encoding })` and `fs.writeFile(path, content, { encoding })` don't accept `{ encoding: string }` — they expect `{ encoding: BufferEncoding }`. Real type drift between the variable-typed `encoding = 'base64'` parameter and `fs-extra`'s strictly-typed options.
+- `reselect.createSelectorCreator` / `defaultMemoize` and `re-reselect.createCachedSelector` (in `reducer.ts`, `services/commands/MenuUtils.ts`, `services/commands/ToolbarButtonUtils.ts`): typed `createCachedSelector` returns a different signature than the codebase assumes — `selectArrayShallow(props, cacheKey)` then errors with `Expected 1 arguments, but got 2`. Probably the reselect version was upgraded without updating call sites.
+- `events.EventEmitter` in `services/plugins/Plugin.ts`: typed `EventEmitter.on(event, fn)` rejects `Function`-typed callbacks. The class has `// eslint-disable-next-line @typescript-eslint/ban-types -- Old code before rule was applied` markers around the `Function`-typed callbacks; tightening them to `(...args: any[]) => void` (or specific event types) is a small change.
+- `@joplin/lib/string-utils` `formatCssSize` in `services/style/themeToCss.ts`: same latent issue as the desktop's `useThemeCss.ts` — `formatCssSize(value: string)` is called with `number`. Same fix would apply to both.
+
+Files skipped entirely (other reasons):
+- `@joplin/lib/shim-init-node` (multiple places) and JS-only sibling files (`./reserved-ids`, `./database-driver-node.js`, `./file-api.js`, `./file-api-driver-onedrive.js`, `./file-api-driver-webdav`, `./randomClipperPort`, `./import-enex-md-gen.js`, `./import-enex-html-gen.js`, `./resourceUtils.js`, `./SyncTarget*.js`, `./parameters.js`, `./vendor/*`, `./welcomeAssets`) — JS-only, no TS counterpart.
+- No-types npm packages: `sprintf-js` (14), `md5` (9), `url-parse` (3), `tcp-port-used` (2), `string-padding` (2), `@joplin/fork-sax` (2), `word-wrap`, `uglifycss`, `server-destroy`, `relative`, `node-notifier`, `multiparty`, `image-data-uri`, `hpagent`, `diff-match-patch`, `base64-stream`, `base-64`, `@joplin/turndown`, `@joplin/turndown-plugin-gfm`, `@aws-sdk/client-s3`, `@adobe/css-tools`, `better-sqlite3`, `sharp`, `color`, `@joplin/fork-uslug`.
+- Inline `require()` inside functions / `.default` accesses on JS-only modules (`shim-init-node.ts` has many of these inside `shimInit`).
+- `electron` requires inside `shim-init-node.ts` (lib used in node + electron; the `require('electron').nativeImage` calls inside conditional branches are deliberately late-loaded).
+- `EventDispatcher.test.ts` line 125: kept as `require(...).default` because the test specifically asserts that the `require + .default` pattern works.
