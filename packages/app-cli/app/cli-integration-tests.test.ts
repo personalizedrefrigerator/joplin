@@ -9,8 +9,8 @@ import Note from '@joplin/lib/models/Note';
 import Setting from '@joplin/lib/models/Setting';
 import { node } from 'execa';
 import { splitCommandString } from '@joplin/utils';
-const nodeSqlite = require('sqlite3');
-const { loadKeychainServiceAndSettings } = require('@joplin/lib/services/SettingUtils');
+import * as nodeSqlite from 'sqlite3';
+import { loadKeychainServiceAndSettings } from '@joplin/lib/services/SettingUtils';
 const { default: shimInitCli } = require('./utils/shimInitCli');
 
 const baseDir = `${dirname(__dirname)}/tests/cli-integration`;

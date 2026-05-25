@@ -63,7 +63,7 @@ Counts captured 2026-05-25, before any work. `const X = require(...)` occurrence
 | 8 | renderer | 23 | 7 | 16 | done (2026-05-25) |
 | 9 | server | 26 | 9 | 17 | done (2026-05-25) |
 | 10 | tools | 49 | 29 | 20 | done (2026-05-25) |
-| 11 | app-cli | 54 |  |  | pending |
+| 11 | app-cli | 49 | 16 | 33 | done (2026-05-25) |
 | 12 | app-mobile | 61 |  |  | pending |
 | 13 | app-desktop | 131 |  |  | pending |
 | 14 | lib | 195 |  |  | pending |
@@ -216,6 +216,32 @@ Files skipped entirely:
 - checkLibPaths.test.ts — inline `require('../lib/shim')` inside a function.
 - utils/translation.ts — `gettext-parser` (no types).
 - website/updateNews.ts — `rss` (no types).
+
+## packages/app-cli
+Session date: 2026-05-25
+
+Files processed:
+- tests/MdToHtml.ts — 2 converted (`@joplin/lib/path-utils`, `@joplin/lib/theme`).
+- tests/HtmlToMd.ts — 2 converted (`os`, `@joplin/lib/path-utils`).
+- app/command-version.ts — 2 converted (`@joplin/lib/locale`, `@joplin/lib/versionInfo` — dropped the `.default` since `import X from` resolves the default export).
+- app/command-settingschema.ts, command-testing.ts, command-mkbook.ts, command-e2ee.ts — 1 each converted (`./base-command` — TS file with `export default class BaseCommand`).
+- app/command-apidoc.ts — 1 converted (`@joplin/lib/string-utils.js` → `@joplin/lib/string-utils`).
+- app/cli-integration-tests.test.ts — 2 converted (`sqlite3`, `@joplin/lib/services/SettingUtils`); 3 left: `@joplin/lib/database-driver-node.js` (JS-only), `@joplin/lib/shim-init-node.js` (lib uses `module.exports = {}`), and `./utils/shimInitCli` — converting that triggers a latent interface mismatch (ShimInitOptions declares `sharp`, `React`, `electronBridge`, `pdfJs` as required, but the runtime defaults them to null, and the CLI never passes them; worth fixing the interface in a follow-up).
+- app/gui/StatusBarWidget.ts — 2 converted (`chalk`, `strip-ansi`); 3 left (`tkwidgets/BaseWidget.js`, `tkwidgets/framework/termutils.js` — no types, `../autocompletion.js` — JS).
+- app/LinkSelector.ts — 1 converted (`open`).
+
+Files skipped entirely (sibling command files use the CommonJS `module.exports = Command` pattern — converting requires changing the exported file too, which is out of scope):
+- app/command-unpublish.test.ts, command-publish.test.ts, command-done.test.ts, command-rmbook.test.ts, command-rmnote.test.ts, command-share.test.ts, command-mkbook.test.ts — `require('./command-X')` patterns.
+
+Files skipped entirely (other reasons):
+- app/command-sync.ts — `./base-command` is convertible, but typing surfaces a latent issue at line 65: `oauthDance`'s `log: (...s: string[])` callback does `this.stdout(...s)`, but `BaseCommand.stdout(text: string)` is single-arg, so the spread is rejected. Skipped here; worth a 1-line follow-up to change the callback to single-arg (the underlying lib only calls it with one string anyway). Other requires in the file (`@joplin/lib/onedrive-api-node-utils.js` JS-only, `./cli-utils.js` JS-only, `md5` no types) skipped too.
+- app/command-keymap.ts, command-ls.ts, command-help.ts, command-import.ts, app/app.ts — `./cli-utils.js` and `./help-utils.js` are JS-only.
+- app/app.ts — `@joplin/lib/Cache` is JS-only; line 164 `require(\`./${path}\`)` and line 442 `require('./app-gui.js')` are dynamic/JS.
+- app/services/plugins/PluginRunner.ts, tests/services/plugins/sandboxProxy.ts — `@joplin/lib/services/plugins/sandboxProxy` is JS-only.
+- app/utils/shimInitCli.ts — `@joplin/lib/shim-init-node.js` (same lib issue as elsewhere).
+- app/gui/FolderListWidget.ts — `tkwidgets/ListWidget.js` (no types).
+- app/command-edit.ts, command-e2ee.ts, command-ls.ts — inline `require()` calls inside functions, or untyped (`sprintf-js`, `md5`, `fs-extra` inline).
+- tests/services/plugins/PluginService.ts — dynamic `require(contentScript.path).default`.
 
 Files skipped entirely:
 - time.ts — 2 deliberate `const X: typeof X = require(...)` workarounds for React Native bundler compatibility (already typed via paired `import type`).
