@@ -1,4 +1,4 @@
-import * as execa from 'execa';
+import execa = require('execa');
 import commandToString from './commandToString';
 import splitCommandString from './splitCommandString';
 import { stdout } from 'process';
