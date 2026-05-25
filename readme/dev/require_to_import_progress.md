@@ -60,7 +60,7 @@ Counts captured 2026-05-25, before any work. `const X = require(...)` occurrence
 | 5 | plugin-repo-cli | 2 | 0 | 2 | done (2026-05-25) |
 | 6 | htmlpack | 3 | 3 | 0 | done (2026-05-25) |
 | 7 | utils | 9 | 4 | 5 | done (2026-05-25) |
-| 8 | renderer | 23 |  |  | pending |
+| 8 | renderer | 23 | 7 | 16 | done (2026-05-25) |
 | 9 | server | 27 |  |  | pending |
 | 10 | tools | 49 |  |  | pending |
 | 11 | app-cli | 54 |  |  | pending |
@@ -145,6 +145,26 @@ Session date: 2026-05-25
 Files processed:
 - Logger.ts — 2 converted (`moment`, `async-mutex`), 1 left (`sprintf-js` — no @types installed).
 - html.ts — 2 converted (`html-entities`, `@joplin/fork-htmlparser2`).
+
+## packages/renderer
+Session date: 2026-05-25
+
+Files processed:
+- htmlUtils.ts — 2 converted (`html-entities`, `@joplin/fork-htmlparser2`).
+- utils.ts — 1 converted (`html-entities`).
+- highlight.ts — 1 converted (`highlight.js/lib/core`).
+- MdToHtml.ts — 1 converted (`html-entities`); 4 left: `md5` (no types), `@joplin/fork-uslug` (types describe `{ default: fn }` but `index.js` unwraps `.default`, so types are misaligned with runtime), `markdown-it-anchor` (no types), `./defaultNoteStyle` (JS, no `.d.ts`).
+- MdToHtml/renderMedia.ts — 1 converted (`html-entities`).
+- MdToHtml/linkReplacement.ts — 1 converted (`html-entities`); 2 left: `../urlUtils.js` (JS, no `.d.ts`), `font-awesome-filetypes` (no types).
+
+Files skipped entirely:
+- MarkupToHtml.ts — `markdown-it` is paired with `import type * as MarkdownItType` (deliberate workaround for mobile bundling, per the convention this plan skips).
+- HtmlToHtml.ts — `md5` (no types).
+- MdToHtml/rules/katex.ts — `md5`, `json-stringify-safe` (no types); `./katex_mhchem.js` (JS, no `.d.ts`).
+- MdToHtml/rules/highlight_keywords.ts — `md5` (no types); `../../stringUtils.js` (JS).
+- MdToHtml/rules/sanitize_html.ts — `md5` (no types).
+- MdToHtml/rules/link_open.ts — `../../urlUtils.js` (JS).
+- MdToHtml/rules/fountain.ts — `../../vendor/fountain.min.js` (vendor JS).
 
 Files skipped entirely:
 - time.ts — 2 deliberate `const X: typeof X = require(...)` workarounds for React Native bundler compatibility (already typed via paired `import type`).
