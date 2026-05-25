@@ -304,12 +304,12 @@ export const getFeatureIdsByPlan = (planName: PlanName, featureOn: boolean): Fea
 	return output;
 };
 
-interface FeatureAction {
+export interface FeatureAction {
 	label: string;
 	actionId: string;
 }
 
-interface FeatureRow {
+export interface FeatureRow {
 	label: string;
 	actions: FeatureAction[];
 }
