@@ -26,7 +26,7 @@ For each `const X = require('...')`:
 4. **Don't install new `@types/*` packages or upgrade dependencies** as part of this migration. The aim is to surface existing types, not expand the dependency graph.
 5. **Don't make whitespace-only changes** to surrounding code (per `CLAUDE.md`).
 6. **Don't add explanatory comments** unless the *why* is non-obvious (e.g. "needs `import *` because the package uses `module.exports = ...`").
-7. After each package, run `yarn tsc --noEmit` from the package directory and `yarn linter <touched files>` from the repo root. The pre-commit hook handles `yarn spellcheck`.
+7. After each package, run `yarn tsc --noEmit` from the package directory to verify nothing broke. The pre-commit hook handles linting and spellcheck.
 
 ## Files to never touch
 
