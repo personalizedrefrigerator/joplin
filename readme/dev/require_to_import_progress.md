@@ -64,7 +64,7 @@ Counts captured 2026-05-25, before any work. `const X = require(...)` occurrence
 | 9 | server | 26 | 9 | 17 | done (2026-05-25) |
 | 10 | tools | 49 | 29 | 20 | done (2026-05-25) |
 | 11 | app-cli | 49 | 18 | 31 | done (2026-05-25) |
-| 12 | app-mobile | 61 |  |  | pending |
+| 12 | app-mobile | 61 | 16 | 45 | done (2026-05-25) |
 | 13 | app-desktop | 131 |  |  | pending |
 | 14 | lib | 195 |  |  | pending |
 | — | generator-joplin | 1 | — | — | excluded (template) |
@@ -242,6 +242,47 @@ Files skipped entirely (other reasons):
 - app/gui/FolderListWidget.ts — `tkwidgets/ListWidget.js` (no types).
 - app/command-edit.ts, command-e2ee.ts, command-ls.ts — inline `require()` calls inside functions, or untyped (`sprintf-js`, `md5`, `fs-extra` inline).
 - tests/services/plugins/PluginService.ts — dynamic `require(contentScript.path).default`.
+
+## packages/app-mobile
+Session date: 2026-05-25
+
+Files processed:
+- PluginAssetsLoader.ts — 1 converted (`@joplin/lib/path-utils`).
+- commands/util/showResource.ts — 1 converted (`react-native-file-viewer`, default import).
+- components/NoteList.tsx — 1 converted (`@joplin/lib/locale`).
+- components/NoteBodyViewer/hooks/useOnResourceLongPress.ts — 1 converted (`@joplin/lib/locale`, dropped `.js` extension).
+- components/SelectDateTimeDialog.tsx — 1 converted (`react-native-modal-datetime-picker`, default).
+- components/side-menu-content.tsx — 1 converted (`@joplin/lib/string-utils`).
+- components/screens/JoplinCloudLoginScreen.tsx — 2 converted (`react-redux`, `@joplin/lib/locale`).
+- components/screens/Note/Note.tsx — 1 converted (`@react-native-clipboard/clipboard`, default).
+- components/screens/UpgradeSyncTargetScreen.tsx — 1 converted (`react-redux`).
+- root.tsx — 1 converted (`react-redux`); several `require()`s left for internal mobile `.js` modules (`./components/app-nav.js`, `./components/screens/onedrive-login.js`) and the `@joplin/lib/SyncTarget*.js` family — TS counterparts either don't exist or coexist with `.js` build artifacts in ways Metro currently relies on.
+- services/AlarmServiceDriver.ios.ts — 1 converted (`@react-native-community/push-notification-ios`, default, merged with existing `import type`).
+- utils/TlsUtils.ts, utils/setupNotifications.ts — 1 each converted (`react-native` named imports).
+- utils/buildStartupTasks.ts — 1 converted (`react-native-version-info`, default); other requires left (SyncTarget JS-only, `AlarmServiceDriver` platform extensions kept as `require` to avoid platform-resolution complications during this mechanical pass).
+- utils/fs-driver/fs-driver-rn.ts — 1 converted (`rn-fetch-blob`, default); `md5` left (no types).
+
+Files skipped entirely (latent issues surfaced; reverted for now, worth a follow-up):
+- services/e2ee/RSA.react-native.ts — typed `react-native-rsa-native` returns `KeyPair`, but the file casts it to a local `LegacyRsaKeyPair` interface with a missing `keySizeBits` property. Real interface drift; needs deciding whether the local interface should adapt or the cast is now wrong.
+- utils/database-driver-react-native.web.ts — `@sqlite.org/sqlite-wasm` typings only export `init` (default); the runtime exposes `sqlite3Worker1Promiser` as a named property. Typed import fails — the `.d.ts` is incomplete vs the JS. Could be fixed with a local `declare module` augmentation, but that's beyond a mechanical pass.
+- components/screens/dropbox-login.tsx — typed `connect` from `react-redux` rejects `DropboxLoginScreenComponent` because `BaseScreenComponent` is still `require()`'d (untyped) and so the class isn't seen as a real `React.Component`. Will resolve naturally once `base-screen` is typed-imported, which currently coexists with a `.js` build artifact (similar concern to other mobile files).
+
+Files skipped entirely (other reasons):
+- utils/initReact.ts — `require('react')` is deliberate (comment explains the timing constraint with `shim.setReact`).
+- utils/shim-init-react/index.web.ts — `: typeof ShimType = require()` is the deliberate paired-with-`import type` workaround pattern.
+- utils/shim-init-react/index.ts — inline `require('react-native-version-info')` and JS-only `geolocation-react.js`.
+- root.tsx — `react-native-dropdownalert` (no types); see "Files processed" note for the internal mobile `.js` requires.
+- components/global-style.ts — `color` (no types).
+- components/ProfileSwitcher/ProfileEditor.tsx — `react-native-paper` is required as `const { TextInput } = require(...)` but the package has no types.
+- components/screens/Notes/Notes.tsx, components/screens/Note/Note.tsx (line 85) — `@joplin/lib/reserved-ids` is JS-only.
+- contentScripts/markdownEditorBundle/useWebViewSetup.ts — `@joplin/lib/resourceUtils` is JS-only.
+- contentScripts/richTextEditorBundle/contentScript/convertHtmlToMarkdown.ts — `@joplin/turndown`, `@joplin/turndown-plugin-gfm` (no types).
+- services/voiceTyping/VoiceTyping.ts, fs-driver/fs-driver-rn.web.worker.ts, services/voiceTyping/whisper.test.ts — `md5` / `@joplin/whisper-voice-typing` no types.
+- services/AlarmServiceDriver.android.ts — `@joplin/react-native-alarm-notification` (no types).
+- utils/database-driver-react-native.ts — `react-native-sqlite-storage` (no types).
+- utils/getPackageInfo.ts — `../packageInfo.js` (JS-only).
+- components/plugins/backgroundPage/pluginRunnerBackgroundPage.ts — `path` and `punycode` (mobile-specific bundling; `punycode/` has no types).
+- gulpfile.ts, web/webpack.config.ts — build-time files (`gulp`, `@joplin/tools/*`, `@pmmmwh/react-refresh-webpack-plugin`, `../babel.config` are untyped or build-only).
 
 Files skipped entirely:
 - time.ts — 2 deliberate `const X: typeof X = require(...)` workarounds for React Native bundler compatibility (already typed via paired `import type`).
