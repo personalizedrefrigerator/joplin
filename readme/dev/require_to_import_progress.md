@@ -43,7 +43,7 @@ For each `const X = require('...')`:
   - For large packages (`lib`, `app-desktop`, `app-mobile`), checkpoint the row every ~20 files.
 - When resuming, re-read this file first and compare entries against the live state with:
   ```bash
-  grep -rn --include="*.ts" --include="*.tsx" -E "^\s*const\s+[^=]+=\s*require\(" packages/<name>/
+  grep -rn --include="*.ts" --include="*.tsx" -E "^\s*const\s+[^=]+=\s*require\(" packages/[name here]/
   ```
   Trust the file, not memory.
 
