@@ -63,7 +63,7 @@ Counts captured 2026-05-25, before any work. `const X = require(...)` occurrence
 | 8 | renderer | 23 | 7 | 16 | done (2026-05-25) |
 | 9 | server | 26 | 9 | 17 | done (2026-05-25) |
 | 10 | tools | 49 | 29 | 20 | done (2026-05-25) |
-| 11 | app-cli | 49 | 16 | 33 | done (2026-05-25) |
+| 11 | app-cli | 49 | 17 | 32 | done (2026-05-25) |
 | 12 | app-mobile | 61 |  |  | pending |
 | 13 | app-desktop | 131 |  |  | pending |
 | 14 | lib | 195 |  |  | pending |
@@ -234,7 +234,7 @@ Files skipped entirely (sibling command files use the CommonJS `module.exports =
 - app/command-unpublish.test.ts, command-publish.test.ts, command-done.test.ts, command-rmbook.test.ts, command-rmnote.test.ts, command-share.test.ts, command-mkbook.test.ts — `require('./command-X')` patterns.
 
 Files skipped entirely (other reasons):
-- app/command-sync.ts — `./base-command` is convertible, but typing surfaces a latent issue at line 65: `oauthDance`'s `log: (...s: string[])` callback does `this.stdout(...s)`, but `BaseCommand.stdout(text: string)` is single-arg, so the spread is rejected. Skipped here; worth a 1-line follow-up to change the callback to single-arg (the underlying lib only calls it with one string anyway). Other requires in the file (`@joplin/lib/onedrive-api-node-utils.js` JS-only, `./cli-utils.js` JS-only, `md5` no types) skipped too.
+- app/command-sync.ts — 1 converted (`./base-command`); the typed `BaseCommand` surfaced a latent issue at line 65 (a variadic `log: (...s: string[])` callback spread-passed to single-arg `stdout`); fixed in the follow-up by narrowing the callback to single-arg. Other requires in the file (`@joplin/lib/onedrive-api-node-utils.js` JS-only, `./cli-utils.js` JS-only, `md5` no types) left.
 - app/command-keymap.ts, command-ls.ts, command-help.ts, command-import.ts, app/app.ts — `./cli-utils.js` and `./help-utils.js` are JS-only.
 - app/app.ts — `@joplin/lib/Cache` is JS-only; line 164 `require(\`./${path}\`)` and line 442 `require('./app-gui.js')` are dynamic/JS.
 - app/services/plugins/PluginRunner.ts, tests/services/plugins/sandboxProxy.ts — `@joplin/lib/services/plugins/sandboxProxy` is JS-only.
