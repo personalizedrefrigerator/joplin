@@ -61,7 +61,7 @@ Counts captured 2026-05-25, before any work. `const X = require(...)` occurrence
 | 6 | htmlpack | 3 | 3 | 0 | done (2026-05-25) |
 | 7 | utils | 9 | 4 | 5 | done (2026-05-25) |
 | 8 | renderer | 23 | 7 | 16 | done (2026-05-25) |
-| 9 | server | 27 |  |  | pending |
+| 9 | server | 26 | 9 | 17 | done (2026-05-25) |
 | 10 | tools | 49 |  |  | pending |
 | 11 | app-cli | 54 |  |  | pending |
 | 12 | app-mobile | 61 |  |  | pending |
@@ -69,7 +69,7 @@ Counts captured 2026-05-25, before any work. `const X = require(...)` occurrence
 | 14 | lib | 195 |  |  | pending |
 | — | generator-joplin | 1 | — | — | excluded (template) |
 
-Total in-scope `require()` calls at start: **559** (counted across `*.ts`/`*.tsx`, excluding `**/node_modules/**` and `**/build/**`).
+Total in-scope `require()` calls at start: **558** (counted across `*.ts`/`*.tsx`, excluding `**/node_modules/**`, `**/build/**` and `**/dist/**`).
 
 ## Recommended order
 
@@ -165,6 +165,28 @@ Files skipped entirely:
 - MdToHtml/rules/sanitize_html.ts — `md5` (no types).
 - MdToHtml/rules/link_open.ts — `../../urlUtils.js` (JS).
 - MdToHtml/rules/fountain.ts — `../../vendor/fountain.min.js` (vendor JS).
+
+## packages/server
+Session date: 2026-05-25
+
+Files processed:
+- app.ts — 1 converted (`sqlite3`); 2 left: `@koa/cors` (no types), `@joplin/lib/shim-init-node.js` (lib's `.ts` source uses `module.exports = { ... }` rather than ES `export`, so a typed `import {}` fails — would require modifying lib to convert).
+- utils/htmlUtils.ts — 1 converted (`html-entities`).
+- utils/bytes.ts — 1 converted (`pretty-bytes`, via `import X = require()` because the package uses `export =`).
+- utils/joplinUtils.ts — 1 converted (`@joplin/lib/string-utils`); 1 left (`@joplin/lib/database-driver-node.js` — JS only, no `.d.ts`).
+- utils/testing/populateDatabase.ts — 1 converted (`sqlite3`); 1 left (`shim-init-node`, same reason as app.ts).
+- utils/routeUtils.ts — 1 converted (`@joplin/lib/path-utils`).
+- utils/testing/testRouters.ts — 2 converted (`query-string`, `child_process.spawn`); 1 left (inline `require('child_process').exec` inside a function — would require refactoring to top-level).
+- routes/admin/emails.ts — 1 converted (`@joplin/lib/string-utils`).
+
+Files skipped entirely:
+- config.ts — `require(`${__dirname}/packageInfo.js`)` uses a template-literal path; the line is also already typed via `: PackageJson`.
+- utils/crypto.ts, models/UserModel.ts, routes/index/mfa.ts — `thirty-two` (no types).
+- utils/prettycron.ts — `dayjs` and its plugins (`advancedFormat`, `calendar`) are convertible, but this is a vendored file (see its header comment) so kept untouched; converting also surfaces a pre-existing `noImplicitReturns` issue at line 153. `later` has no types.
+- utils/stripe.ts — `stripe` has types, but the existing call site uses `stripeLib(secretKey)` as a function; the typed `Stripe` is a class requiring `new Stripe(secretKey, config)`. Converting would force a logic/signature change.
+- services/TaskService.ts — `node-cron` (no types).
+- routes/admin/tasks.ts — `prettycron` (no types).
+- tools/generateTypes.ts — inline `require('fs')` inside a function (would require refactoring to top-level).
 
 Files skipped entirely:
 - time.ts — 2 deliberate `const X: typeof X = require(...)` workarounds for React Native bundler compatibility (already typed via paired `import type`).
