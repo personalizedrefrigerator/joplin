@@ -194,6 +194,15 @@ const features = (): Record<FeatureId, PlanFeature> => {
 		// 	pro: false,
 		// 	teams: false,
 		// },
+		webApp: {
+			title: _('Joplin Web App'),
+			description: _('Access your notes from any web browser at %s.', 'https://app.joplincloud.com'),
+			basic: true,
+			pro: true,
+			pro100Gb: true,
+			teams: true,
+			joplinServerBusiness: false,
+		},
 		collaborate: {
 			title: _('Collaborate on a notebook with others'),
 			description: _('This allows another user to share a notebook with you, and you can then both collaborate on it. It does not however allow you to share a notebook with someone else, unless you have the feature "%s".', shareNotebookTitle),
@@ -409,7 +418,11 @@ export const createFeatureTableMd = () => {
 
 	const rows: MarkdownTableRow[] = [];
 
-	const getCellInfo = (planName: PlanName, feature: PlanFeature) => {
+	const getCellInfo = (planName: PlanName, featureId: string, feature: PlanFeature) => {
+		if (planName === PlanName.JoplinServerBusiness) {
+			if (['maxItemSize', 'maxStorage'].includes(featureId)) return '∞';
+		}
+
 		if (!feature[planName]) return '-';
 		const key = `${planName}InfoShort` as keyof PlanFeature;
 		const infoShort = feature[key];
@@ -431,12 +444,12 @@ export const createFeatureTableMd = () => {
 	for (const [id, feature] of Object.entries(features())) {
 		const row: MarkdownTableRow = {
 			featureLabel: makeFeatureLabel(id, feature),
-			basic: getCellInfo(PlanName.Basic, feature),
-			pro: getCellInfo(PlanName.Pro, feature),
+			basic: getCellInfo(PlanName.Basic, id, feature),
+			pro: getCellInfo(PlanName.Pro, id, feature),
 			// TODO: Enable when supported by Joplin Cloud
 			// pro100Gb: getCellInfo(PlanName.Pro100Gb, feature),
-			teams: getCellInfo(PlanName.Teams, feature),
-			joplinServerBusiness: getCellInfo(PlanName.JoplinServerBusiness, feature),
+			teams: getCellInfo(PlanName.Teams, id, feature),
+			joplinServerBusiness: getCellInfo(PlanName.JoplinServerBusiness, id, feature),
 		};
 
 		rows.push(row);
@@ -545,9 +558,11 @@ export function getPlans(stripeConfig: StripePublicConfig): Record<PlanName, Pla
 			featured: false,
 			iconName: 'business-icon',
 			featuresOn: getFeatureIdsByPlan(PlanName.JoplinServerBusiness, true),
-			featuresOff: getFeatureIdsByPlan(PlanName.JoplinServerBusiness, false),
+			// JSB has its own separate page and the features that are "missing" (eg. the web app)
+			// are not relevant.
+			featuresOff: [],
 			featureLabelsOn: getFeatureLabelsByPlan(PlanName.JoplinServerBusiness, true),
-			featureLabelsOff: getFeatureLabelsByPlan(PlanName.JoplinServerBusiness, false),
+			featureLabelsOff: [],
 			cfaLabel: _('Get a quote'),
 			cfaUrl: 'https://tally.so/r/D4BlOE',
 			footnote: '',

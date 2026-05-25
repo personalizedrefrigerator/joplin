@@ -765,4 +765,15 @@ export default class PluginService extends BaseService {
 		await this.runner_.waitForSandboxCalls();
 	}
 
+	// Test-only: resets the singleton's transient state between tests that share the
+	// same PluginService instance. Without this, a late callback from an in-flight
+	// install in the previous test can re-populate `plugins_` and dispatch into the
+	// new test's components, triggering "already exists" errors and "not wrapped in
+	// act(...)" warnings.
+	public resetForTesting() {
+		this.plugins_ = {};
+		this.startedPlugins_ = {};
+		this.pluginsChangeListeners_ = [];
+	}
+
 }
