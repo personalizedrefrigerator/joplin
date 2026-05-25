@@ -3,7 +3,7 @@ import { copyFile, pathExists, readdir, readFile, writeFile } from 'fs-extra';
 import { dirname } from 'path';
 import { execCommand } from './tool-utils';
 import md5File = require('md5-file');
-const sharp = require('sharp');
+import sharp = require('sharp');
 
 interface Source {
 	id: number;
@@ -679,7 +679,7 @@ async function main() {
 				throw new Error(`Unsupported extension: ${destExt}`);
 			}
 
-			s = s.toFile(destPath);
+			await s.toFile(destPath);
 		} else {
 			await copyFile(sourcePath, destPath);
 		}

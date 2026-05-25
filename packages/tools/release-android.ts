@@ -3,7 +3,7 @@ import { copy, mkdirp, move, readFile, readFileSync, remove, stat, writeFile, wr
 import { execCommandVerbose, execCommandWithPipes, githubRelease, githubOauthToken, fileExists, gitPullTry, completeReleaseWithChangelog } from './tool-utils';
 import { homedir } from 'os';
 import * as path from 'path';
-const fetch = require('node-fetch');
+import fetch from 'node-fetch';
 import * as uriTemplate from 'uri-template';
 
 const rootDir = path.dirname(path.dirname(__dirname));
@@ -227,7 +227,7 @@ const uploadToGitHubRelease = async (projectName: string, tagName: string, isPre
 			headers: {
 				'Content-Type': 'application/vnd.android.package-archive',
 				'Authorization': `token ${oauthToken}`,
-				'Content-Length': binaryBody.length,
+				'Content-Length': String(binaryBody.length),
 			},
 		});
 

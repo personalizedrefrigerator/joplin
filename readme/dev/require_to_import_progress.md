@@ -62,7 +62,7 @@ Counts captured 2026-05-25, before any work. `const X = require(...)` occurrence
 | 7 | utils | 9 | 4 | 5 | done (2026-05-25) |
 | 8 | renderer | 23 | 7 | 16 | done (2026-05-25) |
 | 9 | server | 26 | 9 | 17 | done (2026-05-25) |
-| 10 | tools | 49 | 27 | 22 | done (2026-05-25) |
+| 10 | tools | 49 | 29 | 20 | done (2026-05-25) |
 | 11 | app-cli | 54 |  |  | pending |
 | 12 | app-mobile | 61 |  |  | pending |
 | 13 | app-desktop | 131 |  |  | pending |
@@ -194,10 +194,10 @@ Session date: 2026-05-25
 Files processed:
 - release-clipper.ts — 1 converted (`md5-file`).
 - generate-database-types.ts — 2 converted (`@rmp135/sql-ts` merged with existing named import; `fs-extra`).
-- generate-images.ts — 1 converted (`md5-file`); 1 reverted: `sharp` (typed import surfaces a pre-existing latent type bug at line 682 — `s = s.toFile(destPath)` assigns a `Promise<OutputInfo>` to a `Sharp` variable; the `toFile()` should be awaited and the assignment dropped. Worth a follow-up).
+- generate-images.ts — 2 converted (`md5-file`, `sharp`). The typed `sharp` import surfaced a latent issue at line 682 where `s = s.toFile(destPath)` assigned a `Promise<OutputInfo>` to a `Sharp` variable, which fixed in the same follow-up: replaced with `await s.toFile(destPath)`.
 - build-release-stats.ts — 1 converted (`yargs-parser`).
 - update-readme-contributors.ts — 1 converted (`./tool-utils.js` merged into the existing `import { rootDir }`); 1 left (`request`, no types).
-- release-android.ts — 2 converted (`path`, `uri-template`); 1 reverted: `node-fetch` (typed import surfaces a pre-existing latent issue at line 230 — `'Content-Length': binaryBody.length` is a `number` but `HeadersInit` expects a `string`; the runtime coerces. Worth a follow-up).
+- release-android.ts — 3 converted (`path`, `uri-template`, `node-fetch`). The typed `node-fetch` import surfaced a latent issue at line 230 where `'Content-Length': binaryBody.length` (a `number`) didn't match `HeadersInit`'s `string` requirement; fixed in the same follow-up by wrapping in `String(...)`.
 - website/utils/news.ts — 1 converted (`moment`).
 - update-readme-sponsors.ts — 1 converted (`@joplin/lib/string-utils`).
 - website/build.ts — 3 converted (`glob`, `path`, `md5-file`).
