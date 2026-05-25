@@ -447,7 +447,7 @@ export const createFeatureTableMd = () => {
 			basic: getCellInfo(PlanName.Basic, id, feature),
 			pro: getCellInfo(PlanName.Pro, id, feature),
 			// TODO: Enable when supported by Joplin Cloud
-			// pro100Gb: getCellInfo(PlanName.Pro100Gb, feature),
+			// pro100Gb: getCellInfo(PlanName.Pro100Gb, id, feature),
 			teams: getCellInfo(PlanName.Teams, id, feature),
 			joplinServerBusiness: getCellInfo(PlanName.JoplinServerBusiness, id, feature),
 		};
