@@ -53,25 +53,37 @@ Counts captured 2026-05-25, before any work. `const X = require(...)` occurrence
 
 | # | Package | Requires (start) | Converted | Remaining | Status |
 |---|---|---:|---:|---:|---|
-| 1 | pdf-viewer | 1 |  |  | pending |
-| 2 | fork-sax | 1 |  |  | pending |
-| 3 | fork-uslug | 1 |  |  | pending |
-| 4 | default-plugins | 1 |  |  | pending |
-| 5 | plugin-repo-cli | 2 |  |  | pending |
-| 6 | htmlpack | 3 |  |  | pending |
-| 7 | editor | 4 |  |  | pending |
-| 8 | doc-builder | 5 |  |  | pending |
-| 9 | utils | 9 | 4 | 5 | in progress (2026-05-25) |
-| 10 | renderer | 23 |  |  | pending |
-| 11 | server | 27 |  |  | pending |
-| 12 | app-cli | 54 |  |  | pending |
-| 13 | tools | 54 |  |  | pending |
-| 14 | app-mobile | 61 |  |  | pending |
-| 15 | app-desktop | 131 |  |  | pending |
-| 16 | lib | 195 |  |  | pending |
+| 1 | pdf-viewer | 1 | 0 | 1 | done (2026-05-25) |
+| 2 | fork-uslug | 1 | 0 | 1 | done (2026-05-25) |
+| 3 | default-plugins | 1 | 1 | 0 | done (2026-05-25) |
+| 4 | editor | 2 | 0 | 2 | done (2026-05-25) |
+| 5 | plugin-repo-cli | 2 | 0 | 2 | done (2026-05-25) |
+| 6 | htmlpack | 3 | 3 | 0 | done (2026-05-25) |
+| 7 | utils | 9 | 4 | 5 | done (2026-05-25) |
+| 8 | renderer | 23 |  |  | pending |
+| 9 | server | 27 |  |  | pending |
+| 10 | tools | 49 |  |  | pending |
+| 11 | app-cli | 54 |  |  | pending |
+| 12 | app-mobile | 61 |  |  | pending |
+| 13 | app-desktop | 131 |  |  | pending |
+| 14 | lib | 195 |  |  | pending |
 | — | generator-joplin | 1 | — | — | excluded (template) |
 
-Total in-scope `require()` calls at start: **572**.
+Total in-scope `require()` calls at start: **559** (counted across `*.ts`/`*.tsx`, excluding `**/node_modules/**` and `**/build/**`).
+
+## Recommended order
+
+Smallest first so the workflow stabilises before the large ones:
+
+1. Warm-up: pdf-viewer, fork-uslug, default-plugins, editor, plugin-repo-cli, htmlpack (~10 requires total)
+2. utils (9)
+3. renderer (23)
+4. server (27)
+5. tools (49)
+6. app-cli (54)
+7. app-mobile (61)
+8. app-desktop (131)
+9. lib (195) — biggest; do last so prior packages inform the work
 
 ## Per-package detail
 
@@ -87,6 +99,45 @@ Files processed:
 Files skipped entirely:
 - path/to/file.ts — reason
 ```
+
+## packages/pdf-viewer
+Session date: 2026-05-25
+
+Files skipped entirely:
+- main.tsx — `react-dom/client` has types and tsc passes the conversion, but the package's build scripts are all disabled (`tsc: ""`, `build: ""`) and the bundling pipeline that produces the `vendor/lib/@joplin/pdf-viewer/` artifact isn't traceable from this repo. The author explicitly chose `require()` to fix a React 18 warning (commit 58da15432). Leave alone until the bundling path is understood.
+
+## packages/fork-uslug
+Session date: 2026-05-25
+
+Files skipped entirely:
+- lib/uslug.ts — `node-emoji` has no types installed.
+
+## packages/default-plugins
+Session date: 2026-05-25
+
+Files processed:
+- build.ts — 1 converted (`yargs` → `import * as yargs from 'yargs'`).
+
+## packages/editor
+Session date: 2026-05-25
+
+Files skipped entirely:
+- CodeMirror/utils/formatting/RegionSpec.ts — imports from `@joplin/lib/string-utils-common`, which is a deliberate `.js` file (no `.d.ts`) per the comment at the top of that file.
+- CodeMirror/CodeMirror5Emulation/CodeMirror5Emulation.ts — same as above.
+
+## packages/plugin-repo-cli
+Session date: 2026-05-25
+
+Files skipped entirely:
+- commands/updateRelease.ts — `node-fetch` is `require(...).default` with an explicit comment linking the known node-fetch issue; `gh-release-assets` has no types installed.
+
+## packages/htmlpack
+Session date: 2026-05-25
+
+Files processed:
+- packToWriter.ts — 1 converted (`html-entities`).
+- index.ts — 1 converted (`datauri/sync` — uses `import X = require(...)` because the package uses `export = X`).
+- utils/parseHtmlAsync.ts — 1 converted (`@joplin/fork-htmlparser2`).
 
 ## packages/utils
 Session date: 2026-05-25
