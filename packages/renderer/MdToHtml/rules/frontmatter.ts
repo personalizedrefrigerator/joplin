@@ -1,5 +1,5 @@
-import type * as MarkdownIt from 'markdown-it';
-import type * as StateBlock from 'markdown-it/lib/rules_block/state_block';
+import type MarkdownIt = require('markdown-it');
+import type StateBlock = require('markdown-it/lib/rules_block/state_block');
 import hljs from '../../highlight';
 
 // Regex to match the FrontMatter delimiter (--- at start of line, optionally with trailing whitespace)
