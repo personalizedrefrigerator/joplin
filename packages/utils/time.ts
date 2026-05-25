@@ -3,15 +3,18 @@
 // added here, and should be based on dayjs (not moment)
 // -----------------------------------------------------------------------------------------------
 
-import type * as dayjsImport from 'dayjs';
-import * as dayJsUtc from 'dayjs/plugin/utc';
-// A require() is needed here for this to work in React Native.
-const dayjs: typeof dayjsImport = require('dayjs');
+import type dayjsImport = require('dayjs');
+// Separating type imports and a runtime `require()` seems to be necessary to support mobile:
+// - `import * as` causes a runtime error and (under `esModuleInterop: true`) types
+//   the imported value as `{ default: ... }`, breaking the calls below.
+// - runtime `import = require` is believed not to work when bundling on mobile, hence
+//   the `const x = require()` form below. TODO: verify whether `import = require` still
+//   breaks the React Native bundler now that the codebase targets newer tooling.
+import type dayJsUtcType = require('dayjs/plugin/utc');
+import type dayJsRelativeTimeType = require('dayjs/plugin/relativeTime');
 
-// Separating this into a type import and a require seems to be necessary to support mobile:
-// - import = require syntax doesn't work when bundling
-// - import * as dayJsRelativeTimeType causes a runtime error.
-import type * as dayJsRelativeTimeType from 'dayjs/plugin/relativeTime';
+const dayjs: typeof dayjsImport = require('dayjs');
+const dayJsUtc: typeof dayJsUtcType = require('dayjs/plugin/utc');
 const dayJsRelativeTime: typeof dayJsRelativeTimeType = require('dayjs/plugin/relativeTime');
 
 const supportedLocales: Record<string, unknown> = {
