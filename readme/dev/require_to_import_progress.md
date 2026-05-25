@@ -62,7 +62,7 @@ Counts captured 2026-05-25, before any work. `const X = require(...)` occurrence
 | 7 | utils | 9 | 4 | 5 | done (2026-05-25) |
 | 8 | renderer | 23 | 7 | 16 | done (2026-05-25) |
 | 9 | server | 26 | 9 | 17 | done (2026-05-25) |
-| 10 | tools | 49 |  |  | pending |
+| 10 | tools | 49 | 27 | 22 | done (2026-05-25) |
 | 11 | app-cli | 54 |  |  | pending |
 | 12 | app-mobile | 61 |  |  | pending |
 | 13 | app-desktop | 131 |  |  | pending |
@@ -187,6 +187,35 @@ Files skipped entirely:
 - services/TaskService.ts — `node-cron` (no types).
 - routes/admin/tasks.ts — `prettycron` (no types).
 - tools/generateTypes.ts — inline `require('fs')` inside a function (would require refactoring to top-level).
+
+## packages/tools
+Session date: 2026-05-25
+
+Files processed:
+- release-clipper.ts — 1 converted (`md5-file`).
+- generate-database-types.ts — 2 converted (`@rmp135/sql-ts` merged with existing named import; `fs-extra`).
+- generate-images.ts — 1 converted (`md5-file`); 1 reverted: `sharp` (typed import surfaces a pre-existing latent type bug at line 682 — `s = s.toFile(destPath)` assigns a `Promise<OutputInfo>` to a `Sharp` variable; the `toFile()` should be awaited and the assignment dropped. Worth a follow-up).
+- build-release-stats.ts — 1 converted (`yargs-parser`).
+- update-readme-contributors.ts — 1 converted (`./tool-utils.js` merged into the existing `import { rootDir }`); 1 left (`request`, no types).
+- release-android.ts — 2 converted (`path`, `uri-template`); 1 reverted: `node-fetch` (typed import surfaces a pre-existing latent issue at line 230 — `'Content-Length': binaryBody.length` is a `number` but `HeadersInit` expects a `string`; the runtime coerces. Worth a follow-up).
+- website/utils/news.ts — 1 converted (`moment`).
+- update-readme-sponsors.ts — 1 converted (`@joplin/lib/string-utils`).
+- website/build.ts — 3 converted (`glob`, `path`, `md5-file`).
+- tool-utils.ts — 3 converted at top level (`node-fetch`, `execa`, `moment`); 7 inline `require()` calls left inside functions (`child_process.exec`/`.spawn`, `path`, `https`, `crypto`, `fs`, `readline`) — converting needs moving to module top, which is a small refactor.
+- fuzzer/model/FolderRecord.test.ts — 1 converted (`sqlite3`); 1 left (`@joplin/lib/shim-init-node`, same `module.exports = { ... }` issue as in server).
+- website/processDocs.ts — 4 converted (`md5-file`, `@joplin/fork-htmlparser2`, `style-to-js` — drop `.default` since `export = X` is callable, `crypto`).
+- website/utils/applyTranslations.ts — 2 converted (`html-entities`, `@joplin/fork-htmlparser2`).
+- website/utils/frontMatter.ts, website/utils/frontMatter.test.ts — 1 each (`moment`).
+- website/utils/openGraph.ts — 1 converted (`@joplin/lib/string-utils`).
+- website/buildTranslations.ts — 1 converted (`gettext-extractor`).
+
+Files skipped entirely:
+- 6 inline `const argv = require('yargs').argv;` calls inside `main`-style async functions (postPreReleasesToForum.ts, tagServerLatest.ts, build-translation.ts, git-changelog.ts, release-android.ts, website/updateNews.ts) — would require a top-level import and a refactor to keep semantics; skipped per the inline-require policy.
+- fuzzer/cli.ts — `@joplin/lib/shim-init-node` (same as above).
+- convertThemesToCss.ts — `require(`${baseThemeDir}/${themeFile}`)` is a dynamic template-literal path.
+- checkLibPaths.test.ts — inline `require('../lib/shim')` inside a function.
+- utils/translation.ts — `gettext-parser` (no types).
+- website/updateNews.ts — `rss` (no types).
 
 Files skipped entirely:
 - time.ts — 2 deliberate `const X: typeof X = require(...)` workarounds for React Native bundler compatibility (already typed via paired `import type`).

@@ -2,9 +2,9 @@ import { execCommand } from '@joplin/utils';
 import { copy, mkdirp, move, readFile, readFileSync, remove, stat, writeFile, writeFileSync } from 'fs-extra';
 import { execCommandVerbose, execCommandWithPipes, githubRelease, githubOauthToken, fileExists, gitPullTry, completeReleaseWithChangelog } from './tool-utils';
 import { homedir } from 'os';
-const path = require('path');
+import * as path from 'path';
 const fetch = require('node-fetch');
-const uriTemplate = require('uri-template');
+import * as uriTemplate from 'uri-template';
 
 const rootDir = path.dirname(path.dirname(__dirname));
 const rnDir = `${rootDir}/packages/app-mobile`;
