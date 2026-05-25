@@ -63,7 +63,7 @@ Counts captured 2026-05-25, before any work. `const X = require(...)` occurrence
 | 8 | renderer | 23 | 7 | 16 | done (2026-05-25) |
 | 9 | server | 26 | 9 | 17 | done (2026-05-25) |
 | 10 | tools | 49 | 29 | 20 | done (2026-05-25) |
-| 11 | app-cli | 49 | 17 | 32 | done (2026-05-25) |
+| 11 | app-cli | 49 | 18 | 31 | done (2026-05-25) |
 | 12 | app-mobile | 61 |  |  | pending |
 | 13 | app-desktop | 131 |  |  | pending |
 | 14 | lib | 195 |  |  | pending |
@@ -226,7 +226,7 @@ Files processed:
 - app/command-version.ts — 2 converted (`@joplin/lib/locale`, `@joplin/lib/versionInfo` — dropped the `.default` since `import X from` resolves the default export).
 - app/command-settingschema.ts, command-testing.ts, command-mkbook.ts, command-e2ee.ts — 1 each converted (`./base-command` — TS file with `export default class BaseCommand`).
 - app/command-apidoc.ts — 1 converted (`@joplin/lib/string-utils.js` → `@joplin/lib/string-utils`).
-- app/cli-integration-tests.test.ts — 2 converted (`sqlite3`, `@joplin/lib/services/SettingUtils`); 3 left: `@joplin/lib/database-driver-node.js` (JS-only), `@joplin/lib/shim-init-node.js` (lib uses `module.exports = {}`), and `./utils/shimInitCli` — converting that triggers a latent interface mismatch (ShimInitOptions declares `sharp`, `React`, `electronBridge`, `pdfJs` as required, but the runtime defaults them to null, and the CLI never passes them; worth fixing the interface in a follow-up).
+- app/cli-integration-tests.test.ts — 3 converted (`sqlite3`, `@joplin/lib/services/SettingUtils`, `./utils/shimInitCli`); 2 left: `@joplin/lib/database-driver-node.js` (JS-only), `@joplin/lib/shim-init-node.js` (lib uses `module.exports = {}`). The typed `shimInitCli` surfaced a latent interface mismatch (`ShimInitOptions` declares `sharp`, `React`, `electronBridge`, `pdfJs` as required, runtime defaults them to null); fixed in a follow-up by passing them as `null` explicitly.
 - app/gui/StatusBarWidget.ts — 2 converted (`chalk`, `strip-ansi`); 3 left (`tkwidgets/BaseWidget.js`, `tkwidgets/framework/termutils.js` — no types, `../autocompletion.js` — JS).
 - app/LinkSelector.ts — 1 converted (`open`).
 
