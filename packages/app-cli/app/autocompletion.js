@@ -91,7 +91,7 @@ async function handleAutocompletionPromise(line) {
 		if (argName === 'item') {
 			const notes = currentFolder ? await Note.previews(currentFolder.id, { titlePattern: `${next}*` }) : [];
 			const folders = await Folder.search({ titlePattern: `${next}*` });
-			l.push(...notes.map(n => n.title), folders.map(n => n.title));
+			l.push(...notes.map(n => n.title), ...folders.map(n => n.title));
 		}
 
 		if (argName === 'tag') {
