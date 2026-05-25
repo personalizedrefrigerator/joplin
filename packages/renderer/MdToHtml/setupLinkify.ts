@@ -1,4 +1,4 @@
-import type * as MarkdownIt from 'markdown-it';
+import type MarkdownIt = require('markdown-it');
 import type LinkifyIt = require('linkify-it');
 
 export default function(markdownIt: MarkdownIt) {

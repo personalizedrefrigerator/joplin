@@ -1,4 +1,4 @@
-import type * as MarkdownIt from 'markdown-it';
+import type MarkdownIt = require('markdown-it');
 import type StateCore = require('markdown-it/lib/rules_core/state_core');
 
 export default function(markdownIt: MarkdownIt) {
