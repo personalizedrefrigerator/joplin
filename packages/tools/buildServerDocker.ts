@@ -1,5 +1,5 @@
 import { rootDir } from './tool-utils';
-import * as moment from 'moment';
+import moment = require('moment');
 import { execCommand } from '@joplin/utils';
 
 interface Argv {

@@ -1,6 +1,6 @@
 import * as yaml from 'js-yaml';
 
-import * as moment from 'moment';
+import moment = require('moment');
 
 export interface FrontMatter {
 	created?: Date;
