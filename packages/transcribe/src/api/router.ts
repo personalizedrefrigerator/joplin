@@ -1,4 +1,4 @@
-import * as Koa from 'koa';
+import Koa = require('koa');
 import Logger from '@joplin/utils/Logger';
 import authorizationGuard from './auth/authorizationGuard';
 import createJob from './handler/createJob';

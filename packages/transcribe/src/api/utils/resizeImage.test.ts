@@ -1,6 +1,6 @@
 import { copy, exists, remove } from 'fs-extra';
 import resizeImageAndDeleteInput from './resizeImageAndDeleteInput';
-import * as sharp from 'sharp';
+import sharp = require('sharp');
 
 describe('resizeImage', () => {
 

@@ -1,6 +1,6 @@
 import { LoggerWrapper } from '@joplin/utils/Logger';
 import { StripePublicConfig } from '@joplin/lib/utils/joplinCloud';
-import * as Koa from 'koa';
+import Koa = require('koa');
 import { User, Uuid } from '../services/database/types';
 import { Models } from '../models/factory';
 import { Account } from '../models/UserModel';
