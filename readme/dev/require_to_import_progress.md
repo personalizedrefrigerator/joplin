@@ -64,7 +64,7 @@ Counts captured 2026-05-25, before any work. `const X = require(...)` occurrence
 | 9 | server | 26 | 9 | 17 | done (2026-05-25) |
 | 10 | tools | 49 | 29 | 20 | done (2026-05-25) |
 | 11 | app-cli | 49 | 18 | 31 | done (2026-05-25) |
-| 12 | app-mobile | 61 | 16 | 45 | done (2026-05-25) |
+| 12 | app-mobile | 61 | 18 | 43 | done (2026-05-25) |
 | 13 | app-desktop | 131 |  |  | pending |
 | 14 | lib | 195 |  |  | pending |
 | — | generator-joplin | 1 | — | — | excluded (template) |
@@ -265,7 +265,7 @@ Files processed:
 Files skipped entirely (latent issues surfaced; reverted for now, worth a follow-up):
 - services/e2ee/RSA.react-native.ts — typed `react-native-rsa-native` returns `KeyPair`, but the file casts it to a local `LegacyRsaKeyPair` interface with a missing `keySizeBits` property. Real interface drift; needs deciding whether the local interface should adapt or the cast is now wrong.
 - utils/database-driver-react-native.web.ts — `@sqlite.org/sqlite-wasm` typings only export `init` (default); the runtime exposes `sqlite3Worker1Promiser` as a named property. Typed import fails — the `.d.ts` is incomplete vs the JS. Could be fixed with a local `declare module` augmentation, but that's beyond a mechanical pass.
-- components/screens/dropbox-login.tsx — typed `connect` from `react-redux` rejects `DropboxLoginScreenComponent` because `BaseScreenComponent` is still `require()`'d (untyped) and so the class isn't seen as a real `React.Component`. Will resolve naturally once `base-screen` is typed-imported, which currently coexists with a `.js` build artifact (similar concern to other mobile files).
+- components/screens/dropbox-login.tsx — typed `connect` from `react-redux` initially rejected `DropboxLoginScreenComponent` because `BaseScreenComponent` was still `require()`'d. Fixed in a follow-up: typed both imports, declared `Props` / `State` interfaces, and made `styles_` / `shared_` proper instance fields.
 
 Files skipped entirely (other reasons):
 - utils/initReact.ts — `require('react')` is deliberate (comment explains the timing constraint with `shim.setReact`).
