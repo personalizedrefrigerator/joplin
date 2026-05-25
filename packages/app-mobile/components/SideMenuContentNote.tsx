@@ -3,6 +3,7 @@ import { useMemo } from 'react';
 import { TouchableOpacity, Text, StyleSheet, ScrollView, View, ViewStyle } from 'react-native';
 import { connect } from 'react-redux';
 import { Ionicons as Icon } from '@react-native-vector-icons/ionicons';
+import { IoniconName } from './Icon';
 import { themeStyle } from './global-style';
 import { AppState } from '../utils/types';
 
@@ -85,7 +86,7 @@ const SideMenuContentNoteComponent: React.FC<Props> = props => {
 	const renderSidebarButton = (key: string, title: string, iconName: string, onPressHandler: ()=> void) => {
 		const content = (
 			<View key={key} style={onPressHandler ? styles.sideButton : styles.sideButtonDisabled}>
-				{!iconName ? null : <Icon name={iconName} style={styles.sidebarIcon} />}
+				{!iconName ? null : <Icon name={iconName as IoniconName} style={styles.sidebarIcon} />}
 				<Text style={styles.sideButtonText}>{title}</Text>
 			</View>
 		);

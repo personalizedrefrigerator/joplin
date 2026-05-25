@@ -7,6 +7,7 @@ import { AccessibilityActionEvent, AccessibilityActionInfo, View } from 'react-n
 import { connect } from 'react-redux';
 import BottomDrawer from '../BottomDrawer';
 import { Ionicons as Icon } from '@react-native-vector-icons/ionicons';
+import { IoniconName } from '../Icon';
 
 type OnButtonPress = ()=> void;
 interface ButtonSpec {
@@ -32,7 +33,7 @@ interface ActionButtonProps {
 
 // Returns a render function compatible with React Native Paper.
 const getIconRenderFunction = (iconName: string) => {
-	return (props: Omit<React.ComponentProps<typeof Icon>, 'name'>) => <Icon name={iconName} {...props} />;
+	return (props: Omit<React.ComponentProps<typeof Icon>, 'name'>) => <Icon name={iconName as IoniconName} {...props} />;
 };
 
 const useIcon = (iconName: string) => {
