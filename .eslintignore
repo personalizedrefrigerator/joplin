@@ -1935,6 +1935,7 @@ packages/renderer/MdToHtml/rules/utils/defaultRule.js
 packages/renderer/MdToHtml/setupLinkify.js
 packages/renderer/MdToHtml/validateLinks.js
 packages/renderer/assetsToHeaders.js
+packages/renderer/defaultNoteStyle.js
 packages/renderer/defaultResourceModel.js
 packages/renderer/headerAnchor.js
 packages/renderer/highlight.js
@@ -1942,7 +1943,9 @@ packages/renderer/htmlUtils.test.js
 packages/renderer/htmlUtils.js
 packages/renderer/index.js
 packages/renderer/noteStyle.js
+packages/renderer/stringUtils.js
 packages/renderer/types.js
+packages/renderer/urlUtils.js
 packages/renderer/utils.js
 packages/tools/build-release-stats.test.js
 packages/tools/build-release-stats.js

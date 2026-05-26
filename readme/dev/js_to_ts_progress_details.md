@@ -93,4 +93,38 @@ Notes / review-later entries added during this round (entries record generic loc
 - `packages/app-cli/app/autocompletion.ts:103` — in the `'item'` argument completion branch, `notes.map(n => n.title)` is spread but `folders.map(n => n.title)` is **not** — folder titles end up pushed into the completion list as a single nested array element. Likely-bug; the `as unknown as string` cast in the converted file preserves the behaviour.
 - `packages/app-cli/app/cli-utils.ts makeCommandArgs` — `if (i >= a.length)` where `a` is `{ required, name }` is unreachable (`a.length` is `undefined`). The else branch always ran; preserved by removing the dead conditional. Likely intended `args['_'].length`.
 
+## packages/renderer
+
+Session date: 2026-05-25
+Branch: claude/chore/renderer--js-to-ts
+
+Files processed (under `packages/renderer/`):
+
+- `stringUtils.ts` — `module.exports = { surroundKeywords }` → named export; `require('html-entities').AllHtmlEntities` swapped for the typed `import { AllHtmlEntities } from 'html-entities'`; new `Keyword = string | RegexKeyword | StringKeyword` discriminated union typed off the in-code comment that documented the keyword shapes. cSpell ignore block added around the diacritic-replacement table. Existing `require('../../stringUtils.js')` consumers in `highlight_keywords.ts` unchanged (named exports remain reachable from the namespace).
+- `urlUtils.ts` — `module.exports = urlUtils` namespace object → named exports (`urlDecode`, `isResourceUrl`, `parseResourceUrl`, `ParsedResourceUrl`). Internal self-references switched from `urlUtils.X(...)` to bare calls. Existing `require('../urlUtils.js')` consumers in `linkReplacement.ts` and `link_open.ts` unchanged.
+- `defaultNoteStyle.ts` — `module.exports = {...}` → `export default {...}`. Single consumer in `MdToHtml.ts:76` updated to a top-of-file `import defaultNoteStyle from './defaultNoteStyle';`.
+- `Tools/buildAssets.ts` — dev-time script. Three function signatures typed (`dirname(path: string)`, `copyFile(source: string, dest: string)`, `main()`); `fs-extra` kept as `const fs = require('fs-extra')` (implicit `any` from `require` per project convention; renderer has no `@types/fs-extra` and adding the dep is out of scope for a mechanical conversion). Verified by running `yarn buildAssets` from `packages/renderer/` — outputs in `assets/{abc,mermaid,katex,highlight.js}` matched the prior structure.
+
+Files skipped:
+
+- `MdToHtml/rules/abc_render.js` and `MdToHtml/rules/mermaid_render.js` — shipped raw to browsers by `Tools/buildAssets.js` (lines 49/52 `fs.copy` the source `.js` to `assets/{mermaid,abc}/`). Matches the same hazard pattern documented for `packages/lib/markJsUtils.js` in the plan's "Files to never touch" section: TS-emit CommonJS wrappers (`Object.defineProperty(exports, '__esModule', …)`) break in a raw `<script>` context. `mermaid_render.js` additionally assigns to `Event.target` (a readonly DOM property in lib.dom.d.ts), so strict TS would require a cast. Skip until the build pipeline is updated (e.g. compile these via a webpack/esbuild step that emits a browser-friendly IIFE, or change `buildAssets.js` to copy the compiled output instead of the source).
+- `MdToHtml/rules/katex_mhchem.js` — 1700+ lines vendored from the KaTeX repo (`https://github.com/KaTeX/KaTeX/blob/master/contrib/mhchem/mhchem.js`); already preceded by `/* eslint-disable */`. Falls under the plan's "Vendored / forked third-party code — preserved verbatim" rule.
+- `lib/renderer.js` — 7-line `// TODO` stub with no callers found in repo. Flag for removal as dead code in a separate PR; not in scope for a mechanical conversion.
+- `tests/test-utils.js` — empty file (0 bytes), no callers. Same: candidate for deletion, not conversion.
+- `jest.config.js` — config file kept as `.js` by design (plan "Files to never touch").
+
+Verification:
+
+- `yarn tsc --noEmit` from the repo root: zero new errors in `@joplin/renderer`. (Pre-existing errors in `@joplin/app-desktop` `WhiteboardEditor/*` and `@joplin/app-mobile` `services/e2ee/crypto.ts` were present on the branch base and are unrelated.)
+- `cd packages/renderer && yarn jest`: 35/35 passing (5 suites).
+- `cd packages/app-cli && yarn test MdToHtml`: 13/13 passing (cross-package renderer integration tests).
+- `cd packages/renderer && yarn buildAssets`: ran clean; regenerated assets under `assets/{abc,mermaid,katex,highlight.js}` matched the prior structure. Note: regenerating overwrote a committed-stale `assets/abc/abcjs-basic-min.js` (v6.5.2 on disk vs v6.6.2 in `package.json`); restored before commit and noted as a pre-existing concern.
+
+Notes / review-later entries added (generic locations; the on-disk `review-later.md` is per-environment and not committed):
+
+- `packages/renderer/stringUtils.ts surroundKeywords` — `valueRegex` from `RegexKeyword` entries is passed verbatim into `new RegExp(...)`; only `pregQuote`-escaped string keywords are safe. A pathological pattern (`(a+)+$`) compiled `gi` and run against note text causes catastrophic backtracking on every render. Source of `valueRegex` is search input — primarily self-inflicted but persists into saved searches.
+- `packages/renderer/assets/abc/abcjs-basic-min.js` — committed v6.5.2 disagrees with `package.json`'s `abcjs: 6.6.2`; running `yarn buildAssets` regenerates and produces a dirty working tree.
+- `packages/renderer/lib/renderer.js` — 7-line `// TODO` stub, no callers in repo; deletion candidate.
+- `packages/renderer/tests/test-utils.js` — 0-byte file, no callers in repo; deletion candidate.
+
 <!-- Add per-package sections below as additional packages are processed. -->
