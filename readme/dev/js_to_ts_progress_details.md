@@ -127,4 +127,74 @@ Notes / review-later entries added (generic locations; the on-disk `review-later
 - `packages/renderer/lib/renderer.js` — 7-line `// TODO` stub, no callers in repo; deletion candidate.
 - `packages/renderer/tests/test-utils.js` — 0-byte file, no callers in repo; deletion candidate.
 
+## packages/lib
+
+Session date: 2026-05-26
+Branch: claude/chore/lib--js-to-ts
+
+Source files processed (under `packages/lib/`):
+
+- `envFromArgs.ts` — signature tightened to `(args: string[] | null | undefined) => 'dev' | 'prod'`.
+- `parameters.ts` — introduced `Env`, `AppCredentials`, `ParametersForEnv` types; `parameters_` typed `Record<Env, ParametersForEnv>`; `Setting.value('env')` cast to `Env`.
+- `randomClipperPort.ts` — added `ClipperPortState` interface and local `Env` alias.
+- `SyncTargetMemory.ts` — `default export class extends BaseSyncTarget`; callers updated to default-import.
+- `SyncTargetNextcloud.ts` — sibling `SyncTargetWebDAV` kept as `require()` (still JS at this point); `checkConfig` temporarily typed `options: any` with an eslint-disable.
+- `SyncTargetDropbox.ts` — removed unused private `api_` field (set in constructor, never read); fixed a spelling slip flagged by cSpell; callers updated to default-import.
+- `SyncTargetWebDAV.ts` — added exported `WebDavFileApiOptions` interface shared by `checkConfig` and `newFileApi_`; sibling `file-api-driver-webdav` kept as `require()`.
+- `resourceUtils.ts` — split previous `module.exports = { ... }` object into individual named exports; both destructured-`require` and namespace-style callers continue to work.
+- `import-enex-html-gen.ts` — removed an unused `options` parameter from `enexXmlToHtml` (forwarded to `enexXmlToHtml_` which never read it, and no caller passed it); `string-to-stream`/`@joplin/fork-sax` kept as `require()` (no types); sax event-handler node/stream-output values stay `any`.
+
+Test files processed (production-code counterpart was already TS):
+
+- `database.test.ts` — converted; benefits from existing TS types in `test-utils` and `BaseModel`.
+- `TaskQueue.test.ts` — constructor now passed a `name`; `push` ids switched from numeric to string to match `TaskQueue.ts`'s typed signature (JS coerced the numbers at runtime).
+- `ArrayUtils.test.ts` — dropped a second arg to `expect().toEqual()` in the `mergeOverlappingIntervals` case (rejected by Jest typings; silently ignored at runtime).
+- `services/KvStore.test.ts` — no notable type adjustments.
+- `eventManager.test.ts` — simplified test states cast through `unknown as AppState` at `appStateEmit` call sites; callbacks typed via the `AppStateChangeCallback` generic; dropped the now-redundant `'use strict'`.
+- `urlUtils.test.ts` — added explicit row types for the `parseResourceUrl`/`extractResourceUrls` test-case arrays; switched to `import * as urlUtils from './urlUtils'` to preserve namespace-style call sites.
+- `mimeUtils.test.ts`, `pathUtils.test.ts`, `timeUtils.test.ts` — no notable type adjustments.
+- `services/KeymapService.test.ts` — negative-test data for "required properties missing" cast through `unknown as KeymapItem[]` so the type checker accepts the deliberately malformed entries; pre-existing `accelerator: null` discrepancy left as-is (masked by root `strict: false`).
+- `import-enex-html-gen.test.ts` — imports `ResourceEntity` and types fixtures explicitly; one `attachment-image` fixture has a `width` field not on `ResourceEntity`, cast `as ResourceEntity` locally (field is unread by the converter; removing it would alter long-standing data).
+- `models/Note.customSortOrder.test.ts` — converted and renamed from `Note_CustomSortOrder.test.js` (and `describe` title updated) to match the `Foo.aspect.test.ts` convention; `Note.insertNotesAt` calls now pass all 5 args (`false, false` for `uncompletedTodosOnTop`/`showCompletedTodos`, preserving prior falsy-undefined behaviour); `is_todo: true` switched to `is_todo: 1` to match the typed numeric schema; `originalTimestamps` typed as `Record<string, {…}>`.
+
+Dead code removed (separate commit):
+
+- `parseUri.js` — deleted; no callers in repo.
+
+Follow-up tightening commits:
+
+- `Type SyncTargetNextcloud.checkConfig with WebDavFileApiOptions` — replaced `options: any` with the `WebDavFileApiOptions` import from `SyncTargetWebDAV`, dropping the eslint-disable. Done as a separate commit because the type wasn't exported until `SyncTargetWebDAV` was itself converted.
+- `Simplify eventManager.test by dropping redundant generics` — removed explicit `<string>` and `<{ name: string }>` args on `appStateOn`/`appStateOff`; the callback's `event.value` already lets TS infer the generic.
+
+Files attempted but reverted:
+
+- `markJsUtils.ts` — converted in `5de93c318` and reverted in `6e2a1b8ec`. The TS-emit CommonJS wrappers (`Object.defineProperty(exports, '__esModule', …)`) broke the desktop note viewer at runtime (`yarn test-ui markdownEditor` failed). `yarn tsc --noEmit` and `yarn jest` did not catch it. Same hazard pattern as the renderer's `abc_render.js` / `mermaid_render.js`: the file is shipped to a browser context where the CJS wrapper isn't valid. Documented in the plan's "Files to never touch" section; don't retry without first identifying the bundling path.
+
+Files not yet processed (deferred to a follow-up round):
+
+- Remaining `packages/lib/` source `.js` files not in this batch (models, services, sync helpers, etc.) — convert per the order in the plan's per-package strategy.
+- `markJsUtils.js` — see above; blocked on the bundler/runtime fix.
+
+Verification:
+
+- `yarn tsc --noEmit` from the repo root: clean after each commit (and after the merge with `upstream/dev`).
+- `cd packages/lib && yarn jest <suite>` against the touched test files: green per-conversion.
+- `yarn syncFuzzer start --steps 5` from the repo root: green after each `SyncTarget*` conversion (primary verification path for sync-target files; `yarn jest` does not meaningfully exercise them).
+
+Notes / review-later entries added during this round (generic locations; on-disk `review-later.md` is per-environment and not committed):
+
+- `packages/lib/markJsUtils.js` — see "Files attempted but reverted" above; the CJS-wrapper-in-browser hazard applies to any other file consumed by the desktop note viewer via a raw `<script>`-style include.
+- `packages/lib/SyncTargetDropbox.ts` constructor — removed unused `api_` field that was assigned but never read; verify no out-of-tree consumer (mobile/desktop overrides) relied on the field name before the next release.
+- `packages/lib/import-enex-html-gen.ts` `enexXmlToHtml` — dropped unused `options` parameter; if a future plugin or external caller passes options it will now silently be ignored at compile time (the parameter was already a no-op at runtime).
+- `packages/lib/services/KeymapService.test.ts` — pre-existing `accelerator: null` in test fixtures disagrees with `KeymapItem` (only present at root `strict: false`); flag for cleanup when `strict` is tightened.
+
+## Merge with upstream/dev (2026-05-26)
+
+`upstream/dev` landed two overlapping PRs while this branch was in progress: `#15523` (app-cli conversions) and `#15532` (renderer conversions). Both equivalently converted files we had also converted locally. Merge resolution:
+
+- `packages/renderer/stringUtils.ts` — true content conflict (different stylistic choices: arrow-function vs function-declaration; module-scope vs function-scope `diacriticReplacements`; discriminated-union vs separate-interfaces for `Keyword`). Resolved by accepting upstream's version verbatim, since it was already reviewed and merged in `#15532`. Local commit `19893150f` becomes redundant content-wise (the rename is preserved by the merge).
+- All app-cli `.js → .ts` renames and the renderer `defaultNoteStyle.ts` / `urlUtils.ts` conversions resolved without conflict (identical content on both sides; git's rename detection collapsed them).
+- `.eslintignore` / `.gitignore` — merge cleanly absorbed upstream's `# AUTO-GENERATED` additions for app-cli; re-ran `yarn updateIgnored` post-merge as a sanity check (no further diff).
+- `yarn tsc --noEmit` post-merge: clean.
+
 <!-- Add per-package sections below as additional packages are processed. -->
