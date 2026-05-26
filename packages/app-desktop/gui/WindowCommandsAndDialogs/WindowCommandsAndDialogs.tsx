@@ -20,7 +20,7 @@ import useSyncDialogState from './utils/useSyncDialogState';
 import AppDialogs from './AppDialogs';
 import PopupNotificationList from '../PopupNotification/PopupNotificationList';
 
-const PluginManager = require('@joplin/lib/services/PluginManager');
+import PluginManager from '@joplin/lib/services/PluginManager';
 
 interface Props {
 	dispatch: Dispatch;
@@ -111,8 +111,10 @@ const WindowCommandsAndDialogs: React.FC<Props> = props => {
 		dialogState.promptOptions.onClose(answer, buttonType);
 	}, [dialogState.promptOptions]);
 
-	const dialogInfo = PluginManager.instance().pluginDialogToShow(props.pluginsLegacy);
-	const pluginDialog = !dialogInfo ? null : <dialogInfo.Dialog {...dialogInfo.props} />;
+	const dialogInfo = PluginManager.instance().pluginDialogToShow(props.pluginsLegacy as Record<string, { dialogOpen?: boolean; userData?: unknown }>);
+	// Dialog is a React.ComponentType<any> at runtime — PluginManager keeps it untyped to avoid a React dep in lib/.
+	const Dialog = dialogInfo?.Dialog as React.ComponentType<Record<string, unknown>> | undefined;
+	const pluginDialog = !dialogInfo || !Dialog ? null : <Dialog {...dialogInfo.props} />;
 
 	const {
 		noteContentPropertiesDialogOptions, notePropertiesDialogOptions, shareNoteDialogOptions, shareFolderDialogOptions, promptOptions,
