@@ -54,8 +54,7 @@ export default class SyncTargetDropbox extends BaseSyncTarget {
 			secret: params.secret,
 		});
 
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- DropboxApi is still JS and has no type definitions yet
-		api.on('authRefreshed', (auth: any) => {
+		api.on('authRefreshed', (auth: string|null) => {
 			this.logger().info('Saving updated Dropbox auth.');
 			Setting.setValue(`sync.${SyncTargetDropbox.id()}.auth`, auth ? auth : null);
 		});
