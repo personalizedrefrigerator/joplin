@@ -1,9 +1,7 @@
-type Target = ((path: string, args: unknown[])=> unknown) & { __joplinNamespace?: string[] };
-
-const handler: ProxyHandler<Target> = {};
+const handler = {};
 
 handler.get = function(target, prop) {
-	let t: Target = target;
+	let t = target;
 
 	// There's probably a cleaner way to do this but not sure how. The idea is to keep
 	// track of the calling chain current state. So if the user call `joplin.something.test("bla")`
@@ -19,13 +17,13 @@ handler.get = function(target, prop) {
 	// and attach a custom "__joplinNamespace" property to it.
 	if (!t.__joplinNamespace) {
 		const originalTarget = t;
-		const newTarget: Target = (name, args) => {
+		const newTarget = (name, args) => {
 			return originalTarget(name, args);
 		};
-		newTarget.__joplinNamespace = [prop as string];
+		newTarget.__joplinNamespace = [prop];
 		t = newTarget;
 	} else {
-		t.__joplinNamespace.push(prop as string);
+		t.__joplinNamespace.push(prop);
 	}
 
 	return new Proxy(t, handler);
@@ -37,7 +35,6 @@ handler.apply = function(target, _thisArg, argumentsList) {
 	return target(path, argumentsList);
 };
 
-// The Proxy mimics any object shape; callers pick the surface type (typically `Joplin`).
-export default function sandboxProxy<T = unknown>(target: Target): T {
-	return new Proxy(target, handler) as unknown as T;
-}
+module.exports = function sandboxProxy(target) {
+	return new Proxy(target, handler);
+};

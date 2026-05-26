@@ -1701,7 +1701,6 @@ packages/lib/services/plugins/defaultPlugins/desktopDefaultPluginsInfo.js
 packages/lib/services/plugins/loadPlugins.test.js
 packages/lib/services/plugins/loadPlugins.js
 packages/lib/services/plugins/reducer.js
-packages/lib/services/plugins/sandboxProxy.js
 packages/lib/services/plugins/testing/MockPlatformImplementation.js
 packages/lib/services/plugins/testing/MockPluginRunner.js
 packages/lib/services/plugins/utils/createViewHandle.js

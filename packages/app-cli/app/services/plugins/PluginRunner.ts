@@ -7,7 +7,7 @@ import mapEventHandlersToIds, { EventHandlers } from '@joplin/lib/services/plugi
 import uuid from '@joplin/lib/uuid';
 import Joplin from '@joplin/lib/services/plugins/api/Joplin';
 import { Console } from 'console';
-import sandboxProxy from '@joplin/lib/services/plugins/sandboxProxy';
+const sandboxProxy = require('@joplin/lib/services/plugins/sandboxProxy');
 
 function createConsoleWrapper(pluginId: string) {
 	const wrapper: Record<string, (...args: unknown[])=> unknown> = {};
@@ -74,7 +74,7 @@ export default class PluginRunner extends BasePluginRunner {
 		};
 
 		const proxy = {
-			joplin: sandboxProxy<Joplin>(target),
+			joplin: sandboxProxy(target),
 			console: createConsoleWrapper(pluginId),
 			stop: () => {
 				stopped = true;
