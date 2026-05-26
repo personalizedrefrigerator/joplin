@@ -1413,6 +1413,7 @@ packages/lib/import-enex-md-gen.test.js
 packages/lib/import-enex-md-gen.js
 packages/lib/import-enex.js
 packages/lib/initLib.js
+packages/lib/lib/lib.js
 packages/lib/locale.test.js
 packages/lib/locale.js
 packages/lib/makeDiscourseDebugUrl.test.js
