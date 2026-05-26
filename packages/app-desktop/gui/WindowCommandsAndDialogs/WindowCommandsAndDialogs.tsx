@@ -29,7 +29,7 @@ interface Props {
 	pluginHtmlContents: PluginHtmlContents;
 	visibleDialogs: VisibleDialogs;
 	appDialogStates: AppStateDialog[];
-	pluginsLegacy: unknown;
+	pluginsLegacy: Record<string, { dialogOpen?: boolean; userData?: unknown }>;
 	modalMessage: string|null;
 
 	customCss: string;
@@ -111,8 +111,7 @@ const WindowCommandsAndDialogs: React.FC<Props> = props => {
 		dialogState.promptOptions.onClose(answer, buttonType);
 	}, [dialogState.promptOptions]);
 
-	const dialogInfo = PluginManager.instance().pluginDialogToShow(props.pluginsLegacy as Record<string, { dialogOpen?: boolean; userData?: unknown }>);
-	// Dialog is a React.ComponentType<any> at runtime — PluginManager keeps it untyped to avoid a React dep in lib/.
+	const dialogInfo = PluginManager.instance().pluginDialogToShow(props.pluginsLegacy);
 	const Dialog = dialogInfo?.Dialog as React.ComponentType<Record<string, unknown>> | undefined;
 	const pluginDialog = !dialogInfo || !Dialog ? null : <Dialog {...dialogInfo.props} />;
 
