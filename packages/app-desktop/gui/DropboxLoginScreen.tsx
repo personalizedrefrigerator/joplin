@@ -22,7 +22,7 @@ interface State {
 
 class DropboxLoginScreenComponent extends React.Component<Props, State> {
 
-	private shared_: Shared;
+	private shared_: Shared<DropboxLoginScreenComponent>;
 
 	public constructor(props: Props) {
 		super(props);

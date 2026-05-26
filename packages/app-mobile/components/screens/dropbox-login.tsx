@@ -9,9 +9,11 @@ import { BaseScreenComponent } from '../base-screen';
 import Shared from '@joplin/lib/components/shared/dropbox-login-shared';
 import shim, { MessageBoxType } from '@joplin/lib/shim';
 import { themeStyle } from '../global-style';
+import { Dispatch } from 'redux';
 
 interface Props {
 	themeId: number;
+	dispatch: Dispatch;
 }
 
 interface State {
@@ -23,7 +25,7 @@ interface State {
 class DropboxLoginScreenComponent extends BaseScreenComponent<Props, State> {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Migrated from JS; per-theme StyleSheet cache
 	private styles_: Record<number, any> = {};
-	private shared_: Shared;
+	private shared_: Shared<DropboxLoginScreenComponent>;
 
 	public constructor(props: Props) {
 		super(props);

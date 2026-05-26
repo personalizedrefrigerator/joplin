@@ -3,12 +3,24 @@ import SyncTargetRegistry from '../../SyncTargetRegistry';
 import { reg } from '../../registry';
 import { _ } from '../../locale';
 import Setting from '../../models/Setting';
+import { Dispatch } from 'redux';
 
-// React.Component<P, S>.setState has a generic Pick<S, K> signature that's painful
-// to model at this cross-app seam (desktop and mobile each have their own Props
-// shape). Keep the host component loose.
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- see comment above
-type HostComponent = any;
+interface BaseProps {
+	dispatch: Dispatch;
+}
+
+interface BaseState {
+	loginUrl: string;
+	authCode: string;
+	checkingAuthToken: boolean;
+}
+
+interface BaseComponent {
+	props: BaseProps;
+	state: BaseState;
+	// Use a Pick<...> to match the types provided by React
+	setState<K extends keyof BaseState>(state: Pick<BaseState, K>): void;
+}
 
 // DropboxApi is still JS-only. Declare just the methods this module touches.
 interface DropboxApi {
@@ -24,15 +36,15 @@ interface InputChangeEvent {
 // Desktop's bridge() returns boolean; mobile's shim returns a Promise. Accept either.
 type MessageBox = (message: string)=> unknown;
 
-export default class Shared {
-	private comp_: HostComponent;
+export default class Shared<Host extends BaseComponent> {
+	private comp_: Host;
 	private dropboxApi_: DropboxApi | null = null;
 
 	public loginUrl_click: ()=> void;
 	public authCodeInput_change: (event: InputChangeEvent | string)=> void;
 	public submit_click: ()=> Promise<void>;
 
-	public constructor(comp: HostComponent, showInfoMessageBox: MessageBox, showErrorMessageBox: MessageBox) {
+	public constructor(comp: Host, showInfoMessageBox: MessageBox, showErrorMessageBox: MessageBox) {
 		this.comp_ = comp;
 
 		this.comp_.state = {
