@@ -1,6 +1,6 @@
 (function(globalObject) {
 	// TODO: Not sure if that will work once packaged in Electron
-	const sandboxProxy = require('../../vendor/lib/@joplin/lib/services/plugins/sandboxProxy.js');
+	const sandboxProxy = require('../../vendor/lib/@joplin/lib/services/plugins/sandboxProxy.js').default;
 	const ipcRenderer = require('electron').ipcRenderer;
 
 	const ipcRendererSend = (message, args) => {
