@@ -18,7 +18,7 @@ import OneDriveApi from '../onedrive-api';
 import SyncTargetOneDrive from '../SyncTargetOneDrive';
 import JoplinDatabase from '../JoplinDatabase';
 import * as fs from 'fs-extra';
-const { DatabaseDriverNode } = require('../database-driver-node.js');
+import { DatabaseDriverNode } from '../database-driver-node';
 import Folder from '../models/Folder';
 import Note from '../models/Note';
 import ItemChange from '../models/ItemChange';
