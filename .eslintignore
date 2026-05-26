@@ -1445,6 +1445,10 @@ packages/lib/markdownUtils.test.js
 packages/lib/markdownUtils.js
 packages/lib/markdownUtils2.test.js
 packages/lib/markupLanguageUtils.js
+packages/lib/migrations/20.js
+packages/lib/migrations/27.js
+packages/lib/migrations/33.js
+packages/lib/migrations/35.js
 packages/lib/migrations/42.js
 packages/lib/mime-utils.js
 packages/lib/mimeUtils.test.js
