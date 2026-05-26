@@ -1,4 +1,4 @@
-import welcomeAssetsRaw from './welcomeAssets';
+const welcomeAssetsAny = require('./welcomeAssets');
 import Note from './models/Note';
 import Setting from './models/Setting';
 import Folder from './models/Folder';
@@ -61,7 +61,7 @@ class WelcomeUtils {
 			defaultFolderId: null,
 		};
 
-		const allWelcomeAssets = welcomeAssetsRaw as unknown as WelcomeAssets;
+		const allWelcomeAssets = welcomeAssetsAny as WelcomeAssets;
 		const welcomeAssets = locale in allWelcomeAssets ? allWelcomeAssets[locale] : allWelcomeAssets['en_GB'];
 		const enGbWelcomeAssets = allWelcomeAssets['en_GB'];
 

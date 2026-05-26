@@ -1900,7 +1900,6 @@ packages/lib/utils/webDAVUtils.js
 packages/lib/uuid.js
 packages/lib/versionInfo.test.js
 packages/lib/versionInfo.js
-packages/lib/welcomeAssets.js
 packages/pdf-viewer/FullViewer.js
 packages/pdf-viewer/Page.js
 packages/pdf-viewer/PdfDocument.js
