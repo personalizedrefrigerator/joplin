@@ -1,6 +1,6 @@
+import { tempFilePath } from '../testing/test-utils';
+import KeymapService, { KeymapItem } from '../services/KeymapService';
 
-const { tempFilePath } = require('../testing/test-utils.js');
-const KeymapService = require('../services/KeymapService').default;
 const keymapService = KeymapService.instance();
 keymapService.initialize([]);
 
@@ -295,7 +295,9 @@ describe('services_KeymapService', () => {
 			];
 
 			for (let i = 0; i < customKeymaps.length; i++) {
-				const customKeymapItems = customKeymaps[i];
+				// Intentionally malformed test data — cast through unknown so the type
+				// checker doesn't reject the wrong-keyed entries that the test relies on.
+				const customKeymapItems = customKeymaps[i] as unknown as KeymapItem[];
 				expect(() => keymapService.overrideKeymap(customKeymapItems)).toThrow();
 			}
 		});

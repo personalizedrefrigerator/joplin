@@ -1,12 +1,19 @@
+import * as resourceUtils from './resourceUtils';
+import { cssValue } from './import-enex-md-gen';
+import htmlUtils from './htmlUtils';
+import { AllHtmlEntities } from 'html-entities';
+import { fixAttributes } from '@joplin/utils/html';
+import { ResourceEntity } from './services/database/types';
 const stringToStream = require('string-to-stream');
-const resourceUtils = require('./resourceUtils.js');
-const { cssValue } = require('./import-enex-md-gen');
-const htmlUtils = require('./htmlUtils').default;
-const Entities = require('html-entities').AllHtmlEntities;
-const { fixAttributes } = require('@joplin/utils/html');
-const htmlentities = new Entities().encode;
 
-function addResourceTag(lines, resource, attributes) {
+const htmlentities = new AllHtmlEntities().encode;
+
+type Attributes = Record<string, string>;
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- sax stream node objects are untyped (fork-sax has no .d.ts)
+type SaxNode = any;
+
+const addResourceTag = (lines: string[], resource: ResourceEntity, attributes: Attributes): string[] => {
 	attributes = fixAttributes(attributes);
 
 	// Note: refactor to use Resource.markdownTag
@@ -36,22 +43,34 @@ function addResourceTag(lines, resource, attributes) {
 	}
 
 	return lines;
-}
+};
 
-function attributeToLowerCase(node) {
+const attributeToLowerCase = (node: SaxNode): Attributes => {
 	if (!node.attributes) return {};
-	const output = {};
+	const output: Attributes = {};
 	for (const n in node.attributes) {
 		if (!node.attributes.hasOwnProperty(n)) continue;
 		output[n.toLowerCase()] = node.attributes[n];
 	}
 	return output;
+};
+
+interface Section {
+	type: 'text';
+	lines: string[];
+	parent: Section | null;
 }
 
-function enexXmlToHtml_(stream, resources) {
+interface EnexXmlToHtmlResult {
+	content: Section;
+	resources: ResourceEntity[];
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- stream-to-stream output is untyped
+const enexXmlToHtml_ = (stream: any, resources: ResourceEntity[]): Promise<EnexXmlToHtmlResult> => {
 	const remainingResources = resources.slice();
 
-	const removeRemainingResource = id => {
+	const removeRemainingResource = (id: string) => {
 		for (let i = 0; i < remainingResources.length; i++) {
 			const r = remainingResources[i];
 			if (r.id === id) {
@@ -65,22 +84,23 @@ function enexXmlToHtml_(stream, resources) {
 		const strict = false;
 		const saxStream = require('@joplin/fork-sax').createStream(strict, options);
 
-		const section = {
+		const section: Section = {
 			type: 'text',
 			lines: [],
 			parent: null,
 		};
 
-		saxStream.on('error', (e) => {
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- sax error is untyped
+		saxStream.on('error', (e: any) => {
 			console.warn(e);
 		});
 
 
-		saxStream.on('text', (text) => {
+		saxStream.on('text', (text: string) => {
 			section.lines.push(htmlentities(text));
 		});
 
-		saxStream.on('opentag', function(node) {
+		saxStream.on('opentag', function(node: SaxNode) {
 			const tagName = node.name.toLowerCase();
 			const attributesStr = resourceUtils.attributesToStr(node.attributes);
 			const nodeAttributes = attributeToLowerCase(node);
@@ -137,7 +157,7 @@ function enexXmlToHtml_(stream, resources) {
 			}
 		});
 
-		saxStream.on('closetag', (node) => {
+		saxStream.on('closetag', (node: string) => {
 			const tagName = node ? node.toLowerCase() : node;
 			if (!htmlUtils.isSelfClosingTag(tagName) && tagName !== 'en-media' && tagName !== 'en-todo') section.lines.push(`</${tagName}>`);
 		});
@@ -153,25 +173,26 @@ function enexXmlToHtml_(stream, resources) {
 
 		stream.pipe(saxStream);
 	});
-}
+};
 
-async function enexXmlToHtml(xmlString, resources, options = {}) {
+// eslint-disable-next-line import/prefer-default-export -- file is named after its functional area, default-export of `enexXmlToHtml` would diverge from the file name
+export const enexXmlToHtml = async (xmlString: string, resources: ResourceEntity[]): Promise<string> => {
 	const stream = stringToStream(xmlString);
-	const result = await enexXmlToHtml_(stream, resources, options);
+	const result = await enexXmlToHtml_(stream, resources);
 
 	const preCleaning = result.content.lines.join('');
 	const final = await beautifyHtml(preCleaning);
 	return final.join('');
-}
+};
 
-const beautifyHtml = (html) => {
+const beautifyHtml = (html: string): Promise<string[]> => {
 	// The clean-html package doesn't appear to be robust enough to deal with the crazy HTML that Evernote can generate.
 	// In the best case scenario it will throw an error but in some cases it will go into an infinite loop, so
 	// for that reason we need to disable it.
 	//
 	// Fixed https://github.com/laurent22/joplin/issues/3958
 
-	return [html];
+	return Promise.resolve([html]);
 
 	// return new Promise((resolve) => {
 	// 	try {
@@ -182,5 +203,3 @@ const beautifyHtml = (html) => {
 	// 	}
 	// });
 };
-
-module.exports = { enexXmlToHtml };

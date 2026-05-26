@@ -1,42 +1,50 @@
-const BaseSyncTarget = require('./BaseSyncTarget').default;
-const { _ } = require('./locale');
-const Setting = require('./models/Setting').default;
-const { FileApi } = require('./file-api.js');
-const Synchronizer = require('./Synchronizer').default;
-const WebDavApi = require('./WebDavApi').default;
+import BaseSyncTarget, { CheckConfigResult } from './BaseSyncTarget';
+import { _ } from './locale';
+import Setting from './models/Setting';
+import Synchronizer from './Synchronizer';
+import WebDavApi from './WebDavApi';
+import { FileApi } from './file-api';
+import checkProviderIsSupported from './utils/webDAVUtils';
 const { FileApiDriverWebDav } = require('./file-api-driver-webdav');
-const checkProviderIsSupported = require('./utils/webDAVUtils').default;
 
-class SyncTargetWebDAV extends BaseSyncTarget {
-	static id() {
+export interface WebDavFileApiOptions {
+	path(): string;
+	username(): string;
+	password(): string;
+	ignoreTlsErrors(): boolean;
+}
+
+export default class SyncTargetWebDAV extends BaseSyncTarget {
+
+	public static id() {
 		return 6;
 	}
 
-	static supportsConfigCheck() {
+	public static supportsConfigCheck() {
 		return true;
 	}
 
-	static targetName() {
+	public static targetName() {
 		return 'webdav';
 	}
 
-	static label() {
+	public static label() {
 		return _('WebDAV');
 	}
 
-	static description() {
+	public static description() {
 		return 'The WebDAV protocol allows users to create, change and move documents on a server. There are many WebDAV compatible servers, including SeaFile, Nginx or Apache.';
 	}
 
-	async isAuthenticated() {
+	public async isAuthenticated() {
 		return true;
 	}
 
-	static requiresPassword() {
+	public static requiresPassword() {
 		return true;
 	}
 
-	static async newFileApi_(syncTargetId, options) {
+	public static async newFileApi_(syncTargetId: number, options: WebDavFileApiOptions) {
 		const apiOptions = {
 			baseUrl: () => options.path(),
 			username: () => options.username(),
@@ -51,11 +59,11 @@ class SyncTargetWebDAV extends BaseSyncTarget {
 		return fileApi;
 	}
 
-	static async checkConfig(options) {
+	public static override async checkConfig(options: WebDavFileApiOptions): Promise<CheckConfigResult> {
 		const fileApi = await SyncTargetWebDAV.newFileApi_(SyncTargetWebDAV.id(), options);
 		fileApi.requestRepeatCount_ = 0;
 
-		const output = {
+		const output: CheckConfigResult = {
 			ok: false,
 			errorMessage: '',
 		};
@@ -73,7 +81,7 @@ class SyncTargetWebDAV extends BaseSyncTarget {
 		return output;
 	}
 
-	async initFileApi() {
+	public async initFileApi() {
 		const fileApi = await SyncTargetWebDAV.newFileApi_(SyncTargetWebDAV.id(), {
 			path: () => Setting.value('sync.6.path'),
 			username: () => Setting.value('sync.6.username'),
@@ -86,9 +94,7 @@ class SyncTargetWebDAV extends BaseSyncTarget {
 		return fileApi;
 	}
 
-	async initSynchronizer() {
+	public async initSynchronizer() {
 		return new Synchronizer(this.db(), await this.fileApi(), Setting.value('appType'));
 	}
 }
-
-module.exports = SyncTargetWebDAV;

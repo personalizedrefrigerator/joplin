@@ -1,8 +1,6 @@
-'use strict';
-
-
-const { checkThrow } = require('./testing/test-utils.js');
-const eventManager = require('./eventManager').default;
+import { checkThrow } from './testing/test-utils';
+import eventManager from './eventManager';
+import type { State as AppState } from './reducer';
 
 describe('eventManager', () => {
 
@@ -18,14 +16,14 @@ describe('eventManager', () => {
 		let localStateName = '';
 		let callCount = 0;
 
-		function nameWatch(event) {
+		function nameWatch(event: { value: string }) {
 			callCount++;
 			localStateName = event.value;
 		}
 
 		const globalState = {
 			name: 'john',
-		};
+		} as AppState & { name: string };
 
 		eventManager.appStateOn('name', nameWatch);
 		eventManager.appStateEmit(globalState);
@@ -48,13 +46,13 @@ describe('eventManager', () => {
 	it('should unwatch state props', (async () => {
 		let localStateName = '';
 
-		function nameWatch(event) {
+		function nameWatch(event: { value: string }) {
 			localStateName = event.value;
 		}
 
 		const globalState = {
 			name: 'john',
-		};
+		} as AppState & { name: string };
 
 		eventManager.appStateOn('name', nameWatch);
 		eventManager.appStateOff('name', nameWatch);
@@ -66,7 +64,7 @@ describe('eventManager', () => {
 	it('should watch nested props', (async () => {
 		let localStateName = '';
 
-		function nameWatch(event) {
+		function nameWatch(event: { value: string }) {
 			localStateName = event.value;
 		}
 
@@ -74,7 +72,7 @@ describe('eventManager', () => {
 			user: {
 				name: 'john',
 			},
-		};
+		} as AppState & { user: { name: string } };
 
 		eventManager.appStateOn('user.name', nameWatch);
 		eventManager.appStateEmit(globalState);
@@ -89,9 +87,9 @@ describe('eventManager', () => {
 	}));
 
 	it('should not be possible to modify state props', (async () => {
-		let localUser = {};
+		let localUser: { name?: string } = {};
 
-		function userWatch(event) {
+		function userWatch(event: { value: { name: string } }) {
 			// Normally, the user should not keep a reference to the whole object
 			// but make a copy. However, if they do keep a reference and try to
 			// modify it, it should throw an exception as that would be an attempt
@@ -103,7 +101,7 @@ describe('eventManager', () => {
 			user: {
 				name: 'john',
 			},
-		};
+		} as AppState & { user: { name: string } };
 
 		eventManager.appStateOn('user', userWatch);
 		eventManager.appStateEmit(globalState);

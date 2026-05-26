@@ -1,3 +1,4 @@
+// cSpell:disable
 const imageMimeTypes = [
 	'image/cgm',
 	'image/fits',
@@ -38,25 +39,45 @@ const imageMimeTypes = [
 	'image/vnd.wap.wbmp',
 	'image/vnd.xiff',
 ];
+// cSpell:enable
 
-const escapeQuotes = (str) => str.replace(/"/g, '&quot;');
+type Attributes = Record<string, string>;
 
-const attributesToStr = (attributes) =>
+interface AttachmentElementOptions {
+	src: string;
+	attributes: Attributes;
+	id: string;
+}
+
+interface ImgElementOptions {
+	src: string;
+	attributes: Attributes;
+}
+
+interface AudioElementOptions {
+	src?: string;
+	alt?: string;
+	id?: string;
+}
+
+const escapeQuotes = (str: string): string => str.replace(/"/g, '&quot;');
+
+export const attributesToStr = (attributes: Attributes): string =>
 	Object.entries(attributes)
 		.map(([key, value]) => ` ${key}="${escapeQuotes(value)}"`)
 		.join('');
 
-const attachmentElement = ({ src, attributes, id }) =>
+export const attachmentElement = ({ src, attributes, id }: AttachmentElementOptions): string =>
 	[
 		`<a href=':/${id}' ${attributesToStr(attributes)}>`,
 		`  ${attributes.alt || src}`,
 		'</a>',
 	].join('');
 
-const imgElement = ({ src, attributes }) =>
+export const imgElement = ({ src, attributes }: ImgElementOptions): string =>
 	`<img src="${src}" ${attributesToStr(attributes)} />`;
 
-const audioElement = ({ src, alt, id }) =>
+export const audioElement = ({ src, alt, id }: AudioElementOptions): string =>
 	[
 		'<audio controls preload="none" style="width:480px;">',
 		`	<source src="${src}" type="audio/mp4" />`,
@@ -71,12 +92,4 @@ const audioElement = ({ src, alt, id }) =>
 		'</p>',
 	].map(s => s.trim()).join('');
 
-const resourceUtils = {
-	imgElement,
-	audioElement,
-	attachmentElement,
-	attributesToStr,
-	isImageMimeType: (m) => imageMimeTypes.indexOf(m) >= 0,
-};
-
-module.exports = resourceUtils;
+export const isImageMimeType = (m: string): boolean => imageMimeTypes.indexOf(m) >= 0;
