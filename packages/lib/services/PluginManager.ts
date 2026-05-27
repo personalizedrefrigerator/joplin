@@ -53,7 +53,7 @@ interface RegisteredPlugin {
 
 interface MenuItemTriggerEvent {
 	pluginName: string;
-	itemName: string;
+	itemName?: string;
 	userData: unknown;
 }
 
