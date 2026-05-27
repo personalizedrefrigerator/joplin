@@ -25,7 +25,7 @@ import Logger from '@joplin/utils/Logger';
 import { SettingsRecord } from './models/settings/types';
 import { Toast, ToastType } from './services/plugins/api/types';
 import { unique } from './array';
-import * as fastDeepEqual from 'fast-deep-equal';
+import fastDeepEqual = require('fast-deep-equal');
 import { ALL_NOTES_FILTER_ID } from './reserved-ids';
 const { createSelectorCreator, defaultMemoize } = require('reselect');
 const { createCachedSelector } = require('re-reselect');
