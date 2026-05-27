@@ -300,5 +300,7 @@ querystring
 msgbox
 LASTEXITCODE
 segfaults
+GHSA
+msdt
 SIGKILL
 dgram
