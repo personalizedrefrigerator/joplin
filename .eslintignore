@@ -997,6 +997,7 @@ packages/app-mobile/tools/buildInjectedJs/constants.js
 packages/app-mobile/tools/buildInjectedJs/copyAssets.js
 packages/app-mobile/tools/buildInjectedJs/gulpTasks.js
 packages/app-mobile/tools/copyAssets.js
+packages/app-mobile/tools/uiTests.js
 packages/app-mobile/utils/ShareExtension.js
 packages/app-mobile/utils/ShareUtils.test.js
 packages/app-mobile/utils/ShareUtils.js

@@ -1,0 +1,39 @@
+import { execCommand } from '@joplin/utils';
+import { dirname, join } from 'path';
+
+const getSimulator = async () => {
+	const simulators = JSON.parse(await execCommand('xcrun simctl list -j', { quiet: true }));
+
+	type Device = {
+		productFamily: string;
+		name: string;
+	};
+	const deviceTypes: Device[] = simulators.devicetypes;
+	// For now, always choose the first iOS simulator in the list
+	return deviceTypes
+		.find((device) => device.productFamily === 'iPhone')
+		.name;
+};
+
+const uiTests = async () => {
+	if (process.platform !== 'darwin') throw new Error('UI tests currently must run on MacOS');
+
+	// Based on the approach taken by react-native-esbuild
+	// (https://github.com/oblador/react-native-esbuild/blob/e5897955357e3fe6a48e1dd90ccb909426d24566/package.json#L9)
+	await execCommand([
+		'xcrun',
+		'xcodebuild',
+		'test',
+		'-workspace',
+		join(dirname(__dirname), 'ios', 'Joplin.xcworkspace'),
+		'-scheme', 'Joplin',
+		'-configuration', 'Release',
+		'-destination', `platform=iOS Simulator,name=${await getSimulator()}`,
+	], {
+		env: {
+			FORCE_BUNDLING: '1',
+		},
+	});
+};
+
+export default uiTests;

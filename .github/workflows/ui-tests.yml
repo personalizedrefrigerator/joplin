@@ -31,11 +31,17 @@ jobs:
           # runners. Since the onenote-converter doesn't have UI tests, it can be excluded
           # from build:
           SKIP_ONENOTE_CONVERTER_BUILD: 1
-      - name: Run UI tests
+      - name: Run desktop UI tests
         shell: bash
         run: |
           cd ${GITHUB_WORKSPACE}/packages/app-desktop/
           bash ./integration-tests/run-ci.sh
+      - name: Run mobile UI tests
+        if: runner.os == 'macOs'
+        shell: bash
+        run: |
+          cd ${GITHUB_WORKSPACE}/packages/app-mobile/
+          yarn test-ui-ios
       # See https://playwright.dev/docs/ci-intro#setting-up-github-actions
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}

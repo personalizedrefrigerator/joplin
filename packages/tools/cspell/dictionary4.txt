@@ -304,3 +304,6 @@ GHSA
 msdt
 SIGKILL
 dgram
+simctl
+devicetypes
+xcodebuild
