@@ -30,7 +30,7 @@ export interface PluginManifest {
 
 export interface PluginInstance {
 	dispatch: (action: unknown)=> void;
-	onTrigger(event: { itemName: string; userData: unknown }): void;
+	onTrigger(event: { itemName?: string; userData: unknown }): void;
 }
 
 // Dialog is a React.ComponentType but typing it as such would pull React into lib/.
