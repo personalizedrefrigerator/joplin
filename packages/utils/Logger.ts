@@ -1,4 +1,4 @@
-import * as moment from 'moment';
+import moment = require('moment');
 import { Mutex } from 'async-mutex';
 const { sprintf } = require('sprintf-js');
 
