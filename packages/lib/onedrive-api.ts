@@ -426,6 +426,10 @@ export default class OneDriveApi {
 		this.accountProperties_ = accountProperties;
 	}
 
+	public get accountProperties() {
+		return { ...this.accountProperties_ };
+	}
+
 	public async execAccountPropertiesRequest() {
 
 		try {

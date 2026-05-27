@@ -230,7 +230,7 @@ Files not yet processed (deferred to a follow-up round):
 
 - `DropboxApi.js` (213 lines) — touch point for `dropbox-login-shared` (which declares a minimal local interface in lieu of converting). Convert next so the local interface can be replaced.
 - `SyncTargetAmazonS3.js` (154 lines) — sync-target file; needs fuzzer-led conversion per the plan.
-- `file-api-driver-amazon-s3.js` (406 lines), `file-api-driver-dropbox.js` (255), `file-api-driver-onedrive.js` (340), `file-api-driver-webdav.js` (237) — sync-target drivers; same fuzzer rule.
+- `file-api-driver-amazon-s3.js` (406 lines), `file-api-driver-dropbox.js` (255), `file-api-driver-webdav.js` (237) — sync-target drivers; same fuzzer rule.
 - `utils/types/pdfJs.js` — already a compiled output of `utils/types/pdfJs.ts` but accidentally tracked in git. Needs `git rm --cached`; flagged as a separate fix (not a conversion).
 
 Verification:

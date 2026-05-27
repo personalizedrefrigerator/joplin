@@ -33,7 +33,7 @@ const FileApiDriverMemory = require('../file-api-driver-memory').default;
 import FileApiDriverLocal from '../file-api-driver-local';
 const { FileApiDriverWebDav } = require('../file-api-driver-webdav.js');
 const { FileApiDriverDropbox } = require('../file-api-driver-dropbox.js');
-const { FileApiDriverOneDrive } = require('../file-api-driver-onedrive.js');
+import FileApiDriverOneDrive from '../file-api-driver-onedrive';
 import SyncTargetRegistry from '../SyncTargetRegistry';
 import SyncTargetMemory from '../SyncTargetMemory';
 import SyncTargetFilesystem from '../SyncTargetFilesystem';
