@@ -1,5 +1,3 @@
-
-
 import XCTest
 
 final class JoplinUITests: XCTestCase {
