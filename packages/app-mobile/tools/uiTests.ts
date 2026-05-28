@@ -27,6 +27,8 @@ const uiTests = async () => {
 		'-workspace',
 		join(dirname(__dirname), 'ios', 'Joplin.xcworkspace'),
 		'-scheme', 'Joplin',
+		// Create a release build: Without this, the React Native dev server needs to be running
+		// in the background:
 		'-configuration', 'Release',
 		'-destination', `platform=iOS Simulator,name=${await getSimulator()}`,
 	], {
