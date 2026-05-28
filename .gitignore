@@ -917,6 +917,8 @@ packages/app-mobile/components/voiceTyping/AudioRecordingBanner.js
 packages/app-mobile/components/voiceTyping/RecordingControls.js
 packages/app-mobile/components/voiceTyping/SpeechToTextBanner.js
 packages/app-mobile/components/voiceTyping/types.js
+packages/app-mobile/config/config.default.js
+packages/app-mobile/config/config.testing.js
 packages/app-mobile/contentScripts/imageEditorBundle/contentScript/applyTemplateToEditor.js
 packages/app-mobile/contentScripts/imageEditorBundle/contentScript/index.test.js
 packages/app-mobile/contentScripts/imageEditorBundle/contentScript/index.js

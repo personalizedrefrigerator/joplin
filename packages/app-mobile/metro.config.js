@@ -47,8 +47,8 @@ const remappedPackages = {
 	...localPackages,
 	...polyfilledPackages,
 	'@joplin/mobile-config': process.env.RUNNING_UI_TESTS
-		? path.resolve(__dirname, 'utils', 'mobile-config.ui-testing.js')
-		: path.resolve(__dirname, 'utils', 'mobile-config.default.js'),
+		? path.resolve(__dirname, 'config', 'config.testing.js')
+		: path.resolve(__dirname, 'config', 'config.default.js'),
 };
 
 const watchedFolders = [];
