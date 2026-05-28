@@ -33,7 +33,7 @@ const uiTests = async () => {
 		'-destination', `platform=iOS Simulator,name=${await getSimulator()}`,
 	], {
 		env: {
-			FORCE_BUNDLING: '1',
+			RUNNING_UI_TESTS: '1',
 		},
 	});
 };
