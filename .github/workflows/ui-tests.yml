@@ -36,12 +36,6 @@ jobs:
         run: |
           cd ${GITHUB_WORKSPACE}/packages/app-desktop/
           bash ./integration-tests/run-ci.sh
-      - name: Run mobile UI tests
-        if: runner.os == 'macOs'
-        shell: bash
-        run: |
-          cd ${GITHUB_WORKSPACE}/packages/app-mobile/
-          yarn test-ui-ios
       # See https://playwright.dev/docs/ci-intro#setting-up-github-actions
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
@@ -49,3 +43,15 @@ jobs:
           name: playwright-report-${{ matrix.os }}
           path: packages/app-desktop/playwright-report/
           retention-days: 7
+  Mobile:
+    if: github.repository == 'laurent22/joplin'
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup build environment
+        uses: ./.github/workflows/shared/setup-build-environment
+      - name: Run mobile UI tests
+        shell: bash
+        run: |
+          cd ${GITHUB_WORKSPACE}/packages/app-mobile/
+          yarn test-ui-ios
