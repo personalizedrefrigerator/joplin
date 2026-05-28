@@ -58,4 +58,5 @@ jobs:
         shell: bash
         run: |
           cd ${GITHUB_WORKSPACE}/packages/app-mobile/
-          yarn test-ui-ios
+          cd ios && pod install
+          cd .. && yarn test-ui-ios
