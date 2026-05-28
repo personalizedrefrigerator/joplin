@@ -24,6 +24,7 @@ const uiTests = async () => {
 		'xcrun',
 		'xcodebuild',
 		'test',
+		'-quiet',
 		'-workspace',
 		join(dirname(__dirname), 'ios', 'Joplin.xcworkspace'),
 		'-scheme', 'Joplin',
