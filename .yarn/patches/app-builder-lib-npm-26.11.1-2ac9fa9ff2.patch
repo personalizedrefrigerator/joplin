@@ -16,10 +16,10 @@ index 601ab15e1c0617eb5782372cbcf7d9854ae308b0..d01cd0fd786923112de84f9cbacf3118
          nodeModules: NodeModuleInfo[];
          logSummary: ModuleManager["logSummary"];
 diff --git a/out/node-module-collector/nodeModulesCollector.js b/out/node-module-collector/nodeModulesCollector.js
-index 8285e38a27665f612033c84d7c13239c08e72da7..785d95193a31b814afa357820f4dbb5b762f11cd 100644
+index e126919721b810d5f9370968cde2f659f21abd20..b5129ec7e373e09d875a78fa0c72cecd383eace1 100644
 --- a/out/node-module-collector/nodeModulesCollector.js
 +++ b/out/node-module-collector/nodeModulesCollector.js
-@@ -45,8 +45,8 @@ class NodeModulesCollector {
+@@ -46,8 +46,8 @@ class NodeModulesCollector {
       * 5. Hoisting the dependencies to their final locations
       * 6. Resolving and returning module information
       */
@@ -30,7 +30,7 @@ index 8285e38a27665f612033c84d7c13239c08e72da7..785d95193a31b814afa357820f4dbb5b
          await this.collectAllDependencies(tree, packageName);
          const realTree = this.getTreeFromWorkspaces(tree, packageName);
          await this.extractProductionDependencyGraph(realTree, packageName);
-@@ -64,7 +64,7 @@ class NodeModulesCollector {
+@@ -65,7 +65,7 @@ class NodeModulesCollector {
       * the output to a temporary file. Includes retry logic to handle transient failures such as
       * incomplete JSON output or missing files. Will retry up to 1 time with exponential backoff.
       */
@@ -118,7 +118,7 @@ index 851c5427b676c0c8e65b7b63bcf8eadef68904a3..3cf3ce9d2e61840aa0f713fa1b46f976
                      const logFields = { parent: moduleName, dependency: depName, version: depVersion };
                      if (pkg == null) {
 diff --git a/out/util/appFileCopier.js b/out/util/appFileCopier.js
-index f762b47b85539eea2b38f6cf76692624a3b7e307..347fa8643e1ed7cbd3ced60f03ff50880d2deb7d 100644
+index 37ccda8e988525ae4a04013e3dd5cdded75e03e0..347fa8643e1ed7cbd3ced60f03ff50880d2deb7d 100644
 --- a/out/util/appFileCopier.js
 +++ b/out/util/appFileCopier.js
 @@ -175,13 +175,16 @@ async function collectNodeModulesWithLogging(platformPackager) {
@@ -135,7 +135,7 @@ index f762b47b85539eea2b38f6cf76692624a3b7e307..347fa8643e1ed7cbd3ced60f03ff5088
          for (const dir of searchDirectories) {
              builder_util_1.log.info({ pm, searchDir: dir }, "searching for node modules");
              const collector = (0, node_module_collector_1.getCollectorByPackageManager)(pm, dir, tempDirManager);
--            deps = await collector.getNodeModules({ packageName: packager.metadata.name });
+-            deps = await collector.getNodeModules({ packageName: packager.nodePackageName });
 +            // JOPLIN CHANGE: Always pass "workspaceDir":
 +            deps = await collector.getNodeModules({ packageName: packager.metadata.name, workspaceDir });
              if (deps.nodeModules.length > 0) {
