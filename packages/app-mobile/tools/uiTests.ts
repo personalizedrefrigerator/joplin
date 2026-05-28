@@ -24,6 +24,7 @@ const uiTests = async () => {
 		'xcrun',
 		'xcodebuild',
 		'test',
+		// Only log errors and warnings.
 		'-quiet',
 		'-workspace',
 		join(dirname(__dirname), 'ios', 'Joplin.xcworkspace'),
