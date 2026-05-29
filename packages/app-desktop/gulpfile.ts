@@ -24,7 +24,12 @@ const tasks = {
 			// The Electron installer creates a path.txt file if installation was successful.
 			const testFile = join(dirname(path), 'path.txt');
 			if (!await pathExists(testFile)) {
-				throw new Error('Electron failed to install successfully: path.txt does not exist.');
+				// Requiring Electron can also trigger the download process
+				require('electron');
+
+				if (!await pathExists(testFile)) {
+					throw new Error(`Electron failed to install successfully: ${testFile} does not exist.`);
+				}
 			}
 		},
 	},
