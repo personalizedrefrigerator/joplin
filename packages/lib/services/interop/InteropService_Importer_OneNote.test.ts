@@ -10,6 +10,10 @@ import InteropService_Importer_OneNote from './InteropService_Importer_OneNote';
 import { JSDOM } from 'jsdom';
 import { ImportModuleOutputFormat, ImportOptions } from './types';
 import HtmlToMd from '../../HtmlToMd';
+import Resource from '../../models/Resource';
+import * as sharp from 'sharp';
+
+// cspell:ignore xpsdocument
 
 const instructionMessage = `
 --------------------------------------
@@ -101,6 +105,36 @@ describe('InteropService_Importer_OneNote', () => {
 		expectWithInstructions(mainNote.title).toBe('Page title');
 		expectWithInstructions(mainNote.markup_language).toBe(MarkupToHtml.MARKUP_LANGUAGE_HTML);
 		expectWithInstructions(normalizeNoteForSnapshot(mainNote.body)).toMatchSnapshot(mainNote.title);
+	});
+
+	it('should convert XPS printouts to image resources on Windows', async () => {
+		if (process.platform !== 'win32') return;
+
+		const notes = await withWarningSilenced(/OneNoteConverter:/, async () => importNote(`${supportDir}/onenote/simple-xps.one`));
+		const resources = await Resource.all();
+		const note = notes.find(note => note.title === 'Printout');
+
+		expectWithInstructions(note).toBeTruthy();
+
+		const imageResourceIds = [
+			...note.body.matchAll(/!\[[^\]]*\]\(:\/([a-f0-9]{32})\)/g),
+			...note.body.matchAll(/<img[^>]+src=["']:\/([a-f0-9]{32})["']/g),
+		].map(match => match[1]);
+
+		const imageResources = await Promise.all(imageResourceIds.map(resourceId => Resource.load(resourceId)));
+
+		expectWithInstructions(imageResources.length).toBe(1);
+
+		for (const resource of imageResources) {
+			expectWithInstructions(resource.mime).toMatch(/^image\//);
+			const content = await Resource.content(resource);
+			const metadata = await sharp(content).metadata();
+			expectWithInstructions(metadata.width).toBeGreaterThan(0);
+			expectWithInstructions(metadata.height).toBeGreaterThan(0);
+		}
+
+		expectWithInstructions(resources.map(resource => resource.mime)).not.toContain('application/vnd.ms-xpsdocument');
+		expectWithInstructions(note.body).not.toMatch(/\.xps/i);
 	});
 
 	it('should preserve indentation of subpages in Section page', async () => {
@@ -244,7 +278,7 @@ describe('InteropService_Importer_OneNote', () => {
 	it('should group link parts even if they have different css styles', async () => {
 		const notes = await importNote(`${supportDir}/onenote/remove_hyperlink_on_title.zip`);
 
-		const noteToTest = notes.find(n => n.title === 'Tips from a Pro Using Trees for Dramatic Landscape Photography');
+		const noteToTest = notes.find(n => n.title === 'Tips from a Pro: Using Trees for Dramatic Landscape Photography');
 
 		expectWithInstructions(noteToTest).toBeTruthy();
 		expectWithInstructions(noteToTest.body).toContain('<a href="onenote:https://d.docs.live.net/c8d3bbab7f1acf3a/Documents/Photography/%E9%A3%8E%E6%99%AF.one#Tips%20from%20a%20Pro%20Using%20Trees%20for%20Dramatic%20Landscape%20Photography&amp;section-id={262ADDFB-A4DC-4453-A239-0024D6769962}&amp;page-id={88D803A5-4F43-48D4-9B16-4C024F5787DC}&amp;end" style="">Tips from a Pro: Using Trees for Dramatic Landscape Photography</a>');
@@ -398,5 +432,13 @@ describe('InteropService_Importer_OneNote', () => {
 		const notes = await importNote(`${supportDir}/onenote/bold_and_italic.one`);
 		const matchingNotes = notes.filter(n => n.title === 'Bold & italic');
 		expect(notesToMarkdownString(matchingNotes)).toMatchSnapshot();
+	});
+
+	it('should import updated/created timestamps', async () => {
+		const notes = await importNote(`${supportDir}/onenote/testOneNoteEmbeddedWordDoc.one`);
+		const importedNote = notes.find(n => n.title.startsWith('Embedded doc sheet'));
+
+		expect(importedNote.user_updated_time).toBe(new Date('2019-12-11T23:37:28.000Z').getTime());
+		expect(importedNote.user_created_time).toBe(new Date('2019-12-11T23:35:52.000Z').getTime());
 	});
 });

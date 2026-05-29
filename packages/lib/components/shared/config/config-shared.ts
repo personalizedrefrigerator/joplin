@@ -1,6 +1,6 @@
-import Setting, { AppType, SettingMetadataSection, SettingSectionSource } from '../../../models/Setting';
+import Setting, { AppType, SettingMetadataSection, SettingSectionSource, type SettingsRecord } from '../../../models/Setting';
 import SyncTargetRegistry from '../../../SyncTargetRegistry';
-const { _ } = require('../../../locale');
+import { _ } from '../../../locale';
 import { createSelector } from 'reselect';
 import Logger from '@joplin/utils/Logger';
 
@@ -11,12 +11,15 @@ import { convertValuesToFunctions } from '../../../ObjectUtils';
 
 const logger = Logger.create('config-shared');
 
+type SettingsMap = Partial<SettingsRecord> & Record<string, unknown>;
+
 interface ConfigScreenState {
 	checkSyncConfigResult: { ok: boolean; errorMessage: string }|'checking'|null;
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	settings: any;
+	settings: SettingsMap;
 	changedSettingKeys: string[];
 	showAdvancedSettings: boolean;
+	searchQuery: string;
+	searchSectionFilter: string|null;
 }
 
 export const defaultScreenState: ConfigScreenState = {
@@ -24,17 +27,17 @@ export const defaultScreenState: ConfigScreenState = {
 	settings: {},
 	changedSettingKeys: [],
 	showAdvancedSettings: false,
+	searchQuery: '',
+	searchSectionFilter: null,
 };
 
 interface ConfigScreenComponent {
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	settingToComponent(settingId: string, setting: any): ReactNode;
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	sectionToComponent(sectionName: string, section: any, settings: any, isSelected: boolean): ReactNode;
+	settingToComponent(settingId: string, setting: unknown): ReactNode;
+	sectionToComponent(sectionName: string, section: SettingMetadataSection, settings: SettingsMap, isSelected: boolean): ReactNode;
 
 	state: Partial<ConfigScreenState>;
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Mirrors React.Component.setState signature (Pick<S, K> etc.); a narrower local type breaks subclass assignment of `this` to ConfigScreenComponent
 	setState(callbackOrNew: any, callback?: ()=> void): void;
 }
 
@@ -69,8 +72,8 @@ export const advancedSettingsButton_click = (comp: ConfigScreenComponent) => {
 	});
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-export const checkSyncConfig = async (comp: ConfigScreenComponent, settings: any) => {
+export const checkSyncConfig = async (comp: ConfigScreenComponent, settings: SettingsMap) => {
+
 	const syncTargetId = settings['sync.target'];
 	const SyncTargetClass = SyncTargetRegistry.classById(syncTargetId);
 
@@ -105,8 +108,7 @@ export const checkSyncConfigMessages = (comp: ConfigScreenComponent) => {
 	return output;
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-export const updateSettingValue = (comp: ConfigScreenComponent, key: string, value: any, callback?: ()=> void) => {
+export const updateSettingValue = (comp: ConfigScreenComponent, key: string, value: unknown, callback?: ()=> void) => {
 	if (!callback) callback = () => {};
 
 	comp.setState((state: ConfigScreenState) => {
@@ -172,8 +174,7 @@ export const saveSettings = async (comp: ConfigScreenComponent) => {
 	return true;
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-export const settingsToComponents = (comp: ConfigScreenComponent, device: AppType, settings: any) => {
+export const settingsToComponents = (comp: ConfigScreenComponent, device: AppType, settings: SettingsMap) => {
 	const keys = Setting.keys(true, device);
 	const settingComps = [];
 
@@ -192,8 +193,7 @@ export const settingsToComponents = (comp: ConfigScreenComponent, device: AppTyp
 	return settingComps;
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-type SettingsSelectorState = { device: AppType; settings: any };
+type SettingsSelectorState = { device: AppType; settings: SettingsMap };
 const deviceSelector = (state: SettingsSelectorState) => state.device;
 const settingsSelector = (state: SettingsSelectorState) => state.settings;
 
@@ -286,8 +286,7 @@ export const settingsSections = createSelector(
 );
 
 export const settingsToComponents2 = (
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	comp: ConfigScreenComponent, device: AppType, settings: any, selectedSectionName = '',
+	comp: ConfigScreenComponent, device: AppType, settings: SettingsMap, selectedSectionName = '',
 ) => {
 	const sectionComps: ReactNode[] = [];
 	const sections = settingsSections({ device, settings });

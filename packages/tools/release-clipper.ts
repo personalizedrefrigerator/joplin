@@ -1,6 +1,6 @@
 import * as fs from 'fs-extra';
 import { execCommand, rootDir } from './tool-utils';
-const md5File = require('md5-file');
+import md5File = require('md5-file');
 import * as glob from 'glob';
 
 const clipperDir = `${rootDir}/packages/app-clipper`;
@@ -150,9 +150,12 @@ async function main() {
 	console.info(await execCommand(`rm -rf ${clipperDir}/popup/build`));
 	console.info(await execCommand('npm run build'));
 
+	type Manifest = Record<string, unknown> & {
+		background?: Record<string, unknown>;
+		browser_specific_settings?: unknown;
+	};
 	type PlatformDistOptions = {
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-		removeManifestKeys(manifest: Record<string, any>): Record<string, any>;
+		removeManifestKeys(manifest: Manifest): Manifest;
 		outputPath?: string;
 	};
 	const dists: Record<string, PlatformDistOptions> = {

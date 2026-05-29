@@ -14,14 +14,16 @@ import { pathExists, readFile, readdirSync } from 'fs-extra';
 import RevisionService from '@joplin/lib/services/RevisionService';
 import shim from '@joplin/lib/shim';
 import setupCommand from './setupCommand';
+import BaseCommand from './base-command';
 import { FolderEntity, NoteEntity } from '@joplin/lib/services/database/types';
+import initializeCommandService from './utils/initializeCommandService';
+import { cliUtils } from './cli-utils';
+import Cache from '@joplin/lib/Cache';
 
 type FolderOrNoteType = ModelType.Note | ModelType.Folder | 'folderOrNote';
-import initializeCommandService from './utils/initializeCommandService';
-const { cliUtils } = require('./cli-utils.js');
-const Cache = require('@joplin/lib/Cache');
 
-class Application extends BaseApplication {
+
+export class Application extends BaseApplication {
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Dynamic command loading system
 	private commands_: Record<string, any> = {};
@@ -123,7 +125,7 @@ class Application extends BaseApplication {
 		return [];
 	}
 
-	public setupCommand(cmd: string) {
+	public setupCommand(cmd: BaseCommand) {
 		return setupCommand(cmd, (t: string) => this.stdout(t), () => this.store(), () => this.gui());
 	}
 
@@ -198,7 +200,7 @@ class Application extends BaseApplication {
 	public async commandMetadata() {
 		if (this.commandMetadata_) return this.commandMetadata_;
 
-		let output = await this.cache_.getItem('metadata');
+		let output = await this.cache_.getItem('metadata') as Record<string, unknown>;
 		if (output) {
 			this.commandMetadata_ = output;
 			return { ...this.commandMetadata_ };
@@ -438,7 +440,7 @@ class Application extends BaseApplication {
 			// Otherwise open the GUI
 			const keymap = await this.loadKeymaps();
 
-			const AppGui = require('./app-gui.js');
+			const AppGui = require('./app-gui.js').default;
 			this.gui_ = new AppGui(this, this.store(), keymap);
 			this.gui_.setLogger(this.logger());
 			await this.gui_.start();

@@ -1,7 +1,7 @@
-const Entities = require('html-entities').AllHtmlEntities;
+import { AllHtmlEntities as Entities } from 'html-entities';
 const htmlentities = new Entities().encode;
 import { fileUriToPath } from '@joplin/utils/url';
-const htmlparser2 = require('@joplin/fork-htmlparser2');
+import * as htmlparser2 from '@joplin/fork-htmlparser2';
 
 // [\s\S] instead of . for multiline matching
 // https://stackoverflow.com/a/16119722/561309
@@ -183,7 +183,7 @@ class HtmlUtils {
 			url.startsWith('http://') ||
 			url.startsWith('mailto:') ||
 			url.startsWith('joplin://') ||
-			!!url.match(/:\/[0-9a-zA-Z]{32}/) ||
+			!!url.match(/^:\/[0-9a-zA-Z]{32}(\/.*)?$/) ||
 			// We also allow anchors but only with a specific set of a characters.
 			// Fixes https://github.com/laurent22/joplin/issues/8286
 			!!url.match(/^#[a-zA-Z0-9-]+$/)) return true;

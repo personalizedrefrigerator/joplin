@@ -4,7 +4,7 @@ import JoplinError from '../../JoplinError';
 import time from '../../time';
 import { FileApi } from '../../file-api';
 import { AppType } from '../../models/Setting';
-const { fileExtension, filename } = require('../../path-utils');
+import { fileExtension, filename } from '../../path-utils';
 
 export enum LockType {
 	None = 0,
@@ -128,8 +128,7 @@ function defaultAcquireLockOptions(): AcquireLockOptions {
 }
 
 interface RefreshTimer {
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	id: any;
+	id: ReturnType<typeof shim.setInterval>;
 	inProgress: boolean;
 }
 
@@ -198,8 +197,7 @@ export default class LockHandler {
 		return `${Dirnames.Locks}/${this.lockFilename(lock)}`;
 	}
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	private lockFileToObject(file: any): Lock {
+	private lockFileToObject(file: { path?: string; updated_time?: number }): Lock {
 		return lockNameToObject(filename(file.path), file.updated_time);
 	}
 

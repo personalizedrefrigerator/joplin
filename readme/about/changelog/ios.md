@@ -1,5 +1,40 @@
 # Joplin iOS Changelog
 
+## [ios-v13.6.9](https://github.com/laurent22/joplin/releases/tag/ios-v13.6.9) - 2026-05-22T10:09:34Z
+
+- Fixed: Fix scroll jumps while editing long paragraphs (#15495) (#15490 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+
+## [ios-v13.6.8](https://github.com/laurent22/joplin/releases/tag/ios-v13.6.8) - 2026-05-19T14:45:16Z
+
+- New: Add padding to the bottom of the viewer and editor  (#15418 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- New: Add setting to choose the default view / edit state (#15423 by [@mrjo118](https://github.com/mrjo118))
+- Improved: Improve view/edit toggle button appearance in note header (#15450)
+- Fixed: Fix JEX import on iOS (#15408) (#15407 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: In-editor rendering: Do not render empty inline HTML (#15470) (#15467 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+
+## [ios-v13.6.7](https://github.com/laurent22/joplin/releases/tag/ios-v13.6.7) - 2026-05-12T10:04:26Z
+
+- Fixed: Fix plugins fail to start (#15362) (#15311 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+
+## [ios-v13.6.6](https://github.com/laurent22/joplin/releases/tag/ios-v13.6.6) - 2026-05-05T15:29:24Z
+
+- New: Add 'Go to start/end of note' toolbar buttons (#15015 by [@Vpatel1093](https://github.com/Vpatel1093))
+- Improved: Accessibility: View/edit toggle: Improve screen reader accessibility (#15167 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Improved: Apply Markdown formatting commands per-line (#15164) (#14854 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Improved: Remove confirm password field when a key already exists, and prevent invalid key creation scenario (#15122 by [@mrjo118](https://github.com/mrjo118))
+- Improved: Remove unnecessary padding at bottom of note in view mode (#15108 by [@mrjo118](https://github.com/mrjo118))
+- Improved: Updated packages react-native-share (v12.2.2), sass (v1.95.1)
+- Fixed: Fix Android markdown editor text replacement (characters disappearing during typing) (#15007) (#13134 by Sriram Varun Kumar)
+- Fixed: Fix E2EE password validation: Upgrade react-native-quick-crypto to v1.0.19 (#15103) (#14975 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Fix back button disabled after navigating away from a deleted notebook (#15028) (#15004 by Sriram Varun Kumar)
+- Fixed: Fix conflicts notebook has low contrast when selected (#15168) (#13437 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Fix markdown editor not scrolling to search results (#15119) (#15116 by Sriram Varun Kumar)
+- Fixed: Fix profile list not scrollable to last item on Manage Profiles screen (#15074) (#15061 by Sriram Varun Kumar)
+- Fixed: Fix share error toast cut off on Android 15+ (#15072) (#15071 by Sriram Varun Kumar)
+- Fixed: Fix shared note not persisted to active notebook (#15064) (#15060 by Sriram Varun Kumar)
+- Fixed: Migrate expo-av to expo-audio (#14847) (#14804 by [@gherardi](https://github.com/gherardi))
+- Fixed: Rich Text Editor: Fix undo/redo keyboard shortcuts (#15207) (#15206 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+
 ## [ios-v13.6.4](https://github.com/laurent22/joplin/releases/tag/ios-v13.6.4) - 2026-04-05T15:21:46Z
 
 - New: Add toolbar button reordering with up/down arrows (#14485 by [@Vpatel1093](https://github.com/Vpatel1093))
