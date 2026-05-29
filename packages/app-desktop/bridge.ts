@@ -33,7 +33,7 @@ interface MessageDialogOptions extends Omit<MessageBoxSyncOptions, 'message'> {
 	message?: string;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Using any to match a TypeScript type
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Using any to match an electron type
 type OnIpcMainMessage = (event: IpcMainInvokeEvent, messageId: string, ...args: any[])=> void;
 type IpcResponseListener = (response: unknown)=> void;
 export interface IpcMainHandle {
@@ -510,13 +510,11 @@ export class Bridge {
 	// Note: The client **must** call respondIpcMainMessage after responding to the event.
 	public setIpcMainHandler(channel: string, handler: OnIpcMainMessage): IpcMainHandle {
 		this.channelHandlers_.set(channel, handler);
-		// For the return value to be correctly sent back to the .invoke call, it seems to be necessary
-		// to await the handler here (perhaps due to @electron/remote?)
 		ipcMain.handle(channel, async (event, ...args) => {
-			// Issue: Electron/remote doesn't send callback responses to the main process...
-			// As a workaround, require that the
+			// `@electron/remote` doesn't send callback responses to the main process.
+			// As such, handler() can't return a value directly to the main process.
+			// `respondIpcMainMessage` is present as a workaround.
 			const messageId = `message-${this.nextResponseListenerId_++}`;
-
 			return new Promise<unknown>((resolve) => {
 				this.channelResponseListeners_.set(messageId, (r) => {
 					resolve(r);
