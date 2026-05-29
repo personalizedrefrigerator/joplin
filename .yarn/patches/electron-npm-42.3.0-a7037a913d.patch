@@ -27,7 +27,7 @@ index 540e1e68a561fbd0b3af0438b0465e984a7d5b52..4f4c624412bdaabf4706fd26c9278ee5
 -    const hasTypeDefinitions = fs.existsSync(srcTypeDefPath);
 +  const dir = path.join(__dirname, 'dist');
 +  const zip = new AdmZip(zipPath);
-+  zip.extractAllTo(dir);
++  zip.extractAllTo(dir, false, true);
  
 -    if (hasTypeDefinitions) {
 -      fs.renameSync(srcTypeDefPath, targetTypeDefPath);

@@ -29223,7 +29223,7 @@ __metadata:
 
 "electron@patch:electron@npm%3A42.3.0#~/.yarn/patches/electron-npm-42.3.0-a7037a913d.patch":
   version: 42.3.0
-  resolution: "electron@patch:electron@npm%3A42.3.0#~/.yarn/patches/electron-npm-42.3.0-a7037a913d.patch::version=42.3.0&hash=2783cc"
+  resolution: "electron@patch:electron@npm%3A42.3.0#~/.yarn/patches/electron-npm-42.3.0-a7037a913d.patch::version=42.3.0&hash=f5a818"
   dependencies:
     "@electron/get": "npm:^5.0.0"
     "@types/node": "npm:^24.9.0"
@@ -29231,7 +29231,7 @@ __metadata:
   bin:
     electron: cli.js
     install-electron: install.js
-  checksum: 10/ba1dcbfce54145498fae63d00c2c61466c04717641531823b4d638b677bd7057d485e75274db4303be212fe29966107e4fdd507ea590608c87cd805240787bae
+  checksum: 10/609578d57f09c5c5f7d921ec3625181c4c8bb98afab56c02ac8808f3562cff1bea31195a4686db6c284279bda4020e6de336c8ba6535bab12cc16fc96c9ad3b7
   languageName: node
   linkType: hard
 
