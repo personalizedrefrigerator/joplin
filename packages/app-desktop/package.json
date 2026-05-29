@@ -8,7 +8,7 @@
     "dist": "gulp before-dist && yarn electronRebuild && npx electron-builder",
     "build": "gulp build",
     "bundle": "gulp bundleWithStats",
-    "install-electron": "install-electron",
+    "install-electron": "install-electron --no",
     "electronBuilder": "gulp electronBuilder",
     "electronRebuild": "gulp electronRebuild",
     "tsc": "tsc --project tsconfig.json",
