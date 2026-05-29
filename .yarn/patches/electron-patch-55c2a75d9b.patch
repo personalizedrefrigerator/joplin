@@ -1,0 +1,52 @@
+diff --git a/install.js b/install.js
+index a8982a02ae64c0a16960a894bc326ddab0a9e400..e010e7bed53294dd065f7078de83eaffd4bce1f7 100755
+--- a/install.js
++++ b/install.js
+@@ -79,26 +79,33 @@ function isInstalled() {
+ }
+ 
+ // unzips and makes path.txt point at the correct executable
+-function extractFile(zipPath) {
++async function extractFile(zipPath) {
+   console.log('Artifact downloaded to', zipPath);
+   const distPath = process.env.ELECTRON_OVERRIDE_DIST_PATH || path.join(__dirname, 'dist');
+   console.log('Dist path', distPath);
+ 
+-  return extract(zipPath, { dir: path.join(__dirname, 'dist') }).then(() => {
+-    console.log('Extraction completed');
+-    // If the zip contains an "electron.d.ts" file,
+-    // move that up
+-    const srcTypeDefPath = path.join(distPath, 'electron.d.ts');
+-    const targetTypeDefPath = path.join(__dirname, 'electron.d.ts');
+-    const hasTypeDefinitions = fs.existsSync(srcTypeDefPath);
++  try {
++    const dir = path.join(__dirname, 'dist');
++    console.log('extract', zipPath, 'from', dir)
++    await extract(zipPath, { dir });
++  } catch (error) {
++    console.log('Extraction failed', error);
++    throw error;
++  }
+ 
+-    if (hasTypeDefinitions) {
+-      fs.renameSync(srcTypeDefPath, targetTypeDefPath);
+-    }
++  console.log('Extraction completed');
++  // If the zip contains an "electron.d.ts" file,
++  // move that up
++  const srcTypeDefPath = path.join(distPath, 'electron.d.ts');
++  const targetTypeDefPath = path.join(__dirname, 'electron.d.ts');
++  const hasTypeDefinitions = fs.existsSync(srcTypeDefPath);
+ 
+-    // Write a "path.txt" file.
+-    return fs.promises.writeFile(path.join(__dirname, 'path.txt'), platformPath);
+-  });
++  if (hasTypeDefinitions) {
++    fs.renameSync(srcTypeDefPath, targetTypeDefPath);
++  }
++
++  // Write a "path.txt" file.
++  return fs.promises.writeFile(path.join(__dirname, 'path.txt'), platformPath);
+ }
+ 
+ function getPlatformPath() {

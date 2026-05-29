@@ -171,7 +171,7 @@
     "color": "3.2.1",
     "compare-versions": "6.1.1",
     "debounce": "1.2.1",
-    "electron": "patch:electron@npm%3A42.3.0#~/.yarn/patches/electron-npm-42.3.0-a7037a913d.patch",
+    "electron": "patch:electron@patch%3Aelectron@npm%253A42.3.0%23~/.yarn/patches/electron-npm-42.3.0-a7037a913d.patch%3A%3Aversion=42.3.0&hash=5ba39a#~/.yarn/patches/electron-patch-55c2a75d9b.patch",
     "electron-builder": "24.13.3",
     "electron-updater": "6.6.8",
     "electron-window-state": "5.0.3",

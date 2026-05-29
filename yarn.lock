@@ -12292,7 +12292,7 @@ __metadata:
     color: "npm:3.2.1"
     compare-versions: "npm:6.1.1"
     debounce: "npm:1.2.1"
-    electron: "patch:electron@npm%3A42.3.0#~/.yarn/patches/electron-npm-42.3.0-a7037a913d.patch"
+    electron: "patch:electron@patch%3Aelectron@npm%253A42.3.0%23~/.yarn/patches/electron-npm-42.3.0-a7037a913d.patch%3A%3Aversion=42.3.0&hash=5ba39a#~/.yarn/patches/electron-patch-55c2a75d9b.patch"
     electron-builder: "npm:24.13.3"
     electron-updater: "npm:6.6.8"
     electron-window-state: "npm:5.0.3"
@@ -29221,7 +29221,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"electron@patch:electron@npm%3A42.3.0#~/.yarn/patches/electron-npm-42.3.0-a7037a913d.patch":
+"electron@patch:electron@npm%3A42.3.0#~/.yarn/patches/electron-npm-42.3.0-a7037a913d.patch::version=42.3.0&hash=5ba39a":
   version: 42.3.0
   resolution: "electron@patch:electron@npm%3A42.3.0#~/.yarn/patches/electron-npm-42.3.0-a7037a913d.patch::version=42.3.0&hash=5ba39a"
   dependencies:
@@ -29232,6 +29232,20 @@ __metadata:
     electron: cli.js
     install-electron: install.js
   checksum: 10/3c86fd42b10951e14a0218b63766f3d259a36f283e752b9e5ec6742124b1f375798c9e31b48a5cc744d325d5f1424b261c756a15face780a0cb1b26a53b12647
+  languageName: node
+  linkType: hard
+
+"electron@patch:electron@patch%3Aelectron@npm%253A42.3.0%23~/.yarn/patches/electron-npm-42.3.0-a7037a913d.patch%3A%3Aversion=42.3.0&hash=5ba39a#~/.yarn/patches/electron-patch-55c2a75d9b.patch":
+  version: 42.3.0
+  resolution: "electron@patch:electron@patch%3Aelectron@npm%253A42.3.0%23~/.yarn/patches/electron-npm-42.3.0-a7037a913d.patch%3A%3Aversion=42.3.0&hash=5ba39a#~/.yarn/patches/electron-patch-55c2a75d9b.patch::version=42.3.0&hash=624bc0"
+  dependencies:
+    "@electron/get": "npm:^5.0.0"
+    "@types/node": "npm:^24.9.0"
+    extract-zip: "npm:^2.0.1"
+  bin:
+    electron: cli.js
+    install-electron: install.js
+  checksum: 10/0dac512761d21def30e1ece96d6278c7e298b951300042da6c71c9386bf5f8afdc96d7414c716edbe7d13e6bebccb51d0f5d41fd3522b7932f706d48c9fd4035
   languageName: node
   linkType: hard
 
