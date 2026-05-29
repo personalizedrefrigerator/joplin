@@ -122,6 +122,15 @@ if [ $testResult -ne 0 ]; then
 	exit $testResult
 fi
 
+cd packages/app-desktop && yarn install-electron
+testResult=$?
+if [ $testResult -ne 0 ]; then
+	echo "Failed to install Electron."
+	exit $testResult
+fi
+
+cd "$ROOT_DIR"
+
 # =============================================================================
 # Run test units
 # =============================================================================

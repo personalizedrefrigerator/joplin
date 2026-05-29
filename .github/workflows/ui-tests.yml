@@ -31,6 +31,8 @@ jobs:
           # runners. Since the onenote-converter doesn't have UI tests, it can be excluded
           # from build:
           SKIP_ONENOTE_CONVERTER_BUILD: 1
+      - name: Download Electron
+        run: cd packages/app-desktop && yarn install-electron
       - name: Run UI tests
         shell: bash
         run: |

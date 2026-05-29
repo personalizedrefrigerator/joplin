@@ -6,21 +6,8 @@ import buildDefaultPlugins from '@joplin/default-plugins/commands/buildAll';
 import copy7Zip from './tools/copy7Zip';
 import bundleJs from './tools/bundleJs';
 import { remove } from 'fs-extra';
-import execa = require('execa');
 
 const tasks = {
-	installElectron: {
-		// Allows importing Electron from tests in CI.
-		// With Electron 42, Electron doesn't download until the first "yarn start".
-		// Not all CI jobs that run automated tests run "yarn start".
-		fn: async () => {
-			const path = require.resolve('electron/install.js');
-			const task = await execa.node(path);
-			if (task.exitCode !== 0) {
-				throw new Error(`Failed to install Electron: ${task.stderr}`);
-			}
-		},
-	},
 	bundle: {
 		fn: () => bundleJs(false),
 	},
@@ -77,7 +64,6 @@ const tasks = {
 utils.registerGulpTasks(gulp, tasks);
 
 const buildBeforeStartParallel = gulp.parallel(
-	'installElectron',
 	'compileScripts',
 	'compilePackageInfo',
 	'copyPluginAssets',
