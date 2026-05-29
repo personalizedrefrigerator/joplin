@@ -5,9 +5,8 @@ const compilePackageInfo = require('@joplin/tools/compilePackageInfo');
 import buildDefaultPlugins from '@joplin/default-plugins/commands/buildAll';
 import copy7Zip from './tools/copy7Zip';
 import bundleJs from './tools/bundleJs';
-import { pathExists, remove } from 'fs-extra';
+import { remove } from 'fs-extra';
 import execa = require('execa');
-import { dirname, join } from 'path';
 
 const tasks = {
 	installElectron: {
@@ -16,23 +15,7 @@ const tasks = {
 		// Not all CI jobs that run automated tests run "yarn start".
 		fn: async () => {
 			const path = require.resolve('electron/install.js');
-			const task = await execa.node(path, { stdio: 'inherit' });
-			if (task.exitCode !== 0) {
-				throw new Error(`Failed to install Electron: ${task.stderr}`);
-			}
-
-			// The Electron installer creates a path.txt file if installation was successful.
-			const testFile = join(dirname(path), 'path.txt');
-			if (!await pathExists(testFile)) {
-				// eslint-disable-next-line no-console
-				console.log('Retrying Electron installation...');
-				// Requiring Electron can also trigger the download process
-				require('electron');
-
-				if (!await pathExists(testFile)) {
-					throw new Error(`Electron failed to install successfully: ${testFile} does not exist.`);
-				}
-			}
+			await execa.node(path, { stdio: 'inherit' });
 		},
 	},
 	bundle: {
