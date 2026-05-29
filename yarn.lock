@@ -12292,7 +12292,7 @@ __metadata:
     color: "npm:3.2.1"
     compare-versions: "npm:6.1.1"
     debounce: "npm:1.2.1"
-    electron: "npm:42.3.0"
+    electron: "patch:electron@npm%3A42.3.0#~/.yarn/patches/electron-npm-42.3.0-a7037a913d.patch"
     electron-builder: "npm:24.13.3"
     electron-updater: "npm:6.6.8"
     electron-window-state: "npm:5.0.3"
@@ -29218,6 +29218,20 @@ __metadata:
     electron: cli.js
     install-electron: install.js
   checksum: 10/969c82badc2cb9e573f82a7e87ca208f15bcee862b77a3d45d19e2f239ca8dcc6130442e20608daa54529847adbf06c0cb628f57c4e0cff3abd6b867b7f1e42a
+  languageName: node
+  linkType: hard
+
+"electron@patch:electron@npm%3A42.3.0#~/.yarn/patches/electron-npm-42.3.0-a7037a913d.patch":
+  version: 42.3.0
+  resolution: "electron@patch:electron@npm%3A42.3.0#~/.yarn/patches/electron-npm-42.3.0-a7037a913d.patch::version=42.3.0&hash=5ba39a"
+  dependencies:
+    "@electron/get": "npm:^5.0.0"
+    "@types/node": "npm:^24.9.0"
+    extract-zip: "npm:^2.0.1"
+  bin:
+    electron: cli.js
+    install-electron: install.js
+  checksum: 10/3c86fd42b10951e14a0218b63766f3d259a36f283e752b9e5ec6742124b1f375798c9e31b48a5cc744d325d5f1424b261c756a15face780a0cb1b26a53b12647
   languageName: node
   linkType: hard
 

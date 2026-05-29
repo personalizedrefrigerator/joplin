@@ -16,7 +16,7 @@ const tasks = {
 		// Not all CI jobs that run automated tests run "yarn start".
 		fn: async () => {
 			const path = require.resolve('electron/install.js');
-			const task = await execa.node(path);
+			const task = await execa.node(path, { stdio: 'inherit' });
 			if (task.exitCode !== 0) {
 				throw new Error(`Failed to install Electron: ${task.stderr}`);
 			}
@@ -24,6 +24,8 @@ const tasks = {
 			// The Electron installer creates a path.txt file if installation was successful.
 			const testFile = join(dirname(path), 'path.txt');
 			if (!await pathExists(testFile)) {
+				// eslint-disable-next-line no-console
+				console.log('Retrying Electron installation...');
 				// Requiring Electron can also trigger the download process
 				require('electron');
 
