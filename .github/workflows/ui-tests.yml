@@ -31,10 +31,6 @@ jobs:
           # runners. Since the onenote-converter doesn't have UI tests, it can be excluded
           # from build:
           SKIP_ONENOTE_CONVERTER_BUILD: 1
-      - name: Download Electron
-        # Since Electron 42, the Electron binary is no longer downloaded as part of postinstall.
-        # See https://www.electronjs.org/blog/electron-42-0#electron-no-longer-downloads-itself-via-postinstall-script
-        run: npx install-electron
       - name: Run UI tests
         shell: bash
         run: |
