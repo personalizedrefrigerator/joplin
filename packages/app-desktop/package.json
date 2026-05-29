@@ -8,7 +8,6 @@
     "dist": "gulp before-dist && yarn electronRebuild && npx electron-builder",
     "build": "gulp build",
     "bundle": "gulp bundleWithStats",
-    "install-electron": "ELECTRON_CACHE_MODE=3 install-electron",
     "electronBuilder": "gulp electronBuilder",
     "electronRebuild": "gulp electronRebuild",
     "tsc": "tsc --project tsconfig.json",
@@ -172,7 +171,7 @@
     "color": "3.2.1",
     "compare-versions": "6.1.1",
     "debounce": "1.2.1",
-    "electron": "patch:electron@npm%3A42.3.0#~/.yarn/patches/electron-npm-42.3.0-a7037a913d.patch",
+    "electron": "42.3.0",
     "electron-builder": "24.13.3",
     "electron-updater": "6.6.8",
     "electron-window-state": "5.0.3",
@@ -214,6 +213,7 @@
     "tinymce": "6.8.5",
     "ts-jest": "29.4.6",
     "ts-node": "10.9.2",
+    "execa": "5.1.1",
     "typescript": "5.9.3"
   },
   "dependencies": {
