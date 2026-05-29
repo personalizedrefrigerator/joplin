@@ -13,7 +13,7 @@ const tasks = {
 		// Allows importing Electron from tests in CI.
 		// With Electron 42, Electron doesn't download until the first "yarn start".
 		// Not all CI jobs that run automated tests run "yarn start".
-		fn: () => execCommand(['yarn', 'installElectron']),
+		fn: () => execCommand(['yarn', 'installElectron'], { cwd: __dirname }),
 	},
 	bundle: {
 		fn: () => bundleJs(false),
