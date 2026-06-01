@@ -22,6 +22,8 @@ const { join } = require('path');
 const ignoreFile = includeIgnoreFile(join(__dirname, '.ignore.eslint'));
 
 module.exports = defineConfig([{
+	name: 'Base rules (all config targets)',
+
 	linterOptions: {
 		// ESLint v9 changed the default to "warn". Leave as "off" for now to limit
 		// the codebase changes needed as part of the ESLint v9 upgrade.
@@ -256,9 +258,7 @@ module.exports = defineConfig([{
 		'no-console': 'off',
 	},
 }, {
-	// Keep parity with the previous `--ext .jsx` flag. No .jsx files exist
-	// today, but registering the extension ensures any added in future are
-	// linted the same way .js files are.
+	// .jsx files should be linted with the default rules
 	files: ['**/*.jsx'],
 }, {
 	// enable the rule specifically for TypeScript files
@@ -276,10 +276,8 @@ module.exports = defineConfig([{
 			'ignoredNodes': [
 				// See https://github.com/typescript-eslint/typescript-eslint/issues/1824
 				'TSUnionType',
-				// Template-literal contents are whitespace-sensitive, so their
-				// indentation cannot be enforced; @stylistic/indent checks them
-				// more strictly than the deprecated @typescript-eslint/indent it
-				// replaces did.
+				// Disable template literal indentation checking for compatibility with
+				// the original indent rule.
 				'TemplateLiteral *',
 			],
 			// @stylistic/indent defaults SwitchCase to 1; the deprecated
