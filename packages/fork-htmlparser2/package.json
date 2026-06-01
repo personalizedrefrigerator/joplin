@@ -33,7 +33,7 @@
   },
   "scripts": {
     "coverage": "cat coverage/lcov.info | coveralls",
-    "lint": "eslint --ext=js,ts src",
+    "lint": "eslint src",
     "format": "prettier --write '**/*.{ts,md,json}'",
     "build": "tsc",
     "prepare": "npm run build"
