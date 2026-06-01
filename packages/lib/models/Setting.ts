@@ -163,7 +163,7 @@ const globalMigrations: GlobalMigration[] = [
 interface UserSettingMigration {
 	oldName: string;
 	newName: string;
-	// eslint-disable-next-line @typescript-eslint/ban-types -- Old code before rule was applied
+	// eslint-disable-next-line @typescript-eslint/no-unsafe-function-type -- Old code before rule was applied
 	transformValue: Function;
 
 	// Currently the migration code only supports migrating a plugin setting to the regular settings
