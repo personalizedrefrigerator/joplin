@@ -16,11 +16,10 @@ const js = require('@eslint/js');
 
 const { join } = require('path');
 
-// `.eslintignore` is no longer read natively by ESLint 9, but it remains the
-// single source of truth for ignored paths. `includeIgnoreFile` translates its
-// gitignore-style patterns into flat-config `ignores` with the correct
-// directory semantics (a hand-rolled split/filter does not).
-const ignoreFile = includeIgnoreFile(join(__dirname, '.eslintignore'));
+// As of ESLint v9, .eslintignore is no longer supported and the presence of
+// a ".eslintignore" file causes "yarn linter" to emit a warning. Work around this
+// by using an ignore file with a different name.
+const ignoreFile = includeIgnoreFile(join(__dirname, '.ignore.eslint'));
 
 module.exports = defineConfig([{
 	// Flat config defaults reportUnusedDisableDirectives to "warn"; the previous
