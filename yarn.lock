@@ -12486,7 +12486,7 @@ __metadata:
     "@react-native-vector-icons/get-image": "npm:12.3.0"
     "@react-native-vector-icons/ionicons": "npm:12.3.0"
     "@react-native-vector-icons/material-design-icons": "npm:12.4.1"
-    "@react-native-vector-icons/material-icons": "npm:12.4.0"
+    "@react-native-vector-icons/material-icons": "npm:12.4.1"
     "@react-native/babel-preset": "npm:0.81.6"
     "@react-native/metro-config": "npm:0.81.6"
     "@react-native/typescript-config": "npm:0.83.1"
@@ -15947,27 +15947,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-native-vector-icons/material-icons@npm:12.4.0":
-  version: 12.4.0
-  resolution: "@react-native-vector-icons/material-icons@npm:12.4.0"
+"@react-native-vector-icons/material-icons@npm:12.4.1":
+  version: 12.4.1
+  resolution: "@react-native-vector-icons/material-icons@npm:12.4.1"
   dependencies:
     "@react-native-vector-icons/common": "npm:^12.4.0"
   peerDependencies:
     react: "*"
     react-native: "*"
-  checksum: 10/472eb93fe551716558e4178707e08c854c05861acb2f7baff53222f13e0d0c0a02f790cfa20fcfb20eb8df1a5562f87380480b02419019c388db223d9a78779b
-  languageName: node
-  linkType: hard
-
-"@react-native-vector-icons/material-icons@patch:@react-native-vector-icons/material-icons@npm%3A12.4.0#~/.yarn/patches/@react-native-vector-icons-material-icons-npm-12.4.0-94138e627b.patch":
-  version: 12.4.0
-  resolution: "@react-native-vector-icons/material-icons@patch:@react-native-vector-icons/material-icons@npm%3A12.4.0#~/.yarn/patches/@react-native-vector-icons-material-icons-npm-12.4.0-94138e627b.patch::version=12.4.0&hash=81fbb4"
-  dependencies:
-    "@react-native-vector-icons/common": "npm:^12.4.0"
-  peerDependencies:
-    react: "*"
-    react-native: "*"
-  checksum: 10/64ff8df53e5a339635278b0fc6cce6a16620d404cad1d97dfb8a5e25542654bbd30fc20ece1cfdce7cd9382a1d999b938c1554122743ee0f2193d5bbcb08c151
+  checksum: 10/88517e20a7b1a31bbe713100a4ab9d07fbf7758ce81cd249bcaa41484e6a7e35006d27a77d20f5d1579febad157a72cee6b68f4e986af0b660da40f5fba5db42
   languageName: node
   linkType: hard
 
@@ -32066,15 +32054,6 @@ __metadata:
     setimmediate: "npm:^1.0.5"
     ua-parser-js: "npm:^1.0.35"
   checksum: 10/71252595b00b06fb0475a295c74d81ada1cc499b7e11f2cde51fef04618affa568f5b7f4927f61720c23254b9144be28f8acb2086a5001cf65df8eec87c6ca5c
-  languageName: node
-  linkType: hard
-
-"fd-slicer@npm:~1.1.0":
-  version: 1.1.0
-  resolution: "fd-slicer@npm:1.1.0"
-  dependencies:
-    pend: "npm:~1.2.0"
-  checksum: 10/db3e34fa483b5873b73f248e818f8a8b59a6427fd8b1436cd439c195fdf11e8659419404826059a642b57d18075c856d06d6a50a1413b714f12f833a9341ead3
   languageName: node
   linkType: hard
 
@@ -60441,23 +60420,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"yauzl@npm:^2.10.0":
-  version: 2.10.0
-  resolution: "yauzl@npm:2.10.0"
-  dependencies:
-    buffer-crc32: "npm:~0.2.3"
-    fd-slicer: "npm:~1.1.0"
-  checksum: 10/1e4c311050dc0cf2ee3dbe8854fe0a6cde50e420b3e561a8d97042526b4cf7a0718d6c8d89e9e526a152f4a9cec55bcea9c3617264115f48bd6704cf12a04445
-  languageName: node
-  linkType: hard
-
-"yauzl@npm:^3.2.0":
-  version: 3.2.0
-  resolution: "yauzl@npm:3.2.0"
+"yauzl@npm:3.3.1":
+  version: 3.3.1
+  resolution: "yauzl@npm:3.3.1"
   dependencies:
     buffer-crc32: "npm:~0.2.3"
     pend: "npm:~1.2.0"
-  checksum: 10/a3cd2bfcf7590673bb35750f2a4e5107e3cc939d32d98a072c0673fe42329e390f471b4a53dbbd72512229099b18aa3b79e6ddb87a73b3a17446080c903a2c4b
+  checksum: 10/b9ecac2dca8cf0ce83d29e24ab66af50c2488f12630d0778c5190cc3ca898308986a3955fb6bbc8ee6fe21eae1691ec26068760a54d873f3930718be3bbd1ce3
   languageName: node
   linkType: hard
 
