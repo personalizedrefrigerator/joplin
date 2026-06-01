@@ -235,11 +235,9 @@ export class Bridge {
 			if (registered) {
 				this.registeredGlobalHotkey_ = accelerator;
 			} else {
-
 				console.warn(`Bridge: Failed to register global shortcut: ${accelerator}`);
 			}
 		} catch (error) {
-
 			console.error(`Bridge: Error registering global shortcut "${accelerator}":`, error);
 		}
 	}
