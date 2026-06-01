@@ -22,10 +22,10 @@ const { join } = require('path');
 const ignoreFile = includeIgnoreFile(join(__dirname, '.ignore.eslint'));
 
 module.exports = defineConfig([{
-	// Flat config defaults reportUnusedDisableDirectives to "warn"; the previous
-	// .eslintrc setup left it off. Keep it off so pre-existing disable comments
-	// are not newly flagged (and not auto-removed by `eslint --fix`).
 	linterOptions: {
+		// ESLint v9 changed the default to "warn". Leave as "off" for now to limit
+		// the codebase changes needed as part of the ESLint v9 upgrade.
+		// TODO: Set to "error".
 		reportUnusedDisableDirectives: 'off',
 	},
 
@@ -100,7 +100,7 @@ module.exports = defineConfig([{
 
 	settings: {
 		react: {
-			version: '16.12',
+			version: '19.1',
 		},
 	},
 
