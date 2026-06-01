@@ -367,4 +367,28 @@ module.exports = defineConfig([{
 			},
 		],
 	},
+}, {
+	files: ['packages/app-cli/tests/**/*.js'],
+
+	rules: {
+		// Ignore all unused function arguments, because in some
+		// case they are kept to indicate the function signature.
+		'no-unused-vars': ['error', { 'argsIgnorePattern': '.*' }],
+		'@typescript-eslint/no-unused-vars': 0,
+	},
+}, {
+	files: ['packages/app-desktop/**/*.{tsx,js,ts}'],
+
+	rules: {
+		'no-restricted-globals': ['error',
+			...['alert', 'confirm', 'prompt'].map(alertLikeFunction => ({
+				'name': alertLikeFunction,
+				'message': [
+					'Avoid using alert()/confirm()/prompt() in the desktop app -- they break keyboard input on some systems.',
+					'Prefer shim.showMessageBox and shim.showConfirmationDialog.',
+					'See https://github.com/electron/electron/issues/19977.',
+				].join(' '),
+			})),
+		],
+	},
 }, ignoreFile]);
