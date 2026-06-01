@@ -23,6 +23,13 @@ const { join } = require('path');
 const ignoreFile = includeIgnoreFile(join(__dirname, '.eslintignore'));
 
 module.exports = defineConfig([{
+	// Flat config defaults reportUnusedDisableDirectives to "warn"; the previous
+	// .eslintrc setup left it off. Keep it off so pre-existing disable comments
+	// are not newly flagged (and not auto-removed by `eslint --fix`).
+	linterOptions: {
+		reportUnusedDisableDirectives: 'off',
+	},
+
 	languageOptions: {
 		globals: {
 			...globals.browser,
@@ -270,6 +277,11 @@ module.exports = defineConfig([{
 			'ignoredNodes': [
 				// See https://github.com/typescript-eslint/typescript-eslint/issues/1824
 				'TSUnionType',
+				// Template-literal contents are whitespace-sensitive, so their
+				// indentation cannot be enforced; @stylistic/indent checks them
+				// more strictly than the deprecated @typescript-eslint/indent it
+				// replaces did.
+				'TemplateLiteral *',
 			],
 			// @stylistic/indent defaults SwitchCase to 1; the deprecated
 			// @typescript-eslint/indent it replaces defaulted to 0, and the
@@ -279,7 +291,9 @@ module.exports = defineConfig([{
 		'@typescript-eslint/ban-ts-comment': ['error'],
 		// `@typescript-eslint/ban-types` was removed in v8 and split into the
 		// rules below, which together reproduce its default behaviour.
-		'@typescript-eslint/no-empty-object-type': ['error'],
+		// `allowInterfaces: 'always'` keeps empty interfaces allowed: the old
+		// ban-types only banned the `{}` type, not empty interface declarations.
+		'@typescript-eslint/no-empty-object-type': ['error', { allowInterfaces: 'always' }],
 		'@typescript-eslint/no-unsafe-function-type': ['error'],
 		'@typescript-eslint/no-wrapper-object-types': ['error'],
 		'@typescript-eslint/explicit-member-accessibility': ['error'],

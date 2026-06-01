@@ -59,6 +59,7 @@ packages/app-mobile/packageInfo.js
 packages/app-mobile/android
 packages/app-mobile/**/*.bundle.js
 packages/app-mobile/**/*.bundle.css
+packages/app-desktop/**/*.bundle.js
 packages/app-mobile/web/public/pluginAssets/**/*
 packages/app-mobile/ios
 packages/app-mobile/lib/rnInjectedJs/
