@@ -24,17 +24,20 @@ import * as mimeUtils from '@joplin/lib/mime-utils';
 import ScreenHeader, { FolderPickerOptions, MenuOptionType, ViewToggleButtonMode } from '../../ScreenHeader';
 import NoteTagsDialog from '../NoteTagsDialog';
 import time from '@joplin/lib/time';
-import Checkbox from '../../Checkbox';
-import { _, currentLocale } from '@joplin/lib/locale';
+import { _ } from '@joplin/lib/locale';
 import { reg } from '@joplin/lib/registry';
 import ResourceFetcher from '@joplin/lib/services/ResourceFetcher';
 import { themeStyle } from '../../global-style';
 import createRootStyle from '../../../utils/createRootStyle';
 import shared, { AttachFileAsset, BaseNoteScreenComponent, Props as BaseProps } from '@joplin/lib/components/shared/note-screen-shared';
 import getStyles from './styles';
+import useStableCallback from './useStableCallback';
+import { State, StateAction, makeInitialState, noteScreenStateReducer } from './state';
+import NoteTitle from './NoteTitle';
+import VoiceTypingDialogs from './VoiceTypingDialogs';
 import SelectDateTimeDialog from '../../SelectDateTimeDialog';
 import ShareExtension from '../../../utils/ShareExtension.js';
-import { FolderEntity, NoteEntity, ResourceEntity } from '@joplin/lib/services/database/types';
+import { NoteEntity, ResourceEntity } from '@joplin/lib/services/database/types';
 import Logger from '@joplin/utils/Logger';
 import ImageEditor from '../../NoteEditor/ImageEditor/ImageEditor';
 import promptRestoreAutosave from '../../NoteEditor/ImageEditor/promptRestoreAutosave';
@@ -51,7 +54,6 @@ import { PluginHtmlContents, PluginStates, utils as pluginUtils } from '@joplin/
 import debounce from '../../../utils/debounce';
 import { focus } from '@joplin/lib/utils/focusHandler';
 import CommandService from '@joplin/lib/services/CommandService';
-import { ResourceInfo } from '../../NoteBodyViewer/hooks/useRerenderHandler';
 import getImageDimensions from '../../../utils/image/getImageDimensions';
 import resizeImage from '../../../utils/image/resizeImage';
 import { CameraResult } from '../../CameraView/types';
@@ -64,8 +66,6 @@ import PluginUserWebView from '../../plugins/dialogs/PluginUserWebView';
 import getShownPluginEditorView from '@joplin/lib/services/plugins/utils/getShownPluginEditorView';
 import getActivePluginEditorView from '@joplin/lib/services/plugins/utils/getActivePluginEditorView';
 import EditorPluginHandler from '@joplin/lib/services/plugins/EditorPluginHandler';
-import AudioRecordingBanner from '../../voiceTyping/AudioRecordingBanner';
-import SpeechToTextBanner from '../../voiceTyping/SpeechToTextBanner';
 import CameraView from '../../CameraView/CameraView';
 import ShareNoteDialog from '../ShareNoteDialog';
 import stateToWhenClauseContext from '../../../services/commands/stateToWhenClauseContext';
@@ -75,7 +75,6 @@ import usePrevious from '@joplin/lib/hooks/usePrevious';
 import useNowEffect from '@joplin/lib/hooks/useNowEffect';
 import { SelectionRange } from '../../../contentScripts/markdownEditorBundle/types';
 import { EditorType } from '../../NoteEditor/types';
-import { IconButton } from 'react-native-paper';
 import { writeTextToCacheFile } from '../../../utils/ShareUtils';
 import shareFile from '../../../utils/shareFile';
 import NotePositionService from '@joplin/lib/services/NotePositionService';
@@ -83,7 +82,6 @@ import useKeyboardState from '../../../utils/hooks/useKeyboardState';
 import VoiceTyping from '../../../services/voiceTyping/VoiceTyping';
 import useDebounced from '../../../utils/hooks/useDebounced';
 import { Second } from '@joplin/utils/time';
-import TextWrapCalculator from '../Notes/TextWrapCalculator';
 import SearchEngine from '@joplin/lib/services/search/SearchEngine';
 import { ALL_NOTES_FILTER_ID } from '@joplin/lib/reserved-ids';
 
@@ -160,97 +158,12 @@ interface ComponentProps extends Props {
 	lowVerticalSpace: boolean;
 }
 
-interface State {
-	note: NoteEntity;
-	mode: NoteViewerMode;
-	readOnly: boolean;
-	searchVisible: boolean;
-	folder: FolderEntity|null;
-	lastSavedNote: NoteEntity | null;
-	isLoading: boolean;
-	titleTextInputHeight: number;
-	alarmDialogShown: boolean;
-	heightBumpView: number;
-	noteTagDialogShown: boolean;
-	publishDialogShown: boolean;
-	fromShare: boolean;
-	showCamera: boolean;
-	showImageEditor: boolean;
-	showAudioRecorder: boolean;
-	imageEditorResource: ResourceEntity;
-	imageEditorResourceFilepath: string;
-	noteResources: Record<string, ResourceInfo>;
-	newAndNoTitleChangeNoteId: boolean|null;
-	noteLastLoadTime: number;
-
-	undoRedoButtonState: {
-		canUndo: boolean;
-		canRedo: boolean;
-	};
-
-	showSpeechToTextDialog: boolean;
-	multiline: boolean;
-	showMultilineToggle: boolean | null;
-	titleContainerWidth: number;
-}
-
 type ScrollEventSlice = { fraction: number };
-
-// Emulates the partial-merge semantics of a class component's setState (accepts either a partial
-// state object or an updater function returning one).
-type StateAction = Partial<State> | ((prevState: State)=> Partial<State>);
-
-const noteScreenStateReducer = (state: State, action: StateAction): State => {
-	const partialState = typeof action === 'function' ? action(state) : action;
-	return { ...state, ...partialState };
-};
-
-const makeInitialState = (props: ComponentProps): State => ({
-	note: Note.new(),
-	mode: props.noteVisiblePanes?.includes('editor') ? 'edit' : 'view',
-	readOnly: false,
-	folder: null,
-	lastSavedNote: null,
-	isLoading: true,
-	titleTextInputHeight: 20,
-	alarmDialogShown: false,
-	heightBumpView: 0,
-	noteTagDialogShown: false,
-	publishDialogShown: false,
-	fromShare: false,
-	showCamera: false,
-	showImageEditor: false,
-	showAudioRecorder: false,
-	searchVisible: false,
-	imageEditorResource: null,
-	noteResources: {},
-	imageEditorResourceFilepath: null,
-	newAndNoTitleChangeNoteId: null,
-	noteLastLoadTime: Date.now(),
-
-	undoRedoButtonState: {
-		canUndo: false,
-		canRedo: false,
-	},
-
-	showSpeechToTextDialog: false,
-	multiline: false,
-	showMultilineToggle: null,
-	titleContainerWidth: 0,
-});
-
-// Returns a stable function reference that always invokes the latest version of the given callback.
-// This mirrors how class methods keep a single identity while reading the current this.state/this.props.
-const useStableCallback = <Args extends unknown[], Result>(callback: (...args: Args)=> Result) => {
-	const callbackRef = useRef(callback);
-	callbackRef.current = callback;
-	return useRef((...args: Args) => callbackRef.current(...args)).current;
-};
 
 type NoteComponentShim = BaseNoteScreenComponent<State>;
 
 const NoteScreenComponent: React.FC<ComponentProps> = props => {
-	const [state, setState] = useReducer(noteScreenStateReducer, props, makeInitialState);
+	const [state, setState] = useReducer(noteScreenStateReducer, props.noteVisiblePanes, makeInitialState);
 
 	// Mirror the committed state/props in refs so that stable callbacks and the shared note-screen
 	// logic can read the current values (equivalent to this.state/this.props on a class instance).
@@ -1692,90 +1605,28 @@ const NoteScreenComponent: React.FC<ComponentProps> = props => {
 	const showSaveButton = false; // state.mode === 'edit' || isModified() || this.saveButtonHasBeenShown_;
 	const saveButtonDisabled = true;// !isModified();
 
-	const titleContainerStyle = isTodo ? styles.titleContainerTodo : styles.titleContainer;
-
 	const dueDate = Note.dueDateObject(note);
 
-	const textWrapCalculator_updateState = (showToggle: boolean, enableMultiline: boolean) => {
-		setState({ showMultilineToggle: showToggle, multiline: enableMultiline });
-	};
-
-	const titleToggleButton = !state.showMultilineToggle ? null :
-		<IconButton
-			icon={(!state.multiline && 'menu-down') || (state.multiline && 'menu-up')}
-			accessibilityLabel={(!state.multiline && _('Expand title')) || (state.multiline && _('Collapse title'))}
-			onPress={() => setState({ multiline: !state.multiline })}
-			size={30}
-			style={{ width: 30, height: 30, alignSelf: 'center' }}
-		/>;
-
 	const titleComp = (
-		<View
-			style={titleContainerStyle}
-			onLayout={(e) => {
-				const width = e.nativeEvent.layout.width;
-				if (width !== state.titleContainerWidth) {
-					setState({ titleContainerWidth: width });
-				}
-			}}
-
-			// Making this focusable works around a tab ordering bug on Android
-			// See https://github.com/laurent22/joplin/issues/14548
-			accessible={Platform.OS === 'android'}
-			// Since the group is focusable, it also needs a label (otherwise TalkBack reads "unlabelled"):
-			aria-label={_('Title')}
-		>
-			<TextWrapCalculator
-				textCompStyle={styles.titleTextInput}
-				textCompContainerWidth={state.titleContainerWidth}
-				showMultilineToggle={state.showMultilineToggle}
-				multiline={state.multiline}
-				text={note.title}
-				updateState={textWrapCalculator_updateState}
-				readOnly={false}
-			/>
-			{isTodo && <Checkbox style={styles.checkbox} checked={!!Number(note.todo_completed)} onChange={todoCheckbox_change} />}
-			<TextInput
-				key={state.multiline ? 'multiLine' : 'singleLine'}
-				ref={titleTextFieldRef}
-				underlineColorAndroid="#ffffff00"
-				autoCapitalize="sentences"
-				style={styles.titleTextInput}
-				value={note.title}
-				onChangeText={title_changeText}
-				selectionColor={theme.textSelectionColor}
-				keyboardAppearance={theme.keyboardAppearance}
-				placeholder={_('Add title')}
-				placeholderTextColor={theme.colorFaded}
-				editable={!state.readOnly}
-				multiline={state.multiline}
-				submitBehavior = "blurAndSubmit"
-			/>
-			{ titleToggleButton }
-		</View>
+		<NoteTitle
+			styles={styles}
+			theme={theme}
+			note={note}
+			isTodo={isTodo}
+			readOnly={state.readOnly}
+			multiline={state.multiline}
+			showMultilineToggle={state.showMultilineToggle}
+			titleContainerWidth={state.titleContainerWidth}
+			titleInputRef={titleTextFieldRef}
+			onContainerWidthChange={(width) => setState({ titleContainerWidth: width })}
+			onToggleMultiline={() => setState({ multiline: !state.multiline })}
+			onUpdateWrapState={(showToggle, enableMultiline) => setState({ showMultilineToggle: showToggle, multiline: enableMultiline })}
+			onChangeTitle={title_changeText}
+			onTodoCheckboxChange={todoCheckbox_change}
+		/>
 	);
 
 	const noteTagDialog = !state.noteTagDialogShown ? null : <NoteTagsDialog onCloseRequested={noteTagDialog_closeRequested} />;
-
-	const renderVoiceTypingDialogs = () => {
-		const result = [];
-		if (state.showAudioRecorder) {
-			result.push(<AudioRecordingBanner
-				key='audio-recorder'
-				onFileSaved={audioRecordingDialog_onFile}
-				onDismiss={audioRecorderDialog_onDismiss}
-			/>);
-		}
-		if (state.showSpeechToTextDialog) {
-			result.push(<SpeechToTextBanner
-				key='speech-to-text'
-				locale={currentLocale()}
-				onText={speechToTextDialog_onText}
-				onDismiss={speechToTextDialog_onDismiss}
-			/>);
-		}
-		return result;
-	};
 
 	const { editorPlugin: activeEditorPlugin } = getActivePluginEditorView(props.plugins, props.windowId);
 
@@ -1808,7 +1659,14 @@ const NoteScreenComponent: React.FC<ComponentProps> = props => {
 			{!increaseSpaceForEditor && header}
 			{!increaseSpaceForEditor && titleComp}
 			{bodyComponent}
-			{renderVoiceTypingDialogs()}
+			<VoiceTypingDialogs
+				showAudioRecorder={state.showAudioRecorder}
+				showSpeechToTextDialog={state.showSpeechToTextDialog}
+				onAudioFileSaved={audioRecordingDialog_onFile}
+				onAudioDismiss={audioRecorderDialog_onDismiss}
+				onSpeechText={speechToTextDialog_onText}
+				onSpeechDismiss={speechToTextDialog_onDismiss}
+			/>
 
 			<SelectDateTimeDialog themeId={props.themeId} shown={state.alarmDialogShown} date={dueDate} onAccept={onAlarmDialogAccept} onReject={onAlarmDialogReject} />
 
