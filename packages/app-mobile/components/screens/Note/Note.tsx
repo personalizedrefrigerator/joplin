@@ -30,8 +30,9 @@ import { _, currentLocale } from '@joplin/lib/locale';
 import { reg } from '@joplin/lib/registry';
 import ResourceFetcher from '@joplin/lib/services/ResourceFetcher';
 import { BaseScreenComponent } from '../../base-screen';
-import { themeStyle, editorFont } from '../../global-style';
+import { themeStyle } from '../../global-style';
 import shared, { BaseNoteScreenComponent, Props as BaseProps } from '@joplin/lib/components/shared/note-screen-shared';
+import getStyles from './styles';
 import SelectDateTimeDialog from '../../SelectDateTimeDialog';
 import ShareExtension from '../../../utils/ShareExtension.js';
 import { FolderEntity, NoteEntity, ResourceEntity } from '@joplin/lib/services/database/types';
@@ -88,6 +89,33 @@ import { ALL_NOTES_FILTER_ID } from '@joplin/lib/reserved-ids';
 const emptyArray: never[] = [];
 
 const logger = Logger.create('screens/Note');
+
+const requestGeoLocationPermissions = async () => {
+	if (!Setting.value('trackLocation')) return;
+	if (Platform.OS === 'web') return;
+
+	const response = await checkPermissions(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION, {
+		onRequestConfirmation: async () => {
+			const yesIndex = 0;
+			const result = await shim.showMessageBox(
+				_('Joplin supports saving the location at which notes are saved or created. Do you want to enable it? This can be changed at any time in settings.'),
+				{
+					buttons: [_('Yes'), _('No')],
+					title: _('Save geolocation?'),
+				},
+			);
+			return result === yesIndex;
+		},
+	});
+
+	// If the user simply pressed "Deny", we don't automatically switch it off because they might accept
+	// once we show the rationale again on second try. If they press "Never again" however we switch it off.
+	// https://github.com/zoontek/react-native-permissions/issues/385#issuecomment-563132396
+	if (response === PermissionsAndroid.RESULTS.NEVER_ASK_AGAIN) {
+		reg.logger().info('Geo-location tracking has been automatically disabled');
+		Setting.setValue('trackLocation', false);
+	}
+};
 
 interface InsertTextOptions {
 	newLine?: boolean;
@@ -466,123 +494,18 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 
 	public styles() {
 		const themeId = this.props.themeId;
-		const theme = themeStyle(themeId);
 
 		const cacheKey = [themeId, this.state.titleTextInputHeight].join('_');
 
 		if (this.styles_[cacheKey]) return this.styles_[cacheKey];
 		this.styles_ = {};
 
-		// TODO: Clean up these style names and nesting
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Heterogeneous style entries (view/text/icon styles spread together); typed split would force restructuring
-		const styles: Record<string, any> = {
-			screen: {
-				flex: 1,
-				backgroundColor: theme.backgroundColor,
-			},
-			bodyTextInput: {
-				flex: 1,
-				paddingLeft: theme.marginLeft,
-				paddingRight: theme.marginRight,
-
-				// Add extra space to allow scrolling past end of document, and also to fix this:
-				// https://github.com/laurent22/joplin/issues/1437
-				// 2020-04-20: removed bottom padding because it doesn't work properly in Android
-				// Instead of being inside the scrollable area, the padding is outside thus
-				// restricting the view.
-				// See https://github.com/laurent22/joplin/issues/3041#issuecomment-616267739
-				// paddingBottom: Math.round(dimensions.height / 4),
-
-				textAlignVertical: 'top',
-				color: theme.color,
-				backgroundColor: theme.backgroundColor,
-				fontSize: this.props.editorFontSize,
-				fontFamily: editorFont(this.props.editorFont),
-			},
-			noteBodyViewer: {
-				flex: 1,
-			},
-			toggleSpaceButtonContent: {
-				flex: 1,
-			},
-			checkbox: {
-				color: theme.color,
-				paddingRight: 10,
-				paddingLeft: theme.marginLeft,
-				paddingTop: 10, // Added for iOS (Not needed for Android??)
-				paddingBottom: 10, // Added for iOS (Not needed for Android??)
-			},
-			markdownButtons: {
-				borderColor: theme.dividerColor,
-				color: theme.urlColor,
-			},
-		};
-
-		styles.noteBodyViewerPreview = {
-			...styles.noteBodyViewer,
-			borderTopColor: theme.dividerColor,
-			borderTopWidth: 1,
-			borderBottomColor: theme.dividerColor,
-			borderBottomWidth: 1,
-		};
-
-		styles.titleContainer = {
-			flex: 0,
-			flexDirection: 'row',
-			flexBasis: 'auto',
-			paddingLeft: theme.marginLeft,
-			borderBottomColor: theme.dividerColor,
-			borderBottomWidth: 1,
-			maxHeight: '40%',
-		};
-
-		styles.titleContainerTodo = { ...styles.titleContainer };
-		styles.titleContainerTodo.paddingLeft = 0;
-
-		styles.titleTextInput = {
-			flex: 1,
-			marginTop: 0,
-			paddingLeft: 0,
-			color: theme.color,
-			fontWeight: 'bold',
-			fontSize: theme.fontSize,
-			paddingTop: 10, // Added for iOS (Not needed for Android??)
-			paddingBottom: 10, // Added for iOS (Not needed for Android??)
-		};
-
-		this.styles_[cacheKey] = StyleSheet.create(styles);
+		this.styles_[cacheKey] = getStyles(themeId, this.props.editorFontSize, this.props.editorFont);
 		return this.styles_[cacheKey];
 	}
 
 	public isModified() {
 		return shared.isModified(this);
-	}
-
-	public async requestGeoLocationPermissions() {
-		if (!Setting.value('trackLocation')) return;
-		if (Platform.OS === 'web') return;
-
-		const response = await checkPermissions(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION, {
-			onRequestConfirmation: async () => {
-				const yesIndex = 0;
-				const result = await shim.showMessageBox(
-					_('Joplin supports saving the location at which notes are saved or created. Do you want to enable it? This can be changed at any time in settings.'),
-					{
-						buttons: [_('Yes'), _('No')],
-						title: _('Save geolocation?'),
-					},
-				);
-				return result === yesIndex;
-			},
-		});
-
-		// If the user simply pressed "Deny", we don't automatically switch it off because they might accept
-		// once we show the rationale again on second try. If they press "Never again" however we switch it off.
-		// https://github.com/zoontek/react-native-permissions/issues/385#issuecomment-563132396
-		if (response === PermissionsAndroid.RESULTS.NEVER_ASK_AGAIN) {
-			reg.logger().info('Geo-location tracking has been automatically disabled');
-			Setting.setValue('trackLocation', false);
-		}
 	}
 
 	public async componentDidMount() {
@@ -600,7 +523,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 		// Although it is async, we don't wait for the answer so that if permission
 		// has already been granted, it doesn't slow down opening the note. If it hasn't
 		// been granted, the popup will open anyway.
-		void this.requestGeoLocationPermissions();
+		void requestGeoLocationPermissions();
 
 		const action = this.props.navigation.state?.newNoteAttachFileAction;
 		if (action) {
