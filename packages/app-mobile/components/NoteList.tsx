@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Component } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 
 import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
@@ -24,32 +24,10 @@ interface NoteListProps {
 	selectedFolderId: string|null;
 }
 
-class NoteListComponent extends Component<NoteListProps> {
-	private rootRef_: FlatList;
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- StyleSheet.NamedStyles<T> requires T to be the style record being passed; `any` matches the existing pattern in other mobile components
-	private styles_: Record<string, StyleSheet.NamedStyles<any>>;
-
-	public constructor(props: NoteListProps) {
-		super(props);
-
-		this.state = {
-			items: [],
-			selectedItemIds: [],
-		};
-		this.rootRef_ = null;
-		this.styles_ = {};
-
-		this.createNotebookButton_click = this.createNotebookButton_click.bind(this);
-	}
-
-	private styles() {
-		const themeId = this.props.themeId;
+const useStyles = (themeId: number) => {
+	return useMemo(() => {
 		const theme = themeStyle(themeId);
-
-		if (this.styles_[themeId]) return this.styles_[themeId];
-		this.styles_ = {};
-
-		const styles = {
+		return StyleSheet.create({
 			noItemMessage: {
 				paddingLeft: theme.marginLeft,
 				paddingRight: theme.marginRight,
@@ -62,54 +40,56 @@ class NoteListComponent extends Component<NoteListProps> {
 			noNotebookView: {
 
 			},
-		};
+		});
+	}, [themeId]);
+};
 
-		this.styles_[themeId] = StyleSheet.create(styles);
-		return this.styles_[themeId];
-	}
+const NoteListComponent: React.FC<NoteListProps> = props => {
+	const { themeId, dispatch, notesSource, items, folders, selectedFolderId } = props;
 
-	private createNotebookButton_click() {
-		this.props.dispatch({
+	const rootRef = useRef<FlatList>(null);
+	const styles = useStyles(themeId);
+
+	const createNotebookButton_click = useCallback(() => {
+		dispatch({
 			type: 'NAV_GO',
 			routeName: 'Folder',
 			folderId: null,
 		});
-	}
+	}, [dispatch]);
 
-	public UNSAFE_componentWillReceiveProps(newProps: NoteListProps) {
-		// Make sure scroll position is reset when switching from one folder to another or to a tag list.
-		if (this.rootRef_ && newProps.notesSource !== this.props.notesSource) {
-			this.rootRef_.scrollToOffset({ offset: 0, animated: false });
+	// Make sure scroll position is reset when switching from one folder to another or to a tag list.
+	useEffect(() => {
+		if (rootRef.current) {
+			rootRef.current.scrollToOffset({ offset: 0, animated: false });
 		}
-	}
+	}, [notesSource]);
 
-	public render() {
-		// `enableEmptySections` is to fix this warning: https://github.com/FaridSafi/react-native-gifted-listview/issues/39
+	// `enableEmptySections` is to fix this warning: https://github.com/FaridSafi/react-native-gifted-listview/issues/39
 
-		if (this.props.items.length) {
-			return <FlatList
-				ref={ref => { this.rootRef_ = ref; }}
-				data={this.props.items}
-				renderItem={({ item }) => <NoteItem note={item} />}
-				keyExtractor={item => item.id}
-			/>;
+	if (items.length) {
+		return <FlatList
+			ref={rootRef}
+			data={items}
+			renderItem={({ item }) => <NoteItem note={item} />}
+			keyExtractor={item => item.id}
+		/>;
+	} else {
+		if (!Folder.atLeastOneRealFolderExists(folders)) {
+			const noItemMessage = _('You currently have no notebooks.');
+			return (
+				<View style={styles.noNotebookView}>
+					<Text style={styles.noItemMessage}>{noItemMessage}</Text>
+					<Button title={_('Create a notebook')} onPress={createNotebookButton_click} />
+				</View>
+			);
 		} else {
-			if (!Folder.atLeastOneRealFolderExists(this.props.folders)) {
-				const noItemMessage = _('You currently have no notebooks.');
-				return (
-					<View style={this.styles().noNotebookView}>
-						<Text style={this.styles().noItemMessage}>{noItemMessage}</Text>
-						<Button title={_('Create a notebook')} onPress={this.createNotebookButton_click} />
-					</View>
-				);
-			} else {
-				return <Text style={this.styles().noItemMessage}>
-					{getEmptyFolderMessage(this.props.folders, this.props.selectedFolderId)}
-				</Text>;
-			}
+			return <Text style={styles.noItemMessage}>
+				{getEmptyFolderMessage(folders, selectedFolderId)}
+			</Text>;
 		}
 	}
-}
+};
 
 
 const NoteList = connect((state: AppState) => {
