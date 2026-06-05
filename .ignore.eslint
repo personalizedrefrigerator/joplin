@@ -944,6 +944,7 @@ packages/app-mobile/components/screens/encryption-config.test.js
 packages/app-mobile/components/screens/encryption-config.js
 packages/app-mobile/components/screens/folder.test.js
 packages/app-mobile/components/screens/folder.js
+packages/app-mobile/components/screens/onedrive-login.js
 packages/app-mobile/components/screens/resourceScreenUtils.test.js
 packages/app-mobile/components/screens/resourceScreenUtils.js
 packages/app-mobile/components/screens/status.test.js
