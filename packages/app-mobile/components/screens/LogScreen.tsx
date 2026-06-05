@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { FlatList, View, Text, Button, StyleSheet, Platform } from 'react-native';
 import { connect } from 'react-redux';
@@ -7,7 +8,6 @@ import { ScreenHeader } from '../ScreenHeader';
 import time from '@joplin/lib/time';
 import { themeStyle } from '../global-style';
 import Logger, { LogEntry } from '@joplin/utils/Logger';
-import { BaseScreenComponent } from '../base-screen';
 import { _ } from '@joplin/lib/locale';
 import { MenuOptionType } from '../ScreenHeader';
 import { AppState } from '../../utils/types';
@@ -15,105 +15,29 @@ import { writeTextToCacheFile } from '../../utils/ShareUtils';
 import shim from '@joplin/lib/shim';
 import { TextInput } from 'react-native-paper';
 import shareFile from '../../utils/shareFile';
+import createRootStyle from '../../utils/createRootStyle';
 
 const logger = Logger.create('LogScreen');
+
+const getLogLevels = (showErrorsOnly: boolean) => {
+	let levels = [Logger.LEVEL_DEBUG, Logger.LEVEL_INFO, Logger.LEVEL_WARN, Logger.LEVEL_ERROR];
+	if (showErrorsOnly) levels = [Logger.LEVEL_WARN, Logger.LEVEL_ERROR];
+
+	return levels;
+};
+
+const formatLogEntry = (item: LogEntry) => {
+	return `${time.formatMsToLocal(item.timestamp, 'MM-DDTHH:mm:ss')}: ${item.message}`;
+};
 
 interface Props {
 	themeId: number;
 	navigation: { state: { defaultFilter?: string } };
 }
 
-interface State {
-	logEntries: LogEntry[];
-	showErrorsOnly: boolean;
-	filter: string|undefined;
-}
-
-class LogScreenComponent extends BaseScreenComponent<Props, State> {
-	private readonly menuOptions_: MenuOptionType[];
-	private styles_: Record<number, ReturnType<typeof StyleSheet.create>>;
-	private readonly logListRef_ = React.createRef<FlatList>();
-
-	public static navigationOptions(): { header: null } {
-		return { header: null };
-	}
-
-	public constructor(props: Props) {
-		super(props);
-
-		this.state = {
-			logEntries: [],
-			showErrorsOnly: false,
-			filter: undefined,
-		};
-		this.styles_ = {};
-
-		this.menuOptions_ = [
-			{
-				title: _('Share'),
-				onPress: () => {
-					void this.onSharePress();
-				},
-			},
-		];
-	}
-
-	private refreshLogTimeout: ReturnType<typeof setTimeout> | null = null;
-	public override componentDidUpdate(_prevProps: Props, prevState: State) {
-		if ((prevState?.filter ?? '') !== (this.state.filter ?? '')) {
-
-			// We refresh the log only after a brief delay -- this prevents the log from updating
-			// with every keystroke in the filter input.
-			if (this.refreshLogTimeout) {
-				clearTimeout(this.refreshLogTimeout);
-			}
-			this.refreshLogTimeout = setTimeout(() => {
-				this.refreshLogTimeout = null;
-				void this.refreshLogEntries();
-			}, 600);
-		}
-	}
-
-	public override componentDidMount() {
-		void this.refreshLogEntries();
-
-		if (this.props.navigation.state.defaultFilter) {
-			this.setState({ filter: this.props.navigation.state.defaultFilter });
-		}
-	}
-
-	private async getLogEntries(showErrorsOnly: boolean, limit: number|null = null): Promise<LogEntry[]> {
-		const levels = this.getLogLevels(showErrorsOnly);
-		return await reg.logger().lastEntries(limit, { levels, filter: this.state.filter });
-	}
-
-	private async onSharePress() {
-		const allEntries = await this.getLogEntries(this.state.showErrorsOnly);
-		const logData = allEntries.map(entry => this.formatLogEntry(entry)).join('\n');
-
-		let fileToShare;
-		try {
-			// Using a .txt file extension causes a "No valid provider found from URL" error
-			// and blank share sheet on iOS for larger log files (around 200 KiB).
-			fileToShare = await writeTextToCacheFile(logData, 'mobile-log.log');
-			await shareFile(fileToShare, 'text/plain');
-		} catch (e) {
-			logger.error('Unable to share log data:', e);
-
-			// Display a message to the user (e.g. in the case where the user is out of disk space).
-			void shim.showErrorDialog(_('Unable to share log data. Reason: %s', e.toString()));
-		} finally {
-			if (fileToShare) {
-				await shim.fsDriver().remove(fileToShare);
-			}
-		}
-	}
-
-	public styles() {
-		if (this.styles_[this.props.themeId]) return this.styles_[this.props.themeId];
-		this.styles_ = {};
-
-		const theme = themeStyle(this.props.themeId);
+const useStyles = (themeId: number) => {
+	return useMemo(() => {
+		const theme = themeStyle(themeId);
 
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Heterogeneous style entries (row + rowText, then rowTextError/Warn spread off rowText); typed split would force restructuring
 		const styles: Record<string, any> = {
@@ -141,110 +65,172 @@ class LogScreenComponent extends BaseScreenComponent<Props, State> {
 		styles.rowTextWarn = { ...styles.rowText };
 		styles.rowTextWarn.color = theme.colorWarn;
 
-		this.styles_[this.props.themeId] = StyleSheet.create(styles);
-		return this.styles_[this.props.themeId];
-	}
+		return StyleSheet.create(styles);
+	}, [themeId]);
+};
 
-	private getLogLevels(showErrorsOnly: boolean) {
-		let levels = [Logger.LEVEL_DEBUG, Logger.LEVEL_INFO, Logger.LEVEL_WARN, Logger.LEVEL_ERROR];
-		if (showErrorsOnly) levels = [Logger.LEVEL_WARN, Logger.LEVEL_ERROR];
+const LogScreenComponent: React.FC<Props> = props => {
+	const { themeId, navigation } = props;
 
-		return levels;
-	}
+	const [logEntries, setLogEntries] = useState<LogEntry[]>([]);
+	const [showErrorsOnly, setShowErrorsOnly] = useState(false);
+	const [filter, setFilter] = useState<string|undefined>(undefined);
 
-	private async refreshLogEntries(showErrorsOnly: boolean = null) {
-		if (showErrorsOnly === null) showErrorsOnly = this.state.showErrorsOnly;
-		const prevShowErrorsOnly = this.state.showErrorsOnly;
+	const logListRef = useRef<FlatList>(null);
+
+	// Refs let the async refresh logic read the latest filter/showErrorsOnly without stale closures.
+	const filterRef = useRef(filter);
+	filterRef.current = filter;
+	const showErrorsOnlyRef = useRef(showErrorsOnly);
+	showErrorsOnlyRef.current = showErrorsOnly;
+
+	const styles = useStyles(themeId);
+	const rootStyle = useMemo(() => createRootStyle(themeId), [themeId]);
+
+	const getLogEntries = useCallback(async (errorsOnly: boolean, limit: number|null = null): Promise<LogEntry[]> => {
+		const levels = getLogLevels(errorsOnly);
+		return await reg.logger().lastEntries(limit, { levels, filter: filterRef.current });
+	}, []);
+
+	// Scroll to the top after the entries refreshed, mirroring the old setState callback.
+	const pendingScrollToTopRef = useRef(false);
+	useEffect(() => {
+		if (pendingScrollToTopRef.current) {
+			pendingScrollToTopRef.current = false;
+			logListRef.current?.scrollToOffset({ offset: 0, animated: false });
+		}
+	}, [logEntries]);
+
+	const refreshLogEntries = useCallback(async (newShowErrorsOnly: boolean = null) => {
+		const effectiveShowErrorsOnly = newShowErrorsOnly === null ? showErrorsOnlyRef.current : newShowErrorsOnly;
+		const prevShowErrorsOnly = showErrorsOnlyRef.current;
 
 		const limit = 1000;
-		const logEntries = await this.getLogEntries(showErrorsOnly, limit);
+		const entries = await getLogEntries(effectiveShowErrorsOnly, limit);
 
-		this.setState({
-			logEntries: logEntries,
-			showErrorsOnly: showErrorsOnly,
-		}, () => {
-			if (this.state.filter !== undefined || prevShowErrorsOnly !== showErrorsOnly) {
-				this.logListRef_.current?.scrollToOffset({ offset: 0, animated: false });
+		if (filterRef.current !== undefined || prevShowErrorsOnly !== effectiveShowErrorsOnly) {
+			pendingScrollToTopRef.current = true;
+		}
+		setLogEntries(entries);
+		setShowErrorsOnly(effectiveShowErrorsOnly);
+	}, [getLogEntries]);
+
+	const defaultFilter = navigation.state.defaultFilter;
+	useEffect(() => {
+		void refreshLogEntries();
+
+		if (defaultFilter) {
+			setFilter(defaultFilter);
+		}
+	}, [refreshLogEntries, defaultFilter]);
+
+	// Refresh the log only after a brief delay -- this prevents the log from updating
+	// with every keystroke in the filter input.
+	const isFirstRender = useRef(true);
+	useEffect(() => {
+		if (isFirstRender.current) {
+			isFirstRender.current = false;
+			return undefined;
+		}
+
+		const timeout = setTimeout(() => {
+			void refreshLogEntries();
+		}, 600);
+		return () => clearTimeout(timeout);
+	}, [filter, refreshLogEntries]);
+
+	const onSharePress = useCallback(async () => {
+		const allEntries = await getLogEntries(showErrorsOnlyRef.current);
+		const logData = allEntries.map(entry => formatLogEntry(entry)).join('\n');
+
+		let fileToShare;
+		try {
+			// Using a .txt file extension causes a "No valid provider found from URL" error
+			// and blank share sheet on iOS for larger log files (around 200 KiB).
+			fileToShare = await writeTextToCacheFile(logData, 'mobile-log.log');
+			await shareFile(fileToShare, 'text/plain');
+		} catch (e) {
+			logger.error('Unable to share log data:', e);
+
+			// Display a message to the user (e.g. in the case where the user is out of disk space).
+			void shim.showErrorDialog(_('Unable to share log data. Reason: %s', e.toString()));
+		} finally {
+			if (fileToShare) {
+				await shim.fsDriver().remove(fileToShare);
 			}
-		});
-	}
+		}
+	}, [getLogEntries]);
 
-	private toggleErrorsOnly() {
-		void this.refreshLogEntries(!this.state.showErrorsOnly);
-	}
+	const menuOptions = useMemo<MenuOptionType[]>(() => [
+		{
+			title: _('Share'),
+			onPress: () => {
+				void onSharePress();
+			},
+		},
+	], [onSharePress]);
 
-	private formatLogEntry(item: LogEntry) {
-		return `${time.formatMsToLocal(item.timestamp, 'MM-DDTHH:mm:ss')}: ${item.message}`;
-	}
-
-	private onRenderLogRow = ({ item }: { item: LogEntry }) => {
-		let textStyle = this.styles().rowText;
-		if (item.level === Logger.LEVEL_WARN) textStyle = this.styles().rowTextWarn;
-		if (item.level === Logger.LEVEL_ERROR) textStyle = this.styles().rowTextError;
+	const onRenderLogRow = useCallback(({ item }: { item: LogEntry }) => {
+		let textStyle = styles.rowText;
+		if (item.level === Logger.LEVEL_WARN) textStyle = styles.rowTextWarn;
+		if (item.level === Logger.LEVEL_ERROR) textStyle = styles.rowTextError;
 
 		return (
-			<View style={this.styles().row}>
-				<Text style={textStyle}>{this.formatLogEntry(item)}</Text>
+			<View style={styles.row}>
+				<Text style={textStyle}>{formatLogEntry(item)}</Text>
 			</View>
 		);
-	};
+	}, [styles]);
 
-	private onFilterUpdated = (newFilter: string) => {
-		this.setState({ filter: newFilter });
-	};
+	const onToggleFilterInput = useCallback(() => {
+		setFilter(prevFilter => prevFilter === undefined ? '' : undefined);
+	}, []);
 
-	private onToggleFilterInput = () => {
-		const filter = this.state.filter === undefined ? '' : undefined;
-		this.setState({ filter });
-	};
+	const filterInput = (
+		<TextInput
+			value={filter}
+			onChangeText={setFilter}
+			label={_('Filter')}
+			placeholder={_('Filter')}
+		/>
+	);
 
-	public render() {
-		const filterInput = (
-			<TextInput
-				value={this.state.filter}
-				onChangeText={this.onFilterUpdated}
-				label={_('Filter')}
-				placeholder={_('Filter')}
+	return (
+		<View style={rootStyle.root}>
+			<ScreenHeader
+				title={_('Log')}
+				menuOptions={menuOptions}
+				showSearchButton={true}
+				onSearchButtonPress={onToggleFilterInput}/>
+			{filter !== undefined ? filterInput : null}
+			<FlatList
+				ref={logListRef}
+				data={logEntries}
+				initialNumToRender={100}
+				renderItem={onRenderLogRow}
+				keyExtractor={item => { return `${item.id}`; }}
 			/>
-		);
-
-		return (
-			<View style={this.rootStyle(this.props.themeId).root}>
-				<ScreenHeader
-					title={_('Log')}
-					menuOptions={this.menuOptions_}
-					showSearchButton={true}
-					onSearchButtonPress={this.onToggleFilterInput}/>
-				{this.state.filter !== undefined ? filterInput : null}
-				<FlatList
-					ref={this.logListRef_}
-					data={this.state.logEntries}
-					initialNumToRender={100}
-					renderItem={this.onRenderLogRow}
-					keyExtractor={item => { return `${item.id}`; }}
-				/>
-				<View style={{ flexDirection: 'row' }}>
-					<View style={{ flex: 1, marginRight: 5 }}>
-						<Button
-							title={_('Refresh')}
-							onPress={() => {
-								void this.refreshLogEntries();
-							}}
-						/>
-					</View>
-					<View style={{ flex: 1 }}>
-						<Button
-							title={this.state.showErrorsOnly ? _('Show all') : _('Errors only')}
-							onPress={() => {
-								this.toggleErrorsOnly();
-							}}
-						/>
-					</View>
+			<View style={{ flexDirection: 'row' }}>
+				<View style={{ flex: 1, marginRight: 5 }}>
+					<Button
+						title={_('Refresh')}
+						onPress={() => {
+							void refreshLogEntries();
+						}}
+					/>
+				</View>
+				<View style={{ flex: 1 }}>
+					<Button
+						title={showErrorsOnly ? _('Show all') : _('Errors only')}
+						onPress={() => {
+							void refreshLogEntries(!showErrorsOnlyRef.current);
+						}}
+					/>
 				</View>
 			</View>
-		);
-	}
-}
+		</View>
+	);
+};
 
 const LogScreen = connect((state: AppState) => {
 	return {
