@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { View, Text, Button, FlatList, TextStyle, StyleSheet, Role } from 'react-native';
 import Setting from '@joplin/lib/models/Setting';
@@ -6,20 +7,16 @@ import { connect } from 'react-redux';
 import { ScreenHeader } from '../ScreenHeader';
 import ReportService, { ReportItemType, ReportSection } from '@joplin/lib/services/ReportService';
 import { _ } from '@joplin/lib/locale';
-import { BaseScreenComponent } from '../base-screen';
 import { themeStyle } from '../global-style';
 import { AppState } from '../../utils/types';
 import checkDisabledSyncItemsNotification from '@joplin/lib/services/synchronizer/utils/checkDisabledSyncItemsNotification';
 import { Dispatch } from 'redux';
 import Icon from '../Icon';
+import createRootStyle from '../../utils/createRootStyle';
 
 interface Props {
 	themeId: number;
 	dispatch: Dispatch;
-}
-
-interface State {
-	report: ReportSection[];
 }
 
 interface ProcessedLine {
@@ -102,26 +99,9 @@ const processReport = (report: ReportSection[], refreshScreen: OnRefreshScreen, 
 	return lines;
 };
 
-class StatusScreenComponent extends BaseScreenComponent<Props, State> {
-	public constructor(props: Props) {
-		super(props);
-		this.state = {
-			report: [],
-		};
-	}
-
-	public override componentDidMount() {
-		void this.refreshScreen();
-	}
-
-	private async refreshScreen() {
-		const service = new ReportService();
-		const report = await service.status(Setting.value('sync.target'));
-		this.setState({ report: report });
-	}
-
-	private styles() {
-		const theme = themeStyle(this.props.themeId);
+const useStyles = (themeId: number) => {
+	return useMemo(() => {
+		const theme = themeStyle(themeId);
 		return StyleSheet.create({
 			body: {
 				flex: 1,
@@ -166,90 +146,105 @@ class StatusScreenComponent extends BaseScreenComponent<Props, State> {
 				marginBottom: 20,
 			},
 		});
-	}
+	}, [themeId]);
+};
 
-	public override render() {
-		const styles = this.styles();
+const StatusScreenComponent: React.FC<Props> = props => {
+	const { themeId, dispatch } = props;
 
-		const renderItem = (item: ProcessedLine, inList: boolean) => {
-			const style: TextStyle = { ...styles.baseStyle };
+	const [report, setReport] = useState<ReportSection[]>([]);
 
-			let textRole: Role|null = undefined;
-			const text = item.text;
-			if (item.isSection === true) {
-				style.fontWeight = 'bold';
-				style.marginBottom = 5;
-				textRole = 'heading';
-			} else if (inList) {
-				textRole = 'listitem';
-			}
+	const styles = useStyles(themeId);
+	const rootStyle = useMemo(() => createRootStyle(themeId), [themeId]);
 
-			style.flex = 1;
+	const refreshScreen = useCallback(async () => {
+		const service = new ReportService();
+		const newReport = await service.status(Setting.value('sync.target'));
+		setReport(newReport);
+	}, []);
 
-			const retryAllButton = item.retryAllHandler ? (
-				<View style={styles.retryAllButton}>
-					<Button title={_('Retry All')} onPress={item.retryAllHandler} />
-				</View>
-			) : null;
+	useEffect(() => {
+		void refreshScreen();
+	}, [refreshScreen]);
 
-			const retryButton = item.retryHandler ? (
-				<View style={styles.actionButton}>
-					<Button title={_('Retry')} onPress={item.retryHandler} />
-				</View>
-			) : null;
+	const renderItem = (item: ProcessedLine, inList: boolean) => {
+		const style: TextStyle = { ...styles.baseStyle };
 
-			const ignoreButton = item.ignoreHandler ? (
-				<View style={styles.actionButton}>
-					<Button title={_('Ignore')} onPress={item.ignoreHandler} />
-				</View>
-			) : null;
+		let textRole: Role|null = undefined;
+		const text = item.text;
+		if (item.isSection === true) {
+			style.fontWeight = 'bold';
+			style.marginBottom = 5;
+			textRole = 'heading';
+		} else if (inList) {
+			textRole = 'listitem';
+		}
 
-			const textComponent = text ? <Text style={style} role={textRole} numberOfLines={2} ellipsizeMode='tail'>{text}</Text> : null;
-			if (item.isDivider) {
-				return <View style={styles.divider} role='separator' key={item.key} />;
-			} else if (item.listItems) {
-				return <View role='list' style={styles.listWrapper} key={item.key}>
-					{textComponent}
-					{item.listItems.map(item => renderItem(item, true))}
-				</View>;
-			} else {
-				return (
-					<View style={{ flex: 1, flexDirection: 'row' }} key={item.key}>
-						{inList ? <Icon style={styles.listBullet} name='fas fa-circle' accessibilityLabel={null} /> : null}
-						{textComponent}
-						{ignoreButton}
-						{retryAllButton}
-						{retryButton}
-					</View>
-				);
-			}
-		};
+		style.flex = 1;
 
-		const renderBody = (report: ReportSection[]) => {
-			const baseStyle = styles.baseStyle;
-			const lines = processReport(report, () => this.refreshScreen(), this.props.dispatch, baseStyle);
+		const retryAllButton = item.retryAllHandler ? (
+			<View style={styles.retryAllButton}>
+				<Button title={_('Retry All')} onPress={item.retryAllHandler} />
+			</View>
+		) : null;
 
+		const retryButton = item.retryHandler ? (
+			<View style={styles.actionButton}>
+				<Button title={_('Retry')} onPress={item.retryHandler} />
+			</View>
+		) : null;
+
+		const ignoreButton = item.ignoreHandler ? (
+			<View style={styles.actionButton}>
+				<Button title={_('Ignore')} onPress={item.ignoreHandler} />
+			</View>
+		) : null;
+
+		const textComponent = text ? <Text style={style} role={textRole} numberOfLines={2} ellipsizeMode='tail'>{text}</Text> : null;
+		if (item.isDivider) {
+			return <View style={styles.divider} role='separator' key={item.key} />;
+		} else if (item.listItems) {
+			return <View role='list' style={styles.listWrapper} key={item.key}>
+				{textComponent}
+				{item.listItems.map(item => renderItem(item, true))}
+			</View>;
+		} else {
 			return (
-				<FlatList
-					data={lines}
-					renderItem={({ item }) => {
-						return renderItem(item, false);
-					}}
-				/>
+				<View style={{ flex: 1, flexDirection: 'row' }} key={item.key}>
+					{inList ? <Icon style={styles.listBullet} name='fas fa-circle' accessibilityLabel={null} /> : null}
+					{textComponent}
+					{ignoreButton}
+					{retryAllButton}
+					{retryButton}
+				</View>
 			);
-		};
+		}
+	};
 
-		const body = renderBody(this.state.report);
+	const renderBody = (reportSections: ReportSection[]) => {
+		const baseStyle = styles.baseStyle;
+		const lines = processReport(reportSections, () => refreshScreen(), dispatch, baseStyle);
 
 		return (
-			<View style={this.rootStyle(this.props.themeId).root}>
-				<ScreenHeader title={_('Status')} />
-				<View style={styles.body}>{body}</View>
-				<Button title={_('Refresh')} onPress={() => this.refreshScreen()} />
-			</View>
+			<FlatList
+				data={lines}
+				renderItem={({ item }) => {
+					return renderItem(item, false);
+				}}
+			/>
 		);
-	}
-}
+	};
+
+	const body = renderBody(report);
+
+	return (
+		<View style={rootStyle.root}>
+			<ScreenHeader title={_('Status')} />
+			<View style={styles.body}>{body}</View>
+			<Button title={_('Refresh')} onPress={() => refreshScreen()} />
+		</View>
+	);
+};
 
 export default connect((state: AppState) => {
 	return {
