@@ -1,11 +1,11 @@
 import * as React from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { View, StyleSheet } from 'react-native';
 import { connect } from 'react-redux';
 import Folder from '@joplin/lib/models/Folder';
 import BaseModel from '@joplin/lib/BaseModel';
 import { ScreenHeader } from '../ScreenHeader';
-import { BaseScreenComponent } from '../base-screen';
 import shim from '@joplin/lib/shim';
 import { _ } from '@joplin/lib/locale';
 import FolderPicker from '../FolderPicker';
@@ -13,6 +13,7 @@ import TextInput from '../TextInput';
 import { FolderEntity } from '@joplin/lib/services/database/types';
 import { AppState } from '../../utils/types';
 import { Dispatch } from 'redux';
+import createRootStyle from '../../utils/createRootStyle';
 
 interface Props {
 	folderId: string;
@@ -22,118 +23,99 @@ interface Props {
 	dispatch: Dispatch;
 }
 
-interface State {
-	folder: FolderEntity;
-	lastSavedFolder: FolderEntity|null;
-}
+const FolderScreenComponent: React.FC<Props> = props => {
+	const { folderId, themeId, folders, dispatch } = props;
 
-class FolderScreenComponent extends BaseScreenComponent<Props, State> {
+	const [folder, setFolder] = useState<FolderEntity>(() => Folder.new());
+	const [lastSavedFolder, setLastSavedFolder] = useState<FolderEntity | null>(null);
 
-	public constructor(props: Props) {
-		super(props);
-		this.state = {
-			folder: Folder.new(),
-			lastSavedFolder: null,
-		};
-	}
-
-	public override UNSAFE_componentWillMount() {
-		if (!this.props.folderId) {
-			const folder = Folder.new();
-			this.setState({
-				folder: folder,
-				lastSavedFolder: { ...folder },
-			});
+	useEffect(() => {
+		if (!folderId) {
+			const newFolder = Folder.new();
+			setFolder(newFolder);
+			setLastSavedFolder({ ...newFolder });
 		} else {
 			// eslint-disable-next-line promise/prefer-await-to-then -- Old code before rule was applied
-			void Folder.load(this.props.folderId).then(folder => {
-				this.setState({
-					folder: folder,
-					lastSavedFolder: { ...folder },
-				});
+			void Folder.load(folderId).then(loadedFolder => {
+				setFolder(loadedFolder);
+				setLastSavedFolder({ ...loadedFolder });
 			});
 		}
-	}
+	}, [folderId]);
 
-	private isModified() {
-		if (!this.state.folder || !this.state.lastSavedFolder) return false;
-		const diff = BaseModel.diffObjects(this.state.folder, this.state.lastSavedFolder);
+	const isModified = useCallback(() => {
+		if (!folder || !lastSavedFolder) return false;
+		const diff = BaseModel.diffObjects(folder, lastSavedFolder);
 		delete diff.type_;
 		return !!Object.getOwnPropertyNames(diff).length;
-	}
+	}, [folder, lastSavedFolder]);
 
-	private folderComponent_change(propName: keyof FolderEntity, propValue: string) {
-		this.setState((prevState) => {
-			const folder = {
-				...prevState.folder,
-				[propName]: propValue,
-			};
-			return { folder: folder };
-		});
-	}
+	const folderComponent_change = useCallback((propName: keyof FolderEntity, propValue: string) => {
+		setFolder(prevFolder => ({
+			...prevFolder,
+			[propName]: propValue,
+		}));
+	}, []);
 
-	private title_changeText(text: string) {
-		this.folderComponent_change('title', text);
-	}
+	const title_changeText = useCallback((text: string) => {
+		folderComponent_change('title', text);
+	}, [folderComponent_change]);
 
-	private parent_changeValue(parent: string) {
-		this.folderComponent_change('parent_id', parent);
-	}
+	const parent_changeValue = useCallback((parent: string) => {
+		folderComponent_change('parent_id', parent);
+	}, [folderComponent_change]);
 
-
-	private async saveFolderButton_press() {
-		let folder = { ...this.state.folder };
+	const saveFolderButton_press = useCallback(async () => {
+		let folderToSave = { ...folder };
 
 		try {
-			if (folder.id && !(await Folder.canNestUnder(folder.id, folder.parent_id))) throw new Error(_('Cannot move notebook to this location'));
-			folder = await Folder.save(folder, { userSideValidation: true });
+			if (folderToSave.id && !(await Folder.canNestUnder(folderToSave.id, folderToSave.parent_id))) throw new Error(_('Cannot move notebook to this location'));
+			folderToSave = await Folder.save(folderToSave, { userSideValidation: true });
 		} catch (error) {
 			void shim.showErrorDialog(_('The notebook could not be saved: %s', error.message));
 			return;
 		}
 
-		this.setState({
-			lastSavedFolder: { ...folder },
-			folder: folder,
-		});
+		setLastSavedFolder({ ...folderToSave });
+		setFolder(folderToSave);
 
-		this.props.dispatch({
+		dispatch({
 			type: 'NAV_GO',
 			routeName: 'Notes',
-			folderId: folder.id,
+			folderId: folderToSave.id,
 		});
-	}
+	}, [folder, dispatch]);
 
-	public override render() {
-		const saveButtonDisabled = !this.isModified() || !this.state.folder.title;
+	const rootStyle = useMemo(() => createRootStyle(themeId), [themeId]);
 
-		return (
-			<View style={this.rootStyle(this.props.themeId).root}>
-				<ScreenHeader title={_('Edit notebook')} showSaveButton={true} saveButtonDisabled={saveButtonDisabled} onSaveButtonPress={() => this.saveFolderButton_press()} showSideMenuButton={false} showSearchButton={false} />
-				<TextInput
-					themeId={this.props.themeId}
-					placeholder={_('Enter notebook title')}
-					autoFocus={true}
-					value={this.state.folder.title}
-					onChangeText={text => this.title_changeText(text)}
-					editable={!this.state.folder.encryption_applied}
+	const saveButtonDisabled = !isModified() || !folder.title;
+
+	return (
+		<View style={rootStyle.root}>
+			<ScreenHeader title={_('Edit notebook')} showSaveButton={true} saveButtonDisabled={saveButtonDisabled} onSaveButtonPress={saveFolderButton_press} showSideMenuButton={false} showSearchButton={false} />
+			<TextInput
+				themeId={themeId}
+				placeholder={_('Enter notebook title')}
+				autoFocus={true}
+				value={folder.title}
+				onChangeText={title_changeText}
+				editable={!folder.encryption_applied}
+			/>
+			<View style={styles.folderPickerContainer}>
+				<FolderPicker
+					themeId={themeId}
+					placeholder={_('Select parent notebook')}
+					folders={Folder.getRealFolders(folders)}
+					selectedFolderId={folder.parent_id}
+					onValueChange={parent_changeValue}
+					mustSelect
+					darkText
 				/>
-				<View style={styles.folderPickerContainer}>
-					<FolderPicker
-						themeId={this.props.themeId}
-						placeholder={_('Select parent notebook')}
-						folders={Folder.getRealFolders(this.props.folders)}
-						selectedFolderId={this.state.folder.parent_id}
-						onValueChange={newValue => this.parent_changeValue(newValue)}
-						mustSelect
-						darkText
-					/>
-				</View>
-				<View style={{ flex: 1 }} />
 			</View>
-		);
-	}
-}
+			<View style={{ flex: 1 }} />
+		</View>
+	);
+};
 
 export default connect((state: AppState) => {
 	return {

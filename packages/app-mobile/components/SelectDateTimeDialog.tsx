@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { themeStyle } from './global-style';
 import { _ } from '@joplin/lib/locale';
 import { View, Button, Text, StyleSheet } from 'react-native';
@@ -60,131 +61,108 @@ interface SelectDateTimeDialogProps {
 	onReject?: ()=> void;
 }
 
-interface SelectDateTimeDialogState {
-	date: Date | null;
-	mode: 'date' | 'datetime' | 'time';
-	showPicker: boolean;
-}
+const SelectDateTimeDialog: React.FC<SelectDateTimeDialogProps> = props => {
+	const { themeId, shown, date: propsDate, onAccept, onReject } = props;
 
-export default class SelectDateTimeDialog extends React.PureComponent<SelectDateTimeDialogProps, SelectDateTimeDialogState> {
+	const [date, setDate] = useState<Date | null>(propsDate);
+	const [showPicker, setShowPicker] = useState(false);
 
-	public constructor(props: SelectDateTimeDialogProps) {
-		super(props);
+	useEffect(() => {
+		setDate(propsDate);
+	}, [propsDate]);
 
-		this.state = {
-			date: null,
-			mode: 'date',
-			showPicker: false,
-		};
+	const onAccept_ = useCallback(() => {
+		if (onAccept) onAccept(date);
+	}, [onAccept, date]);
 
-		this.onReject = this.onReject.bind(this);
-		this.onPickerConfirm = this.onPickerConfirm.bind(this);
-		this.onPickerCancel = this.onPickerCancel.bind(this);
-		this.onSetDate = this.onSetDate.bind(this);
-	}
+	const onReject_ = useCallback(() => {
+		if (onReject) onReject();
+	}, [onReject]);
 
-	public UNSAFE_componentWillReceiveProps(newProps: SelectDateTimeDialogProps) {
-		if (newProps.date !== this.state.date) {
-			this.setState({ date: newProps.date });
-		}
-	}
+	const onClear = useCallback(() => {
+		if (onAccept) onAccept(null);
+	}, [onAccept]);
 
-	public onAccept() {
-		if (this.props.onAccept) this.props.onAccept(this.state.date);
-	}
+	const onPickerConfirm = useCallback((selectedDate: Date) => {
+		setDate(selectedDate);
+		setShowPicker(false);
+	}, []);
 
-	public onReject() {
-		if (this.props.onReject) this.props.onReject();
-	}
+	const onPickerCancel = useCallback(() => {
+		setShowPicker(false);
+	}, []);
 
-	public onClear() {
-		if (this.props.onAccept) this.props.onAccept(null);
-	}
-
-	public onPickerConfirm(selectedDate: Date) {
-		this.setState({ date: selectedDate, showPicker: false });
-	}
-
-	public onPickerCancel() {
-		this.setState({ showPicker: false });
-	}
-
-	public onSetDate() {
-		this.setState({ showPicker: true });
-	}
+	const onSetDate = useCallback(() => {
+		setShowPicker(true);
+	}, []);
 
 	// web
-	private onInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-		this.setState({ date: new Date(event.target.value) });
-	};
+	const onInputChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+		setDate(new Date(event.target.value));
+	}, []);
 
-	public renderContent() {
-		const theme = themeStyle(this.props.themeId);
+	const renderContent = () => {
+		const theme = themeStyle(themeId);
 
 		// DateTimePickerModal doesn't support web.
 		if (Platform.OS === 'web') {
 			// See https://developer.mozilla.org/en-US/docs/Web/HTML/Date_and_time_formats#local_date_and_time_strings
 			// for the expected date input format:
-			const dateString = this.state.date ? formatMsToLocal(this.state.date.getTime(), 'YYYY-MM-DD[T]HH:mm:ss') : '';
+			const dateString = date ? formatMsToLocal(date.getTime(), 'YYYY-MM-DD[T]HH:mm:ss') : '';
 			return <input
 				type="datetime-local"
 				value={dateString}
-				onChange={this.onInputChange}
+				onChange={onInputChange}
 			></input>;
 		}
 
 		return (
 			<View style={{ flex: 0, margin: 20, alignItems: 'center' }}>
 				<View style={{ flexDirection: 'row', alignItems: 'center' }}>
-					{ this.state.date && <Text style={{ ...theme.normalText, color: theme.color, marginRight: 10 }}>{time.formatDateToLocal(this.state.date)}</Text> }
-					<Button title="Set date" onPress={this.onSetDate} />
+					{ date && <Text style={{ ...theme.normalText, color: theme.color, marginRight: 10 }}>{time.formatDateToLocal(date)}</Text> }
+					<Button title="Set date" onPress={onSetDate} />
 				</View>
 				<DateTimePickerModal
-					date={this.state.date ? this.state.date : new Date()}
+					date={date ? date : new Date()}
 					is24Hour={time.use24HourFormat()}
-					isVisible={this.state.showPicker}
+					isVisible={showPicker}
 					mode="datetime"
-					onConfirm={this.onPickerConfirm}
-					onCancel={this.onPickerCancel}
+					onConfirm={onPickerConfirm}
+					onCancel={onPickerCancel}
 				/>
 			</View>
 		);
-	}
+	};
 
-	public render() {
-		const modalVisible = this.props.shown;
+	if (!shown) return null;
 
-		if (!modalVisible) return null;
+	const theme = themeStyle(themeId);
 
-		const theme = themeStyle(this.props.themeId);
-
-		return (
-			<Modal
-				visible={modalVisible}
-				containerStyle={styles.centeredView}
-				onClose={() => {
-					this.onReject();
-				}}
-			>
-				<View style={{ ...styles.modalView, backgroundColor: theme.backgroundColor }}>
-					<View style={{ padding: 15, flexBasis: 'auto', paddingBottom: 0, flexGrow: 0, width: '100%', borderBottomWidth: 1, borderBottomColor: theme.dividerColor }}>
-						<Text style={{ ...styles.modalText, color: theme.color, fontSize: 14, fontWeight: 'bold' }}>{_('Set alarm')}</Text>
+	return (
+		<Modal
+			visible={shown}
+			containerStyle={styles.centeredView}
+			onClose={onReject_}
+		>
+			<View style={{ ...styles.modalView, backgroundColor: theme.backgroundColor }}>
+				<View style={{ padding: 15, flexBasis: 'auto', paddingBottom: 0, flexGrow: 0, width: '100%', borderBottomWidth: 1, borderBottomColor: theme.dividerColor }}>
+					<Text style={{ ...styles.modalText, color: theme.color, fontSize: 14, fontWeight: 'bold' }}>{_('Set alarm')}</Text>
+				</View>
+				{renderContent()}
+				<View style={{ padding: 20, flexBasis: 'auto', borderTopWidth: 1, borderTopColor: theme.dividerColor }}>
+					<View style={{ marginBottom: 10 }}>
+						<Button title={_('Save alarm')} onPress={onAccept_} key="saveButton" />
 					</View>
-					{this.renderContent()}
-					<View style={{ padding: 20, flexBasis: 'auto', borderTopWidth: 1, borderTopColor: theme.dividerColor }}>
-						<View style={{ marginBottom: 10 }}>
-							<Button title={_('Save alarm')} onPress={() => this.onAccept()} key="saveButton" />
-						</View>
-						<View style={{ marginBottom: 10 }}>
-							<Button title={_('Clear alarm')} onPress={() => this.onClear()} key="clearButton" />
-						</View>
-						<View style={{ marginBottom: 10 }}>
-							<Button title={_('Cancel')} onPress={() => this.onReject()} key="cancelButton" />
-						</View>
+					<View style={{ marginBottom: 10 }}>
+						<Button title={_('Clear alarm')} onPress={onClear} key="clearButton" />
+					</View>
+					<View style={{ marginBottom: 10 }}>
+						<Button title={_('Cancel')} onPress={onReject_} key="cancelButton" />
 					</View>
 				</View>
-			</Modal>
-		);
-	}
+			</View>
+		</Modal>
+	);
+};
 
-}
+export default React.memo(SelectDateTimeDialog);
