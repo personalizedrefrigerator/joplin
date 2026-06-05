@@ -43,12 +43,12 @@ const FolderScreenComponent: React.FC<Props> = props => {
 		}
 	}, [folderId]);
 
-	const isModified = useCallback(() => {
+	const isModified = () => {
 		if (!folder || !lastSavedFolder) return false;
 		const diff = BaseModel.diffObjects(folder, lastSavedFolder);
 		delete diff.type_;
 		return !!Object.getOwnPropertyNames(diff).length;
-	}, [folder, lastSavedFolder]);
+	};
 
 	const folderComponent_change = useCallback((propName: keyof FolderEntity, propValue: string) => {
 		setFolder(prevFolder => ({
