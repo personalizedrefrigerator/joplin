@@ -1,11 +1,11 @@
 import * as React from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { View, Button, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
 import { AppState } from '../../utils/types';
 import { connect } from 'react-redux';
 import { ScreenHeader } from '../ScreenHeader';
 import { _ } from '@joplin/lib/locale';
-import { BaseScreenComponent } from '../base-screen';
 import Shared from '@joplin/lib/components/shared/dropbox-login-shared';
 import shim, { MessageBoxType } from '@joplin/lib/shim';
 import { themeStyle } from '../global-style';
@@ -22,33 +22,20 @@ interface State {
 	checkingAuthToken: boolean;
 }
 
-class DropboxLoginScreenComponent extends BaseScreenComponent<Props, State> {
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Migrated from JS; per-theme StyleSheet cache
-	private styles_: Record<number, any> = {};
-	private shared_: Shared<DropboxLoginScreenComponent>;
+// Adapter that lets the shared (class-oriented) helper drive this function
+// component's state via the same `props`/`state`/`setState` interface a class
+// would expose. `state` is kept synchronously current because the helper reads
+// it directly between renders.
+interface Host {
+	props: { dispatch: Dispatch };
+	state: State;
+	setState: (state: Partial<State>)=> void;
+}
 
-	public constructor(props: Props) {
-		super(props);
-
-		this.shared_ = new Shared(
-			this,
-			(msg: string) => shim.showMessageBox(msg, { type: MessageBoxType.Info }),
-			(msg: string) => shim.showErrorDialog(msg),
-		);
-	}
-
-	public UNSAFE_componentWillMount() {
-		void this.shared_.refreshUrl();
-	}
-
-	private styles() {
-		const themeId = this.props.themeId;
+const useStyles = (themeId: number) => {
+	return useMemo(() => {
 		const theme = themeStyle(themeId);
-
-		if (this.styles_[themeId]) return this.styles_[themeId];
-		this.styles_ = {};
-
-		const styles = {
+		return StyleSheet.create({
 			screen: {
 				flex: 1,
 				backgroundColor: theme.backgroundColor,
@@ -59,39 +46,66 @@ class DropboxLoginScreenComponent extends BaseScreenComponent<Props, State> {
 			},
 			stepText: { ...theme.normalText, marginBottom: theme.margin },
 			urlText: { ...theme.urlText, marginBottom: theme.margin },
+		});
+	}, [themeId]);
+};
+
+const DropboxLoginScreenComponent: React.FC<Props> = props => {
+	const { themeId, dispatch } = props;
+
+	const [state, setState] = useState<State>({
+		loginUrl: '',
+		authCode: '',
+		checkingAuthToken: false,
+	});
+
+	const shared = useMemo(() => {
+		const host: Host = {
+			props: { dispatch },
+			state: { loginUrl: '', authCode: '', checkingAuthToken: false },
+			setState: partial => {
+				host.state = { ...host.state, ...partial };
+				setState(prevState => ({ ...prevState, ...partial }));
+			},
 		};
 
-		this.styles_[themeId] = StyleSheet.create(styles);
-		return this.styles_[themeId];
-	}
-
-	public render() {
-		const theme = themeStyle(this.props.themeId);
-
-		return (
-			<View style={this.styles().screen}>
-				<ScreenHeader title={_('Login with Dropbox')} />
-
-				<ScrollView style={this.styles().container}>
-					<Text style={this.styles().stepText}>{_('To allow Joplin to synchronise with Dropbox, please follow the steps below:')}</Text>
-					<Text style={this.styles().stepText}>{_('Step 1: Open this URL in your browser to authorise the application:')}</Text>
-					<View>
-						<TouchableOpacity onPress={this.shared_.loginUrl_click}>
-							<Text style={this.styles().urlText}>{this.state.loginUrl}</Text>
-						</TouchableOpacity>
-					</View>
-					<Text style={this.styles().stepText}>{_('Step 2: Enter the code provided by Dropbox:')}</Text>
-					<TextInput placeholder={_('Enter code here')} placeholderTextColor={theme.colorFaded} selectionColor={theme.textSelectionColor} keyboardAppearance={theme.keyboardAppearance} value={this.state.authCode} onChangeText={this.shared_.authCodeInput_change} style={theme.lineInput} />
-					<View style={{ height: 10 }}></View>
-					<Button disabled={this.state.checkingAuthToken} title={_('Submit')} onPress={this.shared_.submit_click}></Button>
-
-					{/* Add this extra padding to make sure the view is scrollable when the keyboard is visible on small screens (iPhone SE) */}
-					<View style={{ height: 200 }}></View>
-				</ScrollView>
-			</View>
+		return new Shared(
+			host,
+			(msg: string) => shim.showMessageBox(msg, { type: MessageBoxType.Info }),
+			(msg: string) => shim.showErrorDialog(msg),
 		);
-	}
-}
+	}, [dispatch]);
+
+	useEffect(() => {
+		void shared.refreshUrl();
+	}, [shared]);
+
+	const styles = useStyles(themeId);
+	const theme = themeStyle(themeId);
+
+	return (
+		<View style={styles.screen}>
+			<ScreenHeader title={_('Login with Dropbox')} />
+
+			<ScrollView style={styles.container}>
+				<Text style={styles.stepText}>{_('To allow Joplin to synchronise with Dropbox, please follow the steps below:')}</Text>
+				<Text style={styles.stepText}>{_('Step 1: Open this URL in your browser to authorise the application:')}</Text>
+				<View>
+					<TouchableOpacity onPress={shared.loginUrl_click}>
+						<Text style={styles.urlText}>{state.loginUrl}</Text>
+					</TouchableOpacity>
+				</View>
+				<Text style={styles.stepText}>{_('Step 2: Enter the code provided by Dropbox:')}</Text>
+				<TextInput placeholder={_('Enter code here')} placeholderTextColor={theme.colorFaded} selectionColor={theme.textSelectionColor} keyboardAppearance={theme.keyboardAppearance} value={state.authCode} onChangeText={shared.authCodeInput_change} style={theme.lineInput} />
+				<View style={{ height: 10 }}></View>
+				<Button disabled={state.checkingAuthToken} title={_('Submit')} onPress={shared.submit_click}></Button>
+
+				{/* Add this extra padding to make sure the view is scrollable when the keyboard is visible on small screens (iPhone SE) */}
+				<View style={{ height: 200 }}></View>
+			</ScrollView>
+		</View>
+	);
+};
 
 const DropboxLoginScreen = connect((state: AppState) => {
 	return {
