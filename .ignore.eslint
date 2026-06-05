@@ -780,6 +780,7 @@ packages/app-mobile/components/NoteEditor/hooks/useEditorCommandHandler.js
 packages/app-mobile/components/NoteEditor/testing/createTestEditorProps.js
 packages/app-mobile/components/NoteEditor/types.js
 packages/app-mobile/components/NoteItem.js
+packages/app-mobile/components/NoteList.test.js
 packages/app-mobile/components/NoteList.js
 packages/app-mobile/components/ProfileSwitcher/ProfileEditor.js
 packages/app-mobile/components/ProfileSwitcher/ProfileSwitcher.js
@@ -793,6 +794,7 @@ packages/app-mobile/components/ScreenHeader/WarningBanner.js
 packages/app-mobile/components/ScreenHeader/WarningBox.js
 packages/app-mobile/components/ScreenHeader/index.js
 packages/app-mobile/components/SearchInput.js
+packages/app-mobile/components/SelectDateTimeDialog.test.js
 packages/app-mobile/components/SelectDateTimeDialog.js
 packages/app-mobile/components/SideMenu.js
 packages/app-mobile/components/SideMenuContentNote.js
@@ -899,6 +901,7 @@ packages/app-mobile/components/screens/ConfigScreen/types.js
 packages/app-mobile/components/screens/DocumentScanner/DocumentScanner.js
 packages/app-mobile/components/screens/DocumentScanner/NotePreview.js
 packages/app-mobile/components/screens/JoplinCloudLoginScreen.js
+packages/app-mobile/components/screens/LogScreen.test.js
 packages/app-mobile/components/screens/LogScreen.js
 packages/app-mobile/components/screens/Note/Note.test.js
 packages/app-mobile/components/screens/Note/Note.js
@@ -934,6 +937,7 @@ packages/app-mobile/components/screens/ShareNoteDialog.test.js
 packages/app-mobile/components/screens/ShareNoteDialog.js
 packages/app-mobile/components/screens/SsoLoginScreen.js
 packages/app-mobile/components/screens/UpgradeSyncTargetScreen.js
+packages/app-mobile/components/screens/dropbox-login.test.js
 packages/app-mobile/components/screens/dropbox-login.js
 packages/app-mobile/components/screens/encryption-config.test.js
 packages/app-mobile/components/screens/encryption-config.js
@@ -941,6 +945,7 @@ packages/app-mobile/components/screens/folder.test.js
 packages/app-mobile/components/screens/folder.js
 packages/app-mobile/components/screens/resourceScreenUtils.test.js
 packages/app-mobile/components/screens/resourceScreenUtils.js
+packages/app-mobile/components/screens/status.test.js
 packages/app-mobile/components/screens/status.js
 packages/app-mobile/components/screens/tags.js
 packages/app-mobile/components/side-menu-content.js
