@@ -16,7 +16,7 @@ import time from '@joplin/lib/time';
 
 interface Props {
 	themeId: number;
-	// eslint-disable-next-line @typescript-eslint/ban-types -- Old code before rule was applied
+	// eslint-disable-next-line @typescript-eslint/no-unsafe-function-type -- Old code before rule was applied
 	dispatch: Function;
 }
 
@@ -46,7 +46,7 @@ export default function(props: Props) {
 		if ([MasterPasswordStatus.NotSet, MasterPasswordStatus.Invalid].includes(status)) return false;
 		if (mode === Mode.Reset) return false;
 		return true;
-		// eslint-disable-next-line @seiyab/react-hooks/exhaustive-deps -- Old code before rule was applied
+
 	}, [status, mode]);
 
 	const onClose = useCallback(() => {
@@ -104,17 +104,17 @@ export default function(props: Props) {
 		return !hasMasterPasswordEncryptedData;
 	}, [mode, showCurrentPassword, hasMasterPasswordEncryptedData]);
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- PasswordInput's ChangeEventHandler is typed as a custom {value} event but the runtime hands a React.ChangeEvent through
 	const onCurrentPasswordChange = useCallback((event: any) => {
 		setCurrentPassword(event.target.value);
 	}, []);
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Same as onCurrentPasswordChange
 	const onPasswordChange1 = useCallback((event: any) => {
 		setPassword1(event.target.value);
 	}, []);
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Same as onCurrentPasswordChange
 	const onPasswordChange2 = useCallback((event: any) => {
 		setPassword2(event.target.value);
 	}, []);

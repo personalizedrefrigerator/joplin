@@ -6,6 +6,7 @@ import UndoRedoService from '@joplin/lib/services/UndoRedoService';
 import NoteBodyViewer from '../../NoteBodyViewer/NoteBodyViewer';
 import checkPermissions from '../../../utils/checkPermissions';
 import NoteEditor from '../../NoteEditor/NoteEditor';
+import { EditorControl } from '../../NoteEditor/types';
 import * as React from 'react';
 import { Keyboard, View, TextInput, StyleSheet, Linking, Share, NativeSyntheticEvent, useWindowDimensions } from 'react-native';
 import { Platform, PermissionsAndroid } from 'react-native';
@@ -14,14 +15,14 @@ import Note from '@joplin/lib/models/Note';
 import BaseItem from '@joplin/lib/models/BaseItem';
 import Resource from '@joplin/lib/models/Resource';
 import Folder from '@joplin/lib/models/Folder';
-const Clipboard = require('@react-native-clipboard/clipboard').default;
+import Clipboard from '@react-native-clipboard/clipboard';
 const md5 = require('md5');
 import BackButtonService from '../../../services/BackButtonService';
 import NavService, { OnNavigateCallback as OnNavigateCallback } from '@joplin/lib/services/NavService';
 import { ModelType } from '@joplin/lib/BaseModel';
 import { fileExtension, safeFileExtension } from '@joplin/lib/path-utils';
 import * as mimeUtils from '@joplin/lib/mime-utils';
-import ScreenHeader, { MenuOptionType, ViewToggleButtonMode } from '../../ScreenHeader';
+import ScreenHeader, { FolderPickerOptions, MenuOptionType, ViewToggleButtonMode } from '../../ScreenHeader';
 import NoteTagsDialog from '../NoteTagsDialog';
 import time from '@joplin/lib/time';
 import Checkbox from '../../Checkbox';
@@ -81,10 +82,10 @@ import VoiceTyping from '../../../services/voiceTyping/VoiceTyping';
 import useDebounced from '../../../utils/hooks/useDebounced';
 import { Second } from '@joplin/utils/time';
 import TextWrapCalculator from '../Notes/TextWrapCalculator';
-const { ALL_NOTES_FILTER_ID } = require('@joplin/lib/reserved-ids');
+import SearchEngine from '@joplin/lib/services/search/SearchEngine';
+import { ALL_NOTES_FILTER_ID } from '@joplin/lib/reserved-ids';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-const emptyArray: any[] = [];
+const emptyArray: never[] = [];
 
 const logger = Logger.create('screens/Note');
 
@@ -136,8 +137,7 @@ interface State {
 	readOnly: boolean;
 	searchVisible: boolean;
 	folder: FolderEntity|null;
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	lastSavedNote: any;
+	lastSavedNote: NoteEntity | null;
 	isLoading: boolean;
 	titleTextInputHeight: number;
 	alarmDialogShown: boolean;
@@ -174,26 +174,19 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 
 	private saveActionQueues_: Record<string, AsyncActionQueue>;
 	private doFocusUpdate_: boolean;
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	private styles_: any;
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	private editorRef: any;
+	private styles_: Record<string, ReturnType<typeof StyleSheet.create>>;
+	private editorRef: RefObject<EditorControl>;
 	private titleTextFieldRef: RefObject<TextInput>;
 	private navHandler: OnNavigateCallback;
 	private backHandler: ()=> Promise<boolean>;
 	private undoRedoService_: UndoRedoService;
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	private noteTagDialog_closeRequested: any;
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	private refreshResource: (resource: any, noteBody?: string)=> Promise<void>;
+	private noteTagDialog_closeRequested: ()=> void;
+	private refreshResource: (resource: ResourceEntity, noteBody?: string)=> Promise<void>;
 	private selection: SelectionRange;
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	private menuOptionsCache_: Record<string, any>;
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	private focusUpdateIID_: any;
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	private folderPickerOptions_: any;
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
+	private menuOptionsCache_: Record<string, MenuOptionType[]>;
+	private focusUpdateIID_: ReturnType<typeof setTimeout> | null;
+	private folderPickerOptions_: FolderPickerOptions;
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- dialogbox is the react-native-dialogbox ref; the library ships no types
 	public dialogbox: any;
 	private commandRegistration_: RegisteredRuntime|null = null;
 	private editorPluginHandler_ = new EditorPluginHandler(PluginService.instance(), saveEvent => {
@@ -201,8 +194,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 	});
 	private refreshKey: number | undefined;
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	public static navigationOptions(): any {
+	public static navigationOptions(): { header: null } {
 		return { header: null };
 	}
 
@@ -325,8 +317,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 			this.setState({ noteTagDialogShown: false });
 		};
 
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-		this.refreshResource = async (resource: any, noteBody: string = null) => {
+		this.refreshResource = async (resource: ResourceEntity, noteBody: string = null) => {
 			if (noteBody === null && this.state.note && this.state.note.body) noteBody = this.state.note.body;
 			if (noteBody === null) return;
 
@@ -427,11 +418,10 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 	}
 
 	private async undoRedo(type: 'undo'|'redo') {
-		const undoState = await this.undoRedoService_[type](this.undoState());
+		const undoState = await this.undoRedoService_[type](this.undoState()) as { body: string } | undefined;
 		if (!undoState) return;
 
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-		this.setState((state: any) => {
+		this.setState((state) => {
 			const newNote = { ...state.note };
 			newNote.body = undoState.body;
 			return {
@@ -484,8 +474,8 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 		this.styles_ = {};
 
 		// TODO: Clean up these style names and nesting
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-		const styles: any = {
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Heterogeneous style entries (view/text/icon styles spread together); typed split would force restructuring
+		const styles: Record<string, any> = {
 			screen: {
 				flex: 1,
 				backgroundColor: theme.backgroundColor,
@@ -636,8 +626,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 		}, 300);
 	}
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	public onMarkForDownload(event: any) {
+	public onMarkForDownload(event: { resourceId: string }) {
 		void ResourceFetcher.instance().markForDownload(event.resourceId);
 	}
 
@@ -810,8 +799,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 		shared.noteComponent_change(this, 'body', event.value);
 	}, 100);
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	private onPlainEditorSelectionChange = (event: NativeSyntheticEvent<any>) => {
+	private onPlainEditorSelectionChange = (event: NativeSyntheticEvent<{ selection: SelectionRange }>) => {
 		this.selection = event.nativeEvent.selection;
 	};
 
@@ -846,8 +834,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 		Keyboard.dismiss();
 	}
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	public async saveOneProperty(name: string, value: any) {
+	public async saveOneProperty(name: string, value: unknown) {
 		await shared.saveOneProperty(this, name, value);
 	}
 
@@ -1678,7 +1665,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 					!note || !note.body.trim() ? null : (
 						<NoteBodyViewer
 							style={this.styles().noteBodyViewer}
-							paddingBottom={0}
+							paddingBottom={150}
 							noteBody={note.body}
 							noteMarkupLanguage={note.markup_language}
 							noteResources={this.state.noteResources}
@@ -1730,6 +1717,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 					);
 				} else {
 					const editorStyle = this.styles().bodyTextInput;
+					const globalSearch = SearchEngine.instance().createQueryFromTerms(this.props.highlightedWords);
 
 					bodyComponent = <NoteEditor
 						ref={this.editorRef}
@@ -1739,7 +1727,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 						initialText={note.body}
 						initialSelection={this.selection}
 						markupLanguage={this.state.note.markup_language}
-						globalSearch={this.props.searchQuery}
+						globalSearch={globalSearch}
 						onChange={this.onMarkdownEditorTextChange}
 						onSelectionChange={this.onEditorSelectionChange}
 						onUndoRedoDepthChange={this.onUndoRedoDepthChange}

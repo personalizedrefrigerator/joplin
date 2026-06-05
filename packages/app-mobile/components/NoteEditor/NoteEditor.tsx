@@ -100,6 +100,10 @@ function editorTheme(themeId: number) {
 		fontSizeUnits: 'em',
 		fontSize: estimatedFontSizeInEm,
 		fontFamily: fontFamilyFromSettings(),
+
+		// Avoid adding extra padding on iOS:
+		// When the keyboard is open, iOS adds its own padding to the bottom of the note editor.
+		paddingBottom: Platform.OS === 'ios' ? 0 : 150,
 	};
 }
 
@@ -127,8 +131,7 @@ const useEditorControl = (
 			supportsCommand(command: EditorCommandType) {
 				return editorRef.current.supportsCommand(command);
 			},
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-			execCommand(command, ...args: any[]) {
+			execCommand(command, ...args: unknown[]) {
 				logger.debug('execCommand', command);
 				return editorRef.current.execCommand(command, ...args);
 			},

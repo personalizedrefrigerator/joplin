@@ -4,12 +4,12 @@ import { NotificationKey } from '../../models/NotificationModel';
 import { cookieGet } from '../../utils/cookies';
 import { ErrorForbidden } from '../../utils/errors';
 import { execRequest, execRequestC } from '../../utils/testing/apiUtils';
-import { beforeAllDb, afterAllTests, beforeEachDb, koaAppContext, createUserAndSession, models, parseHtml, checkContextError, expectHttpError, expectThrow } from '../../utils/testing/testUtils';
+import { beforeAllDb, afterAllTests, beforeEachDb, koaAppContext, createUserAndSession, models, parseHtml, checkContextError, expectHttpError, expectThrow, createSubscription } from '../../utils/testing/testUtils';
 import { uuidgen } from '@joplin/lib/uuid';
 import config from '../../config';
+import { AccountType } from '../../models/UserModel';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-async function postUser(sessionId: string, email: string, password: string = null, props: any = null): Promise<User> {
+async function postUser(sessionId: string, email: string, password: string = null, props: Partial<User> = null): Promise<User> {
 	password = password === null ? uuidgen() : password;
 
 	const context = await koaAppContext({
@@ -32,8 +32,7 @@ async function postUser(sessionId: string, email: string, password: string = nul
 	return context.response.body;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-async function patchUser(sessionId: string, user: any, url = ''): Promise<User> {
+async function patchUser(sessionId: string, user: Partial<User> & Record<string, unknown>, url = ''): Promise<User> {
 	const context = await koaAppContext({
 		sessionId: sessionId,
 		request: {
@@ -118,8 +117,7 @@ describe('index/users', () => {
 		const doc = parseHtml(userHtml);
 
 		// <input class="input" type="email" name="email" value="user1@localhost"/>
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-		expect((doc.querySelector('input[name=email]') as any).value).toBe('user1@localhost');
+		expect(doc.querySelector<HTMLInputElement>('input[name=email]').value).toBe('user1@localhost');
 	});
 
 	test('should allow user to set a password for new accounts', async () => {
@@ -373,6 +371,28 @@ describe('index/users', () => {
 			).toBe(expectedDisabled);
 		} finally {
 			config().SAML_ENABLED = false;
+		}
+	});
+
+	test.each([
+		{ fromAccountType: AccountType.Basic, shouldAllowUpgrade: true, upgradeButtonText: /to Pro$/ },
+		{ fromAccountType: AccountType.Pro, shouldAllowUpgrade: true, upgradeButtonText: /to Pro 100 GB$/ },
+		{ fromAccountType: AccountType.Pro100Gb, shouldAllowUpgrade: false },
+	])('should prompt users to switch plans (case: %j)', async ({
+		fromAccountType, shouldAllowUpgrade, upgradeButtonText,
+	}) => {
+		const { user, session } = await createUserAndSession(0, false, {
+			account_type: fromAccountType,
+		});
+		await createSubscription(user, 'stripe-user-id-here', 'sub_1234567');
+
+		const userHtml = await getUserHtml(session.id, user.id);
+		const doc = parseHtml(userHtml);
+
+		const upgradeButton = doc.querySelector('a.button.upgrade-subscription');
+		expect(!!upgradeButton).toBe(shouldAllowUpgrade);
+		if (shouldAllowUpgrade) {
+			expect(upgradeButton.textContent).toMatch(upgradeButtonText);
 		}
 	});
 });

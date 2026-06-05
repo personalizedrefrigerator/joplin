@@ -17,12 +17,12 @@ import onUnshareNoteClick from '@joplin/lib/components/shared/ShareNoteDialog/on
 import useShareStatusMessage from '@joplin/lib/components/shared/ShareNoteDialog/useShareStatusMessage';
 import useEncryptionWarningMessage from '@joplin/lib/components/shared/ShareNoteDialog/useEncryptionWarningMessage';
 import { SharingStatus } from '@joplin/lib/components/shared/ShareNoteDialog/types';
-const { clipboard } = require('electron');
+import { clipboard } from 'electron';
 
 interface Props {
 	themeId: number;
 	noteIds: string[];
-	// eslint-disable-next-line @typescript-eslint/ban-types -- Old code before rule was applied
+	// eslint-disable-next-line @typescript-eslint/no-unsafe-function-type -- Old code before rule was applied
 	onClose: Function;
 	shares: StateShare[];
 	syncTargetId: number;

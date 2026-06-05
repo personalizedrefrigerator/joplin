@@ -17,7 +17,7 @@ import { focus } from '@joplin/lib/utils/focusHandler';
 
 interface Props {
 	themeId: number;
-	// eslint-disable-next-line @typescript-eslint/ban-types -- Old code before rule was applied
+	// eslint-disable-next-line @typescript-eslint/no-unsafe-function-type -- Old code before rule was applied
 	dispatch: Function;
 	folderId: string;
 	parentId: string;
@@ -89,8 +89,7 @@ export default function(props: Props) {
 		// eslint-disable-next-line @seiyab/react-hooks/exhaustive-deps -- Old code before rule was applied
 	}, [onClose, folderTitle, folderIcon, props.folderId, props.parentId]);
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	const onFolderTitleChange = useCallback((event: any) => {
+	const onFolderTitleChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
 		setFolderTitle(event.target.value);
 	}, []);
 

@@ -30,7 +30,7 @@ interface Props {
 	onResize(event: OnResizeEvent): void;
 	width?: number;
 	height?: number;
-	// eslint-disable-next-line @typescript-eslint/ban-types -- Old code before rule was applied
+	// eslint-disable-next-line @typescript-eslint/no-unsafe-function-type -- Old code before rule was applied
 	renderItem: Function;
 	onMoveButtonClick(event: MoveButtonClickEvent): void;
 	moveMode: boolean;
@@ -97,8 +97,7 @@ function ResizableLayout(props: Props) {
 			const newWidth = Math.max(itemMinWidth, resizedItem.initialWidth + delta.width);
 			const newHeight = Math.max(itemMinHeight, resizedItem.initialHeight + delta.height);
 
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-			const newSize: any = {};
+			const newSize: { width?: number; height?: number } = {};
 
 			if (item.width) newSize.width = item.width;
 			if (item.height) newSize.height = item.height;
