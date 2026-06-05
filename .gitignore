@@ -896,6 +896,7 @@ packages/app-mobile/components/screens/NoteRevisionViewer.js
 packages/app-mobile/components/screens/NoteTagsDialog.js
 packages/app-mobile/components/screens/Notes/NewNoteButton.test.js
 packages/app-mobile/components/screens/Notes/NewNoteButton.js
+packages/app-mobile/components/screens/Notes/Notes.test.js
 packages/app-mobile/components/screens/Notes/Notes.js
 packages/app-mobile/components/screens/Notes/TextWrapCalculator.js
 packages/app-mobile/components/screens/ResourceScreen.js

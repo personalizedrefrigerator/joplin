@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { AppState as RNAppState, View, StyleSheet, NativeEventSubscription, ViewStyle, TextStyle } from 'react-native';
+import { AppState as RNAppState, View } from 'react-native';
 import { stateUtils } from '@joplin/lib/reducer';
 import { connect } from 'react-redux';
 import NoteList from '../../NoteList';
@@ -10,14 +10,13 @@ import Setting from '@joplin/lib/models/Setting';
 import { themeStyle } from '../../global-style';
 import { FolderPickerOptions, ScreenHeader } from '../../ScreenHeader';
 import { _ } from '@joplin/lib/locale';
-import { BaseScreenComponent } from '../../base-screen';
 import { AppState } from '../../../utils/types';
 import { FolderEntity, NoteEntity, TagEntity } from '@joplin/lib/services/database/types';
 import { getTrashFolderId, itemIsInTrash } from '@joplin/lib/services/trash';
 import AccessibleView from '../../accessibility/AccessibleView';
 import { Dispatch } from 'redux';
-import { DialogContext, DialogControl } from '../../DialogManager';
-import { useContext } from 'react';
+import { DialogContext } from '../../DialogManager';
+import { useCallback, useContext, useEffect, useMemo, useRef } from 'react';
 import { MenuChoice } from '../../DialogManager/types';
 import NewNoteButton from './NewNoteButton';
 import PerFolderSortOrderService from '@joplin/lib/services/sortOrder/PerFolderSortOrderService';
@@ -45,33 +44,114 @@ interface Props {
 	notesParentType: string;
 }
 
-interface State {
+const parentItem = (props: Props) => {
+	let output = null;
+	if (props.notesParentType === 'Folder') {
+		output = Folder.byId(props.folders, props.selectedFolderId);
+	} else if (props.notesParentType === 'Tag') {
+		output = Tag.byId(props.tags, props.selectedTagId);
+	} else if (props.notesParentType === 'SmartFilter') {
+		output = { id: props.selectedSmartFilterId, title: _('All notes') };
+	} else {
+		return null;
+	}
+	return output;
+};
 
-}
+// Show "use own sort order" toggle for folders and the All Notes smart filter,
+// but not for tags, conflicts folder, or trash folder.
+const shouldShowPerFolderSortToggle = (props: Props): boolean => {
+	const { notesParentType, selectedFolderId, selectedSmartFilterId } = props;
 
-interface ComponentProps extends Props {
-	dialogManager: DialogControl;
-}
-
-type Styles = Record<string, ViewStyle|TextStyle>;
-
-class NotesScreenComponent extends BaseScreenComponent<ComponentProps, State> {
-	private onAppStateChangeSub_: NativeEventSubscription = null;
-	private styles_: Record<number, Styles> = {};
-	private folderPickerOptions_: FolderPickerOptions;
-
-	public constructor(props: ComponentProps) {
-		super(props);
+	if (notesParentType === 'Folder') {
+		return selectedFolderId !== Folder.conflictFolderId() && selectedFolderId !== getTrashFolderId();
 	}
 
-	private onAppStateChange_ = async () => {
-		// Force an update to the notes list when app state changes
-		const newProps = { ...this.props };
-		newProps.notesSource = '';
-		await this.refreshNotes(newProps);
-	};
+	if (notesParentType === 'SmartFilter') {
+		return selectedSmartFilterId === ALL_NOTES_FILTER_ID;
+	}
 
-	private sortButton_press = async () => {
+	return false;
+};
+
+const getCurrentFolderIdForSort = (props: Props): string => {
+	if (props.notesParentType === 'Folder') {
+		return props.selectedFolderId;
+	} else if (props.notesParentType === 'SmartFilter') {
+		return props.selectedSmartFilterId;
+	}
+	return '';
+};
+
+const NotesScreenComponent: React.FC<Props> = props => {
+	const {
+		themeId, visible, folders, noteSelectionEnabled,
+		activeFolderId, selectedFolderId, selectedTagId, selectedSmartFilterId,
+		notesParentType, notesOrder, uncompletedTodosOnTop, showCompletedTodos,
+	} = props;
+
+	const dialogManager = useContext(DialogContext);
+
+	// Lets the stable callbacks below read the latest props without becoming
+	// dependencies of the refresh effect/subscription (mirrors the class component
+	// reading this.props).
+	const propsRef = useRef(props);
+	propsRef.current = props;
+
+	const refreshNotes = useCallback(async (notesSourceOverride?: string) => {
+		const current = propsRef.current;
+
+		const options = {
+			order: current.notesOrder,
+			uncompletedTodosOnTop: current.uncompletedTodosOnTop,
+			showCompletedTodos: current.showCompletedTodos,
+			caseInsensitive: true,
+		};
+
+		const parent = parentItem(current);
+		if (!parent) return;
+
+		const source = JSON.stringify({
+			options: options,
+			parentId: parent.id,
+		});
+
+		const effectiveNotesSource = notesSourceOverride ?? current.notesSource;
+		if (source === effectiveNotesSource) return;
+		// For now, search refresh is handled by the search screen.
+		if (current.notesParentType === 'Search') return;
+
+		let notes: NoteEntity[] = [];
+		if (current.notesParentType === 'Folder') {
+			notes = await Note.previews(current.selectedFolderId, options);
+		} else if (current.notesParentType === 'Tag') {
+			notes = await Tag.notes(current.selectedTagId, options);
+		} else if (current.notesParentType === 'SmartFilter') {
+			notes = await Note.previews(null, options);
+		}
+
+		current.dispatch({
+			type: 'NOTE_UPDATE_ALL',
+			notes: notes,
+			notesSource: source,
+		});
+	}, []);
+
+	// Refresh on mount and whenever an input that affects the note list changes.
+	useEffect(() => {
+		void refreshNotes();
+	}, [refreshNotes, notesOrder, selectedFolderId, selectedTagId, selectedSmartFilterId, notesParentType, uncompletedTodosOnTop, showCompletedTodos]);
+
+	// Force an update to the notes list when the app state changes.
+	useEffect(() => {
+		const onAppStateChange = () => { void refreshNotes(''); };
+		const subscription = RNAppState.addEventListener('change', onAppStateChange);
+		return () => subscription.remove();
+	}, [refreshNotes]);
+
+	const sortButton_press = useCallback(async () => {
+		const current = propsRef.current;
+
 		type IdType = { name: string; value: string|boolean };
 		const buttons: MenuChoice<IdType>[] = [];
 		const sortNoteOptions = Setting.enumOptions('notes.sortOrder.field');
@@ -104,8 +184,8 @@ class NotesScreenComponent extends BaseScreenComponent<ComponentProps, State> {
 			id: { name: 'showCompletedTodos', value: !Setting.value('showCompletedTodos') },
 		});
 
-		const showPerFolderToggle = this.shouldShowPerFolderSortToggle();
-		const currentFolderId = this.getCurrentFolderIdForSort();
+		const showPerFolderToggle = shouldShowPerFolderSortToggle(current);
+		const currentFolderId = getCurrentFolderIdForSort(current);
 
 		if (showPerFolderToggle) {
 			const isSet = PerFolderSortOrderService.isSet(currentFolderId);
@@ -116,7 +196,7 @@ class NotesScreenComponent extends BaseScreenComponent<ComponentProps, State> {
 			});
 		}
 
-		const r = await this.props.dialogManager.showMenu(Setting.settingMetadata('notes.sortOrder.field').label(), buttons);
+		const r = await dialogManager.showMenu(Setting.settingMetadata('notes.sortOrder.field').label(), buttons);
 		if (!r) return;
 
 		if (r.name === 'perFolderSortOrder') {
@@ -128,211 +208,67 @@ class NotesScreenComponent extends BaseScreenComponent<ComponentProps, State> {
 		} else {
 			Setting.setValue(r.name, r.value);
 		}
-	};
+	}, [dialogManager]);
 
-	// Show "use own sort order" toggle for folders and the All Notes smart filter,
-	// but not for tags, conflicts folder, or trash folder.
-	private shouldShowPerFolderSortToggle(): boolean {
-		const { notesParentType, selectedFolderId, selectedSmartFilterId } = this.props;
+	const folderPickerOptions = useMemo<FolderPickerOptions>(() => ({
+		visible: noteSelectionEnabled,
+		mustSelect: true,
+	}), [noteSelectionEnabled]);
 
-		if (notesParentType === 'Folder') {
-			return selectedFolderId !== Folder.conflictFolderId() && selectedFolderId !== getTrashFolderId();
-		}
+	const parent = parentItem(props);
+	const theme = themeStyle(themeId);
 
-		if (notesParentType === 'SmartFilter') {
-			return selectedSmartFilterId === ALL_NOTES_FILTER_ID;
-		}
+	const rootStyle = visible ? theme.rootStyle : theme.hiddenRootStyle;
 
-		return false;
-	}
-
-	private getCurrentFolderIdForSort(): string {
-		if (this.props.notesParentType === 'Folder') {
-			return this.props.selectedFolderId;
-		} else if (this.props.notesParentType === 'SmartFilter') {
-			return this.props.selectedSmartFilterId;
-		}
-		return '';
-	}
-
-	public styles() {
-		if (!this.styles_) this.styles_ = {};
-		const themeId = this.props.themeId;
-		const cacheKey = themeId;
-
-		if (this.styles_[cacheKey]) return this.styles_[cacheKey];
-		this.styles_ = {};
-
-		const styles = {
-			noteList: {
-				flex: 1,
-			},
-		};
-
-		this.styles_[cacheKey] = StyleSheet.create(styles);
-		return this.styles_[cacheKey];
-	}
-
-	public async componentDidMount() {
-		await this.refreshNotes();
-		this.onAppStateChangeSub_ = RNAppState.addEventListener('change', this.onAppStateChange_);
-	}
-
-	public async componentWillUnmount() {
-		if (this.onAppStateChangeSub_) this.onAppStateChangeSub_.remove();
-	}
-
-	public async componentDidUpdate(prevProps: Props) {
-		if (prevProps.notesOrder !== this.props.notesOrder || prevProps.selectedFolderId !== this.props.selectedFolderId || prevProps.selectedTagId !== this.props.selectedTagId || prevProps.selectedSmartFilterId !== this.props.selectedSmartFilterId || prevProps.notesParentType !== this.props.notesParentType || prevProps.uncompletedTodosOnTop !== this.props.uncompletedTodosOnTop || prevProps.showCompletedTodos !== this.props.showCompletedTodos) {
-			await this.refreshNotes(this.props);
-		}
-	}
-
-	public async refreshNotes(props: Props|null = null) {
-		if (props === null) props = this.props;
-
-		const options = {
-			order: props.notesOrder,
-			uncompletedTodosOnTop: props.uncompletedTodosOnTop,
-			showCompletedTodos: props.showCompletedTodos,
-			caseInsensitive: true,
-		};
-
-		const parent = this.parentItem(props);
-		if (!parent) return;
-
-		const source = JSON.stringify({
-			options: options,
-			parentId: parent.id,
-		});
-
-		if (source === props.notesSource) return;
-		// For now, search refresh is handled by the search screen.
-		if (props.notesParentType === 'Search') return;
-
-		let notes: NoteEntity[] = [];
-		if (props.notesParentType === 'Folder') {
-			notes = await Note.previews(props.selectedFolderId, options);
-		} else if (props.notesParentType === 'Tag') {
-			notes = await Tag.notes(props.selectedTagId, options);
-		} else if (props.notesParentType === 'SmartFilter') {
-			notes = await Note.previews(null, options);
-		}
-
-		this.props.dispatch({
-			type: 'NOTE_UPDATE_ALL',
-			notes: notes,
-			notesSource: source,
-		});
-	}
-
-	public newNoteNavigate = async (folderId: string, isTodo: boolean) => {
-		try {
-			const newNote = await Note.save({
-				parent_id: folderId,
-				is_todo: isTodo ? 1 : 0,
-			}, { provisional: true });
-
-			this.props.dispatch({
-				type: 'NAV_GO',
-				routeName: 'Note',
-				noteId: newNote.id,
-			});
-		} catch (error) {
-			alert(_('Cannot create a new note: %s', error.message));
-		}
-	};
-
-	public parentItem(props: Props|null = null) {
-		if (!props) props = this.props;
-
-		let output = null;
-		if (props.notesParentType === 'Folder') {
-			output = Folder.byId(props.folders, props.selectedFolderId);
-		} else if (props.notesParentType === 'Tag') {
-			output = Tag.byId(props.tags, props.selectedTagId);
-		} else if (props.notesParentType === 'SmartFilter') {
-			output = { id: this.props.selectedSmartFilterId, title: _('All notes') };
-		} else {
-			return null;
-			// throw new Error('Invalid parent type: ' + props.notesParentType);
-		}
-		return output;
-	}
-
-	public folderPickerOptions() {
-		const options = {
-			visible: this.props.noteSelectionEnabled,
-			mustSelect: true,
-		};
-
-		if (this.folderPickerOptions_ && options.visible === this.folderPickerOptions_.visible) return this.folderPickerOptions_;
-
-		this.folderPickerOptions_ = options;
-		return this.folderPickerOptions_;
-	}
-
-	public render() {
-		const parent = this.parentItem();
-		const theme = themeStyle(this.props.themeId);
-
-		const rootStyle = this.props.visible ? theme.rootStyle : theme.hiddenRootStyle;
-
-		const title = parent ? parent.title : null;
-		if (!parent) {
-			return (
-				<View style={rootStyle}>
-					<ScreenHeader title={title} showSideMenuButton={true} showBackButton={false} />
-				</View>
-			);
-		}
-
-		const icon = Folder.unserializeIcon(parent.icon);
-		const iconString = icon ? `${icon.emoji} ` : '';
-
-		let buttonFolderId = this.props.selectedFolderId !== Folder.conflictFolderId() ? this.props.selectedFolderId : null;
-		if (!buttonFolderId) buttonFolderId = this.props.activeFolderId;
-
-		const addFolderNoteButtons = !!buttonFolderId;
-
-		const makeActionButtonComp = () => {
-			if ((this.props.notesParentType === 'Folder' && itemIsInTrash(parent)) || !Folder.atLeastOneRealFolderExists(this.props.folders)) return null;
-
-			if (addFolderNoteButtons && this.props.folders.length > 0) {
-				return <NewNoteButton />;
-			}
-			return null;
-		};
-
-		const actionButtonComp = this.props.noteSelectionEnabled || !this.props.visible ? null : makeActionButtonComp();
-
-		// Ensure that screen readers can't focus the notes list when it isn't visible.
-		const accessibilityHidden = !this.props.visible;
-
+	const title = parent ? parent.title : null;
+	if (!parent) {
 		return (
-			<AccessibleView
-				style={rootStyle}
-
-				inert={accessibilityHidden}
-			>
-				<ScreenHeader
-					title={iconString + title}
-					showBackButton={false}
-					sortButton_press={this.sortButton_press}
-					folderPickerOptions={this.folderPickerOptions()}
-					showSearchButton={true}
-					showSideMenuButton={true}
-				/>
-				<NoteList />
-				{actionButtonComp}
-			</AccessibleView>
+			<View style={rootStyle}>
+				<ScreenHeader title={title} showSideMenuButton={true} showBackButton={false} />
+			</View>
 		);
 	}
-}
 
-const NotesScreenWrapper: React.FC<Props> = props => {
-	const dialogManager = useContext(DialogContext);
-	return <NotesScreenComponent {...props} dialogManager={dialogManager}/>;
+	const icon = Folder.unserializeIcon(parent.icon);
+	const iconString = icon ? `${icon.emoji} ` : '';
+
+	let buttonFolderId = selectedFolderId !== Folder.conflictFolderId() ? selectedFolderId : null;
+	if (!buttonFolderId) buttonFolderId = activeFolderId;
+
+	const addFolderNoteButtons = !!buttonFolderId;
+
+	const makeActionButtonComp = () => {
+		if ((notesParentType === 'Folder' && itemIsInTrash(parent)) || !Folder.atLeastOneRealFolderExists(folders)) return null;
+
+		if (addFolderNoteButtons && folders.length > 0) {
+			return <NewNoteButton />;
+		}
+		return null;
+	};
+
+	const actionButtonComp = noteSelectionEnabled || !visible ? null : makeActionButtonComp();
+
+	// Ensure that screen readers can't focus the notes list when it isn't visible.
+	const accessibilityHidden = !visible;
+
+	return (
+		<AccessibleView
+			style={rootStyle}
+
+			inert={accessibilityHidden}
+		>
+			<ScreenHeader
+				title={iconString + title}
+				showBackButton={false}
+				sortButton_press={sortButton_press}
+				folderPickerOptions={folderPickerOptions}
+				showSearchButton={true}
+				showSideMenuButton={true}
+			/>
+			<NoteList />
+			{actionButtonComp}
+		</AccessibleView>
+	);
 };
 
 const NotesScreen = connect((state: AppState) => {
@@ -353,6 +289,6 @@ const NotesScreen = connect((state: AppState) => {
 		noteSelectionEnabled: state.noteSelectionEnabled,
 		notesOrder: stateUtils.notesOrder(state.settings),
 	};
-})(NotesScreenWrapper);
+})(NotesScreenComponent);
 
 export default NotesScreen;
