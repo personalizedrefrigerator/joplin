@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { PureComponent, ReactElement } from 'react';
+import { ReactElement, useCallback, useMemo } from 'react';
 import { connect } from 'react-redux';
 import { View, Text, StyleSheet, TouchableOpacity, ViewStyle, TextStyle, ImageStyle } from 'react-native';
 import BackButtonService from '../../services/BackButtonService';
@@ -58,7 +58,7 @@ interface ScreenHeaderProps {
 	showUndoButton: boolean;
 	undoButtonDisabled?: boolean;
 	showRedoButton: boolean;
-	menuOptions: MenuOptionType[];
+	menuOptions?: MenuOptionType[];
 	title?: string|null;
 	folders: FolderEntity[];
 	folderPickerOptions?: FolderPickerOptions;
@@ -89,21 +89,8 @@ interface ScreenHeaderProps {
 	themeId: number;
 }
 
-interface ScreenHeaderState {
-}
-
-class ScreenHeaderComponent extends PureComponent<ScreenHeaderProps, ScreenHeaderState> {
-	private cachedStyles: Record<number, ReturnType<typeof StyleSheet.create>>;
-	public constructor(props: ScreenHeaderProps) {
-		super(props);
-		this.cachedStyles = {};
-	}
-
-	private styles() {
-		const themeId = this.props.themeId;
-		if (this.cachedStyles[themeId]) return this.cachedStyles[themeId];
-		this.cachedStyles = {};
-
+const useStyles = (themeId: number) => {
+	return useMemo<ScreenHeaderStyles>(() => {
 		const theme = themeStyle(themeId);
 
 		const styleObject: Record<string, ViewStyle | TextStyle | ImageStyle> = {
@@ -216,42 +203,47 @@ class ScreenHeaderComponent extends PureComponent<ScreenHeaderProps, ScreenHeade
 		styleObject.saveButtonDisabled = { ...styleObject.saveButton, opacity: theme.disabledOpacity };
 		styleObject.iconButtonDisabled = { ...styleObject.iconButton, opacity: theme.disabledOpacity };
 
-		this.cachedStyles[themeId] = StyleSheet.create(styleObject);
-		return this.cachedStyles[themeId];
-	}
+		return StyleSheet.create(styleObject);
+	}, [themeId]);
+};
 
-	private sideMenuButton_press() {
-		this.props.dispatch({ type: 'SIDE_MENU_TOGGLE' });
-	}
+const ScreenHeaderComponent: React.FC<ScreenHeaderProps> = props => {
+	const { dispatch, noteSelectionEnabled, selectedNoteIds, onSearchButtonPress } = props;
+	const themeId = props.themeId;
+	const styles = useStyles(themeId);
 
-	private async backButton_press() {
-		if (this.props.noteSelectionEnabled) {
-			this.props.dispatch({ type: 'NOTE_SELECTION_END' });
+	const sideMenuButton_press = useCallback(() => {
+		dispatch({ type: 'SIDE_MENU_TOGGLE' });
+	}, [dispatch]);
+
+	const backButton_press = useCallback(async () => {
+		if (noteSelectionEnabled) {
+			dispatch({ type: 'NOTE_SELECTION_END' });
 		} else {
 			await BackButtonService.back();
 		}
-	}
+	}, [noteSelectionEnabled, dispatch]);
 
-	private selectAllButton_press() {
-		this.props.dispatch({ type: 'NOTE_SELECT_ALL_TOGGLE' });
-	}
+	const selectAllButton_press = useCallback(() => {
+		dispatch({ type: 'NOTE_SELECT_ALL_TOGGLE' });
+	}, [dispatch]);
 
-	private searchButton_press() {
-		if (this.props.onSearchButtonPress) {
-			this.props.onSearchButtonPress();
+	const searchButton_press = useCallback(() => {
+		if (onSearchButtonPress) {
+			onSearchButtonPress();
 		} else {
 			void NavService.go('Search');
 		}
-	}
+	}, [onSearchButtonPress]);
 
-	private pluginPanelToggleButton_press() {
-		this.props.dispatch({ type: 'SET_PLUGIN_PANELS_DIALOG_VISIBLE', visible: true });
-	}
+	const pluginPanelToggleButton_press = useCallback(() => {
+		dispatch({ type: 'SET_PLUGIN_PANELS_DIALOG_VISIBLE', visible: true });
+	}, [dispatch]);
 
-	private async duplicateButton_press() {
-		const noteIds = this.props.selectedNoteIds;
+	const duplicateButton_press = useCallback(async () => {
+		const noteIds = selectedNoteIds;
 
-		this.props.dispatch({ type: 'NOTE_SELECTION_END' });
+		dispatch({ type: 'NOTE_SELECTION_END' });
 
 		try {
 			// Duplicate all selected notes. ensureUniqueTitle is set to true to use the
@@ -260,490 +252,483 @@ class ScreenHeaderComponent extends PureComponent<ScreenHeaderProps, ScreenHeade
 		} catch (error) {
 			alert(_n('This note could not be duplicated: %s', 'These notes could not be duplicated: %s', noteIds.length, error.message));
 		}
-	}
+	}, [selectedNoteIds, dispatch]);
 
-	private async deleteButton_press() {
+	const deleteButton_press = useCallback(async () => {
 		// Dialog needs to be displayed as a child of the parent component, otherwise
 		// it won't be visible within the header component.
-		const noteIds = this.props.selectedNoteIds;
-		this.props.dispatch({ type: 'NOTE_SELECTION_END' });
+		const noteIds = selectedNoteIds;
+		dispatch({ type: 'NOTE_SELECTION_END' });
 
 		try {
 			await Note.batchDelete(noteIds, { toTrash: true, sourceDescription: 'Delete selected notes button' });
 		} catch (error) {
 			alert(_n('This note could not be deleted: %s', 'These notes could not be deleted: %s', noteIds.length, error.message));
 		}
-	}
+	}, [selectedNoteIds, dispatch]);
 
-	private async restoreButton_press() {
+	const restoreButton_press = useCallback(async () => {
 		// Dialog needs to be displayed as a child of the parent component, otherwise
 		// it won't be visible within the header component.
-		const noteIds = this.props.selectedNoteIds;
-		this.props.dispatch({ type: 'NOTE_SELECTION_END' });
+		const noteIds = selectedNoteIds;
+		dispatch({ type: 'NOTE_SELECTION_END' });
 
 		try {
 			await restoreItems(ModelType.Note, noteIds);
 		} catch (error) {
 			alert(`Could not restore note(s): ${error.message}`);
 		}
+	}, [selectedNoteIds, dispatch]);
+
+	function sideMenuButton(styles: ScreenHeaderStyles, onPress: OnPressCallback) {
+		return (
+			<TouchableOpacity
+				onPress={onPress}
+
+				accessibilityLabel={_('Sidebar')}
+				accessibilityHint={_('Show/hide the sidebar')}
+				accessibilityRole="button">
+				<View style={styles.sideMenuButton}>
+					<Icon name="ionicon menu" style={styles.topIcon} accessibilityLabel={null} />
+				</View>
+			</TouchableOpacity>
+		);
 	}
 
-	public render() {
-		const themeId = this.props.themeId;
-		function sideMenuButton(styles: ScreenHeaderStyles, onPress: OnPressCallback) {
-			return (
-				<TouchableOpacity
-					onPress={onPress}
+	function backButton(styles: ScreenHeaderStyles, onPress: OnPressCallback, disabled: boolean) {
+		return (
+			<TouchableOpacity
+				onPress={onPress}
+				disabled={disabled}
 
-					accessibilityLabel={_('Sidebar')}
-					accessibilityHint={_('Show/hide the sidebar')}
-					accessibilityRole="button">
-					<View style={styles.sideMenuButton}>
-						<Icon name="ionicon menu" style={styles.topIcon} accessibilityLabel={null} />
-					</View>
-				</TouchableOpacity>
-			);
-		}
-
-		function backButton(styles: ScreenHeaderStyles, onPress: OnPressCallback, disabled: boolean) {
-			return (
-				<TouchableOpacity
-					onPress={onPress}
-					disabled={disabled}
-
-					accessibilityLabel={_('Back')}
-					accessibilityRole="button">
-					<View style={disabled ? styles.backButtonDisabled : styles.backButton}>
-						<Icon
-							name="ionicon arrow-back"
-							style={styles.topIcon}
-							accessibilityLabel={null}
-						/>
-					</View>
-				</TouchableOpacity>
-			);
-		}
-
-		function saveButton(
-			styles: ScreenHeaderStyles, onPress: OnPressCallback, disabled: boolean, show: boolean,
-		) {
-			if (!show) return null;
-
-			return (
-				<IconButton
-					onPress={onPress}
-
-					themeId={themeId}
-					description={_('Save changes')}
-					disabled={disabled}
-					contentWrapperStyle={disabled ? styles.saveButtonDisabled : styles.saveButton}
-					iconStyle={disabled ? styles.savedButtonIcon : styles.saveButtonIcon}
-
-					iconName={disabled ? 'ionicon checkmark' : 'material content-save'}
-				/>
-			);
-		}
-
-		interface TopButtonOptions {
-			visible: boolean;
-			iconName: string;
-			disabled?: boolean;
-			description: string;
-			onPress: OnPressCallback;
-		}
-		const renderTopButton = (options: TopButtonOptions) => {
-			if (!options.visible) return null;
-
-			const viewStyle = options.disabled ? this.styles().iconButtonDisabled : this.styles().iconButton;
-
-			return (
-				<IconButton
-					onPress={options.onPress}
-					containerStyle={{ padding: 0 }}
-					contentWrapperStyle={viewStyle}
-					themeId={themeId}
-					disabled={!!options.disabled}
-					description={options.description}
-					iconName={options.iconName}
-					iconStyle={this.styles().topIcon}
-				/>
-			);
-		};
-
-		const renderUndoButton = () => {
-			return renderTopButton({
-				iconName: 'ionicon arrow-undo-circle-sharp',
-				description: _('Undo'),
-				onPress: this.props.onUndoButtonPress,
-				visible: this.props.showUndoButton,
-				disabled: this.props.undoButtonDisabled,
-			});
-		};
-
-		const renderRedoButton = () => {
-			return renderTopButton({
-				iconName: 'ionicon arrow-redo-circle-sharp',
-				description: _('Redo'),
-				onPress: this.props.onRedoButtonPress,
-				visible: this.props.showRedoButton,
-			});
-		};
-
-		const renderViewToggleButton = () => {
-			const mode = this.props.viewToggleButtonMode ?? ViewToggleButtonMode.Hidden;
-			if (mode === ViewToggleButtonMode.Hidden || !this.props.onViewTogglePress) return null;
-
-			return (
-				<IconButton
-					onPress={this.props.onViewTogglePress}
-					containerStyle={{ padding: 0 }}
-					contentWrapperStyle={this.styles().viewToggleButton}
-					themeId={themeId}
-					description={mode === ViewToggleButtonMode.ShowViewer ? _('Stop editing') : _('Edit')}
-					iconName={mode === ViewToggleButtonMode.ShowViewer ? 'ionicon book-outline' : 'ionicon create-outline'}
-					iconStyle={this.styles().viewToggleIcon}
-				/>
-			);
-		};
-
-		function selectAllButton(styles: ScreenHeaderStyles, onPress: OnPressCallback) {
-			return (
-				<IconButton
-					onPress={onPress}
-
-					themeId={themeId}
-					description={_('Select all')}
-					contentWrapperStyle={styles.iconButton}
-
-					iconName="ionicon checkmark-circle-outline"
-					iconStyle={styles.topIcon}
-				/>
-			);
-		}
-
-		function searchButton(styles: ScreenHeaderStyles, onPress: OnPressCallback) {
-			return (
-				<IconButton
-					onPress={onPress}
-
-					description={_('Search')}
-					themeId={themeId}
-					contentWrapperStyle={styles.iconButton}
-
-					iconName='ionicon search'
-					iconStyle={styles.topIcon}
-				/>
-			);
-		}
-
-		const customDeleteButton = (styles: ScreenHeaderStyles, onPress: OnPressCallback) => {
-			return (
-				<IconButton
-					onPress={onPress}
-
-					description={_('Delete')}
-					themeId={themeId}
-					contentWrapperStyle={styles.iconButton}
-
-					iconName='fas trash'
-					iconStyle={styles.topIcon}
-				/>
-			);
-		};
-
-		const pluginPanelToggleButton = (styles: ScreenHeaderStyles, onPress: OnPressCallback) => {
-			const allPluginViews = Object.values(this.props.plugins).map(plugin => Object.values(plugin.views)).flat();
-			const allVisiblePanels = allPluginViews.filter(
-				view => view.containerType === ContainerType.Panel && view.opened,
-			);
-			if (allVisiblePanels.length === 0) return null;
-
-			return (
-				<IconButton
-					onPress={onPress}
-					description={_('Plugin panels')}
-					themeId={themeId}
-					contentWrapperStyle={styles.iconButton}
-
-					iconName="ionicon extension-puzzle"
-					iconStyle={styles.topIcon}
-				/>
-			);
-		};
-
-		const renderTogglePluginEditorButton = (styles: ScreenHeaderStyles, onPress: OnPressCallback, disabled: boolean) => {
-			if (!this.props.showPluginEditorButton) return null;
-
-			return (
-				<IconButton
-					onPress={onPress}
-					disabled={disabled}
-
-					themeId={themeId}
-					description={_('Toggle plugin editor')}
-					contentWrapperStyle={disabled ? styles.iconButtonDisabled : styles.iconButton}
-
-					iconName='ionicon eye'
-					iconStyle={styles.topIcon}
-				/>
-			);
-		};
-
-		function deleteButton(styles: ScreenHeaderStyles, onPress: OnPressCallback, disabled: boolean) {
-			return (
-				<IconButton
-					onPress={onPress}
-					disabled={disabled}
-
-					themeId={themeId}
-					description={_('Delete')}
-					accessibilityHint={
-						disabled ? null : _('Delete selected notes')
-					}
-					contentWrapperStyle={disabled ? styles.iconButtonDisabled : styles.iconButton}
-
-					iconName='ionicon trash'
-					iconStyle={styles.topIcon}
-				/>
-			);
-		}
-
-		function restoreButton(styles: ScreenHeaderStyles, onPress: OnPressCallback, disabled: boolean) {
-			return (
-				<IconButton
-					onPress={onPress}
-					disabled={disabled}
-
-					themeId={themeId}
-					description={_('Restore')}
-					accessibilityHint={
-						disabled ? null : _('Restore')
-					}
-					contentWrapperStyle={disabled ? styles.iconButtonDisabled : styles.iconButton}
-
-					iconName='ionicon reload-circle'
-					iconStyle={styles.topIcon}
-				/>
-			);
-		}
-
-		function duplicateButton(styles: ScreenHeaderStyles, onPress: OnPressCallback, disabled: boolean) {
-			return (
-				<IconButton
-					onPress={onPress}
-					disabled={disabled}
-
-					themeId={themeId}
-					description={_('Duplicate')}
-					accessibilityHint={
-						disabled ? null : _('Duplicate selected notes')
-					}
-					contentWrapperStyle={disabled ? styles.iconButtonDisabled : styles.iconButton}
-					iconName='ionicon copy'
-					iconStyle={styles.topIcon}
-				/>
-			);
-		}
-
-		function sortButton(styles: ScreenHeaderStyles, onPress: OnPressCallback) {
-			return (
-				<IconButton
-					onPress={onPress}
-					themeId={themeId}
-
-					description={_('Sort notes by')}
-					iconName='ionicon filter-outline'
-					contentWrapperStyle={styles.iconButton}
-					iconStyle={styles.topIcon}
-				/>
-			);
-		}
-
-		const menuOptions: MenuOptionType[] = [...this.props.menuOptions];
-
-		const selectedFolder = this.props.notesParentType === 'Folder' ? Folder.byId(this.props.folders, this.props.selectedFolderId) : null;
-		const selectedFolderInTrash = itemIsInTrash(selectedFolder);
-
-		if (!this.props.noteSelectionEnabled) {
-			if (menuOptions.length) {
-				menuOptions.push({ isDivider: true });
-			}
-		} else {
-			menuOptions.push({
-				key: 'delete',
-				title: _('Delete'),
-				onPress: this.deleteButton_press,
-			});
-
-			menuOptions.push({
-				key: 'duplicate',
-				title: _('Duplicate'),
-				onPress: this.duplicateButton_press,
-			});
-		}
-
-		const createTitleComponent = (hideableAfterTitleComponents: ReactElement) => {
-			const folderPickerOptions = this.props.folderPickerOptions;
-
-			if (folderPickerOptions && folderPickerOptions.visible) {
-				const hasSelectedNotes = this.props.selectedNoteIds.length > 0;
-				const disabled = this.props.folderPickerOptions.disabled ?? !hasSelectedNotes;
-				return (
-					<FolderPicker
-						themeId={themeId}
-						disabled={disabled}
-						selectedFolderId={'selectedFolderId' in folderPickerOptions ? folderPickerOptions.selectedFolderId : null}
-						onValueChange={async (folderId) => {
-							// If onValueChange is specified, use this as a callback, otherwise do the default
-							// which is to take the selectedNoteIds from the state and move them to the
-							// chosen folder.
-
-							if (folderPickerOptions.onValueChange) {
-								folderPickerOptions.onValueChange(folderId);
-								return;
-							}
-
-							if (!folderId) return;
-							const noteIds = this.props.selectedNoteIds;
-							if (!noteIds.length) return;
-
-							const folder = await Folder.load(folderId);
-
-							const ok = noteIds.length > 1 ? await shim.showConfirmationDialog(_n('Move %d note to notebook "%s"?', 'Move %d notes to notebook "%s"?', noteIds.length, noteIds.length, folder.title)) : true;
-							if (!ok) return;
-
-							this.props.dispatch({ type: 'NOTE_SELECTION_END' });
-
-							try {
-								for (let i = 0; i < noteIds.length; i++) {
-									await Note.moveToFolder(
-										noteIds[i],
-										folderId,
-										// By default, the note selection is preserved on mobile when a note is moved to
-										// a different folder. However, when moving notes from the note list, this shouldn't be
-										// the case:
-										{ dispatchOptions: { preserveSelection: false } },
-									);
-								}
-							} catch (error) {
-								alert(_n('This note could not be moved: %s', 'These notes could not be moved: %s', noteIds.length, error.message));
-							}
-						}}
-						mustSelect={!!folderPickerOptions.mustSelect}
-						folders={Folder.getRealFolders(this.props.folders)}
-						coverableChildrenRight={hideableAfterTitleComponents}
+				accessibilityLabel={_('Back')}
+				accessibilityRole="button">
+				<View style={disabled ? styles.backButtonDisabled : styles.backButton}>
+					<Icon
+						name="ionicon arrow-back"
+						style={styles.topIcon}
+						accessibilityLabel={null}
 					/>
-				);
-			} else {
-				const title = 'title' in this.props && this.props.title !== null ? this.props.title : '';
-				return (
-					<>
-						<Text
-							ellipsizeMode={'tail'}
-							numberOfLines={1}
-							style={this.styles().titleText}
-							accessibilityRole='header'
-						>{title}</Text>
-						{hideableAfterTitleComponents}
-					</>
-				);
-			}
-		};
-
-		const showSideMenuButton = !!this.props.showSideMenuButton && !this.props.noteSelectionEnabled;
-		const showSelectAllButton = this.props.noteSelectionEnabled;
-		const showSearchButton = !!this.props.showSearchButton && !this.props.noteSelectionEnabled;
-		const showContextMenuButton = this.props.showContextMenuButton !== false;
-		const showBackButton = !!this.props.noteSelectionEnabled || this.props.showBackButton !== false;
-		const showStandardDeleteButton = !this.props.onDeleteButtonPress && !selectedFolderInTrash && this.props.noteSelectionEnabled;
-
-		let backButtonDisabled = !this.props.historyCanGoBack;
-		if (this.props.noteSelectionEnabled) backButtonDisabled = false;
-		const headerItemDisabled = !(this.props.selectedNoteIds.length > 0);
-
-		const sideMenuComp = !showSideMenuButton ? null : sideMenuButton(this.styles(), () => this.sideMenuButton_press());
-		const backButtonComp = !showBackButton ? null : backButton(this.styles(), () => this.backButton_press(), backButtonDisabled);
-		const pluginPanelsComp = pluginPanelToggleButton(this.styles(), () => this.pluginPanelToggleButton_press());
-		const selectAllButtonComp = !showSelectAllButton ? null : selectAllButton(this.styles(), () => this.selectAllButton_press());
-		const searchButtonComp = !showSearchButton ? null : searchButton(this.styles(), () => this.searchButton_press());
-		const customDeleteButtonComp = this.props.onDeleteButtonPress ? customDeleteButton(this.styles(), this.props.onDeleteButtonPress) : null;
-		const deleteButtonComp = showStandardDeleteButton ? deleteButton(this.styles(), () => this.deleteButton_press(), headerItemDisabled) : null;
-		const restoreButtonComp = selectedFolderInTrash && this.props.noteSelectionEnabled ? restoreButton(this.styles(), () => this.restoreButton_press(), headerItemDisabled) : null;
-		const duplicateButtonComp = !selectedFolderInTrash && this.props.noteSelectionEnabled ? duplicateButton(this.styles(), () => this.duplicateButton_press(), headerItemDisabled) : null;
-		const sortButtonComp = !this.props.noteSelectionEnabled && this.props.sortButton_press ? sortButton(this.styles(), () => this.props.sortButton_press()) : null;
-		const togglePluginEditorButton = renderTogglePluginEditorButton(this.styles(), () => CommandService.instance().execute('toggleEditorPlugin'), false);
-
-		// To allow the notebook dropdown (and perhaps other components) to have sufficient
-		// space while in use, we allow certain buttons to be hidden.
-		const hideableRightComponents = <>
-			{pluginPanelsComp}
-			{togglePluginEditorButton}
-			{selectAllButtonComp}
-			{searchButtonComp}
-			{deleteButtonComp}
-			{customDeleteButtonComp}
-			{renderViewToggleButton()}
-		</>;
-
-		const titleComp = createTitleComponent(hideableRightComponents);
-
-		const contextMenuStyle: ViewStyle = {
-			paddingTop: PADDING_V,
-			paddingBottom: PADDING_V,
-		};
-
-		// HACK: if this button is removed during selection mode, the header layout is broken, so for now just make it 1 pixel large (normally it should be hidden)
-		if (this.props.noteSelectionEnabled) contextMenuStyle.width = 1;
-
-		const menuComp =
-			!menuOptions.length || !showContextMenuButton ? null : (
-				<Menu themeId={this.props.themeId} options={menuOptions}>
-					<View style={contextMenuStyle}>
-						<Icon name="ionicon ellipsis-vertical" style={this.styles().contextMenuTrigger} accessibilityLabel={_('Actions')}/>
-					</View>
-				</Menu>
-			);
-
-		// Updating the state of this component can result in the left most element becoming hidden, so add a dummy as the first element to prevent this
-		// See https://github.com/laurent22/joplin/issues/14153
-		const zeroWidthSpacer = (
-			<View style={{ width: 0 }} pointerEvents="none"/>
+				</View>
+			</TouchableOpacity>
 		);
+	}
+
+	function saveButton(
+		styles: ScreenHeaderStyles, onPress: OnPressCallback, disabled: boolean, show: boolean,
+	) {
+		if (!show) return null;
 
 		return (
-			<View style={this.styles().outerContainer}>
-				<View style={this.styles().aboveHeader}/>
-				<View style={this.styles().innerContainer}>
-					{zeroWidthSpacer}
-					{sideMenuComp}
-					{backButtonComp}
-					{renderUndoButton()}
-					{renderRedoButton()}
-					{saveButton(
-						this.styles(),
-						() => {
-							if (this.props.onSaveButtonPress) this.props.onSaveButtonPress();
-						},
-						this.props.saveButtonDisabled === true,
-						this.props.showSaveButton === true,
-					)}
-					{titleComp}
-					{restoreButtonComp}
-					{duplicateButtonComp}
-					{sortButtonComp}
-					{menuComp}
-				</View>
-				<WarningBanner
-					showShouldUpgradeSyncTargetMessage={this.props.showShouldUpgradeSyncTargetMessage}
-				/>
-			</View>
+			<IconButton
+				onPress={onPress}
+
+				themeId={themeId}
+				description={_('Save changes')}
+				disabled={disabled}
+				contentWrapperStyle={disabled ? styles.saveButtonDisabled : styles.saveButton}
+				iconStyle={disabled ? styles.savedButtonIcon : styles.saveButtonIcon}
+
+				iconName={disabled ? 'ionicon checkmark' : 'material content-save'}
+			/>
 		);
 	}
 
-	public static defaultProps: Partial<ScreenHeaderProps> = {
-		menuOptions: [],
+	interface TopButtonOptions {
+		visible: boolean;
+		iconName: string;
+		disabled?: boolean;
+		description: string;
+		onPress: OnPressCallback;
+	}
+	const renderTopButton = (options: TopButtonOptions) => {
+		if (!options.visible) return null;
+
+		const viewStyle = options.disabled ? styles.iconButtonDisabled : styles.iconButton;
+
+		return (
+			<IconButton
+				onPress={options.onPress}
+				containerStyle={{ padding: 0 }}
+				contentWrapperStyle={viewStyle}
+				themeId={themeId}
+				disabled={!!options.disabled}
+				description={options.description}
+				iconName={options.iconName}
+				iconStyle={styles.topIcon}
+			/>
+		);
 	};
-}
+
+	const renderUndoButton = () => {
+		return renderTopButton({
+			iconName: 'ionicon arrow-undo-circle-sharp',
+			description: _('Undo'),
+			onPress: props.onUndoButtonPress,
+			visible: props.showUndoButton,
+			disabled: props.undoButtonDisabled,
+		});
+	};
+
+	const renderRedoButton = () => {
+		return renderTopButton({
+			iconName: 'ionicon arrow-redo-circle-sharp',
+			description: _('Redo'),
+			onPress: props.onRedoButtonPress,
+			visible: props.showRedoButton,
+		});
+	};
+
+	const renderViewToggleButton = () => {
+		const mode = props.viewToggleButtonMode ?? ViewToggleButtonMode.Hidden;
+		if (mode === ViewToggleButtonMode.Hidden || !props.onViewTogglePress) return null;
+
+		return (
+			<IconButton
+				onPress={props.onViewTogglePress}
+				containerStyle={{ padding: 0 }}
+				contentWrapperStyle={styles.viewToggleButton}
+				themeId={themeId}
+				description={mode === ViewToggleButtonMode.ShowViewer ? _('Stop editing') : _('Edit')}
+				iconName={mode === ViewToggleButtonMode.ShowViewer ? 'ionicon book-outline' : 'ionicon create-outline'}
+				iconStyle={styles.viewToggleIcon}
+			/>
+		);
+	};
+
+	function selectAllButton(styles: ScreenHeaderStyles, onPress: OnPressCallback) {
+		return (
+			<IconButton
+				onPress={onPress}
+
+				themeId={themeId}
+				description={_('Select all')}
+				contentWrapperStyle={styles.iconButton}
+
+				iconName="ionicon checkmark-circle-outline"
+				iconStyle={styles.topIcon}
+			/>
+		);
+	}
+
+	function searchButton(styles: ScreenHeaderStyles, onPress: OnPressCallback) {
+		return (
+			<IconButton
+				onPress={onPress}
+
+				description={_('Search')}
+				themeId={themeId}
+				contentWrapperStyle={styles.iconButton}
+
+				iconName='ionicon search'
+				iconStyle={styles.topIcon}
+			/>
+		);
+	}
+
+	const customDeleteButton = (styles: ScreenHeaderStyles, onPress: OnPressCallback) => {
+		return (
+			<IconButton
+				onPress={onPress}
+
+				description={_('Delete')}
+				themeId={themeId}
+				contentWrapperStyle={styles.iconButton}
+
+				iconName='fas trash'
+				iconStyle={styles.topIcon}
+			/>
+		);
+	};
+
+	const pluginPanelToggleButton = (styles: ScreenHeaderStyles, onPress: OnPressCallback) => {
+		const allPluginViews = Object.values(props.plugins).map(plugin => Object.values(plugin.views)).flat();
+		const allVisiblePanels = allPluginViews.filter(
+			view => view.containerType === ContainerType.Panel && view.opened,
+		);
+		if (allVisiblePanels.length === 0) return null;
+
+		return (
+			<IconButton
+				onPress={onPress}
+				description={_('Plugin panels')}
+				themeId={themeId}
+				contentWrapperStyle={styles.iconButton}
+
+				iconName="ionicon extension-puzzle"
+				iconStyle={styles.topIcon}
+			/>
+		);
+	};
+
+	const renderTogglePluginEditorButton = (styles: ScreenHeaderStyles, onPress: OnPressCallback, disabled: boolean) => {
+		if (!props.showPluginEditorButton) return null;
+
+		return (
+			<IconButton
+				onPress={onPress}
+				disabled={disabled}
+
+				themeId={themeId}
+				description={_('Toggle plugin editor')}
+				contentWrapperStyle={disabled ? styles.iconButtonDisabled : styles.iconButton}
+
+				iconName='ionicon eye'
+				iconStyle={styles.topIcon}
+			/>
+		);
+	};
+
+	function deleteButton(styles: ScreenHeaderStyles, onPress: OnPressCallback, disabled: boolean) {
+		return (
+			<IconButton
+				onPress={onPress}
+				disabled={disabled}
+
+				themeId={themeId}
+				description={_('Delete')}
+				accessibilityHint={
+					disabled ? null : _('Delete selected notes')
+				}
+				contentWrapperStyle={disabled ? styles.iconButtonDisabled : styles.iconButton}
+
+				iconName='ionicon trash'
+				iconStyle={styles.topIcon}
+			/>
+		);
+	}
+
+	function restoreButton(styles: ScreenHeaderStyles, onPress: OnPressCallback, disabled: boolean) {
+		return (
+			<IconButton
+				onPress={onPress}
+				disabled={disabled}
+
+				themeId={themeId}
+				description={_('Restore')}
+				accessibilityHint={
+					disabled ? null : _('Restore')
+				}
+				contentWrapperStyle={disabled ? styles.iconButtonDisabled : styles.iconButton}
+
+				iconName='ionicon reload-circle'
+				iconStyle={styles.topIcon}
+			/>
+		);
+	}
+
+	function duplicateButton(styles: ScreenHeaderStyles, onPress: OnPressCallback, disabled: boolean) {
+		return (
+			<IconButton
+				onPress={onPress}
+				disabled={disabled}
+
+				themeId={themeId}
+				description={_('Duplicate')}
+				accessibilityHint={
+					disabled ? null : _('Duplicate selected notes')
+				}
+				contentWrapperStyle={disabled ? styles.iconButtonDisabled : styles.iconButton}
+				iconName='ionicon copy'
+				iconStyle={styles.topIcon}
+			/>
+		);
+	}
+
+	function sortButton(styles: ScreenHeaderStyles, onPress: OnPressCallback) {
+		return (
+			<IconButton
+				onPress={onPress}
+				themeId={themeId}
+
+				description={_('Sort notes by')}
+				iconName='ionicon filter-outline'
+				contentWrapperStyle={styles.iconButton}
+				iconStyle={styles.topIcon}
+			/>
+		);
+	}
+
+	const menuOptions: MenuOptionType[] = [...(props.menuOptions ?? [])];
+
+	const selectedFolder = props.notesParentType === 'Folder' ? Folder.byId(props.folders, props.selectedFolderId) : null;
+	const selectedFolderInTrash = itemIsInTrash(selectedFolder);
+
+	if (!noteSelectionEnabled) {
+		if (menuOptions.length) {
+			menuOptions.push({ isDivider: true });
+		}
+	} else {
+		menuOptions.push({
+			key: 'delete',
+			title: _('Delete'),
+			onPress: deleteButton_press,
+		});
+
+		menuOptions.push({
+			key: 'duplicate',
+			title: _('Duplicate'),
+			onPress: duplicateButton_press,
+		});
+	}
+
+	const createTitleComponent = (hideableAfterTitleComponents: ReactElement) => {
+		const folderPickerOptions = props.folderPickerOptions;
+
+		if (folderPickerOptions && folderPickerOptions.visible) {
+			const hasSelectedNotes = selectedNoteIds.length > 0;
+			const disabled = folderPickerOptions.disabled ?? !hasSelectedNotes;
+			return (
+				<FolderPicker
+					themeId={themeId}
+					disabled={disabled}
+					selectedFolderId={'selectedFolderId' in folderPickerOptions ? folderPickerOptions.selectedFolderId : null}
+					onValueChange={async (folderId) => {
+						// If onValueChange is specified, use this as a callback, otherwise do the default
+						// which is to take the selectedNoteIds from the state and move them to the
+						// chosen folder.
+
+						if (folderPickerOptions.onValueChange) {
+							folderPickerOptions.onValueChange(folderId);
+							return;
+						}
+
+						if (!folderId) return;
+						const noteIds = selectedNoteIds;
+						if (!noteIds.length) return;
+
+						const folder = await Folder.load(folderId);
+
+						const ok = noteIds.length > 1 ? await shim.showConfirmationDialog(_n('Move %d note to notebook "%s"?', 'Move %d notes to notebook "%s"?', noteIds.length, noteIds.length, folder.title)) : true;
+						if (!ok) return;
+
+						dispatch({ type: 'NOTE_SELECTION_END' });
+
+						try {
+							for (let i = 0; i < noteIds.length; i++) {
+								await Note.moveToFolder(
+									noteIds[i],
+									folderId,
+									// By default, the note selection is preserved on mobile when a note is moved to
+									// a different folder. However, when moving notes from the note list, this shouldn't be
+									// the case:
+									{ dispatchOptions: { preserveSelection: false } },
+								);
+							}
+						} catch (error) {
+							alert(_n('This note could not be moved: %s', 'These notes could not be moved: %s', noteIds.length, error.message));
+						}
+					}}
+					mustSelect={!!folderPickerOptions.mustSelect}
+					folders={Folder.getRealFolders(props.folders)}
+					coverableChildrenRight={hideableAfterTitleComponents}
+				/>
+			);
+		} else {
+			const title = 'title' in props && props.title !== null ? props.title : '';
+			return (
+				<>
+					<Text
+						ellipsizeMode={'tail'}
+						numberOfLines={1}
+						style={styles.titleText}
+						accessibilityRole='header'
+					>{title}</Text>
+					{hideableAfterTitleComponents}
+				</>
+			);
+		}
+	};
+
+	const showSideMenuButton = !!props.showSideMenuButton && !noteSelectionEnabled;
+	const showSelectAllButton = noteSelectionEnabled;
+	const showSearchButton = !!props.showSearchButton && !noteSelectionEnabled;
+	const showContextMenuButton = props.showContextMenuButton !== false;
+	const showBackButton = !!noteSelectionEnabled || props.showBackButton !== false;
+	const showStandardDeleteButton = !props.onDeleteButtonPress && !selectedFolderInTrash && noteSelectionEnabled;
+
+	let backButtonDisabled = !props.historyCanGoBack;
+	if (noteSelectionEnabled) backButtonDisabled = false;
+	const headerItemDisabled = !(selectedNoteIds.length > 0);
+
+	const sideMenuComp = !showSideMenuButton ? null : sideMenuButton(styles, () => sideMenuButton_press());
+	const backButtonComp = !showBackButton ? null : backButton(styles, () => backButton_press(), backButtonDisabled);
+	const pluginPanelsComp = pluginPanelToggleButton(styles, () => pluginPanelToggleButton_press());
+	const selectAllButtonComp = !showSelectAllButton ? null : selectAllButton(styles, () => selectAllButton_press());
+	const searchButtonComp = !showSearchButton ? null : searchButton(styles, () => searchButton_press());
+	const customDeleteButtonComp = props.onDeleteButtonPress ? customDeleteButton(styles, props.onDeleteButtonPress) : null;
+	const deleteButtonComp = showStandardDeleteButton ? deleteButton(styles, () => deleteButton_press(), headerItemDisabled) : null;
+	const restoreButtonComp = selectedFolderInTrash && noteSelectionEnabled ? restoreButton(styles, () => restoreButton_press(), headerItemDisabled) : null;
+	const duplicateButtonComp = !selectedFolderInTrash && noteSelectionEnabled ? duplicateButton(styles, () => duplicateButton_press(), headerItemDisabled) : null;
+	const sortButtonComp = !noteSelectionEnabled && props.sortButton_press ? sortButton(styles, () => props.sortButton_press()) : null;
+	const togglePluginEditorButton = renderTogglePluginEditorButton(styles, () => CommandService.instance().execute('toggleEditorPlugin'), false);
+
+	// To allow the notebook dropdown (and perhaps other components) to have sufficient
+	// space while in use, we allow certain buttons to be hidden.
+	const hideableRightComponents = <>
+		{pluginPanelsComp}
+		{togglePluginEditorButton}
+		{selectAllButtonComp}
+		{searchButtonComp}
+		{deleteButtonComp}
+		{customDeleteButtonComp}
+		{renderViewToggleButton()}
+	</>;
+
+	const titleComp = createTitleComponent(hideableRightComponents);
+
+	const contextMenuStyle: ViewStyle = {
+		paddingTop: PADDING_V,
+		paddingBottom: PADDING_V,
+	};
+
+	// HACK: if this button is removed during selection mode, the header layout is broken, so for now just make it 1 pixel large (normally it should be hidden)
+	if (noteSelectionEnabled) contextMenuStyle.width = 1;
+
+	const menuComp =
+		!menuOptions.length || !showContextMenuButton ? null : (
+			<Menu themeId={themeId} options={menuOptions}>
+				<View style={contextMenuStyle}>
+					<Icon name="ionicon ellipsis-vertical" style={styles.contextMenuTrigger} accessibilityLabel={_('Actions')}/>
+				</View>
+			</Menu>
+		);
+
+	// Updating the state of this component can result in the left most element becoming hidden, so add a dummy as the first element to prevent this
+	// See https://github.com/laurent22/joplin/issues/14153
+	const zeroWidthSpacer = (
+		<View style={{ width: 0 }} pointerEvents="none"/>
+	);
+
+	return (
+		<View style={styles.outerContainer}>
+			<View style={styles.aboveHeader}/>
+			<View style={styles.innerContainer}>
+				{zeroWidthSpacer}
+				{sideMenuComp}
+				{backButtonComp}
+				{renderUndoButton()}
+				{renderRedoButton()}
+				{saveButton(
+					styles,
+					() => {
+						if (props.onSaveButtonPress) props.onSaveButtonPress();
+					},
+					props.saveButtonDisabled === true,
+					props.showSaveButton === true,
+				)}
+				{titleComp}
+				{restoreButtonComp}
+				{duplicateButtonComp}
+				{sortButtonComp}
+				{menuComp}
+			</View>
+			<WarningBanner
+				showShouldUpgradeSyncTargetMessage={props.showShouldUpgradeSyncTargetMessage}
+			/>
+		</View>
+	);
+};
 
 const ScreenHeader = connect((state: State) => {
 	return {
