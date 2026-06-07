@@ -18,6 +18,7 @@
     "buildInjectedJs": "gulp buildInjectedJs",
     "test": "jest",
     "test-ci": "node tools/runTestsConditionally.js",
+    "test-ui-ios": "gulp uiTests",
     "watchInjectedJs": "gulp watchInjectedJs",
     "postinstall": "jetify"
   },
