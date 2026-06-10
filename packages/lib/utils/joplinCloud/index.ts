@@ -319,11 +319,10 @@ const getFeatureActions = (planName: PlanName, featureId: FeatureId, featureEnab
 
 	if (featureId === 'maxStorage' && featureEnabled) {
 		if (planName === PlanName.Pro) {
-			// TODO: Enable, when supported by the server
-			// result.push({
-			// 	label: _('Upgrade to 100 GB'),
-			// 	actionId: 'toggleIncreaseStorage',
-			// });
+			result.push({
+				label: _('Upgrade to 100 GB'),
+				actionId: 'toggleIncreaseStorage',
+			});
 		} else if (planName === PlanName.Pro100Gb) {
 			const defaultPlan = features().maxStorage.proInfoShort;
 			result.push({
