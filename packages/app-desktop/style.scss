@@ -9,6 +9,7 @@
 @use 'gui/Dropdown/style.scss' as dropdown-control;
 @use 'gui/ShareFolderDialog/style.scss' as share-folder-dialog;
 @use 'gui/NoteList/style.scss' as note-list;
+@use 'gui/pdf-viewer.scss' as pdf-viewer;
 @use 'gui/NoteListWrapper/note-list-wrapper.scss' as note-list-wrapper;
 @use 'gui/SsoLoginScreen/SsoLoginScreen.scss' as sso-login-screen;
 @use 'gui/StatusScreen/advanced-tool-item.scss' as status-screen;

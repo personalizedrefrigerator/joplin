@@ -88,7 +88,7 @@ Legend: ✅ done · 🚧 in progress · ⬜ not started · ➖ no migration need
 | `gui/StatusScreen/StatusScreen.tsx` | 1 | — | ✅ | `advanced-tool-item` → `StatusScreen/advanced-tool-item.scss`. |
 | `services/plugins/UserWebviewDialogButtonBar.tsx` | 1 | — | ✅ | Dropped the redundant `styled(Button)` + `mr` prop; inter-button spacing is now `gap: 6px` on the container. |
 | `gui/ConfigScreen/controls/plugins/SearchPlugins.tsx` | 2 | — | ✅ | `.search-plugins > .results`; empty `Root` became a plain anchor div. |
-| `gui/PdfViewer.tsx` | 2 | — | ⬜ | |
+| `gui/PdfViewer.tsx` | 2 | — | ✅ | `.pdf-viewer > .frame` → `gui/pdf-viewer.scss`. |
 | `gui/QuitSyncDialog.tsx` | 2 | — | ⬜ | |
 | `gui/ResizableLayout/utils/style.ts` | 3 | — | ⬜ | |
 | `gui/ConfigScreen/controls/plugins/PluginsStates.tsx` | 4 | StyledLink, StyledMessage | 🚧 | `RepoApiErrorMessage` (→ `.repo-api-error`) and the StyledLink/StyledMessage uses done with the shared helpers; `Root`, `UserPluginsRoot`, `ToolsButton` remain. |

@@ -7,29 +7,7 @@ import bridge from '../services/bridge';
 import contextMenu from './NoteEditor/utils/contextMenu';
 import { ContextMenuItemType, ContextMenuOptions } from './NoteEditor/utils/contextMenuUtils';
 import CommandService from '@joplin/lib/services/CommandService';
-import styled from 'styled-components';
 import { themeStyle } from '@joplin/lib/theme';
-
-interface StyleProps {
-	theme: { backgroundColor: string; color: string };
-}
-
-const Window = styled.div`
-	height: 100%;
-    width: 100%;
-    position: fixed;
-    top: 0px;
-    left: 0px;
-    z-index: 999;
-    background-color: ${(props: StyleProps) => props.theme.backgroundColor};
-	color: ${(props: StyleProps) => props.theme.color};
-	`;
-
-const IFrame = styled.iframe`
-	height: 100%;
-    width: 100%;
-    border: none;
-	`;
 
 interface Props {
 	themeId: number;
@@ -103,12 +81,12 @@ export default function PdfViewer(props: Props) {
 	const theme = themeStyle(props.themeId);
 
 	return (
-		<Window theme={theme}>
-			<IFrame src="./vendor/lib/@joplin/pdf-viewer/index.html" x-url={Resource.fullPath(props.resource)}
+		<div className='pdf-viewer'>
+			<iframe className='frame' src="./vendor/lib/@joplin/pdf-viewer/index.html" x-url={Resource.fullPath(props.resource)}
 				x-appearance={theme.appearance} ref={iframeRef}
 				x-title={props.resource.title}
 				x-anchorpage={props.pageNo}
-				x-type="full"></IFrame>
-		</Window>
+				x-type="full"></iframe>
+		</div>
 	);
 }

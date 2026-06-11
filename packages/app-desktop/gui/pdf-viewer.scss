@@ -1,0 +1,16 @@
+.pdf-viewer {
+	height: 100%;
+	width: 100%;
+	position: fixed;
+	top: 0px;
+	left: 0px;
+	z-index: 999;
+	background-color: var(--joplin-background-color);
+	color: var(--joplin-color);
+
+	> .frame {
+		height: 100%;
+		width: 100%;
+		border: none;
+	}
+}
