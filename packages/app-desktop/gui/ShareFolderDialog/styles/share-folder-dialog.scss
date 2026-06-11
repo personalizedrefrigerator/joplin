@@ -1,0 +1,28 @@
+.share-folder-dialog {
+	min-width: 500px;
+
+	// Generic element names, so keep them scoped to the dialog.
+	> .folder {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		border: 1px solid var(--joplin-divider-color);
+		padding: 0.5em;
+		margin-bottom: 1em;
+	}
+
+	> .error,
+	> .share-state {
+		border-radius: 3px;
+		font-size: var(--joplin-font-size);
+		color: var(--joplin-color);
+		font-family: var(--joplin-font-family);
+		word-break: break-all;
+		margin-bottom: 1em;
+	}
+
+	> .error {
+		background-color: var(--joplin-warning-background-color);
+		padding: var(--joplin-main-padding);
+	}
+}

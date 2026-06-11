@@ -7,12 +7,9 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { FolderEntity } from '@joplin/lib/services/database/types';
 import Folder from '@joplin/lib/models/Folder';
 import ShareService, { ApiShare } from '@joplin/lib/services/share/ShareService';
-import styled from 'styled-components';
-import StyledFormLabel from '../style/StyledFormLabel';
 import Button, { ButtonSize } from '../Button/Button';
 import InlineCombobox from '../InlineCombobox';
 import Logger from '@joplin/utils/Logger';
-import StyledMessage from '../style/StyledMessage';
 import { SharePermissions, ShareUserStatus, StateShare, StateShareUser } from '@joplin/lib/services/share/reducer';
 import { State } from '@joplin/lib/reducer';
 import { connect } from 'react-redux';
@@ -24,75 +21,6 @@ import { SettingsRecord } from '@joplin/lib/models/Setting';
 const debounce = require('debounce');
 
 const logger = Logger.create('ShareFolderDialog');
-
-const StyledRoot = styled.div`
-	min-width: 500px;
-`;
-
-const StyledFolder = styled.div`
-	border: 1px solid ${(props) => props.theme.dividerColor};
-	padding: 0.5em;
-	margin-bottom: 1em;
-	display: flex;
-	align-items: center;
-`;
-
-const StyledRecipientControls = styled.div`
-	display: flex;
-	flex-direction: row;
-	gap: 10px;
-`;
-
-const StyledAddRecipient = styled.div`
-	margin-bottom: 1em;
-`;
-
-const StyledRecipient = styled(StyledMessage)<{ index: number }>`
-	display: flex;
-	flex-direction: row;
-	padding: .6em 1em;
-	background-color: ${props => props.index % 2 === 0 ? props.theme.backgroundColor : props.theme.oddBackgroundColor};
-	align-items: center;
-`;
-
-const StyledRecipientName = styled.div`
-	display: flex;
-	flex: 1;
-`;
-
-const StyledRecipientStatusIcon = styled.i`
-	margin-right: .6em;
-`;
-
-const StyledRecipients = styled.div`
-	margin-bottom: 10px;
-`;
-
-interface StyleProps {
-	theme: { dividerColor: string };
-}
-
-const StyledRecipientList = styled.div`
-	border: 1px solid ${(props: StyleProps) => props.theme.dividerColor};
-	border-radius: 3px;
-	height: 300px;
-	overflow-x: hidden;
-	overflow-y: scroll;
-`;
-
-const StyledError = styled(StyledMessage)`
-	word-break: break-all;
-	margin-bottom: 1em;
-`;
-
-const StyledShareState = styled(StyledMessage)`
-	word-break: break-all;
-	margin-bottom: 1em;
-`;
-
-const StyledIcon = styled.i`
-	margin-right: 8px;
-`;
 
 interface Props {
 	themeId: number;
@@ -278,9 +206,9 @@ function ShareFolderDialog(props: Props) {
 
 	function renderFolder() {
 		return (
-			<StyledFolder>
-				<StyledIcon className="icon-notebooks"/>{folder ? folder.title : '...'}
-			</StyledFolder>
+			<div className="folder">
+				<i className="icon-notebooks"/>{folder ? folder.title : '...'}
+			</div>
 		);
 	}
 
@@ -294,9 +222,9 @@ function ShareFolderDialog(props: Props) {
 		const dropdown = !props.canUseSharePermissions ? null : <Dropdown options={permissionOptions} value={recipientPermissions} onChange={recipientPermissions_change}/>;
 
 		return (
-			<StyledAddRecipient>
-				<StyledFormLabel>{_('Add recipient:')}</StyledFormLabel>
-				<StyledRecipientControls>
+			<div className="add-recipient">
+				<div className="form-label">{_('Add recipient:')}</div>
+				<div className="recipient-controls">
 					<InlineCombobox
 						value={recipientEmail}
 						onChange={recipientEmail_change}
@@ -308,8 +236,8 @@ function ShareFolderDialog(props: Props) {
 					/>
 					{dropdown}
 					<Button size={ButtonSize.Small} disabled={disabled} title={_('Share')} onClick={shareRecipient_click}></Button>
-				</StyledRecipientControls>
-			</StyledAddRecipient>
+				</div>
+			</div>
 		);
 	}
 
@@ -329,7 +257,7 @@ function ShareFolderDialog(props: Props) {
 		}
 	}, [share]);
 
-	function renderRecipient(index: number, shareUser: StateShareUser) {
+	function renderRecipient(shareUser: StateShareUser) {
 		const statusToIcon = {
 			[ShareUserStatus.Waiting]: 'fas fa-question',
 			[ShareUserStatus.Rejected]: 'fas fa-times',
@@ -347,10 +275,10 @@ function ShareFolderDialog(props: Props) {
 		const dropdown = !props.canUseSharePermissions ? null : <Dropdown disabled={!enabled} className="permission-dropdown" value={permission} options={permissionOptions} variant={DropdownVariant.NoBorder} onChange={event => recipient_permissionChange(shareUser.id, event.value)}/>;
 
 		return (
-			<StyledRecipient type="info" key={shareUser.user.email} index={index}>
-				<StyledRecipientName>{shareUser.user.email}</StyledRecipientName>
+			<div className="share-recipient" key={shareUser.user.email}>
+				<div className="name">{shareUser.user.email}</div>
 				{dropdown}
-				<StyledRecipientStatusIcon title={statusToMessage[shareUser.status]} className={statusToIcon[shareUser.status]}></StyledRecipientStatusIcon>
+				<i title={statusToMessage[shareUser.status]} className={`status-icon ${statusToIcon[shareUser.status]}`}></i>
 				<Button
 					disabled={!enabled}
 					size={ButtonSize.Small}
@@ -358,20 +286,20 @@ function ShareFolderDialog(props: Props) {
 					onClick={() => recipient_delete({ shareUserId: shareUser.id })}
 					tooltip={_('Remove %s from share', shareUser.user.email)}
 				/>
-			</StyledRecipient>
+			</div>
 		);
 	}
 
 	function renderRecipients() {
-		const listItems = shareUsers.map((su: StateShareUser, index: number) => renderRecipient(index, su));
+		const listItems = shareUsers.map((su: StateShareUser) => renderRecipient(su));
 
 		return (
-			<StyledRecipients>
-				<StyledFormLabel>{_('Recipients:')}</StyledFormLabel>
-				<StyledRecipientList>
+			<div className="share-recipients">
+				<div className="form-label">{_('Recipients:')}</div>
+				<div className="recipient-list">
 					{listItems}
-				</StyledRecipientList>
-			</StyledRecipients>
+				</div>
+			</div>
 		);
 	}
 
@@ -379,9 +307,9 @@ function ShareFolderDialog(props: Props) {
 		if (!latestError) return null;
 
 		return (
-			<StyledError type="error">
+			<div className="error">
 				{latestError.message}
-			</StyledError>
+			</div>
 		);
 	}
 
@@ -397,9 +325,9 @@ function ShareFolderDialog(props: Props) {
 		if (!message) throw new Error(`Unsupported state: ${shareState}`);
 
 		return (
-			<StyledShareState type="info">
+			<div className="share-state">
 				{message}
-			</StyledShareState>
+			</div>
 		);
 	}
 
@@ -436,7 +364,7 @@ function ShareFolderDialog(props: Props) {
 
 	function renderContent() {
 		return (
-			<StyledRoot className="share-folder-dialog">
+			<div className="share-folder-dialog">
 				<DialogTitle title={_('Share Notebook')}/>
 				{renderFolder()}
 				{renderAddRecipient()}
@@ -451,7 +379,7 @@ function ShareFolderDialog(props: Props) {
 					cancelButtonLabel={_('Close')}
 					customButtons={customButtons}
 				/>
-			</StyledRoot>
+			</div>
 		);
 	}
 

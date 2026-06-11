@@ -1,0 +1,9 @@
+.add-recipient {
+	margin-bottom: 1em;
+
+	> .recipient-controls {
+		display: flex;
+		flex-direction: row;
+		gap: 10px;
+	}
+}

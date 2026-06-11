@@ -1,5 +1,5 @@
-.share-folder-dialog {
-	.permission-dropdown {
-		margin-right: 10px;
-	}
-}
+@use 'styles/share-folder-dialog.scss';
+@use 'styles/add-recipient.scss';
+@use 'styles/share-recipients.scss';
+@use 'styles/share-recipient.scss';
+@use 'styles/form-label.scss';

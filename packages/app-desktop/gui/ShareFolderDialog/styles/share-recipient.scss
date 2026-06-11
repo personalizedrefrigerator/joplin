@@ -1,0 +1,30 @@
+.share-recipient {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	padding: .6em 1em;
+	border-radius: 3px;
+	font-size: var(--joplin-font-size);
+	color: var(--joplin-color);
+	font-family: var(--joplin-font-family);
+	word-break: break-all;
+	background-color: var(--joplin-background-color);
+
+	// Alternating row background, previously passed as an `index` prop.
+	&:nth-child(even) {
+		background-color: var(--joplin-odd-background-color);
+	}
+
+	> .name {
+		display: flex;
+		flex: 1;
+	}
+
+	> .status-icon {
+		margin-right: .6em;
+	}
+
+	> .permission-dropdown {
+		margin-right: 10px;
+	}
+}

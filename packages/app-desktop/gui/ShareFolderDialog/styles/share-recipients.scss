@@ -1,0 +1,11 @@
+.share-recipients {
+	margin-bottom: 10px;
+
+	> .recipient-list {
+		border: 1px solid var(--joplin-divider-color);
+		border-radius: 3px;
+		height: 300px;
+		overflow-x: hidden;
+		overflow-y: scroll;
+	}
+}
