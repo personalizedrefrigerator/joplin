@@ -2,7 +2,6 @@ import * as React from 'react';
 
 import shim from '@joplin/lib/shim';
 import bridge from '../../../services/bridge';
-import StyledLink from '../../style/StyledLink';
 import { ThemeStyle } from '@joplin/lib/theme';
 
 interface Props {
@@ -17,12 +16,12 @@ const openMissingPasswordFAQ = () =>
 // to a MacOS/ARM release.
 const MacOSMissingPasswordHelpLink: React.FunctionComponent<Props> = props => {
 	const macInfoLink = (
-		<StyledLink href="#"
+		<a href="#"
 			onClick={openMissingPasswordFAQ}
 			style={props.theme.urlStyle}
 		>
 			{props.text}
-		</StyledLink>
+		</a>
 	);
 
 	// The FAQ section related to missing passwords is specific to MacOS/ARM -- only show it

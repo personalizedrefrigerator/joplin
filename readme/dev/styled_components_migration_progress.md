@@ -78,7 +78,7 @@ Legend: ✅ done · 🚧 in progress · ⬜ not started · ➖ no migration need
 | `gui/style/StyledFormLabel.tsx` | 1 | — | ✅ | Single consumer; folded into ShareFolderDialog and deleted. |
 | `gui/style/StyledTextInput.tsx` | 1 | — | ✅ | Dead code — deleted. |
 | `gui/style/StyledInput.tsx` | 1 | — | ✅ | → reusable `.styled-input` in `gui/styles`; consumers (EditFolderDialog, PasswordInput, SearchInput) use plain inputs. Alpha colours → `color-mix(..., transparent)`. Helper deleted. |
-| `gui/style/StyledLink.tsx` | 1 | — | ⬜ | Shared (2 consumers: PluginsStates, MissingPasswordHelpLink). |
+| `gui/style/StyledLink.tsx` | 1 | — | ✅ | → `.styled-link` in `gui/styles` (PluginsStates). MissingPasswordHelpLink already had an inline `urlStyle` that fully overrode it, so it became a plain `<a>`. Helper deleted. |
 | `gui/style/StyledMessage.tsx` | 1 | — | ⬜ | Shared (1 remaining consumer: PluginsStates). |
 | `gui/ConfigScreen/ButtonBar.tsx` | 1 | — | ✅ | `button-bar` → `ConfigScreen/styles/button-bar.scss`. |
 | `gui/DialogTitle.tsx` | 1 | — | ✅ | `dialog-title` → `gui/styles/`. Dropped unused `justifyContent` prop (only ever `center`, the default). |
