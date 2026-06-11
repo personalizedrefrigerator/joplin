@@ -148,8 +148,8 @@ export default function(props: Props) {
 								onChange={onFolderIconChange}
 								themeId={props.themeId}
 							/>
-							<Button ml={1} title={_('Select file...')} onClick={onBrowseClick}/>
-							{ folderIcon && <Button ml={1} title={_('Clear')} onClick={onClearClick}/> }
+							<Button title={_('Select file...')} onClick={onBrowseClick}/>
+							{ folderIcon && <Button title={_('Clear')} onClick={onClearClick}/> }
 						</div>
 					</div>
 				</div>

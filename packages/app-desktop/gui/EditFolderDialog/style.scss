@@ -2,6 +2,11 @@
 	display: flex;
 	flex-direction: row;
 	align-items: center;
+
+	// Space the Select file / Clear buttons from the control before them (was an `ml` prop).
+	> .app-button + .app-button {
+		margin-left: 4px;
+	}
 }
 
 .icon-selector-row > .foldericon {

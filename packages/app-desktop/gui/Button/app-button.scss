@@ -1,0 +1,143 @@
+.app-button {
+	display: flex;
+	align-items: center;
+	flex-direction: row;
+	box-sizing: border-box;
+	border-radius: 3px;
+	border-style: solid;
+	border-width: 1px;
+	padding: 0 14px;
+	justify-content: center;
+	user-select: none;
+
+	height: 32px;
+	min-height: 32px;
+	max-height: 32px;
+	width: auto;
+	min-width: 100px;
+
+	&:disabled {
+		opacity: 0.5;
+	}
+
+	&.-small {
+		height: 26px;
+		min-height: 26px;
+		max-height: 26px;
+	}
+
+	&.-square {
+		width: 32px;
+		min-width: 32px;
+		max-width: 32px;
+		padding: 0 4px;
+
+		&.-small {
+			width: 26px;
+			min-width: 26px;
+			max-width: 26px;
+		}
+	}
+
+	> .icon {
+		font-size: var(--joplin-toolbar-icon-size);
+
+		// The previous styled-component set margin-right only when a title followed the icon.
+		&:not(:last-child) {
+			margin-right: 6px;
+		}
+	}
+
+	&.-primary {
+		border: none;
+		background-color: var(--joplin-background-color5);
+
+		&:not(:disabled) {
+			&:hover {
+				background-color: var(--joplin-background-color-hover5);
+			}
+
+			&:active {
+				background-color: var(--joplin-background-color-active5);
+			}
+		}
+
+		> .icon { color: var(--joplin-color5); }
+		> .title { color: var(--joplin-color5); }
+	}
+
+	&.-secondary {
+		border: 1px solid var(--joplin-border-color4);
+		background-color: var(--joplin-background-color4);
+
+		&:not(:disabled) {
+			&:hover {
+				background-color: var(--joplin-background-color-hover4);
+			}
+
+			&:active {
+				background-color: var(--joplin-background-color-active4);
+			}
+		}
+
+		> .icon { color: var(--joplin-color4); }
+		> .title { color: var(--joplin-color4); }
+	}
+
+	&.-tertiary {
+		border: 1px solid var(--joplin-color3);
+		background-color: var(--joplin-background-color3);
+
+		&:hover {
+			background-color: var(--joplin-background-color-hover-dim3);
+		}
+
+		&:active {
+			background-color: var(--joplin-background-color-active3);
+		}
+
+		> .icon { color: var(--joplin-color); }
+		> .title {
+			color: var(--joplin-color);
+			opacity: 0.9;
+		}
+	}
+
+	&.-recommended {
+		border: 1px solid var(--joplin-border-color4);
+		background-color: var(--joplin-warning-background-color);
+
+		> .icon { color: var(--joplin-color); }
+		> .title {
+			color: var(--joplin-color);
+			opacity: 0.9;
+		}
+	}
+
+	&.-sidebar-secondary {
+		background: none;
+		border-color: var(--joplin-color2);
+		color: var(--joplin-color2);
+
+		&:hover {
+			color: var(--joplin-color-hover2);
+			border-color: var(--joplin-color-hover2);
+			background: none;
+
+			> .title { color: var(--joplin-color-hover2); }
+			> .icon { color: var(--joplin-color-hover2); }
+		}
+
+		&:active {
+			color: var(--joplin-color-active2);
+			border-color: var(--joplin-color-active2);
+			background: none;
+
+			> .title { color: var(--joplin-color-active2); }
+			> .icon { color: var(--joplin-color-active2); }
+		}
+
+		> .title { color: var(--joplin-color2); }
+		> .icon { color: var(--joplin-color2); }
+	}
+}

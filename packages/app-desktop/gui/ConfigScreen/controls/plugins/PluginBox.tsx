@@ -208,7 +208,7 @@ export default function(props: Props) {
 		if (props.updateState === UpdateState.HasBeenUpdated) title = _('Updated');
 
 		return <Button
-			ml={1}
+			style={{ marginLeft: 4 }}
 			level={ButtonLevel.Recommended}
 			onClick={() => props.onUpdate({ item })}
 			title={title}

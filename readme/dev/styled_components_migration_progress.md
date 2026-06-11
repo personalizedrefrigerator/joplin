@@ -94,7 +94,7 @@ Legend: ✅ done · 🚧 in progress · ⬜ not started · ➖ no migration need
 | `gui/ConfigScreen/controls/plugins/PluginsStates.tsx` | 4 | StyledLink, StyledMessage | ✅ | `.plugins-states`, `.user-plugins` (+`-spaced`), `.tools-button`; `.repo-api-error` done earlier with StyledMessage. |
 | `gui/ResizableLayout/MoveButtons.tsx` | 4 | — | ✅ | `.move-buttons` / `.move-button-row` with `> .arrow` / `> .empty`; disabled-arrow opacity via `:disabled`, hidden placeholder via `.empty`. |
 | `gui/NoteListControls/NoteListControls.tsx` | 7 | — | ✅ | `note-list-controls.scss`; button overrides scoped under `.note-list-controls`. Per-instance padding/gap and the pair-button width stay inline (computed). |
-| `gui/Button/Button.tsx` | 9 | — | ⬜ | High-leverage; many `styled(Button)` call sites. |
+| `gui/Button/Button.tsx` | 9 | — | ✅ | `.app-button` with `-primary/-secondary/-tertiary/-recommended/-sidebar-secondary`, `-small`, `-square` variants and `> .icon` / `> .title` elements (`app-button.scss`). Dropped styled-system `space`; the `ml` consumers (EditFolderDialog, PluginBox) now use CSS/inline margin. `styled(Button)` still works via `className` forwarding. |
 | `gui/ConfigScreen/controls/plugins/PluginBox.tsx` | 11 | — | ⬜ | |
 | `gui/Sidebar/styles/index.ts` | 12 | — | ⬜ | Partially migrated; finish into `Sidebar/styles/`. |
 | `gui/SyncWizard/Dialog.tsx` | 14 | — | ⬜ | Largest. |
