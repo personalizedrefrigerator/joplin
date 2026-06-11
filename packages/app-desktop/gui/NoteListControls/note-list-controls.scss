@@ -1,0 +1,53 @@
+.note-list-controls {
+	box-sizing: border-box;
+	display: flex;
+	flex-direction: column;
+	background-color: var(--joplin-background-color3);
+	// padding and the vertical gap between rows are passed as props and set inline.
+
+	> .new-note-todo-buttons {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 8px;
+	}
+
+	> .search-and-sort {
+		display: flex;
+		flex-direction: row;
+		flex: 1 1 auto;
+		gap: 8px;
+	}
+
+	.sort-order-buttons {
+		display: flex;
+		flex-direction: row;
+		flex: 1 1 auto;
+	}
+
+	// The buttons below replace styled(Button) wrappers. Scoping them under the
+	// component keeps these overrides winning over the base Button styles.
+	.new-note-button,
+	.new-todo-button {
+		width: auto;
+		height: 26px;
+		min-height: 26px;
+		min-width: 37px;
+		max-width: none;
+		white-space: nowrap;
+
+		.fa, .fas {
+			font-size: 11px;
+		}
+	}
+
+	.sort-order-field-button {
+		border-radius: 3px 0 0 3px;
+	}
+
+	.sort-order-reverse-button {
+		min-width: 8px;
+		border-radius: 0 3px 3px 0;
+		border-width: 1px 1px 1px 0;
+		width: auto;
+	}
+}

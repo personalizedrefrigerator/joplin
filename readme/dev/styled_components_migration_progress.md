@@ -93,7 +93,7 @@ Legend: ✅ done · 🚧 in progress · ⬜ not started · ➖ no migration need
 | `gui/ResizableLayout/utils/style.ts` | 3 | — | ✅ | → `ResizableLayout/styles/` (`.resizable-layout-item`, `.move-overlay`, `.move-mode-message`). Dynamic size stays inline; the appearance-based overlay scrim is fed via a `--move-overlay-background` custom property (ResizableLayout now takes `themeId`). File deleted. |
 | `gui/ConfigScreen/controls/plugins/PluginsStates.tsx` | 4 | StyledLink, StyledMessage | ✅ | `.plugins-states`, `.user-plugins` (+`-spaced`), `.tools-button`; `.repo-api-error` done earlier with StyledMessage. |
 | `gui/ResizableLayout/MoveButtons.tsx` | 4 | — | ✅ | `.move-buttons` / `.move-button-row` with `> .arrow` / `> .empty`; disabled-arrow opacity via `:disabled`, hidden placeholder via `.empty`. |
-| `gui/NoteListControls/NoteListControls.tsx` | 7 | — | ⬜ | |
+| `gui/NoteListControls/NoteListControls.tsx` | 7 | — | ✅ | `note-list-controls.scss`; button overrides scoped under `.note-list-controls`. Per-instance padding/gap and the pair-button width stay inline (computed). |
 | `gui/Button/Button.tsx` | 9 | — | ⬜ | High-leverage; many `styled(Button)` call sites. |
 | `gui/ConfigScreen/controls/plugins/PluginBox.tsx` | 11 | — | ⬜ | |
 | `gui/Sidebar/styles/index.ts` | 12 | — | ⬜ | Partially migrated; finish into `Sidebar/styles/`. |

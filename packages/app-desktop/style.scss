@@ -12,6 +12,7 @@
 @use 'gui/pdf-viewer.scss' as pdf-viewer;
 @use 'gui/quit-sync-dialog.scss' as quit-sync-dialog;
 @use 'gui/NoteListWrapper/note-list-wrapper.scss' as note-list-wrapper;
+@use 'gui/NoteListControls/note-list-controls.scss' as note-list-controls;
 @use 'gui/SsoLoginScreen/SsoLoginScreen.scss' as sso-login-screen;
 @use 'gui/StatusScreen/advanced-tool-item.scss' as status-screen;
 @use 'gui/JoplinCloudLoginScreen.scss' as joplin-cloud-login-screen;

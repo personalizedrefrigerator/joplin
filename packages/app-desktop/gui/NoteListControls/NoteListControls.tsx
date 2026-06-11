@@ -9,7 +9,6 @@ import Note from '@joplin/lib/models/Note';
 import { notesSortOrderNextField } from '@joplin/lib/services/sortOrder/notesSortOrderUtils';
 import { _ } from '@joplin/lib/locale';
 import { connect } from 'react-redux';
-import styled from 'styled-components';
 import stateToWhenClauseContext from '../../services/commands/stateToWhenClauseContext';
 import { getTrashFolderId } from '@joplin/lib/services/trash';
 import { Breakpoints } from '../NoteList/utils/types';
@@ -34,67 +33,6 @@ interface Props {
 	padding: number;
 	buttonVerticalGap: number;
 }
-
-interface StyleProps {
-	theme: { backgroundColor3: string };
-	padding?: number;
-	buttonVerticalGap?: number;
-	size?: ButtonSize;
-}
-
-const StyledRoot = styled.div`
-	box-sizing: border-box;
-	display: flex;
-	flex-direction: column;
-	padding: ${(props: StyleProps) => props.padding}px;
-	background-color: ${(props: StyleProps) => props.theme.backgroundColor3};
-	gap: ${(props: StyleProps) => props.buttonVerticalGap}px;
-`;
-
-const StyledButton = styled(Button)`
-	width: auto;
-	height: 26px;
-	min-height: 26px;
-	min-width: 37px;
-	max-width: none;
-	white-space: nowrap;
-
-  .fa, .fas {
-    font-size: 11px;
-  }
-`;
-
-const StyledPairButtonL = styled(Button)`
-	border-radius: 3px 0 0 3px;
-	min-width: ${(props: StyleProps) => buttonSizePx(props)}px;
-	max-width: ${(props: StyleProps) => buttonSizePx(props)}px;
-`;
-
-const StyledPairButtonR = styled(Button)`
-	min-width: 8px;
-	border-radius: 0 3px 3px 0;
-	border-width: 1px 1px 1px 0;
-	width: auto;
-`;
-
-const TopRow = styled.div`
-	display: grid;
-	grid-template-columns: 1fr 1fr;
-	gap: 8px;
-`;
-
-const BottomRow = styled.div`
-	display: flex;
-	flex-direction: row;
-	flex: 1 1 auto;
-	gap: 8px;
-`;
-
-const SortOrderButtonsContainer = styled.div`
-  display: flex;
-  flex-direction: row;
-  flex: 1 1 auto;
-`;
 
 function NoteListControls(props: Props) {
 	const searchBarRef = useRef(null);
@@ -220,8 +158,8 @@ function NoteListControls(props: Props) {
 		if (!props.showNewNoteButtons) return null;
 
 		return (
-			<TopRow className="new-note-todo-buttons">
-				<StyledButton
+			<div className="new-note-todo-buttons">
+				<Button
 					ref={(el: Element) => {
 						props.setNewNoteButtonElement(el);
 					}}
@@ -234,7 +172,7 @@ function NoteListControls(props: Props) {
 					onClick={onNewNoteButtonClick}
 					disabled={!props.newNoteButtonEnabled}
 				/>
-				<StyledButton ref={newTodoButtonRef}
+				<Button ref={newTodoButtonRef}
 					className="new-todo-button"
 					tooltip={ showTooltip ? CommandService.instance().label('newTodo') : '' }
 					iconName={todoIcon}
@@ -244,27 +182,28 @@ function NoteListControls(props: Props) {
 					onClick={onNewTodoButtonClick}
 					disabled={!props.newTodoButtonEnabled}
 				/>
-			</TopRow>
+			</div>
 		);
 	}
 
 	const windowId = useContext(WindowIdContext);
 	return (
-		<StyledRoot ref={noteControlsRef} padding={props.padding} buttonVerticalGap={props.buttonVerticalGap}>
+		<div className="note-list-controls" ref={noteControlsRef} style={{ padding: props.padding, gap: props.buttonVerticalGap }}>
 			{renderNewNoteButtons()}
-			<BottomRow ref={searchAndSortRef} className="search-and-sort">
+			<div className="search-and-sort" ref={searchAndSortRef}>
 				<SearchBar inputRef={searchBarRef} windowId={windowId}/>
 				{showsSortOrderButtons() &&
-					<SortOrderButtonsContainer>
-						<StyledPairButtonL
+					<div className="sort-order-buttons">
+						<Button
 							className="sort-order-field-button"
+							style={{ minWidth: buttonSizePx(props.buttonSize), maxWidth: buttonSizePx(props.buttonSize) }}
 							tooltip={sortOrderFieldTooltip()}
 							iconName={sortOrderFieldIcon()}
 							level={ButtonLevel.Secondary}
 							size={props.buttonSize}
 							onClick={onSortOrderFieldButtonClick}
 						/>
-						<StyledPairButtonR
+						<Button
 							className="sort-order-reverse-button"
 							tooltip={CommandService.instance().label('toggleNotesSortOrderReverse')}
 							iconName={sortOrderReverseIcon()}
@@ -272,10 +211,10 @@ function NoteListControls(props: Props) {
 							size={props.buttonSize}
 							onClick={onSortOrderReverseButtonClick}
 						/>
-					</SortOrderButtonsContainer>
+					</div>
 				}
-			</BottomRow>
-		</StyledRoot>
+			</div>
+		</div>
 	);
 }
 
