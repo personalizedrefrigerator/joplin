@@ -7,7 +7,7 @@ import { _ } from '@joplin/lib/locale';
 import { formatBytes, GB, MB } from '../utils/bytes';
 import { itemIsEncrypted } from '../utils/joplinUtils';
 import { getIsMFAEnabled, getMaxItemSize, getMaxTotalItemSize } from './utils/user';
-import * as zxcvbn from 'zxcvbn';
+import zxcvbn from 'zxcvbn';
 import { confirmUrl, resetPasswordUrl } from '../utils/urlUtils';
 import { checkRepeatPassword, CheckRepeatPasswordInput } from '../routes/index/users';
 import accountConfirmationTemplate from '../views/emails/accountConfirmationTemplate';
@@ -28,6 +28,7 @@ import changeEmailNotificationTemplate from '../views/emails/changeEmailNotifica
 import { NotificationKey } from './NotificationModel';
 import prettyBytes = require('pretty-bytes');
 import { validateEmail } from '../utils/validation';
+import { EmailSubjectBody } from './EmailModel';
 import { Config, Env, LdapConfig } from '../utils/types';
 import { DbConnection } from '../db';
 import { NewModelFactoryHandler } from './factory';
@@ -228,6 +229,11 @@ export default class UserModel extends BaseModel<User> {
 		}
 
 		let user = await this.loadByEmail(email);
+
+		// A local, password-based account already owns this email address. Do
+		// not allow a SAML assertion to log in as it - this would bypass the
+		// local account's password.
+		if (user && !user.is_external) return null;
 
 		if (!user) { // User does not exist
 			user = {
@@ -472,13 +478,12 @@ export default class UserModel extends BaseModel<User> {
 		await this.save({ id: user.id, email_confirmed: 1 });
 	}
 
-	// eslint-disable-next-line @typescript-eslint/ban-types -- Old code before rule was applied
-	public async processEmailConfirmation(userId: Uuid, token: string, beforeChangingEmailHandler: Function) {
+	public async processEmailConfirmation(userId: Uuid, token: string, beforeChangingEmailHandler: (newEmail: string)=> Promise<void>) {
 		await this.models().token().checkToken(userId, token);
 		const user = await this.models().user().load(userId);
 		if (!user) throw new ErrorNotFound('No such user');
 
-		const newEmail = await this.models().keyValue().value(`newEmail::${userId}`);
+		const newEmail = await this.models().keyValue().value<string>(`newEmail::${userId}`);
 		if (newEmail) {
 			await beforeChangingEmailHandler(newEmail);
 			await this.completeEmailChange(user);
@@ -633,8 +638,7 @@ export default class UserModel extends BaseModel<User> {
 	public async handleFailedPaymentSubscriptions() {
 		interface SubInfo {
 			subs: Subscription[];
-			// eslint-disable-next-line @typescript-eslint/ban-types -- Old code before rule was applied
-			templateFn: Function;
+			templateFn: ()=> EmailSubjectBody;
 			emailKeyPrefix: string;
 			flagType: UserFlagType;
 		}
