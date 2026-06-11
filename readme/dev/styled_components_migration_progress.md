@@ -101,4 +101,4 @@ Legend: ✅ done · 🚧 in progress · ⬜ not started · ➖ no migration need
 | `gui/NoteEditor/EditorWindow.tsx` | 0 | — | ✅ | Removed the `StyleSheetManager` wrapper (kept the emotion `CacheProvider` for react-select). |
 | `gui/Root.tsx` | 0 | — | ✅ | Removed `ThemeProvider`/`StyleSheetManager`; `createGlobalStyle` box-sizing reset moved to `gui/styles/box-sizing.scss`. |
 
-When every row above is ✅/➖, remove `styled-components` from `packages/app-desktop/package.json` and run `yarn install`.
+**Done:** every row above is ✅/➖. `styled-components`, `styled-system` and `@types/styled-components` have been removed from `packages/app-desktop/package.json` and `yarn install` was run. The desktop app no longer depends on styled-components.
