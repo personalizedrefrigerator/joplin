@@ -1,0 +1,41 @@
+.plugin-box {
+	display: flex;
+	box-sizing: border-box;
+	background-color: var(--joplin-background-color);
+	flex-direction: column;
+	align-items: stretch;
+	padding: 15px;
+	border: 1px solid var(--joplin-divider-color);
+	border-radius: 6px;
+	width: 320px;
+	margin-right: 20px;
+	margin-bottom: 20px;
+	box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+
+	&.-incompatible {
+		opacity: 0.6;
+	}
+
+	> .top {
+		display: flex;
+		flex-direction: row;
+		width: 100%;
+		margin-bottom: 10px;
+	}
+
+	> .content {
+		display: flex;
+		margin-bottom: 10px;
+		flex: 1;
+	}
+
+	> .footer {
+		display: flex;
+		flex-direction: row;
+
+		// The update button is spaced from the install button (previously an `ml` prop).
+		> .update {
+			margin-left: 4px;
+		}
+	}
+}

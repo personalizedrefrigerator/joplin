@@ -1,0 +1,22 @@
+.plugin-name-version {
+	font-family: var(--joplin-font-family);
+	color: var(--joplin-color);
+	font-size: var(--joplin-font-size);
+	font-weight: bold;
+	padding-right: 5px;
+	flex: 1;
+
+	> .name {
+		color: var(--joplin-color);
+		margin-right: 5px;
+
+		&:hover {
+			text-decoration: underline;
+		}
+	}
+
+	> .version {
+		color: var(--joplin-color-faded);
+		font-size: calc(var(--joplin-font-size) * 0.9);
+	}
+}

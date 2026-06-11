@@ -1,0 +1,10 @@
+.plugin-boxed-label {
+	border: 1px solid var(--joplin-color);
+	border-radius: 4px;
+	padding: 4px 6px;
+	font-size: calc(var(--joplin-font-size) * 0.75);
+	color: var(--joplin-color);
+	flex-grow: 0;
+	height: min-content;
+	margin-top: auto;
+}

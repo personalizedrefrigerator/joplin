@@ -1,7 +1,6 @@
 import * as React from 'react';
 import { useCallback, useId, useMemo } from 'react';
 import { _ } from '@joplin/lib/locale';
-import styled from 'styled-components';
 import ToggleButton from '../../../lib/ToggleButton/ToggleButton';
 import Button, { ButtonLevel } from '../../../Button/Button';
 import { PluginManifest } from '@joplin/lib/services/plugins/utils/types';
@@ -48,101 +47,6 @@ function manifestToItem(manifest: PluginManifest): PluginItem {
 	};
 }
 
-const CellRoot = styled.div<{ isCompatible: boolean }>`
-	display: flex;
-	box-sizing: border-box;
-	background-color: ${props => props.theme.backgroundColor};
-	flex-direction: column;
-	align-items: stretch;
-	padding: 15px;
-	border: 1px solid ${props => props.theme.dividerColor};
-	border-radius: 6px;
-	width: 320px;
-	margin-right: 20px;
-	margin-bottom: 20px;
-	box-shadow: 1px 1px 3px rgba(0,0,0,0.2);
-
-	opacity: ${props => props.isCompatible ? '1' : '0.6'};
-`;
-
-const CellTop = styled.div`
-	display: flex;
-	flex-direction: row;
-	width: 100%;
-	margin-bottom: 10px;
-`;
-
-const CellContent = styled.div`
-	display: flex;
-	margin-bottom: 10px;
-	flex: 1;
-`;
-
-const CellFooter = styled.div`
-	display: flex;
-	flex-direction: row;
-`;
-
-const NeedUpgradeMessage = styled.span`
-	font-family: ${props => props.theme.fontFamily};
-	color: ${props => props.theme.colorWarn};
-	font-size: ${props => props.theme.fontSize}px;
-`;
-
-const BoxedLabel = styled.div`
-	border: 1px solid ${props => props.theme.color};
-	border-radius: 4px;
-	padding: 4px 6px;
-	font-size: ${props => props.theme.fontSize * 0.75}px;
-	color: ${props => props.theme.color};
-	flex-grow: 0;
-	height: min-content;
-	margin-top: auto;
-`;
-
-const StyledNameAndVersion = styled.div<{ mb: string | number }>`
-	font-family: ${props => props.theme.fontFamily};
-	color: ${props => props.theme.color};
-	font-size: ${props => props.theme.fontSize}px;
-	font-weight: bold;
-	padding-right: 5px;
-	flex: 1;
-`;
-
-const StyledName = styled.a`
-	color: ${props => props.theme.color};
-
-	&:hover {
-		text-decoration: underline;
-	}
-`;
-
-const StyledVersion = styled.span`
-	color: ${props => props.theme.colorFaded};
-	font-size: ${props => props.theme.fontSize * 0.9}px;
-`;
-
-const StyledDescription = styled.div`
-	font-family: ${props => props.theme.fontFamily};
-	color: ${props => props.theme.colorFaded};
-	font-size: ${props => props.theme.fontSize}px;
-	line-height: 1.6em;
-`;
-
-const RecommendedBadge = styled.a`
-	font-family: ${props => props.theme.fontFamily};
-	color: ${props => props.theme.colorWarn};
-	font-size: ${props => props.theme.fontSize}px;
-	border: 1px solid ${props => props.theme.colorWarn};
-	padding: 5px;
-	border-radius: 50px;
-	opacity: 0.8;
-	
-	&:hover {
-		opacity: 1;
-	}
-`;
-
 export default function(props: Props) {
 	const item = useMemo(() => {
 		return props.item ? props.item : manifestToItem(props.manifest);
@@ -165,7 +69,7 @@ export default function(props: Props) {
 		if (!props.onToggle) return null;
 
 		if (item.devMode) {
-			return <BoxedLabel>DEV</BoxedLabel>;
+			return <div className='plugin-boxed-label'>DEV</div>;
 		}
 
 		return <ToggleButton
@@ -208,7 +112,7 @@ export default function(props: Props) {
 		if (props.updateState === UpdateState.HasBeenUpdated) title = _('Updated');
 
 		return <Button
-			style={{ marginLeft: 4 }}
+			className='update'
 			level={ButtonLevel.Recommended}
 			onClick={() => props.onUpdate({ item })}
 			title={title}
@@ -219,7 +123,7 @@ export default function(props: Props) {
 	const renderDefaultPluginLabel = () => {
 		if (item.builtIn) {
 			return (
-				<BoxedLabel>{_('Built-in')}</BoxedLabel>
+				<div className='plugin-boxed-label'>{_('Built-in')}</div>
 			);
 		}
 
@@ -231,49 +135,49 @@ export default function(props: Props) {
 
 		if (!props.isCompatible) {
 			return (
-				<CellFooter>
-					<NeedUpgradeMessage>
+				<div className='footer'>
+					<span className='plugin-upgrade-message'>
 						{PluginService.instance().describeIncompatibility(item.manifest)}
-					</NeedUpgradeMessage>
-				</CellFooter>
+					</span>
+				</div>
 			);
 		}
 
 		return (
-			<CellFooter>
+			<div className='footer'>
 				{renderDeleteButton()}
 				{renderInstallButton()}
 				{renderUpdateButton()}
 				<div style={{ display: 'flex', flex: 1 }}/>
 				{renderDefaultPluginLabel()}
-			</CellFooter>
+			</div>
 		);
 	}
 
 	function renderRecommendedBadge() {
 		if (props.onToggle) return null;
 		if (!item.manifest._recommended) return null;
-		return <RecommendedBadge href="#" title={_('The Joplin team has vetted this plugin and it meets our standards for security and performance.')} onClick={onRecommendedClick}><i className="fas fa-crown"></i></RecommendedBadge>;
+		return <a className='recommended-badge' href="#" title={_('The Joplin team has vetted this plugin and it meets our standards for security and performance.')} onClick={onRecommendedClick}><i className="fas fa-crown"></i></a>;
 	}
 
 	const nameLabelId = useId();
 
 	return (
-		<CellRoot isCompatible={props.isCompatible} role='group' aria-labelledby={nameLabelId}>
-			<CellTop>
-				<StyledNameAndVersion mb={'5px'}>
-					<StyledName onClick={onNameClick} href="#" style={{ marginRight: 5 }} id={nameLabelId}>
+		<div className={`plugin-box${props.isCompatible ? '' : ' -incompatible'}`} role='group' aria-labelledby={nameLabelId}>
+			<div className='top'>
+				<div className='plugin-name-version'>
+					<a className='name' onClick={onNameClick} href="#" id={nameLabelId}>
 						{item.manifest.name} {item.deleted ? _('(%s)', 'Deleted') : ''}
-					</StyledName>
-					<StyledVersion>v{item.manifest.version}</StyledVersion>
-				</StyledNameAndVersion>
+					</a>
+					<span className='version'>v{item.manifest.version}</span>
+				</div>
 				{renderToggleButton()}
 				{renderRecommendedBadge()}
-			</CellTop>
-			<CellContent>
-				<StyledDescription>{item.manifest.description}</StyledDescription>
-			</CellContent>
+			</div>
+			<div className='content'>
+				<div className='plugin-description'>{item.manifest.description}</div>
+			</div>
 			{renderFooter()}
-		</CellRoot>
+		</div>
 	);
 }

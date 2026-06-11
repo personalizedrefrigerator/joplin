@@ -1,0 +1,13 @@
+.recommended-badge {
+	font-family: var(--joplin-font-family);
+	color: var(--joplin-color-warn);
+	font-size: var(--joplin-font-size);
+	border: 1px solid var(--joplin-color-warn);
+	padding: 5px;
+	border-radius: 50px;
+	opacity: 0.8;
+
+	&:hover {
+		opacity: 1;
+	}
+}
