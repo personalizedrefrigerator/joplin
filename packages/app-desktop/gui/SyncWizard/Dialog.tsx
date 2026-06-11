@@ -4,7 +4,6 @@ import { useRef, useCallback, useId } from 'react';
 import { _ } from '@joplin/lib/locale';
 import DialogButtonRow from '../DialogButtonRow';
 import Dialog from '@joplin/lib/components/Dialog';
-import styled from 'styled-components';
 import DialogTitle from '../DialogTitle';
 import SyncTargetRegistry, { SyncTargetInfo } from '@joplin/lib/SyncTargetRegistry';
 import useElementSize from '@joplin/lib/hooks/useElementSize';
@@ -17,110 +16,6 @@ interface Props {
 	themeId: number;
 	dispatch: Dispatch;
 }
-
-const StyledRoot = styled.div`
-	min-width: 500px;
-	max-width: 1200px;
-`;
-
-const SyncTargetDescription = styled.div<{ height: number }>`
-	${props => props.height ? `height: ${props.height}px` : ''};
-	margin-bottom: 1.3em;
-	line-height: ${props => props.theme.lineHeight};
-	font-size: 16px;
-`;
-
-const ContentRoot = styled.div`
-	background-color: ${props => props.theme.backgroundColor3};
-	padding: 1em;
-	padding-right: 0;
-`;
-
-const SelfHostingMessage = styled.div`
-	color: ${props => props.theme.color};
-	padding-right: 1em;
-	font-style: italic;
-	margin-top: 1em;
-	opacity: 0.6;
-`;
-
-const SyncTargetBoxes = styled.div`
-	display: flex;
-	flex-direction: row;
-	justify-content: center;
-`;
-
-const SyncTargetTitle = styled.h2`
-	display: flex;
-	flex-direction: row;
-	font-weight: bold;
-	font-size: 1.7em;
-	align-items: center;
-	white-space: nowrap;
-`;
-
-const SyncTargetLogo = styled.img`
-	height: 1.3em;
-	margin-right: 0.4em;
-`;
-
-const SyncTargetBox = styled.div`
-	display: flex;
-	flex: 1;
-	flex-direction: column;
-	font-family: ${props => props.theme.fontFamily};
-	color: ${props => props.theme.color};
-	background-color: ${props => props.theme.backgroundColor};
-	border: 1px solid ${props => props.theme.dividerColor};
-	border-radius: 8px;
-	padding: 2em 2.2em 2em 2.2em;
-	margin-right: 1em;
-	max-width: 400px;
-	opacity: 1;
-`;
-
-const FeatureList = styled.ul`
-	margin-bottom: 1em;
-
-	list-style-type: none;
-	padding: 0;
-`;
-
-const FeatureIcon = styled.i`
-	display: inline-flex;
-	width: 16px;
-	justify-content: center;
-	color: ${props => props.theme.color4};
-	position: absolute;
-`;
-
-const FeatureLine = styled.li<{ enabled: boolean }>`
-	margin-bottom: .5em;
-	opacity: ${props => props.enabled ? 1 : 0.5};
-	position: relative;
-	font-size: 16px;
-`;
-
-const FeatureLabel = styled.div`
-	margin-left: 24px;
-	line-height: ${props => props.theme.lineHeight};
-`;
-
-const SelectButton = styled(Button)`
-	padding: 10px 10px;
-    height: auto;
-    min-height: auto;
-    max-height: fit-content;
-    font-size: 1em;
-`;
-
-const SlowSyncWarning = styled.div`
-	margin-top: 1em;
-	opacity: 0.8;
-	font-family: ${props => props.theme.fontFamily};
-	color: ${props => props.theme.color};
-	font-size: 14px;
-`;
 
 const syncTargetNames: string[] = [
 	'joplinCloud',
@@ -161,22 +56,22 @@ export default function(props: Props) {
 	function renderFeature(enabled: boolean, label: string) {
 		const className = enabled ? 'fas fa-check' : 'fas fa-times';
 		return (
-			<FeatureLine enabled={enabled} key={label}>
-				<FeatureIcon className={className} role='img' aria-label={enabled ? _('Check') : _('Not checked')}/>
-				<FeatureLabel>{label}</FeatureLabel>
-			</FeatureLine>
+			<li className={`feature-line${enabled ? '' : ' -disabled'}`} key={label}>
+				<i className={`icon ${className}`} role='img' aria-label={enabled ? _('Check') : _('Not checked')}/>
+				<div className='label'>{label}</div>
+			</li>
 		);
 	}
 
 	function renderFeatures(name: string) {
 		return (
-			<FeatureList>
+			<ul className='feature-list'>
 				{[
 					renderFeature(true, _('Sync your notes')),
 					renderFeature(name === 'joplinCloud', _('Publish notes to the internet')),
 					renderFeature(name === 'joplinCloud', _('Collaborate on notebooks with others')),
 				]}
-			</FeatureList>
+			</ul>
 		);
 	}
 
@@ -202,7 +97,8 @@ export default function(props: Props) {
 
 	function renderSelectArea(info: SyncTargetInfo, describedById: string) {
 		return (
-			<SelectButton
+			<Button
+				className='select-button'
 				level={ButtonLevel.Primary}
 				title={_('Select')}
 				onClick={() => onSelectButtonClick(info.name as SyncTargetInfoName)}
@@ -223,31 +119,32 @@ export default function(props: Props) {
 
 		const logoImageName = logosImageNames[info.name];
 		const logoImageSrc = logoImageName ? `${bridge().buildDir()}/images/${logoImageName}` : '';
-		const logo = logoImageSrc ? <SyncTargetLogo src={logoImageSrc} aria-hidden={true}/> : null;
+		const logo = logoImageSrc ? <img className='sync-target-logo' src={logoImageSrc} aria-hidden={true}/> : null;
 
 		const descriptionComp = (
-			<SyncTargetDescription
-				height={height}
+			<div
+				className='description'
+				style={height ? { height } : undefined}
 				ref={info.name === 'joplinCloud' ? joplinCloudDescriptionRef : null}
-			>{info.description}</SyncTargetDescription>
+			>{info.description}</div>
 		);
 		const featuresComp = renderFeatures(info.name);
 
 		const renderSlowSyncWarning = () => {
 			if (info.name === 'joplinCloud') return null;
-			return <SlowSyncWarning>{`⚠️ ${_('%s is not optimised for synchronising many small files so your initial synchronisation will be slow.', info.label)}`}</SlowSyncWarning>;
+			return <div className='slow-sync-warning'>{`⚠️ ${_('%s is not optimised for synchronising many small files so your initial synchronisation will be slow.', info.label)}`}</div>;
 		};
 
 		const headerId = `${baseId}-${info.id}`;
 		return (
-			<SyncTargetBox id={key} key={key}>
-				<SyncTargetTitle id={headerId}>{logo}{info.label}</SyncTargetTitle>
+			<div className='sync-target-box' id={key} key={key}>
+				<h2 className='title' id={headerId}>{logo}{info.label}</h2>
 				{descriptionComp}
 				{featuresComp}
 				{renderSelectArea(info, headerId)}
 				{renderSignUpArea(info)}
 				{renderSlowSyncWarning()}
-			</SyncTargetBox>
+			</div>
 		);
 	}
 
@@ -274,7 +171,7 @@ export default function(props: Props) {
 
 		const selfHostingLabelId = `${baseId}-selfHosting`;
 		const selfHostingLinkId = `${baseId}-selfHostingLink`;
-		const selfHostingMessage = <SelfHostingMessage>
+		const selfHostingMessage = <div className='self-hosting-message'>
 			<span id={selfHostingLabelId}>
 				Self-hosting? Joplin also supports various self-hosting options such as Nextcloud, WebDAV, AWS S3 and Joplin Server.
 			</span>
@@ -291,21 +188,21 @@ export default function(props: Props) {
 			>
 				Click here to select one
 			</a>.
-		</SelfHostingMessage>;
+		</div>;
 
 		return (
-			<ContentRoot>
-				<SyncTargetBoxes>
+			<div className='content'>
+				<div className='sync-target-boxes'>
 					{boxes}
-				</SyncTargetBoxes>
+				</div>
 				{selfHostingMessage}
-			</ContentRoot>
+			</div>
 		);
 	}
 
 	function renderDialogWrapper() {
 		return (
-			<StyledRoot>
+			<div className='sync-wizard-dialog'>
 				<DialogTitle title={_('Joplin can synchronise your notes using various providers. Select one from the list below.')}/>
 				{renderContent()}
 				<DialogButtonRow
@@ -314,7 +211,7 @@ export default function(props: Props) {
 					okButtonShow={false}
 					cancelButtonLabel={_('Close')}
 				/>
-			</StyledRoot>
+			</div>
 		);
 	}
 

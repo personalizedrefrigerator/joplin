@@ -1,0 +1,29 @@
+.sync-target-box {
+	display: flex;
+	flex: 1;
+	flex-direction: column;
+	font-family: var(--joplin-font-family);
+	color: var(--joplin-color);
+	background-color: var(--joplin-background-color);
+	border: 1px solid var(--joplin-divider-color);
+	border-radius: 8px;
+	padding: 2em 2.2em 2em 2.2em;
+	margin-right: 1em;
+	max-width: 400px;
+	opacity: 1;
+
+	> .title {
+		display: flex;
+		flex-direction: row;
+		font-weight: bold;
+		font-size: 1.7em;
+		align-items: center;
+		white-space: nowrap;
+	}
+
+	> .description {
+		margin-bottom: 1.3em;
+		line-height: var(--joplin-line-height);
+		font-size: 16px;
+	}
+}

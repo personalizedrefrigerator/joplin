@@ -1,0 +1,10 @@
+.sync-wizard-dialog {
+	min-width: 500px;
+	max-width: 1200px;
+
+	> .content {
+		background-color: var(--joplin-background-color3);
+		padding: 1em;
+		padding-right: 0;
+	}
+}

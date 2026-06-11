@@ -97,7 +97,7 @@ Legend: ✅ done · 🚧 in progress · ⬜ not started · ➖ no migration need
 | `gui/Button/Button.tsx` | 9 | — | ✅ | `.app-button` with `-primary/-secondary/-tertiary/-recommended/-sidebar-secondary`, `-small`, `-square` variants and `> .icon` / `> .title` elements (`app-button.scss`). Dropped styled-system `space`; the `ml` consumers (EditFolderDialog, PluginBox) now use CSS/inline margin. `styled(Button)` still works via `className` forwarding. |
 | `gui/ConfigScreen/controls/plugins/PluginBox.tsx` | 11 | — | ✅ | `.plugin-box` card (`-incompatible` variant) with `> .top/.content/.footer`; name/version, description, boxed-label, upgrade-message and recommended-badge promoted to their own components in `controls/plugins/styles`. |
 | `gui/Sidebar/styles/index.ts` | 12 | — | ✅ | Moved each styled-component into a `Sidebar/styles/*.scss` file; the list-item colour/opacity become `-conflict/-special/-shared/-selected` variants. Dead `StyledAddButton` removed; the Linux `StyledSpanFix` workaround is now an inline platform-conditional style. `index.ts` deleted. |
-| `gui/SyncWizard/Dialog.tsx` | 14 | — | ⬜ | Largest. |
+| `gui/SyncWizard/Dialog.tsx` | 14 | — | ✅ | → `SyncWizard/styles/` (`.sync-wizard-dialog`, `.sync-target-box`, `.feature-list`/`.feature-line`, etc.). `enabled`→`-disabled` variant; the measured description height stays inline; the SelectButton override is scoped under the dialog. |
 | `gui/NoteEditor/EditorWindow.tsx` | 0 | — | ➖ | Infrastructure (`StyleSheetManager`); migrate last. |
 | `gui/Root.tsx` | 0 | — | ➖ | Infrastructure (`ThemeProvider`/`StyleSheetManager`/`createGlobalStyle`); migrate last. |
 

@@ -1,0 +1,8 @@
+// Scoped under the dialog so it overrides the base Button styles regardless of order.
+.sync-wizard-dialog .select-button {
+	padding: 10px 10px;
+	height: auto;
+	min-height: auto;
+	max-height: fit-content;
+	font-size: 1em;
+}
