@@ -9,7 +9,6 @@ import { themeStyle } from '@joplin/lib/theme';
 import ReportService, { ReportItem, ReportSection, RetryAllHandler } from '@joplin/lib/services/ReportService';
 import Button, { ButtonLevel } from '../Button/Button';
 import bridge from '../../services/bridge';
-import styled from 'styled-components';
 import { AppState } from '../../app.reducer';
 import { writeFileSync } from 'fs';
 
@@ -19,10 +18,6 @@ interface Props {
 	style: any;
 	dispatch: Dispatch;
 }
-
-const StyledAdvancedToolItem = styled.div`
-	margin-bottom: 1em;
-`;
 
 async function exportDebugReportClick() {
 	const filename = `syncReport-${new Date().getTime()}.csv`;
@@ -201,9 +196,9 @@ function StatusScreen(props: Props) {
 				<h2 key="section_tools" style={theme.h2Style}>
 					{_('Advanced tools')}
 				</h2>
-				<StyledAdvancedToolItem>
+				<div className='advanced-tool-item'>
 					<Button level={ButtonLevel.Primary} title={_('Export debug report')} onClick={() => exportDebugReportClick()}/>
-				</StyledAdvancedToolItem>
+				</div>
 			</div>
 		);
 	}

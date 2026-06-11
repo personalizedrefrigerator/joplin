@@ -10,6 +10,7 @@
 @use 'gui/NoteList/style.scss' as note-list;
 @use 'gui/NoteListWrapper/NoteListWrapper.scss' as note-list-wrapper;
 @use 'gui/SsoLoginScreen/SsoLoginScreen.scss' as sso-login-screen;
+@use 'gui/StatusScreen/advanced-tool-item.scss' as status-screen;
 @use 'gui/JoplinCloudLoginScreen.scss' as joplin-cloud-login-screen;
 @use 'gui/NoteListHeader/style.scss' as note-list-header;
 @use 'gui/UpdateNotification/style.scss' as update-notification;
