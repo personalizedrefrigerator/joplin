@@ -587,7 +587,6 @@ packages/app-desktop/gui/menuCommandNames.js
 packages/app-desktop/gui/style/StyledInput.js
 packages/app-desktop/gui/style/StyledLink.js
 packages/app-desktop/gui/style/StyledMessage.js
-packages/app-desktop/gui/style/StyledTextInput.js
 packages/app-desktop/gui/utils/NoteListUtils.test.js
 packages/app-desktop/gui/utils/NoteListUtils.js
 packages/app-desktop/gui/utils/announceForAccessibility.js
