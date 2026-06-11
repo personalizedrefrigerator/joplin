@@ -91,7 +91,7 @@ Legend: ✅ done · 🚧 in progress · ⬜ not started · ➖ no migration need
 | `gui/PdfViewer.tsx` | 2 | — | ✅ | `.pdf-viewer > .frame` → `gui/pdf-viewer.scss`. |
 | `gui/QuitSyncDialog.tsx` | 2 | — | ✅ | `.quit-sync-dialog > .message` → `gui/quit-sync-dialog.scss`. |
 | `gui/ResizableLayout/utils/style.ts` | 3 | — | ✅ | → `ResizableLayout/styles/` (`.resizable-layout-item`, `.move-overlay`, `.move-mode-message`). Dynamic size stays inline; the appearance-based overlay scrim is fed via a `--move-overlay-background` custom property (ResizableLayout now takes `themeId`). File deleted. |
-| `gui/ConfigScreen/controls/plugins/PluginsStates.tsx` | 4 | StyledLink, StyledMessage | 🚧 | `RepoApiErrorMessage` (→ `.repo-api-error`) and the StyledLink/StyledMessage uses done with the shared helpers; `Root`, `UserPluginsRoot`, `ToolsButton` remain. |
+| `gui/ConfigScreen/controls/plugins/PluginsStates.tsx` | 4 | StyledLink, StyledMessage | ✅ | `.plugins-states`, `.user-plugins` (+`-spaced`), `.tools-button`; `.repo-api-error` done earlier with StyledMessage. |
 | `gui/ResizableLayout/MoveButtons.tsx` | 4 | — | ✅ | `.move-buttons` / `.move-button-row` with `> .arrow` / `> .empty`; disabled-arrow opacity via `:disabled`, hidden placeholder via `.empty`. |
 | `gui/NoteListControls/NoteListControls.tsx` | 7 | — | ⬜ | |
 | `gui/Button/Button.tsx` | 9 | — | ⬜ | High-leverage; many `styled(Button)` call sites. |

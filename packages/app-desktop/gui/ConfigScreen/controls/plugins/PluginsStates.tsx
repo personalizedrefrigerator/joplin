@@ -2,7 +2,6 @@ import * as React from 'react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import PluginService, { defaultPluginSetting, Plugins, PluginSetting, PluginSettings, SerializedPluginSettings } from '@joplin/lib/services/plugins/PluginService';
 import { _ } from '@joplin/lib/locale';
-import styled from 'styled-components';
 import SearchPlugins from './SearchPlugins';
 import PluginBox, { UpdateState } from './PluginBox';
 import Button, { ButtonLevel, ButtonSize } from '../../../Button/Button';
@@ -17,26 +16,10 @@ import useOnDeleteHandler from '@joplin/lib/components/shared/config/plugins/use
 import Logger from '@joplin/utils/Logger';
 import SettingHeader from '../SettingHeader';
 import SettingDescription from '../SettingDescription';
-const { space } = require('styled-system');
 
 const logger = Logger.create('PluginState');
 
 const maxWidth = 320;
-
-const Root = styled.div`
-	display: flex;
-	flex-direction: column;
-`;
-
-const UserPluginsRoot = styled.div<{ mb?: string }>`
-	${space}
-	display: flex;
-	flex-wrap: wrap;
-`;
-
-const ToolsButton = styled(Button)`
-	margin-right: 6px;
-`;
 
 interface Props {
 	value: SerializedPluginSettings;
@@ -264,21 +247,21 @@ export default function(props: Props) {
 
 		if (!pluginItems.length || allDeleted) {
 			return (
-				<UserPluginsRoot mb={'10px'}>
+				<div className='user-plugins -spaced'>
 					<SettingDescription text={_('You do not have any installed plugin.')}/>
-				</UserPluginsRoot>
+				</div>
 			);
 		} else {
 			const nonDefaultPlugins = pluginItems.filter(item => !item.builtIn);
 			const defaultPlugins = pluginItems.filter(item => item.builtIn);
 			return (
 				<>
-					<UserPluginsRoot>
+					<div className='user-plugins'>
 						{renderCells(nonDefaultPlugins)}
-					</UserPluginsRoot>
-					<UserPluginsRoot>
+					</div>
+					<div className='user-plugins'>
 						{renderCells(defaultPlugins)}
-					</UserPluginsRoot>
+					</div>
 				</>
 			);
 		}
@@ -314,7 +297,7 @@ export default function(props: Props) {
 			<div>
 				{renderRepoApiError()}
 				<div style={{ display: 'flex', flexDirection: 'row', maxWidth }}>
-					<ToolsButton size={ButtonSize.Small} tooltip={_('Plugin tools')} iconName="fas fa-cog" level={ButtonLevel.Secondary} onClick={onToolsClick}/>
+					<Button className='tools-button' size={ButtonSize.Small} tooltip={_('Plugin tools')} iconName="fas fa-cog" level={ButtonLevel.Secondary} onClick={onToolsClick}/>
 					<div style={{ display: 'flex', flex: 1 }}>
 						<SettingHeader text={_('Manage your plugins')}/>
 					</div>
@@ -325,9 +308,9 @@ export default function(props: Props) {
 	}
 
 	return (
-		<Root>
+		<div className='plugins-states'>
 			{renderSearchArea()}
 			{renderBottomArea()}
-		</Root>
+		</div>
 	);
 }

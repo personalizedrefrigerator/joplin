@@ -1,0 +1,8 @@
+.user-plugins {
+	display: flex;
+	flex-wrap: wrap;
+
+	&.-spaced {
+		margin-bottom: 10px;
+	}
+}
