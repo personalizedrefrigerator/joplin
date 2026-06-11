@@ -21,7 +21,6 @@ import shouldShowMissingPasswordWarning from '@joplin/lib/components/shared/conf
 import { produce } from 'immer';
 import shim from '@joplin/lib/shim';
 import bridge from '../services/bridge';
-import styled from 'styled-components';
 import { themeStyle, ThemeStyle } from '@joplin/lib/theme';
 import validateLayout from './ResizableLayout/utils/validateLayout';
 import iterateItems from './ResizableLayout/utils/iterateItems';
@@ -101,17 +100,6 @@ interface State {
 	shareNoteDialogOptions: Record<string, unknown>;
 	shareFolderDialogOptions: ShareFolderDialogOptions;
 }
-
-const StyledUserWebviewDialogContainer = styled.div`
-	display: flex;
-	position: absolute;
-	top: 0;
-	left: 0;
-	width: 100%;
-	height: 100%;
-	z-index: 1000;
-	box-sizing: border-box;
-`;
 
 const defaultLayout: LayoutItem = {
 	key: 'root',
@@ -756,9 +744,9 @@ class MainScreenComponent extends React.Component<Props, State> {
 		if (!output.length) return null;
 
 		return (
-			<StyledUserWebviewDialogContainer>
+			<div className='user-webview-dialog-container'>
 				{output}
-			</StyledUserWebviewDialogContainer>
+			</div>
 		);
 	}
 
