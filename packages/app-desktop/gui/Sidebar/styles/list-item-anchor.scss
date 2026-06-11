@@ -1,0 +1,39 @@
+.list-item-anchor {
+	font-size: calc(var(--joplin-font-size) * 1.0833333);
+	text-decoration: none;
+	color: var(--joplin-color2);
+	cursor: default;
+	opacity: 0.8;
+	white-space: nowrap;
+	display: flex;
+	flex: 1;
+	align-items: center;
+	user-select: none;
+	height: 100%;
+
+	// A different background color is already used to indicate focus for sidebar list items.
+	&:focus-visible {
+		outline: none;
+	}
+
+	&.-selected {
+		opacity: 1;
+	}
+
+	// Conflict/special/shared items keep full contrast even when unselected. Ordered by the
+	// priority of the previous listItemTextColor() (conflict > special > shared).
+	&.-shared {
+		color: var(--joplin-color-warn2);
+		opacity: 1;
+	}
+
+	&.-special {
+		color: var(--joplin-color-faded2);
+		opacity: 1;
+	}
+
+	&.-conflict {
+		color: var(--joplin-color-error2);
+		opacity: 1;
+	}
+}

@@ -1,6 +1,5 @@
 import * as React from 'react';
-import { StyledSyncReportText, StyledSyncReport, StyledSynchronizeButton, StyledRoot } from './styles';
-import { ButtonLevel } from '../Button/Button';
+import Button, { ButtonLevel } from '../Button/Button';
 import CommandService from '@joplin/lib/services/CommandService';
 import Synchronizer, { type ProgressReport } from '@joplin/lib/Synchronizer';
 import Setting from '@joplin/lib/models/Setting';
@@ -35,7 +34,7 @@ const SidebarComponent = (props: Props) => {
 		const iconName = nothingToSync ? 'fas fa-check' : 'icon-sync';
 
 		return (
-			<StyledSynchronizeButton
+			<Button
 				level={ButtonLevel.SidebarSecondary}
 				className={`sidebar-sync-button ${type === 'sync' ? '' : '-syncing'} ${nothingToSync ? '-synced' : ''}`}
 				iconName={iconName}
@@ -66,9 +65,9 @@ const SidebarComponent = (props: Props) => {
 	const syncReportText = [];
 	for (let i = 0; i < lines.length; i++) {
 		syncReportText.push(
-			<StyledSyncReportText key={i}>
+			<div className='sync-report-text' key={i}>
 				{lines[i]}
-			</StyledSyncReportText>,
+			</div>,
 		);
 	}
 
@@ -77,9 +76,9 @@ const SidebarComponent = (props: Props) => {
 	const hasSyncReport = syncReportText.length > 0;
 
 	const syncReportComp = !hasSyncReport || !props.syncReportIsVisible ? null : (
-		<StyledSyncReport key="sync_report" id="sync-report">
+		<div className='sync-report' key="sync_report" id="sync-report">
 			{syncReportText}
-		</StyledSyncReport>
+		</div>
 	);
 
 	const syncReportToggle = (
@@ -96,14 +95,14 @@ const SidebarComponent = (props: Props) => {
 	);
 
 	return (
-		<StyledRoot className='sidebar _scrollbar2' role='navigation' aria-label={_('Sidebar')}>
+		<div className='sidebar _scrollbar2' role='navigation' aria-label={_('Sidebar')}>
 			<div style={{ flex: 1 }}><FolderAndTagList/></div>
 			<div style={{ flex: 0, padding: theme.mainPadding }}>
 				{syncReportToggle}
 				{syncReportComp}
 				{syncButton}
 			</div>
-		</StyledRoot>
+		</div>
 	);
 };
 

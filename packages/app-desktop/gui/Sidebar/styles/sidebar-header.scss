@@ -1,0 +1,16 @@
+.sidebar-header {
+	flex: 1;
+	box-sizing: border-box;
+	padding: var(--joplin-main-padding);
+	padding-bottom: calc(var(--joplin-main-padding) / 2);
+	display: flex;
+	align-items: center;
+	user-select: none;
+	text-transform: uppercase;
+	cursor: default;
+	transition: background 0.2s;
+
+	&:hover {
+		background: var(--joplin-background-color-hover2);
+	}
+}

@@ -1,13 +1,13 @@
 import Setting from '@joplin/lib/models/Setting';
 import * as React from 'react';
 import { useCallback } from 'react';
-import { StyledListItemAnchor, StyledSpanFix } from '../styles';
 import { TagsWithNoteCountEntity } from '@joplin/lib/services/database/types';
 import BaseModel, { ModelType } from '@joplin/lib/BaseModel';
 import NoteCount from './NoteCount';
 import EmptyExpandLink from './EmptyExpandLink';
 import ListItemWrapper, { ItemSelectionState, ListItemRef } from './ListItemWrapper';
 import { ItemClickEvent } from '../hooks/useOnItemClick';
+import shim from '@joplin/lib/shim';
 
 interface Props {
 	anchorRef: ListItemRef;
@@ -51,16 +51,15 @@ const TagItem = (props: Props) => {
 			itemCount={props.itemCount}
 		>
 			<EmptyExpandLink/>
-			<StyledListItemAnchor
-				className="list-item"
-				selected={selectionState.selected}
+			<a
+				className={`list-item-anchor list-item${selectionState.selected ? ' -selected' : ''}`}
 				data-id={tag.id}
 				data-type={BaseModel.TYPE_TAG}
 				onClick={onClickHandler}
 			>
-				<StyledSpanFix className="tag-label">{props.label}</StyledSpanFix>
+				<span className="tag-label" style={shim.isLinux() ? { position: 'relative' } : undefined}>{props.label}</span>
 				{noteCount}
-			</StyledListItemAnchor>
+			</a>
 		</ListItemWrapper>
 	);
 };

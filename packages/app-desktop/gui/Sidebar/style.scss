@@ -1,3 +1,12 @@
+@use 'styles/sidebar.scss';
+@use 'styles/sidebar-header.scss';
+@use 'styles/sidebar-header-icon.scss';
+@use 'styles/all-notes-icon.scss';
+@use 'styles/sidebar-header-label.scss';
+@use 'styles/list-item-anchor.scss';
+@use 'styles/share-icon.scss';
+@use 'styles/sync-report.scss';
+@use 'styles/sync-report-text.scss';
 @use 'styles/folder-and-tag-list.scss';
 @use 'styles/list-item-wrapper.scss';
 @use 'styles/note-count-label.scss';

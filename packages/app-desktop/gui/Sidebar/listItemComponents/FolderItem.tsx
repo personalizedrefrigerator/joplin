@@ -2,7 +2,6 @@ import * as React from 'react';
 
 import { FolderIcon, FolderIconType } from '@joplin/lib/services/database/types';
 import ExpandLink from './ExpandLink';
-import { StyledListItemAnchor, StyledShareIcon, StyledSpanFix } from '../styles';
 import { ItemClickListener, ItemContextMenuListener, ItemDragListener } from '../types';
 import FolderIconBox from '../../FolderIconBox';
 import { getTrashFolderIcon, getTrashFolderId } from '@joplin/lib/services/trash';
@@ -13,6 +12,7 @@ import NoteCount from './NoteCount';
 import ListItemWrapper, { ItemSelectionState, ListItemRef } from './ListItemWrapper';
 import { useId } from 'react';
 import { ItemClickEvent } from '../hooks/useOnItemClick';
+import shim from '@joplin/lib/shim';
 
 const renderFolderIcon = (folderIcon: FolderIcon) => {
 	if (!folderIcon) {
@@ -56,7 +56,7 @@ function FolderItem(props: FolderItemProps) {
 	const { hasChildren, showFolderIcon, isExpanded, parentId, depth, selectionState, folderId, folderTitle, folderIcon, noteCount, onFolderDragStart_, onFolderDragOver_, onFolderDrop_, itemContextMenu, folderItem_click, onFolderToggleClick_, shareId } = props;
 
 	const shareTitle = _('Shared');
-	const shareIcon = shareId && !parentId ? <StyledShareIcon aria-label={shareTitle} title={shareTitle} className="fas fa-share-alt"/> : null;
+	const shareIcon = shareId && !parentId ? <i className="share-icon fas fa-share-alt" aria-label={shareTitle} title={shareTitle}/> : null;
 	const draggable = ![getTrashFolderId(), Folder.conflictFolderId()].includes(folderId);
 
 	const doRenderFolderIcon = () => {
@@ -92,12 +92,9 @@ function FolderItem(props: FolderItemProps) {
 			// since this information is already conveyed by aria-* props.
 			aria-labelledby={titleId}
 		>
-			<StyledListItemAnchor
-				className="list-item"
+			<a
+				className={`list-item-anchor list-item${folderId === Folder.conflictFolderId() ? ' -conflict' : ''}${shareId ? ' -shared' : ''}${selectionState.selected ? ' -selected' : ''}`}
 				id={titleId}
-				isConflictFolder={folderId === Folder.conflictFolderId()}
-				selected={selectionState.selected}
-				shareId={shareId}
 				data-folder-id={folderId}
 				onDoubleClick={onFolderToggleClick_}
 
@@ -107,9 +104,9 @@ function FolderItem(props: FolderItemProps) {
 					});
 				}}
 			>
-				{doRenderFolderIcon()}<StyledSpanFix className="title">{folderTitle}</StyledSpanFix>
+				{doRenderFolderIcon()}<span className="title" style={shim.isLinux() ? { position: 'relative' } : undefined}>{folderTitle}</span>
 				{shareIcon} <NoteCount count={noteCount}/>
-			</StyledListItemAnchor>
+			</a>
 			<ExpandLink
 				// The ExpandLink is included after the title so that the screen reader reads the
 				// title first.

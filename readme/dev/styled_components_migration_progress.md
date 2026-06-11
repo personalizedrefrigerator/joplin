@@ -64,7 +64,7 @@ For each file:
 ## Notes / known special cases
 
 - `gui/style/StyledTextInput.tsx` has **no importers** — it is dead code and can simply be deleted.
-- `gui/Sidebar/styles/index.ts` is **partially migrated**: most of the Sidebar already uses SCSS (see `Sidebar/styles/*.scss`), but this file still holds ~12 styled-components. Finish by moving each into the existing `Sidebar/styles/` folder.
+- `gui/Sidebar/styles/index.ts` was migrated: each styled-component moved into its own `Sidebar/styles/*.scss` file and the file was deleted.
 - `utils/checkForUpdatesUtilsTestData.ts` matches a `styled-components` grep but only inside changelog **text** — it is **not** a real usage and needs no migration.
 - `Button.tsx` is depended on widely; several other styled-components do `styled(Button)\`...\``. Migrating `Button` may simplify those call sites, so it's a good high-leverage target despite its size.
 
@@ -96,7 +96,7 @@ Legend: ✅ done · 🚧 in progress · ⬜ not started · ➖ no migration need
 | `gui/NoteListControls/NoteListControls.tsx` | 7 | — | ✅ | `note-list-controls.scss`; button overrides scoped under `.note-list-controls`. Per-instance padding/gap and the pair-button width stay inline (computed). |
 | `gui/Button/Button.tsx` | 9 | — | ✅ | `.app-button` with `-primary/-secondary/-tertiary/-recommended/-sidebar-secondary`, `-small`, `-square` variants and `> .icon` / `> .title` elements (`app-button.scss`). Dropped styled-system `space`; the `ml` consumers (EditFolderDialog, PluginBox) now use CSS/inline margin. `styled(Button)` still works via `className` forwarding. |
 | `gui/ConfigScreen/controls/plugins/PluginBox.tsx` | 11 | — | ✅ | `.plugin-box` card (`-incompatible` variant) with `> .top/.content/.footer`; name/version, description, boxed-label, upgrade-message and recommended-badge promoted to their own components in `controls/plugins/styles`. |
-| `gui/Sidebar/styles/index.ts` | 12 | — | ⬜ | Partially migrated; finish into `Sidebar/styles/`. |
+| `gui/Sidebar/styles/index.ts` | 12 | — | ✅ | Moved each styled-component into a `Sidebar/styles/*.scss` file; the list-item colour/opacity become `-conflict/-special/-shared/-selected` variants. Dead `StyledAddButton` removed; the Linux `StyledSpanFix` workaround is now an inline platform-conditional style. `index.ts` deleted. |
 | `gui/SyncWizard/Dialog.tsx` | 14 | — | ⬜ | Largest. |
 | `gui/NoteEditor/EditorWindow.tsx` | 0 | — | ➖ | Infrastructure (`StyleSheetManager`); migrate last. |
 | `gui/Root.tsx` | 0 | — | ➖ | Infrastructure (`ThemeProvider`/`StyleSheetManager`/`createGlobalStyle`); migrate last. |

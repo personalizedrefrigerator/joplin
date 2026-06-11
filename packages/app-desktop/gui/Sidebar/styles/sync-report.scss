@@ -1,0 +1,11 @@
+.sync-report {
+	font-size: calc(var(--joplin-font-size) * 0.9);
+	color: var(--joplin-color2);
+	opacity: 0.5;
+	display: flex;
+	flex-direction: column;
+	margin-left: 5px;
+	margin-right: 5px;
+	margin-bottom: 10px;
+	word-wrap: break-word;
+}

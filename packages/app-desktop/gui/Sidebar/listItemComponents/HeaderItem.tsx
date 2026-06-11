@@ -1,6 +1,5 @@
 import * as React from 'react';
 import { useCallback } from 'react';
-import { StyledHeader, StyledHeaderIcon, StyledHeaderLabel } from '../styles';
 import { HeaderId, HeaderListItem } from '../types';
 import bridge from '../../../services/bridge';
 import MenuUtils from '@joplin/lib/services/commands/MenuUtils';
@@ -58,12 +57,13 @@ const HeaderItem: React.FC<Props> = props => {
 			{...item.extraProps}
 			onDrop={props.onDrop}
 		>
-			<StyledHeader
+			<div
+				className='sidebar-header'
 				onClick={onClick}
 			>
-				<StyledHeaderIcon aria-hidden='true' role='img' className={item.iconName}/>
-				<StyledHeaderLabel>{item.label}</StyledHeaderLabel>
-			</StyledHeader>
+				<i className={`sidebar-header-icon ${item.iconName}`} aria-hidden='true' role='img'/>
+				<span className='sidebar-header-label'>{item.label}</span>
+			</div>
 		</ListItemWrapper>
 	);
 };

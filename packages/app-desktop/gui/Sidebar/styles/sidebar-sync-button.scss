@@ -25,6 +25,8 @@
 }
 
 .sidebar-sync-button {
+	width: 100%;
+
 	&.-syncing > .icon {
 		animation: icon-infinite-rotation 1s linear infinite;
 

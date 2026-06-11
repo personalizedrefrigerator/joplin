@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { StyledAllNotesIcon, StyledListItemAnchor } from '../styles';
 import { useCallback } from 'react';
 import { Dispatch } from 'redux';
 import bridge from '../../../services/bridge';
@@ -61,16 +60,14 @@ const AllNotesItem: React.FC<Props> = props => {
 			itemCount={props.itemCount}
 		>
 			<EmptyExpandLink/>
-			<StyledAllNotesIcon aria-hidden='true' role='img' className='icon-notes'/>
-			<StyledListItemAnchor
-				className="list-item"
-				isSpecialItem={true}
-				selected={props.selectionState.selected}
+			<i className='all-notes-icon icon-notes' aria-hidden='true' role='img'/>
+			<a
+				className={`list-item-anchor list-item -special${props.selectionState.selected ? ' -selected' : ''}`}
 				onClick={onAllNotesClick_}
 				onContextMenu={toggleAllNotesContextMenu}
 			>
 				{props.item.label}
-			</StyledListItemAnchor>
+			</a>
 		</ListItemWrapper>
 	);
 };
