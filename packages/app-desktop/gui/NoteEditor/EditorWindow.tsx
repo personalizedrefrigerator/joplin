@@ -8,7 +8,6 @@ import { Dispatch } from 'redux';
 import NewWindowOrIFrame, { WindowMode } from '../NewWindowOrIFrame';
 import WindowCommandsAndDialogs from '../WindowCommandsAndDialogs/WindowCommandsAndDialogs';
 
-import { StyleSheetManager } from 'styled-components';
 // Note: Transitive dependencies used only by react-select. Remove if react-select is removed.
 import createCache from '@emotion/cache';
 import { CacheProvider } from '@emotion/react';
@@ -74,9 +73,8 @@ interface StyleProviderProps {
 	children: React.ReactNode[]|React.ReactNode;
 }
 
-// Sets the root style container for libraries. At present, this is needed by react-select (which uses @emotion/...)
-// and styled-components.
-// See: https://github.com/JedWatson/react-select/issues/3680 and https://github.com/styled-components/styled-components/issues/659
+// Sets the root style container for libraries. At present, this is needed by react-select (which uses @emotion/...).
+// See: https://github.com/JedWatson/react-select/issues/3680
 const LibraryStyleRoot: React.FC<StyleProviderProps> = props => {
 	const [dependencyStyleContainer, setDependencyStyleContainer] = useState<HTMLDivElement|null>(null);
 	const cache = useMemo(() => {
@@ -88,11 +86,9 @@ const LibraryStyleRoot: React.FC<StyleProviderProps> = props => {
 
 	return <>
 		<div ref={setDependencyStyleContainer}></div>
-		<StyleSheetManager target={dependencyStyleContainer}>
-			<CacheProvider value={cache}>
-				{props.children}
-			</CacheProvider>
-		</StyleSheetManager>
+		<CacheProvider value={cache}>
+			{props.children}
+		</CacheProvider>
 	</>;
 };
 

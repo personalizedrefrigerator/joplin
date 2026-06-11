@@ -1,0 +1,4 @@
+// Global box-sizing reset (previously a styled-components createGlobalStyle in Root.tsx).
+* {
+	box-sizing: border-box;
+}

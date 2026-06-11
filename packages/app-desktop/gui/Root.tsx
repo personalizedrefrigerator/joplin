@@ -8,7 +8,6 @@ import StatusScreen from './StatusScreen/StatusScreen';
 import OneDriveLoginScreen from './OneDriveLoginScreen';
 import DropboxLoginScreen from './DropboxLoginScreen';
 import ErrorBoundary from './ErrorBoundary';
-import { themeStyle } from '@joplin/lib/theme';
 import MenuBar from './MenuBar';
 import { _ } from '@joplin/lib/locale';
 import { createRoot } from 'react-dom/client';
@@ -32,7 +31,6 @@ import EditorWindow from './NoteEditor/EditorWindow';
 import SsoLoginScreen from './SsoLoginScreen/SsoLoginScreen';
 import SamlShared from '@joplin/lib/components/shared/SamlShared';
 import PopupNotificationProvider from './PopupNotification/PopupNotificationProvider';
-import { ThemeProvider, StyleSheetManager, createGlobalStyle } from 'styled-components';
 
 interface Props {
 	themeId: number;
@@ -52,12 +50,6 @@ interface ModalDialogProps {
 	onClick: ClickEventHandler;
 }
 
-
-const GlobalStyle = createGlobalStyle`
-	* {
-		box-sizing: border-box;
-	}
-`;
 
 const navigatorStyle = { width: '100vw', height: '100vh' };
 
@@ -155,7 +147,6 @@ class RootComponent extends React.Component<Props, any> {
 	}
 
 	public render() {
-		const theme = themeStyle(this.props.themeId);
 
 		const screens = {
 			Main: { screen: MainScreen },
@@ -171,19 +162,14 @@ class RootComponent extends React.Component<Props, any> {
 		};
 
 		return (
-			<StyleSheetManager disableVendorPrefixes>
-				<ThemeProvider theme={theme}>
-					<PopupNotificationProvider>
-						<StyleSheetContainer/>
-						<MenuBar/>
-						<GlobalStyle/>
-						<WindowCommandsAndDialogs windowId={defaultWindowId} />
-						<Navigator style={navigatorStyle} screens={screens} className={`profile-${this.props.profileConfigCurrentProfileId}`} />
-						{this.renderSecondaryWindows()}
-						{this.renderModalMessage(this.modalDialogProps())}
-					</PopupNotificationProvider>
-				</ThemeProvider>
-			</StyleSheetManager>
+			<PopupNotificationProvider>
+				<StyleSheetContainer/>
+				<MenuBar/>
+				<WindowCommandsAndDialogs windowId={defaultWindowId} />
+				<Navigator style={navigatorStyle} screens={screens} className={`profile-${this.props.profileConfigCurrentProfileId}`} />
+				{this.renderSecondaryWindows()}
+				{this.renderModalMessage(this.modalDialogProps())}
+			</PopupNotificationProvider>
 		);
 	}
 }
