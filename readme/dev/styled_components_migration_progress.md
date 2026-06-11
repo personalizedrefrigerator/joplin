@@ -84,7 +84,7 @@ Legend: ✅ done · 🚧 in progress · ⬜ not started · ➖ no migration need
 | `gui/DialogTitle.tsx` | 1 | — | ✅ | `dialog-title` → `gui/styles/`. Dropped unused `justifyContent` prop (only ever `center`, the default). |
 | `gui/MainScreen.tsx` | 1 | — | ✅ | Reused existing `.user-webview-dialog-container` (identical styles already in `gui/styles`). |
 | `gui/NoteListWrapper/NoteListWrapper.tsx` | 1 | — | ✅ | `note-list-wrapper` → `NoteListWrapper/NoteListWrapper.scss`. |
-| `gui/SearchBar/SearchBar.tsx` | 1 | — | ⬜ | |
+| `gui/SearchBar/SearchBar.tsx` | 1 | — | ✅ | `search-bar` → `SearchBar/SearchBar.scss`. Dropped the unused `Root` export. |
 | `gui/StatusScreen/StatusScreen.tsx` | 1 | — | ⬜ | |
 | `services/plugins/UserWebviewDialogButtonBar.tsx` | 1 | — | ⬜ | `styled(Button)`. |
 | `gui/ConfigScreen/controls/plugins/SearchPlugins.tsx` | 2 | — | ⬜ | |

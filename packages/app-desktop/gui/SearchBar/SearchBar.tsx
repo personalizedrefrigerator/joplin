@@ -11,14 +11,6 @@ import Note from '@joplin/lib/models/Note';
 import { AppState } from '../../app.reducer';
 import { blur, focus } from '@joplin/lib/utils/focusHandler';
 const debounce = require('debounce');
-import styled from 'styled-components';
-
-export const Root = styled.div`
-	position: relative;
-	display: flex;
-	width: 100%;
-	min-width: 30px;
-`;
 
 interface Props {
 	inputRef?: React.MutableRefObject<HTMLInputElement | null>;
@@ -176,7 +168,7 @@ function SearchBar(props: Props) {
 	}, [props.globalQuery]);
 
 	return (
-		<Root className="search-bar">
+		<div className="search-bar">
 			<SearchInput
 				inputRef={props.inputRef}
 				value={query}
@@ -188,7 +180,7 @@ function SearchBar(props: Props) {
 				searchStarted={searchStarted}
 				aria-controls='notes-list'
 			/>
-		</Root>
+		</div>
 	);
 }
 
