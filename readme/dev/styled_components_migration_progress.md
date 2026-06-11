@@ -89,7 +89,7 @@ Legend: ✅ done · 🚧 in progress · ⬜ not started · ➖ no migration need
 | `services/plugins/UserWebviewDialogButtonBar.tsx` | 1 | — | ✅ | Dropped the redundant `styled(Button)` + `mr` prop; inter-button spacing is now `gap: 6px` on the container. |
 | `gui/ConfigScreen/controls/plugins/SearchPlugins.tsx` | 2 | — | ✅ | `.search-plugins > .results`; empty `Root` became a plain anchor div. |
 | `gui/PdfViewer.tsx` | 2 | — | ✅ | `.pdf-viewer > .frame` → `gui/pdf-viewer.scss`. |
-| `gui/QuitSyncDialog.tsx` | 2 | — | ⬜ | |
+| `gui/QuitSyncDialog.tsx` | 2 | — | ✅ | `.quit-sync-dialog > .message` → `gui/quit-sync-dialog.scss`. |
 | `gui/ResizableLayout/utils/style.ts` | 3 | — | ⬜ | |
 | `gui/ConfigScreen/controls/plugins/PluginsStates.tsx` | 4 | StyledLink, StyledMessage | 🚧 | `RepoApiErrorMessage` (→ `.repo-api-error`) and the StyledLink/StyledMessage uses done with the shared helpers; `Root`, `UserPluginsRoot`, `ToolsButton` remain. |
 | `gui/ResizableLayout/MoveButtons.tsx` | 4 | — | ⬜ | |

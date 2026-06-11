@@ -6,26 +6,12 @@ import { _ } from '@joplin/lib/locale';
 import bridge from '../services/bridge';
 import Dialog from '@joplin/lib/components/Dialog';
 import DialogButtonRow, { ClickEvent } from './DialogButtonRow';
-import styled from 'styled-components';
 import { reg } from '@joplin/lib/registry';
 import Synchronizer from '@joplin/lib/Synchronizer';
 
 interface Props {
 	themeId: number;
 }
-
-const StyledContent = styled.div`
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	padding: 20px;
-	min-width: 300px;
-`;
-
-const StyledMessage = styled.div`
-	margin-bottom: 16px;
-	text-align: center;
-`;
 
 export default function QuitSyncDialog(props: Props) {
 	const dispatch = useDispatch();
@@ -71,10 +57,10 @@ export default function QuitSyncDialog(props: Props) {
 
 	return (
 		<Dialog>
-			<StyledContent>
-				<StyledMessage>{_('Synchronising remaining changes, please wait...')}</StyledMessage>
+			<div className='quit-sync-dialog'>
+				<div className='message'>{_('Synchronising remaining changes, please wait...')}</div>
 				<DialogButtonRow themeId={props.themeId} onClick={dialogButtonOnClick} okButtonLabel={_('Quit anyway')} cancelButtonLabel={_('Cancel')} />
-			</StyledContent>
+			</div>
 		</Dialog>
 	);
 }
