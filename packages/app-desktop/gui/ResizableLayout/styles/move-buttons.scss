@@ -1,0 +1,12 @@
+.move-buttons {
+	display: flex;
+	flex-direction: column;
+	padding: 5px;
+	background-color: var(--joplin-background-color);
+	border-radius: 5px;
+
+	> .label {
+		// Used only for accessibility tools
+		display: none;
+	}
+}

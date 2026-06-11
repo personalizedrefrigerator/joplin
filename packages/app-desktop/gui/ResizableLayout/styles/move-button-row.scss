@@ -1,0 +1,14 @@
+.move-button-row {
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+
+	> .empty {
+		visibility: hidden;
+	}
+
+	// Dim disabled arrows further than the default Button disabled opacity.
+	> .arrow:disabled {
+		opacity: 0.2;
+	}
+}

@@ -2,35 +2,7 @@ import * as React from 'react';
 import { useCallback, useId } from 'react';
 import Button, { ButtonLevel } from '../Button/Button';
 import { MoveDirection } from './utils/movements';
-import styled from 'styled-components';
 import { _ } from '@joplin/lib/locale';
-
-const StyledRoot = styled.div`
-	display: flex;
-	flex-direction: column;
-	padding: 5px;
-	background-color: ${props => props.theme.backgroundColor};
-	border-radius: 5px;
-
-	> .label {
-		// Used only for accessibility tools
-		display: none;
-	}
-`;
-
-const ButtonRow = styled.div`
-	display: flex;
-	flex-direction: row;
-	justify-content: center;
-`;
-
-const EmptyButton = styled(Button)`
-	visibility: hidden;
-`;
-
-const ArrowButton = styled(Button)`
-	opacity: ${props => props.disabled ? 0.2 : 1};
-`;
 
 type ButtonKey = string;
 
@@ -102,7 +74,8 @@ export default function MoveButtons(props: Props) {
 	})();
 
 	function renderButton(dir: MoveDirection) {
-		return <ArrowButton
+		return <Button
+			className='arrow'
 			disabled={!canMove(dir)}
 			level={ButtonLevel.Primary}
 			iconName={`fas fa-arrow-${dir}`}
@@ -113,19 +86,19 @@ export default function MoveButtons(props: Props) {
 	}
 
 	return (
-		<StyledRoot role='group' aria-labelledby={descriptionId}>
-			<ButtonRow>
+		<div className='move-buttons' role='group' aria-labelledby={descriptionId}>
+			<div className='move-button-row'>
 				{renderButton(MoveDirection.Up)}
-			</ButtonRow>
-			<ButtonRow>
+			</div>
+			<div className='move-button-row'>
 				{renderButton(MoveDirection.Left)}
-				<EmptyButton iconName="fas fa-arrow-down" aria-hidden={true} disabled={true}/>
+				<Button className='empty' iconName="fas fa-arrow-down" aria-hidden={true} disabled={true}/>
 				{renderButton(MoveDirection.Right)}
-			</ButtonRow>
-			<ButtonRow>
+			</div>
+			<div className='move-button-row'>
 				{renderButton(MoveDirection.Down)}
-			</ButtonRow>
+			</div>
 			<div className='label' id={descriptionId}>{props.itemLabel}</div>
-		</StyledRoot>
+		</div>
 	);
 }
