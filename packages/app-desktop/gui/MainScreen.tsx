@@ -775,6 +775,7 @@ class MainScreenComponent extends React.Component<Props, State> {
 				layoutKeyToLabel={this.layoutKeyToLabel}
 				moveMode={this.props.layoutMoveMode}
 				moveModeMessage={_('Use the arrows to move the layout items. Press "Escape" to exit.')}
+				themeId={this.props.themeId}
 			/>
 		) : null;
 

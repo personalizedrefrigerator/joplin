@@ -7,8 +7,9 @@ import validateLayout from './utils/validateLayout';
 import { Size, LayoutItem } from './utils/types';
 import { canMove, MoveDirection } from './utils/movements';
 import MoveButtons, { MoveButtonClickEvent } from './MoveButtons';
-import { StyledWrapperRoot, StyledMoveOverlay, MoveModeRootMessage } from './utils/style';
 import type { ResizeCallback, ResizeStartCallback } from 're-resizable';
+import { themeStyle } from '@joplin/lib/theme';
+import { ThemeAppearance } from '@joplin/lib/themes/type';
 import Dialog from '@joplin/lib/components/Dialog';
 import EventEmitter = require('events');
 import LayoutItemContainer from './LayoutItemContainer';
@@ -41,6 +42,7 @@ interface Props {
 	onMoveButtonClick(event: MoveButtonClickEvent): void;
 	moveMode: boolean;
 	moveModeMessage: string;
+	themeId: number;
 }
 
 function itemVisible(item: LayoutItem, moveMode: boolean) {
@@ -55,6 +57,9 @@ function ResizableLayout(props: Props) {
 	const [resizedItem, setResizedItem] = useState<ResizedItem|null>(null);
 	const lastUsedMoveButtonKey = useRef<string|null>(null);
 
+	const theme = themeStyle(props.themeId);
+	const moveOverlayBackground = theme.appearance === ThemeAppearance.Light ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.5)';
+
 	const onMoveButtonClick = useCallback((event: MoveButtonClickEvent) => {
 		lastUsedMoveButtonKey.current = event.buttonKey;
 		props.onMoveButtonClick(event);
@@ -62,8 +67,8 @@ function ResizableLayout(props: Props) {
 
 	const renderMoveControls = (item: LayoutItem, parent: LayoutItem | null, size: Size) => {
 		return (
-			<StyledWrapperRoot key={item.key} size={size}>
-				<StyledMoveOverlay>
+			<div className='resizable-layout-item' key={item.key} style={{ width: size.width, height: size.height }}>
+				<div className='move-overlay' style={{ '--move-overlay-background': moveOverlayBackground } as React.CSSProperties}>
 					<MoveButtons
 						autoFocusKey={lastUsedMoveButtonKey.current}
 						itemKey={item.key}
@@ -74,16 +79,16 @@ function ResizableLayout(props: Props) {
 						canMoveUp={canMove(MoveDirection.Up, item, parent)}
 						canMoveDown={canMove(MoveDirection.Down, item, parent)}
 					/>
-				</StyledMoveOverlay>
-			</StyledWrapperRoot>
+				</div>
+			</div>
 		);
 	};
 
 	function renderItemWrapper(comp: React.ReactNode, item: LayoutItem, size: Size) {
 		return (
-			<StyledWrapperRoot key={item.key} size={size}>
+			<div className='resizable-layout-item' key={item.key} style={{ width: size.width, height: size.height }}>
 				{comp}
-			</StyledWrapperRoot>
+			</div>
 		);
 	}
 
@@ -173,7 +178,7 @@ function ResizableLayout(props: Props) {
 	function renderMoveModeBox() {
 		return <div>
 			<Dialog contentFillsScreen={true} className='change-app-layout-dialog'>
-				<MoveModeRootMessage>{props.moveModeMessage}</MoveModeRootMessage>
+				<h1 className='move-mode-message'>{props.moveModeMessage}</h1>
 				{renderRoot(true)}
 			</Dialog>
 			{renderRoot(false)}

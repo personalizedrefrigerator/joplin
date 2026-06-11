@@ -90,7 +90,7 @@ Legend: ✅ done · 🚧 in progress · ⬜ not started · ➖ no migration need
 | `gui/ConfigScreen/controls/plugins/SearchPlugins.tsx` | 2 | — | ✅ | `.search-plugins > .results`; empty `Root` became a plain anchor div. |
 | `gui/PdfViewer.tsx` | 2 | — | ✅ | `.pdf-viewer > .frame` → `gui/pdf-viewer.scss`. |
 | `gui/QuitSyncDialog.tsx` | 2 | — | ✅ | `.quit-sync-dialog > .message` → `gui/quit-sync-dialog.scss`. |
-| `gui/ResizableLayout/utils/style.ts` | 3 | — | ⬜ | |
+| `gui/ResizableLayout/utils/style.ts` | 3 | — | ✅ | → `ResizableLayout/styles/` (`.resizable-layout-item`, `.move-overlay`, `.move-mode-message`). Dynamic size stays inline; the appearance-based overlay scrim is fed via a `--move-overlay-background` custom property (ResizableLayout now takes `themeId`). File deleted. |
 | `gui/ConfigScreen/controls/plugins/PluginsStates.tsx` | 4 | StyledLink, StyledMessage | 🚧 | `RepoApiErrorMessage` (→ `.repo-api-error`) and the StyledLink/StyledMessage uses done with the shared helpers; `Root`, `UserPluginsRoot`, `ToolsButton` remain. |
 | `gui/ResizableLayout/MoveButtons.tsx` | 4 | — | ⬜ | |
 | `gui/NoteListControls/NoteListControls.tsx` | 7 | — | ⬜ | |

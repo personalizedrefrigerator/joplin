@@ -1,0 +1,14 @@
+.move-overlay {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	z-index: 100;
+	// Appearance-dependent scrim (dark on light themes, light on dark themes); there is no
+	// theme CSS variable for it, so the component supplies it via this custom property.
+	background-color: var(--move-overlay-background);
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+}
