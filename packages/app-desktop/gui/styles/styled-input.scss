@@ -1,0 +1,20 @@
+.styled-input {
+	border: 1px solid color-mix(in srgb, var(--joplin-color3) 60%, transparent);
+	border-radius: 3px;
+	font-size: var(--joplin-font-size);
+	color: var(--joplin-color);
+	padding: 0 8px;
+	height: var(--joplin-toolbar-height);
+	max-height: var(--joplin-toolbar-height);
+	box-sizing: border-box;
+	background-color: color-mix(in srgb, var(--joplin-background-color4) 50%, transparent);
+
+	&::placeholder {
+		color: var(--joplin-color-faded);
+	}
+
+	&:focus {
+		background-color: var(--joplin-background-color4);
+		border: 1px solid var(--joplin-color3);
+	}
+}

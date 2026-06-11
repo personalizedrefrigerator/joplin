@@ -77,7 +77,7 @@ Legend: ✅ done · 🚧 in progress · ⬜ not started · ➖ no migration need
 | `gui/ShareFolderDialog/ShareFolderDialog.tsx` | 12 | StyledFormLabel, StyledMessage | ✅ | First migration; reference example. |
 | `gui/style/StyledFormLabel.tsx` | 1 | — | ✅ | Single consumer; folded into ShareFolderDialog and deleted. |
 | `gui/style/StyledTextInput.tsx` | 1 | — | ✅ | Dead code — deleted. |
-| `gui/style/StyledInput.tsx` | 1 | — | ⬜ | Shared (3 consumers: EditFolderDialog, PasswordInput, SearchInput). |
+| `gui/style/StyledInput.tsx` | 1 | — | ✅ | → reusable `.styled-input` in `gui/styles`; consumers (EditFolderDialog, PasswordInput, SearchInput) use plain inputs. Alpha colours → `color-mix(..., transparent)`. Helper deleted. |
 | `gui/style/StyledLink.tsx` | 1 | — | ⬜ | Shared (2 consumers: PluginsStates, MissingPasswordHelpLink). |
 | `gui/style/StyledMessage.tsx` | 1 | — | ⬜ | Shared (1 remaining consumer: PluginsStates). |
 | `gui/ConfigScreen/ButtonBar.tsx` | 1 | — | ✅ | `button-bar` → `ConfigScreen/styles/button-bar.scss`. |

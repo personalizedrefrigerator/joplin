@@ -3,8 +3,6 @@ import { useCallback } from 'react';
 import CommandService from '@joplin/lib/services/CommandService';
 import { _ } from '@joplin/lib/locale';
 
-import StyledInput from '../../style/StyledInput';
-
 interface Props {
 	inputRef?: React.Ref<HTMLInputElement>;
 	value: string;
@@ -33,12 +31,12 @@ export default function(props: Props) {
 		props.onChange({ value: event.currentTarget.value });
 	}, [props.onChange]);
 
-	const fieldClassName = ['field'];
+	const fieldClassName = ['styled-input', 'field'];
 	if (props.inputClassName) fieldClassName.push(props.inputClassName);
 
 	return (
 		<div className='search-input'>
-			<StyledInput
+			<input
 				ref={props.inputRef}
 				className={fieldClassName.join(' ')}
 				value={props.value}

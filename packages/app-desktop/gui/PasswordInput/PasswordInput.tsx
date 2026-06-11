@@ -1,6 +1,5 @@
 import * as React from 'react';
 import { useState, useCallback } from 'react';
-import StyledInput from '../style/StyledInput';
 import { _ } from '@joplin/lib/locale';
 import { ChangeEventHandler } from './types';
 
@@ -26,11 +25,11 @@ const PasswordInput = (props: Props) => {
 
 	return (
 		<div className="password-input">
-			<StyledInput
+			<input
 				id={props.inputId}
 				aria-errormessage={props['aria-errormessage']}
 				aria-invalid={props['aria-invalid']}
-				className="field"
+				className="styled-input field"
 				type={inputType}
 				value={props.value}
 				onChange={props.onChange}

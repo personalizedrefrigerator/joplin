@@ -5,7 +5,6 @@ import { _ } from '@joplin/lib/locale';
 import DialogButtonRow, { ClickEvent } from '../DialogButtonRow';
 import Dialog from '@joplin/lib/components/Dialog';
 import DialogTitle from '../DialogTitle';
-import StyledInput from '../style/StyledInput';
 import { IconSelector, ChangeEvent } from './IconSelector';
 import useAsyncEffect, { AsyncEffectEvent } from '@joplin/lib/hooks/useAsyncEffect';
 import Folder from '@joplin/lib/models/Folder';
@@ -136,7 +135,7 @@ export default function(props: Props) {
 				<div className="form">
 					<div className="form-input-group">
 						<label htmlFor={formTitleInputId}>{_('Title')}</label>
-						<StyledInput id={formTitleInputId} type="text" ref={titleInputRef} value={folderTitle} onChange={onFolderTitleChange}/>
+						<input className='styled-input' id={formTitleInputId} type="text" ref={titleInputRef} value={folderTitle} onChange={onFolderTitleChange}/>
 					</div>
 
 					<div className="form-input-group">
