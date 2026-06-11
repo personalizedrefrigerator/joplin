@@ -86,7 +86,7 @@ Legend: ✅ done · 🚧 in progress · ⬜ not started · ➖ no migration need
 | `gui/NoteListWrapper/NoteListWrapper.tsx` | 1 | — | ✅ | `note-list-wrapper` → `NoteListWrapper/note-list-wrapper.scss`. |
 | `gui/SearchBar/SearchBar.tsx` | 1 | — | ✅ | `search-bar` → `SearchBar/search-bar.scss`. Dropped the unused `Root` export. |
 | `gui/StatusScreen/StatusScreen.tsx` | 1 | — | ✅ | `advanced-tool-item` → `StatusScreen/advanced-tool-item.scss`. |
-| `services/plugins/UserWebviewDialogButtonBar.tsx` | 1 | — | ⬜ | `styled(Button)`. |
+| `services/plugins/UserWebviewDialogButtonBar.tsx` | 1 | — | ✅ | Dropped the redundant `styled(Button)` + `mr` prop; inter-button spacing is now `gap: 6px` on the container. |
 | `gui/ConfigScreen/controls/plugins/SearchPlugins.tsx` | 2 | — | ⬜ | |
 | `gui/PdfViewer.tsx` | 2 | — | ⬜ | |
 | `gui/QuitSyncDialog.tsx` | 2 | — | ⬜ | |

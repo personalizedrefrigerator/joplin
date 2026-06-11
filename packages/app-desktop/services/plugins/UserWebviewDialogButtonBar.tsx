@@ -2,15 +2,10 @@ import * as React from 'react';
 import Button from '../../gui/Button/Button';
 import { _ } from '@joplin/lib/locale';
 import { ButtonSpec } from '@joplin/lib/services/plugins/api/types';
-import styled from 'styled-components';
-const { space } = require('styled-system');
 
 interface Props {
 	buttons: ButtonSpec[];
 }
-
-
-const StyledButton = styled(Button)`${space}`;
 
 function buttonTitle(b: ButtonSpec) {
 	if (b.title) return b.title;
@@ -31,8 +26,7 @@ export default function UserWebviewDialogButtonBar(props: Props) {
 		const output = [];
 		for (let i = 0; i < props.buttons.length; i++) {
 			const b = props.buttons[i];
-			const marginRight = i !== props.buttons.length - 1 ? '6px' : '0px';
-			output.push(<StyledButton key={b.id} onClick={b.onClick} title={buttonTitle(b)} mr={marginRight}/>);
+			output.push(<Button key={b.id} onClick={b.onClick} title={buttonTitle(b)}/>);
 		}
 		return output;
 	}
