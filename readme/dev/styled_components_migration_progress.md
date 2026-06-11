@@ -81,7 +81,7 @@ Legend: ✅ done · 🚧 in progress · ⬜ not started · ➖ no migration need
 | `gui/style/StyledLink.tsx` | 1 | — | ⬜ | Shared (2 consumers: PluginsStates, MissingPasswordHelpLink). |
 | `gui/style/StyledMessage.tsx` | 1 | — | ⬜ | Shared (1 remaining consumer: PluginsStates). |
 | `gui/ConfigScreen/ButtonBar.tsx` | 1 | — | ✅ | `button-bar` → `ConfigScreen/styles/button-bar.scss`. |
-| `gui/DialogTitle.tsx` | 1 | — | ⬜ | |
+| `gui/DialogTitle.tsx` | 1 | — | ✅ | `dialog-title` → `gui/styles/`. Dropped unused `justifyContent` prop (only ever `center`, the default). |
 | `gui/MainScreen.tsx` | 1 | — | ⬜ | |
 | `gui/NoteListWrapper/NoteListWrapper.tsx` | 1 | — | ⬜ | |
 | `gui/SearchBar/SearchBar.tsx` | 1 | — | ⬜ | |

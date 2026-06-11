@@ -1,0 +1,10 @@
+.dialog-title {
+	display: flex;
+	justify-content: center;
+	font-family: var(--joplin-font-family);
+	font-size: calc(var(--joplin-font-size) * 1.5);
+	line-height: 1.6em;
+	color: var(--joplin-color);
+	font-weight: bold;
+	margin-bottom: 1em;
+}
