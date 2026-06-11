@@ -1,7 +1,6 @@
 import * as React from 'react';
 import { useState, useCallback, useRef, useEffect } from 'react';
 import SearchInput, { OnChangeEvent } from '../../../lib/SearchInput/SearchInput';
-import styled from 'styled-components';
 import RepositoryApi from '@joplin/lib/services/plugins/RepositoryApi';
 import AsyncActionQueue from '@joplin/lib/AsyncActionQueue';
 import { PluginManifest } from '@joplin/lib/services/plugins/utils/types';
@@ -12,14 +11,6 @@ import { _ } from '@joplin/lib/locale';
 import useOnInstallHandler from '@joplin/lib/components/shared/config/plugins/useOnInstallHandler';
 import { themeStyle } from '@joplin/lib/theme';
 import SettingDescription from '../SettingDescription';
-
-const Root = styled.div`
-`;
-
-const ResultsRoot = styled.div`
-	display: flex;
-	flex-wrap: wrap;
-`;
 
 interface Props {
 	themeId: number;
@@ -107,7 +98,7 @@ export default function(props: Props) {
 	};
 
 	return (
-		<Root>
+		<div className='search-plugins'>
 			<div style={{ marginBottom: 10, width: props.maxWidth }}>
 				<SearchInput
 					inputRef={null}
@@ -121,9 +112,9 @@ export default function(props: Props) {
 				{renderContentSourceInfo()}
 			</div>
 
-			<ResultsRoot>
+			<div className='results'>
 				{renderResults(props.searchQuery, manifests)}
-			</ResultsRoot>
-		</Root>
+			</div>
+		</div>
 	);
 }

@@ -87,7 +87,7 @@ Legend: ✅ done · 🚧 in progress · ⬜ not started · ➖ no migration need
 | `gui/SearchBar/SearchBar.tsx` | 1 | — | ✅ | `search-bar` → `SearchBar/search-bar.scss`. Dropped the unused `Root` export. |
 | `gui/StatusScreen/StatusScreen.tsx` | 1 | — | ✅ | `advanced-tool-item` → `StatusScreen/advanced-tool-item.scss`. |
 | `services/plugins/UserWebviewDialogButtonBar.tsx` | 1 | — | ✅ | Dropped the redundant `styled(Button)` + `mr` prop; inter-button spacing is now `gap: 6px` on the container. |
-| `gui/ConfigScreen/controls/plugins/SearchPlugins.tsx` | 2 | — | ⬜ | |
+| `gui/ConfigScreen/controls/plugins/SearchPlugins.tsx` | 2 | — | ✅ | `.search-plugins > .results`; empty `Root` became a plain anchor div. |
 | `gui/PdfViewer.tsx` | 2 | — | ⬜ | |
 | `gui/QuitSyncDialog.tsx` | 2 | — | ⬜ | |
 | `gui/ResizableLayout/utils/style.ts` | 3 | — | ⬜ | |
