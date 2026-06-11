@@ -79,7 +79,7 @@ Legend: ✅ done · 🚧 in progress · ⬜ not started · ➖ no migration need
 | `gui/style/StyledTextInput.tsx` | 1 | — | ✅ | Dead code — deleted. |
 | `gui/style/StyledInput.tsx` | 1 | — | ✅ | → reusable `.styled-input` in `gui/styles`; consumers (EditFolderDialog, PasswordInput, SearchInput) use plain inputs. Alpha colours → `color-mix(..., transparent)`. Helper deleted. |
 | `gui/style/StyledLink.tsx` | 1 | — | ✅ | → `.styled-link` in `gui/styles` (PluginsStates). MissingPasswordHelpLink already had an inline `urlStyle` that fully overrode it, so it became a plain `<a>`. Helper deleted. |
-| `gui/style/StyledMessage.tsx` | 1 | — | ⬜ | Shared (1 remaining consumer: PluginsStates). |
+| `gui/style/StyledMessage.tsx` | 1 | — | ✅ | Single consumer (PluginsStates' `RepoApiErrorMessage`, always `type="error"`); folded into `.repo-api-error` in `controls/plugins/styles`. Helper deleted. |
 | `gui/ConfigScreen/ButtonBar.tsx` | 1 | — | ✅ | `button-bar` → `ConfigScreen/styles/button-bar.scss`. |
 | `gui/DialogTitle.tsx` | 1 | — | ✅ | `dialog-title` → `gui/styles/`. Dropped unused `justifyContent` prop (only ever `center`, the default). |
 | `gui/MainScreen.tsx` | 1 | — | ✅ | Reused existing `.user-webview-dialog-container` (identical styles already in `gui/styles`). |
@@ -91,7 +91,7 @@ Legend: ✅ done · 🚧 in progress · ⬜ not started · ➖ no migration need
 | `gui/PdfViewer.tsx` | 2 | — | ⬜ | |
 | `gui/QuitSyncDialog.tsx` | 2 | — | ⬜ | |
 | `gui/ResizableLayout/utils/style.ts` | 3 | — | ⬜ | |
-| `gui/ConfigScreen/controls/plugins/PluginsStates.tsx` | 4 | StyledLink, StyledMessage | ⬜ | |
+| `gui/ConfigScreen/controls/plugins/PluginsStates.tsx` | 4 | StyledLink, StyledMessage | 🚧 | `RepoApiErrorMessage` (→ `.repo-api-error`) and the StyledLink/StyledMessage uses done with the shared helpers; `Root`, `UserPluginsRoot`, `ToolsButton` remain. |
 | `gui/ResizableLayout/MoveButtons.tsx` | 4 | — | ⬜ | |
 | `gui/NoteListControls/NoteListControls.tsx` | 7 | — | ⬜ | |
 | `gui/Button/Button.tsx` | 9 | — | ⬜ | High-leverage; many `styled(Button)` call sites. |

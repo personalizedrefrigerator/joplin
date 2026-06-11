@@ -1,0 +1,13 @@
+// Folds the former shared StyledMessage (error variant) together with the
+// max-width/margin that RepoApiErrorMessage added on top of it.
+.repo-api-error {
+	border-radius: 3px;
+	background-color: var(--joplin-warning-background-color);
+	font-size: var(--joplin-font-size);
+	color: var(--joplin-color);
+	font-family: var(--joplin-font-family);
+	padding: var(--joplin-main-padding);
+	word-break: break-all;
+	max-width: 320px;
+	margin-bottom: 10px;
+}

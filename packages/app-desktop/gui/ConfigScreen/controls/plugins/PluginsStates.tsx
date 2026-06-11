@@ -15,7 +15,6 @@ import Setting, { AppType } from '@joplin/lib/models/Setting';
 import useOnInstallHandler from '@joplin/lib/components/shared/config/plugins/useOnInstallHandler';
 import useOnDeleteHandler from '@joplin/lib/components/shared/config/plugins/useOnDeleteHandler';
 import Logger from '@joplin/utils/Logger';
-import StyledMessage from '../../../style/StyledMessage';
 import SettingHeader from '../SettingHeader';
 import SettingDescription from '../SettingDescription';
 const { space } = require('styled-system');
@@ -37,11 +36,6 @@ const UserPluginsRoot = styled.div<{ mb?: string }>`
 
 const ToolsButton = styled(Button)`
 	margin-right: 6px;
-`;
-
-const RepoApiErrorMessage = styled(StyledMessage)<{ maxWidth: number }>`
-	max-width: ${props => props.maxWidth}px;
-	margin-bottom: 10px;
 `;
 
 interface Props {
@@ -310,7 +304,7 @@ export default function(props: Props) {
 	function renderRepoApiError() {
 		if (!repoApiError) return null;
 
-		return <RepoApiErrorMessage maxWidth={maxWidth} type="error">{_('Could not connect to plugin repository.')}<br/><br/>- <a className="styled-link" href="#" onClick={() => { setFetchManifestTime(Date.now()); }}>{_('Try again')}</a><br/><br/>- <a className="styled-link" href="#" onClick={onBrowsePlugins}>{_('Browse all plugins')}</a></RepoApiErrorMessage>;
+		return <div className="repo-api-error">{_('Could not connect to plugin repository.')}<br/><br/>- <a className="styled-link" href="#" onClick={() => { setFetchManifestTime(Date.now()); }}>{_('Try again')}</a><br/><br/>- <a className="styled-link" href="#" onClick={onBrowsePlugins}>{_('Browse all plugins')}</a></div>;
 	}
 
 	function renderBottomArea() {

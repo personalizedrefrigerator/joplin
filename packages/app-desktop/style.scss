@@ -1,4 +1,5 @@
 @use 'gui/ConfigScreen/style.scss' as config-screen;
+@use 'gui/ConfigScreen/controls/plugins/styles/index.scss' as plugins-controls;
 @use 'gui/EditFolderDialog/style.scss' as edit-folder-dialog;
 @use 'gui/EncryptionConfigScreen/style.scss' as encryption-config-screen;
 @use 'gui/PasswordInput/style.scss' as password-input;
