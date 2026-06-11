@@ -75,4 +75,4 @@ Do **NOT** do this:
 
 The goal of this approach is to specifically target the elements that you need and nothing else. Over the long term is makes managing the CSS easier.
 
-For more details, see the [RSCSS documentation](https://ricostacruz.com/rscss/index.html).
+For a practical cheat sheet of these conventions (naming rules, theme CSS variables, a worked example, common pitfalls), see [rscss.md](./rscss.md). For more details on RSCSS itself, see the [RSCSS documentation](https://ricostacruz.com/rscss/index.html).
