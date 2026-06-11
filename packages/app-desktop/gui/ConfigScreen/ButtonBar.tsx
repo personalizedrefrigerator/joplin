@@ -1,15 +1,6 @@
 import * as React from 'react';
 import Button, { ButtonLevel } from '../Button/Button';
 import { _ } from '@joplin/lib/locale';
-import styled from 'styled-components';
-
-interface StyleProps {
-	theme: {
-		backgroundColor3: string;
-		configScreenPadding: number;
-		dividerColor: string;
-	};
-}
 
 interface Props {
 	backButtonTitle?: string;
@@ -18,17 +9,6 @@ interface Props {
 	onSaveClick?: ()=> void;
 	onApplyClick?: ()=> void;
 }
-
-const StyledRoot = styled.nav`
-	display: flex;
-	align-items: center;
-	padding: 10px;
-	background-color: ${(props: StyleProps) => props.theme.backgroundColor3};
-	padding-left: ${(props: StyleProps) => props.theme.configScreenPadding}px;
-	border-top-width: 1px;
-	border-top-style: solid;
-	border-top-color: ${(props: StyleProps) => props.theme.dividerColor};
-`;
 
 export default function ButtonBar(props: Props) {
 	function renderOkButton() {
@@ -42,7 +22,7 @@ export default function ButtonBar(props: Props) {
 	}
 
 	return (
-		<StyledRoot className='button-bar'>
+		<nav className='button-bar'>
 			<Button
 				onClick={props.onCancelClick}
 				level={ButtonLevel.Secondary}
@@ -55,6 +35,6 @@ export default function ButtonBar(props: Props) {
 					{renderApplyButton()}
 				</div>
 			)}
-		</StyledRoot>
+		</nav>
 	);
 }

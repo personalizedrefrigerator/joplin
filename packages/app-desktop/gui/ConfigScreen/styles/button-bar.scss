@@ -1,0 +1,10 @@
+.button-bar {
+	display: flex;
+	align-items: center;
+	padding: 10px;
+	background-color: var(--joplin-background-color3);
+	padding-left: var(--joplin-config-screen-padding);
+	border-top-width: 1px;
+	border-top-style: solid;
+	border-top-color: var(--joplin-divider-color);
+}
