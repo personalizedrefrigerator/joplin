@@ -5,7 +5,6 @@ import { EventEmitter } from 'events';
 import NoteList2 from '../NoteList/NoteList2';
 import NoteListControls from '../NoteListControls/NoteListControls';
 import { Size } from '../ResizableLayout/utils/types';
-import styled from 'styled-components';
 import { getDefaultListRenderer, getListRendererById } from '@joplin/lib/services/noteList/renderers';
 import Logger from '@joplin/utils/Logger';
 import NoteListHeader from '../NoteListHeader/NoteListHeader';
@@ -34,13 +33,6 @@ interface Props {
 	columns: NoteListColumns;
 	selectedFolderId: string;
 }
-
-const StyledRoot = styled.div`
-	display: flex;
-	flex-direction: column;
-	overflow: hidden;
-	width: 100%;
-`;
 
 const getTextWidth = (newNoteButtonElement: Element, text: string): number => {
 	const canvas = document.createElement('canvas');
@@ -177,7 +169,7 @@ export default function NoteListWrapper(props: Props) {
 	};
 
 	return (
-		<StyledRoot role='navigation' aria-label={_('Note list')}>
+		<div className='note-list-wrapper' role='navigation' aria-label={_('Note list')}>
 			<NoteListControls
 				height={controlHeight}
 				width={noteListSize.width}
@@ -192,6 +184,6 @@ export default function NoteListWrapper(props: Props) {
 			/>
 			{renderHeader()}
 			{renderNoteList()}
-		</StyledRoot>
+		</div>
 	);
 }

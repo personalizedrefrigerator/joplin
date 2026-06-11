@@ -83,7 +83,7 @@ Legend: ✅ done · 🚧 in progress · ⬜ not started · ➖ no migration need
 | `gui/ConfigScreen/ButtonBar.tsx` | 1 | — | ✅ | `button-bar` → `ConfigScreen/styles/button-bar.scss`. |
 | `gui/DialogTitle.tsx` | 1 | — | ✅ | `dialog-title` → `gui/styles/`. Dropped unused `justifyContent` prop (only ever `center`, the default). |
 | `gui/MainScreen.tsx` | 1 | — | ✅ | Reused existing `.user-webview-dialog-container` (identical styles already in `gui/styles`). |
-| `gui/NoteListWrapper/NoteListWrapper.tsx` | 1 | — | ⬜ | |
+| `gui/NoteListWrapper/NoteListWrapper.tsx` | 1 | — | ✅ | `note-list-wrapper` → `NoteListWrapper/NoteListWrapper.scss`. |
 | `gui/SearchBar/SearchBar.tsx` | 1 | — | ⬜ | |
 | `gui/StatusScreen/StatusScreen.tsx` | 1 | — | ⬜ | |
 | `services/plugins/UserWebviewDialogButtonBar.tsx` | 1 | — | ⬜ | `styled(Button)`. |
