@@ -150,15 +150,54 @@ describe('EmbeddingIndexer', () => {
 		expect(await NoteEmbedding.countByNoteId(conflictNote.id)).toBe(0);
 	});
 
-	it('skips notes with empty bodies', async () => {
+	it('skips notes with neither a title nor a body', async () => {
 		if (skipIfNoVec()) return;
 		const folder = await Folder.save({ title: 'f' });
-		const note = await Note.save({ title: 'title only', body: '', parent_id: folder.id });
+		const note = await Note.save({ title: '', body: '', parent_id: folder.id });
 		await waitForChangesSince(0, 1);
 
 		await EmbeddingIndexer.instance().maintenance();
 
 		expect(await NoteEmbedding.countByNoteId(note.id)).toBe(0);
+	});
+
+	it('indexes a note that has only a title (empty body)', async () => {
+		if (skipIfNoVec()) return;
+		const folder = await Folder.save({ title: 'f' });
+		const note = await Note.save({ title: 'My therapist phone number', body: '', parent_id: folder.id });
+		await waitForChangesSince(0, 1);
+
+		await EmbeddingIndexer.instance().maintenance();
+
+		// A note with a title only is real signal — the user can ask "what's my
+		// therapist's number" and expect this to come up. So it must be indexed.
+		expect(await NoteEmbedding.countByNoteId(note.id)).toBe(1);
+	});
+
+	it('embeds the title alongside the body so title-anchored queries match', async () => {
+		if (skipIfNoVec()) return;
+		const folder = await Folder.save({ title: 'f' });
+		// Body has nothing about dogs — only the title carries that signal.
+		// Without title indexing, this note would be invisible to "dog walker".
+		const dogNote = await Note.save({
+			title: 'Pet sitters for my dog',
+			body: 'see attached pdf for contact details',
+			parent_id: folder.id,
+		});
+		await Note.save({
+			title: 'shopping list',
+			body: 'milk eggs bread butter cheese',
+			parent_id: folder.id,
+		});
+		await waitForChangesSince(0, 2);
+
+		await EmbeddingIndexer.instance().maintenance();
+
+		const [queryVec] = await provider.embed(['dog walker']);
+		const results = await NoteEmbedding.similaritySearch(queryVec, { k: 5 });
+
+		expect(results.length).toBeGreaterThan(0);
+		expect(results[0].noteId).toBe(dogNote.id);
 	});
 
 	it('advances the change-id cursor', async () => {

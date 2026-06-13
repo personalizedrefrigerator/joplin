@@ -167,12 +167,36 @@ export default class EmbeddingIndexer {
 		}
 
 		const body = (note.body ?? '').trim();
-		if (!body) {
+		const title = (note.title ?? '').trim();
+		if (!body && !title) {
+			// Notes with neither a title nor a body have no meaningful signal
+			// to embed. Make sure any stale rows from a previous edit are
+			// cleaned up.
 			await NoteEmbedding.deleteByNoteId(noteId);
 			return;
 		}
 
 		const chunks = chunkText(body);
+
+		// Inject the title into the first chunk twice. The title is often the
+		// densest semantic signal a note carries — e.g. "Pet sitters for my
+		// dog" with a body that's just an attachment reference. Without this,
+		// searching for "dog walker" would never find that note because the
+		// body has no relevant content.
+		//
+		// Why double, and why only chunk 0?
+		// - Doubling boosts the title's weight in the chunk's embedding so
+		//   title-anchored queries pull harder on this note.
+		// - Chunk 0 is the natural place to put it because it's also where
+		//   the body opening lives, which usually flows from the title.
+		if (title) {
+			if (chunks.length === 0) {
+				chunks.push(title);
+			} else {
+				chunks[0] = `${title}\n\n${title}\n\n${chunks[0]}`;
+			}
+		}
+
 		if (chunks.length === 0) {
 			await NoteEmbedding.deleteByNoteId(noteId);
 			return;
