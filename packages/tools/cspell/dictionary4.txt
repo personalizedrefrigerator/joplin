@@ -320,3 +320,4 @@ Ideographs
 chunker
 idempotently
 unigrams
+sentencepiece
