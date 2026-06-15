@@ -48,11 +48,11 @@ export default class JoplinSettings {
      * it is recommended to use the `values()` function instead - it will be much faster than
      * calling `value()` multiple times.
      */
-    value(key: string): Promise<any>;
+    value(key: string): Promise<unknown>;
     /**
      * Sets a setting value (only applies to setting you registered from your plugin)
      */
-    setValue(key: string, value: any): Promise<void>;
+    setValue(key: string, value: unknown): Promise<void>;
     /**
      * Gets global setting values, including app-specific settings and those set by other plugins.
      *
@@ -60,11 +60,11 @@ export default class JoplinSettings {
      *
      * https://github.com/laurent22/joplin/blob/dev/packages/lib/models/settings/builtInMetadata.ts
      */
-    globalValues(keys: string[]): Promise<any[]>;
+    globalValues(keys: string[]): Promise<unknown[]>;
     /**
      * @deprecated Use joplin.settings.globalValues()
      */
-    globalValue(key: string): Promise<any>;
+    globalValue(key: string): Promise<unknown>;
     /**
      * Called when one or multiple settings of your plugin have been changed.
      * - For performance reasons, this event is triggered with a delay.

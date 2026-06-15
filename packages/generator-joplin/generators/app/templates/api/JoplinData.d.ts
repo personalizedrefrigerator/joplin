@@ -1,4 +1,5 @@
 import { ModelType } from '../../../BaseModel';
+import { RequestFile } from '../../rest/Api';
 import Plugin from '../Plugin';
 import { Path } from './types';
 /**
@@ -44,10 +45,10 @@ export default class JoplinData {
     constructor(plugin: Plugin);
     private serializeApiBody;
     private pathToString;
-    get(path: Path, query?: any): Promise<any>;
-    post(path: Path, query?: any, body?: any, files?: any[]): Promise<any>;
-    put(path: Path, query?: any, body?: any, files?: any[]): Promise<any>;
-    delete(path: Path, query?: any): Promise<any>;
+    get(path: Path, query?: Record<string, unknown>): Promise<any>;
+    post(path: Path, query?: Record<string, unknown>, body?: unknown, files?: RequestFile[]): Promise<any>;
+    put(path: Path, query?: Record<string, unknown>, body?: unknown, files?: RequestFile[]): Promise<any>;
+    delete(path: Path, query?: Record<string, unknown>): Promise<any>;
     itemType(itemId: string): Promise<ModelType>;
     resourcePath(resourceId: string): Promise<string>;
     /**
