@@ -13,28 +13,36 @@ import Tag from './Tag';
 const { sprintf } = require('sprintf-js');
 import syncDebugLog from '../services/synchronizer/syncDebugLog';
 import { toFileProtocolPath, toForwardSlashes } from '../path-utils';
-const { pregQuote, substrWithEllipsis } = require('../string-utils.js');
-const { _, _n } = require('../locale');
+import { pregQuote, substrWithEllipsis } from '../string-utils';
+import { _, _n } from '../locale';
 import { pull, removeElement, unique } from '../ArrayUtils';
 import { LoadOptions, SaveOptions } from './utils/types';
 import ActionLogger from '../utils/ActionLogger';
 import { getDisplayParentId, getTrashFolderId } from '../services/trash';
 import { getCollator } from './utils/getCollator';
 const urlUtils = require('../urlUtils.js');
+import { hasWhiteboardFence, parseWhiteboard } from '../services/whiteboard/parse';
+import { resolveFileRef, RefKind } from '../services/whiteboard/resolveRef';
 const { isImageMimeType } = require('../resourceUtils');
-const { MarkupToHtml } = require('@joplin/renderer');
-const { ALL_NOTES_FILTER_ID } = require('../reserved-ids');
+import { MarkupToHtml } from '@joplin/renderer';
+import { ALL_NOTES_FILTER_ID } from '../reserved-ids';
 
 export interface PreviewsOrder {
 	by: string;
 	dir: string;
 }
 
+export interface DuplicateOptions {
+	changes?: Partial<NoteEntity>;
+	uniqueTitle?: string;
+	duplicateResources?: boolean;
+	ensureUniqueTitle?: boolean;
+}
+
 export interface PreviewsOptions {
 	order?: PreviewsOrder[];
 	conditions?: string[];
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	conditionsParams?: any[];
+	conditionsParams?: (string | number | boolean)[];
 	fields?: string[] | string;
 	uncompletedTodosOnTop?: boolean;
 	showCompletedTodos?: boolean;
@@ -49,10 +57,8 @@ export default class Note extends BaseItem {
 	public static defaultIntevalBetweenNotes = 60 * 60 * 1000;
 	public static updateGeolocationEnabled_ = true;
 	private static geolocationUpdating_ = false;
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	private static geolocationCache_: any;
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	private static dueDateObjects_: any;
+	private static geolocationCache_: { timestamp: number; geo: { latitude: number; longitude: number; altitude: number } } = null;
+	private static dueDateObjects_: Record<number, Date> = null;
 
 	public static tableName() {
 		return 'notes';
@@ -96,6 +102,8 @@ export default class Note extends BaseItem {
 
 		const fieldNames = this.fieldNames();
 
+		if (!n.is_locked) pull(fieldNames, 'is_locked');
+		if (!n.extracted_resource_ids) pull(fieldNames, 'extracted_resource_ids');
 		if (!n.is_conflict) pull(fieldNames, 'is_conflict');
 		if (!Number(n.latitude)) pull(fieldNames, 'latitude');
 		if (!Number(n.longitude)) pull(fieldNames, 'longitude');
@@ -144,9 +152,24 @@ export default class Note extends BaseItem {
 	public static linkedItemIds(body: string): string[] {
 		if (!body || body.length <= 32) return [];
 
-		const links = urlUtils.extractResourceUrls(body);
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-		const itemIds = links.map((l: any) => l.itemId);
+		const links: { itemId: string }[] = urlUtils.extractResourceUrls(body);
+		const itemIds = links.map(l => l.itemId);
+
+		// Whiteboard cards reference notes/resources as bare `:/<id>` values
+		// inside a jsoncanvas fence — outside markdown link syntax, so
+		// extractResourceUrls doesn't find them. Walk the canvas separately
+		// so association / orphan-reaping / sync see those refs.
+		if (hasWhiteboardFence(body)) {
+			const parsed = parseWhiteboard(body);
+			if (parsed.hasCanvas) {
+				for (const node of parsed.canvas.nodes) {
+					if (node.type !== 'file') continue;
+					const ref = resolveFileRef(node.file);
+					if (ref.kind !== RefKind.External) itemIds.push(ref.id);
+				}
+			}
+		}
+
 		return unique(itemIds);
 	}
 
@@ -176,8 +199,7 @@ export default class Note extends BaseItem {
 		return this.linkedItemIdsByType(BaseModel.TYPE_NOTE, body);
 	}
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	public static async replaceResourceInternalToExternalLinks(body: string, options: any = null) {
+	public static async replaceResourceInternalToExternalLinks(body: string, options: { useAbsolutePaths?: boolean } = null) {
 		options = { useAbsolutePaths: false, ...options };
 
 		// this.logger().debug('replaceResourceInternalToExternalLinks', 'options:', options, 'body:', body);
@@ -205,8 +227,7 @@ export default class Note extends BaseItem {
 		return body;
 	}
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	public static async replaceResourceExternalToInternalLinks(body: string, options: any = null) {
+	public static async replaceResourceExternalToInternalLinks(body: string, options: { useAbsolutePaths?: boolean } = null) {
 		options = { useAbsolutePaths: false, ...options };
 
 		const resourceDir = toForwardSlashes(Setting.value('resourceDir'));
@@ -283,14 +304,12 @@ export default class Note extends BaseItem {
 	}
 
 	// Note: sort logic must be duplicated in previews().
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	public static sortNotes(notes: NoteEntity[], orders: any[], uncompletedTodosOnTop: boolean) {
+	public static sortNotes(notes: NoteEntity[], orders: { by: string; dir: string }[], uncompletedTodosOnTop: boolean) {
 		const noteOnTop = (note: NoteEntity) => {
 			return uncompletedTodosOnTop && note.is_todo && !note.todo_completed;
 		};
 
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-		const noteFieldComp = (f1: any, f2: any) => {
+		const noteFieldComp = <T>(f1: T, f2: T) => {
 			if (f1 === f2) return 0;
 			return f1 < f2 ? -1 : +1;
 		};
@@ -321,15 +340,13 @@ export default class Note extends BaseItem {
 
 			for (let i = 0; i < orders.length; i++) {
 				const order = orders[i];
-				// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-				let aProp = (a as any)[order.by];
-				// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-				let bProp = (b as any)[order.by];
+				let aProp: string | number | boolean = (a as Record<string, string | number | boolean>)[order.by];
+				let bProp: string | number | boolean = (b as Record<string, string | number | boolean>)[order.by];
 				if (typeof aProp === 'string') aProp = aProp.toLowerCase();
 				if (typeof bProp === 'string') bProp = bProp.toLowerCase();
 
 				if (order.by === 'title') {
-					r = -1 * collator.compare(aProp, bProp);
+					r = -1 * collator.compare(aProp as string, bProp as string);
 				} else {
 					if (aProp < bProp) r = +1;
 					if (aProp > bProp) r = -1;
@@ -342,16 +359,14 @@ export default class Note extends BaseItem {
 		});
 	}
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	public static previewFieldsWithDefaultValues(options: any = null) {
+	public static previewFieldsWithDefaultValues(options: { includeTimestamps?: boolean } = null) {
 		return Note.defaultValues(this.previewFields(options));
 	}
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	public static previewFields(options: any = null) {
+	public static previewFields(options: { includeTimestamps?: boolean } = null) {
 		options = { includeTimestamps: true, ...options };
 
-		const output = ['id', 'title', 'is_todo', 'todo_completed', 'todo_due', 'parent_id', 'encryption_applied', 'order', 'markup_language', 'is_conflict', 'is_shared', 'share_id', 'deleted_time'];
+		const output = ['id', 'title', 'is_todo', 'todo_completed', 'todo_due', 'parent_id', 'encryption_applied', 'is_locked', 'order', 'markup_language', 'is_conflict', 'is_shared', 'share_id', 'deleted_time'];
 
 		if (options.includeTimestamps) {
 			output.push('updated_time');
@@ -368,8 +383,7 @@ export default class Note extends BaseItem {
 		return Array.isArray(escaped) ? escaped.join(',') : escaped;
 	}
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	public static async loadFolderNoteByField(folderId: string, field: string, value: any) {
+	public static async loadFolderNoteByField(folderId: string, field: string, value: string | number | boolean) {
 		if (!folderId) throw new Error('folderId is undefined');
 
 		const options: PreviewsOptions = {
@@ -513,8 +527,7 @@ export default class Note extends BaseItem {
 			results = results.map(n => {
 				n = { ...n };
 				for (const field of autoAddedFields) {
-					// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-					delete (n as any)[field];
+					delete (n as Record<string, unknown>)[field];
 				}
 				return n;
 			});
@@ -523,14 +536,14 @@ export default class Note extends BaseItem {
 		return results;
 	}
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	public static preview(noteId: string, options: any = null) {
+	public static preview(noteId: string, options: { fields?: string | string[] | null; excludeConflicts?: boolean } = null) {
 		if (!options) options = { fields: null };
 		const excludeConflictsSql = options.excludeConflicts ? 'is_conflict = 0 AND' : '';
-		return this.modelSelectOne(`SELECT ${this.previewFieldsSql(options.fields)} FROM notes WHERE ${excludeConflictsSql} id = ?`, [noteId]);
+		const fieldsForSql = Array.isArray(options.fields) ? options.fields : null;
+		return this.modelSelectOne(`SELECT ${this.previewFieldsSql(fieldsForSql)} FROM notes WHERE ${excludeConflictsSql} id = ?`, [noteId]);
 	}
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- search forwards to BaseItem.search which accepts arbitrary SearchOptions augmented with bodyPattern; tightening conflicts with the supertype
 	public static async search(options: any = null): Promise<NoteEntity[]> {
 		if (!options) options = {};
 		if (!options.conditions) options.conditions = [];
@@ -551,6 +564,16 @@ export default class Note extends BaseItem {
 
 	public static async conflictedCount() {
 		const r = await this.db().selectOne('SELECT count(*) as total FROM notes WHERE is_conflict = 1 AND deleted_time = 0');
+		return r && r.total ? r.total : 0;
+	}
+
+	// Count of notes that are eligible for indexing (anything searchable):
+	// not trashed, not in conflict. Used by the AI status reporter as the
+	// denominator in "N / total indexed".
+	public static async indexableCount() {
+		const r = await this.db().selectOne(
+			'SELECT count(*) as total FROM notes WHERE (deleted_time IS NULL OR deleted_time = 0) AND (is_conflict IS NULL OR is_conflict = 0)',
+		);
 		return r && r.total ? r.total : 0;
 	}
 
@@ -686,14 +709,12 @@ export default class Note extends BaseItem {
 		return note;
 	}
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	public static async duplicateMultipleNotes(noteIds: string[], options: any = null) {
+	public static async duplicateMultipleNotes(noteIds: string[], options: DuplicateOptions = null) {
 		// if options.uniqueTitle is true, a unique title for the duplicated file will be assigned.
 		const ensureUniqueTitle = options && options.ensureUniqueTitle;
 
 		for (const noteId of noteIds) {
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-			const noteOptions: any = {};
+			const noteOptions: DuplicateOptions = {};
 
 			// If ensureUniqueTitle is truthy, set the original note's name as root for the unique title.
 			if (ensureUniqueTitle) {
@@ -719,8 +740,7 @@ export default class Note extends BaseItem {
 		return newBody;
 	}
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	public static async duplicate(noteId: string, options: any = null) {
+	public static async duplicate(noteId: string, options: DuplicateOptions = null) {
 		const changes = options && options.changes;
 		const uniqueTitle = options && options.uniqueTitle;
 		const duplicateResources = options && !!options.duplicateResources;
@@ -729,7 +749,7 @@ export default class Note extends BaseItem {
 		if (!originalNote) throw new Error(`Unknown note: ${noteId}`);
 
 		const newNote = { ...originalNote };
-		const fieldsToReset = [
+		const fieldsToReset: (keyof NoteEntity)[] = [
 			'id',
 			'created_time',
 			'updated_time',
@@ -739,14 +759,12 @@ export default class Note extends BaseItem {
 		];
 
 		for (const field of fieldsToReset) {
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-			delete (newNote as any)[field];
+			delete newNote[field];
 		}
 
 		for (const n in changes) {
 			if (!changes.hasOwnProperty(n)) continue;
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-			(newNote as any)[n] = changes[n];
+			(newNote as Record<string, unknown>)[n] = (changes as Record<string, unknown>)[n];
 		}
 
 		if (uniqueTitle) {
@@ -836,8 +854,7 @@ export default class Note extends BaseItem {
 		if (oldNote) {
 			for (const field in o) {
 				if (!o.hasOwnProperty(field)) continue;
-				// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-				if ((o as any)[field] !== (oldNote as any)[field]) {
+				if ((o as Record<string, unknown>)[field] !== (oldNote as Record<string, unknown>)[field]) {
 					changedFields.push(field);
 				}
 			}
@@ -901,8 +918,7 @@ export default class Note extends BaseItem {
 			const processIds = ids.splice(0, 50);
 
 			const notes = await Note.byIds(processIds);
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-			const beforeChangeItems: any = {};
+			const beforeChangeItems: Record<string, string | null> = {};
 			for (const note of notes) {
 				beforeChangeItems[note.id] = toTrash ? null : JSON.stringify(note);
 			}
@@ -1021,8 +1037,7 @@ export default class Note extends BaseItem {
 
 	// Update the note "order" field without changing the user timestamps,
 	// which is generally what we want.
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	private static async updateNoteOrder_(note: NoteEntity, order: any) {
+	private static async updateNoteOrder_(note: NoteEntity, order: number) {
 		return Note.save({ ...note, order: order,
 			user_updated_time: note.user_updated_time,
 			updated_time: time.unixMs() }, { autoTimestamp: false, dispatchUpdateAction: false });
@@ -1186,8 +1201,7 @@ export default class Note extends BaseItem {
 		}
 	}
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	public static handleTitleNaturalSorting(items: NoteEntity[], options: any) {
+	public static handleTitleNaturalSorting(items: NoteEntity[], options: { order?: { by: string; dir: string }[] }) {
 		if (options.order.length > 0 && options.order[0].by === 'title') {
 			const collator = getCollator();
 			items.sort((a, b) => ((options.order[0].dir === 'ASC') ? 1 : -1) * collator.compare(a.title, b.title));

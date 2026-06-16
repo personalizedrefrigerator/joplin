@@ -3,10 +3,11 @@ import Router from '../../utils/Router';
 import { redirect, SubPath } from '../../utils/routeUtils';
 import { generateRedirectHtml, getIdentityProvider, getServiceProvider } from '../../utils/saml';
 import { AppContext, RouteType, SamlPostResponse } from '../../utils/types';
-import { bodyFields } from '../../utils/requestUtils';
+import { bodyFields, userIp } from '../../utils/requestUtils';
 import { ErrorBadRequest, ErrorForbidden } from '../../utils/errors';
 import { cookieSet } from '../../utils/cookies';
 import defaultView from '../../utils/defaultView';
+import limiterLoginBruteForce from '../../utils/request/limiterLoginBruteForce';
 
 export const router = new Router(RouteType.Api);
 
@@ -29,13 +30,17 @@ router.post('api/saml', async (_path: SubPath, ctx: AppContext) => {
 	]);
 
 	// Parse the login response
-	const fields = await bodyFields<SamlPostResponse>(ctx.req);
+	const fields = await bodyFields<SamlPostResponse & Record<string, unknown>>(ctx.req);
 
 	const result = await serviceProvider.parseLoginResponse(identityProvider, 'post', { body: fields });
 
 	// Extract attributes from the SAML response
 	const email = result.extract.attributes['email'];
 	const displayName = result.extract.attributes['displayName'];
+
+	// Type narrowing
+	if (typeof email !== 'string') throw new ErrorBadRequest('email must be a string');
+	if (typeof displayName !== 'string') throw new ErrorBadRequest('displayName must be a string');
 
 	// Load the user
 	const user = await ctx.joplin.models.user().ssoLogin(email, displayName);
@@ -71,6 +76,8 @@ router.post('api/saml', async (_path: SubPath, ctx: AppContext) => {
 });
 
 router.get('api/login_with_code/:id', async (path: SubPath, ctx: AppContext) => {
+	await limiterLoginBruteForce(userIp(ctx));
+
 	const code = path.id;
 	if (!code) {
 		throw new ErrorBadRequest();

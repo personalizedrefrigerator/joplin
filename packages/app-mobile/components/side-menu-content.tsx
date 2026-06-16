@@ -5,7 +5,7 @@ import { Dispatch } from 'redux';
 import { connect } from 'react-redux';
 import Icon from './Icon';
 import Folder from '@joplin/lib/models/Folder';
-import Synchronizer from '@joplin/lib/Synchronizer';
+import Synchronizer, { type ProgressReport } from '@joplin/lib/Synchronizer';
 import NavService from '@joplin/lib/services/NavService';
 import { _ } from '@joplin/lib/locale';
 import { themeStyle } from './global-style';
@@ -20,21 +20,21 @@ import restoreItems from '@joplin/lib/services/trash/restoreItems';
 import emptyTrash from '@joplin/lib/services/trash/emptyTrash';
 import { ModelType } from '@joplin/lib/BaseModel';
 import { DialogContext } from './DialogManager';
+import { PromptButtonSpec } from './DialogManager/types';
 import { TextStyle, ViewStyle } from 'react-native';
 import { StateDecryptionWorker, StateResourceFetcher } from '@joplin/lib/reducer';
 import useOnLongPressProps from '../utils/hooks/useOnLongPressProps';
 import { TouchableRipple } from 'react-native-paper';
 import shim from '@joplin/lib/shim';
 import getConflictFolderId from '@joplin/lib/models/utils/getConflictFolderId';
-const { substrWithEllipsis } = require('@joplin/lib/string-utils');
+import { substrWithEllipsis } from '@joplin/lib/string-utils';
 
 interface Props {
 	syncStarted: boolean;
 	themeId: number;
 	dispatch: Dispatch;
 	collapsedFolderIds: string[];
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	syncReport: any;
+	syncReport: ProgressReport;
 	decryptionWorker: StateDecryptionWorker;
 	resourceFetcher: StateResourceFetcher;
 	syncOnlyOverWifi: boolean;
@@ -348,8 +348,7 @@ const SideMenuContentComponent = (props: Props) => {
 
 		const folder = folderOrAll as FolderEntity;
 
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-		const menuItems: any[] = [];
+		const menuItems: PromptButtonSpec[] = [];
 
 		if (folder && folder.id === getConflictFolderId()) return;
 

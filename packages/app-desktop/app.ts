@@ -30,7 +30,7 @@ import DecryptionWorker from '@joplin/lib/services/DecryptionWorker';
 import ClipperServer from '@joplin/lib/ClipperServer';
 import { ipcRenderer } from 'electron';
 const Menu = bridge().Menu;
-const PluginManager = require('@joplin/lib/services/PluginManager');
+import PluginManager from '@joplin/lib/services/PluginManager';
 import RevisionService from '@joplin/lib/services/RevisionService';
 import MigrationService from '@joplin/lib/services/MigrationService';
 import { loadCustomCss } from '@joplin/lib/CssUtils';
@@ -48,6 +48,7 @@ import ShareService from '@joplin/lib/services/share/ShareService';
 import checkForUpdates from './checkForUpdates';
 import { AppState } from './app.reducer';
 import syncDebugLog from '@joplin/lib/services/synchronizer/syncDebugLog';
+import { completePendingAuthentication } from '@joplin/lib/services/joplinCloudUtils';
 import eventManager, { EventName } from '@joplin/lib/eventManager';
 import path = require('path');
 import { afterDefaultPluginsLoaded, loadAndRunDefaultPlugins } from '@joplin/lib/services/plugins/defaultPlugins/defaultPluginsUtils';
@@ -65,6 +66,8 @@ import OcrDriverBase from '@joplin/lib/services/ocr/OcrDriverBase';
 import PerformanceLogger from '@joplin/lib/PerformanceLogger';
 import Note from '@joplin/lib/models/Note';
 import Resource from '@joplin/lib/models/Resource';
+import AiService from '@joplin/lib/services/ai/AiService';
+import LocalEmbeddingProvider from '@joplin/lib/services/ai/LocalEmbeddingProvider';
 
 const perfLogger = PerformanceLogger.create();
 
@@ -93,7 +96,7 @@ class Application extends BaseApplication {
 		return true;
 	}
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Redux actions are heterogeneous; typing would require an action-type union and base class signature change
 	public reducer(state: AppState = appDefaultState, action: any) {
 		let newState = appReducer(state, action);
 		newState = resourceEditWatcherReducer(newState, action);
@@ -122,7 +125,7 @@ class Application extends BaseApplication {
 		htmlContainer.setAttribute('lang', htmlLang);
 	}
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Redux middleware signature; matches the base class which takes heterogeneous action types
 	protected async generalMiddleware(store: any, next: any, action: any) {
 		if (action.type === 'SETTING_UPDATE_ONE' && action.key === 'locale' || action.type === 'SETTING_UPDATE_ALL') {
 			this.updateLanguage();
@@ -244,16 +247,15 @@ class Application extends BaseApplication {
 		// The context menu must be setup in renderer process because that's where
 		// the spell checker service lives.
 		electronContextMenu({
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-			shouldShowMenu: (_event: any, params: any) => {
+			shouldShowMenu: (_event: unknown, params: { isEditable: boolean; inputFieldType: string }) => {
 				// params.inputFieldType === 'none' when right-clicking the text editor. This is a bit of a hack to detect it because in this
 				// case we don't want to use the built-in context menu but a custom one.
 				return params.isEditable && params.inputFieldType !== 'none';
 			},
 
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any -- electron-context-menu's actions/props don't have public types in this version
 			menu: (actions: any, props: any) => {
-				// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
+				// eslint-disable-next-line @typescript-eslint/no-explicit-any -- contextMenuItems returns a heterogeneous menu shape that doesn't satisfy Electron's MenuItemConstructorOptions structurally
 				const spellCheckerMenuItems = SpellCheckerService.instance().contextMenuItems(props.misspelledWord, props.dictionarySuggestions).map((item: any) => new MenuItem(item));
 
 				const output = [
@@ -374,7 +376,7 @@ class Application extends BaseApplication {
 		if (Setting.value('ocr.enabled')) {
 
 			if (!this.ocrService_) {
-				// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
+				// eslint-disable-next-line @typescript-eslint/no-explicit-any -- tesseract.js is loaded via <script> onto window; the published createWorker type is stricter than the runtime accepts
 				const Tesseract = (window as any).Tesseract;
 
 				const drivers: OcrDriverBase[] = [];
@@ -607,6 +609,10 @@ class Application extends BaseApplication {
 			}
 		});
 
+		addTask('app/complete pending Joplin Cloud auth', async () => {
+			await completePendingAuthentication();
+		});
+
 		addTask('app/start maintenance tasks', () => {
 			// Always disable on Mac for now - and disable too for the few apps that may have the flag enabled.
 			// At present, it only seems to work on Windows.
@@ -682,7 +688,7 @@ class Application extends BaseApplication {
 
 			ResourceEditWatcher.instance().initialize(
 				reg.logger(),
-				// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
+				// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Redux action — heterogeneous; tightening would require a typed action union shared with the store
 				(action: any) => { this.store().dispatch(action); },
 				(path: string) => bridge().openItem(path),
 				() => this.store().getState().windowId,
@@ -690,8 +696,7 @@ class Application extends BaseApplication {
 
 			// Forwards the local event to the global event manager, so that it can
 			// be picked up by the plugin manager.
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-			ResourceEditWatcher.instance().on('resourceChange', (event: any) => {
+			ResourceEditWatcher.instance().on('resourceChange', (event: { id: string }) => {
 				eventManager.emit(EventName.ResourceChange, event);
 			});
 		});
@@ -699,8 +704,7 @@ class Application extends BaseApplication {
 		// Make it available to the console window - useful to call revisionService.collectRevisions()
 		if (Setting.value('env') === 'dev') {
 			addTask('app/add debug variables', () => {
-				// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-				(window as any).joplin = {
+				(window as unknown as Record<string, unknown>).joplin = {
 					revisionService: RevisionService.instance(),
 					migrationService: MigrationService.instance(),
 					decryptionWorker: DecryptionWorker.instance(),
@@ -767,7 +771,7 @@ class Application extends BaseApplication {
 		return tasks;
 	}
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Matches the base class signature (BaseApplication.start returns Promise<any>)
 	public async start(argv: string[], startOptions: StartOptions = null): Promise<any> {
 		const startupTask = perfLogger.taskStart('app/start');
 
@@ -781,6 +785,16 @@ class Application extends BaseApplication {
 		await this.setupIntegrationTestUtils();
 
 		bridge().setLogFilePath(Logger.globalLogger.logFilePath());
+
+		// Install the local embedding provider before applySettingsSideEffects()
+		// — applyEmbeddingIndexerState() consults AiService for an active
+		// provider, so the indexer will silently sit idle if we wire it up after.
+		// Only install when ONNX is actually available; otherwise embeddings
+		// remain unavailable and the indexer stays off.
+		if (shim.onnxRuntime()) {
+			AiService.instance().setEmbeddingProvider(new LocalEmbeddingProvider());
+		}
+
 		await this.applySettingsSideEffects();
 
 		if (Setting.value('sync.upgradeState') === Setting.SYNC_UPGRADE_STATE_MUST_DO) {

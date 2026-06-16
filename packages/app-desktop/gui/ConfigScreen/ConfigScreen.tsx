@@ -4,10 +4,11 @@ import ButtonBar from './ButtonBar';
 import Button, { ButtonLevel } from '../Button/Button';
 import { _ } from '@joplin/lib/locale';
 import bridge from '../../services/bridge';
-import Setting, { AppType, SettingValueType, SyncStartupOperation } from '@joplin/lib/models/Setting';
+import Setting, { AppType, SettingMetadataSection, SettingValueType, SyncStartupOperation } from '@joplin/lib/models/Setting';
+import { AppState } from '../../app.reducer';
 import EncryptionConfigScreen from '../EncryptionConfigScreen/EncryptionConfigScreen';
 import { reg } from '@joplin/lib/registry';
-const { connect } = require('react-redux');
+import { connect } from 'react-redux';
 import { themeStyle } from '@joplin/lib/theme';
 import SyncTargetRegistry from '@joplin/lib/SyncTargetRegistry';
 import * as shared from '@joplin/lib/components/shared/config/config-shared.js';
@@ -19,6 +20,7 @@ import shouldShowMissingPasswordWarning from '@joplin/lib/components/shared/conf
 import { normalizeQuery } from '@joplin/lib/components/shared/config/config-search-text.js';
 import { searchResultGroups, matchedSearchSections } from './configSearch';
 import MacOSMissingPasswordHelpLink from './controls/MissingPasswordHelpLink';
+import AiIndexStatus from './controls/AiIndexStatus';
 const { KeymapConfigScreen } = require('../KeymapConfig/KeymapConfigScreen');
 import SettingComponent, { UpdateSettingValueEvent } from './controls/SettingComponent';
 import shim, { MessageBoxType } from '@joplin/lib/shim';
@@ -37,13 +39,12 @@ declare global {
 	}
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old class component without props/state interfaces; tightening requires structural refactor
 class ConfigScreenComponent extends React.Component<any, any> {
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	private rowStyle_: any = null;
+	private rowStyle_: React.CSSProperties = null;
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Constructor signature must match the class's open `any` props type
 	public constructor(props: any) {
 		super(props);
 
@@ -132,6 +133,13 @@ class ConfigScreenComponent extends React.Component<any, any> {
 			if (!await shim.showConfirmationDialog(this.restartMessage())) return;
 			Setting.setValue('ocr.clearLanguageDataCache', true);
 			await restart();
+		} else if (key === 'ai.usage.resetButton') {
+			if (!await shim.showConfirmationDialog(_('Reset AI token usage counters?'))) return;
+			Setting.setValue('ai.usage.inputTokens', 0);
+			Setting.setValue('ai.usage.outputTokens', 0);
+			await Setting.saveAll();
+		} else if (key === 'ai.chat.testButton') {
+			await shared.checkAiConfig(this);
 		} else if (key === 'sync.openSyncWizard') {
 			this.props.dispatch({
 				type: 'DIALOG_OPEN',
@@ -185,8 +193,7 @@ class ConfigScreenComponent extends React.Component<any, any> {
 		this.setState({ selectedSectionName: section.name, screenName: screenName });
 	}
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	private sidebar_selectionChange(event: any) {
+	private sidebar_selectionChange(event: { section: SettingMetadataSection }) {
 		const sectionName = event.section.name;
 		const searchMode = !!normalizeQuery(this.state.searchQuery);
 
@@ -200,8 +207,7 @@ class ConfigScreenComponent extends React.Component<any, any> {
 		void this.switchSection(sectionName);
 	}
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	public renderSectionDescription(section: any) {
+	public renderSectionDescription(section: SettingMetadataSection) {
 		const description = Setting.sectionDescription(section.name, AppType.Desktop);
 		if (!description) return null;
 
@@ -213,8 +219,7 @@ class ConfigScreenComponent extends React.Component<any, any> {
 		);
 	}
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	public sectionToComponent(key: string, section: any, settings: any, selected: boolean) {
+	public sectionToComponent(key: string, section: SettingMetadataSection, settings: Record<string, unknown>, selected: boolean) {
 		const theme = themeStyle(this.props.themeId);
 		const searchMode = !!normalizeQuery(this.state.searchQuery);
 
@@ -233,13 +238,11 @@ class ConfigScreenComponent extends React.Component<any, any> {
 		const settingComps = createSettingComponents(false);
 		const advancedSettingComps = createSettingComponents(true);
 
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-		const sectionWidths: Record<string, any> = {
+		const sectionWidths: Record<string, string> = {
 			plugins: '100%',
 		};
 
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-		const sectionStyle: any = {
+		const sectionStyle: React.CSSProperties = {
 			marginTop: 20,
 			marginBottom: 20,
 			maxWidth: sectionWidths[section.name] ? sectionWidths[section.name] : 640,
@@ -251,15 +254,31 @@ class ConfigScreenComponent extends React.Component<any, any> {
 			sectionStyle.borderTopWidth = 0;
 		}
 
+		if (section.name === 'ai' && settings['ai.enabled']) {
+			const messages = shared.checkAiConfigMessages(this);
+			if (messages.length) {
+				const result = this.state.checkAiConfigResult;
+				const ok = result && result !== 'checking' && result.ok;
+				const statusStyle = { ...theme.textStyle, marginTop: 10, color: ok ? theme.color : theme.colorWarn };
+				settingComps.push(
+					<div key="ai_config_test_status" style={statusStyle} aria-live='polite'>
+						{messages[0]}
+						{messages.length > 1 ? <p>{messages[1]}</p> : null}
+					</div>,
+				);
+			}
+			settingComps.push(<AiIndexStatus key='ai_index_status' />);
+		}
+
 		if (section.name === 'sync') {
-			const syncTargetMd = SyncTargetRegistry.idToMetadata(settings['sync.target']);
+			const syncTargetMd = SyncTargetRegistry.idToMetadata(settings['sync.target'] as number);
 			const statusStyle = { ...theme.textStyle, marginTop: 10 };
 			const warningStyle = { ...theme.textStyle, color: theme.colorWarn };
 
 			// Don't show the missing password warning if the user just changed the sync target (but hasn't
 			// saved yet).
 			const matchesSavedTarget = settings['sync.target'] === this.props.settings['sync.target'];
-			if (matchesSavedTarget && shouldShowMissingPasswordWarning(settings['sync.target'], settings)) {
+			if (matchesSavedTarget && shouldShowMissingPasswordWarning(settings['sync.target'] as number, settings)) {
 				settingComps.push(
 					<p key='missing-password-warning' style={warningStyle}>
 						{_('%s: Missing password.', _('Warning'))}
@@ -471,8 +490,7 @@ class ConfigScreenComponent extends React.Component<any, any> {
 		const hasValidSectionFilter = !!sectionFilter && matchedSections.some(group => group.section.name === sectionFilter);
 		const filteredMatchedSections = hasValidSectionFilter ? matchedSections.filter(group => group.section.name === sectionFilter) : matchedSections;
 
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-		const needRestartComp: any = this.state.needRestart ? (
+		const needRestartComp: React.ReactNode = this.state.needRestart ? (
 			<div style={{ ...theme.textStyle, padding: 10, paddingLeft: 24, backgroundColor: theme.warningBackgroundColor, color: theme.color }}>
 				{this.restartMessage()}
 				<a style={{ ...theme.urlStyle, marginLeft: 10 }} href="#" onClick={() => { void this.restartApp(); }}>{_('Restart now')}</a>
@@ -603,8 +621,7 @@ class ConfigScreenComponent extends React.Component<any, any> {
 	}
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-const mapStateToProps = (state: any) => {
+const mapStateToProps = (state: AppState) => {
 	return {
 		themeId: state.settings.theme,
 		settings: state.settings,
