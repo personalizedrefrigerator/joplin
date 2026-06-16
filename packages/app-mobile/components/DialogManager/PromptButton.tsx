@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useMemo } from 'react';
 import { StyleSheet, TextStyle, View } from 'react-native';
-import { TouchableRipple, Text } from 'react-native-paper';
+import { TouchableRipple, Text, useTheme } from 'react-native-paper';
 import { PromptButtonSpec } from './types';
 import { ThemeStyle, themeStyle } from '../global-style';
 import Icon from '../Icon';
@@ -12,9 +12,10 @@ interface Props {
 }
 
 const useStyles = (theme: ThemeStyle) => {
+	const paperTheme = useTheme();
 	return useMemo(() => {
 		const buttonText: TextStyle = {
-			color: theme.color4,
+			color: paperTheme.colors.onPrimaryContainer,
 			textAlign: 'center',
 		};
 
@@ -28,6 +29,7 @@ const useStyles = (theme: ThemeStyle) => {
 			button: {
 				borderRadius: theme.borderRadius,
 				padding: 10,
+				backgroundColor: paperTheme.colors.primaryContainer,
 			},
 			buttonContent: {
 				display: 'flex',
@@ -41,7 +43,7 @@ const useStyles = (theme: ThemeStyle) => {
 				marginRight: 8,
 			},
 		});
-	}, [theme]);
+	}, [theme, paperTheme]);
 };
 
 const PromptButton: React.FC<Props> = props => {
