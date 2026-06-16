@@ -39,5 +39,5 @@ export default class JoplinPlugins {
     /**
      * @deprecated Use joplin.require()
      */
-    require(_path: string): unknown;
+    require(_path: string): any;
 }

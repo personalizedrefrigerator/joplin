@@ -7,7 +7,7 @@ export declare enum ItemFlow {
 export type RenderNoteView = Record<string, any>;
 export interface OnChangeEvent {
     elementId: string;
-    value: unknown;
+    value: any;
     noteId: string;
 }
 export interface OnClickEvent {

@@ -68,7 +68,7 @@ export default class JoplinViewsPanels {
      *
      * It is particularly useful when the webview needs to react to events emitted by the plugin or the joplin api.
      */
-    postMessage(handle: ViewHandle, message: unknown): void;
+    postMessage(handle: ViewHandle, message: any): void;
     /**
      * Shows the panel
      */

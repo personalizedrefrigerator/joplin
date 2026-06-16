@@ -103,7 +103,7 @@ export default class JoplinViewsEditors {
     /**
      * See [[JoplinViewPanels]]
      */
-    postMessage(handle: ViewHandle, message: unknown): void;
+    postMessage(handle: ViewHandle, message: any): void;
     /**
      * Tells whether the editor is active or not.
      */
