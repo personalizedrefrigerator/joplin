@@ -221,6 +221,7 @@ packages/app-desktop/gui/ConfigScreen/ButtonBar.js
 packages/app-desktop/gui/ConfigScreen/ConfigScreen.js
 packages/app-desktop/gui/ConfigScreen/Sidebar.js
 packages/app-desktop/gui/ConfigScreen/configSearch.js
+packages/app-desktop/gui/ConfigScreen/controls/AiIndexStatus.js
 packages/app-desktop/gui/ConfigScreen/controls/FontSearch.js
 packages/app-desktop/gui/ConfigScreen/controls/GlobalHotkeyInput.test.js
 packages/app-desktop/gui/ConfigScreen/controls/GlobalHotkeyInput.js
@@ -1571,6 +1572,15 @@ packages/lib/services/WhenClause.test.js
 packages/lib/services/WhenClause.js
 packages/lib/services/ai/AiService.test.js
 packages/lib/services/ai/AiService.js
+packages/lib/services/ai/EmbeddingIndexer.test.js
+packages/lib/services/ai/EmbeddingIndexer.js
+packages/lib/services/ai/EmbeddingModelDownloader.test.js
+packages/lib/services/ai/EmbeddingModelDownloader.js
+packages/lib/services/ai/LocalEmbeddingProvider.test.js
+packages/lib/services/ai/LocalEmbeddingProvider.js
+packages/lib/services/ai/OnnxRuntime.test.js
+packages/lib/services/ai/SearchService.test.js
+packages/lib/services/ai/SearchService.js
 packages/lib/services/ai/SqliteVec.test.js
 packages/lib/services/ai/aiSettingsTransition.test.js
 packages/lib/services/ai/aiSettingsTransition.js
@@ -1581,6 +1591,8 @@ packages/lib/services/ai/providers/Anthropic.js
 packages/lib/services/ai/providers/ChatProviderBase.js
 packages/lib/services/ai/providers/JoplinCloud.js
 packages/lib/services/ai/providers/OpenAiCompatible.js
+packages/lib/services/ai/testing/TestEmbeddingProvider.test.js
+packages/lib/services/ai/testing/TestEmbeddingProvider.js
 packages/lib/services/ai/types.js
 packages/lib/services/commands/MenuUtils.js
 packages/lib/services/commands/ToolbarButtonUtils.test.js
