@@ -45,6 +45,7 @@ const PromptDialog: React.FC<Props> = ({ dialog, containerStyle, themeId }) => {
 		return <PromptButton
 			key={`${index}-${button.text}`}
 			buttonSpec={button}
+			isMenu={isMenu}
 			themeId={themeId}
 		/>;
 	});

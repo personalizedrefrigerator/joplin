@@ -9,18 +9,20 @@ import Icon from '../Icon';
 interface Props {
 	themeId: number;
 	buttonSpec: PromptButtonSpec;
+	isMenu: boolean;
 }
 
-const useStyles = (theme: ThemeStyle, spec: PromptButtonSpec) => {
+const useStyles = (theme: ThemeStyle, spec: PromptButtonSpec, isMenu: boolean) => {
 	const paperTheme = useTheme();
 
 	const { onColor, color } = (() => {
-		if (spec.style === 'destructive') {
+		const style = spec.style ?? 'default';
+		if (style === 'destructive') {
 			return {
 				onColor: paperTheme.colors.onErrorContainer,
 				color: paperTheme.colors.errorContainer,
 			};
-		} else if (spec.style === 'cancel') {
+		} else if (style === (isMenu ? 'default' : 'cancel')) {
 			return {
 				onColor: paperTheme.colors.onSecondary,
 				color: paperTheme.colors.secondary,
@@ -70,7 +72,7 @@ const useStyles = (theme: ThemeStyle, spec: PromptButtonSpec) => {
 
 const PromptButton: React.FC<Props> = props => {
 	const theme = themeStyle(props.themeId);
-	const styles = useStyles(theme, props.buttonSpec);
+	const styles = useStyles(theme, props.buttonSpec, props.isMenu);
 
 	const { checked, text, iconChecked, onPress } = props.buttonSpec;
 
