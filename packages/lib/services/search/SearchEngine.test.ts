@@ -1,5 +1,5 @@
 import { setupDatabaseAndSynchronizer, db, sleep, switchClient, msleep, createNoteAndResource } from '../../testing/test-utils';
-import SearchEngine from './SearchEngine';
+import SearchEngine, { ComplexTerm } from './SearchEngine';
 import Note from '../../models/Note';
 import ItemChange from '../../models/ItemChange';
 import Setting from '../../models/Setting';
@@ -465,8 +465,12 @@ describe('services/SearchEngine', () => {
 	}));
 
 	it('should parse normal query strings', (async () => {
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-		const testCases: [string, any][] = [
+		interface ExpectedTerms {
+			_?: string[];
+			title?: string[];
+			body?: string[];
+		}
+		const testCases: [string, ExpectedTerms][] = [
 			['abcd efgh', { _: ['abcd', 'efgh'] }],
 			['abcd   efgh', { _: ['abcd', 'efgh'] }],
 			['title:abcd efgh', { _: ['efgh'], title: ['abcd'] }],
@@ -483,12 +487,10 @@ describe('services/SearchEngine', () => {
 			const expected = t[1];
 			const actual = await engine.parseQuery(input);
 
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-			const _Values = actual.terms._ ? actual.terms._.map((v: any) => v.value) : undefined;
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-			const titleValues = actual.terms.title ? actual.terms.title.map((v: any) => v.value) : undefined;
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-			const bodyValues = actual.terms.body ? actual.terms.body.map((v: any) => v.value) : undefined;
+			const extractValue = (v: string | { value: string }) => typeof v === 'string' ? v : v.value;
+			const _Values = actual.terms._ ? actual.terms._.map(extractValue) : undefined;
+			const titleValues = actual.terms.title ? actual.terms.title.map(extractValue) : undefined;
+			const bodyValues = actual.terms.body ? actual.terms.body.map(extractValue) : undefined;
 
 			expect(JSON.stringify(_Values)).toBe(JSON.stringify(expected._));
 			expect(JSON.stringify(titleValues)).toBe(JSON.stringify(expected.title));
@@ -614,4 +616,18 @@ describe('services/SearchEngine', () => {
 			expect(rows.length).toBe(resourcesFound);
 		});
 
+	test('createQueryFromTerms returns the an empty string when terms is undefined or an empty array', () => {
+		expect(engine.createQueryFromTerms(undefined)).toBe('');
+		expect(engine.createQueryFromTerms([])).toBe('');
+	});
+
+	test('createQueryFromTerms joins string and ComplexTerm values into a single search string', () => {
+		const terms = [
+			'hello',
+			{ type: 'text', value: 'world', scriptType: 'en' },
+			'test',
+			{ type: 'regex', value: 'query*', scriptType: 'en' },
+		] as (ComplexTerm | string)[];
+		expect(engine.createQueryFromTerms(terms)).toBe('hello world test query*');
+	});
 });

@@ -76,6 +76,7 @@
 		"prosemirror-state",
 		"prosemirror-view",
 		"prosemirror-tables",
+		"prosemirror-transform",
 		// Does not use semver
 		"@dr.pogodin/react-native-fs",
 		"@fortawesome/fontawesome-svg-core",
@@ -88,7 +89,7 @@
 		"browserify",
 		"codemirror",
 		"cspell",
-		"expo-av", // Must be updated with expo
+		"expo-audio", // Must be updated with expo
 		"file-loader",
 		"gradle",
 		"html-webpack-plugin",

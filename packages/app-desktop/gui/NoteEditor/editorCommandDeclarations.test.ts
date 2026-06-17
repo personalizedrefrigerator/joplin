@@ -1,8 +1,7 @@
 import WhenClause from '@joplin/lib/services/WhenClause';
 import { enabledCondition } from './editorCommandDeclarations';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-const baseContext: Record<string, any> = {
+const baseContext: Record<string, boolean> = {
 	modalDialogVisible: false,
 	gotoAnythingVisible: false,
 	markdownEditorPaneVisible: true,
@@ -11,6 +10,7 @@ const baseContext: Record<string, any> = {
 	noteIsMarkdown: true,
 	noteIsReadOnly: false,
 	richTextEditorVisible: false,
+	hasActivePluginEditor: false,
 };
 
 describe('editorCommandDeclarations', () => {

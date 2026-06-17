@@ -16,7 +16,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 3.9\n"
+"X-Generator: Poedit 3.6\n"
 
 #: packages/app-mobile/components/screens/ConfigScreen/ConfigScreen.tsx:621
 msgid "- Camera: to allow taking a picture and attaching it to a note."
@@ -284,9 +284,10 @@ msgid ""
 "list all the tags (use -l for long option)."
 msgstr ""
 "<tag-command> kan vara \"add\", \"remove\", \"list\" eller \"notetags\" för "
-"att tilldela eller ta bort [tag] från [note], eller för att lista "
-"anteckningarna som är associerade med [tag]. Kommandot `tag list` kan "
-"användas för att lista alla taggar (använd -l för långt alternativ)."
+"att tilldela eller ta bort [tag] från [note], för att lista anteckningar "
+"associerade med [tag] eller för att lista taggar associerade med [note]. "
+"Kommandot `tag list` kan användas för att lista alla taggar (använd -l för "
+"långt alternativ)."
 
 #: packages/app-cli/app/command-todo.js:14
 msgid ""
@@ -296,10 +297,10 @@ msgid ""
 "convert the to-do back to a regular note."
 msgstr ""
 "<todo-command> kan antingen vara \"toggle\" eller \"clear\". Använd "
-"\"toggle\" för att växla mellan givna uppgifter mellan slutförda och inte "
-"slutförda tillstånd (Om målet är en vanlig anteckning kommer den att "
-"konverteras till en att-göra). Använd \"clear\" för att konvertera uppgiften "
-"att-göra tillbaka till en vanlig anteckning."
+"\"toggle\" för att växla status på den givna att-göra-posten mellan "
+"slutförd och ej slutförd (om målet är en vanlig anteckning kommer den att "
+"konverteras till en att-göra-post). Använd \"clear\" för att konvertera "
+"att-göra-posten tillbaka till en vanlig anteckning."
 
 #: packages/editor/ProseMirror/plugins/imagePlugin.ts:148
 msgid "A brief description of the image:"
@@ -1655,7 +1656,7 @@ msgstr "Ctrl-klicka för att öppna: %s"
 
 #: packages/app-desktop/gui/NoteEditor/NoteBody/CodeMirror/v6/utils/localisation.ts:24
 msgid "current match"
-msgstr "aktuell matchning"
+msgstr "aktuell sökträff"
 
 #: packages/app-desktop/gui/MasterPasswordDialog/Dialog.tsx:153
 msgid "Current password"
@@ -2953,7 +2954,7 @@ msgstr "Gå till källans URL"
 #: packages/app-desktop/gui/WindowCommandsAndDialogs/commands/gotoAnything.ts:18
 #: packages/app-desktop/plugins/GotoAnything.tsx:775
 msgid "Goto Anything..."
-msgstr "Gå till varsomhelst…"
+msgstr "Gå till varsomhelst..."
 
 #: packages/app-desktop/gui/Root.tsx:130
 msgid "Grant authorisation"
@@ -3527,7 +3528,7 @@ msgstr "Tangentbordsgenvägar"
 
 #: packages/lib/versionInfo.ts:92
 msgid "Keychain Supported: %s"
-msgstr "Nyckelring som stöds: %s"
+msgstr "Nyckelring stöds: %s"
 
 #: packages/app-cli/app/command-keymap.ts:30
 msgid "KEYS"
@@ -4783,7 +4784,7 @@ msgstr "Insticksmodulsverktyg"
 
 #: packages/lib/models/settings/builtInMetadata.ts:1032
 msgid "Plugin WebView debugging"
-msgstr "Plugin WebView-felsökning"
+msgstr "WebView-felsökning för insticksmoduler"
 
 #: packages/app-desktop/gui/ConfigScreen/Sidebar.tsx:148
 #: packages/app-mobile/components/screens/ConfigScreen/ConfigScreen.tsx:550
@@ -5189,7 +5190,7 @@ msgstr "Ersätt alla"
 
 #: packages/app-mobile/components/NoteEditor/SearchPanel.tsx:250
 msgid "Replace with..."
-msgstr "Ersätt med…"
+msgstr "Ersätt med..."
 
 #: packages/app-mobile/components/NoteEditor/SearchPanel.tsx:271
 msgid "Replace: "
@@ -7008,8 +7009,8 @@ msgid ""
 "commands."
 msgstr ""
 "Skriv titeln på en anteckning för att hoppa till den. Eller skriv # följt av "
-"namnet på en tagg eller@ följt av namnet på en anteckningsbok. Eller skriv : "
-"för att söka efter kommandon."
+"namnet på en tagg eller @ följt av namnet på en anteckningsbok. Eller "
+"skriv : för att söka efter kommandon."
 
 #: packages/app-desktop/plugins/GotoAnything.tsx:706
 msgid "Type a note title to search for it."
@@ -7260,8 +7261,8 @@ msgid ""
 "Use this to rebuild the search index if there is a problem with search. It "
 "may take a long time depending on the number of notes."
 msgstr ""
-"Använd detta för att återuppbygga sökindex om det finns sökproblem. Det kan "
-"ta lång tid beroende på antal anteckningar."
+"Använd detta för att återuppbygga sökindex om det är problem med sökningen. "
+"Det kan ta lång tid beroende på antal anteckningar."
 
 #: packages/app-mobile/components/biometrics/BiometricPopup.tsx:83
 msgid ""
@@ -7276,8 +7277,8 @@ msgid ""
 "Used for most text in the markdown editor. If not found, a generic "
 "proportional (variable width) font is used."
 msgstr ""
-"Används för mest text i markdown-redigeraren. Om det inte hittas används ett "
-"generiskt proportionellt (variabelt bredd) teckensnitt."
+"Används för det mesta av texten i markdown-redigeraren. Om det inte hittas "
+"används ett generiskt proportionellt (variabel bredd) teckensnitt."
 
 #: packages/lib/models/settings/builtInMetadata.ts:1262
 msgid ""
@@ -7385,7 +7386,7 @@ msgstr "Varning"
 #: packages/app-desktop/gui/ResourceScreen.tsx:322
 msgid "Warning: not all resources shown for performance reasons (limit: %s)."
 msgstr ""
-"Varning: alla resurser visas inte för förbättrad prestanda (limit: %s)."
+"Varning: alla resurser visas inte för förbättrad prestanda (gräns: %s)."
 
 #: packages/app-mobile/components/screens/ConfigScreen/plugins/EnablePluginSupportPage.tsx:116
 msgid "We have a system for reporting and removing problematic plugins."
@@ -7483,7 +7484,7 @@ msgid ""
 "text from it. This will allow you to search for text in these attachments."
 msgstr ""
 "När det är aktiverat kommer programmet att skanna dina bilagor och extrahera "
-"texten från den. Detta gör att du kan söka efter text i dessa bilagor."
+"texten från dem. Detta gör att du kan söka efter text i dessa bilagor."
 
 #: packages/app-desktop/ElectronAppWrapper.ts:281
 msgid "Window unresponsive."
@@ -7562,7 +7563,7 @@ msgid ""
 "that some of your notes are encrypted with an obsolete encryption method."
 msgstr ""
 "Du kan använda verktyget nedan för att omkryptera dina data, exempelvis om "
-"du vill veta om vissa av dina anteckningar är krypterade med en gammal "
+"du vet att vissa av dina anteckningar är krypterade med en gammal "
 "krypteringsmetod."
 
 #: packages/lib/services/joplinCloudUtils.ts:53

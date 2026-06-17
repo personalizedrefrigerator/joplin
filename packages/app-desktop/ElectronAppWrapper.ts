@@ -6,19 +6,18 @@ const shim: typeof ShimType = require('@joplin/lib/shim').default;
 import { isCallbackUrl } from '@joplin/lib/callbackUrlUtils';
 import { FileLocker } from '@joplin/utils/fs';
 import { IpcMessageHandler, IpcServer, Message, newHttpError, sendMessage, SendMessageOptions, startServer, stopServer } from '@joplin/utils/ipc';
-import { BrowserWindow, Tray, WebContents, screen, App, nativeTheme, Menu } from 'electron';
+import { BrowserWindow, BrowserWindowConstructorOptions, Tray, WebContents, screen, App, nativeTheme, Menu, session as electronSession, Session } from 'electron';
 import bridge from './bridge';
 import * as url from 'url';
-const path = require('path');
-const { dirname } = require('@joplin/lib/path-utils');
-const fs = require('fs-extra');
+import * as path from 'path';
+import { dirname } from '@joplin/lib/path-utils';
+import * as fs from 'fs-extra';
 
 import { dialog, ipcMain } from 'electron';
 import { _ } from '@joplin/lib/locale';
 import restartInSafeModeFromMain from './utils/restartInSafeModeFromMain';
 import handleCustomProtocols, { CustomProtocolHandlers } from './utils/customProtocols/handleCustomProtocols';
 import { clearTimeout, setTimeout } from 'timers';
-import { resolve } from 'path';
 import { defaultWindowId } from '@joplin/lib/reducer';
 import { msleep, Second } from '@joplin/utils/time';
 import determineBaseAppDirs from '@joplin/lib/determineBaseAppDirs';
@@ -59,6 +58,7 @@ export default class ElectronAppWrapper {
 	private secondaryWindows_: Map<SecondaryWindowId, SecondaryWindowData> = new Map();
 
 	private willQuitApp_ = false;
+	private enableUnresponsiveCheck_ = true;
 	private tray_: Tray = null;
 	private buildDir_: string = null;
 	private rendererProcessQuitReply_: RendererProcessQuitReply = null;
@@ -67,6 +67,7 @@ export default class ElectronAppWrapper {
 	private updaterService_: AutoUpdaterService = null;
 	private customProtocolHandlers_: CustomProtocolHandlers|null = null;
 	private updatePollInterval_: ReturnType<typeof setTimeout>|null = null;
+	private joplinSession_: Session|null = null;
 
 	private profileLocker_: FileLocker|null = null;
 	private ipcServer_: IpcServer|null = null;
@@ -201,15 +202,47 @@ export default class ElectronAppWrapper {
 		}
 	}
 
+	private createJoplinSession_() {
+		const sessionPath = path.join(this.profilePath_, 'internal');
+		const joplinSession = electronSession.fromPath(sessionPath, { cache: false });
+
+		// One-time migration: copy existing dictionary words from the old Electron userData location into the new session.
+		const migrationFlagPath = path.join(this.profilePath_, 'spell-checker-migration-done');
+		if (!fs.existsSync(migrationFlagPath)) {
+			try {
+				const wordsToMigrate = new Set<string>();
+
+				const oldElectronDictPath = path.join(this.electronApp_.getPath('userData'), 'Custom Dictionary.txt');
+				if (fs.existsSync(oldElectronDictPath)) {
+					const content = fs.readFileSync(oldElectronDictPath, 'utf8');
+					const words = content.split('\n')
+						.map((w: string) => w.trim())
+						.filter((w: string) => w.length > 0 && !/^checksum_v1\s*=/.test(w));
+
+					for (const word of words) {
+						wordsToMigrate.add(word);
+					}
+				}
+
+				for (const word of wordsToMigrate) {
+					joplinSession.addWordToSpellCheckerDictionary(word);
+				}
+
+				fs.writeFileSync(migrationFlagPath, '', 'utf8');
+			} catch (error) {
+				console.warn('Failed to migrate spell-check dictionary:', error);
+			}
+		}
+		return joplinSession;
+	}
+
 	public createWindow() {
 		// Set to true to view errors if the application does not start
 		const debugEarlyBugs = this.env_ === 'dev' || this.isDebugMode_;
 
 		const windowStateKeeper = require('electron-window-state');
 
-
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-		const stateOptions: any = {
+		const stateOptions: { defaultWidth: number; defaultHeight: number; file: string; path?: string } = {
 			defaultWidth: Math.round(0.8 * screen.getPrimaryDisplay().workArea.width),
 			defaultHeight: Math.round(0.8 * screen.getPrimaryDisplay().workArea.height),
 			file: `window-state-${this.env_}.json`,
@@ -220,8 +253,7 @@ export default class ElectronAppWrapper {
 		// Load the previous state with fallback to defaults
 		const windowState = windowStateKeeper(stateOptions);
 
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-		const windowOptions: any = {
+		const windowOptions: BrowserWindowConstructorOptions = {
 			x: windowState.x,
 			y: windowState.y,
 			width: windowState.width,
@@ -233,11 +265,13 @@ export default class ElectronAppWrapper {
 			// this needs to be a non-transparent color:
 			backgroundColor: nativeTheme.shouldUseDarkColors ? '#333' : '#fff',
 			webPreferences: {
+				session: this.joplinSession_,
 				nodeIntegration: true,
 				contextIsolation: false,
 				spellcheck: true,
+				// enableRemoteModule was removed from Electron's published types but @electron/remote still relies on it at runtime
 				enableRemoteModule: true,
-			},
+			} as import('electron').WebPreferences,
 			// We start with a hidden window, which is then made visible depending on the showTrayIcon setting
 			// https://github.com/laurent22/joplin/issues/2031
 			//
@@ -272,6 +306,8 @@ export default class ElectronAppWrapper {
 		let unresponsiveTimeout: ReturnType<typeof setTimeout>|null = null;
 
 		this.win_.webContents.on('unresponsive', () => {
+			if (!this.enableUnresponsiveCheck_) return;
+
 			// Don't show the "unresponsive" dialog immediately -- the "unresponsive" event
 			// can be fired when showing a dialog or modal (e.g. the update dialog).
 			//
@@ -298,8 +334,7 @@ export default class ElectronAppWrapper {
 		});
 
 		this.win_.webContents.on('did-fail-load', async event => {
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-			if ((event as any).isMainFrame) {
+			if ((event as import('electron').Event & { isMainFrame?: boolean }).isMainFrame) {
 				await this.handleAppFailure('Renderer process failed to load', false);
 			}
 		});
@@ -374,7 +409,8 @@ export default class ElectronAppWrapper {
 						action: 'allow',
 						overrideBrowserWindowOptions: {
 							webPreferences: {
-								preload: resolve(__dirname, './utils/window/secondaryWindowPreload.js'),
+								nodeIntegration: false,
+								preload: path.resolve(__dirname, './utils/window/secondaryWindowPreload.js'),
 							},
 						},
 					};
@@ -395,8 +431,7 @@ export default class ElectronAppWrapper {
 		};
 		addWindowEventHandlers(this.win_.webContents);
 
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-		this.win_.on('close', (event: any) => {
+		this.win_.on('close', (event: import('electron').Event) => {
 			// If it's on macOS, the app is completely closed only if the user chooses to close the app (willQuitApp_ will be true)
 			// otherwise the window is simply hidden, and will be re-open once the app is "activated" (which happens when the
 			// user clicks on the icon in the task bar).
@@ -511,20 +546,18 @@ export default class ElectronAppWrapper {
 			}
 		});
 
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-		ipcMain.on('asynchronous-message', (_event: any, message: string, args: any) => {
+		ipcMain.on('asynchronous-message', (_event: import('electron').IpcMainEvent, message: string, args: unknown) => {
 			if (message === 'appCloseReply') {
 				// We got the response from the renderer process:
 				// save the response and try quit again.
-				this.rendererProcessQuitReply_ = args;
+				this.rendererProcessQuitReply_ = args as RendererProcessQuitReply;
 				this.quit();
 			}
 		});
 
 		// This handler receives IPC messages from a plugin or from the main window,
 		// and forwards it to the main window or the plugin window.
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-		ipcMain.on('pluginMessage', (_event: any, message: PluginMessage) => {
+		ipcMain.on('pluginMessage', (_event: import('electron').IpcMainEvent, message: PluginMessage) => {
 			try {
 				if (message.target === 'mainWindow') {
 					this.win_.webContents.send('pluginMessage', message);
@@ -861,6 +894,10 @@ export default class ElectronAppWrapper {
 		return this.customProtocolHandlers_.pluginContent;
 	}
 
+	public setEnableUnresponsiveCheck(enabled: boolean) {
+		this.enableUnresponsiveCheck_ = enabled;
+	}
+
 	private async fixLinuxAccessibility_() {
 		if (this.electronApp().accessibilitySupportEnabled) return;
 
@@ -896,12 +933,15 @@ export default class ElectronAppWrapper {
 
 		await this.fixLinuxAccessibility_();
 
-		this.customProtocolHandlers_ = handleCustomProtocols();
+		// Session must be created before handleCustomProtocols() so both use the same object.
+		this.joplinSession_ = this.createJoplinSession_();
+		this.customProtocolHandlers_ = handleCustomProtocols(this.joplinSession_);
 		this.createWindow();
 
 		this.electronApp_.on('before-quit', () => {
 			this.appLogger_.info('[appClose] before-quit event fired, setting willQuitApp_ = true');
 			this.willQuitApp_ = true;
+			bridge().unregisterGlobalHotkey();
 		});
 
 		this.electronApp_.on('window-all-closed', () => {
@@ -913,8 +953,7 @@ export default class ElectronAppWrapper {
 			this.win_.show();
 		});
 
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-		this.electronApp_.on('open-url', (event: any, url: string) => {
+		this.electronApp_.on('open-url', (event: import('electron').Event, url: string) => {
 			event.preventDefault();
 			void this.openCallbackUrl(url);
 		});

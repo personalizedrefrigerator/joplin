@@ -1,4 +1,4 @@
-import { createUserAndSession, beforeAllDb, afterAllTests, beforeEachDb, models, checkThrowAsync, expectThrow, createUser, expectHttpError } from '../utils/testing/testUtils';
+import { createUserAndSession, beforeAllDb, afterAllTests, beforeEachDb, models, checkThrowAsync, expectThrow, expectHttpError, createUser } from '../utils/testing/testUtils';
 import { EmailSender, UserFlagType } from '../services/database/types';
 import { ErrorBadRequest, ErrorUnprocessableEntity } from '../utils/errors';
 import { betaUserDateRange, stripeConfig } from '../utils/stripe';
@@ -237,6 +237,7 @@ describe('UserModel', () => {
 	test('should send emails and flag accounts when it is over the size limit', async () => {
 		const { user: user1 } = await createUserAndSession(1);
 		const { user: user2 } = await createUserAndSession(2);
+		const { user: user3 } = await createUserAndSession(3);
 
 		await models().user().save({
 			id: user1.id,
@@ -248,6 +249,12 @@ describe('UserModel', () => {
 			id: user2.id,
 			account_type: AccountType.Pro,
 			total_item_size: Math.round(accountByType(AccountType.Pro).max_total_item_size * 0.2),
+		});
+
+		await models().user().save({
+			id: user3.id,
+			account_type: AccountType.Pro100Gb,
+			total_item_size: Math.round(accountByType(AccountType.Pro100Gb).max_total_item_size * 0.2),
 		});
 
 		const emailBeforeCount = (await models().email().all()).length;
@@ -271,7 +278,7 @@ describe('UserModel', () => {
 		{
 			// Now check that the 100% email is sent too
 
-			for (const u of [user2]) {
+			for (const u of [user2, user3]) {
 				const user = await models().user().load(u.id);
 
 				await models().user().save({
@@ -303,14 +310,32 @@ describe('UserModel', () => {
 		}
 	});
 
+	test('should not send emails when an account\'s size limit has been manually increased', async () => {
+		const { user: user1 } = await createUserAndSession(1);
+
+		const totalSize = Math.round(accountByType(AccountType.Basic).max_total_item_size * 0.85);
+		await models().user().save({
+			id: user1.id,
+			account_type: AccountType.Basic,
+			total_item_size: totalSize,
+			max_total_item_size: totalSize * 2,
+		});
+
+		const emailBeforeCount = (await models().email().all()).length;
+
+		await models().user().handleOversizedAccounts();
+
+		const emailAfterCount = (await models().email().all()).length;
+		expect(emailAfterCount).toBe(emailBeforeCount);
+	});
+
 	test('should get the user public key', async () => {
 		const { user: user1 } = await createUserAndSession(1);
 		const { user: user2 } = await createUserAndSession(2);
 		const { user: user3 } = await createUserAndSession(3);
 		const { user: user4 } = await createUserAndSession(4);
 
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-		const syncInfo1: any = {
+		const syncInfo1: { version: number; e2ee: { value: boolean; updatedTime: number }; ppk?: { value: { publicKey: string; privateKey: { encryptionMode: number; ciphertext: string } }; updatedTime: number } } = {
 			'version': 3,
 			'e2ee': {
 				'value': false,
@@ -328,12 +353,10 @@ describe('UserModel', () => {
 			},
 		};
 
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-		const syncInfo2: any = JSON.parse(JSON.stringify(syncInfo1));
+		const syncInfo2: typeof syncInfo1 = JSON.parse(JSON.stringify(syncInfo1));
 		syncInfo2.ppk.value.publicKey = 'PUBLIC_KEY_2';
 
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-		const syncInfo3: any = JSON.parse(JSON.stringify(syncInfo1));
+		const syncInfo3: typeof syncInfo1 = JSON.parse(JSON.stringify(syncInfo1));
 		delete syncInfo3.ppk;
 
 		await models().item().saveFromRawContent(user1, {
@@ -565,6 +588,22 @@ describe('UserModel', () => {
 			expect(modUser.email).toBe(previousUser.email);
 			expect(modUser.password).toBe(previousUser.password);
 			expect(modUser.max_item_size).toBe(12345);
+		} finally {
+			config().SAML_ENABLED = false;
+		}
+	});
+
+	test('should not log in as a local account via SSO based on email match alone', async () => {
+		const localUser = await createUser(1);
+
+		config().SAML_ENABLED = true;
+
+		try {
+			const result = await models().user().ssoLogin(localUser.email, 'Attacker Controlled Name');
+			expect(result).toBeNull();
+
+			const reloaded = await models().user().load(localUser.id);
+			expect(reloaded.is_external).toBe(0);
 		} finally {
 			config().SAML_ENABLED = false;
 		}

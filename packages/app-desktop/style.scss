@@ -2,6 +2,7 @@
 @use 'gui/EditFolderDialog/style.scss' as edit-folder-dialog;
 @use 'gui/EncryptionConfigScreen/style.scss' as encryption-config-screen;
 @use 'gui/PasswordInput/style.scss' as password-input;
+@use 'gui/lib/SearchInput/style.scss' as search-input;
 @use 'gui/JoplinCloudConfigScreen.scss' as joplin-cloud-config-screen;
 @use 'gui/Dropdown/style.scss' as dropdown-control;
 @use 'gui/ShareFolderDialog/style.scss' as share-folder-dialog;
@@ -28,3 +29,4 @@
 @import url('vendor/lib/smalltalk/css/smalltalk.css');
 @import url('vendor/lib/roboto-fontface/css/roboto/roboto-fontface.css');
 @import url('vendor/lib/codemirror/lib/codemirror.css');
+@import url('vendor/lib/@xyflow/react/dist/style.css');

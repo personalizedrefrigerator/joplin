@@ -1,5 +1,5 @@
 import { resourceBlobPath } from '../utils/joplinUtils';
-import { Change, ChangeType, Item, Share, ShareType, ShareUserStatus, User, Uuid } from '../services/database/types';
+import { Change2 as Change, ChangeType, Item, Share, ShareType, ShareUserStatus, User, Uuid } from '../services/database/types';
 import { unique } from '../utils/array';
 import { ErrorBadRequest, ErrorForbidden, ErrorNotFound } from '../utils/errors';
 import { setQueryParameters } from '../utils/urlUtils';
@@ -103,9 +103,20 @@ export default class ShareModel extends BaseModel<Share> {
 		return !!r;
 	}
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	public shareUrl(shareOwnerId: Uuid, id: Uuid, query: any = null): string {
+	public shareUrl(shareOwnerId: Uuid, id: Uuid, query: Record<string, string | number> = null): string {
 		return setQueryParameters(`${this.personalizedUserContentBaseUrl(shareOwnerId)}/shares/${id}`, query);
+	}
+
+	public async linkedNoteShareUrl(share: Share, linkedNoteJopId: string): Promise<string | null> {
+		if (share.recursive) return null;
+
+		const noteItem = await this.models().item().loadByJopId(share.owner_id, linkedNoteJopId);
+		if (!noteItem) return null;
+
+		const noteShare = await this.itemShare(ShareType.Note, noteItem.id);
+		if (!noteShare) return null;
+
+		return this.shareUrl(noteShare.owner_id, noteShare.id);
 	}
 
 	public async byItemId(itemId: Uuid): Promise<Share | null> {
@@ -117,9 +128,22 @@ export default class ShareModel extends BaseModel<Share> {
 		return this.db(this.tableName).select(this.defaultFields).whereIn('item_id', itemIds);
 	}
 
-	public async byItemAndRecursive(itemId: Uuid, recursive: boolean): Promise<Share | null> {
+	public async byItemAndRecursiveWithEnabledOwner(itemId: Uuid, recursive: boolean): Promise<Share | null> {
+		return this.db(this.tableName)
+			.select(this.selectFields(null, this.defaultFields, this.tableName))
+			.innerJoin('users', 'users.id', `${this.tableName}.owner_id`)
+			.innerJoin('user_items', 'user_items.user_id', `${this.tableName}.owner_id`)
+			.where(`${this.tableName}.item_id`, itemId)
+			.where(`${this.tableName}.recursive`, recursive ? 1 : 0)
+			.where('users.enabled', 1)
+			.where('user_items.item_id', itemId)
+			.first();
+	}
+
+	public async byUserItemAndRecursive(userId: Uuid, itemId: Uuid, recursive: boolean): Promise<Share | null> {
 		return this.db(this.tableName)
 			.select(this.defaultFields)
+			.where('owner_id', userId)
 			.where('item_id', itemId)
 			.where('recursive', recursive ? 1 : 0)
 			.first();
@@ -243,7 +267,7 @@ export default class ShareModel extends BaseModel<Share> {
 		};
 
 		const getPreviousShareId = (change: Change) => {
-			return this.models().change().unserializePreviousItem(change.previous_item)?.jop_share_id;
+			return change.previous_share_id;
 		};
 
 		const handleUpdated = async (change: Change, item: Item, share: Share, nextShareId: Uuid) => {
@@ -596,7 +620,10 @@ export default class ShareModel extends BaseModel<Share> {
 		const noteItem = await this.models().item().loadByJopId(owner.id, noteId);
 		if (!noteItem) throw new ErrorNotFound(`No such note: ${noteId}`);
 
-		const existingShare = await this.byItemAndRecursive(noteItem.id, recursive);
+		const existingShareForOwner = await this.byUserItemAndRecursive(owner.id, noteItem.id, recursive);
+		if (existingShareForOwner) return existingShareForOwner;
+
+		const existingShare = await this.byItemAndRecursiveWithEnabledOwner(noteItem.id, recursive);
 		if (existingShare) return existingShare;
 
 		const shareToSave: Share = {
@@ -651,8 +678,7 @@ export default class ShareModel extends BaseModel<Share> {
 				this.db('items')
 					.select('id')
 					.where('jop_share_id', '=', shareId),
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-			).groupBy('user_id') as any;
+			).groupBy('user_id') as unknown as { item_count: number; user_id: Uuid }[];
 	}
 
 

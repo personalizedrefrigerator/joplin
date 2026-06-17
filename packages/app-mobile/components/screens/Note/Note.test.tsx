@@ -134,7 +134,7 @@ const expectToBeEditing = async (editing: boolean) => {
 };
 
 const openEditor = async () => {
-	const editToggle = await screen.findByLabelText('Toggle view/edit');
+	const editToggle = await screen.findByLabelText('Edit');
 
 	fireEvent.press(editToggle);
 	await expectToBeEditing(true);
@@ -163,6 +163,7 @@ describe('screens/Note', () => {
 		await setupDatabaseAndSynchronizer(1);
 		await setupDatabaseAndSynchronizer(0);
 		await switchClient(0);
+		Setting.setValue('editor.mobile.defaultEditState', 'view');
 
 		store = createMockReduxStore();
 		setupGlobalStore(store);
@@ -377,30 +378,56 @@ describe('screens/Note', () => {
 	it.each([
 		[['viewer']],
 		[['editor']],
-	])('should initialize in the correct mode when noteVisiblePanes is %j', async (panes) => {
+	])('should initialize in the correct mode when noteVisiblePanes is %j, when default edit state is set to last', async (panes) => {
+		Setting.setValue('editor.mobile.defaultEditState', 'last');
 		const { unmount } = await setupNoteWithPanes(panes);
 		await expectToBeEditing(panes.includes('editor'));
 		unmount();
 	});
 
-	it('should show toggle button', async () => {
+	it('should show edit button when in view mode', async () => {
+		Setting.setValue('editor.mobile.defaultEditState', 'last');
 		const { unmount } = await setupNoteWithPanes(['viewer']);
-		const toggleButton = await screen.findByLabelText('Toggle view/edit');
-		expect(toggleButton).toBeVisible();
+		const editButton = await screen.findByLabelText('Edit');
+		expect(editButton).toBeVisible();
 		unmount();
 	});
 
 	it.each([
 		[['viewer']],
 		[['editor']],
-	])('should switch modes when toggle button is pressed', async (panes) => {
+	])('should switch modes when toggle button is pressed, when default edit state is set to last', async (panes) => {
+		Setting.setValue('editor.mobile.defaultEditState', 'last');
 		const initialEditing = panes.includes('editor');
 		const expectedEditing = !initialEditing;
 		const { unmount } = await setupNoteWithPanes(panes);
 		await expectToBeEditing(initialEditing);
-		const toggleButton = await screen.findByLabelText('Toggle view/edit');
+		const toggleButton = await screen.findByLabelText(/Edit|Stop editing/);
 		fireEvent.press(toggleButton);
 		await expectToBeEditing(expectedEditing);
+		unmount();
+	});
+
+	it('should set title, body, and parent_id correctly when a note is created via share', async () => {
+		const folder = await Folder.save({ title: 'Share target folder', parent_id: '' });
+		const note = await Note.save({ parent_id: folder.id }, { provisional: true });
+
+		store.dispatch({
+			type: 'NAV_GO',
+			routeName: 'Note',
+			noteId: note.id,
+			sharedData: { title: 'Shared title', text: 'https://example.com' },
+		});
+		store.dispatch({ type: 'NOTE_UPDATE_ONE', note: { ...note }, provisional: true });
+
+		const { unmount } = render(<WrappedNoteScreen />);
+
+		await waitForNoteToMatch(note.id, {
+			title: 'Shared title',
+			body: 'https://example.com',
+			parent_id: folder.id,
+		});
+
 		unmount();
 	});
 
@@ -427,7 +454,9 @@ describe('screens/Note', () => {
 	it.each([
 		[['viewer']],
 		[['editor']],
-	])('should preserve noteVisiblePanes state when leaving and returning to the same note', async (panes) => {
+	])('should preserve noteVisiblePanes state when leaving and returning to the same note, when default edit state is set to last', async (panes) => {
+		Setting.setValue('editor.mobile.defaultEditState', 'last');
+
 		const firstRender = await setupNoteWithPanes(panes);
 		await expectToBeEditing(panes.includes('editor'));
 		// Navigate away
@@ -457,7 +486,9 @@ describe('screens/Note', () => {
 	it.each([
 		[['viewer']],
 		[['editor']],
-	])('should preserve noteVisiblePanes state when navigating from note 1 to note 2', async (panes) => {
+	])('should preserve noteVisiblePanes state when navigating from note 1 to note 2, when default edit state is set to last', async (panes) => {
+		Setting.setValue('editor.mobile.defaultEditState', 'last');
+
 		// Open note 1
 		await act(async () => {
 			store.dispatch({

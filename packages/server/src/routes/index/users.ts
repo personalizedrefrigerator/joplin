@@ -10,7 +10,7 @@ import { View } from '../../services/MustacheService';
 import defaultView from '../../utils/defaultView';
 import { AclAction } from '../../models/BaseModel';
 import { NotificationKey } from '../../models/NotificationModel';
-import { AccountType, accountTypeOptions } from '../../models/UserModel';
+import { accountTypeOptions, accountTypeToString, getNextSubscriptionPlan } from '../../models/UserModel';
 import { confirmUrl, stripePortalUrl } from '../../utils/urlUtils';
 import { initStripe, updateCustomerEmail } from '../../utils/stripe';
 import { createCsrfTag } from '../../utils/csrf';
@@ -37,14 +37,13 @@ export function checkRepeatPassword(fields: CheckRepeatPasswordInput, required: 
 	return '';
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-function makeUser(userId: Uuid, fields: any): User {
+function makeUser(userId: Uuid, fields: Record<string, unknown>): User {
 	const user: User = {};
 
-	if ('email' in fields) user.email = fields.email;
-	if ('full_name' in fields) user.full_name = fields.full_name;
+	if ('email' in fields) user.email = fields.email as string;
+	if ('full_name' in fields) user.full_name = fields.full_name as string;
 
-	const password = checkRepeatPassword(fields, false);
+	const password = checkRepeatPassword(fields as unknown as CheckRepeatPasswordInput, false);
 	if (password) user.password = password;
 
 	user.id = userId;
@@ -63,8 +62,7 @@ interface FormFields {
 
 const router = new Router(RouteType.Web);
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-router.get('users/:id', async (path: SubPath, ctx: AppContext, formUser: User = null, error: any = null) => {
+router.get('users/:id', async (path: SubPath, ctx: AppContext, formUser: User = null, error: Error | null = null) => {
 	const owner = ctx.joplin.owner;
 	if (path.id !== 'me' && path.id !== owner.id) throw new ErrorForbidden();
 
@@ -110,8 +108,12 @@ router.get('users/:id', async (path: SubPath, ctx: AppContext, formUser: User = 
 		const lastPaymentAttempt = models.subscription().lastPaymentAttempt(subscription);
 
 		view.content.subscription = subscription;
-		view.content.showUpdateSubscriptionBasic = user.account_type !== AccountType.Basic;
-		view.content.showUpdateSubscriptionPro = user.account_type !== AccountType.Pro;
+
+		const { downgradeTo, upgradeTo } = getNextSubscriptionPlan(user.account_type);
+		view.content.showUpgradeSubscription = !!upgradeTo;
+		view.content.showDowngradeSubscription = !!downgradeTo;
+		view.content.upgradeSubscriptionPlan = upgradeTo && accountTypeToString(upgradeTo);
+
 		view.content.subLastPaymentStatus = lastPaymentAttempt.status;
 		view.content.subLastPaymentDate = formatDateTime(lastPaymentAttempt.time);
 	}
@@ -128,8 +130,7 @@ router.get('users/:id', async (path: SubPath, ctx: AppContext, formUser: User = 
 
 	if (config().accountTypesEnabled) {
 		view.content.showAccountTypes = true;
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-		view.content.accountTypes = accountTypeOptions().map((o: any) => {
+		view.content.accountTypes = accountTypeOptions().map((o: { value: number; selected?: boolean }) => {
 			o.selected = user.account_type === o.value;
 			return o;
 		});
@@ -241,7 +242,7 @@ router.post('users', async (path: SubPath, ctx: AppContext) => {
 
 		if (fields.id && fields.id !== owner.id) throw new ErrorForbidden();
 
-		user = makeUser(owner.id, fields);
+		user = makeUser(owner.id, fields as unknown as Record<string, unknown>);
 
 		if (fields.post_button) {
 			const userToSave: User = models.user().fromApiInput(user);

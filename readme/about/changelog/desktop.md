@@ -1,5 +1,116 @@
 # Joplin Desktop Changelog
 
+## [v3.6.14](https://github.com/laurent22/joplin/releases/tag/v3.6.14) - 2026-05-19T22:12:04Z
+
+- Fixed: Fix Markdown export folder paths with dot in parent path ([#15455](https://github.com/laurent22/joplin/issues/15455)) ([#15374](https://github.com/laurent22/joplin/issues/15374) by [@Rygaa](https://github.com/Rygaa))
+- Fixed: Importing from OneNote: Fix importing `.zip` files containing `.onetoc2` files ([#15476](https://github.com/laurent22/joplin/issues/15476)) ([#15430](https://github.com/laurent22/joplin/issues/15430) by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: In-editor rendering: Do not render empty inline HTML ([#15470](https://github.com/laurent22/joplin/issues/15470)) ([#15467](https://github.com/laurent22/joplin/issues/15467) by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+
+## [v3.6.13](https://github.com/laurent22/joplin/releases/tag/v3.6.13) - 2026-05-12T11:16:40Z
+
+- Improved: Front matter: Wrap long lines in the viewer ([#15356](https://github.com/laurent22/joplin/issues/15356)) ([#15328](https://github.com/laurent22/joplin/issues/15328))
+- Fixed: Fix fatal startup crash when sync target upgrade is required ([#15348](https://github.com/laurent22/joplin/issues/15348)) ([#15346](https://github.com/laurent22/joplin/issues/15346))
+- Fixed: Fix importing legacy keyboard shortcuts ([#15308](https://github.com/laurent22/joplin/issues/15308))
+- Fixed: Note list: Don't detect checkbox-like markup in tables and paragraphs as checkboxes ([#15357](https://github.com/laurent22/joplin/issues/15357)) ([#15307](https://github.com/laurent22/joplin/issues/15307) by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Prevent trashed notes from opening in edit mode ([#15248](https://github.com/laurent22/joplin/issues/15248))
+- Fixed: Rich Text Editor: Fix find/replace dialog fails to scroll to the next match ([#15298](https://github.com/laurent22/joplin/issues/15298)) ([#15297](https://github.com/laurent22/joplin/issues/15297) by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+
+## [v3.7.1](https://github.com/laurent22/joplin/releases/tag/v3.7.1) (Pre-release) - 2026-05-11T13:57:38Z
+
+- New: Add support for post-quantum cryptography (PQS) TLS ([#15055](https://github.com/laurent22/joplin/issues/15055) by Alex Martens)
+- New: Add support for whiteboards ([#15305](https://github.com/laurent22/joplin/issues/15305)) ([#15193](https://github.com/laurent22/joplin/issues/15193))
+- Improved: Add settings search to config screen ([#14820](https://github.com/laurent22/joplin/issues/14820)) ([#14763](https://github.com/laurent22/joplin/issues/14763) by [@slimuCS](https://github.com/slimuCS))
+- Improved: Add table editing commands (add/delete rows and columns) ([#14519](https://github.com/laurent22/joplin/issues/14519)) ([#12372](https://github.com/laurent22/joplin/issues/12372) by [@kanishka0411](https://github.com/kanishka0411))
+- Improved: Display inline error instead of smalltalk dialog for invalid master password ([#15236](https://github.com/laurent22/joplin/issues/15236) by [@himanshumishra1309](https://github.com/himanshumishra1309))
+- Improved: Do not load plugin if it is disabled ([#15083](https://github.com/laurent22/joplin/issues/15083))
+- Improved: Exclude user_data from note revisions ([#15245](https://github.com/laurent22/joplin/issues/15245) by [@alondmnt](https://github.com/alondmnt))
+- Improved: Speed up app startup by skipping unnecessary plugin file processing ([#15085](https://github.com/laurent22/joplin/issues/15085)) ([#15081](https://github.com/laurent22/joplin/issues/15081))
+- Improved: Update Disable Encryption dialog ([#15211](https://github.com/laurent22/joplin/issues/15211) by [@himanshumishra1309](https://github.com/himanshumishra1309))
+- Improved: Upgrade Electron to v40.9.2 ([#15192](https://github.com/laurent22/joplin/issues/15192) by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Add the ability to delete the default profile ([#15153](https://github.com/laurent22/joplin/issues/15153)) ([#14506](https://github.com/laurent22/joplin/issues/14506) by [@mrjo118](https://github.com/mrjo118))
+- Fixed: Avoid OOM when printing notes with large attachment links ([#15026](https://github.com/laurent22/joplin/issues/15026)) ([#13903](https://github.com/laurent22/joplin/issues/13903) by [@Rygaa](https://github.com/Rygaa))
+- Fixed: Fix inability to cancel the sync during the deletion step ([#15243](https://github.com/laurent22/joplin/issues/15243) by [@mrjo118](https://github.com/mrjo118))
+- Fixed: Fix inconsistent note order upon note creation, when custom order is set ([#14656](https://github.com/laurent22/joplin/issues/14656)) ([#14647](https://github.com/laurent22/joplin/issues/14647) by [@mrjo118](https://github.com/mrjo118))
+- Fixed: Fix potential unresolved promise race conditions when scheduling the sync ([#15216](https://github.com/laurent22/joplin/issues/15216) by [@mrjo118](https://github.com/mrjo118))
+- Fixed: Fix silent sync failure which prevents new changes being synced, when a single server object has an updated_time in the future ([#15262](https://github.com/laurent22/joplin/issues/15262) by [@mrjo118](https://github.com/mrjo118))
+- Fixed: Preserve timestamps when converting HTML notes ([#15275](https://github.com/laurent22/joplin/issues/15275)) ([#15263](https://github.com/laurent22/joplin/issues/15263) by [@izumedonabe](https://github.com/izumedonabe))
+- Fixed: When a note is deleted, tags can still be added or removed ([#15253](https://github.com/laurent22/joplin/issues/15253)) ([#15247](https://github.com/laurent22/joplin/issues/15247) by [@Vinayreddy765](https://github.com/Vinayreddy765))
+
+## [v3.6.11](https://github.com/laurent22/joplin/releases/tag/v3.6.11) - 2026-05-08T14:28:46Z
+
+- Improved: Importing from OneNote: Convert an ink-related import error to a warning ([#15197](https://github.com/laurent22/joplin/issues/15197) by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Improved: Importing from OneNote: Import created/updated timestamps and support special characters in titles ([#15213](https://github.com/laurent22/joplin/issues/15213) by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Improved: Importing from OneNote: Support large attachments ([#15195](https://github.com/laurent22/joplin/issues/15195) by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Fix Rich Text Editor fails to load in secondary windows ([#15190](https://github.com/laurent22/joplin/issues/15190)) ([#15189](https://github.com/laurent22/joplin/issues/15189) by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Fix positioning of nested ink containers ([#15196](https://github.com/laurent22/joplin/issues/15196)) ([#15194](https://github.com/laurent22/joplin/issues/15194) by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+
+## [v3.6.10](https://github.com/laurent22/joplin/releases/tag/v3.6.10) (Pre-release) - 2026-04-25T07:58:25Z
+
+- Improved: Add sync status icon and collapsible sync report to sidebar ([#15115](https://github.com/laurent22/joplin/issues/15115)) ([#14788](https://github.com/laurent22/joplin/issues/14788))
+- Improved: Apply Markdown formatting commands per-line ([#15164](https://github.com/laurent22/joplin/issues/15164)) ([#14854](https://github.com/laurent22/joplin/issues/14854) by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Improved: Importing from OneNote: Disable unresponsiveness warning while importing ([#15127](https://github.com/laurent22/joplin/issues/15127) by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Improved: Importing from OneNote: Improve display of note tags after converting to Markdown ([#15181](https://github.com/laurent22/joplin/issues/15181) by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Defer sync after master password save to prevent encryption enable race ([#15118](https://github.com/laurent22/joplin/issues/15118)) ([#15107](https://github.com/laurent22/joplin/issues/15107) by [@keshav0479](https://github.com/keshav0479))
+- Fixed: Fix copy/paste not working in Settings text fields ([#15099](https://github.com/laurent22/joplin/issues/15099))
+- Fixed: Fix hang when importing certain OneNote files ([#15159](https://github.com/laurent22/joplin/issues/15159)) ([#15132](https://github.com/laurent22/joplin/issues/15132) by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Fix pasting images from clipboard when no image/* format is reported ([#15101](https://github.com/laurent22/joplin/issues/15101)) ([#15100](https://github.com/laurent22/joplin/issues/15100))
+- Fixed: Importing from OneNote: Fix PDF printouts are imported as broken images ([#15124](https://github.com/laurent22/joplin/issues/15124) by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Importing from OneNote: Fix imported bold and italic aren't converted to Markdown ([#15187](https://github.com/laurent22/joplin/issues/15187) by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Importing from OneNote: Fix imported notes are often displayed in a Serif font ([#15186](https://github.com/laurent22/joplin/issues/15186) by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Importing from OneNote: Fix incorrect import of vertically-scaled ink ([#15110](https://github.com/laurent22/joplin/issues/15110) by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Importing from OneNote: Fix incorrectly positioned ink ([#15178](https://github.com/laurent22/joplin/issues/15178) by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Importing from OneNote: Fix large `.one` files with many attachments fail to import ([#15117](https://github.com/laurent22/joplin/issues/15117) by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Importing from OneNote: Fix text objects are displayed in a Serif font, when Calibri is unavailable ([#15179](https://github.com/laurent22/joplin/issues/15179) by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Importing from OneNote: Support importing nested ink containers ([#15109](https://github.com/laurent22/joplin/issues/15109)) ([#15092](https://github.com/laurent22/joplin/issues/15092) by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Improved: Fix freeze/crash when rapidly closing secondary windows ([#15035](https://github.com/laurent22/joplin/issues/15035)) ([#14968](https://github.com/laurent22/joplin/issues/14968) by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Improved: Updated packages sass (v1.95.1)
+- Fixed: Accessibility: Fix focus unexpectedly jumps to the note list while editing/navigating ([#15090](https://github.com/laurent22/joplin/issues/15090)) ([#15029](https://github.com/laurent22/joplin/issues/15029) by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Add global shortcut to show/hide Joplin ([#15013](https://github.com/laurent22/joplin/issues/15013)) ([#11805](https://github.com/laurent22/joplin/issues/11805) by Ashutosh Singh)
+- Fixed: Auto-generated note title retains inline markdown due to incomplete filtering ([#14947](https://github.com/laurent22/joplin/issues/14947)) ([#14946](https://github.com/laurent22/joplin/issues/14946) by [@MANVENDRA-github](https://github.com/MANVENDRA-github))
+- Fixed: Fix pasting in YesYouKan while Markdown editor is hidden ([#15037](https://github.com/laurent22/joplin/issues/15037))
+- Fixed: Fix undo/redo in plugins and the note titlebar ([#15042](https://github.com/laurent22/joplin/issues/15042)) ([#15023](https://github.com/laurent22/joplin/issues/15023) by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Markdown editor: Fix unselected `&lt;span&gt;`s are hidden in HTML notes ([#15089](https://github.com/laurent22/joplin/issues/15089) by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: OCR not working with Chinese and Norwegian language ([#15076](https://github.com/laurent22/joplin/issues/15076)) ([#14208](https://github.com/laurent22/joplin/issues/14208))
+- Fixed: Prevent sync panel from jumping (v2 with startup fix) ([#14881](https://github.com/laurent22/joplin/issues/14881)) ([#14788](https://github.com/laurent22/joplin/issues/14788) by [@dipanshurdev](https://github.com/dipanshurdev))
+- Fixed: Text copied from note viewer and pasted in an external rich text editor duplicates the codeblocks ([#14860](https://github.com/laurent22/joplin/issues/14860)) ([#14852](https://github.com/laurent22/joplin/issues/14852) by Ashutosh Singh)
+
+## [v3.6.8](https://github.com/laurent22/joplin/releases/tag/v3.6.8) (Pre-release) - 2026-04-07T07:28:36Z
+
+- Desktop: Fixed regression that prevented images from being pasted in editor ([#14750](https://github.com/laurent22/joplin/issues/14750))
+
+## [v3.6.7](https://github.com/laurent22/joplin/releases/tag/v3.6.7) (Pre-release) - 2026-04-05T15:21:11Z
+
+- Improved: Added fullscreen shortcut (Ctrl + Cmd + F) ([#14926](https://github.com/laurent22/joplin/issues/14926)) ([#9637](https://github.com/laurent22/joplin/issues/9637) by [@DevrG03](https://github.com/DevrG03))
+- Improved: Completed date/time is shown as a number ([#14808](https://github.com/laurent22/joplin/issues/14808)) ([#14797](https://github.com/laurent22/joplin/issues/14797) by [@Pixels57](https://github.com/Pixels57))
+- Improved: Enable Copy and Select All in viewer and read-only modes ([#14956](https://github.com/laurent22/joplin/issues/14956) by [@FischLu](https://github.com/FischLu))
+- Improved: Improve checkbox completion icon in detailed note list ([#14780](https://github.com/laurent22/joplin/issues/14780)) ([#14778](https://github.com/laurent22/joplin/issues/14778) by [@Ehtesham-Zahid](https://github.com/Ehtesham-Zahid))
+- Improved: Improve clarity of master password warning message ([#14724](https://github.com/laurent22/joplin/issues/14724)) ([#14717](https://github.com/laurent22/joplin/issues/14717) by [@Vinayreddy765](https://github.com/Vinayreddy765))
+- Improved: Replace smalltalk with React Dialog to add password visibility in encryption setup ([#14739](https://github.com/laurent22/joplin/issues/14739) by [@himanshumishra1309](https://github.com/himanshumishra1309))
+- Improved: Revert: Start sync when app opens or resumes ([#14889](https://github.com/laurent22/joplin/issues/14889))
+- Improved: Updated packages @playwright/test (v1.57.0), esbuild (v0.27.1), fs-extra (v11.3.3), glob (v11.1.0), nan (v2.24.0)
+- Improved: Upgrade Electron to v40.8.3 ([#14882](https://github.com/laurent22/joplin/issues/14882) by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Accessibility: Fix accessibility issues flagged by automated tools in the note properties dialog ([#14798](https://github.com/laurent22/joplin/issues/14798) by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Disable "Expand all notebooks" button when no sub-notebooks exist ([#14891](https://github.com/laurent22/joplin/issues/14891)) ([#14890](https://github.com/laurent22/joplin/issues/14890) by [@dipanshurdev](https://github.com/dipanshurdev))
+- Fixed: Fix JPEG image paste from clipboard on Linux ([#14750](https://github.com/laurent22/joplin/issues/14750)) ([#14613](https://github.com/laurent22/joplin/issues/14613) by [@moaaz-ae](https://github.com/moaaz-ae))
+- Fixed: Fix Markdown export losing folders that differ only by special characters ([#14869](https://github.com/laurent22/joplin/issues/14869)) ([#9436](https://github.com/laurent22/joplin/issues/9436) by [@lnxd](https://github.com/lnxd))
+- Fixed: Fix OneNote zip import path when .one files are at root level ([#14605](https://github.com/laurent22/joplin/issues/14605)) ([#14223](https://github.com/laurent22/joplin/issues/14223) by [@Kaushalendra-Marcus](https://github.com/Kaushalendra-Marcus))
+- Fixed: Fix changes made in an external editor are sometimes ignored ([#14957](https://github.com/laurent22/joplin/issues/14957)) ([#14954](https://github.com/laurent22/joplin/issues/14954) by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Fix crash when closing secondary windows ([#14892](https://github.com/laurent22/joplin/issues/14892)) ([#14628](https://github.com/laurent22/joplin/issues/14628) by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Fix incorrectly re-instated code ([#14962](https://github.com/laurent22/joplin/issues/14962)) ([#14628](https://github.com/laurent22/joplin/issues/14628) by [@mrjo118](https://github.com/mrjo118))
+- Fixed: Fix inline formatting with trailing/leading whitespace ([#14991](https://github.com/laurent22/joplin/issues/14991)) ([#14990](https://github.com/laurent22/joplin/issues/14990) by [@Harsh16gupta](https://github.com/Harsh16gupta))
+- Fixed: Fix most Windows-specific test failures ([#14904](https://github.com/laurent22/joplin/issues/14904)) ([#14903](https://github.com/laurent22/joplin/issues/14903) by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Fix renderer crashes still occuring due to incorrect merge ([#14953](https://github.com/laurent22/joplin/issues/14953)) ([#14628](https://github.com/laurent22/joplin/issues/14628) by [@mrjo118](https://github.com/mrjo118))
+- Fixed: Fixed Custom Dictionary.txt being saved to wrong directory ([#14749](https://github.com/laurent22/joplin/issues/14749)) ([#12910](https://github.com/laurent22/joplin/issues/12910) by [@Harsh16gupta](https://github.com/Harsh16gupta))
+- Fixed: Frontmatter export: Include notebook icon in frontmatter export ([#14582](https://github.com/laurent22/joplin/issues/14582)) ([#9673](https://github.com/laurent22/joplin/issues/9673) by Ashutosh Singh)
+- Fixed: Importing from OneNote: Fix import of ink with negative bounding box coordinates ([#14981](https://github.com/laurent22/joplin/issues/14981) by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Incomplete (out of screen) ABC Sheet Music rendering ([#14767](https://github.com/laurent22/joplin/issues/14767)) ([#14245](https://github.com/laurent22/joplin/issues/14245) by [@Harsh16gupta](https://github.com/Harsh16gupta))
+- Fixed: Inline computed styles when copying from the Markdown preview pane ([#14973](https://github.com/laurent22/joplin/issues/14973)) ([#14950](https://github.com/laurent22/joplin/issues/14950) by [@Harsh16gupta](https://github.com/Harsh16gupta))
+- Fixed: Prevent Plugin API callback registry memory leak ([#14920](https://github.com/laurent22/joplin/issues/14920)) ([#14919](https://github.com/laurent22/joplin/issues/14919) by [@Sandesh13fr](https://github.com/Sandesh13fr))
+- Fixed: Prevent duplicate tags caused by Unicode normalization ([#14599](https://github.com/laurent22/joplin/issues/14599)) ([#14540](https://github.com/laurent22/joplin/issues/14540) by [@itisrohit](https://github.com/itisrohit))
+- Fixed: Prevent renderer crash when closing secondary window ([#14849](https://github.com/laurent22/joplin/issues/14849)) ([#14628](https://github.com/laurent22/joplin/issues/14628) by [@Kaushalendra-Marcus](https://github.com/Kaushalendra-Marcus))
+- Fixed: RTE checklists should create unchecked items on Enter ([#14918](https://github.com/laurent22/joplin/issues/14918)) ([#14914](https://github.com/laurent22/joplin/issues/14914) by [@Sandesh13fr](https://github.com/Sandesh13fr))
+- Fixed: Share owner sees "Leave notebook" instead of "Share notebook" when server is offline ([#14923](https://github.com/laurent22/joplin/issues/14923)) ([#12994](https://github.com/laurent22/joplin/issues/12994) by [@Rygaa](https://github.com/Rygaa))
+
 ## [v3.6.6](https://github.com/laurent22/joplin/releases/tag/v3.6.6) (Pre-release) - 2026-03-17T10:44:55Z
 
 - Improved: Add support for Ctrl/Cmd+Wheel to zoom in and out ([#14684](https://github.com/laurent22/joplin/issues/14684)) ([#7914](https://github.com/laurent22/joplin/issues/7914) by Ashutosh Singh)

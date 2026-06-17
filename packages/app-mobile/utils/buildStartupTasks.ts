@@ -13,9 +13,10 @@ import { loadKeychainServiceAndSettings } from '@joplin/lib/services/SettingUtil
 import { setLocale } from '@joplin/lib/locale';
 import SyncTargetJoplinServer from '@joplin/lib/SyncTargetJoplinServer';
 import SyncTargetJoplinCloud from '@joplin/lib/SyncTargetJoplinCloud';
+import { completePendingAuthentication } from '@joplin/lib/services/joplinCloudUtils';
 import SyncTargetOneDrive from '@joplin/lib/SyncTargetOneDrive';
 import initProfile from '@joplin/lib/services/profileConfig/initProfile';
-const VersionInfo = require('react-native-version-info').default;
+import VersionInfo from 'react-native-version-info';
 const AlarmServiceDriver = require('../services/AlarmServiceDriver').default;
 import NavService from '@joplin/lib/services/NavService';
 import { Dispatch, Store } from 'redux';
@@ -39,9 +40,9 @@ import SearchEngine from '@joplin/lib/services/search/SearchEngine';
 import WelcomeUtils from '@joplin/lib/WelcomeUtils';
 import SyncTargetRegistry from '@joplin/lib/SyncTargetRegistry';
 import SyncTargetFilesystem from '@joplin/lib/SyncTargetFilesystem';
-const SyncTargetNextcloud = require('@joplin/lib/SyncTargetNextcloud.js');
-const SyncTargetWebDAV = require('@joplin/lib/SyncTargetWebDAV.js');
-const SyncTargetDropbox = require('@joplin/lib/SyncTargetDropbox.js');
+import SyncTargetNextcloud from '@joplin/lib/SyncTargetNextcloud';
+import SyncTargetWebDAV from '@joplin/lib/SyncTargetWebDAV';
+import SyncTargetDropbox from '@joplin/lib/SyncTargetDropbox';
 const SyncTargetAmazonS3 = require('@joplin/lib/SyncTargetAmazonS3.js');
 import SyncTargetJoplinServerSAML from '@joplin/lib/SyncTargetJoplinServerSAML';
 import initLib from '@joplin/lib/initLib';
@@ -93,10 +94,10 @@ import { Platform } from 'react-native';
 import VoiceTyping from '../services/voiceTyping/VoiceTyping';
 import whisper from '../services/voiceTyping/whisper';
 import PerFolderSortOrderService from '@joplin/lib/services/sortOrder/PerFolderSortOrderService';
+const { runStartupTests } = require('@joplin/mobile-config');
 
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-function resourceFetcher_downloadComplete(event: any) {
+function resourceFetcher_downloadComplete(event: { id: string; encrypted: boolean }) {
 	if (event.encrypted) {
 		void DecryptionWorker.instance().scheduleStart();
 	}
@@ -312,12 +313,6 @@ const buildStartupTasks = (
 			Setting.setValue('welcome.enabled', false);
 		}
 
-		// Note: for now we hard-code the folder sort order as we need to
-		// create a UI to allow customisation (started in branch mobile_add_sidebar_buttons)
-		Setting.setValue('folders.sortOrder.field', 'title');
-		Setting.setValue('folders.sortOrder.reverse', false);
-
-
 		reg.logger().info(`Sync target: ${Setting.value('sync.target')}`);
 
 		setLocale(Setting.value('locale'));
@@ -418,6 +413,9 @@ const buildStartupTasks = (
 	addTask('buildStartupTasks/run migrations', async () => {
 		await MigrationService.instance().run();
 	});
+	addTask('buildStartupTasks/complete pending Joplin Cloud auth', async () => {
+		await completePendingAuthentication();
+	});
 	addTask('buildStartupTasks/set up background tasks', async () => {
 		initializeUserFetcher();
 		PoorManIntervals.setInterval(() => { void userFetcher(); }, 1000 * 60 * 60);
@@ -485,7 +483,7 @@ const buildStartupTasks = (
 		// call will throw an error, alerting us of the issue. Otherwise it will
 		// just print some messages in the console.
 		// ----------------------------------------------------------------------------
-		if (Setting.value('env') === 'dev') {
+		if (runStartupTests) {
 			await runRsaIntegrationTests();
 			await runCryptoIntegrationTests();
 			await runOnDeviceFsDriverTests();

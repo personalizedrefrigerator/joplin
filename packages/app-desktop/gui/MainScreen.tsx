@@ -1,5 +1,6 @@
 import * as React from 'react';
-import ResizableLayout from './ResizableLayout/ResizableLayout';
+import { Dispatch } from 'redux';
+import ResizableLayout, { RenderItemEvent } from './ResizableLayout/ResizableLayout';
 import findItemByKey from './ResizableLayout/utils/findItemByKey';
 import { MoveButtonClickEvent } from './ResizableLayout/MoveButtons';
 import { move } from './ResizableLayout/utils/movements';
@@ -49,18 +50,16 @@ import Logger from '@joplin/utils/Logger';
 
 const logger = Logger.create('MainScreen');
 
-const ipcRenderer = require('electron').ipcRenderer;
+import { ipcRenderer } from 'electron';
 
 interface Props {
 	plugins: PluginStates;
 	pluginHtmlContents: PluginHtmlContents;
 	pluginsLoaded: boolean;
 	hasNotesBeingSaved: boolean;
-	// eslint-disable-next-line @typescript-eslint/ban-types -- Old code before rule was applied
-	dispatch: Function;
+	dispatch: Dispatch;
 	mainLayout: LayoutItem;
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	style: any;
+	style: React.CSSProperties & { width?: number; height?: number };
 	layoutMoveMode: boolean;
 	shouldUpgradeSyncTarget: boolean;
 	hasDisabledSyncItems: boolean;
@@ -96,14 +95,10 @@ interface ShareFolderDialogOptions {
 }
 
 interface State {
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	promptOptions: any;
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	notePropertiesDialogOptions: any;
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	noteContentPropertiesDialogOptions: any;
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	shareNoteDialogOptions: any;
+	promptOptions: Record<string, unknown> | null;
+	notePropertiesDialogOptions: Record<string, unknown>;
+	noteContentPropertiesDialogOptions: Record<string, unknown>;
+	shareNoteDialogOptions: Record<string, unknown>;
 	shareFolderDialogOptions: ShareFolderDialogOptions;
 }
 
@@ -141,10 +136,9 @@ const layoutKeyToLabel = (key: string, plugins: PluginStates) => {
 
 class MainScreenComponent extends React.Component<Props, State> {
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	private waitForNotesSavedIID_: any;
+	private waitForNotesSavedIID_: ReturnType<typeof setInterval>;
 	private styleKey_: string;
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- styles_ holds heterogeneous values (CSSProperties for nested style blocks, plus computed numbers like rowHeight)
 	private styles_: any;
 
 	public constructor(props: Props) {
@@ -174,8 +168,7 @@ class MainScreenComponent extends React.Component<Props, State> {
 
 		window.addEventListener('resize', this.window_resize);
 
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-		ipcRenderer.on('asynchronous-message', (_event: any, message: string, args: any) => {
+		ipcRenderer.on('asynchronous-message', (_event: import('electron').IpcRendererEvent, message: string, args: { url: string }) => {
 			if (message === 'openCallbackUrl') {
 				this.openCallbackUrl(args.url);
 			}
@@ -219,7 +212,7 @@ class MainScreenComponent extends React.Component<Props, State> {
 		const pluginIds = Object.keys(plugins);
 		const itemsToRemove: string[] = [];
 		iterateItems(newLayout, (_itemIndex: number, item: LayoutItem, _parent: LayoutItem) => {
-			if (item.context && item.context.pluginId && !pluginIds.includes(item.context.pluginId)) {
+			if (item.context && item.context.pluginId && !pluginIds.includes(item.context.pluginId as string)) {
 				itemsToRemove.push(item.key);
 			}
 			return true;
@@ -317,8 +310,7 @@ class MainScreenComponent extends React.Component<Props, State> {
 	}
 
 	public updateRootLayoutSize() {
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-		this.updateMainLayout(produce(this.props.mainLayout, (draft: any) => {
+		this.updateMainLayout(produce(this.props.mainLayout, (draft: LayoutItem) => {
 			const s = this.rootLayoutSize();
 			draft.width = s.width;
 			draft.height = s.height;
@@ -360,8 +352,7 @@ class MainScreenComponent extends React.Component<Props, State> {
 		}
 	}
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	public layoutModeListenerKeyDown(event: any) {
+	public layoutModeListenerKeyDown(event: KeyboardEvent) {
 		if (event.key !== 'Escape') return;
 		if (!this.props.layoutMoveMode) return;
 		void CommandService.instance().execute('toggleLayoutMoveMode');
@@ -431,11 +422,9 @@ class MainScreenComponent extends React.Component<Props, State> {
 		return this.styles_;
 	}
 
-	// eslint-disable-next-line @typescript-eslint/ban-types -- Old code before rule was applied
-	private renderNotificationMessage(message: string, callForAction: string = null, callForActionHandler: Function = null, callForAction2: string = null, callForActionHandler2: Function = null) {
+	private renderNotificationMessage(message: string, callForAction: string = null, callForActionHandler: ()=> void = null, callForAction2: string = null, callForActionHandler2: ()=> void = null) {
 		const theme = themeStyle(this.props.themeId);
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-		const urlStyle: any = { color: theme.colorWarnUrl, textDecoration: 'underline' };
+		const urlStyle: React.CSSProperties = { color: theme.colorWarnUrl, textDecoration: 'underline' };
 
 		if (!callForAction) return <span>{message}</span>;
 
@@ -459,8 +448,7 @@ class MainScreenComponent extends React.Component<Props, State> {
 		);
 	}
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	public renderNotification(theme: ThemeStyle, styles: any) {
+	public renderNotification(theme: ThemeStyle, styles: Record<string, React.CSSProperties>) {
 		if (!this.messageBoxVisible()) return null;
 
 		const onViewStatusScreen = () => {
@@ -635,8 +623,7 @@ class MainScreenComponent extends React.Component<Props, State> {
 			props.shouldSwitchToAppleSiliconVersion;
 	}
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	private resizableLayout_resize(event: any) {
+	private resizableLayout_resize(event: { layout: LayoutItem }) {
 		this.updateMainLayout(event.layout);
 	}
 
@@ -645,8 +632,7 @@ class MainScreenComponent extends React.Component<Props, State> {
 		this.updateMainLayout(newLayout);
 	}
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	private resizableLayout_renderItem(key: string, event: any) {
+	private resizableLayout_renderItem(key: string, event: RenderItemEvent): React.ReactNode {
 		// Key should never be undefined but somehow it can happen, also not
 		// clear how. For now in this case render nothing so that the app
 		// doesn't crash.
@@ -660,8 +646,7 @@ class MainScreenComponent extends React.Component<Props, State> {
 
 		// const viewsToRemove:string[] = [];
 
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-		const components: any = {
+		const components: Record<string, ()=> React.ReactNode> = {
 			sideBar: () => {
 				return <Sidebar key={key} />;
 			},
@@ -742,6 +727,8 @@ class MainScreenComponent extends React.Component<Props, State> {
 				}
 			});
 		}
+
+		return null;
 	}
 
 	public renderPluginDialogs() {
@@ -809,8 +796,7 @@ class MainScreenComponent extends React.Component<Props, State> {
 					lastDeletion={this.props.lastDeletion}
 					lastDeletionNotificationTime={this.props.lastDeletionNotificationTime}
 					themeId={this.props.themeId}
-					// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-					dispatch={this.props.dispatch as any}
+					dispatch={this.props.dispatch as unknown as import('redux').Dispatch}
 				/>
 				<UpdateNotification />
 				<PluginNotification

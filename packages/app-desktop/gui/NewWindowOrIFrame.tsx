@@ -44,6 +44,12 @@ const useDocument = (
 			setDoc(iframeElement?.contentWindow?.document);
 		} else if (mode === WindowMode.NewWindow) {
 			openedWindow = window.open('about:blank');
+
+			// Required to support TinyMCE:
+			openedWindow.document.open();
+			openedWindow.document.write('<!DOCTYPE html><html><head></head><body></body></html>');
+			openedWindow.document.close();
+
 			setDoc(openedWindow.document);
 
 			// .onbeforeunload and .onclose events don't seem to fire when closed by a user -- rely on polling
@@ -93,10 +99,6 @@ type OnSetLoaded = (loaded: boolean)=> void;
 const useDocumentSetup = (doc: Document|null, setLoaded: OnSetLoaded) => {
 	useEffect(() => {
 		if (!doc) return;
-
-		doc.open();
-		doc.write('<!DOCTYPE html><html><head></head><body></body></html>');
-		doc.close();
 
 		const cssUrls = [
 			'style.min.css',
@@ -148,8 +150,7 @@ const NewWindowOrIFrame: React.FC<Props> = props => {
 	const parentNode = loaded ? doc?.body : null;
 	const wrappedChildren = <WindowIdContext.Provider value={props.windowId}>{props.children}</WindowIdContext.Provider>;
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Needed to allow adding the portal to the DOM
-	const contentPortal = parentNode && createPortal(wrappedChildren, parentNode) as any;
+	const contentPortal = parentNode && createPortal(wrappedChildren, parentNode);
 	if (props.mode === WindowMode.NewWindow) {
 		return <div style={{ display: 'none' }}>{contentPortal}</div>;
 	} else {

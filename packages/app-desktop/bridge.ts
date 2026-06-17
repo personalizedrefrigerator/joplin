@@ -1,7 +1,7 @@
 import ElectronAppWrapper from './ElectronAppWrapper';
 import shim, { MessageBoxType } from '@joplin/lib/shim';
 import { _, setLocale } from '@joplin/lib/locale';
-import { BrowserWindow, nativeTheme, nativeImage, shell, dialog, MessageBoxSyncOptions, safeStorage, Menu, MenuItemConstructorOptions, MenuItem, BrowserWindowConstructorOptions, FileFilter, SaveDialogOptions } from 'electron';
+import { BrowserWindow, nativeTheme, nativeImage, shell, dialog, MessageBoxSyncOptions, safeStorage, Menu, MenuItemConstructorOptions, MenuItem, BrowserWindowConstructorOptions, FileFilter, SaveDialogOptions, globalShortcut } from 'electron';
 import { dirname, toSystemSlashes } from '@joplin/lib/path-utils';
 import { fileUriToPath } from '@joplin/utils/url';
 import { urlDecode } from '@joplin/lib/string-utils';
@@ -46,6 +46,7 @@ export class Bridge {
 
 	private extraAllowedExtensions_: string[] = [];
 	private onAllowedExtensionsChangeListener_: OnAllowedExtensionsChange = ()=>{};
+	private registeredGlobalHotkey_ = '';
 
 	public constructor(electronWrapper: ElectronAppWrapper, appId: string, appName: string, rootProfileDir: string, autoUploadCrashDumps: boolean, altInstanceId: string) {
 		this.electronWrapper_ = electronWrapper;
@@ -207,6 +208,52 @@ export class Bridge {
 		this.onAllowedExtensionsChangeListener_ = listener;
 	}
 
+	public updateGlobalHotkey(accelerator: string) {
+		// Skip if the accelerator hasn't changed
+		if (accelerator === this.registeredGlobalHotkey_) return;
+
+		// Unregister the previous shortcut (only Joplin's own)
+		this.unregisterGlobalHotkey();
+
+		if (!accelerator) return;
+
+		try {
+			const registered = globalShortcut.register(accelerator, () => {
+				const win = this.mainWindow();
+				if (!win) return;
+
+				if (win.isVisible() && win.isFocused()) {
+					win.hide();
+				} else {
+					if (win.isMinimized()) win.restore();
+					win.show();
+					// eslint-disable-next-line no-restricted-properties
+					win.focus();
+				}
+			});
+
+			if (registered) {
+				this.registeredGlobalHotkey_ = accelerator;
+			} else {
+				console.warn(`Bridge: Failed to register global shortcut: ${accelerator}`);
+			}
+		} catch (error) {
+			console.error(`Bridge: Error registering global shortcut "${accelerator}":`, error);
+		}
+	}
+
+	public unregisterGlobalHotkey() {
+		if (this.registeredGlobalHotkey_) {
+			try {
+				globalShortcut.unregister(this.registeredGlobalHotkey_);
+			} catch (error) {
+
+				console.warn('Bridge: Error removing global shortcut:', error);
+			}
+			this.registeredGlobalHotkey_ = '';
+		}
+	}
+
 	public async captureException(error: unknown) {
 		Sentry.captureException(error);
 		// We wait to give the "beforeSend" event handler time to process the crash dump and write
@@ -269,15 +316,13 @@ export class Bridge {
 	// Perhaps the easiest would be to patch electron-context-menu to
 	// support the renderer process again. Or possibly revert to an old
 	// version of electron-context-menu.
-	// eslint-disable-next-line @typescript-eslint/ban-types -- Old code before rule was applied
-	public setupContextMenu(_spellCheckerMenuItemsHandler: Function) {
+	public setupContextMenu(_spellCheckerMenuItemsHandler: (misspelledWord: string, dictionarySuggestions: string[])=> void) {
 		require('./services/electron-context-menu')({
 			allWindows: [this.mainWindow()],
 
 			electronApp: this.electronApp(),
 
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-			shouldShowMenu: (_event: any, params: any) => {
+			shouldShowMenu: (_event: unknown, params: { isEditable: boolean }) => {
 				return params.isEditable;
 			},
 
@@ -362,16 +407,14 @@ export class Bridge {
 
 	public async showOpenDialog(options: OpenDialogOptions = null) {
 		if (!options) options = {};
-		let fileType = 'file';
+		let fileType: keyof LastSelectedPath = 'file';
 		if (options.properties && options.properties.includes('openDirectory')) fileType = 'directory';
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-		if (!('defaultPath' in options) && (this.lastSelectedPaths_ as any)[fileType]) options.defaultPath = (this.lastSelectedPaths_ as any)[fileType];
+		if (!('defaultPath' in options) && this.lastSelectedPaths_[fileType]) options.defaultPath = this.lastSelectedPaths_[fileType];
 		if (!('createDirectory' in options)) options.createDirectory = true;
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- App-internal OpenDialogOptions.properties is string[]; Electron's is a stricter union
 		const { filePaths } = await dialog.showOpenDialog(this.activeWindow(), options as any);
 		if (filePaths && filePaths.length) {
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-			(this.lastSelectedPaths_ as any)[fileType] = dirname(filePaths[0]);
+			this.lastSelectedPaths_[fileType] = dirname(filePaths[0]);
 		}
 		return filePaths;
 	}
@@ -432,6 +475,10 @@ export class Bridge {
 
 	public setLocale(locale: string) {
 		setLocale(locale);
+	}
+
+	public setEnableUnresponsiveCheck(enabled: boolean) {
+		this.electronWrapper_.setEnableUnresponsiveCheck(enabled);
 	}
 
 	public get Menu() {

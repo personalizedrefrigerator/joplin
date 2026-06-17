@@ -1,12 +1,13 @@
 import { RefObject, useEffect, useMemo, useRef } from 'react';
 import shim from '@joplin/lib/shim';
-import Setting from '@joplin/lib/models/Setting';
+import Setting, { AppType } from '@joplin/lib/models/Setting';
 import { Platform } from 'react-native';
 import { SetUpResult } from '../types';
 import { themeStyle } from '../../components/global-style';
 import Logger from '@joplin/utils/Logger';
 import { WebViewControl } from '../../components/ExtendedWebView/types';
 import { MainProcessApi, OnScrollCallback, RendererControl, RendererProcessApi, RendererWebViewOptions, RenderOptions } from './types';
+import { PluginOptions } from '@joplin/renderer/MarkupToHtml';
 import PluginService from '@joplin/lib/services/plugins/PluginService';
 import RNToWebViewMessenger from '../../utils/ipc/RNToWebViewMessenger';
 import useEditPopup from './utils/useEditPopup';
@@ -33,10 +34,11 @@ interface Props {
 const useSource = (tempDirPath: string) => {
 	const injectedJs = useMemo(() => {
 		const subValues = Setting.subValues('markdown.plugin', Setting.toPlainObject());
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-		const pluginOptions: any = {};
+		const pluginOptions: PluginOptions = {};
 		for (const n in subValues) {
-			pluginOptions[n] = { enabled: subValues[n] };
+			const appTypes = Setting.settingMetadata(`markdown.plugin.${n}`).appTypes;
+			const enabled = !appTypes.includes(AppType.Mobile) ? false : !!subValues[n];
+			pluginOptions[n] = { enabled };
 		}
 
 		const rendererWebViewStaticOptions: RendererWebViewOptions = {

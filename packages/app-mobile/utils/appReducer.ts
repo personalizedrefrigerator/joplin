@@ -1,16 +1,14 @@
 import reducer from '@joplin/lib/reducer';
-import { AppState } from './types';
-import appDefaultState from './appDefaultState';
+import { AppState, Route } from './types';
+import appDefaultState, { DEFAULT_ROUTE } from './appDefaultState';
 import fastDeepEqual = require('fast-deep-equal');
 import Logger from '@joplin/utils/Logger';
 
 const logger = Logger.create('appReducer');
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-const navHistory: any[] = [];
+const navHistory: Route[] = [];
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-function historyCanGoBackTo(route: any) {
+function historyCanGoBackTo(route: Route) {
 	if (route.routeName === 'Folder') return false;
 
 	// This is an intermediate screen that acts more like a modal -- it should be skipped in the
@@ -25,26 +23,21 @@ function historyCanGoBackTo(route: any) {
 	return true;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Assigning types to these variables would be too big of a refactoring
-function removeAdjacentNoteDuplicates(items: any[]) {
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Assigning types to these variables would be too big of a refactoring
-	return items.filter((item: any, idx: number) => (idx >= 1) ? !(item.routeName === 'Note' && items[idx - 1].routeName === 'Note' && items[idx - 1].noteId === item.noteId) : true);
+function removeAdjacentNoteDuplicates(items: Route[]) {
+	return items.filter((item, idx) => (idx >= 1) ? !(item.routeName === 'Note' && items[idx - 1].routeName === 'Note' && items[idx - 1].noteId === item.noteId) : true);
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Assigning types to these variables would be too big of a refactoring
-function removeAdjacentFolderDuplicates(items: any[]) {
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Assigning types to these variables would be too big of a refactoring
-	return items.filter((item: any, idx: number) => (idx >= 1) ? !(item.routeName === 'Notes' && items[idx - 1].routeName === 'Notes' && items[idx - 1].folderId === item.folderId) : true);
+function removeAdjacentFolderDuplicates(items: Route[]) {
+	return items.filter((item, idx) => (idx >= 1) ? !(item.routeName === 'Notes' && items[idx - 1].routeName === 'Notes' && items[idx - 1].folderId === item.folderId) : true);
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Assigning types to these variables would be too big of a refactoring
-function removeLatestFolderIfSelected(items: any[], route: any) {
+function removeLatestFolderIfSelected(items: Route[], route: Route) {
 	if (items.length && route.routeName === 'Notes' && items[items.length - 1].folderId === route.folderId) {
 		items.splice(items.length - 1, 1);
 	}
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Routes/actions are heterogeneous redux NAV payloads (NAV_GO/NAV_BACK with optional folderId/tagId/noteId/isDeleted/etc.); typing them requires defining a discriminated action union across the mobile codebase
 const appReducer = (state = appDefaultState, action: any) => {
 	let newState = state;
 	let historyGoingBack = false;
@@ -76,6 +69,10 @@ const appReducer = (state = appDefaultState, action: any) => {
 					if (currentRoute.isDeleted) {
 						// Do not add the item to the history, and remove the last item in the history if that is now the selected item
 						removeLatestFolderIfSelected(navHistory, action);
+						// Push DEFAULT_ROUTE so there's always a valid back target after deletion
+						if (!navHistory.length) {
+							navHistory.push(DEFAULT_ROUTE);
+						}
 					} else if (isDifferentRoute) {
 						navHistory.push(currentRoute);
 					}

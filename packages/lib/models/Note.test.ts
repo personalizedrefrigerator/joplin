@@ -8,10 +8,14 @@ import Note from './Note';
 import Tag from './Tag';
 import ItemChange from './ItemChange';
 import Resource from './Resource';
-import { ResourceEntity } from '../services/database/types';
+import { NoteEntity, ResourceEntity } from '../services/database/types';
 import { toForwardSlashes } from '../path-utils';
 import * as ArrayUtils from '../ArrayUtils';
 import { ErrorCode } from '../errors';
+import ResourceService from '../services/ResourceService';
+import NoteResource from './NoteResource';
+import { serializeWhiteboard } from '../services/whiteboard/serialize';
+import { Canvas } from '../services/whiteboard/jsoncanvas';
 import SearchEngine from '../services/search/SearchEngine';
 import { getTrashFolderId } from '../services/trash';
 import getConflictFolderId from './utils/getConflictFolderId';
@@ -76,6 +80,93 @@ describe('models/Note', () => {
 		}
 	}));
 
+	test.each<[string, string[]]>([
+		// Single file card pointing at a resource.
+		[
+			JSON.stringify({
+				nodes: [
+					{ id: 'a', type: 'file', x: 0, y: 0, width: 100, height: 100, file: ':/06894e83b8f84d3d8cbe0f1587f9e226' },
+				],
+				edges: [],
+			}),
+			['06894e83b8f84d3d8cbe0f1587f9e226'],
+		],
+		// Multiple file cards — duplicates collapse, external paths are skipped.
+		[
+			JSON.stringify({
+				nodes: [
+					{ id: 'a', type: 'file', x: 0, y: 0, width: 100, height: 100, file: ':/06894e83b8f84d3d8cbe0f1587f9e226' },
+					{ id: 'b', type: 'file', x: 0, y: 0, width: 100, height: 100, file: ':/06894e83b8f84d3d8cbe0f1587f9e227' },
+					{ id: 'c', type: 'file', x: 0, y: 0, width: 100, height: 100, file: ':/06894e83b8f84d3d8cbe0f1587f9e226' },
+					{ id: 'd', type: 'file', x: 0, y: 0, width: 100, height: 100, file: 'https://example.com/photo.png' },
+				],
+				edges: [],
+			}),
+			['06894e83b8f84d3d8cbe0f1587f9e226', '06894e83b8f84d3d8cbe0f1587f9e227'],
+		],
+		// Non-file node types (text/link/group) don't reference items.
+		[
+			JSON.stringify({
+				nodes: [
+					{ id: 'a', type: 'text', x: 0, y: 0, width: 100, height: 100, text: 'hello' },
+					{ id: 'b', type: 'link', x: 0, y: 0, width: 100, height: 100, url: 'https://example.com' },
+					{ id: 'c', type: 'group', x: 0, y: 0, width: 100, height: 100, label: 'Section' },
+				],
+				edges: [],
+			}),
+			[],
+		],
+	])('should find linked items inside jsoncanvas fences', (canvasJson, expected) => {
+		const body = `\`\`\`jsoncanvas\n${canvasJson}\n\`\`\``;
+		const actual = Note.linkedItemIds(body);
+		expect(ArrayUtils.contentEquals(actual, expected)).toBe(true);
+	});
+
+	it('should merge fence refs with surrounding markdown links', () => {
+		const canvas: Canvas = {
+			nodes: [
+				{ id: 'a', type: 'file', x: 0, y: 0, width: 100, height: 100, file: ':/06894e83b8f84d3d8cbe0f1587f9e226' },
+			],
+			edges: [],
+		};
+		const body = `Intro [foo](:/06894e83b8f84d3d8cbe0f1587f9e227)\n\n${serializeWhiteboard('', canvas)}`;
+		const actual = Note.linkedItemIds(body);
+		expect(ArrayUtils.contentEquals(
+			actual,
+			['06894e83b8f84d3d8cbe0f1587f9e226', '06894e83b8f84d3d8cbe0f1587f9e227'],
+		)).toBe(true);
+	});
+
+	it('should associate whiteboard-referenced resources so they are not orphaned', (async () => {
+		// End-to-end: a resource referenced only from a jsoncanvas card must
+		// still be picked up by ResourceService.indexNoteResources, registered
+		// in note_resources, and survive the orphan reaper.
+		const folder = await Folder.save({ title: 'folder' });
+		const resource = await shim.createResourceFromPath(`${supportDir}/photo.jpg`);
+		const canvas: Canvas = {
+			nodes: [
+				{ id: 'card', type: 'file', x: 0, y: 0, width: 200, height: 160, file: `:/${resource.id}` },
+			],
+			edges: [],
+		};
+		const note = await Note.save({
+			title: 'whiteboard',
+			parent_id: folder.id,
+			body: serializeWhiteboard('', canvas),
+		});
+
+		const service = new ResourceService();
+		await service.indexNoteResources();
+
+		expect(await NoteResource.associatedNoteIds(resource.id)).toEqual([note.id]);
+
+		// Orphan reaper must NOT remove a resource that's still referenced by
+		// a whiteboard card — even though the ref lives outside markdown link
+		// syntax.
+		await service.deleteOrphanResources(0);
+		expect(!!(await Resource.load(resource.id))).toBe(true);
+	}));
+
 	it('should change the type of notes', (async () => {
 		const folder1 = await Folder.save({ title: 'folder1' });
 		let note1 = await Note.save({ title: 'ma note', parent_id: folder1.id });
@@ -111,8 +202,7 @@ describe('models/Note', () => {
 		for (let i = 0; i < testCases.length; i++) {
 			const t = testCases[i];
 
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-			const input: any = t[0];
+			const input = t[0] as NoteEntity;
 
 			const note1 = await Note.save(input);
 			const serialized = await Note.serialize(note1);
@@ -122,6 +212,36 @@ describe('models/Note', () => {
 			expect(unserialized.body).toBe(input.body);
 		}
 	}));
+
+	it('should add lock defaults for old sync notes', () => {
+		expect(Note.filter({
+			is_locked: undefined,
+			extracted_resource_ids: undefined,
+		})).toMatchObject({
+			is_locked: 0,
+			extracted_resource_ids: '',
+		});
+		expect(Note.filter({
+			is_locked: null,
+			extracted_resource_ids: null,
+		})).toMatchObject({
+			is_locked: 0,
+			extracted_resource_ids: '',
+		});
+	});
+
+	it('should default lock fields for new notes', async () => {
+		const note = await Note.save({});
+		const loadedNote = await Note.load(note.id);
+
+		expect(loadedNote.is_locked).toBe(0);
+		expect(loadedNote.extracted_resource_ids).toBe('');
+	});
+
+	it('should include lock state in preview fields', () => {
+		expect(Note.previewFields()).toContain('is_locked');
+		expect(Note.previewFields()).not.toContain('extracted_resource_ids');
+	});
 
 	it('should reset fields for a duplicate', (async () => {
 		const folder1 = await Folder.save({ title: 'folder1' });
@@ -273,7 +393,7 @@ describe('models/Note', () => {
 		const resourceDirE = markdownUtils.escapeLinkUrl(toForwardSlashes(resourceDir));
 		const fileProtocol = `file://${process.platform === 'win32' ? '/' : ''}`;
 
-		const testCases = [
+		const testCases: [boolean, string, string][] = [
 			[
 				false,
 				'',
@@ -313,7 +433,7 @@ describe('models/Note', () => {
 
 		for (const testCase of testCases) {
 			const [useAbsolutePaths, input, expected] = testCase;
-			const internalToExternal = await Note.replaceResourceInternalToExternalLinks(input as string, { useAbsolutePaths });
+			const internalToExternal = await Note.replaceResourceInternalToExternalLinks(input, { useAbsolutePaths });
 			expect(internalToExternal).toBe(expected);
 
 			const externalToInternal = await Note.replaceResourceExternalToInternalLinks(internalToExternal, { useAbsolutePaths });

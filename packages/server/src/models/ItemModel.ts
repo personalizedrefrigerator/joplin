@@ -5,7 +5,7 @@ import { isJoplinItemName, isJoplinResourceBlobPath, linkedResourceIds, serializ
 import { ModelType } from '@joplin/lib/BaseModel';
 import { ApiError, CustomErrorCode, ErrorConflict, ErrorForbidden, ErrorPayloadTooLarge, ErrorUnprocessableEntity, ErrorCode, ErrorBadRequest } from '../utils/errors';
 import { Knex } from 'knex';
-import { ChangePreviousItem } from './ChangeModel';
+import { ChangePreviousItem } from './ChangeModel/ChangeModel';
 import { unique } from '../utils/array';
 import StorageDriverBase, { Context } from './items/storage/StorageDriverBase';
 import { DbConnection, isUniqueConstraintError, returningSupported } from '../db';
@@ -39,6 +39,10 @@ export interface DeleteDatabaseContentOptions {
 	maxProcessedItems?: number;
 }
 
+export interface ProcessOrphanedItemsOptions {
+	batchSize?: number;
+}
+
 export interface SaveFromRawContentItem {
 	name: string;
 	body: Buffer;
@@ -46,8 +50,7 @@ export interface SaveFromRawContentItem {
 
 export interface SaveFromRawContentResultItem {
 	item: Item;
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	error: any;
+	error: (Error & { httpCode?: number; code?: string }) | { httpCode?: number; code?: string; message?: string; stack?: string } | null;
 }
 
 export type SaveFromRawContentResult = Record<string, SaveFromRawContentResultItem>;
@@ -152,8 +155,7 @@ export default class ItemModel extends BaseModel<Item> {
 		const output: Item = {};
 		const propNames = ['id', 'name', 'updated_time', 'created_time'];
 		for (const k of Object.keys(object)) {
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-			if (propNames.includes(k)) (output as any)[k] = (object as any)[k];
+			if (propNames.includes(k)) (output as Record<string, unknown>)[k] = (object as Record<string, unknown>)[k];
 		}
 		return output;
 	}
@@ -553,7 +555,7 @@ export default class ItemModel extends BaseModel<Item> {
 		return output;
 	}
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Returns either a NoteEntity / FolderEntity / ResourceEntity / TagEntity etc. depending on jop_type; callers consume specific properties without narrowing
 	public itemToJoplinItem(itemRow: Item): any {
 		if (itemRow.jop_type <= 0) throw new Error(`Not a Joplin item: ${itemRow.id}`);
 		if (!itemRow.content) throw new Error('Item content is missing');
@@ -589,7 +591,7 @@ export default class ItemModel extends BaseModel<Item> {
 			error: Error;
 			resourceIds?: string[];
 			isNote?: boolean;
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Heterogeneous Joplin entity types (Note/Folder/Resource/Tag) — see itemToJoplinItem
 			joplinItem?: any;
 		}
 
@@ -632,13 +634,24 @@ export default class ItemModel extends BaseModel<Item> {
 						name: rawItem.name,
 					};
 
-					// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
+					// eslint-disable-next-line @typescript-eslint/no-explicit-any -- See itemToJoplinItem - heterogeneous entity type
 					let joplinItem: any = null;
 
 					let resourceIds: string[] = [];
 
 					if (isJoplinItem) {
 						joplinItem = await unserializeJoplinItem(rawItem.body.toString());
+
+						// Null bytes break Joplin's serialised item format and can cause
+						// silent truncation in some HTTP clients (notably React Native on
+						// iOS), making the item unreadable on those devices.
+						const nul = String.fromCharCode(0);
+						for (const k of Object.keys(joplinItem)) {
+							if (typeof joplinItem[k] === 'string' && joplinItem[k].includes(nul)) {
+								throw new ErrorUnprocessableEntity(`Item ${rawItem.name} cannot be saved because its ${k} contains a null byte`);
+							}
+						}
+
 						isNote = joplinItem.type_ === ModelType.Note;
 						resourceIds = isNote ? linkedResourceIds(joplinItem.body) : [];
 
@@ -723,55 +736,50 @@ export default class ItemModel extends BaseModel<Item> {
 
 				const itemToSave = { ...o.item };
 
+				const content = itemToSave.content;
+				delete itemToSave.content;
+
+				itemToSave.content_storage_id = (await this.storageDriver()).storageId;
+
+				itemToSave.content_size = content ? content.byteLength : 0;
+
+				// Here we save the item row and content, and we want to
+				// make sure that either both are saved or none of them.
+				// The savepoint wraps the entire operation so that any
+				// error (including unique constraint violations) is
+				// rolled back cleanly without aborting the outer
+				// transaction.
+
+				// TODO: When an item is uploaded multiple times
+				// simultaneously there could be a race condition, where the
+				// content would not match the db row (for example, the
+				// content_size would differ).
+				//
+				// Possible solutions:
+				//
+				// - Row-level lock on items.id, and release once the
+				//   content is saved.
+				// - Or external lock - eg. Redis.
+
+				const savePoint = await this.setSavePoint();
+
 				try {
-					const content = itemToSave.content;
-					delete itemToSave.content;
-
-					itemToSave.content_storage_id = (await this.storageDriver()).storageId;
-
-					itemToSave.content_size = content ? content.byteLength : 0;
-
-					// Here we save the item row and content, and we want to
-					// make sure that either both are saved or none of them.
-					// This is done by setting up a save point before saving the
-					// row, and rollbacking if the content cannot be saved.
-					//
-					// Normally, since we are in a transaction, throwing an
-					// error should work, but since we catch all errors within
-					// this block it doesn't work.
-
-					// TODO: When an item is uploaded multiple times
-					// simultaneously there could be a race condition, where the
-					// content would not match the db row (for example, the
-					// content_size would differ).
-					//
-					// Possible solutions:
-					//
-					// - Row-level lock on items.id, and release once the
-					//   content is saved.
-					// - Or external lock - eg. Redis.
-
-					const savePoint = await this.setSavePoint();
 					const savedItem = await this.saveForUser(user.id, itemToSave);
-
-					try {
-						await this.storageDriverWrite(savedItem.id, content, { models: this.models() });
-						await this.releaseSavePoint(savePoint);
-					} catch (error) {
-						await this.rollbackSavePoint(savePoint);
-						throw error;
-					}
+					await this.storageDriverWrite(savedItem.id, content, { models: this.models() });
 
 					if (o.isNote) {
 						await this.models().itemResource().deleteByItemId(savedItem.id);
 						await this.models().itemResource().addResourceIds(savedItem.id, o.resourceIds);
 					}
 
+					await this.releaseSavePoint(savePoint);
+
 					output[name] = {
 						item: savedItem,
 						error: null,
 					};
 				} catch (error) {
+					await this.rollbackSavePoint(savePoint);
 					output[name] = {
 						item: null,
 						error: error,
@@ -883,14 +891,11 @@ export default class ItemModel extends BaseModel<Item> {
 		};
 	}
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	public async allForDebug(): Promise<any[]> {
+	public async allForDebug(): Promise<(Omit<Item, 'content'> & { content?: string | Buffer })[]> {
 		const items = await this.all({ fields: ['*'] });
 		return items.map(i => {
 			if (!i.content) return i;
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-			i.content = i.content.toString() as any;
-			return i;
+			return { ...i, content: i.content.toString() };
 		});
 	}
 
@@ -967,28 +972,37 @@ export default class ItemModel extends BaseModel<Item> {
 		if (storageDriverFallback) await storageDriverFallback.delete(ids, { models: this.models() });
 	}
 
-	public async deleteForUser(userId: Uuid, item: Item, options: DeleteOptions = {}): Promise<void> {
-		if (this.isRootSharedFolder(item)) {
-			const share = await this.models().share().byItemId(item.id);
-			if (!share) {
-				// In that case we don't do anything - the item is going to be
-				// deleted locally anyway. And we can't delete a root folder,
-				// otherwise it will potentially delete it for other users too.
-				modelLogger.warn(`Trying to delete a root folder associated with a share that no longer exists: ${item.id}`);
-				return;
-			}
-			const userShare = await this.models().shareUser().byShareAndUserId(share.id, userId);
-
-			if (userShare) {
-				// Leave the share, but keep the notebook for the owner
-				await this.models().shareUser().delete(userShare.id);
-			} else if (share.owner_id === userId) {
-				// Delete the share for everyone
-				await this.delete(item.id, options);
-			}
-		} else {
-			await this.delete(item.id, options);
+	public async deleteForUser(userId: Uuid, items: Item|Item[], options: DeleteOptions = {}): Promise<void> {
+		if (!Array.isArray(items)) {
+			items = [items];
 		}
+
+		const toDelete = [];
+		for (const item of items) {
+			if (this.isRootSharedFolder(item)) {
+				const share = await this.models().share().byItemId(item.id);
+				if (!share) {
+					// In that case we don't do anything - the item is going to be
+					// deleted locally anyway. And we can't delete a root folder,
+					// otherwise it will potentially delete it for other users too.
+					modelLogger.warn(`Trying to delete a root folder associated with a share that no longer exists: ${item.id}`);
+					continue;
+				}
+				const userShare = await this.models().shareUser().byShareAndUserId(share.id, userId);
+
+				if (userShare) {
+					// Leave the share, but keep the notebook for the owner
+					await this.models().shareUser().delete(userShare.id);
+				} else if (share.owner_id === userId) {
+					// Delete the share for everyone
+					toDelete.push(item.id);
+				}
+			} else {
+				toDelete.push(item.id);
+			}
+		}
+
+		await this.delete(toDelete, options);
 	}
 
 	public async makeTestItem(userId: Uuid, num: number) {
@@ -1024,27 +1038,72 @@ export default class ItemModel extends BaseModel<Item> {
 	// can't be replicated so far. On Joplin Cloud it happens on only 0.0008% of
 	// items, so a simple processing task like this one is sufficient for now
 	// but it would be nice to get to the bottom of this bug.
-	public processOrphanedItems = async () => {
-		await this.withTransaction(async () => {
+	public processOrphanedItems = async (options: ProcessOrphanedItemsOptions = {}) => {
+		// Process in batches to avoid long-running transactions that can timeout
+		// and poison the connection pool.
+		const batchSize = options.batchSize ?? 100;
+		let batchNum = 0;
+		let totalProcessed = 0;
+
+		modelLogger.info(`processOrphanedItems: Starting with batchSize=${batchSize}`);
+
+		while (true) {
+			batchNum++;
+			const batchStartTime = Date.now();
+
+			// Find items that have no corresponding entry in user_items.
+			// NOT EXISTS is used instead of LEFT JOIN for performance as it
+			// allows Postgres to short-circuit on the first match per item.
 			const orphanedItems: Item[] = await this.db(this.tableName)
-				.select(['items.id', 'items.owner_id'])
-				.leftJoin('user_items', 'user_items.item_id', 'items.id')
-				.whereNull('user_items.user_id');
+				.select(['items.id', 'items.name', 'items.owner_id'])
+				.whereNotExists(
+					this.db('user_items')
+						.select(this.db.raw('1'))
+						.whereRaw('user_items.item_id = items.id'),
+				)
+				.limit(batchSize);
 
-			const userIds: string[] = orphanedItems.map(i => i.owner_id);
+			if (!orphanedItems.length) {
+				modelLogger.info(`processOrphanedItems: Completed. Total items processed: ${totalProcessed}`);
+				break;
+			}
+
+			modelLogger.info(`processOrphanedItems: Batch ${batchNum} - Found ${orphanedItems.length} orphaned items`);
+
+			const userIds: string[] = unique(orphanedItems.map(i => i.owner_id));
 			const users = await this.models().user().loadByIds(userIds, { fields: ['id'] });
+			const existingUserIds = new Set(users.map(u => u.id));
 
-			for (const orphanedItem of orphanedItems) {
-				if (!users.find(u => u.id)) {
-					// The user may have been deleted since then. In that case, we
-					// simply delete the orphaned item.
-					await this.delete(orphanedItem.id);
+			const itemsToDelete: string[] = [];
+			const itemsToRestoreByUser = new Map<string, Item[]>();
+
+			for (const item of orphanedItems) {
+				if (!existingUserIds.has(item.owner_id)) {
+					itemsToDelete.push(item.id);
 				} else {
-					// Otherwise we add it back to the user's collection
-					await this.models().userItem().add(orphanedItem.owner_id, orphanedItem.id);
+					const userItems = itemsToRestoreByUser.get(item.owner_id) || [];
+					userItems.push(item);
+					itemsToRestoreByUser.set(item.owner_id, userItems);
 				}
 			}
-		}, 'ItemModel::processOrphanedItems');
+
+			if (itemsToDelete.length) {
+				modelLogger.info(`processOrphanedItems: Batch ${batchNum} - Deleting ${itemsToDelete.length} items (users no longer exist)`);
+				await this.delete(itemsToDelete);
+			}
+
+			if (itemsToRestoreByUser.size) {
+				const restoreCount = Array.from(itemsToRestoreByUser.values()).reduce((sum, items) => sum + items.length, 0);
+				modelLogger.info(`processOrphanedItems: Batch ${batchNum} - Restoring ${restoreCount} items for ${itemsToRestoreByUser.size} users`);
+				for (const [userId, items] of itemsToRestoreByUser) {
+					await this.models().userItem().addMulti(userId, items);
+				}
+			}
+
+			totalProcessed += orphanedItems.length;
+			const batchDuration = Date.now() - batchStartTime;
+			modelLogger.info(`processOrphanedItems: Batch ${batchNum} completed in ${batchDuration}ms`);
+		}
 	};
 
 	// This method should be private because items should only be saved using
@@ -1090,18 +1149,18 @@ export default class ItemModel extends BaseModel<Item> {
 
 			if (isNew) await this.models().userItem().add(userId, item.id);
 
-			// We only record updates. This because Create and Update events are
-			// per user, whenever a user_item is created or deleted.
+			// We only record updates. Create and Delete events are recorded elsewhere.
 			const changeItemName = item.name || previousName;
 
 			if (!isNew && this.shouldRecordChange(changeItemName)) {
-				await this.models().change().save({
-					item_type: this.itemType,
-					item_id: item.id,
-					item_name: changeItemName,
-					type: isNew ? ChangeType.Create : ChangeType.Update,
-					previous_item: previousItem ? this.models().change().serializePreviousItem(previousItem) : '',
-					user_id: userId,
+				await this.models().change().recordChange({
+					itemId: item.id,
+					sourceUserId: userId,
+					shareId: item.jop_share_id ?? '',
+					previousItem,
+					itemName: changeItemName,
+					type: ChangeType.Update,
+					itemType: this.itemType,
 				});
 			}
 

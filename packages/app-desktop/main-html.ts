@@ -25,15 +25,17 @@ import Logger from '@joplin/utils/Logger';
 import FsDriverNode from '@joplin/lib/fs-driver-node';
 import bridge from './services/bridge';
 import shim from '@joplin/lib/shim';
-const { shimInit } = require('@joplin/lib/shim-init-node.js');
+import { shimInit } from '@joplin/lib/shim-init-node';
+import type PdfJs from '@joplin/lib/utils/types/pdfJs';
 import EncryptionService from '@joplin/lib/services/e2ee/EncryptionService';
 import FileApiDriverLocal from '@joplin/lib/file-api-driver-local';
 import * as React from 'react';
 import nodeSqlite = require('sqlite3');
+import sqliteVec = require('sqlite-vec');
 import initLib from '@joplin/lib/initLib';
 import PerformanceLogger from '@joplin/lib/PerformanceLogger';
-const pdfJs = require('pdfjs-dist');
-const { isAppleSilicon } = require('is-apple-silicon');
+import * as pdfJs from 'pdfjs-dist';
+import { isAppleSilicon } from 'is-apple-silicon';
 require('@sentry/electron/renderer');
 
 // Allows components to use React as a global
@@ -86,13 +88,28 @@ const main = async () => {
 
 	pdfJs.GlobalWorkerOptions.workerSrc = `${bridge().electronApp().buildDir()}/pdf.worker.min.js`;
 
+	// onnxruntime-node loads a native binding at require time. Wrap it so a missing or broken
+	// prebuilt degrades to "embeddings unavailable" rather than crashing the whole app at startup.
+	//
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- onnxruntime-node has its own typings; we only need to forward the loaded module to the shim
+	let onnxRuntime: any = null;
+	try {
+		// eslint-disable-next-line @typescript-eslint/no-require-imports -- guarded require avoids a top-level import that would crash on a missing native binding
+		onnxRuntime = require('onnxruntime-node');
+	} catch (error) {
+		// eslint-disable-next-line no-console -- main-html runs before the logger is initialised below
+		console.warn('onnxruntime-node failed to load; AI embeddings will be unavailable:', (error as Error).message);
+	}
+
 	shimInit({
 		keytar,
 		React,
 		appVersion,
 		electronBridge: bridge(),
 		nodeSqlite,
-		pdfJs,
+		sqliteVec,
+		onnxRuntime,
+		pdfJs: pdfJs as PdfJs,
 		isAppleSilicon,
 	});
 

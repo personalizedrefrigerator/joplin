@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { Dispatch } from 'redux';
 import { useRef, useCallback, useId } from 'react';
 import { _ } from '@joplin/lib/locale';
 import DialogButtonRow from '../DialogButtonRow';
@@ -14,8 +15,7 @@ import JoplinCloudSignUpCallToAction from '../JoplinCloudSignUpCallToAction';
 
 interface Props {
 	themeId: number;
-	// eslint-disable-next-line @typescript-eslint/ban-types -- Old code before rule was applied
-	dispatch: Function;
+	dispatch: Dispatch;
 }
 
 const StyledRoot = styled.div`
@@ -264,8 +264,7 @@ export default function(props: Props) {
 	}, [props.dispatch, closeDialog]);
 
 	function renderContent() {
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-		const boxes: any[] = [];
+		const boxes: React.ReactNode[] = [];
 
 		for (const name of syncTargetNames) {
 			const info = SyncTargetRegistry.infoByName(name);

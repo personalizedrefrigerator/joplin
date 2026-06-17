@@ -6,7 +6,7 @@ import FsDriverNode from './fs-driver-node';
 import Note from './models/Note';
 import Resource from './models/Resource';
 import { basename, fileExtension, safeFileExtension } from './path-utils';
-import * as fs from 'fs-extra';
+import fs from 'fs-extra';
 import { writeFile } from 'fs/promises';
 import { ResourceEntity } from './services/database/types';
 import replaceUnsupportedCharacters from './utils/replaceUnsupportedCharacters';
@@ -20,18 +20,24 @@ import BaseItem from './models/BaseItem';
 import { Size } from '@joplin/utils/types';
 import { cpus } from 'os';
 import { pathToFileURL } from 'url';
+import tls from 'tls';
 import type PdfJs from './utils/types/pdfJs';
-const { _ } = require('./locale');
-const http = require('http');
-const https = require('https');
+import { _ } from './locale';
+import http from 'http';
+import https from 'https';
 const { HttpProxyAgent, HttpsProxyAgent } = require('hpagent');
 const toRelative = require('relative');
-const timers = require('timers');
-const zlib = require('zlib');
-const dgram = require('dgram');
+import timers from 'timers';
+import zlib from 'zlib';
+import dgram from 'dgram';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-const proxySettings: any = {};
+interface ProxySettings {
+	maxConcurrentConnections?: number;
+	proxyTimeout?: number;
+	proxyEnabled?: boolean;
+	proxyUrl?: string;
+}
+const proxySettings: ProxySettings = {};
 
 function fileExists(filePath: string) {
 	try {
@@ -56,10 +62,10 @@ function resolveProxyUrl(proxyUrl: string) {
 }
 
 // https://github.com/sindresorhus/callsites/blob/main/index.js
-function callsites() {
+function callsites(): NodeJS.CallSite[] {
 	const _prepareStackTrace = Error.prepareStackTrace;
 	Error.prepareStackTrace = (_any, stack) => stack;
-	const stack = new Error().stack.slice(1);
+	const stack = (new Error().stack as unknown as NodeJS.CallSite[]).slice(1);
 	Error.prepareStackTrace = _prepareStackTrace;
 	return stack;
 }
@@ -92,27 +98,31 @@ const gunzipFile = function(source: string, destination: string) {
 	});
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-function setupProxySettings(options: any) {
+function setupProxySettings(options: ProxySettings) {
 	proxySettings.maxConcurrentConnections = options.maxConcurrentConnections;
 	proxySettings.proxyTimeout = options.proxyTimeout;
 	proxySettings.proxyEnabled = options.proxyEnabled;
 	proxySettings.proxyUrl = options.proxyUrl;
 }
 
+// All fields are optional because shimInit fills in null defaults for each
 export interface ShimInitOptions {
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	sharp: any;
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	keytar: any;
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	React: any;
-	appVersion: ()=> string;
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	electronBridge: any;
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	nodeSqlite: any;
-	pdfJs: PdfJs;
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- sharp module type comes from the external library, not imported here
+	sharp?: any;
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- keytar module type comes from the external library
+	keytar?: any;
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- React module is assigned to shim.setReact which is `typeof React`; lib doesn't import React types
+	React?: any;
+	appVersion?: ()=> string;
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Electron bridge concrete type lives in app-desktop; see shim.electronBridge_
+	electronBridge?: any;
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- node sqlite driver shape is per-platform; see shim.nodeSqlite_
+	nodeSqlite?: any;
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- sqlite-vec is only bundled with desktop; see shim.sqliteVec_
+	sqliteVec?: any;
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- onnxruntime-node is only bundled with desktop; see shim.onnxRuntime_
+	onnxRuntime?: any;
+	pdfJs?: PdfJs;
 	isAppleSilicon?: ()=> boolean;
 }
 
@@ -124,6 +134,8 @@ function shimInit(options: ShimInitOptions = null) {
 		appVersion: null,
 		electronBridge: null,
 		nodeSqlite: null,
+		sqliteVec: null,
+		onnxRuntime: null,
 		pdfJs: null,
 		isAppleSilicon: () => false,
 		...options,
@@ -135,6 +147,8 @@ function shimInit(options: ShimInitOptions = null) {
 	const pdfJs = options.pdfJs;
 
 	shim.setNodeSqlite(options.nodeSqlite);
+	shim.setSqliteVec(options.sqliteVec);
+	shim.setOnnxRuntime(options.onnxRuntime);
 
 	shim.fsDriver = () => {
 		throw new Error('Not implemented');
@@ -184,8 +198,7 @@ function shimInit(options: ShimInitOptions = null) {
 		return c[0].model;
 	};
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	shim.detectAndSetLocale = function(Setting: any) {
+	shim.detectAndSetLocale = function(Setting: typeof import('./models/Setting').default) {
 		let locale = shim.isElectron() ? shim.electronBridge().getLocale() : process.env.LANG;
 		if (!locale) locale = defaultLocale();
 		locale = locale.split('.');
@@ -291,7 +304,7 @@ function shimInit(options: ShimInitOptions = null) {
 			// For the CLI tool
 
 			let md: Size = null;
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any -- sharp() instance type comes from the external library; not imported in lib
 			let image: any = null;
 
 			if (sharp) {
@@ -310,8 +323,7 @@ function shimInit(options: ShimInitOptions = null) {
 						fit: 'inside',
 						withoutEnlargement: true,
 					})
-					// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-					.toFile(targetPath, (error: any, info: any) => {
+					.toFile(targetPath, (error: Error | null, info: unknown) => {
 						if (error) {
 							reject(error);
 						} else {
@@ -387,8 +399,7 @@ function shimInit(options: ShimInitOptions = null) {
 		const fileStat = await shim.fsDriver().stat(targetPath);
 		resource.size = fileStat.size;
 
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-		const saveOptions: any = { isNew: true };
+		const saveOptions: { isNew: boolean; userSideValidation?: boolean } = { isNew: true };
 		if (options.userSideValidation) saveOptions.userSideValidation = true;
 
 		if (isUpdate) {
@@ -469,8 +480,7 @@ function shimInit(options: ShimInitOptions = null) {
 				if (size.width > maxSize || size.height > maxSize) {
 					console.warn(`Image is over ${maxSize}px - resizing it: ${filePath}`);
 
-					// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-					const options: any = {};
+					const options: { width?: number; height?: number } = {};
 					if (size.width > size.height) {
 						options.width = maxSize;
 					} else {
@@ -529,13 +539,13 @@ function shimInit(options: ShimInitOptions = null) {
 			throw new Error(`Not a valid URL: ${url}`);
 		}
 		const resolvedProxyUrl = resolveProxyUrl(proxySettings.proxyUrl);
-		options.agent = (resolvedProxyUrl && proxySettings.proxyEnabled) ? shim.proxyAgent(url, resolvedProxyUrl) : null;
+		options.agent = (resolvedProxyUrl && proxySettings.proxyEnabled) ? shim.proxyAgent(url, resolvedProxyUrl) : shim.httpAgent(url);
 		return shim.fetchWithRetry(() => {
 			return nodeFetch(url, options);
 		}, options);
 	};
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- url is passed as a string but reassigned to a parsed UrlWithStringQuery by urlParse below
 	shim.fetchBlob = async function(url: any, options: FetchBlobOptions) {
 		if (!options || !options.path) throw new Error('fetchBlob: target file path is missing');
 		if (!options.method) options.method = 'GET';
@@ -555,8 +565,7 @@ function shimInit(options: ShimInitOptions = null) {
 		const filePath = options.path;
 		const downloadController = options.downloadController;
 
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-		function makeResponse(response: any) {
+		function makeResponse(response: { statusCode: number; statusMessage: string; headers: Record<string, string | string[]> }) {
 			return {
 				ok: response.statusCode < 400,
 				path: filePath,
@@ -571,7 +580,7 @@ function shimInit(options: ShimInitOptions = null) {
 			};
 		}
 
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- requestOptions is the node http/https request options bag plus a runtime-set `agent` field
 		const requestOptions: any = {
 			protocol: url.protocol,
 			host: url.hostname,
@@ -584,15 +593,13 @@ function shimInit(options: ShimInitOptions = null) {
 		};
 
 		const resolvedProxyUrl = resolveProxyUrl(proxySettings.proxyUrl);
-		requestOptions.agent = (resolvedProxyUrl && proxySettings.proxyEnabled) ? shim.proxyAgent(url.href, resolvedProxyUrl) : null;
+		requestOptions.agent = (resolvedProxyUrl && proxySettings.proxyEnabled) ? shim.proxyAgent(url.href, resolvedProxyUrl) : shim.httpAgent(url.href);
 
 		const doFetchOperation = async () => {
 			return new Promise((resolve, reject) => {
-				// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-				let file: any = null;
+				let file: fs.WriteStream | null = null;
 
-				// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-				const cleanUpOnError = (error: any) => {
+				const cleanUpOnError = (error: Error) => {
 					// We ignore any unlink error as we only want to report on the main error
 					void fs.unlink(filePath)
 					// eslint-disable-next-line promise/prefer-await-to-then -- Old code before rule was applied
@@ -614,13 +621,12 @@ function shimInit(options: ShimInitOptions = null) {
 					// Note: relative paths aren't supported
 					file = fs.createWriteStream(filePath);
 
-					// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-					file.on('error', (error: any) => {
+					file.on('error', (error: Error) => {
 						cleanUpOnError(error);
 					});
 
 					const requestStart = new Date();
-					// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
+					// eslint-disable-next-line @typescript-eslint/no-explicit-any -- http is dynamically required from follow-redirects (http or https variant); response is its IncomingMessage
 					const request = http.request(requestOptions, (response: any) => {
 
 						if (downloadController) {
@@ -665,8 +671,7 @@ function shimInit(options: ShimInitOptions = null) {
 						request.destroy(new Error(`Request timed out. Timeout value: ${requestOptions.timeout}ms. Actual connection time: ${new Date().getTime() - requestStart.getTime()}ms`));
 					});
 
-					// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-					request.on('error', (error: any) => {
+					request.on('error', (error: Error) => {
 						cleanUpOnError(error);
 					});
 
@@ -691,8 +696,6 @@ function shimInit(options: ShimInitOptions = null) {
 		return Buffer.byteLength(string, 'utf-8');
 	};
 
-	shim.Buffer = Buffer;
-
 	shim.openUrl = url => {
 		// Returns true if it opens the file successfully; returns false if it could
 		// not find the file.
@@ -701,12 +704,24 @@ function shimInit(options: ShimInitOptions = null) {
 
 	shim.httpAgent_ = null;
 
+	// X25519MLKEM768 is a post-quantum cryptography key exchange, details:
+	// https://developers.cloudflare.com/ssl/post-quantum-cryptography/
+	// Not supported on by all SSL stacks and versions, detect support at runtime.
+	let tlsEcdhCurve: string;
+	try {
+		tls.createSecureContext({ ecdhCurve: 'X25519MLKEM768:X25519:P-256:P-384' });
+		tlsEcdhCurve = 'X25519MLKEM768:X25519:P-256:P-384';
+	} catch {
+		tlsEcdhCurve = 'auto';
+	}
+
 	shim.httpAgent = url => {
 		if (!shim.httpAgent_) {
 			const AgentSettings = {
 				keepAlive: true,
 				maxSockets: 1,
 				keepAliveMsecs: 5000,
+				ecdhCurve: tlsEcdhCurve,
 			};
 			shim.httpAgent_ = {
 				http: new http.Agent(AgentSettings),
@@ -723,6 +738,7 @@ function shimInit(options: ShimInitOptions = null) {
 			keepAliveMsecs: 5000,
 			proxy: proxyUrl,
 			timeout: proxySettings.proxyTimeout * 1000,
+			ecdhCurve: tlsEcdhCurve,
 		};
 
 		// Based on https://github.com/delvedor/hpagent#usage
@@ -790,8 +806,7 @@ function shimInit(options: ShimInitOptions = null) {
 
 	shim.requireDynamic = (path) => {
 		if (path.indexOf('.') === 0) {
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-			const sites: any = callsites();
+			const sites = callsites();
 			if (sites.length <= 1) throw new Error(`Cannot require file (1) ${path}`);
 			const filename = sites[1].getFileName();
 			if (!filename) throw new Error(`Cannot require file (2) ${path}`);
@@ -941,4 +956,4 @@ function shimInit(options: ShimInitOptions = null) {
 	};
 }
 
-module.exports = { shimInit, setupProxySettings };
+export { shimInit, setupProxySettings };

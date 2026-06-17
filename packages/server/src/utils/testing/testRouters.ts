@@ -4,14 +4,13 @@ import * as fs from 'fs-extra';
 
 require('source-map-support').install();
 
-const { stringify } = require('query-string');
+import { stringify } from 'query-string';
 
 const execCommand = function(command: string, returnStdErr = false): Promise<string> {
 	const exec = require('child_process').exec;
 
 	return new Promise((resolve, reject) => {
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-		exec(command, (error: any, stdout: any, stderr: any) => {
+		exec(command, (error: (Error & { signal?: string }) | null, stdout: string, stderr: string) => {
 			if (error) {
 				if (error.signal === 'SIGTERM') {
 					resolve('Process was killed');
@@ -29,16 +28,15 @@ const execCommand = function(command: string, returnStdErr = false): Promise<str
 };
 
 async function sleep(seconds: number) {
-	// eslint-disable-next-line @typescript-eslint/ban-types -- Old code before rule was applied
-	return new Promise((resolve: Function) => {
+	return new Promise<void>((resolve) => {
 		setTimeout(() => {
 			resolve();
 		}, seconds * 1000);
 	});
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-async function curl(method: string, path: string, query: object = null, body: any = null, headers: any = null, formFields: string[] = null, options: any = {}): Promise<any> {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- The curl wrapper returns a heterogeneous parsed JSON response that callers access without narrowing
+async function curl(method: string, path: string, query: object = null, body: object = null, headers: Record<string, string> = null, formFields: string[] = null, options: { verbose?: boolean; output?: string; uploadFile?: string } = {}): Promise<any> {
 	const curlCmd: string[] = ['curl'];
 
 	if (options.verbose) curlCmd.push('-v');
@@ -92,14 +90,12 @@ function extractCurlResponse(rawResult: string) {
 	return splitted.filter((line: string) => line.indexOf('<') === 0).join('\n');
 }
 
-const spawn = require('child_process').spawn;
+import { spawn } from 'child_process';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-let serverProcess: any = null;
+let serverProcess: ReturnType<typeof spawn> | null = null;
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-function checkAndPrintResult(prefix: string, result: any) {
-	if (typeof result === 'object' && result && result.error) throw new Error(`${prefix}: ${JSON.stringify(result)}`);
+function checkAndPrintResult(prefix: string, result: unknown) {
+	if (typeof result === 'object' && result && 'error' in result) throw new Error(`${prefix}: ${JSON.stringify(result)}`);
 	console.info(prefix, result);
 }
 
@@ -143,7 +139,7 @@ async function main() {
 	});
 
 	try {
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- See curl() return — heterogeneous JSON response
 		let response: any = null;
 
 		console.info('Waiting for server to be ready...');

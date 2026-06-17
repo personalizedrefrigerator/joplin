@@ -1,4 +1,4 @@
-import type * as MarkdownIt from 'markdown-it';
+import type MarkdownIt from 'markdown-it';
 import type * as StateBlock from 'markdown-it/lib/rules_block/state_block';
 import hljs from '../../highlight';
 
@@ -104,7 +104,7 @@ const plugin = (markdownIt: MarkdownIt, _ruleOptions: unknown) => {
 		// IMPORTANT: No whitespace between joplin-editable and joplin-source elements!
 		// The turndown joplinEditableBlockInfo function iterates childNodes and crashes
 		// on text nodes (whitespace) because they don't have classList.
-		return `<div class="joplin-editable joplin-frontmatter"><pre class="joplin-source" data-joplin-language="frontmatter" data-joplin-source-open="---&#10;" data-joplin-source-close="&#10;---&#10;">${contentHtml}</pre><div class="joplin-rendered joplin-frontmatter-rendered"><hr class="joplin-frontmatter-marker"/><pre class="hljs">${highlightedContent}</pre><hr class="joplin-frontmatter-marker"/></div></div>`;
+		return `<div class="joplin-editable joplin-frontmatter"><pre class="joplin-source" hidden data-joplin-language="frontmatter" data-joplin-source-open="---&#10;" data-joplin-source-close="&#10;---&#10;">${contentHtml}</pre><div class="joplin-rendered joplin-frontmatter-rendered"><hr class="joplin-frontmatter-marker"/><pre class="hljs">${highlightedContent}</pre><hr class="joplin-frontmatter-marker"/></div></div>`;
 	};
 };
 
@@ -120,6 +120,8 @@ const assets = () => {
 				.joplin-frontmatter-rendered pre.hljs {
 					margin: 0;
 					border-radius: 0;
+					white-space: pre-wrap;
+					word-break: break-word;
 				}
 				.joplin-frontmatter-marker {
 					margin: 0;

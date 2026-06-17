@@ -1,13 +1,10 @@
 PODS:
-  - EXAV (16.0.8):
-    - ExpoModulesCore
-    - ReactCommon/turbomodule/core
   - EXConstants (18.0.13):
     - ExpoModulesCore
   - EXImageLoader (6.0.0):
     - ExpoModulesCore
     - React-Core
-  - Expo (54.0.31):
+  - Expo (54.0.33):
     - ExpoModulesCore
     - hermes-engine
     - RCTRequired
@@ -34,13 +31,15 @@ PODS:
     - Yoga
   - ExpoAsset (12.0.12):
     - ExpoModulesCore
+  - ExpoAudio (1.1.1):
+    - ExpoModulesCore
   - ExpoCamera (17.0.10):
     - ExpoModulesCore
     - ZXingObjC/OneD
     - ZXingObjC/PDF417
   - ExpoFileSystem (19.0.21):
     - ExpoModulesCore
-  - ExpoFont (14.0.10):
+  - ExpoFont (14.0.11):
     - ExpoModulesCore
   - ExpoImageManipulator (14.0.8):
     - EXImageLoader
@@ -72,9 +71,9 @@ PODS:
     - ReactNativeDependencies
     - Yoga
   - FBLazyVector (0.81.6)
-  - hermes-engine (0.81.5):
-    - hermes-engine/Pre-built (= 0.81.5)
-  - hermes-engine/Pre-built (0.81.5)
+  - hermes-engine (0.81.6):
+    - hermes-engine/Pre-built (= 0.81.6)
+  - hermes-engine/Pre-built (0.81.6)
   - JoplinCommonShareExtension (1.0.0)
   - JoplinRNShareExtension (1.0.0):
     - JoplinCommonShareExtension
@@ -91,7 +90,7 @@ PODS:
   - libwebp/sharpyuv (1.5.0)
   - libwebp/webp (1.5.0):
     - libwebp/sharpyuv
-  - NitroModules (0.33.2):
+  - NitroModules (0.33.9):
     - hermes-engine
     - RCTRequired
     - RCTTypeSafety
@@ -114,7 +113,32 @@ PODS:
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
     - Yoga
-  - OpenSSL-Universal (3.3.3001)
+  - OpenSSL-Universal (3.6.0000)
+  - QuickCrypto (1.1.2):
+    - hermes-engine
+    - NitroModules
+    - OpenSSL-Universal (~> 3.6)
+    - RCTRequired
+    - RCTTypeSafety
+    - React-callinvoker
+    - React-Core
+    - React-Core-prebuilt
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-jsi
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-renderercss
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - ReactNativeDependencies
+    - Yoga
   - RCTDeprecation (0.81.6)
   - RCTRequired (0.81.6)
   - RCTTypeSafety (0.81.6):
@@ -154,7 +178,7 @@ PODS:
     - React-utils
     - ReactNativeDependencies
     - Yoga
-  - React-Core-prebuilt (0.81.5):
+  - React-Core-prebuilt (0.81.6):
     - ReactNativeDependencies
   - React-Core/CoreModulesHeaders (0.81.6):
     - hermes-engine
@@ -1394,7 +1418,7 @@ PODS:
     - React-RCTFBReactNativeSpec
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
-  - react-native-alarm-notification (3.6.0):
+  - react-native-alarm-notification (3.7.0):
     - React
   - react-native-document-picker (10.1.7):
     - hermes-engine
@@ -1440,8 +1464,28 @@ PODS:
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
     - Yoga
-  - react-native-get-random-values (1.11.0):
+  - react-native-get-random-values (2.0.0):
+    - hermes-engine
+    - RCTRequired
+    - RCTTypeSafety
     - React-Core
+    - React-Core-prebuilt
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-jsi
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-renderercss
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - ReactNativeDependencies
+    - Yoga
   - react-native-image-picker (8.2.1):
     - hermes-engine
     - RCTRequired
@@ -1464,16 +1508,10 @@ PODS:
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
     - Yoga
-  - react-native-netinfo (11.4.1):
-    - React-Core
-  - react-native-quick-base64 (2.2.2):
-    - React-Core
-  - react-native-quick-crypto (0.7.17):
+  - react-native-netinfo (11.5.2):
     - hermes-engine
-    - OpenSSL-Universal
     - RCTRequired
     - RCTTypeSafety
-    - React
     - React-Core
     - React-Core-prebuilt
     - React-debug
@@ -1492,9 +1530,11 @@ PODS:
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
     - Yoga
+  - react-native-quick-base64 (2.2.2):
+    - React-Core
   - react-native-rsa-native (2.0.5):
     - React
-  - react-native-saf-x (3.6.0):
+  - react-native-saf-x (3.7.0):
     - React-Core
   - react-native-safe-area-context (5.6.2):
     - hermes-engine
@@ -1589,13 +1629,13 @@ PODS:
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
     - Yoga
-  - react-native-vector-icons-fontawesome5 (12.3.0)
+  - react-native-vector-icons-fontawesome5 (12.3.2)
   - react-native-vector-icons-ionicons (12.3.0)
-  - react-native-vector-icons-material-design-icons (12.4.0)
-  - react-native-vector-icons-material-icons (12.4.0)
+  - react-native-vector-icons-material-design-icons (12.4.2)
+  - react-native-vector-icons-material-icons (12.4.1)
   - react-native-version-info (1.1.1):
     - React-Core
-  - react-native-webview (13.16.0):
+  - react-native-webview (13.16.1):
     - hermes-engine
     - RCTRequired
     - RCTTypeSafety
@@ -2013,9 +2053,9 @@ PODS:
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
     - Yoga
-  - RNCPushNotificationIOS (1.11.0):
+  - RNCPushNotificationIOS (1.12.0):
     - React-Core
-  - RNDateTimePicker (8.5.1):
+  - RNDateTimePicker (8.6.0):
     - hermes-engine
     - RCTRequired
     - RCTTypeSafety
@@ -2067,7 +2107,7 @@ PODS:
     - React
   - RNSecureRandom (1.0.1):
     - React
-  - RNShare (12.2.1):
+  - RNShare (12.2.6):
     - hermes-engine
     - RCTRequired
     - RCTTypeSafety
@@ -2089,7 +2129,7 @@ PODS:
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
     - Yoga
-  - RNSVG (15.15.1):
+  - RNSVG (15.15.3):
     - hermes-engine
     - RCTRequired
     - RCTTypeSafety
@@ -2110,9 +2150,9 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
-    - RNSVG/common (= 15.15.1)
+    - RNSVG/common (= 15.15.3)
     - Yoga
-  - RNSVG/common (15.15.1):
+  - RNSVG/common (15.15.3):
     - hermes-engine
     - RCTRequired
     - RCTTypeSafety
@@ -2138,7 +2178,7 @@ PODS:
   - SDWebImageWebPCoder (0.15.0):
     - libwebp (~> 1.0)
     - SDWebImage/Core (~> 5.17)
-  - WhisperVoiceTyping (3.6.0):
+  - WhisperVoiceTyping (3.7.0):
     - hermes-engine
     - RCTRequired
     - RCTTypeSafety
@@ -2169,11 +2209,11 @@ PODS:
     - ZXingObjC/Core
 
 DEPENDENCIES:
-  - EXAV (from `../node_modules/expo-av/ios`)
   - EXConstants (from `../node_modules/expo-constants/ios`)
   - EXImageLoader (from `../node_modules/expo-image-loader/ios`)
   - Expo (from `../node_modules/expo`)
   - ExpoAsset (from `../node_modules/expo-asset/ios`)
+  - ExpoAudio (from `../node_modules/expo-audio/ios`)
   - ExpoCamera (from `../node_modules/expo-camera/ios`)
   - ExpoFileSystem (from `../node_modules/expo-file-system/ios`)
   - ExpoFont (from `../node_modules/expo-font/ios`)
@@ -2185,6 +2225,7 @@ DEPENDENCIES:
   - JoplinCommonShareExtension (from `ShareExtension`)
   - JoplinRNShareExtension (from `ShareExtension`)
   - NitroModules (from `../node_modules/react-native-nitro-modules`)
+  - QuickCrypto (from `../node_modules/react-native-quick-crypto`)
   - RCTDeprecation (from `../node_modules/react-native/ReactApple/Libraries/RCTFoundation/RCTDeprecation`)
   - RCTRequired (from `../node_modules/react-native/Libraries/Required`)
   - RCTTypeSafety (from `../node_modules/react-native/Libraries/TypeSafety`)
@@ -2226,7 +2267,6 @@ DEPENDENCIES:
   - react-native-image-picker (from `../node_modules/react-native-image-picker`)
   - "react-native-netinfo (from `../node_modules/@react-native-community/netinfo`)"
   - react-native-quick-base64 (from `../node_modules/react-native-quick-base64`)
-  - react-native-quick-crypto (from `../node_modules/react-native-quick-crypto`)
   - react-native-rsa-native (from `../node_modules/react-native-rsa-native`)
   - "react-native-saf-x (from `../node_modules/@joplin/react-native-saf-x`)"
   - react-native-safe-area-context (from `../node_modules/react-native-safe-area-context`)
@@ -2293,8 +2333,6 @@ SPEC REPOS:
     - ZXingObjC
 
 EXTERNAL SOURCES:
-  EXAV:
-    :path: "../node_modules/expo-av/ios"
   EXConstants:
     :path: "../node_modules/expo-constants/ios"
   EXImageLoader:
@@ -2303,6 +2341,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/expo"
   ExpoAsset:
     :path: "../node_modules/expo-asset/ios"
+  ExpoAudio:
+    :path: "../node_modules/expo-audio/ios"
   ExpoCamera:
     :path: "../node_modules/expo-camera/ios"
   ExpoFileSystem:
@@ -2326,6 +2366,8 @@ EXTERNAL SOURCES:
     :path: ShareExtension
   NitroModules:
     :path: "../node_modules/react-native-nitro-modules"
+  QuickCrypto:
+    :path: "../node_modules/react-native-quick-crypto"
   RCTDeprecation:
     :path: "../node_modules/react-native/ReactApple/Libraries/RCTFoundation/RCTDeprecation"
   RCTRequired:
@@ -2406,8 +2448,6 @@ EXTERNAL SOURCES:
     :path: "../node_modules/@react-native-community/netinfo"
   react-native-quick-base64:
     :path: "../node_modules/react-native-quick-base64"
-  react-native-quick-crypto:
-    :path: "../node_modules/react-native-quick-crypto"
   react-native-rsa-native:
     :path: "../node_modules/react-native-rsa-native"
   react-native-saf-x:
@@ -2522,31 +2562,32 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/yoga"
 
 SPEC CHECKSUMS:
-  EXAV: b60fcf142fae6684d295bc28cd7cfcb3335570ea
   EXConstants: fce59a631a06c4151602843667f7cfe35f81e271
   EXImageLoader: 189e3476581efe3ad4d1d3fb4735b7179eb26f05
-  Expo: 04993fbd7b06dc98ffac58da8847298470dc3db1
+  Expo: aadbcc8c6c14ff3105a9154f1683cb1424ff0d2a
   ExpoAsset: f867e55ceb428aab99e1e8c082b5aee7c159ea18
+  ExpoAudio: e4cfe3a2f3317b8487460685385a9867a07fb4fb
   ExpoCamera: 6a326deb45ba840749652e4c15198317aa78497e
   ExpoFileSystem: 858a44267a3e6e9057e0888ad7c7cfbf55d52063
-  ExpoFont: 35ac6191ed86bbf56b3ebd2d9154eda9fad5b509
+  ExpoFont: f543ce20a228dd702813668b1a07b46f51878d47
   ExpoImageManipulator: 607a5c8c88085381639458a46cc55fb9d3869148
   ExpoLocalAuthentication: 8a31808565da7af926dd9b595e98594d8b1553b6
   ExpoModulesCore: f3da4f1ab5a8375d0beafab763739dbee8446583
   FBLazyVector: 14ce6e3675cacb2683ad30272f04274a4ee5b67d
-  hermes-engine: 9f4dfe93326146a1c99eb535b1cb0b857a3cd172
+  hermes-engine: 7219f6e751ad6ec7f3d7ec121830ee34dae40749
   JoplinCommonShareExtension: a8b60b02704d85a7305627912c0240e94af78db7
   JoplinRNShareExtension: e158a4b53ee0aa9cd3037a16221dc8adbd6f7860
   libwebp: 02b23773aedb6ff1fd38cec7a77b81414c6842a8
-  NitroModules: 114b4f79e10be9b202723e721d6a54382fa4b599
-  OpenSSL-Universal: 6082b0bf950e5636fe0d78def171184e2b3899c2
+  NitroModules: 97978583f36f88f7a348d5bf986d94bc4b340d0a
+  OpenSSL-Universal: 9110d21982bb7e8b22a962b6db56a8aa805afde7
+  QuickCrypto: b0350170c64587fca880913d51d054189b3f9663
   RCTDeprecation: ff38238d8b6ddfe1fcfeb2718d1c14da9564c1c3
   RCTRequired: 5916f53ff05efcc2bf095b0de01a0e5b00112a55
   RCTTypeSafety: bfbd8d69504a7459a65040705fc6ce10806c383b
   React: 348d1689d8686d034c5b7667dc45de86c6319dd1
   React-callinvoker: 2c3b664f3482f5bc5560ea1edcbbe69748752f08
   React-Core: 346787852200a732b187805344b8a350d464e004
-  React-Core-prebuilt: 02f0ad625ddd47463c009c2d0c5dd35c0d982599
+  React-Core-prebuilt: 721ab014acfaff1e4b8fc0d2f7d6f41ea9a706ed
   React-CoreModules: 7e07391a1082d02c37f846a362f7574ab035933c
   React-cxxreact: c50d278c785792a077a6b357aaabd9e5d09e9c6f
   React-debug: 1b91785fec02ea76c793ead23bed1528d96b4262
@@ -2573,25 +2614,24 @@ SPEC CHECKSUMS:
   React-logger: 6655e8067cf5b86a8b165fecb0395f65ddddfe6b
   React-Mapbuffer: 90837747b018e7061eca67d45bc7e5dab93c4a06
   React-microtasksnativemodule: f86ccf2ec5f619f6df1dd06ae770c326e3eca0b8
-  react-native-alarm-notification: 846df1df72eca38e711409b9c064a5c635ff1c32
+  react-native-alarm-notification: 5236274a333fd40a14c3faafd8984edfc1b6ec62
   react-native-document-picker: 4aa06b45d0f6dfc7fac5bcb5d1cee4f45af5d68a
   react-native-geolocation: cfc39041210bd9f591ec2beb7d417291251da8e5
-  react-native-get-random-values: d16467cf726c618e9c7a8c3c39c31faa2244bbba
+  react-native-get-random-values: a603782b2b222a34533c66371614790282dba3f1
   react-native-image-picker: 48d850454b4a389753053e1d7378b624d3b47d77
-  react-native-netinfo: cec9c4e86083cb5b6aba0e0711f563e2fbbff187
+  react-native-netinfo: f852c868bf5175e46165c7e4db48a204a95c3800
   react-native-quick-base64: 6568199bb2ac8e72ecdfdc73a230fbc5c1d3aac4
-  react-native-quick-crypto: 1a2467cf17acc57dce5bb076a953978b79e3fd11
   react-native-rsa-native: a7931cdda1f73a8576a46d7f431378c5550f0c38
-  react-native-saf-x: 50d176763ed692b379c190bf55ae7293a3ee09bb
+  react-native-saf-x: 5f4d6aed7554454033c39c81d951962dadc8dc5a
   react-native-safe-area-context: 37e680fc4cace3c0030ee46e8987d24f5d3bdab2
   react-native-sqlite-storage: 0c84826214baaa498796c7e46a5ccc9a82e114ed
   react-native-vector-icons: 8215b0e62bf79d3be628cf658ec23777f9bec53c
-  react-native-vector-icons-fontawesome5: 271d813e27a86d30bb8cf1fc2f12dae74b74b69b
+  react-native-vector-icons-fontawesome5: 8187e7738d0db1b8373cf030f7140299a7216103
   react-native-vector-icons-ionicons: ad07e944a092a5cf71b8b569d8f5ce2bf674c415
-  react-native-vector-icons-material-design-icons: 76cd460b3540b80527b4a80fb7f867f7deedb498
-  react-native-vector-icons-material-icons: d67e485a05560416ff6b5977d5fa7e0eb6af6870
+  react-native-vector-icons-material-design-icons: 12bc222b4cd6781a3cbbf4b537767d3d528011dd
+  react-native-vector-icons-material-icons: 2fe75632937d07937bfe8ca953e1b5d06eef3a1d
   react-native-version-info: f0b04e16111c4016749235ff6d9a757039189141
-  react-native-webview: 3e303e80cadb5f17118c8c1502aa398e9287e415
+  react-native-webview: 0ed52ddb2eafc64a502871218440b8b4d37961c3
   React-NativeModulesApple: 2f4d69fb420f671980452a14efacd7a2273c4fbb
   React-oscompat: 0ceaff9ee45fc3801e266194ef8e60b384220b1c
   React-perflogger: f6bcfdde29ace9d7c3eb52643c8d3790bf6b5edf
@@ -2626,18 +2666,18 @@ SPEC CHECKSUMS:
   ReactNativeFs: 601d5cf876d91f779583cef9a7d90d8b45394492
   rn-fetch-blob: 25612b6d6f6e980c6f17ed98ba2f58f5696a51ca
   RNCClipboard: 88d7eeb555d1183915f0885bdbc5c97eb6f7f3ba
-  RNCPushNotificationIOS: 6c4ca3388c7434e4a662b92e4dfeeee858e6f440
-  RNDateTimePicker: 19ffa303c4524ec0a2dfdee2658198451c16b7f1
+  RNCPushNotificationIOS: 85957a0534fd1309b4c028ccbe5b1baf9ab5cf57
+  RNDateTimePicker: 9c0a849bbe1c256f0854fea255734b715f5ea876
   RNDeviceInfo: bcce8752b5043a623fe3c26789679b473f705d3c
   RNFileViewer: 4b5d83358214347e4ab2d4ca8d5c1c90d869e251
   RNLocalize: 44b09911588826d01c5b949e8e3f9ed5fae16b32
   RNQuickAction: c2c8f379e614428be0babe4d53a575739667744d
   RNSecureRandom: b64d263529492a6897e236a22a2c4249aa1b53dc
-  RNShare: 0e600372fb35783fe30d413efd28d11de2bf6cf0
-  RNSVG: cf9ae78f2edf2988242c71a6392d15ff7dd62522
+  RNShare: aad7f2a80ae80be5e2bf57583be28b1a18f95de1
+  RNSVG: 7612f5bc575eab5da3364d44abe9f0d5db2cde03
   SDWebImage: e9c98383c7572d713c1a0d7dd2783b10599b9838
   SDWebImageWebPCoder: 0e06e365080397465cc73a7a9b472d8a3bd0f377
-  WhisperVoiceTyping: 343ea840cbde2a5f3508f8b016ebcf1c089179ea
+  WhisperVoiceTyping: 29015e8468ff2fd2786d3aaace16fcbdd6a712d6
   Yoga: 786fa7d9d2ff6060b4e688062243fa69c323d140
   ZXingObjC: 8898711ab495761b2dbbdec76d90164a6d7e14c5
 
