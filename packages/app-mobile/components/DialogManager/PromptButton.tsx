@@ -11,11 +11,14 @@ interface Props {
 	buttonSpec: PromptButtonSpec;
 }
 
-const useStyles = (theme: ThemeStyle) => {
+const useStyles = (theme: ThemeStyle, spec: PromptButtonSpec) => {
 	const paperTheme = useTheme();
+	const onColor = spec.style === 'primary' ? paperTheme.colors.onPrimary : paperTheme.colors.onSecondary;
+	const color = spec.style === 'primary' ? paperTheme.colors.primary : paperTheme.colors.secondary;
+
 	return useMemo(() => {
 		const buttonText: TextStyle = {
-			color: paperTheme.colors.onSecondary,
+			color: onColor,
 			fontWeight: '600',
 			textAlign: 'center',
 		};
@@ -31,7 +34,7 @@ const useStyles = (theme: ThemeStyle) => {
 				borderRadius: theme.borderRadius,
 				paddingHorizontal: 16,
 				paddingVertical: 14,
-				backgroundColor: paperTheme.colors.secondary,
+				backgroundColor: color,
 			},
 			buttonContent: {
 				display: 'flex',
@@ -45,12 +48,12 @@ const useStyles = (theme: ThemeStyle) => {
 				marginRight: 8,
 			},
 		});
-	}, [theme, paperTheme]);
+	}, [theme, color, onColor]);
 };
 
 const PromptButton: React.FC<Props> = props => {
 	const theme = themeStyle(props.themeId);
-	const styles = useStyles(theme);
+	const styles = useStyles(theme, props.buttonSpec);
 
 	const { checked, text, iconChecked, onPress } = props.buttonSpec;
 

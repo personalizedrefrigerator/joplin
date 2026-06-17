@@ -1,7 +1,7 @@
 
 interface BaseButtonSpec {
 	text: string;
-	style?: 'cancel'|'default'|'destructive';
+	style?: 'cancel'|'primary'|'default'|'destructive';
 
 	checked?: boolean|null;
 	iconChecked?: string;

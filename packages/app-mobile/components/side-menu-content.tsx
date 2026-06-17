@@ -349,6 +349,11 @@ const SideMenuContentComponent = (props: Props) => {
 		const folder = folderOrAll as FolderEntity;
 
 		const menuItems: PromptButtonSpec[] = [];
+		menuItems.push({
+			text: _('Cancel'),
+			onPress: () => {},
+			style: 'cancel',
+		});
 
 		if (folder && folder.id === getConflictFolderId()) return;
 
@@ -408,15 +413,16 @@ const SideMenuContentComponent = (props: Props) => {
 				const folderDeletion = (message: string) => {
 					dialogs.prompt('', message, [
 						{
-							text: _('OK'),
-							onPress: () => {
-								void Folder.delete(folder.id, { toTrash: true, sourceDescription: 'side-menu-content (long-press)' });
-							},
-						},
-						{
 							text: _('Cancel'),
 							onPress: () => { },
 							style: 'cancel',
+						},
+						{
+							text: _('OK'),
+							style: 'destructive',
+							onPress: () => {
+								void Folder.delete(folder.id, { toTrash: true, sourceDescription: 'side-menu-content (long-press)' });
+							},
 						},
 					]);
 				};
@@ -430,7 +436,14 @@ const SideMenuContentComponent = (props: Props) => {
 			};
 
 			menuItems.push({
+				text: _('Delete'),
+				onPress: generateFolderDeletion,
+				style: 'destructive',
+			});
+
+			menuItems.push({
 				text: _('Edit'),
+				style: 'primary',
 				onPress: () => {
 					props.dispatch({ type: 'SIDE_MENU_CLOSE' });
 
@@ -441,19 +454,7 @@ const SideMenuContentComponent = (props: Props) => {
 					});
 				},
 			});
-
-			menuItems.push({
-				text: _('Delete'),
-				onPress: generateFolderDeletion,
-				style: 'destructive',
-			});
 		}
-
-		menuItems.push({
-			text: _('Cancel'),
-			onPress: () => {},
-			style: 'cancel',
-		});
 
 		dialogs.prompt(
 			'',
