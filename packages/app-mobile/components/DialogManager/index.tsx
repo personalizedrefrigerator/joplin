@@ -30,7 +30,7 @@ const useStyles = (themeId: number) => {
 				marginRight: 'auto',
 				marginTop: 'auto',
 				marginBottom: 'auto',
-				width: Math.max(windowSize.width / 2, 400),
+				width: Math.max(windowSize.width / 2, 360),
 				maxWidth: '100%',
 			},
 

@@ -17,9 +17,11 @@ const useStyles = (isMenu: boolean) => {
 
 			dialogContent: {
 				paddingBottom: 14,
+				paddingHorizontal: 12,
 			},
 			dialogActions: {
 				paddingBottom: 14,
+				paddingHorizontal: 12,
 				paddingTop: 4,
 				gap: 4,
 
@@ -62,7 +64,7 @@ const PromptDialog: React.FC<Props> = ({ dialog, containerStyle, themeId }) => {
 			<Dialog.Content style={styles.dialogContent}>
 				{dialog.title ? titleComponent : null}
 				<Text
-					variant='bodyMedium'
+					variant='titleMedium'
 					style={styles.dialogLabel}
 				>{dialog.message}</Text>
 			</Dialog.Content>

@@ -69,4 +69,10 @@ export interface Theme {
 	headerBackgroundColor: string;
 	textSelectionColor: string;
 	colorBright2: string;
+
+	// Material-design style colors used for the redesign
+	primary: string;
+	onPrimary: string;
+	secondary: string;
+	onSecondary: string;
 }

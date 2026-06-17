@@ -15,7 +15,8 @@ const useStyles = (theme: ThemeStyle) => {
 	const paperTheme = useTheme();
 	return useMemo(() => {
 		const buttonText: TextStyle = {
-			color: paperTheme.colors.onPrimaryContainer,
+			color: paperTheme.colors.onSecondary,
+			fontWeight: '600',
 			textAlign: 'center',
 		};
 
@@ -29,7 +30,7 @@ const useStyles = (theme: ThemeStyle) => {
 			button: {
 				borderRadius: theme.borderRadius,
 				padding: 10,
-				backgroundColor: paperTheme.colors.primaryContainer,
+				backgroundColor: paperTheme.colors.secondary,
 			},
 			buttonContent: {
 				display: 'flex',
