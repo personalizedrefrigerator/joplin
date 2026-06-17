@@ -23,10 +23,10 @@ const useStyles = (themeId: number) => {
 				paddingHorizontal: 12,
 			},
 			dialogActions: {
-				paddingBottom: 14,
+				paddingBottom: 12,
 				paddingTop: 4,
 				paddingHorizontal: 12,
-				gap: 6,
+				gap: 12,
 			},
 			textInput: {
 				borderBottomColor: theme.dividerColor,
