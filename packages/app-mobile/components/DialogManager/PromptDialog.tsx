@@ -16,14 +16,14 @@ const useStyles = (isMenu: boolean) => {
 		return StyleSheet.create({
 
 			dialogContent: {
-				paddingBottom: 14,
-				paddingHorizontal: 12,
+				paddingBottom: 15,
+				paddingHorizontal: 10,
 			},
 			dialogActions: {
-				paddingBottom: 14,
-				paddingHorizontal: 12,
+				paddingBottom: 10,
+				paddingHorizontal: 10,
 				paddingTop: 4,
-				gap: isMenu ? 1 : 6,
+				gap: isMenu ? 1 : 10,
 
 				...(isMenu ? {
 					flexDirection: 'column',

@@ -56,8 +56,8 @@ const useStyles = (theme: ThemeStyle, spec: PromptButtonSpec, isMenu: boolean) =
 			},
 			button: {
 				borderRadius: theme.borderRadius,
-				paddingHorizontal: 16,
-				paddingVertical: 14,
+				paddingHorizontal: 20,
+				paddingVertical: 15,
 				backgroundColor: color,
 			},
 			buttonContent: {
