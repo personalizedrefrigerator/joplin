@@ -419,7 +419,6 @@ const SideMenuContentComponent = (props: Props) => {
 						},
 						{
 							text: _('OK'),
-							style: 'destructive',
 							onPress: () => {
 								void Folder.delete(folder.id, { toTrash: true, sourceDescription: 'side-menu-content (long-press)' });
 							},
@@ -443,7 +442,6 @@ const SideMenuContentComponent = (props: Props) => {
 
 			menuItems.push({
 				text: _('Edit'),
-				style: 'primary',
 				onPress: () => {
 					props.dispatch({ type: 'SIDE_MENU_CLOSE' });
 

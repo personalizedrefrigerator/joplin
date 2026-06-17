@@ -13,8 +13,25 @@ interface Props {
 
 const useStyles = (theme: ThemeStyle, spec: PromptButtonSpec) => {
 	const paperTheme = useTheme();
-	const onColor = spec.style === 'primary' ? paperTheme.colors.onPrimary : paperTheme.colors.onSecondary;
-	const color = spec.style === 'primary' ? paperTheme.colors.primary : paperTheme.colors.secondary;
+
+	const { onColor, color } = (() => {
+		if (spec.style === 'destructive') {
+			return {
+				onColor: paperTheme.colors.onErrorContainer,
+				color: paperTheme.colors.errorContainer,
+			};
+		} else if (spec.style === 'cancel') {
+			return {
+				onColor: paperTheme.colors.onSecondary,
+				color: paperTheme.colors.secondary,
+			};
+		} else {
+			return {
+				onColor: paperTheme.colors.onPrimary,
+				color: paperTheme.colors.primary,
+			};
+		}
+	})();
 
 	return useMemo(() => {
 		const buttonText: TextStyle = {
