@@ -30,9 +30,10 @@ const useStyles = (isMenu: boolean) => {
 					alignItems: 'stretch',
 				} : {}),
 			},
-			dialogLabel: {
-				textAlign: isMenu ? 'center' : undefined,
-			},
+			dialogLabel: isMenu ? {
+				textAlign: 'center',
+				marginTop: 5,
+			} : {},
 		});
 	}, [isMenu]);
 };
