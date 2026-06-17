@@ -23,7 +23,7 @@ const useStyles = (isMenu: boolean) => {
 				paddingBottom: 14,
 				paddingHorizontal: 12,
 				paddingTop: 4,
-				gap: 6,
+				gap: isMenu ? 1 : 6,
 
 				...(isMenu ? {
 					flexDirection: 'column',
