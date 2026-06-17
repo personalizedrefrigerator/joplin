@@ -22,10 +22,15 @@ const useStyles = (theme: ThemeStyle, spec: PromptButtonSpec, isMenu: boolean) =
 				onColor: paperTheme.colors.onErrorContainer,
 				color: paperTheme.colors.errorContainer,
 			};
-		} else if (style === (isMenu ? 'default' : 'cancel')) {
+		} else if (style === 'cancel') {
 			return {
 				onColor: paperTheme.colors.onSecondary,
 				color: paperTheme.colors.secondary,
+			};
+		} else if (isMenu) {
+			return {
+				onColor: theme.color4,
+				color: theme.backgroundColor4,
 			};
 		} else {
 			return {
