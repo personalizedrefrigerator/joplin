@@ -823,13 +823,16 @@ class AppComponent extends React.Component<AppComponentProps, AppComponentState>
 						version: 3,
 						colors: {
 							...paperTheme.colors,
+
+							primary: theme.primary,
+							onPrimary: theme.onPrimary,
+							secondary: theme.secondary,
+							onSecondary: theme.onSecondary,
+
 							onPrimaryContainer: theme.color5,
 							primaryContainer: theme.backgroundColor5,
 
 							outline: theme.codeBorderColor,
-
-							primary: theme.color4,
-							onPrimary: theme.backgroundColor4,
 
 							background: theme.backgroundColor,
 
@@ -843,12 +846,12 @@ class AppComponent extends React.Component<AppComponentProps, AppComponentState>
 							onSurfaceVariant: theme.color3,
 
 							elevation: {
-								level0: 'transparent',
-								level1: theme.oddBackgroundColor,
-								level2: theme.raisedBackgroundColor,
-								level3: theme.raisedBackgroundColor,
-								level4: theme.raisedBackgroundColor,
-								level5: theme.raisedBackgroundColor,
+								// level0: 'transparent',
+								// level1: theme.oddBackgroundColor,
+								// level2: theme.raisedBackgroundColor,
+								// level3: theme.raisedBackgroundColor,
+								// level4: theme.raisedBackgroundColor,
+								// level5: theme.raisedBackgroundColor,
 							},
 						},
 					}}>

@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useMemo } from 'react';
 import { StyleSheet, TextStyle, View } from 'react-native';
-import { TouchableRipple, Text } from 'react-native-paper';
+import { TouchableRipple, Text, useTheme } from 'react-native-paper';
 import { PromptButtonSpec } from './types';
 import { ThemeStyle, themeStyle } from '../global-style';
 import Icon from '../Icon';
@@ -9,12 +9,41 @@ import Icon from '../Icon';
 interface Props {
 	themeId: number;
 	buttonSpec: PromptButtonSpec;
+	isMenu: boolean;
 }
 
-const useStyles = (theme: ThemeStyle) => {
+const useStyles = (theme: ThemeStyle, spec: PromptButtonSpec, isMenu: boolean) => {
+	const paperTheme = useTheme();
+
+	const { onColor, color } = (() => {
+		const style = spec.style ?? 'default';
+		if (style === 'destructive') {
+			return {
+				onColor: paperTheme.colors.onErrorContainer,
+				color: paperTheme.colors.errorContainer,
+			};
+		} else if (style === 'cancel') {
+			return {
+				onColor: paperTheme.colors.onSecondary,
+				color: paperTheme.colors.secondary,
+			};
+		} else if (isMenu) {
+			return {
+				onColor: theme.color4,
+				color: theme.backgroundColor4,
+			};
+		} else {
+			return {
+				onColor: paperTheme.colors.onPrimary,
+				color: paperTheme.colors.primary,
+			};
+		}
+	})();
+
 	return useMemo(() => {
 		const buttonText: TextStyle = {
-			color: theme.color4,
+			color: onColor,
+			fontWeight: '600',
 			textAlign: 'center',
 		};
 
@@ -27,7 +56,9 @@ const useStyles = (theme: ThemeStyle) => {
 			},
 			button: {
 				borderRadius: theme.borderRadius,
-				padding: 10,
+				paddingHorizontal: 16,
+				paddingVertical: 14,
+				backgroundColor: color,
 			},
 			buttonContent: {
 				display: 'flex',
@@ -41,12 +72,12 @@ const useStyles = (theme: ThemeStyle) => {
 				marginRight: 8,
 			},
 		});
-	}, [theme]);
+	}, [theme, color, onColor]);
 };
 
 const PromptButton: React.FC<Props> = props => {
 	const theme = themeStyle(props.themeId);
-	const styles = useStyles(theme);
+	const styles = useStyles(theme, props.buttonSpec, props.isMenu);
 
 	const { checked, text, iconChecked, onPress } = props.buttonSpec;
 

@@ -16,11 +16,11 @@ export const runtime = (): CommandRuntime => {
 			if (!noteIds.length) return;
 			const msg = await Note.permanentlyDeleteMessage(noteIds);
 
-			const deleteIndex = 0;
+			const deleteIndex = 1;
 			const result = await shim.showMessageBox(msg, {
-				buttons: [_('Delete'), _('Cancel')],
+				buttons: [_('Cancel'), _('Delete')],
 				defaultId: 1,
-				cancelId: 1,
+				cancelId: 0,
 				type: MessageBoxType.Confirm,
 			});
 

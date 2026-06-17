@@ -17,7 +17,7 @@ const makeShowMessageBox = (dialogControl: null|RefObject<DialogControl>) => (me
 			onPress: () => resolve(1),
 			style: 'cancel',
 		};
-		const defaultConfirmButtons = [okButton, cancelButton];
+		const defaultConfirmButtons = [cancelButton, okButton];
 		const defaultAlertButtons = [okButton];
 
 		const dialogType = options.type ?? MessageBoxType.Confirm;
@@ -26,6 +26,7 @@ const makeShowMessageBox = (dialogControl: null|RefObject<DialogControl>) => (me
 			buttons = options.buttons.map((text, index) => {
 				return {
 					text,
+					style: index === options.cancelId ? 'cancel' : 'default',
 					onPress: () => resolve(index),
 				};
 			});

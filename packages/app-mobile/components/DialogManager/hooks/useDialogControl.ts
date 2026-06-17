@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { Alert, Platform } from 'react-native';
 import { DialogControl, DialogType, MenuChoice, PromptButtonSpec, DialogData, PromptOptions } from '../types';
 import { _ } from '@joplin/lib/locale';
 import { useMemo, useRef } from 'react';
@@ -33,37 +32,31 @@ const useDialogControl = (setPromptDialogs: SetPromptDialogs) => {
 				});
 			},
 			prompt: (title: string, message: string, buttons: PromptButtonSpec[] = defaultButtons, options?: PromptOptions) => {
-				// Alert.alert doesn't work on web.
-				if (Platform.OS !== 'web') {
-					// Note: Alert.alert provides a more native style on iOS.
-					Alert.alert(title, message, buttons, options);
-				} else {
-					const cancelable = options?.cancelable ?? true;
-					const dialog: DialogData = {
-						type: DialogType.ButtonPrompt,
-						key: `dialog-${nextDialogIdRef.current++}`,
-						title,
-						message,
-						buttons: buttons.map(button => ({
-							...button,
-							onPress: () => {
-								onDismiss(dialog);
-								button.onPress?.();
-							},
-						})),
-						onDismiss: cancelable ? () => {
-							options?.onDismiss?.();
+				const cancelable = options?.cancelable ?? true;
+				const dialog: DialogData = {
+					type: DialogType.ButtonPrompt,
+					key: `dialog-${nextDialogIdRef.current++}`,
+					title,
+					message,
+					buttons: buttons.map(button => ({
+						...button,
+						onPress: () => {
 							onDismiss(dialog);
-						} : null,
-					};
+							button.onPress?.();
+						},
+					})),
+					onDismiss: cancelable ? () => {
+						options?.onDismiss?.();
+						onDismiss(dialog);
+					} : null,
+				};
 
-					setPromptDialogs(dialogs => {
-						return [
-							...dialogs,
-							dialog,
-						];
-					});
-				}
+				setPromptDialogs(dialogs => {
+					return [
+						...dialogs,
+						dialog,
+					];
+				});
 			},
 			showMenu: function<T>(title: string, choices: MenuChoice<T>[]) {
 				return new Promise<T>((resolve) => {
