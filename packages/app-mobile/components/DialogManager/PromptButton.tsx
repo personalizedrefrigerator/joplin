@@ -29,7 +29,8 @@ const useStyles = (theme: ThemeStyle) => {
 			},
 			button: {
 				borderRadius: theme.borderRadius,
-				padding: 10,
+				paddingHorizontal: 16,
+				paddingVertical: 14,
 				backgroundColor: paperTheme.colors.secondary,
 			},
 			buttonContent: {
