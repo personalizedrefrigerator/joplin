@@ -62,9 +62,9 @@ const theme: Theme = {
 	headerBackgroundColor: '#2D3136',
 	textSelectionColor: '#00AEFF',
 
-	primary: '#8bb1fb',
+	primary: '#799ce3',
 	onPrimary: '#000000',
-	secondary: '#393f4f',
+	secondary: '#303543',
 	onSecondary: '#8bb1fb',
 };
 
