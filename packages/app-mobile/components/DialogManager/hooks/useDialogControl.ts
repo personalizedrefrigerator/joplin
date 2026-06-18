@@ -112,6 +112,43 @@ const useDialogControl = (setPromptDialogs: SetPromptDialogs) => {
 					});
 				});
 			},
+
+			showCustom: (key, component, onClosed) => {
+				key = `custom--${key}`;
+				const dialog: DialogData = {
+					key,
+					type: DialogType.Custom,
+					onDismiss: () => {
+						onDismiss(dialog);
+						onClosed();
+					},
+					render: () => component,
+				};
+
+				setPromptDialogs(dialogs => {
+					const newDialogs = [];
+
+					let added = false;
+					for (const dialog of dialogs) {
+						if (dialog.key === key) {
+							newDialogs.push(dialog);
+							added = true;
+						}
+					}
+
+					if (!added) {
+						newDialogs.push(dialog);
+					}
+
+					return newDialogs;
+				});
+
+				return {
+					dismiss: () => {
+						dialog.onDismiss();
+					},
+				};
+			},
 		};
 
 		return control;

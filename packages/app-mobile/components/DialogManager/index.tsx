@@ -10,6 +10,7 @@ import useDialogControl from './hooks/useDialogControl';
 import PromptDialog from './PromptDialog';
 import { themeStyle } from '../global-style';
 import TextInputDialog from './TextInputDialog';
+import AccessibleView from '../accessibility/AccessibleView';
 
 export type { DialogControl } from './types';
 export const DialogContext = createContext<DialogControl>(null);
@@ -50,6 +51,15 @@ const useStyles = (themeId: number) => {
 				...dialogContainer,
 				maxWidth: 450,
 			},
+
+			dialogWrapper: {
+				position: 'absolute',
+				width: Math.min(
+					windowSize.width, Math.max(windowSize.width / 2, 360),
+				),
+				borderColor: 'red',
+				borderWidth: 1,
+			},
 		});
 	}, [windowSize.width, themeId]);
 };
@@ -73,29 +83,41 @@ const DialogManager: React.FC<Props> = props => {
 	const styles = useStyles(props.themeId);
 
 	const dialogComponents: React.ReactNode[] = [];
-	for (const dialog of dialogModels) {
+	for (let i = 0; i < dialogModels.length; i++) {
+		const dialog = dialogModels[i];
+		let component;
 		if (dialog.type === DialogType.Menu || dialog.type === DialogType.ButtonPrompt) {
-			dialogComponents.push(
+			component = (
 				<PromptDialog
 					dialog={dialog}
 					containerStyle={dialog.type === DialogType.ButtonPrompt ? styles.promptDialogContainer : styles.dialogContainer}
 					themeId={props.themeId}
-					key={dialog.key}
-				/>,
+				/>
 			);
 		} else if (dialog.type === DialogType.TextInput) {
-			dialogComponents.push(
+			component = (
 				<TextInputDialog
 					dialog={dialog}
 					containerStyle={styles.promptDialogContainer}
 					themeId={props.themeId}
-					key={dialog.key}
-				/>,
+				/>
 			);
+		} else if (dialog.type === DialogType.Custom) {
+			component = dialog.render();
 		} else {
 			const exhaustivenessCheck: never = dialog.type;
 			throw new Error(`Unexpected dialog type ${exhaustivenessCheck}`);
 		}
+
+		dialogComponents.push(
+			<AccessibleView
+				key={dialog.key}
+				inert={i !== dialogModels.length - 1}
+				style={styles.dialogWrapper}
+			>
+				{component}
+			</AccessibleView>,
+		);
 	}
 
 	// Web: Use a <Modal> wrapper for better keyboard focus handling.
@@ -107,7 +129,6 @@ const DialogManager: React.FC<Props> = props => {
 			<Modal
 				visible={!!dialogComponents.length}
 				scrollOverflow={true}
-				containerStyle={styles.modalContainer}
 				backgroundColor={theme.backgroundColorTransparent2}
 				onClose={dialogModels[dialogComponents.length - 1]?.onDismiss}
 			>
