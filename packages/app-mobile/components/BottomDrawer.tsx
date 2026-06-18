@@ -4,7 +4,7 @@ import { useCallback, useMemo } from 'react';
 import { NativeScrollEvent, NativeSyntheticEvent, StyleSheet, useWindowDimensions, View } from 'react-native';
 import useSafeAreaPadding from '../utils/hooks/useSafeAreaPadding';
 import { themeStyle, ThemeStyle } from './global-style';
-import Modal from './Modal';
+import Modal from './DialogManager/Modal';
 import { AppState } from '../utils/types';
 
 interface Props {
