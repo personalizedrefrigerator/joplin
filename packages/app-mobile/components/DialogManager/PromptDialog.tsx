@@ -23,12 +23,15 @@ const useStyles = (isMenu: boolean) => {
 				paddingBottom: 10,
 				paddingHorizontal: 10,
 				paddingTop: 4,
-				gap: isMenu ? 1 : 10,
 
 				...(isMenu ? {
 					flexDirection: 'column',
 					alignItems: 'stretch',
-				} : {}),
+					gap: 1,
+				} : {
+					gap: 10,
+					flexWrap: 'wrap',
+				}),
 			},
 			dialogLabel: isMenu ? {
 				textAlign: 'center',

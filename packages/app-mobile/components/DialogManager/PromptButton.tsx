@@ -49,6 +49,8 @@ const useStyles = (theme: ThemeStyle, spec: PromptButtonSpec, isMenu: boolean) =
 
 		return StyleSheet.create({
 			buttonContainer: {
+				backgroundColor: color,
+
 				// This applies the borderRadius to the TouchableRipple's parent, which
 				// seems necessary on Android.
 				borderRadius: theme.borderRadius,
@@ -58,7 +60,6 @@ const useStyles = (theme: ThemeStyle, spec: PromptButtonSpec, isMenu: boolean) =
 				borderRadius: theme.borderRadius,
 				paddingHorizontal: 20,
 				paddingVertical: 15,
-				backgroundColor: color,
 			},
 			buttonContent: {
 				display: 'flex',
