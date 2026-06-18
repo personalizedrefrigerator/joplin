@@ -5,5 +5,5 @@ import 'react-native-get-random-values';
 
 // eslint-disable-next-line import/prefer-default-export -- This needs to match the exports from NodeJS crypto
 export const getRandomValues = (array: ArrayBufferView<ArrayBufferLike>) => {
-	return crypto.getRandomValues(array);
+	return crypto.getRandomValues(array as ArrayBufferView<ArrayBuffer>);
 };

@@ -9,7 +9,7 @@
 import { Tag } from '@lezer/highlight';
 import { parseMixed, SyntaxNodeRef, Input, NestedParse, ParseWrapper } from '@lezer/common';
 import { MarkdownConfig, BlockContext, Line, LeafBlock, MarkdownExtension } from '@lezer/markdown';
-import { StreamLanguage } from '@codemirror/language';
+import { StreamLanguage, StreamParser } from '@codemirror/language';
 import { yaml } from '@codemirror/legacy-modes/mode/yaml';
 
 export const frontMatterTagName = 'FrontMatter';
@@ -19,7 +19,7 @@ export const frontMatterMarkerTagName = 'FrontMatterMarker';
 export const frontMatterTag = Tag.define();
 
 // Create the YAML language parser using the legacy mode
-const yamlLanguage = StreamLanguage.define(yaml);
+const yamlLanguage = StreamLanguage.define(yaml as unknown as StreamParser<unknown>);
 
 // Wraps a YAML parser for the FrontMatter content.
 // This replaces [nodeTag] from the syntax tree with a region handled by the YAML parser.
