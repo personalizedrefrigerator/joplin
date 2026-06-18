@@ -16,12 +16,12 @@ const useStyles = (isMenu: boolean) => {
 		return StyleSheet.create({
 
 			dialogContent: {
-				paddingBottom: 15,
-				paddingHorizontal: 10,
+				paddingBottom: 16,
+				paddingHorizontal: 12,
 			},
 			dialogActions: {
-				paddingBottom: 10,
-				paddingHorizontal: 10,
+				paddingBottom: 12,
+				paddingHorizontal: 12,
 				paddingTop: 4,
 
 				...(isMenu ? {
@@ -29,13 +29,13 @@ const useStyles = (isMenu: boolean) => {
 					alignItems: 'stretch',
 					gap: 1,
 				} : {
-					gap: 10,
+					gap: 12,
 					flexWrap: 'wrap',
 				}),
 			},
 			dialogLabel: isMenu ? {
 				textAlign: 'center',
-				marginTop: 5,
+				marginTop: 6,
 			} : {},
 		});
 	}, [isMenu]);
