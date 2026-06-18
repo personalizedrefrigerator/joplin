@@ -13,6 +13,7 @@ const makeMockDialogControl = (onPrompt: OnPrompt): DialogControl => {
 		}),
 		promptForText: jest.fn(),
 		showMenu: jest.fn(),
+		showCustom: ()=> ({ dismiss: () => {} }),
 	};
 };
 

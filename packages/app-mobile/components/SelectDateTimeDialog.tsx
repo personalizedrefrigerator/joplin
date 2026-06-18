@@ -4,7 +4,7 @@ import { _ } from '@joplin/lib/locale';
 import { View, Button, Text, StyleSheet } from 'react-native';
 import time from '@joplin/lib/time';
 import { Platform } from 'react-native';
-import Modal from './Modal';
+import Modal from './DialogManager/Modal';
 import { formatMsToLocal } from '@joplin/utils/time';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 
