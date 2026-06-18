@@ -1,7 +1,7 @@
 
 import { PluginHtmlContents, PluginStates, ViewInfo } from '@joplin/lib/services/plugins/reducer';
 import * as React from 'react';
-import { Button, Portal, SegmentedButtons, Text } from 'react-native-paper';
+import { Button, SegmentedButtons, Text } from 'react-native-paper';
 import useViewInfos from './hooks/useViewInfos';
 import { ContainerType } from '@joplin/lib/services/plugins/WebviewController';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -160,17 +160,15 @@ const PluginPanelViewer: React.FC<Props> = props => {
 	}, []);
 
 	return (
-		<Portal>
-			<DismissibleDialog
-				themeId={props.themeId}
-				visible={props.visible}
-				size={DialogVariant.Large}
-				onDismiss={onClose}
-			>
-				{renderTabContent()}
-				{renderTabSelector()}
-			</DismissibleDialog>
-		</Portal>
+		<DismissibleDialog
+			themeId={props.themeId}
+			visible={props.visible}
+			size={DialogVariant.Large}
+			onDismiss={onClose}
+		>
+			{renderTabContent()}
+			{renderTabSelector()}
+		</DismissibleDialog>
 	);
 };
 
