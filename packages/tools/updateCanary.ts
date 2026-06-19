@@ -13,10 +13,53 @@ function formatDate(date: Date): string {
 	return `${day} ${month} ${year}`;
 }
 
+function ordinal(day: number): string {
+	const mod100 = day % 100;
+	if (mod100 >= 11 && mod100 <= 13) return `${day}th`;
+	switch (day % 10) {
+	case 1: return `${day}st`;
+	case 2: return `${day}nd`;
+	case 3: return `${day}rd`;
+	default: return `${day}th`;
+	}
+}
+
+function addMonths(date: Date, months: number): Date {
+	const result = new Date(date);
+	const targetMonth = result.getUTCMonth() + months;
+	const day = result.getUTCDate();
+	result.setUTCDate(1);
+	result.setUTCMonth(targetMonth);
+	const lastDayOfTargetMonth = new Date(Date.UTC(result.getUTCFullYear(), result.getUTCMonth() + 1, 0)).getUTCDate();
+	result.setUTCDate(Math.min(day, lastDayOfTargetMonth));
+	return result;
+}
+
 function addDays(date: Date, days: number): Date {
 	const result = new Date(date);
 	result.setUTCDate(result.getUTCDate() + days);
 	return result;
+}
+
+// The canary is on a fixed bi-monthly schedule anchored to the 19th of
+// even-parity months (Feb, Apr, Jun, Aug, Oct, Dec). The statement date is the
+// nearest scheduled slot to today so that being a few days late doesn't drift
+// the schedule — a warrant canary's signal depends on predictable timing.
+const scheduleDay = 19;
+const scheduleMonthParity = 1; // 0=Jan, 1=Feb, ... — Feb/Apr/Jun/Aug/Oct/Dec.
+
+function nearestScheduledDate(today: Date): Date {
+	const year = today.getUTCFullYear();
+	const candidates: Date[] = [];
+	for (let y = year - 1; y <= year + 1; y++) {
+		for (let m = 0; m < 12; m++) {
+			if (m % 2 === scheduleMonthParity) {
+				candidates.push(new Date(Date.UTC(y, m, scheduleDay)));
+			}
+		}
+	}
+	candidates.sort((a, b) => Math.abs(a.getTime() - today.getTime()) - Math.abs(b.getTime() - today.getTime()));
+	return candidates[0];
 }
 
 function prompt(rl: ReadlineInterface, question: string): Promise<string> {
@@ -34,15 +77,17 @@ async function promptNonEmpty(rl: ReadlineInterface, question: string): Promise<
 }
 
 function buildCanaryContent(statementDate: Date, headline1: string, headline2: string): string {
-	const validUntil = addDays(statementDate, 60);
+	const validUntil = addMonths(statementDate, 2);
+	const expiresAt = addDays(validUntil, 15);
+	const dayOfMonth = ordinal(statementDate.getUTCDate());
 	return `Joplin Warrant Canary
 
 Statement date: ${formatDate(statementDate)}
 Valid until: ${formatDate(validUntil)}
 
-This warrant canary is updated every 60 days.
-If this document has not been updated within 75 days of the
-Statement date above, it should be considered expired.
+This warrant canary is updated on the ${dayOfMonth} of every other month.
+If this document has not been updated by ${formatDate(expiresAt)},
+it should be considered expired.
 
 As of the Statement date:
 
@@ -82,7 +127,7 @@ async function main() {
 		const headline1 = await promptNonEmpty(rl, 'Headline 1: ');
 		const headline2 = await promptNonEmpty(rl, 'Headline 2: ');
 
-		const statementDate = new Date();
+		const statementDate = nearestScheduledDate(new Date());
 		const content = buildCanaryContent(statementDate, headline1, headline2);
 
 		const tmpFile = `${canaryFile}.tmp`;
