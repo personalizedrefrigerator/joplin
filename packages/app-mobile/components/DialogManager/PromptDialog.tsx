@@ -20,9 +20,9 @@ const useStyles = (isMenu: boolean) => {
 				paddingHorizontal: 12,
 			},
 			dialogActions: {
-				paddingBottom: 12,
+				paddingBottom: 16,
 				paddingHorizontal: 12,
-				paddingTop: 4,
+				paddingTop: isMenu ? 4 : 8,
 
 				...(isMenu ? {
 					flexDirection: 'column',

@@ -40,7 +40,7 @@ const useStyles = (theme: ThemeStyle, spec: PromptButtonSpec, isMenu: boolean) =
 		}
 	})();
 
-	return useMemo(() => {
+	const styles = useMemo(() => {
 		const buttonText: TextStyle = {
 			color: onColor,
 			fontWeight: '600',
@@ -55,12 +55,15 @@ const useStyles = (theme: ThemeStyle, spec: PromptButtonSpec, isMenu: boolean) =
 				// seems necessary on Android.
 				borderRadius: theme.borderRadius,
 				overflow: 'hidden',
+				// Add additional padding to prevent the focus indicator from clipped by
+				// the overflow: 'hidden':
+				padding: 1,
 			},
 			button: {
 				borderRadius: theme.borderRadius,
-				paddingHorizontal: 24,
-				paddingVertical: 16,
-				minWidth: 72,
+				paddingHorizontal: 22,
+				paddingVertical: 12,
+				minWidth: 62,
 			},
 			buttonContent: {
 				display: 'flex',
@@ -75,6 +78,8 @@ const useStyles = (theme: ThemeStyle, spec: PromptButtonSpec, isMenu: boolean) =
 			},
 		});
 	}, [theme, color, onColor]);
+
+	return styles;
 };
 
 const PromptButton: React.FC<Props> = props => {
