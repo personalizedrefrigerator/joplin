@@ -1,8 +1,8 @@
 import * as React from 'react';
 import { createContext, useEffect, useMemo, useRef, useState } from 'react';
-import { StyleSheet, ViewStyle } from 'react-native';
+import { StyleSheet, useWindowDimensions, ViewStyle } from 'react-native';
 import { Portal } from 'react-native-paper';
-import Modal from './Modal';
+import Modal from '../Modal';
 import shim from '@joplin/lib/shim';
 import makeShowMessageBox from '../../utils/makeShowMessageBox';
 import { DialogControl, DialogData, DialogType } from './types';
@@ -10,7 +10,7 @@ import useDialogControl from './hooks/useDialogControl';
 import PromptDialog from './PromptDialog';
 import { themeStyle } from '../global-style';
 import TextInputDialog from './TextInputDialog';
-import ModalContent from './ModalContent';
+import AccessibleView from '../accessibility/AccessibleView';
 
 export type { DialogControl } from './types';
 export const DialogContext = createContext<DialogControl>(null);
@@ -21,6 +21,8 @@ interface Props {
 }
 
 const useStyles = (themeId: number) => {
+	const windowSize = useWindowDimensions();
+
 	return useMemo(() => {
 		const theme = themeStyle(themeId);
 		const dialogContainer = {
@@ -34,6 +36,16 @@ const useStyles = (themeId: number) => {
 		} satisfies ViewStyle;
 
 		return StyleSheet.create({
+			modalContainer: {
+				marginLeft: 'auto',
+				marginRight: 'auto',
+				marginTop: 'auto',
+				marginBottom: 'auto',
+				paddingHorizontal: 4,
+				width: Math.max(windowSize.width / 2, 360),
+				maxWidth: '100%',
+			},
+
 			dialogContainer: dialogContainer,
 			promptDialogContainer: {
 				...dialogContainer,
@@ -42,14 +54,14 @@ const useStyles = (themeId: number) => {
 
 			dialogWrapper: {
 				position: 'absolute',
-				top: 0,
-				left: 0,
-				alignContent: 'center',
-				verticalAlign: 'middle',
-				justifyContent: 'center',
+				width: Math.min(
+					windowSize.width, Math.max(windowSize.width / 2, 360),
+				),
+				borderColor: 'red',
+				borderWidth: 1,
 			},
 		});
-	}, [themeId]);
+	}, [windowSize.width, themeId]);
 };
 
 const DialogManager: React.FC<Props> = props => {
@@ -98,20 +110,17 @@ const DialogManager: React.FC<Props> = props => {
 		}
 
 		dialogComponents.push(
-			<ModalContent
+			<AccessibleView
 				key={dialog.key}
-				onClose={dialog.onDismiss}
-				visible={true}
-				setModalStatus={null}
-				containerStyle={styles.dialogWrapper}
-				backgroundColor='rgba(0,0,0,0.4)'
-				scrollOverflow={false}
+				inert={i !== dialogModels.length - 1}
+				style={styles.dialogWrapper}
 			>
 				{component}
-			</ModalContent>,
+			</AccessibleView>,
 		);
 	}
 
+	// Web: Use a <Modal> wrapper for better keyboard focus handling.
 	return <>
 		<DialogContext.Provider value={dialogControl}>
 			{props.children}

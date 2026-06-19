@@ -4,7 +4,7 @@ import * as React from 'react';
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
 
-import Modal from '../DialogManager/Modal';
+import Modal from '../Modal';
 import { themeStyle } from '@joplin/lib/theme';
 import { _ } from '@joplin/lib/locale';
 import { EditorControl } from './types';
