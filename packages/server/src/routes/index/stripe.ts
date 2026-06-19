@@ -16,6 +16,7 @@ import { Models } from '../../models/factory';
 import { confirmUrl } from '../../utils/urlUtils';
 import { msleep } from '../../utils/time';
 import { IncomingMessage } from 'http';
+import { ErrorTaskInProgress } from '../../models/StripeEventModel';
 
 const logger = Logger.create('index/stripe');
 
@@ -138,6 +139,21 @@ const waitForUserCreation = async (models: Models, userEmail: string): Promise<U
 	return null;
 };
 
+// Cleans up information about interrupted Stripe events.
+// Assumption: At most one server is handling Stripe events at a time.
+let serverSetupTask: Promise<void>|null = null;
+const handleFirstEvent = async (models: Models) => {
+	serverSetupTask ??= (async () => {
+		logger.info('Clearing old Stripe tasks');
+		// If only one server can receive Stripe webhook events,
+		// any in-progress events must be left over from the last run of the server.
+		// Clear them so that Stripe can retry the events.
+		await models.stripeEvent().clearInProgressEvents();
+	})();
+	// Wait to start processing Stripe events until setup has finished running:
+	await serverSetupTask;
+};
+
 export const postHandlers: PostHandlers = {
 
 	createCheckoutSession: async (stripe: Stripe, __path: SubPath, ctx: AppContext) => {
@@ -240,16 +256,7 @@ export const postHandlers: PostHandlers = {
 		event = event ? event : await stripeEvent(stripe, ctx.req);
 
 		const models = ctx.joplin.models;
-
-		// Webhook endpoints might occasionally receive the same event more than
-		// once.
-		// https://stripe.com/docs/webhooks/best-practices#duplicate-events
-		const eventDoneKey = `stripeEventDone::${event.id}`;
-		if (await models.keyValue().value<number>(eventDoneKey)) {
-			logger.info(`Skipping event that has already been done: ${event.id}`);
-			return;
-		}
-		await models.keyValue().setValue(eventDoneKey, 1);
+		await handleFirstEvent(models);
 
 		// console.info('EVENT', JSON.stringify(event, null, 4));
 
@@ -357,11 +364,18 @@ export const postHandlers: PostHandlers = {
 		};
 
 		if (hooks[event.type]) {
-			logger.info(`Got Stripe event: ${event.type} [Handled]`);
 			try {
-				await hooks[event.type]();
+				await models.stripeEvent().withTask(
+					`webhookEvent::${event.id}`,
+					async () => {
+						logger.info(`Got Stripe event: ${event.type} [Handled]`);
+						await hooks[event.type]();
+					},
+				);
 			} catch (error) {
-				if (logErrors) {
+				if (error instanceof ErrorTaskInProgress) {
+					logger.info(`Skipped duplicate event ${event.type}`, event.id);
+				} else if (logErrors) {
 					logger.error(`Error processing event ${event.type}:`, event, error);
 				} else {
 					throw error;
