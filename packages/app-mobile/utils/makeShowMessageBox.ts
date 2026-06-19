@@ -34,7 +34,8 @@ const makeShowMessageBox = (dialogControl: null|RefObject<DialogControl>) => (me
 		// This will be -1 for dialogs that don't include the default "cancel" button
 		// Even though cancel is at position 0, this needs to return 1 for cancel for compatibility
 		// reasons.
-		const cancelId = buttons.includes(cancelButton) ? 1 : -1;
+		const defaultCancelId = buttons.includes(cancelButton) ? 1 : -1;
+		const cancelId = options.cancelId ?? defaultCancelId;
 
 		// Web doesn't support Alert.alert -- prefer using the global dialogControl if available.
 		(dialogControl?.current?.prompt ?? Alert.alert)(
