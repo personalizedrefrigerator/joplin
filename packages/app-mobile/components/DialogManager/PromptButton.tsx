@@ -43,7 +43,6 @@ const useStyles = (theme: ThemeStyle, spec: PromptButtonSpec, isMenu: boolean) =
 	const styles = useMemo(() => {
 		const buttonText: TextStyle = {
 			color: onColor,
-			fontWeight: '600',
 			textAlign: 'center',
 		};
 
