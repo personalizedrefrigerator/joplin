@@ -3,9 +3,8 @@ import { useMemo } from 'react';
 import { StyleSheet, View, ViewStyle, useWindowDimensions } from 'react-native';
 import { IconButton, Surface, Text } from 'react-native-paper';
 import { themeStyle } from './global-style';
-// import Modal from './Modal';
+import Modal from './Modal';
 import { _ } from '@joplin/lib/locale';
-import CustomDialog from './DialogManager/CustomDialog';
 
 export enum DialogVariant {
 	// Small width, auto-determined height
@@ -102,7 +101,7 @@ const useStyles = (themeId: number, containerStyle: ViewStyle, size: DialogVaria
 };
 
 const DismissibleDialog: React.FC<Props> = props => {
-	// const theme = themeStyle(props.themeId);
+	const theme = themeStyle(props.themeId);
 	const styles = useStyles(props.themeId, props.containerStyle, props.size);
 
 	const heading = props.heading ? (
@@ -123,21 +122,21 @@ const DismissibleDialog: React.FC<Props> = props => {
 	);
 
 	return (
-		<CustomDialog
+		<Modal
 			visible={props.visible}
-			onDismiss={props.onDismiss}
-			// containerStyle={styles.dialogContainer}
-			// modalBackgroundStyle={styles.modalBackground}
-			// backgroundColor={theme.backgroundColorTransparent2}
-			// scrollOverflow={props.scrollOverflow}
+			onClose={props.onDismiss}
+			containerStyle={styles.dialogContainer}
+			modalBackgroundStyle={styles.modalBackground}
+			backgroundColor={theme.backgroundColorTransparent2}
+			scrollOverflow={props.scrollOverflow}
 			// Allows the modal background to extend under the statusbar
-			// statusBarTranslucent
+			statusBarTranslucent
 		>
 			<Surface style={styles.dialogSurface} elevation={1}>
 				{closeButtonRow}
 				{props.children}
 			</Surface>
-		</CustomDialog>
+		</Modal>
 	);
 };
 
