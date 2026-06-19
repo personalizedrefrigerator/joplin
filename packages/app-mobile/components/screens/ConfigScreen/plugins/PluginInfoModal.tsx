@@ -2,7 +2,7 @@ import { PluginItem } from '@joplin/lib/components/shared/config/plugins/types';
 import * as React from 'react';
 import { _ } from '@joplin/lib/locale';
 import { useCallback, useMemo } from 'react';
-import { Card, Divider, List, Switch, Text } from 'react-native-paper';
+import { Card, Divider, List, Portal, Switch, Text } from 'react-native-paper';
 import getPluginIssueReportUrl from '@joplin/lib/services/plugins/utils/getPluginIssueReportUrl';
 import { Linking, ScrollView, StyleSheet, View, ViewStyle } from 'react-native';
 import DismissibleDialog, { DialogVariant } from '../../../DismissibleDialog';
@@ -247,14 +247,16 @@ const PluginInfoModalContent: React.FC<Props> = props => {
 
 const PluginInfoModal: React.FC<Props> = props => {
 	return (
-		<DismissibleDialog
-			themeId={props.themeId}
-			visible={props.visible}
-			size={DialogVariant.Small}
-			onDismiss={props.onModalDismiss}
-		>
-			{ props.item ? <PluginInfoModalContent {...props}/> : null }
-		</DismissibleDialog>
+		<Portal>
+			<DismissibleDialog
+				themeId={props.themeId}
+				visible={props.visible}
+				size={DialogVariant.Small}
+				onDismiss={props.onModalDismiss}
+			>
+				{ props.item ? <PluginInfoModalContent {...props}/> : null }
+			</DismissibleDialog>
+		</Portal>
 	);
 };
 

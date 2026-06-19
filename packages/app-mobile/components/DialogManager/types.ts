@@ -1,4 +1,3 @@
-import type * as React from 'react';
 
 interface BaseButtonSpec {
 	text: string;
@@ -21,25 +20,18 @@ export interface MenuChoice<IdType> extends BaseButtonSpec {
 	id: IdType;
 }
 
-export interface CustomDialogHandle {
-	dismiss: ()=> void;
-}
-
 export interface DialogControl {
 	info(message: string): Promise<void>;
 	error(message: string): Promise<void>;
 	prompt(title: string, message: string, buttons?: PromptButtonSpec[], options?: PromptOptions): void;
 	promptForText(message: string, initialValue?: string): Promise<string>;
 	showMenu<IdType>(title: string, choices: MenuChoice<IdType>[]): Promise<IdType>;
-
-	showCustom(key: string, component: React.ReactNode, onDismiss: ()=> void): CustomDialogHandle;
 }
 
 export enum DialogType {
 	ButtonPrompt,
 	Menu,
 	TextInput,
-	Custom,
 }
 
 export interface ButtonDialogData {
@@ -60,12 +52,5 @@ export interface TextInputDialogData {
 	onDismiss: ()=> void;
 }
 
-export interface CustomDialogData {
-	type: DialogType.Custom;
-	key: string;
-	render: ()=> React.ReactNode;
-	onDismiss: ()=> void;
-}
-
-export type DialogData = ButtonDialogData | TextInputDialogData | CustomDialogData;
+export type DialogData = ButtonDialogData | TextInputDialogData;
 
