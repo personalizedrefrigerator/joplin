@@ -18,19 +18,25 @@ export const runtime = (): CommandRuntime => {
 
 			const deleteLabel = _('Delete');
 			const cancelLabel = _('Cancel');
-			const buttons = [cancelLabel, deleteLabel];
+			let buttons;
+			let deleteIndex;
+			let cancelIndex;
 
 			// On desktop, 'Cancel' is usually shown on the right:
-			const swapButtons = shim.isElectron();
-			if (swapButtons) {
-				buttons.reverse();
+			if (shim.isElectron()) {
+				buttons = [deleteLabel, cancelLabel];
+				deleteIndex = 0;
+				cancelIndex = 1;
+			} else {
+				buttons = [cancelLabel, deleteLabel];
+				deleteIndex = 1;
+				cancelIndex = 0;
 			}
 
-			const deleteIndex = buttons.indexOf(deleteLabel);
 			const result = await shim.showMessageBox(msg, {
 				buttons,
-				defaultId: deleteIndex,
-				cancelId: buttons.indexOf(cancelLabel),
+				defaultId: 1,
+				cancelId: cancelIndex,
 				type: MessageBoxType.Confirm,
 			});
 
