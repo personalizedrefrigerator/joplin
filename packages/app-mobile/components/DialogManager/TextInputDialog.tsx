@@ -23,7 +23,7 @@ const useStyles = (themeId: number) => {
 				paddingHorizontal: 12,
 			},
 			dialogActions: {
-				paddingBottom: 12,
+				paddingBottom: 16,
 				paddingTop: 4,
 				paddingHorizontal: 12,
 				gap: 12,
