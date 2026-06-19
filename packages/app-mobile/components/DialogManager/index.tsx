@@ -27,7 +27,7 @@ const useStyles = (themeId: number) => {
 		const dialogContainer = {
 			backgroundColor: theme.backgroundColor,
 			borderRadius: theme.borderRadius,
-			paddingTop: theme.borderRadius,
+			paddingTop: 16,
 			marginLeft: 'auto',
 			marginRight: 'auto',
 

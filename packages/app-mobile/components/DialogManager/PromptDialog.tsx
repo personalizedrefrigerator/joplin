@@ -35,7 +35,6 @@ const useStyles = (isMenu: boolean) => {
 			},
 			dialogLabel: isMenu ? {
 				textAlign: 'center',
-				marginTop: 6,
 			} : {},
 		});
 	}, [isMenu]);
