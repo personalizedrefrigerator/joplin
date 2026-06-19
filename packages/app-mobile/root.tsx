@@ -846,12 +846,12 @@ class AppComponent extends React.Component<AppComponentProps, AppComponentState>
 							onSurfaceVariant: theme.color3,
 
 							elevation: {
-								// level0: 'transparent',
-								// level1: theme.oddBackgroundColor,
-								// level2: theme.raisedBackgroundColor,
-								// level3: theme.raisedBackgroundColor,
-								// level4: theme.raisedBackgroundColor,
-								// level5: theme.raisedBackgroundColor,
+								level0: 'transparent',
+								level1: theme.oddBackgroundColor,
+								level2: theme.raisedBackgroundColor,
+								level3: theme.raisedBackgroundColor,
+								level4: theme.raisedBackgroundColor,
+								level5: theme.raisedBackgroundColor,
 							},
 						},
 					}}>
