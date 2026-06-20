@@ -1,6 +1,6 @@
 # AI embeddings
 
-How Joplin builds and queries the local note-embeddings index. See [ai_primitives.md](ai_primitives.md) for the user-facing spec.
+How Joplin builds and queries the local note-embeddings index. See [ai_primitives.md](ai_primitives.md) for how it fits with the other AI primitives.
 
 ## Overview
 

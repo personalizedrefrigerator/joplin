@@ -1269,6 +1269,9 @@ packages/generator-joplin/generators/app/templates/api/index.js
 packages/generator-joplin/generators/app/templates/api/noteListType.js
 packages/generator-joplin/generators/app/templates/api/types.js
 packages/generator-joplin/generators/app/templates/api_index.js
+packages/generator-joplin/generators/app/templates/script/publish/steps/verifyBuild.js
+packages/generator-joplin/generators/app/templates/script/publish/steps/verifyGitState.js
+packages/generator-joplin/generators/app/templates/script/publish/utils/logger.js
 packages/generator-joplin/generators/app/templates/src/index.js
 packages/generator-joplin/tools/updateCategories.js
 packages/htmlpack/index.test.js
@@ -1442,6 +1445,7 @@ packages/lib/mimeUtils.test.js
 packages/lib/models/Alarm.js
 packages/lib/models/BaseItem.test.js
 packages/lib/models/BaseItem.js
+packages/lib/models/ConflictNoteState.js
 packages/lib/models/Folder.sharing.test.js
 packages/lib/models/Folder.test.js
 packages/lib/models/Folder.js
@@ -1489,6 +1493,7 @@ packages/lib/models/utils/paginatedFeed.js
 packages/lib/models/utils/paginationToSql.js
 packages/lib/models/utils/readOnly.test.js
 packages/lib/models/utils/readOnly.js
+packages/lib/models/utils/resourceUtils.test.js
 packages/lib/models/utils/resourceUtils.js
 packages/lib/models/utils/types.js
 packages/lib/models/utils/userData.test.js
@@ -1591,6 +1596,7 @@ packages/lib/services/database/migrations/49.js
 packages/lib/services/database/migrations/50.js
 packages/lib/services/database/migrations/51.js
 packages/lib/services/database/migrations/52.js
+packages/lib/services/database/migrations/53.js
 packages/lib/services/database/migrations/index.js
 packages/lib/services/database/sqlStringToLines.js
 packages/lib/services/database/types.js
@@ -1653,6 +1659,20 @@ packages/lib/services/keychain/KeychainServiceDriver.dummy.js
 packages/lib/services/keychain/KeychainServiceDriver.electron.js
 packages/lib/services/keychain/KeychainServiceDriver.node.js
 packages/lib/services/keychain/KeychainServiceDriverBase.js
+packages/lib/services/mcp/McpServer.test.js
+packages/lib/services/mcp/McpServer.js
+packages/lib/services/mcp/registry.js
+packages/lib/services/mcp/tools/createNote.js
+packages/lib/services/mcp/tools/createNotebook.js
+packages/lib/services/mcp/tools/deleteNote.js
+packages/lib/services/mcp/tools/listNotebooks.js
+packages/lib/services/mcp/tools/listTags.js
+packages/lib/services/mcp/tools/manageTags.js
+packages/lib/services/mcp/tools/readNote.js
+packages/lib/services/mcp/tools/searchNotes.js
+packages/lib/services/mcp/tools/semanticSearchNotes.js
+packages/lib/services/mcp/tools/updateNote.js
+packages/lib/services/mcp/types.js
 packages/lib/services/noteList/checkboxPieCss.js
 packages/lib/services/noteList/defaultLeftToRightListRenderer.js
 packages/lib/services/noteList/defaultListRenderer.js
@@ -1663,6 +1683,11 @@ packages/lib/services/noteList/renderTemplate.js
 packages/lib/services/noteList/renderViewProps.test.js
 packages/lib/services/noteList/renderViewProps.js
 packages/lib/services/noteList/renderers.js
+packages/lib/services/noteLock/NoteLockKey.js
+packages/lib/services/noteLock/NoteLockNote.js
+packages/lib/services/noteLock/NoteLockService.test.js
+packages/lib/services/noteLock/NoteLockService.js
+packages/lib/services/noteLock/isNoteLockEnabled.js
 packages/lib/services/ocr/OcrDriverBase.js
 packages/lib/services/ocr/OcrService.test.js
 packages/lib/services/ocr/OcrService.js
@@ -1760,6 +1785,7 @@ packages/lib/services/rest/routes/events.js
 packages/lib/services/rest/routes/folders.test.js
 packages/lib/services/rest/routes/folders.js
 packages/lib/services/rest/routes/master_keys.js
+packages/lib/services/rest/routes/mcp.js
 packages/lib/services/rest/routes/notes.test.js
 packages/lib/services/rest/routes/notes.js
 packages/lib/services/rest/routes/ping.js
@@ -1806,6 +1832,7 @@ packages/lib/services/synchronizer/ItemUploader.test.js
 packages/lib/services/synchronizer/ItemUploader.js
 packages/lib/services/synchronizer/LockHandler.js
 packages/lib/services/synchronizer/MigrationHandler.js
+packages/lib/services/synchronizer/Synchronizer.baseFields.test.js
 packages/lib/services/synchronizer/Synchronizer.basics.test.js
 packages/lib/services/synchronizer/Synchronizer.conflicts.test.js
 packages/lib/services/synchronizer/Synchronizer.e2ee.test.js
