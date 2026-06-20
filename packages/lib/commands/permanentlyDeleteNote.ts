@@ -16,11 +16,27 @@ export const runtime = (): CommandRuntime => {
 			if (!noteIds.length) return;
 			const msg = await Note.permanentlyDeleteMessage(noteIds);
 
-			const deleteIndex = 1;
+			const deleteLabel = _('Delete');
+			const cancelLabel = _('Cancel');
+			let buttons;
+			let deleteIndex;
+			let cancelIndex;
+
+			// On desktop, 'Cancel' is usually shown on the right:
+			if (shim.isElectron()) {
+				buttons = [deleteLabel, cancelLabel];
+				deleteIndex = 0;
+				cancelIndex = 1;
+			} else {
+				buttons = [cancelLabel, deleteLabel];
+				deleteIndex = 1;
+				cancelIndex = 0;
+			}
+
 			const result = await shim.showMessageBox(msg, {
-				buttons: [_('Cancel'), _('Delete')],
+				buttons,
 				defaultId: 1,
-				cancelId: 0,
+				cancelId: cancelIndex,
 				type: MessageBoxType.Confirm,
 			});
 

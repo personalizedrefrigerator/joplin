@@ -123,7 +123,7 @@ function extraStyles(theme: BaseTheme) {
 		backgroundColor5: theme.backgroundColor5 ?? theme.color4,
 
 		backgroundColorHover4: Color(theme.color4).alpha(0.12).rgb().string(),
-		borderRadius: 10,
+		borderRadius: 8,
 	};
 }
 
