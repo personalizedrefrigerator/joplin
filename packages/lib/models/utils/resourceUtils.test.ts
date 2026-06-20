@@ -17,4 +17,5 @@ describe('resourceUtils', () => {
 	])('should reject filenames containing path separators or parent segments (%j)', (resource) => {
 		expect(() => resourceFilename(resource as ResourceEntity)).toThrow(/Invalid resource filename/);
 	});
+
 });
