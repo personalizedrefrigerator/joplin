@@ -32,6 +32,7 @@ import syncDeleteStep from './services/synchronizer/utils/syncDeleteStep';
 import { ErrorCode } from './errors';
 import { SyncAction } from './services/synchronizer/utils/types';
 import checkDisabledSyncItemsNotification from './services/synchronizer/utils/checkDisabledSyncItemsNotification';
+import { NoteEntity } from './services/database/types';
 import { reg } from './registry';
 import SyncTargetRegistry from './SyncTargetRegistry';
 import { Day } from '@joplin/utils/time';
@@ -693,18 +694,18 @@ export default class Synchronizer {
 							// a few seconds ahead of what it was set with setTimestamp()
 							try {
 								remoteContent = await this.apiCall('get', path);
+								if (!remoteContent) throw new Error(`Got metadata for path but could not fetch content: ${path}`);
+								remoteContent = await BaseItem.unserialize(remoteContent);
 							} catch (error) {
-								if (error.code === 'rejectedByTarget') {
+								if (error.code === 'rejectedByTarget' || error.code === 'malformedItem') {
 									this.progressReport_.errors.push(error);
-									logger.warn(`Rejected by target: ${path}: ${error.message}`);
+									logger.warn(`Skipping item from sync target: ${path}: ${error.message}`);
 									completeItemProcessing(path);
 									continue;
 								} else {
 									throw error;
 								}
 							}
-							if (!remoteContent) throw new Error(`Got metadata for path but could not fetch content: ${path}`);
-							remoteContent = await BaseItem.unserialize(remoteContent);
 
 							if (remoteContent.updated_time > local.sync_time) {
 								// Since, in this loop, we are only dealing with items that require sync, if the
@@ -849,6 +850,11 @@ export default class Synchronizer {
 								// get set there
 
 								await ItemClass.saveSyncTime(syncTargetId, local, local.updated_time);
+
+								if (local.type_ === BaseModel.TYPE_NOTE) {
+									const note = local as NoteEntity;
+									await Note.saveSyncBaseContent(syncTargetId, note.id, note.body, note.title);
+								}
 							}
 						}
 
@@ -1020,9 +1026,9 @@ export default class Synchronizer {
 								}
 							}
 						} catch (error) {
-							if (error.code === 'rejectedByTarget') {
+							if (error.code === 'rejectedByTarget' || error.code === 'malformedItem') {
 								this.progressReport_.errors.push(error);
-								logger.warn(`Rejected by target: ${path}: ${error.message}`);
+								logger.warn(`Skipping item from sync target: ${path}: ${error.message}`);
 								action = null;
 							} else {
 								error.message = `On file ${path}: ${error.message}`;

@@ -8,7 +8,7 @@ import Setting from './Setting';
 import shim from '../shim';
 import time from '../time';
 import markdownUtils from '../markdownUtils';
-import { FolderEntity, NoteEntity } from '../services/database/types';
+import { FolderEntity, NoteEntity, SyncItemEntity } from '../services/database/types';
 import Tag from './Tag';
 const { sprintf } = require('sprintf-js');
 import syncDebugLog from '../services/synchronizer/syncDebugLog';
@@ -26,6 +26,8 @@ import { resolveFileRef, RefKind } from '../services/whiteboard/resolveRef';
 const { isImageMimeType } = require('../resourceUtils');
 import { MarkupToHtml } from '@joplin/renderer';
 import { ALL_NOTES_FILTER_ID } from '../reserved-ids';
+import NoteLockNote from '../services/noteLock/NoteLockNote';
+import isNoteLockEnabled from '../services/noteLock/isNoteLockEnabled';
 
 export interface PreviewsOrder {
 	by: string;
@@ -789,8 +791,10 @@ export default class Note extends BaseItem {
 		return n.updated_time < date;
 	}
 
-	public static load(id: string, options: LoadOptions = null): Promise<NoteEntity> {
-		return super.load(id, options);
+	public static async load(id: string, options: LoadOptions = null): Promise<NoteEntity> {
+		const note = await super.load(id, options);
+		if (isNoteLockEnabled() && !!options?.useNoteLock) return NoteLockNote.decryptBody(note);
+		return note;
 	}
 
 	public static async save(o: NoteEntity, options: SaveOptions = null): Promise<NoteEntity> {
@@ -834,6 +838,9 @@ export default class Note extends BaseItem {
 		// we should set beforeNoteJson to the current contents in the database, or the last value which was stored
 		// in the item_changes table
 		const oldNote = !isNew && o.id ? await Note.load(o.id) : null;
+		if (isNoteLockEnabled() && !!options?.useNoteLock) {
+			await NoteLockNote.prepareForSave(o, this.linkedItemIds, isNew);
+		}
 
 		syncDebugLog.info('Save Note: P:', oldNote);
 
@@ -842,7 +849,9 @@ export default class Note extends BaseItem {
 		// has just been downloaded from the sync target and save is invoked when the note has not yet been decrypted
 		if (oldNote && !oldNote.encryption_applied) {
 			const changedSinceCollection = this.revisionService().changedSinceCollection(o.id);
-			if (changedSinceCollection) {
+			if (isNoteLockEnabled() && NoteLockNote.isLocked(o)) {
+				beforeNoteJson = null;
+			} else if (changedSinceCollection) {
 				beforeNoteJson = await ItemChange.oldNoteContent(o.id);
 			} else {
 				beforeNoteJson = JSON.stringify(oldNote);
@@ -863,6 +872,11 @@ export default class Note extends BaseItem {
 		syncDebugLog.info('Save Note: N:', o);
 
 		let savedNote = await super.save(o, options);
+
+		if (isNoteLockEnabled() && !!options?.useNoteLock && NoteLockNote.isLocking(o, oldNote)) {
+			await ItemChange.waitForAllSaved();
+			await this.revisionService().deleteUnencryptedHistoryForNote(savedNote.id, { sourceDescription: 'Note.save: note lock' });
+		}
 
 		void ItemChange.add(BaseModel.TYPE_NOTE, savedNote.id, isNew ? ItemChange.TYPE_CREATE : ItemChange.TYPE_UPDATE, {
 			changeSource, changeId: options?.changeId, beforeChangeItemJson: beforeNoteJson,
@@ -1216,6 +1230,24 @@ export default class Note extends BaseItem {
 		conflictNote.is_conflict = 1;
 		conflictNote.conflict_original_id = sourceNote.id;
 		return await Note.save(conflictNote, { autoTimestamp: false, changeSource: changeSource });
+	}
+
+	// Records the note content that was just pushed to the server. This becomes the
+	// "base" version - the common ancestor used to detect what changed on each side
+	// when a conflict later occurs. A clean upload also means there's no active
+	// conflict, so we clear any previously recorded conflict note id.
+	public static async saveSyncBaseContent(syncTarget: number, noteId: string, body: string, title: string) {
+		const sql = 'UPDATE sync_items SET base_body = ?, base_title = ?, base_conflict_note_id = ? WHERE item_id = ? AND item_type = ? AND sync_target = ?';
+		await this.db().exec(sql, [body, title, '', noteId, this.TYPE_NOTE, syncTarget]);
+	}
+
+	public static async setBaseConflictNoteId(syncTarget: number, noteId: string, conflictNoteId: string) {
+		const sql = 'UPDATE sync_items SET base_conflict_note_id = ? WHERE item_id = ? AND item_type = ? AND sync_target = ?';
+		await this.db().exec(sql, [conflictNoteId, noteId, this.TYPE_NOTE, syncTarget]);
+	}
+
+	public static async syncBaseContent(syncTarget: number, noteId: string): Promise<SyncItemEntity> {
+		return BaseItem.syncItem(syncTarget, noteId, { fields: ['base_body', 'base_title'] });
 	}
 
 	public static async getNextOrderValue(folderId: string) {
