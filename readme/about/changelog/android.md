@@ -1,5 +1,11 @@
 # Joplin Android Changelog
 
+## [android-v3.6.21](https://github.com/laurent22/joplin/releases/tag/android-v3.6.21) - 2026-06-20T10:38:19Z
+
+- Improved: Improve how resource filenames are determined (#15672 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Fix Fountain rendering issue (#15659 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Fix duplicate tag creation for special unicode characters (#15613) (#15608 by [@mrjo118](https://github.com/mrjo118))
+
 ## [android-v3.6.20](https://github.com/laurent22/joplin/releases/tag/android-v3.6.20) - 2026-05-22T10:08:40Z
 
 - Fixed: Fix file system sync (#15500) (#15496 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
