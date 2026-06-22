@@ -30,7 +30,7 @@ export default class StripeEventModel extends BaseModel<StripeEvent> {
 			.first();
 	}
 
-	// Runs the given `task`. Rejects if the task is already in progress
+	// Rejects if a task with the same ID is already in progress or has previously completed
 	public async withTask(taskId: string, task: ()=> Promise<void>) {
 		const previousRecord = await this.loadByTaskId(taskId);
 		if (previousRecord && previousRecord.status !== StripeEventStatus.NotStarted) {
