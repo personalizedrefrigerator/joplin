@@ -32,7 +32,7 @@ const useStyles = (themeId: number, isMenu: boolean) => {
 					alignItems: 'stretch',
 					gap: 1,
 				} : {
-					gap: theme.margin,
+					gap: theme.marginMedium,
 					flexWrap: 'wrap',
 				}),
 			},

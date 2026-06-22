@@ -60,9 +60,10 @@ const useStyles = (theme: ThemeStyle, spec: PromptButtonSpec, isMenu: boolean) =
 			},
 			button: {
 				borderRadius: theme.borderRadius,
-				paddingHorizontal: 22,
-				paddingVertical: 12,
-				minWidth: 62,
+				paddingHorizontal: (theme.marginMedium - 1) * 2,
+				paddingTop: theme.marginMedium - 1,
+				paddingBottom: theme.marginMedium - 1,
+				minWidth: theme.margin * 4,
 			},
 			buttonContent: {
 				display: 'flex',
@@ -73,7 +74,7 @@ const useStyles = (theme: ThemeStyle, spec: PromptButtonSpec, isMenu: boolean) =
 			buttonText,
 			icon: {
 				...buttonText,
-				marginRight: 8,
+				marginRight: theme.marginSmall,
 			},
 		});
 	}, [theme, color, onColor]);

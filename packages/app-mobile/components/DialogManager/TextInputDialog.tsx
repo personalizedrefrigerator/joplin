@@ -19,14 +19,14 @@ const useStyles = (themeId: number) => {
 		const theme = themeStyle(themeId);
 		return StyleSheet.create({
 			dialogContent: {
-				paddingBottom: 14,
-				paddingHorizontal: 12,
+				paddingBottom: theme.margin,
+				paddingHorizontal: theme.marginMedium,
 			},
 			dialogActions: {
-				paddingBottom: 16,
+				paddingBottom: theme.margin,
 				paddingTop: 4,
-				paddingHorizontal: 12,
-				gap: 12,
+				paddingHorizontal: theme.marginMedium,
+				gap: theme.marginMedium,
 			},
 			textInput: {
 				borderBottomColor: theme.dividerColor,
