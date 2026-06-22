@@ -19,20 +19,20 @@ const useStyles = (themeId: number, isMenu: boolean) => {
 		return StyleSheet.create({
 
 			dialogContent: {
-				paddingBottom: 16,
-				paddingHorizontal: 12,
+				paddingBottom: theme.margin,
+				paddingHorizontal: theme.margin,
 			},
 			dialogActions: {
-				paddingBottom: 16,
-				paddingHorizontal: 12,
-				paddingTop: isMenu ? 4 : 8,
+				paddingBottom: theme.margin,
+				paddingHorizontal: theme.margin,
+				paddingTop: isMenu ? 4 : theme.marginSmall,
 
 				...(isMenu ? {
 					flexDirection: 'column',
 					alignItems: 'stretch',
 					gap: 1,
 				} : {
-					gap: theme.itemMarginTop,
+					gap: theme.margin,
 					flexWrap: 'wrap',
 				}),
 			},
