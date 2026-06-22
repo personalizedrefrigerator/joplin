@@ -10,7 +10,8 @@ const baseStyle = {
 	fontSize: 16,
 	fontSizeLarger: 18,
 	fontSizeLarge: 20,
-	margin: 15, // No text and no interactive component should be within this margin
+	margin: 16, // No text and no interactive component should be within this margin
+	marginSmall: 12,
 	itemMarginTop: 10,
 	itemMarginBottom: 10,
 	fontSizeSmaller: 14,
