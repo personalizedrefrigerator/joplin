@@ -15,40 +15,40 @@ interface Props {
 const useStyles = (theme: ThemeStyle, spec: PromptButtonSpec, isMenu: boolean) => {
 	const paperTheme = useTheme();
 
-	const { onColor, color } = (() => {
+	const { backgroundColor, color } = (() => {
 		const style = spec.style ?? 'default';
 		if (style === 'destructive') {
 			return {
-				onColor: paperTheme.colors.onErrorContainer,
-				color: paperTheme.colors.errorContainer,
+				backgroundColor: paperTheme.colors.errorContainer,
+				color: paperTheme.colors.onErrorContainer,
 			};
 		} else if (style === 'cancel') {
 			return {
-				onColor: paperTheme.colors.onSecondary,
-				color: paperTheme.colors.secondary,
+				backgroundColor: theme.backgroundColor6,
+				color: theme.color6,
 			};
 		} else if (isMenu) {
 			return {
-				onColor: theme.color4,
+				backgroundColor: theme.color4,
 				color: theme.backgroundColor4,
 			};
 		} else {
 			return {
-				onColor: paperTheme.colors.onPrimary,
-				color: paperTheme.colors.primary,
+				backgroundColor: theme.backgroundColor5,
+				color: theme.color5,
 			};
 		}
 	})();
 
 	const styles = useMemo(() => {
 		const buttonText: TextStyle = {
-			color: onColor,
+			color: color,
 			textAlign: 'center',
 		};
 
 		return StyleSheet.create({
 			buttonContainer: {
-				backgroundColor: color,
+				backgroundColor: backgroundColor,
 
 				// This applies the borderRadius to the TouchableRipple's parent, which
 				// seems necessary on Android.
@@ -77,7 +77,7 @@ const useStyles = (theme: ThemeStyle, spec: PromptButtonSpec, isMenu: boolean) =
 				marginRight: theme.marginSmall,
 			},
 		});
-	}, [theme, color, onColor]);
+	}, [theme, color, backgroundColor]);
 
 	return styles;
 };
