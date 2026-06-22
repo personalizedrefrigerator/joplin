@@ -63,10 +63,8 @@ const input: Theme = {
 	textSelectionColor: '#a0a0ff',
 	colorBright2: '#ffffff',
 
-	primary: '#2c5be5',
-	onPrimary: '#ffffff',
-	secondary: '#e3eaff',
-	onSecondary: '#2c5be5',
+	backgroundColor6: '#e3eaff',
+	color6: '#2c5be5',
 };
 
 const expected = `
@@ -76,6 +74,7 @@ const expected = `
 	--joplin-background-color2: #313640;
 	--joplin-background-color3: #F4F5F6;
 	--joplin-background-color4: #ffffff;
+	--joplin-background-color6: #e3eaff;
 	--joplin-background-color-hover3: #CBDAF1;
 	--joplin-background-color-transparent: rgba(255,255,255,0.9);
 	--joplin-background-color-transparent2: rgba(0, 0, 0, 0.1);
@@ -89,6 +88,7 @@ const expected = `
 	--joplin-color2: #ffffff;
 	--joplin-color3: #738598;
 	--joplin-color4: #2D6BDC;
+	--joplin-color6: #2c5be5;
 	--joplin-color-bright2: #ffffff;
 	--joplin-color-correct: green;
 	--joplin-color-error: red;
@@ -103,14 +103,10 @@ const expected = `
 	--joplin-divider-color: #dddddd;
 	--joplin-header-background-color: #ffffff;
 	--joplin-odd-background-color: #eeeeee;
-	--joplin-on-primary: #ffffff;
-	--joplin-on-secondary: #2c5be5;
-	--joplin-primary: #2c5be5;
 	--joplin-raised-background-color: #e5e5e5;
 	--joplin-raised-color: #222222;
 	--joplin-search-marker-background-color: #F7D26E;
 	--joplin-search-marker-color: black;
-	--joplin-secondary: #e3eaff;
 	--joplin-selected-color: #e5e5e5;
 	--joplin-selected-color2: #131313;
 	--joplin-table-background-color: rgb(247, 247, 247);

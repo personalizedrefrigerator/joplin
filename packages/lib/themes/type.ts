@@ -70,9 +70,7 @@ export interface Theme {
 	textSelectionColor: string;
 	colorBright2: string;
 
-	// Material-design style colors used for the redesign
-	primary: string;
-	onPrimary: string;
-	secondary: string;
-	onSecondary: string;
+	// Light blue buttons
+	backgroundColor6: string;
+	color6: string;
 }

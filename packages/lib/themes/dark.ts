@@ -63,10 +63,8 @@ const theme: Theme = {
 	headerBackgroundColor: '#2D3136',
 	textSelectionColor: '#00AEFF',
 
-	primary: '#799ce3',
-	onPrimary: '#000000',
-	secondary: '#303543',
-	onSecondary: '#8bb1fb',
+	backgroundColor6: '#303543',
+	color6: '#8bb1fb',
 };
 
 export default theme;
