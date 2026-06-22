@@ -10,10 +10,14 @@ const baseStyle = {
 	fontSize: 16,
 	fontSizeLarger: 18,
 	fontSizeLarge: 20,
-	margin: 15, // No text and no interactive component should be within this margin
-	itemMarginTop: 10,
-	itemMarginBottom: 10,
 	fontSizeSmaller: 14,
+
+	margin: 16, // No text and no interactive component should be within this margin
+	// Smaller margins for spacing between/around items:
+	marginSmall: 8,
+	itemMarginTop: 12,
+	itemMarginBottom: 12,
+
 	disabledOpacity: 0.2,
 	lineHeight: '1.6em',
 	listTabSize: '1.7em',
