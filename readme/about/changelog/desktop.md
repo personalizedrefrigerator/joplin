@@ -1,5 +1,11 @@
 # Joplin Desktop Changelog
 
+## [v3.6.15](https://github.com/laurent22/joplin/releases/tag/v3.6.15) - 2026-06-20T11:04:11Z
+
+- Improved: Improve how resource filenames are determined ([#15672](https://github.com/laurent22/joplin/issues/15672) by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Fix Fountain rendering issue ([#15659](https://github.com/laurent22/joplin/issues/15659) by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Fix duplicate tag creation for special unicode characters ([#15613](https://github.com/laurent22/joplin/issues/15613)) ([#15608](https://github.com/laurent22/joplin/issues/15608) by [@mrjo118](https://github.com/mrjo118))
+
 ## [v3.6.14](https://github.com/laurent22/joplin/releases/tag/v3.6.14) - 2026-05-19T22:12:04Z
 
 - Fixed: Fix Markdown export folder paths with dot in parent path ([#15455](https://github.com/laurent22/joplin/issues/15455)) ([#15374](https://github.com/laurent22/joplin/issues/15374) by [@Rygaa](https://github.com/Rygaa))
