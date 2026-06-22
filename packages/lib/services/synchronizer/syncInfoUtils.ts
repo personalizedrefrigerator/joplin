@@ -10,7 +10,7 @@ import { compareVersions } from 'compare-versions';
 import { _ } from '../../locale';
 import JoplinError from '../../JoplinError';
 import { ErrorCode } from '../../errors';
-const fastDeepEqual = require('fast-deep-equal');
+import fastDeepEqual = require('fast-deep-equal');
 
 const logger = Logger.create('syncInfoUtils');
 
@@ -43,7 +43,7 @@ export interface SyncInfoValuePublicPrivateKeyPair {
 //
 // `appMinVersion_` should really just be a constant but for testing purposes it can be changed
 // using `setAppMinVersion()`
-let appMinVersion_ = '3.0.0';
+let appMinVersion_ = '3.7.0';
 
 export const setAppMinVersion = (v: string) => {
 	appMinVersion_ = v;

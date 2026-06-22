@@ -15,7 +15,7 @@ import {
 
 // The existing stexMath parser is used to parse the text between the $s
 import { stexMath } from '@codemirror/legacy-modes/mode/stex';
-import { StreamLanguage } from '@codemirror/language';
+import { StreamLanguage, StreamParser } from '@codemirror/language';
 
 const dollarSignCharcode = 36;
 const backslashCharcode = 92;
@@ -24,7 +24,7 @@ const backslashCharcode = 92;
 const mathBlockStartRegex = /^(?:\s*[>]\s*)?\$\$/;
 const mathBlockEndRegex = /\$\$\s*$/;
 
-const texLanguage = StreamLanguage.define(stexMath);
+const texLanguage = StreamLanguage.define(stexMath as unknown as StreamParser<unknown>);
 export const blockMathTagName = 'BlockMath';
 export const blockMathContentTagName = 'BlockMathContent';
 export const inlineMathTagName = 'InlineMath';

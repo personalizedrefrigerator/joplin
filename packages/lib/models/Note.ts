@@ -13,8 +13,8 @@ import Tag from './Tag';
 const { sprintf } = require('sprintf-js');
 import syncDebugLog from '../services/synchronizer/syncDebugLog';
 import { toFileProtocolPath, toForwardSlashes } from '../path-utils';
-const { pregQuote, substrWithEllipsis } = require('../string-utils.js');
-const { _, _n } = require('../locale');
+import { pregQuote, substrWithEllipsis } from '../string-utils';
+import { _, _n } from '../locale';
 import { pull, removeElement, unique } from '../ArrayUtils';
 import { LoadOptions, SaveOptions } from './utils/types';
 import ActionLogger from '../utils/ActionLogger';
@@ -24,8 +24,8 @@ const urlUtils = require('../urlUtils.js');
 import { hasWhiteboardFence, parseWhiteboard } from '../services/whiteboard/parse';
 import { resolveFileRef, RefKind } from '../services/whiteboard/resolveRef';
 const { isImageMimeType } = require('../resourceUtils');
-const { MarkupToHtml } = require('@joplin/renderer');
-const { ALL_NOTES_FILTER_ID } = require('../reserved-ids');
+import { MarkupToHtml } from '@joplin/renderer';
+import { ALL_NOTES_FILTER_ID } from '../reserved-ids';
 
 export interface PreviewsOrder {
 	by: string;
@@ -102,6 +102,8 @@ export default class Note extends BaseItem {
 
 		const fieldNames = this.fieldNames();
 
+		if (!n.is_locked) pull(fieldNames, 'is_locked');
+		if (!n.extracted_resource_ids) pull(fieldNames, 'extracted_resource_ids');
 		if (!n.is_conflict) pull(fieldNames, 'is_conflict');
 		if (!Number(n.latitude)) pull(fieldNames, 'latitude');
 		if (!Number(n.longitude)) pull(fieldNames, 'longitude');
@@ -364,7 +366,7 @@ export default class Note extends BaseItem {
 	public static previewFields(options: { includeTimestamps?: boolean } = null) {
 		options = { includeTimestamps: true, ...options };
 
-		const output = ['id', 'title', 'is_todo', 'todo_completed', 'todo_due', 'parent_id', 'encryption_applied', 'order', 'markup_language', 'is_conflict', 'is_shared', 'share_id', 'deleted_time'];
+		const output = ['id', 'title', 'is_todo', 'todo_completed', 'todo_due', 'parent_id', 'encryption_applied', 'is_locked', 'order', 'markup_language', 'is_conflict', 'is_shared', 'share_id', 'deleted_time'];
 
 		if (options.includeTimestamps) {
 			output.push('updated_time');
@@ -562,6 +564,16 @@ export default class Note extends BaseItem {
 
 	public static async conflictedCount() {
 		const r = await this.db().selectOne('SELECT count(*) as total FROM notes WHERE is_conflict = 1 AND deleted_time = 0');
+		return r && r.total ? r.total : 0;
+	}
+
+	// Count of notes that are eligible for indexing (anything searchable):
+	// not trashed, not in conflict. Used by the AI status reporter as the
+	// denominator in "N / total indexed".
+	public static async indexableCount() {
+		const r = await this.db().selectOne(
+			'SELECT count(*) as total FROM notes WHERE (deleted_time IS NULL OR deleted_time = 0) AND (is_conflict IS NULL OR is_conflict = 0)',
+		);
 		return r && r.total ? r.total : 0;
 	}
 

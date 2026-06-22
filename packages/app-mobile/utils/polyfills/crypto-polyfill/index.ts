@@ -4,6 +4,6 @@ import 'react-native-get-random-values';
 // This file is a partial polyfill for the NodeJS crypto module.
 
 // eslint-disable-next-line import/prefer-default-export -- This needs to match the exports from NodeJS crypto
-export const getRandomValues = (array: ArrayBufferView<ArrayBufferLike>) => {
+export const getRandomValues = (array: ArrayBufferView<ArrayBuffer>) => {
 	return crypto.getRandomValues(array);
 };
