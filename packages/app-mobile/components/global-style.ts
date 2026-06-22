@@ -15,7 +15,7 @@ const baseStyle = {
 	margin: 16, // No text and no interactive component should be within this margin
 	// Smaller margins for spacing between/around items:
 	marginSmall: 8,
-	itemMargin: 12,
+	marginMedium: 12,
 
 	disabledOpacity: 0.2,
 	lineHeight: '1.6em',
@@ -111,8 +111,8 @@ function extraStyles(theme: BaseTheme) {
 		marginTop: baseStyle.margin,
 		marginBottom: baseStyle.margin,
 
-		itemMarginTop: baseStyle.itemMargin,
-		itemMarginBottom: baseStyle.itemMargin,
+		itemMarginTop: baseStyle.marginMedium,
+		itemMarginBottom: baseStyle.marginMedium,
 
 		icon,
 		lineInput,
