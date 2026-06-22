@@ -34,6 +34,8 @@ export type ThemeStyle = BaseTheme & typeof baseStyle & {
 	marginTop: number;
 	marginBottom: number;
 	borderRadius: number;
+	itemMarginBottom: number;
+	itemMarginTop: number;
 	icon: TextStyle;
 	lineInput: ViewStyle;
 	buttonRow: ViewStyle;
