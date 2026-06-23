@@ -269,7 +269,7 @@ describe('screens/Note', () => {
 		const { unmount } = render(<WrappedNoteScreen />);
 
 		// Permanently delete note shows a confirmation dialog -- mock it.
-		const deleteId = 1;
+		const deleteId = 0;
 		shim.showMessageBox = jest.fn(async () => deleteId);
 
 		await openNoteActionsMenu();
