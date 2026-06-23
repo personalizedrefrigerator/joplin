@@ -46,15 +46,14 @@ export default class StripeEventModel extends BaseModel<StripeEvent> {
 			taskRecord = await this.save({
 				stripe_id: stripeEventId,
 				status: StripeEventStatus.InProgress,
-			}, { isNew: true });
+			}, {
+				// Require that this be a new entry (with a unique stripe_id).
+				// This helps avoid a race condition if two identical Stripe events pass the
+				// previousRecord check at roughly the same time. An earlier check is still
+				// important, since a non-unique stripe_id here logs a verbose unique constraint error.
+				isNew: true,
+			});
 		} catch (error) {
-			// A unique constraint helps protect against race conditions. Attempting to modify an
-			// existing row will fail.
-			// This can theoretically happen if duplicates of the same event are received
-			// at roughly the same time. If this happens, the earlier status check can pass
-			// for both events and the save call fails due to a unique constraint on `stripe_id`.
-			// If this happens, a database constraint error is logged, but the event should still
-			// be handled only once.
 			throw new ErrorTaskInProgress(error.message);
 		}
 
