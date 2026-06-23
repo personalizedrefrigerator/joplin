@@ -20,12 +20,12 @@ const useStyles = (themeId: number) => {
 		return StyleSheet.create({
 			dialogContent: {
 				paddingBottom: theme.margin,
-				paddingHorizontal: theme.marginMedium,
+				paddingHorizontal: theme.margin,
 			},
 			dialogActions: {
 				paddingBottom: theme.margin,
 				paddingTop: 4,
-				paddingHorizontal: theme.marginMedium,
+				paddingHorizontal: theme.margin,
 				gap: theme.marginMedium,
 			},
 			textInput: {
