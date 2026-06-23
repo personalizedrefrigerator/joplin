@@ -139,18 +139,13 @@ const waitForUserCreation = async (models: Models, userEmail: string): Promise<U
 	return null;
 };
 
-// Cleans up information about interrupted Stripe events.
-// Assumption: At most one server is handling Stripe events at a time.
 let serverSetupTask: Promise<void>|null = null;
 const handleFirstEvent = async (models: Models) => {
 	serverSetupTask ??= (async () => {
 		logger.info('Clearing old Stripe tasks');
-		// If only one server can receive Stripe webhook events,
-		// any in-progress events must be left over from the last run of the server.
-		// Clear them so that Stripe can retry the events.
+		// Any events that were interrupted by server shutdown can be retried:
 		await models.stripeEvent().clearInProgressEvents();
 	})();
-	// Wait to start processing Stripe events until setup has finished running:
 	await serverSetupTask;
 };
 
