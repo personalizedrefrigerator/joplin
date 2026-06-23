@@ -1,3 +1,4 @@
+import { isUniqueConstraintError } from '../db';
 import { StripeEvent, StripeEventStatus } from '../services/database/types';
 import { ApiError, ErrorOptions } from '../utils/errors';
 import BaseModel from './BaseModel';
@@ -54,7 +55,11 @@ export default class StripeEventModel extends BaseModel<StripeEvent> {
 				isNew: true,
 			});
 		} catch (error) {
-			throw new ErrorTaskInProgress(error.message);
+			if (isUniqueConstraintError(error)) {
+				throw new ErrorTaskInProgress(error.message);
+			} else {
+				throw error;
+			}
 		}
 
 		try {
@@ -69,6 +74,7 @@ export default class StripeEventModel extends BaseModel<StripeEvent> {
 				id: taskRecord.id,
 				status: StripeEventStatus.Errored,
 			});
+			throw error;
 		}
 	}
 
