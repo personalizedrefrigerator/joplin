@@ -30,7 +30,10 @@ const makeShowMessageBox = (dialogControl: null|RefObject<DialogControl>) => (me
 					onPress: () => resolve(index),
 				};
 			});
+			// Android and iOS usually have the cancel button first.
+			buttons = moveCancelFirst(buttons);
 		}
+
 		// This will be -1 for dialogs that don't include the default "cancel" button
 		// Even though cancel is at position 0, this needs to return 1 for cancel for compatibility
 		// reasons.
@@ -47,3 +50,20 @@ const makeShowMessageBox = (dialogControl: null|RefObject<DialogControl>) => (me
 	});
 };
 export default makeShowMessageBox;
+
+const moveCancelFirst = (buttons: PromptButtonSpec[]) => {
+	const result = [];
+
+	const cancelButton = buttons.find(button => button.style === 'cancel');
+	if (cancelButton) {
+		result.push(cancelButton);
+	}
+
+	for (const button of buttons) {
+		if (button !== cancelButton) {
+			result.push(button);
+		}
+	}
+
+	return result;
+};
