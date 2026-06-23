@@ -366,11 +366,11 @@ export const postHandlers: PostHandlers = {
 		if (hooks[event.type]) {
 			try {
 				await models.stripeEvent().withTask(
-					`webhookEvent::${event.id}`,
 					async () => {
 						logger.info(`Got Stripe event: ${event.type} [Handled]`);
 						await hooks[event.type]();
 					},
+					{ stripeEventId: event.id },
 				);
 			} catch (error) {
 				if (error instanceof ErrorTaskInProgress) {

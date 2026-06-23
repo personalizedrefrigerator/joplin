@@ -12,6 +12,10 @@ export class ErrorTaskInProgress extends ApiError {
 	}
 }
 
+interface WithTaskOptions {
+	stripeEventId: string;
+}
+
 export default class StripeEventModel extends BaseModel<StripeEvent> {
 
 	public get tableName(): string {
@@ -22,25 +26,25 @@ export default class StripeEventModel extends BaseModel<StripeEvent> {
 		return true;
 	}
 
-	protected loadByTaskId(taskId: string): Promise<StripeEvent> {
+	protected loadByEventId(eventId: string): Promise<StripeEvent> {
 		return this
 			.db(this.tableName)
 			.select(this.defaultFields)
-			.where('stripe_id', '=', taskId)
+			.where('stripe_id', '=', eventId)
 			.first();
 	}
 
 	// Rejects if a task with the same ID is already in progress or has previously completed
-	public async withTask(taskId: string, task: ()=> Promise<void>) {
-		const previousRecord = await this.loadByTaskId(taskId);
+	public async withTask(task: ()=> Promise<void>, { stripeEventId }: WithTaskOptions) {
+		const previousRecord = await this.loadByEventId(stripeEventId);
 		if (previousRecord) {
-			throw new ErrorTaskInProgress(`Task ${taskId} already processed. Status: ${previousRecord.status}.`);
+			throw new ErrorTaskInProgress(`Event ${stripeEventId} already processed. Status: ${previousRecord.status}.`);
 		}
 
 		let taskRecord: StripeEvent;
 		try {
 			taskRecord = await this.save({
-				stripe_id: taskId,
+				stripe_id: stripeEventId,
 				status: StripeEventStatus.InProgress,
 			}, { isNew: true });
 		} catch (error) {
