@@ -34,7 +34,6 @@ export enum EventType {
 }
 
 export enum StripeEventStatus {
-	NotStarted = 0,
 	InProgress = 1,
 	Success = 2,
 	Errored = 3,

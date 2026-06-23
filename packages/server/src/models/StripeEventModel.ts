@@ -33,7 +33,7 @@ export default class StripeEventModel extends BaseModel<StripeEvent> {
 	// Rejects if a task with the same ID is already in progress or has previously completed
 	public async withTask(taskId: string, task: ()=> Promise<void>) {
 		const previousRecord = await this.loadByTaskId(taskId);
-		if (previousRecord && previousRecord.status !== StripeEventStatus.NotStarted) {
+		if (previousRecord) {
 			throw new ErrorTaskInProgress(`Task ${taskId} already processed. Status: ${previousRecord.status}.`);
 		}
 
@@ -44,10 +44,13 @@ export default class StripeEventModel extends BaseModel<StripeEvent> {
 				status: StripeEventStatus.InProgress,
 			}, { isNew: true });
 		} catch (error) {
-			// Due to a unique constraint on `stripe_id`, attempting to save a new status
-			// for an existing task will fail. This is a second guard to prevent multiple instances
-			// of the same task from running at the same time and helps avoid race conditions.
-			// Note: In the event that this happens, an (ignorable) database conflict warning will be logged.
+			// A unique constraint helps protect against race conditions. Attempting to modify an
+			// existing row will fail.
+			// This can theoretically happen if duplicates of the same event are received
+			// at roughly the same time. If this happens, the earlier status check can pass
+			// for both events and the save call fails due to a unique constraint on `stripe_id`.
+			// If this happens, a database constraint error is logged, but the event should still
+			// be handled only once.
 			throw new ErrorTaskInProgress(error.message);
 		}
 
