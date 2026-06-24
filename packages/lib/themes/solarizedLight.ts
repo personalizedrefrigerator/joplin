@@ -33,10 +33,8 @@ const theme: Theme = {
 	codeMirrorTheme: 'solarized light',
 	codeThemeCss: 'atom-one-light.css',
 
-	primary: '#002b36',
-	onPrimary: '#fdf6e3',
-	secondary: '#eee8d5',
-	onSecondary: '#073642',
+	backgroundColor6: '#eee8d5',
+	color6: '#073642',
 };
 
 export default theme;
