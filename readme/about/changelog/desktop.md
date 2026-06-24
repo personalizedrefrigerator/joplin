@@ -1,5 +1,10 @@
 # Joplin Desktop Changelog
 
+## [v3.7.4](https://github.com/laurent22/joplin/releases/tag/v3.7.4) (Pre-release) - 2026-06-24T12:55:38Z
+
+- Improved: Index locked note resources ([#15717](https://github.com/laurent22/joplin/issues/15717)) ([#15714](https://github.com/laurent22/joplin/issues/15714) by [@keshav0479](https://github.com/keshav0479))
+- Fixed: Fix renderer crash loop when sqlite-vec is unavailable  ([#15762](https://github.com/laurent22/joplin/issues/15762)) ([#15761](https://github.com/laurent22/joplin/issues/15761))
+
 ## [v3.7.3](https://github.com/laurent22/joplin/releases/tag/v3.7.3) (Pre-release) - 2026-06-23T04:54:15Z
 
 - New: Add AI chat backend and plugin API ([#15643](https://github.com/laurent22/joplin/issues/15643))
