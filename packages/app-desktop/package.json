@@ -45,7 +45,10 @@
     ],
     "afterAllArtifactBuild": "./afterAllArtifactBuild.js",
     "asar": true,
-    "asarUnpack": "./node_modules/node-notifier/vendor/**",
+    "asarUnpack": [
+      "./node_modules/node-notifier/vendor/**",
+      "./node_modules/sqlite-vec-*/**"
+    ],
     "win": {
       "publisherName": [
         "Joplin"
