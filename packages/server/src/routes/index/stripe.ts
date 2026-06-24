@@ -146,7 +146,13 @@ const handleFirstEvent = async (models: Models) => {
 		// Any events that were interrupted by server shutdown can be retried:
 		await models.stripeEvent().clearInProgressEvents();
 	})();
-	await serverSetupTask;
+
+	try {
+		await serverSetupTask;
+	} catch (error) {
+		serverSetupTask = null;
+		throw error;
+	}
 };
 
 export const postHandlers: PostHandlers = {
