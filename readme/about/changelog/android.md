@@ -1,5 +1,10 @@
 # Joplin Android Changelog
 
+## [android-v3.7.2](https://github.com/laurent22/joplin/releases/tag/android-v3.7.2) - 2026-06-22T20:27:04Z
+
+- Improved: Preserve customised note history settings when syncing across clients (#15728)
+- Fixed: Fixed crash when the profile database is updated (d85f430)
+
 ## [android-v3.7.1](https://github.com/laurent22/joplin/releases/tag/android-v3.7.1) - 2026-06-20T12:22:13Z
 
 - New: Add notebook sort options in config screen (#15203 by Self Not Found)

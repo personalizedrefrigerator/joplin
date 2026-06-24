@@ -29,8 +29,8 @@ const useStyles = (theme: ThemeStyle, spec: PromptButtonSpec, isMenu: boolean) =
 			};
 		} else if (isMenu) {
 			return {
-				backgroundColor: theme.color4,
-				color: theme.backgroundColor4,
+				backgroundColor: theme.backgroundColor4,
+				color: theme.color4,
 			};
 		} else {
 			return {
