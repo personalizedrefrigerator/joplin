@@ -1,7 +1,7 @@
 import Setting from '../../models/Setting';
 import shim from '../../shim';
 import Logger from '@joplin/utils/Logger';
-import { Minute } from '@joplin/utils/time';
+import { Minute, Second } from '@joplin/utils/time';
 import { ModelType } from '../../BaseModel';
 import ItemChange from '../../models/ItemChange';
 import Note from '../../models/Note';
@@ -13,12 +13,18 @@ import { EmbeddingProvider, IndexStatus } from './types';
 
 const logger = Logger.create('EmbeddingIndexer');
 
-// Matches OcrService — slow enough to avoid burning CPU on every edit,
-// fast enough that newly-saved notes are searchable within minutes.
-const MAINTENANCE_INTERVAL = 5 * Minute;
+// Tick cadence after the initial scan is done — slow enough to avoid burning
+// CPU on every edit, fast enough that newly-saved notes are searchable
+// within a few minutes.
+const maintenanceInterval = 3 * Minute;
+
+// Tick cadence while the initial scan is still walking the vault. Aggressive
+// because the user just opted in and expects activity; ticks rarely run
+// back-to-back because the per-tick work caps via `maintenanceRunning_`.
+const initialScanInterval = 30 * Second;
 
 // Caps both the per-tick change-feed drain and the backfill top-up.
-const BATCH_SIZE = 100;
+const batchSize = 100;
 
 // Background service that watches `item_changes`, chunks each modified note,
 // embeds the chunks via the active EmbeddingProvider, and stores them in
@@ -36,7 +42,7 @@ export default class EmbeddingIndexer {
 		return this.instance_;
 	}
 
-	private maintenanceTimer_: ReturnType<typeof shim.setInterval> = null;
+	private maintenanceTimer_: ReturnType<typeof shim.setTimeout> = null;
 	private isRunningInBackground_ = false;
 	private maintenanceRunning_ = false;
 	// Notes that threw during this session's initial scan. Skipped for the
@@ -64,17 +70,29 @@ export default class EmbeddingIndexer {
 		// be 5-15s and would otherwise block app startup.
 		void this.maintenance();
 
-		this.maintenanceTimer_ = shim.setInterval(async () => {
-			await this.maintenance();
-		}, MAINTENANCE_INTERVAL);
+		this.scheduleNextTick();
 	}
 
 	public async stopRunInBackground() {
 		if (!this.isRunningInBackground_) return;
 		logger.info('Stopping background indexer');
-		if (this.maintenanceTimer_) shim.clearInterval(this.maintenanceTimer_);
+		if (this.maintenanceTimer_) shim.clearTimeout(this.maintenanceTimer_);
 		this.maintenanceTimer_ = null;
 		this.isRunningInBackground_ = false;
+	}
+
+	// Cadence switches between an aggressive initial-scan tempo and a relaxed
+	// steady-state tempo. Re-evaluated after each tick so the switch happens
+	// the moment the scan completes, not on the next process restart.
+	private scheduleNextTick() {
+		if (!this.isRunningInBackground_) return;
+		const interval = Setting.value('ai.embedding.initialScanDone')
+			? maintenanceInterval
+			: initialScanInterval;
+		this.maintenanceTimer_ = shim.setTimeout(async () => {
+			await this.maintenance();
+			this.scheduleNextTick();
+		}, interval);
 	}
 
 	// Snapshot of indexer + model state for the settings UI. Cheap enough to
@@ -155,7 +173,7 @@ export default class EmbeddingIndexer {
 
 	private async processChangeBatch(provider: EmbeddingProvider): Promise<void> {
 		const cursor = Setting.value('ai.embedding.lastProcessedChangeId') as number;
-		const changes = await ItemChange.changesSinceId(cursor, { limit: BATCH_SIZE });
+		const changes = await ItemChange.changesSinceId(cursor, { limit: batchSize });
 		if (!changes.length) return;
 
 		// Collapse duplicates so a note edited multiple times only gets
@@ -199,7 +217,7 @@ export default class EmbeddingIndexer {
 		}
 
 		const excluded = Array.from(this.initialScanFailures_);
-		const noteIds = await NoteEmbedding.notYetIndexedNoteIds(BATCH_SIZE, excluded);
+		const noteIds = await NoteEmbedding.notYetIndexedNoteIds(batchSize, excluded);
 
 		if (!noteIds.length) {
 			Setting.setValue('ai.embedding.initialScanDone', true);
