@@ -39,6 +39,9 @@ const theme: Theme = {
 
 	codeMirrorTheme: 'solarized dark',
 	codeThemeCss: 'atom-one-dark-reasonable.css',
+
+	backgroundColor6: '#073642',
+	color6: '#eee8d5',
 };
 
 export default theme;

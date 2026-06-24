@@ -69,4 +69,8 @@ export interface Theme {
 	headerBackgroundColor: string;
 	textSelectionColor: string;
 	colorBright2: string;
+
+	// Light blue buttons
+	backgroundColor6: string;
+	color6: string;
 }

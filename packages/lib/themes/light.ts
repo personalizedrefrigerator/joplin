@@ -62,6 +62,10 @@ const theme: Theme = {
 	headerBackgroundColor: '#F0F0F0',
 	textSelectionColor: '#0096FF',
 	colorBright2: '#ffffff',
+
+	// Light blue buttons
+	backgroundColor6: '#e3eaff',
+	color6: '#2c5be5',
 };
 
 export default theme;

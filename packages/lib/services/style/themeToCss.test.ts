@@ -62,6 +62,9 @@ const input: Theme = {
 	headerBackgroundColor: '#ffffff',
 	textSelectionColor: '#a0a0ff',
 	colorBright2: '#ffffff',
+
+	backgroundColor6: '#e3eaff',
+	color6: '#2c5be5',
 };
 
 const expected = `
@@ -71,6 +74,7 @@ const expected = `
 	--joplin-background-color2: #313640;
 	--joplin-background-color3: #F4F5F6;
 	--joplin-background-color4: #ffffff;
+	--joplin-background-color6: #e3eaff;
 	--joplin-background-color-hover3: #CBDAF1;
 	--joplin-background-color-transparent: rgba(255,255,255,0.9);
 	--joplin-background-color-transparent2: rgba(0, 0, 0, 0.1);
@@ -84,6 +88,7 @@ const expected = `
 	--joplin-color2: #ffffff;
 	--joplin-color3: #738598;
 	--joplin-color4: #2D6BDC;
+	--joplin-color6: #2c5be5;
 	--joplin-color-bright2: #ffffff;
 	--joplin-color-correct: green;
 	--joplin-color-error: red;
