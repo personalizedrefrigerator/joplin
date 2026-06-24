@@ -168,6 +168,15 @@ export default class NoteEmbedding extends BaseModel {
 			const lastID = row?.id;
 			if (!lastID) throw new Error('Failed to obtain rowid after embedding insert');
 
+			// Wipe any orphan vec-row at this rowid before inserting. Orphans
+			// show up when a prior saveChunks crashed between the meta insert
+			// and the vec insert: meta was wiped on the next pass but the vec
+			// row stayed, and sqlite later hands us the same rowid (#15761).
+			// vec0 doesn't support INSERT OR REPLACE — explicit DELETE then INSERT.
+			await this.db().exec({
+				sql: 'DELETE FROM note_embeddings_vec WHERE rowid = ?',
+				params: [lastID],
+			});
 			await this.db().exec({
 				sql: 'INSERT INTO note_embeddings_vec(rowid, embedding) VALUES (?, ?)',
 				params: [lastID, JSON.stringify(chunk.vector)],
