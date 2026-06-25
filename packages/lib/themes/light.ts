@@ -40,6 +40,7 @@ const theme: Theme = {
 	// button with blue text.
 	backgroundColor4: '#ffffff',
 	color4: '#2D6BDC',
+	backgroundColor4Dimmed: '#e3eaff',
 
 	raisedBackgroundColor: '#e5e5e5',
 	raisedColor: '#222222',
@@ -62,10 +63,6 @@ const theme: Theme = {
 	headerBackgroundColor: '#F0F0F0',
 	textSelectionColor: '#0096FF',
 	colorBright2: '#ffffff',
-
-	// Light blue buttons
-	backgroundColor6: '#e3eaff',
-	color6: '#2c5be5',
 };
 
 export default theme;
