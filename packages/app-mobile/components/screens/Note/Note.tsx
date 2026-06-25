@@ -1758,10 +1758,6 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 			}
 		}
 
-		// Save button is not really needed anymore with the improved save logic
-		const showSaveButton = false; // this.state.mode === 'edit' || this.isModified() || this.saveButtonHasBeenShown_;
-		const saveButtonDisabled = true;// !this.isModified();
-
 		const titleContainerStyle = isTodo ? this.styles().titleContainerTodo : this.styles().titleContainer;
 
 		const dueDate = Note.dueDateObject(note);
@@ -1857,9 +1853,6 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 		const header = <ScreenHeader
 			folderPickerOptions={this.folderPickerOptions()}
 			menuOptions={this.menuOptions()}
-			showSaveButton={showSaveButton}
-			saveButtonDisabled={saveButtonDisabled}
-			onSaveButtonPress={this.saveNoteButton_press}
 			showSideMenuButton={false}
 			showSearchButton={false}
 			showUndoButton={(this.state.undoRedoButtonState.canUndo || this.state.undoRedoButtonState.canRedo) && this.state.mode === 'edit'}

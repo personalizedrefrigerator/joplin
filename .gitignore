@@ -766,6 +766,7 @@ packages/app-mobile/components/ProfileSwitcher/useProfileConfig.js
 packages/app-mobile/components/ProfileSwitcher/utils/deleteProfile.test.js
 packages/app-mobile/components/ProfileSwitcher/utils/deleteProfile.js
 packages/app-mobile/components/SafeAreaView.js
+packages/app-mobile/components/ScreenHeader/DrawerMenu.js
 packages/app-mobile/components/ScreenHeader/Menu.js
 packages/app-mobile/components/ScreenHeader/WarningBanner.test.js
 packages/app-mobile/components/ScreenHeader/WarningBanner.js

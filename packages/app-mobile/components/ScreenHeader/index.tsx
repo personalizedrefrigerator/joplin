@@ -21,10 +21,11 @@ import { ContainerType } from '@joplin/lib/services/plugins/WebviewController';
 import { Dispatch } from 'redux';
 import WarningBanner from './WarningBanner';
 
-import Menu, { MenuOptionType } from './Menu';
+import { MenuOptionType } from './Menu';
 import shim from '@joplin/lib/shim';
 import CommandService from '@joplin/lib/services/CommandService';
 import Icon from '../Icon';
+import DrawerMenu from './DrawerMenu';
 export { MenuOptionType };
 
 // Rather than applying a padding to the whole bar, it is applied to each
@@ -697,11 +698,11 @@ class ScreenHeaderComponent extends PureComponent<ScreenHeaderProps, ScreenHeade
 
 		const menuComp =
 			!menuOptions.length || !showContextMenuButton ? null : (
-				<Menu themeId={this.props.themeId} options={menuOptions}>
+				<DrawerMenu themeId={this.props.themeId} options={menuOptions}>
 					<View style={contextMenuStyle}>
 						<Icon name="ionicon ellipsis-vertical" style={this.styles().contextMenuTrigger} accessibilityLabel={_('Actions')}/>
 					</View>
-				</Menu>
+				</DrawerMenu>
 			);
 
 		// Updating the state of this component can result in the left most element becoming hidden, so add a dummy as the first element to prevent this
