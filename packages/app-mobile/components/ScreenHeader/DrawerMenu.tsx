@@ -5,9 +5,8 @@ import { themeStyle } from '../global-style';
 import useKeyboardState from '../../utils/hooks/useKeyboardState';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import BottomDrawer from '../BottomDrawer';
-import IconButton from '../IconButton';
-import { _ } from '@joplin/lib/locale';
 import TextButton, { ButtonType } from '../buttons/TextButton';
+import { TouchableRipple } from 'react-native-paper';
 
 interface MenuOptionDivider {
 	isDivider: true;
@@ -124,16 +123,16 @@ const DrawerMenu: React.FC<Props> = props => {
 		setOpen(false);
 	}, []);
 
-
+	const theme = themeStyle(props.themeId);
 
 	return <>
-		<IconButton
-			iconName='ionicon ellipsis-vertical'
+		<TouchableRipple
 			onPress={() => setOpen(true)}
-			description={_('Actions')}
-			iconStyle={styles.icon}
-			themeId={props.themeId}
-		/>
+			rippleColor={theme.backgroundColorTransparent2}
+			role='button'
+		>
+			{props.children}
+		</TouchableRipple>
 		<BottomDrawer
 			visible={open}
 			onDismiss={onMenuClosed}
