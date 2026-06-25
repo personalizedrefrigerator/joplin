@@ -85,6 +85,7 @@ export enum AccountType {
 	Pro = 2,
 	Team = 3,
 	Pro100Gb = 4,
+	SelfHosted = 5,
 }
 
 interface StripeBasePrice {

@@ -101,6 +101,13 @@ const accountMetadata: Record<AccountType, Account> = {
 		max_item_size: 200 * MB,
 		max_total_item_size: 50 * GB,
 	},
+	[AccountType.SelfHosted]: {
+		account_type: AccountType.SelfHosted,
+		can_share_folder: 0,
+		can_receive_folder: 0,
+		max_item_size: 200 * MB,
+		max_total_item_size: 1 * MB,
+	},
 };
 
 interface AccountTypeSelectOptions {
@@ -141,6 +148,7 @@ export function accountTypeToString(accountType: AccountType): string {
 	if (accountType === AccountType.Pro) return 'Pro';
 	if (accountType === AccountType.Pro100Gb) return 'Pro 100 GB';
 	if (accountType === AccountType.Team) return 'Team';
+	if (accountType === AccountType.SelfHosted) return 'Self hosted';
 	const exhaustivenessCheck: never = accountType;
 	throw new Error(`Invalid type: ${exhaustivenessCheck}`);
 }
@@ -150,6 +158,7 @@ export const accountTypeToPlan = (accountType: AccountType): PlanName => {
 	if (accountType === AccountType.Pro) return PlanName.Pro;
 	if (accountType === AccountType.Pro100Gb) return PlanName.Pro100Gb;
 	if (accountType === AccountType.Team) return PlanName.Teams;
+	if (accountType === AccountType.SelfHosted) return PlanName.JoplinServerBusiness;
 	if (accountType === AccountType.Default) throw new Error('No plan exists for account type "Default"');
 	const exhaustivenessCheck: never = accountType;
 	throw new Error(`Invalid type: ${exhaustivenessCheck}`);
