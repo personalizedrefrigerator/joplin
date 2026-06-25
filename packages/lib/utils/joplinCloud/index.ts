@@ -79,11 +79,6 @@ export enum ProductType {
 	AiCredits = 'ai-credits',
 }
 
-interface StripePublicConfigBasePrice {
-	id: string;
-	currency: PriceCurrency;
-}
-
 export enum AccountType {
 	Default = 0,
 	Basic = 1,
@@ -92,29 +87,34 @@ export enum AccountType {
 	Pro100Gb = 4,
 }
 
-export interface StripePublicConfigBaseSubscriptionPrice extends StripePublicConfigBasePrice {
+interface StripeBasePrice {
+	id: string;
+	currency: PriceCurrency;
+}
+
+interface StripeBaseSubscriptionPrice extends StripeBasePrice {
 	accountType: AccountType;
 	period: PricePeriod;
 	productType: ProductType.Subscription|undefined;
 	aiCredits?: undefined;
 }
 
-export interface StripePublicConfigFixedSubscriptionPrice extends StripePublicConfigBaseSubscriptionPrice {
+export interface StripeFixedSubscriptionPrice extends StripeBaseSubscriptionPrice {
 	amount: string;
 	formattedAmount: string;
 	formattedMonthlyAmount: string;
 	amounts: undefined;
 }
 
-export interface StripePublicConfigTieredAmount {
+export interface StripeTieredAmount {
 	amount: string;
 	formattedAmount: string;
 	users: [number, number|'infinity'];
 	userRange: { min: number; max: number };
 }
 
-export interface StripePublicConfigTieredSubscriptionPrice extends StripePublicConfigBaseSubscriptionPrice {
-	amounts: StripePublicConfigTieredAmount[];
+export interface StripeTieredSubscriptionPrice extends StripeBaseSubscriptionPrice {
+	amounts: StripeTieredAmount[];
 
 	quantityMinimum: number;
 	amount: undefined;
@@ -122,18 +122,19 @@ export interface StripePublicConfigTieredSubscriptionPrice extends StripePublicC
 	formattedMonthlyAmount: undefined;
 }
 
-export type StripePublicConfigSubscriptionPrice = StripePublicConfigTieredSubscriptionPrice | StripePublicConfigFixedSubscriptionPrice;
+type StripeSubscriptionPrice = StripeTieredSubscriptionPrice | StripeFixedSubscriptionPrice;
 
-export interface StripePublicConfigAiProductPrice extends StripePublicConfigBasePrice {
+export interface StripePublicConfigAiProductPrice extends StripeBasePrice {
 	productType: ProductType.AiCredits;
 	amount: string;
 	formattedAmount: string;
 	aiCredits: number;
+
 	accountType?: undefined;
 	period?: undefined;
 }
 
-export type StripePublicConfigPrice = StripePublicConfigSubscriptionPrice | StripePublicConfigAiProductPrice;
+export type StripePublicConfigPrice = StripeSubscriptionPrice | StripePublicConfigAiProductPrice;
 
 export interface StripePublicConfig {
 	publishableKey: string;
@@ -150,7 +151,7 @@ function formatPrice(amount: string | number, currency: PriceCurrency): string {
 	throw new Error(`Unsupported currency: ${currency}`);
 }
 
-export const isTieredPrice = (p: StripePublicConfigPrice): p is StripePublicConfigTieredSubscriptionPrice => {
+export const isTieredPrice = (p: StripePublicConfigPrice): p is StripeTieredSubscriptionPrice => {
 	return 'amounts' in p;
 };
 
@@ -158,7 +159,7 @@ export function loadStripeConfig(env: string, filePath: string): StripePublicCon
 	const config: StripePublicConfig = JSON.parse(fs.readFileSync(filePath, 'utf8'))[env];
 	if (!config) throw new Error(`Invalid env: ${env}`);
 
-	const isSubscriptionPrice = (p: StripePublicConfigPrice): p is StripePublicConfigSubscriptionPrice => {
+	const isSubscriptionPrice = (p: StripePublicConfigPrice): p is StripeSubscriptionPrice => {
 		return p.productType === undefined || p.productType === ProductType.Subscription;
 	};
 
@@ -183,7 +184,7 @@ export function loadStripeConfig(env: string, filePath: string): StripePublicCon
 				productType: ProductType.Subscription,
 				formattedAmount: formatPrice(p.amount, p.currency),
 				formattedMonthlyAmount: p.period === PricePeriod.Monthly ? formatPrice(p.amount, p.currency) : formatPrice(Number(p.amount) / 12, p.currency),
-			} satisfies StripePublicConfigSubscriptionPrice;
+			} satisfies StripeSubscriptionPrice;
 		}
 		if (p.productType === ProductType.AiCredits) {
 			return {
