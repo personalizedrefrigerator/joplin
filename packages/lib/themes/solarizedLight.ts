@@ -34,8 +34,6 @@ const theme: Theme = {
 	codeThemeCss: 'atom-one-light.css',
 
 	backgroundColor4Dimmed: '#eee8d5',
-	backgroundColor4: '#eee8d5',
-	color4: '#073642',
 };
 
 export default theme;
