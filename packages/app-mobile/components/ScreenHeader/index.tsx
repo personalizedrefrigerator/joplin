@@ -21,11 +21,10 @@ import { ContainerType } from '@joplin/lib/services/plugins/WebviewController';
 import { Dispatch } from 'redux';
 import WarningBanner from './WarningBanner';
 
-import { MenuOptionType } from './Menu';
 import shim from '@joplin/lib/shim';
 import CommandService from '@joplin/lib/services/CommandService';
 import Icon from '../Icon';
-import DrawerMenu from './DrawerMenu';
+import DrawerMenu, { MenuOptionType } from './DrawerMenu';
 export { MenuOptionType };
 
 // Rather than applying a padding to the whole bar, it is applied to each

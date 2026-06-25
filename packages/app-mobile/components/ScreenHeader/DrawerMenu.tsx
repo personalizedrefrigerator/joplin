@@ -1,15 +1,13 @@
 import * as React from 'react';
 import { useCallback, useMemo, useState } from 'react';
-import { StyleSheet, TextStyle, View, Text, ScrollView, useWindowDimensions, Platform } from 'react-native';
+import { StyleSheet, View, Text, ScrollView, useWindowDimensions } from 'react-native';
 import { themeStyle } from '../global-style';
-import AccessibleView from '../accessibility/AccessibleView';
-import debounce from '../../utils/debounce';
 import useKeyboardState from '../../utils/hooks/useKeyboardState';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import BottomDrawer from '../BottomDrawer';
 import IconButton from '../IconButton';
 import { _ } from '@joplin/lib/locale';
-import { Button } from 'react-native-paper';
+import TextButton, { ButtonType } from '../buttons/TextButton';
 
 interface MenuOptionDivider {
 	isDivider: true;
@@ -20,6 +18,7 @@ interface MenuOptionButton {
 	isDivider?: false|undefined;
 	disabled?: boolean;
 	onPress: ()=> void;
+	icon?: string;
 	title: string;
 }
 
@@ -38,18 +37,6 @@ const useStyles = (themeId: number) => {
 
 	return useMemo(() => {
 		const theme = themeStyle(themeId);
-
-		const contextMenuItemTextBase: TextStyle = {
-			flex: 1,
-			textAlignVertical: 'center',
-			paddingLeft: theme.marginLeft,
-			paddingRight: theme.marginRight,
-			paddingTop: theme.itemMarginTop,
-			paddingBottom: theme.itemMarginBottom,
-			color: theme.color,
-			backgroundColor: theme.backgroundColor,
-			fontSize: theme.fontSize,
-		};
 
 		const isLandscape = windowWidth > windowHeight;
 		const extraPadding = isLandscape ? 25 : 50;
@@ -77,11 +64,8 @@ const useStyles = (themeId: number) => {
 			contextMenuItem: {
 				backgroundColor: theme.backgroundColor,
 			},
-			contextMenuItemText: {
-				...contextMenuItemTextBase,
-			},
+			contextMenuItemText: { },
 			contextMenuItemTextDisabled: {
-				...contextMenuItemTextBase,
 				opacity: 0.5,
 			},
 			menuContentScroller: {
@@ -104,53 +88,39 @@ const DrawerMenu: React.FC<Props> = props => {
 
 	const menuOptionComponents: React.ReactNode[] = [];
 
-	// When undefined/null: Don't auto-focus anything.
-	const [refocusCounter, setRefocusCounter] = useState<number|undefined>(undefined);
-
 	const [open, setOpen] = useState(false);
 
 	let keyCounter = 0;
-	let isFirst = true;
 	for (const option of props.options) {
 		if (option.isDivider === true) {
 			menuOptionComponents.push(
 				<View key={`menuOption_divider_${keyCounter++}`} style={styles.divider} />,
 			);
 		} else {
-			// Don't auto-focus on iOS -- as of RN 0.74, this causes focus to get stuck. However,
-			// the auto-focus seems to be necessary on web (and possibly Android) to avoid first focusing
-			// the dismiss button and other items not in the menu:
-			const canAutoFocus = isFirst && Platform.OS !== 'ios';
 			const key = `menuOption_${option.key ?? keyCounter++}`;
 			menuOptionComponents.push(
-				<Button onPress={() => {
-					option.onPress();
-					setOpen(false);
-					setRefocusCounter(undefined);
-				}} key={key} style={styles.contextMenuItem} disabled={!!option.disabled}>
-					<AccessibleView refocusCounter={canAutoFocus ? refocusCounter : undefined} testID={key}>
-						<Text
-							style={option.disabled ? styles.contextMenuItemTextDisabled : styles.contextMenuItemText}
-							disabled={option.disabled}
-						>{option.title}</Text>
-					</AccessibleView>
-				</Button>,
+				<TextButton
+					type={ButtonType.Link}
+					icon={option.icon}
+					onPress={() => {
+						option.onPress();
+						setOpen(false);
+					}}
+					key={key}
+					disabled={!!option.disabled}
+				>
+					<Text
+						style={option.disabled ? styles.contextMenuItemTextDisabled : styles.contextMenuItemText}
+						disabled={option.disabled}
+					>{option.title}</Text>
+				</TextButton>,
 			);
-
-			isFirst = false;
 		}
 	}
-
-	// debounce: If the menu is focused during its transition animation, it briefly
-	// appears to be in the wrong place. As such, add a brief delay before focusing.
-	const onMenuOpened = useMemo(() => debounce(() => {
-		setRefocusCounter(counter => (counter ?? 0) + 1);
-	}, 200), []);
 
 	// Resetting the refocus counter to undefined causes the menu to not be focused immediately
 	// after opening.
 	const onMenuClosed = useCallback(() => {
-		setRefocusCounter(undefined);
 		setOpen(false);
 	}, []);
 
@@ -167,7 +137,6 @@ const DrawerMenu: React.FC<Props> = props => {
 		<BottomDrawer
 			visible={open}
 			onDismiss={onMenuClosed}
-			onShow={onMenuOpened}
 			style={styles.contextMenu}
 		>
 			<ScrollView
