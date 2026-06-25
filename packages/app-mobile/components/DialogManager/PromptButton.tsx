@@ -24,8 +24,8 @@ const useStyles = (theme: ThemeStyle, spec: PromptButtonSpec, isMenu: boolean) =
 			};
 		} else if (style === 'cancel') {
 			return {
-				backgroundColor: theme.backgroundColor6,
-				color: theme.color6,
+				backgroundColor: theme.backgroundColor4Dimmed,
+				color: theme.color4,
 			};
 		} else if (isMenu) {
 			return {
