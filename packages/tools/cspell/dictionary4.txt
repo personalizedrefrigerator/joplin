@@ -326,3 +326,4 @@ pretrained
 huggingface
 stdio
 doesnotexist
+asar
