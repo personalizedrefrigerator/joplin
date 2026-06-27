@@ -72,6 +72,7 @@ export interface GotoAnythingUserData {
 	startString?: string;
 	mode?: Mode;
 	callback?: UserDataCallback;
+	alwaysShowHelp?: boolean;
 }
 
 interface Props {
@@ -158,6 +159,7 @@ class DialogComponent extends React.PureComponent<Props, State> {
 	private markupToHtml_: MarkupToHtml;
 	private userCallback_: UserDataCallback|null = null;
 	private mode_: Mode;
+	private alwaysShowHelp_: boolean;
 	private lastMouseCoords_: { x: number; y: number } | null = null;
 
 	public constructor(props: Props) {
@@ -169,6 +171,7 @@ class DialogComponent extends React.PureComponent<Props, State> {
 		this.listUpdateQueue_ = new AsyncActionQueue(100);
 
 		this.mode_ = props?.userData?.mode ? props.userData.mode : Mode.Default;
+		this.alwaysShowHelp_ = !!props?.userData?.alwaysShowHelp;
 
 		this.state = {
 			query: startString,
@@ -730,7 +733,7 @@ class DialogComponent extends React.PureComponent<Props, State> {
 				aria-live='polite'
 				id={helpTextId}
 				style={style.help}
-				hidden={!this.state.showHelp}
+				hidden={!this.alwaysShowHelp_ && !this.state.showHelp}
 			>{this.helpText()}</div>
 		);
 
@@ -752,11 +755,11 @@ class DialogComponent extends React.PureComponent<Props, State> {
 						aria-controls={itemListId}
 						aria-activedescendant={this.state.selectedItemId}
 					/>
-					<HelpButton
+					{this.alwaysShowHelp_ ? null : <HelpButton
 						onClick={this.helpButton_onClick}
 						aria-controls={helpTextId}
 						aria-expanded={this.state.showHelp}
-					/>
+					/>}
 				</div>
 				{this.renderList()}
 			</Dialog>
