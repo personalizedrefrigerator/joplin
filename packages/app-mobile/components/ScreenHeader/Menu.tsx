@@ -1,14 +1,12 @@
 import * as React from 'react';
 import { useCallback, useMemo, useState } from 'react';
-import { StyleSheet, TextStyle, View, Text, ScrollView, useWindowDimensions, Platform } from 'react-native';
+import { StyleSheet, View, Text, ScrollView, useWindowDimensions } from 'react-native';
 import { themeStyle } from '../global-style';
-import { Menu, MenuOption as MenuOptionComponent, MenuOptions, MenuTrigger } from 'react-native-popup-menu';
-import AccessibleView from '../accessibility/AccessibleView';
-import debounce from '../../utils/debounce';
-import FocusControl from '../accessibility/FocusControl/FocusControl';
-import { ModalState } from '../accessibility/FocusControl/types';
 import useKeyboardState from '../../utils/hooks/useKeyboardState';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import BottomDrawer from '../BottomDrawer';
+import TextButton, { ButtonType } from '../buttons/TextButton';
+import { TouchableRipple } from 'react-native-paper';
 
 interface MenuOptionDivider {
 	isDivider: true;
@@ -19,6 +17,7 @@ interface MenuOptionButton {
 	isDivider?: false|undefined;
 	disabled?: boolean;
 	onPress: ()=> void;
+	icon?: string;
 	title: string;
 }
 
@@ -37,18 +36,6 @@ const useStyles = (themeId: number) => {
 
 	return useMemo(() => {
 		const theme = themeStyle(themeId);
-
-		const contextMenuItemTextBase: TextStyle = {
-			flex: 1,
-			textAlignVertical: 'center',
-			paddingLeft: theme.marginLeft,
-			paddingRight: theme.marginRight,
-			paddingTop: theme.itemMarginTop,
-			paddingBottom: theme.itemMarginBottom,
-			color: theme.color,
-			backgroundColor: theme.backgroundColor,
-			fontSize: theme.fontSize,
-		};
 
 		const isLandscape = windowWidth > windowHeight;
 		const extraPadding = isLandscape ? 25 : 50;
@@ -76,11 +63,8 @@ const useStyles = (themeId: number) => {
 			contextMenuItem: {
 				backgroundColor: theme.backgroundColor,
 			},
-			contextMenuItemText: {
-				...contextMenuItemTextBase,
-			},
+			contextMenuItemText: { },
 			contextMenuItemTextDisabled: {
-				...contextMenuItemTextBase,
 				opacity: 0.5,
 			},
 			menuContentScroller: {
@@ -88,6 +72,11 @@ const useStyles = (themeId: number) => {
 			},
 			contextMenuButton: {
 				padding: 0,
+			},
+			icon: {
+				color: theme.color,
+				backgroundColor: theme.backgroundColor,
+				fontSize: theme.fontSizeLarge,
 			},
 		});
 	}, [themeId, windowWidth, windowHeight, safeAreaInsets, keyboardHeight]);
@@ -98,81 +87,63 @@ const MenuComponent: React.FC<Props> = props => {
 
 	const menuOptionComponents: React.ReactNode[] = [];
 
-	// When undefined/null: Don't auto-focus anything.
-	const [refocusCounter, setRefocusCounter] = useState<number|undefined>(undefined);
+	const [open, setOpen] = useState(false);
 
 	let keyCounter = 0;
-	let isFirst = true;
 	for (const option of props.options) {
 		if (option.isDivider === true) {
 			menuOptionComponents.push(
 				<View key={`menuOption_divider_${keyCounter++}`} style={styles.divider} />,
 			);
 		} else {
-			// Don't auto-focus on iOS -- as of RN 0.74, this causes focus to get stuck. However,
-			// the auto-focus seems to be necessary on web (and possibly Android) to avoid first focusing
-			// the dismiss button and other items not in the menu:
-			const canAutoFocus = isFirst && Platform.OS !== 'ios';
 			const key = `menuOption_${option.key ?? keyCounter++}`;
 			menuOptionComponents.push(
-				<MenuOptionComponent value={option.onPress} key={key} style={styles.contextMenuItem} disabled={!!option.disabled}>
-					<AccessibleView refocusCounter={canAutoFocus ? refocusCounter : undefined} testID={key}>
-						<Text
-							style={option.disabled ? styles.contextMenuItemTextDisabled : styles.contextMenuItemText}
-							disabled={option.disabled}
-						>{option.title}</Text>
-					</AccessibleView>
-				</MenuOptionComponent>,
+				<TextButton
+					type={ButtonType.Link}
+					icon={option.icon}
+					onPress={() => {
+						option.onPress();
+						setOpen(false);
+					}}
+					key={key}
+					disabled={!!option.disabled}
+				>
+					<Text
+						style={option.disabled ? styles.contextMenuItemTextDisabled : styles.contextMenuItemText}
+						disabled={option.disabled}
+					>{option.title}</Text>
+				</TextButton>,
 			);
-
-			isFirst = false;
 		}
 	}
-
-	const [open, setOpen] = useState(false);
-
-	const onMenuItemSelect = useCallback((value: unknown) => {
-		if (typeof value === 'function') {
-			value();
-		}
-		setRefocusCounter(undefined);
-		setOpen(false);
-	}, []);
-
-	// debounce: If the menu is focused during its transition animation, it briefly
-	// appears to be in the wrong place. As such, add a brief delay before focusing.
-	const onMenuOpened = useMemo(() => debounce(() => {
-		setRefocusCounter(counter => (counter ?? 0) + 1);
-		setOpen(true);
-	}, 200), []);
 
 	// Resetting the refocus counter to undefined causes the menu to not be focused immediately
 	// after opening.
 	const onMenuClosed = useCallback(() => {
-		setRefocusCounter(undefined);
 		setOpen(false);
 	}, []);
 
-	return (
-		<Menu
-			onSelect={onMenuItemSelect}
-			onClose={onMenuClosed}
-			onOpen={onMenuOpened}
+	const theme = themeStyle(props.themeId);
+
+	return <>
+		<TouchableRipple
+			onPress={() => setOpen(true)}
+			rippleColor={theme.backgroundColorTransparent2}
+			role='button'
+		>
+			{props.children}
+		</TouchableRipple>
+		<BottomDrawer
+			visible={open}
+			onDismiss={onMenuClosed}
 			style={styles.contextMenu}
 		>
-			<MenuTrigger style={styles.contextMenuButton} testID='screen-header-menu-trigger'>
-				{props.children}
-			</MenuTrigger>
-			<MenuOptions>
-				<FocusControl.ModalWrapper state={open ? ModalState.Open : ModalState.Closed}>
-					<ScrollView
-						style={styles.menuContentScroller}
-						testID={`menu-content-${open ? 'open' : 'closed'}`}
-					>{menuOptionComponents}</ScrollView>
-				</FocusControl.ModalWrapper>
-			</MenuOptions>
-		</Menu>
-	);
+			<ScrollView
+				style={styles.menuContentScroller}
+				testID={`menu-content-${open ? 'open' : 'closed'}`}
+			>{menuOptionComponents}</ScrollView>
+		</BottomDrawer>
+	</>;
 };
 
 export default MenuComponent;
