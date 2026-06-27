@@ -158,6 +158,7 @@ class DialogComponent extends React.PureComponent<Props, State> {
 	private markupToHtml_: MarkupToHtml;
 	private userCallback_: UserDataCallback|null = null;
 	private mode_: Mode;
+	private lastMouseCoords_: { x: number; y: number } | null = null;
 
 	public constructor(props: Props) {
 		super(props);
@@ -189,6 +190,7 @@ class DialogComponent extends React.PureComponent<Props, State> {
 		this.input_onKeyDown = this.input_onKeyDown.bind(this);
 		this.renderItem = this.renderItem.bind(this);
 		this.listItem_onClick = this.listItem_onClick.bind(this);
+		this.listItem_onMouseMove = this.listItem_onMouseMove.bind(this);
 		this.helpButton_onClick = this.helpButton_onClick.bind(this);
 
 		if (startString) this.scheduleListUpdate();
@@ -572,6 +574,21 @@ class DialogComponent extends React.PureComponent<Props, State> {
 		void this.gotoItem(this.selectedItem(targetResultId));
 	}
 
+	private listItem_onMouseMove(event: React.MouseEvent<HTMLDivElement>) {
+		// Only update selection when the mouse actually moves. Without this, a stationary
+		// cursor over a row that gets re-mounted (e.g. after keyboard navigation re-renders
+		// the list) would steal the keyboard selection.
+		if (this.lastMouseCoords_ && this.lastMouseCoords_.x === event.clientX && this.lastMouseCoords_.y === event.clientY) {
+			return;
+		}
+		this.lastMouseCoords_ = { x: event.clientX, y: event.clientY };
+
+		const targetResultId = event.currentTarget.getAttribute('id');
+		if (targetResultId && targetResultId !== this.state.selectedItemId) {
+			this.setState({ selectedItemId: targetResultId });
+		}
+	}
+
 	public renderItem(item: GotoAnythingSearchResult, index: number) {
 		const theme = themeStyle(this.props.themeId);
 		const style = this.style();
@@ -603,6 +620,7 @@ class DialogComponent extends React.PureComponent<Props, State> {
 				className={isSelected ? 'selected' : null}
 				style={rowStyle}
 				onClick={this.listItem_onClick}
+				onMouseMove={this.listItem_onMouseMove}
 
 				data-id={item.id}
 				data-parent-id={item.parent_id}
