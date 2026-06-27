@@ -327,3 +327,5 @@ huggingface
 stdio
 doesnotexist
 asar
+agentic
+tiebreak
