@@ -517,8 +517,14 @@ class DialogComponent extends React.PureComponent<Props, State> {
 
 		if (item.type === BaseModel.TYPE_COMMAND) {
 			logger.info('gotoItem: execute command', item);
-			void CommandService.instance().execute(item.id, ...item.commandArgs);
-			void focusEditorIfEditorCommand(item.id, CommandService.instance());
+			// Defer so the close above renders before the command runs — otherwise
+			// commands that reopen the dialog (e.g. linkToNote) get batched with the
+			// close, the dialog never remounts, and its constructor-read userData is
+			// stale. See https://github.com/laurent22/joplin/issues/15780
+			setTimeout(() => {
+				void CommandService.instance().execute(item.id, ...item.commandArgs);
+				void focusEditorIfEditorCommand(item.id, CommandService.instance());
+			}, 0);
 			return;
 		}
 
