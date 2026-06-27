@@ -711,7 +711,12 @@ class MainScreenComponent extends React.Component<Props, State> {
 				/>;
 			}
 		} else {
-			throw new Error(`Invalid layout component: ${key}`);
+			// The layout may reference a component that no longer exists -
+			// for example a panel from a previous version of the app, or a
+			// feature that has been removed. Rather than crash, log the issue
+			// and queue the item for removal from the layout.
+			console.warn(`Invalid layout component: ${key} - it will be removed from the layout`);
+			viewsToRemove.push(key);
 		}
 
 		if (viewsToRemove.length) {
