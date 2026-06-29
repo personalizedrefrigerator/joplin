@@ -45,13 +45,13 @@ import NoteEditor from './NoteEditor/NoteEditor';
 import ChatPanel from './ChatPanel/ChatPanel';
 import PluginNotification from './PluginNotification/PluginNotification';
 import { Toast } from '@joplin/lib/services/plugins/api/types';
-import PluginService from '@joplin/lib/services/plugins/PluginService';
 import QuitSyncDialog from './QuitSyncDialog';
 import Logger from '@joplin/utils/Logger';
 
 const logger = Logger.create('MainScreen');
 
 import { ipcRenderer } from 'electron';
+import layoutKeyToLabel from '../utils/layout/layoutKeyToLabel';
 
 interface Props {
 	plugins: PluginStates;
@@ -122,19 +122,6 @@ const defaultLayout: LayoutItem = {
 		{ key: 'editor' },
 		{ key: 'chatPanel', width: 340, visible: false },
 	],
-};
-
-const layoutKeyToLabel = (key: string, plugins: PluginStates) => {
-	if (key === 'sideBar') return _('Sidebar');
-	if (key === 'noteList') return _('Note list');
-	if (key === 'editor') return _('Editor');
-	if (key === 'chatPanel') return _('AI Chat');
-
-	const viewInfo = pluginUtils.viewInfoByViewId(plugins, key);
-	if (viewInfo) {
-		return PluginService.instance().safePluginNameById(viewInfo.plugin.id);
-	}
-	return key;
 };
 
 class MainScreenComponent extends React.Component<Props, State> {
@@ -689,7 +676,7 @@ class MainScreenComponent extends React.Component<Props, State> {
 			},
 
 			chatPanel: () => {
-				return <ChatPanel key={key} />;
+				return <ChatPanel windowId={defaultWindowId} key={key} />;
 			},
 		};
 

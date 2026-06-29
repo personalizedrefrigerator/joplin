@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
 import { _ } from '@joplin/lib/locale';
@@ -7,11 +7,12 @@ import Setting from '@joplin/lib/models/Setting';
 import Note from '@joplin/lib/models/Note';
 import CommandService from '@joplin/lib/services/CommandService';
 import Logger from '@joplin/utils/Logger';
-import { defaultWindowId, stateUtils } from '@joplin/lib/reducer';
+import { stateUtils } from '@joplin/lib/reducer';
 import { AiChatMessage, AppState } from '../../app.reducer';
 import { runNoteChat, ChatTurn } from '@joplin/lib/services/ai/noteChat';
 import { applyAnchorEdits } from '@joplin/lib/services/ai/applyNoteEdits';
 import { chatAvailability } from '@joplin/lib/services/ai/availability';
+import { WindowIdContext } from '../NewWindowOrIFrame';
 
 const logger = Logger.create('ChatPanel');
 
@@ -65,9 +66,11 @@ const ChatPanel: React.FC<Props> = (props) => {
 	const generationRef = useRef(0);
 	useEffect(() => () => { generationRef.current++; }, []);
 
+	const windowId = useContext(WindowIdContext);
+
 	const appendMessage = useCallback((message: AiChatMessage) => {
-		dispatch({ type: 'AI_CHAT_APPEND', message });
-	}, [dispatch]);
+		dispatch({ type: 'AI_CHAT_APPEND', windowId, message });
+	}, [dispatch, windowId]);
 
 	// Drop a separator when the active note changes mid-conversation. Skip
 	// the first ever opened note (no prior context to separate from).
@@ -198,13 +201,13 @@ const ChatPanel: React.FC<Props> = (props) => {
 		} catch (error) {
 			logger.warn('Chat failed:', error);
 			if (generationRef.current !== startGeneration) return;
-			dispatch({ type: 'AI_CHAT_REMOVE', id: userTurnId });
+			dispatch({ type: 'AI_CHAT_REMOVE', windowId, id: userTurnId });
 			setInput(text);
 			appendMessage({ id: makeId(), role: 'error', text: error.message || _('Something went wrong.') });
 		} finally {
 			setSending(false);
 		}
-	}, [input, sending, props.noteId, conversationTurns, appendMessage, dispatch]);
+	}, [input, sending, props.noteId, conversationTurns, windowId, appendMessage, dispatch]);
 
 	const handleAcknowledgeDisclosure = useCallback(() => {
 		Setting.setValue(disclosureSetting, true);
@@ -321,8 +324,12 @@ const ChatPanel: React.FC<Props> = (props) => {
 	);
 };
 
-const mapStateToProps = (state: AppState) => {
-	const windowState = stateUtils.windowStateById(state, defaultWindowId);
+interface OwnProps {
+	windowId: string;
+}
+
+const mapStateToProps = (state: AppState, ownProps: OwnProps) => {
+	const windowState = stateUtils.windowStateById(state, ownProps.windowId);
 	const noteId = stateUtils.selectedNoteId(windowState);
 	const note = noteId ? windowState.notes.find(n => n.id === noteId) : null;
 	const availability = chatAvailability();
