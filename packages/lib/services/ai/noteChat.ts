@@ -217,6 +217,7 @@ export const runNoteChat = async (
 	}
 
 	const result = await AiService.instance().chat(messages, { responseFormat: responseSchema(note) });
+	logger.debug('Got response', result);
 	return enforceSelectionScope(tryParseReply(result.text), note.selection);
 };
 
