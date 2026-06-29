@@ -113,9 +113,31 @@ const systemPrompt = (note: NoteContext) => {
 	return lines.join('\n');
 };
 
-const responseSchema = (note: NoteContext) => ({
-	type: 'json_schema' as const,
-	json_schema: {
+const responseSchema = (note: NoteContext) => {
+	const editOperationSchema = {
+		type: 'object',
+		properties: note.selection ? {
+			op: {
+				type: 'string',
+				enum: ['replaceSelection'],
+			},
+			text: { type: 'string' },
+		} : {
+			op: {
+				type: 'string',
+				enum: [
+					'insertBefore', 'insertAfter', 'appendToNote',
+					'replaceRange', 'replaceFencedBlock',
+				],
+			},
+			anchor: { type: 'string' },
+			tag: { type: 'string' },
+			text: { type: 'string' },
+		},
+		required: ['op', 'text'],
+	};
+
+	const schema = {
 		name: 'NoteChatResponse',
 		strict: true,
 		schema: {
@@ -124,35 +146,19 @@ const responseSchema = (note: NoteContext) => ({
 				reply: { type: 'string' },
 				edits: {
 					type: 'array',
-					items: {
-						type: 'object',
-						properties: note.selection ? {
-							op: {
-								type: 'string',
-								enum: ['replaceSelection'],
-							},
-							text: { type: 'string' },
-						} : {
-							op: {
-								type: 'string',
-								enum: [
-									'insertBefore', 'insertAfter', 'appendToNote',
-									'replaceRange', 'replaceFencedBlock',
-								],
-							},
-							anchor: { type: 'string' },
-							tag: { type: 'string' },
-							text: { type: 'string' },
-						},
-						required: ['op', 'text'],
-					},
+					items: editOperationSchema,
 				},
 			},
 			required: ['reply', 'edits'],
 			additionalProperties: false,
 		},
-	},
-});
+	};
+
+	return {
+		type: 'json_schema' as const,
+		json_schema: schema,
+	};
+};
 
 const estimateTokens = (text: string) => Math.ceil(text.length / charsPerToken);
 
