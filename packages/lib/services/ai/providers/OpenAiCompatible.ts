@@ -80,9 +80,17 @@ export default class OpenAiCompatibleProvider extends ChatProviderBase {
 		// `max_completion_tokens`. Older models and many OpenAI-compatible
 		// servers only know `max_tokens`. Retry once with the new name when the
 		// server tells us so.
-		if (response.status === 400 && 'max_tokens' in body && /max_completion_tokens/i.test(json?.error?.message ?? '')) {
+		const errorMessage = json?.error?.message ?? '';
+		if (response.status === 400 && 'max_tokens' in body && /max_completion_tokens/i.test(errorMessage)) {
 			body.max_completion_tokens = body.max_tokens;
 			delete body.max_tokens;
+			({ response, json } = await doFetch());
+		}
+
+		// Older OpenAI models might reject `response_format` json_schema (see https://stackoverflow.com/q/79039544).
+		// For compatibility, retry without response_format on failure:
+		if (response.status === 400 && 'response_format' in body && /json_schema|response_format/.test(errorMessage)) {
+			delete body.response_format;
 			({ response, json } = await doFetch());
 		}
 
