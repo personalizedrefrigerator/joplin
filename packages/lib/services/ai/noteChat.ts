@@ -126,7 +126,7 @@ const responseSchema = (note: NoteContext) => {
 			op: {
 				type: 'string',
 				enum: [
-					'insertBefore', 'insertAfter', 'appendToNote',
+					'appendToNote', 'insertBefore', 'insertAfter',
 					'replaceRange', 'replaceFencedBlock',
 				],
 			},
