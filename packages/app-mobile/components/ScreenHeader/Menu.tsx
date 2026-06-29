@@ -64,9 +64,10 @@ const useStyles = (themeId: number) => {
 				backgroundColor: theme.backgroundColor,
 				justifyContent: 'space-between',
 			},
-			contextMenuItemText: { },
+			contextMenuItemText: { color: theme.color },
 			contextMenuItemTextDisabled: {
 				opacity: 0.5,
+				color: theme.color,
 			},
 			menuContentScroller: {
 				maxHeight: maxMenuHeight,
