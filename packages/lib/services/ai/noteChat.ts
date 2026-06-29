@@ -113,6 +113,47 @@ const systemPrompt = (note: NoteContext) => {
 	return lines.join('\n');
 };
 
+const responseSchema = (note: NoteContext) => ({
+	type: 'json_schema' as const,
+	json_schema: {
+		name: 'NoteChatResponse',
+		strict: true,
+		schema: {
+			type: 'object',
+			properties: {
+				reply: { type: 'string' },
+				edits: {
+					type: 'array',
+					items: {
+						type: 'object',
+						properties: note.selection ? {
+							op: {
+								type: 'string',
+								enum: ['replaceSelection'],
+							},
+							text: { type: 'string' },
+						} : {
+							op: {
+								type: 'string',
+								enum: [
+									'insertBefore', 'insertAfter', 'appendToNote',
+									'replaceRange', 'replaceFencedBlock',
+								],
+							},
+							anchor: { type: 'string' },
+							tag: { type: 'string' },
+							text: { type: 'string' },
+						},
+						required: ['op', 'text'],
+					},
+				},
+			},
+			required: ['reply', 'edits'],
+			additionalProperties: false,
+		},
+	},
+});
+
 const estimateTokens = (text: string) => Math.ceil(text.length / charsPerToken);
 
 // First-pass filter. Per-op field validation lives in applyNoteEdits.
@@ -175,7 +216,7 @@ export const runNoteChat = async (
 		);
 	}
 
-	const result = await AiService.instance().chat(messages);
+	const result = await AiService.instance().chat(messages, { responseFormat: responseSchema(note) });
 	return enforceSelectionScope(tryParseReply(result.text), note.selection);
 };
 
@@ -188,4 +229,4 @@ const enforceSelectionScope = (reply: ChatReply, selection: string | null): Chat
 };
 
 // Exported for tests.
-export const _internal = { systemPrompt, tryParseReply, estimateTokens, sanitizeEdits, enforceSelectionScope, noteBodyTokenBudget };
+export const _internal = { systemPrompt, responseSchema, tryParseReply, estimateTokens, sanitizeEdits, enforceSelectionScope, noteBodyTokenBudget };

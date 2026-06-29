@@ -53,6 +53,7 @@ export default class OpenAiCompatibleProvider extends ChatProviderBase {
 		};
 		if (options?.temperature !== undefined) body.temperature = options.temperature;
 		if (options?.maxTokens !== undefined) body.max_tokens = options.maxTokens;
+		if (options?.responseFormat !== undefined) body.response_format = options.responseFormat;
 
 		const headers: Record<string, string> = { 'Content-Type': 'application/json' };
 		if (this.apiKey_) headers['Authorization'] = `Bearer ${this.apiKey_}`;

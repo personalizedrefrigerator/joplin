@@ -15,32 +15,6 @@ describe('noteChat', () => {
 		expect(prompt).not.toContain('long body text');
 	});
 
-	test('systemPrompt restricts ops to replaceSelection when selection present', () => {
-		const prompt = _internal.systemPrompt({
-			title: 'n',
-			body: 'b',
-			selection: 'sel',
-		});
-		expect(prompt).toContain('replaceSelection');
-		expect(prompt).not.toContain('insertBefore');
-		expect(prompt).not.toContain('insertAfter');
-		expect(prompt).not.toContain('appendToNote');
-		expect(prompt).not.toContain('replaceRange');
-		expect(prompt).not.toContain('replaceFencedBlock');
-	});
-
-	test('systemPrompt offers anchor ops when no selection', () => {
-		const prompt = _internal.systemPrompt({
-			title: 'n',
-			body: 'b',
-			selection: null,
-		});
-		expect(prompt).toContain('insertBefore');
-		expect(prompt).toContain('insertAfter');
-		expect(prompt).toContain('appendToNote');
-		expect(prompt).toContain('replaceRange');
-	});
-
 	test('systemPrompt advertises Joplin-specific Markdown features', () => {
 		const prompt = _internal.systemPrompt({ title: 'n', body: 'b', selection: null });
 		// The fence tags are the load-bearing strings — the model knows the
@@ -64,6 +38,55 @@ describe('noteChat', () => {
 		});
 		expect(prompt).toContain('the whole body');
 		expect(prompt).toContain('BEGIN NOTE');
+	});
+
+	test.each([
+		{
+			label: 'restricts ops to replaceSelection when selection present',
+			note: {
+				title: 'My note',
+				body: 'long body text',
+				selection: 'just this bit',
+			},
+			expectedOperations: ['replaceSelection'],
+		},
+		{
+			label: 'offers anchor operations when no selection present',
+			note: {
+				title: 'n',
+				body: 'b',
+				selection: null,
+			},
+			expectedOperations: ['insertBefore', 'insertAfter', 'appendToNote', 'replaceRange', 'replaceFencedBlock'],
+		},
+	])('responseSchema is consistent with systemPrompt (case $label)', ({ note, expectedOperations }) => {
+		const allOperations = new Set([
+			'insertBefore',
+			'insertAfter',
+			'appendToNote',
+			'replaceRange',
+			'replaceFencedBlock',
+		]);
+		const expectedMissingOperations = new Set(allOperations);
+		for (const operation of expectedOperations) {
+			expectedMissingOperations.delete(operation);
+		}
+
+		const prompt = _internal.systemPrompt(note);
+		const schema = _internal.responseSchema(note).json_schema.schema;
+
+		// Schema's operations list should be correct
+		const editSchema = schema.properties.edits;
+		const operationSchema = editSchema.items.properties.op;
+		expect([...operationSchema.enum].sort()).toEqual([...expectedOperations].sort());
+
+		// Prompt's operations list should be correct
+		for (const operation of expectedOperations) {
+			expect(prompt).toContain(operation);
+		}
+		for (const operation of expectedMissingOperations) {
+			expect(prompt).not.toContain(operation);
+		}
 	});
 
 	test.each([
