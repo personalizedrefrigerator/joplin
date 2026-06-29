@@ -1304,7 +1304,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 		if (canAttachPicture) {
 			output.push({
 				title: _('Attach...'),
-				icon: 'paperclip',
+				icon: 'material paperclip',
 				onPress: () => this.onAttach(),
 				disabled: readOnly,
 			});
@@ -1314,7 +1314,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 			title: _('Draw picture'),
 			onPress: () => this.drawPicture_onPress(),
 			disabled: readOnly,
-			icon: 'draw',
+			icon: 'material draw',
 		});
 
 		if (isTodo) {
@@ -1357,7 +1357,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 			} else {
 				output.push({
 					title: title ?? commandService.description(commandName),
-					icon: icon,
+					icon: icon ?? commandService.iconName(commandName),
 					onPress: async () => {
 						void commandService.execute(commandName);
 					},
@@ -1367,12 +1367,12 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 		};
 
 		if (isSaved && !isDeleted) {
-			addButtonFromCommand('setTags', undefined, 'tag-outline');
+			addButtonFromCommand('setTags');
 		}
 
 		output.push({
 			title: isTodo ? _('Convert to note') : _('Convert to todo'),
-			icon: 'arrow-left-right-bold-outline',
+			icon: 'material arrow-left-right-bold-outline',
 			onPress: () => {
 				this.toggleIsTodo_onPress();
 			},
@@ -1382,7 +1382,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 		if (isSaved && !isDeleted) {
 			output.push({
 				title: _('Copy Markdown link'),
-				icon: 'content-copy',
+				icon: 'material content-copy',
 				onPress: () => {
 					this.copyMarkdownLink_onPress();
 				},
@@ -1392,7 +1392,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 			if (Platform.OS !== 'web') {
 				output.push({
 					title: _('Copy external link'),
-					icon: 'content-copy',
+					icon: 'material content-copy',
 					onPress: () => {
 						this.copyExternalLink_onPress();
 					},
@@ -1411,7 +1411,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 			const newCodeView = !isCodeView;
 			output.push({
 				title: newCodeView ? _('Edit as Markdown') : _('Edit as Rich Text'),
-				icon: newCodeView ? 'file-edit-outline' : 'file-edit',
+				icon: newCodeView ? 'material file-edit-outline' : 'material file-edit',
 				onPress: () => {
 					Setting.setValue('editor.codeView', newCodeView);
 				},
@@ -1439,9 +1439,9 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 		}
 
 		if (whenContext.inTrash) {
-			addButtonFromCommand('permanentlyDeleteNote', undefined, 'delete-outline');
+			addButtonFromCommand('permanentlyDeleteNote', undefined, 'material delete-outline');
 		} else {
-			addButtonFromCommand('deleteNote', _('Delete'), 'delete-outline');
+			addButtonFromCommand('deleteNote', _('Delete'), 'material delete-outline');
 		}
 
 		if (pluginCommands.length) {

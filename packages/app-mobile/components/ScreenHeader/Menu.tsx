@@ -5,8 +5,8 @@ import { themeStyle } from '../global-style';
 import useKeyboardState from '../../utils/hooks/useKeyboardState';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import BottomDrawer from '../BottomDrawer';
-import TextButton, { ButtonType } from '../buttons/TextButton';
 import { TouchableRipple } from 'react-native-paper';
+import Icon from '../Icon';
 
 interface MenuOptionDivider {
 	isDivider: true;
@@ -62,6 +62,7 @@ const useStyles = (themeId: number) => {
 			},
 			contextMenuItem: {
 				backgroundColor: theme.backgroundColor,
+				justifyContent: 'space-between',
 			},
 			contextMenuItemText: { },
 			contextMenuItemTextDisabled: {
@@ -84,6 +85,7 @@ const useStyles = (themeId: number) => {
 
 const MenuComponent: React.FC<Props> = props => {
 	const styles = useStyles(props.themeId);
+	const theme = themeStyle(props.themeId);
 
 	const menuOptionComponents: React.ReactNode[] = [];
 
@@ -98,9 +100,9 @@ const MenuComponent: React.FC<Props> = props => {
 		} else {
 			const key = `menuOption_${option.key ?? keyCounter++}`;
 			menuOptionComponents.push(
-				<TextButton
-					type={ButtonType.Link}
-					icon={option.icon}
+				<TouchableRipple
+					role='button'
+					style={{ alignItems: 'flex-start', padding: theme.margin }}
 					onPress={() => {
 						option.onPress();
 						setOpen(false);
@@ -108,11 +110,14 @@ const MenuComponent: React.FC<Props> = props => {
 					key={key}
 					disabled={!!option.disabled}
 				>
-					<Text
-						style={option.disabled ? styles.contextMenuItemTextDisabled : styles.contextMenuItemText}
-						disabled={option.disabled}
-					>{option.title}</Text>
-				</TextButton>,
+					<View style={{ flexDirection: 'row', gap: theme.marginSmall }}>
+						{option.icon && <Icon name={option.icon} style={{ color: theme.color, fontSize: theme.fontSize }} accessibilityLabel={null} />}
+						<Text
+							style={option.disabled ? styles.contextMenuItemTextDisabled : styles.contextMenuItemText}
+							disabled={option.disabled}
+						>{option.title}</Text>
+					</View>
+				</TouchableRipple>,
 			);
 		}
 	}
@@ -122,8 +127,6 @@ const MenuComponent: React.FC<Props> = props => {
 	const onMenuClosed = useCallback(() => {
 		setOpen(false);
 	}, []);
-
-	const theme = themeStyle(props.themeId);
 
 	return <>
 		<TouchableRipple
@@ -141,7 +144,9 @@ const MenuComponent: React.FC<Props> = props => {
 			<ScrollView
 				style={styles.menuContentScroller}
 				testID={`menu-content-${open ? 'open' : 'closed'}`}
-			>{menuOptionComponents}</ScrollView>
+			>
+				<View style={{ flexDirection: 'column' }}>{menuOptionComponents}</View>
+			</ScrollView>
 		</BottomDrawer>
 	</>;
 };
