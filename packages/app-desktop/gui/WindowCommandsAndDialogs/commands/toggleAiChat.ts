@@ -15,7 +15,7 @@ export const runtime = (control: WindowControl): CommandRuntime => {
 	return {
 		execute: async (context: CommandContext) => {
 			const state = context.state as AppState;
-			const layout = state.windowId === defaultWindowId ? state.mainLayout : state.windowLayout;
+			const layout = state.windowId === defaultWindowId ? state.mainLayout : state.secondaryWindowLayout;
 			if (!layout) return;
 
 			const visible = !layoutItemProp(layout, 'chatPanel', 'visible');

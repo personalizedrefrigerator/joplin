@@ -59,7 +59,7 @@ export interface AppWindowState extends WindowState {
 	// layout container can swap component types and unmount the panel).
 	aiChatMessages: AiChatMessage[];
 	// Layout for secondary windows
-	windowLayout: LayoutItem|null;
+	secondaryWindowLayout: LayoutItem|null;
 }
 
 interface BackgroundWindowStates {
@@ -94,7 +94,7 @@ export const createAppDefaultWindowState = (): AppWindowState => {
 		whiteboardForceMarkdown: {},
 		activeNoteIsWhiteboard: false,
 		aiChatMessages: [],
-		windowLayout: null,
+		secondaryWindowLayout: null,
 	};
 };
 
@@ -303,15 +303,15 @@ export default function(state: AppState, action: any) {
 
 		case 'WINDOW_LAYOUT_SET':
 		case 'MAIN_LAYOUT_SET':
-			if ((action.windowId ?? defaultWindowId) !== defaultWindowId) {
-				newState = withWindowStateUpdated(
-					state, action.windowId, 'windowLayout', () => action.value,
-				);
-			} else {
+			if ((action.windowId ?? defaultWindowId) === defaultWindowId) {
 				newState = {
 					...state,
 					mainLayout: action.value,
 				};
+			} else {
+				newState = withWindowStateUpdated(
+					state, action.windowId, 'secondaryWindowLayout', () => action.value,
+				);
 			}
 			break;
 
@@ -321,7 +321,7 @@ export default function(state: AppState, action: any) {
 
 			if ((action.windowId ?? defaultWindowId) !== defaultWindowId) {
 				newState = withWindowStateUpdated(
-					state, action.windowId, 'windowLayout', oldLayout => (
+					state, action.windowId, 'secondaryWindowLayout', oldLayout => (
 						setLayoutProp(oldLayout, updateOption)
 					),
 				);

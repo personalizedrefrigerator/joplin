@@ -193,7 +193,7 @@ export default connect((state: AppState, ownProps: ConnectProps) => {
 	return {
 		themeId: state.settings.theme,
 		isSafeMode: state.settings.isSafeMode,
-		layout: windowState.windowLayout,
+		layout: windowState.secondaryWindowLayout,
 		codeView: windowState?.editorCodeView ?? state.settings['editor.codeView'],
 		legacyMarkdown: state.settings['editor.legacyMarkdown'],
 		plugins: state.pluginService.plugins,
