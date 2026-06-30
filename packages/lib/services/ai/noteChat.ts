@@ -114,27 +114,48 @@ const systemPrompt = (note: NoteContext) => {
 };
 
 const responseSchema = (note: NoteContext) => {
-	const editOperationSchema = {
+	const editOperationSchema = note.selection ? {
 		type: 'object',
-		properties: note.selection ? {
+		properties: {
 			op: {
 				type: 'string',
 				enum: ['replaceSelection'],
 			},
 			text: { type: 'string' },
-		} : {
-			op: {
-				type: 'string',
-				enum: [
-					'appendToNote', 'insertBefore', 'insertAfter',
-					'replaceRange', 'replaceFencedBlock',
-				],
-			},
-			anchor: { type: 'string' },
-			tag: { type: 'string' },
-			text: { type: 'string' },
+			additionalProperties: false,
 		},
-		required: ['op', 'text'],
+	} : {
+		oneOf: [
+			{
+				type: 'object',
+				properties: {
+					op: { type: 'string', enum: ['insertBefore', 'insertAfter', 'replaceRange'] },
+					anchor: { type: 'string' },
+					text: { type: 'string' },
+				},
+				required: ['op', 'anchor', 'text'],
+				additionalProperties: false,
+			},
+			{
+				type: 'object',
+				properties: {
+					op: { type: 'string', enum: ['appendToNote'] },
+					text: { type: 'string' },
+				},
+				required: ['op', 'text'],
+				additionalProperties: false,
+			},
+			{
+				type: 'object',
+				properties: {
+					op: { type: 'string', enum: ['replaceFencedBlock'] },
+					tag: { type: 'string' },
+					text: { type: 'string' },
+				},
+				required: ['op', 'tag', 'text'],
+				additionalProperties: false,
+			},
+		],
 	};
 
 	const schema = {

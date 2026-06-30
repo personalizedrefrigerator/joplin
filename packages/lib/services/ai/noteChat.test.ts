@@ -76,9 +76,12 @@ describe('noteChat', () => {
 		const schema = _internal.responseSchema(note).json_schema.schema;
 
 		// Schema's operations list should be correct
-		const editSchema = schema.properties.edits;
-		const operationSchema = editSchema.items.properties.op;
-		expect([...operationSchema.enum].sort()).toEqual([...expectedOperations].sort());
+		const editSchemaItems = schema.properties.edits.items;
+		const allowedSchemaOperations = [
+			...(editSchemaItems.properties?.op?.enum ?? []),
+			...(editSchemaItems.oneOf?.map(item => item.properties.op.enum)?.flat() ?? []),
+		].sort();
+		expect(allowedSchemaOperations).toEqual([...expectedOperations].sort());
 
 		// Prompt's operations list should be correct
 		for (const operation of expectedOperations) {
