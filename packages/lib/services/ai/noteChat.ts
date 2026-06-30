@@ -24,10 +24,6 @@ const knownOps = new Set<EditOp['op']>([
 	'replaceSelection', 'insertBefore', 'insertAfter', 'appendToNote', 'replaceRange', 'replaceFencedBlock',
 ]);
 
-// Structured-document fences where the model regenerates the whole block —
-// plain code fences (```js, ```python) are deliberately excluded.
-export const replaceFencedBlockSupportedTags = ['jsoncanvas', 'mermaid', 'abc', 'fountain'];
-
 export interface ChatTurn {
 	role: 'user' | 'assistant';
 	content: string;
@@ -105,7 +101,7 @@ const systemPrompt = (note: NoteContext) => {
 		lines.push('  { "op": "insertAfter", "anchor": "...", "text": "..." } — inserts text immediately after the first occurrence of "anchor".');
 		lines.push('  { "op": "appendToNote", "text": "..." } — appends text at the end of the note.');
 		lines.push('  { "op": "replaceRange", "anchor": "...", "text": "..." } — replaces the first occurrence of "anchor" with "text".');
-		lines.push(`  { "op": "replaceFencedBlock", "tag": "...", "text": "..." } — replaces the inner content of the first \`\`\`<tag>\`\`\` fenced block. "text" is the new content inside the fence (no fence markers). Supported tags: ${replaceFencedBlockSupportedTags.join(', ')}.`);
+		lines.push('  { "op": "replaceFencedBlock", "tag": "...", "text": "..." } — replaces the inner content of the first ```<tag>``` fenced block. "text" is the new content inside the fence (no fence markers). Supported tags: jsoncanvas, mermaid, abc, fountain.');
 		lines.push('');
 		lines.push('Anchors must be exact substrings of the current note body. Keep them short but unique.');
 		lines.push('');
@@ -154,7 +150,7 @@ const responseSchema = (note: NoteContext) => {
 				type: 'object',
 				properties: {
 					op: { type: 'string', enum: ['replaceFencedBlock'] },
-					tag: { type: 'string', enum: [...replaceFencedBlockSupportedTags] },
+					tag: { type: 'string' },
 					text: { type: 'string' },
 				},
 				required: ['op', 'tag', 'text'],
