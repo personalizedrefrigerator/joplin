@@ -28,7 +28,9 @@ export interface CommandRuntime {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- State is lib's State for cli but app-desktop runtimes type this as AppState; narrowing here breaks downstream contravariance
 	mapStateToTitle?(state: any): string;
 	// Used to break ties when commands are registered by different components.
-	getPriority?(state: State, targetWindowId: string): number;
+	// `state` should be the main app state. `targetWindowId` should be the window ID
+	// the command should run in, or `null` for any window.
+	getPriority?(state: State, targetWindowId: string|null): number;
 }
 
 export interface CommandDeclaration {
