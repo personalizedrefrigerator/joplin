@@ -222,8 +222,8 @@ const ChatPanel: React.FC<Props> = (props) => {
 
 	const handleReset = useCallback(() => {
 		generationRef.current++;
-		dispatch({ type: 'AI_CHAT_RESET' });
-	}, [dispatch]);
+		dispatch({ type: 'AI_CHAT_RESET', windowId: windowId });
+	}, [dispatch, windowId]);
 
 	const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLTextAreaElement>) => {
 		// Don't send while an IME composition is in flight — Enter commits
