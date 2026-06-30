@@ -34,7 +34,6 @@ import { MasterKeyEntity } from '@joplin/lib/services/e2ee/types';
 import invitationRespond from '@joplin/lib/services/share/invitationRespond';
 import restart from '../services/restart';
 import { connect } from 'react-redux';
-import validateColumns from './NoteListHeader/utils/validateColumns';
 import TrashNotification from './TrashNotification/TrashNotification';
 import UpdateNotification from './UpdateNotification/UpdateNotification';
 import PluginNotification from './PluginNotification/PluginNotification';
@@ -712,7 +711,6 @@ class MainScreenComponent extends React.Component<Props, State> {
 const mapStateToProps = (state: AppState) => {
 	const syncInfo = localSyncInfoFromState(state);
 	const showNeedUpgradingEnabledMasterKeyMessage = !!EncryptionService.instance().masterKeysThatNeedUpgrading(syncInfo.masterKeys.filter((k) => !!k.enabled)).length;
-	const windowState = stateUtils.windowStateById(state, defaultWindowId);
 
 	return {
 		themeId: state.settings.theme,
@@ -728,21 +726,15 @@ const mapStateToProps = (state: AppState) => {
 		hasNotesBeingSaved: stateUtils.hasNotesBeingSaved(state),
 		layoutMoveMode: state.layoutMoveMode,
 		mainLayout: state.mainLayout,
-		startupPluginsLoaded: state.startupPluginsLoaded,
 		shareInvitations: state.shareService.shareInvitations,
 		processingShareInvitationResponse: state.shareService.processingShareInvitationResponse,
 		isSafeMode: state.settings.isSafeMode,
 		enableLegacyMarkdownEditor: state.settings['editor.legacyMarkdown'],
 		needApiAuth: state.needApiAuth,
 		isResettingLayout: state.isResettingLayout,
-		listRendererId: state.settings['notes.listRendererId'],
 		lastDeletion: state.lastDeletion,
 		lastDeletionNotificationTime: state.lastDeletionNotificationTime,
-		selectedFolderId: windowState.selectedFolderId,
 		mustUpgradeAppMessage: state.mustUpgradeAppMessage,
-		notesSortOrderField: state.settings['notes.sortOrder.field'],
-		notesSortOrderReverse: state.settings['notes.sortOrder.reverse'],
-		notesColumns: validateColumns(state.settings['notes.columns']),
 		showInvalidJoplinCloudCredential: state.settings['sync.target'] === 10 && state.mustAuthenticate,
 		toast: state.toast,
 		shouldSwitchToAppleSiliconVersion: shim.isAppleSilicon() && shim.isMac() && process.arch !== 'arm64',
