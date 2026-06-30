@@ -1,6 +1,5 @@
 import * as React from 'react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import NoteEditor from './NoteEditor';
 import StyleSheetContainer from '../StyleSheets/StyleSheetContainer';
 import { connect } from 'react-redux';
 import { AppState } from '../../app.reducer';
@@ -13,11 +12,11 @@ import { StyleSheetManager } from 'styled-components';
 import createCache from '@emotion/cache';
 import { CacheProvider } from '@emotion/react';
 import { stateUtils } from '@joplin/lib/reducer';
-import ResizableLayout from '../ResizableLayout/ResizableLayout';
+import ResizableLayout, { RenderItemEvent } from '../ResizableLayout/ResizableLayout';
 import { LayoutItem } from '../ResizableLayout/utils/types';
 import { PluginStates } from '@joplin/lib/services/plugins/reducer';
 import layoutKeyToLabel from '../../utils/layout/layoutKeyToLabel';
-import ChatPanel from '../ChatPanel/ChatPanel';
+import MainLayoutPane from '../MainLayoutPane';
 
 interface Props {
 	dispatch: Dispatch;
@@ -27,7 +26,6 @@ interface Props {
 	plugins: PluginStates;
 	newWindow: boolean;
 	windowId: string;
-	startupPluginsLoaded: boolean;
 }
 
 const emptyCallback = () => {};
@@ -44,8 +42,20 @@ const useWindowTitle = (isNewWindow: boolean) => {
 	return { windowTitle: `Joplin - ${title}`, onNoteTitleChange: setTitle };
 };
 
+const defaultLayout = {
+	key: 'root',
+	isRoot: true,
+	width: 500,
+	height: 500,
+	children: [
+		{ key: 'editor' },
+		{ key: 'chatPanel', width: 340, visible: false },
+	],
+};
+
 const useLayout = ({ windowId, layout, plugins, dispatch }: Props) => {
 	const [window, setWindow] = useState<Window|null>(null);
+	layout ??= defaultLayout;
 
 	const onUpdateLayout = useCallback((newLayout: LayoutItem) => {
 		dispatch({
@@ -90,12 +100,16 @@ const useLayout = ({ windowId, layout, plugins, dispatch }: Props) => {
 		};
 	}, [window, onRefreshLayoutSize]);
 
-	return { layout, onWindow: setWindow, onResize, onKeyToLabel };
+	return {
+		layout,
+		onWindow: setWindow,
+		onResize,
+		onUpdate: onUpdateLayout,
+		onKeyToLabel,
+	};
 };
 
 const SecondaryWindow: React.FC<Props> = props => {
-	const containerRef = useRef<HTMLDivElement>(null);
-
 	const { windowTitle, onNoteTitleChange } = useWindowTitle(props.newWindow);
 
 	const newWindow = props.newWindow;
@@ -107,21 +121,17 @@ const SecondaryWindow: React.FC<Props> = props => {
 
 	const layout = useLayout(props);
 
-	const onRenderItem = useCallback((key: string) => {
-		if (key === 'editor') {
-			return <div key={key} className='note-editor-wrapper' ref={containerRef}>
-				<NoteEditor
-					windowId={props.windowId}
-					onTitleChange={onNoteTitleChange}
-					startupPluginsLoaded={props.startupPluginsLoaded}
-				/>
-			</div>;
-		}
-		if (key === 'chatPanel') {
-			return <ChatPanel windowId={props.windowId} key={key} />;
-		}
-		return null;
-	}, [props.windowId, props.startupPluginsLoaded, onNoteTitleChange, containerRef]);
+	const onRenderItem = useCallback((key: string, event: RenderItemEvent) => {
+		return <MainLayoutPane
+			key={key}
+			contentKey={key}
+			windowId={props.windowId}
+			onNoteTitleChange={onNoteTitleChange}
+			event={event}
+			onUpdateLayout={layout.onUpdate}
+			layout={layout.layout}
+		/>;
+	}, [props.windowId, onNoteTitleChange, layout.layout, layout.onUpdate]);
 
 	return <NewWindowOrIFrame
 		onWindow={layout.onWindow}
@@ -186,7 +196,6 @@ export default connect((state: AppState, ownProps: ConnectProps) => {
 		layout: windowState.windowLayout,
 		codeView: windowState?.editorCodeView ?? state.settings['editor.codeView'],
 		legacyMarkdown: state.settings['editor.legacyMarkdown'],
-		startupPluginsLoaded: state.startupPluginsLoaded,
 		plugins: state.pluginService.plugins,
 	};
 })(SecondaryWindow);

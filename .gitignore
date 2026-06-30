@@ -239,6 +239,7 @@ packages/app-desktop/gui/KeymapConfig/styles/index.js
 packages/app-desktop/gui/KeymapConfig/utils/getLabel.js
 packages/app-desktop/gui/KeymapConfig/utils/useCommandStatus.js
 packages/app-desktop/gui/KeymapConfig/utils/useKeymap.js
+packages/app-desktop/gui/MainLayoutPane.js
 packages/app-desktop/gui/MainScreen.js
 packages/app-desktop/gui/MasterPasswordDialog/Dialog.js
 packages/app-desktop/gui/MenuBar.js

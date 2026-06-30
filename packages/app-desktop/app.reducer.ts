@@ -59,7 +59,7 @@ export interface AppWindowState extends WindowState {
 	// layout container can swap component types and unmount the panel).
 	aiChatMessages: AiChatMessage[];
 	// Layout for secondary windows
-	windowLayout: LayoutItem;
+	windowLayout: LayoutItem|null;
 }
 
 interface BackgroundWindowStates {
@@ -94,10 +94,7 @@ export const createAppDefaultWindowState = (): AppWindowState => {
 		whiteboardForceMarkdown: {},
 		activeNoteIsWhiteboard: false,
 		aiChatMessages: [],
-		windowLayout: { key: 'root', isRoot: true, width: 500, height: 500, children: [
-			{ key: 'editor' },
-			{ key: 'chatPanel', width: 340, visible: false },
-		] },
+		windowLayout: null,
 	};
 };
 
