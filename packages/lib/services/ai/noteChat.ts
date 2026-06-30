@@ -122,10 +122,11 @@ const responseSchema = (note: NoteContext) => {
 				enum: ['replaceSelection'],
 			},
 			text: { type: 'string' },
-			additionalProperties: false,
 		},
+		required: ['op', 'text'],
+		additionalProperties: false,
 	} : {
-		oneOf: [
+		anyOf: [
 			{
 				type: 'object',
 				properties: {

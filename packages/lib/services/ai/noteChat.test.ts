@@ -1,5 +1,10 @@
-import { _internal } from './noteChat';
+import { _internal, NoteContext } from './noteChat';
 import { applyAnchorEdits } from './applyNoteEdits';
+
+const getEditOperationSchema = (note: NoteContext) => {
+	const schema = _internal.responseSchema(note).json_schema.schema;
+	return schema.properties.edits.items;
+};
 
 describe('noteChat', () => {
 
@@ -41,6 +46,26 @@ describe('noteChat', () => {
 	});
 
 	test.each([
+		true, false,
+	])('responseSchema should require "op" and disallow additional properties (has selection: %b)', (selection) => {
+		const schema = getEditOperationSchema({
+			title: 'Note',
+			body: 'some body',
+			selection: selection ? 'body' : null,
+		});
+
+		const operations = [
+			...(schema.type === 'object' ? [schema] : []),
+			...(schema.anyOf ?? []),
+		];
+
+		for (const operation of operations) {
+			expect(operation.required).toContain('op');
+			expect(operation.additionalProperties).toBe(false);
+		}
+	});
+
+	test.each([
 		{
 			label: 'restricts ops to replaceSelection when selection present',
 			note: {
@@ -73,13 +98,12 @@ describe('noteChat', () => {
 		}
 
 		const prompt = _internal.systemPrompt(note);
-		const schema = _internal.responseSchema(note).json_schema.schema;
+		const editSchemaItems = getEditOperationSchema(note);
 
 		// Schema's operations list should be correct
-		const editSchemaItems = schema.properties.edits.items;
 		const allowedSchemaOperations = [
 			...(editSchemaItems.properties?.op?.enum ?? []),
-			...(editSchemaItems.oneOf?.map(item => item.properties.op.enum)?.flat() ?? []),
+			...(editSchemaItems.anyOf?.map(item => item.properties.op.enum)?.flat() ?? []),
 		].sort();
 		expect(allowedSchemaOperations).toEqual([...expectedOperations].sort());
 
