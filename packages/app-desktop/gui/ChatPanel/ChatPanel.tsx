@@ -171,7 +171,10 @@ const ChatPanel: React.FC<Props> = (props) => {
 								editsMissed++;
 								continue;
 							}
-							await CommandService.instance().execute('replaceSelection', edit.text);
+							await CommandService.instance().executeInWindow('replaceSelection', {
+								windowId,
+								args: [edit.text],
+							});
 							editsApplied++;
 						}
 
@@ -182,7 +185,10 @@ const ChatPanel: React.FC<Props> = (props) => {
 							editsMissed += missed;
 							editsApplied += appliedEdits.length - missed;
 							if (newBody !== liveBody) {
-								await CommandService.instance().execute('editor.setText', newBody);
+								await CommandService.instance().executeInWindow('editor.setText', {
+									windowId,
+									args: [newBody],
+								});
 							}
 						}
 					}
