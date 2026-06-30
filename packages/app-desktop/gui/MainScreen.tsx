@@ -42,6 +42,7 @@ import validateColumns from './NoteListHeader/utils/validateColumns';
 import TrashNotification from './TrashNotification/TrashNotification';
 import UpdateNotification from './UpdateNotification/UpdateNotification';
 import NoteEditor from './NoteEditor/NoteEditor';
+import ChatPanel from './ChatPanel/ChatPanel';
 import PluginNotification from './PluginNotification/PluginNotification';
 import { Toast } from '@joplin/lib/services/plugins/api/types';
 import PluginService from '@joplin/lib/services/plugins/PluginService';
@@ -118,7 +119,8 @@ const defaultLayout: LayoutItem = {
 	children: [
 		{ key: 'sideBar', width: 250 },
 		{ key: 'noteList', width: 250 },
-		{ key: 'editor' },
+		{ key: 'editor', flexible: true },
+		{ key: 'chatPanel', width: 340, visible: false },
 	],
 };
 
@@ -126,6 +128,7 @@ const layoutKeyToLabel = (key: string, plugins: PluginStates) => {
 	if (key === 'sideBar') return _('Sidebar');
 	if (key === 'noteList') return _('Note list');
 	if (key === 'editor') return _('Editor');
+	if (key === 'chatPanel') return _('AI Chat');
 
 	const viewInfo = pluginUtils.viewInfoByViewId(plugins, key);
 	if (viewInfo) {
@@ -233,10 +236,22 @@ class MainScreenComponent extends React.Component<Props, State> {
 	private buildLayout(plugins: PluginStates): LayoutItem {
 		const rootLayoutSize = this.rootLayoutSize();
 
-		const userLayout = Setting.value('ui.layout');
+		let userLayout = Setting.value('ui.layout');
 		let output = null;
 
 		try {
+			// Migration: stamp the flexible flag on the editor and clear any
+			// stale width before validateLayout's first pass.
+			if (userLayout && Object.keys(userLayout).length) {
+				userLayout = produce(userLayout as LayoutItem, (draft: LayoutItem) => {
+					const editor = findItemByKey(draft, 'editor');
+					if (editor && !editor.flexible) {
+						editor.flexible = true;
+						delete editor.width;
+					}
+				});
+			}
+
 			output = loadLayout(Object.keys(userLayout).length ? userLayout : null, defaultLayout, rootLayoutSize);
 
 			// For unclear reasons, layout items sometimes end up without a key.
@@ -249,6 +264,14 @@ class MainScreenComponent extends React.Component<Props, State> {
 
 			if (!findItemByKey(output, 'sideBar') || !findItemByKey(output, 'noteList') || !findItemByKey(output, 'editor')) {
 				throw new Error('"sideBar", "noteList" and "editor" must be present in the layout');
+			}
+
+			// Migration: existing users have layouts saved before chatPanel
+			// existed. Add it (hidden) so the toggle works.
+			if (!findItemByKey(output, 'chatPanel')) {
+				output = produce(output, (draft: LayoutItem) => {
+					draft.children.push({ key: 'chatPanel', width: 340, visible: false });
+				});
 			}
 		} catch (error) {
 			console.warn('Could not load layout - restoring default layout:', error);
@@ -676,6 +699,10 @@ class MainScreenComponent extends React.Component<Props, State> {
 					/>
 				</div>;
 			},
+
+			chatPanel: () => {
+				return <ChatPanel key={key} />;
+			},
 		};
 
 		if (components[key]) return components[key]();
@@ -711,7 +738,12 @@ class MainScreenComponent extends React.Component<Props, State> {
 				/>;
 			}
 		} else {
-			throw new Error(`Invalid layout component: ${key}`);
+			// The layout may reference a component that no longer exists -
+			// for example a panel from a previous version of the app, or a
+			// feature that has been removed. Rather than crash, log the issue
+			// and queue the item for removal from the layout.
+			console.warn(`Invalid layout component: ${key} - it will be removed from the layout`);
+			viewsToRemove.push(key);
 		}
 
 		if (viewsToRemove.length) {
