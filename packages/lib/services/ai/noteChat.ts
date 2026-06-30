@@ -26,7 +26,7 @@ const knownOps = new Set<EditOp['op']>([
 
 // Structured-document fences where the model regenerates the whole block —
 // plain code fences (```js, ```python) are deliberately excluded.
-export const replaceFencedBlockSupportedTags = ['jsoncanvas', 'mermaid', 'abc', 'fountain'];
+export const supportedStructuredBlockTags = ['jsoncanvas', 'mermaid', 'abc', 'fountain'];
 
 export interface ChatTurn {
 	role: 'user' | 'assistant';
@@ -60,6 +60,10 @@ const joplinMarkdownNotes = [
 	'- Whiteboards (canvas): ```` ```jsoncanvas ```` fenced blocks containing JSONCanvas 1.0 — the open spec at jsoncanvas.org. Use this when the user asks for a whiteboard, canvas, mind map, sticky notes, or similar spatial layout. A note that already contains a `jsoncanvas` block is a whiteboard; modifying its prose without preserving the block will break the whiteboard.',
 	'- HTML is allowed for features without a Markdown equivalent (e.g. `<s>strikethrough</s>`).',
 ].join('\n');
+
+const hasStructuredBlock = (note: NoteContext) => {
+	return supportedStructuredBlockTags.some(tag => note.body.includes(`\`\`\`${tag}`));
+};
 
 const systemPrompt = (note: NoteContext) => {
 	const lines: string[] = [
@@ -105,7 +109,7 @@ const systemPrompt = (note: NoteContext) => {
 		lines.push('  { "op": "insertAfter", "anchor": "...", "text": "..." } — inserts text immediately after the first occurrence of "anchor".');
 		lines.push('  { "op": "appendToNote", "text": "..." } — appends text at the end of the note.');
 		lines.push('  { "op": "replaceRange", "anchor": "...", "text": "..." } — replaces the first occurrence of "anchor" with "text".');
-		lines.push(`  { "op": "replaceFencedBlock", "tag": "...", "text": "..." } — replaces the inner content of the first \`\`\`<tag>\`\`\` fenced block. "text" is the new content inside the fence (no fence markers). Supported tags: ${replaceFencedBlockSupportedTags.join(', ')}.`);
+		lines.push(`  { "op": "replaceFencedBlock", "tag": "...", "text": "..." } — replaces the inner content of the first \`\`\`<tag>\`\`\` fenced block. "text" is the new content inside the fence (no fence markers). Supported tags: ${supportedStructuredBlockTags.join(', ')}.`);
 		lines.push('');
 		lines.push('Anchors must be exact substrings of the current note body. Keep them short but unique.');
 		lines.push('');
@@ -150,16 +154,16 @@ const responseSchema = (note: NoteContext) => {
 				required: ['op', 'text'],
 				additionalProperties: false,
 			},
-			{
+			...(hasStructuredBlock(note) ? [{
 				type: 'object',
 				properties: {
 					op: { type: 'string', enum: ['replaceFencedBlock'] },
-					tag: { type: 'string', enum: [...replaceFencedBlockSupportedTags] },
+					tag: { type: 'string', enum: [...supportedStructuredBlockTags] },
 					text: { type: 'string' },
 				},
 				required: ['op', 'tag', 'text'],
 				additionalProperties: false,
-			},
+			}] : []),
 		],
 	};
 

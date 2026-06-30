@@ -1,8 +1,8 @@
-import { EditOp, replaceFencedBlockSupportedTags } from './noteChat';
+import { EditOp, supportedStructuredBlockTags } from './noteChat';
 
 export type ApplyEditStatus = 'applied' | 'anchor-not-found' | 'invalid';
 
-export const structuredBlockTags = new Set<string>([...replaceFencedBlockSupportedTags]);
+export const structuredBlockTags = new Set<string>([...supportedStructuredBlockTags]);
 
 const fencedBlockRegex = (tag: string) =>
 	new RegExp(`\`\`\`${tag}\\s*\\n([\\s\\S]*?)\\n?\`\`\``, 'gi');

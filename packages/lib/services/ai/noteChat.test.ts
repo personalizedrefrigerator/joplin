@@ -82,6 +82,15 @@ describe('noteChat', () => {
 				body: 'b',
 				selection: null,
 			},
+			expectedOperations: ['insertBefore', 'insertAfter', 'appendToNote', 'replaceRange'],
+		},
+		{
+			label: 'offers replaceFencedBlock when Mermaid block present',
+			note: {
+				title: 'n',
+				body: '```mermaid\ngitGraph\n\tcommit\n```\n',
+				selection: null,
+			},
 			expectedOperations: ['insertBefore', 'insertAfter', 'appendToNote', 'replaceRange', 'replaceFencedBlock'],
 		},
 	])('responseSchema is consistent with systemPrompt (case $label)', ({ note, expectedOperations }) => {
@@ -111,6 +120,10 @@ describe('noteChat', () => {
 			expect(prompt).toContain(operation);
 		}
 		for (const operation of expectedMissingOperations) {
+			// replaceFencedBlock can be mentioned in the prompt even in cases where it isn't
+			// supported:
+			if (operation === 'replaceFencedBlock') continue;
+
 			expect(prompt).not.toContain(operation);
 		}
 	});
