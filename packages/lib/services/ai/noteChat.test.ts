@@ -100,7 +100,6 @@ describe('noteChat', () => {
 		const prompt = _internal.systemPrompt(note);
 		const editSchemaItems = getEditOperationSchema(note);
 
-		// Schema's operations list should be correct
 		const allowedSchemaOperations = [
 			...(editSchemaItems.properties?.op?.enum ?? []),
 			...(editSchemaItems.anyOf?.map(item => item.properties.op.enum)?.flat() ?? []),
