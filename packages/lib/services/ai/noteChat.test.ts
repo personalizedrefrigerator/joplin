@@ -120,10 +120,6 @@ describe('noteChat', () => {
 			expect(prompt).toContain(operation);
 		}
 		for (const operation of expectedMissingOperations) {
-			// replaceFencedBlock can be mentioned in the prompt even in cases where it isn't
-			// supported:
-			if (operation === 'replaceFencedBlock') continue;
-
 			expect(prompt).not.toContain(operation);
 		}
 	});
@@ -272,7 +268,7 @@ describe('noteChat', () => {
 	});
 
 	test('systemPrompt advertises replaceFencedBlock with structured-block guidance', () => {
-		const prompt = _internal.systemPrompt({ title: 'n', body: 'b', selection: null });
+		const prompt = _internal.systemPrompt({ title: 'n', body: '```abc\n```', selection: null });
 		expect(prompt).toContain('replaceFencedBlock');
 		expect(prompt).toContain('jsoncanvas');
 		// Guidance to use the op for structured blocks, appendToNote for creation.

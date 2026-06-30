@@ -104,16 +104,21 @@ const systemPrompt = (note: NoteContext) => {
 		lines.push('');
 		lines.push('Do not use any other operation. The selection is the only part of the note you can modify in this turn.');
 	} else {
+		const hasFencedBlock = hasStructuredBlock(note);
 		lines.push('Each edit must be one of:');
 		lines.push('  { "op": "insertBefore", "anchor": "...", "text": "..." } — inserts text immediately before the first occurrence of "anchor".');
 		lines.push('  { "op": "insertAfter", "anchor": "...", "text": "..." } — inserts text immediately after the first occurrence of "anchor".');
 		lines.push('  { "op": "appendToNote", "text": "..." } — appends text at the end of the note.');
 		lines.push('  { "op": "replaceRange", "anchor": "...", "text": "..." } — replaces the first occurrence of "anchor" with "text".');
-		lines.push(`  { "op": "replaceFencedBlock", "tag": "...", "text": "..." } — replaces the inner content of the first \`\`\`<tag>\`\`\` fenced block. "text" is the new content inside the fence (no fence markers). Supported tags: ${supportedStructuredBlockTags.join(', ')}.`);
+		if (hasFencedBlock) {
+			lines.push(`  { "op": "replaceFencedBlock", "tag": "...", "text": "..." } — replaces the inner content of the first \`\`\`<tag>\`\`\` fenced block. "text" is the new content inside the fence (no fence markers). Supported tags: ${supportedStructuredBlockTags.join(', ')}.`);
+		}
 		lines.push('');
 		lines.push('Anchors must be exact substrings of the current note body. Keep them short but unique.');
 		lines.push('');
-		lines.push('To edit a structured block already in the note (whiteboard / mermaid / abc / fountain), use replaceFencedBlock with the full new content — do not try to anchor inside the block\'s contents. To create one that doesn\'t exist yet, use appendToNote with the complete fenced block including the ```<tag> markers.');
+		if (hasFencedBlock) {
+			lines.push('To edit a structured block already in the note (whiteboard / mermaid / abc / fountain), use replaceFencedBlock with the full new content — do not try to anchor inside the block\'s contents. To create one that doesn\'t exist yet, use appendToNote with the complete fenced block including the ```<tag> markers.');
+		}
 	}
 
 	lines.push('Preserve the user\'s existing formatting conventions, including any Joplin-specific blocks already in the note.');
