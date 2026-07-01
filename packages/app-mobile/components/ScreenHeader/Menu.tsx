@@ -39,18 +39,12 @@ const useStyles = (themeId: number) => {
 		const theme = themeStyle(themeId);
 
 		return StyleSheet.create({
-			divider: {
-				height: 0,
-				borderBottomWidth: 1,
-				borderColor: theme.dividerColor,
-				marginVertical: theme.marginSmall,
-				marginHorizontal: theme.margin,
-			},
-			contextMenu: {
+			menu: {
 				paddingHorizontal: 0,
 				paddingTop: theme.marginMedium,
 				paddingBottom: theme.marginMedium,
 			},
+			menuContent: { flexDirection: 'column', width: '100%' },
 			menuItem: {
 				alignItems: 'flex-start',
 				padding: theme.margin,
@@ -68,13 +62,12 @@ const useStyles = (themeId: number) => {
 			menuItemTextDestructive: {
 				color: theme.destructiveColor,
 			},
-			contextMenuButton: {
-				padding: 0,
-			},
-			icon: {
-				color: theme.color,
-				backgroundColor: theme.backgroundColor,
-				fontSize: theme.fontSizeLarge,
+			divider: {
+				height: 0,
+				borderBottomWidth: 1,
+				borderColor: theme.dividerColor,
+				marginVertical: theme.marginSmall,
+				marginHorizontal: theme.margin,
 			},
 		});
 	}, [themeId, windowWidth]);
@@ -140,15 +133,19 @@ const MenuComponent: React.FC<Props> = props => {
 			onPress={() => setOpen(true)}
 			rippleColor={theme.backgroundColorTransparent2}
 			role='button'
+			testID='screen-header-menu-trigger'
 		>
 			{props.children}
 		</TouchableRipple>
 		<BottomDrawer
 			visible={open}
 			onDismiss={onMenuClosed}
-			style={styles.contextMenu}
+			style={styles.menu}
 		>
-			<View style={{ flexDirection: 'column', width: '100%' }}>
+			<View
+				style={styles.menuContent}
+				testID={`menu-content-${open ? 'open' : 'closed'}`}
+			>
 				{menuOptionComponents}
 			</View>
 		</BottomDrawer>
