@@ -102,6 +102,7 @@ const MenuComponent: React.FC<Props> = props => {
 			const key = `menuOption_${option.key ?? keyCounter++}`;
 			menuOptionComponents.push(
 				<TouchableRipple
+					borderless={true}
 					role='button'
 					style={{ alignItems: 'flex-start', padding: theme.margin }}
 					onPress={() => {
@@ -131,6 +132,7 @@ const MenuComponent: React.FC<Props> = props => {
 
 	return <>
 		<TouchableRipple
+			borderless={true}
 			onPress={() => setOpen(true)}
 			rippleColor={theme.backgroundColorTransparent2}
 			role='button'
