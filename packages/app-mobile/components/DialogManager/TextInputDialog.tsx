@@ -61,6 +61,8 @@ const TextInputDialog: React.FC<Props> = ({ dialog, containerStyle, themeId }) =
 					style={styles.textInput}
 					value={text}
 					onChangeText={setText}
+					// Underline styles are set via styles
+					underlineColorAndroid='transparent'
 				/>
 			</Dialog.Content>
 			<Dialog.Actions
