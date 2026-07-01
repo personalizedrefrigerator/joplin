@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useCallback, useMemo, useState } from 'react';
-import { StyleSheet, View, Text, useWindowDimensions } from 'react-native';
+import { StyleSheet, View, Text, useWindowDimensions, TextStyle } from 'react-native';
 import { themeStyle } from '../global-style';
 import BottomDrawer from '../BottomDrawer';
 import { TouchableRipple } from 'react-native-paper';
@@ -10,10 +10,16 @@ interface MenuOptionDivider {
 	isDivider: true;
 }
 
-interface MenuOptionButton {
+export enum MenuOptionStyle {
+	Normal = 'normal',
+	Destructive = 'destructive',
+}
+
+export interface MenuOptionButton {
 	key?: string;
 	isDivider?: false|undefined;
 	disabled?: boolean;
+	style?: MenuOptionStyle;
 	onPress: ()=> void;
 	icon?: string;
 	title: string;
@@ -42,20 +48,25 @@ const useStyles = (themeId: number) => {
 			},
 			contextMenu: {
 				paddingHorizontal: 0,
-				paddingTop: theme.margin,
-				paddingBottom: 0,
+				paddingTop: theme.marginMedium,
+				paddingBottom: theme.marginMedium,
 			},
-			contextMenuItem: {
+			menuItem: {
 				alignItems: 'flex-start',
 				padding: theme.margin,
 				paddingLeft: theme.marginLeft,
 				paddingRight: theme.marginRight,
 				minWidth: Math.min(350, windowWidth),
 			},
-			contextMenuItemText: { color: theme.color },
-			contextMenuItemTextDisabled: {
-				opacity: 0.5,
+			menuItemText: {
 				color: theme.color,
+				fontSize: theme.fontSize,
+			},
+			menuItemTextDisabled: {
+				opacity: theme.disabledOpacity,
+			},
+			menuItemTextDestructive: {
+				color: theme.destructiveColor,
 			},
 			contextMenuButton: {
 				padding: 0,
@@ -85,11 +96,19 @@ const MenuComponent: React.FC<Props> = props => {
 			);
 		} else {
 			const key = `menuOption_${option.key ?? keyCounter++}`;
+			const textStyles: TextStyle[] = [styles.menuItemText];
+			if (option.disabled) {
+				textStyles.push(styles.menuItemTextDisabled);
+			}
+			if (option.style === MenuOptionStyle.Destructive) {
+				textStyles.push(styles.menuItemTextDestructive);
+			}
+
 			menuOptionComponents.push(
 				<TouchableRipple
 					borderless={true}
 					role='button'
-					style={styles.contextMenuItem}
+					style={styles.menuItem}
 					onPress={() => {
 						option.onPress();
 						setOpen(false);
@@ -98,9 +117,9 @@ const MenuComponent: React.FC<Props> = props => {
 					disabled={!!option.disabled}
 				>
 					<View style={{ flexDirection: 'row', gap: theme.marginSmall }}>
-						{option.icon && <Icon name={option.icon} style={{ color: theme.color, fontSize: theme.fontSize }} accessibilityLabel={null} />}
+						{option.icon && <Icon name={option.icon} style={textStyles} accessibilityLabel={null} />}
 						<Text
-							style={option.disabled ? styles.contextMenuItemTextDisabled : styles.contextMenuItemText}
+							style={textStyles}
 							disabled={option.disabled}
 						>{option.title}</Text>
 					</View>

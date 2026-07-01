@@ -84,6 +84,7 @@ import { Second } from '@joplin/utils/time';
 import TextWrapCalculator from '../Notes/TextWrapCalculator';
 import SearchEngine from '@joplin/lib/services/search/SearchEngine';
 import { ALL_NOTES_FILTER_ID } from '@joplin/lib/reserved-ids';
+import { MenuOptionButton, MenuOptionStyle } from '../../ScreenHeader/Menu';
 
 const emptyArray: never[] = [];
 
@@ -1354,23 +1355,27 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 
 		const commandService = CommandService.instance();
 		const whenContext = commandService.currentWhenClauseContext();
-		const addButtonFromCommand = (commandName: string, title?: string, icon?: string) => {
+
+
+		const addButtonFromCommand = (commandName: string, overrides: Partial<MenuOptionButton> = {}) => {
 			if (commandName === '-') {
 				output.push({ isDivider: true });
 			} else {
 				output.push({
-					title: title ?? commandService.description(commandName),
-					icon: icon ?? commandService.iconName(commandName),
+					isDivider: false,
+					title: commandService.description(commandName),
+					icon: commandService.iconName(commandName),
 					onPress: async () => {
 						void commandService.execute(commandName);
 					},
 					disabled: !commandService.isEnabled(commandName, whenContext),
+					...overrides,
 				});
 			}
 		};
 
 		if (isSaved && !isDeleted) {
-			addButtonFromCommand('setTags', undefined, 'material tag-outline');
+			addButtonFromCommand('setTags', { icon: 'material tag-outline' });
 		}
 
 		output.push({
@@ -1414,6 +1419,14 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 			});
 		}
 
+		if (pluginCommands.length) {
+			output.push({ isDivider: true });
+
+			for (const commandName of pluginCommands) {
+				addButtonFromCommand(commandName);
+			}
+		}
+
 		output.push({ isDivider: true });
 
 		output.push({
@@ -1449,17 +1462,9 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 		}
 
 		if (whenContext.inTrash) {
-			addButtonFromCommand('permanentlyDeleteNote', undefined, 'material delete-outline');
+			addButtonFromCommand('permanentlyDeleteNote', { icon: 'material delete-outline', style: MenuOptionStyle.Destructive });
 		} else {
-			addButtonFromCommand('deleteNote', _('Delete'), 'material delete-outline');
-		}
-
-		if (pluginCommands.length) {
-			output.push({ isDivider: true });
-
-			for (const commandName of pluginCommands) {
-				addButtonFromCommand(commandName);
-			}
+			addButtonFromCommand('deleteNote', { title: _('Delete'), icon: 'material delete-outline', style: MenuOptionStyle.Destructive });
 		}
 
 		this.menuOptionsCache_ = {};
