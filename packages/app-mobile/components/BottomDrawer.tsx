@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { connect } from 'react-redux';
 import { useCallback, useMemo } from 'react';
-import { NativeScrollEvent, NativeSyntheticEvent, StyleSheet, useWindowDimensions, View } from 'react-native';
+import { NativeScrollEvent, NativeSyntheticEvent, StyleSheet, useWindowDimensions, View, ViewStyle } from 'react-native';
 import useSafeAreaPadding from '../utils/hooks/useSafeAreaPadding';
 import { themeStyle, ThemeStyle } from './global-style';
 import Modal from './Modal';
@@ -9,6 +9,7 @@ import { AppState } from '../utils/types';
 
 interface Props {
 	themeId: number;
+	style: ViewStyle;
 	children: React.ReactNode;
 	visible: boolean;
 	onDismiss: ()=> void;
@@ -92,7 +93,7 @@ const BottomDrawer: React.FC<Props> = props => {
 			onScroll: onContainerScroll,
 		}}
 	>
-		<View style={styles.contentContainer}>
+		<View style={[styles.contentContainer, props.style]}>
 			{props.children}
 		</View>
 	</Modal>;

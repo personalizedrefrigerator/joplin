@@ -564,21 +564,17 @@ class ScreenHeaderComponent extends PureComponent<ScreenHeaderProps, ScreenHeade
 		const selectedFolder = this.props.notesParentType === 'Folder' ? Folder.byId(this.props.folders, this.props.selectedFolderId) : null;
 		const selectedFolderInTrash = itemIsInTrash(selectedFolder);
 
-		if (!this.props.noteSelectionEnabled) {
-			if (menuOptions.length) {
-				menuOptions.push({ isDivider: true });
-			}
-		} else {
+		if (this.props.noteSelectionEnabled) {
 			menuOptions.push({
 				key: 'delete',
 				title: _('Delete'),
-				onPress: this.deleteButton_press,
+				onPress: () => this.deleteButton_press(),
 			});
 
 			menuOptions.push({
 				key: 'duplicate',
 				title: _('Duplicate'),
-				onPress: this.duplicateButton_press,
+				onPress: () => this.duplicateButton_press(),
 			});
 		}
 

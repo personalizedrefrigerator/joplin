@@ -1324,6 +1324,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 					this.setState({ alarmDialogShown: true });
 				},
 				disabled: readOnly,
+				icon: 'material bell-outline',
 			});
 		}
 
@@ -1331,6 +1332,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 		if (shareSupported) {
 			output.push({
 				title: _('Share'),
+				icon: 'material share-outline',
 				onPress: () => {
 					void this.share_onPress();
 				},
@@ -1341,6 +1343,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 		if (VoiceTyping.supported()) {
 			output.push({
 				title: _('Voice typing...'),
+				icon: 'material microphone-outline',
 				onPress: () => {
 					// this.voiceRecording_onPress();
 					this.setState({ showSpeechToTextDialog: true });
@@ -1367,12 +1370,12 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 		};
 
 		if (isSaved && !isDeleted) {
-			addButtonFromCommand('setTags');
+			addButtonFromCommand('setTags', undefined, 'material tag-outline');
 		}
 
 		output.push({
 			title: isTodo ? _('Convert to note') : _('Convert to todo'),
-			icon: 'material arrow-left-right-bold-outline',
+			icon: isTodo ? 'material file-document-outline' : 'material file-send-outline',
 			onPress: () => {
 				this.toggleIsTodo_onPress();
 			},
@@ -1402,6 +1405,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 
 		output.push({
 			title: _('Properties'),
+			icon: 'material information-outline',
 			onPress: () => {
 				this.properties_onPress();
 			},
@@ -1420,6 +1424,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 
 		output.push({
 			title: _('Reveal in notebook'),
+			icon: 'material folder-file-outline',
 			onPress: () => {
 				this.revealInNotebook_onPress();
 			},

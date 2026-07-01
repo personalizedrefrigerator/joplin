@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useCallback, useMemo, useState } from 'react';
-import { StyleSheet, View, Text } from 'react-native';
+import { StyleSheet, View, Text, useWindowDimensions } from 'react-native';
 import { themeStyle } from '../global-style';
 import BottomDrawer from '../BottomDrawer';
 import { TouchableRipple } from 'react-native-paper';
@@ -28,6 +28,7 @@ interface Props {
 }
 
 const useStyles = (themeId: number) => {
+	const windowWidth = useWindowDimensions().width;
 	return useMemo(() => {
 		const theme = themeStyle(themeId);
 
@@ -38,11 +39,15 @@ const useStyles = (themeId: number) => {
 				backgroundColor: '#0000ff',
 			},
 			contextMenu: {
-				backgroundColor: theme.backgroundColor2,
+				paddingHorizontal: 0,
+				paddingTop: theme.margin,
 			},
 			contextMenuItem: {
-				backgroundColor: theme.backgroundColor,
-				justifyContent: 'space-between',
+				alignItems: 'flex-start',
+				padding: theme.margin,
+				paddingLeft: theme.marginLeft,
+				paddingRight: theme.marginRight,
+				minWidth: Math.min(350, windowWidth),
 			},
 			contextMenuItemText: { color: theme.color },
 			contextMenuItemTextDisabled: {
@@ -58,7 +63,7 @@ const useStyles = (themeId: number) => {
 				fontSize: theme.fontSizeLarge,
 			},
 		});
-	}, [themeId]);
+	}, [themeId, windowWidth]);
 };
 
 const MenuComponent: React.FC<Props> = props => {
@@ -81,7 +86,7 @@ const MenuComponent: React.FC<Props> = props => {
 				<TouchableRipple
 					borderless={true}
 					role='button'
-					style={{ alignItems: 'flex-start', padding: theme.margin, borderColor: 'red', borderWidth: 1 }}
+					style={styles.contextMenuItem}
 					onPress={() => {
 						option.onPress();
 						setOpen(false);
