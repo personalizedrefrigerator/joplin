@@ -34,13 +34,16 @@ const useStyles = (themeId: number) => {
 
 		return StyleSheet.create({
 			divider: {
+				height: 0,
 				borderBottomWidth: 1,
 				borderColor: theme.dividerColor,
-				backgroundColor: '#0000ff',
+				marginVertical: theme.marginSmall,
+				marginHorizontal: theme.margin,
 			},
 			contextMenu: {
 				paddingHorizontal: 0,
 				paddingTop: theme.margin,
+				paddingBottom: 0,
 			},
 			contextMenuItem: {
 				alignItems: 'flex-start',

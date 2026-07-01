@@ -1403,14 +1403,6 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 			}
 		}
 
-		output.push({
-			title: _('Properties'),
-			icon: 'material information-outline',
-			onPress: () => {
-				this.properties_onPress();
-			},
-		});
-
 		if (this.state.mode === 'edit') {
 			const newCodeView = !isCodeView;
 			output.push({
@@ -1422,6 +1414,16 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 			});
 		}
 
+		output.push({ isDivider: true });
+
+		output.push({
+			title: _('Properties'),
+			icon: 'material information-outline',
+			onPress: () => {
+				this.properties_onPress();
+			},
+		});
+
 		output.push({
 			title: _('Reveal in notebook'),
 			icon: 'material folder-file-outline',
@@ -1430,9 +1432,12 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 			},
 		});
 
+		output.push({ isDivider: true });
+
 		if (isDeleted) {
 			output.push({
 				title: _('Restore'),
+				icon: 'material delete-off-outline',
 				onPress: async () => {
 					await restoreItems(ModelType.Note, [this.state.note.id]);
 					this.props.dispatch({
