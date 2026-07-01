@@ -2,14 +2,12 @@ import * as React from 'react';
 import { Alert, Platform } from 'react-native';
 import { DialogControl, DialogType, MenuChoice, PromptButtonSpec, DialogData, PromptOptions } from '../types';
 import { _ } from '@joplin/lib/locale';
-import { useContext, useMemo, useRef } from 'react';
-import { FocusControlContext } from '../../accessibility/FocusControl/FocusControlProvider';
+import { useMemo, useRef } from 'react';
 
 type SetPromptDialogs = React.Dispatch<React.SetStateAction<DialogData[]>>;
 
 const useDialogControl = (setPromptDialogs: SetPromptDialogs) => {
 	const nextDialogIdRef = useRef(0);
-	const hasOpenModalRef = useHasOpenModalRef();
 
 	const dialogControl: DialogControl = useMemo(() => {
 		const onDismiss = (dialog: DialogData) => {
@@ -36,7 +34,7 @@ const useDialogControl = (setPromptDialogs: SetPromptDialogs) => {
 			},
 			prompt: (title: string, message: string, buttons: PromptButtonSpec[] = defaultButtons, options?: PromptOptions) => {
 				// Alert.alert doesn't work on web.
-				if (Platform.OS !== 'web' && (Platform.OS === 'ios' || hasOpenModalRef.current)) {
+				if (Platform.OS !== 'web') {
 					// Alert.alert provides a more native style on iOS.
 					// It also allows displaying confirmation dialogs on top of modals.
 					Alert.alert(title, message, buttons, options);
@@ -125,14 +123,8 @@ const useDialogControl = (setPromptDialogs: SetPromptDialogs) => {
 		};
 
 		return control;
-	}, [setPromptDialogs, hasOpenModalRef]);
+	}, [setPromptDialogs]);
 	return dialogControl;
-};
-
-const useHasOpenModalRef = () => {
-	const focusContext = useContext(FocusControlContext);
-	const isModalOpenRef = useRef(focusContext.hasOpenModal);
-	return isModalOpenRef;
 };
 
 export default useDialogControl;
