@@ -82,14 +82,6 @@ router.get('login', async (_path: SubPath, ctx: AppContext, fields: LoginInputFi
 	return makeView(null, fields, viewContentOptions);
 });
 
-router.post('login', async (_path: SubPath, _ctx: AppContext) => {
-	if (!config().LOCAL_AUTH_ENABLED) {
-		return await generateRedirectHtml('web-login');
-	}
-
-	return makeView();
-});
-
 // Log in using external authentication.
 router.get('login/:id', async (path: SubPath, ctx: AppContext) => {
 	if (!config().saml.enabled) throw new ErrorForbidden('SAML not enabled');
@@ -107,6 +99,10 @@ router.get('login/:id', async (path: SubPath, ctx: AppContext) => {
 
 router.post('login', async (path: SubPath, ctx: AppContext) => {
 	await limiterLoginBruteForce(userIp(ctx));
+
+	if (!config().LOCAL_AUTH_ENABLED) {
+		return await generateRedirectHtml('web-login');
+	}
 
 	const body = await formParse(ctx.req);
 
