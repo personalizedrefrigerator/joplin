@@ -140,6 +140,7 @@ const MenuComponent: React.FC<Props> = props => {
 		<BottomDrawer
 			visible={open}
 			onDismiss={onMenuClosed}
+			draggable={true}
 			style={styles.menu}
 		>
 			<View

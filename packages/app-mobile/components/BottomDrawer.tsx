@@ -1,17 +1,20 @@
 import * as React from 'react';
 import { connect } from 'react-redux';
-import { useCallback, useMemo } from 'react';
-import { NativeScrollEvent, NativeSyntheticEvent, StyleSheet, useWindowDimensions, View, ViewStyle } from 'react-native';
+import { useCallback, useMemo, useRef } from 'react';
+import { Animated, Easing, NativeScrollEvent, NativeSyntheticEvent, PanResponder, StyleSheet, useWindowDimensions, View, ViewStyle } from 'react-native';
 import useSafeAreaPadding from '../utils/hooks/useSafeAreaPadding';
 import { themeStyle, ThemeStyle } from './global-style';
 import Modal from './Modal';
 import { AppState } from '../utils/types';
+import useReduceMotionEnabled from '../utils/hooks/useReduceMotionEnabled';
+import { TouchableRipple } from 'react-native-paper';
 
 interface Props {
 	themeId: number;
 	style: ViewStyle;
 	children: React.ReactNode;
 	visible: boolean;
+	draggable: boolean;
 	onDismiss: ()=> void;
 	onShow: ()=> void;
 }
@@ -42,6 +45,10 @@ const useStyles = (theme: ThemeStyle) => {
 				borderBottomRightRadius: 0,
 				borderBottomLeftRadius: 0,
 				maxWidth: Math.min(400, windowWidth - menuGapRight - menuGapLeft),
+
+				// Web: Prevents a scrollbar from being shown when dragging the menu
+				// below the bottom of the screen.
+				overflow: 'hidden',
 			},
 			contentContainer: {
 				padding: 20,
@@ -80,6 +87,30 @@ const BottomDrawer: React.FC<Props> = props => {
 		}
 	}, [props.onDismiss]);
 
+	const menuDragOffset = useMemo(() => new Animated.Value(0), []);
+	const menuYOffset = useMemo(() => Animated.multiply(menuDragOffset, new Animated.Value(-1)), [menuDragOffset]);
+
+	const reduceMotionEnabled = useReduceMotionEnabled();
+	const reduceMotionEnabledRef = useRef(false);
+	reduceMotionEnabledRef.current = reduceMotionEnabled;
+	const clearDragOffset = useCallback(() => {
+		const baseAnimationProps = {
+			easing: Easing.elastic(0.5),
+			duration: reduceMotionEnabledRef.current ? 0 : 200,
+			useNativeDriver: true,
+		};
+
+		const animation = Animated.timing(menuDragOffset, { toValue: 0, ...baseAnimationProps });
+		animation.start();
+	}, [menuDragOffset]);
+
+	const onDragEnd = useCallback((_dx: number, dy: number) => {
+		if (dy > 50) {
+			props.onDismiss();
+		}
+		clearDragOffset();
+	}, [clearDragOffset, props.onDismiss]);
+
 	return <Modal
 		visible={props.visible}
 		onClose={props.onDismiss}
@@ -93,9 +124,11 @@ const BottomDrawer: React.FC<Props> = props => {
 			onScroll: onContainerScroll,
 		}}
 	>
-		<View style={[styles.contentContainer, props.style]}>
+		<Animated.View style={[styles.contentContainer, props.style, { marginBottom: menuYOffset }]}>
+			{props.draggable &&
+				<DragHandle dragValue={menuDragOffset} onDragEnd={onDragEnd} onDismiss={props.onDismiss}/>}
 			{props.children}
-		</View>
+		</Animated.View>
 	</Modal>;
 };
 
@@ -104,3 +137,43 @@ export default connect((state: AppState) => {
 		themeId: state.settings.theme,
 	};
 })(BottomDrawer);
+
+
+interface DragHandleProps {
+	dragValue: Animated.Value;
+	onDragEnd: (dx: number, dy: number)=> void;
+	onDismiss: ()=> void;
+}
+
+const DragHandle: React.FC<DragHandleProps> = props => {
+
+	const panResponder = useMemo(() => {
+		return PanResponder.create({
+			onMoveShouldSetPanResponderCapture: (_event, gestureState) => {
+				return Math.abs(gestureState.dx) < 30;
+			},
+			onPanResponderGrant: () => {
+			},
+			onPanResponderMove: Animated.event([
+				null,
+				// Updates menuDragOffset with the .dy property of the second argument:
+				{ dy: props.dragValue },
+			], { useNativeDriver: false, listener: event => event.preventDefault() }),
+			onPanResponderEnd: (_event, gestureState) => {
+				props.onDragEnd(gestureState.dx, gestureState.dy);
+			},
+		});
+	}, [props.dragValue, props.onDragEnd]);
+
+
+	return <View
+		style={{ flexGrow: 1 }}
+		{...panResponder.panHandlers}
+	>
+		<TouchableRipple
+			style={{ marginLeft: 'auto', marginRight: 'auto', backgroundColor: 'red', width: '60%', height: 8, borderRadius: 8 }}
+			onPress={props.onDismiss}
+		><View/></TouchableRipple>
+	</View>;
+};
+
