@@ -68,6 +68,10 @@ const replaceCheckboxes = [
 	EditorView.theme({
 		[`& .${checkboxClassName}`]: {
 			'& > input': {
+				// Native inputs don't inherit font-size, so `em` units below
+				// would otherwise resolve against the UA default rather than
+				// the editor's font size.
+				fontSize: 'inherit',
 				width: '1.1em',
 				height: '1.1em',
 				margin: '4px',
