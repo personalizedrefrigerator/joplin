@@ -57,18 +57,37 @@ export default class AnthropicProvider extends ChatProviderBase {
 		};
 		if (systemMessages.length) body.system = systemMessages.join('\n\n');
 		if (options?.temperature !== undefined) body.temperature = options.temperature;
+		if (options?.responseFormat?.type === 'json_schema') {
+			// Anthropic's API accepts the schema property directly:
+			const schema = options.responseFormat.json_schema.schema;
+			body.output_config = {
+				format: {
+					type: options.responseFormat.type,
+					schema,
+				},
+			};
+		}
 
-		const response = await shim.fetch('https://api.anthropic.com/v1/messages', {
-			method: 'POST',
-			headers: {
-				'x-api-key': this.apiKey_,
-				'anthropic-version': '2023-06-01',
-				'Content-Type': 'application/json',
-			},
-			body: JSON.stringify(body),
-		});
+		const doRequest = async () => {
+			const response = await shim.fetch('https://api.anthropic.com/v1/messages', {
+				method: 'POST',
+				headers: {
+					'x-api-key': this.apiKey_,
+					'anthropic-version': '2023-06-01',
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify(body),
+			});
+			return { response, text: await response.text() };
+		};
 
-		const text = await response.text();
+		// Older Anthropic models may not support the "output_config" property:
+		let { response, text } = await doRequest();
+		if (response.status === 400 && body.output_config && /output_config|json_schema/.test(text)) {
+			delete body.output_config;
+			({ response, text } = await doRequest());
+		}
+
 		let json: AnthropicResponse;
 		try {
 			json = JSON.parse(text) as AnthropicResponse;
