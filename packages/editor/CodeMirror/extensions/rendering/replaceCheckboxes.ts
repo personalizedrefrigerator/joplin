@@ -71,7 +71,11 @@ const replaceCheckboxes = [
 				width: '1.1em',
 				height: '1.1em',
 				margin: '4px',
+				// `vertical-align: middle` aligns to the parent's x-height
+				// midpoint, which sits below the visual centre of the line;
+				// nudge up so the checkbox appears centred with the text.
 				verticalAlign: 'middle',
+				transform: 'translateY(calc(-0.1em - 1px))',
 			},
 			'&:not(.-depth-1) > input': {
 				marginInlineStart: 0,
