@@ -1,7 +1,10 @@
 import shim from '../../../shim';
 import JoplinError from '../../../JoplinError';
+import Logger from '@joplin/utils/Logger';
 import { ChatMessage, ChatOptions, ChatResult, ProviderClassification } from '../types';
 import ChatProviderBase from './ChatProviderBase';
+
+const logger = Logger.create('AnthropicProvider');
 
 interface AnthropicUsage {
 	input_tokens?: number;
@@ -84,6 +87,7 @@ export default class AnthropicProvider extends ChatProviderBase {
 		// Older Anthropic models may not support the "output_config" property:
 		let { response, text } = await doRequest();
 		if (response.status === 400 && body.output_config && /output_config|json_schema/.test(text)) {
+			logger.warn(`Model ${this.model_} rejected output_config; retrying without structured output schema.`);
 			delete body.output_config;
 			({ response, text } = await doRequest());
 		}
