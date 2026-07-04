@@ -82,6 +82,15 @@ describe('noteChat', () => {
 				body: 'b',
 				selection: null,
 			},
+			expectedOperations: ['insertBefore', 'insertAfter', 'appendToNote', 'replaceRange'],
+		},
+		{
+			label: 'offers replaceFencedBlock when Mermaid block present',
+			note: {
+				title: 'n',
+				body: '```mermaid\ngitGraph\n\tcommit\n```\n',
+				selection: null,
+			},
 			expectedOperations: ['insertBefore', 'insertAfter', 'appendToNote', 'replaceRange', 'replaceFencedBlock'],
 		},
 	])('responseSchema is consistent with systemPrompt (case $label)', ({ note, expectedOperations }) => {
@@ -259,7 +268,7 @@ describe('noteChat', () => {
 	});
 
 	test('systemPrompt advertises replaceFencedBlock with structured-block guidance', () => {
-		const prompt = _internal.systemPrompt({ title: 'n', body: 'b', selection: null });
+		const prompt = _internal.systemPrompt({ title: 'n', body: '```abc\n```', selection: null });
 		expect(prompt).toContain('replaceFencedBlock');
 		expect(prompt).toContain('jsoncanvas');
 		// Guidance to use the op for structured blocks, appendToNote for creation.
