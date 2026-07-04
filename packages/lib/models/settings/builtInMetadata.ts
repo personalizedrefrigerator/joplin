@@ -2260,6 +2260,13 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 			storage: SettingStorage.File,
 		},
 
+		'noteLock.lockOnNoteSwitch': {
+			value: false,
+			type: SettingItemType.Bool,
+			public: false,
+			storage: SettingStorage.File,
+		},
+
 		'featureFlag.autoUpdaterServiceEnabled': {
 			value: false,
 			type: SettingItemType.Bool,
