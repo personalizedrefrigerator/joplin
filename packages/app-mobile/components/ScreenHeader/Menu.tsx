@@ -42,7 +42,6 @@ const useStyles = (themeId: number) => {
 			menu: {
 				paddingHorizontal: 0,
 				paddingTop: theme.marginMedium,
-				paddingBottom: theme.marginMedium,
 			},
 			menuContent: { flexDirection: 'column', width: '100%' },
 			menuItem: {
