@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { connect } from 'react-redux';
-import { useCallback, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Animated, Easing, NativeScrollEvent, NativeSyntheticEvent, PanResponder, StyleSheet, useWindowDimensions, View, ViewStyle } from 'react-native';
 import useSafeAreaPadding from '../utils/hooks/useSafeAreaPadding';
 import { themeStyle, ThemeStyle } from './global-style';
@@ -8,6 +8,7 @@ import Modal from './Modal';
 import { AppState } from '../utils/types';
 import useReduceMotionEnabled from '../utils/hooks/useReduceMotionEnabled';
 import { TouchableRipple } from 'react-native-paper';
+import { Second } from '@joplin/utils/time';
 
 interface Props {
 	themeId: number;
@@ -19,7 +20,7 @@ interface Props {
 	onShow: ()=> void;
 }
 
-const useStyles = (theme: ThemeStyle) => {
+const useStyles = (theme: ThemeStyle, dragging: boolean) => {
 	const { width: windowWidth } = useWindowDimensions();
 	const safeAreaPadding = useSafeAreaPadding();
 
@@ -58,6 +59,7 @@ const useStyles = (theme: ThemeStyle) => {
 				flexWrap: 'wrap',
 				flexShrink: 1,
 				flexGrow: 1,
+				userSelect: dragging ? 'none' : 'auto',
 			},
 			modalBackground: {
 				paddingTop: 0,
@@ -73,12 +75,13 @@ const useStyles = (theme: ThemeStyle) => {
 				height: 12,
 			},
 		});
-	}, [theme, safeAreaPadding, windowWidth]);
+	}, [theme, safeAreaPadding, windowWidth, dragging]);
 };
 
 const BottomDrawer: React.FC<Props> = props => {
 	const theme = themeStyle(props.themeId);
-	const styles = useStyles(theme);
+	const [dragging, setDragging] = useState(false);
+	const styles = useStyles(theme, dragging);
 
 	const onContainerScroll = useCallback((event: NativeSyntheticEvent<NativeScrollEvent>) => {
 		const offsetY = event.nativeEvent.contentOffset.y;
@@ -93,22 +96,39 @@ const BottomDrawer: React.FC<Props> = props => {
 	const reduceMotionEnabled = useReduceMotionEnabled();
 	const reduceMotionEnabledRef = useRef(false);
 	reduceMotionEnabledRef.current = reduceMotionEnabled;
-	const clearDragOffset = useCallback(() => {
+
+	const dragToOffset = useCallback((offset: number) => {
 		const baseAnimationProps = {
 			easing: Easing.elastic(0.5),
 			duration: reduceMotionEnabledRef.current ? 0 : 200,
 			useNativeDriver: true,
 		};
 
-		const animation = Animated.timing(menuDragOffset, { toValue: 0, ...baseAnimationProps });
+		const animation = Animated.timing(menuDragOffset, { toValue: offset, ...baseAnimationProps });
 		animation.start();
 	}, [menuDragOffset]);
+
+	const clearDragOffset = useCallback(() => {
+		dragToOffset(0);
+	}, [dragToOffset]);
+
+	const containerRef = useRef<View|null>(null);
+	useEffect(() => {
+		if (props.visible) {
+			clearDragOffset();
+		} else {
+			containerRef.current?.measure((_x, _y, _width, height) => {
+				dragToOffset(height);
+			});
+		}
+	}, [props.visible, clearDragOffset, dragToOffset]);
 
 	const onDragEnd = useCallback((_dx: number, dy: number) => {
 		if (dy > 50) {
 			props.onDismiss();
+		} else {
+			clearDragOffset();
 		}
-		clearDragOffset();
 	}, [clearDragOffset, props.onDismiss]);
 
 	return <Modal
@@ -124,9 +144,14 @@ const BottomDrawer: React.FC<Props> = props => {
 			onScroll: onContainerScroll,
 		}}
 	>
-		<Animated.View style={[styles.contentContainer, props.style, { marginBottom: menuYOffset }]}>
+		<Animated.View style={[styles.contentContainer, props.style, { marginBottom: menuYOffset }]} ref={containerRef}>
 			{props.draggable &&
-				<DragHandle dragValue={menuDragOffset} onDragEnd={onDragEnd} onDismiss={props.onDismiss}/>}
+				<DragHandle
+					setDragging={setDragging}
+					dragValue={menuDragOffset}
+					onDragEnd={onDragEnd}
+					onDismiss={props.onDismiss}
+				/>}
 			{props.children}
 		</Animated.View>
 	</Modal>;
@@ -143,9 +168,12 @@ interface DragHandleProps {
 	dragValue: Animated.Value;
 	onDragEnd: (dx: number, dy: number)=> void;
 	onDismiss: ()=> void;
+
+	setDragging: (dragging: boolean)=> void;
 }
 
 const DragHandle: React.FC<DragHandleProps> = props => {
+	const dragEndRef = useRef(0);
 
 	const panResponder = useMemo(() => {
 		return PanResponder.create({
@@ -153,6 +181,8 @@ const DragHandle: React.FC<DragHandleProps> = props => {
 				return Math.abs(gestureState.dx) < 30;
 			},
 			onPanResponderGrant: () => {
+				props.setDragging(true);
+				dragEndRef.current = 0;
 			},
 			onPanResponderMove: Animated.event([
 				null,
@@ -161,9 +191,18 @@ const DragHandle: React.FC<DragHandleProps> = props => {
 			], { useNativeDriver: false, listener: event => event.preventDefault() }),
 			onPanResponderEnd: (_event, gestureState) => {
 				props.onDragEnd(gestureState.dx, gestureState.dy);
+				props.setDragging(false);
+				dragEndRef.current = performance.now();
 			},
 		});
-	}, [props.dragValue, props.onDragEnd]);
+	}, [props.dragValue, props.onDragEnd, props.setDragging]);
+
+	const onPress = useCallback(() => {
+		// Drags can also trigger onPress events:
+		if (dragEndRef.current < performance.now() - Second * 0.1) {
+			props.onDismiss();
+		}
+	}, [props.onDismiss]);
 
 
 	return <View
@@ -172,7 +211,7 @@ const DragHandle: React.FC<DragHandleProps> = props => {
 	>
 		<TouchableRipple
 			style={{ marginLeft: 'auto', marginRight: 'auto', backgroundColor: 'red', width: '60%', height: 8, borderRadius: 8 }}
-			onPress={props.onDismiss}
+			onPress={onPress}
 		><View/></TouchableRipple>
 	</View>;
 };
