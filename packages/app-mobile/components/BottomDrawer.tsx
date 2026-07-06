@@ -1,14 +1,14 @@
 import * as React from 'react';
 import { connect } from 'react-redux';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Animated, Easing, NativeScrollEvent, NativeSyntheticEvent, PanResponder, StyleSheet, useWindowDimensions, View, ViewStyle } from 'react-native';
+import { Animated, Easing, NativeScrollEvent, NativeSyntheticEvent, PanResponder, Platform, Pressable, StyleSheet, useWindowDimensions, View, ViewStyle } from 'react-native';
 import useSafeAreaPadding from '../utils/hooks/useSafeAreaPadding';
 import { themeStyle, ThemeStyle } from './global-style';
 import Modal from './Modal';
 import { AppState } from '../utils/types';
 import useReduceMotionEnabled from '../utils/hooks/useReduceMotionEnabled';
-import { TouchableRipple } from 'react-native-paper';
 import { Second } from '@joplin/utils/time';
+import { _ } from '@joplin/lib/locale';
 
 interface Props {
 	themeId: number;
@@ -29,6 +29,9 @@ const useStyles = (theme: ThemeStyle, dragging: boolean, dragOffset: Animated.An
 		const menuGapLeft = safeAreaPadding.paddingLeft + 6;
 		const menuGapRight = safeAreaPadding.paddingRight + 6;
 
+		// On web, any spaceBelowScreenEdge results in a scrollbar and extra scroll.
+		const spaceBelowScreenEdge = Platform.OS === 'web' ? 0 : windowHeight;
+
 		return StyleSheet.create({
 			menuStyle: {
 				alignSelf: 'flex-end',
@@ -46,14 +49,19 @@ const useStyles = (theme: ThemeStyle, dragging: boolean, dragOffset: Animated.An
 				borderBottomLeftRadius: 0,
 				maxWidth: Math.min(400, windowWidth - menuGapRight - menuGapLeft),
 
-				// Web: Prevents a scrollbar from being shown when dragging the menu
-				// below the bottom of the screen.
-				overflow: 'hidden',
-				marginBottom: -windowHeight,
+				marginBottom: -spaceBelowScreenEdge,
 
 				userSelect: dragging ? 'none' : 'auto',
 				transform: [
-					{ translateY: dragOffset },
+					{
+						translateY: dragOffset.interpolate({
+							inputRange: [-spaceBelowScreenEdge, 1],
+							outputRange: [-spaceBelowScreenEdge, 1],
+							// Avoid shifting the menu up when there's no extra space below the menu
+							extrapolateLeft: 'clamp',
+							extrapolateRight: 'extend',
+						}),
+					},
 					{ perspective: 1000 },
 				],
 			},
@@ -66,7 +74,7 @@ const useStyles = (theme: ThemeStyle, dragging: boolean, dragOffset: Animated.An
 				flexShrink: 1,
 				flexGrow: 1,
 
-				marginBottom: windowHeight,
+				marginBottom: spaceBelowScreenEdge,
 			},
 			modalBackground: {
 				paddingTop: 0,
@@ -79,7 +87,16 @@ const useStyles = (theme: ThemeStyle, dragging: boolean, dragOffset: Animated.An
 			dismissButton: {
 				top: 0,
 				bottom: undefined,
-				height: 12,
+				height: theme.marginMedium,
+			},
+			dragHandle: {
+				marginLeft: 'auto',
+				marginRight: 'auto',
+				backgroundColor: theme.dividerColor,
+				width: '100%',
+				maxWidth: 88,
+				height: theme.marginSmall,
+				borderRadius: theme.marginSmall,
 			},
 		});
 	}, [theme, safeAreaPadding, windowWidth, dragging, dragOffset, windowHeight]);
@@ -105,13 +122,12 @@ const BottomDrawer: React.FC<Props> = props => {
 	reduceMotionEnabledRef.current = reduceMotionEnabled;
 
 	const dragToOffset = useCallback((offset: number) => {
-		const baseAnimationProps = {
+		const animation = Animated.timing(menuDragOffset, {
+			toValue: offset,
 			easing: Easing.elastic(0.5),
 			duration: reduceMotionEnabledRef.current ? 0 : 200,
 			useNativeDriver: true,
-		};
-
-		const animation = Animated.timing(menuDragOffset, { toValue: offset, ...baseAnimationProps });
+		});
 		animation.start();
 	}, [menuDragOffset]);
 
@@ -145,22 +161,22 @@ const BottomDrawer: React.FC<Props> = props => {
 		backgroundColor={theme.backgroundColorTransparent2}
 		modalBackgroundStyle={styles.modalBackground}
 		dismissButtonStyle={styles.dismissButton}
+		containerStyle={styles.menuStyle}
 		scrollOverflow={{
 			overScrollMode: 'always',
 			onScroll: onContainerScroll,
 		}}
 	>
-		<Animated.View style={styles.menuStyle}>
-			<Animated.View style={[styles.contentContainer, props.style]} ref={containerRef}>
-				{props.draggable &&
-					<DragHandle
-						setDragging={setDragging}
-						dragValue={menuDragOffset}
-						onDragEnd={onDragEnd}
-						onDismiss={props.onDismiss}
-					/>}
-				{props.children}
-			</Animated.View>
+		<Animated.View style={[styles.contentContainer, props.style]} ref={containerRef}>
+			{props.draggable &&
+				<DragHandle
+					style={styles.dragHandle}
+					setDragging={setDragging}
+					dragValue={menuDragOffset}
+					onDragEnd={onDragEnd}
+					onDismiss={props.onDismiss}
+				/>}
+			{props.children}
 		</Animated.View>
 	</Modal>;
 };
@@ -173,6 +189,8 @@ export default connect((state: AppState) => {
 
 
 interface DragHandleProps {
+	style: ViewStyle;
+
 	dragValue: Animated.Value;
 	onDragEnd: (dx: number, dy: number)=> void;
 	onDismiss: ()=> void;
@@ -217,10 +235,13 @@ const DragHandle: React.FC<DragHandleProps> = props => {
 		style={{ flexGrow: 1 }}
 		{...panResponder.panHandlers}
 	>
-		<TouchableRipple
-			style={{ marginLeft: 'auto', marginRight: 'auto', backgroundColor: 'red', width: '60%', height: 8, borderRadius: 8 }}
+		<Pressable
 			onPress={onPress}
-		><View/></TouchableRipple>
+			style={{ paddingTop: 16, marginTop: -16 }}
+			aria-label={_('Dismiss')}
+		>
+			<View style={props.style}/>
+		</Pressable>
 	</View>;
 };
 
