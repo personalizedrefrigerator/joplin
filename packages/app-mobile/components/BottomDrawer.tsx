@@ -206,6 +206,7 @@ const DragHandle: React.FC<DragHandleProps> = props => {
 			onMoveShouldSetPanResponderCapture: (_event, gestureState) => {
 				return Math.abs(gestureState.dx) < 30;
 			},
+			onStartShouldSetPanResponderCapture: () => true,
 			onPanResponderGrant: () => {
 				props.setDragging(true);
 				dragEndRef.current = 0;
