@@ -20,8 +20,8 @@ interface Props {
 	onShow: ()=> void;
 }
 
-const useStyles = (theme: ThemeStyle, dragging: boolean) => {
-	const { width: windowWidth } = useWindowDimensions();
+const useStyles = (theme: ThemeStyle, dragging: boolean, dragOffset: Animated.AnimatedInterpolation<number>) => {
+	const { width: windowWidth, height: windowHeight } = useWindowDimensions();
 	const safeAreaPadding = useSafeAreaPadding();
 
 	return useMemo(() => {
@@ -39,7 +39,6 @@ const useStyles = (theme: ThemeStyle, dragging: boolean) => {
 				flexDirection: 'row',
 				marginRight: menuGapRight,
 				marginLeft: menuGapLeft,
-				paddingBottom: 0,
 
 				backgroundColor: theme.backgroundColor,
 				borderRadius: 16,
@@ -50,6 +49,13 @@ const useStyles = (theme: ThemeStyle, dragging: boolean) => {
 				// Web: Prevents a scrollbar from being shown when dragging the menu
 				// below the bottom of the screen.
 				overflow: 'hidden',
+				marginBottom: -windowHeight,
+
+				userSelect: dragging ? 'none' : 'auto',
+				transform: [
+					{ translateY: dragOffset },
+					{ perspective: 1000 },
+				],
 			},
 			contentContainer: {
 				padding: 20,
@@ -59,7 +65,8 @@ const useStyles = (theme: ThemeStyle, dragging: boolean) => {
 				flexWrap: 'wrap',
 				flexShrink: 1,
 				flexGrow: 1,
-				userSelect: dragging ? 'none' : 'auto',
+
+				marginBottom: windowHeight,
 			},
 			modalBackground: {
 				paddingTop: 0,
@@ -75,23 +82,23 @@ const useStyles = (theme: ThemeStyle, dragging: boolean) => {
 				height: 12,
 			},
 		});
-	}, [theme, safeAreaPadding, windowWidth, dragging]);
+	}, [theme, safeAreaPadding, windowWidth, dragging, dragOffset, windowHeight]);
 };
 
 const BottomDrawer: React.FC<Props> = props => {
 	const theme = themeStyle(props.themeId);
 	const [dragging, setDragging] = useState(false);
-	const styles = useStyles(theme, dragging);
 
 	const onContainerScroll = useCallback((event: NativeSyntheticEvent<NativeScrollEvent>) => {
 		const offsetY = event.nativeEvent.contentOffset.y;
-		if (offsetY < -50) {
+		if (offsetY < -80) {
 			props.onDismiss();
 		}
 	}, [props.onDismiss]);
 
 	const menuDragOffset = useMemo(() => new Animated.Value(0), []);
-	const menuYOffset = useMemo(() => Animated.multiply(menuDragOffset, new Animated.Value(-1)), [menuDragOffset]);
+	const menuYOffset = useMemo(() => menuDragOffset, [menuDragOffset]);
+	const styles = useStyles(theme, dragging, menuYOffset);
 
 	const reduceMotionEnabled = useReduceMotionEnabled();
 	const reduceMotionEnabledRef = useRef(false);
@@ -138,21 +145,22 @@ const BottomDrawer: React.FC<Props> = props => {
 		backgroundColor={theme.backgroundColorTransparent2}
 		modalBackgroundStyle={styles.modalBackground}
 		dismissButtonStyle={styles.dismissButton}
-		containerStyle={styles.menuStyle}
 		scrollOverflow={{
 			overScrollMode: 'always',
 			onScroll: onContainerScroll,
 		}}
 	>
-		<Animated.View style={[styles.contentContainer, props.style, { marginBottom: menuYOffset }]} ref={containerRef}>
-			{props.draggable &&
-				<DragHandle
-					setDragging={setDragging}
-					dragValue={menuDragOffset}
-					onDragEnd={onDragEnd}
-					onDismiss={props.onDismiss}
-				/>}
-			{props.children}
+		<Animated.View style={styles.menuStyle}>
+			<Animated.View style={[styles.contentContainer, props.style]} ref={containerRef}>
+				{props.draggable &&
+					<DragHandle
+						setDragging={setDragging}
+						dragValue={menuDragOffset}
+						onDragEnd={onDragEnd}
+						onDismiss={props.onDismiss}
+					/>}
+				{props.children}
+			</Animated.View>
 		</Animated.View>
 	</Modal>;
 };
