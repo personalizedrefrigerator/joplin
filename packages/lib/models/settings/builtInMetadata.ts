@@ -22,6 +22,10 @@ const showVoiceTypingSettings = (settings: VoiceTypingSettingSlice) => (
 	shim.mobilePlatform() === 'android' && !!settings['buildFlag.voiceTypingEnabled']
 );
 
+const show3rdPartySyncSettings = (Setting: typeof SettingType) => {
+	return !Setting.value('isJoplinCloudWebApp');
+};
+
 export enum CameraDirection {
 	Back,
 	Front,
@@ -130,7 +134,12 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 				return appType !== 'cli' ? null : _('The target to synchronise to. Each sync target may have additional parameters which are named as `sync.NUM.NAME` (all documented below).');
 			},
 			options: () => {
-				return SyncTargetRegistry.idAndLabelPlainObject(platform);
+				if (show3rdPartySyncSettings(Setting)) {
+					return SyncTargetRegistry.idAndLabelPlainObject(platform);
+				} else {
+					// Only the Joplin-related sync targets are shown on app.joplincloud.com:
+					return SyncTargetRegistry.idAndLabelPlainObject(platform, ['0', '10']);
+				}
 			},
 			optionsOrder: () => {
 				return SyncTargetRegistry.optionsOrder();
@@ -670,7 +679,7 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 				return '';
 			},
 			options: () => ({
-				'joplin-cloud': _('Joplin Cloud AI'),
+				'joplin-cloud': _('Joplin Cloud AI (beta)'),
 				'openai-compatible': _('OpenAI-compatible'),
 				'anthropic': _('Anthropic'),
 			}),
@@ -770,6 +779,17 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 			label: () => _('Test AI configuration'),
 		},
 
+		// First-send disclosure for non-cloud providers. The chat panel shows
+		// an inline banner the first time the user sends a message; clicking
+		// "Don't show again" flips this so the banner stays away.
+		'ai.chat.disclosureAcknowledged': {
+			value: false,
+			type: SettingItemType.Bool,
+			public: false,
+			appTypes: [AppType.Desktop],
+			storage: SettingStorage.Database,
+		},
+
 		// User toggle for the background embedding indexer. On by default —
 		// when AI is enabled, indexing is part of what AI does. The toggle
 		// exists as a kill switch for users who want chat without the
@@ -816,6 +836,127 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 			public: false,
 			appTypes: [AppType.Desktop],
 			storage: SettingStorage.Database,
+		},
+
+		'mcp.enabled': {
+			value: false,
+			type: SettingItemType.Bool,
+			public: true,
+			section: 'mcp',
+			appTypes: [AppType.Desktop],
+			label: () => _('Enable MCP server'),
+			description: () => _('Exposes Joplin notes to external AI applications (Claude Desktop, Cursor, etc.) via the Model Context Protocol. Requires the Web Clipper service to be running. Connected AI tools can read your note content; any text they retrieve may be sent to the external LLM provider those tools use.'),
+			storage: SettingStorage.File,
+		},
+
+		'mcp.tool.search_notes.enabled': {
+			value: true,
+			type: SettingItemType.Bool,
+			public: true,
+			section: 'mcp',
+			appTypes: [AppType.Desktop],
+			show: (settings) => !!settings['mcp.enabled'],
+			label: () => _('MCP: Allow searching notes'),
+			storage: SettingStorage.File,
+		},
+
+		'mcp.tool.read_note.enabled': {
+			value: true,
+			type: SettingItemType.Bool,
+			public: true,
+			section: 'mcp',
+			appTypes: [AppType.Desktop],
+			show: (settings) => !!settings['mcp.enabled'],
+			label: () => _('MCP: Allow reading notes'),
+			storage: SettingStorage.File,
+		},
+
+		'mcp.tool.list_notebooks.enabled': {
+			value: true,
+			type: SettingItemType.Bool,
+			public: true,
+			section: 'mcp',
+			appTypes: [AppType.Desktop],
+			show: (settings) => !!settings['mcp.enabled'],
+			label: () => _('MCP: Allow listing notebooks'),
+			storage: SettingStorage.File,
+		},
+
+		'mcp.tool.list_tags.enabled': {
+			value: true,
+			type: SettingItemType.Bool,
+			public: true,
+			section: 'mcp',
+			appTypes: [AppType.Desktop],
+			show: (settings) => !!settings['mcp.enabled'],
+			label: () => _('MCP: Allow listing tags'),
+			storage: SettingStorage.File,
+		},
+
+		'mcp.tool.create_note.enabled': {
+			value: false,
+			type: SettingItemType.Bool,
+			public: true,
+			section: 'mcp',
+			appTypes: [AppType.Desktop],
+			show: (settings) => !!settings['mcp.enabled'],
+			label: () => _('MCP: Allow creating notes'),
+			storage: SettingStorage.File,
+		},
+
+		'mcp.tool.update_note.enabled': {
+			value: false,
+			type: SettingItemType.Bool,
+			public: true,
+			section: 'mcp',
+			appTypes: [AppType.Desktop],
+			show: (settings) => !!settings['mcp.enabled'],
+			label: () => _('MCP: Allow updating notes'),
+			storage: SettingStorage.File,
+		},
+
+		'mcp.tool.delete_note.enabled': {
+			value: false,
+			type: SettingItemType.Bool,
+			public: true,
+			section: 'mcp',
+			appTypes: [AppType.Desktop],
+			show: (settings) => !!settings['mcp.enabled'],
+			label: () => _('MCP: Allow trashing notes'),
+			storage: SettingStorage.File,
+		},
+
+		'mcp.tool.manage_tags.enabled': {
+			value: false,
+			type: SettingItemType.Bool,
+			public: true,
+			section: 'mcp',
+			appTypes: [AppType.Desktop],
+			show: (settings) => !!settings['mcp.enabled'],
+			label: () => _('MCP: Allow editing tags on notes'),
+			storage: SettingStorage.File,
+		},
+
+		'mcp.tool.create_notebook.enabled': {
+			value: false,
+			type: SettingItemType.Bool,
+			public: true,
+			section: 'mcp',
+			appTypes: [AppType.Desktop],
+			show: (settings) => !!settings['mcp.enabled'],
+			label: () => _('MCP: Allow creating notebooks'),
+			storage: SettingStorage.File,
+		},
+
+		'mcp.tool.semantic_search_notes.enabled': {
+			value: true,
+			type: SettingItemType.Bool,
+			public: true,
+			section: 'mcp',
+			appTypes: [AppType.Desktop],
+			show: (settings) => !!settings['mcp.enabled'],
+			label: () => _('MCP: Allow semantic search of notes'),
+			storage: SettingStorage.File,
 		},
 
 		theme: {
@@ -2110,6 +2251,13 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 			type: SettingItemType.Bool,
 			public: false,
 			appTypes: [AppType.Mobile],
+		},
+
+		'featureFlag.noteLock': {
+			value: false,
+			type: SettingItemType.Bool,
+			public: false,
+			storage: SettingStorage.File,
 		},
 
 		'featureFlag.autoUpdaterServiceEnabled': {

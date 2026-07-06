@@ -10,10 +10,13 @@ const baseStyle = {
 	fontSize: 16,
 	fontSizeLarger: 18,
 	fontSizeLarge: 20,
-	margin: 15, // No text and no interactive component should be within this margin
-	itemMarginTop: 10,
-	itemMarginBottom: 10,
 	fontSizeSmaller: 14,
+
+	margin: 16, // No text and no interactive component should be within this margin
+	// Smaller margins for spacing between/around items:
+	marginSmall: 8,
+	marginMedium: 12,
+
 	disabledOpacity: 0.2,
 	lineHeight: '1.6em',
 	listTabSize: '1.7em',
@@ -31,6 +34,8 @@ export type ThemeStyle = BaseTheme & typeof baseStyle & {
 	marginTop: number;
 	marginBottom: number;
 	borderRadius: number;
+	itemMarginBottom: number;
+	itemMarginTop: number;
 	icon: TextStyle;
 	lineInput: ViewStyle;
 	buttonRow: ViewStyle;
@@ -107,6 +112,9 @@ function extraStyles(theme: BaseTheme) {
 		marginLeft: baseStyle.margin,
 		marginTop: baseStyle.margin,
 		marginBottom: baseStyle.margin,
+
+		itemMarginTop: baseStyle.marginMedium,
+		itemMarginBottom: baseStyle.marginMedium,
 
 		icon,
 		lineInput,

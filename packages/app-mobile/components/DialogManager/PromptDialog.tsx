@@ -4,6 +4,7 @@ import { DialogType, ButtonDialogData } from './types';
 import { StyleSheet, ViewStyle } from 'react-native';
 import { useMemo } from 'react';
 import PromptButton from './PromptButton';
+import { themeStyle } from '../global-style';
 
 interface Props {
 	dialog: ButtonDialogData;
@@ -11,25 +12,27 @@ interface Props {
 	themeId: number;
 }
 
-const useStyles = (isMenu: boolean) => {
+const useStyles = (themeId: number, isMenu: boolean) => {
 	return useMemo(() => {
+		const theme = themeStyle(themeId);
+
 		return StyleSheet.create({
 
 			dialogContent: {
-				paddingBottom: 16,
-				paddingHorizontal: 12,
+				paddingBottom: theme.margin,
+				paddingHorizontal: theme.margin,
 			},
 			dialogActions: {
-				paddingBottom: 16,
-				paddingHorizontal: 12,
-				paddingTop: isMenu ? 4 : 8,
+				paddingBottom: theme.margin,
+				paddingHorizontal: theme.margin,
+				paddingTop: isMenu ? 4 : theme.marginSmall,
 
 				...(isMenu ? {
 					flexDirection: 'column',
 					alignItems: 'stretch',
 					gap: 1,
 				} : {
-					gap: 12,
+					gap: theme.marginMedium,
 					flexWrap: 'wrap',
 				}),
 			},
@@ -37,12 +40,12 @@ const useStyles = (isMenu: boolean) => {
 				textAlign: 'center',
 			} : {},
 		});
-	}, [isMenu]);
+	}, [isMenu, themeId]);
 };
 
 const PromptDialog: React.FC<Props> = ({ dialog, containerStyle, themeId }) => {
 	const isMenu = dialog.type === DialogType.Menu;
-	const styles = useStyles(isMenu);
+	const styles = useStyles(themeId, isMenu);
 
 	const buttons = dialog.buttons.map((button, index) => {
 		return <PromptButton

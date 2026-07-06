@@ -38,11 +38,17 @@ enum PlanHostingType {
 	Self = 'self',
 }
 
+export interface PlanTieredPricingTableRow {
+	condition: string;
+	priceYearly: string;
+}
+
 export interface Plan {
 	name: string;
 	title: string;
 	priceMonthly?: StripePublicConfigPrice;
 	priceYearly?: StripePublicConfigPrice;
+	pricingTable?: { rows: PlanTieredPricingTableRow[] };
 	featured: boolean;
 	iconName: string;
 	featuresOn: FeatureId[];
@@ -67,15 +73,69 @@ export enum PriceCurrency {
 	USD = 'USD',
 }
 
-export interface StripePublicConfigPrice {
-	accountType: number; // AccountType
+
+export enum ProductType {
+	Subscription = 'subscription',
+	AiCredits = 'ai-credits',
+}
+
+export enum AccountType {
+	Default = 0,
+	Basic = 1,
+	Pro = 2,
+	Team = 3,
+	Pro100Gb = 4,
+	SelfHosted = 5,
+}
+
+interface StripeBasePrice {
 	id: string;
+	currency: PriceCurrency;
+}
+
+interface StripeBaseSubscriptionPrice extends StripeBasePrice {
+	accountType: AccountType;
 	period: PricePeriod;
+	productType: ProductType.Subscription|undefined;
+	aiCredits?: undefined;
+}
+
+export interface StripeFixedSubscriptionPrice extends StripeBaseSubscriptionPrice {
 	amount: string;
 	formattedAmount: string;
 	formattedMonthlyAmount: string;
-	currency: PriceCurrency;
+	amounts: undefined;
 }
+
+export interface StripeTieredAmount {
+	amount: string;
+	formattedAmount: string;
+	users: [number, number|'infinity'];
+	userRange: { min: number; max: number };
+}
+
+export interface StripeTieredSubscriptionPrice extends StripeBaseSubscriptionPrice {
+	amounts: StripeTieredAmount[];
+
+	quantityMinimum: number;
+	amount: undefined;
+	formattedAmount: undefined;
+	formattedMonthlyAmount: undefined;
+}
+
+type StripeSubscriptionPrice = StripeTieredSubscriptionPrice | StripeFixedSubscriptionPrice;
+
+export interface StripePublicConfigAiProductPrice extends StripeBasePrice {
+	productType: ProductType.AiCredits;
+	amount: string;
+	formattedAmount: string;
+	aiCredits: number;
+
+	accountType?: undefined;
+	period?: undefined;
+}
+
+export type StripePublicConfigPrice = StripeSubscriptionPrice | StripePublicConfigAiProductPrice;
 
 export interface StripePublicConfig {
 	publishableKey: string;
@@ -92,22 +152,51 @@ function formatPrice(amount: string | number, currency: PriceCurrency): string {
 	throw new Error(`Unsupported currency: ${currency}`);
 }
 
-interface FindPriceQuery {
-	accountType?: number;
-	period?: PricePeriod;
-	priceId?: string;
-}
+export const isTieredPrice = (p: StripePublicConfigPrice): p is StripeTieredSubscriptionPrice => {
+	return 'amounts' in p;
+};
 
 export function loadStripeConfig(env: string, filePath: string): StripePublicConfig {
 	const config: StripePublicConfig = JSON.parse(fs.readFileSync(filePath, 'utf8'))[env];
 	if (!config) throw new Error(`Invalid env: ${env}`);
 
+	const isSubscriptionPrice = (p: StripePublicConfigPrice): p is StripeSubscriptionPrice => {
+		return p.productType === undefined || p.productType === ProductType.Subscription;
+	};
+
 	const decoratePrices = (p: StripePublicConfigPrice) => {
-		return {
-			...p,
-			formattedAmount: formatPrice(p.amount, p.currency),
-			formattedMonthlyAmount: p.period === PricePeriod.Monthly ? formatPrice(p.amount, p.currency) : formatPrice(Number(p.amount) / 12, p.currency),
-		};
+		const price = p;
+		if (isTieredPrice(p)) {
+			return {
+				...p,
+				amounts: p.amounts.map(amount => ({
+					...amount,
+					formattedAmount: formatPrice(amount.amount, p.currency),
+					userRange: {
+						min: amount.users[0],
+						max: amount.users[1] === 'infinity' ? Number.POSITIVE_INFINITY : amount.users[1],
+					},
+				})),
+			};
+		}
+		if (isSubscriptionPrice(p)) {
+			return {
+				...p,
+				productType: ProductType.Subscription,
+				formattedAmount: formatPrice(p.amount, p.currency),
+				formattedMonthlyAmount: p.period === PricePeriod.Monthly ? formatPrice(p.amount, p.currency) : formatPrice(Number(p.amount) / 12, p.currency),
+			} satisfies StripeSubscriptionPrice;
+		}
+		if (p.productType === ProductType.AiCredits) {
+			return {
+				...p,
+				formattedAmount: formatPrice(p.amount, p.currency),
+			} satisfies StripePublicConfigAiProductPrice;
+		}
+
+		const exhaustivenessCheck: never = p;
+		// Use the exhaustivenessCheck to prevent unused variable warnings
+		throw new Error(`Unexpected product type: ${exhaustivenessCheck && price.productType}`);
 	};
 
 	config.prices = config.prices.map(decoratePrices);
@@ -115,6 +204,25 @@ export function loadStripeConfig(env: string, filePath: string): StripePublicCon
 
 	return config;
 }
+
+
+type FindPriceQuery = {
+	accountType?: number;
+	period?: PricePeriod;
+
+	priceId?: undefined;
+}|{
+	accountType?: undefined;
+	period?: undefined;
+
+	priceId?: string;
+}|{
+	accountType?: undefined;
+	period?: undefined;
+	priceId?: undefined;
+
+	productType: ProductType;
+};
 
 export function findPrice(config: StripePublicConfig, query: FindPriceQuery): StripePublicConfigPrice {
 	let output: StripePublicConfigPrice = null;
@@ -124,6 +232,8 @@ export function findPrice(config: StripePublicConfig, query: FindPriceQuery): St
 			output = prices.filter(p => p.accountType === query.accountType).find(p => p.period === query.period);
 		} else if (query.priceId) {
 			output = prices.find(p => p.id === query.priceId);
+		} else if ('productType' in query) {
+			output = prices.find(p => p.productType === query.productType);
 		} else {
 			throw new Error(`Invalid query: ${JSON.stringify(query)}`);
 		}
@@ -229,6 +339,15 @@ const features = (): Record<FeatureId, PlanFeature> => {
 			pro100Gb: true,
 			teams: true,
 			joplinServerBusiness: true,
+		},
+		joplinCloudAi: {
+			title: _('Joplin Cloud AI (beta)'),
+			description: '[Joplin Cloud AI](https://joplinapp.org/help/apps/ai_chat) is a chat model hosted by Joplin Cloud that can summarise, rewrite, or answer questions about your notes from the desktop app. This is a beta feature and may change or contain bugs.',
+			basic: true,
+			pro: true,
+			pro100Gb: true,
+			teams: true,
+			joplinServerBusiness: false,
 		},
 		customBanner: {
 			title: _('Customise the note publishing banner'),
@@ -455,7 +574,32 @@ export const createFeatureTableMd = () => {
 	return markdownUtils.createMarkdownTable(headers, rows);
 };
 
+const getTieredPricingTable = (price: StripePublicConfigPrice) => {
+	if (!isTieredPrice(price)) throw new Error(`Not a tiered price: ${price.id}`);
+
+	const rows: PlanTieredPricingTableRow[] = [];
+	for (const amount of price.amounts) {
+		const formatUserCount = (count: number) => {
+			if (count === Number.POSITIVE_INFINITY) {
+				return '∞';
+			}
+			return String(count);
+		};
+		rows.push({
+			condition: `${
+				formatUserCount(amount.userRange.min)
+			}—${
+				formatUserCount(amount.userRange.max)
+			} users`,
+			priceYearly: `${amount.formattedAmount} / user / year`,
+		});
+	}
+	return rows;
+};
+
 export function getPlans(stripeConfig: StripePublicConfig): Record<PlanName, Plan> {
+	// TODO: Set to true to enable self-hosting self-service.
+	const selfServiceSelfHostingEnabled = false;
 	return {
 		basic: {
 			name: 'basic',
@@ -560,8 +704,23 @@ export function getPlans(stripeConfig: StripePublicConfig): Record<PlanName, Pla
 			featuresOff: [],
 			featureLabelsOn: getFeatureLabelsByPlan(PlanName.JoplinServerBusiness, true),
 			featureLabelsOff: [],
-			cfaLabel: _('Get a quote'),
-			cfaUrl: 'https://tally.so/r/D4BlOE',
+			...(selfServiceSelfHostingEnabled ? {
+				pricingTable: {
+					rows: getTieredPricingTable(findPrice(stripeConfig, {
+						accountType: 5,
+						period: PricePeriod.Yearly,
+					})),
+				},
+				cfaLabel: _('Try it now'),
+				cfaUrl: '',
+				priceYearly: findPrice(stripeConfig, {
+					accountType: 5,
+					period: PricePeriod.Yearly,
+				}),
+			} : {
+				cfaLabel: _('Get a quote'),
+				cfaUrl: 'https://tally.so/r/D4BlOE',
+			}),
 			footnote: '',
 			learnMoreUrl: 'https://joplinapp.org/help/apps/joplin_server_business',
 			hostingType: PlanHostingType.Self,

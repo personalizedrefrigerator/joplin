@@ -19,14 +19,14 @@ const useStyles = (themeId: number) => {
 		const theme = themeStyle(themeId);
 		return StyleSheet.create({
 			dialogContent: {
-				paddingBottom: 14,
-				paddingHorizontal: 12,
+				paddingBottom: theme.margin,
+				paddingHorizontal: theme.margin,
 			},
 			dialogActions: {
-				paddingBottom: 16,
+				paddingBottom: theme.margin,
 				paddingTop: 4,
-				paddingHorizontal: 12,
-				gap: 12,
+				paddingHorizontal: theme.margin,
+				gap: theme.marginMedium,
 			},
 			textInput: {
 				borderBottomColor: theme.dividerColor,
@@ -61,6 +61,8 @@ const TextInputDialog: React.FC<Props> = ({ dialog, containerStyle, themeId }) =
 					style={styles.textInput}
 					value={text}
 					onChangeText={setText}
+					// Underline styles are set via styles
+					underlineColorAndroid='transparent'
 				/>
 			</Dialog.Content>
 			<Dialog.Actions
