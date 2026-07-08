@@ -19,7 +19,14 @@ interface Props {
 	onShow: ()=> void;
 }
 
-const useStyles = (theme: ThemeStyle, dragging: boolean, dragOffset: Animated.AnimatedInterpolation<number>) => {
+interface UseStylesProps {
+	theme: ThemeStyle;
+	dragging: boolean;
+	draggable: boolean;
+	dragOffset: Animated.AnimatedInterpolation<number>;
+}
+
+const useStyles = ({ theme, dragging, draggable, dragOffset }: UseStylesProps) => {
 	const { width: windowWidth, height: windowHeight } = useWindowDimensions();
 	const safeAreaPadding = useSafeAreaPadding();
 
@@ -65,15 +72,17 @@ const useStyles = (theme: ThemeStyle, dragging: boolean, dragOffset: Animated.An
 				],
 			},
 			contentContainer: {
-				padding: 20,
-				paddingBottom: 14 + safeAreaPadding.paddingBottom,
-				gap: 8,
 				flexDirection: 'row',
 				flexWrap: 'wrap',
 				flexShrink: 1,
 				flexGrow: 1,
 
 				marginBottom: spaceBelowScreenEdge,
+
+				// The drag handle should be at the very top of the menu
+				paddingTop: draggable ? 0 : undefined,
+				paddingBottom: 14 + safeAreaPadding.paddingBottom,
+				paddingHorizontal: 20,
 			},
 			modalBackground: {
 				paddingTop: 0,
@@ -88,14 +97,23 @@ const useStyles = (theme: ThemeStyle, dragging: boolean, dragOffset: Animated.An
 				bottom: undefined,
 				height: theme.marginMedium,
 			},
+
+			dragHandleContainer: {
+				display: draggable ? 'flex' : 'none',
+				width: '100%',
+				height: theme.margin,
+			},
 			dragHandle: {
 				marginLeft: 'auto',
 				marginRight: 'auto',
 				backgroundColor: theme.dividerColor,
 				width: '100%',
+
+				marginVertical: theme.marginSmall,
+
 				maxWidth: 88,
-				height: theme.marginSmall,
-				borderRadius: theme.marginSmall,
+				height: 5,
+				borderRadius: theme.borderRadius,
 			},
 
 			// An invisible overlay, prevents drags from clicking buttons on web
@@ -108,7 +126,7 @@ const useStyles = (theme: ThemeStyle, dragging: boolean, dragOffset: Animated.An
 				zIndex: 2,
 			},
 		});
-	}, [theme, safeAreaPadding, windowWidth, dragging, dragOffset, windowHeight]);
+	}, [theme, safeAreaPadding, windowWidth, dragging, draggable, dragOffset, windowHeight]);
 };
 
 const usePanResponder = (
@@ -178,7 +196,7 @@ const BottomDrawer: React.FC<Props> = props => {
 
 	const menuDragOffset = useMemo(() => new Animated.Value(0), []);
 	const menuYOffset = useMemo(() => menuDragOffset, [menuDragOffset]);
-	const styles = useStyles(theme, dragging, menuYOffset);
+	const styles = useStyles({ theme, dragging, draggable: props.draggable, dragOffset: menuYOffset });
 
 	const reduceMotionEnabled = useReduceMotionEnabled();
 	const reduceMotionEnabledRef = useRef(false);
@@ -239,11 +257,11 @@ const BottomDrawer: React.FC<Props> = props => {
 	>
 		<View {...panResponder.panHandlers} style={[styles.contentContainer, props.style]} ref={containerRef}>
 			{dragging && <View style={styles.dragOverlay} />}
-			{props.draggable &&
-				<DragHandle
-					style={styles.dragHandle}
-					onDismiss={props.onDismiss}
-				/>}
+			<DragHandle
+				containerStyle={styles.dragHandleContainer}
+				style={styles.dragHandle}
+				onDismiss={props.onDismiss}
+			/>
 			{props.children}
 		</View>
 	</Modal>;
@@ -258,12 +276,13 @@ export default connect((state: AppState) => {
 
 interface DragHandleProps {
 	style: ViewStyle;
+	containerStyle: ViewStyle;
 
 	onDismiss: ()=> void;
 }
 
 const DragHandle: React.FC<DragHandleProps> = props => {
-	return <View style={{ flexGrow: 1 }}>
+	return <View style={props.containerStyle}>
 		<Pressable
 			onPress={props.onDismiss}
 			aria-label={_('Dismiss')}

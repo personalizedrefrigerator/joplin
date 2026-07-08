@@ -41,7 +41,6 @@ const useStyles = (themeId: number) => {
 		return StyleSheet.create({
 			menu: {
 				paddingHorizontal: 0,
-				paddingTop: theme.marginMedium,
 			},
 			menuContent: { flexDirection: 'column', width: '100%' },
 			menuItem: {
