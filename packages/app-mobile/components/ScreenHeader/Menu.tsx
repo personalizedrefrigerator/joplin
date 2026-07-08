@@ -51,6 +51,7 @@ const useStyles = (themeId: number) => {
 				paddingRight: theme.marginRight,
 				minWidth: Math.min(350, windowWidth),
 			},
+			menuItemContent: { flexDirection: 'row', gap: theme.marginSmall },
 			menuItemText: {
 				color: theme.color,
 				fontSize: theme.fontSize,
@@ -108,7 +109,7 @@ const MenuComponent: React.FC<Props> = props => {
 					key={key}
 					disabled={!!option.disabled}
 				>
-					<View style={{ flexDirection: 'row', gap: theme.marginSmall }}>
+					<View style={styles.menuItemContent}>
 						{option.icon && <Icon name={option.icon} style={textStyles} accessibilityLabel={null} />}
 						<Text
 							style={textStyles}
