@@ -1,13 +1,12 @@
 import * as React from 'react';
 import { connect } from 'react-redux';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Animated, Easing, NativeScrollEvent, NativeSyntheticEvent, PanResponder, Platform, Pressable, StyleSheet, useWindowDimensions, View, ViewStyle } from 'react-native';
+import { Animated, Easing, NativeScrollEvent, NativeScrollPoint, NativeSyntheticEvent, PanResponder, Platform, Pressable, StyleSheet, useWindowDimensions, View, ViewStyle } from 'react-native';
 import useSafeAreaPadding from '../utils/hooks/useSafeAreaPadding';
 import { themeStyle, ThemeStyle } from './global-style';
 import Modal from './Modal';
 import { AppState } from '../utils/types';
 import useReduceMotionEnabled from '../utils/hooks/useReduceMotionEnabled';
-import { Second } from '@joplin/utils/time';
 import { _ } from '@joplin/lib/locale';
 
 interface Props {
@@ -98,20 +97,64 @@ const useStyles = (theme: ThemeStyle, dragging: boolean, dragOffset: Animated.An
 				height: theme.marginSmall,
 				borderRadius: theme.marginSmall,
 			},
+
+			// An invisible overlay, prevents drags from clicking buttons on web
+			dragOverlay: {
+				position: 'absolute',
+				top: 0,
+				bottom: 0,
+				left: 0,
+				right: 0,
+				zIndex: 2,
+			},
 		});
 	}, [theme, safeAreaPadding, windowWidth, dragging, dragOffset, windowHeight]);
+};
+
+const usePanResponder = (
+	setDragging: (dragging: boolean)=> void,
+	onDragEnd: (dx: number, dy: number)=> void,
+	dragValue: Animated.Value,
+) => {
+	const currentScrollRef = useRef<NativeScrollPoint|null>(null);
+	const onScroll = useCallback((event: NativeSyntheticEvent<NativeScrollEvent>) => {
+		currentScrollRef.current = event.nativeEvent.contentOffset;
+	}, []);
+	const panResponder = useMemo(() => {
+		return PanResponder.create({
+			// Don't use panResponderCapture
+			onMoveShouldSetPanResponder: (_event, gestureState) => {
+				if (currentScrollRef.current) {
+					const top = currentScrollRef.current.y;
+
+					const tolerance = 3;
+					if (top > tolerance && gestureState.dy > 0) return false;
+				}
+				// Use a large tolerance so that buttons in the menu are still clickable, even
+				// with a noisy input source:
+				return Math.abs(gestureState.dx) < 40 && gestureState.dy > 22;
+			},
+			onPanResponderGrant: () => {
+				setDragging(true);
+			},
+			onPanResponderMove: Animated.event([
+				null,
+				// Updates menuDragOffset with the .dy property of the second argument:
+				{ dy: dragValue },
+			], { useNativeDriver: false }),
+			onPanResponderEnd: (_event, gestureState) => {
+				onDragEnd(gestureState.dx, gestureState.dy);
+				setDragging(false);
+			},
+		});
+	}, [dragValue, onDragEnd, setDragging]);
+
+	return { panResponder, onScroll };
 };
 
 const BottomDrawer: React.FC<Props> = props => {
 	const theme = themeStyle(props.themeId);
 	const [dragging, setDragging] = useState(false);
-
-	const onContainerScroll = useCallback((event: NativeSyntheticEvent<NativeScrollEvent>) => {
-		const offsetY = event.nativeEvent.contentOffset.y;
-		if (offsetY < -80) {
-			props.onDismiss();
-		}
-	}, [props.onDismiss]);
 
 	const menuDragOffset = useMemo(() => new Animated.Value(0), []);
 	const menuYOffset = useMemo(() => menuDragOffset, [menuDragOffset]);
@@ -154,6 +197,20 @@ const BottomDrawer: React.FC<Props> = props => {
 		}
 	}, [clearDragOffset, props.onDismiss]);
 
+	const { panResponder, onScroll: onPanResponderScroll } = usePanResponder(
+		setDragging, onDragEnd, menuDragOffset,
+	);
+
+	const onContainerScroll = useCallback((event: NativeSyntheticEvent<NativeScrollEvent>) => {
+		const offsetY = event.nativeEvent.contentOffset.y;
+		// On iOS, support menu dismissal through the native scrollview's overscroll behavior:
+		if (offsetY < -80) {
+			props.onDismiss();
+		} else {
+			onPanResponderScroll(event);
+		}
+	}, [props.onDismiss, onPanResponderScroll]);
+
 	return <Modal
 		visible={props.visible}
 		onClose={props.onDismiss}
@@ -163,21 +220,18 @@ const BottomDrawer: React.FC<Props> = props => {
 		dismissButtonStyle={styles.dismissButton}
 		containerStyle={styles.menuStyle}
 		scrollOverflow={{
-			overScrollMode: 'always',
 			onScroll: onContainerScroll,
 		}}
 	>
-		<Animated.View style={[styles.contentContainer, props.style]} ref={containerRef}>
+		<View {...panResponder.panHandlers} style={[styles.contentContainer, props.style]} ref={containerRef}>
+			{dragging && <View style={styles.dragOverlay} />}
 			{props.draggable &&
 				<DragHandle
 					style={styles.dragHandle}
-					setDragging={setDragging}
-					dragValue={menuDragOffset}
-					onDragEnd={onDragEnd}
 					onDismiss={props.onDismiss}
 				/>}
 			{props.children}
-		</Animated.View>
+		</View>
 	</Modal>;
 };
 
@@ -191,54 +245,13 @@ export default connect((state: AppState) => {
 interface DragHandleProps {
 	style: ViewStyle;
 
-	dragValue: Animated.Value;
-	onDragEnd: (dx: number, dy: number)=> void;
 	onDismiss: ()=> void;
-
-	setDragging: (dragging: boolean)=> void;
 }
 
 const DragHandle: React.FC<DragHandleProps> = props => {
-	const dragEndRef = useRef(0);
-
-	const panResponder = useMemo(() => {
-		return PanResponder.create({
-			onMoveShouldSetPanResponderCapture: (_event, gestureState) => {
-				return Math.abs(gestureState.dx) < 30;
-			},
-			onStartShouldSetPanResponderCapture: () => true,
-			onPanResponderGrant: () => {
-				props.setDragging(true);
-				dragEndRef.current = 0;
-			},
-			onPanResponderMove: Animated.event([
-				null,
-				// Updates menuDragOffset with the .dy property of the second argument:
-				{ dy: props.dragValue },
-			], { useNativeDriver: false, listener: event => event.preventDefault() }),
-			onPanResponderEnd: (_event, gestureState) => {
-				props.onDragEnd(gestureState.dx, gestureState.dy);
-				props.setDragging(false);
-				dragEndRef.current = performance.now();
-			},
-		});
-	}, [props.dragValue, props.onDragEnd, props.setDragging]);
-
-	const onPress = useCallback(() => {
-		// Drags can also trigger onPress events:
-		if (dragEndRef.current < performance.now() - Second * 0.1) {
-			props.onDismiss();
-		}
-	}, [props.onDismiss]);
-
-
-	return <View
-		style={{ flexGrow: 1 }}
-		{...panResponder.panHandlers}
-	>
+	return <View style={{ flexGrow: 1 }}>
 		<Pressable
-			onPress={onPress}
-			style={{ paddingTop: 16, marginTop: -16 }}
+			onPress={props.onDismiss}
 			aria-label={_('Dismiss')}
 		>
 			<View style={props.style}/>
