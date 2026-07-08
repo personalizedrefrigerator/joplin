@@ -16,7 +16,7 @@ interface Props {
 	visible: boolean;
 	draggable: boolean;
 	onDismiss: ()=> void;
-	onShow: ()=> void;
+	onShow?: ()=> void;
 }
 
 interface UseStylesProps {
