@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { connect } from 'react-redux';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { RefObject, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Animated, Easing, NativeScrollEvent, NativeScrollPoint, NativeSyntheticEvent, PanResponder, Platform, Pressable, StyleSheet, useWindowDimensions, View, ViewStyle } from 'react-native';
 import useSafeAreaPadding from '../utils/hooks/useSafeAreaPadding';
 import { themeStyle, ThemeStyle } from './global-style';
@@ -137,6 +137,7 @@ const usePanResponder = (
 			onPanResponderGrant: () => {
 				setDragging(true);
 			},
+			onPanResponderTerminate: () => setDragging(false),
 			onPanResponderMove: Animated.event([
 				null,
 				// Updates menuDragOffset with the .dy property of the second argument:
@@ -150,6 +151,25 @@ const usePanResponder = (
 	}, [dragValue, onDragEnd, setDragging]);
 
 	return { panResponder, onScroll };
+};
+
+interface UseSyncVisibleProps {
+	visible: boolean;
+	dragToOffset: (offset: number)=> void;
+	containerRef: RefObject<View|null>;
+}
+
+const useUpdateOnVisibilityChange = (props: UseSyncVisibleProps) => {
+	const propsRef = useRef(props);
+	useEffect(() => {
+		if (props.visible) {
+			propsRef.current.dragToOffset(0);
+		} else {
+			propsRef.current.containerRef.current?.measure((_x, _y, _width, height) => {
+				propsRef.current.dragToOffset(height);
+			});
+		}
+	}, [props.visible]);
 };
 
 const BottomDrawer: React.FC<Props> = props => {
@@ -179,15 +199,9 @@ const BottomDrawer: React.FC<Props> = props => {
 	}, [dragToOffset]);
 
 	const containerRef = useRef<View|null>(null);
-	useEffect(() => {
-		if (props.visible) {
-			clearDragOffset();
-		} else {
-			containerRef.current?.measure((_x, _y, _width, height) => {
-				dragToOffset(height);
-			});
-		}
-	}, [props.visible, clearDragOffset, dragToOffset]);
+	useUpdateOnVisibilityChange({
+		visible: props.visible, dragToOffset, containerRef,
+	});
 
 	const onDragEnd = useCallback((_dx: number, dy: number) => {
 		if (dy > 50) {
