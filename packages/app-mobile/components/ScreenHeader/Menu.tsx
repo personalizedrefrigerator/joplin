@@ -120,8 +120,6 @@ const MenuComponent: React.FC<Props> = props => {
 		}
 	}
 
-	// Resetting the refocus counter to undefined causes the menu to not be focused immediately
-	// after opening.
 	const onMenuClosed = useCallback(() => {
 		setOpen(false);
 	}, []);
