@@ -13,10 +13,12 @@ import {
 	OnConnect,
 	OnEdgesChange,
 	OnNodesChange,
+	OnReconnect,
 	ReactFlow,
 	ReactFlowProvider,
 	applyEdgeChanges,
 	applyNodeChanges,
+	reconnectEdge,
 	useReactFlow,
 } from '@xyflow/react';
 import generateId from '@joplin/lib/services/whiteboard/generateId';
@@ -161,6 +163,10 @@ const InnerSurface = ({ canvas, onChange }: Props) => {
 			},
 		};
 		setFlowEdges(prev => [...prev, edge]);
+	}, []);
+
+	const onReconnect: OnReconnect = useCallback((oldEdge, newConnection) => {
+		setFlowEdges(prev => reconnectEdge(oldEdge as unknown as WhiteboardFlowEdge, newConnection, prev) as WhiteboardFlowEdge[]);
 	}, []);
 
 	const defaultEdgeOptions = useMemo(() => ({
@@ -333,6 +339,8 @@ const InnerSurface = ({ canvas, onChange }: Props) => {
 				onNodesChange={onNodesChange}
 				onEdgesChange={onEdgesChange}
 				onConnect={onConnect}
+				onReconnect={onReconnect}
+				edgesReconnectable
 				onNodeDragStart={onNodeDragStart}
 				onNodeDrag={onNodeDrag}
 				onNodeDragStop={onNodeDragStop}
