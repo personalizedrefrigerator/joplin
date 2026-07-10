@@ -203,10 +203,10 @@ const InnerSurface = ({ canvas, onChange }: Props) => {
 		addCanvasNode({
 			id: generateId(),
 			type: 'text',
-			x: cx - 100,
-			y: cy - 50,
-			width: 200,
-			height: 100,
+			x: cx - 120,
+			y: cy - 70,
+			width: 240,
+			height: 140,
 			text: _('New text card'),
 		});
 	}, [viewportCentre, addCanvasNode]);
@@ -216,10 +216,10 @@ const InnerSurface = ({ canvas, onChange }: Props) => {
 		addCanvasNode({
 			id: generateId(),
 			type: 'group',
-			x: cx - 200,
-			y: cy - 140,
-			width: 400,
-			height: 280,
+			x: cx - 240,
+			y: cy - 200,
+			width: 480,
+			height: 400,
 			label: _('New group'),
 		});
 	}, [viewportCentre, addCanvasNode]);
