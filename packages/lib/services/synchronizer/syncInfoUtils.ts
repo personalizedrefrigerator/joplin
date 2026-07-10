@@ -45,10 +45,6 @@ export interface SyncInfoValuePublicPrivateKeyPair {
 // using `setAppMinVersion()`
 let appMinVersion_ = '3.0.0';
 
-// 2026-07-10: Joplin 3.6 now supports the Joplin 3.7.0 sync format. This allows the 3.6 stable release
-// to sync with clients that have been upgraded to Joplin 3.7.
-const forwardCompatibleAppMinVersion = '3.7.0';
-
 export const setAppMinVersion = (v: string) => {
 	appMinVersion_ = v;
 };
@@ -181,7 +177,9 @@ const fixSyncInfo = (syncInfo: SyncInfo) => {
 
 export function localSyncInfo(): SyncInfo {
 	const output = new SyncInfo(Setting.value('syncInfoCache'));
-	if (output.appMinVersion !== forwardCompatibleAppMinVersion) {
+	// Keep the greater appMinVersion to avoid data loss: If operating in forward-compatibility mode, the sync target may contain
+	// data/properties that will be removed when an older Joplin device syncs.
+	if (!output.appMinVersion || compareVersions(appMinVersion_, output.appMinVersion) >= 0) {
 		output.appMinVersion = appMinVersion_;
 	}
 	return fixSyncInfo(output);
@@ -587,8 +585,9 @@ export function masterKeyById(id: string) {
 export const checkIfCanSync = (s: SyncInfo, appVersion: string) => {
 	if (
 		compareVersions(appVersion, s.appMinVersion) < 0
-		// Forward compatibility: This version of Joplin supports the Joplin 3.7 sync target format
-		&& s.appMinVersion !== forwardCompatibleAppMinVersion
+		// 2026-07-10: Joplin 3.6 now supports the Joplin 3.7.0 sync format. This allows the 3.6 stable release
+		// to sync with clients that have been upgraded to Joplin 3.7.
+		&& s.appMinVersion !== '3.7.0'
 	) {
 		throw new JoplinError(_('In order to synchronise, please upgrade your application to version %s+', s.appMinVersion), ErrorCode.MustUpgradeApp);
 	}
