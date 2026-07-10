@@ -552,5 +552,11 @@ export function masterKeyById(id: string) {
 }
 
 export const checkIfCanSync = (s: SyncInfo, appVersion: string) => {
-	if (compareVersions(appVersion, s.appMinVersion) < 0) throw new JoplinError(_('In order to synchronise, please upgrade your application to version %s+', s.appMinVersion), ErrorCode.MustUpgradeApp);
+	if (
+		compareVersions(appVersion, s.appMinVersion) < 0
+		// Forward compatibility: This version of Joplin supports the Joplin 3.7 sync target format
+		&& s.appMinVersion !== '3.7.0'
+	) {
+		throw new JoplinError(_('In order to synchronise, please upgrade your application to version %s+', s.appMinVersion), ErrorCode.MustUpgradeApp);
+	}
 };
