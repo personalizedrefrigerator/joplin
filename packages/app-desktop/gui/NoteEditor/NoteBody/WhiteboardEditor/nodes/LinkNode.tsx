@@ -29,7 +29,10 @@ const LinkNode = ({ data, selected }: NodeProps<{ id: string; type: 'wbLink'; da
 				className={`whiteboard-node ${selected ? '-selected' : ''}`}
 				onDoubleClick={onDoubleClick}
 				onWheelCapture={onWheel}
-				style={{ borderColor: resolveCanvasColor(node.color, ctx.themeAppearance, 'stroke') ?? (selected ? '#4a90e2' : undefined) }}
+				style={{
+					borderColor: resolveCanvasColor(node.color, ctx.themeAppearance, 'stroke') ?? (selected ? '#4a90e2' : undefined),
+					backgroundColor: resolveCanvasColor(node.color, ctx.themeAppearance, 'fill'),
+				}}
 			>
 				<div className="header">{_('Link')}</div>
 				<div className="body -url">{node.url}</div>

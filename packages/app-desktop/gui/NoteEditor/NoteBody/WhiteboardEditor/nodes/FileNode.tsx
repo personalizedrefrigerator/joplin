@@ -221,7 +221,10 @@ const FileNode = ({ data, selected }: NodeProps<{ id: string; type: 'wbFile'; da
 				className={`whiteboard-node ${selected ? '-selected' : ''}`}
 				onDoubleClick={onDoubleClick}
 				onWheelCapture={onWheel}
-				style={{ borderColor: resolveCanvasColor(node.color, ctx.themeAppearance, 'stroke') ?? (selected ? '#4a90e2' : undefined) }}
+				style={{
+					borderColor: resolveCanvasColor(node.color, ctx.themeAppearance, 'stroke') ?? (selected ? '#4a90e2' : undefined),
+					backgroundColor: resolveCanvasColor(node.color, ctx.themeAppearance, 'fill'),
+				}}
 			>
 				{renderContent()}
 			</div>

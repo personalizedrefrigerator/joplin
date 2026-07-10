@@ -120,7 +120,10 @@ const TextNode = ({ data, selected, id }: NodeProps<{ id: string; type: 'wbText'
 				onDoubleClick={onDoubleClick}
 				onKeyDown={onCardKeyDown}
 				onWheelCapture={onWheel}
-				style={{ borderColor: resolveCanvasColor(node.color, ctx.themeAppearance, 'stroke') ?? (selected ? '#4a90e2' : undefined) }}
+				style={{
+					borderColor: resolveCanvasColor(node.color, ctx.themeAppearance, 'stroke') ?? (selected ? '#4a90e2' : undefined),
+					backgroundColor: resolveCanvasColor(node.color, ctx.themeAppearance, 'fill'),
+				}}
 			>
 				{editing ? (
 					<textarea
