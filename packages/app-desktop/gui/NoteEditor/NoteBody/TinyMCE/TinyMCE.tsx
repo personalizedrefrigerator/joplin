@@ -692,7 +692,7 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: Ref<NoteBodyEditorRef>) => {
 			const toolbar = [
 				'bold', 'italic', 'joplinHighlight', 'joplinStrikethrough', '|',
 				'joplinInsert', 'joplinSup', 'joplinSub', 'forecolor', '|',
-				'link', 'joplinInlineCode', 'joplinCodeBlock', 'joplinAttach', '|',
+				'link', 'joplinLinkToNote', 'joplinInlineCode', 'joplinCodeBlock', 'joplinAttach', '|',
 				'bullist', 'numlist', 'joplinChecklist', '|',
 				'h1', 'h2', 'h3', '|',
 				'hr', '|',
@@ -819,6 +819,14 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: Ref<NoteBodyEditorRef>) => {
 						icon: 'paperclip',
 						onAction: async function() {
 							editor.execCommand('joplinAttach');
+						},
+					});
+
+					editor.ui.registry.addButton('joplinLinkToNote', {
+						tooltip: _('Link to note'),
+						icon: 'export',
+						onAction: async function() {
+							void CommandService.instance().execute('linkToNote');
 						},
 					});
 
@@ -1110,6 +1118,17 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: Ref<NoteBodyEditorRef>) => {
 				// when the note content is updated externally.
 				const offsetBookmarkId = 2;
 				const bookmark = editor.selection.getBookmark(offsetBookmarkId);
+
+				// This is a workaround to inject missing ink style for OneNote imported notes.
+				// See https://github.com/laurent22/joplin/issues/15578 for more details.
+				const oneNoteInkContentStyleId = 'joplin-onenote-content-style';
+				const hasOneNoteInkContentStyle = !!editor.getDoc().getElementById(oneNoteInkContentStyleId);
+				if (!hasOneNoteInkContentStyle && new DOMParser().parseFromString(result.html, 'text/html').querySelector('.ink-text, .ink-space, .container-outline')) {
+					const styleElement = editor.getDoc().createElement('style');
+					styleElement.id = oneNoteInkContentStyleId;
+					styleElement.textContent = '.ink-text, .ink-space { display: inline-block; position: relative; vertical-align: bottom; } .container-outline { font-family: Calibri, sans-serif; font-size: 6pt; font-weight: normal; }';
+					editor.getDoc().head.appendChild(styleElement);
+				}
 				const htmlAndCss = [
 					`<style>${result.cssStrings?.join('\n')}</style>`,
 					preprocessHtml(result.html),
@@ -1222,8 +1241,7 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: Ref<NoteBodyEditorRef>) => {
 	// Need to save the onChange handler to a ref to make sure
 	// we call the current one from setTimeout.
 	// https://github.com/facebook/react/issues/14010#issuecomment-433788147
-	// eslint-disable-next-line @typescript-eslint/no-unsafe-function-type -- Old code before rule was applied
-	const props_onChangeRef = useRef<Function>(null);
+	const props_onChangeRef = useRef<NoteBodyEditorProps['onChange']>(null);
 	props_onChangeRef.current = props.onChange;
 
 	const prop_htmlToMarkdownRef = useRef<HtmlToMarkdownHandler>(null);
@@ -1660,4 +1678,3 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: Ref<NoteBodyEditorRef>) => {
 };
 
 export default forwardRef(TinyMCE);
-

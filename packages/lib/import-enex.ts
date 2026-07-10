@@ -10,7 +10,7 @@ import { MarkupToHtml } from '@joplin/renderer';
 import { fileExtension, friendlySafeFilename, safeFileExtension } from './path-utils';
 import { extractUrls as extractUrlsFromHtml } from '@joplin/utils/html';
 import { extractUrls as extractUrlsFromMarkdown } from '@joplin/utils/markdown';
-import * as moment from 'moment';
+import moment from 'moment';
 import { wrapError } from './errorUtils';
 const { enexXmlToHtml } = require('./import-enex-html-gen.js');
 const md5 = require('md5');
@@ -225,11 +225,18 @@ async function saveNoteTags(note: ExtractedNote) {
 	return notesTagged;
 }
 
+export interface ImportProgressState {
+	loaded: number;
+	created: number;
+	updated: number;
+	skipped: number;
+	resourcesCreated: number;
+	notesTagged: number;
+}
+
 export interface ImportOptions {
-	// eslint-disable-next-line @typescript-eslint/no-unsafe-function-type -- Old code before rule was applied
-	onProgress?: Function;
-	// eslint-disable-next-line @typescript-eslint/no-unsafe-function-type -- Old code before rule was applied
-	onError?: Function;
+	onProgress?: (progressState: ImportProgressState)=> void;
+	onError?: (error: Error)=> void;
 	outputFormat?: string;
 	batchSize?: number;
 }

@@ -316,8 +316,7 @@ export class Bridge {
 	// Perhaps the easiest would be to patch electron-context-menu to
 	// support the renderer process again. Or possibly revert to an old
 	// version of electron-context-menu.
-	// eslint-disable-next-line @typescript-eslint/no-unsafe-function-type -- Old code before rule was applied
-	public setupContextMenu(_spellCheckerMenuItemsHandler: Function) {
+	public setupContextMenu(_spellCheckerMenuItemsHandler: (misspelledWord: string, dictionarySuggestions: string[])=> void) {
 		require('./services/electron-context-menu')({
 			allWindows: [this.mainWindow()],
 

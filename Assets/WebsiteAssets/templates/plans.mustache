@@ -118,10 +118,9 @@
 				{{> plan}}
 			{{/plans.pro}}
 
-			{{! TODO: Enable, when supported by Joplin Cloud
-			\{\{#plans.pro100Gb\}\}
-				\{\{> plan\}\}
-			\{\{/plans.pro100Gb\}\} }}
+			{{#plans.pro100Gb}}
+				{{> plan}}
+			{{/plans.pro100Gb}}
 
 			{{#plans.teams}}
 				{{> plan}}
@@ -251,6 +250,8 @@
 
 		$('.toggle-button-self').click((event) => {
 			event.preventDefault();
+			// Self-hosting is currently yearly-only
+			applyPeriod('yearly');
 			setHostingType('self');
 		});
 

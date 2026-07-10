@@ -1,4 +1,4 @@
-import { createUserAndSession, beforeAllDb, afterAllTests, beforeEachDb, models, checkThrowAsync, expectThrow, expectHttpError, createUser } from '../utils/testing/testUtils';
+import { createUserAndSession, beforeAllDb, afterAllTests, beforeEachDb, models, checkThrowAsync, expectThrow, expectHttpError, createUser, koaAppContext } from '../utils/testing/testUtils';
 import { EmailSender, UserFlagType } from '../services/database/types';
 import { ErrorBadRequest, ErrorUnprocessableEntity } from '../utils/errors';
 import { betaUserDateRange, stripeConfig } from '../utils/stripe';
@@ -556,8 +556,9 @@ describe('UserModel', () => {
 		config().LOCAL_AUTH_ENABLED = false;
 
 		const user = await createUser();
+		const ctx = await koaAppContext();
 
-		expect(await models().user().login(user.email, '123456')).toBe(null);
+		expect(await models().user().login(user.email, '123456', ctx.joplin.services)).toBe(null);
 	});
 
 	test('should not change user properties managed by SAML', async () => {
@@ -593,6 +594,23 @@ describe('UserModel', () => {
 		}
 	});
 
+	test('should not log in as a local account via SSO based on email match alone', async () => {
+		const localUser = await createUser(1);
+
+		config().SAML_ENABLED = true;
+
+		try {
+			const ctx = await koaAppContext();
+			const result = await models().user().ssoLogin(localUser.email, 'Attacker Controlled Name', ctx.joplin.services);
+			expect(result).toBeNull();
+
+			const reloaded = await models().user().load(localUser.id);
+			expect(reloaded.is_external).toBe(0);
+		} finally {
+			config().SAML_ENABLED = false;
+		}
+	});
+
 	test('should generate a unique SSO code', async () => {
 		const createExternalUser = async (index: number) => {
 			const user = await createUser(index);
@@ -617,4 +635,26 @@ describe('UserModel', () => {
 		}
 	});
 
+	test('should correctly return whether a user has MFA enabled', async () => {
+		const createTestUser = async (index: number, mfaEnabled: boolean) => {
+			const user = await createUser(index);
+			await models().user().save({
+				id: user.id,
+				totp_secret: mfaEnabled ? '111111' : '',
+			});
+			return await models().user().load(user.id);
+		};
+
+		const user1 = await createTestUser(1, true);
+		expect(await models().user().hasMFAEnabled(user1.email, { requireUserExists: true })).toBe(true);
+		const user2 = await createTestUser(2, false);
+		expect(await models().user().hasMFAEnabled(user2.email, { requireUserExists: true })).toBe(false);
+
+		expect(
+			await models().user().hasMFAEnabled('no-exist@localhost', { requireUserExists: false }),
+		).toBe(false);
+		await expectHttpError(async () => {
+			await models().user().hasMFAEnabled('no-exist@localhost', { requireUserExists: true });
+		}, 403);
+	});
 });

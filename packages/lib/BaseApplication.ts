@@ -8,6 +8,9 @@ import KeychainServiceDriverNode from './services/keychain/KeychainServiceDriver
 import KeychainServiceDriverElectron from './services/keychain/KeychainServiceDriver.electron';
 import { setLocale } from './locale';
 import KvStore from './services/KvStore';
+import AiService from './services/ai/AiService';
+import { embeddingAvailability } from './services/ai/availability';
+import EmbeddingIndexer from './services/ai/EmbeddingIndexer';
 import SyncTargetJoplinServer from './SyncTargetJoplinServer';
 import SyncTargetJoplinServerSAML from './SyncTargetJoplinServerSAML';
 import SyncTargetOneDrive from './SyncTargetOneDrive';
@@ -69,6 +72,9 @@ import NavService from './services/NavService';
 import getAppName from './getAppName';
 import PerformanceLogger from './PerformanceLogger';
 import Synchronizer from './Synchronizer';
+import NoteLockKey from './services/noteLock/NoteLockKey';
+import NoteLockSession from './services/noteLock/NoteLockSession';
+import NoteLockService from './services/noteLock/NoteLockService';
 
 const appLogger: LoggerWrapper = Logger.create('App');
 const perfLogger = PerformanceLogger.create();
@@ -120,6 +126,7 @@ export default class BaseApplication {
 		await folderScreenUtilsCancelTimers();
 		await BaseItem.revisionService_.cancelTimers();
 		await ResourceService.instance().cancelTimers();
+		await EmbeddingIndexer.instance().stopRunInBackground();
 		await reg.cancelTimers();
 
 		this.eventEmitter_.removeAllListeners();
@@ -133,6 +140,9 @@ export default class BaseApplication {
 		ResourceService.isRunningInBackground_ = false;
 		// ResourceService.isRunningInBackground_ = false;
 		ResourceFetcher.instance_ = null;
+		NoteLockService.destroyInstance();
+		NoteLockSession.destroyInstance();
+		NoteLockKey.destroyInstance();
 		EncryptionService.instance_ = null;
 		DecryptionWorker.instance_ = null;
 
@@ -348,6 +358,19 @@ export default class BaseApplication {
 		return middleware;
 	}
 
+	// Starts or stops the embedding indexer to match current state. Called
+	// from the settings-side-effects path (on ai.enabled / ai.embedding.enabled
+	// toggles) and from app startup. Gates on the shared embeddingAvailability
+	// helper so the same preconditions used by the panel/settings UI control
+	// whether the background indexer runs.
+	protected async applyEmbeddingIndexerState() {
+		if (embeddingAvailability().available) {
+			await EmbeddingIndexer.instance().runInBackground();
+		} else {
+			await EmbeddingIndexer.instance().stopRunInBackground();
+		}
+	}
+
 	protected async applySettingsSideEffects(action: { type?: string; key?: string; keys?: string[] } = null) {
 		const sideEffects: Record<string, ()=> Promise<void>> = {
 			'dateFormat': async () => {
@@ -407,6 +430,20 @@ export default class BaseApplication {
 			'sync.interval': async () => {
 				if (this.hasGui()) reg.setupRecurrentSync();
 			},
+
+			'ai.enabled': async () => {
+				if (Setting.value('ai.enabled')) AiService.instance().applyFirstEnableDefault();
+				AiService.instance().invalidateProvider();
+				await this.applyEmbeddingIndexerState();
+			},
+
+			'ai.chat.providerType': async () => {
+				AiService.instance().invalidateProvider();
+			},
+
+			'ai.embedding.enabled': async () => {
+				await this.applyEmbeddingIndexerState();
+			},
 		};
 
 		sideEffects['timeFormat'] = sideEffects['dateFormat'];
@@ -416,6 +453,9 @@ export default class BaseApplication {
 		sideEffects['sync.maxConcurrentConnections'] = sideEffects['net.proxyEnabled'];
 		sideEffects['sync.proxyTimeout'] = sideEffects['net.proxyEnabled'];
 		sideEffects['sync.proxyUrl'] = sideEffects['net.proxyEnabled'];
+		sideEffects['ai.chat.baseUrl'] = sideEffects['ai.chat.providerType'];
+		sideEffects['ai.chat.apiKey'] = sideEffects['ai.chat.providerType'];
+		sideEffects['ai.chat.model'] = sideEffects['ai.chat.providerType'];
 
 		if (action) {
 			const effect = sideEffects[action.key];

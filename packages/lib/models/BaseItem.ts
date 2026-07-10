@@ -555,7 +555,7 @@ export default class BaseItem extends BaseModel {
 
 		// List of keys that won't be encrypted - mostly foreign keys required to link items
 		// with each others and timestamp required for synchronisation.
-		const keepKeys = ['id', 'note_id', 'tag_id', 'parent_id', 'share_id', 'updated_time', 'deleted_time', 'type_'];
+		const keepKeys = ['id', 'note_id', 'tag_id', 'parent_id', 'share_id', 'updated_time', 'deleted_time', 'type_', 'is_locked', 'extracted_resource_ids'];
 		const reducedItem: Record<string, unknown> = {};
 
 		for (let i = 0; i < keepKeys.length; i++) {
@@ -620,6 +620,19 @@ export default class BaseItem extends BaseModel {
 
 		const ItemClass = this.itemClass(output.type_);
 		output = ItemClass.removeUnknownFields(output);
+
+		// Reject any field that could be used to escape the resource directory
+		// when concatenated into a file path (resourceFullPath uses raw string
+		// concat on id and file_extension). The id format is universally a 32
+		// char hex string; the extension must not contain path separators.
+		// Throws a malformedItem JoplinError so the sync loop can log+skip the
+		// item rather than abort the whole batch.
+		if ('id' in output && output.id !== '' && !/^[a-fA-F0-9]{32}$/.test(output.id)) {
+			throw new JoplinError(`Invalid item ID format: ${JSON.stringify(output.id)}`, 'malformedItem');
+		}
+		if ('file_extension' in output && /[/\\]|\.\./.test(output.file_extension)) {
+			throw new JoplinError(`Invalid file extension: ${JSON.stringify(output.file_extension)}`, 'malformedItem');
+		}
 
 		for (const n in output) {
 			if (!output.hasOwnProperty(n)) continue;

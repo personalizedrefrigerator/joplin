@@ -94,6 +94,7 @@ import { Platform } from 'react-native';
 import VoiceTyping from '../services/voiceTyping/VoiceTyping';
 import whisper from '../services/voiceTyping/whisper';
 import PerFolderSortOrderService from '@joplin/lib/services/sortOrder/PerFolderSortOrderService';
+const { runStartupTests } = require('@joplin/mobile-config');
 
 
 function resourceFetcher_downloadComplete(event: { id: string; encrypted: boolean }) {
@@ -184,6 +185,7 @@ const buildStartupTasks = (
 		Setting.setConstant('sync.9.apiKey', '');
 		Setting.setConstant('sync.10.apiKey', '');
 		Setting.setConstant('sync.11.apiKey', '');
+		Setting.setConstant('isJoplinCloudWebApp', Platform.OS === 'web' && location.origin === 'https://app.joplincloud.com');
 	});
 	addTask('buildStartupTasks/make resource directory', async () => {
 		await shim.fsDriver().mkdir(Setting.value('resourceDir'));
@@ -482,7 +484,7 @@ const buildStartupTasks = (
 		// call will throw an error, alerting us of the issue. Otherwise it will
 		// just print some messages in the console.
 		// ----------------------------------------------------------------------------
-		if (Setting.value('env') === 'dev') {
+		if (runStartupTests) {
 			await runRsaIntegrationTests();
 			await runCryptoIntegrationTests();
 			await runOnDeviceFsDriverTests();

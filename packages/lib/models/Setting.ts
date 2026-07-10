@@ -63,6 +63,7 @@ export interface Constants {
 	syncVersion: number;
 	startupDevPlugins: string[];
 	isSubProfile: boolean;
+	isJoplinCloudWebApp: boolean;
 
 	'sync.9.apiKey': string;
 	'sync.10.apiKey': string;
@@ -163,8 +164,7 @@ const globalMigrations: GlobalMigration[] = [
 interface UserSettingMigration {
 	oldName: string;
 	newName: string;
-	// eslint-disable-next-line @typescript-eslint/no-unsafe-function-type -- Old code before rule was applied
-	transformValue: Function;
+	transformValue: (value: string)=> string | string[];
 
 	// Currently the migration code only supports migrating a plugin setting to the regular settings
 	// (not a plugin setting to a different name). So "oldName" should be the plugin setting name
@@ -306,6 +306,7 @@ class Setting extends BaseModel {
 		syncVersion: 3,
 		startupDevPlugins: [],
 		isSubProfile: false,
+		isJoplinCloudWebApp: false,
 
 		'sync.9.apiKey': '',
 		'sync.10.apiKey': '',
@@ -504,7 +505,7 @@ class Setting extends BaseModel {
 				}
 
 				if (applyMigration) {
-					this.setValue(migration.newName, migration.transformValue(newValue));
+					this.setValue(migration.newName, migration.transformValue(newValue as string));
 					logger.info(`applyUserSettingMigrations: Migrated ${migration.oldName} to ${migration.newName}`);
 				}
 			}
@@ -1291,6 +1292,8 @@ class Setting extends BaseModel {
 			'sync',
 			'encryption',
 			'joplinCloud',
+			'ai',
+			'mcp',
 			'editor',
 			'plugins',
 			'markdownPlugins',
@@ -1365,6 +1368,8 @@ class Setting extends BaseModel {
 		if (name === 'tools') return _('Tools');
 		if (name === 'importOrExport') return _('Import and Export');
 		if (name === 'moreInfo') return _('More information');
+		if (name === 'ai') return _('AI');
+		if (name === 'mcp') return _('MCP Server');
 
 		if (this.customSections_[name] && this.customSections_[name].label) return this.customSections_[name].label;
 
@@ -1441,6 +1446,8 @@ class Setting extends BaseModel {
 			'tools': 'fa fa-toolbox',
 			'importOrExport': 'fa fa-file-export',
 			'moreInfo': 'fa fa-info-circle',
+			'ai': 'fa fa-robot',
+			'mcp': 'fa fa-plug',
 		};
 
 		// Icomoon icons are currently not present in the mobile app -- we override these

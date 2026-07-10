@@ -7,7 +7,7 @@ import { _ } from '@joplin/lib/locale';
 import { formatBytes, GB, MB } from '../utils/bytes';
 import { itemIsEncrypted } from '../utils/joplinUtils';
 import { getIsMFAEnabled, getMaxItemSize, getMaxTotalItemSize } from './utils/user';
-import * as zxcvbn from 'zxcvbn';
+import zxcvbn from 'zxcvbn';
 import { confirmUrl, resetPasswordUrl } from '../utils/urlUtils';
 import { checkRepeatPassword, CheckRepeatPasswordInput } from '../routes/index/users';
 import accountConfirmationTemplate from '../views/emails/accountConfirmationTemplate';
@@ -28,6 +28,7 @@ import changeEmailNotificationTemplate from '../views/emails/changeEmailNotifica
 import { NotificationKey } from './NotificationModel';
 import prettyBytes = require('pretty-bytes');
 import { validateEmail } from '../utils/validation';
+import { EmailSubjectBody } from './EmailModel';
 import { Config, Env, LdapConfig } from '../utils/types';
 import { DbConnection } from '../db';
 import { NewModelFactoryHandler } from './factory';
@@ -37,7 +38,9 @@ const thirtyTwo = require('thirty-two');
 import config, { isUsingExternalAuth } from '../config';
 import { randomInt } from 'node:crypto';
 import { samlOwnedUserProperties } from '../utils/saml';
-import { PlanName } from '@joplin/lib/utils/joplinCloud';
+import { AccountType, PlanName } from '@joplin/lib/utils/joplinCloud';
+import { Services } from '../services/types';
+export { AccountType };
 
 const logger = Logger.create('UserModel');
 
@@ -50,11 +53,8 @@ interface UserEmailDetails {
 
 export type GetUsersApiResponse = User;
 
-export enum AccountType {
-	Default = 0,
-	Basic = 1,
-	Pro = 2,
-	Pro100Gb = 4,
+interface HasMfaEnabledOptions {
+	requireUserExists: boolean;
 }
 
 export interface Account {
@@ -99,6 +99,20 @@ const accountMetadata: Record<AccountType, Account> = {
 		max_item_size: 200 * MB,
 		max_total_item_size: 100 * GB,
 	},
+	[AccountType.Team]: {
+		account_type: AccountType.Team,
+		can_share_folder: 1,
+		can_receive_folder: 1,
+		max_item_size: 200 * MB,
+		max_total_item_size: 50 * GB,
+	},
+	[AccountType.SelfHosted]: {
+		account_type: AccountType.SelfHosted,
+		can_share_folder: 0,
+		can_receive_folder: 0,
+		max_item_size: 200 * MB,
+		max_total_item_size: 1 * MB,
+	},
 };
 
 interface AccountTypeSelectOptions {
@@ -138,6 +152,8 @@ export function accountTypeToString(accountType: AccountType): string {
 	if (accountType === AccountType.Basic) return 'Basic';
 	if (accountType === AccountType.Pro) return 'Pro';
 	if (accountType === AccountType.Pro100Gb) return 'Pro 100 GB';
+	if (accountType === AccountType.Team) return 'Team';
+	if (accountType === AccountType.SelfHosted) return 'Self hosted';
 	const exhaustivenessCheck: never = accountType;
 	throw new Error(`Invalid type: ${exhaustivenessCheck}`);
 }
@@ -146,6 +162,8 @@ export const accountTypeToPlan = (accountType: AccountType): PlanName => {
 	if (accountType === AccountType.Basic) return PlanName.Basic;
 	if (accountType === AccountType.Pro) return PlanName.Pro;
 	if (accountType === AccountType.Pro100Gb) return PlanName.Pro100Gb;
+	if (accountType === AccountType.Team) return PlanName.Teams;
+	if (accountType === AccountType.SelfHosted) return PlanName.JoplinServerBusiness;
 	if (accountType === AccountType.Default) throw new Error('No plan exists for account type "Default"');
 	const exhaustivenessCheck: never = accountType;
 	throw new Error(`Invalid type: ${exhaustivenessCheck}`);
@@ -197,7 +215,7 @@ export default class UserModel extends BaseModel<User> {
 		return this.db<User>(this.tableName).where(user).first();
 	}
 
-	public async login(email: string, password: string): Promise<User> {
+	public async login(email: string, password: string, _services: Services): Promise<User> {
 		if (!config().LOCAL_AUTH_ENABLED) {
 			return null;
 		}
@@ -222,12 +240,17 @@ export default class UserModel extends BaseModel<User> {
 		return user;
 	}
 
-	public async ssoLogin(email: string, displayName: string) {
+	public async ssoLogin(email: string, displayName: string, _services: Services) {
 		if (!email || !displayName) {
 			return null;
 		}
 
 		let user = await this.loadByEmail(email);
+
+		// A local, password-based account already owns this email address. Do
+		// not allow a SAML assertion to log in as it - this would bypass the
+		// local account's password.
+		if (user && !user.is_external) return null;
 
 		if (!user) { // User does not exist
 			user = {
@@ -472,13 +495,12 @@ export default class UserModel extends BaseModel<User> {
 		await this.save({ id: user.id, email_confirmed: 1 });
 	}
 
-	// eslint-disable-next-line @typescript-eslint/no-unsafe-function-type -- Old code before rule was applied
-	public async processEmailConfirmation(userId: Uuid, token: string, beforeChangingEmailHandler: Function) {
+	public async processEmailConfirmation(userId: Uuid, token: string, beforeChangingEmailHandler: (newEmail: string)=> Promise<void>) {
 		await this.models().token().checkToken(userId, token);
 		const user = await this.models().user().load(userId);
 		if (!user) throw new ErrorNotFound('No such user');
 
-		const newEmail = await this.models().keyValue().value(`newEmail::${userId}`);
+		const newEmail = await this.models().keyValue().value<string>(`newEmail::${userId}`);
 		if (newEmail) {
 			await beforeChangingEmailHandler(newEmail);
 			await this.completeEmailChange(user);
@@ -633,8 +655,7 @@ export default class UserModel extends BaseModel<User> {
 	public async handleFailedPaymentSubscriptions() {
 		interface SubInfo {
 			subs: Subscription[];
-			// eslint-disable-next-line @typescript-eslint/no-unsafe-function-type -- Old code before rule was applied
-			templateFn: Function;
+			templateFn: ()=> EmailSubjectBody;
 			emailKeyPrefix: string;
 			flagType: UserFlagType;
 		}
@@ -871,9 +892,12 @@ export default class UserModel extends BaseModel<User> {
 		}, 'UserModel::saveMulti');
 	}
 
-	public async hasMFAEnabled(email: string) {
+	public async hasMFAEnabled(email: string, { requireUserExists }: HasMfaEnabledOptions) {
 		const user = await this.loadByEmail(email, { fields: ['totp_secret'] });
-		if (!user) throw new ErrorForbidden('Invalid email or password', { details: { email } });
+		if (!user) {
+			if (requireUserExists) throw new ErrorForbidden('Invalid email or password', { details: { email } });
+			return false;
+		}
 		return getIsMFAEnabled(user);
 	}
 
