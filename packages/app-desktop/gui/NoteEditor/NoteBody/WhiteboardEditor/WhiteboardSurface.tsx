@@ -64,6 +64,7 @@ const InnerSurface = ({ canvas, onChange }: Props) => {
 	const initial = useMemo(() => canvasToFlow(canvas), [canvas]);
 	const [flowNodes, setFlowNodes] = useState<WhiteboardFlowNode[]>(initial.nodes);
 	const [flowEdges, setFlowEdges] = useState<WhiteboardFlowEdge[]>(initial.edges);
+	const [labelFocusToken, setLabelFocusToken] = useState(0);
 	const containerRef = useRef<HTMLDivElement | null>(null);
 	const rf = useReactFlow();
 
@@ -167,6 +168,14 @@ const InnerSurface = ({ canvas, onChange }: Props) => {
 
 	const onReconnect: OnReconnect = useCallback((oldEdge, newConnection) => {
 		setFlowEdges(prev => reconnectEdge(oldEdge as unknown as WhiteboardFlowEdge, newConnection, prev) as WhiteboardFlowEdge[]);
+	}, []);
+
+	// Double-clicking an edge selects it exclusively and focuses the label
+	// input, so a user can start typing without moving the mouse to the panel.
+	const onEdgeDoubleClick = useCallback((_e: React.MouseEvent, edge: Edge) => {
+		setFlowEdges(prev => prev.map(x => ({ ...x, selected: x.id === edge.id })));
+		setFlowNodes(prev => prev.some(n => n.selected) ? prev.map(n => ({ ...n, selected: false })) : prev);
+		setLabelFocusToken(t => t + 1);
 	}, []);
 
 	const defaultEdgeOptions = useMemo(() => ({
@@ -340,6 +349,7 @@ const InnerSurface = ({ canvas, onChange }: Props) => {
 				onEdgesChange={onEdgesChange}
 				onConnect={onConnect}
 				onReconnect={onReconnect}
+				onEdgeDoubleClick={onEdgeDoubleClick}
 				edgesReconnectable
 				onNodeDragStart={onNodeDragStart}
 				onNodeDrag={onNodeDrag}
@@ -381,6 +391,7 @@ const InnerSurface = ({ canvas, onChange }: Props) => {
 								<ActionInput
 									value={typeof selectedEdges[0].label === 'string' ? selectedEdges[0].label : ''}
 									placeholder={_('Label')}
+									focusToken={labelFocusToken}
 									onChange={setEdgeLabel}
 								/>
 							</>

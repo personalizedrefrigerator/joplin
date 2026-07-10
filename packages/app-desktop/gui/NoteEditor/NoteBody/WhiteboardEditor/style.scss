@@ -96,6 +96,9 @@ $hover-bg: rgba(127, 127, 127, 0.12);
 	font-size: 12px;
 	height: 36px;
 	color: var(--joplin-color);
+	user-select: none;
+
+	> .input { user-select: text; }
 
 	&.-bottom-center { bottom: 16px; left: 50%; transform: translateX(-50%); }
 	&.-top-center { top: 16px; left: 50%; transform: translateX(-50%); }
