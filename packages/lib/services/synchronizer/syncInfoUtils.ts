@@ -181,7 +181,9 @@ const fixSyncInfo = (syncInfo: SyncInfo) => {
 
 export function localSyncInfo(): SyncInfo {
 	const output = new SyncInfo(Setting.value('syncInfoCache'));
-	if (output.appMinVersion !== forwardCompatibleAppMinVersion) {
+	// Avoid resetting appMinVersion when operating in forward-compatibility mode. This avoids data loss if the user
+	// switches sync targets (v3.7.0 sync targets contain properties/data unsupported by most older Joplin versions)
+	if (output.appMinVersion !== forwardCompatibleAppMinVersion || compareVersions(appMinVersion_, forwardCompatibleAppMinVersion) > 0) {
 		output.appMinVersion = appMinVersion_;
 	}
 	return fixSyncInfo(output);
