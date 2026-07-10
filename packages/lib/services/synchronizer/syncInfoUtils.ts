@@ -45,13 +45,21 @@ export interface SyncInfoValuePublicPrivateKeyPair {
 // using `setAppMinVersion()`
 let appMinVersion_ = '3.0.0';
 
+export const setAppMinVersion = (v: string) => {
+	const previous = appMinVersion_;
+	appMinVersion_ = v;
+
+	return {
+		reset: () => {
+			appMinVersion_ = previous;
+		},
+	};
+};
+
 // 2026-07-10: Joplin 3.6 now supports the Joplin 3.7.0 sync format. This allows the 3.6 stable release
 // to sync with clients that have been upgraded to Joplin 3.7.
 const forwardCompatibleAppMinVersion = '3.7.0';
 
-export const setAppMinVersion = (v: string) => {
-	appMinVersion_ = v;
-};
 
 export function onRevisionServiceSettingsChanged(key: string, value: unknown) {
 	if (key !== 'revisionService.enabled' && key !== 'revisionService.ttlDays') return;
