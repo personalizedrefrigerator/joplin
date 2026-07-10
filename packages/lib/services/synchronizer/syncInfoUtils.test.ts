@@ -335,6 +335,8 @@ describe('syncInfoUtils', () => {
 		['1.0.0', '1.0.4', true],
 		['1.0.0', '0.0.5', false],
 		['1.0.0', '1.0.0', true],
+		['3.7.0', '3.6.4', true],
+		['3.7.1', '3.6.4', false],
 	])('should check if it can sync', async (appMinVersion, appVersion, expected) => {
 		let succeeded = true;
 		try {
