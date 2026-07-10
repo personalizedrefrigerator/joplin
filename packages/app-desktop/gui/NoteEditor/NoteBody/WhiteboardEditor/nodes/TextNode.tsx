@@ -5,6 +5,7 @@ import { MarkupLanguage } from '@joplin/renderer';
 import { focus } from '@joplin/lib/utils/focusHandler';
 import { _ } from '@joplin/lib/locale';
 import { TextCanvasNode } from '@joplin/lib/services/whiteboard/jsoncanvas';
+import { resolveCanvasColor } from '@joplin/lib/services/whiteboard/presetColors';
 import { useWhiteboardContext, WhiteboardContextValue } from '../WhiteboardContext';
 import { WhiteboardNodeData } from '../canvasFlow';
 import useCheckboxToggle from '../useCheckboxToggle';
@@ -112,7 +113,12 @@ const TextNode = ({ data, selected, id }: NodeProps<{ id: string; type: 'wbText'
 			{handlePositions.map(({ id: hid, position }) => (
 				<Handle key={hid} type="source" position={position} id={hid} />
 			))}
-			<div className={`whiteboard-node -text ${selected ? '-selected' : ''}`} onDoubleClick={onDoubleClick} onKeyDown={onCardKeyDown}>
+			<div
+				className={`whiteboard-node -text ${selected ? '-selected' : ''}`}
+				onDoubleClick={onDoubleClick}
+				onKeyDown={onCardKeyDown}
+				style={{ borderColor: resolveCanvasColor(node.color, ctx.themeAppearance, 'stroke') ?? (selected ? '#4a90e2' : undefined) }}
+			>
 				{editing ? (
 					<textarea
 						ref={textareaRef}

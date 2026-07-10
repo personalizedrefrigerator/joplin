@@ -13,6 +13,7 @@ import Logger from '@joplin/utils/Logger';
 import { resourceFullPath } from '@joplin/lib/models/utils/resourceUtils';
 import { ResourceEntity } from '@joplin/lib/services/database/types';
 import { FileCanvasNode } from '@joplin/lib/services/whiteboard/jsoncanvas';
+import { resolveCanvasColor } from '@joplin/lib/services/whiteboard/presetColors';
 import { isInternalRef, RefKind, resolveFileRef } from '@joplin/lib/services/whiteboard/resolveRef';
 import { useWhiteboardContext } from '../WhiteboardContext';
 import { WhiteboardNodeData } from '../canvasFlow';
@@ -214,7 +215,11 @@ const FileNode = ({ data, selected }: NodeProps<{ id: string; type: 'wbFile'; da
 			{handlePositions.map(({ id: hid, position }) => (
 				<Handle key={hid} type="source" position={position} id={hid} />
 			))}
-			<div className={`whiteboard-node ${selected ? '-selected' : ''}`} onDoubleClick={onDoubleClick}>
+			<div
+				className={`whiteboard-node ${selected ? '-selected' : ''}`}
+				onDoubleClick={onDoubleClick}
+				style={{ borderColor: resolveCanvasColor(node.color, ctx.themeAppearance, 'stroke') ?? (selected ? '#4a90e2' : undefined) }}
+			>
 				{renderContent()}
 			</div>
 		</>

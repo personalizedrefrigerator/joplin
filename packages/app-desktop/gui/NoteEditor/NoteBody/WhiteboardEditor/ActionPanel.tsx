@@ -50,6 +50,30 @@ export const ActionButton = ({ onClick, active, disabled, title, children }: Act
 
 export const ActionDivider = () => <div className="divider" />;
 
+interface ActionSwatchProps {
+	color: string | null;
+	active?: boolean;
+	title?: string;
+	onClick: ()=> void;
+}
+
+export const ActionSwatch = ({ color, active, title, onClick }: ActionSwatchProps) => {
+	const classes = ['swatch'];
+	if (active) classes.push('-active');
+	if (color === null) classes.push('-none');
+	return (
+		<button
+			type="button"
+			onClick={onClick}
+			title={title}
+			aria-label={title}
+			aria-pressed={active}
+			className={classes.join(' ')}
+			style={color ? { background: color } : undefined}
+		/>
+	);
+};
+
 interface ActionInputProps {
 	value: string;
 	placeholder?: string;
