@@ -19,6 +19,7 @@ import { useWhiteboardContext } from '../WhiteboardContext';
 import { WhiteboardNodeData } from '../canvasFlow';
 import useCheckboxToggle from '../useCheckboxToggle';
 import handlePositions from './handlePositions';
+import useCardWheel from './useCardWheel';
 
 const logger = Logger.create('WhiteboardFileNode');
 
@@ -92,6 +93,7 @@ const useResolvedRef = (file: string): { resolved: ResolvedItem | null; refetch:
 const FileNode = ({ data, selected }: NodeProps<{ id: string; type: 'wbFile'; data: WhiteboardNodeData; position: { x: number; y: number } }>) => {
 	const ctx = useWhiteboardContext();
 	const node = data.canvasNode as FileCanvasNode;
+	const onWheel = useCardWheel();
 
 	const onDoubleClick = useCallback((e: React.MouseEvent) => {
 		e.stopPropagation();
@@ -218,6 +220,7 @@ const FileNode = ({ data, selected }: NodeProps<{ id: string; type: 'wbFile'; da
 			<div
 				className={`whiteboard-node ${selected ? '-selected' : ''}`}
 				onDoubleClick={onDoubleClick}
+				onWheelCapture={onWheel}
 				style={{ borderColor: resolveCanvasColor(node.color, ctx.themeAppearance, 'stroke') ?? (selected ? '#4a90e2' : undefined) }}
 			>
 				{renderContent()}

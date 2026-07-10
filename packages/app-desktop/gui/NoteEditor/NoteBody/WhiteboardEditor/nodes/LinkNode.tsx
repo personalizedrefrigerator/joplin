@@ -7,10 +7,12 @@ import { resolveCanvasColor } from '@joplin/lib/services/whiteboard/presetColors
 import { useWhiteboardContext } from '../WhiteboardContext';
 import { WhiteboardNodeData } from '../canvasFlow';
 import handlePositions from './handlePositions';
+import useCardWheel from './useCardWheel';
 
 const LinkNode = ({ data, selected }: NodeProps<{ id: string; type: 'wbLink'; data: WhiteboardNodeData; position: { x: number; y: number } }>) => {
 	const ctx = useWhiteboardContext();
 	const node = data.canvasNode as LinkCanvasNode;
+	const onWheel = useCardWheel();
 
 	const onDoubleClick = useCallback((e: React.MouseEvent) => {
 		e.stopPropagation();
@@ -26,6 +28,7 @@ const LinkNode = ({ data, selected }: NodeProps<{ id: string; type: 'wbLink'; da
 			<div
 				className={`whiteboard-node ${selected ? '-selected' : ''}`}
 				onDoubleClick={onDoubleClick}
+				onWheelCapture={onWheel}
 				style={{ borderColor: resolveCanvasColor(node.color, ctx.themeAppearance, 'stroke') ?? (selected ? '#4a90e2' : undefined) }}
 			>
 				<div className="header">{_('Link')}</div>
