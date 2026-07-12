@@ -1,7 +1,7 @@
 import Setting from '../../../models/Setting';
 import JoplinError from '../../../JoplinError';
 import SyncTargetRegistry from '../../../SyncTargetRegistry';
-import { ProviderClassification } from '../types';
+import { ChatMessage, ChatOptions, ChatResult, ProviderClassification } from '../types';
 import OpenAiCompatibleProvider, { ChatRequestOptions, OpenAiChatResponse } from './OpenAiCompatible';
 import { msleep, Second } from '@joplin/utils/time';
 import Logger from '@joplin/utils/Logger';
@@ -34,12 +34,26 @@ interface JoplinCloudChatRequestOptions extends ChatRequestOptions {
 
 // Maps the server-side errors thrown by the Joplin Cloud AI route to messages
 // the user can act on. See joplin-server/packages/server/src/routes/api/ai.ts.
-const mapErrorByStatus = (status: number, detail: string): JoplinError => {
-	if (status === 401) return new JoplinError('Sign in to Joplin Cloud to use AI', status);
-	if (status === 403) return new JoplinError('Joplin Cloud AI has been disabled for this account', status);
-	if (status === 429) return new JoplinError('Joplin Cloud AI rate limit or token budget exceeded', status);
-	if (status === 501) return new JoplinError('Joplin Cloud AI is not enabled on this server', status);
-	if (status === 502) return new JoplinError('Joplin Cloud AI upstream error', status);
+//
+// Code match wins over status match; codes are camelCase, matching the
+// ErrorCode enum in packages/server/src/utils/errors.ts.
+export const mapErrorByCode = (code: string | number | null, status: number, detail: string): JoplinError => {
+	if (code === 'aiRateLimitExceeded') return new JoplinError('You\'re sending requests too quickly. Try again in a moment.', code);
+	if (code === 'aiBudgetExhausted') return new JoplinError('You\'ve reached your AI usage budget for this billing period.', code);
+	if (code === 'aiAccountDisabled') return new JoplinError('AI access is disabled for your account. Contact support.', code);
+	if (code === 'aiUpstreamError') return new JoplinError('The AI provider is temporarily unavailable. Try again shortly.', code);
+
+	if (status === 401) return new JoplinError('Please sign in to use AI features.', status);
+	if (status === 501) return new JoplinError('AI is not enabled on this server.', status);
+
+	// Unknown string code (e.g. a code added server-side that this client
+	// version doesn't know yet): preserve it on both the message and the
+	// error's `code` field so callers switching on error.code and log
+	// scrapers looking at the message can still distinguish it.
+	if (typeof code === 'string') {
+		return new JoplinError(`Joplin Cloud AI returned ${code}${detail ? `: ${detail}` : ''}`, code);
+	}
+
 	return new JoplinError(`Joplin Cloud AI returned ${status}${detail ? `: ${detail}` : ''}`, status);
 };
 
@@ -60,6 +74,7 @@ export default class JoplinCloudProvider extends OpenAiCompatibleProvider {
 	public id = 'joplin-cloud';
 	public classification: ProviderClassification = 'remote';
 	private lastEventTime_ = 0;
+	private lastJoplinMeta_: JoplinCloudResponse['joplin'] | null = null;
 
 	public constructor() {
 		super({
@@ -113,14 +128,31 @@ export default class JoplinCloudProvider extends OpenAiCompatibleProvider {
 				return this.sendChatRequest(body, { ...options, retry: retry + 1 });
 			}
 
-			const status = typeof error?.code === 'number' ? error.code : 0;
+			// JoplinServerApi stores the server's `code` field on error.code
+			// (string) and falls back to the HTTP status (number) when no code
+			// was returned. Preserve that distinction.
+			const rawCode = error?.code;
+			const code = typeof rawCode === 'string' ? rawCode : null;
+			const status = typeof rawCode === 'number' ? rawCode : 0;
 			const detail = error?.message ?? '';
-
-			throw mapErrorByStatus(status, detail);
+			throw mapErrorByCode(code, status, detail);
 		}
 
 		this.lastEventTime_ = Date.now();
+		this.lastJoplinMeta_ = json?.joplin ?? null;
 
 		return { response: { status: 200 }, json };
+	}
+
+	protected override async doChat(messages: ChatMessage[], options?: ChatOptions): Promise<ChatResult> {
+		this.lastJoplinMeta_ = null;
+		const result = await super.doChat(messages, options);
+		const meta = this.lastJoplinMeta_;
+		if (meta) {
+			if (typeof meta.degraded === 'boolean') result.degraded = meta.degraded;
+			if (typeof meta.tokens_used === 'number') result.tokensUsed = meta.tokens_used;
+			if (typeof meta.tokens_budget === 'number') result.tokensBudget = meta.tokens_budget;
+		}
+		return result;
 	}
 }
