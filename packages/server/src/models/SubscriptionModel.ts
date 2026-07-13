@@ -28,7 +28,7 @@ interface PaymentAttempt {
 }
 
 export interface StripeSubscriptionSlice {
-	current_period_end: number;
+	current_period_end: number|null;
 	trial_end: number|null;
 }
 
