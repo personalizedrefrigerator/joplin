@@ -168,8 +168,9 @@ export default class SubscriptionModel extends BaseModel<Subscription> {
 			subscription = await this.byUserId(subscription.user_id);
 		}
 
-		// Stripe subscriptions date/time properties are in seconds
-		const stripePeriodEnd = stripeSubscription.current_period_end * Second;
+		// Stripe subscriptions date/time properties are in seconds. Handling undefined is important, since
+		// current_period_end can be undefined when creating a new trial subscription:
+		const stripePeriodEnd = (stripeSubscription.current_period_end ?? 0) * Second;
 		const stripeTrialEnd = (stripeSubscription.trial_end ?? 0) * Second;
 
 		if (subscription.current_period_end !== stripePeriodEnd || subscription.trial_end !== stripeTrialEnd) {
