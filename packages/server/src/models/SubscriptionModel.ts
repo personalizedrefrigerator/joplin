@@ -6,6 +6,8 @@ import { uuidgen } from '../utils/uuid';
 import paymentFailedTemplate from '../views/emails/paymentFailedTemplate';
 import BaseModel from './BaseModel';
 import { AccountType } from './UserModel';
+import { Second } from '@joplin/utils/time';
+import type Stripe from 'stripe';
 
 export const failedPaymentWarningInterval = 7 * Day;
 export const failedPaymentFinalAccount = 14 * Day;
@@ -23,6 +25,11 @@ enum PaymentAttemptStatus {
 interface PaymentAttempt {
 	status: PaymentAttemptStatus;
 	time: number;
+}
+
+export interface StripeSubscriptionSlice {
+	current_period_end: number;
+	trial_end: number|null;
 }
 
 export default class SubscriptionModel extends BaseModel<Subscription> {
@@ -156,4 +163,38 @@ export default class SubscriptionModel extends BaseModel<Subscription> {
 		await this.save({ id, is_deleted: isDeleted ? 1 : 0 });
 	}
 
+	public async updateFromStripe(subscription: Subscription, stripeSubscription: StripeSubscriptionSlice) {
+		if (!subscription.id) {
+			subscription = await this.byUserId(subscription.user_id);
+		}
+
+		// Stripe subscriptions date/time properties are in seconds
+		const stripePeriodEnd = stripeSubscription.current_period_end * Second;
+		const stripeTrialEnd = (stripeSubscription.trial_end ?? 0) * Second;
+
+		if (subscription.current_period_end !== stripePeriodEnd || subscription.trial_end !== stripeTrialEnd) {
+			await this.save({
+				id: subscription.id,
+				current_period_end: stripePeriodEnd,
+				trial_end: stripeTrialEnd,
+			});
+		}
+	}
+
+	public async retrievePeriodEnd(stripe: Stripe, subscription: Subscription) {
+		subscription = subscription.id ? await this.load(subscription.id) : await this.byUserId(subscription.user_id);
+
+		// Older subscriptions might not have a trial_end or current_period_end
+		const isUninitialized = subscription.trial_end === 0 && subscription.current_period_end === 0;
+		if (isUninitialized) {
+			const stripeSubscription = await stripe.subscriptions.retrieve(subscription.stripe_subscription_id);
+			await this.updateFromStripe(subscription, stripeSubscription);
+			subscription = await this.load(subscription.id);
+		}
+
+		return {
+			trialEnd: subscription.trial_end,
+			currentPeriodEnd: subscription.current_period_end,
+		};
+	}
 }
