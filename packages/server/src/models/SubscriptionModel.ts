@@ -1,6 +1,6 @@
 import { Knex } from 'knex';
 import { EmailSender, Subscription, User, UserFlagType, Uuid } from '../services/database/types';
-import { ErrorNotFound } from '../utils/errors';
+import { ErrorBadRequest, ErrorNotFound } from '../utils/errors';
 import { Day } from '../utils/time';
 import { uuidgen } from '../utils/uuid';
 import paymentFailedTemplate from '../views/emails/paymentFailedTemplate';
@@ -166,6 +166,10 @@ export default class SubscriptionModel extends BaseModel<Subscription> {
 	public async updateFromStripe(subscription: Subscription, stripeSubscription: StripeSubscriptionSlice) {
 		if (!subscription.id) {
 			subscription = await this.byUserId(subscription.user_id);
+		}
+
+		if ((stripeSubscription.current_period_end ?? null) === null && (stripeSubscription.trial_end ?? null) === null) {
+			throw new ErrorBadRequest('Failed to update subscription from Stripe -- missing both trial_end and current_period_end');
 		}
 
 		// Stripe subscriptions date/time properties are in seconds. Handling undefined is important, since
