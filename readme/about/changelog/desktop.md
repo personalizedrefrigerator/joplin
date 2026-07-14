@@ -1,5 +1,10 @@
 # Joplin Desktop Changelog
 
+## [v3.7.9](https://github.com/laurent22/joplin/releases/tag/v3.7.9) (Pre-release) - 2026-07-14T10:21:16Z
+
+- Fixed: Fix dependencies used for semantic search ([#15891](https://github.com/laurent22/joplin/issues/15891) by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Revert "Web: Fixes [#15601](https://github.com/laurent22/joplin/issues/15601): Fix S3 sync failing with getReader TypeError ([#15851](https://github.com/laurent22/joplin/issues/15851))"
+
 ## [v3.7.8](https://github.com/laurent22/joplin/releases/tag/v3.7.8) (Pre-release) - 2026-07-13T19:11:22Z
 
 - Improved: Unable to select text within links ([#15871](https://github.com/laurent22/joplin/issues/15871)) ([#15842](https://github.com/laurent22/joplin/issues/15842) by [@Rygaa](https://github.com/Rygaa))
