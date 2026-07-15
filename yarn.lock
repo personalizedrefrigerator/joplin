@@ -9971,16 +9971,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@dr.pogodin/react-native-fs@npm:2.36.2":
-  version: 2.36.2
-  resolution: "@dr.pogodin/react-native-fs@npm:2.36.2"
+"@dr.pogodin/react-native-fs@npm:2.39.2":
+  version: 2.39.2
+  resolution: "@dr.pogodin/react-native-fs@npm:2.39.2"
   dependencies:
     buffer: "npm:^6.0.3"
     http-status-codes: "npm:^2.3.0"
   peerDependencies:
     react: "*"
     react-native: "*"
-  checksum: 10/6a4b1c324386c455e01ccf45daf80474364079bc6495f0a65c1468e4e15607951754b81d9d720fb635a8caba5ba94b34719d0140357ce8e168172583e09156d4
+  checksum: 10/414af918d4070cc2f95625cb1407d7360fbded631bbfe1433b09232c719b540af9ea6d18035850ca35102650a5be7389b97b0dfe24909f32e21319d6f9f678ac
   languageName: node
   linkType: hard
 
@@ -12603,7 +12603,7 @@ __metadata:
     "@babel/plugin-transform-export-namespace-from": "npm:7.27.1"
     "@babel/preset-env": "npm:7.25.3"
     "@babel/runtime": "npm:7.25.0"
-    "@dr.pogodin/react-native-fs": "npm:2.36.2"
+    "@dr.pogodin/react-native-fs": "npm:2.39.2"
     "@joplin/editor": "npm:~3.7"
     "@joplin/lib": "npm:~3.7"
     "@joplin/react-native-alarm-notification": "npm:~3.7"
@@ -12689,11 +12689,10 @@ __metadata:
     react-native-quick-actions: "npm:0.3.13"
     react-native-quick-base64: "npm:2.2.2"
     react-native-quick-crypto: "npm:1.1.2"
-    react-native-rsa-native: "npm:2.0.5"
+    react-native-rsa-native: "patch:react-native-rsa-native@npm%3A2.0.5#~/.yarn/patches/react-native-rsa-native-npm-2.0.5-4664e1ce79.patch"
     react-native-safe-area-context: "npm:5.7.0"
-    react-native-securerandom: "npm:1.0.1"
     react-native-share: "npm:12.2.6"
-    react-native-sqlite-storage: "npm:6.0.1"
+    react-native-sqlite-storage: "patch:react-native-sqlite-storage@npm%3A6.0.1#~/.yarn/patches/react-native-sqlite-storage-npm-6.0.1-8369d747bd.patch"
     react-native-svg: "npm:15.15.4"
     react-native-url-polyfill: "npm:2.0.0"
     react-native-version-info: "npm:1.1.1"
@@ -12704,7 +12703,7 @@ __metadata:
     react-refresh: "npm:0.18.0"
     react-test-renderer: "npm:19.1.4"
     redux: "npm:4.2.1"
-    rn-fetch-blob: "npm:0.12.0"
+    rn-fetch-blob: "patch:rn-fetch-blob@npm%3A0.12.0#~/.yarn/patches/rn-fetch-blob-npm-0.12.0-cf02e3c544.patch"
     sharp: "npm:0.34.5"
     sqlite3: "npm:5.1.6"
     stream: "npm:0.0.3"
@@ -23290,7 +23289,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"base64-js@npm:*, base64-js@npm:^1.0.2, base64-js@npm:^1.1.2, base64-js@npm:^1.3.1, base64-js@npm:^1.5.1":
+"base64-js@npm:^1.0.2, base64-js@npm:^1.1.2, base64-js@npm:^1.3.1, base64-js@npm:^1.5.1":
   version: 1.5.1
   resolution: "base64-js@npm:1.5.1"
   checksum: 10/669632eb3745404c2f822a18fc3a0122d2f9a7a13f7fb8b5823ee19d1d2ff9ee5b52c53367176ea4ad093c332fd5ab4bd0ebae5a8e27917a4105a4cfc86b1005
@@ -50184,6 +50183,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-native-rsa-native@patch:react-native-rsa-native@npm%3A2.0.5#~/.yarn/patches/react-native-rsa-native-npm-2.0.5-4664e1ce79.patch":
+  version: 2.0.5
+  resolution: "react-native-rsa-native@patch:react-native-rsa-native@npm%3A2.0.5#~/.yarn/patches/react-native-rsa-native-npm-2.0.5-4664e1ce79.patch::version=2.0.5&hash=96c90a"
+  checksum: 10/c7c57dbc03bfbf80b08af742469be40be74b3a81ab59a23b965d80186109edec09a3784e1f76f2cd4576dd5bf03f860224b04a30b5683c8f5f19c7cbaa12cf65
+  languageName: node
+  linkType: hard
+
 "react-native-safe-area-context@npm:5.7.0":
   version: 5.7.0
   resolution: "react-native-safe-area-context@npm:5.7.0"
@@ -50191,17 +50197,6 @@ __metadata:
     react: "*"
     react-native: "*"
   checksum: 10/9f5d3469c18c90c527c4068560ce4dcc7689e9fc8ddc68b8a5e76c94a6eafdba975ced89a48e08fecfd1303331e8c2498722bc249fcd87b1c5ea64ef3abd1d00
-  languageName: node
-  linkType: hard
-
-"react-native-securerandom@npm:1.0.1":
-  version: 1.0.1
-  resolution: "react-native-securerandom@npm:1.0.1"
-  dependencies:
-    base64-js: "npm:*"
-  peerDependencies:
-    react-native: "*"
-  checksum: 10/ca0cca7ecd704c8b102cab5be494a433cc22be6a04f56ff7953066569a4f928d13de806469e0bafab726225adbf299d062f1510f0aee5fcc3ee91068fe7c7cf5
   languageName: node
   linkType: hard
 
@@ -50221,12 +50216,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-sqlite-storage@patch:react-native-sqlite-storage@npm%3A6.0.1#./.yarn/patches/react-native-sqlite-storage-npm-6.0.1-8369d747bd.patch::locator=root%40workspace%3A.":
+"react-native-sqlite-storage@patch:react-native-sqlite-storage@npm%3A6.0.1#~/.yarn/patches/react-native-sqlite-storage-npm-6.0.1-8369d747bd.patch":
   version: 6.0.1
-  resolution: "react-native-sqlite-storage@patch:react-native-sqlite-storage@npm%3A6.0.1#./.yarn/patches/react-native-sqlite-storage-npm-6.0.1-8369d747bd.patch::version=6.0.1&hash=da72a2&locator=root%40workspace%3A."
+  resolution: "react-native-sqlite-storage@patch:react-native-sqlite-storage@npm%3A6.0.1#~/.yarn/patches/react-native-sqlite-storage-npm-6.0.1-8369d747bd.patch::version=6.0.1&hash=3356e1"
   peerDependencies:
     react-native: ">=0.14.0"
-  checksum: 10/1f9453652cadb9b3eb3b43c62f856cbf498e8ca6efc916a081306507708d709b4e636431202cf7ce086a8748516069c3cc7d6f730ae501592b1757aa77f5deaa
+  checksum: 10/ccf84d48f063c45e84a0cf19fd97656cf29f8559a1f6e49439e3bd5d94510cf7fe5e9001cf74832effde551693dfcc2fdf3c815965a31d48edbc6ac08ae3ce54
   languageName: node
   linkType: hard
 
@@ -52309,13 +52304,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"rn-fetch-blob@patch:rn-fetch-blob@npm%3A0.12.0#./.yarn/patches/rn-fetch-blob-npm-0.12.0-cf02e3c544.patch::locator=root%40workspace%3A.":
+"rn-fetch-blob@patch:rn-fetch-blob@npm%3A0.12.0#~/.yarn/patches/rn-fetch-blob-npm-0.12.0-cf02e3c544.patch":
   version: 0.12.0
-  resolution: "rn-fetch-blob@patch:rn-fetch-blob@npm%3A0.12.0#./.yarn/patches/rn-fetch-blob-npm-0.12.0-cf02e3c544.patch::version=0.12.0&hash=a1df16&locator=root%40workspace%3A."
+  resolution: "rn-fetch-blob@patch:rn-fetch-blob@npm%3A0.12.0#~/.yarn/patches/rn-fetch-blob-npm-0.12.0-cf02e3c544.patch::version=0.12.0&hash=5eccb0"
   dependencies:
     base-64: "npm:0.1.0"
     glob: "npm:7.0.6"
-  checksum: 10/782c688c20fd9e68e993efedf157e9cb2bf925320f8bb5e6840579c0a30a0a44877778fe6c6994af4ea068a73e2b61832403b2efeb803b7519edfea5e25e7e5d
+  checksum: 10/29b51017c4f073fe648774e056f60ab16506c4d620291a249daf31530c42a395f437aedd02c05b124f7602cf56cbd9d88e985978daf0cdd654ae834f3dbf5155
   languageName: node
   linkType: hard
 
