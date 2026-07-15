@@ -5,7 +5,7 @@ import ReactAppDependencyProvider
 // Notes:
 // - UNUserNotificationCenterDelegate is required by @react-native-community/push-notification-ios
 // - This file is derived from the default React Native and Expo `AppDelegate.swift`.
-@UIApplicationMain
+@main
 public class AppDelegate: ExpoAppDelegate, UNUserNotificationCenterDelegate {
   var window: UIWindow?
  
@@ -22,7 +22,6 @@ public class AppDelegate: ExpoAppDelegate, UNUserNotificationCenterDelegate {
  
     reactNativeDelegate = delegate
     reactNativeFactory = factory
-    bindReactNativeFactory(factory)
  
 #if os(iOS) || os(tvOS)
     window = UIWindow(frame: UIScreen.main.bounds)
