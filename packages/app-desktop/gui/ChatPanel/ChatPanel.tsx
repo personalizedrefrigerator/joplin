@@ -103,6 +103,10 @@ const ChatPanel: React.FC<Props> = (props) => {
 	noteIdRef.current = props.noteId;
 	const messagesEndRef = useRef<HTMLDivElement>(null);
 
+	const [hasFocus, setHasFocus] = useState(false);
+	const onFocus = useCallback(() => setHasFocus(true), []);
+	const onBlur = useCallback(() => setHasFocus(false), []);
+
 	const { abortControllerRef, cancelRequest } = useCancelCallback();
 
 	const windowId = useContext(WindowIdContext);
@@ -326,7 +330,11 @@ const ChatPanel: React.FC<Props> = (props) => {
 		const content = <>
 			{props.aiDegraded && <AiDegradedNotice className='degraded-status' />}
 			<div className='messages'>
-				<ul className='chat-messages-list'>
+				<ul
+					className='chat-messages-list'
+					aria-label={_('Messages')}
+					aria-live={hasFocus ? 'polite' : undefined}
+				>
 					{messages.length === 0 && (
 						<li className='empty'>
 							{_('Ask about this note, or request changes. Select text in the editor first to scope the request to that selection.')}
@@ -375,9 +383,15 @@ const ChatPanel: React.FC<Props> = (props) => {
 	const { content, showingMessages } = renderContent();
 
 	return (
-		<div className='chat-panel' role='region' aria-labelledby={headerId}>
+		<div
+			className='chat-panel'
+			role='region'
+			aria-labelledby={headerId}
+			onFocus={onFocus}
+			onBlur={onBlur}
+		>
 			<div className='header'>
-				<h2 className='title' id={headerId}>{_('AI Chat')}</h2>
+				<h1 className='title' id={headerId}>{_('AI Chat')}</h1>
 				{showingMessages && (
 					<button type='button' className='reset' onClick={handleReset}>{_('Reset')}</button>
 				)}
