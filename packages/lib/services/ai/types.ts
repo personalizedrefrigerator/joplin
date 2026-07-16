@@ -11,6 +11,7 @@ interface ChatBaseMessage {
 
 export interface ChatStandardMessage extends ChatBaseMessage {
 	role: ChatRole.System | ChatRole.User | ChatRole.Assistant;
+	hide?: boolean;
 	toolCalls?: ChatToolCall[];
 }
 

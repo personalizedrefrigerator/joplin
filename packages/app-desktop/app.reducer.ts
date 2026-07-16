@@ -13,6 +13,7 @@ export interface AiChatMessage {
 	id: string;
 	role: 'user' | 'assistant' | 'error' | 'separator';
 	text: string;
+	hide?: boolean;
 	editsApplied?: number;
 	editsMissed?: number;
 

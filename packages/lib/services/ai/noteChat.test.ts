@@ -340,11 +340,35 @@ describe('noteChat', () => {
 
 		expect(result).toMatchObject([
 			{ role: ChatRole.System },
+			{ role: ChatRole.Assistant },
+			{ role: ChatRole.Tool },
+
 			{ role: ChatRole.User, content: userMessage },
 
 			...failedAttempts,
 
 			{ role: ChatRole.Assistant, content: 'tool not found: replaceRange\ntool not found: appendToNote' },
+		]);
+	});
+
+	test('noteChat initialize the chat history with the note body', async () => {
+		const { onContext, commands } = makeTestContext();
+
+		const result = await runNoteChat(
+			onContext,
+			[],
+			'test',
+			commands,
+			() => {},
+			new AbortController().signal,
+		);
+
+		expect(result).toMatchObject([
+			{ role: ChatRole.System },
+			{ role: ChatRole.Assistant, content: '', toolCalls: [{ toolName: 'readNote' }] },
+			{ role: ChatRole.Tool, content: 'Body', toolName: 'readNote' },
+			{ role: ChatRole.User, content: 'test' },
+			{ role: ChatRole.Assistant, content: '' },
 		]);
 	});
 });

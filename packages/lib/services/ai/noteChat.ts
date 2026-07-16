@@ -85,7 +85,6 @@ const systemPrompt = (note: NoteContext) => {
 	} else {
 		lines.push(
 			'Tool guidance:',
-			'- It\'s usually helpful to start by reading the note with the readNote tool.',
 			'- You have access to various tools that allow updating the note. For example, if you need to add the text "test" to the end of the note, do this using the "appendToNote" tool.',
 			'- Some tools call for anchors. Anchors must be exact substrings of the current note body. Keep them short but unique.',
 		);
@@ -116,7 +115,7 @@ const toolDefinitions = (note: NoteContext) => {
 		result.push(
 			{
 				name: 'readNote',
-				description: 'Read the full content of the note',
+				description: 'Get the current, up-to-date content of the note.',
 				inputSchema: {
 					type: 'object',
 					required: [],
@@ -208,6 +207,33 @@ const toolDefinitions = (note: NoteContext) => {
 	return result;
 };
 
+const addInitialHistory = (messages: ChatMessage[], context: NoteContext): ChatMessage[] => {
+	if (messages.length === 0 && !context.selection) {
+		// The assistant almost always needs to fetch the current content of the note. Initializing the
+		// chat transcript with a `readNote` tool call saves one round-trip:
+		return [
+			{
+				role: ChatRole.Assistant,
+				content: '',
+				hide: true,
+				toolCalls: [
+					{ callId: 'call_init', arguments: { }, toolName: 'readNote', parseError: null },
+				],
+			},
+			{
+				role: ChatRole.Tool,
+				content: context.body,
+				toolCallId: 'call_init',
+				isError: false,
+				toolName: 'readNote',
+				userDescription: '',
+			},
+		];
+	} else {
+		return messages;
+	}
+};
+
 const estimateTokens = (text: string) => Math.ceil(text.length / charsPerToken);
 
 export interface ChatCommands {
@@ -227,9 +253,10 @@ export const runNoteChat = async (
 	onHistoryChanged: OnHistoryChanged,
 	signal: AbortSignal,
 ) => {
+	const initialContext = await context();
 	history = [
-		{ role: ChatRole.System, content: systemPrompt(await context()) },
-		...removeSystemPrompt(history),
+		{ role: ChatRole.System, content: systemPrompt(initialContext) },
+		...addInitialHistory(removeSystemPrompt(history), initialContext),
 		{ role: ChatRole.User, content: userMessage },
 	];
 	onHistoryChanged([...history]);

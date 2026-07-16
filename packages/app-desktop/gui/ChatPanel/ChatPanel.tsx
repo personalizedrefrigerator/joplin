@@ -142,11 +142,13 @@ const ChatPanel: React.FC<Props> = (props) => {
 		lastNoteIdRef.current = props.noteId;
 		if (prev === null || prev === props.noteId || !props.noteId) return;
 		if (messagesLengthRef.current === 0) return;
+
+		const text = _('— now viewing: %s —', props.noteTitle || _('(untitled)'));
 		appendMessage({
 			id: makeId(),
 			role: 'separator',
-			text: _('— now viewing: %s —', props.noteTitle || _('(untitled)')),
-			raw: [],
+			text,
+			raw: [{ role: ChatRole.User, content: _('Switched notes: %s', text) }],
 		});
 	}, [props.noteId, props.noteTitle, appendMessage]);
 
@@ -245,6 +247,7 @@ const ChatPanel: React.FC<Props> = (props) => {
 							id: makeId(),
 							role: entry.role,
 							text: entry.content,
+							hide: entry.hide,
 							raw: [entry],
 						});
 					}
@@ -343,15 +346,17 @@ const ChatPanel: React.FC<Props> = (props) => {
 			return { content, showingMessages: false };
 		}
 
+		const visibleMessages = messages.filter(m => !m.hide);
+
 		const content = <>
 			{props.aiDegraded && <AiDegradedNotice className='degraded-status' />}
 			<div className='messages' aria-live={hasFocus ? 'polite' : undefined}>
-				{messages.length === 0 && (
+				{visibleMessages.length === 0 && (
 					<div className='empty'>
 						{_('Ask about this note, or request changes. Select text in the editor first to scope the request to that selection.')}
 					</div>
 				)}
-				{messages.map(m => <ChatMessageItem key={m.id} message={m}/>)}
+				{visibleMessages.map(m => <ChatMessageItem key={m.id} message={m}/>)}
 				<div ref={messagesEndRef} />
 			</div>
 			<div className='composer'>
@@ -385,7 +390,7 @@ const ChatPanel: React.FC<Props> = (props) => {
 			</div>
 		</>;
 
-		return { content, showingMessages: messages.length > 0 };
+		return { content, showingMessages: visibleMessages.length > 0 };
 	};
 
 	const sendButtonLabel = sending ? _('Stop generating') : _('Send');
