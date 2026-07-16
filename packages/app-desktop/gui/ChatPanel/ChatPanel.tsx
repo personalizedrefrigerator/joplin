@@ -81,6 +81,24 @@ const useCancelCallback = () => {
 	return { abortControllerRef, cancelRequest };
 };
 
+const useHasFocus = () => {
+	const [hasFocus, setHasFocus] = useState(false);
+	const onFocus = useCallback(() => setHasFocus(true), []);
+	const onBlur: React.FocusEventHandler<HTMLDivElement> = useCallback((event) => {
+		const chatPanelContainer = event.currentTarget;
+		const newElementWithFocus = event.relatedTarget;
+		const movingFocusOut = !chatPanelContainer.contains(newElementWithFocus);
+
+		// Avoid quickly toggling hasFocus: onBlur/onFocus are emitted when moving focus between
+		// elements within the container.
+		if (movingFocusOut) {
+			setHasFocus(false);
+		}
+	}, []);
+
+	return { hasFocus, onFocus, onBlur };
+};
+
 // Single-window for v1: mapStateToProps hard-codes defaultWindowId and the
 // toggle writes to the app-wide layout. A second window would mirror the main.
 const ChatPanel: React.FC<Props> = (props) => {
@@ -103,9 +121,7 @@ const ChatPanel: React.FC<Props> = (props) => {
 	noteIdRef.current = props.noteId;
 	const messagesEndRef = useRef<HTMLDivElement>(null);
 
-	const [hasFocus, setHasFocus] = useState(false);
-	const onFocus = useCallback(() => setHasFocus(true), []);
-	const onBlur = useCallback(() => setHasFocus(false), []);
+	const { hasFocus, onFocus, onBlur } = useHasFocus();
 
 	const { abortControllerRef, cancelRequest } = useCancelCallback();
 
