@@ -60,6 +60,8 @@ const hasStructuredBlock = (note: NoteContext) => {
 	return supportedStructuredBlockTags.some(tag => !!findFencedBlock(note.body, tag, 0));
 };
 
+// The system prompt should be relatively constant across note changes to take advantage of prompt caching.
+// See https://developers.openai.com/api/docs/guides/prompt-caching
 const systemPrompt = (note: NoteContext) => {
 	const lines: string[] = [
 		'You are an assistant helping the user work on a note in Joplin, a note-taking application.',
@@ -75,12 +77,6 @@ const systemPrompt = (note: NoteContext) => {
 		lines.push('--- BEGIN SELECTION ---');
 		lines.push(note.selection);
 		lines.push('--- END SELECTION ---');
-		lines.push();
-	} else {
-		lines.push('Note body:');
-		lines.push('--- BEGIN NOTE ---');
-		lines.push(note.body);
-		lines.push('--- END NOTE ---');
 		lines.push();
 	}
 
@@ -116,6 +112,18 @@ const toolDefinitions = (note: NoteContext) => {
 			},
 		});
 	} else {
+		result.push(
+			{
+				name: 'readNote',
+				description: 'Read the full content of the note',
+				inputSchema: {
+					type: 'object',
+					required: [],
+					additionalProperties: false,
+				},
+			},
+		);
+
 		result.push(
 			{
 				name: 'appendToNote',
@@ -219,9 +227,6 @@ export const runNoteChat = async (
 	signal: AbortSignal,
 ) => {
 	history = [
-		// Ensure that the system prompt is up-to-date with the context.
-		// TODO: This will invalidate the prompt cache.
-		//       See https://developers.openai.com/api/docs/guides/prompt-caching
 		{ role: ChatRole.System, content: systemPrompt(await context()) },
 		...removeSystemPrompt(history),
 		{ role: ChatRole.User, content: userMessage },
@@ -343,13 +348,13 @@ const runTools = async (chat: ChatResult, initialContext: NoteContext, context: 
 
 	let chatResponses: ChatToolMessage[] = [];
 
-	const respondSuccess = (action: ChatToolCall, message: string) => {
+	const respondSuccess = (action: ChatToolCall, message: string, userDescription?: string) => {
 		chatResponses.push({
 			role: ChatRole.Tool,
 			toolName: action.toolName,
 			toolCallId: action.callId,
 			content: message,
-			userDescription: message,
+			userDescription: userDescription ?? message,
 			isError: false,
 		});
 	};
@@ -400,47 +405,43 @@ const runTools = async (chat: ChatResult, initialContext: NoteContext, context: 
 	} else {
 		const initialBody = initialContext.body;
 		let body = currentContext.body;
-
-		if (initialBody !== body && chat.toolCalls.length > 0) {
-			for (const toolCall of chat.toolCalls) {
-				respondFailure(toolCall, 'body changed externally, before edit could be applied');
-			}
-			commands.displayError(_('The note changed while the request was running; edits were not applied. Try again.'));
-
-			return chatResponses;
-		}
+		const hadExternalBodyChanges = initialBody !== body;
+		let attemptedEdit = false;
 
 		for (const toolCall of chat.toolCalls) {
 			if (toolCall.toolName === 'replaceSelection') {
 				respondFailure(toolCall, 'replaceSelection is invalid in this context');
-				continue;
-			}
-			if (!isValidEditOp(toolCall.toolName)) {
-				respondFailure(toolCall, 'tool not found');
-				continue;
-			}
-			if (toolCall.parseError) {
+			} else if (toolCall.parseError) {
 				respondFailure(toolCall, toolCall.parseError);
-				continue;
-			}
-
-			const editOperation = toolCallToEditOperation(toolCall);
-			const { newBody, appliedEdits } = applyAnchorEdits(body, [editOperation], 0);
-			body = newBody;
-
-			if (appliedEdits.length !== 1) {
-				throw new Error(`Invalid state: Wrong number of applied edits, ${appliedEdits.length}`);
-			}
-
-			const edit = appliedEdits[0];
-			if (edit.status === 'applied') {
-				respondSuccess(toolCall, describeEditOperation(editOperation));
+			} else if (toolCall.toolName === 'readNote') {
+				respondSuccess(toolCall, body, _('Read note'));
+			} else if (!isValidEditOp(toolCall.toolName)) {
+				respondFailure(toolCall, 'tool not found');
+			} else if (hadExternalBodyChanges) {
+				attemptedEdit = true;
+				respondFailure(toolCall, 'body changed externally, before edit could be applied');
 			} else {
-				respondFailure(toolCall, edit.status);
+				attemptedEdit = true;
+				const editOperation = toolCallToEditOperation(toolCall);
+				const { newBody, appliedEdits } = applyAnchorEdits(body, [editOperation], 0);
+				body = newBody;
+
+				if (appliedEdits.length !== 1) {
+					throw new Error(`Invalid state: Wrong number of applied edits, ${appliedEdits.length}`);
+				}
+
+				const edit = appliedEdits[0];
+				if (edit.status === 'applied') {
+					respondSuccess(toolCall, describeEditOperation(editOperation));
+				} else {
+					respondFailure(toolCall, edit.status);
+				}
 			}
 		}
 
-		if (body !== initialBody) {
+		if (attemptedEdit && hadExternalBodyChanges) {
+			commands.displayError(_('The note changed while the request was running; edits were not applied. Try again.'));
+		} else if (body !== initialBody) {
 			try {
 				await commands.updateNoteBody(body, initialBody);
 			} catch (error) {

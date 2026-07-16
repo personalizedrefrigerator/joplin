@@ -62,14 +62,14 @@ describe('noteChat', () => {
 		expect(prompt).toContain('- [ ]');
 	});
 
-	test('systemPrompt includes full body when no selection', () => {
+	test('systemPrompt should not include body', () => {
 		const prompt = _internal.systemPrompt({
 			title: 'My note',
 			body: 'the whole body',
 			selection: null,
 		});
-		expect(prompt).toContain('the whole body');
-		expect(prompt).toContain('BEGIN NOTE');
+		// Including the body in the prompt would cause a cache invalidation on each note change
+		expect(prompt).not.toContain('the whole body');
 	});
 
 	test.each([
@@ -89,7 +89,7 @@ describe('noteChat', () => {
 				body: 'b',
 				selection: null,
 			},
-			expectedOperations: ['insertBefore', 'insertAfter', 'appendToNote', 'replaceRange'],
+			expectedOperations: ['insertBefore', 'insertAfter', 'appendToNote', 'replaceRange', 'readNote'],
 		},
 		{
 			label: 'offers replaceFencedBlock when Mermaid block present',
@@ -98,7 +98,7 @@ describe('noteChat', () => {
 				body: '```mermaid\ngitGraph\n\tcommit\n```\n',
 				selection: null,
 			},
-			expectedOperations: ['insertBefore', 'insertAfter', 'appendToNote', 'replaceRange', 'replaceFencedBlock'],
+			expectedOperations: ['insertBefore', 'insertAfter', 'appendToNote', 'replaceRange', 'replaceFencedBlock', 'readNote'],
 		},
 	])('toolDefinitions should include the expected operations (case $label)', ({ note, expectedOperations }) => {
 		const editSchemaItems = _internal.toolDefinitions(note);
