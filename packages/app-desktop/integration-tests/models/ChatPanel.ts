@@ -29,6 +29,6 @@ export default class ChatPanel {
 	}
 
 	public async waitForMessageCount(count: number) {
-		await expect(this.container.locator('li.turn')).toHaveCount(count);
+		await expect(this.container.locator('.chat-message.turn')).toHaveCount(count);
 	}
 }
