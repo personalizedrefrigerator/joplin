@@ -85,6 +85,7 @@ const systemPrompt = (note: NoteContext) => {
 	} else {
 		lines.push(
 			'Tool guidance:',
+			'- It\'s usually helpful to start by reading the note with the readNote tool.',
 			'- You have access to various tools that allow updating the note. For example, if you need to add the text "test" to the end of the note, do this using the "appendToNote" tool.',
 			'- Some tools call for anchors. Anchors must be exact substrings of the current note body. Keep them short but unique.',
 		);
