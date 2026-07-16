@@ -21,10 +21,10 @@ interface Props {
 
 const ChatMessageItem: React.FC<Props> = ({ message }) => {
 	if (message.role === 'separator') {
-		return <div key={message.id} className='separator'>{message.text}</div>;
+		return <div className='separator'>{message.text}</div>;
 	}
 	if (message.role === 'error') {
-		return <div key={message.id} className='error'>{message.text}</div>;
+		return <div className='error'>{message.text}</div>;
 	}
 
 	const summary = message.role === 'assistant' ? editsSummary(message.raw, message.editsApplied ?? 0, message.editsMissed ?? 0) : '';
@@ -40,7 +40,7 @@ const ChatMessageItem: React.FC<Props> = ({ message }) => {
 		: <div className='content'>{textContent}</div>;
 
 	return (
-		<li className={`turn -${message.role}`}>
+		<div className={`chat-message turn -${message.role}`}>
 			{content}
 			{summary && (
 				<div className='meta'>
@@ -49,7 +49,7 @@ const ChatMessageItem: React.FC<Props> = ({ message }) => {
 						: <span>{summary}</span>}
 				</div>
 			)}
-		</li>
+		</div>
 	);
 };
 

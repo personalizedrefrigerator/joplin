@@ -56,19 +56,12 @@
 	flex: 1;
 	overflow-y: auto;
 	padding: 8px;
-}
-
-.chat-messages-list {
 	display: flex;
 	flex-direction: column;
 	gap: 8px;
-
-	list-style: none;
-	margin: 0;
-	padding: 0;
 }
 
-.chat-messages-list > .empty {
+.chat-panel > .messages > .empty {
 	color: var(--joplin-color-faded);
 	font-style: italic;
 	text-align: center;
@@ -77,7 +70,7 @@
 	line-height: 1.5;
 }
 
-.chat-messages-list > .turn {
+.chat-panel > .messages > .turn {
 	padding: 8px 10px;
 	border-radius: 6px;
 	overflow-wrap: anywhere;
@@ -85,7 +78,7 @@
 }
 
 // User turn uses the sidebar colour scheme (dark blue bg, white text).
-.chat-messages-list > .turn.-user {
+.chat-panel > .messages > .turn.-user {
 	background-color: var(--joplin-background-color2);
 	color: var(--joplin-color2);
 	align-self: flex-end;
@@ -100,31 +93,31 @@
 // near-black in dark theme), with regular text colour so contrast is correct
 // in both themes. align-self stretch so a short reply still fills the column
 // width instead of leaving empty space on the right.
-.chat-messages-list > .turn.-assistant {
+.chat-panel > .messages > .turn.-assistant {
 	background-color: var(--joplin-background-color3);
 	color: var(--joplin-color);
 	align-self: stretch;
 }
 
-.chat-messages-list > .turn > .meta {
+.chat-panel > .messages > .turn > .meta {
 	font-size: 0.8em;
 	color: var(--joplin-color-faded);
 	margin-top: 4px;
 	white-space: pre-wrap;
 }
 
-.chat-messages-list > .turn > .meta > .warning {
+.chat-panel > .messages > .turn > .meta > .warning {
 	color: var(--joplin-color-warn);
 }
 
-.chat-messages-list > .separator {
+.chat-panel > .messages > .separator {
 	text-align: center;
 	color: var(--joplin-color-faded);
 	font-size: 0.8em;
 	margin: 6px 0;
 }
 
-.chat-messages-list > .error {
+.chat-panel > .messages > .error {
 	color: var(--joplin-color-warn);
 	background-color: var(--joplin-background-color3);
 	border-left: 3px solid var(--joplin-color-warn);

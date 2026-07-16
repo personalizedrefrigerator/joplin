@@ -329,19 +329,13 @@ const ChatPanel: React.FC<Props> = (props) => {
 
 		const content = <>
 			{props.aiDegraded && <AiDegradedNotice className='degraded-status' />}
-			<div className='messages'>
-				<ul
-					className='chat-messages-list'
-					aria-label={_('Messages')}
-					aria-live={hasFocus ? 'polite' : undefined}
-				>
-					{messages.length === 0 && (
-						<li className='empty'>
-							{_('Ask about this note, or request changes. Select text in the editor first to scope the request to that selection.')}
-						</li>
-					)}
-					{messages.map(m => <ChatMessageItem key={m.id} message={m}/>)}
-				</ul>
+			<div className='messages' aria-live={hasFocus ? 'polite' : undefined}>
+				{messages.length === 0 && (
+					<div className='empty'>
+						{_('Ask about this note, or request changes. Select text in the editor first to scope the request to that selection.')}
+					</div>
+				)}
+				{messages.map(m => <ChatMessageItem key={m.id} message={m}/>)}
 				<div ref={messagesEndRef} />
 			</div>
 			<div className='composer'>
