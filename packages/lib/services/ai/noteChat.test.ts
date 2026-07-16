@@ -340,10 +340,11 @@ describe('noteChat', () => {
 
 		expect(result).toMatchObject([
 			{ role: ChatRole.System },
+			{ role: ChatRole.User, content: userMessage },
+
+			// Reading the body
 			{ role: ChatRole.Assistant },
 			{ role: ChatRole.Tool },
-
-			{ role: ChatRole.User, content: userMessage },
 
 			...failedAttempts,
 
@@ -365,9 +366,9 @@ describe('noteChat', () => {
 
 		expect(result).toMatchObject([
 			{ role: ChatRole.System },
+			{ role: ChatRole.User, content: 'test' },
 			{ role: ChatRole.Assistant, content: '', toolCalls: [{ toolName: 'readNote' }] },
 			{ role: ChatRole.Tool, content: 'Body', toolName: 'readNote' },
-			{ role: ChatRole.User, content: 'test' },
 			{ role: ChatRole.Assistant, content: '' },
 		]);
 	});

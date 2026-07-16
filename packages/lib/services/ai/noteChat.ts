@@ -207,11 +207,17 @@ const toolDefinitions = (note: NoteContext) => {
 	return result;
 };
 
-const addInitialHistory = (messages: ChatMessage[], context: NoteContext): ChatMessage[] => {
-	if (messages.length === 0 && !context.selection) {
-		// The assistant almost always needs to fetch the current content of the note. Initializing the
-		// chat transcript with a `readNote` tool call saves one round-trip:
+const createHistory = (history: ChatMessage[], newMessage: string, context: NoteContext): ChatMessage[] => {
+	const currentSystemPrompt: ChatMessage = { role: ChatRole.System, content: systemPrompt(context) };
+	const userMessage: ChatMessage = { role: ChatRole.User, content: newMessage };
+	history = removeSystemPrompt(history);
+
+	// The assistant almost always needs to fetch the current content of the note. Initializing the
+	// chat transcript with a `readNote` tool call saves one round-trip:
+	if (history.length === 0 && !context.selection) {
 		return [
+			currentSystemPrompt,
+			userMessage,
 			{
 				role: ChatRole.Assistant,
 				content: '',
@@ -230,7 +236,11 @@ const addInitialHistory = (messages: ChatMessage[], context: NoteContext): ChatM
 			},
 		];
 	} else {
-		return messages;
+		return [
+			currentSystemPrompt,
+			...history,
+			userMessage,
+		];
 	}
 };
 
@@ -254,11 +264,7 @@ export const runNoteChat = async (
 	signal: AbortSignal,
 ) => {
 	const initialContext = await context();
-	history = [
-		{ role: ChatRole.System, content: systemPrompt(initialContext) },
-		...addInitialHistory(removeSystemPrompt(history), initialContext),
-		{ role: ChatRole.User, content: userMessage },
-	];
+	history = createHistory(history, userMessage, initialContext);
 	onHistoryChanged([...history]);
 
 	const hasUndeliveredToolResults = () => history[history.length - 1]?.role === ChatRole.Tool;
