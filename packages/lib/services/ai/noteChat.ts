@@ -208,40 +208,41 @@ const toolDefinitions = (note: NoteContext) => {
 };
 
 const createHistory = (history: ChatMessage[], newMessage: string, context: NoteContext): ChatMessage[] => {
-	const currentSystemPrompt: ChatMessage = { role: ChatRole.System, content: systemPrompt(context) };
-	const userMessage: ChatMessage = { role: ChatRole.User, content: newMessage };
 	history = removeSystemPrompt(history);
+
+	const isNewChat = history.length === 0 && !context.selection;
+	history = [
+		{ role: ChatRole.System, content: systemPrompt(context) },
+		...history,
+		{ role: ChatRole.User, content: newMessage },
+	];
 
 	// The assistant almost always needs to fetch the current content of the note. Initializing the
 	// chat transcript with a `readNote` tool call saves one round-trip:
-	if (history.length === 0 && !context.selection) {
-		return [
-			currentSystemPrompt,
-			userMessage,
+	const addReadNote = isNewChat;
+	if (addReadNote) {
+		const callId = `call_read${history.length}`;
+		history.push(
 			{
 				role: ChatRole.Assistant,
 				content: '',
 				hide: true,
 				toolCalls: [
-					{ callId: 'call_init', arguments: { }, toolName: 'readNote', parseError: null },
+					{ callId, arguments: { }, toolName: 'readNote', parseError: null },
 				],
 			},
 			{
 				role: ChatRole.Tool,
 				content: context.body,
-				toolCallId: 'call_init',
+				toolCallId: callId,
 				isError: false,
 				toolName: 'readNote',
 				userDescription: '',
 			},
-		];
-	} else {
-		return [
-			currentSystemPrompt,
-			...history,
-			userMessage,
-		];
+		);
 	}
+
+	return history;
 };
 
 const estimateTokens = (text: string) => Math.ceil(text.length / charsPerToken);
