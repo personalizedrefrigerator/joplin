@@ -55,11 +55,14 @@ const PromptDialog: React.FC<Props> = ({ dialog, containerStyle, themeId }) => {
 			themeId={themeId}
 		/>;
 	});
-	const titleComponent = <Text
-		variant='titleMedium'
+
+	const hasTitle = !!dialog.title;
+	const bodyVariant = hasTitle ? 'bodyLarge' as const : 'titleMedium' as const;
+	const titleComponent = hasTitle ? <Text
+		variant='titleLarge'
 		accessibilityRole='header'
 		style={styles.dialogLabel}
-	>{dialog.title}</Text>;
+	>{dialog.title}</Text> : null;
 
 	return (
 		<Surface
@@ -69,9 +72,9 @@ const PromptDialog: React.FC<Props> = ({ dialog, containerStyle, themeId }) => {
 			elevation={1}
 		>
 			<Dialog.Content style={styles.dialogContent}>
-				{dialog.title ? titleComponent : null}
+				{titleComponent}
 				<Text
-					variant='titleMedium'
+					variant={bodyVariant}
 					style={styles.dialogLabel}
 				>{dialog.message}</Text>
 			</Dialog.Content>

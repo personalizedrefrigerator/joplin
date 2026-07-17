@@ -12,6 +12,7 @@ import DecryptionWorker from '@joplin/lib/services/DecryptionWorker';
 import PluginService from '@joplin/lib/services/plugins/PluginService';
 import Tag from '@joplin/lib/models/Tag';
 import SearchEngine from '@joplin/lib/services/search/SearchEngine';
+import shim from '@joplin/lib/shim';
 
 require('./web/rnVectorIconsSetup.js');
 
@@ -40,6 +41,7 @@ if (__DEV__) {
 		commandService: CommandService.instance(),
 		pluginService: PluginService.instance(),
 		searchEngine: SearchEngine.instance(),
+		shim,
 	};
 }
 
