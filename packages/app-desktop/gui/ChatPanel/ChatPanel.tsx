@@ -190,7 +190,7 @@ const ChatPanel: React.FC<Props> = (props) => {
 		// Captured so we can roll it back on failure — otherwise a retry would
 		// send the prior user turn as history alongside the new prompt.
 		const userTurnId = makeId();
-		let hadSuccessfulResponse = false;
+		let hadVisibleResponse = false;
 		appendMessage({
 			id: userTurnId,
 			role: 'user',
@@ -238,11 +238,11 @@ const ChatPanel: React.FC<Props> = (props) => {
 					// System messages are not shown in the UI
 					if (entry.role === ChatRole.System) continue;
 
-					hadSuccessfulResponse = true;
-
 					if (entry.role === ChatRole.Tool) {
 						addToolResult(entry);
 					} else {
+						hadVisibleResponse ||= !entry.hide;
+
 						appendMessage({
 							id: makeId(),
 							role: entry.role,
@@ -298,7 +298,7 @@ const ChatPanel: React.FC<Props> = (props) => {
 			logger.warn('Chat failed:', error);
 			if (abortController.signal.aborted) return;
 
-			if (!hadSuccessfulResponse) {
+			if (!hadVisibleResponse) {
 				dispatch({ type: 'AI_CHAT_REMOVE', windowId, id: userTurnId });
 				setInput(text);
 			}
