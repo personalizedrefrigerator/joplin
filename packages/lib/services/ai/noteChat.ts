@@ -235,9 +235,10 @@ const createHistory = (history: ChatMessage[], newMessage: string, context: Note
 				role: ChatRole.Tool,
 				content: context.body,
 				toolCallId: callId,
-				isError: false,
 				toolName: 'readNote',
 				userDescription: '',
+				isEdit: false,
+				isError: false,
 			},
 		);
 	}
@@ -383,6 +384,8 @@ const runTools = async (chat: ChatResult, initialContext: NoteContext, context: 
 
 	let chatResponses: ChatToolMessage[] = [];
 
+	const isEdit = (toolName: string) => isValidEditOp(toolName);
+
 	const respondSuccess = (action: ChatToolCall, message: string, userDescription?: string) => {
 		chatResponses.push({
 			role: ChatRole.Tool,
@@ -391,6 +394,7 @@ const runTools = async (chat: ChatResult, initialContext: NoteContext, context: 
 			content: message,
 			userDescription: userDescription ?? message,
 			isError: false,
+			isEdit: isEdit(action.toolName),
 		});
 	};
 
@@ -402,6 +406,7 @@ const runTools = async (chat: ChatResult, initialContext: NoteContext, context: 
 			content: `failed: ${reason}`,
 			userDescription: reason,
 			isError: true,
+			isEdit: isEdit(action.toolName),
 		});
 	};
 

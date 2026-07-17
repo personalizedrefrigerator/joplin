@@ -22,6 +22,7 @@ export interface ChatToolMessage extends ChatBaseMessage {
 	isError: boolean;
 	// A very brief description of the result that can be shown to the user
 	userDescription: string;
+	isEdit: boolean;
 }
 
 export type ChatMessage = ChatStandardMessage | ChatToolMessage;
