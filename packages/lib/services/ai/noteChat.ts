@@ -476,7 +476,9 @@ const runTools = async (chat: ChatResult, initialContext: NoteContext, context: 
 
 		if (attemptedEdit && hadExternalBodyChanges) {
 			commands.displayError(_('The note changed while the request was running; edits were not applied. Try again.'));
-		} else if (body !== initialBody) {
+		}
+		// Avoid overwriting user-created changes
+		if (!hadExternalBodyChanges && body !== initialBody) {
 			try {
 				await commands.updateNoteBody(body, initialBody);
 			} catch (error) {
