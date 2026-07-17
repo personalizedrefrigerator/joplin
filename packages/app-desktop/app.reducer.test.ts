@@ -146,6 +146,7 @@ describe('app.reducer', () => {
 				toolCallId: 'call-1',
 				userDescription: '',
 				isError: false,
+				isEdit: true,
 				content: 'Result',
 			} satisfies ChatToolMessage),
 		});
