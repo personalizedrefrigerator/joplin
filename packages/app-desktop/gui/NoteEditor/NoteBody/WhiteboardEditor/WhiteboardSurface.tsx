@@ -444,6 +444,7 @@ const InnerSurface = ({ canvas, onChange }: Props) => {
 				onNodeDragStart={onNodeDragStart}
 				onNodeDrag={onNodeDrag}
 				onNodeDragStop={onNodeDragStop}
+				elevateEdgesOnSelect
 				deleteKeyCode={['Backspace', 'Delete']}
 				multiSelectionKeyCode={['Shift', 'Meta', 'Control']}
 				selectionKeyCode={['Shift']}
