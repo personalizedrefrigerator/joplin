@@ -230,6 +230,7 @@ packages/app-desktop/gui/ConfigScreen/controls/FontSearch.js
 packages/app-desktop/gui/ConfigScreen/controls/GlobalHotkeyInput.test.js
 packages/app-desktop/gui/ConfigScreen/controls/GlobalHotkeyInput.js
 packages/app-desktop/gui/ConfigScreen/controls/MissingPasswordHelpLink.js
+packages/app-desktop/gui/ConfigScreen/controls/NoteLockSettings.js
 packages/app-desktop/gui/ConfigScreen/controls/SettingComponent.js
 packages/app-desktop/gui/ConfigScreen/controls/SettingDescription.js
 packages/app-desktop/gui/ConfigScreen/controls/SettingHeader.js
@@ -238,6 +239,7 @@ packages/app-desktop/gui/ConfigScreen/controls/ToggleAdvancedSettingsButton.js
 packages/app-desktop/gui/ConfigScreen/controls/plugins/PluginBox.js
 packages/app-desktop/gui/ConfigScreen/controls/plugins/PluginsStates.js
 packages/app-desktop/gui/ConfigScreen/controls/plugins/SearchPlugins.js
+packages/app-desktop/gui/ConfigScreen/controls/useNoteLockMode.js
 packages/app-desktop/gui/ConfigScreen/searchHighlight.test.js
 packages/app-desktop/gui/ConfigScreen/searchHighlight.js
 packages/app-desktop/gui/DialogButtonRow.js
@@ -465,6 +467,8 @@ packages/app-desktop/gui/ResizableLayout/utils/persist.test.js
 packages/app-desktop/gui/ResizableLayout/utils/persist.js
 packages/app-desktop/gui/ResizableLayout/utils/removeItem.js
 packages/app-desktop/gui/ResizableLayout/utils/removeKeylessItems.js
+packages/app-desktop/gui/ResizableLayout/utils/resizeLogic.test.js
+packages/app-desktop/gui/ResizableLayout/utils/resizeLogic.js
 packages/app-desktop/gui/ResizableLayout/utils/setLayoutItemProps.js
 packages/app-desktop/gui/ResizableLayout/utils/style.js
 packages/app-desktop/gui/ResizableLayout/utils/types.js
@@ -1402,6 +1406,7 @@ packages/lib/components/shared/ShareNoteDialog/useShareStatusMessage.js
 packages/lib/components/shared/SsoScreenShared.js
 packages/lib/components/shared/config/config-search-text.js
 packages/lib/components/shared/config/config-search.test.js
+packages/lib/components/shared/config/config-shared.test.js
 packages/lib/components/shared/config/config-shared.js
 packages/lib/components/shared/config/plugins/types.js
 packages/lib/components/shared/config/plugins/useOnDeleteHandler.js
