@@ -251,6 +251,7 @@ export interface Subscription {
 	is_deleted?: number;
 	trial_end?: number;
 	current_period_end?: number;
+	source?: string;
 }
 
 export interface UserFlag extends WithDates {
@@ -502,6 +503,7 @@ export const databaseSchema: DatabaseTables = {
 		is_deleted: { type: 'number', defaultValue: 0 },
 		trial_end: { type: 'string', defaultValue: 0 },
 		current_period_end: { type: 'string', defaultValue: 0 },
+		source: { type: 'string', defaultValue: '' },
 	},
 	user_flags: {
 		id: { type: 'number', defaultValue: null },
