@@ -2,13 +2,19 @@ import { EditorSelection } from '@codemirror/state';
 import { EditorView } from '@codemirror/view';
 import createTestEditor from '../../testing/createTestEditor';
 import renderTables, { renderInlineMarkdown } from './renderTables';
+import { RenderedContentContext } from './types';
 
-const createEditor = async (initialMarkdown: string) => {
+const createEditor = async (initialMarkdown: string, context?: Partial<RenderedContentContext>) => {
+	const fullContext: RenderedContentContext = {
+		resolveImageSrc: async () => '',
+		openLink: () => {},
+		...context,
+	};
 	return await createTestEditor(
 		initialMarkdown,
 		EditorSelection.cursor(0),
 		['TableHeader'],
-		[renderTables],
+		[renderTables(fullContext)],
 	);
 };
 
@@ -126,6 +132,37 @@ describe('renderTables', () => {
 		expect(editor.state.doc.toString()).toBe(source);
 	});
 
+	test('ctrl/cmd-clicking a rendered cell link should open it', async () => {
+		const opened: string[] = [];
+		const editor = await createEditor(
+			'| [label](https://example.com) | b |\n|---|---|\n| x | y |',
+			{ openLink: (link) => opened.push(link) },
+		);
+		const anchor = editor.dom.querySelector<HTMLAnchorElement>('.cm-tw-text a[href]');
+		expect(anchor).not.toBeNull();
+
+		anchor!.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true }));
+		expect(opened).toEqual([]);
+
+		anchor!.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true, ctrlKey: true }));
+		expect(opened).toEqual(['https://example.com']);
+	});
+
+	test('holding the modifier over a link should show the pointer cursor', async () => {
+		const editor = await createEditor('| [label](https://example.com) | b |\n|---|---|\n| x | y |');
+		const container = editor.dom.querySelector<HTMLElement>('.cm-tw')!;
+		const anchor = editor.dom.querySelector<HTMLAnchorElement>('.cm-tw-text a[href]')!;
+
+		anchor.dispatchEvent(new MouseEvent('mousemove', { bubbles: true }));
+		expect(container.classList.contains('cm-tw-mod-link')).toBe(false);
+
+		anchor.dispatchEvent(new MouseEvent('mousemove', { bubbles: true, ctrlKey: true }));
+		expect(container.classList.contains('cm-tw-mod-link')).toBe(true);
+
+		anchor.dispatchEvent(new MouseEvent('mousemove', { bubbles: true }));
+		expect(container.classList.contains('cm-tw-mod-link')).toBe(false);
+	});
+
 	test('typing a trailing space in a cell should keep it visible after live-sync', async () => {
 		jest.useFakeTimers();
 		let editor: EditorView | null = null;
@@ -154,4 +191,5 @@ describe('renderTables', () => {
 			jest.useRealTimers();
 		}
 	});
+
 });
