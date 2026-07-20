@@ -46,7 +46,10 @@ export interface ResponseFormat {
 
 export type ToolInput = Record<string, unknown>;
 export class ToolOutputObject {
-	public modelDescription = '';
+	// Full tool output
+	public fullContent = '';
+	// Human-readable output preview, shown as a summary
+	public preview = '';
 }
 export type ToolOutput = string|ToolOutputObject|Record<string, unknown>;
 

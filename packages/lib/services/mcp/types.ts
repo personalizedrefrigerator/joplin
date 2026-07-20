@@ -1,8 +1,4 @@
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- JSON Schema is arbitrary nested JSON
-export type JsonSchema = { type: string;[key: string]: any };
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Tool input shape varies per schema
-export type ToolInput = Record<string, any>;
+import type { ToolDefinition } from '../ai/types';
 
 export interface ToolTextContent {
 	type: 'text';
@@ -21,12 +17,7 @@ export interface ToolCallResult {
 // The dispatcher serialises the payload into MCP content. ToolErrors come back
 // as { isError: true, content: [text] }; any other Error bubbles up to the
 // JSON-RPC layer as an InternalError so the MCP client sees it.
-export interface McpTool {
-	id: string;
-	description: string;
-	inputSchema: JsonSchema;
-	handler: (input: ToolInput)=> Promise<unknown>;
-}
+export type McpTool = ToolDefinition;
 
 // Throw this from a tool handler for failure modes the LLM should see and
 // recover from (note not found, ambiguous match, missing parameter, etc.).

@@ -99,9 +99,10 @@ const systemPrompt = (note: NoteContext) => {
 class ChatToolError extends Error {}
 
 class ChatToolResponse extends ToolOutputObject {
-	public constructor(modelDescription: string, public readonly userDescription: string) {
+	public constructor(modelDescription: string, userDescription: string) {
 		super();
-		this.modelDescription = modelDescription;
+		this.fullContent = modelDescription;
+		this.preview = userDescription;
 	}
 }
 
@@ -471,12 +472,12 @@ const runTools = async (
 
 				let content = output;
 				if (output instanceof ToolOutputObject) {
-					content = output.modelDescription;
+					content = output.fullContent;
 				}
 
 				let userDescription = _('Ran %s', toolCall.toolName);
 				if (output instanceof ChatToolResponse) {
-					userDescription = output.userDescription;
+					userDescription = output.preview;
 				}
 
 				chatResponses.push({
