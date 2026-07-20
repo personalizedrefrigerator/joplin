@@ -33,9 +33,13 @@ const toolResultSummary = (actions: ChatMessage[]) => {
 	};
 
 	return [
-		toolResults.map(result => !result.isEdit && result.userDescription).join('\n'),
+		...toolResults
+			.filter(result => !result.isEdit)
+			.map(result => result.userDescription),
 		editSummary(),
-	].join('\n');
+	]
+		.filter(item => !!item)
+		.join('\n');
 };
 
 const hasToolError = (actions: ChatMessage[]) => {
