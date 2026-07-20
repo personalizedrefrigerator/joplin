@@ -7,9 +7,6 @@ import { ChatMessage, ChatRole } from '@joplin/lib/services/ai/types';
 
 const toolResultSummary = (actions: ChatMessage[]) => {
 	const toolResults = actions.filter(action => action.role === ChatRole.Tool);
-	if (toolResults.length === 1 && !toolResults[0].isError) {
-		return toolResults.map(result => result.userDescription).join('\n');
-	}
 
 	const editSummary = () => {
 		let applied = 0;
