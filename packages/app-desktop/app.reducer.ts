@@ -14,8 +14,6 @@ export interface AiChatMessage {
 	role: 'user' | 'assistant' | 'error' | 'separator';
 	text: string;
 	hide?: boolean;
-	editsApplied?: number;
-	editsMissed?: number;
 
 	// The raw message(s) corresponding to this event
 	raw: ChatMessage[];
@@ -318,16 +316,8 @@ export default function(state: AppState, action: any) {
 				state, action.windowId, 'aiChatMessages', messages => {
 					let lastMessage = messages[messages.length - 1];
 					if (lastMessage) {
-						const toolCall = action.toolCall;
-						const error = toolCall.isError;
-						const editCount = toolCall.isEdit ? 1 : 0;
-						const editsApplied = (lastMessage.editsApplied ?? 0) + (error ? 0 : editCount);
-						const editsMissed = (lastMessage.editsMissed ?? 0) + (error ? editCount : 0);
-
 						lastMessage = {
 							...lastMessage,
-							editsApplied,
-							editsMissed,
 							raw: [
 								...lastMessage.raw,
 								action.toolCall,
