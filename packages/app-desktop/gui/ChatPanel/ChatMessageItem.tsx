@@ -5,14 +5,41 @@ import InlineMarkdownDisplay from '../InlineMarkdownDisplay';
 import { ChatMessage, ChatRole } from '@joplin/lib/services/ai/types';
 
 
-const editsSummary = (actions: ChatMessage[], applied: number, missed: number) => {
-	if (applied + missed === 0) return '';
-	if (missed === 0 && applied > 1) return _('%d edit(s) applied.', applied);
-	if (missed === 0) {
-		const toolResults = actions.filter(action => action.role === ChatRole.Tool);
+const toolResultSummary = (actions: ChatMessage[]) => {
+	const toolResults = actions.filter(action => action.role === ChatRole.Tool);
+	if (toolResults.length === 1 && !toolResults[0].isError) {
 		return toolResults.map(result => result.userDescription).join('\n');
 	}
-	return _('%d edit(s) applied, %d could not be placed automatically.', applied, missed);
+
+	const editSummary = () => {
+		let applied = 0;
+		let missed = 0;
+		let lastEdit;
+		for (const result of toolResults) {
+			if (!result.isEdit) continue;
+
+			if (result.isError) {
+				missed ++;
+			} else {
+				applied ++;
+				lastEdit = result;
+			}
+		}
+
+		if (applied + missed === 0) return '';
+		if (missed === 0 && applied > 1) return _('%d edit(s) applied.', applied);
+		if (missed === 0) return lastEdit.userDescription;
+		return _('%d edit(s) applied, %d could not be placed automatically.', applied, missed);
+	};
+
+	return [
+		toolResults.map(result => !result.isEdit && result.userDescription).join('\n'),
+		editSummary(),
+	].join('\n');
+};
+
+const hasToolError = (actions: ChatMessage[]) => {
+	return actions.some(action => action.role === ChatRole.Tool && action.isError);
 };
 
 interface Props {
@@ -27,7 +54,7 @@ const ChatMessageItem: React.FC<Props> = ({ message }) => {
 		return <div className='error'>{message.text}</div>;
 	}
 
-	const summary = message.role === 'assistant' ? editsSummary(message.raw, message.editsApplied ?? 0, message.editsMissed ?? 0) : '';
+	const summary = message.role === 'assistant' ? toolResultSummary(message.raw) : '';
 	// Always show something in the message box:
 	const textContent = !message.text && !summary ? _('(no message)') : message.text;
 
@@ -44,7 +71,7 @@ const ChatMessageItem: React.FC<Props> = ({ message }) => {
 			{content}
 			{summary && (
 				<div className='meta'>
-					{(message.editsMissed ?? 0) > 0
+					{hasToolError(message.raw)
 						? <span className='warning'>{summary}</span>
 						: <span>{summary}</span>}
 				</div>
