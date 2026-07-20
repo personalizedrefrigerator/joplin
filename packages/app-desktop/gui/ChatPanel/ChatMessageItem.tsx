@@ -2,7 +2,7 @@ import * as React from 'react';
 import { _ } from '@joplin/lib/locale';
 import { AiChatMessage } from '../../app.reducer';
 import InlineMarkdownDisplay from '../InlineMarkdownDisplay';
-import { ChatMessage, ChatRole } from '@joplin/lib/services/ai/types';
+import { ChatMessage, ChatRole, ChatToolMessage } from '@joplin/lib/services/ai/types';
 
 
 const toolResultSummary = (actions: ChatMessage[]) => {
@@ -11,7 +11,7 @@ const toolResultSummary = (actions: ChatMessage[]) => {
 	const editSummary = () => {
 		let applied = 0;
 		let missed = 0;
-		let lastEdit;
+		let lastEdit: ChatToolMessage|null = null;
 		for (const result of toolResults) {
 			if (!result.isEdit) continue;
 
@@ -25,7 +25,7 @@ const toolResultSummary = (actions: ChatMessage[]) => {
 
 		if (applied + missed === 0) return '';
 		if (missed === 0 && applied > 1) return _('%d edit(s) applied.', applied);
-		if (missed === 0) return lastEdit.userDescription;
+		if (missed === 0 && lastEdit) return lastEdit.userDescription;
 		return _('%d edit(s) applied, %d could not be placed automatically.', applied, missed);
 	};
 
