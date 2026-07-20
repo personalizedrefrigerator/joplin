@@ -48,7 +48,7 @@ const convertTool = (tool: ToolSpec) => {
 	return {
 		type: 'function',
 		function: {
-			name: tool.name,
+			name: tool.id,
 			description: tool.description,
 			parameters: tool.inputSchema,
 			strict: true,

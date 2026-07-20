@@ -44,11 +44,21 @@ export interface ResponseFormat {
 	};
 }
 
+export type ToolInput = Record<string, unknown>;
+export class ToolOutputObject {
+	public modelDescription = '';
+}
+export type ToolOutput = string|ToolOutputObject|Record<string, unknown>;
+
 export interface ToolSpec {
-	name: string;
+	id: string;
 	description: string;
 	// Information provided by the model to the tool
 	inputSchema: JsonSchema;
+}
+
+export interface ToolDefinition extends ToolSpec {
+	handler: (input: ToolInput)=> Promise<ToolOutput>;
 }
 
 export interface ChatOptions {

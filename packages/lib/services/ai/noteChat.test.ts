@@ -4,13 +4,14 @@ import { ChatRole, ChatToolCall } from './types';
 import { expectThrow, setupDatabase, switchClient } from '../../testing/test-utils';
 import Setting from '../../models/Setting';
 
-const makeTestContext = () => {
-	let body = 'Body';
+const makeTestContext = (defaultContext: Partial<NoteContext>) => {
 	const initialContext: NoteContext = {
 		title: 'Test',
-		body,
+		body: 'Body',
 		selection: null,
+		...defaultContext,
 	};
+	let body = initialContext.body;
 
 	const commands: ChatCommands = {
 		replaceSelection: jest.fn(),
@@ -21,8 +22,11 @@ const makeTestContext = () => {
 		displayError: jest.fn(),
 	};
 
+	const context = () => ({ ...initialContext, body });
+
 	return {
-		onContext: () => Promise.resolve({ ...initialContext, body }),
+		onContext: () => Promise.resolve(context()),
+		get context() { return context(); },
 		commands,
 	};
 };
@@ -101,9 +105,10 @@ describe('noteChat', () => {
 			expectedOperations: ['insertBefore', 'insertAfter', 'appendToNote', 'replaceRange', 'replaceFencedBlock', 'readNote'],
 		},
 	])('toolDefinitions should include the expected operations (case $label)', ({ note, expectedOperations }) => {
-		const editSchemaItems = _internal.toolDefinitions(note);
+		const { commands } = makeTestContext(note);
+		const editSchemaItems = _internal.toolDefinitions(note, commands);
 
-		const allowedSchemaOperations = editSchemaItems.map(item => item.name).sort();
+		const allowedSchemaOperations = editSchemaItems.map(item => item.id).sort();
 		expect(allowedSchemaOperations).toEqual([...expectedOperations].sort());
 	});
 
@@ -234,8 +239,12 @@ describe('noteChat', () => {
 	});
 
 	test('toolDefinitions advertises replaceFencedBlock with structured-block guidance', () => {
-		const tools = _internal.toolDefinitions({ title: 'n', body: '```abc\n```', selection: null });
-		const toolDefinition = tools.find(tool => tool.name === 'replaceFencedBlock');
+		const { context, commands } = makeTestContext({ title: 'n', body: '```abc\n```', selection: null });
+		const tools = _internal.toolDefinitions(
+			context,
+			commands,
+		);
+		const toolDefinition = tools.find(tool => tool.id === 'replaceFencedBlock');
 		expect(toolDefinition).toBeTruthy();
 		expect(toolDefinition.description).toContain('jsoncanvas');
 		// Guidance to use the op for structured blocks, appendToNote for creation.
@@ -280,12 +289,13 @@ describe('noteChat', () => {
 			{ toolName: 'replaceRange', callId: 'call-2', arguments: { anchor: 'Body', text: 'Updated' }, parseError: null },
 		];
 
-		const { onContext, commands } = makeTestContext();
+		const { onContext, commands } = makeTestContext({});
 
 		const result = await _internal.runTools(
 			{ text: 'Test...', toolCalls, usage: { inputTokens: 10, outputTokens: 300 } },
 			await onContext(),
 			onContext,
+			(note, commands) => _internal.toolDefinitions(note, commands),
 			commands,
 			new AbortController().signal,
 		);
@@ -310,7 +320,7 @@ describe('noteChat', () => {
 	});
 
 	test('noteChat should stop retry loop if several responses in a row include tool failures', async () => {
-		const { onContext, commands } = makeTestContext();
+		const { onContext, commands } = makeTestContext({});
 		const failingAndSucceedingToolCall = (repeat: number) => [
 			`/repeat ${repeat}`,
 			// one failing tool
@@ -353,7 +363,7 @@ describe('noteChat', () => {
 	});
 
 	test('noteChat initialize the chat history with the note body', async () => {
-		const { onContext, commands } = makeTestContext();
+		const { onContext, commands } = makeTestContext({});
 
 		const result = await runNoteChat(
 			onContext,

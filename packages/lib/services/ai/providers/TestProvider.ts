@@ -12,7 +12,7 @@ const parseUserCommand = (message: ChatMessage, availableTools: ToolSpec[]) => {
 		if (command[1] === 'tool') {
 			const args = command[2].split(' ');
 			const toolName = args[0];
-			if (!availableTools.some(tool => tool.name === toolName)) {
+			if (!availableTools.some(tool => tool.id === toolName)) {
 				reply.push(`tool not found: ${toolName}`);
 			} else {
 				toolCalls.push({
