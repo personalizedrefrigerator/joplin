@@ -13,7 +13,7 @@ interface Input {
 
 const tool: McpTool = {
 	id: 'semantic_search_notes',
-	userDescription: () => _('Semantic search'),
+	userDescription: (input: Input) => _('Searched for: %s', input.query ?? _('(empty)')),
 	description: [
 		'Semantic search across notes using the local embeddings index.',
 		'Use this when the user asks by meaning rather than exact words — for example "the note about pet sitters for my dog" rather than "pet sitter".',

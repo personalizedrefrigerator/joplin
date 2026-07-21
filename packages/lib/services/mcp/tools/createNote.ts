@@ -13,7 +13,7 @@ interface Input {
 
 const tool: McpTool = {
 	id: 'create_note',
-	userDescription: (input: ToolInput) => _('Create note: %s', input.title ?? _('(no title)')),
+	userDescription: (input: ToolInput) => _('Created note: %s', input.title ?? _('(no title)')),
 	description: 'Create a new note. Returns the created note id. If notebook_id is omitted, the note is created in the default notebook.',
 	inputSchema: {
 		type: 'object',

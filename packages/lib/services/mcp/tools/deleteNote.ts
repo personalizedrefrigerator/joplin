@@ -9,7 +9,7 @@ interface Input {
 
 const tool: McpTool = {
 	id: 'delete_note',
-	userDescription: () => _('Delete note'),
+	userDescription: () => _('Deleted note'),
 	description: 'Move a note to the trash. The note is not permanently removed and the user can restore it from the trash.',
 	inputSchema: {
 		type: 'object',

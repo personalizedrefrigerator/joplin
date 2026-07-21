@@ -23,7 +23,7 @@ interface Input {
 
 const tool: McpTool = {
 	id: 'update_note',
-	userDescription: () => _('Update note'),
+	userDescription: () => _('Updated note'),
 	description: [
 		'Update an existing note. Only the fields you pass are changed; omitted fields keep their current value.',
 		'',
