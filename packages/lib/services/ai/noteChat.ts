@@ -527,7 +527,7 @@ const runTools = async (
 		const initialBody = initialContext.body;
 		let body = currentContext.body;
 		const hadExternalBodyChanges = initialBody !== body;
-		let attemptedEdit = false;
+		const appliedEdits: ChatToolCall[] = [];
 
 		for (const toolCall of chat.toolCalls) {
 			if (toolCall.toolName === 'replaceSelection') {
@@ -535,34 +535,35 @@ const runTools = async (
 			} else if (toolCall.parseError) {
 				respondFailure(toolCall, toolCall.parseError);
 			} else if (isValidEditOp(toolCall.toolName)) {
-				attemptedEdit = true;
-
-				if (hadExternalBodyChanges) {
-					respondFailure(toolCall, 'body changed externally, before edit could be applied');
-				} else {
-					body = await runTool(toolCall, body);
-				}
+				body = await runTool(toolCall, body);
+				appliedEdits.push(toolCall);
 			} else {
 				body = await runTool(toolCall, body);
 			}
 		}
 
-		if (attemptedEdit && hadExternalBodyChanges) {
-			commands.displayError(_('The note changed while the request was running; edits were not applied. Try again.'));
-		}
-		// Avoid overwriting user-created changes
-		if (!hadExternalBodyChanges && body !== initialBody) {
+		if (appliedEdits.length > 0 && body !== initialBody) {
 			try {
+				// Avoid overwriting user-created changes
+				if (hadExternalBodyChanges) {
+					throw new Error(_('The note changed while the request was running; edits were not applied. Try again.'));
+				}
+
 				await commands.updateNoteBody(body, initialBody);
 			} catch (error) {
 				logger.error('Failed to update body', error);
 
-				// Replace any 'success' messages with failures, since all tools
-				// currently depend on updating the body.
-				chatResponses = [];
-				for (const toolCall of chat.toolCalls) {
-					respondFailure(toolCall, 'failed to update body');
-				}
+				// All of the edit operations depend on updating the body, so they all
+				// need to be marked as failures:
+				const successfulEditIds = new Set(appliedEdits.map(edit => edit.callId));
+				chatResponses = chatResponses.map(response => {
+					if (!successfulEditIds.has(response.toolCallId)) return response;
+					return {
+						...response,
+						content: 'failed to update body',
+						isError: true,
+					};
+				});
 
 				commands.displayError(error.message ?? String(error));
 			}
