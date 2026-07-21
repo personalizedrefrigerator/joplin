@@ -16,7 +16,7 @@ const snippetChars = 240;
 
 const tool = buildTool({
 	id: 'search_notes',
-	userDescription: () => _('Searched notes'),
+	userDescription: (input: Input) => _('Searched for: %s', input.query || _('(empty)')),
 	description: [
 		'Search notes. Returns a ranked list of matches with id, title, notebook id, updated_time, and a short snippet anchored on the keyword match. The snippet often answers the question without a follow-up read_note call.',
 		'',
