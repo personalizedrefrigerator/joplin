@@ -37,18 +37,9 @@ Unknown methods return JSON-RPC `MethodNotFound`. Malformed `tools/call` params 
 
 ## Tools
 
-Tools live under `packages/lib/services/mcp/tools/`. Each module exports an `McpTool`:
+Tools live under `packages/lib/services/ai/tools/`. Each module exports a `ToolDefinition`.
 
-```ts
-interface McpTool {
-    id: string;
-    description: string;
-    inputSchema: JsonSchema;
-    handler: (input) => Promise<unknown>;
-}
-```
-
-Handlers return their raw payload. The dispatcher JSON-serialises it into MCP text content. There is no need to wrap responses in `{ content, isError }` boilerplate.
+Tool handlers return their raw payload. The dispatcher JSON-serialises it into MCP text content. There is no need to wrap responses in `{ content, isError }` boilerplate.
 
 | Tool | Purpose | Default |
 |---|---|---|
