@@ -12,7 +12,7 @@ import deleteNote from './tools/deleteNote';
 import manageTags from './tools/manageTags';
 import createNotebook from './tools/createNotebook';
 
-// Every tool registered here gets an `mcp.tool.<id>.enabled` setting (see
+// Every tool registered here gets an `ai.tool.<id>.enabled` setting (see
 // builtInMetadata.ts). Adding a tool to this list without also adding the
 // setting means it will be reported as enabled by default — keep them in sync.
 const allMcpTools: McpTool[] = [
@@ -31,12 +31,12 @@ const allMcpTools: McpTool[] = [
 export const allTools = () => allMcpTools;
 
 export const enabledTools = () => {
-	return allMcpTools.filter(t => Setting.value(`mcp.tool.${t.id}.enabled`) as boolean);
+	return allMcpTools.filter(t => Setting.value(`ai.tool.${t.id}.enabled`) as boolean);
 };
 
 export const findTool = (id: string) => {
 	const t = allMcpTools.find(t => t.id === id);
 	if (!t) return null;
-	if (!(Setting.value(`mcp.tool.${t.id}.enabled`) as boolean)) return null;
+	if (!(Setting.value(`ai.tool.${t.id}.enabled`) as boolean)) return null;
 	return t;
 };

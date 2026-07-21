@@ -1,8 +1,8 @@
 import Logger from '@joplin/utils/Logger';
 import Setting from '../../models/Setting';
 import { allTools, enabledTools, findTool } from './registry';
-import { JsonRpcRequest, JsonRpcResponse, JsonRpcErrorCodes, McpProtocolVersion, ToolCallResult, ToolError } from './types';
-import { ToolOutputObject } from '../ai/types';
+import { JsonRpcRequest, JsonRpcResponse, JsonRpcErrorCodes, McpProtocolVersion, ToolCallResult } from './types';
+import { ToolError, ToolOutputObject } from '../ai/types';
 
 const logger = Logger.create('McpServer');
 

@@ -1,5 +1,5 @@
 import AiService from './AiService';
-import { ChatMessage, ChatResult, ChatRole, ChatToolCall, ChatToolMessage, ToolDefinition, ToolInput, ToolOutputObject } from './types';
+import { ChatMessage, ChatResult, ChatRole, ChatToolCall, ChatToolMessage, ToolDefinition, ToolError, ToolInput, ToolOutputObject } from './types';
 import JoplinError from '../../JoplinError';
 import Logger from '@joplin/utils/Logger';
 import findFencedBlock from './utils/findFencedBlock';
@@ -7,6 +7,8 @@ import { applyAnchorEdits, supportedStructuredBlockTags } from './applyNoteEdits
 import { hasOwnProperty } from '@joplin/utils/object';
 const Countable = require('../../countable/Countable');
 import { _, _n } from '../../locale';
+import Setting from '../../models/Setting';
+import { enabledTools } from '../mcp/registry';
 
 const logger = Logger.create('noteChat');
 
@@ -31,6 +33,7 @@ const knownOps = new Set<EditOp['op']>([
 
 export interface NoteContext {
 	title: string;
+	noteId: string;
 	body: string;
 	selection: string | null;
 }
@@ -67,6 +70,7 @@ const systemPrompt = (note: NoteContext) => {
 		'You are an assistant helping the user work on a note in Joplin, a note-taking application.',
 		'',
 		`Note title: ${note.title || '(untitled)'}`,
+		`Note ID: ${note.noteId}`,
 		'',
 		joplinMarkdownNotes,
 		'',
@@ -95,9 +99,6 @@ const systemPrompt = (note: NoteContext) => {
 	return lines.join('\n');
 };
 
-// Errors that will be forwarded back to the model
-class ChatToolError extends Error {}
-
 class ChatToolResponse extends ToolOutputObject {
 	public constructor(modelDescription: string, userDescription: string) {
 		super();
@@ -109,7 +110,7 @@ class ChatToolResponse extends ToolOutputObject {
 const toolDefinitions = (note: NoteContext, commands: ChatCommands) => {
 	const result: ToolDefinition[] = [];
 
-	if (note.selection) {
+	const addSelectionOperations = () => {
 		result.push({
 			id: 'replaceSelection',
 			description: 'Replaces the text currently selected by the user.',
@@ -123,24 +124,26 @@ const toolDefinitions = (note: NoteContext, commands: ChatCommands) => {
 			},
 			handler: async (args) => {
 				if (!hasOwnProperty(args, 'text') || typeof args.text !== 'string') {
-					throw new ChatToolError('missing or invalid `text` property');
+					throw new ToolError('missing or invalid `text` property');
 				} else {
 					try {
 						await commands.replaceSelection(args.text, note.selection);
 					} catch (error) {
 						commands.displayError(error.message ?? String(error));
-						throw new ChatToolError('failed to replace selection');
+						throw new ToolError('failed to replace selection');
 					}
 					const description = describeEditOperation({ op: 'replaceSelection', text: args.text });
 					return new ChatToolResponse(description, description);
 				}
 			},
 		});
-	} else {
+	};
+
+	const addReadEditOperations = () => {
 		result.push(
 			{
-				id: 'readNote',
-				description: 'Get the current, up-to-date content of the note.',
+				id: 'readNoteContent',
+				description: 'Get the current, up-to-date content of the note. This returns the full content of the note that\'s currently open in Joplin\'s editor.',
 				inputSchema: {
 					type: 'object',
 					required: [],
@@ -168,7 +171,7 @@ const toolDefinitions = (note: NoteContext, commands: ChatCommands) => {
 				const description = describeEditOperation(editOperation);
 				return new ChatToolResponse(description, description);
 			} else {
-				throw new ChatToolError(edit.status);
+				throw new ToolError(edit.status);
 			}
 		};
 		const buildEditTool = (id: EditOp['op']) => ({
@@ -253,7 +256,19 @@ const toolDefinitions = (note: NoteContext, commands: ChatCommands) => {
 				},
 			});
 		}
+	};
 
+	const allowStandardOperations = Setting.value('ai.tool.edit_current.enabled');
+	if (allowStandardOperations) {
+		if (note.selection) {
+			addSelectionOperations();
+		} else {
+			addReadEditOperations();
+		}
+	}
+
+	for (const tool of enabledTools()) {
+		result.push(tool);
 	}
 
 	return result;
@@ -280,14 +295,14 @@ const createHistory = (history: ChatMessage[], newMessage: string, context: Note
 				content: '',
 				hide: true,
 				toolCalls: [
-					{ callId, arguments: { }, toolName: 'readNote', parseError: null },
+					{ callId, arguments: { }, toolName: 'readNoteContent', parseError: null },
 				],
 			},
 			{
 				role: ChatRole.Tool,
 				content: context.body,
 				toolCallId: callId,
-				toolName: 'readNote',
+				toolName: 'readNoteContent',
 				userDescription: '',
 				isEdit: false,
 				isError: false,
@@ -491,7 +506,7 @@ const runTools = async (
 				});
 			} catch (error) {
 				logger.error('Tool call', toolCall.toolName, 'failed', error);
-				if (error instanceof ChatToolError) {
+				if (error instanceof ToolError) {
 					respondFailure(toolCall, error.message);
 				} else {
 					respondFailure(toolCall, 'failed');
@@ -580,7 +595,7 @@ const isValidEditOp = (operation: string): operation is EditOp['op'] => {
 
 const toolCallToEditOperation = (toolName: string, args: ToolInput): EditOp => {
 	if (!isValidEditOp(toolName)) {
-		throw new ChatToolError(`Invalid edit operation: ${toolName}`);
+		throw new ToolError(`Invalid edit operation: ${toolName}`);
 	}
 
 	return {

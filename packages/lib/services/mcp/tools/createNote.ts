@@ -1,6 +1,7 @@
 import Note from '../../../models/Note';
 import Folder from '../../../models/Folder';
-import { McpTool, ToolError } from '../types';
+import { McpTool } from '../types';
+import { ToolError } from '../../ai/types';
 
 interface Input {
 	title?: string;

@@ -45,12 +45,20 @@ export interface ResponseFormat {
 }
 
 export type ToolInput = Record<string, unknown>;
+
+// Throw this from a tool handler for failure modes the LLM should see and
+// recover from (note not found, ambiguous match, missing parameter, etc.).
+// Plain Errors are treated as internal bugs.
+export class ToolError extends Error {}
+
+// Base class for all tool outputs with differing human/AI output
 export class ToolOutputObject {
 	// Full tool output
 	public fullContent = '';
 	// Human-readable output preview, shown as a summary
 	public preview = '';
 }
+
 export type ToolOutput = string|ToolOutputObject|Record<string, unknown>;
 
 export interface ToolSpec {

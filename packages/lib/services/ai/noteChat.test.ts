@@ -1,13 +1,14 @@
 import { _internal, ChatCommands, NoteContext, runNoteChat } from './noteChat';
 import { applyAnchorEdits } from './applyNoteEdits';
 import { ChatRole, ChatToolCall } from './types';
-import { expectThrow, setupDatabase, switchClient } from '../../testing/test-utils';
+import { expectThrow, setupDatabase, switchClient, withWarningSilenced } from '../../testing/test-utils';
 import Setting from '../../models/Setting';
 
 const makeTestContext = (defaultContext: Partial<NoteContext>) => {
 	const initialContext: NoteContext = {
 		title: 'Test',
 		body: 'Body',
+		noteId: '00000000000000000000000000000000',
 		selection: null,
 		...defaultContext,
 	};
@@ -44,6 +45,7 @@ describe('noteChat', () => {
 			title: 'My note',
 			body: 'long body text',
 			selection: 'just this bit',
+			noteId: '',
 		});
 		expect(prompt).toContain('My note');
 		expect(prompt).toContain('just this bit');
@@ -52,7 +54,7 @@ describe('noteChat', () => {
 	});
 
 	test('systemPrompt advertises Joplin-specific Markdown features', () => {
-		const prompt = _internal.systemPrompt({ title: 'n', body: 'b', selection: null });
+		const prompt = _internal.systemPrompt({ title: 'n', body: 'b', noteId: '', selection: null });
 		// The fence tags are the load-bearing strings — the model knows the
 		// syntax inside (JSONCanvas, Mermaid, KaTeX) but needs the Joplin
 		// fence tag to wrap it correctly.
@@ -70,6 +72,7 @@ describe('noteChat', () => {
 		const prompt = _internal.systemPrompt({
 			title: 'My note',
 			body: 'the whole body',
+			noteId: '00000000000000000000000000000000',
 			selection: null,
 		});
 		// Including the body in the prompt would cause a cache invalidation on each note change
@@ -93,7 +96,7 @@ describe('noteChat', () => {
 				body: 'b',
 				selection: null,
 			},
-			expectedOperations: ['insertBefore', 'insertAfter', 'appendToNote', 'replaceRange', 'readNote'],
+			expectedOperations: ['insertBefore', 'insertAfter', 'appendToNote', 'replaceRange', 'readNoteContent'],
 		},
 		{
 			label: 'offers replaceFencedBlock when Mermaid block present',
@@ -102,11 +105,11 @@ describe('noteChat', () => {
 				body: '```mermaid\ngitGraph\n\tcommit\n```\n',
 				selection: null,
 			},
-			expectedOperations: ['insertBefore', 'insertAfter', 'appendToNote', 'replaceRange', 'replaceFencedBlock', 'readNote'],
+			expectedOperations: ['insertBefore', 'insertAfter', 'appendToNote', 'replaceRange', 'replaceFencedBlock', 'readNoteContent'],
 		},
 	])('toolDefinitions should include the expected operations (case $label)', ({ note, expectedOperations }) => {
-		const { commands } = makeTestContext(note);
-		const editSchemaItems = _internal.toolDefinitions(note, commands);
+		const { commands, context } = makeTestContext(note);
+		const editSchemaItems = _internal.toolDefinitions(context, commands);
 
 		const allowedSchemaOperations = editSchemaItems.map(item => item.id).sort();
 		expect(allowedSchemaOperations).toEqual([...expectedOperations].sort());
@@ -330,13 +333,16 @@ describe('noteChat', () => {
 		].join('\n');
 
 		const userMessage = failingAndSucceedingToolCall(32);
-		const result = await runNoteChat(
-			onContext,
-			[],
-			userMessage,
-			commands,
-			() => {},
-			new AbortController().signal,
+		const result = await withWarningSilenced(
+			/call replaceRange failed/,
+			() => runNoteChat(
+				onContext,
+				[],
+				userMessage,
+				commands,
+				() => {},
+				new AbortController().signal,
+			),
 		);
 
 		const failedAttempts = [];
@@ -377,8 +383,8 @@ describe('noteChat', () => {
 		expect(result).toMatchObject([
 			{ role: ChatRole.System },
 			{ role: ChatRole.User, content: 'test' },
-			{ role: ChatRole.Assistant, content: '', toolCalls: [{ toolName: 'readNote' }] },
-			{ role: ChatRole.Tool, content: 'Body', toolName: 'readNote' },
+			{ role: ChatRole.Assistant, content: '', toolCalls: [{ toolName: 'readNoteContent' }] },
+			{ role: ChatRole.Tool, content: 'Body', toolName: 'readNoteContent' },
 			{ role: ChatRole.Assistant, content: '' },
 		]);
 	});

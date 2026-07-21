@@ -82,18 +82,18 @@ The split lets us distinguish expected, LLM-recoverable failures from genuine bu
 
 ## Tool registry and toggles
 
-`registry.ts` holds the static list of all tools. `findTool(id)` returns a tool only if it exists *and* its `mcp.tool.<id>.enabled` setting is true. `enabledTools()` filters the same way.
+`registry.ts` holds the static list of all tools. `findTool(id)` returns a tool only if it exists *and* its `ai.tool.<id>.enabled` setting is true. `enabledTools()` filters the same way.
 
-Adding a tool means: write the file in `tools/`, register it in `registry.ts`, add the `mcp.tool.<id>.enabled` setting to `builtInMetadata.ts`, and add it to the table above.
+Adding a tool means: write the file in `tools/`, register it in `registry.ts`, add the `ai.tool.<id>.enabled` setting to `builtInMetadata.ts`, and add it to the table above.
 
 ## Settings
 
-All MCP settings live in the dedicated `mcp` section of Settings.
+All MCP settings live in the dedicated `ai.tools` section of Settings.
 
 | Setting | Default | Purpose |
 |---|---|---|
 | `mcp.enabled` | false | Master toggle. Server returns 403 when off. |
-| `mcp.tool.<id>.enabled` | varies (see table above) | Per-tool toggle. Disabled tools are hidden from `tools/list`. |
+| `ai.tool.<id>.enabled` | varies (see table above) | Per-tool toggle. Disabled tools are hidden from `tools/list`. |
 
 There is no scope/permission system on the auth token — for v1, the per-tool toggles are the granularity. Token scopes could be added later without breaking existing setups.
 

@@ -1,6 +1,7 @@
 import Note from '../../../models/Note';
 import Tag from '../../../models/Tag';
-import { McpTool, ToolError } from '../types';
+import { ToolError } from '../../ai/types';
+import { McpTool } from '../types';
 
 interface Input {
 	note_id?: string;

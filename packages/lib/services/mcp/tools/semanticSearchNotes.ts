@@ -1,6 +1,7 @@
 import Note from '../../../models/Note';
 import SearchService from '../../ai/SearchService';
-import { McpTool, ToolError } from '../types';
+import { ToolError } from '../../ai/types';
+import { McpTool } from '../types';
 
 interface Input {
 	query?: string;

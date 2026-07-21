@@ -219,6 +219,7 @@ const ChatPanel: React.FC<Props> = (props) => {
 					body: note.body,
 					title: note.title,
 					selection,
+					noteId: note.id,
 				};
 			};
 

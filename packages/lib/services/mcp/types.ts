@@ -19,16 +19,6 @@ export interface ToolCallResult {
 // JSON-RPC layer as an InternalError so the MCP client sees it.
 export type McpTool = ToolDefinition;
 
-// Throw this from a tool handler for failure modes the LLM should see and
-// recover from (note not found, ambiguous match, missing parameter, etc.).
-// Plain Errors are treated as internal bugs and surface as JSON-RPC errors.
-export class ToolError extends Error {
-	public constructor(message: string) {
-		super(message);
-		this.name = 'ToolError';
-	}
-}
-
 export interface JsonRpcRequest {
 	jsonrpc: '2.0';
 	id?: string | number | null;

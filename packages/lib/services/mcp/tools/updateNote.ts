@@ -1,7 +1,8 @@
 import Note from '../../../models/Note';
 import Folder from '../../../models/Folder';
 import { NoteEntity } from '../../database/types';
-import { McpTool, ToolError } from '../types';
+import { McpTool } from '../types';
+import { ToolError } from '../../ai/types';
 
 interface ReplaceTextOp {
 	find: string;

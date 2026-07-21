@@ -1,6 +1,7 @@
 import SearchEngineUtils from '../../search/SearchEngineUtils';
 import { NoteEntity } from '../../database/types';
-import { McpTool, ToolError } from '../types';
+import { McpTool } from '../types';
+import { ToolError } from '../../ai/types';
 
 interface Input {
 	query?: string;
