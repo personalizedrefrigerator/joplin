@@ -191,15 +191,6 @@ const userSettingMigration: UserSettingMigration[] = [
 		transformValue: (value) => { return value; },
 		isPluginSetting: true,
 	},
-	...([
-		'search_notes', 'read_note', 'list_notebooks', 'list_tags', 'create_note',
-		'update_note', 'delete_note', 'manage_tags', 'create_notebook', 'semantic_search_notes',
-	].map(toolName => ({
-		oldName: `mcp.tool.${toolName}.enabled`,
-		newName: `ai.tool.${toolName}.enabled`,
-		transformValue: (value: unknown) => value,
-		isPluginSetting: false,
-	}))),
 ];
 
 // Certain settings for similar (or the same) functionality can conflict. This map
