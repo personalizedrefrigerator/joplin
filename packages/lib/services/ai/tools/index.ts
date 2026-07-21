@@ -12,8 +12,7 @@ import manageTags from './manageTags';
 import createNotebook from './createNotebook';
 
 // Every tool registered here gets an `ai.tool.<id>.enabled` setting (see
-// builtInMetadata.ts). Adding a tool to this list without also adding the
-// setting means it will be reported as enabled by default — keep them in sync.
+// builtInMetadata.ts). Tools missing settings will throw at runtime.
 const allMcpTools = [
 	searchNotes,
 	semanticSearchNotes,
