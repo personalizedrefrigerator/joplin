@@ -113,6 +113,7 @@ const toolDefinitions = (note: NoteContext, commands: ChatCommands) => {
 	const addSelectionOperations = () => {
 		result.push({
 			id: 'replaceSelection',
+			userDescription: (input) => describeEditOperation(toolCallToEditOperation('replaceSelection', input)),
 			description: 'Replaces the text currently selected by the user.',
 			inputSchema: {
 				type: 'object',
@@ -143,6 +144,7 @@ const toolDefinitions = (note: NoteContext, commands: ChatCommands) => {
 		result.push(
 			{
 				id: 'readNoteContent',
+				userDescription: () => _('Read note'),
 				description: 'Get the current, up-to-date content of the note. This returns the full content of the note that\'s currently open in Joplin\'s editor.',
 				inputSchema: {
 					type: 'object',
@@ -157,26 +159,28 @@ const toolDefinitions = (note: NoteContext, commands: ChatCommands) => {
 			},
 		);
 
-		const runEditOperation = async (operation: EditOp['op'], args: ToolInput) => {
-			const editOperation = toolCallToEditOperation(operation, args);
-			const { newBody, appliedEdits } = applyAnchorEdits(note.body, [editOperation], 0);
-			await commands.updateNoteBody(newBody, note.body);
-
-			if (appliedEdits.length !== 1) {
-				throw new Error(`Invalid state: Wrong number of applied edits, ${appliedEdits.length}`);
-			}
-
-			const edit = appliedEdits[0];
-			if (edit.status === 'applied') {
-				const description = describeEditOperation(editOperation);
-				return new ChatToolResponse(description, description);
-			} else {
-				throw new ToolError(edit.status);
-			}
-		};
 		const buildEditTool = (id: EditOp['op']) => ({
 			id,
-			handler: (input: ToolInput) => runEditOperation(id, input),
+			userDescription: (args: ToolInput) => (
+				describeEditOperation(toolCallToEditOperation(id, args))
+			),
+			handler: async (args: ToolInput) => {
+				const editOperation = toolCallToEditOperation(id, args);
+				const { newBody, appliedEdits } = applyAnchorEdits(note.body, [editOperation], 0);
+				await commands.updateNoteBody(newBody, note.body);
+
+				if (appliedEdits.length !== 1) {
+					throw new Error(`Invalid state: Wrong number of applied edits, ${appliedEdits.length}`);
+				}
+
+				const edit = appliedEdits[0];
+				if (edit.status === 'applied') {
+					const description = describeEditOperation(editOperation);
+					return new ChatToolResponse(description, description);
+				} else {
+					throw new ToolError(edit.status);
+				}
+			},
 		});
 
 		result.push(
@@ -490,7 +494,7 @@ const runTools = async (
 					content = output.fullContent;
 				}
 
-				let userDescription = _('Ran %s', toolCall.toolName);
+				let userDescription = tool.userDescription(toolCall.arguments);
 				if (output instanceof ChatToolResponse) {
 					userDescription = output.preview;
 				}

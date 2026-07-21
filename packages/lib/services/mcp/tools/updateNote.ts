@@ -3,6 +3,7 @@ import Folder from '../../../models/Folder';
 import { NoteEntity } from '../../database/types';
 import { McpTool } from '../types';
 import { ToolError } from '../../ai/types';
+import { _ } from '../../../locale';
 
 interface ReplaceTextOp {
 	find: string;
@@ -22,6 +23,7 @@ interface Input {
 
 const tool: McpTool = {
 	id: 'update_note',
+	userDescription: () => _('Update note'),
 	description: [
 		'Update an existing note. Only the fields you pass are changed; omitted fields keep their current value.',
 		'',

@@ -3,6 +3,7 @@ import Folder from '../../../models/Folder';
 import Tag from '../../../models/Tag';
 import { McpTool } from '../types';
 import { ToolError } from '../../ai/types';
+import { _ } from '../../../locale';
 
 interface Input {
 	id?: string;
@@ -14,6 +15,7 @@ const defaultMaxChars = 0;
 
 const tool: McpTool = {
 	id: 'read_note',
+	userDescription: () => _('Read note'),
 	description: 'Read a single note by id. Returns title, markdown body, notebook name, tags, and timestamps. For very long notes, use offset and max_chars to page through the body.',
 	inputSchema: {
 		type: 'object',

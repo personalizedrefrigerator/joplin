@@ -1,3 +1,4 @@
+import { _ } from '../../../locale';
 import Note from '../../../models/Note';
 import { ToolError } from '../../ai/types';
 import { McpTool } from '../types';
@@ -8,6 +9,7 @@ interface Input {
 
 const tool: McpTool = {
 	id: 'delete_note',
+	userDescription: () => _('Delete note'),
 	description: 'Move a note to the trash. The note is not permanently removed and the user can restore it from the trash.',
 	inputSchema: {
 		type: 'object',

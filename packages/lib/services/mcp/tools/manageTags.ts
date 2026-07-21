@@ -1,3 +1,4 @@
+import { _ } from '../../../locale';
 import Note from '../../../models/Note';
 import Tag from '../../../models/Tag';
 import { ToolError } from '../../ai/types';
@@ -11,6 +12,7 @@ interface Input {
 
 const tool: McpTool = {
 	id: 'manage_tags',
+	userDescription: () => _('Manage tags'),
 	description: 'Add or remove tags on a note. Tags are addressed by title; unknown tags in "add" are created automatically.',
 	inputSchema: {
 		type: 'object',

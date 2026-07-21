@@ -1,7 +1,8 @@
 import Note from '../../../models/Note';
 import Folder from '../../../models/Folder';
 import { McpTool } from '../types';
-import { ToolError } from '../../ai/types';
+import { ToolError, ToolInput } from '../../ai/types';
+import { _ } from '../../../locale';
 
 interface Input {
 	title?: string;
@@ -12,6 +13,7 @@ interface Input {
 
 const tool: McpTool = {
 	id: 'create_note',
+	userDescription: (input: ToolInput) => _('Create note: %s', input.title ?? _('(no title)')),
 	description: 'Create a new note. Returns the created note id. If notebook_id is omitted, the note is created in the default notebook.',
 	inputSchema: {
 		type: 'object',

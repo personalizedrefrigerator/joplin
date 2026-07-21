@@ -2,6 +2,7 @@ import SearchEngineUtils from '../../search/SearchEngineUtils';
 import { NoteEntity } from '../../database/types';
 import { McpTool } from '../types';
 import { ToolError } from '../../ai/types';
+import { _ } from '../../../locale';
 
 interface Input {
 	query?: string;
@@ -15,6 +16,7 @@ const snippetChars = 240;
 
 const tool: McpTool = {
 	id: 'search_notes',
+	userDescription: () => _('Search notes'),
 	description: [
 		'Search notes. Returns a ranked list of matches with id, title, notebook id, updated_time, and a short snippet anchored on the keyword match. The snippet often answers the question without a follow-up read_note call.',
 		'',

@@ -1,8 +1,10 @@
+import { _ } from '../../../locale';
 import Tag from '../../../models/Tag';
 import { McpTool } from '../types';
 
 const tool: McpTool = {
 	id: 'list_tags',
+	userDescription: () => _('List all tags'),
 	description: 'List all tags that have at least one note attached, with their ids and titles.',
 	inputSchema: {
 		type: 'object',

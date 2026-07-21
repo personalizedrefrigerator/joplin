@@ -1,3 +1,4 @@
+import { _ } from '../../../locale';
 import Folder from '../../../models/Folder';
 import { ToolError } from '../../ai/types';
 import { McpTool } from '../types';
@@ -9,6 +10,7 @@ interface Input {
 
 const tool: McpTool = {
 	id: 'create_notebook',
+	userDescription: (input: Input) => _('Create notebook: %s', input.title ?? _('(no title)')),
 	description: 'Create a new notebook. Optionally nest it under an existing notebook by passing parent_id.',
 	inputSchema: {
 		type: 'object',

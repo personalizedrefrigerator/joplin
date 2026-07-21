@@ -70,6 +70,8 @@ export interface ToolSpec {
 
 export interface ToolDefinition extends ToolSpec {
 	handler: (input: ToolInput)=> Promise<ToolOutput>;
+	// A human-readable description of what the tool does
+	userDescription: (input: ToolInput)=> string;
 }
 
 export interface ChatOptions {
