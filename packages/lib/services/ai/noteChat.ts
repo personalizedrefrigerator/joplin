@@ -1,5 +1,5 @@
 import AiService from './AiService';
-import { ChatMessage, ChatResult, ChatRole, ChatToolCall, ChatToolMessage, ToolDefinition, ToolError, ToolInput, ToolOutputObject } from './types';
+import { ChatMessage, ChatResult, ChatRole, ChatToolCall, ChatToolMessage, ToolDefinition, ToolError, ToolInput } from './types';
 import JoplinError from '../../JoplinError';
 import Logger from '@joplin/utils/Logger';
 import findFencedBlock from './utils/findFencedBlock';
@@ -99,14 +99,6 @@ const systemPrompt = (note: NoteContext) => {
 	return lines.join('\n');
 };
 
-class ChatToolResponse extends ToolOutputObject {
-	public constructor(modelDescription: string, userDescription: string) {
-		super();
-		this.fullContent = modelDescription;
-		this.preview = userDescription;
-	}
-}
-
 const toolDefinitions = (note: NoteContext, commands: ChatCommands) => {
 	const result: ToolDefinition[] = [];
 
@@ -133,8 +125,7 @@ const toolDefinitions = (note: NoteContext, commands: ChatCommands) => {
 						commands.displayError(error.message ?? String(error));
 						throw new ToolError('failed to replace selection');
 					}
-					const description = describeEditOperation({ op: 'replaceSelection', text: args.text });
-					return new ChatToolResponse(description, description);
+					return describeEditOperation({ op: 'replaceSelection', text: args.text });
 				}
 			},
 		});
@@ -152,9 +143,7 @@ const toolDefinitions = (note: NoteContext, commands: ChatCommands) => {
 					additionalProperties: false,
 				},
 				handler: (_input) => {
-					return Promise.resolve(
-						new ChatToolResponse(note.body, _('Read note')),
-					);
+					return Promise.resolve(note.body);
 				},
 			},
 		);
@@ -175,8 +164,7 @@ const toolDefinitions = (note: NoteContext, commands: ChatCommands) => {
 
 				const edit = appliedEdits[0];
 				if (edit.status === 'applied') {
-					const description = describeEditOperation(editOperation);
-					return new ChatToolResponse(description, description);
+					return describeEditOperation(editOperation);
 				} else {
 					throw new ToolError(edit.status);
 				}
@@ -489,22 +477,12 @@ const runTools = async (
 			try {
 				const output = await tool.handler(toolCall.arguments);
 
-				let content = output;
-				if (output instanceof ToolOutputObject) {
-					content = output.fullContent;
-				}
-
-				let userDescription = tool.userDescription(toolCall.arguments);
-				if (output instanceof ChatToolResponse) {
-					userDescription = output.preview;
-				}
-
 				chatResponses.push({
 					role: ChatRole.Tool,
 					toolName: tool.id,
 					toolCallId: toolCall.callId,
-					content: typeof content === 'string' ? content : JSON.stringify(content),
-					userDescription,
+					content: typeof output === 'string' ? output : JSON.stringify(output),
+					userDescription: tool.userDescription(toolCall.arguments),
 					isError: false,
 					isEdit: isValidEditOp(toolCall.toolName),
 				});

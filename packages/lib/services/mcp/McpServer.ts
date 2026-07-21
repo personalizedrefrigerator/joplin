@@ -2,7 +2,7 @@ import Logger from '@joplin/utils/Logger';
 import Setting from '../../models/Setting';
 import { allTools, enabledTools, findTool } from './registry';
 import { JsonRpcRequest, JsonRpcResponse, JsonRpcErrorCodes, McpProtocolVersion, ToolCallResult } from './types';
-import { ToolError, ToolOutputObject } from '../ai/types';
+import { ToolError } from '../ai/types';
 
 const logger = Logger.create('McpServer');
 
@@ -133,6 +133,5 @@ const toolErrorResult = (message: string): ToolCallResult => ({
 const serialisePayload = (payload: unknown) => {
 	if (payload === null || payload === undefined) return '';
 	if (typeof payload === 'string') return payload;
-	if (payload instanceof ToolOutputObject) return payload.fullContent;
 	return JSON.stringify(payload, null, 2);
 };
