@@ -1,6 +1,6 @@
 import Logger from '@joplin/utils/Logger';
 import Setting from '../../models/Setting';
-import { allTools, enabledTools, findTool } from './registry';
+import { allTools, enabledTools, findTool } from '../ai/tools';
 import { JsonRpcRequest, JsonRpcResponse, JsonRpcErrorCodes, McpProtocolVersion, ToolCallResult } from './types';
 import { ToolError } from '../ai/types';
 

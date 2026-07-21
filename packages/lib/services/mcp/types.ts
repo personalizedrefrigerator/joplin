@@ -1,4 +1,4 @@
-import type { ToolDefinition } from '../ai/types';
+import type { ToolDefinition, ToolOutput } from '../ai/types';
 
 export interface ToolTextContent {
 	type: 'text';
@@ -17,7 +17,7 @@ export interface ToolCallResult {
 // The dispatcher serialises the payload into MCP content. ToolErrors come back
 // as { isError: true, content: [text] }; any other Error bubbles up to the
 // JSON-RPC layer as an InternalError so the MCP client sees it.
-export type McpTool = ToolDefinition;
+export type McpTool<Output extends ToolOutput> = ToolDefinition<Output>;
 
 export interface JsonRpcRequest {
 	jsonrpc: '2.0';

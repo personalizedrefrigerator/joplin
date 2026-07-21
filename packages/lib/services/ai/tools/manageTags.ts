@@ -1,8 +1,8 @@
-import { _ } from '../../../locale';
+import { _n } from '../../../locale';
 import Note from '../../../models/Note';
 import Tag from '../../../models/Tag';
 import { ToolError } from '../../ai/types';
-import { McpTool } from '../types';
+import buildTool from './utils/buildTool';
 
 interface Input {
 	note_id?: string;
@@ -10,9 +10,21 @@ interface Input {
 	remove?: string[];
 }
 
-const tool: McpTool = {
+const tool = buildTool({
 	id: 'manage_tags',
-	userDescription: () => _('Managed tags'),
+	userDescription: (_input, output) => {
+		const addList = output.added;
+		const removeList = output.removed;
+
+		const result = [];
+		if (addList.length) {
+			result.push(_n('Added tag: %s', 'Added tags: %s', addList.length, addList.join(', ')));
+		}
+		if (removeList.length) {
+			result.push(_n('Removed tag: %s', 'Removed tags: %s', removeList.length, removeList.join(', ')));
+		}
+		return result.join('\n');
+	},
 	description: 'Add or remove tags on a note. Tags are addressed by title; unknown tags in "add" are created automatically.',
 	inputSchema: {
 		type: 'object',
@@ -63,7 +75,7 @@ const tool: McpTool = {
 			tags: currentTags.map(t => t.title),
 		};
 	},
-};
+});
 
 const checkStringArray = (value: unknown, paramName: string) => {
 	if (value === undefined || value === null) return [];

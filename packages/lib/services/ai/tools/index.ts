@@ -1,21 +1,20 @@
-import Setting from '../../models/Setting';
-import { McpTool } from './types';
+import Setting from '../../../models/Setting';
 
-import searchNotes from './tools/searchNotes';
-import semanticSearchNotes from './tools/semanticSearchNotes';
-import readNote from './tools/readNote';
-import listNotebooks from './tools/listNotebooks';
-import listTags from './tools/listTags';
-import createNote from './tools/createNote';
-import updateNote from './tools/updateNote';
-import deleteNote from './tools/deleteNote';
-import manageTags from './tools/manageTags';
-import createNotebook from './tools/createNotebook';
+import searchNotes from './searchNotes';
+import semanticSearchNotes from './semanticSearchNotes';
+import readNote from './readNote';
+import listNotebooks from './listNotebooks';
+import listTags from './listTags';
+import createNote from './createNote';
+import updateNote from './updateNote';
+import deleteNote from './deleteNote';
+import manageTags from './manageTags';
+import createNotebook from './createNotebook';
 
 // Every tool registered here gets an `ai.tool.<id>.enabled` setting (see
 // builtInMetadata.ts). Adding a tool to this list without also adding the
 // setting means it will be reported as enabled by default — keep them in sync.
-const allMcpTools: McpTool[] = [
+const allMcpTools = [
 	searchNotes,
 	semanticSearchNotes,
 	readNote,

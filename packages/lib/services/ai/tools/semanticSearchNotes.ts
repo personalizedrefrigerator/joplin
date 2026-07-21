@@ -2,7 +2,7 @@ import { _ } from '../../../locale';
 import Note from '../../../models/Note';
 import SearchService from '../../ai/SearchService';
 import { ToolError } from '../../ai/types';
-import { McpTool } from '../types';
+import buildTool from './utils/buildTool';
 
 interface Input {
 	query?: string;
@@ -11,7 +11,7 @@ interface Input {
 	relevance?: 'strict' | 'normal' | 'loose';
 }
 
-const tool: McpTool = {
+const tool = buildTool({
 	id: 'semantic_search_notes',
 	userDescription: (input: Input) => _('Searched for: %s', input.query ?? _('(empty)')),
 	description: [
@@ -81,6 +81,6 @@ const tool: McpTool = {
 
 		return { results, total: results.length };
 	},
-};
+});
 
 export default tool;

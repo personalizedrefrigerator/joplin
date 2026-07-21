@@ -60,11 +60,11 @@ export interface ToolSpec {
 	inputSchema: JsonSchema;
 }
 
-export interface ToolDefinition extends ToolSpec {
-	handler: (input: ToolInput)=> Promise<ToolOutput>;
-	// A human-readable description of what the tool does
-	userDescription: (input: ToolInput)=> string;
-}
+export type ToolDefinition<Output extends ToolOutput|unknown = unknown> = ToolSpec & {
+	handler: (input: ToolInput)=> Promise<Output>;
+	// A human-readable description of an action completed by the tool
+	userDescription: (input: ToolInput, output: Output)=> string;
+};
 
 export interface ChatOptions {
 	temperature?: number;

@@ -1,8 +1,8 @@
 import Note from '../../../models/Note';
 import Folder from '../../../models/Folder';
-import { McpTool } from '../types';
 import { ToolError, ToolInput } from '../../ai/types';
 import { _ } from '../../../locale';
+import buildTool from './utils/buildTool';
 
 interface Input {
 	title?: string;
@@ -11,7 +11,7 @@ interface Input {
 	is_todo?: boolean;
 }
 
-const tool: McpTool = {
+const tool = buildTool({
 	id: 'create_note',
 	userDescription: (input: ToolInput) => _('Created note: %s', input.title ?? _('(no title)')),
 	description: 'Create a new note. Returns the created note id. If notebook_id is omitted, the note is created in the default notebook.',
@@ -53,6 +53,6 @@ const tool: McpTool = {
 
 		return { id: saved.id, title: saved.title, notebook_id: saved.parent_id };
 	},
-};
+});
 
 export default tool;

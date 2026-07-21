@@ -8,7 +8,8 @@ import { hasOwnProperty } from '@joplin/utils/object';
 const Countable = require('../../countable/Countable');
 import { _, _n } from '../../locale';
 import Setting from '../../models/Setting';
-import { enabledTools } from '../mcp/registry';
+import { enabledTools } from './tools/index';
+import buildTool from './tools/utils/buildTool';
 
 const logger = Logger.create('noteChat');
 
@@ -103,9 +104,9 @@ const toolDefinitions = (note: NoteContext, commands: ChatCommands) => {
 	const result: ToolDefinition[] = [];
 
 	const addSelectionOperations = () => {
-		result.push({
+		result.push(buildTool({
 			id: 'replaceSelection',
-			userDescription: (input) => describeEditOperation(toolCallToEditOperation('replaceSelection', input)),
+			userDescription: (_input: ToolInput, output: string) => output,
 			description: 'Replaces the text currently selected by the user.',
 			inputSchema: {
 				type: 'object',
@@ -115,7 +116,7 @@ const toolDefinitions = (note: NoteContext, commands: ChatCommands) => {
 				required: ['text'],
 				additionalProperties: false,
 			},
-			handler: async (args) => {
+			handler: async (args: ToolInput) => {
 				if (!hasOwnProperty(args, 'text') || typeof args.text !== 'string') {
 					throw new ToolError('missing or invalid `text` property');
 				} else {
@@ -128,7 +129,7 @@ const toolDefinitions = (note: NoteContext, commands: ChatCommands) => {
 					return describeEditOperation({ op: 'replaceSelection', text: args.text });
 				}
 			},
-		});
+		}));
 	};
 
 	const addReadEditOperations = () => {
@@ -142,7 +143,7 @@ const toolDefinitions = (note: NoteContext, commands: ChatCommands) => {
 					required: [],
 					additionalProperties: false,
 				},
-				handler: (_input) => {
+				handler: () => {
 					return Promise.resolve(note.body);
 				},
 			},
@@ -482,7 +483,7 @@ const runTools = async (
 					toolName: tool.id,
 					toolCallId: toolCall.callId,
 					content: typeof output === 'string' ? output : JSON.stringify(output),
-					userDescription: tool.userDescription(toolCall.arguments),
+					userDescription: tool.userDescription(toolCall.arguments, output),
 					isError: false,
 					isEdit: isValidEditOp(toolCall.toolName),
 				});

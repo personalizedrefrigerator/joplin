@@ -1,8 +1,8 @@
 import SearchEngineUtils from '../../search/SearchEngineUtils';
 import { NoteEntity } from '../../database/types';
-import { McpTool } from '../types';
 import { ToolError } from '../../ai/types';
 import { _ } from '../../../locale';
+import buildTool from './utils/buildTool';
 
 interface Input {
 	query?: string;
@@ -14,7 +14,7 @@ const defaultLimit = 20;
 const maxLimit = 100;
 const snippetChars = 240;
 
-const tool: McpTool = {
+const tool = buildTool({
 	id: 'search_notes',
 	userDescription: () => _('Searched notes'),
 	description: [
@@ -75,7 +75,7 @@ const tool: McpTool = {
 
 		return { results, total: notes.length };
 	},
-};
+});
 
 const makeSnippet = (body: string, keywords: string[]) => {
 	const normalised = body.replace(/\s+/g, ' ').trim();
