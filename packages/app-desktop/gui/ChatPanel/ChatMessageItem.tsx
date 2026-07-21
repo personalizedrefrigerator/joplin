@@ -2,19 +2,16 @@ import * as React from 'react';
 import { _ } from '@joplin/lib/locale';
 import { AiChatMessage } from '../../app.reducer';
 import InlineMarkdownDisplay from '../InlineMarkdownDisplay';
-import { ChatMessage, ChatRole } from '@joplin/lib/services/ai/types';
+import { ChatMessage, ChatRole, ChatToolMessage } from '@joplin/lib/services/ai/types';
 
 
 const toolResultSummary = (actions: ChatMessage[]) => {
 	const toolResults = actions.filter(action => action.role === ChatRole.Tool);
-	if (toolResults.length === 1 && !toolResults[0].isError) {
-		return toolResults.map(result => result.userDescription).join('\n');
-	}
 
 	const editSummary = () => {
 		let applied = 0;
 		let missed = 0;
-		let lastEdit;
+		let lastEdit: ChatToolMessage|null = null;
 		for (const result of toolResults) {
 			if (!result.isEdit) continue;
 
@@ -28,14 +25,18 @@ const toolResultSummary = (actions: ChatMessage[]) => {
 
 		if (applied + missed === 0) return '';
 		if (missed === 0 && applied > 1) return _('%d edit(s) applied.', applied);
-		if (missed === 0) return lastEdit.userDescription;
+		if (missed === 0 && lastEdit) return lastEdit.userDescription;
 		return _('%d edit(s) applied, %d could not be placed automatically.', applied, missed);
 	};
 
 	return [
-		toolResults.map(result => !result.isEdit && result.userDescription).join('\n'),
+		...toolResults
+			.filter(result => !result.isEdit)
+			.map(result => result.userDescription),
 		editSummary(),
-	].join('\n');
+	]
+		.filter(item => !!item)
+		.join('\n');
 };
 
 const hasToolError = (actions: ChatMessage[]) => {
