@@ -174,7 +174,7 @@ const toolDefinitions = (note: NoteContext, commands: ChatCommands) => {
 		result.push(
 			{
 				...buildEditTool('appendToNote'),
-				description: 'Adds text to the end of the note. Text is always added to the end of the note. This tool does not require an anchor.',
+				description: 'Adds text to the end of the current note: Text is always added to the end of the note. This tool does not require an anchor.',
 				inputSchema: {
 					type: 'object',
 					properties: {
@@ -198,7 +198,7 @@ const toolDefinitions = (note: NoteContext, commands: ChatCommands) => {
 		result.push(
 			{
 				...buildEditTool('insertBefore'),
-				description: 'Insert text immediately before the first occurrence of `anchor`.',
+				description: 'Add text before an `anchor` in the current note: Insert text immediately before the first occurrence of `anchor`.',
 				inputSchema: anchoredSchema(
 					'Text to find',
 					'What to insert just **before** the found text',
@@ -206,7 +206,7 @@ const toolDefinitions = (note: NoteContext, commands: ChatCommands) => {
 			},
 			{
 				...buildEditTool('insertAfter'),
-				description: 'Insert text immediately after the first occurrence of `anchor`.',
+				description: 'Add text after an `anchor` in the current note: Inserts text immediately after the first occurrence of `anchor` in the current note.',
 				inputSchema: anchoredSchema(
 					'Text to find',
 					'What to insert just **after** the found text',
@@ -214,7 +214,7 @@ const toolDefinitions = (note: NoteContext, commands: ChatCommands) => {
 			},
 			{
 				...buildEditTool('replaceRange'),
-				description: 'Replace the first occurrence of `anchor` with `text`.',
+				description: 'Remove or replace text in the current note: Replaces the first occurrence of `anchor` with `text`.',
 				inputSchema: anchoredSchema(
 					'The text to replace',
 					'What to replace it with',
@@ -227,7 +227,7 @@ const toolDefinitions = (note: NoteContext, commands: ChatCommands) => {
 			result.push({
 				...buildEditTool('replaceFencedBlock'),
 				description: [
-					'Replaces the inner content of the first ```<tag>``` fenced block.',
+					'Replaces the inner content of the first ```<tag>``` fenced block in the current note.',
 					`"text" is the new content inside the fence (no fence markers). Supported tags: ${supportedStructuredBlockTags.join(', ')}.`,
 					'Use appendToNote to create a new fenced block.',
 				].join(' '),
