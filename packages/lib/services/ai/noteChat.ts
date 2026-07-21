@@ -35,6 +35,7 @@ const knownOps = new Set<EditOp['op']>([
 export interface NoteContext {
 	title: string;
 	noteId: string;
+	folderId: string;
 	body: string;
 	selection: string | null;
 }
@@ -476,7 +477,7 @@ const runTools = async (
 
 		if (tool) {
 			try {
-				const output = await tool.handler(toolCall.arguments);
+				const output = await tool.handler(toolCall.arguments, { selectedFolderId: currentContext.folderId });
 
 				chatResponses.push({
 					role: ChatRole.Tool,

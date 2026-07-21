@@ -97,7 +97,7 @@ export default class McpServer {
 		}
 		const input = params.arguments ?? {};
 		try {
-			const payload = await tool.handler(input);
+			const payload = await tool.handler(input, {});
 			return {
 				content: [{ type: 'text', text: serialisePayload(payload) }],
 			};

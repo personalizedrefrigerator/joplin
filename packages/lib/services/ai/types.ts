@@ -60,8 +60,12 @@ export interface ToolSpec {
 	inputSchema: JsonSchema;
 }
 
+export interface ToolContext {
+	selectedFolderId?: string;
+}
+
 export type ToolDefinition<Output extends ToolOutput|unknown = unknown> = ToolSpec & {
-	handler: (input: ToolInput)=> Promise<Output>;
+	handler: (input: ToolInput, context: ToolContext)=> Promise<Output>;
 	// A human-readable description of an action completed by the tool
 	userDescription: (input: ToolInput, output: Output)=> string;
 };

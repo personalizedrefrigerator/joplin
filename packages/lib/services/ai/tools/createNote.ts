@@ -25,7 +25,7 @@ const tool = buildTool({
 		},
 		required: ['title'],
 	},
-	handler: async (input: Input) => {
+	handler: async (input: Input, context) => {
 		if (typeof input.title !== 'string' || !input.title.trim()) {
 			throw new ToolError('Missing or invalid "title" parameter');
 		}
@@ -34,7 +34,7 @@ const tool = buildTool({
 			throw new ToolError('"is_todo" must be a boolean');
 		}
 
-		let parentId = input.notebook_id;
+		let parentId = input.notebook_id ?? context.selectedFolderId;
 		if (parentId) {
 			const folder = await Folder.load(parentId);
 			if (!folder) throw new ToolError(`Notebook not found: ${parentId}`);

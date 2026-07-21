@@ -9,6 +9,7 @@ const makeTestContext = (defaultContext: Partial<NoteContext>) => {
 		title: 'Test',
 		body: 'Body',
 		noteId: '00000000000000000000000000000000',
+		folderId: '00000000000000000000000000000001',
 		selection: null,
 		...defaultContext,
 	};
@@ -46,6 +47,7 @@ describe('noteChat', () => {
 			body: 'long body text',
 			selection: 'just this bit',
 			noteId: '',
+			folderId: '',
 		});
 		expect(prompt).toContain('My note');
 		expect(prompt).toContain('just this bit');
@@ -54,7 +56,7 @@ describe('noteChat', () => {
 	});
 
 	test('systemPrompt advertises Joplin-specific Markdown features', () => {
-		const prompt = _internal.systemPrompt({ title: 'n', body: 'b', noteId: '', selection: null });
+		const prompt = _internal.systemPrompt({ title: 'n', body: 'b', noteId: '', folderId: '', selection: null });
 		// The fence tags are the load-bearing strings — the model knows the
 		// syntax inside (JSONCanvas, Mermaid, KaTeX) but needs the Joplin
 		// fence tag to wrap it correctly.
@@ -72,7 +74,8 @@ describe('noteChat', () => {
 		const prompt = _internal.systemPrompt({
 			title: 'My note',
 			body: 'the whole body',
-			noteId: '00000000000000000000000000000000',
+			noteId: '',
+			folderId: '',
 			selection: null,
 		});
 		// Including the body in the prompt would cause a cache invalidation on each note change
