@@ -15,7 +15,7 @@ const defaultMaxChars = 0;
 
 const tool = buildTool({
 	id: 'read_note',
-	userDescription: () => _('Read note'),
+	userDescription: (_input, output) => _('Read note: %s', output.title ?? _('(untitled)')),
 	description: 'Read a single note by id. Returns title, markdown body, notebook name, tags, and timestamps. For very long notes, use offset and max_chars to page through the body.',
 	inputSchema: {
 		type: 'object',
