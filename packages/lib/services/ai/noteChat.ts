@@ -8,7 +8,7 @@ import { hasOwnProperty } from '@joplin/utils/object';
 const Countable = require('../../countable/Countable');
 import { _, _n } from '../../locale';
 import Setting from '../../models/Setting';
-import { enabledTools } from './tools/index';
+import { describeToolNotFoundFailure, enabledTools } from './tools/index';
 import buildTool from './tools/utils/buildTool';
 
 const logger = Logger.create('noteChat');
@@ -454,13 +454,13 @@ const runTools = async (
 
 	const isEdit = (toolName: string) => isValidEditOp(toolName);
 
-	const respondFailure = (action: ChatToolCall, reason: string) => {
+	const respondFailure = (action: ChatToolCall, reason: string, userDescription?: string) => {
 		chatResponses.push({
 			role: ChatRole.Tool,
 			toolName: action.toolName,
 			toolCallId: action.callId,
 			content: `failed: ${reason}`,
-			userDescription: reason,
+			userDescription: userDescription ?? reason,
 			isError: true,
 			isEdit: isEdit(action.toolName),
 		});
@@ -497,7 +497,11 @@ const runTools = async (
 				}
 			}
 		} else {
-			respondFailure(toolCall, 'tool not found');
+			respondFailure(
+				toolCall,
+				describeToolNotFoundFailure(toolCall.toolName),
+				_('Tool not found: %s', toolCall.toolName),
+			);
 		}
 		return body;
 	};

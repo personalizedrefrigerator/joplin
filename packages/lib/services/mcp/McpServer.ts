@@ -1,6 +1,6 @@
 import Logger from '@joplin/utils/Logger';
 import Setting from '../../models/Setting';
-import { allTools, enabledTools, findTool } from '../ai/tools';
+import { describeToolNotFoundFailure, enabledTools, findTool } from '../ai/tools';
 import { JsonRpcRequest, JsonRpcResponse, JsonRpcErrorCodes, McpProtocolVersion, ToolCallResult } from './types';
 import { ToolError } from '../ai/types';
 
@@ -91,9 +91,7 @@ export default class McpServer {
 		}
 		const tool = findTool(params.name);
 		if (!tool) {
-			// "Disabled" vs "unknown" surface differently so the LLM gets actionable feedback.
-			const exists = allTools().some(t => t.id === params.name);
-			return toolErrorResult(exists ? `Tool '${params.name}' is disabled in Joplin settings` : `Unknown tool '${params.name}'`);
+			return toolErrorResult(describeToolNotFoundFailure(params.name));
 		}
 		const input = params.arguments ?? {};
 		try {
