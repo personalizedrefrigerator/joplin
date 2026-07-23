@@ -44,8 +44,13 @@ const buildRequestEnableTool = () => {
 	const disabledToolIds = disabledTools().map(t => t.id);
 
 	return buildTool<{ tool_id: string }>({
-		id: 'how_do_i_enable_this_tool',
-		description: `Run this tool if one or more of the following currently-disabled tools would be helpful: ${disabledToolIds.join(', ')}. The response will include more information about the tool and instructions for how to ask the user to enable it.`,
+		id: 'disabled_tool_info',
+		description: [
+			'Run this tool if one or more of the following currently-disabled tools may be needed to complete the current task:',
+			`${disabledToolIds.join(', ')}.`,
+			'The response will include more information about the tool and instructions for how to ask the user to enable it.',
+			'This is a non-destructive action. It only returns information.',
+		].join(' '),
 		inputSchema: {
 			type: 'object',
 			properties: {
@@ -66,7 +71,7 @@ const buildRequestEnableTool = () => {
 
 			const description = disabledTools().find(tool => tool.id === input.tool_id)?.description;
 			const toolsSectionName = Setting.sectionNameToLabel('ai.tools');
-			const toolSettingName = Setting.settingMetadata(toolSettingKey(toolId));
+			const toolSettingName = Setting.settingMetadata(toolSettingKey(toolId))?.label?.();
 			const info = [
 				'If you need this tool, please ask the user to enable it for you. The user can enable this tool by:',
 				'1. opening Joplin\'s settings screen,',
