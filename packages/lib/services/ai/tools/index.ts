@@ -69,7 +69,7 @@ const buildRequestEnableTool = () => {
 			'Learn how to enable a tool: Run this tool if you need one or more of the following **currently-disabled** tools:',
 			...tools.map((tool) => `- ${tool.id}: ${substrWithEllipsis(tool.description, 0, 50)}`),
 			' ',
-			'disabled_tool_info\'s response will include: 1) the full description of the tool and 2) how to enable the tool.',
+			'disabled_tool_info\'s response will include more information about the tool and instructions for how to ask the user to enable it.',
 		].join('\n'),
 		inputSchema: {
 			type: 'object',
