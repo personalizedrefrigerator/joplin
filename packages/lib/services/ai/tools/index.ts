@@ -72,9 +72,11 @@ const buildRequestEnableTool = () => {
 		description: [
 			'**Getting access to more tools:** The following tools/capabilities are currently **disabled** in Joplin\'s settings:',
 			...tools.map((tool) => `- ${JSON.stringify({ id: tool.id, settingName: toolsSettingName(tool.id) })}`),
-			' ',
-			'The user may not know that these tools exist or how to enable them: If you may need one or more of these, **please ask the user for permission**.',
-			`The user can enable tools from the **${toolsSectionName()}** tab of Joplin's settings screen.`,
+			'',
+			'Communication is important here! The user may not know that these tools exist or how to enable them:',
+			`If you need one or more of these tools, please ask the user to enable them from the **${toolsSectionName()}** tab of Joplin's settings screen.`,
+			'',
+			'Run this tool for more information about any of the above disabled tools.',
 		].join('\n'),
 		inputSchema: {
 			type: 'object',
@@ -108,8 +110,6 @@ export const enabledTools = () => {
 };
 
 export const findTool = (id: string) => {
-	const t = allMcpTools.find(t => t.id === id);
-	if (!t) return null;
-	if (!(Setting.value(`ai.tool.${t.id}.enabled`) as boolean)) return null;
-	return t;
+	const t = enabledTools().find(t => t.id === id);
+	return t ?? null;
 };
