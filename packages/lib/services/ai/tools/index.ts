@@ -13,6 +13,7 @@ import createNotebook from './createNotebook';
 import buildTool from './utils/buildTool';
 import { ToolDefinition, ToolError } from '../types';
 import { _ } from '../../../locale';
+import { substrWithEllipsis } from '../../../string-utils';
 
 // Every tool registered here gets an `ai.tool.<id>.enabled` setting (see
 // builtInMetadata.ts). Tools missing settings will throw at runtime.
@@ -71,7 +72,9 @@ const buildRequestEnableTool = () => {
 		id: 'disabled_tool_info',
 		description: [
 			'**Getting access to more tools:** The following tools/capabilities are currently **disabled** in Joplin\'s settings:',
-			...tools.map((tool) => `- ${JSON.stringify({ id: tool.id, settingName: toolsSettingName(tool.id) })}`),
+			'| Tool ID | Setting name | Description |',
+			'|---------|--------------|-------------|',
+			...tools.map((tool) => `| ${tool.id} | ${toolsSettingName(tool.id)} | ${substrWithEllipsis(tool.description, 0, 50)} |`),
 			'',
 			'Communication is important here! The user may not know that these tools exist or how to enable them:',
 			`If you need one or more of these tools, please ask the user to enable them from the **${toolsSectionName()}** tab of Joplin's settings screen.`,

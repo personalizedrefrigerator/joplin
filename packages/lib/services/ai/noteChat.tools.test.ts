@@ -69,4 +69,24 @@ describe('noteChat.tools', () => {
 		await runChat();
 		expect(await Tag.tagsByNoteId(note.id)).toHaveLength(1);
 	});
+
+	test('should provide information about disabled tools', async () => {
+		const note = await Note.save({ title: 'test' });
+
+		const toolCallMessage = `/tool disabled_tool_info ${JSON.stringify({ tool_id: 'manage_tags' })}`;
+		const runChat = () => (
+			runChatForNote(
+				note,
+				// Avoid the default history
+				[{ role: ChatRole.User, content: 'testing' }],
+				toolCallMessage,
+			)
+		);
+
+		// Should not allow managing tags when disabled in settings
+		Setting.setValue('ai.tool.manage_tags.enabled', false);
+		const messages = await runChat();
+		const infoMessage = messages.find(message => message.role === ChatRole.Tool && message.toolName === 'disabled_tool_info');
+		expect(infoMessage.content).toContain('Tool `manage_tags` is disabled in Joplin\'s settings');
+	});
 });
