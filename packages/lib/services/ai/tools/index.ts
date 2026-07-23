@@ -13,7 +13,6 @@ import createNotebook from './createNotebook';
 import buildTool from './utils/buildTool';
 import { ToolDefinition, ToolError } from '../types';
 import { _ } from '../../../locale';
-import { substrWithEllipsis } from '../../../string-utils';
 
 // Every tool registered here gets an `ai.tool.<id>.enabled` setting (see
 // builtInMetadata.ts). Tools missing settings will throw at runtime.
@@ -39,6 +38,11 @@ const disabledTools = () => {
 	return allMcpTools.filter(t => !isToolEnabled(t));
 };
 
+const toolsSectionName = () => Setting.sectionNameToLabel('ai.tools');
+const toolsSettingName = (toolId: string) => {
+	const key = toolSettingKey(toolId);
+	return Setting.keyExists(key) ? Setting.settingMetadata(key).label?.() : null;
+};
 export const describeToolNotFoundFailure = (toolId: string) => {
 	const toolSettingName = Setting.settingMetadata(toolSettingKey(toolId))?.label?.();
 	// Return "disabled" vs "unknown" differently so the LLM gets actionable feedback.
@@ -66,10 +70,11 @@ const buildRequestEnableTool = () => {
 	return buildTool<{ tool_id: string }>({
 		id: 'disabled_tool_info',
 		description: [
-			'Learn how to enable a tool: Run this tool if you need one or more of the following **currently-disabled** tools:',
-			...tools.map((tool) => `- ${tool.id}: ${substrWithEllipsis(tool.description, 0, 50)}`),
+			'**Getting access to more tools:** The following tools/capabilities are currently **disabled** in Joplin\'s settings:',
+			...tools.map((tool) => `- ${JSON.stringify({ id: tool.id, settingName: toolsSettingName(tool.id) })}`),
 			' ',
-			'disabled_tool_info\'s response will include more information about the tool and instructions for how to ask the user to enable it.',
+			'The user may not know that these tools exist or how to enable them: If you may need one or more of these, **please ask the user for permission**.',
+			`The user can enable tools from the **${toolsSectionName()}** tab of Joplin's settings screen.`,
 		].join('\n'),
 		inputSchema: {
 			type: 'object',
@@ -90,7 +95,6 @@ const buildRequestEnableTool = () => {
 			if (!disabledToolIds.includes(toolId)) throw new ToolError(`Invalid tool_id: ${JSON.stringify(toolId)}. Must be one of ${JSON.stringify(disabledToolIds)}`);
 
 			const description = disabledTools().find(tool => tool.id === input.tool_id)?.description;
-
 			return { tool_id: toolId, description, how_to_enable: describeToolNotFoundFailure(toolId) };
 		},
 	});

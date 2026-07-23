@@ -90,7 +90,7 @@ describe('noteChat', () => {
 				body: 'long body text',
 				selection: 'just this bit',
 			},
-			expectedOperations: ['replaceSelection'],
+			expectedOperations: ['replaceSelection', 'disabled_tool_info'],
 		},
 		{
 			label: 'offers anchor operations when no selection present',
@@ -99,7 +99,7 @@ describe('noteChat', () => {
 				body: 'b',
 				selection: null,
 			},
-			expectedOperations: ['insertBefore', 'insertAfter', 'appendToNote', 'replaceRange', 'readNoteContent'],
+			expectedOperations: ['insertBefore', 'insertAfter', 'appendToNote', 'replaceRange', 'readNoteContent', 'disabled_tool_info'],
 		},
 		{
 			label: 'offers replaceFencedBlock when Mermaid block present',
@@ -108,7 +108,7 @@ describe('noteChat', () => {
 				body: '```mermaid\ngitGraph\n\tcommit\n```\n',
 				selection: null,
 			},
-			expectedOperations: ['insertBefore', 'insertAfter', 'appendToNote', 'replaceRange', 'replaceFencedBlock', 'readNoteContent'],
+			expectedOperations: ['insertBefore', 'insertAfter', 'appendToNote', 'replaceRange', 'replaceFencedBlock', 'readNoteContent', 'disabled_tool_info'],
 		},
 	])('toolDefinitions should include the expected operations (case $label)', ({ note, expectedOperations }) => {
 		const { commands, context } = makeTestContext(note);
