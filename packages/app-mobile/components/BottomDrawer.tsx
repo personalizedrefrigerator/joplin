@@ -9,9 +9,15 @@ import { AppState } from '../utils/types';
 import useReduceMotionEnabled from '../utils/hooks/useReduceMotionEnabled';
 import { _ } from '@joplin/lib/locale';
 
+export enum MenuAlignment {
+	Left,
+	Right,
+}
+
 interface Props {
 	themeId: number;
 	style: ViewStyle;
+	alignment?: MenuAlignment;
 	children: React.ReactNode;
 	visible: boolean;
 	draggable: boolean;
@@ -20,6 +26,7 @@ interface Props {
 }
 
 interface UseStylesProps {
+	alignment: MenuAlignment;
 	theme: ThemeStyle;
 	dragging: boolean;
 	draggable: boolean;
@@ -27,7 +34,7 @@ interface UseStylesProps {
 	dragOffset: Animated.AnimatedInterpolation<number>;
 }
 
-const useStyles = ({ theme, dragging, draggable, dragOffset, backgroundOpacity }: UseStylesProps) => {
+const useStyles = ({ theme, dragging, alignment, draggable, dragOffset, backgroundOpacity }: UseStylesProps) => {
 	const { width: windowWidth, height: windowHeight } = useWindowDimensions();
 	const safeAreaPadding = useSafeAreaPadding();
 
@@ -61,7 +68,7 @@ const useStyles = ({ theme, dragging, draggable, dragOffset, backgroundOpacity }
 			},
 			menuStyle: {
 				zIndex: 1,
-				alignSelf: 'flex-end',
+				alignSelf: alignment === MenuAlignment.Left ? 'flex-start' : 'flex-end',
 				...(isSmallWidthScreen ? {
 					// Center on small screens, rather than float right.
 					alignSelf: 'center',
@@ -148,7 +155,7 @@ const useStyles = ({ theme, dragging, draggable, dragOffset, backgroundOpacity }
 				zIndex: 2,
 			},
 		});
-	}, [theme, safeAreaPadding, windowWidth, dragging, draggable, dragOffset, windowHeight, backgroundOpacity, menuMarginTop]);
+	}, [theme, safeAreaPadding, windowWidth, dragging, draggable, alignment, dragOffset, windowHeight, backgroundOpacity, menuMarginTop]);
 };
 
 interface UsePanResponderProps {
@@ -308,7 +315,7 @@ const BottomDrawer: React.FC<Props> = props => {
 	const [animating, setAnimating] = useState(false);
 	const menuYOffset = useMemo(() => menuDragOffset, [menuDragOffset]);
 	const styles = useStyles({
-		theme, dragging, draggable: props.draggable, dragOffset: menuYOffset, backgroundOpacity,
+		theme, dragging, alignment: props.alignment, draggable: props.draggable, dragOffset: menuYOffset, backgroundOpacity,
 	});
 
 	const reduceMotionEnabled = useReduceMotionEnabled();
