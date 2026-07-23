@@ -66,11 +66,10 @@ const buildRequestEnableTool = () => {
 	return buildTool<{ tool_id: string }>({
 		id: 'disabled_tool_info',
 		description: [
-			'Learn how to enable a tool: Run this tool if you need one or more of the following **currently-disabled** tools:',
-			...tools.map((tool) => `- ${tool.id}: ${substrWithEllipsis(tool.description, 0, 50)}`),
-			' ',
-			'disabled_tool_info\'s response will include more information about the tool and instructions for how to ask the user to enable it.',
-		].join('\n'),
+			'Get info about a disabled tool: Run this tool if you need one or more of the following **currently-disabled** tools:',
+			...tools.map((tool) => `<disabled-tool id="${tool.id}">${substrWithEllipsis(tool.description, 0, 50)}</disabled-tool>`),
+			'The response will include more information about the tool and instructions for how to ask the user to enable it.',
+		].join(' '),
 		inputSchema: {
 			type: 'object',
 			properties: {
