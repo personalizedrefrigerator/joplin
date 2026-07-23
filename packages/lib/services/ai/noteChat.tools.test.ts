@@ -87,6 +87,7 @@ describe('noteChat.tools', () => {
 		Setting.setValue('ai.tool.manage_tags.enabled', false);
 		const messages = await runChat();
 		const infoMessage = messages.find(message => message.role === ChatRole.Tool && message.toolName === 'disabled_tool_info');
+		expect(infoMessage).toBeTruthy();
 		expect(infoMessage.content).toContain('Tool `manage_tags` is disabled in Joplin\'s settings');
 	});
 });

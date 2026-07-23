@@ -45,9 +45,9 @@ const toolsSettingName = (toolId: string) => {
 	return Setting.keyExists(key) ? Setting.settingMetadata(key).label?.() : null;
 };
 export const describeToolNotFoundFailure = (toolId: string) => {
-	const toolSettingName = Setting.settingMetadata(toolSettingKey(toolId))?.label?.();
+	const settingName = toolsSettingName(toolId);
 	// Return "disabled" vs "unknown" differently so the LLM gets actionable feedback.
-	if (!toolSettingName) return `Unknown tool: '${toolId}'`;
+	if (!settingName) return `Unknown tool: '${toolId}'`;
 
 	const toolsSectionName = Setting.sectionNameToLabel('ai.tools');
 	return [
@@ -56,7 +56,7 @@ export const describeToolNotFoundFailure = (toolId: string) => {
 		'If you need this tool, please ask the user to enable it for you. The user can enable this tool by:',
 		'1. opening Joplin\'s settings screen,',
 		`2. opening the "${toolsSectionName}" tab, and`,
-		`3. enabling the "${toolSettingName}" setting.`,
+		`3. enabling the "${settingName}" setting.`,
 		'',
 		'You can\'t enable this tool yourself. If you need this tool, you\'ll have to ask the user to enable it for you.',
 	].join('\n');
