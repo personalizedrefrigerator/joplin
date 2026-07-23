@@ -8,7 +8,7 @@ import { MenuAlignment } from '../BottomDrawer';
 interface Props {
 	themeId: number;
 	options: MenuOption[];
-	children?: React.ReactNode;
+	children: React.ReactNode;
 }
 
 const MenuComponent: React.FC<Props> = props => {
