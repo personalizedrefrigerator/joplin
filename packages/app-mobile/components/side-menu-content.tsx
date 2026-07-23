@@ -384,7 +384,6 @@ const SideMenuContentComponent = (props: Props) => {
 				onPress: async () => {
 					await restoreItems(ModelType.Folder, [folder.id]);
 				},
-				style: MenuOptionStyle.Destructive,
 			});
 
 			// Alert.alert(
