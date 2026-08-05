@@ -363,15 +363,15 @@ const SideMenuContentComponent = (props: Props) => {
 				onPress: async () => {
 					dialogs.prompt('', _('This will permanently delete all items in the trash. Continue?'), [
 						{
+							text: _('Cancel'),
+							onPress: () => { },
+							style: 'cancel',
+						},
+						{
 							text: _('Empty trash'),
 							onPress: async () => {
 								await emptyTrash();
 							},
-						},
-						{
-							text: _('Cancel'),
-							onPress: () => { },
-							style: 'cancel',
 						},
 					]);
 				},
@@ -454,7 +454,7 @@ const SideMenuContentComponent = (props: Props) => {
 				},
 			};
 
-			menuItems.push(editButton, { isDivider: true }, deleteButton);
+			menuItems.push(editButton, deleteButton);
 		}
 
 		setFolderMenuOptions(menuItems);

@@ -1,10 +1,12 @@
 import * as React from 'react';
-import { useMemo } from 'react';
+import { useMemo, useRef } from 'react';
 import { StyleSheet, View, useWindowDimensions, TextStyle, StyleProp, ViewStyle } from 'react-native';
 import { themeStyle } from './global-style';
 import BottomDrawer, { MenuAlignment, MenuType } from './BottomDrawer';
 import { TouchableRipple, Text } from 'react-native-paper';
 import Icon from './Icon';
+import focusView from '../utils/focusView';
+import debounce from '../utils/debounce';
 
 interface MenuOptionDivider {
 	isDivider: true;
@@ -23,6 +25,9 @@ export interface MenuOptionButton {
 	onPress: ()=> void;
 	icon?: string;
 	title: string;
+
+	accessibilityHint?: string;
+	autoFocus?: boolean;
 }
 
 export type MenuOption = MenuOptionDivider|MenuOptionButton;
@@ -43,15 +48,18 @@ const useStyles = (themeId: number) => {
 	const windowWidth = useWindowDimensions().width;
 	return useMemo(() => {
 		const theme = themeStyle(themeId);
+		const dividerMargin = theme.marginSmall;
 
 		return StyleSheet.create({
 			title: {
-				marginLeft: theme.marginLeft,
-				marginRight: theme.marginRight,
-				paddingVertical: theme.marginMedium,
+				paddingLeft: theme.marginLeft,
+				paddingRight: theme.marginRight,
+				// Match the space from button text to a neighbouring divider:
+				paddingVertical: theme.marginMedium + dividerMargin,
+				marginBottom: theme.marginSmall,
+
 				lineHeight: theme.fontSizeLarger,
 				fontSize: theme.fontSizeLarger,
-				marginBottom: theme.marginSmall,
 
 				borderColor: theme.dividerColor,
 				borderBottomWidth: 1,
@@ -87,15 +95,32 @@ const useStyles = (themeId: number) => {
 				height: 0,
 				borderBottomWidth: 1,
 				borderColor: theme.dividerColor,
-				marginVertical: theme.marginSmall,
+				marginVertical: dividerMargin,
 				marginHorizontal: theme.margin,
 			},
 		});
 	}, [themeId, windowWidth]);
 };
 
+const useFocusView = (visible: boolean) => {
+	const visibleRef = useRef(visible);
+	visibleRef.current = visible;
+
+	const autoFocusView = useMemo(() => {
+		// Debounce: Auto-focus seems to need to occur after a delay
+		return debounce((view: View|null) => {
+			if (!view || !visibleRef.current) return;
+			focusView('BottomDrawerMenu', view);
+		}, 100);
+	}, []);
+
+	return autoFocusView;
+};
+
 const BottomDrawerMenu: React.FC<Props> = props => {
 	const styles = useStyles(props.themeId);
+
+	const autoFocusView = useFocusView(props.visible);
 
 	const menuOptionComponents: React.ReactNode[] = [];
 
@@ -124,6 +149,8 @@ const BottomDrawerMenu: React.FC<Props> = props => {
 						option.onPress();
 						props.onDismiss();
 					}}
+					accessibilityHint={option.accessibilityHint}
+					ref={(option.autoFocus && props.visible) ? autoFocusView : undefined}
 					key={key}
 					disabled={!!option.disabled}
 				>
