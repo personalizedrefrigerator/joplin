@@ -172,24 +172,6 @@ elif [[ $ARCHITECTURE =~ .*i386.*|.*i686.* ]]; then
 fi
 
 #-----------------------------------------------------
-print "Checking dependencies..."
-## Check if libfuse2 is present.
-if [[ $(command -v ldconfig) ]]; then
-  LIBFUSE=$(ldconfig -p | grep "libfuse.so.2" || echo '')
-fi
-if [[ $LIBFUSE == "" ]]; then
-  LIBFUSE=$(find /lib /usr/lib /lib64 /usr/lib64 /usr/local/lib -name "libfuse.so.2" 2>/dev/null | grep "libfuse.so.2" || echo '')
-fi
-if [[ $LIBFUSE == "" ]]; then
-  print "${COLOR_RED}Error: Can't get libfuse2 on system, please install libfuse2${COLOR_RESET}"
-  print "See https://joplinapp.org/help/faq/#desktop-application-will-not-launch-on-linux and https://github.com/AppImage/AppImageKit/wiki/FUSE for more information"
-  exit 1
-fi
-
-#-----------------------------------------------------
-# Download Joplin
-#-----------------------------------------------------
-
 # Get the latest version to download
 if [[ "$INCLUDE_PRE_RELEASE" == true ]]; then
   RELEASE_VERSION=$($DL - "https://api.github.com/repos/laurent22/joplin/releases" | grep -Po '"tag_name": ?"v\K.*?(?=")' | sort -rV | head -1)
@@ -197,13 +179,43 @@ else
   RELEASE_VERSION=$($DL - "https://api.github.com/repos/laurent22/joplin/releases/latest" | grep -Po '"tag_name": ?"v\K.*?(?=")')
 fi
 
+#-----------------------------------------------------
+print "Checking dependencies..."
+## Check for libfuse2 for Joplin versions lesser than 3.7.10, which transitioned to a new AppImage runtime without libfuse2 dependency
+if [[ $(compareVersions "$RELEASE_VERSION" "3.7.10") -lt 0 ]]; then
+  if [[ $(command -v ldconfig) ]]; then
+    LIBFUSE=$(ldconfig -p | grep "libfuse.so.2" || echo '')
+  fi
+  if [[ $LIBFUSE == "" ]]; then
+    LIBFUSE=$(find /lib /usr/lib /lib64 /usr/lib64 /usr/local/lib -name "libfuse.so.2" 2>/dev/null | grep "libfuse.so.2" || echo '')
+  fi
+  if [[ $LIBFUSE == "" ]]; then
+    print "${COLOR_RED}Error: Can't get libfuse2 on system, please install libfuse2${COLOR_RESET}"
+    print "See https://joplinapp.org/help/faq/#desktop-application-will-not-launch-on-linux and https://github.com/AppImage/AppImageKit/wiki/FUSE for more information"
+    exit 1
+  fi
+fi
+
+#-----------------------------------------------------
+# Download Joplin
+#-----------------------------------------------------
+
 # Check if it's in the latest version
-if [[ -e "${INSTALL_DIR}/VERSION" ]] && [[ $(< "${INSTALL_DIR}/VERSION") == "${RELEASE_VERSION}" ]]; then
-  print "${COLOR_GREEN}You already have the latest version${COLOR_RESET} ${RELEASE_VERSION} ${COLOR_GREEN}installed.${COLOR_RESET}"
-  ([[ "$FORCE" == true ]] && print "Forcing installation...") || exit 0
+if [[ -e "${INSTALL_DIR}/VERSION" ]]; then
+  CURRENT_VERSION=$(< "${INSTALL_DIR}/VERSION")
+  VERSION_COMPARISON=$(compareVersions "$CURRENT_VERSION" "$RELEASE_VERSION")
+
+  if [[ "$VERSION_COMPARISON" == "0" ]]; then
+    print "${COLOR_GREEN}You already have the latest version${COLOR_RESET} ${RELEASE_VERSION} ${COLOR_GREEN}installed.${COLOR_RESET}"
+    ([[ "$FORCE" == true ]] && print "Forcing installation...") || exit 0
+  elif [[ "$VERSION_COMPARISON" == "1" ]]; then
+    print "${COLOR_YELLOW}You have version ${CURRENT_VERSION} installed, which is newer than the latest published version ${RELEASE_VERSION}.${COLOR_RESET}"
+    print "${COLOR_YELLOW}Skipping installation to avoid downgrade.${COLOR_RESET}"
+  else
+    print "The latest version is ${RELEASE_VERSION}, but you have ${CURRENT_VERSION} installed."
+  fi
 else
-  [[ -e "${INSTALL_DIR}/VERSION" ]] && CURRENT_VERSION=$(< "${INSTALL_DIR}/VERSION")
-  print "The latest version is ${RELEASE_VERSION}, but you have ${CURRENT_VERSION:-no version} installed."
+  print "The latest version is ${RELEASE_VERSION}, but you have no version installed."
 fi
 
 # Check if it's an update or a new install

@@ -33,14 +33,14 @@ import { DropHandler } from '../../utils/useDropHandler';
 import Logger from '@joplin/utils/Logger';
 import useWebViewApi from './utils/useWebViewApi';
 import useLinkTooltips from './utils/useLinkTooltips';
-import { focus } from '@joplin/lib/utils/focusHandler';
+import { blur, focus } from '@joplin/lib/utils/focusHandler';
 const md5 = require('md5');
-const { clipboard } = require('electron');
+import { clipboard } from 'electron';
 const supportedLocales = require('./supportedLocales');
 import { hasProtocol } from '@joplin/utils/url';
 import useTabIndenter from './utils/useTabIndenter';
 import useKeyboardRefocusHandler from './utils/useKeyboardRefocusHandler';
-import useDocument from '../../../hooks/useDocument';
+import useDocument from '@joplin/lib/hooks/dom/useDocument';
 import useEditDialog from './utils/useEditDialog';
 import useEditDialogEventListeners from './utils/useEditDialogEventListeners';
 import Setting from '@joplin/lib/models/Setting';
@@ -80,8 +80,7 @@ function preprocessHtml(html: string): string {
 
 
 let markupToHtml_ = new MarkupToHtml();
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-function stripMarkup(markupLanguage: number, markup: string, options: any = null) {
+function stripMarkup(markupLanguage: number, markup: string, options: { collapseWhiteSpaces?: boolean } = null) {
 	if (!markupToHtml_) markupToHtml_ = new MarkupToHtml();
 	return	markupToHtml_.stripMarkup(markupLanguage, markup, options);
 }
@@ -92,8 +91,7 @@ interface LastOnChangeEventInfo {
 	contentKey: string;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-let dispatchDidUpdateIID_: any = null;
+let dispatchDidUpdateIID_: ReturnType<typeof setTimeout> | null = null;
 let changeId_ = 1;
 
 const TinyMCE = (props: NoteBodyEditorProps, ref: Ref<NoteBodyEditorRef>) => {
@@ -145,7 +143,7 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: Ref<NoteBodyEditorRef>) => {
 	useTabIndenter(editor, !props.tabMovesFocus);
 	useKeyboardRefocusHandler(editor);
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- TinyMCE editor instance / event types are looser than the published @types/tinymce (we use APIs not in the published types: getDoc, getWin, formatter, ui.registry, undoManager extensions)
 	const insertResourcesIntoContent = useCallback(async (filePaths: string[] = null, options: any = null) => {
 		const resourceMd = await commandAttachFileToBody('', filePaths, options);
 		if (!resourceMd) return;
@@ -156,7 +154,7 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: Ref<NoteBodyEditorRef>) => {
 	const insertResourcesIntoContentRef = useRef(null);
 	insertResourcesIntoContentRef.current = insertResourcesIntoContent;
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- TinyMCE editor instance / event types are looser than the published @types/tinymce (we use APIs not in the published types: getDoc, getWin, formatter, ui.registry, undoManager extensions)
 	const onEditorContentClick = useCallback((event: any) => {
 		const nodeName = event.target ? event.target.nodeName : '';
 
@@ -187,6 +185,9 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: Ref<NoteBodyEditorRef>) => {
 			content: async () => {
 				if (!editorRef.current) return '';
 				return prop_htmlToMarkdownRef.current(props.contentMarkupLanguage, editorRef.current.getContent(), props.contentOriginalCss);
+			},
+			blurEditor: () => {
+				if (editor) blur('TinyMCE::reload', editor.getBody());
 			},
 			resetScroll: () => {
 				if (editor) editor.getWin().scrollTo(0, 0);
@@ -273,7 +274,7 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: Ref<NoteBodyEditorRef>) => {
 
 				if (commandProcessed) return true;
 
-				// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
+				// eslint-disable-next-line @typescript-eslint/no-explicit-any -- TinyMCE editor instance / event types are looser than the published @types/tinymce (we use APIs not in the published types: getDoc, getWin, formatter, ui.registry, undoManager extensions)
 				const additionalCommands: any = {
 					selectedText: () => {
 						return stripMarkup(MarkupToHtml.MARKUP_LANGUAGE_HTML, editor.selection.getContent());
@@ -281,7 +282,7 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: Ref<NoteBodyEditorRef>) => {
 					selectedHtml: () => {
 						return editor.selection.getContent();
 					},
-					// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
+					// eslint-disable-next-line @typescript-eslint/no-explicit-any -- TinyMCE editor instance / event types are looser than the published @types/tinymce (we use APIs not in the published types: getDoc, getWin, formatter, ui.registry, undoManager extensions)
 					replaceSelection: (value: any) => {
 						editor.selection.setContent(value);
 						editor.fire(TinyMceEditorEvents.JoplinChange);
@@ -294,6 +295,13 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: Ref<NoteBodyEditorRef>) => {
 						window.requestAnimationFrame(() => editor.undoManager.add());
 					},
 					pasteAsText: () => editor.fire(TinyMceEditorEvents.PasteAsText),
+
+					'editor.undo': () => {
+						editor.undoManager.undo();
+					},
+					'editor.redo': () => {
+						editor.undoManager.redo();
+					},
 				};
 
 				if (additionalCommands[cmd.name]) {
@@ -362,7 +370,7 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: Ref<NoteBodyEditorRef>) => {
 		let cancelled = false;
 
 		async function loadScripts() {
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any -- TinyMCE editor instance / event types are looser than the published @types/tinymce (we use APIs not in the published types: getDoc, getWin, formatter, ui.registry, undoManager extensions)
 			const scriptsToLoad: any[] = [
 				{
 					src: `${bridge().vendorDir()}/lib/tinymce/tinymce.min.js`,
@@ -687,7 +695,7 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: Ref<NoteBodyEditorRef>) => {
 			const toolbar = [
 				'bold', 'italic', 'joplinHighlight', 'joplinStrikethrough', '|',
 				'joplinInsert', 'joplinSup', 'joplinSub', 'forecolor', '|',
-				'link', 'joplinInlineCode', 'joplinCodeBlock', 'joplinAttach', '|',
+				'link', 'joplinLinkToNote', 'joplinInlineCode', 'joplinCodeBlock', 'joplinAttach', '|',
 				'bullist', 'numlist', 'joplinChecklist', '|',
 				'h1', 'h2', 'h3', '|',
 				'hr', '|',
@@ -696,8 +704,17 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: Ref<NoteBodyEditorRef>) => {
 				`joplinInsertDateTime${toolbarPluginButtons}`,
 			];
 
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any -- TinyMCE editor instance / event types are looser than the published @types/tinymce (we use APIs not in the published types: getDoc, getWin, formatter, ui.registry, undoManager extensions)
 			const containerWindow = editorContainerDom.defaultView as any;
+			const isDefaultEnglishLocale = ['en_US', 'en_GB'].includes(language);
+
+			if (!isDefaultEnglishLocale) {
+				await loadScript({
+					id: `tinyMceLang_${language}`,
+					src: `${bridge().vendorDir()}/lib/tinymce/langs/${language}.js`,
+				}, editorContainerDom);
+			}
+
 			const editors = await containerWindow.tinymce.init({
 				selector: `#${editorContainer.id}`,
 
@@ -728,7 +745,7 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: Ref<NoteBodyEditorRef>) => {
 				// Handle the first table row as table header.
 				// https://www.tiny.cloud/docs/plugins/table/#table_header_type
 				table_header_type: 'sectionCells',
-				language_url: ['en_US', 'en_GB'].includes(language) ? undefined : `${bridge().vendorDir()}/lib/tinymce/langs/${language}`,
+				language: isDefaultEnglishLocale ? undefined : language,
 				toolbar: toolbar.join(' '),
 				localization_function: _,
 				// See https://www.tiny.cloud/docs/tinymce/latest/tinymce-and-csp/#content_security_policy
@@ -742,7 +759,7 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: Ref<NoteBodyEditorRef>) => {
 					'media-src \'self\' blob: data: *', // Audio and video players
 
 					// Disallow certain unused features
-					'child-src \'none\'', // Should not contain sub-frames
+					'child-src https://*.youtube.com https://*.youtube-nocookie.com', // Allow YouTube embeds
 					'object-src \'none\'', // Objects can be used for script injection
 					'form-action \'none\'', // No submitting forms
 
@@ -808,6 +825,14 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: Ref<NoteBodyEditorRef>) => {
 						},
 					});
 
+					editor.ui.registry.addButton('joplinLinkToNote', {
+						tooltip: _('Link to note'),
+						icon: 'export',
+						onAction: async function() {
+							void CommandService.instance().execute('linkToNote');
+						},
+					});
+
 					setupToolbarButtons(editor);
 
 					editor.ui.registry.addButton('joplinCodeBlock', {
@@ -822,7 +847,7 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: Ref<NoteBodyEditorRef>) => {
 						tooltip: _('Inline Code'),
 						icon: 'sourcecode',
 						onAction: function() {
-							// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
+							// eslint-disable-next-line @typescript-eslint/no-explicit-any -- TinyMCE editor instance / event types are looser than the published @types/tinymce (we use APIs not in the published types: getDoc, getWin, formatter, ui.registry, undoManager extensions)
 							editor.execCommand('mceToggleFormat', false, 'code', { class: 'inline-code' } as any);
 						},
 						onSetup: function(api) {
@@ -934,8 +959,7 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: Ref<NoteBodyEditorRef>) => {
 	// Set the initial content and load the plugin CSS and JS files
 	// -----------------------------------------------------------------------------------------
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	const loadDocumentAssets = (themeId: number, editor: any, pluginAssets: any[]) => {
+	const loadDocumentAssets = (themeId: number, editor: Editor, pluginAssets: RenderResultPluginAsset[]) => {
 		const theme = themeStyle(themeId);
 
 		let docHead_: HTMLHeadElement = null;
@@ -961,15 +985,13 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: Ref<NoteBodyEditorRef>) => {
 			`gui/note-viewer/pluginAssets/highlight.js/${theme.codeThemeCss}`,
 		].concat(
 			pluginAssets
-				// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-				.filter((a: any) => a.mime === 'text/css')
+				.filter(a => a.mime === 'text/css')
 				.map(assetToUrl),
 		);
 
 		const allJsFiles = [].concat(
 			pluginAssets
-				// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-				.filter((a: any) => a.mime === 'application/javascript')
+				.filter(a => a.mime === 'application/javascript')
 				.map(assetToUrl),
 		);
 
@@ -1051,6 +1073,7 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: Ref<NoteBodyEditorRef>) => {
 		editor,
 	});
 
+	const noteChangeTimeRef = useRef(Date.now());
 	const lastNoteIdRef = useRef(props.noteId);
 	useEffect(() => {
 		if (!editor) return () => {};
@@ -1068,6 +1091,9 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: Ref<NoteBodyEditorRef>) => {
 			// Use nextOnChangeEventInfo's noteId -- lastOnChangeEventInfo can be slightly out-of-date.
 			const differentNoteId = lastNoteIdRef.current !== props.noteId;
 			const differentContent = lastOnChangeEventInfo.current.content !== props.content;
+
+			if (differentNoteId) noteChangeTimeRef.current = Date.now();
+
 			if (differentNoteId || differentContent || !resourcesEqual) {
 				const result = await props.markupToHtml(
 					props.contentMarkupLanguage,
@@ -1095,6 +1121,17 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: Ref<NoteBodyEditorRef>) => {
 				// when the note content is updated externally.
 				const offsetBookmarkId = 2;
 				const bookmark = editor.selection.getBookmark(offsetBookmarkId);
+
+				// This is a workaround to inject missing ink style for OneNote imported notes.
+				// See https://github.com/laurent22/joplin/issues/15578 for more details.
+				const oneNoteInkContentStyleId = 'joplin-onenote-content-style';
+				const hasOneNoteInkContentStyle = !!editor.getDoc().getElementById(oneNoteInkContentStyleId);
+				if (!hasOneNoteInkContentStyle && new DOMParser().parseFromString(result.html, 'text/html').querySelector('.ink-text, .ink-space, .container-outline')) {
+					const styleElement = editor.getDoc().createElement('style');
+					styleElement.id = oneNoteInkContentStyleId;
+					styleElement.textContent = '.ink-text, .ink-space { display: inline-block; position: relative; vertical-align: bottom; } .container-outline { font-family: Calibri, sans-serif; font-size: 6pt; font-weight: normal; }';
+					editor.getDoc().head.appendChild(styleElement);
+				}
 				const htmlAndCss = [
 					`<style>${result.cssStrings?.join('\n')}</style>`,
 					preprocessHtml(result.html),
@@ -1207,14 +1244,15 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: Ref<NoteBodyEditorRef>) => {
 	// Need to save the onChange handler to a ref to make sure
 	// we call the current one from setTimeout.
 	// https://github.com/facebook/react/issues/14010#issuecomment-433788147
-	// eslint-disable-next-line @typescript-eslint/ban-types -- Old code before rule was applied
-	const props_onChangeRef = useRef<Function>(null);
+	const props_onChangeRef = useRef<NoteBodyEditorProps['onChange']>(null);
 	props_onChangeRef.current = props.onChange;
+	const editorNoteReloadTimeRequestRef = useRef(props.editorNoteReloadTimeRequest);
+	editorNoteReloadTimeRequestRef.current = props.editorNoteReloadTimeRequest;
 
 	const prop_htmlToMarkdownRef = useRef<HtmlToMarkdownHandler>(null);
 	prop_htmlToMarkdownRef.current = props.htmlToMarkdown;
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- TinyMCE editor instance / event types are looser than the published @types/tinymce (we use APIs not in the published types: getDoc, getWin, formatter, ui.registry, undoManager extensions)
 	const nextOnChangeEventInfo = useRef<any>(null);
 
 	async function execOnChangeEvent() {
@@ -1222,12 +1260,14 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: Ref<NoteBodyEditorRef>) => {
 		if (!info) return;
 
 		nextOnChangeEventInfo.current = null;
+		if (info.editorNoteReloadTimeRequest !== editorNoteReloadTimeRequestRef.current) return;
 
 		resetLinkTooltips();
 		const contentMd = await prop_htmlToMarkdownRef.current(info.contentMarkupLanguage, info.editor.getContent(), info.contentOriginalCss);
 
 		lastOnChangeEventInfo.current.content = contentMd;
 		lastOnChangeEventInfo.current.resourceInfos = await attachedResources(contentMd);
+		if (info.editorNoteReloadTimeRequest !== editorNoteReloadTimeRequestRef.current) return;
 
 		props_onChangeRef.current({
 			changeId: info.changeId,
@@ -1247,7 +1287,7 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: Ref<NoteBodyEditorRef>) => {
 		// eslint-disable-next-line @seiyab/react-hooks/exhaustive-deps -- Old code before rule was applied
 	}, []);
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- TinyMCE editor instance / event types are looser than the published @types/tinymce (we use APIs not in the published types: getDoc, getWin, formatter, ui.registry, undoManager extensions)
 	const onChangeHandlerTimeoutRef = useRef<any>(null);
 
 	useEffect(() => {
@@ -1268,6 +1308,7 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: Ref<NoteBodyEditorRef>) => {
 				editor: editor,
 				contentMarkupLanguage: props.contentMarkupLanguage,
 				contentOriginalCss: props.contentOriginalCss,
+				editorNoteReloadTimeRequest: editorNoteReloadTimeRequestRef.current,
 			};
 
 			onChangeHandlerTimeoutRef.current = shim.setTimeout(async () => {
@@ -1276,7 +1317,7 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: Ref<NoteBodyEditorRef>) => {
 			}, 1000);
 		}
 
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- TinyMCE editor instance / event types are looser than the published @types/tinymce (we use APIs not in the published types: getDoc, getWin, formatter, ui.registry, undoManager extensions)
 		function onExecCommand(event: any) {
 			const c: string = event.command;
 			if (!c) return;
@@ -1313,15 +1354,37 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: Ref<NoteBodyEditorRef>) => {
 			}
 		}
 
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- TinyMCE editor instance / event types are looser than the published @types/tinymce (we use APIs not in the published types: getDoc, getWin, formatter, ui.registry, undoManager extensions)
 		const onSetAttrib = (event: EditorEvent<any>) => {
-			// Dispatch onChange when a link is edited
+			// Dispatch onChange when a link or table-related formatting is edited
 			const target = Array.isArray(event.attrElm) ? event.attrElm[0] : event.attrElm;
+			if (!target) return;
+
 			if (target.nodeName === 'A') {
 				if (event.attrName === 'title' || event.attrName === 'href' || event.attrName === 'rel') {
 					onChangeHandler();
 				}
 			}
+
+			if (['TABLE', 'TR', 'TD', 'TH'].includes(target.nodeName)) {
+				const attributeName = (event.attrName ?? '').toLowerCase();
+				if (
+					attributeName === 'style' ||
+					attributeName === 'class' ||
+					attributeName === 'bgcolor' ||
+					attributeName === 'bordercolor' ||
+					attributeName === 'background' ||
+					attributeName === 'cellpadding' ||
+					attributeName === 'cellspacing'
+				) {
+					onChangeHandler();
+				}
+			}
+		};
+
+		// Table plugin fires this on structure/style changes from dialogs.
+		const onTableModified = () => {
+			onChangeHandler();
 		};
 
 		// Keypress means that a printable key (letter, digit, etc.) has been
@@ -1338,9 +1401,17 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: Ref<NoteBodyEditorRef>) => {
 		// onChange even though nothing is changed. The alternative would be to
 		// check the content before and after, but this is too slow, so let's
 		// keep it this way for now.
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- TinyMCE editor instance / event types are looser than the published @types/tinymce (we use APIs not in the published types: getDoc, getWin, formatter, ui.registry, undoManager extensions)
 		function onKeyUp(event: any) {
-			if (['Backspace', 'Delete', 'Enter', 'Tab'].includes(event.key)) {
+			const timeSinceNoteChange = Date.now() - noteChangeTimeRef.current;
+
+			// A key that is pressed before the editor is opened, and that is released after it is
+			// opened is going to be processed here. For example if the user presses Enter in
+			// GotoAnything to arrive here. But in that case, we don't want the change handler to be
+			// activated, because that would change the note timestamp. So we take into account how
+			// long the note has been loaded before we process the key. Fixes
+			// https://github.com/laurent22/joplin/issues/12367
+			if (['Backspace', 'Delete', 'Enter', 'Tab'].includes(event.key) && timeSinceNoteChange > 200) {
 				onChangeHandler();
 			}
 		}
@@ -1394,7 +1465,7 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: Ref<NoteBodyEditorRef>) => {
 			}
 		}
 
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- TinyMCE editor instance / event types are looser than the published @types/tinymce (we use APIs not in the published types: getDoc, getWin, formatter, ui.registry, undoManager extensions)
 		async function onCopy(event: any) {
 			const copiedContent = editor.selection.getContent();
 			if (!copiedContent) return;
@@ -1402,7 +1473,7 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: Ref<NoteBodyEditorRef>) => {
 			event.preventDefault();
 		}
 
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- TinyMCE editor instance / event types are looser than the published @types/tinymce (we use APIs not in the published types: getDoc, getWin, formatter, ui.registry, undoManager extensions)
 		async function onCut(event: any) {
 			event.preventDefault();
 			const selectedContent = editor.selection.getContent();
@@ -1419,7 +1490,24 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: Ref<NoteBodyEditorRef>) => {
 			}
 		}
 
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
+		const clearInheritedCheckedStateOnChecklistEnter = () => {
+			const currentNode = editor.selection.getStart();
+			const currentListItem = editor.dom.getParent(currentNode, 'li') as HTMLLIElement;
+			if (!currentListItem) return;
+
+			const parentChecklist = editor.dom.getParent(currentListItem, 'ul.joplin-checklist');
+			if (!parentChecklist) return;
+
+			if (!currentListItem.classList.contains('checked')) return;
+
+			const textContent = (currentListItem.textContent ?? '').replace(/\u200B/g, '').trim();
+			if (textContent !== '') return;
+
+			currentListItem.classList.remove('checked');
+			onChangeHandler();
+		};
+
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- TinyMCE editor instance / event types are looser than the published @types/tinymce (we use APIs not in the published types: getDoc, getWin, formatter, ui.registry, undoManager extensions)
 		async function onKeyDown(event: any) {
 			// It seems "paste as text" is handled automatically on Windows and Linux,
 			// so we need to run the below code only on macOS. If we were to run this
@@ -1433,6 +1521,13 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: Ref<NoteBodyEditorRef>) => {
 			if ((event.metaKey || event.ctrlKey) && event.shiftKey && event.code === 'KeyV') {
 				event.preventDefault();
 				pasteAsPlainText(null);
+			}
+
+			if (event.key === 'Enter' && !event.metaKey && !event.ctrlKey && !event.altKey && !event.shiftKey && !event.isComposing) {
+				shim.setTimeout(() => {
+					if (!editor || !editor.getDoc()) return;
+					clearInheritedCheckedStateOnChecklistEnter();
+				}, 0);
 			}
 		}
 
@@ -1462,6 +1557,7 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: Ref<NoteBodyEditorRef>) => {
 		editor.on(TinyMceEditorEvents.Redo, onChangeHandler);
 		editor.on(TinyMceEditorEvents.ExecCommand, onExecCommand);
 		editor.on(TinyMceEditorEvents.SetAttrib, onSetAttrib);
+		editor.on('TableModified', onTableModified);
 
 		return () => {
 			try {
@@ -1478,6 +1574,7 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: Ref<NoteBodyEditorRef>) => {
 				editor.off(TinyMceEditorEvents.Redo, onChangeHandler);
 				editor.off(TinyMceEditorEvents.ExecCommand, onExecCommand);
 				editor.off(TinyMceEditorEvents.SetAttrib, onSetAttrib);
+				editor.off('TableModified', onTableModified);
 			} catch (error) {
 				console.warn('Error removing events', error);
 			}
@@ -1589,4 +1686,3 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: Ref<NoteBodyEditorRef>) => {
 };
 
 export default forwardRef(TinyMCE);
-

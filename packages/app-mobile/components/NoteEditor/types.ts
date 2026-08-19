@@ -62,11 +62,13 @@ export interface EditorProps {
 	noteHash: string;
 	initialText: string;
 	initialSelection: SelectionRange;
+	initialScroll: number;
 	editorSettings: EditorSettings;
 	globalSearch: string;
 	plugins: PluginStates;
 
 	onAttach: OnAttachCallback;
+	onLoadEnd?: ()=> void;
 	onEditorEvent: (event: EditorEvent)=> void;
 }
 

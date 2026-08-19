@@ -33,6 +33,7 @@ interface WrapperProps {
 	onLinkClick?: (link: string)=> void;
 	note?: NoteEntity;
 	noteBody: string;
+	readOnly?: boolean;
 }
 
 const defaultEditorProps = createTestEditorProps();
@@ -45,6 +46,7 @@ const WrappedEditor: React.FC<WrapperProps> = (
 		onLinkClick,
 		noteResources,
 		ref,
+		readOnly = false,
 	}: WrapperProps,
 ) => {
 	const onEvent = useCallback((event: EditorEvent) => {
@@ -63,9 +65,10 @@ const WrappedEditor: React.FC<WrapperProps> = (
 		const isHtml = note?.markup_language === MarkupLanguage.Html;
 		return {
 			...defaultEditorProps.editorSettings,
+			readOnly,
 			language: isHtml ? EditorLanguageType.Html : EditorLanguageType.Markdown,
 		};
-	}, [note]);
+	}, [note, readOnly]);
 
 	return <TestProviderStack store={testStore}>
 		<RichTextEditor
@@ -174,6 +177,28 @@ describe('RichTextEditor', () => {
 		});
 	});
 
+	it('should become non-editable when set to read-only', async () => {
+		const table = '| A | B |\n| --- | --- |\n| C | D |';
+		const component = render(<WrappedEditor
+			noteBody={table}
+			onBodyChange={jest.fn()}
+		/>);
+		const editor = await findElement('.prosemirror-editor');
+		expect(editor.getAttribute('contenteditable')).toBe('true');
+		mockSelectionMovement(await getEditorWindow(), 4);
+		const tableToolbar = await findElement('.floating-button-bar:not(.-hidden)');
+
+		component.rerender(<WrappedEditor
+			noteBody={table}
+			onBodyChange={jest.fn()}
+			readOnly={true}
+		/>);
+		await waitFor(() => {
+			expect(editor.getAttribute('contenteditable')).toBe('false');
+			expect(tableToolbar.classList).toContain('-hidden');
+		});
+	});
+
 	it('should save repeated spaces using nonbreaking spaces', async () => {
 		let body = 'Test';
 		render(<WrappedEditor
@@ -215,8 +240,7 @@ describe('RichTextEditor', () => {
 		firstCheckbox.click();
 
 		await waitFor(async () => {
-			// At present, lists are saved as non-tight lists:
-			expect(body.trim()).toBe('- [x] Test\n    \n- [x] Another test');
+			expect(body.trim()).toBe('- [x] Test\n- [x] Another test');
 		});
 	});
 
@@ -433,8 +457,14 @@ describe('RichTextEditor', () => {
 		expect(editor.textContent).toContain('3^2 + 4^2 = 5^2');
 	});
 
-	it('should save lists as single-spaced', async () => {
-		let body = 'Test:\n\n- this\n- is\n- a\n- test.';
+	it.each(['-', '- [ ]'])('should save lists as single-spaced (list markers: %j)', async (marker) => {
+		let body = [
+			'Test:\n',
+			'this',
+			'is',
+			'a',
+			'test.',
+		].join(`\n${marker} `);
 
 		render(<WrappedEditor
 			noteBody={body}
@@ -445,7 +475,31 @@ describe('RichTextEditor', () => {
 		mockTyping(window, ' Testing');
 
 		await waitFor(async () => {
-			expect(body.trim()).toBe('Test:\n\n- this\n- is\n- a\n- test. Testing');
+			expect(body.trim()).toBe([
+				'Test:\n',
+				'this',
+				'is',
+				'a',
+				'test. Testing',
+			].join(`\n${marker} `));
+		});
+	});
+
+	it.each(['-', '1.'])('should not add extra blank lines around nested lists (marker: %j)', async (marker) => {
+		const nested = marker === '1.' ? '1.' : '-';
+		let body = `${marker} a\n${marker} b\n    ${nested} c\n    ${nested} d\n${marker} e`;
+
+		render(<WrappedEditor
+			noteBody={body}
+			onBodyChange={newBody => { body = newBody; }}
+		/>);
+
+		const window = await getEditorWindow();
+		mockTyping(window, ' testing');
+
+		await waitFor(async () => {
+			// Nested lists should not have extra blank lines above or below
+			expect(body).not.toMatch(/\n\n\s*[-\d]/);
 		});
 	});
 

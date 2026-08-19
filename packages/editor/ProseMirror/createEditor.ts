@@ -28,6 +28,7 @@ import { RenderResult } from '../../renderer/types';
 import postprocessEditorOutput from './utils/postprocessEditorOutput';
 import detailsPlugin from './plugins/detailsPlugin';
 import tablePlugin from './plugins/tablePlugin';
+import clampPointToDocument from './utils/clampPointToDocument';
 
 interface ProseMirrorControl extends EditorControl {
 	getSettings(): EditorSettings;
@@ -134,10 +135,19 @@ const createEditor = async (
 				formatting: selectionFormatting,
 			});
 		}
+
+		props.onEvent({
+			kind: EditorEventType.SelectionRangeChange,
+			anchor: newState.selection.anchor,
+			head: newState.selection.head,
+			from: newState.selection.from,
+			to: newState.selection.to,
+		});
 	};
 
 	const view = new EditorView(parentElement, {
 		state: await createInitialState(props.initialText),
+		editable: () => !settings.readOnly,
 		dispatchTransaction: transaction => {
 			const newState = view.state.apply(transaction);
 
@@ -187,10 +197,14 @@ const createEditor = async (
 		redo: () => {
 			void editorControl.execCommand(EditorCommandType.Redo);
 		},
-		select: function(anchor: number, head: number): void {
+		select: (anchor: number, head: number) => {
 			const transaction = view.state.tr;
 			transaction.setSelection(
-				TextSelection.create(transaction.doc, anchor, head),
+				TextSelection.create(
+					transaction.doc,
+					clampPointToDocument(view.state, anchor),
+					clampPointToDocument(view.state, head),
+				),
 			);
 			view.dispatch(transaction);
 		},
@@ -211,6 +225,9 @@ const createEditor = async (
 		updateSettings: async (newSettings: EditorSettings) => {
 			const oldSettings = settings;
 			settings = newSettings;
+			if (oldSettings.readOnly !== newSettings.readOnly) {
+				view.setProps({ editable: () => !settings.readOnly });
+			}
 
 			if (oldSettings.themeData.themeId !== newSettings.themeData.themeId) {
 				// Refresh global CSS when the theme changes -- render the full document
