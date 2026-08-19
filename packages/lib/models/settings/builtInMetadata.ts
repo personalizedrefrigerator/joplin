@@ -2506,7 +2506,7 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 			},
 
 			label: () => _('Voice typing: Locale'),
-			show: () => showVoiceTypingSettings(),
+			show: settings => showVoiceTypingSettings(settings),
 			section: 'note',
 		},
 
