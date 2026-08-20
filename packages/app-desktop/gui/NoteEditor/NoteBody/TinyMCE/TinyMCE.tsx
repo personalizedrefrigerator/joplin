@@ -1262,8 +1262,11 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: Ref<NoteBodyEditorRef>) => {
 		nextOnChangeEventInfo.current = null;
 		if (info.editorNoteReloadTimeRequest !== editorNoteReloadTimeRequestRef.current) return;
 
+		const content = info.editor.getContent();
+		info.editor.setDirty(false);
+
 		resetLinkTooltips();
-		const contentMd = await prop_htmlToMarkdownRef.current(info.contentMarkupLanguage, info.editor.getContent(), info.contentOriginalCss);
+		const contentMd = await prop_htmlToMarkdownRef.current(info.contentMarkupLanguage, content, info.contentOriginalCss);
 
 		lastOnChangeEventInfo.current.content = contentMd;
 		lastOnChangeEventInfo.current.resourceInfos = await attachedResources(contentMd);
@@ -1540,21 +1543,17 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: Ref<NoteBodyEditorRef>) => {
 			pasteAsPlainText(clipboardWithoutMarkdown);
 		}
 
-		editor.on(TinyMceEditorEvents.KeyUp, onKeyUp);
-		editor.on(TinyMceEditorEvents.KeyDown, onKeyDown);
-		editor.on(TinyMceEditorEvents.KeyPress, onKeypress);
 		// Passing `true` adds the listener to the front of the listener list.
 		// This allows overriding TinyMCE's built-in paste handler with .preventDefault.
 		editor.on(TinyMceEditorEvents.Paste, onPaste, true);
 		editor.on(TinyMceEditorEvents.PasteAsText, onPasteAsText);
 		editor.on(TinyMceEditorEvents.Copy, onCopy);
-		// `compositionend` means that a user has finished entering a Chinese
-		// (or other languages that require IME) character.
-		editor.on(TinyMceEditorEvents.CompositionEnd, onChangeHandler);
 		editor.on(TinyMceEditorEvents.Cut, onCut, true);
 		editor.on(TinyMceEditorEvents.JoplinChange, onChangeHandler);
 		editor.on(TinyMceEditorEvents.Undo, onChangeHandler);
 		editor.on(TinyMceEditorEvents.Redo, onChangeHandler);
+		// The "Dirty" event fires when the editor transitions from an unchanged to a changed state
+		editor.on(TinyMceEditorEvents.Dirty, onChangeHandler);
 		editor.on(TinyMceEditorEvents.ExecCommand, onExecCommand);
 		editor.on(TinyMceEditorEvents.SetAttrib, onSetAttrib);
 		editor.on('TableModified', onTableModified);
@@ -1567,11 +1566,11 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: Ref<NoteBodyEditorRef>) => {
 				editor.off(TinyMceEditorEvents.Paste, onPaste);
 				editor.off(TinyMceEditorEvents.PasteAsText, onPasteAsText);
 				editor.off(TinyMceEditorEvents.Copy, onCopy);
-				editor.off(TinyMceEditorEvents.CompositionEnd, onChangeHandler);
 				editor.off(TinyMceEditorEvents.Cut, onCut);
 				editor.off(TinyMceEditorEvents.JoplinChange, onChangeHandler);
 				editor.off(TinyMceEditorEvents.Undo, onChangeHandler);
 				editor.off(TinyMceEditorEvents.Redo, onChangeHandler);
+				editor.off(TinyMceEditorEvents.Dirty, onChangeHandler);
 				editor.off(TinyMceEditorEvents.ExecCommand, onExecCommand);
 				editor.off(TinyMceEditorEvents.SetAttrib, onSetAttrib);
 				editor.off('TableModified', onTableModified);

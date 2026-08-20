@@ -15,6 +15,7 @@ export enum TinyMceEditorEvents {
 	Redo = 'Redo',
 	ExecCommand = 'ExecCommand',
 	SetAttrib = 'SetAttrib',
+	Dirty = 'Dirty',
 }
 
 export type DispatchDidUpdateCallback = (editor: Editor)=> void;
