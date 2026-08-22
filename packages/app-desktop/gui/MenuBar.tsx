@@ -13,6 +13,7 @@ import versionInfo, { PackageInfo } from '@joplin/lib/versionInfo';
 import { ImportModule } from '@joplin/lib/services/interop/Module';
 import InteropServiceHelper from '../InteropServiceHelper';
 import { _ } from '@joplin/lib/locale';
+import isNoteLockEnabled from '@joplin/lib/services/noteLock/isNoteLockEnabled';
 import { isContextMenuItemLocation, MenuItem, MenuItemLocation } from '@joplin/lib/services/plugins/api/types';
 import SpellCheckerService from '@joplin/lib/services/spellChecker/SpellCheckerService';
 import menuCommandNames from './menuCommandNames';
@@ -863,9 +864,16 @@ function useMenu(props: Props) {
 						menuItemDic.openNoteInNewWindow,
 						menuItemDic.toggleExternalEditing,
 						separator(),
+						menuItemDic.linkToNote,
 						menuItemDic.setTags,
 						menuItemDic.showShareNoteDialog,
 						menuItemDic.convertNoteToMarkdown,
+						...(isNoteLockEnabled() ? [
+							separator(),
+							menuItemDic.enableNoteEncryption,
+							menuItemDic.disableNoteEncryption,
+							menuItemDic.lockEncryptedNotes,
+						] : []),
 						separator(),
 						menuItemDic.showNoteProperties,
 						menuItemDic.showNoteContentProperties,
@@ -973,7 +981,6 @@ function useMenu(props: Props) {
 
 			rootMenus.go.submenu.push(menuItemDic.gotoAnything);
 			rootMenus.tools.submenu.push(menuItemDic.commandPalette);
-			rootMenus.tools.submenu.push(menuItemDic.linkToNote);
 			rootMenus.tools.submenu.push(menuItemDic.openMasterPasswordDialog);
 
 			for (const view of props.pluginMenuItems) {

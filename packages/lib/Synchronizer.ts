@@ -5,7 +5,7 @@ import shim from './shim';
 import MigrationHandler from './services/synchronizer/MigrationHandler';
 import eventManager, { EventName } from './eventManager';
 import { _ } from './locale';
-import BaseItem from './models/BaseItem';
+import BaseItem, { RemoteItemMetadata } from './models/BaseItem';
 import Folder from './models/Folder';
 import Note from './models/Note';
 import Resource from './models/Resource';
@@ -32,6 +32,7 @@ import syncDeleteStep from './services/synchronizer/utils/syncDeleteStep';
 import { ErrorCode } from './errors';
 import { SyncAction } from './services/synchronizer/utils/types';
 import checkDisabledSyncItemsNotification from './services/synchronizer/utils/checkDisabledSyncItemsNotification';
+import { NoteEntity } from './services/database/types';
 import { reg } from './registry';
 import SyncTargetRegistry from './SyncTargetRegistry';
 import { Day } from '@joplin/utils/time';
@@ -540,10 +541,14 @@ export default class Synchronizer {
 
 					// console.info('NEW', newInfo);
 
-					if (newInfo.revisionServiceEnabled !== localInfo.revisionServiceEnabled) {
+					// Only copy a synced revisionService.* value back to the local
+					// Setting when it carries a real timestamp; a timestamp of 0
+					// means no client has explicitly set it, so we must not
+					// overwrite a customised local value with a migration default.
+					if (newInfo.revisionServiceEnabled !== localInfo.revisionServiceEnabled && newInfo.keyTimestamp('revisionServiceEnabled') > 0) {
 						Setting.setValue('revisionService.enabled', newInfo.revisionServiceEnabled);
 					}
-					if (newInfo.revisionServiceTtlDays !== localInfo.revisionServiceTtlDays) {
+					if (newInfo.revisionServiceTtlDays !== localInfo.revisionServiceTtlDays && newInfo.keyTimestamp('revisionServiceTtlDays') > 0) {
 						Setting.setValue('revisionService.ttlDays', newInfo.revisionServiceTtlDays);
 					}
 
@@ -693,18 +698,18 @@ export default class Synchronizer {
 							// a few seconds ahead of what it was set with setTimestamp()
 							try {
 								remoteContent = await this.apiCall('get', path);
+								if (!remoteContent) throw new Error(`Got metadata for path but could not fetch content: ${path}`);
+								remoteContent = await BaseItem.unserialize(remoteContent);
 							} catch (error) {
-								if (error.code === 'rejectedByTarget') {
+								if (error.code === 'rejectedByTarget' || error.code === 'malformedItem') {
 									this.progressReport_.errors.push(error);
-									logger.warn(`Rejected by target: ${path}: ${error.message}`);
+									logger.warn(`Skipping item from sync target: ${path}: ${error.message}`);
 									completeItemProcessing(path);
 									continue;
 								} else {
 									throw error;
 								}
 							}
-							if (!remoteContent) throw new Error(`Got metadata for path but could not fetch content: ${path}`);
-							remoteContent = await BaseItem.unserialize(remoteContent);
 
 							if (remoteContent.updated_time > local.sync_time) {
 								// Since, in this loop, we are only dealing with items that require sync, if the
@@ -849,6 +854,11 @@ export default class Synchronizer {
 								// get set there
 
 								await ItemClass.saveSyncTime(syncTargetId, local, local.updated_time);
+
+								if (local.type_ === BaseModel.TYPE_NOTE) {
+									const note = local as NoteEntity;
+									await Note.saveSyncBaseContent(syncTargetId, note.id, note.body, note.title);
+								}
 							}
 						}
 
@@ -893,6 +903,7 @@ export default class Synchronizer {
 				while (true) {
 					if (this.cancelling() || hasCancelled) break;
 
+					let localItemMetadata: Map<string, RemoteItemMetadata> = null;
 					const listResult: PaginatedList = await this.apiCall('delta', '', {
 						context: context,
 
@@ -907,7 +918,8 @@ export default class Synchronizer {
 
 						// This is only used by the basic delta
 						allItemMetadataHandler: async () => {
-							return BaseItem.remoteItemMetadata(syncTargetId);
+							localItemMetadata = await BaseItem.remoteItemMetadata(syncTargetId);
+							return localItemMetadata;
 						},
 
 						wipeOutFailSafe: Setting.value('sync.wipeOutFailSafe'),
@@ -1007,22 +1019,26 @@ export default class Synchronizer {
 										// Nothing to do, and no need to fetch the content
 									} else {
 										content = await loadContent();
-										if (content && content.updated_time > local.updated_time) {
+										// Load the latest updated_time, otherwise a change made during a long delta step could overwrite the local version without making a conflict
+										const latestLocalState = await ItemClass.load(remoteId, { fields: ['updated_time'] });
+										const localUpdatedTime = latestLocalState ? latestLocalState.updated_time : local.updated_time;
+										if (content && content.updated_time > localUpdatedTime) {
 											action = SyncAction.UpdateLocal;
 											reason = 'remote is more recent than local';
 										} else if (enableEnhancedBasicDeltaAlgorithm()) {
 											// When the enhanced basic delta algorithm is first used, all items are rescanned and we need to persist the remoteItemUpdatedTime
 											// to set up the initial synced state. This also catches the case if content.updated_time < local.updated_time due to manual manipulation
 											// of the md files, to prevent these items being continually fetched on every sync
-											await ItemClass.saveSyncTime(syncTargetId, local, local.updated_time, remote.updated_time);
+											const syncTime = localItemMetadata.get(local.id)?.sync_time ?? 0;
+											await ItemClass.saveSyncTime(syncTargetId, local, syncTime, remote.updated_time);
 										}
 									}
 								}
 							}
 						} catch (error) {
-							if (error.code === 'rejectedByTarget') {
+							if (error.code === 'rejectedByTarget' || error.code === 'malformedItem') {
 								this.progressReport_.errors.push(error);
-								logger.warn(`Rejected by target: ${path}: ${error.message}`);
+								logger.warn(`Skipping item from sync target: ${path}: ${error.message}`);
 								action = null;
 							} else {
 								error.message = `On file ${path}: ${error.message}`;
@@ -1094,6 +1110,14 @@ export default class Synchronizer {
 								// Ensure that the item can be found if another create/update event is received for the same item:
 								if (!local) {
 									locals.push(saved);
+								}
+
+								if (action === SyncAction.UpdateLocal && content.type_ === BaseModel.TYPE_NOTE && content.id) {
+									// Force the viewer / editor to reload on mobile, if a note is updated and it is currently open
+									this.dispatch({
+										type: 'EDITOR_NOTE_NEEDS_RELOAD',
+										noteId: content.id,
+									});
 								}
 							}
 
@@ -1228,6 +1252,17 @@ export default class Synchronizer {
 					this.logLastRequests();
 				}
 			}
+		}
+
+		try {
+			// Update published/unpublished status after the main sync to avoid conflicts.
+			// See https://github.com/laurent22/joplin/issues/16167.
+			if (!hasCaughtError && !this.cancelling()) {
+				await Note.updatePublishedNotes(this.shareService_ ? this.shareService_.shares : []);
+			}
+		} catch (error) {
+			logger.error('Failed to save note publication status', error);
+			this.progressReport_.errors.push(error);
 		}
 
 		if (syncLock) {

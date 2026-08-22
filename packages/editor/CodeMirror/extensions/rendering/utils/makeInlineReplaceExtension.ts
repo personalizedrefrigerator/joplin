@@ -4,18 +4,46 @@
 import { EditorView, Decoration, DecorationSet, WidgetType } from '@codemirror/view';
 import { ViewPlugin, ViewUpdate } from '@codemirror/view';
 import { syntaxTree } from '@codemirror/language';
-import { Range } from '@codemirror/state';
+import { Range, StateEffect } from '@codemirror/state';
 import { SyntaxNodeRef } from '@lezer/common';
 import { ReplacementExtension } from '../types';
 import nodeIntersectsSelection from './nodeIntersectsSelection';
 
+const updateInlineDecorationsEffect = StateEffect.define();
 
 export const makeInlineReplaceExtension = (extensionSpec: ReplacementExtension) => ViewPlugin.fromClass(class {
-	public decorations: DecorationSet;
+	public decorations: DecorationSet = Decoration.set([]);
+	private mouseSelectionInProgress = false;
 
-	public constructor(view: EditorView) {
+	public constructor(private view: EditorView) {
+		view.dom.addEventListener('mousedown', this.onMouseDown, true);
+		view.dom.ownerDocument.addEventListener('mouseup', this.onMouseUp);
 		this.updateDecorations(view);
 	}
+
+	public destroy() {
+		this.view.dom.removeEventListener('mousedown', this.onMouseDown, true);
+		this.view.dom.ownerDocument.removeEventListener('mouseup', this.onMouseUp);
+	}
+
+	private onMouseDown = (event: MouseEvent) => {
+		if (event.button === 0) {
+			this.mouseSelectionInProgress = true;
+		}
+	};
+
+	private onMouseUp = () => {
+		if (this.mouseSelectionInProgress) {
+			// To prevent unnecessary scroll on iOS, decoration changes need to
+			// happen *after* the gesture ends.
+			requestAnimationFrame(() => {
+				this.mouseSelectionInProgress = false;
+				this.view.dispatch({
+					effects: updateInlineDecorationsEffect.of(null),
+				});
+			});
+		}
+	};
 
 	private updateDecorations(view: EditorView) {
 		const doc = view.state.doc;
@@ -35,7 +63,7 @@ export const makeInlineReplaceExtension = (extensionSpec: ReplacementExtension) 
 			}
 
 			if (decoration) {
-				const range = extensionSpec.getDecorationRange?.(node, view.state) ?? [node.from, node.to];
+				const range = extensionSpec.getDecorationRange?.(node, view.state, parentTagCounts) ?? [node.from, node.to];
 				const rangeLineFrom = doc.lineAt(range[0]);
 				const rangeLineTo = range.length === 2 ? doc.lineAt(range[1]) : rangeLineFrom;
 
@@ -50,7 +78,7 @@ export const makeInlineReplaceExtension = (extensionSpec: ReplacementExtension) 
 			}
 		};
 
-		const widgets: Range<Decoration>[] = [];
+		let widgets: Range<Decoration>[] = [];
 		for (const { from, to } of view.visibleRanges) {
 			parentTagCounts.clear();
 			syntaxTree(view.state).iterate({
@@ -58,7 +86,7 @@ export const makeInlineReplaceExtension = (extensionSpec: ReplacementExtension) 
 				enter: node => {
 					parentTagCounts.set(node.name, (parentTagCounts.get(node.name) ?? 0) + 1);
 
-					const strategy = extensionSpec.getRevealStrategy?.(node, view.state) ?? 'line';
+					const strategy = extensionSpec.getRevealStrategy?.(node, view.state, parentTagCounts) ?? 'line';
 
 					let isSelected = false;
 					if (typeof strategy === 'boolean') {
@@ -88,10 +116,46 @@ export const makeInlineReplaceExtension = (extensionSpec: ReplacementExtension) 
 			});
 		}
 		this.decorations = Decoration.set(widgets, true);
+
+		if (extensionSpec.mergeNeighbors && widgets.length > 0) {
+			const originalLength = widgets.length;
+			widgets = [];
+
+			const iter = this.decorations.iter();
+			let previous = iter.value;
+			let previousFrom = iter.from;
+			let previousTo = iter.to;
+			widgets.push(iter.value.range(iter.from, iter.to));
+
+			for (iter.next(); iter.value; iter.next()) {
+				let from = iter.from;
+				if (previousTo === iter.from && previous.eq(iter.value)) {
+					from = previousFrom;
+					widgets.pop();
+				}
+				widgets.push(iter.value.range(from, iter.to));
+
+				previous = iter.value;
+				previousTo = iter.to;
+				previousFrom = from;
+			}
+
+			if (widgets.length < originalLength) {
+				this.decorations = Decoration.set(widgets, true);
+			}
+		}
 	}
 
 	public update(update: ViewUpdate) {
-		if (update.docChanged || update.viewportChanged || update.selectionSet) {
+		const forceUpdate = update.transactions.some(transaction => (
+			transaction.effects.some(effect => effect.is(updateInlineDecorationsEffect))
+			|| extensionSpec.shouldFullReRender?.(transaction)
+		));
+		if (this.mouseSelectionInProgress && !update.docChanged && !forceUpdate) {
+			return;
+		}
+
+		if (update.docChanged || update.viewportChanged || update.selectionSet || forceUpdate) {
 			this.updateDecorations(update.view);
 		}
 	}

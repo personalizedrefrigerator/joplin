@@ -41,6 +41,8 @@ export type AttachedResources = Record<string, AttachedResource>;
 
 export interface SaveNoteOptions {
 	autoTitle?: boolean;
+	editorNoteReloadTimeRequest?: number;
+	getEditorNoteReloadTimeRequest?: ()=> number;
 }
 
 export interface BaseState {
@@ -97,7 +99,7 @@ interface Shared {
 	installResourceHandling?: (refreshResourceHandler: ResourceHandler)=> void;
 	uninstallResourceHandling?: (refreshResourceHandler: ResourceHandler)=> void;
 
-	reloadNote?: (comp: BaseNoteScreenComponent)=> Promise<NoteEntity>;
+	reloadNote?: (comp: BaseNoteScreenComponent, useDefaultEditorState?: boolean)=> Promise<NoteEntity>;
 }
 
 const shared: Shared = {};
@@ -160,6 +162,17 @@ shared.saveNoteButton_press = async function(comp: BaseNoteScreenComponent, stat
 		if (saveOptions.fields && saveOptions.fields.indexOf('title') < 0) saveOptions.fields.push('title');
 	}
 
+	// This check is intentionally immediately before Note.save. The action may
+	// have been queued, or waiting for the save mutex, when the reload was
+	// requested. In that case its note snapshot is stale and must be discarded.
+	if (
+		options.editorNoteReloadTimeRequest !== undefined &&
+		options.getEditorNoteReloadTimeRequest &&
+		options.getEditorNoteReloadTimeRequest() > options.editorNoteReloadTimeRequest
+	) {
+		return releaseMutex();
+	}
+
 	const savedNote = 'fields' in saveOptions && !saveOptions.fields.length ? { ...note } : await Note.save(note, saveOptions);
 
 	const stateNote = comp.state.note;
@@ -171,7 +184,7 @@ shared.saveNoteButton_press = async function(comp: BaseNoteScreenComponent, stat
 	note = { ...note, ...savedNote };
 
 	if (stateNote.id === note.id) {
-		// But we preserve the current title and body because
+		// But we preserve the current title, body and todo_completed because
 		// the user might have changed them between the time
 		// saveNoteButton_press was called and the note was
 		// saved (it's done asynchronously).
@@ -180,6 +193,7 @@ shared.saveNoteButton_press = async function(comp: BaseNoteScreenComponent, stat
 		// it from the state because it will be empty there.
 		if (!hasAutoTitle) note.title = stateNote.title;
 		note.body = stateNote.body;
+		note.todo_completed = stateNote.todo_completed;
 	}
 
 	const newState: Partial<BaseState> = {
@@ -197,7 +211,9 @@ shared.saveNoteButton_press = async function(comp: BaseNoteScreenComponent, stat
 		const updateGeoloc = async () => {
 			const geoNote: NoteEntity = await Note.updateGeolocation(note.id);
 
-			const stateNote = state.note;
+			// Read the latest state (not the closure `state`, which was captured
+			// before Note.save and doesn't include the auto-derived title).
+			const stateNote = comp.state.note;
 			if (!stateNote || !geoNote) return;
 			if (stateNote.id !== geoNote.id) return; // Another note has been loaded while geoloc was being retrieved
 
@@ -211,7 +227,7 @@ shared.saveNoteButton_press = async function(comp: BaseNoteScreenComponent, stat
 			};
 
 			const modNote = { ...stateNote, ...geoInfo };
-			const modLastSavedNote = { ...state.lastSavedNote, ...geoInfo };
+			const modLastSavedNote = { ...comp.state.lastSavedNote, ...geoInfo };
 
 			comp.setState({ note: modNote, lastSavedNote: modLastSavedNote });
 		};
@@ -235,7 +251,7 @@ shared.saveOneProperty = async function(comp: BaseNoteScreenComponent, name: str
 	(note as Record<string, unknown>)[name] = saved[name];
 
 	comp.setState({
-		lastSavedNote: { ...note },
+		lastSavedNote: { ...note, ...saved },
 		note: note,
 	});
 };
@@ -292,21 +308,36 @@ shared.isModified = function(comp: BaseNoteScreenComponent) {
 	return !!Object.getOwnPropertyNames(diff).length;
 };
 
-shared.reloadNote = async (comp: BaseNoteScreenComponent) => {
+shared.reloadNote = async (comp: BaseNoteScreenComponent, useDefaultEditorState = false) => {
 	const isProvisionalNote = comp.props.provisionalNoteIds.includes(comp.props.noteId);
 
-	const note = await Note.load(comp.props.noteId);
+	let note = await Note.load(comp.props.noteId);
+	if (note?.encryption_cipher_text) {
+		try {
+			note = await Note.decrypt(note);
+		} catch (error) {
+			reg.logger().info(`Could not decrypt note ${note.id}, note could not be refreshed:`, error.message);
+			// All decryption errors, including masterKeyNotLoaded, intentionally use the non-existent note branch below.
+			// A forced reload must not retain the previously loaded plaintext, as it presents a risk of data loss if the
+			// user is typing during the reload. Aside from certain edge cases, a user cannot directly open a note which
+			// is still encrypted, so normally would not see this.
+			note = null;
+		}
+	}
+	let mode = comp.state.mode;
 
-	const panes = comp.props.noteVisiblePanes;
-	let mode = panes.includes('editor') ? 'edit' : 'view';
+	if (useDefaultEditorState) {
+		const panes = comp.props.noteVisiblePanes;
+		mode = panes.includes('editor') ? 'edit' : 'view';
 
-	// Override the mode if the default state is not last
-	const defaultState = Setting.value('editor.mobile.defaultEditState');
-	if (defaultState === 'view') mode = 'view';
-	if (defaultState === 'edit') mode = 'edit';
+		// Override the mode if the default state is not last
+		const defaultState = Setting.value('editor.mobile.defaultEditState');
+		if (defaultState === 'view') mode = 'view';
+		if (defaultState === 'edit') mode = 'edit';
+	}
 
-	// Prevent trashed notes from opening in edit mode.
-	if (note?.deleted_time) {
+	// Prevent trashed notes and notes created via sharing from opening in edit mode.
+	if (note?.deleted_time || comp.props.sharedData) {
 		mode = 'view';
 	}
 
@@ -351,9 +382,11 @@ shared.reloadNote = async (comp: BaseNoteScreenComponent) => {
 };
 
 shared.initState = async function(comp: BaseNoteScreenComponent) {
-	const note = await shared.reloadNote(comp);
+	const note = await shared.reloadNote(comp, true);
 
-	if (comp.props.sharedData && note) {
+	// Ensure that only empty notes created for shared content are populated with sharedData, because in some cases
+	// existing notes can be overwritten by the shared data. See https://github.com/laurent22/joplin/issues/11479
+	if (comp.props.sharedData && note && note.title.length === 0 && note.body.length === 0) {
 		// Use the note returned by reloadNote directly to avoid a race condition where
 		// comp.state.note is still the initial empty note (Note.new() with parent_id='')
 		// because React hasn't flushed reloadNote's setState yet. Without this, the
@@ -370,7 +403,7 @@ shared.initState = async function(comp: BaseNoteScreenComponent) {
 		}
 		if (fieldsToSave.title !== undefined || fieldsToSave.body !== undefined) {
 			await Note.save(fieldsToSave);
-			comp.setState({ note: updatedNote, lastSavedNote: updatedNote });
+			comp.setState({ note: updatedNote, lastSavedNote: { ...updatedNote } });
 		}
 		if (comp.props.sharedData.resources) {
 			for (let i = 0; i < comp.props.sharedData.resources.length; i++) {

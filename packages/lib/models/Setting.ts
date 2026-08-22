@@ -63,6 +63,7 @@ export interface Constants {
 	syncVersion: number;
 	startupDevPlugins: string[];
 	isSubProfile: boolean;
+	isJoplinCloudWebApp: boolean;
 
 	'sync.9.apiKey': string;
 	'sync.10.apiKey': string;
@@ -163,7 +164,7 @@ const globalMigrations: GlobalMigration[] = [
 interface UserSettingMigration {
 	oldName: string;
 	newName: string;
-	transformValue: (value: string)=> string | string[];
+	transformValue: (value: unknown)=> unknown;
 
 	// Currently the migration code only supports migrating a plugin setting to the regular settings
 	// (not a plugin setting to a different name). So "oldName" should be the plugin setting name
@@ -181,13 +182,13 @@ const userSettingMigration: UserSettingMigration[] = [
 	{
 		oldName: 'spellChecker.language',
 		newName: 'spellChecker.languages',
-		transformValue: (value: string) => { return [value]; },
+		transformValue: (value) => { return [value]; },
 		isPluginSetting: false,
 	},
 	{
 		oldName: 'plugin-org.joplinapp.plugins.AbcSheetMusic.options',
 		newName: 'markdown.plugin.abc.options',
-		transformValue: (value: string) => { return value; },
+		transformValue: (value) => { return value; },
 		isPluginSetting: true,
 	},
 ];
@@ -305,6 +306,7 @@ class Setting extends BaseModel {
 		syncVersion: 3,
 		startupDevPlugins: [],
 		isSubProfile: false,
+		isJoplinCloudWebApp: false,
 
 		'sync.9.apiKey': '',
 		'sync.10.apiKey': '',
@@ -1289,7 +1291,11 @@ class Setting extends BaseModel {
 			'appearance',
 			'sync',
 			'encryption',
+			'noteLock',
 			'joplinCloud',
+			'ai',
+			'ai.tools',
+			'mcp',
 			'editor',
 			'plugins',
 			'markdownPlugins',
@@ -1309,7 +1315,7 @@ class Setting extends BaseModel {
 	}
 
 	public static isSubSection(sectionName: string) {
-		return ['encryption', 'application', 'appearance', 'joplinCloud'].includes(sectionName);
+		return ['encryption', 'application', 'appearance', 'joplinCloud', 'ai.tools'].includes(sectionName);
 	}
 
 	public static groupMetadatasBySections(metadatas: SettingItem[]): MetadataBySection {
@@ -1358,12 +1364,15 @@ class Setting extends BaseModel {
 		if (name === 'application') return _('Application');
 		if (name === 'revisionService') return _('Note History');
 		if (name === 'encryption') return _('Encryption');
+		if (name === 'noteLock') return _('Note lock');
 		if (name === 'server') return _('Web Clipper');
 		if (name === 'keymap') return _('Keyboard Shortcuts');
 		if (name === 'joplinCloud') return _('Joplin Cloud');
 		if (name === 'tools') return _('Tools');
 		if (name === 'importOrExport') return _('Import and Export');
 		if (name === 'moreInfo') return _('More information');
+		if (name === 'ai') return _('AI');
+		if (name === 'ai.tools') return _('Tools');
 
 		if (this.customSections_[name] && this.customSections_[name].label) return this.customSections_[name].label;
 
@@ -1377,6 +1386,12 @@ class Setting extends BaseModel {
 		if (name === 'general' && appType === AppType.Desktop) {
 			return _('Notes and settings are stored in: %s', toSystemSlashes(this.value('profileDir'), process.platform));
 		}
+		if (name === 'noteLock') {
+			return _('Locked notes are encrypted on this device and can only be read after entering your note lock password. The password is required again after locking or restarting Joplin.');
+		}
+		if (name === 'ai.tools') {
+			return _('Tools and services to expose to AI. AI agents can use these tools either via the note chat panel or Joplin\'s MCP server (if enabled).');
+		}
 
 		if (this.customSections_[name] && this.customSections_[name].description) return this.customSections_[name].description;
 
@@ -1389,6 +1404,7 @@ class Setting extends BaseModel {
 			'general': _('Language, date format'),
 			'appearance': _('Themes, notebook sort order'),
 			'sync': _('Sync, encryption, proxy'),
+			'noteLock': _('Note lock password, auto lock'),
 			'joplinCloud': _('Email To Note, login information'),
 			'editor': _('Typography, spellcheck, layout'),
 			'markdownPlugins': _('Media player, math, diagrams, table of contents'),
@@ -1434,12 +1450,15 @@ class Setting extends BaseModel {
 			'application': 'icon-application',
 			'revisionService': 'icon-note-history',
 			'encryption': 'icon-encryption',
+			'noteLock': 'fa fa-lock',
 			'server': 'far fa-hand-scissors',
 			'keymap': 'fa fa-keyboard',
 			'joplinCloud': 'fa fa-cloud',
 			'tools': 'fa fa-toolbox',
 			'importOrExport': 'fa fa-file-export',
 			'moreInfo': 'fa fa-info-circle',
+			'ai': 'fa fa-robot',
+			'ai.tools': 'fa fa-plug',
 		};
 
 		// Icomoon icons are currently not present in the mobile app -- we override these

@@ -221,6 +221,24 @@ describe('screens/Note', () => {
 		unmount();
 	});
 
+	it('should discard a queued save when the reload time has moved on', async () => {
+		const noteId = await openNewNote({ title: 'Original title', body: 'Body' });
+		const { unmount } = render(<WrappedNoteScreen />);
+		const titleInput = await screen.findByDisplayValue('Original title');
+
+		await act(async () => {
+			fireEvent.changeText(titleInput, 'Stale local title');
+			const remotelyUpdatedNote = await Note.load(noteId);
+			remotelyUpdatedNote.title = 'Remote title';
+			await Note.save(remotelyUpdatedNote);
+			store.dispatch({ type: 'EDITOR_NOTE_NEEDS_RELOAD', noteId });
+		});
+
+		await waitForNoteToMatch(noteId, { title: 'Remote title' });
+		unmount();
+		await waitForNoteToMatch(noteId, { title: 'Remote title' });
+	});
+
 	it('changing the note body in the editor should update the note\'s body', async () => {
 		const defaultBody = 'Change me!';
 		const noteId = await openNewNote({ title: 'Unchanged title', body: defaultBody });
@@ -519,6 +537,55 @@ describe('screens/Note', () => {
 		await expectToBeEditing(panes.includes('editor'));
 		expect(store.getState().noteVisiblePanes).toEqual(panes);
 		unmount();
+	});
+
+	// Regression test: when a provisional note has no title, saving derives the
+	// title from the body. The provisional-note branch of saveNoteButton_press
+	// also kicks off a background geolocation update; that callback used to
+	// close over a stale `state.note` (captured before the title was derived)
+	// and wipe the derived title back to empty when it resolved.
+	it('should not clear the auto-derived title when the background geolocation update resolves', async () => {
+		Setting.setValue('trackLocation', true);
+
+		const originalGeolocation = shim.Geolocation;
+		let resolveGeoloc: (v: unknown)=> void = () => {};
+		shim.Geolocation = {
+			currentPosition: () => new Promise(resolve => { resolveGeoloc = resolve; }),
+		};
+
+		let unmount = () => {};
+		try {
+			const noteId = await openNewNote({ title: '', body: '' });
+			store.dispatch({
+				type: 'NOTE_UPDATE_ONE',
+				note: await Note.load(noteId),
+				provisional: true,
+			});
+
+			({ unmount } = render(<WrappedNoteScreen />));
+			const editor = await getMarkdownEditorControl();
+
+			await act(async () => {
+				editor.insertText('Derived from body');
+			});
+
+			await screen.findByDisplayValue('Derived from body');
+
+			await act(async () => {
+				resolveGeoloc({ timestamp: Date.now(), coords: { latitude: 1, longitude: 2, altitude: 3 } });
+			});
+			await waitForNoteToMatch(noteId, { title: 'Derived from body' });
+			await waitFor(async () => {
+				const loaded = await Note.load(noteId);
+				expect(Number(loaded.latitude)).toBe(1);
+			});
+
+			expect(screen.getByDisplayValue('Derived from body')).toBeVisible();
+		} finally {
+			unmount();
+			shim.Geolocation = originalGeolocation;
+			Setting.setValue('trackLocation', false);
+		}
 	});
 
 	it('should set the initial editor cursor location to the specified hash', async () => {

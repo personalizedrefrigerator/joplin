@@ -46,6 +46,7 @@ interface FolderItemProps {
 	folderItem_click: (event: ItemClickEvent)=> void;
 	onFolderToggleClick_: ItemClickListener;
 	shareId: string;
+	isPublished: boolean;
 	selectionState: ItemSelectionState;
 
 	index: number;
@@ -53,10 +54,12 @@ interface FolderItemProps {
 }
 
 function FolderItem(props: FolderItemProps) {
-	const { hasChildren, showFolderIcon, isExpanded, parentId, depth, selectionState, folderId, folderTitle, folderIcon, noteCount, onFolderDragStart_, onFolderDragOver_, onFolderDrop_, itemContextMenu, folderItem_click, onFolderToggleClick_, shareId } = props;
+	const { hasChildren, showFolderIcon, isExpanded, parentId, depth, selectionState, folderId, folderTitle, folderIcon, noteCount, onFolderDragStart_, onFolderDragOver_, onFolderDrop_, itemContextMenu, folderItem_click, onFolderToggleClick_, shareId, isPublished } = props;
 
 	const shareTitle = _('Shared');
-	const shareIcon = shareId && !parentId ? <i className="share-icon fas fa-share-alt" aria-label={shareTitle} title={shareTitle}/> : null;
+	const shareIcon = shareId && !parentId ? <i aria-label={shareTitle} title={shareTitle} className="share-icon fas fa-share-alt"/> : null;
+	const publishedTitle = _('Published');
+	const publishedIcon = isPublished ? <i aria-label={publishedTitle} title={publishedTitle} className="share-icon fas fa-globe"/> : null;
 	const draggable = ![getTrashFolderId(), Folder.conflictFolderId()].includes(folderId);
 
 	const doRenderFolderIcon = () => {
@@ -93,7 +96,14 @@ function FolderItem(props: FolderItemProps) {
 			aria-labelledby={titleId}
 		>
 			<a
-				className={`list-item-anchor list-item${folderId === Folder.conflictFolderId() ? ' -conflict' : ''}${shareId ? ' -shared' : ''}${selectionState.selected ? ' -selected' : ''}`}
+				className={[
+					'list-item-anchor',
+					'list-item',
+					folderId === Folder.conflictFolderId() ? '-conflict' : '',
+					shareId ? '-shared' : '',
+					props.isPublished ? '-published' : '',
+					selectionState.selected ? '-selected' : '',
+				].join(' ')}
 				id={titleId}
 				data-folder-id={folderId}
 				onDoubleClick={onFolderToggleClick_}
@@ -104,8 +114,8 @@ function FolderItem(props: FolderItemProps) {
 					});
 				}}
 			>
-				{doRenderFolderIcon()}<span className="title" style={shim.isLinux() ? { position: 'relative' } : undefined}>{folderTitle}</span>
-				{shareIcon} <NoteCount count={noteCount}/>
+				{doRenderFolderIcon()}<span className={`title ${shim.isLinux() ? '-workaround' : ''}`}>{folderTitle}</span>
+				{publishedIcon}{shareIcon} <NoteCount count={noteCount}/>
 			</a>
 			<ExpandLink
 				// The ExpandLink is included after the title so that the screen reader reads the

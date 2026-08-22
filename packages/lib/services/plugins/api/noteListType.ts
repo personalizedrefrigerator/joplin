@@ -16,7 +16,8 @@ export type RenderNoteView = Record<string, any>;
 
 export interface OnChangeEvent {
 	elementId: string;
-	value: unknown;
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Plugin API: value depends on the input element type
+	value: any;
 	noteId: string;
 }
 
@@ -51,6 +52,7 @@ export type ListRendererDependency =
 	'item.size.width' |
 	'note.checkboxes' |
 	'note.folder.title' |
+	'note.is_published' |
 	'note.isWatched' |
 	'note.tags' |
 	'note.todoStatusText' |

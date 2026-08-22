@@ -1,5 +1,3 @@
-import * as React from 'react';
+import { ChangeEventHandler as ReactChangeEventHandler } from 'react';
 
-// The password input forwards this handler straight to its native <input>, so it
-// receives a real change event (consumers read event.target.value).
-export type ChangeEventHandler = React.ChangeEventHandler<HTMLInputElement>;
+export type ChangeEventHandler = ReactChangeEventHandler<HTMLInputElement>;

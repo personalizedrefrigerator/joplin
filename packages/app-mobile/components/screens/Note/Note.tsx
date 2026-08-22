@@ -22,7 +22,7 @@ import NavService, { OnNavigateCallback as OnNavigateCallback } from '@joplin/li
 import { ModelType } from '@joplin/lib/BaseModel';
 import { fileExtension, safeFileExtension } from '@joplin/lib/path-utils';
 import * as mimeUtils from '@joplin/lib/mime-utils';
-import ScreenHeader, { FolderPickerOptions, MenuOptionType, ViewToggleButtonMode } from '../../ScreenHeader';
+import ScreenHeader, { FolderPickerOptions, MenuOption, ViewToggleButtonMode } from '../../ScreenHeader';
 import NoteTagsDialog from '../NoteTagsDialog';
 import time from '@joplin/lib/time';
 import Checkbox from '../../Checkbox';
@@ -49,7 +49,7 @@ import restoreItems from '@joplin/lib/services/trash/restoreItems';
 import { getDisplayParentTitle } from '@joplin/lib/services/trash';
 import { PluginHtmlContents, PluginStates, utils as pluginUtils } from '@joplin/lib/services/plugins/reducer';
 import debounce from '../../../utils/debounce';
-import { focus } from '@joplin/lib/utils/focusHandler';
+import { blur, focus } from '@joplin/lib/utils/focusHandler';
 import CommandService, { RegisteredRuntime } from '@joplin/lib/services/CommandService';
 import { ResourceInfo } from '../../NoteBodyViewer/hooks/useRerenderHandler';
 import getImageDimensions from '../../../utils/image/getImageDimensions';
@@ -69,7 +69,7 @@ import SpeechToTextBanner from '../../voiceTyping/SpeechToTextBanner';
 import CameraView from '../../CameraView/CameraView';
 import ShareNoteDialog from '../ShareNoteDialog';
 import stateToWhenClauseContext from '../../../services/commands/stateToWhenClauseContext';
-import { defaultWindowId } from '@joplin/lib/reducer';
+import { defaultWindowId, HighlightedWord } from '@joplin/lib/reducer';
 import useVisiblePluginEditorViewIds from '@joplin/lib/hooks/plugins/useVisiblePluginEditorViewIds';
 import { SelectionRange } from '../../../contentScripts/markdownEditorBundle/types';
 import { EditorType } from '../../NoteEditor/types';
@@ -84,6 +84,7 @@ import { Second } from '@joplin/utils/time';
 import TextWrapCalculator from '../Notes/TextWrapCalculator';
 import SearchEngine from '@joplin/lib/services/search/SearchEngine';
 import { ALL_NOTES_FILTER_ID } from '@joplin/lib/reserved-ids';
+import { MenuOptionStyle, MenuOptionButton } from '../../BottomDrawerMenu';
 
 const emptyArray: never[] = [];
 
@@ -116,7 +117,7 @@ interface Props extends BaseProps {
 	showSideMenu: boolean;
 	searchQuery: string;
 	ftsEnabled: number;
-	highlightedWords: string[];
+	highlightedWords: HighlightedWord[];
 	noteHash: string;
 	toolbarEnabled: boolean;
 	pluginHtmlContents: PluginHtmlContents;
@@ -153,6 +154,7 @@ interface State {
 	noteResources: Record<string, ResourceInfo>;
 	newAndNoTitleChangeNoteId: boolean|null;
 	noteLastLoadTime: number;
+	reloadInProgress: boolean;
 
 	undoRedoButtonState: {
 		canUndo: boolean;
@@ -183,7 +185,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 	private noteTagDialog_closeRequested: ()=> void;
 	private refreshResource: (resource: ResourceEntity, noteBody?: string)=> Promise<void>;
 	private selection: SelectionRange;
-	private menuOptionsCache_: Record<string, MenuOptionType[]>;
+	private menuOptionsCache_: Record<string, MenuOption[]>;
 	private focusUpdateIID_: ReturnType<typeof setTimeout> | null;
 	private folderPickerOptions_: FolderPickerOptions;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- dialogbox is the react-native-dialogbox ref; the library ships no types
@@ -193,6 +195,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 		return shared.noteComponent_change(this, 'body', saveEvent.body);
 	});
 	private refreshKey: number | undefined;
+	private reloadInProgress_ = false;
 
 	public static navigationOptions(): { header: null } {
 		return { header: null };
@@ -225,6 +228,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 			imageEditorResourceFilepath: null,
 			newAndNoTitleChangeNoteId: null,
 			noteLastLoadTime: Date.now(),
+			reloadInProgress: false,
 
 			undoRedoButtonState: {
 				canUndo: false,
@@ -546,8 +550,8 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 			color: theme.color,
 			fontWeight: 'bold',
 			fontSize: theme.fontSize,
-			paddingTop: 10, // Added for iOS (Not needed for Android??)
-			paddingBottom: 10, // Added for iOS (Not needed for Android??)
+			paddingTop: theme.itemMarginTop, // Added for iOS (Not needed for Android??)
+			paddingBottom: theme.itemMarginBottom, // Added for iOS (Not needed for Android??)
 		};
 
 		this.styles_[cacheKey] = StyleSheet.create(styles);
@@ -570,6 +574,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 					{
 						buttons: [_('Yes'), _('No')],
 						title: _('Save geolocation?'),
+						cancelId: 1,
 					},
 				);
 				return result === yesIndex;
@@ -707,6 +712,11 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 			const explicitReloadRequired = !editorPlugin && this.props.editorNoteReloadTimeRequest > this.state.noteLastLoadTime;
 
 			if (explicitReloadRequired) {
+				this.reloadInProgress_ = true;
+				Keyboard.dismiss();
+				this.editorRef.current?.hideKeyboard();
+				blur('Note::reload', this.titleTextFieldRef.current);
+				this.setState({ reloadInProgress: true });
 				void this.reloadNoteAndUpdateRefreshKey();
 			}
 
@@ -756,6 +766,11 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 		this.commandRegistration_?.deregister();
 		this.commandRegistration_ = null;
 
+		if (this.focusUpdateIID_) {
+			shim.clearInterval(this.focusUpdateIID_);
+			this.focusUpdateIID_ = null;
+		}
+
 		this.props.dispatch({
 			type: 'SET_NOTE_EDITOR_VISIBLE',
 			visible: false,
@@ -764,10 +779,24 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 
 	private async reloadNoteAndUpdateRefreshKey() {
 		await shared.reloadNote(this);
-		this.refreshKey = this.props.editorNoteReloadTimeRequest;
+
+		const refreshKey = this.props.editorNoteReloadTimeRequest;
+		this.refreshKey = refreshKey;
+		if (this.useEditorBeta() && this.state.mode === 'edit') {
+			this.forceUpdate();
+		} else {
+			this.setState({}, () => this.editorReloadComplete(refreshKey));
+		}
 	}
 
+	private editorReloadComplete = (refreshKey: number|undefined) => {
+		if (!this.reloadInProgress_ || refreshKey !== this.props.editorNoteReloadTimeRequest) return;
+		this.reloadInProgress_ = false;
+		this.setState({ reloadInProgress: false });
+	};
+
 	private title_changeText(text: string) {
+		if (this.reloadInProgress_) return;
 		let newText = text;
 		newText = text.replace(/(\r\n|\n|\r)/gm, ' ');
 		shared.noteComponent_change(this, 'title', newText);
@@ -782,6 +811,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 	}
 
 	private onPlainEditorTextChange = (text: string) => {
+		if (this.reloadInProgress_) return;
 		if (!this.undoRedoService_.canUndo) {
 			this.undoRedoService_.push(this.undoState());
 		} else {
@@ -795,9 +825,15 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 	// and updating this.state.note immediately causes slow rerenders.
 	//
 	// See https://github.com/laurent22/joplin/issues/10130
-	private onMarkdownEditorTextChange = debounce((event: EditorChangeEvent) => {
+	private debouncedMarkdownEditorTextChange_ = debounce((event: EditorChangeEvent, reloadRequest: number) => {
+		if (this.reloadInProgress_ || reloadRequest !== this.props.editorNoteReloadTimeRequest) return;
 		shared.noteComponent_change(this, 'body', event.value);
 	}, 100);
+
+	private onMarkdownEditorTextChange = (event: EditorChangeEvent) => {
+		if (this.reloadInProgress_) return;
+		this.debouncedMarkdownEditorTextChange_(event, this.props.editorNoteReloadTimeRequest);
+	};
 
 	private onPlainEditorSelectionChange = (event: NativeSyntheticEvent<{ selection: SelectionRange }>) => {
 		this.selection = event.nativeEvent.selection;
@@ -811,9 +847,12 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 		);
 	};
 
-	public makeSaveAction(state: State) {
+	public makeSaveAction(state: State, editorNoteReloadTimeRequest: number) {
 		return async () => {
-			return shared.saveNoteButton_press(this, state, null, null);
+			return shared.saveNoteButton_press(this, state, null, {
+				editorNoteReloadTimeRequest,
+				getEditorNoteReloadTimeRequest: () => this.props.editorNoteReloadTimeRequest,
+			});
 		};
 	}
 
@@ -825,7 +864,9 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 	}
 
 	public scheduleSave(state: State) {
-		this.saveActionQueue(state.note.id).push(this.makeSaveAction(state));
+		if (this.reloadInProgress_) return;
+		const editorNoteReloadTimeRequest = this.props.editorNoteReloadTimeRequest;
+		this.saveActionQueue(state.note.id).push(this.makeSaveAction(state, editorNoteReloadTimeRequest));
 	}
 
 	private async saveNoteButton_press(folderId: string = null) {
@@ -1290,7 +1331,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 
 		if (this.menuOptionsCache_[cacheKey]) return this.menuOptionsCache_[cacheKey];
 
-		const output: MenuOptionType[] = [];
+		const output: MenuOption[] = [];
 
 		// The file attachment modules only work in Android >= 5 (Version 21)
 		// https://github.com/react-community/react-native-image-picker/issues/606
@@ -1304,6 +1345,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 		if (canAttachPicture) {
 			output.push({
 				title: _('Attach...'),
+				icon: 'material paperclip',
 				onPress: () => this.onAttach(),
 				disabled: readOnly,
 			});
@@ -1313,6 +1355,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 			title: _('Draw picture'),
 			onPress: () => this.drawPicture_onPress(),
 			disabled: readOnly,
+			icon: 'material draw',
 		});
 
 		if (isTodo) {
@@ -1322,6 +1365,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 					this.setState({ alarmDialogShown: true });
 				},
 				disabled: readOnly,
+				icon: 'material bell-outline',
 			});
 		}
 
@@ -1329,6 +1373,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 		if (shareSupported) {
 			output.push({
 				title: _('Share'),
+				icon: 'material share-outline',
 				onPress: () => {
 					void this.share_onPress();
 				},
@@ -1339,6 +1384,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 		if (VoiceTyping.supported()) {
 			output.push({
 				title: _('Voice typing...'),
+				icon: 'material microphone-outline',
 				onPress: () => {
 					// this.voiceRecording_onPress();
 					this.setState({ showSpeechToTextDialog: true });
@@ -1349,26 +1395,32 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 
 		const commandService = CommandService.instance();
 		const whenContext = commandService.currentWhenClauseContext();
-		const addButtonFromCommand = (commandName: string, title?: string) => {
+
+
+		const addButtonFromCommand = (commandName: string, overrides: Partial<MenuOptionButton> = {}) => {
 			if (commandName === '-') {
 				output.push({ isDivider: true });
 			} else {
 				output.push({
-					title: title ?? commandService.description(commandName),
+					isDivider: false,
+					title: commandService.description(commandName),
+					icon: commandService.iconName(commandName),
 					onPress: async () => {
 						void commandService.execute(commandName);
 					},
 					disabled: !commandService.isEnabled(commandName, whenContext),
+					...overrides,
 				});
 			}
 		};
 
 		if (isSaved && !isDeleted) {
-			addButtonFromCommand('setTags');
+			addButtonFromCommand('setTags', { icon: 'material tag-outline' });
 		}
 
 		output.push({
 			title: isTodo ? _('Convert to note') : _('Convert to todo'),
+			icon: isTodo ? 'material file-document-outline' : 'material file-send-outline',
 			onPress: () => {
 				this.toggleIsTodo_onPress();
 			},
@@ -1378,6 +1430,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 		if (isSaved && !isDeleted) {
 			output.push({
 				title: _('Copy Markdown link'),
+				icon: 'material content-copy',
 				onPress: () => {
 					this.copyMarkdownLink_onPress();
 				},
@@ -1387,6 +1440,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 			if (Platform.OS !== 'web') {
 				output.push({
 					title: _('Copy external link'),
+					icon: 'material content-copy',
 					onPress: () => {
 						this.copyExternalLink_onPress();
 					},
@@ -1394,33 +1448,49 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 			}
 		}
 
-		output.push({
-			title: _('Properties'),
-			onPress: () => {
-				this.properties_onPress();
-			},
-		});
-
 		if (this.state.mode === 'edit') {
 			const newCodeView = !isCodeView;
 			output.push({
 				title: newCodeView ? _('Edit as Markdown') : _('Edit as Rich Text'),
+				icon: newCodeView ? 'material file-edit-outline' : 'material file-edit',
 				onPress: () => {
 					Setting.setValue('editor.codeView', newCodeView);
 				},
 			});
 		}
 
+		if (pluginCommands.length) {
+			output.push({ isDivider: true });
+
+			for (const commandName of pluginCommands) {
+				addButtonFromCommand(commandName);
+			}
+		}
+
+		output.push({ isDivider: true });
+
+		output.push({
+			title: _('Properties'),
+			icon: 'material information-outline',
+			onPress: () => {
+				this.properties_onPress();
+			},
+		});
+
 		output.push({
 			title: _('Reveal in notebook'),
+			icon: 'material folder-file-outline',
 			onPress: () => {
 				this.revealInNotebook_onPress();
 			},
 		});
 
+		output.push({ isDivider: true });
+
 		if (isDeleted) {
 			output.push({
 				title: _('Restore'),
+				icon: 'material delete-off-outline',
 				onPress: async () => {
 					await restoreItems(ModelType.Note, [this.state.note.id]);
 					this.props.dispatch({
@@ -1432,17 +1502,9 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 		}
 
 		if (whenContext.inTrash) {
-			addButtonFromCommand('permanentlyDeleteNote');
+			addButtonFromCommand('permanentlyDeleteNote', { icon: 'material delete-outline', style: MenuOptionStyle.Destructive });
 		} else {
-			addButtonFromCommand('deleteNote', _('Delete'));
-		}
-
-		if (pluginCommands.length) {
-			output.push({ isDivider: true });
-
-			for (const commandName of pluginCommands) {
-				addButtonFromCommand(commandName);
-			}
+			addButtonFromCommand('deleteNote', { title: _('Delete'), icon: 'material delete-outline', style: MenuOptionStyle.Destructive });
 		}
 
 		this.menuOptionsCache_ = {};
@@ -1709,6 +1771,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 							keyboardAppearance={theme.keyboardAppearance}
 							placeholder={_('Add body')}
 							placeholderTextColor={theme.colorFaded}
+							editable={!this.state.readOnly && !this.state.reloadInProgress}
 							// need some extra padding for iOS so that the keyboard won't cover last line of the note
 							// see https://github.com/laurent22/joplin/issues/3607
 							// Property is gone as of RN 0.72?
@@ -1734,7 +1797,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 						onSearchVisibleChange={this.onSearchVisibleChange_}
 						onAttach={this.onAttach}
 						noteResources={this.state.noteResources}
-						readOnly={this.state.readOnly}
+						readOnly={this.state.readOnly || this.state.reloadInProgress}
 						plugins={this.props.plugins}
 						style={{
 							...editorStyle,
@@ -1753,14 +1816,11 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 
 						mode={this.props.editorType}
 						refreshKey={this.refreshKey}
+						onLoadEnd={() => this.editorReloadComplete(this.refreshKey)}
 					/>;
 				}
 			}
 		}
-
-		// Save button is not really needed anymore with the improved save logic
-		const showSaveButton = false; // this.state.mode === 'edit' || this.isModified() || this.saveButtonHasBeenShown_;
-		const saveButtonDisabled = true;// !this.isModified();
 
 		const titleContainerStyle = isTodo ? this.styles().titleContainerTodo : this.styles().titleContainer;
 
@@ -1817,7 +1877,7 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 					keyboardAppearance={theme.keyboardAppearance}
 					placeholder={_('Add title')}
 					placeholderTextColor={theme.colorFaded}
-					editable={!this.state.readOnly}
+					editable={!this.state.readOnly && !this.state.reloadInProgress}
 					multiline={this.state.multiline}
 					submitBehavior = "blurAndSubmit"
 				/>
@@ -1857,9 +1917,6 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 		const header = <ScreenHeader
 			folderPickerOptions={this.folderPickerOptions()}
 			menuOptions={this.menuOptions()}
-			showSaveButton={showSaveButton}
-			saveButtonDisabled={saveButtonDisabled}
-			onSaveButtonPress={this.saveNoteButton_press}
 			showSideMenuButton={false}
 			showSearchButton={false}
 			showUndoButton={(this.state.undoRedoButtonState.canUndo || this.state.undoRedoButtonState.canRedo) && this.state.mode === 'edit'}

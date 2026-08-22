@@ -83,8 +83,9 @@ test.describe('markdownEditor', () => {
 			// 2. replace this test with a screenshot comparison (https://playwright.dev/docs/test-snapshots)
 			await expect.poll(
 				() => pdfViewer.evaluate((handle) => {
-					const embed = (handle as HTMLObjectElement).contentDocument.querySelector('embed');
-					return !!embed;
+					const contentDocument = (handle as HTMLObjectElement).contentDocument;
+					const pdfViewerAsset = contentDocument.querySelector('link[href*=pdf_embedder]');
+					return !!pdfViewerAsset;
 				}),
 			).toBe(true);
 		};

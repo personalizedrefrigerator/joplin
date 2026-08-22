@@ -118,6 +118,10 @@ export interface ShimInitOptions {
 	electronBridge?: any;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- node sqlite driver shape is per-platform; see shim.nodeSqlite_
 	nodeSqlite?: any;
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- sqlite-vec is only bundled with desktop; see shim.sqliteVec_
+	sqliteVec?: any;
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- onnxruntime-node is only bundled with desktop; see shim.onnxRuntime_
+	onnxRuntime?: any;
 	pdfJs?: PdfJs;
 	isAppleSilicon?: ()=> boolean;
 }
@@ -130,6 +134,8 @@ function shimInit(options: ShimInitOptions = null) {
 		appVersion: null,
 		electronBridge: null,
 		nodeSqlite: null,
+		sqliteVec: null,
+		onnxRuntime: null,
 		pdfJs: null,
 		isAppleSilicon: () => false,
 		...options,
@@ -141,6 +147,8 @@ function shimInit(options: ShimInitOptions = null) {
 	const pdfJs = options.pdfJs;
 
 	shim.setNodeSqlite(options.nodeSqlite);
+	shim.setSqliteVec(options.sqliteVec);
+	shim.setOnnxRuntime(options.onnxRuntime);
 
 	shim.fsDriver = () => {
 		throw new Error('Not implemented');
@@ -484,6 +492,19 @@ function shimInit(options: ShimInitOptions = null) {
 			}
 
 			return image.toDataURL();
+		} else if (shim.sharpEnabled()) {
+			let image = sharp(filePath);
+			const metadata = await image.metadata();
+
+			const maxDimensionIsWidth = metadata.width > metadata.height;
+			if (metadata.width > maxSize && maxDimensionIsWidth) {
+				image = image.resize({ width: maxSize });
+			} else if (metadata.height > maxSize) {
+				image = image.resize({ height: maxSize });
+			}
+
+			const base64 = (await image.png().toBuffer()).toString('base64');
+			return `data:image/png;base64,${base64}`;
 		} else {
 			throw new Error('Unsupported method');
 		}

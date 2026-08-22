@@ -20,10 +20,14 @@
 		opacity: 1;
 	}
 
-	// Conflict/special/shared items keep full contrast even when unselected. Ordered by the
-	// priority of the previous listItemTextColor() (conflict > special > shared).
+	// Conflict/special/shared items keep full contrast even when unselected.
 	&.-shared {
 		color: var(--joplin-color-warn2);
+		opacity: 1;
+	}
+
+	&.-published:not(.-selected) {
+		color: var(--joplin-color-published2);
 		opacity: 1;
 	}
 
@@ -35,5 +39,11 @@
 	&.-conflict {
 		color: var(--joplin-color-error2);
 		opacity: 1;
+	}
+
+	> .title.-workaround {
+		// Workaround sidebar rendering bug on Intel GPU.
+		// Ref: https://github.com/laurent22/joplin/issues/7506
+		position: relative;
 	}
 }

@@ -45,6 +45,7 @@ export interface ItemsThatNeedSyncResult {
 export interface RemoteItemMetadata {
 	item_id: string;
 	updated_time: number;
+	sync_time: number;
 }
 
 export interface EncryptedItemsStats {
@@ -209,12 +210,13 @@ export default class BaseItem extends BaseModel {
 
 	public static async remoteItemMetadata(syncTarget: number): Promise<Map<string, RemoteItemMetadata>> {
 		if (!syncTarget) throw new Error('No syncTarget specified');
-		const temp = await this.db().selectAll('SELECT item_id, remote_item_updated_time FROM sync_items WHERE sync_time > 0 AND sync_target = ?', [syncTarget]);
+		const temp = await this.db().selectAll('SELECT item_id, remote_item_updated_time, sync_time FROM sync_items WHERE sync_time > 0 AND sync_target = ?', [syncTarget]);
 		const output = new Map<string, RemoteItemMetadata>();
 		for (let i = 0; i < temp.length; i++) {
 			const metadata: RemoteItemMetadata = {
 				item_id: temp[i].item_id,
 				updated_time: temp[i].remote_item_updated_time,
+				sync_time: temp[i].sync_time,
 			};
 			output.set(temp[i].item_id, metadata);
 		}
@@ -620,6 +622,19 @@ export default class BaseItem extends BaseModel {
 
 		const ItemClass = this.itemClass(output.type_);
 		output = ItemClass.removeUnknownFields(output);
+
+		// Reject any field that could be used to escape the resource directory
+		// when concatenated into a file path (resourceFullPath uses raw string
+		// concat on id and file_extension). The id format is universally a 32
+		// char hex string; the extension must not contain path separators.
+		// Throws a malformedItem JoplinError so the sync loop can log+skip the
+		// item rather than abort the whole batch.
+		if ('id' in output && output.id !== '' && !/^[a-fA-F0-9]{32}$/.test(output.id)) {
+			throw new JoplinError(`Invalid item ID format: ${JSON.stringify(output.id)}`, 'malformedItem');
+		}
+		if ('file_extension' in output && /[/\\]|\.\./.test(output.file_extension)) {
+			throw new JoplinError(`Invalid file extension: ${JSON.stringify(output.file_extension)}`, 'malformedItem');
+		}
 
 		for (const n in output) {
 			if (!output.hasOwnProperty(n)) continue;
