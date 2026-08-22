@@ -5,6 +5,9 @@ import { GotoAnythingOptions, UiType } from './gotoAnything';
 import { ModelType } from '@joplin/lib/BaseModel';
 import Logger from '@joplin/utils/Logger';
 import markdownUtils from '@joplin/lib/markdownUtils';
+import { MarkupLanguage } from '@joplin/renderer';
+import { htmlentities } from '@joplin/utils/html';
+import Note from '@joplin/lib/models/Note';
 
 const logger = Logger.create('linkToNote');
 
@@ -29,7 +32,15 @@ export const runtime = (): CommandRuntime => {
 				return null;
 			}
 
-			const link = `[${markdownUtils.escapeTitleText(result.item.title)}](:/${markdownUtils.escapeLinkUrl(result.item.id)})`;
+			const note = await Note.load(result.item.id, { fields: ['title', 'id', 'markup_language'] });
+			if (!note) return null;
+
+			let link;
+			if (note.markup_language === MarkupLanguage.Html) {
+				link = `<a href=":/${htmlentities(note.id)}">${htmlentities(note.title)}</a>`;
+			} else {
+				link = `[${markdownUtils.escapeTitleText(note.title)}](:/${markdownUtils.escapeLinkUrl(note.id)})`;
+			}
 			await CommandService.instance().execute('insertText', link);
 			return result;
 		},
