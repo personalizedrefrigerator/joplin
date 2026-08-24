@@ -86,7 +86,8 @@ function stripMarkup(markupLanguage: number, markup: string, options: { collapse
 }
 
 interface LastOnChangeEventInfo {
-	content: string;
+	contentHtml: string|undefined;
+	contentMarkup: string;
 	resourceInfos: ResourceInfos;
 	contentKey: string;
 }
@@ -112,7 +113,8 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: Ref<NoteBodyEditorRef>) => {
 	markupToHtml.current = props.markupToHtml;
 
 	const lastOnChangeEventInfo = useRef<LastOnChangeEventInfo>({
-		content: null,
+		contentMarkup: null,
+		contentHtml: null,
 		resourceInfos: null,
 		contentKey: null,
 	});
@@ -1090,7 +1092,7 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: Ref<NoteBodyEditorRef>) => {
 
 			// Use nextOnChangeEventInfo's noteId -- lastOnChangeEventInfo can be slightly out-of-date.
 			const differentNoteId = lastNoteIdRef.current !== props.noteId;
-			const differentContent = lastOnChangeEventInfo.current.content !== props.content;
+			const differentContent = lastOnChangeEventInfo.current.contentMarkup !== props.content;
 
 			if (differentNoteId) noteChangeTimeRef.current = Date.now();
 
@@ -1165,7 +1167,8 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: Ref<NoteBodyEditorRef>) => {
 				}
 
 				lastOnChangeEventInfo.current = {
-					content: props.content,
+					contentMarkup: props.content,
+					contentHtml: editor.getContent(),
 					resourceInfos: props.resourceInfos,
 					contentKey: props.contentKey,
 				};
@@ -1262,13 +1265,14 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: Ref<NoteBodyEditorRef>) => {
 		nextOnChangeEventInfo.current = null;
 		if (info.editorNoteReloadTimeRequest !== editorNoteReloadTimeRequestRef.current) return;
 
-		const content = info.editor.getContent();
+		const contentHtml = info.editor.getContent();
 		info.editor.setDirty(false);
 
 		resetLinkTooltips();
-		const contentMd = await prop_htmlToMarkdownRef.current(info.contentMarkupLanguage, content, info.contentOriginalCss);
+		const contentMd = await prop_htmlToMarkdownRef.current(info.contentMarkupLanguage, contentHtml, info.contentOriginalCss);
 
-		lastOnChangeEventInfo.current.content = contentMd;
+		lastOnChangeEventInfo.current.contentMarkup = contentMd;
+		lastOnChangeEventInfo.current.contentHtml = contentHtml;
 		lastOnChangeEventInfo.current.resourceInfos = await attachedResources(contentMd);
 		if (info.editorNoteReloadTimeRequest !== editorNoteReloadTimeRequestRef.current) return;
 
@@ -1300,6 +1304,10 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: Ref<NoteBodyEditorRef>) => {
 			// First this component notifies the parent that a change is going to happen.
 			// Then the actual onChange event is fired after a timeout or when this
 			// component gets unmounted.
+
+			if (editor.getContent() === lastOnChangeEventInfo.current?.contentHtml) {
+				return;
+			}
 
 			const changeId = changeId_++;
 			props.onWillChange({ changeId: changeId });
