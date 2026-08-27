@@ -43,6 +43,7 @@ export interface StateShare {
 	folder_id: string;
 	note_id: string;
 	master_key_id: string;
+	app_min_version?: string;
 	user?: StateShareUserUser;
 }
 
@@ -51,6 +52,7 @@ export interface ShareInvitation {
 	master_key: MasterKeyEntity;
 	share: StateShare;
 	status: ShareUserStatus;
+	app_min_version?: string;
 	can_read: number;
 	can_write: number;
 }

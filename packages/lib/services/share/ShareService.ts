@@ -16,6 +16,8 @@ import ResourceService from '../ResourceService';
 import { addMasterKey, getEncryptionEnabled, localSyncInfo } from '../synchronizer/syncInfoUtils';
 import { ShareInvitation, SharePermissions, ShareType, State, stateRootKey, StateShare } from './reducer';
 import PerformanceLogger from '../../PerformanceLogger';
+import { compareVersions } from 'compare-versions';
+import { hasOwnProperty } from '@joplin/utils/object';
 
 const logger = Logger.create('ShareService');
 const perfLogger = PerformanceLogger.create();
@@ -656,6 +658,23 @@ export default class ShareService {
 		await Folder.updateNoLongerSharedItems(shareIds);
 	}
 
+	private async updateShareMinVersions_() {
+		const supportsShareAppMinVersion = this.shares.some(s => hasOwnProperty(s, 'app_min_version'));
+		if (!supportsShareAppMinVersion) return;
+
+		const appMinVersion = localSyncInfo().appMinVersion;
+		for (const share of this.shares) {
+			const invitation = this.shareInvitations.find(invitation => invitation.share.id === share.id);
+			if (invitation && !invitation?.can_write) continue;
+
+			if (!share.app_min_version || compareVersions(appMinVersion, share.app_min_version) > 0) {
+				await this.api().exec('PATCH', `api/shares/${share.id}`, null, {
+					app_min_version: appMinVersion,
+				});
+			}
+		}
+	}
+
 	public async maintenance() {
 		const task = perfLogger.taskStart('ShareService/maintenance');
 		if (this.enabled) {
@@ -676,6 +695,15 @@ export default class ShareService {
 			}
 
 			Setting.setValue('sync.userId', this.api().userId);
+
+			if (!hasError) {
+				try {
+					await this.updateShareMinVersions_();
+				} catch (error) {
+					hasError = true;
+					logger.error('Maintenance: Failed to update share app_min_versions:', error);
+				}
+			}
 
 			// If there was no errors, it means we have all the share objects,
 			// so we can run the clean up function.

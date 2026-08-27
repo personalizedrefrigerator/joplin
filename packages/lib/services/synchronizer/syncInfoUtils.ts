@@ -595,16 +595,25 @@ export function masterKeyById(id: string) {
 	return localSyncInfo().masterKeys.find(mk => mk.id === id);
 }
 
-export const checkIfCanSync = (s: SyncInfo, appVersion: string) => {
+interface CanSyncWithSyncInfoSlice {
+	appMinVersion: string;
+	noteLockKey?: MasterKeyEntity|null;
+}
+
+export const canSyncWith = ({ noteLockKey, appMinVersion }: CanSyncWithSyncInfoSlice, appVersion: string) => {
 	const isForwardCompatible = () => {
 		// Forward compatibility: This version of Joplin supports the Joplin 3.7 sync target format
-		if (s.appMinVersion !== forwardCompatibleAppMinVersion) return false;
+		if (appMinVersion !== forwardCompatibleAppMinVersion) return false;
 		// Older Joplin versions don't support sync targets with locked notes
-		if (s.noteLockKey !== null) return false;
+		if (noteLockKey !== null) return false;
 		return true;
 	};
 
-	if (compareVersions(appVersion, s.appMinVersion) < 0 && !isForwardCompatible()) {
+	return compareVersions(appVersion, appMinVersion) >= 0 || isForwardCompatible();
+};
+
+export const checkIfCanSync = (s: SyncInfo, appVersion: string) => {
+	if (!canSyncWith(s, appVersion)) {
 		throw new JoplinError(_('In order to synchronise, please upgrade your application to version %s+', s.appMinVersion), ErrorCode.MustUpgradeApp);
 	}
 };

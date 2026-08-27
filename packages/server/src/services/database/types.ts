@@ -221,6 +221,7 @@ export interface Share extends WithDates, WithUuid {
 	note_id?: Uuid;
 	master_key_id?: Uuid;
 	recursive?: number;
+	app_min_version?: string;
 }
 
 export interface Change extends WithDates, WithUuid {
@@ -472,6 +473,7 @@ export const databaseSchema: DatabaseTables = {
 		note_id: { type: 'string', defaultValue: '' },
 		master_key_id: { type: 'string', defaultValue: '' },
 		recursive: { type: 'number', defaultValue: 0 },
+		app_min_version: { type: 'string', defaultValue: '' },
 	},
 	changes: {
 		counter: { type: 'number', defaultValue: null },
@@ -489,9 +491,9 @@ export const databaseSchema: DatabaseTables = {
 		id: { type: 'number', defaultValue: null },
 		value: { type: 'string', defaultValue: null },
 		user_id: { type: 'string', defaultValue: '' },
-		purpose: { type: 'string', defaultValue: '' },
 		updated_time: { type: 'string', defaultValue: null },
 		created_time: { type: 'string', defaultValue: null },
+		purpose: { type: 'string', defaultValue: '' },
 	},
 	subscriptions: {
 		id: { type: 'number', defaultValue: null },

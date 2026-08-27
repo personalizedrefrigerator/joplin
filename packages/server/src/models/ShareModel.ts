@@ -18,7 +18,7 @@ export default class ShareModel extends BaseModel<Share> {
 		return 'shares';
 	}
 
-	public async checkIfAllowed(user: User, action: AclAction, resource: Share = null): Promise<void> {
+	public async checkIfAllowed(user: User, action: AclAction, resource: Share = null, changedFields: string[]|null = null): Promise<void> {
 		if (action === AclAction.Create) {
 			if (resource.type === ShareType.Folder && !getCanShareFolder(user)) throw new ErrorForbidden('The sharing feature is not enabled for this account');
 
@@ -31,6 +31,12 @@ export default class ShareModel extends BaseModel<Share> {
 				const item = await this.models().item().loadByJopId(user.id, resource.folder_id);
 				if (item.jop_parent_id) throw new ErrorForbidden('A shared notebook must be at the root');
 			}
+		}
+
+		if (action === AclAction.Update && user.id !== resource.owner_id) {
+			const invitation = await this.models().shareUser().byShareAndUserId(resource.id, user.id);
+			if (!invitation || invitation.status !== ShareUserStatus.Accepted) throw new ErrorForbidden('no access to this share');
+			if (!changedFields || changedFields.join(',') !== 'app_min_version') throw new ErrorForbidden('cannot change restricted fields');
 		}
 
 		if (action === AclAction.Read) {

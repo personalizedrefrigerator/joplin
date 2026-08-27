@@ -1,11 +1,15 @@
-import { ErrorBadRequest, ErrorNotFound } from '../../utils/errors';
-import { Share, ShareType } from '../../services/database/types';
+import { ErrorBadRequest, ErrorNotFound, ErrorUnprocessableEntity } from '../../utils/errors';
+import { Share, ShareType, ShareUserStatus, User } from '../../services/database/types';
 import { bodyFields, ownerRequired } from '../../utils/requestUtils';
 import { SubPath } from '../../utils/routeUtils';
 import Router from '../../utils/Router';
 import { RouteType } from '../../utils/types';
 import { AppContext } from '../../utils/types';
 import { AclAction } from '../../models/BaseModel';
+import { compareVersions } from 'compare-versions';
+import Logger from '@joplin/utils/Logger';
+
+const logger = Logger.create('api/shares');
 
 interface ShareApiInput extends Share {
 	folder_id?: string;
@@ -51,6 +55,64 @@ router.post('api/shares', async (_path: SubPath, ctx: AppContext) => {
 	} else {
 		throw new ErrorBadRequest('Either folder_id or note_id must be provided');
 	}
+});
+
+const increaseAppMinVersionInInfoJson = async (users: User[], appMinVersion: string, ctx: AppContext) => {
+	const errors = [];
+	for (const user of users) {
+		try {
+			const item = await ctx.joplin.models.item().loadByName(user.id, 'info.json', { withContent: true });
+			const content = JSON.parse(item.content.toString('utf-8'));
+			if (typeof content.appMinVersion === 'string' && compareVersions(content.appMinVersion, appMinVersion) < 0) {
+				content.appMinVersion = appMinVersion;
+
+				await ctx.joplin.models.item().saveFromRawContent(user, {
+					name: 'info.json',
+					body: Buffer.from(JSON.stringify(content, undefined, '\t'), 'utf-8'),
+				});
+			}
+		} catch (error) {
+			errors.push(error);
+		}
+	}
+
+	if (errors.length) {
+		logger.error('Failed to increase appMinVersion', errors);
+		throw new ErrorUnprocessableEntity('Failed to update appMinVersion');
+	}
+};
+
+router.patch('api/shares/:id', async (path: SubPath, ctx: AppContext) => {
+	ownerRequired(ctx);
+
+	interface UserInput {
+		app_min_version: string;
+	}
+
+	const fields = await bodyFields(ctx.req) as UserInput;
+	const appMinVersion = fields.app_min_version;
+	if (!appMinVersion || !appMinVersion.match(/^\d{0,4}\.\d{0,4}\.\d{0,4}$/)) {
+		throw new ErrorBadRequest('Invalid or missing app_min_version');
+	}
+
+	const shareId = path.id;
+
+	const share = await ctx.joplin.models.share().load(shareId);
+	if (!share) throw new ErrorNotFound();
+	await ctx.joplin.models.share().checkIfAllowed(ctx.joplin.owner, AclAction.Update, share, ['app_min_version']);
+
+	const shareUsers = await ctx.joplin.models.shareUser().byShareId(share.id, ShareUserStatus.Accepted);
+	const userIds = shareUsers.map(u => u.user_id);
+	const users = await ctx.joplin.models.user().loadByIds(userIds);
+
+	// Users need to upgrade to either:
+	// - A version of Joplin that supports separate min app versions on separate shares.
+	// - The minimum version for this share.
+	const minVersionSupportingShareVersions = '3.8.0';
+	const newMinVersion = compareVersions(minVersionSupportingShareVersions, appMinVersion) < 0 ? minVersionSupportingShareVersions : appMinVersion;
+	await increaseAppMinVersionInInfoJson(users, newMinVersion, ctx);
+
+	await ctx.joplin.models.share().save({ id: share.id, app_min_version: appMinVersion });
 });
 
 router.post('api/shares/:id/users', async (path: SubPath, ctx: AppContext) => {
