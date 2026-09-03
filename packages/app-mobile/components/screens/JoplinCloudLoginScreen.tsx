@@ -3,9 +3,9 @@ import * as React from 'react';
 import { View, Text, StyleSheet, Linking, Animated, Easing } from 'react-native';
 import { connect } from 'react-redux';
 import { _ } from '@joplin/lib/locale';
-const { themeStyle } = require('../global-style.js');
+import { themeStyle } from '../global-style';
 import { AppState } from '../../utils/types';
-import { generateApplicationConfirmUrl, reducer, checkIfLoginWasSuccessful, saveApplicationAuthId, defaultState } from '@joplin/lib/services/joplinCloudUtils';
+import { generateApplicationConfirmUrl, reducer, checkIfLoginWasSuccessful, saveApplicationAuthId, defaultState, JoplinSyncTargetId } from '@joplin/lib/services/joplinCloudUtils';
 import { uuidgen } from '@joplin/lib/uuid';
 import { Button } from 'react-native-paper';
 import createRootStyle from '../../utils/createRootStyle';
@@ -19,6 +19,7 @@ const logger = Logger.create('JoplinCloudLoginScreen');
 
 interface Props {
 	themeId: number;
+	syncTargetId: JoplinSyncTargetId;
 	joplinCloudWebsite: string;
 	joplinCloudApi: string;
 }
@@ -87,7 +88,7 @@ const JoplinCloudScreenComponent = (props: Props) => {
 
 		const interval = setInterval(async () => {
 			try {
-				const response = await checkIfLoginWasSuccessful(applicationAuthUrl(applicationAuthId));
+				const response = await checkIfLoginWasSuccessful(applicationAuthUrl(applicationAuthId), props.syncTargetId);
 				if (response && response.success) {
 					dispatch({ type: 'COMPLETED' });
 					clearInterval(interval);
@@ -107,7 +108,7 @@ const JoplinCloudScreenComponent = (props: Props) => {
 		if (state.next === 'LINK_USED') {
 			dispatch({ type: 'LINK_USED' });
 		}
-		await saveApplicationAuthId(applicationAuthId);
+		await saveApplicationAuthId(applicationAuthId, props.syncTargetId);
 		periodicallyCheckForCredentials();
 	};
 
@@ -188,11 +189,14 @@ const JoplinCloudScreenComponent = (props: Props) => {
 	);
 };
 
-const JoplinCloudLoginScreen = connect((state: AppState) => {
+type OwnProps = Pick<Props, 'syncTargetId'>;
+
+const JoplinCloudLoginScreen = connect((state: AppState, { syncTargetId }: OwnProps) => {
 	return {
 		themeId: state.settings.theme,
-		joplinCloudWebsite: state.settings['sync.10.website'],
-		joplinCloudApi: state.settings['sync.10.path'],
+		joplinCloudWebsite: syncTargetId === 9 ? state.settings['sync.9.path'] : state.settings[`sync.${syncTargetId}.website`],
+		joplinCloudApi: state.settings[`sync.${syncTargetId}.path`],
+		syncTargetId,
 	};
 })(JoplinCloudScreenComponent);
 

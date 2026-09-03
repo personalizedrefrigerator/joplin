@@ -5,7 +5,6 @@ import shim from '../shim';
 import { _ } from '../locale';
 import eventManager, { EventName } from '../eventManager';
 import { reg } from '../registry';
-import SyncTargetRegistry from '../SyncTargetRegistry';
 import Logger from '@joplin/utils/Logger';
 
 const logger = Logger.create('joplinCloudUtils');
@@ -92,8 +91,19 @@ export const generateApplicationConfirmUrl = async (confirmUrl: string) => {
 	return `${confirmUrl}?${searchParams.toString()}`;
 };
 
-export const saveApplicationAuthId = async (applicationAuthId: string) => {
-	Setting.setValue('sync.10.pendingAuthId', applicationAuthId);
+export type JoplinSyncTargetId = 9 | 10;
+
+export const isJoplinOAuthSyncTarget = (id: number): id is JoplinSyncTargetId => {
+	return id === 9 || id === 10;
+};
+export function assertIsJoplinOAuthSyncTarget(id: number): asserts id is JoplinSyncTargetId {
+	if (!isJoplinOAuthSyncTarget(id)) {
+		throw new Error('Sync target must be Joplin Server or Joplin Cloud');
+	}
+};
+
+export const saveApplicationAuthId = async (applicationAuthId: string, syncTarget: JoplinSyncTargetId) => {
+	Setting.setValue(`sync.${syncTarget}.pendingAuthId`, applicationAuthId);
 	await Setting.saveAll();
 };
 
@@ -101,7 +111,7 @@ export const saveApplicationAuthId = async (applicationAuthId: string) => {
 // after an error occurs. E.g.: if the function would throw an error while isWaitingResponse
 // was set to true the next time we call the function the value would still be true.
 // The closure function prevents that.
-export const checkIfLoginWasSuccessful = async (applicationsUrl: string) => {
+export const checkIfLoginWasSuccessful = async (applicationsUrl: string, syncTarget: JoplinSyncTargetId) => {
 	let isWaitingResponse = false;
 	const performLoginRequest = async () => {
 		if (isWaitingResponse) return undefined;
@@ -109,7 +119,7 @@ export const checkIfLoginWasSuccessful = async (applicationsUrl: string) => {
 
 		const response = await fetch(applicationsUrl, {
 			headers: {
-				'X-JOPLIN-CUSTOM-API-KEY': Setting.value('sync.10.apiKey'),
+				'X-JOPLIN-CUSTOM-API-KEY': syncTarget === 10 ? Setting.value('sync.10.apiKey') : '',
 			},
 		});
 		const jsonBody = await response.json();
@@ -119,10 +129,10 @@ export const checkIfLoginWasSuccessful = async (applicationsUrl: string) => {
 			return undefined;
 		}
 
-		Setting.setValue('sync.10.username', jsonBody.id);
-		Setting.setValue('sync.10.password', jsonBody.password);
-		Setting.setValue('sync.target', SyncTargetRegistry.nameToId('joplinCloud'));
-		Setting.setValue('sync.10.pendingAuthId', '');
+		Setting.setValue(`sync.${syncTarget}.username`, jsonBody.id);
+		Setting.setValue(`sync.${syncTarget}.password`, jsonBody.password);
+		Setting.setValue('sync.target', syncTarget);
+		Setting.setValue(`sync.${syncTarget}.pendingAuthId`, '');
 
 		const fileApi = await reg.syncTarget().fileApi();
 		await fileApi.driver().api().loadSession();
@@ -138,20 +148,23 @@ export const checkIfLoginWasSuccessful = async (applicationsUrl: string) => {
 // pending auth ID is still saved. On startup we check whether the server
 // has already confirmed the authorisation and, if so, save the credentials.
 export const completePendingAuthentication = async () => {
-	const pendingAuthId = Setting.value('sync.10.pendingAuthId');
+	const syncTarget = Setting.value('sync.target');
+	if (!isJoplinOAuthSyncTarget(syncTarget)) return;
+
+	const pendingAuthId = Setting.value(`sync.${syncTarget}.pendingAuthId`);
 	if (!pendingAuthId) return;
 
-	const apiBaseUrl = Setting.value('sync.10.path');
+	const apiBaseUrl = Setting.value(`sync.${syncTarget}.path`);
 	const applicationsUrl = `${apiBaseUrl}/api/application_auth/${pendingAuthId}`;
 
 	try {
-		const result = await checkIfLoginWasSuccessful(applicationsUrl);
+		const result = await checkIfLoginWasSuccessful(applicationsUrl, syncTarget);
 		if (result && result.success) {
 			logger.info('Completed pending Joplin Cloud authentication');
 		}
 	} catch (error) {
 		logger.error('Could not complete pending authentication:', error);
 	} finally {
-		Setting.setValue('sync.10.pendingAuthId', '');
+		Setting.setValue(`sync.${syncTarget}.pendingAuthId`, '');
 	}
 };

@@ -30,6 +30,12 @@ const showAiTools = (settings: Record<string, unknown>) => {
 	return !!settings['mcp.enabled'] || !!settings['ai.enabled'];
 };
 
+const showJoplinServerUsernamePassword = (settings: Record<string, unknown>) => {
+	const hasFilledUsername = (settings['sync.9.username'] as string).includes('@');
+	const isJoplinServer = settings['sync.target'] === SyncTargetRegistry.nameToId('joplinServer');
+	return (settings['sync.9.preferPasswordAuth'] || hasFilledUsername) && isJoplinServer;
+};
+
 const addBetaMarker = (text: string) => _('%s (Beta)', text);
 
 export enum CameraDirection {
@@ -357,9 +363,7 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 			value: '',
 			type: SettingItemType.String,
 			section: 'sync',
-			show: settings => {
-				return settings['sync.target'] === SyncTargetRegistry.nameToId('joplinServer');
-			},
+			show: showJoplinServerUsernamePassword,
 			public: true,
 			label: () => _('Joplin Server email'),
 			storage: SettingStorage.File,
@@ -368,13 +372,23 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 			value: '',
 			type: SettingItemType.String,
 			section: 'sync',
-			show: settings => {
-				return settings['sync.target'] === SyncTargetRegistry.nameToId('joplinServer');
-			},
+			show: showJoplinServerUsernamePassword,
 			public: true,
 			label: () => _('Joplin Server password'),
 			secure: true,
 		},
+		'sync.9.preferPasswordAuth': {
+			value: false,
+			type: SettingItemType.Bool,
+			section: 'sync',
+			show: settings => settings['sync.target'] === SyncTargetRegistry.nameToId('joplinServer'),
+			public: true,
+			label: () => _('Prefer email/password authentication'),
+			description: () => _('By default, Joplin Server uses OAuth to authenticate. Enable this setting to prefer email/password authentication.'),
+			advanced: true,
+		},
+		'sync.9.pendingAuthId': { value: '', type: SettingItemType.String, public: false },
+
 		'sync.11.path': {
 			value: '',
 			type: SettingItemType.String,

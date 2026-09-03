@@ -14,7 +14,7 @@ const { cliUtils } = require('./cli-utils.js');
 const md5 = require('md5');
 import * as locker from 'proper-lockfile';
 import { pathExists, writeFile } from 'fs-extra';
-import { checkIfLoginWasSuccessful, generateApplicationConfirmUrl } from '@joplin/lib/services/joplinCloudUtils';
+import { checkIfLoginWasSuccessful, generateApplicationConfirmUrl, JoplinSyncTargetId } from '@joplin/lib/services/joplinCloudUtils';
 import Logger from '@joplin/utils/Logger';
 import { uuidgen } from '@joplin/lib/uuid';
 import ShareService from '@joplin/lib/services/share/ShareService';
@@ -89,12 +89,13 @@ class Command extends BaseCommand {
 			Setting.setValue(`sync.${this.syncTargetId_}.auth`, response.access_token);
 			api.setAuthToken(response.access_token);
 			return true;
-		} else if (syncTargetMd.name === 'joplinCloud') {
+		} else if (syncTargetMd.name === 'joplinCloud' || syncTargetMd.name === 'joplinServer') {
+			const id = syncTargetMd.id as JoplinSyncTargetId;
 			const applicationAuthId = uuidgen();
 			const checkForCredentials = async () => {
 				try {
-					const applicationAuthUrl = `${Setting.value('sync.10.path')}/api/application_auth/${applicationAuthId}`;
-					const response = await checkIfLoginWasSuccessful(applicationAuthUrl);
+					const applicationAuthUrl = `${Setting.value(`sync.${id}.path`)}/api/application_auth/${applicationAuthId}`;
+					const response = await checkIfLoginWasSuccessful(applicationAuthUrl, id);
 					if (response && response.success) {
 						return response;
 					}
@@ -105,9 +106,11 @@ class Command extends BaseCommand {
 				}
 			};
 
-			this.stdout(_('To allow Joplin to synchronise with Joplin Cloud, please login using this URL:'));
+			this.stdout(_('To allow Joplin to synchronise with %s, please login using this URL:', syncTargetMd.label));
 
-			const confirmUrl = `${Setting.value('sync.10.website')}/applications/${applicationAuthId}/confirm`;
+			// TODO: Use sync.9.website or equivalent
+			const websiteBaseUrl = id === 9 ? Setting.value('sync.9.path') : Setting.value('sync.10.website');
+			const confirmUrl = `${websiteBaseUrl}/applications/${applicationAuthId}/confirm`;
 			const urlWithClient = await generateApplicationConfirmUrl(confirmUrl);
 			this.stdout(urlWithClient);
 

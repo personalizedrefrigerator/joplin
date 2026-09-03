@@ -6,7 +6,7 @@ import { clipboard } from 'electron';
 import Button, { ButtonLevel } from './Button/Button';
 import { uuidgen } from '@joplin/lib/uuid';
 import { Dispatch } from 'redux';
-import { reducer, defaultState, generateApplicationConfirmUrl, checkIfLoginWasSuccessful, saveApplicationAuthId } from '@joplin/lib/services/joplinCloudUtils';
+import { reducer, defaultState, generateApplicationConfirmUrl, checkIfLoginWasSuccessful, saveApplicationAuthId, isJoplinOAuthSyncTarget, assertIsJoplinOAuthSyncTarget } from '@joplin/lib/services/joplinCloudUtils';
 import { AppState } from '../app.reducer';
 import Logger from '@joplin/utils/Logger';
 import { reg } from '@joplin/lib/registry';
@@ -18,6 +18,7 @@ import { connect } from 'react-redux';
 
 interface Props {
 	dispatch: Dispatch;
+	syncTargetId: number;
 	joplinCloudWebsite: string;
 	joplinCloudApi: string;
 }
@@ -37,7 +38,9 @@ const JoplinCloudScreenComponent = (props: Props) => {
 
 		const interval = setInterval(async () => {
 			try {
-				const response = await checkIfLoginWasSuccessful(applicationAuthUrl(applicationAuthId));
+				assertIsJoplinOAuthSyncTarget(props.syncTargetId);
+
+				const response = await checkIfLoginWasSuccessful(applicationAuthUrl(applicationAuthId), props.syncTargetId);
 				if (response && response.success) {
 					dispatch({ type: 'COMPLETED' });
 					clearInterval(interval);
@@ -57,7 +60,9 @@ const JoplinCloudScreenComponent = (props: Props) => {
 		if (state.next === 'LINK_USED') {
 			dispatch({ type: 'LINK_USED' });
 		}
-		await saveApplicationAuthId(applicationAuthId);
+
+		assertIsJoplinOAuthSyncTarget(props.syncTargetId);
+		await saveApplicationAuthId(applicationAuthId, props.syncTargetId);
 		periodicallyCheckForCredentials();
 	};
 
@@ -78,6 +83,13 @@ const JoplinCloudScreenComponent = (props: Props) => {
 			clearInterval(intervalIdentifier);
 		};
 	}, [intervalIdentifier]);
+
+	if (!isJoplinOAuthSyncTarget(props.syncTargetId)) { // Should not happen
+		return <div className='login-page'>
+			<p className='text'>Error: Neither Joplin Server nor Joplin Cloud is set as the sync target</p>
+			<ButtonBar onCancelClick={() => props.dispatch({ type: 'NAV_BACK' })} />
+		</div>;
+	};
 
 	return (
 		<div className="login-page">
