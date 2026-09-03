@@ -10,7 +10,7 @@ import Logger from '@joplin/utils/Logger';
 const logger = Logger.create('joplinCloudUtils');
 
 type ActionType = 'LINK_USED' | 'COMPLETED' | 'ERROR';
-type Action = {
+export type Action = {
 	type: ActionType;
 	payload?: string;
 };

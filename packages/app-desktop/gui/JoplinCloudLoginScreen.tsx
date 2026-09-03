@@ -6,7 +6,7 @@ import { clipboard } from 'electron';
 import Button, { ButtonLevel } from './Button/Button';
 import { uuidgen } from '@joplin/lib/uuid';
 import { Dispatch } from 'redux';
-import { reducer, defaultState, generateApplicationConfirmUrl, checkIfLoginWasSuccessful, saveApplicationAuthId, isJoplinOAuthSyncTarget, assertIsJoplinOAuthSyncTarget } from '@joplin/lib/services/joplinCloudUtils';
+import { reducer, defaultState, generateApplicationConfirmUrl, checkIfLoginWasSuccessful, saveApplicationAuthId, isJoplinOAuthSyncTarget, assertIsJoplinOAuthSyncTarget, Action } from '@joplin/lib/services/joplinCloudUtils';
 import { AppState } from '../app.reducer';
 import Logger from '@joplin/utils/Logger';
 import { reg } from '@joplin/lib/registry';
@@ -15,23 +15,27 @@ import bridge from '../services/bridge';
 
 const logger = Logger.create('JoplinCloudLoginScreen');
 import { connect } from 'react-redux';
+import useAsyncEffect from '@joplin/lib/hooks/useAsyncEffect';
+import shim from '@joplin/lib/shim';
+import SyncTargetRegistry from '@joplin/lib/SyncTargetRegistry';
 
 interface Props {
 	dispatch: Dispatch;
 	syncTargetId: number;
-	joplinCloudWebsite: string;
+	joplinCloudWebsite: string|undefined;
 	joplinCloudApi: string;
 }
 
 const JoplinCloudScreenComponent = (props: Props) => {
+	const isJoplinCloud = props.syncTargetId === SyncTargetRegistry.nameToId('joplinCloud');
+	const syncTargetLabel = SyncTargetRegistry.idToMetadata(props.syncTargetId).label;
 
-	const confirmUrl = (applicationAuthId: string) => `${props.joplinCloudWebsite}/applications/${applicationAuthId}/confirm`;
+	const applicationAuthId = useMemo(() => uuidgen(), []);
 	const applicationAuthUrl = (applicationAuthId: string) => `${props.joplinCloudApi}/api/application_auth/${applicationAuthId}`;
 
 	const [intervalIdentifier, setIntervalIdentifier] = useState(undefined);
 	const [state, dispatch] = useReducer(reducer, defaultState);
-
-	const applicationAuthId = useMemo(() => uuidgen(), []);
+	const { url: confirmUrl } = useConfirmUrl(props.joplinCloudApi, applicationAuthId, dispatch);
 
 	const periodicallyCheckForCredentials = () => {
 		if (intervalIdentifier) return;
@@ -67,13 +71,13 @@ const JoplinCloudScreenComponent = (props: Props) => {
 	};
 
 	const onAuthorizeClicked = async () => {
-		const url = await generateApplicationConfirmUrl(confirmUrl(applicationAuthId));
+		const url = await generateApplicationConfirmUrl(confirmUrl);
 		await onButtonUsed();
 		void bridge().openExternal(url);
 	};
 
 	const onCopyToClipboardClicked = async () => {
-		const url = await generateApplicationConfirmUrl(confirmUrl(applicationAuthId));
+		const url = await generateApplicationConfirmUrl(confirmUrl);
 		await onButtonUsed();
 		clipboard.writeText(url);
 	};
@@ -96,7 +100,7 @@ const JoplinCloudScreenComponent = (props: Props) => {
 			<div className="page-container">
 				{state.active !== 'COMPLETED' ? (
 					<>
-						<p className="text">{_('To allow Joplin to synchronise with Joplin Cloud, please login using this URL:')}</p>
+						<p className="text">{_('To allow Joplin to synchronise with %s, please login using this URL:', syncTargetLabel)}</p>
 						<div className="buttons-container">
 							<Button
 								onClick={onAuthorizeClicked}
@@ -120,17 +124,48 @@ const JoplinCloudScreenComponent = (props: Props) => {
 					) : null}
 				</p>
 				{state.active === 'LINK_USED' ? <div className="loading-animation" /> : null}
-				{state.active !== 'COMPLETED' ? <JoplinCloudSignUpCallToAction source='desktop-login-screen' withLeadIn={true} /> : null}
+				{state.active !== 'COMPLETED' && isJoplinCloud ? <JoplinCloudSignUpCallToAction source='desktop-login-screen' withLeadIn={true} /> : null}
 			</div>
 			<ButtonBar onCancelClick={() => props.dispatch({ type: 'NAV_BACK' })} />
 		</div>
 	);
 };
 
-const mapStateToProps = (state: AppState) => {
+const useConfirmUrl = (apiBaseUrl: string, applicationAuthId: string, dispatch: React.ActionDispatch<[action: Action]>) => {
+	const [url, setUrl] = useState('');
+	const [error, setError] = useState<string|null>(null);
+	useAsyncEffect(async event => {
+		try {
+			const response = await shim.fetch(`${apiBaseUrl}/api/application_login_url/${applicationAuthId}`);
+			if (!event.cancelled) {
+				if (!response.ok) {
+					throw new Error(_('Failed to fetch (code %d): %s', response.status, await response.text()));
+				} else {
+					const body = await response.json();
+					if (typeof body.uri !== 'string') throw new Error('Invalid response');
+					setUrl(body.uri);
+					setError(null);
+				}
+			}
+		} catch (error) {
+			logger.warn('Failed to determine API base URL', error);
+			dispatch({ type: 'ERROR', payload: String(error) });
+		}
+	}, [apiBaseUrl, applicationAuthId]);
+
+	return { error, url };
+};
+
+interface OwnProps {
+	syncTarget: number;
+}
+
+const mapStateToProps = (state: AppState, ownProps: OwnProps) => {
+	const syncTargetId = ownProps.syncTarget ?? state.settings['sync.target'];
 	return {
-		joplinCloudWebsite: state.settings['sync.10.website'],
-		joplinCloudApi: state.settings['sync.10.path'],
+		syncTargetId,
+		joplinCloudWebsite: syncTargetId === 10 ? state.settings['sync.10.website'] : undefined,
+		joplinCloudApi: state.settings[`sync.${syncTargetId as 9|10}.path`],
 	};
 };
 

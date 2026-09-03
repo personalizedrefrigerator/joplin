@@ -308,17 +308,22 @@ class ConfigScreenComponent extends React.Component<any, any> {
 					</div>
 				);
 
-				if (settings['sync.target'] === SyncTargetRegistry.nameToId('joplinCloud')) {
+				if (settings['sync.target'] === SyncTargetRegistry.nameToId('joplinCloud')
+					|| (
+						settings['sync.target'] === SyncTargetRegistry.nameToId('joplinServer')
+						&& !Setting.value('sync.9.preferPasswordAuth')
+					)) {
 					const goToJoplinCloudLogin = () => {
 						this.props.dispatch({
 							type: 'NAV_GO',
 							routeName: 'JoplinCloudLogin',
+							syncTarget: settings['sync.target'],
 						});
 					};
 					settingComps.push(
 						<div key="connect_to_joplin_cloud_button" style={this.rowStyle_}>
 							<Button
-								title={_('Connect to Joplin Cloud')}
+								title={_('Connect to %s', SyncTargetRegistry.idToMetadata(settings['sync.target']).label)}
 								level={ButtonLevel.Primary}
 								onClick={goToJoplinCloudLogin}
 							/>

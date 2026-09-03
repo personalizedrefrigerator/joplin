@@ -31,9 +31,10 @@ const showAiTools = (settings: Record<string, unknown>) => {
 };
 
 const showJoplinServerUsernamePassword = (settings: Record<string, unknown>) => {
-	const hasFilledUsername = (settings['sync.9.username'] as string).includes('@');
+	// When the email field is non-empty and doesn't include an '@', we're using OAuth
+	const hasFilledEmail = (settings['sync.9.username'] as string).includes('@');
 	const isJoplinServer = settings['sync.target'] === SyncTargetRegistry.nameToId('joplinServer');
-	return (settings['sync.9.preferPasswordAuth'] || hasFilledUsername) && isJoplinServer;
+	return (settings['sync.9.preferPasswordAuth'] || hasFilledEmail) && isJoplinServer;
 };
 
 const addBetaMarker = (text: string) => _('%s (Beta)', text);
