@@ -22,6 +22,10 @@ export enum SettingStorage {
 	File = 2,
 }
 
+export interface OnButtonClickEvent {
+	settings: Record<string, unknown>;
+	setSettingValue(key: string, value: unknown): void;
+}
 
 // This is the definition of a setting item
 export interface SettingItem {
@@ -48,7 +52,7 @@ export interface SettingItem {
 	minimum?: number;
 	maximum?: number;
 	step?: number;
-	onClick?(): void;
+	onClick?(event: OnButtonClickEvent): void|Promise<void>;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Partially refactored old code before rule was applied
 	unitLabel?: (value: any)=> string;
 	needRestart?: boolean;

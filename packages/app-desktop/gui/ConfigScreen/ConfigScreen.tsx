@@ -29,8 +29,8 @@ import SettingComponent from './controls/SettingComponent';
 import shim, { MessageBoxType } from '@joplin/lib/shim';
 import { OnChangeEvent } from '../lib/SearchInput/SearchInput';
 import highlightSearchText from './searchHighlight';
-import JoplinServerOAuthButton from './controls/JoplinServerOAuthButton';
 import { UpdateSettingValueEvent } from './types';
+import { Dispatch } from 'redux';
 
 
 interface Font {
@@ -44,10 +44,24 @@ declare global {
 	}
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old class component without props/state interfaces; tightening requires structural refactor
-class ConfigScreenComponent extends React.Component<any, any> {
+interface Props {
+	dispatch: Dispatch;
+	defaultSection?: string;
+	settings: SettingsRecord;
+	themeId: number;
+	style: React.CSSProperties;
+}
+interface State extends shared.ConfigScreenState {
+	selectedSectionName: string;
+	screenName: string;
+	needRestart: boolean;
+	fonts: string[];
+}
+
+class ConfigScreenComponent extends React.Component<Props, State> {
 
 	private rowStyle_: React.CSSProperties = null;
+	private settingsRef_ = React.createRef<shared.SettingsMap|null>();
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Constructor signature must match the class's open `any` props type
 	public constructor(props: any) {
@@ -104,7 +118,7 @@ class ConfigScreenComponent extends React.Component<any, any> {
 				});
 			}
 		}
-		await shared.checkSyncConfig(this, this.state.settings);
+		return await shared.checkSyncConfig(this, this.state.settings);
 	}
 
 	public UNSAFE_componentWillMount() {
@@ -121,6 +135,10 @@ class ConfigScreenComponent extends React.Component<any, any> {
 		const fonts = (await window.queryLocalFonts()).map((font: Font) => font.family);
 		const uniqueFonts = [...new Set(fonts)];
 		this.setState({ fonts: uniqueFonts });
+	}
+
+	public override componentDidUpdate() {
+		this.settingsRef_.current = this.state.settings;
 	}
 
 	private async handleSettingButton(key: string) {
@@ -224,7 +242,7 @@ class ConfigScreenComponent extends React.Component<any, any> {
 		);
 	}
 
-	public sectionToComponent(key: string, section: SettingMetadataSection, settings: SettingsRecord, selected: boolean) {
+	public sectionToComponent(key: string, section: SettingMetadataSection, settings: shared.SettingsMap, selected: boolean) {
 		const theme = themeStyle(this.props.themeId);
 		const searchMode = !!normalizeQuery(this.state.searchQuery);
 
@@ -309,19 +327,6 @@ class ConfigScreenComponent extends React.Component<any, any> {
 						{messages.length >= 1 ? <p>{messages[1]}</p> : null}
 					</div>
 				);
-
-				const isJoplinCloud = settings['sync.target'] === SyncTargetRegistry.nameToId('joplinCloud');
-				const isStandardJoplinServer = settings['sync.target'] === SyncTargetRegistry.nameToId('joplinServer');
-				if (isJoplinCloud || isStandardJoplinServer) {
-					settingComps.push(
-						<JoplinServerOAuthButton
-							key="connect_to_joplin_cloud_button"
-							settings={settings}
-							rowStyle={this.rowStyle_}
-							onUpdateSettingValue={this.onUpdateSettingValue}
-						/>,
-					);
-				}
 
 				if (settings['sync.target'] === SyncTargetRegistry.nameToId('joplinServerSaml')) {
 					const server = settings['sync.11.path'] as string;
@@ -412,6 +417,7 @@ class ConfigScreenComponent extends React.Component<any, any> {
 				themeId={this.props.themeId}
 				key={key}
 				settingKey={key}
+				settingsRef={this.settingsRef_}
 				value={value}
 				fonts={this.state.fonts}
 				onUpdateSettingValue={this.onUpdateSettingValue}
@@ -468,7 +474,7 @@ class ConfigScreenComponent extends React.Component<any, any> {
 		const searchMode = !!searchQuery;
 		const sectionFilter = this.state.searchSectionFilter;
 
-		const style = {
+		const style: React.CSSProperties = {
 			...this.props.style,
 			overflow: 'hidden',
 			display: 'flex',

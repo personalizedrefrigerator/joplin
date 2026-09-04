@@ -13,9 +13,9 @@ import { ChatRole } from '../../../services/ai/types';
 
 const logger = Logger.create('config-shared');
 
-type SettingsMap = Partial<SettingsRecord> & Record<string, unknown>;
+export type SettingsMap = Partial<SettingsRecord>;
 
-interface ConfigScreenState {
+export interface ConfigScreenState {
 	checkSyncConfigResult: { ok: boolean; errorMessage: string }|'checking'|null;
 	checkAiConfigResult: { ok: boolean; message: string }|'checking'|null;
 	settings: SettingsMap;

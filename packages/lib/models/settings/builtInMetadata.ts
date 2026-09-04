@@ -11,6 +11,7 @@ import type { PublicPrivateKeyPair } from '../../services/e2ee/ppk/ppk';
 import { EmptyObject } from '@joplin/utils/types';
 const ObjectUtils = require('../../ObjectUtils');
 import { toTitleCase } from '../../string-utils';
+import NavService from '../../services/NavService';
 
 const customCssFilePath = (Setting: typeof SettingType, filename: string): string => {
 	return `${Setting.value('rootProfileDir')}/${filename}`;
@@ -37,9 +38,57 @@ export const showJoplinServerUsernamePassword = (settings: Record<string, unknow
 
 	const email = (settings[`sync.${joplinServerId}.username`] ?? '') as string;
 	// A UUID email implies that Joplin Server is configured to use OAuth
-	const isUuidEmail = !!email.match(/^[a-zA-Z0-9]{22}$/i);
+	const isUuidEmail = !!email.replace(/-/g, '').match(/^[a-zA-Z0-9]{32}$/i);
 	const hasNonUuidEmail = !!email && !isUuidEmail;
 	return hasNonUuidEmail || (!email && !!settings[`sync.${joplinServerId}.preferPasswordAuth`]);
+};
+
+const showJoplinServerConnectDisconnectButtons = (settings: Record<string, unknown>, targetId: number) => {
+	if (settings['sync.target'] !== targetId) return false;
+	const isJoplinServer = targetId === SyncTargetRegistry.nameToId('joplinServer');
+	const showingUsernameAndPassword = showJoplinServerUsernamePassword(settings);
+	if (isJoplinServer && showingUsernameAndPassword) return false;
+	return true;
+};
+
+const buildJoplinServerConnectButton = (syncTargetId: number, syncTargetName: string) => {
+	return {
+		value: null as null,
+		type: SettingItemType.Button,
+		label: () => _('Connect to %s', syncTargetName),
+		onClick: async (event) => {
+			const { fetchLoginUrl } = await import('../../services/joplinCloudUtils');
+			const loginUrl = await fetchLoginUrl(syncTargetId, event.settings[`sync.${syncTargetId}.path`] as string);
+			if (!loginUrl && syncTargetId === 9) {
+				event.setSettingValue(`sync.${syncTargetId}.preferPasswordAuth`, true);
+			} else {
+				await NavService.go('JoplinCloudLogin', {
+					syncTarget: syncTargetId,
+					websiteUrl: loginUrl,
+				});
+			}
+		},
+		public: true,
+		appTypes: [AppType.Desktop],
+		show: settings => showJoplinServerConnectDisconnectButtons(settings, syncTargetId),
+		section: 'sync',
+	} satisfies SettingItem;
+};
+
+const buildJoplinServerDisconnectButton = (syncTargetId: number, syncTargetName: string) => {
+	return {
+		value: null as null,
+		type: SettingItemType.Button,
+		label: () => _('Disconnect from %s', syncTargetName),
+		onClick: (event) => {
+			event.setSettingValue(`sync.${syncTargetId}.username`, '');
+			event.setSettingValue(`sync.${syncTargetId}.password`, '');
+		},
+		public: true,
+		appTypes: [AppType.Desktop],
+		show: settings => showJoplinServerConnectDisconnectButtons(settings, syncTargetId),
+		section: 'sync',
+	} satisfies SettingItem;
 };
 
 const addBetaMarker = (text: string) => _('%s (Beta)', text);
@@ -394,6 +443,8 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 			advanced: true,
 		},
 		'sync.9.pendingAuthId': { value: '', type: SettingItemType.String, public: false },
+		'sync.9.connect': buildJoplinServerConnectButton(9, _('Joplin Server')),
+		'sync.9.disconnect': buildJoplinServerDisconnectButton(9, _('Joplin Server')),
 
 		'sync.11.path': {
 			value: '',
@@ -460,6 +511,7 @@ const builtInMetadata = (Setting: typeof SettingType) => {
 			public: false,
 			secure: true,
 		},
+		'sync.10.connect': buildJoplinServerConnectButton(10, _('Joplin Cloud')),
 
 		'sync.10.pendingAuthId': { value: '', type: SettingItemType.String, public: false },
 
