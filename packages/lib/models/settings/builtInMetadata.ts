@@ -30,11 +30,16 @@ const showAiTools = (settings: Record<string, unknown>) => {
 	return !!settings['mcp.enabled'] || !!settings['ai.enabled'];
 };
 
-const showJoplinServerUsernamePassword = (settings: Record<string, unknown>) => {
-	// When the email field is non-empty and doesn't include an '@', we're using OAuth
-	const hasFilledEmail = (settings['sync.9.username'] as string).includes('@');
-	const isJoplinServer = settings['sync.target'] === SyncTargetRegistry.nameToId('joplinServer');
-	return (settings['sync.9.preferPasswordAuth'] || hasFilledEmail) && isJoplinServer;
+export const showJoplinServerUsernamePassword = (settings: Record<string, unknown>) => {
+	const joplinServerId = SyncTargetRegistry.nameToId('joplinServer');
+	const isJoplinServer = settings['sync.target'] === joplinServerId;
+	if (!isJoplinServer) return false;
+
+	const email = (settings[`sync.${joplinServerId}.username`] ?? '') as string;
+	// A UUID email implies that Joplin Server is configured to use OAuth
+	const isUuidEmail = !!email.match(/^[a-zA-Z0-9]{22}$/i);
+	const hasNonUuidEmail = !!email && !isUuidEmail;
+	return hasNonUuidEmail || (!email && !!settings[`sync.${joplinServerId}.preferPasswordAuth`]);
 };
 
 const addBetaMarker = (text: string) => _('%s (Beta)', text);

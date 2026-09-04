@@ -4,7 +4,7 @@ import ButtonBar from './ButtonBar';
 import Button, { ButtonLevel } from '../Button/Button';
 import { _ } from '@joplin/lib/locale';
 import bridge from '../../services/bridge';
-import Setting, { AppType, SettingMetadataSection, SettingValueType, SyncStartupOperation } from '@joplin/lib/models/Setting';
+import Setting, { AppType, SettingMetadataSection, SettingsRecord, SettingValueType, SyncStartupOperation } from '@joplin/lib/models/Setting';
 import { AppState } from '../../app.reducer';
 import EncryptionConfigScreen from '../EncryptionConfigScreen/EncryptionConfigScreen';
 import NoteLockSettings from './controls/NoteLockSettings';
@@ -25,10 +25,12 @@ import MacOSMissingPasswordHelpLink from './controls/MissingPasswordHelpLink';
 import AiIndexStatus from './controls/AiIndexStatus';
 import AiStatus from './controls/AiStatus';
 const { KeymapConfigScreen } = require('../KeymapConfig/KeymapConfigScreen');
-import SettingComponent, { UpdateSettingValueEvent } from './controls/SettingComponent';
+import SettingComponent from './controls/SettingComponent';
 import shim, { MessageBoxType } from '@joplin/lib/shim';
 import { OnChangeEvent } from '../lib/SearchInput/SearchInput';
 import highlightSearchText from './searchHighlight';
+import JoplinServerOAuthButton from './controls/JoplinServerOAuthButton';
+import { UpdateSettingValueEvent } from './types';
 
 
 interface Font {
@@ -222,7 +224,7 @@ class ConfigScreenComponent extends React.Component<any, any> {
 		);
 	}
 
-	public sectionToComponent(key: string, section: SettingMetadataSection, settings: Record<string, unknown>, selected: boolean) {
+	public sectionToComponent(key: string, section: SettingMetadataSection, settings: SettingsRecord, selected: boolean) {
 		const theme = themeStyle(this.props.themeId);
 		const searchMode = !!normalizeQuery(this.state.searchQuery);
 
@@ -308,26 +310,16 @@ class ConfigScreenComponent extends React.Component<any, any> {
 					</div>
 				);
 
-				if (settings['sync.target'] === SyncTargetRegistry.nameToId('joplinCloud')
-					|| (
-						settings['sync.target'] === SyncTargetRegistry.nameToId('joplinServer')
-						&& !Setting.value('sync.9.preferPasswordAuth')
-					)) {
-					const goToJoplinCloudLogin = () => {
-						this.props.dispatch({
-							type: 'NAV_GO',
-							routeName: 'JoplinCloudLogin',
-							syncTarget: settings['sync.target'],
-						});
-					};
+				const isJoplinCloud = settings['sync.target'] === SyncTargetRegistry.nameToId('joplinCloud');
+				const isStandardJoplinServer = settings['sync.target'] === SyncTargetRegistry.nameToId('joplinServer');
+				if (isJoplinCloud || isStandardJoplinServer) {
 					settingComps.push(
-						<div key="connect_to_joplin_cloud_button" style={this.rowStyle_}>
-							<Button
-								title={_('Connect to %s', SyncTargetRegistry.idToMetadata(settings['sync.target']).label)}
-								level={ButtonLevel.Primary}
-								onClick={goToJoplinCloudLogin}
-							/>
-						</div>,
+						<JoplinServerOAuthButton
+							key="connect_to_joplin_cloud_button"
+							settings={settings}
+							rowStyle={this.rowStyle_}
+							onUpdateSettingValue={this.onUpdateSettingValue}
+						/>,
 					);
 				}
 
@@ -402,7 +394,7 @@ class ConfigScreenComponent extends React.Component<any, any> {
 		);
 	}
 
-	private onUpdateSettingValue = ({ key, value }: UpdateSettingValueEvent) => {
+	private onUpdateSettingValue = ({ key, value }: UpdateSettingValueEvent<string>) => {
 		const md = Setting.settingMetadata(key);
 		if (md.needRestart) {
 			this.setState({ needRestart: true });
