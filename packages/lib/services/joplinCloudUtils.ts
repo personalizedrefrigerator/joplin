@@ -6,6 +6,7 @@ import { _ } from '../locale';
 import eventManager, { EventName } from '../eventManager';
 import { reg } from '../registry';
 import Logger from '@joplin/utils/Logger';
+import SyncTargetRegistry from '../SyncTargetRegistry';
 
 const logger = Logger.create('joplinCloudUtils');
 
@@ -105,6 +106,24 @@ export function assertIsJoplinOAuthSyncTarget(id: number): asserts id is JoplinS
 export const saveApplicationAuthId = async (applicationAuthId: string, syncTarget: JoplinSyncTargetId) => {
 	Setting.setValue(`sync.${syncTarget}.pendingAuthId`, applicationAuthId);
 	await Setting.saveAll();
+};
+
+// Returns null when no login URL can be determined (e.g.)
+export const fetchLoginUrl = async (syncTargetId: number, apiBaseUrl: string) => {
+	if (syncTargetId === SyncTargetRegistry.nameToId('joplinCloud')) return Setting.value('sync.10.website');
+
+	const response = await shim.fetch(`${apiBaseUrl.replace(/\/$/, '')}/api/application_login_url`);
+	if (response.status === 404) {
+		// The application_login_url API doesn't exist on older Joplin Server versions
+		return null;
+	}
+
+	const json = await response.json();
+	const uri: unknown = json.uri;
+	if (typeof uri !== 'string') {
+		throw new Error('Invalid response. Missing "uri".');
+	}
+	return uri;
 };
 
 // We have isWaitingResponse inside the function to avoid any state from lingering
