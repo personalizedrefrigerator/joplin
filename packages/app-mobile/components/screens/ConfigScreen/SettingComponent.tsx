@@ -2,7 +2,7 @@ import * as React from 'react';
 
 import { UpdateSettingValueCallback } from './types';
 import { View, Text } from 'react-native';
-import Setting, { AppType } from '@joplin/lib/models/Setting';
+import Setting, { AppType, SettingItem } from '@joplin/lib/models/Setting';
 import Dropdown from '../../Dropdown';
 import { ConfigScreenStyles } from './configScreenStyles';
 import SettingsToggle from './SettingsToggle';
@@ -11,12 +11,15 @@ import ValidatedIntegerInput from './ValidatedIntegerInput';
 import SettingTextInput from './SettingTextInput';
 import shim from '@joplin/lib/shim';
 import { themeStyle } from '../../global-style';
+import SettingsButton from './SettingsButton';
+import { RefObject, useCallback, useState } from 'react';
+import { SettingsMap } from '@joplin/lib/components/shared/config/config-shared';
 
 interface Props {
 	settingId: string;
-
-	// The value associated with the given settings key
 	value: unknown;
+
+	settingsRef: RefObject<SettingsMap>;
 
 	styles: ConfigScreenStyles;
 	themeId: number;
@@ -124,7 +127,14 @@ const SettingComponent: React.FunctionComponent<Props> = props => {
 			/>
 		);
 	} else if (md.type === Setting.TYPE_BUTTON) {
-		// TODO: Not yet supported
+		return (
+			<SettingButtonComponent
+				metadata={md}
+				styles={props.styles}
+				onUpdateSettingValue={props.updateSettingValue}
+				settingsRef={props.settingsRef}
+			/>
+		);
 	} else if (Setting.value('env') === 'dev') {
 		throw new Error(`Unsupported setting type: ${md.type}`);
 	}
@@ -133,3 +143,50 @@ const SettingComponent: React.FunctionComponent<Props> = props => {
 };
 
 export default SettingComponent;
+
+interface SettingButtonProps {
+	metadata: SettingItem;
+	styles: ConfigScreenStyles;
+	settingsRef: RefObject<SettingsMap>;
+	onUpdateSettingValue: UpdateSettingValueCallback;
+}
+
+const SettingButtonComponent: React.FC<SettingButtonProps> = ({ metadata, styles, onUpdateSettingValue, settingsRef }) => {
+	const key = metadata.key;
+	const md = Setting.settingMetadata(key);
+
+	const [loading, setLoading] = useState(false);
+	const [error, setError] = useState<string|null>(null);
+
+	const onClick = useCallback(async () => {
+		if (md.onClick) {
+			setError(null);
+			setLoading(true);
+
+			try {
+				await md.onClick({
+					setSettingValue: (key, value) => {
+						void onUpdateSettingValue(key, value);
+					},
+					settings: settingsRef.current,
+				});
+			} catch (error) {
+				setError(String(error));
+			} finally {
+				setLoading(false);
+			}
+		} else {
+			void shim.showErrorDialog('Invalid setting: No click handler');
+		}
+	}, [onUpdateSettingValue, md, settingsRef]);
+
+	return <>
+		<SettingsButton
+			title={md.label()}
+			styles={styles}
+			clickHandler={onClick}
+			disabled={loading}
+		/>
+		{error && <span className='error'>{error}</span>}
+	</>;
+};

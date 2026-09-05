@@ -79,6 +79,7 @@ class ConfigScreenComponent extends BaseScreenComponent<ConfigScreenProps, Confi
 	private componentsY_: Record<string, number> = {};
 	private styles_: Record<number, ConfigScreenStyles> = {};
 	private scrollViewRef_: React.RefObject<ScrollView>;
+	private settingsRef_: React.RefObject<shared.SettingsMap|null> = React.createRef();
 
 	public constructor(props: ConfigScreenProps) {
 		super(props);
@@ -360,6 +361,10 @@ class ConfigScreenComponent extends BaseScreenComponent<ConfigScreenProps, Confi
 
 		const activeFolder = await Folder.getValidActiveFolder();
 		this.setState({ activeFolder });
+	}
+
+	public override componentDidUpdate(): void {
+		this.settingsRef_.current = this.state.settings;
 	}
 
 	public componentWillUnmount() {
@@ -764,6 +769,7 @@ class ConfigScreenComponent extends BaseScreenComponent<ConfigScreenProps, Confi
 				themeId={this.props.themeId}
 				updateSettingValue={updateSettingValue}
 				styles={this.styles()}
+				settingsRef={this.settingsRef_}
 			/>
 		);
 	}

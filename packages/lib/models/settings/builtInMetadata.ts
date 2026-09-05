@@ -59,6 +59,7 @@ const buildJoplinServerConnectButton = (syncTargetId: number, syncTargetName: st
 		onClick: async (event) => {
 			const { fetchLoginUrl } = await import('../../services/joplinCloudUtils');
 			const loginUrl = await fetchLoginUrl(syncTargetId, event.settings[`sync.${syncTargetId}.path`] as string);
+			// Older Joplin Server versions don't support fetching the login URL
 			if (!loginUrl && syncTargetId === 9) {
 				event.setSettingValue(`sync.${syncTargetId}.preferPasswordAuth`, true);
 			} else {
@@ -69,7 +70,7 @@ const buildJoplinServerConnectButton = (syncTargetId: number, syncTargetName: st
 			}
 		},
 		public: true,
-		appTypes: [AppType.Desktop],
+		appTypes: [AppType.Desktop, AppType.Mobile],
 		show: settings => showJoplinServerConnectDisconnectButtons(settings, syncTargetId),
 		section: 'sync',
 	} satisfies SettingItem;
@@ -85,7 +86,7 @@ const buildJoplinServerDisconnectButton = (syncTargetId: number, syncTargetName:
 			event.setSettingValue(`sync.${syncTargetId}.password`, '');
 		},
 		public: true,
-		appTypes: [AppType.Desktop],
+		appTypes: [AppType.Desktop, AppType.Mobile],
 		show: settings => showJoplinServerConnectDisconnectButtons(settings, syncTargetId),
 		section: 'sync',
 	} satisfies SettingItem;

@@ -21,41 +21,48 @@ type DefaultState = {
 	message: ()=> string;
 	next: ActionType;
 	active: ActionType | 'INITIAL';
+	syncTargetName: string;
 	errorMessage?: string;
 };
 
-export const defaultState: DefaultState = {
+export const normalizeBaseUrl = (url: string) => url.replace(/\/$/, '');
+
+export const defaultState = (syncTargetName: string): DefaultState => ({
 	className: 'text',
 	message: ()=> _('Waiting for authorisation...'),
 	next: 'LINK_USED',
 	active: 'INITIAL',
-};
+	syncTargetName,
+});
 
 export const reducer: Reducer<DefaultState, Action> = (state: DefaultState, action: Action) => {
 	switch (action.type) {
 	case 'LINK_USED': {
 		return {
 			className: 'text',
-			message: () => _('If you have already authorised, please wait for the application to sync to Joplin Cloud.'),
+			message: () => _('If you have already authorised, please wait for the application to sync to %s.', state.syncTargetName),
 			next: 'COMPLETED',
 			active: 'LINK_USED',
+			syncTargetName: state.syncTargetName,
 		};
 	}
 	case 'COMPLETED': {
 		return {
 			className: 'bold',
-			message: () => _('You are logged in into Joplin Cloud, you can leave this screen now.'),
+			message: () => _('You are logged in into %s, you can leave this screen now.', state.syncTargetName),
 			active: 'COMPLETED',
 			next: 'COMPLETED',
+			syncTargetName: state.syncTargetName,
 		};
 	}
 	case 'ERROR': {
 		return {
 			className: 'text',
-			message: () => _('You were unable to connect to Joplin Cloud. Please check your credentials and try again. Error:'),
+			message: () => _('You were unable to connect to %s. Please check your credentials and try again. Error:', state.syncTargetName),
 			active: 'ERROR',
 			next: 'COMPLETED',
 			errorMessage: action.payload,
+			syncTargetName: state.syncTargetName,
 		};
 	}
 	default: {
@@ -112,7 +119,7 @@ export const saveApplicationAuthId = async (applicationAuthId: string, syncTarge
 export const fetchLoginUrl = async (syncTargetId: number, apiBaseUrl: string) => {
 	if (syncTargetId === SyncTargetRegistry.nameToId('joplinCloud')) return Setting.value('sync.10.website');
 
-	const response = await shim.fetch(`${apiBaseUrl.replace(/\/$/, '')}/api/application_login_url`);
+	const response = await shim.fetch(`${normalizeBaseUrl(apiBaseUrl)}/api/application_login_url`);
 	if (response.status === 404) {
 		// The application_login_url API doesn't exist on older Joplin Server versions
 		return null;

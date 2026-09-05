@@ -6,7 +6,7 @@ import { clipboard } from 'electron';
 import Button, { ButtonLevel } from './Button/Button';
 import { uuidgen } from '@joplin/lib/uuid';
 import { Dispatch } from 'redux';
-import { reducer, defaultState, generateApplicationConfirmUrl, checkIfLoginWasSuccessful, saveApplicationAuthId, isJoplinOAuthSyncTarget, assertIsJoplinOAuthSyncTarget, Action, fetchLoginUrl } from '@joplin/lib/services/joplinCloudUtils';
+import { reducer, defaultState, generateApplicationConfirmUrl, checkIfLoginWasSuccessful, saveApplicationAuthId, isJoplinOAuthSyncTarget, assertIsJoplinOAuthSyncTarget, Action, fetchLoginUrl, normalizeBaseUrl } from '@joplin/lib/services/joplinCloudUtils';
 import { AppState } from '../app.reducer';
 import Logger from '@joplin/utils/Logger';
 import { reg } from '@joplin/lib/registry';
@@ -29,13 +29,13 @@ interface Props {
 const JoplinCloudScreenComponent = (props: Props) => {
 	const isJoplinCloud = props.syncTargetId === SyncTargetRegistry.nameToId('joplinCloud');
 	const syncTargetLabel = SyncTargetRegistry.idToMetadata(props.syncTargetId).label;
-	const joplinCloudApi = props.joplinCloudApi.replace(/\/$/, '');
+	const joplinCloudApi = normalizeBaseUrl(props.joplinCloudApi);
 
 	const applicationAuthId = useMemo(() => uuidgen(), []);
 	const applicationAuthUrl = (applicationAuthId: string) => `${joplinCloudApi}/api/application_auth/${applicationAuthId}`;
 
 	const [intervalIdentifier, setIntervalIdentifier] = useState(undefined);
-	const [state, dispatch] = useReducer(reducer, defaultState);
+	const [state, dispatch] = useReducer(reducer, defaultState(syncTargetLabel));
 	const { url: confirmUrl } = useConfirmUrl(
 		joplinCloudApi, props.websiteUrl, applicationAuthId, dispatch,
 	);

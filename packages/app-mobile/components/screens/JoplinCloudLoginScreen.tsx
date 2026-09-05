@@ -5,7 +5,7 @@ import { connect } from 'react-redux';
 import { _ } from '@joplin/lib/locale';
 import { themeStyle } from '../global-style';
 import { AppState } from '../../utils/types';
-import { generateApplicationConfirmUrl, reducer, checkIfLoginWasSuccessful, saveApplicationAuthId, defaultState, JoplinSyncTargetId } from '@joplin/lib/services/joplinCloudUtils';
+import { generateApplicationConfirmUrl, reducer, checkIfLoginWasSuccessful, saveApplicationAuthId, defaultState, assertIsJoplinOAuthSyncTarget, fetchLoginUrl, normalizeBaseUrl } from '@joplin/lib/services/joplinCloudUtils';
 import { uuidgen } from '@joplin/lib/uuid';
 import { Button } from 'react-native-paper';
 import createRootStyle from '../../utils/createRootStyle';
@@ -14,14 +14,15 @@ import Clipboard from '@react-native-clipboard/clipboard';
 import Logger from '@joplin/utils/Logger';
 import { reg } from '@joplin/lib/registry';
 import Icon from '../Icon';
+import SyncTargetRegistry from '@joplin/lib/SyncTargetRegistry';
 
 const logger = Logger.create('JoplinCloudLoginScreen');
 
 interface Props {
 	themeId: number;
-	syncTargetId: JoplinSyncTargetId;
-	joplinCloudWebsite: string;
-	joplinCloudApi: string;
+	syncTargetId: number;
+	websiteUrl: string;
+	syncTargetApi: string;
 }
 const syncIconRotationValue = new Animated.Value(0);
 
@@ -63,6 +64,7 @@ const useStyle = (themeId: number) => {
 				fontWeight: 'bold',
 			},
 			loadingIcon: {
+				color: theme.color,
 				marginVertical: theme.fontSize * 1.2,
 				fontSize: 38,
 				textAlign: 'center',
@@ -73,11 +75,15 @@ const useStyle = (themeId: number) => {
 
 const JoplinCloudScreenComponent = (props: Props) => {
 
-	const confirmUrl = (applicationAuthId: string) => `${props.joplinCloudWebsite}/applications/${applicationAuthId}/confirm`;
-	const applicationAuthUrl = (applicationAuthId: string) => `${props.joplinCloudApi}/api/application_auth/${applicationAuthId}`;
+	const confirmUrl = async (applicationAuthId: string) => {
+		const baseUrl = props.websiteUrl ?? await fetchLoginUrl(props.syncTargetId, props.syncTargetApi);
+		return `${baseUrl}/${applicationAuthId}/confirm`;
+	};
+	const applicationAuthUrl = (applicationAuthId: string) => `${props.syncTargetApi}/api/application_auth/${applicationAuthId}`;
 
+	const syncTargetName = SyncTargetRegistry.infoById(props.syncTargetId).label;
 	const [intervalIdentifier, setIntervalIdentifier] = React.useState(undefined);
-	const [state, dispatch] = React.useReducer(reducer, defaultState);
+	const [state, dispatch] = React.useReducer(reducer, defaultState(syncTargetName));
 
 	const applicationAuthId = React.useMemo(() => uuidgen(), []);
 
@@ -88,6 +94,7 @@ const JoplinCloudScreenComponent = (props: Props) => {
 
 		const interval = setInterval(async () => {
 			try {
+				assertIsJoplinOAuthSyncTarget(props.syncTargetId);
 				const response = await checkIfLoginWasSuccessful(applicationAuthUrl(applicationAuthId), props.syncTargetId);
 				if (response && response.success) {
 					dispatch({ type: 'COMPLETED' });
@@ -108,18 +115,33 @@ const JoplinCloudScreenComponent = (props: Props) => {
 		if (state.next === 'LINK_USED') {
 			dispatch({ type: 'LINK_USED' });
 		}
-		await saveApplicationAuthId(applicationAuthId, props.syncTargetId);
-		periodicallyCheckForCredentials();
+		try {
+			assertIsJoplinOAuthSyncTarget(props.syncTargetId);
+			await saveApplicationAuthId(applicationAuthId, props.syncTargetId);
+			periodicallyCheckForCredentials();
+		} catch (error) {
+			dispatch({
+				type: 'ERROR',
+				payload: String(error),
+			});
+		}
 	};
 
 	const onAuthoriseClicked = async () => {
-		const url = await generateApplicationConfirmUrl(confirmUrl(applicationAuthId));
-		await onButtonUsed();
-		await Linking.openURL(url);
+		try {
+			const url = await generateApplicationConfirmUrl(await confirmUrl(applicationAuthId));
+			await onButtonUsed();
+			await Linking.openURL(url);
+		} catch (error) {
+			dispatch({
+				type: 'ERROR',
+				payload: String(error),
+			});
+		}
 	};
 
 	const onCopyToClipboardClicked = async () => {
-		const url = await generateApplicationConfirmUrl(confirmUrl(applicationAuthId));
+		const url = await generateApplicationConfirmUrl(await confirmUrl(applicationAuthId));
 		await onButtonUsed();
 		Clipboard.setString(url);
 	};
@@ -147,12 +169,12 @@ const JoplinCloudScreenComponent = (props: Props) => {
 
 	return (
 		<View style={styles.root}>
-			<ScreenHeader title={_('Joplin Cloud Login')} />
+			<ScreenHeader title={_('%s Login', syncTargetName)} />
 			<View style={styles.containerStyle}>
 				{ state.active !== 'COMPLETED' ?
 					<React.Fragment>
 						<Text style={styles.text}>
-							{_('To allow Joplin to synchronise with Joplin Cloud, please login using this URL:')}
+							{_('To allow Joplin to synchronise with %s, please login using this URL:', syncTargetName)}
 						</Text>
 						<View style={styles.buttonsContainer}>
 							<View style={{ marginBottom: 20 }}>
@@ -189,13 +211,15 @@ const JoplinCloudScreenComponent = (props: Props) => {
 	);
 };
 
-type OwnProps = Pick<Props, 'syncTargetId'>;
+type OwnProps = Pick<Props, 'syncTargetId'|'websiteUrl'>;
 
-const JoplinCloudLoginScreen = connect((state: AppState, { syncTargetId }: OwnProps) => {
+const JoplinCloudLoginScreen = connect((state: AppState, { syncTargetId, websiteUrl }: OwnProps) => {
+	syncTargetId ??= state.settings['sync.target'];
+	const apiBaseUrl = (state.settings[`sync.${syncTargetId}.path`] ?? '') as string;
 	return {
 		themeId: state.settings.theme,
-		joplinCloudWebsite: syncTargetId === 9 ? state.settings['sync.9.path'] : state.settings[`sync.${syncTargetId}.website`],
-		joplinCloudApi: state.settings[`sync.${syncTargetId}.path`],
+		websiteUrl,
+		syncTargetApi: normalizeBaseUrl(apiBaseUrl),
 		syncTargetId,
 	};
 })(JoplinCloudScreenComponent);
