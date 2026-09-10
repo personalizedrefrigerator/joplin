@@ -51,4 +51,16 @@ describe('shim-init-node', () => {
 		});
 	});
 
+	test('should handle https requests', async () => {
+		await using httpsServer = await createLocalhostServer((_req, res) => {
+			res.writeHead(200);
+			res.end('test!');
+		}, { https: true });
+
+		await withExtraRootCa(httpsServer.cert, async () => {
+			const response = await shim.fetch(`${httpsServer.baseUrl}`);
+			expect(response.status).toBe(200);
+			expect(await response.text()).toBe('test!');
+		});
+	});
 });

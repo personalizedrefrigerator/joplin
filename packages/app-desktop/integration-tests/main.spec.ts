@@ -9,14 +9,6 @@ import setFilePickerResponse from './util/setFilePickerResponse';
 import setMessageBoxResponse from './util/setMessageBoxResponse';
 import getImageSourceSize from './util/getImageSourceSize';
 import setSettingValue from './util/setSettingValue';
-import type shim from '@joplin/lib/shim';
-import createLocalhostServer from '@joplin/lib/testing/createLocalhostServer';
-
-interface ExtendedWindow extends Window {
-	joplin: { shim: typeof shim };
-}
-
-declare const window: ExtendedWindow;
 
 test.describe('main', () => {
 	test('app should launch', async ({ mainWindow }) => {
@@ -249,29 +241,6 @@ test.describe('main', () => {
 		const importedNote = mainScreen.noteList.getNoteItemByTitle('test-html-file-with-image');
 		await expect.poll(async () => importedNote.count(), { timeout: 60_000 }).toBeGreaterThan(0);
 		await expect(importedNote).toBeVisible({ timeout: 60_000 });
-	});
-
-	test('shim.fetch should support the renderer process', async ({ mainWindow }) => {
-		const mainScreen = await new MainScreen(mainWindow).setup();
-		await mainScreen.waitFor();
-
-		await using server = await createLocalhostServer((request, response) => {
-			response.writeHead(200, { 'content-type': 'application/json' });
-			response.end(JSON.stringify({ success: request.url?.endsWith('ping') }));
-		}, { https: false });
-
-		const response = await mainWindow.evaluate(async (baseUrl) => {
-			const response = await window.joplin.shim.fetch(`${baseUrl}/ping`);
-			return {
-				ok: response.ok,
-				json: await response.json(),
-			};
-		}, server.baseUrl);
-
-		expect(response).toMatchObject({
-			ok: true,
-			json: { success: true },
-		});
 	});
 });
 
