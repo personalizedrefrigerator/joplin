@@ -10,7 +10,6 @@ import settingValidations from '../../../models/settings/settingValidations';
 import { convertValuesToFunctions } from '../../../ObjectUtils';
 import aiSettingsTransition from '../../../services/ai/aiSettingsTransition';
 import { ChatRole } from '../../../services/ai/types';
-import loadClientCertificate from '../../../utils/tls/loadClientCertificate';
 
 const logger = Logger.create('config-shared');
 
@@ -89,10 +88,6 @@ export const checkSyncConfig = async (comp: ConfigScreenComponent, settings: Set
 	comp.setState({ checkSyncConfigResult: 'checking' });
 	let result;
 	try {
-		// Validate TLS settings as a part of checking the general sync configuration.
-		// This simplifies checking whether networking settings for sync are correct.
-		await loadClientCertificate(settings);
-
 		result = await SyncTargetClass.checkConfig(convertValuesToFunctions(options));
 	} catch (error) {
 		result = { ok: false, errorMessage: String(error) };
@@ -102,12 +97,6 @@ export const checkSyncConfig = async (comp: ConfigScreenComponent, settings: Set
 	if (result.ok) {
 		// Users often expect config to be auto-saved at this point, if the config check was successful
 		await saveSettings(comp);
-	} else {
-		try {
-			await loadClientCertificate({});
-		} catch (error) {
-			logger.warn('Failed to restore original sync configuration:', error);
-		}
 	}
 	return result;
 };

@@ -75,7 +75,6 @@ import NoteLockKey from './services/noteLock/NoteLockKey';
 import isNoteLockEnabled from './services/noteLock/isNoteLockEnabled';
 import NoteLockSession from './services/noteLock/NoteLockSession';
 import NoteLockService from './services/noteLock/NoteLockService';
-import loadClientCertificate from './utils/tls/loadClientCertificate';
 import setExtraRootCertificates from './utils/tls/setExtraRootCertificates';
 import { BuiltInMetadataKeys } from './models/settings/builtInMetadata';
 
@@ -374,14 +373,6 @@ export default class BaseApplication {
 		}
 	}
 
-	private async updateCustomCertificates_() {
-		try {
-			await loadClientCertificate({});
-		} catch (error) {
-			this.logger().error('Failed to set client certificate:', error);
-		}
-	}
-
 	protected async applySettingsSideEffects(action: { type?: string; key?: string; keys?: string[] } = null) {
 		type SideEffects = Partial<Record<BuiltInMetadataKeys, ()=> Promise<void>>>;
 		const sideEffects: SideEffects = {
@@ -404,8 +395,6 @@ export default class BaseApplication {
 					this.logger().error('Failed to add extra CA certificates:', error);
 				}
 			},
-			'net.clientCertificate': () => this.updateCustomCertificates_(),
-			'net.clientCertificate.password': () => this.updateCustomCertificates_(),
 			'net.proxyEnabled': async () => {
 				setupProxySettings({
 					maxConcurrentConnections: Setting.value('sync.maxConcurrentConnections'),

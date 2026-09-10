@@ -1,7 +1,6 @@
-import { join } from 'path';
 import Setting, { AppType } from '../../../models/Setting';
-import { setupDatabaseAndSynchronizer, supportDir, switchClient } from '../../../testing/test-utils';
-import { checkSyncConfig, ConfigScreenComponent, defaultScreenState, settingsSections } from './config-shared';
+import { setupDatabaseAndSynchronizer, switchClient } from '../../../testing/test-utils';
+import { settingsSections } from './config-shared';
 
 describe('config-shared', () => {
 	beforeEach(async () => {
@@ -18,43 +17,5 @@ describe('config-shared', () => {
 		Setting.setValue('featureFlag.noteLock', flag);
 		const sections = settingsSections({ device, settings: Setting.toPlainObject() });
 		expect(sections.some(section => section.name === 'noteLock')).toBe(flag);
-	});
-
-	it('should fail validation if there are client certificate errors', async () => {
-		Setting.setValue('net.clientCertificate', '');
-
-		const mockComponent: ConfigScreenComponent = {
-			settingToComponent: jest.fn(),
-			sectionToComponent: jest.fn(),
-
-			state: {
-				...defaultScreenState,
-				settings: {
-					...Setting.toPlainObject(),
-					'net.clientCertificate': join(supportDir, 'does-not-exist'),
-				},
-			},
-			setState(this: ConfigScreenComponent, state) {
-				if (typeof state === 'function') {
-					this.state = state(this.state);
-				} else {
-					this.state = {
-						...this.state,
-						...state,
-					};
-				}
-			},
-		};
-
-		await checkSyncConfig(mockComponent, mockComponent.state.settings);
-		expect(mockComponent.state.checkSyncConfigResult).toMatchObject({ ok: false });
-
-		await checkSyncConfig(mockComponent, {
-			...mockComponent.state.settings,
-			'net.clientCertificate': '',
-		});
-		expect(mockComponent.state.checkSyncConfigResult).toMatchObject({
-			ok: true, errorMessage: '',
-		});
 	});
 });

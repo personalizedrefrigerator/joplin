@@ -31,7 +31,6 @@ const toRelative = require('relative');
 import timers from 'timers';
 import dgram from 'dgram';
 import { pipeline } from 'stream/promises';
-import { createPrivateKey } from 'crypto';
 import { Second } from '@joplin/utils/time';
 
 interface ProxySettings {
@@ -646,39 +645,7 @@ function shimInit(options: ShimInitOptions = null) {
 		tlsEcdhCurve = 'auto';
 	}
 
-	interface ClientCertificatePair {
-		privateKey: string;
-		certificate: string;
-		domains: string[];
-	}
-	let clientCertificates: ClientCertificatePair[] = [];
-
-	shim.setClientCertificate = async (options) => {
-		if (!options) {
-			clientCertificates = [];
-			return;
-		}
-		const { certPath, keyPath, keyPassword, domains } = options;
-		if (!certPath || !keyPath) {
-			throw new Error(`Missing ${!certPath ? 'certPath' : 'keyPath'}: Both certPath and keyPath must be provided.`);
-		}
-
-		const clientCert = await shim.fsDriver().readFile(certPath, 'utf-8');
-		let clientKey = await shim.fsDriver().readFile(keyPath, 'utf-8');
-		if (keyPassword) {
-			const key = createPrivateKey({ key: clientKey, passphrase: keyPassword || undefined });
-			clientKey = key.export({ format: 'pem', type: 'pkcs8' });
-		}
-
-		clientCertificates = [{ privateKey: clientKey, certificate: clientCert, domains }];
-	};
-
-	const agentSettingsBase = (url: string, options?: HttpAgentOptions) => {
-		const parsedUrl = new URL(url);
-		const clientCertPair = parsedUrl.protocol === 'https:' ? clientCertificates.find(pair => {
-			return pair.domains.includes(parsedUrl.hostname);
-		}) : null;
-
+	const agentSettingsBase = (options: HttpAgentOptions|undefined) => {
 		return {
 			headersTimeout: options?.timeout,
 			bodyTimeout: options?.timeout,
@@ -687,21 +654,17 @@ function shimInit(options: ShimInitOptions = null) {
 
 			connect: {
 				ecdhCurve: tlsEcdhCurve,
-				...(clientCertPair ? {
-					key: clientCertPair.privateKey,
-					cert: clientCertPair.certificate,
-				} : {}),
 			},
 		} satisfies Agent.Options;
 	};
 
-	shim.httpAgent = (url, options) => {
+	shim.httpAgent = (_url, options) => {
 		const resolvedProxyUrl = resolveProxyUrl(proxySettings.proxyUrl);
 		const lastSettings = shim.httpAgent_?.lastSettings;
 
 		if (resolvedProxyUrl && proxySettings.proxyEnabled) {
-			const baseSettings = agentSettingsBase(url, options);
-			const { connect: proxyConnectSettings } = agentSettingsBase(resolvedProxyUrl, options);
+			const baseSettings = agentSettingsBase(options);
+			const { connect: proxyConnectSettings } = agentSettingsBase(options);
 
 			const agentSettings = {
 				...baseSettings,
@@ -724,7 +687,7 @@ function shimInit(options: ShimInitOptions = null) {
 			}
 		} else {
 			const agentSettings = {
-				...agentSettingsBase(url, options),
+				...agentSettingsBase(options),
 				maxSockets: 1,
 			};
 			if (!fastDeepEqual(lastSettings, agentSettings)) {

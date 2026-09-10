@@ -159,12 +159,6 @@ const shimInitShared = () => {
 		setLocale(locale);
 		return locale;
 	};
-
-	shim.setClientCertificate = async (options) => {
-		if (options !== null) {
-			throw new Error('setClientCertificate: Client certificates are unsupported on mobile');
-		}
-	};
 };
 
 export default shimInitShared;
