@@ -10,8 +10,7 @@ import setMessageBoxResponse from './util/setMessageBoxResponse';
 import getImageSourceSize from './util/getImageSourceSize';
 import setSettingValue from './util/setSettingValue';
 import type shim from '@joplin/lib/shim';
-import { createServer } from 'node:http';
-import { AddressInfo } from 'node:net';
+import createLocalhostServer from '@joplin/lib/testing/createLocalhostServer';
 
 interface ExtendedWindow extends Window {
 	joplin: { shim: typeof shim };
@@ -252,46 +251,27 @@ test.describe('main', () => {
 		await expect(importedNote).toBeVisible({ timeout: 60_000 });
 	});
 
-	test('networking should work', async ({ mainWindow }) => {
+	test('shim.fetch should support the renderer process', async ({ mainWindow }) => {
 		const mainScreen = await new MainScreen(mainWindow).setup();
 		await mainScreen.waitFor();
 
-		const server = createServer((request, response) => {
+		await using server = await createLocalhostServer((request, response) => {
 			response.writeHead(200, { 'content-type': 'application/json' });
 			response.end(JSON.stringify({ success: request.url?.endsWith('ping') }));
+		}, { https: false });
+
+		const response = await mainWindow.evaluate(async (baseUrl) => {
+			const response = await window.joplin.shim.fetch(`${baseUrl}/ping`);
+			return {
+				ok: response.ok,
+				json: await response.json(),
+			};
+		}, server.baseUrl);
+
+		expect(response).toMatchObject({
+			ok: true,
+			json: { success: true },
 		});
-
-		try {
-			const listeningPromise = new Promise<void>((resolve, reject) => {
-				const onError = (error: Error) => {
-					server.off('listening', onListening);
-					reject(error);
-				};
-				const onListening = () => {
-					resolve();
-					server.off('error', onError);
-				};
-
-				server.once('listening', onListening);
-				server.once('error', onError);
-			});
-			server.listen();
-
-			await listeningPromise;
-
-			expect(await mainWindow.evaluate(async (serverPort) => {
-				const response = await window.joplin.shim.fetch(`http://127.0.0.1:${serverPort}/ping`);
-				return {
-					ok: response.ok,
-					json: await response.json(),
-				};
-			}, (server.address() as AddressInfo).port)).toMatchObject({
-				ok: true,
-				json: { success: true },
-			});
-		} finally {
-			server.close();
-		}
 	});
 });
 

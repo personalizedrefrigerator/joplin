@@ -7,18 +7,23 @@ const defaultCaCerts = () => {
 	return defaultCaCerts_;
 };
 
+type Cert = { path: string } | { pem: string };
+
 let cacheKey = '[]';
-const setExtraRootCertificates = async (paths: string[]) => {
-	const newCacheKey = JSON.stringify(paths);
+const setExtraRootCertificates = async (certs: Cert[]) => {
+	const newCacheKey = JSON.stringify(certs);
 	if (newCacheKey === cacheKey) return;
 
 	const cas = [...defaultCaCerts()];
-	for (const caPath of paths) {
-		const path = caPath.trim();
-		if (!path) continue;
+	for (const cert of certs) {
+		let data;
+		if ('pem' in cert) {
+			data = cert.pem;
+		} else {
+			data = await shim.fsDriver().readFile(cert.path, 'utf-8');
+		}
 
-		const certificateData = await shim.fsDriver().readFile(path, 'utf-8');
-		cas.push(certificateData);
+		cas.push(data);
 	}
 
 	setDefaultCACertificates(cas);

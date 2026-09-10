@@ -388,9 +388,11 @@ export default class BaseApplication {
 				process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = Setting.value('net.ignoreTlsErrors') ? '0' : '1';
 			},
 			'net.customCertificates': async () => {
-				const caPaths = Setting.value('net.customCertificates').split(',');
+				const caPaths = Setting.value('net.customCertificates')
+					.split(',')
+					.filter(path => !!path.trim());
 				try {
-					await setExtraRootCertificates(caPaths);
+					await setExtraRootCertificates(caPaths.map(path => ({ path })));
 				} catch (error) {
 					this.logger().error('Failed to add extra CA certificates:', error);
 				}
