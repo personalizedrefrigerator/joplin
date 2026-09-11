@@ -26,38 +26,47 @@ interface Options {
 	https: boolean;
 }
 
-const createLocalhostServer = async (requestHandler: http.RequestListener, { https: useHttps }: Options) => {
-	// See https://github.com/jfromaniello/selfsigned#custom-extensions
-	const keyPair = useHttps ? await selfsigned.generate(
-		[{ name: 'commonName', value: 'localhost' }],
+const createLocalhostCerts = async () => {
+	const rootCa = await selfsigned.generate(
+		[{ name: 'commonName', value: 'ca.localhost' }],
 		{
 			extensions: [
 				{
 					name: 'basicConstraints',
-					cA: false,
-				},
-				{
-					name: 'keyUsage',
-					digitalSignature: true,
-					keyEncipherment: true,
-				},
-				{
-					name: 'subjectAltName',
-					altNames: [
-						// DNS
-						{ type: 2, value: 'localhost' },
-						// IPv4 / IPv6
-						{ type: 7, ip: '127.0.0.1' },
-						{ type: 7, ip: '::1' },
-					],
+					cA: true,
+					critical: true,
 				},
 			],
 		},
-	) : undefined;
+	);
+	const localhostCert = await selfsigned.generate(
+		[{ name: 'commonName', value: 'localhost' }],
+		{
+			algorithm: 'sha256',
+			extensions: [
+				{ name: 'basicConstraints', cA: false, critical: true },
+				{ name: 'keyUsage', digitalSignature: true, critical: true },
+				{ name: 'extKeyUsage', serverAuth: true, clientAuth: true },
+				{ name: 'subjectAltName', altNames: [
+					{ type: 2, value: 'localhost' },
+					{ type: 2, value: 'www.localhost' },
+					{ type: 7, value: '127.0.0.1' },
+				] },
+			],
+			ca: { key: rootCa.private, cert: rootCa.cert },
+		},
+	);
 
-	const server = keyPair ? https.createServer({
-		key: keyPair.private,
-		cert: keyPair.cert,
+	return { rootCa: rootCa.cert, localhost: localhostCert };
+};
+
+const createLocalhostServer = async (requestHandler: http.RequestListener, { https: useHttps }: Options) => {
+	// See https://github.com/jfromaniello/selfsigned#custom-extensions
+	const keys = useHttps ? await createLocalhostCerts() : undefined;
+
+	const server = keys ? https.createServer({
+		key: keys.localhost.private,
+		cert: keys.localhost.cert,
 	}, requestHandler) : http.createServer(requestHandler);
 
 	await startListening(server);
@@ -70,7 +79,7 @@ const createLocalhostServer = async (requestHandler: http.RequestListener, { htt
 	return {
 		baseUrl: `${useHttps ? 'https:' : 'http:'}//localhost:${address.port}`,
 		port: address.port,
-		cert: keyPair?.cert,
+		cert: keys?.rootCa,
 		server,
 
 		[Symbol.asyncDispose]() {
