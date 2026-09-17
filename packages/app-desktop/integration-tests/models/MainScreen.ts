@@ -1,5 +1,5 @@
 import { Page, Locator, ElectronApplication } from '@playwright/test';
-import NoteEditorScreen from './NoteEditorScreen';
+import NoteEditorScreen from './NoteEditor/NoteEditorScreen';
 import activateMainMenuItem from '../util/activateMainMenuItem';
 import Sidebar from './Sidebar';
 import GoToAnything from './GoToAnything';
@@ -60,6 +60,12 @@ export default class MainScreen {
 		// Fill the title
 		await this.noteEditor.noteTitleInput.click();
 		await this.noteEditor.noteTitleInput.fill(title);
+
+		// Wait for the title to reach the note list, otherwise a later sort can run
+		// while the note is still "Untitled" and order the list unexpectedly.
+		if (title !== '') {
+			await this.noteList.getNoteItemByTitle(title).waitFor();
+		}
 
 		return this.noteEditor;
 	}

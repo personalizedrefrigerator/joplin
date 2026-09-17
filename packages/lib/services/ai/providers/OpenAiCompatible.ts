@@ -52,24 +52,43 @@ const convertTool = (tool: ToolSpec) => {
 			name: tool.id,
 			description: tool.description,
 			parameters: tool.inputSchema,
-			strict: true,
 		},
 	};
 };
 
 const convertMessage = (message: ChatMessage) => {
 	if (message.role === 'tool') {
-		return {
-			role: 'tool',
-			name: message.toolName,
-			content: message.content,
-			tool_call_id: message.toolCallId,
-		};
+		const content = message.content;
+		if (typeof content === 'string') {
+			return [{
+				role: 'tool',
+				name: message.toolName,
+				content,
+				tool_call_id: message.toolCallId,
+			}];
+		} else {
+			// Joplin currently uses the older OpenAI chat responses API, which does not support
+			// images in tool results. Attach the image in a user message instead:
+			return [{
+				role: 'tool',
+				name: message.toolName,
+				content: 'success: will be attached in user message',
+				tool_call_id: message.toolCallId,
+			}, {
+				role: 'user',
+				content: [
+					{
+						type: 'image_url',
+						image_url: { url: content.dataUrl },
+					},
+				],
+			}];
+		}
 	} else {
-		return {
+		return [{
 			role: message.role,
 			content: message.content,
-			...(message.toolCalls ? {
+			...(message.toolCalls?.length ? {
 				tool_calls: message.toolCalls.map(call => {
 					return {
 						id: call.callId,
@@ -81,7 +100,7 @@ const convertMessage = (message: ChatMessage) => {
 					};
 				}),
 			} : {}),
-		};
+		}];
 	}
 };
 
@@ -128,7 +147,7 @@ export default class OpenAiCompatibleProvider extends ChatProviderBase {
 
 		const body: Record<string, unknown> = {
 			model: this.model_,
-			messages: messages.map(convertMessage),
+			messages: messages.flatMap((message): unknown[] => convertMessage(message)),
 			stream: false,
 		};
 		if (options?.temperature !== undefined) body.temperature = options.temperature;
@@ -149,6 +168,14 @@ export default class OpenAiCompatibleProvider extends ChatProviderBase {
 		if (response.status === 400 && 'max_tokens' in body && /max_completion_tokens/i.test(errorMessage())) {
 			body.max_completion_tokens = body.max_tokens;
 			delete body.max_tokens;
+			({ response, json } = await doFetch());
+		}
+
+		// Reasoning models apply a reasoning_effort default server-side, which OpenAI then rejects
+		// alongside tools on /chat/completions. Opt out of the default to keep tools working.
+		if (response.status === 400 && 'tools' in body && /reasoning_effort/i.test(errorMessage())) {
+			logger.warn(`Model ${this.model_} rejected function tools with reasoning; retrying with reasoning disabled.`);
+			body.reasoning_effort = 'none';
 			({ response, json } = await doFetch());
 		}
 
