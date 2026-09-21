@@ -33,7 +33,7 @@ const JoplinOAuthScreenComponent = (props: Props) => {
 
 	const [intervalIdentifier, setIntervalIdentifier] = useState(undefined);
 	const [state, dispatch] = useReducer(reducer, defaultState(syncTargetLabel));
-	const { url: confirmUrl } = useConfirmUrl(
+	const { url: confirmUrl, isUnsupported } = useConfirmUrl(
 		props.syncTargetId, serverApi, applicationAuthId, dispatch,
 	);
 
@@ -95,6 +95,8 @@ const JoplinOAuthScreenComponent = (props: Props) => {
 		</div>;
 	};
 
+	const showSettingsLink = !isValidBaseUrl(serverApi) || isUnsupported;
+
 	return (
 		<div className="login-page">
 			<div className="page-container">
@@ -123,8 +125,8 @@ const JoplinOAuthScreenComponent = (props: Props) => {
 				<p className={state.className}>{state.message()}
 					{state.active === 'ERROR' ? <>
 						<span className={state.className}>{state.errorMessage}</span>
-						{!isValidBaseUrl(serverApi) && <Button onClick={openSyncSettings} title={_('Open settings')}/>}
 					</> : null}
+					{showSettingsLink && <Button onClick={openSyncSettings} title={_('Open settings')}/>}
 				</p>
 				{state.active === 'LINK_USED' ? <div className="loading-animation" /> : null}
 				{state.active !== 'COMPLETED' && isJoplinCloud ? <JoplinCloudSignUpCallToAction source='desktop-login-screen' withLeadIn={true} /> : null}
@@ -136,12 +138,16 @@ const JoplinOAuthScreenComponent = (props: Props) => {
 
 const useConfirmUrl = (syncTarget: number, apiBaseUrl: string, applicationAuthId: string, dispatch: React.ActionDispatch<[action: Action]>) => {
 	const [url, setUrl] = useState('');
+	const [isUnsupported, setIsUnsupported] = useState(false);
 	useAsyncEffect(async event => {
 		try {
 			const baseUrl = await fetchLoginUrl(syncTarget, apiBaseUrl);
 			if (event.cancelled) return;
 
-			if (!baseUrl) throw new Error('Failed to determine login URL');
+			if (!baseUrl) {
+				setIsUnsupported(true);
+				throw new Error('Failed to determine login URL: The server URL is incorrect or the server does not support the new auth system.');
+			}
 			setUrl(`${normalizeBaseUrl(baseUrl)}/applications/${applicationAuthId}/confirm`);
 		} catch (error) {
 			logger.warn('Failed to determine API base URL', error);
@@ -149,7 +155,7 @@ const useConfirmUrl = (syncTarget: number, apiBaseUrl: string, applicationAuthId
 		}
 	}, [syncTarget, apiBaseUrl, applicationAuthId]);
 
-	return { url };
+	return { url, isUnsupported };
 };
 
 const buildMapStateToProps = (syncTargetId: number) => (state: AppState) => {

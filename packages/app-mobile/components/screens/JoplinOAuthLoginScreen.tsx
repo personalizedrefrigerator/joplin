@@ -14,6 +14,7 @@ import Logger from '@joplin/utils/Logger';
 import { reg } from '@joplin/lib/registry';
 import Icon from '../Icon';
 import SyncTargetRegistry from '@joplin/lib/SyncTargetRegistry';
+import { useState } from 'react';
 
 const logger = Logger.create('JoplinCloudLoginScreen');
 
@@ -73,9 +74,13 @@ const useStyle = (themeId: number) => {
 
 const JoplinOAuthScreenComponent = (props: Props) => {
 
+	const [unsupportedServerInstance, setUnsupportedServerInstance] = useState(false);
 	const confirmUrl = async (applicationAuthId: string) => {
 		const baseUrl = await fetchLoginUrl(props.syncTargetId, props.syncTargetApi);
-		if (!baseUrl) throw new Error('Unable to determine login URL');
+		if (!baseUrl) {
+			setUnsupportedServerInstance(true);
+			throw new Error('Unable to determine login URL: This server instance may not support the new auth system.');
+		}
 		return `${baseUrl}/applications/${applicationAuthId}/confirm`;
 	};
 	const applicationAuthUrl = (applicationAuthId: string) => `${props.syncTargetApi}/api/application_auth/${applicationAuthId}`;
@@ -173,6 +178,8 @@ const JoplinOAuthScreenComponent = (props: Props) => {
 		}
 	}, [intervalIdentifier, state]);
 
+	const showSettingsLink = unsupportedServerInstance || !isValidBaseUrl(props.syncTargetApi);
+
 	return (
 		<View style={styles.root}>
 			<ScreenHeader title={_('%s Login', syncTargetName)} />
@@ -205,8 +212,8 @@ const JoplinOAuthScreenComponent = (props: Props) => {
 				<Text style={styles[state.className]}>{state.message()}</Text>
 				{state.active === 'ERROR' ? <>
 					<Text style={styles[state.className]}>{state.errorMessage}</Text>
-					{!isValidBaseUrl(props.syncTargetApi) && <Button onPress={openSyncSettings} mode='outlined'>{_('Open settings')}</Button>}
 				</> : null}
+				{showSettingsLink && <Button onPress={openSyncSettings} mode='outlined'>{_('Open settings')}</Button>}
 				{state.active === 'LINK_USED' ? (
 					<Animated.View style={{ transform: [{ rotate: syncIconRotation }] }}>
 						<Icon name='ionicon sync' style={styles.loadingIcon} accessibilityLabel={_('Waiting for authorisation...')}/>
