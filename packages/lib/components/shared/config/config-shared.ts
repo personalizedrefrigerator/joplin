@@ -414,12 +414,12 @@ export const onSettingButtonPress = async (comp: ConfigScreenComponent, metadata
 				}
 			}
 		} else if (syncCommand === 'disconnect') {
-			const setValuePermanently = <Key extends string> (key: Key, value: SettingValueType<Key>) => {
+			const setValueAndSave = <Key extends string> (key: Key, value: SettingValueType<Key>) => {
 				comp.setSettingValue(key, value);
 				Setting.setValue(key, value);
 			};
-			setValuePermanently(`sync.${syncCommandId}.username`, '');
-			setValuePermanently(`sync.${syncCommandId}.password`, '');
+			setValueAndSave(`sync.${syncCommandId}.username`, '');
+			setValueAndSave(`sync.${syncCommandId}.password`, '');
 
 			const syncTarget = reg.syncTarget(syncCommandId);
 			await (syncTarget as SyncTargetJoplinServerBase).clearSession();
@@ -439,6 +439,7 @@ export const onSettingButtonPress = async (comp: ConfigScreenComponent, metadata
 	} else if (key === 'ocr.clearLanguageDataCacheButton') {
 		if (!await shim.showConfirmationDialog(restartMessage())) return;
 		Setting.setValue('ocr.clearLanguageDataCache', true);
+		await Setting.saveAll();
 		await shim.restartApp();
 	} else if (key === 'ai.usage.resetButton') {
 		if (!await shim.showConfirmationDialog(_('Reset AI token usage counters?'))) return;
@@ -448,7 +449,7 @@ export const onSettingButtonPress = async (comp: ConfigScreenComponent, metadata
 	} else if (key === 'ai.chat.testButton') {
 		await checkAiConfig(comp);
 	} else if (key === 'sync.openSyncWizard') {
-		void CommandService.instance().execute('openSyncWizard');
+		await CommandService.instance().execute('openSyncWizard');
 	} else {
 		const metadata = Setting.settingMetadata(key);
 		if (metadata.onClick) {

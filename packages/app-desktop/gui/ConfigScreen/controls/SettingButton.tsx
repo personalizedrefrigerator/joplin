@@ -1,5 +1,5 @@
 import * as React from 'react';
-import Setting from '@joplin/lib/models/Setting';
+import Setting, { SettingButtonStyle } from '@joplin/lib/models/Setting';
 import Button, { ButtonLevel } from '../../Button/Button';
 import { useCallback, useState } from 'react';
 import Logger from '@joplin/utils/Logger';
@@ -36,7 +36,7 @@ const SettingButton: React.FC<Props> = ({
 
 	return <>
 		<Button
-			level={ButtonLevel.Secondary}
+			level={md.buttonStyle === SettingButtonStyle.Highlighted ? ButtonLevel.Primary : ButtonLevel.Secondary}
 			title={md.label()}
 			onClick={onClick}
 			disabled={loading}

@@ -4,7 +4,7 @@ import { _, _n, defaultLocale, supportedLocalesToLanguages } from '../../locale'
 import shim from '../../shim';
 import time from '../../time';
 import type SettingType from '../Setting';
-import { AppType, SettingItemSubType, SettingItemType, SettingStorage, SyncStartupOperation, SettingItem } from './types';
+import { AppType, SettingItemSubType, SettingItemType, SettingStorage, SyncStartupOperation, SettingItem, SettingButtonStyle } from './types';
 import { defaultListColumns } from '../../services/plugins/api/noteListType';
 import type { PluginSettings } from '../../services/plugins/PluginService';
 import type { PublicPrivateKeyPair } from '../../services/e2ee/ppk/ppk';
@@ -64,6 +64,8 @@ const buildJoplinServerConnectButton = (syncTargetId: number, syncTargetName: st
 	return {
 		value: null as null,
 		type: SettingItemType.Button,
+		buttonStyle: SettingButtonStyle.Highlighted,
+		hideLabel: true,
 		label: () => _('Connect to %s', syncTargetName),
 		public: true,
 		appTypes: [AppType.Desktop, AppType.Mobile],
@@ -77,6 +79,7 @@ const buildJoplinServerDisconnectButton = (syncTargetId: number, syncTargetName:
 		value: null as null,
 		type: SettingItemType.Button,
 		label: () => _('Disconnect from %s', syncTargetName),
+		hideLabel: true,
 		public: true,
 		appTypes: [AppType.Desktop, AppType.Mobile],
 		show: settings => {

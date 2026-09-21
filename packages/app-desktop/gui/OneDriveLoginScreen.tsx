@@ -9,7 +9,7 @@ import Setting from '@joplin/lib/models/Setting';
 import bridge from '../services/bridge';
 import { themeStyle } from '@joplin/lib/theme';
 import { OneDriveApiNodeUtils } from '@joplin/lib/onedrive-api-node-utils';
-import SyncTargetOneDrive from '@joplin/lib/SyncTargetOneDrive';
+import type SyncTargetOneDrive from '@joplin/lib/SyncTargetOneDrive';
 
 interface Props {
 	themeId: number;

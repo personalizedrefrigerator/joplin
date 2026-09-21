@@ -110,19 +110,19 @@ const WarningBannerComponent: React.FC<Props> = props => {
 	};
 
 	if (props.showMissingMasterKeyMessage) {
-		warningComps.push(renderWarningBox('missing_master_key', _('Press to set the decryption password.'), { screen: 'EncryptionConfig' }));
+		warningComps.push(renderWarningBox('missingDecryptionPassword', _('Press to set the decryption password.'), { screen: 'EncryptionConfig' }));
 	}
 	if (props.hasDisabledSyncItems) {
-		warningComps.push(renderWarningBox('disabled_items', _('Some items cannot be synchronised. Press for more info.'), { screen: 'Status' }));
+		warningComps.push(renderWarningBox('cannotSync', _('Some items cannot be synchronised. Press for more info.'), { screen: 'Status' }));
 	}
 	if (props.shouldUpgradeSyncTarget && props.showShouldUpgradeSyncTargetMessage !== false) {
-		warningComps.push(renderWarningBox('upgrade_sync', _('The sync target needs to be upgraded. Press this banner to proceed.'), { screen: 'UpgradeSyncTarget' }));
+		warningComps.push(renderWarningBox('upgradeSync', _('The sync target needs to be upgraded. Press this banner to proceed.'), { screen: 'UpgradeSyncTarget' }));
 	}
 	if (props.mustUpgradeAppMessage) {
 		warningComps.push(renderMustUpgradeAppMessage());
 	}
 	if (props.hasDisabledEncryptionItems) {
-		warningComps.push(renderWarningBox('cannot_decrypt', _('Some items cannot be decrypted.'), { screen: 'Status' }));
+		warningComps.push(renderWarningBox('cannotDecrypt', _('Some items cannot be decrypted.'), { screen: 'Status' }));
 	}
 	if (props.showInvalidJoplinOAuthCredential) {
 		const syncTargetClass = SyncTargetRegistry.classById(props.syncTargetId);
@@ -149,7 +149,7 @@ const WarningBannerComponent: React.FC<Props> = props => {
 		const sharer = invitation.share.user;
 
 		warningComps.push(renderWarningBox(
-			'share',
+			'incomingShare',
 			_('%s (%s) would like to share a notebook with you.',
 				substrWithEllipsis(sharer?.full_name ?? 'Unknown', 0, 48),
 				substrWithEllipsis(sharer?.email ?? 'Unknown', 0, 52)),

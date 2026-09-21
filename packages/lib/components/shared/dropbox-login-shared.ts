@@ -92,8 +92,8 @@ export default class Shared<Host extends BaseComponent> {
 	public async dropboxApi(): Promise<DropboxApi> {
 		if (this.dropboxApi_) return this.dropboxApi_;
 
-		const syncTarget = reg.syncTarget(this.syncTargetId());
-		this.dropboxApi_ = await (syncTarget as SyncTargetDropbox).api();
+		const syncTarget = reg.syncTarget(this.syncTargetId()) as SyncTargetDropbox;
+		this.dropboxApi_ = await syncTarget.api();
 		return this.dropboxApi_;
 	}
 
