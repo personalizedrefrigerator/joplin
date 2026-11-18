@@ -5,7 +5,7 @@ import MasterKey from '../../models/MasterKey';
 import Note from '../../models/Note';
 import Setting from '../../models/Setting';
 import shim from '../..//shim';
-import { getEncryptionEnabled, setEncryptionEnabled } from '../synchronizer/syncInfoUtils';
+import { localSyncInfo, saveLocalSyncInfo } from '../synchronizer/syncInfoUtils';
 import Logger from '@joplin/utils/Logger';
 
 interface DecryptTestData {
@@ -147,6 +147,7 @@ export async function testStringPerformance(method: EncryptionMethod, dataSize: 
 			const serialized = await Note.serializeForSync(note);
 			const tick2 = performance.now();
 			const deserialized = await Note.unserialize(serialized);
+			if (!deserialized.encryption_applied) throw new Error('Note was not encrypted');
 			const decryptedNote = await Note.decrypt(deserialized);
 			const tick3 = performance.now();
 			// eslint-disable-next-line no-unused-expressions -- Old code before rule was applied
@@ -288,6 +289,23 @@ const decryptTestData: Record<string, DecryptTestData> = {
 
 // cSpell:enable
 
+const withEncryptionEnabled = async (fn: ()=> Promise<void>) => {
+	const syncInfo = localSyncInfo();
+	const lastEnabled = syncInfo.e2ee;
+	const lastEnabledTimestamp = syncInfo.keyTimestamp('e2ee');
+	syncInfo.e2ee = true;
+	saveLocalSyncInfo(syncInfo);
+
+	try {
+		await fn();
+	} finally {
+		const syncInfo = localSyncInfo();
+		syncInfo.e2ee = lastEnabled;
+		syncInfo.setKeyTimestamp('e2ee', lastEnabledTimestamp);
+		saveLocalSyncInfo(syncInfo);
+	}
+};
+
 // This can be used to run integration tests directly on device. It will throw
 // an error if something cannot be decrypted, or else print info messages.
 export const runIntegrationTests = async (silent = false, testPerformance = false) => {
@@ -297,10 +315,8 @@ export const runIntegrationTests = async (silent = false, testPerformance = fals
 	};
 
 	log('Running integration tests...');
-	const encryptionEnabled = getEncryptionEnabled();
 	serviceInstance = EncryptionService.instance();
 	BaseItem.encryptionService_ = EncryptionService.instance();
-	setEncryptionEnabled(true);
 
 	log('Testing bufferToString...');
 	checkBufferToString();
@@ -321,35 +337,37 @@ export const runIntegrationTests = async (silent = false, testPerformance = fals
 	// The performance test is very slow so it is disabled by default.
 	if (testPerformance) {
 		log('Testing performance...');
-		if (shim.mobilePlatform() === '') {
-			await testStringPerformance(EncryptionMethod.StringV1, 100, 1000);
-			await testStringPerformance(EncryptionMethod.StringV1, 1000000, 10);
-			await testStringPerformance(EncryptionMethod.StringV1, 5000000, 10);
-			await testStringPerformance(EncryptionMethod.SJCL1a, 100, 1000);
-			await testStringPerformance(EncryptionMethod.SJCL1a, 1000000, 10);
-			await testStringPerformance(EncryptionMethod.SJCL1a, 5000000, 10);
-			await testFilePerformance(EncryptionMethod.FileV1, 100, 1000);
-			await testFilePerformance(EncryptionMethod.FileV1, 1000000, 3);
-			await testFilePerformance(EncryptionMethod.FileV1, 5000000, 3);
-			await testFilePerformance(EncryptionMethod.SJCL1a, 100, 1000);
-			await testFilePerformance(EncryptionMethod.SJCL1a, 1000000, 3);
-			await testFilePerformance(EncryptionMethod.SJCL1a, 5000000, 3);
-		} else {
-			await testStringPerformance(EncryptionMethod.StringV1, 100, 100);
-			await testStringPerformance(EncryptionMethod.StringV1, 500000, 3);
-			await testStringPerformance(EncryptionMethod.StringV1, 1000000, 3);
-			await testStringPerformance(EncryptionMethod.SJCL1a, 100, 100);
-			await testStringPerformance(EncryptionMethod.SJCL1a, 500000, 3);
-			await testStringPerformance(EncryptionMethod.SJCL1a, 1000000, 3);
-			await testFilePerformance(EncryptionMethod.FileV1, 100, 100);
-			await testFilePerformance(EncryptionMethod.FileV1, 100000, 3);
-			await testFilePerformance(EncryptionMethod.FileV1, 500000, 3);
-			await testFilePerformance(EncryptionMethod.SJCL1a, 100, 100);
-			await testFilePerformance(EncryptionMethod.SJCL1a, 100000, 3);
-			await testFilePerformance(EncryptionMethod.SJCL1a, 500000, 3);
-		}
+		// Avoid enabling encryption globally until it's needed: Doing so reduces the chance of the change syncing
+		// while running on a real device (when this test is run on startup).
+		await withEncryptionEnabled(async () => {
+			if (shim.mobilePlatform() === '') {
+				await testStringPerformance(EncryptionMethod.StringV1, 100, 1000);
+				await testStringPerformance(EncryptionMethod.StringV1, 1000000, 10);
+				await testStringPerformance(EncryptionMethod.StringV1, 5000000, 10);
+				await testStringPerformance(EncryptionMethod.SJCL1a, 100, 1000);
+				await testStringPerformance(EncryptionMethod.SJCL1a, 1000000, 10);
+				await testStringPerformance(EncryptionMethod.SJCL1a, 5000000, 10);
+				await testFilePerformance(EncryptionMethod.FileV1, 100, 1000);
+				await testFilePerformance(EncryptionMethod.FileV1, 1000000, 3);
+				await testFilePerformance(EncryptionMethod.FileV1, 5000000, 3);
+				await testFilePerformance(EncryptionMethod.SJCL1a, 100, 1000);
+				await testFilePerformance(EncryptionMethod.SJCL1a, 1000000, 3);
+				await testFilePerformance(EncryptionMethod.SJCL1a, 5000000, 3);
+			} else {
+				await testStringPerformance(EncryptionMethod.StringV1, 100, 100);
+				await testStringPerformance(EncryptionMethod.StringV1, 500000, 3);
+				await testStringPerformance(EncryptionMethod.StringV1, 1000000, 3);
+				await testStringPerformance(EncryptionMethod.SJCL1a, 100, 100);
+				await testStringPerformance(EncryptionMethod.SJCL1a, 500000, 3);
+				await testStringPerformance(EncryptionMethod.SJCL1a, 1000000, 3);
+				await testFilePerformance(EncryptionMethod.FileV1, 100, 100);
+				await testFilePerformance(EncryptionMethod.FileV1, 100000, 3);
+				await testFilePerformance(EncryptionMethod.FileV1, 500000, 3);
+				await testFilePerformance(EncryptionMethod.SJCL1a, 100, 100);
+				await testFilePerformance(EncryptionMethod.SJCL1a, 100000, 3);
+				await testFilePerformance(EncryptionMethod.SJCL1a, 500000, 3);
+			}
+		});
 
 	}
-
-	setEncryptionEnabled(encryptionEnabled);
 };
