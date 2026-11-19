@@ -38,7 +38,7 @@ const openWebPreviewWindow = async (file: File, item: ResourceEntity, displayTyp
 		throw new Error(_('Failed to open preview window'));
 	}
 
-	const fileDisplayName = item.filename.trim() || file.name;
+	const fileDisplayName = item.filename?.trim() || file.name;
 	previewWindow.document.title = _('%s - Preview', substrWithEllipsis(fileDisplayName, 0, 10));
 	const meta = document.createElement('meta');
 	meta.name = 'viewport';
